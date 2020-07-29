@@ -65,9 +65,21 @@ const HashMap<String, AssetDatabase::Entry>& AssetDatabase::TypedDB::getAssets()
 	return assets;
 }
 
+AssetType AssetDatabase::TypedDB::getType() const
+{
+	return type;
+}
+
 void AssetDatabase::addAsset(const String& name, AssetType type, Entry&& entry)
 {
-	dbs[int(type)].add(name, std::move(entry));
+	const auto iter = dbs.find(static_cast<int>(type));
+	if (iter != dbs.end()) {
+		iter->second.add(name, std::move(entry));
+	} else {
+		TypedDB db(type);
+		db.add(name, std::move(entry));
+		dbs[static_cast<int>(type)] = std::move(db);
+	}
 }
 
 const AssetDatabase::TypedDB& AssetDatabase::getDatabase(AssetType type) const
@@ -81,13 +93,19 @@ const AssetDatabase::TypedDB& AssetDatabase::getDatabase(AssetType type) const
 	return iter->second;
 }
 
+bool AssetDatabase::hasDatabase(AssetType type) const
+{
+	return dbs.find(static_cast<int>(type)) != dbs.end();
+}
+
 std::vector<String> AssetDatabase::getAssets() const
 {
 	std::set<String> contains;
 	std::vector<String> result;
 	for (auto& db: dbs) {
-		for (auto& asset: db.second.getAssets()) {
-			const String& name = asset.first;
+		String prefix = toString(AssetType(db.first)) + ":";
+		for (const auto& asset: db.second.getAssets()) {
+			String name = prefix + asset.first;
 			if (contains.find(name) == contains.end()) {
 				contains.insert(name);
 				result.push_back(name);
@@ -111,8 +129,10 @@ void AssetDatabase::deserialize(Deserializer& s)
 std::vector<String> AssetDatabase::enumerate(AssetType type) const
 {
 	std::vector<String> result;
-	for (auto& asset: getDatabase(type).getAssets()) {
-		result.push_back(asset.first);
+	if (hasDatabase(type)) {
+		for (auto& asset: getDatabase(type).getAssets()) {
+			result.push_back(asset.first);
+		}
 	}
 	return result;
 }

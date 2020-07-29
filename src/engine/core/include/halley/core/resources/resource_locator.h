@@ -60,8 +60,8 @@ namespace Halley {
 		void purge(const String& asset, AssetType type);
 		void purgeAll();
 
-		std::vector<String> enumerate(const AssetType type);
-		bool exists(const String& asset);
+		std::vector<String> enumerate(AssetType type);
+		bool exists(const String& asset, AssetType type);
 
 		size_t getLocatorCount() const;
 

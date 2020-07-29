@@ -129,7 +129,7 @@ bool ResourceCollectionBase::exists(const String& assetId)
 		return true;
 	}
 
-	return parent.locator->exists(assetId);
+	return parent.locator->exists(assetId, type);
 }
 
 void ResourceCollectionBase::setResource(int curDepth, const String& name, std::shared_ptr<Resource> resource) {

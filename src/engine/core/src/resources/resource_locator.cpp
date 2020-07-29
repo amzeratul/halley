@@ -4,6 +4,8 @@
 #include "resource_pack.h"
 #include "halley/support/logger.h"
 #include "api/system_api.h"
+#include "halley/text/string_converter.h"
+#include "halley/resources/resource.h"
 
 using namespace Halley;
 
@@ -32,7 +34,7 @@ void ResourceLocator::loadLocatorData(IResourceLocatorProvider& locator)
 
 void ResourceLocator::purge(const String& asset, AssetType type)
 {
-	auto result = assetToLocator.find(asset);
+	auto result = assetToLocator.find(toString(type) + ":" + asset);
 	if (result != assetToLocator.end()) {
 		// Found the locator for this file, purge it
 		result->second->purge(system);
@@ -53,7 +55,7 @@ void ResourceLocator::purgeAll()
 
 std::unique_ptr<ResourceData> ResourceLocator::getResource(const String& asset, AssetType type, bool stream)
 {
-	auto result = assetToLocator.find(asset);
+	auto result = assetToLocator.find(toString(type) + ":" + asset);
 	if (result != assetToLocator.end()) {
 		auto data = result->second->getData(asset, type, stream);
 		if (data) {
@@ -160,7 +162,7 @@ std::vector<String> ResourceLocator::getAssetsFromPack(const Path& path, const S
 
 const Metadata& ResourceLocator::getMetaData(const String& asset, AssetType type) const
 {
-	auto result = assetToLocator.find(asset);
+	auto result = assetToLocator.find(toString(type) + ":" + asset);
 	if (result != assetToLocator.end()) {
 		return result->second->getAssetDatabase().getDatabase(type).get(asset).meta;
 	} else {
@@ -168,9 +170,9 @@ const Metadata& ResourceLocator::getMetaData(const String& asset, AssetType type
 	}
 }
 
-bool ResourceLocator::exists(const String& asset)
+bool ResourceLocator::exists(const String& asset, AssetType type)
 {
-	return assetToLocator.find(asset) != assetToLocator.end();
+	return assetToLocator.find(toString(type) + ":" + asset) != assetToLocator.end();
 }
 
 size_t ResourceLocator::getLocatorCount() const

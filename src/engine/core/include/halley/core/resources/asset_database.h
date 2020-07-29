@@ -38,6 +38,7 @@ namespace Halley
 			void deserialize(Deserializer& s);
 
 			const HashMap<String, Entry>& getAssets() const;
+			AssetType getType() const;
 
 		private:
 			AssetType type;
@@ -46,6 +47,7 @@ namespace Halley
 
 		void addAsset(const String& name, AssetType type, Entry&& entry);
 		const TypedDB& getDatabase(AssetType type) const;
+		bool hasDatabase(AssetType type) const;
 		std::vector<String> getAssets() const;
 
 		void serialize(Serializer& s) const;
