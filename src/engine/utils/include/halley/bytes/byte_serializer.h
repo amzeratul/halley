@@ -13,6 +13,7 @@
 #include <utility>
 #include <set>
 #include "halley/data_structures/maybe.h"
+#include "halley/maths/colour.h"
 #include "halley/maths/vector4.h"
 
 namespace Halley {
@@ -164,6 +165,12 @@ namespace Halley {
 		Serializer& operator<<(const Vector4D<T>& val)
 		{
 			return *this << val.x << val.y << val.z << val.w;
+		}
+
+		template <typename T>
+		Serializer& operator<<(const Colour4<T>& val)
+		{
+			return *this << val.r << val.g << val.b << val.a;
 		}
 
 		template <typename T>
@@ -394,6 +401,16 @@ namespace Halley {
 			*this >> val.y;
 			*this >> val.z;
 			*this >> val.w;
+			return *this;
+		}
+
+		template <typename T>
+		Deserializer& operator>>(Colour4<T>& val)
+		{
+			*this >> val.r;
+			*this >> val.g;
+			*this >> val.b;
+			*this >> val.a;
 			return *this;
 		}
 

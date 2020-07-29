@@ -104,7 +104,7 @@ void HalleyEditor::parseArguments(const std::vector<String>& args)
 std::unique_ptr<Stage> HalleyEditor::startGame()
 {
 	auto& api = getAPI();
-	preferences = std::make_unique<Preferences>(*api.system, "2020-07-28");
+	preferences = std::make_unique<Preferences>(*api.system, "2020-07-29");
 
 	projectLoader = std::make_unique<ProjectLoader>(api.core->getStatics(), rootPath);
 	std::unique_ptr<Project> project;

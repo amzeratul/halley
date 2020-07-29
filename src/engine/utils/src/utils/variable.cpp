@@ -20,18 +20,26 @@ Internal::VariableStorage::VariableStorage(VariableStorage&& other) noexcept
 
 Internal::VariableStorage& Internal::VariableStorage::operator=(const VariableStorage& other) noexcept
 {
+	clear();
+	
 	switch (other.type) {
-	case ConfigNodeType::Int:
+	case VariableType::Int:
 		intValue = other.intValue;
 		break;
-	case ConfigNodeType::Float:
+	case VariableType::Float:
 		floatValue = other.floatValue;
 		break;
-	case ConfigNodeType::Int2:
+	case VariableType::Int2:
 		vector2iValue = other.vector2iValue;
 		break;
-	case ConfigNodeType::Float2:
+	case VariableType::Float2:
 		vector2fValue = other.vector2fValue;
+		break;
+	case VariableType::Colour:
+		colourValue = other.colourValue;
+		break;
+	case VariableType::String:
+		stringValue = new String(*other.stringValue);
 		break;
 	}
 	type = other.type;
@@ -40,46 +48,71 @@ Internal::VariableStorage& Internal::VariableStorage::operator=(const VariableSt
 
 Internal::VariableStorage& Internal::VariableStorage::operator=(VariableStorage&& other) noexcept
 {
+	clear();
+	
 	switch (other.type) {
-	case ConfigNodeType::Int:
+	case VariableType::Int:
 		intValue = other.intValue;
 		break;
-	case ConfigNodeType::Float:
+	case VariableType::Float:
 		floatValue = other.floatValue;
 		break;
-	case ConfigNodeType::Int2:
+	case VariableType::Int2:
 		vector2iValue = other.vector2iValue;
 		break;
-	case ConfigNodeType::Float2:
+	case VariableType::Float2:
 		vector2fValue = other.vector2fValue;
+		break;
+	case VariableType::Colour:
+		colourValue = other.colourValue;
+		break;
+	case VariableType::String:
+		stringValue = other.stringValue;
+		other.stringValue = nullptr;
 		break;
 	}
 	type = other.type;
 	return *this;
 }
 
+Internal::VariableStorage::~VariableStorage()
+{
+	clear();
+}
+
 void Internal::VariableStorage::setValue(const ConfigNode& node)
 {
-	type = node.getType();
+	clear();
+	
 	switch (node.getType()) {
 	case ConfigNodeType::Int:
+		type = VariableType::Int;
 		intValue = node.asInt();
 		break;
 	case ConfigNodeType::Float:
+		type = VariableType::Float;
 		floatValue = node.asFloat();
 		break;
 	case ConfigNodeType::Int2:
+		type = VariableType::Int2;
 		vector2iValue = node.asVector2i();
 		break;
 	case ConfigNodeType::Float2:
+		type = VariableType::Float2;
 		vector2fValue = node.asVector2f();
 		break;
 	case ConfigNodeType::String:
 	{
-		auto strValue = node.asString();
+		const auto strValue = node.asString();
 		if (strValue == "true" || strValue == "false") {
-			type = ConfigNodeType::Int;
+			type = VariableType::Int;
 			intValue = strValue == "true";
+		} else if (strValue.startsWith("#")) {
+			type = VariableType::Colour;
+			colourValue = Colour4f::fromString(strValue);
+		} else {
+			type = VariableType::String;
+			stringValue = new String(strValue);
 		}
 		break;
 	}
@@ -92,17 +125,23 @@ void Internal::VariableStorage::serialize(Serializer& s) const
 {
 	s << type;
 	switch (type) {
-	case ConfigNodeType::Int:
+	case VariableType::Int:
 		s << intValue;
 		break;
-	case ConfigNodeType::Float:
+	case VariableType::Float:
 		s << floatValue;
 		break;
-	case ConfigNodeType::Int2:
+	case VariableType::Int2:
 		s << vector2iValue;
 		break;
-	case ConfigNodeType::Float2:
+	case VariableType::Float2:
 		s << vector2fValue;
+		break;
+	case VariableType::Colour:
+		s << colourValue;
+		break;
+	case VariableType::String:
+		s << *stringValue;
 		break;
 	default:
 		throw Exception("Unknown variable type " + type, HalleyExceptions::Utils);
@@ -111,23 +150,40 @@ void Internal::VariableStorage::serialize(Serializer& s) const
 
 void Internal::VariableStorage::deserialize(Deserializer& s)
 {
+	clear();
+	
 	s >> type;
 	switch (type) {
-	case ConfigNodeType::Int:
+	case VariableType::Int:
 		s >> intValue;
 		break;
-	case ConfigNodeType::Float:
+	case VariableType::Float:
 		s >> floatValue;
 		break;
-	case ConfigNodeType::Int2:
+	case VariableType::Int2:
 		s >> vector2iValue;
 		break;
-	case ConfigNodeType::Float2:
+	case VariableType::Float2:
 		s >> vector2fValue;
 		break;
+	case VariableType::Colour:
+		s >> colourValue;
+		break;
+	case VariableType::String:
+		stringValue = new String();
+		s >> *stringValue;
 	default:
 		throw Exception("Unknown variable type " + type, HalleyExceptions::Utils);
 	}
+}
+
+void Internal::VariableStorage::clear()
+{
+	if (type == VariableType::String) {
+		delete stringValue;
+		stringValue = nullptr;
+	}
+	type = VariableType::Undefined;
 }
 
 Internal::VariableBase::VariableBase()

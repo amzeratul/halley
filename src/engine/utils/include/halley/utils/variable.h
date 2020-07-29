@@ -1,6 +1,7 @@
 #pragma once
 #include "halley/file_formats/config_file.h"
 #include "halley/data_structures/flat_map.h"
+#include "halley/maths/colour.h"
 
 namespace Halley {
 	class ResourceLoader;
@@ -8,59 +9,87 @@ namespace Halley {
 	class VariableTable;
 
 	namespace Internal {
+		enum class VariableType {
+			Undefined,
+			Int,
+			Float,
+			Int2,
+			Float2,
+			String,
+			Colour
+		};
+		
 		struct VariableStorage {
 			VariableStorage() noexcept;
 			VariableStorage(const VariableStorage& other) noexcept;
 			VariableStorage(VariableStorage&& other) noexcept;
 			VariableStorage& operator=(const VariableStorage& other) noexcept;
 			VariableStorage& operator=(VariableStorage&& other) noexcept;
+			~VariableStorage();
 			
-			ConfigNodeType type = ConfigNodeType::Undefined;
+			VariableType type = VariableType::Undefined;
 
 			union {
 				int intValue;
 				float floatValue;
 				Vector2i vector2iValue;
 				Vector2f vector2fValue;
+				Colour4f colourValue;
+				String* stringValue;
 			};
 
 			void getValue(bool& v) const
 			{
-				Expects(type == ConfigNodeType::Int);
+				Expects(type == VariableType::Int);
 				v = intValue != 0;
 			}
 
 			void getValue(int& v) const
 			{
-				Expects(type == ConfigNodeType::Int);
+				Expects(type == VariableType::Int);
 				v = intValue;
 			}
 			
 			void getValue(float& v) const
 			{
-				Expects(type == ConfigNodeType::Int || type == ConfigNodeType::Float);
-				if (type == ConfigNodeType::Int) {
+				Expects(type == VariableType::Int || type == VariableType::Float);
+				if (type == VariableType::Int) {
 					v = float(intValue);
-				} else if (type == ConfigNodeType::Float) {
+				} else if (type == VariableType::Float) {
 					v = floatValue;
 				}				
 			}
 			
 			void getValue(Vector2i& v) const
 			{
-				Expects(type == ConfigNodeType::Int2);
+				Expects(type == VariableType::Int2);
 				v = vector2iValue;
 			}
 			
 			void getValue(Vector2f& v) const
 			{
-				Expects(type == ConfigNodeType::Float2);
+				Expects(type == VariableType::Float2);
 				v = vector2fValue;
+			}
+			
+			void getValue(Colour4f& v) const
+			{
+				Expects(type == VariableType::Colour);
+				v = colourValue;
+			}
+			
+			void getValue(String& v) const
+			{
+				Expects(type == VariableType::String);
+				v = *stringValue;
 			}
 
 			void setValue(const ConfigNode& node);
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);
+
+		private:
+			void clear();
 		};
 		
 		class VariableBase {
@@ -82,6 +111,21 @@ namespace Halley {
 			void refresh();
 		};		
 	}
+
+	template <>
+	struct EnumNames<Internal::VariableType> {
+		constexpr std::array<const char*, 7> operator()() const {
+			return{{
+				"undefined",
+				"int",
+				"float",
+				"int2",
+				"float2",
+				"string",
+				"colour"
+			}};
+		}
+	};
 
 	template <typename T>
 	class Variable final : public Internal::VariableBase {
