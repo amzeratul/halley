@@ -38,10 +38,15 @@ attributes:
     type: vec4
     semantic: TEXCOORD0
 
-  # custom
+  # custom0
   - name: custom0
     type: vec4
     semantic: CUSTOM0
+
+  # custom1
+  - name: custom1
+    type: vec4
+    semantic: CUSTOM1
 
   # rotation (radians)
   - name: rotation

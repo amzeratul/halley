@@ -27,6 +27,7 @@ void basicVertex(VIn input, out VOut output) {
     output.texCoord0 = getTexCoord(input.texCoord0, input.vertPos.zw, input.textureRotation);
     output.pixelTexCoord0 = output.texCoord0 * input.size;
     output.custom0 = input.custom0;
+    output.custom1 = input.custom1;
     output.vertPos = input.vertPos.xy;
     output.pixelPos = input.size * input.scale * input.vertPos.xy;
     output.pivot = input.pivot;
