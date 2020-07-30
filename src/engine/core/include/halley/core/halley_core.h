@@ -39,6 +39,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "graphics/sprite/animation.h"
 #include "graphics/sprite/animation_player.h"
+#include "graphics/sprite/particles.h"
 #include "graphics/sprite/sprite.h"
 #include "graphics/sprite/sprite_painter.h"
 #include "graphics/sprite/sprite_sheet.h"

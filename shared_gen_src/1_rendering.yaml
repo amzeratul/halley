@@ -53,4 +53,12 @@ component:
       serializable: false
       defaultValue: nullptr
 
+---
+
+component:
+  name: Particles
+  members:
+  - particles:
+      type: 'std::shared_ptr<Halley::ParticleSystem>'
+
 ...
