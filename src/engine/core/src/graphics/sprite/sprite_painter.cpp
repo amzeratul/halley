@@ -6,8 +6,9 @@
 
 using namespace Halley;
 
-SpritePainterEntry::SpritePainterEntry(const Sprite& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
-	: ptr(&sprite)
+SpritePainterEntry::SpritePainterEntry(gsl::span<const Sprite> sprites, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
+	: ptr(sprites.empty() ? nullptr : &sprites[0])
+	, count(sprites.size())
 	, type(SpritePainterEntryType::SpriteRef)
 	, layer(layer)
 	, mask(mask)
@@ -15,8 +16,9 @@ SpritePainterEntry::SpritePainterEntry(const Sprite& sprite, int mask, int layer
 	, clip(clip)
 {}
 
-SpritePainterEntry::SpritePainterEntry(const TextRenderer& text, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
-	: ptr(&text)
+SpritePainterEntry::SpritePainterEntry(gsl::span<const TextRenderer> texts, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
+	: ptr(texts.empty() ? nullptr : &texts[0])
+	, count(texts.size())
 	, type(SpritePainterEntryType::TextRef)
 	, layer(layer)
 	, mask(mask)
@@ -25,8 +27,9 @@ SpritePainterEntry::SpritePainterEntry(const TextRenderer& text, int mask, int l
 {
 }
 
-SpritePainterEntry::SpritePainterEntry(SpritePainterEntryType type, size_t spriteIdx, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
-	: index(static_cast<int>(spriteIdx))
+SpritePainterEntry::SpritePainterEntry(SpritePainterEntryType type, size_t spriteIdx, size_t count, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
+	: count(count)
+	, index(static_cast<int>(spriteIdx))
 	, type(type)
 	, layer(layer)
 	, mask(mask)
@@ -50,24 +53,29 @@ SpritePainterEntryType SpritePainterEntry::getType() const
 	return type;
 }
 
-const Sprite& SpritePainterEntry::getSprite() const
+gsl::span<const Sprite> SpritePainterEntry::getSprites() const
 {
 	Expects(ptr != nullptr);
 	Expects(type == SpritePainterEntryType::SpriteRef);
-	return *static_cast<const Sprite*>(ptr);
+	return gsl::span<const Sprite>(static_cast<const Sprite*>(ptr), count);
 }
 
-const TextRenderer& SpritePainterEntry::getText() const
+gsl::span<const TextRenderer> SpritePainterEntry::getTexts() const
 {
 	Expects(ptr != nullptr);
 	Expects(type == SpritePainterEntryType::TextRef);
-	return *static_cast<const TextRenderer*>(ptr);
+	return gsl::span<const TextRenderer>(static_cast<const TextRenderer*>(ptr), count);
 }
 
-size_t SpritePainterEntry::getIndex() const
+uint32_t SpritePainterEntry::getIndex() const
 {
 	Expects(ptr == nullptr);
 	return index;
+}
+
+uint32_t SpritePainterEntry::getCount() const
+{
+	return count;
 }
 
 int SpritePainterEntry::getMask() const
@@ -95,29 +103,48 @@ void SpritePainter::start(size_t)
 void SpritePainter::add(const Sprite& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
 	Expects(mask >= 0);
-	sprites.push_back(SpritePainterEntry(sprite, mask, layer, tieBreaker, std::move(clip)));
+	sprites.push_back(SpritePainterEntry(gsl::span<const Sprite>(&sprite, 1), mask, layer, tieBreaker, std::move(clip)));
 	dirty = true;
 }
 
 void SpritePainter::addCopy(const Sprite& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
 	Expects(mask >= 0);
-	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::SpriteCached, cachedSprites.size(), mask, layer, tieBreaker, std::move(clip)));
+	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::SpriteCached, cachedSprites.size(), 1, mask, layer, tieBreaker, std::move(clip)));
 	cachedSprites.push_back(sprite);
 	dirty = true;
+}
+
+void SpritePainter::add(gsl::span<const Sprite> sprites, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
+{
+	Expects(mask >= 0);
+	if (!sprites.empty()) {
+		this->sprites.push_back(SpritePainterEntry(sprites, mask, layer, tieBreaker, std::move(clip)));
+		dirty = true;
+	}
+}
+
+void SpritePainter::addCopy(gsl::span<const Sprite> sprites, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
+{
+	Expects(mask >= 0);
+	if (!sprites.empty()) {
+		this->sprites.push_back(SpritePainterEntry(SpritePainterEntryType::SpriteCached, cachedSprites.size(), sprites.size(), mask, layer, tieBreaker, std::move(clip)));
+		cachedSprites.insert(cachedSprites.end(), sprites.begin(), sprites.end());
+		dirty = true;
+	}
 }
 
 void SpritePainter::add(const TextRenderer& text, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
 	Expects(mask >= 0);
-	sprites.push_back(SpritePainterEntry(text, mask, layer, tieBreaker, std::move(clip)));
+	sprites.push_back(SpritePainterEntry(gsl::span<const TextRenderer>(&text, 1), mask, layer, tieBreaker, std::move(clip)));
 	dirty = true;
 }
 
 void SpritePainter::addCopy(const TextRenderer& text, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
 	Expects(mask >= 0);
-	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::TextCached, cachedText.size(), mask, layer, tieBreaker, std::move(clip)));
+	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::TextCached, cachedText.size(), 1, mask, layer, tieBreaker, std::move(clip)));
 	cachedText.push_back(text);
 	dirty = true;
 }
@@ -143,27 +170,31 @@ void SpritePainter::draw(int mask, Painter& painter)
 			const auto type = s.getType();
 			
 			if (type == SpritePainterEntryType::SpriteRef) {
-				draw(s.getSprite(), painter, view, s.getClip());
+				draw(s.getSprites(), painter, view, s.getClip());
 			} else if (type == SpritePainterEntryType::SpriteCached) {
-				draw(cachedSprites[s.getIndex()], painter, view, s.getClip());
+				draw(gsl::span<const Sprite>(cachedSprites.data() + s.getIndex(), s.getCount()), painter, view, s.getClip());
 			} else if (type == SpritePainterEntryType::TextRef) {
-				draw(s.getText(), painter, view, s.getClip());
+				draw(s.getTexts(), painter, view, s.getClip());
 			} else if (type == SpritePainterEntryType::TextCached) {
-				draw(cachedText[s.getIndex()], painter, view, s.getClip());
+				draw(gsl::span<const TextRenderer>(cachedText.data() + s.getIndex(), s.getCount()), painter, view, s.getClip());
 			}
 		}
 	}
 	painter.flush();
 }
 
-void SpritePainter::draw(const Sprite& sprite, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const
+void SpritePainter::draw(gsl::span<const Sprite> sprites, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const
 {
-	if (sprite.isInView(view)) {
-		sprite.draw(painter, clip);
+	for (const auto& sprite: sprites) {
+		if (sprite.isInView(view)) {
+			sprite.draw(painter, clip);
+		}
 	}
 }
 
-void SpritePainter::draw(const TextRenderer& text, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const
+void SpritePainter::draw(gsl::span<const TextRenderer> texts, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const
 {
-	text.draw(painter, clip);
+	for (const auto& text: texts) {
+		text.draw(painter, clip);
+	}
 }
