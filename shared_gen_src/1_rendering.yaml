@@ -59,6 +59,6 @@ component:
   name: Particles
   members:
   - particles:
-      type: 'std::shared_ptr<Halley::ParticleSystem>'
+      type: 'Halley::Particles'
 
 ...

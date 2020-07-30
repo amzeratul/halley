@@ -4,7 +4,7 @@
 #include <halley/time/halleytime.h>
 
 namespace Halley {
-	class ParticleSystem {
+	class Particles {
 	public:
 		void update(Time t);
 		void paint(Painter& painter);

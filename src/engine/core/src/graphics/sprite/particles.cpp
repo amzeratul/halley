@@ -2,10 +2,10 @@
 
 using namespace Halley;
 
-void ParticleSystem::update(Time t)
+void Particles::update(Time t)
 {
 }
 
-void ParticleSystem::paint(Painter& painter)
+void Particles::paint(Painter& painter)
 {
 }
