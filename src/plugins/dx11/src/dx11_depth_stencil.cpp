@@ -73,6 +73,8 @@ DX11DepthStencil::DX11DepthStencil(DX11Video& video, const MaterialDepthStencil&
 	desc.BackFace.StencilPassOp = desc.FrontFace.StencilPassOp;
 	desc.BackFace.StencilFunc = desc.FrontFace.StencilFunc;
 
+	reference = definition.getStencilReference();
+
 	auto result = video.getDevice().CreateDepthStencilState(&desc, &state);
 	if (result != S_OK) {
 		throw Exception("Unable to create DepthStencil state", HalleyExceptions::VideoPlugin);
@@ -94,5 +96,5 @@ const MaterialDepthStencil& DX11DepthStencil::getDefinition() const
 
 void DX11DepthStencil::bind()
 {
-	video.getDeviceContext().OMSetDepthStencilState(state, 1);
+	video.getDeviceContext().OMSetDepthStencilState(state, reference);
 }

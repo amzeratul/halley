@@ -22,5 +22,6 @@ namespace Halley
 		DX11Video& video;
 		ID3D11DepthStencilState* state = nullptr;
 		MaterialDepthStencil definition;
+		int reference = 1;
 	};
 }
