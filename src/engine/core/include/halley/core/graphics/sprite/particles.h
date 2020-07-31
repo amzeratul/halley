@@ -24,6 +24,8 @@ namespace Halley {
 
 		void setEnabled(bool enabled);
 		bool isEnabled() const;
+		void setSpawnRateMultiplier(float value);
+		float getSpawnRateMultiplier() const;
 
 		void setPosition(Vector2f pos);
 		void update(Time t);
@@ -39,6 +41,7 @@ namespace Halley {
 		std::shared_ptr<Material> material;
 
 		bool enabled = true;
+		float spawnRateMultiplier = 1.0f;
 
 		std::vector<Sprite> sprites;
 		std::vector<Particle> particles;

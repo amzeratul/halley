@@ -39,6 +39,16 @@ bool Particles::isEnabled() const
 	return enabled;
 }
 
+void Particles::setSpawnRateMultiplier(float value)
+{
+	spawnRateMultiplier = value;
+}
+
+float Particles::getSpawnRateMultiplier() const
+{
+	return spawnRateMultiplier;
+}
+
 void Particles::setPosition(Vector2f pos)
 {
 	position = pos;
@@ -46,9 +56,7 @@ void Particles::setPosition(Vector2f pos)
 
 void Particles::update(Time t)
 {
-	if (enabled) {
-		pendingSpawn += static_cast<float>(t * spawnRate);
-	}
+	pendingSpawn += static_cast<float>(t * spawnRate * (enabled ? spawnRateMultiplier : 0));
 	const int toSpawn = static_cast<int>(floor(pendingSpawn));
 	pendingSpawn = pendingSpawn - static_cast<float>(toSpawn);
 
