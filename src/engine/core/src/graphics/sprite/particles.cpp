@@ -12,8 +12,14 @@ Particles::Particles()
 Particles::Particles(const ConfigNode& node, Resources& resources)
 	: rng(&Random::getGlobal())
 {
-	baseSprite.setImage(resources, "whitebox.png").setSize(Vector2f(10, 0.5f)).setColour(Colour4f(1, 1, 1, 0.5f));
-	spawnRate = 500;
+	spawnRate = node["spawnRate"].asFloat(100);
+	spawnArea = node["spawnArea"].asVector2f(Vector2f(0, 0));
+	ttl = node["ttl"].asFloat(1.0f);
+	ttlScatter = node["ttlScatter"].asFloat(0.0f);
+	speed = node["speed"].asFloat(100.0f);
+	speedScatter = node["speedScatter"].asFloat(0.0f);
+	angle = node["angle"].asFloat(0.0f);
+	angleScatter = node["angleScatter"].asFloat(0.0f);
 }
 
 ConfigNode Particles::toConfigNode() const
@@ -54,26 +60,34 @@ void Particles::update(Time t)
 			++i;
 		}
 	}
+
+	// Update visibility
+	nParticlesVisible = nParticlesAlive;
+	if (nParticlesVisible > 0 && !sprites[0].hasMaterial()) {
+		nParticlesVisible = 0;
+	}
+}
+
+void Particles::setSprites(const std::vector<Sprite>& sprites)
+{
+	if (!sprites.empty()) {
+		baseSprite = sprites.at(0);
+	}
+}
+
+void Particles::setAnimation(std::shared_ptr<const Animation> animation)
+{
+	baseAnimation = std::move(animation);
 }
 
 gsl::span<Sprite> Particles::getSprites()
 {
-	return gsl::span<Sprite>(sprites).subspan(0, nParticlesAlive);
+	return gsl::span<Sprite>(sprites).subspan(0, nParticlesVisible);
 }
 
 gsl::span<const Sprite> Particles::getSprites() const
 {
-	return gsl::span<const Sprite>(sprites).subspan(0, nParticlesAlive);
-}
-
-int Particles::getMask() const
-{
-	return mask;
-}
-
-int Particles::getLayer() const
-{
-	return layer;
+	return gsl::span<const Sprite>(sprites).subspan(0, nParticlesVisible);
 }
 
 void Particles::spawn(size_t n)
@@ -95,10 +109,10 @@ void Particles::initializeParticle(size_t index)
 {	
 	auto& particle = particles[index];
 	particle.alive = true;
-	particle.ttl = 1;
+	particle.ttl = rng->getFloat(ttl - ttlScatter, ttl + ttlScatter);
 	particle.pos = getSpawnPosition();
-	particle.angle = Angle1f::fromDegrees(340);
-	particle.vel = Vector2f(rng->getFloat(400, 500), particle.angle);
+	particle.angle = Angle1f::fromDegrees(rng->getFloat(angle - angleScatter, angle + angleScatter));
+	particle.vel = Vector2f(rng->getFloat(speed - speedScatter, speed + speedScatter), particle.angle);
 
 	auto& sprite = sprites[index];
 	sprite = baseSprite;
@@ -125,7 +139,7 @@ void Particles::updateParticles(float time)
 
 Vector2f Particles::getSpawnPosition() const
 {
-	return position + Vector2f(rng->getFloat(-500, 500), rng->getFloat(-200, 200));
+	return position + Vector2f(rng->getFloat(-spawnArea.x * 0.5f, spawnArea.x * 0.5f), rng->getFloat(-spawnArea.y * 0.5f, spawnArea.y * 0.5f));
 }
 
 ConfigNode ConfigNodeSerializer<Particles>::serialize(const Particles& particles, ConfigNodeSerializationContext& context)

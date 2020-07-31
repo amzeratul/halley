@@ -695,6 +695,55 @@ public:
 	}
 };
 
+class ComponentEditorParticlesFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::Particles";
+	}
+
+	bool isNested() const override
+	{
+		return true;
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(ConfigNode::MapType());
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		auto data = pars.data;
+
+		auto& fieldData = data.getFieldData();
+		fieldData.ensureType(ConfigNodeType::Map);
+
+		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
+		container->getSizer().setColumnProportions({{0, 1}});
+		container->add(context.makeLabel("spawnRate"));
+		container->add(context.makeField("float", pars.withSubKey("spawnRate", "100"), false));
+		container->add(context.makeLabel("spawnArea"));
+		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("spawnArea"), false));
+		container->add(context.makeLabel("ttl"));
+		container->add(context.makeField("float", pars.withSubKey("ttl", "1"), false));
+		container->add(context.makeLabel("ttlScatter"));
+		container->add(context.makeField("float", pars.withSubKey("ttlScatter", "0.2"), false));
+		container->add(context.makeLabel("speed"));
+		container->add(context.makeField("float", pars.withSubKey("speed", "100"), false));
+		container->add(context.makeLabel("speedScatter"));
+		container->add(context.makeField("float", pars.withSubKey("speedScatter", "10"), false));
+		container->add(context.makeLabel("angle"));
+		container->add(context.makeField("float", pars.withSubKey("angle", "0"), false));
+		container->add(context.makeLabel("angleScatter"));
+		container->add(context.makeField("float", pars.withSubKey("angleScatter", "10"), false));
+		
+		auto containerWeak = std::weak_ptr<UIWidget>(container);
+
+		return container;
+	}
+};
+
 std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
 	std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
@@ -716,6 +765,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorStdOptionalFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorOptionalLiteFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorColourFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorParticlesFieldFactory>());
 
 	return factories;
 }

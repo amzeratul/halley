@@ -5,6 +5,7 @@
 
 namespace Halley {
 	class Random;
+	class Animation;
 	
 	class Particles {
 		struct Particle {
@@ -23,11 +24,12 @@ namespace Halley {
 
 		void setPosition(Vector2f pos);
 		void update(Time t);
+
+		void setSprites(const std::vector<Sprite>& sprites);
+		void setAnimation(std::shared_ptr<const Animation> animation);
 		
 		[[nodiscard]] gsl::span<Sprite> getSprites();
 		[[nodiscard]] gsl::span<const Sprite> getSprites() const;
-		[[nodiscard]] int getMask() const;
-		[[nodiscard]] int getLayer() const;
 
 	private:
 		Random* rng;
@@ -36,13 +38,20 @@ namespace Halley {
 		std::vector<Sprite> sprites;
 		std::vector<Particle> particles;
 		size_t nParticlesAlive = 0;
-		
-		int mask = 1;
-		int layer = 0;
-		float spawnRate = 10;
+		size_t nParticlesVisible = 0;
 		float pendingSpawn = 0;
+		
+		float spawnRate = 100;
+		Vector2f spawnArea;
+		float ttl = 1;
+		float ttlScatter = 0;
+		float speed = 100;
+		float speedScatter = 0;
+		float angle = 0;
+		float angleScatter = 0;
 
 		Sprite baseSprite;
+		std::shared_ptr<const Animation> baseAnimation;
 		Vector2f position;
 
 		void spawn(size_t n);

@@ -58,8 +58,8 @@ namespace Halley {
 		{
 			const float s = angle.sin();
 			const float c = angle.cos();
-			x = s * length;
-			y = c * length;
+			x = c * length;
+			y = s * length;
 		}
 
 		// Getter

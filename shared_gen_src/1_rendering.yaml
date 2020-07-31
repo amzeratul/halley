@@ -60,5 +60,16 @@ component:
   members:
   - particles:
       type: 'Halley::Particles'
+  - sprites:
+      type: 'std::vector<Halley::Sprite>'
+      collapse: true
+  - animation:
+      type: 'std::optional<Halley::AnimationPlayer>'
+      collapse: true
+  - layer:
+      type: int
+      defaultValue: 0
+  - mask:
+      type: 'Halley::OptionalLite<int>'
 
 ...

@@ -46,6 +46,7 @@ namespace Halley
 		float getPlaybackSpeed() const;
 
 		const Animation& getAnimation() const;
+		std::shared_ptr<const Animation> getAnimationPtr() const;
 		bool hasAnimation() const;
 
 		AnimationPlayer& setOffsetPivot(Vector2f offset);

@@ -260,6 +260,11 @@ const Animation& AnimationPlayer::getAnimation() const
 	return *animation;
 }
 
+std::shared_ptr<const Animation> AnimationPlayer::getAnimationPtr() const
+{
+	return animation;
+}
+
 bool AnimationPlayer::hasAnimation() const
 {
 	return static_cast<bool>(animation);
