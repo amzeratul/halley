@@ -25,7 +25,7 @@ namespace Halley {
 		void setPosition(Vector2f pos);
 		void update(Time t);
 
-		void setSprites(const std::vector<Sprite>& sprites);
+		void setSprites(std::vector<Sprite> sprites);
 		void setAnimation(std::shared_ptr<const Animation> animation);
 		
 		[[nodiscard]] gsl::span<Sprite> getSprites();
@@ -50,7 +50,7 @@ namespace Halley {
 		float angle = 0;
 		float angleScatter = 0;
 
-		Sprite baseSprite;
+		std::vector<Sprite> baseSprites;
 		std::shared_ptr<const Animation> baseAnimation;
 		Vector2f position;
 

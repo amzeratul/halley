@@ -68,11 +68,9 @@ void Particles::update(Time t)
 	}
 }
 
-void Particles::setSprites(const std::vector<Sprite>& sprites)
+void Particles::setSprites(std::vector<Sprite> sprites)
 {
-	if (!sprites.empty()) {
-		baseSprite = sprites.at(0);
-	}
+	baseSprites = std::move(sprites);
 }
 
 void Particles::setAnimation(std::shared_ptr<const Animation> animation)
@@ -115,7 +113,9 @@ void Particles::initializeParticle(size_t index)
 	particle.vel = Vector2f(rng->getFloat(speed - speedScatter, speed + speedScatter), particle.angle);
 
 	auto& sprite = sprites[index];
-	sprite = baseSprite;
+	if (!baseSprites.empty()) {
+		sprite = rng->getRandomElement(baseSprites);
+	}
 }
 
 void Particles::updateParticles(float time)
