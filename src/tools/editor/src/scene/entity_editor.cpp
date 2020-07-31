@@ -163,7 +163,7 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 		for (auto& member: componentData.members) {
 			if (member.serializable) {
 				ComponentFieldParameters parameters(componentType, componentNames, ComponentDataRetriever(data, member.name), member.defaultValue);
-				auto field = makeField(member.type.name, parameters, !member.collapse);
+				auto field = makeField(member.type.name, parameters, member.collapse ? ComponentEditorLabelCreation::Never : ComponentEditorLabelCreation::Always);
 				if (field) {
 					componentFields->add(field);
 				}
@@ -191,7 +191,7 @@ std::pair<String, std::vector<String>> EntityEditor::parseType(const String& typ
 	return {type, {}};
 }
 
-std::shared_ptr<IUIElement> EntityEditor::makeField(const String& rawFieldType, ComponentFieldParameters parameters, bool createLabel)
+std::shared_ptr<IUIElement> EntityEditor::makeField(const String& rawFieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel)
 {
 	auto [fieldType, typeParams] = parseType(rawFieldType);
 	parameters.typeParameters = std::move(typeParams);
@@ -199,16 +199,16 @@ std::shared_ptr<IUIElement> EntityEditor::makeField(const String& rawFieldType, 
 	const auto iter = fieldFactories.find(fieldType);
 	auto* compFieldFactory = iter != fieldFactories.end() ? iter->second.get() : nullptr;
 		
-	if (createLabel && compFieldFactory && compFieldFactory->canCreateLabel()) {
+	if (createLabel == ComponentEditorLabelCreation::Always && compFieldFactory && compFieldFactory->canCreateLabel()) {
 		return compFieldFactory->createLabelAndField(*context, parameters);
-	} else if (createLabel && compFieldFactory && compFieldFactory->isNested()) {
+	} else if (createLabel != ComponentEditorLabelCreation::Never && compFieldFactory && compFieldFactory->isNested()) {
 		auto field = factory.makeUI("ui/halley/entity_editor_compound_field");
 		field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(parameters.data.getName()));
 		field->getWidget("fields")->add(compFieldFactory->createField(*context, parameters));
 		return field;
 	} else {
 		auto container = std::make_shared<UISizer>();
-		if (createLabel) {
+		if (createLabel == ComponentEditorLabelCreation::Always) {
 			container->add(makeLabel(parameters.data.getName()), 0, {}, UISizerAlignFlags::CentreVertical);
 		}
 

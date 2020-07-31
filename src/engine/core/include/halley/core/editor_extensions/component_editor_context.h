@@ -14,13 +14,19 @@ namespace Halley {
 	class ConfigNode;
     enum class SceneEditorTool;
 
+	enum class ComponentEditorLabelCreation {
+		Always,
+		Never,
+		OnlyIfNested
+	};
+
 	class IEntityEditor {
 	public:
 		virtual ~IEntityEditor() = default;
 
 		virtual void onEntityUpdated() = 0;
 		virtual std::shared_ptr<IUIElement> makeLabel(const String& label) = 0;
-		virtual std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, bool createLabel) = 0;
+		virtual std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) = 0;
 		virtual void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) = 0;
 		virtual ConfigNode getDefaultNode(const String& fieldType) = 0;
 		virtual void setDefaultName(const String& name, const String& prevName) = 0;
@@ -36,7 +42,7 @@ namespace Halley {
 	    void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) const;
     	
 		std::shared_ptr<IUIElement> makeLabel(const String& label) const;
-		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, bool createLabel) const;
+		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const;
     	ConfigNode getDefaultNode(const String& fieldType) const;
 	    void setDefaultName(const String& name, const String& prevName) const;
 

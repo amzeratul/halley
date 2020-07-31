@@ -329,13 +329,13 @@ public:
 		container->add(context.makeLabel("material"));
 		container->add(std::make_shared<SelectAssetWidget>("material", context.getUIFactory(), AssetType::MaterialDefinition, context.getGameResources()));
 		container->add(context.makeLabel("colour"));
-		container->add(context.makeField("Halley::Colour4f", pars.withSubKey("colour", "#FFFFFF"), false));
+		container->add(context.makeField("Halley::Colour4f", pars.withSubKey("colour", "#FFFFFF"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("pivot"));
-		container->add(context.makeField("std::optional<Halley::Vector2f>", pars.withSubKey("pivot"), false));
+		container->add(context.makeField("std::optional<Halley::Vector2f>", pars.withSubKey("pivot"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("flip"));
-		container->add(context.makeField("bool", pars.withSubKey("flip"), false));
+		container->add(context.makeField("bool", pars.withSubKey("flip"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("visible"));
-		container->add(context.makeField("bool", pars.withSubKey("visible", "true"), false));
+		container->add(context.makeField("bool", pars.withSubKey("visible", "true"), ComponentEditorLabelCreation::Never));
 		auto containerWeak = std::weak_ptr<UIWidget>(container);
 
 		container->bindData("image", fieldData["image"].asString(""), [&context, data, containerWeak](String newVal)
@@ -409,9 +409,9 @@ public:
 		container->add(context.makeLabel("direction"));
 		container->add(std::make_shared<UIDropdown>("direction", dropStyle, scrollStyle, listStyle));
 		container->add(context.makeLabel("playbackSpeed"));
-		container->add(context.makeField("float", pars.withSubKey("playbackSpeed", "1" ), false));
+		container->add(context.makeField("float", pars.withSubKey("playbackSpeed", "1" ), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("applyPivot"));
-		container->add(context.makeField("bool", pars.withSubKey("applyPivot", "true" ), false));
+		container->add(context.makeField("bool", pars.withSubKey("applyPivot", "true" ), ComponentEditorLabelCreation::Never));
 
 		auto updateAnimation = [container, data, &resources] (const String& animName)
 		{
@@ -550,7 +550,7 @@ public:
 			for (size_t i = 0; i < nElements; ++i) {
 				auto rowSizer = std::make_shared<UISizer>();
 
-				rowSizer->add(context.makeField(fieldType, pars.withSubIndex(i), false), 1);
+				rowSizer->add(context.makeField(fieldType, pars.withSubIndex(i), ComponentEditorLabelCreation::OnlyIfNested), 1);
 
 				auto deleteButton = std::make_shared<UIButton>("delete" + toString(i), context.getUIFactory().getStyle("buttonThin"), LocalisedString::fromHardcodedString("-"));
 				deleteButton->setMinSize(Vector2f(22, 22));
@@ -615,7 +615,7 @@ public:
 
 		auto rowSizer = std::make_shared<UISizer>();
 		auto checkbox = std::make_shared<UICheckbox>("present", context.getUIFactory().getStyle("checkbox"), initialValue);
-		rowSizer->add(checkbox);
+		rowSizer->add(checkbox, 0, {}, UISizerAlignFlags::CentreHorizontal);
 
 		auto container = std::make_shared<UIWidget>("container", Vector2f(), UISizer(UISizerType::Vertical));
 		rowSizer->add(container, 1);
@@ -626,7 +626,7 @@ public:
 				if (data.getFieldData().getType() == ConfigNodeType::Undefined) {
 					data.getFieldData() = context.getDefaultNode(fieldType);
 				}
-				container->add(context.makeField(fieldType, pars, false));
+				container->add(context.makeField(fieldType, pars, ComponentEditorLabelCreation::OnlyIfNested));
 			} else {
 				container->clear();
 				data.getFieldData() = ConfigNode();
@@ -722,21 +722,21 @@ public:
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 		container->getSizer().setColumnProportions({{0, 1}});
 		container->add(context.makeLabel("spawnRate"));
-		container->add(context.makeField("float", pars.withSubKey("spawnRate", "100"), false));
+		container->add(context.makeField("float", pars.withSubKey("spawnRate", "100"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("spawnArea"));
-		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("spawnArea"), false));
+		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("spawnArea"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("ttl"));
-		container->add(context.makeField("float", pars.withSubKey("ttl", "1"), false));
+		container->add(context.makeField("float", pars.withSubKey("ttl", "1"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("ttlScatter"));
-		container->add(context.makeField("float", pars.withSubKey("ttlScatter", "0.2"), false));
+		container->add(context.makeField("float", pars.withSubKey("ttlScatter", "0.2"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("speed"));
-		container->add(context.makeField("float", pars.withSubKey("speed", "100"), false));
+		container->add(context.makeField("float", pars.withSubKey("speed", "100"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("speedScatter"));
-		container->add(context.makeField("float", pars.withSubKey("speedScatter", "10"), false));
+		container->add(context.makeField("float", pars.withSubKey("speedScatter", "10"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("angle"));
-		container->add(context.makeField("float", pars.withSubKey("angle", "0"), false));
+		container->add(context.makeField("float", pars.withSubKey("angle", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("angleScatter"));
-		container->add(context.makeField("float", pars.withSubKey("angleScatter", "10"), false));
+		container->add(context.makeField("float", pars.withSubKey("angleScatter", "10"), ComponentEditorLabelCreation::Never));
 		
 		auto containerWeak = std::weak_ptr<UIWidget>(container);
 
