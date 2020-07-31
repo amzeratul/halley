@@ -29,6 +29,16 @@ ConfigNode Particles::toConfigNode() const
 	return result;
 }
 
+void Particles::setEnabled(bool e)
+{
+	enabled = e;
+}
+
+bool Particles::isEnabled() const
+{
+	return enabled;
+}
+
 void Particles::setPosition(Vector2f pos)
 {
 	position = pos;
@@ -36,7 +46,9 @@ void Particles::setPosition(Vector2f pos)
 
 void Particles::update(Time t)
 {
-	pendingSpawn += static_cast<float>(t * spawnRate);
+	if (enabled) {
+		pendingSpawn += static_cast<float>(t * spawnRate);
+	}
 	const int toSpawn = static_cast<int>(floor(pendingSpawn));
 	pendingSpawn = pendingSpawn - static_cast<float>(toSpawn);
 

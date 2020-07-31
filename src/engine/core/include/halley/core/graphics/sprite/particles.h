@@ -22,6 +22,9 @@ namespace Halley {
 
 		ConfigNode toConfigNode() const;
 
+		void setEnabled(bool enabled);
+		bool isEnabled() const;
+
 		void setPosition(Vector2f pos);
 		void update(Time t);
 
@@ -34,6 +37,8 @@ namespace Halley {
 	private:
 		Random* rng;
 		std::shared_ptr<Material> material;
+
+		bool enabled = true;
 
 		std::vector<Sprite> sprites;
 		std::vector<Particle> particles;
