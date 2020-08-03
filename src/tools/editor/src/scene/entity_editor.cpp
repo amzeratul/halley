@@ -73,12 +73,12 @@ bool EntityEditor::loadEntity(const String& id, ConfigNode& data, const ConfigNo
 
 	gameResources = &resources;
 	prefabName->setGameResources(*gameResources);
-	context = std::make_unique<ComponentEditorContext>(*static_cast<IEntityEditor*>(this), factory, resources);
 
 	if (currentId == id && currentEntityData == &data && !force) {
 		return false;
 	}
 
+	context = std::make_unique<ComponentEditorContext>(*static_cast<IEntityEditor*>(this), factory, resources);
 	currentEntityData = &data;
 	prefabData = prefab;
 	currentId = id;
