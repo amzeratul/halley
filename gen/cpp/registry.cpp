@@ -7,6 +7,8 @@ using namespace Halley;
 #include "components/sprite_animation_component.h"
 #include "components/camera_component.h"
 #include "components/particles_component.h"
+#include "components/audio_listener_component.h"
+#include "components/audio_source_component.h"
 
 // System factory functions
 
@@ -31,6 +33,8 @@ static ComponentFactoryMap makeComponentFactories() {
 	result["SpriteAnimation"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return factory.createComponent<SpriteAnimationComponent>(e, node); };
 	result["Camera"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return factory.createComponent<CameraComponent>(e, node); };
 	result["Particles"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return factory.createComponent<ParticlesComponent>(e, node); };
+	result["AudioListener"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return factory.createComponent<AudioListenerComponent>(e, node); };
+	result["AudioSource"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return factory.createComponent<AudioSourceComponent>(e, node); };
 	return result;
 }
 
@@ -39,13 +43,15 @@ using ComponentReflectorList = std::vector<std::unique_ptr<ComponentReflector>>;
 
 static ComponentReflectorList makeComponentReflectors() {
 	ComponentReflectorList result;
-	result.reserve(6);
+	result.reserve(8);
 	result.push_back(std::make_unique<ComponentReflectorImpl<Transform2DComponent>>());
 	result.push_back(std::make_unique<ComponentReflectorImpl<SpriteComponent>>());
 	result.push_back(std::make_unique<ComponentReflectorImpl<TextLabelComponent>>());
 	result.push_back(std::make_unique<ComponentReflectorImpl<SpriteAnimationComponent>>());
 	result.push_back(std::make_unique<ComponentReflectorImpl<CameraComponent>>());
 	result.push_back(std::make_unique<ComponentReflectorImpl<ParticlesComponent>>());
+	result.push_back(std::make_unique<ComponentReflectorImpl<AudioListenerComponent>>());
+	result.push_back(std::make_unique<ComponentReflectorImpl<AudioSourceComponent>>());
 	return result;
 }
 

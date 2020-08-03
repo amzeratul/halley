@@ -1,0 +1,29 @@
+---
+
+component:
+  name: AudioListener
+  members:
+  - referenceDistance:
+      type: float
+      defaultValue: 500
+
+---
+
+component:
+  name: AudioSource
+  members:
+  - clip: 'std::shared_ptr<const Halley::AudioClip>'
+  - volume:
+      type: float
+      defaultValue: 1
+  - rangeMin:
+      type: float
+      defaultValue: 50
+  - rangeMax:
+      type: float
+      defaultValue: 100
+  - playing:
+      type: 'std::vector<Halley::AudioHandle>'
+      serializable: false
+
+...
