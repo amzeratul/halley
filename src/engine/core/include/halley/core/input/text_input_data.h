@@ -16,6 +16,7 @@ namespace Halley {
 
 		const StringUTF32& getText() const;
 		void setText(const String& text);
+		void setTextFromSoftKeyboard(const String& text, bool accept);
 		void setText(StringUTF32 text);
 
 		Range<int> getSelection() const;
@@ -37,6 +38,8 @@ namespace Halley {
 		void setReadOnly(bool enable);
 		bool isReadOnly() const;
 
+		bool isPendingSubmit();
+
 	private:
 		StringUTF32 text;
 		Range<int> selection;
@@ -45,6 +48,7 @@ namespace Halley {
 		std::optional<int> maxLength = {};
 		int textRevision = 0;
 		bool readOnly = false;
+		bool pendingSubmit = false;
 
 		void onTextModified();
 		void onDelete();

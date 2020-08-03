@@ -31,6 +31,14 @@ void TextInputData::setText(const String& text)
 	setText(text.getUTF32());
 }
 
+void TextInputData::setTextFromSoftKeyboard(const String& text, bool accept)
+{
+	setText(text.getUTF32());
+	if (accept) {
+		pendingSubmit = true;
+	}
+}
+
 void TextInputData::setText(StringUTF32 _text)
 {
 	if (text != _text) {
@@ -189,6 +197,13 @@ void TextInputData::setReadOnly(bool enable)
 bool TextInputData::isReadOnly() const
 {
 	return readOnly;
+}
+
+bool TextInputData::isPendingSubmit()
+{
+	const auto value = pendingSubmit;
+	pendingSubmit = false;
+	return value;
 }
 
 void TextInputData::onDelete()

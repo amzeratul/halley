@@ -242,6 +242,10 @@ void UITextInput::update(Time t, bool moved)
 	if (moved) {
 		sprite.setPos(getPosition()).scaleTo(getSize());
 	}
+
+	if (text.isPendingSubmit()) {
+		sendEvent(UIEvent(UIEventType::TextSubmit, getId(), getText()));
+	}
 }
 
 void UITextInput::onFocus()
