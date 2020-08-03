@@ -277,11 +277,11 @@ AnimationPlayer& AnimationPlayer::setOffsetPivot(Vector2f offset)
 	return *this;
 }
 
-void AnimationPlayer::syncWith(const AnimationPlayer& masterAnimator)
+void AnimationPlayer::syncWith(const AnimationPlayer& masterAnimator, bool hideIfNotSynchronized)
 {
 	setSequence(masterAnimator.getCurrentSequenceName());
 	setDirection(masterAnimator.getCurrentDirectionName());
-	visibleOverride = getCurrentSequenceName() == masterAnimator.getCurrentSequenceName();
+	visibleOverride = !hideIfNotSynchronized || getCurrentSequenceName() == masterAnimator.getCurrentSequenceName();
 	curFrame = clamp(masterAnimator.curFrame, 0, static_cast<int>(curSeq->numFrames()) - 1);
 	curFrameTime = masterAnimator.curFrameTime;
 

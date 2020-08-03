@@ -76,7 +76,8 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		if (inputFile.name.getExtension() == ".ase" || inputFile.name.getExtension() == ".aseprite") {
 			// Import Aseprite file
 			auto groupSeparated = meta.getBool("group_separated", false);
-			groupedFrames = AsepriteReader::importAseprite(baseSpriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)), trim, padding, groupSeparated);
+			auto sequenceSeparated = meta.getBool("sequence_separated", false);
+			groupedFrames = AsepriteReader::importAseprite(baseSpriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)), trim, padding, groupSeparated, sequenceSeparated);
 		} else {
 			// Bitmap
 			auto span = gsl::as_bytes(gsl::span<const Byte>(inputFile.data));

@@ -51,7 +51,7 @@ namespace Halley
 
 		AnimationPlayer& setOffsetPivot(Vector2f offset);
 
-		void syncWith(const AnimationPlayer& masterAnimator);
+		void syncWith(const AnimationPlayer& masterAnimator, bool hideIfNotSynchronized);
 		void stepFrames(int amount);
 
 	private:
