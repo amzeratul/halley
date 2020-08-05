@@ -575,15 +575,16 @@ const std::vector<Family*>& World::getFamiliesFor(const FamilyMaskType& mask)
 void World::processSystemMessages(TimeLine timeline)
 {
 	bool keepRunning = true;
+	auto& timelineSystems = systems[static_cast<int>(timeline)];
 	while (keepRunning) {
 		keepRunning = false;
-		for (auto& system: systems[static_cast<int>(timeline)]) {
+		for (auto& system: timelineSystems) {
 			system->prepareSystemMessages();
 		}
-		for (auto& system: systems[static_cast<int>(timeline)]) {
+		for (auto& system: timelineSystems) {
 			system->processSystemMessages();
 		}
-		for (auto& system : systems[static_cast<int>(timeline)]) {
+		for (auto& system : timelineSystems) {
 			if (system->getSystemMessagesInInbox() > 0) {
 				keepRunning = true;
 			}
