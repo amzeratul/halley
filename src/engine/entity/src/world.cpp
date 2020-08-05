@@ -582,6 +582,8 @@ void World::processSystemMessages(TimeLine timeline)
 		}
 		for (auto& system: systems[static_cast<int>(timeline)]) {
 			system->processSystemMessages();
+		}
+		for (auto& system : systems[static_cast<int>(timeline)]) {
 			if (system->getSystemMessagesInInbox() > 0) {
 				keepRunning = true;
 			}
