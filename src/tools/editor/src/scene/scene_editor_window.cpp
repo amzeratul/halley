@@ -658,7 +658,7 @@ bool SceneEditorWindow::isValidEntityTree(const ConfigNode& node) const
 		return false;
 	}
 	for (const auto& [k, v]: node.asMap()) {
-		if (k != "name" && k != "uuid" && k != "components" && k != "children") {
+		if (k != "name" && k != "uuid" && k != "components" && k != "children" && k != "prefab") {
 			return false;
 		}
 	}
