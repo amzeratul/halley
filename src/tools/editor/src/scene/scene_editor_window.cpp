@@ -375,13 +375,13 @@ void SceneEditorWindow::copyEntityToClipboard(const String& id)
 	}
 }
 
-void SceneEditorWindow::pasteEntityFromClipboard(const String& parent)
+void SceneEditorWindow::pasteEntityFromClipboard(const String& selectedEntity)
 {
 	const auto clipboard = api.system->getClipboard();
 	if (clipboard) {
 		auto clipboardData = clipboard->getStringData();
 		if (clipboardData) {
-			pasteEntity(clipboardData.value(), parent);
+			pasteEntity(clipboardData.value(), selectedEntity);
 		}
 	}
 }
@@ -475,16 +475,16 @@ void SceneEditorWindow::addEntity(const String& parentId, ConfigNode data)
 		// Should only be able to place items on the root if it's a scene
 		auto& root = sceneData->getEntityData("").data;
 		root.asSequence().emplace_back(std::move(data));
+		onEntityAdded(uuid, parentId);
 	} else {
 		ConfigNode& parentData = sceneData->getEntityData(parentId).data;
-		auto& children = parentData["children"];
-		if (children.getType() != ConfigNodeType::Sequence) {
-			children = ConfigNode::SequenceType();
+		if (!parentData.hasKey("prefab")) {
+			auto& children = parentData["children"];
+			children.ensureType(ConfigNodeType::Sequence);
+			children.asSequence().emplace_back(std::move(data));
+			onEntityAdded(uuid, parentId);
 		}
-		children.asSequence().emplace_back(std::move(data));
 	}
-
-	onEntityAdded(uuid, parentId);
 }
 
 void SceneEditorWindow::removeEntity()
