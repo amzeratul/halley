@@ -46,7 +46,7 @@ void EntityList::addEntities(const EntityTree& entity, const String& parentId)
 {
 	// Root is empty, don't add it
 	if (!entity.entityId.isEmpty()) {
-		addEntity(entity.name, entity.entityId, parentId, entity.prefab);
+		addEntity(entity.name, entity.entityId, parentId, "", entity.prefab);
 	}
 
 	for (auto& e: entity.children) {
@@ -54,10 +54,10 @@ void EntityList::addEntities(const EntityTree& entity, const String& parentId)
 	}
 }
 
-void EntityList::addEntity(const String& name, const String& id, const String& parentId, const String& prefab)
+void EntityList::addEntity(const String& name, const String& id, const String& parentId, const String& afterSiblingId, const String& prefab)
 {
 	const bool isPrefab = !prefab.isEmpty();
-	list->addTreeItem(id, parentId, LocalisedString::fromUserString(getEntityName(name, prefab)), isPrefab ? "labelSpecial" : "label", isPrefab);
+	list->addTreeItem(id, parentId, afterSiblingId, LocalisedString::fromUserString(getEntityName(name, prefab)), isPrefab ? "labelSpecial" : "label", isPrefab);
 }
 
 String EntityList::getEntityName(const ConfigNode& data) const
@@ -95,20 +95,20 @@ void EntityList::onEntityModified(const String& id, const ConfigNode& node)
 	list->setLabel(id, LocalisedString::fromUserString(getEntityName(node)));
 }
 
-void EntityList::onEntityAdded(const String& id, const String& parentId, const ConfigNode& data)
+void EntityList::onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId, const ConfigNode& data)
 {
-	addEntityTree(parentId, data);
+	addEntityTree(parentId, afterSiblingId, data);
 	list->sortItems();
 	list->setSelectedOptionId(id);
 }
 
-void EntityList::addEntityTree(const String& parentId, const ConfigNode& data)
+void EntityList::addEntityTree(const String& parentId, const String& afterSiblingId, const ConfigNode& data)
 {
 	const auto& curId = data["uuid"].asString();
-	addEntity(data["name"].asString(""), curId, parentId, data["prefab"].asString(""));
+	addEntity(data["name"].asString(""), curId, parentId, afterSiblingId, data["prefab"].asString(""));
 	if (data["children"].getType() == ConfigNodeType::Sequence) {
 		for (const auto& child: data["children"]) {
-			addEntityTree(curId, child);
+			addEntityTree(curId, "", child);
 		}
 	}
 }

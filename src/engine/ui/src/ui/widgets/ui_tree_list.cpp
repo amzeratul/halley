@@ -17,7 +17,7 @@ UITreeList::UITreeList(String id, UIStyle style)
 	setupEvents();
 }
 
-void UITreeList::addTreeItem(const String& id, const String& parentId, const LocalisedString& label, const String& labelStyleName, bool forceLeaf)
+void UITreeList::addTreeItem(const String& id, const String& parentId, const String& afterSiblingId, const LocalisedString& label, const String& labelStyleName, bool forceLeaf)
 {
 	auto listItem = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 
@@ -44,7 +44,7 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Loc
 	// Logical item
 	auto treeItem = std::make_unique<UITreeListItem>(id, listItem, treeControls, labelWidget, forceLeaf);
 	auto& parentItem = getItemOrRoot(parentId);
-	parentItem.addChild(std::move(treeItem));
+	parentItem.addChild(std::move(treeItem), afterSiblingId);
 
 	addItem(listItem, Vector4f(), UISizerAlignFlags::Left | UISizerFillFlags::FillVertical);
 	needsRefresh = true;
@@ -368,7 +368,7 @@ UITreeListItem* UITreeListItem::tryFindId(const String& id)
 	return nullptr;
 }
 
-void UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item)
+void UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item, const String& afterSiblingId)
 {
 	Expects(!forceLeaf);
 	
@@ -376,7 +376,15 @@ void UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item)
 		expanded = true;
 	}
 	item->parentId = id;
-	children.emplace_back(std::move(item));
+
+	auto insertPos = std::find_if(children.begin(), children.end(), [&] (const std::unique_ptr<UITreeListItem>& i) -> bool
+	{
+		return i->getId() == afterSiblingId;
+	});
+	if (insertPos != children.end()) {
+		++insertPos;
+	}
+	children.insert(insertPos, std::move(item));
 }
 
 void UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item, size_t pos)

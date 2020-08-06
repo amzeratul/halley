@@ -24,7 +24,7 @@ namespace Halley {
 		void unloadScene();
 		void markModified();
 
-		void onEntityAdded(const String& id, const String& parentId);
+		void onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId);
 		void onEntityRemoved(const String& id, const String& parentId);
 		void onEntityModified(const String& id);
 		void onEntityMoved(const String& id);
@@ -35,7 +35,8 @@ namespace Halley {
 		void addNewPrefab();
 		void addNewPrefab(const String& prefabName);
 		void addEntity(ConfigNode data);
-		void addEntity(const String& parentId, ConfigNode data);
+		void addEntity(const String& referenceEntityId, bool childOfReference, ConfigNode data);
+		void addEntity(const String& parentId, const String& afterSibling, ConfigNode data);
 		void removeEntity();
 		void removeEntity(const String& entityId);
 		void selectEntity(const String& id);
@@ -47,9 +48,9 @@ namespace Halley {
 		std::shared_ptr<const Prefab> getGamePrefab(const String& id) const;
 
 		void copyEntityToClipboard(const String& id);
-		void pasteEntityFromClipboard(const String& parent);
+		void pasteEntityFromClipboard(const String& referenceId);
 		String copyEntity(const String& id);
-		void pasteEntity(const String& data, const String& parent);
+		void pasteEntity(const String& data, const String& referenceId);
 		void duplicateEntity(const String& id);
 
 	protected:

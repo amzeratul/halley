@@ -17,7 +17,7 @@ namespace Halley {
 		void refreshList();
 
 		void onEntityModified(const String& id, const ConfigNode& node);
-		void onEntityAdded(const String& id, const String& parentId, const ConfigNode& data);
+		void onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId, const ConfigNode& data);
 		void onEntityRemoved(const String& id, const String& parentId);
 		void select(const String& id);
 
@@ -33,8 +33,8 @@ namespace Halley {
 
 		void makeUI();
 		void addEntities(const EntityTree& entity, const String& parentId);
-		void addEntity(const String& name, const String& id, const String& parentId, const String& prefab);
-		void addEntityTree(const String& parentId, const ConfigNode& data);
+		void addEntity(const String& name, const String& id, const String& parentId, const String& afterSiblingId, const String& prefab);
+		void addEntityTree(const String& parentId, const String& afterSiblingId, const ConfigNode& data);
 		String getEntityName(const ConfigNode& data) const;
 		String getEntityName(const String& name, const String& prefab) const;
 	};
