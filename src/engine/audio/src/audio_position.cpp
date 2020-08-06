@@ -99,11 +99,10 @@ static void getPanAndDistance(Vector3f pos, const AudioListenerData& listener, f
 void AudioPosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const
 {
 	if (isPannable) {
-		Expects(nSrcChannels == 1);
 		if (isUI) {
 			setMixUI(dstChannels, dst, gain, listener);
 		} else {
-			setMixPositional(dstChannels, dst, gain, listener);
+			setMixPositional(nSrcChannels, dstChannels, dst, gain, listener);
 		}
 	} else {
 		setMixFixed(nSrcChannels, dstChannels, dst, gain, listener);
@@ -130,7 +129,7 @@ void AudioPosition::setMixUI(gsl::span<const AudioChannelData> dstChannels, gsl:
 	}
 }
 
-void AudioPosition::setMixPositional(gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const
+void AudioPosition::setMixPositional(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const
 {
 	const size_t nDstChannels = size_t(dstChannels.size());
 	if (sources.empty()) {
@@ -171,7 +170,12 @@ void AudioPosition::setMixPositional(gsl::span<const AudioChannelData> dstChanne
 		}
 	}
 
-	for (size_t i = 0; i < nDstChannels; ++i) {
-		dst[i] = gain2DPan(resultPan, dstChannels[i].pan) * gain * proximity * dstChannels[i].gain;
+	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
+		// Read to buffer
+		for (size_t dstChannel = 0; dstChannel < nDstChannels; ++dstChannel) {
+			// Compute mix
+			const size_t mixIndex = (srcChannel * nSrcChannels) + dstChannel;
+			dst[mixIndex] = gain2DPan(resultPan, dstChannels[dstChannel].pan) * gain * proximity * dstChannels[dstChannel].gain;
+		}
 	}
 }

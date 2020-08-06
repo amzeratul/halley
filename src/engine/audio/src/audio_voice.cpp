@@ -33,10 +33,6 @@ void AudioVoice::start()
 
 	playing = true;
 	nChannels = source->getNumberOfChannels();
-
-	if (nChannels > 1) {
-		sourcePos = AudioPosition::makeFixed();
-	}
 }
 
 void AudioVoice::stop()
@@ -79,16 +75,12 @@ void AudioVoice::setGain(float g)
 
 void AudioVoice::setAudioSourcePosition(Vector3f position)
 {
-	if (nChannels == 1) {
-		sourcePos.setPosition(position);
-	}
+	sourcePos.setPosition(position);
 }
 
 void AudioVoice::setAudioSourcePosition(AudioPosition s)
 {
-	if (nChannels == 1) {
-		sourcePos = std::move(s);
-	}
+	sourcePos = std::move(s);
 }
 
 float AudioVoice::getGain() const
