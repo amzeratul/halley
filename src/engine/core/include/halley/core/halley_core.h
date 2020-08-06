@@ -59,6 +59,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "resources/asset_pack.h"
 #include "resources/resources.h"
 #include "resources/resource_locator.h"
+#include "resources/resource_reference.h"
 
 #include "editor_extensions/component_editor_context.h"
 #include "editor_extensions/component_field_parameters.h"

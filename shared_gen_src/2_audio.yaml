@@ -12,7 +12,7 @@ component:
 component:
   name: AudioSource
   members:
-  - clip: 'std::shared_ptr<const Halley::AudioClip>'
+  - clip: 'Halley::ResourceReference<Halley::AudioClip>'
   - volume:
       type: float
       defaultValue: 1

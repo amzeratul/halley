@@ -744,6 +744,61 @@ public:
 	}
 };
 
+class ComponentEditorResourceReferenceFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::ResourceReference<>";
+	}
+
+	bool isNested() const override
+	{
+		return false;
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode();
+	}
+
+	std::optional<AssetType> getType(String typeName)
+	{
+		const String strippedTypeName = typeName.startsWith("Halley::") ? typeName.mid(8) : typeName;
+		if (strippedTypeName == "AudioClip") {
+			return AssetType::AudioClip;
+		} else {
+			Logger::logWarning("Unimplemented resource type on ComponentEditorResourceReferenceFieldFactory: " + strippedTypeName);
+		}
+
+		return {};
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		const auto fieldType = pars.typeParameters.at(0);
+		const auto data = pars.data;
+		auto& fieldData = data.getFieldData();
+		fieldData.ensureType(ConfigNodeType::Map);
+		
+		const std::optional<AssetType> type = getType(fieldType);
+
+		std::shared_ptr<IUIElement> result;
+		if (type) {
+			auto widget = std::make_shared<SelectAssetWidget>("asset", context.getUIFactory(), type.value(), context.getGameResources());
+			widget->bindData("asset", fieldData["asset"].asString(""), [&context, data](String newVal)
+			{
+				data.getFieldData()["asset"] = ConfigNode(std::move(newVal));
+				context.onEntityUpdated();
+			});
+			result = widget;
+		} else {
+			result = context.makeLabel("N/A");
+		}
+		
+		return result;
+	}
+};
+
 std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
 	std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
@@ -766,6 +821,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorOptionalLiteFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorColourFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorParticlesFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorResourceReferenceFieldFactory>());
 
 	return factories;
 }

@@ -7,6 +7,8 @@
 #include "config_node_serializer_base.h"
 #include <set>
 
+#include "halley/core/resources/resource_reference.h"
+
 namespace Halley {
 	template <>
 	class ConfigNodeSerializer<bool> {
@@ -222,6 +224,22 @@ namespace Halley {
 				}
 			}
 			return result;
+		}
+	};
+
+	template <typename T>
+	class ConfigNodeSerializer<ResourceReference<T>> {
+	public:
+		ConfigNode serialize(const ResourceReference<T>& value, ConfigNodeSerializationContext& context)
+		{
+        	ConfigNode result = ConfigNode::MapType();
+			result["asset"] = value.getId();
+			return result;
+		}
+		
+        ResourceReference<T> deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
+		{
+			return ResourceReference<T>(context.resources->get<T>(node["asset"].asString()));
 		}
 	};
 	
