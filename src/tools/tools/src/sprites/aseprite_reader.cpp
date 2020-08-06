@@ -8,7 +8,7 @@
 using namespace Halley;
 
 
-std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String spriteName, gsl::span<const gsl::byte> fileData, bool trim, int padding, bool groupSeparated)
+std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String spriteName, gsl::span<const gsl::byte> fileData, bool trim, int padding, bool groupSeparated, bool sequenceSeparated)
 {
 	const String baseName = Path(spriteName).getFilename().string();
 
@@ -63,15 +63,17 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String s
 
 			for (auto& groupFrameImage : groupFrameImages)
 			{
-				std::vector<ImageData> groupFrameData;
-				auto firstImage = frameData.find(groupFrameImage.first) == frameData.end();
-				addImageData(i, groupFrameData, std::move(groupFrameImage.second), aseFile, baseName, sequence, direction, duration, trim, padding, hasFrameNumber, groupFrameImage.first, firstImage, spriteName);
+				auto name = sequenceSeparated ? sequence : groupFrameImage.first;
 				
-				if(frameData.find(groupFrameImage.first) == frameData.end())
+				std::vector<ImageData> groupFrameData;
+				auto firstImage = frameData.find(name) == frameData.end();
+				addImageData(i, groupFrameData, std::move(groupFrameImage.second), aseFile, baseName, sequence, direction, duration, trim, padding, hasFrameNumber, name, firstImage, spriteName);
+				
+				if(frameData.find(name) == frameData.end())
 				{
-					frameData[groupFrameImage.first] = std::vector<ImageData>();
+					frameData[name] = std::vector<ImageData>();
 				}
-				std::move(groupFrameData.begin(), groupFrameData.end(), std::back_inserter(frameData[groupFrameImage.first]));
+				std::move(groupFrameData.begin(), groupFrameData.end(), std::back_inserter(frameData[name]));
 			}
 			++i;
 		}
