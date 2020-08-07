@@ -37,6 +37,7 @@ component:
 
 component:
   name: Camera
+  componentDependencies: [Transform2D]
   members:
   - zoom:
       type: float
@@ -57,6 +58,7 @@ component:
 
 component:
   name: Particles
+  componentDependencies: [Transform2D]
   members:
   - particles:
       type: 'Halley::Particles'
