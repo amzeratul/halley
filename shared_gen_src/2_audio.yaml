@@ -12,10 +12,7 @@ component:
 component:
   name: AudioSource
   members:
-  - clip: 'Halley::ResourceReference<Halley::AudioClip>'
-  - volume:
-      type: float
-      defaultValue: 1
+  - event: 'Halley::ResourceReference<Halley::AudioEvent>'
   - rangeMin:
       type: float
       defaultValue: 50
