@@ -737,6 +737,12 @@ public:
 		container->add(context.makeField("float", pars.withSubKey("angle", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("angleScatter"));
 		container->add(context.makeField("float", pars.withSubKey("angleScatter", "10"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("fadeInTime"));
+		container->add(context.makeField("float", pars.withSubKey("fadeInTime", "0"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("fadeOutTime"));
+		container->add(context.makeField("float", pars.withSubKey("fadeOutTime", "0"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("rotateTowardsMovement"));
+		container->add(context.makeField("bool", pars.withSubKey("rotateTowardsMovement", "false"), ComponentEditorLabelCreation::Never));
 		
 		auto containerWeak = std::weak_ptr<UIWidget>(container);
 

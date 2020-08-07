@@ -20,6 +20,9 @@ Particles::Particles(const ConfigNode& node, Resources& resources)
 	speedScatter = node["speedScatter"].asFloat(0.0f);
 	angle = node["angle"].asFloat(0.0f);
 	angleScatter = node["angleScatter"].asFloat(0.0f);
+	fadeInTime = node["fadeInTime"].asFloat(0.0f);
+	fadeOutTime = node["fadeOutTime"].asFloat(0.0f);
+	rotateTowardsMovement = node["rotateTowardsMovement"].asBool(false);
 }
 
 ConfigNode Particles::toConfigNode() const
@@ -124,13 +127,16 @@ void Particles::spawn(size_t n)
 }
 
 void Particles::initializeParticle(size_t index)
-{	
+{
+	const auto startDirection = Angle1f::fromDegrees(rng->getFloat(angle - angleScatter, angle + angleScatter));
+	
 	auto& particle = particles[index];
 	particle.alive = true;
+	particle.time = 0;
 	particle.ttl = rng->getFloat(ttl - ttlScatter, ttl + ttlScatter);
 	particle.pos = getSpawnPosition();
-	particle.angle = Angle1f::fromDegrees(rng->getFloat(angle - angleScatter, angle + angleScatter));
-	particle.vel = Vector2f(rng->getFloat(speed - speedScatter, speed + speedScatter), particle.angle);
+	particle.angle = rotateTowardsMovement ? startDirection : Angle1f();
+	particle.vel = Vector2f(rng->getFloat(speed - speedScatter, speed + speedScatter), startDirection);
 
 	auto& sprite = sprites[index];
 	if (!baseSprites.empty()) {
@@ -143,12 +149,20 @@ void Particles::updateParticles(float time)
 	for (size_t i = 0; i < nParticlesAlive; ++i) {
 		auto& particle = particles[i];
 
-		particle.ttl -= time;
-		if (particle.ttl <= 0) {
+		particle.time += time;
+		if (particle.time >= particle.ttl) {
 			particle.alive = false;
 		} else {
 			particle.pos += particle.vel * time;
-			particle.angle = particle.vel.angle();
+
+			if (rotateTowardsMovement && particle.vel.squaredLength() > 0.001f) {
+				particle.angle = particle.vel.angle();
+			}
+
+			if (fadeInTime > 0.000001f || fadeOutTime > 0.00001f) {
+				const float alpha = clamp(std::min(particle.time / fadeInTime, (particle.ttl - particle.time) / fadeOutTime), 0.0f, 1.0f);
+				sprites[i].getColour().a = alpha;
+			}
 			
 			sprites[i]
 				.setPosition(particle.pos)

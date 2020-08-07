@@ -12,6 +12,7 @@ namespace Halley {
 			Vector2f pos;
 			Vector2f vel;
 			Angle1f angle;
+			float time = 0;
 			float ttl = 1;
 			bool alive = true;
 		};
@@ -57,6 +58,9 @@ namespace Halley {
 		float speedScatter = 0;
 		float angle = 0;
 		float angleScatter = 0;
+		float fadeInTime = 0;
+		float fadeOutTime = 0;
+		bool rotateTowardsMovement = false;
 
 		std::vector<Sprite> baseSprites;
 		std::shared_ptr<const Animation> baseAnimation;
