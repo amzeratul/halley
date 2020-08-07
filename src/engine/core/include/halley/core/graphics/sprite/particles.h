@@ -60,6 +60,7 @@ namespace Halley {
 		float angleScatter = 0;
 		float fadeInTime = 0;
 		float fadeOutTime = 0;
+		float directionScatter = 0;
 		bool rotateTowardsMovement = false;
 
 		std::vector<Sprite> baseSprites;

@@ -22,6 +22,7 @@ Particles::Particles(const ConfigNode& node, Resources& resources)
 	angleScatter = node["angleScatter"].asFloat(0.0f);
 	fadeInTime = node["fadeInTime"].asFloat(0.0f);
 	fadeOutTime = node["fadeOutTime"].asFloat(0.0f);
+	directionScatter = node["directionScatter"].asFloat(0.0f);
 	rotateTowardsMovement = node["rotateTowardsMovement"].asBool(false);
 }
 
@@ -153,6 +154,10 @@ void Particles::updateParticles(float time)
 		if (particle.time >= particle.ttl) {
 			particle.alive = false;
 		} else {
+			if (directionScatter > 0.00001f) {
+				particle.vel = particle.vel.rotate(Angle1f::fromDegrees(rng->getFloat(-directionScatter * time, directionScatter * time)));
+			}
+			
 			particle.pos += particle.vel * time;
 
 			if (rotateTowardsMovement && particle.vel.squaredLength() > 0.001f) {

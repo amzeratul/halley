@@ -163,7 +163,7 @@ namespace Halley {
 		constexpr Vector2D round() const { return Vector2D(std::round(x), std::round(y)); }
 
 		// Gets the angle that this vector is pointing to
-		constexpr U angle () const
+		[[nodiscard]] constexpr U angle () const
 		{
 			U angle;
 			angle.setRadians(std::atan2(y, x));
@@ -171,7 +171,7 @@ namespace Halley {
 		}
 
 		// Rotates vector by an angle
-		constexpr Vector2D rotate (U angle) const
+		[[nodiscard]] constexpr Vector2D rotate (U angle) const
 		{
 			const T sin = angle.sin();
 			const T cos = angle.cos();
@@ -179,13 +179,13 @@ namespace Halley {
 		}
 
 		// Rotates vector by sine and cosine
-		constexpr Vector2D rotate (T sine, T cosine) const
+		[[nodiscard]] constexpr Vector2D rotate (T sine, T cosine) const
 		{
 			return Vector2D(x*cosine - y*sine, x*sine + y*cosine);
 		}
 
 		// Removes the length of the vector along the given axis
-		constexpr Vector2D neutralize (Vector2D param) const
+		[[nodiscard]] constexpr Vector2D neutralize (Vector2D param) const
 		{
 			return *this - dot(param)*param;
 		}

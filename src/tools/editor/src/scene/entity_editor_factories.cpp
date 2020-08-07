@@ -741,6 +741,8 @@ public:
 		container->add(context.makeField("float", pars.withSubKey("fadeInTime", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("fadeOutTime"));
 		container->add(context.makeField("float", pars.withSubKey("fadeOutTime", "0"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("directionScatter"));
+		container->add(context.makeField("float", pars.withSubKey("directionScatter", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("rotateTowardsMovement"));
 		container->add(context.makeField("bool", pars.withSubKey("rotateTowardsMovement", "false"), ComponentEditorLabelCreation::Never));
 		
