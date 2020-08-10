@@ -302,9 +302,9 @@ void World::onEntityDirty()
 	entityDirty = true;
 }
 
-void World::setEntityModified()
+void World::setEntityReloaded()
 {
-	entityModified = true;
+	entityReloaded = true;
 }
 
 const CreateComponentFunction& World::getCreateComponentFunction() const
@@ -427,6 +427,7 @@ void World::updateEntities()
 	struct FamilyTodo {
 		std::vector<std::pair<FamilyMaskType, Entity*>> toAdd;
 		std::vector<std::pair<FamilyMaskType, Entity*>> toRemove;
+		std::vector<std::pair<FamilyMaskType, Entity*>> toReload;
 	};
 	std::map<FamilyMaskType, FamilyTodo> pending;
 
@@ -460,6 +461,17 @@ void World::updateEntities()
 		}
 	}
 
+	if (entityReloaded) {
+		for (size_t i = 0; i < nEntities; i++) {
+			auto& entity = *entities[i];
+			if (entity.reloaded && entity.isAlive()) {
+				pending[entity.getMask()].toReload.emplace_back(FamilyMaskType(), &entity);
+			}
+		}
+	}
+
+	entityReloaded = false;
+
 	HALLEY_DEBUG_TRACE();
 	// Go through every family adding/removing entities as needed
 	for (auto& todo: pending) {
@@ -480,16 +492,18 @@ void World::updateEntities()
 					fam->addEntity(*e.second);
 				}
 			}
+
+			for (auto& e : todo.second.toReload) {
+				fam->reloadEntity(*e.second);
+			}
 		}
 	}
 
 	HALLEY_DEBUG_TRACE();
 	// Update families
 	for (auto& iter : families) {
-		iter->updateEntities(entityModified);
+		iter->updateEntities();
 	}
-
-	entityModified = false;
 	
 	HALLEY_DEBUG_TRACE();
 	// Actually remove dead entities

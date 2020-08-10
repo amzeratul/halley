@@ -28,9 +28,9 @@ void FamilyBindingBase::onEntitiesRemoved(void* entity, size_t count)
 	removedCallback(entity, count);
 }
 
-void FamilyBindingBase::onEntitiesModified()
+void FamilyBindingBase::onEntitiesReloaded(void* entity, size_t count)
 {
-	modifiedCallback();
+	reloadedCallback(entity, count);
 }
 
 void FamilyBindingBase::setFamily(Family* f) noexcept {
@@ -49,8 +49,8 @@ void FamilyBindingBase::setOnEntitiesRemoved(std::function<void(void*, size_t)> 
 	family->addOnEntitiesRemoved(this);
 }
 
-void FamilyBindingBase::setOnEntitiesModified(std::function<void()> callback)
+void FamilyBindingBase::setOnEntitiesReloaded(std::function<void(void*, size_t)> callback)
 {
-	modifiedCallback = callback;
-	family->addOnEntitiesModified(this);
+	reloadedCallback = callback;
+	family->addOnEntitiesReloaded(this);
 }

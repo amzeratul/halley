@@ -10,6 +10,7 @@ Entity::Entity()
 	: dirty(false)
 	, alive(true)
 	, serializable(true)
+	, reloaded(false)
 {
 	
 }
@@ -203,7 +204,7 @@ bool Entity::hasBit(World& world, int index) const
 void EntityRef::setModified()
 {
 	Expects(entity);
-	entity->modified = true;
+	entity->reloaded = true;
 
-	world->setEntityModified();
+	world->setEntityReloaded();
 }

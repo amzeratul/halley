@@ -35,23 +35,25 @@ namespace Halley {
 		void removeOnEntityAdded(FamilyBindingBase* bind);
 		void addOnEntitiesRemoved(FamilyBindingBase* bind);
 		void removeOnEntityRemoved(FamilyBindingBase* bind);
-		void addOnEntitiesModified(FamilyBindingBase* bind);
-		void removeOnEntitiesModified(FamilyBindingBase* bind);
+		void addOnEntitiesReloaded(FamilyBindingBase* bind);
+		void removeOnEntitiesReloaded(FamilyBindingBase* bind);
 
 		void notifyAdd(void* entities, size_t count);
 		void notifyRemove(void* entities, size_t count);
-		void notifyModify();
+		void notifyReload(void* entities, size_t count);
 
 	protected:
 		virtual void addEntity(Entity& entity) = 0;
 		void removeEntity(Entity& entity);
-		virtual void updateEntities(bool entityModified) = 0;
+		void reloadEntity(Entity& entity);
+		virtual void updateEntities() = 0;
 		virtual void clearEntities() = 0;
 		
 		void* elems = nullptr;
 		size_t elemCount = 0;
 		size_t elemSize = 0;
 		Vector<EntityId> toRemove;
+		Vector<EntityId> toReload;
 
 		Vector<FamilyBindingBase*> addEntityCallbacks;
 		Vector<FamilyBindingBase*> removeEntityCallbacks;
@@ -119,7 +121,7 @@ namespace Halley {
 			dirty = true;
 		}
 
-		void updateEntities(bool entityModified) override
+		void updateEntities() override
 		{
 			if (dirty) {
 				// Notify additions
@@ -135,10 +137,16 @@ namespace Halley {
 				dirty = false;
 			}
 
-			if (entityModified) {
-				// Notify modifications
+			if (!toReload.empty()) {
+				// Notify reloads
 				HALLEY_DEBUG_TRACE();
-				notifyModify();
+				std::vector<StorageType*> reloadedEntities;
+				for (auto& entity : entities) {
+					if (std::find(toReload.begin(), toReload.end(), entity.entityId) != toReload.end()) {
+						reloadedEntities.push_back(&entity);
+					}
+				}
+				notifyReload(reloadedEntities.data(), reloadedEntities.size());
 			}
 
 			// Remove

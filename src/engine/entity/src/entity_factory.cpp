@@ -197,7 +197,10 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, 
 	}
 
 	entity.setName(node["name"].asString(""));
-	entity.setModified();
+
+	if (mode == UpdateMode::UpdateAllDeleteOld) {
+		entity.setModified();
+	}
 }
 
 void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node)

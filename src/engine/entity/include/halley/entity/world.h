@@ -93,7 +93,7 @@ namespace Halley {
 
 		void onEntityDirty();
 
-		void setEntityModified();
+		void setEntityReloaded();
 
 		template <typename T>
 		Family& getFamily() noexcept
@@ -124,7 +124,7 @@ namespace Halley {
 		CreateComponentFunction createComponent;
 		bool collectMetrics = false;
 		bool entityDirty = false;
-		bool entityModified = false;
+		bool entityReloaded = false;
 		
 		Vector<Entity*> entities;
 		Vector<Entity*> entitiesPendingCreation;

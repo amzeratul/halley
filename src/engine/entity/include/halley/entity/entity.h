@@ -128,8 +128,7 @@ namespace Halley {
 		bool dirty : 1;
 		bool alive : 1;
 		bool serializable : 1;
-		bool modified : 1;
-		uint8_t flags = 0;
+		bool reloaded : 1;
 		
 		int8_t hierarchyRevision = 0;
 		Entity* parent = nullptr;
@@ -504,10 +503,10 @@ namespace Halley {
 
 		void setModified();
 
-		bool wasModified()
+		bool wasReloaded()
 		{
 			Expects(entity);
-			return entity->modified;
+			return entity->reloaded;
 		}
 
 	private:

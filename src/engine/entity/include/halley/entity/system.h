@@ -31,8 +31,8 @@ namespace Halley {
 	template <class T, class F> struct HasOnEntitiesRemoved<T, F, decltype(std::declval<T>().onEntitiesRemoved(std::declval<Span<F>>()))> : std::true_type { };
 
 	// True if T::onEntityModified() exists
-	template <class, class, class = Halley::void_t<>> struct HasOnEntitiesModified : std::false_type {};
-	template <class T, class F> struct HasOnEntitiesModified<T, F, decltype(std::declval<T>().onEntitiesModified())> : std::true_type {};
+	template <class, class, class = Halley::void_t<>> struct HasOnEntitiesReloaded : std::false_type {};
+	template <class T, class F> struct HasOnEntitiesReloaded<T, F, decltype(std::declval<T>().onEntitiesReloaded(std::declval<Span<F*>>()))> : std::true_type {};
 	
 	class System
 	{
@@ -154,11 +154,12 @@ namespace Halley {
 		}
 
 		template <typename T, typename F>
-		void initializeOnEntityModified(FamilyBinding<F>& binding, T* system)
+		void initializeOnEntityReloaded(FamilyBinding<F>& binding, T* system)
 		{
-			if constexpr (HasOnEntitiesModified<T, F>::value) {
-				binding.setOnEntitiesModified([system]() {
-					system->onEntitiesModified();
+			if constexpr (HasOnEntitiesReloaded<T, F>::value) {
+				binding.setOnEntitiesReloaded([system](void* es, size_t count)
+				{
+					system->onEntitiesReloaded(Span<F*>(static_cast<F**>(es), count));
 				});
 			}
 		}
@@ -168,7 +169,7 @@ namespace Halley {
 		{
 			initialiseOnEntityAdded<T, F>(binding, system);
 			initialiseOnEntityRemoved<T, F>(binding, system);
-			initializeOnEntityModified<T, F>(binding, system);
+			initializeOnEntityReloaded<T, F>(binding, system);
 		}
 
 	private:
