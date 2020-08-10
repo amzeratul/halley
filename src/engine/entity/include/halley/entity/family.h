@@ -35,14 +35,17 @@ namespace Halley {
 		void removeOnEntityAdded(FamilyBindingBase* bind);
 		void addOnEntitiesRemoved(FamilyBindingBase* bind);
 		void removeOnEntityRemoved(FamilyBindingBase* bind);
+		void addOnEntitiesModified(FamilyBindingBase* bind);
+		void removeOnEntitiesModified(FamilyBindingBase* bind);
 
 		void notifyAdd(void* entities, size_t count);
 		void notifyRemove(void* entities, size_t count);
+		void notifyModify();
 
 	protected:
 		virtual void addEntity(Entity& entity) = 0;
 		void removeEntity(Entity& entity);
-		virtual void updateEntities() = 0;
+		virtual void updateEntities(bool entityModified) = 0;
 		virtual void clearEntities() = 0;
 		
 		void* elems = nullptr;
@@ -52,6 +55,7 @@ namespace Halley {
 
 		Vector<FamilyBindingBase*> addEntityCallbacks;
 		Vector<FamilyBindingBase*> removeEntityCallbacks;
+		Vector<FamilyBindingBase*> modifiedEntityCallbacks;
 
 	private:
 		FamilyMaskType inclusionMask;
@@ -115,7 +119,7 @@ namespace Halley {
 			dirty = true;
 		}
 
-		void updateEntities() override
+		void updateEntities(bool entityModified) override
 		{
 			if (dirty) {
 				// Notify additions
@@ -129,6 +133,12 @@ namespace Halley {
 				}
 
 				dirty = false;
+			}
+
+			if (entityModified) {
+				// Notify modifications
+				HALLEY_DEBUG_TRACE();
+				notifyModify();
 			}
 
 			// Remove

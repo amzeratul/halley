@@ -26,9 +26,11 @@ namespace Halley {
 
 		void setOnEntitiesAdded(std::function<void(void*, size_t)> callback);
 		void setOnEntitiesRemoved(std::function<void(void*, size_t)> callback);
-
+		void setOnEntitiesModified(std::function<void()> callback);
+		
 		void onEntitiesAdded(void* entities, size_t count);
 		void onEntitiesRemoved(void* entities, size_t count);
+		void onEntitiesModified();
 
 		BindFamilyCallback bindFamily = nullptr;
 
@@ -41,6 +43,7 @@ namespace Halley {
 		FamilyMaskType writeMask;
 		std::function<void(void*, size_t)> addedCallback;
 		std::function<void(void*, size_t)> removedCallback;
+		std::function<void()> modifiedCallback;
 	};
 
 	template <typename T>

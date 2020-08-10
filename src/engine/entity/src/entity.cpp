@@ -6,7 +6,14 @@
 
 using namespace Halley;
 
-Entity::Entity() = default;
+Entity::Entity()
+	: dirty(false)
+	, alive(true)
+	, serializable(true)
+{
+	
+}
+
 Entity::~Entity() = default;
 
 void Entity::destroyComponents(ComponentDeleterTable& table)
@@ -191,4 +198,12 @@ void Entity::doDestroy(bool updateParenting)
 bool Entity::hasBit(World& world, int index) const
 {
 	return FamilyMask::hasBit(mask, index, world.getMaskStorage());
+}
+
+void EntityRef::setModified()
+{
+	Expects(entity);
+	entity->modified = true;
+
+	world->setEntityModified();
 }

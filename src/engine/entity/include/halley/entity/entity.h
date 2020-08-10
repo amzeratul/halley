@@ -125,10 +125,12 @@ namespace Halley {
 		// Start with these for better cache coherence
 		Vector<std::pair<int, Component*>> components;
 		int liveComponents = 0;
-		bool dirty = false;
-		bool alive = true;
-		bool serializable = true;
-
+		bool dirty : 1;
+		bool alive : 1;
+		bool serializable : 1;
+		bool modified : 1;
+		uint8_t flags = 0;
+		
 		int8_t hierarchyRevision = 0;
 		Entity* parent = nullptr;
 		Vector<Entity*> children;
@@ -498,6 +500,14 @@ namespace Halley {
 		{
 			Expects(entity);
 			return entity->serializable;
+		}
+
+		void setModified();
+
+		bool wasModified()
+		{
+			Expects(entity);
+			return entity->modified;
 		}
 
 	private:

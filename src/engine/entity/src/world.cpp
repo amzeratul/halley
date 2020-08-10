@@ -302,6 +302,11 @@ void World::onEntityDirty()
 	entityDirty = true;
 }
 
+void World::setEntityModified()
+{
+	entityModified = true;
+}
+
 const CreateComponentFunction& World::getCreateComponentFunction() const
 {
 	return createComponent;
@@ -481,9 +486,11 @@ void World::updateEntities()
 	HALLEY_DEBUG_TRACE();
 	// Update families
 	for (auto& iter : families) {
-		iter->updateEntities();
+		iter->updateEntities(entityModified);
 	}
 
+	entityModified = false;
+	
 	HALLEY_DEBUG_TRACE();
 	// Actually remove dead entities
 	if (!entitiesRemoved.empty()) {
