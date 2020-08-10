@@ -199,7 +199,7 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, 
 	entity.setName(node["name"].asString(""));
 
 	if (mode == UpdateMode::UpdateAllDeleteOld) {
-		entity.setModified();
+		entity.setReloaded();
 	}
 }
 

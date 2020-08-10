@@ -465,7 +465,8 @@ void World::updateEntities()
 		for (size_t i = 0; i < nEntities; i++) {
 			auto& entity = *entities[i];
 			if (entity.reloaded && entity.isAlive()) {
-				pending[entity.getMask()].toReload.emplace_back(FamilyMaskType(), &entity);
+				pending[entity.getMask()].toReload.emplace_back(entity.getMask(), &entity);
+				entity.reloaded = false;
 			}
 		}
 	}

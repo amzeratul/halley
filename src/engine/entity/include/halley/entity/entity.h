@@ -501,7 +501,7 @@ namespace Halley {
 			return entity->serializable;
 		}
 
-		void setModified();
+		void setReloaded();
 
 		bool wasReloaded()
 		{

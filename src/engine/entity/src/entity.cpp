@@ -201,7 +201,7 @@ bool Entity::hasBit(World& world, int index) const
 	return FamilyMask::hasBit(mask, index, world.getMaskStorage());
 }
 
-void EntityRef::setModified()
+void EntityRef::setReloaded()
 {
 	Expects(entity);
 	entity->reloaded = true;
