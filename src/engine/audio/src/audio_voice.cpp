@@ -58,6 +58,7 @@ bool AudioVoice::isDone() const
 
 void AudioVoice::setBehaviour(std::unique_ptr<AudioVoiceBehaviour> value)
 {
+	Expects(value);
 	behaviour = std::move(value);
 	elapsedTime = 0;
 	behaviour->onAttach(*this);

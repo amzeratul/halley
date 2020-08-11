@@ -20,8 +20,8 @@ namespace Halley {
 	private:
 		float curTime;
 		float fadeTime;
-		float gain0;
-		float gain1;
+		float volume0;
+		float volume1;
 		bool stopAtEnd;
 	};
 }

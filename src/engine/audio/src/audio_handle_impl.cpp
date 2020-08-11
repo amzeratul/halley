@@ -52,13 +52,33 @@ void AudioHandleImpl::stop(float fadeTime)
 	});
 }
 
+// This is kind of like a unique_ptr, but copying it also moves it. >_>
+template <typename T>
+class BadPointer {
+public:
+	BadPointer(T* v) : v(v) {}
+	BadPointer(const BadPointer& other) : v(other.v) { other.v = nullptr; }
+	BadPointer(BadPointer&& other) : v(other.v) { other.v = nullptr; }
+	~BadPointer() { delete v; }
+
+	T* release()
+	{
+		auto value = v;
+		v = nullptr;
+		return value;
+	}
+
+private:
+	mutable T* v = nullptr;
+};
+
 void AudioHandleImpl::setBehaviour(std::unique_ptr<AudioVoiceBehaviour> b)
 {
 	// Gotta work around std::function requiring copyable
-	const auto behaviour = b.release();
+	BadPointer<AudioVoiceBehaviour> behaviour = b.release();
 	enqueue([behaviour] (AudioVoice& src) mutable
 	{
-		src.setBehaviour(std::unique_ptr<AudioVoiceBehaviour>(behaviour));
+		src.setBehaviour(std::unique_ptr<AudioVoiceBehaviour>(behaviour.release()));
 	});
 }
 

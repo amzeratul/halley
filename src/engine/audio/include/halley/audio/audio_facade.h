@@ -89,10 +89,21 @@ namespace Halley {
 
 	inline float volumeToGain(float volume)
 	{
+		// gain = a * exp(volume * -ln(a))
+		
 		constexpr float a = 0.01f;
 		constexpr float b = 4.6051701859880913680359829093687f; // -ln(a)
 		const float gain = clamp(a * ::expf(volume * b), 0.0f, 1.0f);
 		const float linearRolloff = clamp(volume * 10, 0.0f, 1.0f);
 		return gain * linearRolloff;
+	}
+
+	inline float gainToVolume(float gain)
+	{
+		// volume = 1 - ln(gain)/ln(a)
+		
+		constexpr float b = 0.2171472409516259138255644594583; // -1.0f / ln(a)
+		const float volume = std::clamp(1.0f + b * logf(std::max(0.01f, gain)), 0.0f, 1.0f);
+		return volume;
 	}
 }
