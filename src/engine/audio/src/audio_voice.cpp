@@ -56,7 +56,7 @@ bool AudioVoice::isDone() const
 	return done;
 }
 
-void AudioVoice::setBehaviour(std::shared_ptr<AudioVoiceBehaviour> value)
+void AudioVoice::setBehaviour(std::unique_ptr<AudioVoiceBehaviour> value)
 {
 	behaviour = std::move(value);
 	elapsedTime = 0;

@@ -35,7 +35,7 @@ namespace Halley {
 		void setId(uint32_t id);
 		uint32_t getId() const;
 
-		void setBehaviour(std::shared_ptr<AudioVoiceBehaviour> behaviour);
+		void setBehaviour(std::unique_ptr<AudioVoiceBehaviour> behaviour);
 		
 		uint8_t getGroup() const;
 
@@ -50,7 +50,7 @@ namespace Halley {
 		float elapsedTime = 0.0f;
 
 		std::shared_ptr<AudioSource> source;
-		std::shared_ptr<AudioVoiceBehaviour> behaviour;
+		std::unique_ptr<AudioVoiceBehaviour> behaviour;
     	AudioPosition sourcePos;
 
 		std::array<float, 16> channelMix;

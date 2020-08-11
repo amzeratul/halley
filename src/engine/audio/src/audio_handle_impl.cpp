@@ -54,10 +54,11 @@ void AudioHandleImpl::stop(float fadeTime)
 
 void AudioHandleImpl::setBehaviour(std::unique_ptr<AudioVoiceBehaviour> b)
 {
-	std::shared_ptr<AudioVoiceBehaviour> behaviour = std::move(b);
+	// Gotta work around std::function requiring copyable
+	const auto behaviour = b.release();
 	enqueue([behaviour] (AudioVoice& src) mutable
 	{
-		src.setBehaviour(behaviour);
+		src.setBehaviour(std::unique_ptr<AudioVoiceBehaviour>(behaviour));
 	});
 }
 
@@ -72,8 +73,8 @@ void AudioHandleImpl::enqueue(std::function<void(AudioVoice& src)> f)
 {
 	uint32_t id = handleId;
 	AudioEngine* engine = facade.engine.get();
-	facade.enqueue([id, engine, f] () {
-		for (auto& src: engine->getSources(id)) {
+	facade.enqueue([id, engine, f = std::move(f)] () {
+		for (const auto& src: engine->getSources(id)) {
 			f(*src);
 		}
 	});
