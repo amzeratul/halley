@@ -147,6 +147,7 @@ namespace Halley {
 					}
 				}
 				notifyReload(reloadedEntities.data(), reloadedEntities.size());
+				toReload.clear();
 			}
 
 			// Remove
