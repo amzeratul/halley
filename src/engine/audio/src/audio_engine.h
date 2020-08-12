@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <map>
 #include <vector>
+
 #include "audio_voice.h"
 #include "halley/audio/resampler.h"
 #include "halley/data_structures/ring_buffer.h"
@@ -13,6 +14,7 @@ namespace Halley {
 	class AudioMixer;
 	class IAudioClip;
 	class Resources;
+	class AudioVariableTable;
 
     class AudioEngine: private IAudioOutput
     {
@@ -39,10 +41,13 @@ namespace Halley {
 	    
     	Random& getRNG();
 		AudioBufferPool& getPool() const;
+		AudioVariableTable& getVariableTable() const;
 
 		void setMasterGain(float gain);
 		void setGroupGain(const String& name, float gain);
 		int getGroupId(const String& group);
+
+    	void setVariable(const String& name, float value);
 
     private:
 		AudioSpec spec;
@@ -50,6 +55,7 @@ namespace Halley {
 		std::unique_ptr<AudioMixer> mixer;
 		std::unique_ptr<AudioBufferPool> pool;
 		std::unique_ptr<AudioResampler> outResampler;
+		std::unique_ptr<AudioVariableTable> variableTable;
 		std::vector<short> tmpShort;
 		std::vector<int> tmpInt;
 		RingBuffer<gsl::byte> audioOutputBuffer;

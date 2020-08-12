@@ -263,6 +263,15 @@ void AudioFacade::setListener(AudioListenerData listener)
 	});
 }
 
+void AudioFacade::setGlobalVariable(const String& variable, float value)
+{
+	String nameCopy = variable;
+	enqueue([this, nameCopy = std::move(nameCopy), value]()
+	{
+		engine->setVariable(nameCopy, value);
+	});
+}
+
 void AudioFacade::onAudioException(std::exception& e)
 {
 	if (exceptions.canWrite(1)) {

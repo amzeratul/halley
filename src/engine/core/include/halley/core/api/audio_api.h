@@ -181,6 +181,8 @@ namespace Halley
 		virtual void setGroupVolume(const String& groupName, float gain = 1.0f) = 0;
 		virtual void setOutputChannels(std::vector<AudioChannelData> audioChannelData) = 0;
 
+		virtual void setGlobalVariable(const String& variable, float value) = 0;
+
 		virtual void setListener(AudioListenerData listener) = 0;
 	};
 }

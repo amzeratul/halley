@@ -48,6 +48,8 @@ namespace Halley {
 	    void setOutputChannels(std::vector<AudioChannelData> audioChannelData) override;
 	    void setListener(AudioListenerData listener) override;
 
+		void setGlobalVariable(const String& variable, float value) override;
+
 		void onAudioException(std::exception& e);
 
 		void onSuspend() override;

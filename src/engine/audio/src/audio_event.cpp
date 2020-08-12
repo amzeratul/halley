@@ -8,6 +8,7 @@
 #include "halley/core/resources/resources.h"
 #include "audio_source_clip.h"
 #include "audio_filter_resample.h"
+#include "behaviours/audio_voice_dynamics_behaviour.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;
@@ -72,6 +73,25 @@ std::shared_ptr<AudioEvent> AudioEvent::loadResource(ResourceLoader& loader)
 	return event;
 }
 
+AudioDynamicsConfig::AudioDynamicsConfig()
+{
+}
+
+AudioDynamicsConfig::AudioDynamicsConfig(const ConfigNode& node)
+{
+	// TODO
+}
+
+void AudioDynamicsConfig::serialize(Serializer& s) const
+{
+	// TODO
+}
+
+void AudioDynamicsConfig::deserialize(Deserializer& s)
+{
+	// TODO
+}
+
 AudioEventActionPlay::AudioEventActionPlay(AudioEvent& event)
 	: event(event)
 {
@@ -106,6 +126,10 @@ AudioEventActionPlay::AudioEventActionPlay(AudioEvent& event, const ConfigNode& 
 	minimumSpace = node["minimumSpace"].asFloat(0.0f);
 	delay = node["delay"].asFloat(0.0f);
 	loop = node["loop"].asBool(false);
+
+	if (node.hasKey("dynamics")) {
+		dynamics = AudioDynamicsConfig(node["dynamics"]);
+	}
 }
 
 void AudioEventActionPlay::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
@@ -136,6 +160,9 @@ void AudioEventActionPlay::run(AudioEngine& engine, uint32_t id, const AudioPosi
 	}
 
 	auto voice = std::make_unique<AudioVoice>(source, position, curVolume, engine.getGroupId(group));
+	if (dynamics) {
+		voice->addBehaviour(std::make_unique<AudioVoiceDynamicsBehaviour>(dynamics.value(), engine));
+	}
 	
 	engine.addEmitter(id, std::move(voice));
 }
@@ -154,6 +181,7 @@ void AudioEventActionPlay::serialize(Serializer& s) const
 	s << delay;
 	s << minimumSpace;
 	s << loop;
+	s << dynamics;
 }
 
 void AudioEventActionPlay::deserialize(Deserializer& s)
@@ -165,6 +193,7 @@ void AudioEventActionPlay::deserialize(Deserializer& s)
 	s >> delay;
 	s >> minimumSpace;
 	s >> loop;
+	s >> dynamics;
 }
 
 void AudioEventActionPlay::loadDependencies(const Resources& resources)

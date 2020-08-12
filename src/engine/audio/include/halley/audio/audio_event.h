@@ -13,6 +13,7 @@ namespace Halley
 	class ResourceLoader;
 	class IAudioEventAction;
 	class Resources;
+	class AudioDynamicsConfig;
 
 	class AudioEvent final : public Resource
 	{
@@ -61,6 +62,15 @@ namespace Halley
 		virtual void loadDependencies(const Resources& resources) {}
 	};
 
+	class AudioDynamicsConfig {
+	public:
+		AudioDynamicsConfig();
+		AudioDynamicsConfig(const ConfigNode& node);
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+	};
+
 	class AudioEventActionPlay final : public IAudioEventAction
 	{
 	public:
@@ -85,5 +95,6 @@ namespace Halley
 		float delay = 0.0f;
 		float minimumSpace = 0.0f;
 		bool loop = false;
+		std::optional<AudioDynamicsConfig> dynamics;
 	};
 }
