@@ -73,25 +73,6 @@ std::shared_ptr<AudioEvent> AudioEvent::loadResource(ResourceLoader& loader)
 	return event;
 }
 
-AudioDynamicsConfig::AudioDynamicsConfig()
-{
-}
-
-AudioDynamicsConfig::AudioDynamicsConfig(const ConfigNode& node)
-{
-	// TODO
-}
-
-void AudioDynamicsConfig::serialize(Serializer& s) const
-{
-	// TODO
-}
-
-void AudioDynamicsConfig::deserialize(Deserializer& s)
-{
-	// TODO
-}
-
 AudioEventActionPlay::AudioEventActionPlay(AudioEvent& event)
 	: event(event)
 {

@@ -10,7 +10,7 @@ namespace Halley {
 	class AudioVariableTable {
     public:
 		void set(const String& name, float value);
-		float get(const String& name);
+		float get(const String& name) const;
 
 	private:
 		std::unordered_map<String, float> variables;

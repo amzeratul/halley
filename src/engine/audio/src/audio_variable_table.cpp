@@ -7,7 +7,7 @@ void AudioVariableTable::set(const String& name, float value)
 	variables[name] = value;
 }
 
-float AudioVariableTable::get(const String& name)
+float AudioVariableTable::get(const String& name) const
 {
 	const auto iter = variables.find(name);
 	if (iter != variables.end()) {

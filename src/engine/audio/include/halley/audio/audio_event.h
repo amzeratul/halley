@@ -3,6 +3,7 @@
 #include "halley/maths/range.h"
 #include "halley/data_structures/maybe.h"
 #include "audio_clip.h"
+#include "audio_dynamics_config.h"
 
 namespace Halley
 {
@@ -60,15 +61,6 @@ namespace Halley
 		virtual void serialize(Serializer& s) const = 0;
 		virtual void deserialize(Deserializer& s) = 0;
 		virtual void loadDependencies(const Resources& resources) {}
-	};
-
-	class AudioDynamicsConfig {
-	public:
-		AudioDynamicsConfig();
-		AudioDynamicsConfig(const ConfigNode& node);
-
-		void serialize(Serializer& s) const;
-		void deserialize(Deserializer& s);
 	};
 
 	class AudioEventActionPlay final : public IAudioEventAction
