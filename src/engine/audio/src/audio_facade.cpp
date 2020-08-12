@@ -175,7 +175,7 @@ AudioHandle AudioFacade::playMusic(const String& eventName, int track, float fad
 
 	if (hasFade) {
 		handle->setGain(0.0f);
-		handle->setBehaviour(std::make_unique<AudioVoiceFadeBehaviour>(fadeInTime, 1.0f, false));
+		handle->addBehaviour(std::make_unique<AudioVoiceFadeBehaviour>(fadeInTime, 0.0f, 1.0f, false));
 	}
 
 	return handle;
@@ -242,7 +242,7 @@ void AudioFacade::setOutputChannels(std::vector<AudioChannelData> audioChannelDa
 void AudioFacade::stopMusic(AudioHandle& handle, float fadeOutTime)
 {
 	if (fadeOutTime > 0.001f) {
-		handle->setBehaviour(std::make_unique<AudioVoiceFadeBehaviour>(fadeOutTime, 0.0f, true));
+		handle->addBehaviour(std::make_unique<AudioVoiceFadeBehaviour>(fadeOutTime, 1.0f, 0.0f, true));
 	} else {
 		handle->stop();
 	}

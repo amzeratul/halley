@@ -18,7 +18,7 @@ namespace Halley
 		void setPan(float pan) override;
 		void stop(float fadeTime) override;
 		bool isPlaying() const override;
-		void setBehaviour(std::unique_ptr<AudioVoiceBehaviour> behaviour) override;
+		void addBehaviour(std::unique_ptr<AudioVoiceBehaviour> behaviour) override;
 
 	private:
 		AudioFacade& facade;

@@ -154,7 +154,7 @@ namespace Halley
 
 		virtual void stop(float fadeTime = 0.0f) = 0;
 		virtual bool isPlaying() const = 0;
-		virtual void setBehaviour(std::unique_ptr<AudioVoiceBehaviour> behaviour) = 0;
+		virtual void addBehaviour(std::unique_ptr<AudioVoiceBehaviour> behaviour) = 0;
 	};
 	using AudioHandle = std::shared_ptr<IAudioHandle>;
 

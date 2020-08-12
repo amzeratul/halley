@@ -9,7 +9,10 @@ using namespace Halley;
 
 AudioVoice::AudioVoice(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain, uint8_t group) 
 	: group(group)
-	, gain(gain)
+	, playing(false)
+	, done(false)
+	, isFirstUpdate(true)
+	, baseGain(gain)
 	, source(std::move(source))
 	, sourcePos(std::move(sourcePos))
 {}
@@ -56,10 +59,15 @@ bool AudioVoice::isDone() const
 	return done;
 }
 
-void AudioVoice::setBehaviour(std::unique_ptr<AudioVoiceBehaviour> value)
+
+void AudioVoice::addBehaviour(std::unique_ptr<AudioVoiceBehaviour> value)
 {
 	Expects(value);
-	behaviour = std::move(value);
+	if (behaviour) {
+		behaviour->addToChain(std::move(value));
+	} else {
+		behaviour = std::move(value);
+	}
 	elapsedTime = 0;
 	behaviour->onAttach(*this);
 }
@@ -69,9 +77,19 @@ uint8_t AudioVoice::getGroup() const
 	return group;
 }
 
-void AudioVoice::setGain(float g)
+void AudioVoice::setBaseGain(float gain)
 {
-	gain = g;
+	baseGain = gain;
+}
+
+float AudioVoice::getBaseGain() const
+{
+	return baseGain;
+}
+
+float& AudioVoice::getDynamicGainRef()
+{
+	return dynamicGain;
 }
 
 void AudioVoice::setAudioSourcePosition(Vector3f position)
@@ -84,11 +102,6 @@ void AudioVoice::setAudioSourcePosition(AudioPosition s)
 	sourcePos = std::move(s);
 }
 
-float AudioVoice::getGain() const
-{
-	return gain;
-}
-
 size_t AudioVoice::getNumberOfChannels() const
 {
 	return nChannels;
@@ -98,16 +111,17 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioL
 {
 	Expects(playing);
 
+	dynamicGain = 1;
 	if (behaviour) {
-		bool keep = behaviour->update(elapsedTime, *this);
+		const bool keep = behaviour->updateChain(elapsedTime, *this);
 		if (!keep) {
-			behaviour.reset();
+			behaviour = behaviour->releaseNext();
 		}
 		elapsedTime = 0;
 	}
 
 	prevChannelMix = channelMix;
-	sourcePos.setMix(nChannels, channels, channelMix, gain * groupGain, listener);
+	sourcePos.setMix(nChannels, channels, channelMix, baseGain * dynamicGain * groupGain, listener);
 	
 	if (isFirstUpdate) {
 		prevChannelMix = channelMix;
@@ -117,7 +131,7 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioL
 
 void AudioVoice::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixer& mixer, AudioBufferPool& pool)
 {
-	Expects(dst.size() > 0);
+	Expects(!dst.empty());
 	Expects(numSamples % 16 == 0);
 
 	const size_t numPacks = numSamples / 16;

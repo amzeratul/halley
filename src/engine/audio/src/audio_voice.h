@@ -22,11 +22,13 @@ namespace Halley {
 		bool isReady() const;
 		bool isDone() const;
 
-		void setGain(float gain);
+		void setBaseGain(float gain);
+		float getBaseGain() const;
+		float& getDynamicGainRef();
+
 		void setAudioSourcePosition(Vector3f position);
 		void setAudioSourcePosition(AudioPosition sourcePos);
 
-		float getGain() const;
 		size_t getNumberOfChannels() const;
 
 		void update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener, float groupGain);
@@ -35,7 +37,7 @@ namespace Halley {
 		void setId(uint32_t id);
 		uint32_t getId() const;
 
-		void setBehaviour(std::unique_ptr<AudioVoiceBehaviour> behaviour);
+		void addBehaviour(std::unique_ptr<AudioVoiceBehaviour> behaviour);
 		
 		uint8_t getGroup() const;
 
@@ -43,10 +45,11 @@ namespace Halley {
 		uint32_t id = std::numeric_limits<uint32_t>::max();
 		uint8_t group = 0;
 		uint8_t nChannels = 0;
-		bool playing = false;
-		bool done = false;
-		bool isFirstUpdate = true;
-    	float gain;
+		bool playing : 1;
+		bool done : 1;
+		bool isFirstUpdate : 1;
+    	float baseGain = 1.0f;
+		float dynamicGain = 1.0f;
 		float elapsedTime = 0.0f;
 
 		std::shared_ptr<AudioSource> source;

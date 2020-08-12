@@ -15,7 +15,7 @@ void AudioHandleImpl::setGain(float gain)
 {
 	enqueue([gain] (AudioVoice& src)
 	{
-		src.setGain(gain);
+		src.setBaseGain(gain);
 	});
 }
 
@@ -45,7 +45,7 @@ void AudioHandleImpl::stop(float fadeTime)
 	enqueue([fadeTime] (AudioVoice& src)
 	{
 		if (fadeTime >= 0.001f) {
-			src.setBehaviour(std::make_unique<AudioVoiceFadeBehaviour>(fadeTime, 0.0f, true));
+			src.addBehaviour(std::make_unique<AudioVoiceFadeBehaviour>(fadeTime, 1.0f, 0.0f, true));
 		} else {
 			src.stop();
 		}
@@ -72,13 +72,13 @@ private:
 	mutable T* v = nullptr;
 };
 
-void AudioHandleImpl::setBehaviour(std::unique_ptr<AudioVoiceBehaviour> b)
+void AudioHandleImpl::addBehaviour(std::unique_ptr<AudioVoiceBehaviour> b)
 {
 	// Gotta work around std::function requiring copyable
 	BadPointer<AudioVoiceBehaviour> behaviour = b.release();
 	enqueue([behaviour] (AudioVoice& src) mutable
 	{
-		src.setBehaviour(std::unique_ptr<AudioVoiceBehaviour>(behaviour.release()));
+		src.addBehaviour(std::unique_ptr<AudioVoiceBehaviour>(behaviour.release()));
 	});
 }
 

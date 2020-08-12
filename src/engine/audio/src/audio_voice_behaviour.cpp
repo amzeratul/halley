@@ -5,12 +5,38 @@
 using namespace Halley;
 
 AudioVoiceBehaviour::~AudioVoiceBehaviour() {}
+
 void AudioVoiceBehaviour::onAttach(AudioVoice& audioSource) {}
 
-AudioVoiceFadeBehaviour::AudioVoiceFadeBehaviour(float fadeTime, float targetVolume, bool stopAtEnd)
+bool AudioVoiceBehaviour::updateChain(float elapsedTime, AudioVoice& audioSource)
+{
+	if (next) {
+		const bool keepNext = next->updateChain(elapsedTime, audioSource);
+		if (!keepNext) {
+			next = next->releaseNext();
+		}
+	}
+	return update(elapsedTime, audioSource);
+}
+
+void AudioVoiceBehaviour::addToChain(std::unique_ptr<AudioVoiceBehaviour> n)
+{
+	if (next) {
+		next->addToChain(std::move(n));
+	} else {
+		next = std::move(n);
+	}
+}
+
+std::unique_ptr<AudioVoiceBehaviour> AudioVoiceBehaviour::releaseNext()
+{
+	return std::move(next);
+}
+
+AudioVoiceFadeBehaviour::AudioVoiceFadeBehaviour(float fadeTime, float sourceVolume, float targetVolume, bool stopAtEnd)
 	: curTime(0)
 	, fadeTime(fadeTime)
-	, volume0(0)
+	, volume0(sourceVolume)
 	, volume1(targetVolume)
 	, stopAtEnd(stopAtEnd)
 {	
@@ -18,16 +44,15 @@ AudioVoiceFadeBehaviour::AudioVoiceFadeBehaviour(float fadeTime, float targetVol
 
 void AudioVoiceFadeBehaviour::onAttach(AudioVoice& audioSource)
 {
-	volume0 = gainToVolume(audioSource.getGain());
 }
 
 bool AudioVoiceFadeBehaviour::update(float elapsedTime, AudioVoice& audioSource)
 {
 	curTime += elapsedTime;
-	float t = clamp(curTime / fadeTime, 0.0f, 1.0f);
-	float volume = lerp(volume0, volume1, t);
+	const float t = clamp(curTime / fadeTime, 0.0f, 1.0f);
+	const float volume = lerp(volume0, volume1, t);
 	
-	audioSource.setGain(gainToVolume(volume));
+	audioSource.getDynamicGainRef() *= gainToVolume(volume);
 	
 	if (curTime >= fadeTime) {
 		if (stopAtEnd) {
