@@ -109,6 +109,11 @@ namespace Halley {
 		{
 			return alive;
 		}
+
+		bool isFromPrefab() const
+		{
+			return fromPrefab;
+		}
 		
 		const UUID& getUUID() const
 		{
@@ -120,6 +125,8 @@ namespace Halley {
 
 		void refresh(MaskStorage& storage, ComponentDeleterTable& table);
 		void destroy();
+		
+		void sortChildren(const std::vector<UUID>& uuids);
 
 	private:
 		// Start with these for better cache coherence
@@ -129,6 +136,7 @@ namespace Halley {
 		bool alive : 1;
 		bool serializable : 1;
 		bool reloaded : 1;
+		bool fromPrefab : 1;
 		
 		int8_t hierarchyRevision = 0;
 		Entity* parent = nullptr;
@@ -507,6 +515,18 @@ namespace Halley {
 		{
 			Expects(entity);
 			return entity->reloaded;
+		}
+
+		bool isFromPrefab()
+		{
+			Expects(entity);
+			return entity->isFromPrefab();
+		}
+
+		void sortChildren(const std::vector<UUID>& uuids)
+		{
+			Expects(entity);
+			entity->sortChildren(uuids);
 		}
 
 	private:

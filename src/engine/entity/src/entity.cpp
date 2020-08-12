@@ -11,6 +11,7 @@ Entity::Entity()
 	, alive(true)
 	, serializable(true)
 	, reloaded(false)
+	, fromPrefab(false)
 {
 	
 }
@@ -179,6 +180,45 @@ EntityId Entity::getEntityId() const
 void Entity::destroy()
 {
 	doDestroy(true);
+}
+
+void Entity::sortChildren(const std::vector<UUID>& uuids)
+{
+	const size_t nChildren = children.size();
+
+	// Check if there's any work to be done
+	if (nChildren == uuids.size()) {
+		bool allMatch = true;
+		for (size_t i = 0; i < nChildren; ++i) {
+			if (children[i]->uuid != uuids[i]) {
+				allMatch = false;
+				break;
+			}
+		}
+		if (allMatch) {
+			// Nothing to do here, avoid memory allocation and sorting!
+			return;
+		}
+	}
+
+	Vector<std::pair<Entity*, size_t>> pairs(nChildren);
+	
+	for (size_t i = 0; i < nChildren; ++i) {
+		const size_t idx = std::find(uuids.begin(), uuids.end(), children[i]->uuid) - uuids.begin();
+		pairs[i] = std::make_pair(children[i], idx);
+	}
+
+	std::sort(pairs.begin(), pairs.end(), [](const std::pair<Entity*, size_t>& a, const std::pair<Entity*, size_t>& b)
+	{
+		if (a.second != b.second) {
+			return a.second < b.second;
+		}
+		return a.first < b.first;
+	});
+
+	for (size_t i = 0; i < nChildren; ++i) {
+		children[i] = pairs[i].first;
+	}
 }
 
 void Entity::doDestroy(bool updateParenting)

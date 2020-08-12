@@ -95,7 +95,7 @@ EntityRef EntityFactory::createEntity(std::optional<EntityRef> parent, const Con
 	const auto& node = isPrefab ? (prefab ? prefab->getRoot() : dummyPrefab) : treeNode;
 	
 	const auto uuid = getUUID(treeNode["uuid"]); // Use UUID in parent, not in prefab
-	auto entity = world.createEntity(uuid, node["name"].asString(""), parent);
+	auto entity = world.createEntity(uuid, node["name"].asString(""), parent, true);
 
 	if (curScene && prefab) {
 		curScene->addPrefabReference(prefab, entity);
@@ -293,11 +293,12 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& tree
 			}
 		}
 
-		// If not found, it will be deleted. Note that deleting an entity immediately removes it from the tree, so we only increase childIndex if it's not removed
-		if (found) {
-			++childIndex;
-		} else {
+		// If not found, and it was originally loaded from prefab, it will be deleted.
+		// Note that deleting an entity immediately removes it from the tree, so we only increase childIndex if it's not removed
+		if (!found && childEntity.isFromPrefab()) {
 			world.destroyEntity(childEntity.getEntityId());
+		} else {
+			++childIndex;
 		}
 	}
 
@@ -307,6 +308,8 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& tree
 			createEntity(entity, childNodes[i], true, nullptr);
 		}
 	}
+
+	entity.sortChildren(nodeUUIDs);
 }
 
 std::shared_ptr<const Prefab> EntityFactory::getPrefab(const String& id) const
