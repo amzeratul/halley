@@ -119,7 +119,7 @@ void AudioEventActionPlay::run(AudioEngine& engine, uint32_t id, const AudioPosi
 	}
 
 	auto& rng = engine.getRNG();
-	int clipN = rng.getInt(0, int(clips.size()) - 1);
+	const int clipN = rng.getInt(0, static_cast<int>(clips.size()) - 1);
 	auto clip = clipData[clipN];
 
 	if (!clip) {
@@ -130,12 +130,14 @@ void AudioEventActionPlay::run(AudioEngine& engine, uint32_t id, const AudioPosi
 	const float curPitch = clamp(rng.getFloat(pitch.start, pitch.end), 0.1f, 2.0f);
 
 	constexpr int sampleRate = 48000;
-
 	std::shared_ptr<AudioSource> source = std::make_shared<AudioSourceClip>(clip, loop, lround(delay * sampleRate));
 	if (std::abs(curPitch - 1.0f) > 0.01f) {
 		source = std::make_shared<AudioFilterResample>(source, int(lround(sampleRate * curPitch)), sampleRate, engine.getPool());
 	}
-	engine.addEmitter(id, std::make_unique<AudioVoice>(source, position, curVolume, engine.getGroupId(group)));
+
+	auto voice = std::make_unique<AudioVoice>(source, position, curVolume, engine.getGroupId(group));
+	
+	engine.addEmitter(id, std::move(voice));
 }
 
 AudioEventActionType AudioEventActionPlay::getType() const

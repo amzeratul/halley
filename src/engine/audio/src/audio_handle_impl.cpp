@@ -2,6 +2,7 @@
 #include "audio_facade.h"
 #include "audio_engine.h"
 #include <algorithm>
+#include "behaviours/audio_voice_fade_behaviour.h"
 
 using namespace Halley;
 

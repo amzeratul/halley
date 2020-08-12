@@ -1,11 +1,12 @@
 #include "audio_facade.h"
 #include "audio_engine.h"
 #include "audio_handle_impl.h"
-#include "audio_voice_behaviour.h"
+#include "behaviours/audio_voice_behaviour.h"
 #include "halley/support/console.h"
 #include "halley/support/logger.h"
 #include "halley/core/resources/resources.h"
 #include "audio_event.h"
+#include "behaviours/audio_voice_fade_behaviour.h"
 
 using namespace Halley;
 

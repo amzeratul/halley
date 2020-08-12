@@ -17,7 +17,9 @@ set(SOURCES
         "src/audio_position.cpp"
         "src/audio_source_clip.cpp"
         "src/audio_voice.cpp"
-        "src/audio_voice_behaviour.cpp"
+        "src/behaviours/audio_voice_behaviour.cpp"
+        "src/behaviours/audio_voice_dynamics_behaviour.cpp"
+        "src/behaviours/audio_voice_fade_behaviour.cpp"
         "src/vorbis_dec.cpp"
         )
 
@@ -28,9 +30,11 @@ set(HEADERS
         "include/halley/audio/audio_filter_biquad.h"
         "include/halley/audio/audio_position.h"
         "include/halley/audio/audio_source.h"
-        "include/halley/audio/audio_voice_behaviour.h"
         "include/halley/audio/halley_audio.h"
         "include/halley/audio/vorbis_dec.h"
+        "include/halley/audio/behaviours/audio_voice_behaviour.h"
+        "include/halley/audio/behaviours/audio_voice_dynamics_behaviour.h"
+        "include/halley/audio/behaviours/audio_voice_fade_behaviour.h"
         "src/audio_buffer.h"
         "src/audio_engine.h"
         "src/audio_filter_resample.h"

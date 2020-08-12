@@ -1,7 +1,7 @@
 #include "audio_voice.h"
 #include <utility>
 #include "audio_mixer.h"
-#include "audio_voice_behaviour.h"
+#include "behaviours/audio_voice_behaviour.h"
 #include "audio_source.h"
 #include "halley/support/logger.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "audio_position.h"
-#include "audio_voice_behaviour.h"
+#include "behaviours/audio_voice_behaviour.h"
 #include "audio_buffer.h"
 #include <limits>
 
