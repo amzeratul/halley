@@ -16,16 +16,20 @@ void SceneEditorTabs::load(AssetType assetType, const String& name)
 {
 	const String key = toString(assetType) + ":" + name;
 
-	const auto n = tabs->getCount();
-	for (int i = 0; i < n; ++i) {
-		if (tabs->getItem(i)->getId() == key) {
-			tabs->setSelectedOption(i);
-			return;
-		}
+	const bool alreadyExists = tabs->setSelectedOptionId(key);
+	if (alreadyExists) {
+		return;
 	}
 
 	// Not found, add it instead
-	tabs->addTextItem(key, LocalisedString::fromHardcodedString(Path(name).getFilename().toString()));
+	auto tabContents = factory.makeUI("ui/halley/scene_editor_tab_contents");
+	tabContents->getWidgetAs<UILabel>("label")->setText(LocalisedString::fromHardcodedString(Path(name).getFilename().toString()));
+	tabContents->setHandle(UIEventType::ButtonClicked, "close", [=] (const UIEvent& event)
+	{
+		closeTab(key);
+	});
+	tabs->addItem(key, tabContents);
+	
 	auto window = std::make_shared<SceneEditorWindow>(factory, project, api);
 	if (assetType == AssetType::Scene) {
 		window->loadScene(name);
@@ -46,4 +50,12 @@ void SceneEditorTabs::makeUI()
 	{
 		pages->setPage(event.getIntData());
 	});
+}
+
+void SceneEditorTabs::closeTab(const String& key)
+{
+	auto idx = tabs->removeItem(key);
+	if (idx) {
+		pages->removePage(static_cast<int>(idx.value()));
+	}
 }

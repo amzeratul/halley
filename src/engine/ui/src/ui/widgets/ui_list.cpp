@@ -193,6 +193,27 @@ void UIList::addItem(std::shared_ptr<UIListItem> item, Vector4f border, int fill
 	}
 }
 
+std::optional<int> UIList::removeItem(const String& id)
+{
+	const auto iter = std::find_if(items.begin(), items.end(), [&] (const std::shared_ptr<UIListItem>& item)
+	{
+		return item->getId() == id;
+	});
+	if (iter != items.end()) {
+		const size_t idx = iter - items.begin();
+		const auto item = items[idx];
+		remove(*item);
+		items.erase(iter);
+
+		if (curOption == static_cast<int>(idx)) {
+			setSelectedOption(static_cast<int>(idx) - 1);
+		}
+		return static_cast<int>(idx);
+	}
+
+	return {};
+}
+
 void UIList::draw(UIPainter& painter) const
 {
 	if (sprite.hasMaterial()) {

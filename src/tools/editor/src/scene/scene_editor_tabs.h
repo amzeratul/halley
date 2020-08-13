@@ -21,5 +21,6 @@ namespace Halley {
 		std::shared_ptr<UIPagedPane> pages;
 
 		void makeUI();
+		void closeTab(const String& key);
 	};
 }

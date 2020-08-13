@@ -1,0 +1,9 @@
+---
+widget: { class: widget }
+sizer: { type: horizontal }
+children:
+- widget: { id: label, class: label, text: "" }
+  proportion: 1
+- widget: { id: close, class: button, text: "x", size: [20, 20], style: buttonThin, tooltip: "Close Tab" }
+  border: [5, 0, 0, 0]
+...

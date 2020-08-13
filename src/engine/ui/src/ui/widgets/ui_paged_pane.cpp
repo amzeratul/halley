@@ -20,6 +20,11 @@ const std::shared_ptr<UIWidget>& UIPagedPane::addPage()
 	return pages.back();
 }
 
+void UIPagedPane::removePage(int n)
+{
+	remove(*pages[n]);
+}
+
 void UIPagedPane::resizePages(int numPages)
 {
 	const int curPages = static_cast<int>(pages.size());
@@ -31,9 +36,7 @@ void UIPagedPane::resizePages(int numPages)
 	} else if (numPages < curPages) {
 		// Remove
 		for (int i = numPages; i < curPages; ++i) {
-			getSizer().remove(*pages[i]);
-			removeChild(*pages[i]);
-			pages[i]->destroy();
+			remove(*pages[i]);
 		}
 		pages.resize(numPages);
 		setPage(currentPage);

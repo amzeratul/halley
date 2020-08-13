@@ -224,6 +224,20 @@ void UIWidget::addStretchSpacer(float proportion)
 	}
 }
 
+void UIWidget::remove(IUIElement& element)
+{
+	const auto widget = dynamic_cast<UIWidget*>(&element);
+	if (widget) {
+		removeChild(*widget);
+		widget->destroy();
+	} else {
+		throw Exception("Unimplemented: UIWidget::remove with sizer", HalleyExceptions::UI);
+	}	
+	if (sizer) {
+		sizer->remove(element);
+	}
+}
+
 void UIWidget::clear()
 {
 	if (sizer) {

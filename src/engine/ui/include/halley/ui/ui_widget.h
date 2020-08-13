@@ -59,6 +59,7 @@ namespace Halley {
 		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;
 		void addSpacer(float size) override;
 		void addStretchSpacer(float proportion = 0) override;
+		void remove(IUIElement& element) override;
 
 		void clear() override;
 
