@@ -25,7 +25,12 @@ namespace Halley
 		using WidgetFactory = std::function<std::shared_ptr<UIWidget>(const ConfigNode&)>;
 
 		UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet);
-		~UIFactory();
+		UIFactory(const UIFactory& other) = delete;
+		UIFactory(UIFactory&& other) = delete;
+		virtual ~UIFactory();
+
+		UIFactory& operator=(const UIFactory& other) = delete;
+		UIFactory& operator=(UIFactory&& other) = delete;
 
 		void addFactory(const String& key, WidgetFactory factory);
 		
@@ -47,7 +52,7 @@ namespace Halley
 
 		Resources& getResources() const;
 
-		UIFactory withResources(Resources& newResources) const;
+		std::unique_ptr<UIFactory> withResources(Resources& newResources) const;
 
 		const I18N& getI18N() const;
 

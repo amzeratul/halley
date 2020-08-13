@@ -142,9 +142,11 @@ Resources& UIFactory::getResources() const
 	return resources;
 }
 
-UIFactory UIFactory::withResources(Resources& newResources) const
+std::unique_ptr<UIFactory> UIFactory::withResources(Resources& newResources) const
 {
-	return UIFactory(api, newResources, i18n, styleSheet);
+	auto result = std::make_unique<UIFactory>(api, newResources, i18n, styleSheet);
+	result->inputButtons = inputButtons;
+	return result;
 }
 
 const I18N& UIFactory::getI18N() const
