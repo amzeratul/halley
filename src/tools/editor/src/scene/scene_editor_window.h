@@ -6,6 +6,7 @@
 #include "halley/tools/dll/dynamic_library.h"
 
 namespace Halley {
+	class SceneEditorTabs;
 	class HalleyAPI;
 	class Project;
 	class UIFactory;
@@ -13,7 +14,7 @@ namespace Halley {
 
 	class SceneEditorWindow final : public UIWidget, public IDynamicLibraryListener {
 	public:
-		SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api);
+		SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, SceneEditorTabs& sceneEditorTabs);
 		~SceneEditorWindow();
 
 		void onAddedToRoot() override;
@@ -52,6 +53,7 @@ namespace Halley {
 		String copyEntity(const String& id);
 		void pasteEntity(const String& data, const String& referenceId);
 		void duplicateEntity(const String& id);
+		void openEditPrefabWindow(const String& name);
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -65,6 +67,7 @@ namespace Halley {
 		const HalleyAPI& api;
 		UIFactory& uiFactory;
 		Project& project;
+		SceneEditorTabs& sceneEditorTabs;
 
 		std::shared_ptr<SceneEditorGameBridge> gameBridge;
 		std::shared_ptr<SceneEditorCanvas> canvas;

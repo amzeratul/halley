@@ -39,6 +39,7 @@ children:
         - widget: { id: "", class: label, text: "Prefab", style: "labelLight" }
       - widget: { id: prefabName, class: selectAsset, assetType: prefab, size: [200, 20] }
         proportion: 1
+    - widget: { id: editPrefab, class: button, text: Edit, tooltip: "Open this prefab to edit." }
   - widget: { id: fields, class: widget }
     sizer: { type: vertical, gap: 8 }
   - widget: { id: addComponentButton, class: button, text: "Add Component", size: [ 30, 25 ], tooltip: "Add a new Component to this Entity. [Ctrl+T]" }

@@ -71,6 +71,11 @@ void EntityEditor::makeUI()
 	{
 		setPrefabName(event.getStringData());
 	});
+
+	setHandle(UIEventType::ButtonClicked, "editPrefab", [=](const UIEvent& event)
+	{
+		editPrefab();
+	});
 }
 
 bool EntityEditor::loadEntity(const String& id, ConfigNode& data, const ConfigNode* prefab, bool force, Resources& resources)
@@ -396,6 +401,14 @@ void EntityEditor::setPrefabName(const String& prefab)
 			getEntityData()["prefab"] = prefab;
 			onEntityUpdated();
 		}
+	}
+}
+
+void EntityEditor::editPrefab()
+{
+	if (isPrefab) {
+		const String prefab = getEntityData()["prefab"].asString("");
+		sceneEditor->openEditPrefabWindow(prefab);
 	}
 }
 

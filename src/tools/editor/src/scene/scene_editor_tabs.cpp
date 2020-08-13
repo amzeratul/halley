@@ -30,7 +30,7 @@ void SceneEditorTabs::load(AssetType assetType, const String& name)
 	});
 	tabs->addItem(key, tabContents);
 	
-	auto window = std::make_shared<SceneEditorWindow>(factory, project, api);
+	auto window = std::make_shared<SceneEditorWindow>(factory, project, api, *this);
 	if (assetType == AssetType::Scene) {
 		window->loadScene(name);
 	} else if (assetType == AssetType::Prefab) {
