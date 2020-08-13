@@ -55,6 +55,8 @@ namespace Halley {
 		bool isPrefab = false;
 		Resources* gameResources = nullptr;
 
+		int ecsDataRevision = 0;
+
 		void makeUI();
 		void loadComponentData(const String& componentType, ConfigNode& data, const std::vector<String>& componentNames);
 		std::pair<String, std::vector<String>> parseType(const String& type);

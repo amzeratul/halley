@@ -33,7 +33,10 @@ namespace Halley {
 		const HashMap<String, SystemMessageSchema>& getSystemMessages() const;
 		const HashMap<String, CustomTypeSchema>& getCustomTypes() const;
 
-    private:
+    	void clear();
+		int getRevision() const;
+
+	private:
     	void addSource(CodegenSourceInfo sourceInfo);
 		void addComponent(YAML::Node rootNode, bool generate);
 		void addSystem(YAML::Node rootNode, bool generate);
@@ -50,5 +53,6 @@ namespace Halley {
 		HashMap<String, MessageSchema> messages;
     	HashMap<String, SystemMessageSchema> systemMessages;
 		HashMap<String, CustomTypeSchema> types;
+		int revision = 0;
     };
 }

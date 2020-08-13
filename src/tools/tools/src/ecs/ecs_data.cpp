@@ -8,6 +8,7 @@ using namespace Halley;
 
 void ECSData::loadSources(std::vector<CodegenSourceInfo> files)
 {
+	++revision;
 	for (auto& f : files) {
 		addSource(f);
 	}
@@ -39,6 +40,21 @@ const HashMap<String, SystemMessageSchema>& ECSData::getSystemMessages() const
 const HashMap<String, CustomTypeSchema>& ECSData::getCustomTypes() const
 {
 	return types;
+}
+
+void ECSData::clear()
+{
+	++revision;
+	components.clear();
+	systems.clear();
+	messages.clear();
+	systemMessages.clear();
+	types.clear();
+}
+
+int ECSData::getRevision() const
+{
+	return revision;
 }
 
 void ECSData::validate()

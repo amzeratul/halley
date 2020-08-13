@@ -383,7 +383,11 @@ std::unique_ptr<Game> Project::createGameInstance() const
 
 void Project::loadECSData()
 {
-	ecsData = std::make_unique<ECSData>();
+	if (!ecsData) {
+		ecsData = std::make_unique<ECSData>();
+	} else {
+		ecsData->clear();
+	}
 
 	const auto& inputFiles = codegenDatabase->getInputFiles();
 	const auto n = inputFiles.size();

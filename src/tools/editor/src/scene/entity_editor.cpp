@@ -26,6 +26,11 @@ void EntityEditor::onAddedToRoot()
 
 void EntityEditor::update(Time t, bool moved)
 {
+	if (ecsData && ecsData->getRevision() != ecsDataRevision) {
+		ecsDataRevision = ecsData->getRevision();
+		needToReloadUI = true;
+	}
+	
 	if (needToReloadUI) {
 		reloadEntity();
 		needToReloadUI = false;
@@ -40,6 +45,7 @@ void EntityEditor::setSceneEditorWindow(SceneEditorWindow& editor)
 void EntityEditor::setECSData(ECSData& ecs)
 {
 	ecsData = &ecs;
+	ecsDataRevision = ecsData->getRevision();
 }
 
 void EntityEditor::makeUI()
