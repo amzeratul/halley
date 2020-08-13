@@ -22,7 +22,14 @@ const std::shared_ptr<UIWidget>& UIPagedPane::addPage()
 
 void UIPagedPane::removePage(int n)
 {
-	remove(*pages[n]);
+	if (n >= 0 && n < static_cast<int>(pages.size())) {
+		remove(*pages[n]);
+		pages.erase(pages.begin() + n);
+		if (currentPage == n) {
+			--currentPage;
+		}
+		setPage(currentPage);
+	}
 }
 
 void UIPagedPane::resizePages(int numPages)
@@ -48,7 +55,7 @@ void UIPagedPane::setPage(int n)
 	currentPage = clamp(n, 0, getNumberOfPages() - 1);
 
 	for (int i = 0; i < getNumberOfPages(); ++i) {
-		const bool active = i == n;
+		const bool active = i == currentPage;
 		if (pages[i]->isActive() != active) {
 			pages[i]->setActive(active);
 			sendEventDown(UIEvent(active ? UIEventType::TabbedIn : UIEventType::TabbedOut, getId(), active));

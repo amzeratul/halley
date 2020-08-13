@@ -26,7 +26,7 @@ void SceneEditorTabs::load(AssetType assetType, const String& name)
 	tabContents->getWidgetAs<UILabel>("label")->setText(LocalisedString::fromHardcodedString(Path(name).getFilename().toString()));
 	tabContents->setHandle(UIEventType::ButtonClicked, "close", [=] (const UIEvent& event)
 	{
-		closeTab(key);
+		toClose.push_back(key);
 	});
 	tabs->addItem(key, tabContents);
 	
@@ -38,6 +38,14 @@ void SceneEditorTabs::load(AssetType assetType, const String& name)
 	}
 	pages->addPage()->add(window, 1);
 	tabs->setSelectedOption(tabs->getCount() - 1);
+}
+
+void SceneEditorTabs::update(Time t, bool moved)
+{
+	for (auto& key: toClose) {
+		closeTab(key);
+	}
+	toClose.clear();
 }
 
 void SceneEditorTabs::makeUI()

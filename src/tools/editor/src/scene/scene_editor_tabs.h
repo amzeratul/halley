@@ -12,6 +12,9 @@ namespace Halley {
 
 		void load(AssetType assetType, const String& name);
 
+	protected:
+		void update(Time t, bool moved) override;
+		
 	private:
 		UIFactory& factory;
 		Project& project;
@@ -19,6 +22,7 @@ namespace Halley {
 		
 		std::shared_ptr<UIList> tabs;
 		std::shared_ptr<UIPagedPane> pages;
+		std::vector<String> toClose;
 
 		void makeUI();
 		void closeTab(const String& key);

@@ -205,7 +205,11 @@ std::optional<int> UIList::removeItem(const String& id)
 		remove(*item);
 		items.erase(iter);
 
+		layout();
+		reassignIds();
+
 		if (curOption == static_cast<int>(idx)) {
+			curOption = -1;
 			setSelectedOption(static_cast<int>(idx) - 1);
 		}
 		return static_cast<int>(idx);
