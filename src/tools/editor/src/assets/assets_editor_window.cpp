@@ -27,6 +27,7 @@ AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project, Pro
 
 void AssetsEditorWindow::showAsset(AssetType type, const String& assetId)
 {
+	getWidgetAs<UITextInput>("assetSearch")->setText("");
 	Path target;
 	if (type == AssetType::Sprite) {
 		auto ssAssetId = project.getGameResources().get<SpriteResource>(assetId)->getSpriteSheet()->getAssetId();
