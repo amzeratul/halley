@@ -7,6 +7,7 @@
 #include "halley/tools/project/project.h"
 #include "src/assets/assets_editor_window.h"
 #include "src/scene/entity_editor.h"
+#include "src/scene/scene_editor_tabs.h"
 
 namespace Halley {
     class UIFactory;
@@ -56,7 +57,7 @@ namespace Halley {
     	bool hasDLL = false;
 
     	std::shared_ptr<AssetsEditorWindow> assetEditorWindow;
-        std::shared_ptr<SceneEditorWindow> sceneEditorWindow;
+        std::shared_ptr<SceneEditorTabs> sceneEditorTabs;
         std::shared_ptr<ConsoleWindow> consoleWindow;
 
         void makeUI();

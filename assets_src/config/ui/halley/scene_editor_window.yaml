@@ -19,7 +19,7 @@ children:
           proportion: 1
         - widget: { id: removeEntity, class: button, text: Remove, tooltip: "Removes the currently selected entity." }
           proportion: 1
-- sizer: { type: vertical} 
+- sizer: { type: vertical}
   proportion: 1
   children:
     - widget: { id: sceneEditorToolbar, class: image, image: "halley_ui/ui_list_item.png", colour: "#201427", innerBorder: [5, 5, 5, 5] }

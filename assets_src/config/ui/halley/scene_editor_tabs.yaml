@@ -1,0 +1,10 @@
+---
+widget: { class: widget }
+sizer: { type: vertical }
+proportion: 1
+children:
+- widget: { id: tabs, class: list, type: horizontal }
+  proportion: 0
+- widget: { id: pages, class: pagedPane }
+  proportion: 1
+...

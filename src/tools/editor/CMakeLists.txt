@@ -27,6 +27,7 @@ set (editor_sources
 	"src/scene/scene_editor_game_bridge.cpp"
 	"src/scene/scene_editor_gizmo.cpp"
 	"src/scene/scene_editor_gizmo_collection.cpp"
+	"src/scene/scene_editor_tabs.cpp"
 	"src/scene/scene_editor_window.cpp"
 
 	"src/scene/gizmos/polygon_gizmo.cpp"
@@ -69,6 +70,7 @@ set (editor_headers
 	"src/scene/scene_editor_game_bridge.h"
 	"src/scene/scene_editor_gizmo.h"
 	"src/scene/scene_editor_gizmo_collection.h"
+	"src/scene/scene_editor_tabs.h"
 	"src/scene/scene_editor_window.h"
 	"src/scene/gizmos/polygon_gizmo.h"
 	"src/scene/gizmos/selected_bounds_gizmo.h"

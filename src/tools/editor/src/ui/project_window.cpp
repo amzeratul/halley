@@ -87,12 +87,12 @@ void ProjectWindow::makePagedPane()
 	}
 
 	assetEditorWindow = std::make_shared<AssetsEditorWindow>(factory, project, *this);
-	sceneEditorWindow = std::make_shared<SceneEditorWindow>(factory, project, api);
+	sceneEditorTabs = std::make_shared<SceneEditorTabs>(factory, project, api);
 	consoleWindow = std::make_shared<ConsoleWindow>(factory);
 	
 	pagedPane = std::make_shared<UIPagedPane>("pages", numOfStandardTools);
 	pagedPane->getPage(static_cast<int>(EditorTabs::Assets))->add(assetEditorWindow, 1, Vector4f(8, 8, 8, 8));
-	pagedPane->getPage(static_cast<int>(EditorTabs::Scene))->add(sceneEditorWindow, 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(static_cast<int>(EditorTabs::Scene))->add(sceneEditorTabs, 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(static_cast<int>(EditorTabs::Settings))->add(consoleWindow, 1, Vector4f(8, 8, 8, 8));
 
 	uiMid->add(pagedPane, 1);
@@ -203,12 +203,7 @@ LocalisedString ProjectWindow::setCustomPage(const String& pageId)
 
 void ProjectWindow::openPrefab(const String& name, AssetType assetType)
 {
-	auto sceneEditor = getWidgetAs<SceneEditorWindow>("scene_editor");
-	if (assetType == AssetType::Scene) {
-		sceneEditor->loadScene(name);
-	} else if (assetType == AssetType::Prefab) {
-		sceneEditor->loadPrefab(name);
-	}
+	sceneEditorTabs->load(assetType, name);
 	toolbar->getList()->setSelectedOption(static_cast<int>(EditorTabs::Scene));
 }
 
