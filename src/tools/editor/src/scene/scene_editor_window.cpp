@@ -150,6 +150,7 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 		if (!sceneCreated.getEntities().empty()) {
 			panCameraToEntity(sceneCreated.getEntities().at(0).getUUID().toString());
 		}
+		currentEntityScene = sceneCreated;
 
 		// Custom UI
 		setCustomUI(gameBridge->makeCustomUI());
@@ -174,6 +175,7 @@ void SceneEditorWindow::unloadScene()
 	}
 	entityFactory.reset();
 	sceneData.reset();
+	currentEntityScene.reset();
 	entityEditor->unloadEntity();
 }
 
@@ -181,6 +183,12 @@ void SceneEditorWindow::update(Time t, bool moved)
 {
 	if (toolModeTimeout > 0) {
 		--toolModeTimeout;
+	}
+
+	if (currentEntityScene && entityFactory) {
+		if (currentEntityScene->needsUpdate()) {
+			currentEntityScene->updateOnEditor(*entityFactory);
+		}
 	}
 }
 

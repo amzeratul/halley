@@ -16,6 +16,7 @@ namespace Halley {
 
 		bool needsUpdate() const;
 		void update(EntityFactory& factory);
+		void updateOnEditor(EntityFactory& factory);
 
 		void addPrefabReference(const std::shared_ptr<const Prefab>& prefab, const EntityRef& entity, std::optional<int> index = {});
 		void addRootEntity(EntityRef entity);

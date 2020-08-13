@@ -79,6 +79,7 @@ namespace Halley {
 		std::shared_ptr<ISceneData> sceneData;
 		std::shared_ptr<Prefab> prefab;
 		std::shared_ptr<EntityFactory> entityFactory;
+		std::optional<EntityScene> currentEntityScene;
 
 		String currentEntityId;
 

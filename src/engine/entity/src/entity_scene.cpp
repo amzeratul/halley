@@ -36,6 +36,18 @@ void EntityScene::update(EntityFactory& factory)
 	}
 }
 
+void EntityScene::updateOnEditor(EntityFactory& factory)
+{
+	for (auto& entry : prefabObservers) {
+		if (entry.needsUpdate()) {
+			if (!entry.isScene()) {
+				entry.update(factory);
+			}
+			entry.markUpdated();
+		}
+	}
+}
+
 void EntityScene::addPrefabReference(const std::shared_ptr<const Prefab>& prefab, const EntityRef& entity, std::optional<int> index)
 {
 	getOrMakeObserver(prefab).addEntity(entity, index);
