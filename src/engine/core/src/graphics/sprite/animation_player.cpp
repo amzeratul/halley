@@ -47,19 +47,19 @@ AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> 
 	return *this;
 }
 
-AnimationPlayer& AnimationPlayer::setSequence(const String& sequence)
+AnimationPlayer& AnimationPlayer::setSequence(const String& _sequence)
 {
-	curSeqName = sequence;
+	curSeqName = _sequence; // DO NOT use _sequence after this, it can be a reference to nextSequence, which is changed on the next line
 	nextSequence = {};
 	updateIfNeeded();
 
-	if (animation && (!curSeq || curSeq->getName() != sequence)) {
+	if (animation && (!curSeq || curSeq->getName() != curSeqName)) {
 		curSeqTime = 0;
 		curFrameTime = 0;
 		curFrame = 0;
 		curFrameLen = 0;
 		curLoopCount = 0;
-		curSeq = &animation->getSequence(sequence);
+		curSeq = &animation->getSequence(curSeqName);
 
 		seqLen = curSeq->numFrames();
 		seqLooping = curSeq->isLooping();
