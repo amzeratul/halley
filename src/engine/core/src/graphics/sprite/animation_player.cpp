@@ -282,7 +282,7 @@ void AnimationPlayer::syncWith(const AnimationPlayer& masterAnimator, bool hideI
 	setSequence(masterAnimator.getCurrentSequenceName());
 	setDirection(masterAnimator.getCurrentDirectionName());
 	visibleOverride = !hideIfNotSynchronized || getCurrentSequenceName() == masterAnimator.getCurrentSequenceName();
-	curFrame = clamp(masterAnimator.curFrame, 0, static_cast<int>(curSeq->numFrames()) - 1);
+	curFrame = clamp(masterAnimator.curFrame, 0, curSeq ? static_cast<int>(curSeq->numFrames()) - 1 : 0);
 	curFrameTime = masterAnimator.curFrameTime;
 
 	resolveSprite();
@@ -302,10 +302,12 @@ void AnimationPlayer::resolveSprite()
 {
 	updateIfNeeded();
 
-	const auto& frame = curSeq->getFrame(curFrame);
-	curFrameLen = std::max(1, frame.getDuration()) * 0.001; // 1ms minimum
-	spriteData = &frame.getSprite(dirId);
-	hasUpdate = true;
+	if (curSeq) {
+		const auto& frame = curSeq->getFrame(curFrame);
+		curFrameLen = std::max(1, frame.getDuration()) * 0.001; // 1ms minimum
+		spriteData = &frame.getSprite(dirId);
+		hasUpdate = true;
+	}
 }
 
 void AnimationPlayer::onSequenceStarted()
