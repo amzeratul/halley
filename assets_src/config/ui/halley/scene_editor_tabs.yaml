@@ -3,7 +3,7 @@ widget: { class: widget }
 sizer: { type: vertical }
 proportion: 1
 children:
-- widget: { id: tabs, class: list, type: horizontal }
+- widget: { id: tabs, class: list, type: horizontal, style: tabs }
   proportion: 0
 - widget: { id: pages, class: pagedPane }
   proportion: 1

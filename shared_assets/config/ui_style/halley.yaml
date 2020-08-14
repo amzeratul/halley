@@ -211,4 +211,19 @@ uiStyle:
     extraMouseBorder: [1, 3, 1, 3]
     label: { font: Ubuntu Bold, size: 14, colour: "#FFFFFF" }
 
+  tabs:
+    background: { img: halley_ui/tabs/tabs_bg.png, colour: "#9C5BB5" }
+    item:
+      normal: { img: halley_ui/tabs/tab_normal.png, colour: "#9C5BB5" }
+      hover: { img: halley_ui/tabs/tab_hover.png, colour: "#9C5BB5" }
+      selected: { img: halley_ui/tabs/tab_selected.png, colour: "#9C5BB5" }
+      disabled: { img: halley_ui/tabs/tab_normal.png, colour: "#9C5BB5" }
+      innerBorder: [ 5, 6, 5, 2 ]
+    innerBorder: [ 10, 0, 10, 0 ]
+    extraMouseBorder: [ 0, 0, 0, 0 ]
+    label: { font: Ubuntu Bold, size: 14, colour: "#DDDDDD" }
+    selectedLabel: { font: Ubuntu Bold, size: 14, colour: "#FFFFFF" }
+    disabledLabel: { font: Ubuntu Bold, size: 14, colour: "#808080" }
+    gap: 1
+
 ...
