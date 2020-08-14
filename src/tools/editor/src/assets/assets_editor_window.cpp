@@ -214,7 +214,7 @@ void AssetsEditorWindow::setFilter(const String& f)
 
 void AssetsEditorWindow::loadAsset(const String& name, bool doubleClick, bool clearDropdown)
 {
-	if (clearDropdown) {
+	if (clearDropdown && loadedAsset != name && !name.endsWith("/.")) {
 		contentListDropdown->clear();
 		contentListDropdown->setActive(false);
 		contentListDropdownLabel->setActive(false);
