@@ -239,7 +239,8 @@ namespace Halley {
 		
         ResourceReference<T> deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
 		{
-			return ResourceReference<T>(context.resources->get<T>(node["asset"].asString()));
+			const auto assetId = node["asset"].asString("");
+			return ResourceReference<T>(assetId.isEmpty() ? std::shared_ptr<const T>() : context.resources->get<T>(assetId));
 		}
 	};
 	
