@@ -224,6 +224,7 @@ uiStyle:
     label: { font: Ubuntu Bold, size: 14, colour: "#DDDDDD" }
     selectedLabel: { font: Ubuntu Bold, size: 14, colour: "#FFFFFF" }
     disabledLabel: { font: Ubuntu Bold, size: 14, colour: "#808080" }
+    selectionChangedSound: ""
     gap: 1
 
 ...
