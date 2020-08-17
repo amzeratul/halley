@@ -81,6 +81,8 @@ namespace Halley
 		size_t getPrevVertices() const { return prevVertices; }
 		size_t getPrevTriangles() const { return prevTriangles; }
 
+		void setLogging(bool logging);
+
 	protected:
 		virtual void startDrawCall() {}
 		virtual void endDrawCall() {}
@@ -121,6 +123,7 @@ namespace Halley
 		size_t prevDrawCalls = 0;
 		size_t prevVertices = 0;
 		size_t prevTriangles = 0;
+		bool logging = true;
 
 		Vector<IndexType> stdQuadIndexCache;
 		std::optional<Rect4i> curClip;

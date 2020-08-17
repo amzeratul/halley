@@ -8,7 +8,7 @@ namespace Halley
 	public:
 		WorldStatsView(Resources& resources, CoreAPI& coreApi);
 
-		void draw(RenderContext& context) override;
+		void paint(Painter& painter) override;
 
 	private:
 		TextRenderer text;

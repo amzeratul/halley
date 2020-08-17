@@ -1,6 +1,7 @@
 #pragma once
 
 #include "halley/core/graphics/text/text_renderer.h"
+#include "halley/time/halleytime.h"
 #include <cstdint>
 
 namespace Halley {
@@ -14,7 +15,10 @@ namespace Halley {
         StatsView(Resources& resources, CoreAPI& coreApi);
         virtual ~StatsView() = default;
 
-        virtual void draw(RenderContext& context) = 0;
+        void draw(RenderContext& context);
+
+		virtual void update();
+        virtual void paint(Painter& painter) = 0;
 
 		void setWorld(const World* world);
 

@@ -332,6 +332,11 @@ void Painter::drawRect(Rect4f rect, float width, Colour4f colour, std::shared_pt
 	drawLine(points, width, colour, true, std::move(material));
 }
 
+void Painter::setLogging(bool logging)
+{
+	this->logging = logging;
+}
+
 void Painter::makeSpaceForPendingVertices(size_t numBytes)
 {
 	size_t requiredSize = bytesPending + numBytes;
@@ -478,9 +483,11 @@ void Painter::executeDrawPrimitives(Material& material, size_t numVertices, void
 			drawTriangles(indices.size());
 
 			// Log stats
-			nDrawCalls++;
-			nTriangles += indices.size() / 3;
-			nVertices += numVertices;
+			if (logging) {
+				nDrawCalls++;
+				nTriangles += indices.size() / 3;
+				nVertices += numVertices;
+			}
 		}
 	}
 
