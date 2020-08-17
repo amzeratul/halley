@@ -13,10 +13,13 @@ using namespace Halley;
 PerformanceStatsView::PerformanceStatsView(Resources& resources, CoreAPI& coreAPI)
 	: StatsView(resources, coreAPI)
 	, whitebox(Sprite().setImage(resources, "whitebox.png"))
+	, bg(Sprite().setImage(resources, "halley/perf_graph.png"))
 {
 	headerText = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
 	topVariableText = headerText;
 	topRenderText = headerText;
+	graphFPS = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f))
+		.setText("20\n\n30\n\n60").setAlignment(0.5f);
 
 	constexpr size_t frameDataCapacity = 300;
 	frameData.resize(frameDataCapacity);
@@ -130,15 +133,15 @@ void PerformanceStatsView::drawTimeline(Painter& painter, const String& label, T
 
 void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
 {
-	const Vector2f displaySize = Vector2f(1000, 100);
+	const Vector2f displaySize = Vector2f(1200, 100);
 	const float maxFPS = 30.0f;
 	const float scale = maxFPS / 1'000'000.0f * displaySize.y;
 
-	whitebox
+	const Vector2f boxPos = pos + Vector2f(20, 0);
+	bg
 		.clone()
-		.setPosition(pos)
-		.setSize(displaySize)
-		.setColour(Colour4f(0, 0, 0, 0.2f))
+		.setPosition(boxPos - Vector2f(2, 2))
+		.scaleTo(displaySize + Vector2f(4, 4))
 		.draw(painter);
 
 	auto variableSprite = whitebox
@@ -163,7 +166,7 @@ void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
 
 		const float x = xPos(i);
 		const float w = xPos(i + 1) - x;
-		const Vector2f p = pos + Vector2f(x, displaySize.y);
+		const Vector2f p = boxPos + Vector2f(x, displaySize.y);
 		const Vector2f s1 = Vector2f(w, frameData[index].variableTime * scale);
 		const Vector2f s2 = Vector2f(w, frameData[index].renderTime * scale);
 		variableSprite
@@ -175,4 +178,7 @@ void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
 			.setSize(s2)
 			.draw(painter);
 	}
+
+	graphFPS.setPosition(pos + Vector2f(5.0f, 10.0f)).draw(painter);
+	graphFPS.setPosition(pos + Vector2f(displaySize.x + 35.0f, 10.0f)).draw(painter);
 }

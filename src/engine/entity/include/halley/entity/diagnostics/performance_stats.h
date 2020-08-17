@@ -31,6 +31,7 @@ namespace Halley
 		TextRenderer headerText;
 		TextRenderer topVariableText;
 		TextRenderer topRenderText;
+		TextRenderer graphFPS;
 
 		int64_t totalFrameTime;
 		int64_t vsyncTime;
@@ -40,6 +41,7 @@ namespace Halley
 		std::vector<FrameData> frameData;
 		size_t lastFrameData = 0;
 
+		const Sprite bg;
 		const Sprite whitebox;
 
 		void collectData();
