@@ -58,3 +58,8 @@ int64_t CoreAPIWrapper::getTime(CoreAPITimer timer, TimeLine tl, StopwatchAverag
 {
 	return parent.getTime(timer, tl, mode);
 }
+
+void CoreAPIWrapper::setTimerPaused(CoreAPITimer timer, TimeLine tl, bool paused)
+{
+	parent.setTimerPaused(timer, tl, paused);
+}

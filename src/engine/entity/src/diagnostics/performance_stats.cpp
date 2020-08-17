@@ -155,7 +155,7 @@ void PerformanceStatsView::drawTimeline(Painter& painter, const String& label, T
 		.draw(painter);
 	tl.col2Text
 		.setText(col2)
-		.setPosition(pos + Vector2f(300, 0))
+		.setPosition(pos + Vector2f(320, 0))
 		.draw(painter);
 }
 

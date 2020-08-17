@@ -478,17 +478,43 @@ const Environment& Core::getEnvironment()
 	return *environment;
 }
 
+const StopwatchAveraging& Core::getTimer(CoreAPITimer timer, TimeLine tl) const
+{
+	switch (timer) {
+	case CoreAPITimer::Engine:
+		return engineTimers[int(tl)];
+	case CoreAPITimer::Game:
+		return gameTimers[int(tl)];
+	case CoreAPITimer::Vsync:
+		return vsyncTimer;
+	}
+	return dummyTimer;
+}
+
+StopwatchAveraging& Core::getTimer(CoreAPITimer timer, TimeLine tl)
+{
+	switch (timer) {
+	case CoreAPITimer::Engine:
+		return engineTimers[int(tl)];
+	case CoreAPITimer::Game:
+		return gameTimers[int(tl)];
+	case CoreAPITimer::Vsync:
+		return vsyncTimer;
+	}
+	return dummyTimer;
+}
+
 int64_t Core::getTime(CoreAPITimer timerType, TimeLine tl, StopwatchAveraging::Mode mode) const
 {
-	switch (timerType) {
-	case CoreAPITimer::Engine:
-		return engineTimers[int(tl)].elapsedNanoSeconds(mode);
-	case CoreAPITimer::Game:
-		return gameTimers[int(tl)].elapsedNanoSeconds(mode);
-	case CoreAPITimer::Vsync:
-		return vsyncTimer.elapsedNanoSeconds(mode);
-	default:
-		return 0;
+	return getTimer(timerType, tl).elapsedNanoSeconds(mode);
+}
+
+void Core::setTimerPaused(CoreAPITimer timer, TimeLine tl, bool paused)
+{
+	if (paused) {
+		getTimer(timer, tl).pause();
+	} else {
+		getTimer(timer, tl).resume();
 	}
 }
 

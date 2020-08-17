@@ -1,5 +1,7 @@
 #include "diagnostics/stats_view.h"
 
+
+#include "halley/core/api/core_api.h"
 #include "halley/core/graphics/camera.h"
 #include "halley/core/graphics/render_context.h"
 #include "halley/core/graphics/render_target/render_target.h"
@@ -13,6 +15,9 @@ StatsView::StatsView(Resources& resources, CoreAPI& coreAPI)
 
 void StatsView::draw(RenderContext& context)
 {
+	coreAPI.setTimerPaused(CoreAPITimer::Engine, TimeLine::Render, true);
+	coreAPI.setTimerPaused(CoreAPITimer::Game, TimeLine::Render, true);
+	
 	const auto viewPort = Rect4f(context.getDefaultRenderTarget().getViewPort());
 	const auto targetSize = Vector2f(1280, 720);
 	const auto zoom2d = viewPort.getSize() / targetSize;
@@ -21,7 +26,11 @@ void StatsView::draw(RenderContext& context)
 	auto camera = Camera(viewPort.getSize() / zoom * 0.5f).setZoom(zoom);
 	context.with(camera).bind([&](Painter& painter) {
 		paint(painter);
+		painter.flush();
 	});
+
+	coreAPI.setTimerPaused(CoreAPITimer::Engine, TimeLine::Render, false);
+	coreAPI.setTimerPaused(CoreAPITimer::Game, TimeLine::Render, false);
 }
 
 void StatsView::update()

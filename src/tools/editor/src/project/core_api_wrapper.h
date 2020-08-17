@@ -16,7 +16,8 @@ namespace Halley {
 		HalleyStatics& getStatics() override;
 		const Environment& getEnvironment() override;
 		int64_t getTime(CoreAPITimer timer, TimeLine tl, StopwatchAveraging::Mode mode) const override;
-
+		void setTimerPaused(CoreAPITimer timer, TimeLine tl, bool paused) override;
+		
 	private:
 		CoreAPI& parent;
 	};

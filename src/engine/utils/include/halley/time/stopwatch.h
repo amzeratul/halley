@@ -67,6 +67,7 @@ namespace Halley {
 	private:
 		int nSamples;
 		int nsTakenAvgSamples = 0;
+		bool paused = false;
 
 		std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
 		int64_t toAdd = 0;

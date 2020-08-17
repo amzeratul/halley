@@ -24,7 +24,7 @@ namespace Halley {
 
     protected:
         Resources& resources;
-        const CoreAPI& coreAPI;
+        CoreAPI& coreAPI;
         const World* world = nullptr;
 
         String formatTime(int64_t ns) const;
