@@ -5,6 +5,7 @@
 #include "halley/core/api/core_api.h"
 #include "halley/core/graphics/painter.h"
 #include "halley/core/resources/resources.h"
+#include "halley/support/logger.h"
 #include "halley/time/halleytime.h"
 #include "halley/time/stopwatch.h"
 
@@ -12,8 +13,8 @@ using namespace Halley;
 
 PerformanceStatsView::PerformanceStatsView(Resources& resources, CoreAPI& coreAPI)
 	: StatsView(resources, coreAPI)
-	, whitebox(Sprite().setImage(resources, "whitebox.png"))
 	, bg(Sprite().setImage(resources, "halley/perf_graph.png"))
+	, whitebox(Sprite().setImage(resources, "whitebox.png"))
 {
 	headerText = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
 	timelineData[0].setText(headerText);
@@ -29,6 +30,7 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, CoreAPI& coreAP
 
 void PerformanceStatsView::update()
 {
+	StatsView::update();
 	collectData();
 }
 
@@ -84,6 +86,9 @@ void PerformanceStatsView::collectTimelineData(TimeLine timeline)
 
 	tl.average = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchAveraging::Mode::Average);
 	totalFrameTime += tl.average;
+	if (timeline == TimeLine::Render) {
+		tl.average -= timer.averageElapsedNanoSeconds();
+	}
 
 	if (world) {
 		for (const auto& system : world->getSystems(timeline)) {
@@ -213,5 +218,9 @@ void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
 
 int64_t PerformanceStatsView::getTimeNs(TimeLine timeline)
 {
-	return coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchAveraging::Mode::Latest);
+	auto ns = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchAveraging::Mode::Latest);
+	if (timeline == TimeLine::Render) {
+		ns -= timer.lastElapsedNanoSeconds();
+	}
+	return ns;
 }

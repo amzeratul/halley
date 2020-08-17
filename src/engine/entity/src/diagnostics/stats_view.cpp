@@ -15,8 +15,7 @@ StatsView::StatsView(Resources& resources, CoreAPI& coreAPI)
 
 void StatsView::draw(RenderContext& context)
 {
-	coreAPI.setTimerPaused(CoreAPITimer::Engine, TimeLine::Render, true);
-	coreAPI.setTimerPaused(CoreAPITimer::Game, TimeLine::Render, true);
+	timer.beginSample();
 	
 	const auto viewPort = Rect4f(context.getDefaultRenderTarget().getViewPort());
 	const auto targetSize = Vector2f(1280, 720);
@@ -29,12 +28,17 @@ void StatsView::draw(RenderContext& context)
 		painter.flush();
 	});
 
-	coreAPI.setTimerPaused(CoreAPITimer::Engine, TimeLine::Render, false);
-	coreAPI.setTimerPaused(CoreAPITimer::Game, TimeLine::Render, false);
+	timer.endSample();
+	drawing = true;
 }
 
 void StatsView::update()
 {
+	if (!drawing) {
+		timer.beginSample();
+		timer.endSample();
+	}
+	drawing = false;
 }
 
 void StatsView::setWorld(const World* world)

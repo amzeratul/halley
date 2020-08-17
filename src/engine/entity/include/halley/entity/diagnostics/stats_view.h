@@ -4,6 +4,8 @@
 #include "halley/time/halleytime.h"
 #include <cstdint>
 
+#include "halley/time/stopwatch.h"
+
 namespace Halley {
     class CoreAPI;
     class Resources;
@@ -26,6 +28,8 @@ namespace Halley {
         Resources& resources;
         CoreAPI& coreAPI;
         const World* world = nullptr;
+        StopwatchAveraging timer;
+        bool drawing = false;
 
         String formatTime(int64_t ns) const;
     };
