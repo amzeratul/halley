@@ -1,4 +1,4 @@
-#include "world_stats.h"
+#include "diagnostics/world_stats.h"
 #include "halley/core/graphics/render_context.h"
 #include "halley/core/graphics/text/font.h"
 #include "halley/core/resources/resources.h"
@@ -10,8 +10,7 @@
 using namespace Halley;
 
 WorldStatsView::WorldStatsView(Resources& resources, CoreAPI& coreAPI)
-	: resources(resources)
-	, coreAPI(coreAPI)
+	: StatsView(resources, coreAPI)
 	, text(resources.get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f))
 {
 }
@@ -84,17 +83,4 @@ void WorldStatsView::draw(RenderContext& context)
 			.setPosition(Vector2f(20, 20))
 			.draw(painter);
 	});
-}
-
-void WorldStatsView::setWorld(const World* w)
-{
-	world = w;
-}
-
-String WorldStatsView::formatTime(int64_t ns) const
-{
-	int64_t us = (ns + 500) / 1000;
-	std::stringstream ss;
-	ss << (us / 1000) << '.' << std::setw(3) << std::setfill('0') << (us % 1000);
-	return ss.str();
 }

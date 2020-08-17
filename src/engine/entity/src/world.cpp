@@ -11,6 +11,7 @@
 #include "halley/file_formats/config_file.h"
 #include "halley/maths/uuid.h"
 #include "halley/core/api/halley_api.h"
+#include "halley/core/graphics/render_context.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;
@@ -384,6 +385,7 @@ void World::render(RenderContext& rc) const
 	}
 
 	renderSystems(rc);
+	rc.flush();
 
 	if (collectMetrics) {
 		t.endSample();

@@ -18,9 +18,12 @@ set(SOURCES
         "src/system.cpp"
         "src/world.cpp"
         "src/world_scene_data.cpp"
-        "src/world_stats.cpp"
 
         "src/components/transform_2d_component.cpp"
+
+        "src/diagnostics/performance_stats.cpp"
+        "src/diagnostics/stats_view.cpp"
+        "src/diagnostics/world_stats.cpp"
 
         "src/scene_editor/scene_editor.cpp"
         )
@@ -50,9 +53,12 @@ set(HEADERS
         "include/halley/entity/type_deleter.h"
         "include/halley/entity/world.h"
         "include/halley/entity/world_scene_data.h"
-        "include/halley/entity/world_stats.h"
 
         "include/halley/entity/components/transform_2d_component.h"
+
+        "include/halley/entity/diagnostics/performance_stats.h"
+        "include/halley/entity/diagnostics/stats_view.h"
+        "include/halley/entity/diagnostics/world_stats.h"
 
         "include/halley/entity/scene_editor/scene_editor.h"
         )

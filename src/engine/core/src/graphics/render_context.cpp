@@ -55,6 +55,12 @@ RenderTarget& RenderContext::getDefaultRenderTarget()
 {
 	return defaultRenderTarget;
 }
+
+void RenderContext::flush()
+{
+	painter.flush();
+}
+
 /*
 RenderContext RenderContext::subArea(Rect4i area) const
 {

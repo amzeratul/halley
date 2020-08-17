@@ -7,14 +7,14 @@
 #include "halley/data_structures/maybe.h"
 #include <gsl/span>
 #include <map>
+#include "halley/core/graphics/sprite/sprite.h"
+#include "halley/core/graphics/text/font.h"
 
 namespace Halley
 {
 	class LocalisedString;
-	class Font;
 	class Painter;
 	class Material;
-	class Sprite;
 
 	using ColourOverride = std::pair<size_t, std::optional<Colour4f>>;
 

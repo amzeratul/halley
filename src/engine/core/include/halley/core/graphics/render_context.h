@@ -28,6 +28,8 @@ namespace Halley
 
 		RenderTarget& getDefaultRenderTarget();
 
+		void flush();
+
 	private:
 		Painter& painter;
 		Camera& camera;
