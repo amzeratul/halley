@@ -18,7 +18,20 @@ namespace Halley
 		class SystemData {
 		public:
 			String name;
-			int64_t average;
+			int64_t average = 0;
+			int64_t max = 0;
+		};
+
+		class TimeLineData {
+		public:
+			int64_t average = 0;
+			int64_t max = 0;
+			std::vector<SystemData> topSystems;
+			TextRenderer col0Text;
+			TextRenderer col1Text;
+			TextRenderer col2Text;
+
+			void setText(const TextRenderer& text);
 		};
 
 		class FrameData {
@@ -29,14 +42,12 @@ namespace Halley
 		};
 		
 		TextRenderer headerText;
-		TextRenderer topVariableText;
-		TextRenderer topRenderText;
 		TextRenderer graphFPS;
 
 		int64_t totalFrameTime;
 		int64_t vsyncTime;
 		
-		std::array<std::vector<SystemData>, 3> topSystems;
+		std::array<TimeLineData, 3> timelineData;
 
 		std::vector<FrameData> frameData;
 		size_t lastFrameData = 0;
@@ -49,7 +60,9 @@ namespace Halley
 		void tryInsert(std::vector<SystemData>& curTop, const System& system);
 
 		void drawHeader(Painter& painter);
-		void drawTimeline(Painter& painter, const String& label, TimeLine timeline, TextRenderer& textRenderer, Vector2f pos);
+		void drawTimeline(Painter& painter, const String& label, TimeLine timeline, Vector2f pos);
 		void drawGraph(Painter& painter, Vector2f pos);
+
+		int64_t getTimeNs(TimeLine timeline);
 	};
 }

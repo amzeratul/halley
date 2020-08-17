@@ -412,9 +412,11 @@ void Core::doRender(Time)
 
 		painter->endRender();
 
+		engineTimer.pause();
 		vsyncTimer.beginSample();
 		api->video->finishRender();
 		vsyncTimer.endSample();
+		engineTimer.resume();
 	}
 
 	if (!gameSampled) {

@@ -81,13 +81,14 @@ StopwatchAveraging::StopwatchAveraging(int nSamples)
 
 void StopwatchAveraging::beginSample()
 {
+	toAdd = 0;
 	startTime = high_resolution_clock::now();
 }
 
 void StopwatchAveraging::endSample()
 {
 	auto now = high_resolution_clock::now();
-	nsTaken = duration_cast<nanoseconds>(now - startTime).count();
+	nsTaken = duration_cast<nanoseconds>(now - startTime).count() + toAdd;
 
 	nsTakenAvgAccum += nsTaken;
 	nsTakenAvgSamples++;
@@ -96,6 +97,17 @@ void StopwatchAveraging::endSample()
 		nsTakenAvgSamples = 0;
 		nsTakenAvgAccum = 0;
 	}
+}
+
+void StopwatchAveraging::pause()
+{
+	auto now = high_resolution_clock::now();
+	toAdd += duration_cast<nanoseconds>(now - startTime).count();
+}
+
+void StopwatchAveraging::resume()
+{
+	startTime = high_resolution_clock::now();
 }
 
 int64_t StopwatchAveraging::elapsedNanoSeconds(Mode mode) const

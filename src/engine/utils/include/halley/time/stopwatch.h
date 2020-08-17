@@ -57,6 +57,8 @@ namespace Halley {
 		explicit StopwatchAveraging(int nSamples = 30);
 		void beginSample();
 		void endSample();
+		void pause();
+		void resume();
 
 		int64_t elapsedNanoSeconds(Mode mode) const;
 		int64_t averageElapsedNanoSeconds() const;
@@ -67,6 +69,7 @@ namespace Halley {
 		int nsTakenAvgSamples = 0;
 
 		std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
+		int64_t toAdd = 0;
 
 		int64_t nsTaken = 0;
 		int64_t nsTakenAvg = 0;
