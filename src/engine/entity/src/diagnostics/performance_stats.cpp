@@ -54,7 +54,10 @@ void PerformanceStatsView::collectData()
 
 	auto getTime = [&](TimeLine timeline) -> int
 	{
-		const auto ns = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchAveraging::Mode::Latest);
+		auto ns = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchAveraging::Mode::Latest);
+		if (timeline == TimeLine::Render) {
+			ns -= coreAPI.getTime(CoreAPITimer::Vsync, timeline, StopwatchAveraging::Mode::Latest);
+		}
 		return static_cast<int>((ns + 500) / 1000);
 	};
 	
@@ -162,7 +165,7 @@ void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
 		const float w = xPos(i + 1) - x;
 		const Vector2f p = pos + Vector2f(x, displaySize.y);
 		const Vector2f s1 = Vector2f(w, frameData[index].variableTime * scale);
-		const Vector2f s2 = Vector2f(w, frameData[index].variableTime * scale);
+		const Vector2f s2 = Vector2f(w, frameData[index].renderTime * scale);
 		variableSprite
 			.setPosition(p)
 			.setSize(s1)
