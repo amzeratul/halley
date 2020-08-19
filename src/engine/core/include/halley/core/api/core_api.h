@@ -33,5 +33,7 @@ namespace Halley
 
 		virtual int64_t getTime(CoreAPITimer timer, TimeLine tl, StopwatchAveraging::Mode mode) const = 0;
 		virtual void setTimerPaused(CoreAPITimer timer, TimeLine tl, bool paused) = 0;
+
+		virtual bool isDevMode() = 0;
 	};
 }

@@ -7,6 +7,7 @@ using namespace Halley;
 System::System(Vector<FamilyBindingBase*> uninitializedFamilies, Vector<int> messageTypesReceived)
 	: families(std::move(uninitializedFamilies))
 	, messageTypesReceived(std::move(messageTypesReceived))
+	, timer(0)
 {
 }
 
@@ -40,6 +41,7 @@ void System::onAddedToWorld(World& w, int id) {
 	for (auto f : families) {
 		f->bindFamily(*f, w);
 	}
+	timer.setNumSamples(world->isDevMode() ? 300 : 30);
 }
 
 void System::purgeMessages()

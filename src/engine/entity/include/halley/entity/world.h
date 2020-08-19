@@ -117,6 +117,8 @@ namespace Halley {
 
 		size_t sendSystemMessage(SystemMessageContext context, const String& targetSystem);
 
+		bool isDevMode() const;
+
 	private:
 		const HalleyAPI& api;
 		Resources& resources;

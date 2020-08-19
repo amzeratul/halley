@@ -100,18 +100,23 @@ void PerformanceStatsView::collectTimelineData(TimeLine timeline)
 void PerformanceStatsView::tryInsert(std::vector<SystemData>& curTop, const System& system)
 {
 	const auto avg = system.getNanoSecondsTakenAvg();
+	const auto max = system.getNanoSecondsTakenMax();
+	const auto score = (avg + max) / 2;
+	
 	constexpr int systemsToTrack = 5;
-	const int64_t minAvg = curTop.size() < systemsToTrack ? -1 : curTop.back().average;
+	const int64_t minScore = curTop.size() < systemsToTrack ? -1 : curTop.back().score;
 	if (curTop.size() < systemsToTrack) {
 		curTop.emplace_back();
 	}
 
-	if (avg > minAvg) {
+	if (score > minScore) {
 		auto& sys = curTop.back();
 		sys.name = system.getName();
+		sys.max = max;
 		sys.average = avg;
+		sys.score = score;
 
-		std::sort(curTop.begin(), curTop.end(), [=](const SystemData& a, const SystemData& b) { return a.average > b.average; });
+		std::sort(curTop.begin(), curTop.end(), [=](const SystemData& a, const SystemData& b) { return a.score > b.score; });
 	}
 }
 

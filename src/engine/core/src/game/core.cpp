@@ -518,6 +518,11 @@ void Core::setTimerPaused(CoreAPITimer timer, TimeLine tl, bool paused)
 	}
 }
 
+bool Core::isDevMode()
+{
+	return game->isDevMode();
+}
+
 void Core::initStage(Stage& stage)
 {
 	stage.setGame(*game);

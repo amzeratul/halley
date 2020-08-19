@@ -63,3 +63,8 @@ void CoreAPIWrapper::setTimerPaused(CoreAPITimer timer, TimeLine tl, bool paused
 {
 	parent.setTimerPaused(timer, tl, paused);
 }
+
+bool CoreAPIWrapper::isDevMode()
+{
+	return parent.isDevMode();
+}

@@ -341,6 +341,11 @@ size_t World::sendSystemMessage(SystemMessageContext origContext, const String& 
 	return count;
 }
 
+bool World::isDevMode() const
+{
+	return api.core->isDevMode();
+}
+
 void World::deleteEntity(Entity* entity)
 {
 	Expects (entity);

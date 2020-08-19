@@ -20,6 +20,7 @@ namespace Halley
 			String name;
 			int64_t average = 0;
 			int64_t max = 0;
+			int64_t score = 0;
 		};
 
 		class TimeLineData {

@@ -76,4 +76,40 @@ namespace Halley {
 		int64_t nsTakenAvg = 0;
 		int64_t nsTakenAvgAccum = 0;
 	};
+
+	class StopwatchRollingAveraging
+	{
+	public:
+		enum class Mode
+		{
+			Average,
+			Latest,
+			Min,
+			Max
+		};
+
+		explicit StopwatchRollingAveraging(size_t nSamples = 30);
+
+		void setNumSamples(size_t n);
+
+		void beginSample();
+		void endSample();
+		void pause();
+		void resume();
+
+		int64_t elapsedNanoSeconds(Mode mode) const;
+		int64_t minElapsedNanoSeconds() const;
+		int64_t maxElapsedNanoSeconds() const;
+		int64_t averageElapsedNanoSeconds() const;
+		int64_t lastElapsedNanoSeconds() const;
+
+	private:
+		std::vector<int64_t> nsTaken;
+		size_t pos = 0;
+		size_t samplesTaken = 0;
+		bool paused = false;
+
+		std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
+		int64_t toAdd = 0;
+	};
 }
