@@ -23,6 +23,7 @@
 
 #include "halleytime.h"
 #include <chrono>
+#include <vector>
 #include <cstdint>
 
 namespace Halley {
