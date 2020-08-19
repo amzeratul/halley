@@ -84,7 +84,13 @@ void PerformanceStatsView::collectTimelineData(TimeLine timeline)
 	auto& curTop = tl.topSystems;
 	curTop.clear();
 
-	tl.average = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Average);
+	const auto engineTime = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Average);
+	const auto gameTime = coreAPI.getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Average);
+	const auto engineTimeMax = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Max);
+	const auto gameTimeMax = coreAPI.getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Max);
+	
+	tl.average = engineTime + gameTime;
+	tl.max = engineTimeMax + gameTimeMax;
 	totalFrameTime += tl.average;
 	if (timeline == TimeLine::Render) {
 		tl.average -= timer.averageElapsedNanoSeconds();
@@ -223,7 +229,7 @@ void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
 
 int64_t PerformanceStatsView::getTimeNs(TimeLine timeline)
 {
-	auto ns = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Latest);
+	auto ns = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Latest) + coreAPI.getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Latest);
 	if (timeline == TimeLine::Render) {
 		ns -= timer.lastElapsedNanoSeconds();
 	}

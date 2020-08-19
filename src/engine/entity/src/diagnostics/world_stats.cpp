@@ -37,14 +37,13 @@ void WorldStatsView::paint(Painter& painter)
 	};
 
 	for (auto timeline : timelines) {
-		int64_t total = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Average);
-		int64_t gameTotal = coreAPI.getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Average);
+		int64_t engineTime = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Average);
+		int64_t gameTime = coreAPI.getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Average);
 		if (timeline == TimeLine::Render) {
 			const auto selfTime = timer.averageElapsedNanoSeconds();
-			gameTotal -= selfTime;
-			total -= selfTime;
+			gameTime -= selfTime;
 		}
-		grandTotal += total;
+		grandTotal += engineTime + gameTime;
 
 		Vector2f pos = Vector2f(20 + (i++) * width, 60);
 		text.setColour(Colour(0.2f, 1.0f, 0.3f)).setText(String(timelineLabels[int(timeline)]) + ": ").setPosition(pos).draw(painter);
@@ -67,7 +66,7 @@ void WorldStatsView::paint(Painter& painter)
 			drawStats("[World]", 0, worldTotal - sysTotal, pos);
 		}
 
-		drawStats("[Game]", 0, gameTotal - worldTotal, pos);
+		drawStats("[Game]", 0, gameTime - worldTotal, pos);
 
 		int64_t vsyncTime = 0;
 		if (timeline == TimeLine::Render) {
@@ -75,9 +74,9 @@ void WorldStatsView::paint(Painter& painter)
 			drawStats("[VSync]", 0, vsyncTime, pos);
 		}
 
-		drawStats("[Engine]", 0, total - gameTotal, pos);
+		drawStats("[Engine]", 0, engineTime, pos);
 		text.setColour(Colour(0.8f, 1.0f, 0.8f));
-		drawStats("Total", world ? int(world->numEntities()) : 0, total + vsyncTime, pos);
+		drawStats("Total", world ? int(world->numEntities()) : 0, engineTime + gameTime + vsyncTime, pos);
 	}
 
 	int maxFPS = int(lround(1'000'000'000.0 / grandTotal));

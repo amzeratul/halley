@@ -346,7 +346,6 @@ void Core::doFixedUpdate(Time time)
 	HALLEY_DEBUG_TRACE();
 	auto& engineTimer = engineTimers[int(TimeLine::FixedUpdate)];
 	auto& gameTimer = gameTimers[int(TimeLine::FixedUpdate)];
-	engineTimer.beginSample();
 
 	gameTimer.beginSample();
 	if (running && currentStage) {
@@ -357,8 +356,9 @@ void Core::doFixedUpdate(Time time)
 		}
 	}
 	gameTimer.endSample();
-	pumpAudio();
 
+	engineTimer.beginSample();
+	pumpAudio();
 	engineTimer.endSample();
 	HALLEY_DEBUG_TRACE();
 }
@@ -368,9 +368,11 @@ void Core::doVariableUpdate(Time time)
 	HALLEY_DEBUG_TRACE();
 	auto& engineTimer = engineTimers[int(TimeLine::VariableUpdate)];
 	auto& gameTimer = gameTimers[int(TimeLine::VariableUpdate)];
-	engineTimer.beginSample();
 
+	engineTimer.beginSample();
 	pumpEvents(time);
+	engineTimer.pause();
+	
 	gameTimer.beginSample();
 	if (running && currentStage) {
 		try {
@@ -380,6 +382,8 @@ void Core::doVariableUpdate(Time time)
 		}
 	}
 	gameTimer.endSample();
+
+	engineTimer.resume();
 	pumpAudio();
 
 	if (api->platform) {
@@ -415,6 +419,7 @@ void Core::doRender(Time)
 			}
 			RenderContext context(*painter, *camera, *screenTarget);
 
+			engineTimer.pause();
 			gameTimer.beginSample();
 
 			try {
@@ -424,6 +429,7 @@ void Core::doRender(Time)
 			}
 
 			gameTimer.endSample();
+			engineTimer.resume();
 			gameSampled = true;
 		}
 
