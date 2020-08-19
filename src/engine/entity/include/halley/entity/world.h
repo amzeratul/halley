@@ -141,7 +141,7 @@ namespace Halley {
 		std::shared_ptr<MaskStorage> maskStorage;
 		std::shared_ptr<ComponentDeleterTable> componentDeleterTable;
 
-		mutable std::array<StopwatchAveraging, 3> timer;
+		mutable std::array<StopwatchRollingAveraging, 3> timer;
 
 		std::list<SystemMessageContext> pendingSystemMessages;
 

@@ -11,6 +11,7 @@ using namespace Halley;
 StatsView::StatsView(Resources& resources, CoreAPI& coreAPI)
 	: resources(resources)
 	, coreAPI(coreAPI)
+	, timer(coreAPI.isDevMode() ? 300 : 30)
 {}
 
 void StatsView::draw(RenderContext& context)

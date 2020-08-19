@@ -197,6 +197,9 @@ void Core::init()
 
 	// Start game
 	setStage(game->startGame());
+
+	// Init timers
+	setupTimers();
 	
 	// Get video resources
 	if (api->video) {
@@ -304,6 +307,20 @@ void Core::pumpAudio()
 		api->audioInternal->pump();
 		HALLEY_DEBUG_TRACE();
 	}
+}
+
+void Core::setupTimers()
+{
+	const bool devMode = isDevMode();
+	const size_t nSamples = devMode ? 300 : 30;
+	for (auto& timer: engineTimers) {
+		timer.setNumSamples(nSamples);
+	}
+	for (auto& timer : gameTimers) {
+		timer.setNumSamples(nSamples);
+	}
+	vsyncTimer.setNumSamples(nSamples);
+	dummyTimer.setNumSamples(nSamples);
 }
 
 void Core::onFixedUpdate(Time time)
@@ -478,7 +495,7 @@ const Environment& Core::getEnvironment()
 	return *environment;
 }
 
-const StopwatchAveraging& Core::getTimer(CoreAPITimer timer, TimeLine tl) const
+const StopwatchRollingAveraging& Core::getTimer(CoreAPITimer timer, TimeLine tl) const
 {
 	switch (timer) {
 	case CoreAPITimer::Engine:
@@ -491,7 +508,7 @@ const StopwatchAveraging& Core::getTimer(CoreAPITimer timer, TimeLine tl) const
 	return dummyTimer;
 }
 
-StopwatchAveraging& Core::getTimer(CoreAPITimer timer, TimeLine tl)
+StopwatchRollingAveraging& Core::getTimer(CoreAPITimer timer, TimeLine tl)
 {
 	switch (timer) {
 	case CoreAPITimer::Engine:
@@ -504,7 +521,7 @@ StopwatchAveraging& Core::getTimer(CoreAPITimer timer, TimeLine tl)
 	return dummyTimer;
 }
 
-int64_t Core::getTime(CoreAPITimer timerType, TimeLine tl, StopwatchAveraging::Mode mode) const
+int64_t Core::getTime(CoreAPITimer timerType, TimeLine tl, StopwatchRollingAveraging::Mode mode) const
 {
 	return getTimer(timerType, tl).elapsedNanoSeconds(mode);
 }

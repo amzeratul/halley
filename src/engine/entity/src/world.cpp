@@ -24,6 +24,9 @@ World::World(const HalleyAPI& api, Resources& resources, bool collectMetrics, Cr
 	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
 	, componentDeleterTable(std::make_shared<ComponentDeleterTable>())
 {
+	for (auto& t: timer) {
+		t.setNumSamples(isDevMode() ? 300 : 30);
+	}
 }
 
 World::~World()

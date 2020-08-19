@@ -28,7 +28,7 @@ namespace Halley {
         Resources& resources;
         CoreAPI& coreAPI;
         const World* world = nullptr;
-        StopwatchAveraging timer;
+        StopwatchRollingAveraging timer;
         bool drawing = false;
 
         String formatTime(int64_t ns) const;

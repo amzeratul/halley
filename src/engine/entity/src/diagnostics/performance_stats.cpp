@@ -63,7 +63,7 @@ void PerformanceStatsView::collectData()
 	for (const auto timeline: timelines) {
 		collectTimelineData(timeline);
 	}
-	vsyncTime = coreAPI.getTime(CoreAPITimer::Vsync, TimeLine::Render, StopwatchAveraging::Mode::Average);
+	vsyncTime = coreAPI.getTime(CoreAPITimer::Vsync, TimeLine::Render, StopwatchRollingAveraging::Mode::Average);
 
 	auto getTime = [&](TimeLine timeline) -> int
 	{
@@ -84,7 +84,7 @@ void PerformanceStatsView::collectTimelineData(TimeLine timeline)
 	auto& curTop = tl.topSystems;
 	curTop.clear();
 
-	tl.average = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchAveraging::Mode::Average);
+	tl.average = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Average);
 	totalFrameTime += tl.average;
 	if (timeline == TimeLine::Render) {
 		tl.average -= timer.averageElapsedNanoSeconds();
@@ -223,7 +223,7 @@ void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
 
 int64_t PerformanceStatsView::getTimeNs(TimeLine timeline)
 {
-	auto ns = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchAveraging::Mode::Latest);
+	auto ns = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Latest);
 	if (timeline == TimeLine::Render) {
 		ns -= timer.lastElapsedNanoSeconds();
 	}

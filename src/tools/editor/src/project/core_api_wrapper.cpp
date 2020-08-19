@@ -54,7 +54,7 @@ const Environment& CoreAPIWrapper::getEnvironment()
 	return parent.getEnvironment();
 }
 
-int64_t CoreAPIWrapper::getTime(CoreAPITimer timer, TimeLine tl, StopwatchAveraging::Mode mode) const
+int64_t CoreAPIWrapper::getTime(CoreAPITimer timer, TimeLine tl, StopwatchRollingAveraging::Mode mode) const
 {
 	return parent.getTime(timer, tl, mode);
 }
