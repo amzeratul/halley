@@ -167,7 +167,6 @@ AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
 	}
 
 	auto event = resources->get<AudioEvent>(name);
-	event->loadDependencies(*resources);
 
 	uint32_t id = uniqueId++;
 	enqueue([=] () {

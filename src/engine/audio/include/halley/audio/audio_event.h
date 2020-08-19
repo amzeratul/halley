@@ -27,14 +27,13 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
-		void loadDependencies(Resources& resources) const;
-
 		void reload(Resource&& resource) override;
 		static std::shared_ptr<AudioEvent> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::AudioEvent; }
 
 	private:
 		std::vector<std::unique_ptr<IAudioEventAction>> actions;
+		void loadDependencies(Resources& resources) const;
 	};
 
 	enum class AudioEventActionType

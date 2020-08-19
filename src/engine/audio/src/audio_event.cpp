@@ -70,6 +70,7 @@ std::shared_ptr<AudioEvent> AudioEvent::loadResource(ResourceLoader& loader)
 	Deserializer s(staticData->getSpan());
 	auto event = std::make_shared<AudioEvent>();
 	s >> *event;
+	event->loadDependencies(loader.getResources());
 	return event;
 }
 
@@ -187,7 +188,6 @@ void AudioEventActionPlay::loadDependencies(const Resources& resources)
 			if (resources.exists<AudioClip>(c)) {
 				clipData.push_back(resources.get<AudioClip>(c));
 			} else {
-				
 				Logger::logError("AudioClip not found: \"" + c + "\", needed by \"" + event.getAssetId() + "\".");
 				clipData.push_back(std::shared_ptr<AudioClip>());
 			}
