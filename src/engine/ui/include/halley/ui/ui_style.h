@@ -9,6 +9,7 @@ namespace Halley {
 		UIStyle(std::shared_ptr<const UIStyleDefinition>);
 		UIStyle(const String& name, std::shared_ptr<UIStyleSheet> styleSheet);
 
+		bool hasSubStyle(const String& name) const;
 		UIStyle getSubStyle(const String& name) const;
 
 		const Sprite& getSprite(const String& name) const;
