@@ -5,12 +5,13 @@
 #include "halley/core/api/core_api.h"
 #include "world.h"
 #include "system.h"
+#include "halley/core/api/halley_api.h"
 #include "halley/text/string_converter.h"
 
 using namespace Halley;
 
-WorldStatsView::WorldStatsView(Resources& resources, CoreAPI& coreAPI)
-	: StatsView(resources, coreAPI)
+WorldStatsView::WorldStatsView(Resources& resources, const HalleyAPI& api)
+	: StatsView(resources, api)
 	, text(resources.get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f))
 {
 }
@@ -36,6 +37,7 @@ void WorldStatsView::paint(Painter& painter)
 		basePos.y += 20;
 	};
 
+	auto& coreAPI = *api.core;
 	for (auto timeline : timelines) {
 		int64_t engineTime = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Average);
 		int64_t gameTime = coreAPI.getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Average);

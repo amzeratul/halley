@@ -184,5 +184,8 @@ namespace Halley
 		virtual void setGlobalVariable(const String& variable, float value) = 0;
 
 		virtual void setListener(AudioListenerData listener) = 0;
+
+		virtual int64_t getLastTimeElapsed() const = 0;
+		virtual std::optional<AudioSpec> getAudioSpec() const = 0;
 	};
 }

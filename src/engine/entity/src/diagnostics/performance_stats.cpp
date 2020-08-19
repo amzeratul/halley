@@ -3,6 +3,7 @@
 #include "system.h"
 #include "world.h"
 #include "halley/core/api/core_api.h"
+#include "halley/core/api/halley_api.h"
 #include "halley/core/graphics/painter.h"
 #include "halley/core/resources/resources.h"
 #include "halley/support/logger.h"
@@ -11,8 +12,8 @@
 
 using namespace Halley;
 
-PerformanceStatsView::PerformanceStatsView(Resources& resources, CoreAPI& coreAPI)
-	: StatsView(resources, coreAPI)
+PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI& api)
+	: StatsView(resources, api)
 	, bg(Sprite().setImage(resources, "halley/perf_graph.png"))
 	, whitebox(Sprite().setImage(resources, "whitebox.png"))
 {
@@ -63,7 +64,7 @@ void PerformanceStatsView::collectData()
 	for (const auto timeline: timelines) {
 		collectTimelineData(timeline);
 	}
-	vsyncTime = coreAPI.getTime(CoreAPITimer::Vsync, TimeLine::Render, StopwatchRollingAveraging::Mode::Average);
+	vsyncTime = api.core->getTime(CoreAPITimer::Vsync, TimeLine::Render, StopwatchRollingAveraging::Mode::Average);
 
 	auto getTime = [&](TimeLine timeline) -> int
 	{
@@ -84,6 +85,7 @@ void PerformanceStatsView::collectTimelineData(TimeLine timeline)
 	auto& curTop = tl.topSystems;
 	curTop.clear();
 
+	auto& coreAPI = *api.core;
 	const auto engineTime = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Average);
 	const auto gameTime = coreAPI.getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Average);
 	const auto engineTimeMax = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Max);
@@ -131,8 +133,19 @@ void PerformanceStatsView::drawHeader(Painter& painter)
 	const int curFPS = static_cast<int>(lround(1'000'000'000.0 / (totalFrameTime + vsyncTime)));
 	const int maxFPS = static_cast<int>(lround(1'000'000'000.0 / totalFrameTime));
 
+	
 	String str = "Capped: " + formatTime(totalFrameTime + vsyncTime) + " ms [" + toString(curFPS) + " FPS] | Uncapped: " + formatTime(totalFrameTime) + " ms [" + toString(maxFPS) + " FPS].\n"
-		+ toString(painter.getPrevDrawCalls()) + " draw calls, " + toString(painter.getPrevTriangles()) + " triangles, " + toString(painter.getPrevVertices()) + " vertices.\n";
+		+ toString(painter.getPrevDrawCalls()) + " draw calls, " + toString(painter.getPrevTriangles()) + " triangles, " + toString(painter.getPrevVertices()) + " vertices.";
+
+	const auto audioSpec = api.audio->getAudioSpec();
+	if (audioSpec) {
+		const auto audioTime = api.audio->getLastTimeElapsed();
+		const float totalTimePerBuffer = static_cast<float>(audioSpec->bufferSize) / static_cast<float>(audioSpec->sampleRate);
+		const float audioTimeFloat = audioTime / 1'000'000'000.0f;
+		const int percent = lround(audioTimeFloat / totalTimePerBuffer * 100.0f);
+		str += "\nAudio time: " + formatTime(audioTime) + " ms (" + toString(percent) + "%)";
+	}
+	
 	headerText
 		.setText(str)
 		.setPosition(Vector2f(20, 20))
@@ -229,7 +242,7 @@ void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
 
 int64_t PerformanceStatsView::getTimeNs(TimeLine timeline)
 {
-	auto ns = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Latest) + coreAPI.getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Latest);
+	auto ns = api.core->getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Latest) + api.core->getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Latest);
 	if (timeline == TimeLine::Render) {
 		ns -= timer.lastElapsedNanoSeconds();
 	}

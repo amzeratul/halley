@@ -10,6 +10,7 @@
 #include "halley/support/logger.h"
 #include "halley/core/api/audio_api.h"
 #include "audio_variable_table.h"
+#include "halley/time/stopwatch.h"
 
 using namespace Halley;
 
@@ -127,6 +128,9 @@ void AudioEngine::pause()
 
 void AudioEngine::generateBuffer()
 {
+	Stopwatch timer;
+	timer.start();
+	
 	const size_t samplesToRead = alignUp(spec.bufferSize * 48000 / spec.sampleRate, 16);
 	const size_t packsToRead = samplesToRead / 16;
 	const size_t numChannels = spec.numChannels;
@@ -162,6 +166,9 @@ void AudioEngine::generateBuffer()
 	} else {
 		queueAudioFloat(bufferRef.getSampleSpan());
 	}
+
+	timer.pause();
+	lastTimeElapsed = timer.elapsedNanoseconds();
 }
 
 void AudioEngine::queueAudioFloat(gsl::span<const float> data)
@@ -327,6 +334,11 @@ int AudioEngine::getGroupId(const String& group)
 void AudioEngine::setVariable(const String& name, float value)
 {
 	variableTable->set(name, value);
+}
+
+int64_t AudioEngine::getLastTimeElapsed() const
+{
+	return lastTimeElapsed.load();
 }
 
 float AudioEngine::getGroupGain(uint8_t id) const

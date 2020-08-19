@@ -7,14 +7,14 @@
 #include "halley/time/stopwatch.h"
 
 namespace Halley {
-    class CoreAPI;
+	class HalleyAPI;
     class Resources;
     class RenderContext;
     class World;
 
 	class StatsView {
     public:
-        StatsView(Resources& resources, CoreAPI& coreApi);
+        StatsView(Resources& resources, const HalleyAPI& api);
         virtual ~StatsView() = default;
 
         void draw(RenderContext& context);
@@ -26,7 +26,7 @@ namespace Halley {
 
     protected:
         Resources& resources;
-        CoreAPI& coreAPI;
+        const HalleyAPI& api;
         const World* world = nullptr;
         StopwatchRollingAveraging timer;
         bool drawing = false;

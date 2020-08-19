@@ -6,7 +6,7 @@ namespace Halley
 	class WorldStatsView : public StatsView
 	{
 	public:
-		WorldStatsView(Resources& resources, CoreAPI& coreApi);
+		WorldStatsView(Resources& resources, const HalleyAPI& api);
 
 		void paint(Painter& painter) override;
 

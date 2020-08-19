@@ -49,6 +49,8 @@ namespace Halley {
 
     	void setVariable(const String& name, float value);
 
+		int64_t getLastTimeElapsed() const;
+
     private:
 		AudioSpec spec;
 		AudioOutputAPI* out = nullptr;
@@ -76,6 +78,7 @@ namespace Halley {
 		AudioListenerData listener;
 
 		Random rng;
+		std::atomic<int64_t> lastTimeElapsed;
 
 		void mixEmitters(size_t numSamples, size_t channels, gsl::span<AudioBuffer*> buffers);
 	    void removeFinishedEmitters();

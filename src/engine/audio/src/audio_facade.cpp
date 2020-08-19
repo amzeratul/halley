@@ -148,6 +148,16 @@ void AudioFacade::onResume()
 	doStartPlayback(lastDeviceNumber, false);
 }
 
+int64_t AudioFacade::getLastTimeElapsed() const
+{
+	return engine->getLastTimeElapsed();
+}
+
+std::optional<AudioSpec> AudioFacade::getAudioSpec() const
+{
+	return running ? audioSpec : std::optional<AudioSpec>();
+}
+
 AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
 {
 	if (!resources->exists<AudioEvent>(name)) {

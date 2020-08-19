@@ -9,7 +9,7 @@ namespace Halley
 	class PerformanceStatsView : public StatsView
 	{
 	public:
-		PerformanceStatsView(Resources& resources, CoreAPI& coreAPI);
+		PerformanceStatsView(Resources& resources, const HalleyAPI& api);
 
 		void update() override;
 		void paint(Painter& painter) override;

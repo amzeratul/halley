@@ -54,6 +54,9 @@ namespace Halley {
 
 		void onSuspend() override;
 		void onResume() override;
+
+		int64_t getLastTimeElapsed() const override;
+		std::optional<AudioSpec> getAudioSpec() const override;
     	
     private:
 		Resources* resources = nullptr;

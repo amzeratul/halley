@@ -2,16 +2,17 @@
 
 
 #include "halley/core/api/core_api.h"
+#include "halley/core/api/halley_api.h"
 #include "halley/core/graphics/camera.h"
 #include "halley/core/graphics/render_context.h"
 #include "halley/core/graphics/render_target/render_target.h"
 
 using namespace Halley;
 
-StatsView::StatsView(Resources& resources, CoreAPI& coreAPI)
+StatsView::StatsView(Resources& resources, const HalleyAPI& api)
 	: resources(resources)
-	, coreAPI(coreAPI)
-	, timer(coreAPI.isDevMode() ? 300 : 30)
+	, api(api)
+	, timer(api.core->isDevMode() ? 300 : 30)
 {}
 
 void StatsView::draw(RenderContext& context)
