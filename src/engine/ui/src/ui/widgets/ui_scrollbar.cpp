@@ -11,8 +11,10 @@ UIScrollBar::UIScrollBar(String id, UIScrollDirection direction, UIStyle style, 
 	, direction(direction)
 	, alwaysShow(alwaysShow)
 {
-	b0 = std::make_shared<UIButton>("b0", style.getSubStyle(direction == UIScrollDirection::Horizontal ? "left" : "up"));
-	UIWidget::add(b0);
+	if (style.hasSubStyle(direction == UIScrollDirection::Horizontal ? "left" : "up")) {
+		b0 = std::make_shared<UIButton>("b0", style.getSubStyle(direction == UIScrollDirection::Horizontal ? "left" : "up"));
+		UIWidget::add(b0);
+	}
 
 	auto barStyle = style.getSubStyle("bar");
 	bar = std::make_shared<UIImage>(barStyle.getSprite(direction == UIScrollDirection::Horizontal ? "horizontal" : "vertical"));
@@ -21,8 +23,10 @@ UIScrollBar::UIScrollBar(String id, UIScrollDirection direction, UIStyle style, 
 	bar->add(thumb);
 	UIWidget::add(bar, 1);
 
-	b1 = std::make_shared<UIButton>("b1", style.getSubStyle(direction == UIScrollDirection::Horizontal ? "right" : "down"));
-	UIWidget::add(b1);
+	if (style.hasSubStyle(direction == UIScrollDirection::Horizontal ? "right" : "down")) {
+		b1 = std::make_shared<UIButton>("b1", style.getSubStyle(direction == UIScrollDirection::Horizontal ? "right" : "down"));
+		UIWidget::add(b1);
+	}
 
 	setHandle(UIEventType::ButtonClicked, [=] (const UIEvent& event)
 	{
@@ -43,8 +47,12 @@ void UIScrollBar::update(Time t, bool moved)
 {
 	checkActive();
 	thumb->setActive(isEnabled());
-	b0->setEnabled(isEnabled());
-	b1->setEnabled(isEnabled());
+	if (b0) {
+		b0->setEnabled(isEnabled());
+	}
+	if (b1) {
+		b1->setEnabled(isEnabled());
+	}
 
 	if (isEnabled()) {
 		int axis = direction == UIScrollDirection::Horizontal ? 0 : 1;

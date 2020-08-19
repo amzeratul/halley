@@ -172,6 +172,11 @@ bool UIStyleDefinition::hasColour(const String& name) const
 	return hasValue(node, resources, styleName, name, pimpl->colours);
 }
 
+bool UIStyleDefinition::hasSubStyle(const String& name) const
+{
+	return hasValue(node, resources, styleName, name, pimpl->subStyles);
+}
+
 void UIStyleDefinition::reload(const ConfigNode& node)
 {
 	this->node = &node;

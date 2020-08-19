@@ -16,6 +16,11 @@ UIStyle::UIStyle(const String& styleName, std::shared_ptr<UIStyleSheet> styleShe
 	style = styleSheet->getStyle(styleName);
 }
 
+bool UIStyle::hasSubStyle(const String& name) const
+{
+	return style->hasSubStyle(name);
+}
+
 UIStyle UIStyle::getSubStyle(const String& name) const
 {
 	return UIStyle(style->getSubStyle(name));
