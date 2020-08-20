@@ -95,14 +95,25 @@ void UIButton::setLabel(LocalisedString text)
 {
 	if (!label) {
 		const auto& renderer = style.getTextRenderer("label");
-		label = std::make_shared<UILabel>(getId() + "_label", renderer, std::move(text));
+
+		bool existed = false;
+		if (const auto existingLabel = tryGetWidgetAs<UILabel>(getId() + "_label")) {
+			label = existingLabel;
+			label->setText(std::move(text));
+			existed = true;
+		}
+		else {
+			label = std::make_shared<UILabel>(getId() + "_label", renderer, std::move(text));
+		}
 		if (style.hasTextRenderer("hoveredLabel")) {
 			label->setHoverable(style.getTextRenderer("label"), style.getTextRenderer("hoveredLabel"));
 		}
 		if (style.hasTextRenderer("selectedLabel"))	{
 			label->setSelectable(style.getTextRenderer("label"), style.getTextRenderer("selectedLabel"));
 		}
-		add(label, 1, style.getBorder("labelBorder"), UISizerAlignFlags::Centre);
+		if (!existed) {
+			add(label, 1, style.getBorder("labelBorder"), UISizerAlignFlags::Centre);
+		}
 	} else {
 		label->setText(std::move(text));
 	}
