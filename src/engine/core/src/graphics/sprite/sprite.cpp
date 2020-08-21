@@ -318,6 +318,7 @@ Sprite& Sprite::setMaterial(std::unique_ptr<Material> m)
 
 Material& Sprite::getMutableMaterial()
 {
+	Expects(material);
 	if (sharedMaterial) {
 		material = material->clone();
 		sharedMaterial = false;
