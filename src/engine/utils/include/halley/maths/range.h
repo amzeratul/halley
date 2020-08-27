@@ -52,6 +52,11 @@ namespace Halley {
 			return elem >= start && elem < end;
 		}
 
+		constexpr bool contains(const Range& p) const
+		{
+			return (start <= p.end) && (end >= p.end);
+		}
+
 		constexpr T getLength() { return end - start; }
 
 		constexpr bool overlaps(const Range &p) const
