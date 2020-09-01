@@ -176,7 +176,7 @@ Resources& SceneEditor::getEditorResources() const
 void SceneEditor::drawOverlay(Painter& painter, Rect4f view)
 {	
 	const Vector2f drawPos = view.getBottomLeft() + Vector2f(10, -10);
-	String drawStr = Vector2i(mousePos.round()).toString();
+	String drawStr = "[" + toString(camera.getZoom()) + "x] " + Vector2i(mousePos.round()).toString();
 	std::vector<ColourOverride> colours;
 
 	if (selectedEntity) {
