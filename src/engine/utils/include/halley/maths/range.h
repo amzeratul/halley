@@ -102,5 +102,10 @@ namespace Halley {
 		{
 			return start != other.start || end != other.end;
 		}
+
+		Range getUnion(const Range& other) const
+		{
+			return Range(std::min(start, other.start), std::max(end, other.end));
+		}
 	};
 }
