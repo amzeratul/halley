@@ -100,6 +100,7 @@ void Entity::setParent(Entity* newParent, bool propagate)
 		if (parent) {
 			auto& siblings = parent->children;
 			siblings.erase(std::remove(siblings.begin(), siblings.end(), this), siblings.end());
+			parent->propagateChildrenChange();
 			parent = nullptr;
 		}
 
@@ -107,6 +108,7 @@ void Entity::setParent(Entity* newParent, bool propagate)
 		if (newParent) {
 			parent = newParent;
 			parent->children.push_back(this);
+			parent->propagateChildrenChange();
 		}
 
 		if (propagate) {
@@ -144,6 +146,14 @@ void Entity::markHierarchyDirty()
 	}
 }
 
+void Entity::propagateChildrenChange()
+{
+	// Could be recursive, but want to make sure I'm not paying for function calls here
+	for (Entity* cur = this; cur; cur = cur->parent) {
+		cur->childrenRevision++;
+	}
+}
+
 FamilyMaskType Entity::getMask() const
 {
 	return mask;
@@ -166,6 +176,11 @@ void Entity::refresh(MaskStorage& storage, ComponentDeleterTable& table)
 			FamilyMask::setBit(m, i.first);
 		}
 		mask = FamilyMaskType(m, storage);
+
+		// Notify parent
+		if (parent) {
+			parent->propagateChildrenChange();
+		}
 	}
 }
 

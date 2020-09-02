@@ -138,7 +138,8 @@ namespace Halley {
 		bool reloaded : 1;
 		bool fromPrefab : 1;
 		
-		int8_t hierarchyRevision = 0;
+		uint8_t hierarchyRevision = 0;
+		uint8_t childrenRevision = 0;
 		Entity* parent = nullptr;
 		Vector<Entity*> children;
 		
@@ -193,6 +194,7 @@ namespace Halley {
 		void addChild(Entity& child);
 		void detachChildren();
 		void markHierarchyDirty();
+		void propagateChildrenChange();
 
 		void doDestroy(bool updateParenting);
 
@@ -446,10 +448,16 @@ namespace Halley {
 			entity->detachChildren();
 		}
 
-		int8_t getHierarchyRevision() const
+		uint8_t getHierarchyRevision() const
 		{
 			Expects(entity != nullptr);
 			return entity->hierarchyRevision;
+		}
+
+		uint8_t getChildrenRevision() const
+		{
+			Expects(entity != nullptr);
+			return entity->childrenRevision;
 		}
 
 		bool isValid() const
@@ -605,9 +613,14 @@ namespace Halley {
 			return entity->getChildren();
 		}
 
-		int8_t getHierarchyRevision() const
+		uint8_t getHierarchyRevision() const
 		{
 			return entity->hierarchyRevision;
+		}
+
+		uint8_t getChildrenRevision() const
+		{
+			return entity->childrenRevision;
 		}
 
 		size_t getNumComponents() const
