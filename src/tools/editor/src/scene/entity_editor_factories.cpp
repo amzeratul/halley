@@ -349,19 +349,19 @@ public:
 
 			context.setDefaultName(filterName(newVal), filterName(data.getFieldData()["image"].asString("")));
 
-			data.getFieldData()["image"] = ConfigNode(std::move(newVal));
+			data.getFieldData()["image"] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 				
-		container->bindData("image1", fieldData["image1"].asString(""), [&context, data, containerWeak](String newVal)
+		container->bindData("image1", fieldData["image1"].asString(""), [&context, data](String newVal)
 		{
-			data.getFieldData()["image1"] = ConfigNode(std::move(newVal));
+			data.getFieldData()["image1"] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
 		container->bindData("material", fieldData["material"].asString(""), [&context, data](String newVal)
 		{
-			data.getFieldData()["material"] = ConfigNode(std::move(newVal));
+			data.getFieldData()["material"] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
