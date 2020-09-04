@@ -38,6 +38,11 @@ attributes:
     type: vec4
     semantic: TEXCOORD0
 
+  # xy = top-left, zw = bottom-right
+  - name: texCoord1
+    type: vec4
+    semantic: TEXCOORD1
+
   # custom0
   - name: custom0
     type: vec4

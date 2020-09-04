@@ -324,8 +324,10 @@ public:
 
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 		container->getSizer().setColumnProportions({{0, 1}});
-		container->add(context.makeLabel("image"));
+		container->add(context.makeLabel("image0"));
 		container->add(std::make_shared<SelectAssetWidget>("image", context.getUIFactory(), AssetType::Sprite, context.getGameResources()));
+		container->add(context.makeLabel("image1"));
+		container->add(std::make_shared<SelectAssetWidget>("image1", context.getUIFactory(), AssetType::Sprite, context.getGameResources()));
 		container->add(context.makeLabel("material"));
 		container->add(std::make_shared<SelectAssetWidget>("material", context.getUIFactory(), AssetType::MaterialDefinition, context.getGameResources()));
 		container->add(context.makeLabel("colour"));
@@ -348,6 +350,12 @@ public:
 			context.setDefaultName(filterName(newVal), filterName(data.getFieldData()["image"].asString("")));
 
 			data.getFieldData()["image"] = ConfigNode(std::move(newVal));
+			context.onEntityUpdated();
+		});
+				
+		container->bindData("image1", fieldData["image1"].asString(""), [&context, data, containerWeak](String newVal)
+		{
+			data.getFieldData()["image1"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
@@ -776,6 +784,8 @@ public:
 			return AssetType::AudioClip;
 		} else if (strippedTypeName == "AudioEvent") {
 			return AssetType::AudioEvent;
+		} else if (strippedTypeName == "SpriteResource") {
+			return AssetType::Sprite;
 		} else {
 			Logger::logWarning("Unimplemented resource type on ComponentEditorResourceReferenceFieldFactory: " + strippedTypeName);
 		}

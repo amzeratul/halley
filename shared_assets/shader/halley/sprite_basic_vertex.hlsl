@@ -25,7 +25,9 @@ float4 getVertexPosition(float2 position, float2 pivot, float2 size, float2 vert
 
 void basicVertex(VIn input, out VOut output) {
     output.texCoord0 = getTexCoord(input.texCoord0, input.vertPos.zw, input.textureRotation);
+    output.texCoord1 = getTexCoord(input.texCoord1, input.vertPos.zw, input.textureRotation);
     output.pixelTexCoord0 = output.texCoord0 * input.size;
+    output.pixelTexCoord1 = output.texCoord1 * input.size;
     output.custom0 = input.custom0;
     output.custom1 = input.custom1;
     output.vertPos = input.vertPos.xy;

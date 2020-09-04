@@ -7,6 +7,7 @@ struct VIn {
     float2 scale : SCALE;
     float4 colour : COLOUR;
     float4 texCoord0 : TEXCOORD0;
+    float4 texCoord1 : TEXCOORD1;
     float4 custom0 : CUSTOM0;
     float4 custom1 : CUSTOM1;
     float rotation : ROTATION;
@@ -17,7 +18,9 @@ struct VIn {
 struct VOut {
     float4 position : SV_POSITION;
     float2 texCoord0 : TEXCOORD0;
-    float2 pixelTexCoord0 : TEXCOORD1;
+    float2 pixelTexCoord0 : PIXELTEXCOORD0;
+    float2 texCoord1 : TEXCOORD1;
+    float2 pixelTexCoord1 : PIXELTEXCOORD1;
     float4 custom0: CUSTOM0;
     float4 custom1 : CUSTOM1;
     float4 colour : COLOR0;

@@ -275,17 +275,6 @@ Sprite& Sprite::setSize(Vector2f v)
 	return *this;
 }
 
-Sprite& Sprite::setTexRect(Rect4f v)
-{
-	vertexAttrib.texRect = v;
-	return *this;
-}
-
-Rect4f Sprite::getTexRect() const
-{
-	return vertexAttrib.texRect;
-}
-
 Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 {
 	if (materialName == "") {
@@ -329,7 +318,7 @@ Material& Sprite::getMutableMaterial()
 Sprite& Sprite::setImageData(const Texture& image)
 {
 	setSize(Vector2f(image.getSize()));
-	setTexRect(Rect4f(0, 0, 1, 1));
+	setTexRect0(Rect4f(0, 0, 1, 1));
 	return *this;
 }
 
@@ -404,7 +393,7 @@ Sprite& Sprite::setSprite(const SpriteSheetEntry& entry, bool applyPivot)
 		Expects(entry.pivot.isValid());
 		vertexAttrib.pivot = entry.pivot;
 	}
-	vertexAttrib.texRect = entry.coords;
+	vertexAttrib.texRect0 = entry.coords;
 	vertexAttrib.textureRotation = entry.rotated ? 1.0f : 0.0f;
 	return *this;
 }
@@ -449,7 +438,7 @@ bool Sprite::isPointVisible(Vector2f localPoint) const
 		const auto tex = material->getTexture(0);
 		if (tex) {
 			const auto rectPos = localPoint + getAbsolutePivot();
-			const auto texRect = getTexRect();
+			const auto texRect = getTexRect0();
 			const auto texelPos = (rectPos / size) * texRect.getSize() + texRect.getTopLeft();
 			const auto px = tex->getPixel(texelPos);
 			if (px) {
@@ -553,6 +542,11 @@ Sprite ConfigNodeSerializer<Sprite>::deserialize(ConfigNodeSerializationContext&
 
 	if (node.hasKey("image")) {
 		sprite.setImage(*context.resources, node["image"].asString(), node["material"].asString(""));
+	}
+	if (node.hasKey("image1")) {
+		const auto image1 = context.resources->get<SpriteResource>(node["image1"].asString());
+		sprite.setTexRect1(image1->getSprite().coords);
+		sprite.getMutableMaterial().set("tex1", image1->getSpriteSheet()->getTexture());
 	}
 	if (node.hasKey("pivot")) {
 		sprite.setAbsolutePivot(node["pivot"].asVector2f());
