@@ -26,7 +26,14 @@ ComponentDataRetriever ComponentDataRetriever::getSubIndex(size_t index) const
 	auto r = retriever;
 	return ComponentDataRetriever(componentData, name + "[" + toString(index) + "]", [retriever = std::move(r), index] () -> ConfigNode&
 	{
-		return retriever()[index];
+		ConfigNode& node = retriever();
+		if (node.getType() == ConfigNodeType::Sequence) {
+			return node[index];
+		} else if (index == 0 && node.getType() != ConfigNodeType::Map) {
+			return node;
+		} else {
+			throw Exception("ConfigNode is not a sequence", HalleyExceptions::Entity);
+		}
 	});
 }
 

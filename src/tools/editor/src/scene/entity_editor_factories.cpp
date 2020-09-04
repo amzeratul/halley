@@ -545,7 +545,14 @@ public:
 		const auto fieldType = pars.typeParameters.at(0);
 		const auto data = pars.data;
 
-		data.getFieldData().ensureType(ConfigNodeType::Sequence);
+		auto& fieldData = data.getFieldData();
+		if (fieldData.getType() != ConfigNodeType::Sequence) {
+			if (fieldData.getType() == ConfigNodeType::Map) {
+				fieldData.ensureType(ConfigNodeType::Sequence);
+			} else {
+				fieldData = ConfigNode::SequenceType({ std::move(fieldData) });
+			}
+		}
 		
 		const auto containerPtr = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Vertical));
 		const auto containerWeak = std::weak_ptr<UIWidget>(containerPtr);
@@ -553,8 +560,9 @@ public:
 		auto buildList = [=, &context] () {
 			const auto container = containerWeak.lock();
 			container->clear();
-			
+
 			const size_t nElements = data.getFieldData().asSequence().size();
+			
 			for (size_t i = 0; i < nElements; ++i) {
 				auto rowSizer = std::make_shared<UISizer>();
 
@@ -798,16 +806,24 @@ public:
 		const auto fieldType = pars.typeParameters.at(0);
 		const auto data = pars.data;
 		auto& fieldData = data.getFieldData();
-		fieldData.ensureType(ConfigNodeType::Map);
+		if (fieldData.getType() != ConfigNodeType::String) {
+			fieldData.ensureType(ConfigNodeType::Map);
+		}
+		auto& assetName = fieldData.getType() == ConfigNodeType::String ? fieldData : fieldData["asset"];
 		
 		const std::optional<AssetType> type = getType(fieldType);
 
 		std::shared_ptr<IUIElement> result;
 		if (type) {
 			auto widget = std::make_shared<SelectAssetWidget>("asset", context.getUIFactory(), type.value(), context.getGameResources());
-			widget->bindData("asset", fieldData["asset"].asString(""), [&context, data](String newVal)
+			widget->bindData("asset", assetName.asString(""), [&context, data](String newVal)
 			{
-				data.getFieldData()["asset"] = ConfigNode(std::move(newVal));
+				auto& fieldData = data.getFieldData();
+				if (fieldData.getType() == ConfigNodeType::String) {
+					fieldData = ConfigNode(std::move(newVal)); 
+				} else {
+					fieldData["asset"] = ConfigNode(std::move(newVal));
+				}
 				context.onEntityUpdated();
 			});
 			result = widget;
