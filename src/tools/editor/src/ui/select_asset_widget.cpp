@@ -24,6 +24,7 @@ void SelectAssetWidget::setValue(const String& newValue)
 	if (newValue != value) {
 		value = newValue;
 		input->setText(getDisplayName());
+		input->setToolTip(LocalisedString::fromUserString(value));
 		notifyDataBind(value);
 		sendEvent(UIEvent(UIEventType::TextChanged, getId(), value));
 	}

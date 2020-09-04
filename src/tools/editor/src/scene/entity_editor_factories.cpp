@@ -570,6 +570,7 @@ public:
 
 				auto deleteButton = std::make_shared<UIButton>("delete" + toString(i), context.getUIFactory().getStyle("buttonThin"), LocalisedString::fromHardcodedString("-"));
 				deleteButton->setMinSize(Vector2f(22, 22));
+				deleteButton->setToolTip(LocalisedString::fromHardcodedString("Remove entry"));
 				rowSizer->add(deleteButton);
 
 				container->add(rowSizer);
@@ -577,6 +578,7 @@ public:
 			
 			auto addButton = std::make_shared<UIButton>("add", context.getUIFactory().getStyle("buttonThin"), LocalisedString::fromHardcodedString("+"));
 			addButton->setMinSize(Vector2f(22, 22));
+			addButton->setToolTip(LocalisedString::fromHardcodedString("Add new entry on " + pars.data.getName()));
 			container->add(addButton);
 		};
 		buildList();
