@@ -8,7 +8,7 @@ using namespace Halley;
 
 SpritePainterEntry::SpritePainterEntry(gsl::span<const Sprite> sprites, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 	: ptr(sprites.empty() ? nullptr : &sprites[0])
-	, count(sprites.size())
+	, count(uint32_t(sprites.size()))
 	, type(SpritePainterEntryType::SpriteRef)
 	, layer(layer)
 	, mask(mask)
@@ -18,7 +18,7 @@ SpritePainterEntry::SpritePainterEntry(gsl::span<const Sprite> sprites, int mask
 
 SpritePainterEntry::SpritePainterEntry(gsl::span<const TextRenderer> texts, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 	: ptr(texts.empty() ? nullptr : &texts[0])
-	, count(texts.size())
+	, count(uint32_t(texts.size()))
 	, type(SpritePainterEntryType::TextRef)
 	, layer(layer)
 	, mask(mask)
@@ -28,7 +28,7 @@ SpritePainterEntry::SpritePainterEntry(gsl::span<const TextRenderer> texts, int 
 }
 
 SpritePainterEntry::SpritePainterEntry(SpritePainterEntryType type, size_t spriteIdx, size_t count, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
-	: count(count)
+	: count(uint32_t(count))
 	, index(static_cast<int>(spriteIdx))
 	, type(type)
 	, layer(layer)

@@ -37,7 +37,7 @@ void SceneEditorTabs::load(AssetType assetType, const String& name)
 		window->loadPrefab(name);
 	}
 	pages->addPage()->add(window, 1);
-	tabs->setSelectedOption(tabs->getCount() - 1);
+	tabs->setSelectedOption(int(tabs->getCount()) - 1);
 }
 
 void SceneEditorTabs::update(Time t, bool moved)
