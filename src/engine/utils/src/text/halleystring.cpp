@@ -100,6 +100,14 @@ String::String(wchar_t character)
 	*this = String(tmp);
 }
 
+String::String(char32_t utf32Character)
+{
+	char32_t tmp[2];
+	tmp[0] = utf32Character;
+	tmp[1] = 0;
+	*this = String(StringUTF32(tmp, 2));
+}
+
 
 String::String(int character)
 {

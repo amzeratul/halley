@@ -53,6 +53,7 @@ namespace Halley {
 		explicit String(const StringUTF32 &utf32);
 		explicit String(char character);
 		explicit String(wchar_t character);
+		explicit String(char32_t utf32Character);
 		explicit String(int character);
 		explicit String(float number);
 		explicit String(double number);
