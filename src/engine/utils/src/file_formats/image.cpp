@@ -359,6 +359,33 @@ inline constexpr static uint32_t lightenBlend(uint32_t src, uint32_t dst, uint32
 	}
 }
 
+inline constexpr static uint32_t addBlend(uint32_t src, uint32_t dst, uint32_t opacity)
+{
+	const uint32_t sr = src & 0xFF;
+	const uint32_t sg = (src >> 8) & 0xFF;
+	const uint32_t sb = (src >> 16) & 0xFF;
+	const uint32_t sa = (src >> 24) & 0xFF;
+	const uint32_t srcAlpha = (sa * opacity) / 255;
+
+	if (srcAlpha == 0) {
+		return dst;
+	} else {
+		const uint32_t dr = dst & 0xFF;
+		const uint32_t dg = (dst >> 8) & 0xFF;
+		const uint32_t db = (dst >> 16) & 0xFF;
+		const uint32_t da = (dst >> 24) & 0xFF;
+
+		const uint32_t dstAlpha = da;
+		const uint32_t totalAlpha = srcAlpha + dstAlpha;
+
+		const uint32_t r = std::min((sr * srcAlpha + dr * dstAlpha) / totalAlpha, 255u);
+		const uint32_t g = std::min((sg * srcAlpha + dg * dstAlpha) / totalAlpha, 255u);
+		const uint32_t b = std::min((sb * srcAlpha + db * dstAlpha) / totalAlpha, 255u);
+		const uint32_t a = std::max(srcAlpha, dstAlpha);
+
+		return r | (g << 8) | (b << 16) | (a << 24);
+	}
+}
 template<typename F>
 void blendImages(F f, const Image& src, Image& dst, Vector2i pos, uint8_t opacity)
 {
@@ -386,6 +413,11 @@ void blendImages(F f, const Image& src, Image& dst, Vector2i pos, uint8_t opacit
 void Image::drawImageAlpha(const Image& src, Vector2i pos, uint8_t opacity)
 {
 	blendImages(alphaBlend, src, *this, pos, opacity);
+}
+
+void Image::drawImageAdd(const Image& src, Vector2i pos, uint8_t opacity)
+{
+	blendImages(addBlend, src, *this, pos, opacity);
 }
 
 void Image::drawImageLighten(const Image& src, Vector2i pos, uint8_t opacity)

@@ -178,6 +178,8 @@ void AsepriteCel::drawAt(Image& dstImage, uint8_t opacity, AsepriteBlendMode ble
 		dstImage.drawImageAlpha(*imgData, pos, opacity);
 	} else if (blendMode == AsepriteBlendMode::Lighten) {
 		dstImage.drawImageLighten(*imgData, pos, opacity);
+	} else if (blendMode == AsepriteBlendMode::Addition) {
+		dstImage.drawImageAdd(*imgData, pos, opacity);
 	} else {
 		throw Exception("Unsupported blending mode: " + toString(int(blendMode)), HalleyExceptions::Tools);
 	}
