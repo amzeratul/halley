@@ -135,7 +135,7 @@ void Sprite::drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painte
 
 Rect4f Sprite::getLocalAABB() const
 {
-	const Vector2f sz = getSize();
+	const Vector2f sz = getScaledSize() * Vector2f(flip ? -1.0f : 1.0f, 1.0f);
 	const Vector2f pivot = getPivot();
 	return Rect4f(-sz * pivot, sz * (Vector2f(1, 1) - pivot));
 }
