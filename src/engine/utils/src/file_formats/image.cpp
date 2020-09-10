@@ -376,11 +376,10 @@ inline constexpr static uint32_t addBlend(uint32_t src, uint32_t dst, uint32_t o
 		const uint32_t da = (dst >> 24) & 0xFF;
 
 		const uint32_t dstAlpha = da;
-		const uint32_t totalAlpha = srcAlpha + dstAlpha;
 
-		const uint32_t r = std::min((sr * srcAlpha + dr * dstAlpha) / totalAlpha, 255u);
-		const uint32_t g = std::min((sg * srcAlpha + dg * dstAlpha) / totalAlpha, 255u);
-		const uint32_t b = std::min((sb * srcAlpha + db * dstAlpha) / totalAlpha, 255u);
+		const uint32_t r = std::min((sr * srcAlpha + dr * dstAlpha) / dstAlpha, 255u);
+		const uint32_t g = std::min((sg * srcAlpha + dg * dstAlpha) / dstAlpha, 255u);
+		const uint32_t b = std::min((sb * srcAlpha + db * dstAlpha) / dstAlpha, 255u);
 		const uint32_t a = std::max(srcAlpha, dstAlpha);
 
 		return r | (g << 8) | (b << 16) | (a << 24);
