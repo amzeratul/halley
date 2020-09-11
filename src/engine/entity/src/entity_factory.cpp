@@ -88,6 +88,20 @@ EntityRef EntityFactory::createEntityTree(const ConfigNode& node, EntityScene* s
 	return entity;
 }
 
+void EntityFactory::rebuildContext(EntityRef& entity, const ConfigNode& node)
+{
+	const auto uuid = getUUID(node["uuid"]); // Use UUID in parent, not in prefab
+	context.entityContext->uuids[uuid] = entity.getEntityId();
+	if (node["children"].getType() == ConfigNodeType::Sequence) {
+		for (const auto& childNode : node["children"].asSequence()) {
+			auto child = world.findEntity(UUID(childNode["uuid"].asBytes()));
+			if (child) {
+				rebuildContext(*child, childNode);
+			}
+		}
+	}
+}
+
 EntityRef EntityFactory::createEntity(std::optional<EntityRef> parent, const ConfigNode& treeNode, bool populate, EntityScene* curScene)
 {
 	const bool isPrefab = treeNode.hasKey("prefab");
@@ -203,9 +217,12 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, 
 	}
 }
 
-void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node)
+void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node, bool doRebuildContext)
 {
 	startContext();
+	if (doRebuildContext) {
+		rebuildContext(entity, node);
+	}
 	doUpdateEntityTree(entity, node, true);
 }
 

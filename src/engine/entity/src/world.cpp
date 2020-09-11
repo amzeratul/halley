@@ -243,13 +243,22 @@ Entity* World::tryGetRawEntity(EntityId id)
 	return *v;
 }
 
-std::optional<EntityRef> World::findEntity(const UUID& id)
+std::optional<EntityRef> World::findEntity(const UUID& id, bool includePending)
 {
 	for (auto& e: entities) {
 		if (e->getUUID() == id) {
 			return EntityRef(*e, *this);
 		}
 	}
+
+	if (includePending) {
+		for (auto& e : entitiesPendingCreation) {
+			if (e->getUUID() == id) {
+				return EntityRef(*e, *this);
+			}
+		}
+	}
+	
 	return std::optional<EntityRef>();
 }
 
