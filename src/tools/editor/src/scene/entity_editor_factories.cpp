@@ -549,7 +549,11 @@ public:
 		if (fieldData.getType() != ConfigNodeType::Sequence) {
 			if (fieldData.getType() == ConfigNodeType::Map) {
 				fieldData.ensureType(ConfigNodeType::Sequence);
-			} else {
+			}
+			else if (fieldData.getType() == ConfigNodeType::Undefined) {
+				fieldData = ConfigNode::SequenceType();
+			}
+			else {
 				fieldData = ConfigNode::SequenceType({ std::move(fieldData) });
 			}
 		}
