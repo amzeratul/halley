@@ -26,6 +26,8 @@
 #include "halley/maths/colour.h"
 #include <halley/core/graphics/blend.h>
 
+#include "halley/core/graphics/material/material_definition.h"
+
 namespace Halley {
 
 	class Texture;
@@ -39,6 +41,7 @@ namespace Halley {
 		GLUtils& operator=(const GLUtils&) = delete;
 
 		void setBlendType(BlendType type);
+		void setDepthStencil(const MaterialDepthStencil& depthStencil);
 
 		void bindTexture(int id);
 		void setTextureUnit(int n);

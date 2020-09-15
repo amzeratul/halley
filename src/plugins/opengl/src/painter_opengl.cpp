@@ -67,7 +67,8 @@ void PainterOpenGL::clear(Colour colour)
 {
 	glCheckError();
 	glClearColor(colour.r, colour.g, colour.b, colour.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearDepth(1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glCheckError();
 }
 
@@ -77,6 +78,7 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 
 	// Set blend and shader
 	glUtils->setBlendType(pass.getBlend());
+	glUtils->setDepthStencil(pass.getDepthStencil());
 	ShaderOpenGL& shader = static_cast<ShaderOpenGL&>(pass.getShader());
 	shader.bind();
 

@@ -214,6 +214,42 @@ void GLUtils::setBlendType(BlendType type)
 	}
 }
 
+static GLenum getDepthComparison(DepthStencilComparisonFunction func)
+{
+	switch (func) {
+	case DepthStencilComparisonFunction::Always:
+		return GL_ALWAYS;
+	case DepthStencilComparisonFunction::Never:
+		return GL_NEVER;
+	case DepthStencilComparisonFunction::Less:
+		return GL_LESS;
+	case DepthStencilComparisonFunction::LessEqual:
+		return GL_LEQUAL;
+	case DepthStencilComparisonFunction::Greater:
+		return GL_GREATER;
+	case DepthStencilComparisonFunction::GreaterEqual:
+		return GL_GEQUAL;
+	case DepthStencilComparisonFunction::Equal:
+		return GL_EQUAL;
+	case DepthStencilComparisonFunction::NotEqual:
+		return GL_NOTEQUAL;
+	}
+	return GL_ALWAYS;
+}
+
+void GLUtils::setDepthStencil(const MaterialDepthStencil& depthStencil)
+{
+	return;
+	if (depthStencil.isDepthTestEnabled()) {
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(getDepthComparison(depthStencil.getDepthComparisonFunction()));
+		glDepthRange(0, 1);
+	} else {
+		glDisable(GL_DEPTH_TEST);
+	}
+	glDepthMask(depthStencil.isDepthWriteEnabled());
+}
+
 void GLUtils::setTextureUnit(int n)
 {
 	Expects(n >= 0);
