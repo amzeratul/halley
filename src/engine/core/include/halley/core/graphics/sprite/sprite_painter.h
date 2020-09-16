@@ -24,9 +24,9 @@ namespace Halley
 	class SpritePainterEntry
 	{
 	public:
-		SpritePainterEntry(gsl::span<const Sprite> sprites, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip);
-		SpritePainterEntry(gsl::span<const TextRenderer> texts, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip);
-		SpritePainterEntry(SpritePainterEntryType type, size_t spriteIdx, size_t count, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip);
+		SpritePainterEntry(gsl::span<const Sprite> sprites, int mask, int layer, float tieBreaker, size_t insertOrder, std::optional<Rect4f> clip);
+		SpritePainterEntry(gsl::span<const TextRenderer> texts, int mask, int layer, float tieBreaker, size_t insertOrder, std::optional<Rect4f> clip);
+		SpritePainterEntry(SpritePainterEntryType type, size_t spriteIdx, size_t count, int mask, int layer, float tieBreaker, size_t insertOrder, std::optional<Rect4f> clip);
 
 		bool operator<(const SpritePainterEntry& o) const;
 		SpritePainterEntryType getType() const;
@@ -45,6 +45,7 @@ namespace Halley
 		int layer;
 		int mask;
 		float tieBreaker;
+		size_t insertOrder;
 		std::optional<Rect4f> clip;
 	};
 
