@@ -25,6 +25,7 @@ struct VOut {
     float4 custom1 : CUSTOM1;
     float4 colour : COLOR0;
     float4 colourAdd : COLOR1;
+    float4 colourNoPremultiply : COLOR2;
     float2 vertPos : POSITION1;
     float2 pixelPos : POSITION2;
     float2 pivot : POSITION3;

@@ -13,12 +13,13 @@ namespace Halley
 		Add,
 		Multiply,
 		Darken,
-		Invert
+		Invert,
+		AddPremultiplied
 	};
 
 	template <>
 	struct EnumNames<BlendType> {
-		constexpr std::array<const char*, 8> operator()() const {
+		constexpr std::array<const char*, 9> operator()() const {
 			return{{
 				"Undefined",
 				"Opaque",
@@ -27,7 +28,8 @@ namespace Halley
 				"Add",
 				"Multiply",
 				"Darken",
-				"Invert"
+				"Invert",
+				"AddPremultiplied"
 			}};
 		}
 	};
