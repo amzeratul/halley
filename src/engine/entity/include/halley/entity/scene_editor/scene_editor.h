@@ -17,7 +17,7 @@ namespace Halley {
     	
 		void init(SceneEditorContext& context) final override;
 		void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState) override;
-		void render(RenderContext& rc) final override;
+		void render(RenderContext& rc) override;
 
 		bool isReadyToCreateWorld() const final override;
 		void createWorld() final override;
@@ -25,7 +25,7 @@ namespace Halley {
 		World& getWorld() const override;
 		void spawnPending() override;
 
-		EntityId getCameraId() override;
+		const std::vector<EntityId>& getCameraIds() const override;
 		void dragCamera(Vector2f amount) override;
 		void changeZoom(int amount, Vector2f cursorPosRelToCamera) override;
 
@@ -62,7 +62,7 @@ namespace Halley {
 
     	virtual void drawOverlay(Painter& painter, Rect4f view);
 
-    	virtual EntityId createCamera();
+    	virtual std::vector<EntityId> createCamera();
 
     	virtual void onEntitySelected(std::optional<EntityRef> entity);
 
@@ -73,7 +73,7 @@ namespace Halley {
 
     	std::unique_ptr<World> world;
 
-    	EntityId cameraEntityId;
+		std::vector<EntityId> cameraEntityIds;
     	Camera camera;
     	
 		std::optional<EntityRef> selectedEntity;

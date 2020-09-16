@@ -165,12 +165,12 @@ void SceneEditorWindow::unloadScene()
 	if (gameBridge->isLoaded()) {
 		auto& interface = gameBridge->getInterface();
 		auto& world = interface.getWorld();
-		const auto cameraId = interface.getCameraId();
+		const auto& cameraIds = interface.getCameraIds();
 		for (auto& e: world.getTopLevelEntities()) {
-			if (e.getEntityId() != cameraId) {
+			if (std::find(cameraIds.begin(), cameraIds.end(), e.getEntityId()) == cameraIds.end()) {
 				world.destroyEntity(e);
 			}
-		}		
+		}
 		world.spawnPending();
 	}
 	entityFactory.reset();

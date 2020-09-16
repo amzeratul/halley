@@ -115,7 +115,7 @@ namespace Halley {
         virtual World& getWorld() const = 0;
         virtual void spawnPending() = 0;
 
-        virtual EntityId getCameraId() = 0;
+        virtual const std::vector<EntityId>& getCameraIds() const = 0;
         virtual void dragCamera(Vector2f amount) = 0;
         virtual void changeZoom(int amount, Vector2f cursorPosRelToCamera) = 0;
 

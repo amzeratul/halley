@@ -49,7 +49,7 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	world->step(TimeLine::VariableUpdate, t);
 
 	// Update camera
-	auto cameraEntity = world->getEntity(cameraEntityId);
+	auto cameraEntity = world->getEntity(cameraEntityIds.at(0));
 	auto& cameraComponent = cameraEntity.getComponent<CameraComponent>();
 	auto& transformComponent = cameraEntity.getComponent<Transform2DComponent>();
 	camera.setPosition(transformComponent.getGlobalPosition()).setZoom(cameraComponent.zoom);
@@ -109,7 +109,7 @@ void SceneEditor::createWorld()
 	world = doCreateWorld();
 	createServices(*world);
 	createEntities(*world);
-	cameraEntityId = createCamera();
+	cameraEntityIds = createCamera();
 
 	onInit();
 }
@@ -194,26 +194,28 @@ void SceneEditor::drawOverlay(Painter& painter, Rect4f view)
 		.draw(painter);
 }
 
-EntityId SceneEditor::createCamera()
+std::vector<EntityId> SceneEditor::createCamera()
 {
-	return getWorld().createEntity("editorCamera")
-		.addComponent(Transform2DComponent(Vector2f(0, 0)))
-		.addComponent(CameraComponent(1.0f, Colour4f(0.2f, 0.2f, 0.2f), 0x7FFFFFFF, 0))
-		.getEntityId();
+	return std::vector<EntityId>({
+		getWorld().createEntity("editorCamera")
+			.addComponent(Transform2DComponent(Vector2f(0, 0)))
+			.addComponent(CameraComponent(1.0f, Colour4f(0.2f, 0.2f, 0.2f), 0x7FFFFFFF, 0))
+			.getEntityId()
+	});
 }
 
 void SceneEditor::onEntitySelected(std::optional<EntityRef> entity)
 {
 }
 
-EntityId SceneEditor::getCameraId()
+const std::vector<EntityId>& SceneEditor::getCameraIds() const
 {
-	return cameraEntityId;
+	return cameraEntityIds;
 }
 
 void SceneEditor::dragCamera(Vector2f amount)
 {
-	auto camera = getWorld().getEntity(cameraEntityId);
+	auto camera = getWorld().getEntity(cameraEntityIds.at(0));
 	const float zoom = camera.getComponent<CameraComponent>().zoom;
 	auto& transform = camera.getComponent<Transform2DComponent>();
 	transform.setGlobalPosition(roundPosition(transform.getGlobalPosition() + amount / zoom));
@@ -221,7 +223,7 @@ void SceneEditor::dragCamera(Vector2f amount)
 
 void SceneEditor::moveCameraTo2D(Vector2f pos)
 {
-	auto camera = getWorld().getEntity(cameraEntityId);
+	auto camera = getWorld().getEntity(cameraEntityIds.at(0));
 	auto& transform = camera.getComponent<Transform2DComponent>();
 	transform.setGlobalPosition(roundPosition(pos));
 }
@@ -232,7 +234,7 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 		return;
 	}
 
-	auto cameraEntity = getWorld().getEntity(cameraEntityId);
+	auto cameraEntity = getWorld().getEntity(cameraEntityIds.at(0));
 	auto& camera = cameraEntity.getComponent<CameraComponent>();
 	auto& transform = cameraEntity.getComponent<Transform2DComponent>();
 	const float prevZoom = camera.zoom;
