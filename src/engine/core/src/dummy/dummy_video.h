@@ -54,7 +54,7 @@ namespace Halley {
 	{
 	public:
 		explicit DummyPainter(Resources& resources);
-		void clear(Colour colour) override;
+		void clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint32_t> stencil) override;
 		void setMaterialPass(const Material& material, int pass) override;
 		void doStartRender() override;
 		void doEndRender() override;

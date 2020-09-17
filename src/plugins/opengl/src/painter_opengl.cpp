@@ -52,7 +52,7 @@ void PainterOpenGL::doStartRender()
 	glBindVertexArray(vao);
 #endif
 
-	clear(Colour(0, 0, 0, 1.0f));
+	clear(Colour(0, 0, 0, 1.0f), 1.0f, 0);
 }
 
 void PainterOpenGL::doEndRender()
@@ -63,12 +63,26 @@ void PainterOpenGL::doEndRender()
 	glCheckError();
 }
 
-void PainterOpenGL::clear(Colour colour)
+void PainterOpenGL::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint32_t> stencil)
 {
 	glCheckError();
-	glClearColor(colour.r, colour.g, colour.b, colour.a);
-	glClearDepth(1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	const auto col = colour.value_or(Colour());
+	glClearColor(col.r, col.g, col.b, col.a);
+	glClearDepth(depth.value_or(1.0f));
+	glClearStencil(stencil.value_or(0));
+
+	GLbitfield mask = 0;
+	if (colour) {
+		mask |= GL_COLOR_BUFFER_BIT;
+	}
+	if (depth) {
+		mask |= GL_DEPTH_BUFFER_BIT;
+	}
+	if (stencil) {
+		mask |= GL_STENCIL_BUFFER_BIT;
+	}
+	
+	glClear(mask);
 	glCheckError();
 }
 

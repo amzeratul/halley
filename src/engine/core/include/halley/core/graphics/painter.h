@@ -41,7 +41,7 @@ namespace Halley
 		Camera& getCurrentCamera() const { return *camera; }
 		Rect4f getWorldViewAABB() const;
 
-		virtual void clear(Colour colour) = 0;
+		virtual void clear(std::optional<Colour> colour, std::optional<float> depth = 1.0f, std::optional<uint32_t> stencil = 0) = 0;
 		virtual void setMaterialPass(const Material& material, int pass) = 0;
 		virtual void setMaterialData(const Material& material) = 0;
 

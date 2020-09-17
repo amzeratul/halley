@@ -38,15 +38,28 @@ void DX11Painter::doEndRender()
 {
 }
 
-void DX11Painter::clear(Colour colour)
+void DX11Painter::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint32_t> stencil)
 {
-	const float col[] = { colour.r, colour.g, colour.b, colour.a };
 	auto& renderTarget = dynamic_cast<IDX11RenderTarget&>(getActiveRenderTarget());
-	video.getDeviceContext().ClearRenderTargetView(renderTarget.getRenderTargetView(), col);
+	
+	if (colour) {
+		const auto& c = colour.value();
+		const float col[] = { c.r, c.g, c.b, c.a };
+		video.getDeviceContext().ClearRenderTargetView(renderTarget.getRenderTargetView(), col);
+	}
 
-	auto depthStencilView = renderTarget.getDepthStencilView();
-	if (depthStencilView) {
-		video.getDeviceContext().ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+	if (depth || stencil) {
+		auto* depthStencilView = renderTarget.getDepthStencilView();
+		if (depthStencilView) {
+			UINT flags = 0;
+			if (depth) {
+				flags |= D3D11_CLEAR_DEPTH;
+			}
+			if (stencil) {
+				flags |= D3D11_CLEAR_STENCIL;
+			}
+			video.getDeviceContext().ClearDepthStencilView(depthStencilView, flags, depth.value_or(1.0f), stencil.value_or(0));
+		}
 	}
 }
 

@@ -42,7 +42,9 @@ component:
   - zoom:
       type: float
       defaultValue: 1
-  - clear: 'std::optional<Halley::Colour4f>'
+  - clearColour: 'std::optional<Halley::Colour4f>'
+  - clearStencil: 'std::optional<int>'
+  - clearDepth: 'std::optional<float>'
   - mask:
       type: int
       defaultValue: 1

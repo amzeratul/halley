@@ -104,7 +104,7 @@ DummyPainter::DummyPainter(Resources& resources)
 	: Painter(resources)
 {}
 
-void DummyPainter::clear(Colour colour) {}
+void DummyPainter::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint32_t> stencil) {}
 
 void DummyPainter::setMaterialPass(const Material&, int) {}
 
