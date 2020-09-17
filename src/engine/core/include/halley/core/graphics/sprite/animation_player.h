@@ -33,6 +33,8 @@ namespace Halley
 		AnimationPlayer& setMaterialOverride(std::shared_ptr<Material> material);
 		std::shared_ptr<Material> getMaterialOverride() const;
 		std::shared_ptr<const Material> getMaterial() const;
+		void setApplyMaterial(bool apply);
+		bool isApplyingMaterial() const;
 
 		bool isPlaying() const;
 		String getCurrentSequenceName() const;
@@ -96,6 +98,7 @@ namespace Halley
 		std::optional<bool> visibleOverride;
 
 		bool applyPivot = true;
+		bool applyMaterial = true;
 
 		mutable bool hasUpdate = true;
 	};

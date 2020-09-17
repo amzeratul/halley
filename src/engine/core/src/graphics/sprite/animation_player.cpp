@@ -171,10 +171,12 @@ void AnimationPlayer::update(Time time)
 void AnimationPlayer::updateSprite(Sprite& sprite) const
 {
 	if (animation && hasUpdate) {
-		if (materialOverride) {
-			sprite.setMaterial(materialOverride, true);
-		} else {
-			sprite.setMaterial(animation->getMaterial(), true);
+		if (applyMaterial) {
+			if (materialOverride) {
+				sprite.setMaterial(materialOverride, true);
+			} else {
+				sprite.setMaterial(animation->getMaterial(), true);
+			}
 		}
 		
 		sprite.setSprite(*spriteData, false);
@@ -212,6 +214,16 @@ std::shared_ptr<Material> AnimationPlayer::getMaterialOverride() const
 std::shared_ptr<const Material> AnimationPlayer::getMaterial() const
 {
 	return animation->getMaterial();
+}
+
+void AnimationPlayer::setApplyMaterial(bool apply)
+{
+	applyMaterial = apply;
+}
+
+bool AnimationPlayer::isApplyingMaterial() const
+{
+	return applyMaterial;
 }
 
 bool AnimationPlayer::isPlaying() const
