@@ -12,10 +12,12 @@ void TextureRenderTarget::setTarget(int attachmentNumber, std::shared_ptr<Textur
 
 	if (int(attachments.size()) <= attachmentNumber) {
 		attachments.resize(size_t(attachmentNumber) + 1);
+		dirty = true;
 	}
-	attachments[attachmentNumber] = std::move(tex);
-
-	dirty = true;
+	if (attachments[attachmentNumber] != tex) {
+		attachments[attachmentNumber] = std::move(tex);
+		dirty = true;
+	}
 }
 
 const std::shared_ptr<Texture>& TextureRenderTarget::getTexture(int attachmentNumber) const
@@ -25,8 +27,10 @@ const std::shared_ptr<Texture>& TextureRenderTarget::getTexture(int attachmentNu
 
 void TextureRenderTarget::setDepthTexture(std::shared_ptr<Texture> tex)
 {
-	depth = std::move(tex);
-	dirty = true;
+	if (tex != depth) {
+		depth = std::move(tex);
+		dirty = true;
+	}
 }
 
 const std::shared_ptr<Texture>& TextureRenderTarget::getDepthTexture() const

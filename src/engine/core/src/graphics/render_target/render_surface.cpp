@@ -33,14 +33,16 @@ void RenderSurface::setSize(Vector2i size)
 			colourTarget->load(std::move(colourDesc));
 			material->set("tex0", colourTarget);
 
-			std::shared_ptr<Texture> depthTarget = video.createTexture(textureSize);
-			auto depthDesc = TextureDescriptor(textureSize, TextureFormat::DEPTH);
-			depthDesc.isDepthStencil = true;
-			depthTarget->load(std::move(depthDesc));
-
 			renderTarget = video.createTextureRenderTarget();
 			renderTarget->setTarget(0, colourTarget);
-			renderTarget->setDepthTexture(depthTarget);
+
+			if (options.createDepthStencil) {
+				std::shared_ptr<Texture> depthTarget = video.createTexture(textureSize);
+				auto depthDesc = TextureDescriptor(textureSize, TextureFormat::DEPTH);
+				depthDesc.isDepthStencil = true;
+				depthTarget->load(std::move(depthDesc));
+				renderTarget->setDepthTexture(depthTarget);
+			}
 		}
 
 		renderTarget->setViewPort(Rect4i(Vector2i(), size));

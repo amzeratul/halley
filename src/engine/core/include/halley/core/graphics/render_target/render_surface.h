@@ -14,6 +14,7 @@ namespace Halley {
 
 	struct RenderSurfaceOptions {
 		bool useFiltering = false;
+		bool createDepthStencil = true;
 	};
 
 	class RenderSurface {
