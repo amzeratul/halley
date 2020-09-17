@@ -307,12 +307,17 @@ Sprite& Sprite::setMaterial(std::unique_ptr<Material> m)
 
 Material& Sprite::getMutableMaterial()
 {
+	return *getMutableMaterialPtr();
+}
+
+std::shared_ptr<Material> Sprite::getMutableMaterialPtr()
+{
 	Expects(material);
 	if (sharedMaterial) {
 		material = material->clone();
 		sharedMaterial = false;
 	}
-	return *material;
+	return material;
 }
 
 Sprite& Sprite::setImageData(const Texture& image)
