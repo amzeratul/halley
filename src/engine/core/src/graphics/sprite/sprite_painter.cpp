@@ -122,7 +122,7 @@ void SpritePainter::add(gsl::span<const Sprite> sprites, int mask, int layer, fl
 {
 	Expects(mask >= 0);
 	if (!sprites.empty()) {
-		this->sprites.push_back(SpritePainterEntry(sprites, mask, layer, tieBreaker, sprites.size(), std::move(clip)));
+		this->sprites.push_back(SpritePainterEntry(sprites, mask, layer, tieBreaker, this->sprites.size(), std::move(clip)));
 		dirty = true;
 	}
 }
@@ -131,7 +131,7 @@ void SpritePainter::addCopy(gsl::span<const Sprite> sprites, int mask, int layer
 {
 	Expects(mask >= 0);
 	if (!sprites.empty()) {
-		this->sprites.push_back(SpritePainterEntry(SpritePainterEntryType::SpriteCached, cachedSprites.size(), sprites.size(), mask, layer, tieBreaker, sprites.size(), std::move(clip)));
+		this->sprites.push_back(SpritePainterEntry(SpritePainterEntryType::SpriteCached, cachedSprites.size(), sprites.size(), mask, layer, tieBreaker, this->sprites.size(), std::move(clip)));
 		cachedSprites.insert(cachedSprites.end(), sprites.begin(), sprites.end());
 		dirty = true;
 	}
