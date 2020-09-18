@@ -157,7 +157,7 @@ void Core::onTerminatedInError(const std::string& error)
 		std::cout << ConsoleColour(Console::RED) << "\n\nUnknown unhandled exception." << ConsoleColour() << std::endl;
 	}
 
-	OS::get().displayError(error);
+	OS::get().displayError((game ? game->getName() : String("Halley")) + " has aborted with an unhandled exception: \n\n" + error);
 
 	std::cout << ConsoleColour(Console::RED) << "Last traces:\n" << ConsoleColour(Console::DARK_RED);
 	Debug::printLastTraces();

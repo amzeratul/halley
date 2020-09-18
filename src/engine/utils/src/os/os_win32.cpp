@@ -440,7 +440,7 @@ std::vector<Path> OSWin32::enumerateDirectory(const Path& rootPath)
 
 void OSWin32::displayError(const std::string& cs)
 {
-	std::string error = "Halley has aborted with an unhandled exception: \n\n" + cs;
+	std::string error = cs;
 	int n = 0;
 	const size_t sz = error.size();
 	for (size_t i = 0; i < sz; ++i) {
