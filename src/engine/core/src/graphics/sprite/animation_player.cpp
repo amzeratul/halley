@@ -171,7 +171,7 @@ void AnimationPlayer::update(Time time)
 void AnimationPlayer::updateSprite(Sprite& sprite) const
 {
 	if (animation && hasUpdate) {
-		if (applyMaterial) {
+		if (applyMaterial || !sprite.hasMaterial()) {
 			if (materialOverride) {
 				sprite.setMaterial(materialOverride, true);
 			} else {
