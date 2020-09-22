@@ -14,10 +14,13 @@ AudioHandleImpl::AudioHandleImpl(AudioFacade& facade, uint32_t id)
 
 void AudioHandleImpl::setGain(float gain)
 {
-	enqueue([gain] (AudioVoice& src)
-	{
-		src.setUserGain(gain);
-	});
+	if (std::abs(gain - this->gain) > 0.00001f) {
+		this->gain = gain;
+		enqueue([gain] (AudioVoice& src)
+		{
+			src.setUserGain(gain);
+		});
+	}
 }
 
 void AudioHandleImpl::setVolume(float volume)

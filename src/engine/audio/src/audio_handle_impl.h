@@ -11,7 +11,7 @@ namespace Halley
 	{
 	public:
 		AudioHandleImpl(AudioFacade& facade, uint32_t id);
-		
+
 		void setGain(float gain) override;
 		void setVolume(float volume) override;
 		void setPosition(Vector2f pos) override;
@@ -23,6 +23,7 @@ namespace Halley
 	private:
 		AudioFacade& facade;
 		uint32_t handleId;
+		float gain = 1.0f;
 
 		void enqueue(std::function<void(AudioVoice& src)> f);
 	};

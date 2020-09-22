@@ -160,17 +160,25 @@ std::optional<AudioSpec> AudioFacade::getAudioSpec() const
 
 AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
 {
-	if (!resources->exists<AudioEvent>(name)) {
+	uint32_t id = uniqueId++;
+
+	if (resources->exists<AudioEvent>(name)) {
+		const auto event = resources->get<AudioEvent>(name);
+		enqueue([=]() {
+			engine->postEvent(id, *event, position);
+		});
+	} else {
 		Logger::logWarning("Unknown audio event: \"" + name + "\"");
-		uint32_t id = uniqueId++;
-		return std::make_shared<AudioHandleImpl>(*this, id);
 	}
 
-	auto event = resources->get<AudioEvent>(name);
+	return std::make_shared<AudioHandleImpl>(*this, id);
+}
 
+AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop)
+{
 	uint32_t id = uniqueId++;
 	enqueue([=] () {
-		engine->postEvent(id, *event, position);
+		engine->play(id, clip, position, volume, loop);
 	});
 	return std::make_shared<AudioHandleImpl>(*this, id);
 }
@@ -189,15 +197,6 @@ AudioHandle AudioFacade::playMusic(const String& eventName, int track, float fad
 	}
 
 	return handle;
-}
-
-AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop)
-{
-	uint32_t id = uniqueId++;
-	enqueue([=] () {
-		engine->play(id, clip, position, volume, loop);
-	});
-	return std::make_shared<AudioHandleImpl>(*this, id);
 }
 
 AudioHandle AudioFacade::getMusic(int track)
