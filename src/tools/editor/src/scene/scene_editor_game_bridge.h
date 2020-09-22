@@ -9,6 +9,8 @@ namespace Halley {
 		SceneEditorGameBridge(const HalleyAPI& api, Resources& resources, UIFactory& factory, Project& project);
 		~SceneEditorGameBridge();
 
+		void unload();
+
 		void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState);
 		void render(RenderContext& rc) const;
 
@@ -46,7 +48,6 @@ namespace Halley {
 		bool interfaceReady = false;
 
 		void load();
-		void unload();
 
 		void guardedRun(const std::function<void()>& f, bool allowFailure = false) const;
 	};

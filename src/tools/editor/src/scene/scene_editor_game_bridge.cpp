@@ -43,7 +43,9 @@ void SceneEditorGameBridge::update(Time t, SceneEditorInputState inputState, Sce
 
 	if (interface) {
 		initializeInterfaceIfNeeded();
-		interface->update(t, inputState, outputState);
+		if (interfaceReady) {
+			interface->update(t, inputState, outputState);
+		}
 	}
 }
 
@@ -53,7 +55,7 @@ void SceneEditorGameBridge::render(RenderContext& rc) const
 		return;
 	}
 
-	if (interface) {
+	if (interface && interfaceReady) {
 		guardedRun([&]() {
 			interface->render(rc);
 		});
@@ -61,7 +63,7 @@ void SceneEditorGameBridge::render(RenderContext& rc) const
 }
 
 void SceneEditorGameBridge::initializeInterfaceIfNeeded()
-{
+{	
 	if (!interface) {
 		project.withLoadedDLL([&] (DynamicLibrary& dll)
 		{
@@ -73,6 +75,10 @@ void SceneEditorGameBridge::initializeInterfaceIfNeeded()
 		if (interface->isReadyToCreateWorld()) {
 			guardedRun([&]() {
 				interface->createWorld();
+
+				SceneEditorInputState inputState;
+				SceneEditorOutputState outputState;
+				interface->update(0, inputState, outputState);
 				interfaceReady = true;
 			}, true);
 		}

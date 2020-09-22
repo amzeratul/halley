@@ -172,6 +172,7 @@ void SceneEditorWindow::unloadScene()
 			}
 		}
 		world.spawnPending();
+		gameBridge->unload();
 	}
 	entityFactory.reset();
 	sceneData.reset();
