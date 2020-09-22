@@ -13,6 +13,7 @@ AudioVoice::AudioVoice(std::shared_ptr<AudioSource> source, AudioPosition source
 	, done(false)
 	, isFirstUpdate(true)
 	, baseGain(gain)
+	, userGain(1.0f)
 	, source(std::move(source))
 	, sourcePos(std::move(sourcePos))
 {}
@@ -87,6 +88,16 @@ float AudioVoice::getBaseGain() const
 	return baseGain;
 }
 
+void AudioVoice::setUserGain(float gain)
+{
+	userGain = gain;
+}
+
+float AudioVoice::getUserGain() const
+{
+	return userGain;
+}
+
 float& AudioVoice::getDynamicGainRef()
 {
 	return dynamicGain;
@@ -121,7 +132,7 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioL
 	}
 
 	prevChannelMix = channelMix;
-	sourcePos.setMix(nChannels, channels, channelMix, baseGain * dynamicGain * groupGain, listener);
+	sourcePos.setMix(nChannels, channels, channelMix, baseGain * userGain * dynamicGain * groupGain, listener);
 	
 	if (isFirstUpdate) {
 		prevChannelMix = channelMix;

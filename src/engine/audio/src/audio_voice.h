@@ -24,6 +24,8 @@ namespace Halley {
 
 		void setBaseGain(float gain);
 		float getBaseGain() const;
+		void setUserGain(float gain);
+		float getUserGain() const;
 		float& getDynamicGainRef();
 
 		void setAudioSourcePosition(Vector3f position);
@@ -50,6 +52,7 @@ namespace Halley {
 		bool isFirstUpdate : 1;
     	float baseGain = 1.0f;
 		float dynamicGain = 1.0f;
+		float userGain = 1.0f;
 		float elapsedTime = 0.0f;
 
 		std::shared_ptr<AudioSource> source;

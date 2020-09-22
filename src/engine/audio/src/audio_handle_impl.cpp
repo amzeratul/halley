@@ -16,7 +16,7 @@ void AudioHandleImpl::setGain(float gain)
 {
 	enqueue([gain] (AudioVoice& src)
 	{
-		src.setBaseGain(gain);
+		src.setUserGain(gain);
 	});
 }
 
