@@ -12,11 +12,14 @@ MetalPainter::MetalPainter(MetalVideo& video, Resources& resources)
 	, indexBuffer(nil)
 {}
 
-void MetalPainter::clear(Colour colour) {
+void MetalPainter::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint32_t> stencil) {
 	[encoder endEncoding];
 	auto& renderTarget = dynamic_cast<IMetalRenderTarget&>(getActiveRenderTarget());
-	auto descriptor = renderPassDescriptorForTextureAndColour(renderTarget.getMetalTexture(), colour);
-	encoder = [video.getCommandBuffer() renderCommandEncoderWithDescriptor:descriptor];
+	if (colour) {
+		auto descriptor = renderPassDescriptorForTextureAndColour(renderTarget.getMetalTexture(), colour.value());
+		encoder = [video.getCommandBuffer() renderCommandEncoderWithDescriptor:descriptor];
+	}
+	// TODO: depth and stencil
 }
 
 void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
