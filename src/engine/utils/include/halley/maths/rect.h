@@ -26,6 +26,8 @@
 #include "range.h"
 #include <optional>
 
+#include "vector4.h"
+
 namespace Halley {
 	//////////////////////////////
 	// Vector2D class declaration
@@ -146,6 +148,11 @@ namespace Halley {
 		constexpr Rect2D<T> grow(T left, T top, T right, T bottom) const
 		{
 			return Rect2D(p1 - Vector2D<T>(left, top), p2 + Vector2D<T>(right, bottom));
+		}
+
+		constexpr Rect2D<T> grow(Vector4D<T> v) const
+		{
+			return Rect2D(p1 - v.xy(), p2 + v.zw());
 		}
 
 		constexpr Vector2D<T> getTopLeft() const { return p1; }

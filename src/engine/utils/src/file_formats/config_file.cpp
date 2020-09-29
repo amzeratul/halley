@@ -394,7 +394,7 @@ Vector2i ConfigNode::asVector2i() const
 		auto& seq = asSequence();
 		return Vector2i(seq.at(0).asInt(), seq.at(1).asInt());
 	} else {
-		throw Exception(getNodeDebugId() + " is not a vector type", HalleyExceptions::Resources);
+		throw Exception(getNodeDebugId() + " is not a vector2 type", HalleyExceptions::Resources);
 	}
 }
 
@@ -408,7 +408,27 @@ Vector2f ConfigNode::asVector2f() const
 		auto& seq = asSequence();
 		return Vector2f(seq.at(0).asFloat(), seq.at(1).asFloat());
 	} else {
-		throw Exception(getNodeDebugId() + " is not a vector type", HalleyExceptions::Resources);
+		throw Exception(getNodeDebugId() + " is not a vector2 type", HalleyExceptions::Resources);
+	}
+}
+
+Vector4i ConfigNode::asVector4i() const
+{
+	if (type == ConfigNodeType::Sequence) {
+		auto& seq = asSequence();
+		return Vector4i(seq.at(0).asInt(), seq.at(1).asInt(), seq.at(2).asInt(), seq.at(3).asInt());
+	} else {
+		throw Exception(getNodeDebugId() + " is not a vector4 type", HalleyExceptions::Resources);
+	}
+}
+
+Vector4f ConfigNode::asVector4f() const
+{
+	if (type == ConfigNodeType::Sequence) {
+		auto& seq = asSequence();
+		return Vector4f(seq.at(0).asFloat(), seq.at(1).asFloat(), seq.at(2).asFloat(), seq.at(3).asFloat());
+	} else {
+		throw Exception(getNodeDebugId() + " is not a vector4 type", HalleyExceptions::Resources);
 	}
 }
 
