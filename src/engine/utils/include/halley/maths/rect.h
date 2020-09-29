@@ -143,6 +143,11 @@ namespace Halley {
 			return Rect2D(p1 - offset, p2 + offset);
 		}
 
+		constexpr Rect2D<T> grow(T left, T top, T right, T bottom) const
+		{
+			return Rect2D(p1 - Vector2D<T>(left, top), p2 + Vector2D<T>(right, bottom));
+		}
+
 		constexpr Vector2D<T> getTopLeft() const { return p1; }
 		constexpr Vector2D<T> getBottomRight() const { return p2; }
 		constexpr Vector2D<T> getBottomLeft() const { return Vector2D<T>(p1.x, p2.y); }
