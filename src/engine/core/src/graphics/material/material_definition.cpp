@@ -510,14 +510,20 @@ bool MaterialDepthStencil::operator!=(const MaterialDepthStencil& other) const
 }
 
 
-MaterialPass::MaterialPass()
-	: blend(BlendType::Undefined)
-{}
+MaterialPass::MaterialPass() = default;
 
 MaterialPass::MaterialPass(const String& shaderAssetId, const ConfigNode& node)
 	: shaderAssetId(shaderAssetId)
 {
-	blend = fromString<BlendType>(node["blend"].asString("Opaque"));
+	auto blendParts = node["blend"].asString("Opaque").split(' ');
+	for (auto& part: blendParts) {
+		if (part == "Premultiplied") {
+			blend.premultiplied = true;
+		} else {
+			blend.mode = fromString<BlendMode>(part);
+		}
+	}
+	
 	cull = fromString<CullingMode>(node["cull"].asString("None"));
 	enabled = node["enabled"].asBool(true);
 

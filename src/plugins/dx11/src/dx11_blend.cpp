@@ -15,44 +15,26 @@ DX11Blend::DX11Blend(DX11Video& video, BlendType blend)
 	target.BlendEnable = true;
 	target.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-	switch (blend) {
-	case BlendType::Alpha:
+	switch (blend.mode) {
+	case BlendMode::Alpha:
 		target.BlendOp = D3D11_BLEND_OP_ADD;
-		target.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		target.SrcBlend = blend.premultiplied ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
 		target.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
 		target.BlendOpAlpha = D3D11_BLEND_OP_ADD;
 		target.SrcBlendAlpha = D3D11_BLEND_ONE;
 		target.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
 		break;
 
-	case BlendType::AlphaPremultiplied:
+	case BlendMode::Add:
 		target.BlendOp = D3D11_BLEND_OP_ADD;
-		target.SrcBlend = D3D11_BLEND_ONE;
-		target.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-		target.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		target.SrcBlendAlpha = D3D11_BLEND_ONE;
-		target.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-		break;
-
-	case BlendType::Add:
-		target.BlendOp = D3D11_BLEND_OP_ADD;
-		target.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		target.SrcBlend = blend.premultiplied ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
 		target.DestBlend = D3D11_BLEND_ONE;
 		target.BlendOpAlpha = D3D11_BLEND_OP_ADD;
 		target.SrcBlendAlpha = D3D11_BLEND_ONE;
 		target.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
 		break;
 
-	case BlendType::AddPremultiplied:
-		target.BlendOp = D3D11_BLEND_OP_ADD;
-		target.SrcBlend = D3D11_BLEND_ONE;
-		target.DestBlend = D3D11_BLEND_ONE;
-		target.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-		target.SrcBlendAlpha = D3D11_BLEND_ONE;
-		target.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-		break;
-
-	case BlendType::Multiply:
+	case BlendMode::Multiply:
 		target.BlendOp = D3D11_BLEND_OP_ADD;
 		target.SrcBlend = D3D11_BLEND_DEST_COLOR;
 		target.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
@@ -61,7 +43,7 @@ DX11Blend::DX11Blend(DX11Video& video, BlendType blend)
 		target.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
 		break;
 
-	case BlendType::Invert:
+	case BlendMode::Invert:
 		target.BlendOp = D3D11_BLEND_OP_ADD;
 		target.SrcBlend = D3D11_BLEND_INV_DEST_COLOR;
 		target.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
@@ -70,7 +52,25 @@ DX11Blend::DX11Blend(DX11Video& video, BlendType blend)
 		target.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
 		break;
 
-	case BlendType::Opaque:
+	case BlendMode::Max:
+		target.BlendOp = D3D11_BLEND_OP_MAX;
+		target.SrcBlend = blend.premultiplied ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
+		target.DestBlend = D3D11_BLEND_ONE;
+		target.BlendOpAlpha = D3D11_BLEND_OP_MAX;
+		target.SrcBlendAlpha = D3D11_BLEND_ONE;
+		target.DestBlendAlpha = D3D11_BLEND_ONE;
+		break;
+
+	case BlendMode::Min:
+		target.BlendOp = D3D11_BLEND_OP_MIN;
+		target.SrcBlend = blend.premultiplied ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
+		target.DestBlend = D3D11_BLEND_ONE;
+		target.BlendOpAlpha = D3D11_BLEND_OP_MIN;
+		target.SrcBlendAlpha = D3D11_BLEND_ONE;
+		target.DestBlendAlpha = D3D11_BLEND_ONE;
+		break;
+
+	case BlendMode::Opaque:
 	default:
 		target.BlendEnable = false;
 		break;

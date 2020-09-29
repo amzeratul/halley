@@ -2,7 +2,7 @@
 name: Halley/SolidLine
 base: line_base.yaml
 passes:
-  - blend: AlphaPremultiplied
+  - blend: Alpha Premultiplied
     shader:
     - language: hlsl
       vertex: line.vertex.hlsl

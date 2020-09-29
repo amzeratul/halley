@@ -5,7 +5,7 @@
 
 namespace Halley
 {
-	enum class BlendType;
+	class BlendType;
 	class DX11Video;
 
 	class DX11Blend

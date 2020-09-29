@@ -140,6 +140,7 @@ namespace Halley {
 		
 		uint8_t hierarchyRevision = 0;
 		uint8_t childrenRevision = 0;
+		uint8_t worldPartition = 0;
 		Entity* parent = nullptr;
 		Vector<Entity*> children;
 		

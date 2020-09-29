@@ -103,7 +103,7 @@ namespace Halley {
 			numUnits = 0;
 			curTexUnit = 0;
 			scissoring = false;
-			curBlend = BlendType::Undefined;
+			curBlend = BlendType();
 			hasClearCol = false;
 		}
 
@@ -168,13 +168,12 @@ GLUtils::GLUtils(GLUtils& other)
 
 void GLUtils::setBlendType(BlendType type)
 {
-	Expects(type == BlendType::Alpha || type == BlendType::AlphaPremultiplied || type == BlendType::Add || type == BlendType::Opaque || type == BlendType::Multiply || type == BlendType::Invert || type == BlendType::Darken);
 	glCheckError();
 
 	const BlendType curType = state.curBlend;
 	if (!checked || curType != type) {
-		bool hasBlend = curType == BlendType::Alpha || curType == BlendType::AlphaPremultiplied || curType == BlendType::Add || curType == BlendType::Multiply || curType == BlendType::Invert || curType == BlendType::Darken;
-		bool needsBlend = type == BlendType::Alpha || type == BlendType::AlphaPremultiplied || type == BlendType::Add || type == BlendType::Multiply || type == BlendType::Invert || type == BlendType::Darken;
+		bool hasBlend = curType.hasBlend();
+		bool needsBlend = type.hasBlend();
 
 		// Disable current
 		if (hasBlend && !needsBlend) {
@@ -187,19 +186,15 @@ void GLUtils::setBlendType(BlendType type)
 		}
 
 		if (needsBlend) {
-			if (type == BlendType::AlphaPremultiplied) {
-				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			if (type.mode == BlendMode::Alpha) {
+				glBlendFunc(type.premultiplied ? GL_ONE : GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				glCheckError();
 			}
-			else if (type == BlendType::Alpha) {
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				glCheckError();
-			}
-			else if (type == BlendType::Multiply) {
+			else if (type.mode == BlendMode::Multiply) {
 				glBlendFunc(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA);
 				glCheckError();
 			}
-			else if (type == BlendType::Invert) {
+			else if (type.mode == BlendMode::Invert) {
 				glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA);
 				glCheckError();
 			}

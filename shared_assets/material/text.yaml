@@ -9,12 +9,12 @@ uniforms:
     - u_outline: float
     - u_outlineColour: vec4
 passes:
-  - blend: AlphaPremultiplied
+  - blend: Alpha Premultiplied
     shader:
     - language: hlsl
       vertex: sprite.vertex.hlsl
       pixel: distance_field_sprite_outline.pixel.hlsl
-  - blend: AlphaPremultiplied
+  - blend: Alpha Premultiplied
     shader:
     - language: hlsl
       vertex: sprite.vertex.hlsl
