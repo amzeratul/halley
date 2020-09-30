@@ -130,6 +130,7 @@ namespace Halley {
 
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;
+        virtual void onSceneLoaded(AssetType assetType, const String& assetId) = 0;
     };
 
 	class EntityTree {

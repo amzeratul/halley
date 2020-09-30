@@ -136,6 +136,10 @@ std::shared_ptr<UIWidget> SceneEditor::makeCustomUI()
 	return {};
 }
 
+void SceneEditor::onSceneLoaded(AssetType assetType, const String& assetId)
+{
+}
+
 std::unique_ptr<World> SceneEditor::doCreateWorld()
 {
 	auto world = std::make_unique<World>(getAPI(), getGameResources(), true, CreateEntityFunctions::getCreateComponent());

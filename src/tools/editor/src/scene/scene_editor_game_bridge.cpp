@@ -166,6 +166,13 @@ ConfigNode SceneEditorGameBridge::onToolSet(SceneEditorTool tool, const String& 
 	return options;
 }
 
+void SceneEditorGameBridge::onSceneLoaded(AssetType type, const String& assetId)
+{
+	if (interfaceReady) {
+		interface->onSceneLoaded(type, assetId);
+	}
+}
+
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {

@@ -21,7 +21,7 @@ namespace Halley {
 		
 		void loadScene(const String& sceneName);
 		void loadPrefab(const String& name);
-		void loadScene(const Prefab& prefab);
+		void loadScene(AssetType type, const Prefab& prefab);
 		void unloadScene();
 		void markModified();
 
@@ -78,6 +78,7 @@ namespace Halley {
 		Path assetPath;
 		std::shared_ptr<ISceneData> sceneData;
 		std::shared_ptr<Prefab> prefab;
+		AssetType origPrefabAssetType;
 		std::shared_ptr<EntityFactory> entityFactory;
 		std::optional<EntityScene> currentEntityScene;
 

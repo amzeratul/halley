@@ -30,6 +30,7 @@ namespace Halley {
 		void onEntityModified(const UUID& uuid, const ConfigNode& data);
 		void onEntityMoved(const UUID& uuid, const ConfigNode& data);
 		ConfigNode onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options);
+		void onSceneLoaded(AssetType type, const String& assetId);
 
 	private:
 		const HalleyAPI& api;

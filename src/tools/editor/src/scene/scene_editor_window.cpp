@@ -108,7 +108,7 @@ void SceneEditorWindow::loadScene(const String& name)
 	assetPath = project.getAssetsSrcPath() / project.getImportAssetsDatabase().getPrimaryInputFile(AssetType::Scene, name);
 
 	if (!name.isEmpty()) {
-		loadScene(*project.getGameResources().get<Scene>(name));
+		loadScene(AssetType::Scene, *project.getGameResources().get<Scene>(name));
 	}
 }
 
@@ -118,11 +118,11 @@ void SceneEditorWindow::loadPrefab(const String& name)
 	assetPath = project.getAssetsSrcPath() / project.getImportAssetsDatabase().getPrimaryInputFile(AssetType::Prefab, name);
 
 	if (!name.isEmpty()) {
-		loadScene(*project.getGameResources().get<Prefab>(name));
+		loadScene(AssetType::Prefab, *project.getGameResources().get<Prefab>(name));
 	}
 }
 
-void SceneEditorWindow::loadScene(const Prefab& origPrefab)
+void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 {
 	gameBridge->initializeInterfaceIfNeeded();
 	if (gameBridge->isLoaded()) {
@@ -131,6 +131,7 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 
 		// Load prefab
 		prefab = std::make_shared<Prefab>(origPrefab);
+		origPrefabAssetType = assetType;
 		preparePrefab(*prefab);
 
 		// Spawn scene
@@ -154,6 +155,7 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 
 		// Custom UI
 		setCustomUI(gameBridge->makeCustomUI());
+		gameBridge->onSceneLoaded(assetType, origPrefab.getAssetId());
 	}
 }
 
@@ -211,7 +213,7 @@ void SceneEditorWindow::onUnloadDLL()
 void SceneEditorWindow::onLoadDLL()
 {
 	if (prefab) {
-		loadScene(*prefab);
+		loadScene(origPrefabAssetType, *prefab);
 	}
 }
 
