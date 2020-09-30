@@ -153,6 +153,31 @@ void Executor::stop()
 #endif
 }
 
+SingleThreadExecutor::SingleThreadExecutor(String name, MakeThread makeThread)
+	: executor(queue)
+{
+	thread = makeThread(std::move(name), [=] ()
+	{
+		executor.runForever();
+	});
+}
+
+SingleThreadExecutor::~SingleThreadExecutor()
+{
+	executor.stop();
+	thread.join();
+}
+
+ExecutionQueue& SingleThreadExecutor::getQueue()
+{
+	return queue;
+}
+
+void SingleThreadExecutor::stop()
+{
+	executor.stop();
+}
+
 ThreadPool::ThreadPool(const String& name, ExecutionQueue& queue, size_t n, MakeThread makeThread)
 	: name(name)
 {

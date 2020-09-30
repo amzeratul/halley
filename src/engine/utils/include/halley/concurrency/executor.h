@@ -75,6 +75,23 @@ namespace Halley
 		std::atomic<bool> running;
 	};
 
+	class SingleThreadExecutor {
+	public:
+		using MakeThread = std::function<std::thread(String, std::function<void()>)>;
+
+		SingleThreadExecutor(String name, MakeThread makeThread);
+		~SingleThreadExecutor();
+
+		ExecutionQueue& getQueue();
+
+		void stop();
+
+	private:
+		ExecutionQueue queue;
+		Executor executor;
+		std::thread thread;
+	};
+
 	class ThreadPool
 	{
 	public:
