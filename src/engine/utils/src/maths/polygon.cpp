@@ -117,9 +117,6 @@ bool Polygon::isPointInside(Vector2f point) const
 }
 
 
-///////////////////////////////////////////////////////
-// Checks if any of the points are inside the polygon
-// Using the separating axis theorem here
 Vector2f average(Vector<Vector2f>& v)
 {
 	Vector2f result;
@@ -131,8 +128,10 @@ Vector2f average(Vector<Vector2f>& v)
 	return result;
 }
 
+
 bool Polygon::overlaps(const Polygon &param,Vector2f *translation,Vector2f *collisionPoint) const
 {
+	// Using the separating axis theorem here
 	// Check if they are within overlap range
 	const float maxDist = circle.getRadius() + param.circle.getRadius();
 	if ((circle.getCentre() - param.circle.getCentre()).squaredLength() >= maxDist * maxDist) {

@@ -24,6 +24,7 @@ set(SOURCES
         "src/file_formats/text_file.cpp"
         "src/file_formats/text_reader.cpp"
         "src/file_formats/xml_file.cpp"
+        "src/maths/base_transform.cpp"
         "src/maths/circle.cpp"
         "src/maths/line.cpp"
         "src/maths/matrix4.cpp"

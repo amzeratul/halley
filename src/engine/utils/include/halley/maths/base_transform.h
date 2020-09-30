@@ -24,13 +24,22 @@
 #include "vector2.h"
 
 namespace Halley {
-	class BaseTransform {
+	class Base2D {
 	public:
-		BaseTransform(Vector2f u, Vector2f v);
-		Vector2f toBase(Vector2f point) const;
-		Vector2f fromBase(Vector2f point) const;
+		Base2D();
+		Base2D(Vector2f u, Vector2f v);
+
+		Vector2f transform(Vector2f point) const;
+		Vector2f inverseTransform(Vector2f point) const;
+
+		static Vector2f transform(Vector2f point, Vector2f u, Vector2f v);
+
+		Base2D getInverse() const;
 
 	private:
 		Vector2f u, v;
+		Vector2f invU, invV;
+
+		Base2D(Vector2f u, Vector2f v, Vector2f invU, Vector2f invV);
 	};
 }
