@@ -128,6 +128,8 @@ namespace Halley {
 		
 		void sortChildren(const std::vector<UUID>& uuids);
 
+		void setWorldPartition(uint8_t partition);
+
 	private:
 		// Start with these for better cache coherence
 		Vector<std::pair<int, Component*>> components;
@@ -459,6 +461,18 @@ namespace Halley {
 		{
 			Expects(entity != nullptr);
 			return entity->childrenRevision;
+		}
+
+		uint8_t getWorldPartition() const
+		{
+			Expects(entity != nullptr);
+			return entity->worldPartition;
+		}
+
+		void setWorldPartition(uint8_t partition)
+		{
+			Expects(entity != nullptr);
+			entity->setWorldPartition(partition);
 		}
 
 		bool isValid() const

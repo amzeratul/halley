@@ -107,6 +107,7 @@ void Entity::setParent(Entity* newParent, bool propagate)
 		// Reparent
 		if (newParent) {
 			parent = newParent;
+			worldPartition = newParent->worldPartition;
 			parent->children.push_back(this);
 			parent->propagateChildrenChange();
 		}
@@ -233,6 +234,14 @@ void Entity::sortChildren(const std::vector<UUID>& uuids)
 
 	for (size_t i = 0; i < nChildren; ++i) {
 		children[i] = pairs[i].first;
+	}
+}
+
+void Entity::setWorldPartition(uint8_t partition)
+{
+	worldPartition = partition;
+	for (auto& c: children) {
+		c->setWorldPartition(partition);
 	}
 }
 
