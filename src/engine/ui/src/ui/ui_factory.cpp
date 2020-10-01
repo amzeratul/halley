@@ -25,6 +25,7 @@
 #include "widgets/ui_option_list_morpher.h"
 #include "widgets/ui_tree_list.h"
 #include "halley/ui/behaviours/ui_reload_ui_behaviour.h"
+#include "widgets/ui_debug_console.h"
 
 using namespace Halley;
 
@@ -57,6 +58,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("spinList", [=](const ConfigNode& node) { return makeSpinList(node); });
 	addFactory("optionListMorpher", [=](const ConfigNode& node) { return makeOptionListMorpher(node); });
 	addFactory("treeList", [=](const ConfigNode& node) { return makeTreeList(node); });
+	addFactory("debugConsole", [=](const ConfigNode& node) { return makeDebugConsole(node); });
 }
 
 UIFactory::~UIFactory()
@@ -854,6 +856,16 @@ std::shared_ptr<UIWidget> UIFactory::makeTreeList(const ConfigNode& entryNode)
 	applyInputButtons(*widget, node["inputButtons"].asString("treeList"));
 
 	widget->setDragEnabled(node["canDrag"].asBool(false));
+
+	return widget;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeDebugConsole(const ConfigNode& entryNode)
+{
+	const auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+
+	auto widget = std::make_shared<UIDebugConsole>(id, *this, std::make_shared<UIDebugConsoleController>());
 
 	return widget;
 }

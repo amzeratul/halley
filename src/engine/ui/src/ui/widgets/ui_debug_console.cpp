@@ -7,10 +7,10 @@
 
 using namespace Halley;
 
-UIDebugConsole::UIDebugConsole(const String& id, UIFactory& factory, UIDebugConsoleController& controller)
+UIDebugConsole::UIDebugConsole(const String& id, UIFactory& factory, std::shared_ptr<UIDebugConsoleController> controller)
 	: UIWidget(id, {}, UISizer(UISizerType::Vertical))
 	, factory(factory)
-	, controller(controller)
+	, controller(std::move(controller))
 {
 	setup();
 }
@@ -141,7 +141,7 @@ void UIDebugConsole::setup()
 	inputField = getWidgetAs<UITextInput>("input");
 	inputField->setAutoCompleteHandle([=] (const StringUTF32& str) -> std::vector<StringUTF32>
 	{
-		return controller.getAutoComplete(str);
+		return controller->getAutoComplete(str);
 	});
 
 	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
@@ -173,7 +173,7 @@ void UIDebugConsole::runCommand(const String& rawCommand)
 	String command = std::move(args[0]);
 	args.erase(args.begin());
 	
-	controller.runCommand(std::move(command), std::move(args)).then(Executors::getMainThread(), [=] (UIDebugConsoleResponse result) {
+	controller->runCommand(std::move(command), std::move(args)).then(Executors::getMainThread(), [=] (UIDebugConsoleResponse result) {
 		if (!result.getResponse().isEmpty()) {
 			addLine(result.getResponse(), Colour::fromString("#E2D5EA"));
 		}
@@ -195,4 +195,9 @@ void UIDebugConsole::addLine(const String& line, Colour colour)
 	scrollPane->add(newLabel);
 	scrollPane->getPane()->refresh();
 	scrollPane->getPane()->setRelativeScroll(1.0f, UIScrollDirection::Vertical);
+}
+
+const std::shared_ptr<UIDebugConsoleController>& UIDebugConsole::getController() const
+{
+	return controller;
 }

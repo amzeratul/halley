@@ -114,5 +114,7 @@ namespace Halley {
 
 		void assignUUIDs(ConfigNode& node);
 		bool isValidEntityTree(const ConfigNode& node) const;
+
+		void toggleConsole();
 	};
 }

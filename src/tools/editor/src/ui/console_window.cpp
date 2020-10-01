@@ -5,6 +5,7 @@ using namespace Halley;
 ConsoleWindow::ConsoleWindow(UIFactory& ui)
 	: UIWidget("console", {}, UISizer())
 {
+	controller = std::make_shared<UIDebugConsoleController>();
 	console = std::make_shared<UIDebugConsole>("debugConsole", ui, controller);
 
 	Logger::addSink(*this);

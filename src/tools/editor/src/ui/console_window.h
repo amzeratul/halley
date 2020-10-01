@@ -26,7 +26,7 @@ namespace Halley
 		std::vector<std::pair<LoggerLevel, String>> buffer;
 		std::shared_ptr<UIDebugConsole> console;
 
-		UIDebugConsoleController controller;
+		std::shared_ptr<UIDebugConsoleController> controller;
 
 		mutable std::mutex mutex;
 	};

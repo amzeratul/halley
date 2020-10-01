@@ -49,10 +49,13 @@ namespace Halley {
 
     class UIDebugConsole : public UIWidget {
     public:
-		UIDebugConsole(const String& id, UIFactory& factory, UIDebugConsoleController& controller);
+		UIDebugConsole(const String& id, UIFactory& factory, std::shared_ptr<UIDebugConsoleController> controller);
+    	
 		void show();
 		void hide();
 		void addLine(const String& line, Colour colour);
+
+    	const std::shared_ptr<UIDebugConsoleController>& getController() const;
     	
     private:
 		void setup();
@@ -60,7 +63,7 @@ namespace Halley {
 		void runCommand(const String& command);
 
 		UIFactory& factory;
-		UIDebugConsoleController& controller;
+		std::shared_ptr<UIDebugConsoleController> controller;
 		Future<String> pendingCommand;
 		std::shared_ptr<UITextInput> inputField;
     };

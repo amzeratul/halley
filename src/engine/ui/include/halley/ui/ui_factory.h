@@ -108,6 +108,7 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeSpinList(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makeOptionListMorpher(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makeTreeList(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeDebugConsole(const ConfigNode& node);
 
 		bool hasCondition(const String& condition) const;
 		bool resolveConditions(const ConfigNode& node) const;

@@ -202,6 +202,11 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 		return true;
 	}
 
+	if (key.is(KeyCode::F1)) {
+		toggleConsole();
+		return true;
+	}
+
 	return false;
 }
 
@@ -713,4 +718,10 @@ bool SceneEditorWindow::isValidEntityTree(const ConfigNode& node) const
 	}
 	
 	return true;
+}
+
+void SceneEditorWindow::toggleConsole()
+{
+	auto w = getWidget("debugConsole");
+	w->setActive(!w->isActive());
 }
