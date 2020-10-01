@@ -173,10 +173,10 @@ void SceneEditorGameBridge::onSceneLoaded(AssetType type, const String& assetId)
 	}
 }
 
-void SceneEditorGameBridge::setupConsoleCommands(UIDebugConsoleController& controller)
+void SceneEditorGameBridge::setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor)
 {
 	if (interfaceReady) {
-		interface->setupConsoleCommands(controller);
+		interface->setupConsoleCommands(controller, sceneEditor);
 	}
 }
 

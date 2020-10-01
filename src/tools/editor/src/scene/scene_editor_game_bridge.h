@@ -31,7 +31,7 @@ namespace Halley {
 		void onEntityMoved(const UUID& uuid, const ConfigNode& data);
 		ConfigNode onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options);
 		void onSceneLoaded(AssetType type, const String& assetId);
-		void setupConsoleCommands(UIDebugConsoleController& controller);
+		void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor);
 
 	private:
 		const HalleyAPI& api;

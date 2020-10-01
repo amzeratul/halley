@@ -435,6 +435,11 @@ void SceneEditorWindow::openEditPrefabWindow(const String& name)
 	sceneEditorTabs.load(AssetType::Prefab, name);
 }
 
+const std::shared_ptr<ISceneData>& SceneEditorWindow::getSceneData() const
+{
+	return sceneData;
+}
+
 void SceneEditorWindow::addNewEntity()
 {
 	auto data = ConfigNode(ConfigNode::MapType());
@@ -742,5 +747,5 @@ void SceneEditorWindow::setupConsoleCommands()
 {
 	auto controller = getWidgetAs<UIDebugConsole>("debugConsole")->getController();
 	controller->clearCommands();
-	gameBridge->setupConsoleCommands(*controller);
+	gameBridge->setupConsoleCommands(*controller, *this);
 }

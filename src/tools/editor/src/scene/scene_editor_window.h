@@ -12,7 +12,7 @@ namespace Halley {
 	class UIFactory;
 	class EntityFactory;
 
-	class SceneEditorWindow final : public UIWidget, public IDynamicLibraryListener {
+	class SceneEditorWindow final : public UIWidget, public IDynamicLibraryListener, public ISceneEditorWindow {
 	public:
 		SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, SceneEditorTabs& sceneEditorTabs);
 		~SceneEditorWindow();
@@ -23,14 +23,14 @@ namespace Halley {
 		void loadPrefab(const String& name);
 		void loadScene(AssetType type, const Prefab& prefab);
 		void unloadScene();
-		void markModified();
+		void markModified() override;
 
-		void onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId);
-		void onEntityRemoved(const String& id, const String& parentId);
-		void onEntityModified(const String& id);
-		void onEntityMoved(const String& id);
-		void onComponentRemoved(const String& name);
-		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
+		void onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId) override;
+		void onEntityRemoved(const String& id, const String& parentId) override;
+		void onEntityModified(const String& id) override;
+		void onEntityMoved(const String& id) override;
+		void onComponentRemoved(const String& name) override;
+		void onFieldChangedByGizmo(const String& componentName, const String& fieldName) override;
 
 		void addNewEntity();
 		void addNewPrefab();
@@ -54,6 +54,8 @@ namespace Halley {
 		void pasteEntity(const String& data, const String& referenceId);
 		void duplicateEntity(const String& id);
 		void openEditPrefabWindow(const String& name);
+
+		const std::shared_ptr<ISceneData>& getSceneData() const override;
 
 	protected:
 		void update(Time t, bool moved) override;

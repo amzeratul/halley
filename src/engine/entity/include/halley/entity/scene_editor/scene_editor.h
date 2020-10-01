@@ -51,7 +51,7 @@ namespace Halley {
 		static Rect4f getSpriteTreeBounds(const EntityRef& e);
 		static std::optional<Rect4f> getSpriteBounds(const EntityRef& e);
 
-    	void setupConsoleCommands(UIDebugConsoleController& controller) override;
+    	void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) override;
 
     protected:
 		virtual void onInit();

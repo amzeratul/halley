@@ -8,6 +8,7 @@
 #include <optional>
 
 namespace Halley {
+	class ISceneEditorWindow;
 	class UIDebugConsoleController;
 	enum class SceneEditorTool;
 	class UUID;
@@ -131,7 +132,7 @@ namespace Halley {
 
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;
-    	virtual void setupConsoleCommands(UIDebugConsoleController& controller) = 0;
+    	virtual void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) = 0;
         virtual void onSceneLoaded(AssetType assetType, const String& assetId) = 0;
     };
 
@@ -176,5 +177,21 @@ namespace Halley {
         virtual void setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& entityData) = 0;
         virtual std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) = 0;
 		virtual void deselect() = 0;
+	};
+
+	class ISceneEditorWindow {
+	public:
+		virtual ~ISceneEditorWindow() = default;
+
+		virtual void markModified() = 0;
+		
+		virtual void onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId) = 0;
+		virtual void onEntityRemoved(const String& id, const String& parentId) = 0;
+		virtual void onEntityModified(const String& id) = 0;
+		virtual void onEntityMoved(const String& id) = 0;
+		virtual void onComponentRemoved(const String& name) = 0;
+		virtual void onFieldChangedByGizmo(const String& componentName, const String& fieldName) = 0;
+		
+		virtual const std::shared_ptr<ISceneData>& getSceneData() const = 0;
 	};
 }

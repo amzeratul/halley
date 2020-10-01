@@ -362,7 +362,7 @@ std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e)
 	return {};
 }
 
-void SceneEditor::setupConsoleCommands(UIDebugConsoleController& controller)
+void SceneEditor::setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor)
 {
 }
 
