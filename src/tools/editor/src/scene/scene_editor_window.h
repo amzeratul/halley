@@ -39,7 +39,7 @@ namespace Halley {
 		void addEntity(const String& referenceEntityId, bool childOfReference, ConfigNode data);
 		void addEntity(const String& parentId, const String& afterSibling, ConfigNode data);
 		void removeEntity();
-		void removeEntity(const String& entityId);
+		void removeEntity(const String& entityId) override;
 		void selectEntity(const String& id);
 		void selectEntity(const std::vector<UUID>& candidates);
 

@@ -191,6 +191,8 @@ namespace Halley {
 		virtual void onEntityMoved(const String& id) = 0;
 		virtual void onComponentRemoved(const String& name) = 0;
 		virtual void onFieldChangedByGizmo(const String& componentName, const String& fieldName) = 0;
+
+		virtual void removeEntity(const String& entityId) = 0;
 		
 		virtual const std::shared_ptr<ISceneData>& getSceneData() const = 0;
 	};
