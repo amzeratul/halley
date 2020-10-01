@@ -27,6 +27,9 @@ void RenderSurface::setSize(Vector2i size)
 			curTextureSize = textureSize;
 
 			std::shared_ptr<Texture> colourTarget = video.createTexture(textureSize);
+			if (!options.name.isEmpty()) {
+				colourTarget->setAssetId(options.name + "_colour0_v" + toString(version));
+			}
 			auto colourDesc = TextureDescriptor(textureSize, TextureFormat::RGBA);
 			colourDesc.isRenderTarget = true;
 			colourDesc.useFiltering = options.useFiltering;
@@ -38,11 +41,16 @@ void RenderSurface::setSize(Vector2i size)
 
 			if (options.createDepthStencil) {
 				std::shared_ptr<Texture> depthTarget = video.createTexture(textureSize);
+				if (!options.name.isEmpty()) {
+					depthTarget->setAssetId(options.name + "_depth_v" + toString(version));
+				}
 				auto depthDesc = TextureDescriptor(textureSize, TextureFormat::DEPTH);
 				depthDesc.isDepthStencil = true;
 				depthTarget->load(std::move(depthDesc));
 				renderTarget->setDepthTexture(depthTarget);
 			}
+
+			version++;
 		}
 
 		renderTarget->setViewPort(Rect4i(Vector2i(), size));

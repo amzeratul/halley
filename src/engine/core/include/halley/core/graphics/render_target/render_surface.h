@@ -15,6 +15,7 @@ namespace Halley {
 	struct RenderSurfaceOptions {
 		bool useFiltering = false;
 		bool createDepthStencil = true;
+		String name;
 	};
 
 	class RenderSurface {
@@ -38,5 +39,7 @@ namespace Halley {
 		Vector2i curRenderSize;
 
 		std::shared_ptr<Material> material;
+
+		int version = 0;
 	};
 }
