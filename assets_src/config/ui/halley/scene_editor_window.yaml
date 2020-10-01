@@ -53,7 +53,7 @@ children:
           border: [10, 10, 10, 10]
           fill: right
           children: []
-        - widget: { id: debugConsole, class: debugConsole, size: [512, 256], active: false }
+        - widget: { id: debugConsole, class: debugConsole, size: [640, 320], active: false }
           proportion: 1
           border: [10, 10, 10, 10]
           fill: [ bottom, left ]

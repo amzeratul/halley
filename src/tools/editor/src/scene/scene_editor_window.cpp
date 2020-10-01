@@ -728,8 +728,14 @@ bool SceneEditorWindow::isValidEntityTree(const ConfigNode& node) const
 
 void SceneEditorWindow::toggleConsole()
 {
-	auto w = getWidget("debugConsole");
-	w->setActive(!w->isActive());
+	auto console = getWidgetAs<UIDebugConsole>("debugConsole");
+	const bool newState = !console->isActive();
+
+	if (newState) {
+		console->show();
+	} else {
+		console->hide();
+	}
 }
 
 void SceneEditorWindow::setupConsoleCommands()
