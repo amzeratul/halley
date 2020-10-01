@@ -180,6 +180,7 @@ void SceneEditorWindow::unloadScene()
 	sceneData.reset();
 	currentEntityScene.reset();
 	entityEditor->unloadEntity();
+	entityEditor->resetFieldFactories();
 }
 
 void SceneEditorWindow::update(Time t, bool moved)

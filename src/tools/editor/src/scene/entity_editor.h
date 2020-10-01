@@ -22,6 +22,7 @@ namespace Halley {
 		void setSceneEditorWindow(SceneEditorWindow& sceneEditor);
 		void setECSData(ECSData& data);
 		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
+		void resetFieldFactories();
 
 		bool loadEntity(const String& id, ConfigNode& data, const ConfigNode* prefabData, bool force, Resources& gameResources);
 		void unloadEntity();

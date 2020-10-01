@@ -14,7 +14,7 @@ EntityEditor::EntityEditor(String id, UIFactory& factory)
 	: UIWidget(std::move(id), Vector2f(200, 30), UISizer(UISizerType::Vertical))
 	, factory(factory)
 {
-	addFieldFactories(EntityEditorFactories::getDefaultFactories());
+	resetFieldFactories();
 	makeUI();
 	reloadEntity();
 }
@@ -437,4 +437,10 @@ void EntityEditor::addFieldFactories(std::vector<std::unique_ptr<IComponentEdito
 	for (auto& factory: factories) {
 		fieldFactories[factory->getFieldType()] = std::move(factory);
 	}
+}
+
+void EntityEditor::resetFieldFactories()
+{
+	fieldFactories.clear();
+	addFieldFactories(EntityEditorFactories::getDefaultFactories());
 }
