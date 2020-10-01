@@ -100,6 +100,11 @@ void UIDebugConsoleController::removeCommands(UIDebugConsoleCommands& commandSet
 	commands.erase(std::remove(commands.begin(), commands.end(), &commandSet), commands.end());
 }
 
+void UIDebugConsoleController::clearCommands()
+{
+	commands.clear();
+}
+
 std::vector<StringUTF32> UIDebugConsoleController::getAutoComplete(const StringUTF32& line) const
 {
 	std::vector<StringUTF32> results;

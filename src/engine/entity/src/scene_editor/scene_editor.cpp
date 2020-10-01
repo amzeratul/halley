@@ -362,6 +362,10 @@ std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e)
 	return {};
 }
 
+void SceneEditor::setupConsoleCommands(UIDebugConsoleController& controller)
+{
+}
+
 Vector2f SceneEditor::roundPosition(Vector2f pos) const
 {
 	return roundPosition(pos, camera.getZoom());

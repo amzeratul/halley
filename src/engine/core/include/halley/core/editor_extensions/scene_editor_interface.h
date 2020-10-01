@@ -8,6 +8,7 @@
 #include <optional>
 
 namespace Halley {
+	class UIDebugConsoleController;
 	enum class SceneEditorTool;
 	class UUID;
 	class RenderContext;
@@ -130,6 +131,7 @@ namespace Halley {
 
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;
+    	virtual void setupConsoleCommands(UIDebugConsoleController& controller) = 0;
         virtual void onSceneLoaded(AssetType assetType, const String& assetId) = 0;
     };
 

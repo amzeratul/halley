@@ -155,6 +155,11 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 
 		// Custom UI
 		setCustomUI(gameBridge->makeCustomUI());
+
+		// Console
+		setupConsoleCommands();
+
+		// Done
 		gameBridge->onSceneLoaded(assetType, origPrefab.getAssetId());
 	}
 }
@@ -725,4 +730,11 @@ void SceneEditorWindow::toggleConsole()
 {
 	auto w = getWidget("debugConsole");
 	w->setActive(!w->isActive());
+}
+
+void SceneEditorWindow::setupConsoleCommands()
+{
+	auto controller = getWidgetAs<UIDebugConsole>("debugConsole")->getController();
+	controller->clearCommands();
+	gameBridge->setupConsoleCommands(*controller);
 }

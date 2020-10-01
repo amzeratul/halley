@@ -116,5 +116,6 @@ namespace Halley {
 		bool isValidEntityTree(const ConfigNode& node) const;
 
 		void toggleConsole();
+		void setupConsoleCommands();
 	};
 }
