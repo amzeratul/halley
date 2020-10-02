@@ -9,16 +9,8 @@
 
 using namespace Halley;
 
-StatsView::StatsView(Resources& resources, const HalleyAPI& api)
-	: resources(resources)
-	, api(api)
-	, timer(api.core->isDevMode() ? 300 : 30)
-{}
-
-void StatsView::draw(RenderContext& context)
+void ScreenOverlay::draw(RenderContext& context)
 {
-	timer.beginSample();
-	
 	const auto viewPort = Rect4f(context.getDefaultRenderTarget().getViewPort());
 	const auto targetSize = Vector2f(1280, 720);
 	const auto zoom2d = viewPort.getSize() / targetSize;
@@ -29,10 +21,13 @@ void StatsView::draw(RenderContext& context)
 		paint(painter);
 		painter.flush();
 	});
-
-	timer.endSample();
-	drawing = true;
 }
+
+StatsView::StatsView(Resources& resources, const HalleyAPI& api)
+	: resources(resources)
+	, api(api)
+	, timer(api.core->isDevMode() ? 300 : 30)
+{}
 
 void StatsView::update()
 {
@@ -41,6 +36,14 @@ void StatsView::update()
 		timer.endSample();
 	}
 	drawing = false;
+}
+
+void StatsView::draw(RenderContext& context)
+{
+	timer.beginSample();
+	draw(context);
+	timer.endSample();
+	drawing = true;
 }
 
 void StatsView::setWorld(const World* world)

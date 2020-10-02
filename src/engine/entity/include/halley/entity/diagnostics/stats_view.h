@@ -12,15 +12,25 @@ namespace Halley {
     class RenderContext;
     class World;
 
-	class StatsView {
+	class ScreenOverlay {
+	public:
+		virtual ~ScreenOverlay() = default;
+		
+        virtual void draw(RenderContext& context);
+
+		virtual void update() = 0;
+
+	protected:
+        virtual void paint(Painter& painter) = 0;
+	};
+
+	class StatsView : public ScreenOverlay {
     public:
         StatsView(Resources& resources, const HalleyAPI& api);
         virtual ~StatsView() = default;
 
-        void draw(RenderContext& context);
-
-		virtual void update();
-        virtual void paint(Painter& painter) = 0;
+		void update() override;
+		void draw(RenderContext& context) override;
 
 		void setWorld(const World* world);
 
