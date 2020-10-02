@@ -39,7 +39,7 @@ namespace Halley {
 
 		std::unique_ptr<DevConServer> devConServer;
 
-		bool softCursor;
+		bool softCursor = false;
 
 		void initSprites();
 		void createUI();
