@@ -99,7 +99,7 @@ void EditorRootStage::setSoftCursor(bool enabled)
 {
 	softCursor = enabled;
 	if (enabled) {
-		cursor = Sprite().setImage(getResources(), "ui/cursor.png").setAbsolutePivot(Vector2f(4, 4));
+		cursor = Sprite().setImage(getResources(), "ui/cursor.png").setAbsolutePivot(Vector2f(2, 2));
 	}
 	getSystemAPI().showCursor(!enabled);
 }
