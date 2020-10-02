@@ -225,6 +225,10 @@ void UIRoot::receiveKeyPress(KeyboardKeyPress key)
 
 void UIRoot::onUnhandledKeyPress(KeyboardKeyPress key)
 {
+	if (unhandledKeyPressListener && unhandledKeyPressListener(key)) {
+		return;
+	}
+	
 	if (key.is(KeyCode::Tab)) {
 		focusNext(false);
 	}
@@ -240,6 +244,11 @@ void UIRoot::registerKeyPressListener(std::shared_ptr<UIWidget> widget, int prio
 	{
 		return a.second > b.second;
 	});
+}
+
+void UIRoot::setUnhandledKeyPressListener(std::function<bool(KeyboardKeyPress)> handler)
+{
+	unhandledKeyPressListener = std::move(handler);
 }
 
 void UIRoot::makeToolTip(const UIStyle& style)

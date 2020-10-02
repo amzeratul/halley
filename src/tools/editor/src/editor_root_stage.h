@@ -19,6 +19,9 @@ namespace Halley {
 		void onVariableUpdate(Time time) override;
 		void onRender(RenderContext& context) const override;
 
+		void setSoftCursor(bool enabled);
+		bool isSoftCursor() const;
+
 	private:
 		HalleyEditor& editor;
 		I18N i18n;
@@ -28,12 +31,15 @@ namespace Halley {
 
 		Sprite halleyLogo;
 		Sprite background;
+		Sprite cursor;
 
 		std::unique_ptr<EditorUIFactory> uiFactory;
 		std::unique_ptr<UIRoot> ui;
 		std::shared_ptr<UIWidget> topLevelUI;
 
 		std::unique_ptr<DevConServer> devConServer;
+
+		bool softCursor;
 
 		void initSprites();
 		void createUI();

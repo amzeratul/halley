@@ -84,7 +84,29 @@ void EditorRootStage::onRender(RenderContext& context) const
 		spritePainter.start();
 		ui->draw(spritePainter, 1, 0);
 		spritePainter.draw(1, painter);
+
+		// Cursor
+		if (softCursor) {
+			cursor
+				.clone()
+				.setPosition(getInputAPI().getMouse(0)->getPosition())
+				.draw(painter);
+		}
 	});
+}
+
+void EditorRootStage::setSoftCursor(bool enabled)
+{
+	softCursor = enabled;
+	if (enabled) {
+		cursor = Sprite().setImage(getResources(), "ui/cursor.png").setAbsolutePivot(Vector2f(4, 4));
+	}
+	getSystemAPI().showCursor(!enabled);
+}
+
+bool EditorRootStage::isSoftCursor() const
+{
+	return softCursor;
 }
 
 void EditorRootStage::initSprites()
@@ -123,6 +145,15 @@ void EditorRootStage::createUI()
 	uiFactory = std::make_unique<EditorUIFactory>(getAPI(), getResources(), i18n);
 	ui = std::make_unique<UIRoot>(getAPI());
 	ui->makeToolTip(uiFactory->getStyle("tooltip"));
+
+	ui->setUnhandledKeyPressListener([=] (KeyboardKeyPress key) -> bool
+	{
+		if (key.is(KeyCode::F2)) {
+			setSoftCursor(!isSoftCursor());
+			return true;
+		}
+		return false;
+	});
 }
 
 void EditorRootStage::createLoadProjectUI()
