@@ -41,7 +41,7 @@ void StatsView::update()
 void StatsView::draw(RenderContext& context)
 {
 	timer.beginSample();
-	draw(context);
+	ScreenOverlay::draw(context);
 	timer.endSample();
 	drawing = true;
 }
