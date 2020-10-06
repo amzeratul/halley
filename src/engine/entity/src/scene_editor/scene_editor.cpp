@@ -254,7 +254,7 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 
 void SceneEditor::setSelectedEntity(const UUID& id, ConfigNode& entityData)
 {
-	const auto curId = selectedEntity ? selectedEntity.value().getUUID() : UUID();
+	const auto curId = selectedEntity ? selectedEntity.value().getInstanceUUID() : UUID();
 	if (id != curId) {
 		selectedEntity.reset();
 		if (id.isValid()) {
@@ -382,7 +382,7 @@ void SceneEditor::onInit()
 
 EntityRef SceneEditor::getEntity(const UUID& id) const
 {
-	const auto curId = selectedEntity ? selectedEntity.value().getUUID() : UUID();
+	const auto curId = selectedEntity ? selectedEntity.value().getInstanceUUID() : UUID();
 	if (curId == id) {
 		return selectedEntity.value();
 	} else {
@@ -436,7 +436,7 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 	if (bestEntity.isValid()) {
 		std::vector<UUID> uuids;
 		for (auto e = bestEntity; e.isValid(); e = e.getParent()) {
-			uuids.push_back(e.getUUID());
+			uuids.push_back(e.getInstanceUUID());
 		}
 		output.newSelection = uuids;
 	} else {

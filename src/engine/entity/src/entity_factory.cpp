@@ -38,7 +38,7 @@ EntityRef EntityFactory::createEntity(const String& prefabName)
 EntityRef EntityFactory::createEntity(const ConfigNode& node)
 {
 	startContext();
-	return createEntityTree(node, nullptr);
+	return createEntityTree(node, nullptr, false);
 }
 
 EntityRef EntityFactory::createPrefab(std::shared_ptr<const Prefab> prefab)
@@ -53,7 +53,7 @@ EntityRef EntityFactory::createPrefab(std::shared_ptr<const Prefab> prefab)
 		}
 		
 		startContext();
-		return createEntityTree(node, nullptr);
+		return createEntityTree(node, nullptr, true);
 	}
 }
 
@@ -76,22 +76,56 @@ EntityScene EntityFactory::createScene(std::shared_ptr<const Prefab> prefab)
 
 void EntityFactory::createEntityTreeForScene(const ConfigNode& node, EntityScene& curScene, std::shared_ptr<const Prefab> prefab, std::optional<int> index)
 {
-	auto entity = createEntityTree(node, &curScene);
+	auto entity = createEntityTree(node, &curScene, false);
 	curScene.addPrefabReference(prefab, entity, index);
 	curScene.addRootEntity(entity);
 }
 
-EntityRef EntityFactory::createEntityTree(const ConfigNode& node, EntityScene* scene)
+EntityRef EntityFactory::createEntityTree(const ConfigNode& node, EntityScene* scene, bool fromPrefab)
 {
-	auto entity = createEntity(std::optional<EntityRef>(), node, false, scene);
-	doUpdateEntityTree(entity, node, false);
+	auto entity = createEntity(std::optional<EntityRef>(), node, false, scene, fromPrefab, true);
+	doUpdateEntityTree(entity, node, false, fromPrefab);
 	return entity;
+}
+void EntityFactory::rebuildPrefabContext(const ConfigNode& treeNode)
+{
+	if (!treeNode.hasKey("prefabUUID")) {
+		return;
+	}
+	
+	auto& currentMapping = context.entityContext->uuidMapping.back();
+	const auto& instanceUUID = getUUID(treeNode["uuid"].asBytes());
+	const auto& prefabUUID = getUUID(treeNode["prefabUUID"].asBytes());
+	if (currentMapping.find(prefabUUID) != currentMapping.end()) {
+		return;
+	}
+
+	currentMapping[prefabUUID] = instanceUUID;
+	if (treeNode["children"].getType() == ConfigNodeType::Sequence) {
+		for (const auto& childNode : treeNode["children"].asSequence()) {
+			rebuildPrefabContext(childNode);
+		}
+	}
+}
+
+void EntityFactory::rebuildPrefabContext(EntityRef& entity)
+{
+	auto& currentMapping = context.entityContext->uuidMapping.back();
+	if (currentMapping.find(entity.getPrefabUUID()) != currentMapping.end()) {
+		return;
+	}
+	
+	currentMapping[entity.getPrefabUUID()] = entity.getInstanceUUID();
+	for (auto child : entity.getChildren()) {
+		rebuildPrefabContext(child);
+	}
 }
 
 void EntityFactory::rebuildContext(EntityRef& entity, const ConfigNode& node)
 {
 	const auto uuid = getUUID(node["uuid"]); // Use UUID in parent, not in prefab
-	context.entityContext->uuids[uuid] = entity.getEntityId();
+	context.entityContext->uuids[uuid] = entity.getEntityId();	
+	// context.entityContext->uuidMapping.back()[entity.getPrefabUUID()] = uuid;
 	if (node["children"].getType() == ConfigNodeType::Sequence) {
 		for (const auto& childNode : node["children"].asSequence()) {
 			auto child = world.findEntity(UUID(childNode["uuid"].asBytes()));
@@ -102,31 +136,51 @@ void EntityFactory::rebuildContext(EntityRef& entity, const ConfigNode& node)
 	}
 }
 
-EntityRef EntityFactory::createEntity(std::optional<EntityRef> parent, const ConfigNode& treeNode, bool populate, EntityScene* curScene)
+EntityRef EntityFactory::createEntity(std::optional<EntityRef> parent, const ConfigNode& treeNode, bool populate, EntityScene* curScene, bool fromPrefab, bool isPrefabRoot)
 {
 	const bool isPrefab = treeNode.hasKey("prefab");
 	const auto prefab = isPrefab ? getPrefab(treeNode["prefab"].asString()) : std::shared_ptr<const Prefab>();
 	const auto& node = isPrefab ? (prefab ? prefab->getRoot() : dummyPrefab) : treeNode;
+
+	if (isPrefab || isPrefabRoot) {
+		context.entityContext->uuidMapping.push_back({});
+		rebuildPrefabContext(treeNode);
+	}
+
+	UUID uuid;
+	if (fromPrefab && !isPrefabRoot) {
+		const auto& nodeUUID = getUUID(treeNode["uuid"]);
+		if (context.entityContext->uuidMapping.back().find(nodeUUID) != context.entityContext->uuidMapping.back().end()) {
+			uuid = context.entityContext->uuidMapping.back()[nodeUUID];
+		}
+	}
+	else {
+		uuid = getUUID(treeNode["uuid"]);
+	}
 	
-	const auto uuid = getUUID(treeNode["uuid"]); // Use UUID in parent, not in prefab
-	auto entity = world.createEntity(uuid, node["name"].asString(""), parent, true);
+	auto entity = world.createEntity(uuid, node["name"].asString(""), parent, true, getUUID(node["uuid"]));
 
 	if (curScene && prefab) {
 		curScene->addPrefabReference(prefab, entity);
 	}
 	
-	context.entityContext->uuids[uuid] = entity.getEntityId();
-
+	context.entityContext->uuids[entity.getInstanceUUID()] = entity.getEntityId();
+	context.entityContext->uuidMapping.back()[entity.getPrefabUUID()] = entity.getInstanceUUID();
+	
 	if (populate) {
 		updateEntity(entity, treeNode, UpdateMode::UpdateAll);
 	}
 
 	if (node["children"].getType() == ConfigNodeType::Sequence) {
 		for (auto& childNode: node["children"].asSequence()) {
-			createEntity(entity, childNode, populate, curScene);
+			createEntity(entity, childNode, populate, curScene, fromPrefab || isPrefab, false);
 		}
 	}
 
+	if (isPrefab || isPrefabRoot) {
+		context.entityContext->uuidMapping.pop_back();
+	}
+	
 	return entity;
 }
 
@@ -137,7 +191,7 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, 
 	auto* overrideNodes = isPrefab ? &treeNode : nullptr;
 	
 	std::vector<int> idsUpdated;
-
+	
 	// Prepare component overrides
 	std::map<String, const ConfigNode*> overrides;
 	if (overrideNodes) {
@@ -223,7 +277,7 @@ void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node, 
 	if (doRebuildContext) {
 		rebuildContext(entity, node);
 	}
-	doUpdateEntityTree(entity, node, true);
+	doUpdateEntityTree(entity, node, true, false);
 }
 
 void EntityFactory::updateScene(std::vector<EntityRef>& entities, const ConfigNode& node)
@@ -237,16 +291,16 @@ void EntityFactory::updateScene(std::vector<EntityRef>& entities, const ConfigNo
 		}
 		
 		for (auto& e: entities) {
-			const auto iter = nodes.find(e.getUUID().toString());
+			const auto iter = nodes.find(e.getInstanceUUID().toString());
 			if (iter != nodes.end()) {
-				doUpdateEntityTree(e, *iter->second, true);
+				doUpdateEntityTree(e, *iter->second, true, false);
 			}
 		}
 	} else {
 		if (entities.size() != 1) {
 			throw Exception("Expecting only one entity for non-sequence scene", HalleyExceptions::Entity);
 		}
-		doUpdateEntityTree(entities.at(0), node, true);
+		doUpdateEntityTree(entities.at(0), node, true, false);
 	}
 }
 
@@ -261,24 +315,30 @@ ConfigNode EntityFactory::serializeEntity(EntityRef entity)
 	}
 
 	result["name"] = entity.getName();
-	result["uuid"] = entity.getUUID().getBytes();
+	result["uuid"] = entity.getInstanceUUID().getBytes();
+	result["prefabUUID"] = entity.getPrefabUUID().getBytes();
 	result["components"] = std::move(components);
 
 	auto parent = entity.tryGetParent();
 	if (parent) {
-		result["parent"] = parent->getUUID().getBytes();
+		result["parent"] = parent->getInstanceUUID().getBytes();
 	}
 	
 	return result;
 }
 
-void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& treeNode, bool refreshing)
+void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& treeNode, bool refreshing, bool isPrefabRoot)
 {
-	updateEntity(entity, treeNode, refreshing ? UpdateMode::UpdateAllDeleteOld : UpdateMode::UpdateAll);
-
 	const bool isPrefab = treeNode.hasKey("prefab");
 	const auto& node = isPrefab ? getPrefabNode(treeNode["prefab"].asString()) : treeNode;
 
+	if (isPrefab || isPrefabRoot) {
+		context.entityContext->uuidMapping.push_back({});
+		rebuildPrefabContext(entity);
+	}
+	
+	updateEntity(entity, treeNode, refreshing ? UpdateMode::UpdateAllDeleteOld : UpdateMode::UpdateAll);
+	
 	const auto& childNodes = node["children"].getType() == ConfigNodeType::Sequence ? node["children"].asSequence() : ConfigNode::SequenceType();
 	const size_t nNodes = childNodes.size();
 
@@ -294,7 +354,7 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& tree
 	auto& entityChildren = entity.getRawChildren();
 	for (size_t childIndex = 0; childIndex < entityChildren.size();) {
 		auto childEntity = EntityRef(*entityChildren[childIndex], world);
-		const auto& entityUUID = childEntity.getUUID();
+		const auto& entityUUID = childEntity.getPrefabUUID();
 
 		// Find which node to use based on UUID
 		bool found = false;
@@ -305,7 +365,7 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& tree
 			if (entityUUID == nodeUUIDs[nodeIdx]) {
 				nodeConsumed[nodeIdx] = 1;
 				found = true;
-				doUpdateEntityTree(childEntity, childNodes[nodeIdx], refreshing);
+				doUpdateEntityTree(childEntity, childNodes[nodeIdx], refreshing, false);
 				break;
 			}
 		}
@@ -322,11 +382,15 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& tree
 	// Insert new nodes
 	for (size_t i = 0; i < nNodes; ++i) {
 		if (!nodeConsumed[i]) {
-			createEntity(entity, childNodes[i], true, nullptr);
+			createEntity(entity, childNodes[i], true, nullptr, isPrefab, true);
 		}
 	}
 
 	entity.sortChildren(nodeUUIDs);
+
+	if (isPrefab || isPrefabRoot) {
+		context.entityContext->uuidMapping.pop_back();
+	}
 }
 
 std::shared_ptr<const Prefab> EntityFactory::getPrefab(const String& id) const
@@ -347,7 +411,7 @@ const ConfigNode& EntityFactory::getPrefabNode(const String& id) const
 void EntityFactory::startContext()
 {
 	// Warning: this makes this whole class not thread safe
-	context.entityContext->clear();
+	context.entityContext->clear();	
 }
 
 ConfigNodeSerializationContext EntityFactory::makeContext() const

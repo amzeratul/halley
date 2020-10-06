@@ -115,9 +115,14 @@ namespace Halley {
 			return fromPrefab;
 		}
 		
-		const UUID& getUUID() const
+		const UUID& getPrefabUUID() const
 		{
-			return uuid;
+			return prefabUUID;
+		}
+
+		const UUID& getInstanceUUID() const
+		{
+			return instanceUUID;
 		}
 
 		FamilyMaskType getMask() const;
@@ -150,7 +155,8 @@ namespace Halley {
 		FamilyMaskType mask;
 		EntityId entityId;
 		String name;
-		UUID uuid;
+		UUID instanceUUID;
+		UUID prefabUUID;
 
 		Entity();
 		void destroyComponents(ComponentDeleterTable& storage);
@@ -198,6 +204,7 @@ namespace Halley {
 		void detachChildren();
 		void markHierarchyDirty();
 		void propagateChildrenChange();
+		void propagateChildWorldPartition(uint8_t newWorldPartition);
 
 		void doDestroy(bool updateParenting);
 
@@ -378,10 +385,16 @@ namespace Halley {
 			entity->name = std::move(name);
 		}
 
-		const UUID& getUUID() const
+		const UUID& getInstanceUUID() const
 		{
 			Expects(entity != nullptr);
-			return entity->uuid;
+			return entity->instanceUUID;
+		}
+
+		const UUID& getPrefabUUID() const
+		{
+			Expects(entity != nullptr);
+			return entity->prefabUUID;
 		}
 
 		void keepOnlyComponentsWithIds(const std::vector<int>& ids)
@@ -602,9 +615,14 @@ namespace Halley {
 			return entity->name;
 		}
 
-		const UUID& getUUID() const
+		const UUID& getInstanceUUID() const
 		{
-			return entity->uuid;
+			return entity->instanceUUID;
+		}
+
+		const UUID& getPrefabUUID() const
+		{
+			return entity->prefabUUID;
 		}
 
 		bool hasParent() const
