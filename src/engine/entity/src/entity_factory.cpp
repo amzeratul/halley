@@ -277,7 +277,7 @@ void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node, 
 	if (doRebuildContext) {
 		rebuildContext(entity, node);
 	}
-	doUpdateEntityTree(entity, node, true, false);
+	doUpdateEntityTree(entity, node, true, true);
 }
 
 void EntityFactory::updateScene(std::vector<EntityRef>& entities, const ConfigNode& node)
@@ -386,7 +386,7 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& tree
 		}
 	}
 
-	entity.sortChildren(nodeUUIDs);
+	entity.sortChildrenByPrefabUUIDs(nodeUUIDs);
 
 	if (isPrefab || isPrefabRoot) {
 		context.entityContext->uuidMapping.pop_back();

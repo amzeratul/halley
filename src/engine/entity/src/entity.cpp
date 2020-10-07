@@ -209,7 +209,7 @@ void Entity::destroy()
 	doDestroy(true);
 }
 
-void Entity::sortChildren(const std::vector<UUID>& uuids)
+void Entity::sortChildrenByPrefabUUIDs(const std::vector<UUID>& uuids)
 {
 	const size_t nChildren = children.size();
 
@@ -217,7 +217,7 @@ void Entity::sortChildren(const std::vector<UUID>& uuids)
 	if (nChildren == uuids.size()) {
 		bool allMatch = true;
 		for (size_t i = 0; i < nChildren; ++i) {
-			if (children[i]->instanceUUID != uuids[i]) {
+			if (children[i]->prefabUUID != uuids[i]) {
 				allMatch = false;
 				break;
 			}

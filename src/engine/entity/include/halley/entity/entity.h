@@ -131,7 +131,7 @@ namespace Halley {
 		void refresh(MaskStorage& storage, ComponentDeleterTable& table);
 		void destroy();
 		
-		void sortChildren(const std::vector<UUID>& uuids);
+		void sortChildrenByPrefabUUIDs(const std::vector<UUID>& uuids);
 
 		void setWorldPartition(uint8_t partition);
 
@@ -559,10 +559,10 @@ namespace Halley {
 			return entity->isFromPrefab();
 		}
 
-		void sortChildren(const std::vector<UUID>& uuids)
+		void sortChildrenByPrefabUUIDs(const std::vector<UUID>& uuids)
 		{
 			Expects(entity);
-			entity->sortChildren(uuids);
+			entity->sortChildrenByPrefabUUIDs(uuids);
 		}
 
 	private:
