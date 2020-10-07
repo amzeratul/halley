@@ -61,11 +61,13 @@ namespace Halley {
 		ConfigNode dummyPrefab;
 
 		void createEntityTreeForScene(const ConfigNode& node, EntityScene& curScene, std::shared_ptr<const Prefab> prefab, std::optional<int> index = {});
-		EntityRef createEntityTree(const ConfigNode& node, EntityScene* curScene);
-		EntityRef createEntity(std::optional<EntityRef> parent, const ConfigNode& node, bool populate, EntityScene* curScene);
+		EntityRef createEntityTree(const ConfigNode& node, EntityScene* curScene, bool fromPrefab);
+		EntityRef createEntity(std::optional<EntityRef> parent, const ConfigNode& node, bool populate, EntityScene* curScene, bool fromPrefab, bool isPrefabRoot);
 		
 		void updateEntity(EntityRef& entity, const ConfigNode& node, UpdateMode mode = UpdateMode::UpdateAll);
-		void doUpdateEntityTree(EntityRef& entity, const ConfigNode& node, bool refreshing);
+		void doUpdateEntityTree(EntityRef& entity, const ConfigNode& node, bool refreshing, bool isPrefabRoot);
+		void rebuildPrefabContext(const ConfigNode& treeNode);
+		void rebuildPrefabContext(EntityRef& entity);
 		void rebuildContext(EntityRef& entity, const ConfigNode& node);
 		
 		std::shared_ptr<const Prefab> getPrefab(const String& id) const;
@@ -81,6 +83,7 @@ namespace Halley {
 	public:
 		World& world;
 		std::map<UUID, EntityId> uuids;
+		std::vector<std::map<UUID, UUID>> uuidMapping; //prefab -> instance
 
 		EntitySerializationContext(World& world);
 

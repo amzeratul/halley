@@ -107,7 +107,10 @@ void Entity::setParent(Entity* newParent, bool propagate)
 		// Reparent
 		if (newParent) {
 			parent = newParent;
-			worldPartition = newParent->worldPartition;
+			if (worldPartition != newParent->worldPartition) {
+				worldPartition = newParent->worldPartition;				
+				propagateChildWorldPartition(worldPartition);
+			}
 			parent->children.push_back(this);
 			parent->propagateChildrenChange();
 		}
@@ -155,6 +158,14 @@ void Entity::propagateChildrenChange()
 	}
 }
 
+void Entity::propagateChildWorldPartition(uint8_t newWorldPartition)
+{
+	worldPartition = newWorldPartition;
+	for (auto& child : children) {
+		child->propagateChildWorldPartition(newWorldPartition);
+	}
+}
+
 FamilyMaskType Entity::getMask() const
 {
 	return mask;
@@ -198,7 +209,7 @@ void Entity::destroy()
 	doDestroy(true);
 }
 
-void Entity::sortChildren(const std::vector<UUID>& uuids)
+void Entity::sortChildrenByPrefabUUIDs(const std::vector<UUID>& uuids)
 {
 	const size_t nChildren = children.size();
 
@@ -206,7 +217,7 @@ void Entity::sortChildren(const std::vector<UUID>& uuids)
 	if (nChildren == uuids.size()) {
 		bool allMatch = true;
 		for (size_t i = 0; i < nChildren; ++i) {
-			if (children[i]->uuid != uuids[i]) {
+			if (children[i]->prefabUUID != uuids[i]) {
 				allMatch = false;
 				break;
 			}
@@ -220,7 +231,7 @@ void Entity::sortChildren(const std::vector<UUID>& uuids)
 	Vector<std::pair<Entity*, size_t>> pairs(nChildren);
 	
 	for (size_t i = 0; i < nChildren; ++i) {
-		const size_t idx = std::find(uuids.begin(), uuids.end(), children[i]->uuid) - uuids.begin();
+		const size_t idx = std::find(uuids.begin(), uuids.end(), children[i]->instanceUUID) - uuids.begin();
 		pairs[i] = std::make_pair(children[i], idx);
 	}
 

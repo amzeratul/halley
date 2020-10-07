@@ -149,7 +149,7 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 
 		// Show root
 		if (!sceneCreated.getEntities().empty()) {
-			panCameraToEntity(sceneCreated.getEntities().at(0).getUUID().toString());
+			panCameraToEntity(sceneCreated.getEntities().at(0).getInstanceUUID().toString());
 		}
 		currentEntityScene = sceneCreated;
 
