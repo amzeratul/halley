@@ -16,6 +16,7 @@
 #include "halley/tools/ecs/ecs_data.h"
 #include "halley/tools/project/project_loader.h"
 #include "halley/core/game/game.h"
+#include "halley/tools/yaml/yaml_convert.h"
 
 using namespace Halley;
 
@@ -220,7 +221,8 @@ Metadata Project::readMetadataFromDisk(const Path& filePath) const
 
 void Project::writeMetadataToDisk(const Path& filePath, const Metadata& metadata)
 {
-	const auto str = metadata.toYAMLString();
+	const auto config = metadata.toConfig();
+	const auto str = YAMLConvert::generateYAML(config, {});
 	auto data = Bytes(str.size());
 	memcpy(data.data(), str.c_str(), str.size());
 

@@ -2,6 +2,7 @@
 #include "halley/resources/resource_data.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/text/string_converter.h"
+#include "halley/file_formats/config_file.h"
 
 using namespace Halley;
 
@@ -168,19 +169,11 @@ String Metadata::toString() const
 	return ss.str();
 }
 
-String Metadata::toYAMLString() const
+ConfigNode Metadata::toConfig() const
 {
-	std::stringstream ss;
-	ss << "---\n";
+	ConfigNode::MapType result;
 	for (auto& e: entries) {
-		ss << e.first << ": ";
-		if (e.second.isNumber()) {
-			ss << e.second;
-		} else {
-			ss << "\"" << e.second << "\"";
-		}
-		ss << "\n";
+		result[e.first] = e.second;
 	}
-	ss << "...\n";
-	return ss.str();
+	return ConfigNode(std::move(result));
 }

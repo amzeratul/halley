@@ -9,6 +9,7 @@ namespace Halley
 	class Deserializer;
 	class Serializer;
 	class ResourceDataStatic;
+	class ConfigNode;
 
 	class Metadata
 	{
@@ -51,7 +52,7 @@ namespace Halley
 		bool operator!=(const Metadata& rhs) const;
 
 		String toString() const;
-		String toYAMLString() const;
+		ConfigNode toConfig() const;
 
 	private:
 		std::map<String, String> entries;
