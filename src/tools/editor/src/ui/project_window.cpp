@@ -165,6 +165,9 @@ void ProjectWindow::onUnloadDLL()
 	for (const auto& ss: resources.enumerate<SpriteSheet>()) {
 		resources.get<SpriteSheet>(ss)->clearMaterialCache();
 	}
+	for (const auto& ss: project.getGameResources().enumerate<SpriteSheet>()) {
+		project.getGameResources().get<SpriteSheet>(ss)->clearMaterialCache();
+	}
 }
 
 void ProjectWindow::onAssetsLoaded()
