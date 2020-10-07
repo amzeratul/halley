@@ -162,6 +162,9 @@ void ProjectWindow::onLoadDLL()
 void ProjectWindow::onUnloadDLL()
 {
 	destroyCustomUI();
+	for (const auto& ss: resources.enumerate<SpriteSheet>()) {
+		resources.get<SpriteSheet>(ss)->clearMaterialCache();
+	}
 }
 
 void ProjectWindow::onAssetsLoaded()
