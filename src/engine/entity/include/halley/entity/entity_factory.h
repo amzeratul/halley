@@ -28,7 +28,7 @@ namespace Halley {
 		EntityRef createPrefab(std::shared_ptr<const Prefab> prefab);
 		EntityScene createScene(std::shared_ptr<const Prefab> scene);
 		
-		void updateEntityTree(EntityRef& entity, const ConfigNode& node, bool doRebuildContext = false, bool isStub = false);
+		void updateEntityTree(EntityRef& entity, const ConfigNode& node, bool doRebuildContext = false);
 		void updateScene(std::vector<EntityRef>& entities, const ConfigNode& node);
 
 		ConfigNode serializeEntity(EntityRef entity);

@@ -272,7 +272,7 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, 
 	}
 }
 
-void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node, bool doRebuildContext, bool isStub)
+void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node, bool doRebuildContext)
 {
 	startContext();
 	if (doRebuildContext) {
