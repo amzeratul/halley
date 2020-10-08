@@ -24,11 +24,11 @@ namespace Halley {
 
 		EntityRef createEntity(const char* prefabName);
 		EntityRef createEntity(const String& prefabName);
-		EntityRef createEntity(const ConfigNode& node);
+		EntityRef createEntity(const ConfigNode& node, EntityRef stub = EntityRef());
 		EntityRef createPrefab(std::shared_ptr<const Prefab> prefab);
 		EntityScene createScene(std::shared_ptr<const Prefab> scene);
 		
-		void updateEntityTree(EntityRef& entity, const ConfigNode& node, bool doRebuildContext = false);
+		void updateEntityTree(EntityRef& entity, const ConfigNode& node, bool doRebuildContext = false, bool isStub = false);
 		void updateScene(std::vector<EntityRef>& entities, const ConfigNode& node);
 
 		ConfigNode serializeEntity(EntityRef entity);
@@ -61,8 +61,8 @@ namespace Halley {
 		ConfigNode dummyPrefab;
 
 		void createEntityTreeForScene(const ConfigNode& node, EntityScene& curScene, std::shared_ptr<const Prefab> prefab, std::optional<int> index = {});
-		EntityRef createEntityTree(const ConfigNode& node, EntityScene* curScene, bool fromPrefab);
-		EntityRef createEntity(std::optional<EntityRef> parent, const ConfigNode& node, bool populate, EntityScene* curScene, bool fromPrefab, bool isPrefabRoot);
+		EntityRef createEntityTree(const ConfigNode& node, EntityScene* curScene, bool fromPrefab, bool fromNewPrefab, EntityRef stub = EntityRef());
+		EntityRef createEntity(std::optional<EntityRef> parent, const ConfigNode& node, bool populate, EntityScene* curScene, bool fromPrefab, bool isPrefabRoot, bool fromNewPrefab, EntityRef stub = EntityRef());
 		
 		void updateEntity(EntityRef& entity, const ConfigNode& node, UpdateMode mode = UpdateMode::UpdateAll);
 		void doUpdateEntityTree(EntityRef& entity, const ConfigNode& node, bool refreshing, bool isPrefabRoot);

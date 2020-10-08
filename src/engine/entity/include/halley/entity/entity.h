@@ -125,6 +125,11 @@ namespace Halley {
 			return instanceUUID;
 		}
 
+		bool isStub() const
+		{
+			return stub;
+		}
+
 		FamilyMaskType getMask() const;
 		EntityId getEntityId() const;
 
@@ -157,6 +162,7 @@ namespace Halley {
 		String name;
 		UUID instanceUUID;
 		UUID prefabUUID;
+		bool stub;
 
 		Entity();
 		void destroyComponents(ComponentDeleterTable& storage);
@@ -198,7 +204,7 @@ namespace Halley {
 		ComponentDeleterTable& getComponentDeleterTable(World& world);
 
 		Entity* getParent() const { return parent; }
-		void setParent(Entity* parent, bool propagate = true);
+		void setParent(Entity* parent, bool propagate = true, int childIdx = -1);
 		const std::vector<Entity*>& getChildren() const { return children; }
 		void addChild(Entity& child);
 		void detachChildren();
@@ -397,6 +403,12 @@ namespace Halley {
 			return entity->prefabUUID;
 		}
 
+		bool isStub() const
+		{
+			Expects(entity != nullptr);
+			return entity->stub;
+		}
+		
 		void keepOnlyComponentsWithIds(const std::vector<int>& ids)
 		{
 			Expects(entity != nullptr);
@@ -422,10 +434,10 @@ namespace Halley {
 			return parent != nullptr ? EntityRef(*parent, *world) : std::optional<EntityRef>();
 		}
 
-		void setParent(EntityRef& parent)
+		void setParent(EntityRef& parent, int childIdx = -1)
 		{
 			Expects(entity != nullptr);
-			entity->setParent(parent.entity);
+			entity->setParent(parent.entity, true, childIdx);
 		}
 
 		void setParent()
@@ -623,6 +635,11 @@ namespace Halley {
 		const UUID& getPrefabUUID() const
 		{
 			return entity->prefabUUID;
+		}
+
+		bool isStub() const
+		{
+			return entity->stub;
 		}
 
 		bool hasParent() const
