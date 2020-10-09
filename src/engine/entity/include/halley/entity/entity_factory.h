@@ -61,12 +61,12 @@ namespace Halley {
 		ConfigNode dummyPrefab;
 
 		void createEntityTreeForScene(const ConfigNode& node, EntityScene& curScene, std::shared_ptr<const Prefab> prefab, std::optional<int> index = {});
-		EntityRef createEntityTree(const ConfigNode& node, EntityScene* curScene, bool fromPrefab);
-		EntityRef createEntity(std::optional<EntityRef> parent, const ConfigNode& node, bool populate, EntityScene* curScene, bool fromPrefab, bool isPrefabRoot);
+		EntityRef createEntityTree(const ConfigNode& node, EntityScene* curScene, bool fromPrefab, bool fromNewPrefab);
+		EntityRef createEntity(std::optional<EntityRef> parent, const ConfigNode& node, bool populate, EntityScene* curScene, bool fromPrefab, bool isPrefabRoot, bool fromNewPrefab);
 		
 		void updateEntity(EntityRef& entity, const ConfigNode& node, UpdateMode mode = UpdateMode::UpdateAll);
 		void doUpdateEntityTree(EntityRef& entity, const ConfigNode& node, bool refreshing, bool isPrefabRoot);
-		void rebuildPrefabContext(const ConfigNode& treeNode);
+		void rebuildPrefabContext(const ConfigNode& treeNode, bool isRoot = true);
 		void rebuildPrefabContext(EntityRef& entity);
 		void rebuildContext(EntityRef& entity, const ConfigNode& node);
 		

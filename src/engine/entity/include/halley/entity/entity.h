@@ -198,7 +198,7 @@ namespace Halley {
 		ComponentDeleterTable& getComponentDeleterTable(World& world);
 
 		Entity* getParent() const { return parent; }
-		void setParent(Entity* parent, bool propagate = true);
+		void setParent(Entity* parent, bool propagate = true, int childIdx = -1);
 		const std::vector<Entity*>& getChildren() const { return children; }
 		void addChild(Entity& child);
 		void detachChildren();
@@ -396,7 +396,7 @@ namespace Halley {
 			Expects(entity != nullptr);
 			return entity->prefabUUID;
 		}
-
+		
 		void keepOnlyComponentsWithIds(const std::vector<int>& ids)
 		{
 			Expects(entity != nullptr);
@@ -422,10 +422,10 @@ namespace Halley {
 			return parent != nullptr ? EntityRef(*parent, *world) : std::optional<EntityRef>();
 		}
 
-		void setParent(EntityRef& parent)
+		void setParent(EntityRef& parent, int childIdx = -1)
 		{
 			Expects(entity != nullptr);
-			entity->setParent(parent.entity);
+			entity->setParent(parent.entity, true, childIdx);
 		}
 
 		void setParent()
