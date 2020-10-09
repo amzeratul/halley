@@ -149,6 +149,7 @@ namespace Halley {
 		bool serializable : 1;
 		bool reloaded : 1;
 		bool fromPrefab : 1;
+		bool stub : 1;
 		
 		uint8_t hierarchyRevision = 0;
 		uint8_t childrenRevision = 0;
@@ -162,7 +163,6 @@ namespace Halley {
 		String name;
 		UUID instanceUUID;
 		UUID prefabUUID;
-		bool stub;
 
 		Entity();
 		void destroyComponents(ComponentDeleterTable& storage);

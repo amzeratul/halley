@@ -274,11 +274,16 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, 
 
 void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node, bool doRebuildContext)
 {
-	startContext();
-	if (doRebuildContext) {
-		rebuildContext(entity, node);
+	if (entity.isStub()) {
+		createEntity(node, entity);
 	}
-	doUpdateEntityTree(entity, node, true, true);
+	else {
+		startContext();
+		if (doRebuildContext) {
+			rebuildContext(entity, node);
+		}
+		doUpdateEntityTree(entity, node, true, true);
+	}
 }
 
 void EntityFactory::updateScene(std::vector<EntityRef>& entities, const ConfigNode& node)
