@@ -73,7 +73,7 @@ namespace Halley {
 
 		EntityRef createEntity(String name = "", std::optional<EntityRef> parent = {});
 		EntityRef createEntity(String name, EntityId parentId);
-		EntityRef createEntity(UUID uuid, String name = "", std::optional<EntityRef> parent = {}, bool fromPrefab = false, UUID prefabUUID = UUID(), bool isStub = false);
+		EntityRef createEntity(UUID uuid, String name = "", std::optional<EntityRef> parent = {}, bool fromPrefab = false, UUID prefabUUID = UUID());
 		EntityRef createEntity(UUID uuid, String name, EntityId parentId);
 
 		void destroyEntity(EntityId id);

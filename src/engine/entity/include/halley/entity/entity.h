@@ -125,11 +125,6 @@ namespace Halley {
 			return instanceUUID;
 		}
 
-		bool isStub() const
-		{
-			return stub;
-		}
-
 		FamilyMaskType getMask() const;
 		EntityId getEntityId() const;
 
@@ -149,7 +144,6 @@ namespace Halley {
 		bool serializable : 1;
 		bool reloaded : 1;
 		bool fromPrefab : 1;
-		bool stub : 1;
 		
 		uint8_t hierarchyRevision = 0;
 		uint8_t childrenRevision = 0;
@@ -402,12 +396,6 @@ namespace Halley {
 			Expects(entity != nullptr);
 			return entity->prefabUUID;
 		}
-
-		bool isStub() const
-		{
-			Expects(entity != nullptr);
-			return entity->stub;
-		}
 		
 		void keepOnlyComponentsWithIds(const std::vector<int>& ids)
 		{
@@ -635,11 +623,6 @@ namespace Halley {
 		const UUID& getPrefabUUID() const
 		{
 			return entity->prefabUUID;
-		}
-
-		bool isStub() const
-		{
-			return entity->stub;
 		}
 
 		bool hasParent() const

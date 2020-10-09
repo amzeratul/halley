@@ -169,7 +169,7 @@ EntityRef World::createEntity(String name, EntityId parentId)
 	return createEntity(UUID(), name, getEntity(parentId));
 }
 
-EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> parent, bool fromPrefab, UUID prefabUUID, bool isStub)
+EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> parent, bool fromPrefab, UUID prefabUUID)
 {
 	if (!uuid.isValid()) {
 		uuid = UUID::generate();
@@ -182,7 +182,6 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 	entity->instanceUUID = uuid;
 	entity->fromPrefab = fromPrefab;
 	entity->prefabUUID = prefabUUID;
-	entity->stub = isStub;
 	
 	entitiesPendingCreation.push_back(entity);
 	allocateEntity(entity);

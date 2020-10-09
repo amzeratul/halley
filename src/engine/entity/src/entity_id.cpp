@@ -3,6 +3,7 @@
 #include "world.h"
 #include "halley/maths/uuid.h"
 #include "halley/entity/entity_factory.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -26,5 +27,14 @@ EntityId EntityId::fromUUID(const String& uuidStr, ConfigNodeSerializationContex
 			return instanceIter->second;
 		}
 	}
+
+	Logger::logInfo("Trying to find " + uuidStr);
+	for (const auto& uuid : context.entityContext->uuids) {
+		Logger::logInfo("UUID: " + uuid.first);
+	}
+	for (const auto& uuidPair : context.entityContext->uuidMapping.back()) {
+		Logger::logInfo("UUID " + uuidPair.first + " " + uuidPair.second);
+	}
+	
 	return EntityId();
 }
