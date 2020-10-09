@@ -432,6 +432,20 @@ Vector4f ConfigNode::asVector4f() const
 	}
 }
 
+Range<float> ConfigNode::asFloatRange() const
+{
+	if (type == ConfigNodeType::Int2) {
+		return Range<float>(vec2iData.x, vec2iData.y);
+	} else if (type == ConfigNodeType::Float2) {
+		return Range<float>(vec2fData.x, vec2fData.y);
+	} else if (type == ConfigNodeType::Sequence) {
+		const auto& seq = asSequence();
+		return Range<float>(seq.at(0).asFloat(), seq.at(1).asFloat());
+	} else {
+		throw Exception(getNodeDebugId() + " is not a range type", HalleyExceptions::Resources);
+	}
+}
+
 const Bytes& ConfigNode::asBytes() const
 {
 	if (type == ConfigNodeType::Bytes) {

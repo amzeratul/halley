@@ -7,6 +7,8 @@
 #include "halley/resources/resource.h"
 #include <gsl/span>
 
+
+#include "halley/maths/range.h"
 #include "halley/maths/vector4.h"
 
 namespace Halley
@@ -121,6 +123,7 @@ namespace Halley
 		Vector2f asVector2f() const;
 		Vector4i asVector4i() const;
 		Vector4f asVector4f() const;
+		Range<float> asFloatRange() const;
 		String asString() const;
 		const Bytes& asBytes() const;
 		std::vector<String> asStringVector() const;
