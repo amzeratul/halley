@@ -285,6 +285,33 @@ namespace Halley {
 		}
 	};
 
+	template <typename K, typename V>
+	class ConfigNodeSerializer<std::map<K, V>>
+	{
+	public:
+		ConfigNode serialize(const std::map<K, V>& values, ConfigNodeSerializationContext& context)
+		{
+        	auto serializer = ConfigNodeSerializer<V>();
+        	ConfigNode result = ConfigNode::MapType();
+        	for (auto& [key, value]: values) {
+        		result[toString(key)] = serializer.serialize(value, context);
+        	}
+        	return result;
+		}
+		
+		std::map<K, V> deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
+		{
+			std::map<K, V> result;
+			if (node.getType() == ConfigNodeType::Map) {
+				auto map = node.asMap();
+				for (auto& s : map) {
+					result[fromString<K>(s.first)] = ConfigNodeSerializer<V>().deserialize(context, s.second);
+				}
+			}
+			return result;
+		}
+	};
+
 	template <typename T>
 	class ConfigNodeSerializer<OptionalLite<T>> {
 	public:
