@@ -82,7 +82,7 @@ UUID UUID::generate()
 	return result;
 }
 
-UUID UUID::hash(const UUID& one, const UUID& two)
+UUID UUID::generateFromUUIDs(const UUID& one, const UUID& two)
 {
 	const auto oneBytes = one.getBytes();
 	const auto twoBytes = two.getBytes();

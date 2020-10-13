@@ -155,7 +155,7 @@ EntityRef EntityFactory::createEntity(std::optional<EntityRef> parent, std::opti
 			uuid = context.entityContext->uuidMapping.back()[nodeUUID];
 		}
 		else {
-			uuid = UUID::hash(prefabRoot->getInstanceUUID(), getUUID(treeNode["uuid"]));
+			uuid = UUID::generateFromUUIDs(prefabRoot->getInstanceUUID(), getUUID(treeNode["uuid"]));
 		}
 	}
 	else if (!fromNewPrefab) {
