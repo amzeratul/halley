@@ -137,11 +137,12 @@ void MetalPainter::onUpdateProjection(Material& material) {
 }
 
 void MetalPainter::setBlending(BlendType blendType, MTLRenderPipelineColorAttachmentDescriptor* colorAttachment) {
+	const auto blendMode = blendType.mode;
 	Expects(
-		blendType == BlendType::Alpha || blendType == BlendType::AlphaPremultiplied || blendType == BlendType::Add ||
-		blendType == BlendType::Opaque || blendType == BlendType::Multiply || blendType == BlendType::Darken
+		blendMode == BlendType::Alpha || blendMode == BlendType::Max || blendMode == BlendType::Min || blendMode == BlendType::Add ||
+		blendMode == BlendType::Opaque || blendMode == BlendType::Multiply || blendMode == BlendType::Darken
 	);
-	bool useBlending = blendType != BlendType::Opaque;
+	bool useBlending = blendMode != BlendType::Opaque;
 	colorAttachment.blendingEnabled = useBlending;
 	if (!useBlending) {
 		return;
@@ -150,12 +151,9 @@ void MetalPainter::setBlending(BlendType blendType, MTLRenderPipelineColorAttach
 	colorAttachment.rgbBlendOperation = MTLBlendOperationAdd;
 	colorAttachment.alphaBlendOperation = MTLBlendOperationAdd;
 
-	switch (blendType) {
+	switch (blendMode) {
 		case BlendType::Alpha:
-			setBlendFactor(colorAttachment, MTLBlendFactorSourceAlpha, MTLBlendFactorOneMinusSourceAlpha);
-			break;
-		case BlendType::AlphaPremultiplied:
-			setBlendFactor(colorAttachment, MTLBlendFactorOne, MTLBlendFactorOneMinusSourceAlpha);
+			setBlendFactor(colorAttachment, blendType.premultiplied ? MTLBlendFactorOne : MTLBlendFactorSourceAlpha, MTLBlendFactorOneMinusSourceAlpha);
 			break;
 		case BlendType::Multiply:
 			setBlendFactor(colorAttachment, MTLBlendFactorDestinationColor, MTLBlendFactorOneMinusSourceAlpha);
