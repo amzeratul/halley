@@ -147,22 +147,23 @@ EntityRef EntityFactory::createEntity(std::optional<EntityRef> parent, std::opti
 		context.entityContext->uuidMapping.push_back({});
 		rebuildPrefabContext(treeNode);
 	}
-
+	
 	UUID uuid;
 	if (prefabRoot && fromPrefab && !isPrefabRoot) {
-		uuid = UUID::hash(prefabRoot->getInstanceUUID(), getUUID(treeNode["uuid"]));
-		
-		// const auto& nodeUUID = getUUID(treeNode["uuid"]);
-		// if (context.entityContext->uuidMapping.back().find(nodeUUID) != context.entityContext->uuidMapping.back().end()) {
-		// 	uuid = context.entityContext->uuidMapping.back()[nodeUUID];
-		// }
+		const auto& nodeUUID = getUUID(treeNode["uuid"]);
+		if (context.entityContext->uuidMapping.back().find(nodeUUID) != context.entityContext->uuidMapping.back().end()) {
+			uuid = context.entityContext->uuidMapping.back()[nodeUUID];
+		}
+		else {
+			uuid = UUID::hash(prefabRoot->getInstanceUUID(), getUUID(treeNode["uuid"]));
+		}
 	}
 	else if (!fromNewPrefab) {
 		uuid = getUUID(treeNode["uuid"]);
 	}
 
 	auto entity = world.createEntity(uuid, node["name"].asString(""), parent, true, getUUID(node["uuid"]));
-
+	
 	if (curScene && prefab) {
 		curScene->addPrefabReference(prefab, entity);
 	}
@@ -193,7 +194,7 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, 
 	const bool isPrefab = treeNode.hasKey("prefab");
 	const auto& node = isPrefab ? getPrefabNode(treeNode["prefab"].asString()) : treeNode;
 	auto* overrideNodes = isPrefab ? &treeNode : nullptr;
-	
+
 	std::vector<int> idsUpdated;
 	
 	// Prepare component overrides
