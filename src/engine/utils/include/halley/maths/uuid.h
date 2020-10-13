@@ -24,6 +24,7 @@ namespace Halley {
 		String toString() const;
 
         static UUID generate();
+        static UUID hash(const UUID& one, const UUID& two);
     	bool isValid() const;
 
         gsl::span<const gsl::byte> getBytes() const;

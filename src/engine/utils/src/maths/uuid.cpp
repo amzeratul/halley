@@ -82,6 +82,23 @@ UUID UUID::generate()
 	return result;
 }
 
+UUID UUID::hash(const UUID& one, const UUID& two)
+{
+	const auto oneBytes = one.getBytes();
+	const auto twoBytes = two.getBytes();
+
+	Expects(oneBytes.size() == twoBytes.size());
+	
+	UUID result;
+	auto& bs = result.bytes;
+	for (auto i = 0; i < oneBytes.size(); i++) {
+		bs[i] = Byte(oneBytes[i] ^ twoBytes[i]);
+	}
+	bs[6] = (bs[6] & 0b00001111) | (4 << 4); // Version 4
+	bs[8] = (bs[8] & 0b00111111) | (0b10 << 6); // Variant 1
+	return result;
+}
+
 bool UUID::isValid() const
 {
 	for (size_t i = 0; i < 16; ++i) {
