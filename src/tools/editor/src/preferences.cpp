@@ -16,7 +16,7 @@ ConfigNode Preferences::save() const
 	{
 		ConfigNode::SequenceType recentsNode;
 		for (auto& r: recents) {
-			recentsNode.push_back(String(r));
+			recentsNode.push_back(ConfigNode(String(r)));
 		}
 		root["recents"] = std::move(recentsNode);
 	}
