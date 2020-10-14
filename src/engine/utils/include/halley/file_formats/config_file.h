@@ -62,17 +62,17 @@ namespace Halley
 		ConfigNode(ConfigNode&& other) noexcept;
 		ConfigNode(MapType entryMap);
 		ConfigNode(SequenceType entryList);
-		ConfigNode(String value);
-		ConfigNode(const char* value);
-		ConfigNode(bool value);
-		ConfigNode(int value);
-		ConfigNode(float value);
-		ConfigNode(Vector2i value);
-		ConfigNode(Vector2f value);
-		ConfigNode(Bytes value);
+		explicit ConfigNode(String value);
+		explicit ConfigNode(const char* value);
+		explicit ConfigNode(bool value);
+		explicit ConfigNode(int value);
+		explicit ConfigNode(float value);
+		explicit ConfigNode(Vector2i value);
+		explicit ConfigNode(Vector2f value);
+		explicit ConfigNode(Bytes value);
 
 		template <typename T>
-		ConfigNode(const std::vector<T>& sequence)
+		explicit ConfigNode(const std::vector<T>& sequence)
 		{
 			SequenceType seq;
 			seq.reserve(sequence.size());

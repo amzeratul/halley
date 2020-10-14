@@ -98,8 +98,8 @@ void EntityFactory::rebuildPrefabContext(const ConfigNode& treeNode, bool isRoot
 	}
 	
 	auto& currentMapping = context.entityContext->uuidMapping.back();
-	const auto& instanceUUID = getUUID(treeNode["uuid"].asBytes());
-	const auto& prefabUUID = getUUID(treeNode["prefabUUID"].asBytes());
+	const auto& instanceUUID = UUID(treeNode["uuid"].asBytes());
+	const auto& prefabUUID = UUID(treeNode["prefabUUID"].asBytes());
 	
 	currentMapping[prefabUUID] = instanceUUID;
 	if (treeNode["children"].getType() == ConfigNodeType::Sequence) {
