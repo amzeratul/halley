@@ -37,7 +37,7 @@ namespace Halley
 		bool isApplyingMaterial() const;
 
 		bool isPlaying() const;
-		String getCurrentSequenceName() const;
+		const String& getCurrentSequenceName() const;
 		Time getCurrentSequenceTime() const;
 		int getCurrentSequenceFrame() const;
 		int getCurrentSequenceLoopCount() const;

@@ -231,9 +231,9 @@ bool AnimationPlayer::isPlaying() const
 	return playing;
 }
 
-String AnimationPlayer::getCurrentSequenceName() const
+const String& AnimationPlayer::getCurrentSequenceName() const
 {
-	return curSeq ? curSeq->getName() : "";
+	return curSeqName;
 }
 
 Time AnimationPlayer::getCurrentSequenceTime() const
