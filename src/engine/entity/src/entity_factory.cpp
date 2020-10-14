@@ -176,7 +176,7 @@ EntityRef EntityFactory::createEntity(std::optional<EntityRef> parent, std::opti
 	}
 
 	if (node["children"].getType() == ConfigNodeType::Sequence) {
-		auto& pr = prefabRoot ? prefabRoot.value() : entity; //todo(caryn): what if not a prefab
+		auto& pr = prefabRoot ? prefabRoot.value() : entity;
 		for (auto& childNode: node["children"].asSequence()) {
 			createEntity(entity, pr, childNode, populate, curScene, fromPrefab || isPrefab, false, fromNewPrefab);
 		}
@@ -386,7 +386,18 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& tree
 	// Insert new nodes
 	for (size_t i = 0; i < nNodes; ++i) {
 		if (!nodeConsumed[i]) {
-			createEntity(entity, entity, childNodes[i], true, nullptr, isPrefab, false, false); //todo(caryn): is this right?
+			createEntity(entity, entity, childNodes[i], true, nullptr, isPrefab, false, false);
+		}
+	}
+
+	if (isPrefab) {
+		if (treeNode["children"].getType() == ConfigNodeType::Sequence) {
+			for (auto& childNode : treeNode["children"].asSequence()) {
+				auto childEntity = world.findEntity(getUUID(childNode["uuid"]), true);
+				if (childEntity) {
+					doUpdateEntityTree(childEntity.value(), childNode, refreshing, false);
+				}
+			}
 		}
 	}
 
