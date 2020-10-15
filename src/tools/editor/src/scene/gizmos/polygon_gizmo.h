@@ -59,6 +59,7 @@ namespace Halley {
 		VertexList readPoints();
 		void writePoints(const VertexList& ps);
 		void writePointsIfNeeded();
+		ConfigNode& getField(ConfigNode& node, const String& fieldName);
 
 		void loadHandlesFromVertices();
 		void setHandleIndices();

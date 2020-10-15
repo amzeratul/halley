@@ -171,7 +171,7 @@ VertexList PolygonGizmo::readPoints()
 	VertexList result;
 	auto* data = getComponentData(componentName);
 	if (data) {
-		auto& field = (*data)[fieldName];
+		auto& field = getField(*data, fieldName);		
 		if (field.getType() != ConfigNodeType::Sequence) {
 			field = ConfigNode::SequenceType();
 		}
@@ -186,6 +186,30 @@ VertexList PolygonGizmo::readPoints()
 	return result;
 }
 
+ConfigNode& PolygonGizmo::getField(ConfigNode& node, const String& fieldName)
+{
+	if (fieldName.contains("[")) {
+		auto fieldWithIndex = fieldName.split('[');
+		Expects(fieldWithIndex.size() == 2);
+		const auto& name = fieldWithIndex.at(0);
+		const auto& key = fieldWithIndex.at(1).substr(0, fieldWithIndex.at(1).length() - 1);
+		auto& field = (node)[name];
+		if (field.getType() == ConfigNodeType::Sequence) {
+			const auto idx = key.toInteger();
+			return (node)[name].asSequence()[idx];
+		}
+		else if (field.getType() == ConfigNodeType::Map) {
+			return (node)[name].asMap()[key];
+		}
+		else {
+			return (node)[fieldName];
+		}
+	}
+	else {
+		return (node)[fieldName];
+	}
+}
+
 void PolygonGizmo::writePoints(const VertexList& ps)
 {
 	auto* data = getComponentData(componentName);
@@ -196,7 +220,8 @@ void PolygonGizmo::writePoints(const VertexList& ps)
 		for (const auto& p: ps) {
 			result.push_back(ConfigNode(p));
 		}
-		(*data)[fieldName] = ConfigNode(std::move(result));
+		auto& field = getField(*data, fieldName);
+		field = ConfigNode(std::move(result));
 		
 		markModified(componentName, fieldName);
 	}
