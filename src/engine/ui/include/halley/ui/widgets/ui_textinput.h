@@ -38,7 +38,7 @@ namespace Halley {
 		Range<int> getSelection() const;
 		void setSelection(int selection);
 		void setSelection(Range<int> selection);
-		void selectAll();
+		void selectLast();
 
 		void onManualControlActivate() override;
 

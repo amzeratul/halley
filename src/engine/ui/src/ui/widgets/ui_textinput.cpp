@@ -85,7 +85,7 @@ void UITextInput::setSelection(Range<int> selection)
 	text.setSelection(selection);
 }
 
-void UITextInput::selectAll()
+void UITextInput::selectLast()
 {
 	text.setSelection(static_cast<int>(text.getText().size()));
 }
@@ -353,7 +353,7 @@ void UITextInput::autoComplete()
 		
 		modifiedByAutoComplete = true;
 		setText(autoCompleteOptions[autoCompleteCurOption.value()]);
-		selectAll();
+		selectLast();
 	}
 }
 
@@ -420,6 +420,7 @@ void UITextInput::navigateHistory(int delta)
 
 	modifiedByHistory = true;
 	setText(history[val]);
+	selectLast();
 }
 
 void UITextInput::updateHistoryOnTextModified()
