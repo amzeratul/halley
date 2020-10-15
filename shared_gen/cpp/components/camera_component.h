@@ -31,23 +31,25 @@ public:
 	}
 
 	Halley::ConfigNode serialize(Halley::ConfigNodeSerializationContext& context) const {
+		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode node = Halley::ConfigNode::MapType();
-		node["zoom"] = Halley::ConfigNodeHelper<decltype(zoom)>::serialize(zoom, context);
-		node["clearColour"] = Halley::ConfigNodeHelper<decltype(clearColour)>::serialize(clearColour, context);
-		node["clearStencil"] = Halley::ConfigNodeHelper<decltype(clearStencil)>::serialize(clearStencil, context);
-		node["clearDepth"] = Halley::ConfigNodeHelper<decltype(clearDepth)>::serialize(clearDepth, context);
-		node["mask"] = Halley::ConfigNodeHelper<decltype(mask)>::serialize(mask, context);
-		node["layer"] = Halley::ConfigNodeHelper<decltype(layer)>::serialize(layer, context);
+		Halley::EntityConfigNodeSerializer<decltype(zoom)>::serialize(zoom, context, node, "zoom", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(clearColour)>::serialize(clearColour, context, node, "clearColour", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(clearStencil)>::serialize(clearStencil, context, node, "clearStencil", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(clearDepth)>::serialize(clearDepth, context, node, "clearDepth", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(mask)>::serialize(mask, context, node, "mask", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(layer)>::serialize(layer, context, node, "layer", makeMask(Type::Prefab, Type::SaveData));
 		return node;
 	}
 
 	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
-		Halley::ConfigNodeHelper<decltype(zoom)>::deserialize(zoom, context, node["zoom"]);
-		Halley::ConfigNodeHelper<decltype(clearColour)>::deserialize(clearColour, context, node["clearColour"]);
-		Halley::ConfigNodeHelper<decltype(clearStencil)>::deserialize(clearStencil, context, node["clearStencil"]);
-		Halley::ConfigNodeHelper<decltype(clearDepth)>::deserialize(clearDepth, context, node["clearDepth"]);
-		Halley::ConfigNodeHelper<decltype(mask)>::deserialize(mask, context, node["mask"]);
-		Halley::ConfigNodeHelper<decltype(layer)>::deserialize(layer, context, node["layer"]);
+		using namespace Halley::EntitySerialization;
+		Halley::EntityConfigNodeSerializer<decltype(zoom)>::deserialize(zoom, context, node, "zoom", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(clearColour)>::deserialize(clearColour, context, node, "clearColour", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(clearStencil)>::deserialize(clearStencil, context, node, "clearStencil", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(clearDepth)>::deserialize(clearDepth, context, node, "clearDepth", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(mask)>::deserialize(mask, context, node, "mask", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(layer)>::deserialize(layer, context, node, "layer", makeMask(Type::Prefab, Type::SaveData));
 	}
 
 };

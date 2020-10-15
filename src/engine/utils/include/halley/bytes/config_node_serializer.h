@@ -397,5 +397,26 @@ namespace Halley {
 	{
 		return ConfigNode(toString(value));
 	}
+
+	template <typename T>
+	class EntityConfigNodeSerializer {
+	public:
+		static void serialize(const T& value, ConfigNodeSerializationContext& context, ConfigNode& node, const String& name, int serializationMask)
+		{
+			if (context.matchType(serializationMask)) {
+				auto result = Halley::ConfigNodeHelper<T>::serialize(value, context);
+				if (result.getType() != ConfigNodeType::Undefined) {
+					node[name] = std::move(result);
+				}
+			}
+		}
+
+		static void deserialize(T& value, ConfigNodeSerializationContext& context, const ConfigNode& node, const String& name, int serializationMask)
+		{
+			if (context.matchType(serializationMask)) {
+				ConfigNodeHelper<T>::deserialize(value, context, node[name]);
+			}
+		}
+	};
 }
 

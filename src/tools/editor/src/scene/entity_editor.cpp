@@ -172,7 +172,7 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 	if (iter != ecsData->getComponents().end()) {
 		const auto& componentData = iter->second;
 		for (auto& member: componentData.members) {
-			if (member.serializable) {
+			if (member.canEdit) {
 				ComponentFieldParameters parameters(componentType, componentNames, ComponentDataRetriever(data, member.name), member.defaultValue);
 				auto field = makeField(member.type.name, parameters, member.collapse ? ComponentEditorLabelCreation::Never : ComponentEditorLabelCreation::Always);
 				if (field) {

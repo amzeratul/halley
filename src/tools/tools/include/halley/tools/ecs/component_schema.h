@@ -19,7 +19,7 @@ namespace Halley
 
 		int id = -1;
 		String name;
-		Vector<MemberSchema> members;
+		Vector<ComponentFieldSchema> members;
 		std::unordered_set<String> includeFiles;
 		std::optional<String> customImplementation;
 		std::vector<String> componentDependencies;

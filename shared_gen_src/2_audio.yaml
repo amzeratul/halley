@@ -21,6 +21,7 @@ component:
       defaultValue: 100
   - playing:
       type: 'std::vector<Halley::AudioHandle>'
-      serializable: false
+      canEdit: false
+      canSave: false
 
 ...

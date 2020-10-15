@@ -35,9 +35,9 @@ EntityRef EntityFactory::createEntity(const String& prefabName)
 	return createPrefab(getPrefab(prefabName));
 }
 
-EntityRef EntityFactory::createEntity(const ConfigNode& node)
+EntityRef EntityFactory::createEntity(const ConfigNode& node, EntitySerialization::Type sourceType)
 {
-	startContext();
+	startContext(sourceType);
 	return createEntityTree(node, nullptr, false, false);
 }
 
@@ -52,14 +52,14 @@ EntityRef EntityFactory::createPrefab(std::shared_ptr<const Prefab> prefab)
 			throw Exception("Prefab seems to have more than one root; use EntityFactory::createScene() instead", HalleyExceptions::Entity);
 		}
 		
-		startContext();
+		startContext(EntitySerialization::Type::Prefab);
 		return createEntityTree(node, nullptr, true, true);
 	}
 }
 
 EntityScene EntityFactory::createScene(std::shared_ptr<const Prefab> prefab)
 {
-	startContext();
+	startContext(EntitySerialization::Type::Prefab);
 	
 	EntityScene scene;	
 	const auto& node = prefab->getRoot();
@@ -87,6 +87,7 @@ EntityRef EntityFactory::createEntityTree(const ConfigNode& node, EntityScene* s
 	doUpdateEntityTree(entity, node, false, fromPrefab);
 	return entity;
 }
+
 void EntityFactory::rebuildPrefabContext(const ConfigNode& treeNode, bool isRoot)
 {
 	if (!treeNode.hasKey("prefabUUID")) {
@@ -276,18 +277,18 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, 
 	}
 }
 
-void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node, bool doRebuildContext)
+void EntityFactory::updateEntityTree(EntityRef& entity, const ConfigNode& node, EntitySerialization::Type sourceType, bool doRebuildContext)
 {
-	startContext();
+	startContext(sourceType);
 	if (doRebuildContext) {
 		rebuildContext(entity, node);
 	}
 	doUpdateEntityTree(entity, node, true, true);
 }
 
-void EntityFactory::updateScene(std::vector<EntityRef>& entities, const ConfigNode& node)
+void EntityFactory::updateScene(std::vector<EntityRef>& entities, const ConfigNode& node, EntitySerialization::Type sourceType)
 {
-	startContext();
+	startContext(sourceType);
 	if (node.getType() == ConfigNodeType::Sequence) {
 		std::map<String, const ConfigNode*> nodes;
 
@@ -309,14 +310,16 @@ void EntityFactory::updateScene(std::vector<EntityRef>& entities, const ConfigNo
 	}
 }
 
-ConfigNode EntityFactory::serializeEntity(EntityRef entity)
+ConfigNode EntityFactory::serializeEntity(EntityRef entity, EntitySerialization::Type type)
 {
 	ConfigNode result = ConfigNode::MapType();
+	ConfigNodeSerializationContext serializeContext = makeContext();
+	serializeContext.entitySerializationTypeMask = makeMask(type);
 
 	auto components = ConfigNode::MapType();
 	for (auto [componentId, component]: entity) {
 		auto& reflector = getComponentReflector(componentId);
-		components[reflector.getName()] = reflector.serialize(context, *component);
+		components[reflector.getName()] = reflector.serialize(serializeContext, *component);
 	}
 
 	result["name"] = entity.getName();
@@ -425,10 +428,12 @@ const ConfigNode& EntityFactory::getPrefabNode(const String& id) const
 	}
 }
 
-void EntityFactory::startContext()
+void EntityFactory::startContext(EntitySerialization::Type sourceType)
 {
 	// Warning: this makes this whole class not thread safe
-	context.entityContext->clear();	
+	context.entityContext->clear();
+	//context.entitySerializationTypeMask = makeMask(sourceType); // TODO
+	context.entitySerializationTypeMask = makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData);
 }
 
 ConfigNodeSerializationContext EntityFactory::makeContext() const

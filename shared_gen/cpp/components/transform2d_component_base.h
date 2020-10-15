@@ -21,19 +21,21 @@ public:
 	}
 
 	Halley::ConfigNode serialize(Halley::ConfigNodeSerializationContext& context) const {
+		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode node = Halley::ConfigNode::MapType();
-		node["position"] = Halley::ConfigNodeHelper<decltype(position)>::serialize(position, context);
-		node["rotation"] = Halley::ConfigNodeHelper<decltype(rotation)>::serialize(rotation, context);
-		node["scale"] = Halley::ConfigNodeHelper<decltype(scale)>::serialize(scale, context);
-		node["subWorld"] = Halley::ConfigNodeHelper<decltype(subWorld)>::serialize(subWorld, context);
+		Halley::EntityConfigNodeSerializer<decltype(position)>::serialize(position, context, node, "position", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(rotation)>::serialize(rotation, context, node, "rotation", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(scale)>::serialize(scale, context, node, "scale", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(subWorld)>::serialize(subWorld, context, node, "subWorld", makeMask(Type::Prefab, Type::SaveData));
 		return node;
 	}
 
 	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
-		Halley::ConfigNodeHelper<decltype(position)>::deserialize(position, context, node["position"]);
-		Halley::ConfigNodeHelper<decltype(rotation)>::deserialize(rotation, context, node["rotation"]);
-		Halley::ConfigNodeHelper<decltype(scale)>::deserialize(scale, context, node["scale"]);
-		Halley::ConfigNodeHelper<decltype(subWorld)>::deserialize(subWorld, context, node["subWorld"]);
+		using namespace Halley::EntitySerialization;
+		Halley::EntityConfigNodeSerializer<decltype(position)>::deserialize(position, context, node, "position", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(rotation)>::deserialize(rotation, context, node, "rotation", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(scale)>::deserialize(scale, context, node, "scale", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(subWorld)>::deserialize(subWorld, context, node, "subWorld", makeMask(Type::Prefab, Type::SaveData));
 	}
 
 protected:

@@ -209,13 +209,21 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	contents.push_back("");
 
 	const String lineBreak = getPlatform() == GamePlatform::Windows ? "\r\n\t\t" : "\n\t\t";
-	String serializeBody = "Halley::ConfigNode node = Halley::ConfigNode::MapType();" + lineBreak;
-	String deserializeBody;
+	String serializeBody = "using namespace Halley::EntitySerialization;" + lineBreak + "Halley::ConfigNode node = Halley::ConfigNode::MapType();" + lineBreak;
+	String deserializeBody = "using namespace Halley::EntitySerialization;" + lineBreak;
 	bool first = true;
 	for (auto& member: component.members) {
-		if (!member.serializable) {
+		std::vector<String> serializationTypes;
+		if (member.canEdit) {
+			serializationTypes.push_back("Type::Prefab");
+		}
+		if (member.canSave) {
+			serializationTypes.push_back("Type::SaveData");
+		}
+		if (serializationTypes.empty()) {
 			continue;
 		}
+		String mask = "makeMask(" + String::concatList(serializationTypes, ", ") + ")";
 		
 		if (first) {
 			first = false;
@@ -223,8 +231,9 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 			serializeBody += lineBreak;
 			deserializeBody += lineBreak;
 		}
-		serializeBody += "node[\"" + member.name + "\"] = Halley::ConfigNodeHelper<decltype(" + member.name + ")>::serialize(" + member.name + ", context);";
-		deserializeBody += "Halley::ConfigNodeHelper<decltype(" + member.name + ")>::deserialize(" + member.name + ", context, node[\"" + member.name + "\"]);";
+
+		serializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::serialize(" + member.name + ", context, node, \"" + member.name + "\", " + mask + ");";
+		deserializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::deserialize(" + member.name + ", context, node, \"" + member.name + "\", " + mask + ");";
 	}
 	serializeBody += lineBreak + "return node;";
 
@@ -242,10 +251,10 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 
 	// Additional constructors
 	if (!component.members.empty()) {
-		const auto serializableMembers = filter(component.members.begin(), component.members.end(), [] (const MemberSchema& m) { return m.serializable; });
+		const auto serializableMembers = filter(component.members.begin(), component.members.end(), [] (const ComponentFieldSchema& m) { return m.canEdit; });
 		if (!serializableMembers.empty()) {
 			gen.addBlankLine()
-				.addConstructor(MemberSchema::toVariableSchema(serializableMembers), true);
+				.addConstructor(ComponentFieldSchema::toVariableSchema(serializableMembers), true);
 		}
 	}
 	

@@ -47,7 +47,7 @@ void PrefabSceneData::reloadEntity(const String& id, ConfigNode* data)
 	if (entity) {
 		if (data) {
 			// Update
-			factory->updateEntityTree(*entity, *data);
+			factory->updateEntityTree(*entity, *data, EntitySerialization::Type::Prefab);
 		} else {
 			// Destroy
 			world.destroyEntity(entity.value());
@@ -55,7 +55,7 @@ void PrefabSceneData::reloadEntity(const String& id, ConfigNode* data)
 	} else {
 		if (data) {
 			// Create
-			factory->createEntity(*data);
+			factory->createEntity(*data, EntitySerialization::Type::Prefab);
 		}
 	}
 }

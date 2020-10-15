@@ -9,6 +9,25 @@ namespace Halley {
     class Resources;
 	class ConfigNode;
 
+	namespace EntitySerialization {
+        enum class Type {
+        	Undefined = 0,
+        	Prefab = 1,
+	        SaveData = 2
+        };
+
+		static int makeMask(Type t)
+		{
+			return static_cast<int>(t);
+		}
+		
+		template <typename T, typename ... Ts>
+		[[nodiscard]] static int makeMask(T v, Ts ... vs)
+		{
+			return static_cast<int>(v) | makeMask(vs...);
+		}
+	}
+
 	template <typename T>
     class ConfigNodeSerializerEnumUtils {
 	public:
@@ -17,9 +36,15 @@ namespace Halley {
     };
 	
 	class ConfigNodeSerializationContext {
-	public:
+	public:		
 		Resources* resources = nullptr;
 		std::shared_ptr<EntitySerializationContext> entityContext;
+		int entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData);
+
+		[[nodiscard]] bool matchType(int typeMask) const
+		{
+			return (entitySerializationTypeMask & typeMask) != 0;
+		}
 	};
 
     template <typename T>

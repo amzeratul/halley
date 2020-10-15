@@ -24,14 +24,14 @@ namespace Halley {
 
 		EntityRef createEntity(const char* prefabName);
 		EntityRef createEntity(const String& prefabName);
-		EntityRef createEntity(const ConfigNode& node);
+		EntityRef createEntity(const ConfigNode& node, EntitySerialization::Type sourceType);
 		EntityRef createPrefab(std::shared_ptr<const Prefab> prefab);
 		EntityScene createScene(std::shared_ptr<const Prefab> scene);
 		
-		void updateEntityTree(EntityRef& entity, const ConfigNode& node, bool doRebuildContext = false);
-		void updateScene(std::vector<EntityRef>& entities, const ConfigNode& node);
+		void updateEntityTree(EntityRef& entity, const ConfigNode& node, EntitySerialization::Type sourceType, bool doRebuildContext = false);
+		void updateScene(std::vector<EntityRef>& entities, const ConfigNode& node, EntitySerialization::Type sourceType);
 
-		ConfigNode serializeEntity(EntityRef entity);
+		ConfigNode serializeEntity(EntityRef entity, EntitySerialization::Type type);
 
 		template <typename T>
 		CreateComponentFunctionResult createComponent(EntityRef& e, const ConfigNode& componentData)
@@ -73,7 +73,7 @@ namespace Halley {
 		std::shared_ptr<const Prefab> getPrefab(const String& id) const;
 		const ConfigNode& getPrefabNode(const String& id) const;
 
-		void startContext();
+		void startContext(EntitySerialization::Type sourceType);
 		ConfigNodeSerializationContext makeContext() const;
 
 		UUID getUUID(const ConfigNode& node) const;

@@ -53,7 +53,8 @@ component:
       defaultValue: 0
   - target:
       type: 'Halley::RenderTarget*'
-      serializable: false
+      canEdit: false
+      canSave: false
       defaultValue: nullptr
 
 ---

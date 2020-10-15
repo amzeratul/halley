@@ -62,23 +62,44 @@ namespace Halley
 		String name;
 		std::vector<String> defaultValue;
 		std::optional<MemberAccess> access;
-		bool serializable;
-		bool collapse;
 
-		MemberSchema(TypeSchema type, String name, std::vector<String> defaultValue, std::optional<MemberAccess> access = {}, bool serializable = true, bool collapse = false)
+		MemberSchema(TypeSchema type, String name, std::vector<String> defaultValue, std::optional<MemberAccess> access = {})
 			: type(std::move(type))
 			, name(std::move(name))
 			, defaultValue(std::move(defaultValue))
 			, access(access)
-			, serializable(serializable)
-			, collapse(collapse)
 		{}
 
-		MemberSchema(TypeSchema type, String name, String defaultValue = "", std::optional<MemberAccess> access = {}, bool serializable = true, bool collapse = false)
-			: MemberSchema(std::move(type), std::move(name), defaultValue.isEmpty() ? std::vector<String>() : std::vector<String>{std::move(defaultValue)}, access, serializable, collapse)
+		MemberSchema(TypeSchema type, String name, String defaultValue = "", std::optional<MemberAccess> access = {})
+			: MemberSchema(std::move(type), std::move(name), defaultValue.isEmpty() ? std::vector<String>() : std::vector<String>{std::move(defaultValue)}, access)
 		{}
 
 		static std::vector<VariableSchema> toVariableSchema(const std::vector<MemberSchema>& schema)
+		{
+			std::vector<VariableSchema> result;
+			result.reserve(schema.size());
+			for (const auto& s: schema) {
+				result.emplace_back(s.type, s.name);
+			}
+			return result;
+		}
+	};
+
+	class ComponentFieldSchema : public MemberSchema {
+	public:
+		bool canSave = true;
+		bool canEdit = true;
+		bool collapse = false;
+
+		ComponentFieldSchema(TypeSchema type, String name, std::vector<String> defaultValue, std::optional<MemberAccess> access = {})
+			: MemberSchema(std::move(type), std::move(name), std::move(defaultValue), access)
+		{}
+
+		ComponentFieldSchema(TypeSchema type, String name, String defaultValue = "", std::optional<MemberAccess> access = {})
+			: MemberSchema(std::move(type), std::move(name), std::move(defaultValue), access)
+		{}
+
+		static std::vector<VariableSchema> toVariableSchema(const std::vector<ComponentFieldSchema>& schema)
 		{
 			std::vector<VariableSchema> result;
 			result.reserve(schema.size());

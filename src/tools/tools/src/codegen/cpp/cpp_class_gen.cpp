@@ -53,7 +53,7 @@ CPPClassGenerator& CPPClassGenerator::setAccessLevel(MemberAccess access)
 	return *this;
 }
 
-CPPClassGenerator& CPPClassGenerator::addMember(MemberSchema member)
+CPPClassGenerator& CPPClassGenerator::addMember(const MemberSchema& member)
 {
 	if (member.access) {
 		setAccessLevel(member.access.value());
@@ -64,7 +64,15 @@ CPPClassGenerator& CPPClassGenerator::addMember(MemberSchema member)
 
 CPPClassGenerator& CPPClassGenerator::addMembers(const Vector<MemberSchema>& members)
 {
-	for (auto& m : members) {
+	for (const auto& m : members) {
+		addMember(m);
+	}
+	return *this;
+}
+
+CPPClassGenerator& CPPClassGenerator::addMembers(const Vector<ComponentFieldSchema>& members)
+{
+	for (const auto& m : members) {
 		addMember(m);
 	}
 	return *this;

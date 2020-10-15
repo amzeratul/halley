@@ -78,10 +78,10 @@ void EntityScene::PrefabObserver::update(EntityFactory& factory)
 {
 	if (!entities.empty()) {
 		if (scene) {
-			factory.updateScene(entities, config->getRoot());
+			factory.updateScene(entities, config->getRoot(), EntitySerialization::Type::Prefab);
 		} else {
 			for (auto& entity: entities) {
-				factory.updateEntityTree(entity, config->getRoot());
+				factory.updateEntityTree(entity, config->getRoot(), EntitySerialization::Type::Prefab);
 			}
 		}
 	}

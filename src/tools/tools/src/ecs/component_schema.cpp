@@ -28,8 +28,13 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				const YAML::Node& memberProperties = m->second;
 				const String type = memberProperties["type"].as<std::string>();
 				const String access = memberProperties["access"].as<std::string>("public");
-				const bool serializable = memberProperties["serializable"].as<bool>(true);
+				const bool canEdit = memberProperties["canEdit"].as<bool>(true);
+				const bool canSave = memberProperties["canSave"].as<bool>(true);
 				const bool collapse = memberProperties["collapse"].as<bool>(false);
+
+				if (memberProperties["serializable"].IsDefined()) {
+					throw Exception("serializable field is removed from ECS component definitions. Use canSave and canEdit instead.", HalleyExceptions::Entity);
+				}
 
 				std::vector<String> defaultValue;
 				const auto& defNode = memberProperties["defaultValue"];
@@ -43,7 +48,10 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 					}
 				}
 				
-				members.emplace_back(TypeSchema(type), std::move(name), std::move(defaultValue), fromString<MemberAccess>(access), serializable, collapse);
+				auto& field = members.emplace_back(TypeSchema(type), std::move(name), std::move(defaultValue), fromString<MemberAccess>(access));
+				field.collapse = collapse;
+				field.canEdit = canEdit;
+				field.canSave = canSave;
 			}
 		}
 	}
