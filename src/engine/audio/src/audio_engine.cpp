@@ -31,7 +31,10 @@ AudioEngine::~AudioEngine()
 
 void AudioEngine::postEvent(uint32_t id, const AudioEvent& event, const AudioPosition& position)
 {
-	event.run(*this, id, position);
+	const size_t nEmitters = event.run(*this, id, position);
+	if (nEmitters == 0) {
+		finishedSounds.push_back(id);
+	}
 }
 
 void AudioEngine::play(uint32_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop)

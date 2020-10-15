@@ -27,11 +27,15 @@ AudioEvent::AudioEvent(const ConfigNode& config)
 	}
 }
 
-void AudioEvent::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+size_t AudioEvent::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
 {
-	for (auto& a: actions) {
-		a->run(engine, id, position);
+	size_t nEmitters = 0;
+	for (const auto& a: actions) {
+		if (a->run(engine, id, position)) {
+			++nEmitters;
+		}
 	}
+	return nEmitters;
 }
 
 void AudioEvent::serialize(Serializer& s) const
@@ -114,10 +118,10 @@ AudioEventActionPlay::AudioEventActionPlay(AudioEvent& event, const ConfigNode& 
 	}
 }
 
-void AudioEventActionPlay::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+bool AudioEventActionPlay::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
 {
 	if (clips.empty()) {
-		return;
+		return false;
 	}
 
 	if (clips.size() != clipData.size()) {
@@ -129,7 +133,7 @@ void AudioEventActionPlay::run(AudioEngine& engine, uint32_t id, const AudioPosi
 	auto clip = clipData[clipN];
 
 	if (!clip) {
-		return;
+		return false;
 	}
 
 	const float curVolume = rng.getFloat(volume.start, volume.end);
@@ -147,6 +151,7 @@ void AudioEventActionPlay::run(AudioEngine& engine, uint32_t id, const AudioPosi
 	}
 	
 	engine.addEmitter(id, std::move(voice));
+	return true;
 }
 
 AudioEventActionType AudioEventActionPlay::getType() const
