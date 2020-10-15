@@ -112,11 +112,11 @@ void AudioPosition::setMix(size_t nSrcChannels, gsl::span<const AudioChannelData
 void AudioPosition::setMixFixed(size_t nSrcChannels, gsl::span<const AudioChannelData> dstChannels, gsl::span<float, 16> dst, float gain, const AudioListenerData& listener) const
 {
 	const size_t nDstChannels = size_t(dstChannels.size());
-	Expects(nSrcChannels == 2);
-	for (size_t i = 0; i < nSrcChannels; ++i) {
-		float srcPan = i == 0 ? -1.0f : 1.0f;
-		for (size_t j = 0; j < nDstChannels; ++j) {
-			dst[i * nSrcChannels + j] = gain2DPan(srcPan, dstChannels[j].pan) * gain * dstChannels[i].gain;
+	Expects(nSrcChannels == 1 || nSrcChannels == 2);
+	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
+		const float srcPan = nSrcChannels == 1 ? 0.0f : (srcChannel == 0 ? -1.0f : 1.0f);
+		for (size_t dstChannel = 0; dstChannel < nDstChannels; ++dstChannel) {
+			dst[srcChannel * nSrcChannels + dstChannel] = gain2DPan(srcPan, dstChannels[dstChannel].pan) * gain * dstChannels[srcChannel].gain;
 		}
 	}
 }
