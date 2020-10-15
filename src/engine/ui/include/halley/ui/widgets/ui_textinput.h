@@ -38,6 +38,7 @@ namespace Halley {
 		Range<int> getSelection() const;
 		void setSelection(int selection);
 		void setSelection(Range<int> selection);
+		void selectAll();
 
 		void onManualControlActivate() override;
 
@@ -47,6 +48,13 @@ namespace Halley {
 
 		void setReadOnly(bool enabled);
 		bool isReadOnly() const;
+
+		void setHistoryEnabled(bool enabled);
+		bool isHistoryEnabled() const;
+
+		void submit();
+		void setClearOnSubmit(bool enabled);
+		bool isClearOnSubmit() const;
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -68,7 +76,15 @@ namespace Halley {
 		void onTextModified();
 		void validateText();
 		void onValidatorSet() override;
-		void updateAutoComplete();
+
+		void autoComplete();
+		void updateAutoCompleteOnTextModified();
+		void refreshAutoCompleteOptions();
+		StringUTF32 getAutoCompleteCaption() const;
+
+		void addToHistory(String str);
+		void navigateHistory(int delta);
+		void updateHistoryOnTextModified();
 
 		UIStyle style;
 		Sprite sprite;
@@ -80,17 +96,24 @@ namespace Halley {
 		LocalisedString ghostText;
 		StringUTF32 lastText;
 		
-		StringUTF32 autoCompleteText;
 		AutoCompleteHandle autoCompleteHandle;
-		int autoCompleteOptions = 0;
-		int autoCompleteCurOption = 0;
+		StringUTF32 userInputForAutoComplete;
+		std::vector<StringUTF32> autoCompleteOptions;
+		std::optional<size_t> autoCompleteCurOption;
+		bool modifiedByAutoComplete = false;
+
+		std::vector<String> history;
+		std::optional<size_t> historyCurOption;
+		bool historyEnabled = false;
+		bool modifiedByHistory = false;
 
 		Vector2f textScrollPos;
 		float caretPhysicalPos = 0;
 		float caretTime = 0;
 		int caretPos = 0;
+		bool caretShowing = false;
 
 		bool isMultiLine = false;
-		bool caretShowing = false;
+		bool clearOnSubmit = false;
 	};
 }

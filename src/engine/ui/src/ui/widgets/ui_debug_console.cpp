@@ -151,22 +151,15 @@ void UIDebugConsole::setup()
 
 	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
 	{
-		onSubmit();
+		getWidgetAs<UITextInput>("input")->submit();
 	});
 	
 	setHandle(UIEventType::TextSubmit, "input", [=] (const UIEvent& event)
 	{
-		onSubmit();
+		runCommand(event.getStringData());
 	});
 
 	layout();
-}
-
-void UIDebugConsole::onSubmit()
-{
-	auto input = getWidgetAs<UITextInput>("input");
-	runCommand(input->getText());
-	input->setText("");
 }
 
 void UIDebugConsole::runCommand(const String& rawCommand)

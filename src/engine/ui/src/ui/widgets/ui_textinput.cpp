@@ -85,6 +85,11 @@ void UITextInput::setSelection(Range<int> selection)
 	text.setSelection(selection);
 }
 
+void UITextInput::selectAll()
+{
+	text.setSelection(static_cast<int>(text.getText().size()));
+}
+
 void UITextInput::onManualControlActivate()
 {
 	focus();
@@ -93,7 +98,7 @@ void UITextInput::onManualControlActivate()
 void UITextInput::setAutoCompleteHandle(AutoCompleteHandle handle)
 {
 	autoCompleteHandle = std::move(handle);
-	updateAutoComplete();
+	updateAutoCompleteOnTextModified();
 }
 
 bool UITextInput::canReceiveFocus() const
@@ -109,6 +114,16 @@ void UITextInput::setReadOnly(bool enabled)
 bool UITextInput::isReadOnly() const
 {
 	return text.isReadOnly();
+}
+
+void UITextInput::setHistoryEnabled(bool enabled)
+{
+	historyEnabled = enabled;
+}
+
+bool UITextInput::isHistoryEnabled() const
+{
+	return historyEnabled;
 }
 
 void UITextInput::draw(UIPainter& painter) const
@@ -160,7 +175,8 @@ void UITextInput::onTextModified()
 	sendEvent(UIEvent(UIEventType::TextChanged, getId(), str));
 	notifyDataBind(str);
 
-	updateAutoComplete();
+	updateAutoCompleteOnTextModified();
+	updateHistoryOnTextModified();
 }
 
 void UITextInput::validateText()
@@ -192,6 +208,29 @@ void UITextInput::onValidatorSet()
 	updateCaret();
 }
 
+void UITextInput::submit()
+{
+	sendEvent(UIEvent(UIEventType::TextSubmit, getId(), getText()));
+
+	if (historyEnabled) {
+		addToHistory(getText());
+	}
+
+	if (clearOnSubmit) {
+		setText(StringUTF32());
+	}
+}
+
+void UITextInput::setClearOnSubmit(bool enabled)
+{
+	clearOnSubmit = enabled;
+}
+
+bool UITextInput::isClearOnSubmit() const
+{
+	return clearOnSubmit;
+}
+
 void UITextInput::update(Time t, bool moved)
 {
 	if (isFocused()) {
@@ -213,9 +252,9 @@ void UITextInput::update(Time t, bool moved)
 
 	// Update text labels
 	const bool showGhost = text.getText().empty() && !isFocused();
-	const bool showAutoComplete = !autoCompleteText.empty();
+	const bool showAutoComplete = autoCompleteCurOption.has_value();
 	ghostText.checkForUpdates();
-	ghostLabel.setText(showAutoComplete ? autoCompleteText : (showGhost ? ghostText.getString().getUTF32() : StringUTF32()));
+	ghostLabel.setText(showAutoComplete ? getAutoCompleteCaption() : (showGhost ? ghostText.getString().getUTF32() : StringUTF32()));
 	label.setText(text.getText());
 
 	// Position the text
@@ -244,7 +283,7 @@ void UITextInput::update(Time t, bool moved)
 	}
 
 	if (text.isPendingSubmit()) {
-		sendEvent(UIEvent(UIEventType::TextSubmit, getId(), getText()));
+		submit();
 	}
 }
 
@@ -263,27 +302,26 @@ bool UITextInput::onKeyPress(KeyboardKeyPress key)
 {
 	if (autoCompleteHandle) {
 		if (key.is(KeyCode::Tab)) {
-			if (!autoCompleteText.empty()) {
-				setText(autoCompleteText);
-				setSelection(int(text.getText().size()));
-			}
+			autoComplete();
 			return true;
 		}
-		
+	}
+
+	if (historyEnabled) {
 		if (key.is(KeyCode::Up)) {
-			autoCompleteCurOption = autoCompleteOptions > 0 ? modulo(autoCompleteCurOption - 1, autoCompleteOptions) : 0;
+			navigateHistory(1);
 			return true;
 		}
 
 		if (key.is(KeyCode::Down)) {
-			autoCompleteCurOption = autoCompleteOptions > 0 ? modulo(autoCompleteCurOption + 1, autoCompleteOptions) : 0;
+			navigateHistory(-1);
 			return true;
 		}
 	}
 
 	if (key.is(KeyCode::Enter) || key.is(KeyCode::KeypadEnter)) {
 		if (!isMultiLine) {
-			sendEvent(UIEvent(UIEventType::TextSubmit, getId(), getText()));
+			submit();
 		}
 		return true;
 	}
@@ -305,22 +343,89 @@ void UITextInput::readFromDataBind()
 	setText(getDataBind()->getStringData());
 }
 
-void UITextInput::updateAutoComplete()
+void UITextInput::autoComplete()
 {
-	if (!autoCompleteHandle || text.getText().empty()) {
-		autoCompleteOptions = 0;
-		autoCompleteCurOption = 0;
-		autoCompleteText.clear();
+	if (autoCompleteCurOption) {
+		if (text.getText() == autoCompleteOptions[autoCompleteCurOption.value()]) {
+			// Cycle to next
+			autoCompleteCurOption = modulo(static_cast<int>(autoCompleteCurOption.value()) + 1, static_cast<int>(autoCompleteOptions.size()));
+		}
+		
+		modifiedByAutoComplete = true;
+		setText(autoCompleteOptions[autoCompleteCurOption.value()]);
+		selectAll();
+	}
+}
+
+void UITextInput::updateAutoCompleteOnTextModified()
+{
+	if (!modifiedByAutoComplete) {
+		userInputForAutoComplete = text.getText();
+	}
+	modifiedByAutoComplete = false;
+	
+	refreshAutoCompleteOptions();
+}
+
+void UITextInput::refreshAutoCompleteOptions()
+{
+	if (!autoCompleteHandle || userInputForAutoComplete.empty()) {
+		autoCompleteCurOption.reset();
 	} else {
-		const auto result = autoCompleteHandle(text.getText());
-		if (result.empty()) {
-			autoCompleteOptions = 0;
-			autoCompleteCurOption = 0;
-			autoCompleteText.clear();
+		const StringUTF32 prevOption = autoCompleteCurOption ? autoCompleteOptions[autoCompleteCurOption.value()] : StringUTF32();
+		
+		autoCompleteOptions = autoCompleteHandle(userInputForAutoComplete);
+		if (autoCompleteOptions.empty()) {
+			autoCompleteCurOption.reset();
 		} else {
-			autoCompleteOptions = int(result.size());
-			autoCompleteCurOption = modulo(autoCompleteCurOption, autoCompleteOptions);
-			autoCompleteText = result[autoCompleteCurOption];
+			const auto iter = std::find(autoCompleteOptions.begin(), autoCompleteOptions.end(), prevOption);
+			if (iter != autoCompleteOptions.end()) {
+				autoCompleteCurOption = iter - autoCompleteOptions.begin();
+			} else {
+				autoCompleteCurOption = 0;
+			}
 		}
 	}
+}
+
+StringUTF32 UITextInput::getAutoCompleteCaption() const
+{
+	StringUTF32 result = autoCompleteOptions[autoCompleteCurOption.value()];
+	if (autoCompleteOptions.size() > 1) {
+		const String append = " [" + toString(autoCompleteCurOption.value() + 1) + "/" + toString(autoCompleteOptions.size()) + "]";
+		result += append.getUTF32();
+	}
+	return result;
+}
+
+void UITextInput::addToHistory(String str)
+{
+	history.emplace(history.begin(), std::move(str));
+	if (history.size() > 20) {
+		history.pop_back();
+	}
+	historyCurOption.reset();
+}
+
+void UITextInput::navigateHistory(int delta)
+{
+	if (history.empty()) {
+		return;
+	}
+	
+	const int historySize = static_cast<int>(history.size());
+	const int startValue = historyCurOption.value_or(delta > 0 ? -1 : historySize);
+	const int val = modulo(startValue + delta, historySize);
+	historyCurOption = val;
+
+	modifiedByHistory = true;
+	setText(history[val]);
+}
+
+void UITextInput::updateHistoryOnTextModified()
+{
+	if (!modifiedByHistory) {
+		historyCurOption.reset();
+	}
+	modifiedByHistory = false;
 }

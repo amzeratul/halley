@@ -10,7 +10,7 @@ children:
 - sizer: { type: horizontal }
   border: [0, 5, 0, 0]
   children:
-  - widget: { id: input, class: textInput, size: [20, 20] }
+  - widget: { id: input, class: textInput, size: [20, 20], clearOnSubmit: true, history: true }
     proportion: 1
   - widget: { id: ok, class: button, text: "OK" }
 

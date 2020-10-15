@@ -61,7 +61,6 @@ namespace Halley {
     	
     private:
 		void setup();
-		void onSubmit();
 		void runCommand(const String& command);
 
 		UIFactory& factory;
