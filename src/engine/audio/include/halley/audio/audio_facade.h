@@ -75,7 +75,7 @@ namespace Halley {
     	
 		RingBuffer<String> exceptions;
 		std::vector<uint32_t> playingSounds;
-		RingBuffer<std::vector<uint32_t>> playingSoundsQueue;
+		RingBuffer<std::vector<uint32_t>> finishedSoundsQueue;
 
 		std::map<int, AudioHandle> musicTracks;
 

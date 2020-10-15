@@ -30,7 +30,7 @@ namespace Halley {
 		void addEmitter(uint32_t id, std::unique_ptr<AudioVoice> src);
 
 		const std::vector<AudioVoice*>& getSources(uint32_t id);
-		std::vector<uint32_t> getPlayingSounds();
+		std::vector<uint32_t> getFinishedSounds();
 
 		void run();
 		void start(AudioSpec spec, AudioOutputAPI& out);
@@ -79,6 +79,8 @@ namespace Halley {
 
 		Random rng;
 		std::atomic<int64_t> lastTimeElapsed;
+
+    	std::vector<uint32_t> finishedSounds;
 
 		void mixEmitters(size_t numSamples, size_t channels, gsl::span<AudioBuffer*> buffers);
 	    void removeFinishedEmitters();

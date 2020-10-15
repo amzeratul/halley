@@ -17,7 +17,7 @@ AudioFacade::AudioFacade(AudioOutputAPI& o, SystemAPI& system)
 	, started(false)
 	, commandQueue(1024)
 	, exceptions(16)
-	, playingSoundsQueue(4)
+	, finishedSoundsQueue(4)
 	, ownAudioThread(o.needsAudioThread())
 {
 }
@@ -171,6 +171,7 @@ AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
 		Logger::logWarning("Unknown audio event: \"" + name + "\"");
 	}
 
+	playingSounds.push_back(id);
 	return std::make_shared<AudioHandleImpl>(*this, id);
 }
 
@@ -180,6 +181,7 @@ AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioPosit
 	enqueue([=] () {
 		engine->play(id, clip, position, volume, loop);
 	});
+	playingSounds.push_back(id);
 	return std::make_shared<AudioHandleImpl>(*this, id);
 }
 
@@ -301,8 +303,11 @@ void AudioFacade::stepAudio()
 			if (!running) {
 				return;
 			}
-			if (playingSoundsQueue.canWrite(1)) {
-				playingSoundsQueue.writeOne(engine->getPlayingSounds());
+			if (finishedSoundsQueue.canWrite(1)) {
+				auto finishedSounds = engine->getFinishedSounds();
+				if (!finishedSounds.empty()) {
+					finishedSoundsQueue.writeOne(std::move(finishedSounds));
+				}
 			}
 		}
 
@@ -347,8 +352,12 @@ void AudioFacade::pump()
 	}
 
 	if (running) {
-		while (playingSoundsQueue.canRead(1)) {
-			playingSounds = playingSoundsQueue.readOne();
+		while (finishedSoundsQueue.canRead(1)) {
+			auto finishedSounds = finishedSoundsQueue.readOne();
+			playingSounds.erase(std::remove_if(playingSounds.begin(), playingSounds.end(), [&] (uint32_t id) -> bool
+			{
+				return std::find(finishedSounds.begin(), finishedSounds.end(), id) != finishedSounds.end();
+			}), playingSounds.end());
 		}
 	}
 }

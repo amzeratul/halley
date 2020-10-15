@@ -87,14 +87,9 @@ const std::vector<AudioVoice*>& AudioEngine::getSources(uint32_t id)
 	}
 }
 
-std::vector<uint32_t> AudioEngine::getPlayingSounds()
+std::vector<uint32_t> AudioEngine::getFinishedSounds()
 {
-	std::vector<uint32_t> result(idToSource.size());
-	size_t i = 0;
-	for (const auto& kv: idToSource) {
-		result[i++] = kv.first;
-	}
-	return result;
+	return std::move(finishedSounds);
 }
 
 void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
@@ -302,6 +297,7 @@ void AudioEngine::removeFinishedEmitters()
 				if (ems.size() > 1) {
 					ems.erase(std::remove_if(ems.begin(), ems.end(), [] (const AudioVoice* e) { return e->isDone(); }), ems.end());
 				} else {
+					finishedSounds.push_back(iter->first);
 					idToSource.erase(iter);
 				}
 			}
