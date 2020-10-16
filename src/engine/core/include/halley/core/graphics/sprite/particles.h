@@ -3,6 +3,8 @@
 #include "sprite.h"
 #include <halley/time/halleytime.h>
 
+#include "animation_player.h"
+
 namespace Halley {
 	class Random;
 	class Animation;
@@ -33,6 +35,8 @@ namespace Halley {
 
 		void setSprites(std::vector<Sprite> sprites);
 		void setAnimation(std::shared_ptr<const Animation> animation);
+
+		const bool isAnimated() const;
 		
 		[[nodiscard]] gsl::span<Sprite> getSprites();
 		[[nodiscard]] gsl::span<const Sprite> getSprites() const;
@@ -46,10 +50,12 @@ namespace Halley {
 
 		std::vector<Sprite> sprites;
 		std::vector<Particle> particles;
+		std::vector<AnimationPlayerLite> animationPlayers;
+		
 		size_t nParticlesAlive = 0;
 		size_t nParticlesVisible = 0;
 		float pendingSpawn = 0;
-		
+
 		float spawnRate = 100;
 		Vector2f spawnArea;
 		float ttl = 1;
@@ -62,6 +68,7 @@ namespace Halley {
 		float fadeOutTime = 0;
 		float directionScatter = 0;
 		bool rotateTowardsMovement = false;
+		std::optional<size_t> maxParticles;
 
 		std::vector<Sprite> baseSprites;
 		std::shared_ptr<const Animation> baseAnimation;

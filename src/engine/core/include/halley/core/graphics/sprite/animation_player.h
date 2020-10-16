@@ -103,6 +103,25 @@ namespace Halley
 		mutable bool hasUpdate = true;
 	};
 
+	class AnimationPlayerLite {
+	public:
+		explicit AnimationPlayerLite(std::shared_ptr<const Animation> animation = std::shared_ptr<const Animation>(), const String& sequence = "default", const String& direction = "default");
+
+		AnimationPlayerLite& setAnimation(std::shared_ptr<const Animation> animation, const String& sequence = "default", const String& direction = "default");
+		AnimationPlayerLite& setSequence(const String& sequence);
+		AnimationPlayerLite& setDirection(int direction);
+		AnimationPlayerLite& setDirection(const String& direction);
+
+		void update(Time time, Sprite& sprite);
+
+	private:
+		std::shared_ptr<const Animation> animation;
+		const AnimationSequence* curSeq = nullptr;
+		float curTime = 0;
+		int curFrame = -1;
+		int curDir = 0;
+	};
+
 	class Resources;
 
 	template<>

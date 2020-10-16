@@ -348,6 +348,68 @@ void AnimationPlayer::updateIfNeeded()
 	}
 }
 
+AnimationPlayerLite::AnimationPlayerLite(std::shared_ptr<const Animation> animation, const String& sequence, const String& direction)
+{
+	setAnimation(std::move(animation), sequence, direction);
+}
+
+AnimationPlayerLite& AnimationPlayerLite::setAnimation(std::shared_ptr<const Animation> animation, const String& sequence, const String& direction)
+{
+	this->animation = std::move(animation);
+	setSequence(sequence);
+	setDirection(direction);
+	return *this;
+}
+
+AnimationPlayerLite& AnimationPlayerLite::setSequence(const String& sequence)
+{
+	curSeq = &animation->getSequence(sequence);
+	curFrame = -1;
+	return *this;
+}
+
+AnimationPlayerLite& AnimationPlayerLite::setDirection(int direction)
+{
+	curDir = direction;
+	curFrame = -1;
+	return *this;
+}
+
+AnimationPlayerLite& AnimationPlayerLite::setDirection(const String& direction)
+{
+	setDirection(animation->getDirection(direction).getId());
+	return *this;
+}
+
+void AnimationPlayerLite::update(Time time, Sprite& sprite)
+{
+	bool changed = false;
+	curTime += static_cast<float>(time);
+
+	if (curFrame == -1) {
+		curFrame = 0;
+		curTime = 0;
+		changed = true;
+	} else {
+		while (true) {
+			const float duration = curSeq->getFrame(curFrame).getDuration() * 0.001;
+			if (curTime > duration) {
+				curTime -= duration;
+				curFrame = modulo(curFrame + 1, static_cast<int>(curSeq->numFrames()));
+				changed = true;
+			} else {
+				break;
+			}
+		}
+	}
+
+	if (changed) {
+		sprite
+			.setMaterial(animation->getMaterial(), true)
+			.setSprite(curSeq->getFrame(curFrame).getSprite(curDir));
+	}
+}
+
 ConfigNode ConfigNodeSerializer<AnimationPlayer>::serialize(const AnimationPlayer& player, ConfigNodeSerializationContext& context)
 {
 	ConfigNode result = ConfigNode::MapType();

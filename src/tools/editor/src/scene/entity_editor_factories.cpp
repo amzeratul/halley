@@ -747,6 +747,8 @@ public:
 		container->add(context.makeField("float", pars.withSubKey("spawnRate", "100"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("spawnArea"));
 		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("spawnArea"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("maxParticles"));
+		container->add(context.makeField("std::optional<int>", pars.withSubKey("maxParticles", ""), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("ttl"));
 		container->add(context.makeField("float", pars.withSubKey("ttl", "1"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("ttlScatter"));
@@ -800,6 +802,8 @@ public:
 			return AssetType::AudioEvent;
 		} else if (strippedTypeName == "SpriteResource") {
 			return AssetType::Sprite;
+		} else if (strippedTypeName == "Animation") {
+			return AssetType::Animation;
 		} else {
 			Logger::logWarning("Unimplemented resource type on ComponentEditorResourceReferenceFieldFactory: " + strippedTypeName);
 		}

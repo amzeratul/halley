@@ -24,6 +24,10 @@ Particles::Particles(const ConfigNode& node, Resources& resources)
 	fadeOutTime = node["fadeOutTime"].asFloat(0.0f);
 	directionScatter = node["directionScatter"].asFloat(0.0f);
 	rotateTowardsMovement = node["rotateTowardsMovement"].asBool(false);
+
+	if (node.hasKey("maxParticles")) {
+		maxParticles = node["maxParticles"].asInt();
+	}
 }
 
 ConfigNode Particles::toConfigNode() const
@@ -77,6 +81,9 @@ void Particles::update(Time t)
 				// Swap with last particle that's alive
 				std::swap(particles[i], particles[nParticlesAlive - 1]);
 				std::swap(sprites[i], sprites[nParticlesAlive - 1]);
+				if (isAnimated()) {
+					std::swap(animationPlayers[i], animationPlayers[nParticlesAlive - 1]);
+				}
 			}
 			--nParticlesAlive;
 			// Don't increment i here, since i is now a new particle that's still alive
@@ -102,6 +109,11 @@ void Particles::setAnimation(std::shared_ptr<const Animation> animation)
 	baseAnimation = std::move(animation);
 }
 
+const bool Particles::isAnimated() const
+{
+	return !!baseAnimation;
+}
+
 gsl::span<Sprite> Particles::getSprites()
 {
 	return gsl::span<Sprite>(sprites).subspan(0, nParticlesVisible);
@@ -114,12 +126,19 @@ gsl::span<const Sprite> Particles::getSprites() const
 
 void Particles::spawn(size_t n)
 {
+	if (maxParticles) {
+		n = std::min(n, maxParticles.value() - nParticlesAlive);
+	}
+	
 	const size_t start = nParticlesAlive;
 	nParticlesAlive += n;
 	const size_t size = std::max(size_t(8), nextPowerOf2(nParticlesAlive));
 	if (particles.size() < size) {
 		particles.resize(size);
 		sprites.resize(size);
+		if (isAnimated()) {
+			animationPlayers.resize(size, AnimationPlayerLite(baseAnimation));
+		}
 	}
 	
 	for (size_t i = start; i < nParticlesAlive; ++i) {
@@ -140,14 +159,23 @@ void Particles::initializeParticle(size_t index)
 	particle.vel = Vector2f(rng->getFloat(speed - speedScatter, speed + speedScatter), startDirection);
 
 	auto& sprite = sprites[index];
-	if (!baseSprites.empty()) {
+	if (isAnimated()) {
+		auto& anim = animationPlayers[index];
+		anim.update(0, sprite);
+	} else if (!baseSprites.empty()) {
 		sprite = rng->getRandomElement(baseSprites);
 	}
 }
 
 void Particles::updateParticles(float time)
 {
+	const bool hasAnim = isAnimated();
+	
 	for (size_t i = 0; i < nParticlesAlive; ++i) {
+		if (hasAnim) {
+			animationPlayers[i].update(time, sprites[i]);
+		}
+		
 		auto& particle = particles[i];
 
 		particle.time += time;

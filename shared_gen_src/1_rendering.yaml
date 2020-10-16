@@ -69,8 +69,7 @@ component:
       type: 'std::vector<Halley::Sprite>'
       collapse: true
   - animation:
-      type: 'std::optional<Halley::AnimationPlayer>'
-      collapse: true
+      type: 'Halley::ResourceReference<Halley::Animation>'
   - layer:
       type: int
       defaultValue: 0
