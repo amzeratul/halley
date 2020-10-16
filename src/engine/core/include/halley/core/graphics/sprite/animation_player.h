@@ -43,6 +43,7 @@ namespace Halley
 		int getCurrentSequenceLoopCount() const;
 
 		String getCurrentDirectionName() const;
+		int getCurrentDirectionId() const;
 
 		AnimationPlayer& setPlaybackSpeed(float value);
 		float getPlaybackSpeed() const;

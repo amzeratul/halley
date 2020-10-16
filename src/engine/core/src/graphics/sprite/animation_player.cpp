@@ -256,6 +256,11 @@ String AnimationPlayer::getCurrentDirectionName() const
 	return curDir ? curDir->getName() : "default";
 }
 
+int AnimationPlayer::getCurrentDirectionId() const
+{
+	return dirId;
+}
+
 AnimationPlayer& AnimationPlayer::setPlaybackSpeed(float value)
 {
 	playbackSpeed = value;
