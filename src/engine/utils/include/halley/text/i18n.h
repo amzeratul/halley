@@ -33,6 +33,7 @@ namespace Halley {
 		LocalisedString replaceTokens(const LocalisedString& tok0) const;
 		LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1) const;
 		LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2) const;
+		LocalisedString replaceTokens(const std::map<String, LocalisedString>& tokens);
 
 		const String& getString() const;
 

@@ -277,6 +277,17 @@ LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0, cons
 	return LocalisedString(string.replaceAll("{0}", tok0.getString()).replaceAll("{1}", tok1.getString()).replaceAll("{2}", tok2.getString()));
 }
 
+LocalisedString LocalisedString::replaceTokens(const std::map<String, LocalisedString>& tokens)
+{
+	auto curString = string;
+	int idx = 0;
+	for (const auto& token : tokens) {
+		curString = string.replaceAll("{" + token.first + "}", token.second.getString());
+		++idx;
+	}
+	return LocalisedString(curString);
+}
+
 const String& LocalisedString::getString() const
 {
 	return string;
