@@ -749,6 +749,8 @@ public:
 		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("spawnArea"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("maxParticles"));
 		container->add(context.makeField("std::optional<int>", pars.withSubKey("maxParticles", ""), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("burst"));
+		container->add(context.makeField("std::optional<int>", pars.withSubKey("burst", ""), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("ttl"));
 		container->add(context.makeField("float", pars.withSubKey("ttl", "1"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("ttlScatter"));
@@ -757,6 +759,10 @@ public:
 		container->add(context.makeField("float", pars.withSubKey("speed", "100"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("speedScatter"));
 		container->add(context.makeField("float", pars.withSubKey("speedScatter", "10"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("speedDamp"));
+		container->add(context.makeField("float", pars.withSubKey("speedDamp", "0"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("acceleration"));
+		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("acceleration", ""), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("angle"));
 		container->add(context.makeField("float", pars.withSubKey("angle", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("angleScatter"));
@@ -769,6 +775,8 @@ public:
 		container->add(context.makeField("float", pars.withSubKey("directionScatter", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("rotateTowardsMovement"));
 		container->add(context.makeField("bool", pars.withSubKey("rotateTowardsMovement", "false"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("destroyWhenDone"));
+		container->add(context.makeField("bool", pars.withSubKey("destroyWhenDone", "false"), ComponentEditorLabelCreation::Never));
 		
 		auto containerWeak = std::weak_ptr<UIWidget>(container);
 

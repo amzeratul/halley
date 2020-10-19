@@ -110,6 +110,7 @@ void SceneEditor::createWorld()
 	createServices(*world);
 	createEntities(*world);
 	cameraEntityIds = createCamera();
+	world->setEditor(true);
 
 	onInit();
 }

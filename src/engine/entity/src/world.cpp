@@ -359,6 +359,16 @@ bool World::isDevMode() const
 	return api.core->isDevMode();
 }
 
+void World::setEditor(bool isEditor)
+{
+	editor = isEditor;
+}
+
+bool World::isEditor() const
+{
+	return editor;
+}
+
 void World::deleteEntity(Entity* entity)
 {
 	Expects (entity);

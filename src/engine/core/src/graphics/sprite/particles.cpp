@@ -1,6 +1,7 @@
 #include "graphics/sprite/particles.h"
 
 #include "halley/maths/random.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -18,15 +19,21 @@ Particles::Particles(const ConfigNode& node, Resources& resources)
 	ttlScatter = node["ttlScatter"].asFloat(0.0f);
 	speed = node["speed"].asFloat(100.0f);
 	speedScatter = node["speedScatter"].asFloat(0.0f);
+	speedDamp = node["speedDamp"].asFloat(0.0f);
+	acceleration = node["acceleration"].asVector2f(Vector2f());
 	angle = node["angle"].asFloat(0.0f);
 	angleScatter = node["angleScatter"].asFloat(0.0f);
 	fadeInTime = node["fadeInTime"].asFloat(0.0f);
 	fadeOutTime = node["fadeOutTime"].asFloat(0.0f);
 	directionScatter = node["directionScatter"].asFloat(0.0f);
 	rotateTowardsMovement = node["rotateTowardsMovement"].asBool(false);
+	destroyWhenDone = node["destroyWhenDone"].asBool(false);
 
 	if (node.hasKey("maxParticles")) {
 		maxParticles = node["maxParticles"].asInt();
+	}
+	if (node.hasKey("burst")) {
+		burst = node["burst"].asInt();
 	}
 }
 
@@ -62,9 +69,21 @@ void Particles::setPosition(Vector2f pos)
 	position = pos;
 }
 
+void Particles::start()
+{
+	if (burst) {
+		spawn(burst.value());
+	}
+}
+
 void Particles::update(Time t)
 {
-	pendingSpawn += static_cast<float>(t * spawnRate * (enabled ? spawnRateMultiplier : 0));
+	if (firstUpdate) {
+		firstUpdate = false;
+		start();
+	}
+	
+	pendingSpawn += static_cast<float>(t * spawnRate * (enabled && !burst ? spawnRateMultiplier : 0));
 	const int toSpawn = static_cast<int>(floor(pendingSpawn));
 	pendingSpawn = pendingSpawn - static_cast<float>(toSpawn);
 
@@ -109,9 +128,14 @@ void Particles::setAnimation(std::shared_ptr<const Animation> animation)
 	baseAnimation = std::move(animation);
 }
 
-const bool Particles::isAnimated() const
+bool Particles::isAnimated() const
 {
 	return !!baseAnimation;
+}
+
+bool Particles::isAlive() const
+{
+	return nParticlesAlive > 0 || !destroyWhenDone;
 }
 
 gsl::span<Sprite> Particles::getSprites()
@@ -129,7 +153,7 @@ void Particles::spawn(size_t n)
 	if (maxParticles) {
 		n = std::min(n, maxParticles.value() - nParticlesAlive);
 	}
-	
+
 	const size_t start = nParticlesAlive;
 	nParticlesAlive += n;
 	const size_t size = std::max(size_t(8), nextPowerOf2(nParticlesAlive));
@@ -182,6 +206,12 @@ void Particles::updateParticles(float time)
 		if (particle.time >= particle.ttl) {
 			particle.alive = false;
 		} else {
+			particle.vel += acceleration * time;
+			
+			if (speedDamp > 0.0001f) {
+				particle.vel = damp(particle.vel, Vector2f(), speedDamp, time);
+			}
+
 			if (directionScatter > 0.00001f) {
 				particle.vel = particle.vel.rotate(Angle1f::fromDegrees(rng->getFloat(-directionScatter * time, directionScatter * time)));
 			}
@@ -196,7 +226,7 @@ void Particles::updateParticles(float time)
 				const float alpha = clamp(std::min(particle.time / fadeInTime, (particle.ttl - particle.time) / fadeOutTime), 0.0f, 1.0f);
 				sprites[i].getColour().a = alpha;
 			}
-			
+
 			sprites[i]
 				.setPosition(particle.pos)
 				.setRotation(particle.angle);

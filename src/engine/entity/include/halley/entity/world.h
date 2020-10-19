@@ -119,6 +119,9 @@ namespace Halley {
 
 		bool isDevMode() const;
 
+		void setEditor(bool isEditor);
+		bool isEditor() const;
+
 	private:
 		const HalleyAPI& api;
 		Resources& resources;
@@ -127,6 +130,7 @@ namespace Halley {
 		bool collectMetrics = false;
 		bool entityDirty = false;
 		bool entityReloaded = false;
+		bool editor = false;
 		
 		Vector<Entity*> entities;
 		Vector<Entity*> entitiesPendingCreation;
