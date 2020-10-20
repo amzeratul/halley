@@ -100,7 +100,7 @@ void Serializer::serializeVariableInteger(uint64_t val, std::optional<bool> sign
 	// 56 11111110 sxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 	// 64 11111111 sxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx
 	
-	const size_t nBits = size_t(std::max(fastLog2Ceil(val), 1)) + (sign ? 1 : 0);
+	const size_t nBits = size_t(std::max(fastLog2Ceil(val + 1), 1)) + (sign ? 1 : 0);
 	const size_t nBytes = std::min((nBits - 1) / 7, size_t(8)) + 1; // Total length of this sequence
 	std::array<uint8_t, 9> buffer;
 	buffer.fill(0);
