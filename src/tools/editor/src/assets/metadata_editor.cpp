@@ -5,6 +5,7 @@
 #include "halley/ui/widgets/ui_checkbox.h"
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/ui/widgets/ui_textinput.h"
+#include "src/ui/select_asset_widget.h"
 using namespace Halley;
 
 MetadataEditor::MetadataEditor(UIFactory& factory)
@@ -56,18 +57,17 @@ void MetadataEditor::makeUI()
 	case AssetType::Animation:
 		addInt2Field("Pivot", "pivotX", "pivotY", Vector2i());
 		addInt4Field("Slices", "slice_left", "slice_right", "slice_bottom", "slice_top", Vector4i());
-		addInt2Field("Tile", "tileWidth", "tileHeight", Vector2i());
-		addBoolField("Trim", "trim", true);
-		addIntField("Padding", "padding", 0);
+		addBoolField("By Group", "group_separated", false);
+		addAssetTypeField("Material", "material", AssetType::MaterialDefinition, "Halley/Sprite");
 		addStringField("Atlas", "atlas", "");
 		addStringField("Palette", "palette", "");
-		addStringField("Material", "material", "Halley/Sprite");
-		addStringField("Default Material", "defaultMaterial", "Halley/Sprite");
 		addBoolField("Filtering", "filtering", false);
 		addBoolField("Minimap", "minimap", false);
-		addStringField("Format", "format", "rgba");
-		addStringField("Address Mode", "addressMode", "clamp");
-		addBoolField("Group Separated", "group_separated", false);
+		addEnumField<TextureFormat>("Format", "format", "rgba");
+		addEnumField<TextureAddressMode>("Address", "addressMode", "clamp");
+		addInt2Field("Tile Split", "tileWidth", "tileHeight", Vector2i());
+		addBoolField("Trim", "trim", true);
+		addIntField("Padding", "padding", 0);
 		break;
 
 	case AssetType::AudioClip:
@@ -135,6 +135,18 @@ void MetadataEditor::addStringField(const String& name, const String& key, const
 	makeStringField(fields->getSizer(), key, defaultValue);
 }
 
+void MetadataEditor::addAssetTypeField(const String& name, const String& key, AssetType type, const String& defaultValue)
+{
+	makeLabel(name);
+	makeAssetTypeField(fields->getSizer(), key, type, defaultValue);
+}
+
+void MetadataEditor::addDropdownField(const String& name, const String& key, std::vector<String> values, const String& defaultValue)
+{
+	makeLabel(name);
+	makeDropdownField(fields->getSizer(), key, std::move(values), defaultValue);
+}
+
 void MetadataEditor::makeLabel(const String& name)
 {
 	fields->add(std::make_shared<UILabel>("", factory.getStyle("label").getTextRenderer("label"), LocalisedString::fromUserString(name)), 0, Vector4f(0, 0, 10, 0), UISizerAlignFlags::CentreVertical);
@@ -160,9 +172,12 @@ void MetadataEditor::makeIntField(UISizer& sizer, const String& key, int default
 	result->setMinSize(Vector2f(40, 22));
 	result->setValidator(std::make_shared<UINumericValidator>(true, false));
 	sizer.add(result, 1);
-	bindData(key, metadata.getInt(key, defaultValue), [=] (int value)
+
+	const auto effectiveDefault = effectiveMetadata.getInt(":" + key, defaultValue);
+	
+	bindData(key, metadata.getInt(key, effectiveDefault), [=] (int value)
 	{
-		updateMetadata(metadata, key, *this, value, defaultValue);
+		updateMetadata(metadata, key, *this, value, effectiveDefault);
 	});
 }
 
@@ -195,8 +210,40 @@ void MetadataEditor::makeStringField(UISizer& sizer, const String& key, const St
 	result->setMinSize(Vector2f(40, 22));
 	sizer.add(result, 1);
 
-	auto effectiveDefault = effectiveMetadata.getString(":" + key, defaultValue);
-	auto value = metadata.getString(key, effectiveDefault);
+	const auto effectiveDefault = effectiveMetadata.getString(":" + key, defaultValue);
+	const auto value = metadata.getString(key, "");
+	result->setGhostText(LocalisedString::fromUserString(effectiveDefault));
+
+	bindData(key, value, [=] (const String& value)
+	{
+		updateMetadata(metadata, key, *this, value, defaultValue);
+	});
+}
+
+void MetadataEditor::makeDropdownField(UISizer& sizer, const String& key, std::vector<String> values, const String& defaultValue)
+{
+	const auto result = std::make_shared<UIDropdown>(key, factory.getStyle("dropdown"), factory.getStyle("scrollbar"), factory.getStyle("list"));
+	result->setOptions(std::move(values));
+	sizer.add(result, 1);
+
+	const auto effectiveDefault = effectiveMetadata.getString(":" + key, defaultValue);
+	const auto value = metadata.getString(key, effectiveDefault);
+
+	bindData(key, value, [=] (const String& value)
+	{
+		updateMetadata(metadata, key, *this, value, defaultValue);
+	});
+}
+
+void MetadataEditor::makeAssetTypeField(UISizer& sizer, const String& key, AssetType type, const String& defaultValue)
+{
+	const auto result = std::make_shared<SelectAssetWidget>(key, factory, type);
+	result->setGameResources(project->getGameResources());
+	result->setMinSize(Vector2f(40, 22));
+	sizer.add(result, 1);
+
+	const auto effectiveDefault = effectiveMetadata.getString(":" + key, defaultValue);
+	const auto value = metadata.getString(key, effectiveDefault);
 
 	bindData(key, value, [=] (const String& value)
 	{

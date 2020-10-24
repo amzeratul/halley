@@ -60,5 +60,8 @@ Metadata MetadataImporter::getMetaData(const Path& inputFilePath, std::optional<
 	} catch (std::exception& e) {
 		throw Exception("Error parsing metafile for " + inputFilePath + ": " + e.what(), HalleyExceptions::Tools);
 	}
+
+	meta.convertToLatestVersion();
+	
 	return meta;
 }

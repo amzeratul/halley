@@ -43,6 +43,8 @@ namespace Halley
 		bool set(String key, String value);
 		bool erase(const String& key);
 
+		void convertToLatestVersion();
+
 		static std::unique_ptr<Metadata> fromBinary(ResourceDataStatic& data);
 		
 		void serialize(Serializer& s) const;

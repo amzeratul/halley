@@ -36,11 +36,26 @@ namespace Halley
 		void addFloatField(const String& name, const String& key, float defaultValue);
 		void addBoolField(const String& name, const String& key, bool defaultValue);
 		void addStringField(const String& name, const String& key, const String& defaultValue);
+		void addAssetTypeField(const String& name, const String& key, AssetType type, const String& defaultValue);
+		void addDropdownField(const String& name, const String& key, std::vector<String> values, const String& defaultValue);
+
+		template <typename T>
+		void addEnumField(const String& name, const String& key, const String& defaultValue)
+		{
+			const auto names = EnumNames<T>()();
+			std::vector<String> values;
+			for (const auto& name: names) {
+				values.push_back(name);
+			}
+			addDropdownField(name, key, std::move(values), defaultValue);
+		}
 
 		void makeLabel(const String& name);
 		void makeIntField(UISizer& sizer, const String& key, int defaultValue);
 		void makeFloatField(UISizer& sizer, const String& key, float defaultValue);
 		void makeBoolField(UISizer& sizer, const String& key, bool defaultValue);
 		void makeStringField(UISizer& sizer, const String& key, const String& defaultValue);
+		void makeDropdownField(UISizer& sizer, const String& key, std::vector<String> values, const String& defaultValue);
+		void makeAssetTypeField(UISizer& sizer, const String& key, AssetType type, const String& defaultValue);
 	};
 }

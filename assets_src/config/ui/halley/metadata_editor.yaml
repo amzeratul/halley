@@ -7,8 +7,8 @@ children:
   children:
   - widget: { id: "", class: label, text: "Metadata" }
     fill: centre
-  - widget: { id: fields, class: widget }
-    sizer: { type: vertical }
+  - widget: { id: fields, class: widget, innerBorder: [0, 2, 0, 0] }
+    sizer: { type: grid, columns: 2 }
   - widget: { id: applyChanges, class: button, text: "Apply", size: [30, 30] }
     border: [0, 2, 0, 0]
 ...

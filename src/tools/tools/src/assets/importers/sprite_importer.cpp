@@ -144,7 +144,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	ConfigNode spriteInfo;
 	auto atlasImage = generateAtlas(groupAtlasName, totalFrames, spriteSheet, spriteInfo);
 	spriteSheet.setTextureName(groupAtlasName);
-	spriteSheet.setDefaultMaterialName(meta.getString("defaultMaterial", "Halley/Sprite"));
+	spriteSheet.setDefaultMaterialName(meta.getString("material", meta.getString("defaultMaterial", "Halley/Sprite")));
 
 	// Metafile parameters
 	auto size = atlasImage->getSize();

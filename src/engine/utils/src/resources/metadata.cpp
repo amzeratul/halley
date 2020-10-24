@@ -130,6 +130,13 @@ bool Metadata::erase(const String& key)
 	return false;
 }
 
+void Metadata::convertToLatestVersion()
+{
+	if (hasKey("defaultMaterial") && !hasKey("material")) {
+		set("material", getString("defaultMaterial"));
+	}
+}
+
 std::unique_ptr<Metadata> Metadata::fromBinary(ResourceDataStatic& data)
 {
 	auto meta = std::make_unique<Metadata>();
