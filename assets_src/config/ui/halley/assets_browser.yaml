@@ -52,24 +52,9 @@ children:
           proportion: 1
         - widget: { id: removeAsset, class: button, text: Remove }
           proportion: 1
-  - sizer: { type: vertical }
+  - widget: { class: assetEditor }
     proportion: 1
     border: [10, 0, 10, 0]
-    children:
-    - widget: { class: widget }
-      sizer: { type: horizontal}
-      children:
-        - widget: { class: label, id: contentListDropdownLabel, text: "Assets:"}
-          border: [0, 0, 5, 0]
-          fill: [centreVertical]
-        - widget: { id: contentListDropdown, class: dropdown, size: [200, 30] }
-    - widget: { id: contentList, class: list, style: tabs, type: horizontal }
-    - widget: { id: content, class: pagedPane }
-      fill: fill
-      sizer: { type: horizontal }
-      proportion: 1
-    - widget: { class: label, id: assetName, text: "" }
-      fill: centre
   - sizer: { type: vertical }
     children:
     - widget: { class: metadataEditor }

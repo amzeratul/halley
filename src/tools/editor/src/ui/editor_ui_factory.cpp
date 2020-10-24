@@ -4,6 +4,7 @@
 #include "scroll_background.h"
 #include "select_asset_widget.h"
 #include "src/assets/animation_editor.h"
+#include "src/assets/asset_editor_window.h"
 #include "src/assets/metadata_editor.h"
 #include "src/scene/entity_editor.h"
 #include "src/scene/entity_list.h"
@@ -29,6 +30,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 
 	addFactory("scrollBackground", [=] (const ConfigNode& node) { return makeScrollBackground(node); });
 	addFactory("animationEditorDisplay", [=] (const ConfigNode& node) { return makeAnimationEditorDisplay(node); });
+	addFactory("assetEditor", [=] (const ConfigNode& node) { return makeAssetEditor(node); });
 	addFactory("metadataEditor", [=] (const ConfigNode& node) { return makeMetadataEditor(node); });
 	addFactory("sceneEditorCanvas", [=](const ConfigNode& node) { return makeSceneEditorCanvas(node); });
 	addFactory("entityList", [=](const ConfigNode& node) { return makeEntityList(node); });
@@ -46,6 +48,11 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeAnimationEditorDisplay(const Conf
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	return std::make_shared<AnimationEditorDisplay>(id, resources);
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeAssetEditor(const ConfigNode& entryNode)
+{
+	return std::make_shared<AssetEditorWindow>(*this);
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeMetadataEditor(const ConfigNode& entryNode)

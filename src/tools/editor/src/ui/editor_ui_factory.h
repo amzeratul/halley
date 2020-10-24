@@ -9,6 +9,7 @@ namespace Halley {
     private:
 		std::shared_ptr<UIWidget> makeScrollBackground(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeAnimationEditorDisplay(const ConfigNode& entryNode);
+    	std::shared_ptr<UIWidget> makeAssetEditor(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makeMetadataEditor(const ConfigNode& entryNode);
         std::shared_ptr<UIWidget> makeSceneEditorCanvas(const ConfigNode& entryNode);
         std::shared_ptr<UIWidget> makeEntityList(const ConfigNode& entryNode);
