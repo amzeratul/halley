@@ -60,6 +60,9 @@ namespace Halley {
 		String loadedAsset;
         String lastClickedAsset;
 
+		uint64_t curHash = 0;
+		uint64_t curDirHash = 0;
+
         void loadResources();
         void makeUI();
 		void setAssetSrcMode(bool enabled);

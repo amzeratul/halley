@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <gsl/gsl>
 #include "utils.h"
+#include "halley/text/halleystring.h"
 
 struct XXH64_state_s;
 typedef struct XXH64_state_s XXH64_state_t;
@@ -28,12 +29,17 @@ namespace Halley {
 			Hasher();
 			~Hasher();
 
+			void feed(const String& string)
+			{
+				feedBytes(gsl::as_bytes(gsl::span<const char>(string.c_str(), string.length())));
+			}
+
 			template<typename T>
 			void feed(const T& data)
 			{
 				feedBytes(gsl::as_bytes(gsl::span<const T>(&data, 1)));
 			}
-			
+
 			void feedBytes(gsl::span<const gsl::byte> bytes);
 
 			[[nodiscard]] uint64_t digest();

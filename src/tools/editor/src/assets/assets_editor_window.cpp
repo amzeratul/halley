@@ -167,6 +167,32 @@ void AssetsEditorWindow::listAssets(AssetType type)
 
 void AssetsEditorWindow::setListContents(std::vector<String> assets, const Path& curPath, bool flat)
 {
+	{
+		Hash::Hasher hasher;
+		for (const auto& asset: assets) {
+			hasher.feed(asset);
+		}
+		hasher.feed(curPath.toString());
+		const auto hash = hasher.digest();
+
+		if (curHash == hash) {
+			return;
+		}
+		curHash = hash;
+	}
+
+	std::optional<String> selectOption;
+	{
+		Hash::Hasher hasher;
+		hasher.feed(curPath.toString());
+		const auto hash = hasher.digest();
+
+		if (curDirHash == hash) {
+			selectOption = assetList->getSelectedOptionId();
+		}
+		curDirHash = hash;
+	}
+	
 	assetList->clear();
 	if (flat) {
 		for (auto& a: assets) {
@@ -192,6 +218,10 @@ void AssetsEditorWindow::setListContents(std::vector<String> assets, const Path&
 		for (auto& file: files) {
 			assetList->addTextItem(file.first, LocalisedString::fromUserString(file.second));
 		}
+	}
+
+	if (selectOption) {
+		assetList->setSelectedOptionId(selectOption.value());
 	}
 }
 
