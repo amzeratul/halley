@@ -52,15 +52,19 @@ void MetadataEditor::makeUI()
 		saveMetadata();
 	});
 
+	const bool isAseprite = filePath.getExtension() == ".ase" || filePath.getExtension() == ".aseprite";
+
 	switch (assetType) {
 	case AssetType::Sprite:
 	case AssetType::Animation:
 		addInt2Field("Pivot", "pivotX", "pivotY", Vector2i());
 		addInt4Field("Slices", "slice_left", "slice_right", "slice_bottom", "slice_top", Vector4i());
-		addBoolField("By Group", "group_separated", false);
+		if (isAseprite) {
+			addBoolField("By Group", "group_separated", false);
+		}
 		addAssetTypeField("Material", "material", AssetType::MaterialDefinition, "Halley/Sprite");
 		addStringField("Atlas", "atlas", "");
-		addStringField("Palette", "palette", "");
+		addAssetTypeField("Palette", "palette", AssetType::Texture, "");
 		addBoolField("Filtering", "filtering", false);
 		addBoolField("Minimap", "minimap", false);
 		addEnumField<TextureFormat>("Format", "format", "rgba");
@@ -173,11 +177,13 @@ void MetadataEditor::makeIntField(UISizer& sizer, const String& key, int default
 	result->setValidator(std::make_shared<UINumericValidator>(true, false));
 	sizer.add(result, 1);
 
-	const auto effectiveDefault = effectiveMetadata.getInt(":" + key, defaultValue);
-	
-	bindData(key, metadata.getInt(key, effectiveDefault), [=] (int value)
+	const auto effectiveDefault = effectiveMetadata.getString(":" + key, toString(defaultValue));
+	const auto value = metadata.getString(key, "");
+	result->setGhostText(LocalisedString::fromUserString(effectiveDefault));
+
+	bindData(key, value, [=] (const String& value)
 	{
-		updateMetadata(metadata, key, *this, value, effectiveDefault);
+		updateMetadata(metadata, key, *this, value, toString(defaultValue));
 	});
 }
 
@@ -187,9 +193,14 @@ void MetadataEditor::makeFloatField(UISizer& sizer, const String& key, float def
 	result->setMinSize(Vector2f(40, 22));
 	result->setValidator(std::make_shared<UINumericValidator>(true, true));
 	sizer.add(result, 1);
-	bindData(key, metadata.getFloat(key, defaultValue), [=] (float value)
+
+	const auto effectiveDefault = effectiveMetadata.getString(":" + key, toString(defaultValue));
+	const auto value = metadata.getString(key, "");
+	result->setGhostText(LocalisedString::fromUserString(effectiveDefault));
+
+	bindData(key, value, [=] (const String& value)
 	{
-		updateMetadata(metadata, key, *this, value, defaultValue);
+		updateMetadata(metadata, key, *this, value, toString(defaultValue));
 	});
 }
 
@@ -198,7 +209,10 @@ void MetadataEditor::makeBoolField(UISizer& sizer, const String& key, bool defau
 	const auto result = std::make_shared<UICheckbox>(key, factory.getStyle("checkbox"));
 	result->setMinSize(Vector2f(22, 22));
 	sizer.add(result, 1, {}, UISizerAlignFlags::Left | UISizerAlignFlags::CentreVertical);
-	bindData(key, metadata.getBool(key, defaultValue), [=] (bool value)
+
+	const auto effectiveDefault = effectiveMetadata.getBool(":" + key, defaultValue);
+	
+	bindData(key, metadata.getBool(key, effectiveDefault), [=] (bool value)
 	{
 		updateMetadata(metadata, key, *this, value, defaultValue);
 	});
