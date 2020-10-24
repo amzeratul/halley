@@ -198,10 +198,10 @@ void AnimationEditorDisplay::update(Time t, bool moved)
 	pivotSprite.setPos(displayPivotPos);
 	boundsSprite.setPos(getPosition()).scaleTo(bounds.getSize() * zoom);
 
-	if (origSprite.isSliced()) {
-		auto slices = Vector4f(origSprite.getSlices());
-		nineSliceVSprite.setVisible(true).setPos(getPosition() + Vector2f(0, slices.y) * zoom).scaleTo(Vector2f::max(Vector2f(1, 1), (bounds.getSize() - Vector2f(0, slices.w + slices.y)) * zoom));
-		nineSliceHSprite.setVisible(true).setPos(getPosition() + Vector2f(slices.x, 0) * zoom).scaleTo(Vector2f::max(Vector2f(1, 1), (bounds.getSize() - Vector2f(slices.x + slices.z, 0)) * zoom));
+	const auto slices = getCurrentSlices();
+	if (slices) {
+		nineSliceVSprite.setVisible(true).setPos(getPosition() + Vector2f(0, slices->y) * zoom).scaleTo(Vector2f::max(Vector2f(1, 1), (bounds.getSize() - Vector2f(0, slices->w + slices->y)) * zoom));
+		nineSliceHSprite.setVisible(true).setPos(getPosition() + Vector2f(slices->x, 0) * zoom).scaleTo(Vector2f::max(Vector2f(1, 1), (bounds.getSize() - Vector2f(slices->x + slices->z, 0)) * zoom));
 	} else {
 		nineSliceVSprite.setVisible(false);
 		nineSliceHSprite.setVisible(false);
@@ -256,7 +256,24 @@ Vector2i AnimationEditorDisplay::getCurrentPivot() const
 		return Vector2i();
 	}
 	
-	const auto x = metadataEditor->getMetaValue("pivotX");
-	const auto y = metadataEditor->getMetaValue("pivotY");
-	return Vector2i(x.isEmpty() ? origPivot->x : x.toInteger(), y.isEmpty() ? origPivot->y : y.toInteger());
+	return Vector2i(getMetaIntOr("pivotX", origPivot->x), getMetaIntOr("pivotY", origPivot->y));
+}
+
+std::optional<Vector4f> AnimationEditorDisplay::getCurrentSlices() const
+{
+	const auto s = Vector4i(origSprite.getSlices());
+	const auto slices = Vector4i(getMetaIntOr("slice_left", s.x), getMetaIntOr("slice_top", s.y), getMetaIntOr("slice_right", s.z), getMetaIntOr("slice_bottom", s.w));
+	if (slices.x == 0 && slices.y == 0 && slices.z == 0 && slices.w == 0) {
+		return {};
+	}
+	return Vector4f(slices);
+}
+
+int AnimationEditorDisplay::getMetaIntOr(const String& key, int defaultValue) const
+{
+	const auto result = metadataEditor->getMetaValue(key);
+	if (result.isEmpty() || !result.isInteger()) {
+		return defaultValue;
+	}
+	return result.toInteger();
 }

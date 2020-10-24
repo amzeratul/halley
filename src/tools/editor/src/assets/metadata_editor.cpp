@@ -58,7 +58,7 @@ void MetadataEditor::makeUI()
 	case AssetType::Sprite:
 	case AssetType::Animation:
 		addInt2Field("Pivot", "pivotX", "pivotY", Vector2i());
-		addInt4Field("Slices", "slice_left", "slice_right", "slice_bottom", "slice_top", Vector4i());
+		addInt4Field("Slices", "slice_left", "slice_top", "slice_right", "slice_bottom", Vector4i());
 		if (isAseprite) {
 			addBoolField("By Group", "group_separated", false);
 		}

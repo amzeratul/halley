@@ -82,6 +82,9 @@ namespace Halley {
 		Vector2f imageToScreenSpace(Vector2f pos) const;
 		Vector2f screenToImageSpace(Vector2f pos) const;
 		Vector2i getCurrentPivot() const;
+		std::optional<Vector4f> getCurrentSlices() const;
+
+		int getMetaIntOr(const String& key, int defaultValue) const;
 	};
 }
 
