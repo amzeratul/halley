@@ -26,6 +26,20 @@ void AnimationEditor::update(Time t, bool moved)
 	info->setText(LocalisedString::fromUserString(str));
 }
 
+std::shared_ptr<const Resource> AnimationEditor::loadResource(const String& assetId)
+{
+	std::shared_ptr<const Resource> resource;
+	if (assetType == AssetType::Animation) {
+		resource = gameResources.get<Animation>(assetId);
+	} else if (assetType == AssetType::Sprite) {
+		resource = gameResources.get<SpriteResource>(assetId);
+	} else if (assetType == AssetType::Texture) {
+		resource = gameResources.get<Texture>(assetId);
+	}
+
+	return resource;
+}
+
 void AnimationEditor::setupWindow()
 {
 	add(factory.makeUI("ui/halley/animation_editor"), 1);

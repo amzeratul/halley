@@ -22,9 +22,11 @@ namespace Halley {
         virtual void onDoubleClick();
 
     protected:
+		virtual std::shared_ptr<const Resource> loadResource(const String& assetId) = 0;
+		
 		UIFactory& factory;
 		Project& project;
-		Resources& resources;
+		Resources& gameResources;
 		AssetType assetType;
 		String assetId;
 		std::shared_ptr<const Resource> resource;

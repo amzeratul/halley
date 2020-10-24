@@ -25,6 +25,11 @@ void PrefabEditor::update(Time t, bool moved)
 	updateButton();
 }
 
+std::shared_ptr<const Resource> PrefabEditor::loadResource(const String& assetId)
+{
+	return {};
+}
+
 void PrefabEditor::setupWindow()
 {
 	add(factory.makeUI("ui/halley/prefab_editor"), 1);

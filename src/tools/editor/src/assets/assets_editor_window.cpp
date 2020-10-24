@@ -435,7 +435,7 @@ AssetEditor::AssetEditor(UIFactory& factory, Resources& resources, Project& proj
 	: UIWidget("assetEditor", {}, UISizer())
 	, factory(factory)
 	, project(project)
-	, resources(resources)
+	, gameResources(resources)
 	, assetType(type)
 {
 }
@@ -443,13 +443,7 @@ AssetEditor::AssetEditor(UIFactory& factory, Resources& resources, Project& proj
 void AssetEditor::setResource(const String& id)
 {
 	assetId = id;
-	if (assetType == AssetType::Animation) {
-		resource = resources.get<Animation>(assetId);
-	} else if (assetType == AssetType::Sprite) {
-		resource = resources.get<SpriteResource>(assetId);
-	} else if (assetType == AssetType::Texture) {
-		resource = resources.get<Texture>(assetId);
-	}
+	resource = loadResource(id);
 	reload();
 }
 
