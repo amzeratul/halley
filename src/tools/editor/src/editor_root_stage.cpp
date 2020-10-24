@@ -7,7 +7,7 @@
 #include "ui/editor_ui_factory.h"
 #include "ui/console_window.h"
 #include "ui/load_project_window.h"
-#include "assets/assets_editor_window.h"
+#include "assets/assets_browser.h"
 #include "scene/scene_editor_window.h"
 #include "ui/project_window.h"
 

@@ -10,31 +10,11 @@ namespace Halley {
 	class ProjectWindow;
 	class Project;
 	class MetadataEditor;
+	class AssetEditor;
 	
-	class AssetEditor : public UIWidget	{
-	public:
-        AssetEditor(UIFactory& factory, Resources& resources, Project& project, AssetType type);
-		virtual ~AssetEditor() = default;
-
-		void setResource(const String& assetId);
-		void clearResource();
-		virtual void reload();
-        virtual void onDoubleClick();
-
-    protected:
-		virtual std::shared_ptr<const Resource> loadResource(const String& assetId) = 0;
-
-		UIFactory& factory;
-		Project& project;
-		Resources& gameResources;
-		AssetType assetType;
-		String assetId;
-		std::shared_ptr<const Resource> resource;
-	};
-
-	class AssetsEditorWindow : public UIWidget {
+	class AssetsBrowser : public UIWidget {
     public:
-        AssetsEditorWindow(UIFactory& factory, Project& project, ProjectWindow& projectWindow);
+        AssetsBrowser(UIFactory& factory, Project& project, ProjectWindow& projectWindow);
         void showAsset(AssetType type, const String& assetId);
 		void showFile(const Path& path);
 

@@ -6,7 +6,7 @@
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/ui_widget.h"
 #include "halley/ui/widgets/ui_animation.h"
-#include "assets_editor_window.h"
+#include "asset_editor.h"
 #include "src/ui/scroll_background.h"
 
 namespace Halley {

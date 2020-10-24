@@ -1,10 +1,11 @@
-#include "assets_editor_window.h"
+#include "assets_browser.h"
 #include "halley/tools/project/project.h"
 #include "halley/core/resources/resource_locator.h"
 #include "halley/core/resources/standard_resources.h"
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/ui/widgets/ui_list.h"
 #include "animation_editor.h"
+#include "asset_editor.h"
 #include "metadata_editor.h"
 #include "new_asset_window.h"
 #include "prefab_editor.h"
@@ -13,7 +14,7 @@
 
 using namespace Halley;
 
-AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project, ProjectWindow& projectWindow)
+AssetsBrowser::AssetsBrowser(UIFactory& factory, Project& project, ProjectWindow& projectWindow)
 	: UIWidget("assets_editor", {}, UISizer())
 	, factory(factory)
 	, project(project)
@@ -25,7 +26,7 @@ AssetsEditorWindow::AssetsEditorWindow(UIFactory& factory, Project& project, Pro
 	setAssetSrcMode(true);
 }
 
-void AssetsEditorWindow::showAsset(AssetType type, const String& assetId)
+void AssetsBrowser::showAsset(AssetType type, const String& assetId)
 {
 	getWidgetAs<UITextInput>("assetSearch")->setText("");
 	Path target;
@@ -38,7 +39,7 @@ void AssetsEditorWindow::showAsset(AssetType type, const String& assetId)
 	showFile(target);
 }
 
-void AssetsEditorWindow::showFile(const Path& path)
+void AssetsBrowser::showFile(const Path& path)
 {
 	if (!path.isEmpty()) {
 		curSrcPath = path.parentPath();
@@ -47,7 +48,7 @@ void AssetsEditorWindow::showFile(const Path& path)
 	}
 }
 
-void AssetsEditorWindow::loadResources()
+void AssetsBrowser::loadResources()
 {
 	project.addAssetReloadCallback([=] (const std::vector<String>& assets)
 	{
@@ -55,9 +56,9 @@ void AssetsEditorWindow::loadResources()
 	});
 }
 
-void AssetsEditorWindow::makeUI()
+void AssetsBrowser::makeUI()
 {
-	UIWidget::add(factory.makeUI("ui/halley/assets_editor_window"), 1);
+	UIWidget::add(factory.makeUI("ui/halley/assets_browser"), 1);
 
 	assetList = getWidgetAs<UIList>("assetList");
 	assetList->setSingleClickAccept(false);
@@ -120,7 +121,7 @@ void AssetsEditorWindow::makeUI()
 	updateAddRemoveButtons();
 }
 
-void AssetsEditorWindow::setAssetSrcMode(bool enabled)
+void AssetsBrowser::setAssetSrcMode(bool enabled)
 {
 	assetSrcMode = enabled;
 	getWidget("assetType")->setActive(!assetSrcMode);
@@ -131,7 +132,7 @@ void AssetsEditorWindow::setAssetSrcMode(bool enabled)
 	}
 }
 
-void AssetsEditorWindow::listAssetSources()
+void AssetsBrowser::listAssetSources()
 {
 	if (!assetNames) {
 		assetNames = project.getAssetSrcList();
@@ -151,7 +152,7 @@ void AssetsEditorWindow::listAssetSources()
 	}	
 }
 
-void AssetsEditorWindow::listAssets(AssetType type)
+void AssetsBrowser::listAssets(AssetType type)
 {
 	curType = type;
 	if (curPaths.find(type) == curPaths.end()) {
@@ -165,7 +166,7 @@ void AssetsEditorWindow::listAssets(AssetType type)
 	setListContents(assets, curPath, false);
 }
 
-void AssetsEditorWindow::setListContents(std::vector<String> assets, const Path& curPath, bool flat)
+void AssetsBrowser::setListContents(std::vector<String> assets, const Path& curPath, bool flat)
 {
 	{
 		Hash::Hasher hasher;
@@ -225,7 +226,7 @@ void AssetsEditorWindow::setListContents(std::vector<String> assets, const Path&
 	}
 }
 
-void AssetsEditorWindow::refreshList()
+void AssetsBrowser::refreshList()
 {
 	if (assetSrcMode) {
 		listAssetSources();
@@ -234,7 +235,7 @@ void AssetsEditorWindow::refreshList()
 	}
 }
 
-void AssetsEditorWindow::setFilter(const String& f)
+void AssetsBrowser::setFilter(const String& f)
 {
 	if (filter != f) {
 		filter = f.asciiLower();
@@ -242,7 +243,7 @@ void AssetsEditorWindow::setFilter(const String& f)
 	}
 }
 
-void AssetsEditorWindow::loadAsset(const String& name, bool doubleClick, bool clearDropdown)
+void AssetsBrowser::loadAsset(const String& name, bool doubleClick, bool clearDropdown)
 {
 	if (clearDropdown && loadedAsset != name && !name.endsWith("/.")) {
 		contentListDropdown->clear();
@@ -320,7 +321,7 @@ void AssetsEditorWindow::loadAsset(const String& name, bool doubleClick, bool cl
 	}
 }
 
-void AssetsEditorWindow::refreshAssets(const std::vector<String>& assets)
+void AssetsBrowser::refreshAssets(const std::vector<String>& assets)
 {
 	assetNames.reset();
 	refreshList();
@@ -330,14 +331,14 @@ void AssetsEditorWindow::refreshAssets(const std::vector<String>& assets)
 	}
 }
 
-void AssetsEditorWindow::onDoubleClickAsset()
+void AssetsBrowser::onDoubleClickAsset()
 {
 	if (!curEditors.empty()) {
 		curEditors.front()->onDoubleClick();
 	}
 }
 
-std::shared_ptr<AssetEditor> AssetsEditorWindow::makeEditor(Path filePath, AssetType type, const String& name)
+std::shared_ptr<AssetEditor> AssetsBrowser::makeEditor(Path filePath, AssetType type, const String& name)
 {
 	switch (type) {
 	case AssetType::Sprite:
@@ -351,7 +352,7 @@ std::shared_ptr<AssetEditor> AssetsEditorWindow::makeEditor(Path filePath, Asset
 	return {};
 }
 
-void AssetsEditorWindow::createEditorTab(Path filePath, AssetType type, const String& name)
+void AssetsBrowser::createEditorTab(Path filePath, AssetType type, const String& name)
 {
 	auto editor = makeEditor(std::move(filePath), type, name);
 	if (editor) {
@@ -372,7 +373,7 @@ void AssetsEditorWindow::createEditorTab(Path filePath, AssetType type, const St
 	}
 }
 
-void AssetsEditorWindow::updateAddRemoveButtons()
+void AssetsBrowser::updateAddRemoveButtons()
 {
 	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
 	
@@ -384,7 +385,7 @@ void AssetsEditorWindow::updateAddRemoveButtons()
 	getWidget("removeAsset")->setEnabled(canRemove);
 }
 
-void AssetsEditorWindow::addAsset()
+void AssetsBrowser::addAsset()
 {
 	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
 	
@@ -407,57 +408,26 @@ void AssetsEditorWindow::addAsset()
 	}));
 }
 
-void AssetsEditorWindow::removeAsset()
+void AssetsBrowser::removeAsset()
 {
 	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
 	assetList->setItemActive(lastClickedAsset, false);
 	FileSystem::remove(project.getAssetsSrcPath() / lastClickedAsset);
 }
 
-Path AssetsEditorWindow::getCurrentAssetPath() const
+Path AssetsBrowser::getCurrentAssetPath() const
 {
 	return project.getAssetsSrcPath() / loadedAsset;
 }
 
-void AssetsEditorWindow::openFileExternally(const Path& path)
+void AssetsBrowser::openFileExternally(const Path& path)
 {
 	auto cmd = "start \"\" \"" + path.toString().replaceAll("/", "\\") + "\"";
 	system(cmd.c_str());
 }
 
-void AssetsEditorWindow::showFileExternally(const Path& path)
+void AssetsBrowser::showFileExternally(const Path& path)
 {
 	auto cmd = "explorer.exe /select,\"" + path.toString().replaceAll("/", "\\") + "\"";
 	system(cmd.c_str());
-}
-
-AssetEditor::AssetEditor(UIFactory& factory, Resources& resources, Project& project, AssetType type)
-	: UIWidget("assetEditor", {}, UISizer())
-	, factory(factory)
-	, project(project)
-	, gameResources(resources)
-	, assetType(type)
-{
-}
-
-void AssetEditor::setResource(const String& id)
-{
-	assetId = id;
-	resource = loadResource(id);
-	reload();
-}
-
-void AssetEditor::clearResource()
-{
-	assetId = "";
-	resource.reset();
-	reload();
-}
-
-void AssetEditor::reload()
-{
-}
-
-void AssetEditor::onDoubleClick()
-{
 }

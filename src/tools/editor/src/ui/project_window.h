@@ -5,7 +5,7 @@
 #include "halley/ui/ui_widget.h"
 #include "src/editor_root_stage.h"
 #include "halley/tools/project/project.h"
-#include "src/assets/assets_editor_window.h"
+#include "src/assets/assets_browser.h"
 #include "src/scene/entity_editor.h"
 #include "src/scene/scene_editor_tabs.h"
 
@@ -56,7 +56,7 @@ namespace Halley {
     	bool hasAssets = false;
     	bool hasDLL = false;
 
-    	std::shared_ptr<AssetsEditorWindow> assetEditorWindow;
+    	std::shared_ptr<AssetsBrowser> assetEditorWindow;
         std::shared_ptr<SceneEditorTabs> sceneEditorTabs;
         std::shared_ptr<ConsoleWindow> consoleWindow;
 

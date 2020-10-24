@@ -12,7 +12,9 @@ set (editor_sources
 	"src/preferences.cpp"
 
 	"src/assets/animation_editor.cpp"
-	"src/assets/assets_editor_window.cpp"
+	"src/assets/asset_editor_window.cpp"
+	"src/assets/asset_editor.cpp"
+	"src/assets/assets_browser.cpp"
 	"src/assets/metadata_editor.cpp"
 	"src/assets/new_asset_window.cpp"
 	"src/assets/prefab_editor.cpp"
@@ -55,7 +57,9 @@ set (editor_headers
 	"src/preferences.h"
 
 	"src/assets/animation_editor.h"
-	"src/assets/assets_editor_window.h"
+	"src/assets/asset_editor_window.h"
+	"src/assets/asset_editor.h"
+	"src/assets/assets_browser.h"
 	"src/assets/metadata_editor.h"
 	"src/assets/new_asset_window.h"
 	"src/assets/prefab_editor.h"

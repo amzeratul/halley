@@ -6,7 +6,7 @@
 #include "halley/tools/project/project.h"
 #include "src/editor_root_stage.h"
 #include "src/halley_editor.h"
-#include "src/assets/assets_editor_window.h"
+#include "src/assets/assets_browser.h"
 #include "src/scene/scene_editor_window.h"
 
 using namespace Halley;
@@ -86,7 +86,7 @@ void ProjectWindow::makePagedPane()
 		uiMid->clear();
 	}
 
-	assetEditorWindow = std::make_shared<AssetsEditorWindow>(factory, project, *this);
+	assetEditorWindow = std::make_shared<AssetsBrowser>(factory, project, *this);
 	sceneEditorTabs = std::make_shared<SceneEditorTabs>(factory, project, api);
 	consoleWindow = std::make_shared<ConsoleWindow>(factory);
 	

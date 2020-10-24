@@ -1,5 +1,5 @@
 #pragma once
-#include "assets_editor_window.h"
+#include "asset_editor.h"
 
 namespace Halley {
 	class PrefabEditor : public AssetEditor {
