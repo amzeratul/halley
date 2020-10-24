@@ -76,4 +76,7 @@ void StandardResources::initialize(Resources& resources)
 
 		return result;
 	});
+
+	resources.setFallback<Texture>("whitebox.png");
+	resources.setFallback<SpriteResource>("whitebox.png");
 }

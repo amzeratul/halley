@@ -88,6 +88,12 @@ namespace Halley {
 		}
 
 		template <typename T>
+		void setFallback(const String& name)
+		{
+			of<T>().setFallback(name);
+		}
+
+		template <typename T>
 		[[nodiscard]] bool exists(const String& name) const
 		{
 			return of<T>().exists(name);
