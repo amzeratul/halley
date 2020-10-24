@@ -297,7 +297,7 @@ void AssetsEditorWindow::loadAsset(const String& name, bool doubleClick, bool cl
 				
 				for (auto& asset: assets) {
 					if (!useDropdown || asset.second == contentListDropdown->getSelectedOptionId() || std::find(assetNames.begin(), assetNames.end(), asset.second) == assetNames.end()) {
-						createEditorTab(asset.first, asset.second);
+						createEditorTab(Path(name), asset.first, asset.second);
 					}
 				}
 
@@ -310,7 +310,7 @@ void AssetsEditorWindow::loadAsset(const String& name, bool doubleClick, bool cl
 				}
 			} else {
 				metadataEditor->clear();
-				createEditorTab(curType, name);
+				createEditorTab(Path(name), curType, name);
 			}
 		}
 
@@ -337,7 +337,7 @@ void AssetsEditorWindow::onDoubleClickAsset()
 	}
 }
 
-std::shared_ptr<AssetEditor> AssetsEditorWindow::makeEditor(AssetType type, const String& name)
+std::shared_ptr<AssetEditor> AssetsEditorWindow::makeEditor(Path filePath, AssetType type, const String& name)
 {
 	switch (type) {
 	case AssetType::Sprite:
@@ -351,9 +351,9 @@ std::shared_ptr<AssetEditor> AssetsEditorWindow::makeEditor(AssetType type, cons
 	return {};
 }
 
-void AssetsEditorWindow::createEditorTab(AssetType type, const String& name)
+void AssetsEditorWindow::createEditorTab(Path filePath, AssetType type, const String& name)
 {
-	auto editor = makeEditor(type, name);
+	auto editor = makeEditor(std::move(filePath), type, name);
 	if (editor) {
 		editor->setResource(name);
 		auto n = content->getNumberOfPages();

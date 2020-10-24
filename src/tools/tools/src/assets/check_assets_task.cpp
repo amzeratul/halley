@@ -176,7 +176,7 @@ void CheckAssetsTask::sleep(int timeMs)
 	std::unique_lock<std::mutex> lock(mutex);
 	condition.wait_for(lock, timeMs * 1ms);
 	for (auto& a: inbox) {
-		//pending.push_back(std::move(a)); // This is buggy, just wake up
+		//pending.push_back(std::move(a)); // This is buggy, just wake up (causes assets to import twice)
 	}
 	inbox.clear();
 }

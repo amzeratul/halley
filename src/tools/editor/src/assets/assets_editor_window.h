@@ -23,7 +23,7 @@ namespace Halley {
 
     protected:
 		virtual std::shared_ptr<const Resource> loadResource(const String& assetId) = 0;
-		
+
 		UIFactory& factory;
 		Project& project;
 		Resources& gameResources;
@@ -80,8 +80,8 @@ namespace Halley {
 		void refreshAssets(const std::vector<String>& assets);
 		void onDoubleClickAsset();
 
-		std::shared_ptr<AssetEditor> makeEditor(AssetType type, const String& name);
-		void createEditorTab(AssetType type, const String& name);
+		std::shared_ptr<AssetEditor> makeEditor(Path filePath, AssetType type, const String& name);
+		void createEditorTab(Path filePath, AssetType type, const String& name);
 
 		void addAsset();
 		void removeAsset();

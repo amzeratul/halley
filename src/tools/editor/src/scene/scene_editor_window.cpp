@@ -293,6 +293,7 @@ void SceneEditorWindow::saveEntity()
 	auto strData = YAMLConvert::generateYAML(*prefab, options);
 	auto data = gsl::as_bytes(gsl::span<const char>(strData.c_str(), strData.length()));
 	FileSystem::writeFile(assetPath, data);
+	project.notifyAssetFileModified(assetPath);
 }
 
 void SceneEditorWindow::markModified()
