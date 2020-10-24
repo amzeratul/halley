@@ -33,7 +33,6 @@ namespace Halley {
 		String filter;
         
 		std::shared_ptr<UIList> assetList;
-        std::shared_ptr<MetadataEditor> metadataEditor;
 		std::shared_ptr<AssetEditorWindow> assetEditor;
 
         String lastClickedAsset;

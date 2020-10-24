@@ -54,10 +54,5 @@ children:
           proportion: 1
   - widget: { class: assetEditor }
     proportion: 1
-    border: [10, 0, 10, 0]
-  - sizer: { type: vertical }
-    children:
-    - widget: { class: metadataEditor }
-    - widget: { id: openFile, class: button, text: Open File }
-    - widget: { id: showFile, class: button, text: Show File }
+    border: [10, 0, 0, 0]
 ...

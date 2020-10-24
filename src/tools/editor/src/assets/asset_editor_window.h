@@ -13,7 +13,7 @@ namespace Halley {
 		explicit AssetEditorWindow(UIFactory& factory);
 
 		void onMakeUI() override;
-		void init(Project& project, ProjectWindow& projectWindow, std::shared_ptr<MetadataEditor> metadataEditor);
+		void init(Project& project, ProjectWindow& projectWindow);
 		void setAssetSrcMode(bool assetSrcMode);
 		void onDoubleClickAsset();
 		void refreshAssets();

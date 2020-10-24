@@ -20,7 +20,10 @@ void AssetEditorWindow::onMakeUI()
 	content = getWidgetAs<UIPagedPane>("content");
 	contentList = getWidgetAs<UIList>("contentList");
 	contentListDropdown = getWidgetAs<UIDropdown>("contentListDropdown");
-
+	metadataEditor = getWidgetAs<MetadataEditor>("metadataEditor");
+	
+	getWidget("contentListDropdownArea")->setActive(false);
+	
 	setHandle(UIEventType::ListSelectionChanged, "contentList", [=] (const UIEvent& event)
 	{
 		content->setPage(event.getStringData().toInteger());
@@ -32,11 +35,10 @@ void AssetEditorWindow::onMakeUI()
 	});
 }
 
-void AssetEditorWindow::init(Project& project, ProjectWindow& projectWindow, std::shared_ptr<MetadataEditor> metadataEditor)
+void AssetEditorWindow::init(Project& project, ProjectWindow& projectWindow)
 {
 	this->project = &project;
 	this->projectWindow = &projectWindow;
-	this->metadataEditor = std::move(metadataEditor);
 }
 
 void AssetEditorWindow::setAssetSrcMode(bool assetSrcMode)
