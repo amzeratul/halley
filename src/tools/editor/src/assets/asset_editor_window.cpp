@@ -20,7 +20,6 @@ void AssetEditorWindow::onMakeUI()
 	content = getWidgetAs<UIPagedPane>("content");
 	contentList = getWidgetAs<UIList>("contentList");
 	contentListDropdown = getWidgetAs<UIDropdown>("contentListDropdown");
-	contentListDropdownLabel = getWidgetAs<UILabel>("contentListDropdownLabel");
 
 	setHandle(UIEventType::ListSelectionChanged, "contentList", [=] (const UIEvent& event)
 	{
@@ -49,8 +48,7 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 {
 	if (clearDropdown && loadedAsset != name) {
 		contentListDropdown->clear();
-		contentListDropdown->setActive(false);
-		contentListDropdownLabel->setActive(false);
+		getWidget("contentListDropdownArea")->setActive(false);
 	}
 
 	if (loadedAsset != name || force) {
@@ -80,8 +78,7 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 
 				if(!assetNames.empty())	{
 					useDropdown = true;
-					contentListDropdown->setActive(true);
-					contentListDropdownLabel->setActive(true);
+					getWidget("contentListDropdownArea")->setActive(true);
 				}
 
 				if (clearDropdown) {

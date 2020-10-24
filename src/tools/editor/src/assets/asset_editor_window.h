@@ -32,12 +32,10 @@ namespace Halley {
 		String loadedAsset;
 		std::optional<AssetType> loadedType;
 
-		std::vector<std::shared_ptr<AssetEditor>> curEditors;
-
-		std::shared_ptr<UIList> contentList;
 		std::shared_ptr<UIDropdown> contentListDropdown;
-		std::shared_ptr<UILabel> contentListDropdownLabel;
+		std::shared_ptr<UIList> contentList;
 		std::shared_ptr<UIPagedPane> content;
+		std::vector<std::shared_ptr<AssetEditor>> curEditors;
 
 		std::shared_ptr<AssetEditor> makeEditor(Path filePath, AssetType type, const String& name);
 		void createEditorTab(Path filePath, AssetType type, const String& name);

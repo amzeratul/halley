@@ -1,7 +1,7 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
-- widget: { class: widget }
+- widget: { class: widget, id: contentListDropdownArea }
   sizer: { type: horizontal}
   children:
     - widget: { class: label, id: contentListDropdownLabel, text: "Assets:"}
