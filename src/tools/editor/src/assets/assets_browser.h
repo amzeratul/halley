@@ -11,6 +11,7 @@ namespace Halley {
 	class Project;
 	class MetadataEditor;
 	class AssetEditor;
+	class AssetEditorWindow;
 	
 	class AssetsBrowser : public UIWidget {
     public:
@@ -28,18 +29,13 @@ namespace Halley {
 		AssetType curType = AssetType::Sprite;
 
 		bool assetSrcMode = true;
-		std::vector<std::shared_ptr<AssetEditor>> curEditors;
 		std::optional<std::vector<String>> assetNames;
 		String filter;
         
 		std::shared_ptr<UIList> assetList;
-		std::shared_ptr<UIList> contentList;
-		std::shared_ptr<UIDropdown> contentListDropdown;
-		std::shared_ptr<UILabel> contentListDropdownLabel;
-		std::shared_ptr<UIPagedPane> content;
         std::shared_ptr<MetadataEditor> metadataEditor;
+		std::shared_ptr<AssetEditorWindow> assetEditor;
 
-		String loadedAsset;
         String lastClickedAsset;
 
 		uint64_t curHash = 0;
@@ -56,12 +52,8 @@ namespace Halley {
 		void refreshList();
 		void setFilter(const String& filter);
 
-		void loadAsset(const String& name, bool doubleClick, bool clearDropdown);
+		void loadAsset(const String& name, bool doubleClick);
 		void refreshAssets(const std::vector<String>& assets);
-		void onDoubleClickAsset();
-
-		std::shared_ptr<AssetEditor> makeEditor(Path filePath, AssetType type, const String& name);
-		void createEditorTab(Path filePath, AssetType type, const String& name);
 
 		void addAsset();
 		void removeAsset();
