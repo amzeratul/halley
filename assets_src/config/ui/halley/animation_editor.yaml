@@ -24,6 +24,5 @@ children:
     - widget: { class: animationEditorDisplay, id: display }
       proportion: 1
       fill: centre
-  - widget: { id: info, class: label, text: Test }
-    border: [10, -26, 0, 10]
+- widget: { id: info, class: label, text: Test }
 ...

@@ -14,6 +14,7 @@ namespace Halley {
 		// Please keep these in alphabetical order
 		AssetsReloaded,
 		ButtonClicked,
+		ButtonDoubleClicked,
 		CheckboxUpdated,
 		Dragged,
 		DropboxSelectionChanged,

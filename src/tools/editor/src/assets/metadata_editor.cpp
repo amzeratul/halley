@@ -170,6 +170,17 @@ static void updateMetadata(Metadata& metadata, const String& key, MetadataEditor
 	}
 }
 
+void MetadataEditor::setPivot(Vector2i pos)
+{
+	getWidgetAs<UITextInput>("pivotX")->setText(toString(pos.x));
+	getWidgetAs<UITextInput>("pivotY")->setText(toString(pos.y));
+}
+
+String MetadataEditor::getMetaValue(const String& key) const
+{
+	return metadata.getString(key, effectiveMetadata.getString(key, ""));
+}
+
 void MetadataEditor::makeIntField(UISizer& sizer, const String& key, int defaultValue)
 {
 	const auto result = std::make_shared<UITextInput>(key, factory.getStyle("inputThin"));

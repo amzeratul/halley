@@ -2,7 +2,7 @@
 using namespace Halley;
 
 ScrollBackground::ScrollBackground(String id, Resources& res, UISizer sizer)
-	: UIWidget(std::move(id), {}, std::move(sizer))
+	: UIClickable(std::move(id), {}, std::move(sizer))
 {
 	bg = Sprite()
 		.setImage(res, "checkered.png")
@@ -29,6 +29,10 @@ void ScrollBackground::setMousePosListener(MousePosListener listener)
 	mousePosListener = listener;
 }
 
+void ScrollBackground::doSetState(State state)
+{
+}
+
 void ScrollBackground::update(Time t, bool moved)
 {
 	if (moved || dirty) {
@@ -43,16 +47,6 @@ void ScrollBackground::update(Time t, bool moved)
 void ScrollBackground::draw(UIPainter& painter) const
 {
 	painter.draw(bg);
-}
-
-bool ScrollBackground::canInteractWithMouse() const
-{
-	return true;
-}
-
-bool ScrollBackground::isFocusLocked() const
-{
-	return dragging;
 }
 
 UIScrollPane* ScrollBackground::getScrollPane() const
@@ -70,6 +64,8 @@ void ScrollBackground::pressMouse(Vector2f mousePos, int button)
 			startScrollPos = pane->getScrollPosition();
 		}
 	}
+
+	UIClickable::pressMouse(mousePos, button);
 }
 
 void ScrollBackground::releaseMouse(Vector2f mousePos, int button)
@@ -80,6 +76,8 @@ void ScrollBackground::releaseMouse(Vector2f mousePos, int button)
 			dragging = false;
 		}
 	}
+
+	UIClickable::releaseMouse(mousePos, button);
 }
 
 void ScrollBackground::onMouseOver(Vector2f mousePos)
@@ -92,6 +90,13 @@ void ScrollBackground::onMouseOver(Vector2f mousePos)
 	if (mousePosListener) {
 		mousePosListener(mousePos);
 	}
+
+	UIClickable::onMouseOver(mousePos);
+}
+
+void ScrollBackground::onDoubleClicked(Vector2f mousePos)
+{
+	sendEvent(UIEvent(UIEventType::ButtonDoubleClicked, getId()));
 }
 
 void ScrollBackground::setDragPos(Vector2f pos)

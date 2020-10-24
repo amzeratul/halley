@@ -1,10 +1,10 @@
 #pragma once
 
-#include "halley/ui/ui_widget.h"
+#include "halley/ui/widgets/ui_clickable.h"
 #include "halley/ui/widgets/ui_scroll_pane.h"
 
 namespace Halley {
-    class ScrollBackground : public UIWidget {
+    class ScrollBackground : public UIClickable {
     public:
 		using ZoomListener = std::function<void(float)>;
     	using MousePosListener = std::function<void(Vector2f)>;
@@ -14,18 +14,18 @@ namespace Halley {
 		void setZoomListener(ZoomListener listener);
     	void setMousePosListener(MousePosListener listener);
 
-    protected:
-        void update(Time t, bool moved) override;
+	protected:
+		void doSetState(State state) override;
+		void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;
 
-		bool canInteractWithMouse() const override;
-		bool isFocusLocked() const override;
         UIScrollPane* getScrollPane() const;
 
         void pressMouse(Vector2f mousePos, int button) override;
 		void releaseMouse(Vector2f mousePos, int button) override;
         void onMouseOver(Vector2f mousePos) override;
-
+		void onDoubleClicked(Vector2f mousePos) override;
+    	
     private:
 		Sprite bg;
 		Vector2f mouseStartPos;

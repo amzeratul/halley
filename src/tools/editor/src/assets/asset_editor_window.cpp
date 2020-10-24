@@ -152,7 +152,7 @@ std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(Path filePath, AssetT
 	case AssetType::Sprite:
 	case AssetType::Animation:
 	case AssetType::Texture:
-		return std::make_shared<AnimationEditor>(factory, project->getGameResources(), type, *project);
+		return std::make_shared<AnimationEditor>(factory, project->getGameResources(), type, *project, *metadataEditor);
 	case AssetType::Prefab:
 	case AssetType::Scene:
 		return std::make_shared<PrefabEditor>(factory, project->getGameResources(), type, *project, *projectWindow);

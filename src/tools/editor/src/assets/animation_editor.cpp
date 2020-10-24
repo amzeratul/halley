@@ -1,4 +1,6 @@
 #include "animation_editor.h"
+
+#include "metadata_editor.h"
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/tools/project/project.h"
 #include "halley/ui/widgets/ui_animation.h"
@@ -7,10 +9,16 @@
 
 using namespace Halley;
 
-AnimationEditor::AnimationEditor(UIFactory& factory, Resources& resources, AssetType type, Project& project)
+AnimationEditor::AnimationEditor(UIFactory& factory, Resources& resources, AssetType type, Project& project, MetadataEditor& metadataEditor)
 	: AssetEditor(factory, resources, project, type)
+	, metadataEditor(metadataEditor)
 {
 	setupWindow();
+}
+
+void AnimationEditor::refresh()
+{
+	animationDisplay->refresh();
 }
 
 void AnimationEditor::reload()
@@ -44,6 +52,8 @@ void AnimationEditor::setupWindow()
 {
 	add(factory.makeUI("ui/halley/animation_editor"), 1);
 	animationDisplay = getWidgetAs<AnimationEditorDisplay>("display");
+	animationDisplay->setMetadataEditor(metadataEditor);
+	
 	info = getWidgetAs<UILabel>("info");
 	scrollBg = getWidgetAs<ScrollBackground>("scrollBackground");
 
@@ -55,6 +65,12 @@ void AnimationEditor::setupWindow()
 	scrollBg->setMousePosListener([=] (Vector2f mousePos)
 	{
 		animationDisplay->onMouseOver(mousePos);
+	});
+
+	setHandle(UIEventType::ButtonDoubleClicked, "scrollBackground", [=] (const UIEvent& event)
+	{
+		metadataEditor.setPivot(Vector2i(animationDisplay->getMousePos()));
+		refresh();
 	});
 
 	setHandle(UIEventType::DropboxSelectionChanged, "sequence", [=] (const UIEvent& event)
@@ -113,16 +129,21 @@ void AnimationEditorDisplay::setAnimation(std::shared_ptr<const Animation> a)
 {
 	animation = std::move(a);
 	animationPlayer.setAnimation(animation);
-	bounds = Rect4f(animation->getBounds());
+	origBounds = animation->getBounds();
+	origPivot = animation->getPivot();
 	updateBounds();
 }
 
 void AnimationEditorDisplay::setSprite(std::shared_ptr<const SpriteResource> sprite)
 {
 	origSprite.setImage(*sprite, resources.get<MaterialDefinition>("Halley/Sprite"));
-	const auto origin = -origSprite.getAbsolutePivot() - Vector2f(origSprite.getOuterBorder().xy());
-	const auto sz = origSprite.getUncroppedSize();
-	bounds = Rect4f(origin, origin + sz);
+	const auto pivot = Vector2i(origSprite.getAbsolutePivot());
+	const auto origin = -pivot - Vector2i(origSprite.getOuterBorder().xy());
+	const auto sz = Vector2i(origSprite.getUncroppedSize());
+
+	origPivot = pivot;
+	origBounds = Rect4i(origin, origin + sz);
+	updateBounds();
 }
 
 void AnimationEditorDisplay::setTexture(std::shared_ptr<const Texture> texture)
@@ -131,7 +152,9 @@ void AnimationEditorDisplay::setTexture(std::shared_ptr<const Texture> texture)
 		.setTexRect(Rect4f(0, 0, 1, 1))
 		.setColour(Colour4f(1, 1, 1, 1))
 		.setSize(Vector2f(texture->getSize()));
-	bounds = Rect4f(Vector2f(), origSprite.getSize());
+	origPivot.reset();
+	origBounds = Rect4i(Vector2i(), Vector2i(origSprite.getSize()));
+	updateBounds();
 }
 
 void AnimationEditorDisplay::setSequence(const String& sequence)
@@ -142,6 +165,11 @@ void AnimationEditorDisplay::setSequence(const String& sequence)
 void AnimationEditorDisplay::setDirection(const String& direction)
 {
 	animationPlayer.setDirection(direction);
+}
+
+void AnimationEditorDisplay::refresh()
+{
+	updateBounds();
 }
 
 const Rect4f& AnimationEditorDisplay::getBounds() const
@@ -163,10 +191,11 @@ void AnimationEditorDisplay::update(Time t, bool moved)
 		animationPlayer.updateSprite(origSprite);
 	}
 
-	const Vector2f pivotPos = imageToScreenSpace(-bounds.getTopLeft());;
+	const Vector2f pivotPos = imageToScreenSpace(-bounds.getTopLeft());
+	const Vector2f displayPivotPos = imageToScreenSpace(-bounds.getTopLeft() + Vector2f(getCurrentPivot() - origPivot.value_or(Vector2i())));
 
 	drawSprite = origSprite.clone().setPos(pivotPos).setScale(zoom).setNotSliced();
-	pivotSprite.setPos(pivotPos);
+	pivotSprite.setPos(displayPivotPos);
 	boundsSprite.setPos(getPosition()).scaleTo(bounds.getSize() * zoom);
 
 	if (origSprite.isSliced()) {
@@ -183,7 +212,9 @@ void AnimationEditorDisplay::draw(UIPainter& painter) const
 {
 	painter.draw(drawSprite);
 	painter.draw(boundsSprite);
-	painter.draw(pivotSprite);
+	if (origPivot.has_value()) {
+		painter.draw(pivotSprite);
+	}
 	if (nineSliceHSprite.isVisible()) {
 		painter.draw(nineSliceHSprite);
 	}
@@ -197,8 +228,15 @@ void AnimationEditorDisplay::onMouseOver(Vector2f mousePos)
 	this->mousePos = screenToImageSpace(mousePos);
 }
 
+void AnimationEditorDisplay::setMetadataEditor(MetadataEditor& metadataEditor)
+{
+	this->metadataEditor = &metadataEditor;
+}
+
 void AnimationEditorDisplay::updateBounds()
 {
+	bounds = Rect4f(origBounds);
+	
 	setMinSize(bounds.getSize() * zoom);
 }
 
@@ -210,4 +248,15 @@ Vector2f AnimationEditorDisplay::imageToScreenSpace(Vector2f pos) const
 Vector2f AnimationEditorDisplay::screenToImageSpace(Vector2f pos) const
 {
 	return (pos - getPosition()) / zoom;
+}
+
+Vector2i AnimationEditorDisplay::getCurrentPivot() const
+{
+	if (!origPivot) {
+		return Vector2i();
+	}
+	
+	const auto x = metadataEditor->getMetaValue("pivotX");
+	const auto y = metadataEditor->getMetaValue("pivotY");
+	return Vector2i(x.isEmpty() ? origPivot->x : x.toInteger(), y.isEmpty() ? origPivot->y : y.toInteger());
 }

@@ -22,7 +22,7 @@ namespace Halley {
 		void releaseMouse(Vector2f mousePos, int button) override;
 
 		void onClick(UIEventCallback callback);
-		virtual void onClicked(Vector2f mousePos) = 0;
+		virtual void onClicked(Vector2f mousePos);
 		virtual void onDoubleClicked(Vector2f mousePos);
 
 		void onGamepadInput(const UIInputResults& input, Time time) override;

@@ -15,8 +15,9 @@ namespace Halley {
 
 	class AnimationEditor : public AssetEditor {
     public:
-        AnimationEditor(UIFactory& factory, Resources& resources, AssetType type, Project& project);
+        AnimationEditor(UIFactory& factory, Resources& resources, AssetType type, Project& project, MetadataEditor& metadataEditor);
 
+		void refresh();
         void reload() override;
 
     protected:
@@ -24,6 +25,8 @@ namespace Halley {
         std::shared_ptr<const Resource> loadResource(const String& assetId) override;
 		
 	private:
+		MetadataEditor& metadataEditor;
+
 		void setupWindow();
 		void loadAssetData();
 
@@ -43,9 +46,13 @@ namespace Halley {
 		void setSequence(const String& sequence);
 		void setDirection(const String& direction);
 
+		void refresh();
+
 		const Rect4f& getBounds() const;
 		Vector2f getMousePos() const;
 		void onMouseOver(Vector2f mousePos) override;
+
+		void setMetadataEditor(MetadataEditor& metadataEditor);
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -55,6 +62,7 @@ namespace Halley {
 		Resources& resources;
 		std::shared_ptr<const Animation> animation;
 		AnimationPlayer animationPlayer;
+		MetadataEditor* metadataEditor = nullptr;
 
 		Sprite origSprite;
 		Sprite drawSprite;
@@ -62,13 +70,18 @@ namespace Halley {
 		Sprite nineSliceVSprite;
 		Sprite nineSliceHSprite;
 		Sprite pivotSprite;
+
+		std::optional<Vector2i> origPivot;
+		Rect4i origBounds;
 		Rect4f bounds;
+
 		float zoom = 1.0f;
 		Vector2f mousePos;
 
 		void updateBounds();
 		Vector2f imageToScreenSpace(Vector2f pos) const;
 		Vector2f screenToImageSpace(Vector2f pos) const;
+		Vector2i getCurrentPivot() const;
 	};
 }
 

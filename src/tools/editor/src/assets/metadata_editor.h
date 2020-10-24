@@ -17,6 +17,10 @@ namespace Halley
 		void onMetadataChanged();
 		void saveMetadata();
 
+		void setPivot(Vector2i pos);
+
+		String getMetaValue(const String& key) const;
+
 	private:
 		UIFactory& factory;
 		Metadata metadata;

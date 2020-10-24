@@ -75,6 +75,10 @@ void UIClickable::doForceUpdate()
 	forceUpdate = true;
 }
 
+void UIClickable::onClicked(Vector2f mousePos)
+{
+}
+
 void UIClickable::onDoubleClicked(Vector2f mousePos)
 {
 }
