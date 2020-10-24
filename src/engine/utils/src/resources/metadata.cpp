@@ -12,7 +12,8 @@ Metadata::~Metadata() {}
 
 bool Metadata::hasKey(const String& key) const
 {
-	return entries.find(key) != entries.end();
+	const auto iter = entries.find(key);
+	return iter != entries.end() && !iter->second.isEmpty();
 }
 
 bool Metadata::getBool(const String& key) const
@@ -110,11 +111,22 @@ bool Metadata::set(String key, String value)
 {
 	const auto iter = entries.find(key);
 	if (iter != entries.end()) {
+		// Value exists
+		if (value.isEmpty()) {
+			erase(key);
+			return true;
+		}
+
 		if (iter->second == value) {
 			return false;
 		}
 		iter->second = std::move(value);
 	} else {
+		// Value didn't exist
+		if (value.isEmpty()) {
+			return false;
+		}
+
 		entries[std::move(key)] = std::move(value);
 	}
 	return true;

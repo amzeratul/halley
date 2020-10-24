@@ -157,7 +157,7 @@ void MetadataEditor::makeLabel(const String& name)
 }
 
 template <typename T>
-void updateMetadata(Metadata& metadata, const String& key, MetadataEditor& editor, const T& value, const T& defaultValue)
+static void updateMetadata(Metadata& metadata, const String& key, MetadataEditor& editor, const T& value, const T& defaultValue)
 {
 	if (value == defaultValue) {
 		if (metadata.erase(key)) {
