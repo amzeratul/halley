@@ -44,7 +44,7 @@ void ImportAssetsTask::run()
 				return;
 			}
 
-			if (importAsset(files[i])) {
+			if (doImportAsset(files[i])) {
 				++assetsImported;
 				setProgress(float(assetsImported) * 0.98f / float(assetsToImport), files[i].assetId);
 			}
@@ -94,14 +94,65 @@ void ImportAssetsTask::run()
 	Logger::logInfo("Import took " + toString(realTime) + " seconds, on which " + toString(importTime) + " seconds of work were performed (" + toString(importTime / realTime) + "x realtime)");
 }
 
-bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
+bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)
 {
 	Logger::logInfo("Importing " + asset.assetId);
 	Stopwatch timer;
 
-	std::vector<AssetResource> out;
-	std::vector<std::pair<Path, Bytes>> outFiles;
-	std::vector<TimestampedPath> additionalInputs;
+	auto result = importAsset(asset, [&] (const Path& path) { return db.getMetadata(path); }, importer, assetsPath, [=] (float, const String&) -> bool { return !isCancelled(); });
+	
+	if (!result.success) {
+		addError("\"" + asset.assetId + "\" - " + result.errorMsg);
+		asset.additionalInputFiles = std::move(result.additionalInputs);
+		db.markFailed(asset);
+
+		return false;
+	}
+	
+	// Check if it didn't get cancelled
+	if (isCancelled()) {
+		return false;
+	}
+
+	// Retrieve previous output from this asset, and remove any files which went missing
+	auto previous = db.getOutFiles(asset.assetId);
+	for (auto& f: previous) {
+		for (auto& v: f.platformVersions) {
+			if (std::find_if(result.outFiles.begin(), result.outFiles.end(), [&] (const std::pair<Path, Bytes>& r) { return r.first == v.second.filepath; }) == result.outFiles.end()) {
+				// File no longer exists as part of this asset, remove it
+				FileSystem::remove(assetsPath / v.second.filepath);
+			}
+		}
+	}
+
+	// Write files
+	for (auto& outFile: result.outFiles) {
+		auto path = assetsPath / outFile.first;
+		Logger::logInfo("- " + asset.assetId + " -> " + path + " (" + String::prettySize(outFile.second.size()) + ")");
+		FileSystem::writeFile(path, outFile.second);
+	}
+
+	// Add to list of output assets
+	for (auto& o: result.out) {
+		std::unique_lock<std::mutex> lock(mutex);
+		outputAssets.insert(toString(o.type) + ":" + o.name);
+	}
+
+	// Store output in db
+	asset.additionalInputFiles = std::move(result.additionalInputs);
+	asset.outputFiles = std::move(result.out);
+	db.markAsImported(asset);
+
+	timer.pause();
+	totalImportTime += timer.elapsedNanoseconds();
+
+	return true;
+}
+
+ImportAssetsTask::ImportResult ImportAssetsTask::importAsset(const ImportAssetsDatabaseEntry& asset, const MetadataFetchCallback& metadataFetcher, const AssetImporter& importer, Path assetsPath, AssetCollector::ProgressReporter progressReporter)
+{
+	ImportResult result;
+	
 	try {
 		// Create queue
 		std::list<ImportingAsset> toLoad;
@@ -111,7 +162,7 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 		importingAsset.assetId = asset.assetId;
 		importingAsset.assetType = asset.assetType;
 		for (auto& f: asset.inputFiles) {
-			auto meta = db.getMetadata(f.getPath());
+			auto meta = metadataFetcher(f.getPath());
 			auto data = FileSystem::readFile(asset.srcDir / f.getDataPath());
 			if (data.empty()) {
 				Logger::logError("Data for \"" + toString(asset.srcDir / f.getPath()) + "\" is empty.");
@@ -125,11 +176,7 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 			auto cur = std::move(toLoad.front());
 			toLoad.pop_front();
 			
-			AssetCollector collector(cur, assetsPath, importer.getAssetsSrc(), [=] (float assetProgress, const String& label) -> bool
-			{
-				//setProgress(lerp(curFileProgressStart, curFileProgressEnd, assetProgress), curFileLabel + " " + label);
-				return !isCancelled();
-			});
+			AssetCollector collector(cur, assetsPath, importer.getAssetsSrc(), progressReporter);
 
 			for (auto& importer: importer.getImporters(cur.assetType)) {
 				importer.get().import(cur, collector);
@@ -140,61 +187,23 @@ bool ImportAssetsTask::importAsset(ImportAssetsDatabaseEntry& asset)
 			}
 
 			for (auto& outFile: collector.collectOutFiles()) {
-				outFiles.push_back(std::move(outFile));
+				result.outFiles.push_back(std::move(outFile));
 			}
 
 			for (auto& o: collector.getAssets()) {
-				out.push_back(o);
+				result.out.push_back(o);
 			}
 
 			for (auto& i: collector.getAdditionalInputs()) {
-				additionalInputs.push_back(i);
+				result.additionalInputs.push_back(i);
 			}
 		}
+		
+		result.success = true;
 	} catch (std::exception& e) {
-		addError("\"" + asset.assetId + "\" - " + e.what());
-		asset.additionalInputFiles = std::move(additionalInputs);
-		db.markFailed(asset);
-
-		return false;
+		result.errorMsg = e.what();
+		result.success = false;
 	}
 
-	// Check if it didn't get cancelled
-	if (isCancelled()) {
-		return false;
-	}
-
-	// Retrieve previous output from this asset, and remove any files which went missing
-	auto previous = db.getOutFiles(asset.assetId);
-	for (auto& f: previous) {
-		for (auto& v: f.platformVersions) {
-			if (std::find_if(outFiles.begin(), outFiles.end(), [&] (const std::pair<Path, Bytes>& r) { return r.first == v.second.filepath; }) == outFiles.end()) {
-				// File no longer exists as part of this asset, remove it
-				FileSystem::remove(assetsPath / v.second.filepath);
-			}
-		}
-	}
-
-	// Write files
-	for (auto& outFile: outFiles) {
-		auto path = assetsPath / outFile.first;
-		Logger::logInfo("- " + asset.assetId + " -> " + path + " (" + String::prettySize(outFile.second.size()) + ")");
-		FileSystem::writeFile(path, outFile.second);
-	}
-
-	// Add to list of output assets
-	for (auto& o: out) {
-		std::unique_lock<std::mutex> lock(mutex);
-		outputAssets.insert(toString(o.type) + ":" + o.name);
-	}
-
-	// Store output in db
-	asset.additionalInputFiles = std::move(additionalInputs);
-	asset.outputFiles = std::move(out);
-	db.markAsImported(asset);
-
-	timer.pause();
-	totalImportTime += timer.elapsedNanoseconds();
-
-	return true;
+	return result;
 }

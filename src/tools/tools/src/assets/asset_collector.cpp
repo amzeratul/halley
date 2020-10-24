@@ -59,7 +59,7 @@ void AssetCollector::addAdditionalAsset(ImportingAsset&& additionalAsset)
 
 bool AssetCollector::reportProgress(float progress, const String& label)
 {
-	return reporter(progress, label);
+	return reporter ? reporter(progress, label) : true;
 }
 
 const Path& AssetCollector::getDestinationDirectory()
