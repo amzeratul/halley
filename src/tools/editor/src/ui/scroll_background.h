@@ -7,10 +7,12 @@ namespace Halley {
     class ScrollBackground : public UIWidget {
     public:
 		using ZoomListener = std::function<void(float)>;
+    	using MousePosListener = std::function<void(Vector2f)>;
 
         ScrollBackground(String id, Resources& res, UISizer sizer);
 		float getZoomLevel() const;
 		void setZoomListener(ZoomListener listener);
+    	void setMousePosListener(MousePosListener listener);
 
     protected:
         void update(Time t, bool moved) override;
@@ -35,6 +37,7 @@ namespace Halley {
 		bool dragging = false;
 
 		ZoomListener zoomListener;
+    	MousePosListener mousePosListener;
 
         void setDragPos(Vector2f pos);
 		void onMouseWheel(const UIEvent& event);

@@ -24,6 +24,11 @@ void ScrollBackground::setZoomListener(ZoomListener listener)
 	zoomListener = listener;
 }
 
+void ScrollBackground::setMousePosListener(MousePosListener listener)
+{
+	mousePosListener = listener;
+}
+
 void ScrollBackground::update(Time t, bool moved)
 {
 	if (moved || dirty) {
@@ -82,6 +87,10 @@ void ScrollBackground::onMouseOver(Vector2f mousePos)
 	lastMousePos = mousePos;
 	if (dragging) {
 		setDragPos(mouseStartPos - mousePos + startScrollPos);
+	}
+
+	if (mousePosListener) {
+		mousePosListener(mousePos);
 	}
 }
 

@@ -18,14 +18,29 @@ void AnimationEditor::reload()
 	loadAssetData();
 }
 
+void AnimationEditor::update(Time t, bool moved)
+{
+	const auto mousePos = Vector2i(animationDisplay->getMousePos());
+	const auto size = animationDisplay->getBounds().getSize();
+	String str = String("x: ") + toString(mousePos.x) + " y: " + toString(mousePos.y) + " (" + toString(size.x) + "x" + toString(size.y) + ")";
+	info->setText(LocalisedString::fromUserString(str));
+}
+
 void AnimationEditor::setupWindow()
 {
 	add(factory.makeUI("ui/halley/animation_editor"), 1);
 	animationDisplay = getWidgetAs<AnimationEditorDisplay>("display");
+	info = getWidgetAs<UILabel>("info");
+	scrollBg = getWidgetAs<ScrollBackground>("scrollBackground");
 
-	getWidgetAs<ScrollBackground>("scrollBackground")->setZoomListener([=] (float zoom)
+	scrollBg->setZoomListener([=] (float zoom)
 	{
 		animationDisplay->setZoom(zoom);
+	});
+
+	scrollBg->setMousePosListener([=] (Vector2f mousePos)
+	{
+		animationDisplay->onMouseOver(mousePos);
 	});
 
 	setHandle(UIEventType::DropboxSelectionChanged, "sequence", [=] (const UIEvent& event)
@@ -115,6 +130,16 @@ void AnimationEditorDisplay::setDirection(const String& direction)
 	animationPlayer.setDirection(direction);
 }
 
+const Rect4f& AnimationEditorDisplay::getBounds() const
+{
+	return bounds;
+}
+
+Vector2f AnimationEditorDisplay::getMousePos() const
+{
+	return mousePos;
+}
+
 void AnimationEditorDisplay::update(Time t, bool moved)
 {
 	updateBounds();
@@ -124,7 +149,7 @@ void AnimationEditorDisplay::update(Time t, bool moved)
 		animationPlayer.updateSprite(origSprite);
 	}
 
-	const Vector2f pivotPos = getPosition() - bounds.getTopLeft() * zoom;
+	const Vector2f pivotPos = imageToScreenSpace(-bounds.getTopLeft());;
 
 	drawSprite = origSprite.clone().setPos(pivotPos).setScale(zoom).setNotSliced();
 	pivotSprite.setPos(pivotPos);
@@ -153,7 +178,22 @@ void AnimationEditorDisplay::draw(UIPainter& painter) const
 	}
 }
 
+void AnimationEditorDisplay::onMouseOver(Vector2f mousePos)
+{
+	this->mousePos = screenToImageSpace(mousePos);
+}
+
 void AnimationEditorDisplay::updateBounds()
 {
 	setMinSize(bounds.getSize() * zoom);
+}
+
+Vector2f AnimationEditorDisplay::imageToScreenSpace(Vector2f pos) const
+{
+	return getPosition() + zoom * pos;
+}
+
+Vector2f AnimationEditorDisplay::screenToImageSpace(Vector2f pos) const
+{
+	return (pos - getPosition()) / zoom;
 }

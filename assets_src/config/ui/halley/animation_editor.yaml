@@ -16,6 +16,7 @@ children:
 - widget: { id: contents, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, mouseWheelEnabled: false }
   proportion: 1
   fill: fill
+  sizer: { type: vertical }
   children:
   - widget: { class: scrollBackground, id: scrollBackground }
     proportion: 1
@@ -23,4 +24,6 @@ children:
     - widget: { class: animationEditorDisplay, id: display }
       proportion: 1
       fill: centre
+  - widget: { id: info, class: label, text: Test }
+    border: [10, -26, 0, 10]
 ...

@@ -7,6 +7,7 @@
 #include "halley/ui/ui_widget.h"
 #include "halley/ui/widgets/ui_animation.h"
 #include "assets_editor_window.h"
+#include "src/ui/scroll_background.h"
 
 namespace Halley {
 	class Project;
@@ -18,11 +19,16 @@ namespace Halley {
 
         void reload() override;
 
+    protected:
+        void update(Time t, bool moved) override;
+		
 	private:
 		void setupWindow();
 		void loadAssetData();
 
         std::shared_ptr<AnimationEditorDisplay> animationDisplay;
+        std::shared_ptr<UILabel> info;
+        std::shared_ptr<ScrollBackground> scrollBg;
 	};
 
 	class AnimationEditorDisplay : public UIWidget {
@@ -36,10 +42,14 @@ namespace Halley {
 		void setSequence(const String& sequence);
 		void setDirection(const String& direction);
 
+		const Rect4f& getBounds() const;
+		Vector2f getMousePos() const;
+		void onMouseOver(Vector2f mousePos) override;
+
 	protected:
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
-
+		
 	private:
 		Resources& resources;
 		std::shared_ptr<const Animation> animation;
@@ -53,8 +63,11 @@ namespace Halley {
 		Sprite pivotSprite;
 		Rect4f bounds;
 		float zoom = 1.0f;
+		Vector2f mousePos;
 
 		void updateBounds();
+		Vector2f imageToScreenSpace(Vector2f pos) const;
+		Vector2f screenToImageSpace(Vector2f pos) const;
 	};
 }
 
