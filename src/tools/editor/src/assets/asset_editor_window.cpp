@@ -151,7 +151,7 @@ void AssetEditorWindow::createEditorTab(Path filePath, AssetType type, const Str
 std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(Path filePath, AssetType type, const String& name)
 {
 	switch (type) {
-	case AssetType::Sprite:
+	//case AssetType::Sprite:
 	case AssetType::Animation:
 	case AssetType::Texture:
 		return std::make_shared<AnimationEditor>(factory, project->getGameResources(), type, *project, *metadataEditor);
