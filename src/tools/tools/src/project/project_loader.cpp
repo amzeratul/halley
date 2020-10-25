@@ -6,16 +6,35 @@
 using namespace Halley;
 
 
-ProjectLoader::ProjectLoader(const HalleyStatics& statics, const Path& halleyPath)
+ProjectLoader::ProjectLoader(const HalleyStatics& statics, const Path& halleyPath, std::vector<String> disabledPlatforms)
 	: statics(statics)
 	, halleyPath(halleyPath)
+	, disabledPlatforms(std::move(disabledPlatforms))
 {
 	loadPlugins();
 }
 
+void ProjectLoader::setDisabledPlatforms(std::vector<String> platforms)
+{
+	disabledPlatforms = std::move(platforms);
+}
+
 std::unique_ptr<Project> ProjectLoader::loadProject(const Path& path) const
 {
-	return std::make_unique<Project>(path, halleyPath, *this);
+	auto proj = std::make_unique<Project>(path, halleyPath);
+	selectPlugins(*proj);	
+	return proj;
+}
+
+void ProjectLoader::selectPlugins(Project& project) const
+{
+	auto platforms = project.getPlatforms();
+	platforms.erase(std::remove_if(platforms.begin(), platforms.end(), [&] (const String& platform)
+	{
+		return std::find(disabledPlatforms.begin(), disabledPlatforms.end(), platform) != disabledPlatforms.end();
+	}), platforms.end());
+	
+	project.setPlugins(getPlugins(platforms));
 }
 
 static String getDLLExtension()

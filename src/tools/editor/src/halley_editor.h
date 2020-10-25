@@ -19,6 +19,7 @@ namespace Halley
 		std::unique_ptr<Project> createProject(Path path);
 
 		Preferences& getPreferences();
+		ProjectLoader& getProjectLoader();
 
 	protected:
 		void init(const Environment& environment, const Vector<String>& args) override;

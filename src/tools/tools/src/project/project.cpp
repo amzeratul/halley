@@ -20,7 +20,7 @@
 
 using namespace Halley;
 
-Project::Project(Path projectRootPath, Path halleyRootPath, const ProjectLoader& loader)
+Project::Project(Path projectRootPath, Path halleyRootPath)
 	: rootPath(std::move(projectRootPath))
 	, halleyRootPath(std::move(halleyRootPath))
 {	
@@ -28,7 +28,6 @@ Project::Project(Path projectRootPath, Path halleyRootPath, const ProjectLoader&
 	assetPackManifest = rootPath / properties->getAssetPackManifest();
 
 	platforms = properties->getPlatforms();
-	plugins = loader.getPlugins(platforms);
 
 	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getUnpackedAssetsPath(), getUnpackedAssetsPath() / "import.db", getUnpackedAssetsPath() / "assets.db", platforms);
 	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", std::vector<String>{ "" });
@@ -50,6 +49,11 @@ Project::~Project()
 	plugins.clear();
 }
 
+void Project::setPlugins(std::vector<HalleyPluginPtr> plugins)
+{
+	this->plugins = std::move(plugins);
+}
+
 void Project::update(Time time)
 {
 	withDLL([&] (DynamicLibrary& dll)
@@ -68,7 +72,7 @@ void Project::onBuildDone()
 	}
 }
 
-std::vector<String> Project::getPlatforms() const
+const std::vector<String>& Project::getPlatforms() const
 {
 	return platforms;
 }

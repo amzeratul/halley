@@ -24,6 +24,8 @@ namespace Halley
 		WindowDefinition getWindowDefinition() const;
 		void updateWindowDefinition(const Window& window);
 
+		const std::vector<String>& getDisabledPlatforms() const;
+
 	private:
 		SystemAPI& system;
 
@@ -35,5 +37,7 @@ namespace Halley
 		std::optional<Vector2i> windowPosition;
 		Vector2i windowSize;
 		WindowState windowState = WindowState::Normal;
+
+		std::vector<String> disabledPlatforms;
 	};
 }

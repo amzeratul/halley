@@ -76,6 +76,12 @@ Preferences& HalleyEditor::getPreferences()
 	return *preferences;
 }
 
+ProjectLoader& HalleyEditor::getProjectLoader()
+{
+	projectLoader->setDisabledPlatforms(preferences->getDisabledPlatforms());
+	return *projectLoader;
+}
+
 void HalleyEditor::init(const Environment& environment, const Vector<String>& args)
 {
 	rootPath = environment.getProgramPath().parentPath();
@@ -106,7 +112,7 @@ std::unique_ptr<Stage> HalleyEditor::startGame()
 	auto& api = getAPI();
 	preferences = std::make_unique<Preferences>(*api.system, "2020-10-25");
 
-	projectLoader = std::make_unique<ProjectLoader>(api.core->getStatics(), rootPath);
+	projectLoader = std::make_unique<ProjectLoader>(api.core->getStatics(), rootPath, preferences->getDisabledPlatforms());
 	std::unique_ptr<Project> project;
 
 	if (gotProjectPath) {

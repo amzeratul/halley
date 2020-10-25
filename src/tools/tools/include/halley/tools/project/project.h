@@ -34,13 +34,15 @@ namespace Halley
 		
 		using AssetReloadCallback = std::function<void(const std::vector<String>&)>;
 
-		Project(Path projectRootPath, Path halleyRootPath, const ProjectLoader& loader);
+		Project(Path projectRootPath, Path halleyRootPath);
 		~Project();
+
+		void setPlugins(std::vector<HalleyPluginPtr> plugins);
 		
 		void update(Time time);
 		void onBuildDone();
 
-		std::vector<String> getPlatforms() const;
+		const std::vector<String>& getPlatforms() const;
 
 		const Path& getHalleyRootPath() const;
 		

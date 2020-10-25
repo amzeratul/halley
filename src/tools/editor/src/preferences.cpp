@@ -114,3 +114,8 @@ void Preferences::updateWindowDefinition(const Window& window)
 		dirty = true;
 	}
 }
+
+const std::vector<String>& Preferences::getDisabledPlatforms() const
+{
+	return disabledPlatforms;
+}
