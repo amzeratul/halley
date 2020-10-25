@@ -229,7 +229,7 @@ bool Sprite::isFlipped() const
 
 Sprite& Sprite::setTexRect(Rect4f texRect)
 {
-#ifdef DEV_BUILD
+#ifdef ENABLE_HOT_RELOAD
 	setSpriteSheet(nullptr, 0);
 #endif
 	
@@ -417,7 +417,7 @@ Sprite& Sprite::setSprite(const SpriteSheetEntry& entry, bool applyPivot)
 	vertexAttrib.texRect0 = entry.coords;
 	vertexAttrib.textureRotation = entry.rotated ? 1.0f : 0.0f;
 
-#ifdef DEV_BUILD
+#ifdef ENABLE_HOT_RELOAD
 	lastAppliedPivot = applyPivot;
 	setSpriteSheet(entry.parent, entry.idx);
 #endif
@@ -586,7 +586,7 @@ Sprite ConfigNodeSerializer<Sprite>::deserialize(ConfigNodeSerializationContext&
 }
 
 
-#ifdef DEV_BUILD
+#ifdef ENABLE_HOT_RELOAD
 Sprite::~Sprite()
 {
 	setSpriteSheet(nullptr, 0);

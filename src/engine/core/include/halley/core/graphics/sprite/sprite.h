@@ -156,7 +156,7 @@ namespace Halley
 
 		template<typename F> void paintWithClip(Painter& painter, const std::optional<Rect4f>& clip, F f) const;
 
-#ifdef DEV_BUILD
+#ifdef ENABLE_HOT_RELOAD
 	public:
 		Sprite(const Sprite& other);
 		Sprite(Sprite&& other) noexcept;

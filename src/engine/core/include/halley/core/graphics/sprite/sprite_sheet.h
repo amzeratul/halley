@@ -37,7 +37,7 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
-#ifdef DEV_BUILD
+#ifdef ENABLE_HOT_RELOAD
 		SpriteSheet* parent = nullptr;
 		uint32_t idx = 0;
 #endif
@@ -106,7 +106,7 @@ namespace Halley
 
 		void loadTexture(Resources& resources) const;
 
-#ifdef DEV_BUILD
+#ifdef ENABLE_HOT_RELOAD
 	public:
 		void addSprite(Sprite* sprite, uint32_t idx) const;
 		void removeSprite(Sprite* sprite) const;

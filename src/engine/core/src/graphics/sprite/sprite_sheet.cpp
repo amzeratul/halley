@@ -81,7 +81,7 @@ SpriteSheet::SpriteSheet()
 
 SpriteSheet::~SpriteSheet()
 {
-#ifdef DEV_BUILD
+#ifdef ENABLE_HOT_RELOAD
 	for (auto sprite: spriteRefs) {
 		sprite.first->clearSpriteSheetRef();
 	}
@@ -176,7 +176,7 @@ void SpriteSheet::loadTexture(Resources& resources) const
 	texture = resources.get<Texture>(textureName);
 }
 
-#ifdef DEV_BUILD
+#ifdef ENABLE_HOT_RELOAD
 void SpriteSheet::addSprite(Sprite* sprite, uint32_t idx) const
 {
 	spriteRefs[sprite] = idx;
@@ -237,7 +237,7 @@ void SpriteSheet::clearMaterialCache() const
 
 void SpriteSheet::reload(Resource&& resource)
 {
-#ifdef DEV_BUILD
+#ifdef ENABLE_HOT_RELOAD
 	auto oldSpriteIdx = spriteIdx;
 #endif
 
@@ -261,7 +261,7 @@ void SpriteSheet::reload(Resource&& resource)
 
 	defaultMaterialName = std::move(reloaded.defaultMaterialName);
 
-#ifdef DEV_BUILD
+#ifdef ENABLE_HOT_RELOAD
 	// Create idx mapping
 	HashMap<uint32_t, uint32_t> idxMap;
 	for (const auto& [name, idx]: spriteIdx) {

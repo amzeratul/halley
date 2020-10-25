@@ -7,6 +7,10 @@
 #include "metadata.h"
 #include "halley/text/string_converter.h"
 
+#if defined(DEV_BUILD) && !defined(__NX_TOOLCHAIN_MAJOR__)
+#define ENABLE_HOT_RELOAD
+#endif
+
 namespace Halley
 {
 	enum class ImportAssetType
