@@ -171,6 +171,8 @@ namespace Halley
 		bool lastAppliedPivot = false;
 		const SpriteSheet* spriteSheet = nullptr;
 		uint32_t spriteSheetIdx = 0;
+
+		void setSpriteSheet(const SpriteSheet* sheet, uint32_t index);
 #else
 	public:
 		Sprite(const Sprite& other) = default;

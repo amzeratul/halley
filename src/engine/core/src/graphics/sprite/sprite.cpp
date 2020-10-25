@@ -230,10 +230,7 @@ bool Sprite::isFlipped() const
 Sprite& Sprite::setTexRect(Rect4f texRect)
 {
 #ifdef DEV_BUILD
-	if (spriteSheet) {
-		spriteSheet->removeSprite(this);
-		spriteSheet = nullptr;	
-	}
+	setSpriteSheet(nullptr, 0);
 #endif
 	
 	vertexAttrib.texRect0 = texRect;
@@ -421,17 +418,8 @@ Sprite& Sprite::setSprite(const SpriteSheetEntry& entry, bool applyPivot)
 	vertexAttrib.textureRotation = entry.rotated ? 1.0f : 0.0f;
 
 #ifdef DEV_BUILD
-	auto* sheet = entry.parent;
-	auto idx = entry.idx;
-	if (spriteSheet != sheet || spriteSheetIdx != idx) {
-		if (spriteSheet) {
-			spriteSheet->removeSprite(this);
-		}
-		sheet->addSprite(this, idx);
-		spriteSheet = sheet;
-		spriteSheetIdx = idx;
-	}
 	lastAppliedPivot = applyPivot;
+	setSpriteSheet(entry.parent, entry.idx);
 #endif
 	
 	return *this;
@@ -601,10 +589,7 @@ Sprite ConfigNodeSerializer<Sprite>::deserialize(ConfigNodeSerializationContext&
 #ifdef DEV_BUILD
 Sprite::~Sprite()
 {
-	if (spriteSheet) {
-		spriteSheet->removeSprite(this);
-		spriteSheet = nullptr;
-	}
+	setSpriteSheet(nullptr, 0);
 }
 
 Sprite::Sprite(const Sprite& other)
@@ -631,13 +616,9 @@ Sprite& Sprite::operator=(const Sprite& other)
 	flip = other.flip;
 	sliced = other.sliced;
 	sharedMaterial = other.sharedMaterial;
-	spriteSheet = other.spriteSheet;
-	spriteSheetIdx = other.spriteSheetIdx;
 	lastAppliedPivot = other.lastAppliedPivot;
 	
-	if (spriteSheet) {
-		spriteSheet->addSprite(this, spriteSheetIdx);
-	}
+	setSpriteSheet(other.spriteSheet, other.spriteSheetIdx);
 	
 	return *this;
 }
@@ -656,15 +637,9 @@ Sprite& Sprite::operator=(Sprite&& other) noexcept
 	flip = std::move(other.flip);
 	sliced = std::move(other.sliced);
 	sharedMaterial = std::move(other.sharedMaterial);
-	spriteSheet = std::move(other.spriteSheet);
-	spriteSheetIdx = std::move(other.spriteSheetIdx);
 	lastAppliedPivot = std::move(other.lastAppliedPivot);
-		
-	if (spriteSheet) {
-		spriteSheet->addSprite(this, spriteSheetIdx);
-		spriteSheet->removeSprite(&other);
-		other.spriteSheet = nullptr;
-	}
+
+	setSpriteSheet(other.spriteSheet, other.spriteSheetIdx);
 
 	return *this;
 }
@@ -678,5 +653,19 @@ void Sprite::clearSpriteSheetRef()
 {
 	spriteSheet = nullptr;
 	spriteSheetIdx = 0;
+}
+
+void Sprite::setSpriteSheet(const SpriteSheet* sheet, uint32_t index)
+{
+	if (spriteSheet != sheet || spriteSheetIdx != index) {
+		if (spriteSheet) {
+			spriteSheet->removeSprite(this);
+		}
+		if (sheet) {
+			sheet->addSprite(this, index);
+		}
+		spriteSheet = sheet;
+		spriteSheetIdx = index;
+	}
 }
 #endif
