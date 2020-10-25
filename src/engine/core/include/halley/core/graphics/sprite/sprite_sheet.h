@@ -53,8 +53,27 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 	};
+
+	class SpriteHotReloader {
+	public:
+		virtual ~SpriteHotReloader() = default;
+
+#ifdef ENABLE_HOT_RELOAD
+		void addSprite(Sprite* sprite, uint32_t idx) const;
+		void removeSprite(Sprite* sprite) const;
+		void clearSpriteRefs();
+
+	protected:
+		class SpritePointerHasher {
+		public:
+			std::size_t operator()(Sprite* ptr) const noexcept;
+		};
+		
+		mutable std::unordered_map<Sprite*, uint32_t, SpritePointerHasher> spriteRefs;
+#endif
+	};
 	
-	class SpriteSheet final : public Resource
+	class SpriteSheet final : public Resource, public SpriteHotReloader
 	{
 	public:
 		SpriteSheet();
@@ -106,27 +125,14 @@ namespace Halley
 
 		void loadTexture(Resources& resources) const;
 		void assignIds();
-
-#ifdef ENABLE_HOT_RELOAD
-	public:
-		void addSprite(Sprite* sprite, uint32_t idx) const;
-		void removeSprite(Sprite* sprite) const;
-
-	private:
-		class SpritePointerHasher {
-		public:
-			std::size_t operator()(Sprite* ptr) const noexcept;
-		};
-		
-		mutable std::unordered_map<Sprite*, uint32_t, SpritePointerHasher> spriteRefs;
-#endif
 	};
 
-	class SpriteResource final : public Resource
+	class SpriteResource final : public Resource, public SpriteHotReloader
 	{
 	public:
 		SpriteResource();
 		SpriteResource(const std::shared_ptr<const SpriteSheet>& spriteSheet, size_t idx);
+		~SpriteResource();
 
 		const SpriteSheetEntry& getSprite() const;
 		size_t getIdx() const;

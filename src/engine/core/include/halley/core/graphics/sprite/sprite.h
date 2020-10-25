@@ -8,6 +8,7 @@
 
 namespace Halley
 {
+	class SpriteHotReloader;
 	class SpriteResource;
 	class Resources;
 	class SpriteSheetEntry;
@@ -152,6 +153,7 @@ namespace Halley
 		bool sliced = false;
 		bool sharedMaterial = false;
 
+		void doSetSprite(const SpriteSheetEntry& entry, bool applyPivot);
 		void computeSize();
 
 		template<typename F> void paintWithClip(Painter& painter, const std::optional<Rect4f>& clip, F f) const;
@@ -163,16 +165,17 @@ namespace Halley
 		Sprite& operator=(const Sprite& other);
 		Sprite& operator=(Sprite&& other) noexcept;
 		~Sprite();
-		
+
+		void reloadSprite(const SpriteResource& sprite);
 		bool hasLastAppliedPivot() const;
 		void clearSpriteSheetRef();
 
 	private:
 		bool lastAppliedPivot = false;
-		const SpriteSheet* spriteSheet = nullptr;
-		uint32_t spriteSheetIdx = 0;
+		const SpriteHotReloader* hotReloadRef = nullptr;
+		uint32_t hotReloadIdx = 0;
 
-		void setSpriteSheet(const SpriteSheet* sheet, uint32_t index);
+		void setHotReload(const SpriteHotReloader* ref, uint32_t index);
 #else
 	public:
 		Sprite(const Sprite& other) = default;

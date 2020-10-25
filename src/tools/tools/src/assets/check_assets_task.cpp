@@ -40,10 +40,14 @@ void CheckAssetsTask::run()
 	bool first = true;
 	while (!isCancelled()) {
 		bool importing = false;
-		
-		if (!pending.empty()) {
-			const auto assets = checkSpecificAssets(project.getImportAssetsDatabase(), pending);
-			pending.clear();
+
+		decltype(pending) curPending;
+		{
+			std::unique_lock<std::mutex> lock(mutex);
+			curPending = std::move(pending);
+		}
+		if (!curPending.empty()) {
+			const auto assets = checkSpecificAssets(project.getImportAssetsDatabase(), curPending);
 			if (!isCancelled()) {
 				importing |= requestImport(project.getImportAssetsDatabase(), assets, project.getUnpackedAssetsPath(), "Importing assets", true);
 				sleep(10);
@@ -176,7 +180,7 @@ void CheckAssetsTask::sleep(int timeMs)
 	std::unique_lock<std::mutex> lock(mutex);
 	condition.wait_for(lock, timeMs * 1ms);
 	for (auto& a: inbox) {
-		//pending.push_back(std::move(a)); // This is buggy, just wake up (causes assets to import twice)
+		pending.push_back(std::move(a)); // This is buggy, just wake up (causes assets to import twice)
 	}
 	inbox.clear();
 }

@@ -230,7 +230,7 @@ bool Sprite::isFlipped() const
 Sprite& Sprite::setTexRect(Rect4f texRect)
 {
 #ifdef ENABLE_HOT_RELOAD
-	setSpriteSheet(nullptr, 0);
+	setHotReload(nullptr, 0);
 #endif
 	
 	vertexAttrib.texRect0 = texRect;
@@ -363,9 +363,14 @@ Sprite& Sprite::setImage(Resources& resources, const String& imageName, String m
 	if (materialName == "") {
 		materialName = sprite->getDefaultMaterialName();
 	}
-	
+
 	setMaterial(sprite->getMaterial(materialName), true);
-	setSprite(sprite->getSprite());
+	doSetSprite(sprite->getSprite(), true);
+		
+#ifdef ENABLE_HOT_RELOAD
+	setHotReload(sprite.get(), 0);
+#endif
+	
 	return *this;
 }
 
@@ -373,7 +378,22 @@ Sprite& Sprite::setImage(const SpriteResource& sprite, std::shared_ptr<const Mat
 {
 	const auto spriteSheet = sprite.getSpriteSheet();
 	setImage(spriteSheet->getTexture(), std::move(materialDefinition), shared);
-	setSprite(sprite.getSprite());
+	doSetSprite(sprite.getSprite(), true);
+	
+#ifdef ENABLE_HOT_RELOAD
+	setHotReload(&sprite, 0);
+#endif
+	
+	return *this;
+}
+
+Sprite& Sprite::setSprite(const SpriteResource& sprite, bool applyPivot)
+{
+#ifdef ENABLE_HOT_RELOAD
+	setHotReload(&sprite, 0);
+#endif
+
+	doSetSprite(sprite.getSprite(), applyPivot);
 	return *this;
 }
 
@@ -387,13 +407,8 @@ Sprite& Sprite::setSprite(Resources& resources, const String& spriteSheetName, c
 	}
 	auto spriteSheet = resources.get<SpriteSheet>(spriteSheetName);
 	setImage(spriteSheet->getTexture(), resources.get<MaterialDefinition>(materialName));
-	setSprite(*spriteSheet, imageName);
-	return *this;
-}
-
-Sprite& Sprite::setSprite(const SpriteResource& sprite, bool applyPivot)
-{
-	setSprite(sprite.getSprite(), applyPivot);
+	setSprite(spriteSheet->getSprite(imageName), true);
+		
 	return *this;
 }
 
@@ -405,6 +420,17 @@ Sprite& Sprite::setSprite(const SpriteSheet& sheet, const String& name, bool app
 }
 
 Sprite& Sprite::setSprite(const SpriteSheetEntry& entry, bool applyPivot)
+{
+	doSetSprite(entry, applyPivot);
+
+#ifdef ENABLE_HOT_RELOAD
+	setHotReload(entry.parent, entry.idx);
+#endif
+
+	return *this;
+}
+
+void Sprite::doSetSprite(const SpriteSheetEntry& entry, bool applyPivot)
 {
 	outerBorder = entry.trimBorder;
 	slices = entry.slices;
@@ -419,10 +445,7 @@ Sprite& Sprite::setSprite(const SpriteSheetEntry& entry, bool applyPivot)
 
 #ifdef ENABLE_HOT_RELOAD
 	lastAppliedPivot = applyPivot;
-	setSpriteSheet(entry.parent, entry.idx);
 #endif
-	
-	return *this;
 }
 
 Sprite& Sprite::setSliced(Vector4s s)
@@ -589,7 +612,17 @@ Sprite ConfigNodeSerializer<Sprite>::deserialize(ConfigNodeSerializationContext&
 #ifdef ENABLE_HOT_RELOAD
 Sprite::~Sprite()
 {
-	setSpriteSheet(nullptr, 0);
+	setHotReload(nullptr, 0);
+}
+
+void Sprite::reloadSprite(const SpriteResource& sprite)
+{
+	if (sharedMaterial) {
+		setMaterial(sprite.getMaterial(material->getDefinition().getName()));
+	} else if (material) {
+		material->set("tex0", sprite.getSpriteSheet()->getTexture());
+	}
+	doSetSprite(sprite.getSprite(), lastAppliedPivot);
 }
 
 Sprite::Sprite(const Sprite& other)
@@ -618,7 +651,7 @@ Sprite& Sprite::operator=(const Sprite& other)
 	sharedMaterial = other.sharedMaterial;
 	lastAppliedPivot = other.lastAppliedPivot;
 	
-	setSpriteSheet(other.spriteSheet, other.spriteSheetIdx);
+	setHotReload(other.hotReloadRef, other.hotReloadIdx);
 	
 	return *this;
 }
@@ -639,7 +672,7 @@ Sprite& Sprite::operator=(Sprite&& other) noexcept
 	sharedMaterial = std::move(other.sharedMaterial);
 	lastAppliedPivot = std::move(other.lastAppliedPivot);
 
-	setSpriteSheet(other.spriteSheet, other.spriteSheetIdx);
+	setHotReload(other.hotReloadRef, other.hotReloadIdx);
 
 	return *this;
 }
@@ -651,21 +684,21 @@ bool Sprite::hasLastAppliedPivot() const
 
 void Sprite::clearSpriteSheetRef()
 {
-	spriteSheet = nullptr;
-	spriteSheetIdx = 0;
+	hotReloadRef = nullptr;
+	hotReloadIdx = 0;
 }
 
-void Sprite::setSpriteSheet(const SpriteSheet* sheet, uint32_t index)
+void Sprite::setHotReload(const SpriteHotReloader* ref, uint32_t index)
 {
-	if (spriteSheet != sheet || spriteSheetIdx != index) {
-		if (spriteSheet) {
-			spriteSheet->removeSprite(this);
+	if (hotReloadRef != ref || hotReloadIdx != index) {
+		if (hotReloadRef) {
+			hotReloadRef->removeSprite(this);
 		}
-		if (sheet) {
-			sheet->addSprite(this, index);
+		if (ref) {
+			ref->addSprite(this, index);
 		}
-		spriteSheet = sheet;
-		spriteSheetIdx = index;
+		hotReloadRef = ref;
+		hotReloadIdx = index;
 	}
 }
 #endif

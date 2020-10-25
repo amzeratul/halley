@@ -82,9 +82,7 @@ SpriteSheet::SpriteSheet()
 SpriteSheet::~SpriteSheet()
 {
 #ifdef ENABLE_HOT_RELOAD
-	for (auto sprite: spriteRefs) {
-		sprite.first->clearSpriteSheetRef();
-	}
+	clearSpriteRefs();
 #endif
 }
 
@@ -185,23 +183,6 @@ void SpriteSheet::assignIds()
 	}
 #endif	
 }
-
-#ifdef ENABLE_HOT_RELOAD
-void SpriteSheet::addSprite(Sprite* sprite, uint32_t idx) const
-{
-	spriteRefs[sprite] = idx;
-}
-
-void SpriteSheet::removeSprite(Sprite* sprite) const
-{
-	spriteRefs.erase(sprite);
-}
-
-std::size_t SpriteSheet::SpritePointerHasher::operator()(Sprite* ptr) const noexcept
-{
-	return reinterpret_cast<size_t>(ptr) / sizeof(Sprite);
-}
-#endif
 
 SpriteResource::SpriteResource()
 {
@@ -404,6 +385,13 @@ SpriteResource::SpriteResource(const std::shared_ptr<const SpriteSheet>& spriteS
 {
 }
 
+SpriteResource::~SpriteResource()
+{
+#ifdef ENABLE_HOT_RELOAD
+	clearSpriteRefs();
+#endif
+}
+
 const SpriteSheetEntry& SpriteResource::getSprite() const
 {
 	return getSpriteSheet()->getSprite(idx);
@@ -446,7 +434,15 @@ std::unique_ptr<SpriteResource> SpriteResource::loadResource(ResourceLoader& loa
 
 void SpriteResource::reload(Resource&& resource)
 {
-	*this = std::move(dynamic_cast<SpriteResource&>(resource));
+	auto& reloaded = dynamic_cast<SpriteResource&>(resource);
+	spriteSheet = std::move(reloaded.spriteSheet);
+	idx = reloaded.idx;
+
+#ifdef ENABLE_HOT_RELOAD
+	for (auto& sprite: spriteRefs) {
+		sprite.first->reloadSprite(*this);
+	}
+#endif
 }
 
 void SpriteResource::serialize(Serializer& s) const
@@ -464,3 +460,27 @@ void SpriteResource::deserialize(Deserializer& s)
 
 	s >> idx;
 }
+
+#ifdef ENABLE_HOT_RELOAD
+void SpriteHotReloader::addSprite(Sprite* sprite, uint32_t idx) const
+{
+	spriteRefs[sprite] = idx;
+}
+
+void SpriteHotReloader::removeSprite(Sprite* sprite) const
+{
+	spriteRefs.erase(sprite);
+}
+
+void SpriteHotReloader::clearSpriteRefs()
+{
+	for (auto sprite: spriteRefs) {
+		sprite.first->clearSpriteSheetRef();
+	}
+}
+
+std::size_t SpriteHotReloader::SpritePointerHasher::operator()(Sprite* ptr) const noexcept
+{
+	return reinterpret_cast<size_t>(ptr) / sizeof(Sprite);
+}
+#endif
