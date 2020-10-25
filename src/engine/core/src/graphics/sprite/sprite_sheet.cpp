@@ -110,6 +110,11 @@ std::vector<String> SpriteSheet::getSpriteNames() const
 	return result;
 }
 
+const HashMap<String, uint32_t>& SpriteSheet::getSpriteNameMap() const
+{
+	return spriteIdx;
+}
+
 size_t SpriteSheet::getSpriteCount() const
 {
 	return sprites.size();
@@ -149,7 +154,7 @@ std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 	auto result = std::make_unique<SpriteSheet>();
 	result->resources = &loader.getResources();
 	auto data = loader.getStatic();
-	Deserializer s(data->getSpan());
+	Deserializer s(data->getSpan(), SerializerOptions(SerializerOptions::maxVersion));
 	result->deserialize(s);
 
 	return result;
@@ -158,6 +163,10 @@ std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 void SpriteSheet::loadTexture(Resources& resources) const
 {
 	texture = resources.get<Texture>(textureName);
+}
+
+SpriteResource::SpriteResource()
+{
 }
 
 void SpriteSheet::addSprite(String name, const SpriteSheetEntry& sprite)
@@ -335,10 +344,32 @@ const String& SpriteResource::getDefaultMaterialName() const
 
 std::unique_ptr<SpriteResource> SpriteResource::loadResource(ResourceLoader& loader)
 {
-	throw Exception("Not implemented.", HalleyExceptions::Resources);
+	auto result = std::make_unique<SpriteResource>();
+	result->resources = &loader.getResources();
+	auto data = loader.getStatic();
+	Deserializer s(data->getSpan(), SerializerOptions(SerializerOptions::maxVersion));
+	result->deserialize(s);
+
+	return result;
 }
 
 void SpriteResource::reload(Resource&& resource)
 {
 	*this = std::move(dynamic_cast<SpriteResource&>(resource));
+}
+
+void SpriteResource::serialize(Serializer& s) const
+{
+	const auto ss = spriteSheet.lock();
+	s << ss->getAssetId();
+	s << idx;
+}
+
+void SpriteResource::deserialize(Deserializer& s)
+{
+	String ssName;
+	s >> ssName;
+	spriteSheet = resources->get<SpriteSheet>(ssName);
+
+	s >> idx;
 }

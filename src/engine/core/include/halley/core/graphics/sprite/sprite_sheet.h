@@ -58,6 +58,7 @@ namespace Halley
 
 		const std::vector<SpriteSheetFrameTag>& getFrameTags() const;
 		std::vector<String> getSpriteNames() const;
+		const HashMap<String, uint32_t>& getSpriteNameMap() const;
 
 		size_t getSpriteCount() const;
 		size_t getIndex(const String& name) const;
@@ -101,6 +102,7 @@ namespace Halley
 	class SpriteResource final : public Resource
 	{
 	public:
+		SpriteResource();
 		SpriteResource(const std::shared_ptr<const SpriteSheet>& spriteSheet, size_t idx);
 
 		const SpriteSheetEntry& getSprite() const;
@@ -114,8 +116,12 @@ namespace Halley
 		static std::unique_ptr<SpriteResource> loadResource(ResourceLoader& loader);
 		void reload(Resource&& resource) override;
 
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+
 	private:
 		std::weak_ptr<const SpriteSheet> spriteSheet;
 		size_t idx = -1;
+		Resources* resources = nullptr;
 	};
 }

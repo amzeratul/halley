@@ -140,11 +140,11 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 
 	// Create the atlas
 	auto groupAtlasName = asset.assetId;
-	SpriteSheet spriteSheet;
+	auto spriteSheet = std::make_shared<SpriteSheet>();
 	ConfigNode spriteInfo;
-	auto atlasImage = generateAtlas(groupAtlasName, totalFrames, spriteSheet, spriteInfo);
-	spriteSheet.setTextureName(groupAtlasName);
-	spriteSheet.setDefaultMaterialName(meta.getString("material", meta.getString("defaultMaterial", "Halley/Sprite")));
+	auto atlasImage = generateAtlas(groupAtlasName, totalFrames, *spriteSheet, spriteInfo);
+	spriteSheet->setTextureName(groupAtlasName);
+	spriteSheet->setDefaultMaterialName(meta.getString("material", meta.getString("defaultMaterial", "Halley/Sprite")));
 
 	// Metafile parameters
 	auto size = atlasImage->getSize();
@@ -165,7 +165,16 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	collector.addAdditionalAsset(std::move(image));
 
 	// Write spritesheet
-	collector.output(baseSpriteSheetName, AssetType::SpriteSheet, Serializer::toBytes(spriteSheet));
+	spriteSheet->setAssetId(baseSpriteSheetName);
+	collector.output(baseSpriteSheetName, AssetType::SpriteSheet, Serializer::toBytes(*spriteSheet, SerializerOptions(SerializerOptions::maxVersion)));
+
+	// Write sprites
+	for (const auto& [k, idx]: spriteSheet->getSpriteNameMap()) {
+		if (k.startsWith(":img:")) {
+			SpriteResource spriteRes(spriteSheet, idx);
+			collector.output(k.mid(5), AssetType::Sprite, Serializer::toBytes(spriteRes, SerializerOptions(SerializerOptions::maxVersion)));
+		}
+	}
 }
 
 String SpriteImporter::getAssetId(const Path& file, const std::optional<Metadata>& metadata) const

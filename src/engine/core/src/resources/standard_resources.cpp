@@ -37,6 +37,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<Prefab>();
 	resources.init<Scene>();
 
+	/*
 	resources.of<SpriteResource>().setResourceEnumerator([&] () -> std::vector<String>
 	{
 		std::vector<String> result;
@@ -76,6 +77,7 @@ void StandardResources::initialize(Resources& resources)
 
 		return result;
 	});
+	*/
 
 	resources.setFallback<Texture>("whitebox.png");
 	resources.setFallback<SpriteResource>("whitebox.png");
