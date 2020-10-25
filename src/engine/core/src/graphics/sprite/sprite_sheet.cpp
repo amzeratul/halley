@@ -8,6 +8,7 @@
 #include "graphics/material/material_definition.h"
 #include "graphics/sprite/sprite.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -76,6 +77,15 @@ void SpriteSheetFrameTag::deserialize(Deserializer& s)
 SpriteSheet::SpriteSheet()
 	: defaultMaterialName("Halley/Sprite")
 {
+}
+
+SpriteSheet::~SpriteSheet()
+{
+#ifdef DEV_BUILD
+	for (auto sprite: spriteRefs) {
+		sprite.first->clearSpriteSheetRef();
+	}
+#endif
 }
 
 const std::shared_ptr<const Texture>& SpriteSheet::getTexture() const
@@ -228,21 +238,55 @@ void SpriteSheet::clearMaterialCache() const
 void SpriteSheet::reload(Resource&& resource)
 {
 #ifdef DEV_BUILD
-	// Preserve it across the assignment below
-	auto oldRefs = std::move(spriteRefs);
+	auto oldSpriteIdx = spriteIdx;
 #endif
 
-	*this = std::move(dynamic_cast<SpriteSheet&>(resource));
+	auto& reloaded = dynamic_cast<SpriteSheet&>(resource);
+
+	sprites = std::move(reloaded.sprites);
+	spriteIdx = std::move(reloaded.spriteIdx);
+	frameTags = std::move(reloaded.frameTags);
+
+	if (textureName != reloaded.textureName) {
+		textureName = std::move(reloaded.textureName);
+		texture = std::move(reloaded.texture);
+
+		for (auto& material: materials) {
+			auto mat = material.second.lock();
+			if (mat) {
+				mat->set("tex0", texture);
+			}
+		}
+	}
+
+	defaultMaterialName = std::move(reloaded.defaultMaterialName);
 
 #ifdef DEV_BUILD
+	// Create idx mapping
+	HashMap<uint32_t, uint32_t> idxMap;
+	for (const auto& [name, idx]: spriteIdx) {
+		const auto iter = oldSpriteIdx.find(name);
+		if (iter != oldSpriteIdx.end()) {
+			idxMap[iter->second] = idx;
+		}
+	}
+
+	// Assign indices to all sprites
 	for (uint32_t idx = 0; idx < sprites.size(); ++idx) {
 		sprites[idx].parent = this;
 		sprites[idx].idx = idx;
 	}
 
-	spriteRefs = std::move(oldRefs);
-	for (const auto& sprite: spriteRefs) {
-		//sprite.first->setSprite(sprites[sprite.second], sprite.first->hasLastAppliedPivot());
+	// Refresh sprite refs
+	for (auto& sprite: spriteRefs) {
+		const auto iter = idxMap.find(sprite.second);
+		if (iter != idxMap.end()) {
+			sprite.second = iter->second;
+		} else {
+			sprite.second = 0;
+		}
+		
+		sprite.first->setSprite(sprites[sprite.second], sprite.first->hasLastAppliedPivot());
 	}
 #endif
 }

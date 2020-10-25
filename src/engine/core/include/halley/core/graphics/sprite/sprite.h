@@ -165,6 +165,7 @@ namespace Halley
 		~Sprite();
 		
 		bool hasLastAppliedPivot() const;
+		void clearSpriteSheetRef();
 
 	private:
 		bool lastAppliedPivot = false;

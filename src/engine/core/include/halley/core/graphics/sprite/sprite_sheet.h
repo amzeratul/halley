@@ -58,6 +58,7 @@ namespace Halley
 	{
 	public:
 		SpriteSheet();
+		~SpriteSheet();
 		
 		const std::shared_ptr<const Texture>& getTexture() const;
 		const SpriteSheetEntry& getSprite(const String& name) const;

@@ -10,6 +10,7 @@
 #include <gsl/gsl_assert>
 
 #include "halley/file_formats/config_file.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -359,6 +360,10 @@ Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<c
 Sprite& Sprite::setImage(Resources& resources, const String& imageName, String materialName)
 {
 	Expects (!imageName.isEmpty());
+
+	if (imageName == "effects/vfx/grassbit.png") {
+		Logger::logInfo("Sup");
+	}
 		
 	const auto sprite = resources.get<SpriteResource>(imageName);
 
@@ -671,5 +676,11 @@ Sprite& Sprite::operator=(Sprite&& other) noexcept
 bool Sprite::hasLastAppliedPivot() const
 {
 	return lastAppliedPivot;
+}
+
+void Sprite::clearSpriteSheetRef()
+{
+	spriteSheet = nullptr;
+	spriteSheetIdx = 0;
 }
 #endif
