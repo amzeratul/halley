@@ -346,7 +346,11 @@ std::unique_ptr<SpriteResource> SpriteResource::loadResource(ResourceLoader& loa
 {
 	auto result = std::make_unique<SpriteResource>();
 	result->resources = &loader.getResources();
-	auto data = loader.getStatic();
+	auto data = loader.getStatic(false);
+	if (!data) {
+		return {};
+	}
+	
 	Deserializer s(data->getSpan(), SerializerOptions(SerializerOptions::maxVersion));
 	result->deserialize(s);
 

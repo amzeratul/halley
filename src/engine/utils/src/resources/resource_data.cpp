@@ -136,18 +136,22 @@ ResourceLoader::ResourceLoader(IResourceLocator& locator, const String& name, As
 	, priority(priority)
 	, api(api)
 {
-	metadata = &locator.getMetaData(name, type);
+	metadata = locator.getMetaData(name, type);
 }
 
-std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic()
+std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic(bool throwOnFail)
 {
-	auto result = locator.getStatic(name, type);
+	auto result = locator.getStatic(name, type, throwOnFail);
 	if (result) {
-		if (metadata->getString("asset_compression", "") == "deflate") {
+		if (metadata && metadata->getString("asset_compression", "") == "deflate") {
 			try {
 				result->inflate();
 			} catch (Exception &e) {
-				throw Exception("Failed to load resource \"" + getName() + "\" due to inflate exception: " + e.what(), HalleyExceptions::Resources);
+				if (throwOnFail) {
+					throw Exception("Failed to load resource \"" + getName() + "\" due to inflate exception: " + e.what(), HalleyExceptions::Resources);
+				} else {
+					return nullptr;
+				}
 			}
 		}
 		loaded = true;
@@ -155,24 +159,24 @@ std::unique_ptr<ResourceDataStatic> ResourceLoader::getStatic()
 	return result;
 }
 
-std::unique_ptr<ResourceDataStream> ResourceLoader::getStream()
+std::unique_ptr<ResourceDataStream> ResourceLoader::getStream(bool throwOnFail)
 {
-	auto result = locator.getStream(name, type);
+	auto result = locator.getStream(name, type, throwOnFail);
 	if (result) {
 		loaded = true;
 	}
 	return result;
 }
 
-Future<std::unique_ptr<ResourceDataStatic>> ResourceLoader::getAsync() const
+Future<std::unique_ptr<ResourceDataStatic>> ResourceLoader::getAsync(bool throwOnFail) const
 {
 	std::reference_wrapper<IResourceLocator> loc = locator;
 	auto n = name;
 	auto t = type;
 	auto meta = getMeta();
-	return Concurrent::execute(Executors::getDiskIO(), [meta, loc, n, t] () -> std::unique_ptr<ResourceDataStatic>
+	return Concurrent::execute(Executors::getDiskIO(), [meta, loc, n, t, throwOnFail] () -> std::unique_ptr<ResourceDataStatic>
 	{
-		auto result = loc.get().getStatic(n, t);
+		auto result = loc.get().getStatic(n, t, throwOnFail);
 		if (meta.getString("asset_compression", "") == "deflate") {
 			result->inflate();
 		}

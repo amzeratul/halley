@@ -92,9 +92,9 @@ namespace Halley {
 	{
 	public:
 		virtual ~IResourceLocator() {}
-		virtual const Metadata& getMetaData(const String& resource, AssetType type) const = 0;
-		virtual std::unique_ptr<ResourceDataStatic> getStatic(const String& asset, AssetType type) = 0;
-		virtual std::unique_ptr<ResourceDataStream> getStream(const String& asset, AssetType type) = 0;
+		virtual const Metadata* getMetaData(const String& resource, AssetType type) const = 0;
+		virtual std::unique_ptr<ResourceDataStatic> getStatic(const String& asset, AssetType type, bool throwOnFail) = 0;
+		virtual std::unique_ptr<ResourceDataStream> getStream(const String& asset, AssetType type, bool throwOnFail) = 0;
 	};
 
 
@@ -118,9 +118,9 @@ namespace Halley {
 		const HalleyAPI& getAPI() const { return *api; }
 		const Metadata& getMeta() const { return *metadata; }
 
-		std::unique_ptr<ResourceDataStatic> getStatic();
-		std::unique_ptr<ResourceDataStream> getStream();
-		Future<std::unique_ptr<ResourceDataStatic>> getAsync() const;
+		std::unique_ptr<ResourceDataStatic> getStatic(bool throwOnFail = true);
+		std::unique_ptr<ResourceDataStream> getStream(bool throwOnFail = true);
+		Future<std::unique_ptr<ResourceDataStatic>> getAsync(bool throwOnFail = true) const;
 		Resources& getResources() const;
 
 	private:

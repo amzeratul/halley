@@ -53,24 +53,32 @@ void ResourceLocator::purgeAll()
 	}
 }
 
-std::unique_ptr<ResourceData> ResourceLocator::getResource(const String& asset, AssetType type, bool stream)
+std::unique_ptr<ResourceData> ResourceLocator::getResource(const String& asset, AssetType type, bool stream, bool throwOnFail) const
 {
 	auto result = assetToLocator.find(toString(type) + ":" + asset);
 	if (result != assetToLocator.end()) {
 		auto data = result->second->getData(asset, type, stream);
 		if (data) {
 			return data;
-		} else {
+		} else if (throwOnFail) {
 			throw Exception("Unable to load resource: " + asset, HalleyExceptions::Resources);
+		} else {
+			return {};
 		}
-	} else {
+	} else if (throwOnFail) {
 		throw Exception("Unable to locate resource: " + asset, HalleyExceptions::Resources);
+	} else {
+		return {};
 	}
 }
 
-std::unique_ptr<ResourceDataStatic> ResourceLocator::getStatic(const String& asset, AssetType type)
+std::unique_ptr<ResourceDataStatic> ResourceLocator::getStatic(const String& asset, AssetType type, bool throwOnFail)
 {
-	auto rawPtr = getResource(asset, type, false).release();
+	auto rawPtr = getResource(asset, type, false, throwOnFail).release();
+	if (!rawPtr) {
+		return std::unique_ptr<ResourceDataStatic>();
+	}
+	
 	auto ptr = dynamic_cast<ResourceDataStatic*>(rawPtr);
 	if (!ptr) {
 		delete rawPtr;
@@ -79,9 +87,13 @@ std::unique_ptr<ResourceDataStatic> ResourceLocator::getStatic(const String& ass
 	return std::unique_ptr<ResourceDataStatic>(ptr);
 }
 
-std::unique_ptr<ResourceDataStream> ResourceLocator::getStream(const String& asset, AssetType type)
+std::unique_ptr<ResourceDataStream> ResourceLocator::getStream(const String& asset, AssetType type, bool throwOnFail)
 {
-	auto rawPtr = getResource(asset, type, true).release();
+	auto rawPtr = getResource(asset, type, true, throwOnFail).release();
+	if (!rawPtr) {
+		return std::unique_ptr<ResourceDataStream>();
+	}
+	
 	auto ptr = dynamic_cast<ResourceDataStream*>(rawPtr);
 	if (!ptr) {
 		delete rawPtr;
@@ -160,13 +172,13 @@ std::vector<String> ResourceLocator::getAssetsFromPack(const Path& path, const S
 	}
 }
 
-const Metadata& ResourceLocator::getMetaData(const String& asset, AssetType type) const
+const Metadata* ResourceLocator::getMetaData(const String& asset, AssetType type) const
 {
 	auto result = assetToLocator.find(toString(type) + ":" + asset);
 	if (result != assetToLocator.end()) {
-		return result->second->getAssetDatabase().getDatabase(type).get(asset).meta;
+		return &result->second->getAssetDatabase().getDatabase(type).get(asset).meta;
 	} else {
-		throw Exception("Unable to locate resource: " + asset, HalleyExceptions::Resources);
+		return nullptr;
 	}
 }
 

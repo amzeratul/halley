@@ -99,11 +99,8 @@ std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(con
 
 	if (!newRes) {
 		if (allowFallback && !fallback.isEmpty()) {
-			newRes = doGet(fallback, priority, false);
-			if (newRes) {
-				Logger::logError("Resource not found: \"" + toString(type) + ":" + assetId + "\"");
-				return std::make_pair(newRes, false);
-			}
+			Logger::logError("Resource not found: \"" + toString(type) + ":" + assetId + "\"");
+			return loadAsset(fallback, priority, false);
 		}
 		
 		throw Exception("Resource not found: \"" + toString(type) + ":" + assetId + "\"", HalleyExceptions::Resources);

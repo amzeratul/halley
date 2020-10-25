@@ -52,10 +52,10 @@ namespace Halley {
 		std::vector<String> getAssetsFromPack(const Path& path, const String& encryptionKey = "") const;
 		void removePack(const Path& path);
 
-		const Metadata& getMetaData(const String& resource, AssetType type) const override;
+		const Metadata* getMetaData(const String& resource, AssetType type) const override;
 
-		std::unique_ptr<ResourceDataStatic> getStatic(const String& asset, AssetType type) override;
-		std::unique_ptr<ResourceDataStream> getStream(const String& asset, AssetType type) override;
+		std::unique_ptr<ResourceDataStatic> getStatic(const String& asset, AssetType type, bool throwOnFail) override;
+		std::unique_ptr<ResourceDataStream> getStream(const String& asset, AssetType type, bool throwOnFail) override;
 
 		void purge(const String& asset, AssetType type);
 		void purgeAll();
@@ -73,7 +73,7 @@ namespace Halley {
 
 		void add(std::unique_ptr<IResourceLocatorProvider> locator, const Path& path);
 
-		std::unique_ptr<ResourceData> getResource(const String& asset, AssetType type, bool stream);
+		std::unique_ptr<ResourceData> getResource(const String& asset, AssetType type, bool stream, bool throwOnFail) const;
 		void loadLocatorData(IResourceLocatorProvider& locator);
 	};
 }
