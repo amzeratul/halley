@@ -226,6 +226,24 @@ bool Sprite::isFlipped() const
 	return flip;
 }
 
+Sprite& Sprite::setTexRect(Rect4f texRect)
+{
+#ifdef DEV_BUILD
+	if (spriteSheet) {
+		spriteSheet->removeSprite(this);
+		spriteSheet = nullptr;	
+	}
+#endif
+	
+	vertexAttrib.texRect0 = texRect;
+	return *this;
+}
+
+Sprite& Sprite::setTexRect0(Rect4f texRect)
+{
+	return setTexRect(texRect);
+}
+
 Sprite& Sprite::setPivot(Vector2f v)
 {
 	Expects(v.isValid());
@@ -400,6 +418,21 @@ Sprite& Sprite::setSprite(const SpriteSheetEntry& entry, bool applyPivot)
 	}
 	vertexAttrib.texRect0 = entry.coords;
 	vertexAttrib.textureRotation = entry.rotated ? 1.0f : 0.0f;
+
+#ifdef DEV_BUILD
+	auto* sheet = entry.parent;
+	auto idx = entry.idx;
+	if (spriteSheet != sheet || spriteSheetIdx != idx) {
+		if (spriteSheet) {
+			spriteSheet->removeSprite(this);
+		}
+		sheet->addSprite(this, idx);
+		spriteSheet = sheet;
+		spriteSheetIdx = idx;
+	}
+	lastAppliedPivot = applyPivot;
+#endif
+	
 	return *this;
 }
 
@@ -562,3 +595,81 @@ Sprite ConfigNodeSerializer<Sprite>::deserialize(ConfigNodeSerializationContext&
 
 	return sprite;
 }
+
+
+#ifdef DEV_BUILD
+Sprite::~Sprite()
+{
+	if (spriteSheet) {
+		spriteSheet->removeSprite(this);
+		spriteSheet = nullptr;
+	}
+}
+
+Sprite::Sprite(const Sprite& other)
+{
+	*this = other;
+}
+
+Sprite::Sprite(Sprite&& other) noexcept
+{
+	*this = other;
+}
+
+Sprite& Sprite::operator=(const Sprite& other)
+{
+	vertexAttrib = other.vertexAttrib;
+	material = other.material;
+	size = other.size;
+	slices = other.slices;
+	outerBorder = other.outerBorder;
+	clip = other.clip;
+	hasClip = other.hasClip;
+	absoluteClip = other.absoluteClip;
+	visible = other.visible;
+	flip = other.flip;
+	sliced = other.sliced;
+	sharedMaterial = other.sharedMaterial;
+	spriteSheet = other.spriteSheet;
+	spriteSheetIdx = other.spriteSheetIdx;
+	lastAppliedPivot = other.lastAppliedPivot;
+	
+	if (spriteSheet) {
+		spriteSheet->addSprite(this, spriteSheetIdx);
+	}
+	
+	return *this;
+}
+
+Sprite& Sprite::operator=(Sprite&& other) noexcept
+{
+	vertexAttrib = std::move(other.vertexAttrib);
+	material = std::move(other.material);
+	size = std::move(other.size);
+	slices = std::move(other.slices);
+	outerBorder = std::move(other.outerBorder);
+	clip = std::move(other.clip);
+	hasClip = std::move(other.hasClip);
+	absoluteClip = std::move(other.absoluteClip);
+	visible = std::move(other.visible);
+	flip = std::move(other.flip);
+	sliced = std::move(other.sliced);
+	sharedMaterial = std::move(other.sharedMaterial);
+	spriteSheet = std::move(other.spriteSheet);
+	spriteSheetIdx = std::move(other.spriteSheetIdx);
+	lastAppliedPivot = std::move(other.lastAppliedPivot);
+		
+	if (spriteSheet) {
+		spriteSheet->addSprite(this, spriteSheetIdx);
+		spriteSheet->removeSprite(&other);
+		other.spriteSheet = nullptr;
+	}
+
+	return *this;
+}
+
+bool Sprite::hasLastAppliedPivot() const
+{
+	return lastAppliedPivot;
+}
+#endif

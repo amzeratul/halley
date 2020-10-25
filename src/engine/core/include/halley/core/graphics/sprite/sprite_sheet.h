@@ -11,6 +11,7 @@
 
 namespace Halley
 {
+	class Sprite;
 	class Resources;
 	class Serializer;
 	class Deserializer;
@@ -18,6 +19,7 @@ namespace Halley
 	class Texture;
 	class ResourceLoader;
 	class Material;
+	class SpriteSheet;
 
 	class SpriteSheetEntry
 	{
@@ -34,6 +36,11 @@ namespace Halley
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
+
+#ifdef DEV_BUILD
+		SpriteSheet* parent = nullptr;
+		uint32_t idx = 0;
+#endif
 	};
 
 	class SpriteSheetFrameTag
@@ -97,6 +104,15 @@ namespace Halley
 		mutable HashMap<String, std::weak_ptr<Material>> materials;
 
 		void loadTexture(Resources& resources) const;
+
+#ifdef DEV_BUILD
+	public:
+		void addSprite(Sprite* sprite, uint32_t idx) const;
+		void removeSprite(Sprite* sprite) const;
+
+	private:
+		mutable std::map<Sprite*, uint32_t> spriteRefs;
+#endif
 	};
 
 	class SpriteResource final : public Resource

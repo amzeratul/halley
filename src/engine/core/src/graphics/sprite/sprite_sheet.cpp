@@ -6,6 +6,7 @@
 #include <halley/file_formats/json_file.h>
 #include "graphics/material/material.h"
 #include "graphics/material/material_definition.h"
+#include "graphics/sprite/sprite.h"
 #include "halley/bytes/byte_serializer.h"
 
 using namespace Halley;
@@ -165,6 +166,18 @@ void SpriteSheet::loadTexture(Resources& resources) const
 	texture = resources.get<Texture>(textureName);
 }
 
+#ifdef DEV_BUILD
+void SpriteSheet::addSprite(Sprite* sprite, uint32_t idx) const
+{
+	spriteRefs[sprite] = idx;
+}
+
+void SpriteSheet::removeSprite(Sprite* sprite) const
+{
+	spriteRefs.erase(sprite);
+}
+#endif
+
 SpriteResource::SpriteResource()
 {
 }
@@ -214,7 +227,24 @@ void SpriteSheet::clearMaterialCache() const
 
 void SpriteSheet::reload(Resource&& resource)
 {
+#ifdef DEV_BUILD
+	// Preserve it across the assignment below
+	auto oldRefs = std::move(spriteRefs);
+#endif
+
 	*this = std::move(dynamic_cast<SpriteSheet&>(resource));
+
+#ifdef DEV_BUILD
+	for (uint32_t idx = 0; idx < sprites.size(); ++idx) {
+		sprites[idx].parent = this;
+		sprites[idx].idx = idx;
+	}
+
+	spriteRefs = std::move(oldRefs);
+	for (const auto& sprite: spriteRefs) {
+		//sprite.first->setSprite(sprites[sprite.second], sprite.first->hasLastAppliedPivot());
+	}
+#endif
 }
 
 void SpriteSheet::serialize(Serializer& s) const
@@ -245,6 +275,11 @@ void SpriteSheet::deserialize(Deserializer& s)
 
 	if (v >= 1) {
 		s >> defaultMaterialName;
+	}
+
+	for (uint32_t idx = 0; idx < sprites.size(); ++idx) {
+		sprites[idx].parent = this;
+		sprites[idx].idx = idx;
 	}
 }
 

@@ -41,11 +41,6 @@ namespace Halley
 	public:
 		Sprite();
 
-		Sprite(const Sprite& other) = default;
-		Sprite(Sprite&& other) noexcept = default;
-		Sprite& operator=(const Sprite& other) = default;
-		Sprite& operator=(Sprite&& other) noexcept = default;
-
 		void draw(Painter& painter, const std::optional<Rect4f>& extClip = {}) const;
 		void drawNormal(Painter& painter, const std::optional<Rect4f>& extClip = {}) const;
 		void drawSliced(Painter& painter, const std::optional<Rect4f>& extClip = {}) const;
@@ -102,9 +97,9 @@ namespace Halley
 		Colour4f getColour() const { return vertexAttrib.colour; }
 		Colour4f& getColour() { return vertexAttrib.colour; }
 
-		Sprite& setTexRect(Rect4f texRect) { vertexAttrib.texRect0 = texRect; return *this; }
+		Sprite& setTexRect(Rect4f texRect);
 		Rect4f getTexRect() const { return vertexAttrib.texRect0; }
-		Sprite& setTexRect0(Rect4f texRect) { vertexAttrib.texRect0 = texRect; return *this; }
+		Sprite& setTexRect0(Rect4f texRect);
 		Rect4f getTexRect0() const { return vertexAttrib.texRect0; }
 		Sprite& setTexRect1(Rect4f texRect) { vertexAttrib.texRect1 = texRect; return *this; }
 		Rect4f getTexRect1() const { return vertexAttrib.texRect1; }
@@ -160,6 +155,29 @@ namespace Halley
 		void computeSize();
 
 		template<typename F> void paintWithClip(Painter& painter, const std::optional<Rect4f>& clip, F f) const;
+
+#ifdef DEV_BUILD
+	public:
+		Sprite(const Sprite& other);
+		Sprite(Sprite&& other) noexcept;
+		Sprite& operator=(const Sprite& other);
+		Sprite& operator=(Sprite&& other) noexcept;
+		~Sprite();
+		
+		bool hasLastAppliedPivot() const;
+
+	private:
+		bool lastAppliedPivot = false;
+		const SpriteSheet* spriteSheet = nullptr;
+		uint32_t spriteSheetIdx = 0;
+#else
+	public:
+		Sprite(const Sprite& other) = default;
+		Sprite(Sprite&& other) noexcept = default;
+		Sprite& operator=(const Sprite& other) = default;
+		Sprite& operator=(Sprite&& other) noexcept = default;
+#endif
+
 	};
 
 	class Resources;
