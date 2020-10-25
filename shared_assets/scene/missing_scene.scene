@@ -1,0 +1,5 @@
+- name: Missing Scene
+  uuid: 9ec3a49d-6c7b-4de7-9693-91f014fcb103
+  components:
+    - Transform2D:
+        position: [0, 0]

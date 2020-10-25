@@ -169,8 +169,12 @@ Animation::Animation()
 
 std::unique_ptr<Animation> Animation::loadResource(ResourceLoader& loader)
 {
+	auto sData = loader.getStatic(false);
+	if (!sData) {
+		return {};
+	}
+	
 	auto result = std::make_unique<Animation>();
-	auto sData = loader.getStatic();
 	Deserializer s(sData->getSpan());
 	s >> *result;
 	result->loadDependencies(loader);

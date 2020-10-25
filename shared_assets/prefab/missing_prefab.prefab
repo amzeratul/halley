@@ -1,0 +1,5 @@
+name: Missing Prefab
+uuid: 4802889b-9abf-4012-ba12-68df87c2c74e
+components:
+  - Transform2D:
+      position: [0, 0]

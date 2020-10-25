@@ -70,7 +70,11 @@ void AudioEvent::reload(Resource&& resource)
 
 std::shared_ptr<AudioEvent> AudioEvent::loadResource(ResourceLoader& loader)
 {
-	auto staticData = loader.getStatic();
+	auto staticData = loader.getStatic(false);
+	if (!staticData) {
+		return {};
+	}
+	
 	Deserializer s(staticData->getSpan());
 	auto event = std::make_shared<AudioEvent>();
 	s >> *event;

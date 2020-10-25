@@ -960,9 +960,12 @@ String ConfigObserver::getAssetId() const
 
 std::unique_ptr<Prefab> Prefab::loadResource(ResourceLoader& loader)
 {
+	auto data = loader.getStatic(false);
+	if (!data) {
+		return {};
+	}
+	
 	auto prefab = std::make_unique<Prefab>();
-
-	auto data = loader.getStatic();
 	Deserializer::fromBytes(*prefab, data->getSpan());
 
 	return prefab;
@@ -981,8 +984,12 @@ void Prefab::makeDefault()
 
 std::unique_ptr<Scene> Scene::loadResource(ResourceLoader& loader)
 {
+	auto data = loader.getStatic(false);
+	if (!data) {
+		return {};
+	}
+	
 	auto scene = std::make_unique<Scene>();
-	auto data = loader.getStatic();
 	Deserializer::fromBytes(*scene, data->getSpan());
 
 	return scene;

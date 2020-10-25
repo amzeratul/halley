@@ -36,10 +36,9 @@ namespace Halley
 			void deserialize(Deserializer& deserializer);
 		};
 
+		Font() = default;
 		Font(String name, String imageName, float ascender, float height, float sizePt, float replacementScale, Vector2i imageSize);
 		Font(String name, String imageName, float ascender, float height, float sizePt, float replacementScale, Vector2i imageSize, float distanceFieldSmoothRadius, std::vector<String> fallback);
-
-		explicit Font(ResourceLoader& loader);
 
 		static std::unique_ptr<Font> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Font; }

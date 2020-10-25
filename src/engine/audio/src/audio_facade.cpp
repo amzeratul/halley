@@ -168,7 +168,7 @@ AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
 			engine->postEvent(id, *event, position);
 		});
 	} else {
-		Logger::logWarning("Unknown audio event: \"" + name + "\"");
+		Logger::logError("Unknown audio event: \"" + name + "\"");
 	}
 
 	playingSounds.push_back(id);

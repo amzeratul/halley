@@ -37,48 +37,17 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<Prefab>();
 	resources.init<Scene>();
 
-	/*
-	resources.of<SpriteResource>().setResourceEnumerator([&] () -> std::vector<String>
-	{
-		std::vector<String> result;
-		auto& ss = resources.of<SpriteSheet>();
-		for (auto& sheetName: ss.enumerate()) {
-			auto sheet = ss.get(sheetName);
-			for (auto& spriteName: sheet->getSpriteNames()) {
-				if (spriteName.startsWith(":img:")) {
-					result.push_back(spriteName.mid(5));
-				}
-			}
-		}
-		return result;
-	});
+	resources.setFallback<Animation>("missing_image");
+	resources.setFallback<SpriteSheet>("missing_image");
+	resources.setFallback<SpriteResource>("missing_image");
+	resources.setFallback<Texture>("missing_image");
 
-	resources.of<SpriteResource>().setResourceLoader([&] (const String& name, ResourceLoadPriority) -> std::shared_ptr<Resource>
-	{
-		auto& sprites = resources.of<SpriteResource>();
-		const String targetName = ":img:" + name;
+	resources.setFallback<MaterialDefinition>("Halley/Sprite");
 
-		std::shared_ptr<Resource> result;
+	resources.setFallback<Font>("Ubuntu Bold");
 
-		auto& ss = resources.of<SpriteSheet>();
-		for (auto& sheetName: ss.enumerate()) {
-			auto sheet = ss.get(sheetName);
-			for (auto& spriteName: sheet->getSpriteNames()) {
-				if (spriteName.startsWith(":img:")) {
-					auto res = std::make_shared<SpriteResource>(sheet, sheet->getIndex(spriteName));
-					sprites.setResource(0, spriteName.mid(5), res);
+	resources.setFallback<AudioEvent>("missing_audio_event");
 
-					if (spriteName == targetName) {
-						result = res;
-					}
-				}
-			}
-		}
-
-		return result;
-	});
-	*/
-
-	resources.setFallback<Texture>("whitebox.png");
-	resources.setFallback<SpriteResource>("whitebox.png");
+	resources.setFallback<Prefab>("missing_prefab");
+	resources.setFallback<Scene>("missing_scene");
 }

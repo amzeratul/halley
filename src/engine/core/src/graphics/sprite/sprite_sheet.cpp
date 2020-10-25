@@ -162,7 +162,11 @@ std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 {
 	auto result = std::make_unique<SpriteSheet>();
 	result->resources = &loader.getResources();
-	auto data = loader.getStatic();
+	auto data = loader.getStatic(false);
+	if (!data) {
+		return {};
+	}
+	
 	Deserializer s(data->getSpan(), SerializerOptions(SerializerOptions::maxVersion));
 	result->deserialize(s);
 

@@ -66,21 +66,23 @@ Font::Font(String name, String imageName, float ascender, float height, float si
 {
 }
 
-Font::Font(ResourceLoader& loader)
-{
-	auto data = loader.getStatic();
-	auto ds = Deserializer(data->getSpan());
-	deserialize(ds);
-
-	auto texture = loader.getResources().get<Texture>(imageName);
-	auto matDef = loader.getResources().get<MaterialDefinition>(distanceField ? "Halley/Text" : "Halley/Sprite");
-	material = std::make_unique<Material>(matDef);
-	material->set("tex0", texture);
-}
-
 std::unique_ptr<Font> Font::loadResource(ResourceLoader& loader)
 {
-	return std::make_unique<Font>(loader);
+	auto data = loader.getStatic(false);
+	if (!data) {
+		return {};
+	}
+
+	auto font = std::make_unique<Font>();
+	auto ds = Deserializer(data->getSpan());
+	font->deserialize(ds);
+
+	auto texture = loader.getResources().get<Texture>(font->imageName);
+	auto matDef = loader.getResources().get<MaterialDefinition>(font->distanceField ? "Halley/Text" : "Halley/Sprite");
+	font->material = std::make_unique<Material>(matDef);
+	font->material->set("tex0", texture);
+
+	return font;
 }
 
 void Font::reload(Resource&& resource)
