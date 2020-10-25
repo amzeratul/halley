@@ -196,6 +196,11 @@ void SpriteSheet::removeSprite(Sprite* sprite) const
 {
 	spriteRefs.erase(sprite);
 }
+
+std::size_t SpriteSheet::SpritePointerHasher::operator()(Sprite* ptr) const noexcept
+{
+	return reinterpret_cast<size_t>(ptr) / sizeof(Sprite);
+}
 #endif
 
 SpriteResource::SpriteResource()

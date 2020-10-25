@@ -113,7 +113,12 @@ namespace Halley
 		void removeSprite(Sprite* sprite) const;
 
 	private:
-		mutable std::map<Sprite*, uint32_t> spriteRefs;
+		class SpritePointerHasher {
+		public:
+			std::size_t operator()(Sprite* ptr) const noexcept;
+		};
+		
+		mutable std::unordered_map<Sprite*, uint32_t, SpritePointerHasher> spriteRefs;
 #endif
 	};
 

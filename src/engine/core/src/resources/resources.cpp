@@ -57,9 +57,6 @@ void Resources::reloadAssets(const std::map<AssetType, std::vector<String>>& byT
 			resources.reload(asset);
 		}
 
-		if (curType.first == AssetType::SpriteSheet) {
-			ofType(AssetType::Sprite).unloadAll();
-		}
 		if (curType.first == AssetType::AudioClip) {
 			api->audio->resumePlayback();
 		}

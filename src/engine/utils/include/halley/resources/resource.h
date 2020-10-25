@@ -47,16 +47,16 @@ namespace Halley
 		ConfigFile,
 		Texture,
 		Shader,
-		MaterialDefinition,
+		MaterialDefinition, // Depends on Texture and Shader
 		Image,
-		Sprite,
-		SpriteSheet,
-		Animation,
-		Font,
+		SpriteSheet, // Depends on MaterialDefinition
+		Sprite, // Depends on SpriteSheet
+		Animation, // Depends on SpriteSheet
+		Font, // Depends on SpriteSheet
 		AudioClip,
-		AudioEvent,
+		AudioEvent, // Depends on AudioClip
 		Mesh,
-		MeshAnimation,
+		MeshAnimation, // Depends on Mesh
 		VariableTable,
 		Prefab,
 		Scene
@@ -73,8 +73,8 @@ namespace Halley
 				"shader",
 				"materialDefinition",
 				"image",
-				"sprite",
 				"spriteSheet",
+				"sprite",
 				"animation",
 				"font",
 				"audioClip",
