@@ -2,6 +2,9 @@
 
 
 #include "console_window.h"
+#include "ecs_window.h"
+#include "editor_settings_window.h"
+#include "game_properties_window.h"
 #include "taskbar.h"
 #include "halley/tools/project/project.h"
 #include "src/editor_root_stage.h"
@@ -89,11 +92,17 @@ void ProjectWindow::makePagedPane()
 	assetEditorWindow = std::make_shared<AssetsBrowser>(factory, project, *this);
 	sceneEditorTabs = std::make_shared<SceneEditorTabs>(factory, project, api);
 	consoleWindow = std::make_shared<ConsoleWindow>(factory);
+	auto settings = std::make_shared<EditorSettingsWindow>(factory);
+	auto properties = std::make_shared<GamePropertiesWindow>(factory);
+	auto ecs = std::make_shared<ECSWindow>(factory);
 	
 	pagedPane = std::make_shared<UIPagedPane>("pages", numOfStandardTools);
 	pagedPane->getPage(static_cast<int>(EditorTabs::Assets))->add(assetEditorWindow, 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(static_cast<int>(EditorTabs::Scene))->add(sceneEditorTabs, 1, Vector4f(8, 8, 8, 8));
-	pagedPane->getPage(static_cast<int>(EditorTabs::Settings))->add(consoleWindow, 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(static_cast<int>(EditorTabs::ECS))->add(ecs, 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(static_cast<int>(EditorTabs::Remotes))->add(consoleWindow, 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(static_cast<int>(EditorTabs::Properties))->add(properties, 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(static_cast<int>(EditorTabs::Settings))->add(settings, 1, Vector4f(8, 8, 8, 8));
 
 	uiMid->add(pagedPane, 1);
 }

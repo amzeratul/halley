@@ -1,0 +1,5 @@
+---
+widget: { class: widget }
+sizer: { type: vertical }
+children: []
+...

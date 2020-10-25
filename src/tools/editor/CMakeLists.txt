@@ -39,7 +39,10 @@ set (editor_sources
 	"src/scene/gizmos/vertex_gizmo.cpp"
 
 	"src/ui/console_window.cpp"
+	"src/ui/ecs_window.cpp"
+	"src/ui/editor_settings_window.cpp"
 	"src/ui/editor_ui_factory.cpp"
+	"src/ui/game_properties_window.cpp"
 	"src/ui/load_project_window.cpp"
 	"src/ui/project_window.cpp"
 	"src/ui/scroll_background.cpp"
@@ -83,7 +86,10 @@ set (editor_headers
 	"src/scene/gizmos/vertex_gizmo.h"
 	
 	"src/ui/console_window.h"
+	"src/ui/ecs_window.h"
+	"src/ui/editor_settings_window.h"
 	"src/ui/editor_ui_factory.h"
+	"src/ui/game_properties_window.h"
 	"src/ui/load_project_window.h"
 	"src/ui/project_window.h"
 	"src/ui/scroll_background.h"
