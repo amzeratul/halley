@@ -176,6 +176,16 @@ void SpriteSheet::loadTexture(Resources& resources) const
 	texture = resources.get<Texture>(textureName);
 }
 
+void SpriteSheet::assignIds()
+{
+#ifdef ENABLE_HOT_RELOAD
+	for (uint32_t idx = 0; idx < sprites.size(); ++idx) {
+		sprites[idx].parent = this;
+		sprites[idx].idx = idx;
+	}
+#endif	
+}
+
 #ifdef ENABLE_HOT_RELOAD
 void SpriteSheet::addSprite(Sprite* sprite, uint32_t idx) const
 {
@@ -271,11 +281,7 @@ void SpriteSheet::reload(Resource&& resource)
 		}
 	}
 
-	// Assign indices to all sprites
-	for (uint32_t idx = 0; idx < sprites.size(); ++idx) {
-		sprites[idx].parent = this;
-		sprites[idx].idx = idx;
-	}
+	assignIds();
 
 	// Refresh sprite refs
 	for (auto& sprite: spriteRefs) {
@@ -321,10 +327,7 @@ void SpriteSheet::deserialize(Deserializer& s)
 		s >> defaultMaterialName;
 	}
 
-	for (uint32_t idx = 0; idx < sprites.size(); ++idx) {
-		sprites[idx].parent = this;
-		sprites[idx].idx = idx;
-	}
+	assignIds();
 }
 
 void SpriteSheet::loadJson(gsl::span<const gsl::byte> data)

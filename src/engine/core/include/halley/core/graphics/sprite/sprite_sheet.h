@@ -105,6 +105,7 @@ namespace Halley
 		mutable HashMap<String, std::weak_ptr<Material>> materials;
 
 		void loadTexture(Resources& resources) const;
+		void assignIds();
 
 #ifdef ENABLE_HOT_RELOAD
 	public:
