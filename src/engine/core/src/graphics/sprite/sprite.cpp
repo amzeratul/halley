@@ -361,10 +361,6 @@ Sprite& Sprite::setImage(Resources& resources, const String& imageName, String m
 {
 	Expects (!imageName.isEmpty());
 
-	if (imageName == "effects/vfx/grassbit.png") {
-		Logger::logInfo("Sup");
-	}
-		
 	const auto sprite = resources.get<SpriteResource>(imageName);
 
 	if (materialName == "") {
