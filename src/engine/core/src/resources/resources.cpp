@@ -53,7 +53,7 @@ void Resources::reloadAssets(const std::map<AssetType, std::vector<String>>& byT
 	for (auto& curType: byType) {
 		auto& resources = ofType(curType.first);
 		for (auto& asset: curType.second) {
-			Logger::logInfo("Reloading " + curType.first + ": " + asset);
+			//Logger::logInfo("Reloading " + curType.first + ": " + asset);
 			resources.reload(asset);
 		}
 

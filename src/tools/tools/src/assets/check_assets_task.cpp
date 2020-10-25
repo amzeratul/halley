@@ -283,7 +283,7 @@ bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, std::map<String, I
 
 void CheckAssetsTask::requestRefreshAsset(Path path)
 {
-	{
+	if (false) {
 		std::unique_lock<std::mutex> lock(mutex);
 		inbox.push_back(std::move(path));
 	}
