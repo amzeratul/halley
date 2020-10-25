@@ -119,8 +119,13 @@ void UIFactory::loadUI(UIWidget& target, const String& configName)
 
 void UIFactory::loadUI(UIWidget& target, const ConfigFile& configFile)
 {
-	target.add(makeUIFromNode(configFile.getRoot()), 1);
-	target.onMakeUI();
+	try {
+		target.add(makeUIFromNode(configFile.getRoot()), 1);
+		target.onMakeUI();
+	} catch (const std::exception& e) {
+		Logger::logException(e);
+	}
+	
 	target.addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ConfigObserver(configFile)));
 }
 

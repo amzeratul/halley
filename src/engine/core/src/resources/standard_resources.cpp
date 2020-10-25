@@ -46,6 +46,8 @@ void StandardResources::initialize(Resources& resources)
 
 	resources.setFallback<Font>("Ubuntu Bold");
 
+	resources.setFallback<ConfigFile>("missing_config");
+	
 	resources.setFallback<AudioEvent>("missing_audio_event");
 
 	resources.setFallback<Prefab>("missing_prefab");

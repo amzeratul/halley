@@ -892,9 +892,12 @@ void ConfigFile::deserialize(Deserializer& s)
 
 std::unique_ptr<ConfigFile> ConfigFile::loadResource(ResourceLoader& loader)
 {
+	auto data = loader.getStatic(false);
+	if (!data) {
+		return {};
+	}
+	
 	auto config = std::make_unique<ConfigFile>();
-
-	auto data = loader.getStatic();
 	Deserializer s(data->getSpan());
 	s >> *config;
 
