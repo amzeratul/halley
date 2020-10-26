@@ -354,7 +354,12 @@ void EntityFactory::doUpdateEntityTree(EntityRef& entity, const ConfigNode& tree
 	nodeUUIDs.reserve(nNodes);
 	std::vector<char> nodeConsumed(nNodes, 0);
 	for (size_t i = 0; i < nNodes; ++i) {
-		nodeUUIDs.emplace_back(getUUID(childNodes[i]["uuid"]).toString());
+		if (childNodes[i].hasKey("prefabUUID")) {
+			nodeUUIDs.emplace_back(getUUID(childNodes[i]["prefabUUID"]).toString());
+		}
+		else {
+			nodeUUIDs.emplace_back(getUUID(childNodes[i]["uuid"]).toString());
+		}
 	}
 
 	// Update the existing children
