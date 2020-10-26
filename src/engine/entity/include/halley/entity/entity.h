@@ -422,7 +422,7 @@ namespace Halley {
 			return parent != nullptr ? EntityRef(*parent, *world) : std::optional<EntityRef>();
 		}
 
-		void setParent(EntityRef& parent, int childIdx = -1)
+		void setParent(EntityRef& parent, size_t childIdx = -1)
 		{
 			Expects(entity != nullptr);
 			entity->setParent(parent.entity, true, childIdx);
