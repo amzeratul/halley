@@ -473,31 +473,6 @@ Vector2f ConfigNode::asVector2f(Vector2f defaultValue) const
 	}
 }
 
-[[deprecated("Use asVector<String> instead")]]
-std::vector<String> ConfigNode::asStringVector() const
-{
-	if (type == ConfigNodeType::Sequence) {
-		std::vector<String> result;
-		result.reserve(asSequence().size());
-		for (const auto& e: asSequence()) {
-			result.emplace_back(e.asString());
-		}
-		return result;
-	} else {
-		throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to std::vector<String>.", HalleyExceptions::Resources);
-	}
-}
-
-[[deprecated("Use asVector<String> instead")]]
-std::vector<String> ConfigNode::asStringVector(const std::vector<String>& defaultValue) const
-{
-	if (type == ConfigNodeType::Sequence) {
-		return asStringVector();
-	} else {
-		return defaultValue;
-	}
-}
-
 String ConfigNode::asString() const
 {
 	if (type == ConfigNodeType::String) {

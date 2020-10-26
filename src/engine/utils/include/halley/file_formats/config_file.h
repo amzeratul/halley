@@ -126,7 +126,6 @@ namespace Halley
 		Range<float> asFloatRange() const;
 		String asString() const;
 		const Bytes& asBytes() const;
-		std::vector<String> asStringVector() const;
 
 		int asInt(int defaultValue) const;
 		float asFloat(float defaultValue) const;
@@ -134,7 +133,6 @@ namespace Halley
 		String asString(const String& defaultValue) const;
 		Vector2i asVector2i(Vector2i defaultValue) const;
 		Vector2f asVector2f(Vector2f defaultValue) const;
-		std::vector<String> asStringVector(const std::vector<String>& defaultValue) const;
 
 		template <typename T>
 		std::vector<T> asVector() const
