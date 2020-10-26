@@ -95,9 +95,13 @@ ComponentDeleterTable& Entity::getComponentDeleterTable(World& world)
 
 void Entity::setParent(Entity* newParent, bool propagate, int childIdx)
 {
+	Expects(isAlive());
+	
 	if (parent != newParent) {
 		// Unparent from old
 		if (parent) {
+			Expects(parent->isAlive());
+			
 			auto& siblings = parent->children;
 			siblings.erase(std::remove(siblings.begin(), siblings.end(), this), siblings.end());
 			parent->propagateChildrenChange();
