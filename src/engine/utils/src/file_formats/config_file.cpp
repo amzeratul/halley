@@ -473,6 +473,8 @@ Vector2f ConfigNode::asVector2f(Vector2f defaultValue) const
 	}
 }
 
+// TODO: Replace asStringVector calls with asVector<String>
+
 std::vector<String> ConfigNode::asStringVector() const
 {
 	if (type == ConfigNodeType::Sequence) {
@@ -815,6 +817,56 @@ String ConfigNode::backTrackFullNodeName() const
 	} else {
 		return "~";
 	}
+}
+
+int ConfigNode::convertTo(Tag<int> tag) const
+{
+	return asInt();
+}
+
+float ConfigNode::convertTo(Tag<float> tag) const
+{
+	return asFloat();
+}
+
+bool ConfigNode::convertTo(Tag<bool> tag) const
+{
+	return asBool();
+}
+
+Vector2i ConfigNode::convertTo(Tag<Vector2i> tag) const
+{
+	return asVector2i();
+}
+
+Vector2f ConfigNode::convertTo(Tag<Vector2f> tag) const
+{
+	return asVector2f();
+}
+
+Vector4i ConfigNode::convertTo(Tag<Vector4i> tag) const
+{
+	return asVector4i();
+}
+
+Vector4f ConfigNode::convertTo(Tag<Vector4f> tag) const
+{
+	return asVector4f();
+}
+
+Range<float> ConfigNode::convertTo(Tag<Range<float>> tag) const
+{
+	return asFloatRange();
+}
+
+String ConfigNode::convertTo(Tag<String> tag) const
+{
+	return asString();
+}
+
+const Bytes& ConfigNode::convertTo(Tag<Bytes&> tag) const
+{
+	return asBytes();
 }
 
 ConfigFile::ConfigFile()

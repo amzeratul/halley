@@ -136,6 +136,33 @@ namespace Halley
 		Vector2f asVector2f(Vector2f defaultValue) const;
 		std::vector<String> asStringVector(const std::vector<String>& defaultValue) const;
 
+		template <typename T>
+		std::vector<T> asVector() const
+		{
+			if (type == ConfigNodeType::Sequence) {
+				std::vector<T> result;
+				result.reserve(asSequence().size());
+				for (const auto& e : asSequence()) {
+					result.emplace_back(e.convertTo(Tag<T>()));
+				}
+				return result;
+			}
+			else {
+				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to std::vector<T>.", HalleyExceptions::Resources);
+			}
+		}
+
+		template <typename T>
+		std::vector<T> asVector(const std::vector<T>& defaultValue) const
+		{
+			if (type == ConfigNodeType::Sequence) {
+				return asVector<T>();
+			}
+			else {
+				return defaultValue;
+			}
+		}
+		
 		const SequenceType& asSequence() const;
 		const MapType& asMap() const;
 		SequenceType& asSequence();
@@ -170,6 +197,9 @@ namespace Halley
 		}
 
 	private:
+		template <typename T>
+		class Tag {};
+		
 		union {
 			void* ptrData;
 			int intData;
@@ -196,6 +226,17 @@ namespace Halley
 
 		String getNodeDebugId() const;
 		String backTrackFullNodeName() const;
+
+		int convertTo(Tag<int> tag) const;
+		float convertTo(Tag<float> tag) const;
+		bool convertTo(Tag<bool> tag) const;
+		Vector2i convertTo(Tag<Vector2i> tag) const;
+		Vector2f convertTo(Tag<Vector2f> tag) const;
+		Vector4i convertTo(Tag<Vector4i> tag) const;
+		Vector4f convertTo(Tag<Vector4f> tag) const;
+		Range<float> convertTo(Tag<Range<float>> tag) const;
+		String convertTo(Tag<String> tag) const;
+		const Bytes& convertTo(Tag<Bytes&> tag) const;
 	};
 
 	class ConfigFile : public Resource
