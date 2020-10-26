@@ -57,7 +57,7 @@ void EditorRootStage::onVariableUpdate(Time time)
 	auto& prefs = editor.getPreferences();
 	prefs.updateWindowDefinition(getVideoAPI().getWindow());
 	if (prefs.isDirty()) {
-		prefs.saveToFile();
+		prefs.saveToFile(getSystemAPI());
 	}
 
 	if (project) {

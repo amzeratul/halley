@@ -15,6 +15,7 @@ namespace Halley
 		
 		std::unique_ptr<Project> loadProject(const Path& path) const;
 		void selectPlugins(Project& project) const;
+		const std::vector<String>& getKnownPlatforms() const;
 
 	private:
 		const HalleyStatics& statics;

@@ -14,7 +14,7 @@
 
 using namespace Halley;
 
-ImportAssetsTask::ImportAssetsTask(String taskName, ImportAssetsDatabase& db, const AssetImporter& importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry> files, std::vector<String> deletedAssets, Project& project, bool packAfter)
+ImportAssetsTask::ImportAssetsTask(String taskName, ImportAssetsDatabase& db, std::shared_ptr<AssetImporter> importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry> files, std::vector<String> deletedAssets, Project& project, bool packAfter)
 	: EditorTask(taskName, true, true)
 	, db(db)
 	, importer(importer)
@@ -99,7 +99,7 @@ bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)
 	Logger::logInfo("Importing " + asset.assetId);
 	Stopwatch timer;
 
-	auto result = importAsset(asset, [&] (const Path& path) { return db.getMetadata(path); }, importer, assetsPath, [=] (float, const String&) -> bool { return !isCancelled(); });
+	auto result = importAsset(asset, [&] (const Path& path) { return db.getMetadata(path); }, *importer, assetsPath, [=] (float, const String&) -> bool { return !isCancelled(); });
 	
 	if (!result.success) {
 		addError("\"" + asset.assetId + "\" - " + result.errorMsg);

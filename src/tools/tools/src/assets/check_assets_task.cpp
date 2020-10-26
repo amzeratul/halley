@@ -41,6 +41,8 @@ void CheckAssetsTask::run()
 	while (!isCancelled()) {
 		bool importing = false;
 
+		projectAssetImporter = project.getAssetImporter();
+
 		decltype(pending) curPending;
 		{
 			std::unique_lock<std::mutex> lock(mutex);
@@ -137,7 +139,7 @@ bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, Impo
 	}
 
 	// Figure out the right importer and assetId for this file
-	auto& assetImporter = isCodegen ? project.getAssetImporter().getImporters(ImportAssetType::Codegen).at(0).get() : project.getAssetImporter().getRootImporter(filePath);
+	auto& assetImporter = isCodegen ? projectAssetImporter->getImporters(ImportAssetType::Codegen).at(0).get() : projectAssetImporter->getRootImporter(filePath);
 	if (assetImporter.getType() == ImportAssetType::Skip) {
 		return false;
 	}
@@ -275,7 +277,7 @@ bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, std::map<String, I
 	auto toImport = filterNeedsImporting(db, assets);
 	if (!toImport.empty() || !deletedAssets.empty()) {
 		Logger::logInfo("Assets to be imported: " + toString(toImport.size()));
-		addPendingTask(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(taskName, db, project.getAssetImporter(), dstPath, std::move(toImport), std::move(deletedAssets), project, packAfter)));
+		addPendingTask(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(taskName, db, projectAssetImporter, dstPath, std::move(toImport), std::move(deletedAssets), project, packAfter)));
 		return true;
 	}
 	return false;

@@ -1,5 +1,30 @@
 ---
 widget: { class: widget }
 sizer: { type: vertical }
-children: []
+children:
+- widget: { class: image, image: "halley_ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#9C5BB5", size: [400, 300] }
+  sizer: { type: vertical }
+  fill: centre
+  proportion: 1
+  children:
+  - sizer: { type: horizontal }
+    children:
+    - widget: { class: label, text: "Halley Editor Settings" }
+      fill: centre
+      proportion: 1
+  - widget: { id: fields, class: widget }
+    proportion: 1
+    border: [1, 4, 1, 1]
+    sizer: { type: grid, columns: 2, columnProportions: [1, 1] }
+    children:
+    - widget: { class: label, text: "Platforms:" }
+    - widget: { id: platforms, class: widget }
+      sizer: { type: grid, columns: 2 }
+      children: []
+  - sizer: { type: horizontal }
+    children:
+    - stretchSpacer: {}
+      proportion: 1
+    - widget: { id: save, class: button, text: Save, size: [100, 22] }
+    - widget: { id: cancel, class: button, text: Cancel, size: [100, 22] }
 ...

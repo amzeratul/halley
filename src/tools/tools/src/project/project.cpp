@@ -32,7 +32,6 @@ Project::Project(Path projectRootPath, Path halleyRootPath)
 	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getUnpackedAssetsPath(), getUnpackedAssetsPath() / "import.db", getUnpackedAssetsPath() / "assets.db", platforms);
 	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", std::vector<String>{ "" });
 	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", std::vector<String>{ "" });
-	assetImporter = std::make_unique<AssetImporter>(*this, std::vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});
 
 	const auto dllPath = getDLLPath();
 	if (!dllPath.isEmpty()) {
@@ -51,7 +50,10 @@ Project::~Project()
 
 void Project::setPlugins(std::vector<HalleyPluginPtr> plugins)
 {
-	this->plugins = std::move(plugins);
+	if (plugins != this->plugins || !assetImporter) {
+		this->plugins = std::move(plugins);
+		assetImporter = std::make_shared<AssetImporter>(*this, std::vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});
+	}
 }
 
 void Project::update(Time time)
@@ -156,9 +158,9 @@ ECSData& Project::getECSData()
 	return *ecsData;
 }
 
-const AssetImporter& Project::getAssetImporter() const
+const std::shared_ptr<AssetImporter>& Project::getAssetImporter() const
 {
-	return *assetImporter;
+	return assetImporter;
 }
 
 std::vector<std::unique_ptr<IAssetImporter>> Project::getAssetImportersFromPlugins(ImportAssetType type) const

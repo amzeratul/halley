@@ -20,6 +20,8 @@ namespace Halley
 
 	private:
 		Project& project;
+		std::shared_ptr<AssetImporter> projectAssetImporter;
+
 		DirectoryMonitor monitorAssets;
 		DirectoryMonitor monitorAssetsSrc;
 		DirectoryMonitor monitorSharedAssetsSrc;

@@ -23,7 +23,7 @@ namespace Halley
 		};
 		using MetadataFetchCallback = std::function<std::optional<Metadata>(const Path&)>;
 		
-		ImportAssetsTask(String taskName, ImportAssetsDatabase& db, const AssetImporter& importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry> files, std::vector<String> deletedAssets, Project& project, bool packAfter);
+		ImportAssetsTask(String taskName, ImportAssetsDatabase& db, std::shared_ptr<AssetImporter> importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry> files, std::vector<String> deletedAssets, Project& project, bool packAfter);
 
 		static ImportResult importAsset(const ImportAssetsDatabaseEntry& asset, const MetadataFetchCallback& metadataFetcher, const AssetImporter& importer, Path assetsPath, AssetCollector::ProgressReporter progressReporter = {});
 
@@ -32,7 +32,7 @@ namespace Halley
 
 	private:
 		ImportAssetsDatabase& db;
-		const AssetImporter& importer;
+		std::shared_ptr<AssetImporter> importer;
 		Path assetsPath;
 		Project& project;
 		const bool packAfter;

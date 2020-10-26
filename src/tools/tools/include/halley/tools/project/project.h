@@ -65,7 +65,7 @@ namespace Halley
 		ImportAssetsDatabase& getSharedCodegenDatabase() const;
 		ECSData& getECSData();
 
-		const AssetImporter& getAssetImporter() const;
+		const std::shared_ptr<AssetImporter>& getAssetImporter() const;
 		std::vector<std::unique_ptr<IAssetImporter>> getAssetImportersFromPlugins(ImportAssetType type) const;
 
 		void setDevConServer(DevConServer* server);
@@ -128,7 +128,7 @@ namespace Halley
 		std::unique_ptr<ImportAssetsDatabase> importAssetsDatabase;
 		std::unique_ptr<ImportAssetsDatabase> codegenDatabase;
 		std::unique_ptr<ImportAssetsDatabase> sharedCodegenDatabase;
-		std::unique_ptr<AssetImporter> assetImporter;
+		std::shared_ptr<AssetImporter> assetImporter;
 		std::unique_ptr<ProjectProperties> properties;
 		std::unique_ptr<ECSData> ecsData;
 

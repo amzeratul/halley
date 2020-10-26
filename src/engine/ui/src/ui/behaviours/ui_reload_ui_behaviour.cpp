@@ -16,14 +16,12 @@ void UIReloadUIBehaviour::update(Time time)
 	if (observer.needsUpdate()) {
 		observer.update();
 
-		std::shared_ptr<UIWidget> ui;
-
 		try {
-			ui = factory.makeUIFromNode(observer.getRoot());
+			auto ui = factory.makeUIFromNode(observer.getRoot());
 
 			// The above might throw, don't clear until after we know it hasn't
 			getWidget()->clear();
-			getWidget()->add(ui, 1);
+			getWidget()->add(std::move(ui), 1);
 			getWidget()->onMakeUI();
 		} catch (const std::exception& e) {
 			Logger::logException(e);

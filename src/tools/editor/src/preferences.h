@@ -9,14 +9,15 @@ namespace Halley
 	class Preferences
 	{
 	public:
-		explicit Preferences(SystemAPI& system, String editorVersion);
+		Preferences();
+		void setEditorVersion(String editorVersion);
 
 		ConfigNode save() const;
 		void load(const ConfigNode& config);
 
 		bool isDirty() const;
-		void saveToFile() const;
-		void loadFromFile();
+		void saveToFile(SystemAPI& system) const;
+		void loadFromFile(SystemAPI& system);
 
 		void addRecent(Path path);
 		const std::vector<String>& getRecents() const;
@@ -25,10 +26,12 @@ namespace Halley
 		void updateWindowDefinition(const Window& window);
 
 		const std::vector<String>& getDisabledPlatforms() const;
+		bool isPlatformDisabled(const String& name) const;
+		void setPlatformDisabled(const String& name, bool disabled);
+
+		void loadEditorPreferences(const Preferences& preferences);
 
 	private:
-		SystemAPI& system;
-
 		mutable bool dirty = false;
 
 		std::vector<String> recents;

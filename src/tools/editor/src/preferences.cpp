@@ -1,25 +1,21 @@
 #include "preferences.h"
 using namespace Halley;
 
-Preferences::Preferences(SystemAPI& system, String editorVersion) 
-	: system(system)
-	, editorVersion(std::move(editorVersion))
-	, windowSize(Vector2i(1280, 720))
+Preferences::Preferences() 
+	: windowSize(Vector2i(1280, 720))
 {
-	loadFromFile();
+}
+
+void Preferences::setEditorVersion(String editorVersion)
+{
+	this->editorVersion = std::move(editorVersion);
 }
 
 ConfigNode Preferences::save() const
 {
 	ConfigNode::MapType root;
 
-	{
-		ConfigNode::SequenceType recentsNode;
-		for (auto& r: recents) {
-			recentsNode.push_back(ConfigNode(String(r)));
-		}
-		root["recents"] = std::move(recentsNode);
-	}
+	root["recents"] = ConfigNode(recents);
 
 	{
 		ConfigNode::MapType windowNode;
@@ -31,6 +27,8 @@ ConfigNode Preferences::save() const
 		root["window"] = std::move(windowNode);
 	}
 
+	root["disabledPlatforms"] = ConfigNode(disabledPlatforms);
+
 	return root;
 }
 
@@ -41,11 +39,7 @@ void Preferences::load(const ConfigNode& root)
 	windowSize = Vector2i(1280, 720);
 	windowState = WindowState::Normal;
 
-	if (root.hasKey("recents")) {
-		for (auto& r: root["recents"]) {
-			recents.push_back(r.asString());
-		}
-	}
+	recents = root["recents"].asVector<String>({});
 	if (root.hasKey("window")) {
 		auto& windowNode = root["window"];
 		if (windowNode.hasKey("position")) {
@@ -54,6 +48,7 @@ void Preferences::load(const ConfigNode& root)
 		windowSize = windowNode["size"].asVector2i();
 		windowState = WindowState(windowNode["state"].asInt());
 	}
+	disabledPlatforms = root["disabledPlatforms"].asVector<String>({});
 }
 
 bool Preferences::isDirty() const
@@ -61,7 +56,7 @@ bool Preferences::isDirty() const
 	return dirty;
 }
 
-void Preferences::saveToFile() const
+void Preferences::saveToFile(SystemAPI& system) const
 {
 	ConfigFile file;
 	file.getRoot() = save();
@@ -69,7 +64,7 @@ void Preferences::saveToFile() const
 	dirty = false;
 }
 
-void Preferences::loadFromFile()
+void Preferences::loadFromFile(SystemAPI& system)
 {
 	auto data = system.getStorageContainer(SaveDataType::SaveLocal)->getData("preferences");
 	if (!data.empty()) {
@@ -118,4 +113,31 @@ void Preferences::updateWindowDefinition(const Window& window)
 const std::vector<String>& Preferences::getDisabledPlatforms() const
 {
 	return disabledPlatforms;
+}
+
+bool Preferences::isPlatformDisabled(const String& name) const
+{
+	return std::find(disabledPlatforms.begin(), disabledPlatforms.end(), name) != disabledPlatforms.end();
+}
+
+void Preferences::setPlatformDisabled(const String& name, bool disabled)
+{
+	dirty = true;
+	
+	const auto iter = std::find(disabledPlatforms.begin(), disabledPlatforms.end(), name);
+	const bool curDisabled = iter != disabledPlatforms.end();
+	
+	if (curDisabled != disabled) {
+		if (disabled) {
+			disabledPlatforms.push_back(name);
+		} else {
+			disabledPlatforms.erase(iter);
+		}
+	}
+}
+
+void Preferences::loadEditorPreferences(const Preferences& preferences)
+{
+	dirty = true;
+	disabledPlatforms = preferences.disabledPlatforms;
 }

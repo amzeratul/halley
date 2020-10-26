@@ -37,6 +37,11 @@ void ProjectLoader::selectPlugins(Project& project) const
 	project.setPlugins(getPlugins(platforms));
 }
 
+const std::vector<String>& ProjectLoader::getKnownPlatforms() const
+{
+	return knownPlatforms;
+}
+
 static String getDLLExtension()
 {
 #if defined (_WIN32)
@@ -51,6 +56,7 @@ static String getDLLExtension()
 void ProjectLoader::loadPlugins()
 {
 	knownPlatforms.clear();
+	//knownPlatforms.push_back("pc");
 
 	// Look for plugins
 	auto pluginPath = halleyPath / "plugins";
