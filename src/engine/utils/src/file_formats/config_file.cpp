@@ -473,8 +473,7 @@ Vector2f ConfigNode::asVector2f(Vector2f defaultValue) const
 	}
 }
 
-// TODO: Replace asStringVector calls with asVector<String>
-
+[[deprecated("Use asVector<String> instead")]]
 std::vector<String> ConfigNode::asStringVector() const
 {
 	if (type == ConfigNodeType::Sequence) {
@@ -489,6 +488,7 @@ std::vector<String> ConfigNode::asStringVector() const
 	}
 }
 
+[[deprecated("Use asVector<String> instead")]]
 std::vector<String> ConfigNode::asStringVector(const std::vector<String>& defaultValue) const
 {
 	if (type == ConfigNodeType::Sequence) {

@@ -146,8 +146,7 @@ namespace Halley
 					result.emplace_back(e.convertTo(Tag<T>()));
 				}
 				return result;
-			}
-			else {
+			} else {
 				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to std::vector<T>.", HalleyExceptions::Resources);
 			}
 		}
@@ -157,8 +156,7 @@ namespace Halley
 		{
 			if (type == ConfigNodeType::Sequence) {
 				return asVector<T>();
-			}
-			else {
+			} else {
 				return defaultValue;
 			}
 		}
