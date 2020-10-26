@@ -93,7 +93,7 @@ ComponentDeleterTable& Entity::getComponentDeleterTable(World& world)
 	return world.getComponentDeleterTable();
 }
 
-void Entity::setParent(Entity* newParent, bool propagate, int childIdx)
+void Entity::setParent(Entity* newParent, bool propagate, size_t childIdx)
 {
 	Expects(isAlive());
 	
@@ -115,7 +115,7 @@ void Entity::setParent(Entity* newParent, bool propagate, int childIdx)
 				worldPartition = newParent->worldPartition;				
 				propagateChildWorldPartition(worldPartition);
 			}
-			if (childIdx == -1 || childIdx >= parent->children.size()) {
+			if (childIdx >= parent->children.size()) {
 				parent->children.push_back(this);
 			}
 			else {

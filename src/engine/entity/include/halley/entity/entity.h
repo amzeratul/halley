@@ -198,7 +198,7 @@ namespace Halley {
 		ComponentDeleterTable& getComponentDeleterTable(World& world);
 
 		Entity* getParent() const { return parent; }
-		void setParent(Entity* parent, bool propagate = true, int childIdx = -1);
+		void setParent(Entity* parent, bool propagate = true, size_t childIdx = -1);
 		const std::vector<Entity*>& getChildren() const { return children; }
 		void addChild(Entity& child);
 		void detachChildren();
