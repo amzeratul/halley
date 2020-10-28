@@ -23,12 +23,15 @@ namespace Halley {
 		Float,
 		Int2,
 		Float2,
-		Bytes
+		Bytes,
+		Noop, // For delta coding
+		Idx, // For delta coding
+		Del // For delta coding
 	};
 
 	template <>
 	struct EnumNames<ConfigNodeType> {
-		constexpr std::array<const char*, 9> operator()() const {
+		constexpr std::array<const char*, 11> operator()() const {
 			return{{
 				"undefined",
 				"string",
@@ -38,7 +41,10 @@ namespace Halley {
 				"float",
 				"int2",
 				"float2",
-				"bytes"
+				"bytes",
+				"noop",
+				"idx"
+				"del"
 			}};
 		}
 	};
@@ -106,6 +112,9 @@ namespace Halley {
 			}
 			return *this = seq;
 		}
+
+		bool operator==(const ConfigNode& other) const;
+		bool operator!=(const ConfigNode& other) const;
 
 		ConfigNodeType getType() const;
 
@@ -188,9 +197,21 @@ namespace Halley {
 			Expects(intData != 0xDDDDDDDD);
 		}
 
+		static ConfigNode createDelta(const ConfigNode& from, const ConfigNode& to);
+		void applyDelta(const ConfigNode& delta);
+
 	private:
 		template <typename T>
 		class Tag {};
+
+		struct NoopType {};
+		struct DelType {};
+		struct IdxType {
+			int start;
+			int len;
+			IdxType() = default;
+			IdxType(int start, int len) : start(start), len(len) {}
+		};
 		
 		union {
 			void* ptrData;
@@ -216,6 +237,13 @@ namespace Halley {
 			*this = std::move(v);
 		}
 
+		explicit ConfigNode(NoopType value);
+		explicit ConfigNode(DelType value);
+		explicit ConfigNode(IdxType value);
+		ConfigNode& operator=(NoopType value);
+		ConfigNode& operator=(DelType value);
+		ConfigNode& operator=(IdxType value);
+
 		String getNodeDebugId() const;
 		String backTrackFullNodeName() const;
 
@@ -229,5 +257,8 @@ namespace Halley {
 		Range<float> convertTo(Tag<Range<float>> tag) const;
 		String convertTo(Tag<String> tag) const;
 		const Bytes& convertTo(Tag<Bytes&> tag) const;
+
+		static ConfigNode createMapDelta(const ConfigNode& from, const ConfigNode& to);
+		static ConfigNode createSequenceDelta(const ConfigNode& from, const ConfigNode& to);
 	};
 }

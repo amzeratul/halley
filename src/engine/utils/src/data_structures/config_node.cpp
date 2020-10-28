@@ -97,6 +97,21 @@ ConfigNode::ConfigNode(Bytes value)
 	operator=(std::move(value));
 }
 
+ConfigNode::ConfigNode(NoopType value)
+{
+	operator=(value);
+}
+
+ConfigNode::ConfigNode(DelType value)
+{
+	operator=(value);
+}
+
+ConfigNode::ConfigNode(IdxType value)
+{
+	operator=(value);
+}
+
 void ConfigNode::removeKey(const String& key)
 {
 	asMap().erase(key);
@@ -175,6 +190,40 @@ ConfigNode& ConfigNode::operator=(const char* value)
 	return *this;
 }
 
+bool ConfigNode::operator==(const ConfigNode& other) const
+{
+	if (type != other.type) {
+		return false;
+	}
+	
+	switch (type) {
+		case ConfigNodeType::String:
+			return asString() == other.asString();
+		case ConfigNodeType::Sequence:
+			return asSequence() == other.asSequence();
+		case ConfigNodeType::Map:
+			return asMap() == other.asMap();
+		case ConfigNodeType::Int:
+			return asInt() == other.asInt();
+		case ConfigNodeType::Float:
+			return asFloat() == other.asFloat();
+		case ConfigNodeType::Int2:
+		case ConfigNodeType::Idx:
+			return asVector2i() == other.asVector2i();
+		case ConfigNodeType::Float2:
+			return asVector2f() == other.asVector2f();
+		case ConfigNodeType::Bytes:
+			return asBytes() == other.asBytes();
+		default:
+			return true;
+	}
+}
+
+bool ConfigNode::operator!=(const ConfigNode& other) const
+{
+	return !(*this == other);
+}
+
 ConfigNode& ConfigNode::operator=(Bytes value)
 {
 	reset();
@@ -217,6 +266,28 @@ ConfigNode& ConfigNode::operator=(String entry)
 	return *this;
 }
 
+ConfigNode& ConfigNode::operator=(NoopType value)
+{
+	reset();
+	type = ConfigNodeType::Noop;
+	return *this;
+}
+
+ConfigNode& ConfigNode::operator=(DelType value)
+{
+	reset();
+	type = ConfigNodeType::Del;
+	return *this;
+}
+
+ConfigNode& ConfigNode::operator=(IdxType value)
+{
+	reset();
+	type = ConfigNodeType::Idx;
+	vec2iData = Vector2i(value.start, value.len);
+	return *this;
+}
+
 ConfigNodeType ConfigNode::getType() const
 {
 	return type;
@@ -253,6 +324,7 @@ void ConfigNode::serialize(Serializer& s) const
 			break;
 		}
 		case ConfigNodeType::Int2:
+		case ConfigNodeType::Idx:
 		{
 			s << asVector2i();
 			break;
@@ -268,6 +340,8 @@ void ConfigNode::serialize(Serializer& s) const
 			break;
 		}
 		case ConfigNodeType::Undefined:
+		case ConfigNodeType::Del:
+		case ConfigNodeType::Noop:
 		{
 			break;
 		}
@@ -314,6 +388,7 @@ void ConfigNode::deserialize(Deserializer& s)
 			break;
 		}
 		case ConfigNodeType::Int2:
+		case ConfigNodeType::Idx:
 		{
 			deserializeContents<Vector2i>(s);
 			break;
@@ -328,6 +403,8 @@ void ConfigNode::deserialize(Deserializer& s)
 			deserializeContents<Bytes>(s);
 			break;
 		}
+		case ConfigNodeType::Noop:
+		case ConfigNodeType::Del:
 		case ConfigNodeType::Undefined:
 		{
 			break;
@@ -836,4 +913,42 @@ String ConfigNode::convertTo(Tag<String> tag) const
 const Bytes& ConfigNode::convertTo(Tag<Bytes&> tag) const
 {
 	return asBytes();
+}
+
+ConfigNode ConfigNode::createDelta(const ConfigNode& from, const ConfigNode& to)
+{
+	if (from.getType() == to.getType()) {
+		if (from.getType() == ConfigNodeType::Map) {
+			return createMapDelta(from, to);
+		}
+
+		if (from.getType() == ConfigNodeType::Sequence) {
+			return createSequenceDelta(from, to);
+		}
+
+		if (from == to) {
+			// No change
+			return ConfigNode(NoopType());
+		}
+	}
+
+	// No delta coding available, return the outcome
+	return ConfigNode(to);
+}
+
+ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& to)
+{
+	// TODO
+	return ConfigNode();
+}
+
+ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigNode& to)
+{
+	// TODO
+	return ConfigNode();
+}
+
+void ConfigNode::applyDelta(const ConfigNode& delta)
+{
+	// TODO
 }
