@@ -149,11 +149,13 @@ namespace Halley {
 		uint8_t childrenRevision = 0;
 		uint8_t worldPartition = 0;
 		Entity* parent = nullptr;
+
+		FamilyMaskType mask;
+		EntityId entityId;
+
 		Vector<Entity*> children;
 		
 		Vector<MessageEntry> inbox;
-		FamilyMaskType mask;
-		EntityId entityId;
 		String name;
 		UUID instanceUUID;
 		UUID prefabUUID;
