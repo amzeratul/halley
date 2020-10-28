@@ -917,6 +917,22 @@ const Bytes& ConfigNode::convertTo(Tag<Bytes&> tag) const
 	return asBytes();
 }
 
+bool ConfigNode::isNullOrEmpty() const
+{
+	switch (type) {
+	case ConfigNodeType::Undefined:
+		return true;
+	case ConfigNodeType::Map:
+	case ConfigNodeType::DeltaMap:
+		return asMap().empty();
+	case ConfigNodeType::Sequence:
+	case ConfigNodeType::DeltaSequence:
+		return asSequence().empty();
+	default:
+		return false;
+	}
+}
+
 bool ConfigNode::BreadCrumb::hasKeyAt(const String& key, int depth) const
 {
 	if (depth == 0) {
@@ -947,6 +963,10 @@ ConfigNode ConfigNode::createDelta(const ConfigNode& from, const ConfigNode& to,
 ConfigNode ConfigNode::doCreateDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints)
 {
 	if (from.getType() == to.getType()) {
+		if (hints && hints->shouldBypass(breadCrumb)) {
+			return ConfigNode(NoopType());
+		}
+
 		if (from.getType() == ConfigNodeType::Map) {
 			auto delta = createMapDelta(from, to, breadCrumb, hints);
 			delta.auxData = breadCrumb.idx.value_or(0);
@@ -965,6 +985,11 @@ ConfigNode ConfigNode::doCreateDelta(const ConfigNode& from, const ConfigNode& t
 		}
 	}
 
+	// If one is undefined, consider no change if the other is a sequence/map that is empty
+	if (from.isNullOrEmpty() && to.isNullOrEmpty()) {
+		return ConfigNode(NoopType());
+	}
+
 	// No delta coding available, return the outcome
 	return ConfigNode(to);
 }
@@ -976,7 +1001,7 @@ ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& 
 
 	const auto& fromMap = from.asMap();
 	const auto& toMap = to.asMap();
-
+		
 	// Store the new keys if there's a change
 	for (const auto& [k, v]: toMap) {
 		const auto origIter = fromMap.find(k);
@@ -994,17 +1019,24 @@ ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& 
 	}
 
 	// Remove old keys if they're deleted
-	for (const auto& [k, v]: fromMap) {
-		const auto newIter = toMap.find(k);
-		if (newIter == toMap.end()) {
-			// Key deleted
-			result[k] = ConfigNode(DelType());
+	if (!hints || hints->canDeleteAnyKey()) {
+		for (const auto& [k, v]: fromMap) {
+			const auto newIter = toMap.find(k);
+			if (newIter == toMap.end()) {
+				// Key deleted
+				if (!hints || hints->canDeleteKey(k, breadCrumb)) {
+					result[k] = ConfigNode(DelType());
+				}
+			}
 		}
 	}
 
+	// If it doesn't change the original map, just return noop
 	if (result.asMap().empty()) {
 		return ConfigNode(NoopType());
 	}
+
+	// TODO: if it replaces ALL of the original map, just return the new map?
 	
 	return result;
 }

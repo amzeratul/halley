@@ -206,10 +206,11 @@ namespace Halley {
 			const BreadCrumb* prev = nullptr;
 			String key;
 			OptionalLite<int> idx;
+			int depth = 0;
 
 			BreadCrumb() = default;
-			BreadCrumb(const BreadCrumb& prev, String key) : prev(&prev), key(std::move(key)) {}
-			BreadCrumb(const BreadCrumb& prev, int index) : prev(&prev), idx(index) {}
+			BreadCrumb(const BreadCrumb& prev, String key) : prev(&prev), key(std::move(key)), depth(prev.depth + 1) {}
+			BreadCrumb(const BreadCrumb& prev, int index) : prev(&prev), idx(index), depth(prev.depth + 1) {}
 
 			bool hasKeyAt(const String& key, int depth) const;
 			bool hasIndexAt(int idx, int depth) const;
@@ -220,6 +221,9 @@ namespace Halley {
 			virtual ~IDeltaCodeHints() = default;
 
 			virtual std::optional<size_t> getSequenceMatch(const SequenceType& seq, const ConfigNode& newValue, size_t curIdx, const BreadCrumb& breadCrumb) const = 0;
+			virtual bool canDeleteKey(const String& key, const BreadCrumb& breadCrumb) const { return true; }
+			virtual bool canDeleteAnyKey() const { return true; }
+			virtual bool shouldBypass(const BreadCrumb& breadCrumb) const { return false; }
 		};
 
 		static ConfigNode createDelta(const ConfigNode& from, const ConfigNode& to, const IDeltaCodeHints* hints = nullptr);
@@ -287,6 +291,8 @@ namespace Halley {
 		Range<float> convertTo(Tag<Range<float>> tag) const;
 		String convertTo(Tag<String> tag) const;
 		const Bytes& convertTo(Tag<Bytes&> tag) const;
+
+		bool isNullOrEmpty() const;
 
 		static ConfigNode doCreateDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
 		static ConfigNode createMapDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
