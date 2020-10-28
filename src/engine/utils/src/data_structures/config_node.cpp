@@ -397,6 +397,8 @@ void ConfigNode::deserialize(Deserializer& s)
 			throw Exception("Unknown configuration node type.", HalleyExceptions::Resources);
 	}
 
+	type = incomingType;
+
 	const auto state = s.getState<ConfigFileSerializationState>();
 	if (state && state->storeFilePosition) {
 		if (parent) {
@@ -1050,7 +1052,7 @@ ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigN
 		}
 		const auto prev = seq.back().asVector2i();
 		if (prev.x + prev.y == idx) {
-			seq.back() = Vector2i(prev.x, idx - prev.x + 1);
+			seq.back() = IdxType(prev.x, idx - prev.x + 1);
 			return true;
 		}
 		return false;
