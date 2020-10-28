@@ -132,11 +132,7 @@ ConfigNode& ConfigNode::operator=(ConfigNode&& other) noexcept
 	floatData = other.floatData;
 	vec2iData = other.vec2iData;
 	vec2fData = other.vec2fData;
-	line = other.line;
-	column = other.column;
-	parent = other.parent;
-	parentIdx = other.parentIdx;
-	parentFile = other.parentFile;
+	parent = std::move(parent);
 	
 	other.type = ConfigNodeType::Undefined;
 	other.ptrData = nullptr;
@@ -299,46 +295,38 @@ void ConfigNode::serialize(Serializer& s) const
 
 	switch (type) {
 		case ConfigNodeType::String:
-		{
 			s << asString();
 			break;
-		}
 		case ConfigNodeType::Sequence:
-		{
 			s << asSequence();
 			break;
-		}
 		case ConfigNodeType::Map:
-		{
 			s << asMap();
 			break;
-		}
 		case ConfigNodeType::Int:
-		{
 			s << asInt();
 			break;
-		}
 		case ConfigNodeType::Float:
-		{
 			s << asFloat();
 			break;
-		}
 		case ConfigNodeType::Int2:
 		case ConfigNodeType::Idx:
-		{
 			s << asVector2i();
 			break;
-		}
 		case ConfigNodeType::Float2:
-		{
 			s << asVector2f();
 			break;
-		}
 		case ConfigNodeType::Bytes:
-		{
 			s << asBytes();
 			break;
-		}
+		case ConfigNodeType::DeltaMap:
+			s << asMap();
+			s << auxData;
+			break;
+		case ConfigNodeType::DeltaSequence:
+			s << asSequence();
+			s << auxData;
+			break;
 		case ConfigNodeType::Undefined:
 		case ConfigNodeType::Del:
 		case ConfigNodeType::Noop:
@@ -349,10 +337,14 @@ void ConfigNode::serialize(Serializer& s) const
 			throw Exception("Unknown configuration node type.", HalleyExceptions::Resources);
 	}
 
-	const auto state = s.getState<ConfigFileSerializationState>();
+	const auto* state = s.getState<ConfigFileSerializationState>();
 	if (state && state->storeFilePosition) {
-		s << line;
-		s << column;
+		if (parent) {
+			s << parent->line;
+			s << parent->column;
+		} else {
+			s << 0 << 0;
+		}
 	}
 }
 
@@ -363,46 +355,38 @@ void ConfigNode::deserialize(Deserializer& s)
 
 	switch (incomingType) {
 		case ConfigNodeType::String:
-		{
 			deserializeContents<String>(s);
 			break;
-		}
 		case ConfigNodeType::Sequence:
-		{
 			deserializeContents<SequenceType>(s);
 			break;
-		}
 		case ConfigNodeType::Map:
-		{
 			deserializeContents<MapType>(s);
 			break;
-		}
 		case ConfigNodeType::Int:
-		{
 			deserializeContents<int>(s);
 			break;
-		}
 		case ConfigNodeType::Float:
-		{
 			deserializeContents<float>(s);
 			break;
-		}
 		case ConfigNodeType::Int2:
 		case ConfigNodeType::Idx:
-		{
 			deserializeContents<Vector2i>(s);
 			break;
-		}
 		case ConfigNodeType::Float2:
-		{
 			deserializeContents<Vector2f>(s);
 			break;
-		}
 		case ConfigNodeType::Bytes:
-		{
 			deserializeContents<Bytes>(s);
 			break;
-		}
+		case ConfigNodeType::DeltaMap:
+			deserializeContents<MapType>(s);
+			s >> auxData;
+			break;
+		case ConfigNodeType::DeltaSequence:
+			deserializeContents<SequenceType>(s);
+			s >> auxData;
+			break;
 		case ConfigNodeType::Noop:
 		case ConfigNodeType::Del:
 		case ConfigNodeType::Undefined:
@@ -415,8 +399,13 @@ void ConfigNode::deserialize(Deserializer& s)
 
 	const auto state = s.getState<ConfigFileSerializationState>();
 	if (state && state->storeFilePosition) {
-		s >> line;
-		s >> column;
+		if (parent) {
+			s >> parent->line;
+			s >> parent->column;
+		} else {
+			int dummy;
+			s >> dummy >> dummy;
+		}
 	}
 }
 
@@ -615,7 +604,7 @@ String ConfigNode::asString(const String& defaultValue) const
 
 const ConfigNode::SequenceType& ConfigNode::asSequence() const
 {
-	if (type == ConfigNodeType::Sequence) {
+	if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
 		return *reinterpret_cast<SequenceType*>(ptrData);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a sequence type", HalleyExceptions::Resources);
@@ -624,7 +613,7 @@ const ConfigNode::SequenceType& ConfigNode::asSequence() const
 
 const ConfigNode::MapType& ConfigNode::asMap() const
 {
-	if (type == ConfigNodeType::Map) {
+	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
 		return *reinterpret_cast<MapType*>(ptrData);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a map type", HalleyExceptions::Resources);
@@ -633,7 +622,7 @@ const ConfigNode::MapType& ConfigNode::asMap() const
 
 ConfigNode::SequenceType& ConfigNode::asSequence()
 {
-	if (type == ConfigNodeType::Sequence) {
+	if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
 		return *reinterpret_cast<SequenceType*>(ptrData);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a sequence type", HalleyExceptions::Resources);
@@ -642,7 +631,7 @@ ConfigNode::SequenceType& ConfigNode::asSequence()
 
 ConfigNode::MapType& ConfigNode::asMap()
 {
-	if (type == ConfigNodeType::Map) {
+	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
 		return *reinterpret_cast<MapType*>(ptrData);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a map type", HalleyExceptions::Resources);
@@ -715,7 +704,7 @@ const ConfigNode& ConfigNode::operator[](const String& key) const
 	} else {
 		// WARNING: NOT THREAD SAFE
 		undefinedConfigNode.setParent(this, -1);
-		undefinedConfigNode.parentFile = parentFile;
+		undefinedConfigNode.parent->file = parent ? parent->file : nullptr;
 		undefinedConfigNodeName = key;
 		return undefinedConfigNode;
 	}
@@ -763,19 +752,28 @@ void ConfigNode::reset()
 
 void ConfigNode::setOriginalPosition(int l, int c)
 {
-	line = l;
-	column = c;
+	if (!parent) {
+		parent = std::make_unique<ParentingInfo>();
+	}
+	parent->line = l;
+	parent->column = c;
 }
 
 void ConfigNode::setParent(const ConfigNode* p, int idx)
 {
-	parent = p;
-	parentIdx = idx;
+	if (!parent) {
+		parent = std::make_unique<ParentingInfo>();
+	}
+	parent->node = p;
+	parent->idx = idx;
 }
 
 void ConfigNode::propagateParentingInformation(const ConfigFile* file)
 {
-	parentFile = file;
+	if (!parent) {
+		parent = std::make_unique<ParentingInfo>();
+	}
+	parent->file = file;
 	if (type == ConfigNodeType::Sequence) {
 		int i = 0;
 		for (auto& e: asSequence()) {
@@ -830,33 +828,37 @@ String ConfigNode::getNodeDebugId() const
 			break;
 	}
 
-	String assetId = "unknown";
-	if (parentFile) {
-		assetId = parentFile->getAssetId();
+	if (parent) {
+		String assetId = "unknown";
+		if (parent->file) {
+			assetId = parent->file->getAssetId();
+		}
+		return "Node \"" + backTrackFullNodeName() + "\" (" + value + ") at \"" + assetId + "(" + toString(parent->line + 1) + ":" + toString(parent->column + 1) + ")\"";
+	} else {
+		return "Node (" + value + ")";
 	}
-	return "Node \"" + backTrackFullNodeName() + "\" (" + value + ") at \"" + assetId + "(" + toString(line + 1) + ":" + toString(column + 1) + ")\"";
 }
 
 String ConfigNode::backTrackFullNodeName() const
 {
-	if (parent) {
-		if (parent->type == ConfigNodeType::Sequence) {
-			return parent->backTrackFullNodeName() + "[" + toString(parentIdx) + "]";
-		} else if (parent->type == ConfigNodeType::Map) {
-			auto& parentMap = parent->asMap();
+	if (parent && parent->node) {
+		if (parent->node->type == ConfigNodeType::Sequence) {
+			return parent->node->backTrackFullNodeName() + "[" + toString(parent->idx) + "]";
+		} else if (parent->node->type == ConfigNodeType::Map) {
+			auto& parentMap = parent->node->asMap();
 			int i = 0;
 			String name = "?";
-			if (parentIdx == -1) {
+			if (parent->idx == -1) {
 				name = ConfigNode::undefinedConfigNodeName;
 			} else {
 				for (auto& e: parentMap) {
-					if (i++ == parentIdx) {
+					if (i++ == parent->idx) {
 						name = e.first;
 						break;
 					}
 				}
 			}
-			return parent->backTrackFullNodeName() + "." + name;
+			return parent->node->backTrackFullNodeName() + "." + name;
 		} else {
 			return "?";
 		}
@@ -917,13 +919,22 @@ const Bytes& ConfigNode::convertTo(Tag<Bytes&> tag) const
 
 ConfigNode ConfigNode::createDelta(const ConfigNode& from, const ConfigNode& to)
 {
+	return doCreateDelta(from, to, BreadCrumb());
+}
+
+ConfigNode ConfigNode::doCreateDelta(const ConfigNode& from, const ConfigNode& to, BreadCrumb breadCrumb)
+{
 	if (from.getType() == to.getType()) {
 		if (from.getType() == ConfigNodeType::Map) {
-			return createMapDelta(from, to);
+			auto delta = createMapDelta(from, to, breadCrumb);
+			delta.auxData = breadCrumb.idx.value_or(0);
+			return delta;
 		}
 
 		if (from.getType() == ConfigNodeType::Sequence) {
-			return createSequenceDelta(from, to);
+			auto delta = createSequenceDelta(from, to, breadCrumb);
+			delta.auxData = breadCrumb.idx.value_or(0);
+			return delta;
 		}
 
 		if (from == to) {
@@ -936,19 +947,119 @@ ConfigNode ConfigNode::createDelta(const ConfigNode& from, const ConfigNode& to)
 	return ConfigNode(to);
 }
 
-ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& to)
+ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb)
 {
-	// TODO
-	return ConfigNode();
+	auto result = ConfigNode(MapType());
+	result.type = ConfigNodeType::DeltaMap;
+
+	const auto& fromMap = from.asMap();
+	const auto& toMap = to.asMap();
+
+	// Store the new keys if there's a change
+	for (const auto& [k, v]: toMap) {
+		const auto origIter = fromMap.find(k);
+
+		if (origIter != fromMap.end()) {
+			// Was present before, delta compress and store if it's different
+			auto delta = doCreateDelta(origIter->second, v, BreadCrumb(breadCrumb, k));
+			if (delta.getType() != ConfigNodeType::Noop) {
+				result[k] = std::move(delta);
+			}
+		} else {
+			// Is new, store all of it
+			result[k] = ConfigNode(v);
+		}
+	}
+
+	// Remove old keys if they're deleted
+	for (const auto& [k, v]: fromMap) {
+		const auto newIter = toMap.find(k);
+		if (newIter == toMap.end()) {
+			// Key deleted
+			result[k] = ConfigNode(DelType());
+		}
+	}
+	
+	return result;
 }
 
-ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigNode& to)
+ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb)
 {
+	auto result = ConfigNode(SequenceType());
+	result.type = ConfigNodeType::DeltaSequence;
+	
+	const auto& fromSeq = from.asSequence();
+	const auto& toSeq = to.asSequence();
+
 	// TODO
-	return ConfigNode();
+	
+	return ConfigNode(to);
 }
 
 void ConfigNode::applyDelta(const ConfigNode& delta)
 {
-	// TODO
+	if (delta.getType() == ConfigNodeType::Noop) {
+		// Nothing to do
+		return;
+	}
+	
+	if (getType() == ConfigNodeType::Map && delta.getType() == ConfigNodeType::DeltaMap) {
+		applyMapDelta(delta);
+	} else if (getType() == ConfigNodeType::Sequence && delta.getType() == ConfigNodeType::DeltaSequence) {
+		applySequenceDelta(delta);
+	} else if (delta.getType() == ConfigNodeType::Idx || delta.getType() == ConfigNodeType::Del) {
+		throw Exception("Invalid ConfigNode delta type at this position", HalleyExceptions::Utils);
+	} else {
+		*this = ConfigNode(delta);
+	}
 }
+
+void ConfigNode::applyMapDelta(const ConfigNode& delta)
+{
+	auto& myMap = asMap();
+	const auto& deltaMap = delta.asMap();
+
+	for (const auto& [k, v]: deltaMap) {
+		if (v.getType() == ConfigNodeType::Del) {
+			// Erase existing
+			myMap.erase(k);
+		} else {
+			const auto iter = myMap.find(k);
+			if (iter != myMap.end()) {
+				// Update existing
+				iter->second.applyDelta(v);
+			} else {
+				// Insert new
+				myMap[k] = ConfigNode(v);
+			}
+		}
+	}
+}
+
+void ConfigNode::applySequenceDelta(const ConfigNode& delta)
+{
+	const auto& mySeq = asSequence();
+	const auto& deltaSeq = delta.asSequence();
+	SequenceType result;
+
+	for (const auto& v: deltaSeq) {
+		if (v.getType() == ConfigNodeType::Idx) {
+			// Simple index copying
+			const auto indices = v.asVector2i();
+			for (int i = indices.x; i < indices.x + indices.y; ++i) {
+				result.emplace_back(mySeq.at(i));
+			}
+		} else if (v.getType() == ConfigNodeType::DeltaMap || v.getType() == ConfigNodeType::DeltaSequence) {
+			// Apply delta
+			auto value = ConfigNode(mySeq.at(v.auxData));
+			value.applyDelta(v);
+			result.emplace_back(std::move(value));
+		} else {
+			// New value
+			result.emplace_back(v);
+		}
+	}
+
+	*this = std::move(result);
+}
+

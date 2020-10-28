@@ -101,9 +101,6 @@ void ConfigFile::reload(Resource&& resource)
 void ConfigFile::updateRoot()
 {
 	root.propagateParentingInformation(this);
-	Ensures(root.parentIdx == 0);
-	Ensures(root.parent == nullptr);
-	Ensures(root.parentFile == this);
 }
 
 ConfigObserver::ConfigObserver()

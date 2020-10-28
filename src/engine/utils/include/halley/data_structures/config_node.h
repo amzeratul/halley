@@ -6,6 +6,7 @@
 #include "halley/resources/resource.h"
 #include "halley/maths/range.h"
 #include "halley/maths/vector4.h"
+#include "halley/data_structures/maybe.h"
 #include <map>
 #include <vector>
 
@@ -24,6 +25,8 @@ namespace Halley {
 		Int2,
 		Float2,
 		Bytes,
+		DeltaSequence, // For delta coding
+		DeltaMap, // For delta coding
 		Noop, // For delta coding
 		Idx, // For delta coding
 		Del // For delta coding
@@ -31,7 +34,7 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<ConfigNodeType> {
-		constexpr std::array<const char*, 11> operator()() const {
+		constexpr std::array<const char*, 13> operator()() const {
 			return{{
 				"undefined",
 				"string",
@@ -42,6 +45,8 @@ namespace Halley {
 				"int2",
 				"float2",
 				"bytes",
+				"deltaSequence",
+				"deltaMap",
 				"noop",
 				"idx"
 				"del"
@@ -200,6 +205,16 @@ namespace Halley {
 		static ConfigNode createDelta(const ConfigNode& from, const ConfigNode& to);
 		void applyDelta(const ConfigNode& delta);
 
+		struct BreadCrumb {
+			const BreadCrumb* prev = nullptr;
+			String key;
+			OptionalLite<int> idx;
+
+			BreadCrumb() = default;
+			BreadCrumb(const BreadCrumb& prev, String key) : prev(&prev), key(std::move(key)) {}
+			BreadCrumb(const BreadCrumb& prev, int index) : prev(&prev), idx(index) {}
+		};
+
 	private:
 		template <typename T>
 		class Tag {};
@@ -221,11 +236,16 @@ namespace Halley {
 			Vector2f vec2fData;
 		};
 		ConfigNodeType type = ConfigNodeType::Undefined;
-		int line = 0;
-		int column = 0;
-		int parentIdx = 0;
-		const ConfigNode* parent = nullptr;
-		const ConfigFile* parentFile = nullptr;
+		int auxData = 0; // Used by delta coding
+
+		struct ParentingInfo {
+			int line = 0;
+			int column = 0;
+			int idx = 0;
+			const ConfigNode* node = nullptr;
+			const ConfigFile* file = nullptr;
+		};
+		std::unique_ptr<ParentingInfo> parent;
 
 		static ConfigNode undefinedConfigNode;
 		static String undefinedConfigNodeName;
@@ -258,7 +278,10 @@ namespace Halley {
 		String convertTo(Tag<String> tag) const;
 		const Bytes& convertTo(Tag<Bytes&> tag) const;
 
-		static ConfigNode createMapDelta(const ConfigNode& from, const ConfigNode& to);
-		static ConfigNode createSequenceDelta(const ConfigNode& from, const ConfigNode& to);
+		static ConfigNode doCreateDelta(const ConfigNode& from, const ConfigNode& to, BreadCrumb breadCrumb);
+		static ConfigNode createMapDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb);
+		static ConfigNode createSequenceDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb);
+		void applyMapDelta(const ConfigNode& delta);
+		void applySequenceDelta(const ConfigNode& delta);
 	};
 }
