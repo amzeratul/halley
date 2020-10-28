@@ -202,9 +202,6 @@ namespace Halley {
 			Expects(intData != 0xDDDDDDDD);
 		}
 
-		static ConfigNode createDelta(const ConfigNode& from, const ConfigNode& to);
-		void applyDelta(const ConfigNode& delta);
-
 		struct BreadCrumb {
 			const BreadCrumb* prev = nullptr;
 			String key;
@@ -213,7 +210,20 @@ namespace Halley {
 			BreadCrumb() = default;
 			BreadCrumb(const BreadCrumb& prev, String key) : prev(&prev), key(std::move(key)) {}
 			BreadCrumb(const BreadCrumb& prev, int index) : prev(&prev), idx(index) {}
+
+			bool hasKeyAt(const String& key, int depth) const;
+			bool hasIndexAt(int idx, int depth) const;
 		};
+
+		class IDeltaCodeHints {
+		public:
+			virtual ~IDeltaCodeHints() = default;
+
+			virtual std::optional<size_t> getSequenceMatch(const SequenceType& seq, const ConfigNode& newValue, size_t curIdx, const BreadCrumb& breadCrumb) const = 0;
+		};
+
+		static ConfigNode createDelta(const ConfigNode& from, const ConfigNode& to, const IDeltaCodeHints* hints = nullptr);
+		void applyDelta(const ConfigNode& delta);
 
 	private:
 		template <typename T>
@@ -278,9 +288,9 @@ namespace Halley {
 		String convertTo(Tag<String> tag) const;
 		const Bytes& convertTo(Tag<Bytes&> tag) const;
 
-		static ConfigNode doCreateDelta(const ConfigNode& from, const ConfigNode& to, BreadCrumb breadCrumb);
-		static ConfigNode createMapDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb);
-		static ConfigNode createSequenceDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb);
+		static ConfigNode doCreateDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
+		static ConfigNode createMapDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
+		static ConfigNode createSequenceDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints);
 		void applyMapDelta(const ConfigNode& delta);
 		void applySequenceDelta(const ConfigNode& delta);
 	};

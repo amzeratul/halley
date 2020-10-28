@@ -917,22 +917,44 @@ const Bytes& ConfigNode::convertTo(Tag<Bytes&> tag) const
 	return asBytes();
 }
 
-ConfigNode ConfigNode::createDelta(const ConfigNode& from, const ConfigNode& to)
+bool ConfigNode::BreadCrumb::hasKeyAt(const String& key, int depth) const
 {
-	return doCreateDelta(from, to, BreadCrumb());
+	if (depth == 0) {
+		return this->key == key;
+	} else if (prev) {
+		return prev->hasKeyAt(key, depth - 1);
+	} else {
+		return false;
+	}
 }
 
-ConfigNode ConfigNode::doCreateDelta(const ConfigNode& from, const ConfigNode& to, BreadCrumb breadCrumb)
+bool ConfigNode::BreadCrumb::hasIndexAt(int idx, int depth) const
+{
+	if (depth == 0) {
+		return this->idx == idx;
+	} else if (prev) {
+		return prev->hasIndexAt(idx, depth - 1);
+	} else {
+		return false;
+	}	
+}
+
+ConfigNode ConfigNode::createDelta(const ConfigNode& from, const ConfigNode& to, const IDeltaCodeHints* hints)
+{
+	return doCreateDelta(from, to, BreadCrumb(), hints);
+}
+
+ConfigNode ConfigNode::doCreateDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints)
 {
 	if (from.getType() == to.getType()) {
 		if (from.getType() == ConfigNodeType::Map) {
-			auto delta = createMapDelta(from, to, breadCrumb);
+			auto delta = createMapDelta(from, to, breadCrumb, hints);
 			delta.auxData = breadCrumb.idx.value_or(0);
 			return delta;
 		}
 
 		if (from.getType() == ConfigNodeType::Sequence) {
-			auto delta = createSequenceDelta(from, to, breadCrumb);
+			auto delta = createSequenceDelta(from, to, breadCrumb, hints);
 			delta.auxData = breadCrumb.idx.value_or(0);
 			return delta;
 		}
@@ -947,7 +969,7 @@ ConfigNode ConfigNode::doCreateDelta(const ConfigNode& from, const ConfigNode& t
 	return ConfigNode(to);
 }
 
-ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb)
+ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints)
 {
 	auto result = ConfigNode(MapType());
 	result.type = ConfigNodeType::DeltaMap;
@@ -961,7 +983,7 @@ ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& 
 
 		if (origIter != fromMap.end()) {
 			// Was present before, delta compress and store if it's different
-			auto delta = doCreateDelta(origIter->second, v, BreadCrumb(breadCrumb, k));
+			auto delta = doCreateDelta(origIter->second, v, BreadCrumb(breadCrumb, k), hints);
 			if (delta.getType() != ConfigNodeType::Noop) {
 				result[k] = std::move(delta);
 			}
@@ -979,21 +1001,76 @@ ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& 
 			result[k] = ConfigNode(DelType());
 		}
 	}
+
+	if (result.asMap().empty()) {
+		return ConfigNode(NoopType());
+	}
 	
 	return result;
 }
 
-ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb)
+ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints)
 {
+	auto tryExtend = [] (std::vector<ConfigNode>& seq, int idx) -> bool
+	{
+		if (seq.empty() || seq.back().getType() != ConfigNodeType::Idx) {
+			return false;
+		}
+		const auto prev = seq.back().asVector2i();
+		if (prev.x + prev.y == idx) {
+			seq.back() = Vector2i(prev.x, idx - prev.x + 1);
+			return true;
+		}
+		return false;
+	};
+	
 	auto result = ConfigNode(SequenceType());
 	result.type = ConfigNodeType::DeltaSequence;
 	
 	const auto& fromSeq = from.asSequence();
 	const auto& toSeq = to.asSequence();
+	auto& resultSeq = result.asSequence();
 
-	// TODO
-	
-	return ConfigNode(to);
+	for (size_t curIdx = 0; curIdx != toSeq.size(); ++curIdx) {
+		const auto& curVal = toSeq[curIdx];
+		
+		// Ask the hints for the best element to compare with
+		std::optional<size_t> matchIdx;
+		if (hints) {
+			matchIdx = hints->getSequenceMatch(fromSeq, curVal, curIdx, breadCrumb);
+		} else {
+			matchIdx = curIdx;
+		}
+
+		if (matchIdx) {
+			// Found a match, delta code to that
+			auto delta = result.doCreateDelta(fromSeq.at(matchIdx.value()), curVal, BreadCrumb(breadCrumb, static_cast<int>(curIdx)), hints);
+			if (delta.getType() == ConfigNodeType::Noop) {
+				// Nothing to encode, store a reference
+				const int startIdx = static_cast<int>(matchIdx.value());
+
+				// Check if the last value can simply be extended
+				if (!tryExtend(resultSeq, startIdx)) {
+					resultSeq.emplace_back(ConfigNode(IdxType(startIdx, 1)));
+				}
+			} else {
+				// Store delta
+				resultSeq.emplace_back(std::move(delta));
+			}
+		} else {
+			// Just store original
+			resultSeq.push_back(curVal);
+		}
+	}
+
+	if (resultSeq.size() == 1 && resultSeq.back().getType() == ConfigNodeType::Idx) {
+		const auto idxData = resultSeq.back().asVector2i();
+		if (idxData.x == 0 && idxData.y == static_cast<int>(fromSeq.size())) {
+			return ConfigNode(NoopType());
+		}
+	}
+
+	return result;
 }
 
 void ConfigNode::applyDelta(const ConfigNode& delta)
