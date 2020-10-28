@@ -462,6 +462,16 @@ Polygon::CollisionResult Polygon::getCollisionWithSweepingEllipse(Vector2f p0, V
 	return result;
 }
 
+bool Polygon::operator==(const Polygon& other) const
+{
+	return vertices == other.vertices;
+}
+
+bool Polygon::operator!=(const Polygon& other) const
+{
+	return vertices != other.vertices;
+}
+
 ConfigNode ConfigNodeSerializer<Polygon>::serialize(const Polygon& polygon, ConfigNodeSerializationContext&)
 {
 	return ConfigNode(polygon.getVertices());

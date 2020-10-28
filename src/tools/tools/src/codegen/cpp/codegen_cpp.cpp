@@ -194,6 +194,9 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 
 Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 {
+	String className = component.name + "Component" + (component.customImplementation ? "Base" : "");
+	auto gen = CPPClassGenerator(className, "Halley::Component", MemberAccess::Public, !component.customImplementation);
+
 	Vector<String> contents = {
 		"#pragma once",
 		"",
@@ -232,14 +235,12 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 			deserializeBody += lineBreak;
 		}
 
-		serializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::serialize(" + member.name + ", context, node, \"" + member.name + "\", " + mask + ");";
+		serializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::serialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", context, node, \"" + member.name + "\", " + mask + ");";
 		deserializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::deserialize(" + member.name + ", context, node, \"" + member.name + "\", " + mask + ");";
 	}
 	serializeBody += lineBreak + "return node;";
 
-	String className = component.name + "Component" + (component.customImplementation ? "Base" : "");
-	
-	auto gen = CPPClassGenerator(className, "Halley::Component", MemberAccess::Public, !component.customImplementation)
+	gen
 		.setAccessLevel(MemberAccess::Public)
 		.addMember(MemberSchema(TypeSchema("int", false, true, true), "componentIndex", toString(component.id)))
 		.addMember(MemberSchema(TypeSchema("char*", true, true, true), "componentName", component.name))

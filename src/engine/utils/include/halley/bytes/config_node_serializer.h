@@ -398,15 +398,39 @@ namespace Halley {
 		return ConfigNode(toString(value));
 	}
 
+	namespace Detail
+	{
+	    template<typename L, typename R>
+	    struct HasOperatorDifferent
+	    {
+	        template<typename T = L, typename U = R>
+	        static auto test(T &&t, U &&u) -> decltype(t == u, void(), std::true_type{});
+	        static auto test(...) -> std::false_type;
+	        using type = decltype(test(std::declval<L>(), std::declval<R>()));
+	    };
+	}
+
+	template<typename L, typename R = L>
+	struct HasOperatorDifferent : Detail::HasOperatorDifferent<L, R>::type {};
+
 	template <typename T>
 	class EntityConfigNodeSerializer {
 	public:
-		static void serialize(const T& value, ConfigNodeSerializationContext& context, ConfigNode& node, const String& name, int serializationMask)
+		static void serialize(const T& value, const T& defaultValue, ConfigNodeSerializationContext& context, ConfigNode& node, const String& name, int serializationMask)
 		{
 			if (context.matchType(serializationMask)) {
-				auto result = Halley::ConfigNodeHelper<T>::serialize(value, context);
-				if (result.getType() != ConfigNodeType::Undefined) {
-					node[name] = std::move(result);
+				bool canWrite;
+				if constexpr (HasOperatorDifferent<T>::value) {
+					canWrite = value != defaultValue;
+				} else {
+					canWrite = true;
+				}
+				
+				if (canWrite) {
+					auto result = Halley::ConfigNodeHelper<T>::serialize(value, context);
+					if (result.getType() != ConfigNodeType::Undefined) {
+						node[name] = std::move(result);
+					}
 				}
 			}
 		}

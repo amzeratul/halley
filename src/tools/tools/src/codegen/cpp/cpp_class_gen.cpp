@@ -219,14 +219,24 @@ String CPPClassGenerator::getVariableString(const VariableSchema& var)
 
 String CPPClassGenerator::getMemberString(const MemberSchema& var)
 {
+	return getTypeString(var.type) + " " + var.name + var.getValueString();
+}
+
+String CPPClassGenerator::getAnonString(const MemberSchema& var)
+{
+	return getTypeString(var.type) + var.getValueString();
+}
+
+String MemberSchema::getValueString(bool initializer) const
+{
 	String init;
-	if (var.defaultValue.empty()) {
-		if (!var.type.name.endsWith("&")) {
+	if (defaultValue.empty()) {
+		if (!type.name.endsWith("&")) {
 			init = "{}";
 		}
 	} else {
 		bool first = true;
-		for (const auto& v: var.defaultValue) {
+		for (const auto& v: defaultValue) {
 			if (first) {
 				init += "{ ";
 				first = false;
@@ -243,7 +253,12 @@ String CPPClassGenerator::getMemberString(const MemberSchema& var)
 
 		init += " }";
 	}
-	return getTypeString(var.type) + " " + var.name + init;
+
+	if (!initializer && init == "{}") {
+		return type.name + "()";
+	}
+	
+	return init;
 }
 
 String CPPClassGenerator::getMethodSignatureString(const MethodSchema& method)

@@ -69,6 +69,9 @@ namespace Halley {
 		CollisionResult getCollisionWithSweepingCircle(Vector2f circlePos, float radius, Vector2f moveDir, float moveLen) const;
 		CollisionResult getCollisionWithSweepingEllipse(Vector2f circlePos, Vector2f radius, Vector2f moveDir, float moveLen) const;
 
+		bool operator==(const Polygon& other) const;
+		bool operator!=(const Polygon& other) const;
+
 	private:
 		Circle circle;
 		VertexList vertices;

@@ -22,7 +22,7 @@ public:
 	Halley::ConfigNode serialize(Halley::ConfigNodeSerializationContext& context) const {
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode node = Halley::ConfigNode::MapType();
-		Halley::EntityConfigNodeSerializer<decltype(player)>::serialize(player, context, node, "player", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(player)>::serialize(player, Halley::AnimationPlayer{}, context, node, "player", makeMask(Type::Prefab, Type::SaveData));
 		return node;
 	}
 

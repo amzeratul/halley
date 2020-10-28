@@ -138,6 +138,9 @@ namespace Halley
 
 		Sprite clone() const;
 
+		bool operator==(const Sprite& other) const;
+		bool operator!=(const Sprite& other) const;
+
 	private:
 		SpriteVertexAttrib vertexAttrib;
 		std::shared_ptr<Material> material;

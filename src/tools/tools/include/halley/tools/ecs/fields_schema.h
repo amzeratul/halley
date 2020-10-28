@@ -83,6 +83,8 @@ namespace Halley
 			}
 			return result;
 		}
+
+		String getValueString(bool initializer = true) const;
 	};
 
 	class ComponentFieldSchema : public MemberSchema {

@@ -33,6 +33,7 @@ namespace Halley
 		static String getTypeString(const TypeSchema& type);
 		static String getVariableString(const VariableSchema& var);
 		static String getMemberString(const MemberSchema& var);
+		static String getAnonString(const MemberSchema& var);
 		static String getMethodSignatureString(const MethodSchema& var);
 
 		void writeTo(Vector<String>& out, int nTabs = 0);

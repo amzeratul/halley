@@ -446,7 +446,7 @@ bool ConfigNode::asBool() const
 
 Vector2i ConfigNode::asVector2i() const
 {
-	if (type == ConfigNodeType::Int2) {
+	if (type == ConfigNodeType::Int2 || type == ConfigNodeType::Idx) {
 		return vec2iData;
 	} else if (type == ConfigNodeType::Float2) {
 		return Vector2i(vec2fData);

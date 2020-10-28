@@ -33,12 +33,12 @@ public:
 	Halley::ConfigNode serialize(Halley::ConfigNodeSerializationContext& context) const {
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode node = Halley::ConfigNode::MapType();
-		Halley::EntityConfigNodeSerializer<decltype(zoom)>::serialize(zoom, context, node, "zoom", makeMask(Type::Prefab, Type::SaveData));
-		Halley::EntityConfigNodeSerializer<decltype(clearColour)>::serialize(clearColour, context, node, "clearColour", makeMask(Type::Prefab, Type::SaveData));
-		Halley::EntityConfigNodeSerializer<decltype(clearStencil)>::serialize(clearStencil, context, node, "clearStencil", makeMask(Type::Prefab, Type::SaveData));
-		Halley::EntityConfigNodeSerializer<decltype(clearDepth)>::serialize(clearDepth, context, node, "clearDepth", makeMask(Type::Prefab, Type::SaveData));
-		Halley::EntityConfigNodeSerializer<decltype(mask)>::serialize(mask, context, node, "mask", makeMask(Type::Prefab, Type::SaveData));
-		Halley::EntityConfigNodeSerializer<decltype(layer)>::serialize(layer, context, node, "layer", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(zoom)>::serialize(zoom, float{ 1 }, context, node, "zoom", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(clearColour)>::serialize(clearColour, std::optional<Halley::Colour4f>{}, context, node, "clearColour", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(clearStencil)>::serialize(clearStencil, std::optional<int>{}, context, node, "clearStencil", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(clearDepth)>::serialize(clearDepth, std::optional<float>{}, context, node, "clearDepth", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(mask)>::serialize(mask, int{ 1 }, context, node, "mask", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(layer)>::serialize(layer, int{ 0 }, context, node, "layer", makeMask(Type::Prefab, Type::SaveData));
 		return node;
 	}
 

@@ -539,6 +539,17 @@ Sprite Sprite::clone() const
 	return *this;
 }
 
+bool Sprite::operator==(const Sprite& other) const
+{
+	// TODO?
+	return false;
+}
+
+bool Sprite::operator!=(const Sprite& other) const
+{
+	return !(*this == other);
+}
+
 void Sprite::computeSize()
 {
 	vertexAttrib.size = size;
