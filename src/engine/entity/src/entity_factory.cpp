@@ -316,10 +316,12 @@ ConfigNode EntityFactory::serializeEntity(EntityRef entity, EntitySerialization:
 	ConfigNodeSerializationContext serializeContext = makeContext();
 	serializeContext.entitySerializationTypeMask = makeMask(type);
 
-	auto components = ConfigNode::MapType();
+	auto components = ConfigNode::SequenceType();
 	for (auto [componentId, component]: entity) {
 		auto& reflector = getComponentReflector(componentId);
-		components[reflector.getName()] = reflector.serialize(serializeContext, *component);
+		auto entry = ConfigNode::MapType();
+		entry[reflector.getName()] = reflector.serialize(serializeContext, *component);
+		components.emplace_back(std::move(entry));
 	}
 
 	result["name"] = entity.getName();
