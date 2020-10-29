@@ -7,6 +7,7 @@
 #include "game_properties_window.h"
 #include "taskbar.h"
 #include "halley/tools/project/project.h"
+#include "halley/tools/yaml/yaml_convert.h"
 #include "src/editor_root_stage.h"
 #include "src/halley_editor.h"
 #include "src/assets/assets_browser.h"
@@ -131,7 +132,8 @@ bool ProjectWindow::loadCustomUI()
 	}
 	
 	try {
-		customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(factory, resources, project.getGameResources(), api));
+		const auto converter = std::make_shared<YAMLConverter>(project);		
+		customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(factory, resources, project.getGameResources(), api, converter));
 	} catch (const std::exception& e) {
 		Logger::logException(e);
 	} catch (...) {
