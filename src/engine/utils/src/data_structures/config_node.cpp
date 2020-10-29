@@ -197,7 +197,7 @@ ConfigNode& ConfigNode::operator=(const char* value)
 bool ConfigNode::operator==(const ConfigNode& other) const
 {
 	if (type != other.type) {
-		return false;
+		return isEquivalent(other);
 	}
 	
 	switch (type) {
@@ -210,7 +210,7 @@ bool ConfigNode::operator==(const ConfigNode& other) const
 		case ConfigNodeType::Int:
 			return asInt() == other.asInt();
 		case ConfigNodeType::Float:
-			return asFloat() == other.asFloat();
+			return std::abs(asFloat() - other.asFloat()) < 0.00001f;
 		case ConfigNodeType::Int2:
 		case ConfigNodeType::Idx:
 			return asVector2i() == other.asVector2i();
@@ -1000,11 +1000,12 @@ ConfigNode ConfigNode::doCreateDelta(const ConfigNode& from, const ConfigNode& t
 			delta.auxData = breadCrumb.idx.value_or(0);
 			return delta;
 		}
+	}
 
-		if (from == to) {
-			// No change
-			return ConfigNode(NoopType());
-		}
+	// Can compare equals even if the types are different (e.g. float 12.0 and int 12)
+	if (from == to) {
+		// No change
+		return ConfigNode(NoopType());
 	}
 
 	// If one is undefined, consider no change if the other is a sequence/map that is empty
@@ -1225,5 +1226,31 @@ void ConfigNode::applySequenceDelta(const ConfigNode& delta)
 	}
 
 	*this = std::move(result);
+}
+
+bool ConfigNode::isEquivalent(const ConfigNode& other) const
+{
+	if (type < other.type) {
+		return isEquivalentStrictOrder(other);
+	} else {
+		return other.isEquivalentStrictOrder(*this);
+	}
+}
+
+bool ConfigNode::isEquivalentStrictOrder(const ConfigNode& other) const
+{
+	Expects(type < other.type);
+
+	if (type == ConfigNodeType::Int && other.type == ConfigNodeType::Float) {
+		return std::abs(asFloat() - other.asFloat()) < 0.00001f;
+	}
+	if (type == ConfigNodeType::Sequence && other.type == ConfigNodeType::Int2 && asSequence().size() >= 2) {
+		return asVector2i() == other.asVector2i();
+	}
+	if (type == ConfigNodeType::Sequence && other.type == ConfigNodeType::Float2 && asSequence().size() >= 2) {
+		return asVector2f() == other.asVector2f();
+	}
+	
+	return false;
 }
 

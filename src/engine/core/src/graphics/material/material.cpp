@@ -335,7 +335,11 @@ void Material::setPassEnabled(int pass, bool enabled)
 
 bool Material::isPassEnabled(int pass) const
 {
-	return passEnabled[pass];
+	const size_t p = static_cast<size_t>(pass);
+	if (p > passEnabled.size()) {
+		return false;
+	}
+	return passEnabled[p];
 }
 
 const Vector<MaterialTextureParameter>& Material::getTextureUniforms() const

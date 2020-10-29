@@ -54,7 +54,11 @@ namespace Halley
 		Sprite& setMaterial(std::unique_ptr<Material> m);
 		Material& getMutableMaterial();
 		std::shared_ptr<Material> getMutableMaterialPtr();
-		const Material& getMaterial() const { return *material; }
+		const Material& getMaterial() const
+		{
+			Expects(material);
+			return *material;
+		}
 		bool hasMaterial() const { return material != nullptr; }
 
 		Sprite& setImage(Resources& resources, const String& imageName, String materialName = "");
