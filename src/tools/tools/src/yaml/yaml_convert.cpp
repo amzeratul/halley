@@ -219,7 +219,6 @@ String YAMLConverter::generateYAML(const ConfigNode& config) const
 void YAMLConverter::writeYAMLAsset(const ConfigNode& config, const Path& relativePath) const
 {
 	const auto& path = project.getAssetsSrcPath() / relativePath;
-	std::cout << path;
 	const String& yaml = generateYAML(config);
 	FileSystem::writeFile(path, yaml);
 }
