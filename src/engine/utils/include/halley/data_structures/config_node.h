@@ -241,6 +241,7 @@ namespace Halley {
 			virtual bool canDeleteKey(const String& key, const BreadCrumb& breadCrumb) const { return true; }
 			virtual bool canDeleteAnyKey() const { return true; }
 			virtual bool shouldBypass(const BreadCrumb& breadCrumb) const { return false; }
+			virtual bool areNullAndEmptyEquivalent(const BreadCrumb& breadCrumb) const { return false; }
 		};
 
 		static ConfigNode createDelta(const ConfigNode& from, const ConfigNode& to, const IDeltaCodeHints* hints = nullptr);

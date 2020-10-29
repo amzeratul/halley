@@ -1008,8 +1008,10 @@ ConfigNode ConfigNode::doCreateDelta(const ConfigNode& from, const ConfigNode& t
 	}
 
 	// If one is undefined, consider no change if the other is a sequence/map that is empty
-	if (from.isNullOrEmpty() && to.isNullOrEmpty()) {
-		return ConfigNode(NoopType());
+	if ((from.getType() == ConfigNodeType::Undefined && to.isNullOrEmpty()) || (to.getType() == ConfigNodeType::Undefined && from.isNullOrEmpty())) {
+		if (hints && hints->areNullAndEmptyEquivalent(breadCrumb)) {
+			return ConfigNode(NoopType());
+		}
 	}
 
 	// No delta coding available, return the outcome
