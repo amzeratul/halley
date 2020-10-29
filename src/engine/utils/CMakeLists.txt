@@ -77,6 +77,7 @@ set(HEADERS
         "include/halley/concurrency/task.h"
         "include/halley/data_structures/bin_pack.h"
         "include/halley/data_structures/config_node.h"
+        "include/halley/data_structures/config_node.natvis"
         "include/halley/data_structures/dynamic_grid.h"
         "include/halley/data_structures/flat_map.h"
         "include/halley/data_structures/hash_map.h"

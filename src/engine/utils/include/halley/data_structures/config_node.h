@@ -247,13 +247,18 @@ namespace Halley {
 		static ConfigNode createDelta(const ConfigNode& from, const ConfigNode& to, const IDeltaCodeHints* hints = nullptr);
 		static ConfigNode applyDelta(const ConfigNode& from, const ConfigNode& delta);
 		void applyDelta(const ConfigNode& delta);
+		void decayDeltaArtifacts();
 
 	private:
 		template <typename T>
 		class Tag {};
 
 		union {
-			void* ptrData;
+			String* strData;
+			MapType* mapData;
+			SequenceType* sequenceData;
+			Bytes* bytesData;
+			void* rawPtrData;
 			int intData;
 			float floatData;
 			Vector2i vec2iData;

@@ -135,7 +135,7 @@ ConfigNode& ConfigNode::operator=(ConfigNode&& other) noexcept
 	reset();
 
 	type = other.type;
-	ptrData = other.ptrData;
+	rawPtrData = other.rawPtrData;
 	intData = other.intData;
 	floatData = other.floatData;
 	vec2iData = other.vec2iData;
@@ -143,7 +143,7 @@ ConfigNode& ConfigNode::operator=(ConfigNode&& other) noexcept
 	parent = std::move(parent);
 	
 	other.type = ConfigNodeType::Undefined;
-	other.ptrData = nullptr;
+	other.rawPtrData = nullptr;
 	
 	return *this;
 }
@@ -232,7 +232,7 @@ ConfigNode& ConfigNode::operator=(Bytes value)
 {
 	reset();
 	type = ConfigNodeType::Bytes;
-	ptrData = new Bytes(std::move(value));
+	bytesData = new Bytes(std::move(value));
 	return *this;
 }
 
@@ -242,7 +242,7 @@ ConfigNode& ConfigNode::operator=(gsl::span<const gsl::byte> bytes)
 	type = ConfigNodeType::Bytes;
 	auto b = new Bytes(bytes.size_bytes());
 	memcpy(b->data(), bytes.data(), bytes.size_bytes());
-	ptrData = b;
+	bytesData = b;
 	return *this;
 }
 
@@ -250,7 +250,7 @@ ConfigNode& ConfigNode::operator=(MapType entry)
 {
 	reset();
 	type = ConfigNodeType::Map;
-	ptrData = new MapType(std::move(entry));
+	mapData = new MapType(std::move(entry));
 	return *this;
 }
 
@@ -258,7 +258,7 @@ ConfigNode& ConfigNode::operator=(SequenceType entry)
 {
 	reset();
 	type = ConfigNodeType::Sequence;
-	ptrData = new SequenceType(std::move(entry));
+	sequenceData = new SequenceType(std::move(entry));
 	return *this;
 }
 
@@ -266,7 +266,7 @@ ConfigNode& ConfigNode::operator=(String entry)
 {
 	reset();
 	type = ConfigNodeType::String;
-	ptrData = new String(std::move(entry));
+	strData = new String(std::move(entry));
 	return *this;
 }
 
@@ -519,7 +519,7 @@ Range<float> ConfigNode::asFloatRange() const
 const Bytes& ConfigNode::asBytes() const
 {
 	if (type == ConfigNodeType::Bytes) {
-		return *reinterpret_cast<Bytes*>(ptrData);
+		return *bytesData;
 	} else {
 		throw Exception(getNodeDebugId() + " is not a byte sequence type", HalleyExceptions::Resources);
 	}
@@ -546,7 +546,7 @@ Vector2f ConfigNode::asVector2f(Vector2f defaultValue) const
 String ConfigNode::asString() const
 {
 	if (type == ConfigNodeType::String) {
-		return *reinterpret_cast<String*>(ptrData);
+		return *strData;
 	} else if (type == ConfigNodeType::Int) {
 		return toString(asInt());
 	} else if (type == ConfigNodeType::Float) {
@@ -615,7 +615,7 @@ String ConfigNode::asString(const String& defaultValue) const
 const ConfigNode::SequenceType& ConfigNode::asSequence() const
 {
 	if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
-		return *reinterpret_cast<SequenceType*>(ptrData);
+		return *sequenceData;
 	} else {
 		throw Exception(getNodeDebugId() + " is not a sequence type", HalleyExceptions::Resources);
 	}
@@ -624,7 +624,7 @@ const ConfigNode::SequenceType& ConfigNode::asSequence() const
 const ConfigNode::MapType& ConfigNode::asMap() const
 {
 	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
-		return *reinterpret_cast<MapType*>(ptrData);
+		return *mapData;
 	} else {
 		throw Exception(getNodeDebugId() + " is not a map type", HalleyExceptions::Resources);
 	}
@@ -633,7 +633,7 @@ const ConfigNode::MapType& ConfigNode::asMap() const
 ConfigNode::SequenceType& ConfigNode::asSequence()
 {
 	if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
-		return *reinterpret_cast<SequenceType*>(ptrData);
+		return *sequenceData;
 	} else {
 		throw Exception(getNodeDebugId() + " is not a sequence type", HalleyExceptions::Resources);
 	}
@@ -642,7 +642,7 @@ ConfigNode::SequenceType& ConfigNode::asSequence()
 ConfigNode::MapType& ConfigNode::asMap()
 {
 	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
-		return *reinterpret_cast<MapType*>(ptrData);
+		return *mapData;
 	} else {
 		throw Exception(getNodeDebugId() + " is not a map type", HalleyExceptions::Resources);
 	}
@@ -686,7 +686,7 @@ void ConfigNode::ensureType(ConfigNodeType t)
 
 bool ConfigNode::hasKey(const String& key) const
 {
-	if (type == ConfigNodeType::Map) {
+	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
 		auto& map = asMap();
 		auto iter = map.find(key);
 		return iter != map.end() && iter->second.getType() != ConfigNodeType::Undefined;
@@ -747,16 +747,16 @@ std::vector<ConfigNode>::const_iterator ConfigNode::end() const
 
 void ConfigNode::reset()
 {
-	if (type == ConfigNodeType::Map) {
-		delete reinterpret_cast<MapType*>(ptrData);
-	} else if (type == ConfigNodeType::Sequence) {
-		delete reinterpret_cast<SequenceType*>(ptrData);
+	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
+		delete mapData;
+	} else if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
+		delete sequenceData;
 	} else if (type == ConfigNodeType::Bytes) {
-		delete reinterpret_cast<Bytes*>(ptrData);
+		delete bytesData;
 	} else if (type == ConfigNodeType::String) {
-		delete reinterpret_cast<String*>(ptrData);
+		delete strData;
 	}
-	ptrData = nullptr;
+	rawPtrData = nullptr;
 	type = ConfigNodeType::Undefined;
 }
 
@@ -1179,6 +1179,31 @@ void ConfigNode::applyDelta(const ConfigNode& delta)
 	}
 }
 
+void ConfigNode::decayDeltaArtifacts()
+{
+	switch (type) {
+	case ConfigNodeType::Map:
+	case ConfigNodeType::DeltaMap:
+		for (auto& [k, v]: asMap()) {
+			v.decayDeltaArtifacts();
+		}
+		type = ConfigNodeType::Map;
+		break;
+	case ConfigNodeType::Sequence:
+	case ConfigNodeType::DeltaSequence:
+		for (auto& v: asSequence()) {
+			v.decayDeltaArtifacts();
+		}
+		type = ConfigNodeType::Sequence;
+		break;
+	case ConfigNodeType::Idx:
+	case ConfigNodeType::Noop:
+	case ConfigNodeType::Del:
+		reset();
+		break;
+	}
+}
+
 void ConfigNode::applyMapDelta(const ConfigNode& delta)
 {
 	auto& myMap = asMap();
@@ -1195,6 +1220,7 @@ void ConfigNode::applyMapDelta(const ConfigNode& delta)
 				iter->second.applyDelta(v);
 			} else {
 				// Insert new
+				Ensures(v.getType() != ConfigNodeType::Noop);
 				myMap[k] = ConfigNode(v);
 			}
 		}
@@ -1221,6 +1247,7 @@ void ConfigNode::applySequenceDelta(const ConfigNode& delta)
 			result.emplace_back(std::move(value));
 		} else {
 			// New value
+			Ensures(v.getType() != ConfigNodeType::Noop);
 			result.emplace_back(v);
 		}
 	}

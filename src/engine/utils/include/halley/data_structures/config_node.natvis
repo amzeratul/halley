@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="Halley::ConfigNode">
+    <DisplayString Condition="type == ConfigNodeType::Int">Int:{intData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Float">Float:{floatData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Int2">Int2:({vec2iData.x}, {vec2iData.y})</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Float2">Float2:({vec2fData.x}, {vec2fData.y})</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::String">String:{*strData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Bytes">Bytes:{*bytesData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Noop">Noop</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Idx">Idx</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Del">Del</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Map">Map:{*mapData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::DeltaMap">Map:{*mapData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Sequence">Sequence:{*sequenceData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::DeltaSequence">Sequence:{*sequenceData}</DisplayString>
+    <DisplayString>Undefined</DisplayString>
+  </Type>
+</AutoVisualizer>
