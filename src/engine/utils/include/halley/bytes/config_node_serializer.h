@@ -432,6 +432,8 @@ namespace Halley {
 						node[name] = std::move(result);
 					}
 				}
+			} else {
+				node[name] = ConfigNode(ConfigNode::NoopType());
 			}
 		}
 

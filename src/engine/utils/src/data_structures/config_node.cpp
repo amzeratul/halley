@@ -15,9 +15,11 @@ ConfigNode::ConfigNode(const ConfigNode& other)
 			*this = other.asString();
 			break;
 		case ConfigNodeType::Sequence:
+		case ConfigNodeType::DeltaSequence:
 			*this = other.asSequence();
 			break;
 		case ConfigNodeType::Map:
+		case ConfigNodeType::DeltaMap:
 			*this = other.asMap();
 			break;
 		case ConfigNodeType::Int:
@@ -27,6 +29,7 @@ ConfigNode::ConfigNode(const ConfigNode& other)
 			*this = other.asFloat();
 			break;
 		case ConfigNodeType::Int2:
+		case ConfigNodeType::Idx:
 			*this = other.asVector2i();
 			break;
 		case ConfigNodeType::Float2:
@@ -36,10 +39,15 @@ ConfigNode::ConfigNode(const ConfigNode& other)
 			*this = other.asBytes();
 			break;
 		case ConfigNodeType::Undefined:
+		case ConfigNodeType::Noop:
+		case ConfigNodeType::Del:
 			break;
 		default:
 			throw Exception("Unknown configuration node type.", HalleyExceptions::Resources);
 	}
+
+	type = other.type;
+	auxData = other.auxData;
 }
 
 ConfigNode::ConfigNode(ConfigNode&& other) noexcept
@@ -962,8 +970,20 @@ ConfigNode ConfigNode::createDelta(const ConfigNode& from, const ConfigNode& to,
 	return doCreateDelta(from, to, BreadCrumb(), hints);
 }
 
+ConfigNode ConfigNode::applyDelta(const ConfigNode& from, const ConfigNode& delta)
+{
+	auto result = ConfigNode(from);
+	result.applyDelta(delta);
+	return result;
+}
+
 ConfigNode ConfigNode::doCreateDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints)
 {
+	// This allows things (e.g. ConfigNodeSerializer) to return Noop for fields that should skip the delta, for example when a field is not relevant to save data
+	if (to.getType() == ConfigNodeType::Noop) {
+		return ConfigNode(NoopType());
+	}
+	
 	if (from.getType() == to.getType()) {
 		if (hints && hints->shouldBypass(breadCrumb)) {
 			return ConfigNode(NoopType());
@@ -1006,17 +1026,19 @@ ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& 
 		
 	// Store the new keys if there's a change
 	for (const auto& [k, v]: toMap) {
-		const auto origIter = fromMap.find(k);
+		if (v.getType() != ConfigNodeType::Noop) {
+			const auto origIter = fromMap.find(k);
 
-		if (origIter != fromMap.end()) {
-			// Was present before, delta compress and store if it's different
-			auto delta = doCreateDelta(origIter->second, v, BreadCrumb(breadCrumb, k), hints);
-			if (delta.getType() != ConfigNodeType::Noop) {
-				result[k] = std::move(delta);
-			}
-		} else {
-			// Is new, store all of it
-			result[k] = ConfigNode(v);
+			if (origIter != fromMap.end()) {
+				// Was present before, delta compress and store if it's different
+				auto delta = doCreateDelta(origIter->second, v, BreadCrumb(breadCrumb, k), hints);
+				if (delta.getType() != ConfigNodeType::Noop) {
+					result[k] = std::move(delta);
+				}
+			} else {
+				// Is new, store all of it
+				result[k] = ConfigNode(v);
+			}			
 		}
 	}
 
@@ -1065,6 +1087,9 @@ ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigN
 	const auto& toSeq = to.asSequence();
 	auto& resultSeq = result.asSequence();
 
+	bool hasNewData = false;
+	size_t refCount = 0;
+
 	for (size_t curIdx = 0; curIdx != toSeq.size(); ++curIdx) {
 		const auto& curVal = toSeq[curIdx];
 		
@@ -1082,6 +1107,7 @@ ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigN
 			if (delta.getType() == ConfigNodeType::Noop) {
 				// Nothing to encode, store a reference
 				const int startIdx = static_cast<int>(matchIdx.value());
+				++refCount;
 
 				// Check if the last value can simply be extended
 				if (!tryExtend(resultSeq, startIdx)) {
@@ -1090,10 +1116,35 @@ ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigN
 			} else {
 				// Store delta
 				resultSeq.emplace_back(std::move(delta));
+				hasNewData = true;
 			}
 		} else {
 			// Just store original
 			resultSeq.push_back(curVal);
+			hasNewData = true;
+		}
+	}
+
+	// Check if it's just a permutation of the old data
+	if (!hasNewData && refCount == fromSeq.size()) {
+		if (hints && !hints->doesSequenceOrderMatter(breadCrumb)) {
+			std::vector<char> matches(fromSeq.size(), 0);
+			for (const auto& e: resultSeq) {
+				const auto range = e.asVector2i();
+				for (int i = range.x; i < range.x + range.y; ++i) {
+					++matches[i];
+				}
+			}
+			bool redundant = true;
+			for (auto& e: matches) {
+				if (e != 1) {
+					redundant = false;
+					break;
+				}
+			}
+			if (redundant) {
+				return ConfigNode(NoopType());
+			}
 		}
 	}
 

@@ -64,6 +64,15 @@ namespace Halley {
 		using MapType = std::map<String, ConfigNode>;
 		using SequenceType = std::vector<ConfigNode>;
 
+		struct NoopType {};
+		struct DelType {};
+		struct IdxType {
+			int start;
+			int len;
+			IdxType() = default;
+			IdxType(int start, int len) : start(start), len(len) {}
+		};
+		
 		ConfigNode();
 		explicit ConfigNode(const ConfigNode& other);
 		ConfigNode(ConfigNode&& other) noexcept;
@@ -77,6 +86,9 @@ namespace Halley {
 		explicit ConfigNode(Vector2i value);
 		explicit ConfigNode(Vector2f value);
 		explicit ConfigNode(Bytes value);
+		explicit ConfigNode(NoopType value);
+		explicit ConfigNode(DelType value);
+		explicit ConfigNode(IdxType value);
 
 		template <typename T>
 		explicit ConfigNode(const std::vector<T>& sequence)
@@ -106,6 +118,10 @@ namespace Halley {
 		ConfigNode& operator=(gsl::span<const gsl::byte> bytes);
 
 		ConfigNode& operator=(const char* value);
+		
+		ConfigNode& operator=(NoopType value);
+		ConfigNode& operator=(DelType value);
+		ConfigNode& operator=(IdxType value);
 
 		template <typename T>
 		ConfigNode& operator=(const std::vector<T>& sequence)
@@ -221,27 +237,20 @@ namespace Halley {
 			virtual ~IDeltaCodeHints() = default;
 
 			virtual std::optional<size_t> getSequenceMatch(const SequenceType& seq, const ConfigNode& newValue, size_t curIdx, const BreadCrumb& breadCrumb) const = 0;
+			virtual bool doesSequenceOrderMatter(const BreadCrumb& breadCrumb) const { return true; }
 			virtual bool canDeleteKey(const String& key, const BreadCrumb& breadCrumb) const { return true; }
 			virtual bool canDeleteAnyKey() const { return true; }
 			virtual bool shouldBypass(const BreadCrumb& breadCrumb) const { return false; }
 		};
 
 		static ConfigNode createDelta(const ConfigNode& from, const ConfigNode& to, const IDeltaCodeHints* hints = nullptr);
+		static ConfigNode applyDelta(const ConfigNode& from, const ConfigNode& delta);
 		void applyDelta(const ConfigNode& delta);
 
 	private:
 		template <typename T>
 		class Tag {};
 
-		struct NoopType {};
-		struct DelType {};
-		struct IdxType {
-			int start;
-			int len;
-			IdxType() = default;
-			IdxType(int start, int len) : start(start), len(len) {}
-		};
-		
 		union {
 			void* ptrData;
 			int intData;
@@ -270,13 +279,6 @@ namespace Halley {
 			s >> v;
 			*this = std::move(v);
 		}
-
-		explicit ConfigNode(NoopType value);
-		explicit ConfigNode(DelType value);
-		explicit ConfigNode(IdxType value);
-		ConfigNode& operator=(NoopType value);
-		ConfigNode& operator=(DelType value);
-		ConfigNode& operator=(IdxType value);
 
 		String getNodeDebugId() const;
 		String backTrackFullNodeName() const;
