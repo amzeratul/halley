@@ -29,19 +29,33 @@ namespace Halley {
     	void setPrefabUUID(UUID prefabUUID);
     	void setChildren(std::vector<EntityData> children);
     	void setComponents(std::vector<std::pair<String, ConfigNode>> components);
-
-    	EntityData makeDelta(const EntityData& to) const;
+        
+    	static EntityData makeDelta(const EntityData& from, const EntityData& to);
     	void applyDelta(const EntityData& delta);
 
     private:
+        enum class FieldId {
+	        Name,
+        	Prefab,
+        	InstanceUUID,
+        	PrefabUUID,
+        	Children,
+        	Components
+        };
+    	
     	String name;
     	String prefab;
     	UUID instanceUUID;
     	UUID prefabUUID;
     	std::vector<EntityData> children;
     	std::vector<std::pair<String, ConfigNode>> components;
+    	uint8_t fieldPresent = 0;
 
     	void addComponent(String key, ConfigNode data);
     	void parseUUID(UUID& dst, const ConfigNode& node);
+
+    	uint8_t getFieldBit(FieldId id) const;
+    	void setFieldPresent(FieldId id, bool present);
+    	bool isFieldPresent(FieldId id) const;
     };
 }

@@ -106,15 +106,45 @@ void EntityData::setComponents(std::vector<std::pair<String, ConfigNode>> compon
 	this->components = std::move(components);
 }
 
-EntityData EntityData::makeDelta(const EntityData& to) const
+EntityData EntityData::makeDelta(const EntityData& from, const EntityData& to)
 {
-	// TODO
-	return EntityData();
+	EntityData delta;
+
+	if (from.name != to.name) {
+		delta.name = to.name;
+		delta.setFieldPresent(FieldId::Name, true);
+	}
+	if (from.prefab != to.prefab) {
+		delta.prefab = to.prefab;
+		delta.setFieldPresent(FieldId::Prefab, true);
+	}
+	if (from.instanceUUID != to.instanceUUID) {
+		delta.instanceUUID = to.instanceUUID;
+		delta.setFieldPresent(FieldId::InstanceUUID, true);
+	}
+	if (from.prefabUUID != to.prefabUUID) {
+		delta.prefabUUID = to.prefabUUID;
+		delta.setFieldPresent(FieldId::PrefabUUID, true);
+	}
+
+	return delta;
 }
 
 void EntityData::applyDelta(const EntityData& delta)
 {
-	// TODO
+	if (delta.isFieldPresent(FieldId::Name)) {
+		name = delta.name;
+	}
+	if (delta.isFieldPresent(FieldId::Prefab)) {
+		prefab = delta.prefab;
+	}
+	if (delta.isFieldPresent(FieldId::InstanceUUID)) {
+		instanceUUID = delta.instanceUUID;
+	}
+	if (delta.isFieldPresent(FieldId::PrefabUUID)) {
+		prefabUUID = delta.prefabUUID;
+	}
+	
 }
 
 void EntityData::addComponent(String key, ConfigNode data)
@@ -129,4 +159,23 @@ void EntityData::parseUUID(UUID& dst, const ConfigNode& node)
 	} else if (node.getType() == ConfigNodeType::String) {
 		dst = UUID(node.asString());
 	}
+}
+
+uint8_t EntityData::getFieldBit(FieldId id) const
+{
+	return static_cast<uint8_t>(1 << static_cast<int>(id));
+}
+
+void EntityData::setFieldPresent(FieldId id, bool present)
+{
+	if (present) {
+		fieldPresent |= getFieldBit(id);
+	} else {
+		fieldPresent &= ~getFieldBit(id);
+	}
+}
+
+bool EntityData::isFieldPresent(FieldId id) const
+{
+	return (fieldPresent & getFieldBit(id)) != 0;
 }
