@@ -141,6 +141,7 @@ ConfigNode& ConfigNode::operator=(ConfigNode&& other) noexcept
 	vec2iData = other.vec2iData;
 	vec2fData = other.vec2fData;
 	parent = std::move(parent);
+	auxData = other.auxData;
 	
 	other.type = ConfigNodeType::Undefined;
 	other.rawPtrData = nullptr;

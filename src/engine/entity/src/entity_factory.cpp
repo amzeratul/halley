@@ -254,6 +254,7 @@ void EntityFactory::updateEntity(EntityRef& entity, const ConfigNode& treeNode, 
 		}
 		
 		for (const auto& componentNode: sequence) {
+			assert(componentNode.asMap().size() == 1);
 			loadComponents(componentNode.asMap());
 		}
 	} else if (node["components"].getType() == ConfigNodeType::Map) {

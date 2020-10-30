@@ -11,9 +11,9 @@
     <DisplayString Condition="type == ConfigNodeType::Idx">Idx</DisplayString>
     <DisplayString Condition="type == ConfigNodeType::Del">Del</DisplayString>
     <DisplayString Condition="type == ConfigNodeType::Map">Map:{*mapData}</DisplayString>
-    <DisplayString Condition="type == ConfigNodeType::DeltaMap">Map:{*mapData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::DeltaMap">DeltaMap:{*mapData}</DisplayString>
     <DisplayString Condition="type == ConfigNodeType::Sequence">Sequence:{*sequenceData}</DisplayString>
-    <DisplayString Condition="type == ConfigNodeType::DeltaSequence">Sequence:{*sequenceData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::DeltaSequence">DeltaSequence:{*sequenceData}</DisplayString>
     <DisplayString>Undefined</DisplayString>
   </Type>
 </AutoVisualizer>
