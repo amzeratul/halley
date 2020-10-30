@@ -40,5 +40,8 @@ namespace Halley {
     	UUID prefabUUID;
     	std::vector<EntityData> children;
     	std::vector<std::pair<String, ConfigNode>> components;
+
+    	void addComponent(String key, ConfigNode data);
+    	void parseUUID(UUID& dst, const ConfigNode& node);
     };
 }
