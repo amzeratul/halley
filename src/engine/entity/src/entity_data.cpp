@@ -106,47 +106,6 @@ void EntityData::setComponents(std::vector<std::pair<String, ConfigNode>> compon
 	this->components = std::move(components);
 }
 
-EntityData EntityData::makeDelta(const EntityData& from, const EntityData& to)
-{
-	EntityData delta;
-
-	if (from.name != to.name) {
-		delta.name = to.name;
-		delta.setFieldPresent(FieldId::Name, true);
-	}
-	if (from.prefab != to.prefab) {
-		delta.prefab = to.prefab;
-		delta.setFieldPresent(FieldId::Prefab, true);
-	}
-	if (from.instanceUUID != to.instanceUUID) {
-		delta.instanceUUID = to.instanceUUID;
-		delta.setFieldPresent(FieldId::InstanceUUID, true);
-	}
-	if (from.prefabUUID != to.prefabUUID) {
-		delta.prefabUUID = to.prefabUUID;
-		delta.setFieldPresent(FieldId::PrefabUUID, true);
-	}
-
-	return delta;
-}
-
-void EntityData::applyDelta(const EntityData& delta)
-{
-	if (delta.isFieldPresent(FieldId::Name)) {
-		name = delta.name;
-	}
-	if (delta.isFieldPresent(FieldId::Prefab)) {
-		prefab = delta.prefab;
-	}
-	if (delta.isFieldPresent(FieldId::InstanceUUID)) {
-		instanceUUID = delta.instanceUUID;
-	}
-	if (delta.isFieldPresent(FieldId::PrefabUUID)) {
-		prefabUUID = delta.prefabUUID;
-	}
-	
-}
-
 void EntityData::addComponent(String key, ConfigNode data)
 {
 	components.emplace_back(std::move(key), std::move(data));
@@ -161,21 +120,151 @@ void EntityData::parseUUID(UUID& dst, const ConfigNode& node)
 	}
 }
 
-uint8_t EntityData::getFieldBit(FieldId id) const
+uint8_t EntityData::getFieldBit(FieldId id)
 {
 	return static_cast<uint8_t>(1 << static_cast<int>(id));
 }
 
-void EntityData::setFieldPresent(FieldId id, bool present)
+uint8_t EntityData::setFieldPresent(uint8_t value, FieldId id, bool present)
 {
 	if (present) {
-		fieldPresent |= getFieldBit(id);
+		value |= getFieldBit(id);
 	} else {
-		fieldPresent &= ~getFieldBit(id);
+		value &= ~getFieldBit(id);
+	}
+	return value;
+}
+
+bool EntityData::isFieldPresent(uint8_t value, FieldId id)
+{
+	return (value & getFieldBit(id)) != 0;
+}
+
+EntityDataDelta::EntityDataDelta()
+{}
+
+EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, Options options)
+{
+	Expects(from.prefabUUID == to.prefabUUID);
+	
+	if (from.name != to.name) {
+		name = to.name;
+	}
+	if (from.prefab != to.prefab) {
+		prefab = to.prefab;
+	}
+	if (from.instanceUUID != to.instanceUUID) {
+		instanceUUID = to.instanceUUID;
+	}
+	prefabUUID = to.prefabUUID;
+
+	// Children
+	for (const auto& toChild: to.children) {
+		const auto fromIter = std::find_if(from.children.begin(), from.children.end(), [&] (const EntityData& e) { return e.isSameEntity(toChild); });
+		if (fromIter != from.children.end()) {
+			// Potentially modified
+			auto delta = EntityDataDelta(*fromIter, toChild);
+			if (delta.hasChange()) {
+				childrenChanged.emplace_back(std::move(delta));
+			}
+		} else {
+			// Inserted
+			childrenChanged.emplace_back(EntityDataDelta(EntityData(), toChild));
+		}
+	}
+	for (const auto& fromChild: from.children) {
+		const bool stillExists = std::find_if(to.children.begin(), to.children.end(), [&] (const EntityData& e) { return e.isSameEntity(fromChild); }) != to.children.begin();
+		if (!stillExists) {
+			// Removed
+			childrenRemoved.emplace_back(fromChild.getPrefabUUID());
+		}
+	}
+
+	// Components
+	for (const auto& toComponent: to.components) {
+		const auto fromIter = std::find_if(from.components.begin(), from.components.end(), [&] (const auto& e) { return e.first == toComponent.first; });
+		if (fromIter != from.components.end()) {
+			// Potentially modified
+			auto delta = ConfigNode::createDelta(fromIter->second, toComponent.second);
+			if (delta.getType() != ConfigNodeType::Noop) {
+				componentsChanged.emplace_back(toComponent.first, std::move(delta));
+			}
+		} else {
+			// Inserted
+			componentsChanged.emplace_back(toComponent);
+		}
+	}
+	for (const auto& fromComponent: from.components) {
+		const bool stillExists = std::find_if(to.components.begin(), to.components.end(), [&] (const auto& e) { return e.first == fromComponent.first; }) != to.components.begin();
+		if (!stillExists) {
+			// Removed
+			componentsRemoved.emplace_back(fromComponent.first);
+		}
 	}
 }
 
-bool EntityData::isFieldPresent(FieldId id) const
+void EntityData::applyDelta(const EntityDataDelta& delta)
 {
-	return (fieldPresent & getFieldBit(id)) != 0;
+	if (delta.name) {
+		name = delta.name.value();
+	}
+	if (delta.prefab) {
+		prefab = delta.prefab.value();
+	}
+	if (delta.instanceUUID) {
+		instanceUUID = delta.instanceUUID.value();
+	}
+	
+	for (const auto& childId: delta.childrenRemoved) {
+		children.erase(std::remove_if(children.begin(), children.end(), [&] (const EntityData& child) { return child.getPrefabUUID() == childId; }), children.end());
+	}
+	for (const auto& child: delta.childrenChanged) {
+		auto iter = std::find_if(children.begin(), children.end(), [&] (const EntityData& cur) { return cur.getPrefabUUID() == child.prefabUUID; });
+		if (iter == children.end()) {
+			children.emplace_back(applyDelta(EntityData(), child));
+		} else {
+			iter->applyDelta(child);
+		}		
+	}
+	for (const auto& componentId: delta.componentsRemoved) {
+		components.erase(std::remove_if(components.begin(), components.end(), [&] (const auto& component) { return component.first == componentId; }), components.end());
+	}
+	for (const auto& component: delta.componentsChanged) {
+		auto iter = std::find_if(components.begin(), components.end(), [&] (const auto& cur) { return cur.first == component.first; });
+		if (iter == components.end()) {
+			components.emplace_back(component);
+		} else {
+			iter->second.applyDelta(component.second);
+		}
+	}
+}
+
+EntityData EntityData::applyDelta(EntityData src, const EntityDataDelta& delta)
+{
+	src.applyDelta(delta);
+	return src;
+}
+
+bool EntityDataDelta::hasChange() const
+{
+	return name || prefab || instanceUUID
+		|| !componentsChanged.empty() || !componentsRemoved.empty() || !componentOrder.empty()
+		|| !childrenChanged.empty() || !childrenRemoved.empty() || !childrenOrder.empty();
+}
+
+bool EntityData::isSameEntity(const EntityData& other) const
+{
+	return prefabUUID == other.prefabUUID;
+}
+
+void EntityDataDelta::serialize(Serializer& s) const
+{
+	// TODO
+	throw Exception("Unimplemented", HalleyExceptions::Entity);
+}
+
+void EntityDataDelta::deserialize(Deserializer& s)
+{
+	// TODO
+	throw Exception("Unimplemented", HalleyExceptions::Entity);
 }

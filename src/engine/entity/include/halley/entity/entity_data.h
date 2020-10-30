@@ -3,7 +3,11 @@
 #include "halley/maths/uuid.h"
 
 namespace Halley {
+    class EntityDataDelta;
+	
     class EntityData {
+    	friend class EntityDataDelta;
+    	
     public:
     	EntityData();
     	EntityData(const ConfigNode& data);
@@ -29,9 +33,11 @@ namespace Halley {
     	void setPrefabUUID(UUID prefabUUID);
     	void setChildren(std::vector<EntityData> children);
     	void setComponents(std::vector<std::pair<String, ConfigNode>> components);
-        
-    	static EntityData makeDelta(const EntityData& from, const EntityData& to);
-    	void applyDelta(const EntityData& delta);
+
+    	void applyDelta(const EntityDataDelta& delta);
+    	static EntityData applyDelta(EntityData src, const EntityDataDelta& delta);
+
+    	bool isSameEntity(const EntityData& other) const;
 
     private:
         enum class FieldId {
@@ -49,13 +55,44 @@ namespace Halley {
     	UUID prefabUUID;
     	std::vector<EntityData> children;
     	std::vector<std::pair<String, ConfigNode>> components;
-    	uint8_t fieldPresent = 0;
 
     	void addComponent(String key, ConfigNode data);
     	void parseUUID(UUID& dst, const ConfigNode& node);
 
-    	uint8_t getFieldBit(FieldId id) const;
-    	void setFieldPresent(FieldId id, bool present);
-    	bool isFieldPresent(FieldId id) const;
-    };
+    	static uint8_t getFieldBit(FieldId id);
+    	static uint8_t setFieldPresent(uint8_t value, FieldId id, bool present);
+    	static bool isFieldPresent(uint8_t value, FieldId id);
+	};
+
+	class EntityDataDelta {
+		friend class EntityData;
+		
+	public:
+        class Options {
+        public:
+	        bool preserveOrder = false;
+        };
+		
+        EntityDataDelta();
+		EntityDataDelta(const EntityData& from, const EntityData& to, Options options = {});
+
+		bool hasChange() const;
+
+		void serialize(Serializer& s) const;
+    	void deserialize(Deserializer& s);
+
+	private:
+    	std::optional<String> name;
+    	std::optional<String> prefab;
+    	std::optional<UUID> instanceUUID;
+    	UUID prefabUUID;
+		
+		std::vector<std::pair<String, ConfigNode>> componentsChanged; // Add/modified
+		std::vector<String> componentsRemoved; // Removed
+		std::vector<String> componentOrder;
+
+		std::vector<EntityDataDelta> childrenChanged; // Add/modified
+		std::vector<UUID> childrenRemoved; // Removed
+		std::vector<UUID> childrenOrder;
+	};
 }
