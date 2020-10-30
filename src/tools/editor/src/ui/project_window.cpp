@@ -131,9 +131,8 @@ bool ProjectWindow::loadCustomUI()
 		return false;
 	}
 	
-	try {
-		const auto converter = std::make_shared<YAMLConverter>(project);		
-		customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(factory, resources, project.getGameResources(), api, converter));
+	try {		
+		customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(factory, resources, project.getGameResources(), api, std::make_shared<YAMLConverter>(project)));
 	} catch (const std::exception& e) {
 		Logger::logException(e);
 	} catch (...) {
