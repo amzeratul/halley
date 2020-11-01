@@ -25,7 +25,7 @@ namespace Halley {
 	private:
 		class PrefabObserver {
 		public:
-			PrefabObserver(std::shared_ptr<const ConfigFile> config);
+			PrefabObserver(std::shared_ptr<const Prefab> prefab);
 			
 			bool needsUpdate() const;
 			bool isScene() const;
@@ -35,10 +35,10 @@ namespace Halley {
 
 			void addEntity(EntityRef entity, std::optional<int> index);
 
-			const std::shared_ptr<const ConfigFile>& getConfig() const;
+			const std::shared_ptr<const Prefab>& getPrefab() const;
 
 		private:
-			std::shared_ptr<const ConfigFile> config;
+			std::shared_ptr<const Prefab> prefab;
 			std::vector<EntityRef> entities;
 			int assetVersion = 0;
 			bool scene = false;
@@ -47,6 +47,6 @@ namespace Halley {
 		std::vector<EntityRef> entities;
 		std::vector<PrefabObserver> prefabObservers;
 
-		PrefabObserver& getOrMakeObserver(const std::shared_ptr<const ConfigFile>& config);
+		PrefabObserver& getOrMakeObserver(const std::shared_ptr<const Prefab>& prefab);
 	};
 }

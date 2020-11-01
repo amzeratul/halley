@@ -12,9 +12,13 @@ namespace Halley {
 		void makeDefault();
 
 		const EntityData& getEntityData() const;
+		const std::vector<EntityData>& getEntityDatas() const;
 
+	protected:
+		virtual void loadEntityData();
+		
 	private:
-		EntityData entityData;
+		std::vector<EntityData> entityDatas;
 	};
 
 	class Scene final : public Prefab {

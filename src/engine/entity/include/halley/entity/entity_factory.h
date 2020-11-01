@@ -37,15 +37,12 @@ namespace Halley {
 
 		EntityRef createEntity(const char* prefabName);
 		EntityRef createEntity(const String& prefabName);
-		EntityRef createEntity(const ConfigNode& node, EntitySerialization::Type sourceType);
-		EntityRef createPrefab(std::shared_ptr<const Prefab> prefab);
-		EntityScene createScene(std::shared_ptr<const Prefab> scene);
-
+		EntityRef createEntity(const std::shared_ptr<const Prefab>& prefab);
 		EntityRef createEntity(const EntityData& data, EntityRef parent = EntityRef());
-		void updateEntityTree(EntityRef& entity, const EntityData& data);
-		
-		void updateEntityTree(EntityRef& entity, const ConfigNode& node, EntitySerialization::Type sourceType, bool doRebuildContext = false);
-		void updateScene(std::vector<EntityRef>& entities, const ConfigNode& node, EntitySerialization::Type sourceType);
+		EntityScene createScene(const std::shared_ptr<const Prefab>& scene);
+
+		void updateEntity(EntityRef& entity, const EntityData& data);
+		void updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene, EntitySerialization::Type sourceType);
 
 		EntityData serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent = true);
 
@@ -76,23 +73,14 @@ namespace Halley {
 
 		ConfigNode dummyPrefab;
 
-		void createEntityTreeForScene(const ConfigNode& node, EntityScene& curScene, std::shared_ptr<const Prefab> prefab, std::optional<int> index = {});
-		EntityRef createEntityTree(const ConfigNode& node, EntityScene* curScene, bool fromPrefab, bool fromNewPrefab);
-		EntityRef createEntity(std::optional<EntityRef> parent, std::optional<EntityRef> prefabRoot, const ConfigNode& node, bool populate, EntityScene* curScene, bool fromPrefab, bool isPrefabRoot, bool fromNewPrefab);
-		
-		void updateEntity(EntityRef& entity, const ConfigNode& node, UpdateMode mode = UpdateMode::UpdateAll);
-		void doUpdateEntityTree(EntityRef& entity, const ConfigNode& node, bool refreshing, bool isPrefabRoot);
-		void rebuildPrefabContext(const ConfigNode& treeNode, bool isRoot = true);
-		void rebuildPrefabContext(EntityRef& entity);
-		void rebuildContext(EntityRef& entity, const ConfigNode& node);
-		
+		EntityRef createEntity(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prefab);
+		EntityRef doCreateEntity(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prefab);
+
 		std::shared_ptr<const Prefab> getPrefab(const String& id) const;
-		const ConfigNode& getPrefabNode(const String& id) const;
+		EntityData getEntityData(const EntityData& src, const std::shared_ptr<const Prefab>& prefab) const;
 
 		void startContext(EntitySerialization::Type sourceType);
 		ConfigNodeSerializationContext makeContext() const;
-
-		UUID getUUID(const ConfigNode& node) const;
 	};
 
 	class EntitySerializationContext {

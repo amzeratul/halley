@@ -58,15 +58,15 @@ void EntityScene::addRootEntity(EntityRef entity)
 	entities.emplace_back(entity);
 }
 
-EntityScene::PrefabObserver::PrefabObserver(std::shared_ptr<const ConfigFile> config)
-	: config(std::move(config))
+EntityScene::PrefabObserver::PrefabObserver(std::shared_ptr<const Prefab> prefab)
+	: prefab(std::move(prefab))
 {
-	assetVersion = this->config->getAssetVersion();
+	assetVersion = this->prefab->getAssetVersion();
 }
 
 bool EntityScene::PrefabObserver::needsUpdate() const
 {
-	return assetVersion != config->getAssetVersion();
+	return assetVersion != prefab->getAssetVersion();
 }
 
 bool EntityScene::PrefabObserver::isScene() const
@@ -78,10 +78,10 @@ void EntityScene::PrefabObserver::update(EntityFactory& factory)
 {
 	if (!entities.empty()) {
 		if (scene) {
-			factory.updateScene(entities, config->getRoot(), EntitySerialization::Type::Prefab);
+			factory.updateScene(entities, prefab, EntitySerialization::Type::Prefab);
 		} else {
 			for (auto& entity: entities) {
-				factory.updateEntityTree(entity, config->getRoot(), EntitySerialization::Type::Prefab);
+				factory.updateEntity(entity, prefab->getEntityData());
 			}
 		}
 	}
@@ -89,7 +89,7 @@ void EntityScene::PrefabObserver::update(EntityFactory& factory)
 
 void EntityScene::PrefabObserver::markUpdated()
 {
-	assetVersion = config->getAssetVersion();
+	assetVersion = prefab->getAssetVersion();
 }
 
 void EntityScene::PrefabObserver::addEntity(EntityRef entity, std::optional<int> index)
@@ -100,17 +100,17 @@ void EntityScene::PrefabObserver::addEntity(EntityRef entity, std::optional<int>
 	}
 }
 
-const std::shared_ptr<const ConfigFile>& EntityScene::PrefabObserver::getConfig() const
+const std::shared_ptr<const Prefab>& EntityScene::PrefabObserver::getPrefab() const
 {
-	return config;
+	return prefab;
 }
 
-EntityScene::PrefabObserver& EntityScene::getOrMakeObserver(const std::shared_ptr<const ConfigFile>& config)
+EntityScene::PrefabObserver& EntityScene::getOrMakeObserver(const std::shared_ptr<const Prefab>& prefab)
 {
 	for (auto& o: prefabObservers) {
-		if (o.getConfig() == config) {
+		if (o.getPrefab() == prefab) {
 			return o;
 		}
 	}
-	return prefabObservers.emplace_back(config);
+	return prefabObservers.emplace_back(prefab);
 }
