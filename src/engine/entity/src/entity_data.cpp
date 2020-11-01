@@ -139,12 +139,12 @@ void EntityData::parseUUID(UUID& dst, const ConfigNode& node)
 EntityDataDelta::EntityDataDelta()
 {}
 
-EntityDataDelta::EntityDataDelta(const EntityData& to, Options options)
+EntityDataDelta::EntityDataDelta(const EntityData& to, const Options& options)
 	: EntityDataDelta(EntityData(), to, options)
 {
 }
 
-EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, Options options)
+EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, const Options& options)
 {
 	if (from.name != to.name) {
 		name = to.name;
@@ -189,16 +189,19 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, O
 
 	// Components
 	for (const auto& toComponent: to.components) {
-		const auto fromIter = std::find_if(from.components.begin(), from.components.end(), [&] (const auto& e) { return e.first == toComponent.first; });
-		if (fromIter != from.components.end()) {
-			// Potentially modified
-			auto delta = ConfigNode::createDelta(fromIter->second, toComponent.second);
-			if (delta.getType() != ConfigNodeType::Noop) {
-				componentsChanged.emplace_back(toComponent.first, std::move(delta));
+		const String& compId = toComponent.first;
+		if (options.ignoreComponents.find(compId) == options.ignoreComponents.end()) {
+			const auto fromIter = std::find_if(from.components.begin(), from.components.end(), [&] (const auto& e) { return e.first == toComponent.first; });
+			if (fromIter != from.components.end()) {
+				// Potentially modified
+				auto delta = ConfigNode::createDelta(fromIter->second, toComponent.second);
+				if (delta.getType() != ConfigNodeType::Noop) {
+					componentsChanged.emplace_back(toComponent.first, std::move(delta));
+				}
+			} else {
+				// Inserted
+				componentsChanged.emplace_back(toComponent);
 			}
-		} else {
-			// Inserted
-			componentsChanged.emplace_back(toComponent);
 		}
 	}
 	for (const auto& fromComponent: from.components) {

@@ -1101,8 +1101,6 @@ ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigN
 		std::optional<size_t> matchIdx;
 		if (hints) {
 			matchIdx = hints->getSequenceMatch(fromSeq, curVal, curIdx, breadCrumb);
-		} else {
-			matchIdx = curIdx;
 		}
 
 		if (matchIdx) {

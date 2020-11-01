@@ -325,7 +325,7 @@ EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationO
 	serializeContext.entitySerializationTypeMask = makeMask(options.type);
 	for (auto [componentId, component]: entity) {
 		auto& reflector = getComponentReflector(componentId);
-		result.getComponents().emplace_back(componentId, reflector.serialize(serializeContext, *component));
+		result.getComponents().emplace_back(reflector.getName(), reflector.serialize(serializeContext, *component));
 	}
 
 	// Children

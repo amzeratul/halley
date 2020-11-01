@@ -1,6 +1,7 @@
 #pragma once
 #include "halley/data_structures/config_node.h"
 #include "halley/maths/uuid.h"
+#include <set>
 
 namespace Halley {
     class EntityDataDelta;
@@ -62,11 +63,12 @@ namespace Halley {
         class Options {
         public:
 	        bool preserveOrder = false;
+        	std::set<String> ignoreComponents;
         };
 		
         EntityDataDelta();
-		explicit EntityDataDelta(const EntityData& to, Options options = {});
-		EntityDataDelta(const EntityData& from, const EntityData& to, Options options = {});
+		explicit EntityDataDelta(const EntityData& to, const Options& options = {});
+		EntityDataDelta(const EntityData& from, const EntityData& to, const Options& options = {});
 
 		bool hasChange() const;
 
