@@ -479,3 +479,25 @@ void EntitySerializationContext::clear()
 {
 	uuids.clear();
 }
+
+EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent)
+{
+	auto entity = world.createEntity(data.getInstanceUUID(), data.getName(), parent, true, data.getPrefabUUID());
+	
+	const auto func = world.getCreateComponentFunction();
+	for (const auto& [componentName, componentData]: data.getComponents()) {
+		func(*this, componentName, entity, componentData);
+	}
+
+	for (const auto& child: data.getChildren()) {
+		createEntity(child, entity);
+	}
+
+	return entity;
+}
+
+void EntityFactory::updateEntityTree(EntityRef& entity, const EntityData& data)
+{
+	// TODO
+	
+}

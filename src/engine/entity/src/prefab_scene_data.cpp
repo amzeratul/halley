@@ -15,10 +15,10 @@ PrefabSceneData::PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> 
 {
 }
 
-ISceneData::EntityData PrefabSceneData::getEntityData(const String& id)
+ISceneData::EntityNodeData PrefabSceneData::getEntityNodeData(const String& id)
 {
 	if (id.isEmpty()) {
-		return EntityData(prefab.getRoot(), "");
+		return EntityNodeData(prefab.getRoot(), "");
 	}
 	
 	const auto& [data, parentData] = findEntityAndParent(prefab.getRoot(), nullptr, id);
@@ -30,7 +30,7 @@ ISceneData::EntityData PrefabSceneData::getEntityData(const String& id)
 	if (parentData) {
 		parentId = (*parentData)["uuid"].asString();
 	}
-	return EntityData(*data, parentId);
+	return EntityNodeData(*data, parentId);
 }
 
 void PrefabSceneData::reloadEntity(const String& id)

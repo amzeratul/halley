@@ -15,7 +15,7 @@ EntityData::EntityData(const ConfigNode& data)
 {
 	name = data["name"].asString("");
 	prefab = data["prefab"].asString("");
-	parseUUID(instanceUUID, data["instanceUUID"]);
+	parseUUID(instanceUUID, data["uuid"]);
 	parseUUID(prefabUUID, data["prefabUUID"]);
 	parseUUID(parentUUID, data["parent"]);
 
@@ -45,10 +45,10 @@ ConfigNode EntityData::toConfigNode() const
 		result["prefab"] = prefab;
 	}
 	if (instanceUUID.isValid()) {
-		result["instanceUUID"] = instanceUUID.toString();
+		result["uuid"] = instanceUUID.toString();
 	}
 	if (prefabUUID.isValid()) {
-		result["uuid"] = prefabUUID.toString();
+		result["prefabUUID"] = prefabUUID.toString();
 	}
 	if (parentUUID.isValid()) {
 		result["parent"] = parentUUID.toString();
@@ -260,7 +260,7 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 	for (const auto& component: delta.componentsChanged) {
 		auto iter = std::find_if(components.begin(), components.end(), [&] (const auto& cur) { return cur.first == component.first; });
 		if (iter == components.end()) {
-			components.emplace_back(component);
+			components.emplace_back(component.first, ConfigNode::applyDelta(ConfigNode(ConfigNode::MapType()), component.second));
 		} else {
 			iter->second.applyDelta(component.second);
 		}

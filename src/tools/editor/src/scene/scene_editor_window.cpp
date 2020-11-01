@@ -266,7 +266,7 @@ void SceneEditorWindow::onEntitySelected(const String& id)
 		}
 	}
 
-	auto& entityData = sceneData->getEntityData(actualId).data;
+	auto& entityData = sceneData->getEntityNodeData(actualId).data;
 	const ConfigNode* prefabData = nullptr;
 	const String prefabName = entityData["prefab"].asString("");
 	if (!prefabName.isEmpty()) {
@@ -303,7 +303,7 @@ void SceneEditorWindow::markModified()
 
 void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId)
 {
-	auto& data = sceneData->getEntityData(id).data;
+	auto& data = sceneData->getEntityNodeData(id).data;
 	entityList->onEntityAdded(id, parentId, afterSiblingId, data);
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	onEntitySelected(id);
@@ -327,7 +327,7 @@ void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId
 void SceneEditorWindow::onEntityModified(const String& id)
 {
 	if (!id.isEmpty()) {
-		const auto& data = sceneData->getEntityData(id).data;
+		const auto& data = sceneData->getEntityNodeData(id).data;
 
 		entityList->onEntityModified(id, data);
 
@@ -345,7 +345,7 @@ void SceneEditorWindow::onEntityMoved(const String& id)
 		onEntitySelected(id);
 	}
 
-	gameBridge->onEntityMoved(UUID(id), sceneData->getEntityData(id).data);
+	gameBridge->onEntityMoved(UUID(id), sceneData->getEntityNodeData(id).data);
 	
 	markModified();
 }
@@ -413,7 +413,7 @@ void SceneEditorWindow::pasteEntityFromClipboard(const String& referenceId)
 
 String SceneEditorWindow::copyEntity(const String& id)
 {
-	const auto entityData = sceneData->getEntityData(id);
+	const auto entityData = sceneData->getEntityNodeData(id);
 	return serializeEntity(entityData.data);
 }
 
@@ -497,9 +497,9 @@ void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfRef
 	if (referenceEntity.isEmpty()) {
 		addEntity(referenceEntity, true, std::move(data));
 	} else {
-		const bool isScene = sceneData->getEntityData("").data.getType() == ConfigNodeType::Sequence;
+		const bool isScene = sceneData->getEntityNodeData("").data.getType() == ConfigNodeType::Sequence;
 		
-		const auto ref = sceneData->getEntityData(referenceEntity);
+		const auto ref = sceneData->getEntityNodeData(referenceEntity);
 		const bool canBeSibling = !ref.parentId.isEmpty() || isScene;
 		const bool canBeChild = !ref.data.hasKey("prefab");
 		if (!canBeChild && !canBeSibling) {
@@ -532,12 +532,12 @@ void SceneEditorWindow::addEntity(const String& parentId, const String& afterSib
 	
 	if (parentId.isEmpty()) {
 		// Should only be able to place items on the root if it's a scene, and therefore the root is a sequence
-		auto& root = sceneData->getEntityData("").data;
+		auto& root = sceneData->getEntityNodeData("").data;
 		if (root.getType() == ConfigNodeType::Sequence) {
 			addOnSequence(root.asSequence());
 		}
 	} else {
-		ConfigNode& parentData = sceneData->getEntityData(parentId).data;
+		ConfigNode& parentData = sceneData->getEntityNodeData(parentId).data;
 		if (!parentData.hasKey("prefab")) {
 			auto& children = parentData["children"];
 			children.ensureType(ConfigNodeType::Sequence);
@@ -557,7 +557,7 @@ void SceneEditorWindow::removeEntity(const String& targetId)
 {
 	const String& parentId = findParent(currentEntityId);
 
-	auto& data = sceneData->getEntityData(parentId).data;
+	auto& data = sceneData->getEntityNodeData(parentId).data;
 	const bool isSceneRoot = parentId.isEmpty() && data.getType() == ConfigNodeType::Sequence;
 	if (parentId.isEmpty() && !isSceneRoot) {
 		// Don't delete root of prefab

@@ -148,9 +148,9 @@ namespace Halley {
 
 	class ISceneData {
 	public:
-        class EntityData {
+        class EntityNodeData {
         public:
-            EntityData(ConfigNode& data, String parentId)
+            EntityNodeData(ConfigNode& data, String parentId)
                 : data(data)
         		, parentId(std::move(parentId))
             { }
@@ -161,7 +161,7 @@ namespace Halley {
 		
 		virtual ~ISceneData() = default;
 
-		virtual EntityData getEntityData(const String& id) = 0;
+		virtual EntityNodeData getEntityNodeData(const String& id) = 0;
 		virtual void reloadEntity(const String& id) = 0;
 		virtual EntityTree getEntityTree() const = 0;
 		virtual void reparentEntity(const String& entityId, const String& newParentId, int childIndex) = 0;
