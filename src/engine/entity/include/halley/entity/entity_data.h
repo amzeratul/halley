@@ -62,13 +62,15 @@ namespace Halley {
 	public:
         class Options {
         public:
-	        bool preserveOrder = false;
+            Options();
+        	
+	        bool preserveOrder;
         	std::set<String> ignoreComponents;
         };
 		
         EntityDataDelta();
-		explicit EntityDataDelta(const EntityData& to, const Options& options = {});
-		EntityDataDelta(const EntityData& from, const EntityData& to, const Options& options = {});
+		explicit EntityDataDelta(const EntityData& to, const Options& options = Options());
+		EntityDataDelta(const EntityData& from, const EntityData& to, const Options& options = Options());
 
 		bool hasChange() const;
 

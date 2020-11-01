@@ -15,6 +15,7 @@ namespace Halley {
 	class World;
 	class System;
 	class EntityRef;
+	class Prefab;
 
 	// True if T::onAddedToEntity(EntityRef&) exists
 	template <class, class = void_t<>> struct HasOnAddedToEntityMember : std::false_type {};
@@ -48,7 +49,7 @@ namespace Halley {
 		T* tryGetComponent()
 		{
 			constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
-			for (int i = 0; i < liveComponents; i++) {
+			for (uint8_t i = 0; i < liveComponents; i++) {
 				if (components[i].first == id) {
 					return static_cast<T*>(components[i].second);
 				}
@@ -60,7 +61,7 @@ namespace Halley {
 		const T* tryGetComponent() const
 		{
 			constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
-			for (int i = 0; i < liveComponents; i++) {
+			for (uint8_t i = 0; i < liveComponents; i++) {
 				if (components[i].first == id) {
 					return static_cast<const T*>(components[i].second);
 				}
@@ -136,29 +137,37 @@ namespace Halley {
 		void setWorldPartition(uint8_t partition);
 
 	private:
-		// Start with these for better cache coherence
+		// !!! WARNING !!!
+		// The order of elements in this class was carefully chosen to maximise cache performance!
+		// Be SURE to verify that no performance-critical fields get bumped to a worse cacheline if you change anything here
+
+		// Cacheline 0
 		Vector<std::pair<int, Component*>> components;
-		int liveComponents = 0;
+		uint8_t liveComponents = 0;
 		bool dirty : 1;
 		bool alive : 1;
 		bool serializable : 1;
 		bool reloaded : 1;
 		bool fromPrefab : 1;
 		
-		uint8_t hierarchyRevision = 0;
 		uint8_t childrenRevision = 0;
 		uint8_t worldPartition = 0;
-		Entity* parent = nullptr;
 
 		FamilyMaskType mask;
+		Entity* parent = nullptr;
 		EntityId entityId;
+		Vector<Entity*> children; // Cacheline 1 starts 16 bytes into this
 
-		Vector<Entity*> children;
-		
+		// Cacheline 1
 		Vector<MessageEntry> inbox;
 		String name;
+
+		// Cacheline 2
 		UUID instanceUUID;
 		UUID prefabUUID;
+		std::shared_ptr<const Prefab> prefab;
+
+		uint8_t hierarchyRevision = 0;
 
 		Entity();
 		void destroyComponents(ComponentDeleterTable& storage);
@@ -177,7 +186,7 @@ namespace Halley {
 		Entity& removeComponent(World& world)
 		{
 			constexpr int id = T::componentIndex;
-			for (int i = 0; i < liveComponents; ++i) {
+			for (uint8_t i = 0; i < liveComponents; ++i) {
 				if (components[i].first == id) {
 					removeComponentAt(i);
 					markDirty(world);
@@ -513,7 +522,7 @@ namespace Halley {
 		size_t getNumComponents() const
 		{
 			Expects(entity);
-			return size_t(entity->liveComponents);
+			return static_cast<size_t>(entity->liveComponents);
 		}
 
 		std::pair<int, Component*> getRawComponent(size_t idx) const

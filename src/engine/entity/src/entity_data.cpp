@@ -136,6 +136,11 @@ void EntityData::parseUUID(UUID& dst, const ConfigNode& node)
 	}
 }
 
+EntityDataDelta::Options::Options()
+	: preserveOrder(false)
+{
+}
+
 EntityDataDelta::EntityDataDelta()
 {}
 

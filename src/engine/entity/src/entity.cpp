@@ -29,11 +29,15 @@ void Entity::destroyComponents(ComponentDeleterTable& table)
 
 void Entity::addComponent(Component* component, int id)
 {
+	if (liveComponents == std::numeric_limits<decltype(liveComponents)>::max()) {
+		throw Exception("Too many components in Entity", HalleyExceptions::Entity);
+	}
+	
 	// Put it at the back of the list...
 	components.push_back(std::pair<int, Component*>(id, component));
 
 	// ...if there's dead components, swap with the first dead component...
-	if (liveComponents < int(components.size())) {
+	if (static_cast<size_t>(liveComponents) < components.size()) {
 		std::swap(components[liveComponents], components.back());
 	}
 
@@ -44,7 +48,7 @@ void Entity::addComponent(Component* component, int id)
 void Entity::removeComponentAt(int i)
 {
 	// Put it at the end of the list of living components... (guaranteed to swap with living component)
-	std::swap(components[i], components[size_t(liveComponents) - 1]);
+	std::swap(components[i], components[static_cast<size_t>(liveComponents) - 1]);
 
 	// ...then shrink that list, therefore moving it into dead component territory
 	--liveComponents;
@@ -65,7 +69,7 @@ void Entity::deleteComponent(Component* component, int id, ComponentDeleterTable
 
 void Entity::keepOnlyComponentsWithIds(const std::vector<int>& ids, World& world)
 {
-	for (int i = 0; i < liveComponents; ++i) {
+	for (uint8_t i = 0; i < liveComponents; ++i) {
 		if (std::find(ids.begin(), ids.end(), components[i].first) == ids.end()) {
 			std::swap(components[i], components[liveComponents - 1]);
 			--liveComponents;
@@ -186,7 +190,7 @@ void Entity::refresh(MaskStorage& storage, ComponentDeleterTable& table)
 		dirty = false;
 
 		// Delete stale components
-		for (int i = liveComponents; i < int(components.size()); ++i) {
+		for (size_t i = liveComponents; i < components.size(); ++i) {
 			deleteComponent(components[i].second, components[i].first, table);
 		}
 		components.resize(liveComponents);
