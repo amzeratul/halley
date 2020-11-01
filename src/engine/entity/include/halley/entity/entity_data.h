@@ -10,7 +10,8 @@ namespace Halley {
     	
     public:
     	EntityData();
-    	EntityData(const ConfigNode& data);
+        explicit EntityData(UUID instanceUUID);
+    	explicit EntityData(const ConfigNode& data);
 
     	ConfigNode toConfigNode() const;
 
@@ -21,6 +22,7 @@ namespace Halley {
     	const String& getPrefab() const { return prefab; }
     	const UUID& getInstanceUUID() const { return instanceUUID; }
     	const UUID& getPrefabUUID() const { return prefabUUID; }
+    	const UUID& getParentUUID() const { return parentUUID; }
     	
     	const std::vector<EntityData>& getChildren() const { return children; }
     	std::vector<EntityData>& getChildren() { return children; }
@@ -31,37 +33,26 @@ namespace Halley {
     	void setPrefab(String prefab);
     	void setInstanceUUID(UUID instanceUUID);
     	void setPrefabUUID(UUID prefabUUID);
-    	void setChildren(std::vector<EntityData> children);
+        void setParentUUID(UUID parentUUID);
+	   	void setChildren(std::vector<EntityData> children);
     	void setComponents(std::vector<std::pair<String, ConfigNode>> components);
 
     	void applyDelta(const EntityDataDelta& delta);
-    	static EntityData applyDelta(EntityData src, const EntityDataDelta& delta);
+        static EntityData applyDelta(EntityData src, const EntityDataDelta& delta);
 
     	bool isSameEntity(const EntityData& other) const;
 
-    private:
-        enum class FieldId {
-	        Name,
-        	Prefab,
-        	InstanceUUID,
-        	PrefabUUID,
-        	Children,
-        	Components
-        };
-    	
+    private:    	
     	String name;
     	String prefab;
     	UUID instanceUUID;
     	UUID prefabUUID;
+    	UUID parentUUID;
     	std::vector<EntityData> children;
     	std::vector<std::pair<String, ConfigNode>> components;
 
     	void addComponent(String key, ConfigNode data);
     	void parseUUID(UUID& dst, const ConfigNode& node);
-
-    	static uint8_t getFieldBit(FieldId id);
-    	static uint8_t setFieldPresent(uint8_t value, FieldId id, bool present);
-    	static bool isFieldPresent(uint8_t value, FieldId id);
 	};
 
 	class EntityDataDelta {
@@ -74,6 +65,7 @@ namespace Halley {
         };
 		
         EntityDataDelta();
+		explicit EntityDataDelta(const EntityData& to, Options options = {});
 		EntityDataDelta(const EntityData& from, const EntityData& to, Options options = {});
 
 		bool hasChange() const;
@@ -81,18 +73,54 @@ namespace Halley {
 		void serialize(Serializer& s) const;
     	void deserialize(Deserializer& s);
 
+		const std::optional<String>& getPrefab() const { return prefab; }
+
 	private:
     	std::optional<String> name;
     	std::optional<String> prefab;
     	std::optional<UUID> instanceUUID;
-    	UUID prefabUUID;
+    	std::optional<UUID> prefabUUID;
+		std::optional<UUID> parentUUID;
 		
 		std::vector<std::pair<String, ConfigNode>> componentsChanged; // Add/modified
 		std::vector<String> componentsRemoved; // Removed
 		std::vector<String> componentOrder;
 
-		std::vector<EntityDataDelta> childrenChanged; // Add/modified
+		std::vector<std::pair<UUID, EntityDataDelta>> childrenChanged; // Add/modified
 		std::vector<UUID> childrenRemoved; // Removed
 		std::vector<UUID> childrenOrder;
+
+        enum class FieldId {
+        	RESERVED,
+	        Name,
+        	Prefab,
+        	InstanceUUID,
+        	PrefabUUID,
+        	ParentUUID,
+        	ComponentsChanged,
+        	ComponentsRemoved,
+        	ComponentsOrder,
+        	ChildrenChanged,
+        	ChildrenRemoved,
+        	ChildrenOrder
+        };
+
+    	static uint16_t getFieldBit(FieldId id);
+    	static void setFieldPresent(uint16_t& value, FieldId id, bool present);
+    	static bool isFieldPresent(uint16_t value, FieldId id);
+
+		uint16_t getFieldsPresent() const;
+	};
+
+	class SceneDataDelta {
+	public:
+		void addEntity(UUID entityId, EntityDataDelta delta);
+		const std::vector<std::pair<UUID, EntityDataDelta>>& getEntities() const;
+
+		void serialize(Serializer& s) const;
+    	void deserialize(Deserializer& s);
+
+	private:
+		std::vector<std::pair<UUID, EntityDataDelta>> entities;
 	};
 }

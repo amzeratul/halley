@@ -15,6 +15,12 @@ ConfigFile::ConfigFile(const ConfigFile& other)
 	updateRoot();
 }
 
+ConfigFile::ConfigFile(ConfigNode root)
+{
+	root = std::move(root);
+	updateRoot();
+}
+
 ConfigFile::ConfigFile(ConfigFile&& other) noexcept
 {
 	root = std::move(other.root);
@@ -156,6 +162,8 @@ std::unique_ptr<Prefab> Prefab::loadResource(ResourceLoader& loader)
 	auto prefab = std::make_unique<Prefab>();
 	Deserializer::fromBytes(*prefab, data->getSpan());
 
+	prefab->entityData = EntityData(prefab->getRoot());
+
 	return prefab;
 }
 
@@ -168,6 +176,12 @@ void Prefab::reload(Resource&& resource)
 void Prefab::makeDefault()
 {
 	getRoot() = ConfigNode(ConfigNode::MapType());
+	entityData = EntityData();
+}
+
+const EntityData& Prefab::getEntityData() const
+{
+	return entityData;
 }
 
 std::unique_ptr<Scene> Scene::loadResource(ResourceLoader& loader)

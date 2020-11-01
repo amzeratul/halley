@@ -1,8 +1,15 @@
 #include "entity_data.h"
+
+#include "halley/bytes/byte_serializer.h"
 using namespace Halley;
 
 EntityData::EntityData()
 {}
+
+EntityData::EntityData(UUID instanceUUID)
+	: instanceUUID(instanceUUID)
+{
+}
 
 EntityData::EntityData(const ConfigNode& data)
 {
@@ -10,6 +17,7 @@ EntityData::EntityData(const ConfigNode& data)
 	prefab = data["prefab"].asString("");
 	parseUUID(instanceUUID, data["instanceUUID"]);
 	parseUUID(prefabUUID, data["prefabUUID"]);
+	parseUUID(parentUUID, data["parent"]);
 
 	if (data.hasKey("components")) {
 		for (const auto& compMap: data["components"].asSequence()) {
@@ -41,6 +49,9 @@ ConfigNode EntityData::toConfigNode() const
 	}
 	if (prefabUUID.isValid()) {
 		result["uuid"] = prefabUUID.toString();
+	}
+	if (parentUUID.isValid()) {
+		result["parent"] = parentUUID.toString();
 	}
 
 	if (!components.empty()) {
@@ -96,6 +107,11 @@ void EntityData::setPrefabUUID(UUID prefabUUID)
 	this->prefabUUID = std::move(prefabUUID);
 }
 
+void EntityData::setParentUUID(UUID parentUUID)
+{
+	this->parentUUID = std::move(parentUUID);
+}
+
 void EntityData::setChildren(std::vector<EntityData> children)
 {
 	this->children = std::move(children);
@@ -120,33 +136,16 @@ void EntityData::parseUUID(UUID& dst, const ConfigNode& node)
 	}
 }
 
-uint8_t EntityData::getFieldBit(FieldId id)
-{
-	return static_cast<uint8_t>(1 << static_cast<int>(id));
-}
-
-uint8_t EntityData::setFieldPresent(uint8_t value, FieldId id, bool present)
-{
-	if (present) {
-		value |= getFieldBit(id);
-	} else {
-		value &= ~getFieldBit(id);
-	}
-	return value;
-}
-
-bool EntityData::isFieldPresent(uint8_t value, FieldId id)
-{
-	return (value & getFieldBit(id)) != 0;
-}
-
 EntityDataDelta::EntityDataDelta()
 {}
 
+EntityDataDelta::EntityDataDelta(const EntityData& to, Options options)
+	: EntityDataDelta(EntityData(), to, options)
+{
+}
+
 EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, Options options)
 {
-	Expects(from.prefabUUID == to.prefabUUID);
-	
 	if (from.name != to.name) {
 		name = to.name;
 	}
@@ -156,7 +155,12 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, O
 	if (from.instanceUUID != to.instanceUUID) {
 		instanceUUID = to.instanceUUID;
 	}
-	prefabUUID = to.prefabUUID;
+	if (from.prefabUUID != to.prefabUUID) {
+		prefabUUID = to.prefabUUID;
+	}
+	if (from.parentUUID != to.parentUUID) {
+		parentUUID = to.parentUUID;
+	}
 
 	// Children
 	for (const auto& toChild: to.children) {
@@ -165,11 +169,11 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, O
 			// Potentially modified
 			auto delta = EntityDataDelta(*fromIter, toChild);
 			if (delta.hasChange()) {
-				childrenChanged.emplace_back(std::move(delta));
+				childrenChanged.emplace_back(toChild.prefabUUID, std::move(delta));
 			}
 		} else {
 			// Inserted
-			childrenChanged.emplace_back(EntityDataDelta(EntityData(), toChild));
+			childrenChanged.emplace_back(toChild.prefabUUID, EntityDataDelta(EntityData(), toChild));
 		}
 	}
 	for (const auto& fromChild: from.children) {
@@ -178,6 +182,9 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, O
 			// Removed
 			childrenRemoved.emplace_back(fromChild.getPrefabUUID());
 		}
+	}
+	if (options.preserveOrder) {
+		// TODO
 	}
 
 	// Components
@@ -201,6 +208,9 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, O
 			componentsRemoved.emplace_back(fromComponent.first);
 		}
 	}
+	if (options.preserveOrder) {
+		// TODO
+	}
 }
 
 void EntityData::applyDelta(const EntityDataDelta& delta)
@@ -214,18 +224,28 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 	if (delta.instanceUUID) {
 		instanceUUID = delta.instanceUUID.value();
 	}
+	if (delta.prefabUUID) {
+		prefabUUID = delta.prefabUUID.value();
+	}
+	if (delta.parentUUID) {
+		parentUUID = delta.parentUUID.value();
+	}
 	
 	for (const auto& childId: delta.childrenRemoved) {
-		children.erase(std::remove_if(children.begin(), children.end(), [&] (const EntityData& child) { return child.getPrefabUUID() == childId; }), children.end());
+		children.erase(std::remove_if(children.begin(), children.end(), [&] (const auto& child) { return child.getPrefabUUID() == childId; }), children.end());
 	}
 	for (const auto& child: delta.childrenChanged) {
-		auto iter = std::find_if(children.begin(), children.end(), [&] (const EntityData& cur) { return cur.getPrefabUUID() == child.prefabUUID; });
+		auto iter = std::find_if(children.begin(), children.end(), [&] (const auto& cur) { return cur.getPrefabUUID() == child.first; });
 		if (iter == children.end()) {
-			children.emplace_back(applyDelta(EntityData(), child));
+			children.emplace_back(applyDelta(EntityData(child.first), child.second));
 		} else {
-			iter->applyDelta(child);
-		}		
+			iter->applyDelta(child.second);
+		}
 	}
+	if (!delta.childrenOrder.empty()) {
+		// TODO
+	}
+	
 	for (const auto& componentId: delta.componentsRemoved) {
 		components.erase(std::remove_if(components.begin(), components.end(), [&] (const auto& component) { return component.first == componentId; }), components.end());
 	}
@@ -237,6 +257,9 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 			iter->second.applyDelta(component.second);
 		}
 	}
+	if (!delta.componentOrder.empty()) {
+		// TODO
+	}
 }
 
 EntityData EntityData::applyDelta(EntityData src, const EntityDataDelta& delta)
@@ -247,7 +270,7 @@ EntityData EntityData::applyDelta(EntityData src, const EntityDataDelta& delta)
 
 bool EntityDataDelta::hasChange() const
 {
-	return name || prefab || instanceUUID
+	return name || prefab || instanceUUID || prefabUUID || parentUUID
 		|| !componentsChanged.empty() || !componentsRemoved.empty() || !componentOrder.empty()
 		|| !childrenChanged.empty() || !childrenRemoved.empty() || !childrenOrder.empty();
 }
@@ -259,12 +282,138 @@ bool EntityData::isSameEntity(const EntityData& other) const
 
 void EntityDataDelta::serialize(Serializer& s) const
 {
-	// TODO
-	throw Exception("Unimplemented", HalleyExceptions::Entity);
+	uint16_t fieldsPresent = getFieldsPresent();
+	s << fieldsPresent;
+
+	auto encodeField = [&] (auto& v, FieldId id)
+	{
+		if (isFieldPresent(fieldsPresent, id)) {
+			s << v;
+		}
+	};
+
+	auto encodeOptField = [&] (auto& v, FieldId id)
+	{
+		if (isFieldPresent(fieldsPresent, id)) {
+			s << v.value();
+		}
+	};
+
+	encodeOptField(name, FieldId::Name);
+	encodeOptField(prefab, FieldId::Prefab);
+	encodeOptField(instanceUUID, FieldId::InstanceUUID);
+	encodeOptField(prefabUUID, FieldId::PrefabUUID);
+	encodeOptField(parentUUID, FieldId::ParentUUID);
+	encodeField(childrenChanged, FieldId::ChildrenChanged);
+	encodeField(childrenRemoved, FieldId::ChildrenRemoved);
+	encodeField(childrenOrder, FieldId::ChildrenOrder);
+	encodeField(componentsChanged, FieldId::ComponentsChanged);
+	encodeField(componentsRemoved, FieldId::ComponentsRemoved);
+	encodeField(componentOrder, FieldId::ComponentsOrder);
 }
 
 void EntityDataDelta::deserialize(Deserializer& s)
 {
-	// TODO
-	throw Exception("Unimplemented", HalleyExceptions::Entity);
+	uint16_t fieldsPresent;
+	s >> fieldsPresent;
+
+	auto decodeField = [&] (auto& v, FieldId id)
+	{
+		if (isFieldPresent(fieldsPresent, id)) {
+			s >> v;
+		}
+	};
+
+	auto decodeOptField = [&] (auto& v, FieldId id)
+	{
+		if (isFieldPresent(fieldsPresent, id)) {
+			std::remove_reference_t<decltype(*v)> tmp;
+			s >> tmp;
+			v = std::move(tmp);
+		}
+	};
+	
+	decodeOptField(name, FieldId::Name);
+	decodeOptField(prefab, FieldId::Prefab);
+	decodeOptField(instanceUUID, FieldId::InstanceUUID);
+	decodeOptField(prefabUUID, FieldId::PrefabUUID);
+	decodeOptField(parentUUID, FieldId::ParentUUID);
+	decodeField(childrenChanged, FieldId::ChildrenChanged);
+	decodeField(childrenRemoved, FieldId::ChildrenRemoved);
+	decodeField(childrenOrder, FieldId::ChildrenOrder);
+	decodeField(componentsChanged, FieldId::ComponentsChanged);
+	decodeField(componentsRemoved, FieldId::ComponentsRemoved);
+	decodeField(componentOrder, FieldId::ComponentsOrder);
+}
+
+uint16_t EntityDataDelta::getFieldBit(FieldId id)
+{
+	return static_cast<uint8_t>(1 << static_cast<int>(id));
+}
+
+void EntityDataDelta::setFieldPresent(uint16_t& value, FieldId id, bool present)
+{
+	if (present) {
+		value |= getFieldBit(id);
+	} else {
+		value &= ~getFieldBit(id);
+	}
+}
+
+bool EntityDataDelta::isFieldPresent(uint16_t value, FieldId id)
+{
+	return (value & getFieldBit(id)) != 0;
+}
+
+uint16_t EntityDataDelta::getFieldsPresent() const
+{
+	uint16_t value = 0;
+	
+	auto checkField = [&] (const auto& v, FieldId id)
+	{
+		if (v) {
+			setFieldPresent(value, id, true);
+		}
+	};
+
+	auto checkFieldVec = [&] (const auto& v, FieldId id)
+	{
+		if (!v.empty()) {
+			setFieldPresent(value, id, true);
+		}
+	};
+
+	checkField(name, FieldId::Name);
+	checkField(prefab, FieldId::Prefab);
+	checkField(instanceUUID, FieldId::InstanceUUID);
+	checkField(prefabUUID, FieldId::PrefabUUID);
+	checkField(parentUUID, FieldId::ParentUUID);
+	checkFieldVec(childrenChanged, FieldId::ChildrenChanged);
+	checkFieldVec(childrenRemoved, FieldId::ChildrenRemoved);
+	checkFieldVec(childrenOrder, FieldId::ChildrenOrder);
+	checkFieldVec(componentsChanged, FieldId::ComponentsChanged);
+	checkFieldVec(componentsRemoved, FieldId::ComponentsRemoved);
+	checkFieldVec(componentOrder, FieldId::ComponentsOrder);
+
+	return value;
+}
+
+void SceneDataDelta::addEntity(UUID entityId, EntityDataDelta delta)
+{
+	entities.emplace_back(std::move(entityId), std::move(delta));
+}
+
+const std::vector<std::pair<UUID, EntityDataDelta>>& SceneDataDelta::getEntities() const
+{
+	return entities;
+}
+
+void SceneDataDelta::serialize(Serializer& s) const
+{
+	s << entities;
+}
+
+void SceneDataDelta::deserialize(Deserializer& s)
+{
+	s >> entities;
 }

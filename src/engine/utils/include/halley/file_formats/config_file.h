@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../../../entity/include/halley/entity/entity_data.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/data_structures/config_node.h"
 
@@ -17,6 +18,7 @@ namespace Halley
 	public:
 		ConfigFile();
 		explicit ConfigFile(const ConfigFile& other);
+		explicit ConfigFile(ConfigNode root);
 		ConfigFile(ConfigFile&& other) noexcept;
 
 		ConfigFile& operator=(const ConfigFile& other);
@@ -66,6 +68,11 @@ namespace Halley
 
 		void reload(Resource&& resource) override;
 		void makeDefault();
+
+		const EntityData& getEntityData() const;
+
+	private:
+		EntityData entityData;
 	};
 
 	class Scene final : public Prefab {

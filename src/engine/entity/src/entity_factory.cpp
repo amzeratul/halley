@@ -311,28 +311,43 @@ void EntityFactory::updateScene(std::vector<EntityRef>& entities, const ConfigNo
 	}
 }
 
-ConfigNode EntityFactory::serializeEntity(EntityRef entity, EntitySerialization::Type type)
+EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent)
 {
-	ConfigNode result = ConfigNode::MapType();
-	ConfigNodeSerializationContext serializeContext = makeContext();
-	serializeContext.entitySerializationTypeMask = makeMask(type);
+	EntityData result;
 
-	auto components = ConfigNode::SequenceType();
+	// Properties
+	result.setName(entity.getName());
+	result.setInstanceUUID(entity.getInstanceUUID());
+	result.setPrefabUUID(entity.getPrefabUUID());
+
+	// Components
+	ConfigNodeSerializationContext serializeContext = makeContext();
+	serializeContext.entitySerializationTypeMask = makeMask(options.type);
 	for (auto [componentId, component]: entity) {
 		auto& reflector = getComponentReflector(componentId);
 		auto entry = ConfigNode::MapType();
 		entry[reflector.getName()] = reflector.serialize(serializeContext, *component);
-		components.emplace_back(std::move(entry));
+		result.getComponents().emplace_back(std::move(entry));
 	}
 
-	result["name"] = entity.getName();
-	result["uuid"] = entity.getInstanceUUID().getBytes();
-	result["prefabUUID"] = entity.getPrefabUUID().getBytes();
-	result["components"] = std::move(components);
+	// Children
+	for (const auto child: entity.getChildren()) {
+		if (child.isSerializable()) {
+			if (options.serializeAsStub && options.serializeAsStub(child)) {
+				// Store just a stub
+				result.getChildren().emplace_back(child.getInstanceUUID());
+			} else {
+				result.getChildren().push_back(serializeEntity(child, options, false));
+			}
+		}
+	}
 
-	auto parent = entity.tryGetParent();
-	if (parent) {
-		result["parent"] = parent->getInstanceUUID().getBytes();
+	// Parent
+	if (canStoreParent) {
+		auto parent = entity.tryGetParent();
+		if (parent) {
+			result.setParentUUID(parent->getInstanceUUID());
+		}
 	}
 	
 	return result;

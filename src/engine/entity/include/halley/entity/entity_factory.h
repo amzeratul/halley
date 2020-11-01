@@ -10,6 +10,7 @@ namespace Halley {
 	class World;
 	class Resources;
 	class EntityScene;
+	class EntityData;
 	
 	class EntityFactory {
 	public:
@@ -18,7 +19,18 @@ namespace Halley {
 			UpdateAll,
 			UpdateAllDeleteOld
 		};
-		
+
+		struct SerializationOptions {
+			EntitySerialization::Type type = EntitySerialization::Type::Undefined;
+			std::function<bool(EntityRef)> serializeAsStub;
+
+			SerializationOptions() = default;
+			explicit SerializationOptions(EntitySerialization::Type type, std::function<bool(EntityRef)> serializeAsStub = {})
+				: type(type)
+				, serializeAsStub(std::move(serializeAsStub))
+			{}
+		};
+
 		explicit EntityFactory(World& world, Resources& resources);
 		virtual ~EntityFactory();
 
@@ -31,7 +43,7 @@ namespace Halley {
 		void updateEntityTree(EntityRef& entity, const ConfigNode& node, EntitySerialization::Type sourceType, bool doRebuildContext = false);
 		void updateScene(std::vector<EntityRef>& entities, const ConfigNode& node, EntitySerialization::Type sourceType);
 
-		ConfigNode serializeEntity(EntityRef entity, EntitySerialization::Type type);
+		EntityData serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent = true);
 
 		template <typename T>
 		CreateComponentFunctionResult createComponent(EntityRef& e, const ConfigNode& componentData)
