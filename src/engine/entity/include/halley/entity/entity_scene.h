@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "entity.h"
+#include "prefab.h"
 
 namespace Halley {
 	class EntityFactory;

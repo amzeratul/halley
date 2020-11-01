@@ -2,6 +2,7 @@
 #include <functional>
 
 #include "create_functions.h"
+#include "prefab.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/data_structures/maybe.h"
 #include "halley/entity/entity.h"

@@ -13,6 +13,7 @@
 #include "halley/file_formats/binary_file.h"
 #include "halley/file_formats/image.h"
 #include "halley/core/graphics/mesh/mesh.h"
+#include "halley/entity/prefab.h"
 #include "halley/utils/variable.h"
 
 using namespace Halley;
