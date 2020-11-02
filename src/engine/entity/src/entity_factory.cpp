@@ -138,24 +138,26 @@ EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent)
 	return createEntity(data, parent, {});
 }
 
-EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prefab)
+EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prevPrefab)
 {
 	if (!data.getPrefab().isEmpty()) {
 		const auto newPrefab = getPrefab(data.getPrefab());
-		if (!newPrefab) {
+		if (newPrefab) {
+			// New prefab found, generate tree based on it
+			return doCreateEntity(getEntityData(data, newPrefab), parent, newPrefab);
+		} else {
 			Logger::logError("Prefab \"" + data.getPrefab() + "\" not found while instantiating entity.");
+			return doCreateEntity(data, parent, {});
 		}
-		return doCreateEntity(data, parent, newPrefab);
 	} else {
-		return doCreateEntity(data, parent, prefab);
+		return doCreateEntity(data, parent, prevPrefab);
 	}
 }
 
-EntityRef EntityFactory::doCreateEntity(const EntityData& srcData, EntityRef parent, const std::shared_ptr<const Prefab>& prefab)
+EntityRef EntityFactory::doCreateEntity(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prefab)
 {
-	const EntityData& data = getEntityData(srcData, prefab);
-	
 	EntityRef entity = world.createEntity(data.getInstanceUUID(), data.getName(), parent, !!prefab, data.getPrefabUUID());
+	entity.setPrefab(prefab);
 	
 	const auto func = world.getCreateComponentFunction();
 	for (const auto& [componentName, componentData]: data.getComponents()) {
@@ -175,7 +177,12 @@ EntityData EntityFactory::getEntityData(const EntityData& src, const std::shared
 		return src;
 	}
 
-	return EntityData::applyDelta(prefab->getEntityData(), EntityDataDelta(src));
+	const auto* prefabEntity = prefab->getEntityData().tryGetPrefabUUID(src.getPrefabUUID());
+	if (!prefabEntity) {
+		return src;
+	}
+
+	return prefabEntity->instantiateWithAsCopy(src);
 }
 
 void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)

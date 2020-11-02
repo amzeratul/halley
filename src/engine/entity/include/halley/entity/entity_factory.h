@@ -73,7 +73,7 @@ namespace Halley {
 
 		ConfigNode dummyPrefab;
 
-		EntityRef createEntity(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prefab);
+		EntityRef createEntity(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prevPrefab);
 		EntityRef doCreateEntity(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prefab);
 
 		std::shared_ptr<const Prefab> getPrefab(const String& id) const;

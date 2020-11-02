@@ -13,6 +13,10 @@ namespace Halley {
     	EntityData();
         explicit EntityData(UUID instanceUUID);
     	explicit EntityData(const ConfigNode& data);
+        EntityData(const EntityData& other) = default;
+    	EntityData(EntityData&& other) = default;
+    	EntityData& operator=(const EntityData& other) = delete;
+    	EntityData& operator=(EntityData&& other) = default;
 
     	ConfigNode toConfigNode() const;
 
@@ -30,6 +34,8 @@ namespace Halley {
     	const std::vector<std::pair<String, ConfigNode>>& getComponents() const { return components; }
     	std::vector<std::pair<String, ConfigNode>>& getComponents() { return components; }
 
+  	    const EntityData* tryGetPrefabUUID(const UUID& uuid) const;
+
     	void setName(String name);
     	void setPrefab(String prefab);
     	void setInstanceUUID(UUID instanceUUID);
@@ -43,6 +49,12 @@ namespace Halley {
 
     	bool isSameEntity(const EntityData& other) const;
 
+        void updateComponent(const String& id, const ConfigNode& data);
+        void updateChild(const EntityData& instanceChildData);
+
+    	void instantiateWith(const EntityData& instance);
+	    EntityData instantiateWithAsCopy(const EntityData& instance) const;
+
     private:    	
     	String name;
     	String prefab;
@@ -54,6 +66,8 @@ namespace Halley {
 
     	void addComponent(String key, ConfigNode data);
     	void parseUUID(UUID& dst, const ConfigNode& node);
+    	void generateChildUUID(const UUID& root);
+    	void instantiateData(const EntityData& instance);
 	};
 
 	class EntityDataDelta {

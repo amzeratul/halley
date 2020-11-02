@@ -576,6 +576,18 @@ namespace Halley {
 			entity->sortChildrenByPrefabUUIDs(uuids);
 		}
 
+		void setPrefab(std::shared_ptr<const Prefab> prefab)
+		{
+			Expects(entity);
+			entity->prefab = std::move(prefab);
+		}
+
+		const std::shared_ptr<const Prefab>& getPrefab() const
+		{
+			Expects(entity);
+			return entity->prefab;
+		}
+
 	private:
 		friend class World;
 

@@ -1,6 +1,7 @@
 #include "entity_data.h"
 
 #include "halley/bytes/byte_serializer.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 EntityData::EntityData()
@@ -85,6 +86,22 @@ void EntityData::deserialize(Deserializer& s)
 {
 	// TODO
 	throw Exception("Unimplemented", HalleyExceptions::Entity);
+}
+
+const EntityData* EntityData::tryGetPrefabUUID(const UUID& uuid) const
+{
+	if (uuid == prefabUUID) {
+		return this;
+	}
+
+	for (const auto& c: children) {
+		const auto result = c.tryGetPrefabUUID(uuid);
+		if (result) {
+			return result;
+		}
+	}
+
+	return nullptr;
 }
 
 void EntityData::setName(String name)
@@ -286,6 +303,72 @@ bool EntityDataDelta::hasChange() const
 bool EntityData::isSameEntity(const EntityData& other) const
 {
 	return prefabUUID == other.prefabUUID;
+}
+
+void EntityData::instantiateWith(const EntityData& instance)
+{
+	// Root of prefab
+	prefabUUID = instanceUUID;
+	instanceUUID = instance.instanceUUID;
+
+	// Update children UUIDs
+	for (auto& c: children) {
+		c.generateChildUUID(instanceUUID);
+	}
+
+	// Update components and children
+	instantiateData(instance);	
+}
+
+void EntityData::generateChildUUID(const UUID& root)
+{
+	prefabUUID = instanceUUID;
+	instanceUUID = UUID::generateFromUUIDs(instanceUUID, root);
+
+	for (auto& c: children) {
+		c.generateChildUUID(root);
+	}
+}
+
+void EntityData::instantiateData(const EntityData& instance)
+{
+	for (const auto& c: instance.components) {
+		updateComponent(c.first, c.second);
+	}
+	for (const auto& c: instance.children) {
+		updateChild(c);
+	}
+}
+
+void EntityData::updateComponent(const String& id, const ConfigNode& data)
+{
+	for (auto& c: components) {
+		if (c.first == id) {
+			c.second = ConfigNode(data);
+			return;
+		}
+	}
+	components.emplace_back(id, ConfigNode(data));
+}
+
+void EntityData::updateChild(const EntityData& instanceChildData)
+{
+	for (auto& c: children) {
+		// Is this correct???
+		Logger::logWarning("Untested code");
+		if (c.instanceUUID == instanceChildData.instanceUUID) { // Theoretically prefabUUIDs should match here too
+			c.instantiateData(c);
+			return;
+		}
+	}
+	children.emplace_back(instanceChildData);
+}
+
+EntityData EntityData::instantiateWithAsCopy(const EntityData& instance) const
+{
+	EntityData clone = *this;
+	clone.instantiateWith(instance);
+	return clone;
 }
 
 void EntityDataDelta::serialize(Serializer& s) const
