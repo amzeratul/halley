@@ -114,7 +114,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 	registryCpp.insert(registryCpp.end(), {
 		"",
 		"",
-		"using ComponentFactoryPtr = std::function<CreateComponentFunctionResult(EntityFactory&, EntityRef&, const ConfigNode&)>;",
+		"using ComponentFactoryPtr = std::function<CreateComponentFunctionResult(const EntityFactoryContext&, EntityRef&, const ConfigNode&)>;",
 		"using ComponentFactoryMap = HashMap<String, ComponentFactoryPtr>;",
 		"",
 		"static ComponentFactoryMap makeComponentFactories() {",
@@ -122,7 +122,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 	});
 
 	for (auto& comp : components) {
-		registryCpp.push_back("	result[\"" + comp.name + "\"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return factory.createComponent<" + comp.name + "Component>(e, node); };");
+		registryCpp.push_back("	result[\"" + comp.name + "\"] = [] (const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return context.createComponent<" + comp.name + "Component>(e, node); };");
 	}
 
 	registryCpp.insert(registryCpp.end(), {
@@ -164,13 +164,13 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"		return std::unique_ptr<System>(result->second());",
 		"	}",
 		"",
-		"	CreateComponentFunctionResult createComponent(EntityFactory& factory, const String& name, EntityRef& entity, const ConfigNode& componentData) {",
+		"	CreateComponentFunctionResult createComponent(const EntityFactoryContext& context, const String& name, EntityRef& entity, const ConfigNode& componentData) {",
 		"		static ComponentFactoryMap factories = makeComponentFactories();",
 		"		auto result = factories.find(name);",
 		"		if (result == factories.end()) {",
 		"			throw Exception(\"Component not found: \" + name, HalleyExceptions::Entity);",
 		"		}",
-		"		return result->second(factory, entity, componentData);",
+		"		return result->second(context, entity, componentData);",
 		"	}",
 		"",
 		"	ComponentReflector& getComponentReflector(int componentId) {",
@@ -262,11 +262,11 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	// Serialize & deserialize methods
 	gen.addBlankLine()
 		.addMethodDefinition(MethodSchema(TypeSchema("Halley::ConfigNode"), {
-			VariableSchema(TypeSchema("Halley::ConfigNodeSerializationContext&"), "context")
+			VariableSchema(TypeSchema("Halley::ConfigNodeSerializationContext&", true), "context")
 		}, "serialize", true), serializeBody)
 		.addBlankLine()
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), {
-			VariableSchema(TypeSchema("Halley::ConfigNodeSerializationContext&"), "context"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "node")
+			VariableSchema(TypeSchema("Halley::ConfigNodeSerializationContext&", true), "context"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "node")
 		}, "deserialize"), deserializeBody)
 		.addBlankLine();
 

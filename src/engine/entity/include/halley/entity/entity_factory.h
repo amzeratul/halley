@@ -46,50 +46,39 @@ namespace Halley {
 
 		EntityData serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent = true);
 
+	private:
+		World& world;
+		Resources& resources;
+
+		EntityRef createEntityTree(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prevPrefab);
+		EntityRef createEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prefab);
+
+		std::shared_ptr<const Prefab> getPrefab(const String& id) const;
+
+		std::shared_ptr<const EntityFactoryContext> makeContext(EntitySerialization::Type type) const;
+	};
+
+	class EntityFactoryContext {
+	public:
+		ConfigNodeSerializationContext configNodeContext;
+		
 		template <typename T>
-		CreateComponentFunctionResult createComponent(EntityRef& e, const ConfigNode& componentData)
+		CreateComponentFunctionResult createComponent(EntityRef& e, const ConfigNode& componentData) const
 		{
 			CreateComponentFunctionResult result;
 			result.componentId = T::componentIndex;
 			
 			auto comp = e.tryGetComponent<T>();
 			if (comp) {
-				comp->deserialize(context, componentData);
+				comp->deserialize(configNodeContext, componentData);
 			} else {
 				T component;
-				component.deserialize(context, componentData);
+				component.deserialize(configNodeContext, componentData);
 				e.addComponent<T>(std::move(component));
 				result.created = true;
 			}
 
 			return result;
 		}
-
-
-	private:
-		World& world;
-		Resources& resources;
-		ConfigNodeSerializationContext context;
-
-		ConfigNode dummyPrefab;
-
-		EntityRef createEntity(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prevPrefab);
-		EntityRef doCreateEntity(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prefab);
-
-		std::shared_ptr<const Prefab> getPrefab(const String& id) const;
-
-		void startContext(EntitySerialization::Type sourceType);
-		ConfigNodeSerializationContext makeContext() const;
-	};
-
-	class EntitySerializationContext {
-	public:
-		World& world;
-		std::map<UUID, EntityId> uuids;
-		std::vector<std::map<UUID, UUID>> uuidMapping; //prefab -> instance
-
-		EntitySerializationContext(World& world);
-
-		void clear();
 	};
 }

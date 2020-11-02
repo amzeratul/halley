@@ -6,13 +6,14 @@
 
 using namespace Halley;
 
-String EntityId::toUUID(const EntityId& id, ConfigNodeSerializationContext& context)
+String EntityId::toUUID(const EntityId& id, const ConfigNodeSerializationContext& context)
 {
-	auto& world = context.entityContext->world;
-	return world.getEntity(id).getInstanceUUID().toString();
+	//auto& world = context.entityContext->world;
+	//return world.getEntity(id).getInstanceUUID().toString();
+	return "";
 }
 
-EntityId EntityId::fromUUID(const String& uuidStr, ConfigNodeSerializationContext& context)
+EntityId EntityId::fromUUID(const String& uuidStr, const ConfigNodeSerializationContext& context)
 {
 	/*
 	const auto iter = context.entityContext->uuids.find(UUID(uuidStr));

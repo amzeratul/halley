@@ -415,7 +415,7 @@ void AnimationPlayerLite::update(Time time, Sprite& sprite)
 	}
 }
 
-ConfigNode ConfigNodeSerializer<AnimationPlayer>::serialize(const AnimationPlayer& player, ConfigNodeSerializationContext& context)
+ConfigNode ConfigNodeSerializer<AnimationPlayer>::serialize(const AnimationPlayer& player, const ConfigNodeSerializationContext& context)
 {
 	ConfigNode result = ConfigNode::MapType();
 	result["animation"] = player.hasAnimation() ? player.getAnimation().getAssetId() : "";
@@ -426,7 +426,7 @@ ConfigNode ConfigNodeSerializer<AnimationPlayer>::serialize(const AnimationPlaye
 	return result;
 }
 
-AnimationPlayer ConfigNodeSerializer<AnimationPlayer>::deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
+AnimationPlayer ConfigNodeSerializer<AnimationPlayer>::deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
 {
 	auto animName = node["animation"].asString("");
 	auto anim = animName.isEmpty() ? std::shared_ptr<Animation>() : context.resources->get<Animation>(animName);

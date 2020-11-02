@@ -589,7 +589,7 @@ Vector2f Sprite::getScale() const
 	return vertexAttrib.scale;
 }
 
-ConfigNode ConfigNodeSerializer<Sprite>::serialize(const Sprite& sprite, ConfigNodeSerializationContext& context)
+ConfigNode ConfigNodeSerializer<Sprite>::serialize(const Sprite& sprite, const ConfigNodeSerializationContext& context)
 {
 	// TODO
 	// How do I even do this, though...
@@ -597,7 +597,7 @@ ConfigNode ConfigNodeSerializer<Sprite>::serialize(const Sprite& sprite, ConfigN
 	return node;
 }
 
-Sprite ConfigNodeSerializer<Sprite>::deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
+Sprite ConfigNodeSerializer<Sprite>::deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
 {
 	Sprite sprite;
 

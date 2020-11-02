@@ -5,7 +5,7 @@
 #include "halley/support/exception.h"
 
 namespace Halley {
-    class EntitySerializationContext;
+	class EntityFactoryContext;
     class Resources;
 	class ConfigNode;
 
@@ -36,9 +36,9 @@ namespace Halley {
     };
 	
 	class ConfigNodeSerializationContext {
-	public:		
+	public:
 		Resources* resources = nullptr;
-		std::shared_ptr<EntitySerializationContext> entityContext;
+		const EntityFactoryContext* entityContext = nullptr;
 		int entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData);
 
 		[[nodiscard]] bool matchType(int typeMask) const
@@ -50,7 +50,7 @@ namespace Halley {
     template <typename T>
     class ConfigNodeSerializer {
     public:
-        ConfigNode serialize(const T& src, ConfigNodeSerializationContext& context)
+        ConfigNode serialize(const T& src, const ConfigNodeSerializationContext& context)
         {
         	if constexpr (std::is_enum_v<T>) {
         		return ConfigNodeSerializerEnumUtils<T>::fromEnum(src);
@@ -59,7 +59,7 @@ namespace Halley {
             }
         }
     	
-        T deserialize(ConfigNodeSerializationContext&, const ConfigNode& node)
+        T deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node)
         {
         	if constexpr (std::is_enum_v<T>) {
         		return ConfigNodeSerializerEnumUtils<T>::parseEnum(node);

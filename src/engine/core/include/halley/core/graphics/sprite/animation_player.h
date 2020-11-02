@@ -128,7 +128,7 @@ namespace Halley
 	template<>
 	class ConfigNodeSerializer<AnimationPlayer> {
 	public:
-		ConfigNode serialize(const AnimationPlayer& player, ConfigNodeSerializationContext& context);
-		AnimationPlayer deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node);
+		ConfigNode serialize(const AnimationPlayer& player, const ConfigNodeSerializationContext& context);
+		AnimationPlayer deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node);
 	};
 }

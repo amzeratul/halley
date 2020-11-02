@@ -472,12 +472,12 @@ bool Polygon::operator!=(const Polygon& other) const
 	return vertices != other.vertices;
 }
 
-ConfigNode ConfigNodeSerializer<Polygon>::serialize(const Polygon& polygon, ConfigNodeSerializationContext&)
+ConfigNode ConfigNodeSerializer<Polygon>::serialize(const Polygon& polygon, const ConfigNodeSerializationContext&)
 {
 	return ConfigNode(polygon.getVertices());
 }
 
-Polygon ConfigNodeSerializer<Polygon>::deserialize(ConfigNodeSerializationContext&, const ConfigNode& node) 
+Polygon ConfigNodeSerializer<Polygon>::deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node) 
 {
 	VertexList list;
 	if (node.getType() == ConfigNodeType::Sequence) {

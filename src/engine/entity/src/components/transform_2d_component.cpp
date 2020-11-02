@@ -157,7 +157,7 @@ Halley::Rect4f Transform2DComponent::getSpriteUncroppedAABB(const Halley::Sprite
 	return sprite.getUncroppedAABB() - sprite.getPosition() + getGlobalPosition();
 }
 
-void Transform2DComponent::deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
+void Transform2DComponent::deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
 {
 	Transform2DComponentBase::deserialize(context, node);
 	markDirty();

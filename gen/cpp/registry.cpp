@@ -22,19 +22,19 @@ static SystemFactoryMap makeSystemFactories() {
 }
 
 
-using ComponentFactoryPtr = std::function<CreateComponentFunctionResult(EntityFactory&, EntityRef&, const ConfigNode&)>;
+using ComponentFactoryPtr = std::function<CreateComponentFunctionResult(const EntityFactoryContext&, EntityRef&, const ConfigNode&)>;
 using ComponentFactoryMap = HashMap<String, ComponentFactoryPtr>;
 
 static ComponentFactoryMap makeComponentFactories() {
 	ComponentFactoryMap result;
-	result["Transform2D"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return factory.createComponent<Transform2DComponent>(e, node); };
-	result["Sprite"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return factory.createComponent<SpriteComponent>(e, node); };
-	result["TextLabel"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return factory.createComponent<TextLabelComponent>(e, node); };
-	result["SpriteAnimation"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return factory.createComponent<SpriteAnimationComponent>(e, node); };
-	result["Camera"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return factory.createComponent<CameraComponent>(e, node); };
-	result["Particles"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return factory.createComponent<ParticlesComponent>(e, node); };
-	result["AudioListener"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return factory.createComponent<AudioListenerComponent>(e, node); };
-	result["AudioSource"] = [] (EntityFactory& factory, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return factory.createComponent<AudioSourceComponent>(e, node); };
+	result["Transform2D"] = [] (const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return context.createComponent<Transform2DComponent>(e, node); };
+	result["Sprite"] = [] (const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return context.createComponent<SpriteComponent>(e, node); };
+	result["TextLabel"] = [] (const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return context.createComponent<TextLabelComponent>(e, node); };
+	result["SpriteAnimation"] = [] (const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return context.createComponent<SpriteAnimationComponent>(e, node); };
+	result["Camera"] = [] (const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return context.createComponent<CameraComponent>(e, node); };
+	result["Particles"] = [] (const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return context.createComponent<ParticlesComponent>(e, node); };
+	result["AudioListener"] = [] (const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return context.createComponent<AudioListenerComponent>(e, node); };
+	result["AudioSource"] = [] (const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return context.createComponent<AudioSourceComponent>(e, node); };
 	return result;
 }
 
@@ -65,13 +65,13 @@ namespace Halley {
 		return std::unique_ptr<System>(result->second());
 	}
 
-	CreateComponentFunctionResult createComponent(EntityFactory& factory, const String& name, EntityRef& entity, const ConfigNode& componentData) {
+	CreateComponentFunctionResult createComponent(const EntityFactoryContext& context, const String& name, EntityRef& entity, const ConfigNode& componentData) {
 		static ComponentFactoryMap factories = makeComponentFactories();
 		auto result = factories.find(name);
 		if (result == factories.end()) {
 			throw Exception("Component not found: " + name, HalleyExceptions::Entity);
 		}
-		return result->second(factory, entity, componentData);
+		return result->second(context, entity, componentData);
 	}
 
 	ComponentReflector& getComponentReflector(int componentId) {

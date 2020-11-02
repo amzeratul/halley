@@ -53,7 +53,7 @@ public:
 
 	uint32_t getRevision() const { return revision; }
 
-	void deserialize(Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node);
+	void deserialize(const Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node);
 
 private:
 	friend class Halley::EntityRef;

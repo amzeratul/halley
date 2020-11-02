@@ -239,12 +239,12 @@ Vector2f Particles::getSpawnPosition() const
 	return position + Vector2f(rng->getFloat(-spawnArea.x * 0.5f, spawnArea.x * 0.5f), rng->getFloat(-spawnArea.y * 0.5f, spawnArea.y * 0.5f));
 }
 
-ConfigNode ConfigNodeSerializer<Particles>::serialize(const Particles& particles, ConfigNodeSerializationContext& context)
+ConfigNode ConfigNodeSerializer<Particles>::serialize(const Particles& particles, const ConfigNodeSerializationContext& context)
 {
 	return particles.toConfigNode();
 }
 
-Particles ConfigNodeSerializer<Particles>::deserialize(ConfigNodeSerializationContext& context, const ConfigNode& node)
+Particles ConfigNodeSerializer<Particles>::deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
 {
 	return Particles(node, *context.resources);
 }
