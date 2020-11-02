@@ -38,7 +38,7 @@ namespace Halley {
             Resources& editorResources;
             Resources& gameResources;
             const HalleyAPI& api;
-            const std::shared_ptr <IYAMLConverter> yamlConverter = nullptr;
+            const std::shared_ptr <IYAMLConverter> yamlConverter;
 
             MakeToolArgs(UIFactory& factory, Resources& editorResources, Resources& gameResources, const HalleyAPI& api, const std::shared_ptr<IYAMLConverter> yamlConverter)
                 : factory(factory)
