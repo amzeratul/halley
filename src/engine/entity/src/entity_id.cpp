@@ -14,6 +14,7 @@ String EntityId::toUUID(const EntityId& id, ConfigNodeSerializationContext& cont
 
 EntityId EntityId::fromUUID(const String& uuidStr, ConfigNodeSerializationContext& context)
 {
+	/*
 	const auto iter = context.entityContext->uuids.find(UUID(uuidStr));
 	if (iter != context.entityContext->uuids.end()) {
 		return iter->second;
@@ -26,6 +27,7 @@ EntityId EntityId::fromUUID(const String& uuidStr, ConfigNodeSerializationContex
 			return instanceIter->second;
 		}
 	}
+	*/
 	
 	return EntityId();
 }
