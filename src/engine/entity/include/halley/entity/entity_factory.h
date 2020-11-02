@@ -50,17 +50,16 @@ namespace Halley {
 		World& world;
 		Resources& resources;
 
-		EntityRef createEntityTree(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prevPrefab);
-		EntityRef createEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prefab);
+		EntityRef createEntityTree(const EntityData& data, EntityRef parent, const std::shared_ptr<const EntityFactoryContext>& context);
+		EntityRef createEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<const EntityFactoryContext>& context);
 
-		std::shared_ptr<const Prefab> getPrefab(const String& id) const;
-
-		std::shared_ptr<const EntityFactoryContext> makeContext(EntitySerialization::Type type) const;
+		[[nodiscard]] std::shared_ptr<const Prefab> getPrefab(const String& id) const;
+		[[nodiscard]] std::shared_ptr<const EntityFactoryContext> makeContext(EntitySerialization::Type type, std::shared_ptr<const Prefab> prefab) const;
 	};
 
 	class EntityFactoryContext {
 	public:
-		ConfigNodeSerializationContext configNodeContext;
+		EntityFactoryContext(World& world, Resources& resources, EntitySerialization::Type type, std::shared_ptr<const Prefab> prefab = {});
 		
 		template <typename T>
 		CreateComponentFunctionResult createComponent(EntityRef& e, const ConfigNode& componentData) const
@@ -80,5 +79,15 @@ namespace Halley {
 
 			return result;
 		}
+
+		const std::shared_ptr<const Prefab>& getPrefab() const { return prefab; }
+		const ConfigNodeSerializationContext& getConfigNodeContext() const { return configNodeContext; }
+		World& getWorld() const { return *world; }
+		EntityId getEntityIdFromUUID(const UUID& uuid) const;
+
+	private:
+		ConfigNodeSerializationContext configNodeContext;
+		std::shared_ptr<const Prefab> prefab;
+		World* world;
 	};
 }

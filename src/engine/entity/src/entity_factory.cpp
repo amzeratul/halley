@@ -68,10 +68,10 @@ EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationO
 	result.setPrefabUUID(entity.getPrefabUUID());
 
 	// Components
-	auto serializeContext = makeContext(options.type);
+	const auto serializeContext = std::make_shared<EntityFactoryContext>(world, resources, options.type);
 	for (auto [componentId, component]: entity) {
 		auto& reflector = getComponentReflector(componentId);
-		result.getComponents().emplace_back(reflector.getName(), reflector.serialize(serializeContext->configNodeContext, *component));
+		result.getComponents().emplace_back(reflector.getName(), reflector.serialize(serializeContext->getConfigNodeContext(), *component));
 	}
 
 	// Children
@@ -102,13 +102,19 @@ std::shared_ptr<const Prefab> EntityFactory::getPrefab(const String& id) const
 	return resources.exists<Prefab>(id) ? resources.get<Prefab>(id) : std::shared_ptr<const Prefab>();
 }
 
-std::shared_ptr<const EntityFactoryContext> EntityFactory::makeContext(EntitySerialization::Type type) const
+EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, EntitySerialization::Type type, std::shared_ptr<const Prefab> prefab)
+	: world(&world)
 {
-	auto context = std::make_shared<EntityFactoryContext>();
-	context->configNodeContext.resources = &resources;
-	context->configNodeContext.entityContext = context.get();
-	context->configNodeContext.entitySerializationTypeMask = EntitySerialization::makeMask(type);
-	return context;
+	this->prefab = std::move(prefab);
+	configNodeContext.resources = &resources;
+	configNodeContext.entityContext = this;
+	configNodeContext.entitySerializationTypeMask = EntitySerialization::makeMask(type);
+}
+
+EntityId EntityFactoryContext::getEntityIdFromUUID(const UUID& uuid) const
+{
+	// TODO
+	return EntityId();
 }
 
 EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent)
@@ -116,32 +122,41 @@ EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent)
 	return createEntityTree(data, parent, {});
 }
 
-EntityRef EntityFactory::createEntityTree(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prevPrefab)
+EntityRef EntityFactory::createEntityTree(const EntityData& data, EntityRef parent, const std::shared_ptr<const EntityFactoryContext>& context)
 {
-	if (!data.getPrefab().isEmpty()) {
-		const auto newPrefab = getPrefab(data.getPrefab());
-		if (newPrefab) {
-			// New prefab found, generate tree based on it
-			const auto instanceData = newPrefab->getEntityData().instantiateWithAsCopy(data);
-			return createEntityNode(instanceData, parent, newPrefab);
-		} else {
-			Logger::logError("Prefab \"" + data.getPrefab() + "\" not found while instantiating entity.");
-			return createEntityNode(data, parent, {});
+	const bool entityDataIsPrefabInstance = !data.getPrefab().isEmpty();
+	const bool abandonPrefab = context && context->getPrefab() && !data.getPrefabUUID().isValid();
+	
+	if (!context || entityDataIsPrefabInstance || abandonPrefab) {
+		// Load prefab and create new context
+		const auto prefab = entityDataIsPrefabInstance ? getPrefab(data.getPrefab()) : std::shared_ptr<const Prefab>();
+		const auto newContext = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::Type::Prefab, prefab);
+
+		// Instantiate prefab
+		if (entityDataIsPrefabInstance) {
+			if (!prefab) {
+				Logger::logError("Prefab \"" + data.getPrefab() + "\" not found while instantiating entity.");
+			} else {
+				const auto instanceData = prefab->getEntityData().instantiateWithAsCopy(data);
+				return createEntityNode(instanceData, parent, newContext);
+			}
 		}
+
+		// Just instantiate the data given
+		return createEntityNode(data, parent, newContext);
 	} else {
-		return createEntityNode(data, parent, prevPrefab);
+		// Forward old context
+		return createEntityNode(data, parent, context);
 	}
 }
 
-EntityRef EntityFactory::createEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prefab)
+EntityRef EntityFactory::createEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<const EntityFactoryContext>& context)
 {
-	auto context = makeContext(EntitySerialization::Type::Undefined); // TODO
-	
-	const bool instantiatingFromPrefab = prefab && data.getPrefabUUID().isValid();
+	const bool instantiatingFromPrefab = !!context->getPrefab();
 	
 	EntityRef entity = world.createEntity(data.getInstanceUUID(), data.getName(), parent, instantiatingFromPrefab, data.getPrefabUUID());
 	if (instantiatingFromPrefab) {
-		entity.setPrefab(prefab);
+		entity.setPrefab(context->getPrefab());
 	}
 	
 	const auto func = world.getCreateComponentFunction();
@@ -150,7 +165,7 @@ EntityRef EntityFactory::createEntityNode(const EntityData& data, EntityRef pare
 	}
 
 	for (const auto& child: data.getChildren()) {
-		createEntityTree(child, entity, prefab);
+		createEntityTree(child, entity, context);
 	}
 
 	return entity;
