@@ -2,6 +2,7 @@
 #include "halley/bytes/byte_serializer.h"
 #include "halley-yamlcpp.h"
 #include "halley/tools/file/filesystem.h"
+#include "halley/tools/project/project.h"
 using namespace Halley;
 
 ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node)
@@ -203,4 +204,21 @@ bool YAMLConvert::isCompactSequence(const ConfigNode& node, int depth)
 	}
 
 	return false;
+}
+
+YAMLConverter::YAMLConverter(Project& project)
+	: project(project)
+{
+}
+
+String YAMLConverter::generateYAML(const ConfigNode& config) const
+{
+	return YAMLConvert::generateYAML(config, YAMLConvert::EmitOptions());
+}
+
+void YAMLConverter::writeYAMLAsset(const ConfigNode& config, const Path& relativePath) const
+{
+	const auto& path = project.getAssetsSrcPath() / relativePath;
+	const String& yaml = generateYAML(config);
+	FileSystem::writeFile(path, yaml);
 }
