@@ -227,10 +227,13 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 		}
 	}
 	for (const auto& fromComponent: from.components) {
-		const bool stillExists = std::find_if(to.components.begin(), to.components.end(), [&] (const auto& e) { return e.first == fromComponent.first; }) != to.components.begin();
-		if (!stillExists) {
-			// Removed
-			componentsRemoved.emplace_back(fromComponent.first);
+		const String& compId = fromComponent.first;
+		if (options.ignoreComponents.find(compId) == options.ignoreComponents.end()) {
+			const bool stillExists = std::find_if(to.components.begin(), to.components.end(), [&] (const auto& e) { return e.first == compId; }) != to.components.begin();
+			if (!stillExists) {
+				// Removed
+				componentsRemoved.emplace_back(compId);
+			}
 		}
 	}
 	if (options.preserveOrder) {
