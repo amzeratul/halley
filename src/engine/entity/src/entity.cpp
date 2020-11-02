@@ -99,6 +99,7 @@ ComponentDeleterTable& Entity::getComponentDeleterTable(World& world)
 
 void Entity::setParent(Entity* newParent, bool propagate, size_t childIdx)
 {
+	Expects(newParent != this);
 	Expects(isAlive());
 	
 	if (parent != newParent) {

@@ -113,8 +113,26 @@ EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, E
 
 EntityId EntityFactoryContext::getEntityIdFromUUID(const UUID& uuid) const
 {
-	// TODO
+	const auto result = getEntity(uuid);
+	if (result.isValid()) {
+		return result.getEntityId();
+	}
+	Logger::logError("Couldn't find entity with UUID " + uuid.toString() + " while instantiating entity.");
 	return EntityId();
+}
+
+void EntityFactoryContext::addEntity(EntityRef entity)
+{
+	entities[entity.getInstanceUUID()] = entity;
+}
+
+EntityRef EntityFactoryContext::getEntity(const UUID& uuid) const
+{
+	const auto iter = entities.find(uuid);
+	if (iter != entities.end()) {
+		return iter->second;
+	}
+	return EntityRef();
 }
 
 EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent)
@@ -122,7 +140,7 @@ EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent)
 	return createEntityTree(data, parent, {});
 }
 
-EntityRef EntityFactory::createEntityTree(const EntityData& data, EntityRef parent, const std::shared_ptr<const EntityFactoryContext>& context)
+EntityRef EntityFactory::createEntityTree(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context)
 {
 	const bool entityDataIsPrefabInstance = !data.getPrefab().isEmpty();
 	const bool abandonPrefab = context && context->getPrefab() && !data.getPrefabUUID().isValid();
@@ -138,11 +156,13 @@ EntityRef EntityFactory::createEntityTree(const EntityData& data, EntityRef pare
 				Logger::logError("Prefab \"" + data.getPrefab() + "\" not found while instantiating entity.");
 			} else {
 				const auto instanceData = prefab->getEntityData().instantiateWithAsCopy(data);
+				preInstantiateEntities(instanceData, *newContext);
 				return createEntityNode(instanceData, parent, newContext);
 			}
 		}
 
 		// Just instantiate the data given
+		preInstantiateEntities(data, *newContext);
 		return createEntityNode(data, parent, newContext);
 	} else {
 		// Forward old context
@@ -150,14 +170,10 @@ EntityRef EntityFactory::createEntityTree(const EntityData& data, EntityRef pare
 	}
 }
 
-EntityRef EntityFactory::createEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<const EntityFactoryContext>& context)
+EntityRef EntityFactory::createEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context)
 {
-	const bool instantiatingFromPrefab = !!context->getPrefab();
-	
-	EntityRef entity = world.createEntity(data.getInstanceUUID(), data.getName(), parent, instantiatingFromPrefab, data.getPrefabUUID());
-	if (instantiatingFromPrefab) {
-		entity.setPrefab(context->getPrefab());
-	}
+	auto entity = instantiateEntity(data, *context);
+	entity.setParent(parent);
 	
 	const auto func = world.getCreateComponentFunction();
 	for (const auto& [componentName, componentData]: data.getComponents()) {
@@ -169,6 +185,33 @@ EntityRef EntityFactory::createEntityNode(const EntityData& data, EntityRef pare
 	}
 
 	return entity;
+}
+
+EntityRef EntityFactory::instantiateEntity(const EntityData& data, EntityFactoryContext& context)
+{
+	const auto existing = context.getEntity(data.getInstanceUUID());
+	if (existing.isValid()) {
+		return existing;
+	}
+	
+	const bool instantiatingFromPrefab = !!context.getPrefab();
+	auto entity = world.createEntity(data.getInstanceUUID(), data.getName(), {}, instantiatingFromPrefab, data.getPrefabUUID());
+	if (instantiatingFromPrefab) {
+		entity.setPrefab(context.getPrefab());
+	}
+
+	context.addEntity(entity);
+
+	return entity;
+}
+
+void EntityFactory::preInstantiateEntities(const EntityData& data, EntityFactoryContext& context)
+{
+	instantiateEntity(data, context);
+	
+	for (const auto& child: data.getChildren()) {
+		preInstantiateEntities(child, context);
+	}
 }
 
 void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)

@@ -50,8 +50,10 @@ namespace Halley {
 		World& world;
 		Resources& resources;
 
-		EntityRef createEntityTree(const EntityData& data, EntityRef parent, const std::shared_ptr<const EntityFactoryContext>& context);
-		EntityRef createEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<const EntityFactoryContext>& context);
+		EntityRef createEntityTree(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context);
+		EntityRef createEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context);
+		EntityRef instantiateEntity(const EntityData& data, EntityFactoryContext& context);
+		void preInstantiateEntities(const EntityData& data, EntityFactoryContext& context);
 
 		[[nodiscard]] std::shared_ptr<const Prefab> getPrefab(const String& id) const;
 		[[nodiscard]] std::shared_ptr<const EntityFactoryContext> makeContext(EntitySerialization::Type type, std::shared_ptr<const Prefab> prefab) const;
@@ -85,9 +87,13 @@ namespace Halley {
 		World& getWorld() const { return *world; }
 		EntityId getEntityIdFromUUID(const UUID& uuid) const;
 
+		void addEntity(EntityRef entity);
+		EntityRef getEntity(const UUID& uuid) const;
+
 	private:
 		ConfigNodeSerializationContext configNodeContext;
 		std::shared_ptr<const Prefab> prefab;
 		World* world;
+		std::map<UUID, EntityRef> entities;
 	};
 }
