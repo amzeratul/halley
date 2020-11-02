@@ -77,7 +77,6 @@ namespace Halley {
 		EntityRef doCreateEntity(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prefab);
 
 		std::shared_ptr<const Prefab> getPrefab(const String& id) const;
-		EntityData getEntityData(const EntityData& src, const std::shared_ptr<const Prefab>& prefab) const;
 
 		void startContext(EntitySerialization::Type sourceType);
 		ConfigNodeSerializationContext makeContext() const;

@@ -144,7 +144,8 @@ EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent, 
 		const auto newPrefab = getPrefab(data.getPrefab());
 		if (newPrefab) {
 			// New prefab found, generate tree based on it
-			return doCreateEntity(getEntityData(data, newPrefab), parent, newPrefab);
+			const auto instanceData = newPrefab->getEntityData().instantiateWithAsCopy(data);
+			return doCreateEntity(instanceData, parent, newPrefab);
 		} else {
 			Logger::logError("Prefab \"" + data.getPrefab() + "\" not found while instantiating entity.");
 			return doCreateEntity(data, parent, {});
@@ -156,8 +157,12 @@ EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent, 
 
 EntityRef EntityFactory::doCreateEntity(const EntityData& data, EntityRef parent, const std::shared_ptr<const Prefab>& prefab)
 {
-	EntityRef entity = world.createEntity(data.getInstanceUUID(), data.getName(), parent, !!prefab, data.getPrefabUUID());
-	entity.setPrefab(prefab);
+	const bool instantiatingFromPrefab = prefab && data.getPrefabUUID().isValid();
+	
+	EntityRef entity = world.createEntity(data.getInstanceUUID(), data.getName(), parent, instantiatingFromPrefab, data.getPrefabUUID());
+	if (instantiatingFromPrefab) {
+		entity.setPrefab(prefab);
+	}
 	
 	const auto func = world.getCreateComponentFunction();
 	for (const auto& [componentName, componentData]: data.getComponents()) {
@@ -169,20 +174,6 @@ EntityRef EntityFactory::doCreateEntity(const EntityData& data, EntityRef parent
 	}
 
 	return entity;
-}
-
-EntityData EntityFactory::getEntityData(const EntityData& src, const std::shared_ptr<const Prefab>& prefab) const
-{
-	if (!prefab) {
-		return src;
-	}
-
-	const auto* prefabEntity = prefab->getEntityData().tryGetPrefabUUID(src.getPrefabUUID());
-	if (!prefabEntity) {
-		return src;
-	}
-
-	return prefabEntity->instantiateWithAsCopy(src);
 }
 
 void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)
