@@ -94,6 +94,6 @@ namespace Halley {
 		ConfigNodeSerializationContext configNodeContext;
 		std::shared_ptr<const Prefab> prefab;
 		World* world;
-		std::map<UUID, EntityRef> entities;
+		std::vector<EntityRef> entities;
 	};
 }

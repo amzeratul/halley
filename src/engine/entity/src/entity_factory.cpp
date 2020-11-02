@@ -123,14 +123,19 @@ EntityId EntityFactoryContext::getEntityIdFromUUID(const UUID& uuid) const
 
 void EntityFactoryContext::addEntity(EntityRef entity)
 {
-	entities[entity.getInstanceUUID()] = entity;
+	entities.push_back(entity);
 }
 
 EntityRef EntityFactoryContext::getEntity(const UUID& uuid) const
 {
-	const auto iter = entities.find(uuid);
-	if (iter != entities.end()) {
-		return iter->second;
+	if (!uuid.isValid()) {
+		return EntityRef();
+	}
+	
+	for (const auto& e: entities) {
+		if (e.getInstanceUUID() == uuid || e.getPrefabUUID() == uuid) {
+			return e;
+		}
 	}
 	return EntityRef();
 }
