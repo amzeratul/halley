@@ -53,11 +53,6 @@ EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& pref
 	return curScene;
 }
 
-void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene, EntitySerialization::Type sourceType)
-{
-	// TODO
-}
-
 EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent)
 {
 	EntityData result;
@@ -217,6 +212,11 @@ void EntityFactory::preInstantiateEntities(const EntityData& data, EntityFactory
 	for (const auto& child: data.getChildren()) {
 		preInstantiateEntities(child, context);
 	}
+}
+
+void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene, EntitySerialization::Type sourceType)
+{
+	// TODO
 }
 
 void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)

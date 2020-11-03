@@ -189,17 +189,17 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 		const auto fromIter = std::find_if(from.children.begin(), from.children.end(), [&] (const EntityData& e) { return e.isSameEntity(toChild); });
 		if (fromIter != from.children.end()) {
 			// Potentially modified
-			auto delta = EntityDataDelta(*fromIter, toChild);
+			auto delta = EntityDataDelta(*fromIter, toChild, options);
 			if (delta.hasChange()) {
 				childrenChanged.emplace_back(toChild.prefabUUID, std::move(delta));
 			}
 		} else {
 			// Inserted
-			childrenChanged.emplace_back(toChild.prefabUUID, EntityDataDelta(EntityData(), toChild));
+			childrenChanged.emplace_back(toChild.prefabUUID, EntityDataDelta(EntityData(), toChild, options));
 		}
 	}
 	for (const auto& fromChild: from.children) {
-		const bool stillExists = std::find_if(to.children.begin(), to.children.end(), [&] (const EntityData& e) { return e.isSameEntity(fromChild); }) != to.children.begin();
+		const bool stillExists = std::find_if(to.children.begin(), to.children.end(), [&] (const EntityData& e) { return e.isSameEntity(fromChild); }) != to.children.end();
 		if (!stillExists) {
 			// Removed
 			childrenRemoved.emplace_back(fromChild.getPrefabUUID());
@@ -229,7 +229,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 	for (const auto& fromComponent: from.components) {
 		const String& compId = fromComponent.first;
 		if (options.ignoreComponents.find(compId) == options.ignoreComponents.end()) {
-			const bool stillExists = std::find_if(to.components.begin(), to.components.end(), [&] (const auto& e) { return e.first == compId; }) != to.components.begin();
+			const bool stillExists = std::find_if(to.components.begin(), to.components.end(), [&] (const auto& e) { return e.first == compId; }) != to.components.end();
 			if (!stillExists) {
 				// Removed
 				componentsRemoved.emplace_back(compId);
@@ -442,7 +442,7 @@ void EntityDataDelta::deserialize(Deserializer& s)
 
 uint16_t EntityDataDelta::getFieldBit(FieldId id)
 {
-	return static_cast<uint8_t>(1 << static_cast<int>(id));
+	return static_cast<uint16_t>(1 << static_cast<int>(id));
 }
 
 void EntityDataDelta::setFieldPresent(uint16_t& value, FieldId id, bool present)
