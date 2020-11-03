@@ -1,6 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+    <Type Name="natvis::x4hi">
+        <AlternativeType Name="natvis::x4lo" />
+        <DisplayString Condition="v==0">0</DisplayString>
+        <DisplayString Condition="v==1">1</DisplayString>
+        <DisplayString Condition="v==2">2</DisplayString>
+        <DisplayString Condition="v==3">3</DisplayString>
+        <DisplayString Condition="v==4">4</DisplayString>
+        <DisplayString Condition="v==5">5</DisplayString>
+        <DisplayString Condition="v==6">6</DisplayString>
+        <DisplayString Condition="v==7">7</DisplayString>
+        <DisplayString Condition="v==8">8</DisplayString>
+        <DisplayString Condition="v==9">9</DisplayString>
+        <DisplayString Condition="v==10">a</DisplayString>
+        <DisplayString Condition="v==11">b</DisplayString>
+        <DisplayString Condition="v==12">c</DisplayString>
+        <DisplayString Condition="v==13">d</DisplayString>
+        <DisplayString Condition="v==14">e</DisplayString>
+        <DisplayString>f</DisplayString>
+    </Type>
+    <Type Name="natvis::x8">
+        <DisplayString>{*(natvis::x4hi*)(this)}{*(natvis::x4lo*)(this)}</DisplayString>
+    </Type>
+    <Type Name="natvis::x16">
+        <DisplayString>{((natvis::x8*)this)[0]}{((natvis::x8*)this)[1]}</DisplayString>
+    </Type>
+    <Type Name="natvis::x32">
+        <DisplayString>{((natvis::x8*)this)[0]}{((natvis::x8*)this)[1]}{((natvis::x8*)this)[2]}{((natvis::x8*)this)[3]}</DisplayString>
+    </Type>
+    <Type Name="natvis::x48">
+        <DisplayString>{((natvis::x8*)this)[0]}{((natvis::x8*)this)[1]}{((natvis::x8*)this)[2]}{((natvis::x8*)this)[3]}{((natvis::x8*)this)[4]}{((natvis::x8*)this)[5]}</DisplayString>
+    </Type>
     <Type Name="Halley::UUID">
-        <DisplayString>{(((uint16_t)bytes[0]) &lt;&lt; 24) | (((uint16_t)bytes[1]) &lt;&lt; 16) | (((uint16_t)bytes[2]) &lt;&lt; 8) | ((uint16_t)bytes[3]),Xb}-{(((uint16_t)bytes[4]) &lt;&lt; 24) | (((uint16_t)bytes[5]) &lt;&lt; 16) | (((uint16_t)bytes[6]) &lt;&lt; 8) | ((uint16_t)bytes[7]),Xb}-{(((uint16_t)bytes[8]) &lt;&lt; 24) | (((uint16_t)bytes[9]) &lt;&lt; 16) | (((uint16_t)bytes[10]) &lt;&lt; 8) | ((uint16_t)bytes[11]),Xb}-{(((uint16_t)bytes[12]) &lt;&lt; 24) | (((uint16_t)bytes[13]) &lt;&lt; 16) | (((uint16_t)bytes[14]) &lt;&lt; 8) | ((uint16_t)bytes[15]),Xb}</DisplayString>
+        <DisplayString>{*(natvis::x32*)&amp;bytes[0]}-{*(natvis::x16*)&amp;bytes[4]}-{*(natvis::x16*)&amp;bytes[6]}-{*(natvis::x16*)&amp;bytes[8]}-{*(natvis::x48*)&amp;bytes[10]}</DisplayString>
     </Type>
 </AutoVisualizer>

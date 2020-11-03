@@ -37,3 +37,27 @@ namespace Halley {
 		std::array<Byte, 16> bytes;
     };
 }
+
+namespace natvis {
+    struct x4lo {
+    	uint8_t v: 4;
+    	uint8_t _: 4;
+    };
+    struct x4hi {
+	    uint8_t _ : 4;
+    	uint8_t v : 4;
+    };
+    struct x8 {
+	    uint8_t _;
+    };
+	struct x16 {
+	    uint16_t _;
+    };
+    struct x32 {
+	    uint32_t _;
+    };
+	struct x48 {
+	    uint32_t b0;
+		uint16_t b1;
+    };
+}
