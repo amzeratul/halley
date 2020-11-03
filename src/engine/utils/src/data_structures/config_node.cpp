@@ -1022,12 +1022,19 @@ ConfigNode ConfigNode::doCreateDelta(const ConfigNode& from, const ConfigNode& t
 
 ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& to, const BreadCrumb& breadCrumb, const IDeltaCodeHints* hints)
 {
-	auto result = ConfigNode(MapType());
-	result.type = ConfigNodeType::DeltaMap;
-
 	const auto& fromMap = from.asMap();
 	const auto& toMap = to.asMap();
-		
+
+	// Shortcut if from is empty
+	if (fromMap.empty()) {
+		auto result = ConfigNode(toMap);
+		result.type = ConfigNodeType::DeltaMap;
+		return result;
+	}
+	
+	auto result = ConfigNode(MapType());
+	result.type = ConfigNodeType::DeltaMap;
+			
 	// Store the new keys if there's a change
 	for (const auto& [k, v]: toMap) {
 		if (v.getType() != ConfigNodeType::Noop) {
@@ -1217,9 +1224,8 @@ void ConfigNode::applyMapDelta(const ConfigNode& delta)
 			if (iter != myMap.end()) {
 				// Update existing
 				iter->second.applyDelta(v);
-			} else {
+			} else if (v.getType() != ConfigNodeType::Noop) {
 				// Insert new
-				Ensures(v.getType() != ConfigNodeType::Noop);
 				myMap[k] = ConfigNode(v);
 			}
 		}

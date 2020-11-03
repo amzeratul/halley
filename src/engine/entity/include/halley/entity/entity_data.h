@@ -35,6 +35,7 @@ namespace Halley {
     	std::vector<std::pair<String, ConfigNode>>& getComponents() { return components; }
 
   	    const EntityData* tryGetPrefabUUID(const UUID& uuid) const;
+        const EntityData* tryGetInstanceUUID(const UUID& uuid) const;
 
     	void setName(String name);
     	void setPrefab(String prefab);

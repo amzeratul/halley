@@ -104,7 +104,25 @@ const EntityData* EntityData::tryGetPrefabUUID(const UUID& uuid) const
 	}
 
 	for (const auto& c: children) {
-		const auto result = c.tryGetPrefabUUID(uuid);
+		const auto* result = c.tryGetPrefabUUID(uuid);
+		if (result) {
+			return result;
+		}
+	}
+
+	return nullptr;
+}
+
+const EntityData* EntityData::tryGetInstanceUUID(const UUID& uuid) const
+{
+	Expects(uuid.isValid());
+	
+	if (uuid == instanceUUID) {
+		return this;
+	}
+
+	for (const auto& c: children) {
+		const auto* result = c.tryGetInstanceUUID(uuid);
 		if (result) {
 			return result;
 		}

@@ -8,6 +8,7 @@
 #include "registry.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/core/resources/resources.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -210,5 +211,69 @@ void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::sha
 
 void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)
 {
-	// TODO
+	updateEntityTree(entity, data, {});
+}
+
+void EntityFactory::updateEntityTree(EntityRef& entity, const EntityData& data,	const std::shared_ptr<EntityFactoryContext>& context)
+{
+	const bool entityDataIsPrefabInstance = !data.getPrefab().isEmpty();
+	const bool abandonPrefab = context && context->getPrefab() && !data.getPrefabUUID().isValid();
+	
+	if (!context || entityDataIsPrefabInstance || abandonPrefab) {
+		// Load prefab and create new context
+		const auto prefab = entityDataIsPrefabInstance ? getPrefab(data.getPrefab()) : std::shared_ptr<const Prefab>();
+		const auto newContext = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::Type::Prefab, prefab);
+
+		// Instantiate prefab
+		if (entityDataIsPrefabInstance) {
+			if (!prefab) {
+				Logger::logError("Prefab \"" + data.getPrefab() + "\" not found while instantiating entity.");
+			} else {
+				const auto instanceData = prefab->getEntityData().instantiateWithAsCopy(data);
+				//preInstantiateEntities(instanceData, *newContext);
+				return updateEntityNode(entity, instanceData, newContext);
+			}
+		}
+
+		// Just instantiate the data given
+		//preInstantiateEntities(data, *newContext);
+		return updateEntityNode(entity, data, newContext);
+	} else {
+		// Forward old context
+		return updateEntityNode(entity, data, context);
+	}
+}
+
+void EntityFactory::updateEntityNode(EntityRef& entity, const EntityData& data,	const std::shared_ptr<EntityFactoryContext>& context)
+{
+	const auto func = world.getCreateComponentFunction();
+	for (const auto& [componentName, componentData]: data.getComponents()) {
+		func(*context, componentName, entity, componentData);
+	}
+	// TODO: removed components
+
+	std::set<UUID> childrenPresent;
+	std::vector<EntityRef> toRemove;
+	for (auto childEntity: entity.getChildren()) {
+		childrenPresent.insert(childEntity.getInstanceUUID());
+		const auto* childData = data.tryGetInstanceUUID(childEntity.getInstanceUUID());
+		if (childData) {
+			// Update existing child
+			updateEntityTree(childEntity, *childData, context);
+		} else {
+			toRemove.push_back(childEntity);
+		}
+	}
+
+	// Remove old
+	for (auto& e: toRemove) {
+		world.destroyEntity(e);
+	}
+
+	// New children
+	for (const auto& childData: data.getChildren()) {
+		if (!std_ex::contains(childrenPresent, childData.getInstanceUUID())) {
+			createEntityTree(childData, entity, context);
+		}
+	}
 }

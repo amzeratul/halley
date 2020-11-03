@@ -76,7 +76,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 				}
 			} else {
 				// Inserted
-				componentsChanged.emplace_back(toComponent);
+				componentsChanged.emplace_back(toComponent.first, ConfigNode::createDelta(ConfigNode::MapType(), toComponent.second));
 			}
 		}
 	}
