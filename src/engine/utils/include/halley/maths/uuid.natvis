@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+    <Type Name="Halley::UUID">
+        <DisplayString>{(((uint16_t)bytes[0]) &lt;&lt; 24) | (((uint16_t)bytes[1]) &lt;&lt; 16) | (((uint16_t)bytes[2]) &lt;&lt; 8) | ((uint16_t)bytes[3]),Xb}-{(((uint16_t)bytes[4]) &lt;&lt; 24) | (((uint16_t)bytes[5]) &lt;&lt; 16) | (((uint16_t)bytes[6]) &lt;&lt; 8) | ((uint16_t)bytes[7]),Xb}-{(((uint16_t)bytes[8]) &lt;&lt; 24) | (((uint16_t)bytes[9]) &lt;&lt; 16) | (((uint16_t)bytes[10]) &lt;&lt; 8) | ((uint16_t)bytes[11]),Xb}-{(((uint16_t)bytes[12]) &lt;&lt; 24) | (((uint16_t)bytes[13]) &lt;&lt; 16) | (((uint16_t)bytes[14]) &lt;&lt; 8) | ((uint16_t)bytes[15]),Xb}</DisplayString>
+    </Type>
+</AutoVisualizer>
