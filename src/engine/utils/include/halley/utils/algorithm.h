@@ -1,5 +1,10 @@
 #pragma once
 
+#include <set>
+#include <map>
+#include <vector>
+#include <unordered_map>
+
 namespace Halley
 {
 
@@ -65,4 +70,36 @@ namespace Halley
 	}
 
 
+}
+
+namespace std_ex {
+	template <typename C, typename T>
+	bool contains(const C& container, const T& elem)
+	{
+		return std::find(container.begin(), container.end(), elem) != container.end();
+	}
+
+	template <typename T>
+	bool contains(const std::set<T>& container, const T& key)
+	{
+		return container.find(key) != container.end();
+	}
+
+	template <typename K, typename V>
+	bool contains(const std::map<K, V>& container, const K& key)
+	{
+		return container.find(key) != container.end();
+	}
+
+	template <typename K, typename V>
+	bool contains(const std::unordered_map<K, V>& container, const K& key)
+	{
+		return container.find(key) != container.end();
+	}
+
+	template <typename C, typename F>
+	bool contains_if(const C& container, F predicate)
+	{
+		return std::find_if(container.begin(), container.end(), predicate) != container.end();
+	}
 }
