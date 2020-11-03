@@ -50,10 +50,10 @@ void Prefab::loadEntityData()
 		const auto& seq = root.asSequence();
 		entityDatas.reserve(seq.size());
 		for (const auto& s: seq) {
-			entityDatas.push_back(EntityData(s));
+			entityDatas.push_back(EntityData(s, true));
 		}
 	} else {
-		entityDatas.push_back(EntityData(root));
+		entityDatas.push_back(EntityData(root, true));
 	}
 }
 

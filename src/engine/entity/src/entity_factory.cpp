@@ -37,7 +37,9 @@ EntityRef EntityFactory::createEntity(const std::shared_ptr<const Prefab>& prefa
 		Logger::logWarning("Missing prefab");
 		return EntityRef();
 	} else {
-		return createEntity(prefab->getEntityData());
+		auto data = prefab->getEntityData();
+		data.instantiateWith(EntityData(UUID::generate()));
+		return createEntity(data);
 	}
 }
 
