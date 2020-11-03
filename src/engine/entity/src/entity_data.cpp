@@ -97,6 +97,8 @@ void EntityData::deserialize(Deserializer& s)
 
 const EntityData* EntityData::tryGetPrefabUUID(const UUID& uuid) const
 {
+	Expects(uuid.isValid());
+	
 	if (uuid == prefabUUID) {
 		return this;
 	}
