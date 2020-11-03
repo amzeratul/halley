@@ -45,16 +45,7 @@ const std::vector<EntityData>& Prefab::getEntityDatas() const
 void Prefab::loadEntityData()
 {
 	entityDatas.clear();
-	const auto& root = getRoot();
-	if (root.getType() == ConfigNodeType::Sequence) {
-		const auto& seq = root.asSequence();
-		entityDatas.reserve(seq.size());
-		for (const auto& s: seq) {
-			entityDatas.push_back(EntityData(s, true));
-		}
-	} else {
-		entityDatas.push_back(EntityData(root, true));
-	}
+	entityDatas.emplace_back(getRoot(), true);
 }
 
 std::unique_ptr<Scene> Scene::loadResource(ResourceLoader& loader)
@@ -80,4 +71,14 @@ void Scene::reload(Resource&& resource)
 void Scene::makeDefault()
 {
 	getRoot() = ConfigNode(ConfigNode::SequenceType());
+}
+
+void Scene::loadEntityData()
+{
+	const auto& seq = root.asSequence();
+	entityDatas.clear();
+	entityDatas.reserve(seq.size());
+	for (const auto& s: seq) {
+		entityDatas.emplace_back(s, false);
+	}
 }

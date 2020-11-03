@@ -191,6 +191,8 @@ EntityRef EntityFactory::createEntityNode(const EntityData& data, EntityRef pare
 
 EntityRef EntityFactory::instantiateEntity(const EntityData& data, EntityFactoryContext& context)
 {
+	Expects(data.getInstanceUUID().isValid());
+	
 	const auto existing = context.getEntity(data.getInstanceUUID());
 	if (existing.isValid()) {
 		return existing;

@@ -222,7 +222,10 @@ bool EntityData::isSameEntity(const EntityData& other) const
 
 void EntityData::instantiateWith(const EntityData& instance)
 {
-	// Root of prefab
+	// This should only be called on the root of prefab
+	Expects(fromPrefab);
+	Expects(instance.instanceUUID.isValid());
+	
 	instanceUUID = instance.instanceUUID;
 
 	// Update children UUIDs
@@ -236,7 +239,7 @@ void EntityData::instantiateWith(const EntityData& instance)
 
 void EntityData::generateChildUUID(const UUID& root)
 {
-	instanceUUID = UUID::generateFromUUIDs(instanceUUID, root);
+	instanceUUID = UUID::generateFromUUIDs(prefabUUID, root);
 
 	for (auto& c: children) {
 		c.generateChildUUID(root);
@@ -269,8 +272,8 @@ void EntityData::updateChild(const EntityData& instanceChildData)
 	for (auto& c: children) {
 		// Is this correct???
 		Logger::logWarning("Untested code");
-		if (c.instanceUUID == instanceChildData.instanceUUID) { // Theoretically prefabUUIDs should match here too
-			c.instantiateData(c);
+		if (c.prefabUUID == instanceChildData.prefabUUID) {
+			c.instantiateData(instanceChildData);
 			return;
 		}
 	}

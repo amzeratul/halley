@@ -119,6 +119,7 @@ set(HEADERS
         "include/halley/maths/random.h"
         "include/halley/maths/ray.h"
         "include/halley/maths/uuid.h"
+        "include/halley/maths/uuid.natvis"
         "src/maths/mt199937ar.h"
         "include/halley/maths/range.h"
         "include/halley/maths/rect.h"

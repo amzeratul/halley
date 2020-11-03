@@ -16,8 +16,6 @@ namespace Halley {
 
 	protected:
 		virtual void loadEntityData();
-		
-	private:
 		std::vector<EntityData> entityDatas;
 	};
 
@@ -28,5 +26,8 @@ namespace Halley {
 
 		void reload(Resource&& resource) override;
 		void makeDefault();
+
+	protected:
+		void loadEntityData() override;
 	};
 }
