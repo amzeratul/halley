@@ -21,26 +21,11 @@ EntityFactory::~EntityFactory()
 {
 }
 
-EntityRef EntityFactory::createEntity(const char* prefabName)
-{
-	return createEntity(getPrefab(prefabName));
-}
-
 EntityRef EntityFactory::createEntity(const String& prefabName)
 {
-	return createEntity(getPrefab(prefabName));
-}
-
-EntityRef EntityFactory::createEntity(const std::shared_ptr<const Prefab>& prefab)
-{
-	if (!prefab) {
-		Logger::logWarning("Missing prefab");
-		return EntityRef();
-	} else {
-		auto data = prefab->getEntityData();
-		data.instantiateWith(EntityData(UUID::generate()));
-		return createEntity(data);
-	}
+	EntityData data(UUID::generate());
+	data.setPrefab(prefabName);
+	return createEntity(data);
 }
 
 EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& prefab)

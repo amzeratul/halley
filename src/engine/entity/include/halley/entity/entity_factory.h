@@ -35,9 +35,7 @@ namespace Halley {
 		explicit EntityFactory(World& world, Resources& resources);
 		virtual ~EntityFactory();
 
-		EntityRef createEntity(const char* prefabName);
 		EntityRef createEntity(const String& prefabName);
-		EntityRef createEntity(const std::shared_ptr<const Prefab>& prefab);
 		EntityRef createEntity(const EntityData& data, EntityRef parent = EntityRef());
 		EntityScene createScene(const std::shared_ptr<const Prefab>& scene);
 

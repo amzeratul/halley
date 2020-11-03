@@ -55,7 +55,7 @@ namespace Halley {
     	void instantiateWith(const EntityData& instance);
 	    EntityData instantiateWithAsCopy(const EntityData& instance) const;
 
-    private:    	
+    private:
     	String name;
     	String prefab;
     	UUID instanceUUID;
