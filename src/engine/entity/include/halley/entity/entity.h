@@ -136,6 +136,8 @@ namespace Halley {
 
 		void setWorldPartition(uint8_t partition);
 
+		bool isEmpty() const;
+
 	private:
 		// !!! WARNING !!!
 		// The order of elements in this class was carefully chosen to maximise cache performance!
@@ -586,6 +588,11 @@ namespace Halley {
 		{
 			Expects(entity);
 			return entity->prefab;
+		}
+
+		bool isEmpty() const
+		{
+			return !entity || entity->isEmpty();
 		}
 
 	private:

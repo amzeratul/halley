@@ -270,6 +270,11 @@ void Entity::setWorldPartition(uint8_t partition)
 	}
 }
 
+bool Entity::isEmpty() const
+{
+	return liveComponents == 0 && children.empty();
+}
+
 void Entity::doDestroy(bool updateParenting)
 {
 	if (updateParenting) {

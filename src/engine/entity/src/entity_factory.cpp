@@ -183,6 +183,11 @@ EntityRef EntityFactory::instantiateEntity(const EntityData& data, EntityFactory
 	if (existing.isValid()) {
 		return existing;
 	}
+
+	const auto inWorld = world.findEntity(data.getInstanceUUID(), true);
+	if (inWorld) {
+		return inWorld.value();
+	}
 	
 	const bool instantiatingFromPrefab = !!context.getPrefab();
 	auto entity = world.createEntity(data.getInstanceUUID(), data.getName(), {}, instantiatingFromPrefab, data.getPrefabUUID());
@@ -211,39 +216,10 @@ void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::sha
 
 void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)
 {
-	updateEntityTree(entity, data, {});
+	createEntity(data);
 }
 
-void EntityFactory::updateEntityTree(EntityRef& entity, const EntityData& data,	const std::shared_ptr<EntityFactoryContext>& context)
-{
-	const bool entityDataIsPrefabInstance = !data.getPrefab().isEmpty();
-	const bool abandonPrefab = context && context->getPrefab() && !data.getPrefabUUID().isValid();
-	
-	if (!context || entityDataIsPrefabInstance || abandonPrefab) {
-		// Load prefab and create new context
-		const auto prefab = entityDataIsPrefabInstance ? getPrefab(data.getPrefab()) : std::shared_ptr<const Prefab>();
-		const auto newContext = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::Type::Prefab, prefab);
-
-		// Instantiate prefab
-		if (entityDataIsPrefabInstance) {
-			if (!prefab) {
-				Logger::logError("Prefab \"" + data.getPrefab() + "\" not found while instantiating entity.");
-			} else {
-				const auto instanceData = prefab->getEntityData().instantiateWithAsCopy(data);
-				//preInstantiateEntities(instanceData, *newContext);
-				return updateEntityNode(entity, instanceData, newContext);
-			}
-		}
-
-		// Just instantiate the data given
-		//preInstantiateEntities(data, *newContext);
-		return updateEntityNode(entity, data, newContext);
-	} else {
-		// Forward old context
-		return updateEntityNode(entity, data, context);
-	}
-}
-
+/*
 void EntityFactory::updateEntityNode(EntityRef& entity, const EntityData& data,	const std::shared_ptr<EntityFactoryContext>& context)
 {
 	const auto func = world.getCreateComponentFunction();
@@ -277,3 +253,4 @@ void EntityFactory::updateEntityNode(EntityRef& entity, const EntityData& data,	
 		}
 	}
 }
+*/
