@@ -48,7 +48,7 @@ namespace Halley {
 		World& world;
 		Resources& resources;
 
-		EntityRef updateEntityTree(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context);
+		EntityRef updateEntityTreeWithNewContext(const EntityData& data, EntityRef existing, EntityRef parent);
 		EntityRef updateEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context);
 		void updateEntityComponents(EntityRef entity, const EntityData& data, const EntityFactoryContext& context);
 		void updateEntityChildren(EntityRef entity, const EntityData& data, const std::shared_ptr<EntityFactoryContext>& context);
@@ -92,6 +92,8 @@ namespace Halley {
 
 		void addEntity(EntityRef entity);
 		EntityRef getEntity(const UUID& uuid, bool allowPrefabUUID) const;
+
+		bool needsNewContextFor(const EntityData& value) const;
 
 	private:
 		ConfigNodeSerializationContext configNodeContext;

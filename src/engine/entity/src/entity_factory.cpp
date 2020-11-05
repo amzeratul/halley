@@ -132,31 +132,47 @@ EntityRef EntityFactoryContext::getEntity(const UUID& uuid, bool allowPrefabUUID
 	return EntityRef();
 }
 
-EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent)
-{
-	return updateEntityTree(data, parent, {});
-}
-
-EntityRef EntityFactory::updateEntityTree(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context)
+bool EntityFactoryContext::needsNewContextFor(const EntityData& data) const
 {
 	const bool entityDataIsPrefabInstance = !data.getPrefab().isEmpty();
-	const bool abandonPrefab = context && context->getPrefab() && !data.getPrefabUUID().isValid();
-	
-	if (!context || entityDataIsPrefabInstance || abandonPrefab) {
-		// Load and instantiate prefab
-		const auto prefab = getPrefab(data.getPrefab());
-		const auto& instanceData = prefab ? prefab->getEntityData().instantiateWithAsCopy(data) : data;
+	const bool abandonPrefab = prefab && !data.getPrefabUUID().isValid();
+	return entityDataIsPrefabInstance || abandonPrefab;
+}
 
-		// Create context
-		const auto newContext = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::Type::Prefab, prefab);
+EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent)
+{
+	return updateEntityTreeWithNewContext(data, EntityRef(), parent);
+}
 
-		// Create entities and proceed
-		preInstantiateEntities(instanceData, *newContext, 0);
-		return updateEntityNode(instanceData, parent, newContext);
+void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)
+{
+	updateEntityTreeWithNewContext(data, entity, EntityRef());
+}
+
+void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene, EntitySerialization::Type sourceType)
+{
+	// TODO
+}
+
+EntityRef EntityFactory::updateEntityTreeWithNewContext(const EntityData& data, EntityRef existing, EntityRef parent)
+{
+	// Load and instantiate prefab
+	const auto prefab = getPrefab(data.getPrefab());
+	const auto& instanceData = prefab ? prefab->getEntityData().instantiateWithAsCopy(data) : data;
+
+	// Create context
+	const auto context = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::Type::Prefab, prefab);
+
+	// Crawl entity
+	if (existing.isValid()) {
+		collectExistingEntities(existing, *context);
 	}
+	
+	// Create entities
+	preInstantiateEntities(instanceData, *context, 0);
 
-	// No context change needed
-	return updateEntityNode(data, parent, context);
+	// Proceed
+	return updateEntityNode(instanceData, parent, context);
 }
 
 EntityRef EntityFactory::updateEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context)
@@ -174,7 +190,8 @@ EntityRef EntityFactory::updateEntityNode(const EntityData& data, EntityRef pare
 void EntityFactory::updateEntityComponents(EntityRef entity, const EntityData& data, const EntityFactoryContext& context)
 {
 	if (entity.getNumComponents() != 0) {
-		// TODO: Delete old components
+		// TODO: only remove components that are missing?
+		entity.removeAllComponents();
 	}
 
 	const auto func = world.getCreateComponentFunction();
@@ -186,11 +203,27 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const EntityData& d
 void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& data, const std::shared_ptr<EntityFactoryContext>& context)
 {
 	if (!entity.getRawChildren().empty()) {
-		// TODO: delete old children
+		// Delete old children that are no longer present
+		const auto& newChildren = data.getChildren();
+		std::vector<EntityRef> toDelete;
+		for (auto c: entity.getChildren()) {
+			const auto& uuid = c.getInstanceUUID();
+			if (!std_ex::contains_if(newChildren, [&] (const EntityData& c) { return c.getInstanceUUID() == uuid; })) {
+				toDelete.push_back(c);
+			}
+		}
+		for (auto& c: toDelete) {
+			world.destroyEntity(c);
+		}
 	}
 	
+	// Update children
 	for (const auto& child: data.getChildren()) {
-		updateEntityTree(child, entity, context);
+		if (context->needsNewContextFor(child)) {
+			updateEntityTreeWithNewContext(child, EntityRef(), entity);
+		} else {
+			updateEntityNode(child, entity, context);
+		}
 	}
 }
 
@@ -225,7 +258,7 @@ void EntityFactory::collectExistingEntities(EntityRef entity, EntityFactoryConte
 {
 	context.addEntity(entity);
 	
-	for (auto c: entity.getChildren()) {
+	for (const auto c: entity.getChildren()) {
 		collectExistingEntities(c, context);
 	}
 }
@@ -248,49 +281,3 @@ EntityRef EntityFactory::getEntity(const EntityData& data, EntityFactoryContext&
 
 	return EntityRef();
 }
-
-void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene, EntitySerialization::Type sourceType)
-{
-	// TODO
-}
-
-void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)
-{
-	createEntity(data);
-}
-
-/*
-void EntityFactory::updateEntityNode(EntityRef& entity, const EntityData& data,	const std::shared_ptr<EntityFactoryContext>& context)
-{
-	const auto func = world.getCreateComponentFunction();
-	for (const auto& [componentName, componentData]: data.getComponents()) {
-		func(*context, componentName, entity, componentData);
-	}
-	// TODO: removed components
-
-	std::set<UUID> childrenPresent;
-	std::vector<EntityRef> toRemove;
-	for (auto childEntity: entity.getChildren()) {
-		childrenPresent.insert(childEntity.getInstanceUUID());
-		const auto* childData = data.tryGetInstanceUUID(childEntity.getInstanceUUID());
-		if (childData) {
-			// Update existing child
-			updateEntityTree(childEntity, *childData, context);
-		} else {
-			toRemove.push_back(childEntity);
-		}
-	}
-
-	// Remove old
-	for (auto& e: toRemove) {
-		world.destroyEntity(e);
-	}
-
-	// New children
-	for (const auto& childData: data.getChildren()) {
-		if (!std_ex::contains(childrenPresent, childData.getInstanceUUID())) {
-			createEntityTree(childData, entity, context);
-		}
-	}
-}
-*/
