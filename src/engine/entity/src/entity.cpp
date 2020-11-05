@@ -26,6 +26,17 @@ void Entity::destroyComponents(ComponentDeleterTable& table)
 	liveComponents = 0;
 }
 
+void Entity::removeComponentById(World& world, int id)
+{
+	for (uint8_t i = 0; i < liveComponents; ++i) {
+		if (components[i].first == id) {
+			removeComponentAt(i);
+			markDirty(world);
+			return;
+		}
+	}
+}
+
 void Entity::addComponent(Component* component, int id)
 {
 	if (liveComponents == std::numeric_limits<decltype(liveComponents)>::max()) {

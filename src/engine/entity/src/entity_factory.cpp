@@ -197,14 +197,32 @@ EntityRef EntityFactory::updateEntityNode(const EntityData& data, std::optional<
 
 void EntityFactory::updateEntityComponents(EntityRef entity, const EntityData& data, const EntityFactoryContext& context)
 {
-	if (entity.getNumComponents() != 0) {
-		// TODO: only remove components that are missing?
-		//entity.removeAllComponents();
-	}
+	const auto& func = world.getCreateComponentFunction();
 
-	const auto func = world.getCreateComponentFunction();
-	for (const auto& [componentName, componentData]: data.getComponents()) {
-		func(context, componentName, entity, componentData);
+	if (entity.getNumComponents() == 0) {
+		// Simple population
+		for (const auto& [componentName, componentData]: data.getComponents()) {
+			func(context, componentName, entity, componentData);
+		}
+	} else {
+		// Store the existing ids
+		std::vector<int> existingComps;
+		for (auto& c: entity) {
+			existingComps.push_back(c.first);
+		}
+
+		// Populate
+		for (const auto& [componentName, componentData]: data.getComponents()) {
+			const auto result = func(context, componentName, entity, componentData);
+			if (!result.created) {
+				existingComps.erase(std::find(existingComps.begin(), existingComps.end(), result.componentId));
+			}
+		}
+
+		// Remove old
+		for (auto& id: existingComps) {
+			entity.removeComponentById(id);
+		}
 	}
 }
 

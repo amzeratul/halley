@@ -181,20 +181,13 @@ namespace Halley {
 		template <typename T>
 		Entity& removeComponent(World& world)
 		{
-			constexpr int id = T::componentIndex;
-			for (uint8_t i = 0; i < liveComponents; ++i) {
-				if (components[i].first == id) {
-					removeComponentAt(i);
-					markDirty(world);
-					return *this;
-				}
-			}
-
+			removeComponentById(world, T::componentIndex);
 			return *this;
 		}
 
 		void addComponent(Component* component, int id);
 		void removeComponentAt(int index);
+		void removeComponentById(World& world, int id);
 		void removeAllComponents(World& world);
 		void deleteComponent(Component* component, int id, ComponentDeleterTable& table);
 		void keepOnlyComponentsWithIds(const std::vector<int>& ids, World& world);
@@ -314,13 +307,23 @@ namespace Halley {
 		EntityRef& removeComponent()
 		{
 			Expects(entity != nullptr);
+			Expects(world != nullptr);
 			entity->removeComponent<T>(*world);
+			return *this;
+		}
+
+		EntityRef& removeComponentById(int id)
+		{
+			Expects(entity != nullptr);
+			Expects(world != nullptr);
+			entity->removeComponentById(*world, id);
 			return *this;
 		}
 
 		EntityRef& removeAllComponents()
 		{
 			Expects(entity != nullptr);
+			Expects(world != nullptr);
 			entity->removeAllComponents(*world);
 			return *this;
 		}
