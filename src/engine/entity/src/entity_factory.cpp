@@ -163,9 +163,20 @@ void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)
 	updateEntityNode(context->getRootEntityData(), {}, context);
 }
 
-void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene, EntitySerialization::Type sourceType)
+void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene)
 {
-	// TODO
+	std::map<String, const EntityData*> entityDatas;
+
+	for (const auto& data: scene->getEntityDatas()) {
+		entityDatas[data.getInstanceUUID().toString()] = &data;
+	}
+	
+	for (auto& e: entities) {
+		const auto iter = entityDatas.find(e.getInstanceUUID().toString());
+		if (iter != entityDatas.end()) {
+			updateEntity(e, *iter->second);
+		}
+	}
 }
 
 std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const EntityData& data, std::optional<EntityRef> existing)

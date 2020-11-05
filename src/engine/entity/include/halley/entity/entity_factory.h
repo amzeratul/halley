@@ -40,7 +40,7 @@ namespace Halley {
 		EntityScene createScene(const std::shared_ptr<const Prefab>& scene);
 
 		void updateEntity(EntityRef& entity, const EntityData& data);
-		void updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene, EntitySerialization::Type sourceType);
+		void updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene);
 
 		EntityData serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent = true);
 

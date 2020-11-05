@@ -78,7 +78,7 @@ void EntityScene::PrefabObserver::update(EntityFactory& factory)
 {
 	if (!entities.empty()) {
 		if (scene) {
-			factory.updateScene(entities, prefab, EntitySerialization::Type::Prefab);
+			factory.updateScene(entities, prefab);
 		} else {
 			for (auto& entity: entities) {
 				factory.updateEntity(entity, prefab->getEntityData());
