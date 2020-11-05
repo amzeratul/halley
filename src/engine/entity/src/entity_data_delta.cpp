@@ -71,7 +71,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 			if (fromIter != from.components.end()) {
 				// Potentially modified
 				auto delta = ConfigNode::createDelta(fromIter->second, toComponent.second);
-				if (delta.getType() != ConfigNodeType::Noop) {
+				if (delta.getType() == ConfigNodeType::DeltaMap && !delta.asMap().empty()) {
 					componentsChanged.emplace_back(toComponent.first, std::move(delta));
 				}
 			} else {
