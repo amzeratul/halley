@@ -48,10 +48,15 @@ namespace Halley {
 		World& world;
 		Resources& resources;
 
-		EntityRef createEntityTree(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context);
-		EntityRef createEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context);
-		EntityRef instantiateEntity(const EntityData& data, EntityFactoryContext& context);
-		void preInstantiateEntities(const EntityData& data, EntityFactoryContext& context);
+		EntityRef updateEntityTree(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context);
+		EntityRef updateEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context);
+		void updateEntityComponents(EntityRef entity, const EntityData& data, const EntityFactoryContext& context);
+		void updateEntityChildren(EntityRef entity, const EntityData& data, const std::shared_ptr<EntityFactoryContext>& context);
+
+		EntityRef instantiateEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup);
+		EntityRef getEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup);
+		void preInstantiateEntities(const EntityData& data, EntityFactoryContext& context, int depth);
+		void collectExistingEntities(EntityRef entity, EntityFactoryContext& context);
 
 		[[nodiscard]] std::shared_ptr<const Prefab> getPrefab(const String& id) const;
 		[[nodiscard]] std::shared_ptr<const EntityFactoryContext> makeContext(EntitySerialization::Type type, std::shared_ptr<const Prefab> prefab) const;
