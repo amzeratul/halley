@@ -96,7 +96,7 @@ EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, E
 
 EntityId EntityFactoryContext::getEntityIdFromUUID(const UUID& uuid) const
 {
-	const auto result = getEntity(uuid);
+	const auto result = getEntity(uuid, true);
 	if (result.isValid()) {
 		return result.getEntityId();
 	}
@@ -109,14 +109,14 @@ void EntityFactoryContext::addEntity(EntityRef entity)
 	entities.push_back(entity);
 }
 
-EntityRef EntityFactoryContext::getEntity(const UUID& uuid) const
+EntityRef EntityFactoryContext::getEntity(const UUID& uuid, bool allowPrefabUUID) const
 {
 	if (!uuid.isValid()) {
 		return EntityRef();
 	}
 	
 	for (const auto& e: entities) {
-		if (e.getInstanceUUID() == uuid || e.getPrefabUUID() == uuid) {
+		if (e.getInstanceUUID() == uuid || (allowPrefabUUID && e.getPrefabUUID() == uuid)) {
 			return e;
 		}
 	}
@@ -179,7 +179,7 @@ EntityRef EntityFactory::instantiateEntity(const EntityData& data, EntityFactory
 {
 	Expects(data.getInstanceUUID().isValid());
 	
-	const auto existing = context.getEntity(data.getInstanceUUID());
+	const auto existing = context.getEntity(data.getInstanceUUID(), false);
 	if (existing.isValid()) {
 		return existing;
 	}
@@ -216,7 +216,7 @@ void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::sha
 
 void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)
 {
-	createEntity(data);
+	//createEntity(data);
 }
 
 /*

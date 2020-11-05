@@ -53,9 +53,6 @@ namespace Halley {
 		EntityRef instantiateEntity(const EntityData& data, EntityFactoryContext& context);
 		void preInstantiateEntities(const EntityData& data, EntityFactoryContext& context);
 
-		void updateEntityTree(EntityRef& entity, const EntityData& data, const std::shared_ptr<EntityFactoryContext>& context);
-		void updateEntityNode(EntityRef& entity, const EntityData& data, const std::shared_ptr<EntityFactoryContext>& context);
-
 		[[nodiscard]] std::shared_ptr<const Prefab> getPrefab(const String& id) const;
 		[[nodiscard]] std::shared_ptr<const EntityFactoryContext> makeContext(EntitySerialization::Type type, std::shared_ptr<const Prefab> prefab) const;
 	};
@@ -89,7 +86,7 @@ namespace Halley {
 		EntityId getEntityIdFromUUID(const UUID& uuid) const;
 
 		void addEntity(EntityRef entity);
-		EntityRef getEntity(const UUID& uuid) const;
+		EntityRef getEntity(const UUID& uuid, bool allowPrefabUUID) const;
 
 	private:
 		ConfigNodeSerializationContext configNodeContext;

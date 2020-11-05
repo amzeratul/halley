@@ -168,6 +168,11 @@ void EntityDataDelta::deserialize(Deserializer& s)
 	decodeField(componentOrder, FieldId::ComponentsOrder);
 }
 
+void EntityDataDelta::setPrefabUUID(const UUID& uuid)
+{
+	prefabUUID = uuid;
+}
+
 uint16_t EntityDataDelta::getFieldBit(FieldId id)
 {
 	return static_cast<uint16_t>(1 << static_cast<int>(id));

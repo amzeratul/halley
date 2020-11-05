@@ -28,7 +28,8 @@ namespace Halley {
     	void deserialize(Deserializer& s);
 
 		const std::optional<String>& getPrefab() const { return prefab; }
-		const std::optional<UUID>& getPrefabUUID() const { return prefabUUID; };
+		const std::optional<UUID>& getPrefabUUID() const { return prefabUUID; }
+		void setPrefabUUID(const UUID& uuid);
 
 	private:
     	std::optional<String> name;
