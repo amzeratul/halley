@@ -48,11 +48,11 @@ namespace Halley {
 		World& world;
 		Resources& resources;
 
-		EntityRef updateEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context);
+		EntityRef updateEntityNode(const EntityData& data, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context);
 		void updateEntityComponents(EntityRef entity, const EntityData& data, const EntityFactoryContext& context);
 		void updateEntityChildren(EntityRef entity, const EntityData& data, const std::shared_ptr<EntityFactoryContext>& context);
 
-		std::shared_ptr<EntityFactoryContext> makeContext(const EntityData& data, EntityRef existing);
+		std::shared_ptr<EntityFactoryContext> makeContext(const EntityData& data, std::optional<EntityRef> existing);
 		EntityRef instantiateEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup);
 		EntityRef getEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup);
 		void preInstantiateEntities(const EntityData& data, EntityFactoryContext& context, int depth);

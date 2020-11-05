@@ -153,14 +153,14 @@ const EntityData& EntityFactoryContext::getRootEntityData() const
 
 EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent)
 {
-	const auto context = makeContext(data, EntityRef());
+	const auto context = makeContext(data, {});
 	return updateEntityNode(context->getRootEntityData(), parent, context);
 }
 
 void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)
 {
 	const auto context = makeContext(data, entity);
-	updateEntityNode(context->getRootEntityData(), EntityRef(), context);
+	updateEntityNode(context->getRootEntityData(), {}, context);
 }
 
 void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene, EntitySerialization::Type sourceType)
@@ -168,28 +168,27 @@ void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::sha
 	// TODO
 }
 
-std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const EntityData& data, EntityRef existing)
+std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const EntityData& data, std::optional<EntityRef> existing)
 {
-	// Create context
 	auto context = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::Type::Prefab, getPrefab(data.getPrefab()), &data);
 
-	// Crawl entity
-	if (existing.isValid()) {
-		collectExistingEntities(existing, *context);
+	if (existing) {
+		collectExistingEntities(existing.value(), *context);
 	}
 	
-	// Create entities
 	preInstantiateEntities(context->getRootEntityData(), *context, 0);
 
 	return context;
 }
 
-EntityRef EntityFactory::updateEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context)
+EntityRef EntityFactory::updateEntityNode(const EntityData& data, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context)
 {
 	auto entity = getEntity(data, *context, false);
 	assert(entity.isValid());
 
-	entity.setParent(parent);
+	if (parent) {
+		entity.setParent(parent.value());
+	}
 	updateEntityComponents(entity, data, *context);
 	updateEntityChildren(entity, data, context);
 	
@@ -200,7 +199,7 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const EntityData& d
 {
 	if (entity.getNumComponents() != 0) {
 		// TODO: only remove components that are missing?
-		entity.removeAllComponents();
+		//entity.removeAllComponents();
 	}
 
 	const auto func = world.getCreateComponentFunction();
@@ -229,7 +228,7 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& dat
 	// Update children
 	for (const auto& child: data.getChildren()) {
 		if (context->needsNewContextFor(child)) {
-			const auto newContext = makeContext(child, EntityRef());
+			const auto newContext = makeContext(child, {});
 			updateEntityNode(newContext->getRootEntityData(), entity, newContext);
 		} else {
 			updateEntityNode(child, entity, context);
