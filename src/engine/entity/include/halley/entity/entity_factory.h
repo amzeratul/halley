@@ -48,11 +48,11 @@ namespace Halley {
 		World& world;
 		Resources& resources;
 
-		EntityRef updateEntityTreeWithNewContext(const EntityData& data, EntityRef existing, EntityRef parent);
 		EntityRef updateEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context);
 		void updateEntityComponents(EntityRef entity, const EntityData& data, const EntityFactoryContext& context);
 		void updateEntityChildren(EntityRef entity, const EntityData& data, const std::shared_ptr<EntityFactoryContext>& context);
 
+		std::shared_ptr<EntityFactoryContext> makeContext(const EntityData& data, EntityRef existing);
 		EntityRef instantiateEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup);
 		EntityRef getEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup);
 		void preInstantiateEntities(const EntityData& data, EntityFactoryContext& context, int depth);
@@ -64,7 +64,7 @@ namespace Halley {
 
 	class EntityFactoryContext {
 	public:
-		EntityFactoryContext(World& world, Resources& resources, EntitySerialization::Type type, std::shared_ptr<const Prefab> prefab = {});
+		EntityFactoryContext(World& world, Resources& resources, EntitySerialization::Type type, std::shared_ptr<const Prefab> prefab = {}, const EntityData* origEntityData = nullptr);
 		
 		template <typename T>
 		CreateComponentFunctionResult createComponent(EntityRef& e, const ConfigNode& componentData) const
@@ -95,10 +95,15 @@ namespace Halley {
 
 		bool needsNewContextFor(const EntityData& value) const;
 
+		const EntityData& getRootEntityData() const;
+
 	private:
 		ConfigNodeSerializationContext configNodeContext;
 		std::shared_ptr<const Prefab> prefab;
 		World* world;
 		std::vector<EntityRef> entities;
+
+		const EntityData* entityData;
+		EntityData instancedEntityData;
 	};
 }

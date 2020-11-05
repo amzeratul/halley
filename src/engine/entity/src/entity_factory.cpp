@@ -93,13 +93,20 @@ std::shared_ptr<const Prefab> EntityFactory::getPrefab(const String& id) const
 	return std::shared_ptr<const Prefab>();
 }
 
-EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, EntitySerialization::Type type, std::shared_ptr<const Prefab> prefab)
+EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, EntitySerialization::Type type, std::shared_ptr<const Prefab> _prefab, const EntityData* origEntityData)
 	: world(&world)
 {
-	this->prefab = std::move(prefab);
+	prefab = std::move(_prefab);
 	configNodeContext.resources = &resources;
 	configNodeContext.entityContext = this;
 	configNodeContext.entitySerializationTypeMask = EntitySerialization::makeMask(type);
+
+	if (prefab && origEntityData) {
+		instancedEntityData = prefab->getEntityData().instantiateWithAsCopy(*origEntityData);
+		entityData = &instancedEntityData;
+	} else {
+		entityData = origEntityData;
+	}
 }
 
 EntityId EntityFactoryContext::getEntityIdFromUUID(const UUID& uuid) const
@@ -139,14 +146,21 @@ bool EntityFactoryContext::needsNewContextFor(const EntityData& data) const
 	return entityDataIsPrefabInstance || abandonPrefab;
 }
 
+const EntityData& EntityFactoryContext::getRootEntityData() const
+{
+	return *entityData;
+}
+
 EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent)
 {
-	return updateEntityTreeWithNewContext(data, EntityRef(), parent);
+	const auto context = makeContext(data, EntityRef());
+	return updateEntityNode(context->getRootEntityData(), parent, context);
 }
 
 void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)
 {
-	updateEntityTreeWithNewContext(data, entity, EntityRef());
+	const auto context = makeContext(data, entity);
+	updateEntityNode(context->getRootEntityData(), EntityRef(), context);
 }
 
 void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene, EntitySerialization::Type sourceType)
@@ -154,14 +168,10 @@ void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::sha
 	// TODO
 }
 
-EntityRef EntityFactory::updateEntityTreeWithNewContext(const EntityData& data, EntityRef existing, EntityRef parent)
+std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const EntityData& data, EntityRef existing)
 {
-	// Load and instantiate prefab
-	const auto prefab = getPrefab(data.getPrefab());
-	const auto& instanceData = prefab ? prefab->getEntityData().instantiateWithAsCopy(data) : data;
-
 	// Create context
-	const auto context = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::Type::Prefab, prefab);
+	auto context = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::Type::Prefab, getPrefab(data.getPrefab()), &data);
 
 	// Crawl entity
 	if (existing.isValid()) {
@@ -169,10 +179,9 @@ EntityRef EntityFactory::updateEntityTreeWithNewContext(const EntityData& data, 
 	}
 	
 	// Create entities
-	preInstantiateEntities(instanceData, *context, 0);
+	preInstantiateEntities(context->getRootEntityData(), *context, 0);
 
-	// Proceed
-	return updateEntityNode(instanceData, parent, context);
+	return context;
 }
 
 EntityRef EntityFactory::updateEntityNode(const EntityData& data, EntityRef parent, const std::shared_ptr<EntityFactoryContext>& context)
@@ -220,7 +229,8 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& dat
 	// Update children
 	for (const auto& child: data.getChildren()) {
 		if (context->needsNewContextFor(child)) {
-			updateEntityTreeWithNewContext(child, EntityRef(), entity);
+			const auto newContext = makeContext(child, EntityRef());
+			updateEntityNode(newContext->getRootEntityData(), entity, newContext);
 		} else {
 			updateEntityNode(child, entity, context);
 		}
