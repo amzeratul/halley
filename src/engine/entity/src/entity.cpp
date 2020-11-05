@@ -11,9 +11,8 @@ Entity::Entity()
 	, alive(true)
 	, serializable(true)
 	, reloaded(false)
-	, fromPrefab(false)
 {
-	
+
 }
 
 Entity::~Entity() = default;

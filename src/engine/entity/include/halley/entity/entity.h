@@ -110,11 +110,6 @@ namespace Halley {
 		{
 			return alive;
 		}
-
-		bool isFromPrefab() const
-		{
-			return fromPrefab;
-		}
 		
 		const UUID& getPrefabUUID() const
 		{
@@ -150,7 +145,6 @@ namespace Halley {
 		bool alive : 1;
 		bool serializable : 1;
 		bool reloaded : 1;
-		bool fromPrefab : 1;
 		
 		uint8_t childrenRevision = 0;
 		uint8_t worldPartition = 0;
@@ -566,22 +560,18 @@ namespace Halley {
 			return entity->reloaded;
 		}
 
-		bool isFromPrefab()
-		{
-			Expects(entity);
-			return entity->isFromPrefab();
-		}
-
 		void sortChildrenByPrefabUUIDs(const std::vector<UUID>& uuids)
 		{
 			Expects(entity);
 			entity->sortChildrenByPrefabUUIDs(uuids);
 		}
 
-		void setPrefab(std::shared_ptr<const Prefab> prefab)
+		void setPrefab(std::shared_ptr<const Prefab> prefab, UUID prefabUUID)
 		{
 			Expects(entity);
+			Expects(!prefab || prefabUUID.isValid());
 			entity->prefab = std::move(prefab);
+			entity->prefabUUID = prefabUUID;
 		}
 
 		const std::shared_ptr<const Prefab>& getPrefab() const

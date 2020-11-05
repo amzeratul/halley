@@ -252,12 +252,7 @@ EntityRef EntityFactory::instantiateEntity(const EntityData& data, EntityFactory
 		return existing;
 	}
 	
-	const bool instantiatingFromPrefab = !!context.getPrefab();
-	auto entity = world.createEntity(data.getInstanceUUID(), data.getName(), {}, instantiatingFromPrefab, data.getPrefabUUID());
-	if (instantiatingFromPrefab) {
-		entity.setPrefab(context.getPrefab());
-	}
-
+	const auto entity = world.createEntity(data.getInstanceUUID(), data.getName(), {}, context.getPrefab(), data.getPrefabUUID());
 	context.addEntity(entity);
 
 	return entity;
