@@ -289,6 +289,10 @@ EntityRef EntityFactory::instantiateEntity(const EntityData& data, EntityFactory
 
 void EntityFactory::collectExistingEntities(EntityRef entity, EntityFactoryContext& context)
 {
+	// TODO: this does not collect entities on the same prefab, but above the current entity
+	// That case can happen if it's updating an entity whose entity reference is not the root
+	// It can be relevant if there are UUIDs pointing upwards, in that situation
+	
 	context.addEntity(entity);
 	
 	for (const auto c: entity.getChildren()) {
