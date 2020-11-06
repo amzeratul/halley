@@ -16,6 +16,7 @@ namespace Halley {
 
 	protected:
 		virtual void loadEntityData();
+		void validateEntityData();
 		std::vector<EntityData> entityDatas;
 	};
 

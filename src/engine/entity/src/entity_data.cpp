@@ -21,9 +21,17 @@ EntityData::EntityData(const ConfigNode& data, bool isPrefab)
 
 	if (isPrefab) {
 		parseUUID(prefabUUID, data["uuid"]);
+		if (!prefabUUID.isValid()) {
+			prefabUUID = UUID::generate();
+		}
+		instanceUUID = prefabUUID;
 	} else {
 		parseUUID(instanceUUID, data["uuid"]);
 		parseUUID(prefabUUID, data["prefabUUID"]);
+
+		if (!instanceUUID.isValid()) {
+			instanceUUID = UUID::generate();
+		}
 	}
 	parseUUID(parentUUID, data["parent"]);
 
