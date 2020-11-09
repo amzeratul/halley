@@ -12,9 +12,14 @@ namespace Halley {
     class Project;
     class Resources;
     class HalleyAPI;
-	class IYAMLConverter;
     class Path;
-	
+
+	class IProject {
+    public:		
+        virtual ~IProject() = default;
+		virtual Path getAssetsSrcPath() const = 0;
+	};
+
     class IEditorCustomTools { 
     public:
         struct ToolData {
@@ -38,14 +43,14 @@ namespace Halley {
             Resources& editorResources;
             Resources& gameResources;
             const HalleyAPI& api;
-            const std::shared_ptr <IYAMLConverter> yamlConverter;
+        	IProject& project;
 
-            MakeToolArgs(UIFactory& factory, Resources& editorResources, Resources& gameResources, const HalleyAPI& api, const std::shared_ptr<IYAMLConverter> yamlConverter)
+            MakeToolArgs(UIFactory& factory, Resources& editorResources, Resources& gameResources, const HalleyAPI& api, IProject& project)
                 : factory(factory)
                 , editorResources(editorResources)
         		, gameResources(gameResources)
                 , api(api)
-        		, yamlConverter(yamlConverter)
+        		, project(project)
             {}
         };
 
@@ -53,11 +58,4 @@ namespace Halley {
 
         virtual std::vector<ToolData> makeTools(const MakeToolArgs& args) = 0;
     };
-
-	class IYAMLConverter {
-    public:		
-        virtual ~IYAMLConverter() = default;
-        virtual String generateYAML(const ConfigNode& config) const = 0;
-        virtual void writeYAMLAsset(const ConfigNode& config, const Path& relativePath) const = 0;
-	};
 }

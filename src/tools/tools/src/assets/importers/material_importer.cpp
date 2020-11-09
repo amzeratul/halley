@@ -5,7 +5,7 @@
 #include "halley/text/string_converter.h"
 #include "shader_importer.h"
 #include "halley/core/graphics/shader.h"
-#include "halley/tools/yaml/yaml_convert.h"
+#include "halley/file_formats/yaml_convert.h"
 
 using namespace Halley;
 

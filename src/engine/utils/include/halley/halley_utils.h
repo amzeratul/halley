@@ -33,6 +33,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "file_formats/text_file.h"
 #include "file_formats/text_reader.h"
 #include "file_formats/xml_file.h"
+#include "file_formats/yaml_convert.h"
 
 #include "maths/angle.h"
 #include "maths/base_transform.h"

@@ -1,13 +1,9 @@
 if (MSVC)
     if (VCPKG_TARGET_TRIPLET)
-        find_package(yaml-cpp CONFIG REQUIRED)
-        set(YAMLCPP_LIBRARY "yaml-cpp")
         add_definitions(-DUSE_VCPKG_YAML)
     else ()
         set(YAMLCPP_LIBRARY "")
     endif ()
-else ()
-    find_package(YamlCpp)
 endif ()
 
 find_package(Boost COMPONENTS system filesystem REQUIRED)

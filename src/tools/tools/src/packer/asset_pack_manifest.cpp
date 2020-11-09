@@ -2,7 +2,7 @@
 #include "halley/file_formats/config_file.h"
 #include "halley/tools/packer/asset_packer.h"
 #include <yaml-cpp/yaml.h>
-#include "halley/tools/yaml/yaml_convert.h"
+#include "halley/file_formats/yaml_convert.h"
 using namespace Halley;
 
 AssetPackManifestEntry::AssetPackManifestEntry()

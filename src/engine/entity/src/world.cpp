@@ -169,10 +169,8 @@ EntityRef World::createEntity(String name, EntityId parentId)
 	return createEntity(UUID(), name, getEntity(parentId));
 }
 
-EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> parent, std::shared_ptr<const Prefab> prefab, UUID prefabUUID)
+EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> parent)
 {
-	Expects(!prefab || prefabUUID.isValid());
-	
 	if (!uuid.isValid()) {
 		uuid = UUID::generate();
 	}
@@ -182,10 +180,7 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 		throw Exception("Error creating entity - out of memory?", HalleyExceptions::Entity);
 	}
 	entity->instanceUUID = uuid;
-
-	entity->prefab = std::move(prefab);
-	entity->prefabUUID = prefabUUID;
-	
+		
 	entitiesPendingCreation.push_back(entity);
 	allocateEntity(entity);
 

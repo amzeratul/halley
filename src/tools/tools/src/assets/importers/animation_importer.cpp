@@ -1,5 +1,5 @@
 #include "animation_importer.h"
-#include "../../yaml/halley-yamlcpp.h"
+#include "halley/file_formats/halley-yamlcpp.h"
 #include "halley/core/graphics/sprite/animation.h"
 #include "halley/support/exception.h"
 #include "halley/bytes/byte_serializer.h"

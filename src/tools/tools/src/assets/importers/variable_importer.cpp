@@ -1,7 +1,7 @@
 #include "variable_importer.h"
 #include "halley/tools/assets/import_assets_database.h"
 #include "halley/file_formats/config_file.h"
-#include "halley/tools/yaml/yaml_convert.h"
+#include "halley/file_formats/yaml_convert.h"
 #include "halley/utils/variable.h"
 
 using namespace Halley;

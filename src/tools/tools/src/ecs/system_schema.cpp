@@ -1,4 +1,4 @@
-#include "../yaml/halley-yamlcpp.h"
+#include "halley/file_formats/halley-yamlcpp.h"
 #include <halley/support/exception.h>
 #include <halley/tools/ecs/system_schema.h>
 

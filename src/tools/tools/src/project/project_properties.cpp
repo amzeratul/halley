@@ -1,7 +1,7 @@
 #include <utility>
 #include "halley/tools/project/project_properties.h"
 #include "halley/tools/file/filesystem.h"
-#include "halley/tools/yaml/yaml_convert.h"
+#include "halley/file_formats/yaml_convert.h"
 using namespace Halley;
 
 ProjectProperties::ProjectProperties(Path propertiesFile)

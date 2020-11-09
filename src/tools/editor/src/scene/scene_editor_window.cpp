@@ -7,7 +7,7 @@
 #include "halley/entity/world.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/tools/project/project.h"
-#include "halley/tools/yaml/yaml_convert.h"
+#include "halley/file_formats/yaml_convert.h"
 #include "halley/ui/ui_factory.h"
 #include "scene_editor_canvas.h"
 #include "scene_editor_game_bridge.h"

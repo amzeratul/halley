@@ -16,7 +16,7 @@
 #include "halley/tools/ecs/ecs_data.h"
 #include "halley/tools/project/project_loader.h"
 #include "halley/core/game/game.h"
-#include "halley/tools/yaml/yaml_convert.h"
+#include "halley/file_formats/yaml_convert.h"
 
 using namespace Halley;
 

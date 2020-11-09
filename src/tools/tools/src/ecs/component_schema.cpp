@@ -1,4 +1,4 @@
-#include "../yaml/halley-yamlcpp.h"
+#include "halley/file_formats/halley-yamlcpp.h"
 #include <halley/tools/ecs/component_schema.h>
 
 #include "halley/support/logger.h"

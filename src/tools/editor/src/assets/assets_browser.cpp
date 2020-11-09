@@ -11,7 +11,7 @@
 #include "new_asset_window.h"
 #include "prefab_editor.h"
 #include "halley/tools/file/filesystem.h"
-#include "halley/tools/yaml/yaml_convert.h"
+#include "halley/file_formats/yaml_convert.h"
 
 using namespace Halley;
 

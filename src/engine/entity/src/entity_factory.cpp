@@ -197,9 +197,11 @@ EntityRef EntityFactory::updateEntityNode(const EntityData& data, std::optional<
 	auto entity = getEntity(data, *context, false);
 	assert(entity.isValid());
 
+	entity.setPrefab(context->getPrefab(), data.getPrefabUUID());
 	if (parent) {
 		entity.setParent(parent.value());
 	}
+	
 	updateEntityComponents(entity, data, *context);
 	updateEntityChildren(entity, data, context);
 	
@@ -281,7 +283,8 @@ EntityRef EntityFactory::instantiateEntity(const EntityData& data, EntityFactory
 		return existing;
 	}
 	
-	const auto entity = world.createEntity(data.getInstanceUUID(), data.getName(), {}, context.getPrefab(), data.getPrefabUUID());
+	auto entity = world.createEntity(data.getInstanceUUID(), data.getName());
+	entity.setPrefab(context.getPrefab(), data.getPrefabUUID());
 	context.addEntity(entity);
 
 	return entity;

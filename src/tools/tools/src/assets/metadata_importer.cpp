@@ -1,6 +1,6 @@
 #include "halley/tools/assets/metadata_importer.h"
 #include "halley/resources/resource_data.h"
-#include "../yaml/halley-yamlcpp.h"
+#include "halley/file_formats/halley-yamlcpp.h"
 #include "halley/data_structures/maybe.h"
 #include "halley/text/string_converter.h"
 using namespace Halley;

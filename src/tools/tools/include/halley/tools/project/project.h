@@ -5,6 +5,8 @@
 #include "halley/plugin/halley_plugin.h"
 #include <memory>
 
+
+#include "halley/core/editor_extensions/editor_custom_tools_interface.h"
 #include "halley/time/halleytime.h"
 #include "halley/tools/assets/check_assets_task.h"
 #include "halley/tools/dll/dynamic_library.h"
@@ -23,7 +25,7 @@ namespace Halley
 	using HalleyPluginPtr = std::shared_ptr<IHalleyPlugin>;
 	class Game;
 
-	class Project
+	class Project : public IProject
 	{
 	public:
 		class IAssetLoadListener {
@@ -49,7 +51,7 @@ namespace Halley
 		const Path& getRootPath() const;		
 		Path getUnpackedAssetsPath() const;
 		Path getPackedAssetsPath(const String& platform) const;
-		Path getAssetsSrcPath() const;
+		Path getAssetsSrcPath() const override;
 		Path getSharedAssetsSrcPath() const;
 
 		Path getGenPath() const;

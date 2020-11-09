@@ -1,6 +1,6 @@
 #include "halley/tools/ecs/system_message_schema.h"
 
-#include "../yaml/halley-yamlcpp.h"
+#include "halley/file_formats/halley-yamlcpp.h"
 #include <halley/tools/ecs/message_schema.h>
 
 using namespace Halley;

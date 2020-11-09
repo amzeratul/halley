@@ -1,7 +1,7 @@
 #include "audio_event_importer.h"
 #include "halley/audio/audio_event.h"
 #include "config_importer.h"
-#include "halley/tools/yaml/yaml_convert.h"
+#include "halley/file_formats/yaml_convert.h"
 using namespace Halley;
 
 void AudioEventImporter::import(const ImportingAsset& asset, IAssetCollector& collector)

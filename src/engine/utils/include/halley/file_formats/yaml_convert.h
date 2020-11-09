@@ -35,14 +35,4 @@ namespace Halley {
 		static bool isCompactSequence(const ConfigNode& node, int depth);
 	};
 
-	class YAMLConverter : public IYAMLConverter
-	{
-		public:
-			YAMLConverter(Project& project);
-			String generateYAML(const ConfigNode& config) const override;
-			void writeYAMLAsset(const ConfigNode& config, const Path& relativePath) const override;
-
-		private:
-			Project& project;
-	};
 }
