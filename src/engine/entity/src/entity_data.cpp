@@ -2,6 +2,7 @@
 #include "entity_data_delta.h"
 
 #include "halley/bytes/byte_serializer.h"
+#include "halley/file_formats/yaml_convert.h"
 #include "halley/support/logger.h"
 using namespace Halley;
 
@@ -89,6 +90,13 @@ ConfigNode EntityData::toConfigNode() const
 	}
 	
 	return ConfigNode(std::move(result));
+}
+
+String EntityData::toYAML() const
+{
+	YAMLConvert::EmitOptions options;
+	options.mapKeyOrder = {{ "name", "uuid", "prefabUUID", "parent", "components", "children" }};
+	return YAMLConvert::generateYAML(toConfigNode(), options);
 }
 
 void EntityData::serialize(Serializer& s) const

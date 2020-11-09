@@ -190,7 +190,7 @@ void SDLSaveData::setData(const String& path, const Bytes& rawData, bool commit)
 
 	// Write
 	OS::get().createDirectories(dir);
-	OS::get().atomicWriteFile(dstPath, finalData, backupPath);
+	OS::get().atomicWriteFile(dstPath, gsl::as_bytes(gsl::span<const Byte>(finalData)), backupPath);
 	Logger::logDev("Saving \"" + path + "\", " + String::prettySize(finalData.size()));
 }
 

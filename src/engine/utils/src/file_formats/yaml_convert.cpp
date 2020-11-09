@@ -102,10 +102,12 @@ void YAMLConvert::emitNode(const ConfigNode& node, YAML::Emitter& emitter, const
 		return;
 
 	case ConfigNodeType::Sequence:
+	case ConfigNodeType::DeltaSequence:
 		emitSequence(node, emitter, options);
 		return;
 
 	case ConfigNodeType::Map:
+	case ConfigNodeType::DeltaMap:
 		emitMap(node, emitter, options);
 		return;
 
@@ -113,12 +115,11 @@ void YAMLConvert::emitNode(const ConfigNode& node, YAML::Emitter& emitter, const
 		emitter << node.asString().cppStr();
 		return;
 
-	case ConfigNodeType::Undefined:
-		emitter << YAML::Null;
-		return;
-		
 	case ConfigNodeType::Bytes:
 		throw Exception("Unsupported ConfigNode type: bytes", HalleyExceptions::Tools);
+
+	default:
+		emitter << YAML::Null;
 	}
 }
 

@@ -256,7 +256,12 @@ std::string Path::string() const
 
 void Path::writeFile(const Path& path, const Bytes& data)
 {
-	OS::get().atomicWriteFile(path, data);
+	OS::get().atomicWriteFile(path, gsl::as_bytes(gsl::span<const Byte>(data)));
+}
+
+void Path::writeFile(const Path& path, const String& data)
+{
+	OS::get().atomicWriteFile(path, gsl::as_bytes(gsl::span<const char>(data.c_str(), data.length())));
 }
 
 Bytes Path::readFile(const Path& path)

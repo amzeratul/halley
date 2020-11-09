@@ -197,6 +197,7 @@ EntityRef EntityFactory::updateEntityNode(const EntityData& data, std::optional<
 	auto entity = getEntity(data, *context, false);
 	assert(entity.isValid());
 
+	entity.setName(data.getName());
 	entity.setPrefab(context->getPrefab(), data.getPrefabUUID());
 	if (parent) {
 		entity.setParent(parent.value());

@@ -19,6 +19,7 @@ namespace Halley {
     	EntityData& operator=(EntityData&& other) = default;
 
     	ConfigNode toConfigNode() const;
+        String toYAML() const;
 
     	void serialize(Serializer& s) const;
     	void deserialize(Deserializer& s);

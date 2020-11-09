@@ -52,6 +52,7 @@ namespace Halley
 		std::string string() const;
 
 		static void writeFile(const Path& path, const Bytes& data);
+		static void writeFile(const Path& path, const String& data);
 		static Bytes readFile(const Path& path);
 		static void removeFile(const Path& path);
 

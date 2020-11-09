@@ -332,7 +332,7 @@ void OSWin32::createDirectories(const Path& path)
 	}
 }
 
-static void writeFile(const wchar_t* str, const Bytes& data)
+static void writeFile(const wchar_t* str, gsl::span<const gsl::byte> data)
 {
 	//std::ofstream fp(str, std::ios::binary | std::ios::out);
 	//fp.write(reinterpret_cast<const char*>(data.data()), data.size());
@@ -371,7 +371,7 @@ static void writeFile(const wchar_t* str, const Bytes& data)
 			ReadFile(file, readBack.data(), size, &read, nullptr);
 			CloseHandle(file);
 
-			if (readBack != data) {
+			if (readBack.size() != data.size() || std::memcmp(readBack.data(), data.data(), size) != 0) {
 				if (i > 0) {
 					continue;
 				}
@@ -384,7 +384,7 @@ static void writeFile(const wchar_t* str, const Bytes& data)
 	}
 }
 
-void OSWin32::atomicWriteFile(const Path& path, const Bytes& data, std::optional<Path> backupOldVersionPath)
+void OSWin32::atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data, std::optional<Path> backupOldVersionPath)
 {
 	auto dstPath = path.getString().replaceAll("/", "\\").getUTF16();
 	if (PathFileExistsW(dstPath.c_str())) {
