@@ -64,7 +64,7 @@ namespace Halley {
 
 	class EntityFactoryContext {
 	public:
-		EntityFactoryContext(World& world, Resources& resources, EntitySerialization::Type type, std::shared_ptr<const Prefab> prefab = {}, const EntityData* origEntityData = nullptr);
+		EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, std::shared_ptr<const Prefab> prefab = {}, const EntityData* origEntityData = nullptr);
 		
 		template <typename T>
 		CreateComponentFunctionResult createComponent(EntityRef& e, const ConfigNode& componentData) const

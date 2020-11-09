@@ -51,7 +51,7 @@ EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationO
 	result.setPrefabUUID(entity.getPrefabUUID());
 
 	// Components
-	const auto serializeContext = std::make_shared<EntityFactoryContext>(world, resources, options.type);
+	const auto serializeContext = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::makeMask(options.type));
 	for (auto [componentId, component]: entity) {
 		auto& reflector = getComponentReflector(componentId);
 		result.getComponents().emplace_back(reflector.getName(), reflector.serialize(serializeContext->getConfigNodeContext(), *component));
@@ -93,13 +93,13 @@ std::shared_ptr<const Prefab> EntityFactory::getPrefab(const String& id) const
 	return std::shared_ptr<const Prefab>();
 }
 
-EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, EntitySerialization::Type type, std::shared_ptr<const Prefab> _prefab, const EntityData* origEntityData)
+EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, std::shared_ptr<const Prefab> _prefab, const EntityData* origEntityData)
 	: world(&world)
 {
 	prefab = std::move(_prefab);
 	configNodeContext.resources = &resources;
 	configNodeContext.entityContext = this;
-	configNodeContext.entitySerializationTypeMask = EntitySerialization::makeMask(type);
+	configNodeContext.entitySerializationTypeMask = entitySerializationMask;
 
 	if (prefab && origEntityData) {
 		instancedEntityData = prefab->getEntityData().instantiateWithAsCopy(*origEntityData);
@@ -181,7 +181,7 @@ void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::sha
 
 std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const EntityData& data, std::optional<EntityRef> existing)
 {
-	auto context = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::Type::Prefab, getPrefab(data.getPrefab()), &data);
+	auto context = std::make_shared<EntityFactoryContext>(world, resources, makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData), getPrefab(data.getPrefab()), &data);
 
 	if (existing) {
 		collectExistingEntities(existing.value(), *context);
