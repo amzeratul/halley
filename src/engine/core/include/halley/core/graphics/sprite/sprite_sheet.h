@@ -150,7 +150,7 @@ namespace Halley
 
 	private:
 		std::weak_ptr<const SpriteSheet> spriteSheet;
-		size_t idx = -1;
+		uint64_t idx = -1;
 		Resources* resources = nullptr;
 	};
 }
