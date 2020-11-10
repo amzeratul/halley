@@ -140,7 +140,7 @@ ConfigNode& ConfigNode::operator=(ConfigNode&& other) noexcept
 	floatData = other.floatData;
 	vec2iData = other.vec2iData;
 	vec2fData = other.vec2fData;
-	parent = std::move(parent);
+	parent = std::move(other.parent);
 	auxData = other.auxData;
 	
 	other.type = ConfigNodeType::Undefined;

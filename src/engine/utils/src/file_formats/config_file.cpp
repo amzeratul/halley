@@ -17,7 +17,7 @@ ConfigFile::ConfigFile(const ConfigFile& other)
 
 ConfigFile::ConfigFile(ConfigNode root)
 {
-	root = std::move(root);
+	this->root = std::move(root);
 	updateRoot();
 }
 
