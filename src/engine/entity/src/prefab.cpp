@@ -77,6 +77,7 @@ void Scene::reload(Resource&& resource)
 void Scene::makeDefault()
 {
 	getRoot() = ConfigNode(ConfigNode::SequenceType());
+	loadEntityData();
 }
 
 std::vector<EntityData> Scene::makeEntityDatas() const
