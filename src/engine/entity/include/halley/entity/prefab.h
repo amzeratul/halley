@@ -15,7 +15,8 @@ namespace Halley {
 		const std::vector<EntityData>& getEntityDatas() const;
 
 	protected:
-		virtual void loadEntityData();
+		void loadEntityData();
+		virtual std::vector<EntityData> makeEntityDatas() const;
 		std::vector<EntityData> entityDatas;
 	};
 
@@ -28,6 +29,6 @@ namespace Halley {
 		void makeDefault();
 
 	protected:
-		void loadEntityData() override;
+		std::vector<EntityData> makeEntityDatas() const override;
 	};
 }

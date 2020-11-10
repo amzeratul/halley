@@ -3,7 +3,6 @@ project (halley-tools)
 include_directories(
     ${BOOST_INCLUDE_DIR}
     ${FREETYPE_INCLUDE_DIRS}
-    ${YAMLCPP_INCLUDE_DIR}
     ${ShaderConductor_INCLUDE_DIR}
     "include"
     "../../engine/core/include"
@@ -13,6 +12,7 @@ include_directories(
     "../../engine/entity/include"
     "../../contrib/libogg/include"
     "../../contrib/libvorbis/include"
+    "../../contrib/yaml-cpp/include"
 )
 
 set(SOURCES

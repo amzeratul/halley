@@ -1,6 +1,6 @@
 project (halley-utils)
 
-include_directories("include" "../core/include" ${Boost_INCLUDE_DIR})
+include_directories("include" "../core/include" "../../contrib/yaml-cpp/include" ${Boost_INCLUDE_DIR})
 
 set(SOURCES
         "src/audio/resampler.cpp"
