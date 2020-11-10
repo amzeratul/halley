@@ -1,4 +1,6 @@
 #include "prefab.h"
+
+#include "entity_data_delta.h"
 #include "halley/resources/resource_data.h"
 
 using namespace Halley;
@@ -42,9 +44,34 @@ const std::vector<EntityData>& Prefab::getEntityDatas() const
 	return entityDatas;
 }
 
+const std::map<UUID, EntityDataDelta>& Prefab::getEntityDataDeltas() const
+{
+	return deltas;
+}
+
 void Prefab::loadEntityData()
 {
+	/*
+	// Move old entity data
+	std::map<UUID, EntityData> oldDatas;
+	for (auto& data: entityDatas) {
+		oldDatas[data.getInstanceUUID()] = std::move(data);
+	}
+	*/
+	
+	// Get new entities
 	entityDatas = makeEntityDatas();
+
+	/*
+	// Generate deltas
+	deltas.clear();
+	for (const auto& data: entityDatas) {
+		const auto oldIter = oldDatas.find(data.getInstanceUUID());
+		if (oldIter != oldDatas.end()) {
+			deltas[data.getInstanceUUID()] = EntityDataDelta(oldIter->second, data);
+		}
+	}
+	*/
 }
 
 std::vector<EntityData> Prefab::makeEntityDatas() const

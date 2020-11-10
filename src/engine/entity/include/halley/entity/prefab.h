@@ -1,8 +1,9 @@
 #pragma once
 
 #include "halley/file_formats/config_file.h"
+#include "entity_data_delta.h"
 
-namespace Halley {
+namespace Halley {	
 	class Prefab : public ConfigFile {
 	public:
 		static std::unique_ptr<Prefab> loadResource(ResourceLoader& loader);
@@ -13,11 +14,13 @@ namespace Halley {
 
 		const EntityData& getEntityData() const;
 		const std::vector<EntityData>& getEntityDatas() const;
+		const std::map<UUID, EntityDataDelta>& getEntityDataDeltas() const;
 
 	protected:
 		void loadEntityData();
 		virtual std::vector<EntityData> makeEntityDatas() const;
 		std::vector<EntityData> entityDatas;
+		std::map<UUID, EntityDataDelta> deltas;
 	};
 
 	class Scene final : public Prefab {

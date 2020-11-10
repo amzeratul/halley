@@ -35,8 +35,10 @@ namespace Halley {
 		explicit EntityFactory(World& world, Resources& resources);
 		virtual ~EntityFactory();
 
+		World& getWorld();
+		
 		EntityRef createEntity(const String& prefabName);
-		EntityRef createEntity(const EntityData& data, EntityRef parent = EntityRef());
+		EntityRef createEntity(const EntityData& data, EntityRef parent = EntityRef(), EntityScene* scene = nullptr);
 		EntityScene createScene(const std::shared_ptr<const Prefab>& scene);
 
 		void updateEntity(EntityRef& entity, const EntityData& data);
@@ -52,7 +54,7 @@ namespace Halley {
 		void updateEntityComponents(EntityRef entity, const EntityData& data, const EntityFactoryContext& context);
 		void updateEntityChildren(EntityRef entity, const EntityData& data, const std::shared_ptr<EntityFactoryContext>& context);
 
-		std::shared_ptr<EntityFactoryContext> makeContext(const EntityData& data, std::optional<EntityRef> existing);
+		std::shared_ptr<EntityFactoryContext> makeContext(const EntityData& data, std::optional<EntityRef> existing, EntityScene* scene);
 		EntityRef instantiateEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup);
 		EntityRef getEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup);
 		void preInstantiateEntities(const EntityData& data, EntityFactoryContext& context, int depth);
@@ -64,7 +66,7 @@ namespace Halley {
 
 	class EntityFactoryContext {
 	public:
-		EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, std::shared_ptr<const Prefab> prefab = {}, const EntityData* origEntityData = nullptr);
+		EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, std::shared_ptr<const Prefab> prefab = {}, const EntityData* origEntityData = nullptr, EntityScene* scene = nullptr);
 		
 		template <typename T>
 		CreateComponentFunctionResult createComponent(EntityRef& e, const ConfigNode& componentData) const
@@ -91,16 +93,19 @@ namespace Halley {
 		EntityId getEntityIdFromUUID(const UUID& uuid) const;
 
 		void addEntity(EntityRef entity);
+		void notifyEntity(const EntityRef& entity) const;
 		EntityRef getEntity(const UUID& uuid, bool allowPrefabUUID) const;
 
 		bool needsNewContextFor(const EntityData& value) const;
 
 		const EntityData& getRootEntityData() const;
+		EntityScene* getScene() const;
 
 	private:
 		ConfigNodeSerializationContext configNodeContext;
 		std::shared_ptr<const Prefab> prefab;
 		World* world;
+		EntityScene* scene;
 		std::vector<EntityRef> entities;
 
 		const EntityData* entityData;

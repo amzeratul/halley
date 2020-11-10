@@ -22,6 +22,11 @@ EntityFactory::~EntityFactory()
 {
 }
 
+World& EntityFactory::getWorld()
+{
+	return world;
+}
+
 EntityRef EntityFactory::createEntity(const String& prefabName)
 {
 	EntityData data(UUID::generate());
@@ -34,7 +39,7 @@ EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& pref
 	EntityScene curScene;
 	int i = 0;
 	for (const auto& entityData: prefab->getEntityDatas()) {
-		auto entity = createEntity(entityData);
+		auto entity = createEntity(entityData, EntityRef(), &curScene);
 		curScene.addPrefabReference(prefab, entity, i++);
 		curScene.addRootEntity(entity);	
 	}
@@ -93,8 +98,9 @@ std::shared_ptr<const Prefab> EntityFactory::getPrefab(const String& id) const
 	return std::shared_ptr<const Prefab>();
 }
 
-EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, std::shared_ptr<const Prefab> _prefab, const EntityData* origEntityData)
+EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, std::shared_ptr<const Prefab> _prefab, const EntityData* origEntityData, EntityScene* scene)
 	: world(&world)
+	, scene(scene)
 {
 	prefab = std::move(_prefab);
 	configNodeContext.resources = &resources;
@@ -151,37 +157,49 @@ const EntityData& EntityFactoryContext::getRootEntityData() const
 	return *entityData;
 }
 
-EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent)
+EntityScene* EntityFactoryContext::getScene() const
 {
-	const auto context = makeContext(data, {});
+	return scene;
+}
+
+void EntityFactoryContext::notifyEntity(const EntityRef& entity) const
+{
+	if (scene && prefab) {
+		scene->addPrefabReference(prefab, entity, {});
+	}
+}
+
+EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent, EntityScene* scene)
+{
+	const auto context = makeContext(data, {}, scene);
 	return updateEntityNode(context->getRootEntityData(), parent, context);
 }
 
 void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)
 {
-	const auto context = makeContext(data, entity);
+	const auto context = makeContext(data, entity, nullptr);
 	updateEntityNode(context->getRootEntityData(), {}, context);
 }
 
 void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene)
 {
-	std::map<String, const EntityData*> entityDatas;
+	std::map<UUID, const EntityData*> entityDatas;
 
 	for (const auto& data: scene->getEntityDatas()) {
-		entityDatas[data.getInstanceUUID().toString()] = &data;
+		entityDatas[data.getInstanceUUID()] = &data;
 	}
 	
 	for (auto& e: entities) {
-		const auto iter = entityDatas.find(e.getInstanceUUID().toString());
+		const auto iter = entityDatas.find(e.getInstanceUUID());
 		if (iter != entityDatas.end()) {
 			updateEntity(e, *iter->second);
 		}
 	}
 }
 
-std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const EntityData& data, std::optional<EntityRef> existing)
+std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const EntityData& data, std::optional<EntityRef> existing, EntityScene* scene)
 {
-	auto context = std::make_shared<EntityFactoryContext>(world, resources, makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData), getPrefab(data.getPrefab()), &data);
+	auto context = std::make_shared<EntityFactoryContext>(world, resources, makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData), getPrefab(data.getPrefab()), &data, scene);
 
 	if (existing) {
 		collectExistingEntities(existing.value(), *context);
@@ -202,6 +220,7 @@ EntityRef EntityFactory::updateEntityNode(const EntityData& data, std::optional<
 	if (parent) {
 		entity.setParent(parent.value());
 	}
+	context->notifyEntity(entity);
 	
 	updateEntityComponents(entity, data, *context);
 	updateEntityChildren(entity, data, context);
@@ -260,7 +279,7 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& dat
 	// Update children
 	for (const auto& child: data.getChildren()) {
 		if (context->needsNewContextFor(child)) {
-			const auto newContext = makeContext(child, {});
+			const auto newContext = makeContext(child, {}, context->getScene());
 			updateEntityNode(newContext->getRootEntityData(), entity, newContext);
 		} else {
 			updateEntityNode(child, entity, context);

@@ -1,6 +1,8 @@
 #include "entity_scene.h"
 
 #include "entity_factory.h"
+#include "world.h"
+#include "halley/utils/algorithm.h"
 using namespace Halley;
 
 std::vector<EntityRef>& EntityScene::getEntities()
@@ -76,6 +78,15 @@ bool EntityScene::PrefabObserver::isScene() const
 
 void EntityScene::PrefabObserver::update(EntityFactory& factory)
 {
+	auto& world = factory.getWorld();
+	std::vector<EntityRef> entities;
+	for (const auto& id: entityIds) {
+		auto* entity = world.tryGetRawEntity(id);
+		if (entity) {
+			entities.emplace_back(*entity, world);
+		}
+	}
+
 	if (!entities.empty()) {
 		if (scene) {
 			factory.updateScene(entities, prefab);
@@ -85,6 +96,28 @@ void EntityScene::PrefabObserver::update(EntityFactory& factory)
 			}
 		}
 	}
+
+	/*
+	const auto& deltas = prefab->getEntityDataDeltas();
+
+	std::map<UUID, const EntityData*> dataMap;
+	for (const auto& data: prefab->getEntityDatas()) {
+		dataMap[data.getInstanceUUID()] = &data;
+	}
+	
+	for (auto& entity: entities) {
+		auto deltaIter = deltas.find(entity.getInstanceUUID());
+		if (deltaIter != deltas.end()) {
+			factory.updateEntity(entity, deltaIter->second);
+		} else {
+			auto dataIter = dataMap.find(entity.getInstanceUUID());
+			if (dataIter != dataMap.end()) {
+				factory.updateEntity(entity, *dataIter->second);
+			} else {
+				// Not found
+			}
+		}
+	}*/
 }
 
 void EntityScene::PrefabObserver::markUpdated()
@@ -94,7 +127,8 @@ void EntityScene::PrefabObserver::markUpdated()
 
 void EntityScene::PrefabObserver::addEntity(EntityRef entity, std::optional<int> index)
 {
-	entities.push_back(entity);
+	std_ex::contains(entityIds, entity.getEntityId());
+	entityIds.push_back(entity.getEntityId());
 	if (index) {
 		scene = true;
 	}

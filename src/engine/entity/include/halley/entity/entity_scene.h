@@ -39,7 +39,7 @@ namespace Halley {
 
 		private:
 			std::shared_ptr<const Prefab> prefab;
-			std::vector<EntityRef> entities;
+			std::vector<EntityId> entityIds;
 			int assetVersion = 0;
 			bool scene = false;
 		};
