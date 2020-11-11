@@ -101,14 +101,14 @@ String EntityData::toYAML() const
 
 void EntityData::serialize(Serializer& s) const
 {
-	// TODO
-	throw Exception("Unimplemented", HalleyExceptions::Entity);
+	s << EntityDataDelta(*this);
 }
 
 void EntityData::deserialize(Deserializer& s)
 {
-	// TODO
-	throw Exception("Unimplemented", HalleyExceptions::Entity);
+	EntityDataDelta delta;
+	s >> delta;
+	applyDelta(delta);
 }
 
 const EntityData* EntityData::tryGetPrefabUUID(const UUID& uuid) const

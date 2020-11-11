@@ -19,15 +19,23 @@ namespace Halley {
 		std::map<UUID, const EntityData*> getEntityDataMap() const;
 
 		const std::map<UUID, EntityDataDelta>& getEntitiesModified() const;
+		const std::set<UUID>& getEntitiesAdded() const;
 		const std::set<UUID>& getEntitiesRemoved() const;
 
 	protected:
+		struct Deltas {
+			std::map<UUID, EntityDataDelta> entitiesModified;
+			std::set<UUID> entitiesAdded;
+			std::set<UUID> entitiesRemoved;
+		};
+
 		void loadEntityData();
 		virtual std::vector<EntityData> makeEntityDatas() const;
-		std::vector<EntityData> entityDatas;
+		Deltas generatePrefabDeltas(const Prefab& newPrefab) const;
 		
-		std::map<UUID, EntityDataDelta> entitiesModified;
-		std::set<UUID> entitiesRemoved;
+		std::vector<EntityData> entityDatas;
+
+		Deltas deltas;
 	};
 
 	class Scene final : public Prefab {
@@ -42,5 +50,6 @@ namespace Halley {
 
 	protected:
 		std::vector<EntityData> makeEntityDatas() const override;
+		Deltas generateSceneDeltas(const Scene& newScene) const;
 	};
 }

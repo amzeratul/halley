@@ -56,7 +56,7 @@ EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationO
 	result.setPrefabUUID(entity.getPrefabUUID());
 
 	// Components
-	const auto serializeContext = std::make_shared<EntityFactoryContext>(world, resources, false, EntitySerialization::makeMask(options.type));
+	const auto serializeContext = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::makeMask(options.type), false);
 	for (auto [componentId, component]: entity) {
 		auto& reflector = getComponentReflector(componentId);
 		result.getComponents().emplace_back(reflector.getName(), reflector.serialize(serializeContext->getConfigNodeContext(), *component));
@@ -223,8 +223,11 @@ std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityDa
 	const auto mask = makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData);
 	auto context = std::make_shared<EntityFactoryContext>(world, resources, mask, updateContext, getPrefab(existing, data), &data, scene);
 
-	if (existing && updateContext) {
-		collectExistingEntities(existing.value(), *context);
+	if (existing) {
+		context->notifyEntity(existing.value());
+		if (updateContext) {
+			collectExistingEntities(existing.value(), *context);
+		}
 	}
 	
 	preInstantiateEntities(context->getRootEntityData(), *context, 0);
@@ -255,7 +258,7 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 		updateEntityChildren(entity, data, context);
 	}
 
-	context->notifyEntity(entity);
+	//context->notifyEntity(entity);
 }
 
 void EntityFactory::updateEntityComponents(EntityRef entity, const EntityData& data, const EntityFactoryContext& context)
@@ -337,11 +340,9 @@ void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityData
 		if (std_ex::contains(delta.getChildrenRemoved(), child.getInstanceUUID())) {
 			toDelete.emplace_back(child);
 		} else {
-			const auto iter = std::find_if(delta.getChildrenChanged().begin(), delta.getChildrenChanged().end(), [&] (const auto& e) { return e.first == child.getInstanceUUID(); });
+			const auto iter = std::find_if(delta.getChildrenChanged().begin(), delta.getChildrenChanged().end(), [&] (const auto& e) { return e.first == child.getInstanceUUID() || e.first == child.getPrefabUUID(); });
 			if (iter != delta.getChildrenChanged().end()) {
 				updateEntityNode(iter->second, child, entity, context);
-			} else {
-				Logger::logWarning("Child data delta not found: " + child.getInstanceUUID().toString());
 			}
 		}
 	}
@@ -366,7 +367,10 @@ void EntityFactory::preInstantiateEntities(const IEntityData& iData, EntityFacto
 		}
 	} else {
 		const auto& data = iData.asEntityData();
-		instantiateEntity(data, context, depth == 0);
+		const auto entity = instantiateEntity(data, context, depth == 0);
+		if (depth == 0) {
+			context.notifyEntity(entity);
+		}
 		
 		for (const auto& child: data.getChildren()) {
 			preInstantiateEntities(child, context, depth + 1);

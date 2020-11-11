@@ -1104,6 +1104,9 @@ ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigN
 	if (fromSeq == toSeq) {
 		return ConfigNode(NoopType());
 	}
+	if (!hints) {
+		return ConfigNode(to);
+	}
 
 	bool hasNewData = false;
 	size_t refCount = 0;
