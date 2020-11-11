@@ -101,14 +101,14 @@ String EntityData::toYAML() const
 
 void EntityData::serialize(Serializer& s) const
 {
-	// TODO
-	throw Exception("Unimplemented", HalleyExceptions::Entity);
+	s << EntityDataDelta(*this);
 }
 
 void EntityData::deserialize(Deserializer& s)
 {
-	// TODO
-	throw Exception("Unimplemented", HalleyExceptions::Entity);
+	EntityDataDelta delta;
+	s >> delta;
+	applyDelta(delta);
 }
 
 const EntityData* EntityData::tryGetPrefabUUID(const UUID& uuid) const
@@ -219,12 +219,21 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 	}
 	for (const auto& child: delta.childrenChanged) {
 		auto iter = std::find_if(children.begin(), children.end(), [&] (const auto& cur) { return cur.getPrefabUUID() == child.first; });
-		if (iter == children.end()) {
-			children.emplace_back(applyDelta(EntityData(child.first), child.second));
-		} else {
+		if (iter != children.end()) {
 			iter->applyDelta(child.second);
+		} else {
+			Logger::logWarning("Child not found: " + child.first.toString());
 		}
 	}
+	for (const auto& child: delta.childrenAdded) {
+		auto iter = std::find_if(children.begin(), children.end(), [&] (const auto& cur) { return cur.getPrefabUUID() == child.getPrefabUUID(); });
+		if (iter == children.end()) {
+			children.emplace_back(child);
+		} else {
+			Logger::logWarning("Child already present: " + child.getPrefabUUID().toString());
+		}
+	}
+
 	if (!delta.childrenOrder.empty()) {
 		// TODO
 	}
@@ -307,7 +316,7 @@ void EntityData::updateChild(const EntityData& instanceChildData)
 {
 	for (auto& c: children) {
 		// Is this correct???
-		Logger::logWarning("Untested code");
+		Logger::logWarning("Untested code at EntityData::updateChild");
 		if (c.prefabUUID == instanceChildData.prefabUUID) {
 			c.instantiateData(instanceChildData);
 			return;
@@ -321,4 +330,19 @@ EntityData EntityData::instantiateWithAsCopy(const EntityData& instance) const
 	EntityData clone = *this;
 	clone.instantiateWith(instance);
 	return clone;
+}
+
+bool EntityData::isDelta() const
+{
+	return false;
+}
+
+const EntityData& EntityData::asEntityData() const
+{
+	return *this;
+}
+
+const EntityDataDelta& EntityData::asEntityDataDelta() const
+{
+	throw Exception("Not an EntityDataDelta", HalleyExceptions::Entity);
 }

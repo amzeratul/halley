@@ -39,10 +39,9 @@ namespace Halley {
 		
 		EntityRef createEntity(const String& prefabName);
 		EntityRef createEntity(const EntityData& data, EntityRef parent = EntityRef(), EntityScene* scene = nullptr);
-		EntityScene createScene(const std::shared_ptr<const Prefab>& scene);
+		EntityScene createScene(const std::shared_ptr<const Prefab>& scene, bool allowReload);
 
-		void updateEntity(EntityRef& entity, const EntityData& data);
-		void updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene);
+		void updateEntity(EntityRef& entity, const IEntityData& data, EntityScene* scene = nullptr);
 
 		EntityData serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent = true);
 
@@ -50,23 +49,25 @@ namespace Halley {
 		World& world;
 		Resources& resources;
 
-		EntityRef updateEntityNode(const EntityData& data, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context);
+		void updateEntityNode(const IEntityData& iData, EntityRef entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context);
 		void updateEntityComponents(EntityRef entity, const EntityData& data, const EntityFactoryContext& context);
+		void updateEntityComponentsDelta(EntityRef entity, const EntityDataDelta& delta, const EntityFactoryContext& context);
 		void updateEntityChildren(EntityRef entity, const EntityData& data, const std::shared_ptr<EntityFactoryContext>& context);
+		void updateEntityChildrenDelta(EntityRef entity, const EntityDataDelta& delta, const std::shared_ptr<EntityFactoryContext>& context);
 
-		std::shared_ptr<EntityFactoryContext> makeContext(const EntityData& data, std::optional<EntityRef> existing, EntityScene* scene);
+		EntityRef getEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup);
+		std::shared_ptr<EntityFactoryContext> makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext);
 		EntityRef instantiateEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup);
-		EntityRef getEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup);
-		void preInstantiateEntities(const EntityData& data, EntityFactoryContext& context, int depth);
+		void preInstantiateEntities(const IEntityData& data, EntityFactoryContext& context, int depth);
 		void collectExistingEntities(EntityRef entity, EntityFactoryContext& context);
 
 		[[nodiscard]] std::shared_ptr<const Prefab> getPrefab(const String& id) const;
-		[[nodiscard]] std::shared_ptr<const EntityFactoryContext> makeContext(EntitySerialization::Type type, std::shared_ptr<const Prefab> prefab) const;
+		[[nodiscard]] std::shared_ptr<const Prefab> getPrefab(std::optional<EntityRef> entity, const IEntityData& data) const;
 	};
 
 	class EntityFactoryContext {
 	public:
-		EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, std::shared_ptr<const Prefab> prefab = {}, const EntityData* origEntityData = nullptr, EntityScene* scene = nullptr);
+		EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, bool update, std::shared_ptr<const Prefab> prefab = {}, const IEntityData* origEntityData = nullptr, EntityScene* scene = nullptr);
 		
 		template <typename T>
 		CreateComponentFunctionResult createComponent(EntityRef& e, const ConfigNode& componentData) const
@@ -74,14 +75,18 @@ namespace Halley {
 			CreateComponentFunctionResult result;
 			result.componentId = T::componentIndex;
 			
-			auto comp = e.tryGetComponent<T>();
-			if (comp) {
-				comp->deserialize(configNodeContext, componentData);
+			if (componentData.getType() == ConfigNodeType::Del) {
+				e.removeComponent<T>();
 			} else {
-				T component;
-				component.deserialize(configNodeContext, componentData);
-				e.addComponent<T>(std::move(component));
-				result.created = true;
+				auto comp = e.tryGetComponent<T>();
+				if (comp) {
+					comp->deserialize(configNodeContext, componentData);
+				} else {
+					T component;
+					component.deserialize(configNodeContext, componentData);
+					e.addComponent<T>(std::move(component));
+					result.created = true;
+				}
 			}
 
 			return result;
@@ -97,8 +102,9 @@ namespace Halley {
 		EntityRef getEntity(const UUID& uuid, bool allowPrefabUUID) const;
 
 		bool needsNewContextFor(const EntityData& value) const;
+		bool isUpdateContext() const;
 
-		const EntityData& getRootEntityData() const;
+		const IEntityData& getRootEntityData() const;
 		EntityScene* getScene() const;
 
 	private:
@@ -107,8 +113,11 @@ namespace Halley {
 		World* world;
 		EntityScene* scene;
 		std::vector<EntityRef> entities;
+		bool update = false;
 
-		const EntityData* entityData;
+		const IEntityData* entityData = nullptr;
 		EntityData instancedEntityData;
+
+		void setEntityData(const IEntityData& iData);
 	};
 }

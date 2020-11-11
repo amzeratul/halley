@@ -2,11 +2,10 @@
 #include "halley/data_structures/config_node.h"
 #include "halley/maths/uuid.h"
 #include <set>
+#include "entity_data.h"
 
-namespace Halley {
-    class EntityData;
-	
-	class EntityDataDelta {
+namespace Halley {	
+	class EntityDataDelta : public IEntityData {
 		friend class EntityData;
 		
 	public:
@@ -27,9 +26,23 @@ namespace Halley {
 		void serialize(Serializer& s) const;
     	void deserialize(Deserializer& s);
 
+		const std::optional<String>& getName() const { return name; }
 		const std::optional<String>& getPrefab() const { return prefab; }
 		const std::optional<UUID>& getPrefabUUID() const { return prefabUUID; }
 		void setPrefabUUID(const UUID& uuid);
+		
+		const std::vector<std::pair<String, ConfigNode>>& getComponentsChanged() const { return componentsChanged; }
+		const std::vector<String>& getComponentsRemoved() const { return componentsRemoved; }
+		
+		const std::vector<EntityData>& getChildrenAdded() const { return childrenAdded; }
+		const std::vector<std::pair<UUID, EntityDataDelta>>& getChildrenChanged() const { return childrenChanged; }
+		const std::vector<UUID>& getChildrenRemoved() const { return childrenRemoved; }
+
+		bool isSimpleDelta() const;
+    	
+        bool isDelta() const override;
+        const EntityData& asEntityData() const override;
+        const EntityDataDelta& asEntityDataDelta() const override;
 
 	private:
     	std::optional<String> name;
@@ -37,13 +50,14 @@ namespace Halley {
     	std::optional<UUID> instanceUUID;
     	std::optional<UUID> prefabUUID;
 		std::optional<UUID> parentUUID;
-		
-		std::vector<std::pair<String, ConfigNode>> componentsChanged; // Add/modified
-		std::vector<String> componentsRemoved; // Removed
+
+		std::vector<std::pair<String, ConfigNode>> componentsChanged;// Also includes components added
+		std::vector<String> componentsRemoved;
 		std::vector<String> componentOrder;
 
-		std::vector<std::pair<UUID, EntityDataDelta>> childrenChanged; // Add/modified
-		std::vector<UUID> childrenRemoved; // Removed
+		std::vector<EntityData> childrenAdded;
+		std::vector<std::pair<UUID, EntityDataDelta>> childrenChanged;
+		std::vector<UUID> childrenRemoved;
 		std::vector<UUID> childrenOrder;
 
         enum class FieldId {
@@ -57,6 +71,7 @@ namespace Halley {
         	ComponentsRemoved,
         	ComponentsOrder,
         	ChildrenChanged,
+        	ChildrenAdded,
         	ChildrenRemoved,
         	ChildrenOrder
         };

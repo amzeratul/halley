@@ -12,6 +12,8 @@ namespace Halley {
 	
 	class EntityScene {
 	public:
+		explicit EntityScene(bool allowReload = false);
+		
 		std::vector<EntityRef>& getEntities();
 		const std::vector<EntityRef>& getEntities() const;
 
@@ -19,21 +21,20 @@ namespace Halley {
 		void update(EntityFactory& factory);
 		void updateOnEditor(EntityFactory& factory);
 
-		void addPrefabReference(const std::shared_ptr<const Prefab>& prefab, const EntityRef& entity, std::optional<int> index = {});
+		void addPrefabReference(const std::shared_ptr<const Prefab>& prefab, const EntityRef& entity);
 		void addRootEntity(EntityRef entity);
 
 	private:
 		class PrefabObserver {
-		public:
+		public:			
 			PrefabObserver(std::shared_ptr<const Prefab> prefab);
 			
 			bool needsUpdate() const;
-			bool isScene() const;
 			
-			void update(EntityFactory& factory);
+			void updateEntities(EntityFactory& factory,EntityScene& scene) const;
 			void markUpdated();
 
-			void addEntity(EntityRef entity, std::optional<int> index);
+			void addEntity(EntityRef entity);
 
 			const std::shared_ptr<const Prefab>& getPrefab() const;
 
@@ -41,11 +42,14 @@ namespace Halley {
 			std::shared_ptr<const Prefab> prefab;
 			std::vector<EntityId> entityIds;
 			int assetVersion = 0;
-			bool scene = false;
+
+			std::vector<EntityRef> getEntities(World& world) const;
 		};
 
 		std::vector<EntityRef> entities;
 		std::vector<PrefabObserver> prefabObservers;
+		std::vector<PrefabObserver> sceneObservers;
+		bool allowReload = false;
 
 		PrefabObserver& getOrMakeObserver(const std::shared_ptr<const Prefab>& prefab);
 	};
