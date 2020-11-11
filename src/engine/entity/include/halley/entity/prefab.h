@@ -17,13 +17,17 @@ namespace Halley {
 		const EntityData& getEntityData() const;
 		const std::vector<EntityData>& getEntityDatas() const;
 		std::map<UUID, const EntityData*> getEntityDataMap() const;
-		const std::map<UUID, EntityDataDelta>& getSimpleDeltas() const;
+
+		const std::map<UUID, EntityDataDelta>& getEntitiesModified() const;
+		const std::set<UUID>& getEntitiesRemoved() const;
 
 	protected:
 		void loadEntityData();
 		virtual std::vector<EntityData> makeEntityDatas() const;
 		std::vector<EntityData> entityDatas;
-		std::map<UUID, EntityDataDelta> simpleDeltas;
+		
+		std::map<UUID, EntityDataDelta> entitiesModified;
+		std::set<UUID> entitiesRemoved;
 	};
 
 	class Scene final : public Prefab {

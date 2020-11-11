@@ -58,9 +58,14 @@ std::map<UUID, const EntityData*> Prefab::getEntityDataMap() const
 	return dataMap;
 }
 
-const std::map<UUID, EntityDataDelta>& Prefab::getSimpleDeltas() const
+const std::map<UUID, EntityDataDelta>& Prefab::getEntitiesModified() const
 {
-	return simpleDeltas;
+	return entitiesModified;
+}
+
+const std::set<UUID>& Prefab::getEntitiesRemoved() const
+{
+	return entitiesRemoved;
 }
 
 void Prefab::loadEntityData()
@@ -74,16 +79,23 @@ void Prefab::loadEntityData()
 	// Get new entities
 	entityDatas = makeEntityDatas();
 
-	// Generate deltas
-	simpleDeltas.clear();
+	// Modified
+	entitiesModified.clear();
 	for (const auto& data: entityDatas) {
-		const auto oldIter = oldDatas.find(data.getInstanceUUID());
+		const auto uuid = data.getInstanceUUID();
+		const auto oldIter = oldDatas.find(uuid);
 		if (oldIter != oldDatas.end()) {
+			// Update
 			auto delta = EntityDataDelta(oldIter->second, data);
-			if (delta.isSimpleDelta()) {
-				simpleDeltas[data.getInstanceUUID()] = std::move(delta);
-			}
+			entitiesModified[uuid] = std::move(delta);
+			oldDatas.erase(uuid);
 		}
+	}
+
+	// Removed
+	entitiesRemoved.clear();
+	for (const auto& old: oldDatas) {
+		entitiesRemoved.insert(old.first);
 	}
 }
 

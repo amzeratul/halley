@@ -27,7 +27,6 @@ namespace Halley {
 		public:
 			enum class UpdateMode {
 				AllEntries,
-				AllowedPrefabs,
 				DeltaOnly
 			};
 			
@@ -35,7 +34,7 @@ namespace Halley {
 			
 			bool needsUpdate() const;
 			
-			void update(EntityFactory& factory, UpdateMode mode, const std::vector<const Prefab*>& allowedPrefabs);
+			void updateEntities(EntityFactory& factory, UpdateMode mode) const;
 			void markUpdated();
 
 			void addEntity(EntityRef entity, std::optional<int> index);

@@ -104,7 +104,6 @@ std::shared_ptr<const Prefab> EntityFactory::getPrefab(std::optional<EntityRef> 
 		assert(entity);
 		const auto& prefabId = data.asEntityDataDelta().getPrefab();
 		if (prefabId) {
-			Logger::logWarning("Prefab changed during update, untested");
 			return getPrefab(prefabId.value());
 		} else {
 			return entity->getPrefab();
@@ -184,17 +183,11 @@ EntityScene* EntityFactoryContext::getScene() const
 void EntityFactoryContext::setEntityData(const IEntityData& iData)
 {
 	if (prefab) {
-		if (update) {
-			const auto& simpleDeltas = prefab->getSimpleDeltas();
-			if (simpleDeltas.size() == 1) {
-				entityData = &simpleDeltas.begin()->second;
-				return;
-			}
-		}
-		
 		if (iData.isDelta()) {
-			Logger::logWarning("Untested code at EntityFactoryContext::setEntityData");
-			entityData = &iData; // Is this correct?
+			if (iData.asEntityDataDelta().getPrefab()) {
+				Logger::logWarning("Changing prefab in EntityFactoryContext::setEntityData, this will probably not work correctly");
+			}
+			entityData = &iData;
 		} else {
 			instancedEntityData = prefab->getEntityData().instantiateWithAsCopy(iData.asEntityData());
 			entityData = &instancedEntityData;						
@@ -223,22 +216,6 @@ void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, Ent
 {
 	const auto context = makeContext(data, entity, scene, true);
 	updateEntityNode(context->getRootEntityData(), entity, {}, context);
-}
-
-void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene)
-{
-	std::map<UUID, const EntityData*> entityDatas;
-
-	for (const auto& data: scene->getEntityDatas()) {
-		entityDatas[data.getInstanceUUID()] = &data;
-	}
-	
-	for (auto& e: entities) {
-		const auto iter = entityDatas.find(e.getInstanceUUID());
-		if (iter != entityDatas.end()) {
-			updateEntity(e, *iter->second);
-		}
-	}
 }
 
 std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext)
