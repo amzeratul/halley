@@ -1027,6 +1027,9 @@ ConfigNode ConfigNode::createMapDelta(const ConfigNode& from, const ConfigNode& 
 
 	// Shortcut if from is empty
 	if (fromMap.empty()) {
+		if (toMap.empty()) {
+			return ConfigNode(NoopType());
+		}
 		auto result = ConfigNode(toMap);
 		result.type = ConfigNodeType::DeltaMap;
 		return result;
@@ -1097,6 +1100,10 @@ ConfigNode ConfigNode::createSequenceDelta(const ConfigNode& from, const ConfigN
 	const auto& fromSeq = from.asSequence();
 	const auto& toSeq = to.asSequence();
 	auto& resultSeq = result.asSequence();
+
+	if (fromSeq == toSeq) {
+		return ConfigNode(NoopType());
+	}
 
 	bool hasNewData = false;
 	size_t refCount = 0;
