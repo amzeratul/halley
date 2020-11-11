@@ -316,7 +316,7 @@ void EntityData::updateChild(const EntityData& instanceChildData)
 {
 	for (auto& c: children) {
 		// Is this correct???
-		Logger::logWarning("Untested code");
+		Logger::logWarning("Untested code at EntityData::updateChild");
 		if (c.prefabUUID == instanceChildData.prefabUUID) {
 			c.instantiateData(instanceChildData);
 			return;

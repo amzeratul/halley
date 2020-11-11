@@ -56,7 +56,7 @@ EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationO
 	result.setPrefabUUID(entity.getPrefabUUID());
 
 	// Components
-	const auto serializeContext = std::make_shared<EntityFactoryContext>(world, resources, EntitySerialization::makeMask(options.type));
+	const auto serializeContext = std::make_shared<EntityFactoryContext>(world, resources, false, EntitySerialization::makeMask(options.type));
 	for (auto [componentId, component]: entity) {
 		auto& reflector = getComponentReflector(componentId);
 		result.getComponents().emplace_back(reflector.getName(), reflector.serialize(serializeContext->getConfigNodeContext(), *component));
@@ -98,20 +98,34 @@ std::shared_ptr<const Prefab> EntityFactory::getPrefab(const String& id) const
 	return std::shared_ptr<const Prefab>();
 }
 
-EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, std::shared_ptr<const Prefab> _prefab, const EntityData* origEntityData, EntityScene* scene)
+std::shared_ptr<const Prefab> EntityFactory::getPrefab(std::optional<EntityRef> entity, const IEntityData& data) const
+{
+	if (data.isDelta()) {
+		assert(entity);
+		const auto& prefabId = data.asEntityDataDelta().getPrefab();
+		if (prefabId) {
+			Logger::logWarning("Prefab changed during update, untested");
+			return getPrefab(prefabId.value());
+		} else {
+			return entity->getPrefab();
+		}
+	} else {
+		return getPrefab(data.asEntityData().getPrefab());
+	}
+}
+
+EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, bool update, std::shared_ptr<const Prefab> _prefab, const IEntityData* origEntityData, EntityScene* scene)
 	: world(&world)
 	, scene(scene)
+	, update(update)
 {
 	prefab = std::move(_prefab);
 	configNodeContext.resources = &resources;
 	configNodeContext.entityContext = this;
 	configNodeContext.entitySerializationTypeMask = entitySerializationMask;
 
-	if (prefab && origEntityData) {
-		instancedEntityData = prefab->getEntityData().instantiateWithAsCopy(*origEntityData);
-		entityData = &instancedEntityData;
-	} else {
-		entityData = origEntityData;
+	if (origEntityData) {
+		setEntityData(*origEntityData);
 	}
 }
 
@@ -152,7 +166,12 @@ bool EntityFactoryContext::needsNewContextFor(const EntityData& data) const
 	return entityDataIsPrefabInstance || abandonPrefab;
 }
 
-const EntityData& EntityFactoryContext::getRootEntityData() const
+bool EntityFactoryContext::isUpdateContext() const
+{
+	return update;
+}
+
+const IEntityData& EntityFactoryContext::getRootEntityData() const
 {
 	return *entityData;
 }
@@ -160,6 +179,29 @@ const EntityData& EntityFactoryContext::getRootEntityData() const
 EntityScene* EntityFactoryContext::getScene() const
 {
 	return scene;
+}
+
+void EntityFactoryContext::setEntityData(const IEntityData& iData)
+{
+	if (prefab) {
+		if (update) {
+			const auto& simpleDeltas = prefab->getSimpleDeltas();
+			if (simpleDeltas.size() == 1) {
+				entityData = &simpleDeltas.begin()->second;
+				return;
+			}
+		}
+		
+		if (iData.isDelta()) {
+			Logger::logWarning("Untested code at EntityFactoryContext::setEntityData");
+			entityData = &iData; // Is this correct?
+		} else {
+			instancedEntityData = prefab->getEntityData().instantiateWithAsCopy(iData.asEntityData());
+			entityData = &instancedEntityData;						
+		}
+	} else {
+		entityData = &iData;
+	}
 }
 
 void EntityFactoryContext::notifyEntity(const EntityRef& entity) const
@@ -171,21 +213,16 @@ void EntityFactoryContext::notifyEntity(const EntityRef& entity) const
 
 EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent, EntityScene* scene)
 {
-	const auto context = makeContext(data, {}, scene);
+	const auto context = makeContext(data, {}, scene, false);
 	const auto entity = getEntity(data.getInstanceUUID(), *context, false);
 	updateEntityNode(context->getRootEntityData(), entity, parent, context);
 	return entity;
 }
 
-void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)
+void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, EntityScene* scene)
 {
-	const auto context = makeContext(data, entity, nullptr);
+	const auto context = makeContext(data, entity, scene, true);
 	updateEntityNode(context->getRootEntityData(), entity, {}, context);
-}
-
-void EntityFactory::updateEntity(EntityRef& entity, const EntityDataDelta& delta)
-{
-	// TODO
 }
 
 void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene)
@@ -204,11 +241,12 @@ void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::sha
 	}
 }
 
-std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const EntityData& data, std::optional<EntityRef> existing, EntityScene* scene)
+std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext)
 {
-	auto context = std::make_shared<EntityFactoryContext>(world, resources, makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData), getPrefab(data.getPrefab()), &data, scene);
+	const auto mask = makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData);
+	auto context = std::make_shared<EntityFactoryContext>(world, resources, mask, updateContext, getPrefab(existing, data), &data, scene);
 
-	if (existing) {
+	if (existing && updateContext) {
 		collectExistingEntities(existing.value(), *context);
 	}
 	
@@ -217,18 +255,28 @@ std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const EntityDat
 	return context;
 }
 
-void EntityFactory::updateEntityNode(const EntityData& data, EntityRef entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context)
+void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context)
 {
 	assert(entity.isValid());
-
-	entity.setName(data.getName());
-	entity.setPrefab(context->getPrefab(), data.getPrefabUUID());
 	if (parent) {
 		entity.setParent(parent.value());
 	}
-	
-	updateEntityComponents(entity, data, *context);
-	updateEntityChildren(entity, data, context);
+
+	if (iData.isDelta()) {
+		const auto& delta = iData.asEntityDataDelta();
+		if (delta.getName()) {
+			entity.setName(delta.getName().value());
+		}
+		entity.setPrefab(context->getPrefab(), delta.getPrefabUUID().value_or(entity.getPrefabUUID()));
+		updateEntityComponentsDelta(entity, delta, *context);
+		updateEntityChildrenDelta(entity, delta, context);
+	} else {
+		const auto& data = iData.asEntityData();
+		entity.setName(data.getName());
+		entity.setPrefab(context->getPrefab(), data.getPrefabUUID());	
+		updateEntityComponents(entity, data, *context);
+		updateEntityChildren(entity, data, context);
+	}
 
 	context->notifyEntity(entity);
 }
@@ -264,6 +312,19 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const EntityData& d
 	}
 }
 
+void EntityFactory::updateEntityComponentsDelta(EntityRef entity, const EntityDataDelta& delta, const EntityFactoryContext& context)
+{
+	const auto& func = world.getCreateComponentFunction();
+
+	for (const auto& [componentName, componentData]: delta.getComponentsChanged()) {
+		func(context, componentName, entity, componentData);
+	}
+
+	for (const auto& componentName: delta.getComponentsRemoved()) {
+		func(context, componentName, entity, ConfigNode(ConfigNode::DelType()));
+	}
+}
+
 void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& data, const std::shared_ptr<EntityFactoryContext>& context)
 {
 	if (!entity.getRawChildren().empty()) {
@@ -284,7 +345,7 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& dat
 	// Update children
 	for (const auto& child: data.getChildren()) {
 		if (context->needsNewContextFor(child)) {
-			const auto newContext = makeContext(child, {}, context->getScene());
+			const auto newContext = makeContext(child, entity, context->getScene(), context->isUpdateContext());
 			updateEntityNode(newContext->getRootEntityData(), getEntity(child.getInstanceUUID(), *newContext, false), entity, newContext);
 		} else {
 			updateEntityNode(child, getEntity(child.getInstanceUUID(), *context, false), entity, context);
@@ -292,12 +353,47 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& dat
 	}
 }
 
-void EntityFactory::preInstantiateEntities(const EntityData& data, EntityFactoryContext& context, int depth)
+void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityDataDelta& delta, const std::shared_ptr<EntityFactoryContext>& context)
 {
-	instantiateEntity(data, context, depth == 0);
-	
-	for (const auto& child: data.getChildren()) {
-		preInstantiateEntities(child, context, depth + 1);
+	std::vector<EntityRef> toDelete;
+	for (auto child: entity.getChildren()) {
+		if (std_ex::contains(delta.getChildrenRemoved(), child.getInstanceUUID())) {
+			toDelete.emplace_back(child);
+		} else {
+			const auto iter = std::find_if(delta.getChildrenChanged().begin(), delta.getChildrenChanged().end(), [&] (const auto& e) { return e.first == child.getInstanceUUID(); });
+			if (iter != delta.getChildrenChanged().end()) {
+				updateEntityNode(iter->second, child, entity, context);
+			} else {
+				Logger::logWarning("Child data delta not found: " + child.getInstanceUUID().toString());
+			}
+		}
+	}
+	for (const auto& childData: delta.getChildrenAdded()) {
+		updateEntityNode(childData, getEntity(childData.getInstanceUUID(), *context, false), entity, context);
+	}
+	for (auto& c: toDelete) {
+		world.destroyEntity(c);
+	}
+}
+
+void EntityFactory::preInstantiateEntities(const IEntityData& iData, EntityFactoryContext& context, int depth)
+{
+	if (iData.isDelta()) {
+		const auto& delta = iData.asEntityDataDelta();
+		
+		for (const auto& child: delta.getChildrenAdded()) {
+			preInstantiateEntities(child, context, depth + 1);
+		}
+		for (const auto& child: delta.getChildrenChanged()) {
+			preInstantiateEntities(child.second, context, depth + 1);
+		}
+	} else {
+		const auto& data = iData.asEntityData();
+		instantiateEntity(data, context, depth == 0);
+		
+		for (const auto& child: data.getChildren()) {
+			preInstantiateEntities(child, context, depth + 1);
+		}
 	}
 }
 

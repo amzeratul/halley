@@ -26,9 +26,17 @@ namespace Halley {
 		void serialize(Serializer& s) const;
     	void deserialize(Deserializer& s);
 
+		const std::optional<String>& getName() const { return name; }
 		const std::optional<String>& getPrefab() const { return prefab; }
 		const std::optional<UUID>& getPrefabUUID() const { return prefabUUID; }
 		void setPrefabUUID(const UUID& uuid);
+		
+		const std::vector<std::pair<String, ConfigNode>>& getComponentsChanged() const { return componentsChanged; }
+		const std::vector<String>& getComponentsRemoved() const { return componentsRemoved; }
+		
+		const std::vector<EntityData>& getChildrenAdded() const { return childrenAdded; }
+		const std::vector<std::pair<UUID, EntityDataDelta>>& getChildrenChanged() const { return childrenChanged; }
+		const std::vector<UUID>& getChildrenRemoved() const { return childrenRemoved; }
 
 		bool isSimpleDelta() const;
     	
