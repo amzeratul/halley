@@ -49,7 +49,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 			}
 		} else {
 			// Inserted
-			childrenChanged.emplace_back(toChild.prefabUUID, EntityDataDelta(EntityData(), toChild, options));
+			childrenAdded.emplace_back(toChild);
 		}
 	}
 	for (const auto& fromChild: from.children) {
@@ -99,7 +99,7 @@ bool EntityDataDelta::hasChange() const
 {
 	return name || prefab || instanceUUID || prefabUUID || parentUUID
 		|| !componentsChanged.empty() || !componentsRemoved.empty() || !componentOrder.empty()
-		|| !childrenChanged.empty() || !childrenRemoved.empty() || !childrenOrder.empty();
+		|| !childrenChanged.empty() || !childrenAdded.empty() || !childrenRemoved.empty() || !childrenOrder.empty();
 }
 
 void EntityDataDelta::serialize(Serializer& s) const
@@ -127,6 +127,7 @@ void EntityDataDelta::serialize(Serializer& s) const
 	encodeOptField(prefabUUID, FieldId::PrefabUUID);
 	encodeOptField(parentUUID, FieldId::ParentUUID);
 	encodeField(childrenChanged, FieldId::ChildrenChanged);
+	encodeField(childrenAdded, FieldId::ChildrenAdded);
 	encodeField(childrenRemoved, FieldId::ChildrenRemoved);
 	encodeField(childrenOrder, FieldId::ChildrenOrder);
 	encodeField(componentsChanged, FieldId::ComponentsChanged);
@@ -161,6 +162,7 @@ void EntityDataDelta::deserialize(Deserializer& s)
 	decodeOptField(prefabUUID, FieldId::PrefabUUID);
 	decodeOptField(parentUUID, FieldId::ParentUUID);
 	decodeField(childrenChanged, FieldId::ChildrenChanged);
+	decodeField(childrenAdded, FieldId::ChildrenAdded);
 	decodeField(childrenRemoved, FieldId::ChildrenRemoved);
 	decodeField(childrenOrder, FieldId::ChildrenOrder);
 	decodeField(componentsChanged, FieldId::ComponentsChanged);
@@ -171,6 +173,21 @@ void EntityDataDelta::deserialize(Deserializer& s)
 void EntityDataDelta::setPrefabUUID(const UUID& uuid)
 {
 	prefabUUID = uuid;
+}
+
+bool EntityDataDelta::isSimpleDelta() const
+{
+	if (!childrenAdded.empty() || !childrenRemoved.empty() || prefab) {
+		return false;
+	}
+
+	for (auto& child: childrenChanged) {
+		if (!child.second.isSimpleDelta()) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 uint16_t EntityDataDelta::getFieldBit(FieldId id)
@@ -216,6 +233,7 @@ uint16_t EntityDataDelta::getFieldsPresent() const
 	checkField(prefabUUID, FieldId::PrefabUUID);
 	checkField(parentUUID, FieldId::ParentUUID);
 	checkFieldVec(childrenChanged, FieldId::ChildrenChanged);
+	checkFieldVec(childrenAdded, FieldId::ChildrenAdded);
 	checkFieldVec(childrenRemoved, FieldId::ChildrenRemoved);
 	checkFieldVec(childrenOrder, FieldId::ChildrenOrder);
 	checkFieldVec(componentsChanged, FieldId::ComponentsChanged);

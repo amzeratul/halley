@@ -25,12 +25,17 @@ namespace Halley {
 	private:
 		class PrefabObserver {
 		public:
+			enum class UpdateMode {
+				AllEntries,
+				AllowedPrefabs,
+				DeltaOnly
+			};
+			
 			PrefabObserver(std::shared_ptr<const Prefab> prefab);
 			
 			bool needsUpdate() const;
-			bool isScene() const;
 			
-			void update(EntityFactory& factory);
+			void update(EntityFactory& factory, UpdateMode mode, const std::vector<const Prefab*>& allowedPrefabs);
 			void markUpdated();
 
 			void addEntity(EntityRef entity, std::optional<int> index);
@@ -41,11 +46,13 @@ namespace Halley {
 			std::shared_ptr<const Prefab> prefab;
 			std::vector<EntityId> entityIds;
 			int assetVersion = 0;
-			bool scene = false;
+
+			std::vector<EntityRef> getEntities(World& world) const;
 		};
 
 		std::vector<EntityRef> entities;
 		std::vector<PrefabObserver> prefabObservers;
+		std::vector<PrefabObserver> sceneObservers;
 
 		PrefabObserver& getOrMakeObserver(const std::shared_ptr<const Prefab>& prefab);
 	};

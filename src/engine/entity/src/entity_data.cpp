@@ -219,12 +219,21 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 	}
 	for (const auto& child: delta.childrenChanged) {
 		auto iter = std::find_if(children.begin(), children.end(), [&] (const auto& cur) { return cur.getPrefabUUID() == child.first; });
-		if (iter == children.end()) {
-			children.emplace_back(applyDelta(EntityData(child.first), child.second));
-		} else {
+		if (iter != children.end()) {
 			iter->applyDelta(child.second);
+		} else {
+			Logger::logWarning("Child not found: " + child.first.toString());
 		}
 	}
+	for (const auto& child: delta.childrenAdded) {
+		auto iter = std::find_if(children.begin(), children.end(), [&] (const auto& cur) { return cur.getPrefabUUID() == child.getPrefabUUID(); });
+		if (iter == children.end()) {
+			children.emplace_back(child);
+		} else {
+			Logger::logWarning("Child already present: " + child.getPrefabUUID().toString());
+		}
+	}
+
 	if (!delta.childrenOrder.empty()) {
 		// TODO
 	}

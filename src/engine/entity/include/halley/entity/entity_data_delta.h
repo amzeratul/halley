@@ -31,19 +31,22 @@ namespace Halley {
 		const std::optional<UUID>& getPrefabUUID() const { return prefabUUID; }
 		void setPrefabUUID(const UUID& uuid);
 
+		bool isSimpleDelta() const;
+
 	private:
     	std::optional<String> name;
     	std::optional<String> prefab;
     	std::optional<UUID> instanceUUID;
     	std::optional<UUID> prefabUUID;
 		std::optional<UUID> parentUUID;
-		
-		std::vector<std::pair<String, ConfigNode>> componentsChanged; // Add/modified
-		std::vector<String> componentsRemoved; // Removed
+
+		std::vector<std::pair<String, ConfigNode>> componentsChanged;// Also includes components added
+		std::vector<String> componentsRemoved;
 		std::vector<String> componentOrder;
 
-		std::vector<std::pair<UUID, EntityDataDelta>> childrenChanged; // Add/modified
-		std::vector<UUID> childrenRemoved; // Removed
+		std::vector<EntityData> childrenAdded;
+		std::vector<std::pair<UUID, EntityDataDelta>> childrenChanged;
+		std::vector<UUID> childrenRemoved;
 		std::vector<UUID> childrenOrder;
 
         enum class FieldId {
@@ -57,6 +60,7 @@ namespace Halley {
         	ComponentsRemoved,
         	ComponentsOrder,
         	ChildrenChanged,
+        	ChildrenAdded,
         	ChildrenRemoved,
         	ChildrenOrder
         };

@@ -17,7 +17,12 @@ const std::vector<EntityRef>& EntityScene::getEntities() const
 
 bool EntityScene::needsUpdate() const
 {
-	for (auto& entry: prefabObservers) {
+	for (const auto& entry: sceneObservers) {
+		if (entry.needsUpdate()) {
+			return true;
+		}
+	}
+	for (const auto& entry: prefabObservers) {
 		if (entry.needsUpdate()) {
 			return true;
 		}
@@ -27,26 +32,33 @@ bool EntityScene::needsUpdate() const
 
 void EntityScene::update(EntityFactory& factory)
 {
-	// When an update is requested, only actually update the scene, regardless of whichever triggered it
-	// However, mark all of them as updated.
-	// 
+	// Collect all prefabs that changed
+	std::vector<const Prefab*> allowedPrefabs;
 	for (auto& entry: prefabObservers) {
-		if (entry.isScene()) {
-			entry.update(factory);
+		if (entry.needsUpdate()) {
+			allowedPrefabs.emplace_back(entry.getPrefab().get());
+			entry.markUpdated();		
 		}
+	}
+
+	// Update scenes
+	for (auto& entry: sceneObservers) {
+		entry.update(factory, entry.needsUpdate() ? PrefabObserver::UpdateMode::AllEntries : PrefabObserver::UpdateMode::AllowedPrefabs, allowedPrefabs);
 		entry.markUpdated();
 	}
 }
 
 void EntityScene::updateOnEditor(EntityFactory& factory)
 {
-	for (auto& entry : prefabObservers) {
+	for (auto& entry: prefabObservers) {
 		if (entry.needsUpdate()) {
-			if (!entry.isScene()) {
-				entry.update(factory);
-			}
+			entry.update(factory, PrefabObserver::UpdateMode::AllEntries, {});
 			entry.markUpdated();
 		}
+	}
+	
+	for (auto& entry: sceneObservers) {
+		entry.markUpdated();
 	}
 }
 
@@ -71,53 +83,26 @@ bool EntityScene::PrefabObserver::needsUpdate() const
 	return assetVersion != prefab->getAssetVersion();
 }
 
-bool EntityScene::PrefabObserver::isScene() const
+void EntityScene::PrefabObserver::update(EntityFactory& factory, UpdateMode mode, const std::vector<const Prefab*>& allowedPrefabs)
 {
-	return scene;
-}
-
-void EntityScene::PrefabObserver::update(EntityFactory& factory)
-{
-	auto& world = factory.getWorld();
-	std::vector<EntityRef> entities;
-	for (const auto& id: entityIds) {
-		auto* entity = world.tryGetRawEntity(id);
-		if (entity) {
-			entities.emplace_back(*entity, world);
-		}
-	}
-
-	if (!entities.empty()) {
-		if (scene) {
-			factory.updateScene(entities, prefab);
-		} else {
-			for (auto& entity: entities) {
-				factory.updateEntity(entity, prefab->getEntityData());
-			}
-		}
-	}
-
-	/*
-	const auto& deltas = prefab->getEntityDataDeltas();
-
-	std::map<UUID, const EntityData*> dataMap;
-	for (const auto& data: prefab->getEntityDatas()) {
-		dataMap[data.getInstanceUUID()] = &data;
-	}
+	const auto& simpleDeltas = prefab->getSimpleDeltas();
+	const auto& dataMap = prefab->getEntityDataMap();
 	
-	for (auto& entity: entities) {
-		auto deltaIter = deltas.find(entity.getInstanceUUID());
-		if (deltaIter != deltas.end()) {
+	for (auto& entity: getEntities(factory.getWorld())) {
+		auto deltaIter = simpleDeltas.find(entity.getInstanceUUID());
+		if (deltaIter != simpleDeltas.end()) {
+			// A simple delta is available for this entity, apply that
 			factory.updateEntity(entity, deltaIter->second);
 		} else {
 			auto dataIter = dataMap.find(entity.getInstanceUUID());
 			if (dataIter != dataMap.end()) {
+				// Do a full update
 				factory.updateEntity(entity, *dataIter->second);
 			} else {
 				// Not found
 			}
 		}
-	}*/
+	}
 }
 
 void EntityScene::PrefabObserver::markUpdated()
@@ -129,9 +114,6 @@ void EntityScene::PrefabObserver::addEntity(EntityRef entity, std::optional<int>
 {
 	std_ex::contains(entityIds, entity.getEntityId());
 	entityIds.push_back(entity.getEntityId());
-	if (index) {
-		scene = true;
-	}
 }
 
 const std::shared_ptr<const Prefab>& EntityScene::PrefabObserver::getPrefab() const
@@ -139,12 +121,26 @@ const std::shared_ptr<const Prefab>& EntityScene::PrefabObserver::getPrefab() co
 	return prefab;
 }
 
+std::vector<EntityRef> EntityScene::PrefabObserver::getEntities(World& world) const
+{
+	std::vector<EntityRef> entities;
+	for (const auto& id: entityIds) {
+		auto* entity = world.tryGetRawEntity(id);
+		if (entity) {
+			entities.emplace_back(*entity, world);
+		}
+	}
+	return entities;
+}
+
 EntityScene::PrefabObserver& EntityScene::getOrMakeObserver(const std::shared_ptr<const Prefab>& prefab)
 {
-	for (auto& o: prefabObservers) {
+	auto& list = prefab->isScene() ? sceneObservers : prefabObservers;
+	
+	for (auto& o: list) {
 		if (o.getPrefab() == prefab) {
 			return o;
 		}
 	}
-	return prefabObservers.emplace_back(prefab);
+	return list.emplace_back(prefab);
 }

@@ -12,15 +12,18 @@ namespace Halley {
 		void reload(Resource&& resource) override;
 		void makeDefault();
 
+		virtual bool isScene() const;
+
 		const EntityData& getEntityData() const;
 		const std::vector<EntityData>& getEntityDatas() const;
-		const std::map<UUID, EntityDataDelta>& getEntityDataDeltas() const;
+		std::map<UUID, const EntityData*> getEntityDataMap() const;
+		const std::map<UUID, EntityDataDelta>& getSimpleDeltas() const;
 
 	protected:
 		void loadEntityData();
 		virtual std::vector<EntityData> makeEntityDatas() const;
 		std::vector<EntityData> entityDatas;
-		std::map<UUID, EntityDataDelta> deltas;
+		std::map<UUID, EntityDataDelta> simpleDeltas;
 	};
 
 	class Scene final : public Prefab {
@@ -28,6 +31,8 @@ namespace Halley {
 		static std::unique_ptr<Scene> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Scene; }
 
+		bool isScene() const override;
+		
 		void reload(Resource&& resource) override;
 		void makeDefault();
 

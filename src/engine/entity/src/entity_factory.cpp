@@ -181,6 +181,11 @@ void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)
 	updateEntityNode(context->getRootEntityData(), {}, context);
 }
 
+void EntityFactory::updateEntity(EntityRef& entity, const EntityDataDelta& delta)
+{
+	// TODO
+}
+
 void EntityFactory::updateScene(std::vector<EntityRef>& entities, const std::shared_ptr<const Prefab>& scene)
 {
 	std::map<UUID, const EntityData*> entityDatas;

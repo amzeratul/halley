@@ -31,6 +31,11 @@ void Prefab::makeDefault()
 	loadEntityData();
 }
 
+bool Prefab::isScene() const
+{
+	return false;
+}
+
 const EntityData& Prefab::getEntityData() const
 {
 	if (entityDatas.size() != 1) {
@@ -44,34 +49,42 @@ const std::vector<EntityData>& Prefab::getEntityDatas() const
 	return entityDatas;
 }
 
-const std::map<UUID, EntityDataDelta>& Prefab::getEntityDataDeltas() const
+std::map<UUID, const EntityData*> Prefab::getEntityDataMap() const
 {
-	return deltas;
+	std::map<UUID, const EntityData*> dataMap;
+	for (const auto& data: entityDatas) {
+		dataMap[data.getInstanceUUID()] = &data;
+	}
+	return dataMap;
+}
+
+const std::map<UUID, EntityDataDelta>& Prefab::getSimpleDeltas() const
+{
+	return simpleDeltas;
 }
 
 void Prefab::loadEntityData()
 {
-	/*
 	// Move old entity data
 	std::map<UUID, EntityData> oldDatas;
 	for (auto& data: entityDatas) {
 		oldDatas[data.getInstanceUUID()] = std::move(data);
 	}
-	*/
 	
 	// Get new entities
 	entityDatas = makeEntityDatas();
 
-	/*
 	// Generate deltas
-	deltas.clear();
+	simpleDeltas.clear();
 	for (const auto& data: entityDatas) {
 		const auto oldIter = oldDatas.find(data.getInstanceUUID());
 		if (oldIter != oldDatas.end()) {
-			deltas[data.getInstanceUUID()] = EntityDataDelta(oldIter->second, data);
+			auto delta = EntityDataDelta(oldIter->second, data);
+			if (delta.isSimpleDelta()) {
+				simpleDeltas[data.getInstanceUUID()] = std::move(delta);
+			}
 		}
 	}
-	*/
 }
 
 std::vector<EntityData> Prefab::makeEntityDatas() const
@@ -93,6 +106,11 @@ std::unique_ptr<Scene> Scene::loadResource(ResourceLoader& loader)
 	scene->loadEntityData();
 
 	return scene;
+}
+
+bool Scene::isScene() const
+{
+	return true;
 }
 
 void Scene::reload(Resource&& resource)
