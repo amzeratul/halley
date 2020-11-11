@@ -147,6 +147,8 @@ namespace Halley {
 		bool asBool() const;
 		Vector2i asVector2i() const;
 		Vector2f asVector2f() const;
+		Vector3i asVector3i() const;
+		Vector3f asVector3f() const;
 		Vector4i asVector4i() const;
 		Vector4f asVector4f() const;
 		Range<float> asFloatRange() const;
@@ -294,6 +296,8 @@ namespace Halley {
 		bool convertTo(Tag<bool> tag) const;
 		Vector2i convertTo(Tag<Vector2i> tag) const;
 		Vector2f convertTo(Tag<Vector2f> tag) const;
+		Vector3i convertTo(Tag<Vector3i> tag) const;
+		Vector3f convertTo(Tag<Vector3f> tag) const;
 		Vector4i convertTo(Tag<Vector4i> tag) const;
 		Vector4f convertTo(Tag<Vector4f> tag) const;
 		Range<float> convertTo(Tag<Range<float>> tag) const;

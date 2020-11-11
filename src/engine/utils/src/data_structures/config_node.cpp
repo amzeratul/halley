@@ -483,6 +483,28 @@ Vector2f ConfigNode::asVector2f() const
 	}
 }
 
+Vector3i ConfigNode::asVector3i() const
+{
+	if (type == ConfigNodeType::Sequence) {
+		auto& seq = asSequence();
+		return Vector3i(seq.at(0).asInt(), seq.at(1).asInt(), seq.at(2).asInt());
+	}
+	else {
+		throw Exception(getNodeDebugId() + " is not a vector3 type", HalleyExceptions::Resources);
+	}
+}
+
+Vector3f ConfigNode::asVector3f() const
+{
+	if (type == ConfigNodeType::Sequence) {
+		auto& seq = asSequence();
+		return Vector3f(seq.at(0).asFloat(), seq.at(1).asFloat(), seq.at(2).asFloat());
+	}
+	else {
+		throw Exception(getNodeDebugId() + " is not a vector3 type", HalleyExceptions::Resources);
+	}
+}
+
 Vector4i ConfigNode::asVector4i() const
 {
 	if (type == ConfigNodeType::Sequence) {
@@ -901,6 +923,16 @@ Vector2i ConfigNode::convertTo(Tag<Vector2i> tag) const
 Vector2f ConfigNode::convertTo(Tag<Vector2f> tag) const
 {
 	return asVector2f();
+}
+
+Vector3i ConfigNode::convertTo(Tag<Vector3i> tag) const
+{
+	return asVector3i();
+}
+
+Vector3f ConfigNode::convertTo(Tag<Vector3f> tag) const
+{
+	return asVector3f();
 }
 
 Vector4i ConfigNode::convertTo(Tag<Vector4i> tag) const
