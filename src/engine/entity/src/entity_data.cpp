@@ -331,3 +331,18 @@ EntityData EntityData::instantiateWithAsCopy(const EntityData& instance) const
 	clone.instantiateWith(instance);
 	return clone;
 }
+
+bool EntityData::isDelta() const
+{
+	return false;
+}
+
+const EntityData& EntityData::asEntityData() const
+{
+	return *this;
+}
+
+const EntityDataDelta& EntityData::asEntityDataDelta() const
+{
+	throw Exception("Not an EntityDataDelta", HalleyExceptions::Entity);
+}

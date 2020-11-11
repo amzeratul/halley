@@ -190,6 +190,21 @@ bool EntityDataDelta::isSimpleDelta() const
 	return true;
 }
 
+bool EntityDataDelta::isDelta() const
+{
+	return true;
+}
+
+const EntityData& EntityDataDelta::asEntityData() const
+{
+	throw Exception("Not an EntityData", HalleyExceptions::Entity);
+}
+
+const EntityDataDelta& EntityDataDelta::asEntityDataDelta() const
+{
+	return *this;
+}
+
 uint16_t EntityDataDelta::getFieldBit(FieldId id)
 {
 	return static_cast<uint16_t>(1 << static_cast<int>(id));

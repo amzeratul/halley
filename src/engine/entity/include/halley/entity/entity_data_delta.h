@@ -2,11 +2,10 @@
 #include "halley/data_structures/config_node.h"
 #include "halley/maths/uuid.h"
 #include <set>
+#include "entity_data.h"
 
-namespace Halley {
-    class EntityData;
-	
-	class EntityDataDelta {
+namespace Halley {	
+	class EntityDataDelta : public IEntityData {
 		friend class EntityData;
 		
 	public:
@@ -32,6 +31,10 @@ namespace Halley {
 		void setPrefabUUID(const UUID& uuid);
 
 		bool isSimpleDelta() const;
+    	
+        bool isDelta() const override;
+        const EntityData& asEntityData() const override;
+        const EntityDataDelta& asEntityDataDelta() const override;
 
 	private:
     	std::optional<String> name;

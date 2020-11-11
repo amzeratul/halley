@@ -4,13 +4,25 @@
 #include <set>
 
 namespace Halley {
+	class EntityData;
     class EntityDataDelta;
+
+	class IEntityData {
+	public:
+		virtual bool isDelta() const = 0;
+		virtual const EntityData& asEntityData() const = 0;
+		virtual const EntityDataDelta& asEntityDataDelta() const = 0;
+		
+	protected:
+		virtual ~IEntityData() = default;
+	};
 	
-    class EntityData {
+    class EntityData : public IEntityData {
     	friend class EntityDataDelta;
     	
     public:
     	EntityData();
+    	
         explicit EntityData(UUID instanceUUID);
     	EntityData(const ConfigNode& data, bool isPrefab);
         EntityData(const EntityData& other) = default;
@@ -56,6 +68,10 @@ namespace Halley {
 
     	void instantiateWith(const EntityData& instance);
 	    EntityData instantiateWithAsCopy(const EntityData& instance) const;
+    	
+        bool isDelta() const override;
+        const EntityData& asEntityData() const override;
+        const EntityDataDelta& asEntityDataDelta() const override;
 
     private:
     	String name;
