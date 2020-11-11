@@ -136,7 +136,7 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 
 		// Spawn scene
 		entityFactory = std::make_shared<EntityFactory>(world, project.getGameResources());
-		auto sceneCreated = entityFactory->createScene(prefab);
+		auto sceneCreated = entityFactory->createScene(prefab, true);
 		interface.spawnPending();
 
 		// Setup editors

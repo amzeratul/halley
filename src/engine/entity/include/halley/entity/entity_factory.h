@@ -39,7 +39,7 @@ namespace Halley {
 		
 		EntityRef createEntity(const String& prefabName);
 		EntityRef createEntity(const EntityData& data, EntityRef parent = EntityRef(), EntityScene* scene = nullptr);
-		EntityScene createScene(const std::shared_ptr<const Prefab>& scene);
+		EntityScene createScene(const std::shared_ptr<const Prefab>& scene, bool allowReload);
 
 		void updateEntity(EntityRef& entity, const IEntityData& data, EntityScene* scene = nullptr);
 

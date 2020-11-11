@@ -34,13 +34,12 @@ EntityRef EntityFactory::createEntity(const String& prefabName)
 	return createEntity(data);
 }
 
-EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& prefab)
+EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& prefab, bool allowReload)
 {
-	EntityScene curScene;
-	int i = 0;
+	EntityScene curScene(allowReload);
 	for (const auto& entityData: prefab->getEntityDatas()) {
 		auto entity = createEntity(entityData, EntityRef(), &curScene);
-		curScene.addPrefabReference(prefab, entity, i++);
+		curScene.addPrefabReference(prefab, entity);
 		curScene.addRootEntity(entity);	
 	}
 	return curScene;
@@ -200,7 +199,7 @@ void EntityFactoryContext::setEntityData(const IEntityData& iData)
 void EntityFactoryContext::notifyEntity(const EntityRef& entity) const
 {
 	if (scene && prefab) {
-		scene->addPrefabReference(prefab, entity, {});
+		scene->addPrefabReference(prefab, entity);
 	}
 }
 

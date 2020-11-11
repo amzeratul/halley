@@ -6,6 +6,11 @@
 #include "halley/utils/algorithm.h"
 using namespace Halley;
 
+EntityScene::EntityScene(bool allowReload)
+	: allowReload(allowReload)
+{
+}
+
 std::vector<EntityRef>& EntityScene::getEntities()
 {
 	return entities;
@@ -36,7 +41,7 @@ void EntityScene::update(EntityFactory& factory)
 	// Collect all prefabs that changed
 	for (auto& entry: prefabObservers) {
 		if (entry.needsUpdate()) {
-			entry.updateEntities(factory, PrefabObserver::UpdateMode::DeltaOnly, *this);
+			entry.updateEntities(factory, *this);
 			entry.markUpdated();		
 		}
 	}
@@ -44,7 +49,7 @@ void EntityScene::update(EntityFactory& factory)
 	// Update scenes
 	for (auto& entry: sceneObservers) {
 		if (entry.needsUpdate()) {
-			entry.updateEntities(factory, PrefabObserver::UpdateMode::AllEntries, *this);
+			entry.updateEntities(factory, *this);
 			entry.markUpdated();
 		}
 	}
@@ -55,9 +60,11 @@ void EntityScene::updateOnEditor(EntityFactory& factory)
 	update(factory);
 }
 
-void EntityScene::addPrefabReference(const std::shared_ptr<const Prefab>& prefab, const EntityRef& entity, std::optional<int> index)
+void EntityScene::addPrefabReference(const std::shared_ptr<const Prefab>& prefab, const EntityRef& entity)
 {
-	getOrMakeObserver(prefab).addEntity(entity, index);
+	if (allowReload) {
+		getOrMakeObserver(prefab).addEntity(entity);
+	}
 }
 
 void EntityScene::addRootEntity(EntityRef entity)
@@ -76,7 +83,7 @@ bool EntityScene::PrefabObserver::needsUpdate() const
 	return assetVersion != prefab->getAssetVersion();
 }
 
-void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, UpdateMode mode, EntityScene& scene) const
+void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, EntityScene& scene) const
 {
 	const auto& modified = prefab->getEntitiesModified();
 	const auto& removed = prefab->getEntitiesRemoved();
@@ -118,10 +125,11 @@ void EntityScene::PrefabObserver::markUpdated()
 	assetVersion = prefab->getAssetVersion();
 }
 
-void EntityScene::PrefabObserver::addEntity(EntityRef entity, std::optional<int> index)
+void EntityScene::PrefabObserver::addEntity(EntityRef entity)
 {
-	std_ex::contains(entityIds, entity.getEntityId());
-	entityIds.push_back(entity.getEntityId());
+	if (!std_ex::contains(entityIds, entity.getEntityId())) {
+		entityIds.push_back(entity.getEntityId());
+	}
 }
 
 const std::shared_ptr<const Prefab>& EntityScene::PrefabObserver::getPrefab() const
