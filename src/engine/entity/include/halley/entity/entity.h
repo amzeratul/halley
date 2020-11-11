@@ -389,10 +389,12 @@ namespace Halley {
 			return entity->name;
 		}
 
-		void setName(String name)
+		void setName(const String& name)
 		{
 			Expects(entity != nullptr);
-			entity->name = std::move(name);
+			if (entity->name != name) {
+				entity->name = std::move(name);
+			}
 		}
 
 		const UUID& getInstanceUUID() const

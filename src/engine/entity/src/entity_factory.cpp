@@ -172,13 +172,15 @@ void EntityFactoryContext::notifyEntity(const EntityRef& entity) const
 EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent, EntityScene* scene)
 {
 	const auto context = makeContext(data, {}, scene);
-	return updateEntityNode(context->getRootEntityData(), parent, context);
+	const auto entity = getEntity(data.getInstanceUUID(), *context, false);
+	updateEntityNode(context->getRootEntityData(), entity, parent, context);
+	return entity;
 }
 
 void EntityFactory::updateEntity(EntityRef& entity, const EntityData& data)
 {
 	const auto context = makeContext(data, entity, nullptr);
-	updateEntityNode(context->getRootEntityData(), {}, context);
+	updateEntityNode(context->getRootEntityData(), entity, {}, context);
 }
 
 void EntityFactory::updateEntity(EntityRef& entity, const EntityDataDelta& delta)
@@ -215,9 +217,8 @@ std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const EntityDat
 	return context;
 }
 
-EntityRef EntityFactory::updateEntityNode(const EntityData& data, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context)
+void EntityFactory::updateEntityNode(const EntityData& data, EntityRef entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context)
 {
-	auto entity = getEntity(data, *context, false);
 	assert(entity.isValid());
 
 	entity.setName(data.getName());
@@ -225,12 +226,11 @@ EntityRef EntityFactory::updateEntityNode(const EntityData& data, std::optional<
 	if (parent) {
 		entity.setParent(parent.value());
 	}
-	context->notifyEntity(entity);
 	
 	updateEntityComponents(entity, data, *context);
 	updateEntityChildren(entity, data, context);
-	
-	return entity;
+
+	context->notifyEntity(entity);
 }
 
 void EntityFactory::updateEntityComponents(EntityRef entity, const EntityData& data, const EntityFactoryContext& context)
@@ -285,9 +285,9 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& dat
 	for (const auto& child: data.getChildren()) {
 		if (context->needsNewContextFor(child)) {
 			const auto newContext = makeContext(child, {}, context->getScene());
-			updateEntityNode(newContext->getRootEntityData(), entity, newContext);
+			updateEntityNode(newContext->getRootEntityData(), getEntity(child.getInstanceUUID(), *newContext, false), entity, newContext);
 		} else {
-			updateEntityNode(child, entity, context);
+			updateEntityNode(child, getEntity(child.getInstanceUUID(), *context, false), entity, context);
 		}
 	}
 }
@@ -303,7 +303,7 @@ void EntityFactory::preInstantiateEntities(const EntityData& data, EntityFactory
 
 EntityRef EntityFactory::instantiateEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup)
 {
-	const auto existing = getEntity(data, context, allowWorldLookup);
+	const auto existing = getEntity(data.getInstanceUUID(), context, allowWorldLookup);
 	if (existing.isValid()) {
 		return existing;
 	}
@@ -328,16 +328,16 @@ void EntityFactory::collectExistingEntities(EntityRef entity, EntityFactoryConte
 	}
 }
 
-EntityRef EntityFactory::getEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup)
+EntityRef EntityFactory::getEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup)
 {
-	Expects(data.getInstanceUUID().isValid());
-	const auto result = context.getEntity(data.getInstanceUUID(), false);
+	Expects(instanceUUID.isValid());
+	const auto result = context.getEntity(instanceUUID, false);
 	if (result.isValid()) {
 		return result;
 	}
 
 	if (allowWorldLookup) {
-		auto worldResult = world.findEntity(data.getInstanceUUID(), true);
+		auto worldResult = world.findEntity(instanceUUID, true);
 		if (worldResult) {
 			context.addEntity(*worldResult); // Should this be added to the context?
 			return *worldResult;
