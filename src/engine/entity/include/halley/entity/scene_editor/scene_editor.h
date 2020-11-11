@@ -70,6 +70,8 @@ namespace Halley {
 
     	virtual void onEntitySelected(std::optional<EntityRef> entity);
 
+    	Camera camera;
+
     private:
 		const HalleyAPI* api = nullptr;
 		Resources* resources = nullptr;
@@ -78,7 +80,6 @@ namespace Halley {
     	std::unique_ptr<World> world;
 
 		std::vector<EntityId> cameraEntityIds;
-    	Camera camera;
     	
 		std::optional<EntityRef> selectedEntity;
     	ISceneEditorGizmoCollection* gizmoCollection = nullptr;
