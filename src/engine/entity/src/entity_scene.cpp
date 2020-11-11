@@ -6,8 +6,9 @@
 #include "halley/utils/algorithm.h"
 using namespace Halley;
 
-EntityScene::EntityScene(bool allowReload)
+EntityScene::EntityScene(bool allowReload, uint8_t worldPartition)
 	: allowReload(allowReload)
+	, worldPartition(worldPartition)
 {
 }
 
@@ -70,6 +71,11 @@ void EntityScene::addPrefabReference(const std::shared_ptr<const Prefab>& prefab
 void EntityScene::addRootEntity(EntityRef entity)
 {
 	entities.emplace_back(entity);
+}
+
+uint8_t EntityScene::getWorldPartition() const
+{
+	return worldPartition;
 }
 
 EntityScene::PrefabObserver::PrefabObserver(std::shared_ptr<const Prefab> prefab)

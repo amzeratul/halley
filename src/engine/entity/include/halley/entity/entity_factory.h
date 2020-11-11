@@ -39,7 +39,7 @@ namespace Halley {
 		
 		EntityRef createEntity(const String& prefabName);
 		EntityRef createEntity(const EntityData& data, EntityRef parent = EntityRef(), EntityScene* scene = nullptr);
-		EntityScene createScene(const std::shared_ptr<const Prefab>& scene, bool allowReload);
+		EntityScene createScene(const std::shared_ptr<const Prefab>& scene, bool allowReload, uint8_t worldPartition = 0);
 
 		void updateEntity(EntityRef& entity, const IEntityData& data, EntityScene* scene = nullptr);
 
@@ -106,6 +106,7 @@ namespace Halley {
 
 		const IEntityData& getRootEntityData() const;
 		EntityScene* getScene() const;
+		uint8_t getWorldPartition() const;
 
 	private:
 		ConfigNodeSerializationContext configNodeContext;

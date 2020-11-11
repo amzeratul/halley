@@ -272,14 +272,6 @@ void Entity::sortChildrenByPrefabUUIDs(const std::vector<UUID>& uuids)
 	}
 }
 
-void Entity::setWorldPartition(uint8_t partition)
-{
-	worldPartition = partition;
-	for (auto& c: children) {
-		c->setWorldPartition(partition);
-	}
-}
-
 bool Entity::isEmpty() const
 {
 	return liveComponents == 0 && children.empty();

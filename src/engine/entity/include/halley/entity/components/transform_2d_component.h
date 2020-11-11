@@ -52,6 +52,7 @@ public:
 	void onHierarchyChanged();
 
 	uint32_t getRevision() const { return revision; }
+	uint8_t getWorldPartition() const { return worldPartition; }
 
 	void deserialize(const Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node);
 
@@ -62,6 +63,7 @@ private:
 	mutable Transform2DComponent* parentTransform = nullptr;
 	mutable uint32_t revision = 0;
 	mutable uint32_t parentRevision = 0;
+	mutable uint8_t worldPartition = 0;
 
 	mutable uint32_t cachedValues = 0;
 	mutable Halley::Vector2f cachedGlobalPos;

@@ -34,9 +34,9 @@ EntityRef EntityFactory::createEntity(const String& prefabName)
 	return createEntity(data);
 }
 
-EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& prefab, bool allowReload)
+EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& prefab, bool allowReload, uint8_t worldPartition)
 {
-	EntityScene curScene(allowReload);
+	EntityScene curScene(allowReload, worldPartition);
 	for (const auto& entityData: prefab->getEntityDatas()) {
 		auto entity = createEntity(entityData, EntityRef(), &curScene);
 		curScene.addPrefabReference(prefab, entity);
@@ -177,6 +177,11 @@ const IEntityData& EntityFactoryContext::getRootEntityData() const
 EntityScene* EntityFactoryContext::getScene() const
 {
 	return scene;
+}
+
+uint8_t EntityFactoryContext::getWorldPartition() const
+{
+	return scene ? scene->getWorldPartition() : 0;
 }
 
 void EntityFactoryContext::setEntityData(const IEntityData& iData)
@@ -384,7 +389,7 @@ EntityRef EntityFactory::instantiateEntity(const EntityData& data, EntityFactory
 		return existing;
 	}
 	
-	auto entity = world.createEntity(data.getInstanceUUID(), data.getName());
+	auto entity = world.createEntity(data.getInstanceUUID(), data.getName(), std::optional<EntityRef>(), context.getWorldPartition());
 	entity.setPrefab(context.getPrefab(), data.getPrefabUUID());
 	context.addEntity(entity);
 

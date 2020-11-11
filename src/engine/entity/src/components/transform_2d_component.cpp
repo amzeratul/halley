@@ -22,6 +22,7 @@ Transform2DComponent::~Transform2DComponent()
 void Transform2DComponent::onAddedToEntity(EntityRef& entity)
 {
 	this->entity = entity;
+	worldPartition = entity.getWorldPartition();
 	updateParentTransform();
 	markDirty(DirtyPropagationMode::Added);
 }

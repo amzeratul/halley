@@ -129,8 +129,6 @@ namespace Halley {
 		
 		void sortChildrenByPrefabUUIDs(const std::vector<UUID>& uuids);
 
-		void setWorldPartition(uint8_t partition);
-
 		bool isEmpty() const;
 
 	private:
@@ -492,12 +490,6 @@ namespace Halley {
 		{
 			Expects(entity != nullptr);
 			return entity->worldPartition;
-		}
-
-		void setWorldPartition(uint8_t partition)
-		{
-			Expects(entity != nullptr);
-			entity->setWorldPartition(partition);
 		}
 
 		bool isValid() const

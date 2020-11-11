@@ -169,7 +169,12 @@ EntityRef World::createEntity(String name, EntityId parentId)
 	return createEntity(UUID(), name, getEntity(parentId));
 }
 
-EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> parent)
+EntityRef World::createEntity(UUID uuid, String name, EntityId parentId)
+{
+	return createEntity(uuid, name, getEntity(parentId));
+}
+
+EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> parent, uint8_t worldPartition)
 {
 	if (!uuid.isValid()) {
 		uuid = UUID::generate();
@@ -180,7 +185,8 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 		throw Exception("Error creating entity - out of memory?", HalleyExceptions::Entity);
 	}
 	entity->instanceUUID = uuid;
-		
+	entity->worldPartition = worldPartition;
+
 	entitiesPendingCreation.push_back(entity);
 	allocateEntity(entity);
 
@@ -192,11 +198,6 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 	}
 	
 	return e;
-}
-
-EntityRef World::createEntity(UUID uuid, String name, EntityId parentId)
-{
-	return createEntity(uuid, name, getEntity(parentId));
 }
 
 void World::destroyEntity(EntityId id)
