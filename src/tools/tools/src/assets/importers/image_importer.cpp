@@ -29,10 +29,11 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 
 	// Convert to indexed mode
 	auto palette = meta.getString("palette", "");
+	bool paletteTopLineOnly = meta.getBool("paletteTopLineOnly", false);
 	if (palette != "") {
 		auto paletteBytes = collector.readAdditionalFile(palette);
 		Image paletteImage(gsl::as_bytes(gsl::span<Byte>(paletteBytes)));
-		image = convertToIndexed(mainFile.string(), *image, paletteImage, asset.options);
+		image = convertToIndexed(mainFile.string(), *image, paletteImage, asset.options, paletteTopLineOnly);
 	}
 
 	// Fill meta
@@ -49,9 +50,9 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	collector.addAdditionalAsset(std::move(imageAsset));
 }
 
-std::unique_ptr<Image> ImageImporter::convertToIndexed(const String& fileName, const Image& image, const Image& palette, const ConfigNode& assetOptions)
+std::unique_ptr<Image> ImageImporter::convertToIndexed(const String& fileName, const Image& image, const Image& palette, const ConfigNode& assetOptions, bool readTopLineOnly)
 {
-	auto lookup = makePaletteConversion(palette);
+	auto lookup = makePaletteConversion(palette, readTopLineOnly);
 
 	auto result = std::make_unique<Image>(Image::Format::Indexed, image.getSize());
 	auto dst = result->getPixelBytes();
@@ -90,11 +91,11 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const String& fileName, c
 	return result;
 }
 
-std::unordered_map<uint32_t, uint32_t> ImageImporter::makePaletteConversion(const Image& palette)
+std::unordered_map<uint32_t, uint32_t> ImageImporter::makePaletteConversion(const Image& palette, bool readTopLineOnly)
 {
 	auto src = palette.getPixels4BPP();
 	size_t w = palette.getWidth();
-	size_t h = palette.getHeight();
+	size_t h = readTopLineOnly ? 1 : palette.getHeight();
 
 	std::unordered_map<uint32_t, uint32_t> lookup;
 	for (size_t y = 0; y < h; ++y) {
