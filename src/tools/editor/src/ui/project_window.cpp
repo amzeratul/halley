@@ -121,7 +121,7 @@ bool ProjectWindow::loadCustomUI()
 {
 	destroyCustomUI();
 
-	auto game = project.createGameInstance();
+	auto game = project.createGameInstance(api);
 	if (!game) {
 		return false;
 	}

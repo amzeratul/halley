@@ -11,6 +11,7 @@ namespace Halley
 	{
 	public:
 		HalleyStatics();
+		HalleyStatics(const HalleyStatics& other);
 		~HalleyStatics();
 		
 		void setupGlobals() const;

@@ -369,7 +369,7 @@ bool Project::isDLLLoaded() const
 	return gameDll && gameDll->isLoaded();
 }
 
-std::unique_ptr<Game> Project::createGameInstance() const
+std::unique_ptr<Game> Project::createGameInstance(const HalleyAPI& api) const
 {
 	if (!isDLLLoaded()) {
 		return {};
@@ -385,7 +385,8 @@ std::unique_ptr<Game> Project::createGameInstance() const
 		gameDll->unload();
 		return {};
 	}
-	
+
+	entry->initSharedStatics(api.core->getStatics());
 	return entry->createGame();
 }
 

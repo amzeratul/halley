@@ -14,16 +14,20 @@ namespace Halley
 {
 	class Game;
 	class Core;
+	class HalleyStatics;
 
-	constexpr static uint32_t HALLEY_DLL_API_VERSION = 22;
+	constexpr static uint32_t HALLEY_DLL_API_VERSION = 23;
 	
 	class IHalleyEntryPoint
 	{
 	public:
 		virtual ~IHalleyEntryPoint() = default;
+
+		void initSharedStatics(const HalleyStatics& parent);
+		virtual uint32_t getApiVersion() { return HALLEY_DLL_API_VERSION; }
+		
 		virtual std::unique_ptr<Core> createCore(const std::vector<std::string>& args) = 0;
 		virtual std::unique_ptr<Game> createGame() = 0;
-		virtual uint32_t getApiVersion() { return HALLEY_DLL_API_VERSION; }
 	};
 
 	template <typename GameType>

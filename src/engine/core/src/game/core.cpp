@@ -18,6 +18,7 @@
 #include <chrono>
 #include <ctime>
 #include "../dummy/dummy_plugins.h"
+#include "entry/entry_point.h"
 #include "halley/core/devcon/devcon_client.h"
 #include "halley/net/connection/network_service.h"
 
@@ -633,4 +634,10 @@ void Core::log(LoggerLevel level, const String& msg)
 		std::cout << ConsoleColour(Console::CYAN);
 	}
 	std::cout << msg << ConsoleColour() << std::endl;
+}
+
+void IHalleyEntryPoint::initSharedStatics(const HalleyStatics& parent)
+{
+	static HalleyStatics statics(parent);
+	statics.setupGlobals();
 }

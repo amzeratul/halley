@@ -114,7 +114,7 @@ namespace Halley
 			}
 		}
 
-		std::unique_ptr<Game> createGameInstance() const;
+		std::unique_ptr<Game> createGameInstance(const HalleyAPI& api) const;
 
 	private:
 		std::vector<String> platforms;

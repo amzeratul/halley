@@ -183,7 +183,7 @@ void SceneEditorGameBridge::setupConsoleCommands(UIDebugConsoleController& contr
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {
-		const auto game = project.createGameInstance();
+		const auto game = project.createGameInstance(api);
 		if (!game) {
 			throw Exception("Unable to load scene editor", HalleyExceptions::Tools);
 		}

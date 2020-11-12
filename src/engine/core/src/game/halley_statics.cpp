@@ -47,6 +47,11 @@ HalleyStatics::HalleyStatics()
 {
 }
 
+HalleyStatics::HalleyStatics(const HalleyStatics& other)
+	: sharedData(other.sharedData)
+{
+}
+
 HalleyStatics::~HalleyStatics()
 {
 	sharedData.reset();
