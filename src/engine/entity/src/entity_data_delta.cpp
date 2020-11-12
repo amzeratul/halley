@@ -40,11 +40,12 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 
 	// Children
 	for (const auto& toChild: to.children) {
-		const auto fromIter = std::find_if(from.children.begin(), from.children.end(), [&] (const EntityData& e) { return e.isSameEntity(toChild); });
+		const auto fromIter = std::find_if(from.children.begin(), from.children.end(), [&] (const EntityData& e) { return e.matchesUUID(toChild); });
 		if (fromIter != from.children.end()) {
 			// Potentially modified
 			auto delta = EntityDataDelta(*fromIter, toChild, options);
 			if (delta.hasChange()) {
+				assert(toChild.prefabUUID.isValid());
 				childrenChanged.emplace_back(toChild.prefabUUID, std::move(delta));
 			}
 		} else {
@@ -53,9 +54,10 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 		}
 	}
 	for (const auto& fromChild: from.children) {
-		const bool stillExists = std::find_if(to.children.begin(), to.children.end(), [&] (const EntityData& e) { return e.isSameEntity(fromChild); }) != to.children.end();
+		const bool stillExists = std::find_if(to.children.begin(), to.children.end(), [&] (const EntityData& e) { return e.matchesUUID(fromChild); }) != to.children.end();
 		if (!stillExists) {
 			// Removed
+			assert(fromChild.getPrefabUUID().isValid());
 			childrenRemoved.emplace_back(fromChild.getPrefabUUID());
 		}
 	}

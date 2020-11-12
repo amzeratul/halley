@@ -215,10 +215,10 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 	}
 	
 	for (const auto& childId: delta.childrenRemoved) {
-		children.erase(std::remove_if(children.begin(), children.end(), [&] (const auto& child) { return child.getPrefabUUID() == childId; }), children.end());
+		children.erase(std::remove_if(children.begin(), children.end(), [&] (const auto& child) { return child.matchesUUID(childId); }), children.end());
 	}
 	for (const auto& child: delta.childrenChanged) {
-		auto iter = std::find_if(children.begin(), children.end(), [&] (const auto& cur) { return cur.getPrefabUUID() == child.first; });
+		auto iter = std::find_if(children.begin(), children.end(), [&] (const auto& cur) { return cur.matchesUUID(child.first); });
 		if (iter != children.end()) {
 			iter->applyDelta(child.second);
 		} else {
@@ -226,7 +226,7 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 		}
 	}
 	for (const auto& child: delta.childrenAdded) {
-		auto iter = std::find_if(children.begin(), children.end(), [&] (const auto& cur) { return cur.getPrefabUUID() == child.getPrefabUUID(); });
+		auto iter = std::find_if(children.begin(), children.end(), [&] (const auto& cur) { return cur.matchesUUID(child); });
 		if (iter == children.end()) {
 			children.emplace_back(child);
 		} else {
@@ -260,9 +260,16 @@ EntityData EntityData::applyDelta(EntityData src, const EntityDataDelta& delta)
 	return src;
 }
 
-bool EntityData::isSameEntity(const EntityData& other) const
+bool EntityData::matchesUUID(const UUID& uuid) const
 {
-	return prefabUUID == other.prefabUUID;
+	Expects(uuid.isValid());
+	return prefabUUID == uuid || instanceUUID == uuid; 
+}
+
+bool EntityData::matchesUUID(const EntityData& other) const
+{
+	return (prefabUUID.isValid() && prefabUUID == other.getPrefabUUID())
+		|| (instanceUUID.isValid() && instanceUUID == other.getInstanceUUID());
 }
 
 void EntityData::instantiateWith(const EntityData& instance)

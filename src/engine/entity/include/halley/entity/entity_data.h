@@ -61,7 +61,8 @@ namespace Halley {
     	void applyDelta(const EntityDataDelta& delta);
         static EntityData applyDelta(EntityData src, const EntityDataDelta& delta);
 
-    	bool isSameEntity(const EntityData& other) const;
+    	bool matchesUUID(const UUID& uuid) const;
+    	bool matchesUUID(const EntityData& other) const;
 
         void updateComponent(const String& id, const ConfigNode& data);
         void updateChild(const EntityData& instanceChildData);
