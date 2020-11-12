@@ -65,6 +65,7 @@ void MetadataEditor::makeUI()
 		addAssetTypeField("Material", "material", AssetType::MaterialDefinition, "Halley/Sprite");
 		addStringField("Atlas", "atlas", "");
 		addAssetTypeField("Palette", "palette", AssetType::Texture, "");
+		addBoolField("Palette Top Line Only", "paletteTopLineOnly", false);
 		addBoolField("Filtering", "filtering", false);
 		addBoolField("Minimap", "minimap", false);
 		addEnumField<TextureFormat>("Format", "format", "rgba");
