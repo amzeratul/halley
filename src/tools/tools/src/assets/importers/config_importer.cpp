@@ -19,7 +19,7 @@ void ConfigImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 void PrefabImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	Prefab prefab;
-	YAMLConvert::parseConfig(prefab, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
+	prefab.parseYAML(gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
 
 	Metadata meta = asset.inputFiles.at(0).metadata;
 	meta.set("asset_compression", "deflate");
@@ -30,7 +30,7 @@ void PrefabImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 void SceneImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	Scene scene;
-	YAMLConvert::parseConfig(scene, gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
+	scene.parseYAML(gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
 
 	Metadata meta = asset.inputFiles.at(0).metadata;
 	meta.set("asset_compression", "deflate");

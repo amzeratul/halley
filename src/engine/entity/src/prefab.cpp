@@ -1,6 +1,7 @@
 #include "prefab.h"
 
 #include "entity_data_delta.h"
+#include "halley/file_formats/yaml_convert.h"
 #include "halley/resources/resource_data.h"
 
 using namespace Halley;
@@ -25,13 +26,34 @@ void Prefab::reload(Resource&& resource)
 	auto newDeltas = generatePrefabDeltas(prefab);
 	*this = std::move(prefab);
 	deltas = std::move(newDeltas);
-	updateRoot();
 }
 
 void Prefab::makeDefault()
 {
-	getRoot() = ConfigNode(ConfigNode::MapType());
+	config.getRoot() = ConfigNode(ConfigNode::MapType());
 	loadEntityData();
+}
+
+void Prefab::serialize(Serializer& s) const
+{
+	s << config;
+}
+
+void Prefab::deserialize(Deserializer& s)
+{
+	s >> config;
+}
+
+void Prefab::parseYAML(gsl::span<const gsl::byte> yaml)
+{
+	YAMLConvert::parseConfig(config, yaml);
+}
+
+String Prefab::toYAML() const
+{
+	YAMLConvert::EmitOptions options;
+	options.mapKeyOrder = {{ "name", "uuid", "components", "children" }};
+	return YAMLConvert::generateYAML(config, options);
 }
 
 bool Prefab::isScene() const
@@ -76,6 +98,16 @@ const std::set<UUID>& Prefab::getEntitiesRemoved() const
 	return deltas.entitiesRemoved;
 }
 
+const ConfigNode& Prefab::getRoot() const
+{
+	return config.getRoot();
+}
+
+ConfigNode& Prefab::getRoot()
+{
+	return config.getRoot();
+}
+
 void Prefab::loadEntityData()
 {
 	entityDatas = makeEntityDatas();
@@ -84,7 +116,7 @@ void Prefab::loadEntityData()
 std::vector<EntityData> Prefab::makeEntityDatas() const
 {
 	std::vector<EntityData> result;
-	result.emplace_back(getRoot(), true);
+	result.emplace_back(config.getRoot(), true);
 	return result;
 }
 
@@ -120,18 +152,17 @@ void Scene::reload(Resource&& resource)
 	auto newDeltas = generateSceneDeltas(scene);
 	*this = std::move(scene);
 	deltas = std::move(newDeltas);
-	updateRoot();
 }
 
 void Scene::makeDefault()
 {
-	getRoot() = ConfigNode(ConfigNode::SequenceType());
+	config.getRoot() = ConfigNode(ConfigNode::SequenceType());
 	loadEntityData();
 }
 
 std::vector<EntityData> Scene::makeEntityDatas() const
 {
-	const auto& seq = root.asSequence();
+	const auto& seq = config.getRoot().asSequence();
 	std::vector<EntityData> result;
 	result.reserve(seq.size());
 	for (const auto& s: seq) {

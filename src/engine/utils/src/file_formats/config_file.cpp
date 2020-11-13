@@ -2,6 +2,7 @@
 #include "halley/bytes/byte_serializer.h"
 #include "halley/support/exception.h"
 #include "halley/core/resources/resource_collection.h"
+#include "halley/file_formats/yaml_convert.h"
 
 using namespace Halley;
 
