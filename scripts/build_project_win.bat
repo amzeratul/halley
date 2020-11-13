@@ -1,5 +1,9 @@
 @echo off
 
+set targetDllDir="%~1\bin"
+if not exist %targetDllDir% (
+    mkdir %targetDllDir%
+)
 set targetDllPath="%~1\bin\SDL2.dll"
 if not exist %targetDllPath% (
     echo Copying SDL2.dll to %targetDllPath%
