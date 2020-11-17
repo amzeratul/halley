@@ -621,7 +621,7 @@ String SceneEditorWindow::serializeEntity(const EntityData& node) const
 {
 	YAMLConvert::EmitOptions options;
 	options.mapKeyOrder = {{ "name", "uuid", "components", "children" }};
-	return YAMLConvert::generateYAML(node.toConfigNode(), options);
+	return YAMLConvert::generateYAML(node.toConfigNode(false), options);
 }
 
 std::optional<EntityData> SceneEditorWindow::deserializeEntity(const String& data) const

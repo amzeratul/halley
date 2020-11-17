@@ -49,15 +49,25 @@ void Prefab::parseYAML(gsl::span<const gsl::byte> yaml)
 {
 	ConfigFile config;
 	YAMLConvert::parseConfig(config, yaml);
-	entityData = makeEntityData(config.getRoot());
-	entityData.setSceneRoot(isScene());
+	parseConfigNode(config.getRoot());
 }
 
 String Prefab::toYAML() const
 {
 	YAMLConvert::EmitOptions options;
 	options.mapKeyOrder = {{ "name", "uuid", "components", "children" }};
-	return YAMLConvert::generateYAML(entityData.toConfigNode(), options);
+	return YAMLConvert::generateYAML(toConfigNode(), options);
+}
+
+void Prefab::parseConfigNode(const ConfigNode& node)
+{
+	entityData = makeEntityData(node);
+	entityData.setSceneRoot(isScene());
+}
+
+ConfigNode Prefab::toConfigNode() const
+{
+	return entityData.toConfigNode(false);
 }
 
 bool Prefab::isScene() const
@@ -226,6 +236,15 @@ String Scene::getPrefabName() const
 std::shared_ptr<Prefab> Scene::clone() const
 {
 	return std::make_shared<Scene>(*this);
+}
+
+ConfigNode Scene::toConfigNode() const
+{
+	ConfigNode::SequenceType result;
+	for (auto& c: entityData.getChildren()) {
+		result.emplace_back(c.toConfigNode(false));
+	}
+	return ConfigNode(std::move(result));
 }
 
 EntityData Scene::makeEntityData(const ConfigNode& node) const

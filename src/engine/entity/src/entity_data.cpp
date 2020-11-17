@@ -50,7 +50,7 @@ EntityData::EntityData(const ConfigNode& data, bool isPrefab)
 	}
 }
 
-ConfigNode EntityData::toConfigNode() const
+ConfigNode EntityData::toConfigNode(bool allowPrefabUUID) const
 {
 	ConfigNode::MapType result;
 
@@ -63,7 +63,7 @@ ConfigNode EntityData::toConfigNode() const
 	if (instanceUUID.isValid()) {
 		result["uuid"] = instanceUUID.toString();
 	}
-	if (prefabUUID.isValid()) {
+	if (allowPrefabUUID && prefabUUID.isValid()) {
 		result["prefabUUID"] = prefabUUID.toString();
 	}
 	if (parentUUID.isValid()) {
@@ -83,7 +83,7 @@ ConfigNode EntityData::toConfigNode() const
 	if (!children.empty()) {
 		ConfigNode::SequenceType childNodes;
 		for (const auto& child: children) {
-			childNodes.emplace_back(child.toConfigNode());
+			childNodes.emplace_back(child.toConfigNode(allowPrefabUUID));
 		}
 		result["children"] = std::move(childNodes);
 	}
@@ -95,7 +95,7 @@ String EntityData::toYAML() const
 {
 	YAMLConvert::EmitOptions options;
 	options.mapKeyOrder = {{ "name", "uuid", "prefabUUID", "parent", "components", "children" }};
-	return YAMLConvert::generateYAML(toConfigNode(), options);
+	return YAMLConvert::generateYAML(toConfigNode(true), options);
 }
 
 void EntityData::serialize(Serializer& s) const
