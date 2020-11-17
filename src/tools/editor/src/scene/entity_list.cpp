@@ -70,7 +70,7 @@ String EntityList::getEntityName(const String& name, const String& prefabName) c
 	if (!prefabName.isEmpty()) {
 		const auto prefab = sceneEditor->getGamePrefab(prefabName);
 		if (prefab) {
-			return prefab->getRoot()["name"].asString() + " [" + prefabName + "]";
+			return prefab->getPrefabName() + " [" + prefabName + "]";
 		} else {
 			return "Missing prefab! [" + prefabName + "]";
 		}

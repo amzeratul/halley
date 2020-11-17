@@ -28,8 +28,11 @@ namespace Halley {
 		const std::set<UUID>& getEntitiesAdded() const;
 		const std::set<UUID>& getEntitiesRemoved() const;
 
-		const ConfigNode& getRoot() const;
-		ConfigNode& getRoot();
+		ConfigNode& getEntityNodeRoot();
+		ConfigNode& getGameData(const String& key);
+		const ConfigNode* tryGetGameData(const String& key) const;
+
+		virtual String getPrefabName() const;
 
 	protected:
 		struct Deltas {
@@ -44,6 +47,7 @@ namespace Halley {
 		
 		std::vector<EntityData> entityDatas;
 		ConfigFile config;
+		ConfigFile gameData;
 
 		Deltas deltas;
 	};
@@ -58,6 +62,8 @@ namespace Halley {
 		void reload(Resource&& resource) override;
 		void makeDefault();
 
+		String getPrefabName() const override;
+		
 	protected:
 		std::vector<EntityData> makeEntityDatas() const override;
 		Deltas generateSceneDeltas(const Scene& newScene) const;

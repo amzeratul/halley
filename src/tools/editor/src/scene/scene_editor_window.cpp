@@ -267,10 +267,10 @@ void SceneEditorWindow::onEntitySelected(const String& id)
 	}
 
 	auto& entityData = sceneData->getEntityNodeData(actualId).data;
-	const ConfigNode* prefabData = nullptr;
+	const Prefab* prefabData = nullptr;
 	const String prefabName = entityData["prefab"].asString("");
 	if (!prefabName.isEmpty()) {
-		prefabData = &getGamePrefab(prefabName)->getRoot();
+		prefabData = getGamePrefab(prefabName).get();
 	}
 	
 	entityEditor->loadEntity(actualId, entityData, prefabData, false, project.getGameResources());
@@ -462,25 +462,23 @@ void SceneEditorWindow::addNewPrefab(const String& prefabName)
 {
 	const auto prefab = getGamePrefab(prefabName);
 	if (prefab) {
-		const auto& prefabRoot = prefab->getRoot();
-		if (prefabRoot.getType() == ConfigNodeType::Map) {
-			auto components = ConfigNode::SequenceType();
+		const auto& entityData = prefab->getEntityData();
+		auto components = ConfigNode::SequenceType();
 
-			// Clone transform components
-			for (auto& c: prefabRoot["components"].asSequence()) {
-				for (auto& kv: c.asMap()) {
-					if (kv.first == "Transform2D" || kv.first == "Transform3D") {
-						components.emplace_back(c);
-					}
-				}
+		// Clone transform components
+		for (const auto& kv: entityData.getComponents()) {
+			if (kv.first == "Transform2D" || kv.first == "Transform3D") {
+				ConfigNode::MapType map;
+				map[kv.first] = ConfigNode(kv.second);
+				components.emplace_back(std::move(map));
 			}
-
-			auto data = ConfigNode(ConfigNode::MapType());
-			data["uuid"] = UUID::generate().toString();
-			data["components"] = std::move(components);
-			data["prefab"] = prefabName;
-			addEntity(std::move(data));
 		}
+
+		auto data = ConfigNode(ConfigNode::MapType());
+		data["uuid"] = UUID::generate().toString();
+		data["components"] = std::move(components);
+		data["prefab"] = prefabName;
+		addEntity(std::move(data));
 	}
 }
 
@@ -595,13 +593,13 @@ const String* SceneEditorWindow::findParent(const String& entityId, const Entity
 
 void SceneEditorWindow::preparePrefab(Prefab& prefab)
 {
-	auto& root = prefab.getRoot();
+	auto& root = prefab.getEntityNodeRoot();
 	if (root.getType() == ConfigNodeType::Sequence) {
 		for (auto& rootElement: root.asSequence()) {
 			preparePrefabEntity(rootElement);
 		}
 	} else {
-		preparePrefabEntity(prefab.getRoot());
+		preparePrefabEntity(root);
 	}
 }
 

@@ -24,7 +24,7 @@ namespace Halley {
 		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
 		void resetFieldFactories();
 
-		bool loadEntity(const String& id, ConfigNode& data, const ConfigNode* prefabData, bool force, Resources& gameResources);
+		bool loadEntity(const String& id, ConfigNode& data, const Prefab* prefabData, bool force, Resources& gameResources);
 		void unloadEntity();
 		void reloadEntity();
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
@@ -51,7 +51,7 @@ namespace Halley {
 
 		String currentId;
 		ConfigNode* currentEntityData = nullptr;
-		const ConfigNode* prefabData = nullptr;
+		const Prefab* prefabData = nullptr;
 		bool needToReloadUI = false;
 		bool isPrefab = false;
 		Resources* gameResources = nullptr;

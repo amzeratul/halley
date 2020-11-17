@@ -78,7 +78,7 @@ void EntityEditor::makeUI()
 	});
 }
 
-bool EntityEditor::loadEntity(const String& id, ConfigNode& data, const ConfigNode* prefab, bool force, Resources& resources)
+bool EntityEditor::loadEntity(const String& id, ConfigNode& data, const Prefab* prefab, bool force, Resources& resources)
 {
 	Expects(ecsData);
 
@@ -264,13 +264,9 @@ std::set<String> EntityEditor::getComponentsOnPrefab() const
 {
 	std::set<String> prefabComponents;
 	if (isPrefab) {
-		auto& comps = (*prefabData)["components"];
-		if (comps.getType() == ConfigNodeType::Sequence) {
-			for (auto& pc: comps.asSequence()) {
-				for (auto& kv: pc.asMap()) {
-					prefabComponents.insert(kv.first);
-				}
-			}
+		const auto& comps = prefabData->getEntityData().getComponents();
+		for (const auto& [k, v]: comps) {
+			prefabComponents.insert(k);
 		}
 	}
 	return prefabComponents;

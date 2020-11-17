@@ -37,11 +37,13 @@ void Prefab::makeDefault()
 void Prefab::serialize(Serializer& s) const
 {
 	s << config;
+	s << gameData;
 }
 
 void Prefab::deserialize(Deserializer& s)
 {
 	s >> config;
+	s >> gameData;
 }
 
 void Prefab::parseYAML(gsl::span<const gsl::byte> yaml)
@@ -98,14 +100,42 @@ const std::set<UUID>& Prefab::getEntitiesRemoved() const
 	return deltas.entitiesRemoved;
 }
 
-const ConfigNode& Prefab::getRoot() const
+ConfigNode& Prefab::getEntityNodeRoot()
 {
 	return config.getRoot();
 }
 
-ConfigNode& Prefab::getRoot()
+ConfigNode& Prefab::getGameData(const String& key)
 {
-	return config.getRoot();
+	gameData.getRoot().ensureType(ConfigNodeType::Map);
+	auto& map = gameData.getRoot().asMap();
+	const auto iter = map.find(key);
+	if (iter == map.end()) {
+		auto [newIter, inserted] = map.insert(std::make_pair(key, ConfigNode::MapType()));
+		return newIter->second;
+	} else {
+		return iter->second;
+	}
+}
+
+const ConfigNode* Prefab::tryGetGameData(const String& key) const
+{
+	if (gameData.getRoot().getType() != ConfigNodeType::Map) {
+		return nullptr;
+	}
+
+	auto& map = gameData.getRoot().asMap();
+	const auto iter = map.find(key);
+	if (iter == map.end()) {
+		return nullptr;
+	} else {
+		return &iter->second;
+	}
+}
+
+String Prefab::getPrefabName() const
+{
+	return entityDatas.at(0).getName();
 }
 
 void Prefab::loadEntityData()
@@ -158,6 +188,11 @@ void Scene::makeDefault()
 {
 	config.getRoot() = ConfigNode(ConfigNode::SequenceType());
 	loadEntityData();
+}
+
+String Scene::getPrefabName() const
+{
+	return "Scene";
 }
 
 std::vector<EntityData> Scene::makeEntityDatas() const

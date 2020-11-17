@@ -18,10 +18,10 @@ PrefabSceneData::PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> 
 ISceneData::EntityNodeData PrefabSceneData::getEntityNodeData(const String& id)
 {
 	if (id.isEmpty()) {
-		return EntityNodeData(prefab.getRoot(), "");
+		return EntityNodeData(prefab.getEntityNodeRoot(), "");
 	}
 	
-	const auto& [data, parentData] = findEntityAndParent(prefab.getRoot(), nullptr, id);
+	const auto& [data, parentData] = findEntityAndParent(prefab.getEntityNodeRoot(), nullptr, id);
 	if (!data) {
 		throw Exception("Entity data not found for \"" + id + "\"", HalleyExceptions::Entity);
 	}
@@ -36,7 +36,7 @@ ISceneData::EntityNodeData PrefabSceneData::getEntityNodeData(const String& id)
 void PrefabSceneData::reloadEntity(const String& id)
 {
 	if (!id.isEmpty()) {
-		reloadEntity(id, findEntity(prefab.getRoot(), id));
+		reloadEntity(id, findEntity(prefab.getEntityNodeRoot(), id));
 		world.spawnPending();
 	}
 }
@@ -63,7 +63,7 @@ void PrefabSceneData::reloadEntity(const String& id, ConfigNode* data)
 EntityTree PrefabSceneData::getEntityTree() const
 {
 	EntityTree root;
-	const auto& rootNode = prefab.getRoot();
+	const auto& rootNode = prefab.getEntityNodeRoot();
 	if (rootNode.getType() == ConfigNodeType::Sequence) {
 		for (auto& n: rootNode.asSequence()) {
 			fillEntityTree(n, root.children.emplace_back());
@@ -81,8 +81,7 @@ void PrefabSceneData::fillEntityTree(const ConfigNode& node, EntityTree& tree) c
 		const auto& prefabName = node["prefab"].asString();
 		tree.prefab = prefabName;
 		if (gameResources.exists<Prefab>(prefabName)) {
-			const auto& prefabNode = gameResources.get<Prefab>(prefabName)->getRoot();
-			tree.name = prefabNode["name"].asString("");
+			tree.name = gameResources.get<Prefab>(prefabName)->getPrefabName();
 		} else {
 			tree.name = "Missing Prefab";
 		}
@@ -105,7 +104,7 @@ void PrefabSceneData::reparentEntity(const String& entityId, const String& newPa
 	Expects(childIndex >= 0);
 	Expects(!entityId.isEmpty());
 	
-	auto [entityMoving, oldParent] = findEntityAndParent(prefab.getRoot(), nullptr, entityId);
+	auto [entityMoving, oldParent] = findEntityAndParent(prefab.getEntityNodeRoot(), nullptr, entityId);
 
 	if (!entityMoving) {
 		throw Exception("Entity not found: " + entityId, HalleyExceptions::Tools);
@@ -134,12 +133,12 @@ void PrefabSceneData::reparentEntity(const String& entityId, const String& newPa
 
 bool PrefabSceneData::isSingleRoot()
 {
-	return prefab.getRoot().getType() != ConfigNodeType::Sequence;
+	return !prefab.isScene();
 }
 
 ConfigNode::SequenceType& PrefabSceneData::findChildListFor(const String& id)
 {
-	auto& root = prefab.getRoot();
+	auto& root = prefab.getEntityNodeRoot();
 	if (id.isEmpty()) {
 		if (root.getType() == ConfigNodeType::Sequence) {
 			return root.asSequence();

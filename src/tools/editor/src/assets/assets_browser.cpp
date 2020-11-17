@@ -287,11 +287,11 @@ void AssetsBrowser::addAsset()
 			if (assetType == "prefab") {
 				Prefab prefab;
 				prefab.makeDefault();
-				FileSystem::writeFile(dstPath / (newName.value() + ".prefab"), YAMLConvert::generateYAML(prefab.getRoot(), YAMLConvert::EmitOptions()));
+				FileSystem::writeFile(dstPath / (newName.value() + ".prefab"), prefab.toYAML());
 			} else if (assetType == "scene") {
 				Scene scene;
 				scene.makeDefault();
-				FileSystem::writeFile(dstPath / (newName.value() + ".scene"), YAMLConvert::generateYAML(scene.getRoot(), YAMLConvert::EmitOptions()));
+				FileSystem::writeFile(dstPath / (newName.value() + ".scene"), scene.toYAML());
 			}
 		}
 	}));
