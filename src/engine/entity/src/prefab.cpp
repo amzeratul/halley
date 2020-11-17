@@ -163,6 +163,11 @@ EntityData* Prefab::findEntityData(const UUID& uuid)
 	return entityData.tryGetInstanceUUID(uuid);
 }
 
+std::shared_ptr<Prefab> Prefab::clone() const
+{
+	return std::make_shared<Prefab>(*this);
+}
+
 void Prefab::loadEntityData()
 {
 	entityData = makeEntityData();
@@ -226,6 +231,11 @@ gsl::span<EntityData> Scene::getEntityDatas()
 String Scene::getPrefabName() const
 {
 	return "Scene";
+}
+
+std::shared_ptr<Prefab> Scene::clone() const
+{
+	return std::make_shared<Scene>(*this);
 }
 
 EntityData Scene::makeEntityData() const

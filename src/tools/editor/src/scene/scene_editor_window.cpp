@@ -130,9 +130,8 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 		auto& world = interface.getWorld();
 
 		// Load prefab
-		prefab = std::make_shared<Prefab>(origPrefab);
+		prefab = origPrefab.clone();
 		origPrefabAssetType = assetType;
-		preparePrefab(*prefab);
 
 		// Spawn scene
 		entityFactory = std::make_shared<EntityFactory>(world, project.getGameResources());
@@ -485,11 +484,11 @@ void SceneEditorWindow::addEntity(EntityData data)
 void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfReference, EntityData data)
 {
 	if (referenceEntity.isEmpty()) {
-		addEntity(referenceEntity, true, std::move(data));
+		addEntity("", referenceEntity, std::move(data));
 	} else {
 		const bool isScene = sceneData->getEntityNodeData("").data.isSceneRoot();
 		
-		const auto ref = sceneData->getEntityNodeData(referenceEntity);
+		const auto& ref = sceneData->getEntityNodeData(referenceEntity);
 		const bool canBeSibling = !ref.parentId.isEmpty() || isScene;
 		const bool canBeChild = ref.data.getPrefab().isEmpty();
 		if (!canBeChild && !canBeSibling) {
@@ -506,9 +505,9 @@ void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfRef
 
 void SceneEditorWindow::addEntity(const String& parentId, const String& afterSibling, EntityData data)
 {
-	auto addOnEntity = [&] (EntityData& entity)
-	{
-		auto& seq = entity.getChildren();
+	EntityData& parentData = sceneData->getEntityNodeData(parentId).data;
+	if (parentData.getPrefab().isEmpty() && (parentId != "" || parentData.isSceneRoot())) {
+		auto& seq = parentData.getChildren();
 		const auto uuid = data.getInstanceUUID().toString();
 		auto insertPos = std::find_if(seq.begin(), seq.end(), [&] (const EntityData& node) -> bool
 		{
@@ -519,24 +518,6 @@ void SceneEditorWindow::addEntity(const String& parentId, const String& afterSib
 		}
 		seq.insert(insertPos, std::move(data));
 		onEntityAdded(uuid, parentId, afterSibling);
-	};
-
-	EntityData& parentData = sceneData->getEntityNodeData(parentId).data;
-	if (parentData.getPrefab().isEmpty() && (parentId != "" || parentData.isSceneRoot())) {
-		addOnEntity(parentData);
-	}
-	
-	if (parentId.isEmpty()) {
-		// Should only be able to place items on the root if it's a scene, and therefore the root is a sequence
-		auto& root = sceneData->getEntityNodeData("").data;
-		if (root.isSceneRoot()) {
-			addOnEntity(root);
-		}
-	} else {
-		EntityData& parentData = sceneData->getEntityNodeData(parentId).data;
-		if (parentData.getPrefab().isEmpty()) {
-			addOnEntity(parentData);
-		}
 	}
 }
 
@@ -588,31 +569,6 @@ const String* SceneEditorWindow::findParent(const String& entityId, const Entity
 	}
 
 	return nullptr;
-}
-
-void SceneEditorWindow::preparePrefab(Prefab& prefab)
-{
-	auto& root = prefab.getEntityData();
-	preparePrefabEntity(root);
-}
-
-void SceneEditorWindow::preparePrefabEntity(EntityData& node)
-{
-	const bool isPrefab = !node.getPrefab().isEmpty();
-	
-	if (!node.getInstanceUUID().isValid()) {
-		node.setInstanceUUID(UUID::generate());
-	}
-
-	if (!isPrefab) {
-		if (node.getName().isEmpty()) {
-			node.setName("Entity");
-		}
-
-		for (auto& c: node.getChildren()) {
-			preparePrefabEntity(c);
-		}
-	}
 }
 
 void SceneEditorWindow::setCustomUI(std::shared_ptr<UIWidget> ui)

@@ -37,6 +37,8 @@ namespace Halley {
 
 		EntityData* findEntityData(const UUID& uuid);
 
+		virtual std::shared_ptr<Prefab> clone() const;
+
 	protected:
 		struct Deltas {
 			std::map<UUID, EntityDataDelta> entitiesModified;
@@ -71,6 +73,8 @@ namespace Halley {
 		gsl::span<const EntityData> getEntityDatas() const override;
 		gsl::span<EntityData> getEntityDatas() override;
 		String getPrefabName() const override;
+
+		std::shared_ptr<Prefab> clone() const override;
 		
 	protected:
 		EntityData makeEntityData() const override;

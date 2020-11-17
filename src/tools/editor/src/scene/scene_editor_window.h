@@ -101,9 +101,6 @@ namespace Halley {
 		String findParent(const String& entityId) const;
 		const String* findParent(const String& entityId, const EntityTree& tree, const String& prev) const;
 
-		void preparePrefab(Prefab& prefab);
-		void preparePrefabEntity(EntityData& node);
-
 		void setCustomUI(std::shared_ptr<UIWidget> ui);
 		void setToolUI(std::shared_ptr<UIWidget> ui);
 
