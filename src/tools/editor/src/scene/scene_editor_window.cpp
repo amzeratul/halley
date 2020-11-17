@@ -256,6 +256,7 @@ void SceneEditorWindow::onEntitySelected(const String& id)
 			if (tree.children.empty()) {
 				EntityData empty;
 				entityEditor->loadEntity("", empty, nullptr, false, project.getGameResources());
+				currentEntityId = "";
 				return;
 			} else {
 				actualId = tree.children[0].entityId;
