@@ -15,7 +15,6 @@ EntityData::EntityData(UUID instanceUUID)
 }
 
 EntityData::EntityData(const ConfigNode& data, bool isPrefab)
-	: fromPrefab(isPrefab)
 {
 	name = data["name"].asString("");
 	prefab = data["prefab"].asString("");
@@ -293,7 +292,6 @@ bool EntityData::matchesUUID(const EntityData& other) const
 void EntityData::instantiateWith(const EntityData& instance)
 {
 	// This should only be called on the root of prefab
-	Expects(fromPrefab);
 	Expects(instance.instanceUUID.isValid());
 	
 	instanceUUID = instance.instanceUUID;

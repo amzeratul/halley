@@ -46,18 +46,13 @@ namespace Halley {
 			std::set<UUID> entitiesRemoved;
 		};
 
-		void loadEntityData();
-		virtual EntityData makeEntityData() const;
+		virtual EntityData makeEntityData(const ConfigNode& node) const;
 		Deltas generatePrefabDeltas(const Prefab& newPrefab) const;
 		
 		EntityData entityData;
-		ConfigFile config;
 		ConfigFile gameData;
 
 		Deltas deltas;
-
-	private:
-		ConfigNode& getEntityNodeRoot();
 	};
 
 	class Scene final : public Prefab {
@@ -77,7 +72,7 @@ namespace Halley {
 		std::shared_ptr<Prefab> clone() const override;
 		
 	protected:
-		EntityData makeEntityData() const override;
+		EntityData makeEntityData(const ConfigNode& node) const override;
 		Deltas generateSceneDeltas(const Scene& newScene) const;
 	};
 }

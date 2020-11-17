@@ -86,7 +86,6 @@ namespace Halley {
     	UUID parentUUID;
     	std::vector<EntityData> children;
     	std::vector<std::pair<String, ConfigNode>> components;
-    	bool fromPrefab = false;
     	bool sceneRoot = false;
 
     	void addComponent(String key, ConfigNode data);

@@ -15,7 +15,6 @@ std::unique_ptr<Prefab> Prefab::loadResource(ResourceLoader& loader)
 	
 	auto prefab = std::make_unique<Prefab>();
 	Deserializer::fromBytes(*prefab, data->getSpan());
-	prefab->loadEntityData();
 
 	return prefab;
 }
@@ -30,32 +29,35 @@ void Prefab::reload(Resource&& resource)
 
 void Prefab::makeDefault()
 {
-	config.getRoot() = ConfigNode(ConfigNode::MapType());
-	loadEntityData();
+	entityData.setInstanceUUID(UUID::generate());
 }
 
 void Prefab::serialize(Serializer& s) const
 {
-	s << config;
+	s << entityData;
 	s << gameData;
 }
 
 void Prefab::deserialize(Deserializer& s)
 {
-	s >> config;
+	s >> entityData;
 	s >> gameData;
+	entityData.setSceneRoot(isScene());
 }
 
 void Prefab::parseYAML(gsl::span<const gsl::byte> yaml)
 {
+	ConfigFile config;
 	YAMLConvert::parseConfig(config, yaml);
+	entityData = makeEntityData(config.getRoot());
+	entityData.setSceneRoot(isScene());
 }
 
 String Prefab::toYAML() const
 {
 	YAMLConvert::EmitOptions options;
 	options.mapKeyOrder = {{ "name", "uuid", "components", "children" }};
-	return YAMLConvert::generateYAML(config, options);
+	return YAMLConvert::generateYAML(entityData.toConfigNode(), options);
 }
 
 bool Prefab::isScene() const
@@ -113,11 +115,6 @@ const std::set<UUID>& Prefab::getEntitiesRemoved() const
 	return deltas.entitiesRemoved;
 }
 
-ConfigNode& Prefab::getEntityNodeRoot()
-{
-	return config.getRoot();
-}
-
 ConfigNode& Prefab::getGameData(const String& key)
 {
 	gameData.getRoot().ensureType(ConfigNodeType::Map);
@@ -168,14 +165,9 @@ std::shared_ptr<Prefab> Prefab::clone() const
 	return std::make_shared<Prefab>(*this);
 }
 
-void Prefab::loadEntityData()
+EntityData Prefab::makeEntityData(const ConfigNode& node) const
 {
-	entityData = makeEntityData();
-}
-
-EntityData Prefab::makeEntityData() const
-{
-	return EntityData(config.getRoot(), true);
+	return EntityData(node, true);
 }
 
 Prefab::Deltas Prefab::generatePrefabDeltas(const Prefab& newPrefab) const
@@ -194,7 +186,6 @@ std::unique_ptr<Scene> Scene::loadResource(ResourceLoader& loader)
 	
 	auto scene = std::make_unique<Scene>();
 	Deserializer::fromBytes(*scene, data->getSpan());
-	scene->loadEntityData();
 
 	return scene;
 }
@@ -214,8 +205,7 @@ void Scene::reload(Resource&& resource)
 
 void Scene::makeDefault()
 {
-	config.getRoot() = ConfigNode(ConfigNode::SequenceType());
-	loadEntityData();
+	
 }
 
 gsl::span<const EntityData> Scene::getEntityDatas() const
@@ -238,11 +228,10 @@ std::shared_ptr<Prefab> Scene::clone() const
 	return std::make_shared<Scene>(*this);
 }
 
-EntityData Scene::makeEntityData() const
+EntityData Scene::makeEntityData(const ConfigNode& node) const
 {
 	EntityData result;
-	result.setSceneRoot(true);
-	const auto& seq = config.getRoot().asSequence();
+	const auto& seq = node.asSequence();
 	result.getChildren().reserve(seq.size());
 	for (const auto& s: seq) {
 		result.getChildren().emplace_back(s, false);
