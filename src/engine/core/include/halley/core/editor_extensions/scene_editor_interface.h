@@ -121,11 +121,11 @@ namespace Halley {
         virtual void dragCamera(Vector2f amount) = 0;
         virtual void changeZoom(int amount, Vector2f cursorPosRelToCamera) = 0;
 
-    	virtual void setSelectedEntity(const UUID& id, ConfigNode& entityData) = 0;
-        virtual void onEntityAdded(const UUID& id, const ConfigNode& entityData) = 0;
+    	virtual void setSelectedEntity(const UUID& id, EntityData& entityData) = 0;
+        virtual void onEntityAdded(const UUID& id, const EntityData& entityData) = 0;
         virtual void onEntityRemoved(const UUID& id) = 0;
-        virtual void onEntityModified(const UUID& id, const ConfigNode& entityData) = 0;
-        virtual void onEntityMoved(const UUID& id, const ConfigNode& entityData) = 0;
+        virtual void onEntityModified(const UUID& id, const EntityData& entityData) = 0;
+        virtual void onEntityMoved(const UUID& id, const EntityData& entityData) = 0;
 
     	virtual void showEntity(const UUID& id) = 0;
         virtual ConfigNode onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) = 0;
@@ -150,12 +150,12 @@ namespace Halley {
 	public:
         class EntityNodeData {
         public:
-            EntityNodeData(ConfigNode& data, String parentId)
+            EntityNodeData(EntityData& data, String parentId)
                 : data(data)
         		, parentId(std::move(parentId))
             { }
         	
-	        ConfigNode& data;
+	        EntityData& data;
         	String parentId;
         };
 		
@@ -174,7 +174,7 @@ namespace Halley {
 
         virtual bool update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) = 0;
         virtual void draw(Painter& painter) = 0;
-        virtual void setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& entityData) = 0;
+        virtual void setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& entityData) = 0;
         virtual std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) = 0;
 		virtual void deselect() = 0;
 	};

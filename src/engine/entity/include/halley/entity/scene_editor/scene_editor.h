@@ -29,16 +29,16 @@ namespace Halley {
 		void dragCamera(Vector2f amount) override;
 		void changeZoom(int amount, Vector2f cursorPosRelToCamera) override;
 
-		void setSelectedEntity(const UUID& id, ConfigNode& entityData) override;
+		void setSelectedEntity(const UUID& id, EntityData& entityData) override;
 
-		void onEntityAdded(const UUID& id, const ConfigNode& entityData) final override;
+		void onEntityAdded(const UUID& id, const EntityData& entityData) final override;
 		void onEntityRemoved(const UUID& id) final override;
-		void onEntityMoved(const UUID& id, const ConfigNode& entityData) final override;
-		void onEntityModified(const UUID& id, const ConfigNode& entityData) final override;
-		virtual void onEntityAdded(EntityRef entity, const ConfigNode& entityData);
+		void onEntityMoved(const UUID& id, const EntityData& entityData) final override;
+		void onEntityModified(const UUID& id, const EntityData& entityData) final override;
+		virtual void onEntityAdded(EntityRef entity, const EntityData& entityData);
 		virtual void onEntityRemoved(EntityRef entity);
-		virtual void onEntityMoved(EntityRef entity, const ConfigNode& entityData);
-		virtual void onEntityModified(EntityRef entity, const ConfigNode& entityData);
+		virtual void onEntityMoved(EntityRef entity, const EntityData& entityData);
+		virtual void onEntityModified(EntityRef entity, const EntityData& entityData);
 
 		void showEntity(const UUID& id) override;
 		ConfigNode onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) override;

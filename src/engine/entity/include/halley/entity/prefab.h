@@ -20,19 +20,22 @@ namespace Halley {
 
 		virtual bool isScene() const;
 
+		EntityData& getEntityData();
 		const EntityData& getEntityData() const;
-		const std::vector<EntityData>& getEntityDatas() const;
+		virtual gsl::span<const EntityData> getEntityDatas() const;
+		virtual gsl::span<EntityData> getEntityDatas();
 		std::map<UUID, const EntityData*> getEntityDataMap() const;
 
 		const std::map<UUID, EntityDataDelta>& getEntitiesModified() const;
 		const std::set<UUID>& getEntitiesAdded() const;
 		const std::set<UUID>& getEntitiesRemoved() const;
 
-		ConfigNode& getEntityNodeRoot();
 		ConfigNode& getGameData(const String& key);
 		const ConfigNode* tryGetGameData(const String& key) const;
 
 		virtual String getPrefabName() const;
+
+		EntityData* findEntityData(const UUID& uuid);
 
 	protected:
 		struct Deltas {
@@ -42,14 +45,17 @@ namespace Halley {
 		};
 
 		void loadEntityData();
-		virtual std::vector<EntityData> makeEntityDatas() const;
+		virtual EntityData makeEntityData() const;
 		Deltas generatePrefabDeltas(const Prefab& newPrefab) const;
 		
-		std::vector<EntityData> entityDatas;
+		EntityData entityData;
 		ConfigFile config;
 		ConfigFile gameData;
 
 		Deltas deltas;
+
+	private:
+		ConfigNode& getEntityNodeRoot();
 	};
 
 	class Scene final : public Prefab {
@@ -62,10 +68,12 @@ namespace Halley {
 		void reload(Resource&& resource) override;
 		void makeDefault();
 
+		gsl::span<const EntityData> getEntityDatas() const override;
+		gsl::span<EntityData> getEntityDatas() override;
 		String getPrefabName() const override;
 		
 	protected:
-		std::vector<EntityData> makeEntityDatas() const override;
+		EntityData makeEntityData() const override;
 		Deltas generateSceneDeltas(const Scene& newScene) const;
 	};
 }

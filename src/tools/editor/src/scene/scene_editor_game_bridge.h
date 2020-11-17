@@ -23,12 +23,12 @@ namespace Halley {
 		void changeZoom(int amount, Vector2f mousePos);
 		void dragCamera(Vector2f pos);
 		std::shared_ptr<UIWidget> makeCustomUI() const;
-		void setSelectedEntity(const UUID& uuid, ConfigNode& data);
+		void setSelectedEntity(const UUID& uuid, EntityData& data);
 		void showEntity(const UUID& uuid);
-		void onEntityAdded(const UUID& uuid, const ConfigNode& data);
+		void onEntityAdded(const UUID& uuid, const EntityData& data);
 		void onEntityRemoved(const UUID& uuid);
-		void onEntityModified(const UUID& uuid, const ConfigNode& data);
-		void onEntityMoved(const UUID& uuid, const ConfigNode& data);
+		void onEntityModified(const UUID& uuid, const EntityData& data);
+		void onEntityMoved(const UUID& uuid, const EntityData& data);
 		ConfigNode onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options);
 		void onSceneLoaded(AssetType type, const String& assetId);
 		void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor);

@@ -19,18 +19,18 @@ namespace Halley {
         World& world;
     	Resources& gameResources;
 
-    	void reloadEntity(const String& id, ConfigNode* data);
-        void fillEntityTree(const ConfigNode& node, EntityTree& tree) const;
-    	void fillPrefabChildren(const ConfigNode& node, std::vector<String>& dst) const;
+    	void reloadEntity(const String& id, EntityData* data);
+        void fillEntityTree(const EntityData& node, EntityTree& tree) const;
+    	void fillPrefabChildren(const EntityData& node, std::vector<String>& dst) const;
 
-        ConfigNode::SequenceType& findChildListFor(const String& id);
-        static ConfigNode* doFindChildListFor(ConfigNode& node, const String& id);
-    	
-        static ConfigNode* findEntity(ConfigNode& node, const String& id);
-        static std::pair<ConfigNode*, ConfigNode*> findEntityAndParent(ConfigNode& node, ConfigNode* previous, const String& id);
+        EntityData& findEntity(const String& id);
 
-        static void addChild(ConfigNode::SequenceType& parent, int index, ConfigNode child);
-        static ConfigNode removeChild(ConfigNode::SequenceType& parent, const String& childId);
-        static void moveChild(ConfigNode::SequenceType& parent, const String& childId, int targetIndex);
+    	static EntityData* findEntity(gsl::span<EntityData> node, const String& id);
+    	static std::pair<EntityData*, EntityData*> findEntityAndParent(gsl::span<EntityData> node, EntityData* previous, const String& id);
+        static std::pair<EntityData*, EntityData*> findEntityAndParent(EntityData& node, EntityData* previous, const String& id);
+
+        static void addChild(EntityData& parent, int index, EntityData child);
+        static EntityData removeChild(EntityData& parent, const String& childId);
+        static void moveChild(EntityData& parent, const String& childId, int targetIndex);
     };
 }

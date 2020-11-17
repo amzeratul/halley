@@ -16,8 +16,8 @@ namespace Halley {
 		void setSceneData(std::shared_ptr<ISceneData> sceneData);
 		void refreshList();
 
-		void onEntityModified(const String& id, const ConfigNode& node);
-		void onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId, const ConfigNode& data);
+		void onEntityModified(const String& id, const EntityData& node);
+		void onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId, const EntityData& data);
 		void onEntityRemoved(const String& id, const String& parentId);
 		void select(const String& id);
 
@@ -34,8 +34,8 @@ namespace Halley {
 		void makeUI();
 		void addEntities(const EntityTree& entity, const String& parentId);
 		void addEntity(const String& name, const String& id, const String& parentId, const String& afterSiblingId, const String& prefab);
-		void addEntityTree(const String& parentId, const String& afterSiblingId, const ConfigNode& data);
-		String getEntityName(const ConfigNode& data) const;
+		void addEntityTree(const String& parentId, const String& afterSiblingId, const EntityData& data);
+		String getEntityName(const EntityData& data) const;
 		String getEntityName(const String& name, const String& prefab) const;
 	};
 }

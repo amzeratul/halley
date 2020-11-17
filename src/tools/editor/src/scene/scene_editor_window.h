@@ -35,9 +35,9 @@ namespace Halley {
 		void addNewEntity();
 		void addNewPrefab();
 		void addNewPrefab(const String& prefabName);
-		void addEntity(ConfigNode data);
-		void addEntity(const String& referenceEntityId, bool childOfReference, ConfigNode data);
-		void addEntity(const String& parentId, const String& afterSibling, ConfigNode data);
+		void addEntity(EntityData data);
+		void addEntity(const String& referenceEntityId, bool childOfReference, EntityData data);
+		void addEntity(const String& parentId, const String& afterSibling, EntityData data);
 		void removeEntity();
 		void removeEntity(const String& entityId) override;
 		void selectEntity(const String& id);
@@ -102,7 +102,7 @@ namespace Halley {
 		const String* findParent(const String& entityId, const EntityTree& tree, const String& prev) const;
 
 		void preparePrefab(Prefab& prefab);
-		void preparePrefabEntity(ConfigNode& node);
+		void preparePrefabEntity(EntityData& node);
 
 		void setCustomUI(std::shared_ptr<UIWidget> ui);
 		void setToolUI(std::shared_ptr<UIWidget> ui);
@@ -111,10 +111,10 @@ namespace Halley {
 
 		void setSaveEnabled(bool enabled);
 
-		String serializeEntity(const ConfigNode& node) const;
-		std::optional<ConfigNode> deserializeEntity(const String& data) const;
+		String serializeEntity(const EntityData& node) const;
+		std::optional<EntityData> deserializeEntity(const String& data) const;
 
-		void assignUUIDs(ConfigNode& node);
+		void assignUUIDs(EntityData& node);
 		bool isValidEntityTree(const ConfigNode& node) const;
 
 		void toggleConsole();

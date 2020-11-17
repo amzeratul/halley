@@ -137,7 +137,7 @@ std::shared_ptr<UIWidget> SceneEditorGizmo::makeUI()
 	return {};
 }
 
-void SceneEditorGizmo::setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& data)
+void SceneEditorGizmo::setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& data)
 {
 	entityData = &data;
 	if (curEntity != entity) {
@@ -186,21 +186,17 @@ Transform2DComponent* SceneEditorGizmo::getTransform()
 	}
 }
 
-ConfigNode& SceneEditorGizmo::getEntityData()
+EntityData& SceneEditorGizmo::getEntityData()
 {
 	return *entityData;
 }
 
 ConfigNode* SceneEditorGizmo::getComponentData(const String& name)
 {
-	auto& components = (*entityData)["components"];
-	if (components.getType() == ConfigNodeType::Sequence) {
-		for (auto& compNode: components.asSequence()) {
-			for (auto& [curName, value]: compNode.asMap()) {
-				if (curName == name) {
-					return &value;
-				}
-			}
+	auto& components = (*entityData).getComponents();
+	for (auto& [curName, value]: components) {
+		if (curName == name) {
+			return &value;
 		}
 	}
 	return nullptr;
@@ -208,14 +204,10 @@ ConfigNode* SceneEditorGizmo::getComponentData(const String& name)
 
 const ConfigNode* SceneEditorGizmo::getComponentData(const String& name) const
 {
-	auto& components = (*entityData)["components"];
-	if (components.getType() == ConfigNodeType::Sequence) {
-		for (auto& compNode: components.asSequence()) {
-			for (auto& [curName, value]: compNode.asMap()) {
-				if (curName == name) {
-					return &value;
-				}
-			}
+	auto& components = (*entityData).getComponents();
+	for (auto& [curName, value]: components) {
+		if (curName == name) {
+			return &value;
 		}
 	}
 	return nullptr;

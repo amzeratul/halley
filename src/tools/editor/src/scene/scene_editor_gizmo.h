@@ -76,7 +76,7 @@ namespace Halley {
 		virtual void draw(Painter& painter) const;
 		virtual std::shared_ptr<UIWidget> makeUI();
 
-		void setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& entityData);
+		void setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& entityData);
 
 		void setCamera(const Camera& camera);
 		void setOutputState(SceneEditorOutputState& outputState);
@@ -93,7 +93,7 @@ namespace Halley {
 		const Transform2DComponent* getTransform() const;
 		Transform2DComponent* getTransform();
 
-		ConfigNode& getEntityData();
+		EntityData& getEntityData();
 		ConfigNode* getComponentData(const String& name);
 		const ConfigNode* getComponentData(const String& name) const;
 
@@ -105,7 +105,7 @@ namespace Halley {
 
 	private:
 		std::optional<EntityRef> curEntity;
-		ConfigNode* entityData = nullptr;
+		EntityData* entityData = nullptr;
 		SceneEditorOutputState* outputState = nullptr;
 		float zoom = 1.0f;
 

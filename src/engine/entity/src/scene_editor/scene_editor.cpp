@@ -253,7 +253,7 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 	transform.setGlobalPosition(roundPosition(transform.getGlobalPosition() + translate, camera.zoom));
 }
 
-void SceneEditor::setSelectedEntity(const UUID& id, ConfigNode& entityData)
+void SceneEditor::setSelectedEntity(const UUID& id, EntityData& entityData)
 {
 	const auto curId = selectedEntity ? selectedEntity.value().getInstanceUUID() : UUID();
 	if (id != curId) {
@@ -268,7 +268,7 @@ void SceneEditor::setSelectedEntity(const UUID& id, ConfigNode& entityData)
 	onEntitySelected(selectedEntity);
 }
 
-void SceneEditor::onEntityAdded(const UUID& id, const ConfigNode& entityData)
+void SceneEditor::onEntityAdded(const UUID& id, const EntityData& entityData)
 {
 	if (id.isValid()) {
 		onEntityAdded(getEntity(id), entityData);
@@ -282,30 +282,30 @@ void SceneEditor::onEntityRemoved(const UUID& id)
 	}
 }
 
-void SceneEditor::onEntityMoved(const UUID& id, const ConfigNode& entityData)
+void SceneEditor::onEntityMoved(const UUID& id, const EntityData& entityData)
 {
 	if (id.isValid()) {
 		onEntityMoved(getEntity(id), entityData);
 	}
 }
 
-void SceneEditor::onEntityModified(const UUID& id, const ConfigNode& entityData)
+void SceneEditor::onEntityModified(const UUID& id, const EntityData& entityData)
 {
 	if (id.isValid()) {
 		onEntityModified(getEntity(id), entityData);
 	}
 }
 
-void SceneEditor::onEntityModified(EntityRef entity, const ConfigNode& entityData)
+void SceneEditor::onEntityModified(EntityRef entity, const EntityData& entityData)
 {}
 
-void SceneEditor::onEntityAdded(EntityRef entity, const ConfigNode& entityData)
+void SceneEditor::onEntityAdded(EntityRef entity, const EntityData& entityData)
 {}
 
 void SceneEditor::onEntityRemoved(EntityRef entity)
 {}
 
-void SceneEditor::onEntityMoved(EntityRef entity, const ConfigNode& entityData)
+void SceneEditor::onEntityMoved(EntityRef entity, const EntityData& entityData)
 {}
 
 void SceneEditor::showEntity(const UUID& id)

@@ -46,7 +46,7 @@ void SceneEditorGizmoCollection::draw(Painter& painter)
 	}
 }
 
-void SceneEditorGizmoCollection::setSelectedEntity(const std::optional<EntityRef>& entity, ConfigNode& data)
+void SceneEditorGizmoCollection::setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& data)
 {
 	selectedEntity = entity;
 	entityData = &data;

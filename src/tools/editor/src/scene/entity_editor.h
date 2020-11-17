@@ -24,7 +24,7 @@ namespace Halley {
 		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
 		void resetFieldFactories();
 
-		bool loadEntity(const String& id, ConfigNode& data, const Prefab* prefabData, bool force, Resources& gameResources);
+		bool loadEntity(const String& id, EntityData& data, const Prefab* prefabData, bool force, Resources& gameResources);
 		void unloadEntity();
 		void reloadEntity();
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
@@ -50,7 +50,7 @@ namespace Halley {
 		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
 
 		String currentId;
-		ConfigNode* currentEntityData = nullptr;
+		EntityData* currentEntityData = nullptr;
 		const Prefab* prefabData = nullptr;
 		bool needToReloadUI = false;
 		bool isPrefab = false;
@@ -73,8 +73,8 @@ namespace Halley {
 
 		void onEntityUpdated() override;
 		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) override;
-		ConfigNode& getEntityData();
-		const ConfigNode& getEntityData() const;
+		EntityData& getEntityData();
+		const EntityData& getEntityData() const;
 
 		std::set<String> getComponentsOnEntity() const;
 		std::set<String> getComponentsOnPrefab() const;

@@ -78,7 +78,7 @@ void EntityEditor::makeUI()
 	});
 }
 
-bool EntityEditor::loadEntity(const String& id, ConfigNode& data, const Prefab* prefab, bool force, Resources& resources)
+bool EntityEditor::loadEntity(const String& id, EntityData& data, const Prefab* prefab, bool force, Resources& resources)
 {
 	Expects(ecsData);
 
@@ -116,28 +116,23 @@ void EntityEditor::reloadEntity()
 	fields->clear();
 
 	if (currentEntityData) {
-		if (getEntityData()["components"].getType() == ConfigNodeType::Sequence) {
-			auto& seq = getEntityData()["components"].asSequence();
-			std::vector<String> componentNames;
-			componentNames.reserve(seq.size());
+		auto& seq = getEntityData().getComponents();
+		std::vector<String> componentNames;
+		componentNames.reserve(seq.size());
 
-			for (auto& componentNode: seq) {
-				for (auto& c: componentNode.asMap()) {
-					componentNames.push_back(c.first);
-				}
-			}
-			
-			for (auto& componentNode: seq) {
-				for (auto& c: componentNode.asMap()) {
-					loadComponentData(c.first, c.second, componentNames);
-				}
-			}
+		for (auto& c: seq) {
+			componentNames.push_back(c.first);
+		}
+		
+		for (auto& c: seq) {
+			// TODO: load in order
+			loadComponentData(c.first, c.second, componentNames);
 		}
 
 		if (isPrefab) {
-			prefabName->setValue(getEntityData()["prefab"].asString(""));
+			prefabName->setValue(getEntityData().getPrefab());
 		} else {
-			entityName->setText(getEntityData()["name"].asString(""));
+			entityName->setText(getEntityData().getName());
 		}
 	}
 }
@@ -249,13 +244,9 @@ std::set<String> EntityEditor::getComponentsOnEntity() const
 {
 	// Components already on this entity
 	std::set<String> existingComponents;
-	auto& components = getEntityData()["components"];
-	if (components.getType() == ConfigNodeType::Sequence) {
-		for (auto& c: components.asSequence()) {
-			for (auto& kv: c.asMap()) {
-				existingComponents.insert(kv.first);
-			}
-		}
+	auto& components = getEntityData().getComponents();
+	for (auto& kv: components) {
+		existingComponents.insert(kv.first);
 	}
 	return existingComponents;
 }
@@ -305,13 +296,8 @@ void EntityEditor::addComponent(const String& name)
 	}
 	const auto& deps = iter->second.componentDependencies;
 
-	// Generate component
-	ConfigNode compNode = ConfigNode::MapType();
-	compNode[name] = ConfigNode::MapType();
-
 	// Get list
-	auto& components = getEntityData()["components"];
-	components.ensureType(ConfigNodeType::Sequence);
+	auto& components = getEntityData().getComponents();
 
 	// Insert dependencies, if needed
 	auto existingComponents = getComponentsOnEntity();
@@ -323,7 +309,7 @@ void EntityEditor::addComponent(const String& name)
 	}
 	
 	// Insert
-	components.asSequence().emplace_back(std::move(compNode));
+	components.emplace_back(name, ConfigNode::MapType());
 
 	// Reload
 	needToReloadUI = true;	
@@ -332,27 +318,16 @@ void EntityEditor::addComponent(const String& name)
 
 void EntityEditor::deleteComponent(const String& name)
 {
-	auto& components = getEntityData()["components"];
-	if (components.getType() == ConfigNodeType::Sequence) {
-		auto& componentSequence = components.asSequence();
-		bool found = false;
-		
-		for (size_t i = 0; i < componentSequence.size(); ++i) {
-			for (auto& c: componentSequence[i].asMap()) {
-				if (c.first == name) {
-					found = true;
-					break;
-				}
-			}
+	auto& components = getEntityData().getComponents();
+	
+	for (size_t i = 0; i < components.size(); ++i) {
+		if (components[i].first == name) {
+			components.erase(components.begin() + i);
 
-			if (found) {
-				componentSequence.erase(componentSequence.begin() + i);
-
-				needToReloadUI = true;
-				sceneEditor->onComponentRemoved(name);
-				onEntityUpdated();
-				return;
-			}
+			needToReloadUI = true;
+			sceneEditor->onComponentRemoved(name);
+			onEntityUpdated();
+			return;
 		}
 	}
 }
@@ -360,7 +335,7 @@ void EntityEditor::deleteComponent(const String& name)
 void EntityEditor::setName(const String& name)
 {
 	if (!isPrefab && getName() != name) {
-		getEntityData()["name"] = name;
+		getEntityData().setName(name);
 		onEntityUpdated();
 	}
 }
@@ -386,15 +361,15 @@ bool EntityEditor::onKeyPress(KeyboardKeyPress key)
 
 String EntityEditor::getName() const
 {
-	return isPrefab ? "" : getEntityData()["name"].asString("");
+	return isPrefab ? "" : getEntityData().getName();
 }
 
 void EntityEditor::setPrefabName(const String& prefab)
 {
 	if (isPrefab) {
-		const String oldPrefab = getEntityData()["prefab"].asString("");
+		const String oldPrefab = getEntityData().getPrefab();
 		if (oldPrefab != prefab) {
-			getEntityData()["prefab"] = prefab;
+			getEntityData().setPrefab(prefab);
 			onEntityUpdated();
 		}
 	}
@@ -403,7 +378,7 @@ void EntityEditor::setPrefabName(const String& prefab)
 void EntityEditor::editPrefab()
 {
 	if (isPrefab) {
-		const String prefab = getEntityData()["prefab"].asString("");
+		const String prefab = getEntityData().getPrefab();
 		sceneEditor->openEditPrefabWindow(prefab);
 	}
 }
@@ -418,12 +393,12 @@ void EntityEditor::setTool(SceneEditorTool tool, const String& componentName, co
 	sceneEditor->setTool(tool, componentName, fieldName, std::move(options));
 }
 
-ConfigNode& EntityEditor::getEntityData()
+EntityData& EntityEditor::getEntityData()
 {
 	return *currentEntityData;
 }
 
-const ConfigNode& EntityEditor::getEntityData() const
+const EntityData& EntityEditor::getEntityData() const
 {
 	return *currentEntityData;
 }

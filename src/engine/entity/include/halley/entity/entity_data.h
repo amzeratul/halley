@@ -49,6 +49,7 @@ namespace Halley {
 
   	    const EntityData* tryGetPrefabUUID(const UUID& uuid) const;
         const EntityData* tryGetInstanceUUID(const UUID& uuid) const;
+    	EntityData* tryGetInstanceUUID(const UUID& uuid);
 
     	void setName(String name);
     	void setPrefab(String prefab);
@@ -74,6 +75,9 @@ namespace Halley {
         const EntityData& asEntityData() const override;
         const EntityDataDelta& asEntityDataDelta() const override;
 
+    	void setSceneRoot(bool root);
+    	bool isSceneRoot() const;
+
     private:
     	String name;
     	String prefab;
@@ -83,6 +87,7 @@ namespace Halley {
     	std::vector<EntityData> children;
     	std::vector<std::pair<String, ConfigNode>> components;
     	bool fromPrefab = false;
+    	bool sceneRoot = false;
 
     	void addComponent(String key, ConfigNode data);
     	void parseUUID(UUID& dst, const ConfigNode& node);

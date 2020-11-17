@@ -60,9 +60,9 @@ void EntityList::addEntity(const String& name, const String& id, const String& p
 	list->addTreeItem(id, parentId, afterSiblingId, LocalisedString::fromUserString(getEntityName(name, prefab)), isPrefab ? "labelSpecial" : "label", isPrefab);
 }
 
-String EntityList::getEntityName(const ConfigNode& data) const
+String EntityList::getEntityName(const EntityData& data) const
 {
-	return getEntityName(data["name"].asString(""), data["prefab"].asString(""));
+	return getEntityName(data.getName(), data.getPrefab());
 }
 
 String EntityList::getEntityName(const String& name, const String& prefabName) const
@@ -90,26 +90,24 @@ void EntityList::refreshList()
 	addEntities(sceneData->getEntityTree(), "");
 }
 
-void EntityList::onEntityModified(const String& id, const ConfigNode& node)
+void EntityList::onEntityModified(const String& id, const EntityData& node)
 {
 	list->setLabel(id, LocalisedString::fromUserString(getEntityName(node)));
 }
 
-void EntityList::onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId, const ConfigNode& data)
+void EntityList::onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId, const EntityData& data)
 {
 	addEntityTree(parentId, afterSiblingId, data);
 	list->sortItems();
 	list->setSelectedOptionId(id);
 }
 
-void EntityList::addEntityTree(const String& parentId, const String& afterSiblingId, const ConfigNode& data)
+void EntityList::addEntityTree(const String& parentId, const String& afterSiblingId, const EntityData& data)
 {
-	const auto& curId = data["uuid"].asString();
-	addEntity(data["name"].asString(""), curId, parentId, afterSiblingId, data["prefab"].asString(""));
-	if (data["children"].getType() == ConfigNodeType::Sequence) {
-		for (const auto& child: data["children"]) {
-			addEntityTree(curId, "", child);
-		}
+	const auto& curId = data.getInstanceUUID().toString();
+	addEntity(data.getName(), curId, parentId, afterSiblingId, data.getPrefab());
+	for (const auto& child: data.getChildren()) {
+		addEntityTree(curId, "", child);
 	}
 }
 

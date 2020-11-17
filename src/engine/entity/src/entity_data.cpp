@@ -147,6 +147,24 @@ const EntityData* EntityData::tryGetInstanceUUID(const UUID& uuid) const
 	return nullptr;
 }
 
+EntityData* EntityData::tryGetInstanceUUID(const UUID& uuid)
+{
+	Expects(uuid.isValid());
+	
+	if (uuid == instanceUUID) {
+		return this;
+	}
+
+	for (auto& c: children) {
+		auto* result = c.tryGetInstanceUUID(uuid);
+		if (result) {
+			return result;
+		}
+	}
+
+	return nullptr;
+}
+
 void EntityData::setName(String name)
 {
 	this->name = std::move(name);
@@ -352,4 +370,14 @@ const EntityData& EntityData::asEntityData() const
 const EntityDataDelta& EntityData::asEntityDataDelta() const
 {
 	throw Exception("Not an EntityDataDelta", HalleyExceptions::Entity);
+}
+
+void EntityData::setSceneRoot(bool root)
+{
+	sceneRoot = root;
+}
+
+bool EntityData::isSceneRoot() const
+{
+	return sceneRoot;
 }

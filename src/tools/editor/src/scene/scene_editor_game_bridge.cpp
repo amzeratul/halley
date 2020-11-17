@@ -116,7 +116,7 @@ std::shared_ptr<UIWidget> SceneEditorGameBridge::makeCustomUI() const
 	return result;
 }
 
-void SceneEditorGameBridge::setSelectedEntity(const UUID& uuid, ConfigNode& data)
+void SceneEditorGameBridge::setSelectedEntity(const UUID& uuid, EntityData& data)
 {
 	if (interfaceReady) {
 		interface->setSelectedEntity(uuid, data);
@@ -130,7 +130,7 @@ void SceneEditorGameBridge::showEntity(const UUID& uuid)
 	}
 }
 
-void SceneEditorGameBridge::onEntityAdded(const UUID& uuid, const ConfigNode& data)
+void SceneEditorGameBridge::onEntityAdded(const UUID& uuid, const EntityData& data)
 {
 	if (interfaceReady) {
 		interface->onEntityAdded(uuid, data);
@@ -144,14 +144,14 @@ void SceneEditorGameBridge::onEntityRemoved(const UUID& uuid)
 	}
 }
 
-void SceneEditorGameBridge::onEntityModified(const UUID& uuid, const ConfigNode& data)
+void SceneEditorGameBridge::onEntityModified(const UUID& uuid, const EntityData& data)
 {
 	if (interfaceReady) {
 		interface->onEntityModified(uuid, data);
 	}
 }
 
-void SceneEditorGameBridge::onEntityMoved(const UUID& uuid, const ConfigNode& data)
+void SceneEditorGameBridge::onEntityMoved(const UUID& uuid, const EntityData& data)
 {
 	if (interfaceReady) {
 		interface->onEntityMoved(uuid, data);
