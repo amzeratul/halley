@@ -46,7 +46,7 @@ namespace Halley {
 		std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() override;
 		std::shared_ptr<UIWidget> makeCustomUI() override;
 
-		void onSceneLoaded(AssetType assetType, const String& assetId) override;
+		void onSceneLoaded(Prefab& scene) override;
     	
 		static Rect4f getSpriteTreeBounds(const EntityRef& e);
 		static std::optional<Rect4f> getSpriteBounds(const EntityRef& e);

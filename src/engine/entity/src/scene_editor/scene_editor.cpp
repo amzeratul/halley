@@ -137,7 +137,7 @@ std::shared_ptr<UIWidget> SceneEditor::makeCustomUI()
 	return {};
 }
 
-void SceneEditor::onSceneLoaded(AssetType assetType, const String& assetId)
+void SceneEditor::onSceneLoaded(Prefab& scene)
 {
 }
 

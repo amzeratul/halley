@@ -8,6 +8,7 @@
 #include <optional>
 
 namespace Halley {
+	class Prefab;
 	class ISceneEditorWindow;
 	class UIDebugConsoleController;
 	enum class SceneEditorTool;
@@ -133,7 +134,7 @@ namespace Halley {
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;
     	virtual void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) = 0;
-        virtual void onSceneLoaded(AssetType assetType, const String& assetId) = 0;
+        virtual void onSceneLoaded(Prefab& scene) = 0;
     };
 
 	class EntityTree {

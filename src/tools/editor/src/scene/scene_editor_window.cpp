@@ -159,7 +159,7 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 		setupConsoleCommands();
 
 		// Done
-		gameBridge->onSceneLoaded(assetType, origPrefab.getAssetId());
+		gameBridge->onSceneLoaded(*prefab);
 	}
 }
 

@@ -166,10 +166,10 @@ ConfigNode SceneEditorGameBridge::onToolSet(SceneEditorTool tool, const String& 
 	return options;
 }
 
-void SceneEditorGameBridge::onSceneLoaded(AssetType type, const String& assetId)
+void SceneEditorGameBridge::onSceneLoaded(Prefab& scene)
 {
 	if (interfaceReady) {
-		interface->onSceneLoaded(type, assetId);
+		interface->onSceneLoaded(scene);
 	}
 }
 
