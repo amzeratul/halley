@@ -49,7 +49,7 @@ void Prefab::parseYAML(gsl::span<const gsl::byte> yaml)
 {
 	ConfigFile config;
 	YAMLConvert::parseConfig(config, yaml);
-	parseConfigNode(config.getRoot());
+	parseConfigNode(std::move(config.getRoot()));
 }
 
 String Prefab::toYAML() const
@@ -59,13 +59,29 @@ String Prefab::toYAML() const
 	return YAMLConvert::generateYAML(toConfigNode(), options);
 }
 
-void Prefab::parseConfigNode(const ConfigNode& node)
+void Prefab::parseConfigNode(ConfigNode node)
 {
-	entityData = makeEntityData(node);
+	if (node.getType() == ConfigNodeType::Map && node.hasKey("entity")) {
+		entityData = makeEntityData(node["entity"]);
+		gameData.getRoot() = std::move(node["game"]);
+	} else {
+		// Legacy
+		entityData = makeEntityData(node);
+		gameData.getRoot() = ConfigNode();
+	}
+
 	entityData.setSceneRoot(isScene());
 }
 
 ConfigNode Prefab::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	result["entity"] = entityToConfigNode();
+	result["game"] = ConfigNode(gameData.getRoot());
+	return result;
+}
+
+ConfigNode Prefab::entityToConfigNode() const
 {
 	return entityData.toConfigNode(false);
 }
@@ -238,7 +254,7 @@ std::shared_ptr<Prefab> Scene::clone() const
 	return std::make_shared<Scene>(*this);
 }
 
-ConfigNode Scene::toConfigNode() const
+ConfigNode Scene::entityToConfigNode() const
 {
 	ConfigNode::SequenceType result;
 	for (auto& c: entityData.getChildren()) {

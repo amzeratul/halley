@@ -18,7 +18,7 @@ namespace Halley {
 		void parseYAML(gsl::span<const gsl::byte> yaml);
 		String toYAML() const;
 
-		void parseConfigNode(const ConfigNode& node);
+		void parseConfigNode(ConfigNode node);
 		virtual ConfigNode toConfigNode() const;
 
 		virtual bool isScene() const;
@@ -51,6 +51,7 @@ namespace Halley {
 
 		virtual EntityData makeEntityData(const ConfigNode& node) const;
 		Deltas generatePrefabDeltas(const Prefab& newPrefab) const;
+		virtual ConfigNode entityToConfigNode() const;
 		
 		EntityData entityData;
 		ConfigFile gameData;
@@ -74,7 +75,7 @@ namespace Halley {
 
 		std::shared_ptr<Prefab> clone() const override;
 
-		ConfigNode toConfigNode() const override;
+		ConfigNode entityToConfigNode() const override;
 		
 	protected:
 		EntityData makeEntityData(const ConfigNode& node) const override;
