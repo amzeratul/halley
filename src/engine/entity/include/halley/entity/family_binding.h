@@ -178,7 +178,17 @@ namespace Halley {
 			if (res) return *res;
 			throw Exception("No element in family matches id.", HalleyExceptions::Entity);
 		}
-		
+
+		gsl::span<T> getSpan()
+		{
+			return gsl::span<T>(begin(), count());
+		}
+
+		gsl::span<const T> getSpan() const
+		{
+			return gsl::span<const T>(begin(), count());
+		}
+
 	private:
 		void init(MaskStorage& storage) noexcept
 		{
