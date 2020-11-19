@@ -96,7 +96,7 @@ namespace Halley {
 		void makeUI();
 		void onEntitySelected(const String& id);
 		void panCameraToEntity(const String& id);
-		void saveEntity();
+		void saveScene();
 
 		String findParent(const String& entityId) const;
 		const String* findParent(const String& entityId, const EntityTree& tree, const String& prev) const;

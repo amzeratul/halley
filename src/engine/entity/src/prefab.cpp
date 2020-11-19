@@ -141,6 +141,12 @@ const std::set<UUID>& Prefab::getEntitiesRemoved() const
 	return deltas.entitiesRemoved;
 }
 
+void Prefab::setGameData(const String& key, ConfigNode data)
+{
+	gameData.getRoot().ensureType(ConfigNodeType::Map);
+	gameData.getRoot()[key] = std::move(data);
+}
+
 ConfigNode& Prefab::getGameData(const String& key)
 {
 	gameData.getRoot().ensureType(ConfigNodeType::Map);

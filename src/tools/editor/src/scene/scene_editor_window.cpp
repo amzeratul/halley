@@ -78,7 +78,7 @@ void SceneEditorWindow::makeUI()
 
 	setHandle(UIEventType::ButtonClicked, "saveButton", [=] (const UIEvent& event)
 	{
-		saveEntity();
+		saveScene();
 	});
 
 	setHandle(UIEventType::ButtonClicked, "addEntity", [=] (const UIEvent& event)
@@ -203,7 +203,7 @@ void SceneEditorWindow::update(Time t, bool moved)
 bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 {
 	if (key.is(KeyCode::S, KeyMods::Ctrl)) {
-		saveEntity();
+		saveScene();
 		return true;
 	}
 
@@ -283,7 +283,7 @@ void SceneEditorWindow::panCameraToEntity(const String& id)
 	gameBridge->showEntity(UUID(id));
 }
 
-void SceneEditorWindow::saveEntity()
+void SceneEditorWindow::saveScene()
 {
 	setSaveEnabled(false);
 
