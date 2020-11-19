@@ -51,7 +51,6 @@ namespace Halley {
 		constexpr Vector2D () noexcept : x(0), y(0) {}
 		constexpr Vector2D (T x, T y) noexcept : x(x), y(y) {}
 		constexpr Vector2D (const Vector2D& vec) noexcept : x(static_cast<T>(vec.x)), y(static_cast<T>(vec.y)) {}
-		constexpr Vector2D (Vector2D&& vec) noexcept : x(static_cast<T>(vec.x)), y(static_cast<T>(vec.y)) {}
 		template <typename V> constexpr explicit Vector2D (const Vector2D<V>& vec) noexcept : x(static_cast<T>(vec.x)), y(static_cast<T>(vec.y)) {}
 
 		constexpr Vector2D (T length, U angle) noexcept
