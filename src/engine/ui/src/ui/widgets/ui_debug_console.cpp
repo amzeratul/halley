@@ -195,7 +195,22 @@ void UIDebugConsole::addLine(const String& line, Colour colour)
 	scrollPane->getPane()->setRelativeScroll(1.0f, UIScrollDirection::Vertical);
 }
 
+void UIDebugConsole::setForcePaintMask(int mask)
+{
+	forceMask = mask;
+}
+
 const std::shared_ptr<UIDebugConsoleController>& UIDebugConsole::getController() const
 {
 	return controller;
+}
+
+void UIDebugConsole::drawChildren(UIPainter& painter) const
+{
+	if (forceMask) {
+		auto p2 = painter.withMask(forceMask.value());
+		UIWidget::drawChildren(p2);
+	} else {
+		UIWidget::drawChildren(painter);
+	}
 }

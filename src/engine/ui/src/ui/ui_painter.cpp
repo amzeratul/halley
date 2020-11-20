@@ -58,6 +58,11 @@ std::optional<Rect4f> UIPainter::getClip() const
 	return clip;
 }
 
+int UIPainter::getMask() const
+{
+	return mask;
+}
+
 float UIPainter::getCurrentPriorityAndIncrement() const
 {
 	if (rootPainter) {

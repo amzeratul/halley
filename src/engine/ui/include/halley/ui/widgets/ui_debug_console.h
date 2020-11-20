@@ -57,7 +57,12 @@ namespace Halley {
 		void hide();
 		void addLine(const String& line, Colour colour);
 
+    	void setForcePaintMask(int mask);
+
     	const std::shared_ptr<UIDebugConsoleController>& getController() const;
+
+	protected:
+		void drawChildren(UIPainter& painter) const override;
     	
     private:
 		void setup();
@@ -67,5 +72,6 @@ namespace Halley {
 		std::shared_ptr<UIDebugConsoleController> controller;
 		Future<String> pendingCommand;
 		std::shared_ptr<UITextInput> inputField;
+    	std::optional<int> forceMask;
     };
 }
