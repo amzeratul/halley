@@ -16,8 +16,8 @@ namespace Halley {
 	public:
 		explicit UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, std::vector<LocalisedString> options = {}, int defaultOption = 0);
 
-		void setSelectedOption(int option);
-		void setSelectedOption(const String& id);
+		virtual void setSelectedOption(int option);
+		virtual void setSelectedOption(const String& id);
 		int getSelectedOption() const;
 		String getSelectedOptionId() const;
 		LocalisedString getSelectedOptionText() const;
@@ -35,6 +35,16 @@ namespace Halley {
 		bool canReceiveFocus() const override;
 
 	protected:
+		UIStyle style;
+		
+		std::vector<LocalisedString> options;
+		std::vector<String> optionIds;
+		
+		TextRenderer label;
+		std::shared_ptr<UIList> dropdownList;
+		
+		int curOption = 0;
+
 		void draw(UIPainter& painter) const override;
 		void drawChildren(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
@@ -46,24 +56,19 @@ namespace Halley {
 
 		void readFromDataBind() override;
 
+		virtual void updateOptionLabels();
+
 	private:
 		Sprite sprite;
-		TextRenderer label;
 		UIInputButtons inputButtons;
-		UIStyle style;
 		UIStyle scrollbarStyle;
 		UIStyle listStyle;
 		std::shared_ptr<UIWidget> dropdownWindow;
-		std::shared_ptr<UIList> dropdownList;
 		std::shared_ptr<UIScrollPane> scrollPane;
 		
-		std::vector<LocalisedString> options;
-		std::vector<String> optionIds;
-		int curOption = 0;
 		bool isOpen = false;
 
 		void open();
 		void close();
-		void updateOptionLabels();
     };
 }

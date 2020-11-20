@@ -12,9 +12,9 @@ using namespace Halley;
 UIDropdown::UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, std::vector<LocalisedString> os, int defaultOption)
 	: UIClickable(std::move(id), Vector2f(style.getFloat("minSize"), style.getFloat("minSize")))
 	, style(style)
+	, curOption(defaultOption)
 	, scrollbarStyle(std::move(scrollbarStyle))
 	, listStyle(std::move(listStyle))
-	, curOption(defaultOption)
 {
 	sprite = style.getSprite("normal");
 

@@ -24,6 +24,7 @@ namespace Halley {
 		UIPainter withNoClip() const;
 
 		std::optional<Rect4f> getClip() const;
+		int getMask() const;
 
 	private:
 		SpritePainter* painter = nullptr;
