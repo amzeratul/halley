@@ -246,6 +246,11 @@ int AnimationPlayer::getCurrentSequenceFrame() const
 	return curFrame;
 }
 
+Time AnimationPlayer::getCurrentSequenceFrameTime() const
+{
+	return curFrameTime;
+}
+
 int AnimationPlayer::getCurrentSequenceLoopCount() const
 {
 	return curLoopCount;

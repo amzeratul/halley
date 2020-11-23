@@ -40,6 +40,7 @@ namespace Halley
 		const String& getCurrentSequenceName() const;
 		Time getCurrentSequenceTime() const;
 		int getCurrentSequenceFrame() const;
+		Time getCurrentSequenceFrameTime() const;
 		int getCurrentSequenceLoopCount() const;
 
 		String getCurrentDirectionName() const;
