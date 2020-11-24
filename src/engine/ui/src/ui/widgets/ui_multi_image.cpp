@@ -6,17 +6,17 @@ UIMultiImage::UIMultiImage(const String& id, Vector2f size, std::vector<Sprite> 
 	, sprites(std::move(sprites))
 	, offsets(std::move(offsets))
 {
-	if(sprites.size() != offsets.size()) {
-		offsets.resize(sprites.size());
+	if(this->sprites.size() != this->offsets.size()) {
+		this->offsets.resize(this->sprites.size());
 	}
 }
 
-Sprite& UIMultiImage::getSprite(const int index)
+Sprite& UIMultiImage::getSprite(size_t index)
 {
 	return sprites.at(index);
 }
 
-const Sprite& UIMultiImage::getSprite(const int index) const
+const Sprite& UIMultiImage::getSprite(size_t index) const
 {
 	return sprites.at(index);
 }
@@ -26,7 +26,7 @@ const std::vector<Sprite>& UIMultiImage::getSprites() const
 	return sprites;
 }
 
-void UIMultiImage::setSprite(const int index, Sprite sprite)
+void UIMultiImage::setSprite(size_t index, Sprite sprite)
 {
 	sprites[index] = std::move(sprite);
 	dirty = true;
@@ -41,7 +41,7 @@ void UIMultiImage::setSprites(std::vector<Sprite> sprites)
 	dirty = true;
 }
 
-Vector2f UIMultiImage::getOffset(const int index) const
+Vector2f UIMultiImage::getOffset(size_t index) const
 {
 	return offsets.at(index);
 }
@@ -51,9 +51,9 @@ const std::vector<Vector2f>& UIMultiImage::getOffsets() const
 	return offsets;
 }
 
-void UIMultiImage::setOffset(const int index, Vector2f offset)
+void UIMultiImage::setOffset(size_t index, Vector2f offset)
 {
-	offsets[index] = offset;
+	this->offsets[index] = offset;
 	dirty = true;
 }
 

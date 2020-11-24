@@ -9,15 +9,15 @@ namespace Halley
 	public:
 		UIMultiImage(const String& id, Vector2f size, std::vector<Sprite> sprites, std::vector<Vector2f> offsets = {});
 
-		Sprite& getSprite(const int index);
-		const Sprite& getSprite(const int index) const;
+		Sprite& getSprite(size_t index);
+		const Sprite& getSprite(size_t index) const;
 		const std::vector<Sprite>& getSprites() const;
-		void setSprite(const int index, Sprite sprite);
+		void setSprite(size_t index, Sprite sprite);
 		void setSprites(std::vector<Sprite> sprites);
 		
-		Vector2f getOffset(const int index) const;
+		Vector2f getOffset(size_t index) const;
 		const std::vector<Vector2f>& getOffsets() const;
-		void setOffset(const int index, Vector2f offset);
+		void setOffset(size_t index, Vector2f offset);
 		void setOffsets(std::vector<Vector2f> offsets);
 		
 	protected:
