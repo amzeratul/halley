@@ -4,8 +4,6 @@
 
 namespace Halley
 {
-	class AnimationPlayer;
-
 	class UIMultiImage : public UIWidget
 	{
 	public:
