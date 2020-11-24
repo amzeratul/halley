@@ -247,7 +247,7 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 
 	auto makeNormal = [] (Vector2f a, std::optional<Vector2f> maybeB) -> Vector2f
 	{
-		// Enabling this makes it looks nicer, but also introduces a lot of edge cases with acute angles that are very hard to deal with, so only enable for angles <= 90 degrees
+		// Enabling this makes it looks nicer, but also introduces a lot of edge cases with acute angles that are very hard to deal with, so only enable for angles >= 90 degrees
 		if (maybeB && maybeB.value().dot(a) >= -0.001f) {
 			const auto b = maybeB.value();
 			const auto c = (a + b).normalized();
