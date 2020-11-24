@@ -1,6 +1,4 @@
-cbuffer HalleyBlock : register(b0) {
-    float4x4 u_mvp;
-};
+#include "halley/halley_block.hlsl"
 
 float2 getTexCoord(float4 texCoords, float2 vertPos, float texCoordRotation) {
     float2 texPos = lerp(vertPos, float2(1.0 - vertPos.y, vertPos.x), texCoordRotation);

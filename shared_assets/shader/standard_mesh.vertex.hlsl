@@ -1,6 +1,4 @@
-cbuffer HalleyBlock : register(b0) {
-    float4x4 u_mvp;
-};
+#include "halley/halley_block.hlsl"
 
 cbuffer ModelBlock : register(b1) {
     float4x4 u_modelMatrix;

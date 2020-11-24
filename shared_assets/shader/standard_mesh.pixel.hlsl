@@ -1,9 +1,7 @@
 Texture2D tex0 : register(t0);
 SamplerState sampler0 : register(s0);
 
-cbuffer HalleyBlock : register(b0) {
-    float4x4 u_mvp;
-};
+#include "halley/halley_block.hlsl"
 
 struct VOut {
     float4 position : SV_POSITION;

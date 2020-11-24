@@ -568,6 +568,7 @@ void Painter::updateProjection()
 
 	const auto oldHash = halleyGlobalMaterial->getHash();
 	halleyGlobalMaterial->set("u_mvp", projection);
+	halleyGlobalMaterial->set("u_viewPortSize", Vector2f(camera->getActiveViewPort().getSize()));
 	if (oldHash != halleyGlobalMaterial->getHash()) {
 		onUpdateProjection(*halleyGlobalMaterial);
 	}

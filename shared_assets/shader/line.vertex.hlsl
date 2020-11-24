@@ -1,6 +1,4 @@
-cbuffer HalleyBlock : register(b0) {
-    float4x4 u_mvp;
-};
+#include "halley/halley_block.hlsl"
 
 struct VIn {
     float4 colour : COLOUR;
@@ -22,7 +20,9 @@ VOut main(VIn input) {
 
     float width = input.width.x;
     float myPos = input.width.y;
-    float vertPos = 0.5 * (width + 1) * myPos;
+    float zoom = mul(u_mvp, float4(1, 0, 0, 0)).x * u_viewPortSize.x;
+
+    float vertPos = 0.5 * (width + 1.0 / zoom) * myPos;
     float2 pos = input.position + vertPos * input.normal;
     result.position = mul(u_mvp, float4(pos, 0, 1));
     result.colour = input.colour;
