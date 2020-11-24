@@ -94,6 +94,7 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeDropdown(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeCheckbox(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeImage(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeMultiImage(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeAnimation(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeScrollPane(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeScrollBar(const ConfigNode& node);

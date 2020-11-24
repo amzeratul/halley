@@ -10,6 +10,7 @@
 #include "halley/ui/widgets/ui_list.h"
 #include "halley/ui/widgets/ui_dropdown.h"
 #include "halley/ui/widgets/ui_image.h"
+#include "halley/ui/widgets/ui_multi_image.h"
 #include "halley/ui/widgets/ui_animation.h"
 #include "halley/ui/widgets/ui_scrollbar.h"
 #include "halley/ui/widgets/ui_scroll_pane.h"
@@ -44,6 +45,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("dropdown", [=] (const ConfigNode& node) { return makeDropdown(node); });
 	addFactory("checkbox", [=] (const ConfigNode& node) { return makeCheckbox(node); });
 	addFactory("image", [=] (const ConfigNode& node) { return makeImage(node); });
+	addFactory("multiImage", [=](const ConfigNode& node) { return makeMultiImage(node); });
 	addFactory("animation", [=] (const ConfigNode& node) { return makeAnimation(node); });
 	addFactory("scrollBar", [=] (const ConfigNode& node) { return makeScrollBar(node); });
 	addFactory("scrollPane", [=] (const ConfigNode& node) { return makeScrollPane(node); });
@@ -614,6 +616,32 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 		image->setLayerAdjustment(node["layerAdjustment"].asInt());
 	}
 	return image;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeMultiImage(const ConfigNode& entryNode)
+{
+	const auto& node = entryNode["widget"];
+	const auto id = node["id"].asString("");
+	const auto size = asVector2f(node["size"], Vector2f());
+	const auto materialName = node["material"].asString("");
+
+	std::vector<Sprite> sprites = {};
+	std::vector<Vector2f> offsets = {};
+	
+	if (node.hasKey("images")) {
+		const auto& images = node["images"].asSequence();
+
+		for(const auto& imageName : images) {
+			Sprite sprite = Sprite();
+			sprite.setImage(resources, imageName.asString(), materialName);
+		}
+	}
+
+	if(node.hasKey("offsets")) {
+		offsets = node["offsets"].asVector<Vector2f>();
+	}
+
+	return std::make_shared<UIMultiImage>(id, size, sprites, offsets);
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& entryNode)
