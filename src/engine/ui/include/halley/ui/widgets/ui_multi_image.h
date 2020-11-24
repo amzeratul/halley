@@ -20,7 +20,8 @@ namespace Halley
 		Vector2f getOffset(const int index) const;
 		const std::vector<Vector2f>& getOffsets() const;
 		void setOffset(const int index, Vector2f offset);
-
+		void setOffsets(std::vector<Vector2f> offsets);
+		
 	protected:
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;

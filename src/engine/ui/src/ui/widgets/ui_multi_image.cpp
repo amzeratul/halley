@@ -57,10 +57,19 @@ void UIMultiImage::setOffset(const int index, Vector2f offset)
 	dirty = true;
 }
 
+void UIMultiImage::setOffsets(std::vector<Vector2f> offsets)
+{
+	this->offsets = std::move(offsets);
+	if (this->sprites.size() != offsets.size()) {
+		offsets.resize(this->sprites.size());
+	}
+	dirty = true;
+}
+
 void UIMultiImage::update(Time t, bool moved)
 {
 	if (moved || dirty) {
-		const Vector2f basePos = getPosition();
+		const Vector2f basePos = getPosition() + getSize() * 0.5f;
 
 		for (int i = 0; i < sprites.size(); i++) {
 			sprites[i].setPos(basePos + offsets[i]);
