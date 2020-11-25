@@ -403,6 +403,7 @@ void EntityFactory::collectExistingEntities(EntityRef entity, EntityFactoryConte
 	// It can be relevant if there are UUIDs pointing upwards, in that situation
 	
 	context.addEntity(entity);
+	entity.setReloaded();
 	
 	for (const auto c: entity.getChildren()) {
 		collectExistingEntities(c, context);
