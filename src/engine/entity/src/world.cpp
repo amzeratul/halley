@@ -319,6 +319,7 @@ void World::onEntityDirty()
 void World::setEntityReloaded()
 {
 	entityReloaded = true;
+	entityDirty = true;
 }
 
 const CreateComponentFunction& World::getCreateComponentFunction() const
