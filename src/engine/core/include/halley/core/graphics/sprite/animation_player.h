@@ -40,6 +40,7 @@ namespace Halley
 		const String& getCurrentSequenceName() const;
 		Time getCurrentSequenceTime() const;
 		int getCurrentSequenceFrame() const;
+		Time getCurrentSequenceFrameTime() const;
 		int getCurrentSequenceLoopCount() const;
 
 		String getCurrentDirectionName() const;
@@ -55,6 +56,7 @@ namespace Halley
 		AnimationPlayer& setOffsetPivot(Vector2f offset);
 
 		void syncWith(const AnimationPlayer& masterAnimator, bool hideIfNotSynchronized);
+		void setState(const String& sequenceName, const String& directionName, int currentFrame, Time currentFrameTime, bool hideIfNotSynchronized);
 		void stepFrames(int amount);
 
 	private:

@@ -246,6 +246,11 @@ int AnimationPlayer::getCurrentSequenceFrame() const
 	return curFrame;
 }
 
+Time AnimationPlayer::getCurrentSequenceFrameTime() const
+{
+	return curFrameTime;
+}
+
 int AnimationPlayer::getCurrentSequenceLoopCount() const
 {
 	return curLoopCount;
@@ -296,14 +301,20 @@ AnimationPlayer& AnimationPlayer::setOffsetPivot(Vector2f offset)
 
 void AnimationPlayer::syncWith(const AnimationPlayer& masterAnimator, bool hideIfNotSynchronized)
 {
-	setSequence(masterAnimator.getCurrentSequenceName());
-	setDirection(masterAnimator.getCurrentDirectionName());
-	visibleOverride = !hideIfNotSynchronized || getCurrentSequenceName() == masterAnimator.getCurrentSequenceName();
-	curFrame = clamp(masterAnimator.curFrame, 0, curSeq ? static_cast<int>(curSeq->numFrames()) - 1 : 0);
-	curFrameTime = masterAnimator.curFrameTime;
+	setState(masterAnimator.getCurrentSequenceName(), masterAnimator.getCurrentDirectionName(), masterAnimator.curFrame, masterAnimator.curFrameTime, hideIfNotSynchronized);
+}
+
+void AnimationPlayer::setState(const String& sequenceName, const String& directionName, int currentFrame, Time currentFrameTime, bool hideIfNotSynchronized)
+{
+	setSequence(sequenceName);
+	setDirection(directionName);
+	visibleOverride = !hideIfNotSynchronized || getCurrentSequenceName() == sequenceName;
+	curFrame = clamp(currentFrame, 0, curSeq ? static_cast<int>(curSeq->numFrames()) - 1 : 0);
+	curFrameTime = currentFrameTime;
 
 	resolveSprite();
 }
+
 
 void AnimationPlayer::stepFrames(int amount)
 {
