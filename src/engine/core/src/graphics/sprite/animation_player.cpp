@@ -301,10 +301,10 @@ AnimationPlayer& AnimationPlayer::setOffsetPivot(Vector2f offset)
 
 void AnimationPlayer::syncWith(const AnimationPlayer& masterAnimator, bool hideIfNotSynchronized)
 {
-	syncWith(masterAnimator.getCurrentSequenceName(), masterAnimator.getCurrentDirectionName(), masterAnimator.curFrame, masterAnimator.curFrameTime, hideIfNotSynchronized);
+	setState(masterAnimator.getCurrentSequenceName(), masterAnimator.getCurrentDirectionName(), masterAnimator.curFrame, masterAnimator.curFrameTime, hideIfNotSynchronized);
 }
 
-void AnimationPlayer::syncWith(const String& sequenceName, const String& directionName, int currentFrame, Time currentFrameTime, bool hideIfNotSynchronized)
+void AnimationPlayer::setState(const String& sequenceName, const String& directionName, int currentFrame, Time currentFrameTime, bool hideIfNotSynchronized)
 {
 	setSequence(sequenceName);
 	setDirection(directionName);
