@@ -42,6 +42,13 @@ namespace Halley {
 			bool collided = false;
 			bool fastFail = false;
 		};
+
+		enum class SATClassification {
+			Separate,
+			Overlap,
+			Contains,
+			IsContainedBy
+		};
 		
 		Polygon();
 		Polygon(VertexList vertices);
@@ -55,8 +62,9 @@ namespace Halley {
 		static Polygon makePolygon(Vector2f origin, float w, float h);
 
 		bool isPointInside(Vector2f point) const;
-		bool overlaps(const Polygon &param, Vector2f *translation= nullptr, Vector2f *collisionPoint= nullptr) const;
+		bool collide(const Polygon &param, Vector2f *translation= nullptr, Vector2f *collisionPoint= nullptr) const;
 		Vector2f getClosestPoint(Vector2f p, float anisotropy = 1.0f) const; // All Y coordinates are multiplied by anisotropy
+		SATClassification classify(const Polygon& other) const;
 
 		void setVertices(const VertexList& vertices);
 		const VertexList& getVertices() const { return vertices; }
@@ -67,6 +75,7 @@ namespace Halley {
 		bool isClockwise() const { return clockwise; }
 
 		std::vector<Polygon> splitIntoConvex() const;
+		std::optional<std::vector<Polygon>> subtract(const Polygon& other) const;
 
 		const Rect4f& getAABB() const { return aabb; }
 		const Circle& getBoundingCircle() const { return circle; }
@@ -93,7 +102,11 @@ namespace Halley {
 		bool isPointInsideConvex(Vector2f point) const;
 		bool isPointInsideConcave(Vector2f point) const;
 
-		void project(const Vector2f &axis,float &min,float &max) const;
+		SATClassification doClassify(const Polygon& other) const;
+
+		bool collideConvex(const Polygon &param, Vector2f *translation= nullptr, Vector2f *collisionPoint= nullptr) const;
+
+		Range<float> project(Vector2f axis) const;
 		void unproject(const Vector2f &axis,const float point,Vector<Vector2f> &ver) const;
 		void realize();
 		void checkConvex();
@@ -111,6 +124,9 @@ namespace Halley {
 		// 2 if "convex inside" (inside both semi-planes)
 		static int isInsideAngle(Vector2f a, Vector2f b, Vector2f c, Vector2f p, bool clockwise);
 		bool overlapsEdge(LineSegment segment) const;
+
+		std::vector<Polygon> subtractOverlapping(const Polygon& other) const;
+		std::vector<Polygon> subtractContained(const Polygon& other) const;
 	};
 
 	template<>

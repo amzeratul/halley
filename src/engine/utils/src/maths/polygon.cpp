@@ -158,7 +158,6 @@ bool Polygon::isPointInsideConcave(Vector2f point) const
 	return (nLeft % 2) == 1 && (nRight % 2) == 1;
 }
 
-
 Vector2f average(Vector<Vector2f>& v)
 {
 	Vector2f result;
@@ -170,8 +169,16 @@ Vector2f average(Vector<Vector2f>& v)
 	return result;
 }
 
+bool Polygon::collide(const Polygon &param, Vector2f *translation, Vector2f *collisionPoint) const
+{	
+	if (convex && param.convex) {
+		return collideConvex(param, translation, collisionPoint);
+	} else {
+		throw Exception("Cannot check collision between non-convex polygons", HalleyExceptions::Utils);
+	}
+}
 
-bool Polygon::overlaps(const Polygon &param,Vector2f *translation,Vector2f *collisionPoint) const
+bool Polygon::collideConvex(const Polygon& param, Vector2f* translation, Vector2f* collisionPoint) const
 {
 	// Using the separating axis theorem here
 	// Check if they are within overlap range
@@ -199,12 +206,11 @@ bool Polygon::overlaps(const Polygon &param,Vector2f *translation,Vector2f *coll
 		else axis = (param.vertices[(i-len1+1)%len2] - param.vertices[i-len1]).orthoLeft().unit();
 
 		// Project both polygons there
-		float min1, max1, min2, max2;
-		project(axis,min1,max1);
-		param.project(axis,min2,max2);
+		const auto range1 = project(axis);
+		const auto range2 = param.project(axis);
 
 		// Find the distance between the projections
-		float dist = min1<min2 ? min2 - max1 : min1 - max2;
+		const float dist = range1.start < range2.start ? range2.start - range1.end : range1.start - range2.end;
 		if (dist >= 0) {
 			// This axis separates them
 			return false;
@@ -213,10 +219,10 @@ bool Polygon::overlaps(const Polygon &param,Vector2f *translation,Vector2f *coll
 				bestAxis = axis;
 				hasBestAxis = true;
 				minDist = dist;
-				bmin1 = min1;
-				bmin2 = min2;
-				bmax1 = max1;
-				bmax2 = max2;
+				bmin1 = range1.start;
+				bmin2 = range2.start;
+				bmax1 = range1.end;
+				bmax2 = range2.end;
 			}
 		}
 	}
@@ -291,29 +297,76 @@ Vector2f Polygon::getClosestPoint(Vector2f rawPoint, float anisotropy) const
 	return bestPoint * Vector2f(1.0f, anisotropy);
 }
 
-
-////////////////////////////////
-// Project polygon into an axis
-void Polygon::project(const Vector2f &_axis,float &_min,float &_max) const
+Polygon::SATClassification Polygon::classify(const Polygon& other) const
 {
-	Vector2f axis = _axis;
-	float dot = axis.dot(vertices[0]);
-	float min = dot;
-	float max = dot;
-	size_t len = vertices.size();
-	for (size_t i=1;i<len;i++) {
-		dot = axis.dot(vertices[i]);
-		if (dot < min) min = dot;
-		else if (dot > max) max = dot;
+	const auto result = doClassify(other);
+	if (result == SATClassification::Overlap) {
+		// Check the other way around
+		return other.doClassify(*this);
+	} else {
+		return result;
 	}
-	_min = min;
-	_max = max;
 }
 
+Polygon::SATClassification Polygon::doClassify(const Polygon& other) const
+{
+	Expects(convex);
+	Expects(other.convex);
+	
+	// For each edge
+	const size_t n = vertices.size();
+	bool contains = true;
+	bool isContainedBy = true;
+	
+	for (size_t i = 0; i < n; i++) {
+		// Find the orthonormal axis
+		const Vector2f axis = (vertices[(i + 1) % n] - vertices[i]).orthoLeft().unit();
 
-/////////////
-// Unproject
-// Finds all vertices whose projection on a given axis is the value given
+		// Project both polygons there
+		const auto myRange = project(axis);
+		const auto otherRange = other.project(axis);
+
+		if (myRange.overlaps(otherRange)) {
+			if (!myRange.contains(otherRange)) {
+				contains = false;
+			}
+			if (!otherRange.contains(myRange)) {
+				isContainedBy = false;
+			}
+		} else {
+			// This axis separates them
+			return SATClassification::Separate;
+		}
+	}
+
+	if (contains) {
+		// This contains the other entirely
+		return SATClassification::Contains;
+	} else if (isContainedBy) {
+		// This is contained entirely by the other
+		return SATClassification::IsContainedBy;
+	}
+	
+	// At this point, from this point of view it's overlapping
+	// HOWEVER, it can still be separated by the other side, which we'll check separately
+	return SATClassification::Overlap;
+}
+
+Range<float> Polygon::project(Vector2f axis) const
+{
+	float min = std::numeric_limits<float>::infinity();
+	float max = -std::numeric_limits<float>::infinity();
+
+	const size_t len = vertices.size();
+	for (size_t i = 0; i < len; i++) {
+		const float dot = axis.dot(vertices[i]);
+		min = std::min(min, dot);
+		max = std::max(max, dot);
+	}
+
+	return Range<float>(min, max);
+}
+
 void Polygon::unproject(const Vector2f &axis,const float point,Vector<Vector2f> &ver) const
 {
 	size_t len = vertices.size();
@@ -508,6 +561,34 @@ bool Polygon::overlapsEdge(LineSegment segment) const
 		}
 	}
 	return false;
+}
+
+std::optional<std::vector<Polygon>> Polygon::subtract(const Polygon& other) const
+{
+	switch (classify(other)) {
+	case SATClassification::Separate:
+		return {};
+	case SATClassification::Overlap:
+		return subtractOverlapping(other);
+	case SATClassification::Contains:
+		return subtractContained(other);
+	case SATClassification::IsContainedBy:
+		return std::vector<Polygon>();
+	}
+
+	throw Exception("Unknown polygon SAT classification", HalleyExceptions::Utils);
+}
+
+std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other) const
+{
+	// TODO
+	return std::vector<Polygon>{{ *this }};
+}
+
+std::vector<Polygon> Polygon::subtractContained(const Polygon& other) const
+{
+	// TODO
+	return std::vector<Polygon>{{ *this }};
 }
 
 Polygon Polygon::makePolygon(Vector2f origin, float w, float h)
