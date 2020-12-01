@@ -300,12 +300,24 @@ Vector2f Polygon::getClosestPoint(Vector2f rawPoint, float anisotropy) const
 Polygon::SATClassification Polygon::classify(const Polygon& other) const
 {
 	const auto result = doClassify(other);
-	if (result == SATClassification::Overlap) {
-		// Check the other way around
-		return other.doClassify(*this);
-	} else {
+	if (result == SATClassification::Separate) {
+		// Separation can be confirmed with just one
 		return result;
 	}
+
+	// Any other result needs to be confirmed by the other
+	const auto otherResult = other.doClassify(*this);
+	if (otherResult == SATClassification::Separate || otherResult == SATClassification::Overlap) {
+		return otherResult;
+	}
+
+	// Special results
+	if ((result == SATClassification::Contains && otherResult == SATClassification::IsContainedBy)
+		|| (result == SATClassification::IsContainedBy && otherResult == SATClassification::Contains)) {
+		return result;
+	}
+
+	return result;
 }
 
 Polygon::SATClassification Polygon::doClassify(const Polygon& other) const
