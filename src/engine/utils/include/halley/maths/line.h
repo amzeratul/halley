@@ -82,5 +82,25 @@ namespace Halley {
 			const float x = (point - a).dot(dir); // position along the A-B segment
 			return a + dir * clamp(x, 0.0f, len);
 		}
+
+		std::optional<Vector2f> intersection(const LineSegment& other) const
+		{
+			const float len = (this->b - this->a).length();
+			const auto a = this->a;
+			const auto b = (this->b - this->a) / len;
+			const auto c = other.a;
+			const auto d = (other.b - other.a).normalized();
+			const float divisor = b.x * d.y - b.y * d.x;
+			if (std::abs(divisor) < 0.000001f) {
+				// Parallel lines
+				return {};
+			}
+			const float t = (d.x * (a.y - c.y) + d.y * (c.x - a.x)) / divisor;
+			if (t < 0 || t > len) {
+				// Out of edges
+				return {};
+			}
+			return a + t * b;
+		}
 	};
 }

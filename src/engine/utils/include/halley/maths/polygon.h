@@ -29,6 +29,7 @@
 #include "halley/bytes/config_node_serializer_base.h"
 
 namespace Halley {
+	class LineSegment;
 
 	using Vertex = Vector2f;
 	using VertexList = Vector<Vertex>;
@@ -96,6 +97,20 @@ namespace Halley {
 		void unproject(const Vector2f &axis,const float point,Vector<Vector2f> &ver) const;
 		void realize();
 		void checkConvex();
+
+		// Split into as many convex polygons as needed
+		void doSplitIntoConvex(std::vector<Polygon>& result) const;
+
+		// Split by inserting a new edge between v0 and v1
+		void doSplit(std::vector<Polygon>& result, size_t v0, size_t v1) const;
+
+		// Angle is ABC (B in the middle). Checks against semi-planes defined by AB and BC
+		// Returns:
+		// 0 if outside
+		// 1 if "concave inside" (inside one of the semi-planes, but not both)
+		// 2 if "convex inside" (inside both semi-planes)
+		static int isInsideAngle(Vector2f a, Vector2f b, Vector2f c, Vector2f p, bool clockwise);
+		bool overlapsEdge(LineSegment segment) const;
 	};
 
 	template<>

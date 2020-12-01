@@ -324,23 +324,18 @@ void Polygon::unproject(const Vector2f &axis,const float point,Vector<Vector2f> 
 	}
 }
 
-
-//////////
-// Rotate
-// Return this polygon rotated by angle
 void Polygon::rotate(Angle<float> angle)
 {
-	size_t len = vertices.size();
+	const size_t len = vertices.size();
 	for (size_t i=0;i<len;i++) {
 		vertices[i] = vertices[i].rotate(angle);
 	}
 	realize();
 }
 
-
 void Polygon::rotateAndScale(Angle<float> angle, Vector2f scale)
 {
-	size_t len = vertices.size();
+	const size_t len = vertices.size();
 	for (size_t i=0;i<len;i++) {
 		vertices[i] = (vertices[i] * scale).rotate(angle);
 	}
@@ -350,9 +345,148 @@ void Polygon::rotateAndScale(Angle<float> angle, Vector2f scale)
 std::vector<Polygon> Polygon::splitIntoConvex() const
 {
 	std::vector<Polygon> result;
-	// TODO
-	
+	doSplitIntoConvex(result);
 	return result;
+}
+
+void Polygon::doSplitIntoConvex(std::vector<Polygon>& result) const
+{
+	Expects(clockwise);
+
+	if (isConvex()) {
+		result.push_back(*this);
+		return;
+	}
+
+	struct Score {
+		int divs = 0;
+		float dist = std::numeric_limits<float>::infinity();
+
+		Score() = default;
+		Score(int divs, float dist) : divs(divs), dist(dist) {}
+
+		bool operator>(const Score& other) const
+		{
+			if (divs != other.divs) {
+				return divs > other.divs;
+			}
+			return dist < other.dist;
+		}
+	};
+
+	// Not convex. Here's the algorithm:
+	// 1. Find all vertices whose internal angle >180
+	// 2. For each of them, find all the angles it can split with (because it wouldn't overlap any of the existing edges)
+	// 3. Pick the best edge
+	//  3.1. Edges that split another >180 angle have priority (fewer total polygons)
+	//  3.2. Smaller edges have priority
+	// 4. Split on that edge, recurse on the two new polygons
+
+	// Collect all concave angles
+	std::vector<size_t> concaveVertices;
+	const size_t n = vertices.size();
+	std::vector<char> isConcave(n, false);
+	for (size_t i = 0; i < n; ++i) {
+		const auto a = vertices[(i + n - 1) % n];
+		const auto b = vertices[i];
+		const auto c = vertices[(i + 1) % n];
+
+		const float angle = (c - b).cross(b - a);
+
+		if (angle < 0) {
+			concaveVertices.emplace_back(i);
+			isConcave[i] = true;
+		}
+	}
+
+	Score bestScore;
+	std::pair<size_t, size_t> bestSplit = {0, 0};
+
+	// Find the best edge
+	for (size_t i: concaveVertices) {
+		const Vector2f a = vertices[i];
+		const Vector2f prevA = vertices[(i + n - 1) % n];
+		const Vector2f nextA = vertices[(i + 1) % n];
+		
+		for (size_t j = 0; j < n; ++j) {
+			// Cannot be the same or adjacent
+			if (std::abs(static_cast<int>(i) - static_cast<int>(j)) <= 1) {
+				continue;
+			}
+
+			const bool isDoubleConcave = isConcave[j];
+			if (isDoubleConcave && j < i) {
+				// Already checked
+				continue;
+			}
+			const Vector2f b = vertices[j];
+
+			// Potential splitting edge between a and b, check for cone line of sight
+			const Vector2f prevB = vertices[(j + n - 1) % n];
+			const Vector2f nextB = vertices[(j + 1) % n];
+			const int insideResultBPov = isInsideAngle(prevB, b, nextB, a, clockwise);
+			if (insideResultBPov == 0) {
+				// Not in line of sight
+				continue;
+			}
+
+			// Compute the score
+			const int insideResultAPov = isInsideAngle(prevA, a, nextA, b, clockwise);
+			const float dist = (a - b).length();
+			const int divs = (insideResultAPov == 2 ? 1 : 0) + (isDoubleConcave && insideResultBPov == 2 ? 1 : 0);
+			const auto score = Score(divs, dist);
+			if (bestScore > score) {
+				// This isn't better than the previous, abort
+				continue;
+			}
+
+			// If we got here, we want to take this edge, provided it's valid.
+			// Last step is to check it against every edge to make sure it doesn't overlap them
+			if (overlapsEdge(LineSegment(a, b))) {
+				continue;
+			}
+
+			// Valid splitting edge
+			bestScore = score;
+			bestSplit = { i, j };
+		}
+	}
+
+	assert(bestSplit.first != bestSplit.second);
+
+	std::vector<Polygon> tmp;
+	doSplit(tmp, bestSplit.first, bestSplit.second);
+	for (auto& splitPoly: tmp) {
+		splitPoly.doSplitIntoConvex(result);
+	}
+}
+
+void Polygon::doSplit(std::vector<Polygon>& result, size_t v0, size_t v1) const
+{
+	// TODO
+}
+
+int Polygon::isInsideAngle(Vector2f a, Vector2f b, Vector2f c, Vector2f p, bool clockwise)
+{
+	Vector2f u = (a - b).orthoRight();
+	Vector2f v = (c - b).orthoLeft();
+	if (!clockwise) {
+		u = -u;
+		v = -v;
+	}
+	return (u.dot(p - b) > 0 ? 1 : 0) + (v.dot(p - b) > 0 ? 1 : 0);
+}
+
+bool Polygon::overlapsEdge(LineSegment segment) const
+{
+	const size_t n = vertices.size();
+	for (size_t i = 0; i < n; ++i) {
+		auto edge = LineSegment(vertices[i], vertices[(i + 1) % n]);
+		if (segment.intersection(edge)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 Polygon Polygon::makePolygon(Vector2f origin, float w, float h)
