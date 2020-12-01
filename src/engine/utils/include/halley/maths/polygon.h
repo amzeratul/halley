@@ -44,6 +44,12 @@ namespace Halley {
 		
 		Polygon();
 		Polygon(VertexList vertices);
+		explicit Polygon(const ConfigNode& node);
+
+		Polygon(const Polygon& other) = default;
+		Polygon(Polygon&& other) = default;
+		Polygon& operator=(const Polygon& other) = default;
+		Polygon& operator=(Polygon&& other) = default;
 
 		static Polygon makePolygon(Vector2f origin, float w, float h);
 
@@ -71,6 +77,8 @@ namespace Halley {
 
 		bool operator==(const Polygon& other) const;
 		bool operator!=(const Polygon& other) const;
+
+		ConfigNode toConfigNode() const;
 
 	private:
 		Circle circle;

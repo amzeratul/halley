@@ -42,6 +42,17 @@ Polygon::Polygon(VertexList vertices)
 	realize();
 }
 
+Polygon::Polygon(const ConfigNode& node)
+{
+	if (node.getType() == ConfigNodeType::Sequence) {
+		vertices.reserve(node.asSequence().size());
+		for (auto& n: node.asSequence()) {
+			vertices.push_back(n.asVector2f());
+		}
+		realize();
+	}
+}
+
 
 //////////////////////////////////////////////
 // Realize that the polygon has changed shape
@@ -472,19 +483,17 @@ bool Polygon::operator!=(const Polygon& other) const
 	return vertices != other.vertices;
 }
 
+ConfigNode Polygon::toConfigNode() const
+{
+	return ConfigNode(getVertices());
+}
+
 ConfigNode ConfigNodeSerializer<Polygon>::serialize(const Polygon& polygon, const ConfigNodeSerializationContext&)
 {
-	return ConfigNode(polygon.getVertices());
+	return polygon.toConfigNode();
 }
 
 Polygon ConfigNodeSerializer<Polygon>::deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node) 
 {
-	VertexList list;
-	if (node.getType() == ConfigNodeType::Sequence) {
-		list.reserve(node.asSequence().size());
-		for (auto& n: node.asSequence()) {
-			list.push_back(n.asVector2f());
-		}
-	}
-	return Polygon(std::move(list));
+	return Polygon(node);
 }
