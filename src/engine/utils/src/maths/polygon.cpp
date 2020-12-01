@@ -393,7 +393,7 @@ void Polygon::doSplitIntoConvex(std::vector<Polygon>& result) const
 
 		const float angle = (c - b).cross(b - a);
 
-		if (angle < 0) {
+		if (angle > 0) {
 			concaveVertices.emplace_back(i);
 			isConcave[i] = true;
 		}
@@ -468,9 +468,9 @@ std::pair<Polygon, Polygon> Polygon::doSplit(size_t v0, size_t v1) const
 	}
 	std::rotate(vs.begin(), vs.begin() + v0, vs.end());
 
-	auto vs0 = VertexList(vertices.begin(), vertices.begin() + (v1 - v0 + 1));
-	auto vs1 = VertexList(vertices.begin() + (v1 - v0), vertices.end());
-	vs1.push_back(vertices.front());
+	auto vs0 = VertexList(vs.begin(), vs.begin() + (v1 - v0 + 1));
+	auto vs1 = VertexList(vs.begin() + (v1 - v0), vs.end());
+	vs1.push_back(vs.front());
 
 	Ensures(!vs0.empty());
 	Ensures(!vs1.empty());
@@ -478,7 +478,12 @@ std::pair<Polygon, Polygon> Polygon::doSplit(size_t v0, size_t v1) const
 	Ensures(vs0.front() == vs1.back());
 	Ensures(vs1.front() == vs0.back());
 
-	return std::pair<Polygon, Polygon>(Polygon(std::move(vs0)), Polygon(std::move(vs1)));
+	auto res = std::pair<Polygon, Polygon>(Polygon(std::move(vs0)), Polygon(std::move(vs1)));
+
+	Ensures(res.first.clockwise == clockwise);
+	Ensures(res.second.clockwise == clockwise);
+
+	return res;
 }
 
 int Polygon::isInsideAngle(Vector2f a, Vector2f b, Vector2f c, Vector2f p, bool clockwise)
@@ -497,7 +502,8 @@ bool Polygon::overlapsEdge(LineSegment segment) const
 	const size_t n = vertices.size();
 	for (size_t i = 0; i < n; ++i) {
 		auto edge = LineSegment(vertices[i], vertices[(i + 1) % n]);
-		if (segment.intersection(edge)) {
+		auto intersection = segment.intersection(edge);
+		if (intersection && (intersection.value() - segment.a).squaredLength() > 0.000001f && (intersection.value() - segment.b).squaredLength() > 0.000001f) {
 			return true;
 		}
 	}
