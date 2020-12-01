@@ -53,27 +53,66 @@ Polygon::Polygon(const ConfigNode& node)
 	}
 }
 
-
-//////////////////////////////////////////////
-// Realize that the polygon has changed shape
 void Polygon::realize()
 {
+	checkConvex();
 	aabb = Rect4f::getSpanningRect(vertices);
 	circle = Circle::getSpanningCircle(vertices);
 }
 
+void Polygon::checkConvex()
+{
+	size_t n = vertices.size();
+	if (n < 3) {
+		convex = true;
+		clockwise = true;
+	}
+	
+	size_t left = 0;
+	size_t right = 0;
+	float area2 = 0;
+	
+	for (size_t i = 0; i < n; ++i) {
+		auto a = vertices[i];
+		auto b = vertices[(i + 1) % n];
+		auto c = vertices[(i + 2) % n];
+		const float cross = (b - a).cross(c - b);
+		if (cross > 0) {
+			right++;
+		} else {
+			left++;
+		}
 
+		area2 += (a.x - b.x) * (a.y + b.y);
+	}
 
-///////////////////////////////////////////////////////
-// Checks if a particular point is inside the polygon
-// Only works for convex polygons
-bool Polygon::isPointInsideConvex(Vector2f point) const
+	// Is convex if all turns were right turns, or all turns were left turns
+	convex = right == 0 || left == 0;
+
+	// Clockwise if the area is positive
+	clockwise = area2 > 0;
+}
+
+bool Polygon::isPointInside(Vector2f point) const
 {
 	// Fast fail
 	if (!circle.contains(point)) {
 		return false;
 	}
+	if (!aabb.contains(point)) {
+		return false;
+	}
 
+	// Check
+	if (convex) {
+		return isPointInsideConvex(point);
+	} else {
+		return isPointInsideConcave(point);
+	}
+}
+
+bool Polygon::isPointInsideConvex(Vector2f point) const
+{
 	// Do cross product with all the segments
 	const size_t len = vertices.size();
 	for (size_t i = 0; i < len; i++) {
@@ -88,16 +127,8 @@ bool Polygon::isPointInsideConvex(Vector2f point) const
 	return true;
 }
 
-bool Polygon::isPointInside(Vector2f point) const
+bool Polygon::isPointInsideConcave(Vector2f point) const
 {
-	// Fast fail
-	if (!circle.contains(point)) {
-		return false;
-	}
-	if (!aabb.contains(point)) {
-		return false;
-	}
-
 	size_t nLeft = 0;
 	size_t nRight = 0;
 	const size_t len = vertices.size();
@@ -307,7 +338,7 @@ void Polygon::rotate(Angle<float> angle)
 }
 
 
-void Halley::Polygon::rotateAndScale(Angle<float> angle, Vector2f scale)
+void Polygon::rotateAndScale(Angle<float> angle, Vector2f scale)
 {
 	size_t len = vertices.size();
 	for (size_t i=0;i<len;i++) {
@@ -316,8 +347,15 @@ void Halley::Polygon::rotateAndScale(Angle<float> angle, Vector2f scale)
 	realize();
 }
 
+std::vector<Polygon> Polygon::splitIntoConvex() const
+{
+	std::vector<Polygon> result;
+	// TODO
+	
+	return result;
+}
 
-Halley::Polygon Polygon::makePolygon(Vector2f origin, float w, float h)
+Polygon Polygon::makePolygon(Vector2f origin, float w, float h)
 {
 	const float x = origin.x;
 	const float y = origin.y;
@@ -326,15 +364,7 @@ Halley::Polygon Polygon::makePolygon(Vector2f origin, float w, float h)
 	list.push_back(Vertex(x+w, y));
 	list.push_back(Vertex(x+w, y+h));
 	list.push_back(Vertex(x, y+h));
-	return Halley::Polygon(list);
-}
-
-
-bool Polygon::isClockwise() const
-{
-	if (vertices.size() < 3) return true;
-
-	return ((vertices[1]-vertices[0]).cross(vertices[2]-vertices[1]) > 0);
+	return Polygon(list);
 }
 
 void Polygon::setVertices(const VertexList& _vertices)

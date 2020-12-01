@@ -53,7 +53,6 @@ namespace Halley {
 
 		static Polygon makePolygon(Vector2f origin, float w, float h);
 
-		bool isPointInsideConvex(Vector2f point) const;
 		bool isPointInside(Vector2f point) const;
 		bool overlaps(const Polygon &param, Vector2f *translation= nullptr, Vector2f *collisionPoint= nullptr) const;
 		Vector2f getClosestPoint(Vector2f p, float anisotropy = 1.0f) const; // All Y coordinates are multiplied by anisotropy
@@ -63,7 +62,10 @@ namespace Halley {
 		
 		void rotate(Angle<float> angle);
 		void rotateAndScale(Angle<float> angle, Vector2f scale);
-		bool isClockwise() const;
+		bool isConvex() const { return convex; }
+		bool isClockwise() const { return clockwise; }
+
+		std::vector<Polygon> splitIntoConvex() const;
 
 		const Rect4f& getAABB() const { return aabb; }
 		const Circle& getBoundingCircle() const { return circle; }
@@ -84,10 +86,16 @@ namespace Halley {
 		Circle circle;
 		VertexList vertices;
 		Rect4f aabb;
+		bool convex = false;
+		bool clockwise = false;
+
+		bool isPointInsideConvex(Vector2f point) const;
+		bool isPointInsideConcave(Vector2f point) const;
 
 		void project(const Vector2f &axis,float &min,float &max) const;
 		void unproject(const Vector2f &axis,const float point,Vector<Vector2f> &ver) const;
 		void realize();
+		void checkConvex();
 	};
 
 	template<>
