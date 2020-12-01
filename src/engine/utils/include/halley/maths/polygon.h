@@ -102,7 +102,7 @@ namespace Halley {
 		void doSplitIntoConvex(std::vector<Polygon>& result) const;
 
 		// Split by inserting a new edge between v0 and v1
-		void doSplit(std::vector<Polygon>& result, size_t v0, size_t v1) const;
+		std::pair<Polygon, Polygon> doSplit(size_t v0, size_t v1) const;
 
 		// Angle is ABC (B in the middle). Checks against semi-planes defined by AB and BC
 		// Returns:

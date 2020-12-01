@@ -454,16 +454,31 @@ void Polygon::doSplitIntoConvex(std::vector<Polygon>& result) const
 
 	assert(bestSplit.first != bestSplit.second);
 
-	std::vector<Polygon> tmp;
-	doSplit(tmp, bestSplit.first, bestSplit.second);
-	for (auto& splitPoly: tmp) {
-		splitPoly.doSplitIntoConvex(result);
-	}
+	// Split and recurse
+	auto [poly0, poly1] = doSplit(bestSplit.first, bestSplit.second);
+	poly0.doSplitIntoConvex(result);
+	poly1.doSplitIntoConvex(result);
 }
 
-void Polygon::doSplit(std::vector<Polygon>& result, size_t v0, size_t v1) const
+std::pair<Polygon, Polygon> Polygon::doSplit(size_t v0, size_t v1) const
 {
-	// TODO
+	auto vs = vertices;
+	if (v0 > v1) {
+		return doSplit(v1, v0);
+	}
+	std::rotate(vs.begin(), vs.begin() + v0, vs.end());
+
+	auto vs0 = VertexList(vertices.begin(), vertices.begin() + (v1 - v0 + 1));
+	auto vs1 = VertexList(vertices.begin() + (v1 - v0), vertices.end());
+	vs1.push_back(vertices.front());
+
+	Ensures(!vs0.empty());
+	Ensures(!vs1.empty());
+	Ensures(vs0.size() + vs1.size() == vertices.size() + 2);
+	Ensures(vs0.front() == vs1.back());
+	Ensures(vs1.front() == vs0.back());
+
+	return std::pair<Polygon, Polygon>(Polygon(std::move(vs0)), Polygon(std::move(vs1)));
 }
 
 int Polygon::isInsideAngle(Vector2f a, Vector2f b, Vector2f c, Vector2f p, bool clockwise)
