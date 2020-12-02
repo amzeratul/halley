@@ -393,20 +393,71 @@ void Polygon::unproject(const Vector2f &axis,const float point,Vector<Vector2f> 
 
 void Polygon::rotate(Angle<float> angle)
 {
-	const size_t len = vertices.size();
-	for (size_t i=0;i<len;i++) {
-		vertices[i] = vertices[i].rotate(angle);
+	for (auto& v: vertices) {
+		v = v.rotate(angle);
 	}
 	realize();
 }
 
 void Polygon::rotateAndScale(Angle<float> angle, Vector2f scale)
 {
-	const size_t len = vertices.size();
-	for (size_t i=0;i<len;i++) {
-		vertices[i] = (vertices[i] * scale).rotate(angle);
+	for (auto& v: vertices) {
+		v = (v * scale).rotate(angle);
 	}
 	realize();
+}
+
+void Polygon::scale(Vector2f scale)
+{
+	for (auto& v: vertices) {
+		v *= scale;
+	}
+	realize();
+}
+
+void Polygon::expand(float amount, float truncateThreshold)
+{
+	Expects(convex);
+	
+	const float windingDir = clockwise ? -1.0f : 1.0f;
+
+	const size_t numVertices = vertices.size();
+	VertexList newVertices;
+	
+	for (size_t i = 0; i < numVertices; ++i) {
+		const Vector2f prev = vertices[(i + numVertices - 1) % numVertices];
+		const Vector2f cur = vertices[i];
+		const Vector2f next = vertices[(i + 1) % numVertices];
+
+		const Vector2f m = (cur - prev).normalized();
+		const Vector2f n = (next - cur).normalized();
+		const Vector2f u = m.orthoLeft() * windingDir;
+		const Vector2f v = n.orthoLeft() * windingDir;
+
+		auto lineA = Line(cur + u * amount, m);
+		auto lineB = Line(cur + v * amount, n);
+
+		if (std::abs(u.dot(v)) >= 0.999999f) {
+			// Parallel
+			newVertices.push_back(cur + u * amount);
+		} else {
+			const Vector2f newVertexPos = lineA.intersection(lineB).value();
+			const Vector2f w = (u + v).normalized();
+			const Vector2f idealVert = cur + w * amount;
+			
+			if ((newVertexPos - idealVert).length() > truncateThreshold) {
+				// Truncate this vertex
+				auto lineC = Line(idealVert, w.orthoRight());
+				newVertices.push_back(lineA.intersection(lineC).value());
+				newVertices.push_back(lineB.intersection(lineC).value());
+			} else {
+				// OK to go as a single vertex
+				newVertices.push_back(newVertexPos);
+			}
+		}
+	}
+
+	setVertices(std::move(newVertices));
 }
 
 std::vector<Polygon> Polygon::splitIntoConvex() const
@@ -625,9 +676,9 @@ Polygon Polygon::makePolygon(Vector2f origin, float w, float h)
 	return Polygon(list);
 }
 
-void Polygon::setVertices(const VertexList& _vertices)
+void Polygon::setVertices(VertexList _vertices)
 {
-	vertices = _vertices;
+	vertices = std::move(_vertices);
 	realize();
 }
 

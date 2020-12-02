@@ -66,11 +66,14 @@ namespace Halley {
 		Vector2f getClosestPoint(Vector2f p, float anisotropy = 1.0f) const; // All Y coordinates are multiplied by anisotropy
 		SATClassification classify(const Polygon& other) const;
 
-		void setVertices(const VertexList& vertices);
+		void setVertices(VertexList vertices);
 		const VertexList& getVertices() const { return vertices; }
 		
 		void rotate(Angle<float> angle);
 		void rotateAndScale(Angle<float> angle, Vector2f scale);
+		void scale(Vector2f scale);
+		void expand(float amount, float truncateThreshold = 0.0f);
+		
 		bool isConvex() const { return convex; }
 		bool isClockwise() const { return clockwise; }
 		bool isValid() const { return valid; }
