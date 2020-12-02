@@ -58,6 +58,8 @@ void Polygon::realize()
 	checkConvex();
 	aabb = Rect4f::getSpanningRect(vertices);
 	circle = Circle::getSpanningCircle(vertices);
+
+	valid = vertices.size() >= 3 && std::abs((vertices[1] - vertices[0]).cross(vertices[2] - vertices[1])) > 0.00001f;
 }
 
 void Polygon::checkConvex()
@@ -410,16 +412,16 @@ void Polygon::rotateAndScale(Angle<float> angle, Vector2f scale)
 std::vector<Polygon> Polygon::splitIntoConvex() const
 {
 	std::vector<Polygon> result;
-	doSplitIntoConvex(result);
+	splitIntoConvex(result);
 	return result;
 }
 
-void Polygon::doSplitIntoConvex(std::vector<Polygon>& result) const
+void Polygon::splitIntoConvex(std::vector<Polygon>& output) const
 {
-	Expects(clockwise);
-
+	Expects(isValid());
+	
 	if (isConvex()) {
-		result.push_back(*this);
+		output.push_back(*this);
 		return;
 	}
 
@@ -448,6 +450,7 @@ void Polygon::doSplitIntoConvex(std::vector<Polygon>& result) const
 	// 4. Split on that edge, recurse on the two new polygons
 
 	// Collect all concave angles
+	const float angleSign = clockwise ? 1.0f : -1.0f;
 	std::vector<size_t> concaveVertices;
 	const size_t n = vertices.size();
 	std::vector<char> isConcave(n, false);
@@ -456,7 +459,7 @@ void Polygon::doSplitIntoConvex(std::vector<Polygon>& result) const
 		const auto b = vertices[i];
 		const auto c = vertices[(i + 1) % n];
 
-		const float angle = (c - b).cross(b - a);
+		const float angle = (c - b).cross(b - a) * angleSign;
 
 		if (angle > 0) {
 			concaveVertices.emplace_back(i);
@@ -521,8 +524,8 @@ void Polygon::doSplitIntoConvex(std::vector<Polygon>& result) const
 
 	// Split and recurse
 	auto [poly0, poly1] = doSplit(bestSplit.first, bestSplit.second);
-	poly0.doSplitIntoConvex(result);
-	poly1.doSplitIntoConvex(result);
+	poly0.splitIntoConvex(output);
+	poly1.splitIntoConvex(output);
 }
 
 std::pair<Polygon, Polygon> Polygon::doSplit(size_t v0, size_t v1) const
@@ -577,6 +580,13 @@ bool Polygon::overlapsEdge(LineSegment segment) const
 
 std::optional<std::vector<Polygon>> Polygon::subtract(const Polygon& other) const
 {
+	if (!convex) {
+		throw Exception("Error on polygon subtraction: subtrahend is not convex.", HalleyExceptions::Utils);
+	}
+	if (!other.convex) {
+		throw Exception("Error on polygon subtraction: minuend is not convex.", HalleyExceptions::Utils);
+	}
+	
 	switch (classify(other)) {
 	case SATClassification::Separate:
 		return {};

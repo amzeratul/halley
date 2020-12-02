@@ -73,8 +73,10 @@ namespace Halley {
 		void rotateAndScale(Angle<float> angle, Vector2f scale);
 		bool isConvex() const { return convex; }
 		bool isClockwise() const { return clockwise; }
+		bool isValid() const { return valid; }
 
 		std::vector<Polygon> splitIntoConvex() const;
+		void splitIntoConvex(std::vector<Polygon>& output) const;
 		std::optional<std::vector<Polygon>> subtract(const Polygon& other) const;
 
 		const Rect4f& getAABB() const { return aabb; }
@@ -98,6 +100,7 @@ namespace Halley {
 		Rect4f aabb;
 		bool convex = false;
 		bool clockwise = false;
+		bool valid = false;
 
 		bool isPointInsideConvex(Vector2f point) const;
 		bool isPointInsideConcave(Vector2f point) const;
@@ -110,9 +113,6 @@ namespace Halley {
 		void unproject(const Vector2f &axis,const float point,Vector<Vector2f> &ver) const;
 		void realize();
 		void checkConvex();
-
-		// Split into as many convex polygons as needed
-		void doSplitIntoConvex(std::vector<Polygon>& result) const;
 
 		// Split by inserting a new edge between v0 and v1
 		std::pair<Polygon, Polygon> doSplit(size_t v0, size_t v1) const;
