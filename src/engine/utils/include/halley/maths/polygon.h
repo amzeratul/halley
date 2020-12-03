@@ -26,6 +26,7 @@
 #include "vector2.h"
 #include "rect.h"
 #include "circle.h"
+#include "line.h"
 #include "halley/bytes/config_node_serializer_base.h"
 
 namespace Halley {
@@ -87,6 +88,7 @@ namespace Halley {
 
 		const Rect4f& getAABB() const { return aabb; }
 		const Circle& getBoundingCircle() const { return circle; }
+		Vector2f getCentre() const;
 
 		void translate(Vector2f offset);
 
@@ -94,6 +96,8 @@ namespace Halley {
 		// Only returns a value if a collision is found between start pos and up to move len away
 		CollisionResult getCollisionWithSweepingCircle(Vector2f circlePos, float radius, Vector2f moveDir, float moveLen) const;
 		CollisionResult getCollisionWithSweepingEllipse(Vector2f circlePos, Vector2f radius, Vector2f moveDir, float moveLen) const;
+
+		float getDistanceTo(const Line& line) const;
 
 		bool operator==(const Polygon& other) const;
 		bool operator!=(const Polygon& other) const;
@@ -121,7 +125,7 @@ namespace Halley {
 		void checkConvex();
 
 		// Split by inserting a new edge between v0 and v1
-		std::pair<Polygon, Polygon> doSplit(size_t v0, size_t v1) const;
+		std::pair<Polygon, Polygon> doSplit(size_t v0, size_t v1, gsl::span<const Vector2f> insertVertices) const;
 
 		// Angle is ABC (B in the middle). Checks against semi-planes defined by AB and BC
 		// Returns:

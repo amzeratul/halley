@@ -637,28 +637,48 @@ void Polygon::splitIntoConvex(std::vector<Polygon>& output) const
 	assert(bestSplit.first != bestSplit.second);
 
 	// Split and recurse
-	auto [poly0, poly1] = doSplit(bestSplit.first, bestSplit.second);
+	auto [poly0, poly1] = doSplit(bestSplit.first, bestSplit.second, {});
 	poly0.splitIntoConvex(output);
 	poly1.splitIntoConvex(output);
 }
 
-std::pair<Polygon, Polygon> Polygon::doSplit(size_t v0, size_t v1) const
+std::pair<Polygon, Polygon> Polygon::doSplit(size_t v0, size_t v1, gsl::span<const Vector2f> insertVertices) const
 {
-	auto vs = vertices;
 	if (v0 > v1) {
-		return doSplit(v1, v0);
+		std::vector<Vector2f> inserts(insertVertices.begin(), insertVertices.end());
+		std::reverse(inserts.begin(), inserts.end());
+		return doSplit(v1, v0, inserts);
 	}
-	std::rotate(vs.begin(), vs.begin() + v0, vs.end());
 
-	auto vs0 = VertexList(vs.begin(), vs.begin() + (v1 - v0 + 1));
-	auto vs1 = VertexList(vs.begin() + (v1 - v0), vs.end());
-	vs1.push_back(vs.front());
+	Expects(v1 - v0 > 1);
+
+	//auto vs = vertices;
+	//std::rotate(vs.begin(), vs.begin() + v0, vs.end());
+	//auto vs0 = VertexList(vs.begin(), vs.begin() + (v1 - v0 + 1));
+	//auto vs1 = VertexList(vs.begin() + (v1 - v0), vs.end());
+	//vs1.push_back(vs.front());
+
+	const size_t n = vertices.size();
+	VertexList vs0;
+	for (size_t i = v0; true; i = (i + 1) % n) {
+		vs0.push_back(vertices[i]);
+		if (i == v1) {
+			vs0.insert(vs0.end(), insertVertices.begin(), insertVertices.end());
+			break;
+		}
+	}
+	VertexList vs1;
+	for (size_t i = v1; true; i = (i + 1) % n) {
+		vs1.push_back(vertices[i]);
+		if (i == v0) {
+			vs1.insert(vs1.end(), insertVertices.rbegin(), insertVertices.rend());
+			break;
+		}
+	}
 
 	Ensures(!vs0.empty());
 	Ensures(!vs1.empty());
-	Ensures(vs0.size() + vs1.size() == vertices.size() + 2);
-	Ensures(vs0.front() == vs1.back());
-	Ensures(vs1.front() == vs0.back());
+	Ensures(vs0.size() + vs1.size() == vertices.size() + (2 * insertVertices.size()) + 2);
 
 	auto res = std::pair<Polygon, Polygon>(Polygon(std::move(vs0)), Polygon(std::move(vs1)));
 
@@ -723,8 +743,62 @@ std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other) const
 
 std::vector<Polygon> Polygon::subtractContained(const Polygon& other) const
 {
-	// TODO
-	return std::vector<Polygon>{{ *this }};
+	// The idea here is to find the chord that gets closest to the other polygon and this polygon in two, then subtract other from both
+	// If the chord goes right through the other polygon, there's nothing else to be done
+	// If, however, it doesn't, then a new vertex has to be inserted into that chord to "bend" it so it goes inside "other"...
+	// ...This means that one of the two halves is now concave, so convert them all to convex, then subtract them.
+	
+	std::pair<size_t, size_t> bestChord = {0, 0};
+	float bestChordDistance = std::numeric_limits<float>::infinity();
+	const size_t n = vertices.size();
+
+	for (size_t i = 0; i < n; ++i) {
+		for (size_t j = i + 2; j < n; ++j) {
+			if (i == 0 && j == n - 1) {
+				continue;
+			}
+
+			const float distance = other.getDistanceTo(Line(vertices[i], (vertices[j] - vertices[i]).normalized()));
+			if (distance < bestChordDistance) {
+				bestChordDistance = distance;
+				bestChord = std::make_pair(i, j);
+			}
+		}
+	}
+
+	assert(bestChord.second > bestChord.first + 1);
+
+	if (bestChordDistance < 0) {
+		// Found a chord that goes right through the polygon, split there
+		std::pair<Polygon, Polygon> polys = doSplit(bestChord.first, bestChord.second, {});
+		std::vector<Polygon> res0 = polys.first.subtract(other).value();
+		std::vector<Polygon> res1 = polys.second.subtract(other).value();
+		for (auto& r: res1) {
+			res0.emplace_back(std::move(r));
+		}
+		return res0;
+	} else {
+		// Split along the chord, but insert an extra vertex
+		Vector2f extraVertex = other.getCentre();
+		std::pair<Polygon, Polygon> polys = doSplit(bestChord.first, bestChord.second, gsl::span<const Vector2f>(&extraVertex, 1));
+		std::vector<Polygon> splitConvexPolys;
+		polys.first.splitIntoConvex(splitConvexPolys);
+		polys.second.splitIntoConvex(splitConvexPolys);
+
+		std::vector<Polygon> result;
+		for (auto& poly: splitConvexPolys) {
+			auto subResult = poly.subtract(other);
+			if (subResult) {
+				for (auto& p: subResult.value()) {
+					result.emplace_back(std::move(p));
+				}
+			} else {
+				result.emplace_back(std::move(poly));
+			}
+		}
+		
+		return result;
+	}
 }
 
 Polygon Polygon::makePolygon(Vector2f origin, float w, float h)
@@ -743,6 +817,11 @@ void Polygon::setVertices(VertexList _vertices)
 {
 	vertices = std::move(_vertices);
 	realize();
+}
+
+Vector2f Polygon::getCentre() const
+{
+	return circle.getCentre();
 }
 
 void Polygon::translate(Vector2f offset)
@@ -873,6 +952,18 @@ Polygon::CollisionResult Polygon::getCollisionWithSweepingEllipse(Vector2f p0, V
 		result.normal = (result.normal * transformation).normalized();
 	}
 	return result;
+}
+
+float Polygon::getDistanceTo(const Line& line) const
+{
+	const auto n = line.dir.orthoRight();
+	const auto p = line.origin.dot(n);
+	const auto range = project(n);
+	if (range.contains(p)) {
+		return -std::min(p - range.start, range.end - p);
+	} else {
+		return std::max(range.start - p, p - range.end);
+	}
 }
 
 bool Polygon::operator==(const Polygon& other) const
