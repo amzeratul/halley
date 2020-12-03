@@ -115,8 +115,6 @@ namespace Halley {
 		bool isPointInsideConvex(Vector2f point) const;
 		bool isPointInsideConcave(Vector2f point) const;
 
-		SATClassification doClassify(const Polygon& other) const;
-
 		bool collideConvex(const Polygon &param, Vector2f *translation= nullptr, Vector2f *collisionPoint= nullptr) const;
 
 		Range<float> project(Vector2f axis) const;

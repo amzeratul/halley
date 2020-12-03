@@ -54,7 +54,7 @@ namespace Halley {
 
 		constexpr bool contains(const Range& p) const
 		{
-			return (start <= p.end) && (end >= p.end);
+			return (start <= p.start) && (end >= p.end);
 		}
 
 		constexpr T getLength() { return end - start; }

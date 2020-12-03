@@ -301,61 +301,42 @@ Vector2f Polygon::getClosestPoint(Vector2f rawPoint, float anisotropy) const
 
 Polygon::SATClassification Polygon::classify(const Polygon& other) const
 {
+	Expects(convex);
+	Expects(other.convex);
+
 	// If bounding circles don't overlap, then the polygons definitely don't overlap
 	const float maxDist = circle.getRadius() + other.circle.getRadius();
 	if ((circle.getCentre() - other.circle.getCentre()).squaredLength() >= maxDist * maxDist) {
 		return SATClassification::Separate;
 	}
 	
-	const auto result = doClassify(other);
-	if (result == SATClassification::Separate) {
-		// Separation can be confirmed with just one
-		return result;
-	}
-
-	// Any other result needs to be confirmed by the other
-	const auto otherResult = other.doClassify(*this);
-	if (otherResult == SATClassification::Separate || otherResult == SATClassification::Overlap) {
-		return otherResult;
-	}
-
-	// Special results
-	if ((result == SATClassification::Contains && otherResult == SATClassification::IsContainedBy)
-		|| (result == SATClassification::IsContainedBy && otherResult == SATClassification::Contains)) {
-		return result;
-	}
-
-	return result;
-}
-
-Polygon::SATClassification Polygon::doClassify(const Polygon& other) const
-{
-	Expects(convex);
-	Expects(other.convex);
-	
-	// For each edge
-	const size_t n = vertices.size();
 	bool contains = true;
 	bool isContainedBy = true;
-	
-	for (size_t i = 0; i < n; i++) {
-		// Find the orthonormal axis
-		const Vector2f axis = (vertices[(i + 1) % n] - vertices[i]).orthoLeft().unit();
 
-		// Project both polygons there
-		const auto myRange = project(axis);
-		const auto otherRange = other.project(axis);
+	// For each polygon
+	for (size_t j = 0; j < 2; ++j) {
+		const auto& vs = j == 0 ? vertices : other.vertices;
+		const size_t n = vs.size();
+		// For each edge
+		for (size_t i = 0; i < n; i++) {
+			// Find the orthonormal axis
+			const Vector2f axis = (vs[(i + 1) % n] - vs[i]).orthoLeft().unit();
 
-		if (myRange.overlaps(otherRange)) {
-			if (!myRange.contains(otherRange)) {
-				contains = false;
+			// Project both polygons there
+			const auto myRange = project(axis);
+			const auto otherRange = other.project(axis);
+
+			if (myRange.overlaps(otherRange)) {
+				if (!myRange.contains(otherRange)) {
+					contains = false;
+				}
+				if (!otherRange.contains(myRange)) {
+					isContainedBy = false;
+				}
+			} else {
+				// This axis separates them
+				return SATClassification::Separate;
 			}
-			if (!otherRange.contains(myRange)) {
-				isContainedBy = false;
-			}
-		} else {
-			// This axis separates them
-			return SATClassification::Separate;
 		}
 	}
 
@@ -367,8 +348,7 @@ Polygon::SATClassification Polygon::doClassify(const Polygon& other) const
 		return SATClassification::IsContainedBy;
 	}
 	
-	// At this point, from this point of view it's overlapping
-	// HOWEVER, it can still be separated by the other side, which we'll check separately
+	// They overlap without fully containing each other
 	return SATClassification::Overlap;
 }
 
@@ -650,7 +630,7 @@ std::pair<Polygon, Polygon> Polygon::doSplit(size_t v0, size_t v1, gsl::span<con
 		return doSplit(v1, v0, inserts);
 	}
 
-	Expects(v1 - v0 > 1);
+	Expects(!insertVertices.empty() || v1 - v0 > 1);
 
 	//auto vs = vertices;
 	//std::rotate(vs.begin(), vs.begin() + v0, vs.end());
@@ -753,11 +733,7 @@ std::vector<Polygon> Polygon::subtractContained(const Polygon& other) const
 	const size_t n = vertices.size();
 
 	for (size_t i = 0; i < n; ++i) {
-		for (size_t j = i + 2; j < n; ++j) {
-			if (i == 0 && j == n - 1) {
-				continue;
-			}
-
+		for (size_t j = i + 1; j < n; ++j) {
 			const float distance = other.getDistanceTo(Line(vertices[i], (vertices[j] - vertices[i]).normalized()));
 			if (distance < bestChordDistance) {
 				bestChordDistance = distance;
@@ -766,7 +742,7 @@ std::vector<Polygon> Polygon::subtractContained(const Polygon& other) const
 		}
 	}
 
-	assert(bestChord.second > bestChord.first + 1);
+	assert(bestChord.second != bestChord.first);
 
 	if (bestChordDistance < 0) {
 		// Found a chord that goes right through the polygon, split there
