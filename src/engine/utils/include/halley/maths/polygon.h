@@ -73,6 +73,9 @@ namespace Halley {
 		void rotateAndScale(Angle<float> angle, Vector2f scale);
 		void scale(Vector2f scale);
 		void expand(float amount, float truncateThreshold = 0.0f);
+		void invertWinding();
+
+		Polygon convolution(const Polygon& other) const;
 		
 		bool isConvex() const { return convex; }
 		bool isClockwise() const { return clockwise; }

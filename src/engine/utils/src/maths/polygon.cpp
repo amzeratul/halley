@@ -301,6 +301,12 @@ Vector2f Polygon::getClosestPoint(Vector2f rawPoint, float anisotropy) const
 
 Polygon::SATClassification Polygon::classify(const Polygon& other) const
 {
+	// If bounding circles don't overlap, then the polygons definitely don't overlap
+	const float maxDist = circle.getRadius() + other.circle.getRadius();
+	if ((circle.getCentre() - other.circle.getCentre()).squaredLength() >= maxDist * maxDist) {
+		return SATClassification::Separate;
+	}
+	
 	const auto result = doClassify(other);
 	if (result == SATClassification::Separate) {
 		// Separation can be confirmed with just one
@@ -458,6 +464,63 @@ void Polygon::expand(float amount, float truncateThreshold)
 	}
 
 	setVertices(std::move(newVertices));
+}
+
+void Polygon::invertWinding()
+{
+	std::reverse(vertices.begin(), vertices.end());
+	realize();
+}
+
+Polygon Polygon::convolution(const Polygon& other) const
+{
+	Expects(clockwise == other.clockwise);
+	
+	VertexList result;
+
+	// For each vertex, find the "other" polygon vertex that matches the direction we're moving, and use it
+	// Insert any "skipped" vertices
+	const auto findVertex = [&] (const Vector2f dir) -> size_t
+	{
+		const auto& vs = other.vertices;
+		const auto n = dir.orthoRight();
+		size_t best = 0;
+		float bestVal = -std::numeric_limits<float>::infinity();
+		for (size_t i = 0; i < vs.size(); ++i) {
+			const float val = vs[i].dot(n);
+			if (val > bestVal) {
+				bestVal = val;
+				best = i;
+			}
+		}
+		return best;
+	};
+
+	const auto n = vertices.size();
+	const auto nConv = other.vertices.size();
+
+	const Vector2f lastDir = (vertices.front() - vertices.back()).normalized();
+	size_t lastVertex = findVertex(lastDir);
+	const auto insertVertex = [&] (Vector2f base, size_t idx)
+	{
+		for (size_t i = lastVertex; ; i = (i + 1) % nConv) {
+			result.push_back(base + other.vertices[i]);
+			if (i == idx) {
+				lastVertex = idx;
+				break;
+			}
+		}
+	};
+	
+	for (size_t i = 0; i < n; ++i) {
+		const auto cur = vertices[i];
+		const auto next = vertices[(i + 1) % n];
+		const auto dir = (next - cur).normalized();
+
+		insertVertex(cur, findVertex(dir));
+	}
+
+	return Polygon(result);
 }
 
 std::vector<Polygon> Polygon::splitIntoConvex() const
