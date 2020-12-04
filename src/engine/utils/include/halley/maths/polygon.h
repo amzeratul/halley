@@ -87,6 +87,7 @@ namespace Halley {
 		std::vector<Polygon> splitIntoConvex() const;
 		void splitIntoConvex(std::vector<Polygon>& output) const;
 		std::optional<std::vector<Polygon>> subtract(const Polygon& other) const;
+		void simplify(float epsilon = 0.0001f);
 
 		const Rect4f& getAABB() const { return aabb; }
 		const Circle& getBoundingCircle() const { return circle; }

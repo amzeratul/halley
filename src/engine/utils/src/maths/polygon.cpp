@@ -60,7 +60,7 @@ void Polygon::realize()
 	aabb = Rect4f::getSpanningRect(vertices);
 	circle = Circle::getSpanningCircle(vertices);
 
-	valid = vertices.size() >= 3 && std::abs((vertices[1] - vertices[0]).cross(vertices[2] - vertices[1])) > 0.00001f;
+	valid = vertices.size() >= 3;
 }
 
 void Polygon::checkConvex()
@@ -110,6 +110,35 @@ void Polygon::checkConvex()
 
 	// Clockwise if the area is positive
 	clockwise = area2 > 0;
+}
+
+void Polygon::simplify(float epsilon)
+{
+	if (vertices.size() <= 3) {
+		return;
+	}
+
+	bool changed = false;
+	
+	size_t n = vertices.size();
+	Vector2f prev = vertices.back();
+	for (size_t i = 0; i < n && n > 3;) {
+		const Vector2f cur = vertices[i];
+		const Vector2f next = vertices[(i + 1) % n];
+
+		if (cur.epsilonEquals(prev, epsilon) || LineSegment(prev, next).contains(cur, epsilon)) {
+			vertices.erase(vertices.begin() + i);
+			--n;
+			changed = true;
+		} else {
+			prev = cur;
+			++i;
+		}
+	}
+
+	if (changed) {
+		realize();
+	}
 }
 
 bool Polygon::isPointInside(Vector2f point) const
@@ -602,7 +631,7 @@ void Polygon::splitIntoConvex(std::vector<Polygon>& output) const
 		
 		for (size_t j = 0; j < n; ++j) {
 			// Cannot be the same or adjacent
-			if (std::abs(static_cast<int>(i) - static_cast<int>(j)) <= 1) {
+			if (std::abs(static_cast<int>(i) - static_cast<int>(j)) <= 1 || (std::min(i, j) == 0 && std::max(i, j) == n -1)) {
 				continue;
 			}
 
@@ -644,7 +673,17 @@ void Polygon::splitIntoConvex(std::vector<Polygon>& output) const
 		}
 	}
 
+	if (bestSplit.first == bestSplit.second) {
+		int a = 0;
+	}
+
+	if (bestSplit.first > bestSplit.second) {
+		std::swap(bestSplit.first, bestSplit.second);
+	}
+
 	assert(bestSplit.first != bestSplit.second);
+	assert(bestSplit.second > bestSplit.first + 1);
+	assert(bestSplit.first != 0 || bestSplit.second != vertices.size() - 1);
 
 	// Split and recurse
 	auto [poly0, poly1] = doSplit(bestSplit.first, bestSplit.second, {});
@@ -691,11 +730,11 @@ std::pair<Polygon, Polygon> Polygon::doSplit(size_t v0, size_t v1, gsl::span<con
 	Ensures(vs0.size() + vs1.size() == vertices.size() + (2 * insertVertices.size()) + 2);
 
 	auto res = std::pair<Polygon, Polygon>(Polygon(std::move(vs0)), Polygon(std::move(vs1)));
+	res.first.simplify();
+	res.second.simplify();
 
-	if (res.first.clockwise != clockwise) {
-		res.first.realize();
-	}
-	
+	Ensures(res.first.valid);
+	Ensures(res.second.valid);
 	Ensures(res.first.clockwise == clockwise);
 	Ensures(res.second.clockwise == clockwise);
 
@@ -717,9 +756,9 @@ bool Polygon::overlapsEdge(LineSegment segment) const
 {
 	const size_t n = vertices.size();
 	for (size_t i = 0; i < n; ++i) {
-		auto edge = LineSegment(vertices[i], vertices[(i + 1) % n]);
-		auto intersection = segment.intersection(edge);
-		if (intersection && (intersection.value() - segment.a).squaredLength() > 0.000001f && (intersection.value() - segment.b).squaredLength() > 0.000001f) {
+		const auto edge = LineSegment(vertices[i], vertices[(i + 1) % n]);
+		const auto intersection = segment.intersection(edge);
+		if (intersection && !segment.sharesVertexWith(edge)) {
 			return true;
 		}
 	}
@@ -783,8 +822,21 @@ std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other, bool for
 		}
 	}
 
-	// Find intersections and cross-reference them
+	// Find common vertices
 	size_t crossings = 0;
+	for (size_t i = 0; i < polyA.size(); ++i) {
+		Vector2f a = polyA[i].pos;
+		for (size_t j = 0; j < polyB.size(); ++j) {
+			Vector2f b = polyB[j].pos;
+			if (a.epsilonEquals(b, 0.00001f)) {
+				polyA[i].crossIdx = polyB[j].origId;
+				polyB[j].crossIdx = polyA[i].origId;
+				++crossings;
+			}
+		}
+	}
+
+	// Find intersections and cross-reference them
 	for (size_t i = 0; i < polyA.size();) {
 		bool inserted = false;
 		
@@ -817,8 +869,10 @@ std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other, bool for
 		}
 	}
 
-	assert(crossings > 0);
-	assert(crossings % 2 == 0);
+	//assert(crossings >= 2);
+	if (crossings < 2) {
+		return std::vector<Polygon>();
+	}
 
 	// Re-map the cross references and determine if outside the other
 	const float epsilon = 0.001f;
