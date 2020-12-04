@@ -27,6 +27,7 @@
 #include "halley/maths/ray.h"
 #include "halley/maths/circle.h"
 #include "halley/maths/line.h"
+#include "halley/utils/algorithm.h"
 using namespace Halley;
 
 
@@ -111,6 +112,19 @@ bool Polygon::isPointInside(Vector2f point) const
 	} else {
 		return isPointInsideConcave(point);
 	}
+}
+
+bool Polygon::isPointOnEdge(Vector2f point, float epsilon) const
+{
+	const size_t n = vertices.size();
+	for (size_t i = 0; i < n; ++i) {
+		const auto edge = LineSegment(vertices[i], vertices[(i + 1) % n]);
+		auto p2 = edge.getClosestPoint(point);
+		if ((p2 - point).squaredLength() < epsilon * epsilon) {
+			return true;
+		}
+	}
+	return false;
 }
 
 bool Polygon::isPointInsideConvex(Vector2f point) const
@@ -717,7 +731,83 @@ std::optional<std::vector<Polygon>> Polygon::subtract(const Polygon& other) cons
 
 std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other) const
 {
-	// TODO
+	// Based on the paper "Polygon Subtraction in Two or Three Dimensions" by JE Wilson, October 2013
+	
+	struct VertexInfo {
+		Vector2f pos;
+		int origId;
+		int crossIdx = -1;
+		bool processed = false;
+		bool outside = false;
+
+		VertexInfo() = default;
+		VertexInfo(Vector2f pos, int origId, int crossIdx = -1) : pos(pos), origId(origId), crossIdx(crossIdx) {}
+	};
+
+	std::vector<VertexInfo> polyA;
+	std::vector<VertexInfo> polyB;
+
+	// Start by filling the data for both polygons
+	{
+		int i = 0;
+		for (auto v: vertices) {
+			polyA.emplace_back(v, i++);
+		}
+	}
+	{
+		int i = 0;
+		for (auto v: other.vertices) {
+			polyB.emplace_back(v, i++);
+		}
+	}
+
+	// Find intersections and cross-reference them
+	for (size_t i = 0; i < polyA.size();) {
+		bool inserted = false;
+		
+		Vector2f a = polyA[i].pos;
+		Vector2f b = polyA[(i + 1) % polyA.size()].pos;
+		LineSegment segmentA(a, b);
+		for (size_t j = 0; j < polyB.size(); ++j) {
+			Vector2f c = polyB[j].pos;
+			Vector2f d = polyB[(j + 1) % polyB.size()].pos;
+			LineSegment segmentB(c, d);
+
+			if (!segmentA.sharesVertexWith(segmentB)) {
+				const auto intersection = segmentA.intersection(segmentB);
+				if (intersection) {
+					const int idA = static_cast<int>(polyA.size());
+					const int idB = static_cast<int>(polyB.size());
+					polyA.insert(polyA.begin() + i + 1, VertexInfo(intersection.value(), idA, idB));
+					polyB.insert(polyB.begin() + j + 1, VertexInfo(intersection.value(), idB, idA));
+					inserted = true;
+					break;
+				}
+			}
+		}
+
+		if (!inserted) {
+			 ++i;
+		}
+	}
+
+	// Re-map the cross references and determine if outside the other
+	const float epsilon = 0.001f;
+	for (auto& v: polyA) {
+		if (v.crossIdx != -1) {
+			const auto iter = std::find_if(polyB.begin(), polyB.end(), [&] (const VertexInfo& o) { return o.origId == v.crossIdx; });
+			v.crossIdx = static_cast<int>(iter - polyB.begin());
+		}
+		v.outside = !other.isPointInside(v.pos) && !other.isPointOnEdge(v.pos, epsilon);
+	}
+	for (auto& v: polyB) {
+		if (v.crossIdx != -1) {
+			const auto iter = std::find_if(polyA.begin(), polyA.end(), [&] (const VertexInfo& o) { return o.origId == v.crossIdx; });
+			v.crossIdx = static_cast<int>(iter - polyA.begin());
+		}
+		v.outside = !isPointInside(v.pos) && !isPointOnEdge(v.pos, epsilon);
+	}
+
 	return std::vector<Polygon>{{ *this }};
 }
 

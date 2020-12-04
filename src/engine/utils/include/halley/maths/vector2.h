@@ -204,6 +204,12 @@ namespace Halley {
 			return !std::isnan(x) && !std::isnan(y) && !std::isinf(x) && !std::isinf(y);
 		}
 
+		bool epsilonEquals(Vector2D other, float epsilon) const
+		{
+			return std::abs(x - other.x) < epsilon
+				&& std::abs(y - other.y) < epsilon;
+		}
+
 		constexpr static Vector2D<T,U> min(Vector2D<T,U> a, Vector2D<T,U> b)
 		{
 			return Vector2D<T,U>(std::min(a.x, b.x), std::min(a.y, b.y));
