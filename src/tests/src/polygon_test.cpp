@@ -11,4 +11,10 @@ TEST(HalleyPolygon, Subtraction)
     Polygon polyB(std::move(vsB));
 
 	auto result = polyA.subtract(polyB);
+
+	EXPECT_TRUE(result.has_value());
+	EXPECT_EQ(result.value().size(), 3);
+	for (size_t i = 0; i < 3; ++i) {
+		EXPECT_TRUE(result.value()[i].isConvex());
+	}
 }

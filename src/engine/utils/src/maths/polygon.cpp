@@ -733,6 +733,8 @@ std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other) const
 {
 	// Based on the paper "Polygon Subtraction in Two or Three Dimensions" by JE Wilson, October 2013
 	
+	Expects(other.convex); // This method can accept concave polygons, but it requires an additional step outlined in the paper (insert a midpoint in "isolated" edges)
+	
 	struct VertexInfo {
 		Vector2f pos;
 		int origId;
@@ -808,7 +810,56 @@ std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other) const
 		v.outside = !isPointInside(v.pos) && !isPointOnEdge(v.pos, epsilon);
 	}
 
-	return std::vector<Polygon>{{ *this }};
+	auto findFirstUnusedOutsidePoint = [&] (const std::vector<VertexInfo>& vs) -> std::optional<size_t>
+	{
+		const auto iter = std::find_if(vs.begin(), vs.end(), [&] (const VertexInfo& v) { return v.outside && !v.processed; });
+		if (iter == vs.end()) {
+			return {};
+		}
+		return iter - vs.begin();
+	};
+
+	// Run the splitting algorithm
+	const int nextOffset = clockwise == other.clockwise ? -1 : 1;
+	std::vector<Polygon> result;
+
+	while (true) {
+		const auto startPoint = findFirstUnusedOutsidePoint(polyA);
+		if (!startPoint) {
+			// Done!
+			break;
+		}
+
+		std::vector<Vector2f> curOutput;
+
+		for (size_t idxA = startPoint.value(); idxA != startPoint.value() || curOutput.empty(); idxA = (idxA + 1) % polyA.size()) {
+			auto& curVert = polyA[idxA];
+			curVert.processed = true;
+			curOutput.push_back(curVert.pos);
+
+			const bool isCrossingPoint = curVert.crossIdx != -1; // TODO: also check for special case
+
+			if (isCrossingPoint) {
+				size_t idxB = curVert.crossIdx;
+				while (true) {
+					idxB = (idxB + polyB.size() + nextOffset) % polyB.size(); // Increment with bi-directional unsigned wraparound
+					auto& curOtherVert = polyB[idxB];
+					curOutput.push_back(curOtherVert.pos);
+
+					const bool isOtherCrossingPoint = curOtherVert.crossIdx != -1; // TODO: also check for special case
+					if (isOtherCrossingPoint) {
+						idxA = static_cast<size_t>(curOtherVert.crossIdx);
+						break;
+					}
+				}
+			}
+		}
+
+		// Output polygons
+		Polygon(std::move(curOutput)).splitIntoConvex(result);
+	}
+
+	return result;
 }
 
 std::vector<Polygon> Polygon::subtractContained(const Polygon& other) const
