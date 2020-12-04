@@ -83,7 +83,7 @@ namespace Halley {
 			return a + dir * clamp(x, 0.0f, len);
 		}
 
-		std::optional<Vector2f> intersection(const LineSegment& other) const
+		std::optional<Vector2f> intersection(const LineSegment& other, const float epsilon = 0) const
 		{
 			const float len = (this->b - this->a).length();
 			const float otherLen = (other.b - other.a).length();
@@ -98,7 +98,8 @@ namespace Halley {
 			}
 			const float t = (d.x * (a.y - c.y) + d.y * (c.x - a.x)) / divisor;
 			const float u = -(b.x * (c.y - a.y) + b.y * (a.x - c.x)) / divisor;
-			if (t < 0 || t > len || u < 0 || u > otherLen) {
+			
+			if (t < -epsilon || t > len + epsilon || u < -epsilon || u > otherLen + epsilon) {
 				// Out of edges
 				return {};
 			}
@@ -112,6 +113,18 @@ namespace Halley {
 				|| a.epsilonEquals(other.b, epsilon)
 				|| b.epsilonEquals(other.a, epsilon)
 				|| b.epsilonEquals(other.b, epsilon);
+		}
+
+		bool contains(Vector2f point, const float epsilon = 0.001) const
+		{
+			return (getClosestPoint(point) - point).length() < epsilon;
+		}
+
+		bool hasEndpoint(Vector2f point) const
+		{
+			const float epsilon = 0.000001f;
+			return a.epsilonEquals(point, epsilon)
+				|| b.epsilonEquals(point, epsilon);
 		}
 	};
 }

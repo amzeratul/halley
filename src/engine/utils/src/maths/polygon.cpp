@@ -92,6 +92,22 @@ void Polygon::checkConvex()
 	// Is convex if all turns were right turns, or all turns were left turns
 	convex = right == 0 || left == 0;
 
+	// Simple if no self-overlapping
+	simple = true;
+	if (!convex) {
+		for (size_t i = 0; i < n; ++i) {
+			LineSegment a(vertices[i], vertices[(i + 1) % n]);
+
+			for (size_t j = i; j < n - 3; ++j) {
+				LineSegment b(vertices[(i + j + 2) % n], vertices[(i + j + 3) % n]);
+
+				if (a.intersection(b)) {
+					simple = false;
+				}
+			}
+		}
+	}
+
 	// Clockwise if the area is positive
 	clockwise = area2 > 0;
 }
@@ -676,6 +692,10 @@ std::pair<Polygon, Polygon> Polygon::doSplit(size_t v0, size_t v1, gsl::span<con
 
 	auto res = std::pair<Polygon, Polygon>(Polygon(std::move(vs0)), Polygon(std::move(vs1)));
 
+	if (res.first.clockwise != clockwise) {
+		res.first.realize();
+	}
+	
 	Ensures(res.first.clockwise == clockwise);
 	Ensures(res.second.clockwise == clockwise);
 
@@ -719,7 +739,7 @@ std::optional<std::vector<Polygon>> Polygon::subtract(const Polygon& other) cons
 	case SATClassification::Separate:
 		return {};
 	case SATClassification::Overlap:
-		return subtractOverlapping(other);
+		return subtractOverlapping(other, true);
 	case SATClassification::Contains:
 		return subtractContained(other);
 	case SATClassification::IsContainedBy:
@@ -729,7 +749,7 @@ std::optional<std::vector<Polygon>> Polygon::subtract(const Polygon& other) cons
 	throw Exception("Unknown polygon SAT classification", HalleyExceptions::Utils);
 }
 
-std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other) const
+std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other, bool forceConvexOutput) const
 {
 	// Based on the paper "Polygon Subtraction in Two or Three Dimensions" by JE Wilson, October 2013
 	
@@ -764,12 +784,15 @@ std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other) const
 	}
 
 	// Find intersections and cross-reference them
+	size_t crossings = 0;
 	for (size_t i = 0; i < polyA.size();) {
 		bool inserted = false;
 		
 		Vector2f a = polyA[i].pos;
 		Vector2f b = polyA[(i + 1) % polyA.size()].pos;
 		LineSegment segmentA(a, b);
+
+		// Check against the edges of B
 		for (size_t j = 0; j < polyB.size(); ++j) {
 			Vector2f c = polyB[j].pos;
 			Vector2f d = polyB[(j + 1) % polyB.size()].pos;
@@ -782,6 +805,7 @@ std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other) const
 					const int idB = static_cast<int>(polyB.size());
 					polyA.insert(polyA.begin() + i + 1, VertexInfo(intersection.value(), idA, idB));
 					polyB.insert(polyB.begin() + j + 1, VertexInfo(intersection.value(), idB, idA));
+					++crossings;
 					inserted = true;
 					break;
 				}
@@ -792,6 +816,9 @@ std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other) const
 			 ++i;
 		}
 	}
+
+	assert(crossings > 0);
+	assert(crossings % 2 == 0);
 
 	// Re-map the cross references and determine if outside the other
 	const float epsilon = 0.001f;
@@ -856,7 +883,13 @@ std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other) const
 		}
 
 		// Output polygons
-		Polygon(std::move(curOutput)).splitIntoConvex(result);
+		auto poly = Polygon(std::move(curOutput));
+		assert(poly.simple);
+		if (forceConvexOutput) {
+			poly.splitIntoConvex(result);
+		} else {
+			result.emplace_back(std::move(poly));
+		}
 	}
 
 	return result;
