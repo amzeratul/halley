@@ -116,7 +116,6 @@ namespace Halley {
 		Rect4f aabb;
 		bool convex = false;
 		bool clockwise = false;
-		bool simple = false;
 		bool valid = false;
 
 		bool isPointInsideConvex(Vector2f point) const;

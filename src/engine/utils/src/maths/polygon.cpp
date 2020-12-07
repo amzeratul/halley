@@ -74,15 +74,16 @@ void Polygon::checkConvex()
 	size_t left = 0;
 	size_t right = 0;
 	float area2 = 0;
-	
+
+	float epsilon = 0.000001f;
 	for (size_t i = 0; i < n; ++i) {
 		auto a = vertices[i];
 		auto b = vertices[(i + 1) % n];
 		auto c = vertices[(i + 2) % n];
-		const float cross = (b - a).cross(c - b);
-		if (cross > 0) {
+		const float cross = (b - a).normalized().cross((c - b).normalized());
+		if (cross > epsilon) {
 			right++;
-		} else {
+		} else if (cross < -epsilon) {
 			left++;
 		}
 
@@ -91,22 +92,6 @@ void Polygon::checkConvex()
 
 	// Is convex if all turns were right turns, or all turns were left turns
 	convex = right == 0 || left == 0;
-
-	// Simple if no self-overlapping
-	simple = true;
-	if (!convex) {
-		for (size_t i = 0; i < n; ++i) {
-			LineSegment a(vertices[i], vertices[(i + 1) % n]);
-
-			for (size_t j = i; j < n - 3; ++j) {
-				LineSegment b(vertices[(i + j + 2) % n], vertices[(i + j + 3) % n]);
-
-				if (a.intersection(b)) {
-					simple = false;
-				}
-			}
-		}
-	}
 
 	// Clockwise if the area is positive
 	clockwise = area2 > 0;
@@ -955,7 +940,6 @@ std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other, bool for
 
 		// Output polygons
 		auto poly = Polygon(std::move(curOutput));
-		assert(poly.simple);
 		if (forceConvexOutput) {
 			poly.splitIntoConvex(result);
 		} else {
