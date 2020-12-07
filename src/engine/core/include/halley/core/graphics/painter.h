@@ -8,6 +8,7 @@
 
 namespace Halley
 {
+	class Polygon;
 	class Resources;
 	class Shader;
 	class Material;
@@ -73,6 +74,9 @@ namespace Halley
 		// Rect drawing
 		void drawRect(Rect4f rect, float width, Colour4f colour, std::shared_ptr<Material> material = {});
 
+		// Polygon drawing
+		void drawPolygon(const Polygon& polygon, Colour4f colour, std::shared_ptr<Material> material = {});
+
 		size_t getNumDrawCalls() const { return nDrawCalls; }
 		size_t getNumVertices() const { return nVertices; }
 		size_t getNumTriangles() const { return nTriangles; }
@@ -116,6 +120,7 @@ namespace Halley
 		Vector<IndexType> indexBuffer;
 		std::shared_ptr<Material> materialPending;
 		std::shared_ptr<Material> solidLineMaterial;
+		std::shared_ptr<Material> solidPolygonMaterial;
 
 		size_t nDrawCalls = 0;
 		size_t nVertices = 0;
@@ -153,5 +158,6 @@ namespace Halley
 		Rect4i getRectangleForActiveRenderTarget(Rect4i rectangle);
 
 		std::shared_ptr<Material> getSolidLineMaterial();
+		std::shared_ptr<Material> getSolidPolygonMaterial();
 	};
 }

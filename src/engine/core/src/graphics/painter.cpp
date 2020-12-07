@@ -9,14 +9,25 @@
 #include "halley/core/graphics/material/material_parameter.h"
 #include <cstring> // memmove
 #include <gsl/gsl_assert>
+
+#include "halley/maths/polygon.h"
 #include "resources/resources.h"
 
 using namespace Halley;
+
+struct LineVertex {
+	Vector4f colour;
+	Vector2f position;
+	Vector2f normal;
+	Vector2f width;
+	char _padding[8];
+};
 
 Painter::Painter(Resources& resources)
 	: halleyGlobalMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/MaterialBase"), true))
 	, resources(resources)
 	, solidLineMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidLine")))
+	, solidPolygonMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidPolygon")))
 {
 }
 
@@ -219,14 +230,6 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 		return;
 	}
 
-	struct LineVertex {
-		Vector4f colour;
-		Vector2f position;
-		Vector2f normal;
-		Vector2f width;
-		char _padding[8];
-	};
-
 	const Vector4f col(colour.r, colour.g, colour.b, colour.a);
 
 	constexpr float normalPos[] = { -1, 1, 1, -1 };
@@ -332,6 +335,40 @@ void Painter::drawRect(Rect4f rect, float width, Colour4f colour, std::shared_pt
 	drawLine(points, width, colour, true, std::move(material));
 }
 
+void Painter::drawPolygon(const Polygon& polygon, Colour4f colour, std::shared_ptr<Material> material)
+{
+	if (!material) {
+		material = getSolidPolygonMaterial();
+	}
+	
+	if (!polygon.isConvex()) {
+		for (const auto& p: polygon.splitIntoConvex()) {
+			drawPolygon(p, colour, material);
+		}
+		return;
+	}
+
+	auto col = Vector4f(colour.r, colour.g, colour.b, colour.a);
+	
+	const auto& vs = polygon.getVertices();
+	const auto n = vs.size();
+	std::vector<LineVertex> vertices(n);
+	for (size_t i = 0; i < n; ++i) {
+		vertices[i].position = vs[i];
+		vertices[i].colour = col;
+		vertices[i].normal = Vector2f();
+		vertices[i].width = Vector2f();
+	}
+	std::vector<IndexType> indices((n - 2) * 3);
+	for (size_t i = 0; i < n - 2; ++i) {
+		indices.push_back(0);
+		indices.push_back(static_cast<IndexType>(i) + 1);
+		indices.push_back(static_cast<IndexType>(i) + 2);
+	}
+
+	draw(material, vertices.size(), vertices.data(), indices, PrimitiveType::Triangle);
+}
+
 void Painter::setLogging(bool logging)
 {
 	this->logging = logging;
@@ -426,6 +463,11 @@ Rect4i Painter::getRectangleForActiveRenderTarget(Rect4i r)
 std::shared_ptr<Material> Painter::getSolidLineMaterial()
 {
 	return solidLineMaterial;
+}
+
+std::shared_ptr<Material> Painter::getSolidPolygonMaterial()
+{
+	return solidPolygonMaterial;
 }
 
 void Painter::startDrawCall(const std::shared_ptr<Material>& material)

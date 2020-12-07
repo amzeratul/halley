@@ -1,0 +1,10 @@
+---
+name: Halley/SolidPolygon
+base: line_base.yaml
+passes:
+  - blend: Alpha Premultiplied
+    shader:
+    - language: hlsl
+      vertex: polygon.vertex.hlsl
+      pixel: polygon_solid.pixel.hlsl
+...
