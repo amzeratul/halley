@@ -337,6 +337,10 @@ void Painter::drawRect(Rect4f rect, float width, Colour4f colour, std::shared_pt
 
 void Painter::drawPolygon(const Polygon& polygon, Colour4f colour, std::shared_ptr<Material> material)
 {
+	if (!polygon.isValid()) {
+		return;
+	}
+	
 	if (!material) {
 		material = getSolidPolygonMaterial();
 	}
