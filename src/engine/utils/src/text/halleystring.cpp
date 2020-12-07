@@ -540,6 +540,11 @@ void operator <<(double &p1, String &p2)
 float String::toFloat() const
 {
 	if (str.at(length() - 1) == 'f') {
+		if (str == ".inf") {
+			return std::numeric_limits<float>::infinity();
+		} else if (str == "-.inf") {
+			return -std::numeric_limits<float>::infinity();
+		}
 		return std::stof(left(length() - 1).cppStr());
 	}
 	return std::stof(str);
@@ -548,6 +553,11 @@ float String::toFloat() const
 double String::toDouble() const
 {
 	if (str.at(length() - 1) == 'f') {
+		if (str == ".inf") {
+			return std::numeric_limits<double>::infinity();
+		} else if (str == "-.inf") {
+			return -std::numeric_limits<double>::infinity();
+		}
 		return std::stod(left(length() - 1).cppStr());
 	}
 	return std::stod(str);
