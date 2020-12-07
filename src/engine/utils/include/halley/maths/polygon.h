@@ -72,6 +72,8 @@ namespace Halley {
 		void setVertices(VertexList vertices);
 		const VertexList& getVertices() const { return vertices; }
 		const size_t getNumSides() const { return vertices.size(); }
+		LineSegment getEdge(size_t idx) const;
+		std::optional<size_t> findEdge(const LineSegment& edge, float epsilon) const;
 		
 		void rotate(Angle<float> angle);
 		void rotateAndScale(Angle<float> angle, Vector2f scale);

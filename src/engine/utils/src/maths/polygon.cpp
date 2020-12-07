@@ -428,12 +428,29 @@ Range<float> Polygon::project(Vector2f axis) const
 
 void Polygon::unproject(const Vector2f &axis,const float point,Vector<Vector2f> &ver) const
 {
-	size_t len = vertices.size();
-	float dot;
-	for (size_t i=0;i<len;i++) {
-		dot = axis.dot(vertices[i]);
-		if (dot == point) ver.push_back(vertices[i]);
+	const size_t len = vertices.size();
+	for (size_t i = 0; i < len; i++) {
+		const float dot = axis.dot(vertices[i]);
+		if (dot == point) {
+			ver.push_back(vertices[i]);
+		}
 	}
+}
+
+LineSegment Polygon::getEdge(size_t idx) const
+{
+	return LineSegment(vertices[idx], vertices[(idx + 1) % vertices.size()]);
+}
+
+std::optional<size_t> Polygon::findEdge(const LineSegment& edge, float epsilon) const
+{
+	const size_t n = vertices.size();
+	for (size_t i = 0; i < n; ++i) {
+		if (getEdge(i).epsilonEquals(edge, epsilon)) {
+			return i;
+		}
+	}
+	return {};
 }
 
 void Polygon::rotate(Angle<float> angle)

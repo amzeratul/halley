@@ -126,5 +126,11 @@ namespace Halley {
 			return a.epsilonEquals(point, epsilon)
 				|| b.epsilonEquals(point, epsilon);
 		}
+
+		bool epsilonEquals(const LineSegment& other, float epsilon) const
+		{
+			return (a.epsilonEquals(other.a, epsilon) && b.epsilonEquals(other.b, epsilon))
+				|| (a.epsilonEquals(other.b, epsilon) && b.epsilonEquals(other.a, epsilon));
+		}
 	};
 }
