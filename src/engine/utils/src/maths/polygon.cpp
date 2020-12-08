@@ -872,7 +872,7 @@ std::optional<std::vector<Polygon>> Polygon::subtractOverlapping(const Polygon& 
 		}
 	}
 
-	//assert(crossings >= 2);
+	// Just touching by a vertex
 	if (crossings < 2) {
 		return {};
 	}
