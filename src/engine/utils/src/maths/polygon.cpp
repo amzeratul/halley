@@ -27,6 +27,7 @@
 #include "halley/maths/ray.h"
 #include "halley/maths/circle.h"
 #include "halley/maths/line.h"
+#include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 using namespace Halley;
 
@@ -790,7 +791,7 @@ std::optional<std::vector<Polygon>> Polygon::subtract(const Polygon& other) cons
 	throw Exception("Unknown polygon SAT classification", HalleyExceptions::Utils);
 }
 
-std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other, bool forceConvexOutput) const
+std::optional<std::vector<Polygon>> Polygon::subtractOverlapping(const Polygon& other, bool forceConvexOutput) const
 {
 	// Based on the paper "Polygon Subtraction in Two or Three Dimensions" by JE Wilson, October 2013
 	
@@ -873,7 +874,7 @@ std::vector<Polygon> Polygon::subtractOverlapping(const Polygon& other, bool for
 
 	//assert(crossings >= 2);
 	if (crossings < 2) {
-		return std::vector<Polygon>();
+		return {};
 	}
 
 	// Re-map the cross references and determine if outside the other
