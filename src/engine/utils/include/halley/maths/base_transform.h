@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "polygon.h"
 #include "vector2.h"
 
 namespace Halley {
@@ -31,6 +32,9 @@ namespace Halley {
 
 		Vector2f transform(Vector2f point) const;
 		Vector2f inverseTransform(Vector2f point) const;
+
+		Polygon transform(const Polygon& poly) const;
+		Polygon inverseTransform(const Polygon& poly) const;
 
 		static Vector2f transform(Vector2f point, Vector2f u, Vector2f v);
 

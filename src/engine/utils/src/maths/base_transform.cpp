@@ -28,6 +28,24 @@ Vector2f Base2D::inverseTransform(Vector2f point) const
 	return transform(point, invU, invV);
 }
 
+Polygon Base2D::transform(const Polygon& poly) const
+{
+	auto vs = poly.getVertices();
+	for (auto& v: vs) {
+		v = transform(v);
+	}
+	return Polygon(std::move(vs));
+}
+
+Polygon Base2D::inverseTransform(const Polygon& poly) const
+{
+	auto vs = poly.getVertices();
+	for (auto& v: vs) {
+		v = inverseTransform(v);
+	}
+	return Polygon(std::move(vs));
+}
+
 Vector2f Base2D::transform(Vector2f point, Vector2f u, Vector2f v)
 {
 	return point.x * u + point.y * v;

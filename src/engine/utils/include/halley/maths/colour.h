@@ -176,6 +176,11 @@ namespace Halley {
 			return Colour4(1.0f - ((1.0f - r) * t), 1.0f - ((1.0f - g) * t), 1.0f - ((1.0f - b) * t), a);
 		}
 
+		constexpr Colour4 multiplyAlpha(float t) const
+		{
+			return Colour4(r, g, b, a * t);
+		}
+
 		constexpr Colour4 operator+(const Colour4& c) const
 		{
 			return Colour4(r+c.r, g+c.g, b+c.b, a+c.a);
