@@ -39,7 +39,12 @@ namespace Halley {
         {
             return heap.empty();
         }
-        
+
+        void reserve(size_t size)
+        {
+	        heap.reserve(size);
+        }
+
     private:
         std::vector<T> heap;
         Comparator comparator;
