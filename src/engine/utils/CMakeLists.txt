@@ -88,6 +88,7 @@ set(HEADERS
         "include/halley/data_structures/maybe_ref.h"
         "include/halley/data_structures/memory_pool.h"
         "include/halley/data_structures/nullable_reference.h"
+        "include/halley/data_structures/priority_queue.h"
         "include/halley/data_structures/rect_spatial_checker.h"
         "include/halley/data_structures/ring_buffer.h"
         "include/halley/data_structures/tree_map.h"
