@@ -30,6 +30,7 @@
 #include "halley/bytes/config_node_serializer_base.h"
 
 namespace Halley {
+	class Ray;
 	class LineSegment;
 
 	using Vertex = Vector2f;
@@ -109,6 +110,8 @@ namespace Halley {
 		bool operator!=(const Polygon& other) const;
 
 		ConfigNode toConfigNode() const;
+
+		std::optional<size_t> getExitEdge(const Ray& ray) const;
 
 	private:
 		Circle circle;

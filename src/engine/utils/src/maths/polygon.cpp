@@ -1172,6 +1172,23 @@ float Polygon::getDistanceTo(const Line& line) const
 	}
 }
 
+std::optional<size_t> Polygon::getExitEdge(const Ray& ray) const
+{
+	const size_t n = vertices.size();
+	for (size_t i = 0; i < n; ++i) {
+		Vector2f a = vertices[i];
+		Vector2f b = vertices[(i + 1) % n];
+		// Look for a on the left and b on the right
+
+		Vector2f pa = a - ray.p;
+		Vector2f pb = b - ray.p;
+		if (pa.cross(ray.dir) > 0 && pb.cross(ray.dir) < 0) {
+			return i;
+		}
+	}
+	return {};
+}
+
 bool Polygon::operator==(const Polygon& other) const
 {
 	return vertices == other.vertices;
