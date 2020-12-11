@@ -130,13 +130,13 @@ void Polygon::simplify(float epsilon)
 bool Polygon::isPointInside(Vector2f point) const
 {
 	// Fast fail
-	if (!circle.contains(point)) {
+	if ((point - circle.getCentre()).squaredLength() > circle.getRadius() * circle.getRadius()) { // Perf: run this before AABB test, and don't call circle.contains()
 		return false;
 	}
 	if (!aabb.contains(point)) {
 		return false;
 	}
-
+	
 	// Check
 	if (convex) {
 		return isPointInsideConvex(point);
