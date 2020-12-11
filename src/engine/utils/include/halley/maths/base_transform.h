@@ -29,6 +29,7 @@ namespace Halley {
 	public:
 		Base2D();
 		Base2D(Vector2f u, Vector2f v);
+		explicit Base2D(const ConfigNode& node);
 
 		Vector2f transform(Vector2f point) const;
 		Vector2f inverseTransform(Vector2f point) const;
@@ -39,6 +40,8 @@ namespace Halley {
 		static Vector2f transform(Vector2f point, Vector2f u, Vector2f v);
 
 		Base2D getInverse() const;
+
+		ConfigNode toConfigNode() const;
 
 	private:
 		Vector2f u, v;

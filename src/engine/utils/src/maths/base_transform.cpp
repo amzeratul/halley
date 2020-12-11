@@ -13,6 +13,11 @@ Base2D::Base2D(Vector2f u, Vector2f v)
 	invV = det * Vector2f(-v.x, u.x);
 }
 
+Base2D::Base2D(const ConfigNode& node)
+	: Base2D(node["u"].asVector2f(), node["v"].asVector2f())
+{
+}
+
 Base2D::Base2D(Vector2f u, Vector2f v, Vector2f invU, Vector2f invV)
 	: u(u), v(v), invU(invU), invV(invV)
 {
@@ -54,5 +59,13 @@ Vector2f Base2D::transform(Vector2f point, Vector2f u, Vector2f v)
 Base2D Base2D::getInverse() const
 {
 	return Base2D(invU, invV, u, v);
+}
+
+ConfigNode Base2D::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	result["u"] = u;
+	result["v"] = v;
+	return ConfigNode(result);
 }
 
