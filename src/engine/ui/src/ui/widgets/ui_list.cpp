@@ -81,9 +81,9 @@ UIStyle UIList::getStyle() const
 	return style;
 }
 
-void UIList::addTextItem(const String& id, const LocalisedString& label, float maxWidth, bool centre)
+std::shared_ptr<UILabel> UIList::makeLabel(String id, LocalisedString label, float maxWidth) const
 {
-	auto widget = std::make_shared<UILabel>(id + "_label", style.getTextRenderer("label"), label);
+	auto widget = std::make_shared<UILabel>(std::move(id), style.getTextRenderer("label"), std::move(label));
 	if (maxWidth > 0) {
 		widget->setMaxWidth(maxWidth);
 	}
@@ -96,8 +96,13 @@ void UIList::addTextItem(const String& id, const LocalisedString& label, float m
 		widget->setDisablable(style.getTextRenderer("label"), style.getTextRenderer("disabledStyle"));
 	}
 
+	return widget;
+}
+
+void UIList::addTextItem(const String& id, LocalisedString label, float maxWidth, bool centre)
+{
 	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
-	item->add(widget, 0, Vector4f(), centre ? UISizerAlignFlags::CentreHorizontal : UISizerFillFlags::Fill);
+	item->add(makeLabel(id + "_label", std::move(label), maxWidth), 0, Vector4f(), centre ? UISizerAlignFlags::CentreHorizontal : UISizerFillFlags::Fill);
 	addItem(item);
 }
 

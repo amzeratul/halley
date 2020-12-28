@@ -38,6 +38,21 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("selectAsset", [=](const ConfigNode& node) { return makeSelectAsset(node); });
 }
 
+Sprite EditorUIFactory::makeAssetTypeIcon(AssetType type) const
+{
+	return Sprite().setImage(getResources(), Path("ui") / "assetTypes" / toString(type) + ".png");
+}
+
+Sprite EditorUIFactory::makeImportAssetTypeIcon(ImportAssetType type) const
+{
+	return Sprite().setImage(getResources(), Path("ui") / "assetTypes" / toString(type) + ".png");
+}
+
+Sprite EditorUIFactory::makeDirectoryIcon(bool up) const
+{
+	return Sprite().setImage(getResources(), Path("ui") / "assetTypes" / (up ? "directoryUp" : "directory") + ".png");
+}
+
 std::shared_ptr<UIWidget> EditorUIFactory::makeScrollBackground(const ConfigNode& entryNode)
 {
 	return std::make_shared<ScrollBackground>("scrollBackground", resources, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)));

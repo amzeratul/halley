@@ -15,7 +15,7 @@
 
 using namespace Halley;
 
-ProjectWindow::ProjectWindow(UIFactory& factory, HalleyEditor& editor, Project& project, Resources& resources, const HalleyAPI& api)
+ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Project& project, Resources& resources, const HalleyAPI& api)
 	: UIWidget("project_window", {}, UISizer(UISizerType::Vertical))
 	, factory(factory)
 	, editor(editor)

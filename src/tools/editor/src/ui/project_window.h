@@ -8,6 +8,7 @@
 #include "src/assets/assets_browser.h"
 #include "src/scene/entity_editor.h"
 #include "src/scene/scene_editor_tabs.h"
+#include "editor_ui_factory.h"
 
 namespace Halley {
     class UIFactory;
@@ -17,7 +18,7 @@ namespace Halley {
 
     class ProjectWindow final : public UIWidget, public IDynamicLibraryListener, public Project::IAssetLoadListener {
     public:
-        ProjectWindow(UIFactory& factory, HalleyEditor& editor, Project& project, Resources& resources, const HalleyAPI& api);
+        ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Project& project, Resources& resources, const HalleyAPI& api);
     	~ProjectWindow();
 
         void setPage(EditorTabs tab);
@@ -37,7 +38,7 @@ namespace Halley {
     private:
 		constexpr static int numOfStandardTools = 6;
 
-    	UIFactory& factory;
+    	EditorUIFactory& factory;
         HalleyEditor& editor;
     	Project& project;
     	Resources& resources;

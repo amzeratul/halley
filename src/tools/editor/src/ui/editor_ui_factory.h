@@ -6,6 +6,10 @@ namespace Halley {
     public:
 		EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n);
 
+    	Sprite makeAssetTypeIcon(AssetType type) const;
+    	Sprite makeImportAssetTypeIcon(ImportAssetType type) const;
+    	Sprite makeDirectoryIcon(bool up = false) const;
+
     private:
 		std::shared_ptr<UIWidget> makeScrollBackground(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeAnimationEditorDisplay(const ConfigNode& entryNode);

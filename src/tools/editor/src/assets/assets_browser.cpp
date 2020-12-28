@@ -12,10 +12,11 @@
 #include "prefab_editor.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/file_formats/yaml_convert.h"
+#include "src/ui/editor_ui_factory.h"
 
 using namespace Halley;
 
-AssetsBrowser::AssetsBrowser(UIFactory& factory, Project& project, ProjectWindow& projectWindow)
+AssetsBrowser::AssetsBrowser(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow)
 	: UIWidget("assets_editor", {}, UISizer())
 	, factory(factory)
 	, project(project)
@@ -184,36 +185,60 @@ void AssetsBrowser::setListContents(std::vector<String> assets, const Path& curP
 		curDirHash = hash;
 	}
 	
-	assetList->clear();
+	clearAssetList();
+
 	if (flat) {
 		for (auto& a: assets) {
-			assetList->addTextItem(a, LocalisedString::fromUserString(Path(a).getFilename().toString()));
+			addFileToList(a);
 		}
 	} else {
 		std::set<String> dirs;
-		std::vector<std::pair<String, String>> files;
+		std::vector<String> files;
 
 		for (auto& a: assets) {
 			auto relPath = Path("./" + a).makeRelativeTo(curPath);
 			if (relPath.getNumberPaths() == 1) {
-				files.emplace_back(a, relPath.toString());
+				files.emplace_back(a);
 			} else {
 				auto start = relPath.getFront(1);
 				dirs.insert(start.toString());
 			}
 		}
 
-		for (auto& dir: dirs) {
-			assetList->addTextItem(dir + "/.", LocalisedString::fromUserString("[" + dir + "]"));
+		for (const auto& dir: dirs) {
+			addDirToList(dir);
 		}
-		for (auto& file: files) {
-			assetList->addTextItem(file.first, LocalisedString::fromUserString(file.second));
+		for (const auto& file: files) {
+			addFileToList(file);
 		}
 	}
 
 	if (selectOption) {
 		assetList->setSelectedOptionId(selectOption.value());
 	}
+}
+
+void AssetsBrowser::clearAssetList()
+{
+	assetList->clear();
+}
+
+void AssetsBrowser::addDirToList(const String& dir)
+{
+	auto sizer = std::make_shared<UISizer>();
+	sizer->add(std::make_shared<UIImage>(factory.makeDirectoryIcon(dir == "..")), 0, Vector4f(0, 0, 4, 0));
+	sizer->add(assetList->makeLabel("", LocalisedString::fromUserString(dir)));
+	assetList->addItem(dir + "/.", std::move(sizer));
+}
+
+void AssetsBrowser::addFileToList(const Path& path)
+{
+	auto sizer = std::make_shared<UISizer>();
+	sizer->add(std::make_shared<UIImage>(factory.makeImportAssetTypeIcon(ImportAssetType::Image)), 0, Vector4f(0, 0, 4, 0));
+	sizer->add(assetList->makeLabel("", LocalisedString::fromUserString(path.getFilename().toString())));
+	assetList->addItem(path.toString(), std::move(sizer));
+	
+	//assetList->addTextItem(path.toString(), LocalisedString::fromUserString(path.getFilename().toString()));
 }
 
 void AssetsBrowser::refreshList()

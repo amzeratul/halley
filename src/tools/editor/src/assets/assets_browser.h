@@ -7,6 +7,7 @@
 #include "halley/ui/widgets/ui_paged_pane.h"
 
 namespace Halley {
+	class EditorUIFactory;
 	class ProjectWindow;
 	class Project;
 	class MetadataEditor;
@@ -15,12 +16,12 @@ namespace Halley {
 	
 	class AssetsBrowser : public UIWidget {
     public:
-        AssetsBrowser(UIFactory& factory, Project& project, ProjectWindow& projectWindow);
+        AssetsBrowser(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow);
         void showAsset(AssetType type, const String& assetId);
 		void showFile(const Path& path);
 
 	private:
-		UIFactory& factory;
+		EditorUIFactory& factory;
 		Project& project;
 		ProjectWindow& projectWindow;
 
@@ -50,6 +51,10 @@ namespace Halley {
 		void setListContents(std::vector<String> files, const Path& curPath, bool flat);
 		void refreshList();
 		void setFilter(const String& filter);
+
+		void clearAssetList();
+		void addDirToList(const String& dir);
+		void addFileToList(const Path& path);
 
 		void loadAsset(const String& name, bool doubleClick);
 		void refreshAssets(const std::vector<String>& assets);

@@ -37,6 +37,34 @@ namespace Halley
 		Scene
 	};
 
+	template <>
+	struct EnumNames<ImportAssetType> {
+		constexpr std::array<const char*, 20> operator()() const {
+			return{{
+				"undefined",
+				"skip",
+				"codegen",
+				"simpleCopy",
+				"font",
+				"bitmapFont",
+				"image",
+				"texture",
+				"material",
+				"animation",
+				"config",
+				"audio",
+				"audioEvent",
+				"sprite",
+				"spriteSheet",
+				"shader",
+				"mesh",
+				"variableTable",
+				"prefab",
+				"scene"
+			}};
+		}
+	};
+
 	// This order matters.
 	// Assets which depend on other types should show up on the list AFTER
 	// e.g. since materials depend on shaders, they show after shaders

@@ -6,9 +6,10 @@
 #include "metadata_editor.h"
 #include "prefab_editor.h"
 #include "halley/tools/project/project.h"
+#include "src/ui/editor_ui_factory.h"
 using namespace Halley;
 
-AssetEditorWindow::AssetEditorWindow(UIFactory& factory)
+AssetEditorWindow::AssetEditorWindow(EditorUIFactory& factory)
 	: UIWidget("assetEditorWindow", Vector2f(), UISizer())
 	, factory(factory)
 {
@@ -135,8 +136,7 @@ void AssetEditorWindow::createEditorTab(Path filePath, AssetType type, const Str
 		auto n = content->getNumberOfPages();
 		content->addPage();
 		content->getPage(n)->add(editor, 1);
-		auto typeSprite = Sprite().setImage(factory.getResources(), Path("ui") / "assetTypes" / toString(type) + ".png");
-		const auto image = std::make_shared<UIImage>(typeSprite);
+		const auto image = std::make_shared<UIImage>(factory.makeAssetTypeIcon(type));
 		const auto text = std::make_shared<UILabel>(name + "_" + toString(type) + ":label", contentList->getStyle().getTextRenderer("label"), LocalisedString::fromUserString(name));
 		
 		auto item = std::make_shared<UISizer>();
