@@ -45,12 +45,15 @@ Sprite EditorUIFactory::makeAssetTypeIcon(AssetType type) const
 
 Sprite EditorUIFactory::makeImportAssetTypeIcon(ImportAssetType type) const
 {
-	return Sprite().setImage(getResources(), Path("ui") / "assetTypes" / toString(type) + ".png");
+	return Sprite()
+		.setImage(getResources(), Path("ui") / "assetTypes" / toString(type) + ".png")
+		.setColour(Colour4f::fromString("#E47EDA"));
 }
 
 Sprite EditorUIFactory::makeDirectoryIcon(bool up) const
 {
-	return Sprite().setImage(getResources(), Path("ui") / "assetTypes" / (up ? "directoryUp" : "directory") + ".png");
+	return Sprite()
+		.setImage(getResources(), Path("ui") / "assetTypes" / (up ? "directoryUp" : "directory") + ".png");
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeScrollBackground(const ConfigNode& entryNode)

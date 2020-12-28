@@ -12,6 +12,8 @@ namespace Halley
 	{
 	public:
 		AssetImporter(Project& project, std::vector<Path> assetsSrc);
+
+		ImportAssetType getImportAssetType(const Path& path, bool skipRedundantTypes) const;
 		IAssetImporter& getRootImporter(const Path& path) const;
 		std::vector<std::reference_wrapper<IAssetImporter>> getImporters(ImportAssetType type) const;
 		const std::vector<Path>& getAssetsSrc() const;

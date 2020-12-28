@@ -4,7 +4,13 @@
 
 using namespace Halley;
 
+CopyFileImporter::CopyFileImporter(ImportAssetType importType, AssetType outputType)
+	: importType(importType)
+	, outputType(outputType)
+{
+}
+
 void CopyFileImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
-	collector.output(asset.assetId, AssetType::BinaryFile, asset.inputFiles[0].data, asset.inputFiles[0].metadata);
+	collector.output(asset.assetId, outputType, asset.inputFiles[0].data, asset.inputFiles[0].metadata);
 }

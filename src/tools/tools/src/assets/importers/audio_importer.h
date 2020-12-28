@@ -7,7 +7,7 @@ namespace Halley
 	class AudioImporter : public IAssetImporter
 	{
 	public:
-		ImportAssetType getType() const override { return ImportAssetType::Audio; }
+		ImportAssetType getType() const override { return ImportAssetType::AudioClip; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 

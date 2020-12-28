@@ -26,7 +26,7 @@ AssetImporter::AssetImporter(Project& project, std::vector<Path> assetsSrc)
 	: assetsSrc(std::move(assetsSrc))
 {
 	std::unique_ptr<IAssetImporter> defaultImporters[] = {
-		std::make_unique<CopyFileImporter>(),
+		std::make_unique<CopyFileImporter>(ImportAssetType::SimpleCopy, AssetType::BinaryFile),
 		std::make_unique<FontImporter>(),
 		std::make_unique<BitmapFontImporter>(),
 		std::make_unique<ImageImporter>(),
@@ -43,7 +43,7 @@ AssetImporter::AssetImporter(Project& project, std::vector<Path> assetsSrc)
 		std::make_unique<ShaderImporter>(),
 		std::make_unique<TextureImporter>(),
 		std::make_unique<MeshImporter>(),
-		std::make_unique<IAssetImporter>(),
+		std::make_unique<SkipAssetImporter>(),
 		std::make_unique<VariableImporter>()
 	};
 
@@ -66,44 +66,48 @@ void AssetImporter::addImporter(std::vector<std::unique_ptr<IAssetImporter>>& ds
 	dst.emplace_back(std::move(importer));
 }
 
-IAssetImporter& AssetImporter::getRootImporter(const Path& path) const
+ImportAssetType AssetImporter::getImportAssetType(const Path& path, bool skipRedundantTypes) const
 {
-	ImportAssetType type = ImportAssetType::SimpleCopy;
-	
 	const auto root = path.getRoot();
+	
 	if (root == "font") {
-		type = ImportAssetType::Font;
+		return ImportAssetType::Font;
 	} else if (root == "bitmap_font") {
-		type = ImportAssetType::BitmapFont;
+		return ImportAssetType::BitmapFont;
 	} else if (root == "image" || root == "sprite") {
-		type = ImportAssetType::Sprite;
+		return ImportAssetType::Sprite;
 	} else if (root == "animation") {
-		type = ImportAssetType::Animation;
+		return ImportAssetType::Animation;
 	} else if (root == "material") {
-		type = ImportAssetType::Material;
+		return ImportAssetType::MaterialDefinition;
 	} else if (root == "config") {
-		type = ImportAssetType::Config;
+		return ImportAssetType::ConfigFile;
 	} else if (root == "prefab") {
-		type = ImportAssetType::Prefab;
+		return ImportAssetType::Prefab;
 	} else if (root == "scene") {
-		type = ImportAssetType::Scene;
+		return ImportAssetType::Scene;
 	} else if (root == "audio") {
-		type = ImportAssetType::Audio;
+		return ImportAssetType::AudioClip;
 	} else if (root == "audio_event") {
-		type = ImportAssetType::AudioEvent;
+		return ImportAssetType::AudioEvent;
 	} else if (root == "spritesheet") {
-		type = ImportAssetType::SpriteSheet;
+		return ImportAssetType::SpriteSheet;
 	} else if (root == "shader") {
-		type = ImportAssetType::Skip;
+		return skipRedundantTypes ? ImportAssetType::Skip : ImportAssetType::Shader;
 	} else if (root == "texture") {
-		type = ImportAssetType::Texture;
+		return ImportAssetType::Texture;
 	} else if (root == "mesh") {
-		type = ImportAssetType::Mesh;
+		return ImportAssetType::Mesh;
 	} else if (root == "variable") {
-		type = ImportAssetType::VariableTable;
+		return ImportAssetType::VariableTable;
 	}
 
-	return getImporters(type).at(0);
+	return ImportAssetType::SimpleCopy;
+}
+
+IAssetImporter& AssetImporter::getRootImporter(const Path& path) const
+{
+	return getImporters(getImportAssetType(path, true)).at(0);
 }
 
 std::vector<std::reference_wrapper<IAssetImporter>> AssetImporter::getImporters(ImportAssetType type) const
@@ -112,7 +116,7 @@ std::vector<std::reference_wrapper<IAssetImporter>> AssetImporter::getImporters(
 
 	auto i = importers.find(type);
 	if (i != importers.end()) {
-		for (auto& importer: i->second) {
+		for (const auto& importer: i->second) {
 			result.emplace_back(*importer);
 		}
 		return result;

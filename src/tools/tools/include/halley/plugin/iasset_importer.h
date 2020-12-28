@@ -95,7 +95,7 @@ namespace Halley
 	public:
 		virtual ~IAssetImporter() {}
 
-		virtual ImportAssetType getType() const { return ImportAssetType::Skip; }
+		virtual ImportAssetType getType() const = 0;
 		virtual void import(const ImportingAsset&, IAssetCollector&) {}
 		virtual int dropFrontCount() const { return importByExtension ? 0 : 1; }
 
@@ -111,5 +111,11 @@ namespace Halley
 
 	private:
 		bool importByExtension = false;
+	};
+
+	class SkipAssetImporter : public IAssetImporter
+	{
+	public:
+		ImportAssetType getType() const override { return ImportAssetType::Skip; }
 	};
 }

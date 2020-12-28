@@ -233,8 +233,10 @@ void AssetsBrowser::addDirToList(const String& dir)
 
 void AssetsBrowser::addFileToList(const Path& path)
 {
+	auto type = project.getAssetImporter()->getImportAssetType(path, false);
+	
 	auto sizer = std::make_shared<UISizer>();
-	sizer->add(std::make_shared<UIImage>(factory.makeImportAssetTypeIcon(ImportAssetType::Image)), 0, Vector4f(0, 0, 4, 0));
+	sizer->add(std::make_shared<UIImage>(factory.makeImportAssetTypeIcon(type)), 0, Vector4f(0, 0, 4, 0));
 	sizer->add(assetList->makeLabel("", LocalisedString::fromUserString(path.getFilename().toString())));
 	assetList->addItem(path.toString(), std::move(sizer));
 	

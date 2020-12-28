@@ -6,9 +6,15 @@ namespace Halley
 	class CopyFileImporter : public IAssetImporter
 	{
 	public:
-		ImportAssetType getType() const override { return ImportAssetType::SimpleCopy; }
+		CopyFileImporter(ImportAssetType importType, AssetType outputType);
+		
+		ImportAssetType getType() const override { return importType; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 		int dropFrontCount() const override { return 0; }
+
+	private:
+		const ImportAssetType importType;
+		const AssetType outputType;
 	};
 }

@@ -9,7 +9,7 @@ namespace Halley
 	class ConfigImporter : public IAssetImporter
 	{
 	public:
-		ImportAssetType getType() const override { return ImportAssetType::Config; }
+		ImportAssetType getType() const override { return ImportAssetType::ConfigFile; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 	};
