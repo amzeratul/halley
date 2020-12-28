@@ -19,11 +19,13 @@ static std::shared_ptr<UIStyleSheet> makeStyleSheet(Resources& resources)
 			result->load(*resources.get<ConfigFile>(style));
 		}
 	}
+
 	return result;
 }
 
 EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n)
 	: UIFactory(api, resources, i18n, makeStyleSheet(resources))
+	, colourScheme(resources.get<ConfigFile>("colour_schemes/halley_default")->getRoot())
 {
 	UIInputButtons listButtons;
 	setInputButtons("list", listButtons);
@@ -40,20 +42,23 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 
 Sprite EditorUIFactory::makeAssetTypeIcon(AssetType type) const
 {
-	return Sprite().setImage(getResources(), Path("ui") / "assetTypes" / toString(type) + ".png");
+	return Sprite()
+		.setImage(getResources(), Path("ui") / "assetTypes" / toString(type) + ".png")
+		.setColour(colourScheme.getColour("icon_" + toString(type)));
 }
 
 Sprite EditorUIFactory::makeImportAssetTypeIcon(ImportAssetType type) const
 {
 	return Sprite()
 		.setImage(getResources(), Path("ui") / "assetTypes" / toString(type) + ".png")
-		.setColour(Colour4f::fromString("#E47EDA"));
+		.setColour(colourScheme.getColour("icon_" + toString(type)));
 }
 
 Sprite EditorUIFactory::makeDirectoryIcon(bool up) const
 {
 	return Sprite()
-		.setImage(getResources(), Path("ui") / "assetTypes" / (up ? "directoryUp" : "directory") + ".png");
+		.setImage(getResources(), Path("ui") / "assetTypes" / (up ? "directoryUp" : "directory") + ".png")
+		.setColour(colourScheme.getColour("icon_directory"));
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeScrollBackground(const ConfigNode& entryNode)
