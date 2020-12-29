@@ -22,6 +22,7 @@ AssetsBrowser::AssetsBrowser(EditorUIFactory& factory, Project& project, Project
 	, project(project)
 	, projectWindow(projectWindow)
 	, curSrcPath(".")
+	, fuzzyMatcher(false)
 {
 	loadResources();
 	makeUI();

@@ -1,11 +1,16 @@
 #include "halley/text/fuzzy_text_matcher.h"
 using namespace Halley;
 
+FuzzyTextMatcher::FuzzyTextMatcher(bool caseSensitive)
+	: caseSensitive(caseSensitive)
+{
+}
+
 void FuzzyTextMatcher::addStrings(std::vector<String> strs)
 {
 	strings.reserve(strings.size() + strs.size());
 	for (auto& str: strs) {
-		strings.push_back(std::move(str));
+		strings.push_back(caseSensitive ? std::move(str) : str.asciiLower());
 	}
 }
 
@@ -19,8 +24,10 @@ void FuzzyTextMatcher::clear()
 	strings.clear();
 }
 
-std::vector<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const String& query) const
+std::vector<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(String rawQuery) const
 {
+	const String query = caseSensitive ? std::move(rawQuery) : rawQuery.asciiLower();
+	
 	std::vector<Result> results;
 
 	for (const auto& str: strings) {
@@ -29,15 +36,18 @@ std::vector<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const String& quer
 			results.push_back(std::move(result.value()));
 		}
 	}
+
+	std::sort(results.begin(), results.end());
 	
 	return results;
 }
 
-std::optional<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const String& src, const String& query) const
+std::optional<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const String& str, const String& query) const
 {
 	// TODO
-	if (src.asciiLower().contains(query)) {
-		return Result(src, {});
+	const size_t pos = str.cppStr().rfind(query.cppStr());
+	if (pos != std::string::npos) {
+		return Result(str, {}, static_cast<int>(str.size() - pos));
 	}
 	return {};
 }
