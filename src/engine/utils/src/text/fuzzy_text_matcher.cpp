@@ -1,15 +1,60 @@
 #include "halley/text/fuzzy_text_matcher.h"
 using namespace Halley;
 
-FuzzyTextMatcher::FuzzyTextMatcher(bool caseSensitive)
+FuzzyTextMatcher::Score FuzzyTextMatcher::Score::advance(int jumpLen, int sectionPos, int newSectionLen) const
+{
+	Score result = *this;
+	if (jumpLen > 0) {
+		result.curJumps++;
+		result.jumpLength += jumpLen;
+	}
+	result.sectionPos = std::min(result.sectionPos, sectionPos);
+	if (newSectionLen > 0) {
+		result.sectionLens += newSectionLen;
+		result.sections++;
+	}
+	return result;
+}
+
+bool FuzzyTextMatcher::Score::operator<(const Score& other) const
+{
+	if (curJumps != other.curJumps) {
+		return curJumps < other.curJumps;
+	}
+	if (sections != other.sections) {
+		return sections < other.sections;
+	}
+	if (sectionPos != other.sectionPos) {
+		return sectionPos < other.sectionPos;
+	}
+	if (sectionLens != other.sectionLens) {
+		return sectionLens < other.sectionLens;
+	}
+	return jumpLength < other.jumpLength;
+}
+
+FuzzyTextMatcher::Result::Result(String str, std::vector<std::pair<size_t, size_t>> matchPositions, Score score)
+	: str(std::move(str))
+	, matchPositions(std::move(matchPositions))
+	, score(score)
+{
+}
+
+bool FuzzyTextMatcher::Result::operator<(const Result& other) const
+{
+	return score < other.score;
+}
+
+FuzzyTextMatcher::FuzzyTextMatcher(bool caseSensitive, std::optional<size_t> resultsLimit)
 	: caseSensitive(caseSensitive)
+	, resultsLimit(resultsLimit)
 {
 }
 
 void FuzzyTextMatcher::addStrings(const std::vector<String>& strs)
 {
 	strings.reserve(strings.size() + strs.size());
-	for (auto& str: strs) {
+	for (const auto& str: strs) {
 		strings.push_back(caseSensitive ? str.getUTF32() : str.asciiLower().getUTF32());
 	}
 }
@@ -39,31 +84,77 @@ std::vector<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const String& rawQ
 
 	std::sort(results.begin(), results.end());
 	
+	if (resultsLimit && results.size() > resultsLimit.value()) {
+		results.resize(resultsLimit.value());
+	}
+	
 	return results;
 }
 
-static int findBestScore(const std::vector<std::vector<int16_t>>& indices, int idx, std::optional<int16_t> lastPos, int curJumps)
+class FuzzyMatchState {
+public:
+	std::vector<int> sectionMap;
+	std::vector<int> sectionLengths;
+};
+
+static FuzzyTextMatcher::Score findBestScore(const std::vector<std::vector<int16_t>>& indices, int idx, std::optional<int16_t> lastPos, FuzzyTextMatcher::Score score, const FuzzyMatchState& state)
 {
 	if (idx == -1) {
 		// Terminate
-		return curJumps;
+		return score;
 	}
-	
-	int bestScore = std::numeric_limits<int>::max();
+
+	std::optional<FuzzyTextMatcher::Score> bestScore;
 	for (auto pos: indices[idx]) {
-		if (!lastPos || pos < lastPos.value()) {
-			const int jumps = curJumps + (lastPos ? (lastPos.value() - pos - 1) : 0);
-			const int score = findBestScore(indices, idx - 1, pos, jumps);
-			bestScore = std::min(score, bestScore);
+		if (lastPos && pos > lastPos.value()) {
+			break;
+		}
+
+		const int curSection = state.sectionMap[pos];
+		const bool newSection = !lastPos || state.sectionMap[lastPos.value()] != curSection;
+		const int jumps = (lastPos ? (lastPos.value() - pos - 1) : 0);
+		const int sectionPos = state.sectionLengths.size() - curSection - 1;
+		const auto updatedScore = score.advance(jumps, sectionPos, newSection ? state.sectionLengths[curSection] : 0);
+		
+		const auto score = findBestScore(indices, idx - 1, pos, updatedScore, state);
+		if (bestScore) {
+			bestScore = std::min(score, bestScore.value());
+		} else {
+			bestScore = score;
 		}
 	}
 
-	return bestScore;
+	return bestScore.value();
 }
 
-static int findBestScore(const std::vector<std::vector<int16_t>>& indices)
+static FuzzyTextMatcher::Score findBestScore(const std::vector<std::vector<int16_t>>& indices, const FuzzyMatchState& state)
 {
-	return findBestScore(indices, static_cast<int>(indices.size()) - 1, {}, 0);
+	return findBestScore(indices, static_cast<int>(indices.size()) - 1, {}, FuzzyTextMatcher::Score(), state);
+}
+
+static FuzzyMatchState makeState(const StringUTF32& str)
+{
+	FuzzyMatchState state;
+	state.sectionMap.reserve(str.size());
+
+	bool nextIsNewSection = true;
+	for (const char32_t chr: str) {
+		bool newSection = nextIsNewSection;
+		nextIsNewSection = false;
+		if (chr == '/' || chr == '.' || chr == '\\') {
+			newSection = true;
+			nextIsNewSection = true;
+		}
+
+		if (newSection) {
+			state.sectionLengths.push_back(1);
+		} else {
+			++state.sectionLengths.back();
+		}
+		state.sectionMap.push_back(state.sectionLengths.size() - 1);
+	}
+
+	return state;
 }
 
 std::optional<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const StringUTF32& str, const StringUTF32& query) const
@@ -104,7 +195,7 @@ std::optional<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const StringUTF3
 
 	if (indices.size() == query.size()) {
 		// Found something
-		return Result(String(str), {}, findBestScore(indices));
+		return Result(String(str), {}, findBestScore(indices, makeState(str)));
 	} else {
 		// Didn't find anything
 		return {};
