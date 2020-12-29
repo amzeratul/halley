@@ -8,13 +8,13 @@ namespace Halley {
     public:
         class Result {
         public:
-        	const String* str = nullptr;
+        	String str = nullptr;
         	std::vector<std::pair<size_t, size_t>> matchPositions;
         	int score = 0;
 
         	Result() = default;
-        	Result(const String& str, std::vector<std::pair<size_t, size_t>> matchPositions, int score)
-        		: str(&str)
+        	Result(String str, std::vector<std::pair<size_t, size_t>> matchPositions, int score)
+        		: str(std::move(str))
         		, matchPositions(std::move(matchPositions))
         		, score(score)
         	{}
@@ -27,16 +27,16 @@ namespace Halley {
 
         explicit FuzzyTextMatcher(bool caseSensitive);
     	
-    	void addStrings(std::vector<String> strings);
-    	void addString(String string);
+    	void addStrings(const std::vector<String>& strings);
+    	void addString(const String& string);
     	void clear();
 
-    	std::vector<Result> match(String query) const;
+    	std::vector<Result> match(const String& query) const;
 
     private:
-    	std::vector<String> strings;
+    	std::vector<StringUTF32> strings;
     	bool caseSensitive;
 
-    	std::optional<Result> match(const String& str, const String& query) const;
+    	std::optional<Result> match(const StringUTF32& str, const StringUTF32& query) const;
     };
 }

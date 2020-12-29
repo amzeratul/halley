@@ -141,7 +141,7 @@ void AssetsBrowser::listAssetSources()
 		
 		filteredList.reserve(result.size());
 		for (const auto& r: result) {
-			filteredList.push_back(*r.str);
+			filteredList.push_back(r.str);
 		}
 		setListContents(filteredList, curSrcPath, true);
 	}	
