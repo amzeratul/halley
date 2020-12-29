@@ -32,13 +32,13 @@ children:
     children:
     - widget: { id: assetSearch, class: textInput, size: [ 40, 30 ], ghost: "Search assets..." }
       border: [0, 0, 0, 5]
-    - widget: { class: scrollBarPane }
+    - widget: { class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, autoHide: true, size: [255, 50] }
       proportion: 1
       children:
-      - widget: 
+      - proportion: 1
+        widget: 
           class: list
           id: assetList
-          size: [250, 20]
           options:
           - id: test0
             text: test

@@ -1,8 +1,8 @@
 defaultColour: "#FFFFFF"
 colours:
-  icon_directory: "#FFFFFF"
-  icon_shader: "#DA7AF1"
-  icon_materialDefinition: "#DC85F1"
+  icon_directory: "#CAA9CD"
+  icon_shader: "#98D69C"
+  icon_materialDefinition: "#85C5AA"
   icon_prefab: "#FBC24D"
   icon_scene: "#F08A24"
   icon_colours: "#5BF7AD"
