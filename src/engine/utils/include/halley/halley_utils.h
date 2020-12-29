@@ -72,6 +72,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "support/redirect_stream.h"
 
 #include "text/encode.h"
+#include "text/fuzzy_text_matcher.h"
 #include "text/halleystring.h"
 #include "text/i18n.h"
 #include "text/string_converter.h"

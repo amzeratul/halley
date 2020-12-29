@@ -31,6 +31,8 @@ namespace Halley {
 
 		bool assetSrcMode = true;
 		std::optional<std::vector<String>> assetNames;
+
+		FuzzyTextMatcher fuzzyMatcher;
 		String filter;
         
 		std::shared_ptr<UIList> assetList;

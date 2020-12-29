@@ -128,16 +128,19 @@ void AssetsBrowser::listAssetSources()
 	if (!assetNames) {
 		assetNames = project.getAssetSrcList();
 		std::sort(assetNames->begin(), assetNames->end()); // Is this even needed?
+		fuzzyMatcher.clear();
+		fuzzyMatcher.addStrings(assetNames.value());
 	}
 
 	if (filter.isEmpty()) {
 		setListContents(assetNames.value(), curSrcPath, false);
 	} else {
 		std::vector<String> filteredList;
-		for (auto& a: assetNames.value()) {
-			if (a.asciiLower().contains(filter)) {
-				filteredList.push_back(a);
-			}
+		auto result = fuzzyMatcher.match(filter);
+		
+		filteredList.reserve(result.size());
+		for (const auto& r: result) {
+			filteredList.push_back(*r.str);
 		}
 		setListContents(filteredList, curSrcPath, true);
 	}	
