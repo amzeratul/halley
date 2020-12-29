@@ -13,21 +13,28 @@ namespace Halley {
 			int sections = 0;
 			int sectionLens = 0;
 			int sectionPos = 0xFFFF;
+			std::vector<std::pair<uint16_t, uint16_t>> matchPositions;
+
+			bool operator<(const Score& other) const;
 
 			Score advance(int jumpLen, int sectionPos, int newSectionLen) const;
-			bool operator<(const Score& other) const;
+			void makeMatchPositions(const std::vector<int>& breadcrumbs);
 		};
     	
         class Result {
         public:
-        	String str = nullptr;
-        	std::vector<std::pair<size_t, size_t>> matchPositions;
-        	Score score;
-
         	Result() = default;
-            Result(String str, std::vector<std::pair<size_t, size_t>> matchPositions, Score score);
+            Result(String str, Score score);
 
             bool operator<(const Result& other) const;
+
+        	const String& getString() const;
+        	gsl::span<const std::pair<uint16_t, uint16_t>> getMatchPositions() const;
+
+        private:
+        	String str;
+        	std::vector<std::pair<uint16_t, uint16_t>> matchPositions;
+        	Score score;
         };
 
         FuzzyTextMatcher(bool caseSensitive, std::optional<size_t> resultsLimit);

@@ -16,6 +16,19 @@ FuzzyTextMatcher::Score FuzzyTextMatcher::Score::advance(int jumpLen, int sectio
 	return result;
 }
 
+void FuzzyTextMatcher::Score::makeMatchPositions(const std::vector<int>& breadcrumbs)
+{
+	int last = -2;
+	for (auto pos: breadcrumbs) {
+		if (pos != last + 1) {
+			matchPositions.emplace_back(pos, 1);
+		} else {
+			++matchPositions.back().second;
+		}
+		last = pos;
+	}
+}
+
 bool FuzzyTextMatcher::Score::operator<(const Score& other) const
 {
 	if (curJumps != other.curJumps) {
@@ -33,9 +46,9 @@ bool FuzzyTextMatcher::Score::operator<(const Score& other) const
 	return jumpLength < other.jumpLength;
 }
 
-FuzzyTextMatcher::Result::Result(String str, std::vector<std::pair<size_t, size_t>> matchPositions, Score score)
+FuzzyTextMatcher::Result::Result(String str, Score score)
 	: str(std::move(str))
-	, matchPositions(std::move(matchPositions))
+	, matchPositions(std::move(score.matchPositions))
 	, score(score)
 {
 }
@@ -43,6 +56,16 @@ FuzzyTextMatcher::Result::Result(String str, std::vector<std::pair<size_t, size_
 bool FuzzyTextMatcher::Result::operator<(const Result& other) const
 {
 	return score < other.score;
+}
+
+const String& FuzzyTextMatcher::Result::getString() const
+{
+	return str;
+}
+
+gsl::span<const std::pair<uint16_t, uint16_t>> FuzzyTextMatcher::Result::getMatchPositions() const
+{
+	return matchPositions;
 }
 
 FuzzyTextMatcher::FuzzyTextMatcher(bool caseSensitive, std::optional<size_t> resultsLimit)
@@ -95,17 +118,22 @@ class FuzzyMatchState {
 public:
 	std::vector<int> sectionMap;
 	std::vector<int> sectionLengths;
+	std::vector<int> breadcrumb;
 };
 
-static FuzzyTextMatcher::Score findBestScore(const std::vector<std::vector<int16_t>>& indices, int idx, std::optional<int16_t> lastPos, FuzzyTextMatcher::Score score, const FuzzyMatchState& state)
+static FuzzyTextMatcher::Score findBestScore(const std::vector<std::vector<int16_t>>& indices, int idx, std::optional<int16_t> lastPos, FuzzyTextMatcher::Score score, FuzzyMatchState& state)
 {
 	if (idx == -1) {
 		// Terminate
+		score.makeMatchPositions(state.breadcrumb);
 		return score;
 	}
 
 	std::optional<FuzzyTextMatcher::Score> bestScore;
-	for (auto pos: indices[idx]) {
+	for (size_t i = 0; i < indices[idx].size(); ++i) {
+		const auto pos = indices[idx][i];
+		state.breadcrumb[idx] = i;
+		
 		if (lastPos && pos > lastPos.value()) {
 			break;
 		}
@@ -127,12 +155,12 @@ static FuzzyTextMatcher::Score findBestScore(const std::vector<std::vector<int16
 	return bestScore.value();
 }
 
-static FuzzyTextMatcher::Score findBestScore(const std::vector<std::vector<int16_t>>& indices, const FuzzyMatchState& state)
+static FuzzyTextMatcher::Score findBestScore(const std::vector<std::vector<int16_t>>& indices, FuzzyMatchState state)
 {
 	return findBestScore(indices, static_cast<int>(indices.size()) - 1, {}, FuzzyTextMatcher::Score(), state);
 }
 
-static FuzzyMatchState makeState(const StringUTF32& str)
+static FuzzyMatchState makeState(const StringUTF32& str, const StringUTF32& query)
 {
 	FuzzyMatchState state;
 	state.sectionMap.reserve(str.size());
@@ -153,6 +181,8 @@ static FuzzyMatchState makeState(const StringUTF32& str)
 		}
 		state.sectionMap.push_back(state.sectionLengths.size() - 1);
 	}
+
+	state.breadcrumb.resize(query.size());
 
 	return state;
 }
@@ -195,7 +225,7 @@ std::optional<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const StringUTF3
 
 	if (indices.size() == query.size()) {
 		// Found something
-		return Result(String(str), {}, findBestScore(indices, makeState(str)));
+		return Result(String(str), findBestScore(indices, makeState(str, query)));
 	} else {
 		// Didn't find anything
 		return {};
