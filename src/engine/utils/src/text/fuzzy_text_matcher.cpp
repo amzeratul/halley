@@ -97,11 +97,16 @@ std::optional<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const StringUTF3
 		}
 
 		if (query.size() - indices.size() > str.size() - i - 1) {
-			// Not found
-			return {};
+			// Can't find anything else
+			break;
 		}
 	}
 
-	// Found something
-	return Result(String(str), {}, findBestScore(indices));
+	if (indices.size() == query.size()) {
+		// Found something
+		return Result(String(str), {}, findBestScore(indices));
+	} else {
+		// Didn't find anything
+		return {};
+	}
 }
