@@ -85,7 +85,7 @@ std::optional<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const StringUTF3
 			const char32_t queryChr = query[j];
 
 			if (strChr == queryChr) {
-				if (j + 1 == maxDepth) {
+				if (j == indices.size()) {
 					// Expand indices
 					indices.emplace_back();
 					maxDepth = std::min(maxDepth + 1, query.size());
