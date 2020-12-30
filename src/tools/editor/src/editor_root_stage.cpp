@@ -152,6 +152,7 @@ void EditorRootStage::createUI()
 			setSoftCursor(!isSoftCursor());
 			return true;
 		}
+		
 		return false;
 	});
 }
@@ -202,5 +203,6 @@ void EditorRootStage::setTopLevelUI(std::shared_ptr<UIWidget> uiWindow)
 	topLevelUI = std::move(uiWindow);
 	if (topLevelUI) {
 		ui->addChild(topLevelUI);
+		ui->registerKeyPressListener(topLevelUI, 0);
 	}
 }

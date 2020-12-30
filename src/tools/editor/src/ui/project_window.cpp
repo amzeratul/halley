@@ -11,6 +11,7 @@
 #include "src/editor_root_stage.h"
 #include "src/halley_editor.h"
 #include "src/assets/assets_browser.h"
+#include "src/scene/choose_asset_window.h"
 #include "src/scene/scene_editor_window.h"
 
 using namespace Halley;
@@ -64,8 +65,7 @@ void ProjectWindow::makeUI()
 		if (uri.startsWith("asset:")) {
 			auto splitURI = uri.split(':');
 			if (splitURI.size() == 3) {
-				toolbar->getList()->setSelectedOptionId(toString(EditorTabs::Assets));
-				assetEditorWindow->showAsset(fromString<AssetType>(splitURI.at(1)), splitURI.at(2));
+				openAsset(fromString<AssetType>(splitURI.at(1)), splitURI.at(2));
 			}
 		}
 	});
@@ -199,6 +199,16 @@ void ProjectWindow::update(Time t, bool moved)
 	setMinSize(Vector2f(size));
 }
 
+bool ProjectWindow::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::P, KeyMods::Ctrl)) {
+		openAssetFinder();
+		return true;
+	}
+	
+	return false;
+}
+
 void ProjectWindow::setPage(EditorTabs tab)
 {
 	pagedPane->setPage(static_cast<int>(tab));
@@ -217,6 +227,18 @@ LocalisedString ProjectWindow::setCustomPage(const String& pageId)
 	return LocalisedString::fromHardcodedString("???");
 }
 
+void ProjectWindow::openFile(const String& assetId)
+{
+	toolbar->getList()->setSelectedOptionId(toString(EditorTabs::Assets));
+	assetEditorWindow->showFile(assetId);
+}
+
+void ProjectWindow::openAsset(AssetType type, const String& assetId)
+{
+	toolbar->getList()->setSelectedOptionId(toString(EditorTabs::Assets));
+	assetEditorWindow->showAsset(type, assetId);
+}
+
 void ProjectWindow::openPrefab(const String& name, AssetType assetType)
 {
 	sceneEditorTabs->load(assetType, name);
@@ -226,4 +248,14 @@ void ProjectWindow::openPrefab(const String& name, AssetType assetType)
 EditorTaskSet& ProjectWindow::getTasks() const
 {
 	return *tasks;
+}
+
+void ProjectWindow::openAssetFinder()
+{
+	getRoot()->addChild(std::make_shared<ChooseImportAssetWindow>(factory, project, [=] (std::optional<String> result)
+	{
+		if (result) {
+			openFile(result.value());
+		}
+	}));
 }

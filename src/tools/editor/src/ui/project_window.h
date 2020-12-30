@@ -23,6 +23,8 @@ namespace Halley {
 
         void setPage(EditorTabs tab);
         LocalisedString setCustomPage(const String& pageId);
+    	void openFile(const String& assetId);
+    	void openAsset(AssetType type, const String& assetId);
         void openPrefab(const String& assetId, AssetType assetType);
 
     	EditorTaskSet& getTasks() const;
@@ -34,6 +36,7 @@ namespace Halley {
         void onAssetsLoaded() override;
 
         void update(Time t, bool moved) override;
+        bool onKeyPress(KeyboardKeyPress key) override;
     	
     private:
 		constexpr static int numOfStandardTools = 6;
@@ -68,5 +71,7 @@ namespace Halley {
     	void tryLoadCustomUI();
     	bool loadCustomUI();
 		void destroyCustomUI();
+
+    	void openAssetFinder();
     };
 }

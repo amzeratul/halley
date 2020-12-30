@@ -23,7 +23,8 @@ namespace Halley {
     protected:
         bool onKeyPress(KeyboardKeyPress key) override;
         virtual bool canShowBlank() const;
-		virtual Sprite makeIcon(const String& id) const;
+		virtual bool canShowAll() const;
+		virtual Sprite makeIcon(const String& id);
 		EditorUIFactory& getFactory() const;
 
     private:
@@ -58,10 +59,24 @@ namespace Halley {
         ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, Callback callback);
 
     protected:
-        Sprite makeIcon(const String& id) const override;
+        Sprite makeIcon(const String& id) override;
 
 	private:
 		AssetType type;
-		mutable Sprite icon;
+		Sprite icon;
+	};
+
+	class ChooseImportAssetWindow : public ChooseAssetWindow {
+	public:
+		ChooseImportAssetWindow(UIFactory& factory, Project& project, Callback callback);
+
+	protected:
+		Sprite makeIcon(const String& id) override;
+		bool canShowBlank() const override;
+		bool canShowAll() const override;
+
+	private:
+		Project& project;
+		std::map<ImportAssetType, Sprite> icons;
 	};
 }

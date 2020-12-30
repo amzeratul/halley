@@ -4,6 +4,7 @@
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/ui/widgets/ui_list.h"
 #include "src/ui/editor_ui_factory.h"
+#include "halley/tools/project/project.h"
 
 using namespace Halley;
 
@@ -45,16 +46,18 @@ void ChooseAssetWindow::populateList()
 	options->clear();
 	
 	if (filter.isEmpty()) {
-		if (canShowBlank()) {
-			options->addTextItem("", LocalisedString::fromHardcodedString("[Empty]"));
+		if (canShowAll()) {
+			if (canShowBlank()) {
+				options->addTextItem("", LocalisedString::fromHardcodedString("[Empty]"));
+			}
+			
+			for (const auto& c: ids) {
+				addItem(c);
+			}
+			
+			options->layout();
+			options->setSelectedOptionId(defaultOption);
 		}
-		
-		for (const auto& c: ids) {
-			addItem(c);
-		}
-
-		options->layout();
-		options->setSelectedOptionId(defaultOption);
 	} else {
 		for (const auto& r: fuzzyMatcher.match(filter)) {
 			addItem(r.getString(), r.getMatchPositions());
@@ -126,7 +129,12 @@ bool ChooseAssetWindow::canShowBlank() const
 	return true;
 }
 
-Sprite ChooseAssetWindow::makeIcon(const String& id) const
+bool ChooseAssetWindow::canShowAll() const
+{
+	return true;
+}
+
+Sprite ChooseAssetWindow::makeIcon(const String& id)
 {
 	return Sprite();
 }
@@ -200,10 +208,44 @@ ChooseAssetTypeWindow::ChooseAssetTypeWindow(UIFactory& factory, AssetType type,
 	setTitle(LocalisedString::fromHardcodedString("Choose " + toString(type)));
 }
 
-Sprite ChooseAssetTypeWindow::makeIcon(const String& id) const
+Sprite ChooseAssetTypeWindow::makeIcon(const String& id)
 {
 	if (!icon.hasMaterial()) {
 		icon = getFactory().makeAssetTypeIcon(type);
 	}
 	return icon;
+}
+
+ChooseImportAssetWindow::ChooseImportAssetWindow(UIFactory& factory, Project& project, Callback callback)
+	: ChooseAssetWindow(factory, std::move(callback))
+	, project(project)
+{
+	auto assetNames = project.getAssetSrcList();
+	std::sort(assetNames.begin(), assetNames.end());
+	
+	setAssetIds(std::move(assetNames), "");
+	setTitle(LocalisedString::fromHardcodedString("Open asset"));
+}
+
+Sprite ChooseImportAssetWindow::makeIcon(const String& id)
+{
+	const auto type = project.getAssetImporter()->getImportAssetType(id, false);
+	const auto iter = icons.find(type);
+	if (iter != icons.end()) {
+		return iter->second;
+	}
+
+	auto icon = getFactory().makeImportAssetTypeIcon(type);
+	icons[type] = icon;
+	return icon;
+}
+
+bool ChooseImportAssetWindow::canShowBlank() const
+{
+	return false;
+}
+
+bool ChooseImportAssetWindow::canShowAll() const
+{
+	return false;
 }

@@ -20,7 +20,7 @@ namespace Halley {
         void showAsset(AssetType type, const String& assetId);
 		void showFile(const Path& path);
 
-	private:
+    private:
 		EditorUIFactory& factory;
 		Project& project;
 		ProjectWindow& projectWindow;
