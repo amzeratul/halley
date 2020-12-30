@@ -132,9 +132,9 @@ static FuzzyTextMatcher::Score findBestScore(const std::vector<std::vector<int16
 	std::optional<FuzzyTextMatcher::Score> bestScore;
 	for (size_t i = 0; i < indices[idx].size(); ++i) {
 		const auto pos = indices[idx][i];
-		state.breadcrumb[idx] = i;
+		state.breadcrumb[idx] = pos;
 		
-		if (lastPos && pos > lastPos.value()) {
+		if (lastPos && pos >= lastPos.value()) {
 			break;
 		}
 
@@ -209,13 +209,13 @@ std::optional<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const StringUTF3
 				if (j == indices.size()) {
 					// Expand indices
 					indices.emplace_back();
-					maxDepth = std::min(maxDepth + 1, query.size());
 				}
 
 				// Insert a copy
 				indices[j].push_back(static_cast<int16_t>(i));
 			}
 		}
+		maxDepth = std::min(indices.size() + 1, query.size());
 
 		if (query.size() - indices.size() > str.size() - i - 1) {
 			// Can't find anything else

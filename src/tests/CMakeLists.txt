@@ -14,6 +14,7 @@ include_directories(
 )
 
 set(SOURCES
+        "src/fuzzy_text_matcher_test.cpp"
         "src/path_test.cpp"
         "src/polygon_test.cpp"
         "src/serializer_test.cpp"
