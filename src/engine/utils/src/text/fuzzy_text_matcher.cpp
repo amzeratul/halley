@@ -74,17 +74,21 @@ FuzzyTextMatcher::FuzzyTextMatcher(bool caseSensitive, std::optional<size_t> res
 {
 }
 
-void FuzzyTextMatcher::addStrings(const std::vector<String>& strs)
+void FuzzyTextMatcher::addStrings(std::vector<String> strs)
 {
-	strings.reserve(strings.size() + strs.size());
-	for (const auto& str: strs) {
-		strings.push_back(caseSensitive ? str.getUTF32() : str.asciiLower().getUTF32());
+	if (strings.empty()) {
+		strings = std::move(strs);
+	} else {
+		strings.reserve(strings.size() + strs.size());
+		for (auto& str: strs) {
+			strings.push_back(std::move(str));
+		}
 	}
 }
 
-void FuzzyTextMatcher::addString(const String& string)
+void FuzzyTextMatcher::addString(String string)
 {
-	strings.push_back(string.getUTF32());
+	strings.push_back(std::move(string));
 }
 
 void FuzzyTextMatcher::clear()
@@ -187,11 +191,12 @@ static FuzzyMatchState makeState(const StringUTF32& str, const StringUTF32& quer
 	return state;
 }
 
-std::optional<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const StringUTF32& str, const StringUTF32& query) const
+std::optional<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const String& origStr, const StringUTF32& query) const
 {
-	if (str.empty() || query.empty()) {
+	if (origStr.isEmpty() || query.empty()) {
 		return {};
 	}
+	StringUTF32 str = caseSensitive ? origStr.getUTF32() : origStr.asciiLower().getUTF32();
 	
 	std::vector<std::vector<int16_t>> indices;
 	
@@ -225,7 +230,7 @@ std::optional<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const StringUTF3
 
 	if (indices.size() == query.size()) {
 		// Found something
-		return Result(String(str), findBestScore(indices, makeState(str, query)));
+		return Result(origStr, findBestScore(indices, makeState(str, query)));
 	} else {
 		// Didn't find anything
 		return {};

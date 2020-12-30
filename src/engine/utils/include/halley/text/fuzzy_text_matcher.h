@@ -39,17 +39,17 @@ namespace Halley {
 
         FuzzyTextMatcher(bool caseSensitive, std::optional<size_t> resultsLimit);
     	
-    	void addStrings(const std::vector<String>& strings);
-    	void addString(const String& string);
+    	void addStrings(std::vector<String> strings);
+    	void addString(String string);
     	void clear();
 
     	std::vector<Result> match(const String& query) const;
 
     private:
-    	std::vector<StringUTF32> strings;
+    	std::vector<String> strings;
     	bool caseSensitive;
     	std::optional<size_t> resultsLimit;
 
-    	std::optional<Result> match(const StringUTF32& str, const StringUTF32& query) const;
+    	std::optional<Result> match(const String& str, const StringUTF32& query) const;
     };
 }
