@@ -434,18 +434,22 @@ bool UIList::onKeyPress(KeyboardKeyPress key)
 
 	if (key.is(KeyCode::Down)) {
 		moveSelection(0, 1);
+		return true;
 	}
 
 	if (key.is(KeyCode::Left)) {
 		moveSelection(-1, 0);
+		return true;
 	}
 
 	if (key.is(KeyCode::Right)) {
 		moveSelection(1, 0);
+		return true;
 	}
 
 	if (key.is(KeyCode::Enter)) {
 		onAccept();
+		return true;
 	}
 
 	return false;
