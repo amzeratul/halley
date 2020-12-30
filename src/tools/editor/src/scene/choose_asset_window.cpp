@@ -3,13 +3,15 @@
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/ui/widgets/ui_list.h"
+#include "src/ui/editor_ui_factory.h"
 
 using namespace Halley;
 
 ChooseAssetWindow::ChooseAssetWindow(UIFactory& factory, Callback callback)
 	: UIWidget("choose_asset_window", {}, UISizer())
-	, factory(factory)
+	, factory(dynamic_cast<EditorUIFactory&>(factory))
 	, callback(std::move(callback))
+	, fuzzyMatcher(false, 100)
 {
 	makeUI();
 	setModal(true);
@@ -25,16 +27,78 @@ void ChooseAssetWindow::onAddedToRoot()
 	getRoot()->registerKeyPressListener(shared_from_this(), 1);
 }
 
-void ChooseAssetWindow::setAssetIds(const std::vector<String>& ids, const String& defaultOption)
+void ChooseAssetWindow::setAssetIds(std::vector<String> ids, String defaultOption)
 {
-	if (canShowBlank()) {
-		options->addTextItem("", LocalisedString::fromHardcodedString("[Empty]"));
+	this->ids = std::move(ids);
+	this->defaultOption = defaultOption;
+
+	fuzzyMatcher.clear();
+	for (auto& id: this->ids) {
+		fuzzyMatcher.addString(id);
 	}
+
+	populateList();
+}
+
+void ChooseAssetWindow::populateList()
+{
+	options->clear();
 	
-	for (const auto& c: ids) {
-		options->addTextItem(c, LocalisedString::fromUserString(c));
+	if (filter.isEmpty()) {
+		if (canShowBlank()) {
+			options->addTextItem("", LocalisedString::fromHardcodedString("[Empty]"));
+		}
+		
+		for (const auto& c: ids) {
+			addItem(c);
+		}
+
+		options->layout();
+		options->setSelectedOptionId(defaultOption);
+	} else {
+		for (const auto& r: fuzzyMatcher.match(filter)) {
+			addItem(r.getString(), r.getMatchPositions());
+		}
+		options->layout();
+		options->setSelectedOption(0);
 	}
-	options->setSelectedOptionId(defaultOption);
+}
+
+void ChooseAssetWindow::addItem(const String& id, gsl::span<const std::pair<uint16_t, uint16_t>> matchPositions)
+{
+	auto sizer = std::make_shared<UISizer>();
+
+	// Make icon
+	auto icon = makeIcon(id);
+	if (icon.hasMaterial()) {
+		sizer->add(std::make_shared<UIImage>(icon), 0, Vector4f(0, 0, 4, 0));
+	}
+
+	// Make label
+	auto label = options->makeLabel("", LocalisedString::fromUserString(id));
+
+	// Match highlights
+	auto labelCol = label->getColour();
+	auto highlightCol = Colour4f(0.6f, 1.0f, 0.6f);
+	if (!matchPositions.empty()) {
+		std::vector<ColourOverride> overrides;
+		for (auto& p: matchPositions) {
+			overrides.emplace_back(p.first, highlightCol);
+			overrides.emplace_back(p.first + p.second, labelCol);
+		}
+		label->getTextRenderer().setColourOverride(overrides);
+	}
+	sizer->add(label, 0);
+	
+	options->addItem(id, sizer);
+}
+
+void ChooseAssetWindow::setFilter(const String& str)
+{
+	if (filter != str) {
+		filter = str;
+		populateList();
+	}
 }
 
 void ChooseAssetWindow::setTitle(LocalisedString title)
@@ -60,6 +124,16 @@ bool ChooseAssetWindow::onKeyPress(KeyboardKeyPress key)
 bool ChooseAssetWindow::canShowBlank() const
 {
 	return true;
+}
+
+Sprite ChooseAssetWindow::makeIcon(const String& id) const
+{
+	return Sprite();
+}
+
+EditorUIFactory& ChooseAssetWindow::getFactory() const
+{
+	return factory;
 }
 
 void ChooseAssetWindow::makeUI()
@@ -106,11 +180,6 @@ void ChooseAssetWindow::cancel()
 	destroy();
 }
 
-void ChooseAssetWindow::setFilter(const String& str)
-{
-	options->filterOptions(str);
-}
-
 AddComponentWindow::AddComponentWindow(UIFactory& factory, const std::vector<String>& componentList, Callback callback)
 	: ChooseAssetWindow(factory, std::move(callback))
 {
@@ -125,7 +194,16 @@ bool AddComponentWindow::canShowBlank() const
 
 ChooseAssetTypeWindow::ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, Callback callback)
 	: ChooseAssetWindow(factory, std::move(callback))
+	, type(type)
 {
 	setAssetIds(gameResources.ofType(type).enumerate(), defaultOption);
 	setTitle(LocalisedString::fromHardcodedString("Choose " + toString(type)));
+}
+
+Sprite ChooseAssetTypeWindow::makeIcon(const String& id) const
+{
+	if (!icon.hasMaterial()) {
+		icon = getFactory().makeAssetTypeIcon(type);
+	}
+	return icon;
 }

@@ -128,6 +128,8 @@ void UIList::clear()
 	items.clear();
 	curOption = -1;
 	UIWidget::clear();
+	layout();
+	sendEvent(UIEvent(UIEventType::MakeAreaVisibleCentered, getId(), Rect4f(0, 0, 1, 1)));
 }
 
 void UIList::setItemEnabled(const String& id, bool enabled)
