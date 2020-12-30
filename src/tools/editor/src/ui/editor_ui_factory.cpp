@@ -11,22 +11,18 @@
 #include "src/scene/scene_editor_canvas.h"
 using namespace Halley;
 
-static std::shared_ptr<UIStyleSheet> makeStyleSheet(Resources& resources)
-{
-	auto result = std::make_shared<UIStyleSheet>(resources);
-	for (auto& style: resources.enumerate<ConfigFile>()) {
-		if (style.startsWith("ui_style/")) {
-			result->load(*resources.get<ConfigFile>(style));
-		}
-	}
-
-	return result;
-}
-
 EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n)
-	: UIFactory(api, resources, i18n, makeStyleSheet(resources))
+	: UIFactory(api, resources, i18n)
 	, colourScheme(resources.get<ConfigFile>("colour_schemes/halley_default")->getRoot())
 {
+	auto styleSheet = std::make_shared<UIStyleSheet>(resources);
+	for (auto& style: resources.enumerate<ConfigFile>()) {
+		if (style.startsWith("ui_style/")) {
+			styleSheet->load(*resources.get<ConfigFile>(style), &colourScheme);
+		}
+	}
+	setStyleSheet(std::move(styleSheet));
+	
 	UIInputButtons listButtons;
 	setInputButtons("list", listButtons);
 

@@ -2,10 +2,10 @@
 
 uiStyle:
   button:
-    normal: { img: halley_ui/ui_button.png, colour: "#9C5BB5" }
-    down: { img: halley_ui/ui_button.png, colour: "#913DA3" }
-    hover: { img: halley_ui/ui_button.png, colour: "#B68FCB" }
-    disabled: { img: halley_ui/ui_button.png, colour: "#927B95" }
+    normal: { img: halley_ui/ui_button.png, colour: ui_controlNormal }
+    down: { img: halley_ui/ui_button.png, colour: ui_controlDown }
+    hover: { img: halley_ui/ui_button.png, colour: ui_controlHover }
+    disabled: { img: halley_ui/ui_button.png, colour: ui_controlDisabled }
     innerBorder: [ 5, 5, 5, 5 ]
     upSound: ""
     downSound: ""
@@ -15,12 +15,12 @@ uiStyle:
     iconBorder: [0, 0, 0, 0]
 
   checkbox:
-    normal: { img: halley_ui/ui_checkbox.png, colour: "#9C5BB5" }
-    checked: { img: halley_ui/ui_checkbox_checked.png, colour: "#9C5BB5" }
-    hover: { img: halley_ui/ui_checkbox.png, colour: "#B68FCB" }
-    checkedHover: { img: halley_ui/ui_checkbox_checked.png, colour: "#B68FCB" }
-    disabled: { img: halley_ui/ui_checkbox.png, colour: "#CDCDCD" }
-    checkedDisabled: { img: halley_ui/ui_checkbox_checked.png, colour: "#CDCDCD" }
+    normal: { img: halley_ui/ui_checkbox.png, colour: ui_controlNormal }
+    checked: { img: halley_ui/ui_checkbox_checked.png, colour: ui_controlNormal }
+    hover: { img: halley_ui/ui_checkbox.png, colour: ui_controlHover }
+    checkedHover: { img: halley_ui/ui_checkbox_checked.png, colour: ui_controlHover }
+    disabled: { img: halley_ui/ui_checkbox.png, colour: ui_controlDisabled }
+    checkedDisabled: { img: halley_ui/ui_checkbox_checked.png, colour: ui_controlDisabled }
 
   input:
     box: { img: halley_ui/ui_input.png, colour: "#9861B6" }
@@ -35,8 +35,8 @@ uiStyle:
     item:
       normal: ""
       hover: { img: halley_ui/ui_list_item.png, colour: "#5E3962" }
-      selected: { img: halley_ui/ui_list_item.png, colour: "#9C5BB5" }
-      drag: { img: halley_ui/ui_list_item.png, colour: "#9C5BB580" }
+      selected: { img: halley_ui/ui_list_item.png, colour: ui_controlNormal }
+      drag: { img: halley_ui/ui_list_item.png, colour: "ui_controlNormalTransparent" }
       innerBorder: [ 6, 5, 6, 2 ]
     innerBorder: [ 0, 0, 0, 0 ]
     extraMouseBorder: [ 1, 1, 1, 1 ]
@@ -50,8 +50,8 @@ uiStyle:
     item:
       normal: ""
       hover: { img: halley_ui/ui_list_item.png, colour: "#5E3962" }
-      selected: { img: halley_ui/ui_list_item.png, colour: "#9C5BB5" }
-      drag: { img: halley_ui/ui_list_item.png, colour: "#9C5BB580" }
+      selected: { img: halley_ui/ui_list_item.png, colour: ui_controlNormal }
+      drag: { img: halley_ui/ui_list_item.png, colour: "ui_controlNormalTransparent" }
       innerBorder: [ 0, 0, 0, 0 ]
     innerBorder: [ 0, 0, 0, 0 ]
     labelBorder: [ 6, 5, 6, 2 ]
@@ -71,17 +71,17 @@ uiStyle:
       beforeAfter: { img: "whitebox.png" }
       over: { img: "whitebox.png", colour: "#FFFFFF80" }
     controls:
-      guide_i: { img: "halley_ui/ui_treeview_line_i.png", colour: "#9C5BB5" }
-      guide_t: { img: "halley_ui/ui_treeview_line_t.png", colour: "#9C5BB5" }
-      guide_l: { img: "halley_ui/ui_treeview_line_l.png", colour: "#9C5BB5" }
+      guide_i: { img: "halley_ui/ui_treeview_line_i.png", colour: ui_controlNormal }
+      guide_t: { img: "halley_ui/ui_treeview_line_t.png", colour: ui_controlNormal }
+      guide_l: { img: "halley_ui/ui_treeview_line_l.png", colour: ui_controlNormal }
       guide_empty: { img: "halley_ui/ui_treeview_line_i.png", colour: "#00000000" }
-      leaf: { img: "halley_ui/ui_treeview_leaf.png", colour: "#9C5BB5" }
+      leaf: { img: "halley_ui/ui_treeview_leaf.png", colour: ui_controlNormal }
       element: { img: "halley_ui/ui_treeview_element.png", colour: "#FFFFFF" }
       collapseButton:
-        normal: { img: halley_ui/ui_treeview_expanded.png, colour: "#9C5BB5" }
-        down: { img: halley_ui/ui_treeview_expanded.png, colour: "#913DA3" }
-        hover: { img: halley_ui/ui_treeview_expanded.png, colour: "#B68FCB" }
-        disabled: { img: halley_ui/ui_treeview_expanded.png, colour: "#927B95" }
+        normal: { img: halley_ui/ui_treeview_expanded.png, colour: ui_controlNormal }
+        down: { img: halley_ui/ui_treeview_expanded.png, colour: ui_controlDown }
+        hover: { img: halley_ui/ui_treeview_expanded.png, colour: ui_controlHover }
+        disabled: { img: halley_ui/ui_treeview_expanded.png, colour: ui_controlDisabled }
         innerBorder: [ 0, 0, 0, 0 ]
         upSound: ""
         downSound: ""
@@ -89,10 +89,10 @@ uiStyle:
         label: { font: Ubuntu Regular, size: 13, colour: "#FFFFFF" }
         labelBorder: [0, 0, 0, 0]
       expandButton:
-        normal: { img: halley_ui/ui_treeview_collapsed.png, colour: "#9C5BB5" }
-        down: { img: halley_ui/ui_treeview_collapsed.png, colour: "#913DA3" }
-        hover: { img: halley_ui/ui_treeview_collapsed.png, colour: "#B68FCB" }
-        disabled: { img: halley_ui/ui_treeview_collapsed.png, colour: "#927B95" }
+        normal: { img: halley_ui/ui_treeview_collapsed.png, colour: ui_controlNormal }
+        down: { img: halley_ui/ui_treeview_collapsed.png, colour: ui_controlDown }
+        hover: { img: halley_ui/ui_treeview_collapsed.png, colour: ui_controlHover }
+        disabled: { img: halley_ui/ui_treeview_collapsed.png, colour: ui_controlDisabled }
         innerBorder: [ 0, 0, 0, 0 ]
         upSound: ""
         downSound: ""
@@ -101,11 +101,11 @@ uiStyle:
         labelBorder: [0, 0, 0, 0]
 
   dropdown:
-    normal: { img: halley_ui/ui_dropdown_closed.png, colour: "#9C5BB5" }
-    hover: { img: halley_ui/ui_dropdown_closed.png, colour: "#B68FCB" }
-    open: { img: halley_ui/ui_dropdown_open.png, colour: "#B68FCB" }
+    normal: { img: halley_ui/ui_dropdown_closed.png, colour: ui_controlNormal }
+    hover: { img: halley_ui/ui_dropdown_closed.png, colour: ui_controlHover }
+    open: { img: halley_ui/ui_dropdown_open.png, colour: ui_controlHover }
     disabled: { img: halley_ui/ui_dropdown_closed.png, colour: "#CDCDCD" }
-    background: { img: halley_ui/ui_dropdown_window.png, colour: "#B68FCB" }
+    background: { img: halley_ui/ui_dropdown_window.png, colour: ui_controlHover }
     innerBorder: [ 2, 2, 2, 2 ]
     labelBorder: [ 6, 8, 0, 0 ]
     label: { font: Ubuntu Regular, size: 15, colour: "#FFFFFF" }
@@ -121,45 +121,45 @@ uiStyle:
       horizontal: { img: halley_ui/ui_scrollbar.png, colour: "#5E3962" }
       vertical: { img: halley_ui/ui_scrollbar.png, colour: "#5E3962" }
     up:
-      normal: { img: halley_ui/ui_scrollbar.png, colour: "#9C5BB5" }
+      normal: { img: halley_ui/ui_scrollbar.png, colour: ui_controlNormal }
       disabled: { img: halley_ui/ui_scrollbar.png, colour: "#8D7B95" }
-      down: { img: halley_ui/ui_scrollbar.png, colour: "#913DA3" }
-      hover: { img: halley_ui/ui_scrollbar.png, colour: "#B68FCB" }
+      down: { img: halley_ui/ui_scrollbar.png, colour: ui_controlDown }
+      hover: { img: halley_ui/ui_scrollbar.png, colour: ui_controlHover }
       innerBorder: [ 3, 3, 3, 3 ]
       upSound: ""
       downSound: ""
       hoverSound: ""
     down:
-      normal: { img: halley_ui/ui_scrollbar.png, colour: "#9C5BB5" }
+      normal: { img: halley_ui/ui_scrollbar.png, colour: ui_controlNormal }
       disabled: { img: halley_ui/ui_scrollbar.png, colour: "#8D7B95" }
-      down: { img: halley_ui/ui_scrollbar.png, colour: "#913DA3" }
-      hover: { img: halley_ui/ui_scrollbar.png, colour: "#B68FCB" }
+      down: { img: halley_ui/ui_scrollbar.png, colour: ui_controlDown }
+      hover: { img: halley_ui/ui_scrollbar.png, colour: ui_controlHover }
       innerBorder: [ 3, 3, 3, 3 ]
       upSound: ""
       downSound: ""
       hoverSound: ""
     left:
-      normal: { img: halley_ui/ui_scrollbar.png, colour: "#9C5BB5" }
+      normal: { img: halley_ui/ui_scrollbar.png, colour: ui_controlNormal }
       disabled: { img: halley_ui/ui_scrollbar.png, colour: "#8D7B95" }
-      down: { img: halley_ui/ui_scrollbar.png, colour: "#913DA3" }
-      hover: { img: halley_ui/ui_scrollbar.png, colour: "#B68FCB" }
+      down: { img: halley_ui/ui_scrollbar.png, colour: ui_controlDown }
+      hover: { img: halley_ui/ui_scrollbar.png, colour: ui_controlHover }
       innerBorder: [ 3, 3, 3, 3 ]
       upSound: ""
       downSound: ""
       hoverSound: ""
     right:
-      normal: { img: halley_ui/ui_scrollbar.png, colour: "#9C5BB5" }
+      normal: { img: halley_ui/ui_scrollbar.png, colour: ui_controlNormal }
       disabled: { img: halley_ui/ui_scrollbar.png, colour: "#8D7B95" }
-      down: { img: halley_ui/ui_scrollbar.png, colour: "#913DA3" }
-      hover: { img: halley_ui/ui_scrollbar.png, colour: "#B68FCB" }
+      down: { img: halley_ui/ui_scrollbar.png, colour: ui_controlDown }
+      hover: { img: halley_ui/ui_scrollbar.png, colour: ui_controlHover }
       innerBorder: [ 3, 3, 3, 3 ]
       upSound: ""
       downSound: ""
       hoverSound: ""
     thumb:
-      normal: { img: halley_ui/ui_scrollbar.png, colour: "#9C5BB5" }
-      down: { img: halley_ui/ui_scrollbar.png, colour: "#913DA3" }
-      hover: { img: halley_ui/ui_scrollbar.png, colour: "#B68FCB" }
+      normal: { img: halley_ui/ui_scrollbar.png, colour: ui_controlNormal }
+      down: { img: halley_ui/ui_scrollbar.png, colour: ui_controlDown }
+      hover: { img: halley_ui/ui_scrollbar.png, colour: ui_controlHover }
       innerBorder: [ 3, 3, 3, 3 ]
       upSound: ""
       downSound: ""
@@ -187,10 +187,10 @@ uiStyle:
     minSize: 22
 
   buttonThin:
-    normal: { img: halley_ui/ui_button.png, colour: "#9C5BB5" }
-    down: { img: halley_ui/ui_button.png, colour: "#913DA3" }
-    hover: { img: halley_ui/ui_button.png, colour: "#B68FCB" }
-    disabled: { img: halley_ui/ui_button.png, colour: "#927B95" }
+    normal: { img: halley_ui/ui_button.png, colour: ui_controlNormal }
+    down: { img: halley_ui/ui_button.png, colour: ui_controlDown }
+    hover: { img: halley_ui/ui_button.png, colour: ui_controlHover }
+    disabled: { img: halley_ui/ui_button.png, colour: ui_controlDisabled }
     innerBorder: [ 5, 0, 5, 1 ]
     upSound: ""
     downSound: ""
@@ -212,12 +212,12 @@ uiStyle:
     label: { font: Ubuntu Bold, size: 14, colour: "#FFFFFF" }
 
   tabs:
-    background: { img: halley_ui/tabs/tabs_bg.png, colour: "#9C5BB5" }
+    background: { img: halley_ui/tabs/tabs_bg.png, colour: ui_controlNormal }
     item:
-      normal: { img: halley_ui/tabs/tab_normal.png, colour: "#9C5BB5" }
-      hover: { img: halley_ui/tabs/tab_hover.png, colour: "#9C5BB5" }
-      selected: { img: halley_ui/tabs/tab_selected.png, colour: "#9C5BB5" }
-      disabled: { img: halley_ui/tabs/tab_normal.png, colour: "#9C5BB5" }
+      normal: { img: halley_ui/tabs/tab_normal.png, colour: ui_controlNormal }
+      hover: { img: halley_ui/tabs/tab_hover.png, colour: ui_controlNormal }
+      selected: { img: halley_ui/tabs/tab_selected.png, colour: ui_controlNormal }
+      disabled: { img: halley_ui/tabs/tab_normal.png, colour: ui_controlNormal }
       innerBorder: [ 5, 6, 5, 2 ]
     innerBorder: [ 10, 0, 10, 0 ]
     extraMouseBorder: [ 0, 0, 0, 0 ]

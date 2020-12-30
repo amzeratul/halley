@@ -163,6 +163,11 @@ const I18N& UIFactory::getI18N() const
 	return i18n;
 }
 
+void UIFactory::setStyleSheet(std::shared_ptr<UIStyleSheet> styleSheet)
+{
+	this->styleSheet = std::move(styleSheet);
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 {
 	styleSheet->updateIfNeeded();

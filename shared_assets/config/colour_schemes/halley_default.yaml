@@ -24,3 +24,9 @@ colours:
   icon_simpleCopy: "#B5B9CC"
   icon_textFile: "#B5B9CC"
   icon_movie: "#B5B9CC"
+
+  ui_controlNormal: "#9C5BB5"
+  ui_controlDown: "#913DA3"
+  ui_controlHover: "#B68FCB"
+  ui_controlDisabled: "#927B95"
+  ui_controlNormalTransparent: "#9C5BB580"

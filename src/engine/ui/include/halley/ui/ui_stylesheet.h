@@ -6,6 +6,7 @@
 #include <map>
 
 namespace Halley {
+	class UIColourScheme;
 	class ConfigFile;
 	class ConfigNode;
 	class ConfigObserver;
@@ -15,7 +16,7 @@ namespace Halley {
 	class UIStyleDefinition
 	{
 	public:
-		UIStyleDefinition(String styleName, const ConfigNode& node, Resources& resources);
+		UIStyleDefinition(String styleName, const ConfigNode& node, Resources& resources, UIColourScheme* colourScheme);
 		~UIStyleDefinition();
 
 		const Sprite& getSprite(const String& name) const;
@@ -38,6 +39,7 @@ namespace Halley {
 		const String styleName;
 		const ConfigNode* node = nullptr;
 		Resources& resources;
+		UIColourScheme* colourScheme = nullptr;
 
 		std::unique_ptr<Pimpl> pimpl;
 	};
@@ -47,9 +49,9 @@ namespace Halley {
 
 	public:
 		UIStyleSheet(Resources& resources);
-		UIStyleSheet(Resources& resources, const ConfigFile& file);
+		UIStyleSheet(Resources& resources, const ConfigFile& file, UIColourScheme* colourScheme = nullptr);
 
-		void load(const ConfigFile& file);
+		void load(const ConfigFile& file, UIColourScheme* colourScheme = nullptr);
 
 		bool updateIfNeeded();
 
@@ -57,8 +59,9 @@ namespace Halley {
 		Resources& resources;
 		std::unordered_map<String, std::shared_ptr<UIStyleDefinition>> styles;
 		std::map<String, ConfigObserver> observers;
+		UIColourScheme* lastColourScheme = nullptr;
 
-		void load(const ConfigNode& node);
+		void load(const ConfigNode& node, UIColourScheme* colourScheme);
 		std::shared_ptr<const UIStyleDefinition> getStyle(const String& styleName) const;
 
 		bool needsUpdate() const;
