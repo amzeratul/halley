@@ -252,10 +252,14 @@ EditorTaskSet& ProjectWindow::getTasks() const
 
 void ProjectWindow::openAssetFinder()
 {
-	getRoot()->addChild(std::make_shared<ChooseImportAssetWindow>(factory, project, [=] (std::optional<String> result)
-	{
-		if (result) {
-			openFile(result.value());
-		}
-	}));
+	if (!assetFinder) {
+		assetFinder = std::make_shared<ChooseImportAssetWindow>(factory, project, [=] (std::optional<String> result)
+		{
+			if (result) {
+				openFile(result.value());
+			}
+			assetFinder.reset();
+		});
+		getRoot()->addChild(assetFinder);
+	}
 }

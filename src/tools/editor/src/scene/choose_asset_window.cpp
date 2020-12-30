@@ -185,6 +185,7 @@ void ChooseAssetWindow::accept()
 
 void ChooseAssetWindow::cancel()
 {
+	callback({});
 	destroy();
 }
 

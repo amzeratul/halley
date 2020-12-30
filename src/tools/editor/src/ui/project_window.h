@@ -9,6 +9,7 @@
 #include "src/scene/entity_editor.h"
 #include "src/scene/scene_editor_tabs.h"
 #include "editor_ui_factory.h"
+#include "src/scene/choose_asset_window.h"
 
 namespace Halley {
     class UIFactory;
@@ -63,6 +64,7 @@ namespace Halley {
     	std::shared_ptr<AssetsBrowser> assetEditorWindow;
         std::shared_ptr<SceneEditorTabs> sceneEditorTabs;
         std::shared_ptr<ConsoleWindow> consoleWindow;
+        std::shared_ptr<ChooseImportAssetWindow> assetFinder;
 
         void makeUI();
     	void makeToolbar();
