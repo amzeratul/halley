@@ -2,10 +2,10 @@
 
 uiStyle:
   button:
-    normal: { img: halley_ui/ui_button.png, colour: ui_controlNormal }
-    down: { img: halley_ui/ui_button.png, colour: ui_controlDown }
-    hover: { img: halley_ui/ui_button.png, colour: ui_controlHover }
-    disabled: { img: halley_ui/ui_button.png, colour: ui_controlDisabled }
+    normal: { img: halley_ui/ui_button.png, colour: ui_buttonNormal }
+    down: { img: halley_ui/ui_button.png, colour: ui_buttonDown }
+    hover: { img: halley_ui/ui_button.png, colour: ui_buttonHover }
+    disabled: { img: halley_ui/ui_button.png, colour: ui_buttonDisabled }
     innerBorder: [ 5, 5, 5, 5 ]
     upSound: ""
     downSound: ""
@@ -13,6 +13,18 @@ uiStyle:
     label: { font: Ubuntu Bold, size: 15, colour: ui_text }
     labelBorder: [0, 0, 0, 0]
     iconBorder: [0, 0, 0, 0]
+
+  buttonThin:
+    normal: { img: halley_ui/ui_button.png, colour: ui_buttonNormal }
+    down: { img: halley_ui/ui_button.png, colour: ui_buttonDown }
+    hover: { img: halley_ui/ui_button.png, colour: ui_buttonHover }
+    disabled: { img: halley_ui/ui_button.png, colour: ui_buttonDisabled }
+    innerBorder: [ 5, 0, 5, 1 ]
+    upSound: ""
+    downSound: ""
+    hoverSound: ""
+    label: { font: Ubuntu Bold, size: 14, colour: ui_text }
+    labelBorder: [0, 0, 0, 0]
 
   checkbox:
     normal: { img: halley_ui/ui_checkbox.png, colour: ui_controlNormal }
@@ -149,18 +161,6 @@ uiStyle:
 
   labelLight:
     label: { font: Ubuntu Light, size: 14, colour: ui_text }
-
-  buttonThin:
-    normal: { img: halley_ui/ui_button.png, colour: ui_controlNormal }
-    down: { img: halley_ui/ui_button.png, colour: ui_controlDown }
-    hover: { img: halley_ui/ui_button.png, colour: ui_controlHover }
-    disabled: { img: halley_ui/ui_button.png, colour: ui_controlDisabled }
-    innerBorder: [ 5, 0, 5, 1 ]
-    upSound: ""
-    downSound: ""
-    hoverSound: ""
-    label: { font: Ubuntu Bold, size: 14, colour: ui_text }
-    labelBorder: [0, 0, 0, 0]
 
   slider:
     emptyBar: { img: halley_ui/slider_bar_empty.png, colour: ui_controlDisabled }

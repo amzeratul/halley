@@ -39,6 +39,11 @@ colours:
   ui_controlHover: "#6D7285"
   ui_controlDisabled: "#191919"
 
+  ui_buttonNormal: "#3C4051"
+  ui_buttonDown: "#2D303E"
+  ui_buttonHover: "#656D8D"
+  ui_buttonDisabled: "#191919"
+
   ui_text: "#FFFFFF"
   ui_selectedText: "#FFFFFF"
   ui_unselectedText: "#FFFFFF"
@@ -46,12 +51,13 @@ colours:
   ui_disabledText: "#7F7F7F"
 
   ui_listBackground: "#25262E"
-  ui_listSelected: "#40424D"
-  ui_listHover: "#AAA5B6"
+  ui_listSelected: "#9A4E5B"
+  ui_listHover: "#4A2F38"
   ui_listDrag: "#40424D80"
-  ui_inputBox: "#86838D"
-  ui_scrollBackground: "#212227"
 
+  ui_inputBox: "#86838D"
+
+  ui_scrollBackground: "#212227"
   ui_backgroundBox: "#1E1E1E"
   ui_popupWindow: "#53131F"
   ui_staticBox: "#40424D"
