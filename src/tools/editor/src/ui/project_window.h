@@ -29,6 +29,8 @@ namespace Halley {
 
     	EditorTaskSet& getTasks() const;
 
+    	void reloadProject();
+
     protected:
 		void onUnloadDLL() override;
         void onLoadDLL() override;

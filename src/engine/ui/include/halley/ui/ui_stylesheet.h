@@ -31,7 +31,7 @@ namespace Halley {
 		bool hasColour(const String& name) const;
 		bool hasSubStyle(const String& name) const;
 
-		void reload(const ConfigNode& node);
+		void reload(const ConfigNode& node, std::shared_ptr<const UIColourScheme> colourScheme);
 
 	private:
 		class Pimpl;
@@ -42,6 +42,8 @@ namespace Halley {
 		std::shared_ptr<const UIColourScheme> colourScheme;
 
 		std::unique_ptr<Pimpl> pimpl;
+
+		void loadDefaults();
 	};
 
 	class UIStyleSheet {
@@ -54,6 +56,7 @@ namespace Halley {
 		void load(const ConfigFile& file, std::shared_ptr<const UIColourScheme> colourScheme = {});
 
 		bool updateIfNeeded();
+		void reload(std::shared_ptr<const UIColourScheme> colourScheme);
 
 	private:
 		Resources& resources;

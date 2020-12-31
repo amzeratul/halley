@@ -104,21 +104,6 @@ void EditorUIFactory::loadColourSchemes()
 	}
 }
 
-void EditorUIFactory::reloadStyleSheet()
-{
-	const auto cur = getStyleSheet();
-	
-	if (!cur) {
-		auto styleSheet = std::make_shared<UIStyleSheet>(resources);
-		for (auto& style: resources.enumerate<ConfigFile>()) {
-			if (style.startsWith("ui_style/")) {
-				styleSheet->load(*resources.get<ConfigFile>(style), colourScheme);
-			}
-		}
-		setStyleSheet(std::move(styleSheet));
-	}
-}
-
 std::vector<String> EditorUIFactory::getColourSchemeNames() const
 {
 	std::vector<String> result;
@@ -147,5 +132,23 @@ void EditorUIFactory::setColourScheme(const String& name)
 
 	if (found) {
 		reloadStyleSheet();
+	}
+}
+
+void EditorUIFactory::reloadStyleSheet()
+{
+	const auto cur = getStyleSheet();
+	
+	if (true || !cur) {
+		auto styleSheet = std::make_shared<UIStyleSheet>(resources);
+		for (auto& style: resources.enumerate<ConfigFile>()) {
+			if (style.startsWith("ui_style/")) {
+				styleSheet->load(*resources.get<ConfigFile>(style), colourScheme);
+			}
+		}
+		setStyleSheet(std::move(styleSheet));
+	} else {
+		// This doesn't work properly atm
+		cur->reload(colourScheme);
 	}
 }

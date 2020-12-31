@@ -93,7 +93,7 @@ void ProjectWindow::makePagedPane()
 
 	assetEditorWindow = std::make_shared<AssetsBrowser>(factory, project, *this);
 	consoleWindow = std::make_shared<ConsoleWindow>(factory);
-	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader());
+	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader(), *this);
 	auto properties = std::make_shared<GamePropertiesWindow>(factory, project);
 	auto ecs = std::make_shared<ECSWindow>(factory);
 	
@@ -260,4 +260,9 @@ void ProjectWindow::openAssetFinder()
 		});
 		getRoot()->addChild(assetFinder);
 	}
+}
+
+void ProjectWindow::reloadProject()
+{
+	destroy();
 }

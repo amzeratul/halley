@@ -1,15 +1,17 @@
 #include "editor_settings_window.h"
 #include "editor_ui_factory.h"
+#include "project_window.h"
 #include "halley/tools/project/project_loader.h"
 #include "src/preferences.h"
 using namespace Halley;
 
-EditorSettingsWindow::EditorSettingsWindow(EditorUIFactory& factory, Preferences& preferences, Project& project, ProjectLoader& projectLoader)
+EditorSettingsWindow::EditorSettingsWindow(EditorUIFactory& factory, Preferences& preferences, Project& project, ProjectLoader& projectLoader, ProjectWindow& projectWindow)
 	: UIWidget("editor_settings_window", Vector2f(), UISizer())
 	, factory(factory)
 	, preferences(preferences)
 	, project(project)
 	, projectLoader(projectLoader)
+	, projectWindow(projectWindow)
 {
 	factory.loadUI(*this, "ui/halley/editor_settings");
 }
@@ -63,7 +65,8 @@ void EditorSettingsWindow::save()
 	projectLoader.selectPlugins(project);
 
 	if (factory.getColourScheme()->getName() != preferences.getColourScheme()) {
-		// TODO
+		factory.setColourScheme(preferences.getColourScheme());
+		projectWindow.reloadProject();
 	}
 	
 	setSaveEnabled(false);

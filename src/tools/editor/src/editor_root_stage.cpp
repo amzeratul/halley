@@ -126,7 +126,6 @@ void EditorRootStage::initSprites()
 	{
 		// Halley logo
 		auto col = Colour4f(0.065f);
-		//auto col = Colour4f(0.9882f, 0.15686f, 0.27843f, 1);
 		halleyLogo = Sprite()
 			.setImage(getResources(), "halley/halley_icon_dist.png", "Halley/DistanceFieldSprite")
 			.setPivot(Vector2f(0.5f, 0.5f))
@@ -191,6 +190,7 @@ void EditorRootStage::loadProject()
 
 void EditorRootStage::unloadProject()
 {
+	initSprites();
 	setTopLevelUI({});
 	project.reset();
 }
