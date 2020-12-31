@@ -168,6 +168,11 @@ void UIFactory::setStyleSheet(std::shared_ptr<UIStyleSheet> styleSheet)
 	this->styleSheet = std::move(styleSheet);
 }
 
+const UIColourScheme& UIFactory::getColourScheme() const
+{
+	return colourScheme;
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 {
 	styleSheet->updateIfNeeded();
@@ -609,7 +614,7 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 		sprite.setSprite(resources, spriteSheetName, spriteName, materialName);
 	}
 
-	sprite.setColour(Colour4f::fromString(col)).setFlip(flip).setRotation(rotation);
+	sprite.setColour(getColour(col)).setFlip(flip).setRotation(rotation);
 	
 	if (pivot) {
 		sprite.setPivot(pivot.value());
@@ -935,5 +940,14 @@ bool UIFactory::resolveConditions(const ConfigNode& node) const
 		return ok;
 	} else {
 		return resolveCondition(node.asString());
+	}
+}
+
+Colour4f UIFactory::getColour(const String& key) const
+{
+	if (key.startsWith("#")) {
+		return Colour4f::fromString(key);
+	} else {
+		return colourScheme.getColour(key);
 	}
 }

@@ -30,3 +30,13 @@ colours:
   ui_controlHover: "#B68FCB"
   ui_controlDisabled: "#927B95"
   ui_controlNormalTransparent: "#9C5BB580"
+
+  ui_text: "#FFFFFF"
+  ui_selectedText: "#FFFFFF"
+  ui_unselectedText: "#FFFFFF"
+  ui_textGhost: "#7F7F7F"
+  ui_disabledText: "#7F7F7F"
+
+  ui_listBackground: "#201427"
+  ui_listHover: "#5E3962"
+  ui_inputBox: "#9861B6"

@@ -5,6 +5,8 @@
 #include <memory>
 #include <map>
 #include <functional>
+
+#include "ui_colour_scheme.h"
 #include "ui_input.h"
 #include "halley/text/i18n.h"
 
@@ -57,6 +59,7 @@ namespace Halley
 		const I18N& getI18N() const;
 
 		void setStyleSheet(std::shared_ptr<UIStyleSheet> styleSheet);
+		const UIColourScheme& getColourScheme() const;
 
 	protected:
 		struct ParsedOption {
@@ -74,6 +77,7 @@ namespace Halley
 		const HalleyAPI& api;
 		Resources& resources;
 		const I18N& i18n;
+		UIColourScheme colourScheme;
 
 		std::shared_ptr<UIWidget> makeWidget(const ConfigNode& node);
 		std::shared_ptr<UISizer> makeSizerPtr(const ConfigNode& node);
@@ -115,6 +119,8 @@ namespace Halley
 
 		bool hasCondition(const String& condition) const;
 		bool resolveConditions(const ConfigNode& node) const;
+
+		Colour4f getColour(const String& key) const;
 
 	private:
 		std::shared_ptr<UIStyleSheet> styleSheet;
