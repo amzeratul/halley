@@ -34,6 +34,12 @@ colours:
   icon_movie: "#AEBFED"
   
   
+  background0: "#141414"
+  background1: "#121212"
+  backgroundLogo: "#101010"
+  logo: "#FC2847"
+
+
   ui_controlNormal: "#40424D"
   ui_controlDown: "#30323A"
   ui_controlHover: "#6D7285"

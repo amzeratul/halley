@@ -1,24 +1,30 @@
 ---
 
-widget: { class: image, image: ui/float_window.png, innerBorder: [ 14, 11, 14, 14 ], colour: ui_popupWindow }
+widget: { class: widget }
 sizer: { type: vertical }
 children:
-- widget: { id: title, class: label, text: "Load Project" }
-  fill: centre
-- widget: { id: topLabel, class: label, style: labelLight, text: "Enter the path of the project to load:" }
-  border: [0, 5, 0, 0]
-  fill: centre
-- widget: { class: scrollBarPane, size: [200, 250] }
-  proportion: 1
-  border: [0, 5, 0, 5]
+- widget: { id: logo, class: image, image: "halley/halley_logo_dist.png" }
+  border: [0, 0, 0, 40]
+- widget: { class: image, image: ui/float_window.png, innerBorder: [ 14, 11, 14, 14 ], colour: ui_popupWindow }
   sizer: { type: vertical }
   children:
-  - widget: { id: recent, class: list }
+  - widget: { id: title, class: label, text: "Load Project" }
+    fill: centre
+  - widget: { id: topLabel, class: label, style: labelLight, text: "Enter the path of the project to load:" }
+    border: [0, 5, 0, 0]
+    fill: centre
+  - widget: { class: scrollBarPane, size: [200, 250] }
     proportion: 1
-- sizer: { type: horizontal }
-  children:
-  - widget: { id: input, class: textInput, size: [400, 22] }
-    proportion: 1
-  - widget: { id: ok, class: button, text: "OK", size: [60, 22], tooltip: "Load the selected Project" }
+    border: [0, 5, 0, 5]
+    sizer: { type: vertical }
+    children:
+    - widget: { id: recent, class: list }
+      proportion: 1
+  - sizer: { type: horizontal }
+    children:
+    - widget: { id: input, class: textInput, size: [400, 22] }
+      proportion: 1
+    - widget: { id: ok, class: button, text: "OK", size: [60, 22], tooltip: "Load the selected Project" }
+- widget: { class: widget, size: [512, 128] }
 
 ...
