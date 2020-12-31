@@ -79,26 +79,24 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 			}
 
 			auto useDropdown = false;
-			std::vector<String> assetNames;
-			if (int(assets.size()) > 3) {				
+			std::vector<String> dropdownAssetIds;
+			if (assets.size() > 1) {
 				for (const auto& asset : assets) {
 					if (asset.first == AssetType::Animation) {
-						assetNames.push_back(asset.second);
+						dropdownAssetIds.push_back(asset.second);
 					}
 				}
 
-				if(!assetNames.empty())	{
-					useDropdown = true;
-					getWidget("contentListDropdownArea")->setActive(true);
-				}
+				useDropdown = dropdownAssetIds.size() > 1;
 
-				if (clearDropdown) {
-					contentListDropdown->setOptions(assetNames, 0);
+				if (useDropdown && clearDropdown) {
+					contentListDropdown->setOptions(dropdownAssetIds, 0);
 				}
 			}
+			getWidget("contentListDropdownArea")->setActive(useDropdown);
 			
 			for (auto& asset: assets) {
-				if (!useDropdown || asset.second == contentListDropdown->getSelectedOptionId() || std::find(assetNames.begin(), assetNames.end(), asset.second) == assetNames.end()) {
+				if (!useDropdown || asset.second == contentListDropdown->getSelectedOptionId() || std::find(dropdownAssetIds.begin(), dropdownAssetIds.end(), asset.second) == dropdownAssetIds.end()) {
 					createEditorTab(Path(name), asset.first, asset.second);
 				}
 			}
@@ -154,6 +152,7 @@ void AssetEditorWindow::createEditorTab(Path filePath, AssetType type, const Str
 		item->add(text, 1.0f, {}, UISizerAlignFlags::CentreVertical);
 
 		contentList->addItem(toString(n), item);
+		contentList->setActive(contentList->getCount() > 1);
 		curEditors.push_back(editor);
 	}
 }
