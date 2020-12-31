@@ -68,6 +68,10 @@ void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType input
 		}
 
 		checkActive();
+
+		if (eventHandler) {
+			eventHandler->pump();
+		}
 	}
 
 	if (isActive()) {
@@ -86,10 +90,6 @@ void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType input
 		}
 
 		removeDeadChildren();
-
-		if (eventHandler) {
-			eventHandler->pump();
-		}
 	}
 }
 
