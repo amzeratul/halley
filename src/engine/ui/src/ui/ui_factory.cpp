@@ -36,6 +36,11 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	, i18n(i18n)
 	, styleSheet(std::move(styleSheet))
 {
+	const String defaultColourScheme = "colour_schemes/halley_default";
+	if (resources.exists<ConfigFile>(defaultColourScheme)) {
+		colourScheme = resources.get<ConfigFile>(defaultColourScheme)->getRoot();
+	}
+	
 	addFactory("widget", [=] (const ConfigNode& node) { return makeBaseWidget(node); });
 	addFactory("label", [=] (const ConfigNode& node) { return makeLabel(node); });
 	addFactory("button", [=] (const ConfigNode& node) { return makeButton(node); });

@@ -13,9 +13,7 @@ using namespace Halley;
 
 EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n)
 	: UIFactory(api, resources, i18n)
-{
-	colourScheme = resources.get<ConfigFile>("colour_schemes/halley_default")->getRoot();
-	
+{	
 	auto styleSheet = std::make_shared<UIStyleSheet>(resources);
 	for (auto& style: resources.enumerate<ConfigFile>()) {
 		if (style.startsWith("ui_style/")) {
