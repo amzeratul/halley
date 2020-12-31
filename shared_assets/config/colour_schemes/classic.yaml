@@ -1,6 +1,6 @@
 name: Classic
 defaultColour: "#FFFFFF"
-base: colour_schemes/halley_default
+base: colour_schemes/default
 colours:
   icon_directory: "#CAA9CD"
   

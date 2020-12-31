@@ -961,7 +961,7 @@ Colour4f UIFactory::getColour(const String& key) const
 
 void UIFactory::loadDefaultColourScheme()
 {
-	const String defaultColourScheme = "colour_schemes/halley_default";
+	const String defaultColourScheme = "colour_schemes/default";
 	if (resources.exists<ConfigFile>(defaultColourScheme)) {
 		colourScheme = UIColourScheme(resources.get<ConfigFile>(defaultColourScheme)->getRoot(), resources);
 	}

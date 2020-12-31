@@ -15,7 +15,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	: UIFactory(api, resources, i18n)
 {
 	loadColourSchemes();
-	setColourScheme("Boring Grey");
+	setColourScheme("Default");
 	
 	UIInputButtons listButtons;
 	setInputButtons("list", listButtons);
