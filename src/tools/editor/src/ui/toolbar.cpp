@@ -51,9 +51,6 @@ void Toolbar::makeUI()
 		case EditorTabs::Assets:
 			toolName = "Assets";
 			break;
-		case EditorTabs::Scene:
-			toolName = "Scene";
-			break;
 		case EditorTabs::ECS:
 			toolName = "ECS";
 			break;

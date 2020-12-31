@@ -13,6 +13,7 @@
 #include "src/assets/assets_browser.h"
 #include "src/scene/choose_asset_window.h"
 #include "src/scene/scene_editor_window.h"
+#include "src/ui/editor_ui_factory.h"
 
 using namespace Halley;
 
@@ -91,7 +92,6 @@ void ProjectWindow::makePagedPane()
 	}
 
 	assetEditorWindow = std::make_shared<AssetsBrowser>(factory, project, *this);
-	sceneEditorTabs = std::make_shared<SceneEditorTabs>(factory, project, api);
 	consoleWindow = std::make_shared<ConsoleWindow>(factory);
 	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader());
 	auto properties = std::make_shared<GamePropertiesWindow>(factory, project);
@@ -99,7 +99,6 @@ void ProjectWindow::makePagedPane()
 	
 	pagedPane = std::make_shared<UIPagedPane>("pages", numOfStandardTools);
 	pagedPane->getPage(static_cast<int>(EditorTabs::Assets))->add(assetEditorWindow, 1, Vector4f(8, 8, 8, 8));
-	pagedPane->getPage(static_cast<int>(EditorTabs::Scene))->add(sceneEditorTabs, 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(static_cast<int>(EditorTabs::ECS))->add(ecs, 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(static_cast<int>(EditorTabs::Remotes))->add(consoleWindow, 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(static_cast<int>(EditorTabs::Properties))->add(properties, 1, Vector4f(8, 8, 8, 8));
@@ -237,12 +236,6 @@ void ProjectWindow::openAsset(AssetType type, const String& assetId)
 {
 	toolbar->getList()->setSelectedOptionId(toString(EditorTabs::Assets));
 	assetEditorWindow->showAsset(type, assetId);
-}
-
-void ProjectWindow::openPrefab(const String& name, AssetType assetType)
-{
-	sceneEditorTabs->load(assetType, name);
-	toolbar->getList()->setSelectedOption(static_cast<int>(EditorTabs::Scene));
 }
 
 const HalleyAPI& ProjectWindow::getAPI() const

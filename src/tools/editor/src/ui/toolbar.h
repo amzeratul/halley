@@ -10,7 +10,6 @@ namespace Halley {
 
 	enum class EditorTabs {
 		Assets,
-		Scene,
 		ECS,
 		Remotes,
 		Properties,
@@ -19,10 +18,9 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<EditorTabs> {
-		constexpr std::array<const char*, 6> operator()() const {
+		constexpr std::array<const char*, 5> operator()() const {
 			return{{
 				"assets",
-				"scene",
 				"ecs",
 				"remotes",
 				"properties",

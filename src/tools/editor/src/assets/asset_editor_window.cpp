@@ -1,6 +1,4 @@
 #include "asset_editor_window.h"
-
-
 #include "animation_editor.h"
 #include "asset_editor.h"
 #include "metadata_editor.h"

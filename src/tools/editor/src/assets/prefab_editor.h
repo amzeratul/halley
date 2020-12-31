@@ -19,8 +19,8 @@ namespace Halley {
 		ProjectWindow& projectWindow;
 		std::shared_ptr<SceneEditorWindow> window;
 
-		void setupWindow();
+		bool pendingLoad = false;
+
 		void open();
-		void updateButton();
 	};
 }

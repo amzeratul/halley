@@ -14,9 +14,6 @@ children:
     - id: assets
       image: ui/toolbar_assets.png
       tooltip: Asset Browser
-    - id: scene
-      image: ui/toolbar_scene.png
-      tooltip: Scene Editor
     - id: ecs
       image: ui/toolbar_ecs.png
       tooltip: Entity-Component-System
