@@ -2,6 +2,9 @@
 widget: { class: widget }
 sizer: { type: horizontal }
 children:
+- widget: { id: icon, class: image, image: whitebox.png }
+  border: [0, 0, 4, 0]
+  fill: centre
 - widget: { id: label, class: label, text: "" }
   proportion: 1
 - widget: { id: close, class: button, text: "x", size: [20, 20], style: buttonThin, tooltip: "Close Tab" }

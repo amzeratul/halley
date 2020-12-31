@@ -1,11 +1,12 @@
 #include "asset_browser_tabs.h"
 
 #include "asset_editor_window.h"
+#include "halley/tools/project/project.h"
 #include "src/ui/editor_ui_factory.h"
 
 using namespace Halley;
 
-AssetBrowserTabs::AssetBrowserTabs(UIFactory& factory, Project& project, ProjectWindow& projectWindow)
+AssetBrowserTabs::AssetBrowserTabs(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow)
 	: UIWidget("asset_browser_tabs", {}, UISizer(UISizerType::Horizontal))
 	, factory(factory)
 	, project(project)
@@ -23,19 +24,30 @@ void AssetBrowserTabs::load(std::optional<AssetType> assetType, const String& na
 		return;
 	}
 
-	// Not found, add it instead
+	// Tab
+	Sprite icon;
+	if (assetType) {
+		icon = factory.makeAssetTypeIcon(assetType.value());
+	} else {
+		const auto type = project.getAssetImporter()->getImportAssetType(name, false);
+		icon = factory.makeImportAssetTypeIcon(type);
+	}
+	auto label = LocalisedString::fromHardcodedString(Path(name).getFilename().toString());
 	auto tabContents = factory.makeUI("ui/halley/asset_browser_tab_contents");
-	tabContents->getWidgetAs<UILabel>("label")->setText(LocalisedString::fromHardcodedString(Path(name).getFilename().toString()));
+	tabContents->getWidgetAs<UIImage>("icon")->setSprite(icon);
+	tabContents->getWidgetAs<UILabel>("label")->setText(std::move(label));
 	tabContents->setHandle(UIEventType::ButtonClicked, "close", [=] (const UIEvent& event)
 	{
 		toClose.push_back(key);
 	});
 	tabs->addItem(key, tabContents);
 
-	auto window = std::make_shared<AssetEditorWindow>(dynamic_cast<EditorUIFactory&>(factory), project, projectWindow);
+	// Window
+	auto window = std::make_shared<AssetEditorWindow>(factory, project, projectWindow);
 	window->setAssetSrcMode(srcMode);
 	window->loadAsset(name, assetType, true);
-	
+
+	// Select
 	pages->addPage()->add(window, 1);
 	tabs->setSelectedOption(int(tabs->getCount()) - 1);
 }

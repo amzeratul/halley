@@ -2,14 +2,14 @@
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
+	class EditorUIFactory;
 	class ProjectWindow;
 	class HalleyAPI;
 	class Project;
-	class UIFactory;
 
 	class AssetBrowserTabs final : public UIWidget {
 	public:
-		AssetBrowserTabs(UIFactory& factory, Project& project, ProjectWindow& projectWindow);
+		AssetBrowserTabs(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow);
 
 		void load(std::optional<AssetType> assetType, const String& name);
 		void refreshAssets();
@@ -19,7 +19,7 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 		
 	private:
-		UIFactory& factory;
+		EditorUIFactory& factory;
 		Project& project;
 		ProjectWindow& projectWindow;
 		
