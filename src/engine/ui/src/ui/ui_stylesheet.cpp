@@ -27,7 +27,10 @@ Colour4f getColour(const ConfigNode& node, const std::shared_ptr<const UIColourS
 }
 
 template <typename T>
-void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, const std::shared_ptr<const UIColourScheme>& colourScheme, T& data) {}
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, const std::shared_ptr<const UIColourScheme>& colourScheme, T& data)
+{
+	throw Exception("Unreachable code", HalleyExceptions::UI);
+}
 
 template <>
 void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, const std::shared_ptr<const UIColourScheme>& colourScheme, Sprite& data)
@@ -86,7 +89,7 @@ void loadStyleData(Resources& resources, const String& name, const ConfigNode& n
 }
 
 template <>
-void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, const std::shared_ptr<const UIColourScheme>& colourScheme, std::shared_ptr<const UIStyleDefinition>& data)
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, const std::shared_ptr<const UIColourScheme>& colourScheme, std::shared_ptr<UIStyleDefinition>& data)
 {
 	if (node.getType() != ConfigNodeType::Map) {
 		data = {};
@@ -145,7 +148,7 @@ public:
 	mutable std::unordered_map<String, String> strings;
 	mutable std::unordered_map<String, float> floats;
 	mutable std::unordered_map<String, Colour4f> colours;
-	mutable std::unordered_map<String, std::shared_ptr<const UIStyleDefinition>> subStyles;
+	mutable std::unordered_map<String, std::shared_ptr<UIStyleDefinition>> subStyles;
 };
 
 UIStyleDefinition::UIStyleDefinition(String styleName, const ConfigNode& node, Resources& resources, const std::shared_ptr<const UIColourScheme>& colourScheme)
@@ -155,14 +158,7 @@ UIStyleDefinition::UIStyleDefinition(String styleName, const ConfigNode& node, R
 	, colourScheme(colourScheme)
 	, pimpl(std::make_unique<Pimpl>())
 {
-	// Load defaults
-	pimpl->sprites[":default"] = Sprite();
-	pimpl->textRenderers[":default"] = TextRenderer();
-	pimpl->floats[":default"] = 0.0f;
-	pimpl->borders[":default"] = Vector4f();
-	pimpl->strings[":default"] = "";
-	pimpl->subStyles[":default"] = {};
-	pimpl->colours[":default"] = Colour4f(1, 1, 1, 1);
+	loadDefaults();
 }
 
 UIStyleDefinition::~UIStyleDefinition() = default;
@@ -197,9 +193,11 @@ bool UIStyleDefinition::hasSubStyle(const String& name) const
 	return hasValue(node, resources, styleName, name, pimpl->subStyles);
 }
 
-void UIStyleDefinition::reload(const ConfigNode& node)
+void UIStyleDefinition::reload(const ConfigNode& node, std::shared_ptr<const UIColourScheme> colourScheme)
 {
+	this->colourScheme = std::move(colourScheme);
 	this->node = &node;
+	loadDefaults();
 }
 
 Vector4f UIStyleDefinition::getBorder(const String& name) const
@@ -220,6 +218,29 @@ float UIStyleDefinition::getFloat(const String& name) const
 Colour4f UIStyleDefinition::getColour(const String& name) const
 {
 	return getValue(node, resources, styleName, name, colourScheme, pimpl->colours);
+}
+
+void UIStyleDefinition::loadDefaults()
+{
+	pimpl->sprites.clear();
+	pimpl->sprites[":default"] = Sprite();
+	pimpl->textRenderers.clear();
+	pimpl->textRenderers[":default"] = TextRenderer();
+	pimpl->floats.clear();
+	pimpl->floats[":default"] = 0.0f;
+	pimpl->borders.clear();
+	pimpl->borders[":default"] = Vector4f();
+	pimpl->strings.clear();
+	pimpl->strings[":default"] = "";
+	pimpl->colours[":default"] = Colour4f(1, 1, 1, 1);
+	pimpl->colours.clear();
+
+	for (auto& [k, v]: pimpl->subStyles) {
+		if (v) {
+			v->loadDefaults();
+		}
+	}
+	pimpl->subStyles[":default"] = {};
 }
 
 UIStyleSheet::UIStyleSheet(Resources& resources)
@@ -248,6 +269,12 @@ bool UIStyleSheet::updateIfNeeded()
 	return false;
 }
 
+void UIStyleSheet::reload(std::shared_ptr<const UIColourScheme> colourScheme)
+{
+	lastColourScheme = std::move(colourScheme);
+	update();
+}
+
 bool UIStyleSheet::needsUpdate() const
 {
 	for (auto& o: observers) {
@@ -274,7 +301,7 @@ void UIStyleSheet::load(const ConfigNode& root, std::shared_ptr<const UIColourSc
 		// If it already exists, update existing instance (as it might be kept by UI elements all around)
 		const auto iter = styles.find(node.first);
 		if (iter != styles.end()) {
-			iter->second->reload(node.second);
+			iter->second->reload(node.second, colourScheme);
 		} else {
 			styles[node.first] = std::make_unique<UIStyleDefinition>(node.first, node.second, resources, colourScheme);
 		}
