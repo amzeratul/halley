@@ -1,5 +1,6 @@
 #pragma once
 #include "asset_editor.h"
+#include "src/scene/scene_editor_window.h"
 
 namespace Halley {
 	class PrefabEditor : public AssetEditor {
@@ -16,6 +17,7 @@ namespace Halley {
 	private:
 		Project& project;
 		ProjectWindow& projectWindow;
+		std::shared_ptr<SceneEditorWindow> window;
 
 		void setupWindow();
 		void open();

@@ -245,6 +245,11 @@ void ProjectWindow::openPrefab(const String& name, AssetType assetType)
 	toolbar->getList()->setSelectedOption(static_cast<int>(EditorTabs::Scene));
 }
 
+const HalleyAPI& ProjectWindow::getAPI() const
+{
+	return api;
+}
+
 EditorTaskSet& ProjectWindow::getTasks() const
 {
 	return *tasks;

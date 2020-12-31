@@ -28,6 +28,8 @@ namespace Halley {
     	void openAsset(AssetType type, const String& assetId);
         void openPrefab(const String& assetId, AssetType assetType);
 
+    	const HalleyAPI& getAPI() const;
+
     	EditorTaskSet& getTasks() const;
 
     protected:

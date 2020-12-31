@@ -1,5 +1,7 @@
 #include "prefab_editor.h"
 
+
+#include "src/scene/scene_editor_window.h"
 #include "src/ui/project_window.h"
 using namespace Halley;
 
@@ -17,21 +19,27 @@ void PrefabEditor::reload()
 
 void PrefabEditor::onDoubleClick()
 {
-	open();
+	//open();
 }
 
 void PrefabEditor::update(Time t, bool moved)
 {
-	updateButton();
+	//updateButton();
 }
 
 std::shared_ptr<const Resource> PrefabEditor::loadResource(const String& assetId)
 {
+	if (assetType == AssetType::Scene) {
+		window->loadScene(assetId);
+	} else if (assetType == AssetType::Prefab) {
+		window->loadPrefab(assetId);
+	}
 	return {};
 }
 
 void PrefabEditor::setupWindow()
 {
+	/*
 	add(factory.makeUI("ui/halley/prefab_editor"), 1);
 
 	setHandle(UIEventType::ButtonClicked, "open", [=](const UIEvent& event)
@@ -40,6 +48,10 @@ void PrefabEditor::setupWindow()
 	});
 
 	updateButton();
+	*/
+
+	window = std::make_shared<SceneEditorWindow>(factory, project, projectWindow.getAPI(), projectWindow);
+	add(window, 1);
 }
 
 void PrefabEditor::open()

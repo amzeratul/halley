@@ -6,6 +6,7 @@
 #include "halley/tools/dll/dynamic_library.h"
 
 namespace Halley {
+	class ProjectWindow;
 	class SceneEditorTabs;
 	class HalleyAPI;
 	class Project;
@@ -14,7 +15,7 @@ namespace Halley {
 
 	class SceneEditorWindow final : public UIWidget, public IDynamicLibraryListener, public ISceneEditorWindow {
 	public:
-		SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, SceneEditorTabs& sceneEditorTabs);
+		SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, ProjectWindow& projectWindow);
 		~SceneEditorWindow();
 
 		void onAddedToRoot() override;
@@ -69,7 +70,7 @@ namespace Halley {
 		const HalleyAPI& api;
 		UIFactory& uiFactory;
 		Project& project;
-		SceneEditorTabs& sceneEditorTabs;
+		ProjectWindow& projectWindow;
 
 		std::shared_ptr<SceneEditorGameBridge> gameBridge;
 		std::shared_ptr<SceneEditorCanvas> canvas;

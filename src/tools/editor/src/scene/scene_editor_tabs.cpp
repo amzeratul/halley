@@ -14,6 +14,8 @@ SceneEditorTabs::SceneEditorTabs(UIFactory& factory, Project& project, const Hal
 
 void SceneEditorTabs::load(AssetType assetType, const String& name)
 {
+	return;
+
 	const String key = toString(assetType) + ":" + name;
 
 	const bool alreadyExists = tabs->setSelectedOptionId(key);
@@ -29,7 +31,8 @@ void SceneEditorTabs::load(AssetType assetType, const String& name)
 		toClose.push_back(key);
 	});
 	tabs->addItem(key, tabContents);
-	
+
+	/*
 	auto window = std::make_shared<SceneEditorWindow>(factory, project, api, *this);
 	if (assetType == AssetType::Scene) {
 		window->loadScene(name);
@@ -37,6 +40,7 @@ void SceneEditorTabs::load(AssetType assetType, const String& name)
 		window->loadPrefab(name);
 	}
 	pages->addPage()->add(window, 1);
+	*/
 	tabs->setSelectedOption(int(tabs->getCount()) - 1);
 }
 

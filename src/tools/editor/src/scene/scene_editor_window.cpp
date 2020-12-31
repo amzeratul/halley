@@ -11,15 +11,15 @@
 #include "halley/ui/ui_factory.h"
 #include "scene_editor_canvas.h"
 #include "scene_editor_game_bridge.h"
-#include "scene_editor_tabs.h"
+#include "src/ui/project_window.h"
 using namespace Halley;
 
-SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, SceneEditorTabs& sceneEditorTabs)
+SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, ProjectWindow& projectWindow)
 	: UIWidget("scene_editor", {}, UISizer())
 	, api(api)
 	, uiFactory(factory)
 	, project(project)
-	, sceneEditorTabs(sceneEditorTabs)
+	, projectWindow(projectWindow)
 	, gameBridge(std::make_shared<SceneEditorGameBridge>(api, uiFactory.getResources(), uiFactory, project))
 {
 	makeUI();
@@ -430,7 +430,7 @@ void SceneEditorWindow::duplicateEntity(const String& id)
 
 void SceneEditorWindow::openEditPrefabWindow(const String& name)
 {
-	sceneEditorTabs.load(AssetType::Prefab, name);
+	projectWindow.openAsset(AssetType::Prefab, name);
 }
 
 const std::shared_ptr<ISceneData>& SceneEditorWindow::getSceneData() const
