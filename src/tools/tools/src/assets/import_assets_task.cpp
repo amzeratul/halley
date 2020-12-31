@@ -161,7 +161,7 @@ ImportAssetsTask::ImportResult ImportAssetsTask::importAsset(const ImportAssetsD
 		ImportingAsset importingAsset;
 		importingAsset.assetId = asset.assetId;
 		importingAsset.assetType = asset.assetType;
-		for (auto& f: asset.inputFiles) {
+		for (const auto& f: asset.inputFiles) {
 			auto meta = metadataFetcher(f.getPath());
 			auto data = FileSystem::readFile(asset.srcDir / f.getDataPath());
 			if (data.empty()) {
@@ -178,12 +178,12 @@ ImportAssetsTask::ImportResult ImportAssetsTask::importAsset(const ImportAssetsD
 			
 			AssetCollector collector(cur, assetsPath, importer.getAssetsSrc(), progressReporter);
 
-			for (const auto& importer: importer.getImporters(cur.assetType)) {
+			for (const auto& assetImporter: importer.getImporters(cur.assetType)) {
 				try {
-					importer.get().import(cur, collector);
+					assetImporter.get().import(cur, collector);
 				} catch (...) {
-					for (auto& i: collector.getAdditionalInputs()) {
-						result.additionalInputs.push_back(std::move(i));
+					for (const auto& i: collector.getAdditionalInputs()) {
+						result.additionalInputs.push_back(i);
 					}
 					throw;
 				}
@@ -197,12 +197,12 @@ ImportAssetsTask::ImportResult ImportAssetsTask::importAsset(const ImportAssetsD
 				result.outFiles.push_back(std::move(outFile));
 			}
 
-			for (auto& o: collector.getAssets()) {
-				result.out.push_back(std::move(o));
+			for (const auto& o: collector.getAssets()) {
+				result.out.push_back(o);
 			}
 
-			for (auto& i: collector.getAdditionalInputs()) {
-				result.additionalInputs.push_back(std::move(i));
+			for (const auto& i: collector.getAdditionalInputs()) {
+				result.additionalInputs.push_back(i);
 			}
 		}
 		
