@@ -2,7 +2,7 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
-- widget: { class: image, image: "halley_ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: ui_popupWindow, size: [400, 300] }
+- widget: { class: image, image: "halley_ui/title_capsule.png", innerBorder: [ 6, 3, 6, 6 ], colour: ui_popupWindow, size: [400, 300] }
   sizer: { type: vertical }
   fill: centre
   proportion: 1

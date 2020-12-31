@@ -1,11 +1,10 @@
 #include "editor_settings_window.h"
-
-
+#include "editor_ui_factory.h"
 #include "halley/tools/project/project_loader.h"
 #include "src/preferences.h"
 using namespace Halley;
 
-EditorSettingsWindow::EditorSettingsWindow(UIFactory& factory, Preferences& preferences, Project& project, ProjectLoader& projectLoader)
+EditorSettingsWindow::EditorSettingsWindow(EditorUIFactory& factory, Preferences& preferences, Project& project, ProjectLoader& projectLoader)
 	: UIWidget("editor_settings_window", Vector2f(), UISizer())
 	, factory(factory)
 	, preferences(preferences)
@@ -19,6 +18,17 @@ void EditorSettingsWindow::onMakeUI()
 {
 	workingCopy.loadEditorPreferences(preferences);
 	setSaveEnabled(false);
+
+	{
+		auto colourSchemes = getWidgetAs<UIDropdown>("colourScheme");
+		colourSchemes->setOptions(factory.getColourSchemeNames());
+
+		bindData("colourScheme", workingCopy.getColourScheme(), [=] (String value)
+		{
+			workingCopy.setColourScheme(value);
+			setSaveEnabled(true);
+		});
+	}
 
 	auto platforms = getWidget("platforms");
 	for (const auto& platform: projectLoader.getKnownPlatforms()) {
@@ -51,6 +61,10 @@ void EditorSettingsWindow::save()
 	preferences.loadEditorPreferences(workingCopy);
 	projectLoader.setDisabledPlatforms(preferences.getDisabledPlatforms());
 	projectLoader.selectPlugins(project);
+
+	if (factory.getColourScheme()->getName() != preferences.getColourScheme()) {
+		// TODO
+	}
 	
 	setSaveEnabled(false);
 }
@@ -63,6 +77,7 @@ void EditorSettingsWindow::reset()
 	for (const auto& platform: projectLoader.getKnownPlatforms()) {
 		platforms->getWidgetAs<UICheckbox>(platform)->setChecked(!workingCopy.isPlatformDisabled(platform));
 	}
+	getWidgetAs<UIDropdown>("colourScheme")->setSelectedOption(workingCopy.getColourScheme());
 
 	setSaveEnabled(false);
 }

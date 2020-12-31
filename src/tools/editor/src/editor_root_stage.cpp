@@ -142,7 +142,7 @@ void EditorRootStage::initSprites()
 
 void EditorRootStage::createUI()
 {
-	uiFactory = std::make_unique<EditorUIFactory>(getAPI(), getResources(), i18n);
+	uiFactory = std::make_unique<EditorUIFactory>(getAPI(), getResources(), i18n, editor.getPreferences().getColourScheme());
 	ui = std::make_unique<UIRoot>(getAPI());
 	ui->makeToolTip(uiFactory->getStyle("tooltip"));
 

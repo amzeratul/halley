@@ -28,6 +28,7 @@ ConfigNode Preferences::save() const
 	}
 
 	root["disabledPlatforms"] = ConfigNode(disabledPlatforms);
+	root["colourScheme"] = colourScheme;
 
 	return root;
 }
@@ -49,6 +50,7 @@ void Preferences::load(const ConfigNode& root)
 		windowState = WindowState(windowNode["state"].asInt());
 	}
 	disabledPlatforms = root["disabledPlatforms"].asVector<String>({});
+	colourScheme = root["colourScheme"].asString("Default");
 }
 
 bool Preferences::isDirty() const
@@ -136,8 +138,19 @@ void Preferences::setPlatformDisabled(const String& name, bool disabled)
 	}
 }
 
+const String& Preferences::getColourScheme() const
+{
+	return colourScheme;
+}
+
+void Preferences::setColourScheme(String colourScheme)
+{
+	this->colourScheme = std::move(colourScheme);
+}
+
 void Preferences::loadEditorPreferences(const Preferences& preferences)
 {
 	dirty = true;
 	disabledPlatforms = preferences.disabledPlatforms;
+	colourScheme = preferences.colourScheme;
 }

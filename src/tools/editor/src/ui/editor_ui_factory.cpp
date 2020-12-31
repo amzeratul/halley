@@ -11,11 +11,11 @@
 #include "src/scene/scene_editor_canvas.h"
 using namespace Halley;
 
-EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n)
+EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n, const String& colourSchemeName)
 	: UIFactory(api, resources, i18n)
 {
 	loadColourSchemes();
-	setColourScheme("Default");
+	setColourScheme(colourSchemeName);
 	
 	UIInputButtons listButtons;
 	setInputButtons("list", listButtons);
