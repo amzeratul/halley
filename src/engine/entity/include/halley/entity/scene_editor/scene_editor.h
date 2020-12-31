@@ -20,7 +20,7 @@ namespace Halley {
 		void render(RenderContext& rc) override;
 
 		bool isReadyToCreateWorld() const final override;
-		void createWorld() final override;
+		void createWorld(std::shared_ptr<const UIColourScheme> colourScheme) final override;
 
 		World& getWorld() const override;
 		void spawnPending() override;
@@ -54,7 +54,7 @@ namespace Halley {
     	void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) override;
 
     protected:
-		virtual void onInit();
+		virtual void onInit(std::shared_ptr<const UIColourScheme> colourScheme);
     	
 		virtual void createServices(World& world);
 		virtual void createEntities(World& world);

@@ -9,6 +9,7 @@ SceneEditorGameBridge::SceneEditorGameBridge(const HalleyAPI& api, Resources& re
 	: api(api)
 	, resources(resources)
 	, project(project)
+	, factory(factory)
 {
 	gizmos = std::make_unique<SceneEditorGizmoCollection>(factory, resources);
 
@@ -74,7 +75,7 @@ void SceneEditorGameBridge::initializeInterfaceIfNeeded()
 	if (interface && !interfaceReady) {
 		if (interface->isReadyToCreateWorld()) {
 			guardedRun([&]() {
-				interface->createWorld();
+				interface->createWorld(factory.getColourScheme());
 
 				SceneEditorInputState inputState;
 				SceneEditorOutputState outputState;

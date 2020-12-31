@@ -33,21 +33,21 @@ Sprite EditorUIFactory::makeAssetTypeIcon(AssetType type) const
 {
 	return Sprite()
 		.setImage(getResources(), Path("ui") / "assetTypes" / toString(type) + ".png")
-		.setColour(colourScheme.getColour("icon_" + toString(type)));
+		.setColour(colourScheme->getColour("icon_" + toString(type)));
 }
 
 Sprite EditorUIFactory::makeImportAssetTypeIcon(ImportAssetType type) const
 {
 	return Sprite()
 		.setImage(getResources(), Path("ui") / "assetTypes" / toString(type) + ".png")
-		.setColour(colourScheme.getColour("icon_" + toString(type)));
+		.setColour(colourScheme->getColour("icon_" + toString(type)));
 }
 
 Sprite EditorUIFactory::makeDirectoryIcon(bool up) const
 {
 	return Sprite()
 		.setImage(getResources(), Path("ui") / "assetTypes" / (up ? "directoryUp" : "directory") + ".png")
-		.setColour(colourScheme.getColour("icon_directory"));
+		.setColour(colourScheme->getColour("icon_directory"));
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeScrollBackground(const ConfigNode& entryNode)
@@ -99,7 +99,7 @@ void EditorUIFactory::loadColourSchemes()
 {
 	for (const auto& assetId: resources.enumerate<ConfigFile>()) {
 		if (assetId.startsWith("colour_schemes/")) {
-			colourSchemes.push_back(UIColourScheme(resources.get<ConfigFile>(assetId)->getRoot(), resources));
+			colourSchemes.push_back(std::make_shared<UIColourScheme>(resources.get<ConfigFile>(assetId)->getRoot(), resources));
 		}
 	}
 }
@@ -112,7 +112,7 @@ void EditorUIFactory::reloadStyleSheet()
 		auto styleSheet = std::make_shared<UIStyleSheet>(resources);
 		for (auto& style: resources.enumerate<ConfigFile>()) {
 			if (style.startsWith("ui_style/")) {
-				styleSheet->load(*resources.get<ConfigFile>(style), &colourScheme);
+				styleSheet->load(*resources.get<ConfigFile>(style), colourScheme);
 			}
 		}
 		setStyleSheet(std::move(styleSheet));
@@ -123,7 +123,7 @@ std::vector<String> EditorUIFactory::getColourSchemeNames() const
 {
 	std::vector<String> result;
 	for (auto& scheme: colourSchemes) {
-		result.push_back(scheme.getName());
+		result.push_back(scheme->getName());
 	}
 	return result;
 }
@@ -131,9 +131,9 @@ std::vector<String> EditorUIFactory::getColourSchemeNames() const
 void EditorUIFactory::setColourScheme(const String& name)
 {
 	bool found = false;
-	
+
 	for (auto& scheme: colourSchemes) {
-		if (scheme.getName() == name) {
+		if (scheme->getName() == name) {
 			colourScheme = scheme;
 			found = true;
 			break;

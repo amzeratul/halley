@@ -104,7 +104,7 @@ bool SceneEditor::isReadyToCreateWorld() const
 	return getGameResources().exists<ConfigFile>(getSceneEditorStageName());
 }
 
-void SceneEditor::createWorld()
+void SceneEditor::createWorld(std::shared_ptr<const UIColourScheme> colourScheme)
 {
 	world = doCreateWorld();
 	createServices(*world);
@@ -112,7 +112,7 @@ void SceneEditor::createWorld()
 	cameraEntityIds = createCamera();
 	world->setEditor(true);
 
-	onInit();
+	onInit(colourScheme);
 }
 
 World& SceneEditor::getWorld() const
@@ -377,7 +377,7 @@ Vector2f SceneEditor::roundPosition(Vector2f pos, float zoom) const
 	return (pos * zoom).round() / zoom;
 }
 
-void SceneEditor::onInit()
+void SceneEditor::onInit(std::shared_ptr<const UIColourScheme> colourScheme)
 {
 }
 

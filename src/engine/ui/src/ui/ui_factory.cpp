@@ -30,13 +30,16 @@
 
 using namespace Halley;
 
-UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet)
+UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet, std::shared_ptr<const UIColourScheme> colourScheme)
 	: api(api)
 	, resources(resources)
 	, i18n(i18n)
+	, colourScheme(std::move(colourScheme))
 	, styleSheet(std::move(styleSheet))
 {
-	loadDefaultColourScheme();
+	if (!this->colourScheme) {
+		loadDefaultColourScheme();
+	}
 	
 	addFactory("widget", [=] (const ConfigNode& node) { return makeBaseWidget(node); });
 	addFactory("label", [=] (const ConfigNode& node) { return makeLabel(node); });
@@ -155,7 +158,7 @@ Resources& UIFactory::getResources() const
 
 std::unique_ptr<UIFactory> UIFactory::withResources(Resources& newResources) const
 {
-	auto result = std::make_unique<UIFactory>(api, newResources, i18n, styleSheet);
+	auto result = std::make_unique<UIFactory>(api, newResources, i18n, styleSheet, colourScheme);
 	result->inputButtons = inputButtons;
 	return result;
 }
@@ -170,7 +173,7 @@ void UIFactory::setStyleSheet(std::shared_ptr<UIStyleSheet> styleSheet)
 	this->styleSheet = std::move(styleSheet);
 }
 
-const UIColourScheme& UIFactory::getColourScheme() const
+std::shared_ptr<const UIColourScheme> UIFactory::getColourScheme() const
 {
 	return colourScheme;
 }
@@ -954,8 +957,10 @@ Colour4f UIFactory::getColour(const String& key) const
 {
 	if (key.startsWith("#")) {
 		return Colour4f::fromString(key);
+	} else if (colourScheme) {
+		return colourScheme->getColour(key);
 	} else {
-		return colourScheme.getColour(key);
+		return Colour4f();
 	}
 }
 
@@ -963,6 +968,6 @@ void UIFactory::loadDefaultColourScheme()
 {
 	const String defaultColourScheme = "colour_schemes/default";
 	if (resources.exists<ConfigFile>(defaultColourScheme)) {
-		colourScheme = UIColourScheme(resources.get<ConfigFile>(defaultColourScheme)->getRoot(), resources);
+		colourScheme = std::make_shared<UIColourScheme>(resources.get<ConfigFile>(defaultColourScheme)->getRoot(), resources);
 	}
 }

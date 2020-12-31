@@ -37,6 +37,7 @@ namespace Halley {
 		const HalleyAPI& api;
 		Resources& resources;
 		Project& project;
+		UIFactory& factory;
 		
 		std::unique_ptr<ISceneEditor> interface;
 		std::unique_ptr<HalleyAPI> gameAPI;

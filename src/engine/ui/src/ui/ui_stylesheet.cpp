@@ -9,7 +9,7 @@
 #include "halley/maths/vector4.h"
 using namespace Halley;
 
-Colour4f getColour(const ConfigNode& node, UIColourScheme* colourScheme)
+Colour4f getColour(const ConfigNode& node, const std::shared_ptr<const UIColourScheme>& colourScheme)
 {
 	if (node.getType() != ConfigNodeType::String) {
 		return Colour4f(1, 1, 1, 1);
@@ -27,10 +27,10 @@ Colour4f getColour(const ConfigNode& node, UIColourScheme* colourScheme)
 }
 
 template <typename T>
-void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, UIColourScheme* colourScheme, T& data) {}
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, const std::shared_ptr<const UIColourScheme>& colourScheme, T& data) {}
 
 template <>
-void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, UIColourScheme* colourScheme, Sprite& data)
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, const std::shared_ptr<const UIColourScheme>& colourScheme, Sprite& data)
 {
 	if (node.getType() == ConfigNodeType::String) {
 		if (!node.asString().isEmpty()) {
@@ -44,7 +44,7 @@ void loadStyleData(Resources& resources, const String& name, const ConfigNode& n
 }
 
 template <>
-void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, UIColourScheme* colourScheme, TextRenderer& data)
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, const std::shared_ptr<const UIColourScheme>& colourScheme, TextRenderer& data)
 {
 	data = TextRenderer()
 		.setFont(resources.get<Font>(node["font"].asString()))
@@ -57,7 +57,7 @@ void loadStyleData(Resources& resources, const String& name, const ConfigNode& n
 }
 
 template <>
-void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, UIColourScheme* colourScheme, String& data)
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, const std::shared_ptr<const UIColourScheme>& colourScheme, String& data)
 {
 	if (node.asString().isEmpty()) {
 		data = "";
@@ -67,26 +67,26 @@ void loadStyleData(Resources& resources, const String& name, const ConfigNode& n
 }
 
 template <>
-void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, UIColourScheme* colourScheme, Vector4f& data)
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, const std::shared_ptr<const UIColourScheme>& colourScheme, Vector4f& data)
 {
 	auto& vals = node.asSequence();
 	data = Vector4f(vals[0].asFloat(), vals[1].asFloat(), vals[2].asFloat(), vals[3].asFloat());
 }
 
 template <>
-void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, UIColourScheme* colourScheme, float& data)
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, const std::shared_ptr<const UIColourScheme>& colourScheme, float& data)
 {
 	data = node.asFloat();
 }
 
 template <>
-void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, UIColourScheme* colourScheme, Colour4f& data)
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, const std::shared_ptr<const UIColourScheme>& colourScheme, Colour4f& data)
 {
 	data = getColour(node, colourScheme);
 }
 
 template <>
-void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, UIColourScheme* colourScheme, std::shared_ptr<const UIStyleDefinition>& data)
+void loadStyleData(Resources& resources, const String& name, const ConfigNode& node, const std::shared_ptr<const UIColourScheme>& colourScheme, std::shared_ptr<const UIStyleDefinition>& data)
 {
 	if (node.getType() != ConfigNodeType::Map) {
 		data = {};
@@ -96,7 +96,7 @@ void loadStyleData(Resources& resources, const String& name, const ConfigNode& n
 }
 
 template <typename T>
-const T& getValue(const ConfigNode* node, Resources& resources, const String& name, const String& key, UIColourScheme* colourScheme, std::unordered_map<String, T>& cache)
+const T& getValue(const ConfigNode* node, Resources& resources, const String& name, const String& key, std::shared_ptr<const UIColourScheme> colourScheme, std::unordered_map<String, T>& cache)
 {
 	Expects(node);
 	node->assertValid();
@@ -148,7 +148,7 @@ public:
 	mutable std::unordered_map<String, std::shared_ptr<const UIStyleDefinition>> subStyles;
 };
 
-UIStyleDefinition::UIStyleDefinition(String styleName, const ConfigNode& node, Resources& resources, UIColourScheme* colourScheme)
+UIStyleDefinition::UIStyleDefinition(String styleName, const ConfigNode& node, Resources& resources, const std::shared_ptr<const UIColourScheme>& colourScheme)
 	: styleName(std::move(styleName))
 	, node(&node)
 	, resources(resources)
@@ -227,13 +227,13 @@ UIStyleSheet::UIStyleSheet(Resources& resources)
 {
 }
 
-UIStyleSheet::UIStyleSheet(Resources& resources, const ConfigFile& file, UIColourScheme* colourScheme)
+UIStyleSheet::UIStyleSheet(Resources& resources, const ConfigFile& file, std::shared_ptr<const UIColourScheme> colourScheme)
 	: resources(resources)
 {
 	load(file, colourScheme);
 }
 
-void UIStyleSheet::load(const ConfigFile& file, UIColourScheme* colourScheme)
+void UIStyleSheet::load(const ConfigFile& file, std::shared_ptr<const UIColourScheme> colourScheme)
 {
 	load(file.getRoot(), colourScheme);
 	observers[file.getAssetId()] = ConfigObserver(file);
@@ -266,7 +266,7 @@ void UIStyleSheet::update()
 	}
 }
 
-void UIStyleSheet::load(const ConfigNode& root, UIColourScheme* colourScheme)
+void UIStyleSheet::load(const ConfigNode& root, std::shared_ptr<const UIColourScheme> colourScheme)
 {
 	lastColourScheme = colourScheme;
 	
