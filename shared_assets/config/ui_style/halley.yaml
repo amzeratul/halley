@@ -118,44 +118,8 @@ uiStyle:
 
   scrollbar:
     bar:
-      horizontal: { img: halley_ui/ui_scrollbar.png, colour: ui_listHover }
-      vertical: { img: halley_ui/ui_scrollbar.png, colour: ui_listHover }
-    up:
-      normal: { img: halley_ui/ui_scrollbar.png, colour: ui_controlNormal }
-      disabled: { img: halley_ui/ui_scrollbar.png, colour: ui_controlDisabled }
-      down: { img: halley_ui/ui_scrollbar.png, colour: ui_controlDown }
-      hover: { img: halley_ui/ui_scrollbar.png, colour: ui_controlHover }
-      innerBorder: [ 3, 3, 3, 3 ]
-      upSound: ""
-      downSound: ""
-      hoverSound: ""
-    down:
-      normal: { img: halley_ui/ui_scrollbar.png, colour: ui_controlNormal }
-      disabled: { img: halley_ui/ui_scrollbar.png, colour: ui_controlDisabled }
-      down: { img: halley_ui/ui_scrollbar.png, colour: ui_controlDown }
-      hover: { img: halley_ui/ui_scrollbar.png, colour: ui_controlHover }
-      innerBorder: [ 3, 3, 3, 3 ]
-      upSound: ""
-      downSound: ""
-      hoverSound: ""
-    left:
-      normal: { img: halley_ui/ui_scrollbar.png, colour: ui_controlNormal }
-      disabled: { img: halley_ui/ui_scrollbar.png, colour: ui_controlDisabled }
-      down: { img: halley_ui/ui_scrollbar.png, colour: ui_controlDown }
-      hover: { img: halley_ui/ui_scrollbar.png, colour: ui_controlHover }
-      innerBorder: [ 3, 3, 3, 3 ]
-      upSound: ""
-      downSound: ""
-      hoverSound: ""
-    right:
-      normal: { img: halley_ui/ui_scrollbar.png, colour: ui_controlNormal }
-      disabled: { img: halley_ui/ui_scrollbar.png, colour: ui_controlDisabled }
-      down: { img: halley_ui/ui_scrollbar.png, colour: ui_controlDown }
-      hover: { img: halley_ui/ui_scrollbar.png, colour: ui_controlHover }
-      innerBorder: [ 3, 3, 3, 3 ]
-      upSound: ""
-      downSound: ""
-      hoverSound: ""
+      horizontal: { img: halley_ui/ui_scrollbar.png, colour: ui_scrollBackground }
+      vertical: { img: halley_ui/ui_scrollbar.png, colour: ui_scrollBackground }
     thumb:
       normal: { img: halley_ui/ui_scrollbar.png, colour: ui_controlNormal }
       down: { img: halley_ui/ui_scrollbar.png, colour: ui_controlDown }

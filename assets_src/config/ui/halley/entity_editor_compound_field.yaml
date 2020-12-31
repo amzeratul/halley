@@ -1,5 +1,5 @@
 ---
-widget: { class: image, image: "halley_ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: "#5E3962" }
+widget: { class: image, image: "halley_ui/title_capsule.png", innerBorder: [ 4, 1, 4, 4 ], colour: ui_staticBoxSubdue }
 sizer: { type: vertical }
 children:
 - widget: { id: fieldName, class: label, text: "Name" }

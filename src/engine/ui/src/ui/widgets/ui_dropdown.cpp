@@ -262,7 +262,7 @@ void UIDropdown::open()
 
 		forceLayout();
 		auto sz = dropdownList->getSize();
-		scrollPane->setScrollSpeed(ceil(sz.y / options.size()));
+		scrollPane->setScrollSpeed(ceil(2 * sz.y / options.size()));
 		scrollPane->update(0, false);
 
 		playSound(style.getString("openSound"));

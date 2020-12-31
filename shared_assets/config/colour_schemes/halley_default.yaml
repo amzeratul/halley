@@ -48,3 +48,7 @@ colours:
   ui_listBackground: "#201427"
   ui_listHover: "#5E3962"
   ui_inputBox: "#9861B6"
+  ui_scrollBackground: "#442947"
+
+  ui_staticBox: "#9C5BB5"
+  ui_staticBoxSubdue: "#754589"
