@@ -10,15 +10,15 @@ children:
   fill: centre
 - widget: { class: scrollBarPane, size: [200, 250] }
   proportion: 1
-  border: [0, 5, 0, 10]
+  border: [0, 5, 0, 5]
   sizer: { type: vertical }
   children:
   - widget: { id: recent, class: list }
     proportion: 1
 - sizer: { type: horizontal }
   children:
-  - widget: { id: input, class: textInput, size: [400, 20] }
+  - widget: { id: input, class: textInput, size: [400, 22] }
     proportion: 1
-  - widget: { id: ok, class: button, text: "OK", size: [60, 30], tooltip: "Load the selected Project" }
+  - widget: { id: ok, class: button, text: "OK", size: [60, 22], tooltip: "Load the selected Project" }
 
 ...
