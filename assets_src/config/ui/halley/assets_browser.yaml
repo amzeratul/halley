@@ -25,33 +25,38 @@ children:
       text: Shaders
 - widget: { class: widget }
   proportion: 1
-  border: [0, 10, 0, 0]
   sizer: { type: horizontal }
   children:
   - sizer: { type: vertical }
     children:
-    - widget: { id: assetSearch, class: textInput, size: [ 40, 30 ], ghost: "Search assets..." }
+    - widget: { id: collapseButton, class: button, text: "<< Collapse" }
       border: [0, 0, 0, 5]
-    - widget: { class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, autoHide: true, size: [255, 50] }
+    - widget: { id: assetBrowsePanel, class: widget }
+      sizer: { type: vertical }
       proportion: 1
       children:
-      - proportion: 1
-        widget: 
-          class: list
-          id: assetList
-          options:
-          - id: test0
-            text: test
-          - id: test1
-            text: test
-          - id: test2
-            text: test
-    - sizer: { type: horizontal }
-      children:
-        - widget: { id: addAsset, class: button, text: Add }
-          proportion: 1
-        - widget: { id: removeAsset, class: button, text: Remove }
-          proportion: 1
+      - widget: { id: assetSearch, class: textInput, size: [ 40, 30 ], ghost: "Search assets...", active: false }
+        border: [0, 0, 0, 5]
+      - widget: { class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, autoHide: true, size: [255, 50] }
+        proportion: 1
+        children:
+        - proportion: 1
+          widget: 
+            class: list
+            id: assetList
+            options:
+            - id: test0
+              text: test
+            - id: test1
+              text: test
+            - id: test2
+              text: test
+      - sizer: { type: horizontal }
+        children:
+          - widget: { id: addAsset, class: button, text: Add }
+            proportion: 1
+          - widget: { id: removeAsset, class: button, text: Remove }
+            proportion: 1
   - widget: { class: widget, id: assetEditorContainer }
     proportion: 1
     border: [10, 0, 0, 0]

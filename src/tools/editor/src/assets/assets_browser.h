@@ -44,6 +44,8 @@ namespace Halley {
 		uint64_t curHash = 0;
 		uint64_t curDirHash = 0;
 
+		bool collapsed = false;
+
         void loadResources();
         void makeUI();
 		void setAssetSrcMode(bool enabled);
@@ -64,5 +66,7 @@ namespace Halley {
 
 		void addAsset();
 		void removeAsset();
+
+		void setCollapsed(bool collapsed);
 	};
 }

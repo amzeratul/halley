@@ -100,6 +100,11 @@ void AssetsBrowser::makeUI()
 		removeAsset();
 	});
 
+	setHandle(UIEventType::ButtonClicked, "collapseButton", [=] (const UIEvent& event)
+	{
+		setCollapsed(!collapsed);
+	});
+
 	updateAddRemoveButtons();
 }
 
@@ -318,4 +323,22 @@ void AssetsBrowser::removeAsset()
 	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
 	assetList->setItemActive(lastClickedAsset, false);
 	FileSystem::remove(project.getAssetsSrcPath() / lastClickedAsset);
+}
+
+void AssetsBrowser::setCollapsed(bool c)
+{
+	if (collapsed != c) {
+		collapsed = c;
+
+		auto button = getWidgetAs<UIButton>("collapseButton");
+		button->setLabel(LocalisedString::fromHardcodedString(collapsed ? ">>" : "<< Collapse"));
+
+		auto* parent = dynamic_cast<UIWidget*>(button->getParent());
+		if (parent) {
+			parent->getSizer()[0].setBorder(collapsed ? Vector4f(-10, 0, -15, 0) : Vector4f(0, 0, 0, 5));
+		}
+		
+		//getWidget("collapseBorder")->setActive(!collapsed);
+		getWidget("assetBrowsePanel")->setActive(!collapsed);
+	}
 }
