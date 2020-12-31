@@ -1,6 +1,6 @@
 ---
-slice_left: 8
+slice_left: 6
 slice_right: 18
-slice_bottom: 8
-slice_top: 8
+slice_bottom: 6
+slice_top: 6
 ...

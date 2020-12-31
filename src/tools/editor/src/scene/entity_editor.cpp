@@ -219,7 +219,7 @@ std::shared_ptr<IUIElement> EntityEditor::makeField(const String& rawFieldType, 
 		}
 
 		if (compFieldFactory) {
-			container->add(compFieldFactory->createField(*context, parameters), 1);
+			container->add(compFieldFactory->createField(*context, parameters), 1, Vector4f(), UISizerAlignFlags::Top | UISizerFillFlags::FillHorizontal);
 		} else {
 			container->add(std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromHardcodedString("N/A")));
 		}

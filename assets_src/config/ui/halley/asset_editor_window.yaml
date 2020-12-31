@@ -10,7 +10,7 @@ children:
       - widget: { class: label, id: contentListDropdownLabel, text: "Assets:"}
         border: [0, 0, 5, 0]
         fill: [centreVertical]
-      - widget: { id: contentListDropdown, class: dropdown, size: [200, 30] }
+      - widget: { id: contentListDropdown, class: dropdown, size: [200, 22] }
   - widget: { id: contentList, class: list, style: tabs, type: horizontal }
   - widget: { id: content, class: pagedPane }
     fill: fill

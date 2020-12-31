@@ -23,12 +23,36 @@ uiStyle:
     checkedDisabled: { img: halley_ui/ui_checkbox_checked.png, colour: ui_controlDisabled }
 
   input:
-    box: { img: halley_ui/ui_input.png, colour: ui_inputBox }
+    box: { img: halley_ui/ui_input_thin.png, colour: ui_inputBox }
     caret: halley_ui/ui_caret.png
-    innerBorder: [ 6, 5, 6, 2 ]
+    innerBorder: [ 6, 2, 6, 1 ]
     label: { font: Ubuntu Regular, size: 15, colour: ui_text }
     labelGhost: { font: Ubuntu Regular, size: 15, colour: ui_textGhost }
-    minSize: 30
+    minSize: 22
+
+  inputThin:
+    box: { img: halley_ui/ui_input_thin.png, colour: ui_inputBox }
+    caret: halley_ui/ui_caret.png
+    innerBorder: [ 6, 2, 6, 3 ]
+    label: { font: Ubuntu Light, size: 14, colour: ui_text }
+    labelGhost: { font: Ubuntu Light, size: 14, colour: ui_textGhost }
+    minSize: 22
+
+  dropdown:
+    normal: { img: halley_ui/ui_dropdown_closed.png, colour: ui_controlNormal }
+    hover: { img: halley_ui/ui_dropdown_closed.png, colour: ui_controlHover }
+    open: { img: halley_ui/ui_dropdown_open.png, colour: ui_controlHover }
+    disabled: { img: halley_ui/ui_dropdown_closed.png, colour: ui_controlDisabled }
+    background: { img: halley_ui/ui_dropdown_window.png, colour: ui_controlHover }
+    innerBorder: [ 2, 2, 2, 2 ]
+    labelBorder: [ 6, 2, 0, -4 ]
+    label: { font: Ubuntu Regular, size: 15, colour: ui_text }
+    selectedLabel: { font: Ubuntu Regular, size: 15, colour: ui_text }
+    openSound: ""
+    closeSound: ""
+    height: 200
+    minSize: 22
+    minSizeMargins: [ 40, 20, 0, 0 ]
 
   list:
     background: { img: "halley_ui/ui_list_item.png", colour: ui_listBackground }
@@ -100,22 +124,6 @@ uiStyle:
         label: { font: Ubuntu Regular, size: 13, colour: ui_text }
         labelBorder: [0, 0, 0, 0]
 
-  dropdown:
-    normal: { img: halley_ui/ui_dropdown_closed.png, colour: ui_controlNormal }
-    hover: { img: halley_ui/ui_dropdown_closed.png, colour: ui_controlHover }
-    open: { img: halley_ui/ui_dropdown_open.png, colour: ui_controlHover }
-    disabled: { img: halley_ui/ui_dropdown_closed.png, colour: ui_controlDisabled }
-    background: { img: halley_ui/ui_dropdown_window.png, colour: ui_controlHover }
-    innerBorder: [ 2, 2, 2, 2 ]
-    labelBorder: [ 6, 8, 0, 0 ]
-    label: { font: Ubuntu Regular, size: 15, colour: ui_text }
-    selectedLabel: { font: Ubuntu Regular, size: 15, colour: ui_text }
-    openSound: ""
-    closeSound: ""
-    height: 200
-    minSize: 30
-    minSizeMargins: [ 40, 20, 0, 0 ]
-
   scrollbar:
     bar:
       horizontal: { img: halley_ui/ui_scrollbar.png, colour: ui_scrollBackground }
@@ -141,14 +149,6 @@ uiStyle:
 
   labelLight:
     label: { font: Ubuntu Light, size: 14, colour: ui_text }
-
-  inputThin:
-    box: { img: halley_ui/ui_input_thin.png, colour: ui_inputBox }
-    caret: halley_ui/ui_caret.png
-    innerBorder: [ 6, 3, 6, 2 ]
-    label: { font: Ubuntu Light, size: 14, colour: ui_text }
-    labelGhost: { font: Ubuntu Light, size: 14, colour: ui_textGhost }
-    minSize: 22
 
   buttonThin:
     normal: { img: halley_ui/ui_button.png, colour: ui_controlNormal }
