@@ -52,7 +52,9 @@ children:
           proportion: 1
         - widget: { id: removeAsset, class: button, text: Remove }
           proportion: 1
-  - widget: { class: assetEditor }
+  - widget: { class: widget, id: assetEditorContainer }
     proportion: 1
     border: [10, 0, 0, 0]
+    sizer: { type: vertical }
+    children: []
 ...

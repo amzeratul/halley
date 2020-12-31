@@ -65,8 +65,9 @@ void AssetsBrowser::makeUI()
 
 	assetList = getWidgetAs<UIList>("assetList");
 	assetList->setSingleClickAccept(false);
-	assetEditor = getWidgetAs<AssetEditorWindow>("assetEditorWindow");
-	assetEditor->init(project, projectWindow);
+
+	assetTabs = std::make_shared<AssetBrowserTabs>(factory, project, projectWindow);
+	getWidget("assetEditorContainer")->add(assetTabs, 1);
 
 	setHandle(UIEventType::ListSelectionChanged, "assetType", [=] (const UIEvent& event)
 	{
@@ -98,23 +99,13 @@ void AssetsBrowser::makeUI()
 		removeAsset();
 	});
 
-	setHandle(UIEventType::ButtonClicked, "openFile", [=] (const UIEvent& event)
-	{
-		openFileExternally(getCurrentAssetPath());
-	});
-
-	setHandle(UIEventType::ButtonClicked, "showFile", [=] (const UIEvent& event)
-	{
-		showFileExternally(getCurrentAssetPath());
-	});
-
 	updateAddRemoveButtons();
 }
 
 void AssetsBrowser::setAssetSrcMode(bool enabled)
 {
 	assetSrcMode = enabled;
-	assetEditor->setAssetSrcMode(enabled);
+	assetTabs->setAssetSrcMode(enabled);
 	getWidget("assetType")->setActive(!assetSrcMode);
 	if (assetSrcMode) {
 		listAssetSources();
@@ -275,11 +266,7 @@ void AssetsBrowser::loadAsset(const String& name, bool doubleClick)
 			refreshList();
 		}
 	} else {
-		assetEditor->loadAsset(name, curType, true);
-
-		if (doubleClick) {
-			assetEditor->onDoubleClickAsset();
-		}
+		assetTabs->load(curType, name);
 	}
 }
 
@@ -287,7 +274,7 @@ void AssetsBrowser::refreshAssets(const std::vector<String>& assets)
 {
 	assetNames.reset();
 	refreshList();
-	assetEditor->refreshAssets();
+	assetTabs->refreshAssets();
 }
 
 void AssetsBrowser::updateAddRemoveButtons()
@@ -330,21 +317,4 @@ void AssetsBrowser::removeAsset()
 	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
 	assetList->setItemActive(lastClickedAsset, false);
 	FileSystem::remove(project.getAssetsSrcPath() / lastClickedAsset);
-}
-
-Path AssetsBrowser::getCurrentAssetPath() const
-{
-	return assetEditor->getCurrentAssetPath();
-}
-
-void AssetsBrowser::openFileExternally(const Path& path)
-{
-	auto cmd = "start \"\" \"" + path.toString().replaceAll("/", "\\") + "\"";
-	system(cmd.c_str());
-}
-
-void AssetsBrowser::showFileExternally(const Path& path)
-{
-	auto cmd = "explorer.exe /select,\"" + path.toString().replaceAll("/", "\\") + "\"";
-	system(cmd.c_str());
 }

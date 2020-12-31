@@ -1,21 +1,22 @@
 #include "asset_browser_tabs.h"
 
+#include "asset_editor_window.h"
+#include "src/ui/editor_ui_factory.h"
+
 using namespace Halley;
 
-SceneEditorTabs::SceneEditorTabs(UIFactory& factory, Project& project, const HalleyAPI& api)
+AssetBrowserTabs::AssetBrowserTabs(UIFactory& factory, Project& project, ProjectWindow& projectWindow)
 	: UIWidget("asset_browser_tabs", {}, UISizer(UISizerType::Horizontal))
 	, factory(factory)
 	, project(project)
-	, api(api)
+	, projectWindow(projectWindow)
 {
 	makeUI();
 }
 
-void SceneEditorTabs::load(AssetType assetType, const String& name)
+void AssetBrowserTabs::load(std::optional<AssetType> assetType, const String& name)
 {
-	return;
-
-	const String key = toString(assetType) + ":" + name;
+	const String key = assetType ? (toString(assetType) + ":" + name) : name;
 
 	const bool alreadyExists = tabs->setSelectedOptionId(key);
 	if (alreadyExists) {
@@ -31,19 +32,28 @@ void SceneEditorTabs::load(AssetType assetType, const String& name)
 	});
 	tabs->addItem(key, tabContents);
 
-	/*
-	auto window = std::make_shared<SceneEditorWindow>(factory, project, api, *this);
-	if (assetType == AssetType::Scene) {
-		window->loadScene(name);
-	} else if (assetType == AssetType::Prefab) {
-		window->loadPrefab(name);
-	}
+	auto window = std::make_shared<AssetEditorWindow>(dynamic_cast<EditorUIFactory&>(factory), project, projectWindow);
+	window->setAssetSrcMode(srcMode);
+	window->loadAsset(name, assetType, true);
+	
 	pages->addPage()->add(window, 1);
-	*/
 	tabs->setSelectedOption(int(tabs->getCount()) - 1);
 }
 
-void SceneEditorTabs::update(Time t, bool moved)
+void AssetBrowserTabs::refreshAssets()
+{
+	for (int i = 0; i < pages->getNumberOfPages(); ++i) {
+		auto assetEditor = pages->getPage(i)->getWidgetAs<AssetEditorWindow>("assetEditorWindow");
+		assetEditor->refreshAssets();
+	}
+}
+
+void AssetBrowserTabs::setAssetSrcMode(bool srcMode)
+{
+	this->srcMode = srcMode;
+}
+
+void AssetBrowserTabs::update(Time t, bool moved)
 {
 	for (auto& key: toClose) {
 		closeTab(key);
@@ -51,7 +61,7 @@ void SceneEditorTabs::update(Time t, bool moved)
 	toClose.clear();
 }
 
-void SceneEditorTabs::makeUI()
+void AssetBrowserTabs::makeUI()
 {
 	add(factory.makeUI("ui/halley/asset_browser_tabs"), 1);
 	tabs = getWidgetAs<UIList>("tabs");
@@ -63,7 +73,7 @@ void SceneEditorTabs::makeUI()
 	});
 }
 
-void SceneEditorTabs::closeTab(const String& key)
+void AssetBrowserTabs::closeTab(const String& key)
 {
 	auto idx = tabs->removeItem(key);
 	if (idx) {

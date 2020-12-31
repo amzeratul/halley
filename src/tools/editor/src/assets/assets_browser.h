@@ -1,5 +1,6 @@
 #pragma once
 
+#include "asset_browser_tabs.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/ui_widget.h"
@@ -36,7 +37,7 @@ namespace Halley {
 		String filter;
         
 		std::shared_ptr<UIList> assetList;
-		std::shared_ptr<AssetEditorWindow> assetEditor;
+		std::shared_ptr<AssetBrowserTabs> assetTabs;
 
         String lastClickedAsset;
 
@@ -63,9 +64,5 @@ namespace Halley {
 
 		void addAsset();
 		void removeAsset();
-
-		Path getCurrentAssetPath() const;
-		void openFileExternally(const Path& path);
-		void showFileExternally(const Path& path);
 	};
 }

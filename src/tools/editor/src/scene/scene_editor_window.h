@@ -7,7 +7,7 @@
 
 namespace Halley {
 	class ProjectWindow;
-	class SceneEditorTabs;
+	class AssetBrowserTabs;
 	class HalleyAPI;
 	class Project;
 	class UIFactory;

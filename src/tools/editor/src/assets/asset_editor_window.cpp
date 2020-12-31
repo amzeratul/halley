@@ -7,9 +7,11 @@
 #include "src/ui/editor_ui_factory.h"
 using namespace Halley;
 
-AssetEditorWindow::AssetEditorWindow(EditorUIFactory& factory)
+AssetEditorWindow::AssetEditorWindow(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow)
 	: UIWidget("assetEditorWindow", Vector2f(), UISizer())
 	, factory(factory)
+	, project(project)
+	, projectWindow(projectWindow)
 {
 	factory.loadUI(*this, "ui/halley/asset_editor_window");
 }
@@ -32,12 +34,16 @@ void AssetEditorWindow::onMakeUI()
 	{
 		loadAsset(loadedAsset, loadedType, false, true);
 	});
-}
 
-void AssetEditorWindow::init(Project& project, ProjectWindow& projectWindow)
-{
-	this->project = &project;
-	this->projectWindow = &projectWindow;
+	setHandle(UIEventType::ButtonClicked, "openFile", [=] (const UIEvent& event)
+	{
+		openFileExternally(getCurrentAssetPath());
+	});
+
+	setHandle(UIEventType::ButtonClicked, "showFile", [=] (const UIEvent& event)
+	{
+		showFileExternally(getCurrentAssetPath());
+	});
 }
 
 void AssetEditorWindow::setAssetSrcMode(bool assetSrcMode)
@@ -63,7 +69,7 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 		curEditors.clear();
 
 		if (assetSrcMode) {
-			auto assets = project->getAssetsFromFile(Path(name));
+			auto assets = project.getAssetsFromFile(Path(name));
 
 			std::sort(assets.begin(), assets.end(), [] (decltype(assets)::const_reference a, decltype(assets)::const_reference b) -> bool
 			{
@@ -103,8 +109,8 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 				metadataEditor->clear();
 			} else {
 				const auto type = assets.at(0).first;
-				auto effectiveMeta = project->getImportMetadata(type, assets.at(0).second);
-				metadataEditor->setResource(*project, type, Path(name), std::move(effectiveMeta));
+				auto effectiveMeta = project.getImportMetadata(type, assets.at(0).second);
+				metadataEditor->setResource(project, type, Path(name), std::move(effectiveMeta));
 			}
 		} else {
 			metadataEditor->clear();
@@ -117,7 +123,7 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 
 Path AssetEditorWindow::getCurrentAssetPath() const
 {
-	return project->getAssetsSrcPath() / loadedAsset;
+	return project.getAssetsSrcPath() / loadedAsset;
 }
 
 void AssetEditorWindow::onDoubleClickAsset()
@@ -162,10 +168,22 @@ std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(Path filePath, AssetT
 		return {};
 	case AssetType::Animation:
 	case AssetType::Texture:
-		return std::make_shared<AnimationEditor>(factory, project->getGameResources(), type, *project, *metadataEditor);
+		return std::make_shared<AnimationEditor>(factory, project.getGameResources(), type, project, *metadataEditor);
 	case AssetType::Prefab:
 	case AssetType::Scene:
-		return std::make_shared<PrefabEditor>(factory, project->getGameResources(), type, *project, *projectWindow);
+		return std::make_shared<PrefabEditor>(factory, project.getGameResources(), type, project, projectWindow);
 	}
 	return {};
+}
+
+void AssetEditorWindow::openFileExternally(const Path& path)
+{
+	auto cmd = "start \"\" \"" + path.toString().replaceAll("/", "\\") + "\"";
+	system(cmd.c_str());
+}
+
+void AssetEditorWindow::showFileExternally(const Path& path)
+{
+	auto cmd = "explorer.exe /select,\"" + path.toString().replaceAll("/", "\\") + "\"";
+	system(cmd.c_str());
 }

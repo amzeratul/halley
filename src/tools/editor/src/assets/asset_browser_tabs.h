@@ -2,15 +2,18 @@
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
+	class ProjectWindow;
 	class HalleyAPI;
 	class Project;
 	class UIFactory;
 
-	class SceneEditorTabs final : public UIWidget {
+	class AssetBrowserTabs final : public UIWidget {
 	public:
-		SceneEditorTabs(UIFactory& factory, Project& project, const HalleyAPI& api);
+		AssetBrowserTabs(UIFactory& factory, Project& project, ProjectWindow& projectWindow);
 
-		void load(AssetType assetType, const String& name);
+		void load(std::optional<AssetType> assetType, const String& name);
+		void refreshAssets();
+		void setAssetSrcMode(bool srcMode);
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -18,11 +21,13 @@ namespace Halley {
 	private:
 		UIFactory& factory;
 		Project& project;
-		const HalleyAPI& api;
+		ProjectWindow& projectWindow;
 		
 		std::shared_ptr<UIList> tabs;
 		std::shared_ptr<UIPagedPane> pages;
 		std::vector<String> toClose;
+
+		bool srcMode = false;
 
 		void makeUI();
 		void closeTab(const String& key);
