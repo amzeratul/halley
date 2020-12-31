@@ -53,8 +53,11 @@ colours:
   ui_text: "#FFFFFF"
   ui_selectedText: "#FFFFFF"
   ui_unselectedText: "#FFFFFF"
-  ui_textGhost: "#7F7F7F"
   ui_disabledText: "#7F7F7F"
+  ui_selectedTextAlt: "#FFCD06"
+  ui_unselectedTextAlt: "#FFCD06"
+  ui_disabledTextAlt: "#B7A351"
+  ui_textGhost: "#7F7F7F"
 
   ui_listBackground: "#25262E"
   ui_listSelected: "#9A4E5B"

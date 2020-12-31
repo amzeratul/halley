@@ -14,12 +14,6 @@ colours:
   ui_buttonHover: "#C080E3"
   ui_buttonDisabled: "#927B95"
 
-  ui_text: "#FFFFFF"
-  ui_selectedText: "#FFFFFF"
-  ui_unselectedText: "#FFFFFF"
-  ui_textGhost: "#7F7F7F"
-  ui_disabledText: "#7F7F7F"
-
   ui_listBackground: "#201427"
   ui_listSelected: "#9C5BB5"
   ui_listHover: "#5E3962"

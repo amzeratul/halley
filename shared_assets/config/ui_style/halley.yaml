@@ -98,9 +98,9 @@ uiStyle:
       selected: { font: Ubuntu Regular, size: 13, colour: ui_selectedText }
       disabled: { font: Ubuntu Regular, size: 13, colour: ui_disabledText }
     labelSpecial:
-      normal: { font: Ubuntu Regular, size: 13, colour: "#E8B900" }
-      selected: { font: Ubuntu Regular, size: 13, colour: "#FFCD06" }
-      disabled: { font: Ubuntu Regular, size: 13, colour: "#B7A351" }
+      normal: { font: Ubuntu Regular, size: 13, colour: ui_unselectedTextAlt }
+      selected: { font: Ubuntu Regular, size: 13, colour: ui_selectedTextAlt }
+      disabled: { font: Ubuntu Regular, size: 13, colour: ui_disabledTextAlt }
     gap: 1
     indentation: 20
     cursor:
