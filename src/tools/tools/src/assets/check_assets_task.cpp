@@ -192,7 +192,7 @@ std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkSpecificAssets
 	std::map<String, ImportAssetsDatabaseEntry> assets;
 	bool dbChanged = false;
 	for (auto& path: paths) {
-		dbChanged = dbChanged | importFile(db, assets, false, false, directoryMetas, project.getAssetsSrcPath(), path);
+		dbChanged = importFile(db, assets, false, false, directoryMetas, project.getAssetsSrcPath(), path) || dbChanged;
 	}
 	if (dbChanged) {
 		db.save();
@@ -240,14 +240,14 @@ std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkAllAssets(Impo
 			if (skipGen) {
 				const auto basePath = project.getGenSrcPath();
 				const auto newPath = srcPath.makeRelativeTo(basePath) / filePath;
-				dbChanged = dbChanged | importFile(db, assets, isCodegen, skipGen, collectDirMeta ? directoryMetas : dummyDirMetas, basePath, newPath);
+				dbChanged = importFile(db, assets, isCodegen, skipGen, collectDirMeta ? directoryMetas : dummyDirMetas, basePath, newPath) || dbChanged;
 			} else {
-				dbChanged = dbChanged | importFile(db, assets, isCodegen, skipGen, collectDirMeta ? directoryMetas : dummyDirMetas, srcPath, filePath);
+				dbChanged = importFile(db, assets, isCodegen, skipGen, collectDirMeta ? directoryMetas : dummyDirMetas, srcPath, filePath) || dbChanged;
 			}
 		}
 	}
 
-	dbChanged = dbChanged | db.purgeMissingInputs();
+	dbChanged = db.purgeMissingInputs() || dbChanged;
 	
 	if (dbChanged) {
 		db.save();
@@ -274,9 +274,10 @@ bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, std::map<String, I
 	}
 
 	// Import assets
-	auto toImport = filterNeedsImporting(db, assets);
-	if (!toImport.empty() || !deletedAssets.empty()) {
-		Logger::logInfo("Assets to be imported: " + toString(toImport.size()));
+	const bool hasImport = hasAssetsToImport(db, assets);
+	if (hasImport || !deletedAssets.empty()) {
+		auto toImport = hasImport ? getAssetsToImport(db, assets) : std::vector<ImportAssetsDatabaseEntry>();
+		Logger::logInfo("Importing " + toString(toImport.size()) + " assets and deleting " + toString(deletedAssets.size()) + " assets.");
 		addPendingTask(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(taskName, db, projectAssetImporter, dstPath, std::move(toImport), std::move(deletedAssets), project, packAfter)));
 		return true;
 	}
@@ -292,12 +293,22 @@ void CheckAssetsTask::requestRefreshAsset(Path path)
 	condition.notify_one();
 }
 
-std::vector<ImportAssetsDatabaseEntry> CheckAssetsTask::filterNeedsImporting(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets)
+bool CheckAssetsTask::hasAssetsToImport(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets)
+{
+	for (const auto& a: assets) {
+		if (db.needsImporting(a.second, false)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+std::vector<ImportAssetsDatabaseEntry> CheckAssetsTask::getAssetsToImport(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets)
 {
 	Vector<ImportAssetsDatabaseEntry> toImport;
 
-	for (auto& a: assets) {
-		if (db.needsImporting(a.second)) {
+	for (const auto& a: assets) {
+		if (db.needsImporting(a.second, true)) {
 			toImport.push_back(a.second);
 		}
 	}

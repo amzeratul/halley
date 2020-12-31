@@ -252,13 +252,17 @@ Path ImportAssetsDatabase::getPrimaryInputFile(AssetType type, const String& ass
 	return {};
 }
 
-bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset) const
+bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset, bool includeFailed) const
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	
 	// Check if it failed loading last time
 	auto iter = assetsFailed.find(asset.assetId);
-	bool failed = iter != assetsFailed.end();
+	const bool failed = iter != assetsFailed.end();
+	if (failed && includeFailed) {
+		return true;
+	}
+	
 	if (!failed) {
 		// No failures, check if this was imported before
 		iter = assetsImported.find(asset.assetId);
@@ -269,7 +273,7 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 	}
 
 	// At this point, iter points to the failed one if it failed, or the the old successful one if it didn't.
-	auto& oldAsset = iter->second.asset;
+	const auto& oldAsset = iter->second.asset;
 
 	// Input directory changed?
 	if (asset.srcDir != oldAsset.srcDir) {
