@@ -18,8 +18,8 @@ namespace Halley {
 	class AssetsBrowser : public UIWidget {
     public:
         AssetsBrowser(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow);
-        void showAsset(AssetType type, const String& assetId);
-		void showFile(const Path& path);
+        void openAsset(AssetType type, const String& assetId);
+		void openFile(const Path& path);
 
     private:
 		EditorUIFactory& factory;

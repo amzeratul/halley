@@ -229,13 +229,13 @@ LocalisedString ProjectWindow::setCustomPage(const String& pageId)
 void ProjectWindow::openFile(const String& assetId)
 {
 	toolbar->getList()->setSelectedOptionId(toString(EditorTabs::Assets));
-	assetEditorWindow->showFile(assetId);
+	assetEditorWindow->openFile(assetId);
 }
 
 void ProjectWindow::openAsset(AssetType type, const String& assetId)
 {
 	toolbar->getList()->setSelectedOptionId(toString(EditorTabs::Assets));
-	assetEditorWindow->showAsset(type, assetId);
+	assetEditorWindow->openAsset(type, assetId);
 }
 
 const HalleyAPI& ProjectWindow::getAPI() const

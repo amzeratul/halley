@@ -29,7 +29,7 @@ AssetsBrowser::AssetsBrowser(EditorUIFactory& factory, Project& project, Project
 	setAssetSrcMode(true);
 }
 
-void AssetsBrowser::showAsset(AssetType type, const String& assetId)
+void AssetsBrowser::openAsset(AssetType type, const String& assetId)
 {
 	getWidgetAs<UITextInput>("assetSearch")->setText("");
 	Path target;
@@ -39,15 +39,16 @@ void AssetsBrowser::showAsset(AssetType type, const String& assetId)
 	} else {
 		target = project.getImportAssetsDatabase().getPrimaryInputFile(type, assetId);
 	}
-	showFile(target);
+	openFile(target);
 }
 
-void AssetsBrowser::showFile(const Path& path)
+void AssetsBrowser::openFile(const Path& path)
 {
 	if (!path.isEmpty()) {
 		curSrcPath = path.parentPath();
 		refreshList();
 		assetList->setSelectedOptionId(path.toString());
+		loadAsset(path.toString(), false);
 	}
 }
 
@@ -266,7 +267,7 @@ void AssetsBrowser::loadAsset(const String& name, bool doubleClick)
 			refreshList();
 		}
 	} else {
-		assetTabs->load(curType, name);
+		assetTabs->load(assetSrcMode ? std::optional<AssetType>() : curType, name);
 	}
 }
 
