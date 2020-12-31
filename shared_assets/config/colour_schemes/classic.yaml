@@ -8,7 +8,6 @@ colours:
   ui_controlDown: "#913DA3"
   ui_controlHover: "#C080E3"
   ui_controlDisabled: "#927B95"
-  ui_controlNormalTransparent: "#9C5BB580"
 
   ui_text: "#FFFFFF"
   ui_selectedText: "#FFFFFF"
@@ -19,6 +18,7 @@ colours:
   ui_listBackground: "#201427"
   ui_listSelected: "#9C5BB5"
   ui_listHover: "#5E3962"
+  ui_listDrag: "#9C5BB580"
   ui_inputBox: "#9861B6"
   ui_scrollBackground: "#442947"
 

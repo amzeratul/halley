@@ -60,7 +60,7 @@ uiStyle:
       normal: ""
       hover: { img: halley_ui/ui_list_item_selection.png, colour: ui_listHover }
       selected: { img: halley_ui/ui_list_item_selection.png, colour: ui_listSelected }
-      drag: { img: halley_ui/ui_list_item.png, colour: ui_controlNormalTransparent }
+      drag: { img: halley_ui/ui_list_item.png, colour: ui_listDrag }
       innerBorder: [ 6, 5, 6, 2 ]
     innerBorder: [ 0, 0, 0, 0 ]
     extraMouseBorder: [ 1, 1, 1, 1 ]
@@ -75,7 +75,7 @@ uiStyle:
       normal: ""
       hover: { img: halley_ui/ui_list_item.png, colour: ui_listHover }
       selected: { img: halley_ui/ui_list_item.png, colour: ui_controlNormal }
-      drag: { img: halley_ui/ui_list_item.png, colour: ui_controlNormalTransparent }
+      drag: { img: halley_ui/ui_list_item.png, colour: ui_listDrag }
       innerBorder: [ 0, 0, 0, 0 ]
     innerBorder: [ 0, 0, 0, 0 ]
     labelBorder: [ 6, 5, 6, 2 ]
