@@ -178,8 +178,15 @@ ImportAssetsTask::ImportResult ImportAssetsTask::importAsset(const ImportAssetsD
 			
 			AssetCollector collector(cur, assetsPath, importer.getAssetsSrc(), progressReporter);
 
-			for (auto& importer: importer.getImporters(cur.assetType)) {
-				importer.get().import(cur, collector);
+			for (const auto& importer: importer.getImporters(cur.assetType)) {
+				try {
+					importer.get().import(cur, collector);
+				} catch (...) {
+					for (auto& i: collector.getAdditionalInputs()) {
+						result.additionalInputs.push_back(std::move(i));
+					}
+					throw;
+				}
 			}
 			
 			for (auto& additional: collector.collectAdditionalAssets()) {
@@ -191,11 +198,11 @@ ImportAssetsTask::ImportResult ImportAssetsTask::importAsset(const ImportAssetsD
 			}
 
 			for (auto& o: collector.getAssets()) {
-				result.out.push_back(o);
+				result.out.push_back(std::move(o));
 			}
 
 			for (auto& i: collector.getAdditionalInputs()) {
-				result.additionalInputs.push_back(i);
+				result.additionalInputs.push_back(std::move(i));
 			}
 		}
 		

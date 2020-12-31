@@ -4,6 +4,7 @@
 #include "halley/resources/metadata.h"
 #include "halley/support/logger.h"
 #include "halley/bytes/compression.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -69,10 +70,12 @@ const Path& AssetCollector::getDestinationDirectory()
 
 Bytes AssetCollector::readAdditionalFile(const Path& filePath)
 {
-	for (auto path : assetsSrc) {
+	for (const auto& path: assetsSrc) {
 		Path f = path / filePath;
 		if (FileSystem::exists(f)) {
-			additionalInputs.push_back(TimestampedPath(f, FileSystem::getLastWriteTime(f)));
+			if (!std_ex::contains_if(additionalInputs, [&] (const auto& e) { return e.first == f; })) {
+				additionalInputs.push_back(TimestampedPath(f, FileSystem::getLastWriteTime(f)));			
+			}
 			return FileSystem::readFile(f);
 		}
 	}

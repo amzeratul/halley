@@ -263,8 +263,8 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 		return true;
 	}
 	
+	// Check if this was imported before
 	if (!failed) {
-		// No failures, check if this was imported before
 		iter = assetsImported.find(asset.assetId);
 		if (iter == assetsImported.end()) {
 			// Asset didn't even exist before
@@ -287,7 +287,7 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 
 	// Any of the input files changed?
 	// Note: We don't have to check old files on new input, because the size matches and all entries matched.
-	for (auto& i: asset.inputFiles) {
+	for (const auto& i: asset.inputFiles) {
 		auto result = std::find_if(oldAsset.inputFiles.begin(), oldAsset.inputFiles.end(), [&](const AssetPath& entry) { return entry.getDataPath() == i.getDataPath(); });
 		if (result == oldAsset.inputFiles.end()) {
 			// File wasn't there before
@@ -299,7 +299,7 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 	}
 
 	// Any of the additional input files changed?
-	for (auto& i: oldAsset.additionalInputFiles) {
+	for (const auto& i: oldAsset.additionalInputFiles) {
 		if (!FileSystem::exists(i.first)) {
 			// File removed
 			return true;
@@ -311,8 +311,8 @@ bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset
 
 	// Have any of the output files gone missing?
 	if (!failed) {
-		for (auto& o: oldAsset.outputFiles) {
-			for (auto& version: o.platformVersions) {
+		for (const auto& o: oldAsset.outputFiles) {
+			for (const auto& version: o.platformVersions) {
 				if (!FileSystem::exists(directory / version.second.filepath)) {
 					return true;
 				}
