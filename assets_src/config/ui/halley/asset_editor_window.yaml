@@ -18,7 +18,7 @@ children:
     proportion: 1
   - widget: { class: label, id: assetName, text: "" }
     fill: centre
-- widget: { id: metadataPanel, class: widget }
+- widget: { id: metadataPanel, class: widget, active: false }
   sizer: { type: vertical }
   border: [10, 0, 0, 0]
   children:

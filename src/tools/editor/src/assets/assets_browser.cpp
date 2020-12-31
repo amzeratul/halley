@@ -67,7 +67,6 @@ void AssetsBrowser::makeUI()
 	assetList->setSingleClickAccept(false);
 	assetEditor = getWidgetAs<AssetEditorWindow>("assetEditorWindow");
 	assetEditor->init(project, projectWindow);
-	getWidget("metadataPanel")->setActive(false);
 
 	setHandle(UIEventType::ListSelectionChanged, "assetType", [=] (const UIEvent& event)
 	{
@@ -281,8 +280,6 @@ void AssetsBrowser::loadAsset(const String& name, bool doubleClick)
 		if (doubleClick) {
 			assetEditor->onDoubleClickAsset();
 		}
-
-		getWidget("metadataPanel")->setActive(true);
 	}
 }
 

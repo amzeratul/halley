@@ -54,6 +54,8 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 		getWidget("contentListDropdownArea")->setActive(false);
 	}
 
+	bool showMetadataEditor = true;
+
 	if (loadedAsset != name || force) {
 		loadedAsset = name;
 		loadedType = type;
@@ -69,6 +71,12 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 			{
 				return b.first < a.first;
 			});
+
+			for (const auto& asset: assets) {
+				if (asset.first == AssetType::Prefab || asset.first == AssetType::Scene) {
+					showMetadataEditor = false;
+				}
+			}
 
 			auto useDropdown = false;
 			std::vector<String> assetNames;
@@ -107,6 +115,8 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 			createEditorTab(Path(name), type.value(), name);
 		}
 	}
+
+	getWidget("metadataPanel")->setActive(showMetadataEditor);
 }
 
 Path AssetEditorWindow::getCurrentAssetPath() const
