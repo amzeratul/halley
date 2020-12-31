@@ -1,0 +1,30 @@
+name: Classic
+defaultColour: "#FFFFFF"
+base: colour_schemes/halley_default
+colours:
+  icon_directory: "#CAA9CD"
+  
+  ui_controlNormal: "#9C5BB5"
+  ui_controlDown: "#913DA3"
+  ui_controlHover: "#C080E3"
+  ui_controlDisabled: "#927B95"
+  ui_controlNormalTransparent: "#9C5BB580"
+
+  ui_text: "#FFFFFF"
+  ui_selectedText: "#FFFFFF"
+  ui_unselectedText: "#FFFFFF"
+  ui_textGhost: "#7F7F7F"
+  ui_disabledText: "#7F7F7F"
+
+  ui_listBackground: "#201427"
+  ui_listSelected: "#9C5BB5"
+  ui_listHover: "#5E3962"
+  ui_inputBox: "#9861B6"
+  ui_scrollBackground: "#442947"
+
+  ui_backgroundBox: "#201427"
+  ui_popupWindow: "#9C5BB5"
+  ui_staticBox: "#9C5BB5"
+  ui_staticBoxSubdue: "#754589"
+
+  ui_debugConsole: "#201427C0"

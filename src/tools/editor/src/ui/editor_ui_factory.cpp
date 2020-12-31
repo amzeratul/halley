@@ -13,14 +13,9 @@ using namespace Halley;
 
 EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n)
 	: UIFactory(api, resources, i18n)
-{	
-	auto styleSheet = std::make_shared<UIStyleSheet>(resources);
-	for (auto& style: resources.enumerate<ConfigFile>()) {
-		if (style.startsWith("ui_style/")) {
-			styleSheet->load(*resources.get<ConfigFile>(style), &colourScheme);
-		}
-	}
-	setStyleSheet(std::move(styleSheet));
+{
+	loadColourSchemes();
+	setColourScheme("Boring Grey");
 	
 	UIInputButtons listButtons;
 	setInputButtons("list", listButtons);
@@ -98,4 +93,59 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeSelectAsset(const ConfigNode& ent
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	return std::make_shared<SelectAssetWidget>(id, *this, fromString<AssetType>(node["assetType"].asString()));
+}
+
+void EditorUIFactory::loadColourSchemes()
+{
+	for (const auto& assetId: resources.enumerate<ConfigFile>()) {
+		if (assetId.startsWith("colour_schemes/")) {
+			colourSchemes.push_back(UIColourScheme(resources.get<ConfigFile>(assetId)->getRoot(), resources));
+		}
+	}
+}
+
+void EditorUIFactory::reloadStyleSheet()
+{
+	const auto cur = getStyleSheet();
+	
+	if (!cur) {
+		auto styleSheet = std::make_shared<UIStyleSheet>(resources);
+		for (auto& style: resources.enumerate<ConfigFile>()) {
+			if (style.startsWith("ui_style/")) {
+				styleSheet->load(*resources.get<ConfigFile>(style), &colourScheme);
+			}
+		}
+		setStyleSheet(std::move(styleSheet));
+	}
+}
+
+std::vector<String> EditorUIFactory::getColourSchemeNames() const
+{
+	std::vector<String> result;
+	for (auto& scheme: colourSchemes) {
+		result.push_back(scheme.getName());
+	}
+	return result;
+}
+
+void EditorUIFactory::setColourScheme(const String& name)
+{
+	bool found = false;
+	
+	for (auto& scheme: colourSchemes) {
+		if (scheme.getName() == name) {
+			colourScheme = scheme;
+			found = true;
+			break;
+		}
+	}
+
+	if (!found && !colourSchemes.empty()) {
+		colourScheme = colourSchemes.front();
+		found = true;
+	}
+
+	if (found) {
+		reloadStyleSheet();
+	}
 }

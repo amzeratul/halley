@@ -59,7 +59,7 @@ uiStyle:
     item:
       normal: ""
       hover: { img: halley_ui/ui_list_item_selection.png, colour: ui_listHover }
-      selected: { img: halley_ui/ui_list_item_selection.png, colour: ui_controlNormal }
+      selected: { img: halley_ui/ui_list_item_selection.png, colour: ui_listSelected }
       drag: { img: halley_ui/ui_list_item.png, colour: ui_controlNormalTransparent }
       innerBorder: [ 6, 5, 6, 2 ]
     innerBorder: [ 0, 0, 0, 0 ]
@@ -163,12 +163,12 @@ uiStyle:
     labelBorder: [0, 0, 0, 0]
 
   slider:
-    emptyBar: halley_ui/slider_bar_empty.png
-    fullBar: halley_ui/slider_bar_full.png
-    left: halley_ui/slider_bar_left.png
-    right: halley_ui/slider_bar_right.png
-    thumb: halley_ui/slider_thumb.png
-    labelBorder: { img: whitebox.png, colour: "#FFFFFF00" }
+    emptyBar: { img: halley_ui/slider_bar_empty.png, colour: ui_controlDisabled }
+    fullBar: { img: halley_ui/slider_bar_full.png, colour: ui_controlNormal }
+    left: { img: halley_ui/slider_bar_left.png, colour: ui_controlNormal }
+    right: { img: halley_ui/slider_bar_right.png, colour: ui_controlDisabled }
+    thumb: { img: halley_ui/slider_thumb.png, colour: ui_controlHover }
+    labelBorder: { img: whitebox.png, colour: "#00000000" }
     innerBorder: [3, 0, 2, 0]
     barBorder: [0, 1, 6, 1]
     labelInnerBorder: [2, 0, 2, 0]

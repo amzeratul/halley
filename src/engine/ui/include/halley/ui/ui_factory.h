@@ -61,6 +61,8 @@ namespace Halley
 		void setStyleSheet(std::shared_ptr<UIStyleSheet> styleSheet);
 		const UIColourScheme& getColourScheme() const;
 
+		void update();
+
 	protected:
 		struct ParsedOption {
 			String id;
@@ -121,6 +123,7 @@ namespace Halley
 		bool resolveConditions(const ConfigNode& node) const;
 
 		Colour4f getColour(const String& key) const;
+		void loadDefaultColourScheme();
 
 	private:
 		std::shared_ptr<UIStyleSheet> styleSheet;

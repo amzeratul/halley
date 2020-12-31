@@ -1,6 +1,6 @@
 ---
 
-widget: { class: image, image: ui/float_window.png, innerBorder: [ 14, 11, 14, 14 ], colour: "#9C5BB5" }
+widget: { class: image, image: ui/float_window.png, innerBorder: [ 14, 11, 14, 14 ], colour: ui_popupWindow }
 sizer: { type: vertical }
 children:
 - widget: { id: title, class: label, text: "Load Project" }

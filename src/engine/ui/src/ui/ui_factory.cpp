@@ -36,10 +36,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	, i18n(i18n)
 	, styleSheet(std::move(styleSheet))
 {
-	const String defaultColourScheme = "colour_schemes/halley_default";
-	if (resources.exists<ConfigFile>(defaultColourScheme)) {
-		colourScheme = resources.get<ConfigFile>(defaultColourScheme)->getRoot();
-	}
+	loadDefaultColourScheme();
 	
 	addFactory("widget", [=] (const ConfigNode& node) { return makeBaseWidget(node); });
 	addFactory("label", [=] (const ConfigNode& node) { return makeLabel(node); });
@@ -176,6 +173,11 @@ void UIFactory::setStyleSheet(std::shared_ptr<UIStyleSheet> styleSheet)
 const UIColourScheme& UIFactory::getColourScheme() const
 {
 	return colourScheme;
+}
+
+void UIFactory::update()
+{
+	styleSheet->updateIfNeeded();
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
@@ -954,5 +956,13 @@ Colour4f UIFactory::getColour(const String& key) const
 		return Colour4f::fromString(key);
 	} else {
 		return colourScheme.getColour(key);
+	}
+}
+
+void UIFactory::loadDefaultColourScheme()
+{
+	const String defaultColourScheme = "colour_schemes/halley_default";
+	if (resources.exists<ConfigFile>(defaultColourScheme)) {
+		colourScheme = UIColourScheme(resources.get<ConfigFile>(defaultColourScheme)->getRoot(), resources);
 	}
 }

@@ -9,8 +9,8 @@ children:
   children:
   - stretchSpacer: {}
     proportion: 1
-  - widget: { id: new, class: button, text: "New...", size: [100, 30], tooltip: "Create a new Halley Project" }
-  - widget: { id: open, class: button, text: "Open...", size: [100, 30], tooltip: "Opens an existing Halley Project" }
+  - widget: { id: new, class: button, text: "New...", size: [100, 22], tooltip: "Create a new Halley Project" }
+  - widget: { id: open, class: button, text: "Open...", size: [100, 22], tooltip: "Opens an existing Halley Project" }
 - widget: { class: scrollBarPane, size: [200, 200] }
   proportion: 1
   border: [0, 5, 0, 0]

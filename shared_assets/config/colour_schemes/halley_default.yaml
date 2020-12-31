@@ -1,6 +1,7 @@
+name: Boring Grey
 defaultColour: "#FFFFFF"
 colours:
-  icon_directory: "#CAA9CD"
+  icon_directory: "#CDCDCD"
   
   icon_shader: "#EC7171"
   icon_materialDefinition: "#B81616"
@@ -31,13 +32,13 @@ colours:
   icon_simpleCopy: "#DEAEED"
   icon_textFile: "#AEEDBB"
   icon_movie: "#AEBFED"
-
-
-  ui_controlNormal: "#9C5BB5"
-  ui_controlDown: "#913DA3"
-  ui_controlHover: "#C080E3"
-  ui_controlDisabled: "#927B95"
-  ui_controlNormalTransparent: "#9C5BB580"
+  
+  
+  ui_controlNormal: "#40424D"
+  ui_controlDown: "#30323A"
+  ui_controlHover: "#6D7285"
+  ui_controlDisabled: "#191919"
+  ui_controlNormalTransparent: "#40424D80"
 
   ui_text: "#FFFFFF"
   ui_selectedText: "#FFFFFF"
@@ -45,10 +46,15 @@ colours:
   ui_textGhost: "#7F7F7F"
   ui_disabledText: "#7F7F7F"
 
-  ui_listBackground: "#201427"
-  ui_listHover: "#5E3962"
-  ui_inputBox: "#9861B6"
-  ui_scrollBackground: "#442947"
+  ui_listBackground: "#25262E"
+  ui_listSelected: "#40424D"
+  ui_listHover: "#AAA5B6"
+  ui_inputBox: "#86838D"
+  ui_scrollBackground: "#212227"
 
-  ui_staticBox: "#9C5BB5"
-  ui_staticBoxSubdue: "#754589"
+  ui_backgroundBox: "#1E1E1E"
+  ui_popupWindow: "#53131F"
+  ui_staticBox: "#40424D"
+  ui_staticBoxSubdue: "#30323A"
+
+  ui_debugConsole: "#1E1E1EC0"
