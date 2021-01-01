@@ -1,4 +1,4 @@
-name: Default
+name: Dark (Default)
 base: colour_schemes/base_dark
 colours:
   ui_controlNormal: "#40424D"

@@ -1,0 +1,31 @@
+name: Light
+base: colour_schemes/base_light
+colours:
+  background0: "#F5F5F5"
+  background1: "#F8F8F8"
+  backgroundLogo: "#F3F3F3"
+
+  ui_controlNormal: "#A2A0A9"
+  ui_controlDown: "#7A7984"
+  ui_controlHover: "#BBBBC1"
+  ui_controlDisabled: "#CFCFCF"
+  
+  ui_buttonNormal: "#A2A0A9"
+  ui_buttonDown: "#7A7984"
+  ui_buttonHover: "#BBBBC1"
+  ui_buttonDisabled: "#CFCFCF"
+
+  ui_listBackground: "#CFCFD3"
+  ui_listSelected: "#FFFFFF"
+  ui_listHover: "#E0E0E4"
+  ui_listDrag: "#A2A0A980"
+
+  ui_inputBox: "#A2A0A9"
+
+  ui_scrollBackground: "#EBEBED"
+  ui_backgroundBox: "#EBEBED"
+  ui_popupWindow: "#DFDFE6"
+  ui_staticBox: "#DFDFE6"
+  ui_staticBoxSubdue: "#CFCFD6"
+
+  ui_debugConsole: "#A2A0A9C0"

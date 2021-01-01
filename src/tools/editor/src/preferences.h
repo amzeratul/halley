@@ -12,6 +12,7 @@ namespace Halley
 		Preferences();
 		void setEditorVersion(String editorVersion);
 
+		void loadDefaults();
 		ConfigNode save() const;
 		void load(const ConfigNode& config);
 

@@ -2,13 +2,22 @@
 using namespace Halley;
 
 Preferences::Preferences() 
-	: windowSize(Vector2i(1280, 720))
 {
+	loadDefaults();
 }
 
 void Preferences::setEditorVersion(String editorVersion)
 {
 	this->editorVersion = std::move(editorVersion);
+}
+
+void Preferences::loadDefaults()
+{
+	recents.clear();
+	windowPosition = {};
+	windowSize = Vector2i(1280, 720);
+	windowState = WindowState::Normal;
+	colourScheme = "Dark (Default)";
 }
 
 ConfigNode Preferences::save() const
@@ -35,10 +44,7 @@ ConfigNode Preferences::save() const
 
 void Preferences::load(const ConfigNode& root)
 {
-	recents.clear();
-	windowPosition = {};
-	windowSize = Vector2i(1280, 720);
-	windowState = WindowState::Normal;
+	loadDefaults();
 
 	recents = root["recents"].asVector<String>({});
 	if (root.hasKey("window")) {
@@ -50,7 +56,10 @@ void Preferences::load(const ConfigNode& root)
 		windowState = WindowState(windowNode["state"].asInt());
 	}
 	disabledPlatforms = root["disabledPlatforms"].asVector<String>({});
-	colourScheme = root["colourScheme"].asString("Default");
+
+	if (root.hasKey("colourScheme")) {
+		colourScheme = root["colourScheme"].asString();
+	}
 }
 
 bool Preferences::isDirty() const
