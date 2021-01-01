@@ -109,6 +109,7 @@ void UIClickable::onStateChanged(State prev, State next)
 
 bool UIClickable::setState(State state)
 {
+	addNewChildren(getLastInputType());
 	if (state != curState) {
 		onStateChanged(curState, state);
 	}

@@ -11,6 +11,7 @@ uiStyle:
     downSound: ""
     hoverSound: ""
     label: { font: Ubuntu Bold, size: 15, colour: $ui_text }
+    disabledLabel: { font: Ubuntu Bold, size: 15, colour: $ui_disabledText }
     labelBorder: [0, 0, 0, 0]
     iconBorder: [0, 0, 0, 0]
 
@@ -24,6 +25,7 @@ uiStyle:
     downSound: ""
     hoverSound: ""
     label: { font: Ubuntu Bold, size: 14, colour: $ui_text }
+    disabledLabel: { font: Ubuntu Bold, size: 14, colour: $ui_disabledText }
     labelBorder: [0, 0, 0, 0]
 
   checkbox:

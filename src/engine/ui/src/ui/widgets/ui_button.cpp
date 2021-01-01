@@ -105,12 +105,17 @@ void UIButton::setLabel(LocalisedString text)
 		else {
 			label = std::make_shared<UILabel>(getId() + "_label", renderer, std::move(text));
 		}
+
 		if (style.hasTextRenderer("hoveredLabel")) {
 			label->setHoverable(style.getTextRenderer("label"), style.getTextRenderer("hoveredLabel"));
 		}
 		if (style.hasTextRenderer("selectedLabel"))	{
 			label->setSelectable(style.getTextRenderer("label"), style.getTextRenderer("selectedLabel"));
 		}
+		if (style.hasTextRenderer("disabledLabel")) {
+			label->setDisablable(style.getTextRenderer("label"), style.getTextRenderer("disabledLabel"));
+		}
+
 		if (!existed) {
 			add(label, 1, style.getBorder("labelBorder"), UISizerAlignFlags::Centre);
 		}
@@ -139,17 +144,21 @@ void UIButton::doSetState(State state)
 	} else {
 		if (!isEnabled()) {
 			sprite = style.getSprite("disabled");
+			sendEventDown(UIEvent(UIEventType::SetEnabled, getId(), false));
 		} else if (state == State::Up) {
 			sprite = style.getSprite("normal");
 			playSound(style.getString("upSound"));
+			sendEventDown(UIEvent(UIEventType::SetEnabled, getId(), true));
 			sendEventDown(UIEvent(UIEventType::SetSelected, getId(), false));
 			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), false));
 		} else if (state == State::Down) {
 			sprite = style.getSprite("down");
 			playSound(style.getString("downSound"));
+			sendEventDown(UIEvent(UIEventType::SetEnabled, getId(), true));
 			sendEventDown(UIEvent(UIEventType::SetSelected, getId(), true));
 		} else if (state == State::Hover) {
 			sprite = style.getSprite("hover");
+			sendEventDown(UIEvent(UIEventType::SetEnabled, getId(), true));
 			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), true));
 			playSound(style.getString("hoverSound"));
 		}
