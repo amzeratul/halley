@@ -4,16 +4,16 @@ uiStyle:
   toolbar:
     background: ""
     item:
-      selected: { img: ui/slant_capsule.png, colour: "#FFFFFF", imageColour: "#000000" }
-      hover: { img: ui/slant_capsule.png, colour: "#F98A9A" }
-      normal: { img: ui/slant_capsule.png, colour: "#FC2847" }
+      selected: { img: ui/slant_capsule.png, colour: $toolbarSelected }
+      hover: { img: ui/slant_capsule.png, colour: $toolbarHover }
+      normal: { img: ui/slant_capsule.png, colour: $toolbarNormal }
       innerBorder: [ 8, 1, 8, 1 ]
     innerBorder: [ 0, 0, 0, 0 ]
     extraMouseBorder: [ 1, 1, 1, 1 ]
     selectionChangedSound: ""
-    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFFCF" }
-    selectedLabel: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
-    selectedImageColour: '#000000'
+    label: { font: Ubuntu Bold, size: 18, colour: $toolbarText }
+    selectedImageColour: $toolbarIconSelected
+    imageColour: $toolbarIconNormal
     gap: -5
 
   flatButton:
@@ -24,23 +24,23 @@ uiStyle:
     upSound: ""
     downSound: ""
     hoverSound: ""
-    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+    label: { font: Ubuntu Bold, size: 18, colour: $toolbarText }
     labelBorder: [0, 0, 0, 0]
     iconBorder: [0, 0, 0, 0]
-    hoveredIconColour: "#FFCDCD"
+    hoveredIconColour: $toolbarIconHover
 
   slantButton:
-    selected: { img: ui/slant_capsule.png, colour: "#FFFFFF", imageColour: "#000000" }
-    hover: { img: ui/slant_capsule.png, colour: "#F98A9A" }
-    normal: { img: ui/slant_capsule.png, colour: "#FC2847" }
-    down: { img: ui/slant_capsule.png, colour: "#D30322" }
+    selected: { img: ui/slant_capsule.png, colour: $toolbarSelected }
+    hover: { img: ui/slant_capsule.png, colour: $toolbarHover }
+    normal: { img: ui/slant_capsule.png, colour: $toolbarNormal }
+    down: { img: ui/slant_capsule.png, colour: $toolbarDown }
     innerBorder: [ 15, 0, 15, 0 ]
     upSound: ""
     downSound: ""
     hoverSound: ""
-    label: { font: Ubuntu Bold, size: 18, colour: "#FFFFFF" }
+    label: { font: Ubuntu Bold, size: 18, colour: $toolbarText }
     labelBorder: [0, 0, 0, 0]
     iconBorder: [0, 0, 0, 0]
-    hoveredIconColour: "#FFCDCD"
+    hoveredIconColour: $toolbarIconHover
 
 ...

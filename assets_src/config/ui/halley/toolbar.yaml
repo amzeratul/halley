@@ -3,7 +3,7 @@
 widget: { class: widget }
 sizer: { type: horizontal, gap: 0 }
 children:
-- widget: { class: image, image: ui/slant_capsule_short.png, size: [50, 32], colour: "#FC2847" }
+- widget: { class: image, image: ui/slant_capsule_short.png, size: [50, 32], colour: $toolbarNormal }
   border: [-10, 3, -5, 3]
 - widget: 
     id: toolbarList
@@ -26,7 +26,7 @@ children:
     - id: settings
       image: ui/toolbar_settings.png
       tooltip: Halley Settings
-- widget: { class: image, image: ui/slant_capsule_short.png, size: [140, 32], colour: "#FC2847" }
+- widget: { class: image, image: ui/slant_capsule_short.png, size: [140, 32], colour: $toolbarNormal }
   children:
   - widget: { class: label, id: toolName, text: Assets }
     fill: centre
@@ -36,7 +36,7 @@ children:
 - stretchSpacer: {}
   proportion: 1
 
-- widget: { class: image, image: ui/slant_capsule_short.png, size: [120, 32], colour: "#FC2847", innerBorder: [20, 0, 20, 0] }
+- widget: { class: image, image: ui/slant_capsule_short.png, size: [120, 32], colour: $toolbarNormal, innerBorder: [20, 0, 20, 0] }
   border: [0, 3, 0, 3]
   children:
   - widget: { class: label, id: gameName, text: Halley Game }
@@ -47,11 +47,11 @@ children:
   border: [-5, 0, 0, 0]
 - widget: { id: buildProject, class: button, icon: ui/build.png, style: slantButton, size: [42, 42], tooltip: "Build Project" }
   border: [-5, 0, 0, 0]
-- widget: { class: image, image: ui/slant_capsule_short.png, size: [20, 32], colour: "#FC2847", innerBorder: [20, 0, 20, 0] }
+- widget: { class: image, image: ui/slant_capsule_short.png, size: [20, 32], colour: $toolbarNormal, innerBorder: [20, 0, 20, 0] }
   border: [-5, 3, 0, 3]
 - widget: { id: exitProject, class: button, icon: ui/exit.png, style: slantButton, size: [42, 42], tooltip: "Close Project" }
   border: [-5, 0, 0, 0]
-- widget: { class: image, image: ui/slant_capsule_short.png, size: [30, 32], colour: "#FC2847", innerBorder: [20, 0, 20, 0] }
+- widget: { class: image, image: ui/slant_capsule_short.png, size: [30, 32], colour: $toolbarNormal, innerBorder: [20, 0, 20, 0] }
   border: [-5, 3, -10, 3]
 
 ...

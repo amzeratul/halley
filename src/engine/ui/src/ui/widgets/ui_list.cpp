@@ -108,11 +108,18 @@ void UIList::addTextItem(const String& id, LocalisedString label, float maxWidth
 
 void UIList::addImage(const String& id, std::shared_ptr<UIImage> image, float proportion, Vector4f border, int fillFlags, std::optional<UIStyle> styleOverride)
 {
+	Colour4f baseCol;
+	if (style.hasColour("imageColour")) {
+		baseCol = style.getColour("imageColour");
+		image->getSprite().setColour(baseCol);
+	} else {
+		baseCol = image->getSprite().getColour();
+	}
 	if (style.hasColour("selectedImageColour")) {
-		image->setSelectable(image->getSprite().getColour(), style.getColour("selectedImageColour"));
+		image->setSelectable(baseCol, style.getColour("selectedImageColour"));
 	}
 
-	addItem(id, image, proportion, border, fillFlags, styleOverride);
+	addItem(id, image, proportion, border, fillFlags, std::move(styleOverride));
 }
 
 void UIList::addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, std::optional<UIStyle> styleOverride)

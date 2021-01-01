@@ -40,6 +40,15 @@ colours:
   backgroundLogo: "#F0F0F0"
   logo: "#FC2847"
 
+  toolbarNormal: "#FC2847"
+  toolbarHover: "#F98A9A"
+  toolbarDown: "#D30322"
+  toolbarSelected: "#FFFFFF"
+  toolbarIconNormal: "#FFFFFF"
+  toolbarIconHover: "#FFCDCD"
+  toolbarIconSelected: "#000000"
+  toolbarText: "#FFFFFF"
+
 
   ui_text: "#000000"
   ui_selectedText: "#000000"
