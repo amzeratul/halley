@@ -22,7 +22,7 @@ children:
 - sizer: { type: vertical}
   proportion: 1
   children:
-    - widget: { id: sceneEditorToolbar, class: image, image: "halley_ui/ui_list_item.png", colour: ui_backgroundBox, innerBorder: [5, 5, 5, 5] }
+    - widget: { id: sceneEditorToolbar, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5] }
       sizer: { type: horizontal }
       children:
         - widget: { id: saveButton, class: button, style: buttonThin, text: "Save", size: [100, 22] }
@@ -48,7 +48,7 @@ children:
       proportion: 1
       sizer: { type: vertical }
       children:
-        - widget: { id: currentToolUI, class: image, image: "halley_ui/ui_list_item.png", colour: ui_backgroundBox, innerBorder: [5, 5, 5, 5], size: [100, 32] }
+        - widget: { id: currentToolUI, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5], size: [100, 32] }
           sizer: { type: horizontal }
           border: [10, 10, 10, 10]
           fill: right

@@ -33,9 +33,10 @@ colours:
   ui_listDrag: "#FFC6E780"
 
   ui_inputBox: "#FFC6E7"
+  ui_inputCaret: "#000000"
   
   ui_scrollBackground: "#DD6CB6"
-  ui_backgroundBox: "#DD6CB6"
+  ui_backgroundBox: "#F8E0EF"
   ui_popupWindow: "#FFC6E7"
   ui_staticBox: "#FFC6E7"
   ui_staticBoxSubdue: "#F9ACD5"
@@ -43,5 +44,17 @@ colours:
   ui_debugConsole: "#DD6CB6C0"
 
 sprites:
-  ui_float_window: { img: halley_ui/float_window_light.png }
-  ui_input_thin: { img: halley_ui/ui_input_thin_light.png }
+  ui_float_window: { img: halley_ui/ui_float_window.png, material: Halley/SpriteInverseTint }
+  ui_title_capsule: { img: halley_ui/ui_title_capsule.png, material: Halley/SpriteInverseTint }
+  ui_input_thin: { img: halley_ui/ui_input_thin.png, material: Halley/SpriteInverseTint }
+  ui_input: { img: halley_ui/ui_input.png, material: Halley/SpriteInverseTint }
+  ui_checkbox: { img: halley_ui/ui_checkbox.png, material: Halley/SpriteInverseTint }
+  ui_checkbox_checked: { img: halley_ui/ui_checkbox_checked.png, material: Halley/SpriteInverseTint }
+  ui_dropdown_closed: { img: halley_ui/ui_dropdown_closed.png, material: Halley/SpriteInverseTint }
+  ui_dropdown_open: { img: halley_ui/ui_dropdown_open.png, material: Halley/SpriteInverseTint }
+  ui_dropdown_window: { img: halley_ui/ui_dropdown_window.png, material: Halley/SpriteInverseTint }
+  ui_tooltip: { img: halley_ui/ui_tooltip.png, material: Halley/SpriteInverseTint }
+  ui_tab_normal: { img: halley_ui/tabs/tab_normal.png, material: Halley/SpriteInverseTint }
+  ui_tab_hover: { img: halley_ui/tabs/tab_hover.png, material: Halley/SpriteInverseTint }
+  ui_tab_selected: { img: halley_ui/tabs/tab_selected.png, material: Halley/SpriteInverseTint }
+  ui_tabs_bg: { img: halley_ui/tabs/tabs_bg.png, material: Halley/SpriteInverseTint }

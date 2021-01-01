@@ -18,8 +18,8 @@ Colour4f getColour(const ConfigNode& node, const std::shared_ptr<const UIColourS
 	const auto& str = node.asString();
 	if (str.startsWith("#")) {
 		return Colour4f::fromString(str);
-	} else if (colourScheme) {
-		return colourScheme->getColour(str);
+	} else if (str.startsWith("$") && colourScheme) {
+		return colourScheme->getColour(str.mid(1));
 	} else {
 		Logger::logWarning("Invalid colour: \"" + str + "\"");
 		return Colour4f();

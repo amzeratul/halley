@@ -961,8 +961,8 @@ Colour4f UIFactory::getColour(const String& key) const
 {
 	if (key.startsWith("#")) {
 		return Colour4f::fromString(key);
-	} else if (colourScheme) {
-		return colourScheme->getColour(key);
+	} else if (key.startsWith("$") && colourScheme) {
+		return colourScheme->getColour(key.mid(1));
 	} else {
 		return Colour4f();
 	}

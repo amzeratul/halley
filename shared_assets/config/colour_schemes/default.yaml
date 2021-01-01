@@ -65,6 +65,7 @@ colours:
   ui_listDrag: "#40424D80"
 
   ui_inputBox: "#86838D"
+  ui_inputCaret: "#FFFFFF"
 
   ui_scrollBackground: "#212227"
   ui_backgroundBox: "#1E1E1E"
@@ -75,5 +76,17 @@ colours:
   ui_debugConsole: "#1E1E1EC0"
 
 sprites:
-  ui_float_window: { img: halley_ui/float_window.png }
-  ui_input_thin: { img: halley_ui/ui_input_thin.png }
+  ui_float_window: { img: halley_ui/ui_float_window.png, material: Halley/Sprite }
+  ui_title_capsule: { img: halley_ui/ui_title_capsule.png, material: Halley/Sprite }
+  ui_input_thin: { img: halley_ui/ui_input_thin.png, material: Halley/Sprite }
+  ui_input: { img: halley_ui/ui_input.png, material: Halley/Sprite }
+  ui_checkbox: { img: halley_ui/ui_checkbox.png, material: Halley/Sprite }
+  ui_checkbox_checked: { img: halley_ui/ui_checkbox_checked.png, material: Halley/Sprite }
+  ui_dropdown_closed: { img: halley_ui/ui_dropdown_closed.png, material: Halley/Sprite }
+  ui_dropdown_open: { img: halley_ui/ui_dropdown_open.png, material: Halley/Sprite }
+  ui_dropdown_window: { img: halley_ui/ui_dropdown_window.png, material: Halley/Sprite }
+  ui_tooltip: { img: halley_ui/ui_tooltip.png, material: Halley/Sprite }
+  ui_tab_normal: { img: halley_ui/tabs/tab_normal.png, material: Halley/Sprite }
+  ui_tab_hover: { img: halley_ui/tabs/tab_hover.png, material: Halley/Sprite }
+  ui_tab_selected: { img: halley_ui/tabs/tab_selected.png, material: Halley/Sprite }
+  ui_tabs_bg: { img: halley_ui/tabs/tabs_bg.png, material: Halley/Sprite }
