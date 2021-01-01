@@ -9,7 +9,7 @@ namespace Halley {
 		using ZoomListener = std::function<void(float)>;
     	using MousePosListener = std::function<void(Vector2f)>;
 
-        ScrollBackground(String id, Resources& res, UISizer sizer);
+        ScrollBackground(String id, Resources& res, UISizer sizer, Colour4f colour);
 		float getZoomLevel() const;
 		void setZoomListener(ZoomListener listener);
     	void setMousePosListener(MousePosListener listener);

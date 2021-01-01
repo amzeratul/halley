@@ -40,6 +40,10 @@ colours:
   backgroundLogo: "#101010"
   logo: "#FC2847"
 
+  scrollBackground: "#111111"
+
+  taskbarLogoBackground: "#1D1D1D"
+
   toolbarNormal: "#FC2847"
   toolbarHover: "#F98A9A"
   toolbarDown: "#D30322"
@@ -60,6 +64,7 @@ colours:
   ui_textGhost: "#7F7F7F"
   ui_stringMatchText: "#99FF99"
   ui_inputCaret: "#FFFFFF"
+
 
 sprites:
   ui_float_window: { img: halley_ui/ui_float_window.png, material: Halley/Sprite }

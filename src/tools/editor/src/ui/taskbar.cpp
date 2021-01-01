@@ -9,7 +9,7 @@ TaskBar::TaskBar(UIFactory& ui, EditorTaskSet& taskSet)
 	, taskSet(taskSet)
 {
 	{
-		auto col = Colour4f(0.9882f, 0.15686f, 0.27843f, 1);
+		const auto col = ui.getColourScheme()->getColour("logo");
 		halleyLogo = Sprite()
 			.setImage(resources, "halley/halley_logo_dist.png", "Halley/DistanceFieldSprite")
 			.setPivot(Vector2f(0.5f, 0.5f))
@@ -22,7 +22,7 @@ TaskBar::TaskBar(UIFactory& ui, EditorTaskSet& taskSet)
 	}
 
 	{
-		Colour4f col(0.12f, 0.12f, 0.12f);
+		const auto col = ui.getColourScheme()->getColour("taskbarLogoBackground");
 		barSolid = Sprite().setMaterial(resources, "Halley/SolidColour").setSize(Vector2f(1, 1)).setColour(col);
 		barFade = Sprite().setImage(resources, "fade_right.png").setColour(col);
 	}

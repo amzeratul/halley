@@ -21,6 +21,8 @@ colours:
   ui_listDrag: "#FFC6E780"
 
   ui_inputBox: "#DD6CB6"
+
+  ui_disabledText: "#8B747E"
   
   ui_scrollBackground: "#F8E0EF"
   ui_backgroundBox: "#F8E0EF"
