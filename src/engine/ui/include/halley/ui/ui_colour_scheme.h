@@ -16,6 +16,7 @@ namespace Halley {
         UIColourScheme(const ConfigNode& config, Resources& resources);
     	
 		const String& getName() const;
+		bool isEnabled() const;
 
 		Colour4f getColour(const String& key) const;
 		Sprite getSprite(Resources& resources, const String& name, const String& material) const;
@@ -23,6 +24,7 @@ namespace Halley {
 	private:
 		String name;
 		Colour4f defaultColour;
+		bool enabled = true;
         std::unordered_map<String, Colour4f> colours;
 		std::unordered_map<String, Sprite> sprites;
     };

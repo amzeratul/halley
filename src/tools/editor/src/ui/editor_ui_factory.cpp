@@ -99,7 +99,10 @@ void EditorUIFactory::loadColourSchemes()
 {
 	for (const auto& assetId: resources.enumerate<ConfigFile>()) {
 		if (assetId.startsWith("colour_schemes/")) {
-			colourSchemes.push_back(std::make_shared<UIColourScheme>(resources.get<ConfigFile>(assetId)->getRoot(), resources));
+			auto scheme = std::make_shared<UIColourScheme>(resources.get<ConfigFile>(assetId)->getRoot(), resources);
+			if (scheme->isEnabled()) {
+				colourSchemes.push_back(scheme);
+			}
 		}
 	}
 }

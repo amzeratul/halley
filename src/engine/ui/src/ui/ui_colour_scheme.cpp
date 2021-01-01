@@ -39,6 +39,8 @@ UIColourScheme::UIColourScheme(const ConfigNode& node, Resources& resources)
 		defaultColour = Colour4f::fromString(node["defaultColour"].asString());
 	}
 	name = node["name"].asString();
+
+	enabled = node["enabled"].asBool(true);
 }
 
 Colour4f UIColourScheme::getColour(const String& key) const
@@ -70,4 +72,9 @@ Sprite UIColourScheme::getSprite(Resources& resources, const String& name, const
 const String& UIColourScheme::getName() const
 {
 	return name;
+}
+
+bool UIColourScheme::isEnabled() const
+{
+	return enabled;
 }

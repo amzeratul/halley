@@ -1,0 +1,68 @@
+name: Base (Light)
+defaultColour: "#FFFFFF"
+enabled: false
+colours:
+  icon_directory: "#000000"
+  
+  icon_shader: "#EC7171"
+  icon_materialDefinition: "#B81616"
+
+  icon_prefab: "#FFFF40"
+  icon_scene: "#77E726"
+  
+  icon_colours: "#00DDE1"
+  icon_configFile: "#26E743"
+  icon_localisation: "#43FA52"
+  icon_variableTable: "#50E9BB"
+  
+  icon_audioClip: "#E39343"
+  icon_audioEvent: "#FFCB3E"
+  
+  icon_font: "#D538E9"
+  icon_bitmapFont: "#D538E9"
+
+  icon_animation: "#2457FF"
+  icon_image: "#3862E9"
+  icon_sprite: "#3862E9"
+  icon_spriteSheet: "#7023DD"
+  icon_texture: "#9D38E9"
+  icon_mesh: "#9623DD"
+  icon_meshAnimation: "#2457FF"
+  
+  icon_binaryFile: "#DEAEED"
+  icon_simpleCopy: "#DEAEED"
+  icon_textFile: "#AEEDBB"
+  icon_movie: "#AEBFED"
+
+
+  background0: "#FFFFFF"
+  background1: "#F9F9F9"
+  backgroundLogo: "#F0F0F0"
+  logo: "#FC2847"
+
+
+  ui_text: "#000000"
+  ui_selectedText: "#000000"
+  ui_unselectedText: "#000000"
+  ui_disabledText: "#7F7F7F"
+  ui_selectedTextAlt: "#9A570E"
+  ui_unselectedTextAlt: "#9A570E"
+  ui_disabledTextAlt: "#6D503A"
+  ui_textGhost: "#7F7F7F"
+  ui_inputCaret: "#000000"
+
+sprites:
+  ui_float_window: { img: halley_ui/ui_float_window.png, material: Halley/SpriteInverseTint }
+  ui_title_capsule: { img: halley_ui/ui_title_capsule.png, material: Halley/SpriteInverseTint }
+  ui_input_thin: { img: halley_ui/ui_input_thin.png, material: Halley/SpriteInverseTint }
+  ui_input: { img: halley_ui/ui_input.png, material: Halley/SpriteInverseTint }
+  ui_checkbox: { img: halley_ui/ui_checkbox.png, material: Halley/SpriteInverseTint }
+  ui_checkbox_checked: { img: halley_ui/ui_checkbox_checked.png, material: Halley/SpriteInverseTint }
+  ui_dropdown_closed: { img: halley_ui/ui_dropdown_closed.png, material: Halley/SpriteInverseTint }
+  ui_dropdown_open: { img: halley_ui/ui_dropdown_open.png, material: Halley/SpriteInverseTint }
+  ui_dropdown_window: { img: halley_ui/ui_dropdown_window.png, material: Halley/SpriteInverseTint }
+  ui_tooltip: { img: halley_ui/ui_tooltip.png, material: Halley/SpriteInverseTint }
+  ui_tab_normal: { img: halley_ui/tabs/tab_normal.png, material: Halley/SpriteInverseTint }
+  ui_tab_hover: { img: halley_ui/tabs/tab_hover.png, material: Halley/SpriteInverseTint }
+  ui_tab_selected: { img: halley_ui/tabs/tab_selected.png, material: Halley/SpriteInverseTint }
+  ui_tabs_bg: { img: halley_ui/tabs/tabs_bg.png, material: Halley/SpriteInverseTint }
