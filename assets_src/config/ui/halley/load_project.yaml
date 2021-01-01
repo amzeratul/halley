@@ -5,7 +5,7 @@ sizer: { type: vertical }
 children:
 - widget: { id: logo, class: image, image: "halley/halley_logo_dist.png" }
   border: [0, 0, 0, 40]
-- widget: { class: image, image: ui/float_window.png, innerBorder: [ 14, 11, 14, 14 ], colour: ui_popupWindow }
+- widget: { class: image, image: $ui_float_window, innerBorder: [ 14, 11, 14, 14 ], colour: ui_popupWindow }
   sizer: { type: vertical }
   children:
   - widget: { id: title, class: label, text: "Load Project" }

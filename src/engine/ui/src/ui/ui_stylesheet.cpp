@@ -37,11 +37,10 @@ void loadStyleData(Resources& resources, const String& name, const ConfigNode& n
 {
 	if (node.getType() == ConfigNodeType::String) {
 		if (!node.asString().isEmpty()) {
-			data = Sprite().setImage(resources, node.asString());
+			data = colourScheme->getSprite(resources, node.asString(), "");
 		}
 	} else {
-		data = Sprite()
-			.setImage(resources, node["img"].asString())
+		data = colourScheme->getSprite(resources, node["img"].asString(), node["material"].asString(""))
 			.setColour(getColour(node["colour"], colourScheme));
 	}
 }

@@ -617,7 +617,11 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 	
 	if (node.hasKey("image")) {
 		auto imageName = node["image"].asString();
-		sprite.setImage(resources, imageName, materialName);
+		if (colourScheme) {
+			sprite = colourScheme->getSprite(resources, imageName, materialName);
+		} else {
+			sprite = Sprite().setImage(resources, imageName, materialName);
+		}
 	} else if (node.hasKey("sprite")) {
 		auto spriteName = node["sprite"].asString();
 		auto spriteSheetName = node["spriteSheet"].asString();

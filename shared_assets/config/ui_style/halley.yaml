@@ -35,7 +35,7 @@ uiStyle:
     checkedDisabled: { img: halley_ui/ui_checkbox_checked.png, colour: ui_controlDisabled }
 
   input:
-    box: { img: halley_ui/ui_input_thin.png, colour: ui_inputBox }
+    box: { img: $ui_input_thin, colour: ui_inputBox }
     caret: halley_ui/ui_caret.png
     innerBorder: [ 6, 2, 6, 1 ]
     label: { font: Ubuntu Regular, size: 15, colour: ui_text }
@@ -43,7 +43,7 @@ uiStyle:
     minSize: 22
 
   inputThin:
-    box: { img: halley_ui/ui_input_thin.png, colour: ui_inputBox }
+    box: { img: $ui_input_thin, colour: ui_inputBox }
     caret: halley_ui/ui_caret.png
     innerBorder: [ 6, 2, 6, 3 ]
     label: { font: Ubuntu Light, size: 14, colour: ui_text }

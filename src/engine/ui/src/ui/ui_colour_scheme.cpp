@@ -20,6 +20,21 @@ UIColourScheme::UIColourScheme(const ConfigNode& node, Resources& resources)
 	for (const auto& [k, v]: node["colours"].asMap()) {
 		colours[k] = Colour4f::fromString(v.asString());
 	}
+
+	if (node.hasKey("sprites")) {
+		for (const auto& [k, v]: node["sprites"].asMap()) {
+			Sprite sprite;
+
+			if (v.getType() == ConfigNodeType::String) {
+				sprite = Sprite().setImage(resources, v.asString());
+			} else {
+				sprite = Sprite().setImage(resources, v["img"].asString(), v["material"].asString(""));
+			}
+
+			sprites[k] = std::move(sprite);
+		}
+	}
+	
 	if (node.hasKey("defaultColour")) {
 		defaultColour = Colour4f::fromString(node["defaultColour"].asString());
 	}
@@ -35,6 +50,21 @@ Colour4f UIColourScheme::getColour(const String& key) const
 
 	Logger::logWarning("Colour scheme does not define key \"" + key + "\".");
 	return defaultColour;
+}
+
+Sprite UIColourScheme::getSprite(Resources& resources, const String& name, const String& material) const
+{
+	if (name.startsWith("$")) {
+		const auto iter = sprites.find(name.mid(1));
+		if (iter != sprites.end()) {
+			return iter->second;
+		}
+
+		Logger::logWarning("Colour scheme does not define sprite \"" + name.mid(1) + "\".");
+		return Sprite();
+	} else {
+		return Sprite().setImage(resources, name, material);
+	}
 }
 
 const String& UIColourScheme::getName() const

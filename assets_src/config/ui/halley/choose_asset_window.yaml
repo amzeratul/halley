@@ -1,5 +1,5 @@
 ---
-widget: { class: image, image: ui/float_window.png, innerBorder: [ 14, 11, 14, 14 ], colour: ui_popupWindow }
+widget: { class: image, image: $ui_float_window, innerBorder: [ 14, 11, 14, 14 ], colour: ui_popupWindow }
 sizer: { type: vertical }
 children:
 - sizer: { type: horizontal }

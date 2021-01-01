@@ -73,3 +73,7 @@ colours:
   ui_staticBoxSubdue: "#30323A"
 
   ui_debugConsole: "#1E1E1EC0"
+
+sprites:
+  ui_float_window: { img: halley_ui/float_window.png }
+  ui_input_thin: { img: halley_ui/ui_input_thin.png }
