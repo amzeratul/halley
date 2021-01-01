@@ -1,5 +1,4 @@
 name: Default
-defaultColour: "#FFFFFF"
 base: colour_schemes/base_dark
 colours:
   ui_controlNormal: "#40424D"

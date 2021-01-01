@@ -36,6 +36,7 @@ namespace Halley {
 		FuzzyTextMatcher fuzzyMatcher;
 		String filter;
         String defaultOption;
+        Colour4f highlightCol;
 
         void makeUI();
 

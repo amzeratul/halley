@@ -49,6 +49,7 @@ colours:
   ui_unselectedTextAlt: "#FFCD06"
   ui_disabledTextAlt: "#B7A351"
   ui_textGhost: "#7F7F7F"
+  ui_stringMatchText: "#99FF99"
   ui_inputCaret: "#FFFFFF"
 
 sprites:

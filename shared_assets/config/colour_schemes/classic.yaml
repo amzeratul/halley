@@ -1,5 +1,4 @@
 name: Classic
-defaultColour: "#FFFFFF"
 base: colour_schemes/base_dark
 colours:
   icon_directory: "#CAA9CD"

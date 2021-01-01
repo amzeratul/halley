@@ -1,5 +1,4 @@
 name: Sakura
-defaultColour: "#FFFFFF"
 base: colour_schemes/base_light
 colours:
   background0: "#FFECF7"

@@ -14,6 +14,8 @@ ChooseAssetWindow::ChooseAssetWindow(UIFactory& factory, Callback callback)
 	, callback(std::move(callback))
 	, fuzzyMatcher(false, 100)
 {
+	highlightCol = factory.getColourScheme()->getColour("ui_stringMatchText");
+
 	makeUI();
 	setModal(true);
 	setAnchor(UIAnchor());
@@ -82,7 +84,6 @@ void ChooseAssetWindow::addItem(const String& id, gsl::span<const std::pair<uint
 
 	// Match highlights
 	auto labelCol = label->getColour();
-	auto highlightCol = Colour4f(0.6f, 1.0f, 0.6f);
 	if (!matchPositions.empty()) {
 		std::vector<ColourOverride> overrides;
 		for (auto& p: matchPositions) {
