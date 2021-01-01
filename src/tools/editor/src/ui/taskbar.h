@@ -17,6 +17,9 @@ namespace Halley
 			float progressDisplay = 0;
 			float completeTime = 0;
 			float displaySlot = -1;
+
+			TaskDisplay(std::shared_ptr<EditorTaskAnchor> task);
+			bool update(Time time, float targetDisplaySlot);
 		};
 
 	public:
@@ -27,7 +30,7 @@ namespace Halley
 	private:
 		Resources& resources;
 		EditorTaskSet& taskSet;
-		std::vector<TaskDisplay> tasks;
+		std::vector<std::shared_ptr<TaskDisplay>> tasks;
 
 		mutable Sprite barSolid;
 		mutable	Sprite barFade;
@@ -37,6 +40,6 @@ namespace Halley
 
 		float displaySize = 0;
 
-		TaskDisplay& getDisplayFor(const std::shared_ptr<EditorTaskAnchor>& task);
+		std::shared_ptr<TaskDisplay> getDisplayFor(const std::shared_ptr<EditorTaskAnchor>& task);
 	};
 }

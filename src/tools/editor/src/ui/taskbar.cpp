@@ -43,26 +43,12 @@ void TaskBar::update(Time time, bool moved)
 
 	// Update and decay
 	for (size_t i = 0; i < tasks.size();) {
-		auto& t = tasks[i];
-
-		float targetDisplaySlot = float(i);
-		if (t.displaySlot < 0) {
-			t.displaySlot = targetDisplaySlot;
+		const bool ok = tasks[i]->update(time, static_cast<float>(i));
+		if (ok) {
+			++i;
 		} else {
-			t.displaySlot = lerp(t.displaySlot, targetDisplaySlot, static_cast<float>(6 * time));
+			tasks.erase(tasks.begin() + i);
 		}
-
-		if (t.task->getStatus() == EditorTaskStatus::Done) {
-			t.progressDisplay = 1;
-			t.completeTime += static_cast<float>(time);
-			if (t.completeTime >= 1.5f && !t.task->hasError()) {
-				tasks.erase(tasks.begin() + i);
-				continue;
-			}
-		} else {
-			t.progressDisplay = lerp(t.progressDisplay, t.task->getProgress(), static_cast<float>(10 * time));
-		}
-		++i;
 	}
 
 	// Update bar size
@@ -92,10 +78,11 @@ void TaskBar::draw(UIPainter& painter) const
 	text.setFont(font).setOffset(Vector2f(0, 0)).setColour(Colour(1, 1, 1)).setOutline(2.0f).setOutlineColour(Colour(0, 0, 0, 0.35f));
 
 	// Draw tasks
-	for (auto& t : tasks) {
-		Vector2f drawPos = baseDrawPos + Vector2f((size.x + 20) * t.displaySlot, 0);
+	for (const auto& t : tasks) {
+		auto& task = t->task;
+		Vector2f drawPos = baseDrawPos + Vector2f((size.x + 20) * t->displaySlot, 0);
 
-		Colour col = t.task->hasError() ? Colour(0.93f, 0.2f, 0.2f) : (t.task->getProgress() > 0.9999f ? Colour(0.16f, 0.69f, 0.34f) : Colour(0.18f, 0.53f, 0.87f));
+		Colour col = task->hasError() ? Colour(0.93f, 0.2f, 0.2f) : (task->getProgress() > 0.9999f ? Colour(0.16f, 0.69f, 0.34f) : Colour(0.18f, 0.53f, 0.87f));
 
 		auto sprite = Sprite()
 			.setImage(resources, "round_rect.png", "Halley/DistanceFieldSprite")
@@ -113,34 +100,56 @@ void TaskBar::draw(UIPainter& painter) const
 
 		// Progress
 		painter.draw(sprite
-			.setClip(Rect4f(Vector2f(), (size.x + 10) * t.progressDisplay, size.y + 10))
+			.setClip(Rect4f(Vector2f(), (size.x + 10) * t->progressDisplay, size.y + 10))
 			.scaleTo(size + Vector2f(10, 10))
 			.setColour(col), true);
 
 		// Text
-		painter.draw(text.setSize(14).setText(t.task->getName()).setPosition(drawPos + Vector2f(24, 12)), true);
-		painter.draw(text.setSize(17).setText(t.task->getProgressLabel()).setPosition(drawPos + Vector2f(24, 30)), true);
+		painter.draw(text.setSize(14).setText(task->getName()).setPosition(drawPos + Vector2f(24, 12)), true);
+		painter.draw(text.setSize(17).setText(task->getProgressLabel()).setPosition(drawPos + Vector2f(24, 30)), true);
 	}
 }
 
-TaskBar::TaskDisplay& TaskBar::getDisplayFor(const std::shared_ptr<EditorTaskAnchor>& task)
+std::shared_ptr<TaskBar::TaskDisplay> TaskBar::getDisplayFor(const std::shared_ptr<EditorTaskAnchor>& task)
 {
 	for (auto& t : tasks) {
 		// Already assigned one!
-		if (t.task == task) {
+		if (t->task == task) {
 			return t;
 		}
 
 		// Replace error:
-		if (t.task->hasError() && t.task->getName() == task->getName()) {
-			t.task = task;
+		if (t->task->hasError() && t->task->getName() == task->getName()) {
+			t->task = task;
 			return t;
 		}
 	}
 
-	tasks.push_back(TaskDisplay());
-	TaskDisplay& display = tasks.back();
+	return tasks.emplace_back(std::make_shared<TaskDisplay>(task));
+}
 
-	display.task = task;
-	return display;
+TaskBar::TaskDisplay::TaskDisplay(std::shared_ptr<EditorTaskAnchor> task)
+	: task(std::move(task))
+{
+}
+
+bool TaskBar::TaskDisplay::update(Time time, float targetDisplaySlot)
+{
+	if (displaySlot < 0) {
+		displaySlot = targetDisplaySlot;
+	} else {
+		displaySlot = lerp(displaySlot, targetDisplaySlot, static_cast<float>(6 * time));
+	}
+
+	if (task->getStatus() == EditorTaskStatus::Done) {
+		progressDisplay = 1;
+		completeTime += static_cast<float>(time);
+		if (completeTime >= 1.5f && !task->hasError()) {
+			return false;
+		}
+	} else {
+		progressDisplay = lerp(progressDisplay, task->getProgress(), static_cast<float>(10 * time));
+	}
+	
+	return true;
 }
