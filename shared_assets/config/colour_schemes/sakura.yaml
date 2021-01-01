@@ -31,3 +31,7 @@ colours:
   ui_staticBoxSubdue: "#F9ACD5"
 
   ui_debugConsole: "#DD6CB6C0"
+
+  ui_selectedTextAlt: "#9C2E94"
+  ui_unselectedTextAlt: "#9C2E94"
+  ui_disabledTextAlt: "#774077"
