@@ -2,6 +2,8 @@
 
 #include "halleystring.h"
 #include <vector>
+#include <optional>
+#include <gsl/span>
 
 namespace Halley {
     class FuzzyTextMatcher {
