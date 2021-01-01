@@ -8,15 +8,15 @@ colours:
   background1: "#FFF0F9"
   backgroundLogo: "#FFE8F5"
 
-  ui_controlNormal: "#FFC6E7"
-  ui_controlDown: "#E281C0"
-  ui_controlHover: "#FAE4F1"
-  ui_controlDisabled: "#927B95"
+  ui_controlNormal: "#DD6CB6"
+  ui_controlDown: "#C4398F"
+  ui_controlHover: "#E796CA"
+  ui_controlDisabled: "#D7AAC6"
   
   ui_buttonNormal: "#FFC6E7"
   ui_buttonDown: "#E281C0"
-  ui_buttonHover: "#FAE4F1"
-  ui_buttonDisabled: "#927B95"
+  ui_buttonHover: "#FFD9EF"
+  ui_buttonDisabled: "#D7AAC6"
 
   ui_text: "#000000"
   ui_selectedText: "#000000"
@@ -32,10 +32,10 @@ colours:
   ui_listHover: "#FFC6E7"
   ui_listDrag: "#FFC6E780"
 
-  ui_inputBox: "#FFC6E7"
+  ui_inputBox: "#DD6CB6"
   ui_inputCaret: "#000000"
   
-  ui_scrollBackground: "#DD6CB6"
+  ui_scrollBackground: "#F8E0EF"
   ui_backgroundBox: "#F8E0EF"
   ui_popupWindow: "#FFC6E7"
   ui_staticBox: "#FFC6E7"
