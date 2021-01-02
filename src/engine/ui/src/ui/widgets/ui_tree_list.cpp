@@ -17,7 +17,7 @@ UITreeList::UITreeList(String id, UIStyle style)
 	setupEvents();
 }
 
-void UITreeList::addTreeItem(const String& id, const String& parentId, const String& afterSiblingId, const LocalisedString& label, const String& labelStyleName, bool forceLeaf)
+void UITreeList::addTreeItem(const String& id, const String& parentId, const String& afterSiblingId, const LocalisedString& label, const String& labelStyleName, Sprite icon, bool forceLeaf)
 {
 	auto listItem = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 
@@ -26,8 +26,11 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Str
 	listItem->add(treeControls, 0, {}, UISizerFillFlags::Fill);
 
 	// Icon
-	//auto icon = std::make_shared<UIImage>(style.getSubStyle("controls").getSprite("element"));
-	//listItem->add(icon, 0, {}, UISizerAlignFlags::Centre);
+	std::shared_ptr<UIImage> iconWidget;
+	if (icon.hasMaterial()) {
+		iconWidget = std::make_shared<UIImage>(icon);
+		listItem->add(iconWidget, 0, {}, UISizerAlignFlags::Centre);
+	}
 
 	// Label
 	const auto& labelStyle = style.getSubStyle(labelStyleName);
@@ -42,7 +45,7 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Str
 	listItem->setDraggableSubWidget(labelWidget.get());
 
 	// Logical item
-	auto treeItem = std::make_unique<UITreeListItem>(id, listItem, treeControls, labelWidget, forceLeaf);
+	auto treeItem = std::make_unique<UITreeListItem>(id, listItem, treeControls, labelWidget, iconWidget, forceLeaf);
 	auto& parentItem = getItemOrRoot(parentId);
 	parentItem.addChild(std::move(treeItem), afterSiblingId);
 
@@ -74,11 +77,12 @@ void UITreeList::removeTree(const UITreeListItem& tree)
 	}
 }
 
-void UITreeList::setLabel(const String& id, const LocalisedString& label)
+void UITreeList::setLabel(const String& id, const LocalisedString& label, Sprite icon)
 {
 	auto item = root.tryFindId(id);
 	if (item) {
 		item->setLabel(label);
+		item->setIcon(icon);
 	}
 }
 
@@ -344,10 +348,11 @@ void UITreeListControls::setupUI()
 
 UITreeListItem::UITreeListItem() = default;
 
-UITreeListItem::UITreeListItem(String id, std::shared_ptr<UIListItem> listItem, std::shared_ptr<UITreeListControls> treeControls, std::shared_ptr<UILabel> label, bool forceLeaf)
+UITreeListItem::UITreeListItem(String id, std::shared_ptr<UIListItem> listItem, std::shared_ptr<UITreeListControls> treeControls, std::shared_ptr<UILabel> label, std::shared_ptr<UIImage> icon, bool forceLeaf)
 	: id(std::move(id))
 	, listItem(std::move(listItem))
 	, label(std::move(label))
+	, icon(std::move(icon))
 	, treeControls(std::move(treeControls))
 	, forceLeaf(forceLeaf)
 {}
@@ -430,7 +435,16 @@ void UITreeListItem::moveChild(size_t startIndex, size_t targetIndex)
 
 void UITreeListItem::setLabel(const LocalisedString& text)
 {
-	label->setText(text);
+	if (label) {
+		label->setText(text);
+	}
+}
+
+void UITreeListItem::setIcon(Sprite sprite)
+{
+	if (icon) {
+		icon->setSprite(sprite);
+	}
 }
 
 void UITreeListItem::setExpanded(bool e)

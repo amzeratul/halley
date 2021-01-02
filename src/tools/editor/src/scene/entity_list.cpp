@@ -58,26 +58,34 @@ void EntityList::addEntity(const String& name, const String& id, const String& p
 {
 	const bool isPrefab = !prefab.isEmpty();
 	const auto [displayName, displayIcon] = getEntityNameAndIcon(name, icon, prefab);
-	list->addTreeItem(id, parentId, afterSiblingId, LocalisedString::fromUserString(displayName), isPrefab ? "labelSpecial" : "label", isPrefab);
+	list->addTreeItem(id, parentId, afterSiblingId, LocalisedString::fromUserString(displayName), isPrefab ? "labelSpecial" : "label", displayIcon, isPrefab);
 }
 
-std::pair<String, String> EntityList::getEntityNameAndIcon(const EntityData& data) const
+std::pair<String, Sprite> EntityList::getEntityNameAndIcon(const EntityData& data) const
 {
 	return getEntityNameAndIcon(data.getName(), data.getIcon(), data.getPrefab());
 }
 
-std::pair<String, String> EntityList::getEntityNameAndIcon(const String& name, const String& icon, const String& prefabName) const
+std::pair<String, Sprite> EntityList::getEntityNameAndIcon(const String& name, const String& icon, const String& prefabName) const
 {
 	if (!prefabName.isEmpty()) {
 		const auto prefab = sceneEditor->getGamePrefab(prefabName);
 		if (prefab) {
-			return { prefab->getPrefabName() + " [" + prefabName + "]", prefab->getPrefabIcon() };
+			return { prefab->getPrefabName() + " [" + prefabName + "]", getIcon(prefab->getPrefabIcon()) };
 		} else {
-			return { "Missing prefab! [" + prefabName + "]", "" };
+			return { "Missing prefab! [" + prefabName + "]", getIcon("") };
 		}
 	} else {
-		return { name.isEmpty() ? String("Unnamed Entity") : name, icon };
+		return { name.isEmpty() ? String("Unnamed Entity") : name, getIcon(icon) };
 	}
+}
+
+Sprite EntityList::getIcon(const String& name) const
+{
+	if (name.isEmpty()) {
+		return Sprite().setImage(factory.getResources(), "halley_ui/ui_scrollbar.png");
+	}
+	return Sprite().setImage(factory.getResources(), name);
 }
 
 void EntityList::refreshList()
@@ -90,7 +98,7 @@ void EntityList::refreshList()
 void EntityList::onEntityModified(const String& id, const EntityData& node)
 {
 	const auto [name, icon] = getEntityNameAndIcon(node);
-	list->setLabel(id, LocalisedString::fromUserString(name));
+	list->setLabel(id, LocalisedString::fromUserString(name), icon);
 }
 
 void EntityList::onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId, const EntityData& data)
