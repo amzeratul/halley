@@ -114,10 +114,10 @@ TaskDisplay::TaskDisplay(UIFactory& factory, std::shared_ptr<EditorTaskAnchor> t
 void TaskDisplay::update(Time t, bool moved)
 {
 	const float maxTextWidth = std::max(100.0f, getSize().x - 22.0f);
-	name->setMaxWidth(maxTextWidth);
-	desc->setMaxWidth(maxTextWidth);
 	name->setText(LocalisedString::fromUserString(task->getName()));
 	desc->setText(LocalisedString::fromUserString(task->getProgressLabel()));
+	name->setMaxWidth(maxTextWidth);
+	desc->setMaxWidth(maxTextWidth);
 
 	const float progress = clamp(task->getProgress(), 0.0f, 1.0f);
 	
@@ -126,7 +126,7 @@ void TaskDisplay::update(Time t, bool moved)
 	
 	bg->getSprite().setColour(col.multiplyAlpha(0.8f));
 	bgFill->getSprite().setColour(col.multiplyAlpha(0.5f));
-	bgFill->setMinSize(Vector2f((getSize().x - 2) * progress, 38.0f));
+	bgFill->setMinSize(Vector2f((getSize().x - 12) * progress + 10.0f, 38.0f));
 }
 
 bool TaskDisplay::updateTask(Time time, float targetDisplaySlot)
@@ -162,7 +162,9 @@ void TaskDisplay::setTask(std::shared_ptr<EditorTaskAnchor> task)
 void TaskDisplay::onMakeUI()
 {
 	name = getWidgetAs<UILabel>("name");
+	name->setWordWrapped(false);
 	desc = getWidgetAs<UILabel>("desc");
+	desc->setWordWrapped(false);
 	bg = getWidgetAs<UIImage>("bg");
 	bgFill = getWidgetAs<UIImage>("bgFill");
 }

@@ -43,9 +43,9 @@ colours:
   scrollBackground: "#FFFFFF"
   
   taskbarLogoBackground: "#FFD7EE"
-  taskRunning: "#2E87DE"
-  taskComplete: "#29B057"
-  taskError: "#ED3333"
+  taskRunning: "#74AEE9"
+  taskComplete: "#66DB8F"
+  taskError: "#F05959"
 
   toolbarNormal: "#FC2847"
   toolbarHover: "#F98A9A"
