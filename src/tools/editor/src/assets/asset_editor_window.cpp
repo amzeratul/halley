@@ -128,7 +128,10 @@ Path AssetEditorWindow::getCurrentAssetPath() const
 
 bool AssetEditorWindow::isModified() const
 {
-	for (auto& editor: curEditors) {
+	if (metadataEditor->isModified()) {
+		return true;
+	}
+	for (const auto& editor: curEditors) {
 		if (editor->isModified()) {
 			return true;
 		}
