@@ -3,6 +3,7 @@
 #include "halley/ui/widgets/ui_tree_list.h"
 
 namespace Halley {
+	class EntityIcons;
 	class SceneEditorWindow;
 	class UIFactory;
 	class EntityTree;
@@ -27,6 +28,7 @@ namespace Halley {
 	private:
 		UIFactory& factory;
 		SceneEditorWindow* sceneEditor;
+		const EntityIcons* icons = nullptr;
 
 		std::shared_ptr<UITreeList> list;
 		std::shared_ptr<ISceneData> sceneData;
@@ -37,6 +39,5 @@ namespace Halley {
 		void addEntityTree(const String& parentId, const String& afterSiblingId, const EntityData& data);
 		std::pair<String, Sprite> getEntityNameAndIcon(const EntityData& data) const;
 		std::pair<String, Sprite> getEntityNameAndIcon(const String& name, const String& icon, const String& prefab) const;
-		Sprite getIcon(const String& name) const;
 	};
 }

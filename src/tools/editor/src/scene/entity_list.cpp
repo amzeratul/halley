@@ -1,5 +1,7 @@
 #include "entity_list.h"
 
+
+#include "entity_icons.h"
 #include "halley/ui/ui_factory.h"
 #include "scene_editor_window.h"
 using namespace Halley;
@@ -14,6 +16,7 @@ EntityList::EntityList(String id, UIFactory& factory)
 void EntityList::setSceneEditorWindow(SceneEditorWindow& editor)
 {
 	sceneEditor = &editor;
+	icons = &sceneEditor->getEntityIcons();
 }
 
 void EntityList::setSceneData(std::shared_ptr<ISceneData> data)
@@ -71,21 +74,13 @@ std::pair<String, Sprite> EntityList::getEntityNameAndIcon(const String& name, c
 	if (!prefabName.isEmpty()) {
 		const auto prefab = sceneEditor->getGamePrefab(prefabName);
 		if (prefab) {
-			return { prefab->getPrefabName() + " [" + prefabName + "]", getIcon(prefab->getPrefabIcon()) };
+			return { prefab->getPrefabName() + " [" + prefabName + "]", icons->getIcon(prefab->getPrefabIcon()) };
 		} else {
-			return { "Missing prefab! [" + prefabName + "]", getIcon("") };
+			return { "Missing prefab! [" + prefabName + "]", icons->getIcon("") };
 		}
 	} else {
-		return { name.isEmpty() ? String("Unnamed Entity") : name, getIcon(icon) };
+		return { name.isEmpty() ? String("Unnamed Entity") : name, icons->getIcon(icon) };
 	}
-}
-
-Sprite EntityList::getIcon(const String& name) const
-{
-	if (name.isEmpty()) {
-		return Sprite().setImage(factory.getResources(), "halley_ui/ui_scrollbar.png");
-	}
-	return Sprite().setImage(factory.getResources(), name);
 }
 
 void EntityList::refreshList()

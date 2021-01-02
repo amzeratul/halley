@@ -59,6 +59,7 @@ namespace Halley {
 		const std::shared_ptr<ISceneData>& getSceneData() const override;
 
 		bool isModified() const;
+		const EntityIcons& getEntityIcons() const;
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -79,6 +80,7 @@ namespace Halley {
 		std::shared_ptr<EntityList> entityList;
 		std::shared_ptr<EntityEditor> entityEditor;
 		std::shared_ptr<UIList> toolMode;
+		std::shared_ptr<EntityIcons> entityIcons;
 
 		Path assetPath;
 		std::shared_ptr<ISceneData> sceneData;

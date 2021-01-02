@@ -1,6 +1,7 @@
 #include "scene_editor_window.h"
 #include "choose_asset_window.h"
 #include "entity_editor.h"
+#include "entity_icons.h"
 #include "entity_list.h"
 #include "halley/entity/entity_factory.h"
 #include "halley/entity/prefab_scene_data.h"
@@ -21,6 +22,7 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 	, project(project)
 	, projectWindow(projectWindow)
 	, gameBridge(std::make_shared<SceneEditorGameBridge>(api, uiFactory.getResources(), uiFactory, project))
+	, entityIcons(std::make_shared<EntityIcons>(project.getGameResources(), *factory.getColourScheme()))
 {
 	makeUI();
 
@@ -621,6 +623,11 @@ void SceneEditorWindow::setModified(bool enabled)
 bool SceneEditorWindow::isModified() const
 {
 	return modified;
+}
+
+const EntityIcons& SceneEditorWindow::getEntityIcons() const
+{
+	return *entityIcons;
 }
 
 String SceneEditorWindow::serializeEntity(const EntityData& node) const
