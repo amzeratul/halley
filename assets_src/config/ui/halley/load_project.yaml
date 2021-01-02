@@ -3,8 +3,12 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
+- stretchSpacer: {}
+  proportion: 1
 - widget: { id: logo, class: image, image: "halley/halley_logo_dist.png" }
-  border: [0, 0, 0, 40]
+  border: [0, -50, 0, -50]
+- stretchSpacer: {}
+  proportion: 0.5
 - widget: { class: image, image: $ui_float_window, innerBorder: [ 14, 11, 14, 14 ], colour: $ui_popupWindow }
   sizer: { type: vertical }
   children:
@@ -25,6 +29,7 @@ children:
     - widget: { id: input, class: textInput, size: [400, 22] }
       proportion: 1
     - widget: { id: ok, class: button, text: "OK", size: [60, 22], tooltip: "Load the selected Project" }
-- widget: { class: widget, size: [512, 128] }
+- stretchSpacer: {}
+  proportion: 1
 
 ...

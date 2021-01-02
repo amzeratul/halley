@@ -9,5 +9,11 @@ namespace Halley {
 	{
 	public:
 		LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, std::function<void(String)> callback);
+
+	protected:
+		void update(Time t, bool moved) override;
+	
+	private:
+		HalleyEditor& editor;
 	};
 }

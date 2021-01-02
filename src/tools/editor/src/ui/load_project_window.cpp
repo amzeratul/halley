@@ -4,9 +4,10 @@
 using namespace Halley;
 
 LoadProjectWindow::LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, std::function<void(String)> callback)
-	: UIWidget("load_project", {}, UISizer())
+	: UIWidget("load_project", {}, UISizer(UISizerType::Vertical))
+	, editor(editor)
 {
-	UIWidget::add(factory.makeUI("ui/halley/load_project"));
+	UIWidget::add(factory.makeUI("ui/halley/load_project"), 1, {}, UISizerAlignFlags::CentreHorizontal | UISizerFillFlags::FillVertical);
 
 	{
 		auto logo = getWidgetAs<UIImage>("logo");
@@ -51,4 +52,10 @@ LoadProjectWindow::LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, s
 	recent->addTextItem("", LocalisedString::fromHardcodedString("New location..."));
 
 	setAnchor(UIAnchor());
+}
+
+void LoadProjectWindow::update(Time t, bool moved)
+{
+	const auto size = editor.getAPI().video->getWindow().getDefinition().getSize();
+	setMinSize(Vector2f(size));
 }
