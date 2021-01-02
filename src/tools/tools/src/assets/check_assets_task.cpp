@@ -16,7 +16,7 @@ using namespace Halley;
 using namespace std::chrono_literals;
 
 CheckAssetsTask::CheckAssetsTask(Project& project, bool oneShot)
-	: EditorTask("Check assets", true, false)
+	: EditorTask("Checking assets", true, false)
 	, project(project)
 	, monitorAssets(project.getUnpackedAssetsPath())
 	, monitorAssetsSrc(project.getAssetsSrcPath())

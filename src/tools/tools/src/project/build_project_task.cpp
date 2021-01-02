@@ -10,7 +10,7 @@
 using namespace Halley;
 
 BuildProjectTask::BuildProjectTask(Project& project)
-	: EditorTask("Building Project", true, true)
+	: EditorTask("Building project", true, true)
 	, project(project)
 {
 	const String scriptName = [] ()
