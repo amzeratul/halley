@@ -113,6 +113,7 @@ std::vector<String> EditorUIFactory::getColourSchemeNames() const
 	for (auto& scheme: colourSchemes) {
 		result.push_back(scheme->getName());
 	}
+	std::sort(result.begin(), result.end());
 	return result;
 }
 

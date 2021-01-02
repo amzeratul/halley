@@ -1,0 +1,29 @@
+name: Classic Glass
+base: colour_schemes/base_dark
+colours:
+  icon_directory: "#CAA9CD"
+  
+  ui_controlNormal: "#9C5BB5"
+  ui_controlDown: "#913DA3"
+  ui_controlHover: "#C080E3"
+  ui_controlDisabled: "#927B95"
+  
+  ui_buttonNormal: "#9C5BB5"
+  ui_buttonDown: "#913DA3"
+  ui_buttonHover: "#C080E3"
+  ui_buttonDisabled: "#927B95"
+
+  ui_listBackground: "#20142780"
+  ui_listSelected: "#9C5BB5"
+  ui_listHover: "#5E3962"
+  ui_listDrag: "#9C5BB580"
+
+  ui_inputBox: "#9861B6"
+  
+  ui_scrollBackground: "#442947D0"
+  ui_backgroundBox: "#20142780"
+  ui_popupWindow: "#9C5BB5D0"
+  ui_staticBox: "#9C5BB5D0"
+  ui_staticBoxSubdue: "#754589D0"
+
+  ui_debugConsole: "#201427C0"

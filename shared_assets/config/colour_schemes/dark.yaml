@@ -1,4 +1,4 @@
-name: Dark Glass
+name: Dark
 base: colour_schemes/base_dark
 colours:
   ui_controlNormal: "#40424D"
@@ -11,17 +11,17 @@ colours:
   ui_buttonHover: "#656D8D"
   ui_buttonDisabled: "#191919"
 
-  ui_listBackground: "#25262E80"
+  ui_listBackground: "#25262E"
   ui_listSelected: "#9A4E5B"
   ui_listHover: "#4A2F38"
   ui_listDrag: "#40424D80"
 
   ui_inputBox: "#86838D"
 
-  ui_scrollBackground: "#212227D0"
-  ui_backgroundBox: "#1E1E1E80"
-  ui_popupWindow: "#53131FD0"
-  ui_staticBox: "#40424DD0"
-  ui_staticBoxSubdue: "#30323AD0"
+  ui_scrollBackground: "#212227"
+  ui_backgroundBox: "#1E1E1E"
+  ui_popupWindow: "#53131F"
+  ui_staticBox: "#40424D"
+  ui_staticBoxSubdue: "#30323A"
 
   ui_debugConsole: "#1E1E1EC0"

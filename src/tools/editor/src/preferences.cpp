@@ -17,7 +17,7 @@ void Preferences::loadDefaults()
 	windowPosition = {};
 	windowSize = Vector2i(1280, 720);
 	windowState = WindowState::Normal;
-	colourScheme = "Dark (Default)";
+	colourScheme = "Dark Glass";
 }
 
 ConfigNode Preferences::save() const
