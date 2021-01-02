@@ -48,7 +48,7 @@ void AssetsBrowser::openFile(const Path& path)
 		curSrcPath = path.parentPath();
 		refreshList();
 		assetList->setSelectedOptionId(path.toString());
-		loadAsset(path.toString(), false);
+		loadAsset(path.toString(), true);
 	}
 }
 
@@ -272,7 +272,9 @@ void AssetsBrowser::loadAsset(const String& name, bool doubleClick)
 			refreshList();
 		}
 	} else {
-		assetTabs->load(assetSrcMode ? std::optional<AssetType>() : curType, name);
+		if (doubleClick) {
+			assetTabs->load(assetSrcMode ? std::optional<AssetType>() : curType, name);
+		}
 	}
 }
 
