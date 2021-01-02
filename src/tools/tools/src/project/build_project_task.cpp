@@ -50,16 +50,12 @@ void BuildProjectTask::run()
 		project.onBuildDone();
 	} else {
 		// Fail
-		addError("Script returned error code " + toString(returnValue));
+		logError("Build failed with error code " + toString(returnValue));
 	}
 }
 
 void BuildProjectTask::log(LoggerLevel level, const String& msg)
 {
-	if (level == LoggerLevel::Error) {
-		addError(msg);
-	}
-
 	if (buildSystem == BuildSystem::Unknown) {
 		tryToIdentifyBuildSystem(msg);
 	}
@@ -74,7 +70,11 @@ void BuildProjectTask::log(LoggerLevel level, const String& msg)
 		break;
 	}
 
-	Logger::logDev(msg);
+	if (level == LoggerLevel::Error) {
+		logError(msg);
+	} else {
+		logInfo(msg);
+	}
 }
 
 void BuildProjectTask::tryToIdentifyBuildSystem(const String& msg)

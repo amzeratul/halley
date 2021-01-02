@@ -47,6 +47,8 @@ set (editor_sources
 	"src/ui/project_window.cpp"
 	"src/ui/scroll_background.cpp"
 	"src/ui/select_asset_widget.cpp"
+	"src/ui/task_details.cpp"
+	"src/ui/task_display.cpp"
 	"src/ui/taskbar.cpp"
 	"src/ui/toolbar.cpp"
 
@@ -94,6 +96,8 @@ set (editor_headers
 	"src/ui/project_window.h"
 	"src/ui/scroll_background.h"
 	"src/ui/select_asset_widget.h"
+	"src/ui/task_details.h"
+	"src/ui/task_display.h"
 	"src/ui/taskbar.h"
 	"src/ui/toolbar.h"
 	)

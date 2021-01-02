@@ -8,7 +8,6 @@
 #include "halley/tools/assets/asset_collector.h"
 #include "halley/concurrency/concurrent.h"
 #include "halley/tools/packer/asset_packer_task.h"
-#include "halley/support/logger.h"
 #include "halley/time/stopwatch.h"
 #include "halley/support/debug.h"
 
@@ -91,18 +90,18 @@ void ImportAssetsTask::run()
 	timer.pause();
 	Time realTime = timer.elapsedNanoseconds() / 1000000000.0;
 	Time importTime = totalImportTime / 1000000000.0;
-	Logger::logInfo("Import took " + toString(realTime) + " seconds, on which " + toString(importTime) + " seconds of work were performed (" + toString(importTime / realTime) + "x realtime)");
+	logInfo("Import took " + toString(realTime) + " seconds, on which " + toString(importTime) + " seconds of work were performed (" + toString(importTime / realTime) + "x realtime)");
 }
 
 bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)
 {
-	Logger::logInfo("Importing " + asset.assetId);
+	logInfo("Importing " + asset.assetId);
 	Stopwatch timer;
 
 	auto result = importAsset(asset, [&] (const Path& path) { return db.getMetadata(path); }, *importer, assetsPath, [=] (float, const String&) -> bool { return !isCancelled(); });
 	
 	if (!result.success) {
-		addError("\"" + asset.assetId + "\" - " + result.errorMsg);
+		logError("\"" + asset.assetId + "\" - " + result.errorMsg);
 		asset.additionalInputFiles = std::move(result.additionalInputs);
 		db.markFailed(asset);
 
@@ -128,7 +127,7 @@ bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)
 	// Write files
 	for (auto& outFile: result.outFiles) {
 		auto path = assetsPath / outFile.first;
-		Logger::logInfo("- " + asset.assetId + " -> " + path + " (" + String::prettySize(outFile.second.size()) + ")");
+		logInfo("- " + asset.assetId + " -> " + path + " (" + String::prettySize(outFile.second.size()) + ")");
 		FileSystem::writeFile(path, outFile.second);
 	}
 
@@ -165,7 +164,7 @@ ImportAssetsTask::ImportResult ImportAssetsTask::importAsset(const ImportAssetsD
 			auto meta = metadataFetcher(f.getPath());
 			auto data = FileSystem::readFile(asset.srcDir / f.getDataPath());
 			if (data.empty()) {
-				Logger::logError("Data for \"" + toString(asset.srcDir / f.getPath()) + "\" is empty.");
+				logError("Data for \"" + toString(asset.srcDir / f.getPath()) + "\" is empty.");
 			}
 			importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.getPath(), std::move(data), meta ? meta.value() : Metadata()));
 		}

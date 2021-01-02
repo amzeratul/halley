@@ -25,8 +25,6 @@ namespace Halley
 		
 		ImportAssetsTask(String taskName, ImportAssetsDatabase& db, std::shared_ptr<AssetImporter> importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry> files, std::vector<String> deletedAssets, Project& project, bool packAfter);
 
-		static ImportResult importAsset(const ImportAssetsDatabaseEntry& asset, const MetadataFetchCallback& metadataFetcher, const AssetImporter& importer, Path assetsPath, AssetCollector::ProgressReporter progressReporter = {});
-
 	protected:
 		void run() override;
 
@@ -53,5 +51,6 @@ namespace Halley
 
 		std::vector<Path> loadFont(const ImportAssetsDatabaseEntry& asset, Path dstDir);
 		std::vector<Path> genericImporter(const ImportAssetsDatabaseEntry& asset, Path dstDir);
+		ImportResult importAsset(const ImportAssetsDatabaseEntry& asset, const MetadataFetchCallback& metadataFetcher, const AssetImporter& importer, Path assetsPath, AssetCollector::ProgressReporter progressReporter = {});
 	};
 }

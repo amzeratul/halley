@@ -69,6 +69,6 @@ void ImportTool::onTaskTerminated(const std::shared_ptr<EditorTaskAnchor>& task)
 
 void ImportTool::onTaskError(const std::shared_ptr<EditorTaskAnchor>& task)
 {
-	Logger::logError("Task ended in error: " + task->getName() + ": " + task->getError());
+	Logger::logError("Task ended in error: " + task->getName());
 	hasError = true;
 }
