@@ -66,11 +66,11 @@ colours:
   ui_disabledTextAlt: "#6D503A"
   ui_textGhost: "#7F7F7F"
   ui_stringMatchText: "#00AE00"
-  ui_logInfoText: "#FFFFFF"
-  ui_logWarningText: "#FFFF00"
-  ui_logErrorText: "#FF0000"
-  ui_logDevText: "#3060FF"
-  
+  ui_logInfoText: "#000000"
+  ui_logWarningText: "#CA8D00"
+  ui_logErrorText: "#A60000"
+  ui_logDevText: "#1A60A6"
+
   ui_inputCaret: "#000000"
 
 

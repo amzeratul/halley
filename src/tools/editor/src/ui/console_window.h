@@ -23,6 +23,8 @@ namespace Halley
 		void update(Time t, bool moved) override;
 
 	private:
+		UIFactory& factory;
+		
 		std::vector<std::pair<LoggerLevel, String>> buffer;
 		std::shared_ptr<UIDebugConsole> console;
 

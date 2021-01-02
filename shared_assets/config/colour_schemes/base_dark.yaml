@@ -67,8 +67,8 @@ colours:
   ui_textGhost: "#7F7F7F"
   ui_stringMatchText: "#99FF99"
   ui_logInfoText: "#FFFFFF"
-  ui_logWarningText: "#FFFF00"
-  ui_logErrorText: "#FF0000"
+  ui_logWarningText: "#FFDD1C"
+  ui_logErrorText: "#E84A4A"
   ui_logDevText: "#3060FF"
 
   ui_inputCaret: "#FFFFFF"

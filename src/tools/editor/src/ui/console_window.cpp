@@ -4,6 +4,7 @@ using namespace Halley;
 
 ConsoleWindow::ConsoleWindow(UIFactory& ui)
 	: UIWidget("console", {}, UISizer())
+	, factory(ui)
 {
 	controller = std::make_shared<UIDebugConsoleController>();
 	console = std::make_shared<UIDebugConsole>("debugConsole", ui, controller);
@@ -24,6 +25,21 @@ void ConsoleWindow::log(LoggerLevel level, const String& msg)
 	buffer.emplace_back(level, msg);
 }
 
+static Colour4f getColour(const UIColourScheme& colourScheme, LoggerLevel level)
+{
+	switch (level) {
+	case LoggerLevel::Info:
+		return colourScheme.getColour("ui_logInfoText");
+	case LoggerLevel::Warning:
+		return colourScheme.getColour("ui_logWarningText");
+	case LoggerLevel::Error:
+		return colourScheme.getColour("ui_logErrorText");
+	case LoggerLevel::Dev:
+		return colourScheme.getColour("ui_logDevText");
+	}
+	return colourScheme.getColour("ui_text");
+}
+
 void ConsoleWindow::update(Time t, bool moved)
 {
 	std::unique_lock<std::mutex> lock(mutex);
@@ -31,22 +47,9 @@ void ConsoleWindow::update(Time t, bool moved)
 	buffer.clear();
 	lock.unlock();
 
+	const auto& colourScheme = *factory.getColourScheme();
+
 	for (auto& b: buf2) {
-		Colour4f col;
-		switch (b.first) {
-		case LoggerLevel::Info:
-			col = Colour4f(1, 1, 1);
-			break;
-		case LoggerLevel::Dev:
-			col = Colour4f(0.2, 0.4, 1);
-			break;
-		case LoggerLevel::Warning:
-			col = Colour4f(1, 1, 0);
-			break;
-		case LoggerLevel::Error:
-			col = Colour4f(1, 0, 0);
-			break;
-		}
-		console->addLine(b.second, col);
+		console->addLine(b.second, getColour(colourScheme, b.first));
 	}
 }
