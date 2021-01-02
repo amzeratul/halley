@@ -18,6 +18,7 @@ EntityData::EntityData(const ConfigNode& data, bool isPrefab)
 {
 	name = data["name"].asString("");
 	prefab = data["prefab"].asString("");
+	icon = data["icon"].asString("");
 
 	if (isPrefab) {
 		parseUUID(prefabUUID, data["uuid"]);
@@ -59,6 +60,9 @@ ConfigNode EntityData::toConfigNode(bool allowPrefabUUID) const
 	}
 	if (!prefab.isEmpty()) {
 		result["prefab"] = prefab;
+	}
+	if (!icon.isEmpty()) {
+		result["icon"] = icon;
 	}
 	if (instanceUUID.isValid()) {
 		result["uuid"] = instanceUUID.toString();
@@ -174,6 +178,11 @@ void EntityData::setPrefab(String prefab)
 	this->prefab = std::move(prefab);
 }
 
+void EntityData::setIcon(String icon)
+{
+	this->icon = std::move(icon);
+}
+
 void EntityData::setInstanceUUID(UUID instanceUUID)
 {
 	this->instanceUUID = std::move(instanceUUID);
@@ -220,6 +229,9 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 	}
 	if (delta.prefab) {
 		prefab = delta.prefab.value();
+	}
+	if (delta.icon) {
+		prefab = delta.icon.value();
 	}
 	if (delta.instanceUUID) {
 		instanceUUID = delta.instanceUUID.value();

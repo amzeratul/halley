@@ -28,6 +28,9 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 	if (from.prefab != to.prefab) {
 		prefab = to.prefab;
 	}
+	if (from.icon != to.icon) {
+		icon = to.icon;
+	}
 	if (from.instanceUUID != to.instanceUUID) {
 		instanceUUID = to.instanceUUID;
 	}
@@ -99,7 +102,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 
 bool EntityDataDelta::hasChange() const
 {
-	return name || prefab || instanceUUID || prefabUUID || parentUUID
+	return name || prefab || icon || instanceUUID || prefabUUID || parentUUID
 		|| !componentsChanged.empty() || !componentsRemoved.empty() || !componentOrder.empty()
 		|| !childrenChanged.empty() || !childrenAdded.empty() || !childrenRemoved.empty() || !childrenOrder.empty();
 }
@@ -135,6 +138,7 @@ void EntityDataDelta::serialize(Serializer& s) const
 	encodeField(componentsChanged, FieldId::ComponentsChanged);
 	encodeField(componentsRemoved, FieldId::ComponentsRemoved);
 	encodeField(componentOrder, FieldId::ComponentsOrder);
+	encodeOptField(icon, FieldId::Icon);
 }
 
 void EntityDataDelta::deserialize(Deserializer& s)
@@ -170,6 +174,7 @@ void EntityDataDelta::deserialize(Deserializer& s)
 	decodeField(componentsChanged, FieldId::ComponentsChanged);
 	decodeField(componentsRemoved, FieldId::ComponentsRemoved);
 	decodeField(componentOrder, FieldId::ComponentsOrder);
+	decodeOptField(icon, FieldId::Icon);
 }
 
 void EntityDataDelta::setPrefabUUID(const UUID& uuid)

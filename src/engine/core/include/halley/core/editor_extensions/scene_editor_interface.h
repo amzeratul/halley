@@ -143,6 +143,7 @@ namespace Halley {
 		String entityId;
 		String name;
 		String prefab;
+		String icon;
 		std::vector<EntityTree> children;
 
 		bool contains(const String& id) const;

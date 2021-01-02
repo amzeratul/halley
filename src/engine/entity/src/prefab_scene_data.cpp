@@ -76,12 +76,16 @@ void PrefabSceneData::fillEntityTree(const EntityData& node, EntityTree& tree) c
 		const auto& prefabName = node.getPrefab();
 		tree.prefab = prefabName;
 		if (gameResources.exists<Prefab>(prefabName)) {
-			tree.name = gameResources.get<Prefab>(prefabName)->getPrefabName();
+			const auto prefab = gameResources.get<Prefab>(prefabName);
+			tree.name = prefab->getPrefabName();
+			tree.icon = prefab->getPrefabIcon();
 		} else {
 			tree.name = "Missing Prefab";
+			tree.icon = "";
 		}
 	} else {
 		tree.name = node.getName();
+		tree.icon = node.getIcon();
 		if (tree.name.isEmpty()) {
 			tree.name = "Entity";
 		}

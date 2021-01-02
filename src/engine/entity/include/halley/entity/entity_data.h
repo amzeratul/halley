@@ -38,6 +38,7 @@ namespace Halley {
 
     	const String& getName() const { return name; }
     	const String& getPrefab() const { return prefab; }
+    	const String& getIcon() const { return icon; }
     	const UUID& getInstanceUUID() const { return instanceUUID; }
     	const UUID& getPrefabUUID() const { return prefabUUID; }
     	const UUID& getParentUUID() const { return parentUUID; }
@@ -53,6 +54,7 @@ namespace Halley {
 
     	void setName(String name);
     	void setPrefab(String prefab);
+    	void setIcon(String icon);
     	void setInstanceUUID(UUID instanceUUID);
     	void setPrefabUUID(UUID prefabUUID);
         void setParentUUID(UUID parentUUID);
@@ -81,6 +83,7 @@ namespace Halley {
     private:
     	String name;
     	String prefab;
+    	String icon;
     	UUID instanceUUID;
     	UUID prefabUUID;
     	UUID parentUUID;

@@ -28,6 +28,7 @@ namespace Halley {
 
 		const std::optional<String>& getName() const { return name; }
 		const std::optional<String>& getPrefab() const { return prefab; }
+		const std::optional<String>& getIcon() const { return icon; }
 		const std::optional<UUID>& getPrefabUUID() const { return prefabUUID; }
 		void setPrefabUUID(const UUID& uuid);
 		
@@ -47,6 +48,7 @@ namespace Halley {
 	private:
     	std::optional<String> name;
     	std::optional<String> prefab;
+		std::optional<String> icon;
     	std::optional<UUID> instanceUUID;
     	std::optional<UUID> prefabUUID;
 		std::optional<UUID> parentUUID;
@@ -73,7 +75,8 @@ namespace Halley {
         	ChildrenChanged,
         	ChildrenAdded,
         	ChildrenRemoved,
-        	ChildrenOrder
+        	ChildrenOrder,
+        	Icon
         };
 
     	static uint16_t getFieldBit(FieldId id);

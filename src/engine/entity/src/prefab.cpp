@@ -180,6 +180,11 @@ String Prefab::getPrefabName() const
 	return entityData.getName();
 }
 
+String Prefab::getPrefabIcon() const
+{
+	return entityData.getIcon();
+}
+
 EntityData* Prefab::findEntityData(const UUID& uuid)
 {
 	if (!uuid.isValid()) {

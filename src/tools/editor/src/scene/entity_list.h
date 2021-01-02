@@ -33,9 +33,9 @@ namespace Halley {
 
 		void makeUI();
 		void addEntities(const EntityTree& entity, const String& parentId);
-		void addEntity(const String& name, const String& id, const String& parentId, const String& afterSiblingId, const String& prefab);
+		void addEntity(const String& name, const String& id, const String& parentId, const String& afterSiblingId, const String& prefab, const String& icon);
 		void addEntityTree(const String& parentId, const String& afterSiblingId, const EntityData& data);
-		String getEntityName(const EntityData& data) const;
-		String getEntityName(const String& name, const String& prefab) const;
+		std::pair<String, String> getEntityNameAndIcon(const EntityData& data) const;
+		std::pair<String, String> getEntityNameAndIcon(const String& name, const String& icon, const String& prefab) const;
 	};
 }

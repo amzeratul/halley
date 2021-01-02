@@ -38,6 +38,7 @@ namespace Halley {
 		const ConfigNode* tryGetGameData(const String& key) const;
 
 		virtual String getPrefabName() const;
+		String getPrefabIcon() const;
 
 		EntityData* findEntityData(const UUID& uuid);
 
