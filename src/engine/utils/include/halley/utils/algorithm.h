@@ -68,7 +68,7 @@ namespace Halley
 			return *begin;
 		}
 		const auto size = end - begin;
-		return *(begin + rng.getInt(decltype(size)(0), size - 1));
+		return *(begin + rng.getSizeT(decltype(size)(0), size - 1));
 	}
 
 
