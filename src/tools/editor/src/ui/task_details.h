@@ -6,7 +6,7 @@
 namespace Halley {
 	class TaskDetails : public UIWidget {
 	public:
-		TaskDetails(UIFactory& factory);
+		TaskDetails(UIFactory& factory, std::shared_ptr<IClipboard> clipboard);
 
 		void onMakeUI() override;
 
@@ -22,6 +22,7 @@ namespace Halley {
 	
 	private:
 		UIFactory& factory;
+		std::shared_ptr<IClipboard> clipboard;
 
 		bool visible = false;
 		const TaskDisplay* taskDisplay = nullptr;
@@ -30,5 +31,6 @@ namespace Halley {
 		EditorTaskStatus lastStatus = EditorTaskStatus::WaitingToStart;
 
 		void updateMessages();
+		void copyToClipboard(bool verbose);
 	};
 }

@@ -4,3 +4,4 @@ children:
 - widget: { id: messages, class: label, text: desc, style: labelSmall }
   fill: left
   proportion: 1
+- widget: { id: copyToClipboard, class: button, text: Copy to Clipboard, active: false }

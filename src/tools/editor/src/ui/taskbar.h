@@ -12,7 +12,7 @@ namespace Halley
 	class TaskBar : public UIWidget
 	{
 	public:
-		TaskBar(UIFactory& factory, EditorTaskSet& taskSet);
+		TaskBar(UIFactory& factory, EditorTaskSet& taskSet, const HalleyAPI& api);
 		~TaskBar();
 
 		void update(Time time, bool moved) override;
@@ -24,6 +24,7 @@ namespace Halley
 		UIFactory& factory;
 		Resources& resources;
 		EditorTaskSet& taskSet;
+		const HalleyAPI& api;
 		std::vector<std::shared_ptr<TaskDisplay>> tasks;
 
 		Sprite barSolid;

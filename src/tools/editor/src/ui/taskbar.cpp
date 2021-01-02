@@ -7,11 +7,12 @@
 
 using namespace Halley;
 
-TaskBar::TaskBar(UIFactory& ui, EditorTaskSet& taskSet)
+TaskBar::TaskBar(UIFactory& ui, EditorTaskSet& taskSet, const HalleyAPI& api)
 	: UIWidget("taskBar", Vector2f(150.0f, 80.0), {}, Vector4f(160, 8, 10, 8))
 	, factory(ui)
 	, resources(ui.getResources())
 	, taskSet(taskSet)
+	, api(api)
 {
 	{
 		const auto col = ui.getColourScheme()->getColour("logo");
@@ -94,7 +95,7 @@ void TaskBar::update(Time time, bool moved)
 		waitingToShowTaskDisplay = false;
 		if (taskDisplayHovered) {
 			if (!taskDetails) {
-				taskDetails = std::make_shared<TaskDetails>(factory);
+				taskDetails = std::make_shared<TaskDetails>(factory, api.system->getClipboard());
 				taskDetails->hide();
 				getRoot()->addChild(taskDetails);
 			}

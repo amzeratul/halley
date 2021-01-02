@@ -58,7 +58,7 @@ void ProjectWindow::makeUI()
 
 	makeToolbar();
 	makePagedPane();
-	uiBottom->add(std::make_shared<TaskBar>(factory, *tasks), 1);
+	uiBottom->add(std::make_shared<TaskBar>(factory, *tasks, api), 1);
 
 	setHandle(UIEventType::NavigateTo, [=] (const UIEvent& event)
 	{

@@ -206,7 +206,10 @@ ImportAssetsTask::ImportResult ImportAssetsTask::importAsset(const ImportAssetsD
 		}
 		
 		result.success = true;
-	} catch (std::exception& e) {
+	} catch (const Exception& e) {
+		result.errorMsg = e.getMessage();
+		result.success = false;
+	} catch (const std::exception& e) {
 		result.errorMsg = e.what();
 		result.success = false;
 	}
