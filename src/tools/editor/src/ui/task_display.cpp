@@ -16,6 +16,8 @@ TaskDisplay::TaskDisplay(UIFactory& factory, std::shared_ptr<EditorTaskAnchor> t
 void TaskDisplay::update(Time t, bool moved)
 {
 	const float maxTextWidth = std::max(100.0f, getSize().x - 22.0f);
+	name->getTextRenderer().setColour(nameCol.multiplyAlpha(opacity));
+	desc->getTextRenderer().setColour(descCol.multiplyAlpha(opacity));
 	name->setText(LocalisedString::fromUserString(task->getName()));
 	desc->setText(LocalisedString::fromUserString(task->getProgressLabel()));
 	name->setMaxWidth(maxTextWidth);
@@ -26,14 +28,14 @@ void TaskDisplay::update(Time t, bool moved)
 	const auto& cs = factory.getColourScheme();
 	const Colour col = task->hasError() ? cs->getColour("taskError") : (progress > 0.9999f ? cs->getColour("taskComplete") : cs->getColour("taskRunning"));
 	
-	bg->getSprite().setColour(col.multiplyAlpha(0.8f));
-	bgFill->getSprite().setColour(col.multiplyAlpha(0.5f));
+	bg->getSprite().setColour(col.multiplyAlpha(0.8f * opacity));
+	bgFill->getSprite().setColour(col.multiplyAlpha(0.5f * opacity));
 	bgFill->setMinSize(Vector2f((getSize().x - 12) * progress + 10.0f, 38.0f));
 }
 
 bool TaskDisplay::updateTask(Time time, float targetDisplaySlot)
 {
-	constexpr float displayTime = 150.0f;
+	constexpr float displayTime = 1.0f;
 	
 	if (displaySlot < 0) {
 		displaySlot = targetDisplaySlot;
@@ -41,17 +43,21 @@ bool TaskDisplay::updateTask(Time time, float targetDisplaySlot)
 		displaySlot = lerp(displaySlot, targetDisplaySlot, static_cast<float>(6 * time));
 	}
 
+	bool visible = true;
+
 	if (task->getStatus() == EditorTaskStatus::Done) {
 		progressDisplay = 1;
 		completeTime += static_cast<float>(time);
 		if (completeTime >= displayTime && !task->hasError()) {
-			return false;
+			visible = false;
 		}
 	} else {
 		progressDisplay = lerp(progressDisplay, task->getProgress(), static_cast<float>(10 * time));
 	}
+
+	opacity = advance(opacity, visible ? 1.0f : 0.0f, static_cast<float>(time) * 2.0f);
 	
-	return true;
+	return visible || opacity > 0.0001f;
 }
 
 void TaskDisplay::setTask(std::shared_ptr<EditorTaskAnchor> task)
@@ -65,8 +71,10 @@ void TaskDisplay::onMakeUI()
 {
 	name = getWidgetAs<UILabel>("name");
 	name->setWordWrapped(false);
+	nameCol = name->getTextRenderer().getColour();
 	desc = getWidgetAs<UILabel>("desc");
 	desc->setWordWrapped(false);
+	descCol = desc->getTextRenderer().getColour();
 	bg = getWidgetAs<UIImage>("bg");
 	bgFill = getWidgetAs<UIImage>("bgFill");
 }

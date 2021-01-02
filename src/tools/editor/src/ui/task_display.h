@@ -34,9 +34,14 @@ namespace Halley
 		float completeTime = 0;
 		float displaySlot = -1;
 
+		float opacity = 0;
+
 		std::shared_ptr<UILabel> name;
 		std::shared_ptr<UILabel> desc;
 		std::shared_ptr<UIImage> bg;
 		std::shared_ptr<UIImage> bgFill;
+
+		Colour nameCol;
+		Colour descCol;
 	};
 }
