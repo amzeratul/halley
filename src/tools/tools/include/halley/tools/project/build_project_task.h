@@ -28,8 +28,10 @@ namespace Halley {
 
 		std::regex matchProgress;
 
+		LoggerLevel lastLevel = LoggerLevel::Info;
+
 		void tryToIdentifyBuildSystem(const String& msg);
-		void parseMSBuildMessage(const String& msg);
-		void parseNinjaMessage(const String& msg);
+		LoggerLevel parseMSBuildMessage(LoggerLevel level, const String& msg);
+		LoggerLevel parseNinjaMessage(LoggerLevel level, const String& msg);
     };
 }
