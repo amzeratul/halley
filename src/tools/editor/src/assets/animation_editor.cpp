@@ -26,6 +26,11 @@ void AnimationEditor::reload()
 	loadAssetData();
 }
 
+bool AnimationEditor::isModified()
+{
+	return metadataEditor.isModified();
+}
+
 void AnimationEditor::update(Time t, bool moved)
 {
 	const auto mousePos = Vector2i(animationDisplay->getMousePos());

@@ -18,6 +18,7 @@ namespace Halley {
 		void clearResource();
 		virtual void reload();
         virtual void onDoubleClick();
+        virtual bool isModified();
 
     protected:
 		virtual std::shared_ptr<const Resource> loadResource(const String& assetId) = 0;

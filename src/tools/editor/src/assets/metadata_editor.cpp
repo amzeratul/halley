@@ -20,6 +20,7 @@ void MetadataEditor::setResource(Project& p, AssetType type, const Path& path, M
 	filePath = path;
 	project = &p;
 	metadata = project->readMetadataFromDisk(filePath);
+	origMetadata = metadata;
 	effectiveMetadata = std::move(effectiveMeta);
 
 	makeUI();
@@ -27,8 +28,8 @@ void MetadataEditor::setResource(Project& p, AssetType type, const Path& path, M
 
 void MetadataEditor::onMetadataChanged()
 {
-	changed = true;
-	getWidget("applyChanges")->setEnabled(true);
+	changed = metadata != origMetadata;
+	getWidget("applyChanges")->setEnabled(changed);
 }
 
 void MetadataEditor::saveMetadata()
@@ -38,6 +39,11 @@ void MetadataEditor::saveMetadata()
 		changed = false;
 		getWidget("applyChanges")->setEnabled(false);
 	}
+}
+
+bool MetadataEditor::isModified() const
+{
+	return changed;
 }
 
 void MetadataEditor::makeUI()

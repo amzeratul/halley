@@ -58,6 +58,8 @@ namespace Halley {
 
 		const std::shared_ptr<ISceneData>& getSceneData() const override;
 
+		bool isModified() const;
+
 	protected:
 		void update(Time t, bool moved) override;
 
@@ -94,6 +96,8 @@ namespace Halley {
 
 		int toolModeTimeout = 0; // Hack
 
+		bool modified = false;
+
 		void makeUI();
 		void onEntitySelected(const String& id);
 		void panCameraToEntity(const String& id);
@@ -107,7 +111,7 @@ namespace Halley {
 
 		void decayTool();
 
-		void setSaveEnabled(bool enabled);
+		void setModified(bool enabled);
 
 		String serializeEntity(const EntityData& node) const;
 		std::optional<EntityData> deserializeEntity(const String& data) const;

@@ -83,6 +83,7 @@ sprites:
   ui_tab_normal: { img: halley_ui/tabs/tab_normal.png, material: Halley/Sprite }
   ui_tab_hover: { img: halley_ui/tabs/tab_hover.png, material: Halley/Sprite }
   ui_tab_selected: { img: halley_ui/tabs/tab_selected.png, material: Halley/Sprite }
+  ui_tab_modified: { img: halley_ui/ui_tab_modified.png, material: Halley/Sprite }
   ui_tabs_bg: { img: halley_ui/tabs/tabs_bg.png, material: Halley/Sprite }
   ui_task: { img: halley_ui/ui_input.png, material: Halley/Sprite }
   ui_task_fill: { img: halley_ui/ui_list_item.png, material: Halley/Sprite }

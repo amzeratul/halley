@@ -19,7 +19,8 @@ namespace Halley {
 
 		void refresh();
         void reload() override;
-
+        bool isModified() override;
+	
     protected:
         void update(Time t, bool moved) override;
         std::shared_ptr<const Resource> loadResource(const String& assetId) override;

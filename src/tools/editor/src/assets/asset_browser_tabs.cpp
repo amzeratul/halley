@@ -24,7 +24,7 @@ void AssetBrowserTabs::load(std::optional<AssetType> assetType, const String& na
 		return;
 	}
 
-	// Tab
+	// Create tab
 	Sprite icon;
 	if (assetType) {
 		icon = factory.makeAssetTypeIcon(assetType.value());
@@ -32,7 +32,7 @@ void AssetBrowserTabs::load(std::optional<AssetType> assetType, const String& na
 		const auto type = project.getAssetImporter()->getImportAssetType(name, false);
 		icon = factory.makeImportAssetTypeIcon(type);
 	}
-	auto label = LocalisedString::fromHardcodedString(Path(name).getFilename().toString());
+	auto label = LocalisedString::fromUserString(Path(name).getFilename().toString());
 	auto tabContents = factory.makeUI("ui/halley/asset_browser_tab_contents");
 	tabContents->getWidgetAs<UIImage>("icon")->setSprite(icon);
 	tabContents->getWidgetAs<UILabel>("label")->setText(std::move(label));
@@ -42,12 +42,13 @@ void AssetBrowserTabs::load(std::optional<AssetType> assetType, const String& na
 	});
 	tabs->addItem(key, tabContents);
 
-	// Window
+	// Create window
 	auto window = std::make_shared<AssetEditorWindow>(factory, project, projectWindow);
 	window->setAssetSrcMode(srcMode);
 	window->loadAsset(name, assetType, true);
+	windows.push_back(window);
 
-	// Select
+	// Add to tabs
 	pages->addPage()->add(window, 1);
 	tabs->setSelectedOption(int(tabs->getCount()) - 1);
 }
@@ -71,6 +72,10 @@ void AssetBrowserTabs::update(Time t, bool moved)
 		closeTab(key);
 	}
 	toClose.clear();
+
+	for (size_t i = 0; i < windows.size(); ++i) {
+		tabs->getItem(i)->getWidget("modified")->setActive(windows[i]->isModified());
+	}
 }
 
 void AssetBrowserTabs::makeUI()
@@ -90,5 +95,6 @@ void AssetBrowserTabs::closeTab(const String& key)
 	auto idx = tabs->removeItem(key);
 	if (idx) {
 		pages->removePage(static_cast<int>(idx.value()));
+		windows.erase(windows.begin() + idx.value());
 	}
 }

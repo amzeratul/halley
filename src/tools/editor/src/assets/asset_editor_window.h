@@ -22,6 +22,8 @@ namespace Halley {
 
 		Path getCurrentAssetPath() const;
 
+		bool isModified() const;
+
 	private:
 		EditorUIFactory& factory;
 		Project& project;
@@ -36,6 +38,8 @@ namespace Halley {
 		std::shared_ptr<UIList> contentList;
 		std::shared_ptr<UIPagedPane> content;
 		std::vector<std::shared_ptr<AssetEditor>> curEditors;
+
+		bool modified = false;
 
 		std::shared_ptr<AssetEditor> makeEditor(Path filePath, AssetType type, const String& name);
 		void createEditorTab(Path filePath, AssetType type, const String& name);

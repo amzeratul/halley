@@ -56,7 +56,7 @@ void SceneEditorWindow::makeUI()
 
 	toolMode = getWidgetAs<UIList>("toolMode");
 	
-	setSaveEnabled(false);
+	setModified(false);
 
 	setHandle(UIEventType::ListSelectionChanged, "entityList_list", [=] (const UIEvent& event)
 	{
@@ -285,7 +285,7 @@ void SceneEditorWindow::panCameraToEntity(const String& id)
 
 void SceneEditorWindow::saveScene()
 {
-	setSaveEnabled(false);
+	setModified(false);
 
 	const auto strData = prefab->toYAML();
 	auto data = gsl::as_bytes(gsl::span<const char>(strData.c_str(), strData.length()));
@@ -295,7 +295,7 @@ void SceneEditorWindow::saveScene()
 
 void SceneEditorWindow::markModified()
 {
-	setSaveEnabled(true);
+	setModified(true);
 }
 
 void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId)
@@ -610,11 +610,17 @@ void SceneEditorWindow::decayTool()
 	}
 }
 
-void SceneEditorWindow::setSaveEnabled(bool enabled)
+void SceneEditorWindow::setModified(bool enabled)
 {
 	auto button = getWidgetAs<UIButton>("saveButton");
 	button->setLabel(LocalisedString::fromHardcodedString(enabled ? "* Save" : "Save"));
 	button->setEnabled(enabled);
+	modified = enabled;
+}
+
+bool SceneEditorWindow::isModified() const
+{
+	return modified;
 }
 
 String SceneEditorWindow::serializeEntity(const EntityData& node) const

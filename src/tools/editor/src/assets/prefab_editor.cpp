@@ -20,6 +20,11 @@ void PrefabEditor::onDoubleClick()
 {
 }
 
+bool PrefabEditor::isModified()
+{
+	return window && window->isModified();
+}
+
 void PrefabEditor::update(Time t, bool moved)
 {
 	if (pendingLoad && project.isDLLLoaded()) {

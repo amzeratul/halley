@@ -32,3 +32,8 @@ void AssetEditor::reload()
 void AssetEditor::onDoubleClick()
 {
 }
+
+bool AssetEditor::isModified()
+{
+	return false;
+}

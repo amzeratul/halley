@@ -16,6 +16,7 @@ namespace Halley
 		void setResource(Project& project, AssetType type, const Path& filePath, Metadata effectiveMetadata);
 		void onMetadataChanged();
 		void saveMetadata();
+		bool isModified() const;
 
 		void setPivot(Vector2i pos);
 
@@ -24,6 +25,7 @@ namespace Halley
 	private:
 		UIFactory& factory;
 		Metadata metadata;
+		Metadata origMetadata;
 		Metadata effectiveMetadata;
 		Project* project = nullptr;
 		AssetType assetType;

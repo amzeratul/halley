@@ -6,6 +6,7 @@ namespace Halley {
 	class ProjectWindow;
 	class HalleyAPI;
 	class Project;
+	class AssetEditorWindow;
 
 	class AssetBrowserTabs final : public UIWidget {
 	public:
@@ -25,6 +26,7 @@ namespace Halley {
 		
 		std::shared_ptr<UIList> tabs;
 		std::shared_ptr<UIPagedPane> pages;
+		std::vector<std::shared_ptr<AssetEditorWindow>> windows;
 		std::vector<String> toClose;
 
 		bool srcMode = false;

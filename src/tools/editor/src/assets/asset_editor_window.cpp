@@ -126,6 +126,16 @@ Path AssetEditorWindow::getCurrentAssetPath() const
 	return project.getAssetsSrcPath() / loadedAsset;
 }
 
+bool AssetEditorWindow::isModified() const
+{
+	for (auto& editor: curEditors) {
+		if (editor->isModified()) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void AssetEditorWindow::onDoubleClickAsset()
 {
 	if (!curEditors.empty()) {
