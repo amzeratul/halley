@@ -5,12 +5,13 @@
 
 namespace Halley
 {
+	class TaskBar;
 	class EditorTaskSet;
 
 	class TaskDisplay : public UIWidget
 	{
 	public:
-		TaskDisplay(UIFactory& factory, std::shared_ptr<EditorTaskAnchor> task);
+		TaskDisplay(UIFactory& factory, std::shared_ptr<EditorTaskAnchor> task, TaskBar& taskBar);
 
 		void update(Time t, bool moved) override;
 		bool updateTask(Time time, float targetDisplaySlot);
@@ -21,9 +22,13 @@ namespace Halley
 		void onMakeUI() override;
 		float getDisplaySlot() const { return displaySlot; }
 
+		void onMouseOver(Vector2f mousePos) override;
+		bool canInteractWithMouse() const override;
+	
 	private:
 		UIFactory& factory;
 		std::shared_ptr<EditorTaskAnchor> task;
+		TaskBar& taskBar;
 
 		float progressDisplay = 0;
 		float completeTime = 0;

@@ -1,0 +1,6 @@
+widget: { id: bg, class: image, image: $ui_tooltip, colour: $ui_listHover, size: [400, 10], innerBorder: [3, 3, 3, 3] }
+sizer: { type: vertical, gap: 0 }
+children:
+- widget: { id: messages, class: label, text: desc, style: labelSmall }
+  fill: left
+  proportion: 1

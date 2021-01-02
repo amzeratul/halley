@@ -85,50 +85,40 @@ size_t EditorTask::getNumMessages() const
 	return numMessages.load();
 }
 
-std::vector<std::pair<LoggerLevel, String>> EditorTask::copyMessagesTail(size_t max) const
+std::vector<std::pair<LoggerLevel, String>> EditorTask::copyMessagesHead(size_t max, std::optional<LoggerLevel> filter) const
+{
+	std::lock_guard<std::mutex> lock(mutex);
+
+	std::vector<std::pair<LoggerLevel, String>> result;
+	for (const auto& msg: messageLog) {
+		if (!filter || msg.first == filter.value()) {
+			result.push_back(msg);
+			if (result.size() >= max) {
+				break;
+			}
+		}
+	}
+	
+	return result;
+}
+
+std::vector<std::pair<LoggerLevel, String>> EditorTask::copyMessagesTail(size_t max, std::optional<LoggerLevel> filter) const
 {
 	std::vector<std::pair<LoggerLevel, String>> result;
 
 	{
 		std::lock_guard<std::mutex> lock(mutex);
 		for (auto iter = messageLog.rbegin(); iter != messageLog.rend(); ++iter) {
-			result.push_back(*iter);
-			if (result.size() >= max) {
-				break;
+			if (!filter || iter->first == filter.value()) {
+				result.push_back(*iter);
+				if (result.size() >= max) {
+					break;
+				}
 			}
 		}
 	}
 
 	std::reverse(result.begin(), result.end());
-	
-	return result;
-}
-
-std::vector<std::pair<LoggerLevel, String>> EditorTask::copyAllMessages() const
-{
-	std::lock_guard<std::mutex> lock(mutex);
-
-	std::vector<std::pair<LoggerLevel, String>> result;
-	for (const auto& msg: messageLog) {
-		result.push_back(msg);
-	}
-	
-	return result;
-}
-
-std::vector<String> EditorTask::copyErrorMessages(size_t max) const
-{
-	std::lock_guard<std::mutex> lock(mutex);
-
-	std::vector<String> result;
-	for (const auto& msg: messageLog) {
-		if (msg.first == LoggerLevel::Error) {
-			result.push_back(msg.second);
-		}
-		if (result.size() >= max) {
-			break;
-		}
-	}
 	
 	return result;
 }
@@ -270,6 +260,21 @@ void EditorTaskAnchor::setId(int value)
 bool EditorTaskAnchor::hasError() const
 {
 	return error;
+}
+
+size_t EditorTaskAnchor::getNumMessages() const
+{
+	return task->getNumMessages();
+}
+
+std::vector<std::pair<LoggerLevel, String>> EditorTaskAnchor::copyMessagesHead(size_t max, std::optional<LoggerLevel> filter) const
+{
+	return task->copyMessagesHead(max, filter);
+}
+
+std::vector<std::pair<LoggerLevel, String>> EditorTaskAnchor::copyMessagesTail(size_t max, std::optional<LoggerLevel> filter) const
+{
+	return task->copyMessagesTail(max, filter);
 }
 
 Vector<EditorTaskAnchor> EditorTaskAnchor::getContinuations()

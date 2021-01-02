@@ -154,15 +154,18 @@ uiStyle:
   label:
     label: { font: Ubuntu Bold, size: 15, colour: $ui_text }
 
+  labelLight:
+    label: { font: Ubuntu Light, size: 14, colour: $ui_text }
+
+  labelSmall:
+    label: { font: Ubuntu Light, size: 12, colour: $ui_text }
+
   tooltip:
     background: { img: $ui_tooltip, colour: $ui_listHover }
     innerBorder: [ 5, 5, 5, 5 ]
     delay: 0.3
     maxWidth: 200
     label: { font: Ubuntu Bold, size: 14, colour: $ui_text }
-
-  labelLight:
-    label: { font: Ubuntu Light, size: 14, colour: $ui_text }
 
   slider:
     emptyBar: { img: halley_ui/slider_bar_empty.png, colour: $ui_controlDisabled }

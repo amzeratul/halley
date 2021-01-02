@@ -5,6 +5,7 @@
 
 namespace Halley
 {
+	class TaskDetails;
 	class EditorTaskSet;
 	class TaskDisplay;
 	
@@ -12,8 +13,12 @@ namespace Halley
 	{
 	public:
 		TaskBar(UIFactory& factory, EditorTaskSet& taskSet);
+		~TaskBar();
+
 		void update(Time time, bool moved) override;
 		void draw(UIPainter& painter) const override;
+
+		void showTaskDetails(const TaskDisplay& taskDisplay);
 
 	private:
 		UIFactory& factory;
@@ -26,6 +31,10 @@ namespace Halley
 		Sprite halleyLogo;
 
 		float displaySize = 0;
+
+		const TaskDisplay* taskDisplayHovered = nullptr;
+		bool waitingToShowTaskDisplay = false;
+		std::shared_ptr<TaskDetails> taskDetails;
 
 		std::shared_ptr<TaskDisplay> getDisplayFor(const std::shared_ptr<EditorTaskAnchor>& task);
 	};

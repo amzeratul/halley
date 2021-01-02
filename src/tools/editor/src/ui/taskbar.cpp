@@ -1,5 +1,7 @@
 #include "taskbar.h"
 
+
+#include "task_details.h"
 #include "task_display.h"
 #include "halley/tools/tasks/editor_task_set.h"
 
@@ -31,6 +33,13 @@ TaskBar::TaskBar(UIFactory& ui, EditorTaskSet& taskSet)
 	}
 }
 
+TaskBar::~TaskBar()
+{
+	if (taskDetails) {
+		taskDetails->destroy();
+	}
+}
+
 void TaskBar::update(Time time, bool moved)
 {
 	auto taskData = taskSet.getTasks();
@@ -57,6 +66,7 @@ void TaskBar::update(Time time, bool moved)
 		const Vector2f drawPos = baseDrawPos + Vector2f((size.x + 20) * t->getDisplaySlot(), 0);
 		t->setPosition(drawPos);
 		t->setMinSize(size);
+		t->layout();
 	}
 
 	// Update and decay
@@ -66,12 +76,32 @@ void TaskBar::update(Time time, bool moved)
 			++i;
 		} else {
 			tasks[i]->destroy();
+			if (tasks[i].get() == taskDisplayHovered) {
+				taskDisplayHovered = nullptr;
+				if (taskDetails) {
+					taskDetails->hide();
+				}
+			}
 			tasks.erase(tasks.begin() + i);
 		}
 	}
 
 	// Update bar size
 	displaySize = lerp(displaySize, float(tasks.size()), static_cast<float>(6 * time));
+
+	// Show display
+	if (waitingToShowTaskDisplay) {
+		waitingToShowTaskDisplay = false;
+		if (taskDisplayHovered) {
+			if (!taskDetails) {
+				taskDetails = std::make_shared<TaskDetails>(factory);
+				taskDetails->hide();
+				getRoot()->addChild(taskDetails);
+			}
+
+			taskDetails->show(*taskDisplayHovered);
+		}
+	}
 }
 
 void TaskBar::draw(UIPainter& painter) const
@@ -79,6 +109,12 @@ void TaskBar::draw(UIPainter& painter) const
 	painter.draw(barSolid);
 	painter.draw(barFade);
 	painter.draw(halleyLogo);
+}
+
+void TaskBar::showTaskDetails(const TaskDisplay& taskDisplay)
+{
+	taskDisplayHovered = &taskDisplay;
+	waitingToShowTaskDisplay = true;
 }
 
 std::shared_ptr<TaskDisplay> TaskBar::getDisplayFor(const std::shared_ptr<EditorTaskAnchor>& task)
@@ -92,13 +128,13 @@ std::shared_ptr<TaskDisplay> TaskBar::getDisplayFor(const std::shared_ptr<Editor
 		}
 
 		// Replace error:
-		if (existingTask->hasError() && existingTask->getName() == task->getName()) {
+		if (existingTask->getStatus() == EditorTaskStatus::Done && existingTask->getName() == task->getName()) {
 			t->setTask(task);
 			return t;
 		}
 	}
 
-	auto taskDisplay = std::make_shared<TaskDisplay>(factory, task);
+	auto taskDisplay = std::make_shared<TaskDisplay>(factory, task, *this);
 	add(taskDisplay, 0, Vector4f(), UISizerAlignFlags::Centre);
 	tasks.emplace_back(taskDisplay);
 	

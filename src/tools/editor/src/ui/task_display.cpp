@@ -1,11 +1,14 @@
 #include "task_display.h"
+
+#include "taskbar.h"
 using namespace Halley;
 
 
-TaskDisplay::TaskDisplay(UIFactory& factory, std::shared_ptr<EditorTaskAnchor> task)
+TaskDisplay::TaskDisplay(UIFactory& factory, std::shared_ptr<EditorTaskAnchor> task, TaskBar& taskBar)
 	: UIWidget("task", {}, UISizer())
 	, factory(factory)
 	, task(std::move(task))
+	, taskBar(taskBar)
 {
 	factory.loadUI(*this, "ui/halley/task");
 }
@@ -30,7 +33,7 @@ void TaskDisplay::update(Time t, bool moved)
 
 bool TaskDisplay::updateTask(Time time, float targetDisplaySlot)
 {
-	constexpr float displayTime = 1.5f;
+	constexpr float displayTime = 150.0f;
 	
 	if (displaySlot < 0) {
 		displaySlot = targetDisplaySlot;
@@ -66,4 +69,16 @@ void TaskDisplay::onMakeUI()
 	desc->setWordWrapped(false);
 	bg = getWidgetAs<UIImage>("bg");
 	bgFill = getWidgetAs<UIImage>("bgFill");
+}
+
+void TaskDisplay::onMouseOver(Vector2f mousePos)
+{
+	if (task->getNumMessages() > 0) {
+		taskBar.showTaskDetails(*this);
+	}
+}
+
+bool TaskDisplay::canInteractWithMouse() const
+{
+	return true;
 }

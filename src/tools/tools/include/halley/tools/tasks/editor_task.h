@@ -47,9 +47,8 @@ namespace Halley
 		bool hasError() const;
 
 		size_t getNumMessages() const;
-		std::vector<std::pair<LoggerLevel, String>> copyMessagesTail(size_t max) const;
-		std::vector<std::pair<LoggerLevel, String>> copyAllMessages() const;
-		std::vector<String> copyErrorMessages(size_t max) const;
+		std::vector<std::pair<LoggerLevel, String>> copyMessagesHead(size_t max, std::optional<LoggerLevel> filter = {}) const;
+		std::vector<std::pair<LoggerLevel, String>> copyMessagesTail(size_t max, std::optional<LoggerLevel> filter = {}) const;
 
 		bool hasPendingTasks() const;
 		void addPendingTask(EditorTaskAnchor&& task);
@@ -103,6 +102,10 @@ namespace Halley
 		void setId(int value);
 
 		bool hasError() const;
+		
+		size_t getNumMessages() const;
+		std::vector<std::pair<LoggerLevel, String>> copyMessagesHead(size_t max, std::optional<LoggerLevel> filter = {}) const;
+		std::vector<std::pair<LoggerLevel, String>> copyMessagesTail(size_t max, std::optional<LoggerLevel> filter = {}) const;
 
 		Vector<EditorTaskAnchor> getContinuations();
 		Vector<EditorTaskAnchor> getPendingTasks();
