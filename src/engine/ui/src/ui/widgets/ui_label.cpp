@@ -160,14 +160,20 @@ void UILabel::setColourOverride(const std::vector<ColourOverride>& overrides)
 
 void UILabel::setMaxWidth(float m)
 {
-	maxWidth = m;
-	updateMinSize();
+	if (std::abs(maxWidth - m) > 0.001f) {
+		maxWidth = m;
+		updateMinSize();
+		updateText();
+	}
 }
 
 void UILabel::setMaxHeight(float m)
 {
-	maxHeight = m;
-	updateMinSize();
+	if (std::abs(maxHeight - m) > 0.001f) {
+		maxHeight = m;
+		updateMinSize();
+		updateText();
+	}
 }
 
 float UILabel::getMaxWidth() const

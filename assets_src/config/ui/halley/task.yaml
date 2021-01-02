@@ -1,0 +1,18 @@
+widget: { id: bg, class: image, image: $ui_task, size: [80, 40], innerBorder: [1, 1, 1, 1] }
+sizer: { type: vertical, gap: 0 }
+children:
+- widget: { id: bgFill, class: image, image: $ui_task_fill, size: [38, 38] }
+  proportion: 0
+  fill: left
+  border: [0, 0, 0, -38]
+- widget: { class: widget, innerBorder: [9, 0, 9, 0] }
+  proportion: 1
+  sizer: { type: vertical }
+  children:
+  - widget: { id: name, class: label, text: taskName }
+    fill: left
+    proportion: 1
+  - widget: { id: desc, class: label, text: desc, style: labelLight }
+    fill: left
+    proportion: 1
+

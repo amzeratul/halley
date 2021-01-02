@@ -4,7 +4,8 @@
 using namespace Halley;
 
 TaskBar::TaskBar(UIFactory& ui, EditorTaskSet& taskSet)
-	: UIWidget("taskBar", Vector2f(150.0f, 80.0), UISizer())
+	: UIWidget("taskBar", Vector2f(150.0f, 80.0), {}, Vector4f(160, 8, 10, 8))
+	, factory(ui)
 	, resources(ui.getResources())
 	, taskSet(taskSet)
 {
@@ -26,27 +27,43 @@ TaskBar::TaskBar(UIFactory& ui, EditorTaskSet& taskSet)
 		barSolid = Sprite().setMaterial(resources, "Halley/SolidColour").setSize(Vector2f(1, 1)).setColour(col);
 		barFade = Sprite().setImage(resources, "fade_right.png").setColour(col);
 	}
-
-	font = resources.get<Font>("Ubuntu Bold");
 }
 
 void TaskBar::update(Time time, bool moved)
 {
 	auto taskData = taskSet.getTasks();
 
-	// Ensure it has a display associated
+	// Ensure that all tasks have a display associated
 	for (auto& t : taskData) {
 		if (t->isVisible() && t->getStatus() == EditorTaskStatus::Started) {
 			getDisplayFor(t);
 		}
 	}
 
+	// Setup for tasks
+	const Vector2f anchor = getPosition() + Vector2f(0, 80.0f);
+	const Vector2f baseDrawPos = getPosition() + Vector2f(170.0f, 20.0f);
+	const Vector2f size = Vector2f(std::min(400.0f, getSize().x / std::max(1.0f, displaySize)), 40);
+	const float totalLen = baseDrawPos.x + (displaySize * size.x) + 10.0f;
+
+	// Draw logo
+	barSolid.setScale(Vector2f(totalLen, 32)).setPos(anchor + Vector2f(0, -56));
+	barFade.setPos(anchor + Vector2f(totalLen, -56));
+	halleyLogo.setPos(anchor + Vector2f(80, -41));
+
+	for (const auto& t : tasks) {
+		const Vector2f drawPos = baseDrawPos + Vector2f((size.x + 20) * t->getDisplaySlot(), 0);
+		t->setPosition(drawPos);
+		t->setMinSize(size);
+	}
+
 	// Update and decay
 	for (size_t i = 0; i < tasks.size();) {
-		const bool ok = tasks[i]->update(time, static_cast<float>(i));
+		const bool ok = tasks[i]->updateTask(time, static_cast<float>(i));
 		if (ok) {
 			++i;
 		} else {
+			tasks[i]->destroy();
 			tasks.erase(tasks.begin() + i);
 		}
 	}
@@ -57,84 +74,65 @@ void TaskBar::update(Time time, bool moved)
 
 void TaskBar::draw(UIPainter& painter) const
 {
-	// Setup for tasks
-	const Vector2f anchor = getPosition() + Vector2f(0, 80.0f);
-	const Vector2f baseDrawPos = getPosition() + Vector2f(150.0f, 8.0f);
-	const Vector2f size = Vector2f(std::min(400.0f, getSize().x / std::max(1.0f, displaySize)), 40);
-	float totalLen = baseDrawPos.x + (displaySize * size.x) + 10.0f;
-
-	// Draw logo
-	painter.draw(barSolid.setScale(Vector2f(totalLen, 32)).setPos(anchor + Vector2f(0, -56)), true);
-	painter.draw(barFade.setPos(anchor + Vector2f(totalLen, -56)), true);
-	painter.draw(halleyLogo.setPos(anchor + Vector2f(80, -41)), true);
-
-	if (tasks.empty()) {
-		// Nothing to do here!
-		return;
-	}
-
-	// Setup text renderer
-	TextRenderer text;
-	text.setFont(font).setOffset(Vector2f(0, 0)).setColour(Colour(1, 1, 1)).setOutline(2.0f).setOutlineColour(Colour(0, 0, 0, 0.35f));
-
-	// Draw tasks
-	for (const auto& t : tasks) {
-		auto& task = t->task;
-		Vector2f drawPos = baseDrawPos + Vector2f((size.x + 20) * t->displaySlot, 0);
-
-		Colour col = task->hasError() ? Colour(0.93f, 0.2f, 0.2f) : (task->getProgress() > 0.9999f ? Colour(0.16f, 0.69f, 0.34f) : Colour(0.18f, 0.53f, 0.87f));
-
-		auto sprite = Sprite()
-			.setImage(resources, "round_rect.png", "Halley/DistanceFieldSprite")
-			.setPos(drawPos + Vector2f(6.0f, 6.0f))
-			.scaleTo(size + Vector2f(12, 12))
-			.setPivot(Vector2f(0, 0));
-
-		sprite.getMutableMaterial()
-			.set("u_smoothness", 6.0f)
-			.set("u_outline", 0.4f)
-			.set("u_outlineColour", col);
-
-		// Background
-		painter.draw(sprite.setColour(Colour4f(0.15f, 0.15f, 0.19f)), true);
-
-		// Progress
-		painter.draw(sprite
-			.setClip(Rect4f(Vector2f(), (size.x + 10) * t->progressDisplay, size.y + 10))
-			.scaleTo(size + Vector2f(10, 10))
-			.setColour(col), true);
-
-		// Text
-		painter.draw(text.setSize(14).setText(task->getName()).setPosition(drawPos + Vector2f(24, 12)), true);
-		painter.draw(text.setSize(17).setText(task->getProgressLabel()).setPosition(drawPos + Vector2f(24, 30)), true);
-	}
+	painter.draw(barSolid);
+	painter.draw(barFade);
+	painter.draw(halleyLogo);
 }
 
-std::shared_ptr<TaskBar::TaskDisplay> TaskBar::getDisplayFor(const std::shared_ptr<EditorTaskAnchor>& task)
+std::shared_ptr<TaskDisplay> TaskBar::getDisplayFor(const std::shared_ptr<EditorTaskAnchor>& task)
 {
-	for (auto& t : tasks) {
+	for (auto& t: tasks) {
+		const auto& existingTask = t->getTask();
+		
 		// Already assigned one!
-		if (t->task == task) {
+		if (existingTask == task) {
 			return t;
 		}
 
 		// Replace error:
-		if (t->task->hasError() && t->task->getName() == task->getName()) {
-			t->task = task;
+		if (existingTask->hasError() && existingTask->getName() == task->getName()) {
+			t->setTask(task);
 			return t;
 		}
 	}
 
-	return tasks.emplace_back(std::make_shared<TaskDisplay>(task));
+	auto taskDisplay = std::make_shared<TaskDisplay>(factory, task);
+	add(taskDisplay, 0, Vector4f(), UISizerAlignFlags::Centre);
+	tasks.emplace_back(taskDisplay);
+	
+	return taskDisplay;
 }
 
-TaskBar::TaskDisplay::TaskDisplay(std::shared_ptr<EditorTaskAnchor> task)
-	: task(std::move(task))
+TaskDisplay::TaskDisplay(UIFactory& factory, std::shared_ptr<EditorTaskAnchor> task)
+	: UIWidget("task", {}, UISizer())
+	, factory(factory)
+	, task(std::move(task))
 {
+	factory.loadUI(*this, "ui/halley/task");
 }
 
-bool TaskBar::TaskDisplay::update(Time time, float targetDisplaySlot)
+void TaskDisplay::update(Time t, bool moved)
 {
+	const float maxTextWidth = std::max(100.0f, getSize().x - 22.0f);
+	name->setMaxWidth(maxTextWidth);
+	desc->setMaxWidth(maxTextWidth);
+	name->setText(LocalisedString::fromUserString(task->getName()));
+	desc->setText(LocalisedString::fromUserString(task->getProgressLabel()));
+
+	const float progress = clamp(task->getProgress(), 0.0f, 1.0f);
+	
+	const auto& cs = factory.getColourScheme();
+	const Colour col = task->hasError() ? cs->getColour("taskError") : (progress > 0.9999f ? cs->getColour("taskComplete") : cs->getColour("taskRunning"));
+	
+	bg->getSprite().setColour(col.multiplyAlpha(0.8f));
+	bgFill->getSprite().setColour(col.multiplyAlpha(0.5f));
+	bgFill->setMinSize(Vector2f((getSize().x - 2) * progress, 38.0f));
+}
+
+bool TaskDisplay::updateTask(Time time, float targetDisplaySlot)
+{
+	constexpr float displayTime = 1.5f;
+	
 	if (displaySlot < 0) {
 		displaySlot = targetDisplaySlot;
 	} else {
@@ -144,7 +142,7 @@ bool TaskBar::TaskDisplay::update(Time time, float targetDisplaySlot)
 	if (task->getStatus() == EditorTaskStatus::Done) {
 		progressDisplay = 1;
 		completeTime += static_cast<float>(time);
-		if (completeTime >= 1.5f && !task->hasError()) {
+		if (completeTime >= displayTime && !task->hasError()) {
 			return false;
 		}
 	} else {
@@ -152,4 +150,19 @@ bool TaskBar::TaskDisplay::update(Time time, float targetDisplaySlot)
 	}
 	
 	return true;
+}
+
+void TaskDisplay::setTask(std::shared_ptr<EditorTaskAnchor> task)
+{
+	progressDisplay = 0;
+	completeTime = 0;
+	this->task = std::move(task);
+}
+
+void TaskDisplay::onMakeUI()
+{
+	name = getWidgetAs<UILabel>("name");
+	desc = getWidgetAs<UILabel>("desc");
+	bg = getWidgetAs<UIImage>("bg");
+	bgFill = getWidgetAs<UIImage>("bgFill");
 }
