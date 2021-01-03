@@ -77,12 +77,13 @@ void UIDropdown::updateOptionLabels() {
 	label = style.getTextRenderer("label").clone().setText(options[curOption].label);
 
 	float maxExtents = 0;
+	auto tempLabel = label.clone();
 	for (auto& o: options) {
-		maxExtents = std::max(maxExtents, label.clone().setText(o.label).getExtents().x);
+		maxExtents = std::max(maxExtents, tempLabel.setText(o.label).getExtents().x);
 	}
 
-	auto minSizeMargins = style.getBorder("minSizeMargins");
-	auto minSize = Vector2f(maxExtents, 0) + minSizeMargins.xy();
+	const auto minSizeMargins = style.getBorder("minSizeMargins");
+	const auto minSize = Vector2f(maxExtents, 0) + minSizeMargins.xy();
 	setMinSize(Vector2f::max(getMinimumSize(), minSize));
 }
 
@@ -106,8 +107,9 @@ void UIDropdown::setOptions(std::vector<String> oIds, std::vector<LocalisedStrin
 	std::vector<Entry> entries;
 	entries.resize(std::max(os.size(), oIds.size()));
 	for (size_t i = 0; i < entries.size(); ++i) {
-		entries[i].id = oIds.size() > i ? std::move(oIds[i]) : toString(i);
+		// Be careful, do label first as id will get moved out
 		entries[i].label = os.size() > i ? std::move(os[i]) : LocalisedString::fromUserString(oIds[i]);
+		entries[i].id = oIds.size() > i ? std::move(oIds[i]) : toString(i);
 	}
 
 	setOptions(std::move(entries), defaultOption);
