@@ -24,3 +24,4 @@ children:
     children:
     - widget: { id: statusIcon, class: image, image: ui/task_anim_progress.png }
       border: [12, 12, -12, -12]
+      fill: centre
