@@ -259,6 +259,7 @@ void UIDropdown::open()
 
 		auto scrollBar = std::make_shared<UIScrollBar>(getId() + "_vbar", UIScrollDirection::Vertical, style.getSubStyle("scrollbarStyle"));
 		scrollBar->setScrollPane(*scrollPane);
+		scrollBar->setAlwaysShow(false);
 
 		dropdownWindow = std::make_shared<UIImage>(style.getSprite("background"), UISizer(UISizerType::Horizontal), style.getBorder("innerBorder"));
 		dropdownWindow->add(scrollPane, 1);

@@ -13,13 +13,16 @@ colours:
   ui_buttonHover: "#C080E3"
   ui_buttonDisabled: "#927B95"
 
+  ui_inputNormal: "#9C5BB5"
+  ui_inputDown: "#913DA3"
+  ui_inputHover: "#C080E3"
+  ui_inputDisabled: "#927B95"
+
   ui_listBackground: "#201427"
   ui_listSelected: "#9C5BB5"
   ui_listHover: "#5E3962"
   ui_listDrag: "#9C5BB580"
 
-  ui_inputBox: "#9861B6"
-  
   ui_scrollBackground: "#442947"
   ui_backgroundBox: "#201427"
   ui_popupWindow: "#9C5BB5"

@@ -15,12 +15,15 @@ colours:
   ui_buttonHover: "#BBBBC1"
   ui_buttonDisabled: "#CFCFCF"
 
+  ui_inputNormal: "#A2A0A9"
+  ui_inputDown: "#7A7984"
+  ui_inputHover: "#BBBBC1"
+  ui_inputDisabled: "#CFCFCF"
+
   ui_listBackground: "#CFCFD3"
   ui_listSelected: "#FFFFFF"
-  ui_listHover: "#E0E0E4"
+  ui_listHover: "#F0F0F4"
   ui_listDrag: "#A2A0A980"
-
-  ui_inputBox: "#A2A0A9"
 
   ui_scrollBackground: "#EBEBED"
   ui_backgroundBox: "#EBEBED"

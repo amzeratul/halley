@@ -29,15 +29,15 @@ uiStyle:
     labelBorder: [0, 0, 0, 0]
 
   checkbox:
-    normal: { img: $ui_checkbox, colour: $ui_controlNormal }
-    checked: { img: $ui_checkbox_checked, colour: $ui_controlNormal }
-    hover: { img: $ui_checkbox, colour: $ui_controlHover }
-    checkedHover: { img: $ui_checkbox_checked, colour: $ui_controlHover }
-    disabled: { img: $ui_checkbox, colour: $ui_controlDisabled }
-    checkedDisabled: { img: $ui_checkbox_checked, colour: $ui_controlDisabled }
+    normal: { img: $ui_checkbox, colour: $ui_inputNormal }
+    checked: { img: $ui_checkbox_checked, colour: $ui_inputNormal }
+    hover: { img: $ui_checkbox, colour: $ui_inputHover }
+    checkedHover: { img: $ui_checkbox_checked, colour: $ui_inputHover }
+    disabled: { img: $ui_checkbox, colour: $ui_inputDisabled }
+    checkedDisabled: { img: $ui_checkbox_checked, colour: $ui_inputDisabled }
 
   input:
-    box: { img: $ui_input_thin, colour: $ui_inputBox }
+    box: { img: $ui_input_thin, colour: $ui_inputNormal }
     caret: { img: halley_ui/ui_caret.png, colour: $ui_inputCaret }
     innerBorder: [ 6, 2, 6, 1 ]
     label: { font: Ubuntu Regular, size: 15, colour: $ui_text }
@@ -45,7 +45,7 @@ uiStyle:
     minSize: 22
 
   inputThin:
-    box: { img: $ui_input_thin, colour: $ui_inputBox }
+    box: { img: $ui_input_thin, colour: $ui_inputNormal }
     caret: { img: halley_ui/ui_caret.png, colour: $ui_inputCaret }
     innerBorder: [ 6, 2, 6, 3 ]
     label: { font: Ubuntu Light, size: 14, colour: $ui_text }
@@ -53,11 +53,11 @@ uiStyle:
     minSize: 22
 
   dropdown:
-    normal: { img: $ui_dropdown_closed, colour: $ui_controlNormal }
-    hover: { img: $ui_dropdown_closed, colour: $ui_controlHover }
-    open: { img: $ui_dropdown_open, colour: $ui_controlHover }
-    disabled: { img: $ui_dropdown_closed, colour: $ui_controlDisabled }
-    background: { img: $ui_dropdown_window, colour: $ui_controlHover }
+    normal: { img: $ui_dropdown_closed, colour: $ui_inputNormal }
+    hover: { img: $ui_dropdown_closed, colour: $ui_inputHover }
+    open: { img: $ui_dropdown_open, colour: $ui_inputHover }
+    disabled: { img: $ui_dropdown_closed, colour: $ui_inputDisabled }
+    background: { img: $ui_dropdown_window, colour: $ui_inputHover }
     innerBorder: [ 2, 2, 2, 2 ]
     labelBorder: [ 6, 2, 0, -4 ]
     label: { font: Ubuntu Regular, size: 15, colour: $ui_text }
@@ -72,11 +72,11 @@ uiStyle:
     scrollbarStyle: scrollbar
 
   dropdownLight:
-    normal: { img: $ui_dropdown_closed, colour: $ui_controlNormal }
-    hover: { img: $ui_dropdown_closed, colour: $ui_controlHover }
-    open: { img: $ui_dropdown_open, colour: $ui_controlHover }
-    disabled: { img: $ui_dropdown_closed, colour: $ui_controlDisabled }
-    background: { img: $ui_dropdown_window, colour: $ui_controlHover }
+    normal: { img: $ui_dropdown_closed, colour: $ui_inputNormal }
+    hover: { img: $ui_dropdown_closed, colour: $ui_inputHover }
+    open: { img: $ui_dropdown_open, colour: $ui_inputHover }
+    disabled: { img: $ui_dropdown_closed, colour: $ui_inputDisabled }
+    background: { img: $ui_dropdown_window, colour: $ui_inputHover }
     innerBorder: [ 2, 2, 2, 2 ]
     labelBorder: [ 6, 2, 0, -4 ]
     label: { font: Ubuntu Light, size: 14, colour: $ui_text }
@@ -124,8 +124,8 @@ uiStyle:
     background: { img: "halley_ui/ui_list_item.png", colour: $ui_listBackground }
     item:
       normal: ""
-      hover: { img: halley_ui/ui_list_item.png, colour: $ui_listHover }
-      selected: { img: halley_ui/ui_list_item.png, colour: $ui_listSelected }
+      hover: { img: halley_ui/ui_list_item_selection.png, colour: $ui_listHover }
+      selected: { img: halley_ui/ui_list_item_selection.png, colour: $ui_listSelected }
       drag: { img: halley_ui/ui_list_item.png, colour: $ui_listDrag }
       innerBorder: [ 0, 0, 0, 0 ]
     innerBorder: [ 0, 0, 0, 0 ]
@@ -153,10 +153,10 @@ uiStyle:
       leaf: { img: "halley_ui/ui_treeview_leaf.png", colour: $ui_controlNormal }
       element: { img: "halley_ui/ui_treeview_element.png", colour: "#FFFFFF" }
       collapseButton:
-        normal: { img: halley_ui/ui_treeview_expanded.png, colour: $ui_controlNormal }
-        down: { img: halley_ui/ui_treeview_expanded.png, colour: $ui_controlDown }
-        hover: { img: halley_ui/ui_treeview_expanded.png, colour: $ui_controlHover }
-        disabled: { img: halley_ui/ui_treeview_expanded.png, colour: $ui_controlDisabled }
+        normal: { img: halley_ui/ui_treeview_expanded.png, colour: $ui_buttonNormal }
+        down: { img: halley_ui/ui_treeview_expanded.png, colour: $ui_buttonDown }
+        hover: { img: halley_ui/ui_treeview_expanded.png, colour: $ui_buttonHover }
+        disabled: { img: halley_ui/ui_treeview_expanded.png, colour: $ui_buttonDisabled }
         innerBorder: [ 0, 0, 0, 0 ]
         upSound: ""
         downSound: ""
@@ -164,10 +164,10 @@ uiStyle:
         label: { font: Ubuntu Regular, size: 13, colour: $ui_text }
         labelBorder: [0, 0, 0, 0]
       expandButton:
-        normal: { img: halley_ui/ui_treeview_collapsed.png, colour: $ui_controlNormal }
-        down: { img: halley_ui/ui_treeview_collapsed.png, colour: $ui_controlDown }
-        hover: { img: halley_ui/ui_treeview_collapsed.png, colour: $ui_controlHover }
-        disabled: { img: halley_ui/ui_treeview_collapsed.png, colour: $ui_controlDisabled }
+        normal: { img: halley_ui/ui_treeview_collapsed.png, colour: $ui_buttonNormal }
+        down: { img: halley_ui/ui_treeview_collapsed.png, colour: $ui_buttonDown }
+        hover: { img: halley_ui/ui_treeview_collapsed.png, colour: $ui_buttonHover }
+        disabled: { img: halley_ui/ui_treeview_collapsed.png, colour: $ui_buttonDisabled }
         innerBorder: [ 0, 0, 0, 0 ]
         upSound: ""
         downSound: ""
