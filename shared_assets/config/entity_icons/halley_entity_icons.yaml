@@ -75,6 +75,10 @@ entityIcons:
     image: entity_icons/food.png
     name: Food
     colour: "#FFFFFF"
+  - id: grass
+    image: entity_icons/grass.png
+    name: Grass
+    colour: "#FFFFFF"
   - id: health
     image: entity_icons/health.png
     name: Health
