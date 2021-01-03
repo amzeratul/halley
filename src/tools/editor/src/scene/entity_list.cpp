@@ -96,6 +96,11 @@ void EntityList::refreshList()
 	list->setSelectedOptionId(prevId);
 }
 
+void EntityList::refreshNames()
+{
+	refreshList();
+}
+
 void EntityList::onEntityModified(const String& id, const EntityData& node)
 {
 	const auto [name, icon] = getEntityNameAndIcon(node);

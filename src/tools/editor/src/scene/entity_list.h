@@ -15,7 +15,9 @@ namespace Halley {
 
 		void setSceneEditorWindow(SceneEditorWindow& sceneEditor);
 		void setSceneData(std::shared_ptr<ISceneData> sceneData);
+
 		void refreshList();
+		void refreshNames();
 
 		void onEntityModified(const String& id, const EntityData& node);
 		void onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId, const EntityData& data);

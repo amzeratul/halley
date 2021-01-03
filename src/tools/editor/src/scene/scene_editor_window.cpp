@@ -198,7 +198,7 @@ void SceneEditorWindow::update(Time t, bool moved)
 	if (currentEntityScene && entityFactory) {
 		if (currentEntityScene->needsUpdate()) {
 			currentEntityScene->updateOnEditor(*entityFactory);
-			entityList->refreshList();
+			entityList->refreshNames();
 		}
 	}
 }
