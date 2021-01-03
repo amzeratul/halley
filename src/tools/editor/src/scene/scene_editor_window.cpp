@@ -360,7 +360,6 @@ void SceneEditorWindow::onComponentRemoved(const String& name)
 void SceneEditorWindow::onFieldChangedByGizmo(const String& componentName, const String& fieldName)
 {
 	entityEditor->onFieldChangedByGizmo(componentName, fieldName);
-	onEntityModified(currentEntityId);
 }
 
 void SceneEditorWindow::setTool(SceneEditorTool tool)

@@ -111,12 +111,17 @@ bool EntityEditor::loadEntity(const String& id, EntityData& data, const Prefab* 
 	isPrefab = !!prefabData;
 
 	reloadEntity();
+
+	// Only do this after reloadEntity, since factories will (annoyingly) modify entityData
+	prevEntityData = EntityData(*currentEntityData);
+
 	return true;
 }
 
 void EntityEditor::unloadEntity()
 {
 	currentEntityData = nullptr;
+	prevEntityData = EntityData();
 	prefabData = nullptr;
 	currentId = "";
 	isPrefab = false;
@@ -156,6 +161,7 @@ void EntityEditor::reloadEntity()
 void EntityEditor::onFieldChangedByGizmo(const String& componentName, const String& fieldName)
 {
 	sendEventDown(UIEvent(UIEventType::ReloadData, componentName + ":" + fieldName));
+	onEntityUpdated();
 }
 
 std::shared_ptr<IUIElement> EntityEditor::makeLabel(const String& text)
@@ -407,9 +413,9 @@ void EntityEditor::editPrefab()
 	}
 }
 
-
 void EntityEditor::onEntityUpdated()
 {
+	generateDelta();
 	sceneEditor->onEntityModified(currentId);
 }
 
@@ -439,4 +445,15 @@ void EntityEditor::resetFieldFactories()
 {
 	fieldFactories.clear();
 	addFieldFactories(EntityEditorFactories::getDefaultFactories());
+}
+
+void EntityEditor::generateDelta()
+{
+	return;
+	
+	const auto fwdDelta = EntityDataDelta(prevEntityData, *currentEntityData);
+	const auto backDelta = EntityDataDelta(*currentEntityData, prevEntityData);
+	Logger::logDev("Forward:\n" + EntityData(fwdDelta).toYAML() + "\n");
+	Logger::logDev("Back:\n" + EntityData(backDelta).toYAML() + "\n");
+	prevEntityData = EntityData(*currentEntityData);	
 }

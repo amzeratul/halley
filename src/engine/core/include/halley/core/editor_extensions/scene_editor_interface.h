@@ -151,18 +151,26 @@ namespace Halley {
 
 	class ISceneData {
 	public:
+		class ConstEntityNodeData;
+		
         class EntityNodeData {
+        	friend class ConstEntityNodeData;
         public:
-            EntityNodeData(EntityData& data, String parentId)
-                : data(data)
-        		, parentId(std::move(parentId))
-            {}
+            EntityNodeData(EntityData& data, String parentId) : data(data), parentId(std::move(parentId)) {}
 
-        	EntityNodeData(const EntityNodeData& other) = delete;
-        	EntityNodeData& operator=(const EntityNodeData& other) = delete;
+        	EntityData& getData() const { return data; }
+        	const String& getParentId() const { return parentId; }
 
+        private:
+	        EntityData& data;
+        	String parentId;
+        };
+
+		class ConstEntityNodeData {
+        public:
+            ConstEntityNodeData(EntityData& data, String parentId) : data(data), parentId(std::move(parentId)) {}
+			ConstEntityNodeData(EntityNodeData&& other) noexcept : data(other.data), parentId(std::move(other.parentId)) {}
         	const EntityData& getData() const { return data; }
-        	EntityData& getData() { return data; }
         	const String& getParentId() const { return parentId; }
 
         private:
@@ -173,7 +181,7 @@ namespace Halley {
 		virtual ~ISceneData() = default;
 
 		virtual EntityNodeData getWriteableEntityNodeData(const String& id) = 0;
-		virtual const EntityNodeData getEntityNodeData(const String& id) = 0;
+		virtual ConstEntityNodeData getEntityNodeData(const String& id) = 0;
 		virtual void reloadEntity(const String& id) = 0;
 		virtual EntityTree getEntityTree() const = 0;
 		virtual void reparentEntity(const String& entityId, const String& newParentId, int childIndex) = 0;

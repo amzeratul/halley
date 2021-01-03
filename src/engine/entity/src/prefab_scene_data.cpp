@@ -33,9 +33,9 @@ ISceneData::EntityNodeData PrefabSceneData::getWriteableEntityNodeData(const Str
 	return EntityNodeData(*data, parentId);
 }
 
-const ISceneData::EntityNodeData PrefabSceneData::getEntityNodeData(const String& id)
+ISceneData::ConstEntityNodeData PrefabSceneData::getEntityNodeData(const String& id)
 {
-	return getWriteableEntityNodeData(id);
+	return ConstEntityNodeData(getWriteableEntityNodeData(id));
 }
 
 void PrefabSceneData::reloadEntity(const String& id)

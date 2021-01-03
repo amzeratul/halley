@@ -29,6 +29,7 @@ namespace Halley {
     	EntityData(EntityData&& other) = default;
     	EntityData& operator=(const EntityData& other) = delete;
     	EntityData& operator=(EntityData&& other) = default;
+        explicit EntityData(const EntityDataDelta& delta);
 
     	ConfigNode toConfigNode(bool allowPrefabUUID) const;
         String toYAML() const;

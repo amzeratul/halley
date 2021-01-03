@@ -590,9 +590,11 @@ public:
 			auto& seq = data.getFieldData().asSequence();
 			if (event.getSourceId() == "add") {
 				seq.emplace_back(ConfigNode());
+				context.onEntityUpdated();
 			} else if (event.getSourceId().startsWith("delete")) {
 				const size_t index = event.getSourceId().mid(6).toInteger();
 				seq.erase(seq.begin() + index);
+				context.onEntityUpdated();
 			}
 			buildList();
 		});

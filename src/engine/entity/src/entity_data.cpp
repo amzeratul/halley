@@ -51,6 +51,11 @@ EntityData::EntityData(const ConfigNode& data, bool isPrefab)
 	}
 }
 
+EntityData::EntityData(const EntityDataDelta& delta)
+{
+	applyDelta(delta);
+}
+
 ConfigNode EntityData::toConfigNode(bool allowPrefabUUID) const
 {
 	ConfigNode::MapType result;

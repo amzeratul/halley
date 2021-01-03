@@ -59,30 +59,32 @@ void Sprite::drawSliced(Painter& painter, const std::optional<Rect4f>& extClip) 
 
 void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) const
 {
-	Expects(material != nullptr);
-	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+	if (material) {
+		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 
-	paintWithClip(painter, extClip, [&] ()
-	{
-		painter.drawSprites(material, 1, &vertexAttrib);
-	});
+		paintWithClip(painter, extClip, [&] ()
+		{
+			painter.drawSprites(material, 1, &vertexAttrib);
+		});
+	}
 }
 
 void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel, const std::optional<Rect4f>& extClip) const
 {
-	Expects(material != nullptr);
-	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
-	
-	paintWithClip(painter, extClip, [&] ()
-	{
-		Vector4f slices(slicesPixel);
-		slices.x /= size.x;
-		slices.y /= size.y;
-		slices.z /= size.x;
-		slices.w /= size.y;
+	if (material) {
+		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+		
+		paintWithClip(painter, extClip, [&] ()
+		{
+			Vector4f slices(slicesPixel);
+			slices.x /= size.x;
+			slices.y /= size.y;
+			slices.z /= size.x;
+			slices.w /= size.y;
 
-		painter.drawSlicedSprite(material, vertexAttrib.scale, slices, &vertexAttrib);
-	});
+			painter.drawSlicedSprite(material, vertexAttrib.scale, slices, &vertexAttrib);
+		});
+	}
 }
 
 void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter) // static
@@ -600,6 +602,9 @@ ConfigNode ConfigNodeSerializer<Sprite>::serialize(const Sprite& sprite, const C
 Sprite ConfigNodeSerializer<Sprite>::deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
 {
 	Sprite sprite;
+	if (node.getType() == ConfigNodeType::Undefined) {
+		return sprite;
+	}
 
 	if (node.hasKey("image")) {
 		sprite.setImage(*context.resources, node["image"].asString(), node["material"].asString(""));

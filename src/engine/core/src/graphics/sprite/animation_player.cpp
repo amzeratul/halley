@@ -439,6 +439,10 @@ ConfigNode ConfigNodeSerializer<AnimationPlayer>::serialize(const AnimationPlaye
 
 AnimationPlayer ConfigNodeSerializer<AnimationPlayer>::deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
 {
+	if (node.getType() == ConfigNodeType::Undefined) {
+		return AnimationPlayer();
+	}
+	
 	auto animName = node["animation"].asString("");
 	auto anim = animName.isEmpty() ? std::shared_ptr<Animation>() : context.resources->get<Animation>(animName);
 

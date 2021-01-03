@@ -52,8 +52,10 @@ namespace Halley {
 		std::shared_ptr<SelectAssetWidget> prefabName;
 		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
 
-		String currentId;
 		EntityData* currentEntityData = nullptr;
+		EntityData prevEntityData;
+
+		String currentId;
 		const Prefab* prefabData = nullptr;
 		bool needToReloadUI = false;
 		bool isPrefab = false;
@@ -82,5 +84,7 @@ namespace Halley {
 
 		std::set<String> getComponentsOnEntity() const;
 		std::set<String> getComponentsOnPrefab() const;
+
+		void generateDelta();
 	};
 }
