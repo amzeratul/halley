@@ -46,6 +46,7 @@ colours:
   taskRunning: "#2E87DE"
   taskComplete: "#29B057"
   taskError: "#ED3333"
+  taskStatusBackground: "#00000080"
 
   toolbarNormal: "#FC2847"
   toolbarHover: "#F98A9A"

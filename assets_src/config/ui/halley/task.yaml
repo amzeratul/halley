@@ -5,14 +5,22 @@ children:
   proportion: 0
   fill: left
   border: [0, 0, 0, -38]
-- widget: { class: widget, innerBorder: [9, 0, 9, 0] }
+- sizer: { type: horizontal }
   proportion: 1
-  sizer: { type: vertical }
   children:
-  - widget: { id: name, class: label, text: taskName }
-    fill: left
+  - widget: { class: widget, innerBorder: [9, 0, 9, 0] }
     proportion: 1
-  - widget: { id: desc, class: label, text: desc, style: labelLight }
-    fill: left
-    proportion: 1
-
+    sizer: { type: vertical }
+    children:
+    - widget: { id: name, class: label, text: taskName }
+      fill: left
+      proportion: 1
+    - widget: { id: desc, class: label, text: desc, style: labelLight }
+      fill: left
+      proportion: 1
+  - widget: { id: statusIconBackground, class: image, image: ui/task_anim_bg.png, colour: $taskStatusBackground }
+    fill: centre
+    border: [0, 0, 8, 0]
+    children:
+    - widget: { id: statusIcon, class: image, image: ui/task_anim_progress.png }
+      border: [12, 12, -12, -12]

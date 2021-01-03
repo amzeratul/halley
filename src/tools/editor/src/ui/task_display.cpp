@@ -15,7 +15,9 @@ TaskDisplay::TaskDisplay(UIFactory& factory, std::shared_ptr<EditorTaskAnchor> t
 
 void TaskDisplay::update(Time t, bool moved)
 {
-	const float maxTextWidth = std::max(100.0f, getSize().x - 22.0f);
+	elapsedTime += t;
+	
+	const float maxTextWidth = std::max(100.0f, getSize().x - 22.0f - 32.0f);
 	name->getTextRenderer().setColour(nameCol.multiplyAlpha(opacity));
 	desc->getTextRenderer().setColour(descCol.multiplyAlpha(opacity));
 	name->setText(LocalisedString::fromUserString(task->getName()));
@@ -30,7 +32,21 @@ void TaskDisplay::update(Time t, bool moved)
 	
 	bg->getSprite().setColour(col.multiplyAlpha(0.8f * opacity));
 	bgFill->getSprite().setColour(col.multiplyAlpha(0.5f * opacity));
+	iconBg->getSprite().setColour(cs->getColour("taskStatusBackground").multiplyAlpha(opacity));
 	bgFill->setMinSize(Vector2f((getSize().x - 12) * progress + 10.0f, 38.0f));
+
+	if (lastStatus != task->getStatus()) {
+		lastStatus = task->getStatus();
+
+		const String imageName = lastStatus == EditorTaskStatus::Done ? (task->hasError() ? "ui/task_anim_error.png" : "ui/task_anim_done.png") : "ui/task_anim_progress.png";
+		icon->getSprite()
+			.setImage(factory.getResources(), imageName);
+	}
+	
+	icon->getSprite()
+		.setColour(col.multiplyAlpha(opacity))
+		.setPivot(Vector2f(0.5f, 0.5f))
+		.setRotation(Angle1f::fromRadians(task->getStatus() == EditorTaskStatus::Started ? static_cast<float>(elapsedTime * 10.0) : 0.0f));
 }
 
 bool TaskDisplay::updateTask(Time time, float targetDisplaySlot)
@@ -77,6 +93,8 @@ void TaskDisplay::onMakeUI()
 	descCol = desc->getTextRenderer().getColour();
 	bg = getWidgetAs<UIImage>("bg");
 	bgFill = getWidgetAs<UIImage>("bgFill");
+	icon = getWidgetAs<UIImage>("statusIcon");
+	iconBg = getWidgetAs<UIImage>("statusIconBackground");
 }
 
 void TaskDisplay::onMouseOver(Vector2f mousePos)
