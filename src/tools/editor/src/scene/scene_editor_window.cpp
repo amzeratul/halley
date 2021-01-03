@@ -313,7 +313,7 @@ void SceneEditorWindow::panCameraToEntity(const String& id)
 
 void SceneEditorWindow::saveScene()
 {
-	setModified(false);
+	clearModifiedFlag();
 
 	const auto strData = prefab->toYAML();
 	auto data = gsl::as_bytes(gsl::span<const char>(strData.c_str(), strData.length()));
@@ -326,6 +326,11 @@ void SceneEditorWindow::markModified()
 	setModified(true);
 }
 
+void SceneEditorWindow::clearModifiedFlag()
+{
+	setModified(false);
+}
+
 void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId, int childIndex)
 {
 	const auto& data = sceneData->getEntityNodeData(id).getData();
@@ -335,14 +340,14 @@ void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId, 
 
 	gameBridge->onEntityAdded(UUID(id), data);
 
-	undoStack.pushAdded(id, parentId, childIndex, data);
+	undoStack.pushAdded(modified, id, parentId, childIndex, data);
 	
 	markModified();
 }
 
 void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId, int childIndex, const EntityData& prevData)
 {
-	undoStack.pushRemoved(id, parentId, childIndex, prevData);
+	undoStack.pushRemoved(modified, id, parentId, childIndex, prevData);
 	
 	gameBridge->onEntityRemoved(UUID(id));
 
@@ -358,14 +363,15 @@ void SceneEditorWindow::onEntityModified(const String& id, const EntityData& pre
 	if (!id.isEmpty()) {
 		const auto& data = sceneData->getEntityNodeData(id).getData();
 
-		entityList->onEntityModified(id, data);
-		sceneData->reloadEntity(id);
-		gameBridge->onEntityModified(UUID(id), data);
+		const bool hadChange = undoStack.pushModified(modified, id, prevData, newData);
 
-		undoStack.pushModified(id, prevData, newData);
+		if (hadChange) {
+			entityList->onEntityModified(id, data);
+			sceneData->reloadEntity(id);
+			gameBridge->onEntityModified(UUID(id), data);
+			markModified();
+		}
 	}
-
-	markModified();
 }
 
 void SceneEditorWindow::onEntityMoved(const String& id, const String& prevParentId, int prevChildIndex, const String& newParentId, int newChildIndex)
@@ -376,7 +382,7 @@ void SceneEditorWindow::onEntityMoved(const String& id, const String& prevParent
 
 	gameBridge->onEntityMoved(UUID(id), sceneData->getEntityNodeData(id).getData());
 
-	undoStack.pushMoved(id, prevParentId, prevChildIndex, newParentId, newChildIndex);
+	undoStack.pushMoved(modified, id, prevParentId, prevChildIndex, newParentId, newChildIndex);
 	
 	markModified();
 }

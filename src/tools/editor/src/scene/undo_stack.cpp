@@ -5,42 +5,46 @@ using namespace Halley;
 
 UndoStack::UndoStack()
 	: maxSize(50)
-	, accepting(false)
+	, accepting(true)
 {
 }
 
-void UndoStack::pushAdded(const String& entityId, const String& parent, int childIndex, const EntityData& data)
+void UndoStack::pushAdded(bool wasModified, const String& entityId, const String& parent, int childIndex, const EntityData& data)
 {
 	if (accepting) {
-		addToStack(Action(Type::EntityAdded, EntityDataDelta(data), entityId, parent, childIndex), Action(Type::EntityRemoved, EntityDataDelta(), entityId));
+		addToStack(Action(Type::EntityAdded, EntityDataDelta(data), entityId, parent, childIndex), Action(Type::EntityRemoved, EntityDataDelta(), entityId), wasModified);
 	}
 }
 
-void UndoStack::pushRemoved(const String& entityId, const String& parent, int childIndex, const EntityData& data)
+void UndoStack::pushRemoved(bool wasModified, const String& entityId, const String& parent, int childIndex, const EntityData& data)
 {
 	if (accepting) {
-		addToStack(Action(Type::EntityRemoved, EntityDataDelta(), entityId), Action(Type::EntityAdded, EntityDataDelta(data), entityId, parent, childIndex));
+		addToStack(Action(Type::EntityRemoved, EntityDataDelta(), entityId), Action(Type::EntityAdded, EntityDataDelta(data), entityId, parent, childIndex), wasModified);
 	}
 }
 
-void UndoStack::pushMoved(const String& entityId, const String& prevParent, int prevIndex, const String& newParent, int newIndex)
+void UndoStack::pushMoved(bool wasModified, const String& entityId, const String& prevParent, int prevIndex, const String& newParent, int newIndex)
 {
 	if (accepting) {
 		if (prevParent != newParent || prevIndex != newIndex) {
-			addToStack(Action(Type::EntityMoved, EntityDataDelta(), entityId, newParent, newIndex), Action(Type::EntityMoved, EntityDataDelta(), entityId, prevParent, prevIndex));
+			addToStack(Action(Type::EntityMoved, EntityDataDelta(), entityId, newParent, newIndex), Action(Type::EntityMoved, EntityDataDelta(), entityId, prevParent, prevIndex), wasModified);
 		}
 	}
 }
 
-void UndoStack::pushModified(const String& entityId, const EntityData& before, const EntityData& after)
+bool UndoStack::pushModified(bool wasModified, const String& entityId, const EntityData& before, const EntityData& after)
 {
 	if (accepting) {
 		auto forward = EntityDataDelta(before, after);
 		if (forward.hasChange()) {
 			auto back = EntityDataDelta(after, before);
-			addToStack(Action(Type::EntityModified, std::move(forward), entityId), Action(Type::EntityModified, std::move(back), entityId));
+			addToStack(Action(Type::EntityModified, std::move(forward), entityId), Action(Type::EntityModified, std::move(back), entityId), wasModified);
+			return true;
+		} else {
+			return false;
 		}
 	}
+	return true;
 }
 
 void UndoStack::undo(SceneEditorWindow& sceneEditorWindow)
@@ -70,7 +74,7 @@ bool UndoStack::ActionPair::isCompatibleWith(const Action& newForward) const
 	return false;
 }
 
-void UndoStack::addToStack(Action forward, Action back)
+void UndoStack::addToStack(Action forward, Action back, bool wasModified)
 {
 	// Discard redo timeline that is no longer valid
 	const bool hadRedo = stack.size() > stackPos;
@@ -84,6 +88,7 @@ void UndoStack::addToStack(Action forward, Action back)
 	} else {
 		// Insert new action into stack
 		stack.emplace_back(std::make_unique<ActionPair>(std::move(forward), std::move(back)));
+		stack.back()->back.clearModified = !wasModified;
 		if (stack.size() > maxSize) {
 			stack.erase(stack.begin());
 		}
@@ -111,6 +116,10 @@ void UndoStack::runAction(const Action& action, SceneEditorWindow& sceneEditorWi
 	case Type::EntityModified:
 		sceneEditorWindow.modifyEntity(action.entityId, action.delta);
 		break;
+	}
+
+	if (action.clearModified) {
+		sceneEditorWindow.clearModifiedFlag();
 	}
 	
 	accepting = true;

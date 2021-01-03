@@ -25,7 +25,6 @@ namespace Halley {
 		void loadPrefab(const String& name);
 		void loadScene(AssetType type, const Prefab& prefab);
 		void unloadScene();
-		void markModified() override;
 
 		void onEntityAdded(const String& id, const String& parentId, int childIndex) override;
 		void onEntityRemoved(const String& id, const String& parentId, int childIndex, const EntityData& prevData) override;
@@ -61,6 +60,8 @@ namespace Halley {
 
 		const std::shared_ptr<ISceneData>& getSceneData() const override;
 
+		void markModified() override;
+		void clearModifiedFlag();
 		bool isModified() const;
 		const EntityIcons& getEntityIcons() const;
 

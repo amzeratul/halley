@@ -150,12 +150,14 @@ void EntityEditor::reloadEntity()
 		}
 		prevEntityData = EntityData(*currentEntityData);
 
+		setCanSendEvents(false);
 		if (isPrefab) {
 			prefabName->setValue(getEntityData().getPrefab());
 		} else {
 			entityName->setText(getEntityData().getName());
 			entityIcon->setSelectedOption(getEntityData().getIcon());
 		}
+		setCanSendEvents(true);
 	}
 }
 

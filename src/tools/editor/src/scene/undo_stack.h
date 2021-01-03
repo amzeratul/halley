@@ -7,10 +7,10 @@ namespace Halley {
 	public:
 		UndoStack();
 		
-		void pushAdded(const String& entityId, const String& parent, int childIndex, const EntityData& data);
-		void pushRemoved(const String& entityId, const String& parent, int childIndex, const EntityData& data);
-		void pushMoved(const String& entityId, const String& prevParent, int prevIndex, const String& newParent, int newIndex);
-		void pushModified(const String& entityId, const EntityData& before, const EntityData& after);
+		void pushAdded(bool wasModified, const String& entityId, const String& parent, int childIndex, const EntityData& data);
+		void pushRemoved(bool wasModified, const String& entityId, const String& parent, int childIndex, const EntityData& data);
+		void pushMoved(bool wasModified, const String& entityId, const String& prevParent, int prevIndex, const String& newParent, int newIndex);
+		bool pushModified(bool wasModified, const String& entityId, const EntityData& before, const EntityData& after);
 
 		void undo(SceneEditorWindow& sceneEditorWindow);
 		void redo(SceneEditorWindow& sceneEditorWindow);
@@ -30,6 +30,7 @@ namespace Halley {
 			String entityId;
 			String parent;
 			int childIndex;
+			bool clearModified = false;
 
 			Action() = default;
 			Action(Type type, EntityDataDelta delta, String entityId, String parent = "", int childIndex = -1)
@@ -57,7 +58,7 @@ namespace Halley {
 		const size_t maxSize;
 		bool accepting;
 
-		void addToStack(Action forward, Action back);
+		void addToStack(Action forward, Action back, bool wasModified);
 		void runAction(const Action& action, SceneEditorWindow& sceneEditorWindow);
 	};
 }
