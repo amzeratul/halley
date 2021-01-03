@@ -206,7 +206,7 @@ namespace Halley {
 		virtual void markModified() = 0;
 		
 		virtual void onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId) = 0;
-		virtual void onEntityRemoved(const String& id, const String& parentId, const EntityData& prevData) = 0;
+		virtual void onEntityRemoved(const String& id, const String& parentId, int childIndex, const EntityData& prevData) = 0;
 		virtual void onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData) = 0;
 		virtual void onEntityMoved(const String& id) = 0;
 		virtual void onComponentRemoved(const String& name) = 0;

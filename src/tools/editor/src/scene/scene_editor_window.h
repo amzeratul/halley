@@ -28,7 +28,7 @@ namespace Halley {
 		void markModified() override;
 
 		void onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId) override;
-		void onEntityRemoved(const String& id, const String& parentId, const EntityData& prevData) override;
+		void onEntityRemoved(const String& id, const String& parentId, int childIndex, const EntityData& prevData) override;
 		void onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData) override;
 		void onEntityMoved(const String& id) override;
 		void onComponentRemoved(const String& name) override;
@@ -40,10 +40,13 @@ namespace Halley {
 		void addEntity(EntityData data);
 		void addEntity(const String& referenceEntityId, bool childOfReference, EntityData data);
 		void addEntity(const String& parentId, const String& afterSibling, EntityData data);
+		void addEntity(const String& parentId, int childIndex, EntityData data);
 		void removeEntity();
 		void removeEntity(const String& entityId) override;
 		void selectEntity(const String& id);
 		void selectEntity(const std::vector<UUID>& candidates);
+		void modifyEntity(const String& id, const EntityDataDelta& delta);
+		void moveEntity(const String& id, const String& newParent, int childIndex);
 
 		void setTool(SceneEditorTool tool);
 		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options);

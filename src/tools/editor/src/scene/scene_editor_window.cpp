@@ -210,6 +210,16 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 		return true;
 	}
 
+	if (key.is(KeyCode::Z, KeyMods::Ctrl)) {
+		undoStack.undo(*this);
+		return true;
+	}
+
+	if (key.is(KeyCode::Y, KeyMods::Ctrl)) {
+		undoStack.redo(*this);
+		return true;
+	}
+
 	if (key.is(KeyCode::F1)) {
 		toggleConsole();
 		return true;
@@ -246,6 +256,20 @@ void SceneEditorWindow::selectEntity(const std::vector<UUID>& candidates)
 		}
 	}
 	entityList->select("");
+}
+
+void SceneEditorWindow::modifyEntity(const String& id, const EntityDataDelta& delta)
+{
+	auto& data = sceneData->getWriteableEntityNodeData(id).getData();
+	data.applyDelta(delta);
+	onEntityModified(id, data, data);
+}
+
+void SceneEditorWindow::moveEntity(const String& id, const String& newParent, int childIndex)
+{
+	sceneData->reparentEntity(id, newParent, childIndex);
+	entityList->refreshList();
+	onEntityMoved(id);
 }
 
 void SceneEditorWindow::onEntitySelected(const String& id)
@@ -310,14 +334,14 @@ void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId, 
 
 	gameBridge->onEntityAdded(UUID(id), data);
 
-	undoStack.pushAdded(parentId, data);
+	undoStack.pushAdded(id, parentId, 0, data); // TODO: set child index
 	
 	markModified();
 }
 
-void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId, const EntityData& prevData)
+void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId, int childIndex, const EntityData& prevData)
 {
-	undoStack.pushRemoved(id, prevData);
+	undoStack.pushRemoved(id, parentId, childIndex, prevData);
 	
 	gameBridge->onEntityRemoved(UUID(id));
 
@@ -513,8 +537,9 @@ void SceneEditorWindow::addEntity(const String& parentId, const String& afterSib
 {
 	EntityData& parentData = sceneData->getWriteableEntityNodeData(parentId).getData();
 	if (parentData.getPrefab().isEmpty() && (parentId != "" || parentData.isSceneRoot())) {
-		auto& seq = parentData.getChildren();
 		const auto uuid = data.getInstanceUUID().toString();
+
+		auto& seq = parentData.getChildren();
 		auto insertPos = std::find_if(seq.begin(), seq.end(), [&] (const EntityData& node) -> bool
 		{
 			return node.getInstanceUUID().toString() == afterSibling;
@@ -523,8 +548,14 @@ void SceneEditorWindow::addEntity(const String& parentId, const String& afterSib
 			++insertPos;
 		}
 		seq.insert(insertPos, std::move(data));
+
 		onEntityAdded(uuid, parentId, afterSibling);
 	}
+}
+
+void SceneEditorWindow::addEntity(const String& parentId, int childIndex, EntityData data)
+{
+	// TODO
 }
 
 void SceneEditorWindow::removeEntity()
@@ -549,8 +580,9 @@ void SceneEditorWindow::removeEntity(const String& targetId)
 	for (auto iter = children.begin(); iter != children.end(); ++iter) {
 		if (iter->getInstanceUUID().toString() == targetId) {
 			const auto data = std::move(*iter);
+			const int idx = iter - children.begin();
 			children.erase(iter);
-			onEntityRemoved(targetId, parentId, data);
+			onEntityRemoved(targetId, parentId, idx, data);
 			break;
 		}
 	}
