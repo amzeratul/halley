@@ -14,6 +14,13 @@ namespace Halley {
 
 	class UIDropdown : public UIClickable {
 	public:
+		class Entry {
+		public:
+			LocalisedString label;
+			String id;
+			Sprite icon;
+		};
+		
 		explicit UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, std::vector<LocalisedString> options = {}, int defaultOption = 0);
 
 		virtual void setSelectedOption(int option);
@@ -27,6 +34,7 @@ namespace Halley {
 		void setOptions(std::vector<LocalisedString> options, int defaultOption = -1);
 		void setOptions(std::vector<String> optionsIds, int defaultOption = -1);
 		void setOptions(std::vector<String> optionIds, std::vector<LocalisedString> options, int defaultOption = -1);
+		void setOptions(std::vector<Entry> options, int defaultOption = -1);
 		void setOptions(const I18N& i18n, const String& i18nPrefix, std::vector<String> optionIds, int defaultOption = -1);
 
 		void onManualControlCycleValue(int delta) override;
@@ -35,10 +43,10 @@ namespace Halley {
 		bool canReceiveFocus() const override;
 
 	protected:
+		
 		UIStyle style;
 		
-		std::vector<LocalisedString> options;
-		std::vector<String> optionIds;
+		std::vector<Entry> options;
 		
 		TextRenderer label;
 		std::shared_ptr<UIList> dropdownList;
