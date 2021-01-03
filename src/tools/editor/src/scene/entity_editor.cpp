@@ -42,7 +42,13 @@ void EntityEditor::setSceneEditorWindow(SceneEditorWindow& editor)
 	sceneEditor = &editor;
 	entityIcons = &editor.getEntityIcons();
 
-	entityIcon->setOptions(entityIcons->getIconIds());
+	auto icons = entityIcons->getEntries();
+	std::vector<UIDropdown::Entry> entries;
+	entries.reserve(icons.size());
+	for (const auto& icon: icons) {
+		entries.emplace_back(icon.id, LocalisedString::fromUserString(icon.name), icon.icon);
+	}
+	entityIcon->setOptions(std::move(entries));
 }
 
 void EntityEditor::setECSData(ECSData& ecs)

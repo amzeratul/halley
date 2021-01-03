@@ -66,7 +66,29 @@ uiStyle:
     closeSound: ""
     height: 200
     minSize: 22
+    iconGap: 4
     minSizeMargins: [ 40, 20, 0, 0 ]
+    listStyle: list
+    scrollbarStyle: scrollbar
+
+  dropdownLight:
+    normal: { img: $ui_dropdown_closed, colour: $ui_controlNormal }
+    hover: { img: $ui_dropdown_closed, colour: $ui_controlHover }
+    open: { img: $ui_dropdown_open, colour: $ui_controlHover }
+    disabled: { img: $ui_dropdown_closed, colour: $ui_controlDisabled }
+    background: { img: $ui_dropdown_window, colour: $ui_controlHover }
+    innerBorder: [ 2, 2, 2, 2 ]
+    labelBorder: [ 6, 2, 0, -4 ]
+    label: { font: Ubuntu Light, size: 14, colour: $ui_text }
+    selectedLabel: { font: Ubuntu Light, size: 14, colour: $ui_text }
+    openSound: ""
+    closeSound: ""
+    height: 200
+    minSize: 22
+    iconGap: 4
+    minSizeMargins: [ 40, 20, 0, 0 ]
+    listStyle: listLight
+    scrollbarStyle: scrollbar
 
   list:
     background: { img: "halley_ui/ui_list_item.png", colour: $ui_listBackground }
@@ -81,6 +103,21 @@ uiStyle:
     selectionChangedSound: ""
     label: { font: Ubuntu Regular, size: 15, colour: $ui_unselectedText }
     selectedLabel: { font: Ubuntu Regular, size: 15, colour: $ui_selectedText }
+    gap: 1
+
+  listLight:
+    background: { img: "halley_ui/ui_list_item.png", colour: $ui_listBackground }
+    item:
+      normal: ""
+      hover: { img: halley_ui/ui_list_item_selection.png, colour: $ui_listHover }
+      selected: { img: halley_ui/ui_list_item_selection.png, colour: $ui_listSelected }
+      drag: { img: halley_ui/ui_list_item.png, colour: $ui_listDrag }
+      innerBorder: [ 6, 5, 6, 2 ]
+    innerBorder: [ 0, 0, 0, 0 ]
+    extraMouseBorder: [ 1, 1, 1, 1 ]
+    selectionChangedSound: ""
+    label: { font: Ubuntu Light, size: 14, colour: $ui_unselectedText }
+    selectedLabel: { font: Ubuntu Light, size: 14, colour: $ui_selectedText }
     gap: 1
 
   treeList:

@@ -43,8 +43,19 @@ UIColourScheme::UIColourScheme(const ConfigNode& node, Resources& resources)
 	enabled = node["enabled"].asBool(true);
 }
 
-Colour4f UIColourScheme::getColour(const String& key) const
+Colour4f UIColourScheme::getColour(const String& rawKey) const
 {
+	if (rawKey.isEmpty()) {
+		Logger::logWarning("Empty key requested from Colour scheme");
+		return Colour4f(1, 1, 1, 1);
+	}
+	
+	if (rawKey[0] == '#') {
+		return Colour4f::fromString(rawKey);
+	}
+
+	const String& key = rawKey[0] == '$' ? rawKey.mid(1) : rawKey;
+	
 	const auto iter = colours.find(key);
 	if (iter != colours.end()) {
 		return iter->second;

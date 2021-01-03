@@ -9,12 +9,10 @@
 
 using namespace Halley;
 
-UIDropdown::UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, std::vector<LocalisedString> os, int defaultOption)
+UIDropdown::UIDropdown(String id, UIStyle style, std::vector<LocalisedString> os, int defaultOption)
 	: UIClickable(std::move(id), Vector2f(style.getFloat("minSize"), style.getFloat("minSize")))
 	, style(style)
 	, curOption(defaultOption)
-	, scrollbarStyle(std::move(scrollbarStyle))
-	, listStyle(std::move(listStyle))
 {
 	sprite = style.getSprite("normal");
 
@@ -27,6 +25,7 @@ void UIDropdown::setSelectedOption(int option)
 	if (curOption != nextOption) {
 		curOption = nextOption;
 		label.setText(options.at(curOption).label);
+		icon = options.at(curOption).icon;
 		sendEvent(UIEvent(UIEventType::DropboxSelectionChanged, getId(), options[curOption].id, curOption));
 
 		if (getDataBindFormat() == UIDataBind::Format::String) {
@@ -74,12 +73,18 @@ void UIDropdown::setInputButtons(const UIInputButtons& buttons)
 }
 
 void UIDropdown::updateOptionLabels() {
-	label = style.getTextRenderer("label").clone().setText(options[curOption].label);
+	auto tempLabel = style.getTextRenderer("label");
 
+	label = tempLabel.clone().setText(options[curOption].label);
+	icon = options[curOption].icon;
+
+	const float iconGap = style.getFloat("iconGap");
+	
 	float maxExtents = 0;
-	auto tempLabel = label.clone();
 	for (auto& o: options) {
-		maxExtents = std::max(maxExtents, tempLabel.setText(o.label).getExtents().x);
+		const float iconSize = o.icon.hasMaterial() ? o.icon.getScaledSize().x + iconGap : 0;
+		const float strSize = tempLabel.setText(o.label).getExtents().x;
+		maxExtents = std::max(maxExtents, iconSize + strSize);
 	}
 
 	const auto minSizeMargins = style.getBorder("minSizeMargins");
@@ -149,6 +154,9 @@ bool UIDropdown::canReceiveFocus() const
 void UIDropdown::draw(UIPainter& painter) const
 {
 	painter.draw(sprite);
+	if (icon.hasMaterial()) {
+		painter.draw(icon);
+	}
 	painter.draw(label);
 }
 
@@ -176,7 +184,14 @@ void UIDropdown::update(Time t, bool moved)
 
 	if (needUpdate) {
 		sprite.setPos(getPosition()).scaleTo(getSize());
-		label.setAlignment(0.0f).setPosition(getPosition() + style.getBorder("labelBorder").xy());
+
+		const Vector2f basePos = getPosition() + style.getBorder("labelBorder").xy();
+		Vector2f iconOffset;
+		if (icon.hasMaterial()) {
+			icon.setPosition(basePos);
+			iconOffset = Vector2f(style.getFloat("iconGap") + icon.getScaledSize().x, 0.0f);
+		}
+		label.setAlignment(0.0f).setPosition(basePos + iconOffset);
 
 		if (dropdownWindow) {
 			dropdownWindow->setPosition(getPosition() + Vector2f(0.0f, getSize().y));
@@ -216,24 +231,33 @@ void UIDropdown::open()
 {
 	if (!isOpen) {
 		isOpen = true;
+
+		const float iconGap = style.getFloat("iconGap");
 	
-		dropdownList = std::make_shared<UIList>(getId() + "_list", listStyle);
+		dropdownList = std::make_shared<UIList>(getId() + "_list", style.getSubStyle("listStyle"));
 		int i = 0;
 		for (const auto& o: options) {
-			dropdownList->addTextItem(toString(i++), o.label);
+			if (o.icon.hasMaterial()) {
+				auto item = std::make_shared<UISizer>(UISizerType::Horizontal, iconGap);
+				item->add(std::make_shared<UIImage>(o.icon));
+				item->add(dropdownList->makeLabel(toString(i++) + "_label", o.label));
+				dropdownList->addItem(toString(i++), std::move(item));
+			} else {
+				dropdownList->addTextItem(toString(i++), o.label);
+			}
 		}
 		dropdownList->setSelectedOption(curOption);
 		dropdownList->setInputButtons(inputButtons);
 		getRoot()->setFocus(dropdownList);
 
-		auto standardHeight = style.getFloat("height");
-		auto distanceFromBottom = getRoot()->getRect().getBottom() - getRect().getBottom() - 5.0f;
-		auto height = distanceFromBottom < 0 ? standardHeight : std::min(standardHeight, distanceFromBottom);
+		const auto standardHeight = style.getFloat("height");
+		const auto distanceFromBottom = getRoot()->getRect().getBottom() - getRect().getBottom() - 5.0f;
+		const auto height = distanceFromBottom < 0 ? standardHeight : std::min(standardHeight, distanceFromBottom);
 
 		scrollPane = std::make_shared<UIScrollPane>(getId() + "_pane", Vector2f(0, height), UISizer(UISizerType::Vertical, 0));
 		scrollPane->add(dropdownList);
 
-		auto scrollBar = std::make_shared<UIScrollBar>(getId() + "_vbar", UIScrollDirection::Vertical, scrollbarStyle);
+		auto scrollBar = std::make_shared<UIScrollBar>(getId() + "_vbar", UIScrollDirection::Vertical, style.getSubStyle("scrollbarStyle"));
 		scrollBar->setScrollPane(*scrollPane);
 
 		dropdownWindow = std::make_shared<UIImage>(style.getSprite("background"), UISizer(UISizerType::Horizontal), style.getBorder("innerBorder"));

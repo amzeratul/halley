@@ -16,12 +16,19 @@ namespace Halley {
 	public:
 		class Entry {
 		public:
-			LocalisedString label;
 			String id;
+			LocalisedString label;
 			Sprite icon;
+
+			Entry() = default;
+			Entry(String id, LocalisedString label, Sprite icon = Sprite())
+				: id(std::move(id))
+				, label(std::move(label))
+				, icon(std::move(icon))
+			{}
 		};
 		
-		explicit UIDropdown(String id, UIStyle style, UIStyle scrollbarStyle, UIStyle listStyle, std::vector<LocalisedString> options = {}, int defaultOption = 0);
+		UIDropdown(String id, UIStyle style, std::vector<LocalisedString> options = {}, int defaultOption = 0);
 
 		virtual void setSelectedOption(int option);
 		virtual void setSelectedOption(const String& id);
@@ -49,6 +56,7 @@ namespace Halley {
 		std::vector<Entry> options;
 		
 		TextRenderer label;
+		Sprite icon;
 		std::shared_ptr<UIList> dropdownList;
 		
 		int curOption = 0;
@@ -69,8 +77,6 @@ namespace Halley {
 	private:
 		Sprite sprite;
 		UIInputButtons inputButtons;
-		UIStyle scrollbarStyle;
-		UIStyle listStyle;
 		std::shared_ptr<UIWidget> dropdownWindow;
 		std::shared_ptr<UIScrollPane> scrollPane;
 		

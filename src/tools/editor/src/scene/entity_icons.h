@@ -5,16 +5,6 @@
 namespace Halley {
     class EntityIcons {
     public:
-    	EntityIcons(Resources& resources, const UIColourScheme& colourScheme);
-
-    	const Sprite& getIcon(const String& id) const;
-    	const String& getName(const String& id) const;
-    	const std::vector<String>& getIconIds() const;
-
-    private:
-    	Resources& resources;
-    	const UIColourScheme& colourScheme;
-    	
     	class Entry {
     	public:
     		Entry() = default;
@@ -25,8 +15,19 @@ namespace Halley {
     		String id;
     	};
 
-    	std::vector<String> ids;
-    	std::unordered_map<String, Entry> entries;
+    	EntityIcons(Resources& resources, const UIColourScheme& colourScheme);
+
+    	const Sprite& getIcon(const String& id) const;
+    	const String& getName(const String& id) const;
+
+    	const std::vector<Entry>& getEntries() const;
+
+    private:
+    	Resources& resources;
+    	const UIColourScheme& colourScheme;
+    	
+    	std::vector<Entry> entries;
+    	std::unordered_map<String, size_t> entryMap;
     	Entry defaultEntry;
 
     	const Entry& getEntry(const String& id) const;

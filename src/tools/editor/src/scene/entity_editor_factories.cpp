@@ -404,18 +404,16 @@ public:
 		fieldData.ensureType(ConfigNodeType::Map);
 
 		auto& resources = context.getGameResources();
-		const auto& dropStyle = context.getUIFactory().getStyle("dropdown");
-		const auto& scrollStyle = context.getUIFactory().getStyle("scrollbar");
-		const auto& listStyle = context.getUIFactory().getStyle("list");
+		const auto& dropStyle = context.getUIFactory().getStyle("dropdownLight");
 
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 		container->getSizer().setColumnProportions({{0, 1}});
 		container->add(context.makeLabel("animation"));
 		container->add(std::make_shared<SelectAssetWidget>("animation", context.getUIFactory(), AssetType::Animation, context.getGameResources()));
 		container->add(context.makeLabel("sequence"));
-		container->add(std::make_shared<UIDropdown>("sequence", dropStyle, scrollStyle, listStyle));
+		container->add(std::make_shared<UIDropdown>("sequence", dropStyle));
 		container->add(context.makeLabel("direction"));
-		container->add(std::make_shared<UIDropdown>("direction", dropStyle, scrollStyle, listStyle));
+		container->add(std::make_shared<UIDropdown>("direction", dropStyle));
 		container->add(context.makeLabel("playbackSpeed"));
 		container->add(context.makeField("float", pars.withSubKey("playbackSpeed", "1" ), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("applyPivot"));

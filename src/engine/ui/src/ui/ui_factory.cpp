@@ -575,8 +575,6 @@ std::shared_ptr<UIWidget> UIFactory::makeDropdown(const ConfigNode& entryNode)
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	auto style = UIStyle(node["style"].asString("dropdown"), styleSheet);
-	auto scrollStyle = UIStyle(node["ScrollBarStyle"].asString("scrollbar"), styleSheet);
-	auto listStyle = UIStyle(node["listStyle"].asString("list"), styleSheet);
 	auto label = parseLabel(node);
 	auto options = parseOptions(node["options"]);
 
@@ -587,7 +585,7 @@ std::shared_ptr<UIWidget> UIFactory::makeDropdown(const ConfigNode& entryNode)
 		optionLabels.push_back(o.text);
 	}
 
-	auto widget = std::make_shared<UIDropdown>(id, style, scrollStyle, listStyle);
+	auto widget = std::make_shared<UIDropdown>(id, style);
 	applyInputButtons(*widget, node["inputButtons"].asString("list"));
 	widget->setOptions(optionIds, optionLabels);
 	return widget;
@@ -887,8 +885,6 @@ std::shared_ptr<UIWidget> UIFactory::makeOptionListMorpher(const ConfigNode& ent
 	auto id = node["id"].asString();
 	auto dropdownStyle = UIStyle(node["dropdownStyle"].asString("dropdown"), styleSheet);
 	auto spinlistStyle = UIStyle(node["spinlistStyle"].asString("spinlist"), styleSheet);
-	auto scrollStyle = UIStyle(node["ScrollBarStyle"].asString("scrollbar"), styleSheet);
-	auto listStyle = UIStyle(node["listStyle"].asString("list"), styleSheet);
 	auto label = parseLabel(node);
 	auto options = parseOptions(node["options"]);
 
@@ -899,7 +895,7 @@ std::shared_ptr<UIWidget> UIFactory::makeOptionListMorpher(const ConfigNode& ent
 		optionLabels.push_back(o.text);
 	}
 
-	auto widget = std::make_shared<UIOptionListMorpher>(id, dropdownStyle, spinlistStyle, scrollStyle, listStyle);
+	auto widget = std::make_shared<UIOptionListMorpher>(id, dropdownStyle, spinlistStyle);
 	applyInputButtons(*widget, node["inputButtons"].asString("list"));
 	widget->setOptions(optionIds, optionLabels);
 	return widget;

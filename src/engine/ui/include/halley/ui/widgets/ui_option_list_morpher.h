@@ -14,7 +14,7 @@ namespace Halley {
 
 	class UIOptionListMorpher : public UIWidget {
 	public:
-		explicit UIOptionListMorpher(String id, UIStyle dropdownStyle, UIStyle spinlistStyle, UIStyle scrollbarStyle, UIStyle listStyle, std::vector<LocalisedString> options = {}, int defaultOption = 0);
+		explicit UIOptionListMorpher(String id, UIStyle dropdownStyle, UIStyle spinlistStyle, std::vector<LocalisedString> options = {}, int defaultOption = 0);
 
 		void setSelectedOption(int option);
 		void setSelectedOption(const String& id);
@@ -52,8 +52,6 @@ namespace Halley {
 
 		UIStyle dropdownStyle;
 		UIStyle spinlistStyle;
-		UIStyle scrollbarStyle;
-		UIStyle listStyle;
 
 		std::shared_ptr<UIDropdown> dropdown;
 		std::shared_ptr<UISpinList> spinlist;

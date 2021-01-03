@@ -9,12 +9,10 @@
 
 using namespace Halley;
 
-UIOptionListMorpher::UIOptionListMorpher(String id, UIStyle dropdownStyle, UIStyle spinlistStyle, UIStyle scrollbarStyle, UIStyle listStyle, std::vector<LocalisedString> os, int defaultOption)
+UIOptionListMorpher::UIOptionListMorpher(String id, UIStyle dropdownStyle, UIStyle spinlistStyle, std::vector<LocalisedString> os, int defaultOption)
 	: UIWidget(std::move(id), {})
 	, dropdownStyle(dropdownStyle)
 	, spinlistStyle(spinlistStyle)
-	, scrollbarStyle(scrollbarStyle)
-	, listStyle(listStyle)
 {
 	setOptions(std::move(os), defaultOption);
 }
@@ -151,7 +149,7 @@ void UIOptionListMorpher::makeChildren(const std::vector<LocalisedString>& os, i
 		return;
 	}
 
-	dropdown = std::make_shared<UIDropdown>(getId(), dropdownStyle, scrollbarStyle, listStyle, os, defaultOption);
+	dropdown = std::make_shared<UIDropdown>(getId(), dropdownStyle, os, defaultOption);
 	dropdown->setOnlyEnabledWithInputs({ { UIInputType::Mouse, UIInputType::Keyboard } });
 	add(dropdown, 1, {}, UISizerFillFlags::Fill);
 

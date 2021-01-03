@@ -2,180 +2,180 @@ entityIcons:
   - id: ""
     image: entity_icons/default.png
     name: Default
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: abstract
     image: entity_icons/abstract.png
     name: Abstract
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: animal
     image: entity_icons/animal.png
     name: Animal
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: bed
     image: entity_icons/bed.png
     name: Bed
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: boat
     image: entity_icons/boat.png
     name: Boat
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: briefcase
     image: entity_icons/briefcase.png
     name: Briefcase
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: building
     image: entity_icons/building.png
     name: Building
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: camera
     image: entity_icons/camera.png
     name: Camera
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: car
     image: entity_icons/car.png
     name: Car
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: cloud
     image: entity_icons/cloud.png
     name: Cloud
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: deck
     image: entity_icons/deck.png
     name: Deck
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: dice
     image: entity_icons/dice.png
     name: Dice
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: door
     image: entity_icons/door.png
     name: Door
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: fence
     image: entity_icons/fence.png
     name: Fence
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: fire
     image: entity_icons/fire.png
     name: Fire
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: flag
     image: entity_icons/flag.png
     name: Flag
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: flower
     image: entity_icons/flower.png
     name: Flower
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: folder
     image: entity_icons/folder.png
     name: Folder
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: food
     image: entity_icons/food.png
     name: Food
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: grass
     image: entity_icons/grass.png
     name: Grass
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: health
     image: entity_icons/health.png
     name: Health
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: heart
     image: entity_icons/heart.png
     name: Heart
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: house
     image: entity_icons/house.png
     name: House
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: key
     image: entity_icons/key.png
     name: Key
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: layers
     image: entity_icons/layers.png
     name: Layers
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: light
     image: entity_icons/light.png
     name: Light
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: lightning
     image: entity_icons/lightning.png
     name: Lightning
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: location
     image: entity_icons/location.png
     name: Location
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: lock
     image: entity_icons/lock.png
     name: Lock
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: menu
     image: entity_icons/menu.png
     name: Menu
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: person
     image: entity_icons/person.png
     name: Person
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: psychology
     image: entity_icons/psychology.png
     name: Psychology
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: puzzle
     image: entity_icons/puzzle.png
     name: Puzzle
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: roof
     image: entity_icons/roof.png
     name: Roof
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: science
     image: entity_icons/science.png
     name: Science
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: security
     image: entity_icons/security.png
     name: Security
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: sound
     image: entity_icons/sound.png
     name: Sound
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: stairs
     image: entity_icons/stairs.png
     name: Stairs
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: star
     image: entity_icons/star.png
     name: Star
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: store
     image: entity_icons/store.png
     name: Store
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: tag
     image: entity_icons/tag.png
     name: Tag
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: terrain
     image: entity_icons/terrain.png
     name: Terrain
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: tool
     image: entity_icons/tool.png
     name: Tool
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: wall
     image: entity_icons/wall.png
     name: Wall
-    colour: "#FFFFFF"
+    colour: $ui_text
   - id: water
     image: entity_icons/water.png
     name: Water
-    colour: "#FFFFFF"
+    colour: $ui_text

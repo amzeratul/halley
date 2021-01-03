@@ -14,9 +14,9 @@ EntityIcons::EntityIcons(Resources& resources, const UIColourScheme& colourSchem
 
 const EntityIcons::Entry& EntityIcons::getEntry(const String& id) const
 {
-	const auto iter = entries.find(id);
-	if (iter != entries.end()) {
-		return iter->second;
+	const auto iter = entryMap.find(id);
+	if (iter != entryMap.end()) {
+		return entries[iter->second];
 	}
 	return defaultEntry;
 }
@@ -25,16 +25,17 @@ void EntityIcons::load(const ConfigNode& node)
 {
 	const auto& seq = node["entityIcons"].asSequence();
 	entries.reserve(entries.size() + seq.size());
+	entryMap.reserve(entryMap.size() + seq.size());
 	
 	for (const auto& n: seq) {
 		auto entry = Entry(resources, n, colourScheme);
-		String id = entry.id;
+		const String id = entry.id;
 		
 		if (id.isEmpty()) {
 			defaultEntry = entry;
 		}
-		entries[id] = std::move(entry);
-		ids.push_back(std::move(id));
+		entryMap[id] = entries.size();
+		entries.emplace_back(std::move(entry));
 	}
 }
 
@@ -48,9 +49,9 @@ const String& EntityIcons::getName(const String& id) const
 	return getEntry(id).name;
 }
 
-const std::vector<String>& EntityIcons::getIconIds() const
+const std::vector<EntityIcons::Entry>& EntityIcons::getEntries() const
 {
-	return ids;
+	return entries;
 }
 
 EntityIcons::Entry::Entry(Resources& resources, const ConfigNode& node, const UIColourScheme& colourScheme)

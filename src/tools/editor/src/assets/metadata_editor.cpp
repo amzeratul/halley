@@ -254,7 +254,7 @@ void MetadataEditor::makeStringField(UISizer& sizer, const String& key, const St
 
 void MetadataEditor::makeDropdownField(UISizer& sizer, const String& key, std::vector<String> values, const String& defaultValue)
 {
-	const auto result = std::make_shared<UIDropdown>(key, factory.getStyle("dropdown"), factory.getStyle("scrollbar"), factory.getStyle("list"));
+	const auto result = std::make_shared<UIDropdown>(key, factory.getStyle("dropdown"));
 	result->setOptions(std::move(values));
 	sizer.add(result, 1);
 
