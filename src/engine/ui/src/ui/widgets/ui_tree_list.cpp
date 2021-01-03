@@ -26,10 +26,11 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Str
 	listItem->add(treeControls, 0, {}, UISizerFillFlags::Fill);
 
 	// Icon
+	const auto root = std::make_shared<UIWidget>("root", Vector2f(), UISizer());
 	std::shared_ptr<UIImage> iconWidget;
 	if (icon.hasMaterial()) {
 		iconWidget = std::make_shared<UIImage>(icon);
-		listItem->add(iconWidget, 0, {}, UISizerAlignFlags::Centre);
+		root->add(iconWidget, 0, {}, UISizerAlignFlags::Centre);
 	}
 
 	// Label
@@ -41,8 +42,10 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Str
 	if (labelStyle.hasTextRenderer("disabled")) {
 		labelWidget->setDisablable(labelStyle.getTextRenderer("normal"), labelStyle.getTextRenderer("disabled"));
 	}
-	listItem->add(labelWidget, 0, style.getBorder("labelBorder"), UISizerFillFlags::Fill);
-	listItem->setDraggableSubWidget(labelWidget.get());
+	root->add(labelWidget, 0, style.getBorder("labelBorder"), UISizerFillFlags::Fill);
+
+	listItem->add(root, 1);
+	listItem->setDraggableSubWidget(root.get());
 
 	// Logical item
 	auto treeItem = std::make_unique<UITreeListItem>(id, listItem, treeControls, labelWidget, iconWidget, forceLeaf);
