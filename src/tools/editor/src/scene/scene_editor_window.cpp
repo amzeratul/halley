@@ -263,6 +263,7 @@ void SceneEditorWindow::modifyEntity(const String& id, const EntityDataDelta& de
 	auto& data = sceneData->getWriteableEntityNodeData(id).getData();
 	data.applyDelta(delta);
 	onEntityModified(id, data, data);
+	entityEditor->reloadEntity();
 }
 
 void SceneEditorWindow::moveEntity(const String& id, const String& newParent, int childIndex)

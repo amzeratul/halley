@@ -48,6 +48,8 @@ namespace Halley {
 
 			ActionPair() = default;
 			ActionPair(Action forward, Action back) : forward(std::move(forward)), back(std::move(back)) {}
+
+			bool isCompatibleWith(const Action& newForward) const;
 		};
 
 		std::vector<std::unique_ptr<ActionPair>> stack;

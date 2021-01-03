@@ -148,6 +148,7 @@ void EntityEditor::reloadEntity()
 			// TODO: load in order
 			loadComponentData(c.first, c.second, componentNames);
 		}
+		prevEntityData = EntityData(*currentEntityData);
 
 		if (isPrefab) {
 			prefabName->setValue(getEntityData().getPrefab());

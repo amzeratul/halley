@@ -212,6 +212,57 @@ const EntityDataDelta& EntityDataDelta::asEntityDataDelta() const
 	return *this;
 }
 
+bool EntityDataDelta::modifiesTheSameAs(const EntityDataDelta& other) const
+{
+	if (getFieldsPresent() != other.getFieldsPresent()) {
+		return false;
+	}
+
+	if (!childrenAdded.empty() || !childrenRemoved.empty() || !childrenChanged.empty() || !childrenOrder.empty()) {
+		return false;
+	}
+
+	if (!componentsRemoved.empty() || !componentOrder.empty()) {
+		return false;
+	}
+
+	if (componentsChanged.size() != other.componentsChanged.size()) {
+		return false;
+	}
+
+	return getComponentEmptyStructure() == other.getComponentEmptyStructure();
+}
+
+static ConfigNode getEmptyConfigNodeStructure(const ConfigNode& node)
+{
+	if (node.getType() == ConfigNodeType::Map || node.getType() == ConfigNodeType::DeltaMap) {
+		ConfigNode::MapType result;
+		for (const auto& [k, v]: node.asMap()) {
+			result[k] = getEmptyConfigNodeStructure(v);
+		}
+		return result;
+	}
+	if (node.getType() == ConfigNodeType::Sequence || node.getType() == ConfigNodeType::DeltaSequence) {
+		ConfigNode::SequenceType result;
+		for (const auto& v: node.asSequence()) {
+			result.emplace_back(getEmptyConfigNodeStructure(v));
+		}
+		return result;
+	}
+	return ConfigNode();
+}
+
+std::vector<std::pair<String, ConfigNode>> EntityDataDelta::getComponentEmptyStructure() const
+{
+	std::vector<std::pair<String, ConfigNode>> result;
+
+	for (const auto& c: componentsChanged) {
+		result.emplace_back(c.first, getEmptyConfigNodeStructure(c.second));
+	}
+	
+	return result;
+}
+
 uint16_t EntityDataDelta::getFieldBit(FieldId id)
 {
 	return static_cast<uint16_t>(1 << static_cast<int>(id));

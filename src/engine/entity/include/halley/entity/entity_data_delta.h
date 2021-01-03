@@ -45,6 +45,8 @@ namespace Halley {
         const EntityData& asEntityData() const override;
         const EntityDataDelta& asEntityDataDelta() const override;
 
+		bool modifiesTheSameAs(const EntityDataDelta& other) const;
+
 	private:
     	std::optional<String> name;
     	std::optional<String> prefab;
@@ -84,6 +86,8 @@ namespace Halley {
     	static bool isFieldPresent(uint16_t value, FieldId id);
 
 		uint16_t getFieldsPresent() const;
+
+		std::vector<std::pair<String, ConfigNode>> getComponentEmptyStructure() const;
 	};
 
 	class SceneDataDelta {

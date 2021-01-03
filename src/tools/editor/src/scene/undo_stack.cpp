@@ -26,14 +26,20 @@ void UndoStack::pushRemoved(const String& entityId, const String& parent, int ch
 void UndoStack::pushMoved(const String& entityId, const String& prevParent, int prevIndex, const String& newParent, int newIndex)
 {
 	if (accepting) {
-		addToStack(Action(Type::EntityMoved, EntityDataDelta(), entityId, newParent, newIndex), Action(Type::EntityMoved, EntityDataDelta(), entityId, prevParent, prevIndex));
+		if (prevParent != newParent || prevIndex != newIndex) {
+			addToStack(Action(Type::EntityMoved, EntityDataDelta(), entityId, newParent, newIndex), Action(Type::EntityMoved, EntityDataDelta(), entityId, prevParent, prevIndex));
+		}
 	}
 }
 
 void UndoStack::pushModified(const String& entityId, const EntityData& before, const EntityData& after)
 {
 	if (accepting) {
-		addToStack(Action(Type::EntityModified, EntityDataDelta(before, after), entityId), Action(Type::EntityModified, EntityDataDelta(after, before), entityId));
+		auto forward = EntityDataDelta(before, after);
+		if (forward.hasChange()) {
+			auto back = EntityDataDelta(after, before);
+			addToStack(Action(Type::EntityModified, std::move(forward), entityId), Action(Type::EntityModified, std::move(back), entityId));
+		}
 	}
 }
 
@@ -51,18 +57,38 @@ void UndoStack::redo(SceneEditorWindow& sceneEditorWindow)
 	}
 }
 
+bool UndoStack::ActionPair::isCompatibleWith(const Action& newForward) const
+{
+	if (forward.type != newForward.type || forward.entityId != newForward.entityId) {
+		return false;
+	}
+
+	if (forward.type == Type::EntityModified) {
+		return forward.delta.modifiesTheSameAs(newForward.delta);
+	}
+	
+	return false;
+}
+
 void UndoStack::addToStack(Action forward, Action back)
 {
 	// Discard redo timeline that is no longer valid
-	if (stack.size() > stackPos) {
+	const bool hadRedo = stack.size() > stackPos;
+	if (hadRedo) {
 		stack.resize(stackPos);
 	}
-	
-	stack.emplace_back(std::make_unique<ActionPair>(forward, back));
-	if (stack.size() > maxSize) {
-		stack.erase(stack.begin());
+
+	if (!hadRedo && !stack.empty() && stack.back()->isCompatibleWith(forward)) {
+		// User is doing more of the same action, combine them instead
+		stack.back()->forward = std::move(forward);
+	} else {
+		// Insert new action into stack
+		stack.emplace_back(std::make_unique<ActionPair>(std::move(forward), std::move(back)));
+		if (stack.size() > maxSize) {
+			stack.erase(stack.begin());
+		}
+		stackPos = stack.size();
 	}
-	stackPos = stack.size();
 }
 
 void UndoStack::runAction(const Action& action, SceneEditorWindow& sceneEditorWindow)
