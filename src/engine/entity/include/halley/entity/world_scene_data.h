@@ -12,7 +12,7 @@ namespace Halley {
         ConstEntityNodeData getEntityNodeData(const String& id) override;
         void reloadEntity(const String& id) override;
         EntityTree getEntityTree() const override;
-        std::pair<String, int> reparentEntity(const String& entityId, const String& newParentId, int childIndex) override;
+        std::pair<String, size_t> reparentEntity(const String& entityId, const String& newParentId, size_t childIndex) override;
         bool isSingleRoot() override;
     	
     private:

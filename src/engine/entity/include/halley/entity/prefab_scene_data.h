@@ -11,7 +11,7 @@ namespace Halley {
         ConstEntityNodeData getEntityNodeData(const String& id) override;
         void reloadEntity(const String& id) override;
         EntityTree getEntityTree() const override;
-        std::pair<String, int> reparentEntity(const String& entityId, const String& newParentId, int childIndex) override;
+        std::pair<String, size_t> reparentEntity(const String& entityId, const String& newParentId, size_t childIndex) override;
         bool isSingleRoot() override;
     	
     private:
@@ -20,6 +20,12 @@ namespace Halley {
         World& world;
     	Resources& gameResources;
 
+    	struct EntityAndParent {
+    		EntityData* entity = nullptr;
+    		EntityData* parent = nullptr;
+    		size_t childIdx = 0;
+    	};
+
     	void reloadEntity(const String& id, EntityData* data);
         void fillEntityTree(const EntityData& node, EntityTree& tree) const;
     	void fillPrefabChildren(const EntityData& node, std::vector<String>& dst) const;
@@ -27,8 +33,8 @@ namespace Halley {
         EntityData& findEntity(const String& id);
 
     	static EntityData* findEntity(gsl::span<EntityData> node, const String& id);
-    	static std::pair<EntityData*, EntityData*> findEntityAndParent(gsl::span<EntityData> node, EntityData* previous, const String& id);
-        static std::pair<EntityData*, EntityData*> findEntityAndParent(EntityData& node, EntityData* previous, const String& id);
+    	static EntityAndParent findEntityAndParent(gsl::span<EntityData> node, EntityData* previous, size_t idx, const String& id);
+        static EntityAndParent findEntityAndParent(EntityData& node, EntityData* previous, size_t idx, const String& id);
 
         static void addChild(EntityData& parent, int index, EntityData child);
         static EntityData removeChild(EntityData& parent, const String& childId);

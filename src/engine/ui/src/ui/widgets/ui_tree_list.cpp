@@ -203,8 +203,16 @@ void UITreeList::reparentItem(const String& itemId, const String& newParentId, i
 	const size_t oldChildIndex = int(oldParent.getChildIndex(itemId));
 
 	if (oldParentId != newParentId || oldChildIndex != newChildIndex) {
+		int realNewChildIndex = newChildIndex;
 		if (oldParentId == newParentId) {
 			oldParent.moveChild(oldChildIndex, newChildIndex);
+
+			// This requires some explanation:
+			// The index returned here assumes that the item is still present, so it's inflated by one if moving forwards in the same child
+			// We'll subtract one before reporting as an event
+			if (realNewChildIndex > oldChildIndex) {
+				--realNewChildIndex;
+			}
 		} else {
 			auto& newParent = *root.tryFindId(newParentId);
 			newParent.addChild(oldParent.removeChild(itemId), newChildIndex);
@@ -212,7 +220,7 @@ void UITreeList::reparentItem(const String& itemId, const String& newParentId, i
 		sortItems();
 		needsRefresh = true;
 
-		sendEvent(UIEvent(UIEventType::TreeItemReparented, getId(), itemId, newParentId, newChildIndex));
+		sendEvent(UIEvent(UIEventType::TreeItemReparented, getId(), itemId, newParentId, realNewChildIndex));
 	}
 }
 

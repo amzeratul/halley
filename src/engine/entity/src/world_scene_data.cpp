@@ -26,7 +26,7 @@ EntityTree WorldSceneData::getEntityTree() const
 	throw Exception("Not implemented", HalleyExceptions::Entity);
 }
 
-std::pair<String, int> WorldSceneData::reparentEntity(const String& entityId, const String& newParentId, int childIndex)
+std::pair<String, size_t> WorldSceneData::reparentEntity(const String& entityId, const String& newParentId, size_t childIndex)
 {
 	throw Exception("Not implemented", HalleyExceptions::Entity);
 }

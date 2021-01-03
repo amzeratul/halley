@@ -21,16 +21,16 @@ ISceneData::EntityNodeData PrefabSceneData::getWriteableEntityNodeData(const Str
 		return EntityNodeData(prefab.getEntityData(), "");
 	}
 	
-	const auto& [data, parentData] = findEntityAndParent(prefab.getEntityDatas(), nullptr, id);
-	if (!data) {
+	const auto& data = findEntityAndParent(prefab.getEntityDatas(), nullptr, 0, id);
+	if (!data.entity) {
 		throw Exception("Entity data not found for \"" + id + "\"", HalleyExceptions::Entity);
 	}
 
 	String parentId;
-	if (parentData) {
-		parentId = (*parentData).getInstanceUUID().toString();
+	if (data.parent) {
+		parentId = (*data.parent).getInstanceUUID().toString();
 	}
-	return EntityNodeData(*data, parentId);
+	return EntityNodeData(*data.entity, parentId);
 }
 
 ISceneData::ConstEntityNodeData PrefabSceneData::getEntityNodeData(const String& id)
@@ -104,22 +104,23 @@ void PrefabSceneData::fillEntityTree(const EntityData& node, EntityTree& tree) c
 	}
 }
 
-std::pair<String, int> PrefabSceneData::reparentEntity(const String& entityId, const String& newParentId, int childIndex)
+std::pair<String, size_t> PrefabSceneData::reparentEntity(const String& entityId, const String& newParentId, size_t childIndex)
 {
 	Expects(childIndex >= 0);
 	Expects(!entityId.isEmpty());
 	
-	auto [entityMoving, oldParent] = findEntityAndParent(prefab.getEntityDatas(), nullptr, entityId);
+	const auto data = findEntityAndParent(prefab.getEntityDatas(), nullptr, 0, entityId);
+	const auto oldParent = data.parent;
+	const int oldChildIndex = data.childIdx;
 
-	if (!entityMoving) {
+	if (!data.entity) {
 		throw Exception("Entity not found: " + entityId, HalleyExceptions::Tools);
 	}
 	const String oldParentId = oldParent ? (*oldParent).getInstanceUUID().toString() : "";
-	const int oldChildIndex = oldParent ? static_cast<int>(oldParent->getChildIndex(UUID(entityId)).value_or(0)) : -1;
 
 	// WARNING: ALL OF THESE OPERATIONS CAN INVALIDATE OLD POINTERS, DON'T KEEP REFERENCES
 	if (newParentId == oldParentId) {
-		moveChild(findEntity(newParentId), entityId, size_t(childIndex)); // INVALIDATES REFERENCES
+		moveChild(findEntity(newParentId), entityId, childIndex); // INVALIDATES REFERENCES
 		reloadEntity(newParentId.isEmpty() ? entityId : newParentId);
 	} else {
 		// The order is very important here
@@ -130,7 +131,7 @@ std::pair<String, int> PrefabSceneData::reparentEntity(const String& entityId, c
 		reloadEntity(oldParentId.isEmpty() ? entityId : oldParentId);
 
 		// Add to new parent
-		addChild(findEntity(newParentId), childIndex, std::move(child)); // INVALIDATES REFERENCES
+		addChild(findEntity(newParentId), static_cast<int>(childIndex), std::move(child)); // INVALIDATES REFERENCES
 
 		// Reload destination
 		reloadEntity(newParentId.isEmpty() ? entityId : newParentId);
@@ -155,42 +156,43 @@ EntityData& PrefabSceneData::findEntity(const String& id)
 
 EntityData* PrefabSceneData::findEntity(gsl::span<EntityData> node, const String& id)
 {
-	for (auto& childNode: node) {
-		const auto r = findEntityAndParent(childNode, nullptr, id);
-		if (r.first) {
-			return r.first;
+	for (size_t i = 0; i < node.size(); ++i) {
+		const auto r = findEntityAndParent(node[i], nullptr, i, id);
+		if (r.entity) {
+			return r.entity;
 		}
 	}
 
 	return nullptr;
 }
 
-std::pair<EntityData*, EntityData*> PrefabSceneData::findEntityAndParent(gsl::span<EntityData> node, EntityData* previous, const String& id)
+PrefabSceneData::EntityAndParent PrefabSceneData::findEntityAndParent(gsl::span<EntityData> node, EntityData* previous, size_t idx, const String& id)
 {
-	for (auto& childNode: node) {
-		auto r = findEntityAndParent(childNode, nullptr, id);
-		if (r.first) {
+	for (size_t i = 0; i < node.size(); ++i) {
+		const auto r = findEntityAndParent(node[i], nullptr, i, id);
+		if (r.entity) {
 			return r;
 		}
 	}
 
-	return std::make_pair(nullptr, nullptr);
+	return {};
 }
 
-std::pair<EntityData*, EntityData*> PrefabSceneData::findEntityAndParent(EntityData& node, EntityData* previous, const String& id)
+PrefabSceneData::EntityAndParent PrefabSceneData::findEntityAndParent(EntityData& node, EntityData* previous, size_t idx, const String& id)
 {
 	if (node.getInstanceUUID().toString() == id) {
-		return std::make_pair(&node, previous);
+		return { &node, previous, idx };
 	}
 
-	for (auto& childNode : node.getChildren()) {
-		auto r = findEntityAndParent(childNode, &node, id);
-		if (r.first) {
+	auto& children = node.getChildren();
+	for (size_t i = 0; i < children.size(); ++i) {
+		const auto r = findEntityAndParent(children[i], &node, i, id);
+		if (r.entity) {
 			return r;
 		}
 	}
 
-	return std::make_pair(nullptr, nullptr);
+	return {};
 }
 
 void PrefabSceneData::addChild(EntityData& parent, int index, EntityData child)
@@ -217,13 +219,10 @@ void PrefabSceneData::moveChild(EntityData& parent, const String& childId, int t
 {
 	auto& seq = parent.getChildren();
 	const int startIndex = int(std::find_if(seq.begin(), seq.end(), [&] (const EntityData& n) { return n.getInstanceUUID().toString() == childId; }) - seq.begin());
-
-	// If moving forwards, subtract one to account for the fact that the currently occupied slot will be removed
-	const int finalIndex = targetIndex > startIndex ? targetIndex - 1 : targetIndex;
-
+	
 	// Swap from start to end
-	const int dir = signOf(finalIndex - startIndex);
-	for (int i = startIndex; i != finalIndex; i += dir) {
+	const int dir = signOf(targetIndex - startIndex);
+	for (int i = startIndex; i != targetIndex; i += dir) {
 		std::swap(seq[i], seq[i + dir]);
 	}
 }

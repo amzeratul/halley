@@ -184,7 +184,7 @@ namespace Halley {
 		virtual ConstEntityNodeData getEntityNodeData(const String& id) = 0;
 		virtual void reloadEntity(const String& id) = 0;
 		virtual EntityTree getEntityTree() const = 0;
-		virtual std::pair<String, int> reparentEntity(const String& entityId, const String& newParentId, int childIndex) = 0;
+		virtual std::pair<String, size_t> reparentEntity(const String& entityId, const String& newParentId, size_t childIndex) = 0;
         virtual bool isSingleRoot() = 0;
 	};
 
