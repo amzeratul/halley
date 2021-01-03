@@ -26,7 +26,7 @@ void UndoStack::pushRemoved(const String& entityId, const String& parent, int ch
 void UndoStack::pushMoved(const String& entityId, const String& prevParent, int prevIndex, const String& newParent, int newIndex)
 {
 	if (accepting) {
-		addToStack(Action(Type::EntityMoved, EntityDataDelta(), entityId, newParent, newIndex), Action(Type::EntityModified, EntityDataDelta(), entityId, prevParent, prevIndex));
+		addToStack(Action(Type::EntityMoved, EntityDataDelta(), entityId, newParent, newIndex), Action(Type::EntityMoved, EntityDataDelta(), entityId, prevParent, prevIndex));
 	}
 }
 
