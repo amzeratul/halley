@@ -61,6 +61,16 @@ void UndoStack::redo(SceneEditorWindow& sceneEditorWindow)
 	}
 }
 
+void UndoStack::onSave()
+{
+	// When saving, reset everyone's clear flag, unless they're the action that will lead back here
+	for (size_t i = 0; i < stack.size(); ++i) {
+		auto& a = stack[i];
+		a->back.clearModified = i == stackPos;
+		a->forward.clearModified = i + 1 == stackPos;
+	}
+}
+
 bool UndoStack::ActionPair::isCompatibleWith(const Action& newForward) const
 {
 	if (forward.type != newForward.type || forward.entityId != newForward.entityId) {

@@ -15,6 +15,8 @@ namespace Halley {
 		void undo(SceneEditorWindow& sceneEditorWindow);
 		void redo(SceneEditorWindow& sceneEditorWindow);
 
+		void onSave();
+
 	private:
 		enum class Type {
 			EntityAdded,

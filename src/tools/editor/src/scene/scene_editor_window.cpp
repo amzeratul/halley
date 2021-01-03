@@ -314,6 +314,7 @@ void SceneEditorWindow::panCameraToEntity(const String& id)
 void SceneEditorWindow::saveScene()
 {
 	clearModifiedFlag();
+	undoStack.onSave();
 
 	const auto strData = prefab->toYAML();
 	auto data = gsl::as_bytes(gsl::span<const char>(strData.c_str(), strData.length()));
