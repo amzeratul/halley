@@ -74,7 +74,7 @@ std::pair<String, Sprite> EntityList::getEntityNameAndIcon(const String& name, c
 	if (!prefabName.isEmpty()) {
 		const auto prefab = sceneEditor->getGamePrefab(prefabName);
 		if (prefab) {
-			return { prefab->getPrefabName() + " [" + prefabName + "]", icons->getIcon(prefab->getPrefabIcon()) };
+			return { prefab->getPrefabName()/* + " [" + prefabName + "]"*/, icons->getIcon(prefab->getPrefabIcon()) };
 		} else {
 			return { "Missing prefab! [" + prefabName + "]", icons->getIcon("") };
 		}
