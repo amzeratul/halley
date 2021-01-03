@@ -231,7 +231,7 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 		prefab = delta.prefab.value();
 	}
 	if (delta.icon) {
-		prefab = delta.icon.value();
+		icon = delta.icon.value();
 	}
 	if (delta.instanceUUID) {
 		instanceUUID = delta.instanceUUID.value();

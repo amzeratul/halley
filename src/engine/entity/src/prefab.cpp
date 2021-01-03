@@ -55,7 +55,7 @@ void Prefab::parseYAML(gsl::span<const gsl::byte> yaml)
 String Prefab::toYAML() const
 {
 	YAMLConvert::EmitOptions options;
-	options.mapKeyOrder = {{ "name", "uuid", "components", "children" }};
+	options.mapKeyOrder = {{ "name", "icon", "uuid", "prefab", "components", "children" }};
 	return YAMLConvert::generateYAML(toConfigNode(), options);
 }
 

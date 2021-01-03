@@ -633,7 +633,7 @@ const EntityIcons& SceneEditorWindow::getEntityIcons() const
 String SceneEditorWindow::serializeEntity(const EntityData& node) const
 {
 	YAMLConvert::EmitOptions options;
-	options.mapKeyOrder = {{ "name", "uuid", "components", "children" }};
+	options.mapKeyOrder = {{ "name", "icon", "prefab", "uuid", "components", "children" }};
 	return YAMLConvert::generateYAML(node.toConfigNode(false), options);
 }
 
