@@ -27,10 +27,10 @@ namespace Halley {
 		void unloadScene();
 		void markModified() override;
 
-		void onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId) override;
+		void onEntityAdded(const String& id, const String& parentId, int childIndex) override;
 		void onEntityRemoved(const String& id, const String& parentId, int childIndex, const EntityData& prevData) override;
 		void onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData) override;
-		void onEntityMoved(const String& id) override;
+		void onEntityMoved(const String& id, const String& prevParentId, int prevChildIndex, const String& newParentId, int newChildIndex) override;
 		void onComponentRemoved(const String& name) override;
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName) override;
 
@@ -39,7 +39,6 @@ namespace Halley {
 		void addNewPrefab(const String& prefabName);
 		void addEntity(EntityData data);
 		void addEntity(const String& referenceEntityId, bool childOfReference, EntityData data);
-		void addEntity(const String& parentId, const String& afterSibling, EntityData data);
 		void addEntity(const String& parentId, int childIndex, EntityData data);
 		void removeEntity();
 		void removeEntity(const String& entityId) override;

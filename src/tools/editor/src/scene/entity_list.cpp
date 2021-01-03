@@ -40,8 +40,8 @@ void EntityList::makeUI()
 		const auto newParentId = event.getStringData2();
 		const auto childIndex = event.getIntData();
 
-		sceneData->reparentEntity(entityId, newParentId, childIndex);
-		sceneEditor->onEntityMoved(entityId);
+		auto [prevParent, prevIndex] = sceneData->reparentEntity(entityId, newParentId, childIndex);
+		sceneEditor->onEntityMoved(entityId, prevParent, prevIndex, newParentId, childIndex);
 	});
 }
 
@@ -49,7 +49,7 @@ void EntityList::addEntities(const EntityTree& entity, const String& parentId)
 {
 	// Root is empty, don't add it
 	if (!entity.entityId.isEmpty()) {
-		addEntity(entity.name, entity.entityId, parentId, "", entity.prefab, entity.icon);
+		addEntity(entity.name, entity.entityId, parentId, -1, entity.prefab, entity.icon);
 	}
 
 	for (auto& e: entity.children) {
@@ -57,11 +57,12 @@ void EntityList::addEntities(const EntityTree& entity, const String& parentId)
 	}
 }
 
-void EntityList::addEntity(const String& name, const String& id, const String& parentId, const String& afterSiblingId, const String& prefab, const String& icon)
+void EntityList::addEntity(const String& name, const String& id, const String& parentId, int childIndex, const String& prefab, const String& icon)
 {
 	const bool isPrefab = !prefab.isEmpty();
 	const auto [displayName, displayIcon] = getEntityNameAndIcon(name, icon, prefab);
-	list->addTreeItem(id, parentId, afterSiblingId, LocalisedString::fromUserString(displayName), isPrefab ? "labelSpecial" : "label", displayIcon, isPrefab);
+	const size_t idx = childIndex >= 0 ? static_cast<size_t>(childIndex) : std::numeric_limits<size_t>::max();
+	list->addTreeItem(id, parentId, idx, LocalisedString::fromUserString(displayName), isPrefab ? "labelSpecial" : "label", displayIcon, isPrefab);
 }
 
 std::pair<String, Sprite> EntityList::getEntityNameAndIcon(const EntityData& data) const
@@ -107,19 +108,19 @@ void EntityList::onEntityModified(const String& id, const EntityData& node)
 	list->setLabel(id, LocalisedString::fromUserString(name), icon);
 }
 
-void EntityList::onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId, const EntityData& data)
+void EntityList::onEntityAdded(const String& id, const String& parentId, int childIndex, const EntityData& data)
 {
-	addEntityTree(parentId, afterSiblingId, data);
+	addEntityTree(parentId, childIndex, data);
 	list->sortItems();
 	list->setSelectedOptionId(id);
 }
 
-void EntityList::addEntityTree(const String& parentId, const String& afterSiblingId, const EntityData& data)
+void EntityList::addEntityTree(const String& parentId, int childIndex, const EntityData& data)
 {
 	const auto& curId = data.getInstanceUUID().toString();
-	addEntity(data.getName(), curId, parentId, afterSiblingId, data.getPrefab(), data.getIcon());
+	addEntity(data.getName(), curId, parentId, childIndex, data.getPrefab(), data.getIcon());
 	for (const auto& child: data.getChildren()) {
-		addEntityTree(curId, "", child);
+		addEntityTree(curId, -1, child);
 	}
 }
 

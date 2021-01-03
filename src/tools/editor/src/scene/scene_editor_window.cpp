@@ -267,9 +267,9 @@ void SceneEditorWindow::modifyEntity(const String& id, const EntityDataDelta& de
 
 void SceneEditorWindow::moveEntity(const String& id, const String& newParent, int childIndex)
 {
-	sceneData->reparentEntity(id, newParent, childIndex);
+	auto [prevParent, prevIndex] = sceneData->reparentEntity(id, newParent, childIndex);
 	entityList->refreshList();
-	onEntityMoved(id);
+	onEntityMoved(id, prevParent, prevIndex, newParent, childIndex);
 }
 
 void SceneEditorWindow::onEntitySelected(const String& id)
@@ -325,16 +325,16 @@ void SceneEditorWindow::markModified()
 	setModified(true);
 }
 
-void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId)
+void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId, int childIndex)
 {
 	const auto& data = sceneData->getEntityNodeData(id).getData();
-	entityList->onEntityAdded(id, parentId, afterSiblingId, data);
+	entityList->onEntityAdded(id, parentId, childIndex, data);
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	onEntitySelected(id);
 
 	gameBridge->onEntityAdded(UUID(id), data);
 
-	undoStack.pushAdded(id, parentId, 0, data); // TODO: set child index
+	undoStack.pushAdded(id, parentId, childIndex, data);
 	
 	markModified();
 }
@@ -367,13 +367,15 @@ void SceneEditorWindow::onEntityModified(const String& id, const EntityData& pre
 	markModified();
 }
 
-void SceneEditorWindow::onEntityMoved(const String& id)
+void SceneEditorWindow::onEntityMoved(const String& id, const String& prevParentId, int prevChildIndex, const String& newParentId, int newChildIndex)
 {
 	if (currentEntityId == id) {
 		onEntitySelected(id);
 	}
 
 	gameBridge->onEntityMoved(UUID(id), sceneData->getEntityNodeData(id).getData());
+
+	undoStack.pushMoved(id, prevParentId, prevChildIndex, newParentId, newChildIndex);
 	
 	markModified();
 }
@@ -514,7 +516,7 @@ void SceneEditorWindow::addEntity(EntityData data)
 void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfReference, EntityData data)
 {
 	if (referenceEntity.isEmpty()) {
-		addEntity("", referenceEntity, std::move(data));
+		addEntity(String(), -1, std::move(data));
 	} else {
 		const bool isScene = sceneData->getEntityNodeData("").getData().isSceneRoot();
 		
@@ -527,35 +529,29 @@ void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfRef
 		
 		const bool addAsChild = (childOfReference && canBeChild) || !canBeSibling;
 		const String& parentId = addAsChild ? referenceEntity : ref.getParentId();
-		const String& siblingId = addAsChild ? "" : referenceEntity;
 
-		addEntity(parentId, siblingId, std::move(data));
-	}
-}
-
-void SceneEditorWindow::addEntity(const String& parentId, const String& afterSibling, EntityData data)
-{
-	EntityData& parentData = sceneData->getWriteableEntityNodeData(parentId).getData();
-	if (parentData.getPrefab().isEmpty() && (parentId != "" || parentData.isSceneRoot())) {
-		const auto uuid = data.getInstanceUUID().toString();
-
-		auto& seq = parentData.getChildren();
-		auto insertPos = std::find_if(seq.begin(), seq.end(), [&] (const EntityData& node) -> bool
-		{
-			return node.getInstanceUUID().toString() == afterSibling;
-		});		
-		if (insertPos != seq.end()) {
-			++insertPos;
+		int childIndex = -1;
+		if (!addAsChild) {
+			const auto idx = ref.getData().getChildIndex(UUID(referenceEntity));
+			childIndex = idx ? static_cast<int>(idx.value()) : -1;
 		}
-		seq.insert(insertPos, std::move(data));
 
-		onEntityAdded(uuid, parentId, afterSibling);
+		addEntity(parentId, childIndex, std::move(data));
 	}
 }
 
 void SceneEditorWindow::addEntity(const String& parentId, int childIndex, EntityData data)
 {
-	// TODO
+	EntityData& parentData = sceneData->getWriteableEntityNodeData(parentId).getData();
+	if (parentData.getPrefab().isEmpty() && (parentId != "" || parentData.isSceneRoot())) {
+		const auto uuid = data.getInstanceUUID().toString();
+
+		const size_t insertPos = childIndex >= 0 ? static_cast<size_t>(childIndex) : std::numeric_limits<size_t>::max();
+		auto& seq = parentData.getChildren();
+		seq.insert(seq.begin() + std::min(insertPos, seq.size()), std::move(data));
+
+		onEntityAdded(uuid, parentId, childIndex);
+	}
 }
 
 void SceneEditorWindow::removeEntity()

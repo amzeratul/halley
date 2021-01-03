@@ -51,7 +51,6 @@ namespace Halley {
     	UITreeListItem(String id, std::shared_ptr<UIListItem> listItem, std::shared_ptr<UITreeListControls> treeControls, std::shared_ptr<UILabel> label, std::shared_ptr<UIImage> iconWidget, bool forceLeaf);
 
     	UITreeListItem* tryFindId(const String& id);
-    	void addChild(std::unique_ptr<UITreeListItem> item, const String& afterSiblingId);
         void addChild(std::unique_ptr<UITreeListItem> item, size_t pos);
     	std::unique_ptr<UITreeListItem> removeChild(const String& id);
         void moveChild(size_t oldChildIndex, size_t newChildIndex);
@@ -94,7 +93,7 @@ namespace Halley {
     public:
     	UITreeList(String id, UIStyle style);
 
-        void addTreeItem(const String& id, const String& parentId, const String& afterSiblingId, const LocalisedString& label, const String& labelStyle = "label", Sprite icon = Sprite(), bool forceLeaf = false);
+        void addTreeItem(const String& id, const String& parentId, size_t childIndex, const LocalisedString& label, const String& labelStyle = "label", Sprite icon = Sprite(), bool forceLeaf = false);
         void removeItem(const String& id);
         void setLabel(const String& id, const LocalisedString& label, Sprite icon);
 

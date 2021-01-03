@@ -17,7 +17,7 @@ UITreeList::UITreeList(String id, UIStyle style)
 	setupEvents();
 }
 
-void UITreeList::addTreeItem(const String& id, const String& parentId, const String& afterSiblingId, const LocalisedString& label, const String& labelStyleName, Sprite icon, bool forceLeaf)
+void UITreeList::addTreeItem(const String& id, const String& parentId, size_t childIndex, const LocalisedString& label, const String& labelStyleName, Sprite icon, bool forceLeaf)
 {
 	auto listItem = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 
@@ -50,7 +50,7 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, const Str
 	// Logical item
 	auto treeItem = std::make_unique<UITreeListItem>(id, listItem, treeControls, labelWidget, iconWidget, forceLeaf);
 	auto& parentItem = getItemOrRoot(parentId);
-	parentItem.addChild(std::move(treeItem), afterSiblingId);
+	parentItem.addChild(std::move(treeItem), childIndex);
 
 	addItem(listItem, Vector4f(), UISizerAlignFlags::Left | UISizerFillFlags::FillVertical);
 	needsRefresh = true;
@@ -376,25 +376,6 @@ UITreeListItem* UITreeListItem::tryFindId(const String& id)
 	return nullptr;
 }
 
-void UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item, const String& afterSiblingId)
-{
-	Expects(!forceLeaf);
-	
-	if (children.empty()) {
-		expanded = true;
-	}
-	item->parentId = id;
-
-	auto insertPos = std::find_if(children.begin(), children.end(), [&] (const std::unique_ptr<UITreeListItem>& i) -> bool
-	{
-		return i->getId() == afterSiblingId;
-	});
-	if (insertPos != children.end()) {
-		++insertPos;
-	}
-	children.insert(insertPos, std::move(item));
-}
-
 void UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item, size_t pos)
 {
 	Expects(!forceLeaf);
@@ -403,7 +384,8 @@ void UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item, size_t pos)
 		expanded = true;
 	}
 	item->parentId = id;
-	children.insert(children.begin() + pos, std::move(item));
+	
+	children.insert(children.begin() + std::min(children.size(), pos), std::move(item));
 }
 
 std::unique_ptr<UITreeListItem> UITreeListItem::removeChild(const String& id)

@@ -81,6 +81,8 @@ namespace Halley {
     	void setSceneRoot(bool root);
     	bool isSceneRoot() const;
 
+        std::optional<size_t> getChildIndex(const UUID& uuid) const;
+
     private:
     	String name;
     	String prefab;

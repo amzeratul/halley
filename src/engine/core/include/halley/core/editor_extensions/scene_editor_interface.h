@@ -184,7 +184,7 @@ namespace Halley {
 		virtual ConstEntityNodeData getEntityNodeData(const String& id) = 0;
 		virtual void reloadEntity(const String& id) = 0;
 		virtual EntityTree getEntityTree() const = 0;
-		virtual void reparentEntity(const String& entityId, const String& newParentId, int childIndex) = 0;
+		virtual std::pair<String, int> reparentEntity(const String& entityId, const String& newParentId, int childIndex) = 0;
         virtual bool isSingleRoot() = 0;
 	};
 
@@ -205,10 +205,10 @@ namespace Halley {
 
 		virtual void markModified() = 0;
 		
-		virtual void onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId) = 0;
+		virtual void onEntityAdded(const String& id, const String& parentId, int childIndex) = 0;
 		virtual void onEntityRemoved(const String& id, const String& parentId, int childIndex, const EntityData& prevData) = 0;
 		virtual void onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData) = 0;
-		virtual void onEntityMoved(const String& id) = 0;
+		virtual void onEntityMoved(const String& id, const String& prevParentId, int prevChildIndex, const String& newParentId, int newChildIndex) = 0;
 		virtual void onComponentRemoved(const String& name) = 0;
 		virtual void onFieldChangedByGizmo(const String& componentName, const String& fieldName) = 0;
 

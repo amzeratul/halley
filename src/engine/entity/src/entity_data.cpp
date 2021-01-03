@@ -396,3 +396,13 @@ bool EntityData::isSceneRoot() const
 {
 	return sceneRoot;
 }
+
+std::optional<size_t> EntityData::getChildIndex(const UUID& uuid) const
+{
+	for (size_t i = 0; i < children.size(); ++i) {
+		if (children[i].getInstanceUUID() == uuid) {
+			return i;
+		}
+	}
+	return {};
+}

@@ -20,7 +20,7 @@ namespace Halley {
 		void refreshNames();
 
 		void onEntityModified(const String& id, const EntityData& node);
-		void onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId, const EntityData& data);
+		void onEntityAdded(const String& id, const String& parentId, int childIndex, const EntityData& data);
 		void onEntityRemoved(const String& id, const String& parentId);
 		void select(const String& id);
 
@@ -37,8 +37,8 @@ namespace Halley {
 
 		void makeUI();
 		void addEntities(const EntityTree& entity, const String& parentId);
-		void addEntity(const String& name, const String& id, const String& parentId, const String& afterSiblingId, const String& prefab, const String& icon);
-		void addEntityTree(const String& parentId, const String& afterSiblingId, const EntityData& data);
+		void addEntity(const String& name, const String& id, const String& parentId, int childIndex, const String& prefab, const String& icon);
+		void addEntityTree(const String& parentId, int childIndex, const EntityData& data);
 		std::pair<String, Sprite> getEntityNameAndIcon(const EntityData& data) const;
 		std::pair<String, Sprite> getEntityNameAndIcon(const String& name, const String& icon, const String& prefab) const;
 	};
