@@ -415,8 +415,8 @@ void EntityEditor::editPrefab()
 
 void EntityEditor::onEntityUpdated()
 {
-	generateDelta();
-	sceneEditor->onEntityModified(currentId);
+	sceneEditor->onEntityModified(currentId, prevEntityData, *currentEntityData);
+	prevEntityData = EntityData(*currentEntityData);
 }
 
 void EntityEditor::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options)
@@ -445,15 +445,4 @@ void EntityEditor::resetFieldFactories()
 {
 	fieldFactories.clear();
 	addFieldFactories(EntityEditorFactories::getDefaultFactories());
-}
-
-void EntityEditor::generateDelta()
-{
-	return;
-	
-	const auto fwdDelta = EntityDataDelta(prevEntityData, *currentEntityData);
-	const auto backDelta = EntityDataDelta(*currentEntityData, prevEntityData);
-	Logger::logDev("Forward:\n" + EntityData(fwdDelta).toYAML() + "\n");
-	Logger::logDev("Back:\n" + EntityData(backDelta).toYAML() + "\n");
-	prevEntityData = EntityData(*currentEntityData);	
 }

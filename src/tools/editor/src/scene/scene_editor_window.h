@@ -4,6 +4,7 @@
 #include "halley/ui/ui_widget.h"
 #include "scene_editor_canvas.h"
 #include "halley/tools/dll/dynamic_library.h"
+#include "undo_stack.h"
 
 namespace Halley {
 	class ProjectWindow;
@@ -27,8 +28,8 @@ namespace Halley {
 		void markModified() override;
 
 		void onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId) override;
-		void onEntityRemoved(const String& id, const String& parentId) override;
-		void onEntityModified(const String& id) override;
+		void onEntityRemoved(const String& id, const String& parentId, const EntityData& prevData) override;
+		void onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData) override;
 		void onEntityMoved(const String& id) override;
 		void onComponentRemoved(const String& name) override;
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName) override;
@@ -98,6 +99,7 @@ namespace Halley {
 
 		int toolModeTimeout = 0; // Hack
 
+		UndoStack undoStack;
 		bool modified = false;
 
 		void makeUI();

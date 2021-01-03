@@ -309,12 +309,16 @@ void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId, 
 	onEntitySelected(id);
 
 	gameBridge->onEntityAdded(UUID(id), data);
+
+	undoStack.pushAdded(parentId, data);
 	
 	markModified();
 }
 
-void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId)
+void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId, const EntityData& prevData)
 {
+	undoStack.pushRemoved(id, prevData);
+	
 	gameBridge->onEntityRemoved(UUID(id));
 
 	entityList->onEntityRemoved(id, parentId);
@@ -324,16 +328,16 @@ void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId
 	markModified();
 }
 
-void SceneEditorWindow::onEntityModified(const String& id)
+void SceneEditorWindow::onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData)
 {
 	if (!id.isEmpty()) {
 		const auto& data = sceneData->getEntityNodeData(id).getData();
 
 		entityList->onEntityModified(id, data);
-
 		sceneData->reloadEntity(id);
-		
 		gameBridge->onEntityModified(UUID(id), data);
+
+		undoStack.pushModified(id, prevData, newData);
 	}
 
 	markModified();
@@ -542,12 +546,14 @@ void SceneEditorWindow::removeEntity(const String& targetId)
 	}
 
 	auto& children = data.getChildren();
-	children.erase(std::remove_if(children.begin(), children.end(), [&] (const EntityData& child)
-	{
-		return child.getInstanceUUID().toString() == targetId;
-	}), children.end());
-
-	onEntityRemoved(targetId, parentId);
+	for (auto iter = children.begin(); iter != children.end(); ++iter) {
+		if (iter->getInstanceUUID().toString() == targetId) {
+			const auto data = std::move(*iter);
+			children.erase(iter);
+			onEntityRemoved(targetId, parentId, data);
+			break;
+		}
+	}
 }
 
 String SceneEditorWindow::findParent(const String& entityId) const

@@ -84,7 +84,5 @@ namespace Halley {
 
 		std::set<String> getComponentsOnEntity() const;
 		std::set<String> getComponentsOnPrefab() const;
-
-		void generateDelta();
 	};
 }
