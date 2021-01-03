@@ -6,7 +6,12 @@ WorldSceneData::WorldSceneData(World& world)
 {
 }
 
-ISceneData::EntityNodeData WorldSceneData::getEntityNodeData(const String& id)
+ISceneData::EntityNodeData WorldSceneData::getWriteableEntityNodeData(const String& id)
+{
+	throw Exception("Not implemented", HalleyExceptions::Entity);
+}
+
+const ISceneData::EntityNodeData WorldSceneData::getEntityNodeData(const String& id)
 {
 	throw Exception("Not implemented", HalleyExceptions::Entity);
 }

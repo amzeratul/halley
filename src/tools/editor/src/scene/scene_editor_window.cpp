@@ -269,7 +269,7 @@ void SceneEditorWindow::onEntitySelected(const String& id)
 		}
 	}
 
-	auto& entityData = sceneData->getEntityNodeData(actualId).getData();
+	auto& entityData = sceneData->getWriteableEntityNodeData(actualId).getData();
 	const Prefab* prefabData = nullptr;
 	const String prefabName = entityData.getPrefab();
 	if (!prefabName.isEmpty()) {
@@ -413,8 +413,7 @@ void SceneEditorWindow::pasteEntityFromClipboard(const String& referenceId)
 
 String SceneEditorWindow::copyEntity(const String& id)
 {
-	const auto entityData = sceneData->getEntityNodeData(id);
-	return serializeEntity(entityData.getData());
+	return serializeEntity(sceneData->getEntityNodeData(id).getData());
 }
 
 void SceneEditorWindow::pasteEntity(const String& stringData, const String& referenceId)
@@ -509,7 +508,7 @@ void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfRef
 
 void SceneEditorWindow::addEntity(const String& parentId, const String& afterSibling, EntityData data)
 {
-	EntityData& parentData = sceneData->getEntityNodeData(parentId).getData();
+	EntityData& parentData = sceneData->getWriteableEntityNodeData(parentId).getData();
 	if (parentData.getPrefab().isEmpty() && (parentId != "" || parentData.isSceneRoot())) {
 		auto& seq = parentData.getChildren();
 		const auto uuid = data.getInstanceUUID().toString();
@@ -536,7 +535,7 @@ void SceneEditorWindow::removeEntity(const String& targetId)
 {
 	const String& parentId = findParent(currentEntityId);
 
-	auto& data = sceneData->getEntityNodeData(parentId).getData();
+	auto& data = sceneData->getWriteableEntityNodeData(parentId).getData();
 	const bool isSceneRoot = parentId.isEmpty() && data.isSceneRoot();
 	if (parentId.isEmpty() && !isSceneRoot) {
 		// Don't delete root of prefab
