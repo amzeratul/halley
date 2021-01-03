@@ -105,7 +105,7 @@ namespace Halley {
     	bool isSingleRoot() const;
 
         bool canDragListItem(const UIListItem& listItem) override;
-    	
+
     protected:
         void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;

@@ -622,6 +622,16 @@ void UIWidget::setHandle(UIEventType type, String id, UIEventCallback handler)
 	getEventHandler().setHandle(type, std::move(id), std::move(handler));
 }
 
+void UIWidget::clearHandle(UIEventType type)
+{
+	getEventHandler().clearHandle(type);
+}
+
+void UIWidget::clearHandle(UIEventType type, String id)
+{
+	getEventHandler().clearHandle(type, id);
+}
+
 void UIWidget::setCanSendEvents(bool canSend)
 {
 	canSendEvents = canSend;

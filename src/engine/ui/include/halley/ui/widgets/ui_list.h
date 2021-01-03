@@ -58,6 +58,8 @@ namespace Halley {
 
 		void setUniformSizedItems(bool enabled);
 
+        void setScrollToSelection(bool enabled);
+
 		bool ignoreClip() const override;
 
 		bool canReceiveFocus() const override;
@@ -96,6 +98,7 @@ namespace Halley {
 		bool uniformSizedItems = false;
 		bool singleClickAccept = true;
 		bool focusable = true;
+		bool scrollToSelection = true;
 
 		void onItemClicked(UIListItem& item);
 		void onItemDoubleClicked(UIListItem& item);

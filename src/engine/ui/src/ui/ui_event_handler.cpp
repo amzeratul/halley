@@ -14,6 +14,16 @@ void UIEventHandler::setHandle(UIEventType type, const String& id, UIEventCallba
 	specificHandles[std::make_pair(type, id)] = std::move(handler);
 }
 
+void UIEventHandler::clearHandle(UIEventType type)
+{
+	handles.erase(type);
+}
+
+void UIEventHandler::clearHandle(UIEventType type, const String& id)
+{
+	specificHandles.erase(std::make_pair(type, id));
+}
+
 bool UIEventHandler::canHandle(const UIEvent& event) const
 {
 	if (specificHandles.find(std::make_pair(event.getType(), event.getSourceId())) != specificHandles.end()) {

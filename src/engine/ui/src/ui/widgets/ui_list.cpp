@@ -45,7 +45,9 @@ bool UIList::setSelectedOption(int option)
 		playSound(style.getString("selectionChangedSound"));
 
 		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), curItem->getId(), curOption));
-		sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), getOptionRect(curOption)));
+		if (scrollToSelection) {
+			sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), getOptionRect(curOption)));
+		}
 		
 		if (getDataBindFormat() == UIDataBind::Format::String) {
 			notifyDataBind(curItem->getId());
@@ -136,7 +138,10 @@ void UIList::clear()
 	curOption = -1;
 	UIWidget::clear();
 	layout();
-	sendEvent(UIEvent(UIEventType::MakeAreaVisibleCentered, getId(), Rect4f(0, 0, 1, 1)));
+
+	if (scrollToSelection) {
+		sendEvent(UIEvent(UIEventType::MakeAreaVisibleCentered, getId(), Rect4f(0, 0, 1, 1)));
+	}
 }
 
 void UIList::setItemEnabled(const String& id, bool enabled)
@@ -330,6 +335,11 @@ void UIList::setUniformSizedItems(bool enabled)
 	uniformSizedItems = enabled;
 }
 
+void UIList::setScrollToSelection(bool enabled)
+{
+	scrollToSelection = enabled;
+}
+
 bool UIList::ignoreClip() const
 {
 	return true;
@@ -513,7 +523,9 @@ void UIList::update(Time t, bool moved)
 	}
 
 	if (firstUpdate) {
-		sendEvent(UIEvent(UIEventType::MakeAreaVisibleCentered, getId(), getOptionRect(curOption)));
+		if (scrollToSelection) {
+			sendEvent(UIEvent(UIEventType::MakeAreaVisibleCentered, getId(), getOptionRect(curOption)));
+		}
 		firstUpdate = false;
 	}
 }

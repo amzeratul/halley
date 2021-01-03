@@ -13,6 +13,8 @@ namespace Halley {
 	public:
 		void setHandle(UIEventType type, UIEventCallback handler);
 		void setHandle(UIEventType type, const String& id, UIEventCallback handler);
+		void clearHandle(UIEventType type);
+		void clearHandle(UIEventType type, const String& id);
 
 		bool canHandle(const UIEvent& event) const;
 		void queue(UIEvent event);

@@ -110,6 +110,8 @@ namespace Halley {
 		UIEventHandler& getEventHandler();
 		void setHandle(UIEventType type, UIEventCallback handler);
 		void setHandle(UIEventType type, String id, UIEventCallback handler);
+		void clearHandle(UIEventType type);
+		void clearHandle(UIEventType type, String id);
 
 		void setCanSendEvents(bool canSend);
 

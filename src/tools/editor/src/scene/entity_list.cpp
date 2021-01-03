@@ -85,9 +85,15 @@ std::pair<String, Sprite> EntityList::getEntityNameAndIcon(const String& name, c
 
 void EntityList::refreshList()
 {
-	list->clear();
+	const auto prevId = list->getSelectedOptionId();
 
+	list->setScrollToSelection(false);
+	list->clear();
 	addEntities(sceneData->getEntityTree(), "");
+	layout();
+	list->setScrollToSelection(true);
+
+	list->setSelectedOptionId(prevId);
 }
 
 void EntityList::onEntityModified(const String& id, const EntityData& node)
