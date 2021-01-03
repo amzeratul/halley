@@ -30,7 +30,7 @@ void EntityIcons::load(const ConfigNode& node)
 		auto entry = Entry(resources, n, colourScheme);
 		String id = entry.id;
 		
-		if (id == "default") {
+		if (id.isEmpty()) {
 			defaultEntry = entry;
 		}
 		entries[id] = std::move(entry);

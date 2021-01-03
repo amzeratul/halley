@@ -1,4 +1,8 @@
 entityIcons:
+  - id: ""
+    image: entity_icons/default.png
+    name: Default
+    colour: "#FFFFFF"
   - id: abstract
     image: entity_icons/abstract.png
     name: Abstract
@@ -38,10 +42,6 @@ entityIcons:
   - id: deck
     image: entity_icons/deck.png
     name: Deck
-    colour: "#FFFFFF"
-  - id: default
-    image: entity_icons/default.png
-    name: Default
     colour: "#FFFFFF"
   - id: dice
     image: entity_icons/dice.png

@@ -98,7 +98,7 @@ ConfigNode EntityData::toConfigNode(bool allowPrefabUUID) const
 String EntityData::toYAML() const
 {
 	YAMLConvert::EmitOptions options;
-	options.mapKeyOrder = {{ "name", "uuid", "prefabUUID", "parent", "components", "children" }};
+	options.mapKeyOrder = {{ "name", "prefab", "icon", "uuid", "prefabUUID", "parent", "components", "children" }};
 	return YAMLConvert::generateYAML(toConfigNode(true), options);
 }
 

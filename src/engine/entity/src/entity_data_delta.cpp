@@ -261,6 +261,7 @@ uint16_t EntityDataDelta::getFieldsPresent() const
 	checkFieldVec(componentsChanged, FieldId::ComponentsChanged);
 	checkFieldVec(componentsRemoved, FieldId::ComponentsRemoved);
 	checkFieldVec(componentOrder, FieldId::ComponentsOrder);
+	checkField(icon, FieldId::Icon);
 
 	return value;
 }

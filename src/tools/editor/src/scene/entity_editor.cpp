@@ -40,6 +40,9 @@ void EntityEditor::update(Time t, bool moved)
 void EntityEditor::setSceneEditorWindow(SceneEditorWindow& editor)
 {
 	sceneEditor = &editor;
+	entityIcons = &editor.getEntityIcons();
+
+	entityIcon->setOptions(entityIcons->getIconIds());
 }
 
 void EntityEditor::setECSData(ECSData& ecs)
@@ -56,6 +59,7 @@ void EntityEditor::makeUI()
 
 	entityName = getWidgetAs<UITextInput>("entityName");
 	prefabName = getWidgetAs<SelectAssetWidget>("prefabName");
+	entityIcon = getWidgetAs<UIDropdown>("entityIcon");
 
 	setHandle(UIEventType::ButtonClicked, "addComponentButton", [=](const UIEvent& event)
 	{
@@ -75,6 +79,11 @@ void EntityEditor::makeUI()
 	setHandle(UIEventType::ButtonClicked, "editPrefab", [=](const UIEvent& event)
 	{
 		editPrefab();
+	});
+
+	setHandle(UIEventType::DropboxSelectionChanged, "entityIcon", [=](const UIEvent& event)
+	{
+		setIcon(event.getStringData());
 	});
 }
 
@@ -133,6 +142,7 @@ void EntityEditor::reloadEntity()
 			prefabName->setValue(getEntityData().getPrefab());
 		} else {
 			entityName->setText(getEntityData().getName());
+			entityIcon->setSelectedOption(getEntityData().getIcon());
 		}
 	}
 }
@@ -340,6 +350,14 @@ void EntityEditor::setName(const String& name)
 	}
 }
 
+void EntityEditor::setIcon(const String& icon)
+{
+	if (!isPrefab && getEntityData().getIcon() != icon) {
+		getEntityData().setIcon(icon);
+		onEntityUpdated();
+	}
+}
+
 void EntityEditor::setDefaultName(const String& name, const String& prevName)
 {
 	const auto oldName = getName();
@@ -382,6 +400,7 @@ void EntityEditor::editPrefab()
 		sceneEditor->openEditPrefabWindow(prefab);
 	}
 }
+
 
 void EntityEditor::onEntityUpdated()
 {

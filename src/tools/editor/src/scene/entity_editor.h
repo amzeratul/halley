@@ -1,4 +1,5 @@
 #pragma once
+#include "entity_icons.h"
 #include "halley/core/editor_extensions/scene_editor_interface.h"
 #include "halley/tools/ecs/fields_schema.h"
 #include "halley/ui/ui_widget.h"
@@ -42,10 +43,12 @@ namespace Halley {
 		UIFactory& factory;
 		ECSData* ecsData = nullptr;
 		SceneEditorWindow* sceneEditor = nullptr;
+		const EntityIcons* entityIcons;
 		std::unique_ptr<ComponentEditorContext> context;
 		
 		std::shared_ptr<UIWidget> fields;
 		std::shared_ptr<UITextInput> entityName;
+		std::shared_ptr<UIDropdown> entityIcon;
 		std::shared_ptr<SelectAssetWidget> prefabName;
 		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
 
@@ -70,6 +73,7 @@ namespace Halley {
 		String getName() const;
 		void setPrefabName(const String& prefab);
 		void editPrefab();
+		void setIcon(const String& icon);
 
 		void onEntityUpdated() override;
 		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) override;
