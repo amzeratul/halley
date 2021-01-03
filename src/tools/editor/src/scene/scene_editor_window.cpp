@@ -269,7 +269,7 @@ void SceneEditorWindow::onEntitySelected(const String& id)
 		}
 	}
 
-	auto& entityData = sceneData->getEntityNodeData(actualId).data;
+	auto& entityData = sceneData->getEntityNodeData(actualId).getData();
 	const Prefab* prefabData = nullptr;
 	const String prefabName = entityData.getPrefab();
 	if (!prefabName.isEmpty()) {
@@ -303,7 +303,7 @@ void SceneEditorWindow::markModified()
 
 void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId, const String& afterSiblingId)
 {
-	auto& data = sceneData->getEntityNodeData(id).data;
+	const auto& data = sceneData->getEntityNodeData(id).getData();
 	entityList->onEntityAdded(id, parentId, afterSiblingId, data);
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	onEntitySelected(id);
@@ -327,7 +327,7 @@ void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId
 void SceneEditorWindow::onEntityModified(const String& id)
 {
 	if (!id.isEmpty()) {
-		const auto& data = sceneData->getEntityNodeData(id).data;
+		const auto& data = sceneData->getEntityNodeData(id).getData();
 
 		entityList->onEntityModified(id, data);
 
@@ -345,7 +345,7 @@ void SceneEditorWindow::onEntityMoved(const String& id)
 		onEntitySelected(id);
 	}
 
-	gameBridge->onEntityMoved(UUID(id), sceneData->getEntityNodeData(id).data);
+	gameBridge->onEntityMoved(UUID(id), sceneData->getEntityNodeData(id).getData());
 	
 	markModified();
 }
@@ -414,7 +414,7 @@ void SceneEditorWindow::pasteEntityFromClipboard(const String& referenceId)
 String SceneEditorWindow::copyEntity(const String& id)
 {
 	const auto entityData = sceneData->getEntityNodeData(id);
-	return serializeEntity(entityData.data);
+	return serializeEntity(entityData.getData());
 }
 
 void SceneEditorWindow::pasteEntity(const String& stringData, const String& referenceId)
@@ -490,17 +490,17 @@ void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfRef
 	if (referenceEntity.isEmpty()) {
 		addEntity("", referenceEntity, std::move(data));
 	} else {
-		const bool isScene = sceneData->getEntityNodeData("").data.isSceneRoot();
+		const bool isScene = sceneData->getEntityNodeData("").getData().isSceneRoot();
 		
 		const auto& ref = sceneData->getEntityNodeData(referenceEntity);
-		const bool canBeSibling = !ref.parentId.isEmpty() || isScene;
-		const bool canBeChild = ref.data.getPrefab().isEmpty();
+		const bool canBeSibling = !ref.getParentId().isEmpty() || isScene;
+		const bool canBeChild = ref.getData().getPrefab().isEmpty();
 		if (!canBeChild && !canBeSibling) {
 			return;
 		}
 		
 		const bool addAsChild = (childOfReference && canBeChild) || !canBeSibling;
-		const String& parentId = addAsChild ? referenceEntity : ref.parentId;
+		const String& parentId = addAsChild ? referenceEntity : ref.getParentId();
 		const String& siblingId = addAsChild ? "" : referenceEntity;
 
 		addEntity(parentId, siblingId, std::move(data));
@@ -509,7 +509,7 @@ void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfRef
 
 void SceneEditorWindow::addEntity(const String& parentId, const String& afterSibling, EntityData data)
 {
-	EntityData& parentData = sceneData->getEntityNodeData(parentId).data;
+	EntityData& parentData = sceneData->getEntityNodeData(parentId).getData();
 	if (parentData.getPrefab().isEmpty() && (parentId != "" || parentData.isSceneRoot())) {
 		auto& seq = parentData.getChildren();
 		const auto uuid = data.getInstanceUUID().toString();
@@ -536,7 +536,7 @@ void SceneEditorWindow::removeEntity(const String& targetId)
 {
 	const String& parentId = findParent(currentEntityId);
 
-	auto& data = sceneData->getEntityNodeData(parentId).data;
+	auto& data = sceneData->getEntityNodeData(parentId).getData();
 	const bool isSceneRoot = parentId.isEmpty() && data.isSceneRoot();
 	if (parentId.isEmpty() && !isSceneRoot) {
 		// Don't delete root of prefab

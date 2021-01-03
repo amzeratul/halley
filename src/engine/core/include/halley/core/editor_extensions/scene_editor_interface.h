@@ -156,8 +156,13 @@ namespace Halley {
             EntityNodeData(EntityData& data, String parentId)
                 : data(data)
         		, parentId(std::move(parentId))
-            { }
-        	
+            {}
+
+        	const EntityData& getData() const { return data; }
+        	EntityData& getData() { return data; }
+        	const String& getParentId() const { return parentId; }
+
+        private:
 	        EntityData& data;
         	String parentId;
         };
