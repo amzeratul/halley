@@ -115,7 +115,7 @@ std::pair<String, int> PrefabSceneData::reparentEntity(const String& entityId, c
 		throw Exception("Entity not found: " + entityId, HalleyExceptions::Tools);
 	}
 	const String oldParentId = oldParent ? (*oldParent).getInstanceUUID().toString() : "";
-	const size_t oldChildIndex = oldParent->getChildIndex(UUID(entityId)).value_or(0);
+	const int oldChildIndex = oldParent ? static_cast<int>(oldParent->getChildIndex(UUID(entityId)).value_or(0)) : -1;
 
 	// WARNING: ALL OF THESE OPERATIONS CAN INVALIDATE OLD POINTERS, DON'T KEEP REFERENCES
 	if (newParentId == oldParentId) {
@@ -136,7 +136,7 @@ std::pair<String, int> PrefabSceneData::reparentEntity(const String& entityId, c
 		reloadEntity(newParentId.isEmpty() ? entityId : newParentId);
 	}
 
-	return { oldParentId, static_cast<int>(oldChildIndex) };
+	return { oldParentId, oldChildIndex };
 }
 
 bool PrefabSceneData::isSingleRoot()
