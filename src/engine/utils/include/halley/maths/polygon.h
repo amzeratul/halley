@@ -92,6 +92,8 @@ namespace Halley {
 		bool splitIntoConvex(std::vector<Polygon>& output) const;
 		std::optional<std::vector<Polygon>> subtract(const Polygon& other) const;
 		void simplify(float epsilon = 0.0001f);
+		std::vector<Polygon> splitConvexIntoMaxSides(size_t maxSides) const;
+		
 
 		const Rect4f& getAABB() const { return aabb; }
 		const Circle& getBoundingCircle() const { return circle; }
@@ -133,6 +135,8 @@ namespace Halley {
 
 		// Split by inserting a new edge between v0 and v1
 		std::pair<Polygon, Polygon> doSplit(size_t v0, size_t v1, gsl::span<const Vector2f> insertVertices) const;
+
+		void doSplitConvexIntoMaxSides(size_t maxSides, std::vector<Polygon>& output) const;
 
 		// Angle is ABC (B in the middle). Checks against semi-planes defined by AB and BC
 		// Returns:

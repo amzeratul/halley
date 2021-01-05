@@ -127,6 +127,73 @@ void Polygon::simplify(float epsilon)
 	}
 }
 
+std::vector<Polygon> Polygon::splitConvexIntoMaxSides(size_t maxSides) const
+{
+	std::vector<Polygon> result;
+	doSplitConvexIntoMaxSides(maxSides, result);
+	return result;
+}
+
+void Polygon::doSplitConvexIntoMaxSides(size_t maxSides, std::vector<Polygon>& output) const
+{
+	if (!isValid()) {
+		return;
+	}
+	
+	if (vertices.size() < maxSides || maxSides < 3) {
+		output.push_back(*this);
+		return;
+	}
+	
+	const size_t maxPick = maxSides - 1;
+	const Vector2f root = vertices[0];
+	auto remaining = gsl::span<const Vector2f>(vertices).subspan(1);
+
+	auto pick = [&] (size_t n)
+	{
+		Expects(n >= 2);
+		
+		VertexList vs(n + 1);
+		vs[0] = root;
+		for (size_t i = 0; i < n; ++i) {
+			vs[i + 1] = remaining[i];
+		}
+		output.push_back(Polygon(std::move(vs)));
+
+		if (n == remaining.size()) {
+			// Last one, clear
+			remaining = gsl::span<Vertex>();
+		} else {
+			// Keep the last element, it will serve as the first of the new batch
+			remaining = remaining.subspan(n - 1);
+		}
+	};
+	
+	while (!remaining.empty()) {
+		if (remaining.size() <= maxPick) {
+			// Pick all remaining
+			pick(remaining.size());
+			assert(remaining.empty());
+		} else if (remaining.size() <= maxPick * 2 - 1) {
+			// Split as evenly as possible
+			// This case exists to avoid a situation where the next step doesn't have enough vertices to form a polygon
+			const size_t a = remaining.size() / 2 + 1; // +1 because one vertex will be repeated between them
+			const size_t b = remaining.size() - (a - 1);
+
+			assert(a == b || a == b + 1);
+			assert(a + b - 1 == remaining.size());
+			
+			pick(a);
+			pick(b);
+			
+			assert(remaining.empty());
+		} else {
+			// Pick as many as we can
+			pick(maxPick);
+		}
+	}
+}
+
 bool Polygon::isPointInside(Vector2f point) const
 {
 	// Fast fail
