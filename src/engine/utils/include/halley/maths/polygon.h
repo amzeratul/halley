@@ -89,7 +89,7 @@ namespace Halley {
 		bool isValid() const { return valid; }
 
 		std::vector<Polygon> splitIntoConvex() const;
-		void splitIntoConvex(std::vector<Polygon>& output) const;
+		bool splitIntoConvex(std::vector<Polygon>& output) const;
 		std::optional<std::vector<Polygon>> subtract(const Polygon& other) const;
 		void simplify(float epsilon = 0.0001f);
 

@@ -568,19 +568,22 @@ Polygon Polygon::convolution(const Polygon& other) const
 std::vector<Polygon> Polygon::splitIntoConvex() const
 {
 	std::vector<Polygon> result;
-	splitIntoConvex(result);
+	const bool ok = splitIntoConvex(result);
+	if (!ok) {
+		result.clear();
+	}
 	return result;
 }
 
-void Polygon::splitIntoConvex(std::vector<Polygon>& output) const
+bool Polygon::splitIntoConvex(std::vector<Polygon>& output) const
 {
 	Expects(isValid());
 	
 	if (isConvex()) {
 		output.push_back(*this);
-		return;
+		return true;
 	}
-
+	
 	struct Score {
 		int divs = 0;
 		float dist = std::numeric_limits<float>::infinity();
@@ -676,10 +679,6 @@ void Polygon::splitIntoConvex(std::vector<Polygon>& output) const
 		}
 	}
 
-	if (bestSplit.first == bestSplit.second) {
-		int a = 0;
-	}
-
 	if (bestSplit.first > bestSplit.second) {
 		std::swap(bestSplit.first, bestSplit.second);
 	}
@@ -690,8 +689,11 @@ void Polygon::splitIntoConvex(std::vector<Polygon>& output) const
 
 	// Split and recurse
 	auto [poly0, poly1] = doSplit(bestSplit.first, bestSplit.second, {});
-	poly0.splitIntoConvex(output);
-	poly1.splitIntoConvex(output);
+	if (poly0.isValid() && poly1.isValid()) {
+		return poly0.splitIntoConvex(output) && poly1.splitIntoConvex(output);
+	}
+
+	return false;
 }
 
 std::pair<Polygon, Polygon> Polygon::doSplit(size_t v0, size_t v1, gsl::span<const Vector2f> insertVertices) const
@@ -736,10 +738,10 @@ std::pair<Polygon, Polygon> Polygon::doSplit(size_t v0, size_t v1, gsl::span<con
 	res.first.simplify();
 	res.second.simplify();
 
-	Ensures(res.first.valid);
-	Ensures(res.second.valid);
-	Ensures(res.first.clockwise == clockwise);
-	Ensures(res.second.clockwise == clockwise);
+	if (!res.first.valid || !res.second.valid || res.first.clockwise != clockwise || res.second.clockwise != clockwise) {
+		// Failed to split, probably due to starting with non-simple polygon
+		return {};
+	}
 
 	return res;
 }
