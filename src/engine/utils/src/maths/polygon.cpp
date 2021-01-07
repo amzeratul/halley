@@ -58,25 +58,26 @@ Polygon::Polygon(const ConfigNode& node)
 void Polygon::realize()
 {
 	checkConvex();
+
 	aabb = Rect4f::getSpanningRect(vertices);
 	circle = Circle::getSpanningCircle(vertices);
-
-	valid = vertices.size() >= 3;
 }
 
 void Polygon::checkConvex()
 {
-	size_t n = vertices.size();
+	const size_t n = vertices.size();
 	if (n < 3) {
 		convex = true;
 		clockwise = true;
+		valid = false;
+		return;
 	}
 	
 	size_t left = 0;
 	size_t right = 0;
 	float area2 = 0;
 
-	float epsilon = 0.000001f;
+	constexpr float epsilon = 0.000001f;
 	for (size_t i = 0; i < n; ++i) {
 		auto a = vertices[i];
 		auto b = vertices[(i + 1) % n];
@@ -96,6 +97,8 @@ void Polygon::checkConvex()
 
 	// Clockwise if the area is positive
 	clockwise = area2 > 0;
+
+	valid = std::abs(area2) > 0;
 }
 
 void Polygon::simplify(float epsilon)
