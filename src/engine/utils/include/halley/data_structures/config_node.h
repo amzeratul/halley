@@ -10,9 +10,38 @@
 #include <map>
 #include <vector>
 
+#include "halley/utils/type_traits.h"
+
 namespace Halley {
 	class Serializer;
 	class Deserializer;
+	class ConfigNode;
+
+	template<typename T>
+	struct HasToConfigNode
+	{
+	private:
+		typedef std::true_type yes;
+		typedef std::false_type no;
+		template<typename U> static auto test(int) -> decltype(std::declval<U>().toConfigNode(), yes());
+		template<typename> static no test(...);
+	 
+	public:
+		static constexpr bool value = std::is_same<decltype(test<T>(0)),yes>::value;
+	};
+
+	template<typename T>
+	struct HasConfigNodeConstructor
+	{
+	private:
+		typedef std::true_type yes;
+		typedef std::false_type no;
+		template<typename U> static auto test(int) -> decltype(U(std::declval<ConfigNode>()), yes());
+		template<typename> static no test(...);
+	 
+	public:
+		static constexpr bool value = std::is_same<decltype(test<T>(0)),yes>::value;
+	};
 
 	enum class ConfigNodeType
 	{
@@ -96,7 +125,11 @@ namespace Halley {
 			SequenceType seq;
 			seq.reserve(sequence.size());
 			for (auto& e: sequence) {
-				seq.push_back(ConfigNode(e));
+				if constexpr (HasToConfigNode<T>::value) {
+					seq.push_back(e.toConfigNode());
+				} else {
+					seq.push_back(ConfigNode(e));
+				}
 			}
 			*this = seq;
 		}
@@ -129,7 +162,11 @@ namespace Halley {
 			SequenceType seq;
 			seq.reserve(sequence.size());
 			for (auto& e: sequence) {
-				seq.push_back(ConfigNode(e));
+				if constexpr (HasToConfigNode<T>::value) {
+					seq.push_back(e.toConfigNode());
+				} else {
+					seq.push_back(ConfigNode(e));
+				}
 			}
 			return *this = seq;
 		}
@@ -169,7 +206,11 @@ namespace Halley {
 				std::vector<T> result;
 				result.reserve(asSequence().size());
 				for (const auto& e : asSequence()) {
-					result.emplace_back(e.convertTo(Tag<T>()));
+					if constexpr (HasConfigNodeConstructor<T>::value) {
+						result.emplace_back(T(e));
+					} else {
+						result.emplace_back(e.convertTo(Tag<T>()));
+					}
 				}
 				return result;
 			} else {
