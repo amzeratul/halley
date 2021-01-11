@@ -647,7 +647,9 @@ std::vector<Polygon> Polygon::splitIntoConvex() const
 
 bool Polygon::splitIntoConvex(std::vector<Polygon>& output) const
 {
-	Expects(isValid());
+	if (!isValid()) {
+		return false;
+	}
 	
 	if (isConvex()) {
 		output.push_back(*this);
