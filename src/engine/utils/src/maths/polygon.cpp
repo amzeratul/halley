@@ -235,7 +235,7 @@ bool Polygon::isPointInsideConvex(Vector2f point) const
 	for (size_t i = 0; i < len; i++) {
 		const auto a = point - vertices[i];
 		const auto b = vertices[(i+1) % len] - vertices[i];
-		if (a.cross(b) > 0) {
+		if (a.cross(b) < 0) {
 			return false;
 		}
 	}
