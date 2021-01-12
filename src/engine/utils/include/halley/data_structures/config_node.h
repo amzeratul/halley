@@ -213,6 +213,8 @@ namespace Halley {
 					}
 				}
 				return result;
+			} else if (type == ConfigNodeType::Undefined) {
+				return {};
 			} else {
 				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to std::vector<T>.", HalleyExceptions::Resources);
 			}
