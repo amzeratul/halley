@@ -1,6 +1,7 @@
 #include "halley/navigation/navmesh.h"
 
 #include "halley/data_structures/priority_queue.h"
+#include "halley/maths/random.h"
 #include "halley/maths/ray.h"
 using namespace Halley;
 
@@ -457,6 +458,8 @@ void Navmesh::addPolygonsToGrid()
 	for (size_t i = 0; i < polygons.size(); ++i) {
 		addPolygonToGrid(polygons[i], gsl::narrow<NodeId>(i));
 	}
+
+	computeArea();
 }
 
 void Navmesh::addPolygonToGrid(const Polygon& poly, NodeId idx)
@@ -492,6 +495,36 @@ gsl::span<const Navmesh::NodeId> Navmesh::getPolygonsAt(Vector2f pos, bool allow
 	}
 	
 	return polyGrid[x + y * gridSize.x];
+}
+
+float Navmesh::getArea() const
+{
+	return totalArea;
+}
+
+Vector2f Navmesh::getRandomPoint(Random& rng) const
+{
+	if (polygons.empty()) {
+		return Vector2f();
+	}
+	
+	const float areaThreshold = rng.getFloat(0, totalArea);
+	float accum = 0;
+	for (const auto& p: polygons) {
+		accum += p.getArea();
+		if (accum > areaThreshold) {
+			return p.getCentre();
+		}
+	}
+	return polygons[0].getCentre();
+}
+
+void Navmesh::computeArea()
+{
+	totalArea = 0;
+	for (const auto& p: polygons) {
+		totalArea += p.getArea();
+	}
 }
 
 void Navmesh::addToOpenEdges(NodeAndConn nodeAndConn, int id)

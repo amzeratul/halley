@@ -97,8 +97,9 @@ void Polygon::checkConvex()
 
 	// Clockwise if the area is positive
 	clockwise = area2 > 0;
+	area = std::abs(area2 * 0.5f);
 
-	valid = std::abs(area2) > 0;
+	valid = area > 0;
 }
 
 void Polygon::simplify(float epsilon)

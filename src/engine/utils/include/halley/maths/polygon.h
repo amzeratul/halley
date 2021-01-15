@@ -115,6 +115,8 @@ namespace Halley {
 
 		std::optional<size_t> getExitEdge(const Ray& ray) const;
 
+		float getArea() const { return area; }
+
 	private:
 		Circle circle;
 		VertexList vertices;
@@ -122,6 +124,7 @@ namespace Halley {
 		bool convex = false;
 		bool clockwise = false;
 		bool valid = false;
+		float area;
 
 		bool isPointInsideConvex(Vector2f point) const;
 		bool isPointInsideConcave(Vector2f point) const;

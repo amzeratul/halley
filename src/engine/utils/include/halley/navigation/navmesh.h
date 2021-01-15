@@ -6,6 +6,8 @@
 #include "halley/maths/base_transform.h"
 
 namespace Halley {
+	class Random;
+
 	struct NavmeshBounds {
 		Vector2f origin;
 		Vector2f side0;
@@ -97,6 +99,9 @@ namespace Halley {
 
 		Vector2f getPosition() const;
 
+		float getArea() const;
+		Vector2f getRandomPoint(Random& rng) const;
+
 	private:
 		struct State {
 			float gScore = std::numeric_limits<float>::infinity();
@@ -134,6 +139,8 @@ namespace Halley {
 		Vector2f offset;
 		Vector2i worldGridPos;
 
+		float totalArea = 0;
+
 		std::optional<std::vector<NodeAndConn>> pathfind(int fromId, int toId) const;
 		std::vector<NodeAndConn> makeResult(const std::vector<State>& state, int startId, int endId) const;
 		std::optional<NavigationPath> makePath(const NavigationQuery& query, const std::vector<NodeAndConn>& nodePath) const;
@@ -148,5 +155,7 @@ namespace Halley {
 		void addToOpenEdges(NodeAndConn nodeAndConn, int id);
 		OpenEdge& getOpenEdge(int id);
 		void postProcessOpenEdges();
+
+		void computeArea();
 	};
 }
