@@ -58,6 +58,13 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "os/os.h"
 
+#include "navigation/navmesh.h"
+#include "navigation/navmesh_generator.h"
+#include "navigation/navmesh_set.h"
+#include "navigation/navigation_query.h"
+#include "navigation/navigation_path.h"
+#include "navigation/navigation_path_follower.h"
+
 #include "plugin/plugin.h"
 
 #include "resources/metadata.h"
