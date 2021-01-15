@@ -213,6 +213,11 @@ void SceneEditor::onEntitySelected(std::optional<EntityRef> entity)
 {
 }
 
+Vector2f SceneEditor::getMousePos() const
+{
+	return mousePos;
+}
+
 const std::vector<EntityId>& SceneEditor::getCameraIds() const
 {
 	return cameraEntityIds;

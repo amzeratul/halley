@@ -70,6 +70,8 @@ namespace Halley {
 
     	virtual void onEntitySelected(std::optional<EntityRef> entity);
 
+    	Vector2f getMousePos() const;
+
     	Camera camera;
 
     private:
