@@ -206,6 +206,9 @@ namespace Halley
 			if (!data) {
 				throw Exception("Future has not been bound.", HalleyExceptions::Utils);
 			}
+			if (data->isCancelled()) {
+				throw Exception("Future was cancelled.", HalleyExceptions::Utils);
+			}
 			return data->get();
 		}
 
@@ -213,6 +216,9 @@ namespace Halley
 		{
 			if (!data) {
 				throw Exception("Future has not been bound.", HalleyExceptions::Utils);
+			}
+			if (data->isCancelled()) {
+				throw Exception("Waiting on cancelled future is not supported.", HalleyExceptions::Utils);
 			}
 			return data->wait();
 		}
