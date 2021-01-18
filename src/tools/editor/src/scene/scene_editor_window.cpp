@@ -348,13 +348,15 @@ void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId, 
 
 void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId, int childIndex, const EntityData& prevData)
 {
+	const String& newSelectionId = getNextSibling(parentId, childIndex);
+
 	undoStack.pushRemoved(modified, id, parentId, childIndex, prevData);
 	
 	gameBridge->onEntityRemoved(UUID(id));
 
-	entityList->onEntityRemoved(id, parentId);
+	entityList->onEntityRemoved(id, newSelectionId);
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
-	onEntitySelected(parentId);
+	onEntitySelected(newSelectionId);
 
 	markModified();
 }
@@ -616,6 +618,22 @@ const String* SceneEditorWindow::findParent(const String& entityId, const Entity
 	}
 
 	return nullptr;
+}
+
+String SceneEditorWindow::getNextSibling(const String& parentId, int childIndex) const
+{
+	const auto& node = sceneData->getEntityNodeData(parentId);
+	const auto& children = node.getData().getChildren();
+	if (children.empty()) {
+		// No other sibling, return parent
+		return parentId;
+	} else {
+		if (childIndex < static_cast<int>(children.size())) {
+			return children[childIndex].getInstanceUUID().toString();
+		} else {
+			return children.back().getInstanceUUID().toString();
+		}
+	}
 }
 
 void SceneEditorWindow::setCustomUI(std::shared_ptr<UIWidget> ui)

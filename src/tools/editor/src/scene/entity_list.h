@@ -21,7 +21,7 @@ namespace Halley {
 
 		void onEntityModified(const String& id, const EntityData& node);
 		void onEntityAdded(const String& id, const String& parentId, int childIndex, const EntityData& data);
-		void onEntityRemoved(const String& id, const String& parentId);
+		void onEntityRemoved(const String& id, const String& newSelectionId);
 		void select(const String& id);
 
 	protected:

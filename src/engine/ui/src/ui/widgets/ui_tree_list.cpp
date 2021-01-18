@@ -56,13 +56,18 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, size_t ch
 	needsRefresh = true;
 }
 
-void UITreeList::removeItem(const String& id)
+void UITreeList::removeItem(const String& id, bool immediate)
 {
 	auto item = root.removeFromTree(id);
 	if (item) {
 		removeTree(*item);
 	}
-	needsRefresh = true;
+
+	if (immediate) {
+		refresh();
+	} else {
+		needsRefresh = true;
+	}
 }
 
 void UITreeList::removeTree(const UITreeListItem& tree)
@@ -100,9 +105,14 @@ void UITreeList::update(Time t, bool moved)
 {
 	UIList::update(t, moved);
 	if (needsRefresh) {
-		root.updateTree(*this);
-		needsRefresh = false;
+		refresh();
 	}
+}
+
+void UITreeList::refresh()
+{
+	root.updateTree(*this);
+	needsRefresh = false;
 }
 
 void UITreeList::draw(UIPainter& painter) const

@@ -94,7 +94,7 @@ namespace Halley {
     	UITreeList(String id, UIStyle style);
 
         void addTreeItem(const String& id, const String& parentId, size_t childIndex, const LocalisedString& label, const String& labelStyle = "label", Sprite icon = Sprite(), bool forceLeaf = false);
-        void removeItem(const String& id);
+        void removeItem(const String& id, bool immediate = true);
         void setLabel(const String& id, const LocalisedString& label, Sprite icon);
 
         void clear() override;
@@ -121,5 +121,6 @@ namespace Halley {
         void setupEvents();
     	void reparentItem(const String& id, const String& newParentId, int childIndex);
     	void removeTree(const UITreeListItem& tree);
+    	void refresh();
     };
 }
