@@ -112,6 +112,7 @@ void EntityList::onEntityAdded(const String& id, const String& parentId, int chi
 {
 	addEntityTree(parentId, childIndex, data);
 	list->sortItems();
+	layout();
 	list->setSelectedOptionId(id);
 }
 

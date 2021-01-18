@@ -526,7 +526,7 @@ void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfRef
 	if (referenceEntity.isEmpty()) {
 		addEntity(String(), -1, std::move(data));
 	} else {
-		const bool isScene = sceneData->getEntityNodeData("").getData().isSceneRoot();
+		const bool isScene = prefab->isScene();
 		
 		const auto& ref = sceneData->getEntityNodeData(referenceEntity);
 		const bool canBeSibling = !ref.getParentId().isEmpty() || isScene;
@@ -536,15 +536,18 @@ void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfRef
 		}
 		
 		const bool addAsChild = (childOfReference && canBeChild) || !canBeSibling;
-		const String& parentId = addAsChild ? referenceEntity : ref.getParentId();
-
-		int childIndex = -1;
-		if (!addAsChild) {
-			const auto idx = ref.getData().getChildIndex(UUID(referenceEntity));
-			childIndex = idx ? static_cast<int>(idx.value()) : -1;
+		
+		if (addAsChild) {
+			const String& parentId = referenceEntity;
+			const int childIndex = -1;
+			addEntity(parentId, childIndex, std::move(data));
+		} else {
+			const String& parentId = ref.getParentId();
+			const auto& parentRef = sceneData->getEntityNodeData(parentId);
+			const auto idx = parentRef.getData().getChildIndex(UUID(referenceEntity));
+			const int childIndex = idx ? static_cast<int>(idx.value() + 1) : -1;
+			addEntity(parentId, childIndex, std::move(data));
 		}
-
-		addEntity(parentId, childIndex, std::move(data));
 	}
 }
 
@@ -706,7 +709,7 @@ bool SceneEditorWindow::isValidEntityTree(const ConfigNode& node) const
 		return false;
 	}
 	for (const auto& [k, v]: node.asMap()) {
-		if (k != "name" && k != "uuid" && k != "components" && k != "children" && k != "prefab") {
+		if (k != "name" && k != "uuid" && k != "components" && k != "children" && k != "prefab" && k != "icon") {
 			return false;
 		}
 	}
