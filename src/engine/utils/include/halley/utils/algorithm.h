@@ -78,8 +78,9 @@ namespace Halley
 			return;
 		}
 
-		for(int i = (end - begin)-1; i > 0; --i) {
-			int j = rng.getInt(0, i);
+		size_t n = end - begin - 1;
+		for(size_t i = 0; i < n; ++i) {
+			size_t j = rng.getSizeT(i, n);
 			std::swap(begin[i], begin[j]);
 		}
 	}
