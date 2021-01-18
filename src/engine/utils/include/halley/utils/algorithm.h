@@ -71,7 +71,18 @@ namespace Halley
 		return *(begin + rng.getSizeT(decltype(size)(0), size - 1));
 	}
 
+	template<typename Iter, typename R>
+	void shuffle(Iter begin, Iter end, R& rng)
+	{
+		if (begin == end) {
+			return;
+		}
 
+		for(int i = (end - begin)-1; i > 0; --i) {
+			int j = rng.getInt(0, i);
+			std::swap(begin[i], begin[j]);
+		}
+	}
 }
 
 namespace std_ex {
