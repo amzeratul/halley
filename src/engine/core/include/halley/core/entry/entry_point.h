@@ -16,7 +16,7 @@ namespace Halley
 	class Core;
 	class HalleyStatics;
 
-	constexpr static uint32_t HALLEY_DLL_API_VERSION = 27;
+	constexpr static uint32_t HALLEY_DLL_API_VERSION = 28;
 	
 	class IHalleyEntryPoint
 	{

@@ -82,6 +82,8 @@ namespace Halley
 		Metadata readMetadataFromDisk(const Path& filePath) const;
 		void writeMetadataToDisk(const Path& filePath, const Metadata& metadata);
 
+		void writeAssetToDisk(const Path& filePath, gsl::span<const gsl::byte> data);
+
 		std::vector<String> getAssetSrcList() const;
 		std::vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& path) const;
 

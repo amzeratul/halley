@@ -1,10 +1,11 @@
 #pragma once
+#include "halley/core/editor_extensions/scene_editor_interface.h"
 #include "halley/tools/dll/dynamic_library.h"
 
 namespace Halley {
 	class Project;
 
-	class SceneEditorGameBridge {
+	class SceneEditorGameBridge : private IAssetSaveInterface {
 	public:
 		SceneEditorGameBridge(const HalleyAPI& api, Resources& resources, UIFactory& factory, Project& project);
 		~SceneEditorGameBridge();
@@ -31,8 +32,11 @@ namespace Halley {
 		void onEntityMoved(const UUID& uuid, const EntityData& data);
 		ConfigNode onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options);
 		void onSceneLoaded(Prefab& scene);
+		void onSceneSaved();
 		void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor);
 
+		void saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
+	
 	private:
 		const HalleyAPI& api;
 		Resources& resources;
@@ -46,6 +50,8 @@ namespace Halley {
 		std::unique_ptr<SceneEditorGizmoCollection> gizmos;
 
 		Resources* gameResources = nullptr;
+
+		std::map<Path, Bytes> pendingAssets;
 
 		mutable bool errorState = false;
 		bool interfaceReady = false;

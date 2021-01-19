@@ -237,6 +237,13 @@ void Project::writeMetadataToDisk(const Path& filePath, const Metadata& metadata
 	notifyAssetFileModified(filePath);
 }
 
+void Project::writeAssetToDisk(const Path& path, gsl::span<const gsl::byte> data)
+{
+	const Path filePath = getAssetsSrcPath() / path;
+	FileSystem::writeFile(filePath, data);
+	notifyAssetFileModified(path);
+}
+
 std::vector<String> Project::getAssetSrcList() const
 {
 	return importAssetsDatabase->getInputFiles();

@@ -54,7 +54,10 @@ namespace Halley {
     	void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) override;
 
     protected:
-		virtual void onInit(std::shared_ptr<const UIColourScheme> colourScheme);
+    	Camera camera;
+		IAssetSaveInterface* assetSaveInterface;
+
+    	virtual void onInit(std::shared_ptr<const UIColourScheme> colourScheme);
     	
 		virtual void createServices(World& world);
 		virtual void createEntities(World& world);
@@ -72,9 +75,7 @@ namespace Halley {
 
     	Vector2f getMousePos() const;
 
-    	Camera camera;
-
-    private:
+	private:
 		const HalleyAPI* api = nullptr;
 		Resources* resources = nullptr;
 		Resources* editorResources = nullptr;

@@ -249,6 +249,11 @@ bool Path::operator!=(const Path& other) const
 	return false;
 }
 
+bool Path::operator<(const Path& other) const
+{
+	return pathParts < other.pathParts;
+}
+
 std::string Path::string() const
 {
 	return getString().cppStr();

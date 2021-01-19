@@ -86,12 +86,20 @@ namespace Halley {
 		void clear();
 	};
 
+	class IAssetSaveInterface {
+	public:
+		virtual ~IAssetSaveInterface() = default;
+
+		virtual void saveAsset(const Path& path, gsl::span<const gsl::byte> data) = 0;
+	};
+
     class SceneEditorContext {
     public:
         const HalleyAPI* api;
         Resources* resources;
         Resources* editorResources;
         ISceneEditorGizmoCollection* gizmos;
+    	IAssetSaveInterface* assetSaveInterface;
     };
 
     class IComponentEditorFieldFactory {
