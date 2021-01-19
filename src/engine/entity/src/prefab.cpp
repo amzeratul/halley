@@ -147,6 +147,13 @@ void Prefab::setGameData(const String& key, ConfigNode data)
 	gameData.getRoot()[key] = std::move(data);
 }
 
+void Prefab::removeGameData(const String& key)
+{
+	if (gameData.getRoot().getType() == ConfigNodeType::Map) {
+		gameData.getRoot().asMap().erase(key);
+	}
+}
+
 ConfigNode& Prefab::getGameData(const String& key)
 {
 	gameData.getRoot().ensureType(ConfigNodeType::Map);

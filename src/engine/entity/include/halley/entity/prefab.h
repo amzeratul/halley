@@ -34,6 +34,7 @@ namespace Halley {
 		const std::set<UUID>& getEntitiesRemoved() const;
 
 		void setGameData(const String& key, ConfigNode data);
+		void removeGameData(const String& key);
 		ConfigNode& getGameData(const String& key);
 		const ConfigNode* tryGetGameData(const String& key) const;
 

@@ -107,7 +107,7 @@ void SceneEditorWindow::onAddedToRoot()
 void SceneEditorWindow::loadScene(const String& name)
 {
 	unloadScene();
-	assetPath = project.getAssetsSrcPath() / project.getImportAssetsDatabase().getPrimaryInputFile(AssetType::Scene, name);
+	assetPath = project.getImportAssetsDatabase().getPrimaryInputFile(AssetType::Scene, name);
 
 	if (!name.isEmpty()) {
 		loadScene(AssetType::Scene, *project.getGameResources().get<Scene>(name));
@@ -117,7 +117,7 @@ void SceneEditorWindow::loadScene(const String& name)
 void SceneEditorWindow::loadPrefab(const String& name)
 {
 	unloadScene();
-	assetPath = project.getAssetsSrcPath() / project.getImportAssetsDatabase().getPrimaryInputFile(AssetType::Prefab, name);
+	assetPath = project.getImportAssetsDatabase().getPrimaryInputFile(AssetType::Prefab, name);
 
 	if (!name.isEmpty()) {
 		loadScene(AssetType::Prefab, *project.getGameResources().get<Prefab>(name));
