@@ -12,8 +12,11 @@ PrefabEditor::PrefabEditor(UIFactory& factory, Resources& resources, AssetType t
 {
 }
 
-void PrefabEditor::reload()
+void PrefabEditor::refreshAssets()
 {
+	if (window) {
+		window->refreshAssets();
+	}
 }
 
 void PrefabEditor::onDoubleClick()

@@ -193,6 +193,13 @@ bool SceneEditorGameBridge::saveAsset(const Path& path, gsl::span<const gsl::byt
 	return project.writeAssetToDisk(path, data);
 }
 
+void SceneEditorGameBridge::refreshAssets()
+{
+	if (interfaceReady) {
+		interface->refreshAssets();
+	}
+}
+
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {

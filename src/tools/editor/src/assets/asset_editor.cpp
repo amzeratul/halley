@@ -29,6 +29,10 @@ void AssetEditor::reload()
 {
 }
 
+void AssetEditor::refreshAssets()
+{
+}
+
 void AssetEditor::onDoubleClick()
 {
 }

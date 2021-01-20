@@ -145,6 +145,7 @@ namespace Halley {
     	virtual void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) = 0;
         virtual void onSceneLoaded(Prefab& scene) = 0;
     	virtual void onSceneSaved() = 0;
+        virtual void refreshAssets() = 0;
     };
 
 	class EntityTree {

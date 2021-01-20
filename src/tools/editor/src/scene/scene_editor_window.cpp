@@ -691,6 +691,13 @@ const EntityIcons& SceneEditorWindow::getEntityIcons() const
 	return *entityIcons;
 }
 
+void SceneEditorWindow::refreshAssets()
+{
+	if (gameBridge) {
+		gameBridge->refreshAssets();
+	}
+}
+
 String SceneEditorWindow::serializeEntity(const EntityData& node) const
 {
 	YAMLConvert::EmitOptions options;

@@ -65,6 +65,8 @@ namespace Halley {
 		bool isModified() const;
 		const EntityIcons& getEntityIcons() const;
 
+		void refreshAssets();
+
 	protected:
 		void update(Time t, bool moved) override;
 

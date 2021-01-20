@@ -377,6 +377,10 @@ void SceneEditor::setupConsoleCommands(UIDebugConsoleController& controller, ISc
 {
 }
 
+void SceneEditor::refreshAssets()
+{
+}
+
 Vector2f SceneEditor::roundPosition(Vector2f pos) const
 {
 	return roundPosition(pos, camera.getZoom());

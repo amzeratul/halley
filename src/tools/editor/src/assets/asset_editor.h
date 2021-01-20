@@ -17,6 +17,7 @@ namespace Halley {
 		void setResource(const String& assetId);
 		void clearResource();
 		virtual void reload();
+		virtual void refreshAssets();
         virtual void onDoubleClick();
         virtual bool isModified();
 

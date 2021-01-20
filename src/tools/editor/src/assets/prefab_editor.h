@@ -7,7 +7,7 @@ namespace Halley {
 	public:
 		PrefabEditor(UIFactory& factory, Resources& resources, AssetType type, Project& project, ProjectWindow& projectWindow);
 
-		void reload() override;
+		void refreshAssets() override;
 		void onDoubleClick() override;
 		bool isModified() override;
 

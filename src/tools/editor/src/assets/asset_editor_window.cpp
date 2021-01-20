@@ -149,7 +149,7 @@ void AssetEditorWindow::onDoubleClickAsset()
 void AssetEditorWindow::refreshAssets()
 {
 	for (auto& editor: curEditors) {
-		editor->reload();
+		editor->refreshAssets();
 	}
 }
 

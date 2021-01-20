@@ -54,6 +54,8 @@ namespace Halley {
 
     	void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) override;
 
+		void refreshAssets() override;
+    
     protected:
     	Camera camera;
 		IAssetSaveInterface* assetSaveInterface;
