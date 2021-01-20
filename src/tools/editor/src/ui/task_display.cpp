@@ -81,6 +81,7 @@ void TaskDisplay::setTask(std::shared_ptr<EditorTaskAnchor> task)
 	progressDisplay = 0;
 	completeTime = 0;
 	this->task = std::move(task);
+	lastStatus = EditorTaskStatus::WaitingToStart;
 }
 
 void TaskDisplay::onMakeUI()

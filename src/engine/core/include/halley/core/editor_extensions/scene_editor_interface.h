@@ -90,7 +90,7 @@ namespace Halley {
 	public:
 		virtual ~IAssetSaveInterface() = default;
 
-		virtual void saveAsset(const Path& path, gsl::span<const gsl::byte> data) = 0;
+		virtual bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) = 0;
 	};
 
     class SceneEditorContext {
@@ -144,6 +144,7 @@ namespace Halley {
     	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;
     	virtual void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) = 0;
         virtual void onSceneLoaded(Prefab& scene) = 0;
+    	virtual void onSceneSaved() = 0;
     };
 
 	class EntityTree {

@@ -107,7 +107,7 @@ bool SceneEditor::isReadyToCreateWorld() const
 
 void SceneEditor::createWorld(std::shared_ptr<const UIColourScheme> colourScheme)
 {
-	world = doCreateWorld();
+	world = doCreateWorld(getSceneEditorStageName());
 	createServices(*world);
 	createEntities(*world);
 	cameraEntityIds = createCamera();
@@ -142,10 +142,14 @@ void SceneEditor::onSceneLoaded(Prefab& scene)
 {
 }
 
-std::unique_ptr<World> SceneEditor::doCreateWorld()
+void SceneEditor::onSceneSaved()
+{
+}
+
+std::unique_ptr<World> SceneEditor::doCreateWorld(const String& stageName) const
 {
 	auto world = std::make_unique<World>(getAPI(), getGameResources(), true, CreateEntityFunctions::getCreateComponent());
-	const auto& sceneConfig = getGameResources().get<ConfigFile>(getSceneEditorStageName())->getRoot();
+	const auto& sceneConfig = getGameResources().get<ConfigFile>(stageName)->getRoot();
 	world->loadSystems(sceneConfig, CreateEntityFunctions::getCreateSystem());
 
 	return world;

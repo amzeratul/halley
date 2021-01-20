@@ -176,10 +176,9 @@ void SceneEditorGameBridge::onSceneLoaded(Prefab& scene)
 
 void SceneEditorGameBridge::onSceneSaved()
 {
-	for (const auto& [k, v]: pendingAssets) {
-		project.writeAssetToDisk(k, gsl::as_bytes(gsl::span<const Byte>(v)));
+	if (interfaceReady) {
+		interface->onSceneSaved();
 	}
-	pendingAssets.clear();
 }
 
 void SceneEditorGameBridge::setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor)
@@ -189,11 +188,9 @@ void SceneEditorGameBridge::setupConsoleCommands(UIDebugConsoleController& contr
 	}
 }
 
-void SceneEditorGameBridge::saveAsset(const Path& path, gsl::span<const gsl::byte> data)
+bool SceneEditorGameBridge::saveAsset(const Path& path, gsl::span<const gsl::byte> data)
 {
-	Bytes b(data.size_bytes());
-	memcpy(b.data(), data.data(), data.size_bytes());
-	pendingAssets[path] = std::move(b);
+	return project.writeAssetToDisk(path, data);
 }
 
 void SceneEditorGameBridge::load()

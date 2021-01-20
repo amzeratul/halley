@@ -237,11 +237,18 @@ void Project::writeMetadataToDisk(const Path& filePath, const Metadata& metadata
 	notifyAssetFileModified(filePath);
 }
 
-void Project::writeAssetToDisk(const Path& path, gsl::span<const gsl::byte> data)
+bool Project::writeAssetToDisk(const Path& path, gsl::span<const gsl::byte> data)
 {
 	const Path filePath = getAssetsSrcPath() / path;
-	FileSystem::writeFile(filePath, data);
-	notifyAssetFileModified(path);
+	auto existing = FileSystem::readFile(filePath);
+	auto oldData = gsl::as_bytes(gsl::span<const Byte>(existing));
+	
+	if (!std::equal(oldData.begin(), oldData.end(), data.begin(), data.end())) {
+		FileSystem::writeFile(filePath, data);
+		notifyAssetFileModified(path);
+		return true;
+	}
+	return false;
 }
 
 std::vector<String> Project::getAssetSrcList() const

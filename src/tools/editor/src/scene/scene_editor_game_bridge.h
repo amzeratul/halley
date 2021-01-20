@@ -35,7 +35,7 @@ namespace Halley {
 		void onSceneSaved();
 		void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor);
 
-		void saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
+		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
 	
 	private:
 		const HalleyAPI& api;
