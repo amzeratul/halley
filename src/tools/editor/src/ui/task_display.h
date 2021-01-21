@@ -5,18 +5,18 @@
 namespace Halley
 {
 	class TaskBar;
-	class EditorTaskSet;
+	class TaskSet;
 
 	class TaskDisplay : public UIWidget
 	{
 	public:
-		TaskDisplay(UIFactory& factory, std::shared_ptr<EditorTaskAnchor> task, TaskBar& taskBar);
+		TaskDisplay(UIFactory& factory, std::shared_ptr<TaskAnchor> task, TaskBar& taskBar);
 
 		void update(Time t, bool moved) override;
 		bool updateTask(Time time, float targetDisplaySlot);
 		
-		const std::shared_ptr<EditorTaskAnchor>& getTask() const { return task; }
-		void setTask(std::shared_ptr<EditorTaskAnchor> task);
+		const std::shared_ptr<TaskAnchor>& getTask() const { return task; }
+		void setTask(std::shared_ptr<TaskAnchor> task);
 
 		void onMakeUI() override;
 		float getDisplaySlot() const { return displaySlot; }
@@ -26,10 +26,10 @@ namespace Halley
 	
 	private:
 		UIFactory& factory;
-		std::shared_ptr<EditorTaskAnchor> task;
+		std::shared_ptr<TaskAnchor> task;
 		TaskBar& taskBar;
 
-		EditorTaskStatus lastStatus = EditorTaskStatus::WaitingToStart;
+		TaskStatus lastStatus = TaskStatus::WaitingToStart;
 
 		float progressDisplay = 0;
 		float completeTime = 0;

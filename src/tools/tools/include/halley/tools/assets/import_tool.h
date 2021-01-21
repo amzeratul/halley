@@ -4,13 +4,13 @@
 
 namespace Halley
 {
-	class ImportTool : public CommandLineTool, public EditorTaskSetListener
+	class ImportTool : public CommandLineTool, public TaskSetListener
 	{
 	public:
 		int run(Vector<std::string> args) override;
-		void onTaskAdded(const std::shared_ptr<EditorTaskAnchor>& task) override;
-		void onTaskTerminated(const std::shared_ptr<EditorTaskAnchor>& task) override;
-		void onTaskError(const std::shared_ptr<EditorTaskAnchor>& task) override;
+		void onTaskAdded(const std::shared_ptr<TaskAnchor>& task) override;
+		void onTaskTerminated(const std::shared_ptr<TaskAnchor>& task) override;
+		void onTaskError(const std::shared_ptr<TaskAnchor>& task) override;
 
 	private:
 		bool hasError = false;

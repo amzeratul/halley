@@ -7,7 +7,7 @@ namespace Halley
 {
 	class Project;
 
-	class CheckAssetsTask : public EditorTask
+	class CheckAssetsTask : public Task
 	{
 	public:
 		CheckAssetsTask(Project& project, bool oneShot);

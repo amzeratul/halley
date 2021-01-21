@@ -7,7 +7,7 @@
 namespace Halley {
 	class Project;
 
-	class DeleteAssetsTask : public EditorTask
+	class DeleteAssetsTask : public Task
 	{
 	public:
 		DeleteAssetsTask(ImportAssetsDatabase& db, Path assetsPath, Vector<ImportAssetsDatabaseEntry> assets);

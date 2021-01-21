@@ -23,7 +23,7 @@ void TaskDetails::show(const TaskDisplay& display)
 	if (taskDisplay != &display) {
 		taskDisplay = &display;
 		lastNumMessages = 0;
-		lastStatus = EditorTaskStatus::WaitingToStart;
+		lastStatus = TaskStatus::WaitingToStart;
 	}
 	
 	visible = true;
@@ -101,7 +101,7 @@ void TaskDetails::updateMessages()
 		lastNumMessages = task->getNumMessages();
 		lastStatus = task->getStatus();
 
-		const bool endedInError = lastStatus == EditorTaskStatus::Done && task->hasError();
+		const bool endedInError = lastStatus == TaskStatus::Done && task->hasError();
 		std::vector<std::pair<LoggerLevel, String>> msgs;
 		if (endedInError) {
 			msgs = task->copyMessagesHead(6, LoggerLevel::Error);

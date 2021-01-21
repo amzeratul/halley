@@ -11,9 +11,6 @@
 
 namespace Halley
 {
-	template <typename T>
-	class Task;
-
 	struct VoidWrapper
 	{};
 

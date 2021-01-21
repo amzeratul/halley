@@ -9,23 +9,23 @@
 
 using namespace Halley;
 
-EditorTaskAnchor::EditorTaskAnchor(std::unique_ptr<EditorTask> t, float delay)
+TaskAnchor::TaskAnchor(std::unique_ptr<Task> t, float delay)
 	: task(std::move(t))
-	, status(EditorTaskStatus::WaitingToStart)
+	, status(TaskStatus::WaitingToStart)
 	, timeToStart(delay)
 {
 	Expects(!!task);
 }
 
-EditorTaskAnchor::EditorTaskAnchor(EditorTaskAnchor&& other) noexcept = default;
-EditorTaskAnchor& EditorTaskAnchor::operator=(EditorTaskAnchor&& other) noexcept = default;
+TaskAnchor::TaskAnchor(TaskAnchor&& other) noexcept = default;
+TaskAnchor& TaskAnchor::operator=(TaskAnchor&& other) noexcept = default;
 
-EditorTaskAnchor::~EditorTaskAnchor()
+TaskAnchor::~TaskAnchor()
 {
 	terminate();
 }
 
-void EditorTaskAnchor::terminate()
+void TaskAnchor::terminate()
 {
 	if (!terminated) {
 		terminated = true;
@@ -33,12 +33,12 @@ void EditorTaskAnchor::terminate()
 		// If this has been moved, task will be null
 		if (task) {
 			// Wait for task to join
-			if (status != EditorTaskStatus::Done) {
+			if (status != TaskStatus::Done) {
 				cancel();
-				while (status == EditorTaskStatus::Started && !taskFuture.hasValue()) {
+				while (status == TaskStatus::Started && !taskFuture.hasValue()) {
 					using namespace std::chrono_literals;
 					std::this_thread::sleep_for(500ms);
-					if (status == EditorTaskStatus::Started && !taskFuture.hasValue()) {
+					if (status == TaskStatus::Started && !taskFuture.hasValue()) {
 						Logger::logInfo("Waiting for task thread to join...");
 					}
 				}
@@ -52,18 +52,18 @@ void EditorTaskAnchor::terminate()
 	}
 }
 
-void EditorTaskAnchor::update(float time)
+void TaskAnchor::update(float time)
 {
-	if (status == EditorTaskStatus::WaitingToStart) {
+	if (status == TaskStatus::WaitingToStart) {
 		timeToStart -= time;
 		if (timeToStart <= 0) {
-			status = EditorTaskStatus::Started;
+			status = TaskStatus::Started;
 			taskFuture = Concurrent::execute([this]() { task->run(); });
 		}
-	} else if (status == EditorTaskStatus::Started) {
+	} else if (status == TaskStatus::Started) {
 		bool done = taskFuture.hasValue();
 		if (done) {
-			status = EditorTaskStatus::Done;
+			status = TaskStatus::Done;
 			error = task->hasError();
 			progress = 1;
 			progressLabel = "";
@@ -75,79 +75,79 @@ void EditorTaskAnchor::update(float time)
 	}
 }
 
-EditorTaskStatus EditorTaskAnchor::getStatus() const
+TaskStatus TaskAnchor::getStatus() const
 {
 	return status;
 }
 
-String EditorTaskAnchor::getName() const
+String TaskAnchor::getName() const
 {
 	return task->name;
 }
 
-String EditorTaskAnchor::getProgressLabel() const
+String TaskAnchor::getProgressLabel() const
 {
 	return progressLabel;
 }
 
-bool EditorTaskAnchor::canCancel() const
+bool TaskAnchor::canCancel() const
 {
 	return task->isCancellable;
 }
 
-bool EditorTaskAnchor::isVisible() const
+bool TaskAnchor::isVisible() const
 {
 	return task->isVisible;
 }
 
-void EditorTaskAnchor::cancel()
+void TaskAnchor::cancel()
 {
-	if (status == EditorTaskStatus::WaitingToStart) {
-		status = EditorTaskStatus::Done;
+	if (status == TaskStatus::WaitingToStart) {
+		status = TaskStatus::Done;
 	}
 	if (task->isCancellable) {
 		task->cancelled = true;
 	}
 }
 
-void EditorTaskAnchor::setId(int value)
+void TaskAnchor::setId(int value)
 {
 	id = value;
 }
 
-bool EditorTaskAnchor::hasError() const
+bool TaskAnchor::hasError() const
 {
 	return error;
 }
 
-size_t EditorTaskAnchor::getNumMessages() const
+size_t TaskAnchor::getNumMessages() const
 {
 	return task->getNumMessages();
 }
 
-std::vector<std::pair<LoggerLevel, String>> EditorTaskAnchor::copyMessagesHead(size_t max, std::optional<LoggerLevel> filter) const
+std::vector<std::pair<LoggerLevel, String>> TaskAnchor::copyMessagesHead(size_t max, std::optional<LoggerLevel> filter) const
 {
 	return task->copyMessagesHead(max, filter);
 }
 
-std::vector<std::pair<LoggerLevel, String>> EditorTaskAnchor::copyMessagesTail(size_t max, std::optional<LoggerLevel> filter) const
+std::vector<std::pair<LoggerLevel, String>> TaskAnchor::copyMessagesTail(size_t max, std::optional<LoggerLevel> filter) const
 {
 	return task->copyMessagesTail(max, filter);
 }
 
-Vector<std::unique_ptr<EditorTask>> EditorTaskAnchor::getContinuations()
+Vector<std::unique_ptr<Task>> TaskAnchor::getContinuations()
 {
 	std::lock_guard<std::mutex> lock(task->mutex);
 	return std::move(task->continuations);
 }
 
-Vector<std::unique_ptr<EditorTask>> EditorTaskAnchor::getPendingTasks()
+Vector<std::unique_ptr<Task>> TaskAnchor::getPendingTasks()
 {
 	if (task->hasPendingTasksOnQueue) {
 		std::lock_guard<std::mutex> lock(task->mutex);
 		if (task->hasPendingTasksOnQueue) {
 			task->hasPendingTasksOnQueue = false;
-			Vector<std::unique_ptr<EditorTask>> result = std::move(task->pendingTasks);
+			Vector<std::unique_ptr<Task>> result = std::move(task->pendingTasks);
 			task->pendingTasks.clear();
 			return result;
 		}

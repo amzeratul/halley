@@ -6,7 +6,7 @@
 using namespace Halley;
 
 DeleteAssetsTask::DeleteAssetsTask(ImportAssetsDatabase& db, Path assetsPath, Vector<ImportAssetsDatabaseEntry> assets)
-	: EditorTask("Deleting assets", true, true)
+	: Task("Deleting assets", true, true)
 	, db(db)
 	, assetsPath(assetsPath)
 	, assets(assets)

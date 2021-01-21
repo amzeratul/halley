@@ -11,7 +11,7 @@ namespace Halley
 {
 	class Project;
 	
-	class ImportAssetsTask : public EditorTask
+	class ImportAssetsTask : public Task
 	{
 	public:
 		struct ImportResult {

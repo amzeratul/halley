@@ -11,20 +11,20 @@ namespace Halley
 {
 	enum class LoggerLevel;
 
-	class EditorTaskAnchor;
+	class TaskAnchor;
 
-	class EditorTask
+	class Task
 	{
-		friend class EditorTaskAnchor;
+		friend class TaskAnchor;
 
 	public:
-		virtual ~EditorTask() {}
+		virtual ~Task() {}
 
 	protected:
-		EditorTask(String name, bool isCancellable, bool isVisible);
+		Task(String name, bool isCancellable, bool isVisible);
 
 		virtual void run() = 0;
-		void addContinuation(std::unique_ptr<EditorTask> task);
+		void addContinuation(std::unique_ptr<Task> task);
 
 		void setName(String name);
 		void setProgress(float progress, String label = "");
@@ -43,14 +43,14 @@ namespace Halley
 		std::vector<std::pair<LoggerLevel, String>> copyMessagesTail(size_t max, std::optional<LoggerLevel> filter = {}) const;
 
 		bool hasPendingTasks() const;
-		void addPendingTask(std::unique_ptr<EditorTask> task);
+		void addPendingTask(std::unique_ptr<Task> task);
 		void onPendingTaskDone();
 
-		EditorTask* getParent() const;
+		Task* getParent() const;
 
 	private:
-		Vector<std::unique_ptr<EditorTask>> continuations;
-		Vector<std::unique_ptr<EditorTask>> pendingTasks;
+		Vector<std::unique_ptr<Task>> continuations;
+		Vector<std::unique_ptr<Task>> pendingTasks;
 
 		mutable std::mutex mutex;
 		std::atomic<float> progress;
@@ -61,7 +61,7 @@ namespace Halley
 		std::atomic<bool> hasPendingTasksOnQueue;
 		std::atomic<int> pendingTaskCount;
 
-		EditorTask* parent = nullptr;
+		Task* parent = nullptr;
 
 		const bool isCancellable;
 		const bool isVisible;

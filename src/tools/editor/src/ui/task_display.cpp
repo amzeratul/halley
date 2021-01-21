@@ -4,7 +4,7 @@
 using namespace Halley;
 
 
-TaskDisplay::TaskDisplay(UIFactory& factory, std::shared_ptr<EditorTaskAnchor> task, TaskBar& taskBar)
+TaskDisplay::TaskDisplay(UIFactory& factory, std::shared_ptr<TaskAnchor> task, TaskBar& taskBar)
 	: UIWidget("task", {}, UISizer())
 	, factory(factory)
 	, task(std::move(task))
@@ -38,7 +38,7 @@ void TaskDisplay::update(Time t, bool moved)
 	if (lastStatus != task->getStatus()) {
 		lastStatus = task->getStatus();
 
-		const String imageName = lastStatus == EditorTaskStatus::Done ? (task->hasError() ? "ui/task_anim_error.png" : "ui/task_anim_done.png") : "ui/task_anim_progress.png";
+		const String imageName = lastStatus == TaskStatus::Done ? (task->hasError() ? "ui/task_anim_error.png" : "ui/task_anim_done.png") : "ui/task_anim_progress.png";
 		icon->getSprite()
 			.setImage(factory.getResources(), imageName);
 	}
@@ -46,7 +46,7 @@ void TaskDisplay::update(Time t, bool moved)
 	icon->getSprite()
 		.setColour(col.multiplyAlpha(opacity))
 		.setPivot(Vector2f(0.5f, 0.5f))
-		.setRotation(Angle1f::fromRadians(task->getStatus() == EditorTaskStatus::Started ? static_cast<float>(elapsedTime * 10.0) : 0.0f));
+		.setRotation(Angle1f::fromRadians(task->getStatus() == TaskStatus::Started ? static_cast<float>(elapsedTime * 10.0) : 0.0f));
 }
 
 bool TaskDisplay::updateTask(Time time, float targetDisplaySlot)
@@ -61,7 +61,7 @@ bool TaskDisplay::updateTask(Time time, float targetDisplaySlot)
 
 	bool visible = true;
 
-	if (task->getStatus() == EditorTaskStatus::Done) {
+	if (task->getStatus() == TaskStatus::Done) {
 		progressDisplay = 1;
 		completeTime += static_cast<float>(time);
 		if (completeTime >= displayTime && !task->hasError()) {
@@ -76,12 +76,12 @@ bool TaskDisplay::updateTask(Time time, float targetDisplaySlot)
 	return visible || opacity > 0.0001f;
 }
 
-void TaskDisplay::setTask(std::shared_ptr<EditorTaskAnchor> task)
+void TaskDisplay::setTask(std::shared_ptr<TaskAnchor> task)
 {
 	progressDisplay = 0;
 	completeTime = 0;
 	this->task = std::move(task);
-	lastStatus = EditorTaskStatus::WaitingToStart;
+	lastStatus = TaskStatus::WaitingToStart;
 }
 
 void TaskDisplay::onMakeUI()

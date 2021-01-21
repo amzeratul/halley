@@ -10,7 +10,7 @@
 using namespace Halley;
 
 BuildProjectTask::BuildProjectTask(Project& project)
-	: EditorTask("Building project", true, true)
+	: Task("Building project", true, true)
 	, project(project)
 {
 	const String scriptName = [] ()
@@ -70,7 +70,7 @@ void BuildProjectTask::log(LoggerLevel level, const String& msg)
 		break;
 	}
 
-	EditorTask::log(level, msg);
+	Task::log(level, msg);
 }
 
 void BuildProjectTask::tryToIdentifyBuildSystem(const String& msg)

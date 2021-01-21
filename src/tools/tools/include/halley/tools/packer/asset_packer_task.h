@@ -7,7 +7,7 @@ namespace Halley
 {
 	class Project;
 	
-	class AssetPackerTask : public EditorTask
+	class AssetPackerTask : public Task
 	{
 	public:
 		explicit AssetPackerTask(Project& project, std::optional<std::set<String>> assetsToPack, std::vector<String> deletedAssets);

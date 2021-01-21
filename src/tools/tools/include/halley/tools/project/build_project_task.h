@@ -6,7 +6,7 @@
 namespace Halley {
 	class Project;
 
-	class BuildProjectTask : public EditorTask, ILoggerSink {
+	class BuildProjectTask : public Task, ILoggerSink {
     public:
     	BuildProjectTask(Project& project);
 

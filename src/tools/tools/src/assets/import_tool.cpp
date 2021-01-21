@@ -29,7 +29,7 @@ int ImportTool::run(Vector<std::string> args)
 		}
 		Logger::logInfo("Importing project at \"" + projectPath + "\", with Halley root at \"" + halleyRootPath + "\" and manifest at \"" + proj->getAssetPackManifestPath() + "\"");
 
-		auto tasks = std::make_unique<EditorTaskSet>();
+		auto tasks = std::make_unique<TaskSet>();
 		tasks->setListener(*this);
 		tasks->addTask(std::make_unique<CheckAssetsTask>(*proj, true));
 		auto last = std::chrono::steady_clock::now();
@@ -57,17 +57,17 @@ int ImportTool::run(Vector<std::string> args)
 	}
 }
 
-void ImportTool::onTaskAdded(const std::shared_ptr<EditorTaskAnchor>& task)
+void ImportTool::onTaskAdded(const std::shared_ptr<TaskAnchor>& task)
 {
 	Logger::logInfo("Task added: " + task->getName());
 }
 
-void ImportTool::onTaskTerminated(const std::shared_ptr<EditorTaskAnchor>& task)
+void ImportTool::onTaskTerminated(const std::shared_ptr<TaskAnchor>& task)
 {
 	Logger::logInfo("Task ended: " + task->getName());
 }
 
-void ImportTool::onTaskError(const std::shared_ptr<EditorTaskAnchor>& task)
+void ImportTool::onTaskError(const std::shared_ptr<TaskAnchor>& task)
 {
 	Logger::logError("Task ended in error: " + task->getName());
 	hasError = true;

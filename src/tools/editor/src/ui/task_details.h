@@ -28,7 +28,7 @@ namespace Halley {
 		const TaskDisplay* taskDisplay = nullptr;
 		Time showTime = 0;
 		size_t lastNumMessages = 0;
-		EditorTaskStatus lastStatus = EditorTaskStatus::WaitingToStart;
+		TaskStatus lastStatus = TaskStatus::WaitingToStart;
 
 		void updateMessages();
 		void copyToClipboard(bool verbose);

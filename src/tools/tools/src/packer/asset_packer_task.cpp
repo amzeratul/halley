@@ -6,7 +6,7 @@
 using namespace Halley;
 
 AssetPackerTask::AssetPackerTask(Project& project, std::optional<std::set<String>> assetsToPack, std::vector<String> deletedAssets)
-	: EditorTask("Packing assets", true, true)
+	: Task("Packing assets", true, true)
 	, project(project)
 	, assetsToPack(std::move(assetsToPack))
 	, deletedAssets(std::move(deletedAssets))
