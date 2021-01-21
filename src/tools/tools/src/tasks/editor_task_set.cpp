@@ -28,7 +28,7 @@ EditorTaskSet::~EditorTaskSet()
 
 void EditorTaskSet::update(Time time)
 {
-	Vector<EditorTaskAnchor> toAdd;
+	Vector<std::unique_ptr<EditorTask>> toAdd;
 
 	auto next = tasks.begin();
 	for (auto iter = tasks.begin(); iter != tasks.end(); iter = next) {
@@ -63,13 +63,18 @@ void EditorTaskSet::update(Time time)
 	}
 }
 
-void EditorTaskSet::addTask(EditorTaskAnchor&& task)
+void EditorTaskSet::addTask(std::shared_ptr<EditorTaskAnchor> task)
 {
-	task.setId(nextId++);
-	tasks.emplace_back(std::make_shared<EditorTaskAnchor>(std::move(task)));
+	tasks.emplace_back(std::move(task));
+	tasks.back()->setId(nextId++);
 	if (listener) {
 		listener->onTaskAdded(tasks.back());
 	}
+}
+
+void EditorTaskSet::addTask(std::unique_ptr<EditorTask> task)
+{
+	addTask(std::make_shared<EditorTaskAnchor>(std::move(task)));
 }
 
 void EditorTaskSet::setListener(EditorTaskSetListener& l)

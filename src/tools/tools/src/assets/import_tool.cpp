@@ -31,7 +31,7 @@ int ImportTool::run(Vector<std::string> args)
 
 		auto tasks = std::make_unique<EditorTaskSet>();
 		tasks->setListener(*this);
-		tasks->addTask(EditorTaskAnchor(std::make_unique<CheckAssetsTask>(*proj, true)));
+		tasks->addTask(std::make_unique<CheckAssetsTask>(*proj, true));
 		auto last = std::chrono::steady_clock::now();
 
 		while (!tasks->getTasks().empty()) {

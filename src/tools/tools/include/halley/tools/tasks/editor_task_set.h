@@ -21,7 +21,8 @@ namespace Halley
 		~EditorTaskSet();
 		
 		void update(Time time);
-		void addTask(EditorTaskAnchor&& editorTaskAnchor);
+		void addTask(std::shared_ptr<EditorTaskAnchor> editorTaskAnchor);
+		void addTask(std::unique_ptr<EditorTask> task);
 
 		void setListener(EditorTaskSetListener& listener);
 

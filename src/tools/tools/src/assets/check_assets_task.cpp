@@ -269,7 +269,7 @@ bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, std::map<String, I
 		}
 
 		logInfo("Assets to be deleted: " + toString(toDelete.size()));
-		addPendingTask(EditorTaskAnchor(std::make_unique<DeleteAssetsTask>(db, dstPath, std::move(toDelete))));
+		addPendingTask(std::make_unique<DeleteAssetsTask>(db, dstPath, std::move(toDelete)));
 	}
 
 	// Import assets
@@ -277,7 +277,7 @@ bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, std::map<String, I
 	if (hasImport || !deletedAssets.empty()) {
 		auto toImport = hasImport ? getAssetsToImport(db, assets) : std::vector<ImportAssetsDatabaseEntry>();
 		logInfo("Importing " + toString(toImport.size()) + " assets and deleting " + toString(deletedAssets.size()) + " assets.");
-		addPendingTask(EditorTaskAnchor(std::make_unique<ImportAssetsTask>(taskName, db, projectAssetImporter, dstPath, std::move(toImport), std::move(deletedAssets), project, packAfter)));
+		addPendingTask(std::make_unique<ImportAssetsTask>(taskName, db, projectAssetImporter, dstPath, std::move(toImport), std::move(deletedAssets), project, packAfter));
 		return true;
 	}
 	return false;

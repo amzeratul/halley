@@ -19,16 +19,10 @@ EditorTask::EditorTask(String name, bool isCancellable, bool isVisible)
 	, isVisible(isVisible)
 {}
 
-void EditorTask::addContinuation(EditorTaskAnchor&& task)
+void EditorTask::addContinuation(std::unique_ptr<EditorTask> task)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	continuations.emplace_back(std::move(task));
-}
-
-void EditorTask::setContinuations(Vector<EditorTaskAnchor>&& tasks)
-{
-	std::lock_guard<std::mutex> lock(mutex);
-	continuations = std::move(tasks);
 }
 
 void EditorTask::setName(String name)
@@ -133,9 +127,9 @@ bool EditorTask::hasPendingTasks() const
 	return pendingTaskCount != 0;
 }
 
-void EditorTask::addPendingTask(EditorTaskAnchor&& task)
+void EditorTask::addPendingTask(std::unique_ptr<EditorTask> task)
 {
-	task.setParent(*this);
+	task->parent = this;
 	std::lock_guard<std::mutex> lock(mutex);
 
 	++pendingTaskCount;
@@ -146,10 +140,15 @@ void EditorTask::addPendingTask(EditorTaskAnchor&& task)
 
 void EditorTask::onPendingTaskDone(const EditorTaskAnchor& editorTaskAnchor)
 {
-	Expects(pendingTaskCount > 0);
 	std::lock_guard<std::mutex> lock(mutex);
+	Expects(pendingTaskCount > 0);
 	--pendingTaskCount;
 	Ensures(pendingTaskCount >= 0);
+}
+
+EditorTask* EditorTask::getParent() const
+{
+	return parent;
 }
 
 EditorTaskAnchor::EditorTaskAnchor(std::unique_ptr<EditorTask> t, float delay)
@@ -187,6 +186,7 @@ void EditorTaskAnchor::terminate()
 				}
 			}
 
+			auto* parent = task->getParent();
 			if (parent) {
 				parent->onPendingTaskDone(*this);
 			}
@@ -277,28 +277,23 @@ std::vector<std::pair<LoggerLevel, String>> EditorTaskAnchor::copyMessagesTail(s
 	return task->copyMessagesTail(max, filter);
 }
 
-Vector<EditorTaskAnchor> EditorTaskAnchor::getContinuations()
+Vector<std::unique_ptr<EditorTask>> EditorTaskAnchor::getContinuations()
 {
 	std::lock_guard<std::mutex> lock(task->mutex);
 	return std::move(task->continuations);
 }
 
-Vector<EditorTaskAnchor> EditorTaskAnchor::getPendingTasks()
+Vector<std::unique_ptr<EditorTask>> EditorTaskAnchor::getPendingTasks()
 {
 	if (task->hasPendingTasksOnQueue) {
 		std::lock_guard<std::mutex> lock(task->mutex);
 		if (task->hasPendingTasksOnQueue) {
 			task->hasPendingTasksOnQueue = false;
-			Vector<EditorTaskAnchor> result = std::move(task->pendingTasks);
+			Vector<std::unique_ptr<EditorTask>> result = std::move(task->pendingTasks);
 			task->pendingTasks.clear();
 			return result;
 		}
 	}
 	
-	return Vector<EditorTaskAnchor>();
-}
-
-void EditorTaskAnchor::setParent(EditorTask& editorTask)
-{
-	parent = &editorTask;
+	return {};
 }

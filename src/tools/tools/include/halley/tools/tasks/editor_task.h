@@ -31,8 +31,7 @@ namespace Halley
 		EditorTask(String name, bool isCancellable, bool isVisible);
 
 		virtual void run() = 0;
-		void addContinuation(EditorTaskAnchor&& task);
-		void setContinuations(Vector<EditorTaskAnchor>&& tasks);
+		void addContinuation(std::unique_ptr<EditorTask> task);
 
 		void setName(String name);
 		void setProgress(float progress, String label = "");
@@ -51,12 +50,14 @@ namespace Halley
 		std::vector<std::pair<LoggerLevel, String>> copyMessagesTail(size_t max, std::optional<LoggerLevel> filter = {}) const;
 
 		bool hasPendingTasks() const;
-		void addPendingTask(EditorTaskAnchor&& task);
+		void addPendingTask(std::unique_ptr<EditorTask> task);
 		void onPendingTaskDone(const EditorTaskAnchor& editorTaskAnchor);
 
+		EditorTask* getParent() const;
+
 	private:
-		Vector<EditorTaskAnchor> continuations;
-		Vector<EditorTaskAnchor> pendingTasks;
+		Vector<std::unique_ptr<EditorTask>> continuations;
+		Vector<std::unique_ptr<EditorTask>> pendingTasks;
 
 		mutable std::mutex mutex;
 		std::atomic<float> progress;
@@ -66,6 +67,8 @@ namespace Halley
 		std::atomic<bool> cancelled;
 		std::atomic<bool> hasPendingTasksOnQueue;
 		std::atomic<int> pendingTaskCount;
+
+		EditorTask* parent = nullptr;
 
 		const bool isCancellable;
 		const bool isVisible;
@@ -107,15 +110,12 @@ namespace Halley
 		std::vector<std::pair<LoggerLevel, String>> copyMessagesHead(size_t max, std::optional<LoggerLevel> filter = {}) const;
 		std::vector<std::pair<LoggerLevel, String>> copyMessagesTail(size_t max, std::optional<LoggerLevel> filter = {}) const;
 
-		Vector<EditorTaskAnchor> getContinuations();
-		Vector<EditorTaskAnchor> getPendingTasks();
-		void setParent(EditorTask& editorTask);
+		Vector<std::unique_ptr<EditorTask>> getContinuations();
+		Vector<std::unique_ptr<EditorTask>> getPendingTasks();
 
 	private:
 		std::unique_ptr<EditorTask> task;
 		Future<void> taskFuture;
-
-		EditorTask* parent = nullptr;
 
 		EditorTaskStatus status;
 		float timeToStart = 0;

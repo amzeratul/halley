@@ -82,7 +82,7 @@ void ImportAssetsTask::run()
 			}
 
 			if (packAfter) {
-				addContinuation(EditorTaskAnchor(std::make_unique<AssetPackerTask>(project, std::move(outputAssets), std::move(deletedAssets))));
+				addContinuation(std::make_unique<AssetPackerTask>(project, std::move(outputAssets), std::move(deletedAssets)));
 			}
 		}
 	}
