@@ -11,6 +11,9 @@ set(SOURCES
         
         "src/concurrency/concurrent.cpp"
         "src/concurrency/executor.cpp"
+        "src/concurrency/task.cpp"
+        "src/concurrency/task_anchor.cpp"
+        "src/concurrency/task_set.cpp"
         
         "src/data_structures/bin_pack.cpp"
         "src/data_structures/config_node.cpp"
@@ -99,6 +102,8 @@ set(HEADERS
         "include/halley/concurrency/executor.h"
         "include/halley/concurrency/future.h"
         "include/halley/concurrency/task.h"
+        "include/halley/concurrency/task_anchor.h"
+        "include/halley/concurrency/task_set.h"
         
         "include/halley/data_structures/bin_pack.h"
         "include/halley/data_structures/config_node.h"

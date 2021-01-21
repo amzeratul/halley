@@ -83,9 +83,6 @@ set(SOURCES
     "src/sprites/aseprite_file.cpp"
     "src/sprites/aseprite_reader.cpp"
 
-    "src/tasks/editor_task.cpp"
-    "src/tasks/editor_task_set.cpp"
-
     "src/project/build_project_task.cpp"
     "src/project/project.cpp"
     "src/project/project_loader.cpp"
@@ -132,9 +129,6 @@ set(HEADERS
     "include/halley/tools/assets/import_assets_database.h"
     "include/halley/tools/assets/import_tool.h"
     "include/halley/tools/assets/metadata_importer.h"
-
-    "include/halley/tools/tasks/editor_task.h"
-    "include/halley/tools/tasks/editor_task_set.h"
 
     "include/halley/tools/packer/asset_pack_inspector.h"
     "include/halley/tools/packer/asset_pack_manifest.h"

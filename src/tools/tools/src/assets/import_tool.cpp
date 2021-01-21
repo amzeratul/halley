@@ -1,7 +1,7 @@
 #include "halley/tools/assets/import_tool.h"
 #include "halley/tools/codegen/codegen.h"
 #include "halley/tools/project/project.h"
-#include "halley/tools/tasks/editor_task_set.h"
+#include "halley/concurrency/task_anchor.h"
 #include "halley/tools/assets/check_assets_task.h"
 #include <thread>
 #include <chrono>

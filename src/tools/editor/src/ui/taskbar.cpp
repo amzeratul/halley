@@ -1,9 +1,6 @@
 #include "taskbar.h"
-
-
 #include "task_details.h"
 #include "task_display.h"
-#include "halley/tools/tasks/editor_task_set.h"
 
 using namespace Halley;
 

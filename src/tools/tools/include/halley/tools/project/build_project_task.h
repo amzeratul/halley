@@ -1,6 +1,6 @@
 #pragma once
 #include "halley/support/logger.h"
-#include "halley/tools/tasks/editor_task.h"
+#include "halley/concurrency/task.h"
 #include <regex>
 
 namespace Halley {

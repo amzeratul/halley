@@ -1,7 +1,9 @@
-#include "halley/tools/tasks/editor_task_set.h"
+#include "halley/concurrency/task_set.h"
 #include <thread>
 #include <chrono>
 #include <iostream>
+
+#include "halley/concurrency/task_anchor.h"
 
 using namespace Halley;
 using namespace std::chrono_literals;

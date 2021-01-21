@@ -1,7 +1,6 @@
 #pragma once
 
 #include "prec.h"
-#include "halley/tools/tasks/editor_task_set.h"
 #include "ui/toolbar.h"
 
 namespace Halley {

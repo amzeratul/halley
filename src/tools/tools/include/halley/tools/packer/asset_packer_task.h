@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/tools/tasks/editor_task.h"
+#include "halley/concurrency/task.h"
 #include "asset_packer.h"
 #include "halley/data_structures/maybe.h"
 

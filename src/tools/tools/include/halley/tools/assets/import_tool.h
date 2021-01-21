@@ -1,6 +1,6 @@
 #pragma once
 #include "halley/tools/cli_tool.h"
-#include "halley/tools/tasks/editor_task_set.h"
+#include "halley/concurrency/task_set.h"
 
 namespace Halley
 {

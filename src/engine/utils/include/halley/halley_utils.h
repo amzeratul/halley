@@ -3,6 +3,9 @@
 namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "concurrency/concurrent.h"
+#include "concurrency/task.h"
+#include "concurrency/task_anchor.h"
+#include "concurrency/task_set.h"
 
 #include "bytes/byte_serializer.h"
 #include "bytes/compression.h"

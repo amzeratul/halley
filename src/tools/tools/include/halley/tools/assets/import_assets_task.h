@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/tools/tasks/editor_task.h"
+#include "halley/concurrency/task.h"
 #include "halley/file/path.h"
 #include "import_assets_database.h"
 #include <vector>

@@ -1,8 +1,8 @@
 #pragma once
-#include "../tasks/editor_task.h"
 #include "halley/data_structures/vector.h"
 #include "halley/file/path.h"
 #include "import_assets_database.h"
+#include "halley/concurrency/task.h"
 
 namespace Halley {
 	class Project;
