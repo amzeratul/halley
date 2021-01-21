@@ -2,6 +2,8 @@
 
 #include <mutex>
 #include <atomic>
+#include <list>
+#include <vector>
 
 #include "halley/data_structures/vector.h"
 #include "halley/text/halleystring.h"
