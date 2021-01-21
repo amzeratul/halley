@@ -453,46 +453,22 @@ namespace Halley
 	};
 
 	template <typename T>
-	class Task
+	class TaskQueueHelper
 	{
 	public:
-		Task()
-		{}
-
-		Task(std::function<T()> f)
-			: payload(MovableStdFunction<T>(f))
-		{}
-
-		Task(MovableFunction<T> f)
-			: payload(f)
-		{}
-
-		void setPayload(MovableFunction<T> f)
+		[[nodiscard]] static Future<T> enqueueOn(ExecutionQueue& e, MovableFunction<T> payload)
 		{
-			payload = std::move(f);
+			Promise<T> promise;
+			enqueueOn(e, std::move(payload), promise);
+			return promise.getFuture();
 		}
-
-		Future<T> enqueueOn(ExecutionQueue& e)
+		
+		static void enqueueOn(ExecutionQueue& e, MovableFunction<T> payload, Promise<T> promise)
 		{
 			e.addToQueue([payload(std::move(payload)), promise(promise)]() mutable {
 				TaskHelper<T>::setPromise(promise, payload);
 			});
-			return getFuture();
 		}
-
-		Future<T> enqueueOnDefault()
-		{
-			return enqueueOn(ExecutionQueue::getDefault());
-		}
-
-		Future<T> getFuture()
-		{
-			return promise.getFuture();
-		}
-
-	private:
-		Promise<T> promise;
-		MovableFunction<T> payload;
 	};
 
 	template<typename T>
@@ -502,11 +478,10 @@ namespace Halley
 		using R = typename TaskHelper<T>::template FunctionHelper<F>::ReturnType;
 		std::reference_wrapper<E> executor(e);
 
-		auto task = Task<R>();
-		data->addContinuation([task, f, executor](typename TaskHelper<T>::DataType v) mutable {
-			task.setPayload(MovableFunction<R>(f, std::move(v)));
-			task.enqueueOn(executor.get());
+		auto promise = Promise<R>();
+		data->addContinuation([promise, f, executor](typename TaskHelper<T>::DataType v) mutable {
+			TaskQueueHelper<R>::enqueueOn(executor.get(), MovableFunction<R>(f, std::move(v)), promise);
 		});
-		return task.getFuture();
+		return promise.getFuture();
 	}
 }

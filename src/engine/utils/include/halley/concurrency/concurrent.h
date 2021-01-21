@@ -18,28 +18,17 @@ namespace Halley
 
 	namespace Concurrent
 	{
-		template <typename T>
-		auto execute(ExecutionQueue& e, Task<T> task) -> Future<T>
-		{
-			return task.enqueueOn(e);
-		}
-
 		template <typename F>
 		auto execute(ExecutionQueue& e, F f) -> Future<typename std::result_of<F()>::type>
 		{
-			return execute(e, Task<typename std::result_of<F()>::type>(f));
-		}
-
-		template <typename T>
-		auto execute(Task<T> task) -> Future<T>
-		{
-			return execute(ExecutionQueue::getDefault(), task);
+			using R = typename std::result_of<F()>::type;
+			return TaskQueueHelper<R>::enqueueOn(e, MovableFunction<R>(std::move(f)));
 		}
 
 		template <typename F>
 		auto execute(F f) -> Future<typename std::result_of<F()>::type>
 		{
-			return execute(ExecutionQueue::getDefault(), Task<typename std::result_of<F()>::type>(f));
+			return execute<F>(ExecutionQueue::getDefault(), std::move(f));
 		}
 
 		template <typename Iter>

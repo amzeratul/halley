@@ -58,7 +58,7 @@ void EditorTaskAnchor::update(float time)
 		timeToStart -= time;
 		if (timeToStart <= 0) {
 			status = EditorTaskStatus::Started;
-			taskFuture = Concurrent::execute(Task<void>([this]() { task->run(); }));
+			taskFuture = Concurrent::execute([this]() { task->run(); });
 		}
 	} else if (status == EditorTaskStatus::Started) {
 		bool done = taskFuture.hasValue();
