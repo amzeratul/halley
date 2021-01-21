@@ -111,7 +111,7 @@ void NavmeshSet::linkNavmeshes()
 	portalNodes.clear();
 
 	for (auto& navmesh: navmeshes) {
-		navmesh.markEdgesDisconnected();
+		navmesh.markPortalsDisconnected();
 	}
 
 	// Link meshes
@@ -174,8 +174,8 @@ void NavmeshSet::tryLinkNavMeshes(size_t idxA, size_t idxB)
 			
 			if (edgeA.canJoinWith(edgeB)) {
 				// Join edges
-				a.markEdgeConnected(edgeAIdx);
-				b.markEdgeConnected(edgeBIdx);
+				a.markPortalConnected(edgeAIdx);
+				b.markPortalConnected(edgeBIdx);
 
 				const auto curPos = edgeA.pos;
 

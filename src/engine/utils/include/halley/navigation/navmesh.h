@@ -94,8 +94,8 @@ namespace Halley {
 		[[nodiscard]] Vector2i getWorldGridPos() const { return worldGridPos; }
 		[[nodiscard]] int getSubWorld() const { return subWorld; }
 
-		void markEdgeConnected(size_t idx);
-		void markEdgesDisconnected();
+		void markPortalConnected(size_t idx);
+		void markPortalsDisconnected();
 
 		Vector2f getPosition() const;
 

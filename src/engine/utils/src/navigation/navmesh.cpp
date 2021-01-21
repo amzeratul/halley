@@ -401,21 +401,25 @@ void Navmesh::setWorldPosition(Vector2f newOffset, Vector2i gridPos)
 	for (auto& poly: polygons) {
 		poly.translate(delta);
 	}
-	for (auto& edge: portals) {
-		edge.translate(delta);
+	for (auto& portal: portals) {
+		portal.translate(delta);
+	}
+	for (auto& edge: openEdges) {
+		edge.second.a += delta;
+		edge.second.b += delta;
 	}
 	origin += delta;
 }
 
-void Navmesh::markEdgeConnected(size_t idx)
+void Navmesh::markPortalConnected(size_t idx)
 {
 	portals[idx].connected = true;
 }
 
-void Navmesh::markEdgesDisconnected()
+void Navmesh::markPortalsDisconnected()
 {
-	for (auto& edge: portals) {
-		edge.connected = false;
+	for (auto& portal: portals) {
+		portal.connected = false;
 	}
 }
 
