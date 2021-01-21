@@ -5,10 +5,11 @@
 using namespace Halley;
 
 
-SceneEditorGameBridge::SceneEditorGameBridge(const HalleyAPI& api, Resources& resources, UIFactory& factory, Project& project)
+SceneEditorGameBridge::SceneEditorGameBridge(const HalleyAPI& api, Resources& resources, UIFactory& factory, Project& project, ProjectWindow& projectWindow)
 	: api(api)
 	, resources(resources)
 	, project(project)
+	, projectWindow(projectWindow)
 	, factory(factory)
 {
 	gizmos = std::make_unique<SceneEditorGizmoCollection>(factory, resources);
@@ -193,6 +194,10 @@ bool SceneEditorGameBridge::saveAsset(const Path& path, gsl::span<const gsl::byt
 	return project.writeAssetToDisk(path, data);
 }
 
+void SceneEditorGameBridge::addTask()
+{
+}
+
 void SceneEditorGameBridge::refreshAssets()
 {
 	if (interfaceReady) {
@@ -223,7 +228,7 @@ void SceneEditorGameBridge::load()
 		context.editorResources = &resources;
 		context.api = gameAPI.get();
 		context.gizmos = gizmos.get();
-		context.assetSaveInterface = this;
+		context.editorInterface = this;
 
 		guardedRun([&]() {
 			interface->init(context);

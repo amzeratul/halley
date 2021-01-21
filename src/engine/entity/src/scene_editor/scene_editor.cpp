@@ -30,7 +30,7 @@ void SceneEditor::init(SceneEditorContext& context)
 	resources = context.resources;
 	editorResources = context.editorResources;
 	gizmoCollection = context.gizmos;
-	assetSaveInterface = context.assetSaveInterface;
+	editorInterface = context.editorInterface;
 
 	api->core->getStatics().setupGlobals();
 

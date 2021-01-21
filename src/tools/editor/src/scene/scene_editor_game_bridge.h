@@ -3,11 +3,12 @@
 #include "halley/tools/dll/dynamic_library.h"
 
 namespace Halley {
+	class ProjectWindow;
 	class Project;
 
-	class SceneEditorGameBridge : private IAssetSaveInterface {
+	class SceneEditorGameBridge : private IEditorInterface {
 	public:
-		SceneEditorGameBridge(const HalleyAPI& api, Resources& resources, UIFactory& factory, Project& project);
+		SceneEditorGameBridge(const HalleyAPI& api, Resources& resources, UIFactory& factory, Project& project, ProjectWindow& projectWindow);
 		~SceneEditorGameBridge();
 
 		void unload();
@@ -35,13 +36,17 @@ namespace Halley {
 		void onSceneSaved();
 		void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor);
 
-		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
 		void refreshAssets();
 
+	protected:
+		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
+		void addTask() override;
+	
 	private:
 		const HalleyAPI& api;
 		Resources& resources;
 		Project& project;
+		ProjectWindow& projectWindow;
 		UIFactory& factory;
 		
 		std::unique_ptr<ISceneEditor> interface;

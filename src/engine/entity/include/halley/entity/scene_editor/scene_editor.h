@@ -58,7 +58,7 @@ namespace Halley {
     
     protected:
     	Camera camera;
-		IAssetSaveInterface* assetSaveInterface;
+		IEditorInterface* editorInterface;
 
     	virtual void onInit(std::shared_ptr<const UIColourScheme> colourScheme);
     	

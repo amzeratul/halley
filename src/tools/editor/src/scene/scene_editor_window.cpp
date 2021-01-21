@@ -21,7 +21,7 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 	, uiFactory(factory)
 	, project(project)
 	, projectWindow(projectWindow)
-	, gameBridge(std::make_shared<SceneEditorGameBridge>(api, uiFactory.getResources(), uiFactory, project))
+	, gameBridge(std::make_shared<SceneEditorGameBridge>(api, uiFactory.getResources(), uiFactory, project, projectWindow))
 	, entityIcons(std::make_shared<EntityIcons>(project.getGameResources(), *factory.getColourScheme()))
 {
 	makeUI();
