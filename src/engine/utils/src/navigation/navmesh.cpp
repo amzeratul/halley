@@ -30,11 +30,11 @@ Navmesh::Navmesh(std::vector<PolygonData> polys, const NavmeshBounds& bounds, in
 			const float cost = connection >= 0 ? ((polys[connection].polygon.getCentre() - polys[i].polygon.getCentre()) * scaleFactor).length() : std::numeric_limits<float>::infinity();
 			node.connections[j] = connection >= 0 ? OptionalLite<NodeId>(gsl::narrow<NodeId>(connection)) : OptionalLite<NodeId>();
 			node.costs[j] = cost;
-
+			
 			if (connection < -1) {
-				// Open edge
+				// Portal
 				const int id = -connection - 2;
-				addToOpenEdges(NodeAndConn(i, j), id);
+				addToPortals(NodeAndConn(i, j), id);
 			}
 			
 			++j;
@@ -46,10 +46,10 @@ Navmesh::Navmesh(std::vector<PolygonData> polys, const NavmeshBounds& bounds, in
 	for (size_t i = 0; i < polys.size(); ++i) {
 		polygons[i] = std::move(polys[i].polygon);
 	}
-	addPolygonsToGrid();
+	processPolygons();
 
 	// Generate edges
-	postProcessOpenEdges();
+	postProcessPortals();
 }
 
 Navmesh::Navmesh(const ConfigNode& nodeData)
@@ -59,10 +59,10 @@ Navmesh::Navmesh(const ConfigNode& nodeData)
 	normalisedCoordinatesBase = nodeData.hasKey("base") ? Base2D(nodeData["base"]) : Base2D(Vector2f(1.0f, 0.0f), Vector2f(0.0f, 1.0f));
 	nodes = nodeData["nodes"].asVector<Node>();
 	polygons = nodeData["polygons"].asVector<Polygon>();
-	openEdges = nodeData["openEdges"].asVector<OpenEdge>();
+	portals = nodeData["portals"].asVector<Portal>();
 	subWorld = nodeData["subWorld"].asInt(0);
 
-	addPolygonsToGrid();
+	processPolygons();
 }
 
 ConfigNode Navmesh::toConfigNode() const
@@ -74,7 +74,7 @@ ConfigNode Navmesh::toConfigNode() const
 	result["base"] = normalisedCoordinatesBase.toConfigNode();
 	result["nodes"] = nodes;
 	result["polygons"] = polygons;
-	result["openEdges"] = openEdges;
+	result["portals"] = portals;
 	result["subWorld"] = subWorld;
 	
 	return result;
@@ -95,21 +95,42 @@ std::optional<Navmesh::NodeId> Navmesh::getNodeAt(Vector2f position) const
 		}
 	}
 
-	// Haven't found, look for the closest one...
-	float bestDist = std::numeric_limits<float>::infinity();
-	int bestNode = -1;
-	for (auto i: polyIndices) {
-		const auto p = polygons[i].getClosestPoint(position);
-		const float dist = (p - position).length();
-		if (dist < bestDist) {
-			bestDist = dist;
-			bestNode = i;
+	const float maxDistanceToPolygon = 5.0f;
+
+	// Haven't found, look for the closest one in this grid cell...
+	{
+		float bestDist = std::numeric_limits<float>::infinity();
+		int bestNode = -1;
+		for (auto i: polyIndices) {
+			const auto p = polygons[i].getClosestPoint(position);
+			const float distSquared = (p - position).squaredLength();
+			if (distSquared < bestDist && std::sqrt(distSquared) < maxDistanceToPolygon) {
+				bestDist = distSquared;
+				bestNode = i;
+			}
+		}
+		if (bestNode != -1) {
+			return gsl::narrow<NodeId>(bestNode);
 		}
 	}
-	if (bestNode != -1) {
-		return gsl::narrow<NodeId>(bestNode);
+
+	// If we don't find it even in this cell, then look on the open edges
+	{
+		float bestDist = std::numeric_limits<float>::infinity();
+		int bestNode = -1;
+		for (const auto& edge: openEdges) {
+			const float distSquared = (position - edge.second.getClosestPoint(position)).squaredLength();
+			if (distSquared < bestDist && std::sqrt(distSquared) < maxDistanceToPolygon) {
+				bestDist = distSquared;
+				bestNode = edge.first;
+			}
+		}
+		if (bestNode != -1) {
+			return gsl::narrow<NodeId>(bestNode);
+		}
 	}
-	
+
+	// Give up
 	return {};
 }
 
@@ -380,7 +401,7 @@ void Navmesh::setWorldPosition(Vector2f newOffset, Vector2i gridPos)
 	for (auto& poly: polygons) {
 		poly.translate(delta);
 	}
-	for (auto& edge: openEdges) {
+	for (auto& edge: portals) {
 		edge.translate(delta);
 	}
 	origin += delta;
@@ -388,12 +409,12 @@ void Navmesh::setWorldPosition(Vector2f newOffset, Vector2i gridPos)
 
 void Navmesh::markEdgeConnected(size_t idx)
 {
-	openEdges[idx].connected = true;
+	portals[idx].connected = true;
 }
 
 void Navmesh::markEdgesDisconnected()
 {
-	for (auto& edge: openEdges) {
+	for (auto& edge: portals) {
 		edge.connected = false;
 	}
 }
@@ -448,18 +469,22 @@ std::optional<Vector2f> Navmesh::findRayCollision(Ray ray, float maxDistance, No
 	return {};
 }
 
+void Navmesh::processPolygons()
+{
+	addPolygonsToGrid();
+	computeArea();
+	generateOpenEdges();
+}
+
 void Navmesh::addPolygonsToGrid()
 {
 	polyGrid.resize(gridSize.x * gridSize.y);
 	for (auto& c: polyGrid) {
 		c.clear();
 	}
-	
 	for (size_t i = 0; i < polygons.size(); ++i) {
 		addPolygonToGrid(polygons[i], gsl::narrow<NodeId>(i));
 	}
-
-	computeArea();
 }
 
 void Navmesh::addPolygonToGrid(const Polygon& poly, NodeId idx)
@@ -527,37 +552,50 @@ void Navmesh::computeArea()
 	}
 }
 
-void Navmesh::addToOpenEdges(NodeAndConn nodeAndConn, int id)
+void Navmesh::generateOpenEdges()
 {
-	getOpenEdge(id).connections.push_back(nodeAndConn);
+	openEdges.clear();
+	for (size_t nodeId = 0; nodeId < nodes.size(); ++nodeId) {
+		const auto& node = nodes[nodeId];
+		for (size_t i = 0; i < node.nConnections; ++i) {
+			if (!node.connections[i]) {
+				openEdges.emplace_back(static_cast<uint16_t>(nodeId), polygons[nodeId].getEdge(i));
+			}
+		}
+	}
 }
 
-Navmesh::OpenEdge& Navmesh::getOpenEdge(int id)
+void Navmesh::addToPortals(NodeAndConn nodeAndConn, int id)
 {
-	for (auto& edge: openEdges) {
+	getPortals(id).connections.push_back(nodeAndConn);
+}
+
+Navmesh::Portal& Navmesh::getPortals(int id)
+{
+	for (auto& edge: portals) {
 		if (edge.id == id) {
 			return edge;
 		}
 	}
-	return openEdges.emplace_back(OpenEdge(id));
+	return portals.emplace_back(Portal(id));
 }
 
-void Navmesh::postProcessOpenEdges()
+void Navmesh::postProcessPortals()
 {
-	auto edges = std::move(openEdges);
+	auto edges = std::move(portals);
 
 	for (auto& edge: edges) {
-		edge.postProcess(polygons, openEdges);
+		edge.postProcess(polygons, portals);
 	}
 }
 
-Navmesh::OpenEdge::OpenEdge(int id)
+Navmesh::Portal::Portal(int id)
 	: id(id)
 {
 	updateLocal();
 }
 
-Navmesh::OpenEdge::OpenEdge(const ConfigNode& node)
+Navmesh::Portal::Portal(const ConfigNode& node)
 {
 	id = node["id"].asInt();
 	pos = node["pos"].asVector2f();
@@ -569,7 +607,7 @@ Navmesh::OpenEdge::OpenEdge(const ConfigNode& node)
 	updateLocal();
 }
 
-ConfigNode Navmesh::OpenEdge::toConfigNode() const
+ConfigNode Navmesh::Portal::toConfigNode() const
 {
 	ConfigNode::MapType result;
 
@@ -586,7 +624,7 @@ ConfigNode Navmesh::OpenEdge::toConfigNode() const
 	return result;
 }
 
-void Navmesh::OpenEdge::postProcess(gsl::span<const Polygon> polygons, std::vector<OpenEdge>& dst)
+void Navmesh::Portal::postProcess(gsl::span<const Polygon> polygons, std::vector<Portal>& dst)
 {
 	const float epsilon = 0.01f;
 	std::vector<std::deque<Vector2f>> chains;
@@ -655,7 +693,7 @@ void Navmesh::OpenEdge::postProcess(gsl::span<const Polygon> polygons, std::vect
 	}
 }
 
-bool Navmesh::OpenEdge::canJoinWith(const OpenEdge& other) const
+bool Navmesh::Portal::canJoinWith(const Portal& other) const
 {
 	if (vertices.size() != other.vertices.size() || vertices.empty()) {
 		return false;
@@ -673,14 +711,14 @@ bool Navmesh::OpenEdge::canJoinWith(const OpenEdge& other) const
 	return true;
 }
 
-void Navmesh::OpenEdge::updateLocal()
+void Navmesh::Portal::updateLocal()
 {
 	// 0, 1, 2, 3 = map edges
 	// 4+ = other regions
 	local = id >= 4;
 }
 
-void Navmesh::OpenEdge::translate(Vector2f offset)
+void Navmesh::Portal::translate(Vector2f offset)
 {
 	pos += offset;
 	for (auto& v: vertices) {

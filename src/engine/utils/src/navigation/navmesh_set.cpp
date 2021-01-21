@@ -158,8 +158,8 @@ void NavmeshSet::tryLinkNavMeshes(size_t idxA, size_t idxB)
 	}
 	const bool localLink = gridDistance == 0;
 
-	const auto& edgesA = a.getOpenEdges();
-	const auto& edgesB = b.getOpenEdges();
+	const auto& edgesA = a.getPortals();
+	const auto& edgesB = b.getPortals();
 	for (size_t edgeAIdx = 0; edgeAIdx < edgesA.size(); ++edgeAIdx) {
 		const auto& edgeA = edgesA[edgeAIdx];
 		if (edgeA.connected || edgeA.local != localLink) {

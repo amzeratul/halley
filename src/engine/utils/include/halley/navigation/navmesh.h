@@ -51,7 +51,7 @@ namespace Halley {
 			NodeAndConn(NodeId node = -1, uint16_t connection = std::numeric_limits<uint16_t>::max()) : node(node), connectionIdx(connection) {}
 		};
 
-		struct OpenEdge {
+		struct Portal {
 			int id;
 			Vector2f pos;
 			std::vector<NodeAndConn> connections;
@@ -59,13 +59,13 @@ namespace Halley {
 			bool connected = false;
 			bool local = false;
 
-			OpenEdge(int id);
-			explicit OpenEdge(const ConfigNode& node);
+			Portal(int id);
+			explicit Portal(const ConfigNode& node);
 
 			ConfigNode toConfigNode() const;
-			void postProcess(gsl::span<const Polygon> polygons, std::vector<OpenEdge>& dst);
+			void postProcess(gsl::span<const Polygon> polygons, std::vector<Portal>& dst);
 			
-			bool canJoinWith(const OpenEdge& other) const;
+			bool canJoinWith(const Portal& other) const;
 			void updateLocal();
 			void translate(Vector2f offset);
 		};
@@ -80,7 +80,7 @@ namespace Halley {
 		
 		[[nodiscard]] const std::vector<Node>& getNodes() const { return nodes; }
 		[[nodiscard]] const std::vector<Polygon>& getPolygons() const { return polygons; }
-		[[nodiscard]] const std::vector<OpenEdge>& getOpenEdges() const { return openEdges; }
+		[[nodiscard]] const std::vector<Portal>& getPortals() const { return portals; }
 		[[nodiscard]] const Polygon& getPolygon(int id) const;
 		[[nodiscard]] size_t getNumNodes() const { return nodes.size(); }
 		[[nodiscard]] std::optional<NodeId> getNodeAt(Vector2f position) const;
@@ -126,7 +126,8 @@ namespace Halley {
 
 		std::vector<Node> nodes;
 		std::vector<Polygon> polygons;
-		std::vector<OpenEdge> openEdges;
+		std::vector<Portal> portals;
+		std::vector<std::pair<uint16_t, LineSegment>> openEdges;
 		int subWorld = 0;
 
 		Vector2i gridSize = Vector2i(20, 20);
@@ -148,14 +149,17 @@ namespace Halley {
 
 		std::optional<Vector2f> findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon) const;
 
+		void processPolygons();
 		void addPolygonsToGrid();
 		void addPolygonToGrid(const Polygon& poly, NodeId idx);
 		gsl::span<const NodeId> getPolygonsAt(Vector2f pos, bool allowOutside) const;
 
-		void addToOpenEdges(NodeAndConn nodeAndConn, int id);
-		OpenEdge& getOpenEdge(int id);
-		void postProcessOpenEdges();
+		void addToPortals(NodeAndConn nodeAndConn, int id);
+		Portal& getPortals(int id);
+		void postProcessPortals();
 
 		void computeArea();
+
+		void generateOpenEdges();
 	};
 }

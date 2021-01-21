@@ -1,6 +1,7 @@
 #include "halley/navigation/navigation_path_follower.h"
 
 #include "halley/navigation/navmesh_set.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 Halley::NavigationPathFollower::NavigationPathFollower(const ConfigNode& node)
@@ -91,17 +92,22 @@ void NavigationPathFollower::goToNextRegion(const NavmeshSet& navmeshSet)
 		const bool isLastRegion = nextRegionIdx == path->regions.size() - 1;
 		const auto& region = path->regions[nextRegionIdx];
 		const auto& regionNavMesh = navmeshSet.getNavmeshes()[region.regionNodeId];
-		const auto endPos = isLastRegion ? path->query.to : regionNavMesh.getOpenEdges()[region.exitEdgeId].pos;
+		const auto endPos = isLastRegion ? path->query.to : regionNavMesh.getPortals()[region.exitEdgeId].pos;
 
 		// Run the new query for just this region
 		const int subWorld = regionNavMesh.getSubWorld();
 		const auto query = NavigationQuery(startPos, subWorld, endPos, subWorld, path->query.postProcessingType);
 		auto newPath = navmeshSet.pathfindInRegion(query, region.regionNodeId);
 
-		// Set new path
-		path->path = std::move(newPath->path);
-		nextPathIdx = 0;
-		nextRegionIdx++;
+		if (newPath && !newPath->path.empty()) {
+			// Set new path
+			path->path = std::move(newPath->path);
+			nextPathIdx = 0;
+			nextRegionIdx++;
+		} else {
+			Logger::logWarning("Failed to find path within region.");
+			setPath({});
+		}
 	} else {
 		// No more regions
 		setPath({});
