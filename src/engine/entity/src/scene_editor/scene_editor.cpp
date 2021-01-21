@@ -148,11 +148,7 @@ void SceneEditor::onSceneSaved()
 
 std::unique_ptr<World> SceneEditor::doCreateWorld(const String& stageName) const
 {
-	auto world = std::make_unique<World>(getAPI(), getGameResources(), true, CreateEntityFunctions::getCreateComponent());
-	const auto& sceneConfig = getGameResources().get<ConfigFile>(stageName)->getRoot();
-	world->loadSystems(sceneConfig, CreateEntityFunctions::getCreateSystem());
-
-	return world;
+	return World::make(getAPI(), getGameResources(), stageName, true);
 }
 
 void SceneEditor::createServices(World& world)

@@ -54,6 +54,14 @@ World::~World()
 	services.clear();
 }
 
+std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode)
+{
+	auto world = std::make_unique<World>(api, resources, devMode, CreateEntityFunctions::getCreateComponent());
+	const auto& sceneConfig = resources.get<ConfigFile>(sceneName)->getRoot();
+	world->loadSystems(sceneConfig, CreateEntityFunctions::getCreateSystem());
+	return world;
+}
+
 System& World::addSystem(std::unique_ptr<System> system, TimeLine timelineType)
 {
 	system->api = &api;

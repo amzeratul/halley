@@ -32,6 +32,8 @@ namespace Halley {
 		World(const HalleyAPI& api, Resources& resources, bool collectMetrics, CreateComponentFunction createComponent);
 		~World();
 
+		static std::unique_ptr<World> make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode);
+
 		void step(TimeLine timeline, Time elapsed);
 		void render(RenderContext& rc) const;
 		bool hasSystemsOnTimeLine(TimeLine timeline) const;
