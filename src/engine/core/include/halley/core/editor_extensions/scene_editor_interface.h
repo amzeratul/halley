@@ -8,6 +8,7 @@
 #include <optional>
 
 namespace Halley {
+	class Task;
 	class Prefab;
 	class ISceneEditorWindow;
 	class UIDebugConsoleController;
@@ -91,7 +92,7 @@ namespace Halley {
 		virtual ~IEditorInterface() = default;
 
 		virtual bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) = 0;
-		virtual void addTask() = 0;
+		virtual void addTask(std::unique_ptr<Task> task) = 0;
 	};
 
     class SceneEditorContext {

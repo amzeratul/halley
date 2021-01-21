@@ -40,7 +40,7 @@ namespace Halley {
 
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
-		void addTask() override;
+		void addTask(std::unique_ptr<Task> task) override;
 	
 	private:
 		const HalleyAPI& api;

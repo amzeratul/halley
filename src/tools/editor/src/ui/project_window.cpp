@@ -266,3 +266,8 @@ void ProjectWindow::reloadProject()
 {
 	destroy();
 }
+
+void ProjectWindow::addTask(std::unique_ptr<Task> task)
+{
+	tasks->addTask(std::move(task));
+}

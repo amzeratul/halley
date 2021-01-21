@@ -2,6 +2,7 @@
 #include "scene_editor_gizmo_collection.h"
 #include "halley/tools/project/project.h"
 #include "src/project/core_api_wrapper.h"
+#include "src/ui/project_window.h"
 using namespace Halley;
 
 
@@ -194,8 +195,9 @@ bool SceneEditorGameBridge::saveAsset(const Path& path, gsl::span<const gsl::byt
 	return project.writeAssetToDisk(path, data);
 }
 
-void SceneEditorGameBridge::addTask()
+void SceneEditorGameBridge::addTask(std::unique_ptr<Task> task)
 {
+	projectWindow.addTask(std::move(task));
 }
 
 void SceneEditorGameBridge::refreshAssets()

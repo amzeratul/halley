@@ -31,6 +31,8 @@ namespace Halley {
 
     	void reloadProject();
 
+    	void addTask(std::unique_ptr<Task> task);
+
     protected:
 		void onUnloadDLL() override;
         void onLoadDLL() override;
