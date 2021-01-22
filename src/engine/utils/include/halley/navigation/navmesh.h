@@ -93,14 +93,15 @@ namespace Halley {
 		void setWorldPosition(Vector2f offset, Vector2i worldGridPos);
 		[[nodiscard]] Vector2i getWorldGridPos() const { return worldGridPos; }
 		[[nodiscard]] int getSubWorld() const { return subWorld; }
+		[[nodiscard]] Vector2f getOffset() const { return offset; }
 
 		void markPortalConnected(size_t idx);
 		void markPortalsDisconnected();
 
-		Vector2f getPosition() const;
-
 		float getArea() const;
 		Vector2f getRandomPoint(Random& rng) const;
+
+		Base2D getNormalisedCoordinatesBase() const { return normalisedCoordinatesBase; }
 
 	private:
 		struct State {

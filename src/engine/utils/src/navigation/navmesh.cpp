@@ -423,12 +423,6 @@ void Navmesh::markPortalsDisconnected()
 	}
 }
 
-Vector2f Navmesh::getPosition() const
-{
-	// TODO
-	return Vector2f();
-}
-
 std::optional<Vector2f> Navmesh::findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon) const
 {
 	float distanceLeft = maxDistance;

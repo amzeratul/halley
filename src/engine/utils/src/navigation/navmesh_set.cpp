@@ -1,6 +1,7 @@
 #include "halley/navigation/navmesh_set.h"
 
 #include "halley/data_structures/priority_queue.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 NavmeshSet::NavmeshSet()
@@ -136,6 +137,37 @@ void NavmeshSet::linkNavmeshes()
 				const auto dstPortalId = dstRegion.portals[i];
 				const auto& other = portalNodes[dstPortalId];
 				portalNode.connections.emplace_back(dstPortalId, portalNode.toRegion, (other.pos - curPos).length());
+			}
+		}
+	}
+}
+
+void NavmeshSet::reportUnlinkedPortals() const
+{
+	std::set<Vector2i> occupiedGrids;
+	for (const auto& navmesh: navmeshes) {
+		occupiedGrids.insert(navmesh.getWorldGridPos());
+	}
+	
+	for (const auto& navmesh: navmeshes) {
+		if (navmesh.getSubWorld() != 0) {
+			continue;
+		}
+		for (const auto& portal: navmesh.getPortals()) {
+			if (!portal.connected) {
+				if (portal.local) {
+					Logger::logWarning("Local Portal at " + portal.pos + " on subWorld " + toString(navmesh.getSubWorld()) + " is unlinked.");
+				} else {
+					const auto& base = navmesh.getNormalisedCoordinatesBase();
+					const auto relPos = portal.pos - navmesh.getOffset();
+					auto normalPos = Vector2f(base.inverseTransform(relPos)) * 2;
+					normalPos = Vector2f(normalPos.y, -normalPos.x);
+					const auto gridPos = navmesh.getWorldGridPos();
+					const Vector2i gridPosOffset = Vector2i(Vector2f(std::abs(normalPos.x) >= 0.99f ? signOf(normalPos.x) : 0, std::abs(normalPos.y) >= 0.99f ? signOf(normalPos.y) : 0));
+					if (occupiedGrids.find(gridPos + gridPosOffset) != occupiedGrids.end()) {
+						Logger::logWarning("Scene bounds Portal with id " + toString(portal.id) + " at " + portal.pos + " on subWorld " + toString(navmesh.getSubWorld()) +  + " (between chunks at " + gridPos + " and " + (gridPos + gridPosOffset) + ") is unlinked.");
+					}
+				}
 			}
 		}
 	}

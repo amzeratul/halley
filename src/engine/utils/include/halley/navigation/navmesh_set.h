@@ -19,6 +19,7 @@ namespace Halley {
 		void clearSubWorld(int subWorld);
 
 		void linkNavmeshes();
+		void reportUnlinkedPortals() const;
 
 		std::optional<NavigationPath> pathfind(const NavigationQuery& query) const;
 		std::optional<NavigationPath> pathfindInRegion(const NavigationQuery& query, uint16_t regionId) const;
