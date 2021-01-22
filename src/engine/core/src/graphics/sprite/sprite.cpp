@@ -340,6 +340,8 @@ std::shared_ptr<Material> Sprite::getMutableMaterialPtr()
 
 bool Sprite::hasCompatibleMaterial(const Material& other) const
 {
+	return false;
+	
 	if (!material) {
 		return false;
 	}
