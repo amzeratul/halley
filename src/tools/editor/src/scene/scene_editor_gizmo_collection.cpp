@@ -58,6 +58,14 @@ void SceneEditorGizmoCollection::setSelectedEntity(const std::optional<EntityRef
 	}
 }
 
+void SceneEditorGizmoCollection::refreshEntity()
+{
+	selectedBoundsGizmo->refreshEntity();
+	if (activeGizmo) {
+		activeGizmo->refreshEntity();
+	}
+}
+
 std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
 {
 	currentTool = tool;

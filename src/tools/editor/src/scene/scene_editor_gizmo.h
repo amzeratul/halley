@@ -77,6 +77,7 @@ namespace Halley {
 		virtual std::shared_ptr<UIWidget> makeUI();
 
 		void setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& entityData);
+		void refreshEntity();
 
 		void setCamera(const Camera& camera);
 		void setOutputState(SceneEditorOutputState& outputState);

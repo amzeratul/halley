@@ -12,6 +12,7 @@
 #include "halley/ui/ui_factory.h"
 #include "scene_editor_canvas.h"
 #include "scene_editor_game_bridge.h"
+#include "scene_editor_gizmo_collection.h"
 #include "src/ui/project_window.h"
 using namespace Halley;
 
@@ -790,11 +791,13 @@ void SceneEditorWindow::updateButtons()
 void SceneEditorWindow::undo()
 {
 	undoStack.undo(*this);
+	gameBridge->getGizmos().refreshEntity();
 	updateButtons();
 }
 
 void SceneEditorWindow::redo()
 {
 	undoStack.redo(*this);
+	gameBridge->getGizmos().refreshEntity();
 	updateButtons();
 }

@@ -146,6 +146,11 @@ void SceneEditorGizmo::setSelectedEntity(const std::optional<EntityRef>& entity,
 	}
 }
 
+void SceneEditorGizmo::refreshEntity()
+{
+	onEntityChanged();
+}
+
 void SceneEditorGizmo::setCamera(const Camera& camera)
 {
 	zoom = camera.getZoom();
