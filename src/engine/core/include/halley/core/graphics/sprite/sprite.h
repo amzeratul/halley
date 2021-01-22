@@ -60,6 +60,7 @@ namespace Halley
 			return *material;
 		}
 		bool hasMaterial() const { return material != nullptr; }
+		bool hasCompatibleMaterial(const Material& other) const;
 
 		Sprite& setImage(Resources& resources, const String& imageName, String materialName = "");
 		Sprite& setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> material, bool shared = true);

@@ -172,10 +172,9 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 {
 	if (animation && hasUpdate) {
 		if (applyMaterial || !sprite.hasMaterial()) {
-			if (materialOverride) {
-				sprite.setMaterial(materialOverride, true);
-			} else {
-				sprite.setMaterial(animation->getMaterial(), true);
+			const auto& newMaterial = materialOverride ? materialOverride : animation->getMaterial();
+			if (!sprite.hasCompatibleMaterial(*newMaterial)) {
+				sprite.setMaterial(newMaterial, true);
 			}
 		}
 		
@@ -308,11 +307,18 @@ void AnimationPlayer::setState(const String& sequenceName, const String& directi
 {
 	setSequence(sequenceName);
 	setDirection(directionName);
+
+	const auto oldVisibleOverride = visibleOverride;
+	const auto oldCurFrame = curFrame;
+	
 	visibleOverride = !hideIfNotSynchronized || getCurrentSequenceName() == sequenceName;
 	curFrame = clamp(currentFrame, 0, curSeq ? static_cast<int>(curSeq->numFrames()) - 1 : 0);
 	curFrameTime = currentFrameTime;
 
-	resolveSprite();
+	if (dirty || oldVisibleOverride != visibleOverride || oldCurFrame != curFrame) {
+		dirty = false;
+		resolveSprite();
+	}
 }
 
 
