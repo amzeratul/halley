@@ -25,7 +25,10 @@ children:
     - widget: { id: sceneEditorToolbar, class: image, image: "halley_ui/ui_list_item.png", colour: $ui_backgroundBox, innerBorder: [5, 5, 5, 5] }
       sizer: { type: horizontal }
       children:
-        - widget: { id: saveButton, class: button, style: buttonThin, text: "Save", size: [100, 22], tooltip: "Save [Ctrl+S]" }
+        - widget: { id: saveButton, class: button, style: buttonThin, icon: "entity_icons/save.png", size: [22, 22], tooltip: "Save [Ctrl+S]" }
+          border: [0, 0, 10, 0]
+        - widget: { id: undoButton, class: button, style: buttonThin, icon: "entity_icons/undo.png", size: [22, 22], tooltip: "Undo [Ctrl+Z]" }
+        - widget: { id: redoButton, class: button, style: buttonThin, icon: "entity_icons/redo.png", size: [22, 22], tooltip: "Redo [Ctrl+Y]" }
         - border: [10, 0, 0, 0]
           widget:
             id: toolMode

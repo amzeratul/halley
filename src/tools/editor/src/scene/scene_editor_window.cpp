@@ -83,6 +83,16 @@ void SceneEditorWindow::makeUI()
 		saveScene();
 	});
 
+	setHandle(UIEventType::ButtonClicked, "undoButton", [=] (const UIEvent& event)
+	{
+		undo();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "redoButton", [=] (const UIEvent& event)
+	{
+		redo();
+	});
+
 	setHandle(UIEventType::ButtonClicked, "addEntity", [=] (const UIEvent& event)
 	{
 		addNewEntity();
@@ -201,6 +211,11 @@ void SceneEditorWindow::update(Time t, bool moved)
 			entityList->refreshNames();
 		}
 	}
+
+	if (buttonsNeedUpdate) {
+		buttonsNeedUpdate = false;
+		updateButtons();
+	}
 }
 
 bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
@@ -211,12 +226,12 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 	}
 
 	if (key.is(KeyCode::Z, KeyMods::Ctrl)) {
-		undoStack.undo(*this);
+		undo();
 		return true;
 	}
 
 	if (key.is(KeyCode::Y, KeyMods::Ctrl)) {
-		undoStack.redo(*this);
+		redo();
 		return true;
 	}
 
@@ -675,10 +690,8 @@ void SceneEditorWindow::decayTool()
 
 void SceneEditorWindow::setModified(bool enabled)
 {
-	auto button = getWidgetAs<UIButton>("saveButton");
-	button->setLabel(LocalisedString::fromHardcodedString(enabled ? "* Save" : "Save"));
-	button->setEnabled(enabled);
 	modified = enabled;
+	buttonsNeedUpdate = true;
 }
 
 bool SceneEditorWindow::isModified() const
@@ -765,4 +778,23 @@ void SceneEditorWindow::setupConsoleCommands()
 	auto controller = getWidgetAs<UIDebugConsole>("debugConsole")->getController();
 	controller->clearCommands();
 	gameBridge->setupConsoleCommands(*controller, *this);
+}
+
+void SceneEditorWindow::updateButtons()
+{
+	getWidgetAs<UIButton>("saveButton")->setEnabled(modified);
+	getWidgetAs<UIButton>("undoButton")->setEnabled(undoStack.canUndo());
+	getWidgetAs<UIButton>("redoButton")->setEnabled(undoStack.canRedo());
+}
+
+void SceneEditorWindow::undo()
+{
+	undoStack.undo(*this);
+	updateButtons();
+}
+
+void SceneEditorWindow::redo()
+{
+	undoStack.redo(*this);
+	updateButtons();
 }

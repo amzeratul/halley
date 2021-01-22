@@ -128,8 +128,13 @@ void UIButton::setIcon(Sprite icon)
 {
 	if (!iconImage) {
 		iconImage = std::make_shared<UIImage>(icon);
+		const auto iconColour = (style.hasColour("iconColour") ? style.getColour("iconColour") : Colour4f(1, 1, 1, 1)) * icon.getColour();
+		
 		if (style.hasColour("hoveredIconColour")) {
-			iconImage->setHoverable(icon.getColour(), style.getColour("hoveredIconColour"));
+			iconImage->setHoverable(iconColour, style.getColour("hoveredIconColour"));
+		}
+		if (style.hasColour("disabledIconColour")) {
+			iconImage->setDisablable(iconColour, style.getColour("disabledIconColour"));
 		}
 		add(iconImage, label ? 0.0f : 1.0f, style.getBorder("iconBorder"), UISizerAlignFlags::Centre);
 	} else {

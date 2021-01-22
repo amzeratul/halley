@@ -106,6 +106,7 @@ namespace Halley {
 
 		UndoStack undoStack;
 		bool modified = false;
+		bool buttonsNeedUpdate = false;
 
 		void makeUI();
 		void onEntitySelected(const String& id);
@@ -131,5 +132,10 @@ namespace Halley {
 
 		void toggleConsole();
 		void setupConsoleCommands();
+
+		void updateButtons();
+
+		void undo();
+		void redo();
 	};
 }

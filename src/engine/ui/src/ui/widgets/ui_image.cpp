@@ -108,6 +108,18 @@ void UIImage::setSelectable(Sprite normalSprite, Sprite selectedSprite)
 	});
 }
 
+void UIImage::setDisablable(Colour4f normalColour, Colour4f disabledColour)
+{
+	setHandle(UIEventType::SetEnabled, [=] (const UIEvent& event)
+	{
+		if (event.getBoolData()) {
+			sprite.setColour(normalColour);
+		} else {
+			sprite.setColour(disabledColour);
+		}
+	});
+}
+
 void UIImage::setHoverable(Colour4f normalColour, Colour4f selColour)
 {
 	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event)

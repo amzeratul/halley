@@ -14,6 +14,8 @@ uiStyle:
     disabledLabel: { font: Ubuntu Bold, size: 15, colour: $ui_disabledText }
     labelBorder: [0, 0, 0, 0]
     iconBorder: [0, 0, 0, 0]
+    iconColour: $ui_text
+    iconColourDisabled: $ui_disabledText
 
   buttonThin:
     normal: { img: halley_ui/ui_button.png, colour: $ui_buttonNormal }
@@ -27,6 +29,8 @@ uiStyle:
     label: { font: Ubuntu Bold, size: 14, colour: $ui_text }
     disabledLabel: { font: Ubuntu Bold, size: 14, colour: $ui_disabledText }
     labelBorder: [0, 0, 0, 0]
+    iconColour: $ui_text
+    disabledIconColour: $ui_disabledText
 
   checkbox:
     normal: { img: $ui_checkbox, colour: $ui_inputNormal }

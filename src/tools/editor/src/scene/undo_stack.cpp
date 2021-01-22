@@ -49,14 +49,14 @@ bool UndoStack::pushModified(bool wasModified, const String& entityId, const Ent
 
 void UndoStack::undo(SceneEditorWindow& sceneEditorWindow)
 {
-	if (stackPos > 0) {
+	if (canUndo()) {
 		runAction(stack[--stackPos]->back, sceneEditorWindow);
 	}
 }
 
 void UndoStack::redo(SceneEditorWindow& sceneEditorWindow)
 {
-	if (stackPos < stack.size()) {
+	if (canRedo()) {
 		runAction(stack[stackPos++]->forward, sceneEditorWindow);
 	}
 }
@@ -69,6 +69,16 @@ void UndoStack::onSave()
 		a->back.clearModified = i == stackPos;
 		a->forward.clearModified = i + 1 == stackPos;
 	}
+}
+
+bool UndoStack::canUndo() const
+{
+	return stackPos > 0;
+}
+
+bool UndoStack::canRedo() const
+{
+	return stackPos < stack.size();
 }
 
 bool UndoStack::ActionPair::isCompatibleWith(const Action& newForward) const

@@ -17,6 +17,9 @@ namespace Halley {
 
 		void onSave();
 
+		bool canUndo() const;
+		bool canRedo() const;
+
 	private:
 		enum class Type {
 			EntityAdded,

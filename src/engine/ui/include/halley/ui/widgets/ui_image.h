@@ -21,6 +21,7 @@ namespace Halley {
 		void setHoverable(Sprite normalSprite, Sprite selectedSprite);
 		void setSelectable(Colour4f normalColour, Colour4f selColour);
 		void setSelectable(Sprite normalSprite, Sprite selectedSprite);
+		void setDisablable(Colour4f normalColour, Colour4f disabledColour);
 
 	private:
 		Sprite sprite;
