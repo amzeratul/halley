@@ -263,6 +263,19 @@ bool Material::operator!=(const Material& material) const
 	return !(*this == material);
 }
 
+bool Material::isCompatibleWith(const Material& other) const
+{
+	if (materialDefinition != other.materialDefinition) {
+		return false;
+	}
+
+	if (textures != other.textures) {
+		return false;
+	}
+
+	return true;
+}
+
 const std::vector<std::shared_ptr<const Texture>>& Material::getTextures() const
 {
 	return textures;

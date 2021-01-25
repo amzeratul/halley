@@ -340,15 +340,10 @@ std::shared_ptr<Material> Sprite::getMutableMaterialPtr()
 
 bool Sprite::hasCompatibleMaterial(const Material& other) const
 {
-	return false;
-	
 	if (!material) {
 		return false;
 	}
-	if (&material->getDefinition() != &other.getDefinition()) {
-		return false;
-	}
-	return true;
+	return material->isCompatibleWith(other);
 }
 
 Sprite& Sprite::setImageData(const Texture& image)

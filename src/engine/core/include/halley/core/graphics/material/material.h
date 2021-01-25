@@ -78,6 +78,8 @@ namespace Halley
 		bool operator==(const Material& material) const;
 		bool operator!=(const Material& material) const;
 
+		bool isCompatibleWith(const Material& other) const;
+
 		const MaterialDefinition& getDefinition() const { return *materialDefinition; }
 
 		std::shared_ptr<Material> clone() const;
