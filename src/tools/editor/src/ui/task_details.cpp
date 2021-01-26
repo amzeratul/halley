@@ -44,7 +44,7 @@ void TaskDetails::onMouseOver(Vector2f mousePos)
 
 bool TaskDetails::canInteractWithMouse() const
 {
-	return true;
+	return visible;
 }
 
 void TaskDetails::update(Time t, bool moved)
