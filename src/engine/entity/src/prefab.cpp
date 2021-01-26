@@ -160,7 +160,7 @@ ConfigNode& Prefab::getGameData(const String& key)
 	auto& map = gameData.getRoot().asMap();
 	const auto iter = map.find(key);
 	if (iter == map.end()) {
-		auto [newIter, inserted] = map.insert(std::make_pair(key, ConfigNode::MapType()));
+		auto [newIter, inserted] = map.insert(std::make_pair<String, ConfigNode>(String(key), ConfigNode::MapType()));
 		return newIter->second;
 	} else {
 		return iter->second;

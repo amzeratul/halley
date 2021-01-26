@@ -12,6 +12,10 @@
 
 #include "halley/utils/type_traits.h"
 
+#if defined(DEV_BUILD)
+#define STORE_CONFIG_NODE_PARENTING
+#endif
+
 namespace Halley {
 	class Serializer;
 	class Deserializer;
@@ -136,7 +140,7 @@ namespace Halley {
 
 		~ConfigNode();
 		
-		ConfigNode& operator=(const ConfigNode& other) = delete;
+		ConfigNode& operator=(const ConfigNode& other);
 		ConfigNode& operator=(ConfigNode&& other) noexcept;
 		ConfigNode& operator=(bool value);
 		ConfigNode& operator=(int value);
@@ -312,6 +316,7 @@ namespace Halley {
 		ConfigNodeType type = ConfigNodeType::Undefined;
 		int auxData = 0; // Used by delta coding
 
+#if defined(STORE_CONFIG_NODE_PARENTING)
 		struct ParentingInfo {
 			int line = 0;
 			int column = 0;
@@ -320,6 +325,7 @@ namespace Halley {
 			const ConfigFile* file = nullptr;
 		};
 		std::unique_ptr<ParentingInfo> parent;
+#endif
 
 		static ConfigNode undefinedConfigNode;
 		static String undefinedConfigNodeName;

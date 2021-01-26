@@ -8,7 +8,7 @@ ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node)
 	ConfigNode result;
 
 	if (node.IsMap()) {
-		std::map<String, ConfigNode> map;
+		ConfigNode::MapType map;
 		for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
 			String key = it->first.as<std::string>();
 			map[key] = parseYAMLNode(it->second);
