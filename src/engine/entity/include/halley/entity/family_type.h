@@ -6,16 +6,24 @@ namespace Halley {
 	template <typename... Ts>
 	class FamilyType {
 	public:
-		constexpr static FamilyMaskType writeMask(MaskStorage& storage) {
+		constexpr static FamilyMaskType writeMask(MaskStorage& storage)
+		{
 			return FamilyMask::MutableEvaluator<Ts...>::getMask(storage);
 		}
 
-		constexpr static FamilyMaskType readMask(MaskStorage& storage) {
+		constexpr static FamilyMaskType readMask(MaskStorage& storage)
+		{
 			return FamilyMask::Evaluator<Ts...>::getMask(storage);
 		}
 
-		constexpr static FamilyMaskType inclusionMask(MaskStorage& storage) {
+		constexpr static FamilyMaskType inclusionMask(MaskStorage& storage)
+		{
 			return FamilyMask::InclusionEvaluator<Ts...>::getMask(storage);
+		}
+
+		constexpr static FamilyMaskType optionalMask(MaskStorage& storage)
+		{
+			return FamilyMask::OptionalEvaluator<Ts...>::getMask(storage);
 		}
 
 		static void loadComponents(Entity& entity, char* data) {

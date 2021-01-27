@@ -3,8 +3,9 @@
 
 using namespace Halley;
 
-Family::Family(FamilyMaskType mask)
-	: inclusionMask(mask)
+Family::Family(FamilyMaskType inclusionMask, FamilyMaskType optionalMask)
+	: inclusionMask(inclusionMask)
+	, optionalMask(optionalMask)
 {
 }
 

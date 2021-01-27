@@ -18,7 +18,7 @@ namespace Halley {
 		friend class World;
 
 	public:
-		explicit Family(FamilyMaskType mask);
+		explicit Family(FamilyMaskType inclusionMask, FamilyMaskType optionalMask);
 		virtual ~Family() {}
 
 		size_t count() const
@@ -61,6 +61,7 @@ namespace Halley {
 
 	private:
 		FamilyMaskType inclusionMask;
+		FamilyMaskType optionalMask;
 	};
 
 	class FamilyBase {
@@ -107,7 +108,7 @@ namespace Halley {
 
 	public:
 		explicit FamilyImpl(MaskStorage& storage)
-			: Family(T::Type::inclusionMask(storage))
+			: Family(T::Type::inclusionMask(storage), T::Type::optionalMask(storage))
 		{
 		}
 				

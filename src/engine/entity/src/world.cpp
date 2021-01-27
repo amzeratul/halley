@@ -515,20 +515,24 @@ void World::updateEntities()
 	HALLEY_DEBUG_TRACE();
 	// Go through every family adding/removing entities as needed
 	for (auto& todo: pending) {
-		for (auto& fam: getFamiliesFor(todo.first)) {
+		for (auto* fam: getFamiliesFor(todo.first)) {
 			const auto& famMask = fam->inclusionMask;
+			const auto& optFamMask = fam->optionalMask;
+			auto& ms = *maskStorage;
 			
 			for (auto& e: todo.second.toRemove) {
-				// Only remove if the entity is not about to be re-added
+				// Only remove if the entity is not about to be re-added, or if it modified optional
+				const auto& oldMask = todo.first;
 				const auto& newMask = e.first;
-				if (!newMask.contains(famMask, *maskStorage)) {
+				if (!newMask.contains(famMask, ms) || oldMask.contains(optFamMask, ms) != newMask.contains(optFamMask, ms)) {
 					fam->removeEntity(*e.second);
 				}
 			}
 			for (auto& e: todo.second.toAdd) {
 				// Only add if the entity was not already in this
 				const auto& oldMask = e.first;
-				if (!oldMask.contains(famMask, *maskStorage)) {
+				const auto& newMask = todo.first;
+				if (!oldMask.contains(famMask, ms) || oldMask.contains(optFamMask, ms) != newMask.contains(optFamMask, ms)) {
 					fam->addEntity(*e.second);
 				}
 			}

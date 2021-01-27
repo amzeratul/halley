@@ -100,7 +100,7 @@ namespace Halley {
 		template <typename T, typename... Ts>
 		struct MutableEvaluator <T, Ts...> {
 			constexpr static void makeMask(RealType& mask) {
-				if constexpr (std::is_const<T>::value) {
+				if constexpr (!std::is_const<T>::value) {
 					FamilyMask::setBit(mask, RetrieveComponentIndex<T>::componentIndex);
 				}
 				Evaluator<Ts...>::makeMask(mask);
@@ -146,6 +146,35 @@ namespace Halley {
 				return HandleType(mask, storage);
 			}
 		};
+
+
+		
+		template <typename... Ts>
+		struct OptionalEvaluator;
+
+		template <>
+		struct OptionalEvaluator <> {
+			static RealType makeMask(RealType startValue) {
+				return startValue;
+			}
+		};
+
+		template <typename T, typename... Ts>
+		struct OptionalEvaluator <T, Ts...> {
+			static void makeMask(RealType& mask) {
+				if constexpr (IsMaybeRef<T>::value) {
+					FamilyMask::setBit(mask, RetrieveComponentIndex<T>::componentIndex);
+				}
+				OptionalEvaluator<Ts...>::makeMask(mask);
+			}
+
+			static HandleType getMask(MaskStorage& storage) {
+				RealType mask;
+				makeMask(mask);
+				return HandleType(mask, storage);
+			}
+		};
+		
 
 		class MaskStorageInterface {
 		public:
