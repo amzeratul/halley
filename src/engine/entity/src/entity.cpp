@@ -39,8 +39,17 @@ void Entity::removeComponentById(World& world, int id)
 
 void Entity::addComponent(Component* component, int id)
 {
+	// Note that we can't simply delete component here in case of an exception, as deleting it requires using the deleter table from the world
+	
 	if (liveComponents == std::numeric_limits<decltype(liveComponents)>::max()) {
-		throw Exception("Too many components in Entity", HalleyExceptions::Entity);
+		throw Exception("Too many components in Entity. Memory leak has occurred.", HalleyExceptions::Entity);
+	}
+
+	// Ensure it's not already there
+	for (uint8_t i = 0; i < liveComponents; ++i) {
+		if (components[i].first == id) {
+			throw Exception("Component already added to Entity. Memory leak has occurred.", HalleyExceptions::Entity);
+		}
 	}
 	
 	// Put it at the back of the list...
