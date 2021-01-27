@@ -521,10 +521,9 @@ void World::updateEntities()
 			auto& ms = *maskStorage;
 			
 			for (auto& e: todo.second.toRemove) {
-				// Only remove if the entity is not about to be re-added, or if it modified optional
-				const auto& oldMask = todo.first;
+				// Only remove if the entity is not about to be re-added
 				const auto& newMask = e.first;
-				if (!newMask.contains(famMask, ms) || oldMask.contains(optFamMask, ms) != newMask.contains(optFamMask, ms)) {
+				if (!newMask.contains(famMask, ms)) {
 					fam->removeEntity(*e.second);
 				}
 			}
@@ -532,8 +531,11 @@ void World::updateEntities()
 				// Only add if the entity was not already in this
 				const auto& oldMask = e.first;
 				const auto& newMask = todo.first;
-				if (!oldMask.contains(famMask, ms) || oldMask.contains(optFamMask, ms) != newMask.contains(optFamMask, ms)) {
+				if (!oldMask.contains(famMask, ms)) {
 					fam->addEntity(*e.second);
+				} else if (oldMask.contains(optFamMask, ms) != newMask.contains(optFamMask, ms)) {
+					// Needs refreshing of optional references
+					fam->refreshEntity(*e.second);
 				}
 			}
 

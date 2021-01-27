@@ -44,6 +44,7 @@ namespace Halley {
 
 	protected:
 		virtual void addEntity(Entity& entity) = 0;
+		virtual void refreshEntity(Entity& entity) = 0;
 		void removeEntity(Entity& entity);
 		void reloadEntity(Entity& entity);
 		virtual void updateEntities() = 0;
@@ -120,6 +121,16 @@ namespace Halley {
 			T::Type::loadComponents(entity, &e.data[0]);
 
 			dirty = true;
+		}
+		
+		void refreshEntity(Entity& entity) override
+		{
+			for (auto& e: entities) {
+				if (e.entityId == entity.getEntityId()) {
+					T::Type::loadComponents(entity, &e.data[0]);
+					break;
+				}
+			}
 		}
 
 		void updateEntities() override
