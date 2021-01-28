@@ -18,8 +18,9 @@
 using namespace Halley;
 using namespace boost::filesystem;
 
-DynamicLibrary::DynamicLibrary(std::string originalPath)
+DynamicLibrary::DynamicLibrary(std::string originalPath, bool includeDebugSymbols)
 	: libOrigPath(originalPath)
+	, includeDebugSymbols(includeDebugSymbols)
 {
 	libName = path(originalPath).filename().string();
 }
@@ -70,11 +71,13 @@ bool DynamicLibrary::load(bool withAnotherName)
 	}
 
 	// Check for debug symbols
-	debugSymbolsOrigPath = libOrigPath;
-	#ifdef _WIN32
-	debugSymbolsOrigPath.replace_extension("pdb");
-	#endif
-	hasDebugSymbols = exists(debugSymbolsOrigPath);
+	if (includeDebugSymbols) {
+		debugSymbolsOrigPath = libOrigPath;
+		#ifdef _WIN32
+		debugSymbolsOrigPath.replace_extension("pdb");
+		#endif
+		hasDebugSymbols = exists(debugSymbolsOrigPath);
+	}
 
 	// Copy debug symbols if the lib got copied
 	/*
@@ -100,8 +103,8 @@ bool DynamicLibrary::load(bool withAnotherName)
 	}
 
 	// Store write times
+	libLastWrite = last_write_time(libOrigPath);
 	if (hasDebugSymbols) {
-		libLastWrite = last_write_time(libOrigPath);
 		debugLastWrite = last_write_time(debugSymbolsOrigPath);
 	}
 
@@ -170,11 +173,11 @@ bool DynamicLibrary::hasChanged() const
 	flushLoaded();
 	
 	// Never got debug symbols, so disable hot-reload
-	if (!hasDebugSymbols) {
+	if (includeDebugSymbols && !hasDebugSymbols) {
 		return false;
 	}
 	// One of the files is missing, maybe there was a linker error
-	if (!exists(libOrigPath) || !exists(debugSymbolsOrigPath)) {
+	if (!exists(libOrigPath) || (includeDebugSymbols && !exists(debugSymbolsOrigPath))) {
 		return false;
 	}
 
@@ -184,11 +187,21 @@ bool DynamicLibrary::hasChanged() const
 	if (ec.failed()) {
 		return false;
 	}
-	const auto debugWrite = last_write_time(debugSymbolsOrigPath, ec);
-	if (ec.failed()) {
+	if (libWrite <= libLastWrite) {
 		return false;
 	}
-	return libWrite > libLastWrite && debugWrite > debugLastWrite;
+
+	if (includeDebugSymbols) {
+		const auto debugWrite = last_write_time(debugSymbolsOrigPath, ec);
+		if (ec.failed()) {
+			return false;
+		}
+		if (debugWrite <= debugLastWrite) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 void DynamicLibrary::reloadIfChanged()

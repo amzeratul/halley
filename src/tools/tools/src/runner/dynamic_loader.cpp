@@ -9,7 +9,7 @@ using namespace Halley;
 
 DynamicGameLoader::DynamicGameLoader(std::string name)
 	: libName(name)
-	, lib(name)
+	, lib(name, true)
 {
 	load();
 }

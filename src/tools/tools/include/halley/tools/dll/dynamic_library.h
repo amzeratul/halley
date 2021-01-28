@@ -17,7 +17,7 @@ namespace Halley
 	class DynamicLibrary
 	{
 	public:
-		DynamicLibrary(std::string originalPath);
+		DynamicLibrary(std::string originalPath, bool includeDebugSymbols);
 		~DynamicLibrary();
 
 		bool load(bool withAnotherName);
@@ -53,6 +53,7 @@ namespace Halley
 		bool hasDebugSymbols = false;
 		bool loaded = false;
 		bool waitingReload = false;
+		bool includeDebugSymbols = false;
 
 		mutable std::vector<boost::filesystem::path> toDelete;
 
