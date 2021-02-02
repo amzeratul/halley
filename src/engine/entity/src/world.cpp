@@ -644,6 +644,8 @@ void World::processSystemMessages(TimeLine timeline)
 	bool keepRunning = true;
 	auto& timelineSystems = systems[static_cast<int>(timeline)];
 	while (keepRunning) {
+		spawnPending();
+		
 		keepRunning = false;
 		for (auto& system: timelineSystems) {
 			system->prepareSystemMessages();
