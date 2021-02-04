@@ -139,10 +139,7 @@ namespace Halley
 		
 		bool isInView(Rect4f rect) const
 		{
-			const auto sz = size * vertexAttrib.scale * sqrt(2.0f);
-			const auto pos = vertexAttrib.pos;
-			const auto coarseAABB = Rect4f(pos - sz, pos + sz);
-			return visible && coarseAABB.overlaps(rect) && getAABB().overlaps(rect);
+			return visible && getAABB().overlaps(rect);
 		}
 
 		Vector4s getOuterBorder() const { return outerBorder; }
