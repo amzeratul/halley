@@ -154,8 +154,8 @@ Rect4f Sprite::getAABB() const
 		// No rotation, give exact bounding box
 		const Vector2f pivot = getPivot();
 		auto aabb = getPosition() + Rect4f(-sz * pivot, sz * (Vector2f(1, 1) - pivot));
-		Ensures(!std::isnan(aabb.getWidth()));
-		Ensures(!std::isnan(aabb.getHeight()));
+		//Ensures(!std::isnan(aabb.getWidth()));
+		//Ensures(!std::isnan(aabb.getHeight()));
 		return aabb;
 	} else {
 		// This is a coarse test; will give a few false positives
@@ -178,25 +178,10 @@ Rect4f Sprite::getUncroppedAABB() const
 	}
 }
 
-bool Sprite::isInView(Rect4f v) const
-{
-	return isVisible() && getAABB().overlaps(v);
-}
-
-Vector2f Sprite::getScaledSize() const
-{
-	return getScale() * getSize();
-}
-
 Sprite& Sprite::setRotation(Angle1f v)
 {
 	vertexAttrib.rotation = v.getRadians();
 	return *this;
-}
-
-Angle1f Sprite::getRotation() const
-{
-	return vertexAttrib.rotation;
 }
 
 Sprite& Sprite::setScale(Vector2f v)
@@ -222,11 +207,6 @@ Sprite& Sprite::setFlip(bool v)
 		computeSize();
 	}
 	return *this;
-}
-
-bool Sprite::isFlipped() const
-{
-	return flip;
 }
 
 Sprite& Sprite::setTexRect(Rect4f texRect)
@@ -267,11 +247,6 @@ Sprite& Sprite::setAbsolutePivot(Vector2f v)
 	Ensures(vertexAttrib.pivot.isValid());
 
 	return *this;
-}
-
-Vector2f Sprite::getPivot() const
-{
-	return vertexAttrib.pivot;
 }
 
 Vector2f Sprite::getAbsolutePivot() const
@@ -471,11 +446,6 @@ Sprite& Sprite::setNotSliced()
 	return *this;
 }
 
-bool Sprite::isSliced() const
-{
-	return sliced;
-}
-
 Vector4s Sprite::getSlices() const
 {
 	return slices;
@@ -568,11 +538,6 @@ void Sprite::computeSize()
 	}
 }
 
-Vector2f Sprite::getSize() const
-{
-	return size;
-}
-
 Vector2f Sprite::getUncroppedSize() const
 {
 	return getSize() + Vector2f(outerBorder.xy() + outerBorder.zw());
@@ -583,20 +548,10 @@ Vector2f Sprite::getUncroppedScaledSize() const
 	return getScale() * getUncroppedSize();
 }
 
-Vector4s Sprite::getOuterBorder() const
-{
-	return outerBorder;
-}
-
 Sprite& Sprite::setOuterBorder(Vector4s border)
 {
 	outerBorder = border;
 	return *this;
-}
-
-Vector2f Sprite::getScale() const
-{
-	return vertexAttrib.scale;
 }
 
 ConfigNode ConfigNodeSerializer<Sprite>::serialize(const Sprite& sprite, const ConfigNodeSerializationContext& context)

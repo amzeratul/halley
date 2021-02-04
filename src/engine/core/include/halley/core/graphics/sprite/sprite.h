@@ -79,25 +79,25 @@ namespace Halley
 
 		Sprite& setPivot(Vector2f pivot);
 		Sprite& setAbsolutePivot(Vector2f pivot);
-		Vector2f getPivot() const;
+		Vector2f getPivot() const { return vertexAttrib.pivot; }
 		Vector2f getAbsolutePivot() const;
 		Vector2f getUncroppedAbsolutePivot() const;
 
 		Sprite& setRotation(Angle1f angle);
-		Angle1f getRotation() const;
+		Angle1f getRotation() const { return vertexAttrib.rotation; }
 
 		Sprite& setSize(Vector2f size);
 		Sprite& setScale(Vector2f scale);
 		Sprite& setScale(float scale);
 		Sprite& scaleTo(Vector2f size);
-		Vector2f getSize() const;
-		Vector2f getScale() const;
-		Vector2f getScaledSize() const;
+		Vector2f getSize() const { return size; }
+		Vector2f getScale() const { return vertexAttrib.scale; }
+		Vector2f getScaledSize() const { return size * vertexAttrib.scale; }
 		Vector2f getUncroppedSize() const;
 		Vector2f getUncroppedScaledSize() const;
 
 		Sprite& setFlip(bool flip);
-		bool isFlipped() const;
+		bool isFlipped() const { return flip; }
 
 		Sprite& setColour(Colour4f colour) { vertexAttrib.colour = colour; return *this; }
 		Colour4f getColour() const { return vertexAttrib.colour; }
@@ -119,7 +119,7 @@ namespace Halley
 		
 		Sprite& setSliced(Vector4s slices);
 		Sprite& setNotSliced();
-		bool isSliced() const;
+		bool isSliced() const { return sliced; }
 		Vector4s getSlices() const;
 
 		Sprite& setVisible(bool visible) { this->visible = visible; return *this; }
@@ -136,9 +136,16 @@ namespace Halley
 		Rect4f getLocalAABB() const;
 		Rect4f getAABB() const;
 		Rect4f getUncroppedAABB() const;
-		bool isInView(Rect4f rect) const;
+		
+		bool isInView(Rect4f rect) const
+		{
+			const auto sz = size * vertexAttrib.scale * sqrt(2.0f);
+			const auto pos = vertexAttrib.pos;
+			const auto coarseAABB = Rect4f(pos - sz, pos + sz);
+			return visible && coarseAABB.overlaps(rect) && getAABB().overlaps(rect);
+		}
 
-		Vector4s getOuterBorder() const;
+		Vector4s getOuterBorder() const { return outerBorder; }
 		Sprite& setOuterBorder(Vector4s border);
 
 		Sprite clone() const;

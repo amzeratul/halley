@@ -32,7 +32,7 @@ namespace Halley {
 	//////////////////////////////
 	// Vector2D class declaration
 	template <typename T=float>
-	class Rect2D {
+	class alignas(sizeof(T)*4) Rect2D {
 		Vector2D<T> p1, p2;
 
 	public:

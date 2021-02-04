@@ -476,8 +476,10 @@ std::shared_ptr<Material> Painter::getSolidPolygonMaterial()
 
 void Painter::startDrawCall(const std::shared_ptr<Material>& material)
 {
+	constexpr bool enableDynamicBatching = true;
+
 	if (material != materialPending) {
-		if (materialPending != std::shared_ptr<Material>() && !(*material == *materialPending)) {
+		if (!enableDynamicBatching || (materialPending != std::shared_ptr<Material>() && !(*material == *materialPending))) {
 			flushPending();
 		}
 		materialPending = material;
