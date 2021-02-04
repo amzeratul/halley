@@ -5,6 +5,10 @@
 #include "halley/maths/random.h"
 #include <cstdio>
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 using namespace Halley;
 using namespace boost::filesystem;
 
@@ -91,6 +95,44 @@ Bytes FileSystem::readFile(const Path& path)
 {
 	Bytes result;
 
+#if defined(_WIN32)
+	const auto pathStr = path.toString().getUTF16();
+	const auto handle = CreateFileW(pathStr.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, 0, nullptr);
+	
+	if (!handle) {
+		return {};
+	}
+
+	// Get size
+	LARGE_INTEGER fileSize;
+	if (!GetFileSizeEx(handle, &fileSize)) {
+		CloseHandle(handle);
+		return {};
+	}
+	if (fileSize.HighPart > 0) {
+		CloseHandle(handle);
+		return {};
+	}
+
+	// Read
+	result.resize(fileSize.LowPart);
+	DWORD toRead = fileSize.LowPart;
+	DWORD totalRead = 0;
+	while (toRead > 0) {
+		DWORD nRead = 0;
+		if (!ReadFile(handle, result.data() + totalRead, toRead, &nRead, nullptr)) {
+			CloseHandle(handle);
+			return {};
+		}
+		totalRead += nRead;
+		toRead -= nRead;
+	}
+
+	// Clean up
+	CloseHandle(handle);
+	return result;
+	
+#else
 	std::ifstream fp(path.string(), std::ios::binary | std::ios::in);
 	if (!fp.is_open()) {
 		return result;
@@ -103,6 +145,7 @@ Bytes FileSystem::readFile(const Path& path)
 
 	fp.read(reinterpret_cast<char*>(result.data()), size);
 	fp.close();
+#endif
 
 	return result;
 }
