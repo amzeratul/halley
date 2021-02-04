@@ -66,6 +66,8 @@ namespace Halley
 
 		virtual std::optional<String> getGameVersion() const { return {}; }
 
+		virtual void onTickMainLoop() {}
+
 	private:
 		friend class HalleyAPI;
 		friend class Core;

@@ -333,6 +333,10 @@ void Core::onFixedUpdate(Time time)
 
 void Core::onVariableUpdate(Time time)
 {
+	if (api->system) {
+		api->systemInternal->onTickMainLoop();
+	}
+	
 	if (isRunning()) {
 		doVariableUpdate(time);
 	}
