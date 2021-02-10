@@ -348,8 +348,8 @@ std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult
 		const auto borderTL = img->clip.getTopLeft();
 		const auto borderBR = img->img->getSize() - img->clip.getSize() - borderTL;
 
-		// HACK: Hmmm, suspicious
-		const auto offset = Vector2f(0.0001f, 0.0001f);
+		// This is a 0.1px offset to avoid rounding errors drawing adjacent pixels
+		const auto offset = Vector2f(0.1f, 0.1f) / Vector2f(size);
 
 		auto addImageData = [&] (const ImageData& imgData) {
 			SpriteSheetEntry entry;
@@ -357,7 +357,7 @@ std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult
 			entry.rotated = packedImg.rotated;
 			entry.pivot = imgData.clip.isEmpty() ? Vector2f() : Vector2f(imgData.pivot - imgData.clip.getTopLeft()) / entry.size;
 			entry.origPivot = imgData.pivot;
-			entry.coords = (Rect4f(Vector2f(packedImg.rect.getTopLeft()) + offset, Vector2f(packedImg.rect.getBottomRight()) + offset)) / Vector2f(size);
+			entry.coords = (Rect4f(Vector2f(packedImg.rect.getTopLeft()) + offset, Vector2f(packedImg.rect.getBottomRight()) - offset)) / Vector2f(size);
 			entry.trimBorder = Vector4s(static_cast<short>(borderTL.x), static_cast<short>(borderTL.y), static_cast<short>(borderBR.x), static_cast<short>(borderBR.y));
 			entry.slices = imgData.slices;
 
