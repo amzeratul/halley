@@ -40,7 +40,30 @@ Particles::Particles(const ConfigNode& node, Resources& resources)
 ConfigNode Particles::toConfigNode() const
 {
 	ConfigNode::MapType result;
-	// TODO
+
+	result["spawnRate"] = spawnRate;
+	result["spawnArea"] = spawnArea;
+	result["ttl"] = ttl;
+	result["ttlScatter"] = ttlScatter;
+	result["speed"] = speed;
+	result["speedScatter"] = speedScatter;
+	result["speedDamp"] = speedDamp;
+	result["acceleration"] = acceleration;
+	result["angle"] = angle;
+	result["angleScatter"] = angleScatter;
+	result["fadeInTime"] = fadeInTime;
+	result["fadeOutTime"] = fadeOutTime;
+	result["directionScatter"] = directionScatter;
+	result["rotateTowardsMovement"] = rotateTowardsMovement;
+	result["destroyWhenDone"] = destroyWhenDone;
+
+	if (maxParticles) {
+		result["maxParticles"] = static_cast<int>(maxParticles.value());
+	}
+	if (burst) {
+		result["burst"] = static_cast<int>(burst.value());
+	}
+
 	return result;
 }
 
