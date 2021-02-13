@@ -132,7 +132,7 @@ void Painter::drawQuads(const std::shared_ptr<Material>& material, size_t numVer
 
 	const auto result = addDrawData(material, numVertices, numVertices * 3 / 2, true);
 
-	memmove(result.dstVertex, vertexData, result.dataSize);
+	memcpy(result.dstVertex, vertexData, result.dataSize);
 	generateQuadIndices(result.firstIndex, numVertices / 4, result.dstIndex);
 }
 
@@ -152,7 +152,7 @@ void Painter::drawSprites(const std::shared_ptr<Material>& material, size_t numS
 		for (size_t j = 0; j < verticesPerSprite; j++) {
 			const size_t srcOffset = i * result.vertexStride;
 			const size_t dstOffset = (i * verticesPerSprite + j) * result.vertexStride;
-			memmove(result.dstVertex + dstOffset, src + srcOffset, result.vertexSize);
+			memcpy(result.dstVertex + dstOffset, src + srcOffset, result.vertexSize);
 
 			// j -> vertPos
 			// 0 -> 0, 0
@@ -203,7 +203,7 @@ void Painter::drawSlicedSprite(const std::shared_ptr<Material>& material, Vector
 		const size_t iy = i >> 2;
 		const size_t dstOffset = i * result.vertexStride;
 
-		memmove(result.dstVertex + dstOffset, src, result.vertexSize);
+		memcpy(result.dstVertex + dstOffset, src, result.vertexSize);
 
 		Vector4f& vertPos = getVertPos(result.dstVertex + dstOffset, vertPosOffset);
 		vertPos = Vector4f(pos[ix].x, pos[iy].y, tex[ix].x, tex[iy].y);

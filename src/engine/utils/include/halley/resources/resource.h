@@ -125,14 +125,14 @@ namespace Halley
 		virtual ~Resource();
 
 		void setMeta(Metadata meta);
-		const Metadata& getMeta() const;
-		bool isMetaSet() const;
+		const Metadata& getMeta() const { return meta; }
+		bool isMetaSet() const { return metaSet; }
 		
 		void setAssetId(String name);
-		const String& getAssetId() const;
+		const String& getAssetId() const { return assetId; }
 		virtual void onLoaded(Resources& resources);
 		
-		int getAssetVersion() const;
+		int getAssetVersion() const { return assetVersion; }
 		void reloadResource(Resource&& resource);
 
 	protected:

@@ -139,7 +139,7 @@ namespace Halley
 		
 		bool isInView(Rect4f rect) const
 		{
-			return visible && getAABB().overlaps(rect);
+			return getAABB().overlaps(rect) && visible;
 		}
 
 		Vector4s getOuterBorder() const { return outerBorder; }

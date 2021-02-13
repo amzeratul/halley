@@ -15,33 +15,13 @@ void Resource::setMeta(Metadata m)
 	}
 }
 
-const Metadata& Resource::getMeta() const
-{
-	return meta;
-}
-
-bool Resource::isMetaSet() const
-{
-	return metaSet;
-}
-
 void Resource::setAssetId(String id)
 {
 	assetId = std::move(id);
 }
 
-const String& Resource::getAssetId() const
-{
-	return assetId;
-}
-
 void Resource::onLoaded(Resources& resources)
 {
-}
-
-int Resource::getAssetVersion() const
-{
-	return assetVersion;
 }
 
 void Resource::reloadResource(Resource&& resource)

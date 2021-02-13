@@ -65,7 +65,7 @@ namespace Halley {
 	}
 
 	template <typename T>
-	class Colour4 {
+	class alignas(4 * sizeof(T)) Colour4 {
 	public:
 		T r = colMinValue<T>();
 		T g = colMinValue<T>();
