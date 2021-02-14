@@ -66,12 +66,20 @@ void ECSWindow::populateSystem(const String& name)
 	auto labelStyle = factory.getStyle("label").getTextRenderer("label");
 	auto readStyle = labelStyle.clone().setColour(Colour(0.2f, 1.0f, 0.2f));
 	auto writeStyle = labelStyle.clone().setColour(Colour(1.0f, 0.2f, 0.2f));
+	auto addLabel = [&] (const String& label, bool hasRead, bool hasWrite)
+	{
+		const auto style = hasWrite ? writeStyle : (hasRead ? readStyle: labelStyle);
+		systemComponents->add(std::make_shared<UILabel>("", style, LocalisedString::fromUserString(label)), 0, Vector4f(5, 0, 5, 0));
+	};
+
+	addLabel("[World]", false, (int(system.access) & int(SystemAccess::World)) != 0);
+	addLabel("[Resources]", (int(system.access) & int(SystemAccess::Resources)) != 0, false);
+	addLabel("[API]", false, (int(system.access) & int(SystemAccess::API)) != 0);
 	
 	for (const auto& component: ecsData.getComponents()) {
 		const bool hasWrite = writeComponents.find(component.first) != writeComponents.end();
 		const bool hasRead = readComponents.find(component.first) != readComponents.end();
-		const auto style = hasWrite ? writeStyle : (hasRead ? readStyle: labelStyle);
-		systemComponents->add(std::make_shared<UILabel>("", style, LocalisedString::fromUserString(component.first)), 0, Vector4f(5, 0, 5, 0));
+		addLabel(component.first, hasRead, hasWrite);
 	}
 }
 
