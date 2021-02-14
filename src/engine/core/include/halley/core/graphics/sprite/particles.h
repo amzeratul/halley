@@ -31,6 +31,7 @@ namespace Halley {
 		float getSpawnRateMultiplier() const;
 
 		void setPosition(Vector2f pos);
+		void setSpawnArea(Vector2f area);
 
 		void update(Time t);
 

@@ -1,11 +1,27 @@
 #include "halley/ui/ui_colour_scheme.h"
 
+
+#include "halley/core/graphics/material/material.h"
+#include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/resources/resources.h"
 #include "halley/data_structures/config_node.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;
+
+static Sprite getSpriteFromConfigNode(const ConfigNode& node, Resources& resources)
+{
+	Sprite sprite;
+
+	if (node.getType() == ConfigNodeType::String) {
+		sprite = Sprite().setImage(resources, node.asString());
+	} else {
+		sprite = Sprite().setImage(resources, node["img"].asString(), node["material"].asString(""));
+	}
+
+	return sprite;
+}
 
 UIColourScheme::UIColourScheme()
 {}
@@ -23,15 +39,7 @@ UIColourScheme::UIColourScheme(const ConfigNode& node, Resources& resources)
 
 	if (node.hasKey("sprites")) {
 		for (const auto& [k, v]: node["sprites"].asMap()) {
-			Sprite sprite;
-
-			if (v.getType() == ConfigNodeType::String) {
-				sprite = Sprite().setImage(resources, v.asString());
-			} else {
-				sprite = Sprite().setImage(resources, v["img"].asString(), v["material"].asString(""));
-			}
-
-			sprites[k] = std::move(sprite);
+			sprites[k] = getSpriteFromConfigNode(v, resources);
 		}
 	}
 	
@@ -41,6 +49,23 @@ UIColourScheme::UIColourScheme(const ConfigNode& node, Resources& resources)
 	name = node["name"].asString();
 
 	enabled = node["enabled"].asBool(true);
+
+	{
+		auto mat = std::make_shared<Material>(resources.get<MaterialDefinition>("Halley/Scanlines"));
+		mat
+			->set("u_col0", getColour("background0"))
+			.set("u_col1", getColour("background1"))
+			.set("u_distance", 6.0f);
+		background = Sprite().setMaterial(mat);
+	}
+	if (node.hasKey("backgroundParticles")) {
+		backgroundParticles = Particles(node["backgroundParticles"]["particles"], resources);
+		std::vector<Sprite> particleSprites;
+		for (const auto& spriteNode: node["backgroundParticles"]["sprites"].asSequence()) {
+			particleSprites.push_back(getSpriteFromConfigNode(spriteNode, resources));
+		}
+		backgroundParticles.setSprites(std::move(particleSprites));
+	}
 }
 
 Colour4f UIColourScheme::getColour(const String& rawKey) const
@@ -78,6 +103,16 @@ Sprite UIColourScheme::getSprite(Resources& resources, const String& name, const
 	} else {
 		return Sprite().setImage(resources, name, material);
 	}
+}
+
+const Sprite& UIColourScheme::getBackground() const
+{
+	return background;
+}
+
+const Particles& UIColourScheme::getBackgroundParticles() const
+{
+	return backgroundParticles;
 }
 
 const String& UIColourScheme::getName() const

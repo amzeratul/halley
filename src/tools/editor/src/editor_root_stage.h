@@ -29,8 +29,10 @@ namespace Halley {
 		std::unique_ptr<Project> project;
 
 		Sprite halleyLogo;
-		Sprite background;
 		Sprite cursor;
+
+		Sprite background;
+		Particles backgroundParticles;
 
 		std::unique_ptr<EditorUIFactory> uiFactory;
 		std::unique_ptr<UIRoot> ui;

@@ -78,12 +78,17 @@ void EditorRootStage::onRender(RenderContext& context) const
 		auto view = Rect4f(painter.getViewPort());
 
 		// Background
-		Sprite bg = background;
-		bg.setTexRect(view).setSize(view.getSize()).draw(painter);
+		background
+			.clone()
+			.setTexRect(view)
+			.setSize(view.getSize())
+			.draw(painter);
 
 		if (!topLevelUI || !std::dynamic_pointer_cast<LoadProjectWindow>(topLevelUI)) {
 			halleyLogo.clone().setPos(Vector2f(getVideoAPI().getWindow().getDefinition().getSize() / 2)).draw(painter);
 		}
+
+		Sprite::draw(backgroundParticles.getSprites(), painter);
 
 		// UI
 		SpritePainter spritePainter;
@@ -119,16 +124,8 @@ void EditorRootStage::initSprites()
 {
 	// Colour scheme
 	const auto& colourScheme = uiFactory->getColourScheme();
-	
-	// Background
-	{
-		auto mat = std::make_shared<Material>(getResource<MaterialDefinition>("Halley/Scanlines"));
-		mat
-			->set("u_col0", colourScheme->getColour("background0"))
-			.set("u_col1", colourScheme->getColour("background1"))
-			.set("u_distance", 6.0f);
-		background = Sprite().setMaterial(mat).setPos(Vector2f(0, 0));
-	}
+	background = colourScheme->getBackground();
+	backgroundParticles = colourScheme->getBackgroundParticles();
 
 	{
 		// Halley logo
@@ -186,6 +183,10 @@ void EditorRootStage::updateUI(Time time)
 	//uiMainPanel->setMinSize(Vector2f(size));
 	ui->setRect(Rect4f(Vector2f(), Vector2f(size)));
 	ui->update(time, UIInputType::Mouse, getInputAPI().getMouse(), kb);
+
+	backgroundParticles.setPosition(Vector2f(size) * Vector2f(0.6f, 0.4f));
+	backgroundParticles.setSpawnArea(Vector2f(size) * 1.2f);
+	backgroundParticles.update(time);
 }
 
 void EditorRootStage::loadProject()

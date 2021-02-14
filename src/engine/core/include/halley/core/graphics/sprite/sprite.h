@@ -46,7 +46,7 @@ namespace Halley
 		void drawNormal(Painter& painter, const std::optional<Rect4f>& extClip = {}) const;
 		void drawSliced(Painter& painter, const std::optional<Rect4f>& extClip = {}) const;
 		void drawSliced(Painter& painter, Vector4s slices, const std::optional<Rect4f>& extClip = {}) const;
-		static void draw(const Sprite* sprites, size_t n, Painter& painter);
+		static void draw(gsl::span<const Sprite> sprites, Painter& painter);
 		static void drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painter);
 
 		Sprite& setMaterial(Resources& resources, String materialName = "");

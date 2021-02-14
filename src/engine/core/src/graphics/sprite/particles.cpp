@@ -92,6 +92,11 @@ void Particles::setPosition(Vector2f pos)
 	position = pos;
 }
 
+void Particles::setSpawnArea(Vector2f area)
+{
+	spawnArea = area;
+}
+
 void Particles::start()
 {
 	if (burst) {

@@ -87,9 +87,9 @@ void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel, const std::optio
 	}
 }
 
-void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter) // static
+void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter) // static
 {
-	if (n == 0) {
+	if (sprites.empty()) {
 		return;
 	}
 
@@ -100,7 +100,7 @@ void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter) // static
 	char buffer[4096];
 	char* vertexData;
 	std::vector<char> vertices;
-	const size_t vertexDataSize = n * spriteSize;
+	const size_t vertexDataSize = sprites.size() * spriteSize;
 	if (vertexDataSize <= 4096) {
 		vertexData = buffer;
 	} else {
@@ -108,13 +108,13 @@ void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter) // static
 		vertexData = vertices.data();
 	}
 
-	for (size_t i = 0; i < n; i++) {
+	for (size_t i = 0; i < sprites.size(); i++) {
 		auto& sprite = sprites[i];
 		Expects(sprite.material == material);
 		memcpy(&vertexData[i * spriteSize], &sprite.vertexAttrib, spriteSize);
 	}
 
-	painter.drawSprites(material, n, vertexData);
+	painter.drawSprites(material, sprites.size(), vertexData);
 }
 
 void Sprite::drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painter)
@@ -128,12 +128,12 @@ void Sprite::drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painte
 	for (size_t i = 0; i < n; ++i) {
 		auto* material = sprites[i].material.get();
 		if (material != lastMaterial) {
-			draw(sprites + start, i - start, painter);
+			draw(gsl::span<const Sprite>(sprites + start, i - start), painter);
 			start = i;
 			lastMaterial = material;
 		}
 	}
-	draw(sprites + start, n - start, painter);
+	draw(gsl::span<const Sprite>(sprites + start, n - start), painter);
 }
 
 Rect4f Sprite::getLocalAABB() const

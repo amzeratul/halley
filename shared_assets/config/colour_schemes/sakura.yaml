@@ -38,3 +38,19 @@ colours:
   ui_selectedTextAlt: "#9C2E94"
   ui_unselectedTextAlt: "#9C2E94"
   ui_disabledTextAlt: "#774077"
+
+backgroundParticles:
+  particles:
+    spawnRate: 25
+    angle: 135
+    angleScatter: 25
+    speed: 100
+    acceleration: [-10, 10]
+    ttl: 10
+    fadeInTime: 1
+    fadeOutTime: 1
+    speedDamp: 0.2
+    directionScatter: 150
+    rotateTowardsMovement: true
+  sprites:
+  - { img: halley_ui/particles_sakura.png, colour: "#FFFFFF" }
