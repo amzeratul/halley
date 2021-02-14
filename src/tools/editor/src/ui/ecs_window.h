@@ -11,6 +11,10 @@ namespace Halley {
 		void onMakeUI() override;
 	
 	private:
+		UIFactory& factory;
 		Project& project;
+
+		void populateSystem(const String& name);
+		void populateComponent(const String& name);
 	};
 }

@@ -25,10 +25,12 @@ children:
         - widget: { id: systemList, class: list, size: [300, 400] }
       - widget: { class: scrollBarPane, size: [300, 400], scrollVertical: true, autoHide: true }
         border: [1, 4, 1, 1]
+        proportion: 1
         children:
         - widget: { id: systemComponents, class: widget }
-          sizer: { type: grid, columns: 3 }
+          sizer: { type: grid, columns: 3, gap: 3 }
           children: []
+          fill: centre
           proportion: 1
     - widget: { class: widget }
       sizer: { type: horizontal }
@@ -40,9 +42,11 @@ children:
         - widget: { id: componentList, class: list, size: [300, 400] }
       - widget: { class: scrollBarPane, size: [300, 400], scrollVertical: true, autoHide: true }
         border: [1, 4, 1, 1]
+        proportion: 1
         children:
-        - widget: { id: componentData, class: widget }
-          sizer: { type: vertical }
+        - widget: { id: componentSystems, class: widget }
+          sizer: { type: grid, columns: 3, gap: 3 }
           children: []
+          fill: centre
           proportion: 1
 ...
