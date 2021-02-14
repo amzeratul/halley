@@ -1,5 +1,48 @@
 ---
 widget: { class: widget }
 sizer: { type: vertical }
-children: []
+children:
+- widget:
+    id: tabs
+    class: list
+    style: tabs
+    type: horizontal
+    options:
+    - { id: systems, text: Systems }
+    - { id: components, text: Components }
+- proportion: 1
+  widget: 
+    id: content
+    class: pagedPane
+    pages:
+    - widget: { class: widget }
+      sizer: { type: horizontal }
+      proportion: 1
+      children:
+      - widget: { class: scrollBarPane, size: [300, 400], scrollVertical: true, autoHide: true }
+        border: [1, 4, 1, 1]
+        children:
+        - widget: { id: systemList, class: list, size: [300, 400] }
+      - widget: { class: scrollBarPane, size: [300, 400], scrollVertical: true, autoHide: true }
+        border: [1, 4, 1, 1]
+        children:
+        - widget: { id: systemComponents, class: widget }
+          sizer: { type: grid, columns: 3 }
+          children: []
+          proportion: 1
+    - widget: { class: widget }
+      sizer: { type: horizontal }
+      proportion: 1
+      children:
+      - widget: { class: scrollBarPane, size: [300, 400], scrollVertical: true, autoHide: true }
+        border: [1, 4, 1, 1]
+        children:
+        - widget: { id: componentList, class: list, size: [300, 400] }
+      - widget: { class: scrollBarPane, size: [300, 400], scrollVertical: true, autoHide: true }
+        border: [1, 4, 1, 1]
+        children:
+        - widget: { id: componentData, class: widget }
+          sizer: { type: vertical }
+          children: []
+          proportion: 1
 ...

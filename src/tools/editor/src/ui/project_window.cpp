@@ -95,7 +95,7 @@ void ProjectWindow::makePagedPane()
 	consoleWindow = std::make_shared<ConsoleWindow>(factory);
 	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader(), *this);
 	auto properties = std::make_shared<GamePropertiesWindow>(factory, project);
-	auto ecs = std::make_shared<ECSWindow>(factory);
+	auto ecs = std::make_shared<ECSWindow>(factory, project);
 	
 	pagedPane = std::make_shared<UIPagedPane>("pages", numOfStandardTools);
 	pagedPane->getPage(static_cast<int>(EditorTabs::Assets))->add(assetEditorWindow, 1, Vector4f(8, 8, 8, 8));
