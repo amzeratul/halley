@@ -6,6 +6,7 @@
 #include "halley/maths/vector3.h"
 #include "halley/maths/matrix4.h"
 #include "halley/time/halleytime.h"
+#include "halley/core/graphics/material/material.h"
 
 namespace Halley
 {
@@ -36,7 +37,7 @@ namespace Halley
 		Vector3f scale;
 
 		std::shared_ptr<const Mesh> mesh;
-		std::shared_ptr<Material> material;
+		MaterialHandle material;
 
 		bool dirty = true;
 		void updateMatrix();

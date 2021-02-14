@@ -4,6 +4,7 @@
 
 #include "halley/maths/vector2.h"
 #include "halley/text/halleystring.h"
+#include "halley/core/graphics/material/material.h"
 
 namespace Halley {
 	class VideoAPI;
@@ -38,7 +39,7 @@ namespace Halley {
 		Vector2i curTextureSize;
 		Vector2i curRenderSize;
 
-		std::shared_ptr<Material> material;
+		MaterialHandle material;
 
 		int version = 0;
 	};

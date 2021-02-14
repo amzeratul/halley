@@ -30,9 +30,9 @@ namespace Halley
 
 		void updateSprite(Sprite& sprite) const;
 
-		AnimationPlayer& setMaterialOverride(std::shared_ptr<Material> material);
-		std::shared_ptr<Material> getMaterialOverride() const;
-		std::shared_ptr<const Material> getMaterial() const;
+		AnimationPlayer& setMaterialOverride(MaterialHandle material);
+		MaterialHandle getMaterialOverride() const;
+		MaterialHandle getMaterial() const;
 		void setApplyMaterial(bool apply);
 		bool isApplyingMaterial() const;
 
@@ -67,7 +67,7 @@ namespace Halley
 
 		void updateIfNeeded();
 
-		std::shared_ptr<Material> materialOverride;
+		MaterialHandle materialOverride;
 		std::shared_ptr<const Animation> animation;
 		const SpriteSheetEntry* spriteData = nullptr;
 

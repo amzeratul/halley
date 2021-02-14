@@ -3,6 +3,7 @@
 #include <halley/text/halleystring.h>
 #include <memory>
 #include <halley/resources/resource.h>
+#include "halley/core/graphics/material/material.h"
 #include "halley/maths/vector2.h"
 #include "halley/maths/rect.h"
 
@@ -13,7 +14,6 @@ namespace Halley
 	class ResourceLoader;
 	class SpriteSheet;
 	class SpriteSheetEntry;
-	class Material;
 	class AnimationDirection;
 	class AnimationImporter;
 
@@ -123,7 +123,7 @@ namespace Halley
 
 		const String& getName() const { return name; }
 		const SpriteSheet& getSpriteSheet() const { return *spriteSheet; }
-		std::shared_ptr<Material> getMaterial() const { return material; }
+		MaterialHandle getMaterial() const { return material; }
 
 		const AnimationSequence& getSequence(const String& name) const;
 		const AnimationDirection& getDirection(const String& name) const;
@@ -154,6 +154,6 @@ namespace Halley
 		Vector<AnimationDirection> directions;
 
 		std::shared_ptr<const SpriteSheet> spriteSheet;
-		std::shared_ptr<Material> material;
+		MaterialHandle material;
 	};
 }

@@ -59,8 +59,8 @@ void Sprite::drawSliced(Painter& painter, const std::optional<Rect4f>& extClip) 
 
 void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) const
 {
-	if (material) {
-		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+	if (material.hasMaterial()) {
+		Expects(material.getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 
 		paintWithClip(painter, extClip, [&] ()
 		{
@@ -71,8 +71,8 @@ void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) 
 
 void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel, const std::optional<Rect4f>& extClip) const
 {
-	if (material) {
-		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+	if (material.hasMaterial()) {
+		Expects(material.getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 		
 		paintWithClip(painter, extClip, [&] ()
 		{
@@ -94,7 +94,7 @@ void Sprite::draw(const Sprite* sprites, size_t n, Painter& painter) // static
 	}
 
 	auto& material = sprites[0].material;
-	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+	Expects(material.getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
 
 	size_t spriteSize = sizeof(SpriteVertexAttrib);
 	char buffer[4096];
@@ -124,10 +124,10 @@ void Sprite::drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painte
 	}
 
 	size_t start = 0;
-	auto* lastMaterial = sprites[0].material.get();
-	for (size_t i = 0; i < n; ++i) {
-		auto* material = sprites[i].material.get();
-		if (material != lastMaterial) {
+	auto* lastMaterial = &sprites[0].material;
+	for (size_t i = 1; i < n; ++i) {
+		auto* material = &sprites[i].material;
+		if (*material != *lastMaterial) {
 			draw(sprites + start, i - start, painter);
 			start = i;
 			lastMaterial = material;
@@ -273,52 +273,30 @@ Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 	if (materialName == "") {
 		materialName = "Halley/Sprite";
 	}
-	setMaterial(std::make_shared<Material>(resources.get<MaterialDefinition>(materialName)), false);
+	setMaterial(MaterialHandle(resources.get<MaterialDefinition>(materialName)));
 	return *this;
 }
 
-Sprite& Sprite::setMaterial(std::shared_ptr<Material> m, bool shared)
+Sprite& Sprite::setMaterial(MaterialHandle m)
 {
-	Expects(m != nullptr);
+	Expects(m.hasMaterial());
 
-	const bool hadMaterial = static_cast<bool>(material);
+	const bool hadMaterial = material.hasMaterial();
 	material = std::move(m);
-	sharedMaterial = shared;
 
-	if (!hadMaterial && !material->getTextures().empty()) {
-		setImageData(*material->getTextures()[0]);
+	if (!hadMaterial && !material.getTextures().empty()) {
+		setImageData(*material.getTextures()[0]);
 	}
 
 	return *this;
 }
 
-Sprite& Sprite::setMaterial(std::unique_ptr<Material> m)
+bool Sprite::hasCompatibleMaterial(const MaterialHandle& other) const
 {
-	setMaterial(std::move(m), false);
-	return *this;
-}
-
-Material& Sprite::getMutableMaterial()
-{
-	return *getMutableMaterialPtr();
-}
-
-std::shared_ptr<Material> Sprite::getMutableMaterialPtr()
-{
-	Expects(material);
-	if (sharedMaterial) {
-		material = material->clone();
-		sharedMaterial = false;
-	}
-	return material;
-}
-
-bool Sprite::hasCompatibleMaterial(const Material& other) const
-{
-	if (!material) {
+	if (!material.hasMaterial()) {
 		return false;
 	}
-	return material->isCompatibleWith(other);
+	return material.isCompatibleWith(other);
 }
 
 Sprite& Sprite::setImageData(const Texture& image)
@@ -328,14 +306,14 @@ Sprite& Sprite::setImageData(const Texture& image)
 	return *this;
 }
 
-Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> materialDefinition, bool shared)
+Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> materialDefinition)
 {
 	Expects(image != nullptr);
 	Expects(materialDefinition != nullptr);
 
-	auto mat = std::make_shared<Material>(materialDefinition);
-	mat->set("tex0", image);
-	setMaterial(mat, shared);
+	auto mat = MaterialHandle(materialDefinition);
+	mat.set("tex0", image);
+	setMaterial(mat);
 	return *this;
 }
 
@@ -349,7 +327,7 @@ Sprite& Sprite::setImage(Resources& resources, const String& imageName, String m
 		materialName = sprite->getDefaultMaterialName();
 	}
 
-	setMaterial(sprite->getMaterial(materialName), true);
+	setMaterial(sprite->getMaterial(materialName));
 	doSetSprite(sprite->getSprite(), true);
 		
 #ifdef ENABLE_HOT_RELOAD
@@ -359,10 +337,10 @@ Sprite& Sprite::setImage(Resources& resources, const String& imageName, String m
 	return *this;
 }
 
-Sprite& Sprite::setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> materialDefinition, bool shared)
+Sprite& Sprite::setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> materialDefinition)
 {
 	const auto spriteSheet = sprite.getSpriteSheet();
-	setImage(spriteSheet->getTexture(), std::move(materialDefinition), shared);
+	setImage(spriteSheet->getTexture(), std::move(materialDefinition));
 	doSetSprite(sprite.getSprite(), true);
 	
 #ifdef ENABLE_HOT_RELOAD
@@ -464,8 +442,8 @@ bool Sprite::isPointVisible(Vector2f localPoint) const
 	}
 
 	// Check against texture
-	if (material) {
-		const auto tex = material->getTexture(0);
+	if (material.hasMaterial()) {
+		const auto tex = material.getTexture(0);
 		if (tex) {
 			const auto rectPos = localPoint + getAbsolutePivot();
 			const auto texRect = getTexRect0();
@@ -575,7 +553,7 @@ Sprite ConfigNodeSerializer<Sprite>::deserialize(const ConfigNodeSerializationCo
 	if (node.hasKey("image1")) {
 		const auto image1 = context.resources->get<SpriteResource>(node["image1"].asString());
 		sprite.setTexRect1(image1->getSprite().coords);
-		sprite.getMutableMaterial().set("tex1", image1->getSpriteSheet()->getTexture());
+		sprite.getMaterial().set("tex1", image1->getSpriteSheet()->getTexture());
 	}
 	if (node.hasKey("pivot")) {
 		sprite.setAbsolutePivot(node["pivot"].asVector2f());
@@ -596,10 +574,11 @@ Sprite::~Sprite()
 
 void Sprite::reloadSprite(const SpriteResource& sprite)
 {
+	const bool sharedMaterial = false; // TODO
 	if (sharedMaterial) {
-		setMaterial(sprite.getMaterial(material->getDefinition().getName()));
-	} else if (material) {
-		material->set("tex0", sprite.getSpriteSheet()->getTexture());
+		setMaterial(sprite.getMaterial(material.getDefinition().getName()));
+	} else if (material.hasMaterial()) {
+		material.set("tex0", sprite.getSpriteSheet()->getTexture());
 	}
 	doSetSprite(sprite.getSprite(), lastAppliedPivot);
 }
@@ -627,7 +606,6 @@ Sprite& Sprite::operator=(const Sprite& other)
 	visible = other.visible;
 	flip = other.flip;
 	sliced = other.sliced;
-	sharedMaterial = other.sharedMaterial;
 	lastAppliedPivot = other.lastAppliedPivot;
 	
 	setHotReload(other.hotReloadRef, other.hotReloadIdx);
@@ -648,7 +626,6 @@ Sprite& Sprite::operator=(Sprite&& other) noexcept
 	visible = std::move(other.visible);
 	flip = std::move(other.flip);
 	sliced = std::move(other.sliced);
-	sharedMaterial = std::move(other.sharedMaterial);
 	lastAppliedPivot = std::move(other.lastAppliedPivot);
 
 	setHotReload(other.hotReloadRef, other.hotReloadIdx);

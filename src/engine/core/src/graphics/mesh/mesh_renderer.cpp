@@ -40,7 +40,7 @@ Quaternion MeshRenderer::getRotation() const
 
 MeshRenderer& MeshRenderer::setMesh(std::shared_ptr<const Mesh> mesh)
 {
-	material = mesh->getMaterial()->clone();
+	material = mesh->getMaterial();
 	this->mesh = std::move(mesh);
 	dirty = true;
 	return *this;
@@ -75,6 +75,6 @@ void MeshRenderer::updateMatrix()
 		matrix.rotate(rot);
 		matrix.scale(scale);
 		dirty = false;
-		material->set("u_modelMatrix", matrix);
+		material.set("u_modelMatrix", matrix);
 	}
 }

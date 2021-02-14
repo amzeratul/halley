@@ -6,6 +6,8 @@
 #include <condition_variable>
 #include <halley/maths/vector4.h>
 
+#include "material/material.h"
+
 namespace Halley
 {
 	class Polygon;
@@ -51,31 +53,31 @@ namespace Halley
 		void setClip();
 
 		// Draws primitives
-		void draw(const std::shared_ptr<Material>& material, size_t numVertices, const void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
+		void draw(const MaterialHandle& material, size_t numVertices, const void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
 
 		// Draws quads
-		void drawQuads(const std::shared_ptr<Material>& material, size_t numVertices, const void* vertexData);
+		void drawQuads(const MaterialHandle& material, size_t numVertices, const void* vertexData);
 
 		// Draw sprites takes a single vertex per sprite, duplicates the data across multiple vertices, and draws
 		// vertPosOffset is the offset, in bytes, from the start of each vertex's data, to a Vector2f which will be filled with the vertex's position in 0-1 space.
-		void drawSprites(const std::shared_ptr<Material>& material, size_t numSprites, const void* vertexData);
+		void drawSprites(const MaterialHandle& material, size_t numSprites, const void* vertexData);
 
 		// Draw one sliced sprite. Slices -> x = left, y = top, z = right, w = bottom, in [0..1] space relative to the texture
-		void drawSlicedSprite(const std::shared_ptr<Material>& material, Vector2f scale, Vector4f slices, const void* vertexData);
+		void drawSlicedSprite(const MaterialHandle& material, Vector2f scale, Vector4f slices, const void* vertexData);
 
 		// Draws a line across all points (if no material is specified, use standard one)
-		void drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop = false, std::shared_ptr<Material> material = {});
+		void drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop = false, MaterialHandle material = {});
 
 		// Circle drawing
-		void drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<Material> material = {});
-		void drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<Material> material = {});
-		void drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<Material> material = {});
+		void drawCircle(Vector2f centre, float radius, float width, Colour4f colour, MaterialHandle material = {});
+		void drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, MaterialHandle material = {});
+		void drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, MaterialHandle material = {});
 
 		// Rect drawing
-		void drawRect(Rect4f rect, float width, Colour4f colour, std::shared_ptr<Material> material = {});
+		void drawRect(Rect4f rect, float width, Colour4f colour, MaterialHandle material = {});
 
 		// Polygon drawing
-		void drawPolygon(const Polygon& polygon, Colour4f colour, std::shared_ptr<Material> material = {});
+		void drawPolygon(const Polygon& polygon, Colour4f colour, MaterialHandle material = {});
 
 		size_t getNumDrawCalls() const { return nDrawCalls; }
 		size_t getNumVertices() const { return nVertices; }
@@ -118,9 +120,9 @@ namespace Halley
 		bool allIndicesAreQuads = true;
 		Vector<char> vertexBuffer;
 		Vector<IndexType> indexBuffer;
-		std::shared_ptr<Material> materialPending;
-		std::shared_ptr<Material> solidLineMaterial;
-		std::shared_ptr<Material> solidPolygonMaterial;
+		MaterialHandle materialPending;
+		MaterialHandle solidLineMaterial;
+		MaterialHandle solidPolygonMaterial;
 
 		size_t nDrawCalls = 0;
 		size_t nVertices = 0;
@@ -141,13 +143,13 @@ namespace Halley
 		void endRender();
 		
 		void resetPending();
-		void startDrawCall(const std::shared_ptr<Material>& material);
+		void startDrawCall(const MaterialHandle& material);
 		void flushPending();
 		void executeDrawPrimitives(Material& material, size_t numVertices, void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
 
 		void makeSpaceForPendingVertices(size_t numBytes);
 		void makeSpaceForPendingIndices(size_t numIndices);
-		PainterVertexData addDrawData(const std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly);
+		PainterVertexData addDrawData(const MaterialHandle& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly);
 
 		IndexType* getStandardQuadIndices(size_t numQuads);
 		void generateQuadIndicesOffset(IndexType firstVertex, IndexType lineStride, IndexType* target);
@@ -157,7 +159,7 @@ namespace Halley
 
 		Rect4i getRectangleForActiveRenderTarget(Rect4i rectangle);
 
-		std::shared_ptr<Material> getSolidLineMaterial();
-		std::shared_ptr<Material> getSolidPolygonMaterial();
+		MaterialHandle getSolidLineMaterial();
+		MaterialHandle getSolidPolygonMaterial();
 	};
 }

@@ -26,8 +26,8 @@ struct LineVertex {
 Painter::Painter(Resources& resources)
 	: halleyGlobalMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/MaterialBase"), true))
 	, resources(resources)
-	, solidLineMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidLine")))
-	, solidPolygonMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidPolygon")))
+	, solidLineMaterial(resources.get<MaterialDefinition>("Halley/SolidLine"))
+	, solidPolygonMaterial(resources.get<MaterialDefinition>("Halley/SolidPolygon"))
 {
 }
 
@@ -73,7 +73,7 @@ static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
 	return *reinterpret_cast<Vector4f*>(vertexAttrib + vertPosOffset);
 }
 
-Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<Material>& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly)
+Painter::PainterVertexData Painter::addDrawData(const MaterialHandle& material, size_t numVertices, size_t numIndices, bool standardQuadsOnly)
 {
 	updateClip();
 
@@ -85,7 +85,7 @@ Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<Material>&
 		flushPending();
 	}
 
-	Expects(material != nullptr);
+	Expects(material.hasMaterial());
 	Expects(numVertices > 0);
 	Expects(numIndices >= numVertices);
 
@@ -93,8 +93,8 @@ Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<Material>&
 
 	PainterVertexData result;
 
-	result.vertexSize = material->getDefinition().getVertexSize();
-	result.vertexStride = material->getDefinition().getVertexStride();
+	result.vertexSize = material.getDefinition().getVertexSize();
+	result.vertexStride = material.getDefinition().getVertexStride();
 	result.dataSize = numVertices * result.vertexStride;
 	makeSpaceForPendingVertices(result.dataSize);
 	makeSpaceForPendingIndices(numIndices);
@@ -111,7 +111,7 @@ Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<Material>&
 	return result;
 }
 
-void Painter::draw(const std::shared_ptr<Material>& material, size_t numVertices, const void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType)
+void Painter::draw(const MaterialHandle& material, size_t numVertices, const void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType)
 {
 	Expects(primitiveType == PrimitiveType::Triangle);
 	Expects(indices.size() % 3 == 0);
@@ -125,7 +125,7 @@ void Painter::draw(const std::shared_ptr<Material>& material, size_t numVertices
 	}
 }
 
-void Painter::drawQuads(const std::shared_ptr<Material>& material, size_t numVertices, const void* vertexData)
+void Painter::drawQuads(const MaterialHandle& material, size_t numVertices, const void* vertexData)
 {
 	Expects(numVertices % 4 == 0);
 	Expects(vertexData != nullptr);
@@ -136,13 +136,13 @@ void Painter::drawQuads(const std::shared_ptr<Material>& material, size_t numVer
 	generateQuadIndices(result.firstIndex, numVertices / 4, result.dstIndex);
 }
 
-void Painter::drawSprites(const std::shared_ptr<Material>& material, size_t numSprites, const void* vertexData)
+void Painter::drawSprites(const MaterialHandle& material, size_t numSprites, const void* vertexData)
 {
 	Expects(vertexData != nullptr);
 
 	const size_t verticesPerSprite = 4;
 	const size_t numVertices = verticesPerSprite * numSprites;
-	const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
+	const size_t vertPosOffset = material.getDefinition().getVertexPosOffset();
 
 	const auto result = addDrawData(material, numVertices, numSprites * 6, true);
 
@@ -168,7 +168,7 @@ void Painter::drawSprites(const std::shared_ptr<Material>& material, size_t numS
 	generateQuadIndices(result.firstIndex, numSprites, result.dstIndex);
 }
 
-void Painter::drawSlicedSprite(const std::shared_ptr<Material>& material, Vector2f scale, Vector4f slices, const void* vertexData)
+void Painter::drawSlicedSprite(const MaterialHandle& material, Vector2f scale, Vector4f slices, const void* vertexData)
 {
 	Expects(vertexData != nullptr);
 	if (scale.x < 0.00001f || scale.y < 0.00001f) {
@@ -190,7 +190,7 @@ void Painter::drawSlicedSprite(const std::shared_ptr<Material>& material, Vector
 
 	const size_t numVertices = 16;
 	const size_t numIndices = 9 * 6; // 9 quads, 6 indices per quad
-	const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
+	const size_t vertPosOffset = material.getDefinition().getVertexPosOffset();
 
 	const auto result = addDrawData(material, numVertices, numIndices, false);
 	const char* const src = static_cast<const char*>(vertexData);
@@ -219,9 +219,9 @@ void Painter::drawSlicedSprite(const std::shared_ptr<Material>& material, Vector
 	}
 }
 
-void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop, std::shared_ptr<Material> material)
+void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop, MaterialHandle material)
 {
-	if (!material) {
+	if (!material.hasMaterial()) {
 		material = getSolidLineMaterial();
 	}
 
@@ -294,7 +294,7 @@ static size_t getSegmentsForArc(float radius, float arcLen)
 	return clamp(size_t(arcLen / float(pi() * 2) * 50.0f), size_t(4), size_t(256));
 }
 
-void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<Material> material)
+void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f colour, MaterialHandle material)
 {
 	const size_t n = getSegmentsForArc(radius, 2 * float(pi()));
 	std::vector<Vector2f> points;
@@ -304,7 +304,7 @@ void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f co
 	drawLine(points, width, colour, true, std::move(material));
 }
 
-void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<Material> material)
+void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, MaterialHandle material)
 {
 	const float arcLen = (to - from).getRadians() + (from.turnSide(to) > 0 ? 0.0f : 0 * float(pi()));
 	const size_t n = getSegmentsForArc(radius, arcLen);
@@ -315,7 +315,7 @@ void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f 
 	drawLine(points, width, colour, false, std::move(material));
 }
 
-void Painter::drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<Material> material)
+void Painter::drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, MaterialHandle material)
 {
 	const size_t n = getSegmentsForArc(std::max(radius.x, radius.y), 2 * float(pi()));
 	std::vector<Vector2f> points;
@@ -325,7 +325,7 @@ void Painter::drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4
 	drawLine(points, width, colour, true, std::move(material));
 }
 
-void Painter::drawRect(Rect4f rect, float width, Colour4f colour, std::shared_ptr<Material> material)
+void Painter::drawRect(Rect4f rect, float width, Colour4f colour, MaterialHandle material)
 {
 	std::vector<Vector2f> points;
 	points.push_back(rect.getTopLeft());
@@ -335,13 +335,13 @@ void Painter::drawRect(Rect4f rect, float width, Colour4f colour, std::shared_pt
 	drawLine(points, width, colour, true, std::move(material));
 }
 
-void Painter::drawPolygon(const Polygon& polygon, Colour4f colour, std::shared_ptr<Material> material)
+void Painter::drawPolygon(const Polygon& polygon, Colour4f colour, MaterialHandle material)
 {
 	if (!polygon.isValid()) {
 		return;
 	}
 	
-	if (!material) {
+	if (!material.hasMaterial()) {
 		material = getSolidPolygonMaterial();
 	}
 	
@@ -464,22 +464,22 @@ Rect4i Painter::getRectangleForActiveRenderTarget(Rect4i r)
 	}
 }
 
-std::shared_ptr<Material> Painter::getSolidLineMaterial()
+MaterialHandle Painter::getSolidLineMaterial()
 {
 	return solidLineMaterial;
 }
 
-std::shared_ptr<Material> Painter::getSolidPolygonMaterial()
+MaterialHandle Painter::getSolidPolygonMaterial()
 {
 	return solidPolygonMaterial;
 }
 
-void Painter::startDrawCall(const std::shared_ptr<Material>& material)
+void Painter::startDrawCall(const MaterialHandle& material)
 {
 	constexpr bool enableDynamicBatching = true;
 
 	if (material != materialPending) {
-		if (!enableDynamicBatching || (materialPending != std::shared_ptr<Material>() && !(*material == *materialPending))) {
+		if (!enableDynamicBatching || (materialPending != MaterialHandle() && !(material == materialPending))) {
 			flushPending();
 		}
 		materialPending = material;
@@ -489,7 +489,7 @@ void Painter::startDrawCall(const std::shared_ptr<Material>& material)
 void Painter::flushPending()
 {
 	if (verticesPending > 0) {
-		executeDrawPrimitives(*materialPending, verticesPending, vertexBuffer.data(), gsl::span<const IndexType>(indexBuffer.data(), indicesPending));
+		executeDrawPrimitives(materialPending.getMaterial(), verticesPending, vertexBuffer.data(), gsl::span<const IndexType>(indexBuffer.data(), indicesPending));
 	}
 
 	resetPending();
@@ -501,9 +501,9 @@ void Painter::resetPending()
 	verticesPending = 0;
 	indicesPending = 0;
 	allIndicesAreQuads = true;
-	if (materialPending) {
+	if (materialPending.hasMaterial()) {
 		Material::resetBindCache();
-		materialPending.reset();
+		materialPending = MaterialHandle();
 	}
 }
 

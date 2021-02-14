@@ -20,12 +20,12 @@ Mesh::Mesh(ResourceLoader& loader)
 	deserialize(s);
 
 	auto matDef = loader.getResources().get<MaterialDefinition>(materialName);
-	material = std::make_unique<Material>(matDef);
+	material = MaterialHandle(matDef);
 
 	int i = 0;
 	for (auto& t: textureNames) {
 		auto texture = loader.getResources().get<Texture>(t);
-		material->set("tex" + toString(i), texture);
+		material.set("tex" + toString(i), texture);
 		++i;
 	}
 }
@@ -50,7 +50,7 @@ gsl::span<const IndexType> Mesh::getIndices() const
 	return indices;
 }
 
-std::shared_ptr<const Material> Mesh::getMaterial() const
+MaterialHandle Mesh::getMaterial() const
 {
 	return material;
 }

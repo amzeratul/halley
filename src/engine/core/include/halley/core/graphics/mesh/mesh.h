@@ -3,6 +3,7 @@
 #include "halley/resources/resource.h"
 #include "halley/maths/vector4.h"
 #include "../graphics_enums.h"
+#include "halley/core/graphics/material/material.h"
 
 namespace Halley {
 	class ResourceLoader;
@@ -27,7 +28,7 @@ namespace Halley {
         uint32_t getNumVertices() const;
 		gsl::span<const Byte> getVertexData() const;
 		gsl::span<const IndexType> getIndices() const;
-        std::shared_ptr<const Material> getMaterial() const;
+        MaterialHandle getMaterial() const;
 
 		void setVertices(size_t num, Bytes vertexData);
 		void setIndices(std::vector<IndexType> indices);
@@ -44,6 +45,6 @@ namespace Halley {
 
 		String materialName;
 		std::vector<String> textureNames;
-		std::shared_ptr<Material> material;
+		MaterialHandle material;
     };
 }

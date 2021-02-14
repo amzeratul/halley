@@ -261,10 +261,10 @@ void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 				const float scale = getScale(fontForGlyph);
 				const auto fontAdjustment = floorAlign(Vector2f(0, fontForGlyph.getAscenderDistance() - font->getAscenderDistance()) * scale);
 
-				std::shared_ptr<Material> materialToUse = hasMaterialOverride ? getMaterial(fontForGlyph) : fontForGlyph.getMaterial();
+				MaterialHandle materialToUse = hasMaterialOverride ? getMaterial(fontForGlyph) : fontForGlyph.getMaterial();
 
 				sprites[spritesInserted++] = Sprite()
-					.setMaterial(std::move(materialToUse), true)
+					.setMaterial(std::move(materialToUse))
 					.setSize(glyph.size)
 					.setTexRect(glyph.area)
 					.setColour(curCol)
@@ -541,20 +541,20 @@ float TextRenderer::getScale(const Font& f) const
 	return size / f.getSizePoints() * (usingReplacement ? font->getReplacementScale() : 1.0f);
 }
 
-std::shared_ptr<Material> TextRenderer::getMaterial(const Font& font) const
+MaterialHandle TextRenderer::getMaterial(const Font& font) const
 {
 	const auto iter = materials.find(&font);
 	if (iter == materials.end()) {
-		auto material = font.getMaterial()->clone();
+		auto material = font.getMaterial();
 		materials[&font] = material;
-		updateMaterial(*material, font);
+		updateMaterial(material, font);
 		return material;
 	} else {
 		return iter->second;
 	}
 }
 
-void TextRenderer::updateMaterial(Material& material, const Font& font) const
+void TextRenderer::updateMaterial(MaterialHandle& material, const Font& font) const
 {
 	const float smoothRadius = font.getSmoothRadius();
 	const Vector2f smoothPerTexUnit = Vector2f(font.getImageSize()) / (2.0f * smoothRadius);
@@ -575,12 +575,12 @@ void TextRenderer::updateMaterial(Material& material, const Font& font) const
 void TextRenderer::updateMaterialForFont(const Font& font) const
 {
 	auto material = getMaterial(font);
-	updateMaterial(*material, font);
+	updateMaterial(material, font);
 }
 
 void TextRenderer::updateMaterials() const
 {
 	for (auto& m: materials) {
-		updateMaterial(*m.second, *m.first);
+		updateMaterial(m.second, *m.first);
 	}
 }

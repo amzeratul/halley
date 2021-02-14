@@ -7,6 +7,8 @@
 #include <halley/text/halleystring.h>
 #include <halley/data_structures/hash_map.h>
 #include <gsl/span>
+
+#include "halley/core/graphics/material/material.h"
 #include "halley/maths/vector4.h"
 
 namespace Halley
@@ -96,7 +98,7 @@ namespace Halley
 		void addSprite(String name, const SpriteSheetEntry& sprite);
 		void setTextureName(String name);
 
-		std::shared_ptr<Material> getMaterial(const String& name) const;
+		MaterialHandle getMaterial(const String& name) const;
 		void setDefaultMaterialName(String materialName);
 		const String& getDefaultMaterialName() const;
 		void clearMaterialCache() const;
@@ -138,7 +140,7 @@ namespace Halley
 		size_t getIdx() const;
 		std::shared_ptr<const SpriteSheet> getSpriteSheet() const;
 
-		std::shared_ptr<Material> getMaterial(const String& name) const;
+		MaterialHandle getMaterial(const String& name) const;
 		const String& getDefaultMaterialName() const;
 
 		constexpr static AssetType getAssetType() { return AssetType::Sprite; }

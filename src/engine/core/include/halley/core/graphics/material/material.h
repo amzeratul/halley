@@ -130,4 +130,61 @@ namespace Halley
 
 		const std::shared_ptr<const Texture>& getFallbackTexture() const;
 	};
+
+	class MaterialHandle {
+	public:
+		MaterialHandle() = default;
+		MaterialHandle(const MaterialHandle& other) = default;
+		MaterialHandle(MaterialHandle&& other) noexcept = default;
+		MaterialHandle(std::shared_ptr<Material> material);
+		explicit MaterialHandle(std::shared_ptr<const MaterialDefinition> materialDefinition, bool forceLocalBlocks = false); // forceLocalBlocks is for engine use only
+
+		MaterialHandle& operator=(const MaterialHandle& other) = default;
+		MaterialHandle& operator=(MaterialHandle&& other) = default;
+
+		void bind(int pass, Painter& painter);
+		void uploadData(Painter& painter);
+
+		std::weak_ptr<Material> getWeakPtr() { return material; }
+		Material& getMaterial() { return *material; }
+		bool hasMaterial() const { return !!material; }
+
+		bool operator==(const MaterialHandle& other) const { return material == other.material; }
+		bool operator!=(const MaterialHandle& other) const { return material != other.material; }
+
+		bool isCompatibleWith(const MaterialHandle& other) const { return material->isCompatibleWith(*other.material); }
+
+		const MaterialDefinition& getDefinition() const { return material->getDefinition(); }
+		
+		const std::shared_ptr<const Texture>& getTexture(int textureUnit) const { return material->getTexture(textureUnit); }
+		const Vector<MaterialTextureParameter>& getTextureUniforms() const { return material->getTextureUniforms(); }
+		const std::vector<std::shared_ptr<const Texture>>& getTextures() const { return material->getTextures(); }
+		size_t getNumTextureUnits() const { return material->getNumTextureUnits(); }
+
+		const Vector<MaterialParameter>& getUniforms() const { return material->getUniforms(); }
+		const Vector<MaterialDataBlock>& getDataBlocks() const { return material->getDataBlocks(); }
+
+		void setPassEnabled(int pass, bool enabled);
+		bool isPassEnabled(int pass) const { return material->isPassEnabled(pass); }
+
+		MaterialHandle& set(const String& name, const std::shared_ptr<const Texture>& texture);
+		MaterialHandle& set(const String& name, const std::shared_ptr<Texture>& texture);
+
+		bool hasParameter(const String& name) const { return material->hasParameter(name); }
+
+		template <typename T>
+		MaterialHandle& set(const String& name, const T& value)
+		{
+			copyOnWrite();
+			material->set(name, value);
+			return *this;
+		}
+
+		uint64_t getHash() const { return material->getHash(); }
+
+	private:
+		std::shared_ptr<Material> material;
+
+		void copyOnWrite();
+	};
 }

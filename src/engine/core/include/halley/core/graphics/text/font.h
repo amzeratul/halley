@@ -60,7 +60,7 @@ namespace Halley
 
 		void addGlyph(const Glyph& glyph);
 
-		std::shared_ptr<Material> getMaterial() const;
+		MaterialHandle getMaterial() const;
 
 		void serialize(Serializer& deserializer) const;
 		void deserialize(Deserializer& deserializer);
@@ -80,7 +80,7 @@ namespace Halley
 		std::vector<std::shared_ptr<const Font>> fallbackFont;
 		std::vector<String> fallback;
 
-		std::shared_ptr<Material> material;
+		MaterialHandle material;
 		std::unordered_map<int, Glyph> glyphs;
 	};
 }

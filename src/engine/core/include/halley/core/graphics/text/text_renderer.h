@@ -77,7 +77,7 @@ namespace Halley
 
 	private:
 		std::shared_ptr<const Font> font;
-		mutable std::map<const Font*, std::shared_ptr<Material>> materials;
+		mutable std::map<const Font*, MaterialHandle> materials;
 		StringUTF32 text;
 		SpriteFilter spriteFilter;
 		
@@ -101,8 +101,8 @@ namespace Halley
 		mutable bool glyphsDirty = true;
 		mutable bool positionDirty = true;
 
-		std::shared_ptr<Material> getMaterial(const Font& font) const;
-		void updateMaterial(Material& material, const Font& font) const;
+		MaterialHandle getMaterial(const Font& font) const;
+		void updateMaterial(MaterialHandle& material, const Font& font) const;
 		void updateMaterialForFont(const Font& font) const;
 		void updateMaterials() const;
 		float getScale(const Font& font) const;

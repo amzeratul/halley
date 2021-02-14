@@ -203,18 +203,18 @@ void SpriteSheet::setTextureName(String name)
 	textureName = std::move(name);
 }
 
-std::shared_ptr<Material> SpriteSheet::getMaterial(const String& name) const
+MaterialHandle SpriteSheet::getMaterial(const String& name) const
 {
 	const auto iter = materials.find(name);
-	std::shared_ptr<Material> result;
+	MaterialHandle result;
 	if (iter != materials.end()) {
-		result = iter->second.lock();
+		result = MaterialHandle(iter->second.lock());
 	}
 
-	if (!result) {
-		result = std::make_shared<Material>(resources->get<MaterialDefinition>(name));
-		result->set("tex0", getTexture());
-		materials[name] = result;
+	if (!result.hasMaterial()) {
+		result = MaterialHandle(resources->get<MaterialDefinition>(name));
+		result.set("tex0", getTexture());
+		materials[name] = result.getWeakPtr();
 	}
 
 	return result;
@@ -411,7 +411,7 @@ std::shared_ptr<const SpriteSheet> SpriteResource::getSpriteSheet() const
 	return spriteSheet.lock();
 }
 
-std::shared_ptr<Material> SpriteResource::getMaterial(const String& name) const
+MaterialHandle SpriteResource::getMaterial(const String& name) const
 {
 	return spriteSheet.lock()->getMaterial(name);
 }

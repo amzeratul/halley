@@ -14,6 +14,6 @@ namespace Halley {
 
 	private:
 		std::optional<Rect4f> bounds;
-		std::shared_ptr<Material> material;
+		MaterialHandle material;
 	};
 }

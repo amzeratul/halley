@@ -6,6 +6,8 @@
 #include <halley/maths/vector4.h>
 #include <halley/bytes/config_node_serializer_base.h>
 
+#include "halley/core/graphics/material/material.h"
+
 namespace Halley
 {
 	class SpriteHotReloader;
@@ -50,21 +52,15 @@ namespace Halley
 		static void drawMixedMaterials(const Sprite* sprites, size_t n, Painter& painter);
 
 		Sprite& setMaterial(Resources& resources, String materialName = "");
-		Sprite& setMaterial(std::shared_ptr<Material> m, bool shared = true);
-		Sprite& setMaterial(std::unique_ptr<Material> m);
-		Material& getMutableMaterial();
-		std::shared_ptr<Material> getMutableMaterialPtr();
-		const Material& getMaterial() const
-		{
-			Expects(material);
-			return *material;
-		}
-		bool hasMaterial() const { return material != nullptr; }
-		bool hasCompatibleMaterial(const Material& other) const;
+		Sprite& setMaterial(MaterialHandle m);
+		const MaterialHandle& getMaterial() const { return material; }
+		MaterialHandle& getMaterial() { return material; }
+		bool hasMaterial() const { return material.hasMaterial(); }
+		bool hasCompatibleMaterial(const MaterialHandle& other) const;
 
 		Sprite& setImage(Resources& resources, const String& imageName, String materialName = "");
-		Sprite& setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> material, bool shared = true);
-		Sprite& setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> material, bool shared = true);
+		Sprite& setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> material);
+		Sprite& setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> material);
 		Sprite& setImageData(const Texture& image);
 
 		Sprite& setSprite(Resources& resources, const String& spriteSheetName, const String& imageName, String materialName = "");
@@ -152,7 +148,7 @@ namespace Halley
 
 	private:
 		SpriteVertexAttrib vertexAttrib;
-		std::shared_ptr<Material> material;
+		MaterialHandle material;
 
 		Vector2f size;
 		Vector4s slices;
@@ -163,7 +159,6 @@ namespace Halley
 		bool visible = true;
 		bool flip = false;
 		bool sliced = false;
-		bool sharedMaterial = false;
 
 		void doSetSprite(const SpriteSheetEntry& entry, bool applyPivot);
 		void computeSize();

@@ -18,7 +18,7 @@ TaskBar::TaskBar(UIFactory& ui, TaskSet& taskSet, const HalleyAPI& api)
 			.setPivot(Vector2f(0.5f, 0.5f))
 			.setScale(Vector2f(0.5f, 0.5f))
 			.setColour(col);
-		halleyLogo.getMutableMaterial()
+		halleyLogo.getMaterial()
 			.set("u_smoothness", 16.0f)
 			.set("u_outline", 0.0f)
 			.set("u_outlineColour", col);

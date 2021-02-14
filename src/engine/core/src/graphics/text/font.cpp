@@ -79,8 +79,8 @@ std::unique_ptr<Font> Font::loadResource(ResourceLoader& loader)
 
 	auto texture = loader.getResources().get<Texture>(font->imageName);
 	auto matDef = loader.getResources().get<MaterialDefinition>(font->distanceField ? "Halley/Text" : "Halley/Sprite");
-	font->material = std::make_unique<Material>(matDef);
-	font->material->set("tex0", texture);
+	font->material = MaterialHandle(matDef);
+	font->material.set("tex0", texture);
 
 	return font;
 }
@@ -179,7 +179,7 @@ void Font::addGlyph(const Glyph& glyph)
 	glyphs[glyph.charcode] = glyph;
 }
 
-std::shared_ptr<Material> Font::getMaterial() const
+MaterialHandle Font::getMaterial() const
 {
 	return material;
 }

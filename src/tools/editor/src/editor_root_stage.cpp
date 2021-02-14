@@ -139,7 +139,7 @@ void EditorRootStage::initSprites()
 			.setColour(col)
 			.setScale(Vector2f(8, 8))
 			.setPos(Vector2f(640, 360));
-		halleyLogo.getMutableMaterial()
+		halleyLogo.getMaterial()
 			.set("u_smoothness", 0.125f)
 			.set("u_outline", 0.0f)
 			.set("u_outlineColour", col);

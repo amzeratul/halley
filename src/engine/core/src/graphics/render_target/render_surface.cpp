@@ -14,7 +14,7 @@ RenderSurface::RenderSurface(VideoAPI& video, Resources& resources, const String
 	: video(video)
 	, options(options)
 {
-	material = std::make_shared<Material>(resources.get<MaterialDefinition>(materialName));
+	material = MaterialHandle(resources.get<MaterialDefinition>(materialName));
 }
 
 void RenderSurface::setSize(Vector2i size)
@@ -34,7 +34,7 @@ void RenderSurface::setSize(Vector2i size)
 			colourDesc.isRenderTarget = true;
 			colourDesc.useFiltering = options.useFiltering;
 			colourTarget->load(std::move(colourDesc));
-			material->set("tex0", colourTarget);
+			material.set("tex0", colourTarget);
 
 			renderTarget = video.createTextureRenderTarget();
 			renderTarget->setTarget(0, colourTarget);
@@ -66,7 +66,7 @@ Sprite RenderSurface::getSurfaceSprite() const
 {
 	const auto& tex = renderTarget->getTexture(0);
 	return Sprite()
-		.setMaterial(material, false)
+		.setMaterial(material)
 		.setSize(Vector2f(curRenderSize))
 		.setTexRect(Rect4f(Vector2f(), Vector2f(curRenderSize) / Vector2f(tex->getSize())));
 }

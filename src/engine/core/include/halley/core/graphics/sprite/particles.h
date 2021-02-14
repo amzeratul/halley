@@ -45,7 +45,7 @@ namespace Halley {
 
 	private:
 		Random* rng;
-		std::shared_ptr<Material> material;
+		MaterialHandle material;
 
 		bool enabled = true;
 		bool firstUpdate = true;

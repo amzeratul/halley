@@ -5,6 +5,7 @@
 #include "halley/core/graphics/painter.h"
 #include "halley/core/graphics/shader.h"
 #include "api/video_api.h"
+#include "halley/support/logger.h"
 #include "halley/utils/hash.h"
 
 using namespace Halley;
@@ -415,4 +416,59 @@ MaterialParameter& Material::getParameter(const String& name)
 std::shared_ptr<Material> Material::clone() const
 {
 	return std::make_shared<Material>(*this);
+}
+
+
+MaterialHandle::MaterialHandle(std::shared_ptr<Material> material)
+	: material(std::move(material))
+{}
+
+MaterialHandle::MaterialHandle(std::shared_ptr<const MaterialDefinition> materialDefinition, bool forceLocalBlocks)
+	: material(std::make_shared<Material>(materialDefinition, forceLocalBlocks))
+{}
+
+void MaterialHandle::bind(int pass, Painter& painter)
+{
+	material->bind(pass, painter);
+}
+
+void MaterialHandle::uploadData(Painter& painter)
+{
+	material->uploadData(painter);
+}
+
+void MaterialHandle::setPassEnabled(int pass, bool enabled)
+{
+	copyOnWrite();
+	material->setPassEnabled(pass, enabled);
+}
+
+MaterialHandle& MaterialHandle::set(const String& name, const std::shared_ptr<const Texture>& texture)
+{
+	copyOnWrite();
+	material->set(name, texture);
+	return *this;
+}
+
+MaterialHandle& MaterialHandle::set(const String& name, const std::shared_ptr<Texture>& texture)
+{
+	copyOnWrite();
+	material->set(name, texture);
+	return *this;
+}
+
+void MaterialHandle::copyOnWrite()
+{
+	const auto countBefore = material.use_count();
+	if (countBefore == 1) {
+		auto copy = material;
+		const auto countAfter = material.use_count();
+		if (countAfter == 2) {
+			// Nobody else is holding this, no need to do anything!
+			return;
+		}
+	}
+
+	Logger::logDev("Copying material");
+	material = material->clone();
 }

@@ -18,7 +18,7 @@ LoadProjectWindow::LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, s
 			.setColour(col)
 			.setScale(Vector2f(2, 2))
 			.setPos(Vector2f(640, 360));
-		halleyLogo.getMutableMaterial()
+		halleyLogo.getMaterial()
 			.set("u_smoothness", 20.0f)
 			.set("u_outline", 0.0f)
 			.set("u_outlineColour", col);
