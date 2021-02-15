@@ -28,7 +28,7 @@ children:
       tooltip: Halley Settings
 - widget: { class: image, image: ui/slant_capsule_short.png, size: [140, 32], colour: $toolbarNormal }
   children:
-  - widget: { class: label, id: toolName, text: Assets }
+  - widget: { class: label, id: toolName, text: Assets, style: labelToolbar }
     fill: centre
     proportion: 1
   border: [-5, 3, 0, 3]
@@ -39,7 +39,7 @@ children:
 - widget: { class: image, image: ui/slant_capsule_short.png, size: [120, 32], colour: $toolbarNormal, innerBorder: [20, 0, 20, 0] }
   border: [0, 3, 0, 3]
   children:
-  - widget: { class: label, id: gameName, text: Halley Game }
+  - widget: { class: label, id: gameName, text: Halley Game, style: labelToolbar }
     fill: centre
     proportion: 1
     border: [0, 0, 0, 0]

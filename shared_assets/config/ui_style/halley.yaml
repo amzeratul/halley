@@ -195,6 +195,9 @@ uiStyle:
   label:
     label: { font: Ubuntu Bold, size: 15, colour: $ui_text }
 
+  labelToolbar:
+    label: { font: Ubuntu Bold, size: 15, colour: $toolbarText }
+
   labelLight:
     label: { font: Ubuntu Light, size: 14, colour: $ui_text }
 
