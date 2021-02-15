@@ -516,11 +516,6 @@ std::optional<Rect4f> Sprite::getAbsoluteClip() const
 
 Sprite& Sprite::crop(Vector4f sides)
 {
-	Expects(sides.x >= 0);
-	Expects(sides.y >= 0);
-	Expects(sides.z >= 0);
-	Expects(sides.w >= 0);
-
 	const auto origSize = getSize();
 	const auto origPivot = getAbsolutePivot();
 	setSize(origSize - (sides.xy() + sides.zw()));
