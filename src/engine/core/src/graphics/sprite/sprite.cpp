@@ -514,6 +514,28 @@ std::optional<Rect4f> Sprite::getAbsoluteClip() const
 	return hasClip ? clip + (absoluteClip ? Vector2f() : vertexAttrib.pos) : std::optional<Rect4f>();
 }
 
+Sprite& Sprite::crop(Vector4f sides)
+{
+	Expects(sides.x >= 0);
+	Expects(sides.y >= 0);
+	Expects(sides.z >= 0);
+	Expects(sides.w >= 0);
+
+	const auto origSize = getSize();
+	const auto origPivot = getAbsolutePivot();
+	setSize(origSize - (sides.xy() + sides.zw()));
+	setAbsolutePivot(origPivot - sides.xy());
+
+	const auto texRect0 = vertexAttrib.texRect0;
+	const auto texScale0 = texRect0.getSize() / origSize;
+	vertexAttrib.texRect0 = Rect4f(texRect0.getTopLeft() + sides.xy() * texScale0, texRect0.getBottomRight() - sides.zw() * texScale0);
+	const auto texRect1 = vertexAttrib.texRect1;
+	const auto texScale1 = texRect1.getSize() / origSize;
+	vertexAttrib.texRect1 = Rect4f(texRect1.getTopLeft() + sides.xy() * texScale1, texRect1.getBottomRight() - sides.zw() * texScale1);
+
+	return *this;
+}
+
 Sprite Sprite::clone() const
 {
 	return *this;

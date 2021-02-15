@@ -133,6 +133,8 @@ namespace Halley
 		std::optional<Rect4f> getClip() const;
 		std::optional<Rect4f> getAbsoluteClip() const;
 
+		Sprite& crop(Vector4f sides);
+
 		Rect4f getLocalAABB() const;
 		Rect4f getAABB() const;
 		Rect4f getUncroppedAABB() const;
