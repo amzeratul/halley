@@ -34,7 +34,7 @@ Navmesh::Navmesh(std::vector<PolygonData> polys, const NavmeshBounds& bounds, in
 			if (connection < -1) {
 				// Portal
 				const int id = -connection - 2;
-				addToPortals(NodeAndConn(i, j), id);
+				addToPortals(NodeAndConn(static_cast<uint16_t>(i), static_cast<uint16_t>(j)), id);
 			}
 			
 			++j;
@@ -286,7 +286,7 @@ std::optional<std::vector<Navmesh::NodeAndConn>> Navmesh::pathfind(int fromId, i
 					const float neighScore = gScore + curNode.costs[i];
 
 					if (neighScore < neighState.gScore) {
-						neighState.cameFrom = NodeAndConn(curId, i);
+						neighState.cameFrom = NodeAndConn(curId, static_cast<uint16_t>(i));
 						neighState.gScore = neighScore;
 						neighState.fScore = neighScore + h(nodes[nodeId].pos);
 						if (!neighState.inOpenSet) {

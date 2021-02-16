@@ -414,7 +414,7 @@ void UITextInput::navigateHistory(int delta)
 	}
 	
 	const int historySize = static_cast<int>(history.size());
-	const int startValue = historyCurOption.value_or(delta > 0 ? -1 : historySize);
+	const int startValue = static_cast<int>(historyCurOption.value_or(delta > 0 ? -1 : historySize));
 	const int val = modulo(startValue + delta, historySize);
 	historyCurOption = val;
 

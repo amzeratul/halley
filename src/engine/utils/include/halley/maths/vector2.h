@@ -157,9 +157,9 @@ namespace Halley {
 		}
 
 		// Rounding
-		constexpr Vector2D floor() const { return Vector2D(std::floor(x), std::floor(y)); }
-		constexpr Vector2D ceil() const { return Vector2D(std::ceil(x), std::ceil(y)); }
-		constexpr Vector2D round() const { return Vector2D(std::round(x), std::round(y)); }
+		constexpr Vector2D floor() const { return Vector2D(static_cast<T>(std::floor(x)), static_cast<T>(std::floor(y))); }
+		constexpr Vector2D ceil() const { return Vector2D(static_cast<T>(std::ceil(x)), static_cast<T>(std::ceil(y))); }
+		constexpr Vector2D round() const { return Vector2D(static_cast<T>(std::round(x)), static_cast<T>(std::round(y))); }
 
 		// Gets the angle that this vector is pointing to
 		[[nodiscard]] constexpr U angle () const

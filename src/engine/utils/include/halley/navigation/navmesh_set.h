@@ -88,7 +88,7 @@ namespace Halley {
 		std::vector<PortalNode> portalNodes;
 		std::vector<RegionNode> regionNodes;
 
-		void tryLinkNavMeshes(size_t idxA, size_t idxB);
+		void tryLinkNavMeshes(uint16_t idxA, uint16_t idxB);
 
 		std::vector<NavigationPath::RegionNode> findRegionPath(Vector2f startPos, Vector2f endPos, uint16_t fromRegionId, uint16_t toRegionId) const;
 	};

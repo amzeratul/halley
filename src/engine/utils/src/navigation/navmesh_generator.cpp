@@ -137,7 +137,7 @@ Polygon NavmeshGenerator::makeAgentMask(float agentSize)
 	auto d = Vector2f(agentSize, agentSize * static_cast<float>(sin(pi() / 8.0)));
 	VertexList vertices;
 	for (int i = 0; i < 8; ++i) {
-		vertices.push_back(d.rotate(Angle1f::fromRadians(i * pi() / 4.0)) * Vector2f(1.0f, 0.5f));
+		vertices.push_back(d.rotate(Angle1f::fromRadians(static_cast<float>(i * pi() / 4.0f))) * Vector2f(1.0f, 0.5f));
 	}
 	Polygon agentMask(std::move(vertices));
 

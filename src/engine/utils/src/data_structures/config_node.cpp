@@ -544,7 +544,7 @@ Vector4f ConfigNode::asVector4f() const
 Range<float> ConfigNode::asFloatRange() const
 {
 	if (type == ConfigNodeType::Int2) {
-		return Range<float>(vec2iData.x, vec2iData.y);
+		return Range<float>(static_cast<float>(vec2iData.x), static_cast<float>(vec2iData.y));
 	} else if (type == ConfigNodeType::Float2) {
 		return Range<float>(vec2fData.x, vec2fData.y);
 	} else if (type == ConfigNodeType::Sequence) {

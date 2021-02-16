@@ -418,7 +418,7 @@ void AnimationPlayerLite::update(Time time, Sprite& sprite)
 		changed = true;
 	} else {
 		while (true) {
-			const float duration = curSeq->getFrame(curFrame).getDuration() * 0.001;
+			const float duration = curSeq->getFrame(curFrame).getDuration() * 0.001f;
 			if (curTime > duration) {
 				curTime -= duration;
 				curFrame = modulo(curFrame + 1, static_cast<int>(curSeq->numFrames()));

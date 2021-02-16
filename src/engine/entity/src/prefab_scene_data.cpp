@@ -111,7 +111,7 @@ std::pair<String, size_t> PrefabSceneData::reparentEntity(const String& entityId
 	
 	const auto data = findEntityAndParent(prefab.getEntityDatas(), nullptr, 0, entityId);
 	const auto oldParent = data.parent;
-	const int oldChildIndex = data.childIdx;
+	const auto oldChildIndex = data.childIdx;
 
 	if (!data.entity) {
 		throw Exception("Entity not found: " + entityId, HalleyExceptions::Tools);
@@ -120,7 +120,7 @@ std::pair<String, size_t> PrefabSceneData::reparentEntity(const String& entityId
 
 	// WARNING: ALL OF THESE OPERATIONS CAN INVALIDATE OLD POINTERS, DON'T KEEP REFERENCES
 	if (newParentId == oldParentId) {
-		moveChild(findEntity(newParentId), entityId, childIndex); // INVALIDATES REFERENCES
+		moveChild(findEntity(newParentId), entityId, static_cast<int>(childIndex)); // INVALIDATES REFERENCES
 		reloadEntity(newParentId.isEmpty() ? entityId : newParentId);
 	} else {
 		// The order is very important here
