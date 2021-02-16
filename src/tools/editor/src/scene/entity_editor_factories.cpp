@@ -418,6 +418,8 @@ public:
 		container->add(context.makeField("float", pars.withSubKey("playbackSpeed", "1" ), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("applyPivot"));
 		container->add(context.makeField("bool", pars.withSubKey("applyPivot", "true" ), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("applyMaterial"));
+		container->add(context.makeField("bool", pars.withSubKey("applyMaterial", "true" ), ComponentEditorLabelCreation::Never));
 
 		auto updateAnimation = [container, data, &resources] (const String& animName)
 		{

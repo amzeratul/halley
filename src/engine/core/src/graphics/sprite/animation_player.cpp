@@ -2,6 +2,8 @@
 #include "graphics/sprite/animation_player.h"
 #include "graphics/sprite/sprite.h"
 #include <gsl/gsl_assert>
+
+#include "graphics/material/material.h"
 #include "resources/resources.h"
 
 using namespace Halley;
@@ -176,6 +178,8 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 			if (!sprite.hasCompatibleMaterial(*newMaterial)) {
 				sprite.setMaterial(newMaterial, true);
 			}
+		} else {
+			sprite.getMutableMaterial().set("tex0", animation->getSpriteSheet().getTexture());
 		}
 		
 		sprite.setSprite(*spriteData, false);
@@ -438,8 +442,15 @@ ConfigNode ConfigNodeSerializer<AnimationPlayer>::serialize(const AnimationPlaye
 	result["animation"] = player.hasAnimation() ? player.getAnimation().getAssetId() : "";
 	result["sequence"] = player.getCurrentSequenceName();
 	result["direction"] = player.getCurrentDirectionName();
-	result["applyPivot"] = player.isApplyingPivot();
-	result["playbackSpeed"] = player.getPlaybackSpeed();
+	if (player.isApplyingPivot() != true) {
+		result["applyPivot"] = player.isApplyingPivot();
+	}
+	if (player.getPlaybackSpeed() != 1.0f) {
+		result["playbackSpeed"] = player.getPlaybackSpeed();
+	}
+	if (player.isApplyingMaterial() != true) {
+		result["applyMaterial"] = player.isApplyingMaterial();
+	}
 	return result;
 }
 
@@ -454,6 +465,7 @@ AnimationPlayer ConfigNodeSerializer<AnimationPlayer>::deserialize(const ConfigN
 
 	auto player = AnimationPlayer(anim, node["sequence"].asString("default"), node["direction"].asString("default"));
 	player.setApplyPivot(node["applyPivot"].asBool(true));
-	player.setPlaybackSpeed(node["playbackSpeed"].asFloat(1.0f));	
+	player.setPlaybackSpeed(node["playbackSpeed"].asFloat(1.0f));
+	player.setApplyMaterial(node["applyMaterial"].asBool(true));
 	return player;
 }
