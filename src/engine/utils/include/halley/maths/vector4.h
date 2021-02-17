@@ -144,6 +144,8 @@ namespace Halley {
 		// In-place operations
 		constexpr inline Vector4D& operator += (Vector4D param) { x += param.x; y += param.y; z += param.z; w += param.w; return *this; }
 		constexpr inline Vector4D& operator -= (Vector4D param) { x -= param.x; y -= param.y; z -= param.z; w -= param.w; return *this; }
+		constexpr inline Vector4D& operator *= (Vector4D param) { x *= param.x; y *= param.y; z *= param.z; w *= param.w; return *this; }
+		constexpr inline Vector4D& operator /= (Vector4D param) { x /= param.x; y /= param.y; z /= param.z; w /= param.w; return *this; }
 		constexpr inline Vector4D& operator *= (const T param) { x *= param; y *= param; z *= param; w *= param; return *this; }
 		constexpr inline Vector4D& operator /= (const T param) { x /= param; y /= param; z /= param; w /= param; return *this; }
 

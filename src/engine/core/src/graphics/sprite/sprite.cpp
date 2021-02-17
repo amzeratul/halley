@@ -527,6 +527,8 @@ Sprite& Sprite::crop(Vector4f sides)
 	if (flip) {
 		std::swap(sides.x, sides.z);
 	}
+	const auto scale = getScale();
+	sides /= Vector4f(scale.x, scale.y, scale.x, scale.y);
 	
 	const auto origSize = getSize();
 	const auto origPivot = getAbsolutePivot();
