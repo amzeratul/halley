@@ -459,10 +459,11 @@ bool Sprite::isPointVisible(Vector2f point) const
 	}
 
 	// Compute local space point
-	const auto localPoint = (point - getPosition()) / getScale();
+	const auto localPoint = point - getPosition();
 
 	// Check AABB first
-	if (!getLocalAABB().contains(localPoint)) {
+	const auto aabb = getLocalAABB();
+	if (!aabb.contains(localPoint)) {
 		return false;
 	}
 
@@ -470,9 +471,13 @@ bool Sprite::isPointVisible(Vector2f point) const
 	if (material) {
 		const auto tex = material->getTexture(0);
 		if (tex) {
-			const auto rectPos = localPoint + getAbsolutePivot();
+			auto relPos = (localPoint - aabb.getTopLeft()) / aabb.getSize();
+			if (flip) {
+				relPos.x = 1.0f - relPos.x;
+			}
+			
 			const auto texRect = getTexRect0();
-			const auto texelPos = (rectPos / size) * texRect.getSize() + texRect.getTopLeft();
+			const auto texelPos = relPos * texRect.getSize() + texRect.getTopLeft();
 			const auto px = tex->getPixel(texelPos);
 			if (px) {
 				const auto pxColour = Image::convertIntToColour(px.value());
