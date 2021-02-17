@@ -310,16 +310,20 @@ void SceneEditorWindow::onEntitySelected(const String& id)
 		}
 	}
 
-	auto& entityData = sceneData->getWriteableEntityNodeData(actualId).getData();
-	const Prefab* prefabData = nullptr;
-	const String prefabName = entityData.getPrefab();
-	if (!prefabName.isEmpty()) {
-		prefabData = getGamePrefab(prefabName).get();
+	try {
+		auto& entityData = sceneData->getWriteableEntityNodeData(actualId).getData();
+		const Prefab* prefabData = nullptr;
+		const String prefabName = entityData.getPrefab();
+		if (!prefabName.isEmpty()) {
+			prefabData = getGamePrefab(prefabName).get();
+		}
+		
+		entityEditor->loadEntity(actualId, entityData, prefabData, false, project.getGameResources());
+		gameBridge->setSelectedEntity(UUID(actualId), entityData);
+		currentEntityId = actualId;
+	} catch (const std::exception& e) {
+		Logger::logException(e);
 	}
-	
-	entityEditor->loadEntity(actualId, entityData, prefabData, false, project.getGameResources());
-	gameBridge->setSelectedEntity(UUID(actualId), entityData);
-	currentEntityId = actualId;
 }
 
 void SceneEditorWindow::panCameraToEntity(const String& id)
