@@ -79,6 +79,9 @@ namespace Halley {
     	Vector2f getMousePos() const;
 		std::unique_ptr<World> doCreateWorld(const String& stageName) const;
 
+    	virtual EntityRef getEntityAt(Vector2f point) const;
+       	virtual float getSpriteDepth(EntityRef& e, Vector2f point) const;
+
 	private:
 		const HalleyAPI* api = nullptr;
 		Resources* resources = nullptr;
@@ -103,7 +106,6 @@ namespace Halley {
     	EntityRef getEntity(const UUID& uuid) const;
 
     	bool isPointInSprite(EntityRef& e, Vector2f point) const;
-    	int getSpriteLayer(EntityRef& e) const;
     	void onClick(const SceneEditorInputState& input, SceneEditorOutputState& output);
 	};
 }

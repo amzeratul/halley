@@ -451,12 +451,15 @@ Vector4s Sprite::getSlices() const
 	return slices;
 }
 
-bool Sprite::isPointVisible(Vector2f localPoint) const
+bool Sprite::isPointVisible(Vector2f point) const
 {
 	// Is the sprite visible?
 	if (!visible || getColour().a == 0) {
 		return false;
 	}
+
+	// Compute local space point
+	const auto localPoint = (point - getPosition()) / getScale();
 
 	// Check AABB first
 	if (!getLocalAABB().contains(localPoint)) {

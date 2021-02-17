@@ -403,26 +403,41 @@ EntityRef SceneEditor::getEntity(const UUID& id) const
 
 bool SceneEditor::isPointInSprite(EntityRef& e, Vector2f point) const
 {
-	const auto* transform2d = e.tryGetComponent<Transform2DComponent>();
 	const auto* spriteComponent = e.tryGetComponent<SpriteComponent>();
-
-	if (!transform2d || !spriteComponent) {
+	if (!spriteComponent) {
 		return false;
 	}
 	
 	const auto& sprite = spriteComponent->sprite;
-	const auto localPoint = transform2d->inverseTransformPoint(point);
-	return sprite.isPointVisible(localPoint);
+	return sprite.isPointVisible(point);
 }
 
-int SceneEditor::getSpriteLayer(EntityRef& e) const
+float SceneEditor::getSpriteDepth(EntityRef& e, Vector2f pos) const
 {
 	const auto* sprite = e.tryGetComponent<SpriteComponent>();
 	if (sprite) {
-		return sprite->layer;
+		return static_cast<float>(sprite->layer);
 	} else {
-		return std::numeric_limits<int>::lowest();
+		return -std::numeric_limits<float>::infinity();
 	}
+}
+
+EntityRef SceneEditor::getEntityAt(Vector2f point) const
+{
+	EntityRef bestEntity;
+	float bestDepth = -std::numeric_limits<float>::infinity();
+	
+	for (auto& e: world->getEntities()) {
+		if (isPointInSprite(e, point)) {
+			const float depth = getSpriteDepth(e, point);
+			if (depth > bestDepth) {
+				bestDepth = depth;
+				bestEntity = e;
+			}
+		}
+	}
+
+	return bestEntity;
 }
 
 void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputState& output)
@@ -431,18 +446,7 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 		return;
 	}
 	
-	EntityRef bestEntity;
-	int bestLayer = std::numeric_limits<int>::lowest();
-	
-	for (auto& e: world->getEntities()) {
-		if (isPointInSprite(e, input.mousePos)) {
-			const int layer = getSpriteLayer(e);
-			if (layer > bestLayer) {
-				bestLayer = layer;
-				bestEntity = e;
-			}
-		}
-	}
+	const auto bestEntity = getEntityAt(input.mousePos);
 
 	if (bestEntity.isValid()) {
 		std::vector<UUID> uuids;
