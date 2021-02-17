@@ -545,6 +545,19 @@ Sprite& Sprite::crop(Vector4f sides)
 	return *this;
 }
 
+Sprite::RectInfo Sprite::getRectInfo() const
+{
+	return RectInfo{ vertexAttrib.pivot, size, vertexAttrib.texRect0, vertexAttrib.texRect1 };
+}
+
+void Sprite::setRectInfo(const RectInfo& info)
+{
+	vertexAttrib.pivot = info.pivot;
+	size = info.size;
+	vertexAttrib.texRect0 = info.texRect0;
+	vertexAttrib.texRect1 = info.texRect1;
+}
+
 Sprite Sprite::clone() const
 {
 	return *this;

@@ -40,6 +40,13 @@ namespace Halley
 	class Sprite
 	{
 	public:
+		struct RectInfo {
+			Vector2f pivot;
+			Vector2f size;
+			Rect4f texRect0;
+			Rect4f texRect1;
+		};
+		
 		Sprite();
 
 		void draw(Painter& painter, const std::optional<Rect4f>& extClip = {}) const;
@@ -134,6 +141,8 @@ namespace Halley
 		std::optional<Rect4f> getAbsoluteClip() const;
 
 		Sprite& crop(Vector4f sides);
+		RectInfo getRectInfo() const;
+		void setRectInfo(const RectInfo& info);
 
 		Rect4f getLocalAABB() const;
 		Rect4f getAABB() const;
