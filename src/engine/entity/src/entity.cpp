@@ -288,6 +288,8 @@ bool Entity::isEmpty() const
 
 void Entity::doDestroy(bool updateParenting)
 {
+	Expects(alive);
+	
 	if (updateParenting) {
 		setParent(nullptr, false);
 	}

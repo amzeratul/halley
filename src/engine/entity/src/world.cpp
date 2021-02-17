@@ -215,6 +215,8 @@ void World::destroyEntity(EntityId id)
 
 void World::destroyEntity(EntityRef entity)
 {
+	Expects(entity.isValid());
+	Expects(entity.entity->isAlive());
 	Expects(entity.world == this);
 	doDestroyEntity(entity.entity);
 }
