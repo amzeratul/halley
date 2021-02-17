@@ -145,7 +145,7 @@ static FuzzyTextMatcher::Score findBestScore(const std::vector<std::vector<int16
 		const int curSection = state.sectionMap[pos];
 		const bool newSection = !lastPos || state.sectionMap[lastPos.value()] != curSection;
 		const int jumps = (lastPos ? (lastPos.value() - pos - 1) : 0);
-		const int sectionPos = state.sectionLengths.size() - curSection - 1;
+		const int sectionPos = static_cast<int>(state.sectionLengths.size()) - curSection - 1;
 		const auto updatedScore = score.advance(jumps, sectionPos, newSection ? state.sectionLengths[curSection] : 0);
 		
 		const auto score = findBestScore(indices, idx - 1, pos, updatedScore, state);
@@ -183,7 +183,7 @@ static FuzzyMatchState makeState(const StringUTF32& str, const StringUTF32& quer
 		} else {
 			++state.sectionLengths.back();
 		}
-		state.sectionMap.push_back(state.sectionLengths.size() - 1);
+		state.sectionMap.push_back(static_cast<int>(state.sectionLengths.size()) - 1);
 	}
 
 	state.breadcrumb.resize(query.size());

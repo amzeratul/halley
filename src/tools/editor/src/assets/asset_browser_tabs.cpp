@@ -73,7 +73,8 @@ void AssetBrowserTabs::update(Time t, bool moved)
 	}
 	toClose.clear();
 
-	for (size_t i = 0; i < windows.size(); ++i) {
+	int size = static_cast<int>(windows.size());
+	for (int i = 0; i < size; ++i) {
 		tabs->getItem(i)->getWidget("modified")->setActive(windows[i]->isModified());
 	}
 }

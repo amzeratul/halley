@@ -231,7 +231,7 @@ bool Polygon::isPointOnEdge(Vector2f point, float epsilon) const
 
 bool Polygon::isPointInsideConvex(Vector2f point) const
 {
-	const float sign = clockwise ? 1 : -1;
+	const float sign = clockwise ? 1.0f : -1.0f;
 	
 	// Do cross product with all the segments
 	const size_t len = vertices.size();

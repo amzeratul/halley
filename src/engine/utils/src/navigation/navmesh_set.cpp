@@ -63,10 +63,10 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query)
 		return {};
 	} else if (fromRegion == toRegion) {
 		// Just path in that mesh
-		return pathfindInRegion(query, fromRegion);
+		return pathfindInRegion(query, static_cast<uint16_t>(fromRegion));
 	} else {
 		// Gotta path between regions first
-		auto regionPath = findRegionPath(query.from, query.to, fromRegion, toRegion);
+		auto regionPath = findRegionPath(query.from, query.to, static_cast<uint16_t>(fromRegion), static_cast<uint16_t>(toRegion));
 		if (regionPath.size() <= 1) {
 			// Failed
 			return {};
@@ -116,9 +116,9 @@ void NavmeshSet::linkNavmeshes()
 	}
 
 	// Link meshes
-	const size_t nMeshes = navmeshes.size();
-	for (size_t i = 0; i < nMeshes; ++i) {
-		for (size_t j = i + 1; j < nMeshes; ++j) {
+	const uint16_t nMeshes = static_cast<uint16_t>(navmeshes.size());
+	for (uint16_t i = 0; i < nMeshes; ++i) {
+		for (uint16_t j = i + 1; j < nMeshes; ++j) {
 			tryLinkNavMeshes(i, j);
 		}
 	}
@@ -173,7 +173,7 @@ void NavmeshSet::reportUnlinkedPortals() const
 	}
 }
 
-void NavmeshSet::tryLinkNavMeshes(size_t idxA, size_t idxB)
+void NavmeshSet::tryLinkNavMeshes(uint16_t idxA, uint16_t idxB)
 {
 	auto& a = navmeshes[idxA];
 	auto& b = navmeshes[idxB];
@@ -213,8 +213,8 @@ void NavmeshSet::tryLinkNavMeshes(size_t idxA, size_t idxB)
 
 				// Create the portal nodes
 				const uint16_t portalIdx = static_cast<uint16_t>(portalNodes.size());
-				portalNodes.emplace_back(PortalNode(curPos, idxA, edgeAIdx, idxB, edgeBIdx));
-				portalNodes.emplace_back(PortalNode(curPos, idxB, edgeBIdx, idxA, edgeAIdx));
+				portalNodes.emplace_back(PortalNode(curPos, idxA, static_cast<uint16_t>(edgeAIdx), idxB, static_cast<uint16_t>(edgeBIdx)));
+				portalNodes.emplace_back(PortalNode(curPos, idxB, static_cast<uint16_t>(edgeBIdx), idxA, static_cast<uint16_t>(edgeAIdx)));
 
 				// Add portal node to region node
 				regionNodes[idxA].portals.push_back(portalIdx);

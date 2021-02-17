@@ -286,7 +286,7 @@ void SceneEditorWindow::moveEntity(const String& id, const String& newParent, in
 {
 	auto [prevParent, prevIndex] = sceneData->reparentEntity(id, newParent, childIndex);
 	entityList->refreshList();
-	onEntityMoved(id, prevParent, prevIndex, newParent, childIndex);
+	onEntityMoved(id, prevParent, static_cast<int>(prevIndex), newParent, childIndex);
 }
 
 void SceneEditorWindow::onEntitySelected(const String& id)
@@ -608,7 +608,7 @@ void SceneEditorWindow::removeEntity(const String& targetId)
 	for (auto iter = children.begin(); iter != children.end(); ++iter) {
 		if (iter->getInstanceUUID().toString() == targetId) {
 			const auto data = std::move(*iter);
-			const int idx = iter - children.begin();
+			const int idx = static_cast<int>(iter - children.begin());
 			children.erase(iter);
 			onEntityRemoved(targetId, parentId, idx, data);
 			break;
