@@ -30,6 +30,7 @@ namespace Halley {
 			
 			Handle intersection(const Handle& h, MaskStorage& storage) const;
 			bool contains(const Handle& handle, MaskStorage& storage) const;
+			bool unionChangedBetween(const Handle& a, const Handle& b, MaskStorage& storage) const;
 
 		private:
 			int value = -1;

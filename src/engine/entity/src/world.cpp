@@ -535,7 +535,7 @@ void World::updateEntities()
 				const auto& newMask = todo.first;
 				if (!oldMask.contains(famMask, ms)) {
 					fam->addEntity(*e.second);
-				} else if (oldMask.contains(optFamMask, ms) != newMask.contains(optFamMask, ms)) {
+				} else if (optFamMask.unionChangedBetween(oldMask, newMask, ms)) {
 					// Needs refreshing of optional references
 					fam->refreshEntity(*e.second);
 				}

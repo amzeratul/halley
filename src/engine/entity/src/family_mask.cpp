@@ -98,10 +98,19 @@ const RealType& Handle::getRealValue(MaskStorage& storage) const
 
 bool Handle::contains(const Handle& handle, MaskStorage& storage) const
 {
-	auto& mine = getRealValue(storage);
-	auto& theirs = handle.getRealValue(storage);
+	const auto& mine = getRealValue(storage);
+	const auto& theirs = handle.getRealValue(storage);
 
 	return (mine & theirs) == theirs;
+}
+
+bool Handle::unionChangedBetween(const Handle& a, const Handle& b, MaskStorage& storage) const
+{
+	const auto& mine = getRealValue(storage);
+	const auto& theirsA = a.getRealValue(storage);
+	const auto& theirsB = b.getRealValue(storage);
+
+	return (mine & theirsA) != (mine & theirsB);
 }
 
 std::shared_ptr<MaskStorage> MaskStorageInterface::createStorage()
