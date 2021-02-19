@@ -16,13 +16,13 @@ namespace Halley {
 	        SaveData = 2
         };
 
-		static int makeMask(Type t)
+		inline int makeMask(Type t)
 		{
 			return static_cast<int>(t);
 		}
 		
 		template <typename T, typename ... Ts>
-		[[nodiscard]] static int makeMask(T v, Ts ... vs)
+		[[nodiscard]] int makeMask(T v, Ts ... vs)
 		{
 			return static_cast<int>(v) | makeMask(vs...);
 		}
