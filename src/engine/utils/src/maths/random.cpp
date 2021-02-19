@@ -38,6 +38,12 @@ Random::Random(uint32_t seed)
 	setSeed(seed);
 }
 
+Random::Random(uint64_t seed)
+	: generator(std::make_unique<MT199937AR>())
+{
+	setSeed(seed);
+}
+
 Random::Random(gsl::span<const gsl::byte> data)
 	: generator(std::make_unique<MT199937AR>())
 {
@@ -157,6 +163,11 @@ void Random::getBytes(gsl::span<Byte> dst)
 void Random::setSeed(uint32_t seed)
 {
 	 generator->init_genrand(seed);
+}
+
+void Random::setSeed(uint64_t seed)
+{
+	setSeed(gsl::as_bytes(gsl::span<uint64_t>(&seed, 1)));
 }
 
 void Random::setSeed(gsl::span<const gsl::byte> data)

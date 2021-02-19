@@ -15,7 +15,7 @@ namespace Halley {
 			std::vector<int> connections;
 			int region = -1;
 			int regionGroup = 0;
-			int remap;
+			int remap = 0;
 			bool alive = true;
 			bool tagged = false;
 

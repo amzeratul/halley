@@ -391,7 +391,7 @@ namespace Halley {
 		{
 			Expects(entity != nullptr);
 			if (entity->name != name) {
-				entity->name = std::move(name);
+				entity->name = name;
 			}
 		}
 

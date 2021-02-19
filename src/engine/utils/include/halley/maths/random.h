@@ -35,6 +35,7 @@ namespace Halley {
 
 		Random();
 		Random(uint32_t seed);
+		Random(uint64_t seed);
 		Random(gsl::span<const gsl::byte> data);
 		~Random();
 
@@ -70,6 +71,7 @@ namespace Halley {
 		void getBytes(gsl::span<gsl::byte> dst);
 		void getBytes(gsl::span<Byte> dst);
 		void setSeed(uint32_t seed);
+		void setSeed(uint64_t seed);
 		void setSeed(gsl::span<const gsl::byte> data);
 		void setSeed(gsl::span<Byte> data);
 
