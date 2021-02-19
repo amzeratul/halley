@@ -29,4 +29,5 @@ struct VOut {
     float2 vertPos : POSITION1;
     float2 pixelPos : POSITION2;
     float2 pivot : POSITION3;
+    float2 size : SIZE0;
 };
