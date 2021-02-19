@@ -42,7 +42,8 @@ namespace Halley
 		bool set(Vector2i p);
 		bool set(const Matrix4f& m);
 
-		ShaderParameterType getType() const;
+		const String& getName() const { return name; }
+		ShaderParameterType getType() const { return type; }
 
 	private:
 		MaterialParameter(Material& material, String name, ShaderParameterType type, int blockNumber, size_t offset);

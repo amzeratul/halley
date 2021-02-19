@@ -94,8 +94,3 @@ bool MaterialParameter::set(const Matrix4f& m)
 		return material->setUniform(blockNumber, offset, ShaderParameterType::Matrix4, &m);
 	}
 }
-
-ShaderParameterType MaterialParameter::getType() const
-{
-	return type;
-}
