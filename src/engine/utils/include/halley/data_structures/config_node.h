@@ -94,7 +94,7 @@ namespace Halley {
 		friend class ConfigFile;
 
 	public:
-		using MapType = std::map<String, ConfigNode>;
+		using MapType = std::map<String, ConfigNode, std::less<>>;
 		using SequenceType = std::vector<ConfigNode>;
 
 		struct NoopType {};
@@ -112,7 +112,7 @@ namespace Halley {
 		ConfigNode(MapType entryMap);
 		ConfigNode(SequenceType entryList);
 		explicit ConfigNode(String value);
-		explicit ConfigNode(const char* value);
+		explicit ConfigNode(const std::string_view& value);
 		explicit ConfigNode(bool value);
 		explicit ConfigNode(int value);
 		explicit ConfigNode(float value);
@@ -154,7 +154,7 @@ namespace Halley {
 		ConfigNode& operator=(Bytes value);
 		ConfigNode& operator=(gsl::span<const gsl::byte> bytes);
 
-		ConfigNode& operator=(const char* value);
+		ConfigNode& operator=(const std::string_view& value);
 		
 		ConfigNode& operator=(NoopType value);
 		ConfigNode& operator=(DelType value);
@@ -199,7 +199,7 @@ namespace Halley {
 		int asInt(int defaultValue) const;
 		float asFloat(float defaultValue) const;
 		bool asBool(bool defaultValue) const;
-		String asString(const String& defaultValue) const;
+		String asString(const std::string_view& defaultValue) const;
 		Vector2i asVector2i(Vector2i defaultValue) const;
 		Vector2f asVector2f(Vector2f defaultValue) const;
 
@@ -244,10 +244,10 @@ namespace Halley {
 		bool hasKey(const String& key) const;
 		void removeKey(const String& key);
 
-		ConfigNode& operator[](const String& key);
+		ConfigNode& operator[](const std::string_view& key);
 		ConfigNode& operator[](size_t idx);
 
-		const ConfigNode& operator[](const String& key) const;
+		const ConfigNode& operator[](const std::string_view& key) const;
 		const ConfigNode& operator[](size_t idx) const;
 
 		SequenceType::iterator begin();

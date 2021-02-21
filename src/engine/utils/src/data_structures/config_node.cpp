@@ -33,7 +33,7 @@ ConfigNode::ConfigNode(String value)
 	operator=(std::move(value));
 }
 
-ConfigNode::ConfigNode(const char* value)
+ConfigNode::ConfigNode(const std::string_view& value)
 {
 	operator=(value);
 }
@@ -198,7 +198,7 @@ ConfigNode& ConfigNode::operator=(Vector2f value)
 	return *this;
 }
 
-ConfigNode& ConfigNode::operator=(const char* value)
+ConfigNode& ConfigNode::operator=(const std::string_view& value)
 {
 	*this = String(value);
 	return *this;
@@ -642,7 +642,7 @@ bool ConfigNode::asBool(bool defaultValue) const
 	}
 }
 
-String ConfigNode::asString(const String& defaultValue) const
+String ConfigNode::asString(const std::string_view& defaultValue) const
 {
 	if (type == ConfigNodeType::Undefined) {
 		return defaultValue;
@@ -734,7 +734,7 @@ bool ConfigNode::hasKey(const String& key) const
 	}
 }
 
-ConfigNode& ConfigNode::operator[](const String& key)
+ConfigNode& ConfigNode::operator[](const std::string_view& key)
 {
 	return asMap()[key];
 }
@@ -744,10 +744,10 @@ ConfigNode& ConfigNode::operator[](size_t idx)
 	return asSequence().at(idx);
 }
 
-const ConfigNode& ConfigNode::operator[](const String& key) const
+const ConfigNode& ConfigNode::operator[](const std::string_view& key) const
 {
-	auto& map = asMap();
-	auto iter = map.find(key);
+	const auto& map = asMap();
+	const auto iter = map.find(key);
 	if (iter != map.end()) {
 		return iter->second;
 	} else {

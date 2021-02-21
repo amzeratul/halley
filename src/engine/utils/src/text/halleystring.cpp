@@ -991,6 +991,21 @@ std::istream& Halley::operator>> (std::istream& is, String& rhp)
 	return is;
 }
 
+bool Halley::operator<(const String& lhp, const String& rhp)
+{
+	return std::string_view(lhp) < std::string_view(rhp);
+}
+
+bool Halley::operator<(const String& lhp, const std::string_view& rhp)
+{
+	return std::string_view(lhp) < rhp;
+}
+
+bool Halley::operator<(const std::string_view& lhp, const String& rhp)
+{
+	return lhp < std::string_view(rhp);
+}
+
 String Halley::operator+ (const String& lhp, const String& rhp)
 {
 	return String(lhp.cppStr() + rhp.cppStr());
@@ -1024,11 +1039,6 @@ bool String::operator==(const std::string_view& rhp) const
 bool String::operator!= (const std::string_view& rhp) const
 {
 	return str != rhp;
-}
-
-bool String::operator< (const std::string_view& rhp) const
-{
-	return str < rhp;
 }
 
 bool String::operator> (const std::string_view& rhp) const

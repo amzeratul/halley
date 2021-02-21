@@ -161,7 +161,6 @@ namespace Halley {
 
 		bool operator== (const std::string_view& rhp) const;
 		bool operator!= (const std::string_view& rhp) const;
-		bool operator< (const std::string_view& rhp) const;
 		bool operator> (const std::string_view& rhp) const;
 		bool operator<= (const std::string_view& rhp) const;
 		bool operator>= (const std::string_view& rhp) const;
@@ -184,6 +183,10 @@ namespace Halley {
 	String operator+ (const String& lhp, const char* rhp);
 	std::ostream& operator<< (std::ostream& os, const String& rhp);
 	std::istream& operator>> (std::istream& is, String& rhp);
+
+	bool operator< (const String& lhp, const String& rhp);
+	bool operator< (const String& lhp, const std::string_view& rhp);
+	bool operator< (const std::string_view& lhp, const String& rhp);
 
 	using StringArray = Vector<String>;
 

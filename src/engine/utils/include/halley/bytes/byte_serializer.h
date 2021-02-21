@@ -124,8 +124,8 @@ namespace Halley {
 			return *this;
 		}
 
-		template <typename T, typename U>
-		Serializer& operator<<(const std::map<T, U>& val)
+		template <typename K, typename V, typename Cmp, typename Allocator>
+		Serializer& operator<<(const std::map<K, V, Cmp, Allocator>& val)
 		{
 			*this << static_cast<unsigned int>(val.size());
 			for (auto& kv : val) {
@@ -338,16 +338,16 @@ namespace Halley {
 			return *this;
 		}
 
-		template <typename T, typename U>
-		Deserializer& operator >> (std::map<T, U>& val)
+		template <typename K, typename V, typename Cmp, typename Allocator>
+		Deserializer& operator >> (std::map<K, V, Cmp, Allocator>& val)
 		{
 			unsigned int sz;
 			*this >> sz;
 			ensureSufficientBytesRemaining(size_t(sz) * 2); // Expect at least two bytes per map entry
 
 			for (unsigned int i = 0; i < sz; i++) {
-				T key;
-				U value;
+				K key;
+				V value;
 				*this >> key >> value;
 				val[key] = std::move(value);
 			}
