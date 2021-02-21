@@ -39,40 +39,50 @@ String::String()
 {
 }
 
-
 String::String(const char* utf8)
-: str(utf8 ? utf8 : "")
+	: str(utf8 ? utf8 : "")
 {
 }
-
 
 String::String(const char* utf8, size_t bytes)
 {
 	str.resize(bytes);
-	if (bytes > 0) memcpy(getCharPointer(0),utf8,bytes);
-	//*GetCharPointer(bytes) = 0;
+	if (bytes > 0) {
+		memcpy(getCharPointer(0), utf8, bytes);
+	}
 }
 
-
-String::String(const std::basic_string<Character>& _str)
-: str(_str)
+String::String(std::string_view strView)
+	: str(strView)
 {
 }
 
+String::String(const std::basic_string<Character>& str)
+	: str(str)
+{
+}
+
+String::String(std::basic_string<Character>&& str)
+	: str(std::move(str))
+{
+}
 
 String::String(const wchar_t* utf16)
 {
 	size_t len = getUTF8Len(utf16);
 	str.resize(len);
-	if (len > 0) UTF16toUTF8(utf16, getCharPointer(0));
+	if (len > 0) {
+		UTF16toUTF8(utf16, getCharPointer(0));
+	}
 }
-
 
 String::String(const StringUTF32& utf32)
 {
 	size_t len = getUTF8Len(utf32);
 	str.resize(len);
-	if (len > 0) UTF32toUTF8(&utf32[0],getCharPointer(0));
+	if (len > 0) {
+		UTF32toUTF8(&utf32[0],getCharPointer(0));
+	}
 }
 
 String::String(const String& other) noexcept
@@ -85,12 +95,10 @@ String::String(String&& other) noexcept
 	str = std::move(other.str);
 }
 
-
 String::String(char character)
 {
 	*this = std::string(1,character);
 }
-
 
 String::String(wchar_t character)
 {
@@ -108,15 +116,12 @@ String::String(char32_t utf32Character)
 	*this = String(StringUTF32(tmp, 2));
 }
 
-
 String::String(int character)
 {
 	StringUTF32 tmp;
 	tmp.append(1,character);
 	*this = String(tmp);
-	//*this = integerToString(integer);
 }
-
 
 String::String(float number)
 {
@@ -232,7 +237,7 @@ size_t String::length() const
 }
 
 
-bool String::contains(const String& string) const
+bool String::contains(const std::string_view& string) const
 {
 	return str.find(string) != npos;
 }
@@ -257,26 +262,27 @@ String String::mid(size_t start,size_t count) const
 }
 
 
-bool String::startsWith(const String& string,bool caseSensitive) const
+bool String::startsWith(const std::string_view& string, bool caseSensitive) const
 {
 	if (caseSensitive) {
-		String tmp = String(str.substr(0, string.size()));
-		return str.compare(0, string.size(), string) == 0;
+		return strncmp(str.c_str(), string.data(), std::min(str.size(), string.size())) == 0;
 	} else {
-		return asciiLower().startsWith(string.asciiLower(), true);
+		return asciiLower().startsWith(String(string).asciiLower(), true);
 	}
 }
 
 
-bool String::endsWith(const String& string,bool caseSensitive) const
+bool String::endsWith(const std::string_view& string, bool caseSensitive) const
 {
 	if (caseSensitive) {
-		size_t strSize = string.size();
-		size_t sz = size();
-		if (sz < strSize) return false;
+		const size_t strSize = string.size();
+		const size_t sz = size();
+		if (sz < strSize) {
+			return false;
+		}
 		return str.compare(sz - strSize, strSize, string) == 0;
 	} else {
-		return asciiLower().endsWith(string.asciiLower(), true);
+		return asciiLower().endsWith(String(string).asciiLower(), true);
 	}
 }
 
@@ -939,36 +945,36 @@ void String::appendCharacter(int unicode)
 	}
 }
 
-String String::replaceAll(const String& before, const String& after) const
+String String::replaceAll(const std::string_view& before, const std::string_view& after) const
 {
-	size_t pos = find(before);
+	const size_t pos = find(before);
 	if (pos == std::string::npos) {
 		return *this;
 	} else {
-		size_t len = before.length();
+		const size_t len = before.length();
 		return substr(0, pos) + after + substr(pos + len).replaceAll(before, after);
 	}
 }
 
-String String::replaceOne(const String& before, const String& after) const
+String String::replaceOne(const std::string_view& before, const std::string_view& after) const
 {
-	size_t pos = find(before);
+	const size_t pos = find(before);
 	if (pos == std::string::npos) {
 		return *this;
 	} else {
-		size_t len = before.length();
+		const size_t len = before.length();
 		return substr(0, pos) + after + substr(pos + len);
 	}
 }
 
 void String::shrink()
 {
-	str.reserve(length());
+	str.shrink_to_fit();
 }
 
-size_t String::find(String s) const
+size_t String::find(std::string_view s) const
 {
-	return str.find(s.c_str());
+	return str.find(s);
 }
 
 std::ostream& Halley::operator<< (std::ostream& os, const String& rhp)
@@ -990,34 +996,54 @@ String Halley::operator+ (const String& lhp, const String& rhp)
 	return String(lhp.cppStr() + rhp.cppStr());
 }
 
-bool String::operator== (const String& rhp) const
+String Halley::operator+(const std::string_view& lhp, const String& rhp)
 {
-	return strcmp(str.c_str(), rhp.str.c_str()) == 0;
+	return String(std::string(lhp) + rhp.cppStr());
 }
 
-bool String::operator!= (const String& rhp) const
+String Halley::operator+(const String& lhp, const std::string_view& rhp)
 {
-	return strcmp(str.c_str(), rhp.str.c_str()) != 0;
+	return String(lhp.cppStr() + std::string(rhp));
 }
 
-bool String::operator< (const String& rhp) const
+String Halley::operator+(const char* lhp, const String& rhp)
 {
-	return str < rhp.str;
+	return String(std::string(lhp) + rhp.cppStr());
 }
 
-bool String::operator> (const String& rhp) const
+String Halley::operator+(const String& lhp, const char* rhp)
 {
-	return str > rhp.str;
+	return String(lhp.cppStr() + std::string(rhp));
 }
 
-bool String::operator<= (const String& rhp) const
+bool String::operator==(const std::string_view& rhp) const
 {
-	return str <= rhp.str;
+	return str == rhp;
 }
 
-bool String::operator>= (const String& rhp) const
+bool String::operator!= (const std::string_view& rhp) const
 {
-	return str >= rhp.str;
+	return str != rhp;
+}
+
+bool String::operator< (const std::string_view& rhp) const
+{
+	return str < rhp;
+}
+
+bool String::operator> (const std::string_view& rhp) const
+{
+	return str > rhp;
+}
+
+bool String::operator<= (const std::string_view& rhp) const
+{
+	return str <= rhp;
+}
+
+bool String::operator>= (const std::string_view& rhp) const
+{
+	return str >= rhp;
 }
 
 String::operator std::string() const

@@ -44,8 +44,10 @@ namespace Halley {
 
 		String();
 		String(const char* utf8);
-		String(const char* utf8,size_t bytes);
+		String(const char* utf8, size_t bytes);
+		String(std::string_view strView);
 		String(const std::basic_string<Character>& str);
+		String(std::basic_string<Character>&& str);
 		String(const String& str) noexcept;
 		String(String&& str) noexcept;
 
@@ -76,23 +78,23 @@ namespace Halley {
 		String& trimBoth();
 
 		bool contains(Character chr) const;
-		bool contains(const String& string) const;
-		size_t find(String str) const;
+		bool contains(const std::string_view& string) const;
+		size_t find(std::string_view str) const;
 
-		String replaceAll(const String& before, const String& after) const;
-		String replaceOne(const String& before, const String& after) const;
+		String replaceAll(const std::string_view& before, const std::string_view& after) const;
+		String replaceOne(const std::string_view& before, const std::string_view& after) const;
 		void shrink();
 
 		String left(size_t n) const;
 		String right(size_t n) const;
-		String mid(size_t start,size_t count=npos) const;
+		String mid(size_t start, size_t count=npos) const;
 
-		bool startsWith(const String& string,bool caseSensitive=true) const;
-		bool endsWith(const String& string,bool caseSensitive=true) const;
+		bool startsWith(const std::string_view& string, bool caseSensitive=true) const;
+		bool endsWith(const std::string_view& string, bool caseSensitive=true) const;
 
-		void writeText(const Character* src,size_t len,size_t &pos);
-		void writeChar(const Character &src,size_t &pos);
-		void writeNumber(Character *temp,int number,int pad,size_t &pos);
+		void writeText(const Character* src, size_t len, size_t &pos);
+		void writeChar(const Character &src, size_t &pos);
+		void writeNumber(Character *temp, int number, int pad, size_t &pos);
 
 		bool isNumber() const;
 		bool isInteger() const;
@@ -157,12 +159,14 @@ namespace Halley {
 		String& operator += (const int &p);
 		String& operator += (const Character &p);
 
-		bool operator== (const String& rhp) const;
-		bool operator!= (const String& rhp) const;
-		bool operator< (const String& rhp) const;
-		bool operator> (const String& rhp) const;
-		bool operator<= (const String& rhp) const;
-		bool operator>= (const String& rhp) const;
+		bool operator== (const std::string_view& rhp) const;
+		bool operator!= (const std::string_view& rhp) const;
+		bool operator< (const std::string_view& rhp) const;
+		bool operator> (const std::string_view& rhp) const;
+		bool operator<= (const std::string_view& rhp) const;
+		bool operator>= (const std::string_view& rhp) const;
+
+		operator std::string_view() const noexcept { return str; }
 
 	private:
 		Character* getCharPointer(size_t pos);
@@ -174,6 +178,10 @@ namespace Halley {
 	};
 
 	String operator+ (const String& lhp, const String& rhp);
+	String operator+ (const std::string_view& lhp, const String& rhp);
+	String operator+ (const String& lhp, const std::string_view& rhp);
+	String operator+ (const char* lhp, const String& rhp);
+	String operator+ (const String& lhp, const char* rhp);
 	std::ostream& operator<< (std::ostream& os, const String& rhp);
 	std::istream& operator>> (std::istream& is, String& rhp);
 
