@@ -265,7 +265,12 @@ String String::mid(size_t start,size_t count) const
 bool String::startsWith(const std::string_view& string, bool caseSensitive) const
 {
 	if (caseSensitive) {
-		return strncmp(str.c_str(), string.data(), std::min(str.size(), string.size())) == 0;
+		const size_t strSize = string.size();
+		const size_t sz = size();
+		if (sz < strSize) {
+			return false;
+		}
+		return str.compare(0, strSize, string) == 0;
 	} else {
 		return asciiLower().startsWith(String(string).asciiLower(), true);
 	}
