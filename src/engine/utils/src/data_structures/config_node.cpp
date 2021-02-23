@@ -272,6 +272,14 @@ ConfigNode& ConfigNode::operator=(SequenceType entry)
 	return *this;
 }
 
+ConfigNode& ConfigNode::operator=(const char* value)
+{
+	reset();
+	type = ConfigNodeType::String;
+	strData = new String(value);
+	return *this;
+}
+
 ConfigNode& ConfigNode::operator=(String entry) 
 {
 	reset();

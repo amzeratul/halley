@@ -154,6 +154,7 @@ namespace Halley {
 		ConfigNode& operator=(Bytes value);
 		ConfigNode& operator=(gsl::span<const gsl::byte> bytes);
 
+		ConfigNode& operator=(const char* value);
 		ConfigNode& operator=(const std::string_view& value);
 		
 		ConfigNode& operator=(NoopType value);
