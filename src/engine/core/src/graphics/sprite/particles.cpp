@@ -23,6 +23,8 @@ Particles::Particles(const ConfigNode& node, Resources& resources)
 	acceleration = node["acceleration"].asVector2f(Vector2f());
 	angle = node["angle"].asFloat(0.0f);
 	angleScatter = node["angleScatter"].asFloat(0.0f);
+	startScale = node["startScale"].asFloat(1.0f);
+	endScale = node["endScale"].asFloat(1.0f);
 	fadeInTime = node["fadeInTime"].asFloat(0.0f);
 	fadeOutTime = node["fadeOutTime"].asFloat(0.0f);
 	directionScatter = node["directionScatter"].asFloat(0.0f);
@@ -51,6 +53,8 @@ ConfigNode Particles::toConfigNode() const
 	result["acceleration"] = acceleration;
 	result["angle"] = angle;
 	result["angleScatter"] = angleScatter;
+	result["startScale"] = startScale;
+	result["endScale"] = endScale;
 	result["fadeInTime"] = fadeInTime;
 	result["fadeOutTime"] = fadeOutTime;
 	result["directionScatter"] = directionScatter;
@@ -95,6 +99,11 @@ void Particles::setPosition(Vector2f pos)
 void Particles::setSpawnArea(Vector2f area)
 {
 	spawnArea = area;
+}
+
+void Particles::setAngle(float newAngle)
+{
+	angle = newAngle;
 }
 
 void Particles::start()
@@ -208,6 +217,7 @@ void Particles::initializeParticle(size_t index)
 	particle.ttl = rng->getFloat(ttl - ttlScatter, ttl + ttlScatter);
 	particle.pos = getSpawnPosition();
 	particle.angle = rotateTowardsMovement ? startDirection : Angle1f();
+	particle.scale = startScale;
 	particle.vel = Vector2f(rng->getFloat(speed - speedScatter, speed + speedScatter), startDirection);
 
 	auto& sprite = sprites[index];
@@ -250,6 +260,8 @@ void Particles::updateParticles(float time)
 				particle.angle = particle.vel.angle();
 			}
 
+			particle.scale = lerp(startScale, endScale, particle.time / particle.ttl);
+
 			if (fadeInTime > 0.000001f || fadeOutTime > 0.00001f) {
 				const float alpha = clamp(std::min(particle.time / fadeInTime, (particle.ttl - particle.time) / fadeOutTime), 0.0f, 1.0f);
 				sprites[i].getColour().a = alpha;
@@ -257,7 +269,8 @@ void Particles::updateParticles(float time)
 
 			sprites[i]
 				.setPosition(particle.pos)
-				.setRotation(particle.angle);
+				.setRotation(particle.angle)
+				.setScale(particle.scale);
 		}
 	}
 }

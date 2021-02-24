@@ -14,6 +14,7 @@ namespace Halley {
 			Vector2f pos;
 			Vector2f vel;
 			Angle1f angle;
+			float scale = 1;
 			float time = 0;
 			float ttl = 1;
 			bool alive = true;
@@ -33,6 +34,8 @@ namespace Halley {
 		void setPosition(Vector2f pos);
 		void setSpawnArea(Vector2f area);
 
+		void setAngle(float newAngle);
+		
 		void update(Time t);
 
 		void setSprites(std::vector<Sprite> sprites);
@@ -70,6 +73,8 @@ namespace Halley {
 		Vector2f acceleration;
 		float angle = 0;
 		float angleScatter = 0;
+		float startScale = 1;
+		float endScale = 1;
 		float fadeInTime = 0;
 		float fadeOutTime = 0;
 		float directionScatter = 0;

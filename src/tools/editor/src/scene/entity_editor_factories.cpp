@@ -769,6 +769,10 @@ public:
 		container->add(context.makeField("float", pars.withSubKey("angle", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("angleScatter"));
 		container->add(context.makeField("float", pars.withSubKey("angleScatter", "10"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("startScale"));
+		container->add(context.makeField("float", pars.withSubKey("startScale", "1"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("endScale"));
+		container->add(context.makeField("float", pars.withSubKey("endScale", "1"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("fadeInTime"));
 		container->add(context.makeField("float", pars.withSubKey("fadeInTime", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("fadeOutTime"));
