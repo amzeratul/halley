@@ -8,6 +8,7 @@ namespace Halley {
 	class RenderGraph;
 	class RenderContext;
 	class Painter;
+	class Material;
 		
 	class RenderGraphPin {
 	public:
@@ -25,22 +26,26 @@ namespace Halley {
 		void connectInput(uint8_t inputPin, RenderGraphNode& node, uint8_t outputPin);
 
 		void setPaintMethod(PaintMethod paintMethod);
+		void setMaterialMethod(std::shared_ptr<Material> material);
 
 	private:
 		RenderGraphNode();
 
 		PaintMethod paintMethod;
+		std::shared_ptr<Material> materialMethod;
 	};
 
 	class RenderGraph {
 	public:
+		RenderGraph();
+		
 		RenderGraphNode& addNode();
 		RenderGraphNode& getRenderContextNode();
 
 		void render(RenderContext& rc);
 
 	private:
-		std::vector<std::shared_ptr<RenderGraphNode>> nodes;
-		std::shared_ptr<RenderGraphNode> renderContextNode;
+		std::vector<std::unique_ptr<RenderGraphNode>> nodes;
+		std::unique_ptr<RenderGraphNode> renderContextNode;
 	};
 }
