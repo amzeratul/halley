@@ -5,8 +5,10 @@
 #include "graphics/texture_descriptor.h"
 
 namespace Halley {
+	class TextureRenderTarget;
+	class Texture;
+	class RenderTarget;
 	class VideoAPI;
-	class RenderSurface;
 	class RenderGraph;
 	class RenderContext;
 	class Painter;
@@ -38,7 +40,7 @@ namespace Halley {
 		struct InputPin {
 			PinType type = PinType::Unknown;
 			OtherPin other;
-			int8_t surfaceId = -1;
+			int8_t textureId = -1;
 		};
 
 		struct OutputPin {
@@ -50,17 +52,30 @@ namespace Halley {
 
 		void startRender();
 		void prepareRender(VideoAPI& video, Vector2i targetSize);
+		void prepareInputPin(InputPin& pin, VideoAPI& video, Vector2i targetSize);
 		void render(RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue);
 		void notifyOutputs(std::vector<RenderGraphNode*>& renderQueue);
+
+		void resetTextures();
+		int8_t makeTexture(VideoAPI& video, PinType type);
+
+		void prepareRenderTarget();
+		void renderNode(RenderContext& rc);
+
+		std::shared_ptr<Texture> getInputTexture(const InputPin& input);
+		std::shared_ptr<Texture> getOutputTexture(uint8_t pin);
 
 		PaintMethod paintMethod;
 		std::shared_ptr<Material> materialMethod;
 		bool activeInCurrentPass = false;
 		int depsLeft = 0;
+		Vector2i currentSize;
 
 		std::vector<InputPin> inputPins;
 		std::vector<OutputPin> outputPins;
-		std::vector<RenderSurface> surfaces;
+
+		std::shared_ptr<TextureRenderTarget> renderTarget;
+		std::vector<std::shared_ptr<Texture>> textures;
 	};
 
 	class RenderGraph {

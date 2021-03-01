@@ -1,8 +1,11 @@
 #include "graphics/render_target/render_graph.h"
-
+#include "api/video_api.h"
 #include "graphics/render_context.h"
-#include "graphics/render_target/render_surface.h"
+#include "graphics/texture.h"
 #include "graphics/render_target/render_target.h"
+#include "graphics/render_target/render_target_texture.h"
+#include "halley/support/logger.h"
+
 using namespace Halley;
 
 RenderGraphNode::RenderGraphNode(gsl::span<const PinType> input, gsl::span<const PinType> output)
@@ -27,39 +30,125 @@ void RenderGraphNode::startRender()
 void RenderGraphNode::prepareRender(VideoAPI& video, Vector2i targetSize)
 {
 	activeInCurrentPass = true;
+	
+	// Reset if render size changed
+	if (currentSize != targetSize) {
+		currentSize = targetSize;
+		resetTextures();
+	}
+	
+	if (!renderTarget) {
+		renderTarget = video.createTextureRenderTarget();
+	}
 
 	for (auto& input: inputPins) {
-		if (input.other.node) {
-			// Connected to another node
-			++depsLeft;
+		prepareInputPin(input, video, targetSize);
+	}
+}
 
-			if (!input.other.node->activeInCurrentPass) {
-				input.other.node->prepareRender(video, targetSize);
+void RenderGraphNode::prepareInputPin(InputPin& input, VideoAPI& video, Vector2i targetSize)
+{
+	if (input.other.node) {
+		// Connected to another node
+		++depsLeft;
+
+		if (input.other.node->activeInCurrentPass) {
+			if (input.other.node->currentSize != targetSize) {
+				throw Exception("Mismatched target sizes", HalleyExceptions::Graphics);
 			}
-		} else if (input.type != PinType::Texture) {
-			// Not connected, assign surface
-			if (input.surfaceId == -1) {
-				input.surfaceId = gsl::narrow_cast<int8_t>(surfaces.size());
-				surfaces.emplace_back(video, RenderSurfaceOptions());
-			}
-			auto& surface = surfaces.at(input.surfaceId);
-			surface.setSize(targetSize);
+		} else {
+			// TODO: scaling
+			input.other.node->prepareRender(video, targetSize);
+		}
+	} else if (input.type != PinType::Texture) {
+		// Not connected, assign texture
+		if (input.textureId == -1) {
+			input.textureId = makeTexture(video, input.type);
 		}
 	}
 }
 
+void RenderGraphNode::resetTextures()
+{
+	textures.clear();
+	renderTarget.reset();
+	for (auto& input: inputPins) {
+		if (input.textureId >= 0) {
+			input.textureId = 0;
+		}
+	}
+}
+
+int8_t RenderGraphNode::makeTexture(VideoAPI& video, PinType type)
+{
+	Expects (type == PinType::ColourBuffer || type == PinType::DepthStencilBuffer);
+	
+	const int8_t result = gsl::narrow_cast<int8_t>(textures.size());
+	auto& texture = textures.emplace_back(video.createTexture(currentSize));
+
+	auto desc = TextureDescriptor(currentSize, type == PinType::ColourBuffer ? TextureFormat::RGBA : TextureFormat::Depth);
+	desc.isRenderTarget = true;
+	desc.isDepthStencil = type == PinType::DepthStencilBuffer;
+	desc.useFiltering = false; // TODO: allow filtering
+	texture->load(std::move(desc));
+
+	return result;
+}
+
 void RenderGraphNode::render(RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue)
 {
-	rc.with(renderTarget).bind([=] (Painter& painter)
+	prepareRenderTarget();
+	renderNode(rc);
+	notifyOutputs(renderQueue);
+}
+
+void RenderGraphNode::prepareRenderTarget()
+{
+	Expects(renderTarget);
+	
+	int colourIdx = 0;
+	for (const auto& input: inputPins) {
+		if (input.type == PinType::ColourBuffer) {
+			renderTarget->setTarget(colourIdx++, getInputTexture(input));
+		} else if (input.type == PinType::DepthStencilBuffer) {
+			renderTarget->setDepthTexture(getInputTexture(input));
+		}
+	}
+}
+
+void RenderGraphNode::renderNode(RenderContext& rc)
+{
+	rc.with(*renderTarget).bind([=] (Painter& painter)
 	{
 		if (paintMethod) {
 			paintMethod(painter);
 		} else if (materialMethod) {
 			// TODO
 		}
-	});
+	});	
+}
 
-	notifyOutputs(renderQueue);
+std::shared_ptr<Texture> RenderGraphNode::getInputTexture(const InputPin& input)
+{
+	if (input.textureId >= 0) {
+		return textures.at(input.textureId);
+	} else if (input.other.node) {
+		return input.other.node->getOutputTexture(input.other.otherId);
+	} else {
+		return {};
+	}
+}
+
+std::shared_ptr<Texture> RenderGraphNode::getOutputTexture(uint8_t pin)
+{
+	const auto& output = outputPins.at(pin);
+	if (output.type == PinType::ColourBuffer) {
+		return renderTarget->getTexture(0);
+	} else if (output.type == PinType::DepthStencilBuffer) {
+		return renderTarget->getDepthTexture();
+	} else {
+		throw Exception("Unknown pin type.", HalleyExceptions::Graphics);
+	}
 }
 
 void RenderGraphNode::notifyOutputs(std::vector<RenderGraphNode*>& renderQueue)
