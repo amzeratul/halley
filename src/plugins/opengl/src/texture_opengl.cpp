@@ -131,7 +131,7 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
 
 #if defined (WITH_OPENGL) || defined(WITH_OPENGL_ES3)
-	if (format == TextureFormat::DEPTH) {
+	if (format == TextureFormat::Depth) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 	}
@@ -185,7 +185,7 @@ unsigned TextureOpenGL::getGLInternalFormat(TextureFormat format)
 		return GL_RGB;
 	case TextureFormat::RGBA:
 		return GL_RGBA;
-	case TextureFormat::DEPTH:
+	case TextureFormat::Depth:
 		return GL_DEPTH_COMPONENT24;
 	default:
 		throw Exception("Unknown texture format: " + toString(static_cast<int>(format)), HalleyExceptions::VideoPlugin);
@@ -202,7 +202,7 @@ unsigned TextureOpenGL::getGLPixelFormat(TextureFormat format)
 		return GL_RGB;
 	case TextureFormat::RGBA:
 		return GL_RGBA;
-	case TextureFormat::DEPTH:
+	case TextureFormat::Depth:
 		return GL_DEPTH_COMPONENT;
 	default:
 		throw Exception("Unknown texture format: " + toString(static_cast<int>(format)), HalleyExceptions::VideoPlugin);

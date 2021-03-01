@@ -80,7 +80,7 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		bpp = 4;
 		break;
-	case TextureFormat::DEPTH:
+	case TextureFormat::Depth:
 		desc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
 		bpp = 4;
 		break;

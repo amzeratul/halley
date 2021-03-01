@@ -20,7 +20,7 @@ namespace Halley {
 
 	class RenderSurface {
 	public:
-		
+		explicit RenderSurface(VideoAPI& video, RenderSurfaceOptions options = {});
 		RenderSurface(VideoAPI& video, Resources& resources, const String& materialName = "Halley/SpriteOpaque", RenderSurfaceOptions options = {});
 		
 		void setSize(Vector2i size);

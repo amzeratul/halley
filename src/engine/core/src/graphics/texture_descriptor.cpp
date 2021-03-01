@@ -127,7 +127,7 @@ int TextureDescriptor::getBitsPerPixel(TextureFormat format)
 	switch (format) {
 	case TextureFormat::RGBA:
 		return 4;
-	case TextureFormat::DEPTH:
+	case TextureFormat::Depth:
 		return 3;
 	case TextureFormat::RGB:
 		return 3;

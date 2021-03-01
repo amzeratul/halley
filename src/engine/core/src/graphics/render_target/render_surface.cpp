@@ -10,6 +10,12 @@
 
 using namespace Halley;
 
+RenderSurface::RenderSurface(VideoAPI& video, RenderSurfaceOptions options)
+	: video(video)
+	, options(options)
+{
+}
+
 RenderSurface::RenderSurface(VideoAPI& video, Resources& resources, const String& materialName, RenderSurfaceOptions options)
 	: video(video)
 	, options(options)
@@ -34,7 +40,10 @@ void RenderSurface::setSize(Vector2i size)
 			colourDesc.isRenderTarget = true;
 			colourDesc.useFiltering = options.useFiltering;
 			colourTarget->load(std::move(colourDesc));
-			material->set("tex0", colourTarget);
+
+			if (material) {
+				material->set("tex0", colourTarget);
+			}
 
 			renderTarget = video.createTextureRenderTarget();
 			renderTarget->setTarget(0, colourTarget);
@@ -44,7 +53,7 @@ void RenderSurface::setSize(Vector2i size)
 				if (!options.name.isEmpty()) {
 					depthTarget->setAssetId(options.name + "_depth_v" + toString(version));
 				}
-				auto depthDesc = TextureDescriptor(textureSize, TextureFormat::DEPTH);
+				auto depthDesc = TextureDescriptor(textureSize, TextureFormat::Depth);
 				depthDesc.isDepthStencil = true;
 				depthTarget->load(std::move(depthDesc));
 				renderTarget->setDepthTexture(depthTarget);
@@ -64,6 +73,8 @@ bool RenderSurface::isReady() const
 
 Sprite RenderSurface::getSurfaceSprite() const
 {
+	Expects(material);
+	
 	const auto& tex = renderTarget->getTexture(0);
 	return Sprite()
 		.setMaterial(material, false)

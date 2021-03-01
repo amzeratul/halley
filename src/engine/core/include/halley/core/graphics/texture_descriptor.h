@@ -11,7 +11,7 @@ namespace Halley
 		Indexed,
 		RGB,
 		RGBA,
-		DEPTH,
+		Depth,
 		Red
 	};
 
