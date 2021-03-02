@@ -194,7 +194,7 @@ UISizer& UIWidget::getSizer()
 	return sizer.value();
 }
 
-void UIWidget::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags)
+void UIWidget::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, Vector2f position)
 {
 	auto widget = std::dynamic_pointer_cast<UIWidget>(element);
 	if (widget) {
@@ -206,7 +206,7 @@ void UIWidget::add(std::shared_ptr<IUIElement> element, float proportion, Vector
 		}
 	}
 	if (sizer) {
-		sizer->add(element, proportion, border, fillFlags);
+		sizer->add(element, proportion, border, fillFlags, position);
 	}
 }
 

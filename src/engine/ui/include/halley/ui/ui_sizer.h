@@ -10,17 +10,19 @@ namespace Halley {
 		Undefined,
 		Horizontal,
 		Vertical,
-		Grid
+		Grid,
+		Free
 	};
 
 	template <>
 	struct EnumNames<UISizerType> {
-		constexpr std::array<const char*, 4> operator()() const {
+		constexpr std::array<const char*, 5> operator()() const {
 			return {{
 				"undefined",
 				"horizontal",
 				"vertical",
-				"grid"
+				"grid",
+				"free"
 			}};
 		}
 	};
@@ -49,12 +51,13 @@ namespace Halley {
 	class UISizerEntry {
 	public:
 		UISizerEntry();
-		UISizerEntry(UIElementPtr widget, float proportion, Vector4f border, int fillFlags);
+		UISizerEntry(UIElementPtr widget, float proportion, Vector4f border, int fillFlags, Vector2f position);
 	
 		float getProportion() const;
 		Vector2f getMinimumSize() const;
 		Vector4f getBorder() const;
 		int getFillFlags() const;
+		Vector2f getPosition() const;
 
 		void placeInside(Rect4f rect, Vector2f minSize);
 
@@ -72,6 +75,7 @@ namespace Halley {
 		float proportion;
 		Vector4f border;
 		int fillFlags;
+		Vector2f position;
 		mutable bool enabled = true;
 	};
 
@@ -83,7 +87,7 @@ namespace Halley {
 	public:
 		virtual ~IUISizer() {}
 
-		virtual void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) = 0;
+		virtual void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f()) = 0;
 		virtual void addSpacer(float size) = 0;
 		virtual void addStretchSpacer(float proportion = 0) = 0;
 		virtual void remove(IUIElement& element) = 0;
@@ -101,7 +105,7 @@ namespace Halley {
 		Vector2f getLayoutMinimumSize(bool force) const override;
 		void setRect(Rect4f rect) override;
 
-		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;
+		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f()) override;
 		void addSpacer(float size) override;
 		void addStretchSpacer(float proportion = 0) override;
 		void remove(IUIElement& element) override;
@@ -148,6 +152,9 @@ namespace Halley {
 
 		Vector2f computeMinimumSizeBox(bool includeProportional) const;
 		void setRectBox(Rect4f rect);
+
+		Vector2f computeMinimumSizeBoxFree() const;
+		void setRectBoxFree(Rect4f rect);
 
 		void computeGridSizes(std::vector<float>& cols, std::vector<float>& rows) const;
 		Vector2f computeMinimumSizeGrid() const;
