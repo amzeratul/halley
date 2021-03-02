@@ -63,7 +63,7 @@ void PainterOpenGL::doEndRender()
 	glCheckError();
 }
 
-void PainterOpenGL::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint32_t> stencil)
+void PainterOpenGL::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil)
 {
 	glCheckError();
 	const auto col = colour.value_or(Colour());

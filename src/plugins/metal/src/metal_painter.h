@@ -9,7 +9,7 @@ namespace Halley {
 	{
 	public:
 		explicit MetalPainter(MetalVideo& video, Resources& resources);
-		void clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint32_t> stencil) override;
+		void clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil) override;
 		void setMaterialPass(const Material& material, int pass) override;
 		void doStartRender() override;
 		void doEndRender() override;

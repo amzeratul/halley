@@ -12,7 +12,7 @@ MetalPainter::MetalPainter(MetalVideo& video, Resources& resources)
 	, indexBuffer(nil)
 {}
 
-void MetalPainter::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint32_t> stencil) {
+void MetalPainter::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil) {
 	[encoder endEncoding];
 	auto& renderTarget = dynamic_cast<IMetalRenderTarget&>(getActiveRenderTarget());
 	if (colour) {

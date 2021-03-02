@@ -21,7 +21,7 @@ namespace Halley
 	public:
 		explicit DX11Painter(DX11Video& video, Resources& resources);
 		
-		void clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint32_t> stencil) override;
+		void clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil) override;
 		void setMaterialPass(const Material& material, int pass) override;
 		void setMaterialData(const Material& material) override;
 

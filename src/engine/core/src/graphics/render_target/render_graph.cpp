@@ -123,6 +123,7 @@ void RenderGraphNode::renderNode(RenderContext& rc)
 	rc.with(*renderTarget).bind([=] (Painter& painter)
 	{
 		if (paintMethod) {
+			painter.clear(colourClear, depthClear, stencilClear);
 			paintMethod(painter);
 		} else if (materialMethod) {
 			for (auto& input: inputPins) {
@@ -189,9 +190,12 @@ void RenderGraphNode::connectInput(uint8_t inputPin, RenderGraphNode& node, uint
 	output.others.push_back({ this, inputPin });
 }
 
-void RenderGraphNode::setPaintMethod(PaintMethod paintMethod)
+void RenderGraphNode::setPaintMethod(PaintMethod paintMethod, std::optional<Colour4f> colourClear, std::optional<float> depthClear, std::optional<uint8_t> stencilClear)
 {
 	this->paintMethod = std::move(paintMethod);
+	this->colourClear = colourClear;
+	this->depthClear = depthClear;
+	this->stencilClear = stencilClear;
 	materialMethod.reset();
 }
 

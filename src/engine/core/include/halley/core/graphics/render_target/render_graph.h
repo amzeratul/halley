@@ -28,7 +28,7 @@ namespace Halley {
 		
 		void connectInput(uint8_t inputPin, RenderGraphNode& node, uint8_t outputPin);
 
-		void setPaintMethod(PaintMethod paintMethod);
+		void setPaintMethod(PaintMethod paintMethod, std::optional<Colour4f> colourClear, std::optional<float> depthClear, std::optional<uint8_t> stencilClear);
 		void setMaterialMethod(std::shared_ptr<Material> material);
 
 	private:
@@ -67,6 +67,10 @@ namespace Halley {
 
 		PaintMethod paintMethod;
 		std::shared_ptr<Material> materialMethod;
+		std::optional<Colour4f> colourClear;
+		std::optional<float> depthClear;
+		std::optional<uint8_t> stencilClear;
+		
 		bool activeInCurrentPass = false;
 		int depsLeft = 0;
 		Vector2i currentSize;
