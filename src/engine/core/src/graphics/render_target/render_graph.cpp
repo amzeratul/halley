@@ -2,8 +2,10 @@
 #include "api/video_api.h"
 #include "graphics/render_context.h"
 #include "graphics/texture.h"
+#include "graphics/material/material.h"
 #include "graphics/render_target/render_target.h"
 #include "graphics/render_target/render_target_texture.h"
+#include "graphics/sprite/sprite.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;
@@ -123,7 +125,19 @@ void RenderGraphNode::renderNode(RenderContext& rc)
 		if (paintMethod) {
 			paintMethod(painter);
 		} else if (materialMethod) {
-			// TODO
+			for (auto& input: inputPins) {
+				int idx = 0;
+				if (input.type == PinType::Texture) {
+					materialMethod->set("tex" + toString(idx++), getInputTexture(input));
+				}
+			}
+			
+			const auto& tex = renderTarget->getTexture(0);
+			Sprite()
+				.setMaterial(materialMethod, false)
+				.setSize(Vector2f(currentSize))
+				.setTexRect(Rect4f(Vector2f(), Vector2f(currentSize) / Vector2f(tex->getSize())))
+				.draw(painter);
 		}
 	});	
 }
