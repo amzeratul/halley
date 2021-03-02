@@ -204,6 +204,9 @@ uiStyle:
   labelSmall:
     label: { font: Ubuntu Light, size: 12, colour: $ui_text }
 
+  labelSmallDisabled:
+    label: { font: Ubuntu Light, size: 12, colour: $ui_disabledText }
+
   tooltip:
     background: { img: $ui_tooltip, colour: $ui_listHover }
     innerBorder: [ 5, 5, 5, 5 ]
