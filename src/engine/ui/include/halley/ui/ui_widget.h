@@ -65,7 +65,7 @@ namespace Halley {
 
 		virtual bool canInteractWithMouse() const;
 		virtual bool isFocusLocked() const;
-		bool isMouseOver() const;
+		virtual bool isMouseOver() const;
 		bool isFocused() const;
 		void focus();
 

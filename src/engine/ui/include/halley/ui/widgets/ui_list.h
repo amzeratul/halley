@@ -25,7 +25,7 @@ namespace Halley {
 
 		UIStyle getStyle() const;
 
-		void addTextItem(const String& id, LocalisedString label, float maxWidth = -1, bool centre = false);
+		void addTextItem(const String& id, LocalisedString label, float maxWidth = -1, bool centre = false, std::optional<LocalisedString> tooltip = {});
 		void addImage(const String& id, std::shared_ptr<UIImage> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, std::optional<UIStyle> styleOverride = {});
 		void addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, std::optional<UIStyle> styleOverride = {});
 		std::optional<int> removeItem(const String& id);

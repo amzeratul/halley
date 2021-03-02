@@ -258,6 +258,11 @@ void UIRoot::makeToolTip(const UIStyle& style)
 	addChild(toolTip);
 }
 
+Vector2f UIRoot::getLastMousePos() const
+{
+	return lastMousePos;
+}
+
 void UIRoot::updateMouse(const spInputDevice& mouse)
 {
 	// Go through all root-level widgets and find the actual widget under the mouse
@@ -270,6 +275,7 @@ void UIRoot::updateMouse(const spInputDevice& mouse)
 	for (int i = 0; i < 3; ++i) {
 		// Click
 		if (!anyMouseButtonHeld && mouse->isButtonPressed(i)) {
+			
 			anyMouseButtonHeld = true;
 			mouseExclusive = actuallyUnderMouse;
 
@@ -279,7 +285,22 @@ void UIRoot::updateMouse(const spInputDevice& mouse)
 				}
 				mouse->clearButtonPress(i);
 				actuallyUnderMouse->pressMouse(mousePos, i);
+				
+				UIEventType pressEvent;
+				if (i == 0) pressEvent = UIEventType::MousePressLeft;
+				else if (i == 1) pressEvent = UIEventType::MousePressMiddle;
+				else pressEvent = UIEventType::MousePressRight;
+				
+				actuallyUnderMouse->sendEvent(UIEvent(pressEvent, "mouse", mousePos));
 			} else {
+				const auto& cs = getChildren();
+				if (!cs.empty()) {
+					UIEventType unhandledPressEVent;
+					if (i == 0) unhandledPressEVent = UIEventType::UnhandledMousePressLeft;
+					else if (i == 1) unhandledPressEVent = UIEventType::UnhandledMousePressMiddle;
+					else unhandledPressEVent = UIEventType::UnhandledMousePressRight;
+					cs.back()->sendEvent(UIEvent(unhandledPressEVent, "mouse", mousePos));
+				}
 				setFocus({});
 			}
 		}
@@ -291,6 +312,23 @@ void UIRoot::updateMouse(const spInputDevice& mouse)
 			if (exclusive) {
 				exclusive->releaseMouse(mousePos, i);
 				mouse->clearButtonRelease(i);
+
+				UIEventType releaseEvent;
+				if (i == 0) releaseEvent = UIEventType::MouseReleaseLeft;
+				else if (i == 1) releaseEvent = UIEventType::MouseReleaseMiddle;
+				else releaseEvent = UIEventType::MouseReleaseRight;
+
+				exclusive->sendEvent(UIEvent(releaseEvent, "mouse", mousePos));
+			}
+			else {
+				const auto& cs = getChildren();
+				if (!cs.empty()) {
+					UIEventType unhandledReleaseEvent;
+					if (i == 0) unhandledReleaseEvent = UIEventType::UnhandledMouseReleaseLeft;
+					else if (i == 1) unhandledReleaseEvent = UIEventType::UnhandledMouseReleaseMiddle;
+					else unhandledReleaseEvent = UIEventType::UnhandledMouseReleaseRight;
+					cs.back()->sendEvent(UIEvent(unhandledReleaseEvent, "mouse", mousePos));
+				}
 			}
 
 			mouseExclusive.reset();
