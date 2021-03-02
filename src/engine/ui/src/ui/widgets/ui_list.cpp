@@ -101,9 +101,12 @@ std::shared_ptr<UILabel> UIList::makeLabel(String id, LocalisedString label, flo
 	return widget;
 }
 
-void UIList::addTextItem(const String& id, LocalisedString label, float maxWidth, bool centre)
+void UIList::addTextItem(const String& id, LocalisedString label, float maxWidth, bool centre, std::optional<LocalisedString> tooltip)
 {
 	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
+	if (tooltip) {
+		item->setToolTip(tooltip.value());
+	}
 	item->add(makeLabel(id + "_label", std::move(label), maxWidth), 0, Vector4f(), centre ? UISizerAlignFlags::CentreHorizontal : UISizerFillFlags::Fill);
 	addItem(item);
 }
