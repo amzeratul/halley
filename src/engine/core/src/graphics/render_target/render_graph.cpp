@@ -38,10 +38,8 @@ void RenderGraphNode::prepareRender(VideoAPI& video, Vector2i targetSize)
 		currentSize = targetSize;
 		resetTextures();
 	}
-	
-	if (!renderTarget) {
-		renderTarget = video.createTextureRenderTarget();
-	}
+
+	initializeRenderTarget(video);
 
 	for (auto& input: inputPins) {
 		prepareInputPin(input, video, targetSize);
@@ -97,50 +95,108 @@ int8_t RenderGraphNode::makeTexture(VideoAPI& video, PinType type)
 	return result;
 }
 
-void RenderGraphNode::render(RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue)
+void RenderGraphNode::render(const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue)
 {
 	prepareRenderTarget();
 	renderNode(rc);
 	notifyOutputs(renderQueue);
 }
 
-void RenderGraphNode::prepareRenderTarget()
+void RenderGraphNode::initializeRenderTarget(VideoAPI& video)
 {
-	Expects(renderTarget);
-	
-	int colourIdx = 0;
-	for (const auto& input: inputPins) {
-		if (input.type == PinType::ColourBuffer) {
-			renderTarget->setTarget(colourIdx++, getInputTexture(input));
-		} else if (input.type == PinType::DepthStencilBuffer) {
-			renderTarget->setDepthTexture(getInputTexture(input));
+	// Figure out if we can short-circuit this render context
+	bool hasOutputPinsWithMultipleConnections = false;
+	bool hasNonSinkOutputs = false;
+	bool hasMultipleRenderNodeOutputs = false;
+	const RenderGraphNode* curOutputNode = nullptr;
+	for (const auto& outputPin: outputPins) {
+		if (outputPin.others.size() > 1) {
+			hasOutputPinsWithMultipleConnections = true;
+		}
+		for (const auto& otherNode: outputPin.others) {
+			if (otherNode.node != curOutputNode) {
+				if (curOutputNode) {
+					hasMultipleRenderNodeOutputs = true;
+				}
+				curOutputNode = otherNode.node;
+				if (!curOutputNode->rcSinkMethod) {
+					hasNonSinkOutputs = true;
+				}
+			}
+		}
+	}
+	const bool needsRenderTarget = hasOutputPinsWithMultipleConnections || hasNonSinkOutputs || hasMultipleRenderNodeOutputs;
+
+	// Create/destroy render target as needed
+	if (!!renderTarget != needsRenderTarget) {
+		if (!renderTarget) {
+			renderTarget = video.createTextureRenderTarget();
+		} else {
+			renderTarget.reset();
 		}
 	}
 }
 
-void RenderGraphNode::renderNode(RenderContext& rc)
+void RenderGraphNode::prepareRenderTarget()
 {
-	rc.with(*renderTarget).bind([=] (Painter& painter)
-	{
-		if (paintMethod) {
-			painter.clear(colourClear, depthClear, stencilClear);
-			paintMethod(painter);
-		} else if (materialMethod) {
-			for (auto& input: inputPins) {
-				int idx = 0;
-				if (input.type == PinType::Texture) {
-					materialMethod->set("tex" + toString(idx++), getInputTexture(input));
-				}
+	if (renderTarget) {
+		int colourIdx = 0;
+		for (const auto& input: inputPins) {
+			if (input.type == PinType::ColourBuffer) {
+				renderTarget->setTarget(colourIdx++, getInputTexture(input));
+			} else if (input.type == PinType::DepthStencilBuffer) {
+				renderTarget->setDepthTexture(getInputTexture(input));
 			}
-			
-			const auto& tex = renderTarget->getTexture(0);
-			Sprite()
-				.setMaterial(materialMethod, false)
-				.setSize(Vector2f(currentSize))
-				.setTexRect(Rect4f(Vector2f(), Vector2f(currentSize) / Vector2f(tex->getSize())))
-				.draw(painter);
 		}
+	}
+}
+
+void RenderGraphNode::renderNode(const RenderContext& rc)
+{
+	if (paintMethod) {
+		renderNodePaintMethod(rc);
+	} else if (materialMethod) {
+		renderNodeMaterialMethod(rc);
+	}
+}
+
+void RenderGraphNode::renderNodePaintMethod(const RenderContext& rc)
+{
+	getTargetRenderContext(rc).bind([=] (Painter& painter)
+	{
+		painter.clear(colourClear, depthClear, stencilClear);
+		paintMethod(painter);
 	});	
+}
+
+void RenderGraphNode::renderNodeMaterialMethod(const RenderContext& rc)
+{
+	int idx = 0;
+	for (auto& input: inputPins) {
+		if (input.type == PinType::Texture) {
+			materialMethod->set("tex" + toString(idx++), getInputTexture(input));
+		}
+	}
+
+	Camera camera = Camera(Vector2f(currentSize) * 0.5f);
+	getTargetRenderContext(rc).with(camera).bind([=] (Painter& painter)
+	{
+		const auto& tex = materialMethod->getTexture(0);
+		Sprite()
+			.setMaterial(materialMethod, false)
+			.setSize(Vector2f(currentSize))
+			.setTexRect(Rect4f(Vector2f(), Vector2f(currentSize) / Vector2f(tex->getSize())))
+			.draw(painter);
+	});
+}
+
+RenderContext RenderGraphNode::getTargetRenderContext(const RenderContext& rc) const
+{
+	if (renderTarget) {
+		return rc.with(*renderTarget);
+	} else {
+		return rc;
+	}
 }
 
 std::shared_ptr<Texture> RenderGraphNode::getInputTexture(const InputPin& input)
@@ -156,6 +212,8 @@ std::shared_ptr<Texture> RenderGraphNode::getInputTexture(const InputPin& input)
 
 std::shared_ptr<Texture> RenderGraphNode::getOutputTexture(uint8_t pin)
 {
+	Expects(renderTarget);
+	
 	const auto& output = outputPins.at(pin);
 	if (output.type == PinType::ColourBuffer) {
 		return renderTarget->getTexture(0);
@@ -192,25 +250,37 @@ void RenderGraphNode::connectInput(uint8_t inputPin, RenderGraphNode& node, uint
 
 void RenderGraphNode::setPaintMethod(PaintMethod paintMethod, std::optional<Colour4f> colourClear, std::optional<float> depthClear, std::optional<uint8_t> stencilClear)
 {
+	resetMethod();
 	this->paintMethod = std::move(paintMethod);
 	this->colourClear = colourClear;
 	this->depthClear = depthClear;
 	this->stencilClear = stencilClear;
-	materialMethod.reset();
 }
 
 void RenderGraphNode::setMaterialMethod(std::shared_ptr<Material> material)
 {
+	resetMethod();
 	materialMethod = std::move(material);
-	paintMethod = {};
 }
 
+void RenderGraphNode::setRCSinkMethod()
+{
+	resetMethod();
+	rcSinkMethod = true;
+}
+
+void RenderGraphNode::resetMethod()
+{
+	materialMethod.reset();
+	paintMethod = {};
+	rcSinkMethod = false;
+}
 
 
 RenderGraph::RenderGraph()
 {
 	RenderGraphNode::PinType pins[] = { RenderGraphNode::PinType::ColourBuffer, RenderGraphNode::PinType::DepthStencilBuffer };
-	addNode(pins, {});
+	addNode(pins, {}).setRCSinkMethod();
 }
 
 RenderGraphNode& RenderGraph::addNode(gsl::span<const RenderGraphNode::PinType> inputPins, gsl::span<const RenderGraphNode::PinType> outputPins)
@@ -223,7 +293,7 @@ RenderGraphNode& RenderGraph::getRenderContextNode()
 	return *nodes.at(0);
 }
 
-void RenderGraph::render(RenderContext& rc, VideoAPI& video)
+void RenderGraph::render(const RenderContext& rc, VideoAPI& video)
 {
 	for (auto& node: nodes) {
 		node->startRender();

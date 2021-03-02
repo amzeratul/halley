@@ -9,6 +9,13 @@ RenderContext::RenderContext(Painter& painter, Camera& camera, RenderTarget& ren
 	, defaultRenderTarget(renderTarget)
 {}
 
+RenderContext::RenderContext(const RenderContext& context) noexcept
+	: painter(context.painter)
+	, camera(context.camera)
+	, defaultRenderTarget(context.defaultRenderTarget)
+{
+}
+
 RenderContext::RenderContext(RenderContext&& context) noexcept
 	: painter(context.painter)
 	, camera(context.camera)
@@ -51,7 +58,7 @@ RenderContext RenderContext::with(RenderTarget& renderTarget) const
 	return RenderContext(painter, camera, renderTarget);
 }
 
-RenderTarget& RenderContext::getDefaultRenderTarget()
+RenderTarget& RenderContext::getDefaultRenderTarget() const
 {
 	return defaultRenderTarget;
 }

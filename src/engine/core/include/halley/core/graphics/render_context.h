@@ -20,13 +20,14 @@ namespace Halley
 			popContext();
 		}
 
+		RenderContext(const RenderContext& context) noexcept;
 		RenderContext(RenderContext&& context) noexcept;
 
 		RenderContext with(Camera& camera) const;
 		RenderContext with(RenderTarget& defaultRenderTarget) const;
 		Camera& getCamera() const { return camera; }
 
-		RenderTarget& getDefaultRenderTarget();
+		RenderTarget& getDefaultRenderTarget() const;
 
 		void flush();
 

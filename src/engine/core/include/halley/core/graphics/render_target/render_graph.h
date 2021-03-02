@@ -53,25 +53,35 @@ namespace Halley {
 		void startRender();
 		void prepareRender(VideoAPI& video, Vector2i targetSize);
 		void prepareInputPin(InputPin& pin, VideoAPI& video, Vector2i targetSize);
-		void render(RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue);
+		void render(const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue);
 		void notifyOutputs(std::vector<RenderGraphNode*>& renderQueue);
+
+		void setRCSinkMethod();
+		void resetMethod();
 
 		void resetTextures();
 		int8_t makeTexture(VideoAPI& video, PinType type);
 
+		void initializeRenderTarget(VideoAPI& video);
 		void prepareRenderTarget();
-		void renderNode(RenderContext& rc);
+		
+		void renderNode(const RenderContext& rc);
+		void renderNodePaintMethod(const RenderContext& rc);
+		void renderNodeMaterialMethod(const RenderContext& rc);
+		RenderContext getTargetRenderContext(const RenderContext& rc) const;
 
 		std::shared_ptr<Texture> getInputTexture(const InputPin& input);
 		std::shared_ptr<Texture> getOutputTexture(uint8_t pin);
 
 		PaintMethod paintMethod;
 		std::shared_ptr<Material> materialMethod;
+		
 		std::optional<Colour4f> colourClear;
 		std::optional<float> depthClear;
 		std::optional<uint8_t> stencilClear;
 		
 		bool activeInCurrentPass = false;
+		bool rcSinkMethod = false;
 		int depsLeft = 0;
 		Vector2i currentSize;
 
@@ -89,7 +99,7 @@ namespace Halley {
 		RenderGraphNode& addNode(gsl::span<const RenderGraphNode::PinType> inputPins, gsl::span<const RenderGraphNode::PinType> outputPins);
 		RenderGraphNode& getRenderContextNode();
 
-		void render(RenderContext& rc, VideoAPI& video);
+		void render(const RenderContext& rc, VideoAPI& video);
 
 	private:
 		std::vector<std::unique_ptr<RenderGraphNode>> nodes;
