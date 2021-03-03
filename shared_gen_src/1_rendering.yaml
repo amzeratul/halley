@@ -42,20 +42,8 @@ component:
   - zoom:
       type: float
       defaultValue: 1
-  - clearColour: 'std::optional<Halley::Colour4f>'
-  - clearStencil: 'std::optional<int>'
-  - clearDepth: 'std::optional<float>'
-  - mask:
-      type: int
-      defaultValue: 1
-  - layer:
-      type: int
-      defaultValue: 0
-  - target:
-      type: 'Halley::RenderTarget*'
-      canEdit: false
-      canSave: false
-      defaultValue: nullptr
+  - id:
+      type: 'Halley::String'
 
 ---
 

@@ -163,7 +163,7 @@ void RenderGraphNode::prepareRenderTargetInputs()
 
 void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& rc)
 {
-	if (paintMethod) {
+	if (!paintMethod.isEmpty()) {
 		renderNodePaintMethod(graph, rc);
 	} else if (materialMethod) {
 		renderNodeMaterialMethod(rc);
@@ -172,10 +172,10 @@ void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& 
 
 void RenderGraphNode::renderNodePaintMethod(const RenderGraph& graph, const RenderContext& rc)
 {
-	getTargetRenderContext(rc).with(graph.getCamera(cameraId)).bind([=] (Painter& painter)
+	getTargetRenderContext(rc).with(graph.getCamera(cameraId)).bind([this, &graph] (Painter& painter)
 	{
 		painter.clear(colourClear, depthClear, stencilClear);
-		paintMethod(painter);
+		graph.getPaintMethod(paintMethod)(painter);
 	});	
 }
 
@@ -258,7 +258,7 @@ void RenderGraphNode::connectInput(uint8_t inputPin, RenderGraphNode& node, uint
 	output.others.push_back({ this, inputPin });
 }
 
-void RenderGraphNode::setPaintMethod(PaintMethod paintMethod, String cameraId, std::optional<Colour4f> colourClear, std::optional<float> depthClear, std::optional<uint8_t> stencilClear)
+void RenderGraphNode::setPaintMethod(String paintMethod, String cameraId, std::optional<Colour4f> colourClear, std::optional<float> depthClear, std::optional<uint8_t> stencilClear)
 {
 	resetMethod();
 	this->paintMethod = std::move(paintMethod);
@@ -331,4 +331,14 @@ const Camera& RenderGraph::getCamera(std::string_view id) const
 void RenderGraph::setCamera(std::string_view id, const Camera& camera)
 {
 	cameras[id] = camera;
+}
+
+const RenderGraph::PaintMethod& RenderGraph::getPaintMethod(std::string_view id) const
+{
+	return paintMethods.at(id);
+}
+
+void RenderGraph::setPaintMethod(std::string_view id, PaintMethod method)
+{
+	paintMethods[id] = method;
 }

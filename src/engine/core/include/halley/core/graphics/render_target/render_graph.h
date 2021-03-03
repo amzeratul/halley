@@ -19,7 +19,6 @@ namespace Halley {
 		friend class RenderGraph;
 	
 	public:
-		using PaintMethod = std::function<void(Painter&)>;
 		enum class PinType {
 			Unknown,
 			ColourBuffer,
@@ -29,7 +28,7 @@ namespace Halley {
 		
 		void connectInput(uint8_t inputPin, RenderGraphNode& node, uint8_t outputPin);
 
-		void setPaintMethod(PaintMethod paintMethod, String cameraId, std::optional<Colour4f> colourClear, std::optional<float> depthClear, std::optional<uint8_t> stencilClear);
+		void setPaintMethod(String methodId, String cameraId, std::optional<Colour4f> colourClear, std::optional<float> depthClear, std::optional<uint8_t> stencilClear);
 		void setMaterialMethod(std::shared_ptr<Material> material);
 
 	private:
@@ -75,7 +74,7 @@ namespace Halley {
 		std::shared_ptr<Texture> getInputTexture(const InputPin& input);
 		std::shared_ptr<Texture> getOutputTexture(uint8_t pin);
 
-		PaintMethod paintMethod;
+		String paintMethod;
 		std::shared_ptr<Material> materialMethod;
 		
 		std::optional<Colour4f> colourClear;
@@ -98,6 +97,8 @@ namespace Halley {
 
 	class RenderGraph {
 	public:
+		using PaintMethod = std::function<void(Painter&)>;
+
 		RenderGraph();
 		
 		RenderGraphNode& addNode(gsl::span<const RenderGraphNode::PinType> inputPins, gsl::span<const RenderGraphNode::PinType> outputPins);
@@ -108,8 +109,12 @@ namespace Halley {
 		const Camera& getCamera(std::string_view id) const;
 		void setCamera(std::string_view id, const Camera& camera);
 
+		const PaintMethod& getPaintMethod(std::string_view id) const;
+		void setPaintMethod(std::string_view id, PaintMethod method);
+
 	private:
 		std::vector<std::unique_ptr<RenderGraphNode>> nodes;
 		std::map<String, Camera> cameras;
+		std::map<String, PaintMethod> paintMethods;
 	};
 }

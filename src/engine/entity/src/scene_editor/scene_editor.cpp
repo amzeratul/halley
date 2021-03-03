@@ -205,7 +205,7 @@ std::vector<EntityId> SceneEditor::createCamera()
 	return std::vector<EntityId>({
 		getWorld().createEntity("editorCamera")
 			.addComponent(Transform2DComponent(Vector2f(0, 0)))
-			.addComponent(CameraComponent(1.0f, Colour4f(0.2f, 0.2f, 0.2f), 0, 1.0f, 0x7FFFFFFF, 0))
+			.addComponent(CameraComponent(1.0f, "main"))
 			.getEntityId()
 	});
 }
