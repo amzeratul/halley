@@ -33,12 +33,16 @@ namespace Halley {
 		const PaintMethod& getPaintMethod(std::string_view id) const;
 		void setPaintMethod(std::string_view id, PaintMethod method);
 
+		void applyVariable(Material& material, const String& name, const ConfigNode& value) const;
+		void setVariable(std::string_view name, float value);
+
 	private:
 		std::vector<std::unique_ptr<RenderGraphNode>> nodes;
 		std::map<String, RenderGraphNode*> nodeMap;
 		
 		std::map<String, Camera> cameras;
 		std::map<String, PaintMethod> paintMethods;
+		std::map<String, float> variables;
 
 		void addNode(String id, std::unique_ptr<RenderGraphNode> node);
 		void addOutputNode();

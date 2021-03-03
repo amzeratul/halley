@@ -29,7 +29,7 @@ namespace Halley {
     class RenderGraphDefinition : public Resource {
     public:
         class Node {
-        public:
+        public:        	
 	        String id;
         	RenderGraphMethod method = RenderGraphMethod::None;
         	ConfigNode methodParameters;

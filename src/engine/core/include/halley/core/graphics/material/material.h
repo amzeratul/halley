@@ -54,7 +54,7 @@ namespace Halley
 		std::unique_ptr<MaterialConstantBuffer> constantBuffer;
 		Bytes data;
 		Vector<int> addresses;
-		MaterialDataBlockType dataBlockType;
+		MaterialDataBlockType dataBlockType = MaterialDataBlockType::Local;
 		int bindPoint = 0;
 		bool dirty = true;
 

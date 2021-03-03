@@ -42,6 +42,14 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 	} else if (method == RenderGraphMethod::Screen) {
 		screenMethod = std::make_shared<Material>(definition.material);
 
+		if (pars.hasKey("variables")) {
+			const auto& seq = pars["variables"].asSequence();
+			variables.reserve(seq.size());
+			for (const auto& node: seq) {
+				variables.emplace_back(Variable{ node["name"].asString(), ConfigNode(node["value"]) });
+			}
+		}
+
 		const auto& texs = screenMethod->getTextureUniforms();
 		std::vector<RenderGraphPinType> inputPinTypes;
 		inputPinTypes.reserve(2 + texs.size());
@@ -201,7 +209,7 @@ void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& 
 	if (method == RenderGraphMethod::Paint) {
 		renderNodePaintMethod(graph, rc);
 	} else if (method == RenderGraphMethod::Screen) {
-		renderNodeScreenMethod(rc);
+		renderNodeScreenMethod(graph, rc);
 	}
 }
 
@@ -214,7 +222,7 @@ void RenderGraphNode::renderNodePaintMethod(const RenderGraph& graph, const Rend
 	});	
 }
 
-void RenderGraphNode::renderNodeScreenMethod(const RenderContext& rc)
+void RenderGraphNode::renderNodeScreenMethod(const RenderGraph& graph, const RenderContext& rc)
 {
 	const auto& texs = screenMethod->getDefinition().getTextures();
 	size_t idx = 0;
@@ -222,6 +230,10 @@ void RenderGraphNode::renderNodeScreenMethod(const RenderContext& rc)
 		if (input.type == RenderGraphPinType::Texture) {
 			screenMethod->set(texs.at(idx++).name, getInputTexture(input));
 		}
+	}
+
+	for (const auto& variable: variables) {
+		graph.applyVariable(*screenMethod, variable.name, variable.value);
 	}
 
 	const auto camera = Camera(Vector2f(currentSize) * 0.5f);

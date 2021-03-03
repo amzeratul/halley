@@ -38,6 +38,11 @@ namespace Halley {
 			std::vector<OtherPin> others;
 		};
 
+		struct Variable {
+			String name;
+			ConfigNode value;
+		};
+
 		void connectInput(uint8_t inputPin, RenderGraphNode& node, uint8_t outputPin);
 
 		void startRender();
@@ -56,20 +61,22 @@ namespace Halley {
 		
 		void renderNode(const RenderGraph& graph, const RenderContext& rc);
 		void renderNodePaintMethod(const RenderGraph& graph, const RenderContext& rc);
-		void renderNodeScreenMethod(const RenderContext& rc);
+		void renderNodeScreenMethod(const RenderGraph& graph, const RenderContext& rc);
 		RenderContext getTargetRenderContext(const RenderContext& rc) const;
 
 		std::shared_ptr<Texture> getInputTexture(const InputPin& input);
 		std::shared_ptr<Texture> getOutputTexture(uint8_t pin);
 
 		RenderGraphMethod method;
+
 		String paintId;
-		std::shared_ptr<Material> screenMethod;
-		
+		String cameraId;
 		std::optional<Colour4f> colourClear;
 		std::optional<float> depthClear;
 		std::optional<uint8_t> stencilClear;
-		String cameraId;
+
+		std::shared_ptr<Material> screenMethod;
+		std::vector<Variable> variables;
 		
 		bool activeInCurrentPass = false;
 		bool ownRenderTarget = false;

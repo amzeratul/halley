@@ -1,6 +1,7 @@
 #include "graphics/render_target/render_graph.h"
 #include "api/video_api.h"
 #include "graphics/render_context.h"
+#include "graphics/material/material.h"
 #include "graphics/render_target/render_graph_definition.h"
 #include "graphics/render_target/render_graph_node.h"
 #include "graphics/render_target/render_target.h"
@@ -96,4 +97,18 @@ const RenderGraph::PaintMethod& RenderGraph::getPaintMethod(std::string_view id)
 void RenderGraph::setPaintMethod(std::string_view id, PaintMethod method)
 {
 	paintMethods[id] = std::move(method);
+}
+
+void RenderGraph::applyVariable(Material& material, const String& name, const ConfigNode& value) const
+{
+	if (value.getType() == ConfigNodeType::String) {
+		material.set(name, variables.at(value.asString()));
+	} else if (value.getType() == ConfigNodeType::Float || value.getType() == ConfigNodeType::Int) {
+		material.set(name, value.asFloat());
+	}
+}
+
+void RenderGraph::setVariable(std::string_view name, float value)
+{
+	variables[name] = value;
 }
