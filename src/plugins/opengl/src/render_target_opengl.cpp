@@ -23,7 +23,7 @@ void TextureRenderTargetOpenGL::onBind(Painter&)
 
 #ifdef WITH_OPENGL
 	static GLuint buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7, GL_COLOR_ATTACHMENT8 };
-	glDrawBuffers(int(attachments.size()), buffers);
+	glDrawBuffers(int(colourBuffer.size()), buffers);
 #else
 	// TODO?
 	//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, );
@@ -47,12 +47,12 @@ void TextureRenderTargetOpenGL::init()
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glCheckError();
 
-		for (size_t i = 0; i < attachments.size(); i++) {
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + int(i), GL_TEXTURE_2D, dynamic_cast<TextureOpenGL&>(*attachments[i]).getNativeId(), 0);
+		for (size_t i = 0; i < colourBuffer.size(); i++) {
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + int(i), GL_TEXTURE_2D, dynamic_cast<TextureOpenGL&>(*colourBuffer[i]).getNativeId(), 0);
 			glCheckError();
 		}
-		if (depth) {
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, dynamic_cast<TextureOpenGL&>(*depth).getNativeId(), 0);
+		if (depthStencilBuffer) {
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, dynamic_cast<TextureOpenGL&>(*depthStencilBuffer).getNativeId(), 0);
 			glCheckError();
 		}
 

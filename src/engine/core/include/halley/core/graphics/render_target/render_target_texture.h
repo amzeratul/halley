@@ -20,10 +20,13 @@ namespace Halley
 		void setViewPort(Rect4i viewPort);
 		void resetViewPort();
 
+		bool hasColourBuffer(int attachmentNumber) const override;
+		bool hasDepthBuffer() const override;
+	
 	protected:
-		Vector<std::shared_ptr<Texture>> attachments;
-		std::shared_ptr<Texture> depth;
-		bool dirty = false;
+		Vector<std::shared_ptr<Texture>> colourBuffer;
+		std::shared_ptr<Texture> depthStencilBuffer;
 		std::optional<Rect4i> viewPort;
+		bool dirty = false;
 	};
 }

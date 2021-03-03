@@ -22,7 +22,7 @@ bool DX11ScreenRenderTarget::getViewportFlipVertical() const
 void DX11ScreenRenderTarget::onBind(Painter& painter)
 {
 	auto& swapChain = video.getSwapChain();
-	auto renderTarget = swapChain.getRenderTargetView();
+	auto* renderTarget = swapChain.getRenderTargetView();
 	video.getDeviceContext().OMSetRenderTargets(1, &renderTarget, swapChain.getDepthStencilView());
 }
 

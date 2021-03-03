@@ -53,17 +53,18 @@ namespace Halley {
 		void startRender();
 		void prepareRender(VideoAPI& video, Vector2i targetSize);
 		void prepareInputPin(InputPin& pin, VideoAPI& video, Vector2i targetSize);
+		void allocateTextures(VideoAPI& video);
+		
 		void render(const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue);
 		void notifyOutputs(std::vector<RenderGraphNode*>& renderQueue);
 
-		void setRCSinkMethod();
 		void resetMethod();
 
 		void resetTextures();
 		int8_t makeTexture(VideoAPI& video, PinType type);
 
 		void initializeRenderTarget(VideoAPI& video);
-		void prepareRenderTarget();
+		void prepareRenderTargetInputs();
 		
 		void renderNode(const RenderContext& rc);
 		void renderNodePaintMethod(const RenderContext& rc);
@@ -81,7 +82,8 @@ namespace Halley {
 		std::optional<uint8_t> stencilClear;
 		
 		bool activeInCurrentPass = false;
-		bool rcSinkMethod = false;
+		bool ownRenderTarget = false;
+		bool passThrough = false;
 		int depsLeft = 0;
 		Vector2i currentSize;
 

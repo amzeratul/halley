@@ -26,6 +26,7 @@ RenderGraphNode::RenderGraphNode(gsl::span<const PinType> input, gsl::span<const
 void RenderGraphNode::startRender()
 {
 	activeInCurrentPass = false;
+	passThrough = false;
 	depsLeft = 0;
 }
 
@@ -57,13 +58,20 @@ void RenderGraphNode::prepareInputPin(InputPin& input, VideoAPI& video, Vector2i
 				throw Exception("Mismatched target sizes", HalleyExceptions::Graphics);
 			}
 		} else {
-			// TODO: scaling
 			input.other.node->prepareRender(video, targetSize);
 		}
-	} else if (input.type != PinType::Texture) {
-		// Not connected, assign texture
-		if (input.textureId == -1) {
-			input.textureId = makeTexture(video, input.type);
+	}
+}
+
+void RenderGraphNode::allocateTextures(VideoAPI& video)
+{
+	if (activeInCurrentPass && !passThrough) {
+		for (auto& input: inputPins) {
+			if (!input.other.node && input.type != PinType::Texture) {
+				if (input.textureId == -1) {
+					input.textureId = makeTexture(video, input.type);
+				}
+			}
 		}
 	}
 }
@@ -97,7 +105,7 @@ int8_t RenderGraphNode::makeTexture(VideoAPI& video, PinType type)
 
 void RenderGraphNode::render(const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue)
 {
-	prepareRenderTarget();
+	prepareRenderTargetInputs();
 	renderNode(rc);
 	notifyOutputs(renderQueue);
 }
@@ -106,9 +114,9 @@ void RenderGraphNode::initializeRenderTarget(VideoAPI& video)
 {
 	// Figure out if we can short-circuit this render context
 	bool hasOutputPinsWithMultipleConnections = false;
-	bool hasNonSinkOutputs = false;
 	bool hasMultipleRenderNodeOutputs = false;
-	const RenderGraphNode* curOutputNode = nullptr;
+	bool allConnectionsAreCompatible = true;
+	RenderGraphNode* curOutputNode = nullptr;
 	for (const auto& outputPin: outputPins) {
 		if (outputPin.others.size() > 1) {
 			hasOutputPinsWithMultipleConnections = true;
@@ -119,32 +127,34 @@ void RenderGraphNode::initializeRenderTarget(VideoAPI& video)
 					hasMultipleRenderNodeOutputs = true;
 				}
 				curOutputNode = otherNode.node;
-				if (!curOutputNode->rcSinkMethod) {
-					hasNonSinkOutputs = true;
+				if (curOutputNode->inputPins.at(otherNode.otherId).type != outputPin.type) {
+					allConnectionsAreCompatible = false;
 				}
 			}
 		}
 	}
-	const bool needsRenderTarget = hasOutputPinsWithMultipleConnections || hasNonSinkOutputs || hasMultipleRenderNodeOutputs;
-
-	// Create/destroy render target as needed
-	if (!!renderTarget != needsRenderTarget) {
+	const bool needsRenderTarget = curOutputNode != nullptr && (hasOutputPinsWithMultipleConnections || hasMultipleRenderNodeOutputs || !allConnectionsAreCompatible);
+	
+	if (needsRenderTarget) {
 		if (!renderTarget) {
 			renderTarget = video.createTextureRenderTarget();
-		} else {
-			renderTarget.reset();
 		}
+	} else if (curOutputNode) {
+		assert(!curOutputNode->passThrough);
+		renderTarget = curOutputNode->renderTarget;
+		curOutputNode->passThrough = true;
 	}
+	ownRenderTarget = needsRenderTarget;
 }
 
-void RenderGraphNode::prepareRenderTarget()
+void RenderGraphNode::prepareRenderTargetInputs()
 {
-	if (renderTarget) {
+	if (renderTarget && !passThrough) {
 		int colourIdx = 0;
 		for (const auto& input: inputPins) {
-			if (input.type == PinType::ColourBuffer) {
+			if (input.type == PinType::ColourBuffer && !renderTarget->hasColourBuffer(colourIdx)) {
 				renderTarget->setTarget(colourIdx++, getInputTexture(input));
-			} else if (input.type == PinType::DepthStencilBuffer) {
+			} else if (input.type == PinType::DepthStencilBuffer && !renderTarget->hasDepthBuffer()) {
 				renderTarget->setDepthTexture(getInputTexture(input));
 			}
 		}
@@ -201,10 +211,10 @@ RenderContext RenderGraphNode::getTargetRenderContext(const RenderContext& rc) c
 
 std::shared_ptr<Texture> RenderGraphNode::getInputTexture(const InputPin& input)
 {
-	if (input.textureId >= 0) {
-		return textures.at(input.textureId);
-	} else if (input.other.node) {
+	if (input.other.node) {
 		return input.other.node->getOutputTexture(input.other.otherId);
+	} else if (input.textureId >= 0) {
+		return textures.at(input.textureId);
 	} else {
 		return {};
 	}
@@ -263,24 +273,17 @@ void RenderGraphNode::setMaterialMethod(std::shared_ptr<Material> material)
 	materialMethod = std::move(material);
 }
 
-void RenderGraphNode::setRCSinkMethod()
-{
-	resetMethod();
-	rcSinkMethod = true;
-}
-
 void RenderGraphNode::resetMethod()
 {
 	materialMethod.reset();
 	paintMethod = {};
-	rcSinkMethod = false;
 }
 
 
 RenderGraph::RenderGraph()
 {
 	RenderGraphNode::PinType pins[] = { RenderGraphNode::PinType::ColourBuffer, RenderGraphNode::PinType::DepthStencilBuffer };
-	addNode(pins, {}).setRCSinkMethod();
+	addNode(pins, {});
 }
 
 RenderGraphNode& RenderGraph::addNode(gsl::span<const RenderGraphNode::PinType> inputPins, gsl::span<const RenderGraphNode::PinType> outputPins)
@@ -301,6 +304,10 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video)
 
 	const auto renderSize = rc.getDefaultRenderTarget().getViewPort().getSize();
 	getRenderContextNode().prepareRender(video, renderSize);
+
+	for (auto& node: nodes) {
+		node->allocateTextures(video);
+	}
 
 	std::vector<RenderGraphNode*> renderQueue;
 	renderQueue.reserve(nodes.size());

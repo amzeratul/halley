@@ -31,6 +31,9 @@ namespace Halley {
 
 		Rect4i getViewPort() const override { return viewPort; }
 
+		bool hasColourBuffer(int attachmentNumber) const override { return true; }
+		bool hasDepthBuffer() const override { return true; }
+	
 	protected:
 		Vector2f size;
 		Rect4i viewPort;

@@ -64,9 +64,9 @@ void DX11TextureRenderTarget::clear()
 
 void DX11TextureRenderTarget::createViews()
 {
-	views.resize(attachments.size());
-	for (size_t i = 0; i < attachments.size(); ++i) {
-		auto& texture = static_cast<DX11Texture&>(*attachments[i]);
+	views.resize(colourBuffer.size());
+	for (size_t i = 0; i < colourBuffer.size(); ++i) {
+		auto& texture = static_cast<DX11Texture&>(*colourBuffer[i]);
 		texture.waitForLoad();
 
 		D3D11_RENDER_TARGET_VIEW_DESC desc;
@@ -80,8 +80,8 @@ void DX11TextureRenderTarget::createViews()
 		}
 	}
 
-	if (depth) {
-		auto& depthTexture = static_cast<DX11Texture&>(*depth);
+	if (depthStencilBuffer) {
+		auto& depthTexture = static_cast<DX11Texture&>(*depthStencilBuffer);
 		depthTexture.waitForLoad();
 
 		D3D11_DEPTH_STENCIL_VIEW_DESC desc;

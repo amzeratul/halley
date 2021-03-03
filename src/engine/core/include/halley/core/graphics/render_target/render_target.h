@@ -39,5 +39,8 @@ namespace Halley {
 		virtual void onUnbind(Painter&) {}
 		virtual void onStartDrawCall(Painter&) {}
 		virtual void onEndDrawCall(Painter&) {}
+
+		virtual bool hasColourBuffer(int attachmentNumber) const = 0;
+		virtual bool hasDepthBuffer() const = 0;
 	};
 }

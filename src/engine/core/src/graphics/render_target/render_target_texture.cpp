@@ -10,32 +10,32 @@ void TextureRenderTarget::setTarget(int attachmentNumber, std::shared_ptr<Textur
 	Expects(attachmentNumber < 8);
 	Expects(tex);
 
-	if (int(attachments.size()) <= attachmentNumber) {
-		attachments.resize(size_t(attachmentNumber) + 1);
+	if (int(colourBuffer.size()) <= attachmentNumber) {
+		colourBuffer.resize(size_t(attachmentNumber) + 1);
 		dirty = true;
 	}
-	if (attachments[attachmentNumber] != tex) {
-		attachments[attachmentNumber] = std::move(tex);
+	if (colourBuffer[attachmentNumber] != tex) {
+		colourBuffer[attachmentNumber] = std::move(tex);
 		dirty = true;
 	}
 }
 
 const std::shared_ptr<Texture>& TextureRenderTarget::getTexture(int attachmentNumber) const
 {
-	return attachments.at(attachmentNumber);
+	return colourBuffer.at(attachmentNumber);
 }
 
 void TextureRenderTarget::setDepthTexture(std::shared_ptr<Texture> tex)
 {
-	if (tex != depth) {
-		depth = std::move(tex);
+	if (tex != depthStencilBuffer) {
+		depthStencilBuffer = std::move(tex);
 		dirty = true;
 	}
 }
 
 const std::shared_ptr<Texture>& TextureRenderTarget::getDepthTexture() const
 {
-	return depth;
+	return depthStencilBuffer;
 }
 
 Rect4i TextureRenderTarget::getViewPort() const
@@ -51,4 +51,14 @@ void TextureRenderTarget::setViewPort(Rect4i vp)
 void TextureRenderTarget::resetViewPort()
 {
 	viewPort = std::optional<Rect4i>();
+}
+
+bool TextureRenderTarget::hasColourBuffer(int attachmentNumber) const
+{
+	return colourBuffer.size() > static_cast<size_t>(attachmentNumber);
+}
+
+bool TextureRenderTarget::hasDepthBuffer() const
+{
+	return !!depthStencilBuffer;
 }
