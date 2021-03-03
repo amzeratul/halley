@@ -4,6 +4,7 @@
 #include "graphics/render_context.h"
 #include "graphics/texture.h"
 #include "graphics/material/material.h"
+#include "graphics/material/material_definition.h"
 #include "graphics/render_target/render_target.h"
 #include "graphics/render_target/render_target_texture.h"
 #include "graphics/sprite/sprite.h"
@@ -215,14 +216,15 @@ void RenderGraphNode::renderNodePaintMethod(const RenderGraph& graph, const Rend
 
 void RenderGraphNode::renderNodeScreenMethod(const RenderContext& rc)
 {
-	int idx = 0;
+	const auto& texs = screenMethod->getDefinition().getTextures();
+	size_t idx = 0;
 	for (auto& input: inputPins) {
 		if (input.type == RenderGraphPinType::Texture) {
-			screenMethod->set("tex" + toString(idx++), getInputTexture(input));
+			screenMethod->set(texs.at(idx++).name, getInputTexture(input));
 		}
 	}
 
-	Camera camera = Camera(Vector2f(currentSize) * 0.5f);
+	const auto camera = Camera(Vector2f(currentSize) * 0.5f);
 	getTargetRenderContext(rc).with(camera).bind([=] (Painter& painter)
 	{
 		const auto& tex = screenMethod->getTexture(0);
