@@ -1,5 +1,7 @@
 #include <halley/file_formats/text_file.h>
 #include "resources/standard_resources.h"
+
+#include "graphics/render_target/render_graph_definition.h"
 #include "resources/resources.h"
 #include "graphics/sprite/animation.h"
 #include "graphics/sprite/sprite_sheet.h"
@@ -37,6 +39,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<VariableTable>();
 	resources.init<Prefab>();
 	resources.init<Scene>();
+	resources.init<RenderGraphDefinition>();
 
 	resources.setFallback<Animation>("missing_image");
 	resources.setFallback<SpriteSheet>("missing_image");

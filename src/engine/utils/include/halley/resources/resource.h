@@ -33,13 +33,14 @@ namespace Halley
 		Shader,
 		Mesh,
 		VariableTable,
+		RenderGraphDefinition,
 		Prefab,
-		Scene
+		Scene,
 	};
 
 	template <>
 	struct EnumNames<ImportAssetType> {
-		constexpr std::array<const char*, 20> operator()() const {
+		constexpr std::array<const char*, 21> operator()() const {
 			return{{
 				"undefined",
 				"skip",
@@ -59,6 +60,7 @@ namespace Halley
 				"shader",
 				"mesh",
 				"variableTable",
+				"renderGraphDefinition",
 				"prefab",
 				"scene"
 			}};
@@ -86,13 +88,14 @@ namespace Halley
 		Mesh,
 		MeshAnimation, // Depends on Mesh
 		VariableTable,
+		RenderGraphDefinition,
 		Prefab,
 		Scene
 	};
 
 	template <>
 	struct EnumNames<AssetType> {
-		constexpr std::array<const char*, 18> operator()() const {
+		constexpr std::array<const char*, 19> operator()() const {
 			return{{
 				"binaryFile",
 				"textFile",
@@ -110,6 +113,7 @@ namespace Halley
 				"mesh",
 				"meshAnimation",
 				"variableTable",
+				"renderGraphDefinition",
 				"prefab",
 				"scene"
 			}};
