@@ -33,7 +33,7 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 			depthClear = pars["depthClear"].asFloat();
 		}
 		if (pars.hasKey("stencilClear")) {
-			depthClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
+			stencilClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
 		}
 		
 		setPinTypes(inputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }});
