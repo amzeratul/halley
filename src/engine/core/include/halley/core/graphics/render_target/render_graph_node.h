@@ -2,6 +2,8 @@
 #include <memory>
 #include <vector>
 
+
+#include "render_graph_definition.h"
 #include "render_graph_pin_type.h"
 #include "graphics/texture_descriptor.h"
 
@@ -17,11 +19,8 @@ namespace Halley {
 		friend class RenderGraph;
 	
 	public:
-		void connectInput(uint8_t inputPin, RenderGraphNode& node, uint8_t outputPin);
-
-		void setPaintMethod(String methodId, String cameraId, std::optional<Colour4f> colourClear, std::optional<float> depthClear, std::optional<uint8_t> stencilClear);
-		void setScreenMethod(std::shared_ptr<Material> material);
-
+		explicit RenderGraphNode(const RenderGraphDefinition::Node& definition);
+		
 	private:
 		struct OtherPin {
 			RenderGraphNode* node = nullptr;
@@ -38,8 +37,8 @@ namespace Halley {
 			RenderGraphPinType type = RenderGraphPinType::Unknown;
 			std::vector<OtherPin> others;
 		};
-		
-		RenderGraphNode(gsl::span<const RenderGraphPinType> inputPins, gsl::span<const RenderGraphPinType> outputPins);
+
+		void connectInput(uint8_t inputPin, RenderGraphNode& node, uint8_t outputPin);
 
 		void startRender();
 		void prepareRender(VideoAPI& video, Vector2i targetSize);
@@ -48,8 +47,6 @@ namespace Halley {
 		
 		void render(const RenderGraph& graph, const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue);
 		void notifyOutputs(std::vector<RenderGraphNode*>& renderQueue);
-
-		void resetMethod();
 
 		void resetTextures();
 		int8_t makeTexture(VideoAPI& video, RenderGraphPinType type);
@@ -65,7 +62,8 @@ namespace Halley {
 		std::shared_ptr<Texture> getInputTexture(const InputPin& input);
 		std::shared_ptr<Texture> getOutputTexture(uint8_t pin);
 
-		String paintMethod;
+		RenderGraphMethod method;
+		String paintId;
 		std::shared_ptr<Material> screenMethod;
 		
 		std::optional<Colour4f> colourClear;

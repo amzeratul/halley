@@ -1,5 +1,7 @@
 #include "graphics/render_target/render_graph_definition.h"
 #include "halley/bytes/byte_serializer.h"
+#include "resources/resources.h"
+#include "graphics/material/material_definition.h"
 
 using namespace Halley;
 
@@ -16,7 +18,7 @@ RenderGraphDefinition::RenderGraphDefinition(const ConfigNode& config)
 RenderGraphDefinition::Node::Node(const ConfigNode& node)
 {
 	id = node["id"].asString();
-	method = node["method"].asString();
+	method = fromString<RenderGraphMethod>(node["method"].asString());
 	methodParameters = ConfigNode(node["methodParameters"]);
 }
 
@@ -76,5 +78,20 @@ std::unique_ptr<RenderGraphDefinition> RenderGraphDefinition::loadResource(Resou
 {
 	auto result = std::make_unique<RenderGraphDefinition>();
 	Deserializer::fromBytes(*result, loader.getStatic()->getSpan());
+	result->loadMaterials(loader.getResources());
 	return result;
+}
+
+void RenderGraphDefinition::loadMaterials(Resources& resources)
+{
+	for (auto& node: nodes) {
+		node.loadMaterials(resources);
+	}
+}
+
+void RenderGraphDefinition::Node::loadMaterials(Resources& resources)
+{
+	if (method == RenderGraphMethod::Screen) {
+		material = resources.get<MaterialDefinition>(methodParameters["material"].asString());
+	}
 }

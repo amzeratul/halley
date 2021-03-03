@@ -5,19 +5,44 @@
 #include "halley/resources/resource_data.h"
 
 namespace Halley {
+	class MaterialDefinition;
+
+	enum class RenderGraphMethod {
+    	None,
+    	Output,
+	    Paint,
+    	Screen
+    };
+
+	template <>
+	struct EnumNames<RenderGraphMethod> {
+		constexpr std::array<const char*, 4> operator()() const {
+			return{{
+				"none",
+				"output",
+				"paint",
+				"screen"
+			}};
+		}
+	};
+	
     class RenderGraphDefinition : public Resource {
     public:
         class Node {
         public:
 	        String id;
-        	String method;
+        	RenderGraphMethod method = RenderGraphMethod::None;
         	ConfigNode methodParameters;
+        	
+        	std::shared_ptr<const MaterialDefinition> material;
 
         	Node() = default;
         	Node(const ConfigNode& node);
 
         	void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);
+
+        	void loadMaterials(Resources& resources);
         };
 
     	class Connection {
@@ -49,5 +74,7 @@ namespace Halley {
     private:
     	std::vector<Node> nodes;
     	std::vector<Connection> connections;
+
+    	void loadMaterials(Resources& resources);
     };
 }

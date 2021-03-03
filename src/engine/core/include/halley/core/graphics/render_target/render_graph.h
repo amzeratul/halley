@@ -25,9 +25,6 @@ namespace Halley {
 		RenderGraph();
 		explicit RenderGraph(std::shared_ptr<const RenderGraphDefinition> graphDefinition);
 		
-		RenderGraphNode& addNode(gsl::span<const RenderGraphPinType> inputPins, gsl::span<const RenderGraphPinType> outputPins);
-		RenderGraphNode& getRenderContextNode();
-
 		void render(const RenderContext& rc, VideoAPI& video);
 
 		const Camera& getCamera(std::string_view id) const;
@@ -42,5 +39,9 @@ namespace Halley {
 		
 		std::map<String, Camera> cameras;
 		std::map<String, PaintMethod> paintMethods;
+
+		void addNode(String id, std::unique_ptr<RenderGraphNode> node);
+		void addOutputNode();
+		RenderGraphNode* getNode(const String& id);
 	};
 }

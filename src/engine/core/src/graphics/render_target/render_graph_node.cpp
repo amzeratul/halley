@@ -10,16 +10,50 @@
 
 using namespace Halley;
 
-RenderGraphNode::RenderGraphNode(gsl::span<const RenderGraphPinType> input, gsl::span<const RenderGraphPinType> output)
+RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
+	: method(definition.method)
 {
-	inputPins.resize(input.size());
-	for (size_t i = 0; i < input.size(); ++i) {
-		inputPins[i].type = input[i];
-	}
+	auto setPinTypes = [] (auto& pins, gsl::span<const RenderGraphPinType> pinTypes)
+	{
+		pins.resize(pinTypes.size());
+		for (size_t i = 0; i < pinTypes.size(); ++i) {
+			pins[i].type = pinTypes[i];
+		}
+	};
+	
+	const auto& pars = definition.methodParameters;
 
-	outputPins.resize(output.size());
-	for (size_t i = 0; i < output.size(); ++i) {
-		outputPins[i].type = output[i];
+	if (method == RenderGraphMethod::Paint) {
+		paintId = pars["paintId"].asString();
+		cameraId = pars["cameraId"].asString();
+		if (pars.hasKey("colourClear")) {
+			colourClear = Colour4f::fromString(pars["colourClear"].asString());
+		}
+		if (pars.hasKey("depthClear")) {
+			depthClear = pars["depthClear"].asFloat();
+		}
+		if (pars.hasKey("stencilClear")) {
+			depthClear = gsl::narrow_cast<uint8_t>(pars["stencilClear"].asInt());
+		}
+		
+		setPinTypes(inputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }});
+		setPinTypes(outputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }});
+	} else if (method == RenderGraphMethod::Screen) {
+		screenMethod = std::make_shared<Material>(definition.material);
+
+		const auto& texs = screenMethod->getTextureUniforms();
+		std::vector<RenderGraphPinType> inputPinTypes;
+		inputPinTypes.reserve(2 + texs.size());
+		inputPinTypes.push_back(RenderGraphPinType::ColourBuffer);
+		inputPinTypes.push_back(RenderGraphPinType::DepthStencilBuffer);
+		for (size_t i = 0; i < texs.size(); ++i) {
+			inputPinTypes.push_back(RenderGraphPinType::Texture);
+		}
+		
+		setPinTypes(inputPins, inputPinTypes);
+		setPinTypes(outputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }});
+	} else if (method == RenderGraphMethod::Output) {
+		setPinTypes(inputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }});
 	}
 }
 
@@ -163,9 +197,9 @@ void RenderGraphNode::prepareRenderTargetInputs()
 
 void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& rc)
 {
-	if (!paintMethod.isEmpty()) {
+	if (method == RenderGraphMethod::Paint) {
 		renderNodePaintMethod(graph, rc);
-	} else if (screenMethod) {
+	} else if (method == RenderGraphMethod::Screen) {
 		renderNodeScreenMethod(rc);
 	}
 }
@@ -175,7 +209,7 @@ void RenderGraphNode::renderNodePaintMethod(const RenderGraph& graph, const Rend
 	getTargetRenderContext(rc).with(graph.getCamera(cameraId)).bind([this, &graph] (Painter& painter)
 	{
 		painter.clear(colourClear, depthClear, stencilClear);
-		graph.getPaintMethod(paintMethod)(painter);
+		graph.getPaintMethod(paintId)(painter);
 	});	
 }
 
@@ -256,26 +290,4 @@ void RenderGraphNode::connectInput(uint8_t inputPin, RenderGraphNode& node, uint
 	
 	input.other = { &node, outputPin };
 	output.others.push_back({ this, inputPin });
-}
-
-void RenderGraphNode::setPaintMethod(String paintMethod, String cameraId, std::optional<Colour4f> colourClear, std::optional<float> depthClear, std::optional<uint8_t> stencilClear)
-{
-	resetMethod();
-	this->paintMethod = std::move(paintMethod);
-	this->cameraId = std::move(cameraId);
-	this->colourClear = colourClear;
-	this->depthClear = depthClear;
-	this->stencilClear = stencilClear;
-}
-
-void RenderGraphNode::setScreenMethod(std::shared_ptr<Material> material)
-{
-	resetMethod();
-	screenMethod = std::move(material);
-}
-
-void RenderGraphNode::resetMethod()
-{
-	screenMethod.reset();
-	paintMethod = {};
 }
