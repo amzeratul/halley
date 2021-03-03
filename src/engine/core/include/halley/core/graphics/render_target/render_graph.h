@@ -5,6 +5,7 @@
 #include "graphics/texture_descriptor.h"
 
 namespace Halley {
+	class Camera;
 	class TextureRenderTarget;
 	class Texture;
 	class RenderTarget;
@@ -28,7 +29,7 @@ namespace Halley {
 		
 		void connectInput(uint8_t inputPin, RenderGraphNode& node, uint8_t outputPin);
 
-		void setPaintMethod(PaintMethod paintMethod, std::optional<Colour4f> colourClear, std::optional<float> depthClear, std::optional<uint8_t> stencilClear);
+		void setPaintMethod(PaintMethod paintMethod, String cameraId, std::optional<Colour4f> colourClear, std::optional<float> depthClear, std::optional<uint8_t> stencilClear);
 		void setMaterialMethod(std::shared_ptr<Material> material);
 
 	private:
@@ -55,7 +56,7 @@ namespace Halley {
 		void prepareInputPin(InputPin& pin, VideoAPI& video, Vector2i targetSize);
 		void allocateTextures(VideoAPI& video);
 		
-		void render(const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue);
+		void render(const RenderGraph& graph, const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue);
 		void notifyOutputs(std::vector<RenderGraphNode*>& renderQueue);
 
 		void resetMethod();
@@ -66,8 +67,8 @@ namespace Halley {
 		void initializeRenderTarget(VideoAPI& video);
 		void prepareRenderTargetInputs();
 		
-		void renderNode(const RenderContext& rc);
-		void renderNodePaintMethod(const RenderContext& rc);
+		void renderNode(const RenderGraph& graph, const RenderContext& rc);
+		void renderNodePaintMethod(const RenderGraph& graph, const RenderContext& rc);
 		void renderNodeMaterialMethod(const RenderContext& rc);
 		RenderContext getTargetRenderContext(const RenderContext& rc) const;
 
@@ -80,6 +81,7 @@ namespace Halley {
 		std::optional<Colour4f> colourClear;
 		std::optional<float> depthClear;
 		std::optional<uint8_t> stencilClear;
+		String cameraId;
 		
 		bool activeInCurrentPass = false;
 		bool ownRenderTarget = false;
@@ -103,7 +105,11 @@ namespace Halley {
 
 		void render(const RenderContext& rc, VideoAPI& video);
 
+		const Camera& getCamera(std::string_view id) const;
+		void setCamera(std::string_view id, const Camera& camera);
+
 	private:
 		std::vector<std::unique_ptr<RenderGraphNode>> nodes;
+		std::map<String, Camera> cameras;
 	};
 }

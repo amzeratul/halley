@@ -87,29 +87,6 @@ void RenderGraphNode::resetTextures()
 	}
 }
 
-int8_t RenderGraphNode::makeTexture(VideoAPI& video, PinType type)
-{
-	Expects (type == PinType::ColourBuffer || type == PinType::DepthStencilBuffer);
-	
-	const int8_t result = gsl::narrow_cast<int8_t>(textures.size());
-	auto& texture = textures.emplace_back(video.createTexture(currentSize));
-
-	auto desc = TextureDescriptor(currentSize, type == PinType::ColourBuffer ? TextureFormat::RGBA : TextureFormat::Depth);
-	desc.isRenderTarget = true;
-	desc.isDepthStencil = type == PinType::DepthStencilBuffer;
-	desc.useFiltering = false; // TODO: allow filtering
-	texture->load(std::move(desc));
-
-	return result;
-}
-
-void RenderGraphNode::render(const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue)
-{
-	prepareRenderTargetInputs();
-	renderNode(rc);
-	notifyOutputs(renderQueue);
-}
-
 void RenderGraphNode::initializeRenderTarget(VideoAPI& video)
 {
 	// Figure out if we can short-circuit this render context
@@ -147,6 +124,29 @@ void RenderGraphNode::initializeRenderTarget(VideoAPI& video)
 	ownRenderTarget = needsRenderTarget;
 }
 
+int8_t RenderGraphNode::makeTexture(VideoAPI& video, PinType type)
+{
+	Expects (type == PinType::ColourBuffer || type == PinType::DepthStencilBuffer);
+	
+	const int8_t result = gsl::narrow_cast<int8_t>(textures.size());
+	auto& texture = textures.emplace_back(video.createTexture(currentSize));
+
+	auto desc = TextureDescriptor(currentSize, type == PinType::ColourBuffer ? TextureFormat::RGBA : TextureFormat::Depth);
+	desc.isRenderTarget = true;
+	desc.isDepthStencil = type == PinType::DepthStencilBuffer;
+	desc.useFiltering = false; // TODO: allow filtering
+	texture->load(std::move(desc));
+
+	return result;
+}
+
+void RenderGraphNode::render(const RenderGraph& graph, const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue)
+{
+	prepareRenderTargetInputs();
+	renderNode(graph, rc);
+	notifyOutputs(renderQueue);
+}
+
 void RenderGraphNode::prepareRenderTargetInputs()
 {
 	if (renderTarget && !passThrough) {
@@ -161,18 +161,18 @@ void RenderGraphNode::prepareRenderTargetInputs()
 	}
 }
 
-void RenderGraphNode::renderNode(const RenderContext& rc)
+void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& rc)
 {
 	if (paintMethod) {
-		renderNodePaintMethod(rc);
+		renderNodePaintMethod(graph, rc);
 	} else if (materialMethod) {
 		renderNodeMaterialMethod(rc);
 	}
 }
 
-void RenderGraphNode::renderNodePaintMethod(const RenderContext& rc)
+void RenderGraphNode::renderNodePaintMethod(const RenderGraph& graph, const RenderContext& rc)
 {
-	getTargetRenderContext(rc).bind([=] (Painter& painter)
+	getTargetRenderContext(rc).with(graph.getCamera(cameraId)).bind([=] (Painter& painter)
 	{
 		painter.clear(colourClear, depthClear, stencilClear);
 		paintMethod(painter);
@@ -258,10 +258,11 @@ void RenderGraphNode::connectInput(uint8_t inputPin, RenderGraphNode& node, uint
 	output.others.push_back({ this, inputPin });
 }
 
-void RenderGraphNode::setPaintMethod(PaintMethod paintMethod, std::optional<Colour4f> colourClear, std::optional<float> depthClear, std::optional<uint8_t> stencilClear)
+void RenderGraphNode::setPaintMethod(PaintMethod paintMethod, String cameraId, std::optional<Colour4f> colourClear, std::optional<float> depthClear, std::optional<uint8_t> stencilClear)
 {
 	resetMethod();
 	this->paintMethod = std::move(paintMethod);
+	this->cameraId = std::move(cameraId);
 	this->colourClear = colourClear;
 	this->depthClear = depthClear;
 	this->stencilClear = stencilClear;
@@ -318,6 +319,16 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video)
 	}
 
 	for (size_t i = 0; i < renderQueue.size(); ++i) {
-		renderQueue[i]->render(rc, renderQueue);
+		renderQueue[i]->render(*this, rc, renderQueue);
 	}
+}
+
+const Camera& RenderGraph::getCamera(std::string_view id) const
+{
+	return cameras.at(id);
+}
+
+void RenderGraph::setCamera(std::string_view id, const Camera& camera)
+{
+	cameras[id] = camera;
 }
