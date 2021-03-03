@@ -39,7 +39,7 @@ namespace Halley
 		void flush();
 
 		Rect4i getViewPort() const { return viewPort; }
-		Camera& getCurrentCamera() const { return *camera; }
+		const Camera& getCurrentCamera() const { return camera; }
 		Rect4f getWorldViewAABB() const;
 
 		virtual void clear(std::optional<Colour> colour, std::optional<float> depth = 1.0f, std::optional<uint8_t> stencil = 0) = 0;
@@ -110,7 +110,7 @@ namespace Halley
 		RenderTarget* activeRenderTarget = nullptr;
 		Matrix4f projection;
 		Rect4i viewPort;
-		Camera* camera = nullptr;
+		Camera camera;
 
 		size_t verticesPending = 0;
 		size_t bytesPending = 0;

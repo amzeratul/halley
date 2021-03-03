@@ -93,6 +93,5 @@ namespace Halley {
 
 		RenderTarget* renderTarget = nullptr;
 		RenderTarget* defaultRenderTarget = nullptr;
-		bool rendering = false;
 	};
 }

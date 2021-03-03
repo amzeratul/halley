@@ -153,7 +153,6 @@ void Camera::updateProjection(bool flipVertical)
 
 RenderTarget& Camera::getActiveRenderTarget() const
 {
-	Expects(rendering);
 	return renderTarget ? *renderTarget : *defaultRenderTarget;
 }
 

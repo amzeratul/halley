@@ -51,7 +51,7 @@ void Painter::endRender()
 {
 	flush();
 	doEndRender();
-	camera = nullptr;
+	camera = Camera();
 	viewPort = Rect4i(0, 0, 0, 0);
 }
 
@@ -62,9 +62,9 @@ void Painter::flush()
 
 Rect4f Painter::getWorldViewAABB() const
 {
-	Vector2f size = Vector2f(viewPort.getSize()) / camera->getZoom();
-	assert(camera->getZAngle().getRadians() == 0); // Camera rotation not accounted by following line
-	auto camPos = camera->getPosition();
+	Vector2f size = Vector2f(viewPort.getSize()) / camera.getZoom();
+	assert(camera.getZAngle().getRadians() == 0); // Camera rotation not accounted by following line
+	auto camPos = camera.getPosition();
 	return Rect4f(Vector2f(camPos.x, camPos.y) - size * 0.5f, size.x, size.y);
 }
 
@@ -397,19 +397,18 @@ void Painter::makeSpaceForPendingIndices(size_t numIndices)
 void Painter::bind(RenderContext& context)
 {
 	// Setup camera
-	camera = &context.getCamera();
-	camera->rendering = true;
-	camera->defaultRenderTarget = &context.getDefaultRenderTarget();
+	camera = context.getCamera();
+	camera.defaultRenderTarget = &context.getDefaultRenderTarget();
 
 	// Set render target
-	activeRenderTarget = &camera->getActiveRenderTarget();
+	activeRenderTarget = &camera.getActiveRenderTarget();
 	if (!activeRenderTarget) {
 		throw Exception("No active render target", HalleyExceptions::Core);
 	}
 	activeRenderTarget->onBind(*this);
 
 	// Set viewport
-	viewPort = camera->getActiveViewPort();
+	viewPort = camera.getActiveViewPort();
 	setViewPort(getRectangleForActiveRenderTarget(viewPort));
 	setClip();
 
@@ -422,7 +421,6 @@ void Painter::unbind(RenderContext& context)
 	flush();
 	activeRenderTarget->onUnbind(*this);
 	activeRenderTarget = nullptr;
-	camera->rendering = false;
 }
 
 void Painter::setRelativeClip(Rect4f rect)
@@ -433,7 +431,7 @@ void Painter::setRelativeClip(Rect4f rect)
 	float y0 = -std::numeric_limits<float>::infinity();
 	float y1 = std::numeric_limits<float>::infinity();
 	for (auto& p: ps) {
-		auto point = camera->worldToScreen(p, Rect4f(viewPort));
+		auto point = camera.worldToScreen(p, Rect4f(viewPort));
 		x0 = std::max(x0, point.x);
 		x1 = std::min(x1, point.x);
 		y0 = std::max(y0, point.y);
@@ -611,12 +609,12 @@ void Painter::generateQuadIndicesOffset(IndexType pos, IndexType lineStride, Ind
 
 void Painter::updateProjection()
 {
-	camera->updateProjection(activeRenderTarget->getProjectionFlipVertical());
-	projection = camera->getProjection();
+	camera.updateProjection(activeRenderTarget->getProjectionFlipVertical());
+	projection = camera.getProjection();
 
 	const auto oldHash = halleyGlobalMaterial->getHash();
 	halleyGlobalMaterial->set("u_mvp", projection);
-	halleyGlobalMaterial->set("u_viewPortSize", Vector2f(camera->getActiveViewPort().getSize()));
+	halleyGlobalMaterial->set("u_viewPortSize", Vector2f(camera.getActiveViewPort().getSize()));
 	if (oldHash != halleyGlobalMaterial->getHash()) {
 		onUpdateProjection(*halleyGlobalMaterial);
 	}

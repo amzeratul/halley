@@ -3,7 +3,7 @@
 
 using namespace Halley;
 
-RenderContext::RenderContext(Painter& painter, Camera& camera, RenderTarget& renderTarget)
+RenderContext::RenderContext(Painter& painter, const Camera& camera, RenderTarget& renderTarget)
 	: painter(painter)
 	, camera(camera)
 	, defaultRenderTarget(renderTarget)
@@ -48,7 +48,7 @@ void RenderContext::popContext()
 	}
 }
 
-RenderContext RenderContext::with(Camera& v) const
+RenderContext RenderContext::with(const Camera& v) const
 {
 	return RenderContext(painter, v, defaultRenderTarget);
 }

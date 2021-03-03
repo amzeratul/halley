@@ -164,7 +164,7 @@ void SpritePainter::draw(int mask, Painter& painter)
 	}
 
 	// View
-	auto& cam = painter.getCurrentCamera();
+	const auto& cam = painter.getCurrentCamera();
 	Rect4f view = cam.getClippingRectangle();
 
 	// Draw!
