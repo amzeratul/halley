@@ -5,7 +5,7 @@
 
 #include "render_graph_definition.h"
 #include "render_graph_pin_type.h"
-#include "graphics/texture_descriptor.h"
+#include "halley/core/graphics/texture_descriptor.h"
 
 namespace Halley {
 	class Material;

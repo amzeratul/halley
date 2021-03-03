@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "render_graph_pin_type.h"
-#include "graphics/texture_descriptor.h"
+#include "halley/core/graphics/texture_descriptor.h"
 
 namespace Halley {
 	class RenderGraphDefinition;
