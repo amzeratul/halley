@@ -23,7 +23,7 @@ namespace Halley {
 		using PaintMethod = std::function<void(Painter&)>;
 
 		RenderGraph();
-		RenderGraph(std::shared_ptr<const RenderGraphDefinition> graphDefinition);
+		explicit RenderGraph(std::shared_ptr<const RenderGraphDefinition> graphDefinition);
 		
 		RenderGraphNode& addNode(gsl::span<const RenderGraphPinType> inputPins, gsl::span<const RenderGraphPinType> outputPins);
 		RenderGraphNode& getRenderContextNode();
@@ -38,6 +38,8 @@ namespace Halley {
 
 	private:
 		std::vector<std::unique_ptr<RenderGraphNode>> nodes;
+		std::map<String, RenderGraphNode*> nodeMap;
+		
 		std::map<String, Camera> cameras;
 		std::map<String, PaintMethod> paintMethods;
 	};

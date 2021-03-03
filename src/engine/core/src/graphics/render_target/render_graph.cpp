@@ -14,6 +14,11 @@ RenderGraph::RenderGraph()
 	addNode(pins, {});
 }
 
+RenderGraph::RenderGraph(std::shared_ptr<const RenderGraphDefinition> graphDefinition)
+{
+	
+}
+
 RenderGraphNode& RenderGraph::addNode(gsl::span<const RenderGraphPinType> inputPins, gsl::span<const RenderGraphPinType> outputPins)
 {
 	return *nodes.emplace_back(std::unique_ptr<RenderGraphNode>(new RenderGraphNode(inputPins, outputPins)));
@@ -67,5 +72,5 @@ const RenderGraph::PaintMethod& RenderGraph::getPaintMethod(std::string_view id)
 
 void RenderGraph::setPaintMethod(std::string_view id, PaintMethod method)
 {
-	paintMethods[id] = method;
+	paintMethods[id] = std::move(method);
 }
