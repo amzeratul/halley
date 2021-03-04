@@ -32,6 +32,11 @@ RenderGraphDefinition::Connection::Connection(const ConfigNode& node)
 	toPin = gsl::narrow_cast<uint8_t>(toNode["pin"].asInt());
 }
 
+void RenderGraphDefinition::reload(Resource&& resource)
+{
+	*this = std::move(dynamic_cast<RenderGraphDefinition&>(resource));
+}
+
 void RenderGraphDefinition::serialize(Serializer& s) const
 {
 	s << nodes;

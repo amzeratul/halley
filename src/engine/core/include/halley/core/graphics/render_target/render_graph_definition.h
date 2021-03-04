@@ -61,15 +61,16 @@ namespace Halley {
     	
     	RenderGraphDefinition() = default;
         explicit RenderGraphDefinition(const ConfigNode& config);
-    	
-        static std::unique_ptr<RenderGraphDefinition> loadResource(ResourceLoader& loader);
-		constexpr static AssetType getAssetType() { return AssetType::RenderGraphDefinition; }
-
-		void serialize(Serializer& s) const;
-		void deserialize(Deserializer& s);
 
         gsl::span<const Node> getNodes() const { return nodes; }
     	gsl::span<const Connection> getConnections() const { return connections; }
+    	
+        static std::unique_ptr<RenderGraphDefinition> loadResource(ResourceLoader& loader);
+		constexpr static AssetType getAssetType() { return AssetType::RenderGraphDefinition; }
+    	void reload(Resource&& resource) override;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 
     private:
     	std::vector<Node> nodes;

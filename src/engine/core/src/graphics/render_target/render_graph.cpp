@@ -15,8 +15,19 @@ RenderGraph::RenderGraph()
 	addOutputNode();
 }
 
-RenderGraph::RenderGraph(std::shared_ptr<const RenderGraphDefinition> graphDefinition)
+RenderGraph::RenderGraph(std::shared_ptr<const RenderGraphDefinition> def)
 {
+	loadDefinition(std::move(def));
+}
+
+void RenderGraph::loadDefinition(std::shared_ptr<const RenderGraphDefinition> definition)
+{
+	nodes.clear();
+	nodeMap.clear();
+	
+	graphDefinition = std::move(definition);
+	lastDefinitionVersion = graphDefinition->getAssetVersion();
+	
 	addOutputNode();
 	
 	for (const auto& nodeDefinition: graphDefinition->getNodes()) {
@@ -27,6 +38,14 @@ RenderGraph::RenderGraph(std::shared_ptr<const RenderGraphDefinition> graphDefin
 		auto* to = getNode(connectionDefinition.toId);
 
 		to->connectInput(connectionDefinition.toPin, *from, connectionDefinition.fromPin);
+	}
+}
+
+void RenderGraph::update()
+{
+	// Hot-reload
+	if (graphDefinition && graphDefinition->getAssetVersion() != lastDefinitionVersion) {
+		loadDefinition(graphDefinition);
 	}
 }
 
@@ -54,6 +73,8 @@ RenderGraphNode* RenderGraph::getNode(const String& id)
 
 void RenderGraph::render(const RenderContext& rc, VideoAPI& video)
 {
+	update();
+	
 	for (auto& node: nodes) {
 		node->startRender();
 	}

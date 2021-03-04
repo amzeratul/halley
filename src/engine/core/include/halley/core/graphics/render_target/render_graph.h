@@ -24,7 +24,8 @@ namespace Halley {
 
 		RenderGraph();
 		explicit RenderGraph(std::shared_ptr<const RenderGraphDefinition> graphDefinition);
-		
+
+		void update();
 		void render(const RenderContext& rc, VideoAPI& video);
 
 		const Camera* tryGetCamera(std::string_view id) const;
@@ -44,8 +45,13 @@ namespace Halley {
 		std::map<String, PaintMethod> paintMethods;
 		std::map<String, float> variables;
 
+		std::shared_ptr<const RenderGraphDefinition> graphDefinition;
+		int lastDefinitionVersion = 0;
+
 		void addNode(String id, std::unique_ptr<RenderGraphNode> node);
 		void addOutputNode();
 		RenderGraphNode* getNode(const String& id);
+
+		void loadDefinition(std::shared_ptr<const RenderGraphDefinition> definition);
 	};
 }
