@@ -126,16 +126,13 @@ namespace Halley {
 		template <typename T>
 		explicit ConfigNode(const std::vector<T>& sequence)
 		{
-			SequenceType seq;
-			seq.reserve(sequence.size());
-			for (auto& e: sequence) {
-				if constexpr (HasToConfigNode<T>::value) {
-					seq.push_back(e.toConfigNode());
-				} else {
-					seq.push_back(ConfigNode(e));
-				}
-			}
-			*this = seq;
+			*this = sequence;
+		}
+
+		template <typename K, typename V>
+		explicit ConfigNode(const std::map<K, V>& values)
+		{
+			*this = values;
 		}
 
 		~ConfigNode();
@@ -166,7 +163,7 @@ namespace Halley {
 		{
 			SequenceType seq;
 			seq.reserve(sequence.size());
-			for (auto& e: sequence) {
+			for (const auto& e: sequence) {
 				if constexpr (HasToConfigNode<T>::value) {
 					seq.push_back(e.toConfigNode());
 				} else {
@@ -174,6 +171,22 @@ namespace Halley {
 				}
 			}
 			return *this = seq;
+		}
+
+		template <typename K, typename V>
+		ConfigNode& operator=(const std::map<K, V>& values)
+		{
+			MapType map;
+			for (const auto& [k, v]: values) {
+				String key = toString(k);
+
+				if constexpr (HasToConfigNode<V>::value) {
+					map[std::move(key)] = v.toConfigNode();
+				} else {
+					map[std::move(key)] = ConfigNode(v);
+				}
+			}
+			return *this = map;
 		}
 
 		bool operator==(const ConfigNode& other) const;
@@ -232,6 +245,28 @@ namespace Halley {
 				return asVector<T>();
 			} else {
 				return defaultValue;
+			}
+		}
+
+		template <typename K, typename V>
+		std::map<K, V> asMap() const
+		{
+			if (type == ConfigNodeType::Map) {
+				std::map<K, V> result;
+				for (const auto& [k, v] : asMap()) {
+					const K key = fromString<K>(k);
+					
+					if constexpr (HasConfigNodeConstructor<V>::value) {
+						result[std::move(key)] = V(v);
+					} else {
+						result[std::move(key)] = v.convertTo(Tag<V>());
+					}
+				}
+				return result;
+			} else if (type == ConfigNodeType::Undefined) {
+				return {};
+			} else {
+				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to std::map<K, V>.", HalleyExceptions::Resources);
 			}
 		}
 		

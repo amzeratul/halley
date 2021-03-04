@@ -166,6 +166,7 @@ namespace Halley {
 		bool operator>= (const std::string_view& rhp) const;
 
 		operator std::string_view() const noexcept { return str; }
+		const String& toString() const { return *this; }
 
 	private:
 		Character* getCharPointer(size_t pos);

@@ -125,13 +125,13 @@ String::String(int character)
 
 String::String(float number)
 {
-	*this = toString(number);
+	*this = Halley::toString(number);
 }
 
 
 String::String(double number)
 {
-	*this = toString(number);
+	*this = Halley::toString(number);
 }
 
 String& String::operator=(const char* utf8) {
@@ -527,13 +527,13 @@ String& String::operator += (const wchar_t* p)
 
 String& String::operator += (const double &p)
 {
-	str.append(toString(p));
+	str.append(Halley::toString(p));
 	return *this;
 }
 
 String& String::operator += (const int &p)
 {
-	str.append(toString(p));
+	str.append(Halley::toString(p));
 	return *this;
 }
 
@@ -875,7 +875,7 @@ Halley::String Halley::String::prettySize(long long bytes)
 	}
 	String suffixes[] = { " B", " kB", " MB", " GB", " TB", " PB" };
 	int prec = steps == 0 ? 0 : 2;
-	return toString(double(bytes) / double(div), prec) + suffixes[steps];
+	return Halley::toString(double(bytes) / double(div), prec) + suffixes[steps];
 }
 
 Vector<String> Halley::String::split(char delimiter) const
