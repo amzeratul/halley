@@ -16,7 +16,7 @@ namespace Halley
 	class MaterialTextureParameter;
 	class Texture;
 
-	enum class ShaderParameterType
+	enum class ShaderParameterType : uint8_t
 	{
 		Float,
 		Float2,
@@ -33,7 +33,7 @@ namespace Halley
 		Invalid
 	};
 
-	enum class DepthStencilComparisonFunction
+	enum class DepthStencilComparisonFunction : uint8_t
 	{
 		Never,
 		Less,
@@ -61,7 +61,7 @@ namespace Halley
 		}
 	};
 
-	enum class StencilWriteOperation
+	enum class StencilWriteOperation : uint8_t
 	{
 		Keep,
 		Zero,
@@ -89,7 +89,7 @@ namespace Halley
 		}
 	};
 
-	enum class CullingMode
+	enum class CullingMode : uint8_t
 	{
 		None,
 		Front,
@@ -236,23 +236,27 @@ namespace Halley
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
-		bool isDepthTestEnabled() const;
-		bool isDepthWriteEnabled() const;
-		bool isStencilTestEnabled() const;
+		bool isDepthTestEnabled() const { return enableDepthTest; }
+		bool isDepthWriteEnabled() const { return enableDepthWrite; }
+		bool isStencilTestEnabled() const { return enableStencilTest; }
 
-		int getStencilReference() const;
-		int getStencilWriteMask() const;
-		int getStencilReadMask() const;
+		uint8_t getStencilReference() const { return stencilReference; }
+		uint8_t getStencilWriteMask() const { return stencilWriteMask; }
+		uint8_t getStencilReadMask() const { return stencilReadMask; } 
 
-		DepthStencilComparisonFunction getDepthComparisonFunction() const;
-		DepthStencilComparisonFunction getStencilComparisonFunction() const;
+		DepthStencilComparisonFunction getDepthComparisonFunction() const { return depthComparison; }
+		DepthStencilComparisonFunction getStencilComparisonFunction() const { return stencilComparison; }
 
-		StencilWriteOperation getStencilOpPass() const;
-		StencilWriteOperation getStencilOpDepthFail() const;
-		StencilWriteOperation getStencilOpStencilFail() const;
+		StencilWriteOperation getStencilOpPass() const { return stencilOpPass; }
+		StencilWriteOperation getStencilOpDepthFail() const { return stencilOpDepthFail; }
+		StencilWriteOperation getStencilOpStencilFail() const { return stencilOpStencilFail; }
+
+		void setStencilReference(uint8_t value);
 
 		bool operator==(const MaterialDepthStencil& other) const;
 		bool operator!=(const MaterialDepthStencil& other) const;
+
+		uint64_t getHash() const;
 
 	private:
 		DepthStencilComparisonFunction depthComparison = DepthStencilComparisonFunction::Always;
@@ -262,9 +266,9 @@ namespace Halley
 		StencilWriteOperation stencilOpDepthFail = StencilWriteOperation::Keep;
 		StencilWriteOperation stencilOpStencilFail = StencilWriteOperation::Keep;
 
-		int stencilReference = 0;
-		int stencilWriteMask = 0xFF;
-		int stencilReadMask = 0xFF;
+		uint8_t stencilReference = 0;
+		uint8_t stencilWriteMask = 0xFF;
+		uint8_t stencilReadMask = 0xFF;
 
 		bool enableDepthTest = false;
 		bool enableDepthWrite = false;
@@ -300,4 +304,17 @@ namespace Halley
 		
 		String shaderAssetId;
 	};
+}
+
+namespace std
+{
+    template<>
+	struct hash<Halley::MaterialDepthStencil> {
+        std::size_t operator()(Halley::MaterialDepthStencil const& v) const noexcept
+        {
+        	const auto result = v.getHash();
+        	static_assert(sizeof(result) == sizeof(std::size_t));
+        	return static_cast<std::size_t>(result);
+        }
+    };
 }

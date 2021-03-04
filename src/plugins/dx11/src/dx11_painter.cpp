@@ -69,7 +69,7 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 
 	// Raster and depthStencil
 	setRasterizer(pass);
-	setDepthStencil(pass);
+	setDepthStencil(material.getDepthStencil(passN));
 
 	// Shader
 	auto& shader = static_cast<DX11Shader&>(pass.getShader());
@@ -226,10 +226,23 @@ void DX11Painter::setRasterizer(const DX11RasterizerOptions& options)
 	}
 }
 
-void DX11Painter::setDepthStencil(const MaterialPass& pass)
+DX11DepthStencil& DX11Painter::getDepthStencil(const MaterialDepthStencil& depthStencilDefinition)
 {
-	if (!depthStencil || depthStencil->getDefinition() != pass.getDepthStencil()) {
-		depthStencil = std::make_unique<DX11DepthStencil>(video, pass.getDepthStencil());
-		depthStencil->bind();
+	const auto iter = depthStencils.find(depthStencilDefinition);
+	if (iter == depthStencils.end()) {
+		auto depthStencil = std::make_unique<DX11DepthStencil>(video, depthStencilDefinition);
+		const auto result = depthStencil.get();
+		depthStencils[depthStencilDefinition] = std::move(depthStencil);
+		return *result;
+	}
+	
+	return *iter->second;
+}
+
+void DX11Painter::setDepthStencil(const MaterialDepthStencil& depthStencilDefinition)
+{
+	if (!curDepthStencil || curDepthStencil->getDefinition() != depthStencilDefinition) {
+		curDepthStencil = &getDepthStencil(depthStencilDefinition);
+		curDepthStencil->bind();
 	}
 }

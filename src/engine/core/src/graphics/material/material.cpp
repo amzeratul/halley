@@ -355,6 +355,17 @@ bool Material::isPassEnabled(int pass) const
 	return passEnabled[p];
 }
 
+MaterialDepthStencil Material::getDepthStencil(int pass) const
+{
+	if (stencilReferenceOverride) {
+		auto depthStencil = getDefinition().getPass(pass).getDepthStencil();
+		depthStencil.setStencilReference(stencilReferenceOverride.value());
+		return depthStencil;
+	} else {
+		return getDefinition().getPass(pass).getDepthStencil();
+	}
+}
+
 const Vector<MaterialTextureParameter>& Material::getTextureUniforms() const
 {
 	return textureUniforms;

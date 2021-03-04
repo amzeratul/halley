@@ -14,7 +14,7 @@ namespace Halley
 	class VideoAPIInternal;
 	class Material;
 	class MaterialPass;
-	enum class ShaderParameterType;
+	enum class ShaderParameterType : uint8_t;
 
 	class MaterialTextureParameter
 	{

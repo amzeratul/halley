@@ -40,13 +40,14 @@ namespace Halley
 
 		std::vector<DX11Buffer> vertexBuffers;
 		std::vector<DX11Buffer> indexBuffers;
-		ID3D11InputLayout* layout;
+		ID3D11InputLayout* layout = nullptr;
 		std::map<BlendType, DX11Blend> blendModes;
 
 		std::map<DX11RasterizerOptions, std::unique_ptr<DX11Rasterizer>> rasterizers;
 		DX11Rasterizer* curRaster = nullptr;
 
-		std::unique_ptr<DX11DepthStencil> depthStencil;
+		std::unordered_map<MaterialDepthStencil, std::unique_ptr<DX11DepthStencil>> depthStencils;
+		DX11DepthStencil* curDepthStencil = nullptr;
 
 		size_t curBuffer = 0;
 		std::optional<Rect4i> clipping;
@@ -58,6 +59,7 @@ namespace Halley
 		void setRasterizer(const MaterialPass& pass);
 		void setRasterizer(const DX11RasterizerOptions& options);
 
-		void setDepthStencil(const MaterialPass& pass);
+		DX11DepthStencil& getDepthStencil(const MaterialDepthStencil& depthStencil);
+		void setDepthStencil(const MaterialDepthStencil& depthStencil);
 	};
 }

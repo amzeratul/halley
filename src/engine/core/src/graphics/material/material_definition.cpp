@@ -424,59 +424,9 @@ void MaterialDepthStencil::deserialize(Deserializer& s)
 	s >> stencilOpStencilFail;
 }
 
-bool MaterialDepthStencil::isDepthTestEnabled() const
+void MaterialDepthStencil::setStencilReference(uint8_t value)
 {
-	return enableDepthTest;
-}
-
-bool MaterialDepthStencil::isDepthWriteEnabled() const
-{
-	return enableDepthWrite;
-}
-
-bool MaterialDepthStencil::isStencilTestEnabled() const
-{
-	return enableStencilTest;
-}
-
-int MaterialDepthStencil::getStencilReference() const
-{
-	return stencilReference;
-}
-
-int MaterialDepthStencil::getStencilWriteMask() const
-{
-	return stencilWriteMask;
-}
-
-int MaterialDepthStencil::getStencilReadMask() const
-{
-	return stencilReadMask;
-}
-
-DepthStencilComparisonFunction MaterialDepthStencil::getDepthComparisonFunction() const
-{
-	return depthComparison;
-}
-
-DepthStencilComparisonFunction MaterialDepthStencil::getStencilComparisonFunction() const
-{
-	return stencilComparison;
-}
-
-StencilWriteOperation MaterialDepthStencil::getStencilOpPass() const
-{
-	return stencilOpPass;
-}
-
-StencilWriteOperation MaterialDepthStencil::getStencilOpDepthFail() const
-{
-	return stencilOpDepthFail;
-}
-
-StencilWriteOperation MaterialDepthStencil::getStencilOpStencilFail() const
-{
-	return stencilOpStencilFail;
+	stencilReference = value;
 }
 
 bool MaterialDepthStencil::operator==(const MaterialDepthStencil& other) const
@@ -507,6 +457,44 @@ bool MaterialDepthStencil::operator!=(const MaterialDepthStencil& other) const
 		|| enableDepthTest != other.enableDepthTest
 		|| enableDepthWrite != other.enableDepthWrite
 		|| enableStencilTest != other.enableStencilTest;
+}
+
+uint64_t MaterialDepthStencil::getHash() const
+{
+	union {
+		uint64_t hash;
+		struct {
+			uint8_t dc : 4;
+			uint8_t sc : 4;
+			uint8_t sop : 4;
+			uint8_t sodf : 4;
+			uint8_t sosf : 4;
+			uint8_t edt : 1;
+			uint8_t edw : 1;
+			uint8_t est : 1;
+			uint8_t sr;
+			uint8_t swm;
+			uint8_t srm;
+		};
+	} v;
+	v.hash = 0;
+
+	v.dc = static_cast<uint8_t>(depthComparison);
+	v.sc = static_cast<uint8_t>(stencilComparison);
+
+	v.sop = static_cast<uint8_t>(stencilOpPass);
+	v.sodf = static_cast<uint8_t>(stencilOpDepthFail);
+	v.sosf = static_cast<uint8_t>(stencilOpStencilFail);
+
+	v.sr = stencilReference;
+	v.swm = stencilWriteMask;
+	v.srm = stencilReadMask;
+
+	v.edt = enableDepthTest;
+	v.edw = enableDepthWrite;
+	v.est = enableStencilTest;
+
+	return v.hash;
 }
 
 

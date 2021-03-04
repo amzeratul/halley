@@ -8,10 +8,11 @@
 
 namespace Halley
 {
+	class MaterialDepthStencil;
 	enum class ShaderType;
 	class MaterialDataBlock;
 	class Material;
-	enum class ShaderParameterType;
+	enum class ShaderParameterType : uint8_t;
 	class Painter;
 	class MaterialDefinition;
 	class MaterialParameter;
@@ -95,6 +96,8 @@ namespace Halley
 		void setPassEnabled(int pass, bool enabled);
 		bool isPassEnabled(int pass) const;
 
+		MaterialDepthStencil getDepthStencil(int pass) const;
+
 		Material& set(const String& name, const std::shared_ptr<const Texture>& texture);
 		Material& set(const String& name, const std::shared_ptr<Texture>& texture);
 
@@ -121,6 +124,8 @@ namespace Halley
 		mutable uint64_t hashValue = 0;
 		mutable bool needToUpdateHash = true;
 		bool needToUploadData = true;
+
+		std::optional<uint8_t> stencilReferenceOverride;
 
 		void initUniforms(bool forceLocalBlocks);
 		MaterialParameter& getParameter(const String& name);
