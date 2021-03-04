@@ -3,6 +3,7 @@
 #include "audio_engine.h"
 #include <algorithm>
 #include "behaviours/audio_voice_fade_behaviour.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -82,7 +83,12 @@ void AudioHandleImpl::addBehaviour(std::unique_ptr<AudioVoiceBehaviour> b)
 	BadPointer<AudioVoiceBehaviour> behaviour = b.release();
 	enqueue([behaviour] (AudioVoice& src) mutable
 	{
-		src.addBehaviour(std::unique_ptr<AudioVoiceBehaviour>(behaviour.release()));
+		auto b = std::unique_ptr<AudioVoiceBehaviour>(behaviour.release());
+		if (b) {
+			src.addBehaviour(std::move(b));
+		} else {
+			Logger::logWarning("AudioVoiceBehaviour lost since event has more than one voice.");
+		}
 	});
 }
 
