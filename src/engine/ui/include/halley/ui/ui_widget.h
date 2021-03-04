@@ -56,7 +56,7 @@ namespace Halley {
 		virtual std::optional<UISizer>& tryGetSizer();
 		virtual UISizer& getSizer();
 
-		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill) override;
+		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f()) override;
 		void addSpacer(float size) override;
 		void addStretchSpacer(float proportion = 0) override;
 		void remove(IUIElement& element) override;
@@ -65,7 +65,7 @@ namespace Halley {
 
 		virtual bool canInteractWithMouse() const;
 		virtual bool isFocusLocked() const;
-		bool isMouseOver() const;
+		virtual bool isMouseOver() const;
 		bool isFocused() const;
 		void focus();
 

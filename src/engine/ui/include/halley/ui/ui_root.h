@@ -67,6 +67,8 @@ namespace Halley {
 
 		void makeToolTip(const UIStyle& style);
 
+		Vector2f getLastMousePos() const;
+		
 	private:
 		String id;
 		std::shared_ptr<InputKeyboard> keyboard;

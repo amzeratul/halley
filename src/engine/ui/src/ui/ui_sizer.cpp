@@ -7,11 +7,12 @@ UISizerEntry::UISizerEntry()
 {
 }
 
-UISizerEntry::UISizerEntry(UIElementPtr widget, float proportion, Vector4f border, int fillFlags)
+UISizerEntry::UISizerEntry(UIElementPtr widget, float proportion, Vector4f border, int fillFlags, Vector2f position)
 	: widget(widget)
 	, proportion(proportion)
 	, border(border)
 	, fillFlags(fillFlags)
+	, position(position)
 {
 	updateEnabled();
 }
@@ -31,7 +32,7 @@ void UISizerEntry::placeInside(Rect4f rect, Vector2f minSize)
 	Vector2f cellSize = rect.getSize();
 	Vector2f anchoring;
 	Vector2f size = minSize;
-	
+
 	if (fillFlags & UISizerAlignFlags::Top) {
 		anchoring.y = 0.0f;
 	}
@@ -100,6 +101,11 @@ int UISizerEntry::getFillFlags() const
 	return fillFlags;
 }
 
+Vector2f UISizerEntry::getPosition() const
+{
+	return position;
+}
+
 UISizer::UISizer(UISizerType type, float gap, int nColumns)
 	: type(type)
 	, gap(gap)
@@ -137,6 +143,8 @@ Vector2f UISizer::computeMinimumSize(bool includeProportional) const
 	updateEnabled();
 	if (type == UISizerType::Horizontal || type == UISizerType::Vertical) {
 		return computeMinimumSizeBox(includeProportional);
+	} else if (type == UISizerType::Free) {
+		return computeMinimumSizeBoxFree();
 	} else {
 		return computeMinimumSizeGrid();
 	}
@@ -146,25 +154,27 @@ void UISizer::setRect(Rect4f rect)
 {
 	if (type == UISizerType::Horizontal || type == UISizerType::Vertical) {
 		setRectBox(rect);
+	} else if (type == UISizerType::Free) {
+		setRectBoxFree(rect);
 	} else {
 		setRectGrid(rect);
 	}
 }
 
-void UISizer::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags)
+void UISizer::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, Vector2f position)
 {
-	entries.emplace_back(UISizerEntry(element, proportion, border, fillFlags));
+	entries.emplace_back(UISizerEntry(element, proportion, border, fillFlags, position));
 	reparentEntry(entries.back());
 }
 
 void UISizer::addSpacer(float size)
 {
-	entries.emplace_back(UISizerEntry({}, 0, Vector4f(type == UISizerType::Horizontal ? size : 0.0f, type == UISizerType::Vertical ? size : 0.0f, 0.0f, 0.0f), {}));
+	entries.emplace_back(UISizerEntry({}, 0, Vector4f(type == UISizerType::Horizontal ? size : 0.0f, type == UISizerType::Vertical ? size : 0.0f, 0.0f, 0.0f), {}, {}));
 }
 
 void UISizer::addStretchSpacer(float proportion)
 {
-	entries.emplace_back(UISizerEntry({}, proportion, {}, {}));
+	entries.emplace_back(UISizerEntry({}, proportion, {}, {}, {}));
 }
 
 void UISizer::remove(IUIElement& element)
@@ -343,6 +353,7 @@ Vector2f UISizer::computeMinimumSizeBox(bool includeProportional) const
 	return result;
 }
 
+
 void UISizer::setRectBox(Rect4f rect)
 {
 	Vector2f pos = rect.getTopLeft();
@@ -387,6 +398,48 @@ void UISizer::setRectBox(Rect4f rect)
 		e.placeInside(Rect4f(curPos, curPos + cellSize), minSize);
 
 		pos[mainAxis] += cellSize[mainAxis] + border[mainAxis] + border[mainAxis + 2];
+	}
+}
+
+Vector2f UISizer::computeMinimumSizeBoxFree() const
+{
+	Rect4f rect;
+
+	bool first = true;
+	for (const auto& e : entries) {
+		if (!e.isEnabled()) {
+			continue;
+		}
+
+		const auto size = e.getMinimumSize();
+		const auto position = e.getPosition();
+		auto entryRect = Rect4f(position.x, position.y, size.x, size.y);
+		if (first) {
+			rect = entryRect;
+		}
+		else {
+			rect = rect.merge(entryRect);
+		}
+
+		first = false;
+	}
+
+	return rect.getSize();
+}
+
+void UISizer::setRectBoxFree(Rect4f rect)
+{
+	const auto startPos = rect.getTopLeft();
+
+	for (auto& e : entries) {
+		if (!e.isEnabled()) {
+			continue;
+		}
+		
+		const auto minSize = e.getMinimumSize();
+		const auto cellSize = rect.getSize() - e.getPosition();
+		const auto curPos = startPos + e.getPosition();
+		e.placeInside(Rect4f(curPos, curPos + cellSize), minSize);
 	}
 }
 
