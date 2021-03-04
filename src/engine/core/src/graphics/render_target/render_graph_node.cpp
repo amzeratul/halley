@@ -125,7 +125,7 @@ void RenderGraphNode::resetTextures()
 	renderTarget.reset();
 	for (auto& input: inputPins) {
 		if (input.textureId >= 0) {
-			input.textureId = 0;
+			input.textureId = -1;
 		}
 	}
 }
@@ -215,11 +215,16 @@ void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& 
 
 void RenderGraphNode::renderNodePaintMethod(const RenderGraph& graph, const RenderContext& rc)
 {
-	getTargetRenderContext(rc).with(graph.getCamera(cameraId)).bind([this, &graph] (Painter& painter)
-	{
-		painter.clear(colourClear, depthClear, stencilClear);
-		graph.getPaintMethod(paintId)(painter);
-	});	
+	const auto* camera = graph.tryGetCamera(cameraId);
+	const auto* paintMethod = graph.tryGetPaintMethod(paintId);
+
+	if (camera && paintMethod) {
+		getTargetRenderContext(rc).with(*camera).bind([this, paintMethod] (Painter& painter)
+		{
+			painter.clear(colourClear, depthClear, stencilClear);
+			(*paintMethod)(painter);
+		});
+	}
 }
 
 void RenderGraphNode::renderNodeScreenMethod(const RenderGraph& graph, const RenderContext& rc)

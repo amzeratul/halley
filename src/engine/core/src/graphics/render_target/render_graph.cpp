@@ -79,9 +79,14 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video)
 	}
 }
 
-const Camera& RenderGraph::getCamera(std::string_view id) const
+const Camera* RenderGraph::tryGetCamera(std::string_view id) const
 {
-	return cameras.at(id);
+	const auto iter = cameras.find(id);
+	if (iter != cameras.end()) {
+		return &iter->second;
+	} else {
+		return nullptr;
+	}
 }
 
 void RenderGraph::setCamera(std::string_view id, const Camera& camera)
@@ -89,9 +94,14 @@ void RenderGraph::setCamera(std::string_view id, const Camera& camera)
 	cameras[id] = camera;
 }
 
-const RenderGraph::PaintMethod& RenderGraph::getPaintMethod(std::string_view id) const
+const RenderGraph::PaintMethod* RenderGraph::tryGetPaintMethod(std::string_view id) const
 {
-	return paintMethods.at(id);
+	const auto iter = paintMethods.find(id);
+	if (iter != paintMethods.end()) {
+		return &iter->second;
+	} else {
+		return nullptr;
+	}
 }
 
 void RenderGraph::setPaintMethod(std::string_view id, PaintMethod method)

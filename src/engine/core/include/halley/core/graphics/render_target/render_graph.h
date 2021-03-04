@@ -27,10 +27,10 @@ namespace Halley {
 		
 		void render(const RenderContext& rc, VideoAPI& video);
 
-		const Camera& getCamera(std::string_view id) const;
+		const Camera* tryGetCamera(std::string_view id) const;
 		void setCamera(std::string_view id, const Camera& camera);
 
-		const PaintMethod& getPaintMethod(std::string_view id) const;
+		const PaintMethod* tryGetPaintMethod(std::string_view id) const;
 		void setPaintMethod(std::string_view id, PaintMethod method);
 
 		void applyVariable(Material& material, const String& name, const ConfigNode& value) const;
