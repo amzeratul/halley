@@ -57,7 +57,6 @@ colours:
   toolbarIconSelected: "#000000"
   toolbarText: "#FFFFFF"
 
-
   ui_text: "#000000"
   ui_selectedText: "#000000"
   ui_unselectedText: "#000000"

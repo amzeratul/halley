@@ -33,11 +33,13 @@ colours:
   ui_staticBox: "#FFC6E7"
   ui_staticBoxSubdue: "#F9ACD5"
 
-  ui_debugConsole: "#DD6CB6C0"
+  ui_debugConsole: "#F08CA2C0"
 
   ui_selectedTextAlt: "#9C2E94"
   ui_unselectedTextAlt: "#9C2E94"
   ui_disabledTextAlt: "#774077"
+
+  ui_logWarningText: "#FFCD86"
 
 backgroundParticles:
   particles:
