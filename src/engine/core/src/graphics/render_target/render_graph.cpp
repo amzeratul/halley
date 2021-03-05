@@ -84,10 +84,10 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video)
 	outputNode->prepareDependencyGraph(video, renderSize);
 
 	for (auto& node: nodes) {
-		node->initializeRenderTarget(video);
+		node->determineIfNeedsRenderTarget();
 	}
 	for (auto& node: nodes) {
-		node->allocateTextures(video);
+		node->allocateVideoResources(video);
 	}
 
 	std::vector<RenderGraphNode*> renderQueue;

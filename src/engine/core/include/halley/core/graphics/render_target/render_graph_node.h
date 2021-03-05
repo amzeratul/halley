@@ -48,7 +48,7 @@ namespace Halley {
 		void startRender();
 		void prepareDependencyGraph(VideoAPI& video, Vector2i targetSize);
 		void prepareInputPin(InputPin& pin, VideoAPI& video, Vector2i targetSize);
-		void allocateTextures(VideoAPI& video);
+		void allocateVideoResources(VideoAPI& video);
 		
 		void render(const RenderGraph& graph, const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue);
 		void notifyOutputs(std::vector<RenderGraphNode*>& renderQueue);
@@ -56,8 +56,7 @@ namespace Halley {
 		void resetTextures();
 		int8_t makeTexture(VideoAPI& video, RenderGraphPinType type);
 
-		void initializeRenderTarget(VideoAPI& video);
-		void prepareRenderTargetInputs();
+		void determineIfNeedsRenderTarget();
 		
 		void renderNode(const RenderGraph& graph, const RenderContext& rc);
 		void renderNodePaintMethod(const RenderGraph& graph, const RenderContext& rc);
@@ -89,5 +88,6 @@ namespace Halley {
 
 		std::shared_ptr<TextureRenderTarget> renderTarget;
 		std::vector<std::shared_ptr<Texture>> textures;
+		RenderGraphNode* directOutput = nullptr;
 	};
 }

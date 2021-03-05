@@ -70,6 +70,7 @@ void RenderGraphNode::startRender()
 {
 	activeInCurrentPass = false;
 	passThrough = false;
+	ownRenderTarget = false;
 	depsLeft = 0;
 }
 
@@ -104,33 +105,11 @@ void RenderGraphNode::prepareInputPin(InputPin& input, VideoAPI& video, Vector2i
 	}
 }
 
-void RenderGraphNode::allocateTextures(VideoAPI& video)
+void RenderGraphNode::determineIfNeedsRenderTarget()
 {
-	if (activeInCurrentPass && !passThrough) {
-		for (auto& input: inputPins) {
-			if (!input.other.node && input.type != RenderGraphPinType::Texture) {
-				if (input.textureId == -1) {
-					input.textureId = makeTexture(video, input.type);
-				}
-			}
-		}
-	}
-}
-
-void RenderGraphNode::resetTextures()
-{
-	textures.clear();
-	renderTarget.reset();
-	for (auto& input: inputPins) {
-		if (input.textureId >= 0) {
-			input.textureId = -1;
-		}
-	}
-}
-
-void RenderGraphNode::initializeRenderTarget(VideoAPI& video)
-{
+	directOutput = nullptr;
 	if (!activeInCurrentPass) {
+		ownRenderTarget = false;
 		return;
 	}
 	
@@ -159,18 +138,57 @@ void RenderGraphNode::initializeRenderTarget(VideoAPI& video)
 			hasOutputPinsWithMultipleConnections = true;
 		}
 	}
-	const bool needsRenderTarget = curOutputNode != nullptr && (hasOutputPinsWithMultipleConnections || hasMultipleRenderNodeOutputs || !allConnectionsAreCompatible);
+	ownRenderTarget = hasOutputPinsWithMultipleConnections || hasMultipleRenderNodeOutputs || !allConnectionsAreCompatible;
+	if (!ownRenderTarget && curOutputNode) {
+		assert(!curOutputNode->passThrough);
+		directOutput = curOutputNode;
+		directOutput->passThrough = true;
+	}
+}
+
+void RenderGraphNode::allocateVideoResources(VideoAPI& video)
+{
+	if (!activeInCurrentPass) {
+		return;
+	}
 	
-	if (needsRenderTarget) {
+	if (ownRenderTarget) {
 		if (!renderTarget) {
 			renderTarget = video.createTextureRenderTarget();
 		}
-	} else if (curOutputNode) {
-		assert(!curOutputNode->passThrough);
-		renderTarget = curOutputNode->renderTarget;
-		curOutputNode->passThrough = true;
+	} else {
+		if (directOutput) {
+			renderTarget = directOutput->renderTarget;
+		}
 	}
-	ownRenderTarget = needsRenderTarget;
+
+	if (renderTarget && !passThrough) {
+		int colourIdx = 0;
+		for (auto& input: inputPins) {
+			if (!input.other.node && input.type != RenderGraphPinType::Texture) {
+				if (input.textureId == -1) {
+					input.textureId = makeTexture(video, input.type);
+				}
+			}
+			
+			if (input.type == RenderGraphPinType::ColourBuffer && !renderTarget->hasColourBuffer(colourIdx)) {
+				renderTarget->setTarget(colourIdx++, getInputTexture(input));
+			} else if (input.type == RenderGraphPinType::DepthStencilBuffer && !renderTarget->hasDepthBuffer()) {
+				renderTarget->setDepthTexture(getInputTexture(input));
+			}
+		}
+	}
+}
+
+void RenderGraphNode::resetTextures()
+{
+	textures.clear();
+	renderTarget.reset();
+	for (auto& input: inputPins) {
+		if (input.textureId >= 0) {
+			input.textureId = -1;
+		}
+	}
 }
 
 int8_t RenderGraphNode::makeTexture(VideoAPI& video, RenderGraphPinType type)
@@ -191,23 +209,8 @@ int8_t RenderGraphNode::makeTexture(VideoAPI& video, RenderGraphPinType type)
 
 void RenderGraphNode::render(const RenderGraph& graph, const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue)
 {
-	prepareRenderTargetInputs();
 	renderNode(graph, rc);
 	notifyOutputs(renderQueue);
-}
-
-void RenderGraphNode::prepareRenderTargetInputs()
-{
-	if (renderTarget && !passThrough) {
-		int colourIdx = 0;
-		for (const auto& input: inputPins) {
-			if (input.type == RenderGraphPinType::ColourBuffer && !renderTarget->hasColourBuffer(colourIdx)) {
-				renderTarget->setTarget(colourIdx++, getInputTexture(input));
-			} else if (input.type == RenderGraphPinType::DepthStencilBuffer && !renderTarget->hasDepthBuffer()) {
-				renderTarget->setDepthTexture(getInputTexture(input));
-			}
-		}
-	}
 }
 
 void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& rc)
