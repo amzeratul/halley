@@ -366,6 +366,16 @@ MaterialDepthStencil Material::getDepthStencil(int pass) const
 	}
 }
 
+void Material::setStencilReferenceOverride(std::optional<uint8_t> reference)
+{
+	stencilReferenceOverride = reference;
+}
+
+std::optional<uint8_t> Material::getStencilReferenceOverride() const
+{
+	return stencilReferenceOverride;
+}
+
 const Vector<MaterialTextureParameter>& Material::getTextureUniforms() const
 {
 	return textureUniforms;

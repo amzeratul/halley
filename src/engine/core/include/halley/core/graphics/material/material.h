@@ -97,6 +97,8 @@ namespace Halley
 		bool isPassEnabled(int pass) const;
 
 		MaterialDepthStencil getDepthStencil(int pass) const;
+		void setStencilReferenceOverride(std::optional<uint8_t> reference);
+		std::optional<uint8_t> getStencilReferenceOverride() const;
 
 		Material& set(const String& name, const std::shared_ptr<const Texture>& texture);
 		Material& set(const String& name, const std::shared_ptr<Texture>& texture);
