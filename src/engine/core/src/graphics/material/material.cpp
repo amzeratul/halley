@@ -308,6 +308,9 @@ uint64_t Material::computeHash() const
 		hasher.feedBytes(dataBlock.getData());
 	}
 
+	hasher.feed(stencilReferenceOverride.has_value());
+	hasher.feed(stencilReferenceOverride.value_or(0));
+
 	hasher.feedBytes(gsl::as_bytes(gsl::span<const bool>(passEnabled.data(), passEnabled.size())));
 
 	return hasher.digest();
