@@ -73,7 +73,7 @@ void RenderGraphNode::startRender()
 	depsLeft = 0;
 }
 
-void RenderGraphNode::prepareRender(VideoAPI& video, Vector2i targetSize)
+void RenderGraphNode::prepareDependencyGraph(VideoAPI& video, Vector2i targetSize)
 {
 	activeInCurrentPass = true;
 	
@@ -82,8 +82,6 @@ void RenderGraphNode::prepareRender(VideoAPI& video, Vector2i targetSize)
 		currentSize = targetSize;
 		resetTextures();
 	}
-
-	initializeRenderTarget(video);
 
 	for (auto& input: inputPins) {
 		prepareInputPin(input, video, targetSize);
@@ -101,7 +99,7 @@ void RenderGraphNode::prepareInputPin(InputPin& input, VideoAPI& video, Vector2i
 				throw Exception("Mismatched target sizes", HalleyExceptions::Graphics);
 			}
 		} else {
-			input.other.node->prepareRender(video, targetSize);
+			input.other.node->prepareDependencyGraph(video, targetSize);
 		}
 	}
 }
@@ -132,6 +130,10 @@ void RenderGraphNode::resetTextures()
 
 void RenderGraphNode::initializeRenderTarget(VideoAPI& video)
 {
+	if (!activeInCurrentPass) {
+		return;
+	}
+	
 	// Figure out if we can short-circuit this render context
 	bool hasOutputPinsWithMultipleConnections = false;
 	bool hasMultipleRenderNodeOutputs = false;

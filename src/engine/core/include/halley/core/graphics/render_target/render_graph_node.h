@@ -46,7 +46,7 @@ namespace Halley {
 		void connectInput(uint8_t inputPin, RenderGraphNode& node, uint8_t outputPin);
 
 		void startRender();
-		void prepareRender(VideoAPI& video, Vector2i targetSize);
+		void prepareDependencyGraph(VideoAPI& video, Vector2i targetSize);
 		void prepareInputPin(InputPin& pin, VideoAPI& video, Vector2i targetSize);
 		void allocateTextures(VideoAPI& video);
 		

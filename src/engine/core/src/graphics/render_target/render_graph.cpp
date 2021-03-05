@@ -81,8 +81,11 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video)
 
 	const auto renderSize = rc.getDefaultRenderTarget().getViewPort().getSize();
 	auto* outputNode = getNode("output");
-	outputNode->prepareRender(video, renderSize);
+	outputNode->prepareDependencyGraph(video, renderSize);
 
+	for (auto& node: nodes) {
+		node->initializeRenderTarget(video);
+	}
 	for (auto& node: nodes) {
 		node->allocateTextures(video);
 	}
