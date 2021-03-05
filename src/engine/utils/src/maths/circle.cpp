@@ -16,6 +16,10 @@ Circle Circle::getSpanningCircle(const std::vector<Vector2f>& points)
 {
 	// TODO: should use Matousek, Sharir, Welzl's algorithm (https://en.wikipedia.org/wiki/Smallest-circle_problem#Matou%C5%A1ek,_Sharir,_Welzl's_algorithm)
 
+	if (points.empty()) {
+		return Circle(Vector2f(), 0);
+	}
+	
 	Vector2f centre;
 	for (auto& p: points) {
 		centre += p;

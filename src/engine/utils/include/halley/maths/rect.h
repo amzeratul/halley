@@ -329,6 +329,10 @@ namespace Halley {
 
 		static Rect2D getSpanningRect(const std::vector<Vector2D<T>>& points)
 		{
+			if (points.empty()) {
+				return Rect2D(Vector2f(), Vector2f());
+			}
+			
 			T x1 = std::numeric_limits<T>::max();
 			T y1 = std::numeric_limits<T>::max();
 			T x2 = std::numeric_limits<T>::lowest();
