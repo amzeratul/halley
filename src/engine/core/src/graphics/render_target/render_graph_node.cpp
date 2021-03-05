@@ -138,19 +138,23 @@ void RenderGraphNode::initializeRenderTarget(VideoAPI& video)
 	bool allConnectionsAreCompatible = true;
 	RenderGraphNode* curOutputNode = nullptr;
 	for (const auto& outputPin: outputPins) {
-		if (outputPin.others.size() > 1) {
-			hasOutputPinsWithMultipleConnections = true;
-		}
+		int nConnections = 0;
 		for (const auto& otherNode: outputPin.others) {
-			if (otherNode.node != curOutputNode) {
-				if (curOutputNode) {
-					hasMultipleRenderNodeOutputs = true;
+			if (otherNode.node && otherNode.node->activeInCurrentPass) {
+				if (otherNode.node != curOutputNode) {
+					if (curOutputNode) {
+						hasMultipleRenderNodeOutputs = true;
+					}
+					curOutputNode = otherNode.node;
+					if (curOutputNode->inputPins.at(otherNode.otherId).type != outputPin.type) {
+						allConnectionsAreCompatible = false;
+					}
 				}
-				curOutputNode = otherNode.node;
-				if (curOutputNode->inputPins.at(otherNode.otherId).type != outputPin.type) {
-					allConnectionsAreCompatible = false;
-				}
+				++nConnections;
 			}
+		}
+		if (nConnections > 1) {
+			hasOutputPinsWithMultipleConnections = true;
 		}
 	}
 	const bool needsRenderTarget = curOutputNode != nullptr && (hasOutputPinsWithMultipleConnections || hasMultipleRenderNodeOutputs || !allConnectionsAreCompatible);
