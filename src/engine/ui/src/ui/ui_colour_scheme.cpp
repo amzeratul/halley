@@ -17,7 +17,9 @@ static Sprite getSpriteFromConfigNode(const ConfigNode& node, Resources& resourc
 	if (node.getType() == ConfigNodeType::String) {
 		sprite = Sprite().setImage(resources, node.asString());
 	} else {
-		sprite = Sprite().setImage(resources, node["img"].asString(), node["material"].asString(""));
+		sprite = Sprite()
+			.setImage(resources, node["img"].asString(), node["material"].asString(""))
+			.setCustom0(node["custom0"].asVector4f(Vector4f(0, 0, 0, 0)));
 	}
 
 	return sprite;

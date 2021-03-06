@@ -590,6 +590,42 @@ Vector2f ConfigNode::asVector2f(Vector2f defaultValue) const
 	}
 }
 
+Vector3i ConfigNode::asVector3i(Vector3i defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return defaultValue;
+	} else {
+		return asVector3i();
+	}
+}
+
+Vector3f ConfigNode::asVector3f(Vector3f defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return defaultValue;
+	} else {
+		return asVector3f();
+	}
+}
+
+Vector4i ConfigNode::asVector4i(Vector4i defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return defaultValue;
+	} else {
+		return asVector4i();
+	}
+}
+
+Vector4f ConfigNode::asVector4f(Vector4f defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return defaultValue;
+	} else {
+		return asVector4f();
+	}
+}
+
 String ConfigNode::asString() const
 {
 	if (type == ConfigNodeType::String) {

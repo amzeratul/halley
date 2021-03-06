@@ -216,6 +216,10 @@ namespace Halley {
 		String asString(const std::string_view& defaultValue) const;
 		Vector2i asVector2i(Vector2i defaultValue) const;
 		Vector2f asVector2f(Vector2f defaultValue) const;
+		Vector3i asVector3i(Vector3i defaultValue) const;
+		Vector3f asVector3f(Vector3f defaultValue) const;
+		Vector4i asVector4i(Vector4i defaultValue) const;
+		Vector4f asVector4f(Vector4f defaultValue) const;
 
 		template <typename T>
 		std::vector<T> asVector() const
