@@ -2,10 +2,10 @@
 
 uiStyle:
   button:
-    normal: { img: halley_ui/ui_button.png, colour: $ui_buttonNormal }
-    down: { img: halley_ui/ui_button.png, colour: $ui_buttonDown }
-    hover: { img: halley_ui/ui_button.png, colour: $ui_buttonHover }
-    disabled: { img: halley_ui/ui_button.png, colour: $ui_buttonDisabled }
+    normal: { img: $ui_button, colour: $ui_buttonNormal }
+    down: { img: $ui_button, colour: $ui_buttonDown }
+    hover: { img: $ui_button, colour: $ui_buttonHover }
+    disabled: { img: $ui_button, colour: $ui_buttonDisabled }
     innerBorder: [ 5, 5, 5, 5 ]
     upSound: ""
     downSound: ""
@@ -18,10 +18,10 @@ uiStyle:
     iconColourDisabled: $ui_disabledText
 
   buttonThin:
-    normal: { img: halley_ui/ui_button.png, colour: $ui_buttonNormal }
-    down: { img: halley_ui/ui_button.png, colour: $ui_buttonDown }
-    hover: { img: halley_ui/ui_button.png, colour: $ui_buttonHover }
-    disabled: { img: halley_ui/ui_button.png, colour: $ui_buttonDisabled }
+    normal: { img: $ui_button, colour: $ui_buttonNormal }
+    down: { img: $ui_button, colour: $ui_buttonDown }
+    hover: { img: $ui_button, colour: $ui_buttonHover }
+    disabled: { img: $ui_button, colour: $ui_buttonDisabled }
     innerBorder: [ 5, 0, 5, 1 ]
     upSound: ""
     downSound: ""

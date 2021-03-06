@@ -75,6 +75,7 @@ colours:
 
 
 sprites:
+  ui_button: { img: halley_ui/ui_button.png }
   ui_float_window: { img: halley_ui/ui_float_window.png, material: Halley/SpriteInverseTint }
   ui_title_capsule: { img: halley_ui/ui_title_capsule.png, material: Halley/SpriteInverseTint }
   ui_input_thin: { img: halley_ui/ui_input_thin.png, material: Halley/SpriteInverseTint }

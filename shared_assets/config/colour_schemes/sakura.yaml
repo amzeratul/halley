@@ -25,8 +25,6 @@ colours:
   ui_listHover: "#FFC6E7"
   ui_listDrag: "#FFC6E780"
 
-  ui_disabledText: "#8B747E"
-  
   ui_scrollBackground: "#F8E0EF"
   ui_backgroundBox: "#F8E0EF"
   ui_popupWindow: "#FFC6E7"
@@ -37,9 +35,14 @@ colours:
 
   ui_selectedTextAlt: "#9C2E94"
   ui_unselectedTextAlt: "#9C2E94"
+
+  ui_disabledText: "#C76D94"
   ui_disabledTextAlt: "#774077"
 
   ui_logWarningText: "#FFA626"
+
+sprites:
+  ui_button: { img: halley_ui/ui_button.png, material: "Halley/SpriteGradient", custom0: [1.0, 0.0, 0.0, 2.0] }
 
 backgroundParticles:
   particles:
