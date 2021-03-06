@@ -15,7 +15,7 @@ namespace Halley {
         ChooseAssetWindow(UIFactory& factory, Callback callback);
 		virtual ~ChooseAssetWindow();
 
-        void onAddedToRoot() override;
+        void onAddedToRoot(UIRoot& root) override;
 		void setAssetIds(std::vector<String> ids, String defaultOption);
 
 		void setTitle(LocalisedString title);

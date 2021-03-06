@@ -19,9 +19,14 @@ EntityEditor::EntityEditor(String id, UIFactory& factory)
 	reloadEntity();
 }
 
-void EntityEditor::onAddedToRoot()
+void EntityEditor::onAddedToRoot(UIRoot& root)
 {
-	getRoot()->registerKeyPressListener(shared_from_this());
+	root.registerKeyPressListener(shared_from_this());
+}
+
+void EntityEditor::onRemovedFromRoot(UIRoot& root)
+{
+	root.removeKeyPressListener(*this);
 }
 
 void EntityEditor::update(Time t, bool moved)

@@ -26,7 +26,10 @@ UIRoot::UIRoot(const HalleyAPI& api, Rect4f rect)
 	}
 }
 
-UIRoot::~UIRoot() = default;
+UIRoot::~UIRoot()
+{
+	UIParent::clear();
+}
 
 UIRoot* UIRoot::getRoot()
 {
@@ -244,6 +247,15 @@ void UIRoot::registerKeyPressListener(std::shared_ptr<UIWidget> widget, int prio
 	{
 		return a.second > b.second;
 	});
+}
+
+void UIRoot::removeKeyPressListener(const UIWidget& widget)
+{
+	keyPressListeners.erase(std::remove_if(keyPressListeners.begin(), keyPressListeners.end(), [&] (const auto& v) -> bool
+	{
+		const auto sharedPtr = v.first.lock();
+		return sharedPtr && &(*sharedPtr) == &widget;
+	}), keyPressListeners.end());
 }
 
 void UIRoot::setUnhandledKeyPressListener(std::function<bool(KeyboardKeyPress)> handler)
@@ -531,7 +543,7 @@ std::vector<std::shared_ptr<UIWidget>> UIRoot::collectWidgets()
 
 void UIRoot::onChildAdded(UIWidget& child)
 {
-	child.notifyTreeAddedToRoot();
+	child.notifyTreeAddedToRoot(*this);
 }
 
 void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<std::shared_ptr<UIWidget>>& output)

@@ -11,7 +11,7 @@ NewAssetWindow::NewAssetWindow(UIFactory& factory, Callback callback)
 	setAnchor(UIAnchor());
 }
 
-void NewAssetWindow::onAddedToRoot()
+void NewAssetWindow::onAddedToRoot(UIRoot& root)
 {
 	getWidget("name")->focus();
 }

@@ -16,7 +16,8 @@ namespace Halley {
 	public:
 		EntityEditor(String id, UIFactory& factory);
 
-		void onAddedToRoot() override;
+		void onAddedToRoot(UIRoot& root) override;
+		void onRemovedFromRoot(UIRoot& root) override;
 		
 		void update(Time t, bool moved) override;
 

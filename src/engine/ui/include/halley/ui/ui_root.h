@@ -61,8 +61,9 @@ namespace Halley {
 		std::vector<std::shared_ptr<UIWidget>> collectWidgets();
 
 		void onChildAdded(UIWidget& child) override;
-
+		
 		void registerKeyPressListener(std::shared_ptr<UIWidget> widget, int priority = 0);
+		void removeKeyPressListener(const UIWidget& widget);
 		void setUnhandledKeyPressListener(std::function<bool(KeyboardKeyPress)> handler);
 
 		void makeToolTip(const UIStyle& style);

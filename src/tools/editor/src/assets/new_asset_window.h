@@ -10,7 +10,7 @@ namespace Halley {
 		
 		NewAssetWindow(UIFactory& factory, Callback callback);
 
-		void onAddedToRoot() override;
+		void onAddedToRoot(UIRoot& root) override;
 		
 	private:
 		UIFactory& factory;

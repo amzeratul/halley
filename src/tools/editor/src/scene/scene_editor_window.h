@@ -19,7 +19,7 @@ namespace Halley {
 		SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, ProjectWindow& projectWindow);
 		~SceneEditorWindow();
 
-		void onAddedToRoot() override;
+		void onAddedToRoot(UIRoot& root) override;
 		
 		void loadScene(const String& sceneName);
 		void loadPrefab(const String& name);

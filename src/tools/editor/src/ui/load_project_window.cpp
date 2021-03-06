@@ -54,9 +54,9 @@ LoadProjectWindow::LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, s
 	setAnchor(UIAnchor());
 }
 
-void LoadProjectWindow::onAddedToRoot()
+void LoadProjectWindow::onAddedToRoot(UIRoot& root)
 {
-	getRoot()->setFocus(getWidget("recent"));
+	root.setFocus(getWidget("recent"));
 }
 
 void LoadProjectWindow::update(Time t, bool moved)

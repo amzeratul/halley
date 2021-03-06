@@ -164,7 +164,8 @@ namespace Halley {
 
 		virtual bool canReceiveFocus() const;
 
-		virtual void onAddedToRoot();
+		virtual void onAddedToRoot(UIRoot& root);
+		virtual void onRemovedFromRoot(UIRoot& root);
 		void onChildAdded(UIWidget& child) override;
 		
 		virtual void onMakeUI();
@@ -210,13 +211,15 @@ namespace Halley {
 
 	private:
 		void setParent(UIParent* parent);
-		void notifyTreeAddedToRoot();
+		void notifyTreeAddedToRoot(UIRoot& root);
+		void notifyTreeRemovedFromRoot(UIRoot& root);
 
 		void setWidgetRect(Rect4f rect);
 		void resetInputResults();
 		void updateActive(bool wasActiveBefore);
 
 		UIParent* parent = nullptr;
+		UIRoot* root = nullptr;
 		String id;
 
 		std::vector<UIInputType> onlyEnabledWithInputs;

@@ -413,12 +413,12 @@ bool UIWidget::isAlive() const
 
 UIRoot* UIWidget::getRoot()
 {
-	return parent ? parent->getRoot() : nullptr;
+	return root;
 }
 
 const UIRoot* UIWidget::getRoot() const
 {
-	return parent ? parent->getRoot() : nullptr;
+	return root;
 }
 
 void UIWidget::notifyDataBind(bool data) const
@@ -538,6 +538,13 @@ void UIWidget::onParentChanged()
 void UIWidget::setParent(UIParent* p)
 {
 	Expects((parent == nullptr) ^ (p == nullptr));
+
+	if (!p) {
+		if (root) {
+			notifyTreeRemovedFromRoot(*root);
+		}
+	}
+	
 	parent = p;
 
 	if (parent) {
@@ -551,11 +558,21 @@ void UIWidget::setParent(UIParent* p)
 	onParentChanged();
 }
 
-void UIWidget::notifyTreeAddedToRoot()
+void UIWidget::notifyTreeAddedToRoot(UIRoot& root)
 {
-	onAddedToRoot();
+	this->root = &root;
+	onAddedToRoot(root);
 	for (auto& c: getChildren()) {
-		c->notifyTreeAddedToRoot();
+		c->notifyTreeAddedToRoot(root);
+	}
+}
+
+void UIWidget::notifyTreeRemovedFromRoot(UIRoot& root)
+{
+	this->root = nullptr;
+	onRemovedFromRoot(root);
+	for (auto& c: getChildren()) {
+		c->notifyTreeRemovedFromRoot(root);
 	}
 }
 
@@ -794,14 +811,19 @@ bool UIWidget::canReceiveFocus() const
 	return false;
 }
 
-void UIWidget::onAddedToRoot()
+void UIWidget::onAddedToRoot(UIRoot& root)
+{
+}
+
+void UIWidget::onRemovedFromRoot(UIRoot& root)
 {
 }
 
 void UIWidget::onChildAdded(UIWidget& child)
 {
-	if (getRoot()) {
-		child.notifyTreeAddedToRoot();
+	auto* root = getRoot();
+	if (root) {
+		child.notifyTreeAddedToRoot(*root);
 	}
 	child.setMouseClip(mouseClip, true);
 }

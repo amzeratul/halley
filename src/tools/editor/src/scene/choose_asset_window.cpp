@@ -23,11 +23,11 @@ ChooseAssetWindow::ChooseAssetWindow(UIFactory& factory, Callback callback)
 
 ChooseAssetWindow::~ChooseAssetWindow() = default;
 
-void ChooseAssetWindow::onAddedToRoot()
+void ChooseAssetWindow::onAddedToRoot(UIRoot& root)
 {
-	getWidget("search")->focus();
-	getRoot()->registerKeyPressListener(getWidget("options"), 2);
-	getRoot()->registerKeyPressListener(shared_from_this(), 1);
+	root.setFocus(getWidget("search"));
+	root.registerKeyPressListener(getWidget("options"), 2);
+	root.registerKeyPressListener(shared_from_this(), 1);
 }
 
 void ChooseAssetWindow::setAssetIds(std::vector<String> ids, String defaultOption)

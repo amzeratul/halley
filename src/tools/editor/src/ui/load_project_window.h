@@ -10,7 +10,7 @@ namespace Halley {
 	public:
 		LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, std::function<void(String)> callback);
 
-		void onAddedToRoot() override;
+		void onAddedToRoot(UIRoot& root) override;
 
 	protected:
 		void update(Time t, bool moved) override;

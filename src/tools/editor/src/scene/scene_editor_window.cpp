@@ -110,9 +110,9 @@ void SceneEditorWindow::makeUI()
 	});
 }
 
-void SceneEditorWindow::onAddedToRoot()
+void SceneEditorWindow::onAddedToRoot(UIRoot& root)
 {
-	getRoot()->registerKeyPressListener(shared_from_this());
+	root.registerKeyPressListener(shared_from_this());
 }
 
 void SceneEditorWindow::loadScene(const String& name)
