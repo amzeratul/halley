@@ -9,8 +9,8 @@
 
 using namespace Halley;
 
-AnimationEditor::AnimationEditor(UIFactory& factory, Resources& resources, AssetType type, Project& project, MetadataEditor& metadataEditor)
-	: AssetEditor(factory, resources, project, type)
+AnimationEditor::AnimationEditor(UIFactory& factory, Resources& gameResources, AssetType type, Project& project, MetadataEditor& metadataEditor)
+	: AssetEditor(factory, gameResources, project, type)
 	, metadataEditor(metadataEditor)
 {
 	setupWindow();

@@ -2,11 +2,11 @@
 
 using namespace Halley;
 
-Halley::AssetEditor::AssetEditor(UIFactory& factory, Resources& resources, Project& project, AssetType type)
+Halley::AssetEditor::AssetEditor(UIFactory& factory, Resources& gameResources, Project& project, AssetType type)
 	: UIWidget("assetEditor", {}, UISizer())
 	, factory(factory)
 	, project(project)
-	, gameResources(resources)
+	, gameResources(gameResources)
 	, assetType(type)
 {
 }

@@ -11,7 +11,7 @@ namespace Halley {
 	
 	class AssetEditor : public UIWidget	{
 	public:
-        AssetEditor(UIFactory& factory, Resources& resources, Project& project, AssetType type);
+        AssetEditor(UIFactory& factory, Resources& gameResources, Project& project, AssetType type);
 		virtual ~AssetEditor() = default;
 
 		void setResource(const String& assetId);

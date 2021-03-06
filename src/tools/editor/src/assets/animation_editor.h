@@ -15,7 +15,7 @@ namespace Halley {
 
 	class AnimationEditor : public AssetEditor {
     public:
-        AnimationEditor(UIFactory& factory, Resources& resources, AssetType type, Project& project, MetadataEditor& metadataEditor);
+        AnimationEditor(UIFactory& factory, Resources& gameResources, AssetType type, Project& project, MetadataEditor& metadataEditor);
 
 		void refresh();
         void reload() override;

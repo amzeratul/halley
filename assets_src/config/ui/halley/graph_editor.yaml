@@ -9,5 +9,6 @@ children:
   children:
   - widget: { class: scrollBackground, id: scrollBackground }
     proportion: 1
+    sizer: { type: free }
     children: []
 ...
