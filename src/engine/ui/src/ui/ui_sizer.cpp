@@ -403,9 +403,8 @@ void UISizer::setRectBox(Rect4f rect)
 
 Vector2f UISizer::computeMinimumSizeBoxFree() const
 {
-	Rect4f rect;
+	Rect4f rect = Rect4f(0, 0, 1, 1); // Always include origin
 
-	bool first = true;
 	for (const auto& e : entries) {
 		if (!e.isEnabled()) {
 			continue;
@@ -414,14 +413,7 @@ Vector2f UISizer::computeMinimumSizeBoxFree() const
 		const auto size = e.getMinimumSize();
 		const auto position = e.getPosition();
 		auto entryRect = Rect4f(position.x, position.y, size.x, size.y);
-		if (first) {
-			rect = entryRect;
-		}
-		else {
-			rect = rect.merge(entryRect);
-		}
-
-		first = false;
+		rect = rect.merge(entryRect);
 	}
 
 	return rect.getSize();
