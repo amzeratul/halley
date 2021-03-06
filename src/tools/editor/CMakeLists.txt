@@ -16,9 +16,11 @@ set (editor_sources
 	"src/assets/asset_editor.cpp"
 	"src/assets/assets_browser.cpp"
 	"src/assets/asset_browser_tabs.cpp"
+	"src/assets/graph_editor.cpp"
 	"src/assets/metadata_editor.cpp"
 	"src/assets/new_asset_window.cpp"
 	"src/assets/prefab_editor.cpp"
+	"src/assets/render_graph_editor.cpp"
 
 	"src/project/core_api_wrapper.cpp"
 
@@ -68,9 +70,11 @@ set (editor_headers
 	"src/assets/asset_editor.h"
 	"src/assets/assets_browser.h"
 	"src/assets/asset_browser_tabs.h"
+	"src/assets/graph_editor.h"
 	"src/assets/metadata_editor.h"
 	"src/assets/new_asset_window.h"
 	"src/assets/prefab_editor.h"
+	"src/assets/render_graph_editor.h"
 
 	"src/project/core_api_wrapper.h"
 
