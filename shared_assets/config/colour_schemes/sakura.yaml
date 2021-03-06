@@ -5,9 +5,9 @@ colours:
   background1: "#FFF0F9"
   backgroundLogo: "#FFE8F5"
 
-  ui_controlNormal: "#DD6C89"
+  ui_controlNormal: "#F493AD"
   ui_controlDown: "#C4395C"
-  ui_controlHover: "#E796AA"
+  ui_controlHover: "#F9BFCF"
   ui_controlDisabled: "#D7AAB6"
   
   ui_buttonNormal: "#FFC6E7"
@@ -15,9 +15,9 @@ colours:
   ui_buttonHover: "#FFD9EF"
   ui_buttonDisabled: "#D7AAB6"
 
-  ui_inputNormal: "#DD6C89"
+  ui_inputNormal: "#F493AD"
   ui_inputDown: "#C4395C"
-  ui_inputHover: "#E796AA"
+  ui_inputHover: "#F9BFCF"
   ui_inputDisabled: "#D7AAB6"
 
   ui_listBackground: "#F4A4B7C0"
