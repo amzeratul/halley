@@ -94,3 +94,4 @@ sprites:
   ui_tabs_bg: { img: halley_ui/tabs/tabs_bg.png, material: Halley/Sprite }
   ui_task: { img: halley_ui/ui_input.png, material: Halley/Sprite }
   ui_task_fill: { img: halley_ui/ui_list_item.png, material: Halley/Sprite }
+  ui_scroll_background: { img: checkered.png, material: Halley/Sprite }

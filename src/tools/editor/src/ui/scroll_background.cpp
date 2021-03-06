@@ -1,13 +1,11 @@
 #include "scroll_background.h"
 using namespace Halley;
 
-ScrollBackground::ScrollBackground(String id, Resources& res, UISizer sizer, Colour4f colour)
+ScrollBackground::ScrollBackground(String id, UIStyle style, UISizer sizer)
 	: UIClickable(std::move(id), {}, std::move(sizer))
 {
-	bg = Sprite()
-		.setImage(res, "checkered.png")
-		.setColour(colour);
-
+	bg = style.getSprite("background");
+	
 	setHandle(UIEventType::MouseWheel, [this] (const UIEvent& event)
 	{
 		onMouseWheel(event);

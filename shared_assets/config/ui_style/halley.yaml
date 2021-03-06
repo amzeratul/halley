@@ -240,4 +240,7 @@ uiStyle:
     selectionChangedSound: ""
     gap: 1
 
+  scrollBackground:
+    background: { img: $ui_scroll_background, colour: $scrollBackground }
+
 ...

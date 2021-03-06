@@ -40,7 +40,7 @@ colours:
   backgroundLogo: "#F0F0F0"
   logo: "#FC2847"
 
-  scrollBackground: "#FFFFFF"
+  scrollBackground: "#D0D0D0"
   
   taskbarLogoBackground: "#FFD7EE"
   taskRunning: "#74AEE9"
@@ -93,3 +93,4 @@ sprites:
   ui_tabs_bg: { img: halley_ui/tabs/tabs_bg.png, material: Halley/SpriteInverseTint }
   ui_task: { img: halley_ui/ui_input.png, material: Halley/SpriteInverseTint }
   ui_task_fill: { img: halley_ui/ui_list_item.png, material: Halley/SpriteInverseTint }
+  ui_scroll_background: { img: checkered.png, material: Halley/SpriteInverseTint }

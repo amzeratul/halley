@@ -41,6 +41,8 @@ colours:
 
   ui_logWarningText: "#FFA626"
 
+  scrollBackground: "#FFDDE6"
+
 sprites:
   ui_button: { img: halley_ui/ui_button.png, material: "Halley/SpriteGradient", custom0: [1.0, 0.165, 0.08, 2.0] }
 

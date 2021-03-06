@@ -52,7 +52,8 @@ Sprite EditorUIFactory::makeDirectoryIcon(bool up) const
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeScrollBackground(const ConfigNode& entryNode)
 {
-	return std::make_shared<ScrollBackground>("scrollBackground", resources, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), getColourScheme()->getColour("scrollBackground"));
+	auto& node = entryNode["widget"];
+	return std::make_shared<ScrollBackground>("scrollBackground", getStyle(node["style"].asString("scrollBackground")), makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)));
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeAnimationEditorDisplay(const ConfigNode& entryNode)
