@@ -25,6 +25,8 @@ namespace Halley {
     	void loadColourSchemes();
     	void reloadStyleSheet();
 
-    	std::vector<std::shared_ptr<UIColourScheme>> colourSchemes;
+    	void setColourSchemeByAssetId(const String& assetId);
+        
+    	std::vector<std::pair<String, String>> colourSchemes;
     };
 }

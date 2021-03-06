@@ -99,9 +99,9 @@ void EditorUIFactory::loadColourSchemes()
 {
 	for (const auto& assetId: resources.enumerate<ConfigFile>()) {
 		if (assetId.startsWith("colour_schemes/")) {
-			auto scheme = std::make_shared<UIColourScheme>(resources.get<ConfigFile>(assetId)->getRoot(), resources);
-			if (scheme->isEnabled()) {
-				colourSchemes.push_back(scheme);
+			auto& schemeConfig = resources.get<ConfigFile>(assetId)->getRoot();
+			if (schemeConfig["enabled"].asBool(true)) {
+				colourSchemes.emplace_back(assetId, schemeConfig["name"].asString());
 			}
 		}
 	}
@@ -110,8 +110,8 @@ void EditorUIFactory::loadColourSchemes()
 std::vector<String> EditorUIFactory::getColourSchemeNames() const
 {
 	std::vector<String> result;
-	for (auto& scheme: colourSchemes) {
-		result.push_back(scheme->getName());
+	for (const auto& scheme: colourSchemes) {
+		result.push_back(scheme.second);
 	}
 	std::sort(result.begin(), result.end());
 	return result;
@@ -122,21 +122,26 @@ void EditorUIFactory::setColourScheme(const String& name)
 	bool found = false;
 
 	for (auto& scheme: colourSchemes) {
-		if (scheme->getName() == name) {
-			colourScheme = scheme;
+		if (scheme.second == name) {
+			setColourSchemeByAssetId(scheme.first);
 			found = true;
 			break;
 		}
 	}
 
 	if (!found && !colourSchemes.empty()) {
-		colourScheme = colourSchemes.front();
+		setColourSchemeByAssetId(colourSchemes.front().first);
 		found = true;
 	}
 
 	if (found) {
 		reloadStyleSheet();
 	}
+}
+
+void EditorUIFactory::setColourSchemeByAssetId(const String& assetId)
+{
+	colourScheme = std::make_shared<UIColourScheme>(getResources().get<ConfigFile>(assetId)->getRoot(), getResources());
 }
 
 void EditorUIFactory::reloadStyleSheet()
