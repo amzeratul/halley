@@ -6,6 +6,7 @@ colours:
   
   icon_shader: "#EC7171"
   icon_materialDefinition: "#B81616"
+  icon_renderGraphDefinition: "#EC3C09"
 
   icon_prefab: "#FFFF40"
   icon_scene: "#77E726"

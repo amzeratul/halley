@@ -206,7 +206,7 @@ void AssetsBrowser::setListContents(std::vector<String> assets, const Path& curP
 		}
 
 		for (const auto& dir: dirs) {
-			addDirToList(dir);
+			addDirToList(curPath, dir);
 		}
 		for (const auto& file: files) {
 			addFileToList(file);
@@ -223,10 +223,24 @@ void AssetsBrowser::clearAssetList()
 	assetList->clear();
 }
 
-void AssetsBrowser::addDirToList(const String& dir)
+void AssetsBrowser::addDirToList(const Path& curPath, const String& dir)
 {
+	const auto icon = std::make_shared<UIImage>(factory.makeDirectoryIcon(dir == ".."));
+
+	/*
+	std::optional<ImportAssetType> assetTypeDir;
+	if (curPath == ".") {
+		if (dir == "shader") {
+			assetTypeDir = ImportAssetType::Shader;
+		}
+	}
+	if (assetTypeDir) {
+		icon->add(std::make_shared<UIImage>(factory.makeImportAssetTypeIcon(assetTypeDir.value())), 1, {}, UISizerAlignFlags::Centre);
+	}
+	*/
+	
 	auto sizer = std::make_shared<UISizer>();
-	sizer->add(std::make_shared<UIImage>(factory.makeDirectoryIcon(dir == "..")), 0, Vector4f(0, 0, 4, 0));
+	sizer->add(icon, 0, Vector4f(0, 0, 4, 0));
 	sizer->add(assetList->makeLabel("", LocalisedString::fromUserString(dir)));
 	assetList->addItem(dir + "/.", std::move(sizer));
 }

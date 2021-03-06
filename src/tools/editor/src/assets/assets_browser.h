@@ -58,7 +58,7 @@ namespace Halley {
 		void setFilter(const String& filter);
 
 		void clearAssetList();
-		void addDirToList(const String& dir);
+		void addDirToList(const Path& curPath, const String& dir);
 		void addFileToList(const Path& path);
 
 		void loadAsset(const String& name, bool doubleClick);

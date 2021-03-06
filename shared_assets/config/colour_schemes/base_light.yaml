@@ -6,17 +6,18 @@ colours:
   
   icon_shader: "#EC7171"
   icon_materialDefinition: "#B81616"
+  icon_renderGraphDefinition: "#EC3C09"
 
-  icon_prefab: "#FFFF40"
-  icon_scene: "#77E726"
+  icon_prefab: "#EA8C00"
+  icon_scene: "#57BE0C"
   
   icon_colours: "#00DDE1"
-  icon_configFile: "#26E743"
+  icon_configFile: "#23E232"
   icon_localisation: "#43FA52"
   icon_variableTable: "#50E9BB"
   
   icon_audioClip: "#E39343"
-  icon_audioEvent: "#FFCB3E"
+  icon_audioEvent: "#A2630D"
   
   icon_font: "#D538E9"
   icon_bitmapFont: "#D538E9"
