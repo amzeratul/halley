@@ -42,7 +42,7 @@ colours:
   ui_logWarningText: "#FFA626"
 
 sprites:
-  ui_button: { img: halley_ui/ui_button.png, material: "Halley/SpriteGradient", custom0: [1.0, 0.0, 0.0, 2.0] }
+  ui_button: { img: halley_ui/ui_button.png, material: "Halley/SpriteGradient", custom0: [1.0, 0.165, 0.08, 2.0] }
 
 backgroundParticles:
   particles:
