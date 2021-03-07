@@ -10,5 +10,9 @@ namespace Halley {
 		void pressMouse(Vector2f mousePos, int button) override;
 		void releaseMouse(Vector2f mousePos, int button) override;
 		void onMouseOver(Vector2f mousePos) override;
+		bool isFocusLocked() const override;
+
+	private:
+		std::optional<Vector2f> drag;
 	};
 }

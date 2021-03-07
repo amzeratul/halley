@@ -69,6 +69,7 @@ namespace Halley {
 		void setBorder(const Vector4f& border);
 
 		void setProportion(float prop);
+		void setPosition(Vector2f pos);
 
 	private:
 		UIElementPtr widget;
