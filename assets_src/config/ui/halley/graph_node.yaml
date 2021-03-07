@@ -1,0 +1,10 @@
+---
+widget: { class: widget }
+sizer: { type: vertical }
+children:
+- widget: { id: background, class: image, image: $ui_input, size: [200, 100] }
+  proportion: 1
+  fill: fill
+  sizer: { type: vertical }
+  children: []
+...

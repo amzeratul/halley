@@ -14,6 +14,8 @@ namespace Halley {
 		void setZoomListener(ZoomListener listener);
     	void setMousePosListener(MousePosListener listener);
 
+    	void setZoomEnabled(bool enabled);
+
 	protected:
 		void doSetState(State state) override;
 		void update(Time t, bool moved) override;
@@ -35,6 +37,7 @@ namespace Halley {
 		int zoomExp = 0;
 		bool dirty = false;
 		bool dragging = false;
+    	bool zoomEnabled = true;
 
 		ZoomListener zoomListener;
     	MousePosListener mousePosListener;

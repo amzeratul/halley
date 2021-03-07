@@ -3,7 +3,7 @@
 #include "asset_editor.h"
 #include "metadata_editor.h"
 #include "prefab_editor.h"
-#include "render_graph_editor.h"
+#include "graph/render_graph_editor.h"
 #include "halley/tools/project/project.h"
 #include "src/ui/editor_ui_factory.h"
 using namespace Halley;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "asset_editor.h"
+#include "../asset_editor.h"
 #include "src/ui/scroll_background.h"
 
 namespace Halley {

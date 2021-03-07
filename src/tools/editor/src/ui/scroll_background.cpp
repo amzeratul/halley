@@ -27,6 +27,11 @@ void ScrollBackground::setMousePosListener(MousePosListener listener)
 	mousePosListener = listener;
 }
 
+void ScrollBackground::setZoomEnabled(bool enabled)
+{
+	zoomEnabled = enabled;
+}
+
 void ScrollBackground::doSetState(State state)
 {
 }
@@ -104,6 +109,10 @@ void ScrollBackground::setDragPos(Vector2f pos)
 
 void ScrollBackground::onMouseWheel(const UIEvent& event)
 {
+	if (!zoomEnabled) {
+		return;
+	}
+	
 	const float oldZoom = getZoomLevel();
 	zoomExp = clamp(zoomExp + signOf(event.getIntData()), -5, 5);
 	const float zoom = getZoomLevel();
