@@ -129,7 +129,9 @@ void UIDebugConsole::show()
 {
 	setActive(true);
 	inputField->setActive(true);
-	getWidget("input")->focus();
+	if (getRoot()) {
+		getWidget("input")->focus();
+	}
 }
 
 void UIDebugConsole::hide()
@@ -203,6 +205,13 @@ void UIDebugConsole::setForcePaintMask(int mask)
 const std::shared_ptr<UIDebugConsoleController>& UIDebugConsole::getController() const
 {
 	return controller;
+}
+
+void UIDebugConsole::onAddedToRoot(UIRoot& root)
+{
+	if (isActive()) {
+		root.setFocus(getWidget("input"));
+	}
 }
 
 void UIDebugConsole::drawChildren(UIPainter& painter) const

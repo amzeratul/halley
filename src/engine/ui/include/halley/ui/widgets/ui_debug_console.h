@@ -61,6 +61,8 @@ namespace Halley {
 
     	const std::shared_ptr<UIDebugConsoleController>& getController() const;
 
+		void onAddedToRoot(UIRoot& root) override;
+    
 	protected:
 		void drawChildren(UIPainter& painter) const override;
     	
