@@ -334,7 +334,8 @@ void AnimationPlayer::setTiming(int currentFrame, Time currentFrameTime)
 {
 	curFrame = clamp(currentFrame, 0, curSeq ? static_cast<int>(curSeq->numFrames()) - 1 : 0);
 	curFrameTime = currentFrameTime;
-	dirty = true;
+	dirty = false;
+	resolveSprite();
 }
 
 
