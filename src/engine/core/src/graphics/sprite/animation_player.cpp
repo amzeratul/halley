@@ -259,6 +259,11 @@ int AnimationPlayer::getCurrentSequenceLoopCount() const
 	return curLoopCount;
 }
 
+int AnimationPlayer::getCurrentSequenceLength() const
+{
+	return static_cast<int>(seqLen);
+}
+
 String AnimationPlayer::getCurrentDirectionName() const
 {
 	return curDir ? curDir->getName() : "default";
@@ -323,6 +328,13 @@ void AnimationPlayer::setState(const String& sequenceName, const String& directi
 		dirty = false;
 		resolveSprite();
 	}
+}
+
+void AnimationPlayer::setTiming(int currentFrame, Time currentFrameTime)
+{
+	curFrame = clamp(currentFrame, 0, curSeq ? static_cast<int>(curSeq->numFrames()) - 1 : 0);
+	curFrameTime = currentFrameTime;
+	dirty = true;
 }
 
 

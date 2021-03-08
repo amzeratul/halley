@@ -42,6 +42,7 @@ namespace Halley
 		int getCurrentSequenceFrame() const;
 		Time getCurrentSequenceFrameTime() const;
 		int getCurrentSequenceLoopCount() const;
+		int getCurrentSequenceLength() const;
 
 		String getCurrentDirectionName() const;
 		int getCurrentDirectionId() const;
@@ -57,6 +58,7 @@ namespace Halley
 
 		void syncWith(const AnimationPlayer& masterAnimator, bool hideIfNotSynchronized);
 		void setState(const String& sequenceName, const String& directionName, int currentFrame, Time currentFrameTime, bool hideIfNotSynchronized);
+		void setTiming(int currentFrame, Time currentFrameTime);
 		void stepFrames(int amount);
 
 	private:
