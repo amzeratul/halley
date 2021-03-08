@@ -13,7 +13,7 @@ NewAssetWindow::NewAssetWindow(UIFactory& factory, Callback callback)
 
 void NewAssetWindow::onAddedToRoot(UIRoot& root)
 {
-	getWidget("name")->focus();
+	root.setFocus(getWidget("name"));
 }
 
 void NewAssetWindow::makeUI()

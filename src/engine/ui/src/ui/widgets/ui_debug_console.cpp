@@ -130,7 +130,7 @@ void UIDebugConsole::show()
 	setActive(true);
 	inputField->setActive(true);
 	if (getRoot()) {
-		getWidget("input")->focus();
+		getRoot()->setFocus(getWidget("input"));
 	}
 }
 
@@ -178,7 +178,7 @@ void UIDebugConsole::runCommand(const String& rawCommand)
 			addLine(result.getResponse(), Colour::fromString("#E2D5EA"));
 		}
 		inputField->setEnabled(true);
-		inputField->focus();
+		getRoot()->setFocus(inputField);
 		if (result.isCloseConsole()) {
 			hide();
 		}
