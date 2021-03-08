@@ -202,6 +202,7 @@ namespace Halley {
 		constexpr Vector2D<T> xy() const { return Vector2D<T>(x, y); }
 		constexpr Vector2D<T> yz() const { return Vector2D<T>(y, z); }
 		constexpr Vector2D<T> zw() const { return Vector2D<T>(z, w); }
+		constexpr Vector3D<T> xyz() const { return Vector3D<T>(x, y, z); }
 	};
 
 

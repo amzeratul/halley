@@ -136,7 +136,7 @@ void RenderGraph::setPaintMethod(std::string_view id, PaintMethod method)
 void RenderGraph::applyVariable(Material& material, const String& name, const ConfigNode& value) const
 {
 	if (value.getType() == ConfigNodeType::String) {
-		material.set(name, variables.at(value.asString()));
+		variables.at(value.asString()).apply(material, name);
 	} else if (value.getType() == ConfigNodeType::Float || value.getType() == ConfigNodeType::Int) {
 		material.set(name, value.asFloat());
 	}
@@ -145,4 +145,77 @@ void RenderGraph::applyVariable(Material& material, const String& name, const Co
 void RenderGraph::setVariable(std::string_view name, float value)
 {
 	variables[name] = value;
+}
+
+void RenderGraph::setVariable(std::string_view name, Vector2f value)
+{
+	variables[name] = value;
+}
+
+void RenderGraph::setVariable(std::string_view name, Vector3f value)
+{
+	variables[name] = value;
+}
+
+void RenderGraph::setVariable(std::string_view name, Vector4f value)
+{
+	variables[name] = value;
+}
+
+void RenderGraph::setVariable(std::string_view name, Colour4f value)
+{
+	variables[name] = value;
+}
+
+void RenderGraph::Variable::apply(Material& material, const String& name) const
+{
+	switch (type) {
+	case VariableType::Float:
+		material.set(name, var.x);
+		break;
+	case VariableType::Float2:
+		material.set(name, var.xy());
+		break;
+	case VariableType::Float3:
+		material.set(name, var.xyz());
+		break;
+	case VariableType::Float4:
+		material.set(name, var);
+		break;
+	}
+}
+
+RenderGraph::Variable& RenderGraph::Variable::operator=(float v)
+{
+	var = Vector4f(v, 0, 0, 0);
+	type = VariableType::Float;
+	return *this;
+}
+
+RenderGraph::Variable& RenderGraph::Variable::operator=(Vector2f v)
+{
+	var = Vector4f(v.x, v.y, 0, 0);
+	type = VariableType::Float2;
+	return *this;
+}
+
+RenderGraph::Variable& RenderGraph::Variable::operator=(Vector3f v)
+{
+	var = Vector4f(v.x, v.y, v.z, 0);
+	type = VariableType::Float3;
+	return *this;
+}
+
+RenderGraph::Variable& RenderGraph::Variable::operator=(Vector4f v)
+{
+	var = v;
+	type = VariableType::Float4;
+	return *this;
+}
+
+RenderGraph::Variable& RenderGraph::Variable::operator=(Colour4f v)
+{
+	var = Vector4f(v.r, v.g, v.b, v.a);
+	type = VariableType::Float4;
+	return *this;
 }
