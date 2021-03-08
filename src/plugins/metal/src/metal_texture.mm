@@ -27,7 +27,7 @@ void MetalTexture::doLoad(TextureDescriptor& descriptor)
 			pixelFormat = MTLPixelFormatRGBA8Unorm;
 			bytesPerPixel = 4;
 			break;
-		case TextureFormat::DEPTH:
+		case TextureFormat::Depth:
 			pixelFormat = MTLPixelFormatDepth32Float;
 			bytesPerPixel = 4;
 			break;
