@@ -539,7 +539,14 @@ void UIWidget::setParent(UIParent* p)
 {
 	Expects((parent == nullptr) ^ (p == nullptr));
 
-	if (!p) {
+	if (p) {
+		if (!root) {
+			auto* parentRoot = p->getRoot();
+			if (parentRoot) {
+				notifyTreeAddedToRoot(*parentRoot);
+			}
+		}
+	} else {
 		if (root) {
 			notifyTreeRemovedFromRoot(*root);
 		}

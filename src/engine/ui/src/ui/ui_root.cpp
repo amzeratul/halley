@@ -543,7 +543,7 @@ std::vector<std::shared_ptr<UIWidget>> UIRoot::collectWidgets()
 
 void UIRoot::onChildAdded(UIWidget& child)
 {
-	child.notifyTreeAddedToRoot(*this);
+	//child.notifyTreeAddedToRoot(*this);
 }
 
 void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<std::shared_ptr<UIWidget>>& output)
