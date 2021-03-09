@@ -9,6 +9,7 @@
 
 namespace Halley
 {
+	enum class TextureSamplerType : uint8_t;
 	enum class ShaderType;
 	class Texture;
 	class VideoAPIInternal;
@@ -19,12 +20,14 @@ namespace Halley
 	class MaterialTextureParameter
 	{
 	public:
-		MaterialTextureParameter(Material& material, const String& name);
+		MaterialTextureParameter(Material& material, const String& name, TextureSamplerType samplerType);
 		unsigned int getAddress(int pass, ShaderType stage) const;
+		TextureSamplerType getSamplerType() const { return samplerType; }
 
 	private:
 		String name;
 		Vector<int> addresses;
+		TextureSamplerType samplerType;
 	};
 
 	class MaterialParameter

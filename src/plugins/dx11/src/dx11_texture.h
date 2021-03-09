@@ -1,6 +1,8 @@
 #pragma once
 #include "halley/core/graphics/texture.h"
 #include <d3d11.h>
+
+#include "halley/core/graphics/material/material_definition.h"
 #undef min
 #undef max
 
@@ -19,7 +21,7 @@ namespace Halley
 		void doLoad(TextureDescriptor& descriptor) override;
 		void reload(Resource&& resource) override;
 
-		void bind(DX11Video& video, int textureUnit) const;
+		void bind(DX11Video& video, int textureUnit, TextureSamplerType samplerType) const;
 		
 		DXGI_FORMAT getFormat() const;
 		ID3D11Texture2D* getTexture() const;
@@ -28,6 +30,7 @@ namespace Halley
 		DX11Video& video;
 		ID3D11Texture2D* texture = nullptr;
 		ID3D11ShaderResourceView* srv = nullptr;
+		ID3D11ShaderResourceView* srvAlt = nullptr;
 		ID3D11SamplerState* samplerState = nullptr;
 		DXGI_FORMAT format;
 	};

@@ -9,8 +9,9 @@ using namespace Halley;
 
 constexpr static int shaderStageCount = int(ShaderType::NumOfShaderTypes);
 
-MaterialTextureParameter::MaterialTextureParameter(Material& material, const String& name)
+MaterialTextureParameter::MaterialTextureParameter(Material& material, const String& name, TextureSamplerType samplerType)
 	: name(name)
+	, samplerType(samplerType)
 {
 	auto& definition = material.getDefinition();
 	addresses.resize(definition.passes.size() * shaderStageCount);

@@ -99,7 +99,6 @@ size_t MaterialAttribute::getAttributeSize(ShaderParameterType type)
 		case ShaderParameterType::Matrix2: return 16;
 		case ShaderParameterType::Matrix3: return 36;
 		case ShaderParameterType::Matrix4: return 64;
-		case ShaderParameterType::Texture2D: return 4;
 		default: throw Exception("Unknown type: " + toString(int(type)), HalleyExceptions::Resources);
 	}
 }
@@ -107,7 +106,7 @@ size_t MaterialAttribute::getAttributeSize(ShaderParameterType type)
 MaterialTexture::MaterialTexture()
 {}
 
-MaterialTexture::MaterialTexture(String name, String defaultTexture, ShaderParameterType samplerType)
+MaterialTexture::MaterialTexture(String name, String defaultTexture, TextureSamplerType samplerType)
 	: name(std::move(name))
 	, defaultTextureName(std::move(defaultTexture))
 	, samplerType(samplerType)
@@ -292,18 +291,14 @@ void MaterialDefinition::loadTextures(const ConfigNode& node)
 		if (attribEntry.hasKey("name")) {
 			// New format
 			tex.name = attribEntry["name"].asString();
-			tex.samplerType = parseParameterType(attribEntry["sampler"].asString("sampler2D"));
+			tex.samplerType = parseSamplerType(attribEntry["sampler"].asString("sampler2D"));
 			tex.defaultTextureName = attribEntry["defaultTexture"].asString("");
 		} else {
 			// Old format
 			for (auto& it : attribEntry.asMap()) {
 				tex.name = it.first;
-				tex.samplerType = parseParameterType(it.second.asString());
+				tex.samplerType = parseSamplerType(it.second.asString());
 			}
-		}
-
-		if (tex.samplerType != ShaderParameterType::Texture2D) {
-			throw Exception("Texture \"" + tex.name + "\" must be sampler2D", HalleyExceptions::Resources);
 		}
 
 		textures.push_back(tex);
@@ -344,7 +339,7 @@ void MaterialDefinition::loadAttributes(const ConfigNode& node)
 	vertexSize = offset;
 }
 
-ShaderParameterType MaterialDefinition::parseParameterType(String rawType) const
+ShaderParameterType MaterialDefinition::parseParameterType(const String& rawType) const
 {
 	if (rawType == "float") {
 		return ShaderParameterType::Float;
@@ -356,10 +351,25 @@ ShaderParameterType MaterialDefinition::parseParameterType(String rawType) const
 		return ShaderParameterType::Float4;
 	} else if (rawType == "float4x4" || rawType == "mat4") {
 		return ShaderParameterType::Matrix4;
-	} else if (rawType == "sampler2D") {
-		return ShaderParameterType::Texture2D;
 	} else {
 		throw Exception("Unknown attribute type: " + rawType, HalleyExceptions::Resources);
+	}
+}
+
+TextureSamplerType MaterialDefinition::parseSamplerType(const String& rawType) const
+{
+	if (rawType == "sampler1D") {
+		return TextureSamplerType::Texture1D;
+	} else if (rawType == "sampler2D") {
+		return TextureSamplerType::Texture2D;
+	} else if (rawType == "sampler3D") {
+		return TextureSamplerType::Texture3D;
+	} else if (rawType == "depth2D") {
+		return TextureSamplerType::Depth2D;
+	} else if (rawType == "stencil2D") {
+		return TextureSamplerType::Stencil2D;
+	} else {
+		throw Exception("Unknown sampler type: " + rawType, HalleyExceptions::Resources);
 	}
 }
 

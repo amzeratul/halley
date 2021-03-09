@@ -86,7 +86,7 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 		if (!texture) {
 			throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.", HalleyExceptions::VideoPlugin);
 		} else {
-			texture->bind(video, textureUnit);
+			texture->bind(video, textureUnit, tex.getSamplerType());
 		}
 		++textureUnit;
 	}

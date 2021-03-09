@@ -1,12 +1,12 @@
 ---
-name: Halley/DepthView
+name: Halley/StencilView
 base: sprite_base.yaml
 textures:
-  - tex0: depth2D
+  - tex0: stencil2D
 passes:
   - blend: Opaque
     shader:
     - language: hlsl
       vertex: sprite.vertex.hlsl
-      pixel: depth_view.pixel.hlsl
+      pixel: stencil_view.pixel.hlsl
 ...

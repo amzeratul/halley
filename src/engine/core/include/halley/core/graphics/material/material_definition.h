@@ -29,7 +29,6 @@ namespace Halley
 		Matrix2,
 		Matrix3,
 		Matrix4,
-		Texture2D,
 		Invalid
 	};
 
@@ -43,6 +42,14 @@ namespace Halley
 		NotEqual,
 		GreaterEqual,
 		Always
+	};
+
+	enum class TextureSamplerType: uint8_t {
+		Texture1D,
+		Texture2D,
+		Texture3D,
+		Depth2D,
+		Stencil2D
 	};
 
 	template <>
@@ -158,11 +165,11 @@ namespace Halley
 	public:
 		String name;
 		String defaultTextureName;
-		ShaderParameterType samplerType = ShaderParameterType::Texture2D;
+		TextureSamplerType samplerType = TextureSamplerType::Texture2D;
 		std::shared_ptr<const Texture> defaultTexture;
 
 		MaterialTexture();
-		MaterialTexture(String name, String defaultTexture, ShaderParameterType samplerType);
+		MaterialTexture(String name, String defaultTexture, TextureSamplerType samplerType);
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -222,7 +229,8 @@ namespace Halley
 		void loadUniforms(const ConfigNode& node);
 		void loadTextures(const ConfigNode& node);
 		void loadAttributes(const ConfigNode& node);
-		ShaderParameterType parseParameterType(String rawType) const;
+		ShaderParameterType parseParameterType(const String& rawType) const;
+		TextureSamplerType parseSamplerType(const String& rawType) const;
 	};
 
 	class MaterialDepthStencil

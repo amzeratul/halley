@@ -178,7 +178,7 @@ void Material::initUniforms(bool forceLocalBlocks)
 	textureUniforms.reserve(nTextures);
 	for (size_t i = 0; i < nTextures; ++i) {
 		const auto& tex = textureDefs[i];
-		textureUniforms.push_back(MaterialTextureParameter(*this, tex.name));
+		textureUniforms.push_back(MaterialTextureParameter(*this, tex.name, tex.samplerType));
 		textures.push_back(tex.defaultTexture);
 	}
 }

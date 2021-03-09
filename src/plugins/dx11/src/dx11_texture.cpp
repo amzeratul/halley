@@ -20,6 +20,10 @@ DX11Texture::~DX11Texture()
 		srv->Release();
 		srv = nullptr;
 	}
+	if (srvAlt) {
+		srvAlt->Release();
+		srvAlt = nullptr;
+	}
 	if (texture) {
 		texture->Release();
 		texture = nullptr;
@@ -32,12 +36,14 @@ DX11Texture& DX11Texture::operator=(DX11Texture&& other) noexcept
 
 	texture = other.texture;
 	srv = other.srv;
+	srvAlt = other.srvAlt;
 	samplerState = other.samplerState;
 	format = other.format;
 	size = other.size;
 
 	other.texture = nullptr;
 	other.srv = nullptr;
+	other.srvAlt = nullptr;
 	other.samplerState = nullptr;
 
 	doneLoading();
@@ -131,17 +137,27 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 	if (desc.BindFlags & D3D11_BIND_SHADER_RESOURCE) {
 		CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 		srvDesc.Format = desc.Format;
-		if (descriptor.format == TextureFormat::Depth) {
-			srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-		}
-		
 		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MipLevels = 1;
 		srvDesc.Texture2D.MostDetailedMip = 0;
 
-		result = video.getDevice().CreateShaderResourceView(texture, &srvDesc, &srv);
-		if (result != S_OK) {
-			throw Exception("Error creating shader resource view", HalleyExceptions::VideoPlugin);
+		if (descriptor.format == TextureFormat::Depth) {
+			srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+			result = video.getDevice().CreateShaderResourceView(texture, &srvDesc, &srv);
+			if (result != S_OK) {
+				throw Exception("Error creating shader resource view", HalleyExceptions::VideoPlugin);
+			}
+
+			srvDesc.Format = DXGI_FORMAT_X24_TYPELESS_G8_UINT;
+			result = video.getDevice().CreateShaderResourceView(texture, &srvDesc, &srvAlt);
+			if (result != S_OK) {
+				throw Exception("Error creating shader resource view", HalleyExceptions::VideoPlugin);
+			}
+		} else {
+			result = video.getDevice().CreateShaderResourceView(texture, &srvDesc, &srv);
+			if (result != S_OK) {
+				throw Exception("Error creating shader resource view", HalleyExceptions::VideoPlugin);
+			}
 		}
 
 		auto samplerDesc = CD3D11_SAMPLER_DESC(CD3D11_DEFAULT());
@@ -161,11 +177,11 @@ void DX11Texture::reload(Resource&& resource)
 	*this = std::move(dynamic_cast<DX11Texture&>(resource));
 }
 
-void DX11Texture::bind(DX11Video& video, int textureUnit) const
+void DX11Texture::bind(DX11Video& video, int textureUnit, TextureSamplerType samplerType) const
 {
 	waitForLoad();
 
-	ID3D11ShaderResourceView* srvs[] = { srv };
+	ID3D11ShaderResourceView* srvs[] = { samplerType == TextureSamplerType::Stencil2D ? srvAlt : srv };
 	ID3D11SamplerState* samplers[] = { samplerState };
 	video.getDeviceContext().PSSetShaderResources(textureUnit, 1, srvs);
 	video.getDeviceContext().PSSetSamplers(textureUnit, 1, samplers);
