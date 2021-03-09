@@ -143,7 +143,7 @@ void DX11SwapChain::initDepthStencilViews()
 
 		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
 		desc.Flags = 0;
-		desc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+		desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 		desc.Texture2D.MipSlice = 0;
 		ID3D11DepthStencilView *view;

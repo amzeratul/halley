@@ -81,7 +81,7 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 		bpp = 4;
 		break;
 	case TextureFormat::Depth:
-		desc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+		desc.Format = DXGI_FORMAT_R24G8_TYPELESS;
 		bpp = 4;
 		break;
 	default:
@@ -91,6 +91,7 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 	desc.BindFlags = 0;
 	if (descriptor.isDepthStencil) {
 		desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
+		desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
 	} else {
 		desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
 		if (descriptor.isRenderTarget) {
@@ -130,6 +131,10 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 	if (desc.BindFlags & D3D11_BIND_SHADER_RESOURCE) {
 		CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 		srvDesc.Format = desc.Format;
+		if (descriptor.format == TextureFormat::Depth) {
+			srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+		}
+		
 		srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MipLevels = 1;
 		srvDesc.Texture2D.MostDetailedMip = 0;

@@ -84,8 +84,13 @@ void DX11TextureRenderTarget::createViews()
 		auto& depthTexture = static_cast<DX11Texture&>(*depthStencilBuffer);
 		depthTexture.waitForLoad();
 
+		auto format = depthTexture.getFormat();
+		if (format == DXGI_FORMAT_R24G8_TYPELESS) {
+			format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		}
+
 		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
-		desc.Format = depthTexture.getFormat();
+		desc.Format = format;
 		desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 		desc.Flags = 0;
 		desc.Texture2D.MipSlice = 0;

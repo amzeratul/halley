@@ -1,0 +1,12 @@
+---
+name: Halley/DepthView
+base: sprite_base.yaml
+textures:
+  - tex0: sampler2D
+passes:
+  - blend: Opaque
+    shader:
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: depth_view.pixel.hlsl
+...
