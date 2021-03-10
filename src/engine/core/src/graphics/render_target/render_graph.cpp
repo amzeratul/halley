@@ -101,6 +101,11 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video)
 	for (size_t i = 0; i < renderQueue.size(); ++i) {
 		renderQueue[i]->render(*this, rc, renderQueue);
 	}
+
+	RenderContext(rc).bind([] (Painter& painter)
+	{
+		painter.flush();
+	});
 }
 
 const Camera* RenderGraph::tryGetCamera(std::string_view id) const
