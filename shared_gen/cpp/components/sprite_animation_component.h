@@ -28,7 +28,7 @@ public:
 
 	void deserialize(const Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(player)>::deserialize(player, context, node, "player", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(player)>::deserialize(player, Halley::AnimationPlayer{}, context, node, "player", makeMask(Type::Prefab, Type::SaveData));
 	}
 
 };

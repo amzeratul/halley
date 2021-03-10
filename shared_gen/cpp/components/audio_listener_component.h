@@ -28,7 +28,7 @@ public:
 
 	void deserialize(const Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(referenceDistance)>::deserialize(referenceDistance, context, node, "referenceDistance", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(referenceDistance)>::deserialize(referenceDistance, float{ 500 }, context, node, "referenceDistance", makeMask(Type::Prefab, Type::SaveData));
 	}
 
 };

@@ -342,9 +342,11 @@ namespace Halley {
 			return ConfigNodeSerializer<T>().serialize(value, context);
 		}
 		
-		static void deserialize(T& dst, const ConfigNodeSerializationContext& context, const ConfigNode& node)
+		static void deserialize(T& dst, const T& defaultValue, const ConfigNodeSerializationContext& context, const ConfigNode& node)
 		{
-			if (node.getType() != ConfigNodeType::Undefined) {
+			if (node.getType() == ConfigNodeType::Undefined || node.getType() == ConfigNodeType::Del) {
+				dst = defaultValue;
+			} else {
 				dst = ConfigNodeSerializer<T>().deserialize(context, node);
 			}
 		}
@@ -362,7 +364,7 @@ namespace Halley {
 			}
 		}
 
-		static void deserialize(std::optional<T>& dst, const ConfigNodeSerializationContext& context, const ConfigNode& node)
+		static void deserialize(std::optional<T>& dst, const std::optional<T>& defaultValue, const ConfigNodeSerializationContext& context, const ConfigNode& node)
 		{
 			dst = ConfigNodeSerializer<std::optional<T>>().deserialize(context, node);
 		}
@@ -380,7 +382,7 @@ namespace Halley {
 			}
 		}
 		
-		static void deserialize(OptionalLite<T>& dst, const ConfigNodeSerializationContext& context, const ConfigNode& node)
+		static void deserialize(OptionalLite<T>& dst, const OptionalLite<T>& defaultValue, const ConfigNodeSerializationContext& context, const ConfigNode& node)
 		{
 			dst = ConfigNodeSerializer<OptionalLite<T>>().deserialize(context, node);
 		}
@@ -437,10 +439,13 @@ namespace Halley {
 			}
 		}
 
-		static void deserialize(T& value, const ConfigNodeSerializationContext& context, const ConfigNode& node, const String& name, int serializationMask)
+		static void deserialize(T& value, const T& defaultValue, const ConfigNodeSerializationContext& context, const ConfigNode& node, const String& name, int serializationMask)
 		{
-			if (context.matchType(serializationMask)) {
-				ConfigNodeHelper<T>::deserialize(value, context, node[name]);
+			if (context.matchType(serializationMask) && node.getType() != ConfigNodeType::Noop) {
+				const auto& fieldNode = node[name];
+				if (fieldNode.getType() != ConfigNodeType::Noop) {
+					ConfigNodeHelper<T>::deserialize(value, defaultValue, context, node[name]);
+				}
 			}
 		}
 	};

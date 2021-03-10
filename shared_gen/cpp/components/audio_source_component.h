@@ -35,9 +35,9 @@ public:
 
 	void deserialize(const Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(event)>::deserialize(event, context, node, "event", makeMask(Type::Prefab, Type::SaveData));
-		Halley::EntityConfigNodeSerializer<decltype(rangeMin)>::deserialize(rangeMin, context, node, "rangeMin", makeMask(Type::Prefab, Type::SaveData));
-		Halley::EntityConfigNodeSerializer<decltype(rangeMax)>::deserialize(rangeMax, context, node, "rangeMax", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(event)>::deserialize(event, Halley::ResourceReference<Halley::AudioEvent>{}, context, node, "event", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(rangeMin)>::deserialize(rangeMin, float{ 50 }, context, node, "rangeMin", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(rangeMax)>::deserialize(rangeMax, float{ 100 }, context, node, "rangeMax", makeMask(Type::Prefab, Type::SaveData));
 	}
 
 };

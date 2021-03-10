@@ -31,8 +31,8 @@ public:
 
 	void deserialize(const Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(zoom)>::deserialize(zoom, context, node, "zoom", makeMask(Type::Prefab, Type::SaveData));
-		Halley::EntityConfigNodeSerializer<decltype(id)>::deserialize(id, context, node, "id", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(zoom)>::deserialize(zoom, float{ 1 }, context, node, "zoom", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(id)>::deserialize(id, Halley::String{}, context, node, "id", makeMask(Type::Prefab, Type::SaveData));
 	}
 
 };
