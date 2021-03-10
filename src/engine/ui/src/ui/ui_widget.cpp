@@ -558,7 +558,7 @@ void UIWidget::setParent(UIParent* p)
 		parent->markAsNeedingLayout();
 	}
 
-	if (anchor) {
+	if (alive && anchor) {
 		layout();
 	}
 
@@ -579,6 +579,9 @@ void UIWidget::notifyTreeRemovedFromRoot(UIRoot& root)
 	this->root = nullptr;
 	onRemovedFromRoot(root);
 	for (auto& c: getChildren()) {
+		c->notifyTreeRemovedFromRoot(root);
+	}
+	for (auto& c: getChildrenWaiting()) {
 		c->notifyTreeRemovedFromRoot(root);
 	}
 }

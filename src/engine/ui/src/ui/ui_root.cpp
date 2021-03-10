@@ -28,6 +28,7 @@ UIRoot::UIRoot(const HalleyAPI& api, Rect4f rect)
 
 UIRoot::~UIRoot()
 {
+	keyPressListeners.clear();
 	UIParent::clear();
 }
 

@@ -74,6 +74,12 @@ bool UIParent::removeDeadChildren()
 {
 	auto before = children.size();
 
+	for (auto& child: children) {
+		if (!child->isAlive() && child->getParent()) {
+			child->setParent(nullptr);
+		}
+	}
+
 	children.erase(std::remove_if(children.begin(), children.end(), [&] (auto& c)
 	{
 		return !c->isAlive();
@@ -108,6 +114,11 @@ std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren()
 const std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren() const
 {
 	return children;
+}
+
+std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildrenWaiting()
+{
+	return childrenWaiting;
 }
 
 std::shared_ptr<UIWidget> UIParent::getWidget(const String& id)
