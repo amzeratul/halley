@@ -4,6 +4,7 @@ using namespace Halley;
 
 UIGraphNode::UIGraphNode(const RenderGraphDefinition::Node& node, UIFactory& factory)
 	: UIWidget(node.id, {}, UISizer())
+	, factory(factory)
 	, node(node)
 {
 	factory.loadUI(*this, "ui/halley/graph_node");
@@ -12,6 +13,18 @@ UIGraphNode::UIGraphNode(const RenderGraphDefinition::Node& node, UIFactory& fac
 void UIGraphNode::onMakeUI()
 {
 	getWidgetAs<UILabel>("title")->setText(LocalisedString::fromUserString(getId()));
+
+	const auto& inputPins = getWidget("inputPins");
+	for (const auto& inputPin: node.getInputPins()) {
+		auto pin = std::make_shared<UIImage>(Sprite().setImage(factory.getResources(), "halley_ui/ui_render_graph_node_pin.png"));
+		inputPins->add(pin);
+	}
+
+	const auto& outputPins = getWidget("outputPins");
+	for (const auto& outputPin: node.getOutputPins()) {
+		auto pin = std::make_shared<UIImage>(Sprite().setImage(factory.getResources(), "halley_ui/ui_render_graph_node_pin.png"));
+		outputPins->add(pin);
+	}
 }
 
 bool UIGraphNode::canInteractWithMouse() const

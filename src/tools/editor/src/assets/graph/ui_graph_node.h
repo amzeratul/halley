@@ -15,6 +15,7 @@ namespace Halley {
 		bool isFocusLocked() const override;
 
 	private:
+		UIFactory& factory;
 		RenderGraphDefinition::Node node;
 		std::optional<Vector2f> drag;
 	};

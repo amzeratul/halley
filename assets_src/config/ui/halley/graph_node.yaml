@@ -1,17 +1,28 @@
 ---
 widget: { class: widget }
-sizer: { type: vertical }
+sizer: { type: horizontal, gap: 0 }
 children:
-- widget: { id: background, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue, size: [150, 10] }
-  sizer: { type: vertical }
-  border: [0, 0, 0, 4]
+- widget: { id: inputPins, class: widget }
+  sizer: { type: vertical, gap: 5 }
+  border: [0, 10, -2, 10]
+  children: []
+- widget: { id: backgroundBase, class: widget, childLayerAdjustment: 1 }
   proportion: 1
   children:
-  - widget: { id: title, class: label, text: "Title" }
-    fill: centre
-  - widget: { id: entityFields, class: widget }
-    border: [1, 4, 1, 1]
-    sizer: { type: grid, gap: 2, columns: 2, columnProportion: [0, 1] }
-    fill: fill
+  - widget: { id: background, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue, size: [150, 10] }
+    sizer: { type: vertical }
+    border: [0, 0, 0, 4]
+    proportion: 1
     children:
+    - widget: { id: title, class: label, text: "Title" }
+      fill: centre
+    - widget: { id: entityFields, class: widget }
+      border: [1, 4, 1, 1]
+      sizer: { type: grid, gap: 2, columns: 2, columnProportion: [0, 1] }
+      fill: fill
+      children:
+- widget: { id: outputPins, class: widget }
+  sizer: { type: vertical, gap: 5 }
+  border: [-2, 10, 0, 10]
+  children: []
 ...

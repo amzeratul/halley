@@ -3,6 +3,7 @@
 #include "halley/data_structures/config_node.h"
 #include "halley/resources/resource.h"
 #include "halley/resources/resource_data.h"
+#include "render_graph_pin_type.h"
 
 namespace Halley {
 	class MaterialDefinition;
@@ -44,6 +45,15 @@ namespace Halley {
 			void deserialize(Deserializer& s);
 
         	void loadMaterials(Resources& resources);
+
+        	gsl::span<const RenderGraphPinType> getInputPins() const { return inputPins; }
+        	gsl::span<const RenderGraphPinType> getOutputPins() const { return outputPins; }
+
+        private:
+            void generatePins();
+        	
+        	std::vector<RenderGraphPinType> inputPins;
+        	std::vector<RenderGraphPinType> outputPins;
         };
 
     	class Connection {

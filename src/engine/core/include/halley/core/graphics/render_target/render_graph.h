@@ -75,9 +75,9 @@ namespace Halley {
 		int lastDefinitionVersion = 0;
 
 		void addNode(String id, std::unique_ptr<RenderGraphNode> node);
-		void addOutputNode();
 		RenderGraphNode* getNode(const String& id);
 		RenderGraphNode* tryGetNode(const String& id);
+		RenderGraphNode* tryGetOutputNode();
 
 		void loadDefinition(std::shared_ptr<const RenderGraphDefinition> definition);
 	};

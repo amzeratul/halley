@@ -102,4 +102,21 @@ void RenderGraphDefinition::Node::loadMaterials(Resources& resources)
 	if (method == RenderGraphMethod::Screen) {
 		material = resources.get<MaterialDefinition>(methodParameters["material"].asString());
 	}
+	generatePins();
+}
+
+void RenderGraphDefinition::Node::generatePins()
+{
+	inputPins = {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }};
+	if (method == RenderGraphMethod::Output) {
+		outputPins.clear();
+	} else {
+		outputPins = {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }};
+	}
+
+	if (material) {
+		for (const auto& t: material->getTextures()) {
+			inputPins.push_back(RenderGraphPinType::Texture);
+		}
+	}
 }

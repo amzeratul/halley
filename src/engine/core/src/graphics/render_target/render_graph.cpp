@@ -6,13 +6,13 @@
 #include "graphics/render_target/render_graph_node.h"
 #include "graphics/render_target/render_target.h"
 #include "graphics/sprite/sprite.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
 
 RenderGraph::RenderGraph()
 {
-	addOutputNode();
 }
 
 RenderGraph::RenderGraph(std::shared_ptr<const RenderGraphDefinition> def)
@@ -27,8 +27,6 @@ void RenderGraph::loadDefinition(std::shared_ptr<const RenderGraphDefinition> de
 	
 	graphDefinition = std::move(definition);
 	lastDefinitionVersion = graphDefinition->getAssetVersion();
-	
-	addOutputNode();
 	
 	for (const auto& nodeDefinition: graphDefinition->getNodes()) {
 		addNode(nodeDefinition.id, std::make_unique<RenderGraphNode>(nodeDefinition));
@@ -59,13 +57,6 @@ void RenderGraph::addNode(String id, std::unique_ptr<RenderGraphNode> node)
 	nodeMap[std::move(id)] = nodes.back().get();
 }
 
-void RenderGraph::addOutputNode()
-{
-	RenderGraphDefinition::Node nodeDef;
-	nodeDef.method = RenderGraphMethod::Output;
-	addNode("output", std::make_unique<RenderGraphNode>(nodeDef));
-}
-
 RenderGraphNode* RenderGraph::getNode(const String& id)
 {
 	return nodeMap.at(id);
@@ -80,16 +71,31 @@ RenderGraphNode* RenderGraph::tryGetNode(const String& id)
 	return nullptr;
 }
 
+RenderGraphNode* RenderGraph::tryGetOutputNode()
+{
+	for (auto& node: nodes) {
+		if (node->method == RenderGraphMethod::Output) {
+			return node.get();
+		}
+	}
+	return nullptr;
+}
+
 void RenderGraph::render(const RenderContext& rc, VideoAPI& video)
 {
 	update();
 	
+	auto* outputNode = tryGetOutputNode();
+	if (!outputNode) {
+		Logger::logWarning("Render graph is missing an output node.");
+		return;
+	}
+
 	for (auto& node: nodes) {
 		node->startRender();
 	}
 
 	const auto renderSize = rc.getDefaultRenderTarget().getViewPort().getSize();
-	auto* outputNode = getNode("output");
 	outputNode->prepareDependencyGraph(video, renderSize);
 
 	for (auto& node: nodes) {
