@@ -41,6 +41,9 @@ namespace Halley {
 		void setVariable(std::string_view name, Vector4f value);
 		void setVariable(std::string_view name, Colour4f value);
 
+		bool remapNode(std::string_view outputName, uint8_t outputPin, std::string_view inputName, uint8_t inputPin);
+		void resetGraph();
+
 	private:
 		enum class VariableType {
 			None,
@@ -74,6 +77,7 @@ namespace Halley {
 		void addNode(String id, std::unique_ptr<RenderGraphNode> node);
 		void addOutputNode();
 		RenderGraphNode* getNode(const String& id);
+		RenderGraphNode* tryGetNode(const String& id);
 
 		void loadDefinition(std::shared_ptr<const RenderGraphDefinition> definition);
 	};

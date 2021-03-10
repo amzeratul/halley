@@ -319,3 +319,14 @@ void RenderGraphNode::connectInput(uint8_t inputPin, RenderGraphNode& node, uint
 	input.other = { &node, outputPin };
 	output.others.push_back({ this, inputPin });
 }
+
+void RenderGraphNode::disconnectInput(uint8_t inputPin)
+{
+	auto& pin = inputPins.at(inputPin);
+	auto* otherNode = pin.other.node;
+	pin.other = OtherPin();
+
+	auto& outputPin = otherNode->outputPins.at(pin.other.otherId);
+	auto& outs = outputPin.others;
+	outs.erase(std::remove_if(outs.begin(), outs.end(), [=] (const OtherPin& o) { return o.node == this; }), outs.end());
+}

@@ -71,6 +71,15 @@ RenderGraphNode* RenderGraph::getNode(const String& id)
 	return nodeMap.at(id);
 }
 
+RenderGraphNode* RenderGraph::tryGetNode(const String& id)
+{
+	const auto iter = nodeMap.find(id);
+	if (iter != nodeMap.end()) {
+		return iter->second;
+	}
+	return nullptr;
+}
+
 void RenderGraph::render(const RenderContext& rc, VideoAPI& video)
 {
 	update();
@@ -170,6 +179,27 @@ void RenderGraph::setVariable(std::string_view name, Vector4f value)
 void RenderGraph::setVariable(std::string_view name, Colour4f value)
 {
 	variables[name] = value;
+}
+
+bool RenderGraph::remapNode(std::string_view outputName, uint8_t outputPin, std::string_view inputName, uint8_t inputPin)
+{
+	auto* targetNode = tryGetNode(inputName);
+	auto* output = tryGetNode(outputName);
+	if (!output || !targetNode) {
+		return false;
+	}
+	
+	for (uint8_t i = 0; i < static_cast<uint8_t>(output->inputPins.size()); ++i) {
+		output->disconnectInput(i++);
+	}
+
+	output->connectInput(outputPin, *targetNode, inputPin);
+	return true;
+}
+
+void RenderGraph::resetGraph()
+{
+	loadDefinition(graphDefinition);
 }
 
 void RenderGraph::Variable::apply(Material& material, const String& name) const
