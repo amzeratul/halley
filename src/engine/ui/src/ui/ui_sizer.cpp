@@ -608,3 +608,13 @@ float UISizer::getRowProportion(int row) const
 	}
 	return 0.0f;
 }
+
+void UISizer::sortChildrenBySizerOrder()
+{
+	auto& children = curParent->getChildren();
+	if (children.size() == entries.size()) {
+		for (size_t i = 0; i < children.size(); ++i) {
+			children[i] = std::dynamic_pointer_cast<UIWidget>(entries[i].getPointer());
+		}
+	}
+}

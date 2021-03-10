@@ -13,6 +13,6 @@ namespace Halley {
 	protected:
 		std::shared_ptr<ScrollBackground> scrollBg;
 
-		void addNode(Vector2f pos);
+		void addNode(const RenderGraphDefinition::Node& pos);
 	};
 }

@@ -33,6 +33,7 @@ namespace Halley {
 	        String id;
         	RenderGraphMethod method = RenderGraphMethod::None;
         	ConfigNode methodParameters;
+        	Vector2f position;
         	
         	std::shared_ptr<const MaterialDefinition> material;
 

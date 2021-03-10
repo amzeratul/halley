@@ -4,8 +4,10 @@
 namespace Halley {
 	class UIGraphNode : public UIWidget {
 	public:
-		UIGraphNode(String id, UIFactory& factory);
+		UIGraphNode(const RenderGraphDefinition::Node& node, UIFactory& factory);
 
+		void onMakeUI() override;
+		
 		bool canInteractWithMouse() const override;
 		void pressMouse(Vector2f mousePos, int button) override;
 		void releaseMouse(Vector2f mousePos, int button) override;
@@ -13,6 +15,7 @@ namespace Halley {
 		bool isFocusLocked() const override;
 
 	private:
+		RenderGraphDefinition::Node node;
 		std::optional<Vector2f> drag;
 	};
 }

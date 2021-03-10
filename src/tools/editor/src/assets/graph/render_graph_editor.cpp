@@ -12,7 +12,7 @@ void RenderGraphEditor::reload()
 
 	int i = 0;
 	for (const auto& node: renderGraph->getNodes()) {
-		addNode(Vector2f(400, 50) * i + Vector2f(50, 200));
+		addNode(node);
 		++i;
 	}
 }

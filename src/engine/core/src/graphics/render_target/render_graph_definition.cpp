@@ -20,6 +20,7 @@ RenderGraphDefinition::Node::Node(const ConfigNode& node)
 	id = node["id"].asString();
 	method = fromString<RenderGraphMethod>(node["method"].asString());
 	methodParameters = ConfigNode(node["methodParameters"]);
+	position = node["position"].asVector2f(Vector2f(100, 100));
 }
 
 RenderGraphDefinition::Connection::Connection(const ConfigNode& node)
@@ -54,6 +55,7 @@ void RenderGraphDefinition::Node::serialize(Serializer& s) const
 	s << id;
 	s << method;
 	s << methodParameters;
+	s << position;
 }
 
 void RenderGraphDefinition::Node::deserialize(Deserializer& s)
@@ -61,6 +63,7 @@ void RenderGraphDefinition::Node::deserialize(Deserializer& s)
 	s >> id;
 	s >> method;
 	s >> methodParameters;
+	s >> position;
 }
 
 void RenderGraphDefinition::Connection::serialize(Serializer& s) const

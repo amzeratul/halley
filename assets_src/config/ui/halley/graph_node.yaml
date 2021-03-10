@@ -2,9 +2,16 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
-- widget: { id: background, class: image, image: $ui_input, size: [200, 100] }
-  proportion: 1
-  fill: fill
+- widget: { id: background, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue, size: [150, 10] }
   sizer: { type: vertical }
-  children: []
+  border: [0, 0, 0, 4]
+  proportion: 1
+  children:
+  - widget: { id: title, class: label, text: "Title" }
+    fill: centre
+  - widget: { id: entityFields, class: widget }
+    border: [1, 4, 1, 1]
+    sizer: { type: grid, gap: 2, columns: 2, columnProportion: [0, 1] }
+    fill: fill
+    children:
 ...

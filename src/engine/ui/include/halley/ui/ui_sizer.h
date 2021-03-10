@@ -74,10 +74,10 @@ namespace Halley {
 	private:
 		UIElementPtr widget;
 		float proportion;
-		Vector4f border;
 		int fillFlags;
-		Vector2f position;
 		mutable bool enabled = true;
+		Vector4f border;
+		Vector2f position;
 	};
 
 	class UIWidget;
@@ -133,6 +133,7 @@ namespace Halley {
 		void sortItems(F f)
 		{
 			std::sort(entries.begin(), entries.end(), f);
+			sortChildrenBySizerOrder();
 		}
 
 	private:
@@ -162,5 +163,7 @@ namespace Halley {
 		void setRectGrid(Rect4f rect);
 		float getColumnProportion(int column) const;
 		float getRowProportion(int row) const;
+
+		void sortChildrenBySizerOrder();
 	};
 }

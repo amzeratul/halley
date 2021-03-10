@@ -17,8 +17,8 @@ void GraphEditor::onMakeUI()
 	scrollBg->setZoomEnabled(false);
 }
 
-void GraphEditor::addNode(Vector2f pos)
+void GraphEditor::addNode(const RenderGraphDefinition::Node& node)
 {
-	auto nodeWidget = std::make_shared<UIGraphNode>("", factory);
-	scrollBg->add(nodeWidget, 0, {}, {}, pos);
+	auto nodeWidget = std::make_shared<UIGraphNode>(node, factory);
+	scrollBg->add(std::move(nodeWidget), 0, {}, {}, node.position);
 }

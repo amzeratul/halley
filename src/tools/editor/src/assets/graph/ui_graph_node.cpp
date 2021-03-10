@@ -2,10 +2,16 @@
 
 using namespace Halley;
 
-UIGraphNode::UIGraphNode(String id, UIFactory& factory)
-	: UIWidget(std::move(id), {}, UISizer())
+UIGraphNode::UIGraphNode(const RenderGraphDefinition::Node& node, UIFactory& factory)
+	: UIWidget(node.id, {}, UISizer())
+	, node(node)
 {
 	factory.loadUI(*this, "ui/halley/graph_node");
+}
+
+void UIGraphNode::onMakeUI()
+{
+	getWidgetAs<UILabel>("title")->setText(LocalisedString::fromUserString(getId()));
 }
 
 bool UIGraphNode::canInteractWithMouse() const
@@ -53,6 +59,7 @@ void UIGraphNode::onMouseOver(Vector2f mousePos)
 					sizer[i].setPosition(newPos);
 				}
 			}
+			sizer.sortItems([] (const UISizerEntry& a, const UISizerEntry& b) -> bool { return a.getPosition().y < b.getPosition().y; });
 			parent->layout();
 		}
 	}
