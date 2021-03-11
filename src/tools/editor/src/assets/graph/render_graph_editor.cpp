@@ -19,6 +19,11 @@ void RenderGraphEditor::reload()
 	}
 }
 
+std::shared_ptr<const Resource> RenderGraphEditor::loadResource(const String& assetId)
+{
+	return gameResources.get<RenderGraphDefinition>(assetId);
+}
+
 void RenderGraphEditor::drawConnections(UIPainter& painter)
 {
 	painter.draw([this] (Painter& painter)
@@ -37,13 +42,32 @@ void RenderGraphEditor::drawConnections(UIPainter& painter)
 
 			const auto fromPinType = fromNode.getOutputPins()[connection.fromPin];
 			const auto col = getColourForPinType(fromPinType);
-			
-			painter.drawLine({{ startPos, endPos }}, 2, col);
+
+			drawConnection(painter, startPos, endPos, col);
 		}
 	});
 }
 
-std::shared_ptr<const Resource> RenderGraphEditor::loadResource(const String& assetId)
+void RenderGraphEditor::drawConnection(Painter& painter, Vector2f startPoint, Vector2f endPoint, Colour4f col) const
 {
-	return gameResources.get<RenderGraphDefinition>(assetId);
+	const float dist = std::max(std::abs(endPoint.x - startPoint.x), 50.0f) / 2;
+	const Vector2f p0 = startPoint;
+	const Vector2f p1 = startPoint + Vector2f(dist, 0);
+	const Vector2f p2 = endPoint - Vector2f(dist, 0);
+	const Vector2f p3 = endPoint;
+	
+	std::vector<Vector2f> points;
+	const size_t nPoints = 30; // eh
+
+	const float scale = 1.0f / static_cast<float>(nPoints - 1);
+	for (size_t i = 0; i < nPoints; ++i) {
+		const float t = static_cast<float>(i) * scale;
+		Vector2f p =
+			(1 - t) * (1 - t) * (1 - t) * p0 +
+			3 * (1 - t) * (1 - t) * t * p1 +
+			3 * (1 - t) * t * t * p2 +
+			t * t * t * p3;
+		points.push_back(p);
+	}
+	painter.drawLine(points, 2, col);
 }

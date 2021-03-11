@@ -14,5 +14,7 @@ namespace Halley {
 		std::shared_ptr<const Resource> loadResource(const String& assetId) override;
 		
 		std::shared_ptr<const RenderGraphDefinition> renderGraph;
+
+		void drawConnection(Painter& painter, Vector2f p0, Vector2f p1, Colour4f col) const;
 	};
 }

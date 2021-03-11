@@ -31,7 +31,7 @@ void UIGraphNode::onMakeUI()
 			inputPins->add(pin);
 		}
 	}
-
+	 
 	{
 		const auto& outputPins = getWidget("outputPins");
 		int i = 0;
