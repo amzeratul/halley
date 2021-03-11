@@ -170,6 +170,8 @@ void ChooseAssetWindow::makeUI()
 	{
 		accept();
 	});
+
+	setChildLayerAdjustment(10);
 }
 
 void ChooseAssetWindow::accept()
