@@ -123,6 +123,10 @@ entityIcons:
     image: entity_icons/person.png
     name: Person
     colour: $ui_text
+  - id: photo
+    image: entity_icons/photo.png
+    name: Photo
+    colour: $ui_text
   - id: psychology
     image: entity_icons/psychology.png
     name: Psychology

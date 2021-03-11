@@ -42,10 +42,9 @@ Colour4f GraphEditor::getColourForPinType(RenderGraphPinType pinType) const
 	}
 }
 
-void GraphEditor::addNode(const RenderGraphDefinition::Node& node)
+void GraphEditor::addNode(std::shared_ptr<UIGraphNode> node)
 {
-	auto nodeWidget = std::make_shared<UIGraphNode>(*this, node, factory, factory.getStyle("graphNode"));
-	scrollBg->add(std::move(nodeWidget), 0, {}, {}, node.position);
+	scrollBg->add(std::move(node), 0, {}, {}, node->getPosition());
 }
 
 GraphConnections::GraphConnections(GraphEditor& editor)

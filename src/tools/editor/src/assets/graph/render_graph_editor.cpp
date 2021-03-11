@@ -14,7 +14,8 @@ void RenderGraphEditor::reload()
 
 	int i = 0;
 	for (const auto& node: renderGraph->getNodes()) {
-		addNode(node);
+		auto nodeWidget = std::make_shared<UIRenderGraphNode>(*this, node, factory, factory.getStyle("graphNode"));
+		addNode(nodeWidget);
 		++i;
 	}
 }
@@ -31,8 +32,7 @@ void RenderGraphEditor::drawConnections(UIPainter& painter)
 		for (const auto& connection: renderGraph->getConnections()) {
 			const auto& fromNodeWidget = getNode(connection.fromId);
 			const auto& toNodeWidget = getNode(connection.toId);
-			const auto& fromNode = fromNodeWidget->getNode();
-			const auto& toNode = toNodeWidget->getNode();
+			const auto& fromNode = std::dynamic_pointer_cast<UIRenderGraphNode>(fromNodeWidget)->getNode();
 
 			const auto outputPinWidget = fromNodeWidget->getPinWidget(true, connection.fromPin);
 			const auto inputPinWidget = toNodeWidget->getPinWidget(false, connection.toPin);

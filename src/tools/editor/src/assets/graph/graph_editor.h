@@ -20,7 +20,7 @@ namespace Halley {
 		std::shared_ptr<ScrollBackground> scrollBg;
 		UIStyle connectionsStyle;
 
-		void addNode(const RenderGraphDefinition::Node& pos);
+		void addNode(std::shared_ptr<UIGraphNode> node);
 	};
 
 	class GraphConnections : public UIWidget {

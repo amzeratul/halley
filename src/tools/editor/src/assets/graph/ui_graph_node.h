@@ -6,9 +6,10 @@ namespace Halley {
 
 	class UIGraphNode : public UIWidget {
 	public:
-		UIGraphNode(GraphEditor& editor, const RenderGraphDefinition::Node& node, UIFactory& factory, UIStyle style);
+		UIGraphNode(String id, GraphEditor& editor, UIFactory& factory, UIStyle style);
 
-		void onMakeUI() override;
+		Vector2f getPosition() const { return position; }
+		void setPosition(Vector2f position) { this->position = position; }
 		
 		bool canInteractWithMouse() const override;
 		void pressMouse(Vector2f mousePos, int button) override;
@@ -17,17 +18,29 @@ namespace Halley {
 		bool isFocusLocked() const override;
 		
 		std::shared_ptr<UIWidget> getPinWidget(bool outputPin, uint8_t pinId);
-		const RenderGraphDefinition::Node& getNode() const { return node; }
 
-	private:
+	protected:
 		GraphEditor& editor;
 		UIFactory& factory;
-		RenderGraphDefinition::Node node;
 		UIStyle style;
-
-		std::optional<Vector2f> drag;
 
 		std::vector<std::shared_ptr<UIWidget>> inputPinWidgets;
 		std::vector<std::shared_ptr<UIWidget>> outputPinWidgets;
+	
+	private:
+		std::optional<Vector2f> drag;
+		Vector2f position;
+	};
+
+	class UIRenderGraphNode : public UIGraphNode {
+	public:
+		UIRenderGraphNode(GraphEditor& editor, const RenderGraphDefinition::Node& node, UIFactory& factory, UIStyle style);
+
+		void onMakeUI() override;
+
+		const RenderGraphDefinition::Node& getNode() const { return node; }
+
+	private:
+		RenderGraphDefinition::Node node;
 	};
 }
