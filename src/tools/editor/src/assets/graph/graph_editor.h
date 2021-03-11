@@ -10,6 +10,7 @@ namespace Halley {
 	public:
 		GraphEditor(UIFactory& factory, Resources& gameResources, Project& project, AssetType type);
 
+		void reload() override;
 		void onMakeUI() override;
 		std::shared_ptr<UIGraphNode> getNode(std::string_view id);
 

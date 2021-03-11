@@ -12,6 +12,8 @@ void RenderGraphEditor::reload()
 {
 	renderGraph = std::dynamic_pointer_cast<const RenderGraphDefinition>(resource);
 
+	GraphEditor::reload();
+
 	int i = 0;
 	for (const auto& node: renderGraph->getNodes()) {
 		auto nodeWidget = std::make_shared<UIRenderGraphNode>(*this, node, factory, factory.getStyle("graphNode"));

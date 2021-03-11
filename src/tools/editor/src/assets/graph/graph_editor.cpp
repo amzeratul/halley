@@ -12,11 +12,16 @@ GraphEditor::GraphEditor(UIFactory& factory, Resources& gameResources, Project& 
 	factory.loadUI(*this, "ui/halley/graph_editor");
 }
 
+void GraphEditor::reload()
+{
+	scrollBg->clear();
+	scrollBg->add(std::make_shared<GraphConnections>(*this));
+}
+
 void GraphEditor::onMakeUI()
 {
 	scrollBg = getWidgetAs<ScrollBackground>("scrollBackground");
 	scrollBg->setZoomEnabled(false);
-	scrollBg->add(std::make_shared<GraphConnections>(*this));
 }
 
 std::shared_ptr<UIGraphNode> GraphEditor::getNode(std::string_view id)
