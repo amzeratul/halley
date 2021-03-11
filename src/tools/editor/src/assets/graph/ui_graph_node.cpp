@@ -1,9 +1,12 @@
 #include "ui_graph_node.h"
 
+#include "graph_editor.h"
+
 using namespace Halley;
 
-UIGraphNode::UIGraphNode(const RenderGraphDefinition::Node& node, UIFactory& factory)
+UIGraphNode::UIGraphNode(GraphEditor& editor, const RenderGraphDefinition::Node& node, UIFactory& factory)
 	: UIWidget(node.id, {}, UISizer())
+	, editor(editor)
 	, factory(factory)
 	, node(node)
 {
@@ -14,16 +17,24 @@ void UIGraphNode::onMakeUI()
 {
 	getWidgetAs<UILabel>("title")->setText(LocalisedString::fromUserString(getId()));
 
-	const auto& inputPins = getWidget("inputPins");
-	for (const auto& inputPin: node.getInputPins()) {
-		auto pin = std::make_shared<UIImage>(Sprite().setImage(factory.getResources(), "halley_ui/ui_render_graph_node_pin.png"));
-		inputPins->add(pin);
+	{
+		const auto& inputPins = getWidget("inputPins");
+		int i = 0;
+		for (const auto& inputPin: node.getInputPins()) {
+			auto pin = std::make_shared<UIImage>("inputPin" + toString(i++), Sprite().setImage(factory.getResources(), "halley_ui/ui_render_graph_node_pin.png"));
+			inputPinWidgets.push_back(pin);
+			inputPins->add(pin);
+		}
 	}
 
-	const auto& outputPins = getWidget("outputPins");
-	for (const auto& outputPin: node.getOutputPins()) {
-		auto pin = std::make_shared<UIImage>(Sprite().setImage(factory.getResources(), "halley_ui/ui_render_graph_node_pin.png"));
-		outputPins->add(pin);
+	{
+		const auto& outputPins = getWidget("outputPins");
+		int i = 0;
+		for (const auto& outputPin: node.getOutputPins()) {
+			auto pin = std::make_shared<UIImage>("outputPin" + toString(i++), Sprite().setImage(factory.getResources(), "halley_ui/ui_render_graph_node_pin.png"));
+			outputPinWidgets.push_back(pin);
+			outputPins->add(pin);
+		}
 	}
 }
 
@@ -82,3 +93,9 @@ bool UIGraphNode::isFocusLocked() const
 {
 	return !!drag;
 }
+
+std::shared_ptr<UIWidget> UIGraphNode::getPinWidget(bool outputPin, uint8_t pinId)
+{
+	return (outputPin ? outputPinWidgets : inputPinWidgets).at(pinId);
+}
+

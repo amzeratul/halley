@@ -89,3 +89,8 @@ void UIPainter::draw(const TextRenderer& text, bool forceCopy)
 		painter->add(text, mask, layer, getCurrentPriorityAndIncrement(), clip);
 	}
 }
+
+void UIPainter::draw(std::function<void(Painter&)> f)
+{
+	painter->add(std::move(f), mask, layer, getCurrentPriorityAndIncrement(), clip);
+}

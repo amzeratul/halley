@@ -6,6 +6,7 @@ namespace Halley {
 	class TextRenderer;
 	class Sprite;
 	class SpritePainter;
+	class Painter;
 
 	class UIPainter {
 	public:
@@ -16,6 +17,7 @@ namespace Halley {
 
 		void draw(const Sprite& sprite, bool forceCopy = false);
 		void draw(const TextRenderer& text, bool forceCopy = false);
+		void draw(std::function<void(Painter&)> f);
 
 		UIPainter clone() const;
 		UIPainter withAdjustedLayer(int delta) const;

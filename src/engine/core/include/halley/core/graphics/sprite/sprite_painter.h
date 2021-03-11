@@ -18,12 +18,15 @@ namespace Halley
 		SpriteRef,
 		SpriteCached,
 		TextRef,
-		TextCached
+		TextCached,
+		Callback
 	};
 
 	class SpritePainterEntry
 	{
 	public:
+		using Callback = std::function<void(Painter&)>;
+		
 		SpritePainterEntry(gsl::span<const Sprite> sprites, int mask, int layer, float tieBreaker, size_t insertOrder, std::optional<Rect4f> clip);
 		SpritePainterEntry(gsl::span<const TextRenderer> texts, int mask, int layer, float tieBreaker, size_t insertOrder, std::optional<Rect4f> clip);
 		SpritePainterEntry(SpritePainterEntryType type, size_t spriteIdx, size_t count, int mask, int layer, float tieBreaker, size_t insertOrder, std::optional<Rect4f> clip);
@@ -61,6 +64,7 @@ namespace Halley
 		void addCopy(gsl::span<const Sprite> sprites, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
 		void add(const TextRenderer& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
 		void addCopy(const TextRenderer& text, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
+		void add(SpritePainterEntry::Callback callback, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
 		
 		void draw(int mask, Painter& painter);
 
@@ -68,6 +72,7 @@ namespace Halley
 		Vector<SpritePainterEntry> sprites;
 		Vector<Sprite> cachedSprites;
 		Vector<TextRenderer> cachedText;
+		Vector<SpritePainterEntry::Callback> callbacks;
 		bool dirty = false;
 
 		void draw(gsl::span<const Sprite> sprite, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;

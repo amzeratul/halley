@@ -1,5 +1,5 @@
 ---
-widget: { class: widget }
+widget: { class: widget, childLayerAdjustment: 1 }
 sizer: { type: horizontal, gap: 0 }
 children:
 - widget: { id: inputPins, class: widget }

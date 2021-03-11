@@ -152,6 +152,14 @@ void SpritePainter::addCopy(const TextRenderer& text, int mask, int layer, float
 	dirty = true;
 }
 
+void SpritePainter::add(SpritePainterEntry::Callback callback, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
+{
+	Expects(mask >= 0);
+	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::Callback, callbacks.size(), 1, mask, layer, tieBreaker, sprites.size(), std::move(clip)));
+	callbacks.push_back(std::move(callback));
+	dirty = true;
+}
+
 void SpritePainter::draw(int mask, Painter& painter)
 {
 	if (dirty) {
@@ -180,6 +188,8 @@ void SpritePainter::draw(int mask, Painter& painter)
 				draw(s.getTexts(), painter, view, s.getClip());
 			} else if (type == SpritePainterEntryType::TextCached) {
 				draw(gsl::span<const TextRenderer>(cachedText.data() + s.getIndex(), s.getCount()), painter, view, s.getClip());
+			} else if (type == SpritePainterEntryType::Callback) {
+				callbacks.at(s.getIndex())(painter);
 			}
 		}
 	}
