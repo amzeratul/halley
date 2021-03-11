@@ -4,11 +4,12 @@
 
 using namespace Halley;
 
-UIGraphNode::UIGraphNode(GraphEditor& editor, const RenderGraphDefinition::Node& node, UIFactory& factory)
+UIGraphNode::UIGraphNode(GraphEditor& editor, const RenderGraphDefinition::Node& node, UIFactory& factory, UIStyle style)
 	: UIWidget(node.id, {}, UISizer())
 	, editor(editor)
 	, factory(factory)
 	, node(node)
+	, style(style)
 {
 	factory.loadUI(*this, "ui/halley/graph_node");
 }
@@ -17,11 +18,15 @@ void UIGraphNode::onMakeUI()
 {
 	getWidgetAs<UILabel>("title")->setText(LocalisedString::fromUserString(getId()));
 
+	const auto bg = style.getSprite(node.method + "Background");
+	getWidgetAs<UIImage>("background")->getSprite().setColour(bg.getColour());
+
 	{
 		const auto& inputPins = getWidget("inputPins");
 		int i = 0;
 		for (const auto& inputPin: node.getInputPins()) {
 			auto pin = std::make_shared<UIImage>("inputPin" + toString(i++), Sprite().setImage(factory.getResources(), "halley_ui/ui_render_graph_node_pin.png"));
+			pin->getSprite().setColour(editor.getColourForPinType(inputPin));
 			inputPinWidgets.push_back(pin);
 			inputPins->add(pin);
 		}
@@ -32,6 +37,7 @@ void UIGraphNode::onMakeUI()
 		int i = 0;
 		for (const auto& outputPin: node.getOutputPins()) {
 			auto pin = std::make_shared<UIImage>("outputPin" + toString(i++), Sprite().setImage(factory.getResources(), "halley_ui/ui_render_graph_node_pin.png"));
+			pin->getSprite().setColour(editor.getColourForPinType(outputPin));
 			outputPinWidgets.push_back(pin);
 			outputPins->add(pin);
 		}

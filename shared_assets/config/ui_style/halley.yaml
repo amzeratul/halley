@@ -243,4 +243,13 @@ uiStyle:
   scrollBackground:
     background: { img: $ui_scroll_background, colour: $scrollBackground }
 
+  graphNode:
+    paintBackground: { img: $ui_title_capsule, colour: $taskComplete }
+    screenBackground: { img: $ui_title_capsule, colour: $taskRunning }
+    outputBackground: { img: $ui_title_capsule, colour: $taskError }
+
+  graphConnections:
+    colourBuffer: $ui_logErrorText
+    depthStencilBuffer: $ui_logDevText
+    texture: $ui_logInfoText
 ...

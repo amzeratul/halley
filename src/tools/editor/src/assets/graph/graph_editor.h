@@ -14,9 +14,11 @@ namespace Halley {
 		std::shared_ptr<UIGraphNode> getNode(std::string_view id);
 
 		virtual void drawConnections(UIPainter& painter);
+		Colour4f getColourForPinType(RenderGraphPinType pinType) const;
 
 	protected:
 		std::shared_ptr<ScrollBackground> scrollBg;
+		UIStyle connectionsStyle;
 
 		void addNode(const RenderGraphDefinition::Node& pos);
 	};

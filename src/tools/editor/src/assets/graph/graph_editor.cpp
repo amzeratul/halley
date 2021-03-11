@@ -7,6 +7,7 @@ using namespace Halley;
 
 GraphEditor::GraphEditor(UIFactory& factory, Resources& gameResources, Project& project, AssetType type)
 	: AssetEditor(factory, gameResources, project, type)
+	, connectionsStyle(factory.getStyle("graphConnections"))
 {
 	factory.loadUI(*this, "ui/halley/graph_editor");
 }
@@ -27,9 +28,23 @@ void GraphEditor::drawConnections(UIPainter& painter)
 {
 }
 
+Colour4f GraphEditor::getColourForPinType(RenderGraphPinType pinType) const
+{
+	switch (pinType) {
+	case RenderGraphPinType::ColourBuffer:
+		return connectionsStyle.getColour("colourBuffer");
+	case RenderGraphPinType::DepthStencilBuffer:
+		return connectionsStyle.getColour("depthStencilBuffer");
+	case RenderGraphPinType::Texture:
+		return connectionsStyle.getColour("texture");
+	default:
+		return Colour4f(1, 1, 1);
+	}
+}
+
 void GraphEditor::addNode(const RenderGraphDefinition::Node& node)
 {
-	auto nodeWidget = std::make_shared<UIGraphNode>(*this, node, factory);
+	auto nodeWidget = std::make_shared<UIGraphNode>(*this, node, factory, factory.getStyle("graphNode"));
 	scrollBg->add(std::move(nodeWidget), 0, {}, {}, node.position);
 }
 

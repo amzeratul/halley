@@ -36,10 +36,10 @@ void RenderGraphEditor::drawConnections(UIPainter& painter)
 			const auto endPos = inputPinWidget->getPosition() + inputPinWidget->getSize() / 2;
 
 			const auto fromPinType = fromNode.getOutputPins()[connection.fromPin];
-			const auto col = fromPinType == RenderGraphPinType::DepthStencilBuffer ? Colour4f(0, 0.5f, 1.0f) : Colour4f(1, 0, 0);
+			const auto col = getColourForPinType(fromPinType);
 			
 			painter.drawLine({{ startPos, endPos }}, 2, col);
-		}		
+		}
 	});
 }
 

@@ -6,7 +6,7 @@ namespace Halley {
 
 	class UIGraphNode : public UIWidget {
 	public:
-		UIGraphNode(GraphEditor& editor, const RenderGraphDefinition::Node& node, UIFactory& factory);
+		UIGraphNode(GraphEditor& editor, const RenderGraphDefinition::Node& node, UIFactory& factory, UIStyle style);
 
 		void onMakeUI() override;
 		
@@ -23,6 +23,8 @@ namespace Halley {
 		GraphEditor& editor;
 		UIFactory& factory;
 		RenderGraphDefinition::Node node;
+		UIStyle style;
+
 		std::optional<Vector2f> drag;
 
 		std::vector<std::shared_ptr<UIWidget>> inputPinWidgets;
