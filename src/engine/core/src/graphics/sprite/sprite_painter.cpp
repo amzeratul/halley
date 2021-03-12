@@ -189,7 +189,7 @@ void SpritePainter::draw(int mask, Painter& painter)
 			} else if (type == SpritePainterEntryType::TextCached) {
 				draw(gsl::span<const TextRenderer>(cachedText.data() + s.getIndex(), s.getCount()), painter, view, s.getClip());
 			} else if (type == SpritePainterEntryType::Callback) {
-				callbacks.at(s.getIndex())(painter);
+				draw(callbacks.at(s.getIndex()), painter, s.getClip());
 			}
 		}
 	}
@@ -209,5 +209,16 @@ void SpritePainter::draw(gsl::span<const TextRenderer> texts, Painter& painter, 
 {
 	for (const auto& text: texts) {
 		text.draw(painter, clip);
+	}
+}
+
+void SpritePainter::draw(const SpritePainterEntry::Callback& callback, Painter& painter, const std::optional<Rect4f>& clip) const
+{
+	if (clip) {
+		painter.setRelativeClip(clip.value());
+	}
+	callback(painter);
+	if (clip) {
+		painter.setClip();
 	}
 }
