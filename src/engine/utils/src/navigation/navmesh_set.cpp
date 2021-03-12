@@ -314,3 +314,21 @@ std::vector<NavmeshSet::NodeAndConn> NavmeshSet::findRegionPath(Vector2f startPo
 	
 	return {};
 }
+
+std::pair<uint16_t, uint16_t> NavmeshSet::getPortalDestination(uint16_t region, uint16_t edge) const
+{
+	constexpr auto maxVal = std::numeric_limits<uint16_t>::max();
+	if (edge == maxVal) {
+		return { maxVal, maxVal };
+	}
+	
+	const auto& nodePortals = regionNodes.at(region).portals;
+	for (const auto& portalId: nodePortals) {
+		const auto& portal = portalNodes.at(portalId);
+		if (portal.fromRegion == region && portal.fromPortal == edge) {
+			return { portal.toRegion, portal.toPortal };
+		}
+	}
+	
+	return { maxVal, maxVal };
+}

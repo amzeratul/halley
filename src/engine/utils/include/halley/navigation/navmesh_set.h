@@ -28,6 +28,8 @@ namespace Halley {
 		const Navmesh* getNavMeshAt(Vector2f pos, int subWorld) const;
 		size_t getNavMeshIdxAt(Vector2f pos, int subWorld) const;
 
+		std::pair<uint16_t, uint16_t> getPortalDestination(uint16_t region, uint16_t edge) const;
+
 	private:
 		struct PortalConnection {
 			uint16_t portalId;
