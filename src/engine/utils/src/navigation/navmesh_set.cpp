@@ -133,7 +133,7 @@ void NavmeshSet::linkNavmeshes()
 		
 		portalNode.connections.reserve(dstRegion.portals.size() - 1);
 		for (size_t i = 0; i < dstRegion.portals.size(); ++i) {
-			if (i != portalNode.toPortal) {
+			if (curPortalId != portalNode.toPortal) {
 				const auto dstPortalId = dstRegion.portals[i];
 				const auto& other = portalNodes[dstPortalId];
 				portalNode.connections.emplace_back(dstPortalId, portalNode.toRegion, (other.pos - curPos).length());
