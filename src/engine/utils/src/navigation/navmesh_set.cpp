@@ -142,7 +142,7 @@ void NavmeshSet::linkNavmeshes()
 	}
 }
 
-void NavmeshSet::reportUnlinkedPortals() const
+void NavmeshSet::reportUnlinkedPortals(std::function<String(Vector2i)> getChunkName) const
 {
 	std::set<Vector2i> occupiedGrids;
 	for (const auto& navmesh: navmeshes) {
@@ -165,7 +165,7 @@ void NavmeshSet::reportUnlinkedPortals() const
 					const auto gridPos = navmesh.getWorldGridPos();
 					const Vector2i gridPosOffset = Vector2i(Vector2f(std::abs(normalPos.x) >= 0.99f ? signOf(normalPos.x) : 0, std::abs(normalPos.y) >= 0.99f ? signOf(normalPos.y) : 0));
 					if (occupiedGrids.find(gridPos + gridPosOffset) != occupiedGrids.end()) {
-						Logger::logWarning("Scene bounds Portal with id " + toString(portal.id) + " at " + portal.pos + " on subWorld " + toString(navmesh.getSubWorld()) +  + " (between chunks at " + gridPos + " and " + (gridPos + gridPosOffset) + ") is unlinked.");
+						Logger::logWarning("Unlinked portal between \"" + getChunkName(gridPos) + "\" and \"" + getChunkName(gridPos + gridPosOffset) + "\". (Portal id " + toString(portal.id) + " at " + portal.pos + " on subWorld " + toString(navmesh.getSubWorld()) + ")");
 					}
 				}
 			}
