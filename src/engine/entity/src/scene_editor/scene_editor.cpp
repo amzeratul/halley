@@ -180,16 +180,31 @@ Resources& SceneEditor::getEditorResources() const
 }
 
 void SceneEditor::drawOverlay(Painter& painter, Rect4f view)
-{	
+{
+	const auto worldOffset = getWorldOffset();
+	const Vector2i scenePos = Vector2i(mousePos.round());
+	const Vector2i worldPos = scenePos + Vector2i(worldOffset.value_or(Vector2f()));
+	
 	const Vector2f drawPos = view.getBottomLeft() + Vector2f(10, -10);
-	String drawStr = "[" + toString(camera.getZoom()) + "x] " + Vector2i(mousePos.round()).toString();
+	String drawStr = "Zoom: " + toString(camera.getZoom()) + "x";
 	std::vector<ColourOverride> colours;
+
+	colours.emplace_back(drawStr.size(), Colour4f(1.0f, 1.0f, 0.8f));
+	drawStr += "\nScene: " + scenePos;
+
+	if (worldOffset) {
+		colours.emplace_back(drawStr.size(), Colour4f(0.8f, 1.0f, 0.8f));
+		drawStr += "\nWorld: " + Vector2i(worldPos);
+	}
 
 	if (selectedEntity) {
 		const auto* t2d = selectedEntity.value().tryGetComponent<Transform2DComponent>();
+		colours.emplace_back(drawStr.size(), Colour4f(0.8f, 0.8f, 1.0f));
 		if (t2d) {
-			colours.emplace_back(drawStr.size(), Colour4f(0.5f, 0.5f, 0.5f));
-			drawStr += " " + t2d->inverseTransformPoint(mousePos.round()).toString();
+			const auto objectPos = Vector2i(t2d->inverseTransformPoint(Vector2f(scenePos)));
+			drawStr += "\nObject: " + objectPos;
+		} else {
+			drawStr += "\nObject: --";
 		}
 	}
 	
@@ -197,6 +212,7 @@ void SceneEditor::drawOverlay(Painter& painter, Rect4f view)
 		.setPosition(drawPos)
 		.setText(drawStr)
 		.setColourOverride(colours)
+		.setOffset(Vector2f(0, 1))
 		.draw(painter);
 }
 
@@ -217,6 +233,11 @@ void SceneEditor::onEntitySelected(std::optional<EntityRef> entity)
 Vector2f SceneEditor::getMousePos() const
 {
 	return mousePos;
+}
+
+std::optional<Vector2f> SceneEditor::getWorldOffset() const
+{
+	return {};
 }
 
 const std::vector<EntityId>& SceneEditor::getCameraIds() const

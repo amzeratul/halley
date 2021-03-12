@@ -76,6 +76,7 @@ namespace Halley {
 
     	virtual void onEntitySelected(std::optional<EntityRef> entity);
 
+		virtual std::optional<Vector2f> getWorldOffset() const;
     	Vector2f getMousePos() const;
 		std::unique_ptr<World> doCreateWorld(const String& stageName) const;
 
