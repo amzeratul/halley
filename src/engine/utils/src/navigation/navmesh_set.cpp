@@ -165,7 +165,7 @@ void NavmeshSet::reportUnlinkedPortals(std::function<String(Vector2i)> getChunkN
 					const auto gridPos = navmesh.getWorldGridPos();
 					const Vector2i gridPosOffset = Vector2i(Vector2f(std::abs(normalPos.x) >= 0.99f ? signOf(normalPos.x) : 0, std::abs(normalPos.y) >= 0.99f ? signOf(normalPos.y) : 0));
 					if (occupiedGrids.find(gridPos + gridPosOffset) != occupiedGrids.end()) {
-						Logger::logWarning("Unlinked portal between \"" + getChunkName(gridPos) + "\" and \"" + getChunkName(gridPos + gridPosOffset) + "\". (Portal id " + toString(portal.id) + " at " + portal.pos + " on subWorld " + toString(navmesh.getSubWorld()) + ")");
+						Logger::logWarning("Unlinked portal between \"" + getChunkName(gridPos) + "\" and \"" + getChunkName(gridPos + gridPosOffset) + "\" at " + portal.pos + " on subWorld " + toString(navmesh.getSubWorld()));
 					}
 				}
 			}
