@@ -1,6 +1,8 @@
 #pragma once
 #include <typeinfo>
 #include <gsl/gsl_assert>
+#include <gsl/span>
+#include <sstream>
 #include <algorithm>
 #include "halleystring.h"
 #include <halley/support/exception.h>
@@ -224,6 +226,45 @@ namespace Halley
 	String operator+ (const T& lhp, const String& rhp)
 	{
 		return toString<typename std::remove_cv<T>::type>(lhp) + rhp;
+	}
+
+
+	template <typename T>
+	String toString(gsl::span<const T> values, std::string_view separator)
+	{
+		std::stringstream ss;
+		for (size_t i = 0; i < values.size(); i++) {
+			if (i != 0) {
+				ss << separator;
+			}
+			ss << toString(values[i]).cppStr();
+		}
+		return ss.str();
+	}
+
+	template <typename T, typename F>
+	String toString(gsl::span<const T> values, std::string_view separator, F f)
+	{
+		std::stringstream ss;
+		for (size_t i = 0; i < values.size(); i++) {
+			if (i != 0) {
+				ss << separator;
+			}
+			ss << f(values[i]).cppStr();
+		}
+		return ss.str();
+	}
+	
+	template <typename T>
+	String toString(const std::vector<T> values, std::string_view separator)
+	{
+		return toString(gsl::span<const T>(values), separator);
+	}
+	
+	template <typename T, typename F>
+	String toString(const std::vector<T> values, std::string_view separator, F f)
+	{
+		return toString(gsl::span<const T>(values), separator, std::move(f));
 	}
 
 }
