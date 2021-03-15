@@ -60,6 +60,7 @@ colours:
 
 
   ui_text: "#FFFFFF"
+  ui_text_outline: "#000000"
   ui_selectedText: "#FFFFFF"
   ui_unselectedText: "#FFFFFF"
   ui_disabledText: "#7F7F7F"
