@@ -33,7 +33,7 @@ namespace Halley
 		template<typename T>
 		static T fromString(const String& str)
 		{
-			if constexpr (std::is_enum<T>::value) {
+			if constexpr (std::is_enum_v<T>) {
 				EnumNames<T> n;
 				auto names = n();
 				auto res = std::find_if(std::begin(names), std::end(names), [&](const char* v) { return str == v; });
@@ -41,6 +41,10 @@ namespace Halley
 					throw Exception("String \"" + str + "\" does not exist in enum \"" + typeid(T).name() + "\".", HalleyExceptions::Utils);
 				}
 				return T(res - std::begin(names));
+			} else if constexpr (std::is_integral_v<T>) {
+				return str.toInteger();
+			} else if constexpr (std::is_floating_point_v<T>) {
+				return str.toFloat();
 			} else {
 				return T(str);
 			}
