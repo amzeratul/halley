@@ -16,7 +16,7 @@ namespace Halley {
 		void setGameBridge(SceneEditorGameBridge& gameBridge);
 		void setSceneEditorWindow(SceneEditorWindow& editorWindow);
 
-		std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options);
+		std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options);
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -44,7 +44,7 @@ namespace Halley {
 		std::shared_ptr<InputDevice> mouse;
 		SceneEditorInputState inputState;
 		SceneEditorOutputState outputState;
-		SceneEditorTool tool = SceneEditorTool::None;
+		String tool;
 
 		bool dragging = false;
 		int dragButton = 0;

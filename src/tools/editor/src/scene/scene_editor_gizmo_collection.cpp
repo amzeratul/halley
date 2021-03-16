@@ -66,23 +66,17 @@ void SceneEditorGizmoCollection::refreshEntity()
 	}
 }
 
-std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
+std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options)
 {
 	currentTool = tool;
 	activeGizmo.reset();
 	
-	switch (tool) {
-	case SceneEditorTool::Translate:
+	if (tool == "translate") {
 		activeGizmo = std::make_unique<TranslateGizmo>(snapRules);
-		break;
-
-	case SceneEditorTool::Polygon:
+	} else if (tool == "polygon") {
 		activeGizmo = std::make_unique<PolygonGizmo>(snapRules, componentName, fieldName, options, factory);
-		break;
-
-	case SceneEditorTool::Vertex:
+	} else if (tool == "vertex") {
 		activeGizmo = std::make_unique<VertexGizmo>(snapRules, componentName, fieldName);
-		break;
 	}
 
 	if (activeGizmo) {

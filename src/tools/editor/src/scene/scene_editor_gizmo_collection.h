@@ -15,7 +15,7 @@ namespace Halley {
 		void draw(Painter& painter) override;
 		void setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& entityData) override;
 		void refreshEntity() override;
-		std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) override;
+		std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options) override;
 		void deselect() override;
 		
 	private:
@@ -27,7 +27,7 @@ namespace Halley {
 		std::unique_ptr<SceneEditorGizmo> selectionBoxGizmo;
 		std::unique_ptr<SceneEditorGizmo> activeGizmo;
 		
-		SceneEditorTool currentTool = SceneEditorTool::None;
+		String currentTool;
 		
 		std::optional<EntityRef> selectedEntity;
 		EntityData* entityData = nullptr;

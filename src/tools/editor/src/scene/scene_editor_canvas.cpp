@@ -100,7 +100,7 @@ void SceneEditorCanvas::pressMouse(Vector2f mousePos, int button)
 	}
 
 	if (!dragging) {
-		if (button == 1 || (tool == SceneEditorTool::Drag && button == 0) || (inputState.spaceHeld && button == 0)) {
+		if (button == 1 || (tool == "drag" && button == 0) || (inputState.spaceHeld && button == 0)) {
 			dragButton = button;
 			dragging = true;
 			lastMousePos = mousePos;
@@ -154,7 +154,7 @@ void SceneEditorCanvas::setSceneEditorWindow(SceneEditorWindow& window)
 	editorWindow = &window;
 }
 
-std::shared_ptr<UIWidget> SceneEditorCanvas::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
+std::shared_ptr<UIWidget> SceneEditorCanvas::setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options)
 {
 	this->tool = tool;
 	return gameBridge->getGizmos().setTool(tool, componentName, fieldName, options);

@@ -291,7 +291,7 @@ public:
 
 		field->setHandle(UIEventType::ButtonClicked, "editVertex", [=, &context] (const UIEvent& event)
 		{
-			context.setTool(SceneEditorTool::Vertex, componentName, data.getName(), ConfigNode());
+			context.setTool("vertex", componentName, data.getName(), ConfigNode());
 		});
 
 		return field;
@@ -503,7 +503,7 @@ public:
 			}
 			options["componentNames"] = std::move(compNames);
 
-			context.setTool(SceneEditorTool::Polygon, componentName, data.getName(), std::move(options));
+			context.setTool("polygon", componentName, data.getName(), std::move(options));
 		});
 
 		return field;
