@@ -18,13 +18,17 @@ namespace Halley {
 		void refreshEntity() override;
 		std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options) override;
 		void deselect() override;
-		void addGizmoFactory(const String& name, GizmoFactory gizmoFactory) override;
+
+		void addTool(const Tool& tool, GizmoFactory gizmoFactory) override;
+		void generateList(UIList& list) override;
+		gsl::span<const Tool> getTools() const { return tools; }
 		
 	private:
 		UIFactory& factory;
 		Resources& resources;
 		SceneEditorGizmo::SnapRules snapRules;
 
+		std::vector<Tool> tools;
 		std::map<String, GizmoFactory> gizmoFactories;
 		
 		std::unique_ptr<SceneEditorGizmo> selectedBoundsGizmo;

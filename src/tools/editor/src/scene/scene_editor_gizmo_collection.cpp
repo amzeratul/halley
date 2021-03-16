@@ -18,15 +18,19 @@ SceneEditorGizmoCollection::SceneEditorGizmoCollection(UIFactory& factory, Resou
 	selectedBoundsGizmo = std::make_unique<SelectedBoundsGizmo>(snapRules, resources);
 	selectionBoxGizmo = std::make_unique<SelectionBoxGizmo>(snapRules, resources);
 
-	addGizmoFactory("translate", [this] (const String& componentName, const String& fieldName, const ConfigNode& options)
+	addTool(Tool("drag", LocalisedString::fromHardcodedString("Pan Scene"), Sprite().setImage(resources, "ui/scene_editor_drag.png")), [this] (const String& componentName, const String& fieldName, const ConfigNode& options)
+	{
+		return std::unique_ptr<SceneEditorGizmo>{};
+	});
+	addTool(Tool("translate", LocalisedString::fromHardcodedString("Move Entities"), Sprite().setImage(resources, "ui/scene_editor_move.png")), [this] (const String& componentName, const String& fieldName, const ConfigNode& options)
 	{
 		return std::make_unique<TranslateGizmo>(snapRules);
 	});
-	addGizmoFactory("polygon", [this] (const String& componentName, const String& fieldName, const ConfigNode& options)
+	addTool(Tool("polygon", LocalisedString::fromHardcodedString("Edit Polygon"), Sprite().setImage(resources, "ui/scene_editor_polygon.png")), [this] (const String& componentName, const String& fieldName, const ConfigNode& options)
 	{
 		return std::make_unique<PolygonGizmo>(snapRules, componentName, fieldName, options, this->factory);
 	});
-	addGizmoFactory("vertex", [this] (const String& componentName, const String& fieldName, const ConfigNode& options)
+	addTool(Tool("vertex", LocalisedString::fromHardcodedString("Edit Vertex"), Sprite().setImage(resources, "ui/scene_editor_polygon.png")), [this] (const String& componentName, const String& fieldName, const ConfigNode& options)
 	{
 		return std::make_unique<VertexGizmo>(snapRules, componentName, fieldName);
 	});
@@ -106,7 +110,18 @@ void SceneEditorGizmoCollection::deselect()
 	}
 }
 
-void SceneEditorGizmoCollection::addGizmoFactory(const String& name, GizmoFactory gizmoFactory)
+void SceneEditorGizmoCollection::generateList(UIList& list)
 {
-	gizmoFactories[name] = std::move(gizmoFactory);
+	list.clear();
+	for (const auto& tool: tools) {
+		auto image = std::make_shared<UIImage>(tool.icon);
+		image->setToolTip(tool.toolTip);
+		list.addImage(tool.id, std::move(image), 1, {}, UISizerAlignFlags::Centre);
+	}
+}
+
+void SceneEditorGizmoCollection::addTool(const Tool& tool, GizmoFactory gizmoFactory)
+{
+	tools.push_back(tool);
+	gizmoFactories[tool.id] = std::move(gizmoFactory);
 }

@@ -157,6 +157,8 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 		entityEditor->addFieldFactories(interface.getComponentEditorFieldFactories());
 		entityList->setSceneData(sceneData);
 
+		// Setup tools
+		interface.setupTools(*toolMode, gameBridge->getGizmos());
 		setTool("translate");
 
 		// Show root

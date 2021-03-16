@@ -26,11 +26,13 @@ namespace Halley {
 		World& getWorld() const override;
 		void spawnPending() override;
 
-		const std::vector<EntityId>& getCameraIds() const override;
+    	const std::vector<EntityId>& getCameraIds() const override;
 		void dragCamera(Vector2f amount) override;
 		void changeZoom(int amount, Vector2f cursorPosRelToCamera) override;
 
-		void setSelectedEntity(const UUID& id, EntityData& entityData) override;
+    	void setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizmoCollection) override;
+
+    	void setSelectedEntity(const UUID& id, EntityData& entityData) override;
 
 		void onEntityAdded(const UUID& id, const EntityData& entityData) final override;
 		void onEntityRemoved(const UUID& id) final override;
@@ -83,8 +85,6 @@ namespace Halley {
 
     	virtual EntityRef getEntityAt(Vector2f point) const;
        	virtual float getSpriteDepth(EntityRef& e, Vector2f point) const;
-
-    	virtual void initializeGizmoCollection(const ISceneEditorGizmoCollection& gizmoCollection);
 
 	private:
 		const HalleyAPI* api = nullptr;

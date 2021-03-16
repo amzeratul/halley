@@ -7,8 +7,12 @@
 #include "halley/maths/uuid.h"
 #include "scene_editor_gizmo.h"
 #include <optional>
+#include "halley/core/graphics/sprite/sprite.h"
+#include "halley/text/i18n.h"
 
 namespace Halley {
+	class Sprite;
+	class LocalisedString;
 	class Task;
 	class Prefab;
 	class ISceneEditorWindow;
@@ -31,6 +35,7 @@ namespace Halley {
 	class ComponentEditorContext;
 	class UIColourScheme;
 	class SceneEditorGizmo;
+	class UIList;
     struct EntityId;
 	struct SceneEditorInputState;
 	struct SceneEditorOutputState;
@@ -96,6 +101,8 @@ namespace Halley {
         virtual void onSceneLoaded(Prefab& scene) = 0;
     	virtual void onSceneSaved() = 0;
         virtual void refreshAssets() = 0;
+
+    	virtual void setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizmoCollection) = 0;
     };
 
 	class EntityTree {
@@ -150,6 +157,17 @@ namespace Halley {
 
 	class ISceneEditorGizmoCollection {
 	public:
+		struct Tool {
+			String id;
+			LocalisedString toolTip;
+			Sprite icon;
+
+			Tool() = default;
+			Tool(String id, LocalisedString toolTip, Sprite icon)
+				: id(std::move(id)), toolTip(std::move(toolTip)), icon(std::move(icon))
+			{}
+		};
+
 		using GizmoFactory = std::function<std::unique_ptr<SceneEditorGizmo>(const String& componentName, const String& fieldName, const ConfigNode& options)>;
 		
 		virtual ~ISceneEditorGizmoCollection() = default;
@@ -160,7 +178,8 @@ namespace Halley {
 		virtual void refreshEntity() = 0;
         virtual std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options) = 0;
 		virtual void deselect() = 0;
-		virtual void addGizmoFactory(const String& name, GizmoFactory gizmoFactory) = 0;
+		virtual void addTool(const Tool& tool, GizmoFactory gizmoFactory) = 0;
+		virtual void generateList(UIList& list) = 0;
 	};
 
 	class ISceneEditorWindow {

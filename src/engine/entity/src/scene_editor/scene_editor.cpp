@@ -42,8 +42,6 @@ void SceneEditor::init(SceneEditorContext& context)
 		.setColour(Colour(1, 1, 1))
 		.setOutlineColour(Colour())
 		.setOffset(Vector2f(0, 1));
-
-	initializeGizmoCollection(*gizmoCollection);
 }
 
 void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState)
@@ -283,6 +281,11 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 	transform.setGlobalPosition(roundPosition(transform.getGlobalPosition() + translate, camera.zoom));
 }
 
+void SceneEditor::setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizmoCollection)
+{
+	gizmoCollection.generateList(toolList);
+}
+
 void SceneEditor::setSelectedEntity(const UUID& id, EntityData& entityData)
 {
 	const auto curId = selectedEntity ? selectedEntity.value().getInstanceUUID() : UUID();
@@ -444,10 +447,6 @@ float SceneEditor::getSpriteDepth(EntityRef& e, Vector2f pos) const
 	} else {
 		return -std::numeric_limits<float>::infinity();
 	}
-}
-
-void SceneEditor::initializeGizmoCollection(const ISceneEditorGizmoCollection& gizmoCollection)
-{
 }
 
 EntityRef SceneEditor::getEntityAt(Vector2f point) const
