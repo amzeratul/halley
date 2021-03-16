@@ -18,7 +18,7 @@ void TranslateGizmo::update(Time time, const SceneEditorInputState& inputState)
 {
 	handle.update(inputState);
 
-	const auto transform = getTransform();
+	const auto transform = getComponent<Transform2DComponent>();
 	if (transform) {
 		if (handle.isHeld()) {
 			// Write to object

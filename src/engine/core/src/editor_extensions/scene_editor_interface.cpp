@@ -1,4 +1,5 @@
 #include "halley/core/editor_extensions/scene_editor_interface.h"
+#include "editor_extensions/scene_editor_input_state.h"
 using namespace Halley;
 
 

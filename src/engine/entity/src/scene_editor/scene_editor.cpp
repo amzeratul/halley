@@ -8,6 +8,7 @@
 #include "components/sprite_component.h"
 #include "components/camera_component.h"
 #include "components/transform_2d_component.h"
+#include "halley/core/editor_extensions/scene_editor_input_state.h"
 #include "halley/core/graphics/sprite/sprite_sheet.h"
 #include "halley/core/graphics/text/font.h"
 
@@ -41,6 +42,8 @@ void SceneEditor::init(SceneEditorContext& context)
 		.setColour(Colour(1, 1, 1))
 		.setOutlineColour(Colour())
 		.setOffset(Vector2f(0, 1));
+
+	initializeGizmoCollection(*gizmoCollection);
 }
 
 void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState)
@@ -441,6 +444,10 @@ float SceneEditor::getSpriteDepth(EntityRef& e, Vector2f pos) const
 	} else {
 		return -std::numeric_limits<float>::infinity();
 	}
+}
+
+void SceneEditor::initializeGizmoCollection(const ISceneEditorGizmoCollection& gizmoCollection)
+{
 }
 
 EntityRef SceneEditor::getEntityAt(Vector2f point) const

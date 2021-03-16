@@ -1,11 +1,12 @@
 #pragma once
 #include <optional>
 #include "halley/core/editor_extensions/scene_editor_interface.h"
+#include "halley/core/editor_extensions/scene_editor_gizmo.h"
 #include "halley/time/halleytime.h"
-#include "scene_editor_gizmo.h"
 
 namespace Halley {
 	class Painter;
+	class SceneEditorGizmo;
 
 	class SceneEditorGizmoCollection : public ISceneEditorGizmoCollection {
 	public:
@@ -17,11 +18,14 @@ namespace Halley {
 		void refreshEntity() override;
 		std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options) override;
 		void deselect() override;
+		void addGizmoFactory(const String& name, GizmoFactory gizmoFactory) override;
 		
 	private:
 		UIFactory& factory;
 		Resources& resources;
 		SceneEditorGizmo::SnapRules snapRules;
+
+		std::map<String, GizmoFactory> gizmoFactories;
 		
 		std::unique_ptr<SceneEditorGizmo> selectedBoundsGizmo;
 		std::unique_ptr<SceneEditorGizmo> selectionBoxGizmo;

@@ -17,6 +17,19 @@ SceneEditorGizmoCollection::SceneEditorGizmoCollection(UIFactory& factory, Resou
 	
 	selectedBoundsGizmo = std::make_unique<SelectedBoundsGizmo>(snapRules, resources);
 	selectionBoxGizmo = std::make_unique<SelectionBoxGizmo>(snapRules, resources);
+
+	addGizmoFactory("translate", [this] (const String& componentName, const String& fieldName, const ConfigNode& options)
+	{
+		return std::make_unique<TranslateGizmo>(snapRules);
+	});
+	addGizmoFactory("polygon", [this] (const String& componentName, const String& fieldName, const ConfigNode& options)
+	{
+		return std::make_unique<PolygonGizmo>(snapRules, componentName, fieldName, options, this->factory);
+	});
+	addGizmoFactory("vertex", [this] (const String& componentName, const String& fieldName, const ConfigNode& options)
+	{
+		return std::make_unique<VertexGizmo>(snapRules, componentName, fieldName);
+	});
 }
 
 bool SceneEditorGizmoCollection::update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState)
@@ -71,12 +84,11 @@ std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(const String& tool
 	currentTool = tool;
 	activeGizmo.reset();
 	
-	if (tool == "translate") {
-		activeGizmo = std::make_unique<TranslateGizmo>(snapRules);
-	} else if (tool == "polygon") {
-		activeGizmo = std::make_unique<PolygonGizmo>(snapRules, componentName, fieldName, options, factory);
-	} else if (tool == "vertex") {
-		activeGizmo = std::make_unique<VertexGizmo>(snapRules, componentName, fieldName);
+	const auto iter = gizmoFactories.find(tool);
+	if (iter != gizmoFactories.end()) {
+		activeGizmo = iter->second(componentName, fieldName, options);
+	} else {
+		activeGizmo.reset();
 	}
 
 	if (activeGizmo) {
@@ -92,4 +104,9 @@ void SceneEditorGizmoCollection::deselect()
 	if (activeGizmo) {
 		activeGizmo->deselect();
 	}
+}
+
+void SceneEditorGizmoCollection::addGizmoFactory(const String& name, GizmoFactory gizmoFactory)
+{
+	gizmoFactories[name] = std::move(gizmoFactory);
 }

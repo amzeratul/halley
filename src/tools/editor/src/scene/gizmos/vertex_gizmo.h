@@ -1,5 +1,5 @@
 #pragma once
-#include "../scene_editor_gizmo.h"
+#include "halley/core/editor_extensions/scene_editor_gizmo.h"
 
 namespace Halley {
 	class VertexGizmo final : public SceneEditorGizmo {

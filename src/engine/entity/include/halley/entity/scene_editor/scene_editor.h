@@ -5,6 +5,7 @@
 #include "halley/core/graphics/text/text_renderer.h"
 
 namespace Halley {
+	struct SceneEditorOutputState;
 	class EntityRef;
 	class World;
 	class Painter;
@@ -14,7 +15,7 @@ namespace Halley {
     public:
 		SceneEditor();
     	virtual ~SceneEditor();
-    	
+
 		void init(SceneEditorContext& context) final override;
 		void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState) override;
 		void render(RenderContext& rc) override;
@@ -82,6 +83,8 @@ namespace Halley {
 
     	virtual EntityRef getEntityAt(Vector2f point) const;
        	virtual float getSpriteDepth(EntityRef& e, Vector2f point) const;
+
+    	virtual void initializeGizmoCollection(const ISceneEditorGizmoCollection& gizmoCollection);
 
 	private:
 		const HalleyAPI* api = nullptr;

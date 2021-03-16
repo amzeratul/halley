@@ -2,14 +2,15 @@
 #include <optional>
 #include "halley/core/editor_extensions/scene_editor_interface.h"
 #include "halley/entity/entity.h"
+#include "halley/maths/line.h"
 #include "halley/time/halleytime.h"
 
-class Transform2DComponent;
-
 namespace Halley {
+	struct SceneEditorOutputState;
 	struct SceneEditorInputState;
 	class Camera;
 	class Painter;
+	class UIWidget;
 
 	enum class GridSnapMode {
 		Disabled,
@@ -91,9 +92,6 @@ namespace Halley {
 		const std::optional<EntityRef>& getEntity() const;
 		std::optional<EntityRef>& getEntity();
 
-		const Transform2DComponent* getTransform() const;
-		Transform2DComponent* getTransform();
-
 		EntityData& getEntityData();
 		ConfigNode* getComponentData(const String& name);
 		const ConfigNode* getComponentData(const String& name) const;
@@ -103,6 +101,26 @@ namespace Halley {
 		float getZoom() const;
 		SnapRules getSnapRules() const;
 		Vector2f solveLineSnap(Vector2f cur, std::optional<Vector2f> prev, std::optional<Vector2f> next) const;
+
+		template <typename T>
+		T* getComponent()
+		{
+			if (curEntity) {
+				return curEntity->tryGetComponent<T>();
+			} else {
+				return nullptr;
+			}
+		}
+		
+		template <typename T>
+		const T* getComponent() const
+		{
+			if (curEntity) {
+				return curEntity->tryGetComponent<T>();
+			} else {
+				return nullptr;
+			}
+		}
 
 	private:
 		std::optional<EntityRef> curEntity;

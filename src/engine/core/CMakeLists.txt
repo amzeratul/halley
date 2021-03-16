@@ -74,6 +74,7 @@ set(SOURCES
         "src/editor_extensions/component_editor_context.cpp"
         "src/editor_extensions/component_field_parameters.cpp"
         "src/editor_extensions/scene_editor_interface.cpp"
+        "src/editor_extensions/scene_editor_gizmo.cpp"
 
         "src/stage/stage.cpp"
 
@@ -182,7 +183,9 @@ set(HEADERS
         "include/halley/core/editor_extensions/component_editor_context.h"
         "include/halley/core/editor_extensions/component_field_parameters.h"
         "include/halley/core/editor_extensions/editor_custom_tools_interface.h"
+        "include/halley/core/editor_extensions/scene_editor_input_state.h"
         "include/halley/core/editor_extensions/scene_editor_interface.h"
+        "include/halley/core/editor_extensions/scene_editor_gizmo.h"
 
         "include/halley/core/stage/stage.h"
         "include/halley/core/stage/stage_id.h"

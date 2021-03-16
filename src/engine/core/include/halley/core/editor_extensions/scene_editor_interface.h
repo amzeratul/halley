@@ -5,6 +5,7 @@
 #include "halley/maths/rect.h"
 #include "halley/text/halleystring.h"
 #include "halley/maths/uuid.h"
+#include "scene_editor_gizmo.h"
 #include <optional>
 
 namespace Halley {
@@ -29,37 +30,11 @@ namespace Halley {
 	class ComponentFieldParameters;
 	class ComponentEditorContext;
 	class UIColourScheme;
+	class SceneEditorGizmo;
     struct EntityId;
+	struct SceneEditorInputState;
+	struct SceneEditorOutputState;
 	
-	struct SceneEditorInputState {
-		// Filled on editor side
-		bool leftClickPressed = false;
-		bool leftClickReleased = false;
-		bool leftClickHeld = false;
-		bool middleClickPressed = false;
-		bool middleClickHeld = false;
-		bool rightClickPressed = false;
-		bool rightClickHeld = false;
-		bool shiftHeld = false;
-		bool ctrlHeld = false;
-		bool spaceHeld = false;
-		Vector2f rawMousePos;
-		Rect4f viewRect;
-
-		// Filled on SceneEditor side
-        Vector2f mousePos;
-		std::optional<Rect4f> selectionBox;
-		bool deselect = false;
-    };
-
-	struct SceneEditorOutputState {
-		std::vector<std::pair<String, String>> fieldsChanged;
-		std::optional<std::vector<UUID>> newSelection;
-		std::optional<UUID> mouseOver;
-
-		void clear();
-	};
-
 	class IEditorInterface {
 	public:
 		virtual ~IEditorInterface() = default;
@@ -175,6 +150,8 @@ namespace Halley {
 
 	class ISceneEditorGizmoCollection {
 	public:
+		using GizmoFactory = std::function<std::unique_ptr<SceneEditorGizmo>(const String& componentName, const String& fieldName, const ConfigNode& options)>;
+		
 		virtual ~ISceneEditorGizmoCollection() = default;
 
         virtual bool update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) = 0;
@@ -183,6 +160,7 @@ namespace Halley {
 		virtual void refreshEntity() = 0;
         virtual std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options) = 0;
 		virtual void deselect() = 0;
+		virtual void addGizmoFactory(const String& name, GizmoFactory gizmoFactory) = 0;
 	};
 
 	class ISceneEditorWindow {

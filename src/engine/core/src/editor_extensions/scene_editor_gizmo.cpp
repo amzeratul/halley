@@ -1,5 +1,5 @@
-#include "scene_editor_gizmo.h"
-#include "halley/entity/components/transform_2d_component.h"
+#include "halley/core/editor_extensions/scene_editor_gizmo.h"
+#include "editor_extensions/scene_editor_input_state.h"
 #include "halley/core/editor_extensions/scene_editor_interface.h"
 #include "halley/core/graphics/camera.h"
 using namespace Halley;
@@ -172,24 +172,6 @@ void SceneEditorGizmo::deselect()
 
 void SceneEditorGizmo::onEntityChanged()
 {}
-
-const Transform2DComponent* SceneEditorGizmo::getTransform() const
-{
-	if (curEntity) {
-		return curEntity->tryGetComponent<Transform2DComponent>();
-	} else {
-		return nullptr;
-	}
-}
-
-Transform2DComponent* SceneEditorGizmo::getTransform()
-{
-	if (curEntity) {
-		return curEntity->tryGetComponent<Transform2DComponent>();
-	} else {
-		return nullptr;
-	}
-}
 
 EntityData& SceneEditorGizmo::getEntityData()
 {
