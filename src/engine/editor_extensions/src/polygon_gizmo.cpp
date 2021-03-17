@@ -11,13 +11,13 @@
 
 using namespace Halley;
 
-PolygonGizmo::PolygonGizmo(SnapRules snapRules, String componentName, String fieldName, const ConfigNode& options, UIFactory& factory)
+PolygonGizmo::PolygonGizmo(SnapRules snapRules, String componentName, String fieldName, bool isOpenPolygon, Colour4f colour, UIFactory& factory)
 	: SceneEditorGizmo(snapRules)
 	, factory(factory)
 	, componentName(std::move(componentName))
 	, fieldName(std::move(fieldName))
-	, isOpenPolygon(options["isOpenPolygon"].asBool(false))
-	, colour(Colour4f::fromString(options["colour"].asString("#0080FF")))
+	, isOpenPolygon(isOpenPolygon)
+	, colour(colour)
 {
 }
 

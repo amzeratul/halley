@@ -26,7 +26,7 @@ namespace Halley {
 
 	class PolygonGizmo final : public SceneEditorGizmo {
 	public:
-		PolygonGizmo(SnapRules snapRules, String componentName, String fieldName, const ConfigNode& options, UIFactory& factory);
+		PolygonGizmo(SnapRules snapRules, String componentName, String fieldName, bool isOpenPolygon, Colour4f colour, UIFactory& factory);
 		void update(Time time, const SceneEditorInputState& inputState) override;
 		void draw(Painter& painter) const override;
 		std::shared_ptr<UIWidget> makeUI() override;
