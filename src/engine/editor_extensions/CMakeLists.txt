@@ -6,6 +6,7 @@ set(SOURCES
         "src/component_editor_context.cpp"
         "src/component_field_parameters.cpp"
         "src/polygon_gizmo.cpp"
+        "src/scene_editor.cpp"
         "src/scene_editor_gizmo.cpp"
         "src/vertex_gizmo.cpp"
         )
@@ -18,6 +19,7 @@ set(HEADERS
         "include/halley/editor_extensions/editor_custom_tools_interface.h"
         "include/halley/editor_extensions/polygon_gizmo.h"
         "include/halley/editor_extensions/scene_editor_input_state.h"
+        "include/halley/editor_extensions/scene_editor.h"
         "include/halley/editor_extensions/scene_editor_gizmo.h"
         "include/halley/editor_extensions/vertex_gizmo.h"
         )

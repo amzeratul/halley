@@ -27,8 +27,6 @@ set(SOURCES
         "src/diagnostics/performance_stats.cpp"
         "src/diagnostics/stats_view.cpp"
         "src/diagnostics/world_stats.cpp"
-
-        "src/scene_editor/scene_editor.cpp"
         )
 
 set(HEADERS
@@ -65,8 +63,6 @@ set(HEADERS
         "include/halley/entity/diagnostics/performance_stats.h"
         "include/halley/entity/diagnostics/stats_view.h"
         "include/halley/entity/diagnostics/world_stats.h"
-
-        "include/halley/entity/scene_editor/scene_editor.h"
         )
 
 assign_source_group(${SOURCES})

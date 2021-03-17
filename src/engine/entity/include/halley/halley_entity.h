@@ -23,5 +23,3 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "entity/diagnostics/performance_stats.h"
 #include "entity/diagnostics/world_stats.h"
-
-#include "entity/scene_editor/scene_editor.h"

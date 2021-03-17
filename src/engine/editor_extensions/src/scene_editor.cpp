@@ -1,16 +1,18 @@
-#include "scene_editor/scene_editor.h"
-#include "world.h"
+#define DONT_INCLUDE_HALLEY_HPP
+
+#include "scene_editor.h"
+#include "halley/entity/world.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/core/game/halley_statics.h"
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/render_context.h"
-#include "system.h"
-#include "components/sprite_component.h"
-#include "components/camera_component.h"
-#include "components/transform_2d_component.h"
+#include "halley/entity/system.h"
 #include "halley/editor_extensions/scene_editor_input_state.h"
 #include "halley/core/graphics/sprite/sprite_sheet.h"
 #include "halley/core/graphics/text/font.h"
+#include "halley/entity/components/transform_2d_component.h"
+#include "components/sprite_component.h"
+#include "components/camera_component.h"
 
 using namespace Halley;
 

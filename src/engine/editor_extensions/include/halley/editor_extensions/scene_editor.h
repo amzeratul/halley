@@ -1,7 +1,7 @@
 #pragma once
 #include "halley/core/game/scene_editor_interface.h"
 #include "halley/core/graphics/camera.h"
-#include "../entity.h"
+#include "halley/entity/entity.h"
 #include "halley/core/graphics/text/text_renderer.h"
 
 namespace Halley {

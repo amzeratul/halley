@@ -3,7 +3,6 @@
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/graphics/painter.h"
 #include "halley/core/resources/resources.h"
-#include "halley/entity/scene_editor/scene_editor.h"
 using namespace Halley;
 
 SelectedBoundsGizmo::SelectedBoundsGizmo(SnapRules snapRules, Resources& resources)
