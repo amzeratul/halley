@@ -353,9 +353,8 @@ void SceneEditor::showEntity(const UUID& id)
 	}
 }
 
-ConfigNode SceneEditor::onToolSet(const String& tool, const String& componentName, const String& fieldName, ConfigNode options)
+void SceneEditor::onToolSet(String& tool, String& componentName, String& fieldName, ConfigNode& options)
 {
-	return options;
 }
 
 Rect4f SceneEditor::getSpriteTreeBounds(const EntityRef& e)

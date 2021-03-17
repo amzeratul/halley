@@ -92,7 +92,7 @@ namespace Halley {
         virtual void onEntityMoved(const UUID& id, const EntityData& entityData) = 0;
 
     	virtual void showEntity(const UUID& id) = 0;
-        virtual ConfigNode onToolSet(const String& tool, const String& componentName, const String& fieldName, ConfigNode options) = 0;
+        virtual void onToolSet(String& tool, String& componentName, String& fieldName, ConfigNode& options) = 0;
 
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;

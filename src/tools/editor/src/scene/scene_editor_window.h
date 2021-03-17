@@ -46,8 +46,8 @@ namespace Halley {
 		void modifyEntity(const String& id, const EntityDataDelta& delta);
 		void moveEntity(const String& id, const String& newParent, int childIndex);
 
-		void setTool(const String& tool);
-		void setTool(const String& tool, const String& componentName, const String& fieldName, ConfigNode options);
+		void setTool(String tool);
+		void setTool(String tool, String componentName, String fieldName, ConfigNode options);
 
 		std::shared_ptr<const Prefab> getGamePrefab(const String& id) const;
 

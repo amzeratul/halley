@@ -418,22 +418,27 @@ void SceneEditorWindow::onFieldChangedByGizmo(const String& componentName, const
 	entityEditor->onFieldChangedByGizmo(componentName, fieldName);
 }
 
-void SceneEditorWindow::setTool(const String& tool)
+void SceneEditorWindow::setTool(String tool)
 {
 	if (curTool != tool) {
 		setTool(tool, "", "", ConfigNode());
 	}
 }
 
-void SceneEditorWindow::setTool(const String& tool, const String& componentName, const String& fieldName, ConfigNode options)
+void SceneEditorWindow::setTool(String tool, String componentName, String fieldName, ConfigNode options)
 {
-	options = gameBridge->onToolSet(tool, componentName, fieldName, std::move(options));
+	// This can mutate all parameters
+	gameBridge->onToolSet(tool, componentName, fieldName, options);
 
+	if (tool.isEmpty()) {
+		tool = "translate";
+	}
+	
 	curTool = tool;
 	curComponentName = componentName;
-	
+		
 	setToolUI(canvas->setTool(tool, componentName, fieldName, options));
-	
+		
 	toolMode->setSelectedOptionId(toString(tool));
 }
 
