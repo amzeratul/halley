@@ -84,7 +84,9 @@ std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(const String& tool
 	
 	const auto iter = gizmoFactories.find(tool);
 	if (iter != gizmoFactories.end()) {
-		activeGizmo = iter->second(snapRules, componentName, fieldName, options);
+		if (iter->second) {
+			activeGizmo = iter->second(snapRules, componentName, fieldName, options);
+		}
 	} else {
 		activeGizmo.reset();
 	}
@@ -108,9 +110,7 @@ void SceneEditorGizmoCollection::generateList(UIList& list)
 {
 	list.clear();
 	for (const auto& tool: tools) {
-		auto image = std::make_shared<UIImage>(tool.icon);
-		image->setToolTip(tool.toolTip);
-		list.addImage(tool.id, std::move(image), 1, {}, UISizerAlignFlags::Centre);
+		list.addImage(tool.id, std::make_shared<UIImage>(tool.icon), 1, {}, UISizerAlignFlags::Centre)->setToolTip(tool.toolTip);
 	}
 }
 

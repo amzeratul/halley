@@ -101,17 +101,17 @@ std::shared_ptr<UILabel> UIList::makeLabel(String id, LocalisedString label, flo
 	return widget;
 }
 
-void UIList::addTextItem(const String& id, LocalisedString label, float maxWidth, bool centre, std::optional<LocalisedString> tooltip)
+std::shared_ptr<UIListItem> UIList::addTextItem(const String& id, LocalisedString label, float maxWidth, bool centre, std::optional<LocalisedString> tooltip)
 {
 	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 	if (tooltip) {
 		item->setToolTip(tooltip.value());
 	}
 	item->add(makeLabel(id + "_label", std::move(label), maxWidth), 0, Vector4f(), centre ? UISizerAlignFlags::CentreHorizontal : UISizerFillFlags::Fill);
-	addItem(item);
+	return addItem(item);
 }
 
-void UIList::addImage(const String& id, std::shared_ptr<UIImage> image, float proportion, Vector4f border, int fillFlags, std::optional<UIStyle> styleOverride)
+std::shared_ptr<UIListItem> UIList::addImage(const String& id, std::shared_ptr<UIImage> image, float proportion, Vector4f border, int fillFlags, std::optional<UIStyle> styleOverride)
 {
 	Colour4f baseCol;
 	if (style.hasColour("imageColour")) {
@@ -124,15 +124,15 @@ void UIList::addImage(const String& id, std::shared_ptr<UIImage> image, float pr
 		image->setSelectable(baseCol, style.getColour("selectedImageColour"));
 	}
 
-	addItem(id, image, proportion, border, fillFlags, std::move(styleOverride));
+	return addItem(id, image, proportion, border, fillFlags, std::move(styleOverride));
 }
 
-void UIList::addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, std::optional<UIStyle> styleOverride)
+std::shared_ptr<UIListItem> UIList::addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, std::optional<UIStyle> styleOverride)
 {
 	const auto& itemStyle = styleOverride ? *styleOverride : style;
 	auto item = std::make_shared<UIListItem>(id, *this, itemStyle.getSubStyle("item"), int(getNumberOfItems()), itemStyle.getBorder("extraMouseBorder"));
 	item->add(element, proportion, border, fillFlags);
-	addItem(item);
+	return addItem(item);
 }
 
 void UIList::clear()
@@ -204,7 +204,7 @@ void UIList::filterOptions(const String& filter)
 	}
 }
 
-void UIList::addItem(std::shared_ptr<UIListItem> item, Vector4f border, int fillFlags)
+std::shared_ptr<UIListItem> UIList::addItem(std::shared_ptr<UIListItem> item, Vector4f border, int fillFlags)
 {
 	add(item, uniformSizedItems ? 1.0f : 0.0f, border, fillFlags);
 	items.push_back(item);
@@ -213,6 +213,8 @@ void UIList::addItem(std::shared_ptr<UIListItem> item, Vector4f border, int fill
 		curOption = -1;
 		setSelectedOption(0);
 	}
+
+	return items.back();
 }
 
 std::optional<int> UIList::removeItem(const String& id)
