@@ -39,6 +39,7 @@ namespace Halley {
     struct EntityId;
 	struct SceneEditorInputState;
 	struct SceneEditorOutputState;
+	struct SnapRules;
 	
 	class IEditorInterface {
 	public:
@@ -168,7 +169,7 @@ namespace Halley {
 			{}
 		};
 
-		using GizmoFactory = std::function<std::unique_ptr<SceneEditorGizmo>(const String& componentName, const String& fieldName, const ConfigNode& options)>;
+		using GizmoFactory = std::function<std::unique_ptr<SceneEditorGizmo>(SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)>;
 		
 		virtual ~ISceneEditorGizmoCollection() = default;
 

@@ -1,4 +1,6 @@
-#include "polygon_gizmo.h"
+#include "halley/core/editor_extensions/polygon_gizmo.h"
+
+#include "editor_extensions/scene_editor_input_state.h"
 #include "halley/core/graphics/painter.h"
 #include "halley/entity/components/transform_2d_component.h"
 #include "halley/maths/line.h"

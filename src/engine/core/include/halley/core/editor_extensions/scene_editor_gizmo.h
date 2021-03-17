@@ -12,15 +12,20 @@ namespace Halley {
 	class Painter;
 	class UIWidget;
 
-	enum class GridSnapMode {
+	enum class GridSnapMode : uint8_t {
 		Disabled,
 		Pixel
 	};
 	
-	enum class LineSnapMode {
+	enum class LineSnapMode : uint8_t {
 		Disabled,
 		AxisAligned,
 		IsometricAxisAligned
+	};
+
+	struct SnapRules {
+		GridSnapMode grid = GridSnapMode::Disabled;
+		LineSnapMode line = LineSnapMode::Disabled;
 	};
 
 	class SceneEditorGizmoHandle {
@@ -65,11 +70,6 @@ namespace Halley {
 
 	class SceneEditorGizmo {
 	public:
-		struct SnapRules {
-			GridSnapMode grid = GridSnapMode::Disabled;
-			LineSnapMode line = LineSnapMode::Disabled;
-		};
-
 		explicit SceneEditorGizmo(SnapRules snapRules);
 		virtual ~SceneEditorGizmo() = default;
 

@@ -37,11 +37,9 @@ set (editor_sources
 	"src/scene/scene_editor_window.cpp"
 	"src/scene/undo_stack.cpp"
 
-	"src/scene/gizmos/polygon_gizmo.cpp"
 	"src/scene/gizmos/selected_bounds_gizmo.cpp"
 	"src/scene/gizmos/selection_box_gizmo.cpp"
 	"src/scene/gizmos/translate_gizmo.cpp"
-	"src/scene/gizmos/vertex_gizmo.cpp"
 
 	"src/ui/console_window.cpp"
 	"src/ui/ecs_window.cpp"
@@ -92,11 +90,9 @@ set (editor_headers
 	"src/scene/scene_editor_window.h"
 	"src/scene/undo_stack.h"
 
-	"src/scene/gizmos/polygon_gizmo.h"
 	"src/scene/gizmos/selected_bounds_gizmo.h"
 	"src/scene/gizmos/selection_box_gizmo.h"
 	"src/scene/gizmos/translate_gizmo.h"
-	"src/scene/gizmos/vertex_gizmo.h"
 	
 	"src/ui/console_window.h"
 	"src/ui/ecs_window.h"

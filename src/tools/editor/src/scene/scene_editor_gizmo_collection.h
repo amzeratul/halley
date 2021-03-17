@@ -26,7 +26,7 @@ namespace Halley {
 	private:
 		UIFactory& factory;
 		Resources& resources;
-		SceneEditorGizmo::SnapRules snapRules;
+		SnapRules snapRules;
 
 		std::vector<Tool> tools;
 		std::map<String, GizmoFactory> gizmoFactories;

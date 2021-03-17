@@ -222,7 +222,7 @@ float SceneEditorGizmo::getZoom() const
 	return zoom;
 }
 
-SceneEditorGizmo::SnapRules SceneEditorGizmo::getSnapRules() const
+SnapRules SceneEditorGizmo::getSnapRules() const
 {
 	return snapRules;
 }
