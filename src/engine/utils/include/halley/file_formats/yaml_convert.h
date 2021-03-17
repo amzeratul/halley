@@ -2,7 +2,6 @@
 
 #include <gsl/gsl>
 
-#include "halley/core/editor_extensions/editor_custom_tools_interface.h"
 #include "halley/file_formats/config_file.h"
 
 namespace YAML {

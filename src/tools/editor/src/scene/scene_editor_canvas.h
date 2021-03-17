@@ -1,5 +1,5 @@
 #pragma once
-#include "halley/core/editor_extensions/scene_editor_interface.h"
+#include "halley/core/game/scene_editor_interface.h"
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {

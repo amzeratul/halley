@@ -10,6 +10,7 @@ include_directories(
     "../../engine/audio/include"
     "../../engine/net/include"
     "../../engine/entity/include"
+    "../../engine/editor_extensions/include"
     "../../contrib/libogg/include"
     "../../contrib/libvorbis/include"
     "../../contrib/yaml-cpp/include"

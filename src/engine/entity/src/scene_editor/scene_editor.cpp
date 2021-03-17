@@ -8,7 +8,7 @@
 #include "components/sprite_component.h"
 #include "components/camera_component.h"
 #include "components/transform_2d_component.h"
-#include "halley/core/editor_extensions/scene_editor_input_state.h"
+#include "halley/editor_extensions/scene_editor_input_state.h"
 #include "halley/core/graphics/sprite/sprite_sheet.h"
 #include "halley/core/graphics/text/font.h"
 

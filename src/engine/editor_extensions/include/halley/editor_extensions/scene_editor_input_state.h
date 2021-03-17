@@ -30,6 +30,11 @@ namespace Halley {
 		std::optional<std::vector<UUID>> newSelection;
 		std::optional<UUID> mouseOver;
 
-		void clear();
+		void clear()
+		{
+			fieldsChanged.clear();
+			newSelection.reset();
+			mouseOver.reset();
+		}
 	};
 }

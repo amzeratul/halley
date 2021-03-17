@@ -2,13 +2,11 @@
 
 #include "halley/time/halleytime.h"
 #include "halley/file_formats/config_file.h"
-#include "halley/maths/rect.h"
 #include "halley/text/halleystring.h"
 #include "halley/maths/uuid.h"
-#include "scene_editor_gizmo.h"
-#include <optional>
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/text/i18n.h"
+#include <optional>
 
 namespace Halley {
 	class Sprite;
@@ -114,7 +112,20 @@ namespace Halley {
 		String icon;
 		std::vector<EntityTree> children;
 
-		bool contains(const String& id) const;
+		bool contains(const String& id) const
+		{
+			if (entityId == id) {
+				return true;
+			}
+
+			for (const auto& child: children) {
+				if (child.contains(id)) {
+					return true;
+				}
+			}
+
+			return false;
+		}
 	};
 
 	class ISceneData {
@@ -200,4 +211,49 @@ namespace Halley {
 		
 		virtual const std::shared_ptr<ISceneData>& getSceneData() const = 0;
 	};
+
+	class IProject {
+    public:		
+        virtual ~IProject() = default;
+		virtual Path getAssetsSrcPath() const = 0;
+	};
+
+    class IEditorCustomTools { 
+    public:
+        struct ToolData {
+            String id;
+            LocalisedString text;
+        	LocalisedString tooltip;
+            Sprite icon;
+            std::shared_ptr<UIWidget> widget;
+
+        	ToolData(String id, LocalisedString text, LocalisedString tooltip, Sprite icon, std::shared_ptr<UIWidget> widget)
+                : id(std::move(id))
+                , text(std::move(text))
+        		, tooltip(std::move(tooltip))
+                , icon(std::move(icon))
+                , widget(std::move(widget))
+            {}
+        };
+
+        struct MakeToolArgs {
+        	UIFactory& factory;
+            Resources& editorResources;
+            Resources& gameResources;
+            const HalleyAPI& api;
+        	IProject& project;
+
+            MakeToolArgs(UIFactory& factory, Resources& editorResources, Resources& gameResources, const HalleyAPI& api, IProject& project)
+                : factory(factory)
+                , editorResources(editorResources)
+        		, gameResources(gameResources)
+                , api(api)
+        		, project(project)
+            {}
+        };
+
+        virtual ~IEditorCustomTools() = default;
+
+        virtual std::vector<ToolData> makeTools(const MakeToolArgs& args) = 0;
+    };
 }

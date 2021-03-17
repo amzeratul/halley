@@ -1,6 +1,7 @@
 #pragma once
 
 #include "halley/core/stage/stage.h"
+#include "halley/core/game/scene_editor_interface.h"
 
 namespace Halley
 {

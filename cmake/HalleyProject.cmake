@@ -296,6 +296,7 @@ set(HALLEY_PROJECT_INCLUDE_DIRS
 	${HALLEY_PATH}/src/engine/audio/include
 	${HALLEY_PATH}/src/engine/lua/include
 	${HALLEY_PATH}/src/engine/ui/include
+	${HALLEY_PATH}/src/engine/editor_extensions/include
 	${Boost_INCLUDE_DIR} 
 	)
 
@@ -308,6 +309,7 @@ set(HALLEY_PROJECT_LIBS
 	optimized halley-net
 	optimized halley-lua
 	optimized halley-utils
+	optimized halley-editor-extensions
 	debug halley-contrib_d
 	debug halley-ui_d
 	debug halley-core_d
@@ -316,6 +318,7 @@ set(HALLEY_PROJECT_LIBS
 	debug halley-net_d
 	debug halley-lua_d
 	debug halley-utils_d
+	debug halley-editor-extensions_d
 	${HALLEY_PROJECT_EXTERNAL_LIBS}
 	)
 
@@ -476,7 +479,7 @@ function(halleyProject name sources headers genDefinitions targetDir)
 
 	SET(LINK_LIBRARIES "")
 	if (EMBED)
-		SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-ui halley-core halley-entity halley-audio halley-net halley-lua halley-utils ${HALLEY_PROJECT_EXTERNAL_LIBS})
+		SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-ui halley-core halley-entity halley-audio halley-net halley-lua halley-utils halley-editor-extensions ${HALLEY_PROJECT_EXTERNAL_LIBS})
 		if (USE_OPENGL OR USE_OPENGL_ES2 OR USE_OPENGL_ES3)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-opengl)
 		endif ()

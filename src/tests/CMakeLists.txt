@@ -11,6 +11,7 @@ include_directories(
         "../../src/engine/entity/include"
         "../../src/engine/lua/include"
         "../../src/engine/ui/include"
+        "../../src/engine/editor_extensions/include"
 )
 
 set(SOURCES
@@ -31,5 +32,5 @@ find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
 add_executable(halley-tests-exe ${SOURCES} ${HEADERS})
-target_link_libraries(halley-tests-exe halley-core halley-utils halley-audio halley-net halley-entity ${GTEST_BOTH_LIBRARIES})
+target_link_libraries(halley-tests-exe halley-core halley-utils halley-audio halley-net halley-entity halley-editor-extensions ${GTEST_BOTH_LIBRARIES})
 add_test(halley-tests COMMAND halley-tests)

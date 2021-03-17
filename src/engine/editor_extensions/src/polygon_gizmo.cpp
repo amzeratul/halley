@@ -1,11 +1,14 @@
-#include "halley/core/editor_extensions/polygon_gizmo.h"
-
-#include "editor_extensions/scene_editor_input_state.h"
+#include "polygon_gizmo.h"
+#include "halley/ui/ui_event.h"
+#include "halley/editor_extensions/scene_editor_input_state.h"
 #include "halley/core/graphics/painter.h"
-#include "halley/entity/components/transform_2d_component.h"
 #include "halley/maths/line.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/widgets/ui_list.h"
+
+#define DONT_INCLUDE_HALLEY_HPP
+#include "halley/entity/components/transform_2d_component.h"
+
 using namespace Halley;
 
 PolygonGizmo::PolygonGizmo(SnapRules snapRules, String componentName, String fieldName, const ConfigNode& options, UIFactory& factory)

@@ -1,6 +1,6 @@
 #pragma once
 #include "entity_icons.h"
-#include "halley/core/editor_extensions/scene_editor_interface.h"
+#include "halley/core/game/scene_editor_interface.h"
 #include "halley/tools/ecs/fields_schema.h"
 #include "halley/ui/ui_widget.h"
 #include "src/ui/select_asset_widget.h"
