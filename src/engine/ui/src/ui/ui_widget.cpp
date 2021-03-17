@@ -89,6 +89,13 @@ void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType input
 			c->doUpdate(updateType, t, inputType, joystickType);
 		}
 
+		if (sizer) {
+			for (auto& c : getChildren()) {
+				if (!c->isAlive()) {
+					sizer->remove(*c);
+				}
+			}
+		}
 		removeDeadChildren();
 	}
 }
@@ -362,7 +369,7 @@ void UIWidget::onMouseOver(Vector2f mousePos)
 
 bool UIWidget::isActive() const
 {
-	return activeByUser && activeByInput;
+	return activeByUser && activeByInput && alive;
 }
 
 bool UIWidget::isActiveInHierarchy() const
