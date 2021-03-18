@@ -184,9 +184,10 @@ uiStyle:
       horizontal: { img: halley_ui/ui_scrollbar.png, colour: $ui_scrollBackground }
       vertical: { img: halley_ui/ui_scrollbar.png, colour: $ui_scrollBackground }
     thumb:
-      normal: { img: halley_ui/ui_scrollbar.png, colour: $ui_controlNormal }
-      down: { img: halley_ui/ui_scrollbar.png, colour: $ui_controlDown }
-      hover: { img: halley_ui/ui_scrollbar.png, colour: $ui_controlHover }
+      normal: { img: halley_ui/ui_scrollbar.png, colour: $ui_scrollBarNormal }
+      down: { img: halley_ui/ui_scrollbar.png, colour: $ui_scrollBarDown }
+      hover: { img: halley_ui/ui_scrollbar.png, colour: $ui_scrollBarHover }
+      disabled: { img: halley_ui/ui_scrollbar.png, colour: $ui_scrollBarDisabled }
       innerBorder: [ 3, 3, 3, 3 ]
       upSound: ""
       downSound: ""

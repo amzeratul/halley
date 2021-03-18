@@ -123,6 +123,9 @@ std::shared_ptr<UIListItem> UIList::addImage(const String& id, std::shared_ptr<U
 	if (style.hasColour("selectedImageColour")) {
 		image->setSelectable(baseCol, style.getColour("selectedImageColour"));
 	}
+	if (style.hasColour("hoveredImageColour")) {
+		image->setHoverable(baseCol, style.getColour("hoveredImageColour"));
+	}
 
 	return addItem(id, image, proportion, border, fillFlags, std::move(styleOverride));
 }

@@ -8,6 +8,11 @@ colours:
   ui_controlHover: "#C080E3"
   ui_controlDisabled: "#927B95"
   
+  ui_scrollBarNormal: "#9C5BB5"
+  ui_scrollBarDown: "#913DA3"
+  ui_scrollBarHover: "#C080E3"
+  ui_scrollBarDisabled: "#927B95"
+  
   ui_buttonNormal: "#9C5BB5"
   ui_buttonDown: "#913DA3"
   ui_buttonHover: "#C080E3"

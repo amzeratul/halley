@@ -5,6 +5,11 @@ colours:
   ui_controlDown: "#30323A"
   ui_controlHover: "#6D7285"
   ui_controlDisabled: "#191919"
+  
+  ui_scrollBarNormal: "#40424D"
+  ui_scrollBarDown: "#30323A"
+  ui_scrollBarHover: "#6D7285"
+  ui_scrollBarDisabled: "#191919"
 
   ui_buttonNormal: "#3C4051"
   ui_buttonDown: "#2D303E"
