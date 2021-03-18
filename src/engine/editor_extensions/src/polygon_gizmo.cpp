@@ -144,18 +144,6 @@ void PolygonGizmo::draw(Painter& painter) const
 	}
 }
 
-std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
-{
-	auto ui = factory.makeUI("ui/halley/polygon_gizmo_toolbar");
-	uiList = ui->getWidgetAs<UIList>("mode");
-	uiList->setSelectedOptionId(toString(mode));
-	ui->setHandle(UIEventType::ListSelectionChanged, "mode", [=] (const UIEvent& event)
-	{
-		setMode(fromString<PolygonGizmoMode>(event.getStringData()));
-	});
-	return ui;
-}
-
 bool PolygonGizmo::isHighlighted() const
 {
 	return highlightCooldown > 0;
@@ -276,10 +264,23 @@ void PolygonGizmo::writePointsIfNeeded()
 void PolygonGizmo::setMode(PolygonGizmoMode m)
 {
 	mode = m;
-	updateList();
+	updateUI();
 }
 
-void PolygonGizmo::updateList()
+std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
+{
+	auto ui = factory.makeUI("ui/halley/polygon_gizmo_toolbar");
+	uiList = ui->getWidgetAs<UIList>("mode");
+	uiList->setMouseBlocker(true);
+	updateUI();
+	ui->setHandle(UIEventType::ListSelectionChanged, "mode", [=] (const UIEvent& event)
+	{
+		setMode(fromString<PolygonGizmoMode>(event.getStringData()));
+	});
+	return ui;
+}
+
+void PolygonGizmo::updateUI()
 {
 	const bool canEdit = !!vertices;
 

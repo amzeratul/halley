@@ -69,7 +69,7 @@ namespace Halley {
 		int updateHandles(const SceneEditorInputState& inputState);
 
 		void setMode(PolygonGizmoMode mode);
-		void updateList();
+		void updateUI();
 
 		std::pair<Vertex, size_t> findInsertPoint(Vector2f pos) const;
 

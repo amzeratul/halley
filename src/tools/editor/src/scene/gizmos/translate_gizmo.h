@@ -12,8 +12,10 @@ namespace Halley {
 	private:
 		bool visible = false;
 		SceneEditorGizmoHandle handle;
+		Vector2f handleOffset;
 
 		Circle getMainHandle() const;
 		void updateEntityData(Vector2f pos);
+		Vector2f getObjectOffset() const;
 	};
 }
