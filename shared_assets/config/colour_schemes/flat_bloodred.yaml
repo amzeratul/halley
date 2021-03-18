@@ -1,0 +1,18 @@
+name: Flat Blood Red
+author: Finn
+base: colour_schemes/base_flat
+colours:
+
+  background0: "#ffdee3"
+  background1: "#ffeff1"
+  toolbarNormal: "#fc2847"   # main theme accent colour
+
+  ui_listSelected: "#fc2847"  # main theme accent colour
+
+  ui_stringMatchText: "#8f0f22" # darker version of the main theme accent colour
+
+  ui_debugConsole: "#fc2847"  # main theme accent colour
+
+  ui_unselectedTextAlt: "#8f0f22" # darker version of the main theme accent colour
+
+
