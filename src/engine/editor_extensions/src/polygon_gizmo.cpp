@@ -172,7 +172,7 @@ void PolygonGizmo::onEntityChanged()
 {
 	vertices = readPoints();
 
-	mode = PolygonGizmoMode::Move;
+	setMode(PolygonGizmoMode::Move);
 	
 	loadHandlesFromVertices();
 }
@@ -276,8 +276,18 @@ void PolygonGizmo::writePointsIfNeeded()
 void PolygonGizmo::setMode(PolygonGizmoMode m)
 {
 	mode = m;
+	updateList();
+}
+
+void PolygonGizmo::updateList()
+{
+	const bool canEdit = !!vertices;
+
 	if (uiList) {
 		uiList->setSelectedOptionId(toString(mode));
+		uiList->setItemEnabled("append", canEdit);
+		uiList->setItemEnabled("insert", canEdit);
+		uiList->setItemEnabled("delete", canEdit);
 	}
 }
 
