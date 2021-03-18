@@ -54,9 +54,11 @@ void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
 	}
 
 	// Update vertices
-	vertices.resize(handles.size());
-	for (size_t i = 0; i < handles.size(); ++i) {
-		vertices[i] = worldToLocal(handles[i].getPosition());
+	if (vertices) {
+		vertices->resize(handles.size());
+		for (size_t i = 0; i < handles.size(); ++i) {
+			(*vertices)[i] = worldToLocal(handles[i].getPosition());
+		}
 	}
 	
 	writePointsIfNeeded();
@@ -106,9 +108,13 @@ void PolygonGizmo::draw(Painter& painter) const
 	const auto zoom = getZoom();
 	const auto highCol = Colour4f(1, 1, 1);
 
-	worldSpaceVertices.resize(vertices.size());
-	for (size_t i = 0; i < vertices.size(); ++i) {
-		worldSpaceVertices[i] = localToWorld(vertices[i]);
+	if (vertices) {
+		worldSpaceVertices.resize(vertices->size());
+		for (size_t i = 0; i < vertices->size(); ++i) {
+			worldSpaceVertices[i] = localToWorld((*vertices)[i]);
+		}
+	} else {
+		worldSpaceVertices.clear();
 	}
 
 	if (mode == PolygonGizmoMode::Append && preview.has_value()) {
@@ -166,14 +172,14 @@ void PolygonGizmo::onEntityChanged()
 {
 	vertices = readPoints();
 
-	mode = vertices.empty() ? PolygonGizmoMode::Append : PolygonGizmoMode::Move;
+	mode = PolygonGizmoMode::Move;
 	
 	loadHandlesFromVertices();
 }
 
-VertexList PolygonGizmo::readPoints()
+std::optional<VertexList> PolygonGizmo::readPoints()
 {
-	VertexList result;
+	std::optional<VertexList> result;
 	auto* data = getComponentData(componentName);
 	if (data) {
 		auto& field = getField(*data, fieldName);		
@@ -182,9 +188,10 @@ VertexList PolygonGizmo::readPoints()
 		}
 		
 		const auto& seq = field.asSequence();
-		result.reserve(seq.size());
+		result = VertexList();
+		result->reserve(seq.size());
 		for (const auto& p: seq) {
-			result.push_back(p.asVector2f());
+			result->push_back(p.asVector2f());
 		}
 	}
 	lastStored = result;
@@ -235,9 +242,13 @@ void PolygonGizmo::writePoints(const VertexList& ps)
 
 void PolygonGizmo::loadHandlesFromVertices()
 {
-	handles.resize(vertices.size(), makeHandle({}));
-	for (size_t i = 0; i < vertices.size(); ++i) {
-		handles[i].setPosition(localToWorld(vertices[i]), false);
+	if (vertices) {
+		handles.resize(vertices->size(), makeHandle({}));
+		for (size_t i = 0; i < vertices->size(); ++i) {
+			handles[i].setPosition(localToWorld((*vertices)[i]), false);
+		}
+	} else {
+		handles.clear();
 	}
 	setHandleIndices();
 }
@@ -257,8 +268,8 @@ Rect4f PolygonGizmo::getHandleRect(Vector2f pos, float size) const
 
 void PolygonGizmo::writePointsIfNeeded()
 {
-	if (lastStored != vertices) {
-		writePoints(vertices);
+	if (vertices && lastStored != vertices) {
+		writePoints(*vertices);
 	}
 }
 
@@ -272,11 +283,11 @@ void PolygonGizmo::setMode(PolygonGizmoMode m)
 
 std::pair<Vector2f, size_t> PolygonGizmo::findInsertPoint(Vector2f pos) const
 {
-	if (vertices.empty()) {
+	if (!vertices || vertices->empty()) {
 		return std::make_pair(pos, 0);
 	}
 
-	const size_t nVertices = vertices.size();
+	const size_t nVertices = vertices->size();
 	const size_t n = isOpenPolygon ? nVertices - 1 : nVertices;
 
 	size_t bestIndex = 0;
@@ -284,8 +295,8 @@ std::pair<Vector2f, size_t> PolygonGizmo::findInsertPoint(Vector2f pos) const
 	float bestDist = std::numeric_limits<float>::infinity();
 	const auto* transform = getComponent<Transform2DComponent>();
 	for (size_t i = 0; i < n; ++i) {
-		const auto v0 = transform->transformPoint(vertices[i]);
-		const auto v1 = transform->transformPoint(vertices[(i + 1) % nVertices]);
+		const auto v0 = transform->transformPoint((*vertices)[i]);
+		const auto v1 = transform->transformPoint((*vertices)[(i + 1) % nVertices]);
 		
 		const auto seg = LineSegment(v0, v1);
 		const auto p = seg.getClosestPoint(pos);

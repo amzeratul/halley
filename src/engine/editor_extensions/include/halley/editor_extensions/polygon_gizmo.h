@@ -44,8 +44,8 @@ namespace Halley {
 		bool isOpenPolygon;
 		Colour4f colour;
 
-		VertexList lastStored;
-		VertexList vertices;
+		std::optional<VertexList> lastStored;
+		std::optional<VertexList> vertices;
 		mutable VertexList worldSpaceVertices;
 		std::optional<Vertex> preview;
 		size_t previewIndex = 0;
@@ -57,7 +57,7 @@ namespace Halley {
 		bool enableLineSnap = false;
 		int highlightCooldown = 0;
 
-		VertexList readPoints();
+		std::optional<VertexList> readPoints();
 		void writePoints(const VertexList& ps);
 		void writePointsIfNeeded();
 		ConfigNode& getField(ConfigNode& node, const String& fieldName);
