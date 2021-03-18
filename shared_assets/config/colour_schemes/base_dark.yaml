@@ -75,6 +75,10 @@ colours:
   ui_logDevText: "#3060FF"
 
   ui_inputCaret: "#FFFFFF"
+  
+  ui_staticListBackground: "#4e9a5c80"
+  ui_staticListBackgroundAlternate: "#324a2f80"
+  ui_staticListBackgroundInvalid: "#9A4E5B80"
 
 
 sprites:

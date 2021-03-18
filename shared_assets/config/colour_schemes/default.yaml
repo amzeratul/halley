@@ -29,7 +29,3 @@ colours:
   ui_staticBoxSubdue: "#30323AD0"
 
   ui_debugConsole: "#1E1E1EC0"
-  
-  ui_staticListBackground: "#4e9a5c80"
-  ui_staticListBackgroundAlternate: "#324a2f80"
-  ui_staticListBackgroundInvalid: "#9A4E5B80"
