@@ -43,7 +43,7 @@ colours:
 
   scrollBackground: "#D0D0D0"
   
-  taskbarLogoBackground: "#FFD7EE"
+  taskbarLogoBackground: "#FFFFFF"
   taskRunning: "#74AEE9"
   taskComplete: "#66DB8F"
   taskError: "#F05959"
