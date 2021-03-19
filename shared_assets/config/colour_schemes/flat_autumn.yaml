@@ -11,6 +11,4 @@ colours:
 
   ui_stringMatchText: "#874c2a" # darker version of the main theme accent colour
 
-  ui_debugConsole: "#d9814f"  # main theme accent colour
-
   ui_unselectedTextAlt: "#874c2a" # darker version of the main theme accent colour

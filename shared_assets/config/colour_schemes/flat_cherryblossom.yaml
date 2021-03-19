@@ -4,14 +4,12 @@ base: colour_schemes/base_flat
 colours:
   background0: "#ffe5ea"
   background1: "#fff2f5"  
-  
+
   toolbarNormal: "#ffb7c5"   # main theme accent colour
 
   ui_listSelected: "#ffb7c5"  # main theme accent colour
 
   ui_stringMatchText: "#d46177" # darker version of the main theme accent colour
-
-  ui_debugConsole: "#ffb7c5"  # main theme accent colour
 
   ui_unselectedTextAlt: "#d46177" # darker version of the main theme accent colour
 

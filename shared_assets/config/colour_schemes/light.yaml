@@ -1,39 +1,13 @@
 name: Light
-base: colour_schemes/base_light
+author: Finn
+base: colour_schemes/base_flat
 colours:
-  background0: "#F5F5F5"
-  background1: "#F8F8F8"
-  backgroundLogo: "#F3F3F3"
+  toolbarNormal: "#fc2847"   # main theme accent colour
 
-  ui_controlNormal: "#A2A0A9"
-  ui_controlDown: "#7A7984"
-  ui_controlHover: "#BBBBC1"
-  ui_controlDisabled: "#CFCFCF"
+  ui_listSelected: "#fc2847"  # main theme accent colour
 
-  ui_scrollBarNormal: "#A2A0A9"
-  ui_scrollBarDown: "#7A7984"
-  ui_scrollBarHover: "#BBBBC1"
-  ui_scrollBarDisabled: "#CFCFCF"
-  
-  ui_buttonNormal: "#A2A0A9"
-  ui_buttonDown: "#7A7984"
-  ui_buttonHover: "#BBBBC1"
-  ui_buttonDisabled: "#CFCFCF"
+  ui_stringMatchText: "#8f0f22" # darker version of the main theme accent colour
 
-  ui_inputNormal: "#A2A0A9"
-  ui_inputDown: "#7A7984"
-  ui_inputHover: "#BBBBC1"
-  ui_inputDisabled: "#CFCFCF"
+  ui_unselectedTextAlt: "#8f0f22" # darker version of the main theme accent colour
 
-  ui_listBackground: "#CFCFD3"
-  ui_listSelected: "#FFFFFF"
-  ui_listHover: "#F0F0F4"
-  ui_listDrag: "#A2A0A980"
 
-  ui_scrollBackground: "#EBEBED"
-  ui_backgroundBox: "#EBEBED"
-  ui_popupWindow: "#DFDFE6"
-  ui_staticBox: "#DFDFE6"
-  ui_staticBoxSubdue: "#CFCFD6"
-
-  ui_debugConsole: "#A2A0A9C0"

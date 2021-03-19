@@ -51,7 +51,7 @@ colours:
 
   ui_stringMatchText: "#284376" # darker version of the main theme accent colour
 
-  ui_debugConsole: "#5c80c3"  # main theme accent colour
+  ui_debugConsole: "#ffffffc0"  # main theme accent colour
 
   ui_selectedText: "#ffffff"
 
