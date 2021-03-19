@@ -1,4 +1,4 @@
-name: Dark Glass
+name: Dark
 base: colour_schemes/base_dark
 colours:
   ui_controlNormal: "#40424D"
