@@ -1,0 +1,12 @@
+name: Flat Autumn (Dark)
+author: Finn
+base: colour_schemes/base_flat_dark
+colours:
+  
+  toolbarNormal: "#d9814f"   # main theme accent colour
+
+  ui_listSelected: "#d9814f"  # main theme accent colour
+
+  ui_stringMatchText: "#ffb286" # lighter version of the main theme accent colour
+
+  ui_unselectedTextAlt: "#ffb286" # lighter version of the main theme accent colour

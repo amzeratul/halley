@@ -17,18 +17,18 @@ colours:
   toolbarText: "#ffffff"
 
   ui_controlNormal: "#d7d8e3"
-  ui_controlDown: "#ffffff"
-  ui_controlHover: "#ffffff"
+  ui_controlDown: "#f6f7f9"
+  ui_controlHover: "#f6f7f9"
   ui_controlDisabled: "#b4b5bd"
   
-  ui_buttonNormal: "#f6f7f9"
+  ui_buttonNormal: "#cfd1de"
   ui_buttonDown: "#d7d8e3"
   ui_buttonHover: "#d7d8e3"
-  ui_buttonDisabled: "#b4b5bd"
+  ui_buttonDisabled: "#ffffff"
 
-  ui_inputNormal: "#d7d8e3"
-  ui_inputDown: "#d7d8e3"
-  ui_inputHover: "#d7d8e3"
+  ui_inputNormal: "#ffffff"
+  ui_inputDown: "#ffffff"
+  ui_inputHover: "#ffffff"
   ui_inputDisabled: "#000000"
 
   ui_listBackground: "#ffffff"
@@ -63,29 +63,29 @@ colours:
 
   ui_selectedTextAlt: "#ffffff"   # prefab text
   ui_unselectedTextAlt: "#284376" # darker version of the main theme accent colour
-  ui_disabledTextAlt: "#707070"
+  ui_disabledTextAlt: "#cfcfcf"
 
 sprites:
   ui_button: { img: halley_ui/ui_button_flat.png }
   ui_float_window: { img: halley_ui/ui_float_window.png, material: Halley/SpriteInverseTint }
   ui_title_capsule: { img: halley_ui/ui_title_capsule.png, material: Halley/SpriteInverseTint }
-  ui_input_thin: { img: halley_ui/ui_input_thin.png, material: Halley/SpriteInverseTint }
-  ui_input: { img: halley_ui/ui_input.png, material: Halley/SpriteInverseTint }
-  ui_checkbox: { img: halley_ui/ui_checkbox.png, material: Halley/SpriteInverseTint }
-  ui_checkbox_checked: { img: halley_ui/ui_checkbox_checked.png, material: Halley/SpriteInverseTint }
-  ui_dropdown_closed: { img: halley_ui/ui_dropdown_closed.png, material: Halley/SpriteInverseTint }
-  ui_dropdown_open: { img: halley_ui/ui_dropdown_open.png, material: Halley/SpriteInverseTint }
-  ui_dropdown_window: { img: halley_ui/ui_dropdown_window.png, material: Halley/SpriteInverseTint }
+  ui_input_thin: { img: halley_ui/ui_input_thin_flat_light.png, material: Halley/Sprite }
+  ui_input: { img: halley_ui/ui_input_flat_light.png, material: Halley/Sprite }
+  ui_checkbox: { img: halley_ui/ui_checkbox_flat_light.png, material: Halley/Sprite }
+  ui_checkbox_checked: { img: halley_ui/ui_checkbox_checked_flat_light.png, material: Halley/Sprite }
+  ui_dropdown_closed: { img: halley_ui/ui_dropdown_closed_flat_light.png, material: Halley/Sprite }
+  ui_dropdown_open: { img: halley_ui/ui_dropdown_open_flat_light.png, material: Halley/Sprite }
+  ui_dropdown_window: { img: halley_ui/ui_dropdown_window_flat_light.png, material: Halley/Sprite }
   ui_list_background: { img: halley_ui/ui_list_item.png, material: Halley/Sprite }
-  ui_list_item: { img: halley_ui/ui_list_item.png, material: Halley/Sprite }
+  ui_list_item: { img: halley_ui/ui_list_item_flat.png, material: Halley/Sprite }
   ui_list_item_drag: { img: halley_ui/ui_list_item.png, material: Halley/Sprite }
-  ui_tooltip: { img: halley_ui/ui_tooltip.png, material: Halley/SpriteInverseTint }
-  ui_tab_normal: { img: halley_ui/tabs/tab_normal_flat.png, material: Halley/SpriteInverseTint }
-  ui_tab_hover: { img: halley_ui/tabs/tab_hover_flat.png, material: Halley/SpriteInverseTint }
-  ui_tab_selected: { img: halley_ui/tabs/tab_selected_flat.png, material: Halley/SpriteInverseTint }
+  ui_tooltip: { img: halley_ui/ui_tooltip_flat_light.png, material: Halley/Sprite }
+  ui_tab_normal: { img: halley_ui/tabs/tab_normal_flat_light.png, material: Halley/Sprite }
+  ui_tab_hover: { img: halley_ui/tabs/tab_hover_flat_light.png, material: Halley/Sprite }
+  ui_tab_selected: { img: halley_ui/tabs/tab_selected_flat_light.png, material: Halley/Sprite }
   ui_tab_modified: { img: halley_ui/ui_tab_modified.png, material: Halley/SpriteInverseTint }
-  ui_tabs_bg: { img: halley_ui/tabs/tabs_bg.png, material: Halley/SpriteInverseTint }
-  ui_task: { img: halley_ui/ui_input.png, material: Halley/SpriteInverseTint }
-  ui_task_fill: { img: halley_ui/ui_list_item.png, material: Halley/SpriteInverseTint }
+  ui_tabs_bg: { img: halley_ui/tabs/tabs_bg_flat_light.png, material: Halley/Sprite }
+  ui_task: { img: halley_ui/ui_input_flat_light.png, material: Halley/Sprite }
+  ui_task_fill: { img: halley_ui/ui_list_item_flat.png, material: Halley/SpriteInverseTint }
   ui_scroll_background: { img: halley_ui/checkered.png, material: Halley/SpriteInverseTint }
 

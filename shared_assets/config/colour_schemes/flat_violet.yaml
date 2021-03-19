@@ -2,8 +2,6 @@ name: Flat Violet
 author: Finn
 base: colour_schemes/base_flat
 colours:
-  background0: "#feecfe"
-  background1: "#fff6ff"
 
   toolbarNormal: "#cb83cc"   # main theme accent colour
 

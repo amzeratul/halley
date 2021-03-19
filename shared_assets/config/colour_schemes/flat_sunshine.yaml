@@ -1,0 +1,12 @@
+name: Flat Sunshine
+author: Finn
+base: colour_schemes/base_flat
+colours:
+  
+  toolbarNormal: "#ffca45"   # main theme accent colour
+
+  ui_listSelected: "#ffca45"  # main theme accent colour
+
+  ui_stringMatchText: "#b57a24" # darker version of the main theme accent colour
+
+  ui_unselectedTextAlt: "#b57a24" # darker version of the main theme accent colour

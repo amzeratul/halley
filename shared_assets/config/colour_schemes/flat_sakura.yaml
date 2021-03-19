@@ -1,0 +1,31 @@
+name: Flat Sakura
+author: Finn
+base: colour_schemes/base_flat
+colours:
+  background0: "#ffe5ea"
+  background1: "#fff2f5"  
+
+  toolbarNormal: "#ffb7c5"   # main theme accent colour
+
+  ui_listSelected: "#ffb7c5"  # main theme accent colour
+
+  ui_stringMatchText: "#d46177" # darker version of the main theme accent colour
+
+  ui_unselectedTextAlt: "#d46177" # darker version of the main theme accent colour
+
+
+backgroundParticles:
+  particles:
+    spawnRate: 25
+    angle: 135
+    angleScatter: 25
+    speed: 100
+    acceleration: [-10, 10]
+    ttl: 10
+    fadeInTime: 1
+    fadeOutTime: 1
+    speedDamp: 0.2
+    directionScatter: 150
+    rotateTowardsMovement: true
+  sprites:
+  - { img: halley_ui/particles_sakura_flat.png, colour: "#FFFFFF" }

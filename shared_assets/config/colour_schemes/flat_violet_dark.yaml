@@ -1,0 +1,13 @@
+name: Flat Violet (Dark)
+author: Finn
+base: colour_schemes/base_flat_dark
+colours:
+
+  toolbarNormal: "#cb83cc"   # main theme accent colour
+
+  ui_listSelected: "#cb83cc"  # main theme accent colour
+
+  ui_stringMatchText: "#feacff" # lighter version of the main theme accent colour
+
+  ui_unselectedTextAlt: "#feacff" # lighter version of the main theme accent colour
+

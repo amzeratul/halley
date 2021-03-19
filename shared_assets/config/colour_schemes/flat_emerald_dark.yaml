@@ -1,0 +1,12 @@
+name: Flat Emerald (Dark)
+author: Finn
+base: colour_schemes/base_flat_dark
+colours:
+  
+  toolbarNormal: "#5cc36c"   # main theme accent colour
+
+  ui_listSelected: "#5cc36c"  # main theme accent colour
+
+  ui_stringMatchText: "#62ff7b" # lighter version of the main theme accent colour
+
+  ui_unselectedTextAlt: "#62ff7b" # lighter version of the main theme accent colour

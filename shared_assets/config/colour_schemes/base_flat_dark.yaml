@@ -1,0 +1,91 @@
+name: Base (Flat) dark
+author: Finn
+base: colour_schemes/base_dark
+enabled: false
+colours:
+  background0: "#2f424b"
+  background1: "#2f424b"
+  backgroundLogo: "#22333b"
+  
+  toolbarNormal: "#5c80c3"   # main theme accent colour
+  toolbarHover: "#f6f7f9"
+  toolbarDown: "#f6f7f9"
+  toolbarSelected: "#f6f7f9"
+  toolbarIconNormal: "#ffffff"
+  toolbarIconHover: "#000000"
+  toolbarIconSelected: "#000000"
+  toolbarText: "#ffffff"
+
+  ui_controlNormal: "#d7d8e3"
+  ui_controlDown: "#ffffff"
+  ui_controlHover: "#ffffff"
+  ui_controlDisabled: "#b4b5bd"
+  
+  ui_buttonNormal: "#4a5e68"
+  ui_buttonDown: "#22333b"
+  ui_buttonHover: "#22333b"
+  ui_buttonDisabled: "#4a5e68"
+
+  ui_inputNormal: "#d7d8e3"
+  ui_inputDown: "#d7d8e3"
+  ui_inputHover: "#d7d8e3"
+  ui_inputDisabled: "#000000"
+
+  ui_listBackground: "#22333b"
+  ui_listSelected: "#5c80c3"  # main theme accent colour
+  ui_listHover: "#405965"
+  ui_listDrag: "#405965"
+
+  ui_disabledText: "#9d9da4"
+
+  ui_scrollBarNormal: "#6e7b81"
+  ui_scrollBarDown: "#97a1a5"
+  ui_scrollBarHover: "#97a1a5"
+  ui_scrollBarDisabled: "#D7AAB6"
+  ui_scrollBackground: "#2f424b"
+  
+  ui_backgroundBox: "#22333b"
+  ui_popupWindow: "#22333b"
+  ui_staticBox: "#2f424b"
+  ui_staticBoxSubdue: "#2f424b"
+
+  ui_stringMatchText: "#cadcff" # lighter version of the main theme accent colour
+
+  ui_debugConsole: "#000000c0"  
+
+  # ui_selectedText: "#ffffff"
+
+  taskbarLogoBackground: "#22333b"
+  taskRunning: "#74AEE9"
+  taskComplete: "#66DB8F"
+  taskError: "#F05959"
+  taskStatusBackground: "#d7d8e3"
+
+  ui_selectedTextAlt: "#ffffff"   # prefab text
+  ui_unselectedTextAlt: "#cadcff" # lighter version of the main theme accent colour
+  ui_disabledTextAlt: "#546973"
+
+sprites:
+  ui_button: { img: halley_ui/ui_button_flat.png }
+  ui_float_window: { img: halley_ui/ui_float_window.png, material: Halley/Sprite }
+  ui_title_capsule: { img: halley_ui/ui_title_capsule.png, material: Halley/Sprite }
+  ui_input_thin: { img: halley_ui/ui_input_thin_flat.png, material: Halley/Sprite }
+  ui_input: { img: halley_ui/ui_input_flat.png, material: Halley/Sprite }
+  ui_checkbox: { img: halley_ui/ui_checkbox_flat.png, material: Halley/Sprite }
+  ui_checkbox_checked: { img: halley_ui/ui_checkbox_checked_flat.png, material: Halley/Sprite }
+  ui_dropdown_closed: { img: halley_ui/ui_dropdown_closed_flat.png, material: Halley/Sprite }
+  ui_dropdown_open: { img: halley_ui/ui_dropdown_open_flat.png, material: Halley/Sprite }
+  ui_dropdown_window: { img: halley_ui/ui_dropdown_window_flat.png, material: Halley/Sprite }
+  ui_list_background: { img: halley_ui/ui_list_item.png, material: Halley/Sprite }
+  ui_list_item: { img: halley_ui/ui_list_item.png, material: Halley/Sprite }
+  ui_list_item_drag: { img: halley_ui/ui_list_item.png, material: Halley/Sprite }
+  ui_tooltip: { img: halley_ui/ui_tooltip_flat.png, material: Halley/Sprite }
+  ui_tab_normal: { img: halley_ui/tabs/tab_normal_flat.png, material: Halley/Sprite }
+  ui_tab_hover: { img: halley_ui/tabs/tab_hover_flat.png, material: Halley/Sprite }
+  ui_tab_selected: { img: halley_ui/tabs/tab_selected_flat.png, material: Halley/Sprite }
+  ui_tab_modified: { img: halley_ui/ui_tab_modified.png, material: Halley/Sprite }
+  ui_tabs_bg: { img: halley_ui/tabs/tabs_bg_flat.png, material: Halley/Sprite }
+  ui_task: { img: halley_ui/ui_input_flat.png, material: Halley/Sprite }
+  ui_task_fill: { img: halley_ui/ui_list_item_flat.png, material: Halley/Sprite }
+  ui_scroll_background: { img: halley_ui/checkered.png, material: Halley/Sprite }
+
