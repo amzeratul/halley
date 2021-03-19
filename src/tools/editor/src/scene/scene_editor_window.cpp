@@ -158,6 +158,7 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 		entityList->setSceneData(sceneData);
 
 		// Setup tools
+		gameBridge->getGizmos().resetTools();
 		interface.setupTools(*toolMode, gameBridge->getGizmos());
 		setTool("translate");
 

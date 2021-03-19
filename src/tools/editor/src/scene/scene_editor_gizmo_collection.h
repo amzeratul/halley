@@ -20,9 +20,10 @@ namespace Halley {
 		void deselect() override;
 
 		void addTool(const Tool& tool, GizmoFactory gizmoFactory) override;
+		void resetTools();
 		void generateList(UIList& list) override;
 		gsl::span<const Tool> getTools() const { return tools; }
-		
+
 	private:
 		UIFactory& factory;
 		Resources& resources;

@@ -16,18 +16,7 @@ SceneEditorGizmoCollection::SceneEditorGizmoCollection(UIFactory& factory, Resou
 	selectedBoundsGizmo = std::make_unique<SelectedBoundsGizmo>(snapRules, resources);
 	selectionBoxGizmo = std::make_unique<SelectionBoxGizmo>(snapRules, resources);
 
-	addTool(Tool("drag", LocalisedString::fromHardcodedString("Pan Scene"), Sprite().setImage(resources, "ui/scene_editor_drag.png")),
-		[this] (SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)
-		{
-			return std::unique_ptr<SceneEditorGizmo>{};
-		}
-	);
-	addTool(Tool("translate", LocalisedString::fromHardcodedString("Move Entities"), Sprite().setImage(resources, "ui/scene_editor_move.png")),
-		[this] (SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)
-		{
-			return std::make_unique<TranslateGizmo>(snapRules);
-		}
-	);
+	resetTools();
 }
 
 bool SceneEditorGizmoCollection::update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState)
@@ -119,4 +108,22 @@ void SceneEditorGizmoCollection::addTool(const Tool& tool, GizmoFactory gizmoFac
 {
 	tools.push_back(tool);
 	gizmoFactories[tool.id] = std::move(gizmoFactory);
+}
+
+void SceneEditorGizmoCollection::resetTools()
+{
+	tools.clear();
+	
+	addTool(Tool("drag", LocalisedString::fromHardcodedString("Pan Scene"), Sprite().setImage(resources, "ui/scene_editor_drag.png")),
+		[this] (SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)
+		{
+			return std::unique_ptr<SceneEditorGizmo>{};
+		}
+	);
+	addTool(Tool("translate", LocalisedString::fromHardcodedString("Move Entities"), Sprite().setImage(resources, "ui/scene_editor_move.png")),
+		[this] (SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)
+		{
+			return std::make_unique<TranslateGizmo>(snapRules);
+		}
+	);
 }
