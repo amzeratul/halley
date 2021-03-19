@@ -8,7 +8,7 @@ SelectionBoxGizmo::SelectionBoxGizmo(SnapRules snapRules, Resources& resources)
 {
 }
 
-void SelectionBoxGizmo::update(Time time, const SceneEditorInputState& inputState)
+void SelectionBoxGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {
 	bounds = inputState.selectionBox;
 }

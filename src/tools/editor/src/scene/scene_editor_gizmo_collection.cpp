@@ -19,17 +19,17 @@ SceneEditorGizmoCollection::SceneEditorGizmoCollection(UIFactory& factory, Resou
 	resetTools();
 }
 
-bool SceneEditorGizmoCollection::update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState)
+bool SceneEditorGizmoCollection::update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState)
 {
 	selectedBoundsGizmo->setCamera(camera);
-	selectedBoundsGizmo->update(time, inputState);
+	selectedBoundsGizmo->update(time, sceneEditor, inputState);
 	selectionBoxGizmo->setCamera(camera);
-	selectionBoxGizmo->update(time, inputState);
+	selectionBoxGizmo->update(time, sceneEditor, inputState);
 	
 	if (activeGizmo) {
 		activeGizmo->setCamera(camera);
 		activeGizmo->setOutputState(outputState);
-		activeGizmo->update(time, inputState);
+		activeGizmo->update(time, sceneEditor, inputState);
 
 		return activeGizmo->isHighlighted();
 	}

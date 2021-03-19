@@ -1,4 +1,5 @@
 #pragma once
+
 #include "halley/core/game/scene_editor_interface.h"
 #include "halley/core/graphics/camera.h"
 #include "halley/entity/entity.h"
@@ -52,8 +53,9 @@ namespace Halley {
 		void onSceneLoaded(Prefab& scene) override;
     	void onSceneSaved() override;
     	
-		static Rect4f getSpriteTreeBounds(const EntityRef& e);
-		static std::optional<Rect4f> getSpriteBounds(const EntityRef& e);
+		Rect4f getSpriteTreeBounds(const EntityRef& e) const override;
+		std::optional<Rect4f> getSpriteBounds(const EntityRef& e) const;
+		virtual bool isSpriteVisibleOnCamera(const Sprite& sprite, OptionalLite<int> mask) const;
 
     	void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) override;
 
@@ -104,7 +106,7 @@ namespace Halley {
     	std::optional<Rect4f> selBox;
 
     	void moveCameraTo2D(Vector2f pos);
-		static void doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect);
+		void doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect) const;
     	Vector2f roundPosition(Vector2f pos) const;
 		Vector2f roundPosition(Vector2f pos, float zoom) const;
     	EntityRef getEntity(const UUID& uuid) const;

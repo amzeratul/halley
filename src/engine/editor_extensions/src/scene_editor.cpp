@@ -75,7 +75,7 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	}
 
 	// Update gizmos
-	const bool hasHighlightedGizmo = gizmoCollection->update(t, camera, inputState, outputState);
+	const bool hasHighlightedGizmo = gizmoCollection->update(t, camera, *this, inputState, outputState);
 	if (!hasHighlightedGizmo && inputState.leftClickPressed) {
 		gizmoCollection->deselect();
 		onClick(inputState, outputState);
@@ -357,14 +357,14 @@ void SceneEditor::onToolSet(String& tool, String& componentName, String& fieldNa
 {
 }
 
-Rect4f SceneEditor::getSpriteTreeBounds(const EntityRef& e)
+Rect4f SceneEditor::getSpriteTreeBounds(const EntityRef& e) const
 {
 	std::optional<Rect4f> rect;
 	doGetSpriteTreeBounds(e, rect);
 	return rect.value_or(Rect4f());
 }
 
-void SceneEditor::doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect)
+void SceneEditor::doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect) const
 {
 	auto cur = getSpriteBounds(e);
 	if (!rect) {
@@ -380,7 +380,7 @@ void SceneEditor::doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f
 	}
 }
 
-std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e)
+std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e) const
 {
 	const auto transform2d = e.tryGetComponent<Transform2DComponent>();
 
@@ -388,13 +388,20 @@ std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e)
 		const auto sprite = e.tryGetComponent<SpriteComponent>();
 
 		if (sprite) {
-			return transform2d->getSpriteAABB(sprite->sprite);
+			if (isSpriteVisibleOnCamera(sprite->sprite, sprite->mask)) {
+				return transform2d->getSpriteAABB(sprite->sprite);
+			}
 		} else {
 			auto pos = transform2d->getGlobalPosition();
 			return Rect4f(pos, pos);
 		}
 	}
 	return {};
+}
+
+bool SceneEditor::isSpriteVisibleOnCamera(const Sprite& sprite, OptionalLite<int> mask) const
+{
+	return true;
 }
 
 void SceneEditor::setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor)

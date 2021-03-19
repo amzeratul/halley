@@ -17,7 +17,7 @@ TranslateGizmo::TranslateGizmo(SnapRules snapRules)
 	handle.setGridSnap(snapRules.grid);
 }
 
-void TranslateGizmo::update(Time time, const SceneEditorInputState& inputState)
+void TranslateGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {
 	handle.update(inputState);
 

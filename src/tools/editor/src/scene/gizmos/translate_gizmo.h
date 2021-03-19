@@ -5,7 +5,7 @@ namespace Halley {
 	class TranslateGizmo final : public SceneEditorGizmo {
 	public:
 		explicit TranslateGizmo(SnapRules snapRules);
-		void update(Time time, const SceneEditorInputState& inputState) override;
+		void update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState) override;
 		void draw(Painter& painter) const override;
 		bool isHighlighted() const override;
 		

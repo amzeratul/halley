@@ -12,7 +12,7 @@ namespace Halley {
 	public:
 		SceneEditorGizmoCollection(UIFactory& factory, Resources& resources);
 		
-		bool update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) override;
+		bool update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) override;
 		void draw(Painter& painter) override;
 		void setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& entityData) override;
 		void refreshEntity() override;

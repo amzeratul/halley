@@ -73,7 +73,7 @@ namespace Halley {
 		explicit SceneEditorGizmo(SnapRules snapRules);
 		virtual ~SceneEditorGizmo() = default;
 
-		virtual void update(Time time, const SceneEditorInputState& inputState);
+		virtual void update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState);
 		virtual void draw(Painter& painter) const;
 		virtual std::shared_ptr<UIWidget> makeUI();
 

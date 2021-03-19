@@ -21,7 +21,7 @@ PolygonGizmo::PolygonGizmo(SnapRules snapRules, String componentName, String fie
 {
 }
 
-void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
+void PolygonGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {
 	if (inputState.rightClickPressed) {
 		setMode(PolygonGizmoMode::Move);

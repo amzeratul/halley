@@ -11,11 +11,11 @@ SelectedBoundsGizmo::SelectedBoundsGizmo(SnapRules snapRules, Resources& resourc
 	material = std::make_shared<Material>(resources.get<MaterialDefinition>("Halley/InvertLine"));
 }
 
-void SelectedBoundsGizmo::update(Time time, const SceneEditorInputState& inputState)
+void SelectedBoundsGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {
 	const auto& e = getEntity();
 	if (e) {
-		bounds = SceneEditor::getSpriteTreeBounds(e.value());
+		bounds = sceneEditor.getSpriteTreeBounds(e.value());
 	} else {
 		bounds.reset();
 	}

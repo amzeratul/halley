@@ -102,6 +102,8 @@ namespace Halley {
         virtual void refreshAssets() = 0;
 
     	virtual void setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizmoCollection) = 0;
+
+    	virtual Rect4f getSpriteTreeBounds(const EntityRef& e) const = 0;
     };
 
 	class EntityTree {
@@ -184,7 +186,7 @@ namespace Halley {
 		
 		virtual ~ISceneEditorGizmoCollection() = default;
 
-        virtual bool update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) = 0;
+        virtual bool update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) = 0;
         virtual void draw(Painter& painter) = 0;
         virtual void setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& entityData) = 0;
 		virtual void refreshEntity() = 0;

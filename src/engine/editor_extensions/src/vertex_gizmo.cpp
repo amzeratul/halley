@@ -19,7 +19,7 @@ VertexGizmo::VertexGizmo(SnapRules snapRules, String componentName, String field
 	handle.setGridSnap(snapRules.grid);
 }
 
-void VertexGizmo::update(Time time, const SceneEditorInputState& inputState)
+void VertexGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {
 	handle.update(inputState);
 

@@ -126,7 +126,7 @@ SceneEditorGizmo::SceneEditorGizmo(SnapRules rules)
 {
 }
 
-void SceneEditorGizmo::update(Time time, const SceneEditorInputState& inputState)
+void SceneEditorGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {}
 
 void SceneEditorGizmo::draw(Painter& painter) const
