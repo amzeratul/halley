@@ -33,16 +33,13 @@ set (editor_sources
 	"src/scene/entity_list.cpp"
 	"src/scene/scene_editor_canvas.cpp"
 	"src/scene/scene_editor_game_bridge.cpp"
-	"src/scene/scene_editor_gizmo.cpp"
 	"src/scene/scene_editor_gizmo_collection.cpp"
 	"src/scene/scene_editor_window.cpp"
 	"src/scene/undo_stack.cpp"
 
-	"src/scene/gizmos/polygon_gizmo.cpp"
 	"src/scene/gizmos/selected_bounds_gizmo.cpp"
 	"src/scene/gizmos/selection_box_gizmo.cpp"
 	"src/scene/gizmos/translate_gizmo.cpp"
-	"src/scene/gizmos/vertex_gizmo.cpp"
 
 	"src/ui/console_window.cpp"
 	"src/ui/ecs_window.cpp"
@@ -89,16 +86,13 @@ set (editor_headers
 	"src/scene/entity_list.h"
 	"src/scene/scene_editor_canvas.h"
 	"src/scene/scene_editor_game_bridge.h"
-	"src/scene/scene_editor_gizmo.h"
 	"src/scene/scene_editor_gizmo_collection.h"
 	"src/scene/scene_editor_window.h"
 	"src/scene/undo_stack.h"
 
-	"src/scene/gizmos/polygon_gizmo.h"
 	"src/scene/gizmos/selected_bounds_gizmo.h"
 	"src/scene/gizmos/selection_box_gizmo.h"
 	"src/scene/gizmos/translate_gizmo.h"
-	"src/scene/gizmos/vertex_gizmo.h"
 	
 	"src/ui/console_window.h"
 	"src/ui/ecs_window.h"

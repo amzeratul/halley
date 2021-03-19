@@ -1,15 +1,18 @@
-#include "scene_editor/scene_editor.h"
-#include "world.h"
+#define DONT_INCLUDE_HALLEY_HPP
+
+#include "scene_editor.h"
+#include "halley/entity/world.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/core/game/halley_statics.h"
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/render_context.h"
-#include "system.h"
-#include "components/sprite_component.h"
-#include "components/camera_component.h"
-#include "components/transform_2d_component.h"
+#include "halley/entity/system.h"
+#include "halley/editor_extensions/scene_editor_input_state.h"
 #include "halley/core/graphics/sprite/sprite_sheet.h"
 #include "halley/core/graphics/text/font.h"
+#include "halley/entity/components/transform_2d_component.h"
+#include "components/sprite_component.h"
+#include "components/camera_component.h"
 
 using namespace Halley;
 
@@ -280,6 +283,11 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 	transform.setGlobalPosition(roundPosition(transform.getGlobalPosition() + translate, camera.zoom));
 }
 
+void SceneEditor::setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizmoCollection)
+{
+	gizmoCollection.generateList(toolList);
+}
+
 void SceneEditor::setSelectedEntity(const UUID& id, EntityData& entityData)
 {
 	const auto curId = selectedEntity ? selectedEntity.value().getInstanceUUID() : UUID();
@@ -345,9 +353,8 @@ void SceneEditor::showEntity(const UUID& id)
 	}
 }
 
-ConfigNode SceneEditor::onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options)
+void SceneEditor::onToolSet(String& tool, String& componentName, String& fieldName, ConfigNode& options)
 {
-	return options;
 }
 
 Rect4f SceneEditor::getSpriteTreeBounds(const EntityRef& e)

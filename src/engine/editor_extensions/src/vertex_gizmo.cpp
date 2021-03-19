@@ -1,7 +1,10 @@
 #include "vertex_gizmo.h"
-#include "halley/entity/components/transform_2d_component.h"
-#include "halley/core/editor_extensions/scene_editor_interface.h"
+#include "halley/core/game/scene_editor_interface.h"
 #include "halley/core/graphics/painter.h"
+
+#define DONT_INCLUDE_HALLEY_HPP
+#include "halley/entity/components/transform_2d_component.h"
+
 using namespace Halley;
 
 VertexGizmo::VertexGizmo(SnapRules snapRules, String componentName, String fieldName)
@@ -20,7 +23,7 @@ void VertexGizmo::update(Time time, const SceneEditorInputState& inputState)
 {
 	handle.update(inputState);
 
-	const auto transform = getTransform();
+	const auto transform = getComponent<Transform2DComponent>();
 	if (transform) {
 		if (handle.isHeld()) {
 			// Write to object

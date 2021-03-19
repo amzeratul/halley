@@ -1,6 +1,6 @@
 #pragma once
 #include "entity_icons.h"
-#include "halley/core/editor_extensions/scene_editor_interface.h"
+#include "halley/core/game/scene_editor_interface.h"
 #include "halley/tools/ecs/fields_schema.h"
 #include "halley/ui/ui_widget.h"
 #include "src/ui/select_asset_widget.h"
@@ -79,7 +79,7 @@ namespace Halley {
 		void setIcon(const String& icon);
 
 		void onEntityUpdated() override;
-		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) override;
+		void setTool(const String& tool, const String& componentName, const String& fieldName, ConfigNode options) override;
 		EntityData& getEntityData();
 		const EntityData& getEntityData() const;
 

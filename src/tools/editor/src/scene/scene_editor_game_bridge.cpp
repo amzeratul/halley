@@ -161,12 +161,11 @@ void SceneEditorGameBridge::onEntityMoved(const UUID& uuid, const EntityData& da
 	}
 }
 
-ConfigNode SceneEditorGameBridge::onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options)
+void SceneEditorGameBridge::onToolSet(String& tool, String& componentName, String& fieldName, ConfigNode& options)
 {
 	if (interfaceReady) {
-		return interface->onToolSet(tool, componentName, fieldName, std::move(options));
+		interface->onToolSet(tool, componentName, fieldName, options);
 	}
-	return options;
 }
 
 void SceneEditorGameBridge::onSceneLoaded(Prefab& scene)

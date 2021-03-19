@@ -69,7 +69,7 @@ void SceneEditorWindow::makeUI()
 	setHandle(UIEventType::ListSelectionChanged, "toolMode", [=] (const UIEvent& event)
 	{
 		if (toolModeTimeout == 0) {
-			setTool(fromString<SceneEditorTool>(event.getStringData()));
+			setTool(event.getStringData());
 			toolModeTimeout = 2;
 		}
 	});
@@ -157,7 +157,10 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 		entityEditor->addFieldFactories(interface.getComponentEditorFieldFactories());
 		entityList->setSceneData(sceneData);
 
-		setTool(SceneEditorTool::Translate);
+		// Setup tools
+		gameBridge->getGizmos().resetTools();
+		interface.setupTools(*toolMode, gameBridge->getGizmos());
+		setTool("translate");
 
 		// Show root
 		if (!sceneCreated.getEntities().empty()) {
@@ -291,8 +294,6 @@ void SceneEditorWindow::moveEntity(const String& id, const String& newParent, in
 
 void SceneEditorWindow::onEntitySelected(const String& id)
 {
-	decayTool();
-	
 	String actualId = id;
 	if (actualId.isEmpty()) {
 		const auto& tree = sceneData->getEntityTree();
@@ -411,9 +412,6 @@ void SceneEditorWindow::onEntityMoved(const String& id, const String& prevParent
 
 void SceneEditorWindow::onComponentRemoved(const String& name)
 {
-	if (name == curComponentName) {
-		decayTool();
-	}
 }
 
 void SceneEditorWindow::onFieldChangedByGizmo(const String& componentName, const String& fieldName)
@@ -421,24 +419,27 @@ void SceneEditorWindow::onFieldChangedByGizmo(const String& componentName, const
 	entityEditor->onFieldChangedByGizmo(componentName, fieldName);
 }
 
-void SceneEditorWindow::setTool(SceneEditorTool tool)
+void SceneEditorWindow::setTool(String tool)
 {
 	if (curTool != tool) {
 		setTool(tool, "", "", ConfigNode());
 	}
 }
 
-void SceneEditorWindow::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options)
+void SceneEditorWindow::setTool(String tool, String componentName, String fieldName, ConfigNode options)
 {
-	options = gameBridge->onToolSet(tool, componentName, fieldName, std::move(options));
+	// This can mutate all parameters
+	gameBridge->onToolSet(tool, componentName, fieldName, options);
 
+	if (tool.isEmpty()) {
+		tool = "translate";
+	}
+	
 	curTool = tool;
 	curComponentName = componentName;
-	
+		
 	setToolUI(canvas->setTool(tool, componentName, fieldName, options));
-	
-	toolMode->setItemActive("polygon", tool == SceneEditorTool::Polygon);
-	toolMode->setItemActive("vertex", tool == SceneEditorTool::Vertex);
+		
 	toolMode->setSelectedOptionId(toString(tool));
 }
 
@@ -684,13 +685,6 @@ void SceneEditorWindow::setToolUI(std::shared_ptr<UIWidget> ui)
 		customUIField->add(ui, 1);
 	}
 	customUIField->setActive(!!ui);
-}
-
-void SceneEditorWindow::decayTool()
-{
-	if (curTool == SceneEditorTool::Polygon) {
-		setTool(SceneEditorTool::Translate);
-	}
 }
 
 void SceneEditorWindow::setModified(bool enabled)

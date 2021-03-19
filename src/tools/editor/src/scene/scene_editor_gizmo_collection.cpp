@@ -1,9 +1,7 @@
 #include "scene_editor_gizmo_collection.h"
 #include "gizmos/translate_gizmo.h"
 #include "gizmos/selected_bounds_gizmo.h"
-#include "gizmos/polygon_gizmo.h"
 #include "gizmos/selection_box_gizmo.h"
-#include "gizmos/vertex_gizmo.h"
 #include "halley/core/graphics/camera.h"
 using namespace Halley;
 
@@ -17,6 +15,8 @@ SceneEditorGizmoCollection::SceneEditorGizmoCollection(UIFactory& factory, Resou
 	
 	selectedBoundsGizmo = std::make_unique<SelectedBoundsGizmo>(snapRules, resources);
 	selectionBoxGizmo = std::make_unique<SelectionBoxGizmo>(snapRules, resources);
+
+	resetTools();
 }
 
 bool SceneEditorGizmoCollection::update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState)
@@ -66,23 +66,18 @@ void SceneEditorGizmoCollection::refreshEntity()
 	}
 }
 
-std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options)
+std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options)
 {
 	currentTool = tool;
 	activeGizmo.reset();
 	
-	switch (tool) {
-	case SceneEditorTool::Translate:
-		activeGizmo = std::make_unique<TranslateGizmo>(snapRules);
-		break;
-
-	case SceneEditorTool::Polygon:
-		activeGizmo = std::make_unique<PolygonGizmo>(snapRules, componentName, fieldName, options, factory);
-		break;
-
-	case SceneEditorTool::Vertex:
-		activeGizmo = std::make_unique<VertexGizmo>(snapRules, componentName, fieldName);
-		break;
+	const auto iter = gizmoFactories.find(tool);
+	if (iter != gizmoFactories.end()) {
+		if (iter->second) {
+			activeGizmo = iter->second(snapRules, componentName, fieldName, options);
+		}
+	} else {
+		activeGizmo.reset();
 	}
 
 	if (activeGizmo) {
@@ -98,4 +93,37 @@ void SceneEditorGizmoCollection::deselect()
 	if (activeGizmo) {
 		activeGizmo->deselect();
 	}
+}
+
+void SceneEditorGizmoCollection::generateList(UIList& list)
+{
+	const auto iconCol = factory.getColourScheme()->getColour("ui_text");
+	list.clear();
+	for (const auto& tool: tools) {
+		list.addImage(tool.id, std::make_shared<UIImage>(tool.icon.clone().setColour(iconCol)), 1, {}, UISizerAlignFlags::Centre)->setToolTip(tool.toolTip);
+	}
+}
+
+void SceneEditorGizmoCollection::addTool(const Tool& tool, GizmoFactory gizmoFactory)
+{
+	tools.push_back(tool);
+	gizmoFactories[tool.id] = std::move(gizmoFactory);
+}
+
+void SceneEditorGizmoCollection::resetTools()
+{
+	tools.clear();
+	
+	addTool(Tool("drag", LocalisedString::fromHardcodedString("Pan Scene"), Sprite().setImage(resources, "ui/scene_editor_drag.png")),
+		[this] (SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)
+		{
+			return std::unique_ptr<SceneEditorGizmo>{};
+		}
+	);
+	addTool(Tool("translate", LocalisedString::fromHardcodedString("Move Entities"), Sprite().setImage(resources, "ui/scene_editor_move.png")),
+		[this] (SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)
+		{
+			return std::make_unique<TranslateGizmo>(snapRules);
+		}
+	);
 }

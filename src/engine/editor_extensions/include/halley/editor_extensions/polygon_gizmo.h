@@ -1,5 +1,6 @@
 #pragma once
-#include "../scene_editor_gizmo.h"
+#include "scene_editor_gizmo.h"
+#include "halley/maths/polygon.h"
 
 namespace Halley {
 	class UIList;
@@ -25,7 +26,7 @@ namespace Halley {
 
 	class PolygonGizmo final : public SceneEditorGizmo {
 	public:
-		PolygonGizmo(SnapRules snapRules, String componentName, String fieldName, const ConfigNode& options, UIFactory& factory);
+		PolygonGizmo(SnapRules snapRules, String componentName, String fieldName, bool isOpenPolygon, Colour4f colour, UIFactory& factory);
 		void update(Time time, const SceneEditorInputState& inputState) override;
 		void draw(Painter& painter) const override;
 		std::shared_ptr<UIWidget> makeUI() override;
@@ -43,8 +44,8 @@ namespace Halley {
 		bool isOpenPolygon;
 		Colour4f colour;
 
-		VertexList lastStored;
-		VertexList vertices;
+		std::optional<VertexList> lastStored;
+		std::optional<VertexList> vertices;
 		mutable VertexList worldSpaceVertices;
 		std::optional<Vertex> preview;
 		size_t previewIndex = 0;
@@ -56,7 +57,7 @@ namespace Halley {
 		bool enableLineSnap = false;
 		int highlightCooldown = 0;
 
-		VertexList readPoints();
+		std::optional<VertexList> readPoints();
 		void writePoints(const VertexList& ps);
 		void writePointsIfNeeded();
 		ConfigNode& getField(ConfigNode& node, const String& fieldName);
@@ -68,6 +69,7 @@ namespace Halley {
 		int updateHandles(const SceneEditorInputState& inputState);
 
 		void setMode(PolygonGizmoMode mode);
+		void updateUI();
 
 		std::pair<Vertex, size_t> findInsertPoint(Vector2f pos) const;
 

@@ -6,7 +6,8 @@
 #include <memory>
 
 
-#include "halley/core/editor_extensions/editor_custom_tools_interface.h"
+
+#include "halley/core/game/scene_editor_interface.h"
 #include "halley/time/halleytime.h"
 #include "halley/tools/assets/check_assets_task.h"
 #include "halley/tools/dll/dynamic_library.h"

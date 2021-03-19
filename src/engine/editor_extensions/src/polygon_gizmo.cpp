@@ -1,18 +1,23 @@
 #include "polygon_gizmo.h"
+#include "halley/ui/ui_event.h"
+#include "halley/editor_extensions/scene_editor_input_state.h"
 #include "halley/core/graphics/painter.h"
-#include "halley/entity/components/transform_2d_component.h"
 #include "halley/maths/line.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/widgets/ui_list.h"
+
+#define DONT_INCLUDE_HALLEY_HPP
+#include "halley/entity/components/transform_2d_component.h"
+
 using namespace Halley;
 
-PolygonGizmo::PolygonGizmo(SnapRules snapRules, String componentName, String fieldName, const ConfigNode& options, UIFactory& factory)
+PolygonGizmo::PolygonGizmo(SnapRules snapRules, String componentName, String fieldName, bool isOpenPolygon, Colour4f colour, UIFactory& factory)
 	: SceneEditorGizmo(snapRules)
 	, factory(factory)
 	, componentName(std::move(componentName))
 	, fieldName(std::move(fieldName))
-	, isOpenPolygon(options["isOpenPolygon"].asBool(false))
-	, colour(Colour4f::fromString(options["colour"].asString("#0080FF")))
+	, isOpenPolygon(isOpenPolygon)
+	, colour(colour)
 {
 }
 
@@ -49,9 +54,11 @@ void PolygonGizmo::update(Time time, const SceneEditorInputState& inputState)
 	}
 
 	// Update vertices
-	vertices.resize(handles.size());
-	for (size_t i = 0; i < handles.size(); ++i) {
-		vertices[i] = worldToLocal(handles[i].getPosition());
+	if (vertices) {
+		vertices->resize(handles.size());
+		for (size_t i = 0; i < handles.size(); ++i) {
+			(*vertices)[i] = worldToLocal(handles[i].getPosition());
+		}
 	}
 	
 	writePointsIfNeeded();
@@ -101,9 +108,13 @@ void PolygonGizmo::draw(Painter& painter) const
 	const auto zoom = getZoom();
 	const auto highCol = Colour4f(1, 1, 1);
 
-	worldSpaceVertices.resize(vertices.size());
-	for (size_t i = 0; i < vertices.size(); ++i) {
-		worldSpaceVertices[i] = localToWorld(vertices[i]);
+	if (vertices) {
+		worldSpaceVertices.resize(vertices->size());
+		for (size_t i = 0; i < vertices->size(); ++i) {
+			worldSpaceVertices[i] = localToWorld((*vertices)[i]);
+		}
+	} else {
+		worldSpaceVertices.clear();
 	}
 
 	if (mode == PolygonGizmoMode::Append && preview.has_value()) {
@@ -133,18 +144,6 @@ void PolygonGizmo::draw(Painter& painter) const
 	}
 }
 
-std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
-{
-	auto ui = factory.makeUI("ui/halley/polygon_gizmo_toolbar");
-	uiList = ui->getWidgetAs<UIList>("mode");
-	uiList->setSelectedOptionId(toString(mode));
-	ui->setHandle(UIEventType::ListSelectionChanged, "mode", [=] (const UIEvent& event)
-	{
-		setMode(fromString<PolygonGizmoMode>(event.getStringData()));
-	});
-	return ui;
-}
-
 bool PolygonGizmo::isHighlighted() const
 {
 	return highlightCooldown > 0;
@@ -161,14 +160,14 @@ void PolygonGizmo::onEntityChanged()
 {
 	vertices = readPoints();
 
-	mode = vertices.empty() ? PolygonGizmoMode::Append : PolygonGizmoMode::Move;
+	setMode(PolygonGizmoMode::Move);
 	
 	loadHandlesFromVertices();
 }
 
-VertexList PolygonGizmo::readPoints()
+std::optional<VertexList> PolygonGizmo::readPoints()
 {
-	VertexList result;
+	std::optional<VertexList> result;
 	auto* data = getComponentData(componentName);
 	if (data) {
 		auto& field = getField(*data, fieldName);		
@@ -177,9 +176,10 @@ VertexList PolygonGizmo::readPoints()
 		}
 		
 		const auto& seq = field.asSequence();
-		result.reserve(seq.size());
+		result = VertexList();
+		result->reserve(seq.size());
 		for (const auto& p: seq) {
-			result.push_back(p.asVector2f());
+			result->push_back(p.asVector2f());
 		}
 	}
 	lastStored = result;
@@ -230,9 +230,13 @@ void PolygonGizmo::writePoints(const VertexList& ps)
 
 void PolygonGizmo::loadHandlesFromVertices()
 {
-	handles.resize(vertices.size(), makeHandle({}));
-	for (size_t i = 0; i < vertices.size(); ++i) {
-		handles[i].setPosition(localToWorld(vertices[i]), false);
+	if (vertices) {
+		handles.resize(vertices->size(), makeHandle({}));
+		for (size_t i = 0; i < vertices->size(); ++i) {
+			handles[i].setPosition(localToWorld((*vertices)[i]), false);
+		}
+	} else {
+		handles.clear();
 	}
 	setHandleIndices();
 }
@@ -252,34 +256,58 @@ Rect4f PolygonGizmo::getHandleRect(Vector2f pos, float size) const
 
 void PolygonGizmo::writePointsIfNeeded()
 {
-	if (lastStored != vertices) {
-		writePoints(vertices);
+	if (vertices && lastStored != vertices) {
+		writePoints(*vertices);
 	}
 }
 
 void PolygonGizmo::setMode(PolygonGizmoMode m)
 {
 	mode = m;
+	updateUI();
+}
+
+std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
+{
+	auto ui = factory.makeUI("ui/halley/polygon_gizmo_toolbar");
+	uiList = ui->getWidgetAs<UIList>("mode");
+	uiList->setMouseBlocker(true);
+	updateUI();
+	ui->setHandle(UIEventType::ListSelectionChanged, "mode", [=] (const UIEvent& event)
+	{
+		setMode(fromString<PolygonGizmoMode>(event.getStringData()));
+	});
+	return ui;
+}
+
+void PolygonGizmo::updateUI()
+{
+	const bool canEdit = !!vertices;
+
 	if (uiList) {
 		uiList->setSelectedOptionId(toString(mode));
+		uiList->setItemEnabled("append", canEdit);
+		uiList->setItemEnabled("insert", canEdit);
+		uiList->setItemEnabled("delete", canEdit);
 	}
 }
 
 std::pair<Vector2f, size_t> PolygonGizmo::findInsertPoint(Vector2f pos) const
 {
-	if (vertices.empty()) {
+	if (!vertices || vertices->empty()) {
 		return std::make_pair(pos, 0);
 	}
 
-	const size_t nVertices = vertices.size();
+	const size_t nVertices = vertices->size();
 	const size_t n = isOpenPolygon ? nVertices - 1 : nVertices;
 
 	size_t bestIndex = 0;
 	Vector2f bestPoint;
 	float bestDist = std::numeric_limits<float>::infinity();
+	const auto* transform = getComponent<Transform2DComponent>();
 	for (size_t i = 0; i < n; ++i) {
-		const auto v0 = getTransform()->transformPoint(vertices[i]);
-		const auto v1 = getTransform()->transformPoint(vertices[(i + 1) % nVertices]);
+		const auto v0 = transform->transformPoint((*vertices)[i]);
+		const auto v1 = transform->transformPoint((*vertices)[(i + 1) % nVertices]);
 		
 		const auto seg = LineSegment(v0, v1);
 		const auto p = seg.getClosestPoint(pos);
@@ -296,7 +324,7 @@ std::pair<Vector2f, size_t> PolygonGizmo::findInsertPoint(Vector2f pos) const
 
 Vector2f PolygonGizmo::localToWorld(Vector2f localPos) const
 {
-	auto t = getTransform();
+	auto t = getComponent<Transform2DComponent>();
 	if (t) {
 		return t->transformPoint(localPos);
 	} else {
@@ -306,7 +334,7 @@ Vector2f PolygonGizmo::localToWorld(Vector2f localPos) const
 
 Vector2f PolygonGizmo::worldToLocal(Vector2f worldPos) const
 {
-	auto t = getTransform();
+	auto t = getComponent<Transform2DComponent>();
 	if (t) {
 		return t->inverseTransformPoint(worldPos);
 	} else {

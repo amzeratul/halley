@@ -1,10 +1,11 @@
 #pragma once
-#include "halley/core/editor_extensions/scene_editor_interface.h"
+#include "halley/core/game/scene_editor_interface.h"
 #include "halley/core/graphics/camera.h"
-#include "../entity.h"
+#include "halley/entity/entity.h"
 #include "halley/core/graphics/text/text_renderer.h"
 
 namespace Halley {
+	struct SceneEditorOutputState;
 	class EntityRef;
 	class World;
 	class Painter;
@@ -14,7 +15,7 @@ namespace Halley {
     public:
 		SceneEditor();
     	virtual ~SceneEditor();
-    	
+
 		void init(SceneEditorContext& context) final override;
 		void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState) override;
 		void render(RenderContext& rc) override;
@@ -25,11 +26,13 @@ namespace Halley {
 		World& getWorld() const override;
 		void spawnPending() override;
 
-		const std::vector<EntityId>& getCameraIds() const override;
+    	const std::vector<EntityId>& getCameraIds() const override;
 		void dragCamera(Vector2f amount) override;
 		void changeZoom(int amount, Vector2f cursorPosRelToCamera) override;
 
-		void setSelectedEntity(const UUID& id, EntityData& entityData) override;
+    	void setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizmoCollection) override;
+
+    	void setSelectedEntity(const UUID& id, EntityData& entityData) override;
 
 		void onEntityAdded(const UUID& id, const EntityData& entityData) final override;
 		void onEntityRemoved(const UUID& id) final override;
@@ -41,7 +44,7 @@ namespace Halley {
 		virtual void onEntityModified(EntityRef entity, const EntityData& entityData);
 
 		void showEntity(const UUID& id) override;
-		ConfigNode onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) override;
+		void onToolSet(String& tool, String& componentName, String& fieldName, ConfigNode& options) override;
     	
 		std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() override;
 		std::shared_ptr<UIWidget> makeCustomUI() override;

@@ -1,7 +1,4 @@
 #include "halley/core/game/game.h"
-#include "halley/core/editor_extensions/scene_editor_interface.h"
-#include "halley/core/editor_extensions/editor_custom_tools_interface.h"
-#include "halley/entity/scene_editor/scene_editor.h"
 using namespace Halley;
 
 Game::~Game() = default;
@@ -52,12 +49,12 @@ void Game::onUncaughtException(const Exception& exception, TimeLine timeLine)
 
 std::unique_ptr<ISceneEditor> Game::createSceneEditorInterface()
 {
-	return std::make_unique<SceneEditor>();
+	throw Exception("Method not implemented: Game::createSceneEditorInterface", HalleyExceptions::Core);
 }
 
 std::unique_ptr<IEditorCustomTools> Game::createEditorCustomToolsInterface()
 {
-	return std::unique_ptr<IEditorCustomTools>();
+	throw Exception("Method not implemented: Game::createEditorCustomToolsInterface", HalleyExceptions::Core);
 }
 
 const HalleyAPI& Game::getAPI() const

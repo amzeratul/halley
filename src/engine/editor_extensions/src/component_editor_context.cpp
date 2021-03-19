@@ -1,6 +1,6 @@
-#include "editor_extensions/component_editor_context.h"
+#include "component_editor_context.h"
 #include "halley/file_formats/config_file.h"
-#include "editor_extensions/component_field_parameters.h"
+#include "halley/editor_extensions/component_field_parameters.h"
 
 using namespace Halley;
 
@@ -20,7 +20,7 @@ std::shared_ptr<IUIElement> ComponentEditorContext::makeLabel(const String& labe
 	return parent.makeLabel(label);
 }
 
-void ComponentEditorContext::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) const
+void ComponentEditorContext::setTool(const String& tool, const String& componentName, const String& fieldName, ConfigNode options) const
 {
 	parent.setTool(tool, componentName, fieldName, std::move(options));
 }

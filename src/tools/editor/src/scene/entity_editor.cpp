@@ -427,7 +427,7 @@ void EntityEditor::onEntityUpdated()
 	prevEntityData = EntityData(*currentEntityData);
 }
 
-void EntityEditor::setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options)
+void EntityEditor::setTool(const String& tool, const String& componentName, const String& fieldName, ConfigNode options)
 {
 	sceneEditor->setTool(tool, componentName, fieldName, std::move(options));
 }

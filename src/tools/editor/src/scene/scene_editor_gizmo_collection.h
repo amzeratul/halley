@@ -1,11 +1,12 @@
 #pragma once
 #include <optional>
-#include "halley/core/editor_extensions/scene_editor_interface.h"
+#include "halley/core/game/scene_editor_interface.h"
+#include "halley/editor_extensions/scene_editor_gizmo.h"
 #include "halley/time/halleytime.h"
-#include "scene_editor_gizmo.h"
 
 namespace Halley {
 	class Painter;
+	class SceneEditorGizmo;
 
 	class SceneEditorGizmoCollection : public ISceneEditorGizmoCollection {
 	public:
@@ -15,19 +16,27 @@ namespace Halley {
 		void draw(Painter& painter) override;
 		void setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& entityData) override;
 		void refreshEntity() override;
-		std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) override;
+		std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options) override;
 		void deselect() override;
-		
+
+		void addTool(const Tool& tool, GizmoFactory gizmoFactory) override;
+		void resetTools();
+		void generateList(UIList& list) override;
+		gsl::span<const Tool> getTools() const { return tools; }
+
 	private:
 		UIFactory& factory;
 		Resources& resources;
-		SceneEditorGizmo::SnapRules snapRules;
+		SnapRules snapRules;
+
+		std::vector<Tool> tools;
+		std::map<String, GizmoFactory> gizmoFactories;
 		
 		std::unique_ptr<SceneEditorGizmo> selectedBoundsGizmo;
 		std::unique_ptr<SceneEditorGizmo> selectionBoxGizmo;
 		std::unique_ptr<SceneEditorGizmo> activeGizmo;
 		
-		SceneEditorTool currentTool = SceneEditorTool::None;
+		String currentTool;
 		
 		std::optional<EntityRef> selectedEntity;
 		EntityData* entityData = nullptr;

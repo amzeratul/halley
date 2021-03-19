@@ -1,6 +1,6 @@
 project (halley-core)
 
-include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../audio/include" "../net/include" "../entity/include")
+include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/core" "../utils/include" "../audio/include" "../net/include" "../entity/include" "../ui/include" "../editor_extensions/include")
 
 set(SOURCES
         "src/api/halley_api.cpp"
@@ -71,10 +71,6 @@ set(SOURCES
         "src/resources/resources.cpp"
         "src/resources/standard_resources.cpp"
 
-        "src/editor_extensions/component_editor_context.cpp"
-        "src/editor_extensions/component_field_parameters.cpp"
-        "src/editor_extensions/scene_editor_interface.cpp"
-
         "src/stage/stage.cpp"
 
         "src/devcon/devcon_client.cpp"
@@ -117,7 +113,8 @@ set(HEADERS
         "include/halley/core/game/halley_statics.h"
         "include/halley/core/game/game_platform.h"
         "include/halley/core/game/main_loop.h"
-        
+        "include/halley/core/game/scene_editor_interface.h"
+
         "include/halley/core/graphics/blend.h"
         "include/halley/core/graphics/camera.h"
         "include/halley/core/graphics/material/material_definition.h"
@@ -179,11 +176,6 @@ set(HEADERS
         "src/resources/resource_filesystem.h"
         "src/resources/resource_pack.h"
 
-        "include/halley/core/editor_extensions/component_editor_context.h"
-        "include/halley/core/editor_extensions/component_field_parameters.h"
-        "include/halley/core/editor_extensions/editor_custom_tools_interface.h"
-        "include/halley/core/editor_extensions/scene_editor_interface.h"
-
         "include/halley/core/stage/stage.h"
         "include/halley/core/stage/stage_id.h"
 
@@ -198,7 +190,7 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-core ${SOURCES} ${HEADERS})
-target_link_libraries(halley-core halley-utils halley-audio halley-net halley-entity)
+target_link_libraries(halley-core halley-utils halley-audio halley-net halley-entity halley-ui)
 
 # Hack, there should be no platform specific stuff in core...
 if (USE_ANDROID)

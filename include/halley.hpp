@@ -8,6 +8,7 @@
 #include <halley/audio/halley_audio.h>
 #include <halley/lua/halley_lua.h>
 #include <halley/ui/halley_ui.h>
+#include <halley/editor_extensions/halley_editor_extensions.h>
 
 #ifdef __glew_h__
 #error "Glew cannot be included in halley.hpp"

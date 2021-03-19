@@ -25,9 +25,9 @@ namespace Halley {
 
 		UIStyle getStyle() const;
 
-		void addTextItem(const String& id, LocalisedString label, float maxWidth = -1, bool centre = false, std::optional<LocalisedString> tooltip = {});
-		void addImage(const String& id, std::shared_ptr<UIImage> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, std::optional<UIStyle> styleOverride = {});
-		void addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, std::optional<UIStyle> styleOverride = {});
+		std::shared_ptr<UIListItem> addTextItem(const String& id, LocalisedString label, float maxWidth = -1, bool centre = false, std::optional<LocalisedString> tooltip = {});
+		std::shared_ptr<UIListItem> addImage(const String& id, std::shared_ptr<UIImage> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, std::optional<UIStyle> styleOverride = {});
+		std::shared_ptr<UIListItem> addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, std::optional<UIStyle> styleOverride = {});
 		std::optional<int> removeItem(const String& id);
 
 		void clear() override;
@@ -75,7 +75,7 @@ namespace Halley {
 		bool onKeyPress(KeyboardKeyPress key) override;
 		void moveSelection(int dx, int dy);
 				
-		void addItem(std::shared_ptr<UIListItem> item, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill);
+		std::shared_ptr<UIListItem> addItem(std::shared_ptr<UIListItem> item, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill);
 		size_t getNumberOfItems() const;
 
 		virtual void onItemDragging(UIListItem& item, int index, Vector2f pos);

@@ -1,5 +1,5 @@
 #pragma once
-#include "../scene_editor_gizmo.h"
+#include "halley/editor_extensions/scene_editor_gizmo.h"
 
 namespace Halley {
 	class TranslateGizmo final : public SceneEditorGizmo {
@@ -12,8 +12,10 @@ namespace Halley {
 	private:
 		bool visible = false;
 		SceneEditorGizmoHandle handle;
+		Vector2f handleOffset;
 
 		Circle getMainHandle() const;
 		void updateEntityData(Vector2f pos);
+		Vector2f getObjectOffset() const;
 	};
 }

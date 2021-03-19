@@ -139,7 +139,7 @@ bool ProjectWindow::loadCustomUI()
 	}
 
 	if (!customTools.empty()) {
-		toolbar->getList()->add(std::make_shared<UIImage>(Sprite().setImage(resources, "ui/slant_capsule_short.png").setColour(Colour4f::fromString("#FC2847"))), 0, Vector4f(0, 3, 0, 3));
+		toolbar->getList()->add(std::make_shared<UIImage>(Sprite().setImage(resources, "ui/slant_capsule_short.png").setColour(factory.getColourScheme()->getColour("toolbarNormal"))), 0, Vector4f(0, 3, 0, 3));
 		
 		for (auto& tool: customTools) {
 			const auto img = std::make_shared<UIImage>(tool.icon);

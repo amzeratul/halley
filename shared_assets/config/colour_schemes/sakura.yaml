@@ -9,6 +9,11 @@ colours:
   ui_controlDown: "#C4395C"
   ui_controlHover: "#F9BFCF"
   ui_controlDisabled: "#D7AAB6"
+
+  ui_scrollBarNormal: "#F493AD"
+  ui_scrollBarDown: "#C4395C"
+  ui_scrollBarHover: "#F9BFCF"
+  ui_scrollBarDisabled: "#D7AAB6"
   
   ui_buttonNormal: "#FFC6E7"
   ui_buttonDown: "#E281C0"
@@ -42,6 +47,8 @@ colours:
   ui_logWarningText: "#FFA626"
 
   scrollBackground: "#FFDDE6"
+
+  taskbarLogoBackground: "#FFD7EE"
 
 sprites:
   ui_button: { img: halley_ui/ui_button.png, material: "Halley/SpriteGradient", custom0: [1.0, 0.165, 0.08, 2.0] }

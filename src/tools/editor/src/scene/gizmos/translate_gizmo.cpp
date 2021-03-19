@@ -1,6 +1,9 @@
 #include "translate_gizmo.h"
+
+#include <components/sprite_component.h>
+
 #include "halley/entity/components/transform_2d_component.h"
-#include "halley/core/editor_extensions/scene_editor_interface.h"
+#include "halley/core/game/scene_editor_interface.h"
 #include "halley/core/graphics/painter.h"
 using namespace Halley;
 
@@ -18,15 +21,16 @@ void TranslateGizmo::update(Time time, const SceneEditorInputState& inputState)
 {
 	handle.update(inputState);
 
-	const auto transform = getTransform();
+	const auto transform = getComponent<Transform2DComponent>();
 	if (transform) {
 		if (handle.isHeld()) {
 			// Write to object
-			transform->setGlobalPosition(handle.getPosition());
+			transform->setGlobalPosition(handle.getPosition() - handleOffset);
 			updateEntityData(transform->getLocalPosition());
 		} else {
 			// Read from object
-			handle.setPosition(transform->getGlobalPosition(), false);
+			handleOffset = getObjectOffset();			
+			handle.setPosition(transform->getGlobalPosition() + handleOffset, false);
 		}
 		visible = true;
 	} else {
@@ -73,5 +77,14 @@ void TranslateGizmo::updateEntityData(Vector2f pos)
 		(*data)["position"] = pos;
 	}
 	markModified("Transform2D", "position");
+}
+
+Vector2f TranslateGizmo::getObjectOffset() const
+{
+	auto sprite = getComponent<SpriteComponent>();
+	if (sprite) {
+		return sprite->sprite.getAABB().getCenter() - sprite->sprite.getPosition();
+	}
+	return Vector2f();
 }
 

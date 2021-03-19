@@ -46,8 +46,8 @@ namespace Halley {
 		void modifyEntity(const String& id, const EntityDataDelta& delta);
 		void moveEntity(const String& id, const String& newParent, int childIndex);
 
-		void setTool(SceneEditorTool tool);
-		void setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options);
+		void setTool(String tool);
+		void setTool(String tool, String componentName, String fieldName, ConfigNode options);
 
 		std::shared_ptr<const Prefab> getGamePrefab(const String& id) const;
 
@@ -99,7 +99,7 @@ namespace Halley {
 
 		std::shared_ptr<UIWidget> curCustomUI;
 		std::shared_ptr<UIWidget> curToolUI;
-		SceneEditorTool curTool = SceneEditorTool::None;
+		String curTool;
 		String curComponentName;
 
 		int toolModeTimeout = 0; // Hack
@@ -119,8 +119,6 @@ namespace Halley {
 
 		void setCustomUI(std::shared_ptr<UIWidget> ui);
 		void setToolUI(std::shared_ptr<UIWidget> ui);
-
-		void decayTool();
 
 		void setModified(bool enabled);
 

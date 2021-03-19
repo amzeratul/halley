@@ -1,7 +1,7 @@
 #include <utility>
 
 
-#include "editor_extensions/component_field_parameters.h"
+#include "component_field_parameters.h"
 #include "halley/file_formats/config_file.h"
 using namespace Halley;
 

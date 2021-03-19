@@ -2,17 +2,19 @@
 
 #include "halley/time/halleytime.h"
 #include "halley/file_formats/config_file.h"
-#include "halley/maths/rect.h"
 #include "halley/text/halleystring.h"
 #include "halley/maths/uuid.h"
+#include "halley/core/graphics/sprite/sprite.h"
+#include "halley/text/i18n.h"
 #include <optional>
 
 namespace Halley {
+	class Sprite;
+	class LocalisedString;
 	class Task;
 	class Prefab;
 	class ISceneEditorWindow;
 	class UIDebugConsoleController;
-	enum class SceneEditorTool;
 	class UUID;
 	class RenderContext;
     class World;
@@ -30,63 +32,13 @@ namespace Halley {
 	class ComponentFieldParameters;
 	class ComponentEditorContext;
 	class UIColourScheme;
+	class SceneEditorGizmo;
+	class UIList;
     struct EntityId;
-
-    enum class SceneEditorTool {
-    	None,
-        Drag,
-        Translate,
-        Rotate,
-        Scale,
-        Polygon,
-    	Vertex
-    };
-
-    template <>
-    struct EnumNames<SceneEditorTool> {
-        constexpr std::array<const char*, 7> operator()() const {
-            return
-        	{{
-				"none",
-            	"drag",
-            	"translate",
-        		"rotate",
-        		"scale",
-        		"polygon",
-        		"vertex"
-            }};
-        }
-    };
-
-	struct SceneEditorInputState {
-		// Filled on editor side
-		bool leftClickPressed = false;
-		bool leftClickReleased = false;
-		bool leftClickHeld = false;
-		bool middleClickPressed = false;
-		bool middleClickHeld = false;
-		bool rightClickPressed = false;
-		bool rightClickHeld = false;
-		bool shiftHeld = false;
-		bool ctrlHeld = false;
-		bool spaceHeld = false;
-		Vector2f rawMousePos;
-		Rect4f viewRect;
-
-		// Filled on SceneEditor side
-        Vector2f mousePos;
-		std::optional<Rect4f> selectionBox;
-		bool deselect = false;
-    };
-
-	struct SceneEditorOutputState {
-		std::vector<std::pair<String, String>> fieldsChanged;
-		std::optional<std::vector<UUID>> newSelection;
-		std::optional<UUID> mouseOver;
-
-		void clear();
-	};
-
+	struct SceneEditorInputState;
+	struct SceneEditorOutputState;
+	struct SnapRules;
+	
 	class IEditorInterface {
 	public:
 		virtual ~IEditorInterface() = default;
@@ -140,7 +92,7 @@ namespace Halley {
         virtual void onEntityMoved(const UUID& id, const EntityData& entityData) = 0;
 
     	virtual void showEntity(const UUID& id) = 0;
-        virtual ConfigNode onToolSet(SceneEditorTool tool, const String& componentName, const String& fieldName, ConfigNode options) = 0;
+        virtual void onToolSet(String& tool, String& componentName, String& fieldName, ConfigNode& options) = 0;
 
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;
@@ -148,6 +100,8 @@ namespace Halley {
         virtual void onSceneLoaded(Prefab& scene) = 0;
     	virtual void onSceneSaved() = 0;
         virtual void refreshAssets() = 0;
+
+    	virtual void setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizmoCollection) = 0;
     };
 
 	class EntityTree {
@@ -158,7 +112,20 @@ namespace Halley {
 		String icon;
 		std::vector<EntityTree> children;
 
-		bool contains(const String& id) const;
+		bool contains(const String& id) const
+		{
+			if (entityId == id) {
+				return true;
+			}
+
+			for (const auto& child: children) {
+				if (child.contains(id)) {
+					return true;
+				}
+			}
+
+			return false;
+		}
 	};
 
 	class ISceneData {
@@ -202,14 +169,29 @@ namespace Halley {
 
 	class ISceneEditorGizmoCollection {
 	public:
+		struct Tool {
+			String id;
+			LocalisedString toolTip;
+			Sprite icon;
+
+			Tool() = default;
+			Tool(String id, LocalisedString toolTip, Sprite icon)
+				: id(std::move(id)), toolTip(std::move(toolTip)), icon(std::move(icon))
+			{}
+		};
+
+		using GizmoFactory = std::function<std::unique_ptr<SceneEditorGizmo>(SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)>;
+		
 		virtual ~ISceneEditorGizmoCollection() = default;
 
         virtual bool update(Time time, const Camera& camera, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) = 0;
         virtual void draw(Painter& painter) = 0;
         virtual void setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& entityData) = 0;
 		virtual void refreshEntity() = 0;
-        virtual std::shared_ptr<UIWidget> setTool(SceneEditorTool tool, const String& componentName, const String& fieldName, const ConfigNode& options) = 0;
+        virtual std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options) = 0;
 		virtual void deselect() = 0;
+		virtual void addTool(const Tool& tool, GizmoFactory gizmoFactory) = 0;
+		virtual void generateList(UIList& list) = 0;
 	};
 
 	class ISceneEditorWindow {
@@ -229,4 +211,49 @@ namespace Halley {
 		
 		virtual const std::shared_ptr<ISceneData>& getSceneData() const = 0;
 	};
+
+	class IProject {
+    public:		
+        virtual ~IProject() = default;
+		virtual Path getAssetsSrcPath() const = 0;
+	};
+
+    class IEditorCustomTools { 
+    public:
+        struct ToolData {
+            String id;
+            LocalisedString text;
+        	LocalisedString tooltip;
+            Sprite icon;
+            std::shared_ptr<UIWidget> widget;
+
+        	ToolData(String id, LocalisedString text, LocalisedString tooltip, Sprite icon, std::shared_ptr<UIWidget> widget)
+                : id(std::move(id))
+                , text(std::move(text))
+        		, tooltip(std::move(tooltip))
+                , icon(std::move(icon))
+                , widget(std::move(widget))
+            {}
+        };
+
+        struct MakeToolArgs {
+        	UIFactory& factory;
+            Resources& editorResources;
+            Resources& gameResources;
+            const HalleyAPI& api;
+        	IProject& project;
+
+            MakeToolArgs(UIFactory& factory, Resources& editorResources, Resources& gameResources, const HalleyAPI& api, IProject& project)
+                : factory(factory)
+                , editorResources(editorResources)
+        		, gameResources(gameResources)
+                , api(api)
+        		, project(project)
+            {}
+        };
+
+        virtual ~IEditorCustomTools() = default;
+
+        virtual std::vector<ToolData> makeTools(const MakeToolArgs& args) = 0;
+    };
 }
