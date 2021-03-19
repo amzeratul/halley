@@ -25,6 +25,8 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	, resources(resources)
 	, api(api)
 {
+	debugConsoleController = std::make_shared<UIDebugConsoleController>();
+
 	project.withDLL([&] (DynamicLibrary& dll)
 	{
 		dll.addReloadListener(*this);
@@ -45,6 +47,14 @@ ProjectWindow::~ProjectWindow()
 		dll.removeReloadListener(*this);
 	});
 	project.removeAssetLoadedListener(this);
+}
+
+void ProjectWindow::onRemovedFromRoot(UIRoot& root)
+{
+	debugConsole->destroy();
+	debugConsole.reset();
+	debugConsoleController.reset();
+	debugConsoleCommands.reset();
 }
 
 void ProjectWindow::makeUI()
@@ -149,6 +159,10 @@ bool ProjectWindow::loadCustomUI()
 		}
 	}
 
+	debugConsoleCommands = std::make_shared<UIDebugConsoleCommands>();
+	game->attachToEditorDebugConsole(*debugConsoleCommands, project.getGameResources(), project);
+	debugConsoleController->addCommands(*debugConsoleCommands);
+
 	return true;
 }
 
@@ -202,6 +216,11 @@ bool ProjectWindow::onKeyPress(KeyboardKeyPress key)
 {
 	if (key.is(KeyCode::P, KeyMods::Ctrl)) {
 		openAssetFinder();
+		return true;
+	}
+
+	if (key.is(KeyCode::F1)) {
+		toggleDebugConsole();
 		return true;
 	}
 	
@@ -259,6 +278,22 @@ void ProjectWindow::openAssetFinder()
 			assetFinder.reset();
 		});
 		getRoot()->addChild(assetFinder);
+	}
+}
+
+void ProjectWindow::toggleDebugConsole()
+{
+	if (debugConsole && debugConsole->isActive()) {
+		debugConsole->hide();
+	} else {
+		if (!debugConsole) {
+			debugConsole = std::make_shared<UIDebugConsole>("debugConsole", factory, debugConsoleController);
+			debugConsole->setChildLayerAdjustment(50);
+			debugConsole->setMinSize(Vector2f(640, 320));
+			debugConsole->setAnchor(UIAnchor(Vector2f(1.0f, 1.0f), Vector2f(1.0f, 1.0f), Vector2f(-10.0f, -10.0f)));
+			getRoot()->addChild(debugConsole);
+		}
+		debugConsole->show();
 	}
 }
 

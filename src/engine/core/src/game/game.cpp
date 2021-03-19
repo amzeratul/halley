@@ -57,6 +57,10 @@ std::unique_ptr<IEditorCustomTools> Game::createEditorCustomToolsInterface()
 	throw Exception("Method not implemented: Game::createEditorCustomToolsInterface", HalleyExceptions::Core);
 }
 
+void Game::attachToEditorDebugConsole(UIDebugConsoleCommands& commands, Resources& gameResources, IProject& project)
+{
+}
+
 const HalleyAPI& Game::getAPI() const
 {
 	if (!api) {

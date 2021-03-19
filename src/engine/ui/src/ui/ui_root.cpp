@@ -414,7 +414,7 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos, bool in
 		if (widget) {
 			return widget;
 		} else {
-			if (curRootWidget->isMouseBlocker()) {
+			if (curRootWidget->isMouseBlocker() && curRootWidget->isActiveInHierarchy()) {
 				return {};
 			}
 		}

@@ -20,6 +20,8 @@ namespace Halley {
         ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Project& project, Resources& resources, const HalleyAPI& api);
     	~ProjectWindow();
 
+        void onRemovedFromRoot(UIRoot& root) override;
+    	
         void setPage(EditorTabs tab);
         LocalisedString setCustomPage(const String& pageId);
     	void openFile(const String& assetId);
@@ -68,6 +70,10 @@ namespace Halley {
         std::shared_ptr<ConsoleWindow> consoleWindow;
         std::shared_ptr<ChooseImportAssetWindow> assetFinder;
 
+    	std::shared_ptr<UIDebugConsoleController> debugConsoleController;
+    	std::shared_ptr<UIDebugConsoleCommands> debugConsoleCommands;
+        std::shared_ptr<UIDebugConsole> debugConsole;
+
         void makeUI();
     	void makeToolbar();
     	void makePagedPane();
@@ -77,5 +83,7 @@ namespace Halley {
 		void destroyCustomUI();
 
     	void openAssetFinder();
-    };
+
+        void toggleDebugConsole();
+	};
 }

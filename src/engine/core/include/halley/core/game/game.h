@@ -5,6 +5,7 @@
 
 namespace Halley
 {
+	class UIDebugConsoleCommands;
 	class SceneEditorContext;
 	class IPluginRegistry;
 	class ResourceLocator;
@@ -44,6 +45,7 @@ namespace Halley
 
 		virtual std::unique_ptr<ISceneEditor> createSceneEditorInterface();
 		virtual std::unique_ptr<IEditorCustomTools> createEditorCustomToolsInterface();
+		virtual void attachToEditorDebugConsole(UIDebugConsoleCommands& commands, Resources& gameResources, IProject& project);
 
 		const HalleyAPI& getAPI() const;
 		Resources& getResources() const;
