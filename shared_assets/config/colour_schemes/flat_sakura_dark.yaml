@@ -1,17 +1,15 @@
-name: Flat Cherry Blossom
+name: Flat Sakura (Dark)
 author: Finn
-base: colour_schemes/base_flat
+base: colour_schemes/base_flat_dark
 colours:
-  background0: "#ffe5ea"
-  background1: "#fff2f5"  
 
   toolbarNormal: "#ffb7c5"   # main theme accent colour
 
   ui_listSelected: "#ffb7c5"  # main theme accent colour
 
-  ui_stringMatchText: "#d46177" # darker version of the main theme accent colour
+  ui_stringMatchText: "#ffe2e8" # lighter version of the main theme accent colour
 
-  ui_unselectedTextAlt: "#d46177" # darker version of the main theme accent colour
+  ui_unselectedTextAlt: "#ffe2e8" # lighter version of the main theme accent colour
 
 
 backgroundParticles:
@@ -28,4 +26,4 @@ backgroundParticles:
     directionScatter: 150
     rotateTowardsMovement: true
   sprites:
-  - { img: halley_ui/particles_sakura.png, colour: "#FFFFFF" }
+  - { img: halley_ui/particles_sakura_flat.png, colour: "#FFFFFF" }

@@ -2,6 +2,8 @@ name: Light
 author: Finn
 base: colour_schemes/base_flat
 colours:
+  background0: "#eaeff2"
+  background1: "#eaeff2"
   toolbarNormal: "#fc2847"   # main theme accent colour
 
   ui_listSelected: "#fc2847"  # main theme accent colour

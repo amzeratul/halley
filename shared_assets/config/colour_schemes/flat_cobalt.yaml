@@ -1,10 +1,8 @@
-name: Flat Cobalt Blue
+name: Flat Cobalt
 author: Finn
 base: colour_schemes/base_flat
 colours:
 
-  background0: "#dde9ff"
-  background1: "#eef4ff"
   toolbarNormal: "#5c80c3"   # main theme accent colour
 
   ui_listSelected: "#5c80c3"  # main theme accent colour

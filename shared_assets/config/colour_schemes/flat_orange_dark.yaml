@@ -1,0 +1,12 @@
+name: Flat Orange (Dark)
+author: Finn
+base: colour_schemes/base_flat_dark
+colours:
+  
+  toolbarNormal: "#ff7f02"   # main theme accent colour
+
+  ui_listSelected: "#ff7f02"  # main theme accent colour
+
+  ui_stringMatchText: "#ffcc9a" # darker version of the main theme accent colour
+
+  ui_unselectedTextAlt: "#ffcc9a" # darker version of the main theme accent colour

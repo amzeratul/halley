@@ -1,0 +1,12 @@
+name: Flat Forest
+author: Finn
+base: colour_schemes/base_flat
+colours:
+  
+  toolbarNormal: "#275c0a"   # main theme accent colour
+
+  ui_listSelected: "#275c0a"  # main theme accent colour
+
+  ui_stringMatchText: "#143004" # darker version of the main theme accent colour
+
+  ui_unselectedTextAlt: "#143004" # darker version of the main theme accent colour
