@@ -51,7 +51,9 @@ ProjectWindow::~ProjectWindow()
 
 void ProjectWindow::onRemovedFromRoot(UIRoot& root)
 {
-	debugConsole->destroy();
+	if (debugConsole) {
+		debugConsole->destroy();
+	}
 	debugConsole.reset();
 	debugConsoleController.reset();
 	debugConsoleCommands.reset();
