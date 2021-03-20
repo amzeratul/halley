@@ -22,8 +22,8 @@ colours:
   ui_controlDisabled: "#b4b5bd"
   
   ui_buttonNormal: "#4a5e68"
-  ui_buttonDown: "#22333b"
-  ui_buttonHover: "#22333b"
+  ui_buttonDown: "#6e7b81"
+  ui_buttonHover: "#6e7b81"
   ui_buttonDisabled: "#4a5e68"
 
   ui_inputNormal: "#d7d8e3"
@@ -67,8 +67,8 @@ colours:
 
 sprites:
   ui_button: { img: halley_ui/ui_button_flat.png }
-  ui_float_window: { img: halley_ui/ui_float_window.png, material: Halley/Sprite }
-  ui_title_capsule: { img: halley_ui/ui_title_capsule.png, material: Halley/Sprite }
+  ui_float_window: { img: halley_ui/ui_float_window_flat.png, material: Halley/Sprite }
+  ui_title_capsule: { img: halley_ui/ui_title_capsule_flat.png, material: Halley/Sprite }
   ui_input_thin: { img: halley_ui/ui_input_thin_flat.png, material: Halley/Sprite }
   ui_input: { img: halley_ui/ui_input_flat.png, material: Halley/Sprite }
   ui_checkbox: { img: halley_ui/ui_checkbox_flat.png, material: Halley/Sprite }
