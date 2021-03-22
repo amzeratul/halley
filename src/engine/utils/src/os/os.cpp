@@ -122,16 +122,16 @@ std::vector<Path> OS::enumerateDirectory(const Path& path)
 	return {};
 }
 
-void Halley::OS::setConsoleColor(int, int)
+void OS::setConsoleColor(int, int)
 {
 }
 
-int OS::runCommand(String, ILoggerSink* sink)
+int OS::runCommand(String, String, ILoggerSink* sink)
 {
 	throw Exception("Running commands is not implemented in this platform.", HalleyExceptions::OS);
 }
 
-Future<int> OS::runCommandAsync(const String& string, ILoggerSink* sink)
+Future<int> OS::runCommandAsync(const String& string, const String& cwd, ILoggerSink* sink)
 {
 	throw Exception("Running commands is not implemented in this platform.", HalleyExceptions::OS);
 }

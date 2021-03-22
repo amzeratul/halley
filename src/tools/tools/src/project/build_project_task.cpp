@@ -34,7 +34,7 @@ BuildProjectTask::BuildProjectTask(Project& project)
 void BuildProjectTask::run()
 {
 	using namespace std::literals::chrono_literals;
-	auto future = OS::get().runCommandAsync(command, this);
+	auto future = OS::get().runCommandAsync(command, "", this);
 
 	while (!future.isReady()) {
 		if (isCancelled()) {

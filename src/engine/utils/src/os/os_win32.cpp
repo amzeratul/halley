@@ -472,7 +472,7 @@ static String readPipeToString(HANDLE pipe)
 	return result;
 }
 
-int OSWin32::runCommand(String rawCommand, ILoggerSink* sink)
+int OSWin32::runCommand(String rawCommand, String cwd, ILoggerSink* sink)
 {
 	using namespace std::chrono_literals;
 	std::this_thread::sleep_for(100ms);
@@ -480,33 +480,40 @@ int OSWin32::runCommand(String rawCommand, ILoggerSink* sink)
 	Promise<int> promise;
 	auto future = promise.getFuture();
 
-	runCommand(rawCommand.getUTF16(), promise, sink);
+	runCommand(rawCommand.getUTF16(), cwd.getUTF16(), promise, sink);
 
 	return future.get();
 }
 
-Future<int> OSWin32::runCommandAsync(const String& rawCommand, ILoggerSink* sink)
+Future<int> OSWin32::runCommandAsync(const String& rawCommand, const String& rawCwd, ILoggerSink* sink)
 {
 	Promise<int> promise;
 	auto future = promise.getFuture();
 
 	auto command = rawCommand.getUTF16();
-	std::thread([this, command = std::move(command), promise = std::move(promise), sink] () {
-		runCommand(command, promise, sink);
+	auto cwd = rawCwd.getUTF16();
+	std::thread([this, command = std::move(command), cwd = std::move(cwd), promise = std::move(promise), sink] () {
+		runCommand(command, cwd, promise, sink);
 	}).detach();
 
 	return future;
 }
 
-void OSWin32::runCommand(StringUTF16 command, Promise<int> promise, ILoggerSink* sink)
+void OSWin32::runCommand(StringUTF16 command, StringUTF16 cwd, Promise<int> promise, ILoggerSink* sink)
 {
 	// Create the commandline
 	if (command.length() >= 1024) {
 		throw Exception("Command is too long!", HalleyExceptions::OS);
 	}
-	wchar_t buffer[1024];
-	memcpy(buffer, command.c_str(), command.size() * sizeof(wchar_t));
-	buffer[command.size()] = 0;
+	if (cwd.length() >= 1024) {
+		throw Exception("CWD is too long!", HalleyExceptions::OS);
+	}
+	wchar_t cmdBuffer[1024];
+	memcpy(cmdBuffer, command.c_str(), command.size() * sizeof(wchar_t));
+	cmdBuffer[command.size()] = 0;
+	wchar_t cwdBuffer[1024];
+	memcpy(cwdBuffer, cwd.c_str(), cwd.size() * sizeof(wchar_t));
+	cwdBuffer[cwd.size()] = 0;
 
 	// Create pipes for reading process output
 	SECURITY_ATTRIBUTES saAttr;
@@ -544,7 +551,7 @@ void OSWin32::runCommand(StringUTF16 command, Promise<int> promise, ILoggerSink*
 	// Create the process
 	PROCESS_INFORMATION pi;
 	memset(&pi, 0, sizeof(PROCESS_INFORMATION));
-	if (!CreateProcessW(nullptr, buffer, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
+	if (!CreateProcessW(nullptr, cmdBuffer, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, cwd.empty() ? nullptr : cwdBuffer, &si, &pi)) {
 		promise.setValue(-1);
 		return;
 	}

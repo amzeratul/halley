@@ -69,8 +69,8 @@ namespace Halley {
 		virtual std::vector<Path> enumerateDirectory(const Path& path);
 
 		virtual void setConsoleColor(int foreground, int background);
-		virtual int runCommand(String command, ILoggerSink* sink = nullptr);
-		virtual Future<int> runCommandAsync(const String& string, ILoggerSink* sink = nullptr);
+		virtual int runCommand(String command, String cwd = "", ILoggerSink* sink = nullptr);
+		virtual Future<int> runCommandAsync(const String& string, const String& cwd = "", ILoggerSink* sink = nullptr);
 
 		virtual std::shared_ptr<IClipboard> getClipboard();
 
