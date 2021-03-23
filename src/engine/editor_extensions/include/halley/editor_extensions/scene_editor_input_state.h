@@ -15,6 +15,7 @@ namespace Halley {
 		bool rightClickHeld = false;
 		bool shiftHeld = false;
 		bool ctrlHeld = false;
+   		bool altHeld = false;
 		bool spaceHeld = false;
 		Vector2f rawMousePos;
 		Rect4f viewRect;

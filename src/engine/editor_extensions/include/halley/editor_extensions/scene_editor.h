@@ -80,12 +80,14 @@ namespace Halley {
     	virtual std::vector<EntityId> createCamera();
 
     	virtual void onEntitySelected(std::optional<EntityRef> entity);
+    	virtual void setEntityFocus(std::vector<EntityId> entityIds);
 
 		virtual std::optional<Vector2f> getWorldOffset() const;
     	Vector2f getMousePos() const;
 		std::unique_ptr<World> doCreateWorld(const String& stageName) const;
 
     	virtual EntityRef getEntityAt(Vector2f point) const;
+    	EntityRef getRootEntityAt(Vector2f point) const;
        	virtual float getSpriteDepth(EntityRef& e, Vector2f point) const;
 
 	private:
@@ -98,6 +100,8 @@ namespace Halley {
 		std::vector<EntityId> cameraEntityIds;
     	
 		std::optional<EntityRef> selectedEntity;
+    	EntityRef focusedEntity;
+    	bool focusEntityEnabled = false;
     	ISceneEditorGizmoCollection* gizmoCollection = nullptr;
 
     	TextRenderer coordinateInfo;
@@ -113,5 +117,8 @@ namespace Halley {
 
     	bool isPointInSprite(EntityRef& e, Vector2f point) const;
     	void onClick(const SceneEditorInputState& input, SceneEditorOutputState& output);
+    	
+		void updateEntityFocused();
+		void addEntityIdToList(std::vector<EntityId>& dst, EntityRef entity);
 	};
 }

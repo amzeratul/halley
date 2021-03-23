@@ -164,6 +164,7 @@ void SceneEditorCanvas::updateInputState()
 {
 	inputState.ctrlHeld = keyboard->isButtonDown(KeyCode::LCtrl) || keyboard->isButtonDown(KeyCode::RCtrl);
 	inputState.shiftHeld = keyboard->isButtonDown(KeyCode::LShift) || keyboard->isButtonDown(KeyCode::RShift);
+	inputState.altHeld = keyboard->isButtonDown(KeyCode::LAlt) || keyboard->isButtonDown(KeyCode::RAlt);
 	inputState.spaceHeld = keyboard->isButtonDown(KeyCode::Space);
 
 	inputState.viewRect = getRect();

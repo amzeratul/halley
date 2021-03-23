@@ -85,6 +85,9 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	if (!hasHighlightedGizmo && inputState.leftClickPressed) {
 		holdMouseStart = mousePos;
 	}
+
+	focusEntityEnabled = inputState.altHeld;
+	updateEntityFocused();
 }
 
 void SceneEditor::render(RenderContext& rc)
@@ -233,6 +236,34 @@ void SceneEditor::onEntitySelected(std::optional<EntityRef> entity)
 {
 }
 
+void SceneEditor::setEntityFocus(std::vector<EntityId> entityIds)
+{
+}
+
+void SceneEditor::updateEntityFocused()
+{
+	const EntityRef targetFocusedEntity = focusEntityEnabled ? getRootEntityAt(mousePos) : EntityRef();
+	if (targetFocusedEntity != focusedEntity) {
+		focusedEntity = targetFocusedEntity;
+		
+		std::vector<EntityId> selectedIds;
+		if (focusedEntity.isValid()) {
+			addEntityIdToList(selectedIds, focusedEntity);
+		}
+		setEntityFocus(std::move(selectedIds));
+	}
+}
+
+void SceneEditor::addEntityIdToList(std::vector<EntityId>& dst, EntityRef entity)
+{
+	dst.push_back(entity.getEntityId());
+	if (entity.getPrefab()) {
+		for (auto e: entity.getChildren()) {
+			addEntityIdToList(dst, e);
+		}
+	}
+}
+
 Vector2f SceneEditor::getMousePos() const
 {
 	return mousePos;
@@ -301,6 +332,7 @@ void SceneEditor::setSelectedEntity(const UUID& id, EntityData& entityData)
 	gizmoCollection->setSelectedEntity(selectedEntity, entityData);
 
 	onEntitySelected(selectedEntity);
+	updateEntityFocused();
 }
 
 void SceneEditor::onEntityAdded(const UUID& id, const EntityData& entityData)
@@ -473,6 +505,21 @@ EntityRef SceneEditor::getEntityAt(Vector2f point) const
 	}
 
 	return bestEntity;
+}
+
+EntityRef SceneEditor::getRootEntityAt(Vector2f point) const
+{
+	EntityRef result = getEntityAt(point);
+
+	if (result.isValid()) {
+		for (EntityRef parent = result.getParent(); parent.isValid(); parent = parent.getParent()) {
+			if (parent.getPrefab()) {
+				result = parent;
+			}
+		}
+	}
+
+	return result;
 }
 
 void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputState& output)
