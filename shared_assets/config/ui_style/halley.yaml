@@ -107,6 +107,7 @@ uiStyle:
     selectionChangedSound: ""
     label: { font: Ubuntu Regular, size: 15, colour: $ui_unselectedText }
     selectedLabel: { font: Ubuntu Regular, size: 15, colour: $ui_selectedText }
+    disabledLabel: { font: Ubuntu Regular, size: 15, colour: $ui_disabledText }
     gap: 1
 
   listLight:

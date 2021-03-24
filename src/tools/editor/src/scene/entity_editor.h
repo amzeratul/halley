@@ -37,6 +37,10 @@ namespace Halley {
 
 		void setDefaultName(const String& name, const String& prevName) override;
 
+		void addComponent();
+		void addComponent(const String& name);
+		void deleteComponent(const String& name);
+
 	protected:
 		bool onKeyPress(KeyboardKeyPress key) override;
 
@@ -67,10 +71,6 @@ namespace Halley {
 		void makeUI();
 		void loadComponentData(const String& componentType, ConfigNode& data, const std::vector<String>& componentNames);
 		std::pair<String, std::vector<String>> parseType(const String& type);
-
-		void addComponent();
-		void addComponent(const String& name);
-		void deleteComponent(const String& name);
 
 		void setName(const String& name);
 		String getName() const;

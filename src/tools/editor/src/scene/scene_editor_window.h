@@ -66,6 +66,8 @@ namespace Halley {
 
 		void refreshAssets();
 
+		void addComponentToCurrentEntity(const String& componentName) override;
+	
 	protected:
 		void update(Time t, bool moved) override;
 

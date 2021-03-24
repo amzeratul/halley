@@ -1,6 +1,7 @@
 #pragma once
 #include "scene_editor_gizmo.h"
 #include "halley/maths/polygon.h"
+#include "halley/ui/widgets/ui_button.h"
 
 namespace Halley {
 	class UIList;
@@ -53,11 +54,13 @@ namespace Halley {
 		std::vector<SceneEditorGizmoHandle> handles;
 
 		PolygonGizmoMode mode = PolygonGizmoMode::Move;
-		std::shared_ptr<UIList> uiList;
+		std::shared_ptr<UIList> uiMode;
+		std::shared_ptr<UIButton> uiAddComponent;
 
 		bool enableLineSnap = false;
 		int highlightCooldown = 0;
 
+		void loadEntity(PolygonGizmoMode mode);
 		std::optional<VertexList> readPoints();
 		void writePoints(const VertexList& ps);
 		void writePointsIfNeeded();

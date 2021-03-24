@@ -697,6 +697,11 @@ void SceneEditorWindow::refreshAssets()
 	}
 }
 
+void SceneEditorWindow::addComponentToCurrentEntity(const String& componentName)
+{
+	entityEditor->addComponent(componentName);
+}
+
 String SceneEditorWindow::serializeEntity(const EntityData& node) const
 {
 	YAMLConvert::EmitOptions options;

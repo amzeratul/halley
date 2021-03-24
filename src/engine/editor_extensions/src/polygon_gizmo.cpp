@@ -159,9 +159,14 @@ void PolygonGizmo::deselect()
 
 void PolygonGizmo::onEntityChanged()
 {
+	loadEntity(PolygonGizmoMode::Move);
+}
+
+void PolygonGizmo::loadEntity(PolygonGizmoMode mode)
+{
 	vertices = readPoints();
 
-	setMode(PolygonGizmoMode::Move);
+	setMode(mode);
 	
 	loadHandlesFromVertices();
 }
@@ -271,13 +276,24 @@ void PolygonGizmo::setMode(PolygonGizmoMode m)
 std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
 {
 	auto ui = factory.makeUI("ui/halley/polygon_gizmo_toolbar");
-	uiList = ui->getWidgetAs<UIList>("mode");
-	uiList->setInteractWithMouse(true);
+	ui->setInteractWithMouse(true);
+
+	uiMode = ui->getWidgetAs<UIList>("mode");
+	uiAddComponent = ui->getWidgetAs<UIButton>("addComponent");
+	
 	updateUI();
+
 	ui->setHandle(UIEventType::ListSelectionChanged, "mode", [=] (const UIEvent& event)
 	{
 		setMode(fromString<PolygonGizmoMode>(event.getStringData()));
 	});
+
+	ui->setHandle(UIEventType::ButtonClicked, "addComponent", [=] (const UIEvent& event)
+	{
+		sceneEditorWindow.addComponentToCurrentEntity(componentName);
+		loadEntity(PolygonGizmoMode::Append);
+	});
+	
 	return ui;
 }
 
@@ -285,11 +301,15 @@ void PolygonGizmo::updateUI()
 {
 	const bool canEdit = !!vertices;
 
-	if (uiList) {
-		uiList->setSelectedOptionId(toString(mode));
-		uiList->setItemEnabled("append", canEdit);
-		uiList->setItemEnabled("insert", canEdit);
-		uiList->setItemEnabled("delete", canEdit);
+	if (uiMode) {
+		uiMode->setSelectedOptionId(toString(mode));
+		//uiList->setItemEnabled("append", canEdit);
+		//uiList->setItemEnabled("insert", canEdit);
+		//uiList->setItemEnabled("delete", canEdit);
+		uiMode->setActive(canEdit);
+	}
+	if (uiAddComponent) {
+		uiAddComponent->setActive(!canEdit);
 	}
 }
 

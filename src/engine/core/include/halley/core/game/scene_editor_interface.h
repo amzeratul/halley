@@ -213,6 +213,8 @@ namespace Halley {
 		virtual void removeEntity(const String& entityId) = 0;
 		
 		virtual const std::shared_ptr<ISceneData>& getSceneData() const = 0;
+
+		virtual void addComponentToCurrentEntity(const String& componentName) = 0;
 	};
 
 	class IProject {

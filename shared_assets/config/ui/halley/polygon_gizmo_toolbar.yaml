@@ -1,13 +1,17 @@
-widget: 
-  id: mode
-  class: list
-  type: horizontal
-  options:
-    - id: move
-      text: Move
-    - id: append
-      text: Append
-    - id: insert
-      text: Insert
-    - id: delete
-      text: Delete
+widget: { class: widget }
+sizer: { type: vertical }
+children:
+- widget:
+    id: mode
+    class: list
+    type: horizontal
+    options:
+      - id: move
+        text: Move
+      - id: append
+        text: Append
+      - id: insert
+        text: Insert
+      - id: delete
+        text: Delete
+- widget: { class: button, id: addComponent, text: Add Component }
