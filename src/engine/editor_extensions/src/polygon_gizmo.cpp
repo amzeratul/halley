@@ -162,6 +162,11 @@ void PolygonGizmo::onEntityChanged()
 	loadEntity(PolygonGizmoMode::Move);
 }
 
+void PolygonGizmo::refreshEntity()
+{
+	loadEntity(mode);
+}
+
 void PolygonGizmo::loadEntity(PolygonGizmoMode mode)
 {
 	vertices = readPoints();
@@ -174,6 +179,11 @@ void PolygonGizmo::loadEntity(PolygonGizmoMode mode)
 std::optional<VertexList> PolygonGizmo::readPoints()
 {
 	std::optional<VertexList> result;
+
+	if (!getEntityData().getPrefab().isEmpty()) {
+		return result;
+	}
+	
 	auto* data = getComponentData(componentName);
 	if (data) {
 		auto& field = getField(*data, fieldName);		
@@ -300,16 +310,15 @@ std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
 void PolygonGizmo::updateUI()
 {
 	const bool canEdit = !!vertices;
+	const bool isPrefab = !getEntityData().getPrefab().isEmpty();
 
 	if (uiMode) {
 		uiMode->setSelectedOptionId(toString(mode));
-		//uiList->setItemEnabled("append", canEdit);
-		//uiList->setItemEnabled("insert", canEdit);
-		//uiList->setItemEnabled("delete", canEdit);
 		uiMode->setActive(canEdit);
 	}
 	if (uiAddComponent) {
 		uiAddComponent->setActive(!canEdit);
+		uiAddComponent->setEnabled(!isPrefab);
 	}
 }
 

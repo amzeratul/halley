@@ -37,7 +37,8 @@ namespace Halley {
 		
 	protected:
 		void onEntityChanged() override;
-
+		void refreshEntity() override;
+	
 	private:
 		UIFactory& factory;
 		String componentName;
