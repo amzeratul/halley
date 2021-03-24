@@ -32,18 +32,18 @@ void PolygonGizmo::update(Time time, const ISceneEditor& sceneEditor, const Scen
 
 	// Update preview
 	preview.reset();
-	if (curFocus == -1) {
+	if (curFocus == -1 && inputState.mousePos) {
 		if (mode == PolygonGizmoMode::Append) {
-			preview = snapVertex(static_cast<int>(handles.size()), inputState.mousePos);
+			preview = snapVertex(static_cast<int>(handles.size()), inputState.mousePos.value());
 		} else if (mode == PolygonGizmoMode::Insert) {
-			std::tie(preview, previewIndex) = findInsertPoint(inputState.mousePos);
+			std::tie(preview, previewIndex) = findInsertPoint(inputState.mousePos.value());
 		}
 	}
 
 	// Insert/delete
 	if (inputState.leftClickPressed) {
-		if (mode == PolygonGizmoMode::Append && curFocus == -1) {
-			handles.emplace_back(makeHandle(inputState.mousePos));
+		if (mode == PolygonGizmoMode::Append && curFocus == -1 && inputState.mousePos) {
+			handles.emplace_back(makeHandle(inputState.mousePos.value()));
 			setHandleIndices();
 		} else if (mode == PolygonGizmoMode::Delete && curFocus != -1) {
 			handles.erase(handles.begin() + curFocus);

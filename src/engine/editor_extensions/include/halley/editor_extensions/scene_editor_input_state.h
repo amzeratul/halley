@@ -17,11 +17,11 @@ namespace Halley {
 		bool ctrlHeld = false;
    		bool altHeld = false;
 		bool spaceHeld = false;
-		Vector2f rawMousePos;
+		std::optional<Vector2f> rawMousePos;
 		Rect4f viewRect;
 
 		// Filled on SceneEditor side
-        Vector2f mousePos;
+        std::optional<Vector2f> mousePos;
 		std::optional<Rect4f> selectionBox;
 		bool deselect = false;
     };

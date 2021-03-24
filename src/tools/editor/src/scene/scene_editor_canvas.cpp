@@ -82,7 +82,7 @@ bool SceneEditorCanvas::canInteractWithMouse() const
 
 bool SceneEditorCanvas::isFocusLocked() const
 {
-	return dragging;
+	return inputState.leftClickHeld || inputState.middleClickHeld || inputState.rightClickHeld;
 }
 
 void SceneEditorCanvas::pressMouse(Vector2f mousePos, int button)
@@ -141,7 +141,11 @@ void SceneEditorCanvas::onMouseOver(Vector2f mousePos)
 
 void SceneEditorCanvas::onMouseWheel(const UIEvent& event)
 {
-	gameBridge->changeZoom(event.getIntData(), lastMousePos - getPosition() - getSize() / 2);
+	if (inputState.altHeld) {
+		
+	} else {
+		gameBridge->changeZoom(event.getIntData(), lastMousePos - getPosition() - getSize() / 2);
+	}
 }
 
 void SceneEditorCanvas::setGameBridge(SceneEditorGameBridge& bridge)
@@ -166,6 +170,10 @@ void SceneEditorCanvas::updateInputState()
 	inputState.shiftHeld = keyboard->isButtonDown(KeyCode::LShift) || keyboard->isButtonDown(KeyCode::RShift);
 	inputState.altHeld = keyboard->isButtonDown(KeyCode::LAlt) || keyboard->isButtonDown(KeyCode::RAlt);
 	inputState.spaceHeld = keyboard->isButtonDown(KeyCode::Space);
+
+	if (!isMouseOver() && !isFocusLocked()) {
+		inputState.rawMousePos.reset();
+	}
 
 	inputState.viewRect = getRect();
 }

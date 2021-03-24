@@ -59,13 +59,15 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	camera.setPosition(transformComponent.getGlobalPosition()).setZoom(cameraComponent.zoom);
 
 	// Update input state
-	inputState.mousePos = camera.screenToWorld(inputState.rawMousePos, inputState.viewRect);
+	inputState.mousePos = inputState.rawMousePos ? camera.screenToWorld(inputState.rawMousePos.value(), inputState.viewRect) : std::optional<Vector2f>();
 	mousePos = inputState.mousePos;
 	if (!inputState.leftClickHeld) {
 		holdMouseStart.reset();
 	}
-	if (holdMouseStart && (holdMouseStart.value() - mousePos).length() > 3) {
-		selBox = Rect4f(holdMouseStart.value(), mousePos);
+	if (mousePos) {
+		if (holdMouseStart && (holdMouseStart.value() - mousePos.value()).length() > 3) {
+			selBox = Rect4f(holdMouseStart.value(), mousePos.value());
+		}
 	}
 	inputState.selectionBox = selBox;
 	if (!inputState.leftClickHeld) {
@@ -187,30 +189,32 @@ Resources& SceneEditor::getEditorResources() const
 
 void SceneEditor::drawOverlay(Painter& painter, Rect4f view)
 {
-	const auto worldOffset = getWorldOffset();
-	const Vector2i scenePos = Vector2i(mousePos.round());
-	const Vector2i worldPos = scenePos + Vector2i(worldOffset.value_or(Vector2f()));
-	
 	const Vector2f drawPos = view.getBottomLeft() + Vector2f(10, -10);
 	String drawStr = "Zoom: " + toString(camera.getZoom()) + "x";
 	std::vector<ColourOverride> colours;
 
-	colours.emplace_back(drawStr.size(), Colour4f(1.0f, 1.0f, 0.8f));
-	drawStr += "\nScene: " + scenePos;
+	if (mousePos) {
+		const auto worldOffset = getWorldOffset();
+		const Vector2i scenePos = Vector2i(mousePos.value().round());
+		const Vector2i worldPos = scenePos + Vector2i(worldOffset.value_or(Vector2f()));
 
-	if (worldOffset) {
-		colours.emplace_back(drawStr.size(), Colour4f(0.8f, 1.0f, 0.8f));
-		drawStr += "\nWorld: " + Vector2i(worldPos);
-	}
+		colours.emplace_back(drawStr.size(), Colour4f(1.0f, 1.0f, 0.8f));
+		drawStr += "\nScene: " + scenePos;
 
-	if (selectedEntity) {
-		const auto* t2d = selectedEntity.value().tryGetComponent<Transform2DComponent>();
-		colours.emplace_back(drawStr.size(), Colour4f(0.8f, 0.8f, 1.0f));
-		if (t2d) {
-			const auto objectPos = Vector2i(t2d->inverseTransformPoint(Vector2f(scenePos)));
-			drawStr += "\nObject: " + objectPos;
-		} else {
-			drawStr += "\nObject: --";
+		if (worldOffset) {
+			colours.emplace_back(drawStr.size(), Colour4f(0.8f, 1.0f, 0.8f));
+			drawStr += "\nWorld: " + Vector2i(worldPos);
+		}
+
+		if (selectedEntity) {
+			const auto* t2d = selectedEntity.value().tryGetComponent<Transform2DComponent>();
+			colours.emplace_back(drawStr.size(), Colour4f(0.8f, 0.8f, 1.0f));
+			if (t2d) {
+				const auto objectPos = Vector2i(t2d->inverseTransformPoint(Vector2f(scenePos)));
+				drawStr += "\nObject: " + objectPos;
+			} else {
+				drawStr += "\nObject: --";
+			}
 		}
 	}
 	
@@ -242,7 +246,7 @@ void SceneEditor::setEntityFocus(std::vector<EntityId> entityIds)
 
 void SceneEditor::updateEntityFocused()
 {
-	const EntityRef targetFocusedEntity = focusEntityEnabled ? getRootEntityAt(mousePos) : EntityRef();
+	const EntityRef targetFocusedEntity = focusEntityEnabled && mousePos ? getRootEntityAt(mousePos.value()) : EntityRef();
 	if (targetFocusedEntity != focusedEntity) {
 		focusedEntity = targetFocusedEntity;
 		
@@ -264,7 +268,7 @@ void SceneEditor::addEntityIdToList(std::vector<EntityId>& dst, EntityRef entity
 	}
 }
 
-Vector2f SceneEditor::getMousePos() const
+std::optional<Vector2f> SceneEditor::getMousePos() const
 {
 	return mousePos;
 }
@@ -524,11 +528,14 @@ EntityRef SceneEditor::getRootEntityAt(Vector2f point) const
 
 void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputState& output)
 {
+	if (!input.mousePos) {
+		return;
+	}
 	if (input.spaceHeld || input.ctrlHeld || input.shiftHeld) {
 		return;
 	}
 	
-	const auto bestEntity = getRootEntityAt(input.mousePos);
+	const auto bestEntity = getRootEntityAt(input.mousePos.value());
 
 	if (bestEntity.isValid()) {
 		output.newSelection = bestEntity.getInstanceUUID();

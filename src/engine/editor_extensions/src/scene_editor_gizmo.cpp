@@ -11,16 +11,18 @@ SceneEditorGizmoHandle::SceneEditorGizmoHandle()
 void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl::span<SceneEditorGizmoHandle> handles)
 {
 	if (!holding) {
-		over = boundsCheck ? boundsCheck(pos, inputState.mousePos) : false;
+		over = boundsCheck && inputState.mousePos ? boundsCheck(pos, inputState.mousePos.value()) : false;
 		if (canDrag && over && inputState.leftClickPressed) {
 			holding = true;
-			startOffset = pos - inputState.mousePos;
+			startOffset = pos - inputState.mousePos.value();
 		}
 	}
 
 	if (holding) {
 		const auto oldPos = pos;
-		setPosition(inputState.mousePos + startOffset, true);
+		if (inputState.mousePos) {
+			setPosition(inputState.mousePos.value() + startOffset, true);
+		}
 		const Vector2f delta = pos - oldPos;
 
 		// Drag all other selected handles too

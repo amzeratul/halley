@@ -83,7 +83,7 @@ namespace Halley {
     	virtual void setEntityFocus(std::vector<EntityId> entityIds);
 
 		virtual std::optional<Vector2f> getWorldOffset() const;
-    	Vector2f getMousePos() const;
+    	std::optional<Vector2f> getMousePos() const;
 		std::unique_ptr<World> doCreateWorld(const String& stageName) const;
 
     	virtual EntityRef getEntityAt(Vector2f point) const;
@@ -105,7 +105,7 @@ namespace Halley {
     	ISceneEditorGizmoCollection* gizmoCollection = nullptr;
 
     	TextRenderer coordinateInfo;
-		Vector2f mousePos;
+		std::optional<Vector2f> mousePos;
     	std::optional<Vector2f> holdMouseStart;
     	std::optional<Rect4f> selBox;
 
