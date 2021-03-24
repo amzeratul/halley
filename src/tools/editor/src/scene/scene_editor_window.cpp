@@ -22,7 +22,7 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 	, uiFactory(factory)
 	, project(project)
 	, projectWindow(projectWindow)
-	, gameBridge(std::make_shared<SceneEditorGameBridge>(api, uiFactory.getResources(), uiFactory, project, projectWindow))
+	, gameBridge(std::make_shared<SceneEditorGameBridge>(api, uiFactory.getResources(), uiFactory, project, projectWindow, *this))
 	, entityIcons(std::make_shared<EntityIcons>(project.getGameResources(), *factory.getColourScheme()))
 {
 	makeUI();
@@ -262,19 +262,6 @@ void SceneEditorWindow::onLoadDLL()
 void SceneEditorWindow::selectEntity(const String& id)
 {
 	entityList->select(id);
-}
-
-void SceneEditorWindow::selectEntity(const std::vector<UUID>& candidates)
-{
-	const auto tree = sceneData->getEntityTree();
-	for (auto& c: candidates) {
-		const auto found = tree.contains(c.toString());
-		if (found) {
-			entityList->select(c.toString());
-			break;
-		}
-	}
-	entityList->select("");
 }
 
 void SceneEditorWindow::modifyEntity(const String& id, const EntityDataDelta& delta)

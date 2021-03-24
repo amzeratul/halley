@@ -253,9 +253,14 @@ void UIWidget::clear()
 	UIParent::clear();
 }
 
+void UIWidget::setInteractWithMouse(bool enabled)
+{
+	mouseInteraction = enabled;
+}
+
 bool UIWidget::canInteractWithMouse() const
 {
-	return false;
+	return mouseInteraction;
 }
 
 bool UIWidget::isFocused() const

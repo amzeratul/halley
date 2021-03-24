@@ -42,7 +42,6 @@ namespace Halley {
 		void removeEntity();
 		void removeEntity(const String& entityId) override;
 		void selectEntity(const String& id);
-		void selectEntity(const std::vector<UUID>& candidates);
 		void modifyEntity(const String& id, const EntityDataDelta& delta);
 		void moveEntity(const String& id, const String& newParent, int childIndex);
 

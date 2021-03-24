@@ -178,7 +178,7 @@ void SceneEditorCanvas::notifyOutputState()
 	outputState.fieldsChanged.clear();
 
 	if (outputState.newSelection) {
-		editorWindow->selectEntity(outputState.newSelection.value());
+		editorWindow->selectEntity(outputState.newSelection.value().toString());
 	}
 }
 

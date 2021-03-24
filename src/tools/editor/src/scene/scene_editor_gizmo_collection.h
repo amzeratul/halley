@@ -10,7 +10,7 @@ namespace Halley {
 
 	class SceneEditorGizmoCollection : public ISceneEditorGizmoCollection {
 	public:
-		SceneEditorGizmoCollection(UIFactory& factory, Resources& resources);
+		SceneEditorGizmoCollection(UIFactory& factory, Resources& resources, ISceneEditorWindow& sceneEditorWindow);
 		
 		bool update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) override;
 		void draw(Painter& painter) override;
@@ -24,9 +24,12 @@ namespace Halley {
 		void generateList(UIList& list) override;
 		gsl::span<const Tool> getTools() const { return tools; }
 
+		ISceneEditorWindow& getSceneEditorWindow() override;
+	
 	private:
 		UIFactory& factory;
 		Resources& resources;
+		ISceneEditorWindow& sceneEditorWindow;
 		SnapRules snapRules;
 
 		std::vector<Tool> tools;

@@ -11,13 +11,14 @@
 
 using namespace Halley;
 
-PolygonGizmo::PolygonGizmo(SnapRules snapRules, String componentName, String fieldName, bool isOpenPolygon, Colour4f colour, UIFactory& factory)
+PolygonGizmo::PolygonGizmo(SnapRules snapRules, String componentName, String fieldName, bool isOpenPolygon, Colour4f colour, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow)
 	: SceneEditorGizmo(snapRules)
 	, factory(factory)
 	, componentName(std::move(componentName))
 	, fieldName(std::move(fieldName))
 	, isOpenPolygon(isOpenPolygon)
 	, colour(colour)
+	, sceneEditorWindow(sceneEditorWindow)
 {
 }
 
@@ -271,7 +272,7 @@ std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
 {
 	auto ui = factory.makeUI("ui/halley/polygon_gizmo_toolbar");
 	uiList = ui->getWidgetAs<UIList>("mode");
-	uiList->setMouseBlocker(true);
+	uiList->setInteractWithMouse(true);
 	updateUI();
 	ui->setHandle(UIEventType::ListSelectionChanged, "mode", [=] (const UIEvent& event)
 	{

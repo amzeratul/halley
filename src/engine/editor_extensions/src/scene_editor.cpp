@@ -528,14 +528,10 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 		return;
 	}
 	
-	const auto bestEntity = getEntityAt(input.mousePos);
+	const auto bestEntity = getRootEntityAt(input.mousePos);
 
 	if (bestEntity.isValid()) {
-		std::vector<UUID> uuids;
-		for (auto e = bestEntity; e.isValid(); e = e.getParent()) {
-			uuids.push_back(e.getInstanceUUID());
-		}
-		output.newSelection = uuids;
+		output.newSelection = bestEntity.getInstanceUUID();
 	} else {
 		output.newSelection.reset();
 	}

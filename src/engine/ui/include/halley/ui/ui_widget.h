@@ -63,6 +63,7 @@ namespace Halley {
 
 		void clear() override;
 
+		void setInteractWithMouse(bool enabled);
 		virtual bool canInteractWithMouse() const;
 		virtual bool isFocusLocked() const;
 		virtual bool isMouseOver() const;
@@ -257,6 +258,7 @@ namespace Halley {
 		bool positionUpdated = false;
 		bool modal = true;
 		bool mouseBlocker = true;
+		bool mouseInteraction = false;
 		bool shrinkOnLayout = true;
 		bool destroying = false;
 		bool canSendEvents = true;

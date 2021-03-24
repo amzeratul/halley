@@ -5,9 +5,10 @@
 #include "halley/core/graphics/camera.h"
 using namespace Halley;
 
-SceneEditorGizmoCollection::SceneEditorGizmoCollection(UIFactory& factory, Resources& resources)
+SceneEditorGizmoCollection::SceneEditorGizmoCollection(UIFactory& factory, Resources& resources, ISceneEditorWindow& sceneEditorWindow)
 	: factory(factory)
 	, resources(resources)
+	, sceneEditorWindow(sceneEditorWindow)
 {
 	// TODO: read this elsewhere
 	snapRules.grid = GridSnapMode::Pixel;
@@ -102,6 +103,11 @@ void SceneEditorGizmoCollection::generateList(UIList& list)
 	for (const auto& tool: tools) {
 		list.addImage(tool.id, std::make_shared<UIImage>(tool.icon.clone().setColour(iconCol)), 1, {}, UISizerAlignFlags::Centre)->setToolTip(tool.toolTip);
 	}
+}
+
+ISceneEditorWindow& SceneEditorGizmoCollection::getSceneEditorWindow()
+{
+	return sceneEditorWindow;
 }
 
 void SceneEditorGizmoCollection::addTool(const Tool& tool, GizmoFactory gizmoFactory)

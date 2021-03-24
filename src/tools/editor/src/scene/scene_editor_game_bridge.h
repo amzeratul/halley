@@ -3,12 +3,13 @@
 #include "halley/tools/dll/dynamic_library.h"
 
 namespace Halley {
+	class SceneEditorWindow;
 	class ProjectWindow;
 	class Project;
 
 	class SceneEditorGameBridge : private IEditorInterface {
 	public:
-		SceneEditorGameBridge(const HalleyAPI& api, Resources& resources, UIFactory& factory, Project& project, ProjectWindow& projectWindow);
+		SceneEditorGameBridge(const HalleyAPI& api, Resources& resources, UIFactory& factory, Project& project, ProjectWindow& projectWindow, SceneEditorWindow& sceneEditorWindow);
 		~SceneEditorGameBridge();
 
 		void unload();
@@ -48,6 +49,7 @@ namespace Halley {
 		Project& project;
 		ProjectWindow& projectWindow;
 		UIFactory& factory;
+		SceneEditorWindow& sceneEditorWindow;
 		
 		std::unique_ptr<ISceneEditor> interface;
 		std::unique_ptr<HalleyAPI> gameAPI;
