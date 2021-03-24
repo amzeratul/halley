@@ -171,3 +171,13 @@ bool EntityList::onKeyPress(KeyboardKeyPress key)
 
 	return false;
 }
+
+UUID EntityList::getEntityUnderCursor() const
+{
+	const auto item = list->getItemUnderCursor();
+	if (item) {
+		return UUID(item->getId());
+	} else {
+		return UUID();
+	}
+}

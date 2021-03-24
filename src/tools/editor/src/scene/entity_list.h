@@ -24,6 +24,8 @@ namespace Halley {
 		void onEntityRemoved(const String& id, const String& newSelectionId);
 		void select(const String& id);
 
+		UUID getEntityUnderCursor() const;
+
 	protected:
 		bool onKeyPress(KeyboardKeyPress key) override;
 		

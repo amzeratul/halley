@@ -46,6 +46,7 @@ namespace Halley {
 		std::shared_ptr<UIListItem> getItem(int n) const;
 		std::shared_ptr<UIListItem> getItem(const String& id) const;
 		std::shared_ptr<UIListItem> tryGetItem(const String& id) const;
+		std::shared_ptr<UIListItem> getItemUnderCursor() const;
 
 		bool isDragEnabled() const;
 		void setDragEnabled(bool drag);
@@ -99,6 +100,7 @@ namespace Halley {
 		bool singleClickAccept = true;
 		bool focusable = true;
 		bool scrollToSelection = true;
+		int itemUnderCursor = -1;
 
 		void onItemClicked(UIListItem& item);
 		void onItemDoubleClicked(UIListItem& item);
@@ -107,6 +109,7 @@ namespace Halley {
 
 		void swapItems(int idxA, int idxB);
 		bool isManualDragging() const;
+		void setItemUnderCursor(int itemIdx, bool isMouseOver);
 	};
 
 	class UIListItem : public UIClickable {

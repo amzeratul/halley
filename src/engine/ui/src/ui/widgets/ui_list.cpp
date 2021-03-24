@@ -313,6 +313,15 @@ std::shared_ptr<UIListItem> UIList::tryGetItem(const String& id) const
 	return {};
 }
 
+std::shared_ptr<UIListItem> UIList::getItemUnderCursor() const
+{
+	if (itemUnderCursor >= 0 && itemUnderCursor < static_cast<int>(items.size())) {
+		return items[itemUnderCursor];
+	} else {
+		return {};
+	}
+}
+
 bool UIList::isDragEnabled() const
 {
 	return dragEnabled;
@@ -393,6 +402,15 @@ void UIList::swapItems(int idxA, int idxB)
 bool UIList::isManualDragging() const
 {
 	return manualDragging;
+}
+
+void UIList::setItemUnderCursor(int itemIdx, bool isMouseOver)
+{
+	if (isMouseOver) {
+		itemUnderCursor = itemIdx;
+	} else if (itemUnderCursor == itemIdx) {
+		itemUnderCursor = -1;
+	}
 }
 
 void UIList::onGamepadInput(const UIInputResults& input, Time time)
@@ -761,6 +779,8 @@ void UIListItem::doSetState(State state)
 		}
 	}
 	updateSpritePosition();
+
+	parent.setItemUnderCursor(index, isMouseOver());
 }
 
 void UIListItem::updateSpritePosition()

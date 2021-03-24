@@ -27,6 +27,7 @@ namespace Halley {
 		void dragCamera(Vector2f pos);
 		std::shared_ptr<UIWidget> makeCustomUI() const;
 		void setSelectedEntity(const UUID& uuid, EntityData& data);
+		void setEntityHighlightedOnList(const UUID& uuid);
 		void showEntity(const UUID& uuid);
 		void onEntityAdded(const UUID& uuid, const EntityData& data);
 		void onEntityRemoved(const UUID& uuid);

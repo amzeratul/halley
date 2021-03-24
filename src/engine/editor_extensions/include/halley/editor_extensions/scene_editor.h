@@ -34,6 +34,7 @@ namespace Halley {
     	void setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizmoCollection) override;
 
     	void setSelectedEntity(const UUID& id, EntityData& entityData) override;
+    	void setEntityHighlightedOnList(const UUID& id) override;
 
 		void onEntityAdded(const UUID& id, const EntityData& entityData) final override;
 		void onEntityRemoved(const UUID& id) final override;
@@ -65,7 +66,7 @@ namespace Halley {
     	Camera camera;
 		IEditorInterface* editorInterface;
 
-    	virtual void onInit(std::shared_ptr<const UIColourScheme> colourScheme);
+		virtual void onInit(std::shared_ptr<const UIColourScheme> colourScheme);
     	
 		virtual void createServices(World& world);
 		virtual void createEntities(World& world);
@@ -101,6 +102,7 @@ namespace Halley {
     	
 		std::optional<EntityRef> selectedEntity;
     	EntityRef focusedEntity;
+		EntityRef entityHighlightedOnList;
     	bool focusEntityEnabled = false;
     	ISceneEditorGizmoCollection* gizmoCollection = nullptr;
 
@@ -117,7 +119,8 @@ namespace Halley {
 
     	bool isPointInSprite(EntityRef& e, Vector2f point) const;
     	void onClick(const SceneEditorInputState& input, SceneEditorOutputState& output);
-    	
+
+    	EntityRef getEntityToFocus();
 		void updateEntityFocused();
 		void addEntityIdToList(std::vector<EntityId>& dst, EntityRef entity);
 	};

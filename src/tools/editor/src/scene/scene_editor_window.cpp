@@ -220,6 +220,10 @@ void SceneEditorWindow::update(Time t, bool moved)
 		buttonsNeedUpdate = false;
 		updateButtons();
 	}
+
+	if (entityList && gameBridge) {
+		gameBridge->setEntityHighlightedOnList(entityList->getEntityUnderCursor());
+	}
 }
 
 bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)

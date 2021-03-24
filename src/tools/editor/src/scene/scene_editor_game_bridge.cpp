@@ -128,6 +128,13 @@ void SceneEditorGameBridge::setSelectedEntity(const UUID& uuid, EntityData& data
 	}
 }
 
+void SceneEditorGameBridge::setEntityHighlightedOnList(const UUID& uuid)
+{
+	if (interfaceReady) {
+		interface->setEntityHighlightedOnList(uuid);
+	}
+}
+
 void SceneEditorGameBridge::showEntity(const UUID& uuid)
 {
 	if (interfaceReady) {

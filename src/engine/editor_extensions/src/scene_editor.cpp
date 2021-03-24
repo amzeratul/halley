@@ -244,9 +244,27 @@ void SceneEditor::setEntityFocus(std::vector<EntityId> entityIds)
 {
 }
 
+void SceneEditor::setEntityHighlightedOnList(const UUID& id)
+{
+	entityHighlightedOnList = world->findEntity(id).value_or(EntityRef());
+}
+
+EntityRef SceneEditor::getEntityToFocus()
+{
+	if (!focusEntityEnabled) {
+		return EntityRef();
+	}
+
+	EntityRef underMouse = mousePos ? getRootEntityAt(mousePos.value()) : EntityRef();
+	if (!underMouse.isValid()) {
+		return entityHighlightedOnList;
+	}
+	return underMouse;
+}
+
 void SceneEditor::updateEntityFocused()
 {
-	const EntityRef targetFocusedEntity = focusEntityEnabled && mousePos ? getRootEntityAt(mousePos.value()) : EntityRef();
+	const EntityRef targetFocusedEntity = getEntityToFocus();
 	if (targetFocusedEntity != focusedEntity) {
 		focusedEntity = targetFocusedEntity;
 		
