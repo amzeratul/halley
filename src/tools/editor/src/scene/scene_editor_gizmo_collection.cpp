@@ -67,6 +67,15 @@ void SceneEditorGizmoCollection::refreshEntity()
 	}
 }
 
+void SceneEditorGizmoCollection::onEntityModified(const UUID& uuid, const EntityData& oldData, const EntityData& newData)
+{
+	if (selectedEntity && selectedEntity->getInstanceUUID() == uuid) {
+		if (newData.getComponents().size() != oldData.getComponents().size()) {
+			refreshEntity();
+		}
+	}
+}
+
 std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options)
 {
 	currentTool = tool;

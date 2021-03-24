@@ -16,6 +16,7 @@ namespace Halley {
 		void draw(Painter& painter) override;
 		void setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& entityData) override;
 		void refreshEntity() override;
+		void onEntityModified(const UUID& uuid, const EntityData& oldData, const EntityData& newData);
 		std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options) override;
 		void deselect() override;
 
@@ -25,7 +26,7 @@ namespace Halley {
 		gsl::span<const Tool> getTools() const { return tools; }
 
 		ISceneEditorWindow& getSceneEditorWindow() override;
-	
+
 	private:
 		UIFactory& factory;
 		Resources& resources;

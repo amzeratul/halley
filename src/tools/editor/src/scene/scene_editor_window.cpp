@@ -378,7 +378,7 @@ void SceneEditorWindow::onEntityModified(const String& id, const EntityData& pre
 		if (hadChange) {
 			entityList->onEntityModified(id, data);
 			sceneData->reloadEntity(id);
-			gameBridge->onEntityModified(UUID(id), data);
+			gameBridge->onEntityModified(UUID(id), prevData, newData);
 			markModified();
 		}
 	}

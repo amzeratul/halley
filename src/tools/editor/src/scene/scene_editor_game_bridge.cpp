@@ -149,11 +149,12 @@ void SceneEditorGameBridge::onEntityRemoved(const UUID& uuid)
 	}
 }
 
-void SceneEditorGameBridge::onEntityModified(const UUID& uuid, const EntityData& data)
+void SceneEditorGameBridge::onEntityModified(const UUID& uuid,  const EntityData& oldData, const EntityData& newData)
 {
 	if (interfaceReady) {
-		interface->onEntityModified(uuid, data);
+		interface->onEntityModified(uuid, newData);
 	}
+	gizmos->onEntityModified(uuid, oldData, newData);
 }
 
 void SceneEditorGameBridge::onEntityMoved(const UUID& uuid, const EntityData& data)
