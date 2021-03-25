@@ -45,6 +45,7 @@ namespace Halley {
 		bool isOver() const;
 		bool isHeld() const;
 		bool isSelected() const;
+		bool isEnabled() const;
 
 		void setCanDrag(bool enabled);
 		void setNotOver();
@@ -53,6 +54,7 @@ namespace Halley {
 		void setBoundsCheck(BoundsCheckFunction boundsCheck);
 		void setSnap(SnapFunction snapFunc);
 		void setGridSnap(GridSnapMode gridSnap);
+		void setEnabled(bool enabled);
 
 	private:
 		int id = 0;
@@ -60,6 +62,7 @@ namespace Halley {
 		bool holding = false;
 		bool canDrag = true;
 		bool selected = false;
+		bool enabled = true;
 
 		Vector2f pos;
 		Vector2f startOffset;

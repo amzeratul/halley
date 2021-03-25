@@ -12,7 +12,7 @@ SceneEditorGizmoHandle::SceneEditorGizmoHandle()
 void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl::span<SceneEditorGizmoHandle> handles)
 {
 	if (!holding) {
-		over = boundsCheck && inputState.mousePos ? boundsCheck(pos, inputState.mousePos.value()) : false;
+		over = enabled && boundsCheck && inputState.mousePos ? boundsCheck(pos, inputState.mousePos.value()) : false;
 		if (canDrag && over && inputState.leftClickPressed) {
 			holding = true;
 			startOffset = pos - inputState.mousePos.value();
@@ -78,6 +78,11 @@ void SceneEditorGizmoHandle::setGridSnap(GridSnapMode gridSnap)
 	}
 }
 
+void SceneEditorGizmoHandle::setEnabled(bool enabled)
+{
+	this->enabled = enabled;
+}
+
 void SceneEditorGizmoHandle::setPosition(Vector2f p, bool snap)
 {
 	if (!std::isnan(p.x) && !std::isnan(p.y)) {
@@ -92,17 +97,22 @@ Vector2f SceneEditorGizmoHandle::getPosition() const
 
 bool SceneEditorGizmoHandle::isOver() const
 {
-	return over;
+	return enabled && over;
 }
 
 bool SceneEditorGizmoHandle::isHeld() const
 {
-	return holding;
+	return enabled && holding;
 }
 
 bool SceneEditorGizmoHandle::isSelected() const
 {
-	return selected;
+	return enabled && selected;
+}
+
+bool SceneEditorGizmoHandle::isEnabled() const
+{
+	return enabled;
 }
 
 void SceneEditorGizmoHandle::setCanDrag(bool enabled)
