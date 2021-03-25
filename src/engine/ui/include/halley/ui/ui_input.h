@@ -11,6 +11,10 @@ namespace Halley {
 			Next,
 			Prev,
 			Hold,
+
+			Secondary,
+			Tertiary,
+			
 			NumberOfButtons
 		};
 
@@ -40,6 +44,8 @@ namespace Halley {
 		int next = -1;
 		int prev = -1;
 		int hold = -1;
+		int secondary = -1;
+		int tertiary = -1;
 		int xAxis = -1;
 		int yAxis = -1;
 		int xAxisAlt = -1;
