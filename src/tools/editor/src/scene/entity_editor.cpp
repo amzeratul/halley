@@ -139,6 +139,7 @@ void EntityEditor::reloadEntity()
 	getWidget("prefabHeader")->setActive(currentEntityData && isPrefab);
 	getWidget("addComponentButton")->setActive(currentEntityData);
 	fields->clear();
+	componentWidgets.clear();
 
 	if (currentEntityData) {
 		auto& seq = getEntityData().getComponents();
@@ -150,7 +151,6 @@ void EntityEditor::reloadEntity()
 		}
 		
 		for (auto& c: seq) {
-			// TODO: load in order
 			loadComponentData(c.first, c.second, componentNames);
 		}
 		prevEntityData = EntityData(*currentEntityData);
@@ -206,8 +206,11 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 			}
 		}
 	}
+
+	setComponentColour(componentType, *componentUI);
 	
 	fields->add(componentUI);
+	componentWidgets[componentType] = componentUI;
 }
 
 std::pair<String, std::vector<String>> EntityEditor::parseType(const String& type)
@@ -453,4 +456,24 @@ void EntityEditor::resetFieldFactories()
 {
 	fieldFactories.clear();
 	addFieldFactories(EntityEditorFactories::getDefaultFactories());
+}
+
+void EntityEditor::setHighlightedComponents(std::vector<String> componentNames)
+{
+	if (componentNames != highlightedComponents) {
+		highlightedComponents = std::move(componentNames);
+
+		for (auto& [compName, widget]: componentWidgets) {
+			setComponentColour(compName, *widget);
+		}
+	}
+}
+
+void EntityEditor::setComponentColour(const String& name, UIWidget& component)
+{
+	const bool highlighted = std_ex::contains(highlightedComponents, name);
+	
+	const auto colour = factory.getColourScheme()->getColour(highlighted ? "ui_listSelected" : "ui_staticBox");
+	auto capsule = component.getWidgetAs<UIImage>("capsule");
+	capsule->getSprite().setColour(colour);
 }

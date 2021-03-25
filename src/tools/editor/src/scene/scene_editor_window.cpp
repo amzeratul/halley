@@ -713,6 +713,11 @@ void SceneEditorWindow::addComponentToCurrentEntity(const String& componentName)
 	entityEditor->addComponent(componentName);
 }
 
+void SceneEditorWindow::setHighlightedComponents(std::vector<String> componentNames)
+{
+	entityEditor->setHighlightedComponents(std::move(componentNames));
+}
+
 String SceneEditorWindow::serializeEntity(const EntityData& node) const
 {
 	YAMLConvert::EmitOptions options;

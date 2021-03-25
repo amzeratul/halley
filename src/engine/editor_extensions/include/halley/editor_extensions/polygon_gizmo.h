@@ -34,6 +34,8 @@ namespace Halley {
 
 		bool isHighlighted() const override;
 		void deselect() override;
+
+		std::vector<String> getHighlightedComponents() const override;
 		
 	protected:
 		void onEntityChanged() override;

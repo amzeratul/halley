@@ -85,6 +85,8 @@ namespace Halley {
 
 		virtual bool isHighlighted() const;
 		virtual void deselect();
+		
+		virtual std::vector<String> getHighlightedComponents() const;
 
 	protected:
 		virtual void onEntityChanged();

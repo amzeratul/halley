@@ -78,6 +78,11 @@ std::shared_ptr<UIWidget> TranslateGizmo::makeUI()
 	return ui;
 }
 
+std::vector<String> TranslateGizmo::getHighlightedComponents() const
+{
+	return { "Transform2D" };
+}
+
 Circle TranslateGizmo::getMainHandle() const
 {
 	const auto pos = handle.getPosition();

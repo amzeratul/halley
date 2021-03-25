@@ -172,6 +172,11 @@ void SceneEditorGizmo::deselect()
 {
 }
 
+std::vector<String> SceneEditorGizmo::getHighlightedComponents() const
+{
+	return {};
+}
+
 void SceneEditorGizmo::onEntityChanged()
 {}
 

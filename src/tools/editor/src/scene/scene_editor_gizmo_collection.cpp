@@ -78,6 +78,8 @@ void SceneEditorGizmoCollection::onEntityModified(const UUID& uuid, const Entity
 
 std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options)
 {
+	const bool changedTool = currentTool != tool;
+	
 	currentTool = tool;
 	activeGizmo.reset();
 	
@@ -88,6 +90,10 @@ std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(const String& tool
 		}
 	} else {
 		activeGizmo.reset();
+	}
+
+	if (changedTool) {
+		sceneEditorWindow.setHighlightedComponents(activeGizmo ? activeGizmo->getHighlightedComponents() : std::vector<String>());
 	}
 
 	if (activeGizmo) {

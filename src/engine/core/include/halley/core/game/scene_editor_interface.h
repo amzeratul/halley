@@ -218,6 +218,7 @@ namespace Halley {
 		virtual const std::shared_ptr<ISceneData>& getSceneData() const = 0;
 
 		virtual void addComponentToCurrentEntity(const String& componentName) = 0;
+		virtual void setHighlightedComponents(std::vector<String> componentNames) = 0;
 	};
 
 	class IProject {

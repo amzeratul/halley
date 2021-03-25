@@ -41,6 +41,8 @@ namespace Halley {
 		void addComponent(const String& name);
 		void deleteComponent(const String& name);
 
+		void setHighlightedComponents(std::vector<String> componentNames);
+
 	protected:
 		bool onKeyPress(KeyboardKeyPress key) override;
 
@@ -68,6 +70,9 @@ namespace Halley {
 
 		int ecsDataRevision = 0;
 
+		std::map<String, std::shared_ptr<UIWidget>> componentWidgets;
+		std::vector<String> highlightedComponents;
+
 		void makeUI();
 		void loadComponentData(const String& componentType, ConfigNode& data, const std::vector<String>& componentNames);
 		std::pair<String, std::vector<String>> parseType(const String& type);
@@ -85,5 +90,7 @@ namespace Halley {
 
 		std::set<String> getComponentsOnEntity() const;
 		std::set<String> getComponentsOnPrefab() const;
+
+		void setComponentColour(const String& name, UIWidget& component);
 	};
 }

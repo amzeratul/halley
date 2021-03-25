@@ -24,6 +24,7 @@ namespace Halley {
 		void draw(Painter& painter) const override;
 		bool isHighlighted() const override;
 		std::shared_ptr<UIWidget> makeUI() override;
+		std::vector<String> getHighlightedComponents() const override;
 	
 	private:
 		UIFactory& factory;

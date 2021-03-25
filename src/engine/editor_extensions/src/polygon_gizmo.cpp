@@ -157,6 +157,11 @@ void PolygonGizmo::deselect()
 	}
 }
 
+std::vector<String> PolygonGizmo::getHighlightedComponents() const
+{
+	return { componentName };
+}
+
 void PolygonGizmo::onEntityChanged()
 {
 	loadEntity(PolygonGizmoMode::Move);
