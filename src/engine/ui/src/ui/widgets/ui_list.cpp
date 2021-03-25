@@ -29,6 +29,15 @@ bool UIList::setSelectedOption(int option)
 		return false;
 	}
 
+	if (!requiresSelection && option < 0) {
+		if (curOption >= 0) {
+			getItem(curOption)->setSelected(false);
+		}
+		
+		curOption = -1;
+		return false;
+	}
+	
 	const auto newSel = clamp(option, 0, numberOfItems - 1);
 	if (newSel != curOption) {
 		if (!getItem(newSel)->isEnabled()) {
@@ -162,7 +171,7 @@ void UIList::setItemEnabled(const String& id, bool enabled)
 		}
 	}
 	reassignIds();
-	if (!setSelectedOptionId(curId)) {
+	if (!setSelectedOptionId(curId) && (requiresSelection || curOption >= 0)) {
 		curOption = -1;
 		setSelectedOption(0);
 	}
@@ -180,7 +189,7 @@ void UIList::setItemActive(const String& id, bool active)
 		}
 	}
 	reassignIds();
-	if (!setSelectedOptionId(curId)) {
+	if (!setSelectedOptionId(curId) && (requiresSelection || curOption >= 0)) {
 		curOption = -1;
 		setSelectedOption(0);
 	}
@@ -201,7 +210,7 @@ void UIList::filterOptions(const String& filter)
 
 	layout();
 	reassignIds();
-	if (!setSelectedOptionId(curId)) {
+	if (!setSelectedOptionId(curId) && (requiresSelection || curOption >= 0)) {
 		curOption = -1;
 		setSelectedOption(0);
 	}
@@ -370,6 +379,11 @@ bool UIList::canReceiveFocus() const
 void UIList::setFocusable(bool f)
 {
 	focusable = f;
+}
+
+void UIList::setRequiresSelection(bool r)
+{
+	requiresSelection = r;
 }
 
 size_t UIList::getNumberOfItems() const

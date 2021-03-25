@@ -66,6 +66,8 @@ namespace Halley {
 		bool canReceiveFocus() const override;
 		void setFocusable(bool focusable);
 
+		void setRequiresSelection(bool requireSelection);
+
 		std::shared_ptr<UILabel> makeLabel(String id, LocalisedString label, float maxWidth = 0) const;
 
 	protected:
@@ -101,6 +103,8 @@ namespace Halley {
 		bool focusable = true;
 		bool scrollToSelection = true;
 		int itemUnderCursor = -1;
+
+		bool requiresSelection = true;
 
 		void onItemClicked(UIListItem& item);
 		void onItemDoubleClicked(UIListItem& item);
