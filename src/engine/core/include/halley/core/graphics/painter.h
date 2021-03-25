@@ -6,6 +6,8 @@
 #include <condition_variable>
 #include <halley/maths/vector4.h>
 
+#include "halley/maths/circle.h"
+
 namespace Halley
 {
 	class Polygon;
@@ -68,7 +70,9 @@ namespace Halley
 
 		// Circle drawing
 		void drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<Material> material = {});
+		void drawCircle(Circle circle, float width, Colour4f colour, std::shared_ptr<Material> material = {});
 		void drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<Material> material = {});
+		void drawCircleArc(Circle circle, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<Material> material = {});
 		void drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<Material> material = {});
 
 		// Rect drawing

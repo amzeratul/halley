@@ -304,6 +304,11 @@ void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f co
 	drawLine(points, width, colour, true, std::move(material));
 }
 
+void Painter::drawCircle(Circle circle, float width, Colour4f colour, std::shared_ptr<Material> material)
+{
+	drawCircle(circle.getCentre(), circle.getRadius(), width, colour, std::move(material));
+}
+
 void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<Material> material)
 {
 	const float arcLen = (to - from).getRadians() + (from.turnSide(to) > 0 ? 0.0f : 0 * float(pi()));
@@ -313,6 +318,11 @@ void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f 
 		points.push_back(centre + Vector2f(radius, 0).rotate(from + Angle1f::fromRadians(i * arcLen / (n - 1))));
 	}
 	drawLine(points, width, colour, false, std::move(material));
+}
+
+void Painter::drawCircleArc(Circle circle, float width, Angle1f from, Angle1f to, Colour4f colour, std::shared_ptr<Material> material)
+{
+	drawCircleArc(circle.getCentre(), circle.getRadius(), width, from, to, colour, std::move(material));
 }
 
 void Painter::drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<Material> material)
