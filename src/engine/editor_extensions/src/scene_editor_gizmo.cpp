@@ -2,6 +2,7 @@
 #include "scene_editor_input_state.h"
 #include "halley/core/game/scene_editor_interface.h"
 #include "halley/core/graphics/camera.h"
+#include "halley/entity/entity_data.h"
 using namespace Halley;
 
 SceneEditorGizmoHandle::SceneEditorGizmoHandle()

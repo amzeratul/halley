@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../../../../entity/include/halley/entity/entity_data.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/data_structures/config_node.h"
 
 namespace Halley
 {
 	class ResourceLoader;
+	class EntityData;
 
 	class ConfigFileSerializationState : public SerializerState {
 	public:
