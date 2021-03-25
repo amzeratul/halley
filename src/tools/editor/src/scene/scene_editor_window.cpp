@@ -248,6 +248,13 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 		return true;
 	}
 
+	if (gameBridge && toolMode) {
+		auto& gizmos = gameBridge->getGizmos();
+		if (gizmos.onKeyPress(key, *toolMode)) {
+			return true;
+		}
+	}
+
 	return false;
 }
 

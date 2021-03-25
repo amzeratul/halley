@@ -27,6 +27,8 @@ namespace Halley {
 
 		ISceneEditorWindow& getSceneEditorWindow() override;
 
+		bool onKeyPress(KeyboardKeyPress key, UIList& list);
+
 	private:
 		UIFactory& factory;
 		Resources& resources;

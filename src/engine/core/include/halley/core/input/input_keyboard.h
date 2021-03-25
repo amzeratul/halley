@@ -14,7 +14,7 @@ namespace Halley {
 		KeyMods mod;
 
 		KeyboardKeyPress() = default;
-		KeyboardKeyPress(KeyCode key, KeyMods mod);
+		KeyboardKeyPress(KeyCode key, KeyMods mod = KeyMods::None);
 
 		bool operator ==(const KeyboardKeyPress& other) const;
 		bool is(KeyCode key, KeyMods mod = KeyMods::None) const;

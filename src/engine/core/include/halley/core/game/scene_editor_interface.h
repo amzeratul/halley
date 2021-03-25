@@ -7,6 +7,7 @@
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/text/i18n.h"
 #include <optional>
+#include "halley/core/input/input_keyboard.h"
 
 namespace Halley {
 	class Sprite;
@@ -176,10 +177,11 @@ namespace Halley {
 			String id;
 			LocalisedString toolTip;
 			Sprite icon;
+			KeyboardKeyPress shortcut;
 
 			Tool() = default;
-			Tool(String id, LocalisedString toolTip, Sprite icon)
-				: id(std::move(id)), toolTip(std::move(toolTip)), icon(std::move(icon))
+			Tool(String id, LocalisedString toolTip, Sprite icon, KeyboardKeyPress shortcut)
+				: id(std::move(id)), toolTip(std::move(toolTip)), icon(std::move(icon)), shortcut(shortcut)
 			{}
 		};
 

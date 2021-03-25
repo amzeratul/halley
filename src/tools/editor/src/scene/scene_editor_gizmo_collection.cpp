@@ -119,6 +119,18 @@ ISceneEditorWindow& SceneEditorGizmoCollection::getSceneEditorWindow()
 	return sceneEditorWindow;
 }
 
+bool SceneEditorGizmoCollection::onKeyPress(KeyboardKeyPress key, UIList& list)
+{
+	for (const auto& t: tools) {
+		if (key == t.shortcut) {
+			list.setSelectedOptionId(t.id);
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void SceneEditorGizmoCollection::addTool(const Tool& tool, GizmoFactory gizmoFactory)
 {
 	tools.push_back(tool);
@@ -129,13 +141,13 @@ void SceneEditorGizmoCollection::resetTools()
 {
 	tools.clear();
 	
-	addTool(Tool("drag", LocalisedString::fromHardcodedString("Pan Scene"), Sprite().setImage(resources, "ui/scene_editor_drag.png")),
+	addTool(Tool("drag", LocalisedString::fromHardcodedString("Hand [H]"), Sprite().setImage(resources, "ui/scene_editor_drag.png"), KeyCode::H),
 		[this] (SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)
 		{
 			return std::unique_ptr<SceneEditorGizmo>{};
 		}
 	);
-	addTool(Tool("translate", LocalisedString::fromHardcodedString("Move Entities"), Sprite().setImage(resources, "ui/scene_editor_move.png")),
+	addTool(Tool("translate", LocalisedString::fromHardcodedString("Move [V]"), Sprite().setImage(resources, "ui/scene_editor_move.png"), KeyCode::V),
 		[this] (SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)
 		{
 			return std::make_unique<TranslateGizmo>(snapRules, factory);
