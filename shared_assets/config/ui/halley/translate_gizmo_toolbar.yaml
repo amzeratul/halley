@@ -1,0 +1,12 @@
+widget: { class: widget }
+sizer: { type: vertical }
+children:
+- widget:
+    id: mode
+    class: list
+    type: horizontal
+    options:
+      - id: pivot
+        text: Pivot
+      - id: centre
+        text: Centre

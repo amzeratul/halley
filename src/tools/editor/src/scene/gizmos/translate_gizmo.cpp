@@ -7,8 +7,9 @@
 #include "halley/core/graphics/painter.h"
 using namespace Halley;
 
-TranslateGizmo::TranslateGizmo(SnapRules snapRules)
+TranslateGizmo::TranslateGizmo(SnapRules snapRules, UIFactory& factory)
 	: SceneEditorGizmo(snapRules)
+	, factory(factory)
 {
 	handle.setBoundsCheck([=] (Vector2f myPos, Vector2f mousePos) -> bool
 	{
@@ -64,6 +65,19 @@ bool TranslateGizmo::isHighlighted() const
 	return handle.isOver();
 }
 
+std::shared_ptr<UIWidget> TranslateGizmo::makeUI()
+{
+	auto ui = factory.makeUI("ui/halley/translate_gizmo_toolbar");
+	ui->setInteractWithMouse(true);
+
+	ui->setHandle(UIEventType::ListSelectionChanged, "mode", [=] (const UIEvent& event)
+	{
+		setMode(fromString<TranslateGizmoMode>(event.getStringData()));
+	});
+	
+	return ui;
+}
+
 Circle TranslateGizmo::getMainHandle() const
 {
 	const auto pos = handle.getPosition();
@@ -81,10 +95,17 @@ void TranslateGizmo::updateEntityData(Vector2f pos)
 
 Vector2f TranslateGizmo::getObjectOffset() const
 {
-	auto sprite = getComponent<SpriteComponent>();
-	if (sprite) {
-		return sprite->sprite.getAABB().getCenter() - sprite->sprite.getPosition();
+	if (mode == TranslateGizmoMode::Centre) {
+		auto sprite = getComponent<SpriteComponent>();
+		if (sprite) {
+			return sprite->sprite.getAABB().getCenter() - sprite->sprite.getPosition();
+		}		
 	}
 	return Vector2f();
+}
+
+void TranslateGizmo::setMode(TranslateGizmoMode mode)
+{
+	this->mode = mode;
 }
 
