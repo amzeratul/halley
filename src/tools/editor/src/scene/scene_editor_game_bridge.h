@@ -37,6 +37,7 @@ namespace Halley {
 		void onSceneLoaded(Prefab& scene);
 		void onSceneSaved();
 		void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor);
+		void cycleHighlight(int delta);
 
 		void refreshAssets();
 

@@ -13,6 +13,7 @@
 #include "halley/entity/components/transform_2d_component.h"
 #include "components/sprite_component.h"
 #include "components/camera_component.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -89,6 +90,9 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	}
 
 	focusEntityEnabled = inputState.altHeld;
+	if (!focusEntityEnabled) {
+		highlightDelta = 0;
+	}
 	updateEntityFocused();
 }
 
@@ -242,6 +246,11 @@ void SceneEditor::onEntitySelected(std::optional<EntityRef> entity)
 
 void SceneEditor::setEntityFocus(std::vector<EntityId> entityIds)
 {
+}
+
+void SceneEditor::cycleHighlight(int delta)
+{
+	highlightDelta += delta;
 }
 
 void SceneEditor::setEntityHighlightedOnList(const UUID& id)
@@ -534,22 +543,38 @@ std::vector<EntityRef> SceneEditor::getEntitiesAt(Vector2f point) const
 	return result;
 }
 
-EntityRef SceneEditor::getRootEntityAt(Vector2f point) const
+std::vector<EntityRef> SceneEditor::getRootEntitiesAt(Vector2f point) const
 {
 	const auto entities = getEntitiesAt(point);
-	if (entities.empty()) {
-		return EntityRef();
-	}
-	
-	EntityRef result = entities.front(); // TODO
 
-	for (EntityRef parent = result.getParent(); parent.isValid(); parent = parent.getParent()) {
-		if (parent.getPrefab()) {
-			result = parent;
+	std::vector<EntityRef> result;
+	for (const auto& e: entities) {
+		EntityRef curResult = e;
+		for (EntityRef parent = curResult.getParent(); parent.isValid(); parent = parent.getParent()) {
+			if (parent.getPrefab()) {
+				curResult = parent;
+			}
+		}
+
+		if (!std_ex::contains(result, curResult)) {
+			result.push_back(curResult);
 		}
 	}
 
 	return result;
+}
+
+EntityRef SceneEditor::getRootEntityAt(Vector2f point) const
+{
+	const auto entities = getRootEntitiesAt(point);
+	if (entities.empty()) {
+		highlightDelta = 0;
+		return EntityRef();
+	}
+
+	highlightDelta = modulo(highlightDelta, static_cast<int>(entities.size()));
+	
+	return entities.at(highlightDelta);
 }
 
 void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputState& output)

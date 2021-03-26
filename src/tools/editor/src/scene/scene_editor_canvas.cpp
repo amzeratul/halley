@@ -142,7 +142,7 @@ void SceneEditorCanvas::onMouseOver(Vector2f mousePos)
 void SceneEditorCanvas::onMouseWheel(const UIEvent& event)
 {
 	if (inputState.altHeld) {
-		
+		gameBridge->cycleHighlight(event.getIntData());
 	} else {
 		gameBridge->changeZoom(event.getIntData(), lastMousePos - getPosition() - getSize() / 2);
 	}

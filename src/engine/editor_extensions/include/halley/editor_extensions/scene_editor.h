@@ -61,7 +61,7 @@ namespace Halley {
     	void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) override;
 
 		void refreshAssets() override;
-    
+
     protected:
     	Camera camera;
 		IEditorInterface* editorInterface;
@@ -82,6 +82,7 @@ namespace Halley {
 
     	virtual void onEntitySelected(std::optional<EntityRef> entity);
     	virtual void setEntityFocus(std::vector<EntityId> entityIds);
+		void cycleHighlight(int delta) override;
 
 		virtual std::optional<Vector2f> getWorldOffset() const;
     	std::optional<Vector2f> getMousePos() const;
@@ -89,6 +90,7 @@ namespace Halley {
 
     	virtual std::vector<EntityRef> getEntitiesAt(Vector2f point) const;
     	EntityRef getRootEntityAt(Vector2f point) const;
+    	std::vector<EntityRef> getRootEntitiesAt(Vector2f point) const;
        	virtual float getSpriteDepth(EntityRef& e, Vector2f point) const;
 
 	private:
@@ -104,6 +106,7 @@ namespace Halley {
     	EntityRef focusedEntity;
 		EntityRef entityHighlightedOnList;
     	bool focusEntityEnabled = false;
+    	mutable int highlightDelta = 0;
     	ISceneEditorGizmoCollection* gizmoCollection = nullptr;
 
     	TextRenderer coordinateInfo;

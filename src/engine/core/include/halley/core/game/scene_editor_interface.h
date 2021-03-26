@@ -106,6 +106,8 @@ namespace Halley {
     	virtual void setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizmoCollection) = 0;
 
     	virtual Rect4f getSpriteTreeBounds(const EntityRef& e) const = 0;
+
+    	virtual void cycleHighlight(int delta) = 0;
     };
 
 	class EntityTree {

@@ -199,6 +199,13 @@ void SceneEditorGameBridge::setupConsoleCommands(UIDebugConsoleController& contr
 	}
 }
 
+void SceneEditorGameBridge::cycleHighlight(int delta)
+{
+	if (interfaceReady) {
+		interface->cycleHighlight(delta);
+	}
+}
+
 bool SceneEditorGameBridge::saveAsset(const Path& path, gsl::span<const gsl::byte> data)
 {
 	return project.writeAssetToDisk(path, data);
