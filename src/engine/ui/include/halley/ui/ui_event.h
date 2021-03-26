@@ -28,6 +28,7 @@ namespace Halley {
 		ListAccept,
 		ListCancel,
 		ListItemsSwapped,
+		ListHoveredChanged,
 		MouseWheel,
 		MousePressLeft,
 		MousePressRight,
@@ -56,7 +57,11 @@ namespace Halley {
 		TreeCollapse,
 		TreeExpand,
 		TreeItemReparented,
-		WidgetHighlighted
+		WidgetHighlighted,
+		PopupAccept,
+		PopupHoveredChanged,
+		PopupSelectionChanged,
+		PopupCanceled
 	};
 
     class UIEvent {

@@ -260,4 +260,20 @@ uiStyle:
     colourBuffer: $ui_logErrorText
     depthStencilBuffer: $ui_logDevText
     texture: $ui_logInfoText
+
+  popupMenu:
+    background: { img: $ui_popup, colour: $ui_popupWindowSolid }
+    item:
+      normal: ""
+      hover: { img: $ui_list_item, colour: $ui_listHover }
+      selected: { img: $ui_list_item, colour: $ui_listSelected }
+      drag: { img: $ui_list_item_drag, colour: $ui_listDrag }
+      innerBorder: [ 6, 5, 6, 2 ]
+    innerBorder: [ 4, 4, 4, 4 ]
+    extraMouseBorder: [ 1, 1, 1, 1 ]
+    selectionChangedSound: ""
+    label: { font: Ubuntu Regular, size: 15, colour: $ui_unselectedText }
+    selectedLabel: { font: Ubuntu Regular, size: 15, colour: $ui_selectedText }
+    disabledLabel: { font: Ubuntu Regular, size: 15, colour: $ui_disabledText }
+    gap: 1
 ...
