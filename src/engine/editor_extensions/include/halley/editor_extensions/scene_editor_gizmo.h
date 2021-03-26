@@ -98,6 +98,7 @@ namespace Halley {
 		std::optional<EntityRef>& getEntity();
 
 		EntityData& getEntityData();
+		bool hasEntityData() const;
 		ConfigNode* getComponentData(const String& name);
 		const ConfigNode* getComponentData(const String& name) const;
 

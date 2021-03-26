@@ -511,33 +511,41 @@ float SceneEditor::getSpriteDepth(EntityRef& e, Vector2f pos) const
 	}
 }
 
-EntityRef SceneEditor::getEntityAt(Vector2f point) const
+std::vector<EntityRef> SceneEditor::getEntitiesAt(Vector2f point) const
 {
-	EntityRef bestEntity;
-	float bestDepth = -std::numeric_limits<float>::infinity();
+	std::vector<std::pair<EntityRef, float>> temp;
 	
 	for (auto& e: world->getEntities()) {
 		if (isPointInSprite(e, point)) {
 			const float depth = getSpriteDepth(e, point);
-			if (depth > bestDepth) {
-				bestDepth = depth;
-				bestEntity = e;
-			}
+			temp.emplace_back(e, depth);
 		}
 	}
 
-	return bestEntity;
+	std::sort(temp.begin(), temp.end(), [] (const auto& a, const auto& b) { return a.second > b.second; });
+
+	std::vector<EntityRef> result;
+	result.reserve(temp.size());
+	for (auto& e: temp) {
+		if (e.first.isValid()) {
+			result.push_back(e.first);
+		}
+	}
+	return result;
 }
 
 EntityRef SceneEditor::getRootEntityAt(Vector2f point) const
 {
-	EntityRef result = getEntityAt(point);
+	const auto entities = getEntitiesAt(point);
+	if (entities.empty()) {
+		return EntityRef();
+	}
+	
+	EntityRef result = entities.front(); // TODO
 
-	if (result.isValid()) {
-		for (EntityRef parent = result.getParent(); parent.isValid(); parent = parent.getParent()) {
-			if (parent.getPrefab()) {
-				result = parent;
-			}
+	for (EntityRef parent = result.getParent(); parent.isValid(); parent = parent.getParent()) {
+		if (parent.getPrefab()) {
+			result = parent;
 		}
 	}
 

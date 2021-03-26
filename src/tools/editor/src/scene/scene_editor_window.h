@@ -109,7 +109,7 @@ namespace Halley {
 		String curTool;
 		String curComponentName;
 
-		int toolModeTimeout = 0; // Hack
+		int toolModeTimeout = 1; // Hack
 
 		UndoStack undoStack;
 		bool modified = false;

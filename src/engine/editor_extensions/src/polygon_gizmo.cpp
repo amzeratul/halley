@@ -316,7 +316,7 @@ std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
 void PolygonGizmo::updateUI()
 {
 	const bool canEdit = !!vertices;
-	const bool isPrefab = !getEntityData().getPrefab().isEmpty();
+	const bool isPrefab = hasEntityData() && !getEntityData().getPrefab().isEmpty();
 
 	if (uiMode) {
 		uiMode->setSelectedOptionId(toString(mode));

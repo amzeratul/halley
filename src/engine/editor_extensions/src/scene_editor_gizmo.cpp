@@ -196,6 +196,11 @@ EntityData& SceneEditorGizmo::getEntityData()
 	return *entityData;
 }
 
+bool SceneEditorGizmo::hasEntityData() const
+{
+	return !!entityData;
+}
+
 ConfigNode* SceneEditorGizmo::getComponentData(const String& name)
 {
 	auto& components = (*entityData).getComponents();

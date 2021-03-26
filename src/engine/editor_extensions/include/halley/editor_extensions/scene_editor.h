@@ -87,7 +87,7 @@ namespace Halley {
     	std::optional<Vector2f> getMousePos() const;
 		std::unique_ptr<World> doCreateWorld(const String& stageName) const;
 
-    	virtual EntityRef getEntityAt(Vector2f point) const;
+    	virtual std::vector<EntityRef> getEntitiesAt(Vector2f point) const;
     	EntityRef getRootEntityAt(Vector2f point) const;
        	virtual float getSpriteDepth(EntityRef& e, Vector2f point) const;
 

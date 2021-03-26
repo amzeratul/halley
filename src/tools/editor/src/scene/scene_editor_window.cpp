@@ -66,10 +66,10 @@ void SceneEditorWindow::makeUI()
 		onEntitySelected(event.getStringData());
 	});
 
-	setHandle(UIEventType::ListSelectionChanged, "toolMode", [=] (const UIEvent& event)
+	bindData("toolMode", getSetting(EditorSettingType::Temp, "tools.curTool").asString("drag"), [=] (const String& value)
 	{
 		if (toolModeTimeout == 0) {
-			setTool(event.getStringData());
+			setTool(value);
 			toolModeTimeout = 2;
 		}
 	});
