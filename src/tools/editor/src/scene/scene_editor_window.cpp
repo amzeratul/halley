@@ -160,7 +160,7 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 		// Setup tools
 		gameBridge->getGizmos().resetTools();
 		interface.setupTools(*toolMode, gameBridge->getGizmos());
-		setTool("translate");
+		setTool(getSetting(EditorSettingType::Temp, "tools.curTool").asString("translate"));
 
 		// Show root
 		if (!sceneCreated.getEntities().empty()) {
@@ -816,4 +816,9 @@ ConfigNode SceneEditorWindow::getSetting(EditorSettingType type, std::string_vie
 void SceneEditorWindow::setSetting(EditorSettingType type, std::string_view id, ConfigNode data)
 {
 	projectWindow.setSetting(type, id, std::move(data));
+}
+
+void SceneEditorWindow::onTabbedIn()
+{
+	setTool(getSetting(EditorSettingType::Temp, "tools.curTool").asString("translate"));
 }

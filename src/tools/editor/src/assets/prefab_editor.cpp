@@ -10,6 +10,10 @@ PrefabEditor::PrefabEditor(UIFactory& factory, Resources& resources, AssetType t
 	, project(project)
 	, projectWindow(projectWindow)
 {
+	setHandle(UIEventType::TabbedIn, [=] (const UIEvent& event)
+	{
+		window->onTabbedIn();
+	});
 }
 
 void PrefabEditor::refreshAssets()

@@ -21,6 +21,11 @@ TranslateGizmo::TranslateGizmo(SnapRules snapRules, UIFactory& factory, ISceneEd
 
 void TranslateGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {
+	const auto curMode = fromString<TranslateGizmoMode>(sceneEditorWindow.getSetting(EditorSettingType::Editor, "tools.translate.mode").asString("pivot"));
+	if (curMode != mode) {
+		setMode(curMode);
+	}
+	
 	handle.update(inputState);
 
 	const auto transform = getComponent<Transform2DComponent>();
@@ -71,6 +76,8 @@ std::shared_ptr<UIWidget> TranslateGizmo::makeUI()
 	auto ui = factory.makeUI("ui/halley/translate_gizmo_toolbar");
 	ui->setInteractWithMouse(true);
 
+	uiMode = ui->getWidgetAs<UIList>("mode");
+
 	const auto initialMode = sceneEditorWindow.getSetting(EditorSettingType::Editor, "tools.translate.mode").asString("pivot");
 	setMode(fromString<TranslateGizmoMode>(initialMode));
 	ui->bindData("mode", initialMode, [=] (const String& value)
@@ -115,5 +122,6 @@ Vector2f TranslateGizmo::getObjectOffset() const
 void TranslateGizmo::setMode(TranslateGizmoMode mode)
 {
 	this->mode = mode;
+	uiMode->setSelectedOptionId(toString(mode));
 	sceneEditorWindow.setSetting(EditorSettingType::Editor, "tools.translate.mode", ConfigNode(toString(mode)));
 }

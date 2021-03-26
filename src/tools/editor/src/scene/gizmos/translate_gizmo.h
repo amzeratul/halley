@@ -33,6 +33,7 @@ namespace Halley {
 		SceneEditorGizmoHandle handle;
 		Vector2f handleOffset;
 		TranslateGizmoMode mode;
+		std::shared_ptr<UIList> uiMode;
 
 		Circle getMainHandle() const;
 		void updateEntityData(Vector2f pos);

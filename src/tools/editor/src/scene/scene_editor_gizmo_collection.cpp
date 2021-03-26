@@ -93,6 +93,7 @@ std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(const String& tool
 	}
 
 	if (changedTool) {
+		sceneEditorWindow.setSetting(EditorSettingType::Temp, "tools.curTool", ConfigNode(tool));
 		sceneEditorWindow.setHighlightedComponents(activeGizmo ? activeGizmo->getHighlightedComponents() : std::vector<String>());
 	}
 
