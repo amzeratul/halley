@@ -11,22 +11,19 @@ namespace Halley {
 		String id;
 		LocalisedString text;
 		LocalisedString tooltip;
-		std::function<void()> callback;
 
-		UIPopupMenuItem(String id, LocalisedString text, LocalisedString tooltip, std::function<void()> callback)
+		UIPopupMenuItem(String id, LocalisedString text, LocalisedString tooltip)
 			: id(std::move(id))
 			, text(std::move(text))
 			, tooltip(std::move(tooltip))
-			, callback(std::move(callback))
 		{
 			
 		}
 
-		UIPopupMenuItem(String id, String tooltip, std::function<void()> callback)
+		UIPopupMenuItem(String id, String tooltip)
 			: id(id)
 			, text(LocalisedString::fromHardcodedString(std::move(id)))
 			, tooltip(LocalisedString::fromHardcodedString(std::move(tooltip)))
-			, callback(std::move(callback))
 		{
 
 		}
@@ -36,6 +33,8 @@ namespace Halley {
 	public:
 		UIPopupMenu(String id, UIStyle style, std::vector<UIPopupMenuItem> items);
 
+		void update(Time t, bool moved) override;
+		
 		void pressMouse(Vector2f mousePos, int button) override;
 
 		void onAddedToRoot(UIRoot& root) override;
@@ -47,6 +46,8 @@ namespace Halley {
 		
 		std::vector<UIPopupMenuItem> items;
 		std::shared_ptr<UIList> itemList;
+
+		bool destroyOnUpdate = false;
 
 		void makeUI();
 	};

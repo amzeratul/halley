@@ -114,6 +114,8 @@ namespace Halley {
 		void swapItems(int idxA, int idxB);
 		bool isManualDragging() const;
 		void setItemUnderCursor(int itemIdx, bool isMouseOver);
+
+		void resetSelectionIfInvalid();
 	};
 
 	class UIListItem : public UIClickable {

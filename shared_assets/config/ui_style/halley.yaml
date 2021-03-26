@@ -262,7 +262,7 @@ uiStyle:
     texture: $ui_logInfoText
 
   popupMenu:
-    background: { img: $ui_input, colour: $ui_popupWindowSolid }
+    background: { img: $ui_popup, colour: $ui_popupWindowSolid }
     item:
       normal: ""
       hover: { img: $ui_list_item, colour: $ui_listHover }

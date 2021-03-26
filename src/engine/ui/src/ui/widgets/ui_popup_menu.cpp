@@ -11,6 +11,13 @@ UIPopupMenu::UIPopupMenu(String id, UIStyle style, std::vector<UIPopupMenuItem> 
 	makeUI();
 }
 
+void UIPopupMenu::update(Time t, bool moved)
+{
+	if (destroyOnUpdate) {
+		destroy();
+	}
+}
+
 void UIPopupMenu::pressMouse(Vector2f mousePos, int button)
 {
 	if (!getRect().contains(mousePos)) {
@@ -39,10 +46,18 @@ void UIPopupMenu::makeUI()
 	}
 
 	itemList->setHandle(UIEventType::ListAccept, [=](const UIEvent& event) {
-		const auto& item = items.at(event.getIntData());
-		item.callback();
-		destroy();
+		sendEvent(UIEvent(UIEventType::PopupAccept, getId(), event.getStringData(), event.getIntData()));
+		destroyOnUpdate = true;
 	});
+
+	itemList->setHandle(UIEventType::ListSelectionChanged, [=](const UIEvent& event) {
+		sendEvent(UIEvent(UIEventType::PopupSelectionChanged, getId(), event.getStringData(), event.getIntData()));
+	});
+
+	itemList->setHandle(UIEventType::ListHoveredChanged, [=](const UIEvent& event) {
+		sendEvent(UIEvent(UIEventType::PopupHoveredChanged, getId(), event.getStringData(), event.getIntData()));
+	});
+	
 	add(itemList);
 
 	itemList->setRequiresSelection(false);
@@ -50,18 +65,22 @@ void UIPopupMenu::makeUI()
 	itemList->setInputButtons(inputButtons);
 	
 	setHandle(UIEventType::UnhandledMousePressLeft, [=](const UIEvent&) {
-		destroy();
+		sendEvent(UIEvent(UIEventType::PopupCanceled, getId()));
+		destroyOnUpdate = true;
 	});
 
 	setHandle(UIEventType::UnhandledMousePressMiddle, [=](const UIEvent&) {
-		destroy();
+		sendEvent(UIEvent(UIEventType::PopupCanceled, getId()));
+		destroyOnUpdate = true;
 	});
 
 	setHandle(UIEventType::UnhandledMousePressRight, [=](const UIEvent&) {
-		destroy();
+		sendEvent(UIEvent(UIEventType::PopupCanceled, getId()));
+		destroyOnUpdate = true;
 	});
 
 	itemList->setHandle(UIEventType::ListCancel, [=](const UIEvent&) {
-		destroy();
+		sendEvent(UIEvent(UIEventType::PopupCanceled, getId()));
+		destroyOnUpdate = true;
 	});
 }

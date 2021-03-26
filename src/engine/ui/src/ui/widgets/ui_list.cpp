@@ -17,7 +17,12 @@ UIList::UIList(String id, UIStyle style, UISizerType orientation, int nColumns)
 	sprite = style.getSprite("background");
 
 	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event) {});
-	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event) {});
+	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event) {
+		if (event.getBoolData()) {
+			const auto hoveredChild = std::find_if(getChildren().begin(), getChildren().end(), [=](std::shared_ptr<UIWidget> child) { return child->getId() == event.getStringData(); });
+			sendEvent(UIEvent(UIEventType::ListHoveredChanged, getId(), event.getSourceId(), int(hoveredChild - getChildren().begin())));
+		}
+	});
 }
 
 bool UIList::setSelectedOption(int option)
@@ -171,9 +176,18 @@ void UIList::setItemEnabled(const String& id, bool enabled)
 		}
 	}
 	reassignIds();
-	if (!setSelectedOptionId(curId) && (requiresSelection || curOption >= 0)) {
+
+	resetSelectionIfInvalid();
+}
+
+void UIList::resetSelectionIfInvalid()
+{
+	if (!setSelectedOptionId(getSelectedOptionId())) {
+		const auto shouldResetSelection = (requiresSelection || curOption >= 0);
 		curOption = -1;
-		setSelectedOption(0);
+		if (shouldResetSelection) {
+			setSelectedOption(0);
+		}
 	}
 }
 
@@ -189,10 +203,7 @@ void UIList::setItemActive(const String& id, bool active)
 		}
 	}
 	reassignIds();
-	if (!setSelectedOptionId(curId) && (requiresSelection || curOption >= 0)) {
-		curOption = -1;
-		setSelectedOption(0);
-	}
+	resetSelectionIfInvalid();
 }
 
 void UIList::filterOptions(const String& filter)
@@ -210,10 +221,7 @@ void UIList::filterOptions(const String& filter)
 
 	layout();
 	reassignIds();
-	if (!setSelectedOptionId(curId) && (requiresSelection || curOption >= 0)) {
-		curOption = -1;
-		setSelectedOption(0);
-	}
+	resetSelectionIfInvalid();
 }
 
 std::shared_ptr<UIListItem> UIList::addItem(std::shared_ptr<UIListItem> item, Vector4f border, int fillFlags)
@@ -782,10 +790,12 @@ void UIListItem::doSetState(State state)
 		case State::Up:
 			sprite = style.getSprite("normal");
 			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), false));
+			sendEvent(UIEvent(UIEventType::SetHovered, getId(), false));
 			break;
 		case State::Hover:
 			sprite = style.getSprite("hover");
 			sendEventDown(UIEvent(UIEventType::SetHovered, getId(), true));
+			sendEvent(UIEvent(UIEventType::SetHovered, getId(), true));
 			break;
 		case State::Down:
 			sprite = style.getSprite("selected");
