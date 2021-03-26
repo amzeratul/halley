@@ -7,9 +7,10 @@
 #include "halley/core/graphics/painter.h"
 using namespace Halley;
 
-TranslateGizmo::TranslateGizmo(SnapRules snapRules, UIFactory& factory)
+TranslateGizmo::TranslateGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow)
 	: SceneEditorGizmo(snapRules)
 	, factory(factory)
+	, sceneEditorWindow(sceneEditorWindow)
 {
 	handle.setBoundsCheck([=] (Vector2f myPos, Vector2f mousePos) -> bool
 	{
@@ -70,9 +71,11 @@ std::shared_ptr<UIWidget> TranslateGizmo::makeUI()
 	auto ui = factory.makeUI("ui/halley/translate_gizmo_toolbar");
 	ui->setInteractWithMouse(true);
 
-	ui->setHandle(UIEventType::ListSelectionChanged, "mode", [=] (const UIEvent& event)
+	const auto initialMode = sceneEditorWindow.getSetting(EditorSettingType::Editor, "tools.translate.mode").asString("pivot");
+	setMode(fromString<TranslateGizmoMode>(initialMode));
+	ui->bindData("mode", initialMode, [=] (const String& value)
 	{
-		setMode(fromString<TranslateGizmoMode>(event.getStringData()));
+		setMode(fromString<TranslateGizmoMode>(value));
 	});
 	
 	return ui;
@@ -112,5 +115,5 @@ Vector2f TranslateGizmo::getObjectOffset() const
 void TranslateGizmo::setMode(TranslateGizmoMode mode)
 {
 	this->mode = mode;
+	sceneEditorWindow.setSetting(EditorSettingType::Editor, "tools.translate.mode", ConfigNode(toString(mode)));
 }
-

@@ -199,7 +199,13 @@ namespace Halley {
 		virtual void generateList(UIList& list) = 0;
 		virtual ISceneEditorWindow& getSceneEditorWindow() = 0;
 	};
-
+	
+    enum class EditorSettingType {
+        Editor,
+        Project,
+        Temp
+    };
+	
 	class ISceneEditorWindow {
 	public:
 		virtual ~ISceneEditorWindow() = default;
@@ -219,6 +225,9 @@ namespace Halley {
 
 		virtual void addComponentToCurrentEntity(const String& componentName) = 0;
 		virtual void setHighlightedComponents(std::vector<String> componentNames) = 0;
+
+		virtual ConfigNode getSetting(EditorSettingType type, std::string_view id) const = 0;
+		virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;
 	};
 
 	class IProject {

@@ -807,3 +807,13 @@ void SceneEditorWindow::redo()
 	gameBridge->getGizmos().refreshEntity();
 	updateButtons();
 }
+
+ConfigNode SceneEditorWindow::getSetting(EditorSettingType type, std::string_view id) const
+{
+	return projectWindow.getSetting(type, id);
+}
+
+void SceneEditorWindow::setSetting(EditorSettingType type, std::string_view id, ConfigNode data)
+{
+	projectWindow.setSetting(type, id, std::move(data));
+}

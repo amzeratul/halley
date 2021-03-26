@@ -156,7 +156,7 @@ void SceneEditorGizmoCollection::resetTools()
 	addTool(Tool("translate", LocalisedString::fromHardcodedString("Move [V]"), Sprite().setImage(resources, "ui/scene_editor_move.png"), KeyCode::V),
 		[this] (SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)
 		{
-			return std::make_unique<TranslateGizmo>(snapRules, factory);
+			return std::make_unique<TranslateGizmo>(snapRules, factory, sceneEditorWindow);
 		}
 	);
 }

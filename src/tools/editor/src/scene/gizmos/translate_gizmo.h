@@ -19,7 +19,7 @@ namespace Halley {
 	
 	class TranslateGizmo final : public SceneEditorGizmo {
 	public:
-		explicit TranslateGizmo(SnapRules snapRules, UIFactory& factory);
+		explicit TranslateGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow);
 		void update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState) override;
 		void draw(Painter& painter) const override;
 		bool isHighlighted() const override;
@@ -28,6 +28,7 @@ namespace Halley {
 	
 	private:
 		UIFactory& factory;
+		ISceneEditorWindow& sceneEditorWindow;
 		bool visible = false;
 		SceneEditorGizmoHandle handle;
 		Vector2f handleOffset;

@@ -35,6 +35,9 @@ namespace Halley {
 
     	void addTask(std::unique_ptr<Task> task);
 
+    	ConfigNode getSetting(EditorSettingType type, std::string_view id) const;
+        void setSetting(EditorSettingType type, std::string_view id, ConfigNode data);
+
     protected:
 		void onUnloadDLL() override;
         void onLoadDLL() override;
@@ -73,6 +76,8 @@ namespace Halley {
     	std::shared_ptr<UIDebugConsoleController> debugConsoleController;
     	std::shared_ptr<UIDebugConsoleCommands> debugConsoleCommands;
         std::shared_ptr<UIDebugConsole> debugConsole;
+
+    	std::map<String, ConfigNode> tempSettings;
 
         void makeUI();
     	void makeToolbar();
