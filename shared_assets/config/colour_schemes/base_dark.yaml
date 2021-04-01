@@ -76,9 +76,9 @@ colours:
 
   ui_inputCaret: "#FFFFFF"
   
-  ui_staticListBackground: "#4e9a5c80"
-  ui_staticListBackgroundAlternate: "#324a2f80"
-  ui_staticListBackgroundInvalid: "#9A4E5B80"
+  ui_staticListBackground: "#3e6e53dd"
+  ui_staticListBackgroundAlternate: "#30463ddd"
+  ui_staticListBackgroundInvalid: "#644853dd"
 
 
 sprites:
