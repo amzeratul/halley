@@ -32,6 +32,22 @@ uiStyle:
     iconColour: $ui_text
     disabledIconColour: $ui_disabledText
 
+  buttonSmall:
+    normal: { img: $ui_button, colour: $ui_buttonNormal }
+    down: { img: $ui_button, colour: $ui_buttonDown }
+    hover: { img: $ui_button, colour: $ui_buttonHover }
+    disabled: { img: $ui_button, colour: $ui_buttonDisabled }
+    innerBorder: [ 1,1,1,1 ]
+    upSound: ""
+    downSound: ""
+    hoverSound: ""
+    label: { font: Ubuntu Bold, size: 15, colour: $ui_text }
+    disabledLabel: { font: Ubuntu Bold, size: 15, colour: $ui_disabledText }
+    labelBorder: [0, 0, 0, 0]
+    iconBorder: [0, 0, 0, 0]
+    iconColour: $ui_text
+    iconColourDisabled: $ui_disabledText
+
   checkbox:
     normal: { img: $ui_checkbox, colour: $ui_inputNormal }
     checked: { img: $ui_checkbox_checked, colour: $ui_inputNormal }
