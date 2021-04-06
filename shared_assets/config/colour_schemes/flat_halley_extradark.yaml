@@ -1,0 +1,30 @@
+name: Flat Halley (Extra Dark)
+author: Finn
+base: colour_schemes/base_flat_dark
+colours:
+
+  background0: "#172024"
+  background1: "#172024"
+
+  ui_scrollBackground: "#172024"
+  ui_staticBox: "#172024"
+  ui_staticBoxSubdue: "#172024"
+
+  backgroundLogo: "#0e1417"
+  ui_listBackground: "#0e1417"
+  ui_backgroundBox: "#0e1417"
+  ui_popupWindow: "#0e1417"
+  taskbarLogoBackground: "#0e1417"
+
+
+
+
+  toolbarNormal: "#fc2847"   # main theme accent colour
+
+  ui_listSelected: "#fc2847"  # main theme accent colour
+
+  ui_stringMatchText: "#ffaab6" # lighter version of the main theme accent colour
+
+  ui_unselectedTextAlt: "#ffaab6" # lighter version of the main theme accent colour
+
+
