@@ -791,7 +791,8 @@ void SceneEditorWindow::assignUUIDs(EntityData& node)
 
 void SceneEditorWindow::positionEntityAtCursor(EntityData& entityData) const
 {
-	positionEntity(entityData, gameBridge->getMousePos().value_or(gameBridge->getCameraPos()));
+	const auto pos = gameBridge->getMousePos().value_or(gameBridge->getCameraPos());
+	positionEntity(entityData, pos.round());
 }
 
 void SceneEditorWindow::positionEntity(EntityData& entityData, Vector2f pos) const
