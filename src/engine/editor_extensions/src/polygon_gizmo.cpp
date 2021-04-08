@@ -266,7 +266,7 @@ void PolygonGizmo::loadHandlesFromVertices()
 void PolygonGizmo::setHandleIndices()
 {
 	for (size_t i = 0; i < handles.size(); ++i) {
-		handles[i].setId(static_cast<int>(i));
+		handles[i].setIndex(static_cast<int>(i));
 	}
 }
 
@@ -401,7 +401,7 @@ Vector2f PolygonGizmo::snapVertex(int id, Vector2f pos) const
 const SceneEditorGizmoHandle* PolygonGizmo::tryGetHandle(int id) const
 {
 	for (const auto& handle: handles) {
-		if (handle.getId() == id) {
+		if (handle.getIndex() == id) {
 			return &handle;
 		}
 	}

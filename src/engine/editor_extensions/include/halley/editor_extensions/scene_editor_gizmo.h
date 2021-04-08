@@ -33,11 +33,13 @@ namespace Halley {
 		using SnapFunction = std::function<Vector2f(int, Vector2f)>;
 		using BoundsCheckFunction = std::function<bool(Vector2f, Vector2f)>;
 
-		SceneEditorGizmoHandle();
+		SceneEditorGizmoHandle(String id = "");
 		void update(const SceneEditorInputState& inputState, gsl::span<SceneEditorGizmoHandle> handles = {});
 
-		void setId(int id);
-		int getId() const;
+		void setIndex(int index);
+		int getIndex() const;
+
+		const String& getId() const { return id; }
 		
 		void setPosition(Vector2f pos, bool snap);
 		Vector2f getPosition() const;
@@ -57,7 +59,7 @@ namespace Halley {
 		void setEnabled(bool enabled);
 
 	private:
-		int id = 0;
+		int index = 0;
 		bool over = false;
 		bool holding = false;
 		bool canDrag = true;
@@ -66,6 +68,7 @@ namespace Halley {
 
 		Vector2f pos;
 		Vector2f startOffset;
+		String id;
 
 		BoundsCheckFunction boundsCheck;
 		SnapFunction snapFunc;

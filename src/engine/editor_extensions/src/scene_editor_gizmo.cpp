@@ -5,14 +5,17 @@
 #include "halley/entity/entity_data.h"
 using namespace Halley;
 
-SceneEditorGizmoHandle::SceneEditorGizmoHandle()
+SceneEditorGizmoHandle::SceneEditorGizmoHandle(String id)
+	: id(std::move(id))
 {
 }
 
 void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl::span<SceneEditorGizmoHandle> handles)
 {
+	const bool overAnother = std::any_of(handles.begin(), handles.end(), [&] (const SceneEditorGizmoHandle& handle) { return &handle != this && handle.isOver(); });
+	
 	if (!holding) {
-		over = enabled && boundsCheck && inputState.mousePos ? boundsCheck(pos, inputState.mousePos.value()) : false;
+		over = !overAnother && enabled && boundsCheck && inputState.mousePos ? boundsCheck(pos, inputState.mousePos.value()) : false;
 		if (canDrag && over && inputState.leftClickPressed) {
 			holding = true;
 			startOffset = pos - inputState.mousePos.value();
@@ -43,14 +46,14 @@ void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl
 	}
 }
 
-void SceneEditorGizmoHandle::setId(int id)
+void SceneEditorGizmoHandle::setIndex(int index)
 {
-	this->id = id;
+	this->index = index;
 }
 
-int SceneEditorGizmoHandle::getId() const
+int SceneEditorGizmoHandle::getIndex() const
 {
-	return id;
+	return index;
 }
 
 void SceneEditorGizmoHandle::setBoundsCheck(BoundsCheckFunction bc)
@@ -86,7 +89,7 @@ void SceneEditorGizmoHandle::setEnabled(bool enabled)
 void SceneEditorGizmoHandle::setPosition(Vector2f p, bool snap)
 {
 	if (!std::isnan(p.x) && !std::isnan(p.y)) {
-		pos = snapFunc && snap ? snapFunc(id, p) : p;
+		pos = snapFunc && snap ? snapFunc(index, p) : p;
 	}
 }
 
