@@ -206,6 +206,22 @@ void SceneEditorGameBridge::cycleHighlight(int delta)
 	}
 }
 
+std::optional<Vector2f> SceneEditorGameBridge::getMousePos() const
+{
+	if (interfaceReady) {
+		return interface->getMousePos();
+	}
+	return {};
+}
+
+Vector2f SceneEditorGameBridge::getCameraPos() const
+{
+	if (interfaceReady) {
+		return interface->getCameraPos();
+	}
+	return Vector2f();
+}
+
 bool SceneEditorGameBridge::saveAsset(const Path& path, gsl::span<const gsl::byte> data)
 {
 	return project.writeAssetToDisk(path, data);

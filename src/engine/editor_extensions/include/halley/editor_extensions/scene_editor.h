@@ -58,6 +58,9 @@ namespace Halley {
 		std::optional<Rect4f> getSpriteBounds(const EntityRef& e) const;
 		virtual bool isSpriteVisibleOnCamera(const Sprite& sprite, OptionalLite<int> mask) const;
 
+    	std::optional<Vector2f> getMousePos() const override;
+		Vector2f getCameraPos() const override;
+    	
     	void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) override;
 
 		void refreshAssets() override;
@@ -85,7 +88,6 @@ namespace Halley {
 		void cycleHighlight(int delta) override;
 
 		virtual std::optional<Vector2f> getWorldOffset() const;
-    	std::optional<Vector2f> getMousePos() const;
 		std::unique_ptr<World> doCreateWorld(const String& stageName) const;
 
     	virtual std::vector<EntityRef> getEntitiesAt(Vector2f point) const;

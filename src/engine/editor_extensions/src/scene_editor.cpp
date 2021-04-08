@@ -300,6 +300,11 @@ std::optional<Vector2f> SceneEditor::getMousePos() const
 	return mousePos;
 }
 
+Vector2f SceneEditor::getCameraPos() const
+{
+	return camera.getPosition().xy();
+}
+
 std::optional<Vector2f> SceneEditor::getWorldOffset() const
 {
 	return {};

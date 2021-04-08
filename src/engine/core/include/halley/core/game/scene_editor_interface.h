@@ -108,6 +108,9 @@ namespace Halley {
     	virtual Rect4f getSpriteTreeBounds(const EntityRef& e) const = 0;
 
     	virtual void cycleHighlight(int delta) = 0;
+
+    	virtual std::optional<Vector2f> getMousePos() const = 0;
+    	virtual Vector2f getCameraPos() const = 0;
     };
 
 	class EntityTree {

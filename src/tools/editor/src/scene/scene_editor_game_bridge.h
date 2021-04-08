@@ -38,6 +38,8 @@ namespace Halley {
 		void onSceneSaved();
 		void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor);
 		void cycleHighlight(int delta);
+		std::optional<Vector2f> getMousePos() const;
+		Vector2f getCameraPos() const;
 
 		void refreshAssets();
 

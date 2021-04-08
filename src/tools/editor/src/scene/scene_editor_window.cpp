@@ -475,8 +475,12 @@ String SceneEditorWindow::copyEntity(const String& id)
 
 void SceneEditorWindow::pasteEntity(const String& stringData, const String& referenceId)
 {
+	Expects(gameBridge);
 	auto data = deserializeEntity(stringData);
 	if (data) {
+		const auto pos = gameBridge->getMousePos();
+		positionEntity(data.value(), pos.value_or(gameBridge->getCameraPos()));
+		
 		assignUUIDs(data.value());
 		addEntity(referenceId, false, std::move(data.value()));
 	}
@@ -744,6 +748,15 @@ void SceneEditorWindow::assignUUIDs(EntityData& node)
 	node.setInstanceUUID(UUID::generate());
 	for (auto& child: node.getChildren()) {
 		assignUUIDs(child);
+	}
+}
+
+void SceneEditorWindow::positionEntity(EntityData& entityData, Vector2f pos) const
+{
+	for (auto& [componentName, component]: entityData.getComponents()) {
+		if (componentName == "Transform2D") {
+			component.asMap()["position"] = pos;
+		}
 	}
 }
 
