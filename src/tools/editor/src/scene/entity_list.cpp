@@ -139,39 +139,6 @@ void EntityList::select(const String& id)
 	list->setSelectedOptionId(id);
 }
 
-bool EntityList::onKeyPress(KeyboardKeyPress key)
-{
-	const auto& curEntity = list->getSelectedOptionId();
-	
-	if (key.is(KeyCode::Delete)) {
-		sceneEditor->removeEntity(curEntity);
-		return true;
-	}
-
-	if (key.is(KeyCode::C, KeyMods::Ctrl)) {
-		sceneEditor->copyEntityToClipboard(curEntity);
-		return true;
-	}
-
-	if (key.is(KeyCode::X, KeyMods::Ctrl)) {
-		sceneEditor->copyEntityToClipboard(curEntity);
-		sceneEditor->removeEntity(curEntity);
-		return true;
-	}
-
-	if (key.is(KeyCode::V, KeyMods::Ctrl)) {
-		sceneEditor->pasteEntityFromClipboard(curEntity);
-		return true;
-	}
-
-	if (key.is(KeyCode::D, KeyMods::Ctrl)) {
-		sceneEditor->duplicateEntity(curEntity);
-		return true;
-	}
-
-	return false;
-}
-
 UUID EntityList::getEntityUnderCursor() const
 {
 	const auto item = list->getItemUnderCursor();
@@ -180,4 +147,9 @@ UUID EntityList::getEntityUnderCursor() const
 	} else {
 		return UUID();
 	}
+}
+
+String EntityList::getCurrentSelection() const
+{
+	return list->getSelectedOptionId();
 }

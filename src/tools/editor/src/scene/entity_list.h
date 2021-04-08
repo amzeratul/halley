@@ -25,10 +25,8 @@ namespace Halley {
 		void select(const String& id);
 
 		UUID getEntityUnderCursor() const;
+		String getCurrentSelection() const;
 
-	protected:
-		bool onKeyPress(KeyboardKeyPress key) override;
-		
 	private:
 		UIFactory& factory;
 		SceneEditorWindow* sceneEditor;

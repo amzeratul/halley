@@ -133,6 +133,7 @@ namespace Halley {
 		std::optional<EntityData> deserializeEntity(const String& data) const;
 
 		void assignUUIDs(EntityData& node);
+		void positionEntityAtCursor(EntityData& entityData) const;
 		void positionEntity(EntityData& entityData, Vector2f pos) const;
 		bool isValidEntityTree(const ConfigNode& node) const;
 

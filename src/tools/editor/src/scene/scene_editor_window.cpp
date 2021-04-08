@@ -242,6 +242,43 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 		redo();
 		return true;
 	}
+	
+	if (key.is(KeyCode::Delete)) {
+		removeEntity(entityList->getCurrentSelection());
+		return true;
+	}
+
+	if (key.is(KeyCode::C, KeyMods::Ctrl)) {
+		copyEntityToClipboard(entityList->getCurrentSelection());
+		return true;
+	}
+
+	if (key.is(KeyCode::X, KeyMods::Ctrl)) {
+		const auto sel = entityList->getCurrentSelection();
+		copyEntityToClipboard(sel);
+		removeEntity(sel);
+		return true;
+	}
+
+	if (key.is(KeyCode::V, KeyMods::Ctrl)) {
+		pasteEntityFromClipboard(entityList->getCurrentSelection());
+		return true;
+	}
+
+	if (key.is(KeyCode::D, KeyMods::Ctrl)) {
+		duplicateEntity(entityList->getCurrentSelection());
+		return true;
+	}
+
+	if (key.is(KeyCode::N, KeyMods::Ctrl)) {
+		addNewEntity();
+		return true;
+	}
+
+	if (key.is(KeyCode::N, KeyMods::CtrlShift)) {
+		addNewPrefab();
+		return true;
+	}
 
 	if (key.is(KeyCode::F1)) {
 		toggleConsole();
@@ -478,9 +515,7 @@ void SceneEditorWindow::pasteEntity(const String& stringData, const String& refe
 	Expects(gameBridge);
 	auto data = deserializeEntity(stringData);
 	if (data) {
-		const auto pos = gameBridge->getMousePos();
-		positionEntity(data.value(), pos.value_or(gameBridge->getCameraPos()));
-		
+		positionEntityAtCursor(data.value());
 		assignUUIDs(data.value());
 		addEntity(referenceId, false, std::move(data.value()));
 	}
@@ -505,6 +540,7 @@ void SceneEditorWindow::addNewEntity()
 {
 	EntityData data;
 	data.setInstanceUUID(UUID::generate());
+	data.getComponents().emplace_back("Transform2D", ConfigNode::MapType());
 	addEntity(std::move(data));
 }
 
@@ -550,6 +586,8 @@ void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfRef
 	if (referenceEntity.isEmpty()) {
 		addEntity(String(), -1, std::move(data));
 	} else {
+		positionEntityAtCursor(data);
+		
 		const bool isScene = prefab->isScene();
 		
 		const auto& ref = sceneData->getEntityNodeData(referenceEntity);
@@ -749,6 +787,11 @@ void SceneEditorWindow::assignUUIDs(EntityData& node)
 	for (auto& child: node.getChildren()) {
 		assignUUIDs(child);
 	}
+}
+
+void SceneEditorWindow::positionEntityAtCursor(EntityData& entityData) const
+{
+	positionEntity(entityData, gameBridge->getMousePos().value_or(gameBridge->getCameraPos()));
 }
 
 void SceneEditorWindow::positionEntity(EntityData& entityData, Vector2f pos) const
