@@ -23,7 +23,8 @@ namespace Halley {
 		static ConfigNode parseYAMLNode(const YAML::Node& node);
 		static ConfigFile parseConfig(gsl::span<const gsl::byte> data);
 		static ConfigFile parseConfig(const Bytes& data);
-
+		static ConfigNode parseConfig(const String& str);
+		
 		static String generateYAML(const ConfigFile& config, const EmitOptions& options);
 		static String generateYAML(const ConfigNode& node, const EmitOptions& options);
 

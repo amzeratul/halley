@@ -43,9 +43,7 @@ ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node)
 void YAMLConvert::parseConfig(ConfigFile& config, gsl::span<const gsl::byte> data)
 {
 	String strData(reinterpret_cast<const char*>(data.data()), data.size());
-	YAML::Node root = YAML::Load(strData.cppStr());
-
-	config.getRoot() = parseYAMLNode(root);
+	config.getRoot() = parseConfig(strData);
 }
 
 ConfigFile YAMLConvert::parseConfig(gsl::span<const gsl::byte> data)
@@ -58,6 +56,12 @@ ConfigFile YAMLConvert::parseConfig(gsl::span<const gsl::byte> data)
 ConfigFile YAMLConvert::parseConfig(const Bytes& data)
 {
 	return parseConfig(gsl::as_bytes(gsl::span<const Byte>(data.data(), data.size())));
+}
+
+ConfigNode YAMLConvert::parseConfig(const String& str)
+{
+	YAML::Node root = YAML::Load(str.cppStr());
+	return parseYAMLNode(root);
 }
 
 String YAMLConvert::generateYAML(const ConfigFile& config, const EmitOptions& options)
