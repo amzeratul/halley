@@ -6,6 +6,8 @@
 #include "halley/maths/rect.h"
 #include "config_node_serializer_base.h"
 #include <set>
+#include <unordered_set>
+
 
 #include "halley/core/resources/resource_reference.h"
 
@@ -227,6 +229,34 @@ namespace Halley {
 		}
 	};
 
+	template <typename T>
+	class ConfigNodeSerializer<std::unordered_set<T>> {
+	public:
+		ConfigNode serialize(const std::unordered_set<T>& values, const ConfigNodeSerializationContext& context)
+		{
+			auto serializer = ConfigNodeSerializer<T>();
+			ConfigNode result = ConfigNode::SequenceType();
+			auto& seq = result.asSequence();
+			seq.reserve(values.size());
+			for (auto& value : values) {
+				seq.push_back(serializer.serialize(value, context));
+			}
+			return result;
+		}
+
+		std::unordered_set<T> deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+		{
+			std::unordered_set<T> result;
+			if (node.getType() == ConfigNodeType::Sequence) {
+				auto seq = node.asSequence();
+				for (auto& s : seq) {
+					result.insert(ConfigNodeSerializer<T>().deserialize(context, s));
+				}
+			}
+			return result;
+		}
+	};
+	
 	template <typename T>
 	class ConfigNodeSerializer<ResourceReference<T>> {
 	public:
