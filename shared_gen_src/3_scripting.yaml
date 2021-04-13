@@ -1,0 +1,21 @@
+---
+
+component:
+  name: Script
+  members:
+  - scriptGraph:
+      type: 'Halley::ScriptGraph'
+      canEdit: true
+      canSave: false
+  - scriptState:
+      type: 'Halley::ScriptState'
+      canEdit: false
+      canSave: true
+
+---
+
+component:
+  name: ScriptTarget
+  members: []
+
+...

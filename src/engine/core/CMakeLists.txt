@@ -71,6 +71,9 @@ set(SOURCES
         "src/resources/resources.cpp"
         "src/resources/standard_resources.cpp"
 
+        "src/scripting/script_graph.cpp"
+        "src/scripting/script_state.cpp"
+
         "src/stage/stage.cpp"
 
         "src/devcon/devcon_client.cpp"
@@ -175,6 +178,9 @@ set(HEADERS
 
         "src/resources/resource_filesystem.h"
         "src/resources/resource_pack.h"
+
+        "include/halley/core/scripting/script_graph.h"
+        "include/halley/core/scripting/script_state.h"
 
         "include/halley/core/stage/stage.h"
         "include/halley/core/stage/stage_id.h"

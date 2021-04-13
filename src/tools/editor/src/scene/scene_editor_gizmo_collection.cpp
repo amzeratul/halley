@@ -1,4 +1,6 @@
 #include "scene_editor_gizmo_collection.h"
+
+#include "gizmos/scripting_gizmo.h"
 #include "gizmos/translate_gizmo.h"
 #include "gizmos/selected_bounds_gizmo.h"
 #include "gizmos/selection_box_gizmo.h"
@@ -158,6 +160,12 @@ void SceneEditorGizmoCollection::resetTools()
 		[this] (SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)
 		{
 			return std::make_unique<TranslateGizmo>(snapRules, factory, sceneEditorWindow);
+		}
+	);
+	addTool(Tool("scripting", LocalisedString::fromHardcodedString("Scripting [S]"), Sprite().setImage(resources, "ui/scene_editor_scripting.png"), KeyCode::S),
+		[this] (SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)
+		{
+			return std::make_unique<ScriptingGizmo>(snapRules, factory, sceneEditorWindow);
 		}
 	);
 }

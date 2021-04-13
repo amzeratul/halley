@@ -64,6 +64,9 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "resources/resource_locator.h"
 #include "resources/resource_reference.h"
 
+#include "scripting/script_graph.h"
+#include "scripting/script_state.h"
+
 #include "stage/stage.h"
 
 #include "devcon/devcon_client.h"
