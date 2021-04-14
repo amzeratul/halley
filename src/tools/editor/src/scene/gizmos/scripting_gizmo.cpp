@@ -31,5 +31,5 @@ std::shared_ptr<UIWidget> ScriptingGizmo::makeUI()
 
 std::vector<String> ScriptingGizmo::getHighlightedComponents() const
 {
-	return { "Scripting" };
+	return { "Script" };
 }
