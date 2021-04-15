@@ -71,6 +71,7 @@ set(SOURCES
         "src/resources/resources.cpp"
         "src/resources/standard_resources.cpp"
 
+        "src/scripting/script_environment.cpp"
         "src/scripting/script_graph.cpp"
         "src/scripting/script_state.cpp"
 
@@ -179,6 +180,7 @@ set(HEADERS
         "src/resources/resource_filesystem.h"
         "src/resources/resource_pack.h"
 
+        "include/halley/core/scripting/script_environment.h"
         "include/halley/core/scripting/script_graph.h"
         "include/halley/core/scripting/script_state.h"
 
