@@ -33,11 +33,11 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 			}
 
 			// Update
-			auto [timeConsumed, running] = updateNode(time, node, thread.getCurData());
+			auto [timeConsumed, done] = updateNode(time, node, thread.getCurData());
 			timeLeft -= timeConsumed;
 
 			// Proceed to next node(s)
-			if (!running) {
+			if (done) {
 				thread.finishNode();
 				const auto& outputs = node.getOutput();
 				if (outputs.empty()) {
@@ -63,14 +63,26 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 	threads.erase(std::remove_if(threads.begin(), threads.end(), [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); }), threads.end());
 }
 
-std::pair<Time, bool> ScriptEnvironment::updateNode(Time time, const ScriptGraphNode& node, IScriptStateData* curData)
+void ScriptEnvironment::addScriptNode(std::unique_ptr<IScriptNodeType> nodeType)
 {
-	// TODO
-	return { 0, false };
+	auto name = nodeType->getName();
+	nodeTypes[std::move(name)] = std::move(nodeType);
+}
+
+IScriptNodeType::Result ScriptEnvironment::updateNode(Time time, const ScriptGraphNode& node, IScriptStateData* curData)
+{
+	const auto iter = nodeTypes.find(node.getType());
+	if (iter == nodeTypes.end()) {
+		return {0, true};
+	}
+	return iter->second->update(time, node.getSettings(), curData);
 }
 
 std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const String& type)
 {
-	// TODO
-	return {};
+	const auto iter = nodeTypes.find(type);
+	if (iter == nodeTypes.end()) {
+		return {};
+	}
+	return iter->second->makeData();
 }

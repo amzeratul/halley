@@ -19,6 +19,9 @@ namespace Halley {
 		std::vector<uint32_t>& getOutput() { return output; }
 		const std::vector<uint32_t>& getOutput() const { return output; }
 
+		const ConfigNode& getSettings() const { return settings; }
+		ConfigNode& getSettings() { return settings; }
+
 		void setOutput(uint8_t outputPinN, uint32_t targetNode, uint8_t inputPinN);
 		void feedToHash(Hash::Hasher& hasher);
 
