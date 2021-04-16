@@ -53,18 +53,18 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 			// Proceed to next node(s)
 			if (done) {
 				thread.finishNode();
-				const auto& outputs = node.getOutput();
+				const auto& outputs = node.getOutputs();
 				if (outputs.empty()) {
 					// Nothing follows this, terminate thread
 					thread.advanceToNode({});
 				} else {
 					// Direct sequel
-					thread.advanceToNode(outputs[0]);
+					thread.advanceToNode(outputs[0].nodeId);
 					
 					if (outputs.size() > 1)	{
 						// Spawn others as new threads
 						for (size_t j = 1; j < outputs.size(); ++j) {
-							auto& newThread = threads.emplace_back(outputs[j]);
+							auto& newThread = threads.emplace_back(outputs[j].nodeId);
 							newThread.getTimeSlice() = timeLeft;
 						}
 					}

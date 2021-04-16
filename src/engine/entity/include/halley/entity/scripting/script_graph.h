@@ -1,23 +1,36 @@
 #pragma once
+#include "../entity_id.h"
 #include "halley/bytes/config_node_serializer.h"
 #include "halley/utils/hash.h"
 
 namespace Halley {
 	class ScriptGraphNode {
 	public:
+		struct Output {
+			uint32_t nodeId = 0;
+			uint8_t inputPin = 0;
+
+			Output() = default;
+			Output(const ConfigNode& node);
+			ConfigNode toConfigNode() const;
+		};
+		
 		ScriptGraphNode();
 		ScriptGraphNode(String type, Vector2f position);
-		ScriptGraphNode(const ConfigNode& node);
+		ScriptGraphNode(const ConfigNode& node, const ConfigNodeSerializationContext& context);
 
-		ConfigNode toConfigNode() const;
+		ConfigNode toConfigNode(const ConfigNodeSerializationContext& context) const;
 
 		Vector2f getPosition() const { return position; }
 		void setPosition(Vector2f p) { position = p; }
 
 		const String& getType() const { return type; }
 
-		std::vector<uint32_t>& getOutput() { return output; }
-		const std::vector<uint32_t>& getOutput() const { return output; }
+		std::vector<Output>& getOutputs() { return outputs; }
+		const std::vector<Output>& getOutputs() const { return outputs; }
+
+		std::vector<EntityId>& getTargets() { return targets; }
+		const std::vector<EntityId>& getTargets() const { return targets; }
 
 		const ConfigNode& getSettings() const { return settings; }
 		ConfigNode& getSettings() { return settings; }
@@ -29,15 +42,18 @@ namespace Halley {
 		Vector2f position;
 		String type;
 		ConfigNode settings;
-		std::vector<uint32_t> output;
+		std::vector<Output> outputs;
+		std::vector<EntityId> targets;
 	};
 	
 	class ScriptGraph {
 	public:
 		ScriptGraph();
-		ScriptGraph(const ConfigNode& node);
+		ScriptGraph(const ConfigNode& node, const ConfigNodeSerializationContext& context);
 
-		ConfigNode toConfigNode() const;
+		ConfigNode toConfigNode(const ConfigNodeSerializationContext& context) const;
+
+		void makeBaseGraph();
 
 		const std::vector<ScriptGraphNode>& getNodes() const { return nodes; }
 		std::vector<ScriptGraphNode>& getNodes() { return nodes; }
@@ -47,7 +63,7 @@ namespace Halley {
 
 	private:
 		std::vector<ScriptGraphNode> nodes;
-		uint64_t hash;
+		uint64_t hash = 0;
 
 		void computeHash();
 	};
