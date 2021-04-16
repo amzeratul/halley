@@ -30,6 +30,9 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 
 	// Allocate time for each thread
 	auto& threads = state.getThreads();
+	if (threads.empty()) {
+		return;
+	}
 	for (auto& thread: threads) {
 		thread.getTimeSlice() = time;
 	}
