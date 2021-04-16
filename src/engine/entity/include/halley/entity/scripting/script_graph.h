@@ -69,6 +69,13 @@ namespace Halley {
 	};
 
 	template<>
+	class ConfigNodeSerializer<ScriptGraphNode> {
+	public:
+		ConfigNode serialize(const ScriptGraphNode& node, const ConfigNodeSerializationContext& context);
+		ScriptGraphNode deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node);
+	};
+
+	template<>
 	class ConfigNodeSerializer<ScriptGraph> {
 	public:
 		ConfigNode serialize(const ScriptGraph& graph, const ConfigNodeSerializationContext& context);

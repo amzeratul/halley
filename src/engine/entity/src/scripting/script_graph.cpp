@@ -127,6 +127,16 @@ void ScriptGraph::computeHash()
 	hash = hasher.digest();
 }
 
+ConfigNode ConfigNodeSerializer<ScriptGraphNode>::serialize(const ScriptGraphNode& node, const ConfigNodeSerializationContext& context)
+{
+	return node.toConfigNode(context);
+}
+
+ScriptGraphNode ConfigNodeSerializer<ScriptGraphNode>::deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+{
+	return ScriptGraphNode(node, context);
+}
+
 ConfigNode ConfigNodeSerializer<ScriptGraph>::serialize(const ScriptGraph& graph, const ConfigNodeSerializationContext& context)
 {
 	return graph.toConfigNode(context);
