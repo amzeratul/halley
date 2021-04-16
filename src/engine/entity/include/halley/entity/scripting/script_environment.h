@@ -4,6 +4,7 @@
 #include "halley/time/halleytime.h"
 
 namespace Halley {
+	class World;
 	class ScriptEnvironment;
 	class ScriptGraph;
     class ScriptState;
@@ -43,7 +44,7 @@ namespace Halley {
 
     class ScriptEnvironment {
     public:
-    	ScriptEnvironment();
+    	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources);
 
     	void addBasicScriptNodes();
     	void addScriptNode(std::unique_ptr<IScriptNodeType> nodeType);
@@ -51,9 +52,12 @@ namespace Halley {
     	void update(Time time, const ScriptGraph& graph, ScriptState& state);
 
     private:
+		const HalleyAPI& api;
+    	World& world;
+    	Resources& resources;
+    	std::map<String, std::unique_ptr<IScriptNodeType>> nodeTypes;
+    	
         IScriptNodeType::Result updateNode(Time time, const ScriptGraphNode& node, IScriptStateData* curData);
         std::unique_ptr<IScriptStateData> makeNodeData(const String& type);
-
-    	std::map<String, std::unique_ptr<IScriptNodeType>> nodeTypes;
     };
 }

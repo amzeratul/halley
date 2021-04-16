@@ -4,7 +4,10 @@
 
 using namespace Halley;
 
-ScriptEnvironment::ScriptEnvironment()
+ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources)
+	: api(api)
+	, world(world)
+	, resources(resources)
 {
 }
 
