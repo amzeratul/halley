@@ -1,4 +1,4 @@
-#include "halley/core/scripting/script_graph.h"
+#include "scripting/script_graph.h"
 #include "halley/utils/hash.h"
 using namespace Halley;
 

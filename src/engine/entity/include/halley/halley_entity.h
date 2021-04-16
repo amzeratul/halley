@@ -23,3 +23,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "entity/diagnostics/performance_stats.h"
 #include "entity/diagnostics/world_stats.h"
+
+#include "entity/scripting/script_environment.h"
+#include "entity/scripting/script_graph.h"
+#include "entity/scripting/script_state.h"

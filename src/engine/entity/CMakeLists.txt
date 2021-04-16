@@ -27,6 +27,10 @@ set(SOURCES
         "src/diagnostics/performance_stats.cpp"
         "src/diagnostics/stats_view.cpp"
         "src/diagnostics/world_stats.cpp"
+
+        "src/scripting/script_environment.cpp"
+        "src/scripting/script_graph.cpp"
+        "src/scripting/script_state.cpp"
         )
 
 set(HEADERS
@@ -63,6 +67,10 @@ set(HEADERS
         "include/halley/entity/diagnostics/performance_stats.h"
         "include/halley/entity/diagnostics/stats_view.h"
         "include/halley/entity/diagnostics/world_stats.h"
+
+        "include/halley/entity/scripting/script_environment.h"
+        "include/halley/entity/scripting/script_graph.h"
+        "include/halley/entity/scripting/script_state.h"
         )
 
 assign_source_group(${SOURCES})

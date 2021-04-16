@@ -1,4 +1,4 @@
-#include "halley/core/scripting/script_environment.h"
+#include "scripting/script_environment.h"
 #include "scripting/script_graph.h"
 #include "scripting/script_state.h"
 
@@ -6,6 +6,17 @@ using namespace Halley;
 
 ScriptEnvironment::ScriptEnvironment()
 {
+}
+
+void ScriptEnvironment::addBasicScriptNodes()
+{
+	// TODO
+}
+
+void ScriptEnvironment::addScriptNode(std::unique_ptr<IScriptNodeType> nodeType)
+{
+	auto name = nodeType->getName();
+	nodeTypes[std::move(name)] = std::move(nodeType);
 }
 
 void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState& state)
@@ -63,19 +74,13 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 	threads.erase(std::remove_if(threads.begin(), threads.end(), [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); }), threads.end());
 }
 
-void ScriptEnvironment::addScriptNode(std::unique_ptr<IScriptNodeType> nodeType)
-{
-	auto name = nodeType->getName();
-	nodeTypes[std::move(name)] = std::move(nodeType);
-}
-
 IScriptNodeType::Result ScriptEnvironment::updateNode(Time time, const ScriptGraphNode& node, IScriptStateData* curData)
 {
 	const auto iter = nodeTypes.find(node.getType());
 	if (iter == nodeTypes.end()) {
 		return {0, true};
 	}
-	return iter->second->update(time, node.getSettings(), curData);
+	return iter->second->update(*this, time, node.getSettings(), curData);
 }
 
 std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const String& type)
