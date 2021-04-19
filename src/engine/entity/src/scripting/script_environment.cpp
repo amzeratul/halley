@@ -57,11 +57,15 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 			}
 
 			// Update
-			auto [timeConsumed, done] = updateNode(time, node, thread.getCurData());
+			auto [timeConsumed, state] = updateNode(time, node, thread.getCurData());
 			timeLeft -= timeConsumed;
 
-			// Proceed to next node(s)
-			if (done) {
+			if (state == ScriptNodeExecutionState::Terminate) {
+				// Terminate script
+				threads.clear();
+				break;
+			} else if (state == ScriptNodeExecutionState::Done) {
+				// Proceed to next node(s)
 				thread.finishNode();
 				const auto& outputs = node.getOutputs();
 				if (outputs.empty()) {
@@ -97,7 +101,7 @@ IScriptNodeType::Result ScriptEnvironment::updateNode(Time time, const ScriptGra
 	const auto iter = nodeTypes.find(node.getType());
 	if (iter == nodeTypes.end()) {
 		Logger::logError("Unknown node type: \"" + node.getType() + "\"");
-		return {0, true};
+		return {0, ScriptNodeExecutionState::Done};
 	}
 	return iter->second->update(*this, time, node, curData);
 }

@@ -10,11 +10,17 @@ namespace Halley {
 	class ScriptGraph;
     class ScriptState;
 
+	enum class ScriptNodeExecutionState {
+		Done,
+		Executing,
+		Terminate
+	};
+	
 	class IScriptNodeType {
-	public:
+	public:		
         struct Result {
 	        Time timeElapsed = 0;
-        	bool done = true;
+        	ScriptNodeExecutionState state = ScriptNodeExecutionState::Done;
         };
 
 		virtual ~IScriptNodeType() = default;

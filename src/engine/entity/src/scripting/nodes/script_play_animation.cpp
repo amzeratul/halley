@@ -15,5 +15,5 @@ IScriptNodeType::Result ScriptPlayAnimation::doUpdate(ScriptEnvironment& environ
 	if (spriteAnimation) {
 		spriteAnimation->player.setSequence(node.getSettings()["sequence"].asString(""));
 	}
-	return { 0, true };
+	return { 0, ScriptNodeExecutionState::Done };
 }
