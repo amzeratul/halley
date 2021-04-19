@@ -31,6 +31,9 @@ set(SOURCES
         "src/scripting/script_environment.cpp"
         "src/scripting/script_graph.cpp"
         "src/scripting/script_state.cpp"
+
+        "src/scripting/nodes/script_wait.cpp"
+        "src/scripting/nodes/script_play_animation.cpp"
         )
 
 set(HEADERS
@@ -71,6 +74,9 @@ set(HEADERS
         "include/halley/entity/scripting/script_environment.h"
         "include/halley/entity/scripting/script_graph.h"
         "include/halley/entity/scripting/script_state.h"
+
+        "src/scripting/nodes/script_wait.h"
+        "src/scripting/nodes/script_play_animation.h"
         )
 
 assign_source_group(${SOURCES})

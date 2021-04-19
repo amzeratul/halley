@@ -46,7 +46,7 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 
 			// Start node if not done yet
 			if (!thread.isNodeStarted()) {
-				thread.startNode(makeNodeData(node.getType()));
+				thread.startNode(makeNodeData(node.getType(), node.getSettings()));
 			}
 
 			// Update
@@ -89,11 +89,17 @@ IScriptNodeType::Result ScriptEnvironment::updateNode(Time time, const ScriptGra
 	return iter->second->update(*this, time, node.getSettings(), curData);
 }
 
-std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const String& type)
+std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const String& type, const ConfigNode& settings)
 {
 	const auto iter = nodeTypes.find(type);
 	if (iter == nodeTypes.end()) {
 		return {};
 	}
-	return iter->second->makeData();
+	const auto& node = iter->second;
+	
+	auto result = node->makeData();
+	if (result) {
+		node->initData(*result, settings);
+	}
+	return result;
 }
