@@ -1,4 +1,9 @@
 #include "scripting/script_environment.h"
+
+#include "world.h"
+#include "halley/support/logger.h"
+#include "nodes/script_play_animation.h"
+#include "nodes/script_wait.h"
 #include "scripting/script_graph.h"
 #include "scripting/script_state.h"
 
@@ -9,11 +14,13 @@ ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resourc
 	, world(world)
 	, resources(resources)
 {
+	addBasicScriptNodes();
 }
 
 void ScriptEnvironment::addBasicScriptNodes()
 {
-	// TODO
+	addScriptNode(std::make_unique<ScriptWait>());
+	addScriptNode(std::make_unique<ScriptPlayAnimation>());
 }
 
 void ScriptEnvironment::addScriptNode(std::unique_ptr<IScriptNodeType> nodeType)
@@ -46,7 +53,7 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 
 			// Start node if not done yet
 			if (!thread.isNodeStarted()) {
-				thread.startNode(makeNodeData(node.getType(), node.getSettings()));
+				thread.startNode(makeNodeData(node));
 			}
 
 			// Update
@@ -80,26 +87,33 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 	threads.erase(std::remove_if(threads.begin(), threads.end(), [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); }), threads.end());
 }
 
+EntityRef ScriptEnvironment::getEntity(EntityId entityId)
+{
+	return world.getEntity(entityId);
+}
+
 IScriptNodeType::Result ScriptEnvironment::updateNode(Time time, const ScriptGraphNode& node, IScriptStateData* curData)
 {
 	const auto iter = nodeTypes.find(node.getType());
 	if (iter == nodeTypes.end()) {
+		Logger::logError("Unknown node type: \"" + node.getType() + "\"");
 		return {0, true};
 	}
-	return iter->second->update(*this, time, node.getSettings(), curData);
+	return iter->second->update(*this, time, node, curData);
 }
 
-std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const String& type, const ConfigNode& settings)
+std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const ScriptGraphNode& node)
 {
-	const auto iter = nodeTypes.find(type);
+	const auto iter = nodeTypes.find(node.getType());
 	if (iter == nodeTypes.end()) {
+		Logger::logError("Unknown node type: \"" + node.getType() + "\"");
 		return {};
 	}
-	const auto& node = iter->second;
+	const auto& nodeType = iter->second;
 	
-	auto result = node->makeData();
+	auto result = nodeType->makeData();
 	if (result) {
-		node->initData(*result, settings);
+		nodeType->initData(*result, node);
 	}
 	return result;
 }

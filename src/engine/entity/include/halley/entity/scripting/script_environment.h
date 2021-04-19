@@ -1,4 +1,5 @@
 #pragma once
+#include "../entity.h"
 #include "script_graph.h"
 #include "script_state.h"
 #include "halley/time/halleytime.h"
@@ -19,9 +20,9 @@ namespace Halley {
 		virtual ~IScriptNodeType() = default;
 
 		virtual String getName() = 0;
-		virtual Result update(ScriptEnvironment& environment, Time time, const ConfigNode& settings, IScriptStateData* curData) = 0;
+		virtual Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData* curData) = 0;
 		virtual std::unique_ptr<IScriptStateData> makeData() { return {}; }
-        virtual void initData(IScriptStateData& data, const ConfigNode& settings) {}
+        virtual void initData(IScriptStateData& data, const ScriptGraphNode& node) {}
 	};
 
 	template <typename T>
@@ -29,20 +30,20 @@ namespace Halley {
 	public:
 		static_assert(std::is_base_of_v<IScriptStateData, T>);
 		
-		virtual Result doUpdate(ScriptEnvironment& environment, Time time, const ConfigNode& settings, T& curData) = 0;
-		virtual void doInitData(T& data, const ConfigNode& settings) = 0;
+		virtual Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, T& curData) = 0;
+		virtual void doInitData(T& data, const ScriptGraphNode& node) = 0;
 		
-		Result update(ScriptEnvironment& environment, Time time, const ConfigNode& settings, IScriptStateData* curData) final override { return doUpdate(environment, time, settings, *dynamic_cast<T*>(curData)); }
+		Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData* curData) final override { return doUpdate(environment, time, node, *dynamic_cast<T*>(curData)); }
 		std::unique_ptr<IScriptStateData> makeData() override { return std::make_unique<T>(); }
-		virtual void initData(IScriptStateData& data, const ConfigNode& settings) { doInitData(dynamic_cast<T&>(data), settings); }
+		virtual void initData(IScriptStateData& data, const ScriptGraphNode& node) { doInitData(dynamic_cast<T&>(data), node); }
 	};
 
 	template <>
 	class ScriptNodeTypeBase<void> : public IScriptNodeType {
 	public:
-		virtual Result doUpdate(ScriptEnvironment& environment, Time time, const ConfigNode& settings) = 0;
+		virtual Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) = 0;
 		
-		Result update(ScriptEnvironment& environment, Time time, const ConfigNode& settings, IScriptStateData*) final override { return doUpdate(environment, time, settings); }
+		Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData*) final override { return doUpdate(environment, time, node); }
 	};
 
     class ScriptEnvironment {
@@ -54,6 +55,8 @@ namespace Halley {
 
     	void update(Time time, const ScriptGraph& graph, ScriptState& state);
 
+    	EntityRef getEntity(EntityId entityId);
+
     private:
 		const HalleyAPI& api;
     	World& world;
@@ -61,6 +64,6 @@ namespace Halley {
     	std::map<String, std::unique_ptr<IScriptNodeType>> nodeTypes;
     	
         IScriptNodeType::Result updateNode(Time time, const ScriptGraphNode& node, IScriptStateData* curData);
-        std::unique_ptr<IScriptStateData> makeNodeData(const String& type, const ConfigNode& settings);
+        std::unique_ptr<IScriptStateData> makeNodeData(const ScriptGraphNode& node);
     };
 }
