@@ -26,6 +26,11 @@ namespace Halley {
 		virtual ~IScriptNodeType() = default;
 
 		virtual String getName() = 0;
+		virtual uint8_t getNumInputPins() { return 1; }
+		virtual uint8_t getNumOutputPins() { return 1; }
+		virtual uint8_t getNumTargetPins() { return 0; }
+		virtual bool hasSettings() { return false; }
+		
 		virtual Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData* curData) = 0;
 		virtual std::unique_ptr<IScriptStateData> makeData() { return {}; }
         virtual void initData(IScriptStateData& data, const ScriptGraphNode& node) {}

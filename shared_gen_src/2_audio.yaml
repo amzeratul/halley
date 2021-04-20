@@ -2,6 +2,7 @@
 
 component:
   name: AudioListener
+  componentDependencies: [Transform2D]
   members:
   - referenceDistance:
       type: float
@@ -11,6 +12,7 @@ component:
 
 component:
   name: AudioSource
+  componentDependencies: [Transform2D]
   members:
   - event: 'Halley::ResourceReference<Halley::AudioEvent>'
   - rangeMin:

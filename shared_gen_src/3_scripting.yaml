@@ -2,6 +2,7 @@
 
 component:
   name: Script
+  componentDependencies: [Transform2D]
   members:
   - scriptGraph:
       type: 'Halley::ScriptGraph'
@@ -16,6 +17,7 @@ component:
 
 component:
   name: ScriptTarget
+  componentDependencies: [Transform2D]
   members: []
 
 ...
