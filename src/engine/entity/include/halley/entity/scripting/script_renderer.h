@@ -19,6 +19,9 @@ namespace Halley {
 
 		Sprite nodeBg;
 
+		void drawNodeOutputs(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, const ScriptGraph& graph, float curZoom);
 		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom);
+
+		Vector2f getNodeSize(float curZoom) const;
 	};
 }
