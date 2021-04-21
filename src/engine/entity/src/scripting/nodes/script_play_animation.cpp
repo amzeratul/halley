@@ -8,7 +8,7 @@
 
 using namespace Halley;
 
-IScriptNodeType::Result ScriptPlayAnimation::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node)
+IScriptNodeType::Result ScriptPlayAnimation::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	auto entity = environment.getEntity(node.getTargets().at(0));
 	auto* spriteAnimation = entity.tryGetComponent<SpriteAnimationComponent>();

@@ -9,8 +9,8 @@ namespace Halley {
 	
 	class ScriptWait final : public ScriptNodeTypeBase<ScriptWaitData> {
 	public:
-		String getName() override { return "wait"; }
-		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptWaitData& curData) override;
-		void doInitData(ScriptWaitData& data, const ScriptGraphNode& node) override;
+		String getName() const override { return "wait"; }
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptWaitData& curData) const override;
+		void doInitData(ScriptWaitData& data, const ScriptGraphNode& node) const override;
 	};
 }

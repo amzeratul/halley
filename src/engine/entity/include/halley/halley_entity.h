@@ -26,5 +26,6 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "entity/scripting/script_environment.h"
 #include "entity/scripting/script_graph.h"
+#include "entity/scripting/script_node_type.h"
 #include "entity/scripting/script_renderer.h"
 #include "entity/scripting/script_state.h"

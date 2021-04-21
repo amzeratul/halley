@@ -3,15 +3,18 @@
 #include "halley/maths/vector2.h"
 
 namespace Halley {
+	class ScriptNodeTypeCollection;
 	class World;
 	class ScriptGraphNode;
 	class ScriptGraph;
+	class ScriptState;
 
 	class ScriptRenderer {
 	public:
-		explicit ScriptRenderer(Resources& resources, World& world);
+		ScriptRenderer(Resources& resources, World& world, const ScriptNodeTypeCollection& nodeTypeCollection);
 		
 		void setGraph(const ScriptGraph& graph);
+		void setState(const ScriptState& scriptState);
 		void draw(Painter& painter, Vector2f basePos, float curZoom);
 
 	private:
@@ -23,7 +26,10 @@ namespace Halley {
 		
 		Resources& resources;
 		World& world;
+		const ScriptNodeTypeCollection& nodeTypeCollection;
+		
 		const ScriptGraph* graph = nullptr;
+		const ScriptState* state = nullptr;
 
 		Sprite nodeBg;
 

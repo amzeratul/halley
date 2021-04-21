@@ -30,6 +30,7 @@ set(SOURCES
 
         "src/scripting/script_environment.cpp"
         "src/scripting/script_graph.cpp"
+        "src/scripting/script_node_type.cpp"
         "src/scripting/script_renderer.cpp"
         "src/scripting/script_state.cpp"
 
@@ -74,6 +75,7 @@ set(HEADERS
 
         "include/halley/entity/scripting/script_environment.h"
         "include/halley/entity/scripting/script_graph.h"
+        "include/halley/entity/scripting/script_node_type.h"
         "include/halley/entity/scripting/script_renderer.h"
         "include/halley/entity/scripting/script_state.h"
 

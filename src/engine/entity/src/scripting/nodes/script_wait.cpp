@@ -1,12 +1,12 @@
 #include "script_wait.h"
 using namespace Halley;
 
-void ScriptWait::doInitData(ScriptWaitData& data, const ScriptGraphNode& node)
+void ScriptWait::doInitData(ScriptWaitData& data, const ScriptGraphNode& node) const
 {
 	data.timeLeft = static_cast<Time>(node.getSettings()["time"].asFloat(0.0f));
 }
 
-IScriptNodeType::Result ScriptWait::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptWaitData& curData)
+IScriptNodeType::Result ScriptWait::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptWaitData& curData) const
 {
 	const bool done = time >= curData.timeLeft;
 	const Time elapsed = done ? curData.timeLeft : time;

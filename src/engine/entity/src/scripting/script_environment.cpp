@@ -2,31 +2,17 @@
 
 #include "world.h"
 #include "halley/support/logger.h"
-#include "nodes/script_play_animation.h"
-#include "nodes/script_wait.h"
 #include "scripting/script_graph.h"
 #include "scripting/script_state.h"
 
 using namespace Halley;
 
-ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources)
+ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection)
 	: api(api)
 	, world(world)
 	, resources(resources)
+	, nodeTypeCollection(nodeTypeCollection)
 {
-	addBasicScriptNodes();
-}
-
-void ScriptEnvironment::addBasicScriptNodes()
-{
-	addScriptNode(std::make_unique<ScriptWait>());
-	addScriptNode(std::make_unique<ScriptPlayAnimation>());
-}
-
-void ScriptEnvironment::addScriptNode(std::unique_ptr<IScriptNodeType> nodeType)
-{
-	auto name = nodeType->getName();
-	nodeTypes[std::move(name)] = std::move(nodeType);
 }
 
 void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState& state)
@@ -98,22 +84,21 @@ EntityRef ScriptEnvironment::getEntity(EntityId entityId)
 
 IScriptNodeType::Result ScriptEnvironment::updateNode(Time time, const ScriptGraphNode& node, IScriptStateData* curData)
 {
-	const auto iter = nodeTypes.find(node.getType());
-	if (iter == nodeTypes.end()) {
+	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
+	if (!nodeType) {
 		Logger::logError("Unknown node type: \"" + node.getType() + "\"");
 		return {0, ScriptNodeExecutionState::Done};
 	}
-	return iter->second->update(*this, time, node, curData);
+	return nodeType->update(*this, time, node, curData);
 }
 
 std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const ScriptGraphNode& node)
 {
-	const auto iter = nodeTypes.find(node.getType());
-	if (iter == nodeTypes.end()) {
+	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
+	if (!nodeType) {
 		Logger::logError("Unknown node type: \"" + node.getType() + "\"");
 		return {};
 	}
-	const auto& nodeType = iter->second;
 	
 	auto result = nodeType->makeData();
 	if (result) {

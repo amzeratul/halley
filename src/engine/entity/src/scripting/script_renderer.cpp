@@ -10,9 +10,10 @@ using namespace Halley;
 #endif
 #include "components/transform_2d_component.h"
 
-ScriptRenderer::ScriptRenderer(Resources& resources, World& world)
+ScriptRenderer::ScriptRenderer(Resources& resources, World& world, const ScriptNodeTypeCollection& nodeTypeCollection)
 	: resources(resources)
 	, world(world)
+	, nodeTypeCollection(nodeTypeCollection)
 {
 	nodeBg = Sprite().setImage(resources, "halley_ui/ui_float_solid_window.png");
 }
@@ -20,6 +21,11 @@ ScriptRenderer::ScriptRenderer(Resources& resources, World& world)
 void ScriptRenderer::setGraph(const ScriptGraph& graph)
 {
 	this->graph = &graph;
+}
+
+void ScriptRenderer::setState(const ScriptState& scriptState)
+{
+	this->state = &scriptState;
 }
 
 void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
