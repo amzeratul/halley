@@ -36,6 +36,7 @@ set(SOURCES
         "src/file_formats/yaml_convert.cpp"
         
         "src/maths/base_transform.cpp"
+        "src/maths/bezier.cpp"
         "src/maths/circle.cpp"
         "src/maths/line.cpp"
         "src/maths/matrix4.cpp"
@@ -144,6 +145,7 @@ set(HEADERS
         "include/halley/halley_utils.h"
         "include/halley/maths/angle.h"
         "include/halley/maths/base_transform.h"
+        "include/halley/maths/bezier.h"
         "include/halley/maths/box.h"
         "include/halley/maths/circle.h"
         "include/halley/maths/colour.h"

@@ -96,6 +96,7 @@ namespace Halley
 		Sprite& setSize(Vector2f size);
 		Sprite& setScale(Vector2f scale);
 		Sprite& setScale(float scale);
+		Sprite& setSliceScale(float scale);
 		Sprite& scaleTo(Vector2f size);
 		Vector2f getSize() const { return size; }
 		Vector2f getScale() const { return vertexAttrib.scale; }
@@ -167,6 +168,7 @@ namespace Halley
 
 		Vector2f size;
 		Vector4s slices;
+		float sliceScale = 1;
 		Vector4s outerBorder;
 		Rect4f clip; // This is not a std::optional<Rect4f>, and instead has a companion bool, because it allows for better memory alignment
 		bool hasClip = false;

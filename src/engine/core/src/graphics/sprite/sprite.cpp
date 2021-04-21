@@ -81,6 +81,7 @@ void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel, const std::optio
 			slices.y /= size.y;
 			slices.z /= size.x;
 			slices.w /= size.y;
+			slices *= sliceScale;
 
 			painter.drawSlicedSprite(material, vertexAttrib.scale, slices, &vertexAttrib);
 		});
@@ -193,6 +194,12 @@ Sprite& Sprite::setScale(Vector2f v)
 Sprite& Sprite::setScale(float scale)
 {
 	return setScale(Vector2f(scale, scale));
+}
+
+Sprite& Sprite::setSliceScale(float scale)
+{
+	sliceScale = scale;
+	return *this;
 }
 
 Sprite& Sprite::scaleTo(Vector2f newSize)
