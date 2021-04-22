@@ -2,6 +2,7 @@
 #include "world.h"
 #include "halley/core/graphics/painter.h"
 #include "halley/maths/bezier.h"
+#include "halley/support/logger.h"
 #include "scripting/script_graph.h"
 using namespace Halley;
 
@@ -18,14 +19,14 @@ ScriptRenderer::ScriptRenderer(Resources& resources, World& world, const ScriptN
 	nodeBg = Sprite().setImage(resources, "halley_ui/ui_float_solid_window.png");
 }
 
-void ScriptRenderer::setGraph(const ScriptGraph& graph)
+void ScriptRenderer::setGraph(const ScriptGraph* graph)
 {
-	this->graph = &graph;
+	this->graph = graph;
 }
 
-void ScriptRenderer::setState(const ScriptState& scriptState)
+void ScriptRenderer::setState(const ScriptState* scriptState)
 {
-	this->state = &scriptState;
+	this->state = scriptState;
 }
 
 void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
@@ -62,16 +63,20 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 	}
 
 	for (const auto& target: node.getTargets()) {
-		auto entity = world.getEntity(target);
-		auto* transform = entity.tryGetComponent<Transform2DComponent>();
-		if (transform) {
-			const Vector2f srcPos = getNodeElementPosition(NodeElementType::Target, basePos, node, 0, curZoom);
-			const auto dstPos = transform->getGlobalPosition();
+		if (target.isValid()) {
+			auto entity = world.getEntity(target);
+			auto* transform = entity.tryGetComponent<Transform2DComponent>();
+			if (transform) {
+				const Vector2f srcPos = getNodeElementPosition(NodeElementType::Target, basePos, node, 0, curZoom);
+				const auto dstPos = transform->getGlobalPosition();
 
-			const float dist = std::max(std::abs(dstPos.x - srcPos.x), 20.0f) / 2;
-			const auto bezier = BezierCubic(srcPos, srcPos + Vector2f(0, dist), dstPos - Vector2f(0, dist), dstPos);
-			
-			painter.drawLine(bezier, 1.5f / curZoom, Colour4f(0.35f, 1.0f, 0.35f));
+				const float dist = std::max(std::abs(dstPos.x - srcPos.x), 20.0f) / 2;
+				const auto bezier = BezierCubic(srcPos, srcPos + Vector2f(0, dist), dstPos - Vector2f(0, dist), dstPos);
+				
+				painter.drawLine(bezier, 1.5f / curZoom, Colour4f(0.35f, 1.0f, 0.35f));
+			}
+		} else {
+			Logger::logWarning("Invalid target on script graph node");
 		}
 	}
 }

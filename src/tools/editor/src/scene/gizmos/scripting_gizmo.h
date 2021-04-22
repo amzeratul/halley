@@ -16,5 +16,9 @@ namespace Halley {
 		UIFactory& factory;
 		ISceneEditorWindow& sceneEditorWindow;
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
+		std::shared_ptr<ScriptRenderer> renderer;
+
+		Vector2f basePos;
+		ScriptGraph* scriptGraph = nullptr;
 	};
 }

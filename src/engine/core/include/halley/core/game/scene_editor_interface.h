@@ -81,6 +81,7 @@ namespace Halley {
     	virtual void createWorld(std::shared_ptr<const UIColourScheme> colourScheme) = 0;
     	
         virtual World& getWorld() const = 0;
+    	virtual Resources& getResources() const = 0;
         virtual void spawnPending() = 0;
 
         virtual const std::vector<EntityId>& getCameraIds() const = 0;

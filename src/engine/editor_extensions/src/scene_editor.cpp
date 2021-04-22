@@ -135,6 +135,12 @@ World& SceneEditor::getWorld() const
 	return *world;
 }
 
+Resources& SceneEditor::getResources() const
+{
+	Expects(resources);
+	return *resources;
+}
+
 void SceneEditor::spawnPending()
 {
 	Expects(world);

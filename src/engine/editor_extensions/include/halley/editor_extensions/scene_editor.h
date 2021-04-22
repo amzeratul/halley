@@ -25,6 +25,7 @@ namespace Halley {
 		void createWorld(std::shared_ptr<const UIColourScheme> colourScheme) final override;
 
 		World& getWorld() const override;
+		Resources& getResources() const override;
 		void spawnPending() override;
 
     	const std::vector<EntityId>& getCameraIds() const override;

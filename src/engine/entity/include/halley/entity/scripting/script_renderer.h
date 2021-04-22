@@ -13,8 +13,8 @@ namespace Halley {
 	public:
 		ScriptRenderer(Resources& resources, World& world, const ScriptNodeTypeCollection& nodeTypeCollection);
 		
-		void setGraph(const ScriptGraph& graph);
-		void setState(const ScriptState& scriptState);
+		void setGraph(const ScriptGraph* graph);
+		void setState(const ScriptState* scriptState);
 		void draw(Painter& painter, Vector2f basePos, float curZoom);
 
 	private:
