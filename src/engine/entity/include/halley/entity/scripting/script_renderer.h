@@ -33,6 +33,7 @@ namespace Halley {
 		const ScriptState* state = nullptr;
 
 		Sprite nodeBg;
+		std::map<String, Sprite> icons;
 
 		void drawNodeOutputs(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, const ScriptGraph& graph, float curZoom);
 		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom);
@@ -40,5 +41,6 @@ namespace Halley {
 		Vector2f getNodeSize(float curZoom) const;
 		Vector2f getNodeElementPosition(const IScriptNodeType& nodeType, NodeElementType type, Vector2f basePos, const ScriptGraphNode& node, size_t elemIdx, float curZoom) const;
 		Colour4f getNodeColour(const IScriptNodeType& nodeType) const;
+		const Sprite& getIcon(const IScriptNodeType& nodeType);
 	};
 }

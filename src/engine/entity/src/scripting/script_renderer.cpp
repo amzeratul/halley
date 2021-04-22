@@ -114,6 +114,11 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 		//.setTexRect(nodeBg.getTexRect() / curZoom)
 		.draw(painter);
 
+	getIcon(*nodeType).clone()
+		.setPosition(pos)
+		.setScale(1.0f / curZoom)
+		.draw(painter);
+
 	const float radius = 4.0f / curZoom;
 	const float width = 2.0f / curZoom;
 
@@ -169,4 +174,14 @@ Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType) const
 		return Colour4f(0.35f, 0.35f, 0.97f);
 	}
 	return Colour4f(0.2f, 0.2f, 0.2f);
+}
+
+const Sprite& ScriptRenderer::getIcon(const IScriptNodeType& nodeType)
+{
+	const auto iter = icons.find(nodeType.getName());
+	if (iter != icons.end()) {
+		return iter->second;
+	}
+	icons[nodeType.getName()] = Sprite().setImage(resources, nodeType.getIconName()).setPivot(Vector2f(0.5f, 0.5f));
+	return icons[nodeType.getName()];
 }

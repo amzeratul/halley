@@ -5,6 +5,7 @@ namespace Halley {
 	class ScriptPlayAnimation final : public ScriptNodeTypeBase<void> {
 	public:
 		String getName() const override { return "playAnimation"; }
+		String getIconName() const override { return "script_icons/play_animation.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
 		uint8_t getNumTargetPins() const override { return 1; }
 		

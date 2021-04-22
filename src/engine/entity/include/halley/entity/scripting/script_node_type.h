@@ -33,6 +33,7 @@ namespace Halley {
 		virtual ~IScriptNodeType() = default;
 
 		virtual String getName() const = 0;
+        virtual String getIconName() const = 0;
 		virtual ScriptNodeClassification getClassification() const = 0;
 		virtual uint8_t getNumInputPins() const { return 1; }
 		virtual uint8_t getNumOutputPins() const { return 1; }
