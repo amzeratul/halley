@@ -10,6 +10,7 @@
 #include "halley/core/input/input_keyboard.h"
 
 namespace Halley {
+	class ScriptNodeTypeCollection;
 	class Sprite;
 	class LocalisedString;
 	class Task;
@@ -111,6 +112,8 @@ namespace Halley {
 
     	virtual std::optional<Vector2f> getMousePos() const = 0;
     	virtual Vector2f getCameraPos() const = 0;
+
+    	virtual std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() = 0;
     };
 
 	class EntityTree {
@@ -230,6 +233,8 @@ namespace Halley {
 
 		virtual void addComponentToCurrentEntity(const String& componentName) = 0;
 		virtual void setHighlightedComponents(std::vector<String> componentNames) = 0;
+
+		virtual std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() = 0;
 
 		virtual ConfigNode getSetting(EditorSettingType type, std::string_view id) const = 0;
 		virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;

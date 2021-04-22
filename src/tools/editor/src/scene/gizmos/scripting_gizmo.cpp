@@ -1,10 +1,11 @@
 #include "scripting_gizmo.h"
 using namespace Halley;
 
-ScriptingGizmo::ScriptingGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow)
+ScriptingGizmo::ScriptingGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes)
 	: SceneEditorGizmo(snapRules)
 	, factory(factory)
 	, sceneEditorWindow(sceneEditorWindow)
+	, scriptNodeTypes(std::move(scriptNodeTypes))
 {}
 
 void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)

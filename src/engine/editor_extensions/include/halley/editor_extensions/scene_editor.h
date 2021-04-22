@@ -65,6 +65,8 @@ namespace Halley {
 
 		void refreshAssets() override;
 
+		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() override;
+    
     protected:
     	Camera camera;
 		IEditorInterface* editorInterface;

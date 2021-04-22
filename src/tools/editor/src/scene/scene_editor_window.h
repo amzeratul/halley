@@ -69,6 +69,8 @@ namespace Halley {
 		void addComponentToCurrentEntity(const String& componentName) override;
 		void setHighlightedComponents(std::vector<String> componentNames) override;
 
+		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() override;
+		
 		ConfigNode getSetting(EditorSettingType type, std::string_view id) const override;
 		void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) override;
 

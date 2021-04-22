@@ -760,6 +760,14 @@ void SceneEditorWindow::setHighlightedComponents(std::vector<String> componentNa
 	entityEditor->setHighlightedComponents(std::move(componentNames));
 }
 
+std::shared_ptr<ScriptNodeTypeCollection> SceneEditorWindow::getScriptNodeTypes()
+{
+	if (gameBridge) {
+		return gameBridge->getScriptNodeTypes();
+	}
+	return {};
+}
+
 String SceneEditorWindow::serializeEntity(const EntityData& node) const
 {
 	YAMLConvert::EmitOptions options;

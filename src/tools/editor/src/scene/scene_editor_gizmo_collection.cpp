@@ -165,7 +165,7 @@ void SceneEditorGizmoCollection::resetTools()
 	addTool(Tool("scripting", LocalisedString::fromHardcodedString("Scripting [S]"), Sprite().setImage(resources, "ui/scene_editor_scripting.png"), KeyCode::S),
 		[this] (SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)
 		{
-			return std::make_unique<ScriptingGizmo>(snapRules, factory, sceneEditorWindow);
+			return std::make_unique<ScriptingGizmo>(snapRules, factory, sceneEditorWindow, sceneEditorWindow.getScriptNodeTypes());
 		}
 	);
 }

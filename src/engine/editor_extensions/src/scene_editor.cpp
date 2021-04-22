@@ -13,6 +13,7 @@
 #include "halley/entity/components/transform_2d_component.h"
 #include "components/sprite_component.h"
 #include "components/camera_component.h"
+#include "halley/entity/scripting/script_node_type.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
@@ -478,6 +479,11 @@ void SceneEditor::setupConsoleCommands(UIDebugConsoleController& controller, ISc
 
 void SceneEditor::refreshAssets()
 {
+}
+
+std::shared_ptr<ScriptNodeTypeCollection> SceneEditor::getScriptNodeTypes()
+{
+	return std::make_shared<ScriptNodeTypeCollection>();
 }
 
 Vector2f SceneEditor::roundPosition(Vector2f pos) const

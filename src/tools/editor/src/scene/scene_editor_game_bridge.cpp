@@ -239,6 +239,14 @@ void SceneEditorGameBridge::refreshAssets()
 	}
 }
 
+std::shared_ptr<ScriptNodeTypeCollection> SceneEditorGameBridge::getScriptNodeTypes()
+{
+	if (interfaceReady) {
+		return interface->getScriptNodeTypes();
+	}
+	return {};
+}
+
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {

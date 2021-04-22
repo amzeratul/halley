@@ -43,6 +43,8 @@ namespace Halley {
 
 		void refreshAssets();
 
+		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes();
+
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
 		void addTask(std::unique_ptr<Task> task) override;
