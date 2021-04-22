@@ -239,6 +239,8 @@ namespace Halley {
 
 		virtual ConfigNode getSetting(EditorSettingType type, std::string_view id) const = 0;
 		virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;
+
+		virtual float getProjectDefaultZoom() const = 0;
 	};
 
 	class IProject {

@@ -12,7 +12,7 @@ namespace Halley {
 
 	class ScriptRenderer {
 	public:
-		ScriptRenderer(Resources& resources, World& world, const ScriptNodeTypeCollection& nodeTypeCollection);
+		ScriptRenderer(Resources& resources, World& world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom);
 		
 		void setGraph(const ScriptGraph* graph);
 		void setState(const ScriptState* scriptState);
@@ -28,6 +28,7 @@ namespace Halley {
 		Resources& resources;
 		World& world;
 		const ScriptNodeTypeCollection& nodeTypeCollection;
+		float nativeZoom = 1.0f;
 		
 		const ScriptGraph* graph = nullptr;
 		const ScriptState* state = nullptr;

@@ -13,6 +13,7 @@
 #include "scene_editor_canvas.h"
 #include "scene_editor_game_bridge.h"
 #include "scene_editor_gizmo_collection.h"
+#include "halley/tools/project/project_properties.h"
 #include "src/ui/project_window.h"
 using namespace Halley;
 
@@ -886,4 +887,9 @@ void SceneEditorWindow::setSetting(EditorSettingType type, std::string_view id, 
 void SceneEditorWindow::onTabbedIn()
 {
 	setTool(getSetting(EditorSettingType::Temp, "tools.curTool").asString("translate"));
+}
+
+float SceneEditorWindow::getProjectDefaultZoom() const
+{
+	return project.getProperties().getDefaultZoom();
 }

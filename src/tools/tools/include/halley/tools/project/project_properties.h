@@ -24,12 +24,16 @@ namespace Halley {
 		bool getImportByExtension() const;
     	void setImportByExtension(bool enabled);
 
+    	void setDefaultZoom(float zoom);
+		float getDefaultZoom() const;
+
 	private:
 		const Path& propertiesFile;
 		String name;
     	String assetPackManifest;
         String binName;
     	bool importByExtension = false;
+    	float defaultZoom = 1.0f;
     	std::vector<String> platforms;
 
 		void load();

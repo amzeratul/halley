@@ -60,6 +60,16 @@ void ProjectProperties::setImportByExtension(bool enabled)
 	importByExtension = enabled;
 }
 
+void ProjectProperties::setDefaultZoom(float zoom)
+{
+	defaultZoom = zoom;
+}
+
+float ProjectProperties::getDefaultZoom() const
+{
+	return defaultZoom;
+}
+
 void ProjectProperties::load()
 {
 	const auto data = FileSystem::readFile(propertiesFile);
@@ -74,6 +84,7 @@ void ProjectProperties::load()
 	assetPackManifest = node["assetPackManifest"].asString("halley_project/asset_manifest.yaml");
 	binName = node["binName"].asString("");
 	importByExtension = node["importByExtension"].asBool(false);
+	defaultZoom = node["defaultZoom"].asFloat(1.0f);
 
 	if (node.hasKey("platforms")) {
 		for (auto& plat: node["platforms"].asSequence()) {

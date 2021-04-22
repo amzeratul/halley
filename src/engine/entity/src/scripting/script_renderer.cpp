@@ -12,10 +12,11 @@ using namespace Halley;
 #endif
 #include "components/transform_2d_component.h"
 
-ScriptRenderer::ScriptRenderer(Resources& resources, World& world, const ScriptNodeTypeCollection& nodeTypeCollection)
+ScriptRenderer::ScriptRenderer(Resources& resources, World& world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom)
 	: resources(resources)
 	, world(world)
 	, nodeTypeCollection(nodeTypeCollection)
+	, nativeZoom(nativeZoom)
 {
 	nodeBg = Sprite().setImage(resources, "halley_ui/ui_float_solid_window.png");
 }
@@ -36,7 +37,7 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 		return;
 	}
 
-	const float effectiveZoom = std::max(2.0f, curZoom);
+	const float effectiveZoom = std::max(nativeZoom, curZoom);
 
 	for (const auto& node: graph->getNodes()) {
 		drawNodeOutputs(painter, basePos, node, *graph, effectiveZoom);

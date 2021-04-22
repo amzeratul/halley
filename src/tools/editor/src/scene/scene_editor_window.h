@@ -76,6 +76,8 @@ namespace Halley {
 
 		void onTabbedIn();
 
+		float getProjectDefaultZoom() const override;
+	
 	protected:
 		void update(Time t, bool moved) override;
 
