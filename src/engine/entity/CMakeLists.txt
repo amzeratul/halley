@@ -34,8 +34,9 @@ set(SOURCES
         "src/scripting/script_renderer.cpp"
         "src/scripting/script_state.cpp"
 
-        "src/scripting/nodes/script_wait.cpp"
         "src/scripting/nodes/script_play_animation.cpp"
+        "src/scripting/nodes/script_start.cpp"
+        "src/scripting/nodes/script_wait.cpp"
         )
 
 set(HEADERS
@@ -79,8 +80,9 @@ set(HEADERS
         "include/halley/entity/scripting/script_renderer.h"
         "include/halley/entity/scripting/script_state.h"
 
-        "src/scripting/nodes/script_wait.h"
         "src/scripting/nodes/script_play_animation.h"
+        "src/scripting/nodes/script_start.h"
+        "src/scripting/nodes/script_wait.h"
         )
 
 assign_source_group(${SOURCES})

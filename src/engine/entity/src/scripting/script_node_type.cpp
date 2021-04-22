@@ -1,5 +1,6 @@
 #include "scripting/script_node_type.h"
 
+#include "nodes/script_start.h"
 #include "nodes/script_play_animation.h"
 #include "nodes/script_wait.h"
 using namespace Halley;
@@ -26,6 +27,7 @@ const IScriptNodeType* ScriptNodeTypeCollection::tryGetNodeType(const String& ty
 
 void ScriptNodeTypeCollection::addBasicScriptNodes()
 {
+	addScriptNode(std::make_unique<ScriptStart>());
 	addScriptNode(std::make_unique<ScriptWait>());
 	addScriptNode(std::make_unique<ScriptPlayAnimation>());
 }

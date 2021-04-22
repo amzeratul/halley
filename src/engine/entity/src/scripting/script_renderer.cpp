@@ -4,6 +4,7 @@
 #include "halley/maths/bezier.h"
 #include "halley/support/logger.h"
 #include "scripting/script_graph.h"
+#include "scripting/script_node_type.h"
 using namespace Halley;
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -35,7 +36,7 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 		return;
 	}
 
-	const float effectiveZoom = std::max(1.0f, curZoom);
+	const float effectiveZoom = std::max(2.0f, curZoom);
 
 	for (const auto& node: graph->getNodes()) {
 		drawNodeOutputs(painter, basePos, node, *graph, effectiveZoom);
@@ -48,13 +49,22 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 
 void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, const ScriptGraph& graph, float curZoom)
 {
-	const Vector2f pos = basePos + node.getPosition();
+	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
+	if (!nodeType) {
+		return;
+	}
 
 	for (const auto& output: node.getOutputs()) {
-		const Vector2f srcPos = getNodeElementPosition(NodeElementType::Output, basePos, node, 0, curZoom);
-		
+		const size_t srcIdx = 0; // TODO		
+		const Vector2f srcPos = getNodeElementPosition(*nodeType, NodeElementType::Output, basePos, node, srcIdx, curZoom);
+
+		const size_t dstIdx = 0; // TODO
 		const auto& dstNode = graph.getNodes().at(output.nodeId);
-		const Vector2f dstPos = getNodeElementPosition(NodeElementType::Input, basePos, dstNode, 0, curZoom);
+		const auto* dstNodeType = nodeTypeCollection.tryGetNodeType(dstNode.getType());
+		if (!dstNodeType) {
+			continue;
+		}
+		const Vector2f dstPos = getNodeElementPosition(*dstNodeType, NodeElementType::Input, basePos, dstNode, dstIdx, curZoom);
 
 		const float dist = std::max(std::abs(dstPos.x - srcPos.x), 20.0f) / 2;
 		const auto bezier = BezierCubic(srcPos, srcPos + Vector2f(dist, 0), dstPos - Vector2f(dist, 0), dstPos);
@@ -62,12 +72,13 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 		painter.drawLine(bezier, 2.0f / curZoom, Colour4f(1, 1, 1));
 	}
 
-	for (const auto& target: node.getTargets()) {
+	for (size_t i = 0; i < node.getTargets().size(); ++i) {
+		const auto& target = node.getTargets()[i];
 		if (target.isValid()) {
 			auto entity = world.getEntity(target);
 			auto* transform = entity.tryGetComponent<Transform2DComponent>();
 			if (transform) {
-				const Vector2f srcPos = getNodeElementPosition(NodeElementType::Target, basePos, node, 0, curZoom);
+				const Vector2f srcPos = getNodeElementPosition(*nodeType, NodeElementType::Target, basePos, node, i, curZoom);
 				const auto dstPos = transform->getGlobalPosition();
 
 				const float dist = std::max(std::abs(dstPos.x - srcPos.x), 20.0f) / 2;
@@ -87,9 +98,14 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 	const Vector2f nodeSize = getNodeSize(curZoom);
 	const auto pos = basePos + node.getPosition();
 
+	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
+	if (!nodeType) {
+		return;
+	}
+	
 	// Node body
 	nodeBg.clone()
-		.setColour(Colour4f(0.35f, 0.35f, 0.97f))
+		.setColour(getNodeColour(*nodeType))
 		.setPivot(Vector2f(0.5f, 0.5f))
 		.setPosition(pos)
 		.scaleTo(nodeSize + border)
@@ -100,10 +116,17 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 
 	const float radius = 4.0f / curZoom;
 	const float width = 2.0f / curZoom;
-	painter.drawCircle(getNodeElementPosition(NodeElementType::Input, basePos, node, 0, curZoom), radius, width, Colour4f(1, 1, 1));
-	painter.drawCircle(getNodeElementPosition(NodeElementType::Output, basePos, node, 0, curZoom), radius, width, Colour4f(1, 1, 1));
-	if (!node.getTargets().empty()) {
-		painter.drawCircle(getNodeElementPosition(NodeElementType::Target, basePos, node, 0, curZoom), radius, width, Colour4f(0.35f, 1, 0.35f));
+
+	for (size_t i = 0; i < nodeType->getNumInputPins(); ++i) {
+		painter.drawCircle(getNodeElementPosition(*nodeType, NodeElementType::Input, basePos, node, i, curZoom), radius, width, Colour4f(1, 1, 1));
+	}
+
+	for (size_t i = 0; i < nodeType->getNumOutputPins(); ++i) {
+		painter.drawCircle(getNodeElementPosition(*nodeType, NodeElementType::Output, basePos, node, i, curZoom), radius, width, Colour4f(1, 1, 1));
+	}
+	
+	for (size_t i = 0; i < nodeType->getNumTargetPins(); ++i) {
+		painter.drawCircle(getNodeElementPosition(*nodeType, NodeElementType::Target, basePos, node, i, curZoom), radius, width, Colour4f(0.35f, 1, 0.35f));
 	}
 }
 
@@ -112,7 +135,7 @@ Vector2f ScriptRenderer::getNodeSize(float curZoom) const
 	return Vector2f(60, 60);
 }
 
-Vector2f ScriptRenderer::getNodeElementPosition(NodeElementType type, Vector2f basePos, const ScriptGraphNode& node, size_t elemIdx, float curZoom)
+Vector2f ScriptRenderer::getNodeElementPosition(const IScriptNodeType& nodeType, NodeElementType type, Vector2f basePos, const ScriptGraphNode& node, size_t elemIdx, float curZoom) const
 {
 	const Vector2f nodeSize = getNodeSize(curZoom);
 	
@@ -131,4 +154,19 @@ Vector2f ScriptRenderer::getNodeElementPosition(NodeElementType type, Vector2f b
 
 	const Vector2f pos = basePos + node.getPosition();
 	return pos + offset / curZoom;
+}
+
+Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType) const
+{
+	switch (nodeType.getClassification()) {
+	case ScriptNodeClassification::Terminator:
+		return Colour4f(0.97f, 0.35f, 0.35f);
+	case ScriptNodeClassification::Action:
+		return Colour4f(0.07f, 0.84f, 0.09f);
+	case ScriptNodeClassification::Condition:
+		return Colour4f(0.91f, 0.71f, 0.0f);
+	case ScriptNodeClassification::FlowControl:
+		return Colour4f(0.35f, 0.35f, 0.97f);
+	}
+	return Colour4f(0.2f, 0.2f, 0.2f);
 }

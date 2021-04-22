@@ -15,6 +15,13 @@ namespace Halley {
 		Executing,
 		Terminate
 	};
+
+	enum class ScriptNodeClassification {
+		Terminator, // As in start/end, not as in Arnie
+		FlowControl,
+		Condition,
+		Action
+	};
 	
 	class IScriptNodeType {
 	public:		
@@ -26,6 +33,7 @@ namespace Halley {
 		virtual ~IScriptNodeType() = default;
 
 		virtual String getName() const = 0;
+		virtual ScriptNodeClassification getClassification() const = 0;
 		virtual uint8_t getNumInputPins() const { return 1; }
 		virtual uint8_t getNumOutputPins() const { return 1; }
 		virtual uint8_t getNumTargetPins() const { return 0; }
