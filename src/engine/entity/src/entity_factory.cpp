@@ -154,7 +154,7 @@ EntityRef EntityFactoryContext::getEntity(const UUID& uuid, bool allowPrefabUUID
 		}
 	}
 
-	return EntityRef();
+	return world->findEntity(uuid, true).value_or(EntityRef());
 }
 
 bool EntityFactoryContext::needsNewContextFor(const EntityData& data) const
