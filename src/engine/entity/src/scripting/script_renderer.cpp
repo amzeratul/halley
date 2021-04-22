@@ -34,12 +34,14 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 		return;
 	}
 
+	const float effectiveZoom = std::max(1.0f, curZoom);
+
 	for (const auto& node: graph->getNodes()) {
-		drawNodeOutputs(painter, basePos, node, *graph, curZoom);
+		drawNodeOutputs(painter, basePos, node, *graph, effectiveZoom);
 	}
 	
 	for (const auto& node: graph->getNodes()) {
-		drawNode(painter, basePos, node, curZoom);
+		drawNode(painter, basePos, node, effectiveZoom);
 	}
 }
 
@@ -53,7 +55,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 		const auto& dstNode = graph.getNodes().at(output.nodeId);
 		const Vector2f dstPos = getNodeElementPosition(NodeElementType::Input, basePos, dstNode, 0, curZoom);
 
-		const float dist = std::max(std::abs(dstPos.x - srcPos.x), 50.0f) / 2;
+		const float dist = std::max(std::abs(dstPos.x - srcPos.x), 20.0f) / 2;
 		const auto bezier = BezierCubic(srcPos, srcPos + Vector2f(dist, 0), dstPos - Vector2f(dist, 0), dstPos);
 		
 		painter.drawLine(bezier, 2.0f / curZoom, Colour4f(1, 1, 1));
@@ -66,7 +68,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 			const Vector2f srcPos = getNodeElementPosition(NodeElementType::Target, basePos, node, 0, curZoom);
 			const auto dstPos = transform->getGlobalPosition();
 
-			const float dist = std::max(std::abs(dstPos.x - srcPos.x), 50.0f) / 2;
+			const float dist = std::max(std::abs(dstPos.x - srcPos.x), 20.0f) / 2;
 			const auto bezier = BezierCubic(srcPos, srcPos + Vector2f(0, dist), dstPos - Vector2f(0, dist), dstPos);
 			
 			painter.drawLine(bezier, 1.5f / curZoom, Colour4f(0.35f, 1.0f, 0.35f));
