@@ -43,10 +43,16 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 		drawNodeOutputs(painter, basePos, node, *graph, effectiveZoom);
 	}
 	
-	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
+	for (uint32_t i = 0; i < static_cast<uint32_t>(graph->getNodes().size()); ++i) {
 		const auto& node = graph->getNodes()[i];
 		
-		const NodeDrawMode mode = (highlightNode == i) ? NodeDrawMode::Highlight : NodeDrawMode::Normal;
+		NodeDrawMode mode = NodeDrawMode::Normal;
+		if (highlightNode == i) {
+			mode = NodeDrawMode::Highlight;
+		} else if (state && !state->hasThreadAt(i)) {
+			mode = NodeDrawMode::Dimmed;
+		}
+		
 		drawNode(painter, basePos, node, effectiveZoom, mode);
 	}
 }
@@ -112,6 +118,10 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 	switch (drawMode) {
 	case NodeDrawMode::Highlight:
 		col = col.inverseMultiplyLuma(0.5f);
+		break;
+	case NodeDrawMode::Dimmed:
+		col = col.multiplyLuma(0.5f);
+		break;
 	}
 	
 	// Node body
@@ -197,7 +207,7 @@ const Sprite& ScriptRenderer::getIcon(const IScriptNodeType& nodeType)
 	return icons[nodeType.getName()];
 }
 
-std::optional<size_t> ScriptRenderer::getNodeIdxUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos) const
+std::optional<uint32_t> ScriptRenderer::getNodeIdxUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos) const
 {
 	if (!graph || !mousePos) {
 		return {};
@@ -211,14 +221,14 @@ std::optional<size_t> ScriptRenderer::getNodeIdxUnderMouse(Vector2f basePos, flo
 		const auto& node = graph->getNodes()[i];
 		const auto pos = basePos + node.getPosition();
 		if ((area + pos).contains(mousePos.value())) {
-			return i;
+			return static_cast<uint32_t>(i);
 		}
 	}
 
 	return {};
 }
 
-void ScriptRenderer::setHighlight(std::optional<size_t> node)
+void ScriptRenderer::setHighlight(std::optional<uint32_t> node)
 {
 	highlightNode = node;
 }

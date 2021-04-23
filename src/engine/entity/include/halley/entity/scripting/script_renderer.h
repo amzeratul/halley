@@ -18,8 +18,8 @@ namespace Halley {
 		void setState(const ScriptState* scriptState);
 		void draw(Painter& painter, Vector2f basePos, float curZoom);
 		
-		std::optional<size_t> getNodeIdxUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos) const;
-		void setHighlight(std::optional<size_t> highlightNode);
+		std::optional<uint32_t> getNodeIdxUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos) const;
+		void setHighlight(std::optional<uint32_t> highlightNode);
 
 	private:
 		enum class NodeElementType {
@@ -30,7 +30,8 @@ namespace Halley {
 
 		enum class NodeDrawMode {
 			Normal,
-			Highlight
+			Highlight,
+			Dimmed
 		};
 		
 		Resources& resources;
@@ -44,7 +45,7 @@ namespace Halley {
 		Sprite nodeBg;
 		std::map<String, Sprite> icons;
 
-		std::optional<size_t> highlightNode;
+		std::optional<uint32_t> highlightNode;
 
 		void drawNodeOutputs(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, const ScriptGraph& graph, float curZoom);
 		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode);

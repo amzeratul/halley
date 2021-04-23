@@ -50,6 +50,8 @@ namespace Halley {
 		ConfigNode toConfigNode() const;
         uint64_t getGraphHash() const { return graphHash; }
 
+    	bool hasThreadAt(uint32_t node) const;
+
     private:
     	std::vector<ScriptStateThread> threads;
     	uint64_t graphHash;

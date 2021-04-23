@@ -60,6 +60,16 @@ ConfigNode ScriptState::toConfigNode() const
 	return result;
 }
 
+bool ScriptState::hasThreadAt(uint32_t node) const
+{
+	for (const auto& thread: threads) {
+		if (thread.getCurNode() == node) {
+			return true;
+		}
+	}
+	return false;
+}
+
 void ScriptState::start(OptionalLite<uint32_t> startNode, uint64_t hash)
 {
 	threads.clear();
