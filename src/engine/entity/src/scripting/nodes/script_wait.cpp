@@ -6,6 +6,20 @@ void ScriptWait::doInitData(ScriptWaitData& data, const ScriptGraphNode& node) c
 	data.timeLeft = static_cast<Time>(node.getSettings()["time"].asFloat(0.0f));
 }
 
+std::pair<String, std::vector<ColourOverride>> ScriptWait::getDescription(const ScriptGraphNode& node) const
+{
+	String text;
+	std::vector<ColourOverride> cols;
+
+	text += "Wait ";
+	cols.emplace_back(text.length(), Colour4f(0.97f, 0.35f, 0.35f));
+	text += toString(node.getSettings()["time"].asFloat(0.0f));
+	cols.emplace_back(text.length(), std::optional<Colour4f>());
+	text += " seconds.";
+
+	return { std::move(text), std::move(cols) };
+}
+
 IScriptNodeType::Result ScriptWait::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptWaitData& curData) const
 {
 	const bool done = time >= curData.timeLeft;

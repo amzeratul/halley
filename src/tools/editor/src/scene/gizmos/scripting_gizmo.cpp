@@ -115,12 +115,19 @@ void ScriptingGizmo::saveEntityData()
 
 void ScriptingGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, Rect4f nodePos) const
 {
-	const auto text = node.getType();
+	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
+	if (!nodeType) {
+		return;
+	}
+	
+	const auto [text, colours] = nodeType->getDescription(node);
 	const float curZoom = getZoom();
+	const auto pos = 0.5f * (nodePos.getBottomLeft() + nodePos.getBottomRight()) + Vector2f(0, 10) / curZoom;
 	
 	tooltipLabel
 		.setText(text)
-		.setPosition(0.5f * (nodePos.getBottomLeft() + nodePos.getBottomRight()))
+		.setColourOverride(colours)
+		.setPosition(pos)
 		.setAlignment(0.5f)
 		.setSize(16 / curZoom)
 		.setOutline(4.0f / curZoom)
