@@ -10,6 +10,12 @@ ScriptingGizmo::ScriptingGizmo(SnapRules snapRules, UIFactory& factory, ISceneEd
 	, sceneEditorWindow(sceneEditorWindow)
 	, scriptNodeTypes(std::move(scriptNodeTypes))
 {
+	tooltipLabel
+		.setFont(factory.getResources().get<Font>("Ubuntu Bold"))
+		.setSize(14)
+		.setColour(Colour(1, 1, 1))
+		.setOutlineColour(Colour(0, 0, 0))
+		.setOutline(1);
 }
 
 void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
@@ -20,19 +26,19 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 	renderer->setGraph(scriptGraph);
 
 	if (!dragging) {
-		nodeUnderMouse = renderer->getNodeIdxUnderMouse(basePos, getZoom(), inputState.mousePos);
+		nodeUnderMouse = renderer->getNodeUnderMouse(basePos, getZoom(), inputState.mousePos);
 	}
 
 	if (!dragging && nodeUnderMouse && inputState.leftClickPressed && inputState.mousePos) {
 		dragging = true;
-		const auto nodePos = scriptGraph->getNodes()[nodeUnderMouse.value()].getPosition();
+		const auto nodePos = scriptGraph->getNodes()[nodeUnderMouse->first].getPosition();
 		startDragPos = nodePos - inputState.mousePos.value();
 	}
 
 	if (dragging) {
 		if (inputState.mousePos) {
 			const auto newPos = startDragPos + inputState.mousePos.value();
-			scriptGraph->getNodes()[nodeUnderMouse.value()].setPosition(newPos);
+			scriptGraph->getNodes()[nodeUnderMouse->first].setPosition(newPos);
 		}
 		if (!inputState.leftClickHeld) {
 			dragging = false;
@@ -47,8 +53,12 @@ void ScriptingGizmo::draw(Painter& painter) const
 		return;
 	}
 
-	renderer->setHighlight(nodeUnderMouse);
+	renderer->setHighlight(nodeUnderMouse ? nodeUnderMouse->first : std::optional<uint32_t>());
 	renderer->draw(painter, basePos, getZoom());
+
+	if (nodeUnderMouse && !dragging) {
+		drawToolTip(painter, scriptGraph->getNodes().at(nodeUnderMouse->first), nodeUnderMouse->second);
+	}
 }
 
 bool ScriptingGizmo::isHighlighted() const
@@ -101,4 +111,18 @@ void ScriptingGizmo::saveEntityData()
 		(*data)["scriptGraph"] = scriptGraphData;
 	}
 	markModified("Script", "scriptGraph");
+}
+
+void ScriptingGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, Rect4f nodePos) const
+{
+	const auto text = node.getType();
+	const float curZoom = getZoom();
+	
+	tooltipLabel
+		.setText(text)
+		.setPosition(0.5f * (nodePos.getBottomLeft() + nodePos.getBottomRight()))
+		.setAlignment(0.5f)
+		.setSize(16 / curZoom)
+		.setOutline(4.0f / curZoom)
+		.draw(painter);
 }

@@ -207,7 +207,7 @@ const Sprite& ScriptRenderer::getIcon(const IScriptNodeType& nodeType)
 	return icons[nodeType.getName()];
 }
 
-std::optional<uint32_t> ScriptRenderer::getNodeIdxUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos) const
+std::optional<std::pair<uint32_t, Rect4f>> ScriptRenderer::getNodeUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos) const
 {
 	if (!graph || !mousePos) {
 		return {};
@@ -220,8 +220,9 @@ std::optional<uint32_t> ScriptRenderer::getNodeIdxUnderMouse(Vector2f basePos, f
 	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
 		const auto& node = graph->getNodes()[i];
 		const auto pos = basePos + node.getPosition();
-		if ((area + pos).contains(mousePos.value())) {
-			return static_cast<uint32_t>(i);
+		const auto curRect = area + pos;
+		if (curRect.contains(mousePos.value())) {
+			return std::pair<uint32_t, Rect4f>{ static_cast<uint32_t>(i), curRect };
 		}
 	}
 

@@ -22,12 +22,15 @@ namespace Halley {
 
 		Vector2f basePos;
 		ScriptGraph* scriptGraph = nullptr;
-		std::optional<uint32_t> nodeUnderMouse;
+		std::optional<std::pair<uint32_t, Rect4f>> nodeUnderMouse;
 
 		bool dragging = false;
 		Vector2f startDragPos;
 
+		mutable TextRenderer tooltipLabel;
+
 		void loadEntityData();
 		void saveEntityData();
+		void drawToolTip(Painter& painter, const ScriptGraphNode& node, Rect4f nodePos) const;
 	};
 }

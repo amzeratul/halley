@@ -18,7 +18,7 @@ namespace Halley {
 		void setState(const ScriptState* scriptState);
 		void draw(Painter& painter, Vector2f basePos, float curZoom);
 		
-		std::optional<uint32_t> getNodeIdxUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos) const;
+		std::optional<std::pair<uint32_t, Rect4f>> getNodeUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos) const;
 		void setHighlight(std::optional<uint32_t> highlightNode);
 
 	private:
