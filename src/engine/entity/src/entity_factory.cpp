@@ -239,6 +239,12 @@ std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityDa
 	return context;
 }
 
+std::shared_ptr<EntityFactoryContext> EntityFactory::makeStandaloneContext()
+{
+	const auto mask = makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData);
+	return std::make_shared<EntityFactoryContext>(world, resources, mask, true);
+}
+
 void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context)
 {
 	assert(entity.isValid());

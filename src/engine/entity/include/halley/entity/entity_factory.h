@@ -45,6 +45,8 @@ namespace Halley {
 
 		EntityData serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent = true);
 
+		std::shared_ptr<EntityFactoryContext> makeStandaloneContext();
+
 	private:
 		World& world;
 		Resources& resources;

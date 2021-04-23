@@ -36,6 +36,7 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 		}
 		if (!inputState.leftClickHeld) {
 			dragging = false;
+			saveEntityData();
 		}
 	}
 }
@@ -85,4 +86,19 @@ void ScriptingGizmo::loadEntityData()
 	scriptGraph = script ? &script->scriptGraph : nullptr;
 
 	dragging = false;
+}
+
+void ScriptingGizmo::saveEntityData()
+{
+	ConfigNode scriptGraphData;
+	if (scriptGraph) {
+		const auto context = sceneEditorWindow.getEntityFactory()->makeStandaloneContext();
+		scriptGraphData = scriptGraph->toConfigNode(context->getConfigNodeContext());
+	}
+	
+	auto* data = getComponentData("Script");
+	if (data) {
+		(*data)["scriptGraph"] = scriptGraphData;
+	}
+	markModified("Script", "scriptGraph");
 }

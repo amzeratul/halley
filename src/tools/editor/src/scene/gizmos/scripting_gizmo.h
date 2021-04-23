@@ -28,5 +28,6 @@ namespace Halley {
 		Vector2f startDragPos;
 
 		void loadEntityData();
+		void saveEntityData();
 	};
 }

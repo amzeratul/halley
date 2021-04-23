@@ -10,6 +10,7 @@
 #include "halley/core/input/input_keyboard.h"
 
 namespace Halley {
+	class EntityFactory;
 	class ScriptNodeTypeCollection;
 	class Sprite;
 	class LocalisedString;
@@ -241,6 +242,8 @@ namespace Halley {
 		virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;
 
 		virtual float getProjectDefaultZoom() const = 0;
+
+		virtual std::shared_ptr<EntityFactory> getEntityFactory() const = 0;
 	};
 
 	class IProject {

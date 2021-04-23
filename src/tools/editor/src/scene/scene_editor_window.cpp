@@ -893,3 +893,8 @@ float SceneEditorWindow::getProjectDefaultZoom() const
 {
 	return project.getProperties().getDefaultZoom();
 }
+
+std::shared_ptr<EntityFactory> SceneEditorWindow::getEntityFactory() const
+{
+	return entityFactory;
+}

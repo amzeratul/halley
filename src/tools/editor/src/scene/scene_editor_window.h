@@ -77,6 +77,8 @@ namespace Halley {
 		void onTabbedIn();
 
 		float getProjectDefaultZoom() const override;
+
+		std::shared_ptr<EntityFactory> getEntityFactory() const override;
 	
 	protected:
 		void update(Time t, bool moved) override;
