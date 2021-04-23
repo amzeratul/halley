@@ -20,5 +20,6 @@ namespace Halley {
 
 		Vector2f basePos;
 		ScriptGraph* scriptGraph = nullptr;
+		std::optional<size_t> nodeUnderMouse;
 	};
 }

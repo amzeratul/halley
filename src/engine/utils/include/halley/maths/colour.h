@@ -101,7 +101,7 @@ namespace Halley {
 			a = convertColour<U, T>(c.a);
 		}
 
-		String toString() const
+		[[nodiscard]] String toString() const
 		{
 			std::stringstream ss;
 			ss << "#" << std::hex;
@@ -113,7 +113,7 @@ namespace Halley {
 			return ss.str();
 		}
 
-		static Colour4 fromString(String str)
+		[[nodiscard]] static Colour4 fromString(String str)
 		{
 			Colour4 col;
 			size_t len = str.length();
@@ -134,7 +134,7 @@ namespace Halley {
 			return col;
 		}
 
-		static Colour4 fromHSV(float h, float s, float v)
+		[[nodiscard]] static Colour4 fromHSV(float h, float s, float v)
 		{
 			float r = 0;
 			float g = 0;
@@ -166,42 +166,42 @@ namespace Halley {
 			return Colour4<T>(Colour4<float>(r, g, b));
 		}
 
-		constexpr Colour4 multiplyLuma(float t) const
+		[[nodiscard]] constexpr Colour4 multiplyLuma(float t) const
 		{
 			return Colour4(r*t, g*t, b*t, a);
 		}
 
-		constexpr Colour4 inverseMultiplyLuma(float t) const
+		[[nodiscard]] constexpr Colour4 inverseMultiplyLuma(float t) const
 		{
 			return Colour4(1.0f - ((1.0f - r) * t), 1.0f - ((1.0f - g) * t), 1.0f - ((1.0f - b) * t), a);
 		}
 
-		constexpr Colour4 multiplyAlpha(float t) const
+		[[nodiscard]] constexpr Colour4 multiplyAlpha(float t) const
 		{
 			return Colour4(r, g, b, a * t);
 		}
 
-		constexpr Colour4 operator+(const Colour4& c) const
+		[[nodiscard]] constexpr Colour4 operator+(const Colour4& c) const
 		{
 			return Colour4(r+c.r, g+c.g, b+c.b, a+c.a);
 		}
 
-		constexpr Colour4 operator*(const Colour4& c) const
+		[[nodiscard]] constexpr Colour4 operator*(const Colour4& c) const
 		{
 			return Colour4(r * c.r, g * c.g, b * c.b, a * c.a);
 		}
 
-		constexpr Colour4 operator*(float t) const
+		[[nodiscard]] constexpr Colour4 operator*(float t) const
 		{
 			return Colour4(r*t, g*t, b*t, a*t);
 		}
 
-		constexpr bool operator==(const Colour4& c) const
+		[[nodiscard]] constexpr bool operator==(const Colour4& c) const
 		{
 			return r == c.r && g == c.g && b == c.b && a == c.a;
 		}
 
-		constexpr bool operator!=(const Colour4& c) const
+		[[nodiscard]] constexpr bool operator!=(const Colour4& c) const
 		{
 			return r != c.r || g != c.g || b != c.b || a != c.a;
 		}

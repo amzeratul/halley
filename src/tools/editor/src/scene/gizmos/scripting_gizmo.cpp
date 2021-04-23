@@ -25,8 +25,9 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 
 	auto* script = getComponent<ScriptComponent>();
 	scriptGraph = script ? &script->scriptGraph : nullptr;
-
 	renderer->setGraph(scriptGraph);
+
+	nodeUnderMouse = renderer->getNodeIdxUnderMouse(basePos, getZoom(), inputState.mousePos);
 }
 
 void ScriptingGizmo::draw(Painter& painter) const
@@ -34,14 +35,14 @@ void ScriptingGizmo::draw(Painter& painter) const
 	if (!renderer) {
 		return;
 	}
-	
+
+	renderer->setHighlight(nodeUnderMouse);
 	renderer->draw(painter, basePos, getZoom());
 }
 
 bool ScriptingGizmo::isHighlighted() const
 {
-	// TODO
-	return false;
+	return !!nodeUnderMouse;
 }
 
 std::shared_ptr<UIWidget> ScriptingGizmo::makeUI()

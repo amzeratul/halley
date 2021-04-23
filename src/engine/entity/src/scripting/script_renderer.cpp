@@ -43,8 +43,11 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 		drawNodeOutputs(painter, basePos, node, *graph, effectiveZoom);
 	}
 	
-	for (const auto& node: graph->getNodes()) {
-		drawNode(painter, basePos, node, effectiveZoom);
+	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
+		const auto& node = graph->getNodes()[i];
+		
+		const NodeDrawMode mode = (highlightNode == i) ? NodeDrawMode::Highlight : NodeDrawMode::Normal;
+		drawNode(painter, basePos, node, effectiveZoom, mode);
 	}
 }
 
@@ -93,7 +96,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 	}
 }
 
-void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom)
+void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode)
 {
 	const Vector2f border = Vector2f(18, 18);
 	const Vector2f nodeSize = getNodeSize(curZoom);
@@ -103,10 +106,17 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 	if (!nodeType) {
 		return;
 	}
+
+	const auto baseCol = getNodeColour(*nodeType);
+	Colour4f col = baseCol;
+	switch (drawMode) {
+	case NodeDrawMode::Highlight:
+		col = col.inverseMultiplyLuma(0.5f);
+	}
 	
 	// Node body
 	nodeBg.clone()
-		.setColour(getNodeColour(*nodeType))
+		.setColour(col)
 		.setPivot(Vector2f(0.5f, 0.5f))
 		.setPosition(pos)
 		.scaleTo(nodeSize + border)
@@ -185,4 +195,30 @@ const Sprite& ScriptRenderer::getIcon(const IScriptNodeType& nodeType)
 	}
 	icons[nodeType.getName()] = Sprite().setImage(resources, nodeType.getIconName()).setPivot(Vector2f(0.5f, 0.5f));
 	return icons[nodeType.getName()];
+}
+
+std::optional<size_t> ScriptRenderer::getNodeIdxUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos) const
+{
+	if (!graph || !mousePos) {
+		return {};
+	}
+
+	const float effectiveZoom = std::max(nativeZoom, curZoom);
+	const auto nodeSize = getNodeSize(effectiveZoom);
+	const Rect4f area = Rect4f(-nodeSize / 2, nodeSize / 2) / effectiveZoom;
+
+	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
+		const auto& node = graph->getNodes()[i];
+		const auto pos = basePos + node.getPosition();
+		if ((area + pos).contains(mousePos.value())) {
+			return i;
+		}
+	}
+
+	return {};
+}
+
+void ScriptRenderer::setHighlight(std::optional<size_t> node)
+{
+	highlightNode = node;
 }
