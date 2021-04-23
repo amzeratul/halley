@@ -11,6 +11,8 @@ namespace Halley {
 		bool isHighlighted() const override;
 		std::shared_ptr<UIWidget> makeUI() override;
 		std::vector<String> getHighlightedComponents() const override;
+		void refreshEntity() override;
+		void onEntityChanged() override;
 	
 	private:
 		UIFactory& factory;
@@ -21,5 +23,10 @@ namespace Halley {
 		Vector2f basePos;
 		ScriptGraph* scriptGraph = nullptr;
 		std::optional<uint32_t> nodeUnderMouse;
+
+		bool dragging = false;
+		Vector2f startDragPos;
+
+		void loadEntityData();
 	};
 }
