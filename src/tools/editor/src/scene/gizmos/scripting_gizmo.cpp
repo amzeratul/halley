@@ -120,7 +120,7 @@ void ScriptingGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, 
 		return;
 	}
 	
-	const auto [text, colours] = nodeType->getDescription(node);
+	const auto [text, colours] = nodeType->getDescription(node, sceneEditorWindow.getEntityFactory()->getWorld());
 	const float curZoom = getZoom();
 	const auto pos = 0.5f * (nodePos.getBottomLeft() + nodePos.getBottomRight()) + Vector2f(0, 10) / curZoom;
 	
@@ -130,6 +130,13 @@ void ScriptingGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, 
 		.setPosition(pos)
 		.setAlignment(0.5f)
 		.setSize(16 / curZoom)
-		.setOutline(4.0f / curZoom)
+		.setOutline(4.0f / curZoom);
+
+	const auto extents = tooltipLabel.getExtents();
+	const Rect4f tooltipArea = Rect4f(pos + extents * Vector2f(-0.5f, 0), pos + extents * Vector2f(0.5f, 1.0f)).grow(4 / curZoom, 2 / curZoom, 4 / curZoom, 4 / curZoom);
+	const auto poly = Polygon({ tooltipArea.getTopLeft(), tooltipArea.getTopRight(), tooltipArea.getBottomRight(), tooltipArea.getBottomLeft() });
+	painter.drawPolygon(poly, Colour4f(0, 0, 0, 0.6f));
+
+	tooltipLabel
 		.draw(painter);
 }

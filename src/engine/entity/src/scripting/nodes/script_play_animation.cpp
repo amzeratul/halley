@@ -4,20 +4,29 @@
 #ifndef DONT_INCLUDE_HALLEY_HPP
 #define DONT_INCLUDE_HALLEY_HPP
 #endif
+#include "world.h"
 #include "components/sprite_animation_component.h"
 
 using namespace Halley;
 
-std::pair<String, std::vector<ColourOverride>> ScriptPlayAnimation::getDescription(const ScriptGraphNode& node) const
+std::pair<String, std::vector<ColourOverride>> ScriptPlayAnimation::getDescription(const ScriptGraphNode& node, const World& world) const
 {
 	String text;
 	std::vector<ColourOverride> cols;
+
+	const EntityId targetId = node.getTargets().empty() ? EntityId() : node.getTargets()[0];
+	const ConstEntityRef target = world.getEntity(targetId);
+	const String targetName = target.isValid() ? target.getName() : "<unknown>";
 
 	text += "Play sequence \"";
 	cols.emplace_back(text.length(), Colour4f(0.97f, 0.35f, 0.35f));
 	text += toString(node.getSettings()["sequence"].asString(""));
 	cols.emplace_back(text.length(), std::optional<Colour4f>());
-	text += "\" on target.";
+	text += "\" on entity \"";
+	cols.emplace_back(text.length(), Colour4f(0.97f, 0.35f, 0.35f));
+	text += targetName;
+	cols.emplace_back(text.length(), std::optional<Colour4f>());
+	text += "\".";
 
 	return { std::move(text), std::move(cols) };
 }

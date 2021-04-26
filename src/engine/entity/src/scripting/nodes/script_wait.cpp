@@ -6,7 +6,7 @@ void ScriptWait::doInitData(ScriptWaitData& data, const ScriptGraphNode& node) c
 	data.timeLeft = static_cast<Time>(node.getSettings()["time"].asFloat(0.0f));
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptWait::getDescription(const ScriptGraphNode& node) const
+std::pair<String, std::vector<ColourOverride>> ScriptWait::getDescription(const ScriptGraphNode& node, const World& world) const
 {
 	String text;
 	std::vector<ColourOverride> cols;

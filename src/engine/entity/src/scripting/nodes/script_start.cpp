@@ -2,7 +2,7 @@
 
 using namespace Halley;
 
-std::pair<String, std::vector<ColourOverride>> ScriptStart::getDescription(const ScriptGraphNode& node) const
+std::pair<String, std::vector<ColourOverride>> ScriptStart::getDescription(const ScriptGraphNode& node, const World& world) const
 {
 	return { "Start execution", {} };
 }

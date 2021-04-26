@@ -35,7 +35,7 @@ namespace Halley {
 
 		virtual String getName() const = 0;
 
-		virtual std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node) const = 0;
+		virtual std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world) const = 0;
 		virtual String getIconName() const = 0;
 		virtual ScriptNodeClassification getClassification() const = 0;
 		
