@@ -125,12 +125,14 @@ void ScriptingGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, 
 	const auto pos = 0.5f * (nodePos.getBottomLeft() + nodePos.getBottomRight()) + Vector2f(0, 10) / curZoom;
 	
 	tooltipLabel
-		.setText(text)
 		.setColourOverride(colours)
 		.setPosition(pos)
 		.setAlignment(0.5f)
 		.setSize(16 / curZoom)
 		.setOutline(4.0f / curZoom);
+
+	tooltipLabel
+		.setText(tooltipLabel.split(text, 250.0f / curZoom));
 
 	const auto extents = tooltipLabel.getExtents();
 	const Rect4f tooltipArea = Rect4f(pos + extents * Vector2f(-0.5f, 0), pos + extents * Vector2f(0.5f, 1.0f)).grow(4 / curZoom, 2 / curZoom, 4 / curZoom, 4 / curZoom);
