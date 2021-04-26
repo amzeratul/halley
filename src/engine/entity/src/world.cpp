@@ -244,9 +244,39 @@ EntityRef World::getEntity(EntityId id)
 	return EntityRef(*entity, *this);
 }
 
+ConstEntityRef World::getEntity(EntityId id) const
+{
+	const Entity* entity = tryGetRawEntity(id);
+	if (entity == nullptr) {
+		throw Exception("Entity does not exist: " + toString(id), HalleyExceptions::Entity);
+	}
+	return ConstEntityRef(*entity, *this);
+}
+
+EntityRef World::tryGetEntity(EntityId id)
+{
+	Entity* entity = tryGetRawEntity(id);
+	return EntityRef(*entity, *this);
+}
+
+ConstEntityRef World::tryGetEntity(EntityId id) const
+{
+	const Entity* entity = tryGetRawEntity(id);
+	return ConstEntityRef(*entity, *this);
+}
+
 Entity* World::tryGetRawEntity(EntityId id)
 {
-	auto v = entityMap.get(id.value);
+	auto* v = entityMap.get(id.value);
+	if (v == nullptr) {
+		return nullptr;
+	}
+	return *v;
+}
+
+const Entity* World::tryGetRawEntity(EntityId id) const
+{
+	const auto* v = entityMap.get(id.value);
 	if (v == nullptr) {
 		return nullptr;
 	}

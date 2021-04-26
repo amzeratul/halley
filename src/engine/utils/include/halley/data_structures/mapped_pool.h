@@ -111,6 +111,26 @@ namespace Halley {
 			return reinterpret_cast<T*>(&(data.data));
 		}
 
+		const T* get(int64_t externalIdx) const {
+			auto idx = static_cast<uint32_t>(externalIdx & 0xFFFFFFFFll);
+			auto rev = static_cast<uint32_t>(externalIdx >> 32);
+
+			int blockN = idx / blockLen;
+			if (blockN < 0 || blockN >= int(blocks.size())) {
+				return nullptr;
+			}
+
+			// TODO: check if can shrink?
+
+			auto& block = blocks[blockN];
+			int localIdx = idx % blockLen;
+			auto& data = block.data[localIdx];
+			if (data.revision != rev) {
+				return nullptr;
+			}
+			return reinterpret_cast<const T*>(&(data.data));
+		}
+
 	private:
 		Vector<Block> blocks;
 		uint32_t next = 0;

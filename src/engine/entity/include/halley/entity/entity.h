@@ -599,7 +599,7 @@ namespace Halley {
 		ConstEntityRef& operator=(const ConstEntityRef& other) = default;
 		ConstEntityRef& operator=(ConstEntityRef&& other) = default;
 
-		ConstEntityRef(Entity& e, const World& w)
+		ConstEntityRef(const Entity& e, const World& w)
 			: entity(&e)
 			, world(&w)
 		{}
@@ -685,13 +685,13 @@ namespace Halley {
 			return entity->components[idx];
 		}
 
-		std::vector<std::pair<int, Component*>>::iterator begin() const
+		std::vector<std::pair<int, Component*>>::const_iterator begin() const
 		{
 			Expects(entity);
 			return entity->components.begin();
 		}
 
-		std::vector<std::pair<int, Component*>>::iterator end() const
+		std::vector<std::pair<int, Component*>>::const_iterator end() const
 		{
 			Expects(entity);
 			return entity->components.begin() + entity->liveComponents;
@@ -703,10 +703,15 @@ namespace Halley {
 			return entity->serializable;
 		}
 
+		bool isValid() const
+		{
+			return entity != nullptr;
+		}
+
 	private:
 		friend class World;
 
-		Entity* entity;
+		const Entity* entity;
 		const World* world;
 	};
 
