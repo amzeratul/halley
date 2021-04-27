@@ -35,7 +35,7 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 			const auto nodePos = scriptGraph->getNodes()[nodeUnderMouse->first].getPosition();
 			startDragPos = nodePos - inputState.mousePos.value();
 		} else if (inputState.rightClickPressed) {
-			openNodeUI(scriptGraph->getNodes()[nodeUnderMouse->first]);
+			openNodeUI(scriptGraph->getNodes()[nodeUnderMouse->first], inputState.rawMousePos.value());
 		}
 	}
 
@@ -147,21 +147,21 @@ std::shared_ptr<UIWidget> ScriptingGizmo::makeUI()
 	return {};
 }
 
-void ScriptingGizmo::openNodeUI(ScriptGraphNode& node)
+void ScriptingGizmo::openNodeUI(ScriptGraphNode& node, Vector2f pos)
 {
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
 	if (nodeType) {
-		sceneEditorWindow.spawnUI(std::make_shared<ScriptingNodeEditor>(factory, node, *nodeType));
+		sceneEditorWindow.spawnUI(std::make_shared<ScriptingNodeEditor>(factory, node, *nodeType, pos));
 	}
 }
 
-ScriptingNodeEditor::ScriptingNodeEditor(UIFactory& factory, ScriptGraphNode& node, const IScriptNodeType& nodeType)
+ScriptingNodeEditor::ScriptingNodeEditor(UIFactory& factory, ScriptGraphNode& node, const IScriptNodeType& nodeType, Vector2f pos)
 	: UIWidget("scripting_node_editor", {}, UISizer())
 	, node(node)
 	, nodeType(nodeType)
 {
 	factory.loadUI(*this, "ui/halley/scripting_node_editor");
-	setAnchor(UIAnchor());
+	setAnchor(UIAnchor(Vector2f(), Vector2f(0.0f, 0.5f), pos));
 }
 
 void ScriptingNodeEditor::onMakeUI()
@@ -170,7 +170,7 @@ void ScriptingNodeEditor::onMakeUI()
 
 	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
 	{
-		// TODO
+		applyChanges();
 		destroy();
 	});
 
@@ -181,7 +181,44 @@ void ScriptingNodeEditor::onMakeUI()
 
 	setHandle(UIEventType::ButtonClicked, "delete", [=] (const UIEvent& event)
 	{
-		// TODO
+		deleteNode();
 		destroy();
 	});
+}
+
+void ScriptingNodeEditor::onAddedToRoot(UIRoot& root)
+{
+	root.registerKeyPressListener(shared_from_this());
+	root.setFocus(shared_from_this());
+}
+
+void ScriptingNodeEditor::onRemovedFromRoot(UIRoot& root)
+{
+	root.removeKeyPressListener(*this);
+}
+
+bool ScriptingNodeEditor::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::Esc)) {
+		destroy();
+		return true;
+	}
+
+	if (key.is(KeyCode::Enter)) {
+		applyChanges();
+		destroy();
+		return true;
+	}
+
+	return false;
+}
+
+void ScriptingNodeEditor::applyChanges()
+{
+	// TODO
+}
+
+void ScriptingNodeEditor::deleteNode()
+{
+	// TODO
 }

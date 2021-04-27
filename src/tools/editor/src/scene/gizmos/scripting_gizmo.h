@@ -33,17 +33,25 @@ namespace Halley {
 		void saveEntityData();
 		void drawToolTip(Painter& painter, const ScriptGraphNode& node, Rect4f nodePos) const;
 
-		void openNodeUI(ScriptGraphNode& node);
+		void openNodeUI(ScriptGraphNode& node, Vector2f pos);
 	};
 
 	class ScriptingNodeEditor : public UIWidget {
 	public:
-		ScriptingNodeEditor(UIFactory& factory, ScriptGraphNode& node, const IScriptNodeType& nodeType);
+		ScriptingNodeEditor(UIFactory& factory, ScriptGraphNode& node, const IScriptNodeType& nodeType, Vector2f pos);
 
 		void onMakeUI() override;
+		void onAddedToRoot(UIRoot& root) override;
+		void onRemovedFromRoot(UIRoot& root) override;
+
+	protected:
+		bool onKeyPress(KeyboardKeyPress key) override;
 	
 	private:
 		ScriptGraphNode& node;
 		const IScriptNodeType& nodeType;
+
+		void applyChanges();
+		void deleteNode();
 	};
 }
