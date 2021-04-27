@@ -898,3 +898,8 @@ std::shared_ptr<EntityFactory> SceneEditorWindow::getEntityFactory() const
 {
 	return entityFactory;
 }
+
+void SceneEditorWindow::spawnUI(std::shared_ptr<UIWidget> ui)
+{
+	getRoot()->addChild(std::move(ui));
+}

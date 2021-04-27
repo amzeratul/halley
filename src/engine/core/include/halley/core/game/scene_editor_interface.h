@@ -244,6 +244,7 @@ namespace Halley {
 		virtual float getProjectDefaultZoom() const = 0;
 
 		virtual std::shared_ptr<EntityFactory> getEntityFactory() const = 0;
+		virtual void spawnUI(std::shared_ptr<UIWidget> ui) = 0;
 	};
 
 	class IProject {

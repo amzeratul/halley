@@ -79,6 +79,7 @@ namespace Halley {
 		float getProjectDefaultZoom() const override;
 
 		std::shared_ptr<EntityFactory> getEntityFactory() const override;
+		void spawnUI(std::shared_ptr<UIWidget> ui) override;
 	
 	protected:
 		void update(Time t, bool moved) override;

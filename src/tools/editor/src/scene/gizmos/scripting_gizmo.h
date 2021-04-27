@@ -5,7 +5,7 @@ namespace Halley {
 	class ScriptingGizmo final : public SceneEditorGizmo {
 	public:
 		ScriptingGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes);
-		
+
 		void update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState) override;
 		void draw(Painter& painter) const override;
 		bool isHighlighted() const override;
@@ -32,5 +32,7 @@ namespace Halley {
 		void loadEntityData();
 		void saveEntityData();
 		void drawToolTip(Painter& painter, const ScriptGraphNode& node, Rect4f nodePos) const;
+
+		void openNodeUI(ScriptGraphNode& node);
 	};
 }

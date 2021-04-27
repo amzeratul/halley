@@ -1,0 +1,18 @@
+---
+widget: { class: image, image: $ui_float_window, innerBorder: [ 14, 11, 14, 14 ], colour: $ui_popupWindow }
+sizer: { type: vertical }
+children:
+- widget: { id: name, class: label, text: "Name" }
+  fill: centre
+  proportion: 1
+- widget: { id: nodeFields, class: widget }
+  border: [1, 4, 1, 1]
+  sizer: { type: vertical, gap: 2 }
+- widget: { id: delete, class: button, text: Delete, tooltip: "Remove node" }
+- sizer: { type: horizontal }
+  children:
+  - widget: { id: ok, class: button, text: OK, tooltip: "Accept changes" }
+    proportion: 1
+  - widget: { id: cancel, class: button, text: Cancel, tooltip: "Discard changes" }
+    proportion: 1
+...

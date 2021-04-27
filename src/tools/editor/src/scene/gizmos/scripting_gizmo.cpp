@@ -29,10 +29,14 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 		nodeUnderMouse = renderer->getNodeUnderMouse(basePos, getZoom(), inputState.mousePos);
 	}
 
-	if (!dragging && nodeUnderMouse && inputState.leftClickPressed && inputState.mousePos) {
-		dragging = true;
-		const auto nodePos = scriptGraph->getNodes()[nodeUnderMouse->first].getPosition();
-		startDragPos = nodePos - inputState.mousePos.value();
+	if (!dragging && nodeUnderMouse && inputState.mousePos) {
+		if (inputState.leftClickPressed) {
+			dragging = true;
+			const auto nodePos = scriptGraph->getNodes()[nodeUnderMouse->first].getPosition();
+			startDragPos = nodePos - inputState.mousePos.value();
+		} else if (inputState.rightClickPressed) {
+			openNodeUI(scriptGraph->getNodes()[nodeUnderMouse->first]);
+		}
 	}
 
 	if (dragging) {
@@ -64,12 +68,6 @@ void ScriptingGizmo::draw(Painter& painter) const
 bool ScriptingGizmo::isHighlighted() const
 {
 	return !!nodeUnderMouse;
-}
-
-std::shared_ptr<UIWidget> ScriptingGizmo::makeUI()
-{
-	// TODO
-	return {};
 }
 
 std::vector<String> ScriptingGizmo::getHighlightedComponents() const
@@ -141,4 +139,16 @@ void ScriptingGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, 
 
 	tooltipLabel
 		.draw(painter);
+}
+
+std::shared_ptr<UIWidget> ScriptingGizmo::makeUI()
+{
+	// TODO
+	return {};
+}
+
+void ScriptingGizmo::openNodeUI(ScriptGraphNode& node)
+{
+	auto ui = factory.makeUI("ui/halley/scripting_node_editor");
+	sceneEditorWindow.spawnUI(ui);
 }
