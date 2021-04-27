@@ -33,6 +33,7 @@ namespace Halley {
 
 		virtual ~IScriptNodeType() = default;
 
+		virtual String getId() const = 0;
 		virtual String getName() const = 0;
 
 		virtual std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world) const = 0;

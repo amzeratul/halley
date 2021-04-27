@@ -35,4 +35,15 @@ namespace Halley {
 
 		void openNodeUI(ScriptGraphNode& node);
 	};
+
+	class ScriptingNodeEditor : public UIWidget {
+	public:
+		ScriptingNodeEditor(UIFactory& factory, ScriptGraphNode& node, const IScriptNodeType& nodeType);
+
+		void onMakeUI() override;
+	
+	private:
+		ScriptGraphNode& node;
+		const IScriptNodeType& nodeType;
+	};
 }

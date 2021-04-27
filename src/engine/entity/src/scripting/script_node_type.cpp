@@ -12,7 +12,7 @@ ScriptNodeTypeCollection::ScriptNodeTypeCollection()
 
 void ScriptNodeTypeCollection::addScriptNode(std::unique_ptr<IScriptNodeType> nodeType)
 {
-	auto name = nodeType->getName();
+	auto name = nodeType->getId();
 	nodeTypes[std::move(name)] = std::move(nodeType);
 }
 

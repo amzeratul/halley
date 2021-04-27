@@ -9,7 +9,8 @@ namespace Halley {
 	
 	class ScriptWait final : public ScriptNodeTypeBase<ScriptWaitData> {
 	public:
-		String getName() const override { return "wait"; }
+		String getId() const override { return "wait"; }
+		String getName() const override { return "Wait"; }
 		String getIconName() const override { return "script_icons/wait.png"; }
 		std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world) const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }

@@ -149,6 +149,39 @@ std::shared_ptr<UIWidget> ScriptingGizmo::makeUI()
 
 void ScriptingGizmo::openNodeUI(ScriptGraphNode& node)
 {
-	auto ui = factory.makeUI("ui/halley/scripting_node_editor");
-	sceneEditorWindow.spawnUI(ui);
+	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
+	if (nodeType) {
+		sceneEditorWindow.spawnUI(std::make_shared<ScriptingNodeEditor>(factory, node, *nodeType));
+	}
+}
+
+ScriptingNodeEditor::ScriptingNodeEditor(UIFactory& factory, ScriptGraphNode& node, const IScriptNodeType& nodeType)
+	: UIWidget("scripting_node_editor", {}, UISizer())
+	, node(node)
+	, nodeType(nodeType)
+{
+	factory.loadUI(*this, "ui/halley/scripting_node_editor");
+	setAnchor(UIAnchor());
+}
+
+void ScriptingNodeEditor::onMakeUI()
+{
+	getWidgetAs<UILabel>("name")->setText(LocalisedString::fromUserString(nodeType.getName()));
+
+	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
+	{
+		// TODO
+		destroy();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "cancel", [=] (const UIEvent& event)
+	{
+		destroy();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "delete", [=] (const UIEvent& event)
+	{
+		// TODO
+		destroy();
+	});
 }

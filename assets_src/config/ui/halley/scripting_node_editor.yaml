@@ -1,5 +1,5 @@
 ---
-widget: { class: image, image: $ui_float_window, innerBorder: [ 14, 11, 14, 14 ], colour: $ui_popupWindow }
+widget: { class: image, image: $ui_float_window, innerBorder: [ 14, 11, 14, 14 ], colour: $ui_popupWindow, size: [300, 20] }
 sizer: { type: vertical }
 children:
 - widget: { id: name, class: label, text: "Name" }

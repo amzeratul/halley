@@ -4,7 +4,8 @@
 namespace Halley {
 	class ScriptStart final : public ScriptNodeTypeBase<void> {
 	public:
-		String getName() const override { return "start"; }
+		String getId() const override { return "start"; }
+		String getName() const override { return "Start"; }
 		std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world) const override;
 		String getIconName() const override { return "script_icons/start.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Terminator; }

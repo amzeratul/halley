@@ -199,12 +199,12 @@ Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType) const
 
 const Sprite& ScriptRenderer::getIcon(const IScriptNodeType& nodeType)
 {
-	const auto iter = icons.find(nodeType.getName());
+	const auto iter = icons.find(nodeType.getId());
 	if (iter != icons.end()) {
 		return iter->second;
 	}
-	icons[nodeType.getName()] = Sprite().setImage(resources, nodeType.getIconName()).setPivot(Vector2f(0.5f, 0.5f));
-	return icons[nodeType.getName()];
+	icons[nodeType.getId()] = Sprite().setImage(resources, nodeType.getIconName()).setPivot(Vector2f(0.5f, 0.5f));
+	return icons[nodeType.getId()];
 }
 
 std::optional<std::pair<uint32_t, Rect4f>> ScriptRenderer::getNodeUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos) const
