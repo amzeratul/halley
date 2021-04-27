@@ -17,14 +17,13 @@ namespace Halley {
 	public:
 		EntityEditor(String id, UIFactory& factory);
 
+		void setEntityEditorFactory(std::shared_ptr<EntityEditorFactory> entityEditorFactory);
+
 		void onAddedToRoot(UIRoot& root) override;
 		void onRemovedFromRoot(UIRoot& root) override;
 		
 		void update(Time t, bool moved) override;
 		
-		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
-		void resetFieldFactories();
-
 		void setSceneEditorWindow(SceneEditorWindow& sceneEditor);
 		void setECSData(ECSData& data);
 
@@ -49,7 +48,7 @@ namespace Halley {
 		ECSData* ecsData = nullptr;
 		SceneEditorWindow* sceneEditor = nullptr;
 		const EntityIcons* entityIcons = nullptr;
-		std::unique_ptr<EntityEditorFactory> entityEditorFactory;
+		std::shared_ptr<EntityEditorFactory> entityEditorFactory;
 		
 		std::shared_ptr<UIWidget> fields;
 		std::shared_ptr<UITextInput> entityName;

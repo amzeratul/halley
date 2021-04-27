@@ -99,6 +99,7 @@ namespace Halley {
 		std::shared_ptr<SceneEditorCanvas> canvas;
 		std::shared_ptr<EntityList> entityList;
 		std::shared_ptr<EntityEditor> entityEditor;
+		std::shared_ptr<EntityEditorFactory> entityEditorFactory;
 		std::shared_ptr<UIList> toolMode;
 		std::shared_ptr<EntityIcons> entityIcons;
 

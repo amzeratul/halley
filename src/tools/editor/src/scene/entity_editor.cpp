@@ -14,11 +14,14 @@ EntityEditor::EntityEditor(String id, UIFactory& factory)
 	: UIWidget(std::move(id), Vector2f(200, 30), UISizer(UISizerType::Vertical))
 	, factory(factory)
 {
-	entityEditorFactory = std::make_unique<EntityEditorFactory>(factory);
-	entityEditorFactory->setEntityEditor(*this);
-	resetFieldFactories();
 	makeUI();
 	reloadEntity();
+}
+
+void EntityEditor::setEntityEditorFactory(std::shared_ptr<EntityEditorFactory> factory)
+{
+	entityEditorFactory = std::move(factory);
+	entityEditorFactory->setEntityEditor(*this);
 }
 
 void EntityEditor::onAddedToRoot(UIRoot& root)
@@ -369,16 +372,6 @@ const EntityData& EntityEditor::getEntityData() const
 	return *currentEntityData;
 }
 
-void EntityEditor::addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories)
-{
-	entityEditorFactory->addFieldFactories(std::move(factories));
-}
-
-void EntityEditor::resetFieldFactories()
-{
-	entityEditorFactory->resetFieldFactories();
-}
-
 void EntityEditor::setHighlightedComponents(std::vector<String> componentNames)
 {
 	if (componentNames != highlightedComponents) {
@@ -402,6 +395,7 @@ void EntityEditor::setComponentColour(const String& name, UIWidget& component)
 EntityEditorFactory::EntityEditorFactory(UIFactory& factory)
 	: factory(factory)
 {
+	resetFieldFactories();
 }
 
 std::shared_ptr<IUIElement> EntityEditorFactory::makeLabel(const String& text)
