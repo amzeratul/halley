@@ -84,7 +84,7 @@ namespace Halley {
 		void setIcon(const String& icon);
 
 		void onEntityUpdated() override;
-		void setTool(const String& tool, const String& componentName, const String& fieldName, ConfigNode options) override;
+		void setTool(const String& tool, const String& componentName, const String& fieldName) override;
 		EntityData& getEntityData();
 		const EntityData& getEntityData() const;
 

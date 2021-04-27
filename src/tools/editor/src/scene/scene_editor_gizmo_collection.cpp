@@ -78,7 +78,7 @@ void SceneEditorGizmoCollection::onEntityModified(const UUID& uuid, const Entity
 	}
 }
 
-std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options)
+std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(const String& tool, const String& componentName, const String& fieldName)
 {
 	const bool changedTool = currentTool != tool;
 	
@@ -88,7 +88,7 @@ std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(const String& tool
 	const auto iter = gizmoFactories.find(tool);
 	if (iter != gizmoFactories.end()) {
 		if (iter->second) {
-			activeGizmo = iter->second(snapRules, componentName, fieldName, options);
+			activeGizmo = iter->second(snapRules, componentName, fieldName);
 		}
 	} else {
 		activeGizmo.reset();
@@ -151,19 +151,19 @@ void SceneEditorGizmoCollection::resetTools()
 	tools.clear();
 	
 	addTool(Tool("drag", LocalisedString::fromHardcodedString("Hand [H]"), Sprite().setImage(resources, "ui/scene_editor_drag.png"), KeyCode::H),
-		[this] (SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)
+		[this] (SnapRules snapRules, const String& componentName, const String& fieldName)
 		{
 			return std::unique_ptr<SceneEditorGizmo>{};
 		}
 	);
 	addTool(Tool("translate", LocalisedString::fromHardcodedString("Move [V]"), Sprite().setImage(resources, "ui/scene_editor_move.png"), KeyCode::V),
-		[this] (SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)
+		[this] (SnapRules snapRules, const String& componentName, const String& fieldName)
 		{
 			return std::make_unique<TranslateGizmo>(snapRules, factory, sceneEditorWindow);
 		}
 	);
 	addTool(Tool("scripting", LocalisedString::fromHardcodedString("Scripting [S]"), Sprite().setImage(resources, "ui/scene_editor_scripting.png"), KeyCode::S),
-		[this] (SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)
+		[this] (SnapRules snapRules, const String& componentName, const String& fieldName)
 		{
 			return std::make_unique<ScriptingGizmo>(snapRules, factory, sceneEditorWindow, sceneEditorWindow.getScriptNodeTypes());
 		}

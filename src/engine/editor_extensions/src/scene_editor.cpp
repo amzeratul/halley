@@ -428,7 +428,7 @@ void SceneEditor::showEntity(const UUID& id)
 	}
 }
 
-void SceneEditor::onToolSet(String& tool, String& componentName, String& fieldName, ConfigNode& options)
+void SceneEditor::onToolSet(String& tool, String& componentName, String& fieldName)
 {
 }
 

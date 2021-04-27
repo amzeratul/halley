@@ -20,9 +20,9 @@ std::shared_ptr<IUIElement> ComponentEditorContext::makeLabel(const String& labe
 	return parent.makeLabel(label);
 }
 
-void ComponentEditorContext::setTool(const String& tool, const String& componentName, const String& fieldName, ConfigNode options) const
+void ComponentEditorContext::setTool(const String& tool, const String& componentName, const String& fieldName) const
 {
-	parent.setTool(tool, componentName, fieldName, std::move(options));
+	parent.setTool(tool, componentName, fieldName);
 }
 
 std::shared_ptr<IUIElement> ComponentEditorContext::makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const

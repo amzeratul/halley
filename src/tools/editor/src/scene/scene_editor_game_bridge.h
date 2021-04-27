@@ -33,7 +33,7 @@ namespace Halley {
 		void onEntityRemoved(const UUID& uuid);
 		void onEntityModified(const UUID& uuid, const EntityData& oldData, const EntityData& newData);
 		void onEntityMoved(const UUID& uuid, const EntityData& data);
-		void onToolSet(String& tool, String& componentName, String& fieldName, ConfigNode& options);
+		void onToolSet(String& tool, String& componentName, String& fieldName);
 		void onSceneLoaded(Prefab& scene);
 		void onSceneSaved();
 		void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor);

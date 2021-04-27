@@ -458,14 +458,14 @@ void SceneEditorWindow::onFieldChangedByGizmo(const String& componentName, const
 void SceneEditorWindow::setTool(String tool)
 {
 	if (curTool != tool) {
-		setTool(tool, "", "", ConfigNode());
+		setTool(tool, "", "");
 	}
 }
 
-void SceneEditorWindow::setTool(String tool, String componentName, String fieldName, ConfigNode options)
+void SceneEditorWindow::setTool(String tool, String componentName, String fieldName)
 {
 	// This can mutate all parameters
-	gameBridge->onToolSet(tool, componentName, fieldName, options);
+	gameBridge->onToolSet(tool, componentName, fieldName);
 
 	if (tool.isEmpty()) {
 		tool = "translate";
@@ -474,7 +474,7 @@ void SceneEditorWindow::setTool(String tool, String componentName, String fieldN
 	curTool = tool;
 	curComponentName = componentName;
 		
-	setToolUI(canvas->setTool(tool, componentName, fieldName, options));
+	setToolUI(canvas->setTool(tool, componentName, fieldName));
 		
 	toolMode->setSelectedOptionId(toString(tool));
 }

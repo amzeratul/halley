@@ -97,7 +97,7 @@ namespace Halley {
         virtual void onEntityMoved(const UUID& id, const EntityData& entityData) = 0;
 
     	virtual void showEntity(const UUID& id) = 0;
-        virtual void onToolSet(String& tool, String& componentName, String& fieldName, ConfigNode& options) = 0;
+        virtual void onToolSet(String& tool, String& componentName, String& fieldName) = 0;
 
     	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;
@@ -195,7 +195,7 @@ namespace Halley {
 			{}
 		};
 
-		using GizmoFactory = std::function<std::unique_ptr<SceneEditorGizmo>(SnapRules snapRules, const String& componentName, const String& fieldName, const ConfigNode& options)>;
+		using GizmoFactory = std::function<std::unique_ptr<SceneEditorGizmo>(SnapRules snapRules, const String& componentName, const String& fieldName)>;
 		
 		virtual ~ISceneEditorGizmoCollection() = default;
 
@@ -203,7 +203,7 @@ namespace Halley {
         virtual void draw(Painter& painter) = 0;
         virtual void setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& entityData) = 0;
 		virtual void refreshEntity() = 0;
-        virtual std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options) = 0;
+        virtual std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName) = 0;
 		virtual void deselect() = 0;
 		virtual void addTool(const Tool& tool, GizmoFactory gizmoFactory) = 0;
 		virtual void generateList(UIList& list) = 0;

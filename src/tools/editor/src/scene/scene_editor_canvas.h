@@ -16,7 +16,7 @@ namespace Halley {
 		void setGameBridge(SceneEditorGameBridge& gameBridge);
 		void setSceneEditorWindow(SceneEditorWindow& editorWindow);
 
-		std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options);
+		std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName);
 
 	protected:
 		void update(Time t, bool moved) override;

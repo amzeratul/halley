@@ -158,10 +158,10 @@ void SceneEditorCanvas::setSceneEditorWindow(SceneEditorWindow& window)
 	editorWindow = &window;
 }
 
-std::shared_ptr<UIWidget> SceneEditorCanvas::setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options)
+std::shared_ptr<UIWidget> SceneEditorCanvas::setTool(const String& tool, const String& componentName, const String& fieldName)
 {
 	this->tool = tool;
-	return gameBridge->getGizmos().setTool(tool, componentName, fieldName, options);
+	return gameBridge->getGizmos().setTool(tool, componentName, fieldName);
 }
 
 void SceneEditorCanvas::updateInputState()

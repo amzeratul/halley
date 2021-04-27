@@ -26,7 +26,7 @@ namespace Halley {
 		virtual void onEntityUpdated() = 0;
 		virtual std::shared_ptr<IUIElement> makeLabel(const String& label) = 0;
 		virtual std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) = 0;
-		virtual void setTool(const String& tool, const String& componentName, const String& fieldName, ConfigNode options) = 0;
+		virtual void setTool(const String& tool, const String& componentName, const String& fieldName) = 0;
 		virtual ConfigNode getDefaultNode(const String& fieldType) = 0;
 		virtual void setDefaultName(const String& name, const String& prevName) = 0;
 	};
@@ -38,7 +38,7 @@ namespace Halley {
         UIFactory& getUIFactory() const;
 	    Resources& getGameResources() const;
         void onEntityUpdated() const;
-	    void setTool(const String& tool, const String& componentName, const String& fieldName, ConfigNode options) const;
+	    void setTool(const String& tool, const String& componentName, const String& fieldName) const;
     	
 		std::shared_ptr<IUIElement> makeLabel(const String& label) const;
 		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const;

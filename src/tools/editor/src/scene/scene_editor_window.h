@@ -46,7 +46,7 @@ namespace Halley {
 		void moveEntity(const String& id, const String& newParent, int childIndex);
 
 		void setTool(String tool);
-		void setTool(String tool, String componentName, String fieldName, ConfigNode options);
+		void setTool(String tool, String componentName, String fieldName);
 
 		std::shared_ptr<const Prefab> getGamePrefab(const String& id) const;
 

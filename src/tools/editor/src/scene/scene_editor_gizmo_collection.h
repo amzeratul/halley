@@ -17,7 +17,7 @@ namespace Halley {
 		void setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& entityData) override;
 		void refreshEntity() override;
 		void onEntityModified(const UUID& uuid, const EntityData& oldData, const EntityData& newData);
-		std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName, const ConfigNode& options) override;
+		std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName) override;
 		void deselect() override;
 
 		void addTool(const Tool& tool, GizmoFactory gizmoFactory) override;

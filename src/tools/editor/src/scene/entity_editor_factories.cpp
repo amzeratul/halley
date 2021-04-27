@@ -281,7 +281,6 @@ public:
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		const auto data = pars.data;
-		const auto componentNames = pars.otherComponentNames;
 		const auto componentName = pars.componentName;
 
 		auto style = context.getUIFactory().getStyle("buttonThin");
@@ -291,7 +290,7 @@ public:
 
 		field->setHandle(UIEventType::ButtonClicked, "editVertex", [=, &context] (const UIEvent& event)
 		{
-			context.setTool("vertex", componentName, data.getName(), ConfigNode());
+			context.setTool("vertex", componentName, data.getName());
 		});
 
 		return field;
@@ -494,16 +493,7 @@ public:
 
 		field->setHandle(UIEventType::ButtonClicked, "editPolygon", [=, &context] (const UIEvent& event)
 		{
-			ConfigNode options = ConfigNode(ConfigNode::MapType());
-			options["isOpenPolygon"] = isOpenPolygon();
-
-			ConfigNode::SequenceType compNames;
-			for (const auto& name : componentNames) {
-				compNames.emplace_back(ConfigNode(name));
-			}
-			options["componentNames"] = std::move(compNames);
-
-			context.setTool("polygon", componentName, data.getName(), std::move(options));
+			context.setTool("polygon", componentName, data.getName());
 		});
 
 		return field;

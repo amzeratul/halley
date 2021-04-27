@@ -171,10 +171,10 @@ void SceneEditorGameBridge::onEntityMoved(const UUID& uuid, const EntityData& da
 	}
 }
 
-void SceneEditorGameBridge::onToolSet(String& tool, String& componentName, String& fieldName, ConfigNode& options)
+void SceneEditorGameBridge::onToolSet(String& tool, String& componentName, String& fieldName)
 {
 	if (interfaceReady) {
-		interface->onToolSet(tool, componentName, fieldName, options);
+		interface->onToolSet(tool, componentName, fieldName);
 	}
 }
 
