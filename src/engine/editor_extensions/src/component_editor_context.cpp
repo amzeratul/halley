@@ -4,8 +4,9 @@
 
 using namespace Halley;
 
-ComponentEditorContext::ComponentEditorContext(IEntityEditor& parent, UIFactory& factory, Resources& gameResources)
-	: parent(parent)
+ComponentEditorContext::ComponentEditorContext(IEntityEditorFactory& entityEditorFactory, IEntityEditor* entityEditor, UIFactory& factory, Resources& gameResources)
+	: entityEditorFactory(entityEditorFactory)
+	, entityEditor(entityEditor)
 	, factory(factory)
 	, gameResources(gameResources)
 {}
@@ -15,37 +16,43 @@ Resources& ComponentEditorContext::getGameResources() const
 	return gameResources;
 }
 
-std::shared_ptr<IUIElement> ComponentEditorContext::makeLabel(const String& label) const
-{
-	return parent.makeLabel(label);
-}
-
-void ComponentEditorContext::setTool(const String& tool, const String& componentName, const String& fieldName) const
-{
-	parent.setTool(tool, componentName, fieldName);
-}
-
-std::shared_ptr<IUIElement> ComponentEditorContext::makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const
-{
-	return parent.makeField(fieldType, std::move(parameters), createLabel);
-}
-
-ConfigNode ComponentEditorContext::getDefaultNode(const String& fieldType) const
-{
-	return parent.getDefaultNode(fieldType);
-}
-
-void ComponentEditorContext::setDefaultName(const String& name, const String& prevName) const
-{
-	parent.setDefaultName(name, prevName);
-}
-
 UIFactory& ComponentEditorContext::getUIFactory() const
 {
 	return factory;
 }
 
+std::shared_ptr<IUIElement> ComponentEditorContext::makeLabel(const String& label) const
+{
+	return entityEditorFactory.makeLabel(label);
+}
+
+std::shared_ptr<IUIElement> ComponentEditorContext::makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const
+{
+	return entityEditorFactory.makeField(fieldType, std::move(parameters), createLabel);
+}
+
+ConfigNode ComponentEditorContext::getDefaultNode(const String& fieldType) const
+{
+	return entityEditorFactory.getDefaultNode(fieldType);
+}
+
+void ComponentEditorContext::setTool(const String& tool, const String& componentName, const String& fieldName) const
+{
+	if (entityEditor) {
+		entityEditor->setTool(tool, componentName, fieldName);
+	}
+}
+
+void ComponentEditorContext::setDefaultName(const String& name, const String& prevName) const
+{
+	if (entityEditor) {
+		entityEditor->setDefaultName(name, prevName);
+	}
+}
+
 void ComponentEditorContext::onEntityUpdated() const
 {
-	parent.onEntityUpdated();
+	if (entityEditor) {
+		entityEditor->onEntityUpdated();
+	}
 }

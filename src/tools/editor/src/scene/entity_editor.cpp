@@ -109,7 +109,7 @@ bool EntityEditor::loadEntity(const String& id, EntityData& data, const Prefab* 
 		return false;
 	}
 
-	context = std::make_unique<ComponentEditorContext>(*static_cast<IEntityEditor*>(this), factory, resources);
+	context = std::make_unique<ComponentEditorContext>(*static_cast<IEntityEditorFactory*>(this), static_cast<IEntityEditor*>(this), factory, resources);
 	currentEntityData = &data;
 	prefabData = prefab;
 	currentId = id;
@@ -229,7 +229,7 @@ std::shared_ptr<IUIElement> EntityEditor::makeField(const String& rawFieldType, 
 		
 	const auto iter = fieldFactories.find(fieldType);
 	auto* compFieldFactory = iter != fieldFactories.end() ? iter->second.get() : nullptr;
-		
+
 	if (createLabel == ComponentEditorLabelCreation::Always && compFieldFactory && compFieldFactory->canCreateLabel()) {
 		return compFieldFactory->createLabelAndField(*context, parameters);
 	} else if (createLabel != ComponentEditorLabelCreation::Never && compFieldFactory && compFieldFactory->isNested()) {

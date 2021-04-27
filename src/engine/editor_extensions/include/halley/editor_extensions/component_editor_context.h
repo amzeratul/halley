@@ -24,16 +24,22 @@ namespace Halley {
 		virtual ~IEntityEditor() = default;
 
 		virtual void onEntityUpdated() = 0;
+		virtual void setTool(const String& tool, const String& componentName, const String& fieldName) = 0;
+		virtual void setDefaultName(const String& name, const String& prevName) = 0;
+	};
+
+	class IEntityEditorFactory {
+	public:
+		virtual ~IEntityEditorFactory() = default;
+
 		virtual std::shared_ptr<IUIElement> makeLabel(const String& label) = 0;
 		virtual std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) = 0;
-		virtual void setTool(const String& tool, const String& componentName, const String& fieldName) = 0;
 		virtual ConfigNode getDefaultNode(const String& fieldType) = 0;
-		virtual void setDefaultName(const String& name, const String& prevName) = 0;
 	};
 	
     class ComponentEditorContext {
     public:
-	    ComponentEditorContext(IEntityEditor& parent, UIFactory& factory, Resources& gameResources);
+	    ComponentEditorContext(IEntityEditorFactory& entityEditorFactory, IEntityEditor* entityEditor, UIFactory& factory, Resources& gameResources);
 
         UIFactory& getUIFactory() const;
 	    Resources& getGameResources() const;
@@ -46,7 +52,8 @@ namespace Halley {
 	    void setDefaultName(const String& name, const String& prevName) const;
 
     private:
-        IEntityEditor& parent;
+    	IEntityEditorFactory& entityEditorFactory;
+        IEntityEditor* entityEditor = nullptr;
         UIFactory& factory;
         Resources& gameResources;
     };

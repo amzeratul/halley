@@ -12,7 +12,7 @@ namespace Halley {
 	class UIDropdown;
 	class UITextInput;
 
-	class EntityEditor final : public UIWidget, IEntityEditor {
+	class EntityEditor final : public UIWidget, IEntityEditor, IEntityEditorFactory {
 	public:
 		EntityEditor(String id, UIFactory& factory);
 
