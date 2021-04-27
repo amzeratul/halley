@@ -6,13 +6,14 @@
 #include "src/ui/select_asset_widget.h"
 
 namespace Halley {
+	class EntityEditorFactory;
 	class SceneEditorWindow;
 	class ECSData;
 	class UIFactory;
 	class UIDropdown;
 	class UITextInput;
 
-	class EntityEditor final : public UIWidget, IEntityEditor, IEntityEditorFactory {
+	class EntityEditor final : public UIWidget, IEntityEditor {
 	public:
 		EntityEditor(String id, UIFactory& factory);
 
@@ -20,20 +21,17 @@ namespace Halley {
 		void onRemovedFromRoot(UIRoot& root) override;
 		
 		void update(Time t, bool moved) override;
+		
+		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
+		void resetFieldFactories();
 
 		void setSceneEditorWindow(SceneEditorWindow& sceneEditor);
 		void setECSData(ECSData& data);
-		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
-		void resetFieldFactories();
 
 		bool loadEntity(const String& id, EntityData& data, const Prefab* prefabData, bool force, Resources& gameResources);
 		void unloadEntity();
 		void reloadEntity();
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
-
-		std::shared_ptr<IUIElement> makeLabel(const String& label) override;
-		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) override;
-		ConfigNode getDefaultNode(const String& fieldType) override;
 
 		void setDefaultName(const String& name, const String& prevName) override;
 
@@ -50,14 +48,13 @@ namespace Halley {
 		UIFactory& factory;
 		ECSData* ecsData = nullptr;
 		SceneEditorWindow* sceneEditor = nullptr;
-		const EntityIcons* entityIcons;
-		std::unique_ptr<ComponentEditorContext> context;
+		const EntityIcons* entityIcons = nullptr;
+		std::unique_ptr<EntityEditorFactory> entityEditorFactory;
 		
 		std::shared_ptr<UIWidget> fields;
 		std::shared_ptr<UITextInput> entityName;
 		std::shared_ptr<UIDropdown> entityIcon;
 		std::shared_ptr<SelectAssetWidget> prefabName;
-		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
 
 		EntityData* currentEntityData = nullptr;
 		EntityData prevEntityData;
@@ -75,7 +72,6 @@ namespace Halley {
 
 		void makeUI();
 		void loadComponentData(const String& componentType, ConfigNode& data);
-		std::pair<String, std::vector<String>> parseType(const String& type);
 
 		void setName(const String& name);
 		String getName() const;
@@ -92,5 +88,30 @@ namespace Halley {
 		std::set<String> getComponentsOnPrefab() const;
 
 		void setComponentColour(const String& name, UIWidget& component);
+	};
+
+	class EntityEditorFactory : public IEntityEditorFactory {
+	public:
+		EntityEditorFactory(UIFactory& factory);
+		
+		void setEntityEditor(IEntityEditor& entityEditor);
+		void setGameResources(Resources& resources);
+
+		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
+		void resetFieldFactories();
+	
+		std::shared_ptr<IUIElement> makeLabel(const String& label) override;
+		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) override;
+		ConfigNode getDefaultNode(const String& fieldType) override;
+
+	private:
+		UIFactory& factory;
+		std::unique_ptr<ComponentEditorContext> context;
+		IEntityEditor* entityEditor = nullptr;
+		Resources* gameResources = nullptr;
+		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
+
+		std::pair<String, std::vector<String>> parseType(const String& type);
+		void makeContext();
 	};
 }
