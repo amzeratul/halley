@@ -56,9 +56,8 @@ const String& ComponentDataRetriever::getName() const
 	return name;
 }
 
-ComponentFieldParameters::ComponentFieldParameters(String componentName, std::vector<String> otherComponentNames, ComponentDataRetriever data, std::vector<String> defaultValue, std::vector<String> typeParameters)
+ComponentFieldParameters::ComponentFieldParameters(String componentName, ComponentDataRetriever data, std::vector<String> defaultValue, std::vector<String> typeParameters)
 	: componentName(std::move(componentName))
-	, otherComponentNames(std::move(otherComponentNames))
 	, data(std::move(data))
 	, defaultValue(std::move(defaultValue))
 	, typeParameters(std::move(typeParameters))
@@ -66,12 +65,12 @@ ComponentFieldParameters::ComponentFieldParameters(String componentName, std::ve
 
 ComponentFieldParameters ComponentFieldParameters::withSubIndex(size_t index, std::vector<String> defaultValue, std::vector<String> typeParameters) const
 {
-	return ComponentFieldParameters(componentName, otherComponentNames, data.getSubIndex(index), std::move(defaultValue), std::move(typeParameters));
+	return ComponentFieldParameters(componentName, data.getSubIndex(index), std::move(defaultValue), std::move(typeParameters));
 }
 
 ComponentFieldParameters ComponentFieldParameters::withSubKey(const String& key, std::vector<String> defaultValue, std::vector<String> typeParameters) const
 {
-	return ComponentFieldParameters(componentName, otherComponentNames, data.getSubKey(key), std::move(defaultValue), std::move(typeParameters));
+	return ComponentFieldParameters(componentName, data.getSubKey(key), std::move(defaultValue), std::move(typeParameters));
 }
 
 ComponentFieldParameters ComponentFieldParameters::withSubIndex(size_t index, String defaultValue, std::vector<String> typeParameters) const

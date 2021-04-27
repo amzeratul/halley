@@ -142,16 +142,8 @@ void EntityEditor::reloadEntity()
 	componentWidgets.clear();
 
 	if (currentEntityData) {
-		auto& seq = getEntityData().getComponents();
-		std::vector<String> componentNames;
-		componentNames.reserve(seq.size());
-
-		for (auto& c: seq) {
-			componentNames.push_back(c.first);
-		}
-		
-		for (auto& c: seq) {
-			loadComponentData(c.first, c.second, componentNames);
+		for (auto& c: getEntityData().getComponents()) {
+			loadComponentData(c.first, c.second);
 		}
 		prevEntityData = EntityData(*currentEntityData);
 
@@ -182,7 +174,7 @@ std::shared_ptr<IUIElement> EntityEditor::makeLabel(const String& text)
 	return labelBox;
 }
 
-void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data, const std::vector<String>& componentNames)
+void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data)
 {
 	auto componentUI = factory.makeUI("ui/halley/entity_editor_component");
 	componentUI->getWidgetAs<UILabel>("componentType")->setText(LocalisedString::fromUserString(componentType));
@@ -198,7 +190,7 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 		const auto& componentData = iter->second;
 		for (auto& member: componentData.members) {
 			if (member.canEdit) {
-				ComponentFieldParameters parameters(componentType, componentNames, ComponentDataRetriever(data, member.name), member.defaultValue);
+				ComponentFieldParameters parameters(componentType, ComponentDataRetriever(data, member.name), member.defaultValue);
 				auto field = makeField(member.type.name, parameters, member.collapse ? ComponentEditorLabelCreation::Never : ComponentEditorLabelCreation::Always);
 				if (field) {
 					componentFields->add(field);

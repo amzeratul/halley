@@ -483,7 +483,6 @@ public:
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		const auto data = pars.data;
-		const auto componentNames = pars.otherComponentNames;
 		const auto componentName = pars.componentName;
 
 		auto style = context.getUIFactory().getStyle("buttonThin");

@@ -74,7 +74,7 @@ namespace Halley {
 		std::vector<String> highlightedComponents;
 
 		void makeUI();
-		void loadComponentData(const String& componentType, ConfigNode& data, const std::vector<String>& componentNames);
+		void loadComponentData(const String& componentType, ConfigNode& data);
 		std::pair<String, std::vector<String>> parseType(const String& type);
 
 		void setName(const String& name);

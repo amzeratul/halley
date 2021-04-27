@@ -28,7 +28,7 @@ namespace Halley {
 	
 	class ComponentFieldParameters {
 	public:
-		ComponentFieldParameters(String componentName, std::vector<String> otherComponentNames, ComponentDataRetriever data, std::vector<String> defaultValue = {}, std::vector<String> typeParameters = {});
+		ComponentFieldParameters(String componentName, ComponentDataRetriever data, std::vector<String> defaultValue = {}, std::vector<String> typeParameters = {});
 
 		ComponentFieldParameters withSubIndex(size_t index, std::vector<String> defaultValue, std::vector<String> typeParameters = {}) const;
 		ComponentFieldParameters withSubKey(const String& key, std::vector<String> defaultValue, std::vector<String> typeParameters = {}) const;
@@ -41,7 +41,6 @@ namespace Halley {
 		float getFloatDefaultParameter(size_t n = 0) const;
 
 		String componentName;
-		std::vector<String> otherComponentNames;
 		ComponentDataRetriever data;
 		std::vector<String> defaultValue;
 		std::vector<String> typeParameters;
