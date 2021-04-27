@@ -9,7 +9,7 @@ colours:
   
   toolbarNormal: "#5c80c3"   # main theme accent colour
   toolbarHover: "#f6f7f9"
-  toolbarDown: "#f6f7f9"
+  toolbarDown: "#ECEEF2"
   toolbarSelected: "#f6f7f9"
   toolbarIconNormal: "#ffffff"
   toolbarIconHover: "#000000"
@@ -17,7 +17,7 @@ colours:
   toolbarText: "#ffffff"
 
   ui_controlNormal: "#d7d8e3"
-  ui_controlDown: "#f6f7f9"
+  ui_controlDown: "#ECEEF2"
   ui_controlHover: "#f6f7f9"
   ui_controlDisabled: "#b4b5bd"
   

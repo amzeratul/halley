@@ -9,7 +9,7 @@ colours:
   
   toolbarNormal: "#5c80c3"   # main theme accent colour
   toolbarHover: "#f6f7f9"
-  toolbarDown: "#f6f7f9"
+  toolbarDown: "#ECEEF2"
   toolbarSelected: "#f6f7f9"
   toolbarIconNormal: "#ffffff"
   toolbarIconHover: "#000000"
@@ -17,17 +17,17 @@ colours:
   toolbarText: "#ffffff"
 
   ui_controlNormal: "#d7d8e3"
-  ui_controlDown: "#ffffff"
+  ui_controlDown: "#EAEAEA"
   ui_controlHover: "#ffffff"
   ui_controlDisabled: "#b4b5bd"
   
   ui_buttonNormal: "#4a5e68"
-  ui_buttonDown: "#6e7b81"
+  ui_buttonDown: "#3D4D54"
   ui_buttonHover: "#6e7b81"
   ui_buttonDisabled: "#4a5e68"
 
   ui_inputNormal: "#d7d8e3"
-  ui_inputDown: "#d7d8e3"
+  ui_inputDown: "#BEBFD1"
   ui_inputHover: "#d7d8e3"
   ui_inputDisabled: "#000000"
 
@@ -39,7 +39,7 @@ colours:
   ui_disabledText: "#9d9da4"
 
   ui_scrollBarNormal: "#6e7b81"
-  ui_scrollBarDown: "#97a1a5"
+  ui_scrollBarDown: "#5C686D"
   ui_scrollBarHover: "#97a1a5"
   ui_scrollBarDisabled: "#D7AAB6"
   ui_scrollBackground: "#2f424b"
