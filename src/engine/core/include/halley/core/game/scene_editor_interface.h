@@ -10,6 +10,7 @@
 #include "halley/core/input/input_keyboard.h"
 
 namespace Halley {
+	class IEntityEditorFactory;
 	class EntityFactory;
 	class ScriptNodeTypeCollection;
 	class Sprite;
@@ -235,6 +236,7 @@ namespace Halley {
 
 		virtual void addComponentToCurrentEntity(const String& componentName) = 0;
 		virtual void setHighlightedComponents(std::vector<String> componentNames) = 0;
+		virtual const IEntityEditorFactory& getEntityEditorFactory() const = 0;
 
 		virtual std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() = 0;
 

@@ -151,14 +151,16 @@ void ScriptingGizmo::openNodeUI(ScriptGraphNode& node, Vector2f pos)
 {
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
 	if (nodeType) {
-		sceneEditorWindow.spawnUI(std::make_shared<ScriptingNodeEditor>(factory, node, *nodeType, pos));
+		sceneEditorWindow.spawnUI(std::make_shared<ScriptingNodeEditor>(factory, sceneEditorWindow.getEntityEditorFactory(), node, *nodeType, pos));
 	}
 }
 
-ScriptingNodeEditor::ScriptingNodeEditor(UIFactory& factory, ScriptGraphNode& node, const IScriptNodeType& nodeType, Vector2f pos)
+ScriptingNodeEditor::ScriptingNodeEditor(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, ScriptGraphNode& node, const IScriptNodeType& nodeType, Vector2f pos)
 	: UIWidget("scripting_node_editor", {}, UISizer())
+	, entityEditorFactory(entityEditorFactory)
 	, node(node)
 	, nodeType(nodeType)
+	, curSettings(node.getSettings())
 {
 	factory.loadUI(*this, "ui/halley/scripting_node_editor");
 	setAnchor(UIAnchor(Vector2f(), Vector2f(0.0f, 0.5f), pos));
@@ -184,6 +186,8 @@ void ScriptingNodeEditor::onMakeUI()
 		deleteNode();
 		destroy();
 	});
+
+	makeFields(getWidget("nodeFields"));
 }
 
 void ScriptingNodeEditor::onAddedToRoot(UIRoot& root)
@@ -215,10 +219,23 @@ bool ScriptingNodeEditor::onKeyPress(KeyboardKeyPress key)
 
 void ScriptingNodeEditor::applyChanges()
 {
-	// TODO
+	node.getSettings() = curSettings;
 }
 
 void ScriptingNodeEditor::deleteNode()
 {
 	// TODO
+}
+
+void ScriptingNodeEditor::makeFields(const std::shared_ptr<UIWidget>& fieldsRoot)
+{
+	fieldsRoot->clear();
+	
+	const auto& types = nodeType.getSettingTypes();
+
+	for (const auto& type: types) {
+		const auto params = ComponentFieldParameters(type.name, ComponentDataRetriever(curSettings, type.name), type.defaultValue);
+		auto field = entityEditorFactory.makeField(type.type, params, ComponentEditorLabelCreation::Always);
+		fieldsRoot->add(field);
+	}
 }

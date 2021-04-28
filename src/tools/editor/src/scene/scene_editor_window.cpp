@@ -763,6 +763,11 @@ void SceneEditorWindow::setHighlightedComponents(std::vector<String> componentNa
 	entityEditor->setHighlightedComponents(std::move(componentNames));
 }
 
+const IEntityEditorFactory& SceneEditorWindow::getEntityEditorFactory() const
+{
+	return *entityEditorFactory;
+}
+
 std::shared_ptr<ScriptNodeTypeCollection> SceneEditorWindow::getScriptNodeTypes()
 {
 	if (gameBridge) {

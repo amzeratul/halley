@@ -396,9 +396,10 @@ EntityEditorFactory::EntityEditorFactory(UIFactory& factory)
 	: factory(factory)
 {
 	resetFieldFactories();
+	makeContext();
 }
 
-std::shared_ptr<IUIElement> EntityEditorFactory::makeLabel(const String& text)
+std::shared_ptr<IUIElement> EntityEditorFactory::makeLabel(const String& text) const
 {
 	auto label = std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromUserString(text));
 	label->setMaxWidth(100);
@@ -408,12 +409,8 @@ std::shared_ptr<IUIElement> EntityEditorFactory::makeLabel(const String& text)
 	return labelBox;
 }
 
-std::shared_ptr<IUIElement> EntityEditorFactory::makeField(const String& rawFieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel)
+std::shared_ptr<IUIElement> EntityEditorFactory::makeField(const String& rawFieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const
 {
-	if (!context) {
-		makeContext();
-	}
-	
 	auto [fieldType, typeParams] = parseType(rawFieldType);
 	parameters.typeParameters = std::move(typeParams);
 		
@@ -445,7 +442,7 @@ std::shared_ptr<IUIElement> EntityEditorFactory::makeField(const String& rawFiel
 	return {};
 }
 
-ConfigNode EntityEditorFactory::getDefaultNode(const String& fieldType)
+ConfigNode EntityEditorFactory::getDefaultNode(const String& fieldType) const
 {
 	const auto iter = fieldFactories.find(fieldType);
 	if (iter == fieldFactories.end()) {
@@ -471,16 +468,16 @@ void EntityEditorFactory::resetFieldFactories()
 void EntityEditorFactory::setEntityEditor(IEntityEditor& editor)
 {
 	entityEditor = &editor;
-	context.reset();
+	makeContext();
 }
 
 void EntityEditorFactory::setGameResources(Resources& resources)
 {
 	gameResources = &resources;
-	context.reset();
+	makeContext();
 }
 
-std::pair<String, std::vector<String>> EntityEditorFactory::parseType(const String& type)
+std::pair<String, std::vector<String>> EntityEditorFactory::parseType(const String& type) const
 {
 	// This will split the C++ type for templates, e.g.:
 	// std::optional<Halley::String> -> "std::optional<>", {"Halley::String"}

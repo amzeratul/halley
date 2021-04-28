@@ -31,11 +31,18 @@ namespace Halley {
         	ScriptNodeExecutionState state = ScriptNodeExecutionState::Done;
         };
 
+		struct SettingType {
+			String name;
+			String type;
+			std::vector<String> defaultValue;
+		};
+
 		virtual ~IScriptNodeType() = default;
 
 		virtual String getId() const = 0;
 		virtual String getName() const = 0;
 
+		virtual std::vector<SettingType> getSettingTypes() const = 0;
 		virtual std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world) const = 0;
 		virtual String getIconName() const = 0;
 		virtual ScriptNodeClassification getClassification() const = 0;

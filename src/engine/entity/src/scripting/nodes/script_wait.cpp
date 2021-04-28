@@ -6,6 +6,11 @@ void ScriptWait::doInitData(ScriptWaitData& data, const ScriptGraphNode& node) c
 	data.timeLeft = static_cast<Time>(node.getSettings()["time"].asFloat(0.0f));
 }
 
+std::vector<IScriptNodeType::SettingType> ScriptWait::getSettingTypes() const
+{
+	return { SettingType{ "time", "float", std::vector<String>{"0"} } };
+}
+
 std::pair<String, std::vector<ColourOverride>> ScriptWait::getDescription(const ScriptGraphNode& node, const World& world) const
 {
 	String text;

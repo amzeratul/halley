@@ -99,18 +99,19 @@ namespace Halley {
 		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
 		void resetFieldFactories();
 	
-		std::shared_ptr<IUIElement> makeLabel(const String& label) override;
-		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) override;
-		ConfigNode getDefaultNode(const String& fieldType) override;
+		std::shared_ptr<IUIElement> makeLabel(const String& label) const override;
+		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const override;
+		ConfigNode getDefaultNode(const String& fieldType) const override;
 
 	private:
 		UIFactory& factory;
-		std::unique_ptr<ComponentEditorContext> context;
 		IEntityEditor* entityEditor = nullptr;
 		Resources* gameResources = nullptr;
 		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
 
-		std::pair<String, std::vector<String>> parseType(const String& type);
+		mutable std::unique_ptr<ComponentEditorContext> context;
+
+		std::pair<String, std::vector<String>> parseType(const String& type) const;
 		void makeContext();
 	};
 }

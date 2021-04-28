@@ -38,7 +38,7 @@ namespace Halley {
 
 	class ScriptingNodeEditor : public UIWidget {
 	public:
-		ScriptingNodeEditor(UIFactory& factory, ScriptGraphNode& node, const IScriptNodeType& nodeType, Vector2f pos);
+		ScriptingNodeEditor(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, ScriptGraphNode& node, const IScriptNodeType& nodeType, Vector2f pos);
 
 		void onMakeUI() override;
 		void onAddedToRoot(UIRoot& root) override;
@@ -48,10 +48,13 @@ namespace Halley {
 		bool onKeyPress(KeyboardKeyPress key) override;
 	
 	private:
+		const IEntityEditorFactory& entityEditorFactory;
 		ScriptGraphNode& node;
 		const IScriptNodeType& nodeType;
+		ConfigNode curSettings;
 
 		void applyChanges();
 		void deleteNode();
+		void makeFields(const std::shared_ptr<UIWidget>& fieldsRoot);
 	};
 }

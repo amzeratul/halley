@@ -9,6 +9,11 @@
 
 using namespace Halley;
 
+std::vector<IScriptNodeType::SettingType> ScriptPlayAnimation::getSettingTypes() const
+{
+	return { SettingType{ "sequence", "Halley::String", std::vector<String>{"default"} } };
+}
+
 std::pair<String, std::vector<ColourOverride>> ScriptPlayAnimation::getDescription(const ScriptGraphNode& node, const World& world) const
 {
 	String text;
