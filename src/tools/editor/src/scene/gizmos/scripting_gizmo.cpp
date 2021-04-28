@@ -35,7 +35,7 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 			const auto nodePos = scriptGraph->getNodes()[nodeUnderMouse->first].getPosition();
 			startDragPos = nodePos - inputState.mousePos.value();
 		} else if (inputState.rightClickReleased) {
-			openNodeUI(scriptGraph->getNodes()[nodeUnderMouse->first], inputState.rawMousePos.value());
+			openNodeUI(nodeUnderMouse->first, inputState.rawMousePos.value());
 		}
 	}
 
@@ -111,6 +111,25 @@ void ScriptingGizmo::saveEntityData()
 	markModified("Script", "scriptGraph");
 }
 
+void ScriptingGizmo::destroyNode(uint32_t id)
+{
+	auto& nodes = scriptGraph->getNodes();
+
+	if (id < nodes.size()) {
+		for (auto& n: nodes) {
+			n.onNodeRemoved(id);
+		}
+		
+		nodes.erase(nodes.begin() + id);
+		saveEntityData();
+	}
+}
+
+ScriptGraphNode& ScriptingGizmo::getNode(uint32_t id)
+{
+	return scriptGraph->getNodes().at(id);
+}
+
 void ScriptingGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, Rect4f nodePos) const
 {
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
@@ -143,25 +162,39 @@ void ScriptingGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, 
 
 std::shared_ptr<UIWidget> ScriptingGizmo::makeUI()
 {
-	// TODO
-	return {};
+	auto ui = factory.makeUI("ui/halley/scripting_gizmo_toolbar");
+	ui->setInteractWithMouse(true);
+
+	ui->setHandle(UIEventType::ButtonClicked, "addNode", [=] (const UIEvent& event)
+	{
+		addNode();
+	});
+	
+	return ui;
 }
 
-void ScriptingGizmo::openNodeUI(ScriptGraphNode& node, Vector2f pos)
+void ScriptingGizmo::openNodeUI(uint32_t nodeId, Vector2f pos)
 {
+	ScriptGraphNode& node = getNode(nodeId);
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
 	if (nodeType) {
-		sceneEditorWindow.spawnUI(std::make_shared<ScriptingNodeEditor>(factory, sceneEditorWindow.getEntityEditorFactory(), node, *nodeType, pos));
+		sceneEditorWindow.spawnUI(std::make_shared<ScriptingNodeEditor>(*this, factory, sceneEditorWindow.getEntityEditorFactory(), nodeId, *nodeType, pos));
 	}
 }
 
-ScriptingNodeEditor::ScriptingNodeEditor(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, ScriptGraphNode& node, const IScriptNodeType& nodeType, Vector2f pos)
+void ScriptingGizmo::addNode()
+{
+	// TODO
+}
+
+ScriptingNodeEditor::ScriptingNodeEditor(ScriptingGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, uint32_t nodeId, const IScriptNodeType& nodeType, Vector2f pos)
 	: UIWidget("scripting_node_editor", {}, UISizer())
+	, gizmo(gizmo)
 	, factory(factory)
 	, entityEditorFactory(entityEditorFactory)
-	, node(node)
+	, nodeId(nodeId)
 	, nodeType(nodeType)
-	, curSettings(node.getSettings())
+	, curSettings(gizmo.getNode(nodeId).getSettings())
 {
 	setAnchor(UIAnchor(Vector2f(), Vector2f(0.0f, 0.5f), pos));
 }
@@ -220,12 +253,13 @@ bool ScriptingNodeEditor::onKeyPress(KeyboardKeyPress key)
 
 void ScriptingNodeEditor::applyChanges()
 {
-	node.getSettings() = curSettings;
+	gizmo.getNode(nodeId).getSettings() = curSettings;
+	gizmo.saveEntityData();
 }
 
 void ScriptingNodeEditor::deleteNode()
 {
-	// TODO
+	gizmo.destroyNode(nodeId);
 }
 
 void ScriptingNodeEditor::makeFields(const std::shared_ptr<UIWidget>& fieldsRoot)

@@ -13,7 +13,11 @@ namespace Halley {
 		std::vector<String> getHighlightedComponents() const override;
 		void refreshEntity() override;
 		void onEntityChanged() override;
-	
+
+		void saveEntityData();
+		void destroyNode(uint32_t id);
+		ScriptGraphNode& getNode(uint32_t id);
+
 	private:
 		UIFactory& factory;
 		ISceneEditorWindow& sceneEditorWindow;
@@ -30,15 +34,15 @@ namespace Halley {
 		mutable TextRenderer tooltipLabel;
 
 		void loadEntityData();
-		void saveEntityData();
 		void drawToolTip(Painter& painter, const ScriptGraphNode& node, Rect4f nodePos) const;
 
-		void openNodeUI(ScriptGraphNode& node, Vector2f pos);
+		void openNodeUI(uint32_t nodeId, Vector2f pos);
+		void addNode();
 	};
 
 	class ScriptingNodeEditor : public UIWidget {
 	public:
-		ScriptingNodeEditor(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, ScriptGraphNode& node, const IScriptNodeType& nodeType, Vector2f pos);
+		ScriptingNodeEditor(ScriptingGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, uint32_t nodeId, const IScriptNodeType& nodeType, Vector2f pos);
 
 		void onMakeUI() override;
 		void onAddedToRoot(UIRoot& root) override;
@@ -48,9 +52,10 @@ namespace Halley {
 		bool onKeyPress(KeyboardKeyPress key) override;
 	
 	private:
+		ScriptingGizmo& gizmo;
 		UIFactory& factory;
 		const IEntityEditorFactory& entityEditorFactory;
-		ScriptGraphNode& node;
+		uint32_t nodeId;
 		const IScriptNodeType& nodeType;
 		ConfigNode curSettings;
 

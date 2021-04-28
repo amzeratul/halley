@@ -77,6 +77,16 @@ void ScriptGraphNode::feedToHash(Hash::Hasher& hasher)
 	// TODO
 }
 
+void ScriptGraphNode::onNodeRemoved(uint32_t idx)
+{
+	outputs.erase(std::remove_if(outputs.begin(), outputs.end(), [&] (const Output& o) { return o.nodeId == idx; }), outputs.end());
+	for (auto& o: outputs) {
+		if (o.nodeId >= idx) {
+			--o.nodeId;
+		}
+	}
+}
+
 ScriptGraph::ScriptGraph()
 {
 	makeBaseGraph();

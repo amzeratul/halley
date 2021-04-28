@@ -38,6 +38,8 @@ namespace Halley {
 		void setOutput(uint8_t outputPinN, uint32_t targetNode, uint8_t inputPinN);
 		void feedToHash(Hash::Hasher& hasher);
 
+		void onNodeRemoved(uint32_t idx);
+
 	private:
 		Vector2f position;
 		String type;
