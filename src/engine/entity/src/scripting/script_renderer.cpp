@@ -64,11 +64,12 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 		return;
 	}
 
-	for (const auto& output: node.getOutputs()) {
-		const size_t srcIdx = 0; // TODO		
+	for (size_t i = 0; i < node.getOutputs().size(); ++i) {
+		const auto& output = node.getOutputs()[i];
+		const size_t srcIdx = i;
 		const Vector2f srcPos = getNodeElementPosition(*nodeType, NodeElementType::Output, basePos, node, srcIdx, curZoom);
 
-		const size_t dstIdx = 0; // TODO
+		const size_t dstIdx = output.inputPin;
 		const auto& dstNode = graph.getNodes().at(output.nodeId);
 		const auto* dstNodeType = nodeTypeCollection.tryGetNodeType(dstNode.getType());
 		if (!dstNodeType) {
@@ -207,7 +208,7 @@ const Sprite& ScriptRenderer::getIcon(const IScriptNodeType& nodeType)
 	return icons[nodeType.getId()];
 }
 
-std::optional<std::pair<uint32_t, Rect4f>> ScriptRenderer::getNodeUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos) const
+std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos) const
 {
 	if (!graph || !mousePos) {
 		return {};
@@ -222,7 +223,7 @@ std::optional<std::pair<uint32_t, Rect4f>> ScriptRenderer::getNodeUnderMouse(Vec
 		const auto pos = basePos + node.getPosition();
 		const auto curRect = area + pos;
 		if (curRect.contains(mousePos.value())) {
-			return std::pair<uint32_t, Rect4f>{ static_cast<uint32_t>(i), curRect };
+			return NodeUnderMouseInfo{ static_cast<uint32_t>(i), NodeElementType::Node, 0, curRect };
 		}
 	}
 

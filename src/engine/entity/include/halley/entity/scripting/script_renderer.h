@@ -12,23 +12,31 @@ namespace Halley {
 
 	class ScriptRenderer {
 	public:
+		enum class NodeElementType : uint8_t {
+			Node,
+			Input,
+			Output,
+			Target
+		};
+
+		struct NodeUnderMouseInfo {
+			uint32_t nodeId;
+			NodeElementType elementType;
+			uint8_t elementId;
+			Rect4f nodeArea;
+		};
+		
 		ScriptRenderer(Resources& resources, World& world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom);
 		
 		void setGraph(const ScriptGraph* graph);
 		void setState(const ScriptState* scriptState);
 		void draw(Painter& painter, Vector2f basePos, float curZoom);
 		
-		std::optional<std::pair<uint32_t, Rect4f>> getNodeUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos) const;
+		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos) const;
 		void setHighlight(std::optional<uint32_t> highlightNode);
 
 	private:
-		enum class NodeElementType {
-			Input,
-			Output,
-			Target
-		};
-
-		enum class NodeDrawMode {
+		enum class NodeDrawMode : uint8_t {
 			Normal,
 			Highlight,
 			Dimmed

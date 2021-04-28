@@ -26,7 +26,7 @@ namespace Halley {
 
 		Vector2f basePos;
 		ScriptGraph* scriptGraph = nullptr;
-		std::optional<std::pair<uint32_t, Rect4f>> nodeUnderMouse;
+		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeUnderMouse;
 
 		bool dragging = false;
 		Vector2f startDragPos;
