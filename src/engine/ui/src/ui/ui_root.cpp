@@ -144,7 +144,7 @@ void UIRoot::updateGamepadInput(const spInputDevice& input)
 		auto& c = *cs[i];
 		updateGamepadInputTree(input, c, inputTargets, bestPriority, accepting);
 
-		if (c.isMouseBlocker()) {
+		if (c.isMouseBlocker() && c.isActive()) {
 			accepting = false;
 		}
 	}
