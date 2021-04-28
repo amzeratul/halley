@@ -20,7 +20,7 @@ std::pair<String, std::vector<ColourOverride>> ScriptPlayAnimation::getDescripti
 	std::vector<ColourOverride> cols;
 
 	const EntityId targetId = node.getTargets().empty() ? EntityId() : node.getTargets()[0];
-	const ConstEntityRef target = world.getEntity(targetId);
+	const ConstEntityRef target = world.tryGetEntity(targetId);
 	const String targetName = target.isValid() ? target.getName() : "<unknown>";
 
 	text += "Play sequence \"";

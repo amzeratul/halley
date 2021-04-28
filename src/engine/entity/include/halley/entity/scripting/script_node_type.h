@@ -84,8 +84,9 @@ namespace Halley {
     	void addScriptNode(std::unique_ptr<IScriptNodeType> nodeType);
 
 		const IScriptNodeType* tryGetNodeType(const String& typeId) const;
-		
-    private:
+		std::vector<String> getTypes() const;
+
+	private:
     	std::map<String, std::unique_ptr<IScriptNodeType>> nodeTypes;
 
 		void addBasicScriptNodes();

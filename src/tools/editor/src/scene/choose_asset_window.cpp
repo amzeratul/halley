@@ -8,11 +8,12 @@
 
 using namespace Halley;
 
-ChooseAssetWindow::ChooseAssetWindow(UIFactory& factory, Callback callback)
+ChooseAssetWindow::ChooseAssetWindow(UIFactory& factory, Callback callback, bool canShowBlank)
 	: UIWidget("choose_asset_window", {}, UISizer())
 	, factory(dynamic_cast<EditorUIFactory&>(factory))
 	, callback(std::move(callback))
 	, fuzzyMatcher(false, 100)
+	, canShowBlank(canShowBlank)
 {
 	highlightCol = factory.getColourScheme()->getColour("ui_stringMatchText");
 
@@ -49,7 +50,7 @@ void ChooseAssetWindow::populateList()
 	
 	if (filter.isEmpty()) {
 		if (canShowAll()) {
-			if (canShowBlank()) {
+			if (canShowBlank) {
 				options->addTextItem("", LocalisedString::fromHardcodedString("[Empty]"));
 			}
 			
@@ -125,11 +126,6 @@ bool ChooseAssetWindow::onKeyPress(KeyboardKeyPress key)
 	return false;
 }
 
-bool ChooseAssetWindow::canShowBlank() const
-{
-	return true;
-}
-
 bool ChooseAssetWindow::canShowAll() const
 {
 	return true;
@@ -177,7 +173,7 @@ void ChooseAssetWindow::makeUI()
 void ChooseAssetWindow::accept()
 {
 	const auto id = getWidgetAs<UIList>("options")->getSelectedOptionId();
-	if (canShowBlank() || !id.isEmpty()) {
+	if (canShowBlank || !id.isEmpty()) {
 		if (callback) {
 			callback(id);
 			destroy();
@@ -193,15 +189,10 @@ void ChooseAssetWindow::cancel()
 }
 
 AddComponentWindow::AddComponentWindow(UIFactory& factory, const std::vector<String>& componentList, Callback callback)
-	: ChooseAssetWindow(factory, std::move(callback))
+	: ChooseAssetWindow(factory, std::move(callback), false)
 {
 	setAssetIds(componentList, "");
 	setTitle(LocalisedString::fromHardcodedString("Add Component"));
-}
-
-bool AddComponentWindow::canShowBlank() const
-{
-	return false;
 }
 
 ChooseAssetTypeWindow::ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, Callback callback)
@@ -221,7 +212,7 @@ Sprite ChooseAssetTypeWindow::makeIcon(const String& id)
 }
 
 ChooseImportAssetWindow::ChooseImportAssetWindow(UIFactory& factory, Project& project, Callback callback)
-	: ChooseAssetWindow(factory, std::move(callback))
+	: ChooseAssetWindow(factory, std::move(callback), false)
 	, project(project)
 {
 	auto assetNames = project.getAssetSrcList();
@@ -242,11 +233,6 @@ Sprite ChooseImportAssetWindow::makeIcon(const String& id)
 	auto icon = getFactory().makeImportAssetTypeIcon(type);
 	icons[type] = icon;
 	return icon;
-}
-
-bool ChooseImportAssetWindow::canShowBlank() const
-{
-	return false;
 }
 
 bool ChooseImportAssetWindow::canShowAll() const

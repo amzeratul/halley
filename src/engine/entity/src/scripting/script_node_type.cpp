@@ -25,6 +25,16 @@ const IScriptNodeType* ScriptNodeTypeCollection::tryGetNodeType(const String& ty
 	return nullptr;
 }
 
+std::vector<String> ScriptNodeTypeCollection::getTypes() const
+{
+	std::vector<String> result;
+	result.reserve(nodeTypes.size());
+	for (const auto& [id, v]: nodeTypes) {
+		result.push_back(id);
+	}
+	return result;
+}
+
 void ScriptNodeTypeCollection::addBasicScriptNodes()
 {
 	addScriptNode(std::make_unique<ScriptStart>());

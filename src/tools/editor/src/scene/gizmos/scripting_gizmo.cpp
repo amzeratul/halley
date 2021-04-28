@@ -1,6 +1,7 @@
 #include "scripting_gizmo.h"
 #include <components/script_component.h>
 #include "halley/entity/components/transform_2d_component.h"
+#include "src/scene/choose_asset_window.h"
 
 using namespace Halley;
 
@@ -184,7 +185,21 @@ void ScriptingGizmo::openNodeUI(uint32_t nodeId, Vector2f pos)
 
 void ScriptingGizmo::addNode()
 {
-	// TODO
+	auto chooseAssetWindow = std::make_shared<ChooseAssetWindow>(factory, [=] (std::optional<String> result)
+	{
+		if (result) {
+			addNode(result.value());
+		}
+	}, false);
+	chooseAssetWindow->setAssetIds(scriptNodeTypes->getTypes(), "");
+	chooseAssetWindow->setTitle(LocalisedString::fromHardcodedString("Add Scripting Node"));
+	sceneEditorWindow.spawnUI(std::move(chooseAssetWindow));
+}
+
+void ScriptingGizmo::addNode(const String& type)
+{
+	Vector2f pos; // TODO?
+	scriptGraph->getNodes().push_back(ScriptGraphNode(type, pos));
 }
 
 ScriptingNodeEditor::ScriptingNodeEditor(ScriptingGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, uint32_t nodeId, const IScriptNodeType& nodeType, Vector2f pos)

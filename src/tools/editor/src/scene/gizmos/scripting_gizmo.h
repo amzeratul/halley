@@ -38,6 +38,7 @@ namespace Halley {
 
 		void openNodeUI(uint32_t nodeId, Vector2f pos);
 		void addNode();
+		void addNode(const String& type);
 	};
 
 	class ScriptingNodeEditor : public UIWidget {

@@ -24,6 +24,7 @@ ScriptGraphNode::ScriptGraphNode()
 ScriptGraphNode::ScriptGraphNode(String type, Vector2f position)
 	: position(position)
 	, type(std::move(type))
+	, settings(ConfigNode::MapType())
 {
 }
 
