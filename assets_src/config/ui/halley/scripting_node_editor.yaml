@@ -6,7 +6,7 @@ children:
   fill: centre
   proportion: 1
 - widget: { id: nodeFields, class: widget }
-  border: [1, 4, 1, 1]
+  border: [1, 10, 1, 7]
   sizer: { type: vertical, gap: 2 }
 - widget: { id: delete, class: button, text: Delete, tooltip: "Remove node" }
 - sizer: { type: horizontal }

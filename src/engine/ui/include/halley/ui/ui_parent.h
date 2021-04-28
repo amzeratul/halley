@@ -72,7 +72,7 @@ namespace Halley {
 		virtual bool isActiveInHierarchy() const;
 
 		template <typename F>
-		void descend(F f, bool includeInactive = false);
+		void descend(F f, bool includeInactive = false, bool includePending = false);
 
 	private:
 		std::vector<std::shared_ptr<UIWidget>> children;

@@ -10,8 +10,10 @@ namespace Halley {
 		bool leftClickReleased = false;
 		bool leftClickHeld = false;
 		bool middleClickPressed = false;
+   		bool middleClickReleased = false;
 		bool middleClickHeld = false;
 		bool rightClickPressed = false;
+   		bool rightClickReleased = false;
 		bool rightClickHeld = false;
 		bool shiftHeld = false;
 		bool ctrlHeld = false;

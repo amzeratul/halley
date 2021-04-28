@@ -116,9 +116,11 @@ void SceneEditorCanvas::releaseMouse(Vector2f mousePos, int button)
 		inputState.leftClickHeld = false;
 		break;
 	case 1:
+		inputState.middleClickReleased = true;
 		inputState.middleClickHeld = false;
 		break;
 	case 2:
+		inputState.rightClickReleased = true;
 		inputState.rightClickHeld = false;
 		break;
 	}
@@ -195,5 +197,7 @@ void SceneEditorCanvas::clearInputState()
 	inputState.leftClickPressed = false;
 	inputState.leftClickReleased = false;
 	inputState.middleClickPressed = false;
+	inputState.middleClickReleased = false;
 	inputState.rightClickPressed = false;
+	inputState.rightClickReleased = false;
 }

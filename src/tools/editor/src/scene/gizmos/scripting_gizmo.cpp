@@ -34,7 +34,7 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 			dragging = true;
 			const auto nodePos = scriptGraph->getNodes()[nodeUnderMouse->first].getPosition();
 			startDragPos = nodePos - inputState.mousePos.value();
-		} else if (inputState.rightClickPressed) {
+		} else if (inputState.rightClickReleased) {
 			openNodeUI(scriptGraph->getNodes()[nodeUnderMouse->first], inputState.rawMousePos.value());
 		}
 	}
@@ -157,12 +157,12 @@ void ScriptingGizmo::openNodeUI(ScriptGraphNode& node, Vector2f pos)
 
 ScriptingNodeEditor::ScriptingNodeEditor(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, ScriptGraphNode& node, const IScriptNodeType& nodeType, Vector2f pos)
 	: UIWidget("scripting_node_editor", {}, UISizer())
+	, factory(factory)
 	, entityEditorFactory(entityEditorFactory)
 	, node(node)
 	, nodeType(nodeType)
 	, curSettings(node.getSettings())
 {
-	factory.loadUI(*this, "ui/halley/scripting_node_editor");
 	setAnchor(UIAnchor(Vector2f(), Vector2f(0.0f, 0.5f), pos));
 }
 
@@ -192,8 +192,9 @@ void ScriptingNodeEditor::onMakeUI()
 
 void ScriptingNodeEditor::onAddedToRoot(UIRoot& root)
 {
+	factory.loadUI(*this, "ui/halley/scripting_node_editor");
+
 	root.registerKeyPressListener(shared_from_this());
-	root.setFocus(shared_from_this());
 }
 
 void ScriptingNodeEditor::onRemovedFromRoot(UIRoot& root)
@@ -237,5 +238,18 @@ void ScriptingNodeEditor::makeFields(const std::shared_ptr<UIWidget>& fieldsRoot
 		const auto params = ComponentFieldParameters(type.name, ComponentDataRetriever(curSettings, type.name), type.defaultValue);
 		auto field = entityEditorFactory.makeField(type.type, params, ComponentEditorLabelCreation::Always);
 		fieldsRoot->add(field);
+	}
+
+	bool foundFocus = false;
+	fieldsRoot->descend([&] (const std::shared_ptr<UIWidget>& e)
+	{
+		if (!foundFocus && e->canReceiveFocus()) {
+			foundFocus = true;
+			getRoot()->setFocus(e);
+		}
+	}, false, true);
+
+	if (!foundFocus) {
+		getRoot()->setFocus(shared_from_this());
 	}
 }

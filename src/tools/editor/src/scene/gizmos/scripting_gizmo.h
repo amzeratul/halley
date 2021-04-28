@@ -48,6 +48,7 @@ namespace Halley {
 		bool onKeyPress(KeyboardKeyPress key) override;
 	
 	private:
+		UIFactory& factory;
 		const IEntityEditorFactory& entityEditorFactory;
 		ScriptGraphNode& node;
 		const IScriptNodeType& nodeType;
