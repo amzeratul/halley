@@ -26,7 +26,7 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 	}
 	renderer->setGraph(scriptGraph);
 
-	if (!dragging ) {
+	if (!dragging) {
 		nodeUnderMouse = renderer->getNodeUnderMouse(basePos, getZoom(), inputState.mousePos);
 	}
 
@@ -49,8 +49,6 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 			}
 		}
 	}
-
-	lastMousePos = inputState.mousePos;
 }
 
 void ScriptingGizmo::onNodeClicked(Vector2f mousePos)
@@ -74,11 +72,43 @@ void ScriptingGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 
 void ScriptingGizmo::onPinClicked()
 {
+	Expects(nodeUnderMouse);
 	nodeEditingConnection = nodeUnderMouse;
+
+	const auto nodeId = nodeEditingConnection->nodeId;
+	const auto pinId = nodeEditingConnection->elementId;
+	auto& node = scriptGraph->getNodes().at(nodeId);
+	
+	if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Input) {
+		// Erase existing connection to this input
+		for (auto& n: scriptGraph->getNodes()) {
+			n.disconnectOutputsTo(nodeId, pinId);
+		}
+	}
+	if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Output) {
+		// Erase connection coming out of this
+		node.setOutput(pinId, {}, 0);
+	}
+	if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Target) {
+		// Erase connection coming out of this
+		node.setTarget(pinId, {});
+	}
 }
 
 void ScriptingGizmo::onEditingConnection(const SceneEditorInputState& inputState)
 {
+	nodeConnectionDst = inputState.mousePos;
+
+	if (nodeUnderMouse) {
+		const auto srcType = nodeEditingConnection->elementType;
+		const auto dstType = nodeUnderMouse->elementType;
+		using ET = ScriptRenderer::NodeElementType;
+		
+		if ((srcType == ET::Input && dstType != ET::Output) || (srcType == ET::Output && dstType != ET::Input) || (srcType == ET::Target && dstType != ET::Target)) {
+			nodeUnderMouse.reset();
+		}
+	}
+	
 	if (inputState.leftClickPressed) {
 		nodeEditingConnection.reset();
 	}
@@ -96,8 +126,8 @@ void ScriptingGizmo::draw(Painter& painter) const
 	const bool overNodeBody = nodeUnderMouse && nodeUnderMouse->elementType == ScriptRenderer::NodeElementType::Node;
 
 	std::optional<ScriptRenderer::ConnectionPath> path;
-	if (nodeEditingConnection && lastMousePos) {
-		path = ScriptRenderer::ConnectionPath{ nodeEditingConnection->pinPos, lastMousePos.value(), nodeEditingConnection->elementType };
+	if (nodeEditingConnection && nodeConnectionDst) {
+		path = ScriptRenderer::ConnectionPath{ nodeEditingConnection->pinPos, nodeConnectionDst.value(), nodeEditingConnection->elementType };
 	}
 	
 	renderer->setHighlight(nodeUnderMouse);

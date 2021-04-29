@@ -7,7 +7,7 @@ namespace Halley {
 	class ScriptGraphNode {
 	public:
 		struct Output {
-			uint32_t nodeId = 0;
+			OptionalLite<uint32_t> nodeId = {};
 			uint8_t inputPin = 0;
 
 			Output() = default;
@@ -35,10 +35,12 @@ namespace Halley {
 		const ConfigNode& getSettings() const { return settings; }
 		ConfigNode& getSettings() { return settings; }
 
-		void setOutput(uint8_t outputPinN, uint32_t targetNode, uint8_t inputPinN);
+		void setOutput(uint8_t outputPinN, OptionalLite<uint32_t> targetNode, uint8_t inputPinN);
+		void setTarget(uint8_t targetPinN, EntityId targetEntity);
 		void feedToHash(Hash::Hasher& hasher);
 
-		void onNodeRemoved(uint32_t idx);
+		void onNodeRemoved(uint32_t nodeId);
+		void disconnectOutputsTo(uint32_t nodeId, OptionalLite<uint8_t> pinId);
 
 	private:
 		Vector2f position;

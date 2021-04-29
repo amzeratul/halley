@@ -28,7 +28,7 @@ namespace Halley {
 		ScriptGraph* scriptGraph = nullptr;
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeUnderMouse;
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeEditingConnection;
-		std::optional<Vector2f> lastMousePos;
+		std::optional<Vector2f> nodeConnectionDst;
 
 		bool dragging = false;
 		Vector2f startDragPos;

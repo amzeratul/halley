@@ -73,18 +73,22 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 
 	for (size_t i = 0; i < node.getOutputs().size(); ++i) {
 		const auto& output = node.getOutputs()[i];
+		if (!output.nodeId) {
+			continue;
+		}
+		
 		const size_t srcIdx = i;
 		const Vector2f srcPos = getNodeElementArea(*nodeType, NodeElementType::Output, basePos, node, srcIdx, curZoom).getCentre();
 
 		const size_t dstIdx = output.inputPin;
-		const auto& dstNode = graph.getNodes().at(output.nodeId);
+		const auto& dstNode = graph.getNodes().at(output.nodeId.value());
 		const auto* dstNodeType = nodeTypeCollection.tryGetNodeType(dstNode.getType());
 		if (!dstNodeType) {
 			continue;
 		}
 		const Vector2f dstPos = getNodeElementArea(*dstNodeType, NodeElementType::Input, basePos, dstNode, dstIdx, curZoom).getCentre();
 		
-		drawConnection(painter, ConnectionPath{ srcPos, dstPos, NodeElementType::Input }, curZoom);
+		drawConnection(painter, ConnectionPath{ srcPos, dstPos, NodeElementType::Output }, curZoom);
 	}
 
 	for (size_t i = 0; i < node.getTargets().size(); ++i) {
@@ -106,8 +110,8 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 
 BezierCubic ScriptRenderer::makeBezier(const ConnectionPath& path) const
 {
-	const float xSelect = path.type == NodeElementType::Target ? 0.0f : 1.0f;
-	const float ySelect = 1.0f - xSelect;
+	const float xSelect = path.type == NodeElementType::Target ? 0.0f : (path.type == NodeElementType::Output ? 1.0f : -1.0f);
+	const float ySelect = 1.0f - std::abs(xSelect);
 	const Vector2f axisSelector = Vector2f(xSelect, ySelect);
 	
 	const float dist = std::max(std::abs((path.to * axisSelector).manhattanLength() - (path.from * axisSelector).manhattanLength()), 20.0f) / 2;

@@ -53,21 +53,25 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 			} else if (state == ScriptNodeExecutionState::Done) {
 				// Proceed to next node(s)
 				thread.finishNode();
-				const auto& outputs = node.getOutputs();
-				if (outputs.empty()) {
-					// Nothing follows this, terminate thread
-					thread.advanceToNode({});
-				} else {
-					// Direct sequel
-					thread.advanceToNode(outputs[0].nodeId);
-					
-					if (outputs.size() > 1)	{
-						// Spawn others as new threads
-						for (size_t j = 1; j < outputs.size(); ++j) {
-							auto& newThread = threads.emplace_back(outputs[j].nodeId);
+
+				size_t nOutputsFound = 0;
+				for (const auto& output: node.getOutputs()) {
+					if (output.nodeId) {
+						if (nOutputsFound == 0) {
+							// Direct sequel
+							thread.advanceToNode(output.nodeId.value());
+						} else {
+							// Spawn as new thread
+							auto& newThread = threads.emplace_back(output.nodeId.value());
 							newThread.getTimeSlice() = timeLeft;
 						}
+
+						++nOutputsFound;
 					}
+				}
+				if (nOutputsFound == 0) {
+					// Nothing follows this, terminate thread
+					thread.advanceToNode({});
 				}
 			}
 		}

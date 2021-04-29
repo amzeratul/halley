@@ -4,14 +4,16 @@ using namespace Halley;
 
 ScriptGraphNode::Output::Output(const ConfigNode& node)
 {
-	nodeId = static_cast<uint32_t>(node["nodeId"].asInt());
+	if (node.hasKey("nodeId")) {
+		nodeId = static_cast<uint32_t>(node["nodeId"].asInt());
+	}
 	inputPin = static_cast<uint8_t>(node["inputPin"].asInt(0));
 }
 
 ConfigNode ScriptGraphNode::Output::toConfigNode() const
 {
 	ConfigNode::MapType result;
-	result["nodeId"] = static_cast<int>(nodeId);
+	result["nodeId"] = nodeId ? ConfigNode(static_cast<int>(nodeId.value())) : ConfigNode();
 	if (inputPin != 0) {
 		result["inputPin"] = static_cast<int>(inputPin);
 	}
@@ -64,7 +66,7 @@ ConfigNode ScriptGraphNode::toConfigNode(const ConfigNodeSerializationContext& c
 	return result;
 }
 
-void ScriptGraphNode::setOutput(uint8_t outputPinN, uint32_t targetNode, uint8_t inputPinN)
+void ScriptGraphNode::setOutput(uint8_t outputPinN, OptionalLite<uint32_t> targetNode, uint8_t inputPinN)
 {
 	outputs.resize(std::max(outputs.size(), static_cast<size_t>(outputPinN + 1)));
 	auto& output = outputs[outputPinN];
@@ -72,19 +74,34 @@ void ScriptGraphNode::setOutput(uint8_t outputPinN, uint32_t targetNode, uint8_t
 	output.inputPin = inputPinN;
 }
 
+void ScriptGraphNode::setTarget(uint8_t targetPinN, EntityId targetEntity)
+{
+	targets.resize(std::max(targets.size(), static_cast<size_t>(targetPinN + 1)));
+	targets[targetPinN] = targetEntity;
+}
+
 void ScriptGraphNode::feedToHash(Hash::Hasher& hasher)
 {
 	// TODO
 }
 
-void ScriptGraphNode::onNodeRemoved(uint32_t idx)
+void ScriptGraphNode::onNodeRemoved(uint32_t nodeId)
 {
-	outputs.erase(std::remove_if(outputs.begin(), outputs.end(), [&] (const Output& o) { return o.nodeId == idx; }), outputs.end());
+	disconnectOutputsTo(nodeId, {});
+	
 	for (auto& o: outputs) {
-		if (o.nodeId >= idx) {
-			--o.nodeId;
+		if (o.nodeId && o.nodeId.value() >= nodeId) {
+			--o.nodeId.value();
 		}
 	}
+}
+
+void ScriptGraphNode::disconnectOutputsTo(uint32_t nodeId, OptionalLite<uint8_t> pinId)
+{
+	outputs.erase(std::remove_if(outputs.begin(), outputs.end(), [&] (const Output& o)
+	{
+		return o.nodeId == nodeId && (!pinId || pinId == o.inputPin);
+	}), outputs.end());
 }
 
 ScriptGraph::ScriptGraph()
