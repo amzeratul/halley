@@ -367,8 +367,8 @@ namespace Halley {
 		std::unique_ptr<ParentingInfo> parent;
 #endif
 
-		static ConfigNode undefinedConfigNode;
-		static String undefinedConfigNodeName;
+		thread_local static ConfigNode undefinedConfigNode;
+		thread_local static String undefinedConfigNodeName;
 
 		template <typename T> void deserializeContents(Deserializer& s)
 		{

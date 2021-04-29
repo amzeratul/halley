@@ -795,7 +795,6 @@ const ConfigNode& ConfigNode::operator[](const std::string_view& key) const
 	if (iter != map.end()) {
 		return iter->second;
 	} else {
-		// WARNING: NOT THREAD SAFE
 #if defined(STORE_CONFIG_NODE_PARENTING)
 		undefinedConfigNode.setParent(this, -1);
 		undefinedConfigNode.parent->file = parent ? parent->file : nullptr;
