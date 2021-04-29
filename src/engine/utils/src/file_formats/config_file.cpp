@@ -154,5 +154,5 @@ String ConfigObserver::getAssetId() const
 }
 
 
-thread_local ConfigNode ConfigNode::undefinedConfigNode;
-thread_local String ConfigNode::undefinedConfigNodeName;
+ConfigNode ConfigNode::undefinedConfigNode;
+String ConfigNode::undefinedConfigNodeName;
