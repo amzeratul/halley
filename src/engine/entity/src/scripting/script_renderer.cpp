@@ -43,6 +43,10 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 	for (const auto& node: graph->getNodes()) {
 		drawNodeOutputs(painter, basePos, node, *graph, effectiveZoom);
 	}
+
+	if (currentPath) {
+		drawConnection(painter, currentPath.value(), curZoom);
+	}
 	
 	for (uint32_t i = 0; i < static_cast<uint32_t>(graph->getNodes().size()); ++i) {
 		const auto& node = graph->getNodes()[i];
@@ -79,11 +83,8 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 			continue;
 		}
 		const Vector2f dstPos = getNodeElementArea(*dstNodeType, NodeElementType::Input, basePos, dstNode, dstIdx, curZoom).getCentre();
-
-		const float dist = std::max(std::abs(dstPos.x - srcPos.x), 20.0f) / 2;
-		const auto bezier = BezierCubic(srcPos, srcPos + Vector2f(dist, 0), dstPos - Vector2f(dist, 0), dstPos);
 		
-		painter.drawLine(bezier, 2.0f / curZoom, Colour4f(1, 1, 1));
+		drawConnection(painter, ConnectionPath{ srcPos, dstPos, NodeElementType::Input }, curZoom);
 	}
 
 	for (size_t i = 0; i < node.getTargets().size(); ++i) {
@@ -95,15 +96,29 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 				const Vector2f srcPos = getNodeElementArea(*nodeType, NodeElementType::Target, basePos, node, i, curZoom).getCentre();
 				const auto dstPos = transform->getGlobalPosition();
 
-				const float dist = std::max(std::abs(dstPos.x - srcPos.x), 20.0f) / 2;
-				const auto bezier = BezierCubic(srcPos, srcPos + Vector2f(0, dist), dstPos - Vector2f(0, dist), dstPos);
-				
-				painter.drawLine(bezier, 1.5f / curZoom, Colour4f(0.35f, 1.0f, 0.35f));
+				drawConnection(painter, ConnectionPath{ srcPos, dstPos, NodeElementType::Target }, curZoom);
 			}
 		} else {
 			Logger::logWarning("Invalid target on script graph node");
 		}
 	}
+}
+
+BezierCubic ScriptRenderer::makeBezier(const ConnectionPath& path) const
+{
+	const float xSelect = path.type == NodeElementType::Target ? 0.0f : 1.0f;
+	const float ySelect = 1.0f - xSelect;
+	const Vector2f axisSelector = Vector2f(xSelect, ySelect);
+	
+	const float dist = std::max(std::abs((path.to * axisSelector).manhattanLength() - (path.from * axisSelector).manhattanLength()), 20.0f) / 2;
+	
+	return BezierCubic(path.from, path.from + dist * axisSelector, path.to - dist * axisSelector, path.to);
+}
+
+void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path, float curZoom) const
+{
+	const auto col = path.type == NodeElementType::Target ? Colour4f(0.35f, 1.0f, 0.35f) : Colour4f(1, 1, 1);
+	painter.drawLine(makeBezier(path), 1.5f / curZoom, col);
 }
 
 void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<NodeElementType> highlightElement, uint8_t highlightElementId)
@@ -143,10 +158,10 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 		.setScale(1.0f / curZoom)
 		.draw(painter);
 
+	// Draw pins
 	const uint8_t nPins[] = { nodeType->getNumInputPins(), nodeType->getNumOutputPins(), nodeType->getNumTargetPins() };
 	const NodeElementType types[] = { NodeElementType::Input, NodeElementType::Output, NodeElementType::Target };
 	const Colour4f colours[] = { Colour4f(0.8f, 0.8f, 0.8f), Colour4f(0.8f, 0.8f, 0.8f), Colour4f(0.35f, 1, 0.35f) };
-
 	for (size_t i = 0; i < 3; ++i) {
 		for (size_t j = 0; j < nPins[i]; ++j) {
 			const auto circle = getNodeElementArea(*nodeType, types[i], basePos, node, j, curZoom);
@@ -252,14 +267,14 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 			for (uint8_t k = 0; k < nPins[j]; ++k) {
 				const auto circle = getNodeElementArea(*nodeType, types[j], basePos, node, k, curZoom).expand(4.0f / curZoom);
 				if (circle.contains(mousePos.value())) {
-					return NodeUnderMouseInfo{ static_cast<uint32_t>(i), types[j], k, curRect };
+					return NodeUnderMouseInfo{ static_cast<uint32_t>(i), types[j], k, curRect, circle.getCentre() };
 				}
 			}
 		}
 		
 		// Check main body
 		if (curRect.contains(mousePos.value())) {
-			return NodeUnderMouseInfo{ static_cast<uint32_t>(i), NodeElementType::Node, 0, curRect };
+			return NodeUnderMouseInfo{ static_cast<uint32_t>(i), NodeElementType::Node, 0, curRect, Vector2f() };
 		}
 	}
 
@@ -269,4 +284,9 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 void ScriptRenderer::setHighlight(std::optional<NodeUnderMouseInfo> node)
 {
 	highlightNode = node;
+}
+
+void ScriptRenderer::setCurrentPath(std::optional<ConnectionPath> path)
+{
+	currentPath = path;
 }

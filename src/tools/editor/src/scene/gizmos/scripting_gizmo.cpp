@@ -26,31 +26,64 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 	}
 	renderer->setGraph(scriptGraph);
 
-	if (!dragging) {
+	if (!dragging ) {
 		nodeUnderMouse = renderer->getNodeUnderMouse(basePos, getZoom(), inputState.mousePos);
 	}
 
-	if (!dragging && nodeUnderMouse && inputState.mousePos) {
+	if (dragging) {
+		onNodeDragging(inputState);
+	} else if (nodeEditingConnection) {
+		onEditingConnection(inputState);
+	}
+
+	if (!dragging && !nodeEditingConnection && nodeUnderMouse && inputState.mousePos) {
 		if (nodeUnderMouse->elementType == ScriptRenderer::NodeElementType::Node) {
 			if (inputState.leftClickPressed) {
-				dragging = true;
-				const auto nodePos = scriptGraph->getNodes()[nodeUnderMouse->nodeId].getPosition();
-				startDragPos = nodePos - inputState.mousePos.value();
+				onNodeClicked(inputState.mousePos.value());
 			} else if (inputState.rightClickReleased) {
 				openNodeUI(nodeUnderMouse->nodeId, inputState.rawMousePos.value());
+			}
+		} else {
+			if (inputState.leftClickPressed) {
+				onPinClicked();
 			}
 		}
 	}
 
-	if (dragging) {
-		if (inputState.mousePos) {
-			const auto newPos = startDragPos + inputState.mousePos.value();
-			scriptGraph->getNodes()[nodeUnderMouse->nodeId].setPosition(newPos);
-		}
-		if (!inputState.leftClickHeld) {
-			dragging = false;
-			saveEntityData();
-		}
+	lastMousePos = inputState.mousePos;
+}
+
+void ScriptingGizmo::onNodeClicked(Vector2f mousePos)
+{
+	dragging = true;
+	const auto nodePos = scriptGraph->getNodes()[nodeUnderMouse->nodeId].getPosition();
+	startDragPos = nodePos - mousePos;
+}
+
+void ScriptingGizmo::onNodeDragging(const SceneEditorInputState& inputState)
+{
+	if (inputState.mousePos) {
+		const auto newPos = startDragPos + inputState.mousePos.value();
+		scriptGraph->getNodes()[nodeUnderMouse->nodeId].setPosition(newPos);
+	}
+	if (!inputState.leftClickHeld) {
+		dragging = false;
+		saveEntityData();
+	}
+}
+
+void ScriptingGizmo::onPinClicked()
+{
+	nodeEditingConnection = nodeUnderMouse;
+}
+
+void ScriptingGizmo::onEditingConnection(const SceneEditorInputState& inputState)
+{
+	if (inputState.leftClickPressed) {
+		nodeEditingConnection.reset();
+	}
+	if (inputState.rightClickPressed) {
+		nodeEditingConnection.reset();
 	}
 }
 
@@ -61,8 +94,14 @@ void ScriptingGizmo::draw(Painter& painter) const
 	}
 
 	const bool overNodeBody = nodeUnderMouse && nodeUnderMouse->elementType == ScriptRenderer::NodeElementType::Node;
+
+	std::optional<ScriptRenderer::ConnectionPath> path;
+	if (nodeEditingConnection && lastMousePos) {
+		path = ScriptRenderer::ConnectionPath{ nodeEditingConnection->pinPos, lastMousePos.value(), nodeEditingConnection->elementType };
+	}
 	
 	renderer->setHighlight(nodeUnderMouse);
+	renderer->setCurrentPath(path);
 	renderer->draw(painter, basePos, getZoom());
 
 	if (overNodeBody && !dragging) {
@@ -72,7 +111,7 @@ void ScriptingGizmo::draw(Painter& painter) const
 
 bool ScriptingGizmo::isHighlighted() const
 {
-	return !!nodeUnderMouse;
+	return !!nodeUnderMouse || nodeEditingConnection;
 }
 
 std::vector<String> ScriptingGizmo::getHighlightedComponents() const

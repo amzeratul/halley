@@ -27,6 +27,8 @@ namespace Halley {
 		Vector2f basePos;
 		ScriptGraph* scriptGraph = nullptr;
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeUnderMouse;
+		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeEditingConnection;
+		std::optional<Vector2f> lastMousePos;
 
 		bool dragging = false;
 		Vector2f startDragPos;
@@ -39,6 +41,11 @@ namespace Halley {
 		void openNodeUI(uint32_t nodeId, Vector2f pos);
 		void addNode();
 		void addNode(const String& type);
+
+		void onNodeClicked(Vector2f mousePos);
+		void onNodeDragging(const SceneEditorInputState& inputState);
+		void onPinClicked();
+		void onEditingConnection(const SceneEditorInputState& inputState);
 	};
 
 	class ScriptingNodeEditor : public UIWidget {
