@@ -1,5 +1,7 @@
 #include "scripting_gizmo.h"
 #include <components/script_component.h>
+#include <components/script_target_component.h>
+
 #include "halley/entity/components/transform_2d_component.h"
 #include "src/scene/choose_asset_window.h"
 
@@ -17,6 +19,8 @@ ScriptingGizmo::ScriptingGizmo(SnapRules snapRules, UIFactory& factory, ISceneEd
 		.setColour(Colour(1, 1, 1))
 		.setOutlineColour(Colour(0, 0, 0))
 		.setOutline(1);
+
+	compileEntityTargetList();
 }
 
 void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
@@ -137,6 +141,18 @@ void ScriptingGizmo::onEditingConnection(const SceneEditorInputState& inputState
 	}
 }
 
+void ScriptingGizmo::compileEntityTargetList()
+{
+	entityTargets.clear();
+	const auto& world = sceneEditorWindow.getEntityFactory()->getWorld();
+	for (const auto& e: world.getEntities()) {
+		if (e.hasComponent<ScriptTargetComponent>()) {
+			const auto pos = e.getComponent<Transform2DComponent>().getGlobalPosition();
+			entityTargets.emplace_back(EntityTarget{ pos, e.getEntityId() });
+		}
+	}
+}
+
 void ScriptingGizmo::draw(Painter& painter) const
 {
 	if (!renderer) {
@@ -149,6 +165,8 @@ void ScriptingGizmo::draw(Painter& painter) const
 	if (nodeEditingConnection && nodeConnectionDst) {
 		path = ScriptRenderer::ConnectionPath{ nodeEditingConnection->pinPos, nodeConnectionDst.value(), nodeEditingConnection->elementType };
 	}
+
+	drawEntityTargets(painter);
 	
 	renderer->setHighlight(nodeUnderMouse);
 	renderer->setCurrentPath(path);
@@ -252,6 +270,17 @@ void ScriptingGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, 
 
 	tooltipLabel
 		.draw(painter);
+}
+
+void ScriptingGizmo::drawEntityTargets(Painter& painter) const
+{
+	const float curZoom = getZoom();
+	
+	for (const auto& e: entityTargets) {
+		const float radius = 6.0f / curZoom;
+		const float width = 1.5f / curZoom;
+		painter.drawCircle(e.pos, radius, width, Colour4f(0.35f, 1.0f, 0.35f));
+	}
 }
 
 std::shared_ptr<UIWidget> ScriptingGizmo::makeUI()

@@ -303,7 +303,7 @@ void Entity::doDestroy(bool updateParenting)
 	dirty = true;
 }
 
-bool Entity::hasBit(World& world, int index) const
+bool Entity::hasBit(const World& world, int index) const
 {
 	return FamilyMask::hasBit(mask, index, world.getMaskStorage());
 }

@@ -19,6 +19,11 @@ namespace Halley {
 		ScriptGraphNode& getNode(uint32_t id);
 
 	private:
+		struct EntityTarget {
+			Vector2f pos;
+			EntityId entityId;
+		};
+		
 		UIFactory& factory;
 		ISceneEditorWindow& sceneEditorWindow;
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
@@ -33,10 +38,13 @@ namespace Halley {
 		bool dragging = false;
 		Vector2f startDragPos;
 
+		std::vector<EntityTarget> entityTargets;
+
 		mutable TextRenderer tooltipLabel;
 
 		void loadEntityData();
 		void drawToolTip(Painter& painter, const ScriptGraphNode& node, Rect4f nodePos) const;
+		void drawEntityTargets(Painter& painter) const;
 
 		void openNodeUI(uint32_t nodeId, Vector2f pos);
 		void addNode();
@@ -46,6 +54,8 @@ namespace Halley {
 		void onNodeDragging(const SceneEditorInputState& inputState);
 		void onPinClicked();
 		void onEditingConnection(const SceneEditorInputState& inputState);
+
+		void compileEntityTargetList();
 	};
 
 	class ScriptingNodeEditor : public UIWidget {

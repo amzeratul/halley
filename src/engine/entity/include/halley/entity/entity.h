@@ -92,7 +92,7 @@ namespace Halley {
 		}
 
 		template <typename T>
-		bool hasComponent(World& world) const
+		bool hasComponent(const World& world) const
 		{
 			if (dirty) {
 				return tryGetComponent<T>() != nullptr;
@@ -206,7 +206,7 @@ namespace Halley {
 
 		void doDestroy(bool updateParenting);
 
-		bool hasBit(World& world, int index) const;
+		bool hasBit(const World& world, int index) const;
 	};
 
 	class EntityRef;
