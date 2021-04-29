@@ -34,6 +34,17 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 		nodeUnderMouse = renderer->getNodeUnderMouse(basePos, getZoom(), inputState.mousePos);
 	}
 
+	// Find entity target under mouse
+	curEntityTarget = EntityId();
+	const auto curZoom = getZoom();
+	if (inputState.mousePos) {
+		for (const auto& entity: entityTargets) {
+			if (Circle(entity.pos, 6.0f / curZoom).contains(inputState.mousePos.value())) {
+				curEntityTarget = entity.entityId;
+			}
+		}
+	}
+
 	// This must be set before onNodeDragging/onEditingConnection below
 	const bool startedIdle = !dragging && !nodeEditingConnection;
 
@@ -104,34 +115,35 @@ void ScriptingGizmo::onPinClicked()
 
 void ScriptingGizmo::onEditingConnection(const SceneEditorInputState& inputState)
 {
+	using ET = ScriptRenderer::NodeElementType;
 	nodeConnectionDst = inputState.mousePos;
 
+	const auto srcType = nodeEditingConnection->elementType;
+
 	if (nodeUnderMouse) {
-		const auto srcType = nodeEditingConnection->elementType;
 		const auto dstType = nodeUnderMouse->elementType;
-		using ET = ScriptRenderer::NodeElementType;
-		
-		if ((srcType == ET::Input && dstType != ET::Output) || (srcType == ET::Output && dstType != ET::Input) || (srcType == ET::Target && dstType != ET::Target)) {
+		if ((srcType == ET::Input && dstType != ET::Output) || (srcType == ET::Output && dstType != ET::Input) || srcType == ET::Target) {
 			nodeUnderMouse.reset();
 		}
 	}
-	
+
 	if (inputState.leftClickPressed) {
+		const auto nodeId = nodeEditingConnection->nodeId;
+		const auto pinId = nodeEditingConnection->elementId;
+		auto& node = scriptGraph->getNodes().at(nodeId);
+
 		if (nodeUnderMouse) {
-			const auto nodeId = nodeEditingConnection->nodeId;
-			const auto pinId = nodeEditingConnection->elementId;
-			auto& node = scriptGraph->getNodes().at(nodeId);
-			
-			if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Output) {
+			if (nodeEditingConnection->elementType == ET::Output) {
 				node.setOutput(pinId, nodeUnderMouse->nodeId, nodeUnderMouse->elementId);
 			}
-			if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Input) {
+			if (nodeEditingConnection->elementType == ET::Input) {
 				auto& otherNode = scriptGraph->getNodes().at(nodeUnderMouse->nodeId);
 				otherNode.setOutput(nodeUnderMouse->elementId, nodeId, pinId);
 			}
-			if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Target) {
-				// TODO
-			}
+		}
+		
+		if (nodeEditingConnection->elementType == ET::Target) {
+			node.setTarget(pinId, curEntityTarget);
 		}
 		
 		nodeEditingConnection.reset();
@@ -179,7 +191,7 @@ void ScriptingGizmo::draw(Painter& painter) const
 
 bool ScriptingGizmo::isHighlighted() const
 {
-	return !!nodeUnderMouse || nodeEditingConnection;
+	return !!nodeUnderMouse || curEntityTarget.isValid() || nodeEditingConnection;
 }
 
 std::vector<String> ScriptingGizmo::getHighlightedComponents() const
@@ -279,7 +291,8 @@ void ScriptingGizmo::drawEntityTargets(Painter& painter) const
 	for (const auto& e: entityTargets) {
 		const float radius = 6.0f / curZoom;
 		const float width = 1.5f / curZoom;
-		painter.drawCircle(e.pos, radius, width, Colour4f(0.35f, 1.0f, 0.35f));
+		const auto col = e.entityId == curEntityTarget ? Colour4f(1, 1, 1) : Colour4f(0.35f, 1.0f, 0.35f);
+		painter.drawCircle(e.pos, radius, width, col);
 	}
 }
 

@@ -39,6 +39,7 @@ namespace Halley {
 		Vector2f startDragPos;
 
 		std::vector<EntityTarget> entityTargets;
+		EntityId curEntityTarget;
 
 		mutable TextRenderer tooltipLabel;
 
