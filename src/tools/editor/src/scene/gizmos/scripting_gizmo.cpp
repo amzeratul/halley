@@ -30,13 +30,16 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 		nodeUnderMouse = renderer->getNodeUnderMouse(basePos, getZoom(), inputState.mousePos);
 	}
 
+	// This must be set before onNodeDragging/onEditingConnection below
+	const bool startedIdle = !dragging && !nodeEditingConnection;
+
 	if (dragging) {
 		onNodeDragging(inputState);
 	} else if (nodeEditingConnection) {
 		onEditingConnection(inputState);
 	}
 
-	if (!dragging && !nodeEditingConnection && nodeUnderMouse && inputState.mousePos) {
+	if (startedIdle && nodeUnderMouse && inputState.mousePos) {
 		if (nodeUnderMouse->elementType == ScriptRenderer::NodeElementType::Node) {
 			if (inputState.leftClickPressed) {
 				onNodeClicked(inputState.mousePos.value());
@@ -79,15 +82,15 @@ void ScriptingGizmo::onPinClicked()
 	const auto pinId = nodeEditingConnection->elementId;
 	auto& node = scriptGraph->getNodes().at(nodeId);
 	
+	if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Output) {
+		// Erase connection coming out of this
+		node.setOutput(pinId, {}, 0);
+	}
 	if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Input) {
 		// Erase existing connection to this input
 		for (auto& n: scriptGraph->getNodes()) {
 			n.disconnectOutputsTo(nodeId, pinId);
 		}
-	}
-	if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Output) {
-		// Erase connection coming out of this
-		node.setOutput(pinId, {}, 0);
 	}
 	if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Target) {
 		// Erase connection coming out of this
@@ -110,6 +113,23 @@ void ScriptingGizmo::onEditingConnection(const SceneEditorInputState& inputState
 	}
 	
 	if (inputState.leftClickPressed) {
+		if (nodeUnderMouse) {
+			const auto nodeId = nodeEditingConnection->nodeId;
+			const auto pinId = nodeEditingConnection->elementId;
+			auto& node = scriptGraph->getNodes().at(nodeId);
+			
+			if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Output) {
+				node.setOutput(pinId, nodeUnderMouse->nodeId, nodeUnderMouse->elementId);
+			}
+			if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Input) {
+				auto& otherNode = scriptGraph->getNodes().at(nodeUnderMouse->nodeId);
+				otherNode.setOutput(nodeUnderMouse->elementId, nodeId, pinId);
+			}
+			if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Target) {
+				// TODO
+			}
+		}
+		
 		nodeEditingConnection.reset();
 	}
 	if (inputState.rightClickPressed) {
