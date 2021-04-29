@@ -12,6 +12,11 @@ bool Circle::overlaps(const Circle& circle) const
 	return (circle.centre - centre).squaredLength() <= r * r;
 }
 
+Circle Circle::expand(float r) const
+{
+	return Circle(centre, radius + r);
+}
+
 Circle Circle::getSpanningCircle(const std::vector<Vector2f>& points)
 {
 	// TODO: should use Matousek, Sharir, Welzl's algorithm (https://en.wikipedia.org/wiki/Smallest-circle_problem#Matou%C5%A1ek,_Sharir,_Welzl's_algorithm)

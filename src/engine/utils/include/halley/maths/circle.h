@@ -18,6 +18,8 @@ namespace Halley {
     	bool contains(Vector2f point) const;
         bool overlaps(const Circle& circle) const;
 
+    	[[nodiscard]] Circle expand(float radius) const;
+
         static Circle getSpanningCircle(const std::vector<Vector2f>& points);
 
     private:

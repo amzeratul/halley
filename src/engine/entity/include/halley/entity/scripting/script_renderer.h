@@ -1,5 +1,6 @@
 #pragma once
 #include "halley/core/graphics/sprite/sprite.h"
+#include "halley/maths/circle.h"
 #include "halley/maths/vector2.h"
 
 namespace Halley {
@@ -33,7 +34,7 @@ namespace Halley {
 		void draw(Painter& painter, Vector2f basePos, float curZoom);
 		
 		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos) const;
-		void setHighlight(std::optional<uint32_t> highlightNode);
+		void setHighlight(std::optional<NodeUnderMouseInfo> highlightNode);
 
 	private:
 		enum class NodeDrawMode : uint8_t {
@@ -51,15 +52,16 @@ namespace Halley {
 		const ScriptState* state = nullptr;
 
 		Sprite nodeBg;
+		Sprite pinSprite;
 		std::map<String, Sprite> icons;
 
-		std::optional<uint32_t> highlightNode;
+		std::optional<NodeUnderMouseInfo> highlightNode;
 
 		void drawNodeOutputs(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, const ScriptGraph& graph, float curZoom);
-		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode);
+		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<NodeElementType> highlightElement, uint8_t highlightElementId);
 
 		Vector2f getNodeSize(float curZoom) const;
-		Vector2f getNodeElementPosition(const IScriptNodeType& nodeType, NodeElementType type, Vector2f basePos, const ScriptGraphNode& node, size_t elemIdx, float curZoom) const;
+		Circle getNodeElementArea(const IScriptNodeType& nodeType, NodeElementType type, Vector2f basePos, const ScriptGraphNode& node, size_t elemIdx, float curZoom) const;
 		Colour4f getNodeColour(const IScriptNodeType& nodeType) const;
 		const Sprite& getIcon(const IScriptNodeType& nodeType);
 	};

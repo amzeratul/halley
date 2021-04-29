@@ -31,12 +31,14 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 	}
 
 	if (!dragging && nodeUnderMouse && inputState.mousePos) {
-		if (inputState.leftClickPressed) {
-			dragging = true;
-			const auto nodePos = scriptGraph->getNodes()[nodeUnderMouse->nodeId].getPosition();
-			startDragPos = nodePos - inputState.mousePos.value();
-		} else if (inputState.rightClickReleased) {
-			openNodeUI(nodeUnderMouse->nodeId, inputState.rawMousePos.value());
+		if (nodeUnderMouse->elementType == ScriptRenderer::NodeElementType::Node) {
+			if (inputState.leftClickPressed) {
+				dragging = true;
+				const auto nodePos = scriptGraph->getNodes()[nodeUnderMouse->nodeId].getPosition();
+				startDragPos = nodePos - inputState.mousePos.value();
+			} else if (inputState.rightClickReleased) {
+				openNodeUI(nodeUnderMouse->nodeId, inputState.rawMousePos.value());
+			}
 		}
 	}
 
@@ -58,10 +60,12 @@ void ScriptingGizmo::draw(Painter& painter) const
 		return;
 	}
 
-	renderer->setHighlight(nodeUnderMouse ? nodeUnderMouse->nodeId : std::optional<uint32_t>());
+	const bool overNodeBody = nodeUnderMouse && nodeUnderMouse->elementType == ScriptRenderer::NodeElementType::Node;
+	
+	renderer->setHighlight(nodeUnderMouse);
 	renderer->draw(painter, basePos, getZoom());
 
-	if (nodeUnderMouse && !dragging) {
+	if (overNodeBody && !dragging) {
 		drawToolTip(painter, scriptGraph->getNodes().at(nodeUnderMouse->nodeId), nodeUnderMouse->nodeArea);
 	}
 }
