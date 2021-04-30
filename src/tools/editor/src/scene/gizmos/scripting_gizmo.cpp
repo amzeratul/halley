@@ -264,6 +264,16 @@ void ScriptingGizmo::destroyNode(uint32_t id)
 	}
 }
 
+bool ScriptingGizmo::destroyHighlightedNode()
+{
+	if (nodeUnderMouse && nodeUnderMouse->elementType == ScriptRenderer::NodeElementType::Node) {
+		destroyNode(nodeUnderMouse->nodeId);
+		nodeUnderMouse.reset();
+		return true;
+	}
+	return false;
+}
+
 ScriptGraphNode& ScriptingGizmo::getNode(uint32_t id)
 {
 	return scriptGraph->getNodes().at(id);
@@ -485,7 +495,8 @@ void ScriptingGizmoToolbar::onMakeUI()
 
 void ScriptingGizmoToolbar::onAddedToRoot(UIRoot& root)
 {
-	root.registerKeyPressListener(shared_from_this());
+	root.setFocus(shared_from_this());
+	root.registerKeyPressListener(shared_from_this(), 1);
 }
 
 void ScriptingGizmoToolbar::onRemovedFromRoot(UIRoot& root)
@@ -498,6 +509,10 @@ bool ScriptingGizmoToolbar::onKeyPress(KeyboardKeyPress key)
 	if (key.is(KeyCode::A, KeyMods::Ctrl)) {
 		gizmo.addNode();
 		return true;
+	}
+
+	if (key.is(KeyCode::Delete)) {
+		return gizmo.destroyHighlightedNode();
 	}
 	
 	return false;
