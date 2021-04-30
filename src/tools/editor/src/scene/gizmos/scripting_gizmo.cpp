@@ -340,7 +340,7 @@ std::shared_ptr<UIWidget> ScriptingGizmo::makeUI()
 	return std::make_shared<ScriptingGizmoToolbar>(factory, *this);
 }
 
-void ScriptingGizmo::openNodeUI(uint32_t nodeId, Vector2f pos)
+void ScriptingGizmo::openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos)
 {
 	ScriptGraphNode& node = getNode(nodeId);
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
@@ -369,11 +369,15 @@ void ScriptingGizmo::addNode()
 
 void ScriptingGizmo::addNode(const String& type, Vector2f pos)
 {
-	scriptGraph->getNodes().push_back(ScriptGraphNode(type, pos));
+	auto& nodes = scriptGraph->getNodes();
+	const uint32_t id = static_cast<uint32_t>(nodes.size());
+	nodes.emplace_back(type, pos);
 	saveEntityData();
+	
+	openNodeUI(id, {});
 }
 
-ScriptingNodeEditor::ScriptingNodeEditor(ScriptingGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, uint32_t nodeId, const IScriptNodeType& nodeType, Vector2f pos)
+ScriptingNodeEditor::ScriptingNodeEditor(ScriptingGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, uint32_t nodeId, const IScriptNodeType& nodeType, std::optional<Vector2f> pos)
 	: UIWidget("scripting_node_editor", {}, UISizer())
 	, gizmo(gizmo)
 	, factory(factory)
@@ -382,7 +386,11 @@ ScriptingNodeEditor::ScriptingNodeEditor(ScriptingGizmo& gizmo, UIFactory& facto
 	, nodeType(nodeType)
 	, curSettings(gizmo.getNode(nodeId).getSettings())
 {
-	setAnchor(UIAnchor(Vector2f(), Vector2f(0.0f, 0.5f), pos));
+	if (pos) {
+		setAnchor(UIAnchor(Vector2f(), Vector2f(0.0f, 0.5f), pos.value()));
+	} else {
+		setAnchor(UIAnchor());
+	}
 }
 
 void ScriptingNodeEditor::onMakeUI()
@@ -403,6 +411,12 @@ void ScriptingNodeEditor::onMakeUI()
 	setHandle(UIEventType::ButtonClicked, "delete", [=] (const UIEvent& event)
 	{
 		deleteNode();
+		destroy();
+	});
+
+	setHandle(UIEventType::TextSubmit, [=] (const UIEvent& event)
+	{
+		applyChanges();
 		destroy();
 	});
 

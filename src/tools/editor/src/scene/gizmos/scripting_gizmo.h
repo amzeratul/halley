@@ -55,7 +55,7 @@ namespace Halley {
 		void drawToolTip(Painter& painter, const ScriptGraphNode& node, Rect4f nodePos) const;
 		void drawEntityTargets(Painter& painter) const;
 
-		void openNodeUI(uint32_t nodeId, Vector2f pos);
+		void openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos);
 		void addNode(const String& type, Vector2f pos);
 
 		void onNodeClicked(Vector2f mousePos);
@@ -68,7 +68,7 @@ namespace Halley {
 
 	class ScriptingNodeEditor : public UIWidget {
 	public:
-		ScriptingNodeEditor(ScriptingGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, uint32_t nodeId, const IScriptNodeType& nodeType, Vector2f pos);
+		ScriptingNodeEditor(ScriptingGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, uint32_t nodeId, const IScriptNodeType& nodeType, std::optional<Vector2f> pos);
 
 		void onMakeUI() override;
 		void onAddedToRoot(UIRoot& root) override;
