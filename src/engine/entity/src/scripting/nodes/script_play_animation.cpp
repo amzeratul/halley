@@ -14,7 +14,7 @@ std::vector<IScriptNodeType::SettingType> ScriptPlayAnimation::getSettingTypes()
 	return { SettingType{ "sequence", "Halley::String", std::vector<String>{"default"} } };
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptPlayAnimation::getDescription(const ScriptGraphNode& node, const World& world) const
+std::pair<String, std::vector<ColourOverride>> ScriptPlayAnimation::getNodeDescription(const ScriptGraphNode& node, const World& world) const
 {
 	String text;
 	std::vector<ColourOverride> cols;

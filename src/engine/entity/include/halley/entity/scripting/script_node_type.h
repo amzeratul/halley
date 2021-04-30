@@ -23,6 +23,13 @@ namespace Halley {
 		Condition,
 		Action
 	};
+
+	enum class ScriptNodeElementType : uint8_t {
+		Node,
+		Input,
+		Output,
+		Target
+	};
 	
 	class IScriptNodeType {
 	public:		
@@ -43,7 +50,10 @@ namespace Halley {
 		virtual String getName() const = 0;
 
 		virtual std::vector<SettingType> getSettingTypes() const = 0;
-		virtual std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world) const = 0;
+		virtual std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world, ScriptNodeElementType elementType, uint8_t elementIdx) const;
+		virtual std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world) const;
+		virtual std::pair<String, std::vector<ColourOverride>> getIOPinDescription(const ScriptGraphNode& node, ScriptNodeElementType elementType, uint8_t elementIdx) const;
+		virtual std::pair<String, std::vector<ColourOverride>> getTargetPinDescription(const ScriptGraphNode& node, const World& world, uint8_t elementIdx) const;
 		virtual String getIconName() const = 0;
 		virtual ScriptNodeClassification getClassification() const = 0;
 		

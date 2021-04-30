@@ -1,4 +1,5 @@
 #pragma once
+#include "script_node_type.h"
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/maths/bezier.h"
 #include "halley/maths/circle.h"
@@ -14,16 +15,9 @@ namespace Halley {
 
 	class ScriptRenderer {
 	public:
-		enum class NodeElementType : uint8_t {
-			Node,
-			Input,
-			Output,
-			Target
-		};
-
 		struct NodeUnderMouseInfo {
 			uint32_t nodeId;
-			NodeElementType elementType;
+			ScriptNodeElementType elementType;
 			uint8_t elementId;
 			Rect4f nodeArea;
 			Vector2f pinPos;
@@ -32,7 +26,7 @@ namespace Halley {
 		struct ConnectionPath {
 			Vector2f from;
 			Vector2f to;
-			NodeElementType type;
+			ScriptNodeElementType type;
 		};
 		
 		ScriptRenderer(Resources& resources, World& world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom);
@@ -68,10 +62,10 @@ namespace Halley {
 		std::optional<ConnectionPath> currentPath;
 
 		void drawNodeOutputs(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, const ScriptGraph& graph, float curZoom);
-		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<NodeElementType> highlightElement, uint8_t highlightElementId);
+		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<ScriptNodeElementType> highlightElement, uint8_t highlightElementId);
 
 		Vector2f getNodeSize(float curZoom) const;
-		Circle getNodeElementArea(const IScriptNodeType& nodeType, NodeElementType type, Vector2f basePos, const ScriptGraphNode& node, size_t elemIdx, float curZoom) const;
+		Circle getNodeElementArea(const IScriptNodeType& nodeType, ScriptNodeElementType type, Vector2f basePos, const ScriptGraphNode& node, size_t elemIdx, float curZoom) const;
 		Colour4f getNodeColour(const IScriptNodeType& nodeType) const;
 		const Sprite& getIcon(const IScriptNodeType& nodeType);
 

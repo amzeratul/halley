@@ -57,7 +57,7 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 	}
 
 	if (startedIdle && nodeUnderMouse && inputState.mousePos) {
-		if (nodeUnderMouse->elementType == ScriptRenderer::NodeElementType::Node) {
+		if (nodeUnderMouse->elementType == ScriptNodeElementType::Node) {
 			if (inputState.leftClickPressed) {
 				onNodeClicked(inputState.mousePos.value());
 			} else if (inputState.rightClickReleased) {
@@ -101,13 +101,13 @@ void ScriptingGizmo::onPinClicked()
 	const auto pinId = nodeEditingConnection->elementId;
 	auto& node = scriptGraph->getNodes().at(nodeId);
 	
-	if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Output) {
+	if (nodeEditingConnection->elementType == ScriptNodeElementType::Output) {
 		// Erase connection coming out of this
 		if (node.setOutput(pinId, {}, 0)) {
 			saveEntityData();
 		}
 	}
-	if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Input) {
+	if (nodeEditingConnection->elementType == ScriptNodeElementType::Input) {
 		// Erase existing connection to this input
 		bool anyChanged = false;
 		for (auto& n: scriptGraph->getNodes()) {
@@ -117,7 +117,7 @@ void ScriptingGizmo::onPinClicked()
 			saveEntityData();
 		}
 	}
-	if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Target) {
+	if (nodeEditingConnection->elementType == ScriptNodeElementType::Target) {
 		// Erase connection coming out of this
 		if (node.setTarget(pinId, {})) {
 			saveEntityData();
@@ -127,7 +127,7 @@ void ScriptingGizmo::onPinClicked()
 
 void ScriptingGizmo::onEditingConnection(const SceneEditorInputState& inputState)
 {
-	using ET = ScriptRenderer::NodeElementType;
+	using ET = ScriptNodeElementType;
 	nodeConnectionDst = inputState.mousePos;
 
 	const auto srcType = nodeEditingConnection->elementType;
@@ -188,7 +188,7 @@ void ScriptingGizmo::draw(Painter& painter) const
 		return;
 	}
 
-	const bool overNodeBody = nodeUnderMouse && nodeUnderMouse->elementType == ScriptRenderer::NodeElementType::Node;
+	const bool overNodeBody = nodeUnderMouse && nodeUnderMouse->elementType == ScriptNodeElementType::Node;
 
 	std::optional<ScriptRenderer::ConnectionPath> path;
 	if (nodeEditingConnection && nodeConnectionDst) {
@@ -201,8 +201,8 @@ void ScriptingGizmo::draw(Painter& painter) const
 	renderer->setCurrentPath(path);
 	renderer->draw(painter, basePos, getZoom());
 
-	if (overNodeBody && !dragging) {
-		drawToolTip(painter, scriptGraph->getNodes().at(nodeUnderMouse->nodeId), nodeUnderMouse->nodeArea);
+	if (nodeUnderMouse && !dragging) {
+		drawToolTip(painter, scriptGraph->getNodes().at(nodeUnderMouse->nodeId), nodeUnderMouse.value());
 	}
 }
 
@@ -275,7 +275,7 @@ bool ScriptingGizmo::destroyNode(uint32_t id)
 
 bool ScriptingGizmo::destroyHighlightedNode()
 {
-	if (nodeUnderMouse && nodeUnderMouse->elementType == ScriptRenderer::NodeElementType::Node) {
+	if (nodeUnderMouse && nodeUnderMouse->elementType == ScriptNodeElementType::Node) {
 		destroyNode(nodeUnderMouse->nodeId);
 		nodeUnderMouse.reset();
 		return true;
@@ -293,21 +293,24 @@ ExecutionQueue& ScriptingGizmo::getExecutionQueue()
 	return pendingUITasks;
 }
 
-void ScriptingGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, Rect4f nodePos) const
+void ScriptingGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, const ScriptRenderer::NodeUnderMouseInfo& nodeInfo) const
 {
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
 	if (!nodeType) {
 		return;
 	}
 	
-	const auto [text, colours] = nodeType->getDescription(node, sceneEditorWindow.getEntityFactory()->getWorld());
+	const auto [text, colours] = nodeType->getDescription(node, sceneEditorWindow.getEntityFactory()->getWorld(), nodeInfo.elementType, nodeInfo.elementId);
 	const float curZoom = getZoom();
-	const auto pos = 0.5f * (nodePos.getBottomLeft() + nodePos.getBottomRight()) + Vector2f(0, 10) / curZoom;
+
+	const float align = 0.5f;
+	const auto elemPos = nodeInfo.elementType == ScriptNodeElementType::Node ? 0.5f * (nodeInfo.nodeArea.getBottomLeft() + nodeInfo.nodeArea.getBottomRight()) : nodeInfo.pinPos;
+	const auto pos = elemPos + Vector2f(0, 10) / curZoom;
 	
 	tooltipLabel
 		.setColourOverride(colours)
 		.setPosition(pos)
-		.setAlignment(0.5f)
+		.setAlignment(align)
 		.setSize(16 / curZoom)
 		.setOutline(4.0f / curZoom);
 
@@ -315,7 +318,7 @@ void ScriptingGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, 
 		.setText(tooltipLabel.split(text, 250.0f / curZoom));
 
 	const auto extents = tooltipLabel.getExtents();
-	const Rect4f tooltipArea = Rect4f(pos + extents * Vector2f(-0.5f, 0), pos + extents * Vector2f(0.5f, 1.0f)).grow(4 / curZoom, 2 / curZoom, 4 / curZoom, 4 / curZoom);
+	const Rect4f tooltipArea = Rect4f(pos + extents * Vector2f(-align, 0), pos + extents * Vector2f(1.0f - align, 1.0f)).grow(4 / curZoom, 2 / curZoom, 4 / curZoom, 4 / curZoom);
 	const auto poly = Polygon({ tooltipArea.getTopLeft(), tooltipArea.getTopRight(), tooltipArea.getBottomRight(), tooltipArea.getBottomLeft() });
 	painter.drawPolygon(poly, Colour4f(0, 0, 0, 0.6f));
 

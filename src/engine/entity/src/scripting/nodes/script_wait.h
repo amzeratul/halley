@@ -13,7 +13,7 @@ namespace Halley {
 		String getName() const override { return "Wait"; }
 		String getIconName() const override { return "script_icons/wait.png"; }
 		std::vector<SettingType> getSettingTypes() const override;
-		std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world) const override;
+		std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world) const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptWaitData& curData) const override;
 		void doInitData(ScriptWaitData& data, const ScriptGraphNode& node) const override;

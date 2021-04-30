@@ -7,7 +7,7 @@ std::vector<IScriptNodeType::SettingType> ScriptStart::getSettingTypes() const
 	return {};
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptStart::getDescription(const ScriptGraphNode& node, const World& world) const
+std::pair<String, std::vector<ColourOverride>> ScriptStart::getNodeDescription(const ScriptGraphNode& node, const World& world) const
 {
 	return { "Start execution", {} };
 }

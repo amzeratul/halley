@@ -5,6 +5,52 @@
 #include "nodes/script_wait.h"
 using namespace Halley;
 
+std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node,	const World& world, ScriptNodeElementType elementType, uint8_t elementIdx) const
+{
+	switch (elementType) {
+	case ScriptNodeElementType::Input:
+	case ScriptNodeElementType::Output:
+		return getIOPinDescription(node, elementType, elementIdx);
+	case ScriptNodeElementType::Target:
+		return getTargetPinDescription(node, world, elementIdx);
+	case ScriptNodeElementType::Node:
+		return getNodeDescription(node, world);
+	}
+	
+	return { "?", {} };
+}
+
+std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getNodeDescription(const ScriptGraphNode& node,	const World& world) const
+{
+	return { getName(), {} };
+}
+
+std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getIOPinDescription(const ScriptGraphNode& node, ScriptNodeElementType elementType, uint8_t elementIdx) const
+{
+	if (elementType == ScriptNodeElementType::Input) {
+		if (getNumInputPins() <= 1) {
+			return { "Input", {} };
+		} else {
+			return { "Input " + toString(static_cast<int>(elementIdx)), {} };
+		}
+	} else {
+		if (getNumOutputPins() <= 1) {
+			return { "Output", {} };
+		} else {
+			return { "Output " + toString(static_cast<int>(elementIdx)), {} };
+		}
+	}
+}
+
+std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getTargetPinDescription(const ScriptGraphNode& node, const World& world, uint8_t elementIdx) const
+{
+	if (getNumTargetPins() <= 1) {
+		return { "Target", {} };
+	} else {
+		return { "Target " + toString(static_cast<int>(elementIdx)), {} };
+	}
+}
+
 ScriptNodeTypeCollection::ScriptNodeTypeCollection()
 {
 	addBasicScriptNodes();

@@ -52,7 +52,7 @@ namespace Halley {
 		ExecutionQueue pendingUITasks;
 
 		void loadEntityData();
-		void drawToolTip(Painter& painter, const ScriptGraphNode& node, Rect4f nodePos) const;
+		void drawToolTip(Painter& painter, const ScriptGraphNode& node, const ScriptRenderer::NodeUnderMouseInfo& nodeInfo) const;
 		void drawEntityTargets(Painter& painter) const;
 
 		void openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos);

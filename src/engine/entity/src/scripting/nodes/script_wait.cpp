@@ -11,7 +11,7 @@ std::vector<IScriptNodeType::SettingType> ScriptWait::getSettingTypes() const
 	return { SettingType{ "time", "float", std::vector<String>{"0"} } };
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptWait::getDescription(const ScriptGraphNode& node, const World& world) const
+std::pair<String, std::vector<ColourOverride>> ScriptWait::getNodeDescription(const ScriptGraphNode& node, const World& world) const
 {
 	String text;
 	std::vector<ColourOverride> cols;
