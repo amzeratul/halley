@@ -17,6 +17,7 @@ namespace Halley {
 
         void onAddedToRoot(UIRoot& root) override;
 		void setAssetIds(std::vector<String> ids, String defaultOption);
+		void setAssetIds(std::vector<String> _ids, std::vector<String> _names, String _defaultOption);
 
 		void setTitle(LocalisedString title);
 
@@ -32,6 +33,8 @@ namespace Halley {
         std::shared_ptr<UIList> options;
 
 		std::vector<String> ids;
+		std::vector<String> names;
+		std::vector<String>* effectiveNames;
 		FuzzyTextMatcher fuzzyMatcher;
 		String filter;
         String defaultOption;
@@ -44,7 +47,7 @@ namespace Halley {
         void cancel();
         void setFilter(const String& str);
 		void populateList();
-		void addItem(const String& id, gsl::span<const std::pair<uint16_t, uint16_t>> matchPositions = {});
+		void addItem(const String& id, const String& name, gsl::span<const std::pair<uint16_t, uint16_t>> matchPositions = {});
     };
 
     class AddComponentWindow : public ChooseAssetWindow {

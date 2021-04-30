@@ -365,7 +365,7 @@ void ScriptingGizmo::addNode()
 			});
 		}
 	}, false);
-	chooseAssetWindow->setAssetIds(scriptNodeTypes->getTypes(false), "");
+	chooseAssetWindow->setAssetIds(scriptNodeTypes->getTypes(false), scriptNodeTypes->getNames(false), "");
 	chooseAssetWindow->setTitle(LocalisedString::fromHardcodedString("Add Scripting Node"));
 	sceneEditorWindow.spawnUI(std::move(chooseAssetWindow));
 }

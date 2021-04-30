@@ -33,12 +33,23 @@ void ChooseAssetWindow::onAddedToRoot(UIRoot& root)
 
 void ChooseAssetWindow::setAssetIds(std::vector<String> ids, String defaultOption)
 {
-	this->ids = std::move(ids);
-	this->defaultOption = defaultOption;
+	setAssetIds(std::move(ids), {}, std::move(defaultOption));
+}
+
+void ChooseAssetWindow::setAssetIds(std::vector<String> _ids, std::vector<String> _names, String _defaultOption)
+{
+	ids = std::move(_ids);
+	names = std::move(_names);
+	defaultOption = std::move(_defaultOption);
+
+	effectiveNames = &(names.empty() ? ids : names);
+	if (effectiveNames->size() != ids.size()) {
+		throw Exception("Names and ids must have same length", HalleyExceptions::UI);
+	}
 
 	fuzzyMatcher.clear();
-	for (auto& id: this->ids) {
-		fuzzyMatcher.addString(id);
+	for (size_t i = 0; i < ids.size(); ++i) {
+		fuzzyMatcher.addString((*effectiveNames)[i], ids[i]);
 	}
 
 	populateList();
@@ -53,9 +64,9 @@ void ChooseAssetWindow::populateList()
 			if (canShowBlank) {
 				options->addTextItem("", LocalisedString::fromHardcodedString("[Empty]"));
 			}
-			
-			for (const auto& c: ids) {
-				addItem(c);
+
+			for (size_t i = 0; i < ids.size(); ++i) {
+				addItem(ids[i], (*effectiveNames)[i]);
 			}
 			
 			options->layout();
@@ -63,14 +74,14 @@ void ChooseAssetWindow::populateList()
 		}
 	} else {
 		for (const auto& r: fuzzyMatcher.match(filter)) {
-			addItem(r.getString(), r.getMatchPositions());
+			addItem(r.getId(), r.getString(), r.getMatchPositions());
 		}
 		options->layout();
 		options->setSelectedOption(0);
 	}
 }
 
-void ChooseAssetWindow::addItem(const String& id, gsl::span<const std::pair<uint16_t, uint16_t>> matchPositions)
+void ChooseAssetWindow::addItem(const String& id, const String& name, gsl::span<const std::pair<uint16_t, uint16_t>> matchPositions)
 {
 	auto sizer = std::make_shared<UISizer>();
 
@@ -81,13 +92,13 @@ void ChooseAssetWindow::addItem(const String& id, gsl::span<const std::pair<uint
 	}
 
 	// Make label
-	auto label = options->makeLabel("", LocalisedString::fromUserString(id));
+	auto label = options->makeLabel("", LocalisedString::fromUserString(name));
 
 	// Match highlights
 	auto labelCol = label->getColour();
 	if (!matchPositions.empty()) {
 		std::vector<ColourOverride> overrides;
-		for (auto& p: matchPositions) {
+		for (const auto& p: matchPositions) {
 			overrides.emplace_back(p.first, highlightCol);
 			overrides.emplace_back(p.first + p.second, labelCol);
 		}

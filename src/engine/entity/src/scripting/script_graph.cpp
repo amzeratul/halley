@@ -145,7 +145,7 @@ ConfigNode ScriptGraph::toConfigNode(const ConfigNodeSerializationContext& conte
 
 void ScriptGraph::makeBaseGraph()
 {
-	nodes.emplace_back("start", Vector2f(0, -100));
+	nodes.emplace_back("start", Vector2f(0, -30));
 }
 
 OptionalLite<uint32_t> ScriptGraph::getStartNode() const

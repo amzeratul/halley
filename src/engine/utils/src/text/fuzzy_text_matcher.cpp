@@ -46,8 +46,9 @@ bool FuzzyTextMatcher::Score::operator<(const Score& other) const
 	return jumpLength < other.jumpLength;
 }
 
-FuzzyTextMatcher::Result::Result(String str, Score score)
+FuzzyTextMatcher::Result::Result(String str, String id, Score score)
 	: str(std::move(str))
+	, id(std::move(id))
 	, matchPositions(std::move(score.matchPositions))
 	, score(score)
 {
@@ -63,6 +64,11 @@ const String& FuzzyTextMatcher::Result::getString() const
 	return str;
 }
 
+const String& FuzzyTextMatcher::Result::getId() const
+{
+	return id;
+}
+
 gsl::span<const std::pair<uint16_t, uint16_t>> FuzzyTextMatcher::Result::getMatchPositions() const
 {
 	return matchPositions;
@@ -76,19 +82,15 @@ FuzzyTextMatcher::FuzzyTextMatcher(bool caseSensitive, std::optional<size_t> res
 
 void FuzzyTextMatcher::addStrings(std::vector<String> strs)
 {
-	if (strings.empty()) {
-		strings = std::move(strs);
-	} else {
-		strings.reserve(strings.size() + strs.size());
-		for (auto& str: strs) {
-			strings.push_back(std::move(str));
-		}
+	strings.reserve(strings.size() + strs.size());
+	for (auto& str: strs) {
+		strings.emplace_back(Entry{ std::move(str), "" });
 	}
 }
 
-void FuzzyTextMatcher::addString(String string)
+void FuzzyTextMatcher::addString(String string, String id)
 {
-	strings.push_back(std::move(string));
+	strings.emplace_back(Entry{ std::move(string), std::move(id) });
 }
 
 void FuzzyTextMatcher::clear()
@@ -103,7 +105,7 @@ std::vector<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const String& rawQ
 	std::vector<Result> results;
 
 	for (const auto& str: strings) {
-		auto result = match(str, query);
+		auto result = match(str.string, str.id, query);
 		if (result) {
 			results.push_back(std::move(result.value()));
 		}
@@ -191,7 +193,7 @@ static FuzzyMatchState makeState(const StringUTF32& str, const StringUTF32& quer
 	return state;
 }
 
-std::optional<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const String& origStr, const StringUTF32& query) const
+std::optional<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const String& origStr, const String& id, const StringUTF32& query) const
 {
 	if (origStr.isEmpty() || query.empty()) {
 		return {};
@@ -230,7 +232,7 @@ std::optional<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const String& or
 
 	if (indices.size() == query.size()) {
 		// Found something
-		return Result(origStr, findBestScore(indices, makeState(str, query)));
+		return Result(origStr, id, findBestScore(indices, makeState(str, query)));
 	} else {
 		// Didn't find anything
 		return {};

@@ -83,6 +83,18 @@ std::vector<String> ScriptNodeTypeCollection::getTypes(bool includeNonAddable) c
 	return result;
 }
 
+std::vector<String> ScriptNodeTypeCollection::getNames(bool includeNonAddable) const
+{
+	std::vector<String> result;
+	result.reserve(nodeTypes.size());
+	for (const auto& [id, v]: nodeTypes) {
+		if (v->canAdd() || includeNonAddable) {
+			result.push_back(v->getName());
+		}
+	}
+	return result;
+}
+
 void ScriptNodeTypeCollection::addBasicScriptNodes()
 {
 	addScriptNode(std::make_unique<ScriptStart>());

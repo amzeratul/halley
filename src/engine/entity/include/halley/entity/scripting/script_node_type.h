@@ -97,6 +97,7 @@ namespace Halley {
 
 		const IScriptNodeType* tryGetNodeType(const String& typeId) const;
 		std::vector<String> getTypes(bool includeNonAddable) const;
+		std::vector<String> getNames(bool includeNonAddable) const;
 
 	private:
     	std::map<String, std::unique_ptr<IScriptNodeType>> nodeTypes;
