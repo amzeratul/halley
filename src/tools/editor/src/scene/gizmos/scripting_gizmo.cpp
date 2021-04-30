@@ -25,6 +25,8 @@ ScriptingGizmo::ScriptingGizmo(SnapRules snapRules, UIFactory& factory, ISceneEd
 
 void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {
+	Executor(pendingUITasks).runPending();
+	
 	if (!renderer) {
 		renderer = std::make_shared<ScriptRenderer>(sceneEditor.getResources(), sceneEditor.getWorld(), *scriptNodeTypes, sceneEditorWindow.getProjectDefaultZoom());
 	}
@@ -99,17 +101,25 @@ void ScriptingGizmo::onPinClicked()
 	
 	if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Output) {
 		// Erase connection coming out of this
-		node.setOutput(pinId, {}, 0);
+		if (node.setOutput(pinId, {}, 0)) {
+			saveEntityData();
+		}
 	}
 	if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Input) {
 		// Erase existing connection to this input
+		bool anyChanged = false;
 		for (auto& n: scriptGraph->getNodes()) {
-			n.disconnectOutputsTo(nodeId, pinId);
+			anyChanged = n.disconnectOutputsTo(nodeId, pinId) || anyChanged;
+		}
+		if (anyChanged) {
+			saveEntityData();
 		}
 	}
 	if (nodeEditingConnection->elementType == ScriptRenderer::NodeElementType::Target) {
 		// Erase connection coming out of this
-		node.setTarget(pinId, {});
+		if (node.setTarget(pinId, {})) {
+			saveEntityData();
+		}
 	}
 }
 
@@ -135,15 +145,18 @@ void ScriptingGizmo::onEditingConnection(const SceneEditorInputState& inputState
 		if (nodeUnderMouse) {
 			if (nodeEditingConnection->elementType == ET::Output) {
 				node.setOutput(pinId, nodeUnderMouse->nodeId, nodeUnderMouse->elementId);
+				saveEntityData();
 			}
 			if (nodeEditingConnection->elementType == ET::Input) {
 				auto& otherNode = scriptGraph->getNodes().at(nodeUnderMouse->nodeId);
 				otherNode.setOutput(nodeUnderMouse->elementId, nodeId, pinId);
+				saveEntityData();
 			}
 		}
 		
 		if (nodeEditingConnection->elementType == ET::Target) {
 			node.setTarget(pinId, curEntityTarget);
+			saveEntityData();
 		}
 		
 		nodeEditingConnection.reset();
@@ -254,6 +267,11 @@ ScriptGraphNode& ScriptingGizmo::getNode(uint32_t id)
 	return scriptGraph->getNodes().at(id);
 }
 
+ExecutionQueue& ScriptingGizmo::getExecutionQueue()
+{
+	return pendingUITasks;
+}
+
 void ScriptingGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, Rect4f nodePos) const
 {
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
@@ -323,7 +341,10 @@ void ScriptingGizmo::addNode()
 	auto chooseAssetWindow = std::make_shared<ChooseAssetWindow>(factory, [=] (std::optional<String> result)
 	{
 		if (result) {
-			addNode(result.value());
+			Concurrent::execute(pendingUITasks, [this, type = std::move(result.value())] ()
+			{
+				addNode(type);
+			});
 		}
 	}, false);
 	chooseAssetWindow->setAssetIds(scriptNodeTypes->getTypes(), "");
@@ -335,6 +356,7 @@ void ScriptingGizmo::addNode(const String& type)
 {
 	Vector2f pos; // TODO?
 	scriptGraph->getNodes().push_back(ScriptGraphNode(type, pos));
+	saveEntityData();
 }
 
 ScriptingNodeEditor::ScriptingNodeEditor(ScriptingGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, uint32_t nodeId, const IScriptNodeType& nodeType, Vector2f pos)
@@ -403,13 +425,24 @@ bool ScriptingNodeEditor::onKeyPress(KeyboardKeyPress key)
 
 void ScriptingNodeEditor::applyChanges()
 {
-	gizmo.getNode(nodeId).getSettings() = curSettings;
-	gizmo.saveEntityData();
+	auto* gizmo = &this->gizmo;
+	const auto nodeId = this->nodeId;
+	auto curSettings = ConfigNode(this->curSettings);
+	
+	Concurrent::execute(gizmo->getExecutionQueue(), [gizmo, nodeId, curSettings = std::move(curSettings)] () {
+		gizmo->getNode(nodeId).getSettings() = std::move(curSettings);
+		gizmo->saveEntityData();
+	});
 }
 
 void ScriptingNodeEditor::deleteNode()
 {
-	gizmo.destroyNode(nodeId);
+	auto* gizmo = &this->gizmo;
+	const auto nodeId = this->nodeId;
+
+	Concurrent::execute(gizmo->getExecutionQueue(), [gizmo, nodeId] () {
+		gizmo->destroyNode(nodeId);
+	});
 }
 
 void ScriptingNodeEditor::makeFields(const std::shared_ptr<UIWidget>& fieldsRoot)

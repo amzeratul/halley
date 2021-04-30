@@ -26,6 +26,7 @@ ScriptGraphNode::ScriptGraphNode()
 ScriptGraphNode::ScriptGraphNode(String type, Vector2f position)
 	: position(position)
 	, type(std::move(type))
+	, settings(ConfigNode::MapType())
 {
 }
 
@@ -66,18 +67,30 @@ ConfigNode ScriptGraphNode::toConfigNode(const ConfigNodeSerializationContext& c
 	return result;
 }
 
-void ScriptGraphNode::setOutput(uint8_t outputPinN, OptionalLite<uint32_t> targetNode, uint8_t inputPinN)
+bool ScriptGraphNode::setOutput(uint8_t outputPinN, OptionalLite<uint32_t> targetNode, uint8_t inputPinN)
 {
 	outputs.resize(std::max(outputs.size(), static_cast<size_t>(outputPinN + 1)));
+	
 	auto& output = outputs[outputPinN];
-	output.nodeId = targetNode;
-	output.inputPin = inputPinN;
+	if (output.nodeId != targetNode || output.inputPin != inputPinN) {
+		output.nodeId = targetNode;
+		output.inputPin = inputPinN;
+		return true;
+	}
+
+	return false;
 }
 
-void ScriptGraphNode::setTarget(uint8_t targetPinN, EntityId targetEntity)
+bool ScriptGraphNode::setTarget(uint8_t targetPinN, EntityId targetEntity)
 {
 	targets.resize(std::max(targets.size(), static_cast<size_t>(targetPinN + 1)));
-	targets[targetPinN] = targetEntity;
+
+	if (targets[targetPinN] != targetEntity) {
+		targets[targetPinN] = targetEntity;
+		return true;
+	}
+
+	return false;
 }
 
 void ScriptGraphNode::feedToHash(Hash::Hasher& hasher)
@@ -96,12 +109,16 @@ void ScriptGraphNode::onNodeRemoved(uint32_t nodeId)
 	}
 }
 
-void ScriptGraphNode::disconnectOutputsTo(uint32_t nodeId, OptionalLite<uint8_t> pinId)
+bool ScriptGraphNode::disconnectOutputsTo(uint32_t nodeId, OptionalLite<uint8_t> pinId)
 {
+	const size_t startN = outputs.size();
+	
 	outputs.erase(std::remove_if(outputs.begin(), outputs.end(), [&] (const Output& o)
 	{
 		return o.nodeId == nodeId && (!pinId || pinId == o.inputPin);
 	}), outputs.end());
+	
+	return startN != outputs.size();
 }
 
 ScriptGraph::ScriptGraph()

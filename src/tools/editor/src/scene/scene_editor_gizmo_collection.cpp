@@ -31,8 +31,9 @@ bool SceneEditorGizmoCollection::update(Time time, const Camera& camera, const I
 	
 	if (activeGizmo) {
 		activeGizmo->setCamera(camera);
-		activeGizmo->setOutputState(outputState);
+		activeGizmo->setOutputState(&outputState);
 		activeGizmo->update(time, sceneEditor, inputState);
+		activeGizmo->setOutputState(nullptr);
 
 		return activeGizmo->isHighlighted();
 	}

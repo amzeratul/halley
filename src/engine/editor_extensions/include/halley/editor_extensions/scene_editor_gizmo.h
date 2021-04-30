@@ -87,7 +87,7 @@ namespace Halley {
 		virtual void refreshEntity();
 
 		void setCamera(const Camera& camera);
-		void setOutputState(SceneEditorOutputState& outputState);
+		void setOutputState(SceneEditorOutputState* outputState);
 
 		virtual bool isHighlighted() const;
 		virtual void deselect();

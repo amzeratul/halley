@@ -3,6 +3,7 @@
 #include "halley/core/game/scene_editor_interface.h"
 #include "halley/core/graphics/camera.h"
 #include "halley/entity/entity_data.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 SceneEditorGizmoHandle::SceneEditorGizmoHandle(String id)
@@ -172,9 +173,9 @@ void SceneEditorGizmo::setCamera(const Camera& camera)
 	zoom = camera.getZoom();
 }
 
-void SceneEditorGizmo::setOutputState(SceneEditorOutputState& state)
+void SceneEditorGizmo::setOutputState(SceneEditorOutputState* state)
 {
-	outputState = &state;
+	outputState = state;
 }
 
 bool SceneEditorGizmo::isHighlighted() const
@@ -230,6 +231,8 @@ void SceneEditorGizmo::markModified(const String& component, const String& field
 {
 	if (outputState) {
 		outputState->fieldsChanged.emplace_back(component, field);
+	} else {
+		Logger::logError("Gizmo trying to markModified with not outputState bound");
 	}
 }
 

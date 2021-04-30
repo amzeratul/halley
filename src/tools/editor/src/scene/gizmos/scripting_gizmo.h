@@ -18,6 +18,8 @@ namespace Halley {
 		void destroyNode(uint32_t id);
 		ScriptGraphNode& getNode(uint32_t id);
 
+		ExecutionQueue& getExecutionQueue();
+
 	private:
 		struct EntityTarget {
 			Vector2f pos;
@@ -42,6 +44,8 @@ namespace Halley {
 		EntityId curEntityTarget;
 
 		mutable TextRenderer tooltipLabel;
+
+		ExecutionQueue pendingUITasks;
 
 		void loadEntityData();
 		void drawToolTip(Painter& painter, const ScriptGraphNode& node, Rect4f nodePos) const;
