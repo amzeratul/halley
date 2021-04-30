@@ -50,7 +50,9 @@ namespace Halley {
 		virtual uint8_t getNumInputPins() const { return 1; }
 		virtual uint8_t getNumOutputPins() const { return 1; }
 		virtual uint8_t getNumTargetPins() const { return 0; }
-		virtual bool hasSettings() const { return false; }
+		virtual bool hasSettings() const { return true; }
+        virtual bool canAdd() const { return true; }
+        virtual bool canDelete() const { return true; }
 		
 		virtual Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData* curData) const = 0;
 		virtual std::unique_ptr<IScriptStateData> makeData() const { return {}; }
@@ -84,7 +86,7 @@ namespace Halley {
     	void addScriptNode(std::unique_ptr<IScriptNodeType> nodeType);
 
 		const IScriptNodeType* tryGetNodeType(const String& typeId) const;
-		std::vector<String> getTypes() const;
+		std::vector<String> getTypes(bool includeNonAddable) const;
 
 	private:
     	std::map<String, std::unique_ptr<IScriptNodeType>> nodeTypes;

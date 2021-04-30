@@ -131,33 +131,35 @@ void ScriptingGizmo::onEditingConnection(const SceneEditorInputState& inputState
 	nodeConnectionDst = inputState.mousePos;
 
 	const auto srcType = nodeEditingConnection->elementType;
+	const auto srcNodeId = nodeEditingConnection->nodeId;
+	const auto srcPinId = nodeEditingConnection->elementId;
 
 	if (nodeUnderMouse) {
+		const auto dstNodeId = nodeUnderMouse->nodeId;
 		const auto dstType = nodeUnderMouse->elementType;
-		if ((srcType == ET::Input && dstType != ET::Output) || (srcType == ET::Output && dstType != ET::Input) || srcType == ET::Target) {
+		
+		if ((srcType == ET::Input && dstType != ET::Output) || (srcType == ET::Output && dstType != ET::Input) || srcType == ET::Target || srcNodeId == dstNodeId) {
 			nodeUnderMouse.reset();
 		}
 	}
 
 	if (inputState.leftClickPressed) {
-		const auto nodeId = nodeEditingConnection->nodeId;
-		const auto pinId = nodeEditingConnection->elementId;
-		auto& node = scriptGraph->getNodes().at(nodeId);
+		auto& srcNode = scriptGraph->getNodes().at(srcNodeId);
 
 		if (nodeUnderMouse) {
 			if (nodeEditingConnection->elementType == ET::Output) {
-				node.setOutput(pinId, nodeUnderMouse->nodeId, nodeUnderMouse->elementId);
+				srcNode.setOutput(srcPinId, nodeUnderMouse->nodeId, nodeUnderMouse->elementId);
 				saveEntityData();
 			}
 			if (nodeEditingConnection->elementType == ET::Input) {
 				auto& otherNode = scriptGraph->getNodes().at(nodeUnderMouse->nodeId);
-				otherNode.setOutput(nodeUnderMouse->elementId, nodeId, pinId);
+				otherNode.setOutput(nodeUnderMouse->elementId, srcNodeId, srcPinId);
 				saveEntityData();
 			}
 		}
 		
 		if (nodeEditingConnection->elementType == ET::Target) {
-			node.setTarget(pinId, curEntityTarget);
+			srcNode.setTarget(srcPinId, curEntityTarget);
 			saveEntityData();
 		}
 		
@@ -250,18 +252,25 @@ void ScriptingGizmo::saveEntityData()
 	markModified("Script", "scriptGraph");
 }
 
-void ScriptingGizmo::destroyNode(uint32_t id)
+bool ScriptingGizmo::destroyNode(uint32_t id)
 {
 	auto& nodes = scriptGraph->getNodes();
-
 	if (id < nodes.size()) {
+		const auto* nodeType = scriptNodeTypes->tryGetNodeType(nodes[id].getType());
+		if (nodeType && !nodeType->canDelete()) {
+			return false;
+		}
+		
 		for (auto& n: nodes) {
 			n.onNodeRemoved(id);
 		}
 		
 		nodes.erase(nodes.begin() + id);
 		saveEntityData();
+		return true;
 	}
+
+	return false;
 }
 
 bool ScriptingGizmo::destroyHighlightedNode()
@@ -335,7 +344,7 @@ void ScriptingGizmo::openNodeUI(uint32_t nodeId, Vector2f pos)
 {
 	ScriptGraphNode& node = getNode(nodeId);
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
-	if (nodeType) {
+	if (nodeType && nodeType->hasSettings()) {
 		sceneEditorWindow.spawnUI(std::make_shared<ScriptingNodeEditor>(*this, factory, sceneEditorWindow.getEntityEditorFactory(), nodeId, *nodeType, pos));
 	}
 }
@@ -353,7 +362,7 @@ void ScriptingGizmo::addNode()
 			});
 		}
 	}, false);
-	chooseAssetWindow->setAssetIds(scriptNodeTypes->getTypes(), "");
+	chooseAssetWindow->setAssetIds(scriptNodeTypes->getTypes(false), "");
 	chooseAssetWindow->setTitle(LocalisedString::fromHardcodedString("Add Scripting Node"));
 	sceneEditorWindow.spawnUI(std::move(chooseAssetWindow));
 }

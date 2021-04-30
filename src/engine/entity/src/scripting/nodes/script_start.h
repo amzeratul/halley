@@ -11,6 +11,9 @@ namespace Halley {
 		String getIconName() const override { return "script_icons/start.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Terminator; }
 		uint8_t getNumInputPins() const override { return 0; }
+		bool hasSettings() const override { return false; }
+		bool canAdd() const override { return false; }
+		bool canDelete() const override { return false; }
 		
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
 	};

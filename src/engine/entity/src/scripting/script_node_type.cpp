@@ -25,12 +25,14 @@ const IScriptNodeType* ScriptNodeTypeCollection::tryGetNodeType(const String& ty
 	return nullptr;
 }
 
-std::vector<String> ScriptNodeTypeCollection::getTypes() const
+std::vector<String> ScriptNodeTypeCollection::getTypes(bool includeNonAddable) const
 {
 	std::vector<String> result;
 	result.reserve(nodeTypes.size());
 	for (const auto& [id, v]: nodeTypes) {
-		result.push_back(id);
+		if (v->canAdd() || includeNonAddable) {
+			result.push_back(id);
+		}
 	}
 	return result;
 }
