@@ -1,4 +1,4 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
-- widget: { class: button, id: addNode, text: Add Node }
+- widget: { class: button, id: addNode, text: Add Node, tooltip: "Add a new Node [Ctrl+A]" }

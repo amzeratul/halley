@@ -69,6 +69,8 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 			}
 		}
 	}
+	
+	lastMousePos = inputState.mousePos;
 }
 
 void ScriptingGizmo::onNodeClicked(Vector2f mousePos)
@@ -316,15 +318,7 @@ void ScriptingGizmo::drawEntityTargets(Painter& painter) const
 
 std::shared_ptr<UIWidget> ScriptingGizmo::makeUI()
 {
-	auto ui = factory.makeUI("ui/halley/scripting_gizmo_toolbar");
-	ui->setInteractWithMouse(true);
-
-	ui->setHandle(UIEventType::ButtonClicked, "addNode", [=] (const UIEvent& event)
-	{
-		addNode();
-	});
-	
-	return ui;
+	return std::make_shared<ScriptingGizmoToolbar>(factory, *this);
 }
 
 void ScriptingGizmo::openNodeUI(uint32_t nodeId, Vector2f pos)
@@ -338,12 +332,14 @@ void ScriptingGizmo::openNodeUI(uint32_t nodeId, Vector2f pos)
 
 void ScriptingGizmo::addNode()
 {
+	const Vector2f pos = lastMousePos ? lastMousePos.value() - basePos : Vector2f();
+	
 	auto chooseAssetWindow = std::make_shared<ChooseAssetWindow>(factory, [=] (std::optional<String> result)
 	{
 		if (result) {
-			Concurrent::execute(pendingUITasks, [this, type = std::move(result.value())] ()
+			Concurrent::execute(pendingUITasks, [this, type = std::move(result.value()), pos] ()
 			{
-				addNode(type);
+				addNode(type, pos);
 			});
 		}
 	}, false);
@@ -352,9 +348,8 @@ void ScriptingGizmo::addNode()
 	sceneEditorWindow.spawnUI(std::move(chooseAssetWindow));
 }
 
-void ScriptingGizmo::addNode(const String& type)
+void ScriptingGizmo::addNode(const String& type, Vector2f pos)
 {
-	Vector2f pos; // TODO?
 	scriptGraph->getNodes().push_back(ScriptGraphNode(type, pos));
 	saveEntityData();
 }
@@ -469,4 +464,41 @@ void ScriptingNodeEditor::makeFields(const std::shared_ptr<UIWidget>& fieldsRoot
 	if (!foundFocus) {
 		getRoot()->setFocus(shared_from_this());
 	}
+}
+
+ScriptingGizmoToolbar::ScriptingGizmoToolbar(UIFactory& factory, ScriptingGizmo& gizmo)
+	: UIWidget("scripting_gizmo_toolbar", {}, UISizer())
+	, gizmo(gizmo)
+	, factory(factory)
+{
+	factory.loadUI(*this, "ui/halley/scripting_gizmo_toolbar");
+	setInteractWithMouse(true);
+}
+
+void ScriptingGizmoToolbar::onMakeUI()
+{
+	setHandle(UIEventType::ButtonClicked, "addNode", [=] (const UIEvent& event)
+	{
+		gizmo.addNode();
+	});
+}
+
+void ScriptingGizmoToolbar::onAddedToRoot(UIRoot& root)
+{
+	root.registerKeyPressListener(shared_from_this());
+}
+
+void ScriptingGizmoToolbar::onRemovedFromRoot(UIRoot& root)
+{
+	root.removeKeyPressListener(*this);
+}
+
+bool ScriptingGizmoToolbar::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::A, KeyMods::Ctrl)) {
+		gizmo.addNode();
+		return true;
+	}
+	
+	return false;
 }

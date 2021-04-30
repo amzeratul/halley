@@ -15,6 +15,8 @@ namespace Halley {
 		void onEntityChanged() override;
 
 		void saveEntityData();
+		
+		void addNode();
 		void destroyNode(uint32_t id);
 		ScriptGraphNode& getNode(uint32_t id);
 
@@ -36,6 +38,7 @@ namespace Halley {
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeUnderMouse;
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeEditingConnection;
 		std::optional<Vector2f> nodeConnectionDst;
+		std::optional<Vector2f> lastMousePos;
 
 		bool dragging = false;
 		Vector2f startDragPos;
@@ -52,8 +55,7 @@ namespace Halley {
 		void drawEntityTargets(Painter& painter) const;
 
 		void openNodeUI(uint32_t nodeId, Vector2f pos);
-		void addNode();
-		void addNode(const String& type);
+		void addNode(const String& type, Vector2f pos);
 
 		void onNodeClicked(Vector2f mousePos);
 		void onNodeDragging(const SceneEditorInputState& inputState);
@@ -85,5 +87,21 @@ namespace Halley {
 		void applyChanges();
 		void deleteNode();
 		void makeFields(const std::shared_ptr<UIWidget>& fieldsRoot);
+	};
+
+	class ScriptingGizmoToolbar : public UIWidget {
+	public:
+		ScriptingGizmoToolbar(UIFactory& factory, ScriptingGizmo& gizmo);
+
+		void onMakeUI() override;
+		void onAddedToRoot(UIRoot& root) override;
+		void onRemovedFromRoot(UIRoot& root) override;
+
+	protected:
+		bool onKeyPress(KeyboardKeyPress key) override;
+	
+	private:
+		ScriptingGizmo& gizmo;
+		UIFactory& factory;
 	};
 }
