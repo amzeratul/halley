@@ -1,4 +1,7 @@
 #include "scripting/script_graph.h"
+
+#include "entity.h"
+#include "world.h"
 #include "halley/utils/hash.h"
 using namespace Halley;
 
@@ -119,6 +122,19 @@ bool ScriptGraphNode::disconnectOutputsTo(uint32_t nodeId, OptionalLite<uint8_t>
 	}), outputs.end());
 	
 	return startN != outputs.size();
+}
+
+String ScriptGraphNode::getTargetName(const World& world, uint8_t idx) const
+{
+	const EntityId targetId = static_cast<size_t>(idx) < targets.size() ? targets[idx] : EntityId();
+	if (targetId.isValid()) {
+		const ConstEntityRef target = world.tryGetEntity(targetId);
+		if (target.isValid()) {
+			return target.getName();
+		}
+	}
+	
+	return "<unknown>";
 }
 
 ScriptGraph::ScriptGraph()

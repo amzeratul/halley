@@ -107,4 +107,16 @@ namespace Halley
 		void updateMaterials() const;
 		float getScale(const Font& font) const;
 	};
+
+	class ColourStringBuilder {
+	public:
+		void append(String text, std::optional<Colour4f> col = {});
+
+		std::pair<String, std::vector<ColourOverride>> moveResults();
+
+	private:
+		std::vector<String> strings;
+		std::vector<ColourOverride> colours;
+		size_t len = 0;
+	};
 }

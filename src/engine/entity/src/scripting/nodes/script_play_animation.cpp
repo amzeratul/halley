@@ -16,24 +16,13 @@ std::vector<IScriptNodeType::SettingType> ScriptPlayAnimation::getSettingTypes()
 
 std::pair<String, std::vector<ColourOverride>> ScriptPlayAnimation::getNodeDescription(const ScriptGraphNode& node, const World& world) const
 {
-	String text;
-	std::vector<ColourOverride> cols;
-
-	const EntityId targetId = node.getTargets().empty() ? EntityId() : node.getTargets()[0];
-	const ConstEntityRef target = world.tryGetEntity(targetId);
-	const String targetName = target.isValid() ? target.getName() : "<unknown>";
-
-	text += "Play sequence \"";
-	cols.emplace_back(text.length(), Colour4f(0.97f, 0.35f, 0.35f));
-	text += toString(node.getSettings()["sequence"].asString(""));
-	cols.emplace_back(text.length(), std::optional<Colour4f>());
-	text += "\" on entity \"";
-	cols.emplace_back(text.length(), Colour4f(0.97f, 0.35f, 0.35f));
-	text += targetName;
-	cols.emplace_back(text.length(), std::optional<Colour4f>());
-	text += "\".";
-
-	return { std::move(text), std::move(cols) };
+	ColourStringBuilder str;
+	str.append("Play sequence \"");
+	str.append(toString(node.getSettings()["sequence"].asString("")), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append("\" on entity \"");
+	str.append(node.getTargetName(world, 0), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append("\".");
+	return str.moveResults();
 }
 
 IScriptNodeType::Result ScriptPlayAnimation::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const

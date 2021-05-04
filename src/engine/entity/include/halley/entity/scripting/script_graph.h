@@ -4,6 +4,8 @@
 #include "halley/utils/hash.h"
 
 namespace Halley {
+	class World;
+	
 	class ScriptGraphNode {
 	public:
 		struct Output {
@@ -41,6 +43,8 @@ namespace Halley {
 
 		void onNodeRemoved(uint32_t nodeId);
 		bool disconnectOutputsTo(uint32_t nodeId, OptionalLite<uint8_t> pinId);
+
+		String getTargetName(const World& world, uint8_t idx) const;
 
 	private:
 		Vector2f position;

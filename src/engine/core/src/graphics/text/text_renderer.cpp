@@ -584,3 +584,22 @@ void TextRenderer::updateMaterials() const
 		updateMaterial(*m.second, *m.first);
 	}
 }
+
+void ColourStringBuilder::append(String text, std::optional<Colour4f> col)
+{
+	colours.emplace_back(len, col);
+	len += text.length();
+	strings.push_back(std::move(text));
+}
+
+std::pair<String, std::vector<ColourOverride>> ColourStringBuilder::moveResults()
+{
+	String result;
+	result.cppStr().reserve(len + 1);
+	for (auto& s: strings) {
+		result += s;
+	}
+	strings.clear();
+	len = 0;
+	return { std::move(result), std::move(colours) };
+}
