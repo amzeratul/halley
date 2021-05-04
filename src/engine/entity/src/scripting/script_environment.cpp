@@ -33,8 +33,9 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 	for (size_t i = 0; i < threads.size(); ++i) {
 		auto& thread = threads[i];
 		Time& timeLeft = thread.getTimeSlice();
+		bool suspended = false;
 
-		while (timeLeft > 0 && thread.getCurNode()) {
+		while (!suspended && timeLeft > 0 && thread.getCurNode()) {
 			const auto& node = graph.getNodes().at(thread.getCurNode().value());
 
 			// Start node if not done yet
@@ -73,6 +74,8 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 					// Nothing follows this, terminate thread
 					thread.advanceToNode({});
 				}
+			} else if (state == ScriptNodeExecutionState::Executing) {
+				suspended = true;
 			}
 		}
 	}
