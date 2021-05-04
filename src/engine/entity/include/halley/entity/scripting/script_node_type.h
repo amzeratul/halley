@@ -69,25 +69,28 @@ namespace Halley {
         virtual void initData(IScriptStateData& data, const ScriptGraphNode& node) const {}
 	};
 
-	template <typename T>
+	template <typename DataType, typename EnvironmentType = ScriptEnvironment>
 	class ScriptNodeTypeBase : public IScriptNodeType {
 	public:
-		static_assert(std::is_base_of_v<IScriptStateData, T>);
+		static_assert(std::is_base_of_v<IScriptStateData, DataType>);
+		static_assert(std::is_base_of_v<ScriptEnvironment, EnvironmentType>);
 		
-		virtual Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, T& curData) const = 0;
-		virtual void doInitData(T& data, const ScriptGraphNode& node) const = 0;
+		virtual Result doUpdate(EnvironmentType& environment, Time time, const ScriptGraphNode& node, DataType& curData) const = 0;
+		virtual void doInitData(DataType& data, const ScriptGraphNode& node) const = 0;
 		
-		Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData* curData) const final override { return doUpdate(environment, time, node, *dynamic_cast<T*>(curData)); }
-		std::unique_ptr<IScriptStateData> makeData() const override { return std::make_unique<T>(); }
-		virtual void initData(IScriptStateData& data, const ScriptGraphNode& node) const { doInitData(dynamic_cast<T&>(data), node); }
+		Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData* curData) const final override { return doUpdate(dynamic_cast<EnvironmentType&>(environment), time, node, *dynamic_cast<DataType*>(curData)); }
+		std::unique_ptr<IScriptStateData> makeData() const override { return std::make_unique<DataType>(); }
+		virtual void initData(IScriptStateData& data, const ScriptGraphNode& node) const { doInitData(dynamic_cast<DataType&>(data), node); }
 	};
 
-	template <>
-	class ScriptNodeTypeBase<void> : public IScriptNodeType {
+	template <typename EnvironmentType>
+	class ScriptNodeTypeBase<void, EnvironmentType> : public IScriptNodeType {
 	public:
-		virtual Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const = 0;
+		static_assert(std::is_base_of_v<ScriptEnvironment, EnvironmentType>);
 		
-		Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData*) const final override { return doUpdate(environment, time, node); }
+		virtual Result doUpdate(EnvironmentType& environment, Time time, const ScriptGraphNode& node) const = 0;
+		
+		Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData*) const final override { return doUpdate(dynamic_cast<EnvironmentType&>(environment), time, node); }
 	};
 
 	class ScriptNodeTypeCollection {

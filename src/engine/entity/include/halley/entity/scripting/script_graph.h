@@ -33,6 +33,7 @@ namespace Halley {
 
 		std::vector<EntityId>& getTargets() { return targets; }
 		const std::vector<EntityId>& getTargets() const { return targets; }
+		EntityId getTarget(uint8_t idx) const { return idx < targets.size() ? targets[idx] : EntityId(); }
 
 		const ConfigNode& getSettings() const { return settings; }
 		ConfigNode& getSettings() { return settings; }

@@ -18,7 +18,7 @@ std::pair<String, std::vector<ColourOverride>> ScriptPlayAnimation::getNodeDescr
 {
 	ColourStringBuilder str;
 	str.append("Play sequence \"");
-	str.append(toString(node.getSettings()["sequence"].asString("")), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(node.getSettings()["sequence"].asString("default"), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append("\" on entity \"");
 	str.append(node.getTargetName(world, 0), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append("\".");
