@@ -100,14 +100,14 @@ void ScriptingGizmo::onPinClicked()
 	const auto nodeId = nodeEditingConnection->nodeId;
 	const auto pinId = nodeEditingConnection->elementId;
 	auto& node = scriptGraph->getNodes().at(nodeId);
+	const auto srcType = nodeEditingConnection->elementType;
 	
-	if (nodeEditingConnection->elementType == ScriptNodeElementType::Output) {
+	if (srcType == ScriptNodeElementType::FlowOutput) {
 		// Erase connection coming out of this
 		if (node.setOutput(pinId, {}, 0)) {
 			saveEntityData();
 		}
-	}
-	if (nodeEditingConnection->elementType == ScriptNodeElementType::Input) {
+	} else if (srcType == ScriptNodeElementType::FlowInput) {
 		// Erase existing connection to this input
 		bool anyChanged = false;
 		for (auto& n: scriptGraph->getNodes()) {
@@ -116,8 +116,11 @@ void ScriptingGizmo::onPinClicked()
 		if (anyChanged) {
 			saveEntityData();
 		}
-	}
-	if (nodeEditingConnection->elementType == ScriptNodeElementType::Target) {
+	} else if (srcType == ScriptNodeElementType::DataOutput) {
+		// TODO
+	} else if (srcType == ScriptNodeElementType::DataInput) {
+		// TODO
+	} else if (srcType == ScriptNodeElementType::Target) {
 		// Erase connection coming out of this
 		if (node.setTarget(pinId, {})) {
 			saveEntityData();
@@ -138,7 +141,12 @@ void ScriptingGizmo::onEditingConnection(const SceneEditorInputState& inputState
 		const auto dstNodeId = nodeUnderMouse->nodeId;
 		const auto dstType = nodeUnderMouse->elementType;
 		
-		if ((srcType == ET::Input && dstType != ET::Output) || (srcType == ET::Output && dstType != ET::Input) || srcType == ET::Target || srcNodeId == dstNodeId) {
+		if ((srcType == ET::FlowInput && dstType != ET::FlowOutput)
+			|| (srcType == ET::FlowOutput && dstType != ET::FlowInput)
+			|| (srcType == ET::DataOutput && dstType != ET::DataInput)
+			|| (srcType == ET::DataInput && dstType != ET::DataOutput)
+			|| srcType == ET::Target
+			|| srcNodeId == dstNodeId) {
 			nodeUnderMouse.reset();
 		}
 	}
@@ -147,18 +155,21 @@ void ScriptingGizmo::onEditingConnection(const SceneEditorInputState& inputState
 		auto& srcNode = scriptGraph->getNodes().at(srcNodeId);
 
 		if (nodeUnderMouse) {
-			if (nodeEditingConnection->elementType == ET::Output) {
+			if (srcType == ET::FlowOutput) {
 				srcNode.setOutput(srcPinId, nodeUnderMouse->nodeId, nodeUnderMouse->elementId);
 				saveEntityData();
-			}
-			if (nodeEditingConnection->elementType == ET::Input) {
+			} else if (srcType == ET::FlowInput) {
 				auto& otherNode = scriptGraph->getNodes().at(nodeUnderMouse->nodeId);
 				otherNode.setOutput(nodeUnderMouse->elementId, srcNodeId, srcPinId);
 				saveEntityData();
+			} else if (srcType == ET::DataOutput) {
+				// TODO
+			} else if (srcType == ET::DataInput) {
+				// TODO
 			}
 		}
 		
-		if (nodeEditingConnection->elementType == ET::Target) {
+		if (srcType == ET::Target) {
 			srcNode.setTarget(srcPinId, curEntityTarget);
 			saveEntityData();
 		}

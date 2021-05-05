@@ -38,7 +38,7 @@ ScriptGraphNode::ScriptGraphNode(const ConfigNode& node, const ConfigNodeSeriali
 	position = node["position"].asVector2f();
 	type = node["type"].asString();
 	settings = ConfigNode(node["settings"]);
-	outputs = node["outputs"].asVector<Output>();
+	flowOutputs = node["outputs"].asVector<Output>();
 	targets = ConfigNodeSerializer<std::vector<EntityId>>().deserialize(context, node["targets"]);
 	/*
 	if (node["targets"].getType() == ConfigNodeType::Sequence) {
@@ -57,7 +57,7 @@ ConfigNode ScriptGraphNode::toConfigNode(const ConfigNodeSerializationContext& c
 	result["position"] = position;
 	result["type"] = type;
 	result["settings"] = ConfigNode(settings);
-	result["outputs"] = outputs;
+	result["outputs"] = flowOutputs;
 	result["targets"] = ConfigNodeSerializer<std::vector<EntityId>>().serialize(targets, context);
 	/*
 	ConfigNode::SequenceType targetNodes;
@@ -72,9 +72,9 @@ ConfigNode ScriptGraphNode::toConfigNode(const ConfigNodeSerializationContext& c
 
 bool ScriptGraphNode::setOutput(uint8_t outputPinN, OptionalLite<uint32_t> targetNode, uint8_t inputPinN)
 {
-	outputs.resize(std::max(outputs.size(), static_cast<size_t>(outputPinN + 1)));
+	flowOutputs.resize(std::max(flowOutputs.size(), static_cast<size_t>(outputPinN + 1)));
 	
-	auto& output = outputs[outputPinN];
+	auto& output = flowOutputs[outputPinN];
 	if (output.nodeId != targetNode || output.inputPin != inputPinN) {
 		output.nodeId = targetNode;
 		output.inputPin = inputPinN;
@@ -105,7 +105,7 @@ void ScriptGraphNode::onNodeRemoved(uint32_t nodeId)
 {
 	disconnectOutputsTo(nodeId, {});
 	
-	for (auto& o: outputs) {
+	for (auto& o: flowOutputs) {
 		if (o.nodeId && o.nodeId.value() >= nodeId) {
 			--o.nodeId.value();
 		}
@@ -114,14 +114,14 @@ void ScriptGraphNode::onNodeRemoved(uint32_t nodeId)
 
 bool ScriptGraphNode::disconnectOutputsTo(uint32_t nodeId, OptionalLite<uint8_t> pinId)
 {
-	const size_t startN = outputs.size();
+	const size_t startN = flowOutputs.size();
 	
-	outputs.erase(std::remove_if(outputs.begin(), outputs.end(), [&] (const Output& o)
+	flowOutputs.erase(std::remove_if(flowOutputs.begin(), flowOutputs.end(), [&] (const Output& o)
 	{
 		return o.nodeId == nodeId && (!pinId || pinId == o.inputPin);
-	}), outputs.end());
+	}), flowOutputs.end());
 	
-	return startN != outputs.size();
+	return startN != flowOutputs.size();
 }
 
 String ScriptGraphNode::getTargetName(const World& world, uint8_t idx) const

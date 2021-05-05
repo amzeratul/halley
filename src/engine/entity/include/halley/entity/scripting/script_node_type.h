@@ -21,15 +21,16 @@ namespace Halley {
 	enum class ScriptNodeClassification {
 		Terminator, // As in start/end, not as in Arnie
 		FlowControl,
-		WaitCondition,
-		BranchCondition,
+		Variable,
 		Action
 	};
 
 	enum class ScriptNodeElementType : uint8_t {
 		Node,
-		Input,
-		Output,
+		FlowInput,
+		FlowOutput,
+		DataInput,
+		DataOutput,
 		Target
 	};
 	
@@ -65,9 +66,11 @@ namespace Halley {
 		virtual String getIconName() const = 0;
 		virtual ScriptNodeClassification getClassification() const = 0;
 		
-		virtual uint8_t getNumInputPins() const { return 1; }
-		virtual uint8_t getNumOutputPins() const { return 1; }
+		virtual uint8_t getNumFlowInputPins() const { return 1; }
+		virtual uint8_t getNumFlowOutputPins() const { return 1; }
 		virtual uint8_t getNumTargetPins() const { return 0; }
+		virtual uint8_t getNumDataInputPins() const { return 0; }
+		virtual uint8_t getNumDataOutputPins() const { return 0; }
         virtual bool canAdd() const { return true; }
         virtual bool canDelete() const { return true; }
 		

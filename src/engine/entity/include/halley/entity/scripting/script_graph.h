@@ -28,8 +28,8 @@ namespace Halley {
 
 		const String& getType() const { return type; }
 
-		std::vector<Output>& getOutputs() { return outputs; }
-		const std::vector<Output>& getOutputs() const { return outputs; }
+		std::vector<Output>& getFlowOutputs() { return flowOutputs; }
+		const std::vector<Output>& getFlowOutputs() const { return flowOutputs; }
 
 		std::vector<EntityId>& getTargets() { return targets; }
 		const std::vector<EntityId>& getTargets() const { return targets; }
@@ -51,7 +51,7 @@ namespace Halley {
 		Vector2f position;
 		String type;
 		ConfigNode settings;
-		std::vector<Output> outputs;
+		std::vector<Output> flowOutputs;
 		std::vector<EntityId> targets;
 	};
 	

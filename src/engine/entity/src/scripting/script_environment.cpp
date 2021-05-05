@@ -52,8 +52,8 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 				thread.finishNode();
 
 				size_t nOutputsFound = 0;
-				for (size_t j = 0; j < node.getOutputs().size(); ++j) {
-					const auto& output = node.getOutputs()[j];
+				for (size_t j = 0; j < node.getFlowOutputs().size(); ++j) {
+					const auto& output = node.getFlowOutputs()[j];
 					const bool outputActive = (result.outputsActive & (1 << j)) != 0;
 					
 					if (outputActive && output.nodeId) {

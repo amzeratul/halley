@@ -15,8 +15,10 @@ std::vector<IScriptNodeType::SettingType> IScriptNodeType::getSettingTypes() con
 std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node,	const World& world, ScriptNodeElementType elementType, uint8_t elementIdx) const
 {
 	switch (elementType) {
-	case ScriptNodeElementType::Input:
-	case ScriptNodeElementType::Output:
+	case ScriptNodeElementType::FlowInput:
+	case ScriptNodeElementType::FlowOutput:
+	case ScriptNodeElementType::DataInput:
+	case ScriptNodeElementType::DataOutput:
 		return getIOPinDescription(node, elementType, elementIdx);
 	case ScriptNodeElementType::Target:
 		return getTargetPinDescription(node, world, elementIdx);
@@ -34,19 +36,32 @@ std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getNodeDescripti
 
 std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getIOPinDescription(const ScriptGraphNode& node, ScriptNodeElementType elementType, uint8_t elementIdx) const
 {
-	if (elementType == ScriptNodeElementType::Input) {
-		if (getNumInputPins() <= 1) {
-			return { "Input", {} };
+	if (elementType == ScriptNodeElementType::FlowInput) {
+		if (getNumFlowInputPins() <= 1) {
+			return { "Flow Input", {} };
 		} else {
-			return { "Input " + toString(static_cast<int>(elementIdx)), {} };
+			return { "Flow Input " + toString(static_cast<int>(elementIdx)), {} };
 		}
-	} else {
-		if (getNumOutputPins() <= 1) {
-			return { "Output", {} };
+	} else if (elementType == ScriptNodeElementType::FlowOutput) {
+		if (getNumFlowOutputPins() <= 1) {
+			return { "Flow Output", {} };
 		} else {
-			return { "Output " + toString(static_cast<int>(elementIdx)), {} };
+			return { "Flow Output " + toString(static_cast<int>(elementIdx)), {} };
+		}
+	} else if (elementType == ScriptNodeElementType::DataInput) {
+		if (getNumDataInputPins() <= 1) {
+			return { "Data Input", {} };
+		} else {
+			return { "Data Input " + toString(static_cast<int>(elementIdx)), {} };
+		}
+	} else if (elementType == ScriptNodeElementType::DataOutput) {
+		if (getNumDataOutputPins() <= 1) {
+			return { "Data Output", {} };
+		} else {
+			return { "Data Output " + toString(static_cast<int>(elementIdx)), {} };
 		}
 	}
+	return { "?", {} };
 }
 
 std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getTargetPinDescription(const ScriptGraphNode& node, const World& world, uint8_t elementIdx) const
