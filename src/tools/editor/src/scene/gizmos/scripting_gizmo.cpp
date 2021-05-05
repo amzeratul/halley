@@ -104,14 +104,14 @@ void ScriptingGizmo::onPinClicked()
 	
 	if (srcType == ScriptNodeElementType::FlowOutput) {
 		// Erase connection coming out of this
-		if (node.setOutput(pinId, {}, 0)) {
+		if (node.connectPin(pinId, {}, 0)) {
 			saveEntityData();
 		}
 	} else if (srcType == ScriptNodeElementType::FlowInput) {
 		// Erase existing connection to this input
 		bool anyChanged = false;
 		for (auto& n: scriptGraph->getNodes()) {
-			anyChanged = n.disconnectOutputsTo(nodeId, pinId) || anyChanged;
+			anyChanged = n.disconnectPinsTo(nodeId, pinId) || anyChanged;
 		}
 		if (anyChanged) {
 			saveEntityData();
@@ -120,9 +120,9 @@ void ScriptingGizmo::onPinClicked()
 		// TODO
 	} else if (srcType == ScriptNodeElementType::DataInput) {
 		// TODO
-	} else if (srcType == ScriptNodeElementType::Target) {
+	} else if (srcType == ScriptNodeElementType::TargetPin) {
 		// Erase connection coming out of this
-		if (node.setTarget(pinId, {})) {
+		if (node.connectTarget(pinId, {})) {
 			saveEntityData();
 		}
 	}
@@ -145,7 +145,7 @@ void ScriptingGizmo::onEditingConnection(const SceneEditorInputState& inputState
 			|| (srcType == ET::FlowOutput && dstType != ET::FlowInput)
 			|| (srcType == ET::DataOutput && dstType != ET::DataInput)
 			|| (srcType == ET::DataInput && dstType != ET::DataOutput)
-			|| srcType == ET::Target
+			|| srcType == ET::TargetPin
 			|| srcNodeId == dstNodeId) {
 			nodeUnderMouse.reset();
 		}
@@ -156,11 +156,11 @@ void ScriptingGizmo::onEditingConnection(const SceneEditorInputState& inputState
 
 		if (nodeUnderMouse) {
 			if (srcType == ET::FlowOutput) {
-				srcNode.setOutput(srcPinId, nodeUnderMouse->nodeId, nodeUnderMouse->elementId);
+				srcNode.connectPin(srcPinId, nodeUnderMouse->nodeId, nodeUnderMouse->elementId);
 				saveEntityData();
 			} else if (srcType == ET::FlowInput) {
 				auto& otherNode = scriptGraph->getNodes().at(nodeUnderMouse->nodeId);
-				otherNode.setOutput(nodeUnderMouse->elementId, srcNodeId, srcPinId);
+				otherNode.connectPin(nodeUnderMouse->elementId, srcNodeId, srcPinId);
 				saveEntityData();
 			} else if (srcType == ET::DataOutput) {
 				// TODO
@@ -169,8 +169,8 @@ void ScriptingGizmo::onEditingConnection(const SceneEditorInputState& inputState
 			}
 		}
 		
-		if (srcType == ET::Target) {
-			srcNode.setTarget(srcPinId, curEntityTarget);
+		if (srcType == ET::TargetPin) {
+			srcNode.connectTarget(srcPinId, curEntityTarget);
 			saveEntityData();
 		}
 		

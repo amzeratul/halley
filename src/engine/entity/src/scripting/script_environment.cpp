@@ -52,17 +52,17 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 				thread.finishNode();
 
 				size_t nOutputsFound = 0;
-				for (size_t j = 0; j < node.getFlowOutputs().size(); ++j) {
-					const auto& output = node.getFlowOutputs()[j];
+				for (size_t j = 0; j < node.getPins().size(); ++j) {
+					const auto& output = node.getPins()[j];
 					const bool outputActive = (result.outputsActive & (1 << j)) != 0;
 					
-					if (outputActive && output.nodeId) {
+					if (outputActive && output.dstNode) {
 						if (nOutputsFound == 0) {
 							// Direct sequel
-							thread.advanceToNode(output.nodeId.value());
+							thread.advanceToNode(output.dstNode.value());
 						} else {
 							// Spawn as new thread
-							auto& newThread = threads.emplace_back(output.nodeId.value());
+							auto& newThread = threads.emplace_back(output.dstNode.value());
 							newThread.getTimeSlice() = timeLeft;
 						}
 

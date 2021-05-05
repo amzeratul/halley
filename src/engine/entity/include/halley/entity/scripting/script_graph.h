@@ -8,13 +8,14 @@ namespace Halley {
 	
 	class ScriptGraphNode {
 	public:
-		struct Output {
-			OptionalLite<uint32_t> nodeId = {};
-			uint8_t inputPin = 0;
+		struct Pin {
+			OptionalLite<uint32_t> dstNode = {};
+			uint8_t dstPin = 0;
+			EntityId entity;
 
-			Output() = default;
-			Output(const ConfigNode& node);
-			ConfigNode toConfigNode() const;
+			Pin() = default;
+			Pin(const ConfigNode& node, const ConfigNodeSerializationContext& context);
+			ConfigNode toConfigNode(const ConfigNodeSerializationContext& context) const;
 		};
 		
 		ScriptGraphNode();
@@ -28,22 +29,19 @@ namespace Halley {
 
 		const String& getType() const { return type; }
 
-		std::vector<Output>& getFlowOutputs() { return flowOutputs; }
-		const std::vector<Output>& getFlowOutputs() const { return flowOutputs; }
-
-		std::vector<EntityId>& getTargets() { return targets; }
-		const std::vector<EntityId>& getTargets() const { return targets; }
-		EntityId getTarget(uint8_t idx) const { return idx < targets.size() ? targets[idx] : EntityId(); }
+		std::vector<Pin>& getPins() { return pins; }
+		const std::vector<Pin>& getPins() const { return pins; }
+		EntityId getTarget(uint8_t idx) const { return idx < pins.size() ? pins[idx].entity : EntityId(); }
 
 		const ConfigNode& getSettings() const { return settings; }
 		ConfigNode& getSettings() { return settings; }
 
-		bool setOutput(uint8_t outputPinN, OptionalLite<uint32_t> targetNode, uint8_t inputPinN);
-		bool setTarget(uint8_t targetPinN, EntityId targetEntity);
+		bool connectPin(uint8_t pinN, OptionalLite<uint32_t> dstNode, uint8_t dstPinN);
+		bool connectTarget(uint8_t pinN, EntityId targetEntity);
 		void feedToHash(Hash::Hasher& hasher);
 
 		void onNodeRemoved(uint32_t nodeId);
-		bool disconnectOutputsTo(uint32_t nodeId, OptionalLite<uint8_t> pinId);
+		bool disconnectPinsTo(uint32_t nodeId, OptionalLite<uint8_t> pinId);
 
 		String getTargetName(const World& world, uint8_t idx) const;
 
@@ -51,8 +49,7 @@ namespace Halley {
 		Vector2f position;
 		String type;
 		ConfigNode settings;
-		std::vector<Output> flowOutputs;
-		std::vector<EntityId> targets;
+		std::vector<Pin> pins;
 	};
 	
 	class ScriptGraph {
@@ -75,6 +72,13 @@ namespace Halley {
 		uint64_t hash = 0;
 
 		void computeHash();
+	};
+
+	template<>
+	class ConfigNodeSerializer<ScriptGraphNode::Pin> {
+	public:
+		ConfigNode serialize(const ScriptGraphNode::Pin& pin, const ConfigNodeSerializationContext& context);
+		ScriptGraphNode::Pin deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node);
 	};
 
 	template<>

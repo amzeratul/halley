@@ -9,7 +9,7 @@ namespace Halley {
 		std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world) const override;
 		String getIconName() const override { return "script_icons/start.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Terminator; }
-		uint8_t getNumFlowInputPins() const override { return 0; }
+		gsl::span<const PinType> getPinConfiguration() const override;
 		bool canAdd() const override { return false; }
 		bool canDelete() const override { return false; }
 		

@@ -14,6 +14,14 @@ std::vector<IScriptNodeType::SettingType> ScriptPlayAnimation::getSettingTypes()
 	return { SettingType{ "sequence", "Halley::String", std::vector<String>{"default"} } };
 }
 
+gsl::span<const IScriptNodeType::PinType> ScriptPlayAnimation::getPinConfiguration() const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Output } };
+	return data;
+}
+
 std::pair<String, std::vector<ColourOverride>> ScriptPlayAnimation::getNodeDescription(const ScriptGraphNode& node, const World& world) const
 {
 	ColourStringBuilder str;

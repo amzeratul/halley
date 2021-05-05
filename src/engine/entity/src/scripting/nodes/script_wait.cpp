@@ -6,6 +6,14 @@ void ScriptWait::doInitData(ScriptWaitData& data, const ScriptGraphNode& node) c
 	data.timeLeft = static_cast<Time>(node.getSettings()["time"].asFloat(0.0f));
 }
 
+gsl::span<const IScriptNodeType::PinType> ScriptWait::getPinConfiguration() const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
+	return data;
+}
+
 std::vector<IScriptNodeType::SettingType> ScriptWait::getSettingTypes() const
 {
 	return { SettingType{ "time", "float", std::vector<String>{"0"} } };

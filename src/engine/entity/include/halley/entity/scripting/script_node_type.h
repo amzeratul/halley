@@ -26,12 +26,16 @@ namespace Halley {
 	};
 
 	enum class ScriptNodeElementType : uint8_t {
+		Undefined,
 		Node,
-		FlowInput,
-		FlowOutput,
-		DataInput,
-		DataOutput,
-		Target
+		FlowPin,
+		DataPin,
+		TargetPin
+	};
+
+	enum class ScriptNodePinDirection : uint8_t {
+		Input,
+		Output
 	};
 	
 	class IScriptNodeType {
@@ -53,24 +57,24 @@ namespace Halley {
 			std::vector<String> defaultValue;
 		};
 
+		struct PinType {
+			ScriptNodeElementType type = ScriptNodeElementType::Undefined;
+			ScriptNodePinDirection direction = ScriptNodePinDirection::Input;
+		};
+
 		virtual ~IScriptNodeType() = default;
 
 		virtual String getId() const = 0;
 		virtual String getName() const = 0;
 
 		virtual std::vector<SettingType> getSettingTypes() const;
-		virtual std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world, ScriptNodeElementType elementType, uint8_t elementIdx) const;
+		virtual std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world, PinType elementType, uint8_t elementIdx) const;
 		virtual std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world) const;
-		virtual std::pair<String, std::vector<ColourOverride>> getIOPinDescription(const ScriptGraphNode& node, ScriptNodeElementType elementType, uint8_t elementIdx) const;
-		virtual std::pair<String, std::vector<ColourOverride>> getTargetPinDescription(const ScriptGraphNode& node, const World& world, uint8_t elementIdx) const;
+		virtual std::pair<String, std::vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const;
 		virtual String getIconName() const = 0;
 		virtual ScriptNodeClassification getClassification() const = 0;
 		
-		virtual uint8_t getNumFlowInputPins() const { return 1; }
-		virtual uint8_t getNumFlowOutputPins() const { return 1; }
-		virtual uint8_t getNumTargetPins() const { return 0; }
-		virtual uint8_t getNumDataInputPins() const { return 0; }
-		virtual uint8_t getNumDataOutputPins() const { return 0; }
+		virtual gsl::span<const PinType> getPinConfiguration() const = 0;
         virtual bool canAdd() const { return true; }
         virtual bool canDelete() const { return true; }
 		
