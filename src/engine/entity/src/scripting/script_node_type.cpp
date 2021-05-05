@@ -2,8 +2,15 @@
 
 #include "nodes/script_start.h"
 #include "nodes/script_play_animation.h"
+#include "nodes/script_restart.h"
+#include "nodes/script_stop.h"
 #include "nodes/script_wait.h"
 using namespace Halley;
+
+std::vector<IScriptNodeType::SettingType> IScriptNodeType::getSettingTypes() const
+{
+	return {};
+}
 
 std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node,	const World& world, ScriptNodeElementType elementType, uint8_t elementIdx) const
 {
@@ -98,6 +105,8 @@ std::vector<String> ScriptNodeTypeCollection::getNames(bool includeNonAddable) c
 void ScriptNodeTypeCollection::addBasicScriptNodes()
 {
 	addScriptNode(std::make_unique<ScriptStart>());
+	addScriptNode(std::make_unique<ScriptRestart>());
+	addScriptNode(std::make_unique<ScriptStop>());
 	addScriptNode(std::make_unique<ScriptWait>());
 	addScriptNode(std::make_unique<ScriptPlayAnimation>());
 }

@@ -9,7 +9,7 @@ namespace Halley {
     	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection);
     	virtual ~ScriptEnvironment() = default;
 
-    	virtual void update(Time time, const ScriptGraph& graph, ScriptState& state);
+    	virtual void update(Time time, const ScriptGraph& graph, ScriptState& graphState);
 
     	EntityRef getEntity(EntityId entityId);
 

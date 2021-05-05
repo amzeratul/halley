@@ -14,6 +14,7 @@ namespace Halley {
 	enum class ScriptNodeExecutionState {
 		Done,
 		Executing,
+		Restart,
 		Terminate
 	};
 
@@ -49,7 +50,7 @@ namespace Halley {
 		virtual String getId() const = 0;
 		virtual String getName() const = 0;
 
-		virtual std::vector<SettingType> getSettingTypes() const = 0;
+		virtual std::vector<SettingType> getSettingTypes() const;
 		virtual std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world, ScriptNodeElementType elementType, uint8_t elementIdx) const;
 		virtual std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world) const;
 		virtual std::pair<String, std::vector<ColourOverride>> getIOPinDescription(const ScriptGraphNode& node, ScriptNodeElementType elementType, uint8_t elementIdx) const;
@@ -60,7 +61,6 @@ namespace Halley {
 		virtual uint8_t getNumInputPins() const { return 1; }
 		virtual uint8_t getNumOutputPins() const { return 1; }
 		virtual uint8_t getNumTargetPins() const { return 0; }
-		virtual bool hasSettings() const { return true; }
         virtual bool canAdd() const { return true; }
         virtual bool canDelete() const { return true; }
 		

@@ -15,14 +15,14 @@ ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resourc
 {
 }
 
-void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState& state)
+void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState& graphState)
 {
-	if (!state.hasStarted() || state.getGraphHash() != graph.getHash()) {
-		state.start(graph.getStartNode(), graph.getHash());
+	if (!graphState.hasStarted() || graphState.getGraphHash() != graph.getHash()) {
+		graphState.start(graph.getStartNode(), graph.getHash());
 	}
 
 	// Allocate time for each thread
-	auto& threads = state.getThreads();
+	auto& threads = graphState.getThreads();
 	if (threads.empty()) {
 		return;
 	}
@@ -44,14 +44,10 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 			}
 
 			// Update
-			auto [timeConsumed, state] = updateNode(time, node, thread.getCurData());
+			auto [timeConsumed, nodeExecutionState] = updateNode(time, node, thread.getCurData());
 			timeLeft -= timeConsumed;
 
-			if (state == ScriptNodeExecutionState::Terminate) {
-				// Terminate script
-				threads.clear();
-				break;
-			} else if (state == ScriptNodeExecutionState::Done) {
+			if (nodeExecutionState == ScriptNodeExecutionState::Done) {
 				// Proceed to next node(s)
 				thread.finishNode();
 
@@ -74,8 +70,18 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 					// Nothing follows this, terminate thread
 					thread.advanceToNode({});
 				}
-			} else if (state == ScriptNodeExecutionState::Executing) {
+			} else if (nodeExecutionState == ScriptNodeExecutionState::Executing) {
+				// Still running this node, suspend
 				suspended = true;
+			} else if (nodeExecutionState == ScriptNodeExecutionState::Terminate) {
+				// Terminate script
+				threads.clear();
+				break;
+			} else if (nodeExecutionState == ScriptNodeExecutionState::Restart) {
+				// Restart script
+				threads.clear();
+				graphState.start(graph.getStartNode(), graph.getHash());
+				break;
 			}
 		}
 	}

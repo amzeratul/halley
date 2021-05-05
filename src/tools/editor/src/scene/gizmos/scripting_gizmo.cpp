@@ -61,7 +61,7 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 			if (inputState.leftClickPressed) {
 				onNodeClicked(inputState.mousePos.value());
 			} else if (inputState.rightClickReleased) {
-				openNodeUI(nodeUnderMouse->nodeId, inputState.rawMousePos.value());
+				openNodeUI(nodeUnderMouse->nodeId, inputState.rawMousePos.value(), true);
 			}
 		} else {
 			if (inputState.leftClickPressed) {
@@ -343,11 +343,11 @@ std::shared_ptr<UIWidget> ScriptingGizmo::makeUI()
 	return std::make_shared<ScriptingGizmoToolbar>(factory, *this);
 }
 
-void ScriptingGizmo::openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos)
+void ScriptingGizmo::openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos, bool force)
 {
 	ScriptGraphNode& node = getNode(nodeId);
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
-	if (nodeType && nodeType->hasSettings()) {
+	if (nodeType && (force || !nodeType->getSettingTypes().empty())) {
 		sceneEditorWindow.spawnUI(std::make_shared<ScriptingNodeEditor>(*this, factory, sceneEditorWindow.getEntityEditorFactory(), nodeId, *nodeType, pos));
 	}
 }
@@ -377,7 +377,7 @@ void ScriptingGizmo::addNode(const String& type, Vector2f pos)
 	nodes.emplace_back(type, pos);
 	saveEntityData();
 	
-	openNodeUI(id, {});
+	openNodeUI(id, {}, false);
 }
 
 ScriptingNodeEditor::ScriptingNodeEditor(ScriptingGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, uint32_t nodeId, const IScriptNodeType& nodeType, std::optional<Vector2f> pos)
@@ -422,6 +422,8 @@ void ScriptingNodeEditor::onMakeUI()
 		applyChanges();
 		destroy();
 	});
+
+	getWidget("delete")->setEnabled(nodeType.canDelete());
 
 	makeFields(getWidget("nodeFields"));
 }
