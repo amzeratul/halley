@@ -21,7 +21,8 @@ namespace Halley {
 	enum class ScriptNodeClassification {
 		Terminator, // As in start/end, not as in Arnie
 		FlowControl,
-		Condition,
+		WaitCondition,
+		BranchCondition,
 		Action
 	};
 
@@ -35,8 +36,14 @@ namespace Halley {
 	class IScriptNodeType {
 	public:		
         struct Result {
-	        Time timeElapsed = 0;
         	ScriptNodeExecutionState state = ScriptNodeExecutionState::Done;
+        	uint32_t outputsActive = 1;
+	        Time timeElapsed = 0;
+
+        	Result() = default;
+        	Result(ScriptNodeExecutionState state, Time timeElapsed = 0, uint32_t outputsActive = 1)
+        		: state(state), outputsActive(outputsActive), timeElapsed(timeElapsed)
+        	{}
         };
 
 		struct SettingType {

@@ -26,5 +26,5 @@ IScriptNodeType::Result ScriptWait::doUpdate(ScriptEnvironment& environment, Tim
 	const bool done = time >= curData.timeLeft;
 	const Time elapsed = done ? curData.timeLeft : time;
 	curData.timeLeft -= elapsed;
-	return { elapsed, done ? ScriptNodeExecutionState::Done : ScriptNodeExecutionState::Executing };
+	return Result(done ? ScriptNodeExecutionState::Done : ScriptNodeExecutionState::Executing, elapsed);
 }

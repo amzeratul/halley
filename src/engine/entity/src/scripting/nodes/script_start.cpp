@@ -9,5 +9,5 @@ std::pair<String, std::vector<ColourOverride>> ScriptStart::getNodeDescription(c
 
 IScriptNodeType::Result ScriptStart::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	return { 0, ScriptNodeExecutionState::Done };
+	return Result(ScriptNodeExecutionState::Done);
 }

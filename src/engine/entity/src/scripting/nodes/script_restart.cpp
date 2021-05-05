@@ -8,5 +8,5 @@ std::pair<String, std::vector<ColourOverride>> ScriptRestart::getNodeDescription
 
 IScriptNodeType::Result ScriptRestart::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	return { 0, ScriptNodeExecutionState::Restart };
+	return Result(ScriptNodeExecutionState::Restart);
 }

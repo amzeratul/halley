@@ -44,16 +44,19 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 			}
 
 			// Update
-			auto [timeConsumed, nodeExecutionState] = updateNode(time, node, thread.getCurData());
-			timeLeft -= timeConsumed;
+			const auto result = updateNode(time, node, thread.getCurData());
+			timeLeft -= result.timeElapsed;
 
-			if (nodeExecutionState == ScriptNodeExecutionState::Done) {
+			if (result.state == ScriptNodeExecutionState::Done) {
 				// Proceed to next node(s)
 				thread.finishNode();
 
 				size_t nOutputsFound = 0;
-				for (const auto& output: node.getOutputs()) {
-					if (output.nodeId) {
+				for (size_t j = 0; j < node.getOutputs().size(); ++j) {
+					const auto& output = node.getOutputs()[j];
+					const bool outputActive = (result.outputsActive & (1 << j)) != 0;
+					
+					if (outputActive && output.nodeId) {
 						if (nOutputsFound == 0) {
 							// Direct sequel
 							thread.advanceToNode(output.nodeId.value());
@@ -70,14 +73,14 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 					// Nothing follows this, terminate thread
 					thread.advanceToNode({});
 				}
-			} else if (nodeExecutionState == ScriptNodeExecutionState::Executing) {
+			} else if (result.state == ScriptNodeExecutionState::Executing) {
 				// Still running this node, suspend
 				suspended = true;
-			} else if (nodeExecutionState == ScriptNodeExecutionState::Terminate) {
+			} else if (result.state == ScriptNodeExecutionState::Terminate) {
 				// Terminate script
 				threads.clear();
 				break;
-			} else if (nodeExecutionState == ScriptNodeExecutionState::Restart) {
+			} else if (result.state == ScriptNodeExecutionState::Restart) {
 				// Restart script
 				threads.clear();
 				graphState.start(graph.getStartNode(), graph.getHash());
@@ -100,7 +103,7 @@ IScriptNodeType::Result ScriptEnvironment::updateNode(Time time, const ScriptGra
 	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
 	if (!nodeType) {
 		Logger::logError("Unknown node type: \"" + node.getType() + "\"");
-		return {0, ScriptNodeExecutionState::Done};
+		return IScriptNodeType::Result(ScriptNodeExecutionState::Done);
 	}
 	return nodeType->update(*this, time, node, curData);
 }
