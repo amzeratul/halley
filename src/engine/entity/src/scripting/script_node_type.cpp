@@ -5,6 +5,7 @@
 #include "nodes/script_restart.h"
 #include "nodes/script_stop.h"
 #include "nodes/script_wait.h"
+#include "nodes/script_wait_for.h"
 using namespace Halley;
 
 std::vector<IScriptNodeType::SettingType> IScriptNodeType::getSettingTypes() const
@@ -87,6 +88,23 @@ IScriptNodeType::PinType IScriptNodeType::getPin(size_t n) const
 	return PinType{ ScriptNodeElementType::Undefined, ScriptNodePinDirection::Input };
 }
 
+ConfigNode IScriptNodeType::readDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto& pins = node.getPins();
+	if (pinN >= pins.size()) {
+		return ConfigNode();
+	}
+
+	const auto& pin = pins[pinN];
+	if (!pin.dstNode) {
+		return ConfigNode();
+	}
+
+	const auto& nodes = environment.getCurrentGraph()->getNodes();
+	const auto& dstNode = nodes[pin.dstNode.value()];
+	return dstNode.getNodeType().getData(environment, dstNode, pin.dstPin);
+}
+
 ScriptNodeTypeCollection::ScriptNodeTypeCollection()
 {
 	addBasicScriptNodes();
@@ -137,5 +155,6 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptRestart>());
 	addScriptNode(std::make_unique<ScriptStop>());
 	addScriptNode(std::make_unique<ScriptWait>());
+	addScriptNode(std::make_unique<ScriptWaitFor>());
 	addScriptNode(std::make_unique<ScriptPlayAnimation>());
 }

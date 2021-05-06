@@ -17,6 +17,7 @@ ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resourc
 
 void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState& graphState)
 {
+	currentGraph = &graph;
 	graph.assignTypes(nodeTypeCollection);
 	
 	if (!graphState.hasStarted() || graphState.getGraphHash() != graph.getHash()) {
@@ -101,11 +102,18 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 
 	// Remove stopped threads
 	threads.erase(std::remove_if(threads.begin(), threads.end(), [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); }), threads.end());
+
+	currentGraph = nullptr;
 }
 
 EntityRef ScriptEnvironment::getEntity(EntityId entityId)
 {
 	return world.getEntity(entityId);
+}
+
+const ScriptGraph* ScriptEnvironment::getCurrentGraph() const
+{
+	return currentGraph;
 }
 
 std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const IScriptNodeType& nodeType, const ScriptGraphNode& node)

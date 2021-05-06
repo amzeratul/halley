@@ -39,6 +39,7 @@ set(SOURCES
         "src/scripting/nodes/script_start.cpp"
         "src/scripting/nodes/script_stop.cpp"
         "src/scripting/nodes/script_wait.cpp"
+        "src/scripting/nodes/script_wait_for.cpp"
         )
 
 set(HEADERS
@@ -88,6 +89,7 @@ set(HEADERS
         "src/scripting/nodes/script_start.h"
         "src/scripting/nodes/script_stop.h"
         "src/scripting/nodes/script_wait.h"
+        "src/scripting/nodes/script_wait_for.h"
         )
 
 assign_source_group(${SOURCES})
