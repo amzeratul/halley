@@ -156,5 +156,8 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptWait>());
 	addScriptNode(std::make_unique<ScriptWaitFor>());
 	addScriptNode(std::make_unique<ScriptPlayAnimation>());
-	addScriptNode(std::make_unique<ScriptIf>());
+	addScriptNode(std::make_unique<ScriptBranch>());
+	addScriptNode(std::make_unique<ScriptFork>());
+	addScriptNode(std::make_unique<ScriptMergeOne>());
+	addScriptNode(std::make_unique<ScriptMergeAll>());
 }

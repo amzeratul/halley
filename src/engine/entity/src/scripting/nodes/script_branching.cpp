@@ -1,7 +1,7 @@
 #include "script_branching.h"
 using namespace Halley;
 
-gsl::span<const IScriptNodeType::PinType> ScriptIf::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptBranch::getPinConfiguration() const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -9,7 +9,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptIf::getPinConfiguration() const
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptIf::getNodeDescription(const ScriptGraphNode& node, const World& world) const
+std::pair<String, std::vector<ColourOverride>> ScriptBranch::getNodeDescription(const ScriptGraphNode& node, const World& world) const
 {
 	ColourStringBuilder str;
 	str.append("Branch based on \"");
@@ -18,13 +18,13 @@ std::pair<String, std::vector<ColourOverride>> ScriptIf::getNodeDescription(cons
 	return str.moveResults();
 }
 
-IScriptNodeType::Result ScriptIf::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+IScriptNodeType::Result ScriptBranch::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	const bool value = readDataPin(environment, node, 1).asBool(false);
 	return Result(ScriptNodeExecutionState::Done, 0, value ? 1 : 2);
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptIf::getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const
+std::pair<String, std::vector<ColourOverride>> ScriptBranch::getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const
 {
 	if (elementIdx >= 1) {
 		ColourStringBuilder builder;
@@ -38,4 +38,74 @@ std::pair<String, std::vector<ColourOverride>> ScriptIf::getPinDescription(const
 	} else {
 		return IScriptNodeType::getPinDescription(node, elementType, elementIdx);
 	}	
+}
+
+
+
+gsl::span<const IScriptNodeType::PinType> ScriptFork::getPinConfiguration() const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, std::vector<ColourOverride>> ScriptFork::getNodeDescription(const ScriptGraphNode& node, const World& world) const
+{
+	ColourStringBuilder str;
+	str.append("Fork execution.");
+	return str.moveResults();
+}
+
+IScriptNodeType::Result ScriptFork::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	return Result(ScriptNodeExecutionState::Done, 0, 1 | 2 | 4);
+}
+
+
+
+gsl::span<const IScriptNodeType::PinType> ScriptMergeOne::getPinConfiguration() const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, std::vector<ColourOverride>> ScriptMergeOne::getNodeDescription(const ScriptGraphNode& node, const World& world) const
+{
+	ColourStringBuilder str;
+	str.append("Proceeds with execution when the ");
+	str.append("first", Colour4f(1, 0, 0));
+	str.append(" flow arrives.");
+	return str.moveResults();
+}
+
+IScriptNodeType::Result ScriptMergeOne::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	return Result(ScriptNodeExecutionState::Done);
+}
+
+
+
+gsl::span<const IScriptNodeType::PinType> ScriptMergeAll::getPinConfiguration() const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, std::vector<ColourOverride>> ScriptMergeAll::getNodeDescription(const ScriptGraphNode& node, const World& world) const
+{
+	ColourStringBuilder str;
+	str.append("Proceeds with execution when ");
+	str.append("all", Colour4f(1, 0, 0));
+	str.append(" connected flows arrive.");
+	return str.moveResults();
+}
+
+IScriptNodeType::Result ScriptMergeAll::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	return Result(ScriptNodeExecutionState::Done);
 }
