@@ -54,13 +54,13 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 		const bool highlightThis = highlightNode && highlightNode->nodeId == i;
 		
 		NodeDrawMode mode = NodeDrawMode::Normal;
-		if (highlightThis && highlightNode->elementType == ScriptNodeElementType::Node) {
+		if (highlightThis && highlightNode->element.type == ScriptNodeElementType::Node) {
 			mode = NodeDrawMode::Highlight;
 		} else if (state && !state->hasThreadAt(i)) {
 			mode = NodeDrawMode::Dimmed;
 		}
 		
-		drawNode(painter, basePos, node, effectiveZoom, mode, highlightThis ? highlightNode->elementType : std::optional<ScriptNodeElementType>(), highlightThis ? highlightNode->elementId : 0);
+		drawNode(painter, basePos, node, effectiveZoom, mode, highlightThis ? highlightNode->element : std::optional<ScriptNodePinType>(), highlightThis ? highlightNode->elementId : 0);
 	}
 }
 
@@ -73,13 +73,14 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 
 	// Output connections
 	for (size_t i = 0; i < node.getPins().size(); ++i) {
+		const auto& srcPinType = nodeType->getPin(i);
 		const auto& output = node.getPins()[i];
 		if (!output.dstNode) {
 			continue;
 		}
 		
 		const size_t srcIdx = i;
-		const Vector2f srcPos = getNodeElementArea(*nodeType, ScriptNodeElementType::FlowOutput, basePos, node, srcIdx, curZoom).getCentre();
+		const Vector2f srcPos = getNodeElementArea(*nodeType, srcPinType, basePos, node, srcIdx, curZoom).getCentre();
 
 		const size_t dstIdx = output.dstPin;
 		const auto& dstNode = graph.getNodes().at(output.dstNode.value());
@@ -87,9 +88,10 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 		if (!dstNodeType) {
 			continue;
 		}
-		const Vector2f dstPos = getNodeElementArea(*dstNodeType, ScriptNodeElementType::FlowInput, basePos, dstNode, dstIdx, curZoom).getCentre();
+		const auto dstPinType = dstNodeType->getPin(dstIdx);
+		const Vector2f dstPos = getNodeElementArea(*dstNodeType, dstPinType, basePos, dstNode, dstIdx, curZoom).getCentre();
 		
-		drawConnection(painter, ConnectionPath{ srcPos, dstPos, ScriptNodeElementType::FlowOutput }, curZoom);
+		drawConnection(painter, ConnectionPath{ srcPos, dstPos, srcPinType.type }, curZoom);
 	}
 
 	// Data output connections
@@ -130,7 +132,7 @@ void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path
 	painter.drawLine(makeBezier(path), 1.5f / curZoom, col);
 }
 
-void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<ScriptNodeElementType> highlightElement, uint8_t highlightElementId)
+void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, uint8_t highlightElementId)
 {
 	const Vector2f border = Vector2f(18, 18);
 	const Vector2f nodeSize = getNodeSize(curZoom);

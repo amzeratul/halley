@@ -47,6 +47,15 @@ std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getPinDescriptio
 	return { "?", {} };
 }
 
+IScriptNodeType::PinType IScriptNodeType::getPin(size_t n) const
+{
+	const auto& pins = getPinConfiguration();
+	if (n < pins.size()) {
+		return pins[n];
+	}
+	return PinType{ ScriptNodeElementType::Undefined, ScriptNodePinDirection::Input };
+}
+
 ScriptNodeTypeCollection::ScriptNodeTypeCollection()
 {
 	addBasicScriptNodes();

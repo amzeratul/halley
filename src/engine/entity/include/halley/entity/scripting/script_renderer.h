@@ -1,5 +1,6 @@
 #pragma once
 #include "script_node_type.h"
+#include "script_node_enums.h"
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/maths/bezier.h"
 #include "halley/maths/circle.h"
@@ -17,7 +18,7 @@ namespace Halley {
 	public:
 		struct NodeUnderMouseInfo {
 			uint32_t nodeId;
-			ScriptNodeElementType elementType;
+			ScriptNodePinType element;
 			uint8_t elementId;
 			Rect4f nodeArea;
 			Vector2f pinPos;
@@ -62,7 +63,7 @@ namespace Halley {
 		std::optional<ConnectionPath> currentPath;
 
 		void drawNodeOutputs(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, const ScriptGraph& graph, float curZoom);
-		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<ScriptNodeElementType> highlightElement, uint8_t highlightElementId);
+		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, uint8_t highlightElementId);
 
 		Vector2f getNodeSize(float curZoom) const;
 		Circle getNodeElementArea(const IScriptNodeType& nodeType, ScriptNodeElementType type, Vector2f basePos, const ScriptGraphNode& node, size_t elemIdx, float curZoom) const;

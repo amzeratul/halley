@@ -2,6 +2,7 @@
 #include "../entity.h"
 #include "script_graph.h"
 #include "script_state.h"
+#include "script_node_enums.h"
 #include "halley/core/graphics/text/text_renderer.h"
 #include "halley/time/halleytime.h"
 
@@ -10,33 +11,6 @@ namespace Halley {
 	class ScriptEnvironment;
 	class ScriptGraph;
     class ScriptState;
-
-	enum class ScriptNodeExecutionState {
-		Done,
-		Executing,
-		Restart,
-		Terminate
-	};
-
-	enum class ScriptNodeClassification {
-		Terminator, // As in start/end, not as in Arnie
-		FlowControl,
-		Variable,
-		Action
-	};
-
-	enum class ScriptNodeElementType : uint8_t {
-		Undefined,
-		Node,
-		FlowPin,
-		DataPin,
-		TargetPin
-	};
-
-	enum class ScriptNodePinDirection : uint8_t {
-		Input,
-		Output
-	};
 	
 	class IScriptNodeType {
 	public:		
@@ -57,10 +31,7 @@ namespace Halley {
 			std::vector<String> defaultValue;
 		};
 
-		struct PinType {
-			ScriptNodeElementType type = ScriptNodeElementType::Undefined;
-			ScriptNodePinDirection direction = ScriptNodePinDirection::Input;
-		};
+		using PinType = ScriptNodePinType;
 
 		virtual ~IScriptNodeType() = default;
 
@@ -75,7 +46,9 @@ namespace Halley {
 		virtual ScriptNodeClassification getClassification() const = 0;
 		
 		virtual gsl::span<const PinType> getPinConfiguration() const = 0;
-        virtual bool canAdd() const { return true; }
+        PinType getPin(size_t n) const;
+
+		virtual bool canAdd() const { return true; }
         virtual bool canDelete() const { return true; }
 		
 		virtual Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData* curData) const = 0;

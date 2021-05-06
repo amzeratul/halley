@@ -78,6 +78,7 @@ set(HEADERS
 
         "include/halley/entity/scripting/script_environment.h"
         "include/halley/entity/scripting/script_graph.h"
+        "include/halley/entity/scripting/script_node_enums.h"
         "include/halley/entity/scripting/script_node_type.h"
         "include/halley/entity/scripting/script_renderer.h"
         "include/halley/entity/scripting/script_state.h"
