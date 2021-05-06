@@ -42,7 +42,7 @@ namespace Halley {
 		virtual std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world, PinType elementType, uint8_t elementIdx) const;
 		virtual std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world) const;
 		virtual std::pair<String, std::vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const;
-		virtual String getIconName() const = 0;
+		virtual String getIconName(const ScriptGraphNode& node) const = 0;
 		virtual ScriptNodeClassification getClassification() const = 0;
 		
 		virtual gsl::span<const PinType> getPinConfiguration() const = 0;

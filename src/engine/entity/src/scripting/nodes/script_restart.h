@@ -6,7 +6,7 @@ namespace Halley {
 	public:
 		String getId() const override { return "restart"; }
 		String getName() const override { return "Restart"; }
-		String getIconName() const override { return "script_icons/restart.png"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/restart.png"; }
 		gsl::span<const PinType> getPinConfiguration() const override;
 		std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world) const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Terminator; }

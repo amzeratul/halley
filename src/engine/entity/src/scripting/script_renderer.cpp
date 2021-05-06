@@ -169,7 +169,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 			//.setTexRect(nodeBg.getTexRect() / curZoom)
 			.draw(painter);
 
-		getIcon(*nodeType).clone()
+		getIcon(*nodeType, node).clone()
 			.setPosition(pos)
 			.setScale(1.0f / curZoom)
 			.draw(painter);
@@ -273,14 +273,16 @@ Colour4f ScriptRenderer::getPinColour(ScriptNodePinType pinType) const
 	return Colour4f();
 }
 
-const Sprite& ScriptRenderer::getIcon(const IScriptNodeType& nodeType)
+const Sprite& ScriptRenderer::getIcon(const IScriptNodeType& nodeType, const ScriptGraphNode& node)
 {
-	const auto iter = icons.find(nodeType.getId());
+	const auto& iconName = nodeType.getIconName(node);
+	
+	const auto iter = icons.find(iconName);
 	if (iter != icons.end()) {
 		return iter->second;
 	}
-	icons[nodeType.getId()] = Sprite().setImage(resources, nodeType.getIconName()).setPivot(Vector2f(0.5f, 0.5f));
-	return icons[nodeType.getId()];
+	icons[iconName] = Sprite().setImage(resources, iconName).setPivot(Vector2f(0.5f, 0.5f));
+	return icons[iconName];
 }
 
 std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos, bool pinPriority) const

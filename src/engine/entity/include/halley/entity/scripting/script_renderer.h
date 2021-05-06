@@ -70,7 +70,7 @@ namespace Halley {
 		Circle getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom) const;
 		Colour4f getNodeColour(const IScriptNodeType& nodeType) const;
 		Colour4f getPinColour(ScriptNodePinType pinType) const;
-		const Sprite& getIcon(const IScriptNodeType& nodeType);
+		const Sprite& getIcon(const IScriptNodeType& nodeType, const ScriptGraphNode& node);
 
 		BezierCubic makeBezier(const ConnectionPath& path) const;
 		void drawConnection(Painter& painter, const ConnectionPath& path, float curZoom) const;
