@@ -108,7 +108,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 
 BezierCubic ScriptRenderer::makeBezier(const ConnectionPath& path) const
 {
-	auto getAxisSelector = [] (ScriptPinSide side) -> Vector2f
+	auto getSideNormal = [] (ScriptPinSide side) -> Vector2f
 	{
 		switch (side) {
 		case ScriptPinSide::Left:
@@ -123,13 +123,13 @@ BezierCubic ScriptRenderer::makeBezier(const ConnectionPath& path) const
 		return Vector2f();
 	};
 	
-	const Vector2f fromAxis = getAxisSelector(path.fromType.getSide());
-	const Vector2f toAxis = getAxisSelector(path.toType.getSide());
+	const Vector2f fromDir = getSideNormal(path.fromType.getSide());
+	const Vector2f toDir = getSideNormal(path.toType.getSide());
 
 	const auto delta = path.to - path.from;
 	const float dist = std::max(std::max(std::abs(delta.x), std::abs(delta.y)), 20.0f) / 2;
 
-	return BezierCubic(path.from, path.from + dist * fromAxis, path.to - dist * toAxis, path.to);
+	return BezierCubic(path.from, path.from + dist * fromDir, path.to + dist * toDir, path.to);
 }
 
 void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path, float curZoom) const
@@ -209,13 +209,19 @@ Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vecto
 	const auto pinSide = pin.getSide();
 	
 	size_t pinsOnSide = 0;
-	for (const auto& pinType: nodeType.getPinConfiguration()) {
+	size_t idxOnSide = 0;
+	const auto& pins = nodeType.getPinConfiguration();
+	for (size_t i = 0; i < pins.size(); ++i) {
+		const auto& pinType = pins[i];
+		if (i == pinN) {
+			idxOnSide = pinsOnSide;
+		}
 		if (pinType.getSide() == pinSide) {
 			++pinsOnSide;
 		}
 	}
 	
-	const auto sideOffset = getOffset(pinN, pinsOnSide);
+	const auto sideOffset = getOffset(idxOnSide, pinsOnSide);
 	Vector2f offset;
 	switch (pinSide) {
 	case ScriptPinSide::Left:
@@ -300,7 +306,7 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 			continue;
 		}
 		
-		const auto nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
+		const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
 		if (!nodeType) {
 			continue;
 		}
@@ -327,7 +333,7 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 			const float distance = (mousePos.value() - curRect.getCenter()).length();
 			if (distance < bestDistance) {
 				bestDistance = distance;
-				bestResult = NodeUnderMouseInfo{ static_cast<uint32_t>(i), ScriptNodePinType(), 0, curRect, Vector2f() };
+				bestResult = NodeUnderMouseInfo{ static_cast<uint32_t>(i), ScriptNodePinType{ScriptNodeElementType::Node}, 0, curRect, Vector2f() };
 			}
 		}
 	}
