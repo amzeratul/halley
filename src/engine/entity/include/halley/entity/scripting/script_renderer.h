@@ -27,7 +27,8 @@ namespace Halley {
 		struct ConnectionPath {
 			Vector2f from;
 			Vector2f to;
-			ScriptNodeElementType type;
+			ScriptNodePinType fromType;
+			ScriptNodePinType toType;
 		};
 		
 		ScriptRenderer(Resources& resources, World& world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom);
@@ -66,8 +67,9 @@ namespace Halley {
 		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, uint8_t highlightElementId);
 
 		Vector2f getNodeSize(float curZoom) const;
-		Circle getNodeElementArea(const IScriptNodeType& nodeType, ScriptNodeElementType type, Vector2f basePos, const ScriptGraphNode& node, size_t elemIdx, float curZoom) const;
+		Circle getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom) const;
 		Colour4f getNodeColour(const IScriptNodeType& nodeType) const;
+		Colour4f getPinColour(ScriptNodePinType pinType) const;
 		const Sprite& getIcon(const IScriptNodeType& nodeType);
 
 		BezierCubic makeBezier(const ConnectionPath& path) const;

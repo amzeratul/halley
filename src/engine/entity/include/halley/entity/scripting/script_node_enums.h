@@ -30,8 +30,37 @@ namespace Halley {
 		Output
 	};
 
+	enum class ScriptPinSide : uint8_t {
+		Undefined,
+		Left,
+		Right,
+		Top,
+		Bottom
+	};
+
 	struct ScriptNodePinType {
 		ScriptNodeElementType type = ScriptNodeElementType::Undefined;
 		ScriptNodePinDirection direction = ScriptNodePinDirection::Input;
+
+		bool operator==(const ScriptNodePinType& other) const
+		{
+			return type == other.type && direction == other.direction;
+		}
+		bool operator!=(const ScriptNodePinType& other) const
+		{
+			return type != other.type || direction != other.direction;
+		}
+
+		ScriptPinSide getSide() const
+		{
+			switch (type) {
+			case ScriptNodeElementType::DataPin:
+			case ScriptNodeElementType::FlowPin:
+				return direction == ScriptNodePinDirection::Input ? ScriptPinSide::Left : ScriptPinSide::Right;
+			case ScriptNodeElementType::TargetPin:
+				return ScriptPinSide::Bottom;
+			}
+			return ScriptPinSide::Undefined;
+		}
 	};
 }

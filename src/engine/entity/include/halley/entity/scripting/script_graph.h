@@ -32,16 +32,16 @@ namespace Halley {
 
 		std::vector<Pin>& getPins() { return pins; }
 		const std::vector<Pin>& getPins() const { return pins; }
-		Pin& getPin(uint8_t idx)
+		Pin& getPin(size_t idx)
 		{
-			if (static_cast<size_t>(idx) >= pins.size()) {
+			if (idx >= pins.size()) {
 				pins.resize(idx + 1);
 			}
 			return pins[idx];
 		}
-		const Pin& getPin(uint8_t idx) const
+		const Pin& getPin(size_t idx) const
 		{
-			if (static_cast<size_t>(idx) >= pins.size()) {
+			if (idx >= pins.size()) {
 				static Pin dummy;
 				return dummy;
 			}

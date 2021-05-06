@@ -71,7 +71,6 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 		return;
 	}
 
-	// Output connections
 	for (size_t i = 0; i < node.getPins().size(); ++i) {
 		const auto& srcPinType = nodeType->getPin(i);
 		const auto& output = node.getPins()[i];
@@ -79,57 +78,63 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 			continue;
 		}
 		
-		const size_t srcIdx = i;
-		const Vector2f srcPos = getNodeElementArea(*nodeType, srcPinType, basePos, node, srcIdx, curZoom).getCentre();
+		const Vector2f srcPos = getNodeElementArea(*nodeType, basePos, node, i, curZoom).getCentre();
 
-		const size_t dstIdx = output.dstPin;
-		const auto& dstNode = graph.getNodes().at(output.dstNode.value());
-		const auto* dstNodeType = nodeTypeCollection.tryGetNodeType(dstNode.getType());
-		if (!dstNodeType) {
-			continue;
-		}
-		const auto dstPinType = dstNodeType->getPin(dstIdx);
-		const Vector2f dstPos = getNodeElementArea(*dstNodeType, dstPinType, basePos, dstNode, dstIdx, curZoom).getCentre();
-		
-		drawConnection(painter, ConnectionPath{ srcPos, dstPos, srcPinType.type }, curZoom);
-	}
-
-	// Data output connections
-	// TODO
-	
-	// Target connections
-	for (size_t i = 0; i < node.getTargets().size(); ++i) {
-		const auto& target = node.getTargets()[i];
-		if (target.isValid()) {
-			auto entity = world.getEntity(target);
-			auto* transform = entity.tryGetComponent<Transform2DComponent>();
-			if (transform) {
-				const Vector2f srcPos = getNodeElementArea(*nodeType, ScriptNodeElementType::TargetPin, basePos, node, i, curZoom).getCentre();
-				const auto dstPos = transform->getGlobalPosition();
-
-				drawConnection(painter, ConnectionPath{ srcPos, dstPos, ScriptNodeElementType::TargetPin }, curZoom);
+		std::optional<Vector2f> dstPos;
+		if (srcPinType.type == ScriptNodeElementType::TargetPin) {
+			const auto target = node.getPin(i).entity;
+			if (target.isValid()) {
+				auto entity = world.getEntity(target);
+				auto* transform = entity.tryGetComponent<Transform2DComponent>();
+				if (transform) {
+					dstPos = transform->getGlobalPosition();
+				}
 			}
 		} else {
-			Logger::logWarning("Invalid target on script graph node");
+			const size_t dstIdx = output.dstPin;
+			const auto& dstNode = graph.getNodes().at(output.dstNode.value());
+			const auto* dstNodeType = nodeTypeCollection.tryGetNodeType(dstNode.getType());
+			if (!dstNodeType) {
+				continue;
+			}
+			dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom).getCentre();
+		}
+
+		if (dstPos) {
+			drawConnection(painter, ConnectionPath{ srcPos, dstPos.value(), srcPinType.type }, curZoom);
 		}
 	}
 }
 
 BezierCubic ScriptRenderer::makeBezier(const ConnectionPath& path) const
 {
-	const float xSelect = path.type == ScriptNodeElementType::TargetPin ? 0.0f : (path.type == ScriptNodeElementType::FlowOutput ? 1.0f : -1.0f);
-	const float ySelect = 1.0f - std::abs(xSelect);
-	const Vector2f axisSelector = Vector2f(xSelect, ySelect);
+	auto getAxisSelector = [] (ScriptPinSide side) -> Vector2f
+	{
+		switch (side) {
+		case ScriptPinSide::Left:
+			return Vector2f(-1, 0);
+		case ScriptPinSide::Right:
+			return Vector2f(1, 0);
+		case ScriptPinSide::Top:
+			return Vector2f(0, -1);
+		case ScriptPinSide::Bottom:
+			return Vector2f(0, 1);
+		}
+		return Vector2f();
+	};
 	
-	const float dist = std::max(std::abs((path.to * axisSelector).manhattanLength() - (path.from * axisSelector).manhattanLength()), 20.0f) / 2;
-	
-	return BezierCubic(path.from, path.from + dist * axisSelector, path.to - dist * axisSelector, path.to);
+	const Vector2f fromAxis = getAxisSelector(path.fromType.getSide());
+	const Vector2f toAxis = getAxisSelector(path.toType.getSide());
+
+	const auto delta = path.to - path.from;
+	const float dist = std::max(std::max(std::abs(delta.x), std::abs(delta.y)), 20.0f) / 2;
+
+	return BezierCubic(path.from, path.from + dist * fromAxis, path.to - dist * toAxis, path.to);
 }
 
 void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path, float curZoom) const
 {
-	const auto col = path.type == ScriptNodeElementType::TargetPin ? Colour4f(0.35f, 1.0f, 0.35f) : Colour4f(1, 1, 1);
-	painter.drawLine(makeBezier(path), 1.5f / curZoom, col);
+	painter.drawLine(makeBezier(path), 1.5f / curZoom, getPinColour(path.fromType));
 }
 
 void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, uint8_t highlightElementId)
@@ -143,47 +148,46 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 		return;
 	}
 
-	const auto baseCol = getNodeColour(*nodeType);
-	Colour4f col = baseCol;
-	switch (drawMode) {
-	case NodeDrawMode::Highlight:
-		col = col.inverseMultiplyLuma(0.5f);
-		break;
-	case NodeDrawMode::Dimmed:
-		col = col.multiplyLuma(0.5f);
-		break;
-	}
-	
-	// Node body
-	nodeBg.clone()
-		.setColour(col)
-		.setPosition(pos)
-		.scaleTo(nodeSize + border)
-		.setSize(nodeBg.getSize() / curZoom)
-		.setSliceScale(1.0f / curZoom)
-		//.setTexRect(nodeBg.getTexRect() / curZoom)
-		.draw(painter);
+	{
+		const auto baseCol = getNodeColour(*nodeType);
+		Colour4f col = baseCol;
+		switch (drawMode) {
+		case NodeDrawMode::Highlight:
+			col = col.inverseMultiplyLuma(0.5f);
+			break;
+		case NodeDrawMode::Dimmed:
+			col = col.multiplyLuma(0.5f);
+			break;
+		}
+		
+		// Node body
+		nodeBg.clone()
+			.setColour(col)
+			.setPosition(pos)
+			.scaleTo(nodeSize + border)
+			.setSize(nodeBg.getSize() / curZoom)
+			.setSliceScale(1.0f / curZoom)
+			//.setTexRect(nodeBg.getTexRect() / curZoom)
+			.draw(painter);
 
-	getIcon(*nodeType).clone()
-		.setPosition(pos)
-		.setScale(1.0f / curZoom)
-		.draw(painter);
+		getIcon(*nodeType).clone()
+			.setPosition(pos)
+			.setScale(1.0f / curZoom)
+			.draw(painter);
+	}
 
 	// Draw pins
-	const uint8_t nPins[] = { nodeType->getNumFlowInputPins(), nodeType->getNumFlowOutputPins(), nodeType->getNumDataInputPins(), nodeType->getNumDataOutputPins(), nodeType->getNumTargetPins() };
-	const ScriptNodeElementType types[] = { ScriptNodeElementType::FlowInput, ScriptNodeElementType::FlowOutput, ScriptNodeElementType::DataInput, ScriptNodeElementType::DataOutput, ScriptNodeElementType::TargetPin };
-	const Colour4f colours[] = { Colour4f(0.8f, 0.8f, 0.8f), Colour4f(0.8f, 0.8f, 0.8f), Colour4f(0.91f, 0.55f, 0.2f), Colour4f(0.91f, 0.55f, 0.2f), Colour4f(0.35f, 1, 0.35f) };
-	for (size_t i = 0; i < 5; ++i) {
-		for (size_t j = 0; j < nPins[i]; ++j) {
-			const auto circle = getNodeElementArea(*nodeType, types[i], basePos, node, j, curZoom);
-			const auto baseCol = colours[i];
-			const auto col = highlightElement == types[i] && highlightElementId == j ? baseCol.inverseMultiplyLuma(0.3f) : baseCol;
-			pinSprite.clone()
-				.setPosition(circle.getCentre())
-				.setColour(col)
-				.setScale(1.0f / curZoom)
-				.draw(painter);
-		}
+	const auto& pins = nodeType->getPinConfiguration();
+	for (size_t i = 0; i < pins.size(); ++i) {
+		const auto& pinType = pins[i];
+		const auto circle = getNodeElementArea(*nodeType, basePos, node, i, curZoom);
+		const auto baseCol = getPinColour(pinType);
+		const auto col = highlightElement == pinType && highlightElementId == i ? baseCol.inverseMultiplyLuma(0.3f) : baseCol;
+		pinSprite.clone()
+			.setPosition(circle.getCentre())
+			.setColour(col)
+			.setScale(1.0f / curZoom)
+			.draw(painter);
 	}
 }
 
@@ -192,7 +196,7 @@ Vector2f ScriptRenderer::getNodeSize(float curZoom) const
 	return Vector2f(60, 60);
 }
 
-Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, ScriptNodeElementType type, Vector2f basePos, const ScriptGraphNode& node, size_t elemIdx, float curZoom) const
+Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom) const
 {
 	const Vector2f nodeSize = getNodeSize(curZoom);
 	const auto getOffset = [&] (size_t idx, size_t n)
@@ -200,26 +204,34 @@ Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Scrip
 		const float spacing = 10.0f;
 		return (static_cast<float>(idx) - (n - 1) * 0.5f) * spacing;
 	};
+
+	const auto& pin = nodeType.getPin(pinN);
+	const auto pinSide = pin.getSide();
 	
+	size_t pinsOnSide = 0;
+	for (const auto& pinType: nodeType.getPinConfiguration()) {
+		if (pinType.getSide() == pinSide) {
+			++pinsOnSide;
+		}
+	}
+	
+	const auto sideOffset = getOffset(pinN, pinsOnSide);
 	Vector2f offset;
-	switch (type) {
-	case ScriptNodeElementType::FlowInput:
-		offset = Vector2f(-nodeSize.x * 0.5f, getOffset(elemIdx, nodeType.getNumFlowInputPins()));
+	switch (pinSide) {
+	case ScriptPinSide::Left:
+		offset = Vector2f(-nodeSize.x * 0.5f, sideOffset);
 		break;
-	case ScriptNodeElementType::FlowOutput:
-		offset = Vector2f(nodeSize.x * 0.5f, getOffset(elemIdx, nodeType.getNumFlowOutputPins()));
+	case ScriptPinSide::Right:
+		offset = Vector2f(nodeSize.x * 0.5f, sideOffset);
 		break;
-	case ScriptNodeElementType::DataInput:
-		offset = Vector2f(-nodeSize.x * 0.5f, getOffset(elemIdx, nodeType.getNumDataInputPins()));
+	case ScriptPinSide::Top:
+		offset = Vector2f(sideOffset, -nodeSize.y * 0.5f);
 		break;
-	case ScriptNodeElementType::DataOutput:
-		offset = Vector2f(nodeSize.x * 0.5f, getOffset(elemIdx, nodeType.getNumDataOutputPins()));
-		break;
-	case ScriptNodeElementType::TargetPin:
-		offset = Vector2f(getOffset(elemIdx, nodeType.getNumTargetPins()), nodeSize.y * 0.5f);
+	case ScriptPinSide::Bottom:
+		offset = Vector2f(sideOffset, nodeSize.y * 0.5f);
 		break;
 	}
-
+	
 	const Vector2f pos = basePos + node.getPosition();
 	const Vector2f centre = pos + offset / curZoom;
 	const float radius = 4.0f / curZoom;
@@ -240,6 +252,20 @@ Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType) const
 		return Colour4f(0.35f, 0.35f, 0.97f);
 	}
 	return Colour4f(0.2f, 0.2f, 0.2f);
+}
+
+Colour4f ScriptRenderer::getPinColour(ScriptNodePinType pinType) const
+{
+	switch (pinType.type) {
+	case ScriptNodeElementType::FlowPin:
+		return Colour4f(0.8f, 0.8f, 0.8f);
+	case ScriptNodeElementType::DataPin:
+		return Colour4f(0.91f, 0.55f, 0.2f);
+	case ScriptNodeElementType::TargetPin:
+		return Colour4f(0.35f, 1, 0.35f);
+	}
+
+	return Colour4f();
 }
 
 const Sprite& ScriptRenderer::getIcon(const IScriptNodeType& nodeType)
@@ -282,18 +308,16 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 		
 		// Check each pin handle
 		bool foundPin = false;
-		const uint8_t nPins[] = { nodeType->getNumFlowInputPins(), nodeType->getNumFlowOutputPins(), nodeType->getNumDataInputPins(), nodeType->getNumDataOutputPins(), nodeType->getNumTargetPins() };
-		const ScriptNodeElementType types[] = { ScriptNodeElementType::FlowInput, ScriptNodeElementType::FlowOutput, ScriptNodeElementType::DataInput, ScriptNodeElementType::DataOutput, ScriptNodeElementType::TargetPin };
-		for (size_t j = 0; j < 5; ++j) {
-			for (uint8_t k = 0; k < nPins[j]; ++k) {
-				const auto circle = getNodeElementArea(*nodeType, types[j], basePos, node, k, curZoom).expand((pinPriority ? 12.0f : 4.0f) / curZoom);
-				if (circle.contains(mousePos.value())) {
-					foundPin = true;
-					const float distance = (mousePos.value() - circle.getCentre()).length();
-					if (distance < bestDistance) {
-						bestDistance = distance;
-						bestResult = NodeUnderMouseInfo{ static_cast<uint32_t>(i), types[j], k, curRect, circle.getCentre() };
-					}
+		const auto& pins = nodeType->getPinConfiguration();
+		for	(size_t j = 0; j < pins.size(); ++j) {
+			const auto& pinType = pins[j];
+			const auto circle = getNodeElementArea(*nodeType, basePos, node, j, curZoom).expand((pinPriority ? 12.0f : 4.0f) / curZoom);
+			if (circle.contains(mousePos.value())) {
+				foundPin = true;
+				const float distance = (mousePos.value() - circle.getCentre()).length();
+				if (distance < bestDistance) {
+					bestDistance = distance;
+					bestResult = NodeUnderMouseInfo{ static_cast<uint32_t>(i), pinType, static_cast<uint8_t>(j), curRect, circle.getCentre() };
 				}
 			}
 		}
@@ -303,7 +327,7 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 			const float distance = (mousePos.value() - curRect.getCenter()).length();
 			if (distance < bestDistance) {
 				bestDistance = distance;
-				bestResult = NodeUnderMouseInfo{ static_cast<uint32_t>(i), ScriptNodeElementType::Node, 0, curRect, Vector2f() };
+				bestResult = NodeUnderMouseInfo{ static_cast<uint32_t>(i), ScriptNodePinType(), 0, curRect, Vector2f() };
 			}
 		}
 	}

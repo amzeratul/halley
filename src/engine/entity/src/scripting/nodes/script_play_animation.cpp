@@ -35,7 +35,7 @@ std::pair<String, std::vector<ColourOverride>> ScriptPlayAnimation::getNodeDescr
 
 IScriptNodeType::Result ScriptPlayAnimation::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	auto entity = environment.getEntity(node.getTargets().at(0));
+	auto entity = environment.getEntity(node.getPin(2).entity);
 	auto* spriteAnimation = entity.tryGetComponent<SpriteAnimationComponent>();
 	if (spriteAnimation) {
 		spriteAnimation->player.setSequence(node.getSettings()["sequence"].asString(""));
