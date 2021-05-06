@@ -32,6 +32,10 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 	}
 	renderer->setGraph(scriptGraph);
 
+	if (scriptGraph) {
+		scriptGraph->assignTypes(*scriptNodeTypes);
+	}
+
 	if (!dragging) {
 		nodeUnderMouse = renderer->getNodeUnderMouse(basePos, getZoom(), inputState.mousePos, !!nodeEditingConnection);
 	}
@@ -276,7 +280,7 @@ void ScriptingGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, 
 		return;
 	}
 	
-	const auto [text, colours] = nodeType->getDescription(node, sceneEditorWindow.getEntityFactory()->getWorld(), nodeInfo.element, nodeInfo.elementId);
+	const auto [text, colours] = nodeType->getDescription(node, sceneEditorWindow.getEntityFactory()->getWorld(), nodeInfo.element, nodeInfo.elementId, *scriptGraph);
 	const float curZoom = getZoom();
 
 	const float align = 0.5f;

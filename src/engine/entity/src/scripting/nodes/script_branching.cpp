@@ -9,11 +9,11 @@ gsl::span<const IScriptNodeType::PinType> ScriptBranch::getPinConfiguration() co
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptBranch::getNodeDescription(const ScriptGraphNode& node, const World& world) const
+std::pair<String, std::vector<ColourOverride>> ScriptBranch::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Branch based on \"");
-	//str.append(toString(time), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(getConnectedNodeName(node, graph, 1), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append("\".");
 	return str.moveResults();
 }
@@ -50,7 +50,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptFork::getPinConfiguration() cons
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptFork::getNodeDescription(const ScriptGraphNode& node, const World& world) const
+std::pair<String, std::vector<ColourOverride>> ScriptFork::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Fork execution.");
@@ -72,7 +72,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptMergeOne::getPinConfiguration() 
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptMergeOne::getNodeDescription(const ScriptGraphNode& node, const World& world) const
+std::pair<String, std::vector<ColourOverride>> ScriptMergeOne::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Proceeds with execution when the ");
@@ -96,7 +96,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptMergeAll::getPinConfiguration() 
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptMergeAll::getNodeDescription(const ScriptGraphNode& node, const World& world) const
+std::pair<String, std::vector<ColourOverride>> ScriptMergeAll::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Proceeds with execution when ");

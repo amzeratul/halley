@@ -22,7 +22,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptPlayAnimation::getPinConfigurati
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptPlayAnimation::getNodeDescription(const ScriptGraphNode& node, const World& world) const
+std::pair<String, std::vector<ColourOverride>> ScriptPlayAnimation::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Play sequence \"");

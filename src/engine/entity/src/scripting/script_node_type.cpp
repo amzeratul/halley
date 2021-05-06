@@ -12,7 +12,7 @@ std::vector<IScriptNodeType::SettingType> IScriptNodeType::getSettingTypes() con
 	return {};
 }
 
-std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node,	const World& world, PinType elementType, uint8_t elementIdx) const
+std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node,	const World& world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const
 {
 	switch (elementType.type) {
 	case ScriptNodeElementType::DataPin:
@@ -20,13 +20,13 @@ std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getDescription(c
 	case ScriptNodeElementType::TargetPin:
 		return getPinDescription(node, elementType, elementIdx);
 	case ScriptNodeElementType::Node:
-		return getNodeDescription(node, world);
+		return getNodeDescription(node, world, graph);
 	}
 	
 	return { "?", {} };
 }
 
-std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getNodeDescription(const ScriptGraphNode& node,	const World& world) const
+std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getNodeDescription(const ScriptGraphNode& node,	const World& world, const ScriptGraph& graph) const
 {
 	return { getName(), {} };
 }
@@ -102,6 +102,16 @@ ConfigNode IScriptNodeType::readDataPin(ScriptEnvironment& environment, const Sc
 	const auto& nodes = environment.getCurrentGraph()->getNodes();
 	const auto& dstNode = nodes[pin.dstNode.value()];
 	return dstNode.getNodeType().getData(environment, dstNode, pin.dstPin);
+}
+
+String IScriptNodeType::getConnectedNodeName(const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const
+{
+	const auto& pin = node.getPin(pinN);
+	if (!pin.dstNode) {
+		return "<empty>";
+	}
+	const auto& otherNode = graph.getNodes().at(pin.dstNode.value());
+	return otherNode.getNodeType().getName();
 }
 
 ScriptNodeTypeCollection::ScriptNodeTypeCollection()

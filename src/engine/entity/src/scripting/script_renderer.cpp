@@ -200,7 +200,7 @@ Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vecto
 	const Vector2f nodeSize = getNodeSize(curZoom);
 	const auto getOffset = [&] (size_t idx, size_t n)
 	{
-		const float spacing = 10.0f;
+		const float spacing = nodeSize.x / (n + 1);
 		return (static_cast<float>(idx) - (n - 1) * 0.5f) * spacing;
 	};
 
