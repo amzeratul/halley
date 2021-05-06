@@ -44,29 +44,41 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 			}
 
 			// Update
-			const auto result = updateNode(time, node, thread.getCurData());
-			timeLeft -= result.timeElapsed;
+			const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
+			if (!nodeType) {
+				Logger::logError("Unknown node type: \"" + node.getType() + "\"");
+				threads.clear();
+				break;
+			}
+			const auto result = nodeType->update(*this, time, node, thread.getCurData());
 
 			if (result.state == ScriptNodeExecutionState::Done) {
 				// Proceed to next node(s)
 				thread.finishNode();
 
 				size_t nOutputsFound = 0;
-				for (size_t j = 0; j < node.getPins().size(); ++j) {
-					const auto& output = node.getPins()[j];
-					const bool outputActive = (result.outputsActive & (1 << j)) != 0;
-					
-					if (outputActive && output.dstNode) {
-						if (nOutputsFound == 0) {
-							// Direct sequel
-							thread.advanceToNode(output.dstNode.value());
-						} else {
-							// Spawn as new thread
-							auto& newThread = threads.emplace_back(output.dstNode.value());
-							newThread.getTimeSlice() = timeLeft;
+				size_t curOutputPin = 0;
+				const auto& pinConfig = nodeType->getPinConfiguration();
+				for (size_t j = 0; j < pinConfig.size(); ++j) {
+					if (pinConfig[j].type == ScriptNodeElementType::FlowPin && pinConfig[j].direction == ScriptNodePinDirection::Output) {
+						const bool outputActive = (result.outputsActive & (1 << curOutputPin)) != 0;
+						if (outputActive) {
+							const auto& output = node.getPin(j);
+							if (output.dstNode) {
+								if (nOutputsFound == 0) {
+									// Direct sequel
+									thread.advanceToNode(output.dstNode.value());
+								} else {
+									// Spawn as new thread
+									auto& newThread = threads.emplace_back(output.dstNode.value());
+									newThread.getTimeSlice() = timeLeft;
+								}
+
+								++nOutputsFound;
+							}
 						}
 
-						++nOutputsFound;
+						++curOutputPin;
 					}
 				}
 				if (nOutputsFound == 0) {
@@ -96,16 +108,6 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 EntityRef ScriptEnvironment::getEntity(EntityId entityId)
 {
 	return world.getEntity(entityId);
-}
-
-IScriptNodeType::Result ScriptEnvironment::updateNode(Time time, const ScriptGraphNode& node, IScriptStateData* curData)
-{
-	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
-	if (!nodeType) {
-		Logger::logError("Unknown node type: \"" + node.getType() + "\"");
-		return IScriptNodeType::Result(ScriptNodeExecutionState::Done);
-	}
-	return nodeType->update(*this, time, node, curData);
 }
 
 std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const ScriptGraphNode& node)

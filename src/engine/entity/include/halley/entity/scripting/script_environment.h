@@ -20,7 +20,6 @@ namespace Halley {
     	const ScriptNodeTypeCollection& nodeTypeCollection;
 
     private:
-        IScriptNodeType::Result updateNode(Time time, const ScriptGraphNode& node, IScriptStateData* curData);
         std::unique_ptr<IScriptStateData> makeNodeData(const ScriptGraphNode& node);
     };
 }

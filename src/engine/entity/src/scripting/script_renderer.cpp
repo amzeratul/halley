@@ -74,13 +74,15 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 	for (size_t i = 0; i < node.getPins().size(); ++i) {
 		const auto& srcPinType = nodeType->getPin(i);
 		const auto& output = node.getPins()[i];
-		if (!output.dstNode) {
+		if (!output.dstNode || (srcPinType.direction == ScriptNodePinDirection::Input && srcPinType.type != ScriptNodeElementType::TargetPin)) {
 			continue;
 		}
 		
 		const Vector2f srcPos = getNodeElementArea(*nodeType, basePos, node, i, curZoom).getCentre();
 
 		std::optional<Vector2f> dstPos;
+		ScriptNodePinType dstPinType;
+		
 		if (srcPinType.type == ScriptNodeElementType::TargetPin) {
 			const auto target = node.getPin(i).entity;
 			if (target.isValid()) {
@@ -98,10 +100,11 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 				continue;
 			}
 			dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom).getCentre();
+			dstPinType = dstNodeType->getPin(dstIdx);
 		}
 
 		if (dstPos) {
-			drawConnection(painter, ConnectionPath{ srcPos, dstPos.value(), srcPinType.type }, curZoom);
+			drawConnection(painter, ConnectionPath{ srcPos, dstPos.value(), srcPinType, dstPinType }, curZoom);
 		}
 	}
 }
