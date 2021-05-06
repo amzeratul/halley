@@ -167,8 +167,9 @@ void ScriptingGizmo::draw(Painter& painter) const
 	std::optional<ScriptRenderer::ConnectionPath> path;
 	if (nodeEditingConnection && nodeConnectionDst) {
 		const auto srcType = nodeEditingConnection->element;
-		auto dstType = srcType;
-		dstType.direction = dstType.direction == ScriptNodePinDirection::Input ? ScriptNodePinDirection::Output : ScriptNodePinDirection::Input;
+		ScriptNodePinType dstType;
+		dstType.type = srcType.type == ScriptNodeElementType::TargetPin ? ScriptNodeElementType::Undefined : srcType.type;
+		dstType.direction = srcType.direction == ScriptNodePinDirection::Input ? ScriptNodePinDirection::Output : ScriptNodePinDirection::Input;
 		path = ScriptRenderer::ConnectionPath{ nodeEditingConnection->pinPos, nodeConnectionDst.value(), srcType, dstType };
 	}
 

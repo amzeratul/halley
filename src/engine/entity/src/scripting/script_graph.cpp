@@ -187,6 +187,15 @@ bool ScriptGraph::disconnectPin(uint32_t nodeIdx, uint8_t pinN)
 		return false;
 	}
 
+	if (pin.dstNode) {
+		auto& otherNode = nodes.at(pin.dstNode.value());
+		auto& otherPin = otherNode.getPin(pin.dstPin);
+
+		otherPin.dstNode = OptionalLite<uint32_t>();
+		otherPin.dstPin = 0;
+		otherPin.entity = EntityId();
+	}
+
 	pin.dstNode = OptionalLite<uint32_t>();
 	pin.dstPin = 0;
 	pin.entity = EntityId();

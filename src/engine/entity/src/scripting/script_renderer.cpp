@@ -73,13 +73,8 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 
 	for (size_t i = 0; i < node.getPins().size(); ++i) {
 		const auto& srcPinType = nodeType->getPin(i);
-		const auto& output = node.getPins()[i];
-		if (!output.dstNode || (srcPinType.direction == ScriptNodePinDirection::Input && srcPinType.type != ScriptNodeElementType::TargetPin)) {
-			continue;
-		}
+		const auto& pin = node.getPins()[i];
 		
-		const Vector2f srcPos = getNodeElementArea(*nodeType, basePos, node, i, curZoom).getCentre();
-
 		std::optional<Vector2f> dstPos;
 		ScriptNodePinType dstPinType;
 		
@@ -92,9 +87,9 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 					dstPos = transform->getGlobalPosition();
 				}
 			}
-		} else {
-			const size_t dstIdx = output.dstPin;
-			const auto& dstNode = graph.getNodes().at(output.dstNode.value());
+		} else if (pin.dstNode && srcPinType.direction == ScriptNodePinDirection::Output) {
+			const size_t dstIdx = pin.dstPin;
+			const auto& dstNode = graph.getNodes().at(pin.dstNode.value());
 			const auto* dstNodeType = nodeTypeCollection.tryGetNodeType(dstNode.getType());
 			if (!dstNodeType) {
 				continue;
@@ -104,6 +99,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 		}
 
 		if (dstPos) {
+			const Vector2f srcPos = getNodeElementArea(*nodeType, basePos, node, i, curZoom).getCentre();
 			drawConnection(painter, ConnectionPath{ srcPos, dstPos.value(), srcPinType, dstPinType }, curZoom);
 		}
 	}
