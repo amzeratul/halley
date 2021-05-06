@@ -4,6 +4,8 @@
 #include "halley/utils/hash.h"
 
 namespace Halley {
+	class IScriptNodeType;
+	class ScriptNodeTypeCollection;
 	class ScriptGraph;
 	class World;
 	
@@ -58,11 +60,15 @@ namespace Halley {
 
 		String getTargetName(const World& world, uint8_t idx) const;
 
+		void assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const;
+		const IScriptNodeType& getNodeType() const;
+
 	private:
 		Vector2f position;
 		String type;
 		ConfigNode settings;
 		std::vector<Pin> pins;
+		mutable const IScriptNodeType* nodeType = nullptr;
 	};
 	
 	class ScriptGraph {
@@ -84,9 +90,13 @@ namespace Halley {
 		bool connectPin(uint32_t srcNode, uint8_t srcPinN, EntityId target);
 		bool disconnectPin(uint32_t node, uint8_t pin);
 
+		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const;
+
 	private:
 		std::vector<ScriptGraphNode> nodes;
 		uint64_t hash = 0;
+
+		mutable uint64_t lastAssignTypeHash = 1;
 
 		void computeHash();
 	};

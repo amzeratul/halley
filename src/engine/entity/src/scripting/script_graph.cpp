@@ -3,6 +3,7 @@
 #include "entity.h"
 #include "world.h"
 #include "halley/utils/hash.h"
+#include "scripting/script_node_type.h"
 using namespace Halley;
 
 ScriptGraphNode::Pin::Pin(const ConfigNode& node, const ConfigNodeSerializationContext& context)
@@ -98,6 +99,17 @@ String ScriptGraphNode::getTargetName(const World& world, uint8_t idx) const
 	}
 	
 	return "<unknown>";
+}
+
+void ScriptGraphNode::assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const
+{
+	nodeType = nodeTypeCollection.tryGetNodeType(type);
+}
+
+const IScriptNodeType& ScriptGraphNode::getNodeType() const
+{
+	Expects(nodeType != nullptr);
+	return *nodeType;
 }
 
 ScriptGraph::ScriptGraph()
@@ -201,6 +213,16 @@ bool ScriptGraph::disconnectPin(uint32_t nodeIdx, uint8_t pinN)
 	pin.entity = EntityId();
 
 	return true;
+}
+
+void ScriptGraph::assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const
+{
+	if (lastAssignTypeHash != hash) {
+		lastAssignTypeHash = hash;
+		for (auto& node: nodes) {
+			node.assignType(nodeTypeCollection);
+		}
+	}
 }
 
 void ScriptGraph::computeHash()

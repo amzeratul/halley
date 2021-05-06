@@ -17,6 +17,8 @@ ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resourc
 
 void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState& graphState)
 {
+	graph.assignTypes(nodeTypeCollection);
+	
 	if (!graphState.hasStarted() || graphState.getGraphHash() != graph.getHash()) {
 		graphState.start(graph.getStartNode(), graph.getHash());
 	}
@@ -36,21 +38,17 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 		bool suspended = false;
 
 		while (!suspended && timeLeft > 0 && thread.getCurNode()) {
+			// Get node type
 			const auto& node = graph.getNodes().at(thread.getCurNode().value());
-
+			const auto& nodeType = node.getNodeType();
+			
 			// Start node if not done yet
 			if (!thread.isNodeStarted()) {
-				thread.startNode(makeNodeData(node));
+				thread.startNode(makeNodeData(nodeType, node));
 			}
 
 			// Update
-			const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
-			if (!nodeType) {
-				Logger::logError("Unknown node type: \"" + node.getType() + "\"");
-				threads.clear();
-				break;
-			}
-			const auto result = nodeType->update(*this, time, node, thread.getCurData());
+			const auto result = nodeType.update(*this, time, node, thread.getCurData());
 
 			if (result.state == ScriptNodeExecutionState::Done) {
 				// Proceed to next node(s)
@@ -58,7 +56,7 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 
 				size_t nOutputsFound = 0;
 				size_t curOutputPin = 0;
-				const auto& pinConfig = nodeType->getPinConfiguration();
+				const auto& pinConfig = nodeType.getPinConfiguration();
 				for (size_t j = 0; j < pinConfig.size(); ++j) {
 					if (pinConfig[j].type == ScriptNodeElementType::FlowPin && pinConfig[j].direction == ScriptNodePinDirection::Output) {
 						const bool outputActive = (result.outputsActive & (1 << curOutputPin)) != 0;
@@ -110,17 +108,11 @@ EntityRef ScriptEnvironment::getEntity(EntityId entityId)
 	return world.getEntity(entityId);
 }
 
-std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const ScriptGraphNode& node)
+std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const IScriptNodeType& nodeType, const ScriptGraphNode& node)
 {
-	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
-	if (!nodeType) {
-		Logger::logError("Unknown node type: \"" + node.getType() + "\"");
-		return {};
-	}
-	
-	auto result = nodeType->makeData();
+	auto result = nodeType.makeData();
 	if (result) {
-		nodeType->initData(*result, node);
+		nodeType.initData(*result, node);
 	}
 	return result;
 }

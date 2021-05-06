@@ -46,7 +46,7 @@ std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getPinDescriptio
 		return "?";
 	};
 
-	auto getIO = [](ScriptNodeElementType type, ScriptNodePinDirection direction) -> const char*
+	auto getIO = [](ScriptNodePinDirection direction) -> const char*
 	{
 		switch (direction) {
 		case ScriptNodePinDirection::Input:
@@ -71,7 +71,7 @@ std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getPinDescriptio
 
 	ColourStringBuilder builder;
 	builder.append(getName(elementType.type));
-	builder.append(getIO(elementType.type, elementType.direction));
+	builder.append(getIO(elementType.direction));
 	if (typeTotal > 1) {
 		builder.append(" " + toString(static_cast<int>(typeIdx)));
 	}

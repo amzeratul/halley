@@ -20,6 +20,6 @@ namespace Halley {
     	const ScriptNodeTypeCollection& nodeTypeCollection;
 
     private:
-        std::unique_ptr<IScriptStateData> makeNodeData(const ScriptGraphNode& node);
+        std::unique_ptr<IScriptStateData> makeNodeData(const IScriptNodeType& nodeType, const ScriptGraphNode& node);
     };
 }
