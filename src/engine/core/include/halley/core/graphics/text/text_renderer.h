@@ -110,7 +110,7 @@ namespace Halley
 
 	class ColourStringBuilder {
 	public:
-		void append(String text, std::optional<Colour4f> col = {});
+		void append(std::string_view text, std::optional<Colour4f> col = {});
 
 		std::pair<String, std::vector<ColourOverride>> moveResults();
 

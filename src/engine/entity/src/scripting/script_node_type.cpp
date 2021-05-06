@@ -33,18 +33,49 @@ std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getNodeDescripti
 
 std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const
 {
-	if (elementType.type == ScriptNodeElementType::FlowPin && elementType.direction == ScriptNodePinDirection::Input) {
-		return { "Flow Input " + toString(static_cast<int>(elementIdx)), {} };
-	} else if (elementType.type == ScriptNodeElementType::FlowPin && elementType.direction == ScriptNodePinDirection::Output) {
-		return { "Flow Output " + toString(static_cast<int>(elementIdx)), {} };
-	} else if (elementType.type == ScriptNodeElementType::DataPin && elementType.direction == ScriptNodePinDirection::Input) {
-		return { "Data Input " + toString(static_cast<int>(elementIdx)), {} };
-	} else if (elementType.type == ScriptNodeElementType::DataPin && elementType.direction == ScriptNodePinDirection::Output) {
-		return { "Data Output " + toString(static_cast<int>(elementIdx)), {} };
-	} else if (elementType.type == ScriptNodeElementType::TargetPin) {
-		return { "Target " + toString(static_cast<int>(elementIdx)), {} };
+	auto getName = [](ScriptNodeElementType type) -> const char*
+	{
+		switch (type) {
+		case ScriptNodeElementType::FlowPin:
+			return "Flow";
+		case ScriptNodeElementType::DataPin:
+			return "Data";
+		case ScriptNodeElementType::TargetPin:
+			return "Target";
+		}
+		return "?";
+	};
+
+	auto getIO = [](ScriptNodeElementType type, ScriptNodePinDirection direction) -> const char*
+	{
+		switch (direction) {
+		case ScriptNodePinDirection::Input:
+			return " Input";
+		case ScriptNodePinDirection::Output:
+			return " Output";
+		}
+		return nullptr;
+	};
+
+	const auto& config = getPinConfiguration();
+	size_t typeIdx = 0;
+	size_t typeTotal = 0;
+	for (size_t i = 0; i < config.size(); ++i) {
+		if (i == elementIdx) {
+			typeIdx = typeTotal;
+		}
+		if (config[i] == elementType) {
+			++typeTotal;
+		}
 	}
-	return { "?", {} };
+
+	ColourStringBuilder builder;
+	builder.append(getName(elementType.type));
+	builder.append(getIO(elementType.type, elementType.direction));
+	if (typeTotal > 1) {
+		builder.append(" " + toString(static_cast<int>(typeIdx)));
+	}
+	return builder.moveResults();
 }
 
 IScriptNodeType::PinType IScriptNodeType::getPin(size_t n) const

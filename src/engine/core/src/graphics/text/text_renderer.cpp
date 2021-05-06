@@ -585,9 +585,11 @@ void TextRenderer::updateMaterials() const
 	}
 }
 
-void ColourStringBuilder::append(String text, std::optional<Colour4f> col)
+void ColourStringBuilder::append(std::string_view text, std::optional<Colour4f> col)
 {
-	colours.emplace_back(len, col);
+	if ((colours.empty() && col) || (!colours.empty() && col != colours.back().second)) {
+		colours.emplace_back(len, col);	
+	}
 	len += text.length();
 	strings.push_back(std::move(text));
 }

@@ -162,8 +162,6 @@ void ScriptingGizmo::draw(Painter& painter) const
 		return;
 	}
 
-	const bool overNodeBody = nodeUnderMouse && nodeUnderMouse->element.type == ScriptNodeElementType::Node;
-
 	std::optional<ScriptRenderer::ConnectionPath> path;
 	if (nodeEditingConnection && nodeConnectionDst) {
 		const auto srcType = nodeEditingConnection->element;
