@@ -54,8 +54,8 @@ namespace Halley {
 
     private:
     	std::vector<ScriptStateThread> threads;
-    	uint64_t graphHash;
-    	bool started;
+    	uint64_t graphHash = 0;
+    	bool started = false;
     };
 	
 	template<>
