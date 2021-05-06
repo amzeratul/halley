@@ -95,36 +95,11 @@ void ScriptingGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 void ScriptingGizmo::onPinClicked()
 {
 	Expects(nodeUnderMouse);
-	nodeEditingConnection = nodeUnderMouse;
-
-	const auto nodeId = nodeEditingConnection->nodeId;
-	const auto pinId = nodeEditingConnection->elementId;
-	auto& node = scriptGraph->getNodes().at(nodeId);
-	const auto srcType = nodeEditingConnection->element;
 	
-	if (srcType == ScriptNodeElementType::FlowOutput) {
-		// Erase connection coming out of this
-		if (node.connectPin(pinId, {}, 0)) {
-			saveEntityData();
-		}
-	} else if (srcType == ScriptNodeElementType::FlowInput) {
-		// Erase existing connection to this input
-		bool anyChanged = false;
-		for (auto& n: scriptGraph->getNodes()) {
-			anyChanged = n.disconnectPinsTo(nodeId, pinId) || anyChanged;
-		}
-		if (anyChanged) {
-			saveEntityData();
-		}
-	} else if (srcType == ScriptNodeElementType::DataOutput) {
-		// TODO
-	} else if (srcType == ScriptNodeElementType::DataInput) {
-		// TODO
-	} else if (srcType == ScriptNodeElementType::TargetPin) {
-		// Erase connection coming out of this
-		if (node.connectTarget(pinId, {})) {
-			saveEntityData();
-		}
+	nodeEditingConnection = nodeUnderMouse;
+	
+	if (scriptGraph->disconnectPin(nodeEditingConnection->nodeId, nodeEditingConnection->elementId)) {
+		saveEntityData();
 	}
 }
 
@@ -140,38 +115,26 @@ void ScriptingGizmo::onEditingConnection(const SceneEditorInputState& inputState
 	if (nodeUnderMouse) {
 		const auto dstNodeId = nodeUnderMouse->nodeId;
 		const auto dstType = nodeUnderMouse->element;
-		
-		if ((srcType == ET::FlowInput && dstType != ET::FlowOutput)
-			|| (srcType == ET::FlowOutput && dstType != ET::FlowInput)
-			|| (srcType == ET::DataOutput && dstType != ET::DataInput)
-			|| (srcType == ET::DataInput && dstType != ET::DataOutput)
-			|| srcType == ET::TargetPin
-			|| srcNodeId == dstNodeId) {
+
+		if (srcType.type != dstType.type || srcType.direction == dstType.direction || srcNodeId == dstNodeId) {
 			nodeUnderMouse.reset();
 		}
 	}
 
 	if (inputState.leftClickPressed) {
-		auto& srcNode = scriptGraph->getNodes().at(srcNodeId);
-
 		if (nodeUnderMouse) {
-			if (srcType == ET::FlowOutput) {
-				srcNode.connectPin(srcPinId, nodeUnderMouse->nodeId, nodeUnderMouse->elementId);
+			const auto dstNodeId = nodeUnderMouse->nodeId;
+			const auto dstPinId = nodeUnderMouse->elementId;
+			
+			if (scriptGraph->connectPins(srcNodeId, srcPinId, dstNodeId, dstPinId)) {
 				saveEntityData();
-			} else if (srcType == ET::FlowInput) {
-				auto& otherNode = scriptGraph->getNodes().at(nodeUnderMouse->nodeId);
-				otherNode.connectPin(nodeUnderMouse->elementId, srcNodeId, srcPinId);
-				saveEntityData();
-			} else if (srcType == ET::DataOutput) {
-				// TODO
-			} else if (srcType == ET::DataInput) {
-				// TODO
 			}
 		}
 		
 		if (srcType.type == ET::TargetPin) {
-			srcNode.connectTarget(srcPinId, curEntityTarget);
-			saveEntityData();
+			if (scriptGraph->connectPin(srcNodeId, srcPinId, curEntityTarget)) {
+				saveEntityData();
+			}
 		}
 		
 		nodeEditingConnection.reset();

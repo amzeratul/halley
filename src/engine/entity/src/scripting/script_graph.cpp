@@ -59,36 +59,6 @@ ConfigNode ScriptGraphNode::toConfigNode(const ConfigNodeSerializationContext& c
 	return result;
 }
 
-bool ScriptGraphNode::connectPin(uint8_t pinN, OptionalLite<uint32_t> dstNode, uint8_t dstPinN)
-{
-	pins.resize(std::max(pins.size(), static_cast<size_t>(pinN + 1)));
-	
-	auto& pin = pins[pinN];
-	if (pin.dstNode != dstNode || pin.dstPin != dstPinN || pin.entity.isValid()) {
-		pin.dstNode = dstNode;
-		pin.dstPin = dstPinN;
-		pin.entity = EntityId();
-		return true;
-	}
-
-	return false;
-}
-
-bool ScriptGraphNode::connectTarget(uint8_t pinN, EntityId targetEntity)
-{
-	pins.resize(std::max(pins.size(), static_cast<size_t>(pinN + 1)));
-
-	auto& pin = pins[pinN];
-	if (pin.entity != targetEntity || pin.dstNode.has_value() || pin.dstPin != 0) {
-		pin.entity = targetEntity;
-		pin.dstNode = OptionalLite<uint32_t>{};
-		pin.dstPin = 0;
-		return true;
-	}
-
-	return false;
-}
-
 void ScriptGraphNode::feedToHash(Hash::Hasher& hasher)
 {
 	// TODO
@@ -169,6 +139,59 @@ OptionalLite<uint32_t> ScriptGraph::getStartNode() const
 uint64_t ScriptGraph::getHash() const
 {
 	return hash;
+}
+
+bool ScriptGraph::connectPins(uint32_t srcNodeIdx, uint8_t srcPinN, uint32_t dstNodeIdx, uint8_t dstPinN)
+{
+	auto& srcNode = nodes.at(srcNodeIdx);
+	auto& srcPin = srcNode.getPin(srcPinN);
+	auto& dstNode = nodes.at(dstNodeIdx);
+	auto& dstPin = dstNode.getPin(dstPinN);
+
+	if (srcPin.dstNode == dstNodeIdx && srcPin.dstPin == dstPinN && dstPin.dstNode == srcNodeIdx && dstPin.dstPin == srcPinN) {
+		return false;
+	}
+
+	disconnectPin(srcNodeIdx, srcPinN);
+	disconnectPin(dstNodeIdx, dstPinN);
+	
+	srcPin.dstNode = dstNodeIdx;
+	srcPin.dstPin = dstPinN;
+	dstPin.dstNode = srcNodeIdx;
+	dstPin.dstPin = srcPinN;
+
+	return true;
+}
+
+bool ScriptGraph::connectPin(uint32_t srcNodeIdx, uint8_t srcPinN, EntityId target)
+{
+	auto& srcNode = nodes.at(srcNodeIdx);
+	auto& srcPin = srcNode.getPin(srcPinN);
+
+	if (srcPin.entity == target) {
+		return false;
+	}
+
+	disconnectPin(srcNodeIdx, srcPinN);
+
+	srcPin.entity = target;
+
+	return true;
+}
+
+bool ScriptGraph::disconnectPin(uint32_t nodeIdx, uint8_t pinN)
+{
+	auto& node = nodes.at(nodeIdx);
+	auto& pin = node.getPin(pinN);
+	if (!pin.dstNode.has_value() && pin.dstPin == 0 && !pin.entity.isValid()) {
+		return false;
+	}
+
+	pin.dstNode = OptionalLite<uint32_t>();
+	pin.dstPin = 0;
+	pin.entity = EntityId();
+
+	return true;
 }
 
 void ScriptGraph::computeHash()

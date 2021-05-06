@@ -4,6 +4,7 @@
 #include "halley/utils/hash.h"
 
 namespace Halley {
+	class ScriptGraph;
 	class World;
 	
 	class ScriptGraphNode {
@@ -31,13 +32,25 @@ namespace Halley {
 
 		std::vector<Pin>& getPins() { return pins; }
 		const std::vector<Pin>& getPins() const { return pins; }
-		EntityId getTarget(uint8_t idx) const { return idx < pins.size() ? pins[idx].entity : EntityId(); }
+		Pin& getPin(uint8_t idx)
+		{
+			if (static_cast<size_t>(idx) >= pins.size()) {
+				pins.resize(idx + 1);
+			}
+			return pins[idx];
+		}
+		const Pin& getPin(uint8_t idx) const
+		{
+			if (static_cast<size_t>(idx) >= pins.size()) {
+				static Pin dummy;
+				return dummy;
+			}
+			return pins[idx];
+		}
 
 		const ConfigNode& getSettings() const { return settings; }
 		ConfigNode& getSettings() { return settings; }
 
-		bool connectPin(uint8_t pinN, OptionalLite<uint32_t> dstNode, uint8_t dstPinN);
-		bool connectTarget(uint8_t pinN, EntityId targetEntity);
 		void feedToHash(Hash::Hasher& hasher);
 
 		void onNodeRemoved(uint32_t nodeId);
@@ -66,6 +79,10 @@ namespace Halley {
 
 		OptionalLite<uint32_t> getStartNode() const;
 		uint64_t getHash() const;
+
+		bool connectPins(uint32_t srcNode, uint8_t srcPinN, uint32_t dstNode, uint8_t dstPin);
+		bool connectPin(uint32_t srcNode, uint8_t srcPinN, EntityId target);
+		bool disconnectPin(uint32_t node, uint8_t pin);
 
 	private:
 		std::vector<ScriptGraphNode> nodes;
