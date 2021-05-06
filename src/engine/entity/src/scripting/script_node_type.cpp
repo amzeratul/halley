@@ -1,9 +1,8 @@
 #include "scripting/script_node_type.h"
 
-#include "nodes/script_start.h"
+#include "nodes/script_branching.h"
+#include "nodes/script_flow_control.h"
 #include "nodes/script_play_animation.h"
-#include "nodes/script_restart.h"
-#include "nodes/script_stop.h"
 #include "nodes/script_wait.h"
 #include "nodes/script_wait_for.h"
 using namespace Halley;
@@ -157,4 +156,5 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptWait>());
 	addScriptNode(std::make_unique<ScriptWaitFor>());
 	addScriptNode(std::make_unique<ScriptPlayAnimation>());
+	addScriptNode(std::make_unique<ScriptIf>());
 }
