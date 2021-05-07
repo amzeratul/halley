@@ -46,5 +46,15 @@ namespace Halley {
     	}
 
     	std::vector<Vector2f> toLineSegments() const;
+
+    	BezierCubic operator+(Vector2f v) const
+    	{
+    		return BezierCubic{ p0 + v, p1 + v, p2 + v, p3 + v };
+    	}
+
+    	BezierCubic operator-(Vector2f v) const
+    	{
+    		return BezierCubic{ p0 - v, p1 - v, p2 - v, p3 - v };
+    	}
     };
 }

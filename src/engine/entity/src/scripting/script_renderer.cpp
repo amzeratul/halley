@@ -147,7 +147,9 @@ BezierCubic ScriptRenderer::makeBezier(const ConnectionPath& path) const
 
 void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path, float curZoom) const
 {
-	painter.drawLine(makeBezier(path), 1.5f / curZoom, getPinColour(path.fromType));
+	const auto bezier = makeBezier(path);
+	painter.drawLine(bezier + Vector2f(1.0f, 2.0f) / curZoom, 3.0f / curZoom, Colour4f(0, 0, 0, 0.3f));
+	painter.drawLine(bezier, 3.0f / curZoom, getPinColour(path.fromType));
 }
 
 void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, uint8_t highlightElementId)
@@ -292,7 +294,7 @@ Colour4f ScriptRenderer::getPinColour(ScriptNodePinType pinType) const
 {
 	switch (pinType.type) {
 	case ScriptNodeElementType::FlowPin:
-		return Colour4f(0.8f, 0.8f, 0.8f);
+		return Colour4f(0.75f, 0.75f, 0.99f);
 	case ScriptNodeElementType::DataPin:
 		return Colour4f(0.91f, 0.55f, 0.2f);
 	case ScriptNodeElementType::TargetPin:
