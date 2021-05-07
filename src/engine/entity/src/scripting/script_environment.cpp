@@ -40,12 +40,14 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 
 		while (!suspended && timeLeft > 0 && thread.getCurNode()) {
 			// Get node type
-			const auto& node = graph.getNodes().at(thread.getCurNode().value());
+			const auto nodeId = thread.getCurNode().value();
+			const auto& node = graph.getNodes().at(nodeId);
 			const auto& nodeType = node.getNodeType();
 			
 			// Start node if not done yet
 			if (!thread.isNodeStarted()) {
 				thread.startNode(makeNodeData(nodeType, node));
+				graphState.onNodeStarted(nodeId);
 			}
 
 			// Update
@@ -54,6 +56,7 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 			if (result.state == ScriptNodeExecutionState::Done) {
 				// Proceed to next node(s)
 				thread.finishNode();
+				graphState.onNodeEnded(nodeId);
 
 				size_t nOutputsFound = 0;
 				size_t curOutputPin = 0;
@@ -104,11 +107,12 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 	threads.erase(std::remove_if(threads.begin(), threads.end(), [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); }), threads.end());
 
 	currentGraph = nullptr;
+	graphState.updateIntrospection(time);
 }
 
-EntityRef ScriptEnvironment::getEntity(EntityId entityId)
+EntityRef ScriptEnvironment::tryGetEntity(EntityId entityId)
 {
-	return world.getEntity(entityId);
+	return world.tryGetEntity(entityId);
 }
 
 const ScriptGraph* ScriptEnvironment::getCurrentGraph() const

@@ -84,6 +84,11 @@ namespace Halley {
 		return 3.1415926535897932384626433832795;
 	}
 
+	constexpr float pif()
+	{
+		return 3.1415926535897932384626433832795f;
+	}
+
 	// True modulo definition
 	template <typename T> constexpr inline T modulo (T a, T b)
 	{
@@ -141,6 +146,18 @@ namespace Halley {
 	template <typename T>
 	[[nodiscard]] constexpr inline T damp(T a, T b, float lambda, float dt) {
 		return lerp<T>(a, b, 1.0f - std::exp(-lambda * dt));
+	}
+
+	template <typename T>
+	constexpr T sinRange(T angle, T min, T max)
+	{
+		return lerp(min, max, sin(angle) * T(0.5) + T(0.5));
+	}
+
+	template <typename T>
+	constexpr T cosRange(T angle, T min, T max)
+	{
+		return lerp(min, max, cos(angle) * T(0.5) + T(0.5));
 	}
 
 	// Smoothing

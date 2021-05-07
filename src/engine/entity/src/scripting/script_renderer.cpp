@@ -27,9 +27,9 @@ void ScriptRenderer::setGraph(const ScriptGraph* graph)
 	this->graph = graph;
 }
 
-void ScriptRenderer::setState(const ScriptState* scriptState)
+void ScriptRenderer::setState(ScriptState* scriptState)
 {
-	this->state = scriptState;
+	state = scriptState;
 }
 
 void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
@@ -52,15 +52,28 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 		const auto& node = graph->getNodes()[i];
 
 		const bool highlightThis = highlightNode && highlightNode->nodeId == i;
+		const auto pinType = highlightThis ? highlightNode->element : std::optional<ScriptNodePinType>();
+		const auto pinId = highlightThis ? highlightNode->elementId : 0;
 		
-		NodeDrawMode mode = NodeDrawMode::Normal;
-		if (highlightThis && highlightNode->element.type == ScriptNodeElementType::Node) {
-			mode = NodeDrawMode::Highlight;
-		} else if (state && !state->hasThreadAt(i)) {
-			mode = NodeDrawMode::Dimmed;
+		NodeDrawMode drawMode;
+		if (state) {
+			// Rendering in-game, with execution state
+			const auto nodeIntrospection = state->getNodeIntrospection(i);
+			if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Active) {
+				drawMode.type = NodeDrawModeType::Active;
+				drawMode.param = nodeIntrospection.time;
+			} else if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Visited) {
+				drawMode.type = NodeDrawModeType::Visited;
+				drawMode.param = nodeIntrospection.time;
+			}
+		} else {
+			// Rendering in editor
+			if (highlightThis && highlightNode->element.type == ScriptNodeElementType::Node) {
+				drawMode.type = NodeDrawModeType::Highlight;
+			}
 		}
 		
-		drawNode(painter, basePos, node, effectiveZoom, mode, highlightThis ? highlightNode->element : std::optional<ScriptNodePinType>(), highlightThis ? highlightNode->elementId : 0);
+		drawNode(painter, basePos, node, effectiveZoom, drawMode, pinType, pinId);
 	}
 }
 
@@ -150,13 +163,23 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 	{
 		const auto baseCol = getNodeColour(*nodeType);
 		Colour4f col = baseCol;
-		switch (drawMode) {
-		case NodeDrawMode::Highlight:
+		
+		switch (drawMode.type) {
+		case NodeDrawModeType::Highlight:
 			col = col.inverseMultiplyLuma(0.5f);
 			break;
-		case NodeDrawMode::Dimmed:
-			col = col.multiplyLuma(0.5f);
-			break;
+		case NodeDrawModeType::Active:
+			{
+				const float phase = drawMode.param * 2.0f * pif();
+				col = col.inverseMultiplyLuma(sinRange(phase, 0.3f, 1.0f));
+				break;
+			}
+		case NodeDrawModeType::Visited:
+			{
+				const float t = drawMode.param * 4;
+				col = t < 1 ? col.inverseMultiplyLuma(lerp(0.0f, 1.0f, t)) : col.multiplyLuma(lerp(1.0f, 1.0f, clamp((t - 1.0f) / 3.0f, 0.0f, 1.0f)));
+				break;
+			}
 		}
 		
 		// Node body

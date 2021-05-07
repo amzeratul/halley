@@ -39,6 +39,17 @@ namespace Halley {
 
     class ScriptState {
     public:
+		enum class NodeIntrospectionState {
+			Unvisited,
+			Active,
+			Visited
+		};
+    	
+    	struct NodeIntrospection {
+    		float time = 0;
+    		NodeIntrospectionState state;
+    	};
+
     	ScriptState();
 		ScriptState(const ConfigNode& node);
 
@@ -52,10 +63,32 @@ namespace Halley {
 
     	bool hasThreadAt(uint32_t node) const;
 
+    	void setIntrospection(bool enabled);
+    	void updateIntrospection(Time t);
+        void onNodeStarted(uint32_t nodeId)
+        {
+	        if (introspection) {
+		        onNodeStartedIntrospection(nodeId);
+	        }
+        }
+    	void onNodeEnded(uint32_t nodeId)
+    	{
+	        if (introspection) {
+		        onNodeEndedIntrospection(nodeId);
+	        }
+        }
+    	NodeIntrospection getNodeIntrospection(uint32_t nodeId) const;
+
     private:
     	std::vector<ScriptStateThread> threads;
     	uint64_t graphHash = 0;
     	bool started = false;
+    	bool introspection = false;
+
+    	std::vector<NodeIntrospection> nodeIntrospection;
+
+    	void onNodeStartedIntrospection(uint32_t nodeId);
+    	void onNodeEndedIntrospection(uint32_t nodeId);
     };
 	
 	template<>

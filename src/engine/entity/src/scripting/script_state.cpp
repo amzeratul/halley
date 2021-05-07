@@ -80,6 +80,45 @@ void ScriptState::start(OptionalLite<uint32_t> startNode, uint64_t hash)
 	started = true;
 }
 
+void ScriptState::setIntrospection(bool enabled)
+{
+	introspection = enabled;
+	if (!introspection) {
+		nodeIntrospection.clear();
+	}
+}
+
+void ScriptState::updateIntrospection(Time t)
+{
+	for (auto& n: nodeIntrospection) {
+		n.time += static_cast<float>(t);
+	}
+}
+
+ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(uint32_t nodeId) const
+{
+	return nodeId < nodeIntrospection.size() ? nodeIntrospection[nodeId] : NodeIntrospection();
+}
+
+void ScriptState::onNodeStartedIntrospection(uint32_t nodeId)
+{
+	if (nodeId >= nodeIntrospection.size()) {
+		nodeIntrospection.resize(nodeId + 1);
+	}
+	auto& node = nodeIntrospection[nodeId];
+	node.state = NodeIntrospectionState::Active;
+	node.time = 0;
+}
+
+void ScriptState::onNodeEndedIntrospection(uint32_t nodeId)
+{
+	if (nodeId >= nodeIntrospection.size()) {
+		nodeIntrospection.resize(nodeId + 1);
+	}
+	auto& node = nodeIntrospection.at(nodeId);
+	node.state = NodeIntrospectionState::Visited;
+	node.time = 0;
+}
 
 ConfigNode ConfigNodeSerializer<ScriptState>::serialize(const ScriptState& state, const ConfigNodeSerializationContext& context)
 {

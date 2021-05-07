@@ -34,7 +34,7 @@ namespace Halley {
 		ScriptRenderer(Resources& resources, World& world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom);
 		
 		void setGraph(const ScriptGraph* graph);
-		void setState(const ScriptState* scriptState);
+		void setState(ScriptState* scriptState);
 		void draw(Painter& painter, Vector2f basePos, float curZoom);
 		
 		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos, bool pinPriority) const;
@@ -42,10 +42,16 @@ namespace Halley {
 		void setCurrentPath(std::optional<ConnectionPath> path);
 
 	private:
-		enum class NodeDrawMode : uint8_t {
+		enum class NodeDrawModeType : uint8_t {
 			Normal,
 			Highlight,
-			Dimmed
+			Visited,
+			Active
+		};
+
+		struct NodeDrawMode {
+			NodeDrawModeType type = NodeDrawModeType::Normal;
+			float param = 0;
 		};
 		
 		Resources& resources;
@@ -54,7 +60,7 @@ namespace Halley {
 		float nativeZoom = 1.0f;
 		
 		const ScriptGraph* graph = nullptr;
-		const ScriptState* state = nullptr;
+		ScriptState* state = nullptr;
 
 		Sprite nodeBg;
 		Sprite pinSprite;

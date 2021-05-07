@@ -11,7 +11,7 @@ namespace Halley {
 
     	virtual void update(Time time, const ScriptGraph& graph, ScriptState& graphState);
 
-    	EntityRef getEntity(EntityId entityId);
+    	EntityRef tryGetEntity(EntityId entityId);
     	const ScriptGraph* getCurrentGraph() const;
 
     protected:
