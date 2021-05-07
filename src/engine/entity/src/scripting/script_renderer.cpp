@@ -157,7 +157,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 {
 	const Vector2f border = Vector2f(18, 18);
 	const Vector2f nodeSize = getNodeSize(curZoom);
-	const auto pos = basePos + node.getPosition();
+	const auto pos = ((basePos + node.getPosition()) * curZoom).round() / curZoom;
 
 	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
 	if (!nodeType) {
@@ -192,14 +192,21 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 		
 		// Node body
 		const bool variable = nodeType->getClassification() == ScriptNodeClassification::Variable;
-		const auto& img = variable ? variableBg : nodeBg;
-		img.clone()
-			.setColour(col)
-			.setPosition(pos)
-			.scaleTo(nodeSize + border)
-			.setSize(img.getSize() / curZoom)
-			.setSliceScale(1.0f / curZoom)
-			.draw(painter);
+		if (variable) {
+			variableBg.clone()
+				.setColour(col)
+				.setPosition(pos)
+				.setScale(1.0f / curZoom)
+				.draw(painter);
+		} else {
+			nodeBg.clone()
+				.setColour(col)
+				.setPosition(pos)
+				.scaleTo(nodeSize + border)
+				.setSize(nodeBg.getSize() / curZoom)
+				.setSliceScale(1.0f / curZoom)
+				.draw(painter);
+		}
 
 		getIcon(*nodeType, node).clone()
 			.setPosition(pos)
