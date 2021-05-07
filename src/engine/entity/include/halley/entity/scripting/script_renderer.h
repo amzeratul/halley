@@ -51,7 +51,8 @@ namespace Halley {
 
 		struct NodeDrawMode {
 			NodeDrawModeType type = NodeDrawModeType::Normal;
-			float param = 0;
+			float time = 0;
+			float activationTime = 0;
 		};
 		
 		Resources& resources;

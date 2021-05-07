@@ -61,11 +61,12 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 			const auto nodeIntrospection = state->getNodeIntrospection(i);
 			if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Active) {
 				drawMode.type = NodeDrawModeType::Active;
-				drawMode.param = nodeIntrospection.time;
+				drawMode.time = nodeIntrospection.time;
 			} else if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Visited) {
 				drawMode.type = NodeDrawModeType::Visited;
-				drawMode.param = nodeIntrospection.time;
+				drawMode.time = nodeIntrospection.time;
 			}
+			drawMode.activationTime = nodeIntrospection.activationTime;
 		} else {
 			// Rendering in editor
 			if (highlightThis && highlightNode->element.type == ScriptNodeElementType::Node) {
@@ -163,6 +164,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 	{
 		const auto baseCol = getNodeColour(*nodeType);
 		Colour4f col = baseCol;
+		Colour4f iconCol = Colour4f(1, 1, 1);
 		
 		switch (drawMode.type) {
 		case NodeDrawModeType::Highlight:
@@ -170,16 +172,19 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 			break;
 		case NodeDrawModeType::Active:
 			{
-				const float phase = drawMode.param * 2.0f * pif();
+				const float phase = drawMode.time * 2.0f * pif();
 				col = col.inverseMultiplyLuma(sinRange(phase, 0.3f, 1.0f));
 				break;
 			}
 		case NodeDrawModeType::Visited:
-			{
-				const float t = drawMode.param * 4;
-				col = t < 1 ? col.inverseMultiplyLuma(lerp(0.0f, 1.0f, t)) : col.multiplyLuma(lerp(1.0f, 1.0f, clamp((t - 1.0f) / 3.0f, 0.0f, 1.0f)));
-				break;
-			}
+			col = col.multiplyLuma(0.3f);
+			iconCol = Colour4f(0.5f, 0.5f, 0.5f);
+			break;
+		}
+
+		if (drawMode.activationTime > 0.0f) {
+			const float t = drawMode.activationTime;
+			col = lerp(col, Colour4f(1, 1, 1), t * t);
 		}
 		
 		// Node body
@@ -195,6 +200,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 		getIcon(*nodeType, node).clone()
 			.setPosition(pos)
 			.setScale(1.0f / curZoom)
+			.setColour(iconCol)
 			.draw(painter);
 	}
 

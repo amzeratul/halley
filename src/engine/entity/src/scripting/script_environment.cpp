@@ -96,8 +96,7 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 				break;
 			} else if (result.state == ScriptNodeExecutionState::Restart) {
 				// Restart script
-				threads.clear();
-				graphState.start(graph.getStartNode(), graph.getHash());
+				graphState.reset();
 				break;
 			}
 		}

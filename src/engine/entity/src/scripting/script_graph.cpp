@@ -219,7 +219,7 @@ void ScriptGraph::assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection
 {
 	if (lastAssignTypeHash != hash) {
 		lastAssignTypeHash = hash;
-		for (auto& node: nodes) {
+		for (const auto& node: nodes) {
 			node.assignType(nodeTypeCollection);
 		}
 	}

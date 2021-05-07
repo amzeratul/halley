@@ -47,6 +47,7 @@ namespace Halley {
     	
     	struct NodeIntrospection {
     		float time = 0;
+    		float activationTime = 0;
     		NodeIntrospectionState state;
     	};
 
@@ -55,6 +56,7 @@ namespace Halley {
 
     	bool hasStarted() const { return started; }
     	void start(OptionalLite<uint32_t> startNode, uint64_t graphHash);
+		void reset();
     	
     	std::vector<ScriptStateThread>& getThreads() { return threads; }
 
@@ -79,7 +81,7 @@ namespace Halley {
         }
     	NodeIntrospection getNodeIntrospection(uint32_t nodeId) const;
 
-    private:
+	private:
     	std::vector<ScriptStateThread> threads;
     	uint64_t graphHash = 0;
     	bool started = false;

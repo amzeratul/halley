@@ -80,6 +80,17 @@ void ScriptState::start(OptionalLite<uint32_t> startNode, uint64_t hash)
 	started = true;
 }
 
+void ScriptState::reset()
+{
+	threads.clear();
+	started = false;
+	graphHash = 0;
+	for (auto& n: nodeIntrospection) {
+		n.state = NodeIntrospectionState::Unvisited;
+		n.time = 0;
+	}
+}
+
 void ScriptState::setIntrospection(bool enabled)
 {
 	introspection = enabled;
@@ -90,8 +101,10 @@ void ScriptState::setIntrospection(bool enabled)
 
 void ScriptState::updateIntrospection(Time t)
 {
+	const auto time = static_cast<float>(t);
 	for (auto& n: nodeIntrospection) {
-		n.time += static_cast<float>(t);
+		n.time += time;
+		n.activationTime = std::max(0.0f, n.activationTime - time);
 	}
 }
 
@@ -108,6 +121,7 @@ void ScriptState::onNodeStartedIntrospection(uint32_t nodeId)
 	auto& node = nodeIntrospection[nodeId];
 	node.state = NodeIntrospectionState::Active;
 	node.time = 0;
+	node.activationTime = 1.0f;
 }
 
 void ScriptState::onNodeEndedIntrospection(uint32_t nodeId)
