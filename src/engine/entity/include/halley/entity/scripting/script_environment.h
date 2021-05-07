@@ -13,13 +13,15 @@ namespace Halley {
 
     	EntityRef tryGetEntity(EntityId entityId);
     	const ScriptGraph* getCurrentGraph() const;
+        size_t& getNodeCounter(uint32_t nodeId);
 
     protected:
 		const HalleyAPI& api;
     	World& world;
     	Resources& resources;
     	const ScriptNodeTypeCollection& nodeTypeCollection;
-    	const ScriptGraph* currentGraph;
+    	const ScriptGraph* currentGraph = nullptr;
+    	ScriptState* currentState = nullptr;
 
     private:
         std::unique_ptr<IScriptStateData> makeNodeData(const IScriptNodeType& nodeType, const ScriptGraphNode& node);

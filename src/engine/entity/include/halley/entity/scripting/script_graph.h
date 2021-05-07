@@ -63,11 +63,15 @@ namespace Halley {
 		void assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		const IScriptNodeType& getNodeType() const;
 
+		uint32_t getId() const { return id; }
+		void setId(uint32_t i) { id = i; }
+
 	private:
 		Vector2f position;
 		String type;
 		ConfigNode settings;
 		std::vector<Pin> pins;
+		uint32_t id = 0;
 		mutable const IScriptNodeType* nodeType = nullptr;
 	};
 	
@@ -98,7 +102,7 @@ namespace Halley {
 
 		mutable uint64_t lastAssignTypeHash = 1;
 
-		void computeHash();
+		void finishGraph();
 	};
 
 	template<>

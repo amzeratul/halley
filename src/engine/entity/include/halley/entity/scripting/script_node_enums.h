@@ -7,7 +7,8 @@ namespace Halley {
 		Done,
 		Executing,
 		Restart,
-		Terminate
+		Terminate,
+    	Merged
 	};
 
 	enum class ScriptNodeClassification {

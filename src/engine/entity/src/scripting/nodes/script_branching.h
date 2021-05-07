@@ -25,10 +25,10 @@ namespace Halley {
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
 	};
 
-	class ScriptMergeOne final : public ScriptNodeTypeBase<void> {
+	class ScriptMergeAny final : public ScriptNodeTypeBase<void> {
 	public:
-		String getId() const override { return "mergeOne"; }
-		String getName() const override { return "Merge One"; }
+		String getId() const override { return "mergeAny"; }
+		String getName() const override { return "Merge Any"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/merge_one.png"; }
 		gsl::span<const PinType> getPinConfiguration() const override;
 		std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const override;

@@ -81,11 +81,14 @@ namespace Halley {
         }
     	NodeIntrospection getNodeIntrospection(uint32_t nodeId) const;
 
+    	size_t& getNodeCounter(uint32_t node);
+
 	private:
     	std::vector<ScriptStateThread> threads;
     	uint64_t graphHash = 0;
     	bool started = false;
     	bool introspection = false;
+    	std::map<uint32_t, size_t> nodeCounters;
 
     	std::vector<NodeIntrospection> nodeIntrospection;
 

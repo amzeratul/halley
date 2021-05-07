@@ -41,7 +41,6 @@ void ScriptStateThread::finishNode()
 
 void ScriptStateThread::advanceToNode(OptionalLite<uint32_t> node)
 {
-	Expects(!nodeStarted);
 	curNode = node;
 }
 
@@ -73,6 +72,7 @@ bool ScriptState::hasThreadAt(uint32_t node) const
 void ScriptState::start(OptionalLite<uint32_t> startNode, uint64_t hash)
 {
 	threads.clear();
+	nodeCounters.clear();
 	if (startNode) {
 		threads.emplace_back(startNode.value());
 	}
@@ -83,6 +83,7 @@ void ScriptState::start(OptionalLite<uint32_t> startNode, uint64_t hash)
 void ScriptState::reset()
 {
 	threads.clear();
+	nodeCounters.clear();
 	started = false;
 	graphHash = 0;
 	for (auto& n: nodeIntrospection) {
@@ -111,6 +112,11 @@ void ScriptState::updateIntrospection(Time t)
 ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(uint32_t nodeId) const
 {
 	return nodeId < nodeIntrospection.size() ? nodeIntrospection[nodeId] : NodeIntrospection();
+}
+
+size_t& ScriptState::getNodeCounter(uint32_t node)
+{
+	return nodeCounters[node];
 }
 
 void ScriptState::onNodeStartedIntrospection(uint32_t nodeId)

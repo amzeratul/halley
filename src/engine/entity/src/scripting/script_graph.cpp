@@ -115,7 +115,7 @@ const IScriptNodeType& ScriptGraphNode::getNodeType() const
 ScriptGraph::ScriptGraph()
 {
 	makeBaseGraph();
-	computeHash();
+	finishGraph();
 }
 
 ScriptGraph::ScriptGraph(const ConfigNode& node, const ConfigNodeSerializationContext& context)
@@ -124,7 +124,7 @@ ScriptGraph::ScriptGraph(const ConfigNode& node, const ConfigNodeSerializationCo
 	if (nodes.empty()) {
 		makeBaseGraph();
 	}
-	computeHash();
+	finishGraph();
 }
 
 ConfigNode ScriptGraph::toConfigNode(const ConfigNodeSerializationContext& context) const
@@ -225,10 +225,12 @@ void ScriptGraph::assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection
 	}
 }
 
-void ScriptGraph::computeHash()
+void ScriptGraph::finishGraph()
 {
 	Hash::Hasher hasher;
+	uint32_t i = 0;
 	for (auto& node: nodes) {
+		node.setId(i++);
 		node.feedToHash(hasher);
 	}
 	hash = hasher.digest();

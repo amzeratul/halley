@@ -64,7 +64,7 @@ IScriptNodeType::Result ScriptFork::doUpdate(ScriptEnvironment& environment, Tim
 
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptMergeOne::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptMergeAny::getPinConfiguration() const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -72,7 +72,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptMergeOne::getPinConfiguration() 
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptMergeOne::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, std::vector<ColourOverride>> ScriptMergeAny::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	ColourStringBuilder str;
 	str.append("Proceeds with execution when the ");
@@ -81,7 +81,7 @@ std::pair<String, std::vector<ColourOverride>> ScriptMergeOne::getNodeDescriptio
 	return str.moveResults();
 }
 
-IScriptNodeType::Result ScriptMergeOne::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+IScriptNodeType::Result ScriptMergeAny::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	return Result(ScriptNodeExecutionState::Done);
 }
@@ -107,5 +107,21 @@ std::pair<String, std::vector<ColourOverride>> ScriptMergeAll::getNodeDescriptio
 
 IScriptNodeType::Result ScriptMergeAll::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	return Result(ScriptNodeExecutionState::Done);
+	auto& counter = environment.getNodeCounter(node.getId());
+
+	size_t expected = 0;
+	const auto& pinConfigs = getPinConfiguration();
+	const auto& pins = node.getPins();
+	for (size_t i = 0; i < pins.size(); ++i) {
+		if (pinConfigs[i].type == ScriptNodeElementType::FlowPin && pinConfigs[i].direction == ScriptNodePinDirection::Input && pins[i].dstNode) {
+			++expected;
+		}
+	}
+
+	if (++counter == expected) {
+		counter = 0;
+		return Result(ScriptNodeExecutionState::Done);
+	} else {
+		return Result(ScriptNodeExecutionState::Merged);
+	}
 }

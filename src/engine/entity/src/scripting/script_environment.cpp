@@ -18,6 +18,7 @@ ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resourc
 void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState& graphState)
 {
 	currentGraph = &graph;
+	currentState = &graphState;
 	graph.assignTypes(nodeTypeCollection);
 	
 	if (!graphState.hasStarted() || graphState.getGraphHash() != graph.getHash()) {
@@ -58,34 +59,13 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 				thread.finishNode();
 				graphState.onNodeEnded(nodeId);
 
-				size_t nOutputsFound = 0;
-				size_t curOutputPin = 0;
-				const auto& pinConfig = nodeType.getPinConfiguration();
-				for (size_t j = 0; j < pinConfig.size(); ++j) {
-					if (pinConfig[j].type == ScriptNodeElementType::FlowPin && pinConfig[j].direction == ScriptNodePinDirection::Output) {
-						const bool outputActive = (result.outputsActive & (1 << curOutputPin)) != 0;
-						if (outputActive) {
-							const auto& output = node.getPin(j);
-							if (output.dstNode) {
-								if (nOutputsFound == 0) {
-									// Direct sequel
-									thread.advanceToNode(output.dstNode.value());
-								} else {
-									// Spawn as new thread
-									auto& newThread = threads.emplace_back(output.dstNode.value());
-									newThread.getTimeSlice() = timeLeft;
-								}
-
-								++nOutputsFound;
-							}
-						}
-
-						++curOutputPin;
+				auto outputNodes = nodeType.getOutputNodes(node, result.outputsActive);
+				thread.advanceToNode(outputNodes[0]);
+				for (size_t j = 1; j < outputNodes.size(); ++j) {
+					if (outputNodes[j]) {
+						auto& newThread = threads.emplace_back(outputNodes[j].value());
+						newThread.getTimeSlice() = timeLeft;
 					}
-				}
-				if (nOutputsFound == 0) {
-					// Nothing follows this, terminate thread
-					thread.advanceToNode({});
 				}
 			} else if (result.state == ScriptNodeExecutionState::Executing) {
 				// Still running this node, suspend
@@ -98,6 +78,10 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 				// Restart script
 				graphState.reset();
 				break;
+			} else if (result.state == ScriptNodeExecutionState::Merged) {
+				// Merged thread
+				thread.advanceToNode({});
+				break;
 			}
 		}
 	}
@@ -105,8 +89,10 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 	// Remove stopped threads
 	threads.erase(std::remove_if(threads.begin(), threads.end(), [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); }), threads.end());
 
-	currentGraph = nullptr;
 	graphState.updateIntrospection(time);
+
+	currentGraph = nullptr;
+	currentState = nullptr;
 }
 
 EntityRef ScriptEnvironment::tryGetEntity(EntityId entityId)
@@ -117,6 +103,11 @@ EntityRef ScriptEnvironment::tryGetEntity(EntityId entityId)
 const ScriptGraph* ScriptEnvironment::getCurrentGraph() const
 {
 	return currentGraph;
+}
+
+size_t& ScriptEnvironment::getNodeCounter(uint32_t nodeId)
+{
+	return currentState->getNodeCounter(nodeId);
 }
 
 std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const IScriptNodeType& nodeType, const ScriptGraphNode& node)

@@ -114,6 +114,32 @@ String IScriptNodeType::getConnectedNodeName(const ScriptGraphNode& node, const 
 	return otherNode.getNodeType().getName();
 }
 
+std::array<OptionalLite<uint32_t>, 4> IScriptNodeType::getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const
+{
+	std::array<OptionalLite<uint32_t>, 4> result;
+	result.fill({});
+	
+	const auto& pinConfig = getPinConfiguration();
+
+	size_t curOutputPin = 0;
+	size_t nOutputsFound = 0;
+	for (size_t i = 0; i < pinConfig.size(); ++i) {
+		if (pinConfig[i].type == ScriptNodeElementType::FlowPin && pinConfig[i].direction == ScriptNodePinDirection::Output) {
+			const bool outputActive = (outputActiveMask & (1 << curOutputPin)) != 0;
+			if (outputActive) {
+				const auto& output = node.getPin(i);
+				if (output.dstNode) {
+					result[nOutputsFound++] = output.dstNode;
+				}
+			}
+
+			++curOutputPin;
+		}
+	}
+
+	return result;
+}
+
 ScriptNodeTypeCollection::ScriptNodeTypeCollection()
 {
 	addBasicScriptNodes();
@@ -168,6 +194,6 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptPlayAnimation>());
 	addScriptNode(std::make_unique<ScriptBranch>());
 	addScriptNode(std::make_unique<ScriptFork>());
-	addScriptNode(std::make_unique<ScriptMergeOne>());
+	addScriptNode(std::make_unique<ScriptMergeAny>());
 	addScriptNode(std::make_unique<ScriptMergeAll>());
 }
