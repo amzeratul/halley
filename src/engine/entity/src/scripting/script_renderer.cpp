@@ -19,6 +19,7 @@ ScriptRenderer::ScriptRenderer(Resources& resources, World& world, const ScriptN
 	, nativeZoom(nativeZoom)
 {
 	nodeBg = Sprite().setImage(resources, "halley_ui/ui_float_solid_window.png").setPivot(Vector2f(0.5f, 0.5f));
+	variableBg = Sprite().setImage(resources, "halley_ui/script_variable.png").setPivot(Vector2f(0.5f, 0.5f));
 	pinSprite = Sprite().setImage(resources, "halley_ui/ui_render_graph_node_pin.png").setPivot(Vector2f(0.5f, 0.5f));
 }
 
@@ -190,13 +191,14 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 		}
 		
 		// Node body
-		nodeBg.clone()
+		const bool variable = nodeType->getClassification() == ScriptNodeClassification::Variable;
+		const auto& img = variable ? variableBg : nodeBg;
+		img.clone()
 			.setColour(col)
 			.setPosition(pos)
 			.scaleTo(nodeSize + border)
-			.setSize(nodeBg.getSize() / curZoom)
+			.setSize(img.getSize() / curZoom)
 			.setSliceScale(1.0f / curZoom)
-			//.setTexRect(nodeBg.getTexRect() / curZoom)
 			.draw(painter);
 
 		getIcon(*nodeType, node).clone()

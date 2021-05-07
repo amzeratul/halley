@@ -64,6 +64,7 @@ namespace Halley {
 		ScriptState* state = nullptr;
 
 		Sprite nodeBg;
+		Sprite variableBg;
 		Sprite pinSprite;
 		std::map<String, Sprite> icons;
 
