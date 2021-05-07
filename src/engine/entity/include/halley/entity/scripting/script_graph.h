@@ -56,7 +56,6 @@ namespace Halley {
 		void feedToHash(Hash::Hasher& hasher);
 
 		void onNodeRemoved(uint32_t nodeId);
-		bool disconnectPinsTo(uint32_t nodeId, OptionalLite<uint8_t> pinId);
 
 		String getTargetName(const World& world, uint8_t idx) const;
 

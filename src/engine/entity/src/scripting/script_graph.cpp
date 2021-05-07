@@ -67,25 +67,16 @@ void ScriptGraphNode::feedToHash(Hash::Hasher& hasher)
 
 void ScriptGraphNode::onNodeRemoved(uint32_t nodeId)
 {
-	disconnectPinsTo(nodeId, {});
-	
 	for (auto& o: pins) {
-		if (o.dstNode && o.dstNode.value() >= nodeId) {
-			--o.dstNode.value();
+		if (o.dstNode) {
+			if (o.dstNode.value() == nodeId) {
+				o.dstNode = OptionalLite<uint32_t>();
+				o.dstPin = 0;
+			} else if (o.dstNode.value() >= nodeId) {
+				--o.dstNode.value();
+			}
 		}
 	}
-}
-
-bool ScriptGraphNode::disconnectPinsTo(uint32_t nodeId, OptionalLite<uint8_t> pinId)
-{
-	const size_t startN = pins.size();
-	
-	pins.erase(std::remove_if(pins.begin(), pins.end(), [&] (const Pin& o)
-	{
-		return o.dstNode == nodeId && (!pinId || pinId == o.dstPin);
-	}), pins.end());
-	
-	return startN != pins.size();
 }
 
 String ScriptGraphNode::getTargetName(const World& world, uint8_t idx) const
