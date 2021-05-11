@@ -210,22 +210,23 @@ void EntityFactoryContext::notifyEntity(const EntityRef& entity) const
 
 EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent, EntityScene* scene)
 {
-	const auto context = makeContext(data, {}, scene, false);
+	const auto mask = makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData);
+	const auto context = makeContext(data, {}, scene, false, mask);
 	const auto entity = getEntity(data.getInstanceUUID(), *context, false);
 	updateEntityNode(context->getRootEntityData(), entity, parent, context);
 	return entity;
 }
 
-void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, EntityScene* scene)
+void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene)
 {
-	const auto context = makeContext(data, entity, scene, true);
+	Expects(entity.isValid());
+	const auto context = makeContext(data, entity, scene, true, serializationMask);
 	updateEntityNode(context->getRootEntityData(), entity, {}, context);
 }
 
-std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext)
+std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask)
 {
-	const auto mask = makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData);
-	auto context = std::make_shared<EntityFactoryContext>(world, resources, mask, updateContext, getPrefab(existing, data), &data, scene);
+	auto context = std::make_shared<EntityFactoryContext>(world, resources, serializationMask, updateContext, getPrefab(existing, data), &data, scene);
 
 	if (existing) {
 		context->notifyEntity(existing.value());
@@ -335,7 +336,7 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& dat
 	// Update children
 	for (const auto& child: data.getChildren()) {
 		if (context->needsNewContextFor(child)) {
-			const auto newContext = makeContext(child, entity, context->getScene(), context->isUpdateContext());
+			const auto newContext = makeContext(child, entity, context->getScene(), context->isUpdateContext(), context->getConfigNodeContext().entitySerializationTypeMask);
 			updateEntityNode(newContext->getRootEntityData(), getEntity(child.getInstanceUUID(), *newContext, false), entity, newContext);
 		} else {
 			updateEntityNode(child, getEntity(child.getInstanceUUID(), *context, false), entity, context);

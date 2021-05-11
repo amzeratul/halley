@@ -472,8 +472,9 @@ namespace Halley {
 		static void deserialize(T& value, const T& defaultValue, const ConfigNodeSerializationContext& context, const ConfigNode& node, const String& name, int serializationMask)
 		{
 			if (context.matchType(serializationMask) && node.getType() != ConfigNodeType::Noop) {
+				const bool delta = node.getType() == ConfigNodeType::DeltaMap;
 				const auto& fieldNode = node[name];
-				if (fieldNode.getType() != ConfigNodeType::Noop) {
+				if (fieldNode.getType() != ConfigNodeType::Noop && (fieldNode.getType() != ConfigNodeType::Undefined || !delta)) {
 					ConfigNodeHelper<T>::deserialize(value, defaultValue, context, node[name]);
 				}
 			}

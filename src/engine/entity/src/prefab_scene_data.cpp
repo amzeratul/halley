@@ -52,7 +52,7 @@ void PrefabSceneData::reloadEntity(const String& id, EntityData* data)
 	if (entity) {
 		if (data) {
 			// Update
-			factory->updateEntity(*entity, *data);
+			factory->updateEntity(*entity, *data, static_cast<int>(EntitySerialization::Type::Prefab));
 		} else {
 			// Destroy
 			world.destroyEntity(entity.value());

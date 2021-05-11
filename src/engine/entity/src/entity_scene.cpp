@@ -106,7 +106,7 @@ void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, EntityS
 		auto deltaIter = modified.find(uuid);
 		if (deltaIter != modified.end()) {
 			// A simple delta is available for this entity, apply that
-			factory.updateEntity(entity, deltaIter->second);
+			factory.updateEntity(entity, deltaIter->second, static_cast<int>(EntitySerialization::Type::Prefab));
 		} else if (removed.find(uuid) != removed.end()) {
 			// Remove
 			factory.getWorld().destroyEntity(entity);
