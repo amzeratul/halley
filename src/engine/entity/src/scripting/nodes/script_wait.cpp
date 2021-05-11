@@ -1,9 +1,20 @@
 #include "script_wait.h"
 using namespace Halley;
 
-void ScriptWait::doInitData(ScriptWaitData& data, const ScriptGraphNode& node) const
+void ScriptWait::doInitData(ScriptWaitData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const
 {
-	data.timeLeft = static_cast<Time>(node.getSettings()["time"].asFloat(0.0f));
+	if (nodeData.getType() == ConfigNodeType::Undefined) {
+		data.timeLeft = node.getSettings()["time"].asFloat(0.0f);
+	} else {
+		data.timeLeft = nodeData["time"].asFloat(0);
+	}
+}
+
+ConfigNode ScriptWaitData::toConfigNode(const ConfigNodeSerializationContext& context)
+{
+	ConfigNode::MapType node;
+	node["time"] = timeLeft;
+	return node;
 }
 
 gsl::span<const IScriptNodeType::PinType> ScriptWait::getPinConfiguration() const
@@ -31,8 +42,9 @@ std::pair<String, std::vector<ColourOverride>> ScriptWait::getNodeDescription(co
 
 IScriptNodeType::Result ScriptWait::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptWaitData& curData) const
 {
-	const bool done = time >= curData.timeLeft;
-	const Time elapsed = done ? curData.timeLeft : time;
+	const float t = static_cast<float>(time);
+	const bool done = t >= curData.timeLeft;
+	const float elapsed = done ? curData.timeLeft : t;
 	curData.timeLeft -= elapsed;
 	return Result(done ? ScriptNodeExecutionState::Done : ScriptNodeExecutionState::Executing, elapsed);
 }

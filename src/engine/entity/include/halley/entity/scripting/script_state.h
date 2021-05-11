@@ -8,11 +8,14 @@ namespace Halley {
 	class IScriptStateData {
 	public:
 		virtual ~IScriptStateData() = default;
+
+		virtual ConfigNode toConfigNode(const ConfigNodeSerializationContext& context) = 0;
 	};
 
 	class ScriptStateThread {
 	public:
 		ScriptStateThread();
+		ScriptStateThread(const ConfigNode& node, const ConfigNodeSerializationContext& context);
 		explicit ScriptStateThread(uint32_t startNode);
 
 		ScriptStateThread(const ScriptStateThread& other);
@@ -28,13 +31,19 @@ namespace Halley {
 		void finishNode();
 		void advanceToNode(OptionalLite<uint32_t> node);
 
-		Time& getTimeSlice() { return timeSlice; }
+		float& getTimeSlice() { return timeSlice; }
+
+		ConfigNode toConfigNode(const ConfigNodeSerializationContext& context) const;
+
+		bool hasPendingNodeData() const;
+		ConfigNode getPendingNodeData();
 
 	private:
 		OptionalLite<uint32_t> curNode;
 		bool nodeStarted = false;
 		std::unique_ptr<IScriptStateData> curData;
-		Time timeSlice;
+		float timeSlice;
+		ConfigNode pendingData;
 	};
 
     class ScriptState {
@@ -52,7 +61,7 @@ namespace Halley {
     	};
 
     	ScriptState();
-		ScriptState(const ConfigNode& node);
+		ScriptState(const ConfigNode& node, const ConfigNodeSerializationContext& context);
 
     	bool hasStarted() const { return started; }
     	void start(OptionalLite<uint32_t> startNode, uint64_t graphHash);
@@ -60,7 +69,7 @@ namespace Halley {
     	
     	std::vector<ScriptStateThread>& getThreads() { return threads; }
 
-		ConfigNode toConfigNode() const;
+		ConfigNode toConfigNode(const ConfigNodeSerializationContext& context) const;
         uint64_t getGraphHash() const { return graphHash; }
 
     	bool hasThreadAt(uint32_t node) const;
@@ -101,6 +110,13 @@ namespace Halley {
 	public:
 		ConfigNode serialize(const ScriptState& state, const ConfigNodeSerializationContext& context);
 		ScriptState deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node);
+	};
+	
+	template<>
+	class ConfigNodeSerializer<ScriptStateThread> {
+	public:
+		ConfigNode serialize(const ScriptStateThread& thread, const ConfigNodeSerializationContext& context);
+		ScriptStateThread deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node);
 	};
 
 }

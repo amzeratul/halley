@@ -28,12 +28,12 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 	// Allocate time for each thread
 	auto& threads = graphState.getThreads();
 	for (auto& thread: threads) {
-		thread.getTimeSlice() = time;
+		thread.getTimeSlice() = static_cast<float>(time);
 	}
 	
 	for (size_t i = 0; i < threads.size(); ++i) {
 		auto& thread = threads[i];
-		Time& timeLeft = thread.getTimeSlice();
+		float& timeLeft = thread.getTimeSlice();
 		bool suspended = false;
 
 		while (!suspended && timeLeft > 0 && thread.getCurNode()) {
@@ -44,7 +44,7 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 			
 			// Start node if not done yet
 			if (!thread.isNodeStarted()) {
-				thread.startNode(makeNodeData(nodeType, node));
+				thread.startNode(makeNodeData(nodeType, node, thread.getPendingNodeData()));
 				graphState.onNodeStarted(nodeId);
 			}
 
@@ -107,11 +107,11 @@ size_t& ScriptEnvironment::getNodeCounter(uint32_t nodeId)
 	return currentState->getNodeCounter(nodeId);
 }
 
-std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const IScriptNodeType& nodeType, const ScriptGraphNode& node)
+std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const IScriptNodeType& nodeType, const ScriptGraphNode& node, const ConfigNode& nodeData)
 {
 	auto result = nodeType.makeData();
 	if (result) {
-		nodeType.initData(*result, node);
+		nodeType.initData(*result, node, nodeData);
 	}
 	return result;
 }

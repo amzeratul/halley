@@ -4,7 +4,9 @@
 namespace Halley {
 	class ScriptWaitData : public IScriptStateData {
 	public:
-		Time timeLeft = 0;
+		float timeLeft = 0;
+
+		ConfigNode toConfigNode(const ConfigNodeSerializationContext& context) override;
 	};
 	
 	class ScriptWait final : public ScriptNodeTypeBase<ScriptWaitData> {
@@ -17,6 +19,6 @@ namespace Halley {
 		std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptWaitData& curData) const override;
-		void doInitData(ScriptWaitData& data, const ScriptGraphNode& node) const override;
+		void doInitData(ScriptWaitData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const override;
 	};
 }

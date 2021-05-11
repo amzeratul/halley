@@ -52,7 +52,7 @@ namespace Halley {
         virtual bool canDelete() const { return true; }
 		
 		virtual std::unique_ptr<IScriptStateData> makeData() const { return {}; }
-        virtual void initData(IScriptStateData& data, const ScriptGraphNode& node) const {}
+        virtual void initData(IScriptStateData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const {}
 
 		virtual Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData* curData) const = 0;
 		virtual ConfigNode getData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const = 0;
@@ -71,12 +71,12 @@ namespace Halley {
 		static_assert(std::is_base_of_v<ScriptEnvironment, EnvironmentType>);
 		
 		virtual Result doUpdate(EnvironmentType& environment, Time time, const ScriptGraphNode& node, DataType& curData) const = 0;
-		virtual void doInitData(DataType& data, const ScriptGraphNode& node) const = 0;
+		virtual void doInitData(DataType& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const = 0;
 		virtual ConfigNode doGetData(EnvironmentType& environment, const ScriptGraphNode& node, size_t pinN) const { return ConfigNode(); }
 		virtual void doSetData(EnvironmentType& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const {}
 		
 		std::unique_ptr<IScriptStateData> makeData() const override { return std::make_unique<DataType>(); }
-		virtual void initData(IScriptStateData& data, const ScriptGraphNode& node) const { doInitData(dynamic_cast<DataType&>(data), node); }
+		virtual void initData(IScriptStateData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const { doInitData(dynamic_cast<DataType&>(data), node, nodeData); }
 
 		Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData* curData) const final override { return doUpdate(dynamic_cast<EnvironmentType&>(environment), time, node, *dynamic_cast<DataType*>(curData)); }
 		ConfigNode getData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const final override { return doGetData(dynamic_cast<EnvironmentType&>(environment), node, pinN); }
