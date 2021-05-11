@@ -87,6 +87,7 @@ ScriptState::ScriptState(const ConfigNode& node, const ConfigNodeSerializationCo
 {
 	started = node["started"].asBool(false);
 	threads = ConfigNodeSerializer<decltype(threads)>().deserialize(context, node["threads"]);
+	graphHash = Deserializer::fromBytes<decltype(graphHash)>(node["graphHash"].asBytes());
 }
 
 ConfigNode ScriptState::toConfigNode(const ConfigNodeSerializationContext& context) const
@@ -96,6 +97,7 @@ ConfigNode ScriptState::toConfigNode(const ConfigNodeSerializationContext& conte
 		node["started"] = started;
 	}
 	node["threads"] = ConfigNodeSerializer<decltype(threads)>().serialize(threads, context);
+	node["graphHash"] = Serializer::toBytes(graphHash);
 	return node;
 }
 
