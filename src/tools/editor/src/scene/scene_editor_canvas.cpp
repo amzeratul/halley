@@ -2,11 +2,8 @@
 
 
 #include "scene_editor_game_bridge.h"
-#include "halley/core/entry/entry_point.h"
-#include "halley/core/game/game.h"
 #include "halley/core/graphics/render_context.h"
 #include "halley/core/graphics/render_target/render_surface.h"
-#include "halley/core/graphics/render_target/render_target_texture.h"
 #include "halley/core/input/input_keyboard.h"
 #include "halley/core/input/input_keys.h"
 #include "scene_editor_gizmo_collection.h"
@@ -18,6 +15,7 @@ using namespace Halley;
 
 SceneEditorCanvas::SceneEditorCanvas(String id, UIFactory& factory, Resources& resources, const HalleyAPI& api, std::optional<UISizer> sizer)
 	: UIWidget(std::move(id), Vector2f(32, 32), std::move(sizer))
+	, factory(factory)
 	, resources(resources)
 {
 	border.setImage(resources, "whitebox.png").setColour(Colour4f());
@@ -35,6 +33,11 @@ SceneEditorCanvas::SceneEditorCanvas(String id, UIFactory& factory, Resources& r
 void SceneEditorCanvas::update(Time t, bool moved)
 {
 	updateInputState();
+
+	if (inputState.rightClickPressed) {
+		openRightClickMenu();
+	}
+	
 	if (gameBridge) {
 		outputState.clear();
 		gameBridge->update(t, inputState, outputState);
@@ -200,4 +203,38 @@ void SceneEditorCanvas::clearInputState()
 	inputState.middleClickReleased = false;
 	inputState.rightClickPressed = false;
 	inputState.rightClickReleased = false;
+}
+
+void SceneEditorCanvas::openRightClickMenu()
+{
+	if (gameBridge && gameBridge->getMousePos() && inputState.rawMousePos) {
+		const auto& mousePos = gameBridge->getMousePos().value();
+		const auto menuOptions = gameBridge->getRightClickMenu(mousePos);
+
+		if (menuOptions.empty()) {
+			return;
+		}
+		
+		std::vector<UIPopupMenuItem> menuItems;
+		for (const auto& option : menuOptions) {
+			if (option.first == "scene") {
+				menuItems.push_back(UIPopupMenuItem(
+					option.second + ":" + option.first,
+					LocalisedString::fromHardcodedString("Open Scene: " + option.second),
+					LocalisedString::fromHardcodedString("Opens the scene " + option.second + " in a new tab.")));
+			}
+		}
+
+		auto menu = std::make_shared<UIPopupMenu>("month_day_menu", factory.getStyle("popupMenu"), menuItems);
+		menu->setAnchor(UIAnchor(Vector2f(), Vector2f(), inputState.rawMousePos.value()));
+
+		menu->setHandle(UIEventType::PopupAccept, [this, menuOptions](const UIEvent& e) {
+			const auto& option = menuOptions.at(e.getIntData());
+			if (option.first == "scene") {
+				editorWindow->openAsset(AssetType::Scene, option.second);
+			}
+		});
+
+		getRoot()->addChild(menu);
+	}
 }

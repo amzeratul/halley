@@ -45,6 +45,8 @@ namespace Halley {
 
 		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes();
 
+		std::vector<std::pair<String, String>> getRightClickMenu(const Vector2f& mousePos) const;
+
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
 		void addTask(std::unique_ptr<Task> task) override;

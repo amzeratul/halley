@@ -247,6 +247,15 @@ std::shared_ptr<ScriptNodeTypeCollection> SceneEditorGameBridge::getScriptNodeTy
 	return {};
 }
 
+std::vector<std::pair<String, String>> SceneEditorGameBridge::getRightClickMenu(const Vector2f& mousePos) const
+{
+	if (interfaceReady) {
+		return interface->getRightClickMenu(mousePos);
+	}
+
+	return std::vector<std::pair<String, String>>();
+}
+
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {

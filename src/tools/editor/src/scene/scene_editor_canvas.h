@@ -32,6 +32,7 @@ namespace Halley {
 		void onMouseWheel(const UIEvent& event);
 
 	private:
+		UIFactory& factory;
 		Resources& resources;
 		SceneEditorWindow* editorWindow = nullptr;
 		SceneEditorGameBridge* gameBridge = nullptr;
@@ -53,5 +54,7 @@ namespace Halley {
 		void updateInputState();
 		void notifyOutputState();
 		void clearInputState();
+
+		void openRightClickMenu();
 	};
 }

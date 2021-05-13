@@ -910,3 +910,8 @@ void SceneEditorWindow::spawnUI(std::shared_ptr<UIWidget> ui)
 {
 	getRoot()->addChild(std::move(ui));
 }
+
+void SceneEditorWindow::openAsset(AssetType assetType, const String& assetId)
+{
+	projectWindow.openAsset(AssetType::Scene, assetId);
+}

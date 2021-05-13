@@ -117,6 +117,8 @@ namespace Halley {
     	virtual Vector2f getCameraPos() const = 0;
 
     	virtual std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() = 0;
+    	
+        virtual std::vector<std::pair<String, String>> getRightClickMenu(const Vector2f& mousePos) const = 0;
     };
 
 	class EntityTree {

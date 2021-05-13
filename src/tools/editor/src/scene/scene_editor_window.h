@@ -81,7 +81,9 @@ namespace Halley {
 
 		std::shared_ptr<EntityFactory> getEntityFactory() const override;
 		void spawnUI(std::shared_ptr<UIWidget> ui) override;
-	
+		
+		void openAsset(AssetType assetType, const String& assetId);
+
 	protected:
 		void update(Time t, bool moved) override;
 
