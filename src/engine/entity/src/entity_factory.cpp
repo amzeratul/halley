@@ -188,7 +188,8 @@ void EntityFactoryContext::setEntityData(const IEntityData& iData)
 {
 	if (prefab) {
 		if (iData.isDelta()) {
-			if (iData.asEntityDataDelta().getPrefab()) {
+			const auto& newPrefab = iData.asEntityDataDelta().getPrefab();
+			if (newPrefab && newPrefab != prefab->getAssetId()) {
 				Logger::logWarning("Changing prefab in EntityFactoryContext::setEntityData, this will probably not work correctly");
 			}
 			entityData = &iData;
