@@ -67,6 +67,8 @@ namespace Halley {
 		void refreshAssets() override;
 
 		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() override;
+
+		std::vector<std::pair<String, String>> getRightClickMenu(const Vector2f& mousePos) const override;
     
     protected:
     	Camera camera;

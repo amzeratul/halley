@@ -225,7 +225,7 @@ void SceneEditorCanvas::openRightClickMenu()
 			}
 		}
 
-		auto menu = std::make_shared<UIPopupMenu>("month_day_menu", factory.getStyle("popupMenu"), menuItems);
+		auto menu = std::make_shared<UIPopupMenu>("scene_editor_canvas_popup", factory.getStyle("popupMenu"), menuItems);
 		menu->setAnchor(UIAnchor(Vector2f(), Vector2f(), inputState.rawMousePos.value()));
 
 		menu->setHandle(UIEventType::PopupAccept, [this, menuOptions](const UIEvent& e) {

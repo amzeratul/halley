@@ -492,6 +492,11 @@ std::shared_ptr<ScriptNodeTypeCollection> SceneEditor::getScriptNodeTypes()
 	return std::make_shared<ScriptNodeTypeCollection>();
 }
 
+std::vector<std::pair<String, String>> SceneEditor::getRightClickMenu(const Vector2f& mousePos) const
+{
+	return {};
+}
+
 Vector2f SceneEditor::roundPosition(Vector2f pos) const
 {
 	return roundPosition(pos, camera.getZoom());
