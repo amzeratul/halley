@@ -8,6 +8,8 @@
 #include "entity_id.h"
 #include "type_deleter.h"
 #include <halley/data_structures/vector.h>
+
+#include "prefab.h"
 #include "halley/utils/type_traits.h"
 #include "halley/maths/uuid.h"
 
@@ -575,6 +577,11 @@ namespace Halley {
 		{
 			Expects(entity);
 			return entity->prefab;
+		}
+
+		std::optional<String> getPrefabAssetId() const
+		{
+			return entity && entity->prefab ? entity->prefab->getAssetId() : std::optional<String>{};
 		}
 
 		bool isEmpty() const
