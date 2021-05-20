@@ -143,6 +143,10 @@ entityIcons:
     image: entity_icons/science.png
     name: Science
     colour: $ui_text
+  - id: script
+    image: entity_icons/script.png
+    name: Script
+    colour: $ui_text
   - id: security
     image: entity_icons/security.png
     name: Security
