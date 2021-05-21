@@ -5,6 +5,7 @@
 #include "nodes/script_logic_gates.h"
 #include "nodes/script_music.h"
 #include "nodes/script_play_animation.h"
+#include "nodes/script_variables.h"
 #include "nodes/script_wait.h"
 #include "nodes/script_wait_for.h"
 using namespace Halley;
@@ -17,7 +18,7 @@ std::vector<IScriptNodeType::SettingType> IScriptNodeType::getSettingTypes() con
 std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node,	const World& world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const
 {
 	switch (elementType.type) {
-	case ScriptNodeElementType::DataPin:
+	case ScriptNodeElementType::ReadDataPin:
 	case ScriptNodeElementType::FlowPin:
 	case ScriptNodeElementType::TargetPin:
 		return getPinDescription(node, elementType, elementIdx);
@@ -40,7 +41,7 @@ std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getPinDescriptio
 		switch (type) {
 		case ScriptNodeElementType::FlowPin:
 			return "Flow";
-		case ScriptNodeElementType::DataPin:
+		case ScriptNodeElementType::ReadDataPin:
 			return "Data";
 		case ScriptNodeElementType::TargetPin:
 			return "Target";
@@ -204,4 +205,8 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptLogicGateNot>());
 	addScriptNode(std::make_unique<ScriptPlayMusic>());
 	addScriptNode(std::make_unique<ScriptStopMusic>());
+	addScriptNode(std::make_unique<ScriptVariable>());
+	addScriptNode(std::make_unique<ScriptLiteral>());
+	addScriptNode(std::make_unique<ScriptComparison>());
+	addScriptNode(std::make_unique<ScriptSetVariable>());
 }

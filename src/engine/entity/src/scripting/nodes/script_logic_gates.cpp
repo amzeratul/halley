@@ -6,7 +6,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateAnd::getPinConfiguratio
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::DataPin, PD::Input }, PinType{ ET::DataPin, PD::Input }, PinType{ ET::DataPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
 
@@ -30,7 +30,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateOr::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::DataPin, PD::Input }, PinType{ ET::DataPin, PD::Input }, PinType{ ET::DataPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
 
@@ -53,7 +53,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateXor::getPinConfiguratio
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::DataPin, PD::Input }, PinType{ ET::DataPin, PD::Input }, PinType{ ET::DataPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
 
@@ -76,7 +76,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateNot::getPinConfiguratio
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 2>{ PinType{ ET::DataPin, PD::Input }, PinType{ ET::DataPin, PD::Output } };
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
 

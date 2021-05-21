@@ -118,6 +118,17 @@ void ScriptEnvironment::stopMusic()
 	api.audio->stopMusic();
 }
 
+ConfigNode ScriptEnvironment::getVariable(const String& variable)
+{
+	// TODO
+	return ConfigNode(0);
+}
+
+void ScriptEnvironment::setVariable(const String& variable, ConfigNode data)
+{
+	// TODO
+}
+
 std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const IScriptNodeType& nodeType, const ScriptGraphNode& node, const ConfigNode& nodeData)
 {
 	auto result = nodeType.makeData();

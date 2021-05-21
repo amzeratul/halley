@@ -22,7 +22,8 @@ namespace Halley {
 		Undefined,
 		Node,
 		FlowPin,
-		DataPin,
+		ReadDataPin,
+		WriteDataPin,
 		TargetPin
 	};
 
@@ -55,7 +56,8 @@ namespace Halley {
 		ScriptPinSide getSide() const
 		{
 			switch (type) {
-			case ScriptNodeElementType::DataPin:
+			case ScriptNodeElementType::ReadDataPin:
+			case ScriptNodeElementType::WriteDataPin:
 			case ScriptNodeElementType::FlowPin:
 				return direction == ScriptNodePinDirection::Input ? ScriptPinSide::Left : ScriptPinSide::Right;
 			case ScriptNodeElementType::TargetPin:

@@ -5,7 +5,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptWaitFor::getPinConfiguration() c
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::DataPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
 	return data;
 }
 

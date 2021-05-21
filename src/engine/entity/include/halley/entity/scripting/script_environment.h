@@ -18,6 +18,9 @@ namespace Halley {
     	void playMusic(const String& music);
     	void stopMusic();
 
+    	virtual ConfigNode getVariable(const String& variable);
+    	virtual void setVariable(const String& variable, ConfigNode data);
+
     protected:
 		const HalleyAPI& api;
     	World& world;
