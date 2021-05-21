@@ -36,7 +36,10 @@ set(SOURCES
 
         "src/scripting/nodes/script_branching.cpp"
         "src/scripting/nodes/script_flow_control.cpp"
+        "src/scripting/nodes/script_logic_gates.cpp"
+        "src/scripting/nodes/script_music.cpp"
         "src/scripting/nodes/script_play_animation.cpp"
+        "src/scripting/nodes/script_variables.cpp"
         "src/scripting/nodes/script_wait.cpp"
         "src/scripting/nodes/script_wait_for.cpp"
         )
@@ -85,7 +88,10 @@ set(HEADERS
 
         "src/scripting/nodes/script_branching.h"
         "src/scripting/nodes/script_flow_control.h"
+        "src/scripting/nodes/script_logic_gates.h"
+        "src/scripting/nodes/script_music.h"
         "src/scripting/nodes/script_play_animation.h"
+        "src/scripting/nodes/script_variables.h"
         "src/scripting/nodes/script_wait.h"
         "src/scripting/nodes/script_wait_for.h"
         )
