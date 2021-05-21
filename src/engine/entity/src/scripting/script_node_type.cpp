@@ -19,6 +19,7 @@ std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getDescription(c
 {
 	switch (elementType.type) {
 	case ScriptNodeElementType::ReadDataPin:
+	case ScriptNodeElementType::WriteDataPin:
 	case ScriptNodeElementType::FlowPin:
 	case ScriptNodeElementType::TargetPin:
 		return getPinDescription(node, elementType, elementIdx);
@@ -42,7 +43,9 @@ std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getPinDescriptio
 		case ScriptNodeElementType::FlowPin:
 			return "Flow";
 		case ScriptNodeElementType::ReadDataPin:
-			return "Data";
+			return "Read Data";
+		case ScriptNodeElementType::WriteDataPin:
+			return "Write Data";
 		case ScriptNodeElementType::TargetPin:
 			return "Target";
 		}

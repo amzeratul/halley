@@ -306,6 +306,8 @@ Colour4f ScriptRenderer::getPinColour(ScriptNodePinType pinType) const
 		return Colour4f(0.75f, 0.75f, 0.99f);
 	case ScriptNodeElementType::ReadDataPin:
 		return Colour4f(0.91f, 0.55f, 0.2f);
+	case ScriptNodeElementType::WriteDataPin:
+		return Colour4f(0.91f, 0.2f, 0.2f);
 	case ScriptNodeElementType::TargetPin:
 		return Colour4f(0.35f, 1, 0.35f);
 	}
