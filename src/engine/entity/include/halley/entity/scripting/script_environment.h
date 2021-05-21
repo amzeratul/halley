@@ -15,6 +15,9 @@ namespace Halley {
     	const ScriptGraph* getCurrentGraph() const;
         size_t& getNodeCounter(uint32_t nodeId);
 
+    	void playMusic(const String& music);
+    	void stopMusic();
+
     protected:
 		const HalleyAPI& api;
     	World& world;

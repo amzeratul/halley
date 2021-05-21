@@ -3,6 +3,7 @@
 #include "nodes/script_branching.h"
 #include "nodes/script_flow_control.h"
 #include "nodes/script_logic_gates.h"
+#include "nodes/script_music.h"
 #include "nodes/script_play_animation.h"
 #include "nodes/script_wait.h"
 #include "nodes/script_wait_for.h"
@@ -201,4 +202,6 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptLogicGateOr>());
 	addScriptNode(std::make_unique<ScriptLogicGateXor>());
 	addScriptNode(std::make_unique<ScriptLogicGateNot>());
+	addScriptNode(std::make_unique<ScriptPlayMusic>());
+	addScriptNode(std::make_unique<ScriptStopMusic>());
 }

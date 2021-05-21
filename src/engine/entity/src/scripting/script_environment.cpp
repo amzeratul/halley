@@ -1,6 +1,7 @@
 #include "scripting/script_environment.h"
 
 #include "world.h"
+#include "halley/core/api/halley_api.h"
 #include "halley/support/logger.h"
 #include "scripting/script_graph.h"
 #include "scripting/script_state.h"
@@ -105,6 +106,16 @@ const ScriptGraph* ScriptEnvironment::getCurrentGraph() const
 size_t& ScriptEnvironment::getNodeCounter(uint32_t nodeId)
 {
 	return currentState->getNodeCounter(nodeId);
+}
+
+void ScriptEnvironment::playMusic(const String& music)
+{
+	api.audio->playMusic(music);
+}
+
+void ScriptEnvironment::stopMusic()
+{
+	api.audio->stopMusic();
 }
 
 std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const IScriptNodeType& nodeType, const ScriptGraphNode& node, const ConfigNode& nodeData)
