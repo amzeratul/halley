@@ -88,6 +88,7 @@ ScriptState::ScriptState(const ConfigNode& node, const ConfigNodeSerializationCo
 	started = node["started"].asBool(false);
 	threads = ConfigNodeSerializer<decltype(threads)>().deserialize(context, node["threads"]);
 	graphHash = Deserializer::fromBytes<decltype(graphHash)>(node["graphHash"].asBytes());
+	variables = ConfigNodeSerializer<decltype(variables)>().deserialize(context, node["variables"]);
 }
 
 ConfigNode ScriptState::toConfigNode(const ConfigNodeSerializationContext& context) const
@@ -98,6 +99,7 @@ ConfigNode ScriptState::toConfigNode(const ConfigNodeSerializationContext& conte
 	}
 	node["threads"] = ConfigNodeSerializer<decltype(threads)>().serialize(threads, context);
 	node["graphHash"] = Serializer::toBytes(graphHash);
+	node["variables"] = ConfigNodeSerializer<decltype(variables)>().serialize(variables, context);
 	return node;
 }
 
@@ -159,6 +161,20 @@ ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(uint32_t nodeId
 size_t& ScriptState::getNodeCounter(uint32_t node)
 {
 	return nodeCounters[node];
+}
+
+ConfigNode ScriptState::getVariable(const String& name) const
+{
+	const auto iter = variables.find(name);
+	if (iter != variables.end()) {
+		return ConfigNode(iter->second);
+	}
+	return ConfigNode(0);
+}
+
+void ScriptState::setVariable(const String& name, ConfigNode value)
+{
+	variables[name] = std::move(value);
 }
 
 void ScriptState::onNodeStartedIntrospection(uint32_t nodeId)

@@ -92,12 +92,16 @@ namespace Halley {
 
     	size_t& getNodeCounter(uint32_t node);
 
+    	ConfigNode getVariable(const String& name) const;
+    	void setVariable(const String& name, ConfigNode value);
+
 	private:
     	std::vector<ScriptStateThread> threads;
     	uint64_t graphHash = 0;
     	bool started = false;
     	bool introspection = false;
     	std::map<uint32_t, size_t> nodeCounters;
+    	std::map<String, ConfigNode> variables;
 
     	std::vector<NodeIntrospection> nodeIntrospection;
 

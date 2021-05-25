@@ -120,13 +120,12 @@ void ScriptEnvironment::stopMusic()
 
 ConfigNode ScriptEnvironment::getVariable(const String& variable)
 {
-	// TODO
-	return ConfigNode(0);
+	return currentState->getVariable(variable);
 }
 
 void ScriptEnvironment::setVariable(const String& variable, ConfigNode data)
 {
-	// TODO
+	currentState->setVariable(variable, std::move(data));
 }
 
 std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const IScriptNodeType& nodeType, const ScriptGraphNode& node, const ConfigNode& nodeData)
