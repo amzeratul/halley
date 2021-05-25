@@ -112,6 +112,25 @@ ConfigNode IScriptNodeType::readDataPin(ScriptEnvironment& environment, const Sc
 	return dstNode.getNodeType().getData(environment, dstNode, dst.dstPin);
 }
 
+void IScriptNodeType::writeDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const
+{
+	const auto& pins = node.getPins();
+	if (pinN >= pins.size()) {
+		return;
+	}
+
+	const auto& pin = pins[pinN];
+	if (pin.connections.empty() || !pin.connections[0].dstNode) {
+		return;
+	}
+	assert(pin.connections.size() == 1);
+
+	const auto& dst = pin.connections[0];
+	const auto& nodes = environment.getCurrentGraph()->getNodes();
+	const auto& dstNode = nodes[dst.dstNode.value()];
+	dstNode.getNodeType().setData(environment, dstNode, dst.dstPin, std::move(data));
+}
+
 String IScriptNodeType::getConnectedNodeName(const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const
 {
 	const auto& pin = node.getPin(pinN);

@@ -28,6 +28,10 @@ ConfigNode ScriptVariable::doGetData(ScriptEnvironment& environment, const Scrip
 	return environment.getVariable(node.getSettings()["variable"].asString(""));
 }
 
+void ScriptVariable::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const
+{
+	environment.setVariable(node.getSettings()["variable"].asString(""), std::move(data));
+}
 
 
 gsl::span<const IScriptNodeType::PinType> ScriptLiteral::getPinConfiguration() const
@@ -123,7 +127,7 @@ std::pair<String, std::vector<ColourOverride>> ScriptSetVariable::getNodeDescrip
 
 IScriptNodeType::Result ScriptSetVariable::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	// TODO
+	writeDataPin(environment, node, 3, readDataPin(environment, node, 2));
 	return Result(ScriptNodeExecutionState::Done);
 }
 
