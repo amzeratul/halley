@@ -124,9 +124,9 @@ String IScriptNodeType::getConnectedNodeName(const ScriptGraphNode& node, const 
 	return otherNode.getNodeType().getName();
 }
 
-std::array<OptionalLite<uint32_t>, 4> IScriptNodeType::getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const
+std::array<OptionalLite<uint32_t>, 8> IScriptNodeType::getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const
 {
-	std::array<OptionalLite<uint32_t>, 4> result;
+	std::array<OptionalLite<uint32_t>, 8> result;
 	result.fill({});
 	
 	const auto& pinConfig = getPinConfiguration();
@@ -205,8 +205,8 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptWaitFor>());
 	addScriptNode(std::make_unique<ScriptPlayAnimation>());
 	addScriptNode(std::make_unique<ScriptBranch>());
-	addScriptNode(std::make_unique<ScriptFork>());
-	addScriptNode(std::make_unique<ScriptMergeAny>());
+	//addScriptNode(std::make_unique<ScriptFork>());
+	//addScriptNode(std::make_unique<ScriptMergeAny>());
 	addScriptNode(std::make_unique<ScriptMergeAll>());
 	addScriptNode(std::make_unique<ScriptLogicGateAnd>());
 	addScriptNode(std::make_unique<ScriptLogicGateOr>());

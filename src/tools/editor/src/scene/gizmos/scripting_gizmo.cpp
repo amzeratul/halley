@@ -69,7 +69,9 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 			}
 		} else {
 			if (inputState.leftClickPressed) {
-				onPinClicked();
+				onPinClicked(false, inputState.shiftHeld);
+			} else if (inputState.rightClickPressed) {
+				onPinClicked(true, inputState.shiftHeld);
 			}
 		}
 	}
@@ -96,13 +98,19 @@ void ScriptingGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 	}
 }
 
-void ScriptingGizmo::onPinClicked()
+void ScriptingGizmo::onPinClicked(bool rightClick, bool shiftHeld)
 {
 	Expects(nodeUnderMouse);
 	
-	nodeEditingConnection = nodeUnderMouse;
+	if (!rightClick) {
+		nodeEditingConnection = nodeUnderMouse;
+	}
+
+	const bool changed = rightClick || !shiftHeld ?
+		scriptGraph->disconnectPin(nodeEditingConnection->nodeId, nodeEditingConnection->elementId) :
+		scriptGraph->disconnectPinIfSingleConnection(nodeEditingConnection->nodeId, nodeEditingConnection->elementId);
 	
-	if (scriptGraph->disconnectPinIfSingleConnection(nodeEditingConnection->nodeId, nodeEditingConnection->elementId)) {
+	if (changed) {
 		saveEntityData();
 	}
 }

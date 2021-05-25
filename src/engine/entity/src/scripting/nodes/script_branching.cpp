@@ -75,9 +75,9 @@ gsl::span<const IScriptNodeType::PinType> ScriptMergeAny::getPinConfiguration() 
 std::pair<String, std::vector<ColourOverride>> ScriptMergeAny::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	ColourStringBuilder str;
-	str.append("Proceeds with execution when the ");
-	str.append("first", Colour4f(1, 0, 0));
-	str.append(" flow arrives.");
+	str.append("Allows ");
+	str.append("any", Colour4f(1, 0, 0));
+	str.append(" flow threads to continue forward.");
 	return str.moveResults();
 }
 
@@ -92,14 +92,14 @@ gsl::span<const IScriptNodeType::PinType> ScriptMergeAll::getPinConfiguration() 
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
+	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
 	return data;
 }
 
 std::pair<String, std::vector<ColourOverride>> ScriptMergeAll::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	ColourStringBuilder str;
-	str.append("Proceeds with execution when ");
+	str.append("Proceeds with execution only when ");
 	str.append("all", Colour4f(1, 0, 0));
 	str.append(" connected flows arrive.");
 	return str.moveResults();
@@ -113,8 +113,12 @@ IScriptNodeType::Result ScriptMergeAll::doUpdate(ScriptEnvironment& environment,
 	const auto& pinConfigs = getPinConfiguration();
 	const auto& pins = node.getPins();
 	for (size_t i = 0; i < pins.size(); ++i) {
-		if (pinConfigs[i].type == ScriptNodeElementType::FlowPin && pinConfigs[i].direction == ScriptNodePinDirection::Input && pins[i].connections.at(0).dstNode) {
-			++expected;
+		if (pinConfigs[i].type == ScriptNodeElementType::FlowPin && pinConfigs[i].direction == ScriptNodePinDirection::Input) {
+			for (const auto& conn: pins[i].connections) {
+				if (conn.dstNode) {
+					++expected;
+				}
+			}			
 		}
 	}
 

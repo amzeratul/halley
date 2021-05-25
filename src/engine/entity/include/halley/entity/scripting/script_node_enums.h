@@ -68,7 +68,9 @@ namespace Halley {
 
 		bool isMultiConnection() const
 		{
-			return type == ScriptNodeElementType::ReadDataPin && direction == ScriptNodePinDirection::Output;
+			return (type == ScriptNodeElementType::ReadDataPin && direction == ScriptNodePinDirection::Output)
+				|| (type == ScriptNodeElementType::WriteDataPin && direction == ScriptNodePinDirection::Input)
+				|| (type == ScriptNodeElementType::FlowPin);
 		}
 	};
 }

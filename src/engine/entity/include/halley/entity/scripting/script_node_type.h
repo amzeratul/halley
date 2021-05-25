@@ -61,7 +61,7 @@ namespace Halley {
 		ConfigNode readDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const;
 		String getConnectedNodeName(const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const;
 
-		std::array<OptionalLite<uint32_t>, 4> getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const;
+		std::array<OptionalLite<uint32_t>, 8> getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const;
 	};
 
 	template <typename DataType, typename EnvironmentType = ScriptEnvironment>

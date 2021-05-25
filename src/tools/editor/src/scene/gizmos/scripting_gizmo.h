@@ -60,7 +60,7 @@ namespace Halley {
 
 		void onNodeClicked(Vector2f mousePos);
 		void onNodeDragging(const SceneEditorInputState& inputState);
-		void onPinClicked();
+		void onPinClicked(bool rightClick, bool shiftHeld);
 		void onEditingConnection(const SceneEditorInputState& inputState);
 
 		void compileEntityTargetList();

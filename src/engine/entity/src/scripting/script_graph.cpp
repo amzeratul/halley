@@ -237,13 +237,9 @@ bool ScriptGraph::connectPin(uint32_t srcNodeIdx, uint8_t srcPinN, EntityId targ
 	return true;
 }
 
-bool ScriptGraph::disconnectPinIfSingleConnection(uint32_t nodeIdx, uint8_t pinN)
+bool ScriptGraph::disconnectPin(uint32_t nodeIdx, uint8_t pinN)
 {
 	auto& node = nodes.at(nodeIdx);
-	if (node.getPinType(pinN).isMultiConnection()) {
-		return false;
-	}
-
 	auto& pin = node.getPin(pinN);
 	if (pin.connections.empty()) {
 		return false;
@@ -264,6 +260,16 @@ bool ScriptGraph::disconnectPinIfSingleConnection(uint32_t nodeIdx, uint8_t pinN
 	pin.connections.clear();
 
 	return true;
+}
+
+bool ScriptGraph::disconnectPinIfSingleConnection(uint32_t nodeIdx, uint8_t pinN)
+{
+	auto& node = nodes.at(nodeIdx);
+	if (node.getPinType(pinN).isMultiConnection()) {
+		return false;
+	}
+
+	return disconnectPin(nodeIdx, pinN);
 }
 
 void ScriptGraph::assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const
