@@ -65,5 +65,10 @@ namespace Halley {
 			}
 			return ScriptPinSide::Undefined;
 		}
+
+		bool isMultiConnection() const
+		{
+			return type == ScriptNodeElementType::ReadDataPin && direction == ScriptNodePinDirection::Output;
+		}
 	};
 }

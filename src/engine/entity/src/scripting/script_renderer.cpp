@@ -90,32 +90,34 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 		const auto& srcPinType = nodeType->getPin(i);
 		const auto& pin = node.getPins()[i];
 		
-		std::optional<Vector2f> dstPos;
-		ScriptNodePinType dstPinType;
-		
-		if (srcPinType.type == ScriptNodeElementType::TargetPin) {
-			const auto target = node.getPin(i).entity;
-			if (target.isValid()) {
-				auto entity = world.getEntity(target);
-				auto* transform = entity.tryGetComponent<Transform2DComponent>();
-				if (transform) {
-					dstPos = transform->getGlobalPosition();
-				}
-			}
-		} else if (pin.dstNode && srcPinType.direction == ScriptNodePinDirection::Output) {
-			const size_t dstIdx = pin.dstPin;
-			const auto& dstNode = graph.getNodes().at(pin.dstNode.value());
-			const auto* dstNodeType = nodeTypeCollection.tryGetNodeType(dstNode.getType());
-			if (!dstNodeType) {
-				continue;
-			}
-			dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom).getCentre();
-			dstPinType = dstNodeType->getPin(dstIdx);
-		}
+		for (const auto& pinConnection: pin.connections) {
+			std::optional<Vector2f> dstPos;
+			ScriptNodePinType dstPinType;
 
-		if (dstPos) {
-			const Vector2f srcPos = getNodeElementArea(*nodeType, basePos, node, i, curZoom).getCentre();
-			drawConnection(painter, ConnectionPath{ srcPos, dstPos.value(), srcPinType, dstPinType }, curZoom);
+			if (srcPinType.type == ScriptNodeElementType::TargetPin) {
+				const auto target = pinConnection.entity;
+				if (target.isValid()) {
+					auto entity = world.getEntity(target);
+					auto* transform = entity.tryGetComponent<Transform2DComponent>();
+					if (transform) {
+						dstPos = transform->getGlobalPosition();
+					}
+				}
+			} else if (pinConnection.dstNode && srcPinType.direction == ScriptNodePinDirection::Output) {
+				const size_t dstIdx = pinConnection.dstPin;
+				const auto& dstNode = graph.getNodes().at(pinConnection.dstNode.value());
+				const auto* dstNodeType = nodeTypeCollection.tryGetNodeType(dstNode.getType());
+				if (!dstNodeType) {
+					continue;
+				}
+				dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom).getCentre();
+				dstPinType = dstNodeType->getPin(dstIdx);
+			}
+			
+			if (dstPos) {
+				const Vector2f srcPos = getNodeElementArea(*nodeType, basePos, node, i, curZoom).getCentre();
+				drawConnection(painter, ConnectionPath{ srcPos, dstPos.value(), srcPinType, dstPinType }, curZoom);
+			}
 		}
 	}
 }

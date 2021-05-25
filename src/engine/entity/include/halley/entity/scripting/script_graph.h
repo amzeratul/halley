@@ -1,4 +1,5 @@
 #pragma once
+#include "script_node_enums.h"
 #include "../entity_id.h"
 #include "halley/bytes/config_node_serializer.h"
 #include "halley/utils/hash.h"
@@ -11,10 +12,20 @@ namespace Halley {
 	
 	class ScriptGraphNode {
 	public:
-		struct Pin {
+		struct PinConnection {
 			OptionalLite<uint32_t> dstNode = {};
 			uint8_t dstPin = 0;
 			EntityId entity;
+
+			PinConnection() = default;
+			PinConnection(const ConfigNode& node, const ConfigNodeSerializationContext& context);
+			PinConnection(uint32_t dstNode, uint8_t dstPin);
+			explicit PinConnection(EntityId entity);
+			ConfigNode toConfigNode(const ConfigNodeSerializationContext& context) const;
+		};
+		
+		struct Pin {
+			std::vector<PinConnection> connections;
 
 			Pin() = default;
 			Pin(const ConfigNode& node, const ConfigNodeSerializationContext& context);
@@ -50,6 +61,9 @@ namespace Halley {
 			return pins[idx];
 		}
 
+		EntityId getEntityAtPin(size_t idx) const;
+		EntityId tryGetEntityAtPin(size_t idx) const;
+
 		const ConfigNode& getSettings() const { return settings; }
 		ConfigNode& getSettings() { return settings; }
 
@@ -64,6 +78,8 @@ namespace Halley {
 
 		uint32_t getId() const { return id; }
 		void setId(uint32_t i) { id = i; }
+
+		ScriptNodePinType getPinType(uint8_t idx) const;
 
 	private:
 		Vector2f position;
@@ -91,7 +107,7 @@ namespace Halley {
 
 		bool connectPins(uint32_t srcNode, uint8_t srcPinN, uint32_t dstNode, uint8_t dstPin);
 		bool connectPin(uint32_t srcNode, uint8_t srcPinN, EntityId target);
-		bool disconnectPin(uint32_t node, uint8_t pin);
+		bool disconnectPinIfSingleConnection(uint32_t node, uint8_t pin);
 
 		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 
@@ -102,6 +118,13 @@ namespace Halley {
 		mutable uint64_t lastAssignTypeHash = 1;
 
 		void finishGraph();
+	};
+
+	template<>
+	class ConfigNodeSerializer<ScriptGraphNode::PinConnection> {
+	public:
+		ConfigNode serialize(const ScriptGraphNode::PinConnection& connection, const ConfigNodeSerializationContext& context);
+		ScriptGraphNode::PinConnection deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node);
 	};
 
 	template<>

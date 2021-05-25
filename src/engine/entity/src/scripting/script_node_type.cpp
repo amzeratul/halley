@@ -101,22 +101,26 @@ ConfigNode IScriptNodeType::readDataPin(ScriptEnvironment& environment, const Sc
 	}
 
 	const auto& pin = pins[pinN];
-	if (!pin.dstNode) {
+	if (pin.connections.empty() || !pin.connections[0].dstNode) {
 		return ConfigNode();
 	}
+	assert(pin.connections.size() == 1);
 
+	const auto& dst = pin.connections[0];
 	const auto& nodes = environment.getCurrentGraph()->getNodes();
-	const auto& dstNode = nodes[pin.dstNode.value()];
-	return dstNode.getNodeType().getData(environment, dstNode, pin.dstPin);
+	const auto& dstNode = nodes[dst.dstNode.value()];
+	return dstNode.getNodeType().getData(environment, dstNode, dst.dstPin);
 }
 
 String IScriptNodeType::getConnectedNodeName(const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const
 {
 	const auto& pin = node.getPin(pinN);
-	if (!pin.dstNode) {
+	if (pin.connections.empty() || !pin.connections[0].dstNode) {
 		return "<empty>";
 	}
-	const auto& otherNode = graph.getNodes().at(pin.dstNode.value());
+	assert(pin.connections.size() == 1);
+	
+	const auto& otherNode = graph.getNodes().at(pin.connections[0].dstNode.value());
 	return otherNode.getNodeType().getName();
 }
 
@@ -134,8 +138,10 @@ std::array<OptionalLite<uint32_t>, 4> IScriptNodeType::getOutputNodes(const Scri
 			const bool outputActive = (outputActiveMask & (1 << curOutputPin)) != 0;
 			if (outputActive) {
 				const auto& output = node.getPin(i);
-				if (output.dstNode) {
-					result[nOutputsFound++] = output.dstNode;
+				for (auto& conn: output.connections) {
+					if (conn.dstNode) {
+						result[nOutputsFound++] = conn.dstNode;
+					}
 				}
 			}
 

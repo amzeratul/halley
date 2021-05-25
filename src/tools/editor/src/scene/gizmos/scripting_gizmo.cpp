@@ -102,7 +102,7 @@ void ScriptingGizmo::onPinClicked()
 	
 	nodeEditingConnection = nodeUnderMouse;
 	
-	if (scriptGraph->disconnectPin(nodeEditingConnection->nodeId, nodeEditingConnection->elementId)) {
+	if (scriptGraph->disconnectPinIfSingleConnection(nodeEditingConnection->nodeId, nodeEditingConnection->elementId)) {
 		saveEntityData();
 	}
 }

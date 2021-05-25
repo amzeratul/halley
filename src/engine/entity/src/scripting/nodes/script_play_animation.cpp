@@ -35,7 +35,7 @@ std::pair<String, std::vector<ColourOverride>> ScriptPlayAnimation::getNodeDescr
 
 IScriptNodeType::Result ScriptPlayAnimation::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	auto entity = environment.tryGetEntity(node.getPin(2).entity);
+	auto entity = environment.tryGetEntity(node.getEntityAtPin(2));
 	if (entity.isValid()) {
 		auto* spriteAnimation = entity.tryGetComponent<SpriteAnimationComponent>();
 		if (spriteAnimation) {
