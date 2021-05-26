@@ -94,16 +94,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 			std::optional<Vector2f> dstPos;
 			ScriptNodePinType dstPinType;
 
-			if (srcPinType.type == ScriptNodeElementType::TargetPin) {
-				const auto target = pinConnection.entity;
-				if (target.isValid()) {
-					auto entity = world.getEntity(target);
-					auto* transform = entity.tryGetComponent<Transform2DComponent>();
-					if (transform) {
-						dstPos = transform->getGlobalPosition();
-					}
-				}
-			} else if (pinConnection.dstNode && srcPinType.direction == ScriptNodePinDirection::Output) {
+			if (pinConnection.dstNode && srcPinType.direction == ScriptNodePinDirection::Output) {
 				const size_t dstIdx = pinConnection.dstPin;
 				const auto& dstNode = graph.getNodes().at(pinConnection.dstNode.value());
 				const auto* dstNodeType = nodeTypeCollection.tryGetNodeType(dstNode.getType());
@@ -112,6 +103,13 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 				}
 				dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom).getCentre();
 				dstPinType = dstNodeType->getPin(dstIdx);
+			} else if (pinConnection.entity.isValid()) {
+				auto entity = world.getEntity(pinConnection.entity);
+				auto* transform = entity.tryGetComponent<Transform2DComponent>();
+				if (transform) {
+					dstPos = transform->getGlobalPosition();
+					dstPinType = ScriptNodePinType{ ScriptNodeElementType::TargetPin, ScriptNodePinDirection::Output };
+				}
 			}
 			
 			if (dstPos) {

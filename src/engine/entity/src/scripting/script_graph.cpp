@@ -87,22 +87,6 @@ ConfigNode ScriptGraphNode::toConfigNode(const ConfigNodeSerializationContext& c
 	return result;
 }
 
-EntityId ScriptGraphNode::getEntityAtPin(size_t idx) const
-{
-	return pins.at(idx).connections.at(0).entity;
-}
-
-EntityId ScriptGraphNode::tryGetEntityAtPin(size_t idx) const
-{
-	if (idx < pins.size()) {
-		const auto& pin = pins[idx];
-		if (!pin.connections.empty()) {
-			return pin.connections[0].entity;
-		}
-	}
-	return EntityId();
-}
-
 void ScriptGraphNode::feedToHash(Hash::Hasher& hasher)
 {
 	// TODO
@@ -122,19 +106,6 @@ void ScriptGraphNode::onNodeRemoved(uint32_t nodeId)
 			}
 		}
 	}
-}
-
-String ScriptGraphNode::getTargetName(const World& world, uint8_t idx) const
-{
-	const EntityId targetId = tryGetEntityAtPin(idx);
-	if (targetId.isValid()) {
-		const ConstEntityRef target = world.tryGetEntity(targetId);
-		if (target.isValid()) {
-			return target.getName();
-		}
-	}
-	
-	return "<unknown>";
 }
 
 void ScriptGraphNode::assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const

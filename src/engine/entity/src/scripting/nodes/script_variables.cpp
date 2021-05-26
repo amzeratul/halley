@@ -93,11 +93,11 @@ std::pair<String, std::vector<ColourOverride>> ScriptComparison::getNodeDescript
 {
 	ColourStringBuilder str;
 	str.append("True if \"");
-	str.append(getConnectedNodeName(node, graph, 0), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(getConnectedNodeName(world, node, graph, 0), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append("\" ");
 	str.append(node.getSettings()["operator"].asString("equals"), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append(" \"");
-	str.append(getConnectedNodeName(node, graph, 1), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(getConnectedNodeName(world, node, graph, 1), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append("\".");
 	return str.moveResults();
 }

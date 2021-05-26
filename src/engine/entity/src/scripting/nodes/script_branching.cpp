@@ -13,7 +13,7 @@ std::pair<String, std::vector<ColourOverride>> ScriptBranch::getNodeDescription(
 {
 	ColourStringBuilder str;
 	str.append("Branch based on \"");
-	str.append(getConnectedNodeName(node, graph, 1), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(getConnectedNodeName(world, node, graph, 1), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append("\".");
 	return str.moveResults();
 }

@@ -18,7 +18,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptPlayAnimation::getPinConfigurati
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
 	return data;
 }
 
@@ -28,14 +28,14 @@ std::pair<String, std::vector<ColourOverride>> ScriptPlayAnimation::getNodeDescr
 	str.append("Play sequence \"");
 	str.append(node.getSettings()["sequence"].asString("default"), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append("\" on entity \"");
-	str.append(node.getTargetName(world, 2), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(getConnectedNodeName(world, node, graph, 2), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append("\".");
 	return str.moveResults();
 }
 
 IScriptNodeType::Result ScriptPlayAnimation::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	auto entity = environment.tryGetEntity(node.getEntityAtPin(2));
+	auto entity = environment.tryGetEntity(readEntityId(environment, node, 2));
 	if (entity.isValid()) {
 		auto* spriteAnimation = entity.tryGetComponent<SpriteAnimationComponent>();
 		if (spriteAnimation) {

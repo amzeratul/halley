@@ -61,7 +61,7 @@ namespace Halley {
 			case ScriptNodeElementType::FlowPin:
 				return direction == ScriptNodePinDirection::Input ? ScriptPinSide::Left : ScriptPinSide::Right;
 			case ScriptNodeElementType::TargetPin:
-				return ScriptPinSide::Bottom;
+				return direction == ScriptNodePinDirection::Input ? ScriptPinSide::Top : ScriptPinSide::Bottom;
 			}
 			return ScriptPinSide::Undefined;
 		}
@@ -70,7 +70,8 @@ namespace Halley {
 		{
 			return (type == ScriptNodeElementType::ReadDataPin && direction == ScriptNodePinDirection::Output)
 				|| (type == ScriptNodeElementType::WriteDataPin && direction == ScriptNodePinDirection::Input)
-				|| (type == ScriptNodeElementType::FlowPin);
+				|| (type == ScriptNodeElementType::FlowPin)
+				|| (type == ScriptNodeElementType::TargetPin && direction == ScriptNodePinDirection::Output);
 		}
 	};
 }

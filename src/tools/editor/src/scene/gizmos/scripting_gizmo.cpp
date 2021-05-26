@@ -141,11 +141,11 @@ void ScriptingGizmo::onEditingConnection(const SceneEditorInputState& inputState
 			if (scriptGraph->connectPins(srcNodeId, srcPinId, dstNodeId, dstPinId)) {
 				saveEntityData();
 			}
-		}
-		
-		if (srcType.type == ET::TargetPin) {
-			if (scriptGraph->connectPin(srcNodeId, srcPinId, curEntityTarget)) {
-				saveEntityData();
+		} else {
+			if (srcType.type == ET::TargetPin && srcType.direction == ScriptNodePinDirection::Input) {
+				if (scriptGraph->connectPin(srcNodeId, srcPinId, curEntityTarget)) {
+					saveEntityData();
+				}
 			}
 		}
 		
@@ -178,7 +178,7 @@ void ScriptingGizmo::draw(Painter& painter) const
 	if (nodeEditingConnection && nodeConnectionDst) {
 		const auto srcType = nodeEditingConnection->element;
 		ScriptNodePinType dstType;
-		dstType.type = srcType.type == ScriptNodeElementType::TargetPin ? ScriptNodeElementType::Undefined : srcType.type;
+		dstType.type = srcType.type;
 		dstType.direction = srcType.direction == ScriptNodePinDirection::Input ? ScriptNodePinDirection::Output : ScriptNodePinDirection::Input;
 		path = ScriptRenderer::ConnectionPath{ nodeEditingConnection->pinPos, nodeConnectionDst.value(), srcType, dstType };
 	}

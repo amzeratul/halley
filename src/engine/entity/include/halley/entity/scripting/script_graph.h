@@ -61,17 +61,12 @@ namespace Halley {
 			return pins[idx];
 		}
 
-		EntityId getEntityAtPin(size_t idx) const;
-		EntityId tryGetEntityAtPin(size_t idx) const;
-
 		const ConfigNode& getSettings() const { return settings; }
 		ConfigNode& getSettings() { return settings; }
 
 		void feedToHash(Hash::Hasher& hasher);
 
 		void onNodeRemoved(uint32_t nodeId);
-
-		String getTargetName(const World& world, uint8_t idx) const;
 
 		void assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		const IScriptNodeType& getNodeType() const;

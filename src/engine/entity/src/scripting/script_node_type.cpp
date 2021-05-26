@@ -1,5 +1,7 @@
 #include "scripting/script_node_type.h"
 
+
+#include "world.h"
 #include "nodes/script_branching.h"
 #include "nodes/script_flow_control.h"
 #include "nodes/script_logic_gates.h"
@@ -131,16 +133,43 @@ void IScriptNodeType::writeDataPin(ScriptEnvironment& environment, const ScriptG
 	dstNode.getNodeType().setData(environment, dstNode, dst.dstPin, std::move(data));
 }
 
-String IScriptNodeType::getConnectedNodeName(const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const
+String IScriptNodeType::getConnectedNodeName(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const
 {
 	const auto& pin = node.getPin(pinN);
-	if (pin.connections.empty() || !pin.connections[0].dstNode) {
+	if (pin.connections.empty()) {
 		return "<empty>";
 	}
 	assert(pin.connections.size() == 1);
+
+	 if (pin.connections[0].dstNode) {
+		const auto& otherNode = graph.getNodes().at(pin.connections[0].dstNode.value());
+		return otherNode.getNodeType().getName();
+	 } else if (pin.connections[0].entity.isValid()) {
+		const auto target = world.tryGetEntity(pin.connections[0].entity);
+		if (target.isValid()) {
+			return target.getName();
+		}
+	 }
 	
-	const auto& otherNode = graph.getNodes().at(pin.connections[0].dstNode.value());
-	return otherNode.getNodeType().getName();
+	 return "<unknown>";
+}
+
+EntityId IScriptNodeType::readEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const
+{
+	if (idx < node.getPins().size()) {
+		const auto& pin = node.getPins()[idx];
+		if (!pin.connections.empty()) {
+			const auto& conn = pin.connections[0];
+			if (conn.entity.isValid()) {
+				return conn.entity;
+			} else if (conn.dstNode) {
+				const auto& nodes = environment.getCurrentGraph()->getNodes();
+				const auto& dstNode = nodes.at(conn.dstNode.value());
+				return dstNode.getNodeType().getEntityId(environment, dstNode, conn.dstPin);
+			}
+		}
+	}
+	return EntityId();
 }
 
 std::array<OptionalLite<uint32_t>, 8> IScriptNodeType::getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const
