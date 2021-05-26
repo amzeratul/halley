@@ -3,6 +3,7 @@
 #include "world.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/support/logger.h"
+#include "halley/utils/algorithm.h"
 #include "scripting/script_graph.h"
 #include "scripting/script_state.h"
 
@@ -85,7 +86,7 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 	}
 
 	// Remove stopped threads
-	threads.erase(std::remove_if(threads.begin(), threads.end(), [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); }), threads.end());
+	std_ex::erase_if(threads, [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); });
 
 	graphState.updateIntrospection(time);
 

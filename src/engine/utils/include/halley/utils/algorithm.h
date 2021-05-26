@@ -116,4 +116,36 @@ namespace std_ex {
 	{
 		return std::find_if(container.begin(), container.end(), predicate) != container.end();
 	}
+
+	template <typename K, typename V, typename F>
+	void erase_if_value(std::map<K, V>& map, F predicate)
+	{
+		const auto endIter = map.end();
+		for (auto iter = map.begin(); iter != endIter;) {
+		     if (predicate(iter->second)) {
+		          iter = map.erase(iter);
+		     } else {
+		          ++iter;
+		     }
+		}		
+	}
+
+	template <typename K, typename V, typename F>
+	void erase_if_key(std::map<K, V>& map, F predicate)
+	{
+		const auto endIter = map.end();
+		for (auto iter = map.begin(); iter != endIter;) {
+		     if (predicate(iter->first)) {
+		          iter = map.erase(iter);
+		     } else {
+		          ++iter;
+		     }
+		}		
+	}
+
+	template <typename C, typename F>
+	void erase_if(C& container, F predicate)
+	{
+		container.erase(std::remove_if(container.begin(), container.end(), predicate), container.end());
+	}
 }
