@@ -2,6 +2,7 @@
 
 #include "entity.h"
 #include "world.h"
+#include "halley/utils/algorithm.h"
 #include "halley/utils/hash.h"
 #include "scripting/script_node_type.h"
 using namespace Halley;
@@ -253,7 +254,7 @@ bool ScriptGraph::disconnectPin(uint32_t nodeIdx, uint8_t pinN)
 		if (conn.dstNode) {
 			auto& otherNode = nodes.at(conn.dstNode.value());
 			auto& ocs = otherNode.getPin(conn.dstPin).connections;
-			ocs.erase(std::remove_if(ocs.begin(), ocs.end(), [&] (const auto& oc) { return oc.dstNode == nodeIdx && oc.dstPin == pinN; }), ocs.end());
+			std_ex::erase_if(ocs, [&] (const auto& oc) { return oc.dstNode == nodeIdx && oc.dstPin == pinN; });
 		}
 	}
 

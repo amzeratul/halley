@@ -1,6 +1,7 @@
 #include "system.h"
 #include <halley/data_structures/flat_map.h>
 #include "halley/support/debug.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -52,8 +53,7 @@ void System::purgeMessages()
 			Entity* entity = world->tryGetRawEntity(target);
 
 			if (entity) {
-				auto& inbox = entity->inbox;
-				inbox.erase(std::remove_if(inbox.begin(), inbox.end(), [&] (const MessageEntry& e) { return e.age == systemId; }), inbox.end());
+				std_ex::erase_if(entity->inbox, [&] (const MessageEntry& e) { return e.age == systemId; });
 			}
 		}
 		messagesSentTo.clear();

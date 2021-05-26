@@ -148,4 +148,28 @@ namespace std_ex {
 	{
 		container.erase(std::remove_if(container.begin(), container.end(), predicate), container.end());
 	}
+
+	template <typename C, typename V>
+	auto find(const C& container, const V& value)
+	{
+		return std::find(container.begin(), container.end(), value);
+	}
+
+	template <typename C, typename V>
+	auto find(C& container, const V& value)
+	{
+		return std::find(container.begin(), container.end(), value);
+	}
+
+	template <typename C, typename F>
+	auto find_if(const C& container, F predicate)
+	{
+		return std::find_if(container.begin(), container.end(), predicate);
+	}
+
+	template <typename C, typename F>
+	auto find_if(C& container, F predicate)
+	{
+		return std::find_if(container.begin(), container.end(), predicate);
+	}
 }

@@ -4,6 +4,7 @@
 #include "halley/bytes/byte_serializer.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/support/logger.h"
+#include "halley/utils/algorithm.h"
 using namespace Halley;
 
 EntityData::EntityData()
@@ -249,10 +250,10 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 	}
 	
 	for (const auto& childId: delta.childrenRemoved) {
-		children.erase(std::remove_if(children.begin(), children.end(), [&] (const auto& child) { return child.matchesUUID(childId); }), children.end());
+		std_ex::erase_if(children, [&] (const auto& child) { return child.matchesUUID(childId); });
 	}
 	for (const auto& child: delta.childrenChanged) {
-		auto iter = std::find_if(children.begin(), children.end(), [&] (const auto& cur) { return cur.matchesUUID(child.first); });
+		auto iter = std_ex::find_if(children, [&] (const auto& cur) { return cur.matchesUUID(child.first); });
 		if (iter != children.end()) {
 			iter->applyDelta(child.second);
 		} else {
@@ -260,7 +261,7 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 		}
 	}
 	for (const auto& child: delta.childrenAdded) {
-		auto iter = std::find_if(children.begin(), children.end(), [&] (const auto& cur) { return cur.matchesUUID(child); });
+		auto iter = std_ex::find_if(children, [&] (const auto& cur) { return cur.matchesUUID(child); });
 		if (iter == children.end()) {
 			children.emplace_back(child);
 		} else {
@@ -273,10 +274,10 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 	}
 	
 	for (const auto& componentId: delta.componentsRemoved) {
-		components.erase(std::remove_if(components.begin(), components.end(), [&] (const auto& component) { return component.first == componentId; }), components.end());
+		std_ex::erase_if(components, [&] (const auto& component) { return component.first == componentId; });
 	}
 	for (const auto& component: delta.componentsChanged) {
-		auto iter = std::find_if(components.begin(), components.end(), [&] (const auto& cur) { return cur.first == component.first; });
+		auto iter = std_ex::find_if(components, [&] (const auto& cur) { return cur.first == component.first; });
 		if (iter == components.end()) {
 			components.emplace_back(component.first, ConfigNode::applyDelta(ConfigNode(ConfigNode::MapType()), component.second));
 		} else {
