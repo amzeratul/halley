@@ -135,15 +135,17 @@ bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 		setSelection(static_cast<int>(text.size()));
 		return true;
 	}
-	
-	if (c.is(KeyCode::Left, KeyMods::None)) {
-		setSelection(getSelection().start - 1);
-		return true;
-	}
-	
-	if (c.is(KeyCode::Right, KeyMods::None)) {
-		setSelection(getSelection().start + 1);
-		return true;
+
+	if (!text.empty()) {
+		if (c.is(KeyCode::Left, KeyMods::None)) {
+			setSelection(getSelection().start - 1);
+			return true;
+		}
+		
+		if (c.is(KeyCode::Right, KeyMods::None)) {
+			setSelection(getSelection().start + 1);
+			return true;
+		}
 	}
 	
 	if (c.is(KeyCode::C, KeyMods::Ctrl)) {

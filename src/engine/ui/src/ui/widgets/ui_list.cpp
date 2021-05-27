@@ -25,6 +25,18 @@ UIList::UIList(String id, UIStyle style, UISizerType orientation, int nColumns)
 	});
 }
 
+void UIList::setOrientation(UISizerType orientation, int nColumns)
+{
+	Expects(items.empty());
+	
+	if (orientation != this->orientation || nColumns != this->nColumns) {
+		setSizer(UISizer(orientation, style.getFloat("gap"), nColumns));
+		getSizer().setEvenColumns();
+		this->orientation = orientation;
+		this->nColumns = nColumns;
+	}
+}
+
 bool UIList::setSelectedOption(int option)
 {
 	forceAddChildren(UIInputType::Undefined, false);

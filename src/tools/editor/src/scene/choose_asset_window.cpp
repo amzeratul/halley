@@ -8,16 +8,19 @@
 
 using namespace Halley;
 
-ChooseAssetWindow::ChooseAssetWindow(UIFactory& factory, Callback callback, bool canShowBlank)
+ChooseAssetWindow::ChooseAssetWindow(UIFactory& factory, Callback callback, bool canShowBlank, UISizerType orientation, int nColumns)
 	: UIWidget("choose_asset_window", {}, UISizer())
 	, factory(dynamic_cast<EditorUIFactory&>(factory))
 	, callback(std::move(callback))
 	, fuzzyMatcher(false, 100)
 	, canShowBlank(canShowBlank)
+	, orientation(orientation)
+	, nColumns(nColumns)
 {
 	highlightCol = factory.getColourScheme()->getColour("ui_stringMatchText");
 
-	makeUI();
+	factory.loadUI(*this, "ui/halley/choose_asset_window");
+	
 	setModal(true);
 	setAnchor(UIAnchor());
 }
@@ -152,11 +155,10 @@ EditorUIFactory& ChooseAssetWindow::getFactory() const
 	return factory;
 }
 
-void ChooseAssetWindow::makeUI()
+void ChooseAssetWindow::onMakeUI()
 {
-	add(factory.makeUI("ui/halley/choose_asset_window"), 1);
-
 	options = getWidgetAs<UIList>("options");
+	options->setOrientation(orientation, nColumns);
 
 	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
 	{

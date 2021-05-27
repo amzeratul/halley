@@ -201,6 +201,14 @@ UISizer& UIWidget::getSizer()
 	return sizer.value();
 }
 
+void UIWidget::setSizer(std::optional<UISizer> sizer)
+{
+	this->sizer = std::move(sizer);
+	if (this->sizer) {
+		this->sizer->reparent(*this);
+	}
+}
+
 void UIWidget::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, Vector2f position)
 {
 	auto widget = std::dynamic_pointer_cast<UIWidget>(element);

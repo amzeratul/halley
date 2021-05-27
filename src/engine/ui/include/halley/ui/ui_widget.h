@@ -55,6 +55,7 @@ namespace Halley {
 
 		virtual std::optional<UISizer>& tryGetSizer();
 		virtual UISizer& getSizer();
+		void setSizer(std::optional<UISizer> sizer);
 
 		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f()) override;
 		void addSpacer(float size) override;

@@ -3,7 +3,7 @@
 using namespace Halley;
 
 ScriptingChooseNode::ScriptingChooseNode(UIFactory& factory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, const Callback& callback)
-	: ChooseAssetWindow(factory, callback, false)
+	: ChooseAssetWindow(factory, callback, false, UISizerType::Grid, 2)
 {
 	setAssetIds(scriptNodeTypes->getTypes(false), scriptNodeTypes->getNames(false), "");
 	setTitle(LocalisedString::fromHardcodedString("Add Scripting Node"));

@@ -12,7 +12,7 @@ namespace Halley {
     public:
         using Callback = std::function<void(std::optional<String>)>;
 		
-        ChooseAssetWindow(UIFactory& factory, Callback callback, bool canShowBlank = true);
+        ChooseAssetWindow(UIFactory& factory, Callback callback, bool canShowBlank = true, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
 		virtual ~ChooseAssetWindow();
 
         void onAddedToRoot(UIRoot& root) override;
@@ -26,11 +26,14 @@ namespace Halley {
 		virtual bool canShowAll() const;
 		virtual Sprite makeIcon(const String& id);
 		EditorUIFactory& getFactory() const;
+        std::shared_ptr<UIList> options;
+        void onMakeUI() override;
 
     private:
         EditorUIFactory& factory;
         Callback callback;
-        std::shared_ptr<UIList> options;
+		UISizerType orientation;
+		int nColumns;
 
 		std::vector<String> ids;
 		std::vector<String> names;
@@ -40,8 +43,6 @@ namespace Halley {
         String defaultOption;
         Colour4f highlightCol;
 		bool canShowBlank = true;
-
-        void makeUI();
 
         void accept();
         void cancel();
