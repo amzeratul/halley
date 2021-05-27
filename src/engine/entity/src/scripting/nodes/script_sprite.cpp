@@ -73,12 +73,6 @@ std::pair<String, std::vector<ColourOverride>> ScriptSpriteDirection::getNodeDes
 
 IScriptNodeType::Result ScriptSpriteDirection::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	auto entity = environment.tryGetEntity(readEntityId(environment, node, 2));
-	if (entity.isValid()) {
-		auto* spriteAnimation = entity.tryGetComponent<SpriteAnimationComponent>();
-		if (spriteAnimation) {
-			spriteAnimation->player.setDirection(node.getSettings()["direction"].asString("right"));
-		}
-	}
+	environment.setDirection(readEntityId(environment, node, 2), node.getSettings()["direction"].asString("right"));
 	return Result(ScriptNodeExecutionState::Done);
 }

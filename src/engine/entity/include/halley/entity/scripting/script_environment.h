@@ -21,6 +21,8 @@ namespace Halley {
     	virtual ConfigNode getVariable(const String& variable);
     	virtual void setVariable(const String& variable, ConfigNode data);
 
+    	virtual void setDirection(EntityId entityId, const String& direction);
+
     protected:
 		const HalleyAPI& api;
     	World& world;

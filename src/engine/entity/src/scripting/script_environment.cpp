@@ -1,11 +1,13 @@
 #include "scripting/script_environment.h"
-
 #include "world.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 #include "scripting/script_graph.h"
 #include "scripting/script_state.h"
+
+#include "halley/core/graphics/sprite/animation_player.h"
+#include <components/sprite_animation_component.h>
 
 using namespace Halley;
 
@@ -128,6 +130,17 @@ ConfigNode ScriptEnvironment::getVariable(const String& variable)
 void ScriptEnvironment::setVariable(const String& variable, ConfigNode data)
 {
 	currentState->setVariable(variable, std::move(data));
+}
+
+void ScriptEnvironment::setDirection(EntityId entityId, const String& direction)
+{
+	auto entity = tryGetEntity(entityId);
+	if (entity.isValid()) {
+		auto* spriteAnimation = entity.tryGetComponent<SpriteAnimationComponent>();
+		if (spriteAnimation) {
+			spriteAnimation->player.setDirection(direction);
+		}
+	}
 }
 
 std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const IScriptNodeType& nodeType, const ScriptGraphNode& node, const ConfigNode& nodeData)
