@@ -37,10 +37,14 @@ set (editor_sources
 	"src/scene/scene_editor_window.cpp"
 	"src/scene/undo_stack.cpp"
 
-	"src/scene/gizmos/scripting_gizmo.cpp"
 	"src/scene/gizmos/selected_bounds_gizmo.cpp"
 	"src/scene/gizmos/selection_box_gizmo.cpp"
 	"src/scene/gizmos/translate_gizmo.cpp"
+
+	"src/scene/gizmos/scripting/scripting_choose_node.cpp"
+	"src/scene/gizmos/scripting/scripting_gizmo_toolbar.cpp"
+	"src/scene/gizmos/scripting/scripting_gizmo.cpp"
+	"src/scene/gizmos/scripting/scripting_node_editor.cpp"
 
 	"src/ui/console_window.cpp"
 	"src/ui/ecs_window.cpp"
@@ -91,10 +95,14 @@ set (editor_headers
 	"src/scene/scene_editor_window.h"
 	"src/scene/undo_stack.h"
 
-	"src/scene/gizmos/scripting_gizmo.h"
 	"src/scene/gizmos/selected_bounds_gizmo.h"
 	"src/scene/gizmos/selection_box_gizmo.h"
 	"src/scene/gizmos/translate_gizmo.h"
+
+	"src/scene/gizmos/scripting/scripting_choose_node.h"
+	"src/scene/gizmos/scripting/scripting_gizmo_toolbar.h"
+	"src/scene/gizmos/scripting/scripting_gizmo.h"
+	"src/scene/gizmos/scripting/scripting_node_editor.h"
 	
 	"src/ui/console_window.h"
 	"src/ui/ecs_window.h"

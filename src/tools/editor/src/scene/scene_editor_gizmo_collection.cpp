@@ -1,6 +1,6 @@
 #include "scene_editor_gizmo_collection.h"
 
-#include "gizmos/scripting_gizmo.h"
+#include "gizmos/scripting/scripting_gizmo.h"
 #include "gizmos/translate_gizmo.h"
 #include "gizmos/selected_bounds_gizmo.h"
 #include "gizmos/selection_box_gizmo.h"
