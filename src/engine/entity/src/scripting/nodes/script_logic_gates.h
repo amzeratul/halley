@@ -5,7 +5,7 @@ namespace Halley {
 	class ScriptLogicGateAnd final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "logicGateAnd"; }
-		String getName() const override { return "AND (Logic Gate)"; }
+		String getName() const override { return "Logic Gate AND"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/logic_gate_and.png"; }
 		gsl::span<const PinType> getPinConfiguration() const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Variable; }
@@ -17,7 +17,7 @@ namespace Halley {
 	class ScriptLogicGateOr final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "logicGateOr"; }
-		String getName() const override { return "OR (Logic Gate)"; }
+		String getName() const override { return "Logic Gate OR"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/logic_gate_or.png"; }
 		gsl::span<const PinType> getPinConfiguration() const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Variable; }
@@ -29,7 +29,7 @@ namespace Halley {
 	class ScriptLogicGateXor final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "logicGateXor"; }
-		String getName() const override { return "XOR (Logic Gate)"; }
+		String getName() const override { return "Logic Gate XOR"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/logic_gate_xor.png"; }
 		gsl::span<const PinType> getPinConfiguration() const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Variable; }
@@ -41,7 +41,7 @@ namespace Halley {
 	class ScriptLogicGateNot final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "logicGateNot"; }
-		String getName() const override { return "NOT (Logic Gate)"; }
+		String getName() const override { return "Logic Gate NOT"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/logic_gate_not.png"; }
 		gsl::span<const PinType> getPinConfiguration() const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Variable; }

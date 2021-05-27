@@ -12,7 +12,7 @@ namespace Halley {
 	class ScriptWait final : public ScriptNodeTypeBase<ScriptWaitData> {
 	public:
 		String getId() const override { return "wait"; }
-		String getName() const override { return "Wait for Time"; }
+		String getName() const override { return "Wait (Time)"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/wait.png"; }
 		gsl::span<const PinType> getPinConfiguration() const override;
 		std::vector<SettingType> getSettingTypes() const override;

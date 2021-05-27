@@ -5,7 +5,7 @@ namespace Halley {
 	class ScriptPlayAnimation final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "playAnimation"; }
-		String getName() const override { return "Play Animation"; }
+		String getName() const override { return "Animation Play"; }
 		std::vector<SettingType> getSettingTypes() const override;
 		gsl::span<const PinType> getPinConfiguration() const override;
 		std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const override;

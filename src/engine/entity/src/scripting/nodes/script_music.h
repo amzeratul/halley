@@ -5,7 +5,7 @@ namespace Halley {
 	class ScriptPlayMusic final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "playMusic"; }
-		String getName() const override { return "Play Music"; }
+		String getName() const override { return "Music Play"; }
 		std::vector<SettingType> getSettingTypes() const override;
 		gsl::span<const PinType> getPinConfiguration() const override;
 		std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const override;
@@ -18,7 +18,7 @@ namespace Halley {
 	class ScriptStopMusic final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "stopMusic"; }
-		String getName() const override { return "Stop Music"; }
+		String getName() const override { return "Music Stop"; }
 		gsl::span<const PinType> getPinConfiguration() const override;
 		std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const override;
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/stop_music.png"; }

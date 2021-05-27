@@ -45,7 +45,7 @@ namespace Halley {
 	class ScriptSetVariable final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "setVariable"; }
-		String getName() const override { return "Set Variable"; }
+		String getName() const override { return "Variable Set"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/set_variable.png"; }
 		gsl::span<const PinType> getPinConfiguration() const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
