@@ -41,6 +41,8 @@ namespace Halley {
 		void setHighlight(std::optional<NodeUnderMouseInfo> highlightNode);
 		void setCurrentPath(std::optional<ConnectionPath> path);
 
+		static Colour4f getNodeColour(const IScriptNodeType& nodeType);
+
 	private:
 		enum class NodeDrawModeType : uint8_t {
 			Normal,
@@ -76,7 +78,6 @@ namespace Halley {
 
 		Vector2f getNodeSize(float curZoom) const;
 		Circle getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom) const;
-		Colour4f getNodeColour(const IScriptNodeType& nodeType) const;
 		Colour4f getPinColour(ScriptNodePinType pinType) const;
 		const Sprite& getIcon(const IScriptNodeType& nodeType, const ScriptGraphNode& node);
 

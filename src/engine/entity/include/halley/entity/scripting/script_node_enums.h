@@ -12,10 +12,11 @@ namespace Halley {
 	};
 
 	enum class ScriptNodeClassification {
-		Terminator, // As in start/end, not as in Arnie
 		FlowControl,
+		Action,
 		Variable,
-		Action
+		Terminator, // As in start/end, not as in Arnie
+		Unknown
 	};
 
 	enum class ScriptNodeElementType : uint8_t {

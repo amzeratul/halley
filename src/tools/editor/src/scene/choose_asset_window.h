@@ -32,6 +32,8 @@ namespace Halley {
 		virtual std::shared_ptr<UISizer> makeItemSizer(Sprite icon, std::shared_ptr<UILabel> label);
 		std::shared_ptr<UISizer> makeItemSizerBigIcon(Sprite icon, std::shared_ptr<UILabel> label);
 
+        virtual void sortItems(std::vector<std::pair<String, String>>& items);
+
     private:
         EditorUIFactory& factory;
         Callback callback;

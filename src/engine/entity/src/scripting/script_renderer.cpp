@@ -284,7 +284,7 @@ Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vecto
 	return Circle(centre, radius);
 }
 
-Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType) const
+Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType)
 {
 	switch (nodeType.getClassification()) {
 	case ScriptNodeClassification::Terminator:

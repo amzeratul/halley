@@ -68,8 +68,15 @@ void ChooseAssetWindow::populateList()
 				options->addTextItem("", LocalisedString::fromHardcodedString("[Empty]"));
 			}
 
+			std::vector<std::pair<String, String>> items;
 			for (size_t i = 0; i < ids.size(); ++i) {
-				addItem(ids[i], (*effectiveNames)[i]);
+				items.emplace_back(ids[i], (*effectiveNames)[i]);
+			}
+
+			sortItems(items);
+
+			for (auto& item: items) {
+				addItem(item.first, item.second);
 			}
 			
 			options->layout();
@@ -101,7 +108,7 @@ void ChooseAssetWindow::addItem(const String& id, const String& name, gsl::span<
 		label->getTextRenderer().setColourOverride(overrides);
 	}
 	
-	options->addItem(id, makeItemSizer(std::move(icon), std::move(label)));
+	options->addItem(id, makeItemSizer(std::move(icon), std::move(label)), 1);
 }
 
 std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizer(Sprite icon, std::shared_ptr<UILabel> label)
@@ -122,6 +129,11 @@ std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizerBigIcon(Sprite icon, st
 	}
 	sizer->add(label, 0, {}, UISizerAlignFlags::CentreHorizontal);
 	return sizer;
+}
+
+void ChooseAssetWindow::sortItems(std::vector<std::pair<String, String>>& items)
+{
+	std::sort(items.begin(), items.end(), [=] (const auto& a, const auto& b) { return a.second < b.second; });
 }
 
 void ChooseAssetWindow::setFilter(const String& str)

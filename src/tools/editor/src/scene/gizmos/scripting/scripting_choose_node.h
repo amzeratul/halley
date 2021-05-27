@@ -10,7 +10,8 @@ namespace Halley {
 	protected:
 		std::shared_ptr<UISizer> makeItemSizer(Sprite icon, std::shared_ptr<UILabel> label) override;
 		Sprite makeIcon(const String& id) override;
-
+		void sortItems(std::vector<std::pair<String, String>>& items) override;
+	
 	private:
 		Resources& resources;
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
