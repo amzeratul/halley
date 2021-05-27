@@ -218,10 +218,6 @@ bool ScriptGraph::disconnectPin(uint32_t nodeIdx, uint8_t pinN)
 	}
 
 	for (auto& conn: pin.connections) {
-		if (!conn.dstNode.has_value() && conn.dstPin == 0 && !conn.entity.isValid()) {
-			return false;
-		}
-
 		if (conn.dstNode) {
 			auto& otherNode = nodes.at(conn.dstNode.value());
 			auto& ocs = otherNode.getPin(conn.dstPin).connections;

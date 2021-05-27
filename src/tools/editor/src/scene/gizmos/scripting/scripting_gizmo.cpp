@@ -114,8 +114,8 @@ void ScriptingGizmo::onPinClicked(bool rightClick, bool shiftHeld)
 	}
 
 	const bool changed = rightClick || !shiftHeld ?
-		scriptGraph->disconnectPin(nodeEditingConnection->nodeId, nodeEditingConnection->elementId) :
-		scriptGraph->disconnectPinIfSingleConnection(nodeEditingConnection->nodeId, nodeEditingConnection->elementId);
+		scriptGraph->disconnectPin(nodeUnderMouse->nodeId, nodeUnderMouse->elementId) :
+		scriptGraph->disconnectPinIfSingleConnection(nodeUnderMouse->nodeId, nodeUnderMouse->elementId);
 	
 	if (changed) {
 		saveEntityData();
