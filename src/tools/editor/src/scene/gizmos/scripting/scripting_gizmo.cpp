@@ -31,6 +31,8 @@ ScriptingGizmo::ScriptingGizmo(SnapRules snapRules, UIFactory& factory, ISceneEd
 void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {
 	Executor(pendingUITasks).runPending();
+
+	resources = &sceneEditor.getResources();
 	
 	if (!renderer) {
 		renderer = std::make_shared<ScriptRenderer>(sceneEditor.getResources(), sceneEditor.getWorld(), *scriptNodeTypes, sceneEditorWindow.getProjectDefaultZoom());
@@ -349,7 +351,7 @@ void ScriptingGizmo::addNode()
 {
 	const Vector2f pos = lastMousePos ? lastMousePos.value() - basePos : Vector2f();
 	
-	auto chooseAssetWindow = std::make_shared<ScriptingChooseNode>(factory, scriptNodeTypes, [=] (std::optional<String> result)
+	auto chooseAssetWindow = std::make_shared<ScriptingChooseNode>(factory, *resources, scriptNodeTypes, [=] (std::optional<String> result)
 	{
 		if (result) {
 			Concurrent::execute(pendingUITasks, [this, type = std::move(result.value()), pos] ()

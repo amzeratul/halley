@@ -86,18 +86,11 @@ void ChooseAssetWindow::populateList()
 
 void ChooseAssetWindow::addItem(const String& id, const String& name, gsl::span<const std::pair<uint16_t, uint16_t>> matchPositions)
 {
-	auto sizer = std::make_shared<UISizer>();
-
 	// Make icon
 	auto icon = makeIcon(id);
-	if (icon.hasMaterial()) {
-		sizer->add(std::make_shared<UIImage>(icon), 0, Vector4f(0, 0, 4, 0));
-	}
 
 	// Make label
 	auto label = options->makeLabel("", LocalisedString::fromUserString(name));
-
-	// Match highlights
 	auto labelCol = label->getColour();
 	if (!matchPositions.empty()) {
 		std::vector<ColourOverride> overrides;
@@ -107,9 +100,28 @@ void ChooseAssetWindow::addItem(const String& id, const String& name, gsl::span<
 		}
 		label->getTextRenderer().setColourOverride(overrides);
 	}
-	sizer->add(label, 0);
 	
-	options->addItem(id, sizer);
+	options->addItem(id, makeItemSizer(std::move(icon), std::move(label)));
+}
+
+std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizer(Sprite icon, std::shared_ptr<UILabel> label)
+{
+	auto sizer = std::make_shared<UISizer>();
+	if (icon.hasMaterial()) {
+		sizer->add(std::make_shared<UIImage>(icon), 0, Vector4f(0, 0, 4, 0));
+	}
+	sizer->add(label, 0);
+	return sizer;
+}
+
+std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizerBigIcon(Sprite icon, std::shared_ptr<UILabel> label)
+{
+	auto sizer = std::make_shared<UISizer>(UISizerType::Vertical);
+	if (icon.hasMaterial()) {
+		sizer->add(std::make_shared<UIImage>(icon), 0, Vector4f(0, 0, 4, 0), UISizerAlignFlags::CentreHorizontal);
+	}
+	sizer->add(label, 0, {}, UISizerAlignFlags::CentreHorizontal);
+	return sizer;
 }
 
 void ChooseAssetWindow::setFilter(const String& str)

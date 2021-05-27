@@ -29,6 +29,9 @@ namespace Halley {
         std::shared_ptr<UIList> options;
         void onMakeUI() override;
 
+		virtual std::shared_ptr<UISizer> makeItemSizer(Sprite icon, std::shared_ptr<UILabel> label);
+		std::shared_ptr<UISizer> makeItemSizerBigIcon(Sprite icon, std::shared_ptr<UILabel> label);
+
     private:
         EditorUIFactory& factory;
         Callback callback;

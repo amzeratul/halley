@@ -34,6 +34,8 @@ namespace Halley {
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
 		std::shared_ptr<ScriptRenderer> renderer;
 
+		Resources* resources = nullptr;
+
 		Vector2f basePos;
 		ScriptGraph* scriptGraph = nullptr;
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeUnderMouse;
