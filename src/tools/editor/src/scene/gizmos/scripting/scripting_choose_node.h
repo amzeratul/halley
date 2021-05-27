@@ -8,8 +8,8 @@ namespace Halley {
 		ScriptingChooseNode(UIFactory& factory, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, const Callback& callback);
 
 	protected:
-		std::shared_ptr<UISizer> makeItemSizer(Sprite icon, std::shared_ptr<UILabel> label) override;
-		Sprite makeIcon(const String& id) override;
+		std::shared_ptr<UISizer> makeItemSizer(Sprite icon, std::shared_ptr<UILabel> label, bool hasSearch) override;
+		Sprite makeIcon(const String& id, bool hasSearch) override;
 		void sortItems(std::vector<std::pair<String, String>>& items) override;
 	
 	private:

@@ -63,6 +63,7 @@ void ChooseAssetWindow::populateList()
 	options->clear();
 	
 	if (filter.isEmpty()) {
+		options->setOrientation(orientation, nColumns);
 		if (canShowAll()) {
 			if (canShowBlank) {
 				options->addTextItem("", LocalisedString::fromHardcodedString("[Empty]"));
@@ -83,6 +84,7 @@ void ChooseAssetWindow::populateList()
 			options->setSelectedOptionId(defaultOption);
 		}
 	} else {
+		options->setOrientation(UISizerType::Vertical, 1);
 		for (const auto& r: fuzzyMatcher.match(filter)) {
 			addItem(r.getId(), r.getString(), r.getMatchPositions());
 		}
@@ -93,8 +95,10 @@ void ChooseAssetWindow::populateList()
 
 void ChooseAssetWindow::addItem(const String& id, const String& name, gsl::span<const std::pair<uint16_t, uint16_t>> matchPositions)
 {
+	const bool hasSearch = !matchPositions.empty();
+	
 	// Make icon
-	auto icon = makeIcon(id);
+	auto icon = makeIcon(id, hasSearch);
 
 	// Make label
 	auto label = options->makeLabel("", LocalisedString::fromUserString(name));
@@ -108,10 +112,10 @@ void ChooseAssetWindow::addItem(const String& id, const String& name, gsl::span<
 		label->getTextRenderer().setColourOverride(overrides);
 	}
 	
-	options->addItem(id, makeItemSizer(std::move(icon), std::move(label)), 1);
+	options->addItem(id, makeItemSizer(std::move(icon), std::move(label), hasSearch), 1);
 }
 
-std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizer(Sprite icon, std::shared_ptr<UILabel> label)
+std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizer(Sprite icon, std::shared_ptr<UILabel> label, bool hasSearch)
 {
 	auto sizer = std::make_shared<UISizer>();
 	if (icon.hasMaterial()) {
@@ -169,7 +173,7 @@ bool ChooseAssetWindow::canShowAll() const
 	return true;
 }
 
-Sprite ChooseAssetWindow::makeIcon(const String& id)
+Sprite ChooseAssetWindow::makeIcon(const String& id, bool hasSearch)
 {
 	return Sprite();
 }
@@ -182,7 +186,6 @@ EditorUIFactory& ChooseAssetWindow::getFactory() const
 void ChooseAssetWindow::onMakeUI()
 {
 	options = getWidgetAs<UIList>("options");
-	options->setOrientation(orientation, nColumns);
 
 	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
 	{
@@ -240,7 +243,7 @@ ChooseAssetTypeWindow::ChooseAssetTypeWindow(UIFactory& factory, AssetType type,
 	setTitle(LocalisedString::fromHardcodedString("Choose " + toString(type)));
 }
 
-Sprite ChooseAssetTypeWindow::makeIcon(const String& id)
+Sprite ChooseAssetTypeWindow::makeIcon(const String& id, bool hasSearch)
 {
 	if (!icon.hasMaterial()) {
 		icon = getFactory().makeAssetTypeIcon(type);
@@ -259,7 +262,7 @@ ChooseImportAssetWindow::ChooseImportAssetWindow(UIFactory& factory, Project& pr
 	setTitle(LocalisedString::fromHardcodedString("Open asset"));
 }
 
-Sprite ChooseImportAssetWindow::makeIcon(const String& id)
+Sprite ChooseImportAssetWindow::makeIcon(const String& id, bool hasSearch)
 {
 	const auto type = project.getAssetImporter()->getImportAssetType(id, false);
 	const auto iter = icons.find(type);

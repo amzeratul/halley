@@ -24,12 +24,12 @@ namespace Halley {
     protected:
         bool onKeyPress(KeyboardKeyPress key) override;
 		virtual bool canShowAll() const;
-		virtual Sprite makeIcon(const String& id);
+		virtual Sprite makeIcon(const String& id, bool hasSearch);
 		EditorUIFactory& getFactory() const;
         std::shared_ptr<UIList> options;
         void onMakeUI() override;
 
-		virtual std::shared_ptr<UISizer> makeItemSizer(Sprite icon, std::shared_ptr<UILabel> label);
+		virtual std::shared_ptr<UISizer> makeItemSizer(Sprite icon, std::shared_ptr<UILabel> label, bool hasSearch);
 		std::shared_ptr<UISizer> makeItemSizerBigIcon(Sprite icon, std::shared_ptr<UILabel> label);
 
         virtual void sortItems(std::vector<std::pair<String, String>>& items);
@@ -66,7 +66,7 @@ namespace Halley {
         ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, Callback callback);
 
     protected:
-        Sprite makeIcon(const String& id) override;
+        Sprite makeIcon(const String& id, bool hasSearch) override;
 
 	private:
 		AssetType type;
@@ -78,7 +78,7 @@ namespace Halley {
 		ChooseImportAssetWindow(UIFactory& factory, Project& project, Callback callback);
 
 	protected:
-		Sprite makeIcon(const String& id) override;
+		Sprite makeIcon(const String& id, bool hasSearch) override;
 		bool canShowAll() const override;
 
 	private:
