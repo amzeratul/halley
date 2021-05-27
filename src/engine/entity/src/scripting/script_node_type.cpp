@@ -6,7 +6,7 @@
 #include "nodes/script_flow_control.h"
 #include "nodes/script_logic_gates.h"
 #include "nodes/script_music.h"
-#include "nodes/script_play_animation.h"
+#include "nodes/script_sprite.h"
 #include "nodes/script_variables.h"
 #include "nodes/script_wait.h"
 #include "nodes/script_wait_for.h"
@@ -251,7 +251,8 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptStop>());
 	addScriptNode(std::make_unique<ScriptWait>());
 	addScriptNode(std::make_unique<ScriptWaitFor>());
-	addScriptNode(std::make_unique<ScriptPlayAnimation>());
+	addScriptNode(std::make_unique<ScriptSpriteAnimation>());
+	addScriptNode(std::make_unique<ScriptSpriteDirection>());
 	addScriptNode(std::make_unique<ScriptBranch>());
 	//addScriptNode(std::make_unique<ScriptFork>());
 	//addScriptNode(std::make_unique<ScriptMergeAny>());

@@ -48,6 +48,7 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 			if (!thread.isNodeStarted()) {
 				thread.startNode(makeNodeData(nodeType, node, thread.getPendingNodeData()));
 				graphState.onNodeStarted(nodeId);
+				//Logger::logDev("Start node " + nodeType.getId());
 			}
 
 			// Update
