@@ -110,14 +110,14 @@ size_t& ScriptEnvironment::getNodeCounter(uint32_t nodeId)
 	return currentState->getNodeCounter(nodeId);
 }
 
-void ScriptEnvironment::playMusic(const String& music)
+void ScriptEnvironment::playMusic(const String& music, float fadeTime)
 {
-	api.audio->playMusic(music);
+	api.audio->playMusic(music, 0, fadeTime);
 }
 
-void ScriptEnvironment::stopMusic()
+void ScriptEnvironment::stopMusic(float fadeTime)
 {
-	api.audio->stopMusic();
+	api.audio->stopMusic(0, fadeTime);
 }
 
 ConfigNode ScriptEnvironment::getVariable(const String& variable)

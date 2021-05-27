@@ -15,8 +15,8 @@ namespace Halley {
     	const ScriptGraph* getCurrentGraph() const;
         size_t& getNodeCounter(uint32_t nodeId);
 
-    	void playMusic(const String& music);
-    	void stopMusic();
+    	void playMusic(const String& music, float fadeTime);
+    	void stopMusic(float fadeTime);
 
     	virtual ConfigNode getVariable(const String& variable);
     	virtual void setVariable(const String& variable, ConfigNode data);

@@ -25,7 +25,7 @@ std::pair<String, std::vector<ColourOverride>> ScriptPlayMusic::getNodeDescripti
 
 IScriptNodeType::Result ScriptPlayMusic::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	environment.playMusic(node.getSettings()["music"].asString(""));
+	environment.playMusic(node.getSettings()["music"].asString(""), 1.0f);
 	return Result(ScriptNodeExecutionState::Done);
 }
 
@@ -48,6 +48,6 @@ std::pair<String, std::vector<ColourOverride>> ScriptStopMusic::getNodeDescripti
 
 IScriptNodeType::Result ScriptStopMusic::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	environment.stopMusic();
+	environment.stopMusic(1.0f);
 	return Result(ScriptNodeExecutionState::Done);
 }
