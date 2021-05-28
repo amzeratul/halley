@@ -22,7 +22,9 @@ void EntityList::setSceneEditorWindow(SceneEditorWindow& editor)
 void EntityList::setSceneData(std::shared_ptr<ISceneData> data)
 {
 	sceneData = std::move(data);
-	list->setSingleRoot(sceneData->isSingleRoot());
+	if (sceneData) {
+		list->setSingleRoot(sceneData->isSingleRoot());
+	}
 	refreshList();
 }
 
@@ -90,7 +92,9 @@ void EntityList::refreshList()
 
 	list->setScrollToSelection(false);
 	list->clear();
-	addEntities(sceneData->getEntityTree(), "");
+	if (sceneData) {
+		addEntities(sceneData->getEntityTree(), "");
+	}
 	layout();
 	list->setScrollToSelection(true);
 

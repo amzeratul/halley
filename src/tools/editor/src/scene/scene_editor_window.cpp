@@ -204,6 +204,7 @@ void SceneEditorWindow::unloadScene()
 	currentEntityScene.reset();
 	entityEditor->unloadEntity();
 	entityEditorFactory.reset();
+	entityList->setSceneData({});
 }
 
 void SceneEditorWindow::update(Time t, bool moved)

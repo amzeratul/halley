@@ -175,6 +175,7 @@ void ProjectWindow::destroyCustomUI()
 		customTools.clear();
 	}
 	pagedPane->resizePages(numOfStandardTools);
+	debugConsoleCommands.reset();
 }
 
 void ProjectWindow::onLoadDLL()
