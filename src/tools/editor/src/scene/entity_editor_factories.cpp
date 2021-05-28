@@ -848,6 +848,32 @@ public:
 	}
 };
 
+class ComponentEditorScriptGraphFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::ScriptGraph";
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		const auto data = pars.data;
+		const auto componentName = pars.componentName;
+
+		auto style = context.getUIFactory().getStyle("buttonThin");
+
+		auto field = std::make_shared<UIButton>("editScript", style, LocalisedString::fromHardcodedString("Edit..."));
+		field->setMinSize(Vector2f(30, 22));
+
+		field->setHandle(UIEventType::ButtonClicked, "editScript", [=, &context] (const UIEvent& event)
+		{
+			context.setTool("scripting", componentName, data.getName());
+		});
+
+		return field;
+	}
+};
+
 std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
 	std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
@@ -871,6 +897,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorColourFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorParticlesFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorResourceReferenceFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorScriptGraphFieldFactory>());
 
 	return factories;
 }
