@@ -585,13 +585,23 @@ void TextRenderer::updateMaterials() const
 	}
 }
 
+ColourStringBuilder::ColourStringBuilder(bool replaceEmptyWithQuotes)
+	: replaceEmptyWithQuotes(replaceEmptyWithQuotes)
+{
+}
+
 void ColourStringBuilder::append(std::string_view text, std::optional<Colour4f> col)
 {
 	if ((colours.empty() && col) || (!colours.empty() && col != colours.back().second)) {
 		colours.emplace_back(len, col);	
 	}
-	len += text.length();
-	strings.push_back(std::move(text));
+	if (text.empty() && replaceEmptyWithQuotes) {
+		len += 2;
+		strings.push_back("\"\"");
+	} else {
+		len += text.length();
+		strings.emplace_back(text);
+	}
 }
 
 std::pair<String, std::vector<ColourOverride>> ColourStringBuilder::moveResults()

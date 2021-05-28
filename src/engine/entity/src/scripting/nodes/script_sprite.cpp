@@ -24,7 +24,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpriteAnimation::getPinConfigura
 
 std::pair<String, std::vector<ColourOverride>> ScriptSpriteAnimation::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
-	ColourStringBuilder str;
+	auto str = ColourStringBuilder(true);
 	str.append("Play sequence ");
 	str.append(node.getSettings()["sequence"].asString("default"), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append(" on entity ");
@@ -61,7 +61,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpriteDirection::getPinConfigura
 
 std::pair<String, std::vector<ColourOverride>> ScriptSpriteDirection::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
-	ColourStringBuilder str;
+	auto str = ColourStringBuilder(true);
 	str.append("Set direction ");
 	str.append(node.getSettings()["direction"].asString("right"), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append(" on entity ");

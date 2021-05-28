@@ -19,8 +19,13 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateAnd::getPinConfiguratio
 
 std::pair<String, std::vector<ColourOverride>> ScriptLogicGateAnd::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
+	auto a = getConnectedNodeName(world, node, graph, 0);
+	auto b = getConnectedNodeName(world, node, graph, 1);
 	ColourStringBuilder result;
-	result.append("AND: True if all inputs are true.");
+	result.append("True if ");
+	result.append(addParentheses(std::move(a)), Colour4f(0.97f, 0.35f, 0.35f));
+	result.append(" AND ");
+	result.append(addParentheses(std::move(b)), Colour4f(0.97f, 0.35f, 0.35f));
 	return result.moveResults();
 }
 
@@ -48,8 +53,13 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateOr::getPinConfiguration
 
 std::pair<String, std::vector<ColourOverride>> ScriptLogicGateOr::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
+	auto a = getConnectedNodeName(world, node, graph, 0);
+	auto b = getConnectedNodeName(world, node, graph, 1);
 	ColourStringBuilder result;
-	result.append("OR: True if any of the inputs are true.");
+	result.append("True if ");
+	result.append(addParentheses(std::move(a)), Colour4f(0.97f, 0.35f, 0.35f));
+	result.append(" OR ");
+	result.append(addParentheses(std::move(b)), Colour4f(0.97f, 0.35f, 0.35f));
 	return result.moveResults();
 }
 
@@ -77,8 +87,13 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateXor::getPinConfiguratio
 
 std::pair<String, std::vector<ColourOverride>> ScriptLogicGateXor::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
+	auto a = getConnectedNodeName(world, node, graph, 0);
+	auto b = getConnectedNodeName(world, node, graph, 1);
 	ColourStringBuilder result;
-	result.append("XOR: True if exactly one of the inputs is true.");
+	result.append("True if ");
+	result.append(addParentheses(std::move(a)), Colour4f(0.97f, 0.35f, 0.35f));
+	result.append(" XOR ");
+	result.append(addParentheses(std::move(b)), Colour4f(0.97f, 0.35f, 0.35f));
 	return result.moveResults();
 }
 
@@ -105,8 +120,10 @@ gsl::span<const IScriptNodeType::PinType> ScriptLogicGateNot::getPinConfiguratio
 
 std::pair<String, std::vector<ColourOverride>> ScriptLogicGateNot::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
+	auto a = getConnectedNodeName(world, node, graph, 0);
 	ColourStringBuilder result;
-	result.append("NOT: Inverts the boolean value of the input.");
+	result.append("True if NOT ");
+	result.append(addParentheses(std::move(a)), Colour4f(0.97f, 0.35f, 0.35f));
 	return result.moveResults();
 }
 

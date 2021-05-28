@@ -110,11 +110,13 @@ namespace Halley
 
 	class ColourStringBuilder {
 	public:
+		explicit ColourStringBuilder(bool replaceEmptyWithQuotes = false);
 		void append(std::string_view text, std::optional<Colour4f> col = {});
 
 		std::pair<String, std::vector<ColourOverride>> moveResults();
 
 	private:
+		bool replaceEmptyWithQuotes;
 		std::vector<String> strings;
 		std::vector<ColourOverride> colours;
 		size_t len = 0;

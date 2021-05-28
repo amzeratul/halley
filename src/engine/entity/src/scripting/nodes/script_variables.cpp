@@ -26,7 +26,7 @@ std::vector<IScriptNodeType::SettingType> ScriptVariable::getSettingTypes() cons
 
 std::pair<String, std::vector<ColourOverride>> ScriptVariable::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
-	ColourStringBuilder str;
+	auto str = ColourStringBuilder(true);
 	str.append("Variable ");
 	str.append(node.getSettings()["variable"].asString(""), Colour4f(0.97f, 0.35f, 0.35f));
 	return str.moveResults();
@@ -68,7 +68,7 @@ std::vector<IScriptNodeType::SettingType> ScriptLiteral::getSettingTypes() const
 
 std::pair<String, std::vector<ColourOverride>> ScriptLiteral::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
-	ColourStringBuilder str;
+	auto str = ColourStringBuilder(true);
 	str.append("Literal with value ");
 	str.append(node.getSettings()["value"].asString("0"), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append(".");
@@ -122,7 +122,7 @@ std::vector<IScriptNodeType::SettingType> ScriptComparison::getSettingTypes() co
 
 std::pair<String, std::vector<ColourOverride>> ScriptComparison::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
-	ColourStringBuilder str;
+	auto str = ColourStringBuilder(true);
 	str.append("True if ");
 	str.append(addParentheses(getConnectedNodeName(world, node, graph, 0)), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append(" ");
@@ -150,7 +150,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSetVariable::getPinConfiguration
 
 std::pair<String, std::vector<ColourOverride>> ScriptSetVariable::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
-	ColourStringBuilder str;
+	auto str = ColourStringBuilder(true);
 	str.append("Copies value into variable.");
 	return str.moveResults();
 }
