@@ -73,7 +73,7 @@ namespace Halley {
 		std::optional<NodeUnderMouseInfo> highlightNode;
 		std::optional<ConnectionPath> currentPath;
 
-		void drawNodeOutputs(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, const ScriptGraph& graph, float curZoom);
+		void drawNodeOutputs(Painter& painter, Vector2f basePos, size_t nodeIdx, const ScriptGraph& graph, float curZoom);
 		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, uint8_t highlightElementId);
 
 		Vector2f getNodeSize(float curZoom) const;
@@ -82,6 +82,6 @@ namespace Halley {
 		const Sprite& getIcon(const IScriptNodeType& nodeType, const ScriptGraphNode& node);
 
 		BezierCubic makeBezier(const ConnectionPath& path) const;
-		void drawConnection(Painter& painter, const ConnectionPath& path, float curZoom) const;
+		void drawConnection(Painter& painter, const ConnectionPath& path, float curZoom, bool highlight) const;
 	};
 }

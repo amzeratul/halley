@@ -41,12 +41,12 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 
 	const float effectiveZoom = std::max(nativeZoom, curZoom);
 
-	for (const auto& node: graph->getNodes()) {
-		drawNodeOutputs(painter, basePos, node, *graph, effectiveZoom);
+	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
+		drawNodeOutputs(painter, basePos, i, *graph, effectiveZoom);
 	}
 
 	if (currentPath) {
-		drawConnection(painter, currentPath.value(), curZoom);
+		drawConnection(painter, currentPath.value(), curZoom, false);
 	}
 	
 	for (uint32_t i = 0; i < static_cast<uint32_t>(graph->getNodes().size()); ++i) {
@@ -79,12 +79,15 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 	}
 }
 
-void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, const ScriptGraph& graph, float curZoom)
+void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t nodeIdx, const ScriptGraph& graph, float curZoom)
 {
+	const ScriptGraphNode& node = graph.getNodes().at(nodeIdx);
 	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
 	if (!nodeType) {
 		return;
 	}
+
+	const bool nodeHighlighted = highlightNode && highlightNode->nodeId == nodeIdx;
 
 	for (size_t i = 0; i < node.getPins().size(); ++i) {
 		const auto& srcPinType = nodeType->getPin(i);
@@ -93,6 +96,8 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 		for (const auto& pinConnection: pin.connections) {
 			std::optional<Vector2f> dstPos;
 			ScriptNodePinType dstPinType;
+
+			bool highlighted = nodeHighlighted;
 
 			if (pinConnection.dstNode && srcPinType.direction == ScriptNodePinDirection::Output) {
 				const size_t dstIdx = pinConnection.dstPin;
@@ -103,6 +108,9 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 				}
 				dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom).getCentre();
 				dstPinType = dstNodeType->getPin(dstIdx);
+				if (highlightNode && highlightNode->nodeId == pinConnection.dstNode.value()) {
+					highlighted = true;
+				}
 			} else if (pinConnection.entity.isValid()) {
 				auto entity = world.getEntity(pinConnection.entity);
 				auto* transform = entity.tryGetComponent<Transform2DComponent>();
@@ -114,7 +122,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, const S
 			
 			if (dstPos) {
 				const Vector2f srcPos = getNodeElementArea(*nodeType, basePos, node, i, curZoom).getCentre();
-				drawConnection(painter, ConnectionPath{ srcPos, dstPos.value(), srcPinType, dstPinType }, curZoom);
+				drawConnection(painter, ConnectionPath{ srcPos, dstPos.value(), srcPinType, dstPinType }, curZoom, highlighted);
 			}
 		}
 	}
@@ -146,11 +154,13 @@ BezierCubic ScriptRenderer::makeBezier(const ConnectionPath& path) const
 	return BezierCubic(path.from, path.from + dist * fromDir, path.to + dist * toDir, path.to);
 }
 
-void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path, float curZoom) const
+void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path, float curZoom, bool highlight) const
 {
 	const auto bezier = makeBezier(path);
+	const auto baseCol = getPinColour(path.fromType);
+	const auto col = highlight ? baseCol.inverseMultiplyLuma(0.25f) : baseCol;
 	painter.drawLine(bezier + Vector2f(1.0f, 2.0f) / curZoom, 3.0f / curZoom, Colour4f(0, 0, 0, 0.3f));
-	painter.drawLine(bezier, 3.0f / curZoom, getPinColour(path.fromType));
+	painter.drawLine(bezier, 3.0f / curZoom, col);
 }
 
 void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, uint8_t highlightElementId)
