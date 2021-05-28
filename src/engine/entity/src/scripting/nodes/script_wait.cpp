@@ -17,6 +17,11 @@ ConfigNode ScriptWaitData::toConfigNode(const ConfigNodeSerializationContext& co
 	return node;
 }
 
+String ScriptWait::getLabel(const ScriptGraphNode& node) const
+{
+	return toString(node.getSettings()["time"].asFloat(0.0f));
+}
+
 gsl::span<const IScriptNodeType::PinType> ScriptWait::getPinConfiguration() const
 {
 	using ET = ScriptNodeElementType;

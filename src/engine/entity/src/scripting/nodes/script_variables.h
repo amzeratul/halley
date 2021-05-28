@@ -6,6 +6,7 @@ namespace Halley {
 	public:
 		String getId() const override { return "variable"; }
 		String getName() const override { return "Variable"; }
+		String getLabel(const ScriptGraphNode& node) const override;
 		String getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const override;
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/variable.png"; }
 		gsl::span<const PinType> getPinConfiguration() const override;
@@ -21,6 +22,7 @@ namespace Halley {
 	public:
 		String getId() const override { return "literal"; }
 		String getName() const override { return "Literal"; }
+		String getLabel(const ScriptGraphNode& node) const override;
 		String getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const override;
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/literal.png"; }
 		gsl::span<const PinType> getPinConfiguration() const override;
@@ -35,6 +37,7 @@ namespace Halley {
 	public:
 		String getId() const override { return "comparison"; }
 		String getName() const override { return "Comparison"; }
+		String getLabel(const ScriptGraphNode& node) const override;
 		String getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const override;
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/comparison.png"; }
 		gsl::span<const PinType> getPinConfiguration() const override;

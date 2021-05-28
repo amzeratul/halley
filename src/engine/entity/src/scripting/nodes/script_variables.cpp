@@ -1,9 +1,14 @@
 #include "script_variables.h"
 using namespace Halley;
 
-String ScriptVariable::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String ScriptVariable::getLabel(const ScriptGraphNode& node) const
 {
 	return node.getSettings()["variable"].asString("");
+}
+
+String ScriptVariable::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+{
+	return getLabel(node);
 }
 
 gsl::span<const IScriptNodeType::PinType> ScriptVariable::getPinConfiguration() const
@@ -38,9 +43,14 @@ void ScriptVariable::doSetData(ScriptEnvironment& environment, const ScriptGraph
 }
 
 
-String ScriptLiteral::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String ScriptLiteral::getLabel(const ScriptGraphNode& node) const
 {
 	return node.getSettings()["value"].asString("0");
+}
+
+String ScriptLiteral::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+{
+	return getLabel(node);
 }
 
 gsl::span<const IScriptNodeType::PinType> ScriptLiteral::getPinConfiguration() const
@@ -84,11 +94,16 @@ ConfigNode ScriptLiteral::doGetData(ScriptEnvironment& environment, const Script
 }
 
 
+String ScriptComparison::getLabel(const ScriptGraphNode& node) const
+{
+	return node.getSettings()["operator"].asString("equals");
+}
+
 String ScriptComparison::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
-	auto op = node.getSettings()["operator"].asString("equals");
+	auto op = getLabel(node);
 	return addParentheses(std::move(a)) + " " + std::move(op) + " " + addParentheses(std::move(b));
 }
 

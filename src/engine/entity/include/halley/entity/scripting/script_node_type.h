@@ -38,6 +38,7 @@ namespace Halley {
 		virtual String getId() const = 0;
 		virtual String getName() const = 0;
 		virtual String getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const;
+		virtual String getLabel(const ScriptGraphNode& node) const;
 
 		virtual std::vector<SettingType> getSettingTypes() const;
 		virtual std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const;

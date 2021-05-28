@@ -68,6 +68,7 @@ namespace Halley {
 		Sprite nodeBg;
 		Sprite variableBg;
 		Sprite pinSprite;
+		TextRenderer labelText;
 		std::map<String, Sprite> icons;
 
 		std::optional<NodeUnderMouseInfo> highlightNode;

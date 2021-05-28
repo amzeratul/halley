@@ -17,6 +17,11 @@ String IScriptNodeType::getShortDescription(const World& world, const ScriptGrap
 	return getName();
 }
 
+String IScriptNodeType::getLabel(const ScriptGraphNode& node) const
+{
+	return "";
+}
+
 std::vector<IScriptNodeType::SettingType> IScriptNodeType::getSettingTypes() const
 {
 	return {};

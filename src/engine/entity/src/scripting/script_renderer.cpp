@@ -21,6 +21,13 @@ ScriptRenderer::ScriptRenderer(Resources& resources, World& world, const ScriptN
 	nodeBg = Sprite().setImage(resources, "halley_ui/ui_float_solid_window.png").setPivot(Vector2f(0.5f, 0.5f));
 	variableBg = Sprite().setImage(resources, "halley_ui/script_variable.png").setPivot(Vector2f(0.5f, 0.5f));
 	pinSprite = Sprite().setImage(resources, "halley_ui/ui_render_graph_node_pin.png").setPivot(Vector2f(0.5f, 0.5f));
+	labelText
+		.setFont(resources.get<Font>("Ubuntu Bold"))
+		.setSize(14)
+		.setColour(Colour(1, 1, 1))
+		.setOutlineColour(Colour(0, 0, 0))
+		.setOutline(1)
+		.setAlignment(0.5f);
 }
 
 void ScriptRenderer::setGraph(const ScriptGraph* graph)
@@ -218,11 +225,27 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 				.draw(painter);
 		}
 
+		const auto label = nodeType->getLabel(node);
+		const float iconExtraOffset = nodeType->getClassification() == ScriptNodeClassification::Variable ? -2.0f : 0.0f;
+		const Vector2f iconOffset = label.isEmpty() ? Vector2f() : Vector2f(0, (-8.0f + iconExtraOffset) / curZoom).round();
+
+		// Icon
 		getIcon(*nodeType, node).clone()
-			.setPosition(pos)
+			.setPosition(pos + iconOffset)
 			.setScale(1.0f / curZoom)
 			.setColour(iconCol)
 			.draw(painter);
+
+		// Label
+		if (!label.isEmpty()) {
+			labelText.clone()
+				.setPosition(pos + Vector2f(0, (8.0f + iconExtraOffset) / curZoom).round())
+				.setText(label)
+				.setSize(14 / curZoom)
+				.setOutline(8.0f / curZoom)
+				.setOutlineColour(col.multiplyLuma(0.75f))
+				.draw(painter);
+		}
 	}
 
 	// Draw pins
