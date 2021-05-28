@@ -37,6 +37,7 @@ namespace Halley {
 
 		virtual String getId() const = 0;
 		virtual String getName() const = 0;
+		virtual String getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const;
 
 		virtual std::vector<SettingType> getSettingTypes() const;
 		virtual std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const;
@@ -65,6 +66,8 @@ namespace Halley {
 		String getConnectedNodeName(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const;
 
 		std::array<OptionalLite<uint32_t>, 8> getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const;
+
+		static String addParentheses(String str);
 	};
 
 	template <typename DataType, typename EnvironmentType = ScriptEnvironment>

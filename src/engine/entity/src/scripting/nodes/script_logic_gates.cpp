@@ -2,6 +2,13 @@
 
 using namespace Halley;
 
+String ScriptLogicGateAnd::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+{
+	auto a = getConnectedNodeName(world, node, graph, 0);
+	auto b = getConnectedNodeName(world, node, graph, 1);
+	return addParentheses(std::move(a)) + " AND " + addParentheses(std::move(b));
+}
+
 gsl::span<const IScriptNodeType::PinType> ScriptLogicGateAnd::getPinConfiguration() const
 {
 	using ET = ScriptNodeElementType;
@@ -24,7 +31,12 @@ ConfigNode ScriptLogicGateAnd::doGetData(ScriptEnvironment& environment, const S
 }
 
 
-
+String ScriptLogicGateOr::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+{
+	auto a = getConnectedNodeName(world, node, graph, 0);
+	auto b = getConnectedNodeName(world, node, graph, 1);
+	return addParentheses(std::move(a)) + " OR " + addParentheses(std::move(b));
+}
 
 gsl::span<const IScriptNodeType::PinType> ScriptLogicGateOr::getPinConfiguration() const
 {
@@ -48,6 +60,12 @@ ConfigNode ScriptLogicGateOr::doGetData(ScriptEnvironment& environment, const Sc
 }
 
 
+String ScriptLogicGateXor::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+{
+	auto a = getConnectedNodeName(world, node, graph, 0);
+	auto b = getConnectedNodeName(world, node, graph, 1);
+	return addParentheses(std::move(a)) + " XOR " + addParentheses(std::move(b));
+}
 
 gsl::span<const IScriptNodeType::PinType> ScriptLogicGateXor::getPinConfiguration() const
 {
@@ -71,6 +89,11 @@ ConfigNode ScriptLogicGateXor::doGetData(ScriptEnvironment& environment, const S
 }
 
 
+String ScriptLogicGateNot::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+{
+	auto a = getConnectedNodeName(world, node, graph, 0);
+	return "NOT " + addParentheses(std::move(a));
+}
 
 gsl::span<const IScriptNodeType::PinType> ScriptLogicGateNot::getPinConfiguration() const
 {

@@ -12,9 +12,8 @@ gsl::span<const IScriptNodeType::PinType> ScriptBranch::getPinConfiguration() co
 std::pair<String, std::vector<ColourOverride>> ScriptBranch::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	ColourStringBuilder str;
-	str.append("Branch based on \"");
+	str.append("Branch if ");
 	str.append(getConnectedNodeName(world, node, graph, 1), Colour4f(0.97f, 0.35f, 0.35f));
-	str.append("\".");
 	return str.moveResults();
 }
 

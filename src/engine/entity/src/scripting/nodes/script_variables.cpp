@@ -1,6 +1,11 @@
 #include "script_variables.h"
 using namespace Halley;
 
+String ScriptVariable::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+{
+	return node.getSettings()["variable"].asString("");
+}
+
 gsl::span<const IScriptNodeType::PinType> ScriptVariable::getPinConfiguration() const
 {
 	using ET = ScriptNodeElementType;
@@ -17,9 +22,8 @@ std::vector<IScriptNodeType::SettingType> ScriptVariable::getSettingTypes() cons
 std::pair<String, std::vector<ColourOverride>> ScriptVariable::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	ColourStringBuilder str;
-	str.append("Variable \"");
+	str.append("Variable ");
 	str.append(node.getSettings()["variable"].asString(""), Colour4f(0.97f, 0.35f, 0.35f));
-	str.append("\".");
 	return str.moveResults();
 }
 
@@ -33,6 +37,11 @@ void ScriptVariable::doSetData(ScriptEnvironment& environment, const ScriptGraph
 	environment.setVariable(node.getSettings()["variable"].asString(""), std::move(data));
 }
 
+
+String ScriptLiteral::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+{
+	return node.getSettings()["value"].asString("0");
+}
 
 gsl::span<const IScriptNodeType::PinType> ScriptLiteral::getPinConfiguration() const
 {
@@ -75,6 +84,13 @@ ConfigNode ScriptLiteral::doGetData(ScriptEnvironment& environment, const Script
 }
 
 
+String ScriptComparison::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+{
+	auto a = getConnectedNodeName(world, node, graph, 0);
+	auto b = getConnectedNodeName(world, node, graph, 1);
+	auto op = node.getSettings()["operator"].asString("equals");
+	return addParentheses(std::move(a)) + " " + std::move(op) + " " + addParentheses(std::move(b));
+}
 
 gsl::span<const IScriptNodeType::PinType> ScriptComparison::getPinConfiguration() const
 {
@@ -92,13 +108,12 @@ std::vector<IScriptNodeType::SettingType> ScriptComparison::getSettingTypes() co
 std::pair<String, std::vector<ColourOverride>> ScriptComparison::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	ColourStringBuilder str;
-	str.append("True if \"");
-	str.append(getConnectedNodeName(world, node, graph, 0), Colour4f(0.97f, 0.35f, 0.35f));
-	str.append("\" ");
+	str.append("True if ");
+	str.append(addParentheses(getConnectedNodeName(world, node, graph, 0)), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(" ");
 	str.append(node.getSettings()["operator"].asString("equals"), Colour4f(0.97f, 0.35f, 0.35f));
-	str.append(" \"");
-	str.append(getConnectedNodeName(world, node, graph, 1), Colour4f(0.97f, 0.35f, 0.35f));
-	str.append("\".");
+	str.append(" ");
+	str.append(addParentheses(getConnectedNodeName(world, node, graph, 1)), Colour4f(0.97f, 0.35f, 0.35f));
 	return str.moveResults();
 }
 

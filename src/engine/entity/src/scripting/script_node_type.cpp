@@ -12,6 +12,11 @@
 #include "nodes/script_wait_for.h"
 using namespace Halley;
 
+String IScriptNodeType::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+{
+	return getName();
+}
+
 std::vector<IScriptNodeType::SettingType> IScriptNodeType::getSettingTypes() const
 {
 	return {};
@@ -141,17 +146,17 @@ String IScriptNodeType::getConnectedNodeName(const World& world, const ScriptGra
 	}
 	assert(pin.connections.size() == 1);
 
-	 if (pin.connections[0].dstNode) {
+	if (pin.connections[0].dstNode) {
 		const auto& otherNode = graph.getNodes().at(pin.connections[0].dstNode.value());
-		return otherNode.getNodeType().getName();
-	 } else if (pin.connections[0].entity.isValid()) {
+		return otherNode.getNodeType().getShortDescription(world, otherNode, graph);
+	} else if (pin.connections[0].entity.isValid()) {
 		const auto target = world.tryGetEntity(pin.connections[0].entity);
 		if (target.isValid()) {
 			return target.getName();
 		}
-	 }
+	}
 	
-	 return "<unknown>";
+	return "<unknown>";
 }
 
 EntityId IScriptNodeType::readEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const
@@ -198,6 +203,14 @@ std::array<OptionalLite<uint32_t>, 8> IScriptNodeType::getOutputNodes(const Scri
 	}
 
 	return result;
+}
+
+String IScriptNodeType::addParentheses(String str)
+{
+	if (str.contains(' ')) {
+		return "(" + std::move(str) + ")";
+	}
+	return str;
 }
 
 ScriptNodeTypeCollection::ScriptNodeTypeCollection()

@@ -36,7 +36,7 @@ std::pair<String, std::vector<ColourOverride>> ScriptWait::getNodeDescription(co
 	ColourStringBuilder str;
 	str.append("Wait ");
 	str.append(toString(time), Colour4f(0.97f, 0.35f, 0.35f));
-	str.append(time == 1.0f ? " second." : " seconds.");
+	str.append(time == 1.0f ? " second" : " seconds");
 	return str.moveResults();
 }
 
