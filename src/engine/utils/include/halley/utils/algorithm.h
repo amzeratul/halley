@@ -99,8 +99,8 @@ namespace std_ex {
 		return container.find(key) != container.end();
 	}
 
-	template <typename K, typename V>
-	bool contains(const std::map<K, V>& container, const K& key)
+	template <typename K, typename V, typename C>
+	bool contains(const std::map<K, V>& container, const C& key)
 	{
 		return container.find(key) != container.end();
 	}

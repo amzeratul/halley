@@ -35,10 +35,6 @@ namespace Halley {
 
 	class HTTP {
 	public:
-		static Bytes get(String host, String path);
-		static Bytes post(String host, String path, std::vector<HTTPPostEntry>& entries);
-
-	private:
-		static Bytes request(String host, String path, bool isPost, String& content, String boundary);
+		static Bytes request(const String& host, const String& path, const String & method, const String& content, const std::map<String, String>& headers);
 	};
 }

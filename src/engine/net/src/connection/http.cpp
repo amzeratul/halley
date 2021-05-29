@@ -19,11 +19,13 @@
 
 \*****************************************************************/
 
-// Comment this whole thing out for now
-#ifdef false
-
-#include "http.h"
+#include "connection/http.h"
 #include <halley/support/exception.h>
+
+
+#include "halley/support/logger.h"
+#include "halley/utils/algorithm.h"
+#include "halley/utils/utils.h"
 
 using namespace Halley;
 
@@ -34,44 +36,16 @@ using namespace Halley;
 #define BOOST_SYSTEM_NO_DEPRECATED
 #include <boost/asio.hpp>
 
-Bytes HTTP::get(String host, String path)
-{
-	String content = "";
-	return request(host, path, false, content, "");
-}
-
-Bytes HTTP::post(String host, String path, Vector<HTTPPostEntry>& entries)
-{
-	String boundary = "=.AaB03xBOunDaRyyy--";
-
-	std::stringstream c;
-	for (size_t i=0; i<entries.size(); i++) {
-		c << "--" << boundary << "\r\n";
-		if (entries[i].filename == "") {
-			c << "content-disposition: form-data; name=\"" << entries[i].name << "\"\r\n\r\n";
-		} else {
-			c << "content-disposition: form-data; name=\"" << entries[i].name << "\"; filename=\"" << entries[i].filename << "\"\r\n";
-			c << "Content-Type: application/unknown\r\n";
-			c << "Content-Transfer-Encoding: binary\r\n\r\n";
-		}
-		c.write(reinterpret_cast<const char*>(entries[i].data.data()), entries[i].data.size());
-		if (i != entries.size() - 1) c << "\r\n";
-	}
-	String content = c.str();
-
-	return request(host, path, true, content, boundary);
-}
-
-Bytes HTTP::request(String host, String path, bool isPost, String& content, String boundary)
+Bytes HTTP::request(const String& host, const String& path, const String& method, const String& content, const std::map<String, String>& headers)
 {
 	// Code adapted from http://www.boost.org/doc/libs/1_49_0_beta1/doc/html/boost_asio/example/http/client/sync_client.cpp
-	
 	using boost::asio::ip::tcp;
 	boost::asio::io_service io_service;
 
 	// Get a list of endpoints corresponding to the server name.
+	const auto hostParts = host.split(':');
     tcp::resolver resolver(io_service);
-    tcp::resolver::query query(host.c_str(), "http");
+    tcp::resolver::query query(hostParts[0].c_str(), hostParts.size() >= 2 ? hostParts[1] : "http");
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
     // Try each endpoint until we successfully establish a connection.
@@ -81,35 +55,42 @@ Bytes HTTP::request(String host, String path, bool isPost, String& content, Stri
     // Form the request. We specify the "Connection: close" header so that the
     // server will close the socket after transmitting the response. This will
     // allow us to treat all data up until the EOF as the content.
-    boost::asio::streambuf request;
-    std::ostream request_stream(&request);
-    request_stream << (isPost ? "POST " : "GET ") << path.c_str() << " HTTP/1.0\r\n";
-    request_stream << "Host: " << host.c_str() << "\r\n";
-    request_stream << "Accept: */*\r\n";
-	if (isPost) {
-		request_stream << "Content-Length: " << content.length() << "\r\n";
-		request_stream << "Content-Type: multipart/form-data; boundary=" << boundary << "\r\n";
+    boost::asio::streambuf requestBuffer;
+    //std::ostream request(&requestBuffer);
+	std::stringstream request;
+    request << method.c_str() << " " << path.c_str() << " HTTP/1.1\r\n";
+    request << "Host: " << hostParts[0].c_str() << "\r\n";
+	for (const auto& header: headers) {
+		request << header.first.c_str() << ": " << header.second.c_str() << "\r\n";
 	}
-    request_stream << "Connection: close\r\n\r\n";
-	if (isPost) {
-		request_stream << content;
+	if (!std_ex::contains(headers, "Accept")) {
+		request << "Accept: */*\r\n";
 	}
+    request << "Connection: close\r\n";
+	request << "\r\n";
+	if (!content.isEmpty()) {
+		request << content;
+	}
+	
+	//Logger::logDev("Sending:\n\n" + request.str());
+	std::ostream reqStream(&requestBuffer);
+	reqStream << request.str();
 
 	// Send the request.
-	write(socket, request);
+	write(socket, requestBuffer);
 
 	// Read the reply
 	Bytes result;
 	size_t pos = 0;
 	while (true) {
-		std::array<char, 128> buf;
+		std::array<char, 2048> buf;
 		boost::system::error_code error;
 
 		size_t len = socket.read_some(boost::asio::buffer(buf), error);
 		if (error == boost::asio::error::eof) {
 			break;
 		} else if (error) {
-			throw Exception("Error reading from socket: " + error.message());
+			throw Exception("Error reading from socket: " + error.message(), HalleyExceptions::Network);
 		}
 
 		result.resize(result.size() + len);
@@ -118,5 +99,3 @@ Bytes HTTP::request(String host, String path, bool isPost, String& content, Stri
 	}
 	return result;
 }
-
-#endif
