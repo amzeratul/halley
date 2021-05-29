@@ -135,7 +135,7 @@ void SDLWindow::destroy()
 	window = nullptr;
 }
 
-void* SDLWindow::getNativeHandle()
+void* SDLWindow::getNativeHandle() const
 {
 #ifdef _WIN32
 	SDL_SysWMinfo wminfo;
@@ -149,7 +149,7 @@ void* SDLWindow::getNativeHandle()
 	return nullptr;
 }
 
-String SDLWindow::getNativeHandleType()
+String SDLWindow::getNativeHandleType() const
 {
 #ifdef _WIN32
 	return "HWND";

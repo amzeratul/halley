@@ -46,19 +46,22 @@ namespace Halley
 
 		void setThreadName(const String& name) override;
 
+		void registerGlobalHotkey(KeyCode key, KeyMods keyMods, std::function<void()> callback) override;
+	
 	private:
 		void processVideoEvent(VideoAPI* video, const SDL_Event& event);
+		void processSystemEvent(const SDL_Event& event);
 
 		void printDebugInfo() const;
 
 		void initVideo() const;
 		void deInitVideo();
-
-	private:
+		
 		std::vector<std::shared_ptr<SDLWindow>> windows;
 		mutable bool videoInit = false;
 		std::map<SaveDataType, Path> saveDir;
 		std::shared_ptr<IClipboard> clipboard;
 		std::optional<String> saveCryptKey;
+		std::vector<std::function<void()>> globalHotkeyCallbacks;
 	};
 }

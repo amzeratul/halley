@@ -1,6 +1,7 @@
 #include "system_sdl.h"
 #include <SDL.h>
 #include <fstream>
+
 #include "halley/core/api/halley_api_internal.h"
 #include <halley/support/console.h>
 #include <halley/support/exception.h>
@@ -13,6 +14,17 @@
 #include "halley/support/logger.h"
 #include "sdl_save.h"
 #include "halley/core/game/game_platform.h"
+
+#ifdef _WIN32
+#define WIN32_WIN_AND_MEAN
+#endif
+#include <SDL_syswm.h>
+#ifdef max
+#undef max
+#endif
+#ifdef min
+#undef min
+#endif
 
 using namespace Halley;
 
@@ -46,6 +58,7 @@ void SystemSDL::init()
 	}
 
 	SDL_ShowCursor(SDL_DISABLE);
+	SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
 
 	// Init clipboard
 	clipboard = OS::get().getClipboard();
@@ -138,6 +151,9 @@ bool SystemSDL::generateEvents(VideoAPI* video, InputAPI* input)
 					}
 					break;
 				}
+			case SDL_SYSWMEVENT:
+				processSystemEvent(event);
+				break;
 			}
 		}
 	}
@@ -161,6 +177,67 @@ void SystemSDL::processVideoEvent(VideoAPI* video, const SDL_Event& event)
 			}
 		}
 	}
+}
+
+void SystemSDL::processSystemEvent(const SDL_Event& event)
+{
+#ifdef _WIN32
+	const auto& winMsg = event.syswm.msg->msg.win;
+	if (winMsg.msg == WM_HOTKEY) {
+		const int key = static_cast<int>(winMsg.wParam);
+		if (key >= 0 && key < static_cast<int>(globalHotkeyCallbacks.size())) {
+			globalHotkeyCallbacks[key]();
+		}
+	}
+#endif
+}
+
+#ifdef _WIN32
+static int sdlToWin32KeyCode(KeyCode key)
+{
+	if (key == KeyCode::Keypad0) {
+		return VK_NUMPAD0;
+	}
+	if (key >= KeyCode::Keypad1 && key <= KeyCode::Keypad9) {
+		return VK_NUMPAD1 + (int(key) - int(KeyCode::Keypad1));
+	}
+	if (key >= KeyCode::A && key <= KeyCode::Z) {
+		return 'A' + (int(key) - int(KeyCode::A));
+	}
+	if (key >= KeyCode::Num0 && key <= KeyCode::Num9) {
+		return '0' + (int(key) - int(KeyCode::Num0));
+	}
+	Logger::logWarning("Unknown key mapping on SDL -> Win32");
+	return 0;
+}
+
+static int sdlToWin32KeyMod(KeyMods mod)
+{
+	const int modVal = static_cast<int>(mod);
+	int value = 0;
+	if ((modVal & static_cast<int>(KeyMods::Alt)) != 0) {
+		value |= MOD_ALT;
+	}
+	if ((modVal & static_cast<int>(KeyMods::Ctrl)) != 0) {
+		value |= MOD_CONTROL;
+	}
+	if ((modVal & static_cast<int>(KeyMods::Shift)) != 0) {
+		value |= MOD_SHIFT;
+	}
+	if ((modVal & static_cast<int>(KeyMods::Mod)) != 0) {
+		value |= MOD_WIN;
+	}
+	return value;
+}
+#endif
+
+void SystemSDL::registerGlobalHotkey(KeyCode key, KeyMods mods, std::function<void()> callback)
+{
+#ifdef _WIN32
+	auto hWnd = GetActiveWindow();
+	RegisterHotKey(hWnd, static_cast<int>(globalHotkeyCallbacks.size()), sdlToWin32KeyMod(mods), sdlToWin32KeyCode(key));
+#endif
+	globalHotkeyCallbacks.push_back(std::move(callback));
 }
 
 std::unique_ptr<ResourceDataReader> SystemSDL::getDataReader(String path, int64_t start, int64_t end)

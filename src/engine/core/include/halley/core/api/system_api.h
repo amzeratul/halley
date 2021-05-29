@@ -5,6 +5,7 @@
 #include "halley/core/graphics/window.h"
 #include "halley/concurrency/concurrent.h"
 #include "halley/data_structures/maybe.h"
+#include "halley/core/input/input_keys.h"
 
 namespace Halley
 {
@@ -67,6 +68,8 @@ namespace Halley
 		virtual std::optional<String> getGameVersion() const { return {}; }
 
 		virtual void onTickMainLoop() {}
+
+		virtual void registerGlobalHotkey(KeyCode key, KeyMods keyMods, std::function<void()> callback) {}
 
 	private:
 		friend class HalleyAPI;
