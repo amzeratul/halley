@@ -1,7 +1,8 @@
 cd ..
 mkdir build
 cd build
-cmake -G "Visual Studio 15 2017 Win64" ^
+cmake -G "Visual Studio 16 2019" ^
+    -A x64 ^
     -DHALLEY_PATH=../halley ^
     -DBUILD_HALLEY_TOOLS=0 ^
     -DBUILD_HALLEY_TESTS=0 ^
@@ -9,6 +10,5 @@ cmake -G "Visual Studio 15 2017 Win64" ^
     -DCMAKE_LIBRARY_PATH="lib\windows64" ^
     -DBOOST_ROOT="lib\boost" ^
     -DBoost_USE_STATIC_LIBS=1 ^
-    -DUSE_PCH=1 ^
     ..
 pause

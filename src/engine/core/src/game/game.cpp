@@ -49,12 +49,12 @@ void Game::onUncaughtException(const Exception& exception, TimeLine timeLine)
 
 std::unique_ptr<ISceneEditor> Game::createSceneEditorInterface()
 {
-	throw Exception("Method not implemented: Game::createSceneEditorInterface", HalleyExceptions::Core);
+	return {};
 }
 
 std::unique_ptr<IEditorCustomTools> Game::createEditorCustomToolsInterface()
 {
-	throw Exception("Method not implemented: Game::createEditorCustomToolsInterface", HalleyExceptions::Core);
+	return {};
 }
 
 void Game::attachToEditorDebugConsole(UIDebugConsoleCommands& commands, Resources& gameResources, IProject& project)
