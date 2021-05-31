@@ -76,7 +76,7 @@ void VideoOpenGL::setWindow(WindowDefinition&& windowDefinition)
 	}
 }
 
-const Window& VideoOpenGL::getWindow() const
+Window& VideoOpenGL::getWindow() const
 {
 	return *window;
 }

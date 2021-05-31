@@ -22,7 +22,7 @@ namespace Halley {
 		void finishRender() override;
 		
 		void setWindow(WindowDefinition&& windowDescriptor) override;
-		const Window& getWindow() const override;
+		Window& getWindow() const override;
 		bool hasWindow() const override;
 		void setVsync(bool vsync) override;
 		

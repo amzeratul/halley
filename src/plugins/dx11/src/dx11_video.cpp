@@ -124,7 +124,7 @@ void DX11Video::setWindow(WindowDefinition&& windowDescriptor)
 	}
 }
 
-const Window& DX11Video::getWindow() const
+Window& DX11Video::getWindow() const
 {
 	return *window;
 }

@@ -234,8 +234,8 @@ static int sdlToWin32KeyMod(KeyMods mod)
 void SystemSDL::registerGlobalHotkey(KeyCode key, KeyMods mods, std::function<void()> callback)
 {
 #ifdef _WIN32
-	auto hWnd = GetActiveWindow();
-	RegisterHotKey(hWnd, static_cast<int>(globalHotkeyCallbacks.size()), sdlToWin32KeyMod(mods), sdlToWin32KeyCode(key));
+	HWND hWnd = windows.empty() ? GetActiveWindow() : reinterpret_cast<HWND>(windows[0]->getNativeHandle());
+	bool success = RegisterHotKey(hWnd, static_cast<int>(globalHotkeyCallbacks.size()), sdlToWin32KeyMod(mods), sdlToWin32KeyCode(key));
 #endif
 	globalHotkeyCallbacks.push_back(std::move(callback));
 }
@@ -268,6 +268,11 @@ std::shared_ptr<Window> SystemSDL::createWindow(const WindowDefinition& windowDe
 		} else {
 			flags |= SDL_WINDOW_FULLSCREEN;
 		}
+	}
+	if (windowDef.isShowOnCreation()) {
+		flags |= SDL_WINDOW_SHOWN;
+	} else {
+		flags |= SDL_WINDOW_HIDDEN;
 	}
 
 	// Context options
@@ -313,7 +318,9 @@ std::shared_ptr<Window> SystemSDL::createWindow(const WindowDefinition& windowDe
 
 	// Show window
 	auto window = std::make_shared<SDLWindow>(sdlWindow);
-	window->show();
+	if (windowDef.isShowOnCreation()) {
+		window->show();
+	}
 	window->update(windowDef);
 	windows.push_back(window);
 	

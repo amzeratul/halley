@@ -24,7 +24,7 @@ void DummyVideoAPI::setWindow(WindowDefinition&& windowDescriptor)
 	window = std::make_shared<DummyWindow>(windowDescriptor);
 }
 
-const Window& DummyVideoAPI::getWindow() const
+Window& DummyVideoAPI::getWindow() const
 {
 	Expects(window != nullptr);
 	return *window;
