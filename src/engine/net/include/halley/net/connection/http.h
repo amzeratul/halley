@@ -23,6 +23,7 @@
 
 #include <halley/text/halleystring.h>
 #include <halley/utils/utils.h>
+#include <map>
 
 namespace Halley {
 	class HTTPPostEntry {

@@ -33,11 +33,15 @@ using namespace Halley;
 #pragma warning(disable: 6386 6258 6309 6387 4913)
 #endif
 
+#if defined(_WIN32) || defined(__linux) || defined(APPLE)
+#define HTTP_AVAILABLE
 #define BOOST_SYSTEM_NO_DEPRECATED
 #include <boost/asio.hpp>
+#endif
 
 Bytes HTTP::request(const String& host, const String& path, const String& method, const String& content, const std::map<String, String>& headers)
 {
+#if HTTP_AVAILABLE
 	// Code adapted from http://www.boost.org/doc/libs/1_49_0_beta1/doc/html/boost_asio/example/http/client/sync_client.cpp
 	using boost::asio::ip::tcp;
 	boost::asio::io_service io_service;
@@ -98,4 +102,8 @@ Bytes HTTP::request(const String& host, const String& path, const String& method
 		pos += len;
 	}
 	return result;
+
+#else
+	return Bytes();
+#endif
 }
