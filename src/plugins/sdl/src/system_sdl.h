@@ -6,6 +6,7 @@
 namespace Halley
 {
 	class SDLWindow;
+	class Window;
 
 	class SystemSDL final : public SystemAPIInternal
 	{

@@ -65,7 +65,7 @@ void MetalVideo::initSwapChain(Window& window) {
 	std::cout << "\tGot Metal device: " << [device.name UTF8String] << std::endl;
 }
 
-const Window& MetalVideo::getWindow() const
+Window& MetalVideo::getWindow() const
 {
 	return *window;
 }
