@@ -41,7 +41,7 @@ using namespace Halley;
 
 Bytes HTTP::request(const String& host, const String& path, const String& method, const String& content, const std::map<String, String>& headers)
 {
-#if HTTP_AVAILABLE
+#ifdef HTTP_AVAILABLE
 	// Code adapted from http://www.boost.org/doc/libs/1_49_0_beta1/doc/html/boost_asio/example/http/client/sync_client.cpp
 	using boost::asio::ip::tcp;
 	boost::asio::io_service io_service;
