@@ -245,7 +245,7 @@ std::unique_ptr<ResourceDataReader> SystemSDL::getDataReader(String path, int64_
 	return SDLRWOps::fromPath(path, start, end);
 }
 
-std::shared_ptr<Window> SystemSDL::createWindow(const WindowDefinition& windowDef)
+std::shared_ptr<Halley::Window> SystemSDL::createWindow(const WindowDefinition& windowDef)
 {
 	initVideo();
 	bool openGL = true;

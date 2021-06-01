@@ -2,6 +2,7 @@
 
 #include "halley/core/api/halley_api_internal.h"
 #include <SDL.h>
+#include <memory>
 
 namespace Halley
 {
