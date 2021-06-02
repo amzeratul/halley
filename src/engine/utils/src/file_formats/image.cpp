@@ -280,7 +280,7 @@ void Image::blitFromRotated(Vector2i pos, gsl::span<const unsigned char> buffer,
 	}
 }
 
-void Image::blitFrom(Vector2i pos, Image& srcImg, bool rotated)
+void Image::blitFrom(Vector2i pos, const Image& srcImg, bool rotated)
 {
 	if (rotated) {
 		blitFromRotated(pos, srcImg.getPixelBytes(), srcImg.getWidth(), srcImg.getHeight(), srcImg.getWidth(), getBytesPerPixel() * 8);
@@ -289,7 +289,7 @@ void Image::blitFrom(Vector2i pos, Image& srcImg, bool rotated)
 	}
 }
 
-void Image::blitFrom(Vector2i dstPos, Image& srcImg, Rect4i srcArea, bool rotated)
+void Image::blitFrom(Vector2i dstPos, const Image& srcImg, Rect4i srcArea, bool rotated)
 {
 	Vector2i pos = dstPos + Vector2i::max(Vector2i(), -srcArea.getTopLeft()); // If srcArea has padding, its top-left will be negative. Use that as an offset.
 	Rect4i src = Rect4i(Vector2i(), srcImg.getSize()).intersection(srcArea);
@@ -299,6 +299,27 @@ void Image::blitFrom(Vector2i dstPos, Image& srcImg, Rect4i srcArea, bool rotate
 		blitFromRotated(pos, srcImg.getPixelBytes().subspan(offset * getBytesPerPixel()), src.getWidth(), src.getHeight(), stride, getBytesPerPixel() * 8);
 	} else {
 		blitFrom(pos, srcImg.getPixelBytes().subspan(offset * getBytesPerPixel()), src.getWidth(), src.getHeight(), stride, getBytesPerPixel() * 8);
+	}
+}
+
+void Image::blitDownsampled(Image& srcImg, int scale)
+{
+	Expects(getBytesPerPixel() == 4);
+	Expects(scale >= 1);
+
+	const auto srcSize = srcImg.getSize();
+	const auto dstSize = getSize();
+	const auto rectW = std::min(dstSize.x, srcSize.x / scale);
+	const auto rectH = std::min(dstSize.y, srcSize.y / scale);
+	auto dst = getPixels4BPP();
+	auto src = srcImg.getPixels4BPP();
+	
+	for (int y = 0; y < rectH; ++y) {
+		auto dstRow = dst.subspan(y * dstSize.x, dstSize.x);
+		auto srcRow = src.subspan(y * scale * srcSize.x, srcSize.x);
+		for (int x = 0; x < rectW; ++x) {
+			dstRow[x] = srcRow[x * scale];
+		}
 	}
 }
 

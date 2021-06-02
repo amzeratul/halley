@@ -86,8 +86,9 @@ namespace Halley {
 		void clear(int colour);
 		void blitFrom(Vector2i pos, gsl::span<const unsigned char> buffer, size_t width, size_t height, size_t pitch, size_t srcBpp);
 		void blitFromRotated(Vector2i pos, gsl::span<const unsigned char> buffer, size_t width, size_t height, size_t pitch, size_t bpp);
-		void blitFrom(Vector2i pos, Image& img, bool rotated = false);
-		void blitFrom(Vector2i pos, Image& img, Rect4i srcArea, bool rotated = false);
+		void blitFrom(Vector2i pos, const Image& srcImg, bool rotated = false);
+		void blitFrom(Vector2i pos, const Image& srcImg, Rect4i srcArea, bool rotated = false);
+		void blitDownsampled(Image& src, int scale);
 
 		void drawImageAlpha(const Image& src, Vector2i pos, uint8_t opacity = 255);
 		void drawImageAdd(const Image& src, Vector2i pos, uint8_t opacity = 255);
