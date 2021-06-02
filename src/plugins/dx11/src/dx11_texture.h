@@ -20,11 +20,14 @@ namespace Halley
 
 		void doLoad(TextureDescriptor& descriptor) override;
 		void reload(Resource&& resource) override;
-
 		void bind(DX11Video& video, int textureUnit, TextureSamplerType samplerType) const;
-		
+
 		DXGI_FORMAT getFormat() const;
 		ID3D11Texture2D* getTexture() const;
+
+	protected:
+		void doCopyToTexture(Texture& other) const override;
+		void doCopyToImage(Image& image) const override;
 
 	private:
 		DX11Video& video;
@@ -33,5 +36,7 @@ namespace Halley
 		ID3D11ShaderResourceView* srvAlt = nullptr;
 		ID3D11SamplerState* samplerState = nullptr;
 		DXGI_FORMAT format;
+
+		void copyToImageDirectly(Image& image) const;
 	};
 }

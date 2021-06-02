@@ -39,8 +39,42 @@ std::optional<uint32_t> Texture::getPixel(Vector2f texPos) const
 	return {};
 }
 
+void Texture::copyToTexture(Texture& other) const
+{
+	if (getSize() != other.getSize()) {
+		throw Exception("Size of source and destination texture don't match.", HalleyExceptions::Graphics);
+	}
+	doCopyToTexture(other);
+}
+
+void Texture::copyToImage(Image& image) const
+{
+	if (image.getSize() != getSize()) {
+		throw Exception("Incompatible image and texture sizes.", HalleyExceptions::Graphics);
+	}
+	doCopyToImage(image);
+}
+
+std::unique_ptr<Image> Texture::makeImage() const
+{
+	auto image = std::make_unique<Image>(Image::Format::RGBA, getSize());
+	doCopyToImage(*image);
+	return image;
+}
+
 void Texture::doLoad(TextureDescriptor& descriptor)
 {
+}
+
+void Texture::doCopyToTexture(Texture& other) const
+{
+	Logger::logWarning("Copying to texture not implemented.");
+}
+
+void Texture::doCopyToImage(Image& image) const
+{
+	Logger::logWarning("Copying to image not implemented.");
+	image.clear(Image::convertRGBAToInt(255, 0, 255));
 }
 
 std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)

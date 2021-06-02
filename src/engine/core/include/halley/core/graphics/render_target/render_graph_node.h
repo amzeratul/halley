@@ -67,6 +67,7 @@ namespace Halley {
 		std::shared_ptr<Texture> getInputTexture(const InputPin& input);
 		std::shared_ptr<Texture> getOutputTexture(uint8_t pin);
 
+		String id;
 		RenderGraphMethod method;
 
 		String paintId;

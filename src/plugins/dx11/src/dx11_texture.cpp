@@ -98,7 +98,7 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 	if (descriptor.isDepthStencil) {
 		desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
 		desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
-	} else {
+	} else if (!descriptor.canBeReadOnCPU) {
 		desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
 		if (descriptor.isRenderTarget) {
 			desc.BindFlags |= D3D11_BIND_RENDER_TARGET;
@@ -112,21 +112,25 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 
 	D3D11_SUBRESOURCE_DATA* res = nullptr;
 	D3D11_SUBRESOURCE_DATA subResData;
-
+			
 	if (descriptor.pixelData.empty()) {
 		desc.Usage = D3D11_USAGE_DEFAULT;
-		desc.CPUAccessFlags = 0;
 	} else {
 		if (descriptor.canBeUpdated) {
 			desc.Usage = D3D11_USAGE_DEFAULT;
 		} else {
 			desc.Usage = D3D11_USAGE_IMMUTABLE;
 		}
-		desc.CPUAccessFlags = 0;
 		subResData.pSysMem = descriptor.pixelData.getSpan().data();
 		subResData.SysMemPitch = descriptor.pixelData.getStrideOr(bpp * size.x);
 		subResData.SysMemSlicePitch = subResData.SysMemPitch;
 		res = &subResData;
+	}
+
+	desc.CPUAccessFlags = 0;
+	if (descriptor.canBeReadOnCPU) {
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+		desc.Usage = D3D11_USAGE_STAGING;
 	}
 
 	HRESULT result = video.getDevice().CreateTexture2D(&desc, res, &texture);
@@ -185,6 +189,54 @@ void DX11Texture::bind(DX11Video& video, int textureUnit, TextureSamplerType sam
 	ID3D11SamplerState* samplers[] = { samplerState };
 	video.getDeviceContext().PSSetShaderResources(textureUnit, 1, srvs);
 	video.getDeviceContext().PSSetSamplers(textureUnit, 1, samplers);
+}
+
+void DX11Texture::doCopyToTexture(Texture& otherRaw) const
+{
+	auto& other = dynamic_cast<DX11Texture&>(otherRaw);
+	
+	auto& dc = video.getDeviceContext();
+	dc.CopyResource(other.texture, texture);
+}
+
+void DX11Texture::doCopyToImage(Image& image) const
+{
+	if (descriptor.canBeReadOnCPU) {
+		copyToImageDirectly(image);
+	} else {
+		// Can't read on CPU, copy to a temporary texture first
+		auto temp = video.createTexture(getSize());
+		auto desc = TextureDescriptor(getSize(), TextureFormat::RGBA);
+		desc.canBeReadOnCPU = true;
+		temp->startLoading();
+		temp->load(std::move(desc));
+		doCopyToTexture(*temp);
+		dynamic_cast<DX11Texture&>(*temp).copyToImageDirectly(image);
+	}		
+}
+
+void DX11Texture::copyToImageDirectly(Image& image) const
+{
+	auto& dc = video.getDeviceContext();
+	D3D11_MAPPED_SUBRESOURCE subResource;
+	const HRESULT result = dc.Map(texture, 0, D3D11_MAP_READ, 0, &subResource);
+	if (!SUCCEEDED(result)) {
+		throw Exception("Unable to map texture for CPU reading", HalleyExceptions::VideoPlugin);
+	}
+
+	const size_t h = image.getSize().y;
+	const size_t w = image.getSize().x;
+	const char* src = static_cast<const char*>(subResource.pData);
+	const auto dst = image.getPixels4BPP();
+	for (size_t y = 0; y < h; ++y) {
+		const auto* srcPx = reinterpret_cast<const uint32_t*>(src + y * subResource.RowPitch);
+		const auto dstPx = dst.subspan(y * w, w);
+		for (size_t x = 0; x < w; ++x) {
+			dstPx[x] = srcPx[x];
+		}
+	}
+
+	dc.Unmap(texture, 0);
 }
 
 DXGI_FORMAT DX11Texture::getFormat() const

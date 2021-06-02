@@ -100,6 +100,7 @@ namespace Halley
 		bool isDepthStencil = false;
 		bool isHardwareVideoDecodeTexture = false;
 		bool retainPixelData = false;
+		bool canBeReadOnCPU = false;
 
 		TextureDescriptor() = default;
 		TextureDescriptor(TextureDescriptor&& other) noexcept = default;

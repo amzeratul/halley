@@ -25,10 +25,16 @@ namespace Halley
 		Vector2i getSize() const { return size; }
 		const TextureDescriptor& getDescriptor() const { return descriptor; }
 
+		void copyToTexture(Texture& other) const;
+		void copyToImage(Image& image) const;
+		std::unique_ptr<Image> makeImage() const;
+
 	protected:
 		Vector2i size;
 		TextureDescriptor descriptor;
 
 		virtual void doLoad(TextureDescriptor& descriptor);
+		virtual void doCopyToTexture(Texture& other) const;
+		virtual void doCopyToImage(Image& image) const;
 	};
 }

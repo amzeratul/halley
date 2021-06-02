@@ -12,7 +12,8 @@
 using namespace Halley;
 
 RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
-	: method(definition.method)
+	: id(definition.id)
+	, method(definition.method)
 {
 	auto setPinTypes = [] (auto& pins, gsl::span<const RenderGraphPinType> pinTypes)
 	{

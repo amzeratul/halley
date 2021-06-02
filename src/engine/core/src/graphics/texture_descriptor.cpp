@@ -119,6 +119,7 @@ TextureDescriptor& TextureDescriptor::operator=(TextureDescriptor&& other) noexc
 	isRenderTarget = other.isRenderTarget;
 	isDepthStencil = other.isDepthStencil;
 	retainPixelData = other.retainPixelData;
+	canBeReadOnCPU = other.canBeReadOnCPU;
 	return *this;
 }
 
