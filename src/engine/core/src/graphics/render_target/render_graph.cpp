@@ -7,6 +7,7 @@
 #include "graphics/render_target/render_target.h"
 #include "graphics/sprite/sprite.h"
 #include "halley/support/logger.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -71,32 +72,21 @@ RenderGraphNode* RenderGraph::tryGetNode(const String& id)
 	return nullptr;
 }
 
-RenderGraphNode* RenderGraph::tryGetOutputNode()
-{
-	for (auto& node: nodes) {
-		if (node->method == RenderGraphMethod::Output) {
-			return node.get();
-		}
-	}
-	return nullptr;
-}
-
 void RenderGraph::render(const RenderContext& rc, VideoAPI& video)
 {
 	update();
 	
-	auto* outputNode = tryGetOutputNode();
-	if (!outputNode) {
-		Logger::logWarning("Render graph is missing an output node.");
-		return;
-	}
-
 	for (auto& node: nodes) {
 		node->startRender();
 	}
 
 	const auto renderSize = rc.getDefaultRenderTarget().getViewPort().getSize();
-	outputNode->prepareDependencyGraph(video, renderSize);
+	for (auto& node: nodes) {
+		if (node->method == RenderGraphMethod::Output
+			|| (node->method == RenderGraphMethod::ImageOutput && std_ex::contains(imageOutputCallbacks, node->id))) {
+			node->prepareDependencyGraph(video, renderSize);
+		}
+	}
 
 	for (auto& node: nodes) {
 		node->determineIfNeedsRenderTarget();
@@ -185,6 +175,34 @@ void RenderGraph::setVariable(std::string_view name, Vector4f value)
 void RenderGraph::setVariable(std::string_view name, Colour4f value)
 {
 	variables[name] = value;
+}
+
+void RenderGraph::setImageOutputCallback(std::string_view name, std::function<void(Image&)> callback)
+{
+	if (callback) {
+		auto& c = imageOutputCallbacks[name];
+		c.calllback = std::move(callback);
+	} else {
+		imageOutputCallbacks.erase(name);
+	}
+}
+
+Image* RenderGraph::getImageOutputForNode(const String& nodeId, Vector2i imageSize) const
+{
+	const auto iter = imageOutputCallbacks.find(nodeId);
+	if (iter == imageOutputCallbacks.end()) {
+		return nullptr;
+	}
+	auto& img = iter->second.image;
+	if (!img || img->getSize() != imageSize) {
+		img = std::make_unique<Image>(Image::Format::RGBA, imageSize);
+	}
+	return img.get();
+}
+
+void RenderGraph::clearImageOutputCallbacks()
+{
+	imageOutputCallbacks.clear();
 }
 
 bool RenderGraph::remapNode(std::string_view outputName, uint8_t outputPin, std::string_view inputName, uint8_t inputPin)

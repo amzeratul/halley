@@ -40,8 +40,8 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 		
 		setPinTypes(inputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }});
 		setPinTypes(outputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }});
-	} else if (method == RenderGraphMethod::Screen) {
-		screenMethod = std::make_shared<Material>(definition.material);
+	} else if (method == RenderGraphMethod::Overlay) {
+		overlayMethod = std::make_shared<Material>(definition.material);
 
 		if (pars.hasKey("variables")) {
 			const auto& seq = pars["variables"].asSequence();
@@ -51,7 +51,7 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 			}
 		}
 
-		const auto& texs = screenMethod->getTextureUniforms();
+		const auto& texs = overlayMethod->getTextureUniforms();
 		std::vector<RenderGraphPinType> inputPinTypes;
 		inputPinTypes.reserve(2 + texs.size());
 		inputPinTypes.push_back(RenderGraphPinType::ColourBuffer);
@@ -63,6 +63,8 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 		setPinTypes(inputPins, inputPinTypes);
 		setPinTypes(outputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }});
 	} else if (method == RenderGraphMethod::Output) {
+		setPinTypes(inputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }});
+	} else if (method == RenderGraphMethod::ImageOutput) {
 		setPinTypes(inputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }});
 	}
 }
@@ -218,8 +220,10 @@ void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& 
 {
 	if (method == RenderGraphMethod::Paint) {
 		renderNodePaintMethod(graph, rc);
-	} else if (method == RenderGraphMethod::Screen) {
-		renderNodeScreenMethod(graph, rc);
+	} else if (method == RenderGraphMethod::Overlay) {
+		renderNodeOverlayMethod(graph, rc);
+	} else if (method == RenderGraphMethod::ImageOutput) {
+		renderNodeImageOutputMethod(graph, rc);
 	}
 }
 
@@ -237,30 +241,39 @@ void RenderGraphNode::renderNodePaintMethod(const RenderGraph& graph, const Rend
 	}
 }
 
-void RenderGraphNode::renderNodeScreenMethod(const RenderGraph& graph, const RenderContext& rc)
+void RenderGraphNode::renderNodeOverlayMethod(const RenderGraph& graph, const RenderContext& rc)
 {
-	const auto& texs = screenMethod->getDefinition().getTextures();
+	const auto& texs = overlayMethod->getDefinition().getTextures();
 	size_t idx = 0;
 	for (auto& input: inputPins) {
 		if (input.type == RenderGraphPinType::Texture) {
-			screenMethod->set(texs.at(idx++).name, getInputTexture(input));
+			overlayMethod->set(texs.at(idx++).name, getInputTexture(input));
 		}
 	}
 
 	for (const auto& variable: variables) {
-		graph.applyVariable(*screenMethod, variable.name, variable.value);
+		graph.applyVariable(*overlayMethod, variable.name, variable.value);
 	}
 
 	const auto camera = Camera(Vector2f(currentSize) * 0.5f);
 	getTargetRenderContext(rc).with(camera).bind([=] (Painter& painter)
 	{
-		const auto& tex = screenMethod->getTexture(0);
+		const auto& tex = overlayMethod->getTexture(0);
 		Sprite()
-			.setMaterial(screenMethod, false)
+			.setMaterial(overlayMethod, false)
 			.setSize(Vector2f(currentSize))
 			.setTexRect(Rect4f(Vector2f(), Vector2f(currentSize) / Vector2f(tex->getSize())))
 			.draw(painter);
 	});
+}
+
+void RenderGraphNode::renderNodeImageOutputMethod(const RenderGraph& graph, const RenderContext& rc)
+{
+	const auto srcTexture = renderTarget->getTexture(0);
+	auto* img = graph.getImageOutputForNode(id, srcTexture->getSize());
+	if (img) {
+		srcTexture->copyToImage(*img);
+	}
 }
 
 RenderContext RenderGraphNode::getTargetRenderContext(const RenderContext& rc) const

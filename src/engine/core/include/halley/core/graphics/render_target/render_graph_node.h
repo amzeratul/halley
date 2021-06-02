@@ -61,7 +61,8 @@ namespace Halley {
 		
 		void renderNode(const RenderGraph& graph, const RenderContext& rc);
 		void renderNodePaintMethod(const RenderGraph& graph, const RenderContext& rc);
-		void renderNodeScreenMethod(const RenderGraph& graph, const RenderContext& rc);
+		void renderNodeOverlayMethod(const RenderGraph& graph, const RenderContext& rc);
+		void renderNodeImageOutputMethod(const RenderGraph& graph, const RenderContext& rc);
 		RenderContext getTargetRenderContext(const RenderContext& rc) const;
 
 		std::shared_ptr<Texture> getInputTexture(const InputPin& input);
@@ -76,7 +77,7 @@ namespace Halley {
 		std::optional<float> depthClear;
 		std::optional<uint8_t> stencilClear;
 
-		std::shared_ptr<Material> screenMethod;
+		std::shared_ptr<Material> overlayMethod;
 		std::vector<Variable> variables;
 		
 		bool activeInCurrentPass = false;

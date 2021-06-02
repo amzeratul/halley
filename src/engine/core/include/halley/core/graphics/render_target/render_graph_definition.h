@@ -11,18 +11,20 @@ namespace Halley {
 	enum class RenderGraphMethod {
     	None,
     	Output,
+		ImageOutput,
 	    Paint,
-    	Screen
+    	Overlay
     };
 
 	template <>
 	struct EnumNames<RenderGraphMethod> {
-		constexpr std::array<const char*, 4> operator()() const {
+		constexpr std::array<const char*, 5> operator()() const {
 			return{{
 				"none",
 				"output",
+				"imageOutput",
 				"paint",
-				"screen"
+				"overlay"
 			}};
 		}
 	};

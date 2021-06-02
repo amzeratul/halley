@@ -99,7 +99,7 @@ void RenderGraphDefinition::loadMaterials(Resources& resources)
 
 void RenderGraphDefinition::Node::loadMaterials(Resources& resources)
 {
-	if (method == RenderGraphMethod::Screen) {
+	if (method == RenderGraphMethod::Overlay) {
 		material = resources.get<MaterialDefinition>(methodParameters["material"].asString());
 	}
 	generatePins();

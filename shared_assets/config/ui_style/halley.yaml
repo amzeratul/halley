@@ -269,8 +269,9 @@ uiStyle:
 
   graphNode:
     paintBackground: { img: $ui_title_capsule, colour: $taskComplete }
-    screenBackground: { img: $ui_title_capsule, colour: $taskRunning }
+    overlayBackground: { img: $ui_title_capsule, colour: $taskRunning }
     outputBackground: { img: $ui_title_capsule, colour: $taskError }
+    imageOutputBackground: { img: $ui_title_capsule, colour: $taskError }
 
   graphConnections:
     colourBuffer: $ui_logErrorText

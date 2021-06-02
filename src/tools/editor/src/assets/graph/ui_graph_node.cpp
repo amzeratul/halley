@@ -121,7 +121,7 @@ void UIRenderGraphNode::onMakeUI()
 	if (node.method == RenderGraphMethod::Paint) {
 		addField("entity_icons/tag.png", node.methodParameters["paintId"].asString(""));
 		addField("entity_icons/camera.png", node.methodParameters["cameraId"].asString(""));
-	} else if (node.method == RenderGraphMethod::Screen) {
+	} else if (node.method == RenderGraphMethod::Overlay) {
 		addField("ui/assetTypes/materialDefinition.png", node.methodParameters["material"].asString(""));
 	}
 }

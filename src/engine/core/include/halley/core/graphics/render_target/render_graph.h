@@ -41,6 +41,10 @@ namespace Halley {
 		void setVariable(std::string_view name, Vector4f value);
 		void setVariable(std::string_view name, Colour4f value);
 
+		void setImageOutputCallback(std::string_view name, std::function<void(Image&)> callback);
+		Image* getImageOutputForNode(const String& nodeId, Vector2i imageSize) const;
+		void clearImageOutputCallbacks();
+
 		bool remapNode(std::string_view outputName, uint8_t outputPin, std::string_view inputName, uint8_t inputPin);
 		void resetGraph();
 
@@ -52,6 +56,7 @@ namespace Halley {
 			Float3,
 			Float4
 		};
+		
 		struct Variable {
 			Vector4f var;
 			VariableType type = VariableType::None;
@@ -63,6 +68,11 @@ namespace Halley {
 			Variable& operator=(Vector4f v);
 			Variable& operator=(Colour4f v);
 		};
+
+		struct ImageOutputCallback {
+			mutable std::unique_ptr<Image> image;
+			std::function<void(Image&)> calllback;
+		};
 		
 		std::vector<std::unique_ptr<RenderGraphNode>> nodes;
 		std::map<String, RenderGraphNode*> nodeMap;
@@ -70,6 +80,7 @@ namespace Halley {
 		std::map<String, Camera> cameras;
 		std::map<String, PaintMethod> paintMethods;
 		std::map<String, Variable> variables;
+		std::map<String, ImageOutputCallback> imageOutputCallbacks;
 
 		std::shared_ptr<const RenderGraphDefinition> graphDefinition;
 		int lastDefinitionVersion = 0;
@@ -77,7 +88,6 @@ namespace Halley {
 		void addNode(String id, std::unique_ptr<RenderGraphNode> node);
 		RenderGraphNode* getNode(const String& id);
 		RenderGraphNode* tryGetNode(const String& id);
-		RenderGraphNode* tryGetOutputNode();
 
 		void loadDefinition(std::shared_ptr<const RenderGraphDefinition> definition);
 	};
