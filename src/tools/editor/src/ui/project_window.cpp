@@ -140,7 +140,7 @@ bool ProjectWindow::loadCustomUI()
 	auto customToolsInterface = game->createEditorCustomToolsInterface();
 	if (customToolsInterface) {
 		try {		
-			customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(factory, resources, project.getGameResources(), api, project));
+			customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(factory, resources, project.getGameResources(), api, project, *this));
 		} catch (const std::exception& e) {
 			Logger::logException(e);
 		} catch (...) {

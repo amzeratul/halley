@@ -257,6 +257,14 @@ namespace Halley {
 		virtual Path getAssetsSrcPath() const = 0;
 	};
 
+    class IProjectWindow
+    {
+    public:
+        virtual ~IProjectWindow() = default;
+        virtual ConfigNode getSetting(EditorSettingType type, std::string_view id) const = 0;
+        virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;
+    };
+
     class IEditorCustomTools { 
     public:
         struct ToolData {
@@ -281,13 +289,15 @@ namespace Halley {
             Resources& gameResources;
             const HalleyAPI& api;
         	IProject& project;
+            IProjectWindow& projectWindow;
 
-            MakeToolArgs(UIFactory& factory, Resources& editorResources, Resources& gameResources, const HalleyAPI& api, IProject& project)
+            MakeToolArgs(UIFactory& factory, Resources& editorResources, Resources& gameResources, const HalleyAPI& api, IProject& project, IProjectWindow& projectWindow)
                 : factory(factory)
                 , editorResources(editorResources)
         		, gameResources(gameResources)
                 , api(api)
         		, project(project)
+        		, projectWindow(projectWindow)
             {}
         };
 
