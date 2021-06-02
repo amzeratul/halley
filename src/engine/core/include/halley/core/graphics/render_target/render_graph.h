@@ -42,8 +42,9 @@ namespace Halley {
 		void setVariable(std::string_view name, Colour4f value);
 
 		void setImageOutputCallback(std::string_view name, std::function<void(Image&)> callback);
-		Image* getImageOutputForNode(const String& nodeId, Vector2i imageSize) const;
 		void clearImageOutputCallbacks();
+		Image* getImageOutputForNode(const String& nodeId, Vector2i imageSize) const;
+		void notifyImage(const String& nodeId) const;
 
 		bool remapNode(std::string_view outputName, uint8_t outputPin, std::string_view inputName, uint8_t inputPin);
 		void resetGraph();

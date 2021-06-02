@@ -64,8 +64,10 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 		setPinTypes(outputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }});
 	} else if (method == RenderGraphMethod::Output) {
 		setPinTypes(inputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }});
+		setPinTypes(outputPins, {});
 	} else if (method == RenderGraphMethod::ImageOutput) {
-		setPinTypes(inputPins, {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }});
+		setPinTypes(inputPins, {{ RenderGraphPinType::Texture }});
+		setPinTypes(outputPins, {});
 	}
 }
 
@@ -269,10 +271,13 @@ void RenderGraphNode::renderNodeOverlayMethod(const RenderGraph& graph, const Re
 
 void RenderGraphNode::renderNodeImageOutputMethod(const RenderGraph& graph, const RenderContext& rc)
 {
-	const auto srcTexture = renderTarget->getTexture(0);
-	auto* img = graph.getImageOutputForNode(id, srcTexture->getSize());
-	if (img) {
-		srcTexture->copyToImage(*img);
+	const auto srcTexture = getInputTexture(inputPins.at(0));
+	if (srcTexture) {
+		auto* img = graph.getImageOutputForNode(id, srcTexture->getSize());
+		if (img) {
+			srcTexture->copyToImage(*img);
+			graph.notifyImage(id);
+		}
 	}
 }
 

@@ -110,6 +110,9 @@ void RenderGraphDefinition::Node::generatePins()
 	inputPins = {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }};
 	if (method == RenderGraphMethod::Output) {
 		outputPins.clear();
+	} else if (method == RenderGraphMethod::ImageOutput) {
+		inputPins = {{ RenderGraphPinType::Texture }};
+		outputPins.clear();
 	} else {
 		outputPins = {{ RenderGraphPinType::ColourBuffer, RenderGraphPinType::DepthStencilBuffer }};
 	}

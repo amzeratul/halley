@@ -200,6 +200,14 @@ Image* RenderGraph::getImageOutputForNode(const String& nodeId, Vector2i imageSi
 	return img.get();
 }
 
+void RenderGraph::notifyImage(const String& nodeId) const
+{
+	const auto iter = imageOutputCallbacks.find(nodeId);
+	if (iter != imageOutputCallbacks.end()) {
+		return iter->second.calllback(*iter->second.image);
+	}
+}
+
 void RenderGraph::clearImageOutputCallbacks()
 {
 	imageOutputCallbacks.clear();
