@@ -15,7 +15,8 @@ namespace Halley {
 	class Toolbar;
 	class Project;
 
-    class ProjectWindow final : public UIWidget, public IDynamicLibraryListener, public Project::IAssetLoadListener {
+    class ProjectWindow final : public UIWidget, public IDynamicLibraryListener, public Project::IAssetLoadListener
+    {
     public:
         ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Project& project, Resources& resources, const HalleyAPI& api);
     	~ProjectWindow();
@@ -76,8 +77,6 @@ namespace Halley {
     	std::shared_ptr<UIDebugConsoleController> debugConsoleController;
     	std::shared_ptr<UIDebugConsoleCommands> debugConsoleCommands;
         std::shared_ptr<UIDebugConsole> debugConsole;
-
-    	std::map<String, ConfigNode> tempSettings;
 
         void makeUI();
     	void makeToolbar();

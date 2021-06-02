@@ -255,6 +255,9 @@ namespace Halley {
     public:		
         virtual ~IProject() = default;
 		virtual Path getAssetsSrcPath() const = 0;
+
+        virtual ConfigNode getSetting(EditorSettingType type, std::string_view id) const = 0;
+        virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;
 	};
 
     class IEditorCustomTools { 

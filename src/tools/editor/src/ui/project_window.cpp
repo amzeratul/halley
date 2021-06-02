@@ -310,16 +310,10 @@ void ProjectWindow::addTask(std::unique_ptr<Task> task)
 
 ConfigNode ProjectWindow::getSetting(EditorSettingType type, std::string_view id) const
 {
-	// TODO: handle different types
-	const auto iter = tempSettings.find(id);
-	if (iter != tempSettings.end()) {
-		return ConfigNode(iter->second);
-	}
-	return ConfigNode();
+	return project.getSetting(type, id);
 }
 
 void ProjectWindow::setSetting(EditorSettingType type, std::string_view id, ConfigNode data)
 {
-	// TODO: handle different types
-	tempSettings[id] = std::move(data);
+	project.setSetting(type, id, std::move(data));
 }
