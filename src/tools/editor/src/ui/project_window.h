@@ -15,7 +15,7 @@ namespace Halley {
 	class Toolbar;
 	class Project;
 
-    class ProjectWindow final : public UIWidget, public IDynamicLibraryListener, public Project::IAssetLoadListener, public IProjectWindow
+    class ProjectWindow final : public UIWidget, public IDynamicLibraryListener, public Project::IAssetLoadListener
     {
     public:
         ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Project& project, Resources& resources, const HalleyAPI& api);
@@ -36,8 +36,8 @@ namespace Halley {
 
     	void addTask(std::unique_ptr<Task> task);
 
-    	ConfigNode getSetting(EditorSettingType type, std::string_view id) const override;
-        void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) override;
+    	ConfigNode getSetting(EditorSettingType type, std::string_view id) const;
+        void setSetting(EditorSettingType type, std::string_view id, ConfigNode data);
 
     protected:
 		void onUnloadDLL() override;
@@ -77,8 +77,6 @@ namespace Halley {
     	std::shared_ptr<UIDebugConsoleController> debugConsoleController;
     	std::shared_ptr<UIDebugConsoleCommands> debugConsoleCommands;
         std::shared_ptr<UIDebugConsole> debugConsole;
-
-    	std::map<String, ConfigNode> tempSettings;
 
         void makeUI();
     	void makeToolbar();

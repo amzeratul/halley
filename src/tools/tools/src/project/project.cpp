@@ -404,6 +404,22 @@ std::unique_ptr<Game> Project::createGameInstance(const HalleyAPI& api) const
 	return entry->createGame();
 }
 
+ConfigNode Project::getSetting(EditorSettingType type, std::string_view id) const
+{
+	// TODO: handle different types
+	const auto iter = tempSettings.find(id);
+	if (iter != tempSettings.end()) {
+		return ConfigNode(iter->second);
+	}
+	return ConfigNode();
+}
+
+void Project::setSetting(EditorSettingType type, std::string_view id, ConfigNode data)
+{
+	// TODO: handle different types
+	tempSettings[id] = std::move(data);
+}
+
 void Project::loadECSData()
 {
 	if (!ecsData) {
