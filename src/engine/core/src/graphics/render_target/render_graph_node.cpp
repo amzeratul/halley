@@ -177,9 +177,9 @@ void RenderGraphNode::allocateVideoResources(VideoAPI& video)
 			}
 
 			if (input.type == RenderGraphPinType::ColourBuffer && !renderTarget->hasColourBuffer(colourIdx)) {
-				renderTarget->setTarget(colourIdx++, getInputTexture(input));
+				renderTarget->setTarget(colourIdx++, input.texture);
 			} else if (input.type == RenderGraphPinType::DepthStencilBuffer && !renderTarget->hasDepthBuffer()) {
-				renderTarget->setDepthTexture(getInputTexture(input));
+				renderTarget->setDepthTexture(input.texture);
 			}
 		}
 	}
@@ -246,7 +246,7 @@ void RenderGraphNode::renderNodeOverlayMethod(const RenderGraph& graph, const Re
 	size_t idx = 0;
 	for (auto& input: inputPins) {
 		if (input.type == RenderGraphPinType::Texture) {
-			overlayMethod->set(texs.at(idx++).name, getInputTexture(input));
+			overlayMethod->set(texs.at(idx++).name, input.texture);
 		}
 	}
 
@@ -268,7 +268,7 @@ void RenderGraphNode::renderNodeOverlayMethod(const RenderGraph& graph, const Re
 
 void RenderGraphNode::renderNodeImageOutputMethod(const RenderGraph& graph, const RenderContext& rc)
 {
-	const auto srcTexture = getInputTexture(inputPins.at(0));
+	const auto srcTexture = inputPins.at(0).texture;
 	if (srcTexture) {
 		auto* img = graph.getImageOutputForNode(id, srcTexture->getSize());
 		if (img) {
@@ -287,37 +287,39 @@ RenderContext RenderGraphNode::getTargetRenderContext(const RenderContext& rc) c
 	}
 }
 
-std::shared_ptr<Texture> RenderGraphNode::getInputTexture(const InputPin& input)
-{
-	if (input.other.node) {
-		return input.other.node->getOutputTexture(input.other.otherId);
-	} else if (input.texture) {
-		return input.texture;
-	} else {
-		return {};
-	}
-}
-
-std::shared_ptr<Texture> RenderGraphNode::getOutputTexture(uint8_t pin)
-{
-	Expects(renderTarget);
-	
-	const auto& output = outputPins.at(pin);
-	if (output.type == RenderGraphPinType::ColourBuffer) {
-		return renderTarget->getTexture(0);
-	} else if (output.type == RenderGraphPinType::DepthStencilBuffer) {
-		return renderTarget->getDepthTexture();
-	} else {
-		throw Exception("Unknown pin type.", HalleyExceptions::Graphics);
-	}
-}
-
 void RenderGraphNode::notifyOutputs(std::vector<RenderGraphNode*>& renderQueue)
 {
+	std::shared_ptr<Texture> colour;
+	std::shared_ptr<Texture> depthStencil;
+	if (renderTarget) {
+		colour = renderTarget->getTexture(0);
+		depthStencil = renderTarget->getDepthTexture();
+	} else {
+		for (const auto& input: inputPins) {
+			if (input.type == RenderGraphPinType::ColourBuffer) {
+				colour = input.texture;
+			} else if (input.type == RenderGraphPinType::DepthStencilBuffer) {
+				depthStencil = input.texture;
+			}
+		}
+	}
+	
 	for (const auto& output: outputPins) {
+		std::shared_ptr<Texture> texture;
+		if (output.type == RenderGraphPinType::ColourBuffer) {
+			texture = colour;
+		} else if (output.type == RenderGraphPinType::DepthStencilBuffer) {
+			texture = depthStencil;
+		}
+		
 		for (const auto& other: output.others) {
-			if (other.node->activeInCurrentPass && --other.node->depsLeft == 0) {
-				renderQueue.push_back(other.node);
+			if (other.node->activeInCurrentPass) {
+				// TODO: copy when needed
+				other.node->inputPins[other.otherId].texture = texture;
+				
+				if (--other.node->depsLeft == 0) {
+					renderQueue.push_back(other.node);
+				}
 			}
 		}
 	}

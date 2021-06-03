@@ -65,9 +65,6 @@ namespace Halley {
 		void renderNodeImageOutputMethod(const RenderGraph& graph, const RenderContext& rc);
 		RenderContext getTargetRenderContext(const RenderContext& rc) const;
 
-		std::shared_ptr<Texture> getInputTexture(const InputPin& input);
-		std::shared_ptr<Texture> getOutputTexture(uint8_t pin);
-
 		String id;
 		RenderGraphMethod method;
 
