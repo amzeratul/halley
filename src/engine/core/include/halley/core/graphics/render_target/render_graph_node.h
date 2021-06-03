@@ -51,7 +51,7 @@ namespace Halley {
 		void prepareInputPin(InputPin& pin, VideoAPI& video, Vector2i targetSize);
 		void allocateVideoResources(VideoAPI& video);
 		
-		void render(const RenderGraph& graph, const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue);
+		void render(const RenderGraph& graph, VideoAPI& video, const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue);
 		void notifyOutputs(std::vector<RenderGraphNode*>& renderQueue);
 
 		void resetTextures();

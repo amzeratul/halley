@@ -208,8 +208,9 @@ std::shared_ptr<Texture> RenderGraphNode::makeTexture(VideoAPI& video, RenderGra
 	return texture;
 }
 
-void RenderGraphNode::render(const RenderGraph& graph, const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue)
+void RenderGraphNode::render(const RenderGraph& graph, VideoAPI& video, const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue)
 {
+	allocateVideoResources(video);
 	renderNode(graph, rc);
 	notifyOutputs(renderQueue);
 }

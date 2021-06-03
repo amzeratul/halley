@@ -91,10 +91,7 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video)
 	for (auto& node: nodes) {
 		node->determineIfNeedsRenderTarget();
 	}
-	for (auto& node: nodes) {
-		node->allocateVideoResources(video);
-	}
-
+	
 	std::vector<RenderGraphNode*> renderQueue;
 	renderQueue.reserve(nodes.size());
 	for (auto& node: nodes) {
@@ -104,7 +101,7 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video)
 	}
 
 	for (size_t i = 0; i < renderQueue.size(); ++i) {
-		renderQueue[i]->render(*this, rc, renderQueue);
+		renderQueue[i]->render(*this, video, rc, renderQueue);
 	}
 
 	RenderContext(rc).bind([] (Painter& painter)
