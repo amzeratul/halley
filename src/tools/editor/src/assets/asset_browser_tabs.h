@@ -30,8 +30,12 @@ namespace Halley {
 		std::vector<String> toClose;
 
 		bool srcMode = false;
+		bool waitingLoad = true;
 
 		void makeUI();
 		void closeTab(const String& key);
+
+		void saveTabs();
+		void loadTabs();
 	};
 }

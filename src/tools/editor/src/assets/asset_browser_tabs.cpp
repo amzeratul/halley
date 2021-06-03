@@ -3,6 +3,7 @@
 #include "asset_editor_window.h"
 #include "halley/tools/project/project.h"
 #include "src/ui/editor_ui_factory.h"
+#include "src/ui/project_window.h"
 
 using namespace Halley;
 
@@ -51,6 +52,17 @@ void AssetBrowserTabs::load(std::optional<AssetType> assetType, const String& na
 	// Add to tabs
 	pages->addPage()->add(window, 1);
 	tabs->setSelectedOption(int(tabs->getCount()) - 1);
+	saveTabs();
+}
+
+void AssetBrowserTabs::closeTab(const String& key)
+{
+	auto idx = tabs->removeItem(key);
+	if (idx) {
+		pages->removePage(static_cast<int>(idx.value()));
+		windows.erase(windows.begin() + idx.value());
+	}
+	saveTabs();
 }
 
 void AssetBrowserTabs::refreshAssets()
@@ -64,6 +76,11 @@ void AssetBrowserTabs::refreshAssets()
 void AssetBrowserTabs::setAssetSrcMode(bool srcMode)
 {
 	this->srcMode = srcMode;
+
+	if (waitingLoad) {
+		waitingLoad = false;
+		loadTabs();
+	}
 }
 
 void AssetBrowserTabs::update(Time t, bool moved)
@@ -91,11 +108,29 @@ void AssetBrowserTabs::makeUI()
 	});
 }
 
-void AssetBrowserTabs::closeTab(const String& key)
+void AssetBrowserTabs::saveTabs()
 {
-	auto idx = tabs->removeItem(key);
-	if (idx) {
-		pages->removePage(static_cast<int>(idx.value()));
-		windows.erase(windows.begin() + idx.value());
+	ConfigNode::SequenceType tabIds;
+	const auto n = tabs->getCount();
+	for (int i = 0; i < n; ++i) {
+		tabIds.push_back(ConfigNode(tabs->getItem(i)->getId()));
+	}
+
+	projectWindow.setSetting(EditorSettingType::Project, "tabsOpen", std::move(tabIds));
+}
+
+void AssetBrowserTabs::loadTabs()
+{
+	const auto tabsOpen = projectWindow.getSetting(EditorSettingType::Project, "tabsOpen");
+	if (tabsOpen.getType() == ConfigNodeType::Sequence) {
+		for (const auto& tab: tabsOpen) {
+			auto id = tab.asString();
+			auto splitParts = id.split(':');
+			if (splitParts.size() == 2) {
+				load(fromString<AssetType>(splitParts[0]), splitParts[1]);
+			} else if (splitParts.size() == 1) {
+				load({}, splitParts[0]);
+			}
+		}
 	}
 }
