@@ -1,0 +1,20 @@
+---
+name: Halley/Blit
+base: material_base.yaml
+attributes:
+  # position [0..1]
+  - name: position
+    type: vec4
+    semantic: POSITION
+  - name: texCoord0
+    type: vec4
+    semantic: TEXCOORD0
+textures:
+  - tex0: sampler2D
+passes:
+  - blend: Opaque
+    shader:
+    - language: hlsl
+      vertex: blit.vertex.hlsl
+      pixel: blit.pixel.hlsl
+...

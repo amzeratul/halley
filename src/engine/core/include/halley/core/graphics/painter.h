@@ -6,6 +6,8 @@
 #include <condition_variable>
 #include <halley/maths/vector4.h>
 
+
+#include "texture.h"
 #include "halley/maths/circle.h"
 
 namespace Halley
@@ -85,6 +87,9 @@ namespace Halley
 		// Polygon drawing
 		void drawPolygon(const Polygon& polygon, Colour4f colour, std::shared_ptr<Material> material = {});
 
+		// Blit a texture over
+		void blitTexture(const std::shared_ptr<const Texture>& texture);
+
 		size_t getNumDrawCalls() const { return nDrawCalls; }
 		size_t getNumVertices() const { return nVertices; }
 		size_t getNumTriangles() const { return nTriangles; }
@@ -129,6 +134,7 @@ namespace Halley
 		std::shared_ptr<Material> materialPending;
 		std::shared_ptr<Material> solidLineMaterial;
 		std::shared_ptr<Material> solidPolygonMaterial;
+		std::shared_ptr<Material> blitMaterial;
 
 		size_t nDrawCalls = 0;
 		size_t nVertices = 0;

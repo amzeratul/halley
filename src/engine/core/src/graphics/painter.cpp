@@ -30,6 +30,7 @@ Painter::Painter(Resources& resources)
 	, resources(resources)
 	, solidLineMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidLine")))
 	, solidPolygonMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidPolygon")))
+	, blitMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/Blit")))
 {
 }
 
@@ -395,6 +396,24 @@ void Painter::drawPolygon(const Polygon& polygon, Colour4f colour, std::shared_p
 	}
 
 	draw(material, vertices.size(), vertices.data(), indices, PrimitiveType::Triangle);
+}
+
+void Painter::blitTexture(const std::shared_ptr<const Texture>& texture)
+{
+	struct BlitVertex {
+		Vector4f p;
+		Vector4f t;
+	};
+	std::array<BlitVertex, 4> vs;
+	vs[0] = BlitVertex{ Vector4f(-1, -1, 0, 1), Vector4f(0, 1, 0, 0) };
+	vs[1] = BlitVertex{ Vector4f(1, -1, 0, 1),  Vector4f(1, 1, 0, 0) };
+	vs[2] = BlitVertex{ Vector4f(1, 1, 0, 1),   Vector4f(1, 0, 0, 0) };
+	vs[3] = BlitVertex{ Vector4f(-1, 1, 0, 1),  Vector4f(0, 0, 0, 0) };
+
+	std::array<uint16_t, 6> indices = { 0, 1, 3, 1, 2, 3 };
+
+	blitMaterial->set("tex0", texture);
+	draw(blitMaterial, 4, vs.data(), indices, PrimitiveType::Triangle);
 }
 
 void Painter::setLogging(bool logging)
