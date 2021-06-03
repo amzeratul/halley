@@ -49,7 +49,7 @@ namespace Halley {
 		void startRender();
 		void prepareDependencyGraph(VideoAPI& video, Vector2i targetSize);
 		void prepareInputPin(InputPin& pin, VideoAPI& video, Vector2i targetSize);
-		void allocateVideoResources(VideoAPI& video);
+		void prepareTextures(VideoAPI& video, const RenderContext& rc);
 		
 		void render(const RenderGraph& graph, VideoAPI& video, const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue);
 		void notifyOutputs(std::vector<RenderGraphNode*>& renderQueue);
@@ -63,6 +63,7 @@ namespace Halley {
 		void renderNodePaintMethod(const RenderGraph& graph, const RenderContext& rc);
 		void renderNodeOverlayMethod(const RenderGraph& graph, const RenderContext& rc);
 		void renderNodeImageOutputMethod(const RenderGraph& graph, const RenderContext& rc);
+		void renderNodeBlitTexture(std::shared_ptr<const Texture> texture, const RenderContext& rc);
 		RenderContext getTargetRenderContext(const RenderContext& rc) const;
 		std::shared_ptr<TextureRenderTarget> getRenderTarget(VideoAPI& video);
 

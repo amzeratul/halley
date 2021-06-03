@@ -154,32 +154,6 @@ void RenderGraphNode::determineIfNeedsRenderTarget()
 	}
 }
 
-void RenderGraphNode::allocateVideoResources(VideoAPI& video)
-{
-	if (!activeInCurrentPass) {
-		return;
-	}
-	
-	getRenderTarget(video);
-
-	if (renderTarget && !passThrough) {
-		int colourIdx = 0;
-		for (auto& input: inputPins) {
-			if (!input.other.node && input.type != RenderGraphPinType::Texture) {
-				if (!input.texture) {
-					input.texture = makeTexture(video, input.type);
-				}
-			}
-
-			if (input.type == RenderGraphPinType::ColourBuffer && !renderTarget->hasColourBuffer(colourIdx)) {
-				renderTarget->setTarget(colourIdx++, input.texture);
-			} else if (input.type == RenderGraphPinType::DepthStencilBuffer && !renderTarget->hasDepthBuffer()) {
-				renderTarget->setDepthTexture(input.texture);
-			}
-		}
-	}
-}
-
 std::shared_ptr<TextureRenderTarget> RenderGraphNode::getRenderTarget(VideoAPI& video)
 {
 	if (ownRenderTarget) {
@@ -217,9 +191,40 @@ std::shared_ptr<Texture> RenderGraphNode::makeTexture(VideoAPI& video, RenderGra
 
 void RenderGraphNode::render(const RenderGraph& graph, VideoAPI& video, const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue)
 {
-	allocateVideoResources(video);
+	prepareTextures(video, rc);
 	renderNode(graph, rc);
 	notifyOutputs(renderQueue);
+}
+
+void RenderGraphNode::prepareTextures(VideoAPI& video, const RenderContext& rc)
+{
+	getRenderTarget(video);
+
+	if (!passThrough) {
+		int colourIdx = 0;
+		for (auto& input: inputPins) {
+			if (renderTarget) {
+				// Create Colour/DepthStencil textures for render target, if needed
+				if (!input.other.node && input.type != RenderGraphPinType::Texture) {
+					if (!input.texture) {
+						input.texture = makeTexture(video, input.type);
+					}
+				}
+
+				// Assign textures to render target
+				if (input.type == RenderGraphPinType::ColourBuffer && !renderTarget->hasColourBuffer(colourIdx)) {
+					renderTarget->setTarget(colourIdx++, input.texture);
+				} else if (input.type == RenderGraphPinType::DepthStencilBuffer && !renderTarget->hasDepthBuffer()) {
+					renderTarget->setDepthTexture(input.texture);
+				}
+			} else {
+				// No render target, copy instead
+				if (input.type == RenderGraphPinType::ColourBuffer && input.texture) {
+					renderNodeBlitTexture(input.texture, rc);
+				}
+			}
+		}
+	}
 }
 
 void RenderGraphNode::renderNode(const RenderGraph& graph, const RenderContext& rc)
@@ -283,6 +288,14 @@ void RenderGraphNode::renderNodeImageOutputMethod(const RenderGraph& graph, cons
 			graph.notifyImage(id);
 		}
 	}
+}
+
+void RenderGraphNode::renderNodeBlitTexture(std::shared_ptr<const Texture> texture, const RenderContext& rc)
+{
+	getTargetRenderContext(rc).bind([=] (Painter& painter)
+	{
+		painter.blitTexture(texture);
+	});
 }
 
 RenderContext RenderGraphNode::getTargetRenderContext(const RenderContext& rc) const
