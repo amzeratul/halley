@@ -68,5 +68,6 @@ namespace Halley {
 		void removeAsset();
 
 		void setCollapsed(bool collapsed);
+		void doSetCollapsed(bool collapsed);
 	};
 }

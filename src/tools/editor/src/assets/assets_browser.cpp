@@ -13,6 +13,7 @@
 #include "halley/tools/file/filesystem.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "src/ui/editor_ui_factory.h"
+#include "src/ui/project_window.h"
 
 using namespace Halley;
 
@@ -106,6 +107,8 @@ void AssetsBrowser::makeUI()
 	});
 
 	updateAddRemoveButtons();
+
+	doSetCollapsed(projectWindow.getSetting(EditorSettingType::Editor, "assetBrowserCollapse").asBool(false));
 }
 
 void AssetsBrowser::setAssetSrcMode(bool enabled)
@@ -341,7 +344,13 @@ void AssetsBrowser::removeAsset()
 	FileSystem::remove(project.getAssetsSrcPath() / lastClickedAsset);
 }
 
-void AssetsBrowser::setCollapsed(bool c)
+void AssetsBrowser::setCollapsed(bool collapsed)
+{
+	doSetCollapsed(collapsed);
+	projectWindow.setSetting(EditorSettingType::Editor, "assetBrowserCollapse", ConfigNode(collapsed));
+}
+
+void AssetsBrowser::doSetCollapsed(bool c)
 {
 	if (collapsed != c) {
 		collapsed = c;
