@@ -63,8 +63,9 @@ namespace Halley {
 				return direction == ScriptNodePinDirection::Input ? ScriptPinSide::Left : ScriptPinSide::Right;
 			case ScriptNodeElementType::TargetPin:
 				return direction == ScriptNodePinDirection::Input ? ScriptPinSide::Top : ScriptPinSide::Bottom;
+			default:
+				return ScriptPinSide::Undefined;
 			}
-			return ScriptPinSide::Undefined;
 		}
 
 		bool isMultiConnection() const

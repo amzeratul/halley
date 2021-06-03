@@ -10,8 +10,8 @@ UISizerEntry::UISizerEntry()
 UISizerEntry::UISizerEntry(UIElementPtr widget, float proportion, Vector4f border, int fillFlags, Vector2f position)
 	: widget(widget)
 	, proportion(proportion)
-	, border(border)
 	, fillFlags(fillFlags)
+	, border(border)
 	, position(position)
 {
 	updateEnabled();

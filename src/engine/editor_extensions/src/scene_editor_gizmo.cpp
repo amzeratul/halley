@@ -43,7 +43,7 @@ void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl
 	}
 
 	if (inputState.selectionBox) {
-		selected = (selected && inputState.shiftHeld) || inputState.selectionBox.has_value() && inputState.selectionBox.value().contains(pos);
+		selected = (selected && inputState.shiftHeld) || (inputState.selectionBox.has_value() && inputState.selectionBox.value().contains(pos));
 	}
 }
 
