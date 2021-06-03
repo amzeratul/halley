@@ -328,6 +328,12 @@ void SceneEditor::dragCamera(Vector2f amount)
 	const float zoom = camera.getComponent<CameraComponent>().zoom;
 	auto& transform = camera.getComponent<Transform2DComponent>();
 	transform.setGlobalPosition(roundPosition(transform.getGlobalPosition() + amount / zoom));
+	saveCameraPos();
+}
+
+void SceneEditor::moveCamera(Vector2f pos)
+{
+	moveCameraTo2D(pos);
 }
 
 void SceneEditor::moveCameraTo2D(Vector2f pos)
@@ -335,6 +341,7 @@ void SceneEditor::moveCameraTo2D(Vector2f pos)
 	auto camera = getWorld().getEntity(cameraEntityIds.at(0));
 	auto& transform = camera.getComponent<Transform2DComponent>();
 	transform.setGlobalPosition(roundPosition(pos));
+	saveCameraPos();
 }
 
 void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
@@ -355,6 +362,35 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 	// Translate to keep fixed point
 	const Vector2f translate = cursorPosRelToCamera * (1.0f / prevZoom - 1.0f / camera.zoom);
 	transform.setGlobalPosition(roundPosition(transform.getGlobalPosition() + translate, camera.zoom));
+	saveCameraPos();
+}
+
+void SceneEditor::saveCameraPos()
+{
+	auto cameraEntity = getWorld().getEntity(cameraEntityIds.at(0));
+	auto& camera = cameraEntity.getComponent<CameraComponent>();
+	auto& transform = cameraEntity.getComponent<Transform2DComponent>();
+	editorInterface->setAssetSetting("cameraPos", ConfigNode(transform.getGlobalPosition()));
+	editorInterface->setAssetSetting("cameraZoom", ConfigNode(camera.zoom));
+}
+
+bool SceneEditor::loadCameraPos()
+{
+	auto cameraEntity = getWorld().getEntity(cameraEntityIds.at(0));
+
+	const auto& zoom = editorInterface->getAssetSetting("cameraZoom");
+	if (zoom.getType() == ConfigNodeType::Float) {
+		auto& camera = cameraEntity.getComponent<CameraComponent>();
+		camera.zoom = zoom.asFloat();
+	}
+
+	const auto& pos = editorInterface->getAssetSetting("cameraPos");
+	if (pos.getType() == ConfigNodeType::Float2) {
+		auto& transform = cameraEntity.getComponent<Transform2DComponent>();
+		transform.setGlobalPosition(pos.asVector2f());
+		return true;
+	}
+	return false;
 }
 
 void SceneEditor::setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizmoCollection)

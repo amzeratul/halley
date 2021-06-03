@@ -214,8 +214,12 @@ void ProjectWindow::update(Time t, bool moved)
 		tasks->update(t);
 	}
 
-	for (auto& s: settings) {
-		s.second->save();
+	timeSinceSettingsSaved += t;
+	if (timeSinceSettingsSaved >= 5) {
+		for (auto& s: settings) {
+			s.second->save();
+		}
+		timeSinceSettingsSaved = 0;
 	}
 
 	const auto size = api.video->getWindow().getDefinition().getSize();
@@ -348,14 +352,21 @@ ProjectWindow::SettingsStorage::SettingsStorage(std::shared_ptr<ISaveData> saveD
 	load();
 }
 
-void ProjectWindow::SettingsStorage::save() const
+ProjectWindow::SettingsStorage::~SettingsStorage()
+{
+	save();
+}
+
+bool ProjectWindow::SettingsStorage::save() const
 {
 	if (dirty) {
 		if (saveData) {
 			saveData->setData(path, Serializer::toBytes(data));
 		}
 		dirty = false;
+		return true;
 	}
+	return false;
 }
 
 void ProjectWindow::SettingsStorage::load()

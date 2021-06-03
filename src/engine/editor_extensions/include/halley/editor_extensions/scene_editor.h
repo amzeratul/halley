@@ -30,6 +30,8 @@ namespace Halley {
 
     	const std::vector<EntityId>& getCameraIds() const override;
 		void dragCamera(Vector2f amount) override;
+		void moveCamera(Vector2f pos) override;
+    	bool loadCameraPos() override;
 		void changeZoom(int amount, Vector2f cursorPosRelToCamera) override;
 
     	void setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizmoCollection) override;
@@ -133,5 +135,7 @@ namespace Halley {
     	EntityRef getEntityToFocus();
 		void updateEntityFocused();
 		void addEntityIdToList(std::vector<EntityId>& dst, EntityRef entity);
+
+    	void saveCameraPos();
 	};
 }

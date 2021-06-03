@@ -99,6 +99,8 @@ namespace Halley {
 
         virtual const std::vector<EntityId>& getCameraIds() const = 0;
         virtual void dragCamera(Vector2f amount) = 0;
+    	virtual void moveCamera(Vector2f pos) = 0;
+    	virtual bool loadCameraPos() = 0;
         virtual void changeZoom(int amount, Vector2f cursorPosRelToCamera) = 0;
 
     	virtual void setSelectedEntity(const UUID& id, EntityData& entityData) = 0;

@@ -165,10 +165,13 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 		interface.setupTools(*toolMode, gameBridge->getGizmos());
 		setTool(getSetting(EditorSettingType::Temp, "tools.curTool").asString("translate"));
 
-		// Show root
-		if (!sceneCreated.getEntities().empty()) {
-			panCameraToEntity(sceneCreated.getEntities().at(0).getInstanceUUID().toString());
+		// Move camera
+		if (!gameBridge->loadCameraPos()) {
+			if (!sceneCreated.getEntities().empty()) {
+				panCameraToEntity(sceneCreated.getEntities().at(0).getInstanceUUID().toString());
+			}
 		}
+		
 		currentEntityScene = sceneCreated;
 
 		// Custom UI

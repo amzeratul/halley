@@ -109,6 +109,21 @@ void SceneEditorGameBridge::dragCamera(Vector2f pos)
 	}
 }
 
+void SceneEditorGameBridge::moveCamera(Vector2f pos)
+{
+	if (interfaceReady) {
+		interface->moveCamera(pos);
+	}
+}
+
+bool SceneEditorGameBridge::loadCameraPos()
+{
+	if (interfaceReady) {
+		return interface->loadCameraPos();
+	}
+	return false;
+}
+
 std::shared_ptr<UIWidget> SceneEditorGameBridge::makeCustomUI() const
 {
 	std::shared_ptr<UIWidget> result;

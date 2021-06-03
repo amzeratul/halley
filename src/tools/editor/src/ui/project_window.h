@@ -54,8 +54,9 @@ namespace Halley {
 		class SettingsStorage {
 		public:
 			SettingsStorage(std::shared_ptr<ISaveData> saveData, String path);
+			~SettingsStorage();
 
-			void save() const;
+			bool save() const;
 			void load();
 
 			void setData(std::string_view key, ConfigNode data);
@@ -99,6 +100,7 @@ namespace Halley {
         std::shared_ptr<UIDebugConsole> debugConsole;
         
     	std::map<EditorSettingType, std::unique_ptr<SettingsStorage>> settings;
+    	Time timeSinceSettingsSaved = 0;
 
         void makeUI();
     	void makeToolbar();
