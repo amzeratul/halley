@@ -171,11 +171,11 @@ void RenderGraphNode::allocateVideoResources(VideoAPI& video)
 		int colourIdx = 0;
 		for (auto& input: inputPins) {
 			if (!input.other.node && input.type != RenderGraphPinType::Texture) {
-				if (input.textureId == -1) {
-					input.textureId = makeTexture(video, input.type);
+				if (!input.texture) {
+					input.texture = makeTexture(video, input.type);
 				}
 			}
-			
+
 			if (input.type == RenderGraphPinType::ColourBuffer && !renderTarget->hasColourBuffer(colourIdx)) {
 				renderTarget->setTarget(colourIdx++, getInputTexture(input));
 			} else if (input.type == RenderGraphPinType::DepthStencilBuffer && !renderTarget->hasDepthBuffer()) {
@@ -187,21 +187,17 @@ void RenderGraphNode::allocateVideoResources(VideoAPI& video)
 
 void RenderGraphNode::resetTextures()
 {
-	textures.clear();
 	renderTarget.reset();
 	for (auto& input: inputPins) {
-		if (input.textureId >= 0) {
-			input.textureId = -1;
-		}
+		input.texture.reset();
 	}
 }
 
-int8_t RenderGraphNode::makeTexture(VideoAPI& video, RenderGraphPinType type)
+std::shared_ptr<Texture> RenderGraphNode::makeTexture(VideoAPI& video, RenderGraphPinType type)
 {
 	Expects (type == RenderGraphPinType::ColourBuffer || type == RenderGraphPinType::DepthStencilBuffer);
 	
-	const int8_t result = gsl::narrow_cast<int8_t>(textures.size());
-	auto& texture = textures.emplace_back(video.createTexture(currentSize));
+	auto texture = video.createTexture(currentSize);
 
 	auto desc = TextureDescriptor(currentSize, type == RenderGraphPinType::ColourBuffer ? TextureFormat::RGBA : TextureFormat::Depth);
 	desc.isRenderTarget = true;
@@ -209,7 +205,7 @@ int8_t RenderGraphNode::makeTexture(VideoAPI& video, RenderGraphPinType type)
 	desc.useFiltering = false; // TODO: allow filtering
 	texture->load(std::move(desc));
 
-	return result;
+	return texture;
 }
 
 void RenderGraphNode::render(const RenderGraph& graph, const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue)
@@ -294,8 +290,8 @@ std::shared_ptr<Texture> RenderGraphNode::getInputTexture(const InputPin& input)
 {
 	if (input.other.node) {
 		return input.other.node->getOutputTexture(input.other.otherId);
-	} else if (input.textureId >= 0) {
-		return textures.at(input.textureId);
+	} else if (input.texture) {
+		return input.texture;
 	} else {
 		return {};
 	}
