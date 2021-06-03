@@ -18,6 +18,12 @@ AssetBrowserTabs::AssetBrowserTabs(EditorUIFactory& factory, Project& project, P
 
 void AssetBrowserTabs::load(std::optional<AssetType> assetType, const String& name)
 {
+	openTab(assetType, name, true);
+	saveTabs();
+}
+
+void AssetBrowserTabs::openTab(std::optional<AssetType> assetType, const String& name, bool selected)
+{
 	const String key = assetType ? (toString(assetType) + ":" + name) : name;
 
 	const bool alreadyExists = tabs->setSelectedOptionId(key);
@@ -51,8 +57,9 @@ void AssetBrowserTabs::load(std::optional<AssetType> assetType, const String& na
 
 	// Add to tabs
 	pages->addPage()->add(window, 1);
-	tabs->setSelectedOption(int(tabs->getCount()) - 1);
-	saveTabs();
+	if (selected) {
+		tabs->setSelectedOption(int(tabs->getCount()) - 1);
+	}
 }
 
 void AssetBrowserTabs::closeTab(const String& key)
@@ -105,6 +112,7 @@ void AssetBrowserTabs::makeUI()
 	setHandle(UIEventType::ListSelectionChanged, "tabs", [=] (const UIEvent& event)
 	{
 		pages->setPage(event.getIntData());
+		saveTabs();
 	});
 }
 
@@ -117,6 +125,7 @@ void AssetBrowserTabs::saveTabs()
 	}
 
 	projectWindow.setSetting(EditorSettingType::Project, "tabsOpen", std::move(tabIds));
+	projectWindow.setSetting(EditorSettingType::Project, "currentTab", ConfigNode(tabs->getSelectedOptionId()));
 }
 
 void AssetBrowserTabs::loadTabs()
@@ -127,10 +136,13 @@ void AssetBrowserTabs::loadTabs()
 			auto id = tab.asString();
 			auto splitParts = id.split(':');
 			if (splitParts.size() == 2) {
-				load(fromString<AssetType>(splitParts[0]), splitParts[1]);
+				openTab(fromString<AssetType>(splitParts[0]), splitParts[1], false);
 			} else if (splitParts.size() == 1) {
-				load({}, splitParts[0]);
+				openTab({}, splitParts[0], false);
 			}
 		}
 	}
+
+	const auto curTab = projectWindow.getSetting(EditorSettingType::Project, "currentTab").asString("");
+	tabs->setSelectedOptionId(curTab);
 }

@@ -33,6 +33,7 @@ namespace Halley {
 		bool waitingLoad = true;
 
 		void makeUI();
+		void openTab(std::optional<AssetType> assetType, const String& name, bool selected);
 		void closeTab(const String& key);
 
 		void saveTabs();
