@@ -43,12 +43,23 @@ namespace Halley {
 	struct SceneEditorOutputState;
 	struct SnapRules;
 	
+    enum class EditorSettingType {
+        Editor,
+        Project,
+        Temp
+    };
+	
 	class IEditorInterface {
 	public:
 		virtual ~IEditorInterface() = default;
 
 		virtual bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) = 0;
 		virtual void addTask(std::unique_ptr<Task> task) = 0;
+
+		virtual const ConfigNode& getSetting(EditorSettingType type, std::string_view id) const = 0;
+		virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;
+		virtual const ConfigNode& getAssetSetting(std::string_view id) const = 0;
+		virtual void setAssetSetting(std::string_view id, ConfigNode data) = 0;
 	};
 
     class SceneEditorContext {
@@ -213,12 +224,6 @@ namespace Halley {
 		virtual ISceneEditorWindow& getSceneEditorWindow() = 0;
 	};
 	
-    enum class EditorSettingType {
-        Editor,
-        Project,
-        Temp
-    };
-	
 	class ISceneEditorWindow {
 	public:
 		virtual ~ISceneEditorWindow() = default;
@@ -242,7 +247,7 @@ namespace Halley {
 
 		virtual std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() = 0;
 
-		virtual ConfigNode getSetting(EditorSettingType type, std::string_view id) const = 0;
+		virtual const ConfigNode& getSetting(EditorSettingType type, std::string_view id) const = 0;
 		virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;
 
 		virtual float getProjectDefaultZoom() const = 0;
@@ -259,7 +264,7 @@ namespace Halley {
 
 	class IProjectWindow {
 	public:
-		virtual ConfigNode getSetting(EditorSettingType type, std::string_view id) const = 0;
+		virtual const ConfigNode& getSetting(EditorSettingType type, std::string_view id) const = 0;
         virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;
 	};
 

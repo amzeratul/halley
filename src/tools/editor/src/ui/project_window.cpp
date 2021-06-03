@@ -317,14 +317,28 @@ void ProjectWindow::addTask(std::unique_ptr<Task> task)
 	tasks->addTask(std::move(task));
 }
 
-ConfigNode ProjectWindow::getSetting(EditorSettingType type, std::string_view id) const
+const ConfigNode& ProjectWindow::getSetting(EditorSettingType type, std::string_view id) const
 {
-	return ConfigNode(settings.at(type)->getData(id));
+	return settings.at(type)->getData(id);
 }
 
 void ProjectWindow::setSetting(EditorSettingType type, std::string_view id, ConfigNode data)
 {
 	settings.at(type)->setData(id, std::move(data));
+}
+
+const ConfigNode& ProjectWindow::getAssetSetting(std::string_view assetKey, std::string_view id)
+{
+	auto& data = settings.at(EditorSettingType::Project)->getMutableData(String("asset:") + assetKey);
+	data.ensureType(ConfigNodeType::Map);
+	return data[id];
+}
+
+void ProjectWindow::setAssetSetting(std::string_view assetKey, std::string_view id, ConfigNode value)
+{
+	auto& data = settings.at(EditorSettingType::Project)->getMutableData(String("asset:") + assetKey);
+	data.ensureType(ConfigNodeType::Map);
+	data[id] = std::move(value);
 }
 
 ProjectWindow::SettingsStorage::SettingsStorage(std::shared_ptr<ISaveData> saveData, String path)
@@ -364,5 +378,11 @@ void ProjectWindow::SettingsStorage::setData(std::string_view key, ConfigNode va
 
 const ConfigNode& ProjectWindow::SettingsStorage::getData(std::string_view key) const
 {
+	return data.getRoot()[key];
+}
+
+ConfigNode& ProjectWindow::SettingsStorage::getMutableData(std::string_view key)
+{
+	dirty = true;
 	return data.getRoot()[key];
 }

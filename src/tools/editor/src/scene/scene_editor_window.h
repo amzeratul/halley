@@ -72,7 +72,7 @@ namespace Halley {
 
 		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() override;
 		
-		ConfigNode getSetting(EditorSettingType type, std::string_view id) const override;
+		const ConfigNode& getSetting(EditorSettingType type, std::string_view id) const override;
 		void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) override;
 
 		void onTabbedIn();
@@ -83,6 +83,7 @@ namespace Halley {
 		void spawnUI(std::shared_ptr<UIWidget> ui) override;
 		
 		void openAsset(AssetType assetType, const String& assetId);
+		String getAssetKey() const;
 
 	protected:
 		void update(Time t, bool moved) override;

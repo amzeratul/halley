@@ -36,8 +36,10 @@ namespace Halley {
 
     	void addTask(std::unique_ptr<Task> task);
 
-    	ConfigNode getSetting(EditorSettingType type, std::string_view id) const override;
+    	const ConfigNode& getSetting(EditorSettingType type, std::string_view id) const override;
         void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) override;
+        const ConfigNode& getAssetSetting(std::string_view assetKey, std::string_view id);
+    	void setAssetSetting(std::string_view assetKey, std::string_view id, ConfigNode data);
 
     protected:
 		void onUnloadDLL() override;
@@ -58,7 +60,8 @@ namespace Halley {
 
 			void setData(std::string_view key, ConfigNode data);
 			const ConfigNode& getData(std::string_view key) const;
-
+			ConfigNode& getMutableData(std::string_view key);
+		
 		private:
 			ConfigFile data;
 			std::shared_ptr<ISaveData> saveData;

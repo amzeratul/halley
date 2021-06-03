@@ -882,7 +882,7 @@ void SceneEditorWindow::redo()
 	updateButtons();
 }
 
-ConfigNode SceneEditorWindow::getSetting(EditorSettingType type, std::string_view id) const
+const ConfigNode& SceneEditorWindow::getSetting(EditorSettingType type, std::string_view id) const
 {
 	return projectWindow.getSetting(type, id);
 }
@@ -915,4 +915,9 @@ void SceneEditorWindow::spawnUI(std::shared_ptr<UIWidget> ui)
 void SceneEditorWindow::openAsset(AssetType assetType, const String& assetId)
 {
 	projectWindow.openAsset(AssetType::Scene, assetId);
+}
+
+String SceneEditorWindow::getAssetKey() const
+{
+	return origPrefabAssetType + ":" + prefab->getAssetId();
 }

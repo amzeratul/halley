@@ -232,6 +232,26 @@ void SceneEditorGameBridge::addTask(std::unique_ptr<Task> task)
 	projectWindow.addTask(std::move(task));
 }
 
+const ConfigNode& SceneEditorGameBridge::getSetting(EditorSettingType type, std::string_view id) const
+{
+	return projectWindow.getSetting(type, id);
+}
+
+void SceneEditorGameBridge::setSetting(EditorSettingType type, std::string_view id, ConfigNode data)
+{
+	projectWindow.setSetting(type, id, std::move(data));
+}
+
+const ConfigNode& SceneEditorGameBridge::getAssetSetting(std::string_view id) const
+{
+	return projectWindow.getAssetSetting(sceneEditorWindow.getAssetKey(), id);
+}
+
+void SceneEditorGameBridge::setAssetSetting(std::string_view id, ConfigNode data)
+{
+	projectWindow.setAssetSetting(sceneEditorWindow.getAssetKey(), id, std::move(data));
+}
+
 void SceneEditorGameBridge::refreshAssets()
 {
 	if (interfaceReady) {

@@ -130,7 +130,7 @@ void AssetBrowserTabs::saveTabs()
 
 void AssetBrowserTabs::loadTabs()
 {
-	const auto tabsOpen = projectWindow.getSetting(EditorSettingType::Project, "tabsOpen");
+	const auto& tabsOpen = projectWindow.getSetting(EditorSettingType::Project, "tabsOpen");
 	if (tabsOpen.getType() == ConfigNodeType::Sequence) {
 		for (const auto& tab: tabsOpen) {
 			auto id = tab.asString();

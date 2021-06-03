@@ -50,7 +50,12 @@ namespace Halley {
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
 		void addTask(std::unique_ptr<Task> task) override;
-	
+		
+		const ConfigNode& getSetting(EditorSettingType type, std::string_view id) const override;
+		void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) override;
+		const ConfigNode& getAssetSetting(std::string_view id) const override;
+		void setAssetSetting(std::string_view id, ConfigNode data) override;
+
 	private:
 		const HalleyAPI& api;
 		Resources& resources;
