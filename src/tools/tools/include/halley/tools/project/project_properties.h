@@ -1,6 +1,7 @@
 #pragma once
 
 #include <halley/text/halleystring.h>
+#include "halley/maths/uuid.h"
 
 namespace Halley {
 	class Path;
@@ -9,6 +10,8 @@ namespace Halley {
     public:
 		ProjectProperties(Path propertiesFile);
 
+        const UUID& getUUID() const;
+    	
 		const String& getName() const;
 		void setName(String name);
 
@@ -29,6 +32,7 @@ namespace Halley {
 
 	private:
 		const Path& propertiesFile;
+    	UUID uuid;
 		String name;
     	String assetPackManifest;
         String binName;
@@ -36,7 +40,10 @@ namespace Halley {
     	float defaultZoom = 1.0f;
     	std::vector<String> platforms;
 
+    	bool dirty = false;
+
 		void load();
 		void save();
+    	void loadDefaults();
     };
 }

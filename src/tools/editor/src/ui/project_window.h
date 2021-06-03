@@ -14,12 +14,12 @@ namespace Halley {
     class HalleyEditor;
 	class Toolbar;
 	class Project;
-
-    class ProjectWindow final : public UIWidget, public IDynamicLibraryListener, public Project::IAssetLoadListener
+        
+    class ProjectWindow final : public UIWidget, public IDynamicLibraryListener, public Project::IAssetLoadListener, public IProjectWindow
     {
     public:
         ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Project& project, Resources& resources, const HalleyAPI& api);
-    	~ProjectWindow();
+    	~ProjectWindow() override;
 
         void onRemovedFromRoot(UIRoot& root) override;
     	
@@ -36,8 +36,8 @@ namespace Halley {
 
     	void addTask(std::unique_ptr<Task> task);
 
-    	ConfigNode getSetting(EditorSettingType type, std::string_view id) const;
-        void setSetting(EditorSettingType type, std::string_view id, ConfigNode data);
+    	ConfigNode getSetting(EditorSettingType type, std::string_view id) const override;
+        void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) override;
 
     protected:
 		void onUnloadDLL() override;
@@ -49,6 +49,23 @@ namespace Halley {
         bool onKeyPress(KeyboardKeyPress key) override;
     	
     private:
+		class SettingsStorage {
+		public:
+			SettingsStorage(std::shared_ptr<ISaveData> saveData, String path);
+
+			void save() const;
+			void load();
+
+			void setData(std::string_view key, ConfigNode data);
+			const ConfigNode& getData(std::string_view key) const;
+
+		private:
+			ConfigFile data;
+			std::shared_ptr<ISaveData> saveData;
+			String path;
+			mutable bool dirty = false;
+		};
+    	
 		constexpr static int numOfStandardTools = 6;
 
     	EditorUIFactory& factory;
@@ -77,6 +94,8 @@ namespace Halley {
     	std::shared_ptr<UIDebugConsoleController> debugConsoleController;
     	std::shared_ptr<UIDebugConsoleCommands> debugConsoleCommands;
         std::shared_ptr<UIDebugConsole> debugConsole;
+        
+    	std::map<EditorSettingType, std::unique_ptr<SettingsStorage>> settings;
 
         void makeUI();
     	void makeToolbar();

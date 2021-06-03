@@ -8,6 +8,7 @@
 #include "taskbar.h"
 #include "halley/tools/project/project.h"
 #include "halley/file_formats/yaml_convert.h"
+#include "halley/tools/project/project_properties.h"
 #include "src/editor_root_stage.h"
 #include "src/halley_editor.h"
 #include "src/assets/assets_browser.h"
@@ -26,6 +27,10 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	, api(api)
 {
 	debugConsoleController = std::make_shared<UIDebugConsoleController>();
+
+	settings[EditorSettingType::Temp] = std::make_unique<SettingsStorage>(std::shared_ptr<ISaveData>(), "");
+	settings[EditorSettingType::Project] = std::make_unique<SettingsStorage>(api.system->getStorageContainer(SaveDataType::SaveLocal, "settings"), project.getProperties().getUUID().toString());
+	settings[EditorSettingType::Editor] = std::make_unique<SettingsStorage>(api.system->getStorageContainer(SaveDataType::SaveLocal, "settings"), "halleyEditor");
 
 	project.withDLL([&] (DynamicLibrary& dll)
 	{
@@ -139,8 +144,8 @@ bool ProjectWindow::loadCustomUI()
 	
 	auto customToolsInterface = game->createEditorCustomToolsInterface();
 	if (customToolsInterface) {
-		try {		
-			customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(factory, resources, project.getGameResources(), api, project));
+		try {
+			customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(factory, resources, project.getGameResources(), api, project, *this));
 		} catch (const std::exception& e) {
 			Logger::logException(e);
 		} catch (...) {
@@ -207,6 +212,10 @@ void ProjectWindow::update(Time t, bool moved)
 {
 	if (tasks) {
 		tasks->update(t);
+	}
+
+	for (auto& s: settings) {
+		s.second->save();
 	}
 
 	const auto size = api.video->getWindow().getDefinition().getSize();
@@ -310,10 +319,50 @@ void ProjectWindow::addTask(std::unique_ptr<Task> task)
 
 ConfigNode ProjectWindow::getSetting(EditorSettingType type, std::string_view id) const
 {
-	return project.getSetting(type, id);
+	return ConfigNode(settings.at(type)->getData(id));
 }
 
 void ProjectWindow::setSetting(EditorSettingType type, std::string_view id, ConfigNode data)
 {
-	project.setSetting(type, id, std::move(data));
+	settings.at(type)->setData(id, std::move(data));
+}
+
+ProjectWindow::SettingsStorage::SettingsStorage(std::shared_ptr<ISaveData> saveData, String path)
+	: saveData(std::move(saveData))
+	, path(std::move(path))
+{
+	load();
+}
+
+void ProjectWindow::SettingsStorage::save() const
+{
+	if (dirty) {
+		if (saveData) {
+			saveData->setData(path, Serializer::toBytes(data));
+		}
+		dirty = false;
+	}
+}
+
+void ProjectWindow::SettingsStorage::load()
+{
+	data.getRoot() = ConfigNode::MapType();
+
+	if (saveData) {
+		const auto bytes = saveData->getData(path);
+		if (!bytes.empty()) {
+			Deserializer::fromBytes(data, bytes);
+		}
+	}
+}
+
+void ProjectWindow::SettingsStorage::setData(std::string_view key, ConfigNode value)
+{
+	data.getRoot()[key] = std::move(value);
+	dirty = true;
+}
+
+const ConfigNode& ProjectWindow::SettingsStorage::getData(std::string_view key) const
+{
+	return data.getRoot()[key];
 }

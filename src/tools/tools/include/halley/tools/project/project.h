@@ -119,9 +119,6 @@ namespace Halley
 
 		std::unique_ptr<Game> createGameInstance(const HalleyAPI& api) const;
 
-		ConfigNode getSetting(EditorSettingType type, std::string_view id) const override;
-		void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) override;
-
 	private:
 		std::vector<String> platforms;
 		Path rootPath;
@@ -143,8 +140,6 @@ namespace Halley
 		std::vector<HalleyPluginPtr> plugins;
 		std::shared_ptr<DynamicLibrary> gameDll;
 		std::unique_ptr<Resources> gameResources;
-
-		std::map<String, ConfigNode> tempSettings;
 
 		Path getDLLPath() const;
 		void loadDLL();
