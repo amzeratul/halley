@@ -103,13 +103,23 @@ bool DynamicLibrary::load(bool withAnotherName)
 	}
 
 	// Store write times
-	libLastWrite = last_write_time(libOrigPath);
-	if (hasDebugSymbols) {
-		debugLastWrite = last_write_time(debugSymbolsOrigPath);
-	}
+	for (size_t i = 0; i < 3; ++i) {
+		boost::system::error_code ec0;
+		boost::system::error_code ec1;
+		libLastWrite = last_write_time(libOrigPath, ec0);
+		if (hasDebugSymbols) {
+			debugLastWrite = last_write_time(debugSymbolsOrigPath, ec1);
+		}
+		if (!ec0.failed() && !ec1.failed()) {
+			loaded = true;
+			return true;
+		}
 
-	loaded = true;
-	return true;
+		using namespace std::chrono_literals;
+		std::this_thread::sleep_for(200ms);
+	}
+	
+	return false;
 }
 
 void DynamicLibrary::unload()
