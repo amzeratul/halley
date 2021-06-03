@@ -64,6 +64,7 @@ namespace Halley {
 		void renderNodeOverlayMethod(const RenderGraph& graph, const RenderContext& rc);
 		void renderNodeImageOutputMethod(const RenderGraph& graph, const RenderContext& rc);
 		RenderContext getTargetRenderContext(const RenderContext& rc) const;
+		std::shared_ptr<TextureRenderTarget> getRenderTarget(VideoAPI& video);
 
 		String id;
 		RenderGraphMethod method;

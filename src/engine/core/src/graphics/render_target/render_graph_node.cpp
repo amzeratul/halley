@@ -77,6 +77,7 @@ void RenderGraphNode::startRender()
 	passThrough = false;
 	ownRenderTarget = false;
 	depsLeft = 0;
+	directOutput = nullptr;
 }
 
 void RenderGraphNode::prepareDependencyGraph(VideoAPI& video, Vector2i targetSize)
@@ -143,8 +144,10 @@ void RenderGraphNode::determineIfNeedsRenderTarget()
 			hasOutputPinsWithMultipleConnections = true;
 		}
 	}
+	
 	ownRenderTarget = hasOutputPinsWithMultipleConnections || hasMultipleRenderNodeOutputs || !allConnectionsAreCompatible;
-	if (!ownRenderTarget && curOutputNode) {
+
+	if (!ownRenderTarget && curOutputNode && !hasOutputPinsWithMultipleConnections) {
 		assert(!curOutputNode->passThrough);
 		directOutput = curOutputNode;
 		directOutput->passThrough = true;
@@ -157,15 +160,7 @@ void RenderGraphNode::allocateVideoResources(VideoAPI& video)
 		return;
 	}
 	
-	if (ownRenderTarget) {
-		if (!renderTarget) {
-			renderTarget = video.createTextureRenderTarget();
-		}
-	} else {
-		if (directOutput) {
-			renderTarget = directOutput->renderTarget;
-		}
-	}
+	getRenderTarget(video);
 
 	if (renderTarget && !passThrough) {
 		int colourIdx = 0;
@@ -183,6 +178,18 @@ void RenderGraphNode::allocateVideoResources(VideoAPI& video)
 			}
 		}
 	}
+}
+
+std::shared_ptr<TextureRenderTarget> RenderGraphNode::getRenderTarget(VideoAPI& video)
+{
+	if (ownRenderTarget) {
+		if (!renderTarget) {
+			renderTarget = video.createTextureRenderTarget();
+		}
+	} else if (directOutput) {
+		renderTarget = directOutput->getRenderTarget(video);
+	}
+	return renderTarget;
 }
 
 void RenderGraphNode::resetTextures()
@@ -281,6 +288,7 @@ void RenderGraphNode::renderNodeImageOutputMethod(const RenderGraph& graph, cons
 RenderContext RenderGraphNode::getTargetRenderContext(const RenderContext& rc) const
 {
 	if (renderTarget) {
+		assert(renderTarget->hasColourBuffer(0));
 		return rc.with(*renderTarget);
 	} else {
 		return rc;
