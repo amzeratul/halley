@@ -9,6 +9,7 @@
 #include "halley/text/string_converter.h"
 #include "halley/file_formats/binary_file.h"
 #include "halley/file_formats/config_file.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -211,6 +212,11 @@ size_t MaterialDefinition::getVertexStride() const
 size_t MaterialDefinition::getVertexPosOffset() const
 {
 	return size_t(vertexPosOffset);
+}
+
+bool MaterialDefinition::hasTexture(const String& name) const
+{
+	return std_ex::contains_if(textures, [&] (const auto& t) { return t.name == name; });
 }
 
 const std::shared_ptr<const Texture>& MaterialDefinition::getFallbackTexture() const

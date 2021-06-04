@@ -213,7 +213,9 @@ std::shared_ptr<Material> SpriteSheet::getMaterial(const String& name) const
 
 	if (!result) {
 		result = std::make_shared<Material>(resources->get<MaterialDefinition>(name));
-		result->set("tex0", getTexture());
+		if (result->getDefinition().hasTexture("tex0")) {
+			result->set("tex0", getTexture());
+		}
 		materials[name] = result;
 	}
 

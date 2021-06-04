@@ -200,6 +200,7 @@ namespace Halley
 		const Vector<MaterialAttribute>& getAttributes() const { return attributes; }
 		const Vector<MaterialUniformBlock>& getUniformBlocks() const { return uniformBlocks; }
 		const Vector<MaterialTexture>& getTextures() const { return textures; }
+		bool hasTexture(const String& name) const;
 		const std::shared_ptr<const Texture>& getFallbackTexture() const;
 		int getDefaultMask() const;
 
