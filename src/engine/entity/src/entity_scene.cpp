@@ -37,12 +37,12 @@ bool EntityScene::needsUpdate() const
 	return false;
 }
 
-void EntityScene::update(EntityFactory& factory)
+void EntityScene::update(EntityFactory& factory, IEntitySceneUpdateCallbacks* callbacks)
 {
 	// Collect all prefabs that changed
 	for (auto& entry: prefabObservers) {
 		if (entry.needsUpdate()) {
-			entry.updateEntities(factory, *this);
+			entry.updateEntities(factory, *this, callbacks, worldPartition);
 			entry.markUpdated();		
 		}
 	}
@@ -50,15 +50,10 @@ void EntityScene::update(EntityFactory& factory)
 	// Update scenes
 	for (auto& entry: sceneObservers) {
 		if (entry.needsUpdate()) {
-			entry.updateEntities(factory, *this);
+			entry.updateEntities(factory, *this, callbacks, worldPartition);
 			entry.markUpdated();
 		}
 	}
-}
-
-void EntityScene::updateOnEditor(EntityFactory& factory)
-{
-	update(factory);
 }
 
 void EntityScene::addPrefabReference(const std::shared_ptr<const Prefab>& prefab, const EntityRef& entity)
@@ -89,7 +84,7 @@ bool EntityScene::PrefabObserver::needsUpdate() const
 	return assetVersion != prefab->getAssetVersion();
 }
 
-void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, EntityScene& scene) const
+void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, EntityScene& scene, IEntitySceneUpdateCallbacks* callbacks, uint8_t worldPartition) const
 {
 	const auto& modified = prefab->getEntitiesModified();
 	const auto& removed = prefab->getEntitiesRemoved();
@@ -107,8 +102,14 @@ void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, EntityS
 		if (deltaIter != modified.end()) {
 			// A simple delta is available for this entity, apply that
 			factory.updateEntity(entity, deltaIter->second, static_cast<int>(EntitySerialization::Type::Prefab));
+			if (callbacks) {
+				callbacks->onEntityUpdated(entity, deltaIter->second, worldPartition);
+			}
 		} else if (removed.find(uuid) != removed.end()) {
 			// Remove
+			if (callbacks) {
+				callbacks->onEntityRemoved(entity, worldPartition);
+			}
 			factory.getWorld().destroyEntity(entity);
 		}
 	}
@@ -118,7 +119,10 @@ void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, EntityS
 		auto dataIter = dataMap.find(uuid);
 		if (dataIter != dataMap.end()) {
 			// Create
-			factory.createEntity(*dataIter->second, {}, &scene);
+			const auto entity = factory.createEntity(*dataIter->second, {}, &scene);
+			if (callbacks) {
+				callbacks->onEntityAdded(entity, *dataIter->second, worldPartition);
+			}
 		} else {
 			// Not found
 			Logger::logError("PrefabObserver::update error: UUID " + uuid.toString() + " not found in prefab " + prefab->getAssetId());
