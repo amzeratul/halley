@@ -160,6 +160,12 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 		entityEditor->setEntityEditorFactory(entityEditorFactory);
 		entityList->setSceneData(sceneData);
 
+		// Select entity
+		const auto& initialEntity = projectWindow.getAssetSetting(getAssetKey(), "currentEntity");
+		if (initialEntity.getType() != ConfigNodeType::Undefined) {
+			selectEntity(initialEntity.asString());
+		}
+
 		// Setup tools
 		gameBridge->getGizmos().resetTools();
 		interface.setupTools(*toolMode, gameBridge->getGizmos());
@@ -364,6 +370,7 @@ void SceneEditorWindow::onEntitySelected(const String& id)
 		entityEditor->loadEntity(actualId, entityData, prefabData, false, project.getGameResources());
 		gameBridge->setSelectedEntity(UUID(actualId), entityData);
 		currentEntityId = actualId;
+		projectWindow.setAssetSetting(getAssetKey(), "currentEntity", ConfigNode(currentEntityId));
 	} catch (const std::exception& e) {
 		Logger::logException(e);
 	}
