@@ -280,7 +280,11 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const EntityData& d
 	if (entity.getNumComponents() == 0) {
 		// Simple population
 		for (const auto& [componentName, componentData]: data.getComponents()) {
-			func(context, componentName, entity, componentData);
+			try {
+				func(context, componentName, entity, componentData);
+			} catch (...) {
+				Logger::logError("Unable to create component \"" + componentName + "\".");
+			}
 		}
 	} else {
 		// Store the existing ids
@@ -291,9 +295,13 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const EntityData& d
 
 		// Populate
 		for (const auto& [componentName, componentData]: data.getComponents()) {
-			const auto result = func(context, componentName, entity, componentData);
-			if (!result.created) {
-				existingComps.erase(std::find(existingComps.begin(), existingComps.end(), result.componentId));
+			try {
+				const auto result = func(context, componentName, entity, componentData);
+				if (!result.created) {
+					existingComps.erase(std::find(existingComps.begin(), existingComps.end(), result.componentId));
+				}
+			} catch (...) {
+				Logger::logError("Unable to update component \"" + componentName + "\".");
 			}
 		}
 
