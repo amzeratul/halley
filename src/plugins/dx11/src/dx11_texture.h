@@ -26,8 +26,8 @@ namespace Halley
 		ID3D11Texture2D* getTexture() const;
 
 	protected:
-		void doCopyToTexture(Texture& other) const override;
-		void doCopyToImage(Image& image) const override;
+		void doCopyToTexture(Painter& painter, Texture& other) const override;
+		void doCopyToImage(Painter& painter, Image& image) const override;
 
 	private:
 		DX11Video& video;

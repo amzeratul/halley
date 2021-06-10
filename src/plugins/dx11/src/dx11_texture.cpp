@@ -191,7 +191,7 @@ void DX11Texture::bind(DX11Video& video, int textureUnit, TextureSamplerType sam
 	video.getDeviceContext().PSSetSamplers(textureUnit, 1, samplers);
 }
 
-void DX11Texture::doCopyToTexture(Texture& otherRaw) const
+void DX11Texture::doCopyToTexture(Painter& painter, Texture& otherRaw) const
 {
 	auto& other = dynamic_cast<DX11Texture&>(otherRaw);
 	
@@ -199,7 +199,7 @@ void DX11Texture::doCopyToTexture(Texture& otherRaw) const
 	dc.CopyResource(other.texture, texture);
 }
 
-void DX11Texture::doCopyToImage(Image& image) const
+void DX11Texture::doCopyToImage(Painter& painter, Image& image) const
 {
 	if (descriptor.canBeReadOnCPU) {
 		copyToImageDirectly(image);
@@ -210,7 +210,7 @@ void DX11Texture::doCopyToImage(Image& image) const
 		desc.canBeReadOnCPU = true;
 		temp->startLoading();
 		temp->load(std::move(desc));
-		doCopyToTexture(*temp);
+		doCopyToTexture(painter, *temp);
 		dynamic_cast<DX11Texture&>(*temp).copyToImageDirectly(image);
 	}		
 }

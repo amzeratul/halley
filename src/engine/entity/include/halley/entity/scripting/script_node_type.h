@@ -84,7 +84,7 @@ namespace Halley {
 		virtual EntityId doGetEntityId(EnvironmentType& environment, const ScriptGraphNode& node, uint8_t pinN) const { return EntityId(); }
 		
 		std::unique_ptr<IScriptStateData> makeData() const override { return std::make_unique<DataType>(); }
-		virtual void initData(IScriptStateData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const { doInitData(dynamic_cast<DataType&>(data), node, nodeData); }
+		void initData(IScriptStateData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const override { doInitData(dynamic_cast<DataType&>(data), node, nodeData); }
 
 		Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData* curData) const final override { return doUpdate(dynamic_cast<EnvironmentType&>(environment), time, node, *dynamic_cast<DataType*>(curData)); }
 		ConfigNode getData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const final override { return doGetData(dynamic_cast<EnvironmentType&>(environment), node, pinN); }

@@ -7,6 +7,7 @@
 
 namespace Halley
 {
+	class Painter;
 	class TextureDescriptor;
 	class ResourceLoader;
 
@@ -25,16 +26,16 @@ namespace Halley
 		Vector2i getSize() const { return size; }
 		const TextureDescriptor& getDescriptor() const { return descriptor; }
 
-		void copyToTexture(Texture& other) const;
-		void copyToImage(Image& image) const;
-		std::unique_ptr<Image> makeImage() const;
+		void copyToTexture(Painter& painter, Texture& other) const;
+		void copyToImage(Painter& painter, Image& image) const;
+		std::unique_ptr<Image> makeImage(Painter& painter) const;
 
 	protected:
 		Vector2i size;
 		TextureDescriptor descriptor;
 
 		virtual void doLoad(TextureDescriptor& descriptor);
-		virtual void doCopyToTexture(Texture& other) const;
-		virtual void doCopyToImage(Image& image) const;
+		virtual void doCopyToTexture(Painter& painter, Texture& other) const;
+		virtual void doCopyToImage(Painter& painter, Image& image) const;
 	};
 }

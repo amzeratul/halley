@@ -284,7 +284,10 @@ void RenderGraphNode::renderNodeImageOutputMethod(const RenderGraph& graph, cons
 	if (srcTexture) {
 		auto* img = graph.getImageOutputForNode(id, srcTexture->getSize());
 		if (img) {
-			srcTexture->copyToImage(*img);
+			getTargetRenderContext(rc).bind([=] (Painter& painter)
+			{
+				srcTexture->copyToImage(painter, *img);
+			});
 			graph.notifyImage(id);
 		}
 	}

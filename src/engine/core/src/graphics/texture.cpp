@@ -39,26 +39,26 @@ std::optional<uint32_t> Texture::getPixel(Vector2f texPos) const
 	return {};
 }
 
-void Texture::copyToTexture(Texture& other) const
+void Texture::copyToTexture(Painter& painter, Texture& other) const
 {
 	if (getSize() != other.getSize()) {
 		throw Exception("Size of source and destination texture don't match.", HalleyExceptions::Graphics);
 	}
-	doCopyToTexture(other);
+	doCopyToTexture(painter, other);
 }
 
-void Texture::copyToImage(Image& image) const
+void Texture::copyToImage(Painter& painter, Image& image) const
 {
 	if (image.getSize() != getSize()) {
 		throw Exception("Incompatible image and texture sizes.", HalleyExceptions::Graphics);
 	}
-	doCopyToImage(image);
+	doCopyToImage(painter, image);
 }
 
-std::unique_ptr<Image> Texture::makeImage() const
+std::unique_ptr<Image> Texture::makeImage(Painter& painter) const
 {
 	auto image = std::make_unique<Image>(Image::Format::RGBA, getSize());
-	doCopyToImage(*image);
+	doCopyToImage(painter, *image);
 	return image;
 }
 
@@ -66,12 +66,12 @@ void Texture::doLoad(TextureDescriptor& descriptor)
 {
 }
 
-void Texture::doCopyToTexture(Texture& other) const
+void Texture::doCopyToTexture(Painter& painter, Texture& other) const
 {
 	Logger::logWarning("Copying to texture not implemented.");
 }
 
-void Texture::doCopyToImage(Image& image) const
+void Texture::doCopyToImage(Painter& painter, Image& image) const
 {
 	Logger::logWarning("Copying to image not implemented.");
 	image.clear(Image::convertRGBAToInt(255, 0, 255));
