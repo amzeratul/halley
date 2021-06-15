@@ -14,8 +14,12 @@ Halley::AssetEditor::AssetEditor(UIFactory& factory, Resources& gameResources, P
 void AssetEditor::setResource(const String& id)
 {
 	assetId = id;
-	resource = loadResource(id);
-	reload();
+	try {
+		resource = loadResource(id);
+		reload();
+	} catch (const std::exception& e) {
+		Logger::logException(e);
+	}
 }
 
 void AssetEditor::clearResource()
@@ -31,6 +35,10 @@ void AssetEditor::reload()
 
 void AssetEditor::refreshAssets()
 {
+	if (!resource) {
+		resource = loadResource(assetId);
+		reload();
+	}
 }
 
 void AssetEditor::onDoubleClick()

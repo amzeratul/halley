@@ -190,6 +190,8 @@ void SpriteSheet::assignIds()
 		sprites[idx].parent = this;
 		sprites[idx].idx = idx;
 	}
+	dummySprite.parent = this;
+	dummySprite.idx = std::numeric_limits<uint32_t>::max();
 #endif	
 }
 
@@ -282,14 +284,18 @@ void SpriteSheet::reload(Resource&& resource)
 
 	// Refresh sprite refs
 	for (auto& sprite: spriteRefs) {
-		const auto iter = idxMap.find(sprite.second);
-		if (iter != idxMap.end()) {
-			sprite.second = iter->second;
+		if (sprite.second != std::numeric_limits<uint32_t>::max()) {
+			const auto iter = idxMap.find(sprite.second);
+			if (iter != idxMap.end()) {
+				sprite.second = iter->second;
+			} else {
+				sprite.second = 0;
+			}
+
+			sprite.first->setSprite(sprites.at(sprite.second), sprite.first->hasLastAppliedPivot());
 		} else {
-			sprite.second = 0;
+			sprite.first->setSprite(dummySprite, sprite.first->hasLastAppliedPivot());
 		}
-		
-		sprite.first->setSprite(sprites[sprite.second], sprite.first->hasLastAppliedPivot());
 	}
 #endif
 }
@@ -475,12 +481,20 @@ void SpriteResource::deserialize(Deserializer& s)
 #ifdef ENABLE_HOT_RELOAD
 void SpriteHotReloader::addSprite(Sprite* sprite, uint32_t idx) const
 {
+	Expects(sprite != nullptr);
 	spriteRefs[sprite] = idx;
 }
 
 void SpriteHotReloader::removeSprite(Sprite* sprite) const
 {
+	Expects(sprite != nullptr);
 	spriteRefs.erase(sprite);
+}
+
+void SpriteHotReloader::updateSpriteIndex(Sprite* sprite, uint32_t idx) const
+{
+	Expects(sprite != nullptr);
+	spriteRefs.at(sprite) = idx;
 }
 
 void SpriteHotReloader::clearSpriteRefs()

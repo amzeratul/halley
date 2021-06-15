@@ -18,6 +18,7 @@ PrefabEditor::PrefabEditor(UIFactory& factory, Resources& resources, AssetType t
 
 void PrefabEditor::refreshAssets()
 {
+	AssetEditor::refreshAssets();
 	if (window) {
 		window->refreshAssets();
 	}

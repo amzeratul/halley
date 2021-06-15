@@ -61,6 +61,7 @@ namespace Halley
 #ifdef ENABLE_HOT_RELOAD
 		void addSprite(Sprite* sprite, uint32_t idx) const;
 		void removeSprite(Sprite* sprite) const;
+		void updateSpriteIndex(Sprite* sprite, uint32_t idx) const;
 		void clearSpriteRefs();
 
 	protected:

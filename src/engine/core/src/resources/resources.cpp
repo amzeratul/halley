@@ -23,9 +23,9 @@ void Resources::reloadAssets(const std::vector<String>& ids)
 	// The order in which asset types are reloaded is important, since they have dependencies
 	std::map<AssetType, std::vector<String>> byType;
 
-	for (auto& id: ids) {
-		auto splitPos = id.find(':');
-		auto type = fromString<AssetType>(id.left(splitPos));
+	for (const auto& id: ids) {
+		const auto splitPos = id.find(':');
+		const auto type = fromString<AssetType>(id.left(splitPos));
 		String name = id.mid(splitPos + 1);
 		byType[type].emplace_back(std::move(name));
 	}

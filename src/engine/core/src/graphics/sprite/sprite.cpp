@@ -720,15 +720,17 @@ void Sprite::clearSpriteSheetRef()
 
 void Sprite::setHotReload(const SpriteHotReloader* ref, uint32_t index)
 {
-	if (hotReloadRef != ref || hotReloadIdx != index) {
+	if (hotReloadRef != ref) {
 		if (hotReloadRef) {
 			hotReloadRef->removeSprite(this);
 		}
 		if (ref) {
 			ref->addSprite(this, index);
 		}
-		hotReloadRef = ref;
-		hotReloadIdx = index;
+	} else if (hotReloadRef != nullptr && hotReloadIdx != index) {
+		hotReloadRef->updateSpriteIndex(this, index);
 	}
+	hotReloadRef = ref;
+	hotReloadIdx = index;
 }
 #endif
