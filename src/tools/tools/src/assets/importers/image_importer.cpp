@@ -84,6 +84,11 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const String& fileName, c
 			auto pos = lookupSpritePosition(fileName, colourMissingPos[i], assetOptions);
 			
 			message += "\n\t" + Colour4<int>(r, g, b, a).toString() + " on " + pos.first + ", " + pos.second;
+
+			if (i >= 20) {
+				message += "\n\t...and " + toString(nMissing - 20) + " others...";
+				break;
+			}
 		}
 		throw Exception(message, HalleyExceptions::Tools);
 	}
