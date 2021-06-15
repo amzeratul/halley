@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <array>
 #include <gsl/gsl>
+
+#include "halley/data_structures/maybe.h"
 #include "halley/maths/vector2.h"
 #include "halley/maths/colour.h"
 #include "halley/file_formats/image.h"
@@ -86,6 +88,9 @@ namespace Halley {
 		bool referenceLayer = false;
 		uint8_t opacity = 255;
 		String layerName;
+
+		OptionalLite<uint32_t> parentIdx;
+		bool visibleInHierarchy = true;
 	};
 
 	enum class AsepriteAnimationDirection
@@ -124,6 +129,7 @@ namespace Halley {
 		void addCelExtraChunk(gsl::span<const gsl::byte> span);
 		void addPaletteChunk(gsl::span<const gsl::byte> span);
 		void addTagsChunk(gsl::span<const gsl::byte> span);
+    	void postProcessLayers();
 
 		template <typename T>
 		void readData(T& dst, gsl::span<const gsl::byte>& data) const

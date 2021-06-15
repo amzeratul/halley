@@ -254,6 +254,8 @@ void AsepriteFile::load(gsl::span<const gsl::byte> data)
 		// Next frame
 		pos = frameStartPos + frameHeader.dataSize;
 	}
+
+	postProcessLayers();
 }
 
 void AsepriteFile::addFrame(uint16_t duration)
@@ -418,6 +420,25 @@ void AsepriteFile::addTagsChunk(gsl::span<const gsl::byte> span)
 	}
 }
 
+void AsepriteFile::postProcessLayers()
+{
+	for (size_t i = 0; i < layers.size(); ++i) {
+		auto& layer = layers[i];
+		if (layer.childLevel > 0) {
+			for (int j = int(i); --j >= 0; ) {
+				if (layers[j].childLevel == layer.childLevel - 1) {
+					layer.parentIdx = j;
+					layer.visibleInHierarchy = layer.visible && layers[j].visibleInHierarchy;
+					break;
+				}
+			}
+		} else {
+			layer.parentIdx = OptionalLite<uint32_t>{};
+			layer.visibleInHierarchy = layer.visible;
+		}
+	}
+}
+
 AsepriteCel* AsepriteFile::getCelAt(int frameNumber, int layerNumber)
 {
 	if (frameNumber < 0 || frameNumber >= int(frames.size())) {
@@ -494,7 +515,7 @@ std::map<String, std::unique_ptr<Image>> AsepriteFile::makeGroupFrameImages(int 
 			}
 		}
 
-		if (layer.visible) {			
+		if (layer.visibleInHierarchy) {			
 			auto* cel = getCelAt(frameNumber, layerNumber);
 			if (cel) {
 				if (currentGroup == "")
