@@ -18,8 +18,16 @@ namespace Halley {
 		std::shared_ptr<UIWidget> getPage(int n) const;
 
         void clear() override;
+
+    	void setGuardedUpdate(bool enabled);
+    	bool isGuardedUpdate() const;
+
+    protected:
+        void updateChildren(UIWidgetUpdateType updateType, Time time, UIInputType uiInput, JoystickType joystick) override;
+
     private:
         int currentPage = 0;
+    	bool guardedUpdate = false;
 
 		std::vector<std::shared_ptr<UIWidget>> pages;
     };

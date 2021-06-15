@@ -115,6 +115,7 @@ void ProjectWindow::makePagedPane()
 	auto ecs = std::make_shared<ECSWindow>(factory, project);
 	
 	pagedPane = std::make_shared<UIPagedPane>("pages", numOfStandardTools);
+	pagedPane->setGuardedUpdate(true);
 	pagedPane->getPage(static_cast<int>(EditorTabs::Assets))->add(assetEditorWindow, 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(static_cast<int>(EditorTabs::ECS))->add(ecs, 1, Vector4f(8, 8, 8, 8));
 	pagedPane->getPage(static_cast<int>(EditorTabs::Remotes))->add(consoleWindow, 1, Vector4f(8, 8, 8, 8));
@@ -148,9 +149,7 @@ bool ProjectWindow::loadCustomUI()
 			customTools = customToolsInterface->makeTools(IEditorCustomTools::MakeToolArgs(factory, resources, project.getGameResources(), api, project, *this));
 		} catch (const std::exception& e) {
 			Logger::logException(e);
-		} catch (...) {
-			return false;
-		}
+		} catch (...) {}
 
 		if (!customTools.empty()) {
 			toolbar->getList()->add(std::make_shared<UIImage>(Sprite().setImage(resources, "ui/slant_capsule_short.png").setColour(factory.getColourScheme()->getColour("toolbarNormal"))), 0, Vector4f(0, 3, 0, 3));
@@ -165,8 +164,12 @@ bool ProjectWindow::loadCustomUI()
 	}
 
 	debugConsoleCommands = std::make_shared<UIDebugConsoleCommands>();
-	game->attachToEditorDebugConsole(*debugConsoleCommands, project.getGameResources(), project);
-	debugConsoleController->addCommands(*debugConsoleCommands);
+	try {
+		game->attachToEditorDebugConsole(*debugConsoleCommands, project.getGameResources(), project);
+		debugConsoleController->addCommands(*debugConsoleCommands);
+	} catch (const std::exception& e) {
+		Logger::logException(e);
+	} catch (...) {}
 
 	return true;
 }

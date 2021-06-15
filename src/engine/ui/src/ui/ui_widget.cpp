@@ -85,9 +85,7 @@ void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType input
 
 		addNewChildren(inputType);
 
-		for (auto& c: getChildren()) {
-			c->doUpdate(updateType, t, inputType, joystickType);
-		}
+		updateChildren(updateType, t, inputType, joystickType);
 
 		if (sizer) {
 			for (auto& c : getChildren()) {
@@ -97,6 +95,13 @@ void UIWidget::doUpdate(UIWidgetUpdateType updateType, Time t, UIInputType input
 			}
 		}
 		removeDeadChildren();
+	}
+}
+
+void UIWidget::updateChildren(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType)
+{
+	for (auto& c: getChildren()) {
+		c->doUpdate(updateType, t, inputType, joystickType);
 	}
 }
 

@@ -1,5 +1,7 @@
 #include <halley/ui/widgets/ui_paged_pane.h>
 
+#include "halley/support/logger.h"
+
 using namespace Halley;
 
 UIPagedPane::UIPagedPane(String id, int nPages, Vector2f minSize)
@@ -91,4 +93,37 @@ void UIPagedPane::clear()
 {
 	UIWidget::clear();
 	pages.clear();
+}
+
+void UIPagedPane::setGuardedUpdate(bool enabled)
+{
+	guardedUpdate = enabled;
+}
+
+bool UIPagedPane::isGuardedUpdate() const
+{
+	return guardedUpdate;
+}
+
+void UIPagedPane::updateChildren(UIWidgetUpdateType updateType, Time t, UIInputType inputType, JoystickType joystickType)
+{
+	for (auto& c: getChildren()) {
+		if (guardedUpdate) {
+			bool crashed = false;
+			try {
+				c->doUpdate(updateType, t, inputType, joystickType);
+			} catch (const std::exception& e) {
+				Logger::logException(e);
+				crashed = true;
+			} catch (...) {
+				crashed = true;
+			}
+
+			if (crashed) {
+				c->clear();
+			}
+		} else {
+			c->doUpdate(updateType, t, inputType, joystickType);
+		}
+	}
 }
