@@ -80,7 +80,7 @@ Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<Material>&
 {
 	updateClip();
 
-	constexpr auto maxVertices = size_t(std::numeric_limits<IndexType>::max());
+	constexpr auto maxVertices = size_t(std::numeric_limits<IndexType>::max()) + 1;
 	if (numVertices > maxVertices) {
 		throw Exception("Too many vertices in draw call: " + toString(numVertices) + ", maximum is " + toString(maxVertices), HalleyExceptions::Graphics);
 	}
@@ -139,36 +139,47 @@ void Painter::drawQuads(const std::shared_ptr<Material>& material, size_t numVer
 	generateQuadIndices(result.firstIndex, numVertices / 4, result.dstIndex);
 }
 
-void Painter::drawSprites(const std::shared_ptr<Material>& material, size_t numSprites, const void* vertexData)
+void Painter::drawSprites(const std::shared_ptr<Material>& material, size_t totalNumSprites, const void* vertexData)
 {
 	Expects(vertexData != nullptr);
 
 	const size_t verticesPerSprite = 4;
-	const size_t numVertices = verticesPerSprite * numSprites;
-	const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
+	const size_t maxSpritesPerCall = (static_cast<size_t>(std::numeric_limits<IndexType>::max()) + 1) / verticesPerSprite;
+	size_t numSpritesLeft = totalNumSprites;
+	size_t offset = 0;
 
-	const auto result = addDrawData(material, numVertices, numSprites * 6, true);
+	while (numSpritesLeft > 0) {
+		const size_t numSprites = std::min(numSpritesLeft, maxSpritesPerCall);
+		
+		const size_t numVertices = verticesPerSprite * numSprites;
+		const size_t vertPosOffset = material->getDefinition().getVertexPosOffset();
 
-	const char* const src = reinterpret_cast<const char*>(vertexData);
+		const auto result = addDrawData(material, numVertices, numSprites * 6, true);
 
-	for (size_t i = 0; i < numSprites; i++) {
-		for (size_t j = 0; j < verticesPerSprite; j++) {
-			const size_t srcOffset = i * result.vertexStride;
-			const size_t dstOffset = (i * verticesPerSprite + j) * result.vertexStride;
-			memcpy(result.dstVertex + dstOffset, src + srcOffset, result.vertexSize);
+		const char* const src = reinterpret_cast<const char*>(vertexData) + offset;
 
-			// j -> vertPos
-			// 0 -> 0, 0
-			// 1 -> 1, 0
-			// 2 -> 1, 1
-			// 3 -> 0, 1
-			const float x = ((j & 1) ^ ((j & 2) >> 1)) * 1.0f;
-			const float y = ((j & 2) >> 1) * 1.0f;
-			getVertPos(result.dstVertex + dstOffset, vertPosOffset) = Vector4f(x, y, x, y);
+		for (size_t i = 0; i < numSprites; i++) {
+			for (size_t j = 0; j < verticesPerSprite; j++) {
+				const size_t srcOffset = i * result.vertexStride;
+				const size_t dstOffset = (i * verticesPerSprite + j) * result.vertexStride;
+				memcpy(result.dstVertex + dstOffset, src + srcOffset, result.vertexSize);
+
+				// j -> vertPos
+				// 0 -> 0, 0
+				// 1 -> 1, 0
+				// 2 -> 1, 1
+				// 3 -> 0, 1
+				const float x = ((j & 1) ^ ((j & 2) >> 1)) * 1.0f;
+				const float y = ((j & 2) >> 1) * 1.0f;
+				getVertPos(result.dstVertex + dstOffset, vertPosOffset) = Vector4f(x, y, x, y);
+			}
 		}
-	}
 
-	generateQuadIndices(result.firstIndex, numSprites, result.dstIndex);
+		generateQuadIndices(result.firstIndex, numSprites, result.dstIndex);
+
+		numSpritesLeft -= numSprites;
+		offset += numSprites * material->getDefinition().getVertexStride();
+	}
 }
 
 void Painter::drawSlicedSprite(const std::shared_ptr<Material>& material, Vector2f scale, Vector4f slices, const void* vertexData)
