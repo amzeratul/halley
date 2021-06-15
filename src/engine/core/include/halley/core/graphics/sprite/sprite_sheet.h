@@ -83,6 +83,7 @@ namespace Halley
 		const SpriteSheetEntry& getSprite(const String& name) const;
 		const SpriteSheetEntry& getSprite(size_t idx) const;
 		const SpriteSheetEntry* tryGetSprite(const String& name) const;
+		const SpriteSheetEntry& getDummySprite() const;
 
 		const std::vector<SpriteSheetFrameTag>& getFrameTags() const;
 		std::vector<String> getSpriteNames() const;

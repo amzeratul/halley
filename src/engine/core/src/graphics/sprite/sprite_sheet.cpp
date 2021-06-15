@@ -119,6 +119,11 @@ const SpriteSheetEntry* SpriteSheet::tryGetSprite(const String& name) const
 	return &getSprite(idx.value());
 }
 
+const SpriteSheetEntry& SpriteSheet::getDummySprite() const
+{
+	return dummySprite;
+}
+
 const std::vector<SpriteSheetFrameTag>& SpriteSheet::getFrameTags() const
 {
 	return frameTags;

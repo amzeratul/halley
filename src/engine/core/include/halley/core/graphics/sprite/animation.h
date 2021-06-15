@@ -8,6 +8,7 @@
 
 namespace Halley
 {
+	class Animation;
 	class Deserializer;
 	class Serializer;
 	class ResourceLoader;
@@ -39,7 +40,7 @@ namespace Halley
 	public:
 		AnimationFrameDefinition();
 		AnimationFrameDefinition(int frameNumber, int duration, String imageName);
-		AnimationFrame makeFrame(const SpriteSheet& sheet, const Vector<AnimationDirection>& directions) const;
+		AnimationFrame makeFrame(const Animation& animation, const SpriteSheet& sheet, const Vector<AnimationDirection>& directions) const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

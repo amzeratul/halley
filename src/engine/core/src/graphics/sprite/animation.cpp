@@ -9,6 +9,8 @@
 #include <gsl/gsl_assert>
 #include <utility>
 
+#include "halley/support/logger.h"
+
 using namespace Halley;
 
 AnimationFrame::AnimationFrame(int frameNumber, int duration, const String& imageName, const SpriteSheet& sheet, const Vector<AnimationDirection>& directions)
@@ -18,7 +20,11 @@ AnimationFrame::AnimationFrame(int frameNumber, int duration, const String& imag
 	sprites.resize(n);
 	for (size_t i = 0; i < n; i++) {
 		const auto& name = directions[i].needsToProcessFrameName(imageName) ? directions[i].getFrameName(frameNumber, imageName) : imageName;
-		sprites[i] = &sheet.getSprite(name);
+		sprites[i] = sheet.tryGetSprite(name);
+		if (!sprites[i]) {
+			sprites[i] = &sheet.getDummySprite();
+			Logger::logWarning("Missing animation frame: " + name);
+		}
 	}
 }
 
