@@ -82,13 +82,14 @@ namespace Halley
 		const std::shared_ptr<const Texture>& getTexture() const;
 		const SpriteSheetEntry& getSprite(const String& name) const;
 		const SpriteSheetEntry& getSprite(size_t idx) const;
+		const SpriteSheetEntry* tryGetSprite(const String& name) const;
 
 		const std::vector<SpriteSheetFrameTag>& getFrameTags() const;
 		std::vector<String> getSpriteNames() const;
 		const HashMap<String, uint32_t>& getSpriteNameMap() const;
 
 		size_t getSpriteCount() const;
-		size_t getIndex(const String& name) const;
+		std::optional<size_t> getIndex(const String& name) const;
 		bool hasSprite(const String& name) const;
 
 		void loadJson(gsl::span<const gsl::byte> data);
@@ -114,6 +115,7 @@ namespace Halley
 		Resources* resources = nullptr;
 
 		std::vector<SpriteSheetEntry> sprites;
+		SpriteSheetEntry dummySprite;
 		HashMap<String, uint32_t> spriteIdx;
 		std::vector<SpriteSheetFrameTag> frameTags;
 

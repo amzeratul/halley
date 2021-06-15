@@ -97,12 +97,26 @@ const std::shared_ptr<const Texture>& SpriteSheet::getTexture() const
 
 const SpriteSheetEntry& SpriteSheet::getSprite(const String& name) const
 {
-	return getSprite(getIndex(name));
+	const auto idx = getIndex(name);
+	if (!idx) {
+		Logger::logError("Spritesheet does not contain sprite \"" + name + "\".");
+		return dummySprite;
+	}
+	return getSprite(idx.value());
 }
 
 const SpriteSheetEntry& SpriteSheet::getSprite(size_t idx) const
 {
 	return sprites[idx];
+}
+
+const SpriteSheetEntry* SpriteSheet::tryGetSprite(const String& name) const
+{
+	const auto idx = getIndex(name);
+	if (!idx) {
+		return {};
+	}
+	return &getSprite(idx.value());
 }
 
 const std::vector<SpriteSheetFrameTag>& SpriteSheet::getFrameTags() const
@@ -129,27 +143,13 @@ size_t SpriteSheet::getSpriteCount() const
 	return sprites.size();
 }
 
-size_t SpriteSheet::getIndex(const String& name) const
+std::optional<size_t> SpriteSheet::getIndex(const String& name) const
 {
-	auto iter = spriteIdx.find(name);
+	const auto iter = spriteIdx.find(name);
 	if (iter == spriteIdx.end()) {
-		String names = "";
-		bool first = true;
-		for (auto& f: spriteIdx) {
-			if (first) {
-				first = false;
-				names += "\"";
-			} else {
-				names += "\", \"";
-			}
-			names += f.first;
-		}
-		if (!spriteIdx.empty()) {
-			names += "\"";
-		}
-		throw Exception("Spritesheet does not contain sprite \"" + name + "\".\nSprites: { " + names + " }.", HalleyExceptions::Resources);
+		return {};
 	} else {
-		return size_t(iter->second);
+		return static_cast<size_t>(iter->second);
 	}
 }
 
