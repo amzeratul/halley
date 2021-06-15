@@ -83,7 +83,7 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const String& fileName, c
 			Image::convertIntToRGBA(coloursMissing[i], r, g, b, a);
 			auto pos = lookupSpritePosition(fileName, colourMissingPos[i], assetOptions);
 			
-			message += "\n\t" + Colour4<int>(r, g, b, a).toString() + " on " + pos.first + " at position " + pos.second;
+			message += "\n\t" + Colour4<int>(r, g, b, a).toString() + " on " + pos.first + ", " + pos.second;
 		}
 		throw Exception(message, HalleyExceptions::Tools);
 	}
@@ -136,7 +136,7 @@ std::pair<String, Vector2i> ImageImporter::lookupSpritePosition(const String& fi
 			}
 			relPos += Vector2i(spriteEntry["offX"].asInt(), spriteEntry["offY"].asInt());
 
-			return { spriteEntry["name"].asString(), relPos };
+			return { "\"" + spriteEntry["origFilename"].asString() + "\", frame " + toString(spriteEntry["origFrameN"].asInt() + 1) , relPos };
 		}
 	}
 

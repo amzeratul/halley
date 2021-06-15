@@ -17,12 +17,14 @@ using namespace Halley;
 bool ImageData::operator==(const ImageData& other) const
 {
 	return frameNumber == other.frameNumber
+		&& origFrameNumber == other.origFrameNumber
 		&& duration == other.duration
 		&& sequenceName == other.sequenceName
 		&& clip == other.clip
 		&& pivot == other.pivot
 		&& slices == other.slices
 		&& filenames == other.filenames
+		&& origFilename == other.origFilename
 		&& img->getSize() == other.img->getSize();
 }
 
@@ -94,7 +96,9 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			imgData.img = std::move(image);
 			imgData.duration = 100;
 			imgData.filenames.emplace_back(":img:" + fileInputId.toString());
+			imgData.origFilename = fileInputId.toString();
 			imgData.frameNumber = 0;
+			imgData.origFrameNumber = 0;
 			imgData.sequenceName = "";
 		}
 
@@ -370,6 +374,8 @@ std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult
 				infoEntry["y"] = packedImg.rect.getTop();
 				infoEntry["w"] = packedImg.rect.getWidth();
 				infoEntry["h"] = packedImg.rect.getHeight();
+				infoEntry["origFilename"] = imgData.origFilename;
+				infoEntry["origFrameN"] = imgData.origFrameNumber;
 				infoEntry["offX"] = borderTL.x;
 				infoEntry["offY"] = borderTL.y;
 				infoEntry["rotated"] = packedImg.rotated;
@@ -421,6 +427,7 @@ std::vector<ImageData> SpriteImporter::splitImagesInGrid(const std::vector<Image
 
 					dst.duration = src.duration;
 					dst.frameNumber = src.frameNumber;
+					dst.origFrameNumber = src.origFrameNumber;
 					dst.filenames.emplace_back(src.filenames.at(0) + suffix);
 					dst.sequenceName = src.sequenceName + suffix;
 					dst.img = std::move(img);

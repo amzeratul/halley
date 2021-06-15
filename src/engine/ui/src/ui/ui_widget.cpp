@@ -594,6 +594,7 @@ void UIWidget::notifyTreeAddedToRoot(UIRoot& root)
 {
 	this->root = &root;
 	onAddedToRoot(root);
+	
 	for (auto& c: getChildren()) {
 		c->notifyTreeAddedToRoot(root);
 	}
@@ -601,14 +602,15 @@ void UIWidget::notifyTreeAddedToRoot(UIRoot& root)
 
 void UIWidget::notifyTreeRemovedFromRoot(UIRoot& root)
 {
-	this->root = nullptr;
-	onRemovedFromRoot(root);
 	for (auto& c: getChildren()) {
 		c->notifyTreeRemovedFromRoot(root);
 	}
 	for (auto& c: getChildrenWaiting()) {
 		c->notifyTreeRemovedFromRoot(root);
 	}
+
+	onRemovedFromRoot(root);
+	this->root = nullptr;
 }
 
 UIParent* UIWidget::getParent() const

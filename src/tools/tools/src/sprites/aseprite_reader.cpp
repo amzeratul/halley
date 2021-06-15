@@ -67,7 +67,7 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String s
 				
 				std::vector<ImageData> groupFrameData;
 				auto firstImage = frameData.find(name) == frameData.end();
-				addImageData(i, groupFrameData, std::move(groupFrameImage.second), aseFile, baseName, sequence, direction, duration, trim, padding, hasFrameNumber, name, firstImage, spriteName);
+				addImageData(i, frameN, groupFrameData, std::move(groupFrameImage.second), aseFile, baseName, sequence, direction, duration, trim, padding, hasFrameNumber, name, firstImage, spriteName);
 				
 				if(frameData.find(name) == frameData.end())
 				{
@@ -82,7 +82,7 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String s
 	return frameData;
 }
 
-void AsepriteReader::addImageData(int frameNumber, std::vector<ImageData>& frameData, std::unique_ptr<Image> frameImage, const AsepriteFile& aseFile,
+void AsepriteReader::addImageData(int tagFrameNumber, int origFrameNumber, std::vector<ImageData>& frameData, std::unique_ptr<Image> frameImage, const AsepriteFile& aseFile,
 	const String& baseName, const String& sequence, const String& direction, int duration, bool trim, int padding, bool hasFrameNumber, std::optional<String> group,
 	bool firstImage, const String& spriteName)
 {
@@ -95,7 +95,8 @@ void AsepriteReader::addImageData(int frameNumber, std::vector<ImageData>& frame
 	}
 	
 	imgData.img = std::move(frameImage);
-	imgData.frameNumber = frameNumber;
+	imgData.frameNumber = tagFrameNumber;
+	imgData.origFrameNumber = origFrameNumber;
 	imgData.sequenceName = sequence;
 	imgData.direction = direction;
 	imgData.duration = duration;
@@ -123,4 +124,5 @@ void AsepriteReader::addImageData(int frameNumber, std::vector<ImageData>& frame
 		firstImage = false;
 		imgData.filenames.emplace_back(":img:" + spriteName + (!group->isEmpty() ? ":" + group.value() : ""));
 	}
+	imgData.origFilename = spriteName;
 }

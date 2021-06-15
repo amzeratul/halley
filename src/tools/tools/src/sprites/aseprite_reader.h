@@ -18,7 +18,7 @@ namespace Halley
 	{
 	public:
 		static std::map<String, std::vector<ImageData>> importAseprite(String baseName, gsl::span<const gsl::byte> fileData, bool trim, int padding, bool groupSeparated, bool sequenceSeparated);
-		static void addImageData(int frameNumber, std::vector<ImageData>& frameData, std::unique_ptr<Image> frameImage,
+		static void addImageData(int tagFrameNumber, int origFrameNumber, std::vector<ImageData>& frameData, std::unique_ptr<Image> frameImage,
 		                  const AsepriteFile& aseFile, const String& baseName, const String& sequence, const String& direction,
 						  int duration, bool trim, int padding, bool hasFrameNumber, std::optional<String> group, bool firstImage,
 		                  const String& spriteName);

@@ -11,8 +11,9 @@ namespace Halley
 	
 	struct ImageData
 	{
-		int frameNumber;
-		int duration;
+		int frameNumber = 0;
+		int origFrameNumber = 0;
+		int duration = 0;
 		String sequenceName;
 		String direction;
 		Rect4i clip;
@@ -21,6 +22,7 @@ namespace Halley
 
 		std::unique_ptr<Image> img;
 		std::vector<String> filenames;
+		String origFilename;
 
 		bool operator==(const ImageData& other) const;
 		bool operator!=(const ImageData& other) const;
