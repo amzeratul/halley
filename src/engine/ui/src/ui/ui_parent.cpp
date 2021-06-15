@@ -121,6 +121,11 @@ std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildrenWaiting()
 	return childrenWaiting;
 }
 
+const std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildrenWaiting() const
+{
+	return childrenWaiting;
+}
+
 std::shared_ptr<UIWidget> UIParent::getWidget(const String& id)
 {
 	if (getId() == id) {

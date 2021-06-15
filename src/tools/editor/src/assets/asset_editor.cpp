@@ -2,24 +2,33 @@
 
 using namespace Halley;
 
-Halley::AssetEditor::AssetEditor(UIFactory& factory, Resources& gameResources, Project& project, AssetType type)
+AssetEditor::AssetEditor(UIFactory& factory, Resources& gameResources, Project& project, AssetType type)
 	: UIWidget("assetEditor", {}, UISizer())
 	, factory(factory)
 	, project(project)
 	, gameResources(gameResources)
 	, assetType(type)
 {
+	setHandle(UIEventType::TabbedIn, [=] (const auto& event)
+	{
+		setTabbedIn(true);
+	});
+
+	setHandle(UIEventType::TabbedOut, [=] (const auto& event)
+	{
+		setTabbedIn(false);
+	});
+}
+
+void AssetEditor::update(Time t, bool moved)
+{
+	tryLoading();
 }
 
 void AssetEditor::setResource(const String& id)
 {
 	assetId = id;
-	try {
-		resource = loadResource(id);
-		reload();
-	} catch (const std::exception& e) {
-		Logger::logException(e);
-	}
+	needsLoading = true;
 }
 
 void AssetEditor::clearResource()
@@ -35,10 +44,7 @@ void AssetEditor::reload()
 
 void AssetEditor::refreshAssets()
 {
-	if (!resource) {
-		resource = loadResource(assetId);
-		reload();
-	}
+	needsLoading = true;
 }
 
 void AssetEditor::onDoubleClick()
@@ -48,4 +54,35 @@ void AssetEditor::onDoubleClick()
 bool AssetEditor::isModified()
 {
 	return false;
+}
+
+void AssetEditor::onTabbedIn()
+{
+}
+
+void AssetEditor::setTabbedIn(bool value)
+{
+	tabbedIn = value;
+	tryLoading();
+	if (value) {
+		onTabbedIn();
+	}
+}
+
+void AssetEditor::tryLoading()
+{
+	if (tabbedIn && needsLoading) {
+		load();
+	}
+}
+
+void AssetEditor::load()
+{
+	try {
+		needsLoading = false;
+		resource = loadResource(assetId);
+		reload();
+	} catch (const std::exception& e) {
+		Logger::logException(e);
+	}
 }

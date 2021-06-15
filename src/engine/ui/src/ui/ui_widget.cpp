@@ -812,6 +812,9 @@ void UIWidget::sendEventDown(const UIEvent& event) const
 		for (const auto& c: getChildren()) {
 			c->sendEventDown(event);
 		}
+		for (const auto& c: getChildrenWaiting()) {
+			c->sendEventDown(event);
+		}
 	}
 }
 

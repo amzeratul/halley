@@ -60,7 +60,7 @@ void UIPagedPane::setPage(int n)
 		const bool active = i == currentPage;
 		if (pages[i]->isActive() != active) {
 			pages[i]->setActive(active);
-			sendEventDown(UIEvent(active ? UIEventType::TabbedIn : UIEventType::TabbedOut, getId(), active));
+			pages[i]->sendEventDown(UIEvent(active ? UIEventType::TabbedIn : UIEventType::TabbedOut, getId(), active));
 		}
 	}
 }

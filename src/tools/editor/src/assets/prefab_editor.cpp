@@ -10,10 +10,6 @@ PrefabEditor::PrefabEditor(UIFactory& factory, Resources& resources, AssetType t
 	, project(project)
 	, projectWindow(projectWindow)
 {
-	setHandle(UIEventType::TabbedIn, [=] (const UIEvent& event)
-	{
-		window->onTabbedIn();
-	});
 }
 
 void PrefabEditor::refreshAssets()
@@ -45,6 +41,13 @@ std::shared_ptr<const Resource> PrefabEditor::loadResource(const String& assetId
 {
 	open();
 	return {};
+}
+
+void PrefabEditor::onTabbedIn()
+{
+	if (window) {
+		window->onTabbedIn();
+	}
 }
 
 void PrefabEditor::open()

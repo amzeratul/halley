@@ -14,6 +14,8 @@ namespace Halley {
         AssetEditor(UIFactory& factory, Resources& gameResources, Project& project, AssetType type);
 		virtual ~AssetEditor() = default;
 
+        void update(Time t, bool moved) override;
+
 		void setResource(const String& assetId);
 		void clearResource();
 		virtual void reload();
@@ -24,11 +26,18 @@ namespace Halley {
     protected:
 		virtual std::shared_ptr<const Resource> loadResource(const String& assetId) = 0;
 
+		virtual void onTabbedIn();
+		void setTabbedIn(bool value);
+		void tryLoading();
+		void load();
+
 		UIFactory& factory;
 		Project& project;
 		Resources& gameResources;
 		AssetType assetType;
 		String assetId;
 		std::shared_ptr<const Resource> resource;
+		bool needsLoading = false;
+		bool tabbedIn = false;
 	};
 }

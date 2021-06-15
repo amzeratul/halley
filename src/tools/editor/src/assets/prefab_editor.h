@@ -14,7 +14,8 @@ namespace Halley {
 	protected:
 		void update(Time t, bool moved) override;
 		std::shared_ptr<const Resource> loadResource(const String& assetId) override;
-
+		void onTabbedIn() override;
+	
 	private:
 		Project& project;
 		ProjectWindow& projectWindow;

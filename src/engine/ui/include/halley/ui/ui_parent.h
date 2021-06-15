@@ -43,6 +43,7 @@ namespace Halley {
 		std::vector<std::shared_ptr<UIWidget>>& getChildren();
 		const std::vector<std::shared_ptr<UIWidget>>& getChildren() const;
 		std::vector<std::shared_ptr<UIWidget>>& getChildrenWaiting();
+		const std::vector<std::shared_ptr<UIWidget>>& getChildrenWaiting() const;
 
 		std::shared_ptr<UIWidget> getWidget(const String& id);
 		std::shared_ptr<UIWidget> tryGetWidget(const String& id);

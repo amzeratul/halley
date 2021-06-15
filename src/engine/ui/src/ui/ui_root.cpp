@@ -8,6 +8,7 @@
 #include "halley/core/input/input_keyboard.h"
 #include "halley/core/input/input_virtual.h"
 #include "halley/maths/random.h"
+#include "halley/support/logger.h"
 #include "widgets/ui_tooltip.h"
 
 using namespace Halley;
@@ -28,6 +29,7 @@ UIRoot::UIRoot(const HalleyAPI& api, Rect4f rect)
 
 UIRoot::~UIRoot()
 {
+	Logger::logInfo(toString(keyPressListeners.size()) + " key press listeners left.");
 	keyPressListeners.clear();
 	UIParent::clear();
 }
