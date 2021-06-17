@@ -8,6 +8,7 @@
 #include "taskbar.h"
 #include "halley/tools/project/project.h"
 #include "halley/file_formats/yaml_convert.h"
+#include "halley/tools/dll/load_dll_task.h"
 #include "halley/tools/project/project_properties.h"
 #include "src/editor_root_stage.h"
 #include "src/halley_editor.h"
@@ -32,14 +33,16 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	settings[EditorSettingType::Project] = std::make_unique<SettingsStorage>(api.system->getStorageContainer(SaveDataType::SaveLocal, "settings"), project.getProperties().getUUID().toString());
 	settings[EditorSettingType::Editor] = std::make_unique<SettingsStorage>(api.system->getStorageContainer(SaveDataType::SaveLocal, "settings"), "halleyEditor");
 
+	tasks = std::make_unique<TaskSet>();
+
 	project.withDLL([&] (ProjectDLL& dll)
 	{
 		dll.addReloadListener(*this);
+		updateDLLStatus(dll.getStatus());
 		hasDLL = dll.isLoaded();
 	});
 	project.addAssetLoadedListener(this);
 
-	tasks = std::make_unique<TaskSet>();
 	tasks->addTask(std::make_unique<CheckAssetsTask>(project, false));
 
 	makeUI();
@@ -199,6 +202,8 @@ void ProjectWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 			project.getGameResources().get<SpriteSheet>(ss)->clearMaterialCache();
 		}
 	}
+
+	updateDLLStatus(status);
 }
 
 void ProjectWindow::onAssetsLoaded()
@@ -311,6 +316,11 @@ void ProjectWindow::toggleDebugConsole()
 		}
 		debugConsole->show();
 	}
+}
+
+void ProjectWindow::updateDLLStatus(ProjectDLL::Status status)
+{
+	addTask(std::make_unique<LoadDLLTask>(status));
 }
 
 void ProjectWindow::reloadProject()

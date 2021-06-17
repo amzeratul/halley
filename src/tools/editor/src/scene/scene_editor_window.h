@@ -5,7 +5,7 @@
 #include "scene_editor_canvas.h"
 #include "halley/tools/dll/dynamic_library.h"
 #include "undo_stack.h"
-#include "halley/tools/project/project_dll.h"
+#include "halley/tools/dll/project_dll.h"
 
 namespace Halley {
 	class ProjectWindow;

@@ -138,6 +138,10 @@ void SceneEditorWindow::loadPrefab(const String& name)
 
 void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 {
+	if (sceneData) {
+		unloadScene();
+	}
+	
 	gameBridge->initializeInterfaceIfNeeded();
 	if (gameBridge->isLoaded()) {
 		auto& interface = gameBridge->getInterface();

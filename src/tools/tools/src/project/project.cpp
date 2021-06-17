@@ -69,12 +69,11 @@ void Project::update(Time time)
 
 void Project::onBuildDone()
 {
-	if (gameDll && !gameDll->isLoaded()) {
-		gameDll->load();
-		if (gameDll->isLoaded()) {
-			gameDll->notifyReload();
+	Concurrent::execute(Executors::getMainThread(), [=] () {
+		if (gameDll && !gameDll->isLoaded()) {
+			gameDll->load();
 		}
-	}
+	});
 }
 
 const std::vector<String>& Project::getPlatforms() const

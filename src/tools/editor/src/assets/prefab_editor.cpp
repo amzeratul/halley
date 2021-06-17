@@ -39,7 +39,12 @@ void PrefabEditor::update(Time t, bool moved)
 
 std::shared_ptr<const Resource> PrefabEditor::loadResource(const String& assetId)
 {
-	open();
+	if (project.isDLLLoaded()) {
+		open();
+	} else {
+		pendingLoad = true;
+	}
+	
 	return {};
 }
 
@@ -52,10 +57,7 @@ void PrefabEditor::onTabbedIn()
 
 void PrefabEditor::open()
 {
-	if (!project.isDLLLoaded()) {
-		pendingLoad = true;
-		return;
-	}
+	Expects (project.isDLLLoaded());
 	
 	if (!window) {
 		window = std::make_shared<SceneEditorWindow>(factory, project, projectWindow.getAPI(), projectWindow);

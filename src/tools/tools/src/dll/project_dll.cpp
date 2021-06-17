@@ -1,4 +1,4 @@
-#include "halley/tools/project/project_dll.h"
+#include "halley/tools/dll/project_dll.h"
 
 
 
@@ -14,10 +14,13 @@ ProjectDLL::ProjectDLL(const Path& path, const HalleyAPI& api)
 	, api(api)
 	, path(path)
 {
+	dll.addReloadListener(*this);
 }
 
 ProjectDLL::~ProjectDLL()
-{}
+{
+	dll.removeReloadListener(*this);
+}
 
 void ProjectDLL::load()
 {
@@ -26,10 +29,13 @@ void ProjectDLL::load()
 	}
 	
 	dll.clearTempDirectory();
-	if (!dll.load(true)) {
-		// Could not load DLL
-		setStatus(Status::DLLNotFound);
-		return;
+	if (!dll.isLoaded()) {
+		const bool success = dll.load(true);
+		if (!success) {
+			// Could not load DLL
+			setStatus(Status::DLLNotFound);
+			return;
+		}
 	}
 	
 	const auto getHalleyEntry = reinterpret_cast<IHalleyEntryPoint * (HALLEY_STDCALL*)()>(dll.getFunction("getHalleyEntry"));
@@ -41,9 +47,11 @@ void ProjectDLL::load()
 	}
 
 	auto* entry = getHalleyEntry();
-	if (entry->getApiVersion() != HALLEY_DLL_API_VERSION) {
+	const auto dllVersion = entry->getApiVersion();
+	const auto editorVersion = HALLEY_DLL_API_VERSION;
+	if (dllVersion != editorVersion) {
 		// Incompatible version
-		setStatus(Status::WrongDLLVersion);
+		setStatus(dllVersion < editorVersion ? Status::DLLVersionTooLow : Status::DLLVersionTooHigh);
 		dll.unload();
 		return;
 	}
@@ -66,21 +74,16 @@ void ProjectDLL::load()
 
 void ProjectDLL::unload()
 {
+	setStatus(Status::Unloaded);
+
 	game.reset();
 	entryPoint = nullptr;
 	dll.unload();
-
-	setStatus(Status::Unloaded);
 }
 
 bool ProjectDLL::isLoaded() const
 {
 	return status == Status::Loaded;
-}
-
-void ProjectDLL::notifyReload()
-{
-	dll.notifyReload();
 }
 
 void ProjectDLL::reloadIfChanged()
@@ -119,4 +122,14 @@ void ProjectDLL::setStatus(Status s)
 			listener->onProjectDLLStatusChange(s);
 		}
 	}
+}
+
+void ProjectDLL::onLoadDLL()
+{
+	load();
+}
+
+void ProjectDLL::onUnloadDLL()
+{
+	unload();
 }

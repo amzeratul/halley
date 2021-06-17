@@ -112,5 +112,6 @@ namespace Halley {
     	void openAssetFinder();
 
         void toggleDebugConsole();
+    	void updateDLLStatus(ProjectDLL::Status status);
 	};
 }

@@ -1,20 +1,21 @@
 #pragma once
+#include "dynamic_library.h"
 #include "halley/core/entry/entry_point.h"
 #include "halley/file/path.h"
-#include "halley/tools/dll/dynamic_library.h"
 #include "halley/core/game/game.h"
 
 namespace Halley {
 	class IProjectDLLListener;
 
-	class ProjectDLL {
+	class ProjectDLL : private IDynamicLibraryListener {
     public:
 		enum class Status {
 			Unloaded,
 			Loaded,
 			DLLNotFound,
 			InvalidDLL,
-			WrongDLLVersion,
+			DLLVersionTooLow,
+			DLLVersionTooHigh,
 			DLLCrash
 		};
 		
@@ -25,7 +26,6 @@ namespace Halley {
 		void unload();
 		bool isLoaded() const;
 		
-		void notifyReload();
 		void reloadIfChanged();
 		void addReloadListener(IProjectDLLListener& listener);
 		void removeReloadListener(IProjectDLLListener& listener);
@@ -46,6 +46,9 @@ namespace Halley {
 		std::set<IProjectDLLListener*> reloadListeners;
 
 		void setStatus(Status status);
+
+		void onLoadDLL() override;
+		void onUnloadDLL() override;
 	};
 
 	class IProjectDLLListener {
@@ -56,13 +59,14 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<ProjectDLL::Status> {
-		constexpr std::array<const char*, 6> operator()() const {
+		constexpr std::array<const char*, 7> operator()() const {
 			return{{
 				"Unloaded",
 				"Loaded",
 				"DLLNotFound",
 				"InvalidDLL",
-				"WrongDLLVersion",
+				"DLLVersionTooLow",
+				"DLLVersionTooHigh",
 				"DLLCrash"
 			}};
 		}
