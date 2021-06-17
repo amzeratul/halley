@@ -129,11 +129,11 @@ std::unique_ptr<Stage> HalleyEditor::startGame()
 std::unique_ptr<Project> HalleyEditor::loadProject(Path path)
 {
 	auto project = projectLoader->loadProject(path);
-
 	if (!project) {
 		throw Exception("Unable to load project at " + path.string(), HalleyExceptions::Tools);
 	}
 
+	project->loadDLL(getAPI());
 	project->loadGameResources(getAPI());
 
 	preferences->addRecent(path.string());

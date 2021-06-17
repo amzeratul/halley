@@ -28,7 +28,7 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 {
 	makeUI();
 
-	project.withDLL([&] (DynamicLibrary& dll)
+	project.withDLL([&] (ProjectDLL& dll)
 	{
 		dll.addReloadListener(*this);
 	});
@@ -38,7 +38,7 @@ SceneEditorWindow::~SceneEditorWindow()
 {
 	unloadScene();
 
-	project.withDLL([&] (DynamicLibrary& dll)
+	project.withDLL([&] (ProjectDLL& dll)
 	{
 		dll.removeReloadListener(*this);
 	});

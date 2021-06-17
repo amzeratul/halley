@@ -32,12 +32,6 @@ Project::Project(Path projectRootPath, Path halleyRootPath)
 	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getUnpackedAssetsPath(), getUnpackedAssetsPath() / "import.db", getUnpackedAssetsPath() / "assets.db", platforms);
 	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", std::vector<String>{ "" });
 	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", std::vector<String>{ "" });
-
-	const auto dllPath = getDLLPath();
-	if (!dllPath.isEmpty()) {
-		gameDll = std::make_shared<DynamicLibrary>(dllPath.string(), false);
-		loadDLL();
-	}
 }
 
 Project::~Project()
@@ -46,6 +40,15 @@ Project::~Project()
 	gameDll.reset();
 	assetImporter.reset();
 	plugins.clear();
+}
+
+void Project::loadDLL(const HalleyAPI& api)
+{
+	const auto dllPath = getDLLPath();
+	if (!dllPath.isEmpty()) {
+		gameDll = std::make_shared<ProjectDLL>(dllPath, api);
+		gameDll->load();
+	}
 }
 
 void Project::setPlugins(std::vector<HalleyPluginPtr> plugins)
@@ -58,7 +61,7 @@ void Project::setPlugins(std::vector<HalleyPluginPtr> plugins)
 
 void Project::update(Time time)
 {
-	withDLL([&] (DynamicLibrary& dll)
+	withDLL([&] (ProjectDLL& dll)
 	{
 		dll.reloadIfChanged();
 	});
@@ -66,9 +69,9 @@ void Project::update(Time time)
 
 void Project::onBuildDone()
 {
-	if (!isDLLLoaded()) {
-		loadDLL();
-		if (isDLLLoaded()) {
+	if (gameDll && !gameDll->isLoaded()) {
+		gameDll->load();
+		if (gameDll->isLoaded()) {
 			gameDll->notifyReload();
 		}
 	}
@@ -342,16 +345,6 @@ Path Project::getDLLPath() const
 	return rootPath / "bin" / (binName + suffix + getDLLExtension());
 }
 
-void Project::loadDLL()
-{
-	if (gameDll) {
-		gameDll->clearTempDirectory();
-		if (gameDll->load(true)) {
-			Logger::logInfo("Loaded " + getDLLPath().string());
-		}
-	}
-}
-
 Path Project::getExecutablePath() const
 {
 	const auto& binName = getProperties().getBinName();
@@ -383,25 +376,14 @@ bool Project::isDLLLoaded() const
 	return gameDll && gameDll->isLoaded();
 }
 
-std::unique_ptr<Game> Project::createGameInstance(const HalleyAPI& api) const
+Game* Project::getGameInstance() const
 {
-	if (!isDLLLoaded()) {
-		return {};
-	}
-
-	const auto getHalleyEntry = reinterpret_cast<IHalleyEntryPoint * (HALLEY_STDCALL*)()>(gameDll->getFunction("getHalleyEntry"));
-	if (!getHalleyEntry) {
-		return {};
-	}
-	auto entry = getHalleyEntry();
-	
-	if (entry->getApiVersion() != HALLEY_DLL_API_VERSION) {
-		gameDll->unload();
-		return {};
-	}
-
-	entry->initSharedStatics(api.core->getStatics());
-	return entry->createGame();
+	Game* result = nullptr;
+	withLoadedDLL([&] (ProjectDLL& dll)
+	{
+		result = &dll.getGame();
+	});
+	return result;
 }
 
 void Project::loadECSData()

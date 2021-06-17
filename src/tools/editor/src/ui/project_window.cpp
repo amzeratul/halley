@@ -32,7 +32,7 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	settings[EditorSettingType::Project] = std::make_unique<SettingsStorage>(api.system->getStorageContainer(SaveDataType::SaveLocal, "settings"), project.getProperties().getUUID().toString());
 	settings[EditorSettingType::Editor] = std::make_unique<SettingsStorage>(api.system->getStorageContainer(SaveDataType::SaveLocal, "settings"), "halleyEditor");
 
-	project.withDLL([&] (DynamicLibrary& dll)
+	project.withDLL([&] (ProjectDLL& dll)
 	{
 		dll.addReloadListener(*this);
 		hasDLL = dll.isLoaded();
@@ -47,7 +47,7 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 
 ProjectWindow::~ProjectWindow()
 {
-	project.withDLL([&] (DynamicLibrary& dll)
+	project.withDLL([&] (ProjectDLL& dll)
 	{
 		dll.removeReloadListener(*this);
 	});
@@ -138,7 +138,7 @@ bool ProjectWindow::loadCustomUI()
 {
 	destroyCustomUI();
 
-	auto game = project.createGameInstance(api);
+	auto game = project.getGameInstance();
 	if (!game) {
 		return false;
 	}

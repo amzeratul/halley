@@ -18,7 +18,7 @@ SceneEditorGameBridge::SceneEditorGameBridge(const HalleyAPI& api, Resources& re
 	gizmos = std::make_unique<SceneEditorGizmoCollection>(factory, resources, sceneEditorWindow);
 
 	gameResources = &project.getGameResources();
-	project.withLoadedDLL([&] (DynamicLibrary& dll)
+	project.withLoadedDLL([&] (ProjectDLL& dll)
 	{
 		load();
 	});
@@ -70,7 +70,7 @@ void SceneEditorGameBridge::render(RenderContext& rc) const
 void SceneEditorGameBridge::initializeInterfaceIfNeeded()
 {	
 	if (!interface) {
-		project.withLoadedDLL([&] (DynamicLibrary& dll)
+		project.withLoadedDLL([&] (ProjectDLL& dll)
 		{
 			load();
 		});
@@ -294,7 +294,7 @@ std::vector<std::pair<String, String>> SceneEditorGameBridge::getRightClickMenu(
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {
-		const auto game = project.createGameInstance(api);
+		const auto game = project.getGameInstance();
 		if (!game) {
 			throw Exception("Unable to load scene editor", HalleyExceptions::Tools);
 		}
