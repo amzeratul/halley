@@ -5,6 +5,8 @@
 #include "halley/core/game/game.h"
 
 namespace Halley {
+	class IProjectDLLListener;
+
 	class ProjectDLL {
     public:
 		enum class Status {
@@ -25,8 +27,8 @@ namespace Halley {
 		
 		void notifyReload();
 		void reloadIfChanged();
-		void addReloadListener(IDynamicLibraryListener& listener);
-		void removeReloadListener(IDynamicLibraryListener& listener);
+		void addReloadListener(IProjectDLLListener& listener);
+		void removeReloadListener(IProjectDLLListener& listener);
 
 		Game& getGame() const;
 		Status getStatus() const;
@@ -40,5 +42,29 @@ namespace Halley {
 		std::unique_ptr<Game> game;
 
 		Status status = Status::Unloaded;
+
+		std::set<IProjectDLLListener*> reloadListeners;
+
+		void setStatus(Status status);
+	};
+
+	class IProjectDLLListener {
+	public:
+		virtual ~IProjectDLLListener() = default;
+		virtual void onProjectDLLStatusChange(ProjectDLL::Status status) = 0;
+	};
+
+	template <>
+	struct EnumNames<ProjectDLL::Status> {
+		constexpr std::array<const char*, 6> operator()() const {
+			return{{
+				"Unloaded",
+				"Loaded",
+				"DLLNotFound",
+				"InvalidDLL",
+				"WrongDLLVersion",
+				"DLLCrash"
+			}};
+		}
 	};
 }

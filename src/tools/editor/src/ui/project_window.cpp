@@ -184,21 +184,20 @@ void ProjectWindow::destroyCustomUI()
 	debugConsoleCommands.reset();
 }
 
-void ProjectWindow::onLoadDLL()
+void ProjectWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 {
-	hasDLL = true;
-	waitingToLoadCustomUI = true;
-	tryLoadCustomUI();
-}
-
-void ProjectWindow::onUnloadDLL()
-{
-	destroyCustomUI();
-	for (const auto& ss: resources.enumerate<SpriteSheet>()) {
-		resources.get<SpriteSheet>(ss)->clearMaterialCache();
-	}
-	for (const auto& ss: project.getGameResources().enumerate<SpriteSheet>()) {
-		project.getGameResources().get<SpriteSheet>(ss)->clearMaterialCache();
+	if (status == ProjectDLL::Status::Loaded) {
+		hasDLL = true;
+		waitingToLoadCustomUI = true;
+		tryLoadCustomUI();
+	} else {
+		destroyCustomUI();
+		for (const auto& ss: resources.enumerate<SpriteSheet>()) {
+			resources.get<SpriteSheet>(ss)->clearMaterialCache();
+		}
+		for (const auto& ss: project.getGameResources().enumerate<SpriteSheet>()) {
+			project.getGameResources().get<SpriteSheet>(ss)->clearMaterialCache();
+		}
 	}
 }
 

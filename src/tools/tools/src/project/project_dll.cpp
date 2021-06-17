@@ -28,14 +28,14 @@ void ProjectDLL::load()
 	dll.clearTempDirectory();
 	if (!dll.load(true)) {
 		// Could not load DLL
-		status = Status::DLLNotFound;
+		setStatus(Status::DLLNotFound);
 		return;
 	}
 	
 	const auto getHalleyEntry = reinterpret_cast<IHalleyEntryPoint * (HALLEY_STDCALL*)()>(dll.getFunction("getHalleyEntry"));
 	if (!getHalleyEntry) {
 		// Not a Halley DLL
-		status = Status::InvalidDLL;
+		setStatus(Status::InvalidDLL);
 		dll.unload();
 		return;
 	}
@@ -43,7 +43,7 @@ void ProjectDLL::load()
 	auto* entry = getHalleyEntry();
 	if (entry->getApiVersion() != HALLEY_DLL_API_VERSION) {
 		// Incompatible version
-		status = Status::WrongDLLVersion;
+		setStatus(Status::WrongDLLVersion);
 		dll.unload();
 		return;
 	}
@@ -53,30 +53,29 @@ void ProjectDLL::load()
 		entryPoint->initSharedStatics(api.core->getStatics());
 		game = entryPoint->createGame();
 
-		status = Status::Loaded;
-		Logger::logInfo("Loaded " + path.string());
+		setStatus(Status::Loaded);
 	} catch (const std::exception& e) {
 		Logger::logException(e);
 		unload();
-		status = Status::DLLCrash;
+		setStatus(Status::DLLCrash);
 	} catch (...) {
-		Logger::logError("Failed to load DLL " + path.string());
 		unload();
-		status = Status::DLLCrash;
+		setStatus(Status::DLLCrash);
 	}
 }
 
 void ProjectDLL::unload()
 {
-	status = Status::Unloaded;
 	game.reset();
 	entryPoint = nullptr;
 	dll.unload();
+
+	setStatus(Status::Unloaded);
 }
 
 bool ProjectDLL::isLoaded() const
 {
-	return entryPoint != nullptr;
+	return status == Status::Loaded;
 }
 
 void ProjectDLL::notifyReload()
@@ -89,22 +88,35 @@ void ProjectDLL::reloadIfChanged()
 	dll.reloadIfChanged();
 }
 
-void ProjectDLL::addReloadListener(IDynamicLibraryListener& listener)
+void ProjectDLL::addReloadListener(IProjectDLLListener& listener)
 {
-	dll.addReloadListener(listener);
+	reloadListeners.insert(&listener);
 }
 
-void ProjectDLL::removeReloadListener(IDynamicLibraryListener& listener)
+void ProjectDLL::removeReloadListener(IProjectDLLListener& listener)
 {
-	dll.removeReloadListener(listener);
+	reloadListeners.erase(&listener);
 }
 
 Game& ProjectDLL::getGame() const
 {
+	Expects(game != nullptr);
 	return *game;
 }
 
 ProjectDLL::Status ProjectDLL::getStatus() const
 {
 	return status;
+}
+
+void ProjectDLL::setStatus(Status s)
+{
+	if (status != s) {
+		Logger::logInfo("DLL status change: " + toString(status) + " -> " + toString(s));
+		
+		status = s;
+		for (const auto& listener: reloadListeners) {
+			listener->onProjectDLLStatusChange(s);
+		}
+	}
 }

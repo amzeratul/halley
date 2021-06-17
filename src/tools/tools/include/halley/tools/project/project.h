@@ -103,6 +103,7 @@ namespace Halley
 		Resources& getGameResources();
 
 		bool isDLLLoaded() const;
+		ProjectDLL::Status getDLLStatus() const;
 		
 		template <typename F>
 		void withDLL(F f) const

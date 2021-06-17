@@ -308,15 +308,14 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 	return false;
 }
 
-void SceneEditorWindow::onUnloadDLL()
+void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 {
-	unloadScene();
-}
-
-void SceneEditorWindow::onLoadDLL()
-{
-	if (prefab) {
-		loadScene(origPrefabAssetType, *prefab);
+	if (status == ProjectDLL::Status::Loaded) {
+		if (prefab) {
+			loadScene(origPrefabAssetType, *prefab);
+		}
+	} else {
+		unloadScene();
 	}
 }
 

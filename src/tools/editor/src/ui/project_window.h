@@ -15,7 +15,7 @@ namespace Halley {
 	class Toolbar;
 	class Project;
         
-    class ProjectWindow final : public UIWidget, public IDynamicLibraryListener, public Project::IAssetLoadListener, public IProjectWindow
+    class ProjectWindow final : public UIWidget, public IProjectDLLListener, public Project::IAssetLoadListener, public IProjectWindow
     {
     public:
         ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Project& project, Resources& resources, const HalleyAPI& api);
@@ -42,8 +42,7 @@ namespace Halley {
     	void setAssetSetting(std::string_view assetKey, std::string_view id, ConfigNode data);
 
     protected:
-		void onUnloadDLL() override;
-        void onLoadDLL() override;
+        void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 
         void onAssetsLoaded() override;
 

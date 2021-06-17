@@ -376,6 +376,11 @@ bool Project::isDLLLoaded() const
 	return gameDll && gameDll->isLoaded();
 }
 
+ProjectDLL::Status Project::getDLLStatus() const
+{
+	return gameDll ? gameDll->getStatus() : ProjectDLL::Status::Unloaded;
+}
+
 Game* Project::getGameInstance() const
 {
 	Game* result = nullptr;
