@@ -56,14 +56,18 @@ void AssetPackListing::sort()
 	std::sort(entries.begin(), entries.end());
 }
 
-void AssetPacker::pack(Project& project, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets)
+void AssetPacker::pack(Project& project, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets, ProgressCallback progress)
 {
-	for (auto& platform: project.getPlatforms()) {
-		packPlatform(project, assetsToPack, deletedAssets, platform);
+	const auto& platforms = project.getPlatforms();
+	const size_t n = platforms.size();
+	for (size_t i = 0; i < n; ++i) {
+		packPlatform(project, assetsToPack, deletedAssets, platforms[i], [=] (float p, const String& s) {
+			progress((p + i) * (1.0f / n), s);
+		});
 	}
 }
 
-void AssetPacker::packPlatform(Project& project, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets, const String& platform)
+void AssetPacker::packPlatform(Project& project, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets, const String& platform, ProgressCallback progress)
 {
 	const auto src = project.getUnpackedAssetsPath();
 	const auto dst = project.getPackedAssetsPath(platform);
@@ -76,7 +80,7 @@ void AssetPacker::packPlatform(Project& project, std::optional<std::set<String>>
 	const std::map<String, AssetPackListing> packs = sortIntoPacks(manifest, *db, assetsToPack, deletedAssets);
 
 	// Generate packs
-	generatePacks(packs, src, dst);
+	generatePacks(packs, src, dst, std::move(progress));
 }
 
 std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets)
@@ -145,12 +149,19 @@ std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackMan
 	return packs;
 }
 
-void AssetPacker::generatePacks(std::map<String, AssetPackListing> packs, const Path& src, const Path& dst)
+void AssetPacker::generatePacks(std::map<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress)
 {
+	struct Entry {
+		String name;
+		AssetPackListing* listing = nullptr;
+		Path dstPack;
+	};
+	std::vector<Entry> toPack;
+	
 	for (auto& packListing: packs) {
 		if (packListing.first.isEmpty()) {
 			Logger::logWarning("The following assets will not be packed:");
-			for (auto& entry: packListing.second.getEntries()) {
+			for (const auto& entry: packListing.second.getEntries()) {
 				Logger::logWarning("  [" + toString(entry.type) + "] " + entry.name);
 			}
 			Logger::logWarning("-----------------------\n");
@@ -158,17 +169,28 @@ void AssetPacker::generatePacks(std::map<String, AssetPackListing> packs, const 
 			// Only pack if this pack listing is active or if it doesn't exist
 			auto dstPack = dst / packListing.first + ".dat";
 			if (packListing.second.isActive() || !FileSystem::exists(dstPack)) {
-				generatePack(packListing.first, packListing.second, src, dstPack);
+				toPack.push_back(Entry{ packListing.first, &packListing.second, dstPack });
 			}
 		}
 	}
+
+	size_t n = toPack.size();
+	for (size_t i = 0; i < n; ++i) {
+		generatePack(toPack[i].name, *toPack[i].listing, src, toPack[i].dstPack, [=] (float p, const String& s)
+		{
+			progress((p + i) * (1.0f / n), s);
+		});
+	}
 }
 
-void AssetPacker::generatePack(const String& packId, const AssetPackListing& packListing, const Path& src, const Path& dst)
+void AssetPacker::generatePack(const String& packId, const AssetPackListing& packListing, const Path& src, const Path& dst, ProgressCallback progress)
 {
 	AssetPack pack;
 	AssetDatabase& db = pack.getAssetDatabase();
 	Bytes& data = pack.getData();
+
+	const size_t n = packListing.getEntries().size();
+	size_t i = 0;
 
 	for (auto& entry: packListing.getEntries()) {
 		//Logger::logDev("  [" + toString(entry.type) + "] " + entry.name);
@@ -187,6 +209,9 @@ void AssetPacker::generatePack(const String& packId, const AssetPackListing& pac
 		memcpy(data.data() + pos, fileData.data(), size);
 
 		db.addAsset(entry.name, entry.type, AssetDatabase::Entry(toString(pos) + ":" + toString(size), entry.metadata));
+
+		progress(float(i) / float(n), packId);
+		i++;
 	}
 
 	if (!packListing.getEncryptionKey().isEmpty()) {
