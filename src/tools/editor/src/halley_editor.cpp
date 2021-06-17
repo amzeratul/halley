@@ -133,7 +133,7 @@ std::unique_ptr<Project> HalleyEditor::loadProject(Path path)
 		throw Exception("Unable to load project at " + path.string(), HalleyExceptions::Tools);
 	}
 
-	project->loadDLL(getAPI());
+	project->loadDLL(getAPI().core->getStatics());
 	project->loadGameResources(getAPI());
 
 	preferences->addRecent(path.string());

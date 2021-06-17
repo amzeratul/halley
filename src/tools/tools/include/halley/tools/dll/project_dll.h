@@ -19,7 +19,7 @@ namespace Halley {
 			DLLCrash
 		};
 		
-		ProjectDLL(const Path& path, const HalleyAPI& api);
+		ProjectDLL(const Path& path, const HalleyStatics& statics);
     	virtual ~ProjectDLL();
 
 		void load();
@@ -35,7 +35,7 @@ namespace Halley {
 
 	private:
     	DynamicLibrary dll;
-		const HalleyAPI& api;
+		const HalleyStatics& statics;
 
 		Path path;
 		IHalleyEntryPoint* entryPoint = nullptr;

@@ -42,11 +42,11 @@ Project::~Project()
 	plugins.clear();
 }
 
-void Project::loadDLL(const HalleyAPI& api)
+void Project::loadDLL(const HalleyStatics& statics)
 {
 	const auto dllPath = getDLLPath();
 	if (!dllPath.isEmpty()) {
-		gameDll = std::make_shared<ProjectDLL>(dllPath, api);
+		gameDll = std::make_shared<ProjectDLL>(dllPath, statics);
 		gameDll->load();
 	}
 }

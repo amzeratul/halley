@@ -9,9 +9,9 @@
 
 using namespace Halley;
 
-ProjectDLL::ProjectDLL(const Path& path, const HalleyAPI& api)
+ProjectDLL::ProjectDLL(const Path& path, const HalleyStatics& statics)
 	: dll(path.string(), false)
-	, api(api)
+	, statics(statics)
 	, path(path)
 {
 	dll.addReloadListener(*this);
@@ -58,7 +58,7 @@ void ProjectDLL::load()
 
 	try {
 		entryPoint = entry;
-		entryPoint->initSharedStatics(api.core->getStatics());
+		entryPoint->initSharedStatics(statics);
 		game = entryPoint->createGame();
 
 		setStatus(Status::Loaded);

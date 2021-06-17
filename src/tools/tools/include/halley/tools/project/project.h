@@ -41,7 +41,7 @@ namespace Halley
 		Project(Path projectRootPath, Path halleyRootPath);
 		~Project() override;
 
-		void loadDLL(const HalleyAPI& api);
+		void loadDLL(const HalleyStatics& statics);
 		void setPlugins(std::vector<HalleyPluginPtr> plugins);
 		
 		void update(Time time);
