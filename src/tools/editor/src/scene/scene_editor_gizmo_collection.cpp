@@ -149,7 +149,7 @@ void SceneEditorGizmoCollection::addTool(const Tool& tool, GizmoFactory gizmoFac
 
 void SceneEditorGizmoCollection::resetTools()
 {
-	tools.clear();
+	clear();
 	
 	addTool(Tool("drag", LocalisedString::fromHardcodedString("Hand [H]"), Sprite().setImage(resources, "ui/scene_editor_drag.png"), KeyCode::H),
 		[this] (SnapRules snapRules, const String& componentName, const String& fieldName)
@@ -169,4 +169,10 @@ void SceneEditorGizmoCollection::resetTools()
 			return std::make_unique<ScriptingGizmo>(snapRules, factory, sceneEditorWindow, sceneEditorWindow.getScriptNodeTypes());
 		}
 	);
+}
+
+void SceneEditorGizmoCollection::clear()
+{
+	tools.clear();
+	gizmoFactories.clear();
 }

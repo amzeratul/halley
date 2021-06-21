@@ -336,6 +336,8 @@ void SceneEditorGameBridge::unload()
 	gameCoreAPI.reset();
 
 	errorState = false;
+
+	gizmos->clear();
 }
 
 void SceneEditorGameBridge::guardedRun(const std::function<void()>& f, bool allowFailure) const
