@@ -21,7 +21,9 @@ EntityEditor::EntityEditor(String id, UIFactory& factory)
 void EntityEditor::setEntityEditorFactory(std::shared_ptr<EntityEditorFactory> factory)
 {
 	entityEditorFactory = std::move(factory);
-	entityEditorFactory->setEntityEditor(*this);
+	if (entityEditorFactory) {
+		entityEditorFactory->setEntityEditor(*this);
+	}
 }
 
 void EntityEditor::onAddedToRoot(UIRoot& root)

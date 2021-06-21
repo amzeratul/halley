@@ -216,6 +216,7 @@ void SceneEditorWindow::unloadScene()
 	sceneData.reset();
 	currentEntityScene.reset();
 	entityEditor->unloadEntity();
+	entityEditor->setEntityEditorFactory({});
 	entityEditorFactory.reset();
 	entityList->setSceneData({});
 }
