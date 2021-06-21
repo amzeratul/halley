@@ -122,6 +122,7 @@ void SceneEditorGizmoCollection::generateList(UIList& list)
 	for (const auto& tool: tools) {
 		list.addImage(tool.id, std::make_shared<UIImage>(tool.icon.clone().setColour(iconCol)), 1, {}, UISizerAlignFlags::Centre)->setToolTip(tool.toolTip);
 	}
+	uiList = &list;
 }
 
 ISceneEditorWindow& SceneEditorGizmoCollection::getSceneEditorWindow()
@@ -175,4 +176,8 @@ void SceneEditorGizmoCollection::clear()
 {
 	tools.clear();
 	gizmoFactories.clear();
+	if (uiList) {
+		uiList->clear();
+		uiList = nullptr;
+	}
 }

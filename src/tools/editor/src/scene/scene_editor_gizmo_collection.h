@@ -47,5 +47,6 @@ namespace Halley {
 		
 		std::optional<EntityRef> selectedEntity;
 		EntityData* entityData = nullptr;
+		UIList* uiList = nullptr;
 	};
 }
