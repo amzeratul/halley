@@ -425,6 +425,8 @@ void Painter::blitTexture(const std::shared_ptr<const Texture>& texture)
 
 	blitMaterial->set("tex0", texture);
 	draw(blitMaterial, 4, vs.data(), indices, PrimitiveType::Triangle);
+	flushPending();
+	blitMaterial->set("tex0", std::shared_ptr<const Texture>{});
 }
 
 void Painter::setLogging(bool logging)
