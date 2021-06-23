@@ -704,7 +704,7 @@ Future<std::optional<Path>> OSWin32::openFileChooser(FileChooserParameters param
 		
 		IFileDialog *fileDialog = nullptr;
 		HRESULT hr = CoCreateInstance(parameters.save ? CLSID_FileSaveDialog : CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&fileDialog));
-
+		
 		DWORD flags;
         fileDialog->GetOptions(&flags);
 		flags |= FOS_FORCEFILESYSTEM;
@@ -712,6 +712,33 @@ Future<std::optional<Path>> OSWin32::openFileChooser(FileChooserParameters param
 			flags |= FOS_PICKFOLDERS;
 		}
 		fileDialog->SetOptions(flags);
+
+		if (!parameters.fileTypes.empty()) {
+			std::vector<StringUTF16> stringBuffer;
+			std::vector<COMDLG_FILTERSPEC> spec;
+			for (const auto& type: parameters.fileTypes) {
+				String pattern;
+				for (const auto& ext: type.extensions) {
+					if (!pattern.isEmpty()) {
+						pattern += ";";
+					}
+					pattern += "*." + ext;
+				}
+
+				size_t n = stringBuffer.size();
+				stringBuffer.push_back(type.name.getUTF16());
+				stringBuffer.push_back(pattern.getUTF16());
+				spec.push_back({ stringBuffer[n].c_str(), stringBuffer[n + 1].c_str() });
+				
+				if (type.makeDefault && !type.extensions.empty()) {
+					stringBuffer.push_back(type.extensions.front().getUTF16());
+					fileDialog->SetDefaultExtension(stringBuffer[n + 2].c_str());
+				}
+			}
+
+			fileDialog->SetFileTypes(static_cast<UINT>(parameters.fileTypes.size()), spec.data());
+		}
+		
 		fileDialog->Show(window);
 
 		IShellItem *result;
