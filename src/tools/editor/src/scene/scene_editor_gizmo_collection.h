@@ -22,6 +22,7 @@ namespace Halley {
 
 		void addTool(const Tool& tool, GizmoFactory gizmoFactory) override;
 		void resetTools();
+		void clear();
 		void generateList(UIList& list) override;
 		gsl::span<const Tool> getTools() const { return tools; }
 
@@ -46,5 +47,6 @@ namespace Halley {
 		
 		std::optional<EntityRef> selectedEntity;
 		EntityData* entityData = nullptr;
+		UIList* uiList = nullptr;
 	};
 }

@@ -68,6 +68,7 @@ void TaskAnchor::update(float time)
 			progress = 1;
 			progressLabel = "";
 		} else {
+			task->updateOnMain(time);
 			std::lock_guard<std::mutex> lock(task->mutex);
 			progress = task->progress;
 			progressLabel = task->progressLabel;

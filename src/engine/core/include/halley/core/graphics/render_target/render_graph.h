@@ -26,7 +26,7 @@ namespace Halley {
 		explicit RenderGraph(std::shared_ptr<const RenderGraphDefinition> graphDefinition);
 
 		void update();
-		void render(const RenderContext& rc, VideoAPI& video);
+		void render(const RenderContext& rc, VideoAPI& video, std::optional<Vector2i> renderSize = {});
 
 		const Camera* tryGetCamera(std::string_view id) const;
 		void setCamera(std::string_view id, const Camera& camera);

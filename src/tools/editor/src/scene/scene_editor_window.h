@@ -5,6 +5,7 @@
 #include "scene_editor_canvas.h"
 #include "halley/tools/dll/dynamic_library.h"
 #include "undo_stack.h"
+#include "halley/tools/dll/project_dll.h"
 
 namespace Halley {
 	class ProjectWindow;
@@ -14,7 +15,7 @@ namespace Halley {
 	class UIFactory;
 	class EntityFactory;
 
-	class SceneEditorWindow final : public UIWidget, public IDynamicLibraryListener, public ISceneEditorWindow {
+	class SceneEditorWindow final : public UIWidget, public IProjectDLLListener, public ISceneEditorWindow {
 	public:
 		SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, ProjectWindow& projectWindow);
 		~SceneEditorWindow();
@@ -90,9 +91,8 @@ namespace Halley {
 
 		bool onKeyPress(KeyboardKeyPress key) override;
 
-		void onUnloadDLL() override;
-		void onLoadDLL() override;
-
+		void onProjectDLLStatusChange(ProjectDLL::Status status) override;
+	
 	private:
 		const HalleyAPI& api;
 		UIFactory& uiFactory;

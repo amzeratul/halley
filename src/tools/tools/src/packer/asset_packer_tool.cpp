@@ -24,7 +24,7 @@ int AssetPackerTool::run(Vector<std::string> args)
 			const auto src = Path(args[1]);
 			const auto dst = Path(args[2]);
 
-			AssetPacker::pack(*project, {}, {});
+			AssetPacker::pack(*project, {}, {}, [=] (float p, const String& s) {});
 			return 0;
 		} else {
 			Logger::logError("Usage: halley-cmd pack path/to/manifest.yaml projDir halleyDir");

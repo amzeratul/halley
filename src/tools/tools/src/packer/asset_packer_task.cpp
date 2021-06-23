@@ -16,7 +16,7 @@ AssetPackerTask::AssetPackerTask(Project& project, std::optional<std::set<String
 void AssetPackerTask::run()
 {
 	Logger::logInfo("Packing assets (" + toString(assetsToPack->size()) + " modified).");
-	AssetPacker::pack(project, assetsToPack, deletedAssets);
+	AssetPacker::pack(project, assetsToPack, deletedAssets, [=] (float p, const String& s) { setProgress(p * 0.95f, s); });
 	Logger::logInfo("Done packing assets");
 
 	if (!isCancelled()) {

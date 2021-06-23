@@ -26,6 +26,7 @@ namespace Halley
 		Task(String name, bool isCancellable, bool isVisible);
 
 		virtual void run() = 0;
+		virtual void updateOnMain(float time);
 		void addContinuation(std::unique_ptr<Task> task);
 
 		void setName(String name);

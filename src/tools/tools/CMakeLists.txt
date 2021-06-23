@@ -57,6 +57,8 @@ set(SOURCES
     "src/ecs/system_schema.cpp"
     
     "src/dll/dynamic_library.cpp"
+    "src/dll/load_dll_task.cpp"
+    "src/dll/project_dll.cpp"
 
     "src/distance_field/distance_field_generator.cpp"
     "src/distance_field/distance_field_tool.cpp"
@@ -122,6 +124,8 @@ set(HEADERS
     "include/halley/tools/ecs/system_schema.h"
     
     "include/halley/tools/dll/dynamic_library.h"
+    "include/halley/tools/dll/load_dll_task.h"
+    "include/halley/tools/dll/project_dll.h"
 
     "include/halley/tools/assets/asset_collector.h"
     "include/halley/tools/assets/asset_importer.h"

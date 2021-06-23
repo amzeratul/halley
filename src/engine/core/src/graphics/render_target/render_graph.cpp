@@ -72,7 +72,7 @@ RenderGraphNode* RenderGraph::tryGetNode(const String& id)
 	return nullptr;
 }
 
-void RenderGraph::render(const RenderContext& rc, VideoAPI& video)
+void RenderGraph::render(const RenderContext& rc, VideoAPI& video, std::optional<Vector2i> requestedRenderSize)
 {
 	update();
 	
@@ -80,7 +80,7 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video)
 		node->startRender();
 	}
 
-	const auto renderSize = rc.getDefaultRenderTarget().getViewPort().getSize();
+	const auto renderSize = requestedRenderSize.value_or(rc.getDefaultRenderTarget().getViewPort().getSize());
 	for (auto& node: nodes) {
 		if (node->method == RenderGraphMethod::Output
 			|| (node->method == RenderGraphMethod::ImageOutput && std_ex::contains(imageOutputCallbacks, node->id))) {

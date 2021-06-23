@@ -28,7 +28,7 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 {
 	makeUI();
 
-	project.withDLL([&] (DynamicLibrary& dll)
+	project.withDLL([&] (ProjectDLL& dll)
 	{
 		dll.addReloadListener(*this);
 	});
@@ -38,7 +38,7 @@ SceneEditorWindow::~SceneEditorWindow()
 {
 	unloadScene();
 
-	project.withDLL([&] (DynamicLibrary& dll)
+	project.withDLL([&] (ProjectDLL& dll)
 	{
 		dll.removeReloadListener(*this);
 	});
@@ -138,6 +138,10 @@ void SceneEditorWindow::loadPrefab(const String& name)
 
 void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 {
+	if (sceneData) {
+		unloadScene();
+	}
+	
 	gameBridge->initializeInterfaceIfNeeded();
 	if (gameBridge->isLoaded()) {
 		auto& interface = gameBridge->getInterface();
@@ -212,6 +216,7 @@ void SceneEditorWindow::unloadScene()
 	sceneData.reset();
 	currentEntityScene.reset();
 	entityEditor->unloadEntity();
+	entityEditor->setEntityEditorFactory({});
 	entityEditorFactory.reset();
 	entityList->setSceneData({});
 }
@@ -308,15 +313,14 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 	return false;
 }
 
-void SceneEditorWindow::onUnloadDLL()
+void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 {
-	unloadScene();
-}
-
-void SceneEditorWindow::onLoadDLL()
-{
-	if (prefab) {
-		loadScene(origPrefabAssetType, *prefab);
+	if (status == ProjectDLL::Status::Loaded) {
+		if (prefab) {
+			loadScene(origPrefabAssetType, *prefab);
+		}
+	} else {
+		unloadScene();
 	}
 }
 

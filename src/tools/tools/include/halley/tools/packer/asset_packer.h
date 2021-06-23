@@ -44,12 +44,14 @@ namespace Halley {
 
 	class AssetPacker {
 	public:
-		static void pack(Project& project, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets);
-		static void packPlatform(Project& project, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets, const String& platform);
+		using ProgressCallback = std::function<void(float, const String&)>;
+		
+		static void pack(Project& project, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets, ProgressCallback progress);
+		static void packPlatform(Project& project, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets, const String& platform, ProgressCallback progress);
 
 	private:
 		static std::map<String, AssetPackListing> sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets);
-		static void generatePacks(std::map<String, AssetPackListing> packs, const Path& src, const Path& dst);
-		static void generatePack(const String& packId, const AssetPackListing& pack, const Path& src, const Path& dst);
+		static void generatePacks(std::map<String, AssetPackListing> packs, const Path& src, const Path& dst, ProgressCallback progress);
+		static void generatePack(const String& packId, const AssetPackListing& pack, const Path& src, const Path& dst, ProgressCallback progress);
 	};
 }

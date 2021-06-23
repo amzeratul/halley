@@ -19,6 +19,10 @@ Task::Task(String name, bool isCancellable, bool isVisible)
 	, isVisible(isVisible)
 {}
 
+void Task::updateOnMain(float time)
+{
+}
+
 void Task::addContinuation(std::unique_ptr<Task> task)
 {
 	std::lock_guard<std::mutex> lock(mutex);

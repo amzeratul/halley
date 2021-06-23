@@ -10,10 +10,11 @@
 #include "halley/core/game/scene_editor_interface.h"
 #include "halley/time/halleytime.h"
 #include "halley/tools/assets/check_assets_task.h"
-#include "halley/tools/dll/dynamic_library.h"
+#include "halley/tools/dll/project_dll.h"
 
 namespace Halley
 {
+	class IHalleyEntryPoint;
 	class ProjectLoader;
 	class ImportAssetsDatabase;
 
@@ -38,8 +39,9 @@ namespace Halley
 		using AssetReloadCallback = std::function<void(const std::vector<String>&)>;
 
 		Project(Path projectRootPath, Path halleyRootPath);
-		~Project();
+		~Project() override;
 
+		void loadDLL(const HalleyStatics& statics);
 		void setPlugins(std::vector<HalleyPluginPtr> plugins);
 		
 		void update(Time time);
@@ -100,6 +102,7 @@ namespace Halley
 		Resources& getGameResources();
 
 		bool isDLLLoaded() const;
+		ProjectDLL::Status getDLLStatus() const;
 		
 		template <typename F>
 		void withDLL(F f) const
@@ -117,7 +120,7 @@ namespace Halley
 			}
 		}
 
-		std::unique_ptr<Game> createGameInstance(const HalleyAPI& api) const;
+		Game* getGameInstance() const;
 
 	private:
 		std::vector<String> platforms;
@@ -138,11 +141,10 @@ namespace Halley
 		std::unique_ptr<ECSData> ecsData;
 
 		std::vector<HalleyPluginPtr> plugins;
-		std::shared_ptr<DynamicLibrary> gameDll;
+		std::shared_ptr<ProjectDLL> gameDll;
 		std::unique_ptr<Resources> gameResources;
 
 		Path getDLLPath() const;
-		void loadDLL();
 		void loadECSData();
 	};
 }

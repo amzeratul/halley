@@ -8,6 +8,7 @@
 #include "taskbar.h"
 #include "halley/tools/project/project.h"
 #include "halley/file_formats/yaml_convert.h"
+#include "halley/tools/dll/load_dll_task.h"
 #include "halley/tools/project/project_properties.h"
 #include "src/editor_root_stage.h"
 #include "src/halley_editor.h"
@@ -32,14 +33,16 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	settings[EditorSettingType::Project] = std::make_unique<SettingsStorage>(api.system->getStorageContainer(SaveDataType::SaveLocal, "settings"), project.getProperties().getUUID().toString());
 	settings[EditorSettingType::Editor] = std::make_unique<SettingsStorage>(api.system->getStorageContainer(SaveDataType::SaveLocal, "settings"), "halleyEditor");
 
-	project.withDLL([&] (DynamicLibrary& dll)
+	tasks = std::make_unique<TaskSet>();
+
+	project.withDLL([&] (ProjectDLL& dll)
 	{
 		dll.addReloadListener(*this);
+		updateDLLStatus(dll.getStatus());
 		hasDLL = dll.isLoaded();
 	});
 	project.addAssetLoadedListener(this);
 
-	tasks = std::make_unique<TaskSet>();
 	tasks->addTask(std::make_unique<CheckAssetsTask>(project, false));
 
 	makeUI();
@@ -47,7 +50,7 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 
 ProjectWindow::~ProjectWindow()
 {
-	project.withDLL([&] (DynamicLibrary& dll)
+	project.withDLL([&] (ProjectDLL& dll)
 	{
 		dll.removeReloadListener(*this);
 	});
@@ -138,7 +141,7 @@ bool ProjectWindow::loadCustomUI()
 {
 	destroyCustomUI();
 
-	auto game = project.createGameInstance(api);
+	auto game = project.getGameInstance();
 	if (!game) {
 		return false;
 	}
@@ -184,22 +187,23 @@ void ProjectWindow::destroyCustomUI()
 	debugConsoleCommands.reset();
 }
 
-void ProjectWindow::onLoadDLL()
+void ProjectWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 {
-	hasDLL = true;
-	waitingToLoadCustomUI = true;
-	tryLoadCustomUI();
-}
+	if (status == ProjectDLL::Status::Loaded) {
+		hasDLL = true;
+		waitingToLoadCustomUI = true;
+		tryLoadCustomUI();
+	} else {
+		destroyCustomUI();
+		for (const auto& ss: resources.enumerate<SpriteSheet>()) {
+			resources.get<SpriteSheet>(ss)->clearMaterialCache();
+		}
+		for (const auto& ss: project.getGameResources().enumerate<SpriteSheet>()) {
+			project.getGameResources().get<SpriteSheet>(ss)->clearMaterialCache();
+		}
+	}
 
-void ProjectWindow::onUnloadDLL()
-{
-	destroyCustomUI();
-	for (const auto& ss: resources.enumerate<SpriteSheet>()) {
-		resources.get<SpriteSheet>(ss)->clearMaterialCache();
-	}
-	for (const auto& ss: project.getGameResources().enumerate<SpriteSheet>()) {
-		project.getGameResources().get<SpriteSheet>(ss)->clearMaterialCache();
-	}
+	updateDLLStatus(status);
 }
 
 void ProjectWindow::onAssetsLoaded()
@@ -311,6 +315,13 @@ void ProjectWindow::toggleDebugConsole()
 			getRoot()->addChild(debugConsole);
 		}
 		debugConsole->show();
+	}
+}
+
+void ProjectWindow::updateDLLStatus(ProjectDLL::Status status)
+{
+	if (status != ProjectDLL::Status::Unloaded) {
+		addTask(std::make_unique<LoadDLLTask>(status));
 	}
 }
 
