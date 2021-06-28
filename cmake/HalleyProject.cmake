@@ -182,6 +182,9 @@ else()
 endif()
 
 # OpenGL
+if (USE_OPENGL AND HALLEY_NO_OPENGL)
+	set(USE_OPENGL 0)
+endif ()
 if (USE_OPENGL)
 	add_definitions(-DWITH_OPENGL)
 	find_package(OpenGL REQUIRED)
