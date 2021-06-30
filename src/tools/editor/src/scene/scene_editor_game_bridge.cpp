@@ -47,7 +47,7 @@ void SceneEditorGameBridge::update(Time t, SceneEditorInputState inputState, Sce
 	}
 
 	if (interface) {
-		initializeInterfaceIfNeeded();
+		initializeInterfaceIfNeeded(false);
 		if (interfaceReady) {
 			interface->update(t, inputState, outputState);
 		}
@@ -67,9 +67,10 @@ void SceneEditorGameBridge::render(RenderContext& rc) const
 	}
 }
 
-void SceneEditorGameBridge::initializeInterfaceIfNeeded()
+void SceneEditorGameBridge::initializeInterfaceIfNeeded(bool force)
 {	
 	if (!interface) {
+		interfaceInitializationError = false;
 		project.withLoadedDLL([&] (ProjectDLL& dll)
 		{
 			load();
@@ -77,15 +78,19 @@ void SceneEditorGameBridge::initializeInterfaceIfNeeded()
 	}
 
 	if (interface && !interfaceReady) {
-		if (interface->isReadyToCreateWorld()) {
-			guardedRun([&]() {
-				interface->createWorld(factory.getColourScheme());
+		if (force || !interfaceInitializationError) {
+			if (interface->isReadyToCreateWorld()) {
+				const bool success = guardedRun([&]() {
+					interface->createWorld(factory.getColourScheme());
 
-				SceneEditorInputState inputState;
-				SceneEditorOutputState outputState;
-				interface->update(0, inputState, outputState);
-				interfaceReady = true;
-			}, true);
+					SceneEditorInputState inputState;
+					SceneEditorOutputState outputState;
+					interface->update(0, inputState, outputState);
+					interfaceReady = true;
+				}, true);
+
+				interfaceInitializationError = !success;
+			}
 		}
 	}
 }
@@ -322,7 +327,7 @@ void SceneEditorGameBridge::load()
 		if (errorState) {
 			unload();
 		} else {
-			initializeInterfaceIfNeeded();
+			initializeInterfaceIfNeeded(true);
 		}
 	}
 }
@@ -340,19 +345,22 @@ void SceneEditorGameBridge::unload()
 	gizmos->clear();
 }
 
-void SceneEditorGameBridge::guardedRun(const std::function<void()>& f, bool allowFailure) const
+bool SceneEditorGameBridge::guardedRun(const std::function<void()>& f, bool allowFailure) const
 {
 	try {
 		f();
+		return true;
 	} catch (const std::exception& e) {
 		Logger::logException(e);
 		if (!allowFailure) {
 			errorState = true;
 		}
+		return false;
 	} catch (...) {
 		Logger::logError("Unknown error in SceneEditorCanvas, probably from game dll");
 		if (!allowFailure) {
 			errorState = true;
 		}
+		return false;
 	}
 }
