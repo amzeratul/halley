@@ -189,6 +189,10 @@ namespace Halley {
 	bool operator< (const String& lhp, const std::string_view& rhp);
 	bool operator< (const std::string_view& lhp, const String& rhp);
 
+	bool operator< (const std::basic_string_view<char32_t>& lhp, const StringUTF32& rhp);
+	bool operator< (const StringUTF32& lhp, const std::basic_string_view<char32_t>& rhp);
+	bool operator== (const std::basic_string_view<char32_t>& lhp, const StringUTF32& rhp);
+
 	using StringArray = Vector<String>;
 
 	
