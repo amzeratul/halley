@@ -40,9 +40,16 @@ namespace Halley {
 
 	class FileChooserParameters {
 	public:
+		struct FileType {
+			String name;
+			std::vector<String> extensions; // Should not contain a "."
+			bool makeDefault = false;
+		};
+		
 		Path defaultPath;
 		bool save = false;
 		bool folderOnly = false;
+		std::vector<FileType> fileTypes;
 	};
 
 	class OS {

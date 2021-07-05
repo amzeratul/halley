@@ -19,7 +19,7 @@ namespace Halley {
 
 		bool isLoaded() const;
 		ISceneEditor& getInterface() const;
-		void initializeInterfaceIfNeeded();
+		void initializeInterfaceIfNeeded(bool force);
 
 		SceneEditorGizmoCollection& getGizmos() const;
 
@@ -77,10 +77,11 @@ namespace Halley {
 		std::map<Path, Bytes> pendingAssets;
 
 		mutable bool errorState = false;
+		bool interfaceInitializationError = false;
 		bool interfaceReady = false;
 
 		void load();
 
-		void guardedRun(const std::function<void()>& f, bool allowFailure = false) const;
+		bool guardedRun(const std::function<void()>& f, bool allowFailure = false) const;
 	};
 }

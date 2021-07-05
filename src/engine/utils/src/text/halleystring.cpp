@@ -1011,6 +1011,21 @@ bool Halley::operator<(const std::string_view& lhp, const String& rhp)
 	return lhp < std::string_view(rhp);
 }
 
+bool Halley::operator<(const std::basic_string_view<char32_t>& lhp, const StringUTF32& rhp)
+{
+	return lhp < std::basic_string_view<char32_t>(rhp);
+}
+
+bool Halley::operator<(const StringUTF32& lhp, const std::basic_string_view<char32_t>& rhp)
+{
+	return std::basic_string_view<char32_t>(lhp) < rhp;
+}
+
+bool Halley::operator==(const std::basic_string_view<char32_t>& lhp, const StringUTF32& rhp)
+{
+	return lhp == std::basic_string_view<char32_t>(rhp);
+}
+
 String Halley::operator+ (const String& lhp, const String& rhp)
 {
 	return String(lhp.cppStr() + rhp.cppStr());

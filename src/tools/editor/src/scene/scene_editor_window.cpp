@@ -142,7 +142,7 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 		unloadScene();
 	}
 	
-	gameBridge->initializeInterfaceIfNeeded();
+	gameBridge->initializeInterfaceIfNeeded(true);
 	if (gameBridge->isLoaded()) {
 		auto& interface = gameBridge->getInterface();
 		auto& world = interface.getWorld();

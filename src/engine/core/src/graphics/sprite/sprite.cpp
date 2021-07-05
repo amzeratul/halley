@@ -141,23 +141,25 @@ Rect4f Sprite::getLocalAABB() const
 {
 	const Vector2f sz = getScaledSize() * Vector2f(flip ? -1.0f : 1.0f, 1.0f);
 	const Vector2f pivot = getPivot();
-	return Rect4f(-sz * pivot, sz * (Vector2f(1, 1) - pivot));
+	const auto offset = -sz * pivot;
+	return Rect4f(offset, sz + offset);
 }
 
 Rect4f Sprite::getAABB() const
 {
+	// PERFORMANCE CRITICAL CODE
+	
 	const Vector2f sz = getScaledSize() * Vector2f(flip ? -1.0f : 1.0f, 1.0f);
 
-	Expects(!std::isnan(sz.x));
-	Expects(!std::isnan(sz.y));
+	//Expects(!std::isnan(sz.x));
+	//Expects(!std::isnan(sz.y));
 	
 	if (std::abs(getRotation().toRadians()) < 0.0001f) {
 		// No rotation, give exact bounding box
 		const Vector2f pivot = getPivot();
-		auto aabb = getPosition() + Rect4f(-sz * pivot, sz * (Vector2f(1, 1) - pivot));
-		//Ensures(!std::isnan(aabb.getWidth()));
-		//Ensures(!std::isnan(aabb.getHeight()));
-		return aabb;
+		const auto pos = getPosition();
+		const auto offsetPos = pos - (sz * pivot);
+		return Rect4f(offsetPos, offsetPos + sz);
 	} else {
 		// This is a coarse test; will give a few false positives
 		const Vector2f sz2 = sz * std::sqrt(2);
