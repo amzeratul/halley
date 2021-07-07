@@ -57,7 +57,7 @@ namespace Halley {
 		TextInputCapture& operator=(TextInputCapture&& other) noexcept = default;
 		TextInputCapture& operator=(const TextInputCapture& other) = delete;
 
-		bool update() const; // Returns if the capture is still open
+		[[maybe_unused]] bool update() const; // Returns if the capture is still open
 
 	private:
 		std::unique_ptr<ITextInputCapture> capture;
