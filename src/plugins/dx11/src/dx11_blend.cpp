@@ -65,7 +65,7 @@ DX11Blend::DX11Blend(DX11Video& video, BlendType blend)
 		target.BlendOp = D3D11_BLEND_OP_MIN;
 		target.SrcBlend = blend.premultiplied ? D3D11_BLEND_ONE : D3D11_BLEND_SRC_ALPHA;
 		target.DestBlend = D3D11_BLEND_ONE;
-		target.BlendOpAlpha = D3D11_BLEND_OP_MIN;
+		target.BlendOpAlpha = D3D11_BLEND_OP_MAX;
 		target.SrcBlendAlpha = D3D11_BLEND_ONE;
 		target.DestBlendAlpha = D3D11_BLEND_ONE;
 		break;
