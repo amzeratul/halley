@@ -82,6 +82,13 @@ void loadStyleData(UIStyleSheet& styleSheet, const String& name, const ConfigNod
 }
 
 template <>
+void loadStyleData(UIStyleSheet& styleSheet, const String& name, const ConfigNode& node, Vector2f& data)
+{
+	auto& vals = node.asSequence();
+	data = Vector2f(vals[0].asFloat(), vals[1].asFloat());
+}
+
+template <>
 void loadStyleData(UIStyleSheet& styleSheet, const String& name, const ConfigNode& node, Colour4f& data)
 {
 	data = getColour(node, styleSheet.getColourScheme());
@@ -148,6 +155,7 @@ public:
 	mutable std::unordered_map<String, Vector4f> borders;
 	mutable std::unordered_map<String, String> strings;
 	mutable std::unordered_map<String, float> floats;
+	mutable std::unordered_map<String, Vector2f> vector2fs;
 	mutable std::unordered_map<String, Colour4f> colours;
 	mutable std::unordered_map<String, std::shared_ptr<UIStyleDefinition>> subStyles;
 };
@@ -208,6 +216,29 @@ float UIStyleDefinition::getFloat(const String& name) const
 	return getValue(node, styleSheet, styleName, name, pimpl->floats);
 }
 
+float UIStyleDefinition::getFloat(const String& name, float defaultValue) const
+{
+	if (hasValue(node, name, pimpl->floats)) {
+		return getFloat(name);
+	}
+
+	return defaultValue;
+}
+
+Vector2f UIStyleDefinition::getVector2f(const String& name) const
+{
+	return getValue(node, styleSheet, styleName, name, pimpl->vector2fs);
+}
+
+Vector2f UIStyleDefinition::getVector2f(const String& name, Vector2f defaultValue) const
+{
+	if (hasValue(node, name, pimpl->vector2fs)) {
+		return getVector2f(name);
+	}
+
+	return defaultValue;
+}
+
 Colour4f UIStyleDefinition::getColour(const String& name) const
 {
 	return getValue(node, styleSheet, styleName, name, pimpl->colours);
@@ -227,6 +258,8 @@ void UIStyleDefinition::loadDefaults()
 	pimpl->textRenderers[":default"] = TextRenderer();
 	pimpl->floats.clear();
 	pimpl->floats[":default"] = 0.0f;
+	pimpl->vector2fs.clear();
+	pimpl->vector2fs[":default"] = Vector2f();
 	pimpl->borders.clear();
 	pimpl->borders[":default"] = Vector4f();
 	pimpl->strings.clear();
