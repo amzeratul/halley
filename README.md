@@ -45,7 +45,7 @@ Halley is divided in a several sub-projects:
   * **winrt**: System/WinRT, Input/WinRT, Platform/WinRT and AudioOut/XAudio2 implementations
 * **tools**
   * **editor**: Editor UI
-  * **cmd**: Command-line interface to tools
+  * **cmd**: Command-line interface tools
   * **runner**: Provides an entry point for execution and dynamic reloading. Highly experimental.
   * **tools**: Editor tools to generate files and assets
 * **tests**
