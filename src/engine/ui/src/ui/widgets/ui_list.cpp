@@ -638,6 +638,7 @@ UIListItem::UIListItem(const String& id, UIList& parent, UIStyle style, int inde
 	, dragWidget(this)
 {
 	sprite = style.getSprite("normal");
+	setMinSize(style.getVector2f("minSize", Vector2f()));
 }
 
 void UIListItem::onDoubleClicked(Vector2f mousePos)
