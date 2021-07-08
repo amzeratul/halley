@@ -75,12 +75,18 @@ namespace Halley {
 		virtual void updateOptionLabels();
 
 	private:
+		enum class OpenState : uint8_t {
+			Closed,
+			OpenDown,
+			OpenUp
+		};
+		
 		Sprite sprite;
 		UIInputButtons inputButtons;
 		std::shared_ptr<UIWidget> dropdownWindow;
 		std::shared_ptr<UIScrollPane> scrollPane;
 		
-		bool isOpen = false;
+		OpenState openState = OpenState::Closed;
 
 		void open();
 		void close();

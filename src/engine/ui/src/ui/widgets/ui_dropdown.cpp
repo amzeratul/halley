@@ -172,39 +172,46 @@ void UIDropdown::update(Time t, bool moved)
 		updateOptionLabels();
 	}
 
-	if (isOpen) {
+	if (openState != OpenState::Closed) {
 		auto focus = getRoot()->getCurrentFocus();
 		if (!focus || (focus != this && !focus->isDescendentOf(*this))) {
 			close();
 		}
 	}
 
-	bool needUpdate = true;
-	sprite = isEnabled() ? (isOpen ? style.getSprite("open") : (isMouseOver() ? style.getSprite("hover") : style.getSprite("normal"))) : style.getSprite("disabled");
-
-	if (needUpdate) {
-		sprite.setPos(getPosition()).scaleTo(getSize());
-
-		const Vector2f basePos = getPosition() + style.getBorder("labelBorder").xy();
-		Vector2f iconOffset;
-		if (icon.hasMaterial()) {
-			icon.setPosition(basePos);
-			iconOffset = Vector2f(style.getFloat("iconGap") + icon.getScaledSize().x, 0.0f);
+	if (isEnabled()) {
+		if (openState == OpenState::OpenDown) {
+			sprite = style.getSprite("open");
+		} else if (openState == OpenState::OpenUp) {
+			sprite = style.getSprite("open"); // TODO
+		} else {
+			sprite = isMouseOver() ? style.getSprite("hover") : style.getSprite("normal");
 		}
-		label.setAlignment(0.0f).setPosition(basePos + iconOffset);
+	} else {
+		sprite = style.getSprite("disabled");
+	}
 
-		if (dropdownWindow) {
-			dropdownWindow->setPosition(getPosition() + Vector2f(0.0f, getSize().y));
-		}
+	sprite.setPos(getPosition()).scaleTo(getSize());
+
+	const Vector2f basePos = getPosition() + style.getBorder("labelBorder").xy();
+	Vector2f iconOffset;
+	if (icon.hasMaterial()) {
+		icon.setPosition(basePos);
+		iconOffset = Vector2f(style.getFloat("iconGap") + icon.getScaledSize().x, 0.0f);
+	}
+	label.setAlignment(0.0f).setPosition(basePos + iconOffset);
+
+	if (dropdownWindow) {
+		dropdownWindow->setPosition(getPosition() + Vector2f(0.0f, getSize().y));
 	}
 }
 
 void UIDropdown::onClicked(Vector2f mousePos)
 {
-	if (isOpen) {
-		close();
-	} else {
+	if (openState == OpenState::Closed) {
 		open();
+	} else {
+		close();
 	}
 }
 
@@ -214,7 +221,7 @@ void UIDropdown::doSetState(State state)
 
 bool UIDropdown::isFocusLocked() const
 {
-	return isOpen || UIClickable::isFocusLocked();
+	return openState != OpenState::Closed || UIClickable::isFocusLocked();
 }
 
 void UIDropdown::readFromDataBind()
@@ -229,8 +236,8 @@ void UIDropdown::readFromDataBind()
 
 void UIDropdown::open()
 {
-	if (!isOpen) {
-		isOpen = true;
+	if (openState == OpenState::Closed) {
+		openState = OpenState::OpenDown; // TODO
 
 		const float iconGap = style.getFloat("iconGap");
 	
@@ -291,8 +298,8 @@ void UIDropdown::open()
 
 void UIDropdown::close()
 {
-	if (isOpen) {
-		isOpen = false;
+	if (openState != OpenState::Closed) {
+		openState = OpenState::Closed;
 
 		scrollPane->destroy();
 		scrollPane.reset();
