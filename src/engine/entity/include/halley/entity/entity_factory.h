@@ -57,7 +57,9 @@ namespace Halley {
 		void updateEntityChildren(EntityRef entity, const EntityData& data, const std::shared_ptr<EntityFactoryContext>& context);
 		void updateEntityChildrenDelta(EntityRef entity, const EntityDataDelta& delta, const std::shared_ptr<EntityFactoryContext>& context);
 
+		EntityRef tryGetEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup);
 		EntityRef getEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup);
+
 		std::shared_ptr<EntityFactoryContext> makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask);
 		EntityRef instantiateEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup);
 		void preInstantiateEntities(const IEntityData& data, EntityFactoryContext& context, int depth);

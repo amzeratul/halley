@@ -213,7 +213,7 @@ EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent, 
 {
 	const auto mask = makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData);
 	const auto context = makeContext(data, {}, scene, false, mask);
-	const auto entity = getEntity(data.getInstanceUUID(), *context, false);
+	const auto entity = tryGetEntity(data.getInstanceUUID(), *context, false);
 	updateEntityNode(context->getRootEntityData(), entity, parent, context);
 	return entity;
 }
@@ -367,7 +367,7 @@ void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityData
 		}
 	}
 	for (const auto& childData: delta.getChildrenAdded()) {
-		updateEntityNode(childData, getEntity(childData.getInstanceUUID(), *context, false), entity, context);
+		updateEntityNode(childData, tryGetEntity(childData.getInstanceUUID(), *context, false), entity, context);
 	}
 	for (auto& c: toDelete) {
 		world.destroyEntity(c);
@@ -400,7 +400,7 @@ void EntityFactory::preInstantiateEntities(const IEntityData& iData, EntityFacto
 
 EntityRef EntityFactory::instantiateEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup)
 {
-	const auto existing = getEntity(data.getInstanceUUID(), context, allowWorldLookup);
+	const auto existing = tryGetEntity(data.getInstanceUUID(), context, allowWorldLookup);
 	if (existing.isValid()) {
 		return existing;
 	}
@@ -426,7 +426,7 @@ void EntityFactory::collectExistingEntities(EntityRef entity, EntityFactoryConte
 	}
 }
 
-EntityRef EntityFactory::getEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup)
+EntityRef EntityFactory::tryGetEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup)
 {
 	Expects(instanceUUID.isValid());
 	const auto result = context.getEntity(instanceUUID, false);
@@ -443,4 +443,13 @@ EntityRef EntityFactory::getEntity(const UUID& instanceUUID, EntityFactoryContex
 	}
 
 	return EntityRef();
+}
+
+EntityRef EntityFactory::getEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup)
+{
+	auto result = tryGetEntity(instanceUUID, context, allowWorldLookup);
+	if (!result.isValid()) {
+		throw Exception("Unable to find entity with UUID \"" + instanceUUID.toString() + "\"", HalleyExceptions::Entity);
+	}
+	return result;
 }
