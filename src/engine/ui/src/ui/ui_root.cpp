@@ -418,9 +418,9 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos, bool in
 	const auto& cs = getChildren();
 	for (int i = static_cast<int>(cs.size()); --i >= 0; ) {
 		const auto& curRootWidget = cs[i];
-		auto widget = getWidgetUnderMouse(curRootWidget, mousePos, includeDisabled);
-		if (widget) {
-			return widget;
+		const auto result = getWidgetUnderMouse(curRootWidget, mousePos, includeDisabled);
+		if (result.first) {
+			return result.first;
 		} else {
 			if (curRootWidget->isMouseBlocker() && curRootWidget->isActiveInHierarchy()) {
 				return {};
@@ -430,23 +430,28 @@ std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(Vector2f mousePos, bool in
 	return {};
 }
 
-std::shared_ptr<UIWidget> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled) const
+std::pair<std::shared_ptr<UIWidget>, int> UIRoot::getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled, int childLayerAdjustment) const
 {
 	if (!curWidget->isActive() || (!includeDisabled && !curWidget->isEnabled())) {
 		return {};
 	}
 
 	// Depth first
+	const int adjustmentForChildren = childLayerAdjustment + curWidget->getChildLayerAdjustment();
+	std::pair<std::shared_ptr<UIWidget>, int> bestResult;
 	for (auto& c: curWidget->getChildren()) {
-		auto result = getWidgetUnderMouse(c, mousePos, includeDisabled);
-		if (result) {
-			return result;
+		auto result = getWidgetUnderMouse(c, mousePos, includeDisabled, adjustmentForChildren);
+		if (result.first && (!bestResult.first || result.second > bestResult.second)) {
+			bestResult = result;
 		}
+	}
+	if (bestResult.first) {
+		return bestResult;
 	}
 
 	auto rect = curWidget->getMouseRect();
 	if (curWidget->canInteractWithMouse() && rect.contains(mousePos)) {
-		return curWidget;
+		return { curWidget, childLayerAdjustment };
 	} else {
 		return {};
 	}

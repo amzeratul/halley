@@ -62,7 +62,6 @@ namespace Halley {
 		int curOption = 0;
 
 		void draw(UIPainter& painter) const override;
-		void drawChildren(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 
 		void onClicked(Vector2f mousePos) override;

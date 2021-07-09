@@ -102,7 +102,7 @@ namespace Halley {
 		void receiveKeyPress(KeyboardKeyPress key) override;
 
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled = false) const;
-		std::shared_ptr<UIWidget> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled = false) const;
+		std::pair<std::shared_ptr<UIWidget>, int> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled = false, int childLayerAdjustment = 0) const;
 		void updateMouseOver(const std::shared_ptr<UIWidget>& underMouse);
 		void collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<std::shared_ptr<UIWidget>>& output);
 

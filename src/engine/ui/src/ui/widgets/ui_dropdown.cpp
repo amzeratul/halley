@@ -202,7 +202,7 @@ void UIDropdown::update(Time t, bool moved)
 	label.setAlignment(0.0f).setPosition(basePos + iconOffset);
 
 	if (dropdownWindow) {
-		dropdownWindow->setPosition(getPosition() + Vector2f(0.0f, getSize().y));
+		dropdownWindow->setPosition(getPosition() + Vector2f(0.0f, openState == OpenState::OpenDown ? getSize().y : (-dropdownWindow->getSize().y)));
 	}
 }
 
@@ -237,7 +237,13 @@ void UIDropdown::readFromDataBind()
 void UIDropdown::open()
 {
 	if (openState == OpenState::Closed) {
-		openState = OpenState::OpenDown; // TODO
+		const auto standardHeight = style.getFloat("height");
+		const auto rootRect = getRoot()->getRect();
+		const auto distanceFromBottom = rootRect.getBottom() - getRect().getBottom() - 5.0f;
+		const auto distanceFromTop = getRect().getTop() - rootRect.getTop() - 5.0f;
+
+		openState = distanceFromBottom >= standardHeight ? OpenState::OpenDown : OpenState::OpenUp;
+		const auto height = openState == OpenState::OpenDown ? standardHeight : std::min(standardHeight, distanceFromTop);
 
 		const float iconGap = style.getFloat("iconGap");
 	
@@ -257,10 +263,6 @@ void UIDropdown::open()
 		dropdownList->setInputButtons(inputButtons);
 		getRoot()->setFocus(dropdownList);
 
-		const auto standardHeight = style.getFloat("height");
-		const auto distanceFromBottom = getRoot()->getRect().getBottom() - getRect().getBottom() - 5.0f;
-		const auto height = distanceFromBottom < 0 ? standardHeight : std::min(standardHeight, distanceFromBottom);
-
 		scrollPane = std::make_shared<UIScrollPane>(getId() + "_pane", Vector2f(0, height), UISizer(UISizerType::Vertical, 0));
 		scrollPane->add(dropdownList);
 
@@ -272,6 +274,7 @@ void UIDropdown::open()
 		dropdownWindow->add(scrollPane, 1);
 		dropdownWindow->add(scrollBar);
 		dropdownWindow->setMinSize(Vector2f(getSize().x, getSize().y));
+		dropdownWindow->setChildLayerAdjustment(1);
 		addChild(dropdownWindow);
 
 		dropdownList->setHandle(UIEventType::ListAccept, [=] (const UIEvent& event)
@@ -311,10 +314,4 @@ void UIDropdown::close()
 		sendEvent(UIEvent(UIEventType::DropdownClosed, getId(), getSelectedOptionId(), curOption));
 		playSound(style.getString("closeSound"));
 	}
-}
-
-void UIDropdown::drawChildren(UIPainter& painter) const
-{
-	auto p = painter.withAdjustedLayer(1);
-	UIWidget::drawChildren(p);
 }
