@@ -78,7 +78,7 @@ void ProjectWindow::makeUI()
 
 	makeToolbar();
 	makePagedPane();
-	uiBottom->add(std::make_shared<TaskBar>(factory, *tasks, api), 1);
+	uiBottom->add(std::make_shared<TaskBar>(factory, *tasks, api), 1, Vector4f(0, 0, 0, 4));
 
 	setHandle(UIEventType::NavigateTo, [=] (const UIEvent& event)
 	{
@@ -101,7 +101,7 @@ void ProjectWindow::makeToolbar()
 	
 	toolbar = std::make_shared<Toolbar>(factory, *this, project);
 	
-	uiTop->add(toolbar, 1, Vector4f(0, 16, 0, 8));
+	uiTop->add(toolbar, 1, Vector4f(0, 8, 0, 0));
 }
 
 void ProjectWindow::makePagedPane()
@@ -116,14 +116,15 @@ void ProjectWindow::makePagedPane()
 	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader(), *this);
 	auto properties = std::make_shared<GamePropertiesWindow>(factory, project);
 	auto ecs = std::make_shared<ECSWindow>(factory, project);
-	
+
+	const auto margin = Vector4f(8, 8, 8, 4);
 	pagedPane = std::make_shared<UIPagedPane>("pages", numOfStandardTools);
 	pagedPane->setGuardedUpdate(true);
-	pagedPane->getPage(static_cast<int>(EditorTabs::Assets))->add(assetEditorWindow, 1, Vector4f(8, 8, 8, 8));
-	pagedPane->getPage(static_cast<int>(EditorTabs::ECS))->add(ecs, 1, Vector4f(8, 8, 8, 8));
-	pagedPane->getPage(static_cast<int>(EditorTabs::Remotes))->add(consoleWindow, 1, Vector4f(8, 8, 8, 8));
-	pagedPane->getPage(static_cast<int>(EditorTabs::Properties))->add(properties, 1, Vector4f(8, 8, 8, 8));
-	pagedPane->getPage(static_cast<int>(EditorTabs::Settings))->add(settings, 1, Vector4f(8, 8, 8, 8));
+	pagedPane->getPage(static_cast<int>(EditorTabs::Assets))->add(assetEditorWindow, 1, margin);
+	pagedPane->getPage(static_cast<int>(EditorTabs::ECS))->add(ecs, 1, margin);
+	pagedPane->getPage(static_cast<int>(EditorTabs::Remotes))->add(consoleWindow, 1, margin);
+	pagedPane->getPage(static_cast<int>(EditorTabs::Properties))->add(properties, 1, margin);
+	pagedPane->getPage(static_cast<int>(EditorTabs::Settings))->add(settings, 1, margin);
 
 	uiMid->add(pagedPane, 1);
 }

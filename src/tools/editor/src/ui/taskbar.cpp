@@ -5,7 +5,7 @@
 using namespace Halley;
 
 TaskBar::TaskBar(UIFactory& ui, TaskSet& taskSet, const HalleyAPI& api)
-	: UIWidget("taskBar", Vector2f(150.0f, 80.0), {}, Vector4f(160, 8, 10, 8))
+	: UIWidget("taskBar", Vector2f(150.0f, 46.0f), {}, Vector4f(160, 8, 10, 4))
 	, factory(ui)
 	, resources(ui.getResources())
 	, taskSet(taskSet)
@@ -50,15 +50,15 @@ void TaskBar::update(Time time, bool moved)
 	}
 
 	// Setup for tasks
-	const Vector2f anchor = getPosition() + Vector2f(0, 80.0f);
-	const Vector2f baseDrawPos = getPosition() + Vector2f(170.0f, 20.0f);
+	const Vector2f anchor = getPosition() + Vector2f(0, 48.0f);
+	const Vector2f baseDrawPos = getPosition() + Vector2f(170.0f, 4.0f);
 	const Vector2f size = Vector2f(std::min(400.0f, getSize().x / std::max(1.0f, displaySize)), 40);
 	const float totalLen = baseDrawPos.x + (displaySize * size.x) + 10.0f;
 
 	// Draw logo
-	barSolid.setScale(Vector2f(totalLen, 32)).setPos(anchor + Vector2f(0, -56));
-	barFade.setPos(anchor + Vector2f(totalLen, -56));
-	halleyLogo.setPos(anchor + Vector2f(80, -41));
+	barSolid.setScale(Vector2f(totalLen, 32)).setPos(anchor + Vector2f(0, -40));
+	barFade.setPos(anchor + Vector2f(totalLen, -40));
+	halleyLogo.setPos(anchor + Vector2f(80, -25));
 
 	for (const auto& t : tasks) {
 		const Vector2f drawPos = baseDrawPos + Vector2f((size.x + 20) * t->getDisplaySlot(), 0);
@@ -100,13 +100,16 @@ void TaskBar::update(Time time, bool moved)
 			taskDetails->show(*taskDisplayHovered);
 		}
 	}
+
+	setMinSize(Vector2f(150.0f, advance(getMinimumSize().y, tasks.empty() ? 0.0f : 46.0f, static_cast<float>(time) * 200.0f)));
 }
 
 void TaskBar::draw(UIPainter& painter) const
 {
-	painter.draw(barSolid);
-	painter.draw(barFade);
-	painter.draw(halleyLogo);
+	auto clipPainter = painter.withClip(getRect());
+	clipPainter.draw(barSolid);
+	clipPainter.draw(barFade);
+	clipPainter.draw(halleyLogo);
 }
 
 void TaskBar::showTaskDetails(const TaskDisplay& taskDisplay)

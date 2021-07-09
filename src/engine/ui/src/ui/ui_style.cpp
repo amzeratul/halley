@@ -56,6 +56,21 @@ float UIStyle::getFloat(const String& name) const
 	return style->getFloat(name);
 }
 
+float UIStyle::getFloat(const String& name, float defaultValue) const
+{
+	return style->getFloat(name, defaultValue);
+}
+
+Vector2f UIStyle::getVector2f(const String& name) const
+{
+	return style->getVector2f(name);
+}
+
+Vector2f UIStyle::getVector2f(const String& name, Vector2f defaultValue) const
+{	
+	return style->getVector2f(name, defaultValue);
+}
+
 Colour4f UIStyle::getColour(const String& name) const
 {
 	return style->getColour(name);
