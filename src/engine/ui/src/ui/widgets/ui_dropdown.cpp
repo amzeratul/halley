@@ -183,7 +183,7 @@ void UIDropdown::update(Time t, bool moved)
 		if (openState == OpenState::OpenDown) {
 			sprite = style.getSprite("open");
 		} else if (openState == OpenState::OpenUp) {
-			sprite = style.getSprite("open"); // TODO
+			sprite = style.getSprite("openUp");
 		} else {
 			sprite = isMouseOver() ? style.getSprite("hover") : style.getSprite("normal");
 		}
@@ -270,7 +270,7 @@ void UIDropdown::open()
 		scrollBar->setScrollPane(*scrollPane);
 		scrollBar->setAlwaysShow(false);
 
-		dropdownWindow = std::make_shared<UIImage>(style.getSprite("background"), UISizer(UISizerType::Horizontal), style.getBorder("innerBorder"));
+		dropdownWindow = std::make_shared<UIImage>(style.getSprite(openState == OpenState::OpenDown ? "background" : "backgroundUp"), UISizer(UISizerType::Horizontal), style.getBorder("innerBorder"));
 		dropdownWindow->add(scrollPane, 1);
 		dropdownWindow->add(scrollBar);
 		dropdownWindow->setMinSize(Vector2f(getSize().x, getSize().y));

@@ -76,8 +76,10 @@ uiStyle:
     normal: { img: $ui_dropdown_closed, colour: $ui_inputNormal }
     hover: { img: $ui_dropdown_closed, colour: $ui_inputHover }
     open: { img: $ui_dropdown_open, colour: $ui_inputHover }
+    openUp: { img: $ui_dropdown_open_up, colour: $ui_inputHover }
     disabled: { img: $ui_dropdown_closed, colour: $ui_inputDisabled }
     background: { img: $ui_dropdown_window, colour: $ui_inputHover }
+    backgroundUp: { img: $ui_dropdown_window_up, colour: $ui_inputHover }
     innerBorder: [ 2, 2, 2, 2 ]
     labelBorder: [ 6, 2, 0, -4 ]
     label: { font: Ubuntu Regular, size: 15, colour: $ui_text }

@@ -75,7 +75,9 @@ sprites:
   ui_checkbox_checked: { img: halley_ui/ui_checkbox_checked_flat_light.png, material: Halley/Sprite }
   ui_dropdown_closed: { img: halley_ui/ui_dropdown_closed_flat_light.png, material: Halley/Sprite }
   ui_dropdown_open: { img: halley_ui/ui_dropdown_open_flat_light.png, material: Halley/Sprite }
+  ui_dropdown_open_up: { img: halley_ui/ui_dropdown_open_up_flat_light.png, material: Halley/Sprite }
   ui_dropdown_window: { img: halley_ui/ui_dropdown_window_flat_light.png, material: Halley/Sprite }
+  ui_dropdown_window_up: { img: halley_ui/ui_dropdown_window_up_flat_light.png, material: Halley/Sprite }
   ui_list_background: { img: halley_ui/ui_list_item.png, material: Halley/Sprite }
   ui_list_item: { img: halley_ui/ui_list_item_flat.png, material: Halley/Sprite }
   ui_list_item_drag: { img: halley_ui/ui_list_item.png, material: Halley/Sprite }
