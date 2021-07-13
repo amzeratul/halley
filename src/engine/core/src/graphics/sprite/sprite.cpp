@@ -629,24 +629,54 @@ void ConfigNodeSerializer<Sprite>::deserialize(const ConfigNodeSerializationCont
 	}
 
 	if (node.hasKey("image")) {
-		sprite.setImage(*context.resources, node["image"].asString(), node["material"].asString(sprite.hasMaterial() ? sprite.getMaterial().getDefinition().getName() : ""));
+		const auto& imageNode = node["image"];
+		if (imageNode.getType() == ConfigNodeType::Del) {
+			sprite.getMutableMaterial().set("tex0", std::shared_ptr<const Texture>());
+		} else {
+			sprite.setImage(*context.resources, imageNode.asString(), node["material"].asString(sprite.hasMaterial() ? sprite.getMaterial().getDefinition().getName() : ""));
+		}
 	}
 	if (node.hasKey("image1")) {
-		const auto image1 = context.resources->get<SpriteResource>(node["image1"].asString());
-		sprite.setTexRect1(image1->getSprite().coords);
-		sprite.getMutableMaterial().set("tex1", image1->getSpriteSheet()->getTexture());
+		const auto& imageNode = node["image1"];
+		if (imageNode.getType() == ConfigNodeType::Del) {
+			sprite.getMutableMaterial().set("tex1", std::shared_ptr<const Texture>());
+		} else {
+			const auto image1 = context.resources->get<SpriteResource>(imageNode.asString());
+			sprite.setTexRect1(image1->getSprite().coords);
+			sprite.getMutableMaterial().set("tex1", image1->getSpriteSheet()->getTexture());
+		}
 	}
 	if (node.hasKey("pivot")) {
-		sprite.setAbsolutePivot(node["pivot"].asVector2f());
+		const auto& pivotNode = node["pivot"];
+		if (pivotNode.getType() == ConfigNodeType::Del) {
+			sprite.setAbsolutePivot(Vector2f());
+		} else {
+			sprite.setAbsolutePivot(pivotNode.asVector2f());
+		}
 	}
 	if (node.hasKey("flip")) {
-		sprite.setFlip(node["flip"].asBool());
+		const auto& flipNode = node["flip"];
+		if (flipNode.getType() == ConfigNodeType::Del) {
+			sprite.setFlip(false);
+		} else {
+			sprite.setFlip(flipNode.asBool());
+		}
 	}
 	if (node.hasKey("visible")) {
-		sprite.setVisible(node["visible"].asBool());
+		const auto& visibleNode = node["visible"];
+		if (visibleNode.getType() == ConfigNodeType::Del) {
+			sprite.setVisible(true);
+		} else {
+			sprite.setVisible(node["visible"].asBool());
+		}
 	}
 	if (node.hasKey("colour")) {
-		sprite.setColour(Colour4f::fromString(node["colour"].asString()));
+		const auto& colourNode = node["colour"];
+		if (colourNode.getType() == ConfigNodeType::Del) {
+			sprite.setColour(Colour(1, 1, 1));
+		} else {
+			sprite.setColour(Colour4f::fromString(node["colour"].asString()));
+		}
 	}
 }
 
