@@ -217,5 +217,6 @@ namespace Halley
 	public:
 		ConfigNode serialize(const Sprite& sprite, const ConfigNodeSerializationContext& context);
 		Sprite deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node);
+		void deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node, Sprite& target);
 	};
 }

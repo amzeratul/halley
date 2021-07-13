@@ -618,12 +618,18 @@ ConfigNode ConfigNodeSerializer<Sprite>::serialize(const Sprite& sprite, const C
 Sprite ConfigNodeSerializer<Sprite>::deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
 {
 	Sprite sprite;
+	deserialize(context, node, sprite);
+	return sprite;
+}
+
+void ConfigNodeSerializer<Sprite>::deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node, Sprite& sprite)
+{
 	if (node.getType() == ConfigNodeType::Undefined) {
-		return sprite;
+		return;
 	}
 
 	if (node.hasKey("image")) {
-		sprite.setImage(*context.resources, node["image"].asString(), node["material"].asString(""));
+		sprite.setImage(*context.resources, node["image"].asString(), node["material"].asString(sprite.hasMaterial() ? sprite.getMaterial().getDefinition().getName() : ""));
 	}
 	if (node.hasKey("image1")) {
 		const auto image1 = context.resources->get<SpriteResource>(node["image1"].asString());
@@ -633,11 +639,15 @@ Sprite ConfigNodeSerializer<Sprite>::deserialize(const ConfigNodeSerializationCo
 	if (node.hasKey("pivot")) {
 		sprite.setAbsolutePivot(node["pivot"].asVector2f());
 	}
-	sprite.setFlip(node["flip"].asBool(false));
-	sprite.setVisible(node["visible"].asBool(true));
-	sprite.setColour(Colour4f::fromString(node["colour"].asString("#FFFFFF")));
-
-	return sprite;
+	if (node.hasKey("flip")) {
+		sprite.setFlip(node["flip"].asBool());
+	}
+	if (node.hasKey("visible")) {
+		sprite.setVisible(node["visible"].asBool());
+	}
+	if (node.hasKey("colour")) {
+		sprite.setColour(Colour4f::fromString(node["colour"].asString()));
+	}
 }
 
 

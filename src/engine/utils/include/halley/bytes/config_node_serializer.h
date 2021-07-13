@@ -364,6 +364,9 @@ namespace Halley {
 		}
 	};
 
+	template <class, class = void_t<>> struct HasInPlaceDeserializer : std::false_type {};
+	template <class T> struct HasInPlaceDeserializer<T, decltype(std::declval<ConfigNodeSerializer<T>>().deserialize(std::declval<const ConfigNodeSerializationContext&>(), std::declval<const ConfigNode&>(), std::declval<T&>()))> : std::true_type { };
+
 	template <typename T>
 	class ConfigNodeHelper {
 	public:
@@ -377,7 +380,11 @@ namespace Halley {
 			if (node.getType() == ConfigNodeType::Undefined || node.getType() == ConfigNodeType::Del) {
 				dst = defaultValue;
 			} else {
-				dst = ConfigNodeSerializer<T>().deserialize(context, node);
+				if constexpr (HasInPlaceDeserializer<T>::value) {
+					ConfigNodeSerializer<T>().deserialize(context, node, dst);
+				} else {
+					dst = ConfigNodeSerializer<T>().deserialize(context, node);
+				}
 			}
 		}
 	};
