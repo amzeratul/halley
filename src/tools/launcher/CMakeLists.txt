@@ -43,7 +43,7 @@ endif()
 
 include_directories(${FREETYPE_INCLUDE_DIR} "../tools/include")
 
-halleyProjectCodegen(halley-launcher "${launcher_sources}" "${launcher_headers}" "${launcher_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+halleyProjectCodegen(halley-launcher "${launcher_sources}" "${launcher_headers}" "" "${launcher_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 add_dependencies(halley-launcher halley-cmd halley-core halley-net halley-sdl halley-opengl)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	add_dependencies(halley-launcher halley-metal)

@@ -120,8 +120,7 @@ set (editor_headers
 	)
 
 if (MSVC)
-	set (editor_headers
-		${editor_headers}
+	set (editor_resources
 		"res/halley-editor.rc"
 		"res/resource.h"
 		"res/halley.ico"
@@ -140,7 +139,7 @@ endif()
 
 include_directories(${FREETYPE_INCLUDE_DIR} "../tools/include")
 
-halleyProjectCodegen(halley-editor "${editor_sources}" "${editor_headers}" "${editor_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/../../../bin)
+halleyProjectCodegen(halley-editor "${editor_sources}" "${editor_headers}" "${editor_resources}" "${editor_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/../../../bin)
 add_dependencies(halley-editor halley-cmd halley-core halley-net halley-sdl halley-opengl)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 	add_dependencies(halley-editor halley-metal)

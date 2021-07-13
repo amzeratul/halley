@@ -400,7 +400,7 @@ set(HALLEY_PROJECT_LIB_DIRS
 
 
 
-function(halleyProject name sources headers genDefinitions targetDir)
+function(halleyProject name sources headers proj_resources genDefinitions targetDir)
 	set(EMBED ${HALLEY_PROJECT_EMBED})
 	set(HALLEY_PROJECT_EMBED 0)
 
@@ -422,15 +422,16 @@ function(halleyProject name sources headers genDefinitions targetDir)
 
 	assign_source_group(${proj_sources})
 	assign_source_group(${proj_headers})
+	assign_source_group(${proj_resources})
 
 	include_directories("." "gen/cpp" ${HALLEY_PROJECT_INCLUDE_DIRS})
 	link_directories(${HALLEY_PROJECT_LIB_DIRS})
 
 	if (ANDROID_NDK)
-		add_library(${name} SHARED ${proj_sources} ${proj_headers})
+		add_library(${name} SHARED ${proj_sources} ${proj_headers} ${proj_resources})
 		add_definitions(-DHALLEY_SHARED_LIBRARY)
 	elseif (HALLEY_MONOLITHIC)
-		add_executable(${name} WIN32 ${proj_sources} ${proj_headers})
+		add_executable(${name} WIN32 ${proj_sources} ${proj_headers} ${proj_resources})
 		target_compile_definitions(${name} PUBLIC HALLEY_EXECUTABLE)
 	else()
 		add_library(${name}-game STATIC ${proj_sources} ${proj_headers})
@@ -439,7 +440,7 @@ function(halleyProject name sources headers genDefinitions targetDir)
 		if (BUILD_MACOSX_BUNDLE)
 			add_executable(${name} MACOSX_BUNDLE ${HALLEY_PATH}/src/entry/halley_exe_entry.cpp)
 		else()
-			add_executable(${name} WIN32 ${HALLEY_PATH}/src/entry/halley_exe_entry.cpp)
+			add_executable(${name} WIN32 ${HALLEY_PATH}/src/entry/halley_exe_entry.cpp ${proj_resources})
 		endif()
 		#set_target_properties(${name}-exe PROPERTIES OUTPUT_NAME ${name})
 
@@ -535,9 +536,9 @@ function(halleyProject name sources headers genDefinitions targetDir)
 	endif ()
 endfunction(halleyProject)
 
-function(halleyProjectCodegen name sources headers genDefinitions targetDir)
+function(halleyProjectCodegen name sources headers project_resources genDefinitions targetDir)
 	add_custom_target(${name}-codegen ALL ${HALLEY_PATH}/bin/halley-cmd import ${targetDir}/.. ${HALLEY_PATH} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} DEPENDS ${genDefinitions})
-	halleyProject(${name} "${sources}" "${headers}" "${genDefinitions}" "${targetDir}")
+	halleyProject(${name} "${sources}" "${headers}" "${project_resources}" "${genDefinitions}" "${targetDir}")
 	add_dependencies(${name} ${PROJECT_NAME}-codegen)
 
 	if (TARGET halley-cmd)
