@@ -84,7 +84,7 @@ void ProjectWindow::makeUI()
 	{
 		auto uri = event.getStringData();
 		if (uri.startsWith("asset:")) {
-			auto splitURI = uri.split(':');
+			auto splitURI = uri.split(':', 3);
 			if (splitURI.size() == 3) {
 				openAsset(fromString<AssetType>(splitURI.at(1)), splitURI.at(2));
 			}

@@ -28,6 +28,11 @@
 #include <gsl/gsl_assert>
 #include <iomanip>
 #include <cstdint>
+#include <limits>
+
+#ifdef max
+#undef max
+#endif
 
 namespace Halley {
 
@@ -146,8 +151,8 @@ namespace Halley {
 		inline std::string& cppStr() { return str; }
 		inline const std::string& cppStr() const { return str; }
 
-		Vector<String> split(char delimiter) const;
-		Vector<String> split(String delimiter) const;
+		Vector<String> split(char delimiter, size_t limit = std::numeric_limits<size_t>::max()) const;
+		Vector<String> split(String delimiter, size_t limit = std::numeric_limits<size_t>::max()) const;
 		static String concatList(const Vector<String>& list, String separator);
 
 		//////////

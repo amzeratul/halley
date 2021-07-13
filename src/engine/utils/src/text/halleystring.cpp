@@ -878,13 +878,13 @@ Halley::String Halley::String::prettySize(long long bytes)
 	return Halley::toString(double(bytes) / double(div), prec) + suffixes[steps];
 }
 
-Vector<String> Halley::String::split(char delimiter) const
+Vector<String> Halley::String::split(char delimiter, size_t limit) const
 {
 	Vector<String> result;
 	
 	size_t startPos = 0;
 	while (true) {
-		size_t endPos = find(delimiter, startPos);
+		size_t endPos = result.size() + 1 != limit ? find(delimiter, startPos) : npos;
 		if (endPos == npos) {
 			// No more delimiters
 			result.push_back(substr(startPos));
@@ -899,7 +899,7 @@ Vector<String> Halley::String::split(char delimiter) const
 	return result;
 }
 
-Vector<String> String::split(String delimiter) const
+Vector<String> String::split(String delimiter, size_t limit) const
 {
 	Vector<String> result;
 	
@@ -907,7 +907,7 @@ Vector<String> String::split(String delimiter) const
 	size_t startPos = 0;
 	const char* cStr = delimiter.c_str();
 	while (true) {
-		size_t endPos = find(cStr, startPos);
+		size_t endPos = result.size() + 1 != limit ? find(cStr, startPos) : npos;
 		if (endPos == npos) {
 			// No more delimiters
 			result.push_back(substr(startPos));
