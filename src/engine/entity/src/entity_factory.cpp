@@ -265,7 +265,9 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 	} else {
 		const auto& data = iData.asEntityData();
 		entity.setName(data.getName());
-		entity.setPrefab(context->getPrefab(), data.getPrefabUUID());	
+		if (data.getPrefabUUID().isValid()) {
+			entity.setPrefab(context->getPrefab(), data.getPrefabUUID());
+		}
 		updateEntityComponents(entity, data, *context);
 		updateEntityChildren(entity, data, context);
 	}
@@ -406,7 +408,9 @@ EntityRef EntityFactory::instantiateEntity(const EntityData& data, EntityFactory
 	}
 	
 	auto entity = world.createEntity(data.getInstanceUUID(), data.getName(), std::optional<EntityRef>(), context.getWorldPartition());
-	entity.setPrefab(context.getPrefab(), data.getPrefabUUID());
+	if (data.getPrefabUUID().isValid()) {
+		entity.setPrefab(context.getPrefab(), data.getPrefabUUID());
+	}
 	context.addEntity(entity);
 
 	return entity;
