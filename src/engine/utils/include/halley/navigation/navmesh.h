@@ -20,6 +20,15 @@ namespace Halley {
 		NavmeshBounds(Vector2f origin, Vector2f side0, Vector2f side1, size_t side0Divisions, size_t side1Divisions, Vector2f scaleFactor);
 	};
 
+	struct NavmeshSubworldThreshold {
+		Vector2f left;
+		Vector2f right;
+		Vector2f normal;
+
+		bool operator==(const NavmeshSubworldThreshold& other) const;
+		bool operator!=(const NavmeshSubworldThreshold& other) const;
+	};
+
 	class Navmesh {
 	public:
 		constexpr static size_t MaxConnections = 8;

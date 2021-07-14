@@ -157,6 +157,16 @@ NavmeshBounds::NavmeshBounds(Vector2f origin, Vector2f side0, Vector2f side1, si
 	, base(side0, side1)
 {}
 
+bool NavmeshSubworldThreshold::operator==(const NavmeshSubworldThreshold& other) const
+{
+	return left == other.left && right == other.right && normal == other.normal;
+}
+
+bool NavmeshSubworldThreshold::operator!=(const NavmeshSubworldThreshold& other) const
+{
+	return left != other.left || right != other.right || normal != other.normal;
+}
+
 Navmesh::Node::Node(const ConfigNode& node)
 {
 	pos = Vector2f(node["pos"].asVector2i());

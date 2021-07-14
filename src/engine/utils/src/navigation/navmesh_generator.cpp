@@ -2,10 +2,11 @@
 #include "halley/navigation/navmesh_set.h"
 using namespace Halley;
 
-NavmeshSet NavmeshGenerator::generate(const NavmeshBounds& bounds, gsl::span<const Polygon> rawObstacles, gsl::span<const Polygon> regions, int subWorld, float agentSize)
+NavmeshSet NavmeshGenerator::generate(const Params& params)
 {
-	auto obstacles = preProcessObstacles(rawObstacles, agentSize);
+	auto obstacles = preProcessObstacles(params.obstacles, params.agentSize);
 
+	const auto& bounds = params.bounds;
 	const auto u = bounds.side0 / bounds.side0Divisions;
 	const auto v = bounds.side1 / bounds.side1Divisions;
 	const float maxSize = (u - v).length() * 0.6f;
@@ -39,12 +40,12 @@ NavmeshSet NavmeshGenerator::generate(const NavmeshBounds& bounds, gsl::span<con
 
 	generateConnectivity(polygons);
 	postProcessPolygons(polygons, maxSize);
-	applyRegions(polygons, regions);
+	applyRegions(polygons, params.regions);
 	const int nRegions = assignRegions(polygons);
 
 	NavmeshSet result;
 	for (int region = 0; region < nRegions; ++region) {
-		result.add(makeNavmesh(polygons, bounds, region, subWorld));
+		result.add(makeNavmesh(polygons, bounds, region, params.subWorld));
 	}
 	return result;
 }

@@ -6,7 +6,15 @@
 namespace Halley {
 	class NavmeshGenerator {
 	public:
-		static NavmeshSet generate(const NavmeshBounds& bounds, gsl::span<const Polygon> obstacles, gsl::span<const Polygon> regions, int subWorld, float agentSize);
+		struct Params {
+			NavmeshBounds bounds;
+			gsl::span<const Polygon> obstacles;
+			gsl::span<const Polygon> regions;
+			int subWorld = 0;
+			float agentSize = 1.0f;
+		};
+		
+		static NavmeshSet generate(const Params& params);
 
 	private:
 		class NavmeshNode {
