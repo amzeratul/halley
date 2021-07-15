@@ -263,7 +263,7 @@ std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const Navme
 	const size_t aSize = vsA.size();
 	const size_t bSize = vsB.size();
 
-	if (aSize + bSize + 2 > maxPolygonSides) {
+	if (aSize + bSize - 2 > maxPolygonSides) {
 		return {};
 	}
 
@@ -435,6 +435,10 @@ int NavmeshGenerator::assignRegions(gsl::span<NavmeshNode> nodes)
 
 void NavmeshGenerator::floodFillRegion(gsl::span<NavmeshNode> nodes, NavmeshNode& firstNode, int regionGroup, int region)
 {
+	for (auto& node: nodes) {
+		node.tagged = false;
+	}
+	
 	std::list<NavmeshNode*> pending;
 	pending.push_back(&firstNode);
 	firstNode.tagged = true;
