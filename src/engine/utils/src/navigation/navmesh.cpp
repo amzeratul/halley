@@ -167,6 +167,11 @@ bool NavmeshSubworldPortal::operator!=(const NavmeshSubworldPortal& other) const
 	return segment != other.segment || normal != other.normal || subworldDelta != other.subworldDelta;
 }
 
+bool NavmeshSubworldPortal::isBeyondPortal(Vector2f p) const
+{
+	return (p - segment.a).dot(normal) > 0;
+}
+
 Navmesh::Node::Node(const ConfigNode& node)
 {
 	pos = Vector2f(node["pos"].asVector2i());

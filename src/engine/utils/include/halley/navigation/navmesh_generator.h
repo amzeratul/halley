@@ -18,6 +18,12 @@ namespace Halley {
 		static NavmeshSet generate(const Params& params);
 
 	private:
+		enum class NavmeshNodePortalSide {
+			Unknown,
+			Before,
+			Beyond
+		};
+		
 		class NavmeshNode {
 		public:
 			Polygon polygon;
@@ -27,8 +33,13 @@ namespace Halley {
 			int remap = 0;
 			bool alive = true;
 			bool tagged = false;
+			NavmeshNodePortalSide beyondPortal = NavmeshNodePortalSide::Unknown;
 
 			NavmeshNode() = default;
+			NavmeshNode(Polygon p)
+				: polygon(std::move(p))
+				, connections(polygon.getNumSides(), -1)
+			{}
 			NavmeshNode(Polygon polygon, std::vector<int> connections)
 				: polygon(std::move(polygon))
 				, connections(std::move(connections))
@@ -52,6 +63,7 @@ namespace Halley {
 		static void limitPolygonSides(std::vector<Polygon>& polygons, size_t maxSides);
 
 		static void splitByPortals(std::vector<NavmeshNode>& nodes, gsl::span<const NavmeshSubworldPortal> portals);
+		static void removeNodesBeyondPortals(std::vector<NavmeshNode>& nodes);
 
 		static void applyRegions(gsl::span<NavmeshNode> nodes, gsl::span<const Polygon> regions);
 		static int assignRegions(gsl::span<NavmeshNode> nodes);

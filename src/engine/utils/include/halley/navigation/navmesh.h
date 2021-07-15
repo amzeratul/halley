@@ -27,6 +27,7 @@ namespace Halley {
 
 		bool operator==(const NavmeshSubworldPortal& other) const;
 		bool operator!=(const NavmeshSubworldPortal& other) const;
+		bool isBeyondPortal(Vector2f p) const;
 	};
 
 	class Navmesh {

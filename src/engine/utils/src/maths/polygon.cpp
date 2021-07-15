@@ -529,6 +529,16 @@ Polygon::SATClassification Polygon::classify(const LineSegment& line) const
 	
 	bool contains = true;
 
+	// Check against the line axis
+	{
+		const auto lineAxis = (line.b - line.a).orthoLeft().unit();
+		const auto myRange = project(lineAxis);
+		const auto otherRange = line.project(lineAxis);
+		if (!myRange.overlaps(otherRange)) {
+			return SATClassification::Separate;
+		}
+	}
+
 	// For each edge
 	const auto n = vertices.size();
 	for (size_t i = 0; i < n; i++) {

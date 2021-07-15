@@ -41,6 +41,7 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 
 	splitByPortals(polygons, params.subworldPortals);
 	generateConnectivity(polygons);
+	removeNodesBeyondPortals(polygons);
 	postProcessPolygons(polygons, maxSize);
 	applyRegions(polygons, params.regions);
 	const int nRegions = assignRegions(polygons);
@@ -154,8 +155,7 @@ std::vector<NavmeshGenerator::NavmeshNode> NavmeshGenerator::toNavmeshNode(std::
 	std::vector<NavmeshNode> result;
 	result.reserve(polygons.size());
 	for (auto& p: polygons) {
-		const size_t n = p.getNumSides();
-		result.push_back(NavmeshNode(std::move(p), std::vector<int>(n, -1)));
+		result.push_back(NavmeshNode(std::move(p)));
 	}
 	return result;
 }
@@ -238,9 +238,7 @@ void NavmeshGenerator::removeDeadPolygons(std::vector<NavmeshNode>& polygons)
 {
 	int newIdx = 0;
 	for (int i = 0; i < static_cast<int>(polygons.size()); ++i) {
-		if (polygons[i].alive) {
-			polygons[i].remap = newIdx++;
-		}
+		polygons[i].remap = polygons[i].alive? newIdx++ : -1;
 	}
 	for (auto& poly: polygons) {
 		if (poly.alive) {
@@ -358,20 +356,51 @@ void NavmeshGenerator::splitByPortals(std::vector<NavmeshNode>& nodes, gsl::span
 		for (auto& portal: portals) {
 			auto result = node.polygon.classify(portal.segment);
 			if (result != Polygon::SATClassification::Separate) {
-				Logger::logDev("Found polygon to split by portal at idx " + toString(idx) + "!");
-
 				auto polys = node.polygon.splitConvexByLine(Line(portal.segment.a, (portal.segment.b - portal.segment.a).normalized()));
-				node.polygon = std::move(polys[0]);
-				node.connections.clear();
-				node.connections.resize(node.polygon.getNumSides(), -1);
 
-				for (size_t j = 1; j < polys.size(); ++j) {
-					const auto nSides = polys[j].getNumSides();
-					nodes.push_back(NavmeshNode(std::move(polys[j]), std::vector<int>(nSides, -1)));
+				for (size_t i = 0; i < polys.size(); ++i) {
+					auto& curNode = i == 0 ? node : nodes.emplace_back();
+					curNode.polygon = std::move(polys[i]);
+					curNode.connections.clear();
+					curNode.connections.resize(curNode.polygon.getNumSides(), -1);
+					curNode.beyondPortal = portal.isBeyondPortal(curNode.polygon.getCentre()) ? NavmeshNodePortalSide::Beyond : NavmeshNodePortalSide::Before;
 				}
 			}
 		}
 	}
+}
+
+void NavmeshGenerator::removeNodesBeyondPortals(std::vector<NavmeshNode>& nodes)
+{
+	std::list<NavmeshNode*> toProcess;
+	for (auto& node: nodes) {
+		if (node.beyondPortal == NavmeshNodePortalSide::Beyond) {
+			toProcess.push_back(&node);
+			node.tagged = true;
+		} else {
+			node.tagged = false;
+		}
+	}
+	
+	while (!toProcess.empty()) {
+		auto& node = *toProcess.front();
+		toProcess.pop_front();
+		
+		node.alive = false;
+		node.beyondPortal = NavmeshNodePortalSide::Beyond;
+
+		for (const auto c: node.connections) {
+			if (c >= 0) {
+				auto& otherNode = nodes[c];
+				if (!otherNode.tagged && otherNode.beyondPortal == NavmeshNodePortalSide::Unknown) {
+					toProcess.push_back(&otherNode);
+					otherNode.tagged = true;
+				}
+			}
+		}
+	}
+	
+	removeDeadPolygons(nodes);
 }
 
 void NavmeshGenerator::applyRegions(gsl::span<NavmeshNode> nodes, gsl::span<const Polygon> regions)
