@@ -68,7 +68,9 @@ namespace Halley {
 
 		bool collide(const Polygon &param, Vector2f *translation= nullptr, Vector2f *collisionPoint= nullptr) const;
 		Vector2f getClosestPoint(Vector2f p, float anisotropy = 1.0f) const; // All Y coordinates are multiplied by anisotropy
+
 		SATClassification classify(const Polygon& other) const;
+		SATClassification classify(const LineSegment& line) const;
 
 		void setVertices(VertexList vertices);
 		const VertexList& getVertices() const { return vertices; }
@@ -93,7 +95,7 @@ namespace Halley {
 		std::optional<std::vector<Polygon>> subtract(const Polygon& other) const;
 		void simplify(float epsilon = 0.0001f);
 		std::vector<Polygon> splitConvexIntoMaxSides(size_t maxSides) const;
-		
+		std::vector<Polygon> splitConvexByLine(const Line& line) const;
 
 		const Rect4f& getAABB() const { return aabb; }
 		const Circle& getBoundingCircle() const { return circle; }

@@ -157,14 +157,14 @@ NavmeshBounds::NavmeshBounds(Vector2f origin, Vector2f side0, Vector2f side1, si
 	, base(side0, side1)
 {}
 
-bool NavmeshSubworldThreshold::operator==(const NavmeshSubworldThreshold& other) const
+bool NavmeshSubworldPortal::operator==(const NavmeshSubworldPortal& other) const
 {
-	return left == other.left && right == other.right && normal == other.normal;
+	return segment == other.segment && normal == other.normal && subworldDelta == other.subworldDelta;
 }
 
-bool NavmeshSubworldThreshold::operator!=(const NavmeshSubworldThreshold& other) const
+bool NavmeshSubworldPortal::operator!=(const NavmeshSubworldPortal& other) const
 {
-	return left != other.left || right != other.right || normal != other.normal;
+	return segment != other.segment || normal != other.normal || subworldDelta != other.subworldDelta;
 }
 
 Navmesh::Node::Node(const ConfigNode& node)

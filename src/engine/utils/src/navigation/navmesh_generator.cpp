@@ -1,5 +1,6 @@
 #include "halley/navigation/navmesh_generator.h"
 #include "halley/navigation/navmesh_set.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 NavmeshSet NavmeshGenerator::generate(const Params& params)
@@ -38,6 +39,7 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 		}
 	}
 
+	splitByPortals(polygons, params.subworldPortals);
 	generateConnectivity(polygons);
 	postProcessPolygons(polygons, maxSize);
 	applyRegions(polygons, params.regions);
@@ -342,6 +344,31 @@ void NavmeshGenerator::limitPolygonSides(std::vector<Polygon>& polygons, size_t 
 			polygons[i] = std::move(result[0]);
 			for (size_t j = 1; j < result.size(); ++j) {
 				polygons.push_back(std::move(result[j]));
+			}
+		}
+	}
+}
+
+void NavmeshGenerator::splitByPortals(std::vector<NavmeshNode>& nodes, gsl::span<const NavmeshSubworldPortal> portals)
+{
+	const auto nNodes = nodes.size();
+	for (size_t idx = 0; idx < nNodes; ++idx) {
+		auto& node = nodes[idx];
+		
+		for (auto& portal: portals) {
+			auto result = node.polygon.classify(portal.segment);
+			if (result != Polygon::SATClassification::Separate) {
+				Logger::logDev("Found polygon to split by portal at idx " + toString(idx) + "!");
+
+				auto polys = node.polygon.splitConvexByLine(Line(portal.segment.a, (portal.segment.b - portal.segment.a).normalized()));
+				node.polygon = std::move(polys[0]);
+				node.connections.clear();
+				node.connections.resize(node.polygon.getNumSides(), -1);
+
+				for (size_t j = 1; j < polys.size(); ++j) {
+					const auto nSides = polys[j].getNumSides();
+					nodes.push_back(NavmeshNode(std::move(polys[j]), std::vector<int>(nSides, -1)));
+				}
 			}
 		}
 	}

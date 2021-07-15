@@ -20,13 +20,13 @@ namespace Halley {
 		NavmeshBounds(Vector2f origin, Vector2f side0, Vector2f side1, size_t side0Divisions, size_t side1Divisions, Vector2f scaleFactor);
 	};
 
-	struct NavmeshSubworldThreshold {
-		Vector2f left;
-		Vector2f right;
+	struct NavmeshSubworldPortal {
+		LineSegment segment;
 		Vector2f normal;
+		int subworldDelta = 0;
 
-		bool operator==(const NavmeshSubworldThreshold& other) const;
-		bool operator!=(const NavmeshSubworldThreshold& other) const;
+		bool operator==(const NavmeshSubworldPortal& other) const;
+		bool operator!=(const NavmeshSubworldPortal& other) const;
 	};
 
 	class Navmesh {

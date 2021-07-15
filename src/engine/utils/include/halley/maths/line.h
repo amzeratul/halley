@@ -24,6 +24,8 @@
 #include "vector2.h"
 #include <optional>
 
+#include "range.h"
+
 namespace Halley {
 	class Line {
 	public:
@@ -106,6 +108,24 @@ namespace Halley {
 			return a + t * b;
 		}
 
+		std::optional<Vector2f> intersection(const Line& other) const
+		{
+			const float len = (this->b - this->a).length();
+			const auto a = this->a;
+			const auto b = (this->b - this->a) / len;
+			const auto c = other.origin;
+			const auto d = other.dir;
+			const float divisor = b.x * d.y - b.y * d.x;
+			if (std::abs(divisor) < 0.000001f) {
+				// Parallel lines
+				return {};
+			}
+			const float t = (d.x * (a.y - c.y) + d.y * (c.x - a.x)) / divisor;
+			const float u = -(b.x * (c.y - a.y) + b.y * (a.x - c.x)) / divisor;
+			
+			return a + t * b;
+		}
+
 		bool sharesVertexWith(const LineSegment& other) const
 		{
 			const float epsilon = 0.000001f;
@@ -131,6 +151,24 @@ namespace Halley {
 		{
 			return (a.epsilonEquals(other.a, epsilon) && b.epsilonEquals(other.b, epsilon))
 				|| (a.epsilonEquals(other.b, epsilon) && b.epsilonEquals(other.a, epsilon));
+		}
+
+		Range<float> project(const Vector2f& axis) const
+		{
+			const float dotA = axis.dot(a);
+			const float dotB = axis.dot(b);
+
+			return Range<float>(dotA, dotB);
+		}
+
+		bool operator==(const LineSegment& other) const
+		{
+			return a == other.a && b == other.b;
+		}
+
+		bool operator!=(const LineSegment& other) const
+		{
+			return a != other.a || b != other.b;
 		}
 	};
 }

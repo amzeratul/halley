@@ -10,10 +10,11 @@ namespace Halley {
 			NavmeshBounds bounds;
 			gsl::span<const Polygon> obstacles;
 			gsl::span<const Polygon> regions;
+			gsl::span<const NavmeshSubworldPortal> subworldPortals;
 			int subWorld = 0;
 			float agentSize = 1.0f;
 		};
-		
+
 		static NavmeshSet generate(const Params& params);
 
 	private:
@@ -49,6 +50,8 @@ namespace Halley {
 		static void remapConnections(NavmeshNode& poly, int from, int to);
 
 		static void limitPolygonSides(std::vector<Polygon>& polygons, size_t maxSides);
+
+		static void splitByPortals(std::vector<NavmeshNode>& nodes, gsl::span<const NavmeshSubworldPortal> portals);
 
 		static void applyRegions(gsl::span<NavmeshNode> nodes, gsl::span<const Polygon> regions);
 		static int assignRegions(gsl::span<NavmeshNode> nodes);

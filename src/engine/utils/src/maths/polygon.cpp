@@ -138,6 +138,52 @@ std::vector<Polygon> Polygon::splitConvexIntoMaxSides(size_t maxSides) const
 	return result;
 }
 
+std::vector<Polygon> Polygon::splitConvexByLine(const Line& line) const
+{
+	if (!isValid()) {
+		return {};
+	}
+	
+	const auto normal = line.dir.orthoLeft();
+	const auto origin = line.origin;
+
+	auto classify = [&] (Vector2f p) -> bool
+	{
+		return (p - origin).dot(normal) > 0;
+	};
+
+	std::array<VertexList, 2> vs;
+	int cur = 0;
+
+	auto lastPoint = vertices[vertices.size() - 1];
+	bool lastSign = classify(lastPoint);
+	
+	for (size_t i = 0; i < vertices.size(); ++i) {
+		const auto point = vertices[i];
+		const bool sign = classify(point);
+		if (sign != lastSign) {
+			// Traversed line, insert point and swap polygon
+			const auto seg = LineSegment(lastPoint, point);
+			const auto p = seg.intersection(line).value_or(point);
+			vs[cur].push_back(p);
+			cur = 1 - cur;
+			vs[cur].push_back(p);
+			lastSign = sign;
+		}
+		vs[cur].push_back(point);
+		lastPoint = point;
+	}
+
+	std::vector<Polygon> result;
+	if (!vs[0].empty()) {
+		result.push_back(vs[0]);
+	}
+	if (!vs[1].empty()) {
+		result.push_back(vs[1]);
+	}
+	return result;
+}
+
 void Polygon::doSplitConvexIntoMaxSides(size_t maxSides, std::vector<Polygon>& output) const
 {
 	if (!isValid()) {
@@ -464,6 +510,48 @@ Polygon::SATClassification Polygon::classify(const Polygon& other) const
 	} else if (isContainedBy) {
 		// This is contained entirely by the other
 		return SATClassification::IsContainedBy;
+	}
+	
+	// They overlap without fully containing each other
+	return SATClassification::Overlap;
+}
+
+Polygon::SATClassification Polygon::classify(const LineSegment& line) const
+{
+	Expects(convex);
+
+	// If bounding circles don't overlap, then the polygons definitely don't overlap
+	const auto otherCircle = Circle(0.5f * (line.a + line.b), 0.5f * (line.a - line.b).length());
+	const float maxDist = circle.getRadius() + otherCircle.getRadius();
+	if ((circle.getCentre() - otherCircle.getCentre()).squaredLength() >= maxDist * maxDist) {
+		return SATClassification::Separate;
+	}
+	
+	bool contains = true;
+
+	// For each edge
+	const auto n = vertices.size();
+	for (size_t i = 0; i < n; i++) {
+		// Find the orthonormal axis
+		const Vector2f axis = (vertices[(i + 1) % n] - vertices[i]).orthoLeft().unit();
+
+		// Project both shapes there
+		const auto myRange = project(axis);
+		const auto otherRange = line.project(axis);
+
+		if (myRange.overlaps(otherRange)) {
+			if (!myRange.contains(otherRange)) {
+				contains = false;
+			}
+		} else {
+			// This axis separates them
+			return SATClassification::Separate;
+		}
+	}
+
+	if (contains) {
+		// This contains the segment entirely
+		return SATClassification::Contains;
 	}
 	
 	// They overlap without fully containing each other
