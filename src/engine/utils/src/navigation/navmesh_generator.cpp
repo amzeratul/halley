@@ -1,6 +1,7 @@
 #include "halley/navigation/navmesh_generator.h"
 #include "halley/navigation/navmesh_set.h"
 #include "halley/support/logger.h"
+#include "halley/utils/algorithm.h"
 using namespace Halley;
 
 NavmeshSet NavmeshGenerator::generate(const Params& params)
@@ -25,7 +26,7 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 
 			auto cellPolygons = toNavmeshNode(generateByPolygonSubtraction(gsl::span<const Polygon>(&cell, 1), obstacles, cell.getBoundingCircle()));
 			generateConnectivity(cellPolygons);
-			postProcessPolygons(cellPolygons, maxSize);
+			postProcessPolygons(cellPolygons, maxSize, false);
 
 			const int startIdx = static_cast<int>(polygons.size());
 			for (auto& p: cellPolygons) {
@@ -42,7 +43,8 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 	splitByPortals(polygons, params.subworldPortals);
 	generateConnectivity(polygons);
 	removeNodesBeyondPortals(polygons);
-	postProcessPolygons(polygons, maxSize);
+	postProcessPolygons(polygons, maxSize, true);
+	simplifyPolygons(polygons);
 	applyRegions(polygons, params.regions);
 	const int nRegions = assignRegions(polygons);
 
@@ -189,7 +191,7 @@ void NavmeshGenerator::generateConnectivity(gsl::span<NavmeshNode> polygons)
 	}
 }
 
-void NavmeshGenerator::postProcessPolygons(std::vector<NavmeshNode>& polygons, float maxSize)
+void NavmeshGenerator::postProcessPolygons(std::vector<NavmeshNode>& polygons, float maxSize, bool allowSimplification)
 {
 	// Go through each polygon and see if any of its neighbours can be merged with it.
 	// If it can be merged, repeat the loop on the same polygon, otherwise move on
@@ -207,9 +209,9 @@ void NavmeshGenerator::postProcessPolygons(std::vector<NavmeshNode>& polygons, f
 			if (bIdx > aIdx) {
 				auto& polyB = polygons[bIdx];
 				auto bEdgeIter = std::find_if(polyB.connections.begin(), polyB.connections.end(), [&] (int c) { return c == aIdx; });
-
-				assert(bIdx == polyA.connections[j]);
-				auto mergedPolygon = merge(polyA, polyB, j, bEdgeIter - polyB.connections.begin(), aIdx, bIdx, maxSize);
+				assert(bEdgeIter != polyB.connections.end());
+				
+				auto mergedPolygon = merge(polyA, polyB, j, bEdgeIter - polyB.connections.begin(), aIdx, bIdx, maxSize, allowSimplification);
 				if (mergedPolygon) {
 					for (auto& c: polyB.connections) {
 						if (c != -1 && c != aIdx) {
@@ -252,9 +254,11 @@ void NavmeshGenerator::removeDeadPolygons(std::vector<NavmeshNode>& polygons)
 	polygons.erase(std::remove_if(polygons.begin(), polygons.end(), [&] (const NavmeshNode& p) { return !p.alive; }), polygons.end());
 }
 
-std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const NavmeshNode& a, const NavmeshNode& b, size_t aEdgeIdx, size_t bEdgeIdx, size_t aIdx, size_t bIdx, float maxSize)
+std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const NavmeshNode& a, const NavmeshNode& b, size_t aEdgeIdx, size_t bEdgeIdx, size_t aIdx, size_t bIdx, float maxSize, bool allowSimplification)
 {
 	Expects(a.polygon.isClockwise() == b.polygon.isClockwise());
+	Expects(a.polygon.isValid());
+	Expects(b.polygon.isValid());
 	
 	std::vector<Vector2f> vsA = a.polygon.getVertices();
 	std::vector<Vector2f> vsB = b.polygon.getVertices();
@@ -291,22 +295,37 @@ std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const Navme
 	connA.pop_back();
 	connB.pop_back();
 	connA.insert(connA.end(), connB.begin(), connB.end());
+	
+	auto result = NavmeshNode(std::move(prePoly), std::move(connA));
+	if (allowSimplification) {
+		simplifyPolygon(result);
+	}
+	return result;
+}
 
-	// Base result
-	auto result = NavmeshNode(std::move(prePoly), connA); // Don't move connA
-
-	// Simplify
-	size_t n = vsA.size();
+void NavmeshGenerator::simplifyPolygon(NavmeshNode& node)
+{
+	Expects(node.polygon.isValid());
+	Expects(node.polygon.isConvex());
+	
+	const bool origClockwise = node.polygon.isClockwise();
+	auto vs = node.polygon.getVertices();
+	auto& conn = node.connections;
+	
+	size_t n = vs.size();
+	
 	bool simplified = false;
 	for (size_t i = 0; n > 3 && i < n; ++i) {
-		if (connA[(i + n - 1) % n] == -1 && connA[i] == -1) {
-			Vector2f cur = vsA[i];
-			Vector2f prev = vsA[(i + n - 1) % n];
-			Vector2f next = vsA[(i + 1) % n];
-			const float maxDist = (prev - next).length() * 0.01f;
+		const size_t prevI = (i + n - 1) % n;
+		const size_t nextI = (i + 1) % n;
+		if (conn[prevI] == -1 && conn[i] == -1) {
+			Vector2f cur = vs[i];
+			Vector2f prev = vs[prevI];
+			Vector2f next = vs[nextI];
+			const float maxDist = (prev - next).length() * 0.1f;
 			if (LineSegment(prev, next).contains(cur, maxDist)) {
-				vsA.erase(vsA.begin() + i);
-				connA.erase(connA.begin() + i);
+				vs.erase(vs.begin() + i);
+				conn.erase(conn.begin() + i);
 				--n;
 				--i;
 				simplified = true;
@@ -315,13 +334,19 @@ std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const Navme
 	}
 
 	if (simplified) {
-		auto simplifiedPoly = Polygon(vsA);
-		if (simplifiedPoly.isConvex() && simplifiedPoly.isClockwise() == a.polygon.isClockwise()) {
-			return NavmeshNode(std::move(simplifiedPoly), std::move(connA));
-		}
+		node.polygon.setVertices(std::move(vs));
+		
+		Ensures(node.polygon.isValid());
+		Ensures(node.polygon.isConvex());
+		Ensures(node.polygon.isClockwise() == origClockwise);
 	}
-	
-	return result;
+}
+
+void NavmeshGenerator::simplifyPolygons(std::vector<NavmeshNode>& nodes)
+{
+	for (auto& node: nodes) {
+		simplifyPolygon(node);
+	}
 }
 
 void NavmeshGenerator::remapConnections(NavmeshNode& poly, int from, int to)
@@ -356,8 +381,22 @@ void NavmeshGenerator::splitByPortals(std::vector<NavmeshNode>& nodes, gsl::span
 		for (auto& portal: portals) {
 			auto result = node.polygon.classify(portal.segment);
 			if (result != Polygon::SATClassification::Separate) {
+				Logger::logInfo("Splitting " + toString(idx));
 				auto polys = node.polygon.splitConvexByLine(Line(portal.segment.a, (portal.segment.b - portal.segment.a).normalized()));
 
+				// Reset connections to existing nodes
+				for (const auto c: node.connections) {
+					if (c >= 0) {
+						for (auto& otherC: nodes[c].connections) {
+							if (otherC == static_cast<int>(idx)) {
+								Logger::logInfo("Disconnecting node");
+								otherC = -1;
+							}
+						}
+					}
+				}
+
+				// Create new nodes
 				for (size_t i = 0; i < polys.size(); ++i) {
 					auto& curNode = i == 0 ? node : nodes.emplace_back();
 					curNode.polygon = std::move(polys[i]);
