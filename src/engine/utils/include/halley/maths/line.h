@@ -170,5 +170,15 @@ namespace Halley {
 		{
 			return a != other.a || b != other.b;
 		}
+
+		Vector2f getCentre() const
+		{
+			return (a + b) * 0.5f;
+		}
+
+		Vector2f getDirection() const
+		{
+			return (b - a).unit();
+		}
 	};
 }

@@ -50,7 +50,7 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 
 	NavmeshSet result;
 	for (int region = 0; region < nRegions; ++region) {
-		result.add(makeNavmesh(polygons, bounds, region, params.subWorld));
+		result.add(makeNavmesh(polygons, bounds, params.subworldPortals, region, params.subWorld));
 	}
 	return result;
 }
@@ -501,7 +501,7 @@ void NavmeshGenerator::floodFillRegion(gsl::span<NavmeshNode> nodes, NavmeshNode
 	}
 }
 
-std::optional<size_t> NavmeshGenerator::getNavmeshEdge(NavmeshNode& node, size_t side, gsl::span<const Line> mapEdges)
+std::optional<size_t> NavmeshGenerator::getNavmeshEdge(NavmeshNode& node, size_t side, gsl::span<const Line> mapEdges, gsl::span<const NavmeshSubworldPortal> subworldPortals)
 {
 	const auto edge = node.polygon.getEdge(side);
 
@@ -511,18 +511,27 @@ std::optional<size_t> NavmeshGenerator::getNavmeshEdge(NavmeshNode& node, size_t
 			return i;
 		}
 	}
+
+	auto normal = edge.getDirection();
+	for (auto& portal: subworldPortals) {
+		if (portal.segment.contains(edge.getCentre(), 2.0f) && std::abs(portal.segment.getDirection().dot(normal)) > 0.95f) {
+			return portal.subworldDelta == 1 ? 4 : 5;
+		}
+	}
 	
 	return {};
 }
 
-Navmesh NavmeshGenerator::makeNavmesh(gsl::span<NavmeshNode> nodes, const NavmeshBounds& bounds, int region, int subWorld)
+Navmesh NavmeshGenerator::makeNavmesh(gsl::span<NavmeshNode> nodes, const NavmeshBounds& bounds, gsl::span<const NavmeshSubworldPortal> subworldPortals, int region, int subWorld)
 {
 	std::vector<Navmesh::PolygonData> output;
 
 	// Special connection values:
 	// -1: no connection
 	// -2, -3, -4, -5: connections to the four edges of this chunk
-	// -6 onwards: connections to other regions in this chunk
+	// -6: next subworld
+	// -7: prev subworld
+	// -8 onwards: connections to other regions in this chunk
 
 	// Establish remapping
 	int i = 0;
@@ -531,7 +540,7 @@ Navmesh NavmeshGenerator::makeNavmesh(gsl::span<NavmeshNode> nodes, const Navmes
 		if (node.region == region) {
 			node.remap = i++;
 		} else {
-			node.remap = -(6 + node.region);
+			node.remap = -(8 + node.region);
 		}
 	}
 	output.reserve(i);
@@ -558,7 +567,7 @@ Navmesh NavmeshGenerator::makeNavmesh(gsl::span<NavmeshNode> nodes, const Navmes
 				if (c >= 0) {
 					c = nodes[c].remap;
 				} else {
-					auto edge = getNavmeshEdge(node, i, edges);
+					auto edge = getNavmeshEdge(node, i, edges, subworldPortals);
 					if (edge) {
 						c = -(2 + static_cast<int>(edge.value()));
 					}
