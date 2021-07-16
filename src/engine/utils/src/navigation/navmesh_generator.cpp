@@ -267,7 +267,9 @@ std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const Navme
 	const size_t aSize = vsA.size();
 	const size_t bSize = vsB.size();
 
-	if (aSize + bSize - 2 > maxPolygonSides) {
+	// Two sides will always be removed in a merge
+	// Up to two additional sides might also be removed after simplification
+	if (aSize + bSize > maxPolygonSides + 4) {
 		return {};
 	}
 
@@ -280,8 +282,8 @@ std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const Navme
 
 	// Make polygon
 	auto prePoly = Polygon(vsA); // Don't move vsA
-	if (!prePoly.isConvex()) {
-		return {};
+	if (!prePoly.isValid() || !prePoly.isConvex()) {
+		//return {};
 	}
 	if (prePoly.getBoundingCircle().getRadius() > maxSize) {
 		return {};
@@ -298,17 +300,18 @@ std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const Navme
 	
 	auto result = NavmeshNode(std::move(prePoly), std::move(connA));
 	if (allowSimplification) {
-		simplifyPolygon(result);
+		simplifyPolygon(result, 0.1f);
 	}
-	return result;
+
+	if (result.polygon.getNumSides() <= maxPolygonSides && result.polygon.isValid() && result.polygon.isConvex()) {
+		return std::optional<NavmeshNode>(std::move(result));
+	} else {
+		return {};
+	}
 }
 
-void NavmeshGenerator::simplifyPolygon(NavmeshNode& node)
+void NavmeshGenerator::simplifyPolygon(NavmeshNode& node, float threshold)
 {
-	Expects(node.polygon.isValid());
-	Expects(node.polygon.isConvex());
-	
-	const bool origClockwise = node.polygon.isClockwise();
 	auto vs = node.polygon.getVertices();
 	auto& conn = node.connections;
 	
@@ -322,7 +325,7 @@ void NavmeshGenerator::simplifyPolygon(NavmeshNode& node)
 			Vector2f cur = vs[i];
 			Vector2f prev = vs[prevI];
 			Vector2f next = vs[nextI];
-			const float maxDist = (prev - next).length() * 0.1f;
+			const float maxDist = (prev - next).length() * threshold;
 			if (LineSegment(prev, next).contains(cur, maxDist)) {
 				vs.erase(vs.begin() + i);
 				conn.erase(conn.begin() + i);
@@ -335,17 +338,13 @@ void NavmeshGenerator::simplifyPolygon(NavmeshNode& node)
 
 	if (simplified) {
 		node.polygon.setVertices(std::move(vs));
-		
-		Ensures(node.polygon.isValid());
-		Ensures(node.polygon.isConvex());
-		Ensures(node.polygon.isClockwise() == origClockwise);
 	}
 }
 
 void NavmeshGenerator::simplifyPolygons(std::vector<NavmeshNode>& nodes)
 {
 	for (auto& node: nodes) {
-		simplifyPolygon(node);
+		simplifyPolygon(node, 0.1f);
 	}
 }
 
@@ -398,6 +397,9 @@ void NavmeshGenerator::splitByPortals(std::vector<NavmeshNode>& nodes, gsl::span
 
 				// Create new nodes
 				for (size_t i = 0; i < polys.size(); ++i) {
+					assert(polys[i].isValid());
+					assert(polys[i].isConvex());
+					
 					auto& curNode = i == 0 ? node : nodes.emplace_back();
 					curNode.polygon = std::move(polys[i]);
 					curNode.connections.clear();

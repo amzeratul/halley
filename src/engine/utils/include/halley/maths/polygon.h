@@ -126,7 +126,7 @@ namespace Halley {
 		bool convex = false;
 		bool clockwise = false;
 		bool valid = false;
-		float area;
+		float area = 0;
 
 		bool isPointInsideConvex(Vector2f point) const;
 		bool isPointInsideConcave(Vector2f point) const;

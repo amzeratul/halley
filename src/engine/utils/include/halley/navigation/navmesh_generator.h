@@ -60,7 +60,7 @@ namespace Halley {
 		static std::optional<NavmeshNode> merge(const NavmeshNode& a, const NavmeshNode& b, size_t aEdgeIdx, size_t bEdgeIdx, size_t aIdx, size_t bIdx, float maxSize, bool allowSimplification);
 		static void remapConnections(NavmeshNode& poly, int from, int to);
 
-		static void simplifyPolygon(NavmeshNode& node);
+		static void simplifyPolygon(NavmeshNode& node, float threshold);
 		static void simplifyPolygons(std::vector<NavmeshNode>& nodes);
 
 		static void limitPolygonSides(std::vector<Polygon>& polygons, size_t maxSides);
