@@ -155,7 +155,7 @@ void NavmeshSet::reportUnlinkedPortals(std::function<String(Vector2i)> getChunkN
 		}
 		for (const auto& portal: navmesh.getPortals()) {
 			if (!portal.connected) {
-				if (portal.local) {
+				if (portal.regionLink) {
 					Logger::logWarning("Local Portal at " + portal.pos + " on subWorld " + toString(navmesh.getSubWorld()) + " is unlinked.");
 				} else {
 					const auto& base = navmesh.getNormalisedCoordinatesBase();
@@ -178,29 +178,32 @@ void NavmeshSet::tryLinkNavMeshes(uint16_t idxA, uint16_t idxB)
 	auto& a = navmeshes[idxA];
 	auto& b = navmeshes[idxB];
 
-	if (a.getSubWorld() != b.getSubWorld()) {
-		// TODO: Different subworlds
-		return;
-	}
-
 	const int gridDistance = (a.getWorldGridPos() - b.getWorldGridPos()).manhattanLength();
 	if (gridDistance > 1) {
 		// Too far
 		return;
 	}
+	
+	const bool differentSubWorlds = a.getSubWorld() != b.getSubWorld();
 	const bool localLink = gridDistance == 0;
+	if (differentSubWorlds && !localLink) {
+		return;
+	}
+
+	const bool subWorldLink = std::abs(a.getSubWorld() - b.getSubWorld()) == 1;
+	const bool regionLink = localLink && !subWorldLink;
 
 	const auto& edgesA = a.getPortals();
 	const auto& edgesB = b.getPortals();
 	for (size_t edgeAIdx = 0; edgeAIdx < edgesA.size(); ++edgeAIdx) {
 		const auto& edgeA = edgesA[edgeAIdx];
-		if (edgeA.connected || edgeA.local != localLink) {
+		if (edgeA.connected || edgeA.regionLink != regionLink || edgeA.subWorldLink != subWorldLink) {
 			continue;
 		}
 		
 		for (size_t edgeBIdx = 0; edgeBIdx < edgesB.size(); ++edgeBIdx) {
 			const auto& edgeB = edgesB[edgeBIdx];
-			if (edgeB.connected || edgeB.local != localLink) {
+			if (edgeB.connected || edgeB.regionLink != regionLink || edgeB.subWorldLink != subWorldLink) {
 				continue;
 			}
 			

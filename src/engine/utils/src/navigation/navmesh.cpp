@@ -708,27 +708,35 @@ void Navmesh::Portal::postProcess(gsl::span<const Polygon> polygons, std::vector
 
 bool Navmesh::Portal::canJoinWith(const Portal& other) const
 {
-	if (vertices.size() != other.vertices.size() || vertices.empty()) {
-		return false;
-	}
-
-	// TODO: can use edge ids to validate this connection, if the algorithm ever makes connections it shouldn't
-
-	constexpr float epsilon = 0.001f;
-	const size_t n = vertices.size();
-	for (size_t i = 0; i < n; ++i) {
-		if (!vertices[i].epsilonEquals(other.vertices[n - i - 1], epsilon)) {
+	if (subWorldLink && other.subWorldLink) {
+		// Subworld links are trickier because the edges might not align exactly
+		// TODO
+		return true;
+	} else {
+		if (vertices.size() != other.vertices.size() || vertices.empty()) {
 			return false;
 		}
+
+		// TODO: can use edge ids to validate this connection, if the algorithm ever makes connections it shouldn't
+
+		constexpr float epsilon = 0.001f;
+		const size_t n = vertices.size();
+		for (size_t i = 0; i < n; ++i) {
+			if (!vertices[i].epsilonEquals(other.vertices[n - i - 1], epsilon)) {
+				return false;
+			}
+		}
+		return true;
 	}
-	return true;
 }
 
 void Navmesh::Portal::updateLocal()
 {
-	// 0, 1, 2, 3 = map edges
-	// 4+ = other regions
-	local = id >= 4;
+	// 0, 1, 2, 3 = map edges\
+	// 4-5 = subworld
+	// 6+ = other regions
+	subWorldLink = id >= 4 && id <= 5;
+	regionLink = id >= 6;
 }
 
 void Navmesh::Portal::translate(Vector2f offset)

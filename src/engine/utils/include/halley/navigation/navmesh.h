@@ -67,7 +67,8 @@ namespace Halley {
 			std::vector<NodeAndConn> connections;
 			std::vector<Vector2f> vertices;
 			bool connected = false;
-			bool local = false;
+			bool regionLink = false;
+			bool subWorldLink = false;
 
 			Portal(int id);
 			explicit Portal(const ConfigNode& node);
