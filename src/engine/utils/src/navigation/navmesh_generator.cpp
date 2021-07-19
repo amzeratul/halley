@@ -396,6 +396,7 @@ void NavmeshGenerator::splitByPortals(std::vector<NavmeshNode>& nodes, gsl::span
 		for (auto& portal: portals) {
 			auto result = node.polygon.classify(portal.segment);
 			if (result != Polygon::SATClassification::Separate) {
+				
 				auto polys = node.polygon.splitConvexByLine(Line(portal.segment.a, (portal.segment.b - portal.segment.a).normalized()));
 
 				// Reset connections to existing nodes

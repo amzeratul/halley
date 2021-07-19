@@ -132,7 +132,7 @@ namespace Halley {
 				// Out of edges
 				return {};
 			}
-			return a + clamp(t, 0.0f, 1.0f) * b;
+			return a + clamp(t, 0.0f, len) * b;
 		}
 		
 		std::optional<float> intersectionParametric(const Line& other, const float epsilon = 0) const
@@ -153,7 +153,7 @@ namespace Halley {
 				// Out of edges
 				return {};
 			}
-			return clamp(t, 0.0f, 1.0f);
+			return clamp(t, 0.0f, len);
 		}
 
 		bool sharesVertexWith(const LineSegment& other) const
