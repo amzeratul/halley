@@ -737,20 +737,21 @@ bool Navmesh::Portal::canJoinWith(const Portal& other, float epsilon) const
 		const auto n0 = (a1 - a0).normalized();
 		const auto n1 = (b1 - b0).normalized();
 		const auto n2 = (b1 - a0).normalized();
-		if (std::abs(n0.dot(n1) < 0.99f)) {
+		if (std::abs(n0.dot(n1)) < 0.99f) {
 			// Not pointing the same direction
 			return false;
 		}
 
-		if (std::abs(n0.dot(n2) < 0.99f)) {
+		if (std::abs(n0.dot(n2)) < 0.99f) {
 			// Not on the same line
 			return false;
 		}
 
-		auto p0 = LineSegment(a0, a1).project(n0.orthoRight());
-		auto p1 = LineSegment(b0, b1).project(n0.orthoRight());
+		const auto p0 = LineSegment(a0, a1).project(n0);
+		const auto p1 = LineSegment(b0, b1).project(n0);
 		if (!p0.overlaps(p1)) {
 			// Not overlapping
+			return false;
 		}
 		
 		return true;
