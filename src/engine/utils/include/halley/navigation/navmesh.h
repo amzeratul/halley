@@ -18,6 +18,7 @@ namespace Halley {
 		Base2D base;
 
 		NavmeshBounds(Vector2f origin, Vector2f side0, Vector2f side1, size_t side0Divisions, size_t side1Divisions, Vector2f scaleFactor);
+		std::array<Line, 4> makeEdges() const;
 	};
 
 	struct NavmeshSubworldPortal {
@@ -76,7 +77,7 @@ namespace Halley {
 			ConfigNode toConfigNode() const;
 			void postProcess(gsl::span<const Polygon> polygons, std::vector<Portal>& dst);
 			
-			bool canJoinWith(const Portal& other) const;
+			bool canJoinWith(const Portal& other, float epsilon) const;
 			void updateLocal();
 			void translate(Vector2f offset);
 		};

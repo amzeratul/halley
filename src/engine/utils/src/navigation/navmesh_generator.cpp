@@ -32,7 +32,7 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 			for (auto& p: cellPolygons) {
 				polygons.emplace_back(std::move(p));
 				for (auto& c: polygons.back().connections) {
-					if (c != -1) {
+					if (c >= 0) {
 						c += startIdx;
 					}
 				}
@@ -42,6 +42,7 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 
 	splitByPortals(polygons, params.subworldPortals);
 	generateConnectivity(polygons);
+	tagEdgeConnections(polygons, params.bounds.makeEdges());
 	removeNodesBeyondPortals(polygons);
 	postProcessPolygons(polygons, maxSize, true);
 	simplifyPolygons(polygons);
@@ -168,18 +169,15 @@ void NavmeshGenerator::generateConnectivity(gsl::span<NavmeshNode> polygons)
 		NavmeshNode& a = polygons[polyAIdx];
 
 		for (size_t edgeAIdx = 0; edgeAIdx < a.connections.size(); ++edgeAIdx) {
-			if (a.connections[edgeAIdx] == -1) {
-				auto edgeA = a.polygon.getEdge(edgeAIdx);
+			if (a.connections[edgeAIdx] < 0) {
+				const auto edgeA = a.polygon.getEdge(edgeAIdx);
 				
 				for (size_t polyBIdx = polyAIdx + 1; polyBIdx < polygons.size(); ++polyBIdx) {
 					NavmeshNode& b = polygons[polyBIdx];
 
-					auto edgeBIdx = b.polygon.findEdge(edgeA, 0.0001f);
+					const auto edgeBIdx = b.polygon.findEdge(edgeA, 0.0001f);
 					if (edgeBIdx) {
-						//auto edgeB = b.polygon.getEdge(edgeBIdx.value());
-						//assert(b.connections[edgeBIdx.value()] == -1);
-
-						if (b.connections[edgeBIdx.value()] == -1) {
+						if (b.connections[edgeBIdx.value()] < 0) {
 							// Establish connection
 							a.connections[edgeAIdx] = static_cast<int>(polyBIdx);
 							b.connections[edgeBIdx.value()] = static_cast<int>(polyAIdx);
@@ -214,7 +212,7 @@ void NavmeshGenerator::postProcessPolygons(std::vector<NavmeshNode>& polygons, f
 				auto mergedPolygon = merge(polyA, polyB, j, bEdgeIter - polyB.connections.begin(), aIdx, bIdx, maxSize, allowSimplification);
 				if (mergedPolygon) {
 					for (auto& c: polyB.connections) {
-						if (c != -1 && c != aIdx) {
+						if (c >= 0 && c != aIdx) {
 							remapConnections(polygons[c], bIdx, aIdx);
 						}
 					}
@@ -252,6 +250,24 @@ void NavmeshGenerator::removeDeadPolygons(std::vector<NavmeshNode>& polygons)
 		}
 	}
 	polygons.erase(std::remove_if(polygons.begin(), polygons.end(), [&] (const NavmeshNode& p) { return !p.alive; }), polygons.end());
+}
+
+void NavmeshGenerator::tagEdgeConnections(gsl::span<NavmeshNode> nodes, gsl::span<const Line> mapEdges)
+{
+	constexpr float epsilon = 0.1f;
+	for (auto& node: nodes) {
+		for (size_t i = 0; i < node.connections.size(); ++i) {
+			auto& c = node.connections[i];
+			if (c == -1) {
+				const auto& e = node.polygon.getEdge(i);
+				for (const auto& edge: mapEdges) {
+					if (edge.contains(e.a, epsilon) && edge.contains(e.b, epsilon)) {
+						c = -2;
+					}
+				}
+			}
+		}
+	}
 }
 
 std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const NavmeshNode& a, const NavmeshNode& b, size_t aEdgeIdx, size_t bEdgeIdx, size_t aIdx, size_t bIdx, float maxSize, bool allowSimplification)
@@ -380,7 +396,6 @@ void NavmeshGenerator::splitByPortals(std::vector<NavmeshNode>& nodes, gsl::span
 		for (auto& portal: portals) {
 			auto result = node.polygon.classify(portal.segment);
 			if (result != Polygon::SATClassification::Separate) {
-				Logger::logInfo("Splitting " + toString(idx));
 				auto polys = node.polygon.splitConvexByLine(Line(portal.segment.a, (portal.segment.b - portal.segment.a).normalized()));
 
 				// Reset connections to existing nodes
@@ -388,7 +403,6 @@ void NavmeshGenerator::splitByPortals(std::vector<NavmeshNode>& nodes, gsl::span
 					if (c >= 0) {
 						for (auto& otherC: nodes[c].connections) {
 							if (otherC == static_cast<int>(idx)) {
-								Logger::logInfo("Disconnecting node");
 								otherC = -1;
 							}
 						}
@@ -490,7 +504,7 @@ void NavmeshGenerator::floodFillRegion(gsl::span<NavmeshNode> nodes, NavmeshNode
 		cur->region = region;
 		
 		for (auto& c: cur->connections) {
-			if (c != -1) {
+			if (c >= 0) {
 				auto* neighbour = &nodes[c];
 				if (!neighbour->tagged && neighbour->regionGroup == regionGroup) {
 					neighbour->tagged = true;
@@ -545,17 +559,7 @@ Navmesh NavmeshGenerator::makeNavmesh(gsl::span<NavmeshNode> nodes, const Navmes
 	}
 	output.reserve(i);
 
-	// Make edges
-	const auto u = bounds.side0.normalized();
-	const auto v = bounds.side1.normalized();
-	const auto p0 = bounds.origin;
-	const auto p1 = bounds.origin + bounds.side0 + bounds.side1;
-	const std::array<Line, 4> edges = {
-		Line(p0, u),
-		Line(p0, v),
-		Line(p1, u),
-		Line(p1, v)
-	};
+	const auto edges = bounds.makeEdges();
 
 	// Generate
 	for (auto& node: nodes) {

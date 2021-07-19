@@ -175,6 +175,7 @@ void NavmeshSet::reportUnlinkedPortals(std::function<String(Vector2i)> getChunkN
 
 void NavmeshSet::tryLinkNavMeshes(uint16_t idxA, uint16_t idxB)
 {
+	constexpr float epsilon = 5.0f;
 	auto& a = navmeshes[idxA];
 	auto& b = navmeshes[idxB];
 
@@ -183,9 +184,9 @@ void NavmeshSet::tryLinkNavMeshes(uint16_t idxA, uint16_t idxB)
 		// Too far
 		return;
 	}
+	const bool localLink = gridDistance == 0;
 	
 	const bool differentSubWorlds = a.getSubWorld() != b.getSubWorld();
-	const bool localLink = gridDistance == 0;
 	if (differentSubWorlds && !localLink) {
 		return;
 	}
@@ -207,7 +208,7 @@ void NavmeshSet::tryLinkNavMeshes(uint16_t idxA, uint16_t idxB)
 				continue;
 			}
 			
-			if (edgeA.canJoinWith(edgeB)) {
+			if (edgeA.canJoinWith(edgeB, epsilon)) {
 				// Join edges
 				a.markPortalConnected(edgeAIdx);
 				b.markPortalConnected(edgeBIdx);

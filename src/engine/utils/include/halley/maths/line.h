@@ -63,6 +63,12 @@ namespace Halley {
 			return a + t * b;
 		}
 
+		bool contains(const Vector2f& point, float epsilon = 0.01f) const
+		{
+			// TODO: this could probably be much faster
+			return (getClosestPoint(point) - point).length() < epsilon;
+		}
+
 		static std::vector<Vector2i> generateLine(Vector2i p0, Vector2i p1);
 		static void doLine(Vector2i p0, Vector2i p1, std::function<void(Vector2i)> callback);
 	};

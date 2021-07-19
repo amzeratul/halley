@@ -157,6 +157,20 @@ NavmeshBounds::NavmeshBounds(Vector2f origin, Vector2f side0, Vector2f side1, si
 	, base(side0, side1)
 {}
 
+std::array<Line, 4> NavmeshBounds::makeEdges() const
+{
+	const auto u = side0.normalized();
+	const auto v = side1.normalized();
+	const auto p0 = origin;
+	const auto p1 = origin + side0 + side1;
+	return {
+		Line(p0, u),
+		Line(p0, v),
+		Line(p1, u),
+		Line(p1, v)
+	};
+}
+
 bool NavmeshSubworldPortal::operator==(const NavmeshSubworldPortal& other) const
 {
 	return segment == other.segment && normal == other.normal && subworldDelta == other.subworldDelta;
@@ -706,20 +720,60 @@ void Navmesh::Portal::postProcess(gsl::span<const Polygon> polygons, std::vector
 	}
 }
 
-bool Navmesh::Portal::canJoinWith(const Portal& other) const
+bool Navmesh::Portal::canJoinWith(const Portal& other, float epsilon) const
 {
+	const auto a0 = vertices.front();
+	const auto a1 = vertices.back();
+	const auto b0 = other.vertices.front();
+	const auto b1 = other.vertices.back();
+
 	if (subWorldLink && other.subWorldLink) {
 		// Subworld links are trickier because the edges might not align exactly
-		// TODO
-		return true;
-	} else {
-		if (vertices.size() != other.vertices.size() || vertices.empty()) {
+		// Instead verify:
+		// a) they're collinear
+		// b) they overlap on their longitudinal axis
+		// c) they're close to each other on their transversal axis
+
+		const auto n0 = (a1 - a0).normalized();
+		const auto n1 = (b1 - b0).normalized();
+		const auto n2 = (b1 - a0).normalized();
+		if (std::abs(n0.dot(n1) < 0.99f)) {
+			// Not pointing the same direction
 			return false;
 		}
 
-		// TODO: can use edge ids to validate this connection, if the algorithm ever makes connections it shouldn't
+		if (std::abs(n0.dot(n2) < 0.99f)) {
+			// Not on the same line
+			return false;
+		}
 
-		constexpr float epsilon = 0.001f;
+		auto p0 = LineSegment(a0, a1).project(n0.orthoRight());
+		auto p1 = LineSegment(b0, b1).project(n0.orthoRight());
+		if (!p0.overlaps(p1)) {
+			// Not overlapping
+		}
+		
+		return true;
+	} else {
+		// TODO: can use edge ids to validate this connection, if the algorithm ever makes connections it shouldn't
+		if (vertices.empty()) {
+			return false;
+		}
+		
+		// Link between different scenes, 0 must pair with 2 and 1 with 3.
+		if (!regionLink && std::abs(id - other.id) != 2) {
+			return false;
+		}
+		
+		return (a0.epsilonEquals(b1, epsilon) && a1.epsilonEquals(b0, epsilon))
+			|| (a0.epsilonEquals(b0, epsilon) && a1.epsilonEquals(b1, epsilon));
+
+		/*
+		if (vertices.size() != other.vertices.size()) {
+			return false;
+		}
+
+
 		const size_t n = vertices.size();
 		for (size_t i = 0; i < n; ++i) {
 			if (!vertices[i].epsilonEquals(other.vertices[n - i - 1], epsilon)) {
@@ -727,12 +781,13 @@ bool Navmesh::Portal::canJoinWith(const Portal& other) const
 			}
 		}
 		return true;
+		*/
 	}
 }
 
 void Navmesh::Portal::updateLocal()
 {
-	// 0, 1, 2, 3 = map edges\
+	// 0, 1, 2, 3 = map edges
 	// 4-5 = subworld
 	// 6+ = other regions
 	subWorldLink = id >= 4 && id <= 5;

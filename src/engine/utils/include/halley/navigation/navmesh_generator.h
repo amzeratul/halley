@@ -56,6 +56,7 @@ namespace Halley {
 		static void generateConnectivity(gsl::span<NavmeshNode> polygons);
 		static void postProcessPolygons(std::vector<NavmeshNode>& polygons, float maxSize, bool allowSimplification);
 		static void removeDeadPolygons(std::vector<NavmeshNode>& polygons);
+		static void tagEdgeConnections(gsl::span<NavmeshNode> nodes, gsl::span<const Line> mapEdges);
 
 		static std::optional<NavmeshNode> merge(const NavmeshNode& a, const NavmeshNode& b, size_t aEdgeIdx, size_t bEdgeIdx, size_t aIdx, size_t bIdx, float maxSize, bool allowSimplification);
 		static void remapConnections(NavmeshNode& poly, int from, int to);
