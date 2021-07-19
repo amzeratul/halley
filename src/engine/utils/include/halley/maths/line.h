@@ -108,7 +108,7 @@ namespace Halley {
 			return a + t * b;
 		}
 
-		std::optional<Vector2f> intersection(const Line& other) const
+		std::optional<Vector2f> intersection(const Line& other, const float epsilon = 0) const
 		{
 			const float len = (this->b - this->a).length();
 			const auto a = this->a;
@@ -121,9 +121,33 @@ namespace Halley {
 				return {};
 			}
 			const float t = (d.x * (a.y - c.y) + d.y * (c.x - a.x)) / divisor;
-			const float u = -(b.x * (c.y - a.y) + b.y * (a.x - c.x)) / divisor;
 			
-			return a + t * b;
+			if (t < -epsilon || t > len + epsilon) {
+				// Out of edges
+				return {};
+			}
+			return a + clamp(t, 0.0f, 1.0f) * b;
+		}
+		
+		std::optional<float> intersectionParametric(const Line& other, const float epsilon = 0) const
+		{
+			const float len = (this->b - this->a).length();
+			const auto a = this->a;
+			const auto b = (this->b - this->a) / len;
+			const auto c = other.origin;
+			const auto d = other.dir;
+			const float divisor = b.x * d.y - b.y * d.x;
+			if (std::abs(divisor) < 0.000001f) {
+				// Parallel lines
+				return {};
+			}
+			const float t = (d.x * (a.y - c.y) + d.y * (c.x - a.x)) / divisor;
+			
+			if (t < -epsilon || t > len + epsilon) {
+				// Out of edges
+				return {};
+			}
+			return clamp(t, 0.0f, 1.0f);
 		}
 
 		bool sharesVertexWith(const LineSegment& other) const
