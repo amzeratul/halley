@@ -153,7 +153,7 @@ namespace Halley {
 				// Out of edges
 				return {};
 			}
-			return clamp(t, 0.0f, len);
+			return clamp(t, 0.0f, len) / len;
 		}
 
 		bool sharesVertexWith(const LineSegment& other) const
