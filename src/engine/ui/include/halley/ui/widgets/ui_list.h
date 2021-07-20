@@ -14,7 +14,7 @@ namespace Halley {
 	class UIList : public UIWidget {
 		friend class UIListItem;
 
-	public:
+	public:		
 		explicit UIList(String id, UIStyle style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
 
 		void setOrientation(UISizerType orientation, int nColumns = 1);
@@ -28,6 +28,7 @@ namespace Halley {
 		UIStyle getStyle() const;
 
 		std::shared_ptr<UIListItem> addTextItem(const String& id, LocalisedString label, float maxWidth = -1, bool centre = false, std::optional<LocalisedString> tooltip = {});
+		std::shared_ptr<UIListItem> addTextItemAligned(const String& id, LocalisedString label, float maxWidth = -1, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, std::optional<LocalisedString> tooltip = {});
 		std::shared_ptr<UIListItem> addImage(const String& id, std::shared_ptr<UIImage> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, std::optional<UIStyle> styleOverride = {});
 		std::shared_ptr<UIListItem> addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, std::optional<UIStyle> styleOverride = {});
 		std::optional<int> removeItem(const String& id);

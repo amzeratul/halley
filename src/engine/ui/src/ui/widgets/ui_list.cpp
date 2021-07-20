@@ -129,11 +129,17 @@ std::shared_ptr<UILabel> UIList::makeLabel(String id, LocalisedString label, flo
 
 std::shared_ptr<UIListItem> UIList::addTextItem(const String& id, LocalisedString label, float maxWidth, bool centre, std::optional<LocalisedString> tooltip)
 {
+	// Use addTextItemAlignedInstead
+	return addTextItemAligned(id, std::move(label), maxWidth, {}, centre ? UISizerAlignFlags::CentreHorizontal : UISizerFillFlags::Fill, std::move(tooltip));
+}
+
+std::shared_ptr<UIListItem> UIList::addTextItemAligned(const String& id, LocalisedString label, float maxWidth, Vector4f border, int fillFlags, std::optional<LocalisedString> tooltip)
+{
 	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 	if (tooltip) {
 		item->setToolTip(tooltip.value());
 	}
-	item->add(makeLabel(id + "_label", std::move(label), maxWidth), 0, Vector4f(), centre ? UISizerAlignFlags::CentreHorizontal : UISizerFillFlags::Fill);
+	item->add(makeLabel(id + "_label", std::move(label), maxWidth), 0, border, fillFlags);
 	return addItem(item);
 }
 
