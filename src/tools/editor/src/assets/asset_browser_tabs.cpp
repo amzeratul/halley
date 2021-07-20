@@ -64,12 +64,13 @@ void AssetBrowserTabs::openTab(std::optional<AssetType> assetType, const String&
 
 void AssetBrowserTabs::closeTab(const String& key)
 {
-	auto idx = tabs->removeItem(key);
-	if (idx) {
-		pages->removePage(static_cast<int>(idx.value()));
-		windows.erase(windows.begin() + idx.value());
+	const auto idx = tabs->tryGetItemId(key);
+	if (idx != -1) {
+		pages->removePage(idx);
+		windows.erase(windows.begin() + idx);
+		tabs->removeItem(key);
+		saveTabs();
 	}
-	saveTabs();
 }
 
 void AssetBrowserTabs::refreshAssets()

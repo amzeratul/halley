@@ -265,8 +265,7 @@ std::optional<int> UIList::removeItem(const String& id)
 		reassignIds();
 
 		if (curOption >= static_cast<int>(idx)) {
-			curOption = -1;
-			setSelectedOption(static_cast<int>(idx) - 1);
+			setSelectedOption(curOption - 1);
 		}
 		return static_cast<int>(idx);
 	}
@@ -330,6 +329,19 @@ std::shared_ptr<UIListItem> UIList::getItem(const String& id) const
 		}
 	}
 	throw Exception("Invalid item", HalleyExceptions::UI);
+}
+
+int UIList::tryGetItemId(const String& id) const
+{
+	const auto iter = std::find_if(items.begin(), items.end(), [&] (const std::shared_ptr<UIListItem>& item)
+	{
+		return item->getId() == id;
+	});
+	if (iter != items.end()) {
+		const size_t idx = iter - items.begin();
+		return static_cast<int>(idx);
+	}
+	return -1;
 }
 
 std::shared_ptr<UIListItem> UIList::tryGetItem(const String& id) const

@@ -47,6 +47,7 @@ namespace Halley {
 
 		std::shared_ptr<UIListItem> getItem(int n) const;
 		std::shared_ptr<UIListItem> getItem(const String& id) const;
+		int tryGetItemId(const String& id) const;
 		std::shared_ptr<UIListItem> tryGetItem(const String& id) const;
 		std::shared_ptr<UIListItem> getItemUnderCursor() const;
 
