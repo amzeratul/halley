@@ -180,4 +180,5 @@ void SceneEditorGizmoCollection::clear()
 		uiList->clear();
 		uiList = nullptr;
 	}
+	activeGizmo.reset();
 }
