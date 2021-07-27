@@ -109,7 +109,7 @@ void UISpinList::updateOptionLabels() {
 
 	auto i = 0;
 	for (auto& o : options) {
-		auto optionLabel = std::make_shared<UILabel>("spinner_option_" + optionIds[i], style.getTextRenderer("label"), o);
+		auto optionLabel = std::make_shared<UILabel>("spinner_option_" + optionIds[i], style, o);
 		spinner->add(optionLabel);
 		++i;
 	}

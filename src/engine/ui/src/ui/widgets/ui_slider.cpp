@@ -13,8 +13,7 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 	UIWidget::add(sliderBar, 1, style.getBorder("barBorder"), UISizerAlignFlags::CentreVertical | UISizerFillFlags::FillHorizontal);
 	
 	box = std::make_shared<UIImage>(style.getSprite("labelBorder"), UISizer(UISizerType::Vertical), style.getBorder("labelInnerBorder"));
-	auto font = style.getTextRenderer("label");
-	label = std::make_shared<UILabel>(id + "_label", font, makeLabel());
+	label = std::make_shared<UILabel>(id + "_label", style, makeLabel());
 	box->add(label, 0, {}, UISizerAlignFlags::Centre);
 	box->layout();
 	box->setMinSize(box->getSize());

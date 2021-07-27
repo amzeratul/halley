@@ -8,7 +8,8 @@
 namespace Halley {
 	class UILabel : public UIWidget {
 	public:
-		explicit UILabel(String id, TextRenderer style, LocalisedString text);
+		explicit UILabel(String id, UIStyle style, LocalisedString text);
+		explicit UILabel(String id, UIStyle style, TextRenderer renderer, LocalisedString text);
 		~UILabel();
 
 		void setText(const LocalisedString& text);
@@ -47,6 +48,7 @@ namespace Halley {
 
 	private:
 		TextRenderer renderer;
+		UIStyle style;
 		LocalisedString text;
 		const std::shared_ptr<bool> aliveFlag;
 

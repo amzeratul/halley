@@ -111,11 +111,10 @@ void UIRenderGraphNode::onMakeUI()
 	}
 
 	const auto fields = getWidget("fields");
-	const auto labelStyle = factory.getStyle("labelSmall");
 	auto addField = [&] (std::string_view imageName, std::string_view data)
 	{
 		fields->add(std::make_shared<UIImage>(Sprite().setImage(factory.getResources(), imageName)), 0, Vector4f(0, -2, 0, -2));
-		fields->add(std::make_shared<UILabel>("", labelStyle.getTextRenderer("label"), LocalisedString::fromUserString(data)), 1);
+		fields->add(std::make_shared<UILabel>("", factory.getStyle("labelSmall"), LocalisedString::fromUserString(data)), 1);
 	};
 
 	if (node.method == RenderGraphMethod::Paint) {

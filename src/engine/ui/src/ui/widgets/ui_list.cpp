@@ -117,7 +117,7 @@ UIStyle UIList::getStyle() const
 
 std::shared_ptr<UILabel> UIList::makeLabel(String id, LocalisedString label, float maxWidth) const
 {
-	auto widget = std::make_shared<UILabel>(std::move(id), style.getTextRenderer("label"), std::move(label));
+	auto widget = std::make_shared<UILabel>(std::move(id), style, std::move(label));
 	if (maxWidth > 0) {
 		widget->setMaxWidth(maxWidth);
 	}

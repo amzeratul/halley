@@ -45,7 +45,7 @@ void UIHybridList::addTextItem(const String& id, const LocalisedString& label)
 		cancelButton->setInputButtons(inputButtons);
 	}
 
-	button->add(std::make_shared<UILabel>("", buttonStyle.getTextRenderer("label"), label), 0, buttonStyle.getBorder("labelBorder"), UISizerAlignFlags::Centre);
+	button->add(std::make_shared<UILabel>("", buttonStyle, label), 0, buttonStyle.getBorder("labelBorder"), UISizerAlignFlags::Centre);
 	buttons->add(button);
 }
 
