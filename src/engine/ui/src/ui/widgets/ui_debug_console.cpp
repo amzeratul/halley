@@ -187,9 +187,10 @@ void UIDebugConsole::runCommand(const String& rawCommand)
 
 void UIDebugConsole::addLine(const String& line, Colour colour)
 {
-	auto style = factory.getStyle("label").getTextRenderer("label");
-	style.setSize(16).setColour(colour);
-	auto newLabel = std::make_shared<UILabel>("", style, LocalisedString::fromUserString(line));
+	auto renderer = factory.getStyle("label").getTextRenderer("label");
+	renderer.setSize(16).setColour(colour);
+	
+	auto newLabel = std::make_shared<UILabel>("", factory.getStyle("label"), renderer, LocalisedString::fromUserString(line));
 	newLabel->setFlowLayout(true);
 	auto scrollPane = getWidgetAs<UIScrollBarPane>("log");
 	scrollPane->add(newLabel);

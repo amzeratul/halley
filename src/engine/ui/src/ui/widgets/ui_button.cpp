@@ -94,8 +94,6 @@ void UIButton::setCanDoBorderOnly(bool canDo)
 void UIButton::setLabel(LocalisedString text)
 {
 	if (!label) {
-		const auto& renderer = style.getTextRenderer("label");
-
 		bool existed = false;
 		if (const auto existingLabel = tryGetWidgetAs<UILabel>(getId() + "_label")) {
 			label = existingLabel;
@@ -103,7 +101,7 @@ void UIButton::setLabel(LocalisedString text)
 			existed = true;
 		}
 		else {
-			label = std::make_shared<UILabel>(getId() + "_label", renderer, std::move(text));
+			label = std::make_shared<UILabel>(getId() + "_label", style, std::move(text));
 		}
 
 		if (style.hasTextRenderer("hoveredLabel")) {

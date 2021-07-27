@@ -69,7 +69,7 @@ void ECSWindow::populateSystem(const String& name)
 	auto addLabel = [&] (const String& label, bool hasRead, bool hasWrite)
 	{
 		const auto style = hasWrite ? writeStyle : (hasRead ? readStyle: labelStyle);
-		systemComponents->add(std::make_shared<UILabel>("", style, LocalisedString::fromUserString(label)), 0, Vector4f(5, 0, 5, 0));
+		systemComponents->add(std::make_shared<UILabel>("", factory.getStyle("label"), style, LocalisedString::fromUserString(label)), 0, Vector4f(5, 0, 5, 0));
 	};
 
 	addLabel("[World]", false, (int(system.access) & int(SystemAccess::World)) != 0);
@@ -108,6 +108,6 @@ void ECSWindow::populateComponent(const String& name)
 			}
 		}
 		const auto style = hasWrite ? writeStyle : (hasRead ? readStyle: labelStyle);
-		componentSystems->add(std::make_shared<UILabel>("", style, LocalisedString::fromUserString(system.first)), 0, Vector4f(5, 0, 5, 0));
+		componentSystems->add(std::make_shared<UILabel>("", factory.getStyle("label"), style, LocalisedString::fromUserString(system.first)), 0, Vector4f(5, 0, 5, 0));
 	}
 }

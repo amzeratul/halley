@@ -38,7 +38,7 @@ void EditorSettingsWindow::onMakeUI()
 		checkbox->setEnabled(platform != "pc");
 		
 		platforms->add(checkbox);
-		platforms->add(std::make_shared<UILabel>(platform + "_label", factory.getStyle("label").getTextRenderer("label"), LocalisedString::fromUserString(platform)));
+		platforms->add(std::make_shared<UILabel>(platform + "_label", factory.getStyle("label"), LocalisedString::fromUserString(platform)));
 
 		platforms->bindData(platform, !workingCopy.isPlatformDisabled(platform), [=] (bool value)
 		{

@@ -423,7 +423,7 @@ std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("label"), styleSheet);
-	auto label = std::make_shared<UILabel>(id, style.getTextRenderer("label"), parseLabel(node));
+	auto label = std::make_shared<UILabel>(id, std::move(style), parseLabel(node));
 	if (node.hasKey("maxWidth")) {
 		label->setMaxWidth(node["maxWidth"].asFloat());
 	}

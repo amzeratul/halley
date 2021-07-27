@@ -163,7 +163,7 @@ void AssetEditorWindow::createEditorTab(Path filePath, AssetType type, const Str
 		content->addPage();
 		content->getPage(n)->add(editor, 1);
 		const auto image = std::make_shared<UIImage>(factory.makeAssetTypeIcon(type));
-		const auto text = std::make_shared<UILabel>(name + "_" + toString(type) + ":label", contentList->getStyle().getTextRenderer("label"), LocalisedString::fromUserString(name));
+		const auto text = std::make_shared<UILabel>(name + "_" + toString(type) + ":label", contentList->getStyle(), LocalisedString::fromUserString(name));
 		
 		auto item = std::make_shared<UISizer>();
 		item->add(image);

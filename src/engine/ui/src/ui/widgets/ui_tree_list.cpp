@@ -35,7 +35,7 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, size_t ch
 
 	// Label
 	const auto& labelStyle = style.getSubStyle(labelStyleName);
-	auto labelWidget = std::make_shared<UILabel>(id + "_label", labelStyle.getTextRenderer("normal"), label);
+	auto labelWidget = std::make_shared<UILabel>(id + "_label", labelStyle, labelStyle.getTextRenderer("normal"), label);
 	if (labelStyle.hasTextRenderer("selected")) {
 		labelWidget->setSelectable(labelStyle.getTextRenderer("normal"), labelStyle.getTextRenderer("selected"));
 	}

@@ -403,7 +403,7 @@ EntityEditorFactory::EntityEditorFactory(UIFactory& factory)
 
 std::shared_ptr<IUIElement> EntityEditorFactory::makeLabel(const String& text) const
 {
-	auto label = std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromUserString(text));
+	auto label = std::make_shared<UILabel>("", factory.getStyle("labelLight"), LocalisedString::fromUserString(text));
 	label->setMaxWidth(100);
 	label->setMarquee(true);
 	auto labelBox = std::make_shared<UIWidget>("", Vector2f(100, 20), UISizer());
@@ -435,7 +435,7 @@ std::shared_ptr<IUIElement> EntityEditorFactory::makeField(const String& rawFiel
 		if (compFieldFactory) {
 			container->add(compFieldFactory->createField(*context, parameters), 1, Vector4f(), UISizerAlignFlags::Top | UISizerFillFlags::FillHorizontal);
 		} else {
-			container->add(std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromHardcodedString("N/A")));
+			container->add(std::make_shared<UILabel>("", factory.getStyle("labelLight"), LocalisedString::fromHardcodedString("N/A")));
 		}
 
 		return container;
