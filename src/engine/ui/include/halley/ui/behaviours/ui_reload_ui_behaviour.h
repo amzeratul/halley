@@ -25,7 +25,6 @@ namespace Halley {
 
 		void setupUIStyleObservers();
 
-		void getLabels(UIWidget* widget, std::vector<std::shared_ptr<UILabel>>& labels) const;
-		void getLabels(const std::shared_ptr<UIWidget>& widget, std::vector<std::shared_ptr<UILabel>>& labels) const;
+		void getStyleObservers(const std::shared_ptr<UIWidget>& widget, std::vector<std::pair<String, int>>& styleObservers) const;
 	};
 }

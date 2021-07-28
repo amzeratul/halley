@@ -39,7 +39,7 @@ void UIReloadUIBehaviour::update(Time time)
 
 bool UIReloadUIBehaviour::requireStyleUpdate() const
 {
-	for (auto& styleObserver : uiStyleObservers) {
+	for (const auto& styleObserver : uiStyleObservers) {
 		if (styleObserverNeedsUpdate(styleObserver)) {
 			return true;
 		}
@@ -58,36 +58,33 @@ void UIReloadUIBehaviour::setupUIStyleObservers()
 	std::vector<std::shared_ptr<UILabel>> labels;
 
 	// TODO: Sort this out! Can this be a shared_ptr?
+	uiStyleObservers.clear();
 	auto* widget = getWidget();
+	if(widget->hasStyle()) {
+		uiStyleObservers.emplace_back(widget->getStyleName(), factory.getStyleSheet()->getStyleObserver(widget->getStyleName()).getAssetVersion());
+	}
+	
 	for (const auto& child : widget->getChildren()) {
-		getLabels(child, labels);
+		getStyleObservers(child, uiStyleObservers);
 	}
 
 	for (const auto& child : widget->getChildrenWaiting()) {
-		getLabels(child, labels);
+		getStyleObservers(child, uiStyleObservers);
 	}
 	// TODO END
-
-	uiStyleObservers.clear();
-	for(const auto& label : labels) {
-		const auto& styleName = label->getStyle().getName();
-		uiStyleObservers.emplace_back(styleName, factory.getStyleSheet()->getStyleObserver(styleName).getAssetVersion());
-	}
 }
 
-// TODO: Refactor this
-void UIReloadUIBehaviour::getLabels(const std::shared_ptr<UIWidget>& widget, std::vector<std::shared_ptr<UILabel>>& labels) const
+void UIReloadUIBehaviour::getStyleObservers(const std::shared_ptr<UIWidget>& widget, std::vector<std::pair<String, int>>& styleObservers) const
 {
-	auto label = std::dynamic_pointer_cast<UILabel>(widget);
-	if (label) {
-		labels.emplace_back(label);
+	if(widget->hasStyle()) {
+		styleObservers.emplace_back(widget->getStyleName(), factory.getStyleSheet()->getStyleObserver(widget->getStyleName()).getAssetVersion());
 	}
 
 	for (const auto& child : widget->getChildren()) {
-		getLabels(child, labels);
+		getStyleObservers(child, styleObservers);
 	}
 
 	for (const auto& child : widget->getChildrenWaiting()) {
-		getLabels(child, labels);
+		getStyleObservers(child, styleObservers);
 	}
 }
