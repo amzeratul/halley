@@ -26,6 +26,11 @@ UIStyle UIStyle::getSubStyle(const String& name) const
 	return UIStyle(style->getSubStyle(name));
 }
 
+const String& UIStyle::getName() const
+{
+	return style->getName();
+}
+
 const Sprite& UIStyle::getSprite(const String& name) const
 {
 	return style->getSprite(name);

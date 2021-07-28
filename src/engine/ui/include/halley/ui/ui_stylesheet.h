@@ -20,6 +20,7 @@ namespace Halley {
 		UIStyleDefinition(String styleName, const ConfigNode& node, UIStyleSheet& styleSheet);
 		~UIStyleDefinition();
 
+		const String& getName() const;
 		const Sprite& getSprite(const String& name) const;
 		const TextRenderer& getTextRenderer(const String& name) const;
 		Vector4f getBorder(const String& name) const;
@@ -66,13 +67,15 @@ namespace Halley {
 		std::shared_ptr<const UIStyleDefinition> getStyle(const String& styleName) const;
 		std::shared_ptr<UIStyleDefinition> getStyle(const String& styleName);
 
+		const ConfigObserver& getStyleObserver(const String& styleName) const;
 	private:
 		Resources& resources;
 		std::unordered_map<String, std::shared_ptr<UIStyleDefinition>> styles;
 		std::map<String, ConfigObserver> observers;
+		std::unordered_map<String, String> styleToObserver;
 		std::shared_ptr<const UIColourScheme> lastColourScheme = nullptr;
 
-		void load(const ConfigNode& node, std::shared_ptr<const UIColourScheme> colourScheme);
+		void load(const ConfigNode& node, const String& assetId, std::shared_ptr<const UIColourScheme> colourScheme);
 
 		bool needsUpdate() const;
 		void update();

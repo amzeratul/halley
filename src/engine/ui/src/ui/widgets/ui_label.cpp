@@ -238,6 +238,11 @@ Colour4f UILabel::getColour() const
 	return renderer.getColour();
 }
 
+const UIStyle& UILabel::getStyle() const
+{
+	return style;
+}
+
 void UILabel::setTextRenderer(TextRenderer r)
 {
 	r.setText(renderer.getText()).setPosition(renderer.getPosition());
