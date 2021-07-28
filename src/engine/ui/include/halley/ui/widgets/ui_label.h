@@ -36,6 +36,8 @@ namespace Halley {
 		void setColour(Colour4f colour);		
 		Colour4f getColour() const;
 
+		const UIStyle& getStyle() const;
+		
 		void setSelectable(TextRenderer normalRenderer, TextRenderer selectedRenderer);
 		void setDisablable(TextRenderer normalRenderer, TextRenderer disabledRenderer);
 		void setHoverable(TextRenderer normalRenderer, TextRenderer hoveredRenderer);

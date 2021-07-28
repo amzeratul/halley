@@ -153,6 +153,11 @@ String ConfigObserver::getAssetId() const
 	}
 }
 
+int ConfigObserver::getAssetVersion() const
+{
+	return assetVersion;
+}
+
 
 ConfigNode ConfigNode::undefinedConfigNode;
 String ConfigNode::undefinedConfigNodeName;

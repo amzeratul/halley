@@ -17,6 +17,7 @@ namespace Halley
 	class Resources;
 	class I18N;
 	class UIWidget;
+	class UILabel;
 	class UIStyle;
 	class IClipboard;
 	class InputKeyboard;

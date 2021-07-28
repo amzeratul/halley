@@ -54,6 +54,7 @@ namespace Halley
 		bool needsUpdate() const;
 		void update();
 		String getAssetId() const;
+		int getAssetVersion() const;
 
 	private:
 		int assetVersion = 0;

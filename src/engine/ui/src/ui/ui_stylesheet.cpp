@@ -176,6 +176,11 @@ std::shared_ptr<const UIStyleDefinition> UIStyleDefinition::getSubStyle(const St
 	return getValue(node, styleSheet, styleName, name, pimpl->subStyles);
 }
 
+const String& UIStyleDefinition::getName() const
+{
+	return styleName;
+}
+
 const Sprite& UIStyleDefinition::getSprite(const String& name) const
 {
 	return getValue(node, styleSheet, styleName, name, pimpl->sprites);
@@ -288,7 +293,7 @@ UIStyleSheet::UIStyleSheet(Resources& resources, const ConfigFile& file, std::sh
 
 void UIStyleSheet::load(const ConfigFile& file, std::shared_ptr<const UIColourScheme> colourScheme)
 {
-	load(file.getRoot(), colourScheme);
+	load(file.getRoot(), file.getAssetId(), colourScheme);
 	observers[file.getAssetId()] = ConfigObserver(file);
 }
 
@@ -320,12 +325,14 @@ bool UIStyleSheet::needsUpdate() const
 void UIStyleSheet::update()
 {
 	for (auto& o: observers) {
-		o.second.update();
-		load(o.second.getRoot(), lastColourScheme);
+		if (o.second.needsUpdate()) {
+			o.second.update();
+			load(o.second.getRoot(), o.first, lastColourScheme);
+		}
 	}
 }
 
-void UIStyleSheet::load(const ConfigNode& root, std::shared_ptr<const UIColourScheme> colourScheme)
+void UIStyleSheet::load(const ConfigNode& root, const String& assetId, std::shared_ptr<const UIColourScheme> colourScheme)
 {
 	lastColourScheme = colourScheme;
 	
@@ -336,6 +343,7 @@ void UIStyleSheet::load(const ConfigNode& root, std::shared_ptr<const UIColourSc
 			iter->second->reload(node.second);
 		} else {
 			styles[node.first] = std::make_unique<UIStyleDefinition>(node.first, node.second, *this);
+			styleToObserver[node.first] = assetId;
 		}
 	}
 }
@@ -356,4 +364,9 @@ std::shared_ptr<UIStyleDefinition> UIStyleSheet::getStyle(const String& styleNam
 		throw Exception("Unknown style: " + styleName, HalleyExceptions::UI);
 	}
 	return iter->second;
+}
+
+const ConfigObserver& UIStyleSheet::getStyleObserver(const String& styleName) const
+{
+	return observers.at(styleToObserver.at(styleName));
 }
