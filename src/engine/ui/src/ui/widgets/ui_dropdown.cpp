@@ -14,6 +14,7 @@ UIDropdown::UIDropdown(String id, UIStyle style, std::vector<LocalisedString> os
 	, style(style)
 	, curOption(defaultOption)
 {
+	styleName = style.getName();
 	sprite = style.getSprite("normal");
 
 	setOptions(std::move(os));

@@ -10,6 +10,7 @@ UIHybridList::UIHybridList(const String& id, UIStyle style, UISizerType orientat
 	, style(style)
 	, nColumns(nColumns)
 {
+	styleName = style.getName();
 	auto listStyle = style.getSubStyle("list");
 	list = std::make_shared<UIList>(id + "_list", listStyle, orientation, nColumns);
 	list->setOnlyEnabledWithInputs({ UIInputType::Gamepad });

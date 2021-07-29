@@ -20,6 +20,7 @@ UITextInput::UITextInput(String id, UIStyle style, String text, LocalisedString 
 	, text(text.getUTF32())
 	, ghostText(std::move(ghostText))
 {
+	styleName = style.getName();
 	label.setText(text);
 	setValidator(std::move(validator));
 }

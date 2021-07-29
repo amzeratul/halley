@@ -13,6 +13,7 @@ UISpinList::UISpinList(String id, const UIStyle& style, std::vector<LocalisedStr
 	, style(style)
 	, curOption(defaultOption)
 {
+	styleName = style.getName();
 	sprite = style.getSprite("normal");
 
 	setOptions(std::move(os));
