@@ -39,6 +39,7 @@ namespace Halley {
 		bool isReadOnly() const;
 
 		bool isPendingSubmit();
+		void setCaptureSubmit(bool enable);
 
 	private:
 		StringUTF32 text;
@@ -49,6 +50,7 @@ namespace Halley {
 		int textRevision = 0;
 		bool readOnly = false;
 		bool pendingSubmit = false;
+		bool captureSubmit = false;
 
 		void onTextModified();
 		void onDelete();

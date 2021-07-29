@@ -172,6 +172,11 @@ bool TextInputData::onKeyPress(KeyboardKeyPress c, IClipboard* clipboard)
 		}
 		return true;
 	}
+
+	if (captureSubmit && c.is(KeyCode::Enter)) {
+		pendingSubmit = true;
+		return true;
+	}
 	
 	if (c.isPrintable()) {
 		// Handled by text capture
@@ -206,6 +211,11 @@ bool TextInputData::isPendingSubmit()
 	const auto value = pendingSubmit;
 	pendingSubmit = false;
 	return value;
+}
+
+void TextInputData::setCaptureSubmit(bool enable)
+{
+	captureSubmit = enable;
 }
 
 void TextInputData::onDelete()
