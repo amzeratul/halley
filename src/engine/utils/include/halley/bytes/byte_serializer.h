@@ -99,6 +99,7 @@ namespace Halley {
 
 		Serializer& operator<<(const std::string& str);
 		Serializer& operator<<(const String& str);
+		Serializer& operator<<(const StringUTF32& str);
 		Serializer& operator<<(const Path& path);
 		Serializer& operator<<(gsl::span<const gsl::byte> span);
 		Serializer& operator<<(const Bytes& bytes);
@@ -303,6 +304,7 @@ namespace Halley {
 
 		Deserializer& operator>>(std::string& str);
 		Deserializer& operator>>(String& str);
+		Deserializer& operator>>(StringUTF32& str);
 		Deserializer& operator>>(Path& p);
 		Deserializer& operator>>(gsl::span<gsl::byte> span);
 		Deserializer& operator>>(Bytes& bytes);

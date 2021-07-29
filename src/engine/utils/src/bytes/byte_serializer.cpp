@@ -62,6 +62,11 @@ Serializer& Serializer::operator<<(const String& str)
 	return *this;
 }
 
+Serializer& Serializer::operator<<(const StringUTF32& str)
+{
+	return (*this << String(str));
+}
+
 Serializer& Serializer::operator<<(const Path& path)
 {
 	return (*this << path.string());
@@ -189,6 +194,14 @@ Deserializer& Deserializer::operator>>(String& str)
 		}
 	}
 
+	return *this;
+}
+
+Deserializer& Deserializer::operator>>(StringUTF32& str)
+{
+	String s;
+	*this >> s;
+	str = s.getUTF32();
 	return *this;
 }
 
