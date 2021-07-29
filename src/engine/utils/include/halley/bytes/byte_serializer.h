@@ -114,6 +114,17 @@ namespace Halley {
 			}
 			return *this;
 		}
+		
+		template <typename T>
+		Serializer& operator<<(const std::list<T>& val)
+		{
+			unsigned int sz = static_cast<unsigned int>(val.size());
+			*this << sz;
+			for (const auto& v: val) {
+				*this << v;
+			}
+			return *this;
+		}
 
 		template <typename T, typename U>
 		Serializer& operator<<(const FlatMap<T, U>& val)
@@ -321,6 +332,22 @@ namespace Halley {
 			for (unsigned int i = 0; i < sz; i++) {
 				val.push_back(T());
 				*this >> val[i];
+			}
+			return *this;
+		}
+		
+		template <typename T>
+		Deserializer& operator>>(std::list<T>& val)
+		{
+			unsigned int sz;
+			*this >> sz;
+			ensureSufficientBytesRemaining(sz); // Expect at least one byte per vector entry
+
+			val.clear();
+			for (unsigned int i = 0; i < sz; i++) {
+				T v;
+				*this >> v;
+				val.push_back(std::move(v));
 			}
 			return *this;
 		}
