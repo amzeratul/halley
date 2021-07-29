@@ -10,6 +10,7 @@ UIButton::UIButton(String id, UIStyle s, std::optional<UISizer> sizer)
 	: UIClickable(std::move(id), s.getSprite("normal").getScaledSize(), std::move(sizer), s.getBorder("innerBorder"))
 	, style(s)
 {
+	styleName = s.getName();
 	sprite = style.getSprite("normal");
 	setMinSize(sprite.getUncroppedSize());
 }

@@ -9,6 +9,7 @@ UICheckbox::UICheckbox(String id, UIStyle style, bool checked)
 	, style(style)
 	, checked(checked)
 {
+	styleName = style.getName();
 	UICheckbox::doSetState(State::Up);
 	setMinSize(sprite.getScaledSize().abs());
 }

@@ -14,6 +14,9 @@ UIOptionListMorpher::UIOptionListMorpher(String id, UIStyle dropdownStyle, UISty
 	, dropdownStyle(dropdownStyle)
 	, spinlistStyle(spinlistStyle)
 {
+	styleName = dropdownStyle.getName();
+	// TODO: Handle multiple styles?
+	
 	setOptions(std::move(os), defaultOption);
 }
 

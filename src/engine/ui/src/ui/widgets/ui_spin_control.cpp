@@ -8,6 +8,7 @@ UISpinControl::UISpinControl(String id, UIStyle style, float value)
 	: UIWidget(id, {}, UISizer())
 	, value(99999)
 {
+	styleName = style.getName();
 	textInput = std::make_shared<UITextInput>(id + "_textinput", style.getSubStyle("input"), "99999");
 	textInput->setValidator(std::make_shared<UINumericValidator>(true, false));
 

@@ -9,6 +9,7 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 	, maxValue(maxValue)
 	, value(maxValue)
 {
+	styleName = style.getName();
 	sliderBar = std::make_shared<UISliderBar>(*this, style);
 	UIWidget::add(sliderBar, 1, style.getBorder("barBorder"), UISizerAlignFlags::CentreVertical | UISizerFillFlags::FillHorizontal);
 	

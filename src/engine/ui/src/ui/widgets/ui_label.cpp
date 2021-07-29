@@ -21,7 +21,7 @@ UILabel::UILabel(String id, UIStyle style, TextRenderer renderer, LocalisedStrin
 	, text(std::move(text))
 	, aliveFlag(std::make_shared<bool>(true))
 {
-	styleName = style.getName();
+	styleName = this->style.getName();
 	updateText();
 }
 
