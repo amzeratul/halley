@@ -15,7 +15,7 @@ UIList::UIList(String id, UIStyle style, UISizerType orientation, int nColumns)
 {
 	getSizer().setEvenColumns();
 	sprite = style.getSprite("background");
-	//styleName = style.getName();
+	styleName = style.getName();
 
 	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event) {});
 	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event) {

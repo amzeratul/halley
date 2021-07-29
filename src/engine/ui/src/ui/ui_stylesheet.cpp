@@ -269,14 +269,16 @@ void UIStyleDefinition::loadDefaults()
 	pimpl->borders[":default"] = Vector4f();
 	pimpl->strings.clear();
 	pimpl->strings[":default"] = "";
-	pimpl->colours[":default"] = Colour4f(1, 1, 1, 1);
 	pimpl->colours.clear();
+	pimpl->colours[":default"] = Colour4f(1, 1, 1, 1);
 
-	for (auto& [k, v]: pimpl->subStyles) {
+	// TODO: Run this by Rodrigo. I found the substyles became invalid after a reload.
+	/*for (auto& [k, v]: pimpl->subStyles) {
 		if (v) {
 			v->loadDefaults();
 		}
-	}
+	}*/
+	pimpl->subStyles.clear();
 	pimpl->subStyles[":default"] = {};
 }
 
@@ -328,6 +330,7 @@ void UIStyleSheet::update()
 		if (o.second.needsUpdate()) {
 			o.second.update();
 			load(o.second.getRoot(), o.first, lastColourScheme);
+			Logger::logInfo("Reloaded Style: " + o.first);
 		}
 	}
 }
