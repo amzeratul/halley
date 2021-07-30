@@ -63,6 +63,12 @@ namespace Halley {
 		}
 
 		template <typename T>
+		auto getRandomElement(const T& vec) -> decltype(vec[0])&
+		{
+			return vec[getRandomIndex(vec)];
+		}
+		
+		template <typename T>
 		auto getRandomElement(T& vec) -> decltype(vec[0])&
 		{
 			return vec[getRandomIndex(vec)];
