@@ -70,6 +70,7 @@ namespace Halley {
 		HashMap<String, IResourceLocatorProvider*> locatorPaths;
 		HashMap<String, IResourceLocatorProvider*> assetToLocator;
 		Vector<std::unique_ptr<IResourceLocatorProvider>> locators;
+		static const Metadata dummyMetadata;
 
 		void add(std::unique_ptr<IResourceLocatorProvider> locator, const Path& path);
 

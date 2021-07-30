@@ -178,7 +178,7 @@ const Metadata* ResourceLocator::getMetaData(const String& asset, AssetType type
 	if (result != assetToLocator.end()) {
 		return &result->second->getAssetDatabase().getDatabase(type).get(asset).meta;
 	} else {
-		return nullptr;
+		return &dummyMetadata;
 	}
 }
 
@@ -191,3 +191,5 @@ size_t ResourceLocator::getLocatorCount() const
 {
 	return assetToLocator.size();
 }
+
+const Metadata ResourceLocator::dummyMetadata;
