@@ -170,7 +170,35 @@ std::optional<String> UIDebugConsoleSyntax::checkSyntax(const String& line) cons
 	return {};
 }
 
-std::vector<StringUTF32> UIDebugConsoleSyntax::getAutoComplete(const StringUTF32& line) const
+std::vector<StringUTF32> UIDebugConsoleSyntax::getAutoComplete(const StringUTF32& line32) const
+{
+	const auto line = String(line32);
+	auto [curVariant, argN, argStart] = getVariantMatch(line);
+	if (!curVariant) {
+		return {};
+	}
+	const auto curArg = line.substr(argStart);
+	const auto& curArgSyntax = variants[curVariant.value()].args[argN];
+
+	// Retrieve valid options
+	std::vector<String> validOptions;
+	if (curArgSyntax.validOptionsCallback) {
+		validOptions = curArgSyntax.validOptionsCallback();
+	}
+
+	// Filter matching ones
+	const StringUTF32 linePrefix = line.substr(0, argStart).getUTF32();
+	std::vector<StringUTF32> results;
+	for (const auto& o: validOptions) {
+		if (o.startsWith(curArg)) {
+			results.emplace_back(linePrefix + o.getUTF32());
+		}
+	}
+	
+	return results;
+}
+
+UIDebugConsoleSyntax::VariantMatch UIDebugConsoleSyntax::getVariantMatch(const String& line) const
 {
 	// Count which argument number we're at, and where it starts
 	size_t argN = 0;
@@ -185,32 +213,11 @@ std::vector<StringUTF32> UIDebugConsoleSyntax::getAutoComplete(const StringUTF32
 		return {};
 	}
 	--argN; // Don't count the command itself
-	
+
 	// TODO: determine which variant we're in
 	size_t curVariant = 0;
-	if (curVariant >= variants.size() || argN >= variants[curVariant].args.size()) {
-		return {};
-	}
 
-	const StringUTF32 linePrefix = line.substr(0, argStart);
-	const auto curArg = String(line.substr(argStart));
-	const auto& curArgSyntax = variants[curVariant].args[argN];
-
-	// Retrieve valid options
-	std::vector<String> validOptions;
-	if (curArgSyntax.validOptionsCallback) {
-		validOptions = curArgSyntax.validOptionsCallback();
-	}
-
-	// Filter matching ones
-	std::vector<StringUTF32> results;
-	for (const auto& o: validOptions) {
-		if (o.startsWith(curArg)) {
-			results.emplace_back(linePrefix + o.getUTF32());
-		}
-	}
-	
-	return results;
+	return VariantMatch{ curVariant, argN, argStart };
 }
 
 void UIDebugConsole::show()

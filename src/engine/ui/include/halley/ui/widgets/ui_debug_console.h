@@ -54,6 +54,13 @@ namespace Halley {
 
 	private:
 		std::vector<Variant> variants;
+
+		struct VariantMatch {
+			OptionalLite<size_t> variantN;
+			size_t argN;
+			size_t argStart;
+		};
+		VariantMatch getVariantMatch(const String& line) const;
 	};
 
 	struct UIDebugConsoleCommandData {
