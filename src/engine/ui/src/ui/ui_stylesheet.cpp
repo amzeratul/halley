@@ -272,12 +272,6 @@ void UIStyleDefinition::loadDefaults()
 	pimpl->colours.clear();
 	pimpl->colours[":default"] = Colour4f(1, 1, 1, 1);
 
-	// TODO: Run this by Rodrigo. I found the substyles became invalid after a reload.
-	/*for (auto& [k, v]: pimpl->subStyles) {
-		if (v) {
-			v->loadDefaults();
-		}
-	}*/
 	pimpl->subStyles.clear();
 	pimpl->subStyles[":default"] = {};
 }
@@ -330,7 +324,6 @@ void UIStyleSheet::update()
 		if (o.second.needsUpdate()) {
 			o.second.update();
 			load(o.second.getRoot(), o.first, lastColourScheme);
-			Logger::logInfo("Reloaded Style: " + o.first);
 		}
 	}
 }
@@ -367,6 +360,11 @@ std::shared_ptr<UIStyleDefinition> UIStyleSheet::getStyle(const String& styleNam
 		throw Exception("Unknown style: " + styleName, HalleyExceptions::UI);
 	}
 	return iter->second;
+}
+
+bool UIStyleSheet::hasStyleObserver(const String& styleName) const
+{
+	return styleToObserver.find(styleName) != styleToObserver.end();
 }
 
 const ConfigObserver& UIStyleSheet::getStyleObserver(const String& styleName) const

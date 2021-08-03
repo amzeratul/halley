@@ -6,7 +6,7 @@
 namespace Halley {
 	class ConfigObserver;
 	class UIFactory;
-	class UILabel;
+	class UIStyleSheet;
 
 	class UIReloadUIBehaviour final : public UIBehaviour {
 	public:
@@ -25,6 +25,6 @@ namespace Halley {
 
 		void setupUIStyleObservers();
 
-		void getStyleObservers(const std::shared_ptr<UIWidget>& widget, std::vector<std::pair<String, int>>& styleObservers) const;
+		void getStyleObservers(const UIWidget& widget, const UIStyleSheet& stylesheet, std::vector<std::pair<String, int>>& styleObservers) const;
 	};
 }

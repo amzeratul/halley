@@ -10,11 +10,10 @@ using namespace Halley;
 
 UISpinList::UISpinList(String id, const UIStyle& style, std::vector<LocalisedString> os, int defaultOption)
 	: UIWidget(std::move(id), {})
-	, style(style)
 	, curOption(defaultOption)
 {
-	styleName = style.getName();
 	sprite = style.getSprite("normal");
+	styles.emplace_back(style);
 
 	setOptions(std::move(os));
 }
@@ -94,6 +93,7 @@ void UISpinList::updateLabelPositions() {
 }
 
 void UISpinList::updateOptionLabels() {
+	const auto& style = styles.at(0);
 	auto label = style.getTextRenderer("label").clone();
 	float maxExtents = 0;
 	for (auto& o : options) {
@@ -183,6 +183,7 @@ void UISpinList::update(Time t, bool moved)
 		updateOptionLabels();
 	}
 
+	const auto& style = styles.at(0);
 	sprite = isEnabled() ? (isMouseOver() ? style.getSprite("hover") : style.getSprite("normal")) : style.getSprite("disabled");
 	sprite.setPos(getPosition()).scaleTo(getSize());
 

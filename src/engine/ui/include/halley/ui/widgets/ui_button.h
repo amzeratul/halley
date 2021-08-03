@@ -33,7 +33,6 @@ namespace Halley {
 
 	private:
 		Sprite sprite;
-		UIStyle style;
 		UIInputType curInputType = UIInputType::Undefined;
 		std::shared_ptr<UILabel> label;
 		std::shared_ptr<UIImage> iconImage;

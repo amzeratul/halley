@@ -11,7 +11,7 @@ UIScrollBar::UIScrollBar(String id, UIScrollDirection direction, UIStyle style, 
 	, direction(direction)
 	, alwaysShow(alwaysShow)
 {
-	styleName = style.getName();
+	styles.emplace_back(style);
 	if (style.hasSubStyle(direction == UIScrollDirection::Horizontal ? "left" : "up")) {
 		b0 = std::make_shared<UIButton>("b0", style.getSubStyle(direction == UIScrollDirection::Horizontal ? "left" : "up"));
 		UIWidget::add(b0);
@@ -136,8 +136,6 @@ void UIScrollBar::checkActive()
 UIScrollThumb::UIScrollThumb(UIStyle style)
 	: UIButton("scrollThumb", style)
 {
-	styleName = "";
-	// TODO: Handle substyles?
 	setShrinkOnLayout(true);
 }
 

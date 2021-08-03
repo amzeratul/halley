@@ -6,22 +6,20 @@ using namespace Halley;
 UILabel::UILabel(String id, UIStyle style, LocalisedString text)
 	: UIWidget(std::move(id), {})
 	, renderer(style.getTextRenderer("label"))
-	, style(style)
 	, text(std::move(text))
 	, aliveFlag(std::make_shared<bool>(true))
 {
-	styleName = style.getName();
+	styles.emplace_back(std::move(style));
 	updateText();
 }
 
 UILabel::UILabel(String id, UIStyle style, TextRenderer renderer, LocalisedString text)
 	: UIWidget(std::move(id), {})
 	, renderer(std::move(renderer))
-	, style(std::move(style))
 	, text(std::move(text))
 	, aliveFlag(std::make_shared<bool>(true))
 {
-	styleName = this->style.getName();
+	styles.emplace_back(std::move(style));
 	updateText();
 }
 
@@ -238,11 +236,6 @@ const TextRenderer& UILabel::getTextRenderer() const
 Colour4f UILabel::getColour() const
 {
 	return renderer.getColour();
-}
-
-const UIStyle& UILabel::getStyle() const
-{
-	return style;
 }
 
 void UILabel::setTextRenderer(TextRenderer r)

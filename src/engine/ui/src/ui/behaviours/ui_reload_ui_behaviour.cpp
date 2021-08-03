@@ -55,36 +55,27 @@ bool UIReloadUIBehaviour::styleObserverNeedsUpdate(const std::pair<String, int>&
 
 void UIReloadUIBehaviour::setupUIStyleObservers()
 {
-	std::vector<std::shared_ptr<UILabel>> labels;
-
-	// TODO: Sort this out! Can this be a shared_ptr?
 	uiStyleObservers.clear();
 	auto* widget = getWidget();
-	if(widget->hasStyle()) {
-		uiStyleObservers.emplace_back(widget->getStyleName(), factory.getStyleSheet()->getStyleObserver(widget->getStyleName()).getAssetVersion());
-	}
-	
-	for (const auto& child : widget->getChildren()) {
-		getStyleObservers(child, uiStyleObservers);
-	}
-
-	for (const auto& child : widget->getChildrenWaiting()) {
-		getStyleObservers(child, uiStyleObservers);
-	}
-	// TODO END
+	const auto stylesheet = factory.getStyleSheet();
+	getStyleObservers(*widget, *stylesheet, uiStyleObservers);
 }
 
-void UIReloadUIBehaviour::getStyleObservers(const std::shared_ptr<UIWidget>& widget, std::vector<std::pair<String, int>>& styleObservers) const
+void UIReloadUIBehaviour::getStyleObservers(const UIWidget& widget, const UIStyleSheet& stylesheet, std::vector<std::pair<String, int>>& styleObservers) const
 {
-	if(widget->hasStyle()) {
-		styleObservers.emplace_back(widget->getStyleName(), factory.getStyleSheet()->getStyleObserver(widget->getStyleName()).getAssetVersion());
+	if(widget.hasStyle()) {
+		for(const auto& style : widget.getStyles()) {
+			if (stylesheet.hasStyleObserver(style.getName())) {
+				styleObservers.emplace_back(style.getName(), stylesheet.getStyleObserver(style.getName()).getAssetVersion());
+			}
+		}
 	}
 
-	for (const auto& child : widget->getChildren()) {
-		getStyleObservers(child, styleObservers);
+	for (const auto& child : widget.getChildren()) {
+		getStyleObservers(*child, stylesheet, styleObservers);
 	}
 
-	for (const auto& child : widget->getChildrenWaiting()) {
-		getStyleObservers(child, styleObservers);
+	for (const auto& child : widget.getChildrenWaiting()) {
+		getStyleObservers(*child, stylesheet, styleObservers);
 	}
 }

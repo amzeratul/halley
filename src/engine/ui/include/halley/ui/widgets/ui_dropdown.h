@@ -49,10 +49,7 @@ namespace Halley {
 
 		bool canReceiveFocus() const override;
 
-	protected:
-		
-		UIStyle style;
-		
+	protected:		
 		std::vector<Entry> options;
 		
 		TextRenderer label;
