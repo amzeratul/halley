@@ -22,15 +22,52 @@ namespace Halley {
 
 	using UIDebugConsoleCallback = std::function<UIDebugConsoleResponse(std::vector<String>)>;
 
+	class UIDebugConsoleSyntax {
+	public:
+		using Callback = std::function<std::vector<String>()>;
+		
+		struct Arg {
+			String name;
+			String type;
+			Callback validOptionsCallback;
+
+			Arg() = default;
+			Arg(String name, String type) : name(std::move(name)), type(std::move(type)) {}
+			Arg(String name, Callback validOptions) : name(std::move(name)), type("enum"), validOptionsCallback(std::move(validOptions)) {}
+		};
+		
+		struct Variant {
+			std::vector<Arg> args;
+
+			Variant() = default;
+			Variant(std::initializer_list<Arg> args) : args(std::move(args)) {}
+			Variant(Arg arg) { args.emplace_back(std::move(arg)); }
+		};
+
+		UIDebugConsoleSyntax() = default;
+		UIDebugConsoleSyntax(std::initializer_list<Arg> args);
+		UIDebugConsoleSyntax(std::initializer_list<Variant> variants);
+		
+		bool hasSyntax() const;
+		std::optional<String> checkSyntax(const String& line) const;
+		std::vector<StringUTF32> getAutoComplete(const StringUTF32& line) const;
+
+	private:
+		std::vector<Variant> variants;
+	};
+
 	struct UIDebugConsoleCommandData {
 		UIDebugConsoleCallback callback;
 		ExecutionQueue* queue = nullptr;
+		UIDebugConsoleSyntax syntax;
 	};
 
 	class UIDebugConsoleCommands {
 	public:
 		void addCommand(String command, UIDebugConsoleCallback callback);
+		void addCommand(String command, UIDebugConsoleCallback callback, UIDebugConsoleSyntax syntax);
 		void addAsyncCommand(String command, ExecutionQueue& queue, UIDebugConsoleCallback callback);
+		void addAsyncCommand(String command, ExecutionQueue& queue, UIDebugConsoleCallback callback, UIDebugConsoleSyntax syntax);
 
 		const std::map<String, UIDebugConsoleCommandData>& getCommands() const;
 

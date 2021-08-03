@@ -37,12 +37,22 @@ bool UIDebugConsoleResponse::isCloseConsole() const
 
 void UIDebugConsoleCommands::addCommand(String command, UIDebugConsoleCallback callback)
 {
-	commands[command] = UIDebugConsoleCommandData{ std::move(callback), nullptr };
+	commands[command] = UIDebugConsoleCommandData{ std::move(callback), nullptr, {} };
+}
+
+void UIDebugConsoleCommands::addCommand(String command, UIDebugConsoleCallback callback, UIDebugConsoleSyntax syntax)
+{
+	commands[command] = UIDebugConsoleCommandData{ std::move(callback), nullptr, std::move(syntax) };
 }
 
 void UIDebugConsoleCommands::addAsyncCommand(String command, ExecutionQueue& queue, UIDebugConsoleCallback callback)
 {
-	commands[command] = UIDebugConsoleCommandData{ std::move(callback), &queue };
+	commands[command] = UIDebugConsoleCommandData{ std::move(callback), &queue, {} };
+}
+
+void UIDebugConsoleCommands::addAsyncCommand(String command, ExecutionQueue& queue, UIDebugConsoleCallback callback, UIDebugConsoleSyntax syntax)
+{
+	commands[command] = UIDebugConsoleCommandData{ std::move(callback), &queue, std::move(syntax) };
 }
 
 const std::map<String, UIDebugConsoleCommandData>& UIDebugConsoleCommands::getCommands() const
@@ -63,14 +73,25 @@ Future<UIDebugConsoleResponse> UIDebugConsoleController::runCommand(String comma
 		const auto& cs = commandSet->getCommands();
 		const auto iter = cs.find(command);
 		if (iter != cs.end()) {
-			const UIDebugConsoleCommandData& pair = iter->second;
-			if (pair.queue) {
-				return Concurrent::execute(*pair.queue, [args=std::move(args), f=pair.callback] () -> UIDebugConsoleResponse {
+			const UIDebugConsoleCommandData& commandData = iter->second;
+
+			if (commandData.syntax.hasSyntax()) {
+				const auto result = commandData.syntax.checkSyntax(command);
+				if (result) {
+					// Syntax error
+					Promise<UIDebugConsoleResponse> value;
+					value.setValue(result.value());
+					return value.getFuture();
+				}
+			}
+			
+			if (commandData.queue) {
+				return Concurrent::execute(*commandData.queue, [args=std::move(args), f=commandData.callback] () -> UIDebugConsoleResponse {
 					return f(args);
 				});
 			} else {
 				Promise<UIDebugConsoleResponse> value;
-				value.setValue(pair.callback(args));
+				value.setValue(commandData.callback(args));
 				return value.getFuture();
 			}
 		}
@@ -115,11 +136,80 @@ std::vector<StringUTF32> UIDebugConsoleController::getAutoComplete(const StringU
 	for (auto& commandSet: commands) {
 		for (auto& command: commandSet->getCommands()) {
 			const auto& c = command.first.getUTF32();
+			if (line.size() > c.size() && line.substr(0, c.size()) == c && line[c.size()] == ' ') {
+				// Line starts with command, autocomplete for it
+				return command.second.syntax.getAutoComplete(line);
+			}
 			if (c.substr(0, line.size()) == line) {
+				// This command could be an autocomplete
 				results.push_back(c);
 			}
 		}
 	}
+	return results;
+}
+
+UIDebugConsoleSyntax::UIDebugConsoleSyntax(std::initializer_list<Arg> args)
+{
+	variants.emplace_back(std::move(args));
+}
+
+UIDebugConsoleSyntax::UIDebugConsoleSyntax(std::initializer_list<Variant> variants)
+	: variants(std::move(variants))
+{
+}
+
+bool UIDebugConsoleSyntax::hasSyntax() const
+{
+	return !variants.empty();
+}
+
+std::optional<String> UIDebugConsoleSyntax::checkSyntax(const String& line) const
+{
+	// TODO
+	return {};
+}
+
+std::vector<StringUTF32> UIDebugConsoleSyntax::getAutoComplete(const StringUTF32& line) const
+{
+	// Count which argument number we're at, and where it starts
+	size_t argN = 0;
+	size_t argStart = 0;
+	for (size_t i = 0; i < line.size(); ++i) {
+		if (line[i] == ' ') {
+			++argN;
+			argStart = i + 1;
+		}
+	}
+	if (argN == 0) {
+		return {};
+	}
+	--argN; // Don't count the command itself
+	
+	// TODO: determine which variant we're in
+	size_t curVariant = 0;
+	if (curVariant >= variants.size() || argN >= variants[curVariant].args.size()) {
+		return {};
+	}
+
+	const StringUTF32 linePrefix = line.substr(0, argStart);
+	const auto curArg = String(line.substr(argStart));
+	const auto& curArgSyntax = variants[curVariant].args[argN];
+
+	// Retrieve valid options
+	std::vector<String> validOptions;
+	if (curArgSyntax.validOptionsCallback) {
+		validOptions = curArgSyntax.validOptionsCallback();
+	}
+
+	// Filter matching ones
+	std::vector<StringUTF32> results;
+	for (const auto& o: validOptions) {
+		if (o.startsWith(curArg)) {
+			results.emplace_back(linePrefix + o.getUTF32());
+		}
+	}
+	
 	return results;
 }
 
