@@ -21,21 +21,27 @@ namespace Halley {
 	};
 
 	using UIDebugConsoleCallback = std::function<UIDebugConsoleResponse(std::vector<String>)>;
-	using UIDebugConsoleCallbackPair = std::pair<ExecutionQueue*, UIDebugConsoleCallback>;
+
+	struct UIDebugConsoleCommandData {
+		UIDebugConsoleCallback callback;
+		ExecutionQueue* queue = nullptr;
+	};
 
 	class UIDebugConsoleCommands {
 	public:
 		void addCommand(String command, UIDebugConsoleCallback callback);
 		void addAsyncCommand(String command, ExecutionQueue& queue, UIDebugConsoleCallback callback);
 
-		const std::map<String, UIDebugConsoleCallbackPair>& getCommands() const;
+		const std::map<String, UIDebugConsoleCommandData>& getCommands() const;
 
 	private:
-		std::map<String, UIDebugConsoleCallbackPair> commands;
+		std::map<String, UIDebugConsoleCommandData> commands;
 	};
 
 	class UIDebugConsoleController {
 	public:
+		UIDebugConsoleController();
+
 		Future<UIDebugConsoleResponse> runCommand(String command, std::vector<String> args);
 		String runHelp();
 		
@@ -47,6 +53,7 @@ namespace Halley {
 
 	private:
 		std::vector<UIDebugConsoleCommands*> commands;
+		std::unique_ptr<UIDebugConsoleCommands> baseCommandSet;
 	};
 
     class UIDebugConsole : public UIWidget {

@@ -37,39 +37,40 @@ bool UIDebugConsoleResponse::isCloseConsole() const
 
 void UIDebugConsoleCommands::addCommand(String command, UIDebugConsoleCallback callback)
 {
-	commands[command] = UIDebugConsoleCallbackPair(nullptr, std::move(callback));
+	commands[command] = UIDebugConsoleCommandData{ std::move(callback), nullptr };
 }
 
 void UIDebugConsoleCommands::addAsyncCommand(String command, ExecutionQueue& queue, UIDebugConsoleCallback callback)
 {
-	commands[command] = UIDebugConsoleCallbackPair(&queue, std::move(callback));
+	commands[command] = UIDebugConsoleCommandData{ std::move(callback), &queue };
 }
 
-const std::map<String, UIDebugConsoleCallbackPair>& UIDebugConsoleCommands::getCommands() const
+const std::map<String, UIDebugConsoleCommandData>& UIDebugConsoleCommands::getCommands() const
 {
 	return commands;
 }
 
+UIDebugConsoleController::UIDebugConsoleController()
+{
+	baseCommandSet = std::make_unique<UIDebugConsoleCommands>();
+	baseCommandSet->addCommand("help", [=](std::vector<String>) { return runHelp(); });
+	clearCommands();
+}
+
 Future<UIDebugConsoleResponse> UIDebugConsoleController::runCommand(String command, std::vector<String> args)
 {
-	if (command == "help") {
-		Promise<UIDebugConsoleResponse> value;
-		value.setValue(runHelp());
-		return value.getFuture();
-	}
-	
 	for (auto& commandSet: commands) {
 		const auto& cs = commandSet->getCommands();
 		const auto iter = cs.find(command);
 		if (iter != cs.end()) {
-			const UIDebugConsoleCallbackPair& pair = iter->second;
-			if (pair.first) {
-				return Concurrent::execute(*pair.first, [args=std::move(args), f=pair.second] () -> UIDebugConsoleResponse {
+			const UIDebugConsoleCommandData& pair = iter->second;
+			if (pair.queue) {
+				return Concurrent::execute(*pair.queue, [args=std::move(args), f=pair.callback] () -> UIDebugConsoleResponse {
 					return f(args);
 				});
 			} else {
 				Promise<UIDebugConsoleResponse> value;
-				value.setValue(pair.second(args));
+				value.setValue(pair.callback(args));
 				return value.getFuture();
 			}
 		}
@@ -102,24 +103,21 @@ void UIDebugConsoleController::removeCommands(UIDebugConsoleCommands& commandSet
 
 void UIDebugConsoleController::clearCommands()
 {
+	Expects(baseCommandSet != nullptr);
 	commands.clear();
+	addCommands(*baseCommandSet);
 }
 
 std::vector<StringUTF32> UIDebugConsoleController::getAutoComplete(const StringUTF32& line) const
 {
 	std::vector<StringUTF32> results;
-
-	auto tryCommand = [&] (const StringUTF32& c)
-	{
-		if (c.substr(0, line.size()) == line) {
-			results.push_back(c);
-		}
-	};
-
-	tryCommand(String("help").getUTF32());
+	
 	for (auto& commandSet: commands) {
 		for (auto& command: commandSet->getCommands()) {
-			tryCommand(command.first.getUTF32());
+			const auto& c = command.first.getUTF32();
+			if (c.substr(0, line.size()) == line) {
+				results.push_back(c);
+			}
 		}
 	}
 	return results;
