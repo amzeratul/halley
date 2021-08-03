@@ -17,6 +17,7 @@ UIDropdown::UIDropdown(String id, UIStyle style, std::vector<LocalisedString> os
 	sprite = style.getSprite("normal");
 
 	setOptions(std::move(os));
+	setChildLayerAdjustment(1);
 }
 
 void UIDropdown::setSelectedOption(int option)
@@ -274,7 +275,6 @@ void UIDropdown::open()
 		dropdownWindow->add(scrollPane, 1);
 		dropdownWindow->add(scrollBar);
 		dropdownWindow->setMinSize(Vector2f(getSize().x, getSize().y));
-		dropdownWindow->setChildLayerAdjustment(1);
 		addChild(dropdownWindow);
 
 		dropdownList->setHandle(UIEventType::ListAccept, [=] (const UIEvent& event)
