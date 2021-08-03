@@ -89,7 +89,6 @@ namespace Halley {
 		virtual void onItemDoneDragging(UIListItem& item, int index, Vector2f pos);
 		void reassignIds();
 
-		UIStyle style;
 		std::vector<std::shared_ptr<UIListItem>> items;
 		int curOption = -1;
 

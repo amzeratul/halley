@@ -19,6 +19,7 @@ UITreeList::UITreeList(String id, UIStyle style)
 
 void UITreeList::addTreeItem(const String& id, const String& parentId, size_t childIndex, const LocalisedString& label, const String& labelStyleName, Sprite icon, bool forceLeaf)
 {
+	const auto& style = styles.at(0);
 	auto listItem = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 
 	// Controls
@@ -138,7 +139,7 @@ void UITreeList::onItemDragging(UIListItem& item, int index, Vector2f pos)
 			rect = Rect4f(rect.getTopLeft() - Vector2f(0, 1), rect.getTopRight() + Vector2f(0, 1));
 		}
 		
-		insertCursor = style.getSubStyle("cursor").getSprite(resData.type == UITreeListItem::PositionType::OnTop ? "over" : "beforeAfter");
+		insertCursor = styles.at(0).getSubStyle("cursor").getSprite(resData.type == UITreeListItem::PositionType::OnTop ? "over" : "beforeAfter");
 		insertCursor.setPos(rect.getTopLeft()).scaleTo(rect.getSize());
 	}
 }
@@ -274,13 +275,14 @@ bool UITreeList::canDragListItem(const UIListItem& listItem)
 
 UITreeListControls::UITreeListControls(String id, UIStyle style)
 	: UIWidget(std::move(id), Vector2f(), UISizer(UISizerType::Horizontal, 0))
-	, style(std::move(style))
 {
+	styles.emplace_back(std::move(style));
 	setupUI();
 }
 
 float UITreeListControls::updateGuides(const std::vector<int>& itemsLeftPerDepth, bool hasChildren, bool expanded)
 {
+	const auto& style = styles.at(0);
 	auto getSprite = [&](size_t depth) -> Sprite
 	{
 		const bool leaf = depth == itemsLeftPerDepth.size();

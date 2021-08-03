@@ -67,6 +67,7 @@ namespace Halley {
 		std::shared_ptr<const UIStyleDefinition> getStyle(const String& styleName) const;
 		std::shared_ptr<UIStyleDefinition> getStyle(const String& styleName);
 
+		bool hasStyleObserver(const String& styleName) const;
 		const ConfigObserver& getStyleObserver(const String& styleName) const;
 	private:
 		Resources& resources;

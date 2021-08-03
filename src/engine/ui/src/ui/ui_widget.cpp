@@ -738,12 +738,12 @@ void UIWidget::setToolTip(LocalisedString toolTip)
 
 bool UIWidget::hasStyle() const
 {
-	return !styleName.isEmpty();
+	return !styles.empty();
 }
 
-const String& UIWidget::getStyleName() const
+const std::vector<UIStyle>& UIWidget::getStyles() const
 {
-	return styleName;
+	return styles;
 }
 
 void UIWidget::draw(UIPainter& painter) const

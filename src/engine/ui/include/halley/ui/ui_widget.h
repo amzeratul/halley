@@ -176,7 +176,7 @@ namespace Halley {
 		void setToolTip(LocalisedString toolTip);
 
 		bool hasStyle() const;
-		const String& getStyleName() const;
+		const std::vector<UIStyle>& getStyles() const;
 
 	protected:
 		virtual void draw(UIPainter& painter) const;
@@ -214,7 +214,7 @@ namespace Halley {
 		virtual void checkActive();
 
 		UIInputType lastInputType = UIInputType::Undefined;
-		String styleName = "";
+		std::vector<UIStyle> styles = {};
 
 	private:
 		void setParent(UIParent* parent);

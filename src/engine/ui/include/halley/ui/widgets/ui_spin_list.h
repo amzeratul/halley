@@ -42,7 +42,6 @@ namespace Halley {
 	private:
 		Sprite sprite;
 		UIInputButtons inputButtons;
-		UIStyle style;
 
 		std::shared_ptr<UIWidget> spinner;
 

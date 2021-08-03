@@ -7,10 +7,9 @@ using namespace Halley;
 
 UIHybridList::UIHybridList(const String& id, UIStyle style, UISizerType orientation, int nColumns)
 	: UIWidget(id, {}, UISizer(orientation))
-	, style(style)
 	, nColumns(nColumns)
 {
-	styleName = style.getName();
+	styles.emplace_back(std::move(style));
 	auto listStyle = style.getSubStyle("list");
 	list = std::make_shared<UIList>(id + "_list", listStyle, orientation, nColumns);
 	list->setOnlyEnabledWithInputs({ UIInputType::Gamepad });
@@ -36,7 +35,7 @@ void UIHybridList::addTextItem(const String& id, const LocalisedString& label)
 {
 	list->addTextItem(id, label, -1, true);
 
-	auto buttonStyle = style.getSubStyle("button");
+	auto buttonStyle = styles.at(0).getSubStyle("button");
 	auto button = std::make_shared<UIButton>(id, buttonStyle, UISizer(UISizerType::Vertical));
 
 	if (id == "cancel") {
@@ -52,7 +51,7 @@ void UIHybridList::addTextItem(const String& id, const LocalisedString& label)
 
 void UIHybridList::addDivider(const String& id)
 {
-	auto dividerStyle = style.getSubStyle("divider");
+	auto dividerStyle = styles.at(0).getSubStyle("divider");
 	buttons->add(std::make_shared<UIImage>(id, dividerStyle.getSprite("image")), 0, dividerStyle.getBorder("border"));
 	list->add(std::make_shared<UIImage>(id, dividerStyle.getSprite("image")), 0, dividerStyle.getBorder("border"));
 }

@@ -5,7 +5,7 @@ using namespace Halley;
 UIFramedImage::UIFramedImage(const String& id, UIStyle style, std::optional<UISizer> sizer)
 	: UIFramedImage(id, style.getSprite("frame"), style.getSprite("framedImage"), style.getBorder("frameBorder"), std::move(sizer), style.getBorder("innerBorder"))
 {
-	styleName = style.getName();
+	styles.emplace_back(std::move(style));
 }
 
 UIFramedImage::UIFramedImage(const String& id, Sprite frame, Sprite framedImage, Vector4f frameBorder, std::optional<UISizer> sizer, Vector4f innerBorder)

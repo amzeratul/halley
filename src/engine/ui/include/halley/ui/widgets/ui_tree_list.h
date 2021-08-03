@@ -12,7 +12,6 @@ namespace Halley {
         void setExpanded(bool expanded);
 
     private:
-    	UIStyle style;
     	std::vector<std::shared_ptr<UIImage>> guides;
         std::shared_ptr<UIButton> expandButton;
         std::shared_ptr<UIButton> collapseButton;
