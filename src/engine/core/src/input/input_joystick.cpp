@@ -26,11 +26,10 @@ using namespace Halley;
 
 float InputJoystick::getAxis(int n)
 {
-	try {
-		return axisAdjust(axes.at(n));
-	} catch (...) {
-		return 0;
+	if (n >= 0 && n < int(axes.size())) {
+		return axisAdjust(axes[n]);
 	}
+	return 0;
 }
 
 float InputJoystick::defaultAxisAdjust(float value)
