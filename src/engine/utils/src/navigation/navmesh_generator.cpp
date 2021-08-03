@@ -272,9 +272,13 @@ void NavmeshGenerator::tagEdgeConnections(gsl::span<NavmeshNode> nodes, gsl::spa
 
 std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const NavmeshNode& a, const NavmeshNode& b, size_t aEdgeIdx, size_t bEdgeIdx, size_t aIdx, size_t bIdx, float maxSize, bool allowSimplification)
 {
-	Expects(a.polygon.isClockwise() == b.polygon.isClockwise());
 	Expects(a.polygon.isValid());
 	Expects(b.polygon.isValid());
+	
+	if (a.polygon.isClockwise() != b.polygon.isClockwise()) {
+		Logger::logWarning("Aborting NavmeshGenerator::merge: Winding of polygons don't match");
+		return {};
+	}
 	
 	std::vector<Vector2f> vsA = a.polygon.getVertices();
 	std::vector<Vector2f> vsB = b.polygon.getVertices();
