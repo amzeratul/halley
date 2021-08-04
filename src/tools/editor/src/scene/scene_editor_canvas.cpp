@@ -223,9 +223,17 @@ void SceneEditorCanvas::openRightClickMenu()
 		auto menu = std::make_shared<UIPopupMenu>("scene_editor_canvas_popup", factory.getStyle("popupMenu"), menuItems);
 		menu->setAnchor(UIAnchor(Vector2f(), Vector2f(), inputState.rawMousePos.value()));
 
-		menu->setHandle(UIEventType::PopupAccept, [this, menuOptions](const UIEvent& e) {
-			const auto& option = menuOptions.at(e.getIntData());
-			gameBridge->onSceneContextMenuSelection(option.id);
+		menu->setHandle(UIEventType::PopupAccept, [this] (const UIEvent& e) {
+			gameBridge->onSceneContextMenuSelection(e.getStringData());
+			gameBridge->onSceneContextMenuHighlight("");
+		});
+
+		menu->setHandle(UIEventType::PopupHoveredChanged, [this] (const UIEvent& e) {
+			gameBridge->onSceneContextMenuHighlight(e.getStringData());
+		});
+
+		menu->setHandle(UIEventType::PopupCanceled, [this] (const UIEvent& e) {
+			gameBridge->onSceneContextMenuHighlight("");
 		});
 
 		getRoot()->addChild(menu);

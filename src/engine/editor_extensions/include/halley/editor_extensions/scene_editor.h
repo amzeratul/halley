@@ -114,6 +114,7 @@ namespace Halley {
 		std::vector<EntityId> cameraEntityIds;
     	
 		std::optional<EntityRef> selectedEntity;
+    	std::optional<EntityRef> forceFocusEntity;
     	EntityRef focusedEntity;
 		EntityRef entityHighlightedOnList;
     	bool focusEntityEnabled = false;

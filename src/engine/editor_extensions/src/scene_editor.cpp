@@ -267,6 +267,10 @@ void SceneEditor::setEntityHighlightedOnList(const UUID& id)
 
 EntityRef SceneEditor::getEntityToFocus()
 {
+	if (forceFocusEntity) {
+		return forceFocusEntity.value();
+	}
+	
 	if (!focusEntityEnabled) {
 		return EntityRef();
 	}
@@ -544,6 +548,11 @@ void SceneEditor::onSceneContextMenuSelection(const String& id)
 
 void SceneEditor::onSceneContextMenuHighlight(const String& id)
 {
+	if (id.isEmpty()) {
+		forceFocusEntity.reset();
+	} else if (id.startsWith("entity:")) {
+		forceFocusEntity = getEntity(UUID(id.mid(7)));
+	}
 }
 
 Vector2f SceneEditor::roundPosition(Vector2f pos) const

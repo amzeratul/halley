@@ -92,6 +92,7 @@ namespace Halley {
 		UIStyle style;
 		std::vector<std::shared_ptr<UIListItem>> items;
 		int curOption = -1;
+		int curHover = -1;
 
 	private:
 		UISizerType orientation;

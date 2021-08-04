@@ -49,6 +49,7 @@ namespace Halley {
 
 		std::vector<SceneContextMenuEntry> getSceneContextMenu(const Vector2f& mousePos) const;
 		void onSceneContextMenuSelection(const String& id);
+		void onSceneContextMenuHighlight(const String& id);
 
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;

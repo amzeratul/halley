@@ -313,6 +313,13 @@ void SceneEditorGameBridge::onSceneContextMenuSelection(const String& id)
 	}
 }
 
+void SceneEditorGameBridge::onSceneContextMenuHighlight(const String& id)
+{
+	if (interfaceReady) {
+		interface->onSceneContextMenuHighlight(id);
+	}
+}
+
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {

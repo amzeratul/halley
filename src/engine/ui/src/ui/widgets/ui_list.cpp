@@ -18,9 +18,15 @@ UIList::UIList(String id, UIStyle style, UISizerType orientation, int nColumns)
 
 	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event) {});
 	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event) {
+		const auto hoveredChild = std::find_if(getChildren().begin(), getChildren().end(), [=](std::shared_ptr<UIWidget> child) { return child->getId() == event.getSourceId(); });
+		const auto childIdx = int(hoveredChild - getChildren().begin());
+
 		if (event.getBoolData()) {
-			const auto hoveredChild = std::find_if(getChildren().begin(), getChildren().end(), [=](std::shared_ptr<UIWidget> child) { return child->getId() == event.getStringData(); });
-			sendEvent(UIEvent(UIEventType::ListHoveredChanged, getId(), event.getSourceId(), int(hoveredChild - getChildren().begin())));
+			curHover = childIdx;
+			sendEvent(UIEvent(UIEventType::ListHoveredChanged, getId(), event.getSourceId(), curHover));
+		} else if (curHover == childIdx) {
+			curHover = -1;
+			sendEvent(UIEvent(UIEventType::ListHoveredChanged, getId(), "", -1));
 		}
 	});
 }
