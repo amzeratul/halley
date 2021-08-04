@@ -79,7 +79,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			// Import Aseprite file
 			auto groupSeparated = meta.getBool("group_separated", false);
 			auto sequenceSeparated = meta.getBool("sequence_separated", false);
-			groupedFrames = AsepriteReader::importAseprite(baseSpriteName, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)), trim, padding, groupSeparated, sequenceSeparated);
+			groupedFrames = AsepriteReader::importAseprite(baseSpriteName, inputFile.name, gsl::as_bytes(gsl::span<const Byte>(inputFile.data)), trim, padding, groupSeparated, sequenceSeparated);
 		} else {
 			// Bitmap
 			auto span = gsl::as_bytes(gsl::span<const Byte>(inputFile.data));
@@ -96,7 +96,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			imgData.img = std::move(image);
 			imgData.duration = 100;
 			imgData.filenames.emplace_back(":img:" + fileInputId.toString());
-			imgData.origFilename = fileInputId.toString();
+			imgData.origFilename = inputFile.name.toString();
 			imgData.frameNumber = 0;
 			imgData.origFrameNumber = 0;
 			imgData.sequenceName = "";
@@ -173,10 +173,19 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	collector.output(baseSpriteSheetName, AssetType::SpriteSheet, Serializer::toBytes(*spriteSheet, SerializerOptions(SerializerOptions::maxVersion)));
 
 	// Write sprites
+	std::map<String, String> primaryPaths;
+	for (const auto& frame: totalFrames) {
+		for (const auto& filename: frame.filenames) {
+			if (filename.startsWith(":img:")) {
+				primaryPaths[filename.mid(5)] = frame.origFilename;
+			}
+		}
+	}
 	for (const auto& [k, idx]: spriteSheet->getSpriteNameMap()) {
 		if (k.startsWith(":img:")) {
+			const auto iter = primaryPaths.find(k.mid(5));
 			SpriteResource spriteRes(spriteSheet, idx);
-			collector.output(k.mid(5), AssetType::Sprite, Serializer::toBytes(spriteRes, SerializerOptions(SerializerOptions::maxVersion)));
+			collector.output(k.mid(5), AssetType::Sprite, Serializer::toBytes(spriteRes, SerializerOptions(SerializerOptions::maxVersion)), {}, "pc", iter->second);
 		}
 	}
 }
