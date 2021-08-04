@@ -34,6 +34,8 @@ namespace Halley {
 			Arg() = default;
 			Arg(String name, String type) : name(std::move(name)), type(std::move(type)) {}
 			Arg(String name, Callback validOptions) : name(std::move(name)), type("enum"), validOptionsCallback(std::move(validOptions)) {}
+
+			bool checkArgument(const String& arg) const;
 		};
 		
 		struct Variant {
@@ -42,6 +44,7 @@ namespace Halley {
 			Variant() = default;
 			Variant(std::initializer_list<Arg> args) : args(std::move(args)) {}
 			Variant(Arg arg) { args.emplace_back(std::move(arg)); }
+			String getSyntax() const;
 		};
 
 		UIDebugConsoleSyntax() = default;
@@ -49,7 +52,7 @@ namespace Halley {
 		UIDebugConsoleSyntax(std::initializer_list<Variant> variants);
 		
 		bool hasSyntax() const;
-		std::optional<String> checkSyntax(const String& line) const;
+		std::optional<String> checkSyntax(const String& command, gsl::span<const String> args) const;
 		std::vector<StringUTF32> getAutoComplete(const StringUTF32& line) const;
 
 	private:
@@ -59,8 +62,10 @@ namespace Halley {
 			OptionalLite<size_t> variantN;
 			size_t argN;
 			size_t argStart;
+			OptionalLite<size_t> invalidArg;
 		};
-		VariantMatch getVariantMatch(const String& line) const;
+		VariantMatch getVariantMatch(const String& line, bool validate) const;
+		VariantMatch getVariantMatch(const String& command, gsl::span<const String> args, bool validate) const;
 	};
 
 	struct UIDebugConsoleCommandData {
