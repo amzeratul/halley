@@ -38,6 +38,7 @@ namespace Halley {
 	class UIColourScheme;
 	class SceneEditorGizmo;
 	class UIList;
+	class EntityIcons;
 	struct UIPopupMenuItem;
     struct EntityId;
 	struct SceneEditorInputState;
@@ -64,6 +65,7 @@ namespace Halley {
 		virtual void setAssetSetting(std::string_view id, ConfigNode data) = 0;
 
 		virtual void selectEntity(const String& uuid) = 0;
+		virtual Sprite getEntityIcon(const String& uuid) = 0;
 	};
 
     class SceneEditorContext {

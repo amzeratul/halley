@@ -149,6 +149,19 @@ std::shared_ptr<UIListItem> UIList::addTextItemAligned(const String& id, Localis
 	return addItem(item);
 }
 
+std::shared_ptr<UIListItem> UIList::addTextIconItem(const String& id, LocalisedString label, Sprite icon, float maxWidth, Vector4f border, int fillFlags, std::optional<LocalisedString> tooltip)
+{
+	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
+	if (tooltip) {
+		item->setToolTip(tooltip.value());
+	}
+	if (icon.hasMaterial()) {
+		item->add(std::make_shared<UIImage>(icon), 0, Vector4f(0, 0, 4, 0));
+	}
+	item->add(makeLabel(id + "_label", std::move(label), maxWidth), 0, border, fillFlags);
+	return addItem(item);
+}
+
 std::shared_ptr<UIListItem> UIList::addImage(const String& id, std::shared_ptr<UIImage> image, float proportion, Vector4f border, int fillFlags, std::optional<UIStyle> styleOverride)
 {
 	Colour4f baseCol;

@@ -282,6 +282,21 @@ void SceneEditorGameBridge::selectEntity(const String& uuid)
 	sceneEditorWindow.selectEntity(uuid);
 }
 
+Sprite SceneEditorGameBridge::getEntityIcon(const String& uuid)
+{
+	const auto& entityData = sceneEditorWindow.getSceneData()->getEntityNodeData(uuid).getData();
+	String icon;
+	if (!entityData.getIcon().isEmpty()) {
+		icon = entityData.getIcon();
+	} else if (!entityData.getPrefab().isEmpty()) {
+		if (gameResources->exists<Prefab>(entityData.getPrefab())) {
+			const auto prefab = gameResources->get<Prefab>(entityData.getPrefab());
+			icon = prefab->getPrefabIcon();
+		}
+	}
+	return sceneEditorWindow.getEntityIcons().getIcon(icon);
+}
+
 void SceneEditorGameBridge::refreshAssets()
 {
 	if (interfaceReady) {

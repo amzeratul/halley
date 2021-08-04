@@ -11,13 +11,21 @@ namespace Halley {
 		String id;
 		LocalisedString text;
 		LocalisedString tooltip;
+		Sprite icon;
 
 		UIPopupMenuItem(String id, LocalisedString text, LocalisedString tooltip)
 			: id(std::move(id))
 			, text(std::move(text))
 			, tooltip(std::move(tooltip))
-		{
-			
+		{			
+		}
+
+		UIPopupMenuItem(String id, LocalisedString text, Sprite icon, LocalisedString tooltip)
+			: id(std::move(id))
+			, text(std::move(text))
+			, tooltip(std::move(tooltip))
+			, icon(icon)
+		{			
 		}
 
 		UIPopupMenuItem(String id, String tooltip)
@@ -25,7 +33,6 @@ namespace Halley {
 			, text(LocalisedString::fromHardcodedString(std::move(id)))
 			, tooltip(LocalisedString::fromHardcodedString(std::move(tooltip)))
 		{
-
 		}
 	};
 

@@ -62,6 +62,7 @@ namespace Halley {
 		void setAssetSetting(std::string_view id, ConfigNode data) override;
 
 		void selectEntity(const String& uuid) override;
+		Sprite getEntityIcon(const String& uuid) override;
 
 	private:
 		const HalleyAPI& api;
