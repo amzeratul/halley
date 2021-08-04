@@ -3,8 +3,12 @@ widget: { class: widget }
 sizer: { type: vertical }
 proportion: 1
 children:
-- widget: { id: tabs, class: list, type: horizontal, style: tabs }
+- widget: { class: scrollBarPane, scrollHorizontal: true, scrollVertical: false, autoHide: true, size: [50, 10] }
   proportion: 0
+  sizer: { type: vertical }
+  children:
+  - widget: { id: tabs, class: list, type: horizontal, style: tabs }
+    proportion: 1
 - widget: { id: pages, class: pagedPane }
   proportion: 1
 ...
