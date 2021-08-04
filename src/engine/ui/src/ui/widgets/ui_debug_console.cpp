@@ -214,8 +214,16 @@ UIDebugConsoleSyntax::VariantMatch UIDebugConsoleSyntax::getVariantMatch(const S
 	}
 	--argN; // Don't count the command itself
 
-	// TODO: determine which variant we're in
-	size_t curVariant = 0;
+	// Find the current variant
+	OptionalLite<size_t> curVariant;
+	if (!variants.empty()) {
+		for (size_t i = 0; i < variants.size(); ++i) {
+			if (argN < variants[i].args.size()) {
+				curVariant = i;
+				break;
+			}
+		}
+	}
 
 	return VariantMatch{ curVariant, argN, argStart };
 }
