@@ -297,7 +297,7 @@ std::shared_ptr<ScriptNodeTypeCollection> SceneEditorGameBridge::getScriptNodeTy
 	return {};
 }
 
-std::vector<SceneContextMenuEntry> SceneEditorGameBridge::getSceneContextMenu(const Vector2f& mousePos) const
+std::vector<UIPopupMenuItem> SceneEditorGameBridge::getSceneContextMenu(const Vector2f& mousePos) const
 {
 	if (interfaceReady) {
 		return interface->getSceneContextMenu(mousePos);

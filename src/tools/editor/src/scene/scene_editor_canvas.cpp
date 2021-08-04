@@ -215,12 +215,7 @@ void SceneEditorCanvas::openRightClickMenu()
 			return;
 		}
 		
-		std::vector<UIPopupMenuItem> menuItems;
-		for (const auto& option : menuOptions) {
-			menuItems.push_back(UIPopupMenuItem(option.id, option.name, option.tooltip));				
-		}
-
-		auto menu = std::make_shared<UIPopupMenu>("scene_editor_canvas_popup", factory.getStyle("popupMenu"), menuItems);
+		auto menu = std::make_shared<UIPopupMenu>("scene_editor_canvas_popup", factory.getStyle("popupMenu"), menuOptions);
 		menu->setAnchor(UIAnchor(Vector2f(), Vector2f(), inputState.rawMousePos.value()));
 
 		menu->setHandle(UIEventType::PopupAccept, [this] (const UIEvent& e) {

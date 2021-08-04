@@ -38,6 +38,7 @@ namespace Halley {
 	class UIColourScheme;
 	class SceneEditorGizmo;
 	class UIList;
+	struct UIPopupMenuItem;
     struct EntityId;
 	struct SceneEditorInputState;
 	struct SceneEditorOutputState;
@@ -84,13 +85,6 @@ namespace Halley {
         virtual std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& parameters) = 0;
         virtual ConfigNode getDefaultNode() const { return ConfigNode(); }
     };
-
-	class SceneContextMenuEntry {
-	public:
-		String id;
-		LocalisedString name;
-		LocalisedString tooltip;
-	};
 
     class ISceneEditor {
     public:    	
@@ -141,7 +135,7 @@ namespace Halley {
 
     	virtual std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() = 0;
     	
-        virtual std::vector<SceneContextMenuEntry> getSceneContextMenu(const Vector2f& mousePos) const = 0;
+        virtual std::vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const = 0;
         virtual void onSceneContextMenuSelection(const String& id) = 0;
     	virtual void onSceneContextMenuHighlight(const String& id) = 0;
     };

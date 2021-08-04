@@ -15,6 +15,7 @@
 #include "components/camera_component.h"
 #include "halley/entity/scripting/script_node_type.h"
 #include "halley/utils/algorithm.h"
+#include "halley/ui/widgets/ui_popup_menu.h"
 
 using namespace Halley;
 
@@ -532,7 +533,7 @@ std::shared_ptr<ScriptNodeTypeCollection> SceneEditor::getScriptNodeTypes()
 	return std::make_shared<ScriptNodeTypeCollection>();
 }
 
-std::vector<SceneContextMenuEntry> SceneEditor::getSceneContextMenu(const Vector2f& mousePos) const
+std::vector<UIPopupMenuItem> SceneEditor::getSceneContextMenu(const Vector2f& mousePos) const
 {
 	return {};
 }

@@ -70,7 +70,7 @@ namespace Halley {
 
 		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() override;
 
-		std::vector<SceneContextMenuEntry> getSceneContextMenu(const Vector2f& mousePos) const override;
+		std::vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const override;
     	void onSceneContextMenuSelection(const String& id) override;
     	void onSceneContextMenuHighlight(const String& id) override;
     
