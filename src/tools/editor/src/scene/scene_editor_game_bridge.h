@@ -47,16 +47,20 @@ namespace Halley {
 
 		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes();
 
-		std::vector<std::pair<String, String>> getRightClickMenu(const Vector2f& mousePos) const;
+		std::vector<SceneContextMenuEntry> getSceneContextMenu(const Vector2f& mousePos) const;
+		void onSceneContextMenuSelection(const String& id);
 
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
+		void openAsset(AssetType assetType, const String& assetId) override;
 		void addTask(std::unique_ptr<Task> task) override;
 		
 		const ConfigNode& getSetting(EditorSettingType type, std::string_view id) const override;
 		void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) override;
 		const ConfigNode& getAssetSetting(std::string_view id) const override;
 		void setAssetSetting(std::string_view id, ConfigNode data) override;
+
+		void selectEntity(const String& uuid) override;
 
 	private:
 		const HalleyAPI& api;

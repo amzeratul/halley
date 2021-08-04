@@ -528,9 +528,22 @@ std::shared_ptr<ScriptNodeTypeCollection> SceneEditor::getScriptNodeTypes()
 	return std::make_shared<ScriptNodeTypeCollection>();
 }
 
-std::vector<std::pair<String, String>> SceneEditor::getRightClickMenu(const Vector2f& mousePos) const
+std::vector<SceneContextMenuEntry> SceneEditor::getSceneContextMenu(const Vector2f& mousePos) const
 {
 	return {};
+}
+
+void SceneEditor::onSceneContextMenuSelection(const String& id)
+{
+	if (id.startsWith("scene:")) {
+		editorInterface->openAsset(AssetType::Scene, id.mid(6));
+	} else if (id.startsWith("entity:")) {
+		editorInterface->selectEntity(id.mid(7));
+	}
+}
+
+void SceneEditor::onSceneContextMenuHighlight(const String& id)
+{
 }
 
 Vector2f SceneEditor::roundPosition(Vector2f pos) const

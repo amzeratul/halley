@@ -54,12 +54,15 @@ namespace Halley {
 		virtual ~IEditorInterface() = default;
 
 		virtual bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) = 0;
+		virtual void openAsset(AssetType assetType, const String& assetId) = 0;
 		virtual void addTask(std::unique_ptr<Task> task) = 0;
 
 		virtual const ConfigNode& getSetting(EditorSettingType type, std::string_view id) const = 0;
 		virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;
 		virtual const ConfigNode& getAssetSetting(std::string_view id) const = 0;
 		virtual void setAssetSetting(std::string_view id, ConfigNode data) = 0;
+
+		virtual void selectEntity(const String& uuid) = 0;
 	};
 
     class SceneEditorContext {
@@ -81,6 +84,13 @@ namespace Halley {
         virtual std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& parameters) = 0;
         virtual ConfigNode getDefaultNode() const { return ConfigNode(); }
     };
+
+	class SceneContextMenuEntry {
+	public:
+		String id;
+		LocalisedString name;
+		LocalisedString tooltip;
+	};
 
     class ISceneEditor {
     public:    	
@@ -131,7 +141,9 @@ namespace Halley {
 
     	virtual std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() = 0;
     	
-        virtual std::vector<std::pair<String, String>> getRightClickMenu(const Vector2f& mousePos) const = 0;
+        virtual std::vector<SceneContextMenuEntry> getSceneContextMenu(const Vector2f& mousePos) const = 0;
+        virtual void onSceneContextMenuSelection(const String& id) = 0;
+    	virtual void onSceneContextMenuHighlight(const String& id) = 0;
     };
 
 	class EntityTree {

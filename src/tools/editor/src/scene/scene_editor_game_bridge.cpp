@@ -247,6 +247,11 @@ bool SceneEditorGameBridge::saveAsset(const Path& path, gsl::span<const gsl::byt
 	return project.writeAssetToDisk(path, data);
 }
 
+void SceneEditorGameBridge::openAsset(AssetType assetType, const String& assetId)
+{
+	sceneEditorWindow.openAsset(assetType, assetId);
+}
+
 void SceneEditorGameBridge::addTask(std::unique_ptr<Task> task)
 {
 	projectWindow.addTask(std::move(task));
@@ -272,6 +277,11 @@ void SceneEditorGameBridge::setAssetSetting(std::string_view id, ConfigNode data
 	projectWindow.setAssetSetting(sceneEditorWindow.getAssetKey(), id, std::move(data));
 }
 
+void SceneEditorGameBridge::selectEntity(const String& uuid)
+{
+	sceneEditorWindow.selectEntity(uuid);
+}
+
 void SceneEditorGameBridge::refreshAssets()
 {
 	if (interfaceReady) {
@@ -287,13 +297,20 @@ std::shared_ptr<ScriptNodeTypeCollection> SceneEditorGameBridge::getScriptNodeTy
 	return {};
 }
 
-std::vector<std::pair<String, String>> SceneEditorGameBridge::getRightClickMenu(const Vector2f& mousePos) const
+std::vector<SceneContextMenuEntry> SceneEditorGameBridge::getSceneContextMenu(const Vector2f& mousePos) const
 {
 	if (interfaceReady) {
-		return interface->getRightClickMenu(mousePos);
+		return interface->getSceneContextMenu(mousePos);
 	}
 
-	return std::vector<std::pair<String, String>>();
+	return {};
+}
+
+void SceneEditorGameBridge::onSceneContextMenuSelection(const String& id)
+{
+	if (interfaceReady) {
+		interface->onSceneContextMenuSelection(id);
+	}
 }
 
 void SceneEditorGameBridge::load()
