@@ -153,6 +153,7 @@ std::shared_ptr<UIListItem> UIList::addTextItemAligned(const String& id, Localis
 
 std::shared_ptr<UIListItem> UIList::addTextIconItem(const String& id, LocalisedString label, Sprite icon, float maxWidth, Vector4f border, int fillFlags, std::optional<LocalisedString> tooltip)
 {
+	const auto& style = styles.at(0);
 	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 	if (tooltip) {
 		item->setToolTip(tooltip.value());
