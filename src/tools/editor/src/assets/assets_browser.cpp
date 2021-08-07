@@ -34,7 +34,7 @@ void AssetsBrowser::openAsset(AssetType type, const String& assetId)
 {
 	getWidgetAs<UITextInput>("assetSearch")->setText("");
 	Path target;
-	if (type == AssetType::Sprite) {
+	if (false && type == AssetType::Sprite) {
 		auto ssAssetId = project.getGameResources().get<SpriteResource>(assetId)->getSpriteSheet()->getAssetId();
 		target = project.getImportAssetsDatabase().getPrimaryInputFile(AssetType::SpriteSheet, ssAssetId);
 	} else {

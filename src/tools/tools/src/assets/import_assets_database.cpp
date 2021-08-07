@@ -4,7 +4,7 @@
 #include "halley/resources/resource_data.h"
 #include "halley/tools/file/filesystem.h"
 
-constexpr static int currentAssetVersion = 89;
+constexpr static int currentAssetVersion = 90;
 
 using namespace Halley;
 

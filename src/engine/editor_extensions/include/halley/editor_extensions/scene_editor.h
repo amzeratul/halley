@@ -70,7 +70,9 @@ namespace Halley {
 
 		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() override;
 
-		std::vector<std::pair<String, String>> getRightClickMenu(const Vector2f& mousePos) const override;
+		std::vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const override;
+    	void onSceneContextMenuSelection(const String& id) override;
+    	void onSceneContextMenuHighlight(const String& id) override;
     
     protected:
     	Camera camera;
@@ -112,6 +114,7 @@ namespace Halley {
 		std::vector<EntityId> cameraEntityIds;
     	
 		std::optional<EntityRef> selectedEntity;
+    	std::optional<EntityRef> forceFocusEntity;
     	EntityRef focusedEntity;
 		EntityRef entityHighlightedOnList;
     	bool focusEntityEnabled = false;

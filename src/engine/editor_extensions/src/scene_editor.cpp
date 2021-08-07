@@ -15,6 +15,7 @@
 #include "components/camera_component.h"
 #include "halley/entity/scripting/script_node_type.h"
 #include "halley/utils/algorithm.h"
+#include "halley/ui/widgets/ui_popup_menu.h"
 
 using namespace Halley;
 
@@ -267,6 +268,10 @@ void SceneEditor::setEntityHighlightedOnList(const UUID& id)
 
 EntityRef SceneEditor::getEntityToFocus()
 {
+	if (forceFocusEntity) {
+		return forceFocusEntity.value();
+	}
+	
 	if (!focusEntityEnabled) {
 		return EntityRef();
 	}
@@ -528,9 +533,27 @@ std::shared_ptr<ScriptNodeTypeCollection> SceneEditor::getScriptNodeTypes()
 	return std::make_shared<ScriptNodeTypeCollection>();
 }
 
-std::vector<std::pair<String, String>> SceneEditor::getRightClickMenu(const Vector2f& mousePos) const
+std::vector<UIPopupMenuItem> SceneEditor::getSceneContextMenu(const Vector2f& mousePos) const
 {
 	return {};
+}
+
+void SceneEditor::onSceneContextMenuSelection(const String& id)
+{
+	if (id.startsWith("scene:")) {
+		editorInterface->openAsset(AssetType::Scene, id.mid(6));
+	} else if (id.startsWith("entity:")) {
+		editorInterface->selectEntity(id.mid(7));
+	}
+}
+
+void SceneEditor::onSceneContextMenuHighlight(const String& id)
+{
+	if (id.isEmpty()) {
+		forceFocusEntity.reset();
+	} else if (id.startsWith("entity:")) {
+		forceFocusEntity = getEntity(UUID(id.mid(7)));
+	}
 }
 
 Vector2f SceneEditor::roundPosition(Vector2f pos) const

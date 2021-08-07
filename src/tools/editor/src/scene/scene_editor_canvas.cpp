@@ -209,30 +209,26 @@ void SceneEditorCanvas::openRightClickMenu()
 {
 	if (gameBridge && gameBridge->getMousePos() && inputState.rawMousePos) {
 		const auto& mousePos = gameBridge->getMousePos().value();
-		const auto menuOptions = gameBridge->getRightClickMenu(mousePos);
+		const auto menuOptions = gameBridge->getSceneContextMenu(mousePos);
 
 		if (menuOptions.empty()) {
 			return;
 		}
 		
-		std::vector<UIPopupMenuItem> menuItems;
-		for (const auto& option : menuOptions) {
-			if (option.first == "scene") {
-				menuItems.push_back(UIPopupMenuItem(
-					option.second + ":" + option.first,
-					LocalisedString::fromHardcodedString("Open Scene: " + option.second),
-					LocalisedString::fromHardcodedString("Opens the scene " + option.second + " in a new tab.")));
-			}
-		}
-
-		auto menu = std::make_shared<UIPopupMenu>("scene_editor_canvas_popup", factory.getStyle("popupMenu"), menuItems);
+		auto menu = std::make_shared<UIPopupMenu>("scene_editor_canvas_popup", factory.getStyle("popupMenu"), menuOptions);
 		menu->setAnchor(UIAnchor(Vector2f(), Vector2f(), inputState.rawMousePos.value()));
 
-		menu->setHandle(UIEventType::PopupAccept, [this, menuOptions](const UIEvent& e) {
-			const auto& option = menuOptions.at(e.getIntData());
-			if (option.first == "scene") {
-				editorWindow->openAsset(AssetType::Scene, option.second);
-			}
+		menu->setHandle(UIEventType::PopupAccept, [this] (const UIEvent& e) {
+			gameBridge->onSceneContextMenuSelection(e.getStringData());
+			gameBridge->onSceneContextMenuHighlight("");
+		});
+
+		menu->setHandle(UIEventType::PopupHoveredChanged, [this] (const UIEvent& e) {
+			gameBridge->onSceneContextMenuHighlight(e.getStringData());
+		});
+
+		menu->setHandle(UIEventType::PopupCanceled, [this] (const UIEvent& e) {
+			gameBridge->onSceneContextMenuHighlight("");
 		});
 
 		getRoot()->addChild(menu);

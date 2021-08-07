@@ -8,7 +8,7 @@
 using namespace Halley;
 
 
-std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String spriteName, gsl::span<const gsl::byte> fileData, bool trim, int padding, bool groupSeparated, bool sequenceSeparated)
+std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(const String& spriteName, const Path& filename, gsl::span<const gsl::byte> fileData, bool trim, int padding, bool groupSeparated, bool sequenceSeparated)
 {
 	const String baseName = Path(spriteName).getFilename().string();
 
@@ -67,7 +67,7 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String s
 				
 				std::vector<ImageData> groupFrameData;
 				auto firstImage = frameData.find(name) == frameData.end();
-				addImageData(i, frameN, groupFrameData, std::move(groupFrameImage.second), aseFile, baseName, sequence, direction, duration, trim, padding, hasFrameNumber, name, firstImage, spriteName);
+				addImageData(i, frameN, groupFrameData, std::move(groupFrameImage.second), aseFile, baseName, sequence, direction, duration, trim, padding, hasFrameNumber, name, firstImage, spriteName, filename);
 				
 				if(frameData.find(name) == frameData.end())
 				{
@@ -84,7 +84,7 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(String s
 
 void AsepriteReader::addImageData(int tagFrameNumber, int origFrameNumber, std::vector<ImageData>& frameData, std::unique_ptr<Image> frameImage, const AsepriteFile& aseFile,
 	const String& baseName, const String& sequence, const String& direction, int duration, bool trim, int padding, bool hasFrameNumber, std::optional<String> group,
-	bool firstImage, const String& spriteName)
+	bool firstImage, const String& spriteName, const Path& filename)
 {
 	frameData.emplace_back();
 	auto& imgData = frameData.back();
@@ -124,5 +124,5 @@ void AsepriteReader::addImageData(int tagFrameNumber, int origFrameNumber, std::
 		firstImage = false;
 		imgData.filenames.emplace_back(":img:" + spriteName + (!group->isEmpty() ? ":" + group.value() : ""));
 	}
-	imgData.origFilename = spriteName;
+	imgData.origFilename = filename.toString();
 }

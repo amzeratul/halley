@@ -12,7 +12,6 @@ using namespace Halley;
 
 UITextInput::UITextInput(String id, UIStyle style, String text, LocalisedString ghostText, std::shared_ptr<UIValidator> validator)
 	: UIWidget(std::move(id), Vector2f(style.getFloat("minSize"), style.getFloat("minSize")), UISizer(UISizerType::Vertical), style.getBorder("innerBorder"))
-	, style(style)
 	, sprite(style.getSprite("box"))
 	, caret(style.getSprite("caret"))
 	, label(style.getTextRenderer("label"))
@@ -20,6 +19,7 @@ UITextInput::UITextInput(String id, UIStyle style, String text, LocalisedString 
 	, text(text.getUTF32())
 	, ghostText(std::move(ghostText))
 {
+	styles.emplace_back(std::move(style));
 	label.setText(text);
 	setValidator(std::move(validator));
 }

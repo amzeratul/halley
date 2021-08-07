@@ -21,21 +21,76 @@ namespace Halley {
 	};
 
 	using UIDebugConsoleCallback = std::function<UIDebugConsoleResponse(std::vector<String>)>;
-	using UIDebugConsoleCallbackPair = std::pair<ExecutionQueue*, UIDebugConsoleCallback>;
+
+	class UIDebugConsoleSyntax {
+	public:
+		using Callback = std::function<std::vector<String>()>;
+		
+		struct Arg {
+			String name;
+			String type;
+			Callback validOptionsCallback;
+
+			Arg() = default;
+			Arg(String name, String type) : name(std::move(name)), type(std::move(type)) {}
+			Arg(String name, Callback validOptions) : name(std::move(name)), type("enum"), validOptionsCallback(std::move(validOptions)) {}
+
+			bool checkArgument(const String& arg) const;
+		};
+		
+		struct Variant {
+			std::vector<Arg> args;
+
+			Variant() = default;
+			Variant(std::initializer_list<Arg> args) : args(std::move(args)) {}
+			Variant(Arg arg) { args.emplace_back(std::move(arg)); }
+			String getSyntax() const;
+		};
+
+		UIDebugConsoleSyntax() = default;
+		UIDebugConsoleSyntax(std::initializer_list<Arg> args);
+		UIDebugConsoleSyntax(std::initializer_list<Variant> variants);
+		
+		bool hasSyntax() const;
+		std::optional<String> checkSyntax(const String& command, gsl::span<const String> args) const;
+		std::vector<StringUTF32> getAutoComplete(const StringUTF32& line) const;
+
+	private:
+		std::vector<Variant> variants;
+
+		struct VariantMatch {
+			OptionalLite<size_t> variantN;
+			size_t argN;
+			size_t argStart;
+			OptionalLite<size_t> invalidArg;
+		};
+		VariantMatch getVariantMatch(const String& line, bool validate) const;
+		VariantMatch getVariantMatch(const String& command, gsl::span<const String> args, bool validate) const;
+	};
+
+	struct UIDebugConsoleCommandData {
+		UIDebugConsoleCallback callback;
+		ExecutionQueue* queue = nullptr;
+		UIDebugConsoleSyntax syntax;
+	};
 
 	class UIDebugConsoleCommands {
 	public:
 		void addCommand(String command, UIDebugConsoleCallback callback);
+		void addCommand(String command, UIDebugConsoleCallback callback, UIDebugConsoleSyntax syntax);
 		void addAsyncCommand(String command, ExecutionQueue& queue, UIDebugConsoleCallback callback);
+		void addAsyncCommand(String command, ExecutionQueue& queue, UIDebugConsoleCallback callback, UIDebugConsoleSyntax syntax);
 
-		const std::map<String, UIDebugConsoleCallbackPair>& getCommands() const;
+		const std::map<String, UIDebugConsoleCommandData>& getCommands() const;
 
 	private:
-		std::map<String, UIDebugConsoleCallbackPair> commands;
+		std::map<String, UIDebugConsoleCommandData> commands;
 	};
 
 	class UIDebugConsoleController {
 	public:
+		UIDebugConsoleController();
+
 		Future<UIDebugConsoleResponse> runCommand(String command, std::vector<String> args);
 		String runHelp();
 		
@@ -47,6 +102,7 @@ namespace Halley {
 
 	private:
 		std::vector<UIDebugConsoleCommands*> commands;
+		std::unique_ptr<UIDebugConsoleCommands> baseCommandSet;
 	};
 
     class UIDebugConsole : public UIWidget {

@@ -247,6 +247,11 @@ bool SceneEditorGameBridge::saveAsset(const Path& path, gsl::span<const gsl::byt
 	return project.writeAssetToDisk(path, data);
 }
 
+void SceneEditorGameBridge::openAsset(AssetType assetType, const String& assetId)
+{
+	sceneEditorWindow.openAsset(assetType, assetId);
+}
+
 void SceneEditorGameBridge::addTask(std::unique_ptr<Task> task)
 {
 	projectWindow.addTask(std::move(task));
@@ -272,6 +277,26 @@ void SceneEditorGameBridge::setAssetSetting(std::string_view id, ConfigNode data
 	projectWindow.setAssetSetting(sceneEditorWindow.getAssetKey(), id, std::move(data));
 }
 
+void SceneEditorGameBridge::selectEntity(const String& uuid)
+{
+	sceneEditorWindow.selectEntity(uuid);
+}
+
+Sprite SceneEditorGameBridge::getEntityIcon(const String& uuid)
+{
+	const auto& entityData = sceneEditorWindow.getSceneData()->getEntityNodeData(uuid).getData();
+	String icon;
+	if (!entityData.getIcon().isEmpty()) {
+		icon = entityData.getIcon();
+	} else if (!entityData.getPrefab().isEmpty()) {
+		if (gameResources->exists<Prefab>(entityData.getPrefab())) {
+			const auto prefab = gameResources->get<Prefab>(entityData.getPrefab());
+			icon = prefab->getPrefabIcon();
+		}
+	}
+	return sceneEditorWindow.getEntityIcons().getIcon(icon);
+}
+
 void SceneEditorGameBridge::refreshAssets()
 {
 	if (interfaceReady) {
@@ -287,13 +312,27 @@ std::shared_ptr<ScriptNodeTypeCollection> SceneEditorGameBridge::getScriptNodeTy
 	return {};
 }
 
-std::vector<std::pair<String, String>> SceneEditorGameBridge::getRightClickMenu(const Vector2f& mousePos) const
+std::vector<UIPopupMenuItem> SceneEditorGameBridge::getSceneContextMenu(const Vector2f& mousePos) const
 {
 	if (interfaceReady) {
-		return interface->getRightClickMenu(mousePos);
+		return interface->getSceneContextMenu(mousePos);
 	}
 
-	return std::vector<std::pair<String, String>>();
+	return {};
+}
+
+void SceneEditorGameBridge::onSceneContextMenuSelection(const String& id)
+{
+	if (interfaceReady) {
+		interface->onSceneContextMenuSelection(id);
+	}
+}
+
+void SceneEditorGameBridge::onSceneContextMenuHighlight(const String& id)
+{
+	if (interfaceReady) {
+		interface->onSceneContextMenuHighlight(id);
+	}
 }
 
 void SceneEditorGameBridge::load()

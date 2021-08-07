@@ -160,7 +160,7 @@ void MetadataEditor::addDropdownField(const String& name, const String& key, std
 
 void MetadataEditor::makeLabel(const String& name)
 {
-	fields->add(std::make_shared<UILabel>("", factory.getStyle("label").getTextRenderer("label"), LocalisedString::fromUserString(name)), 0, Vector4f(0, 0, 10, 0), UISizerAlignFlags::CentreVertical);
+	fields->add(std::make_shared<UILabel>("", factory.getStyle("label"), LocalisedString::fromUserString(name)), 0, Vector4f(0, 0, 10, 0), UISizerAlignFlags::CentreVertical);
 }
 
 template <typename T>

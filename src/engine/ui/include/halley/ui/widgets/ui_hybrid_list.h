@@ -16,7 +16,6 @@ namespace Halley {
 		void setDividerActive(const String& id, bool active);
 
     private:
-		UIStyle style;
 		std::shared_ptr<UIList> list;
 		std::shared_ptr<UIWidget> buttons;
 		std::shared_ptr<UIWidget> cancelButton;

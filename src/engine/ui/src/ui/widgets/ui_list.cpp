@@ -9,18 +9,24 @@ using namespace Halley;
 
 UIList::UIList(String id, UIStyle style, UISizerType orientation, int nColumns)
 	: UIWidget(std::move(id), {}, UISizer(orientation, style.getFloat("gap"), nColumns), style.getBorder("innerBorder"))
-	, style(style)
 	, orientation(orientation)
 	, nColumns(nColumns)
 {
+	styles.emplace_back(style);
 	getSizer().setEvenColumns();
 	sprite = style.getSprite("background");
 
 	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event) {});
 	setHandle(UIEventType::SetHovered, [=] (const UIEvent& event) {
+		const auto hoveredChild = std::find_if(getChildren().begin(), getChildren().end(), [=](std::shared_ptr<UIWidget> child) { return child->getId() == event.getSourceId(); });
+		const auto childIdx = int(hoveredChild - getChildren().begin());
+
 		if (event.getBoolData()) {
-			const auto hoveredChild = std::find_if(getChildren().begin(), getChildren().end(), [=](std::shared_ptr<UIWidget> child) { return child->getId() == event.getStringData(); });
-			sendEvent(UIEvent(UIEventType::ListHoveredChanged, getId(), event.getSourceId(), int(hoveredChild - getChildren().begin())));
+			curHover = childIdx;
+			sendEvent(UIEvent(UIEventType::ListHoveredChanged, getId(), event.getSourceId(), curHover));
+		} else if (curHover == childIdx) {
+			curHover = -1;
+			sendEvent(UIEvent(UIEventType::ListHoveredChanged, getId(), "", -1));
 		}
 	});
 }
@@ -30,7 +36,7 @@ void UIList::setOrientation(UISizerType orientation, int nColumns)
 	Expects(items.empty());
 	
 	if (orientation != this->orientation || nColumns != this->nColumns) {
-		setSizer(UISizer(orientation, style.getFloat("gap"), nColumns));
+		setSizer(UISizer(orientation, styles.at(0).getFloat("gap"), nColumns));
 		getSizer().setEvenColumns();
 		this->orientation = orientation;
 		this->nColumns = nColumns;
@@ -68,7 +74,7 @@ bool UIList::setSelectedOption(int option)
 		auto curItem = getItem(curOption);
 		curItem->setSelected(true);
 
-		playSound(style.getString("selectionChangedSound"));
+		playSound(styles.at(0).getString("selectionChangedSound"));
 
 		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), curItem->getId(), curOption));
 		if (scrollToSelection) {
@@ -106,12 +112,13 @@ size_t UIList::getCount() const
 
 UIStyle UIList::getStyle() const
 {
-	return style;
+	return styles.at(0);
 }
 
 std::shared_ptr<UILabel> UIList::makeLabel(String id, LocalisedString label, float maxWidth) const
 {
-	auto widget = std::make_shared<UILabel>(std::move(id), style.getTextRenderer("label"), std::move(label));
+	const auto& style = styles.at(0);
+	auto widget = std::make_shared<UILabel>(std::move(id), style, std::move(label));
 	if (maxWidth > 0) {
 		widget->setMaxWidth(maxWidth);
 	}
@@ -135,6 +142,7 @@ std::shared_ptr<UIListItem> UIList::addTextItem(const String& id, LocalisedStrin
 
 std::shared_ptr<UIListItem> UIList::addTextItemAligned(const String& id, LocalisedString label, float maxWidth, Vector4f border, int fillFlags, std::optional<LocalisedString> tooltip)
 {
+	const auto& style = styles.at(0);
 	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
 	if (tooltip) {
 		item->setToolTip(tooltip.value());
@@ -143,8 +151,23 @@ std::shared_ptr<UIListItem> UIList::addTextItemAligned(const String& id, Localis
 	return addItem(item);
 }
 
+std::shared_ptr<UIListItem> UIList::addTextIconItem(const String& id, LocalisedString label, Sprite icon, float maxWidth, Vector4f border, int fillFlags, std::optional<LocalisedString> tooltip)
+{
+	const auto& style = styles.at(0);
+	auto item = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
+	if (tooltip) {
+		item->setToolTip(tooltip.value());
+	}
+	if (icon.hasMaterial()) {
+		item->add(std::make_shared<UIImage>(icon), 0, Vector4f(0, 0, 4, 0));
+	}
+	item->add(makeLabel(id + "_label", std::move(label), maxWidth), 0, border, fillFlags);
+	return addItem(item);
+}
+
 std::shared_ptr<UIListItem> UIList::addImage(const String& id, std::shared_ptr<UIImage> image, float proportion, Vector4f border, int fillFlags, std::optional<UIStyle> styleOverride)
 {
+	const auto& style = styles.at(0);
 	Colour4f baseCol;
 	if (style.hasColour("imageColour")) {
 		baseCol = style.getColour("imageColour");
@@ -164,7 +187,7 @@ std::shared_ptr<UIListItem> UIList::addImage(const String& id, std::shared_ptr<U
 
 std::shared_ptr<UIListItem> UIList::addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, std::optional<UIStyle> styleOverride)
 {
-	const auto& itemStyle = styleOverride ? *styleOverride : style;
+	const auto& itemStyle = styleOverride ? *styleOverride : styles.at(0);
 	auto item = std::make_shared<UIListItem>(id, *this, itemStyle.getSubStyle("item"), int(getNumberOfItems()), itemStyle.getBorder("extraMouseBorder"));
 	item->add(element, proportion, border, fillFlags);
 	return addItem(item);

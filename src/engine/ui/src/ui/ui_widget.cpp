@@ -736,6 +736,16 @@ void UIWidget::setToolTip(LocalisedString toolTip)
 	this->toolTip = std::move(toolTip);
 }
 
+bool UIWidget::hasStyle() const
+{
+	return !styles.empty();
+}
+
+const std::vector<UIStyle>& UIWidget::getStyles() const
+{
+	return styles;
+}
+
 void UIWidget::draw(UIPainter& painter) const
 {
 }

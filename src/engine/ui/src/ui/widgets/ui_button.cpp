@@ -8,9 +8,9 @@ using namespace Halley;
 
 UIButton::UIButton(String id, UIStyle s, std::optional<UISizer> sizer)
 	: UIClickable(std::move(id), s.getSprite("normal").getScaledSize(), std::move(sizer), s.getBorder("innerBorder"))
-	, style(s)
 {
-	sprite = style.getSprite("normal");
+	styles.emplace_back(s);
+	sprite = styles.at(0).getSprite("normal");
 	setMinSize(sprite.getUncroppedSize());
 }
 
@@ -94,8 +94,7 @@ void UIButton::setCanDoBorderOnly(bool canDo)
 void UIButton::setLabel(LocalisedString text)
 {
 	if (!label) {
-		const auto& renderer = style.getTextRenderer("label");
-
+		const auto& style = styles.at(0);
 		bool existed = false;
 		if (const auto existingLabel = tryGetWidgetAs<UILabel>(getId() + "_label")) {
 			label = existingLabel;
@@ -103,7 +102,7 @@ void UIButton::setLabel(LocalisedString text)
 			existed = true;
 		}
 		else {
-			label = std::make_shared<UILabel>(getId() + "_label", renderer, std::move(text));
+			label = std::make_shared<UILabel>(getId() + "_label", style, std::move(text));
 		}
 
 		if (style.hasTextRenderer("hoveredLabel")) {
@@ -127,6 +126,7 @@ void UIButton::setLabel(LocalisedString text)
 void UIButton::setIcon(Sprite icon)
 {
 	if (!iconImage) {
+		const auto& style = styles.at(0);
 		iconImage = std::make_shared<UIImage>(icon);
 		const auto iconColour = (style.hasColour("iconColour") ? style.getColour("iconColour") : Colour4f(1, 1, 1, 1)) * icon.getColour();
 		
@@ -144,6 +144,7 @@ void UIButton::setIcon(Sprite icon)
 
 void UIButton::doSetState(State state)
 {
+	const auto& style = styles.at(0);
 	if (borderOnly) {
 		sprite = style.getSprite("borderOnly");
 	} else {
@@ -173,6 +174,7 @@ void UIButton::doSetState(State state)
 void UIButton::onStateChanged(State prev, State next)
 {
 	if (isEnabled() && !borderOnly && prev != next) {
+		const auto& style = styles.at(0);
 		if (next == State::Up) {
 			playSound(style.getString("upSound"));
 		} else if (next == State::Down) {
@@ -185,5 +187,5 @@ void UIButton::onStateChanged(State prev, State next)
 
 void UIButton::onShortcutPressed()
 {
-	playSound(style.getString("shortcutPressedSound"));
+	playSound(styles.at(0).getString("shortcutPressedSound"));
 }

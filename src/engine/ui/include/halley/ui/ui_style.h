@@ -12,6 +12,7 @@ namespace Halley {
 		bool hasSubStyle(const String& name) const;
 		UIStyle getSubStyle(const String& name) const;
 
+		const String& getName() const;
 		const Sprite& getSprite(const String& name) const;
 		const TextRenderer& getTextRenderer(const String& name) const;
 		bool hasTextRenderer(const String& name) const;

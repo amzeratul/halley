@@ -86,7 +86,6 @@ namespace Halley {
 		void navigateHistory(int delta);
 		void updateHistoryOnTextModified();
 
-		UIStyle style;
 		Sprite sprite;
 		Sprite caret;
 		TextRenderer label;

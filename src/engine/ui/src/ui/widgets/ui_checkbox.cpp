@@ -6,9 +6,9 @@ using namespace Halley;
 
 UICheckbox::UICheckbox(String id, UIStyle style, bool checked)
 	: UIClickable(id, {})
-	, style(style)
 	, checked(checked)
 {
+	styles.emplace_back(std::move(style));
 	UICheckbox::doSetState(State::Up);
 	setMinSize(sprite.getScaledSize().abs());
 }
@@ -48,6 +48,7 @@ void UICheckbox::onClicked(Vector2f)
 
 void UICheckbox::doSetState(State state)
 {
+	const auto& style = styles.at(0);
 	if (isEnabled()) {
 		if (state == State::Hover || state == State::Down) {
 			sprite = checked ? style.getSprite("checkedHover") : style.getSprite("hover");

@@ -8,7 +8,8 @@
 namespace Halley {
 	class UILabel : public UIWidget {
 	public:
-		explicit UILabel(String id, TextRenderer style, LocalisedString text);
+		explicit UILabel(String id, UIStyle style, LocalisedString text);
+		explicit UILabel(String id, UIStyle style, TextRenderer renderer, LocalisedString text);
 		~UILabel();
 
 		void setText(const LocalisedString& text);
@@ -34,7 +35,7 @@ namespace Halley {
 
 		void setColour(Colour4f colour);		
 		Colour4f getColour() const;
-
+		
 		void setSelectable(TextRenderer normalRenderer, TextRenderer selectedRenderer);
 		void setDisablable(TextRenderer normalRenderer, TextRenderer disabledRenderer);
 		void setHoverable(TextRenderer normalRenderer, TextRenderer hoveredRenderer);

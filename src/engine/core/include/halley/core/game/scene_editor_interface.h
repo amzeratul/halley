@@ -38,6 +38,8 @@ namespace Halley {
 	class UIColourScheme;
 	class SceneEditorGizmo;
 	class UIList;
+	class EntityIcons;
+	struct UIPopupMenuItem;
     struct EntityId;
 	struct SceneEditorInputState;
 	struct SceneEditorOutputState;
@@ -54,12 +56,16 @@ namespace Halley {
 		virtual ~IEditorInterface() = default;
 
 		virtual bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) = 0;
+		virtual void openAsset(AssetType assetType, const String& assetId) = 0;
 		virtual void addTask(std::unique_ptr<Task> task) = 0;
 
 		virtual const ConfigNode& getSetting(EditorSettingType type, std::string_view id) const = 0;
 		virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;
 		virtual const ConfigNode& getAssetSetting(std::string_view id) const = 0;
 		virtual void setAssetSetting(std::string_view id, ConfigNode data) = 0;
+
+		virtual void selectEntity(const String& uuid) = 0;
+		virtual Sprite getEntityIcon(const String& uuid) = 0;
 	};
 
     class SceneEditorContext {
@@ -131,7 +137,9 @@ namespace Halley {
 
     	virtual std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() = 0;
     	
-        virtual std::vector<std::pair<String, String>> getRightClickMenu(const Vector2f& mousePos) const = 0;
+        virtual std::vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const = 0;
+        virtual void onSceneContextMenuSelection(const String& id) = 0;
+    	virtual void onSceneContextMenuHighlight(const String& id) = 0;
     };
 
 	class EntityTree {
