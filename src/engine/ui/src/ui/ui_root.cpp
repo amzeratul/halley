@@ -69,7 +69,7 @@ void UIRoot::runLayout()
 
 void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual)
 {
-	auto joystickType = manual->getJoystickType();
+	auto joystickType = manual ? manual->getJoystickType() : JoystickType::Generic;
 	bool first = true;
 
 	updateKeyboardInput();
@@ -137,6 +137,10 @@ void UIRoot::updateGamepadInputTree(const spInputDevice& input, UIWidget& widget
 
 void UIRoot::updateGamepadInput(const spInputDevice& input)
 {
+	if (!input) {
+		return;
+	}
+	
 	auto& cs = getChildren();
 	std::vector<UIWidget*> inputTargets;
 	UIGamepadInput::Priority bestPriority = UIGamepadInput::Priority::Lowest;
