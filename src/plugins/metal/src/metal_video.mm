@@ -58,7 +58,6 @@ void MetalVideo::initSwapChain(Window& window) {
 	SDL_SetHint(SDL_HINT_RENDER_DRIVER, "metal");
 	SDL_Renderer *renderer = SDL_CreateRenderer(sdl_window, -1, SDL_RENDERER_PRESENTVSYNC);
 	swap_chain = static_cast<CAMetalLayer*>(SDL_RenderGetMetalLayer(renderer));
-	SDL_DestroyRenderer(renderer);
 	swap_chain.pixelFormat = MTLPixelFormatBGRA8Unorm;
 	device = swap_chain.device;
 	command_queue = [device newCommandQueue];
