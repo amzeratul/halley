@@ -832,12 +832,17 @@ StringUTF32 String::getUTF32() const
 	return result;
 }
 
-size_t Halley::String::getUTF32Len() const
+size_t String::getUTF32Len() const
 {
-	size_t len = length();
+	return getUTF32Len(*this);
+}
+
+size_t String::getUTF32Len(std::string_view str)
+{
+	size_t len = str.length();
 	size_t result = 0;
-	for (size_t i=0; i<len;) {
-		unsigned int c0 = static_cast<unsigned char>(operator[](i++));
+	for (size_t i = 0; i < len;) {
+		unsigned int c0 = static_cast<unsigned char>(str[i++]);
 
 		// 1 byte
 		if ((c0 >> 7) == 0) {
@@ -850,12 +855,12 @@ size_t Halley::String::getUTF32Len() const
 
 		// 3 bytes
 		else if ((c0 >> 4) == 0x0E) {
-			i+=2;
+			i += 2;
 		}
 
 		// 4 bytes
 		else if ((c0 >> 3) == 0x1E) {
-			i+=3;
+			i += 3;
 		}
 
 		result++;
