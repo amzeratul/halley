@@ -268,7 +268,7 @@ void UITextInput::update(Time t, bool moved)
 	label.setText(text.getText());
 
 	// Position the text
-	const float length = label.getExtents().x;
+	const float length = label.empty() ? ghostLabel.getExtents().x : label.getExtents().x;
 	const auto textBounds = getTextBounds();
 	if (length > textBounds.getWidth()) {
 		textScrollPos.x = clamp(textScrollPos.x, std::max(0.0f, caretPhysicalPos - textBounds.getWidth()), std::min(length - textBounds.getWidth(), caretPhysicalPos));

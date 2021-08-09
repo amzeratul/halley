@@ -24,7 +24,7 @@ void SelectAssetWidget::setValue(const String& newValue)
 	if (newValue != value) {
 		value = newValue;
 		input->setText(getDisplayName());
-		input->setToolTip(LocalisedString::fromUserString(value));
+		updateToolTip();
 		notifyDataBind(value);
 		sendEvent(UIEvent(UIEventType::TextChanged, getId(), value));
 	}
@@ -40,6 +40,15 @@ void SelectAssetWidget::setGameResources(Resources& resources)
 	gameResources = &resources;
 }
 
+void SelectAssetWidget::setDefaultAssetId(String assetId)
+{
+	defaultAssetId = std::move(assetId);
+	if (input) {
+		input->setGhostText(LocalisedString::fromUserString(getDisplayName(defaultAssetId)));
+		updateToolTip();
+	}
+}
+
 void SelectAssetWidget::makeUI()
 {
 	add(factory.makeUI("ui/halley/select_asset_widget"), 1);
@@ -47,6 +56,7 @@ void SelectAssetWidget::makeUI()
 	input = getWidgetAs<UITextInput>("input");
 	input->setIcon(factory.makeAssetTypeIcon(type), Vector4f(-2, 0, 2, 0));
 	input->setReadOnly(true);
+	input->setGhostText(LocalisedString::fromUserString(getDisplayName(defaultAssetId)));
 
 	setHandle(UIEventType::ButtonClicked, "choose", [=] (const UIEvent& event)
 	{
@@ -55,7 +65,8 @@ void SelectAssetWidget::makeUI()
 
 	setHandle(UIEventType::ButtonClicked, "goto", [=] (const UIEvent& event)
 	{
-		sendEvent(UIEvent(UIEventType::NavigateTo, getId(), "asset:" + type + ":" + value));
+		auto uri = "asset:" + type + ":" + (value.isEmpty() ? defaultAssetId : value);
+		sendEvent(UIEvent(UIEventType::NavigateTo, getId(), std::move(uri)));
 	});
 }
 
@@ -71,6 +82,11 @@ void SelectAssetWidget::choose()
 	}
 }
 
+void SelectAssetWidget::updateToolTip()
+{
+	input->setToolTip(LocalisedString::fromUserString(value.isEmpty() ? defaultAssetId : value));
+}
+
 void SelectAssetWidget::readFromDataBind()
 {
 	setValue(getDataBind()->getStringData());
@@ -78,9 +94,14 @@ void SelectAssetWidget::readFromDataBind()
 
 String SelectAssetWidget::getDisplayName() const
 {
+	return getDisplayName(value);
+}
+
+String SelectAssetWidget::getDisplayName(const String& name) const
+{
 	if (type == AssetType::Sprite || type == AssetType::Animation) {
-		return Path(value).getFilename().toString();
+		return Path(name).getFilename().toString();
 	} else {
-		return value;
+		return name;
 	}
 }
