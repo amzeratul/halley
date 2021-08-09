@@ -321,12 +321,10 @@ public:
 		auto& fieldData = data.getFieldData();
 		fieldData.ensureType(ConfigNodeType::Map);
 
+		auto prevTextures = std::make_shared<std::vector<std::shared_ptr<IUIElement>>>();
+
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 		container->getSizer().setColumnProportions({{0, 1}});
-		container->add(context.makeLabel("image0"));
-		container->add(std::make_shared<SelectAssetWidget>("image", context.getUIFactory(), AssetType::Sprite, context.getGameResources()));
-		container->add(context.makeLabel("image1"));
-		container->add(std::make_shared<SelectAssetWidget>("image1", context.getUIFactory(), AssetType::Sprite, context.getGameResources()));
 		container->add(context.makeLabel("material"));
 		container->add(std::make_shared<SelectAssetWidget>("material", context.getUIFactory(), AssetType::MaterialDefinition, context.getGameResources()));
 		container->add(context.makeLabel("colour"));
@@ -339,30 +337,74 @@ public:
 		container->add(context.makeField("bool", pars.withSubKey("visible", "true"), ComponentEditorLabelCreation::Never));
 		auto containerWeak = std::weak_ptr<UIWidget>(container);
 
-		container->bindData("image", fieldData["image"].asString(""), [&context, data, containerWeak](String newVal)
+		auto addTextures = [&context, containerWeak, prevTextures, data](const String& materialName)
 		{
-			auto material = containerWeak.lock()->getWidgetAs<SelectAssetWidget>("material");
-			if (material->getValue().isEmpty()) {
-				material->setValue(context.getGameResources().get<SpriteResource>(newVal)->getDefaultMaterialName());
+			auto container = containerWeak.lock();
+			if (!container) {
+				return;
 			}
 
-			context.setDefaultName(filterName(newVal), filterName(data.getFieldData()["image"].asString("")));
-
-			data.getFieldData()["image"] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
-			context.onEntityUpdated();
-		});
+			gsl::span<const MaterialTexture> textures;
+			MaterialTexture dummy;
+			if (!materialName.isEmpty() && context.getGameResources().exists<MaterialDefinition>(materialName)) {
+				auto material = context.getGameResources().get<MaterialDefinition>(materialName);
+				textures = material->getTextures();
+			} else {
+				dummy.name = "tex0";
+				textures = gsl::span(&dummy, 1);
+			}
+			
+			for (auto& widget: *prevTextures) {
+				container->remove(*widget);
+			}
+			prevTextures->clear();
+			
+			size_t insertPos = 0;
+			size_t i = 0;
+			for (const auto& tex: textures) {
+				String key = "image" + (i == 0 ? "" : toString(i));
 				
-		container->bindData("image1", fieldData["image1"].asString(""), [&context, data](String newVal)
-		{
-			data.getFieldData()["image1"] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
-			context.onEntityUpdated();
-		});
+				const auto label = context.makeLabel(tex.name);
+				const auto widget = std::make_shared<SelectAssetWidget>(key, context.getUIFactory(), AssetType::Sprite, context.getGameResources());
+				container->add(label, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
+				container->add(widget, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
+				prevTextures->push_back(label);
+				prevTextures->push_back(widget);
 
-		container->bindData("material", fieldData["material"].asString(""), [&context, data](String newVal)
+				bool isPrimary = i == 0;
+
+				auto& fieldData = data.getFieldData();
+				container->bindData(key, fieldData[key].asString(""), [&context, data, containerWeak, key, isPrimary](String newVal)
+				{
+					if (isPrimary) {
+						context.setDefaultName(filterName(newVal), filterName(data.getFieldData()[key].asString("")));
+
+						auto material = containerWeak.lock()->getWidgetAs<SelectAssetWidget>("material");
+						if (material->getValue().isEmpty()) {
+							const auto materialName = context.getGameResources().get<SpriteResource>(newVal)->getDefaultMaterialName();
+
+							// Important: run this on main thread. Otherwise, this call will result in addTextures being called again, invalidating this method halfway through its execution.
+							Concurrent::execute(Executors::getMainThread(), [materialName, material]() {
+								material->setValue(materialName);
+							});
+						}
+					}
+
+					data.getFieldData()[key] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
+					context.onEntityUpdated();
+				});
+				
+				i++;
+			}
+		};
+		
+		container->bindData("material", fieldData["material"].asString(""), [&context, data, addTextures](String newVal)
 		{
+			addTextures(newVal);
 			data.getFieldData()["material"] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
+		addTextures(fieldData["material"].asString(""));
 
 		return container;
 	}
