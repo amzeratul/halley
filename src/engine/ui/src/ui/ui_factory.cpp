@@ -183,6 +183,11 @@ void UIFactory::update()
 	styleSheet->updateIfNeeded();
 }
 
+Sprite UIFactory::makeAssetTypeIcon(AssetType type) const
+{
+	return Sprite();
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 {
 	styleSheet->updateIfNeeded();

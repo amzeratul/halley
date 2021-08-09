@@ -64,6 +64,8 @@ namespace Halley
 
 		void update();
 
+		virtual Sprite makeAssetTypeIcon(AssetType type) const;
+
 	protected:
 		struct ParsedOption {
 			String id;

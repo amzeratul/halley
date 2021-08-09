@@ -44,6 +44,9 @@ void SelectAssetWidget::makeUI()
 {
 	add(factory.makeUI("ui/halley/select_asset_widget"), 1);
 
+	const auto icon = getWidgetAs<UIImage>("icon");
+	icon->setSprite(factory.makeAssetTypeIcon(type));
+	
 	input = getWidgetAs<UITextInput>("input");
 	input->setReadOnly(true);
 
