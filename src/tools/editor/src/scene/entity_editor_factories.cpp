@@ -363,16 +363,16 @@ public:
 			size_t i = 0;
 			for (const auto& tex: textures) {
 				String key = "image" + (i == 0 ? "" : toString(i));
+				bool isPrimary = i == 0;
 
 				const auto label = context.makeLabel(tex.name);
 				const auto widget = std::make_shared<SelectAssetWidget>(key, context.getUIFactory(), AssetType::Sprite, context.getGameResources());
 				widget->setDefaultAssetId(tex.defaultTextureName);
+				
 				container->add(label, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
 				container->add(widget, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
 				prevTextures->push_back(label);
 				prevTextures->push_back(widget);
-
-				bool isPrimary = i == 0;
 
 				auto& fieldData = data.getFieldData();
 				container->bindData(key, fieldData[key].asString(""), [&context, data, containerWeak, key, isPrimary](String newVal)
