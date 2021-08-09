@@ -692,7 +692,7 @@ void Sprite::reloadSprite(const SpriteResource& sprite)
 	if (sharedMaterial) {
 		setMaterial(sprite.getMaterial(material->getDefinition().getName()));
 	} else if (material) {
-		material->set("tex0", sprite.getSpriteSheet()->getTexture());
+		material->set(0, sprite.getSpriteSheet()->getTexture());
 	}
 	doSetSprite(sprite.getSprite(), lastAppliedPivot);
 }

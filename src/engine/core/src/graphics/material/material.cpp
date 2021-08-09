@@ -386,7 +386,7 @@ const Vector<MaterialTextureParameter>& Material::getTextureUniforms() const
 
 Material& Material::set(const String& name, const std::shared_ptr<const Texture>& texture)
 {
-	auto& texs = materialDefinition->getTextures();
+	const auto& texs = materialDefinition->getTextures();
 	for (size_t i = 0; i < texs.size(); ++i) {
 		if (texs[i].name == name) {
 			const auto textureUnit = i;
@@ -404,6 +404,25 @@ Material& Material::set(const String& name, const std::shared_ptr<const Texture>
 Material& Material::set(const String& name, const std::shared_ptr<Texture>& texture)
 {
 	return set(name, std::shared_ptr<const Texture>(texture));
+}
+
+Material& Material::set(size_t textureUnit, const std::shared_ptr<const Texture>& texture)
+{
+	const auto& texs = materialDefinition->getTextures();
+	if (textureUnit < texs.size()) {
+		if (textures[textureUnit] != texture) {
+			textures[textureUnit] = texture;
+			needToUpdateHash = true;
+		}
+		return *this;
+	}
+
+	throw Exception("Texture unit \"" + toString(textureUnit) + "\" not available in material \"" + materialDefinition->getName() + "\"", HalleyExceptions::Graphics);
+}
+
+Material& Material::set(size_t textureUnit, const std::shared_ptr<Texture>& texture)
+{
+	return set(textureUnit, std::shared_ptr<const Texture>(texture));
 }
 
 bool Material::hasParameter(const String& name) const
