@@ -2,8 +2,6 @@
 widget: { class: widget }
 sizer: { type: horizontal }
 children:
-- widget: { id: icon, class: image }
-  fill: centre
 - widget: { id: input, class: textInput, style: inputThin }
   proportion: 1
 - widget: { id: choose, class: button, text: "...", style: buttonThin, size: [22, 22], tooltip: "Select Asset" }

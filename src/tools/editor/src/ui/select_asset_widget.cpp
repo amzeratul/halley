@@ -44,10 +44,8 @@ void SelectAssetWidget::makeUI()
 {
 	add(factory.makeUI("ui/halley/select_asset_widget"), 1);
 
-	const auto icon = getWidgetAs<UIImage>("icon");
-	icon->setSprite(factory.makeAssetTypeIcon(type));
-	
 	input = getWidgetAs<UITextInput>("input");
+	input->setIcon(factory.makeAssetTypeIcon(type), Vector4f(-2, 0, 2, 0));
 	input->setReadOnly(true);
 
 	setHandle(UIEventType::ButtonClicked, "choose", [=] (const UIEvent& event)
