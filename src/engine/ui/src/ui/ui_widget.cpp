@@ -604,6 +604,7 @@ void UIWidget::notifyTreeRemovedFromRoot(UIRoot& root)
 {
 	this->root = nullptr;
 	onRemovedFromRoot(root);
+	root.onWidgetRemoved(*this);
 
 	for (auto& c: getChildren()) {
 		c->notifyTreeRemovedFromRoot(root);
