@@ -179,7 +179,7 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 				sprite.setMaterial(newMaterial, true);
 			}
 		} else {
-			sprite.getMutableMaterial().set("tex0", animation->getSpriteSheet().getTexture());
+			sprite.getMutableMaterial().set(0, animation->getSpriteSheet().getTexture());
 		}
 		
 		sprite.setSprite(*spriteData, false);

@@ -199,7 +199,7 @@ void Animation::loadDependencies(ResourceLoader& loader)
 
 	auto matDef = loader.getResources().get<MaterialDefinition>(materialName);
 	material = std::make_shared<Material>(matDef);
-	material->set("tex0", spriteSheet->getTexture());
+	material->set(0, spriteSheet->getTexture());
 
 	for (auto& s: sequences) {
 		for (auto& f : s.frameDefinitions) {

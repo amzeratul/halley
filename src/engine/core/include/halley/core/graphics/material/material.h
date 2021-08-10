@@ -102,7 +102,9 @@ namespace Halley
 
 		Material& set(const String& name, const std::shared_ptr<const Texture>& texture);
 		Material& set(const String& name, const std::shared_ptr<Texture>& texture);
-
+		Material& set(size_t textureUnit, const std::shared_ptr<const Texture>& texture);
+		Material& set(size_t textureUnit, const std::shared_ptr<Texture>& texture);
+		
 		bool hasParameter(const String& name) const;
 
 		template <typename T>

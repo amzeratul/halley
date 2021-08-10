@@ -52,6 +52,7 @@ namespace Halley {
 		std::shared_ptr<UIWidget> getWidgetUnderMouseIncludingDisabled() const;
 		void setFocus(const std::shared_ptr<UIWidget>& newFocus);
 		void focusNext(bool reverse);
+		void onWidgetRemoved(const UIWidget& widget);
 
 		UIWidget* getCurrentFocus() const;
 
@@ -69,7 +70,7 @@ namespace Halley {
 		void makeToolTip(const UIStyle& style);
 
 		Vector2f getLastMousePos() const;
-		
+
 	private:
 		String id;
 		std::shared_ptr<InputKeyboard> keyboard;

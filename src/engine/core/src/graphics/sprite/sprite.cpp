@@ -631,7 +631,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const ConfigNodeSerializationCont
 	if (node.hasKey("image")) {
 		const auto& imageNode = node["image"];
 		if (imageNode.getType() == ConfigNodeType::Del) {
-			sprite.getMutableMaterial().set("tex0", std::shared_ptr<const Texture>());
+			sprite.getMutableMaterial().set(0, std::shared_ptr<const Texture>());
 		} else {
 			sprite.setImage(*context.resources, imageNode.asString(), node["material"].asString(sprite.hasMaterial() ? sprite.getMaterial().getDefinition().getName() : ""));
 		}
@@ -639,11 +639,11 @@ void ConfigNodeSerializer<Sprite>::deserialize(const ConfigNodeSerializationCont
 	if (node.hasKey("image1")) {
 		const auto& imageNode = node["image1"];
 		if (imageNode.getType() == ConfigNodeType::Del) {
-			sprite.getMutableMaterial().set("tex1", std::shared_ptr<const Texture>());
+			sprite.getMutableMaterial().set(1, std::shared_ptr<const Texture>());
 		} else {
 			const auto image1 = context.resources->get<SpriteResource>(imageNode.asString());
 			sprite.setTexRect1(image1->getSprite().coords);
-			sprite.getMutableMaterial().set("tex1", image1->getSpriteSheet()->getTexture());
+			sprite.getMutableMaterial().set(1, image1->getSpriteSheet()->getTexture());
 		}
 	}
 	if (node.hasKey("pivot")) {
@@ -692,7 +692,7 @@ void Sprite::reloadSprite(const SpriteResource& sprite)
 	if (sharedMaterial) {
 		setMaterial(sprite.getMaterial(material->getDefinition().getName()));
 	} else if (material) {
-		material->set("tex0", sprite.getSpriteSheet()->getTexture());
+		material->set(0, sprite.getSpriteSheet()->getTexture());
 	}
 	doSetSprite(sprite.getSprite(), lastAppliedPivot);
 }

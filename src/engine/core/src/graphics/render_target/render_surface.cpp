@@ -42,7 +42,7 @@ void RenderSurface::setSize(Vector2i size)
 			colourTarget->load(std::move(colourDesc));
 
 			if (material) {
-				material->set("tex0", colourTarget);
+				material->set(0, colourTarget);
 			}
 
 			renderTarget = video.createTextureRenderTarget();
