@@ -187,7 +187,7 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 		const auto& componentData = iter->second;
 		for (auto& member: componentData.members) {
 			if (member.canEdit) {
-				ComponentFieldParameters parameters(componentType, ComponentDataRetriever(data, member.name), member.defaultValue);
+				ComponentFieldParameters parameters(componentType, ComponentDataRetriever(data, member.name, member.displayName.isEmpty() ? member.name : member.displayName), member.defaultValue);
 				auto field = entityEditorFactory->makeField(member.type.name, parameters, member.collapse ? ComponentEditorLabelCreation::Never : ComponentEditorLabelCreation::Always);
 				if (field) {
 					componentFields->add(field);
@@ -423,13 +423,13 @@ std::shared_ptr<IUIElement> EntityEditorFactory::makeField(const String& rawFiel
 		return compFieldFactory->createLabelAndField(*context, parameters);
 	} else if (createLabel != ComponentEditorLabelCreation::Never && compFieldFactory && compFieldFactory->isNested()) {
 		auto field = factory.makeUI("ui/halley/entity_editor_compound_field");
-		field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(parameters.data.getName()));
+		field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(parameters.data.getLabelName()));
 		field->getWidget("fields")->add(compFieldFactory->createField(*context, parameters));
 		return field;
 	} else {
 		auto container = std::make_shared<UISizer>();
 		if (createLabel == ComponentEditorLabelCreation::Always) {
-			container->add(makeLabel(parameters.data.getName()), 0, {}, UISizerAlignFlags::CentreVertical);
+			container->add(makeLabel(parameters.data.getLabelName()), 0, {}, UISizerAlignFlags::CentreVertical);
 		}
 
 		if (compFieldFactory) {

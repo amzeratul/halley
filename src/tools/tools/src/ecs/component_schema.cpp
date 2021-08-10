@@ -28,6 +28,7 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				const YAML::Node& memberProperties = m->second;
 				const String type = memberProperties["type"].as<std::string>();
 				const String access = memberProperties["access"].as<std::string>("public");
+				const String displayName = memberProperties["displayName"].as<std::string>("");
 				const bool canEdit = memberProperties["canEdit"].as<bool>(true);
 				const bool canSave = memberProperties["canSave"].as<bool>(true);
 				const bool collapse = memberProperties["collapse"].as<bool>(false);
@@ -52,6 +53,7 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				field.collapse = collapse;
 				field.canEdit = canEdit;
 				field.canSave = canSave;
+				field.displayName = displayName;
 			}
 		}
 	}

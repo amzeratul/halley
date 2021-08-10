@@ -5,8 +5,9 @@
 #include "halley/file_formats/config_file.h"
 using namespace Halley;
 
-ComponentDataRetriever::ComponentDataRetriever(ConfigNode& componentData, String fieldName)
+ComponentDataRetriever::ComponentDataRetriever(ConfigNode& componentData, String fieldName, String labelName)
 	: componentData(componentData)
+	, labelName(std::move(labelName))
 	, name(fieldName)
 {
 	retriever = [&componentData, fieldName] () -> ConfigNode&
@@ -15,8 +16,9 @@ ComponentDataRetriever::ComponentDataRetriever(ConfigNode& componentData, String
 	};
 }
 
-ComponentDataRetriever::ComponentDataRetriever(ConfigNode& componentData, String fieldName, Retriever retriever)
+ComponentDataRetriever::ComponentDataRetriever(ConfigNode& componentData, String fieldName, String labelName, Retriever retriever)
 	: componentData(componentData)
+	, labelName(std::move(labelName))
 	, name(std::move(fieldName))
 	, retriever(std::move(retriever))
 {}
@@ -24,7 +26,7 @@ ComponentDataRetriever::ComponentDataRetriever(ConfigNode& componentData, String
 ComponentDataRetriever ComponentDataRetriever::getSubIndex(size_t index) const
 {
 	auto r = retriever;
-	return ComponentDataRetriever(componentData, name + "[" + toString(index) + "]", [retriever = std::move(r), index] () -> ConfigNode&
+	return ComponentDataRetriever(componentData, name + "[" + toString(index) + "]", labelName, [retriever = std::move(r), index] () -> ConfigNode&
 	{
 		ConfigNode& node = retriever();
 		if (node.getType() == ConfigNodeType::Sequence) {
@@ -40,7 +42,7 @@ ComponentDataRetriever ComponentDataRetriever::getSubIndex(size_t index) const
 ComponentDataRetriever ComponentDataRetriever::getSubKey(const String& key) const
 {
 	auto r = retriever;
-	return ComponentDataRetriever(componentData, name + "[\"" + key + "\"]", [retriever = std::move(r), key] () -> ConfigNode&
+	return ComponentDataRetriever(componentData, name + "[\"" + key + "\"]", labelName, [retriever = std::move(r), key] ()->ConfigNode&
 	{
 		return retriever()[key];
 	});
@@ -54,6 +56,11 @@ ConfigNode& ComponentDataRetriever::getFieldData() const
 const String& ComponentDataRetriever::getName() const
 {
 	return name;
+}
+
+const String& ComponentDataRetriever::getLabelName() const
+{
+	return labelName.isEmpty() ? name : labelName;
 }
 
 ComponentFieldParameters::ComponentFieldParameters(String componentName, ComponentDataRetriever data, std::vector<String> defaultValue, std::vector<String> typeParameters)
