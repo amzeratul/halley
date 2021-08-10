@@ -5,7 +5,7 @@
 using namespace Halley;
 
 TaskBar::TaskBar(UIFactory& ui, TaskSet& taskSet, const HalleyAPI& api)
-	: UIWidget("taskBar", Vector2f(150.0f, 46.0f), {}, Vector4f(160, 8, 10, 4))
+	: UIWidget("taskBar", Vector2f(150.0f, 0.0f), {}, Vector4f(160, 8, 10, 4))
 	, factory(ui)
 	, resources(ui.getResources())
 	, taskSet(taskSet)

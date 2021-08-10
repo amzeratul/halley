@@ -322,8 +322,12 @@ void ProjectWindow::toggleDebugConsole()
 void ProjectWindow::updateDLLStatus(ProjectDLL::Status status)
 {
 	if (status != ProjectDLL::Status::Unloaded) {
-		addTask(std::make_unique<LoadDLLTask>(status));
+		if (!firstDLLLoad || status != ProjectDLL::Status::Loaded) {
+			addTask(std::make_unique<LoadDLLTask>(status));
+		}
 	}
+
+	firstDLLLoad = false;
 }
 
 void ProjectWindow::reloadProject()

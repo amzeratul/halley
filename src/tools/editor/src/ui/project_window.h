@@ -89,6 +89,7 @@ namespace Halley {
     	bool waitingToLoadCustomUI = true;
     	bool hasAssets = false;
     	bool hasDLL = false;
+        bool firstDLLLoad = true;
 
     	std::shared_ptr<AssetsBrowser> assetEditorWindow;
         std::shared_ptr<ConsoleWindow> consoleWindow;
