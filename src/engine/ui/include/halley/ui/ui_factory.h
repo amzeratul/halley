@@ -71,6 +71,7 @@ namespace Halley
 			String id;
 			LocalisedString text;
 			String image;
+			String iconColour;
 			String inactiveImage;
 			String spriteSheet;
 			String sprite;
