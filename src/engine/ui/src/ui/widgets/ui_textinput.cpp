@@ -261,7 +261,7 @@ void UITextInput::update(Time t, bool moved)
 	}
 
 	// Update text labels
-	const bool showGhost = text.getText().empty() && !isFocused();
+	const bool showGhost = text.getText().empty() && (!isFocused() || isReadOnly());
 	const bool showAutoComplete = autoCompleteCurOption.has_value();
 	ghostText.checkForUpdates();
 	ghostLabel.setText(showAutoComplete ? getAutoCompleteCaption() : (showGhost ? ghostText.getString().getUTF32() : StringUTF32()));
