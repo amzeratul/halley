@@ -2,7 +2,7 @@
 name: Halley/StencilView
 base: sprite_base.yaml
 textures:
-  - tex0: stencil2D
+  - image: stencil2D
 passes:
   - blend: Opaque
     shader:

@@ -2,7 +2,7 @@
 name: Halley/SpriteGradient
 base: sprite_base.yaml
 textures:
-  - tex0: sampler2D
+  - image: sampler2D
 passes:
   - blend: Alpha Premultiplied
     shader:
