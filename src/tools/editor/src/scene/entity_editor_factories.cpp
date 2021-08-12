@@ -408,11 +408,20 @@ public:
 
 			for (const auto& block: uniformBlocks) {
 				for (const auto& uniform: block.uniforms) {
+					if (!uniform.editable) {
+						continue;
+					}
+					
 					String key = "par_" + uniform.name;
 					String type;
 
-					if (uniform.type == ShaderParameterType::Float) {
-						type = "float";
+					if (uniform.type == ShaderParameterType::Float || uniform.type == ShaderParameterType::Int) {
+						String typeName = uniform.type == ShaderParameterType::Float ? "float" : "int";
+						if (uniform.range) {
+							type = "Halley::Range<" + typeName + "," + toString(uniform.range->start) + "," + toString(uniform.range->end) + ">";
+						} else {
+							type = typeName;
+						}
 					}
 
 					if (type.isEmpty()) {
@@ -955,6 +964,56 @@ public:
 	}
 };
 
+class ComponentEditorRangeFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::Range<>";
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		const auto data = pars.data;
+		const auto componentName = pars.componentName;
+
+		const bool intType = !pars.typeParameters.empty() && pars.typeParameters[0] == "int";
+
+		auto style = context.getUIFactory().getStyle("slider");
+
+		Range<float> range(0, 1);
+		if (pars.typeParameters.size() == 3) {
+			range = Range<float>(pars.typeParameters[1].toFloat(), pars.typeParameters[2].toFloat());
+		}
+		auto field = std::make_shared<UISlider>("range", style, range.start, range.end);
+		if (intType) {
+			field->setGranularity(1.0f);
+		} else {
+			field->setLabelConversion([](float v) { return LocalisedString::fromUserString(toString(v, 2)); });
+		}
+		field->setMinSize(Vector2f(30, 22));
+
+		if (intType) {
+			const auto& defaultValue = pars.getIntDefaultParameter();
+			const int value = data.getFieldData().asInt(defaultValue);
+			field->bindData("range", value, [&context, data](int newVal)
+			{
+				data.getFieldData() = ConfigNode(newVal);
+				context.onEntityUpdated();
+			});
+		} else {
+			const auto& defaultValue = pars.getFloatDefaultParameter();
+			const float value = data.getFieldData().asFloat(defaultValue);
+			field->bindData("range", value, [&context, data](float newVal)
+			{
+				data.getFieldData() = ConfigNode(newVal);
+				context.onEntityUpdated();
+			});
+		}
+
+		return field;
+	}
+};
+
 std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
 	std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
@@ -979,6 +1038,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorParticlesFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorResourceReferenceFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorScriptGraphFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorRangeFieldFactory>());
 
 	return factories;
 }

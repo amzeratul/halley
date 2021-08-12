@@ -679,11 +679,13 @@ void ConfigNodeSerializer<Sprite>::deserialize(const ConfigNodeSerializationCont
 		// Load material parameters
 		for (const auto& block: material->getUniformBlocks()) {
 			for (const auto& uniform: block.uniforms) {
-				const auto key = "par_" + uniform.name;
-				if (node.hasKey(key)) {
-					const auto& parNode = node[key];
-					if (uniform.type == ShaderParameterType::Float) {
-						sprite.getMutableMaterial().set(uniform.name, parNode.asFloat());
+				if (uniform.editable) {
+					const auto key = "par_" + uniform.name;
+					if (node.hasKey(key)) {
+						const auto& parNode = node[key];
+						if (uniform.type == ShaderParameterType::Float) {
+							sprite.getMutableMaterial().set(uniform.name, parNode.asFloat());
+						}
 					}
 				}
 			}
