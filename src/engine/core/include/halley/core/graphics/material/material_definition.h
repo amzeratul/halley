@@ -119,12 +119,13 @@ namespace Halley
 	{
 	public:
 		String name;
-		ShaderParameterType type;
+		String autoVariable;
 		std::optional<Range<float>> range;
 		bool editable = true;
+		ShaderParameterType type;
 
 		MaterialUniform();
-		MaterialUniform(String name, ShaderParameterType type, std::optional<Range<float>> range = {}, bool editable = true);
+		MaterialUniform(String name, ShaderParameterType type, std::optional<Range<float>> range = {}, bool editable = true, String autoVariable = "");
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

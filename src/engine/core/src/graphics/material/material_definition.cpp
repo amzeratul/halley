@@ -17,11 +17,12 @@ MaterialUniform::MaterialUniform()
 	: type(ShaderParameterType::Invalid)
 {}
 
-MaterialUniform::MaterialUniform(String name, ShaderParameterType type, std::optional<Range<float>> range, bool editable)
-	: name(name)
-	, type(type)
+MaterialUniform::MaterialUniform(String name, ShaderParameterType type, std::optional<Range<float>> range, bool editable, String autoVariable)
+	: name(std::move(name))
+	, autoVariable(std::move(autoVariable))
 	, range(range)
 	, editable(editable)
+	, type(type)
 {}
 
 void MaterialUniform::serialize(Serializer& s) const
@@ -30,6 +31,7 @@ void MaterialUniform::serialize(Serializer& s) const
 	s << type;
 	s << range;
 	s << editable;
+	s << autoVariable;
 }
 
 void MaterialUniform::deserialize(Deserializer& s)
@@ -38,6 +40,7 @@ void MaterialUniform::deserialize(Deserializer& s)
 	s >> type;
 	s >> range;
 	s >> editable;
+	s >> autoVariable;
 }
 
 MaterialUniformBlock::MaterialUniformBlock() {}
@@ -291,7 +294,8 @@ void MaterialDefinition::loadUniforms(const ConfigNode& node)
 						range = uniformEntry["range"].asFloatRange();
 					}
 					const bool editable = uniformEntry["canEdit"].asBool(true);
-					uniforms.push_back(MaterialUniform(name, type, range, editable));
+					const auto autoVariable = uniformEntry["autoVariable"].asString("");
+					uniforms.push_back(MaterialUniform(name, type, range, editable, autoVariable));
 				} else {
 					for (auto& uit: uniformEntry.asMap()) {
 						String uniformName = uit.first;
