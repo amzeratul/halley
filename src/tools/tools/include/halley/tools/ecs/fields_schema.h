@@ -6,6 +6,8 @@
 #include <optional>
 #include <utility>
 
+#include "halley/maths/range.h"
+
 namespace Halley
 {
 	class TypeSchema
@@ -93,6 +95,7 @@ namespace Halley
 		bool canSave = true;
 		bool canEdit = true;
 		bool collapse = false;
+		std::optional<Range<float>> range;
 
 		ComponentFieldSchema(TypeSchema type, String name, std::vector<String> defaultValue, std::optional<MemberAccess> access = {})
 			: MemberSchema(std::move(type), std::move(name), std::move(defaultValue), access)
