@@ -82,6 +82,7 @@ namespace Halley
 		bool isCompatibleWith(const Material& other) const;
 
 		const MaterialDefinition& getDefinition() const { return *materialDefinition; }
+		const std::shared_ptr<const MaterialDefinition>& getDefinitionPtr() const { return materialDefinition; }
 
 		std::shared_ptr<Material> clone() const;
 		
