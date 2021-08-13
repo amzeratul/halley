@@ -549,6 +549,14 @@ void UIRoot::focusNext(bool reverse)
 	setFocus(focusables[newIndex]);
 }
 
+void UIRoot::onWidgetRemoved(const UIWidget& widget)
+{
+	auto focus = currentFocus.lock();
+	if (focus && focus.get() == &widget) {
+		currentFocus.reset();
+	}
+}
+
 std::vector<std::shared_ptr<UIWidget>> UIRoot::collectWidgets()
 {
 	std::vector<std::shared_ptr<UIWidget>> output;

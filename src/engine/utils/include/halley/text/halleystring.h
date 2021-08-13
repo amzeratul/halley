@@ -142,6 +142,7 @@ namespace Halley {
 		StringUTF16 getUTF16() const;
 		StringUTF32 getUTF32() const;
 		size_t getUTF32Len() const;
+		static size_t getUTF32Len(std::string_view str);
 
 		// Static unicode routines
 		static size_t getUTF8Len(const wchar_t *utf16);

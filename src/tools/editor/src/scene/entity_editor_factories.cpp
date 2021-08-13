@@ -321,48 +321,93 @@ public:
 		auto& fieldData = data.getFieldData();
 		fieldData.ensureType(ConfigNodeType::Map);
 
+		auto materialWidget = std::make_shared<SelectAssetWidget>("material", context.getUIFactory(), AssetType::MaterialDefinition, context.getGameResources());
+		materialWidget->setDefaultAssetId("Halley/Sprite");
+		
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 		container->getSizer().setColumnProportions({{0, 1}});
-		container->add(context.makeLabel("image0"));
-		container->add(std::make_shared<SelectAssetWidget>("image", context.getUIFactory(), AssetType::Sprite, context.getGameResources()));
-		container->add(context.makeLabel("image1"));
-		container->add(std::make_shared<SelectAssetWidget>("image1", context.getUIFactory(), AssetType::Sprite, context.getGameResources()));
-		container->add(context.makeLabel("material"));
-		container->add(std::make_shared<SelectAssetWidget>("material", context.getUIFactory(), AssetType::MaterialDefinition, context.getGameResources()));
-		container->add(context.makeLabel("colour"));
+		container->add(context.makeLabel("Material"));
+		container->add(materialWidget);
+		container->add(context.makeLabel("Colour"));
 		container->add(context.makeField("Halley::Colour4f", pars.withSubKey("colour", "#FFFFFF"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("pivot"));
+		container->add(context.makeLabel("Pivot"));
 		container->add(context.makeField("std::optional<Halley::Vector2f>", pars.withSubKey("pivot"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("flip"));
+		container->add(context.makeLabel("Flip"));
 		container->add(context.makeField("bool", pars.withSubKey("flip"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("visible"));
+		container->add(context.makeLabel("Visible"));
 		container->add(context.makeField("bool", pars.withSubKey("visible", "true"), ComponentEditorLabelCreation::Never));
 		auto containerWeak = std::weak_ptr<UIWidget>(container);
 
-		container->bindData("image", fieldData["image"].asString(""), [&context, data, containerWeak](String newVal)
+		auto prevTextures = std::make_shared<std::vector<std::shared_ptr<IUIElement>>>();
+		auto addTextures = [&context, containerWeak, prevTextures, data](const String& materialName)
 		{
-			auto material = containerWeak.lock()->getWidgetAs<SelectAssetWidget>("material");
-			if (material->getValue().isEmpty()) {
-				material->setValue(context.getGameResources().get<SpriteResource>(newVal)->getDefaultMaterialName());
+			auto container = containerWeak.lock();
+			if (!container) {
+				return;
 			}
 
-			context.setDefaultName(filterName(newVal), filterName(data.getFieldData()["image"].asString("")));
+			gsl::span<const MaterialTexture> textures;
+			MaterialTexture dummy;
+			if (!materialName.isEmpty() && context.getGameResources().exists<MaterialDefinition>(materialName)) {
+				auto material = context.getGameResources().get<MaterialDefinition>(materialName);
+				textures = material->getTextures();
+			} else {
+				dummy.name = "tex0";
+				textures = gsl::span(&dummy, 1);
+			}
+			
+			for (auto& widget: *prevTextures) {
+				container->remove(*widget);
+			}
+			prevTextures->clear();
+			
+			size_t insertPos = 2;
+			size_t i = 0;
+			for (const auto& tex: textures) {
+				String key = "image" + (i == 0 ? "" : toString(i));
+				bool isPrimary = i == 0;
 
-			data.getFieldData()["image"] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
-			context.onEntityUpdated();
-		});
+				const auto label = context.makeLabel("- " + tex.name);
+				const auto widget = std::make_shared<SelectAssetWidget>(key, context.getUIFactory(), AssetType::Sprite, context.getGameResources());
+				widget->setDefaultAssetId(tex.defaultTextureName);
 				
-		container->bindData("image1", fieldData["image1"].asString(""), [&context, data](String newVal)
-		{
-			data.getFieldData()["image1"] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
-			context.onEntityUpdated();
-		});
+				container->add(label, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
+				container->add(widget, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
+				prevTextures->push_back(label);
+				prevTextures->push_back(widget);
 
-		container->bindData("material", fieldData["material"].asString(""), [&context, data](String newVal)
+				auto& fieldData = data.getFieldData();
+				container->bindData(key, fieldData[key].asString(""), [&context, data, containerWeak, key, isPrimary](String newVal)
+				{
+					if (isPrimary) {
+						context.setDefaultName(filterName(newVal), filterName(data.getFieldData()[key].asString("")));
+
+						auto material = containerWeak.lock()->getWidgetAs<SelectAssetWidget>("material");
+						if (material->getValue().isEmpty()) {
+							const auto materialName = context.getGameResources().get<SpriteResource>(newVal)->getDefaultMaterialName();
+
+							// Important: run this on main thread. Otherwise, this call will result in addTextures being called again, invalidating this method halfway through its execution.
+							Concurrent::execute(Executors::getMainThread(), [materialName, material]() {
+								material->setValue(materialName);
+							});
+						}
+					}
+
+					data.getFieldData()[key] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
+					context.onEntityUpdated();
+				});
+				
+				i++;
+			}
+		};
+		
+		container->bindData("material", fieldData["material"].asString(""), [&context, data, addTextures](String newVal)
 		{
+			addTextures(newVal);
 			data.getFieldData()["material"] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
+		addTextures(fieldData["material"].asString(""));
 
 		return container;
 	}
@@ -407,17 +452,17 @@ public:
 
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 		container->getSizer().setColumnProportions({{0, 1}});
-		container->add(context.makeLabel("animation"));
+		container->add(context.makeLabel("Animation"));
 		container->add(std::make_shared<SelectAssetWidget>("animation", context.getUIFactory(), AssetType::Animation, context.getGameResources()));
-		container->add(context.makeLabel("sequence"));
+		container->add(context.makeLabel("Sequence"));
 		container->add(std::make_shared<UIDropdown>("sequence", dropStyle));
-		container->add(context.makeLabel("direction"));
+		container->add(context.makeLabel("Direction"));
 		container->add(std::make_shared<UIDropdown>("direction", dropStyle));
-		container->add(context.makeLabel("playbackSpeed"));
+		container->add(context.makeLabel("Playback Speed"));
 		container->add(context.makeField("float", pars.withSubKey("playbackSpeed", "1" ), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("applyPivot"));
+		container->add(context.makeLabel("Apply Pivot"));
 		container->add(context.makeField("bool", pars.withSubKey("applyPivot", "true" ), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("applyMaterial"));
+		container->add(context.makeLabel("Apply Material"));
 		container->add(context.makeField("bool", pars.withSubKey("applyMaterial", "true" ), ComponentEditorLabelCreation::Never));
 
 		auto updateAnimation = [container, data, &resources] (const String& animName)
@@ -734,43 +779,43 @@ public:
 
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 		container->getSizer().setColumnProportions({{0, 1}});
-		container->add(context.makeLabel("spawnRate"));
+		container->add(context.makeLabel("Spawn Rate"));
 		container->add(context.makeField("float", pars.withSubKey("spawnRate", "100"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("spawnArea"));
+		container->add(context.makeLabel("Spawn Area"));
 		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("spawnArea"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("maxParticles"));
+		container->add(context.makeLabel("Max Particles"));
 		container->add(context.makeField("std::optional<int>", pars.withSubKey("maxParticles", ""), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("burst"));
+		container->add(context.makeLabel("Burst"));
 		container->add(context.makeField("std::optional<int>", pars.withSubKey("burst", ""), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("ttl"));
+		container->add(context.makeLabel("TTL"));
 		container->add(context.makeField("float", pars.withSubKey("ttl", "1"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("ttlScatter"));
+		container->add(context.makeLabel("TTL Scatter"));
 		container->add(context.makeField("float", pars.withSubKey("ttlScatter", "0.2"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("speed"));
+		container->add(context.makeLabel("Speed"));
 		container->add(context.makeField("float", pars.withSubKey("speed", "100"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("speedScatter"));
+		container->add(context.makeLabel("Speed Scatter"));
 		container->add(context.makeField("float", pars.withSubKey("speedScatter", "10"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("speedDamp"));
+		container->add(context.makeLabel("Speed Damp"));
 		container->add(context.makeField("float", pars.withSubKey("speedDamp", "0"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("acceleration"));
+		container->add(context.makeLabel("Acceleration"));
 		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("acceleration", ""), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("angle"));
+		container->add(context.makeLabel("Angle"));
 		container->add(context.makeField("float", pars.withSubKey("angle", "0"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("angleScatter"));
+		container->add(context.makeLabel("Angle Scatter"));
 		container->add(context.makeField("float", pars.withSubKey("angleScatter", "10"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("startScale"));
+		container->add(context.makeLabel("Start Scale"));
 		container->add(context.makeField("float", pars.withSubKey("startScale", "1"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("endScale"));
+		container->add(context.makeLabel("End Scale"));
 		container->add(context.makeField("float", pars.withSubKey("endScale", "1"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("fadeInTime"));
+		container->add(context.makeLabel("Fade-in Time"));
 		container->add(context.makeField("float", pars.withSubKey("fadeInTime", "0"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("fadeOutTime"));
+		container->add(context.makeLabel("Fade-out Time"));
 		container->add(context.makeField("float", pars.withSubKey("fadeOutTime", "0"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("directionScatter"));
+		container->add(context.makeLabel("Direction Scatter"));
 		container->add(context.makeField("float", pars.withSubKey("directionScatter", "0"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("rotateTowardsMovement"));
+		container->add(context.makeLabel("Rotate Towards Movement"));
 		container->add(context.makeField("bool", pars.withSubKey("rotateTowardsMovement", "false"), ComponentEditorLabelCreation::Never));
-		container->add(context.makeLabel("destroyWhenDone"));
+		container->add(context.makeLabel("Destroy When Done"));
 		container->add(context.makeField("bool", pars.withSubKey("destroyWhenDone", "false"), ComponentEditorLabelCreation::Never));
 		
 		auto containerWeak = std::weak_ptr<UIWidget>(container);

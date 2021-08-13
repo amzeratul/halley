@@ -183,6 +183,11 @@ void UIFactory::update()
 	styleSheet->updateIfNeeded();
 }
 
+Sprite UIFactory::makeAssetTypeIcon(AssetType type) const
+{
+	return Sprite();
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 {
 	styleSheet->updateIfNeeded();
@@ -391,6 +396,7 @@ std::vector<UIFactory::ParsedOption> UIFactory::parseOptions(const ConfigNode& n
 			option.border = asVector4f(n["border"], Vector4f());
 			option.active = n["active"].asBool(true);
 			option.tooltip = parseLabel(n, "", "tooltip");
+			option.iconColour = n["iconColour"].asString("");
 			result.push_back(option);
 		}
 	}
@@ -578,16 +584,19 @@ std::shared_ptr<UIWidget> UIFactory::makeDropdown(const ConfigNode& entryNode)
 	auto label = parseLabel(node);
 	auto options = parseOptions(node["options"]);
 
-	std::vector<String> optionIds;
-	std::vector<LocalisedString> optionLabels;
+	std::vector<UIDropdown::Entry> entries;
+	entries.reserve(options.size());
 	for (auto& o: options) {
-		optionIds.push_back(o.id);
-		optionLabels.push_back(o.text);
+		Sprite icon;
+		if (!o.image.isEmpty()) {
+			icon = Sprite().setImage(getResources(), o.image).setColour(getColour(o.iconColour.isEmpty() ? "#FFFFFF" : o.iconColour));
+		}
+		entries.emplace_back(o.id, o.text, icon);
 	}
 
 	auto widget = std::make_shared<UIDropdown>(id, style);
 	applyInputButtons(*widget, node["inputButtons"].asString("list"));
-	widget->setOptions(optionIds, optionLabels);
+	widget->setOptions(entries);
 	return widget;
 }
 

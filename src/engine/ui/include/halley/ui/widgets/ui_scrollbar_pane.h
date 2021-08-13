@@ -10,7 +10,7 @@ namespace Halley {
 
 		std::shared_ptr<UIScrollPane> getPane() const;
 
-		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f()) override;
+		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f(), size_t insertPos = std::numeric_limits<size_t>::max()) override;
 		void addSpacer(float size) override;
 		void addStretchSpacer(float proportion = 0) override;
 

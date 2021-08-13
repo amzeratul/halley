@@ -89,6 +89,7 @@ namespace Halley
 
 	class ComponentFieldSchema : public MemberSchema {
 	public:
+		String displayName;
 		bool canSave = true;
 		bool canEdit = true;
 		bool collapse = false;

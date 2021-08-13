@@ -8,6 +8,7 @@ component:
       type: 'Halley::ScriptGraph'
       canEdit: true
       canSave: false
+      displayName: Graph
   - scriptState:
       type: 'Halley::ScriptState'
       canEdit: false

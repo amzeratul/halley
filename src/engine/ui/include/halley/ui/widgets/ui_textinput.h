@@ -56,6 +56,8 @@ namespace Halley {
 		void setClearOnSubmit(bool enabled);
 		bool isClearOnSubmit() const;
 
+		void setIcon(Sprite icon, Vector4f border);
+
 	protected:
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
@@ -71,6 +73,7 @@ namespace Halley {
 
 	private:
 		void updateCaret();
+		Rect4f getTextBounds() const;
 
 		void onMaybeTextModified();
 		void onTextModified();
@@ -88,8 +91,10 @@ namespace Halley {
 
 		Sprite sprite;
 		Sprite caret;
+		Sprite icon;
 		TextRenderer label;
 		TextRenderer ghostLabel;
+		Vector4f iconBorder;
 
 		TextInputData text;
 		LocalisedString ghostText;

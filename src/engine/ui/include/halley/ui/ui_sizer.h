@@ -88,7 +88,7 @@ namespace Halley {
 	public:
 		virtual ~IUISizer() {}
 
-		virtual void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f()) = 0;
+		virtual void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f(), size_t insertPos = std::numeric_limits<size_t>::max()) = 0;
 		virtual void addSpacer(float size) = 0;
 		virtual void addStretchSpacer(float proportion = 0) = 0;
 		virtual void remove(IUIElement& element) = 0;
@@ -106,7 +106,7 @@ namespace Halley {
 		Vector2f getLayoutMinimumSize(bool force) const override;
 		void setRect(Rect4f rect) override;
 
-		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f()) override;
+		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f(), size_t insertPos = std::numeric_limits<size_t>::max()) override;
 		void addSpacer(float size) override;
 		void addStretchSpacer(float proportion = 0) override;
 		void remove(IUIElement& element) override;

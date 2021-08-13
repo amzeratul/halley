@@ -64,11 +64,14 @@ namespace Halley
 
 		void update();
 
+		virtual Sprite makeAssetTypeIcon(AssetType type) const;
+
 	protected:
 		struct ParsedOption {
 			String id;
 			LocalisedString text;
 			String image;
+			String iconColour;
 			String inactiveImage;
 			String spriteSheet;
 			String sprite;

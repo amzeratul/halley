@@ -599,7 +599,7 @@ void ColourStringBuilder::append(std::string_view text, std::optional<Colour4f> 
 		len += 2;
 		strings.push_back("\"\"");
 	} else {
-		len += text.length();
+		len += String::getUTF32Len(text);
 		strings.emplace_back(text);
 	}
 }
