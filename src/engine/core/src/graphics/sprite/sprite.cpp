@@ -343,7 +343,7 @@ Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<c
 	Expects(materialDefinition != nullptr);
 
 	auto mat = std::make_shared<Material>(materialDefinition);
-	mat->set("tex0", image);
+	mat->set(0, image);
 	setMaterial(mat, shared);
 	return *this;
 }
