@@ -988,7 +988,18 @@ public:
 		if (intType) {
 			field->setGranularity(1.0f);
 		} else {
-			field->setLabelConversion([](float v) { return LocalisedString::fromUserString(toString(v, 2)); });
+			const float totalRange = range.getLength();
+			float granularity = 0.01f;
+			int decimalPlaces = 2;
+			if (totalRange >= 100) {
+				granularity = 1.0f;
+				decimalPlaces = 0;
+			} else if (totalRange >= 10) {
+				granularity = 0.1f;
+				decimalPlaces = 1;
+			}
+			field->setGranularity(granularity);
+			field->setLabelConversion([decimalPlaces](float v) { return LocalisedString::fromUserString(toString(v, decimalPlaces)); });
 		}
 		field->setMinSize(Vector2f(30, 22));
 
