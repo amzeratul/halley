@@ -371,7 +371,10 @@ MaterialDepthStencil Material::getDepthStencil(int pass) const
 
 void Material::setStencilReferenceOverride(std::optional<uint8_t> reference)
 {
-	stencilReferenceOverride = reference;
+	if (stencilReferenceOverride != reference) {
+		stencilReferenceOverride = reference;
+		needToUpdateHash = true;
+	}
 }
 
 std::optional<uint8_t> Material::getStencilReferenceOverride() const
