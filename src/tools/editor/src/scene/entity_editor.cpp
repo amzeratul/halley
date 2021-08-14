@@ -187,8 +187,13 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 		const auto& componentData = iter->second;
 		for (auto& member: componentData.members) {
 			if (member.canEdit) {
+				auto type = member.type.name;
+				if (type == "float" && member.range) {
+					type = "Halley::Range<" + type + "," + toString(member.range->start) + "," + toString(member.range->end) + ">";
+				}
+				
 				ComponentFieldParameters parameters(componentType, ComponentDataRetriever(data, member.name, member.displayName.isEmpty() ? member.name : member.displayName), member.defaultValue);
-				auto field = entityEditorFactory->makeField(member.type.name, parameters, member.collapse ? ComponentEditorLabelCreation::Never : ComponentEditorLabelCreation::Always);
+				auto field = entityEditorFactory->makeField(type, parameters, member.collapse ? ComponentEditorLabelCreation::Never : ComponentEditorLabelCreation::Always);
 				if (field) {
 					componentFields->add(field);
 				}

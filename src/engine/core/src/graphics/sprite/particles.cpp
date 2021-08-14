@@ -27,6 +27,7 @@ Particles::Particles(const ConfigNode& node, Resources& resources)
 	endScale = node["endScale"].asFloat(1.0f);
 	fadeInTime = node["fadeInTime"].asFloat(0.0f);
 	fadeOutTime = node["fadeOutTime"].asFloat(0.0f);
+	stopTime = node["stopTime"].asFloat(0.0f);
 	directionScatter = node["directionScatter"].asFloat(0.0f);
 	rotateTowardsMovement = node["rotateTowardsMovement"].asBool(false);
 	destroyWhenDone = node["destroyWhenDone"].asBool(false);
@@ -57,6 +58,7 @@ ConfigNode Particles::toConfigNode() const
 	result["endScale"] = endScale;
 	result["fadeInTime"] = fadeInTime;
 	result["fadeOutTime"] = fadeOutTime;
+	result["stopTime"] = stopTime;
 	result["directionScatter"] = directionScatter;
 	result["rotateTowardsMovement"] = rotateTowardsMovement;
 	result["destroyWhenDone"] = destroyWhenDone;
@@ -245,6 +247,10 @@ void Particles::updateParticles(float time)
 			particle.alive = false;
 		} else {
 			particle.vel += acceleration * time;
+			
+			if (stopTime > 0.00001f && particle.time + stopTime >= particle.ttl) {
+				particle.vel = damp(particle.vel, Vector2f(), 10.0f, time);
+			}
 			
 			if (speedDamp > 0.0001f) {
 				particle.vel = damp(particle.vel, Vector2f(), speedDamp, time);

@@ -316,7 +316,7 @@ public:
 
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
-		auto data = pars.data;
+		const auto& data = pars.data;
 
 		auto& fieldData = data.getFieldData();
 		fieldData.ensureType(ConfigNodeType::Map);
@@ -338,34 +338,41 @@ public:
 		container->add(context.makeField("bool", pars.withSubKey("visible", "true"), ComponentEditorLabelCreation::Never));
 		auto containerWeak = std::weak_ptr<UIWidget>(container);
 
-		auto prevTextures = std::make_shared<std::vector<std::shared_ptr<IUIElement>>>();
-		auto addTextures = [&context, containerWeak, prevTextures, data](const String& materialName)
+		auto prevMaterialParameters = std::make_shared<std::vector<std::shared_ptr<IUIElement>>>();
+		auto addMaterialParameters = [&context, containerWeak, prevMaterialParameters, pars](const String& materialName)
 		{
+			const auto& data = pars.data;
 			auto container = containerWeak.lock();
 			if (!container) {
 				return;
 			}
 
 			gsl::span<const MaterialTexture> textures;
+			gsl::span<const MaterialUniformBlock> uniformBlocks;
 			MaterialTexture dummy;
 			if (!materialName.isEmpty() && context.getGameResources().exists<MaterialDefinition>(materialName)) {
-				auto material = context.getGameResources().get<MaterialDefinition>(materialName);
+				const auto material = context.getGameResources().get<MaterialDefinition>(materialName);
 				textures = material->getTextures();
+				uniformBlocks = material->getUniformBlocks();
 			} else {
-				dummy.name = "tex0";
+				dummy.name = "image";
 				textures = gsl::span(&dummy, 1);
 			}
 			
-			for (auto& widget: *prevTextures) {
+			for (auto& widget: *prevMaterialParameters) {
 				container->remove(*widget);
 			}
-			prevTextures->clear();
+			prevMaterialParameters->clear();
 			
 			size_t insertPos = 2;
 			size_t i = 0;
 			for (const auto& tex: textures) {
-				String key = "image" + (i == 0 ? "" : toString(i));
+				String key = "tex_" + tex.name;
 				bool isPrimary = i == 0;
+
+				auto& fieldData = data.getFieldData();
+				const String backupKey = i == 0 ? "image" : (i == 1 ? "image1" : "");
+				const String& srcData = fieldData[fieldData.hasKey(key) || backupKey.isEmpty() ? key : backupKey].asString("");
 
 				const auto label = context.makeLabel("- " + tex.name);
 				const auto widget = std::make_shared<SelectAssetWidget>(key, context.getUIFactory(), AssetType::Sprite, context.getGameResources());
@@ -373,11 +380,10 @@ public:
 				
 				container->add(label, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
 				container->add(widget, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
-				prevTextures->push_back(label);
-				prevTextures->push_back(widget);
+				prevMaterialParameters->push_back(label);
+				prevMaterialParameters->push_back(widget);
 
-				auto& fieldData = data.getFieldData();
-				container->bindData(key, fieldData[key].asString(""), [&context, data, containerWeak, key, isPrimary](String newVal)
+				container->bindData(key, srcData, [&context, data, containerWeak, key, isPrimary](String newVal)
 				{
 					if (isPrimary) {
 						context.setDefaultName(filterName(newVal), filterName(data.getFieldData()[key].asString("")));
@@ -399,15 +405,54 @@ public:
 				
 				i++;
 			}
+
+			for (const auto& block: uniformBlocks) {
+				for (const auto& uniform: block.uniforms) {
+					if (!uniform.editable) {
+						continue;
+					}
+					
+					String key = "par_" + uniform.name;
+					String type;
+
+					if (uniform.type == ShaderParameterType::Float || uniform.type == ShaderParameterType::Int) {
+						String typeName = uniform.type == ShaderParameterType::Float ? "float" : "int";
+						if (uniform.range) {
+							type = "Halley::Range<" + typeName + "," + toString(uniform.range->start) + "," + toString(uniform.range->end) + ">";
+						} else {
+							type = typeName;
+						}
+					}
+
+					if (type.isEmpty()) {
+						continue;
+					}
+					
+					const auto label = context.makeLabel("- " + uniform.name);
+					const auto widget = context.makeField(type, pars.withSubKey(key), ComponentEditorLabelCreation::Never);
+					
+					container->add(label, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
+					container->add(widget, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
+					prevMaterialParameters->push_back(label);
+					prevMaterialParameters->push_back(widget);
+
+					auto& fieldData = data.getFieldData();
+					container->bindData(key, fieldData[key].asString(""), [&context, data, containerWeak, key](String newVal)
+					{
+						data.getFieldData()[key] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
+						context.onEntityUpdated();
+					});
+				}
+			}
 		};
 		
-		container->bindData("material", fieldData["material"].asString(""), [&context, data, addTextures](String newVal)
+		container->bindData("material", fieldData["material"].asString(""), [&context, data, addMaterialParameters](String newVal)
 		{
-			addTextures(newVal);
+			addMaterialParameters(newVal);
 			data.getFieldData()["material"] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
-		addTextures(fieldData["material"].asString(""));
+		addMaterialParameters(fieldData["material"].asString(""));
 
 		return container;
 	}
@@ -811,6 +856,8 @@ public:
 		container->add(context.makeField("float", pars.withSubKey("fadeInTime", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Fade-out Time"));
 		container->add(context.makeField("float", pars.withSubKey("fadeOutTime", "0"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Stop Time"));
+		container->add(context.makeField("float", pars.withSubKey("stopTime", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Direction Scatter"));
 		container->add(context.makeField("float", pars.withSubKey("directionScatter", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Rotate Towards Movement"));
@@ -919,6 +966,67 @@ public:
 	}
 };
 
+class ComponentEditorRangeFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::Range<>";
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		const auto data = pars.data;
+		const auto componentName = pars.componentName;
+
+		const bool intType = !pars.typeParameters.empty() && pars.typeParameters[0] == "int";
+
+		auto style = context.getUIFactory().getStyle("slider");
+
+		Range<float> range(0, 1);
+		if (pars.typeParameters.size() == 3) {
+			range = Range<float>(pars.typeParameters[1].toFloat(), pars.typeParameters[2].toFloat());
+		}
+		auto field = std::make_shared<UISlider>("range", style, range.start, range.end);
+		if (intType) {
+			field->setGranularity(1.0f);
+		} else {
+			const float totalRange = range.getLength();
+			float granularity = 0.01f;
+			int decimalPlaces = 2;
+			if (totalRange >= 100) {
+				granularity = 1.0f;
+				decimalPlaces = 0;
+			} else if (totalRange >= 10) {
+				granularity = 0.1f;
+				decimalPlaces = 1;
+			}
+			field->setGranularity(granularity);
+			field->setLabelConversion([decimalPlaces](float v) { return LocalisedString::fromUserString(toString(v, decimalPlaces)); });
+		}
+		field->setMinSize(Vector2f(30, 22));
+
+		if (intType) {
+			const auto& defaultValue = pars.getIntDefaultParameter();
+			const int value = data.getFieldData().asInt(defaultValue);
+			field->bindData("range", value, [&context, data](int newVal)
+			{
+				data.getFieldData() = ConfigNode(newVal);
+				context.onEntityUpdated();
+			});
+		} else {
+			const auto& defaultValue = pars.getFloatDefaultParameter();
+			const float value = data.getFieldData().asFloat(defaultValue);
+			field->bindData("range", value, [&context, data](float newVal)
+			{
+				data.getFieldData() = ConfigNode(newVal);
+				context.onEntityUpdated();
+			});
+		}
+
+		return field;
+	}
+};
+
 std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
 	std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
@@ -943,6 +1051,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorParticlesFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorResourceReferenceFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorScriptGraphFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorRangeFieldFactory>());
 
 	return factories;
 }

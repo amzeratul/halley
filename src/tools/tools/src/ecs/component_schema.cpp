@@ -32,6 +32,17 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				const bool canEdit = memberProperties["canEdit"].as<bool>(true);
 				const bool canSave = memberProperties["canSave"].as<bool>(true);
 				const bool collapse = memberProperties["collapse"].as<bool>(false);
+				
+				std::optional<Range<float>> range;
+				if (memberProperties["range"].IsDefined()) {
+					std::vector<float> vs;
+					for (auto& r: memberProperties["range"]) {
+						vs.push_back(r.as<float>());
+					}
+					if (vs.size() == 2) {
+						range = Range<float>(vs[0], vs[1]);
+					}
+				}
 
 				if (memberProperties["serializable"].IsDefined()) {
 					throw Exception("serializable field is removed from ECS component definitions. Use canSave and canEdit instead.", HalleyExceptions::Entity);
@@ -54,6 +65,7 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				field.canEdit = canEdit;
 				field.canSave = canSave;
 				field.displayName = displayName;
+				field.range = range;
 			}
 		}
 	}
