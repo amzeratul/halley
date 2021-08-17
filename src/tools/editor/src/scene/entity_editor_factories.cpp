@@ -422,6 +422,10 @@ public:
 						} else {
 							type = typeName;
 						}
+					} else if (uniform.type == ShaderParameterType::Float2) {
+						type = "Halley::Vector2f";
+					} else if (uniform.type == ShaderParameterType::Int2) {
+						type = "Halley::Vector2i";
 					}
 
 					if (type.isEmpty()) {
