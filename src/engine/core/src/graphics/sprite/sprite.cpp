@@ -791,6 +791,7 @@ Sprite& Sprite::operator=(Sprite&& other) noexcept
 	lastAppliedPivot = std::move(other.lastAppliedPivot);
 
 	setHotReload(other.hotReloadRef, other.hotReloadIdx);
+	other.setHotReload(nullptr, 0);
 
 	return *this;
 }
