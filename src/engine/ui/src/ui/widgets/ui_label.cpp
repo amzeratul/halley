@@ -3,12 +3,23 @@
 
 using namespace Halley;
 
-UILabel::UILabel(String id, TextRenderer style, LocalisedString text)
+UILabel::UILabel(String id, UIStyle style, LocalisedString text)
 	: UIWidget(std::move(id), {})
-	, renderer(std::move(style))
+	, renderer(style.getTextRenderer("label"))
 	, text(std::move(text))
 	, aliveFlag(std::make_shared<bool>(true))
 {
+	styles.emplace_back(std::move(style));
+	updateText();
+}
+
+UILabel::UILabel(String id, UIStyle style, TextRenderer renderer, LocalisedString text)
+	: UIWidget(std::move(id), {})
+	, renderer(std::move(renderer))
+	, text(std::move(text))
+	, aliveFlag(std::make_shared<bool>(true))
+{
+	styles.emplace_back(std::move(style));
 	updateText();
 }
 

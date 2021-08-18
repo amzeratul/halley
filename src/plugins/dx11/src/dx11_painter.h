@@ -51,6 +51,7 @@ namespace Halley
 
 		size_t curBuffer = 0;
 		std::optional<Rect4i> clipping;
+		std::vector<int> renderTargetTextureUnits;
 
 		DX11Blend& getBlendMode(BlendType type);
 		void rotateBuffers();
@@ -61,5 +62,7 @@ namespace Halley
 
 		DX11DepthStencil& getDepthStencil(const MaterialDepthStencil& depthStencil);
 		void setDepthStencil(const MaterialDepthStencil& depthStencil);
+
+		void unbindRenderTargetTextureUnits(size_t lastIndex, int minimumTextureUnit);
 	};
 }

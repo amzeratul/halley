@@ -69,7 +69,7 @@ void UIRoot::runLayout()
 
 void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, spInputDevice manual)
 {
-	auto joystickType = manual->getJoystickType();
+	auto joystickType = manual ? manual->getJoystickType() : JoystickType::Generic;
 	bool first = true;
 
 	updateKeyboardInput();
@@ -137,6 +137,10 @@ void UIRoot::updateGamepadInputTree(const spInputDevice& input, UIWidget& widget
 
 void UIRoot::updateGamepadInput(const spInputDevice& input)
 {
+	if (!input) {
+		return;
+	}
+	
 	auto& cs = getChildren();
 	std::vector<UIWidget*> inputTargets;
 	UIGamepadInput::Priority bestPriority = UIGamepadInput::Priority::Lowest;
@@ -543,6 +547,14 @@ void UIRoot::focusNext(bool reverse)
 	const int index = gsl::narrow<int>(std::find(focusables.begin(), focusables.end(), currentFocus.lock()) - focusables.begin());
 	const int newIndex = modulo(index + (reverse ? -1 : 1), gsl::narrow<int>(focusables.size()));
 	setFocus(focusables[newIndex]);
+}
+
+void UIRoot::onWidgetRemoved(const UIWidget& widget)
+{
+	auto focus = currentFocus.lock();
+	if (focus && focus.get() == &widget) {
+		currentFocus.reset();
+	}
 }
 
 std::vector<std::shared_ptr<UIWidget>> UIRoot::collectWidgets()

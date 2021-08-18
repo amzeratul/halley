@@ -77,6 +77,7 @@ namespace Halley {
 		float endScale = 1;
 		float fadeInTime = 0;
 		float fadeOutTime = 0;
+		float stopTime = 0;
 		float directionScatter = 0;
 		bool rotateTowardsMovement = false;
 		bool destroyWhenDone = false;

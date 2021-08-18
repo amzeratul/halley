@@ -10,8 +10,10 @@ component:
   - layer:
       type: int
       defaultValue: 0
+      displayName: Layer
   - mask:
       type: 'Halley::OptionalLite<int>'
+      displayName: Mask
 
 ---
 
@@ -23,15 +25,19 @@ component:
   - layer:
       type: int
       defaultValue: 0
+      displayName: Layer
   - mask:
       type: 'Halley::OptionalLite<int>'
+      displayName: Mask
 
 ---
 
 component:
   name: SpriteAnimation
   members:
-  - player: 'Halley::AnimationPlayer'
+  - player:
+      type: 'Halley::AnimationPlayer'
+      displayName: Player
 
 ---
 
@@ -42,8 +48,10 @@ component:
   - zoom:
       type: float
       defaultValue: 1
+      displayName: Zoom
   - id:
       type: 'Halley::String'
+      displayName: Id
 
 ---
 
@@ -56,12 +64,16 @@ component:
   - sprites:
       type: 'std::vector<Halley::Sprite>'
       collapse: true
+      displayName: Sprites
   - animation:
       type: 'Halley::ResourceReference<Halley::Animation>'
+      displayName: Animation
   - layer:
       type: int
       defaultValue: 0
+      displayName: Layer
   - mask:
       type: 'Halley::OptionalLite<int>'
+      displayName: Mask
 
 ...

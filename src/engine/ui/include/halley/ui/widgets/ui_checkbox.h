@@ -24,7 +24,6 @@ namespace Halley {
 
 	private:
 		Sprite sprite;
-		UIStyle style;
         bool checked = false;
 	};
 }

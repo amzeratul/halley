@@ -82,6 +82,7 @@ namespace Halley
 		bool isCompatibleWith(const Material& other) const;
 
 		const MaterialDefinition& getDefinition() const { return *materialDefinition; }
+		const std::shared_ptr<const MaterialDefinition>& getDefinitionPtr() const { return materialDefinition; }
 
 		std::shared_ptr<Material> clone() const;
 		
@@ -102,7 +103,9 @@ namespace Halley
 
 		Material& set(const String& name, const std::shared_ptr<const Texture>& texture);
 		Material& set(const String& name, const std::shared_ptr<Texture>& texture);
-
+		Material& set(size_t textureUnit, const std::shared_ptr<const Texture>& texture);
+		Material& set(size_t textureUnit, const std::shared_ptr<Texture>& texture);
+		
 		bool hasParameter(const String& name) const;
 
 		template <typename T>

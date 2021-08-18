@@ -32,6 +32,7 @@ namespace Halley
 		Rect4f texRect1;
 		Vector4f custom0;
 		Vector4f custom1;
+		Vector4f custom2;
 		float rotation = 0;
 		float textureRotation = 0;
 		char _padding[8];
@@ -124,6 +125,9 @@ namespace Halley
 		Sprite& setCustom1(Vector4f custom1) { vertexAttrib.custom1 = custom1; return *this; }
 		Vector4f getCustom1() const { return vertexAttrib.custom1; }
 		Vector4f& getCustom1() { return vertexAttrib.custom1; }
+		Sprite& setCustom2(Vector4f custom2) { vertexAttrib.custom2 = custom2; return *this; }
+		Vector4f getCustom2() const { return vertexAttrib.custom2; }
+		Vector4f& getCustom2() { return vertexAttrib.custom2; }
 		
 		Sprite& setSliced(Vector4s slices);
 		Sprite& setNotSliced();

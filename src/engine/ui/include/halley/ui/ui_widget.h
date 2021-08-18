@@ -57,7 +57,7 @@ namespace Halley {
 		virtual UISizer& getSizer();
 		void setSizer(std::optional<UISizer> sizer);
 
-		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f()) override;
+		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f(), size_t insertPos = std::numeric_limits<size_t>::max()) override;
 		void addSpacer(float size) override;
 		void addStretchSpacer(float proportion = 0) override;
 		void remove(IUIElement& element) override;
@@ -175,6 +175,9 @@ namespace Halley {
 		const LocalisedString& getToolTip() const;
 		void setToolTip(LocalisedString toolTip);
 
+		bool hasStyle() const;
+		const std::vector<UIStyle>& getStyles() const;
+
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;
@@ -211,6 +214,7 @@ namespace Halley {
 		virtual void checkActive();
 
 		UIInputType lastInputType = UIInputType::Undefined;
+		std::vector<UIStyle> styles = {};
 
 	private:
 		void setParent(UIParent* parent);

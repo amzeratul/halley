@@ -11,10 +11,10 @@ using namespace Halley;
 
 UIDropdown::UIDropdown(String id, UIStyle style, std::vector<LocalisedString> os, int defaultOption)
 	: UIClickable(std::move(id), Vector2f(style.getFloat("minSize"), style.getFloat("minSize")))
-	, style(style)
 	, curOption(defaultOption)
 {
 	sprite = style.getSprite("normal");
+	styles.emplace_back(std::move(style));
 
 	setOptions(std::move(os));
 	setChildLayerAdjustment(1);
@@ -74,6 +74,7 @@ void UIDropdown::setInputButtons(const UIInputButtons& buttons)
 }
 
 void UIDropdown::updateOptionLabels() {
+	const auto& style = styles.at(0);
 	auto tempLabel = style.getTextRenderer("label");
 
 	label = tempLabel.clone().setText(options[curOption].label);
@@ -180,6 +181,7 @@ void UIDropdown::update(Time t, bool moved)
 		}
 	}
 
+	const auto& style = styles.at(0);
 	if (isEnabled()) {
 		if (openState == OpenState::OpenDown) {
 			sprite = style.getSprite("open");
@@ -237,6 +239,7 @@ void UIDropdown::readFromDataBind()
 
 void UIDropdown::open()
 {
+	const auto& style = styles.at(0);
 	if (openState == OpenState::Closed) {
 		const auto standardHeight = style.getFloat("height");
 		const auto rootRect = getRoot()->getRect();
@@ -312,6 +315,6 @@ void UIDropdown::close()
 		dropdownWindow.reset();
 
 		sendEvent(UIEvent(UIEventType::DropdownClosed, getId(), getSelectedOptionId(), curOption));
-		playSound(style.getString("closeSound"));
+		playSound(styles.at(0).getString("closeSound"));
 	}
 }

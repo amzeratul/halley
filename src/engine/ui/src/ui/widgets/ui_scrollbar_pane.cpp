@@ -21,6 +21,7 @@ UISizer makeSizer(bool scrollHorizontal, bool scrollVertical)
 UIScrollBarPane::UIScrollBarPane(String id, Vector2f clipSize, UIStyle style, UISizer&& sizer, bool scrollHorizontal, bool scrollVertical, bool alwaysShow, Vector2f minSize)
 	: UIWidget(id, minSize, makeSizer(scrollHorizontal, scrollVertical))
 {
+	styles.emplace_back(style);
 	pane = std::make_shared<UIScrollPane>(id + "_pane", clipSize, std::move(sizer), scrollHorizontal, scrollVertical);
 	UIWidget::add(pane, 1);
 
@@ -41,9 +42,9 @@ std::shared_ptr<UIScrollPane> UIScrollBarPane::getPane() const
 	return pane;
 }
 
-void UIScrollBarPane::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, Vector2f position)
+void UIScrollBarPane::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, Vector2f position, size_t insertPos)
 {
-	pane->add(element, proportion, border, fillFlags, position);
+	pane->add(element, proportion, border, fillFlags, position, insertPos);
 }
 
 void UIScrollBarPane::addSpacer(float size)

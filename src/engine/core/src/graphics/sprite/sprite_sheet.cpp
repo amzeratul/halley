@@ -220,8 +220,8 @@ std::shared_ptr<Material> SpriteSheet::getMaterial(const String& name) const
 
 	if (!result) {
 		result = std::make_shared<Material>(resources->get<MaterialDefinition>(name));
-		if (result->getDefinition().hasTexture("tex0")) {
-			result->set("tex0", getTexture());
+		if (!result->getDefinition().getTextures().empty()) {
+			result->set(0, getTexture());
 		}
 		materials[name] = result;
 	}
@@ -263,7 +263,7 @@ void SpriteSheet::reload(Resource&& resource)
 		for (auto& material: materials) {
 			auto mat = material.second.lock();
 			if (mat) {
-				mat->set("tex0", texture);
+				mat->set(0, texture);
 			}
 		}
 	}

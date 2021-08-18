@@ -36,6 +36,8 @@ void DX11Painter::doStartRender()
 
 void DX11Painter::doEndRender()
 {
+	// Unbind recently bound render-target textures
+	unbindRenderTargetTextureUnits(renderTargetTextureUnits.size(), 0);
 }
 
 void DX11Painter::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil)
@@ -81,6 +83,7 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 
 	// Texture
 	int textureUnit = 0;
+	const size_t numRenderTargetTextureUnits = renderTargetTextureUnits.size();
 	for (auto& tex: material.getTextureUniforms()) {
 		auto texture = std::static_pointer_cast<const DX11Texture>(material.getTexture(textureUnit));
 		if (!texture) {
@@ -88,8 +91,13 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 		} else {
 			texture->bind(video, textureUnit, tex.getSamplerType());
 		}
+		if (texture->getDescriptor().isRenderTarget) {
+			// Remember units for textures which are also render targets
+			renderTargetTextureUnits.push_back(textureUnit);
+		}
 		++textureUnit;
 	}
+	unbindRenderTargetTextureUnits(numRenderTargetTextureUnits, textureUnit);
 }
 
 void DX11Painter::setMaterialData(const Material& material)
@@ -244,5 +252,25 @@ void DX11Painter::setDepthStencil(const MaterialDepthStencil& depthStencilDefini
 	if (!curDepthStencil || curDepthStencil->getDefinition() != depthStencilDefinition) {
 		curDepthStencil = &getDepthStencil(depthStencilDefinition);
 		curDepthStencil->bind();
+	}
+}
+
+void DX11Painter::unbindRenderTargetTextureUnits(size_t lastIndex, int minimumTextureUnit)
+{
+	// Iterate texture units *previously* bound to render target textures. Unbind
+	// only if the texture unit is >= lastIndex.
+	// Effectively, this only calls PSSetShaderResources() if the current material
+	// pass does not use the texture unit anymore.
+	for (size_t idx = 0; idx < lastIndex; ++idx) {
+		int textureUnit = renderTargetTextureUnits[idx];
+		if (textureUnit >= minimumTextureUnit) {
+			ID3D11ShaderResourceView* null_views[] = { nullptr };
+			video.getDeviceContext().PSSetShaderResources(textureUnit, 1, null_views);
+		}
+	}
+	// Remove units stored from the previous pass. Keep values of the current pass.
+	if (lastIndex > 0) {
+		const auto iter = renderTargetTextureUnits.begin();
+		renderTargetTextureUnits.erase(iter, iter + lastIndex);
 	}
 }

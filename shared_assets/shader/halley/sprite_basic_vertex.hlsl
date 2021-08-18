@@ -28,6 +28,7 @@ void basicVertex(VIn input, out VOut output) {
     output.pixelTexCoord1 = output.texCoord1 * input.size;
     output.custom0 = input.custom0;
     output.custom1 = input.custom1;
+    output.custom2 = input.custom2;
     output.vertPos = input.vertPos.xy;
     output.pixelPos = input.size * input.scale * input.vertPos.xy;
     output.pivot = input.pivot;

@@ -187,8 +187,13 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 		const auto& componentData = iter->second;
 		for (auto& member: componentData.members) {
 			if (member.canEdit) {
-				ComponentFieldParameters parameters(componentType, ComponentDataRetriever(data, member.name), member.defaultValue);
-				auto field = entityEditorFactory->makeField(member.type.name, parameters, member.collapse ? ComponentEditorLabelCreation::Never : ComponentEditorLabelCreation::Always);
+				auto type = member.type.name;
+				if (type == "float" && member.range) {
+					type = "Halley::Range<" + type + "," + toString(member.range->start) + "," + toString(member.range->end) + ">";
+				}
+				
+				ComponentFieldParameters parameters(componentType, ComponentDataRetriever(data, member.name, member.displayName.isEmpty() ? member.name : member.displayName), member.defaultValue);
+				auto field = entityEditorFactory->makeField(type, parameters, member.collapse ? ComponentEditorLabelCreation::Never : ComponentEditorLabelCreation::Always);
 				if (field) {
 					componentFields->add(field);
 				}
@@ -403,7 +408,7 @@ EntityEditorFactory::EntityEditorFactory(UIFactory& factory)
 
 std::shared_ptr<IUIElement> EntityEditorFactory::makeLabel(const String& text) const
 {
-	auto label = std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromUserString(text));
+	auto label = std::make_shared<UILabel>("", factory.getStyle("labelLight"), LocalisedString::fromUserString(text));
 	label->setMaxWidth(100);
 	label->setMarquee(true);
 	auto labelBox = std::make_shared<UIWidget>("", Vector2f(100, 20), UISizer());
@@ -423,19 +428,19 @@ std::shared_ptr<IUIElement> EntityEditorFactory::makeField(const String& rawFiel
 		return compFieldFactory->createLabelAndField(*context, parameters);
 	} else if (createLabel != ComponentEditorLabelCreation::Never && compFieldFactory && compFieldFactory->isNested()) {
 		auto field = factory.makeUI("ui/halley/entity_editor_compound_field");
-		field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(parameters.data.getName()));
+		field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(parameters.data.getLabelName()));
 		field->getWidget("fields")->add(compFieldFactory->createField(*context, parameters));
 		return field;
 	} else {
 		auto container = std::make_shared<UISizer>();
 		if (createLabel == ComponentEditorLabelCreation::Always) {
-			container->add(makeLabel(parameters.data.getName()), 0, {}, UISizerAlignFlags::CentreVertical);
+			container->add(makeLabel(parameters.data.getLabelName()), 0, {}, UISizerAlignFlags::CentreVertical);
 		}
 
 		if (compFieldFactory) {
 			container->add(compFieldFactory->createField(*context, parameters), 1, Vector4f(), UISizerAlignFlags::Top | UISizerFillFlags::FillHorizontal);
 		} else {
-			container->add(std::make_shared<UILabel>("", factory.getStyle("labelLight").getTextRenderer("label"), LocalisedString::fromHardcodedString("N/A")));
+			container->add(std::make_shared<UILabel>("", factory.getStyle("labelLight"), LocalisedString::fromHardcodedString("N/A")));
 		}
 
 		return container;

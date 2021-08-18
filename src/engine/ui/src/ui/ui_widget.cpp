@@ -214,7 +214,7 @@ void UIWidget::setSizer(std::optional<UISizer> sizer)
 	}
 }
 
-void UIWidget::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, Vector2f position)
+void UIWidget::add(std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, Vector2f position, size_t insertPos)
 {
 	auto widget = std::dynamic_pointer_cast<UIWidget>(element);
 	if (widget) {
@@ -226,7 +226,7 @@ void UIWidget::add(std::shared_ptr<IUIElement> element, float proportion, Vector
 		}
 	}
 	if (sizer) {
-		sizer->add(element, proportion, border, fillFlags, position);
+		sizer->add(element, proportion, border, fillFlags, position, insertPos);
 	}
 }
 
@@ -604,6 +604,7 @@ void UIWidget::notifyTreeRemovedFromRoot(UIRoot& root)
 {
 	this->root = nullptr;
 	onRemovedFromRoot(root);
+	root.onWidgetRemoved(*this);
 
 	for (auto& c: getChildren()) {
 		c->notifyTreeRemovedFromRoot(root);
@@ -734,6 +735,16 @@ Rect4f UIWidget::getMouseRect() const
 void UIWidget::setToolTip(LocalisedString toolTip)
 {
 	this->toolTip = std::move(toolTip);
+}
+
+bool UIWidget::hasStyle() const
+{
+	return !styles.empty();
+}
+
+const std::vector<UIStyle>& UIWidget::getStyles() const
+{
+	return styles;
 }
 
 void UIWidget::draw(UIPainter& painter) const

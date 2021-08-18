@@ -11,19 +11,21 @@ namespace Halley {
 	public:
 		using Retriever = std::function<ConfigNode&()>;
 		
-		ComponentDataRetriever(ConfigNode& componentData, String fieldName);
+		ComponentDataRetriever(ConfigNode& componentData, String fieldName, String labelName);
 		ComponentDataRetriever getSubIndex(size_t index) const;
 		ComponentDataRetriever getSubKey(const String& key) const;
 		
 		ConfigNode& getFieldData() const;
 		const String& getName() const;
+		const String& getLabelName() const;
 
 	private:
 		ConfigNode& componentData;
+		String labelName;
 		String name;
 		Retriever retriever;
 
-		ComponentDataRetriever(ConfigNode& componentData, String fieldName, Retriever retriever);
+		ComponentDataRetriever(ConfigNode& componentData, String fieldName, String labelName, Retriever retriever);
 	};
 	
 	class ComponentFieldParameters {
@@ -39,7 +41,7 @@ namespace Halley {
 		bool getBoolDefaultParameter(size_t n = 0) const;
 		int getIntDefaultParameter(size_t n = 0) const;
 		float getFloatDefaultParameter(size_t n = 0) const;
-
+		
 		String componentName;
 		ComponentDataRetriever data;
 		std::vector<String> defaultValue;

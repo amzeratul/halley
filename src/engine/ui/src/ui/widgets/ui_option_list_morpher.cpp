@@ -14,6 +14,9 @@ UIOptionListMorpher::UIOptionListMorpher(String id, UIStyle dropdownStyle, UISty
 	, dropdownStyle(dropdownStyle)
 	, spinlistStyle(spinlistStyle)
 {
+	styles.emplace_back(dropdownStyle);
+	styles.emplace_back(spinlistStyle);
+	
 	setOptions(std::move(os), defaultOption);
 }
 

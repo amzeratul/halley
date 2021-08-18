@@ -33,7 +33,7 @@ void TaskDisplay::update(Time t, bool moved)
 	bg->getSprite().setColour(col.multiplyAlpha(0.8f * opacity));
 	bgFill->getSprite().setColour(col.multiplyAlpha(0.5f * opacity));
 	iconBg->getSprite().setColour(cs->getColour("taskStatusBackground").multiplyAlpha(opacity));
-	bgFill->setMinSize(Vector2f((getSize().x - 12) * progress + 10.0f, 38.0f));
+	bgFill->setMinSize(Vector2f(std::round((getSize().x - 12) * progress + 10.0f), 38.0f));
 
 	if (lastStatus != task->getStatus()) {
 		lastStatus = task->getStatus();

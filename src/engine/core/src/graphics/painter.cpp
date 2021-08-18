@@ -423,10 +423,10 @@ void Painter::blitTexture(const std::shared_ptr<const Texture>& texture)
 
 	std::array<uint16_t, 6> indices = { 0, 1, 3, 1, 2, 3 };
 
-	blitMaterial->set("tex0", texture);
+	blitMaterial->set(0, texture);
 	draw(blitMaterial, 4, vs.data(), indices, PrimitiveType::Triangle);
 	flushPending();
-	blitMaterial->set("tex0", std::shared_ptr<const Texture>{});
+	blitMaterial->set(0, std::shared_ptr<const Texture>{});
 }
 
 void Painter::setLogging(bool logging)

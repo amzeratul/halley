@@ -17,8 +17,11 @@ MaterialUniform::MaterialUniform()
 	: type(ShaderParameterType::Invalid)
 {}
 
-MaterialUniform::MaterialUniform(String name, ShaderParameterType type)
-	: name(name)
+MaterialUniform::MaterialUniform(String name, ShaderParameterType type, std::optional<Range<float>> range, bool editable, String autoVariable)
+	: name(std::move(name))
+	, autoVariable(std::move(autoVariable))
+	, range(range)
+	, editable(editable)
 	, type(type)
 {}
 
@@ -26,12 +29,18 @@ void MaterialUniform::serialize(Serializer& s) const
 {
 	s << name;
 	s << type;
+	s << range;
+	s << editable;
+	s << autoVariable;
 }
 
 void MaterialUniform::deserialize(Deserializer& s)
 {
 	s >> name;
 	s >> type;
+	s >> range;
+	s >> editable;
+	s >> autoVariable;
 }
 
 MaterialUniformBlock::MaterialUniformBlock() {}
@@ -270,17 +279,29 @@ bool MaterialDefinition::isColumnMajor() const
 
 void MaterialDefinition::loadUniforms(const ConfigNode& node)
 {
-	for (auto& attribEntry : node.asSequence()) {
-		for (auto& it: attribEntry.asMap()) {
+	for (auto& blockEntry : node.asSequence()) {
+		for (auto& it: blockEntry.asMap()) {
 			const String& blockName = it.first;
 			auto& uniformNodes = it.second;
 
 			std::vector<MaterialUniform> uniforms;
 			for (auto& uniformEntry: uniformNodes.asSequence()) {
-				for (auto& uit: uniformEntry.asMap()) {
-					String uniformName = uit.first;
-					ShaderParameterType type = parseParameterType(uit.second.asString());
-					uniforms.push_back(MaterialUniform(uniformName, type));
+				if (uniformEntry.hasKey("name")) {
+					const auto name = uniformEntry["name"].asString();
+					const auto type = parseParameterType(uniformEntry["type"].asString());
+					std::optional<Range<float>> range;
+					if (uniformEntry.hasKey("range")) {
+						range = uniformEntry["range"].asFloatRange();
+					}
+					const bool editable = uniformEntry["canEdit"].asBool(true);
+					const auto autoVariable = uniformEntry["autoVariable"].asString("");
+					uniforms.push_back(MaterialUniform(name, type, range, editable, autoVariable));
+				} else {
+					for (auto& uit: uniformEntry.asMap()) {
+						String uniformName = uit.first;
+						ShaderParameterType type = parseParameterType(uit.second.asString());
+						uniforms.push_back(MaterialUniform(uniformName, type));
+					}
 				}
 			}
 			

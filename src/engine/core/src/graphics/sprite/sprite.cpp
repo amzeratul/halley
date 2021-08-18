@@ -343,7 +343,7 @@ Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<c
 	Expects(materialDefinition != nullptr);
 
 	auto mat = std::make_shared<Material>(materialDefinition);
-	mat->set("tex0", image);
+	mat->set(0, image);
 	setMaterial(mat, shared);
 	return *this;
 }
@@ -628,24 +628,70 @@ void ConfigNodeSerializer<Sprite>::deserialize(const ConfigNodeSerializationCont
 		return;
 	}
 
-	if (node.hasKey("image")) {
-		const auto& imageNode = node["image"];
+	// Get the material definition
+	std::shared_ptr<const MaterialDefinition> material;
+	const auto& materialNode = node["material"];
+	if (materialNode.getType() == ConfigNodeType::String) {
+		material = context.resources->get<MaterialDefinition>(materialNode.asString());
+	} else if (materialNode.getType() == ConfigNodeType::Del || !sprite.hasMaterial()) {
+		material = context.resources->get<MaterialDefinition>("Halley/Sprite");
+	} else {
+		material = sprite.getMaterial().getDefinitionPtr();
+	}
+
+	auto loadTexture = [&](const String& nodeName, size_t texUnit) -> bool
+	{
+		if (!node.hasKey(nodeName)) {
+			return false;
+		}
+		
+		const auto& imageNode = node[nodeName];
 		if (imageNode.getType() == ConfigNodeType::Del) {
-			sprite.getMutableMaterial().set("tex0", std::shared_ptr<const Texture>());
-		} else {
+			sprite.getMutableMaterial().set(texUnit, std::shared_ptr<const Texture>());
+			return false;
+		}
+		
+		if (texUnit == 0) {
 			sprite.setImage(*context.resources, imageNode.asString(), node["material"].asString(sprite.hasMaterial() ? sprite.getMaterial().getDefinition().getName() : ""));
-		}
-	}
-	if (node.hasKey("image1")) {
-		const auto& imageNode = node["image1"];
-		if (imageNode.getType() == ConfigNodeType::Del) {
-			sprite.getMutableMaterial().set("tex1", std::shared_ptr<const Texture>());
 		} else {
-			const auto image1 = context.resources->get<SpriteResource>(imageNode.asString());
-			sprite.setTexRect1(image1->getSprite().coords);
-			sprite.getMutableMaterial().set("tex1", image1->getSpriteSheet()->getTexture());
+			const auto image = context.resources->get<SpriteResource>(imageNode.asString());
+			sprite.setTexRect1(image->getSprite().coords);
+			sprite.getMutableMaterial().set(texUnit, image->getSpriteSheet()->getTexture());
+		}
+		return true;
+	};
+
+	if (material) {
+		// Load each texture
+		size_t i = 0;
+		for (const auto& tex: material->getTextures()) {
+			const bool loaded = loadTexture("tex_" + tex.name, i);
+			if (!loaded) {
+				if (i == 0) {
+					loadTexture("image", i);
+				} else if (i == 1) {
+					loadTexture("image1", i);
+				}
+			}
+			i++;
+		}
+
+		// Load material parameters
+		for (const auto& block: material->getUniformBlocks()) {
+			for (const auto& uniform: block.uniforms) {
+				if (uniform.editable) {
+					const auto key = "par_" + uniform.name;
+					if (node.hasKey(key)) {
+						const auto& parNode = node[key];
+						if (uniform.type == ShaderParameterType::Float) {
+							sprite.getMutableMaterial().set(uniform.name, parNode.asFloat());
+						}
+					}
+				}
+			}
 		}
 	}
+	
 	if (node.hasKey("pivot")) {
 		const auto& pivotNode = node["pivot"];
 		if (pivotNode.getType() == ConfigNodeType::Del) {
@@ -692,7 +738,7 @@ void Sprite::reloadSprite(const SpriteResource& sprite)
 	if (sharedMaterial) {
 		setMaterial(sprite.getMaterial(material->getDefinition().getName()));
 	} else if (material) {
-		material->set("tex0", sprite.getSpriteSheet()->getTexture());
+		material->set(0, sprite.getSpriteSheet()->getTexture());
 	}
 	doSetSprite(sprite.getSprite(), lastAppliedPivot);
 }
@@ -745,6 +791,7 @@ Sprite& Sprite::operator=(Sprite&& other) noexcept
 	lastAppliedPivot = std::move(other.lastAppliedPivot);
 
 	setHotReload(other.hotReloadRef, other.hotReloadIdx);
+	other.setHotReload(nullptr, 0);
 
 	return *this;
 }

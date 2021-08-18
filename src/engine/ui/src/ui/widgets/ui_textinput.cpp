@@ -12,7 +12,6 @@ using namespace Halley;
 
 UITextInput::UITextInput(String id, UIStyle style, String text, LocalisedString ghostText, std::shared_ptr<UIValidator> validator)
 	: UIWidget(std::move(id), Vector2f(style.getFloat("minSize"), style.getFloat("minSize")), UISizer(UISizerType::Vertical), style.getBorder("innerBorder"))
-	, style(style)
 	, sprite(style.getSprite("box"))
 	, caret(style.getSprite("caret"))
 	, label(style.getTextRenderer("label"))
@@ -20,6 +19,7 @@ UITextInput::UITextInput(String id, UIStyle style, String text, LocalisedString 
 	, text(text.getUTF32())
 	, ghostText(std::move(ghostText))
 {
+	styles.emplace_back(std::move(style));
 	label.setText(text);
 	setValidator(std::move(validator));
 }
@@ -132,6 +132,10 @@ void UITextInput::draw(UIPainter& painter) const
 		painter.draw(sprite);
 	}
 	
+	if (icon.hasMaterial()) {
+		painter.draw(icon);
+	}
+
 	if (!ghostLabel.empty()) {
 		painter.draw(ghostLabel);
 	}
@@ -231,6 +235,12 @@ bool UITextInput::isClearOnSubmit() const
 	return clearOnSubmit;
 }
 
+void UITextInput::setIcon(Sprite icon, Vector4f border)
+{
+	this->icon = std::move(icon);
+	iconBorder = border;
+}
+
 void UITextInput::update(Time t, bool moved)
 {
 	if (isFocused()) {
@@ -251,20 +261,18 @@ void UITextInput::update(Time t, bool moved)
 	}
 
 	// Update text labels
-	const bool showGhost = text.getText().empty() && !isFocused();
+	const bool showGhost = text.getText().empty() && (!isFocused() || isReadOnly());
 	const bool showAutoComplete = autoCompleteCurOption.has_value();
 	ghostText.checkForUpdates();
 	ghostLabel.setText(showAutoComplete ? getAutoCompleteCaption() : (showGhost ? ghostText.getString().getUTF32() : StringUTF32()));
 	label.setText(text.getText());
 
 	// Position the text
-	const float length = label.getExtents().x;
-	const float capacityX = getSize().x - getInnerBorder().x - getInnerBorder().z;
-	const float capacityY = getSize().y - getInnerBorder().y - getInnerBorder().w;
-	const Vector2f startPos = getPosition() + Vector2f(getInnerBorder().x, getInnerBorder().y);
-	if (length > capacityX) {
-		textScrollPos.x = clamp(textScrollPos.x, std::max(0.0f, caretPhysicalPos - capacityX), std::min(length - capacityX, caretPhysicalPos));
-		const auto clip = Rect4f(textScrollPos, textScrollPos + Vector2f(capacityX, capacityY));
+	const float length = label.empty() ? ghostLabel.getExtents().x : label.getExtents().x;
+	const auto textBounds = getTextBounds();
+	if (length > textBounds.getWidth()) {
+		textScrollPos.x = clamp(textScrollPos.x, std::max(0.0f, caretPhysicalPos - textBounds.getWidth()), std::min(length - textBounds.getWidth(), caretPhysicalPos));
+		const auto clip = Rect4f(textScrollPos, textScrollPos + textBounds.getSize());
 		label.setClip(clip);
 		ghostLabel.setClip(clip);
 	} else {
@@ -272,11 +280,17 @@ void UITextInput::update(Time t, bool moved)
 		label.setClip();
 		ghostLabel.setClip();
 	}
-	label.setPosition(startPos - textScrollPos);
-	ghostLabel.setPosition(startPos - textScrollPos);
+	const auto textPos = textBounds.getTopLeft() - textScrollPos;
+	label.setPosition(textPos);
+	ghostLabel.setPosition(textPos);
 
 	// Position the caret
-	caret.setPos(startPos - textScrollPos + Vector2f(caretPhysicalPos, 0));
+	caret.setPos(textPos + Vector2f(caretPhysicalPos, 0));
+
+	// Position the icon
+	if (icon.hasMaterial()) {
+		icon.setPos(getPosition() + getInnerBorder().xy() + iconBorder.xy());
+	}
 
 	if (moved) {
 		sprite.setPos(getPosition()).scaleTo(getSize());
@@ -285,6 +299,19 @@ void UITextInput::update(Time t, bool moved)
 	if (text.isPendingSubmit()) {
 		submit();
 	}
+}
+
+Rect4f UITextInput::getTextBounds() const
+{
+	Vector4f border = getInnerBorder();
+	if (icon.hasMaterial()) {
+		border.x += icon.getSize().x + iconBorder.x + iconBorder.z;
+	}
+	
+	const Vector2f startPos = getPosition() + Vector2f(border.x, border.y);
+	const float capacityX = getSize().x - border.x - border.z;
+	const float capacityY = getSize().y - border.y - border.w;
+	return Rect4f(startPos, capacityX, capacityY);
 }
 
 void UITextInput::onFocus()

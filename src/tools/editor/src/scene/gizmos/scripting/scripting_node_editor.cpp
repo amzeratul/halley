@@ -107,7 +107,7 @@ void ScriptingNodeEditor::makeFields(const std::shared_ptr<UIWidget>& fieldsRoot
 	const auto& types = nodeType.getSettingTypes();
 
 	for (const auto& type: types) {
-		const auto params = ComponentFieldParameters(type.name, ComponentDataRetriever(curSettings, type.name), type.defaultValue);
+		const auto params = ComponentFieldParameters(type.name, ComponentDataRetriever(curSettings, type.name, type.name), type.defaultValue);
 		auto field = entityEditorFactory.makeField(type.type, params, ComponentEditorLabelCreation::Always);
 		fieldsRoot->add(field);
 	}
