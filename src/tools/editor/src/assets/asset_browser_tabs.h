@@ -15,6 +15,7 @@ namespace Halley {
 		void load(std::optional<AssetType> assetType, const String& name);
 		void refreshAssets();
 		void setAssetSrcMode(bool srcMode);
+		void replaceAssetTab(AssetType oldType, const String& oldId, AssetType newType, const String& newId);
 
 	protected:
 		void update(Time t, bool moved) override;

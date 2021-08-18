@@ -33,14 +33,8 @@ AssetsBrowser::AssetsBrowser(EditorUIFactory& factory, Project& project, Project
 void AssetsBrowser::openAsset(AssetType type, const String& assetId)
 {
 	getWidgetAs<UITextInput>("assetSearch")->setText("");
-	Path target;
-	if (false && type == AssetType::Sprite) {
-		auto ssAssetId = project.getGameResources().get<SpriteResource>(assetId)->getSpriteSheet()->getAssetId();
-		target = project.getImportAssetsDatabase().getPrimaryInputFile(AssetType::SpriteSheet, ssAssetId);
-	} else {
-		target = project.getImportAssetsDatabase().getPrimaryInputFile(type, assetId);
-	}
-	openFile(target);
+	auto target = project.getImportAssetsDatabase().getPrimaryInputFile(type, assetId);
+	openFile(std::move(target));
 }
 
 void AssetsBrowser::openFile(const Path& path)
@@ -51,6 +45,11 @@ void AssetsBrowser::openFile(const Path& path)
 		assetList->setSelectedOptionId(path.toString());
 		loadAsset(path.toString(), true);
 	}
+}
+
+void AssetsBrowser::replaceAssetTab(AssetType asset, const String& string, AssetType newType, const String& newId)
+{
+	assetTabs->replaceAssetTab(asset, string, newType, newId);
 }
 
 void AssetsBrowser::loadResources()

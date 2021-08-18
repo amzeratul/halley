@@ -73,6 +73,11 @@ void AssetBrowserTabs::closeTab(const String& key)
 	}
 }
 
+void AssetBrowserTabs::replaceAssetTab(AssetType oldType, const String& oldId, AssetType newType, const String& newId)
+{
+	
+}
+
 void AssetBrowserTabs::refreshAssets()
 {
 	for (int i = 0; i < pages->getNumberOfPages(); ++i) {

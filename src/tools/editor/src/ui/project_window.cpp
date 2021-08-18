@@ -279,6 +279,12 @@ void ProjectWindow::openAsset(AssetType type, const String& assetId)
 	assetEditorWindow->openAsset(type, assetId);
 }
 
+void ProjectWindow::replaceAssetTab(AssetType oldType, const String& oldId, AssetType newType, const String& newId)
+{
+	toolbar->getList()->setSelectedOptionId(toString(EditorTabs::Assets));
+	assetEditorWindow->replaceAssetTab(oldType, oldId, newType, newId);
+}
+
 const HalleyAPI& ProjectWindow::getAPI() const
 {
 	return api;

@@ -252,6 +252,11 @@ void SceneEditorGameBridge::openAsset(AssetType assetType, const String& assetId
 	sceneEditorWindow.openAsset(assetType, assetId);
 }
 
+void SceneEditorGameBridge::openAssetHere(AssetType assetType, const String& assetId)
+{
+	sceneEditorWindow.openAssetHere(assetType, assetId);
+}
+
 void SceneEditorGameBridge::addTask(std::unique_ptr<Task> task)
 {
 	projectWindow.addTask(std::move(task));
@@ -295,6 +300,11 @@ Sprite SceneEditorGameBridge::getEntityIcon(const String& uuid)
 		}
 	}
 	return sceneEditorWindow.getEntityIcons().getIcon(icon);
+}
+
+Sprite SceneEditorGameBridge::getAssetIcon(AssetType type)
+{
+	return factory.makeAssetTypeIcon(type);
 }
 
 void SceneEditorGameBridge::refreshAssets()
