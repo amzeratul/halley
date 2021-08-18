@@ -547,7 +547,7 @@ void SceneEditor::onSceneContextMenuSelection(const String& id)
 	if (id.startsWith("scene:")) {
 		editorInterface->openAsset(AssetType::Scene, id.mid(6));
 	} else if (id.startsWith("scene_here:")) {
-		editorInterface->openAssetHere(AssetType::Scene, id.mid(6));
+		editorInterface->openAssetHere(AssetType::Scene, id.mid(11));
 	} else if (id.startsWith("entity:")) {
 		editorInterface->selectEntity(id.mid(7));
 	}

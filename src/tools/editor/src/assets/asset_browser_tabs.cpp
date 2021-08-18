@@ -32,21 +32,9 @@ void AssetBrowserTabs::openTab(std::optional<AssetType> assetType, const String&
 	}
 
 	// Create tab
-	Sprite icon;
-	if (assetType) {
-		icon = factory.makeAssetTypeIcon(assetType.value());
-	} else {
-		const auto type = project.getAssetImporter()->getImportAssetType(name, false);
-		icon = factory.makeImportAssetTypeIcon(type);
-	}
-	auto label = LocalisedString::fromUserString(Path(name).getFilename().toString());
 	auto tabContents = factory.makeUI("ui/halley/asset_browser_tab_contents");
-	tabContents->getWidgetAs<UIImage>("icon")->setSprite(icon);
-	tabContents->getWidgetAs<UILabel>("label")->setText(std::move(label));
-	tabContents->setHandle(UIEventType::ButtonClicked, "close", [=] (const UIEvent& event)
-	{
-		toClose.push_back(key);
-	});
+	tabContents->setId("tabContents");
+	populateTab(*tabContents, assetType, name, key);
 	tabs->addItem(key, tabContents);
 
 	// Create window
@@ -73,9 +61,37 @@ void AssetBrowserTabs::closeTab(const String& key)
 	}
 }
 
-void AssetBrowserTabs::replaceAssetTab(AssetType oldType, const String& oldId, AssetType newType, const String& newId)
+void AssetBrowserTabs::populateTab(UIWidget& tab, std::optional<AssetType> assetType, const String& name, const String& key)
 {
-	
+	Sprite icon;
+	if (assetType) {
+		icon = factory.makeAssetTypeIcon(assetType.value());
+	} else {
+		const auto type = project.getAssetImporter()->getImportAssetType(name, false);
+		icon = factory.makeImportAssetTypeIcon(type);
+	}
+	auto label = LocalisedString::fromUserString(Path(name).getFilename().toString());
+	tab.getWidgetAs<UIImage>("icon")->setSprite(icon);
+	tab.getWidgetAs<UILabel>("label")->setText(std::move(label));
+	tab.setHandle(UIEventType::ButtonClicked, "close", [=] (const UIEvent& event)
+	{
+		toClose.push_back(key);
+	});
+}
+
+void AssetBrowserTabs::replaceAssetTab(const String& oldName, const String& newName)
+{
+	const auto idx = tabs->tryGetItemId(oldName);
+	if (idx == -1) {
+		return;
+	}
+
+	const auto contents = tabs->getItem(idx)->getWidget("tabContents");
+	if (contents) {
+		tabs->changeItemId(idx, newName);
+		populateTab(*contents, {}, newName, newName);
+		windows[idx]->loadAsset(newName, {}, true);
+	}
 }
 
 void AssetBrowserTabs::refreshAssets()

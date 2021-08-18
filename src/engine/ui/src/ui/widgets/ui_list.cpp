@@ -392,6 +392,11 @@ std::shared_ptr<UIListItem> UIList::getItemUnderCursor() const
 	}
 }
 
+void UIList::changeItemId(int idx, const String& newId)
+{
+	items.at(idx)->setId(newId);
+}
+
 bool UIList::isDragEnabled() const
 {
 	return dragEnabled;

@@ -47,9 +47,11 @@ void AssetsBrowser::openFile(const Path& path)
 	}
 }
 
-void AssetsBrowser::replaceAssetTab(AssetType asset, const String& string, AssetType newType, const String& newId)
+void AssetsBrowser::replaceAssetTab(AssetType oldType, const String& oldId, AssetType newType, const String& newId)
 {
-	assetTabs->replaceAssetTab(asset, string, newType, newId);
+	const auto oldTarget = project.getImportAssetsDatabase().getPrimaryInputFile(oldType, oldId);
+	const auto newTarget = project.getImportAssetsDatabase().getPrimaryInputFile(newType, newId);
+	assetTabs->replaceAssetTab(oldTarget.toString(), newTarget.toString());
 }
 
 void AssetsBrowser::loadResources()
