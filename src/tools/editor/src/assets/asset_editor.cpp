@@ -45,6 +45,7 @@ void AssetEditor::reload()
 void AssetEditor::refreshAssets()
 {
 	needsLoading = true;
+	tryLoading();
 }
 
 void AssetEditor::onDoubleClick()
