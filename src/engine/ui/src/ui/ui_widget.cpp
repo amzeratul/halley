@@ -410,7 +410,25 @@ void UIWidget::updateActive(bool wasActiveBefore)
 		}
 
 		markAsNeedingLayout();
+
+		if (isActiveInHierarchy()) {
+			notifyActivationChange(isActive());
+		}
 	}
+}
+
+void UIWidget::notifyActivationChange(bool active)
+{
+	onActiveChanged(active);
+	for (auto& c: getChildren()) {
+		if (c->isActive()) {
+			c->notifyActivationChange(active);
+		}
+	}
+}
+
+void UIWidget::onActiveChanged(bool active)
+{
 }
 
 bool UIWidget::isEnabled() const
