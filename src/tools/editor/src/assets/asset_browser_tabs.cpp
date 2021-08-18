@@ -91,6 +91,7 @@ void AssetBrowserTabs::replaceAssetTab(const String& oldName, const String& newN
 		tabs->changeItemId(idx, newName);
 		populateTab(*contents, {}, newName, newName);
 		windows[idx]->loadAsset(newName, {}, true);
+		saveTabs();
 	}
 }
 
