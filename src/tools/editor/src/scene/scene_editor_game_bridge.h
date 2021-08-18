@@ -61,6 +61,9 @@ namespace Halley {
 		void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) override;
 		const ConfigNode& getAssetSetting(std::string_view id) const override;
 		void setAssetSetting(std::string_view id, ConfigNode data) override;
+		const ConfigNode& getAssetSetting(std::string_view assetKey, std::string_view id) const override;
+		void setAssetSetting(std::string_view assetKey, std::string_view id, ConfigNode data) override;
+		String getAssetKey() override;
 
 		void selectEntity(const String& uuid) override;
 		Sprite getEntityIcon(const String& uuid) override;

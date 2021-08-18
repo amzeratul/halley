@@ -64,6 +64,9 @@ namespace Halley {
 		virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;
 		virtual const ConfigNode& getAssetSetting(std::string_view id) const = 0;
 		virtual void setAssetSetting(std::string_view id, ConfigNode data) = 0;
+		virtual const ConfigNode& getAssetSetting(std::string_view assetKey, std::string_view id) const = 0;
+		virtual void setAssetSetting(std::string_view assetKey, std::string_view id, ConfigNode data) = 0;
+		virtual String getAssetKey() = 0;
 
 		virtual void selectEntity(const String& uuid) = 0;
 		virtual Sprite getEntityIcon(const String& uuid) = 0;
