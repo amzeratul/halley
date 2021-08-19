@@ -252,6 +252,11 @@ void SceneEditorGameBridge::openAsset(AssetType assetType, const String& assetId
 	sceneEditorWindow.openAsset(assetType, assetId);
 }
 
+void SceneEditorGameBridge::openAssetHere(AssetType assetType, const String& assetId)
+{
+	sceneEditorWindow.openAssetHere(assetType, assetId);
+}
+
 void SceneEditorGameBridge::addTask(std::unique_ptr<Task> task)
 {
 	projectWindow.addTask(std::move(task));
@@ -277,6 +282,21 @@ void SceneEditorGameBridge::setAssetSetting(std::string_view id, ConfigNode data
 	projectWindow.setAssetSetting(sceneEditorWindow.getAssetKey(), id, std::move(data));
 }
 
+const ConfigNode& SceneEditorGameBridge::getAssetSetting(std::string_view assetKey, std::string_view id) const
+{
+	return projectWindow.getAssetSetting(assetKey, id);
+}
+
+void SceneEditorGameBridge::setAssetSetting(std::string_view assetKey, std::string_view id, ConfigNode data)
+{
+	projectWindow.setAssetSetting(assetKey, id, std::move(data));
+}
+
+String SceneEditorGameBridge::getAssetKey()
+{
+	return sceneEditorWindow.getAssetKey();
+}
+
 void SceneEditorGameBridge::selectEntity(const String& uuid)
 {
 	sceneEditorWindow.selectEntity(uuid);
@@ -295,6 +315,11 @@ Sprite SceneEditorGameBridge::getEntityIcon(const String& uuid)
 		}
 	}
 	return sceneEditorWindow.getEntityIcons().getIcon(icon);
+}
+
+Sprite SceneEditorGameBridge::getAssetIcon(AssetType type)
+{
+	return factory.makeAssetTypeIcon(type);
 }
 
 void SceneEditorGameBridge::refreshAssets()

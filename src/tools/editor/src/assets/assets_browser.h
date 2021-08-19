@@ -20,6 +20,7 @@ namespace Halley {
         AssetsBrowser(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow);
         void openAsset(AssetType type, const String& assetId);
 		void openFile(const Path& path);
+        void replaceAssetTab(AssetType oldType, const String& oldId, AssetType newType, const String& newId);
 
     private:
 		EditorUIFactory& factory;

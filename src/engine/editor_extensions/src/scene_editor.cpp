@@ -372,6 +372,8 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 
 void SceneEditor::saveCameraPos()
 {
+	Expects(editorInterface);
+
 	auto cameraEntity = getWorld().getEntity(cameraEntityIds.at(0));
 	auto& camera = cameraEntity.getComponent<CameraComponent>();
 	auto& transform = cameraEntity.getComponent<Transform2DComponent>();
@@ -381,6 +383,8 @@ void SceneEditor::saveCameraPos()
 
 bool SceneEditor::loadCameraPos()
 {
+	Expects(editorInterface);
+	
 	auto cameraEntity = getWorld().getEntity(cameraEntityIds.at(0));
 
 	const auto& zoom = editorInterface->getAssetSetting("cameraZoom");
@@ -542,6 +546,8 @@ void SceneEditor::onSceneContextMenuSelection(const String& id)
 {
 	if (id.startsWith("scene:")) {
 		editorInterface->openAsset(AssetType::Scene, id.mid(6));
+	} else if (id.startsWith("scene_here:")) {
+		editorInterface->openAssetHere(AssetType::Scene, id.mid(11));
 	} else if (id.startsWith("entity:")) {
 		editorInterface->selectEntity(id.mid(7));
 	}

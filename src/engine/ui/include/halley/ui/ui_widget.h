@@ -195,6 +195,7 @@ namespace Halley {
 		virtual void onLayout();
 		virtual void onDestroyRequested();
 		virtual void onParentChanged();
+		virtual void onActiveChanged(bool active);
 
 		void notifyDataBind(bool data) const;
 		void notifyDataBind(int data) const;
@@ -224,6 +225,7 @@ namespace Halley {
 		void setWidgetRect(Rect4f rect);
 		void resetInputResults();
 		void updateActive(bool wasActiveBefore);
+		void notifyActivationChange(bool active);
 
 		UIParent* parent = nullptr;
 		UIRoot* root = nullptr;

@@ -15,6 +15,7 @@ namespace Halley {
 		void load(std::optional<AssetType> assetType, const String& name);
 		void refreshAssets();
 		void setAssetSrcMode(bool srcMode);
+		void replaceAssetTab(const String& oldName, const String& newName);
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -35,6 +36,7 @@ namespace Halley {
 		void makeUI();
 		void openTab(std::optional<AssetType> assetType, const String& name, bool selected);
 		void closeTab(const String& key);
+		void populateTab(UIWidget& tab, std::optional<AssetType> assetType, const String& name, const String& key);
 
 		void saveTabs();
 		void loadTabs();
