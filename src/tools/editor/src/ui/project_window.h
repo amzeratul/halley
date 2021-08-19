@@ -27,6 +27,7 @@ namespace Halley {
         LocalisedString setCustomPage(const String& pageId);
     	void openFile(const String& assetId);
     	void openAsset(AssetType type, const String& assetId);
+        void replaceAssetTab(AssetType oldType, const String& oldId, AssetType newType, const String& newId);
 
     	const HalleyAPI& getAPI() const;
 

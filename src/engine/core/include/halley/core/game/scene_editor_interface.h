@@ -57,15 +57,20 @@ namespace Halley {
 
 		virtual bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) = 0;
 		virtual void openAsset(AssetType assetType, const String& assetId) = 0;
+		virtual void openAssetHere(AssetType assetType, const String& assetId) = 0;
 		virtual void addTask(std::unique_ptr<Task> task) = 0;
 
 		virtual const ConfigNode& getSetting(EditorSettingType type, std::string_view id) const = 0;
 		virtual void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) = 0;
 		virtual const ConfigNode& getAssetSetting(std::string_view id) const = 0;
 		virtual void setAssetSetting(std::string_view id, ConfigNode data) = 0;
+		virtual const ConfigNode& getAssetSetting(std::string_view assetKey, std::string_view id) const = 0;
+		virtual void setAssetSetting(std::string_view assetKey, std::string_view id, ConfigNode data) = 0;
+		virtual String getAssetKey() = 0;
 
 		virtual void selectEntity(const String& uuid) = 0;
 		virtual Sprite getEntityIcon(const String& uuid) = 0;
+		virtual Sprite getAssetIcon(AssetType type) = 0;
 	};
 
     class SceneEditorContext {

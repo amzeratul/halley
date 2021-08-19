@@ -219,8 +219,8 @@ void SceneEditorCanvas::openRightClickMenu()
 		menu->setAnchor(UIAnchor(Vector2f(), Vector2f(), inputState.rawMousePos.value()));
 
 		menu->setHandle(UIEventType::PopupAccept, [this] (const UIEvent& e) {
-			gameBridge->onSceneContextMenuSelection(e.getStringData());
 			gameBridge->onSceneContextMenuHighlight("");
+			gameBridge->onSceneContextMenuSelection(e.getStringData());
 		});
 
 		menu->setHandle(UIEventType::PopupHoveredChanged, [this] (const UIEvent& e) {

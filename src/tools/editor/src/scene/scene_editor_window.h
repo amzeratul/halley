@@ -84,6 +84,7 @@ namespace Halley {
 		void spawnUI(std::shared_ptr<UIWidget> ui) override;
 		
 		void openAsset(AssetType assetType, const String& assetId);
+		void openAssetHere(AssetType assetType, const String& assetId);
 		String getAssetKey() const;
 
 	protected:
