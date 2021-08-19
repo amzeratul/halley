@@ -215,9 +215,18 @@ void World::destroyEntity(EntityId id)
 
 void World::destroyEntity(EntityRef entity)
 {
-	Expects(entity.isValid());
-	Expects(entity.entity->isAlive());
-	Expects(entity.world == this);
+	if (!entity.isValid()) {
+		Logger::logWarning("Attempting to destroy invalid EntityRef.");
+		return;
+	}
+	if (!entity.entity->isAlive()) {
+		Logger::logWarning("Attempting to destroy entity which is already dead.");
+		return;
+	}
+	if (entity.world != this) {
+		throw Exception("Attempting to destroy an entity which does not belong to this world.", HalleyExceptions::Entity);
+	}
+	
 	doDestroyEntity(entity.entity);
 }
 

@@ -198,6 +198,7 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 void SceneEditorWindow::unloadScene()
 {
 	setCustomUI({});
+	setToolUI({});
 
 	currentEntityId = "";
 	if (gameBridge->isLoaded()) {
