@@ -71,3 +71,7 @@ _ReSharper*/
 /external/
 /gen/
 /shared_gen/
+
+
+# alvarogalloc changes
+.DS_Store
