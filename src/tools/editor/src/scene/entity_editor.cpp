@@ -79,6 +79,8 @@ void EntityEditor::makeUI()
 	prefabName = getWidgetAs<SelectAssetWidget>("prefabName");
 	entityIcon = getWidgetAs<UIDropdown>("entityIcon");
 
+	prefabName->setSceneEditorWindow(*sceneEditor);
+
 	setHandle(UIEventType::ButtonClicked, "addComponentButton", [=](const UIEvent& event)
 	{
 		addComponent();

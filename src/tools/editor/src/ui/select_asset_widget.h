@@ -4,6 +4,7 @@
 namespace Halley {
 	class UIFactory;
 	class UITextInput;
+	class SceneEditorWindow;
 
 	class SelectAssetWidget : public UIWidget {
 	public:
@@ -15,10 +16,12 @@ namespace Halley {
 
 		void setGameResources(Resources& gameResources);
 		void setDefaultAssetId(String assetId);
+		void setSceneEditorWindow(SceneEditorWindow& sceneEditorWindow);
 
 	private:
 		UIFactory& factory;
 		Resources* gameResources = nullptr;
+		SceneEditorWindow* sceneEditorWindow = nullptr;
 		AssetType type;
 		String value;
 		String defaultAssetId;

@@ -41,18 +41,32 @@ void ChooseAssetWindow::setAssetIds(std::vector<String> ids, String defaultOptio
 
 void ChooseAssetWindow::setAssetIds(std::vector<String> _ids, std::vector<String> _names, String _defaultOption)
 {
-	ids = std::move(_ids);
-	names = std::move(_names);
+	origIds = std::move(_ids);
+	origNames = std::move(_names);
 	defaultOption = std::move(_defaultOption);
-
-	effectiveNames = &(names.empty() ? ids : names);
-	if (effectiveNames->size() != ids.size()) {
+	if (origNames.empty()) {
+		origNames = origIds;
+	}
+	
+	if (origNames.size() != origIds.size()) {
 		throw Exception("Names and ids must have same length", HalleyExceptions::UI);
 	}
 
+	setCategoryFilter("");
+}
+
+void ChooseAssetWindow::setCategoryFilter(const String& filterId)
+{
+	if (filterId.isEmpty()) {
+		ids = origIds;
+		names = origNames;
+	} else {
+		// TODO
+	}
+	
 	fuzzyMatcher.clear();
 	for (size_t i = 0; i < ids.size(); ++i) {
-		fuzzyMatcher.addString((*effectiveNames)[i], ids[i]);
+		fuzzyMatcher.addString(names[i], ids[i]);
 	}
 
 	populateList();
@@ -71,7 +85,7 @@ void ChooseAssetWindow::populateList()
 
 			std::vector<std::pair<String, String>> items;
 			for (size_t i = 0; i < ids.size(); ++i) {
-				items.emplace_back(ids[i], (*effectiveNames)[i]);
+				items.emplace_back(ids[i], names[i]);
 			}
 
 			sortItems(items);
@@ -140,7 +154,20 @@ void ChooseAssetWindow::sortItems(std::vector<std::pair<String, String>>& items)
 	std::sort(items.begin(), items.end(), [=] (const auto& a, const auto& b) { return a.second < b.second; });
 }
 
-void ChooseAssetWindow::setFilter(const String& str)
+void ChooseAssetWindow::setCategoryTabs()
+{
+	getWidget("tabsContainer")->setActive(true);
+
+	auto tabs = getWidgetAs<UIList>("tabs");
+	tabs->addTextItemAligned("", LocalisedString::fromHardcodedString("All"));
+
+	setHandle(UIEventType::ListSelectionChanged, "tabs", [=] (const UIEvent& event)
+	{
+		setCategoryFilter(event.getStringData());
+	});
+}
+
+void ChooseAssetWindow::setUserFilter(const String& str)
 {
 	if (filter != str) {
 		filter = str;
@@ -199,7 +226,7 @@ void ChooseAssetWindow::onMakeUI()
 
 	setHandle(UIEventType::TextChanged, "search", [=](const UIEvent& event)
 	{
-		setFilter(event.getStringData());
+		setUserFilter(event.getStringData());
 	});
 
 	setHandle(UIEventType::TextSubmit, "search", [=](const UIEvent& event)
@@ -278,4 +305,21 @@ Sprite ChooseImportAssetWindow::makeIcon(const String& id, bool hasSearch)
 bool ChooseImportAssetWindow::canShowAll() const
 {
 	return false;
+}
+
+ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, Callback callback)
+	: ChooseAssetWindow(factory, std::move(callback), false, UISizerType::Vertical, 1)
+	, sceneEditorWindow(sceneEditorWindow)
+{
+	setAssetIds(gameResources.ofType(AssetType::Prefab).enumerate(), std::move(defaultOption));
+	setTitle(LocalisedString::fromHardcodedString("Choose Prefab"));
+	setCategoryTabs();
+}
+
+Sprite ChoosePrefabWindow::makeIcon(const String& id, bool hasSearch)
+{
+	if (!icon.hasMaterial()) {
+		icon = getFactory().makeAssetTypeIcon(AssetType::Prefab);
+	}
+	return icon;
 }

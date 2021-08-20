@@ -4,6 +4,7 @@
 #include <optional>
 
 namespace Halley {
+	class SceneEditorWindow;
 	class EditorUIFactory;
 	class UIFactory;
 	class UIList;
@@ -34,15 +35,19 @@ namespace Halley {
 
         virtual void sortItems(std::vector<std::pair<String, String>>& items);
 
+		void setCategoryTabs();
+
     private:
         EditorUIFactory& factory;
         Callback callback;
 		UISizerType orientation;
 		int nColumns;
 
+		std::vector<String> origIds;
+		std::vector<String> origNames;
 		std::vector<String> ids;
 		std::vector<String> names;
-		std::vector<String>* effectiveNames;
+		
 		FuzzyTextMatcher fuzzyMatcher;
 		String filter;
         String defaultOption;
@@ -51,7 +56,8 @@ namespace Halley {
 
         void accept();
         void cancel();
-        void setFilter(const String& str);
+        void setUserFilter(const String& str);
+		void setCategoryFilter(const String& filterId);
 		void populateList();
 		void addItem(const String& id, const String& name, gsl::span<const std::pair<uint16_t, uint16_t>> matchPositions = {});
     };
@@ -84,5 +90,17 @@ namespace Halley {
 	private:
 		Project& project;
 		std::map<ImportAssetType, Sprite> icons;
+	};
+
+	class ChoosePrefabWindow : public ChooseAssetWindow {
+	public:
+		ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, Callback callback);
+	
+    protected:
+        Sprite makeIcon(const String& id, bool hasSearch) override;
+
+	private:
+		Sprite icon;
+		SceneEditorWindow& sceneEditorWindow;
 	};
 }

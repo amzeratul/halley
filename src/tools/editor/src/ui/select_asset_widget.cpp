@@ -49,6 +49,11 @@ void SelectAssetWidget::setDefaultAssetId(String assetId)
 	}
 }
 
+void SelectAssetWidget::setSceneEditorWindow(SceneEditorWindow& window)
+{
+	sceneEditorWindow = &window;
+}
+
 void SelectAssetWidget::makeUI()
 {
 	add(factory.makeUI("ui/halley/select_asset_widget"), 1);
@@ -73,12 +78,21 @@ void SelectAssetWidget::makeUI()
 void SelectAssetWidget::choose()
 {
 	if (gameResources) {
-		getRoot()->addChild(std::make_shared<ChooseAssetTypeWindow>(factory, type, getValue(), *gameResources, [=] (std::optional<String> result)
+		auto callback = [=] (std::optional<String> result)
 		{
 			if (result) {
 				setValue(result.value());
 			}
-		}));
+		};
+
+		std::shared_ptr<UIWidget> window;
+		if (type == AssetType::Prefab) {
+			assert(sceneEditorWindow != nullptr);
+			window = std::make_shared<ChoosePrefabWindow>(factory, getValue(), *gameResources, *sceneEditorWindow, callback);
+		} else {
+			window = std::make_shared<ChooseAssetTypeWindow>(factory, type, getValue(), *gameResources, callback);
+		}
+		getRoot()->addChild(std::move(window));
 	}
 }
 

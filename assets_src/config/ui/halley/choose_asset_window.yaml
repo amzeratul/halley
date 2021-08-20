@@ -7,6 +7,13 @@ children:
   - widget: { id: title, class: label, text: "Choose Asset" }
     fill: centre
     proportion: 1
+- widget: { id: tabsContainer, class: scrollBarPane, scrollHorizontal: true, scrollVertical: false, autoHide: true, size: [50, 10], active: false }
+  proportion: 0
+  sizer: { type: vertical }
+  border: [0, 4, 0, 0]
+  children:
+  - widget: { id: tabs, class: list, type: horizontal, style: tabs }
+    proportion: 1
 - widget: { id: search, class: textInput, size: [50, 22], ghostText: Search, tooltip: "Type the name (or part of the name) of the asset you want to search for." }
   border: [1, 4, 1, 1]
 - widget: { class: scrollBarPane, size: [600, 400], scrollHorizontal: true, scrollVertical: true, autoHide: true }
