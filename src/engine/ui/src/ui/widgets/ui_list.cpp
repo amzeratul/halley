@@ -158,10 +158,17 @@ std::shared_ptr<UIListItem> UIList::addTextIconItem(const String& id, LocalisedS
 	if (tooltip) {
 		item->setToolTip(tooltip.value());
 	}
-	if (icon.hasMaterial()) {
-		item->add(std::make_shared<UIImage>(icon), 0, Vector4f(0, 0, 4, 0));
+
+	const bool hasIcon = icon.hasMaterial();
+	const bool hasLabel = !label.getString().isEmpty();
+	
+	if (hasIcon) {
+		item->add(std::make_shared<UIImage>(icon), 0, hasLabel ? Vector4f(0, 0, 4, 0) : border, hasLabel ? UISizerAlignFlags::Centre : fillFlags);
 	}
-	item->add(makeLabel(id + "_label", std::move(label), maxWidth), 0, border, fillFlags);
+	if (hasLabel) {
+		item->add(makeLabel(id + "_label", std::move(label), maxWidth), 0, border, fillFlags);
+	}
+	
 	return addItem(item);
 }
 

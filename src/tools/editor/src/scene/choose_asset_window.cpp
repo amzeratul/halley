@@ -181,9 +181,8 @@ void ChooseAssetWindow::setCategoryFilters(std::vector<AssetCategoryFilter> filt
 	auto tabs = getWidgetAs<UIList>("tabs");
 	tabs->addTextItemAligned("", LocalisedString::fromHardcodedString("All"));
 
-	for (auto& filter: categoryFilters) {
-		auto item = tabs->addTextIconItem(filter.id, filter.showName ? filter.name : LocalisedString(), filter.icon);
-		item->setToolTip(filter.name);
+	for (const auto& filter: categoryFilters) {
+		auto item = tabs->addTextIconItem(filter.id, filter.showName ? filter.name : LocalisedString(), filter.icon, -1, {}, UISizerAlignFlags::Centre, filter.name);
 	}
 
 	setHandle(UIEventType::ListSelectionChanged, "tabs", [=] (const UIEvent& event)
