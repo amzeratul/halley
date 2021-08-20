@@ -264,7 +264,7 @@ uiStyle:
     selectedLabel: { font: Ubuntu Bold, size: 14, colour: $ui_selectedText }
     disabledLabel: { font: Ubuntu Bold, size: 14, colour: $ui_disabledText }
     selectionChangedSound: ""
-    gap: 1
+    gap: 2
 
   scrollBackground:
     background: { img: $ui_scroll_background, colour: $scrollBackground }
