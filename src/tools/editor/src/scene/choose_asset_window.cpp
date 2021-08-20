@@ -335,12 +335,13 @@ bool ChooseImportAssetWindow::canShowAll() const
 	return false;
 }
 
-ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, std::vector<AssetCategoryFilter> categories, Callback callback)
+ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, Callback callback)
 	: ChooseAssetWindow(factory, std::move(callback), false, UISizerType::Vertical, 1)
+	, sceneEditorWindow(sceneEditorWindow)
 {
 	setAssetIds(gameResources.ofType(AssetType::Prefab).enumerate(), std::move(defaultOption));
 	setTitle(LocalisedString::fromHardcodedString("Choose Prefab"));
-	setCategoryFilters(std::move(categories));
+	setCategoryFilters(sceneEditorWindow.getPrefabCategoryFilters());
 }
 
 std::shared_ptr<UIImage> ChoosePrefabWindow::makeIcon(const String& id, bool hasSearch)
@@ -348,5 +349,19 @@ std::shared_ptr<UIImage> ChoosePrefabWindow::makeIcon(const String& id, bool has
 	if (!icon.hasMaterial()) {
 		icon = getFactory().makeAssetTypeIcon(AssetType::Prefab);
 	}
-	return std::make_shared<UIImage>(icon);
+	auto image = std::make_shared<UIImage>(icon);
+	auto imageWeak = std::weak_ptr<UIImage>(image);
+
+	auto future = sceneEditorWindow.getPrefabPreviewData(id);
+	if (future.isValid()) {
+		future.then(Executors::getMainThread(), [imageWeak] (EditorPrefabData data)
+		{
+			auto image = imageWeak.lock();
+			if (image) {
+				image->setSprite(data.image);
+			}
+		});
+	}
+	
+	return image;
 }

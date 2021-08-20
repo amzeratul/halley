@@ -567,6 +567,11 @@ std::vector<AssetCategoryFilter> SceneEditor::getPrefabCategoryFilters() const
 	return {};
 }
 
+Future<EditorPrefabData> SceneEditor::getPrefabPreviewData(const String& id)
+{
+	return {};
+}
+
 Vector2f SceneEditor::roundPosition(Vector2f pos) const
 {
 	return roundPosition(pos, camera.getZoom());

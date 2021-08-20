@@ -238,6 +238,11 @@ namespace Halley
 			return hasValue();
 		}
 
+		bool isValid() const
+		{
+			return !!data;
+		}
+
 		template <typename F>
 		auto then(F f) -> Future<typename TaskHelper<T>::template FunctionHelper<F>::ReturnType>
 		{

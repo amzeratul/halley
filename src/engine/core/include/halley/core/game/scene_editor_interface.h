@@ -8,6 +8,7 @@
 #include "halley/text/i18n.h"
 #include <optional>
 #include "halley/core/input/input_keyboard.h"
+#include "halley/concurrency/future.h"
 
 namespace Halley {
 	class IEntityEditorFactory;
@@ -112,6 +113,11 @@ namespace Halley {
 		}
 	};
 
+	struct EditorPrefabData {
+		Sprite image;
+		String name;
+	};
+
     class ISceneEditor {
     public:    	
         virtual ~ISceneEditor() = default;
@@ -166,6 +172,7 @@ namespace Halley {
     	virtual void onSceneContextMenuHighlight(const String& id) = 0;
     	
         virtual std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const = 0;
+        virtual Future<EditorPrefabData> getPrefabPreviewData(const String& id) = 0;
     };
 
 	class EntityTree {

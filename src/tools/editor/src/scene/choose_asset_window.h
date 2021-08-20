@@ -4,6 +4,7 @@
 #include <optional>
 
 namespace Halley {
+	class SceneEditorWindow;
 	class EditorUIFactory;
 	class UIFactory;
 	class UIList;
@@ -93,12 +94,13 @@ namespace Halley {
 
 	class ChoosePrefabWindow : public ChooseAssetWindow {
 	public:
-		ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, std::vector<AssetCategoryFilter> categories, Callback callback);
+		ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, Callback callback);
 	
     protected:
         std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
 
 	private:
 		Sprite icon;
+		SceneEditorWindow& sceneEditorWindow;
 	};
 }

@@ -89,7 +89,7 @@ void SelectAssetWidget::choose()
 		std::shared_ptr<UIWidget> window;
 		if (type == AssetType::Prefab) {
 			assert(sceneEditorWindow != nullptr);
-			window = std::make_shared<ChoosePrefabWindow>(factory, getValue(), *gameResources, sceneEditorWindow->getPrefabCategoryFilters(), callback);
+			window = std::make_shared<ChoosePrefabWindow>(factory, getValue(), *gameResources, *sceneEditorWindow, callback);
 		} else {
 			window = std::make_shared<ChooseAssetTypeWindow>(factory, type, getValue(), *gameResources, callback);
 		}

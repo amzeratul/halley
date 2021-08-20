@@ -368,6 +368,14 @@ std::vector<AssetCategoryFilter> SceneEditorGameBridge::getPrefabCategoryFilters
 	return {};
 }
 
+Future<EditorPrefabData> SceneEditorGameBridge::getPrefabPreviewData(const String& id)
+{
+	if (interfaceReady) {
+		return interface->getPrefabPreviewData(id);
+	}
+	return {};
+}
+
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {
