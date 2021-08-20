@@ -9,18 +9,7 @@ namespace Halley {
 	class UIList;
 
 	class ChooseAssetWindow : public UIWidget {
-    public:
-		class CategoryFilter {
-		public:
-			String id;
-			LocalisedString name;
-			Sprite icon;
-			std::vector<String> prefixes;
-			bool showName = false;
-
-			bool matches(const String& id) const;
-		};
-		
+    public:		
         using Callback = std::function<void(std::optional<String>)>;
 		
         ChooseAssetWindow(UIFactory& factory, Callback callback, bool canShowBlank = true, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
@@ -31,7 +20,7 @@ namespace Halley {
 		void setAssetIds(std::vector<String> _ids, std::vector<String> _names, String _defaultOption);
 
 		void setTitle(LocalisedString title);
-		void setCategoryFilters(std::vector<CategoryFilter> filters);
+		void setCategoryFilters(std::vector<AssetCategoryFilter> filters);
 
     protected:
         bool onKeyPress(KeyboardKeyPress key) override;
@@ -56,7 +45,7 @@ namespace Halley {
 		std::vector<String> origNames;
 		std::vector<String> ids;
 		std::vector<String> names;
-		std::vector<CategoryFilter> categoryFilters;
+		std::vector<AssetCategoryFilter> categoryFilters;
 		
 		FuzzyTextMatcher fuzzyMatcher;
 		String filter;
@@ -104,7 +93,7 @@ namespace Halley {
 
 	class ChoosePrefabWindow : public ChooseAssetWindow {
 	public:
-		ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, std::vector<CategoryFilter> categories, Callback callback);
+		ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, std::vector<AssetCategoryFilter> categories, Callback callback);
 	
     protected:
         Sprite makeIcon(const String& id, bool hasSearch) override;

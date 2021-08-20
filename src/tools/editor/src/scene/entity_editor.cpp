@@ -53,6 +53,7 @@ void EntityEditor::setSceneEditorWindow(SceneEditorWindow& editor)
 {
 	sceneEditor = &editor;
 	entityIcons = &editor.getEntityIcons();
+	prefabName->setSceneEditorWindow(editor);
 
 	auto icons = entityIcons->getEntries();
 	std::vector<UIDropdown::Entry> entries;
@@ -77,9 +78,10 @@ void EntityEditor::makeUI()
 
 	entityName = getWidgetAs<UITextInput>("entityName");
 	prefabName = getWidgetAs<SelectAssetWidget>("prefabName");
+	if (sceneEditor) {
+		prefabName->setSceneEditorWindow(*sceneEditor);
+	}
 	entityIcon = getWidgetAs<UIDropdown>("entityIcon");
-
-	prefabName->setSceneEditorWindow(*sceneEditor);
 
 	setHandle(UIEventType::ButtonClicked, "addComponentButton", [=](const UIEvent& event)
 	{

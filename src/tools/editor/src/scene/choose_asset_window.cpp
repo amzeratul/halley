@@ -10,16 +10,6 @@
 
 using namespace Halley;
 
-bool ChooseAssetWindow::CategoryFilter::matches(const String& id) const
-{
-	for (const auto& prefix: prefixes) {
-		if (id.startsWith(prefix)) {
-			return true;
-		}
-	}
-	return false;
-}
-
 ChooseAssetWindow::ChooseAssetWindow(UIFactory& factory, Callback callback, bool canShowBlank, UISizerType orientation, int nColumns)
 	: UIWidget("choose_asset_window", {}, UISizer())
 	, factory(dynamic_cast<EditorUIFactory&>(factory))
@@ -75,15 +65,15 @@ void ChooseAssetWindow::setCategoryFilter(const String& filterId)
 	} else {
 		const auto filterIter = std_ex::find_if(categoryFilters, [&] (const auto& f) { return f.id == filterId; });
 		if (filterIter != categoryFilters.end()) {
-			const auto& filter = *filterIter;
+			const auto& curFilter = *filterIter;
 
 			ids.clear();
 			names.clear();
 
-			for (size_t i = 0; i < ids.size(); ++i) {
-				if (filter.matches(ids[i])) {
-					ids.push_back(ids[i]);
-					names.push_back(names[i]);
+			for (size_t i = 0; i < origIds.size(); ++i) {
+				if (curFilter.matches(origIds[i])) {
+					ids.push_back(origIds[i]);
+					names.push_back(origNames[i]);
 				}
 			}
 		} else {
@@ -182,7 +172,7 @@ void ChooseAssetWindow::sortItems(std::vector<std::pair<String, String>>& items)
 	std::sort(items.begin(), items.end(), [=] (const auto& a, const auto& b) { return a.second < b.second; });
 }
 
-void ChooseAssetWindow::setCategoryFilters(std::vector<CategoryFilter> filters)
+void ChooseAssetWindow::setCategoryFilters(std::vector<AssetCategoryFilter> filters)
 {
 	categoryFilters = std::move(filters);
 	
@@ -342,7 +332,7 @@ bool ChooseImportAssetWindow::canShowAll() const
 	return false;
 }
 
-ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, std::vector<CategoryFilter> categories, Callback callback)
+ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, std::vector<AssetCategoryFilter> categories, Callback callback)
 	: ChooseAssetWindow(factory, std::move(callback), false, UISizerType::Vertical, 1)
 {
 	setAssetIds(gameResources.ofType(AssetType::Prefab).enumerate(), std::move(defaultOption));

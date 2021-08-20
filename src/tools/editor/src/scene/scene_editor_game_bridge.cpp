@@ -360,6 +360,14 @@ void SceneEditorGameBridge::onSceneContextMenuHighlight(const String& id)
 	}
 }
 
+std::vector<AssetCategoryFilter> SceneEditorGameBridge::getPrefabCategoryFilters()
+{
+	if (interfaceReady) {
+		return interface->getPrefabCategoryFilters();
+	}
+	return {};
+}
+
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {

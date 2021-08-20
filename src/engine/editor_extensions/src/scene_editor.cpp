@@ -562,6 +562,11 @@ void SceneEditor::onSceneContextMenuHighlight(const String& id)
 	}
 }
 
+std::vector<AssetCategoryFilter> SceneEditor::getPrefabCategoryFilters() const
+{
+	return {};
+}
+
 Vector2f SceneEditor::roundPosition(Vector2f pos) const
 {
 	return roundPosition(pos, camera.getZoom());

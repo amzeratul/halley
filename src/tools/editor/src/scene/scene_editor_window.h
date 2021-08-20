@@ -88,7 +88,7 @@ namespace Halley {
 		void openAssetHere(AssetType assetType, const String& assetId);
 		String getAssetKey() const;
 
-		std::vector<ChooseAssetWindow::CategoryFilter> getPrefabCategoryFilters() const;
+		std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const;
 
 	protected:
 		void update(Time t, bool moved) override;

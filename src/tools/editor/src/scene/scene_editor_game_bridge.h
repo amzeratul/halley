@@ -1,4 +1,5 @@
 #pragma once
+#include "choose_asset_window.h"
 #include "halley/core/game/scene_editor_interface.h"
 #include "halley/tools/dll/dynamic_library.h"
 
@@ -50,6 +51,8 @@ namespace Halley {
 		std::vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const;
 		void onSceneContextMenuSelection(const String& id);
 		void onSceneContextMenuHighlight(const String& id);
+		
+		std::vector<AssetCategoryFilter> getPrefabCategoryFilters();
 
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;

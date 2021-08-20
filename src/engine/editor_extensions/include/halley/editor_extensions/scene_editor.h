@@ -73,7 +73,9 @@ namespace Halley {
 		std::vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const override;
     	void onSceneContextMenuSelection(const String& id) override;
     	void onSceneContextMenuHighlight(const String& id) override;
-    
+
+		std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const override;
+
     protected:
     	Camera camera;
 		IEditorInterface* editorInterface;

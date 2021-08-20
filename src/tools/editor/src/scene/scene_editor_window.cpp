@@ -942,8 +942,7 @@ String SceneEditorWindow::getAssetKey() const
 	return origPrefabAssetType + ":" + prefab->getAssetId();
 }
 
-std::vector<ChooseAssetWindow::CategoryFilter> SceneEditorWindow::getPrefabCategoryFilters() const
+std::vector<AssetCategoryFilter> SceneEditorWindow::getPrefabCategoryFilters() const
 {
-	// TODO
-	return {};
+	return gameBridge->getPrefabCategoryFilters();
 }
