@@ -1,4 +1,5 @@
 #pragma once
+#include "choose_asset_window.h"
 #include "entity_editor.h"
 #include "entity_list.h"
 #include "halley/ui/ui_widget.h"
@@ -86,6 +87,8 @@ namespace Halley {
 		void openAsset(AssetType assetType, const String& assetId);
 		void openAssetHere(AssetType assetType, const String& assetId);
 		String getAssetKey() const;
+
+		std::vector<ChooseAssetWindow::CategoryFilter> getPrefabCategoryFilters() const;
 
 	protected:
 		void update(Time t, bool moved) override;

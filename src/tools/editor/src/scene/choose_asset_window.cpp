@@ -1,4 +1,6 @@
 #include "choose_asset_window.h"
+
+#include "scene_editor_window.h"
 #include "halley/ui/ui_anchor.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/widgets/ui_label.h"
@@ -8,14 +10,24 @@
 
 using namespace Halley;
 
+bool ChooseAssetWindow::CategoryFilter::matches(const String& id) const
+{
+	for (const auto& prefix: prefixes) {
+		if (id.startsWith(prefix)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 ChooseAssetWindow::ChooseAssetWindow(UIFactory& factory, Callback callback, bool canShowBlank, UISizerType orientation, int nColumns)
 	: UIWidget("choose_asset_window", {}, UISizer())
 	, factory(dynamic_cast<EditorUIFactory&>(factory))
 	, callback(std::move(callback))
-	, fuzzyMatcher(false, 100)
-	, canShowBlank(canShowBlank)
 	, orientation(orientation)
 	, nColumns(nColumns)
+	, fuzzyMatcher(false, 100)
+	, canShowBlank(canShowBlank)
 {
 	highlightCol = factory.getColourScheme()->getColour("ui_stringMatchText");
 
@@ -61,7 +73,23 @@ void ChooseAssetWindow::setCategoryFilter(const String& filterId)
 		ids = origIds;
 		names = origNames;
 	} else {
-		// TODO
+		const auto filterIter = std_ex::find_if(categoryFilters, [&] (const auto& f) { return f.id == filterId; });
+		if (filterIter != categoryFilters.end()) {
+			const auto& filter = *filterIter;
+
+			ids.clear();
+			names.clear();
+
+			for (size_t i = 0; i < ids.size(); ++i) {
+				if (filter.matches(ids[i])) {
+					ids.push_back(ids[i]);
+					names.push_back(names[i]);
+				}
+			}
+		} else {
+			ids = origIds;
+			names = origNames;
+		}
 	}
 	
 	fuzzyMatcher.clear();
@@ -154,12 +182,19 @@ void ChooseAssetWindow::sortItems(std::vector<std::pair<String, String>>& items)
 	std::sort(items.begin(), items.end(), [=] (const auto& a, const auto& b) { return a.second < b.second; });
 }
 
-void ChooseAssetWindow::setCategoryTabs()
+void ChooseAssetWindow::setCategoryFilters(std::vector<CategoryFilter> filters)
 {
+	categoryFilters = std::move(filters);
+	
 	getWidget("tabsContainer")->setActive(true);
 
 	auto tabs = getWidgetAs<UIList>("tabs");
 	tabs->addTextItemAligned("", LocalisedString::fromHardcodedString("All"));
+
+	for (auto& filter: categoryFilters) {
+		auto item = tabs->addTextIconItem(filter.id, filter.showName ? filter.name : LocalisedString(), filter.icon);
+		item->setToolTip(filter.name);
+	}
 
 	setHandle(UIEventType::ListSelectionChanged, "tabs", [=] (const UIEvent& event)
 	{
@@ -307,13 +342,12 @@ bool ChooseImportAssetWindow::canShowAll() const
 	return false;
 }
 
-ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, Callback callback)
+ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, std::vector<CategoryFilter> categories, Callback callback)
 	: ChooseAssetWindow(factory, std::move(callback), false, UISizerType::Vertical, 1)
-	, sceneEditorWindow(sceneEditorWindow)
 {
 	setAssetIds(gameResources.ofType(AssetType::Prefab).enumerate(), std::move(defaultOption));
 	setTitle(LocalisedString::fromHardcodedString("Choose Prefab"));
-	setCategoryTabs();
+	setCategoryFilters(std::move(categories));
 }
 
 Sprite ChoosePrefabWindow::makeIcon(const String& id, bool hasSearch)

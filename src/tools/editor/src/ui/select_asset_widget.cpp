@@ -3,6 +3,7 @@
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/widgets/ui_textinput.h"
 #include "src/scene/choose_asset_window.h"
+#include "src/scene/scene_editor_window.h"
 using namespace Halley;
 
 SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, AssetType type)
@@ -88,7 +89,7 @@ void SelectAssetWidget::choose()
 		std::shared_ptr<UIWidget> window;
 		if (type == AssetType::Prefab) {
 			assert(sceneEditorWindow != nullptr);
-			window = std::make_shared<ChoosePrefabWindow>(factory, getValue(), *gameResources, *sceneEditorWindow, callback);
+			window = std::make_shared<ChoosePrefabWindow>(factory, getValue(), *gameResources, sceneEditorWindow->getPrefabCategoryFilters(), callback);
 		} else {
 			window = std::make_shared<ChooseAssetTypeWindow>(factory, type, getValue(), *gameResources, callback);
 		}

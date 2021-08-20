@@ -4,13 +4,23 @@
 #include <optional>
 
 namespace Halley {
-	class SceneEditorWindow;
 	class EditorUIFactory;
 	class UIFactory;
 	class UIList;
 
 	class ChooseAssetWindow : public UIWidget {
     public:
+		class CategoryFilter {
+		public:
+			String id;
+			LocalisedString name;
+			Sprite icon;
+			std::vector<String> prefixes;
+			bool showName = false;
+
+			bool matches(const String& id) const;
+		};
+		
         using Callback = std::function<void(std::optional<String>)>;
 		
         ChooseAssetWindow(UIFactory& factory, Callback callback, bool canShowBlank = true, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
@@ -21,6 +31,7 @@ namespace Halley {
 		void setAssetIds(std::vector<String> _ids, std::vector<String> _names, String _defaultOption);
 
 		void setTitle(LocalisedString title);
+		void setCategoryFilters(std::vector<CategoryFilter> filters);
 
     protected:
         bool onKeyPress(KeyboardKeyPress key) override;
@@ -35,8 +46,6 @@ namespace Halley {
 
         virtual void sortItems(std::vector<std::pair<String, String>>& items);
 
-		void setCategoryTabs();
-
     private:
         EditorUIFactory& factory;
         Callback callback;
@@ -47,6 +56,7 @@ namespace Halley {
 		std::vector<String> origNames;
 		std::vector<String> ids;
 		std::vector<String> names;
+		std::vector<CategoryFilter> categoryFilters;
 		
 		FuzzyTextMatcher fuzzyMatcher;
 		String filter;
@@ -94,13 +104,12 @@ namespace Halley {
 
 	class ChoosePrefabWindow : public ChooseAssetWindow {
 	public:
-		ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, Callback callback);
+		ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, std::vector<CategoryFilter> categories, Callback callback);
 	
     protected:
         Sprite makeIcon(const String& id, bool hasSearch) override;
 
 	private:
 		Sprite icon;
-		SceneEditorWindow& sceneEditorWindow;
 	};
 }

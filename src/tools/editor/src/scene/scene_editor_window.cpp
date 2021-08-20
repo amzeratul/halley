@@ -565,7 +565,7 @@ void SceneEditorWindow::addNewEntity()
 
 void SceneEditorWindow::addNewPrefab()
 {
-	getRoot()->addChild(std::make_shared<ChoosePrefabWindow>(uiFactory, "", project.getGameResources(), *this, [=] (std::optional<String> result)
+	getRoot()->addChild(std::make_shared<ChoosePrefabWindow>(uiFactory, "", project.getGameResources(), getPrefabCategoryFilters(), [=] (std::optional<String> result)
 	{
 		if (result) {
 			addNewPrefab(result.value());
@@ -940,4 +940,10 @@ void SceneEditorWindow::openAssetHere(AssetType assetType, const String& assetId
 String SceneEditorWindow::getAssetKey() const
 {
 	return origPrefabAssetType + ":" + prefab->getAssetId();
+}
+
+std::vector<ChooseAssetWindow::CategoryFilter> SceneEditorWindow::getPrefabCategoryFilters() const
+{
+	// TODO
+	return {};
 }
