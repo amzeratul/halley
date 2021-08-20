@@ -101,7 +101,9 @@ std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(const String& tool
 	}
 
 	if (activeGizmo) {
-		activeGizmo->setSelectedEntity(selectedEntity, *entityData);
+		if (selectedEntity && entityData) {
+			activeGizmo->setSelectedEntity(selectedEntity, *entityData);
+		}
 		return activeGizmo->makeUI();
 	}
 
