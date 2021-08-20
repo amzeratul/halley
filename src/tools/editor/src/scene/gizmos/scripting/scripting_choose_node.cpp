@@ -11,16 +11,16 @@ ScriptingChooseNode::ScriptingChooseNode(UIFactory& factory, Resources& resource
 	setTitle(LocalisedString::fromHardcodedString("Add Scripting Node"));
 }
 
-std::shared_ptr<UISizer> ScriptingChooseNode::makeItemSizer(Sprite icon, std::shared_ptr<UILabel> label, bool hasSearch)
+std::shared_ptr<UISizer> ScriptingChooseNode::makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch)
 {
 	if (hasSearch) {
-		return ChooseAssetWindow::makeItemSizer(icon, label, hasSearch);
+		return ChooseAssetWindow::makeItemSizer(std::move(icon), std::move(label), hasSearch);
 	} else {
 		return makeItemSizerBigIcon(std::move(icon), std::move(label));
 	}
 }
 
-Sprite ScriptingChooseNode::makeIcon(const String& id, bool hasSearch)
+std::shared_ptr<UIImage> ScriptingChooseNode::makeIcon(const String& id, bool hasSearch)
 {
 	const auto* type = scriptNodeTypes->tryGetNodeType(id);
 	if (type) {
@@ -29,9 +29,9 @@ Sprite ScriptingChooseNode::makeIcon(const String& id, bool hasSearch)
 		if (hasSearch) {
 			sprite.setScale(0.5f);
 		}
-		return sprite;
+		return std::make_shared<UIImage>(sprite);
 	} else {
-		return Sprite();
+		return {};
 	}
 }
 

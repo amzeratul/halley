@@ -93,35 +93,39 @@ void ChooseAssetWindow::setCategoryFilter(const String& filterId)
 void ChooseAssetWindow::populateList()
 {
 	options->clear();
+	const bool hasFilter = !filter.isEmpty();
+	const bool forceText = hasFilter;
 	
-	if (filter.isEmpty()) {
-		options->setOrientation(orientation, nColumns);
-		if (canShowAll()) {
-			if (canShowBlank) {
-				options->addTextItem("", LocalisedString::fromHardcodedString("[Empty]"));
-			}
-
-			std::vector<std::pair<String, String>> items;
-			for (size_t i = 0; i < ids.size(); ++i) {
-				items.emplace_back(ids[i], names[i]);
-			}
-
-			sortItems(items);
-
-			for (auto& item: items) {
-				addItem(item.first, item.second);
-			}
-			
-			options->layout();
-			options->setSelectedOptionId(defaultOption);
-		}
-	} else {
+	if (forceText) {
 		options->setOrientation(UISizerType::Vertical, 1);
+	} else {
+		options->setOrientation(orientation, nColumns);
+	}
+	
+	if (hasFilter) {
 		for (const auto& r: fuzzyMatcher.match(filter)) {
 			addItem(r.getId(), r.getString(), r.getMatchPositions());
+		}			
+	} else if (canShowAll()) {
+		if (canShowBlank) {
+			options->addTextItem("", LocalisedString::fromHardcodedString("[Empty]"));
 		}
-		options->layout();
+
+		std::vector<std::pair<String, String>> items;
+		for (size_t i = 0; i < ids.size(); ++i) {
+			items.emplace_back(ids[i], names[i]);
+		}
+		sortItems(items);
+		for (auto& item: items) {
+			addItem(item.first, item.second);
+		}
+	}
+
+	options->layout();
+	if (hasFilter) {
 		options->setSelectedOption(0);
+	} else {
+		options->setSelectedOptionId(defaultOption);
 	}
 }
 
@@ -147,21 +151,21 @@ void ChooseAssetWindow::addItem(const String& id, const String& name, gsl::span<
 	options->addItem(id, makeItemSizer(std::move(icon), std::move(label), hasSearch), 1);
 }
 
-std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizer(Sprite icon, std::shared_ptr<UILabel> label, bool hasSearch)
+std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch)
 {
 	auto sizer = std::make_shared<UISizer>();
-	if (icon.hasMaterial()) {
-		sizer->add(std::make_shared<UIImage>(icon), 0, Vector4f(0, 0, 4, 0));
+	if (icon) {
+		sizer->add(icon, 0, Vector4f(0, 0, 4, 0));
 	}
 	sizer->add(label, 0);
 	return sizer;
 }
 
-std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizerBigIcon(Sprite icon, std::shared_ptr<UILabel> label)
+std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizerBigIcon(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label)
 {
 	auto sizer = std::make_shared<UISizer>(UISizerType::Vertical);
-	if (icon.hasMaterial()) {
-		sizer->add(std::make_shared<UIImage>(icon), 0, Vector4f(0, 0, 4, 0), UISizerAlignFlags::CentreHorizontal);
+	if (icon) {
+		sizer->add(icon, 0, Vector4f(0, 0, 4, 0), UISizerAlignFlags::CentreHorizontal);
 	}
 	sizer->add(label, 0, {}, UISizerAlignFlags::CentreHorizontal);
 	return sizer;
@@ -224,9 +228,9 @@ bool ChooseAssetWindow::canShowAll() const
 	return true;
 }
 
-Sprite ChooseAssetWindow::makeIcon(const String& id, bool hasSearch)
+std::shared_ptr<UIImage> ChooseAssetWindow::makeIcon(const String& id, bool hasSearch)
 {
-	return Sprite();
+	return {};
 }
 
 EditorUIFactory& ChooseAssetWindow::getFactory() const
@@ -294,12 +298,12 @@ ChooseAssetTypeWindow::ChooseAssetTypeWindow(UIFactory& factory, AssetType type,
 	setTitle(LocalisedString::fromHardcodedString("Choose " + toString(type)));
 }
 
-Sprite ChooseAssetTypeWindow::makeIcon(const String& id, bool hasSearch)
+std::shared_ptr<UIImage> ChooseAssetTypeWindow::makeIcon(const String& id, bool hasSearch)
 {
 	if (!icon.hasMaterial()) {
 		icon = getFactory().makeAssetTypeIcon(type);
 	}
-	return icon;
+	return std::make_shared<UIImage>(icon);
 }
 
 ChooseImportAssetWindow::ChooseImportAssetWindow(UIFactory& factory, Project& project, Callback callback)
@@ -313,17 +317,17 @@ ChooseImportAssetWindow::ChooseImportAssetWindow(UIFactory& factory, Project& pr
 	setTitle(LocalisedString::fromHardcodedString("Open asset"));
 }
 
-Sprite ChooseImportAssetWindow::makeIcon(const String& id, bool hasSearch)
+std::shared_ptr<UIImage> ChooseImportAssetWindow::makeIcon(const String& id, bool hasSearch)
 {
 	const auto type = project.getAssetImporter()->getImportAssetType(id, false);
 	const auto iter = icons.find(type);
 	if (iter != icons.end()) {
-		return iter->second;
+		return std::make_shared<UIImage>(iter->second);
 	}
 
 	auto icon = getFactory().makeImportAssetTypeIcon(type);
 	icons[type] = icon;
-	return icon;
+	return std::make_shared<UIImage>(icon);
 }
 
 bool ChooseImportAssetWindow::canShowAll() const
@@ -339,10 +343,10 @@ ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption,
 	setCategoryFilters(std::move(categories));
 }
 
-Sprite ChoosePrefabWindow::makeIcon(const String& id, bool hasSearch)
+std::shared_ptr<UIImage> ChoosePrefabWindow::makeIcon(const String& id, bool hasSearch)
 {
 	if (!icon.hasMaterial()) {
 		icon = getFactory().makeAssetTypeIcon(AssetType::Prefab);
 	}
-	return icon;
+	return std::make_shared<UIImage>(icon);
 }
