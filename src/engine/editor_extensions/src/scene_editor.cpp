@@ -687,7 +687,7 @@ std::vector<AssetCategoryFilter> SceneEditor::getPrefabCategoryFilters() const
 	return {};
 }
 
-Future<AssetPreviewData> SceneEditor::getAssetPreviewData(AssetType assetType, const String& id)
+Future<AssetPreviewData> SceneEditor::getAssetPreviewData(AssetType assetType, const String& id, Vector2i size)
 {
 	return {};
 }

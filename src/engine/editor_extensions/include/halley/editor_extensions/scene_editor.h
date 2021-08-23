@@ -75,7 +75,7 @@ namespace Halley {
     	void onSceneContextMenuHighlight(const String& id) override;
 
 		std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const override;
-    	Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id) override;
+    	Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size) override;
 
     protected:
     	Camera camera;

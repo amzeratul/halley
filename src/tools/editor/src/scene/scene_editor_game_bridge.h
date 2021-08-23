@@ -53,7 +53,7 @@ namespace Halley {
 		void onSceneContextMenuHighlight(const String& id);
 		
 		std::vector<AssetCategoryFilter> getPrefabCategoryFilters();
-		Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id);
+		Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size);
 
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;

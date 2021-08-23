@@ -173,7 +173,17 @@ std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizerBigIcon(std::shared_ptr
 
 void ChooseAssetWindow::sortItems(std::vector<std::pair<String, String>>& items)
 {
+	sortItemsByName(items);
+}
+
+void ChooseAssetWindow::sortItemsByName(std::vector<std::pair<String, String>>& items)
+{
 	std::sort(items.begin(), items.end(), [=] (const auto& a, const auto& b) { return a.second < b.second; });
+}
+
+void ChooseAssetWindow::sortItemsById(std::vector<std::pair<String, String>>& items)
+{
+	std::sort(items.begin(), items.end(), [=] (const auto& a, const auto& b) { return a.first < b.first; });
 }
 
 void ChooseAssetWindow::setCategoryFilters(std::vector<AssetCategoryFilter> filters)
@@ -336,32 +346,37 @@ bool ChooseImportAssetWindow::canShowAll() const
 }
 
 ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, Callback callback)
-	: ChooseAssetWindow(factory, std::move(callback), false, UISizerType::Vertical, 1)
+	: ChooseAssetWindow(factory, std::move(callback), false, UISizerType::Grid, 4)
 	, sceneEditorWindow(sceneEditorWindow)
 {
-	setAssetIds(gameResources.ofType(AssetType::Prefab).enumerate(), std::move(defaultOption));
+	auto assetIds = gameResources.ofType(AssetType::Prefab).enumerate();
+	std::vector<String> assetNames;
+	assetNames.reserve(assetIds.size());
+	for (auto& id: assetIds) {
+		assetNames.push_back(Path(id).getFilename().toString());
+	}
+	
+	setAssetIds(std::move(assetIds), std::move(assetNames), std::move(defaultOption));
 	setTitle(LocalisedString::fromHardcodedString("Choose Prefab"));
 	setCategoryFilters(sceneEditorWindow.getPrefabCategoryFilters());
 }
 
 std::shared_ptr<UIImage> ChoosePrefabWindow::makeIcon(const String& id, bool hasSearch)
 {
-	const bool showPreview = true;
+	const bool showPreview = !hasSearch;
 	const Vector2f thumbSize = Vector2f(128, 128);
 	
 	if (!icon.hasMaterial()) {
+		emptyPreviewIcon = Sprite().setImage(getFactory().getResources(), "whitebox.png").setColour(Colour4f(0, 0, 0, 0)).scaleTo(thumbSize);
 		icon = getFactory().makeAssetTypeIcon(AssetType::Prefab);
-		if (showPreview) {
-			icon.scaleTo(thumbSize);
-		}
 	}
-	auto image = std::make_shared<UIImage>(icon);
+	auto image = std::make_shared<UIImage>(showPreview ? emptyPreviewIcon : icon);
 	auto imageWeak = std::weak_ptr(image);
 
 	if (showPreview) {
 		image->addBehaviour(std::make_shared<UIImageVisibleBehaviour>([imageWeak, this, id, thumbSize] (UIImage& img)
 		{
-			if (auto future = sceneEditorWindow.getAssetPreviewData(AssetType::Prefab, id); future.isValid()) {
+			if (auto future = sceneEditorWindow.getAssetPreviewData(AssetType::Prefab, id, Vector2i(thumbSize)); future.isValid()) {
 				future.then(Executors::getMainThread(), [imageWeak, thumbSize] (AssetPreviewData data)
 				{
 					if (auto image = imageWeak.lock(); image) {
@@ -376,9 +391,24 @@ std::shared_ptr<UIImage> ChoosePrefabWindow::makeIcon(const String& id, bool has
 		}, [=] (UIImage& img)
 		{
 			// On invisible
-			img.setSprite(icon);
+			img.setSprite(emptyPreviewIcon);
 		}));
 	}
 	
 	return image;
+}
+
+std::shared_ptr<UISizer> ChoosePrefabWindow::makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch)
+{
+	if (hasSearch) {
+		return ChooseAssetWindow::makeItemSizer(std::move(icon), std::move(label), hasSearch);
+	} else {
+		label->setMaxWidth(128);
+		return makeItemSizerBigIcon(std::move(icon), std::move(label));
+	}
+}
+
+void ChoosePrefabWindow::sortItems(std::vector<std::pair<String, String>>& items)
+{
+	sortItemsById(items);
 }

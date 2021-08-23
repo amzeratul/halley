@@ -35,6 +35,8 @@ namespace Halley {
 		std::shared_ptr<UISizer> makeItemSizerBigIcon(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label);
 
         virtual void sortItems(std::vector<std::pair<String, String>>& items);
+		void sortItemsByName(std::vector<std::pair<String, String>>& items);
+		void sortItemsById(std::vector<std::pair<String, String>>& items);
 
     private:
         EditorUIFactory& factory;
@@ -98,9 +100,12 @@ namespace Halley {
 	
     protected:
         std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
-
+		std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch) override;
+		void sortItems(std::vector<std::pair<String, String>>& items) override;
+	
 	private:
 		Sprite icon;
+		Sprite emptyPreviewIcon;
 		SceneEditorWindow& sceneEditorWindow;
 	};
 }

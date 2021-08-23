@@ -947,11 +947,11 @@ std::vector<AssetCategoryFilter> SceneEditorWindow::getPrefabCategoryFilters() c
 	return gameBridge->getPrefabCategoryFilters();
 }
 
-Future<AssetPreviewData> SceneEditorWindow::getAssetPreviewData(AssetType assetType, const String& id)
+Future<AssetPreviewData> SceneEditorWindow::getAssetPreviewData(AssetType assetType, const String& id, Vector2i size)
 {
 	// TODO: check cache
 
-	return gameBridge->getAssetPreviewData(assetType, id).then([this] (AssetPreviewData data) -> AssetPreviewData
+	return gameBridge->getAssetPreviewData(assetType, id, size).then([this] (AssetPreviewData data) -> AssetPreviewData
 	{
 		// Convert image to sprite
 		data.sprite.setImage(project.getGameResources(), *api.video, std::move(data.image));
