@@ -20,6 +20,10 @@ bool UIBehaviour::onParentDestroyed()
 	return true;
 }
 
+void UIBehaviour::onParentAboutToDraw()
+{
+}
+
 bool UIBehaviour::isAlive() const
 {
 	return true;

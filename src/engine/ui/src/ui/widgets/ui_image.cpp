@@ -16,6 +16,10 @@ UIImage::UIImage(String id, Sprite s, std::optional<UISizer> sizer, Vector4f inn
 
 void UIImage::draw(UIPainter& painter) const
 {
+	for (auto& b: getBehaviours()) {
+		b->onParentAboutToDraw();
+	}
+	
 	if (sprite.hasMaterial()) {
 		if (layerAdjustment != 0 || worldClip) {
 			auto p2 = painter.withAdjustedLayer(layerAdjustment).withClip(worldClip);
@@ -141,9 +145,24 @@ void UIImageVisibleBehaviour::update(Time time)
 		return;
 	}
 	
-	const bool curVisible = image->isDrawing();
+	setParentVisible(image->isDrawing());	
+}
+
+void UIImageVisibleBehaviour::onParentAboutToDraw()
+{
+	setParentVisible(true);
+}
+
+void UIImageVisibleBehaviour::setParentVisible(bool curVisible)
+{
 	if (curVisible != visible) {
 		visible = curVisible;
+
+		const auto image = dynamic_cast<UIImage*>(getWidget());
+		if (!image) {
+			return;
+		}
+
 		if (visible) {
 			if (onVisible) {
 				onVisible(*image);

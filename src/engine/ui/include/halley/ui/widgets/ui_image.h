@@ -43,10 +43,13 @@ namespace Halley {
 		UIImageVisibleBehaviour(Callback onVisible, Callback onInvisible);
 		
 		void update(Time time) override;
-
+		void onParentAboutToDraw() override;
+	
 	private:
 		Callback onVisible;
 		Callback onInvisible;
 		bool visible = false;
+
+		void setParentVisible(bool visible);
 	};
 }

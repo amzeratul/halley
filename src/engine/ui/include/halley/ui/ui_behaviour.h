@@ -14,6 +14,7 @@ namespace Halley {
 		virtual void update(Time time);
 
 		virtual bool onParentDestroyed(); // Return true if OK, false to abort destruction
+		virtual void onParentAboutToDraw();
 
 		virtual bool isAlive() const;
 		UIWidget* getWidget() const;
