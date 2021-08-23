@@ -63,6 +63,13 @@ Image::~Image()
 	px.reset();
 }
 
+std::unique_ptr<Image> Image::clone()
+{
+	auto result = std::make_unique<Image>(format, Vector2i(w, h));
+	result->blitFrom(Vector2i(), *this);
+	return result;
+}
+
 void Image::setSize(Vector2i size)
 {
 	w = size.x;

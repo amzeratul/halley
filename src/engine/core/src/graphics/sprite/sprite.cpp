@@ -382,7 +382,7 @@ Sprite& Sprite::setImage(const SpriteResource& sprite, std::shared_ptr<const Mat
 	return *this;
 }
 
-Sprite& Sprite::setImage(Resources& resources, VideoAPI& videoAPI, std::unique_ptr<Image> image, String materialName)
+Sprite& Sprite::setImage(Resources& resources, VideoAPI& videoAPI, std::shared_ptr<Image> image, String materialName)
 {
 	if (image && image->getSize().x > 0 && image->getSize().y > 0) {
 		auto tex = std::shared_ptr(videoAPI.createTexture(image->getSize()));

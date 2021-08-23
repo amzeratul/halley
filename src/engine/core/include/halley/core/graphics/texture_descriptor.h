@@ -58,6 +58,7 @@ namespace Halley
 	public:
 		TextureDescriptorImageData();
 		TextureDescriptorImageData(std::unique_ptr<Image> img);
+		TextureDescriptorImageData(std::shared_ptr<Image> img);
 		TextureDescriptorImageData(Bytes&& bytes, std::optional<int> stride = {});
 		TextureDescriptorImageData(TextureDescriptorImageData&& other) noexcept;
 		TextureDescriptorImageData(gsl::span<const gsl::byte> bytes, std::optional<int> stride = {});
@@ -77,7 +78,8 @@ namespace Halley
 		const Image* getImage() const;
 
 	private:
-		std::unique_ptr<Image> img;
+		std::unique_ptr<Image> imgUnique;
+		std::shared_ptr<Image> imgShared;
 		Bytes rawBytes;
 		std::optional<int> stride;
 		bool isRaw = false;

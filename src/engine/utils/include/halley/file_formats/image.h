@@ -50,6 +50,8 @@ namespace Halley {
 		Image(const ResourceDataStatic& data, const Metadata& meta);
 		~Image();
 
+		std::unique_ptr<Image> clone();
+
 		void setSize(Vector2i size);
 
 		void load(gsl::span<const gsl::byte> bytes, Format format = Format::Undefined);

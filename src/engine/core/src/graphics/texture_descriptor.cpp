@@ -6,7 +6,13 @@ TextureDescriptorImageData::TextureDescriptorImageData()
 {}
 
 TextureDescriptorImageData::TextureDescriptorImageData(std::unique_ptr<Image> img)
-	: img(move(img))
+	: imgUnique(move(img))
+	, isRaw(false)
+{
+}
+
+TextureDescriptorImageData::TextureDescriptorImageData(std::shared_ptr<Image> img)
+	: imgShared(move(img))
 	, isRaw(false)
 {
 }
@@ -18,7 +24,8 @@ TextureDescriptorImageData::TextureDescriptorImageData(Bytes&& bytes, std::optio
 {}
 
 TextureDescriptorImageData::TextureDescriptorImageData(TextureDescriptorImageData&& other) noexcept
-	: img(move(other.img))
+	: imgUnique(move(other.imgUnique))
+	, imgShared(move(other.imgShared))
 	, rawBytes(move(other.rawBytes))
 	, stride(other.stride)
 	, isRaw(other.isRaw)
@@ -34,7 +41,8 @@ TextureDescriptorImageData::TextureDescriptorImageData(gsl::span<const gsl::byte
 
 TextureDescriptorImageData& TextureDescriptorImageData::operator=(TextureDescriptorImageData&& other) noexcept
 {
-	img = move(other.img);
+	imgUnique = move(other.imgUnique);
+	imgShared = move(other.imgShared);
 	rawBytes = move(other.rawBytes);
 	stride = other.stride;
 	isRaw = other.isRaw;
@@ -43,12 +51,12 @@ TextureDescriptorImageData& TextureDescriptorImageData::operator=(TextureDescrip
 
 bool TextureDescriptorImageData::empty() const
 {
-	return isRaw ? rawBytes.empty() : !img;
+	return isRaw ? rawBytes.empty() : !getImage();
 }
 
 Byte* TextureDescriptorImageData::getBytes()
 {
-	return isRaw ? rawBytes.data() : reinterpret_cast<Byte*>(img->getPixelBytes().data());
+	return isRaw ? rawBytes.data() : reinterpret_cast<Byte*>(getImage()->getPixelBytes().data());
 }
 
 gsl::span<const gsl::byte> TextureDescriptorImageData::getSpan() const
@@ -56,7 +64,7 @@ gsl::span<const gsl::byte> TextureDescriptorImageData::getSpan() const
 	if (isRaw) {
 		return gsl::as_bytes(gsl::span<const Byte>(rawBytes.data(), rawBytes.size()));
 	} else {
-		return gsl::as_bytes(img->getPixelBytes());
+		return gsl::as_bytes(getImage()->getPixelBytes());
 	}
 }
 
@@ -65,12 +73,14 @@ Bytes TextureDescriptorImageData::moveBytes()
 	if (isRaw) {
 		return move(rawBytes);
 	} else {
+		auto* img = getImage();
 		if (!img || img->getByteSize() == 0) {
 			return Bytes();
 		}
 		Bytes result(img->getByteSize());
 		memcpy(result.data(), img->getPixelBytes().data(), img->getByteSize());
-		img.reset();
+		imgUnique.reset();
+		imgShared.reset();
 		return result;
 	}
 }
@@ -91,12 +101,12 @@ int TextureDescriptorImageData::getStrideOr(int assumedStride) const
 
 Image* TextureDescriptorImageData::getImage()
 {
-	return img.get();
+	return imgUnique ? imgUnique.get() : imgShared.get();
 }
 
 const Image* TextureDescriptorImageData::getImage() const
 {
-	return img.get();
+	return imgUnique ? imgUnique.get() : imgShared.get();
 }
 
 TextureDescriptor::TextureDescriptor(Vector2i size, TextureFormat format)
