@@ -562,16 +562,6 @@ void SceneEditor::onSceneContextMenuHighlight(const String& id)
 	}
 }
 
-std::vector<AssetCategoryFilter> SceneEditor::getPrefabCategoryFilters() const
-{
-	return {};
-}
-
-Future<EditorPrefabData> SceneEditor::getPrefabPreviewData(const String& id)
-{
-	return {};
-}
-
 Vector2f SceneEditor::roundPosition(Vector2f pos) const
 {
 	return roundPosition(pos, camera.getZoom());
@@ -690,4 +680,14 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 	} else {
 		output.newSelection.reset();
 	}
+}
+
+std::vector<AssetCategoryFilter> SceneEditor::getPrefabCategoryFilters() const
+{
+	return {};
+}
+
+Future<AssetPreviewData> SceneEditor::getAssetPreviewData(AssetType assetType, const String& id)
+{
+	return {};
 }

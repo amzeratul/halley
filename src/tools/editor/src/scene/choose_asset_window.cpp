@@ -350,17 +350,28 @@ std::shared_ptr<UIImage> ChoosePrefabWindow::makeIcon(const String& id, bool has
 		icon = getFactory().makeAssetTypeIcon(AssetType::Prefab);
 	}
 	auto image = std::make_shared<UIImage>(icon);
-	auto imageWeak = std::weak_ptr<UIImage>(image);
+	auto imageWeak = std::weak_ptr(image);
 
-	auto future = sceneEditorWindow.getPrefabPreviewData(id);
-	if (future.isValid()) {
-		future.then(Executors::getMainThread(), [imageWeak] (EditorPrefabData data)
+	const bool showPreview = false;
+	if (showPreview) {
+		const Vector2f thumbSize = Vector2f(160, 160);
+		image->addBehaviour(std::make_shared<UIImageVisibleBehaviour>([imageWeak, this, id, thumbSize] (UIImage& img)
 		{
-			auto image = imageWeak.lock();
-			if (image) {
-				image->setSprite(data.image);
+			if (auto future = sceneEditorWindow.getAssetPreviewData(AssetType::Prefab, id); future.isValid()) {
+				future.then(Executors::getMainThread(), [imageWeak, thumbSize] (AssetPreviewData data)
+				{
+					if (auto image = imageWeak.lock(); image) {
+						auto sprite = std::move(data.sprite);
+						sprite.scaleTo(thumbSize);
+						image->setSprite(std::move(sprite));
+					}
+				});
 			}
-		});
+		}, [=] (UIImage& img)
+		{
+			// On invisible
+			img.setSprite(Sprite());
+		}));
 	}
 	
 	return image;

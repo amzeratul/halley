@@ -24,6 +24,7 @@ void UIImage::draw(UIPainter& painter) const
 			painter.draw(sprite);
 		}
 	}
+	drawing = 2;
 }
 
 void UIImage::update(Time t, bool moved)
@@ -40,6 +41,9 @@ void UIImage::update(Time t, bool moved)
 			.setPos(basePos)
 			.setScale(getSize() / imgBaseSize);
 		dirty = false;
+	}
+	if (drawing > 0) {
+		--drawing;
 	}
 }
 
@@ -118,6 +122,38 @@ void UIImage::setDisablable(Colour4f normalColour, Colour4f disabledColour)
 			sprite.setColour(disabledColour);
 		}
 	});
+}
+
+bool UIImage::isDrawing() const
+{
+	return drawing > 0;
+}
+
+UIImageVisibleBehaviour::UIImageVisibleBehaviour(Callback onVisible, Callback onInvisible)
+	: onVisible(std::move(onVisible))
+	, onInvisible(std::move(onInvisible))
+{}
+
+void UIImageVisibleBehaviour::update(Time time)
+{
+	const auto image = dynamic_cast<UIImage*>(getWidget());
+	if (!image) {
+		return;
+	}
+	
+	const bool curVisible = image->isDrawing();
+	if (curVisible != visible) {
+		visible = curVisible;
+		if (visible) {
+			if (onVisible) {
+				onVisible(*image);
+			}
+		} else {
+			if (onInvisible) {
+				onInvisible(*image);
+			}
+		}
+	}
 }
 
 void UIImage::setHoverable(Colour4f normalColour, Colour4f selColour)

@@ -1,4 +1,5 @@
 #pragma once
+#include "ui_behaviour.h"
 #include "../ui_widget.h"
 #include "halley/core/graphics/sprite/sprite.h"
 
@@ -23,12 +24,29 @@ namespace Halley {
 		void setSelectable(Sprite normalSprite, Sprite selectedSprite);
 		void setDisablable(Colour4f normalColour, Colour4f disabledColour);
 
+		bool isDrawing() const;
+
 	private:
 		Sprite sprite;
 		Vector2f topLeftBorder;
 		Vector2f bottomRightBorder;
 		int layerAdjustment = 0;
 		bool dirty = true;
+		mutable uint8_t drawing = 0;
 		std::optional<Rect4f> worldClip;
+	};
+
+	class UIImageVisibleBehaviour : public UIBehaviour {
+	public:
+		using Callback = std::function<void(UIImage&)>;
+
+		UIImageVisibleBehaviour(Callback onVisible, Callback onInvisible);
+		
+		void update(Time time) override;
+
+	private:
+		Callback onVisible;
+		Callback onInvisible;
+		bool visible = false;
 	};
 }

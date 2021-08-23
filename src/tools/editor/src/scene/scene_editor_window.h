@@ -90,7 +90,7 @@ namespace Halley {
 
 		std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const;
 		
-		Future<EditorPrefabData> getPrefabPreviewData(const String& id);
+		Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id);
 
 	protected:
 		void update(Time t, bool moved) override;

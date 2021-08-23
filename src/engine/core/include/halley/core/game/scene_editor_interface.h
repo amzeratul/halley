@@ -11,6 +11,7 @@
 #include "halley/concurrency/future.h"
 
 namespace Halley {
+	class Image;
 	class IEntityEditorFactory;
 	class EntityFactory;
 	class ScriptNodeTypeCollection;
@@ -113,9 +114,10 @@ namespace Halley {
 		}
 	};
 
-	struct EditorPrefabData {
-		Sprite image;
+	struct AssetPreviewData {
+		Sprite sprite;
 		String name;
+		std::unique_ptr<Image> image;
 	};
 
     class ISceneEditor {
@@ -172,7 +174,7 @@ namespace Halley {
     	virtual void onSceneContextMenuHighlight(const String& id) = 0;
     	
         virtual std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const = 0;
-        virtual Future<EditorPrefabData> getPrefabPreviewData(const String& id) = 0;
+        virtual Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id) = 0;
     };
 
 	class EntityTree {

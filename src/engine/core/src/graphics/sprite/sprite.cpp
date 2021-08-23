@@ -9,6 +9,7 @@
 #include "resources/resources.h"
 #include <gsl/gsl_assert>
 
+#include "api/video_api.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/support/logger.h"
 
@@ -378,6 +379,21 @@ Sprite& Sprite::setImage(const SpriteResource& sprite, std::shared_ptr<const Mat
 	setHotReload(&sprite, 0);
 #endif
 	
+	return *this;
+}
+
+Sprite& Sprite::setImage(Resources& resources, VideoAPI& videoAPI, std::unique_ptr<Image> image, String materialName)
+{
+	auto tex = std::shared_ptr(videoAPI.createTexture(image->getSize()));
+	TextureDescriptor desc(image->getSize(), TextureFormat::RGBA);
+	desc.pixelData = std::move(image);
+	tex->startLoading();
+	tex->load(std::move(desc));
+
+	const auto matDef = resources.get<MaterialDefinition>(materialName.isEmpty() ? "Halley/Sprite" : materialName);
+	setImage(tex, matDef);
+	setImageData(*tex);
+
 	return *this;
 }
 
