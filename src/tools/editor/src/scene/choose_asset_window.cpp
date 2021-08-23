@@ -137,7 +137,7 @@ void ChooseAssetWindow::addItem(const String& id, const String& name, gsl::span<
 	auto icon = makeIcon(id, hasSearch);
 
 	// Make label
-	auto label = options->makeLabel("", LocalisedString::fromUserString(name));
+	auto label = options->makeLabel("", getItemLabel(id, name, hasSearch));
 	auto labelCol = label->getColour();
 	if (!matchPositions.empty()) {
 		std::vector<ColourOverride> overrides;
@@ -275,6 +275,11 @@ void ChooseAssetWindow::onMakeUI()
 	setChildLayerAdjustment(10);
 }
 
+LocalisedString ChooseAssetWindow::getItemLabel(const String& id, const String& name, bool hasSearch)
+{
+	return LocalisedString::fromUserString(name);
+}
+
 void ChooseAssetWindow::accept()
 {
 	const auto id = getWidgetAs<UIList>("options")->getSelectedOptionId();
@@ -349,51 +354,53 @@ ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption,
 	: ChooseAssetWindow(factory, std::move(callback), false, UISizerType::Grid, 4)
 	, sceneEditorWindow(sceneEditorWindow)
 {
-	auto assetIds = gameResources.ofType(AssetType::Prefab).enumerate();
-	std::vector<String> assetNames;
-	assetNames.reserve(assetIds.size());
-	for (auto& id: assetIds) {
-		assetNames.push_back(Path(id).getFilename().toString());
-	}
-	
-	setAssetIds(std::move(assetIds), std::move(assetNames), std::move(defaultOption));
+	setAssetIds(gameResources.ofType(AssetType::Prefab).enumerate(), std::move(defaultOption));
 	setTitle(LocalisedString::fromHardcodedString("Choose Prefab"));
 	setCategoryFilters(sceneEditorWindow.getPrefabCategoryFilters());
 }
 
+LocalisedString ChoosePrefabWindow::getItemLabel(const String& id, const String& name, bool hasSearch)
+{
+	if (hasSearch) {
+		return LocalisedString::fromUserString(id);
+	} else {
+		return LocalisedString::fromUserString(Path(id).getFilename().toString());
+	}
+}
+
 std::shared_ptr<UIImage> ChoosePrefabWindow::makeIcon(const String& id, bool hasSearch)
 {
-	const bool showPreview = !hasSearch;
-	const Vector2f thumbSize = Vector2f(128, 128);
+	const Vector2f thumbSizeBig = Vector2f(128, 128);
+	const Vector2f thumbSizeSmall = Vector2f(64, 64);
+	auto thumbSize = hasSearch ? thumbSizeSmall : thumbSizeBig;
 	
 	if (!icon.hasMaterial()) {
-		emptyPreviewIcon = Sprite().setImage(getFactory().getResources(), "whitebox.png").setColour(Colour4f(0, 0, 0, 0)).scaleTo(thumbSize);
+		emptyPreviewIcon = Sprite().setImage(getFactory().getResources(), "whitebox.png").setColour(Colour4f(0, 0, 0, 0)).scaleTo(thumbSizeBig);
+		emptyPreviewIconSmall = emptyPreviewIcon.clone().scaleTo(thumbSizeSmall);
 		icon = getFactory().makeAssetTypeIcon(AssetType::Prefab);
 	}
-	auto image = std::make_shared<UIImage>(showPreview ? emptyPreviewIcon : icon);
+	auto image = std::make_shared<UIImage>(hasSearch ? emptyPreviewIconSmall : emptyPreviewIcon);
 	auto imageWeak = std::weak_ptr(image);
-
-	if (showPreview) {
-		image->addBehaviour(std::make_shared<UIImageVisibleBehaviour>([imageWeak, this, id, thumbSize] (UIImage& img)
-		{
-			if (auto future = sceneEditorWindow.getAssetPreviewData(AssetType::Prefab, id, Vector2i(thumbSize)); future.isValid()) {
-				future.then(Executors::getMainThread(), [imageWeak, thumbSize] (AssetPreviewData data)
-				{
-					if (auto image = imageWeak.lock(); image) {
-						auto sprite = std::move(data.sprite);
-						if (sprite.hasMaterial()) {
-							sprite.scaleTo(thumbSize);
-							image->setSprite(std::move(sprite));
-						}
+	
+	image->addBehaviour(std::make_shared<UIImageVisibleBehaviour>([imageWeak, this, id, thumbSize] (UIImage& img)
+	{
+		if (auto future = sceneEditorWindow.getAssetPreviewData(AssetType::Prefab, id, Vector2i(thumbSize)); future.isValid()) {
+			future.then(Executors::getMainThread(), [imageWeak, thumbSize] (AssetPreviewData data)
+			{
+				if (auto image = imageWeak.lock(); image) {
+					auto sprite = std::move(data.sprite);
+					if (sprite.hasMaterial()) {
+						sprite.scaleTo(thumbSize);
+						image->setSprite(std::move(sprite));
 					}
-				});
-			}
-		}, [=] (UIImage& img)
-		{
-			// On invisible
-			img.setSprite(emptyPreviewIcon);
-		}));
-	}
+				}
+			});
+		}
+	}, [=] (UIImage& img)
+	{
+		// On invisible
+		img.setSprite(hasSearch ? emptyPreviewIconSmall : emptyPreviewIcon);
+	}));
 	
 	return image;
 }

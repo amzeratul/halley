@@ -26,10 +26,12 @@ namespace Halley {
     protected:
         bool onKeyPress(KeyboardKeyPress key) override;
 		virtual bool canShowAll() const;
-		virtual std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch);
 		EditorUIFactory& getFactory() const;
         std::shared_ptr<UIList> options;
         void onMakeUI() override;
+
+		virtual std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch);
+		virtual LocalisedString getItemLabel(const String& id, const String& name, bool hasSearch);
 
 		virtual std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch);
 		std::shared_ptr<UISizer> makeItemSizerBigIcon(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label);
@@ -99,6 +101,7 @@ namespace Halley {
 		ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, Callback callback);
 	
     protected:
+		LocalisedString getItemLabel(const String& id, const String& name, bool hasSearch) override;
         std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
 		std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch) override;
 		void sortItems(std::vector<std::pair<String, String>>& items) override;
@@ -106,6 +109,7 @@ namespace Halley {
 	private:
 		Sprite icon;
 		Sprite emptyPreviewIcon;
+		Sprite emptyPreviewIconSmall;
 		SceneEditorWindow& sceneEditorWindow;
 	};
 }
