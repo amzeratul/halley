@@ -346,15 +346,19 @@ ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption,
 
 std::shared_ptr<UIImage> ChoosePrefabWindow::makeIcon(const String& id, bool hasSearch)
 {
+	const bool showPreview = true;
+	const Vector2f thumbSize = Vector2f(128, 128);
+	
 	if (!icon.hasMaterial()) {
 		icon = getFactory().makeAssetTypeIcon(AssetType::Prefab);
+		if (showPreview) {
+			icon.scaleTo(thumbSize);
+		}
 	}
 	auto image = std::make_shared<UIImage>(icon);
 	auto imageWeak = std::weak_ptr(image);
 
-	const bool showPreview = false;
 	if (showPreview) {
-		const Vector2f thumbSize = Vector2f(160, 160);
 		image->addBehaviour(std::make_shared<UIImageVisibleBehaviour>([imageWeak, this, id, thumbSize] (UIImage& img)
 		{
 			if (auto future = sceneEditorWindow.getAssetPreviewData(AssetType::Prefab, id); future.isValid()) {
@@ -362,15 +366,17 @@ std::shared_ptr<UIImage> ChoosePrefabWindow::makeIcon(const String& id, bool has
 				{
 					if (auto image = imageWeak.lock(); image) {
 						auto sprite = std::move(data.sprite);
-						sprite.scaleTo(thumbSize);
-						image->setSprite(std::move(sprite));
+						if (sprite.hasMaterial()) {
+							sprite.scaleTo(thumbSize);
+							image->setSprite(std::move(sprite));
+						}
 					}
 				});
 			}
 		}, [=] (UIImage& img)
 		{
 			// On invisible
-			img.setSprite(Sprite());
+			img.setSprite(icon);
 		}));
 	}
 	

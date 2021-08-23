@@ -177,10 +177,11 @@ void RenderGraphNode::resetTextures()
 std::shared_ptr<Texture> RenderGraphNode::makeTexture(VideoAPI& video, RenderGraphPinType type)
 {
 	Expects (type == RenderGraphPinType::ColourBuffer || type == RenderGraphPinType::DepthStencilBuffer);
-	
-	auto texture = video.createTexture(currentSize);
 
-	auto desc = TextureDescriptor(currentSize, type == RenderGraphPinType::ColourBuffer ? TextureFormat::RGBA : TextureFormat::Depth);
+	const auto size = Vector2i::max(currentSize, Vector2i(4, 4));
+	auto texture = video.createTexture(size);
+
+	auto desc = TextureDescriptor(size, type == RenderGraphPinType::ColourBuffer ? TextureFormat::RGBA : TextureFormat::Depth);
 	desc.isRenderTarget = true;
 	desc.isDepthStencil = type == RenderGraphPinType::DepthStencilBuffer;
 	desc.useFiltering = false; // TODO: allow filtering

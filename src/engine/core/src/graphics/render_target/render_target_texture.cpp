@@ -40,7 +40,7 @@ const std::shared_ptr<Texture>& TextureRenderTarget::getDepthTexture() const
 
 Rect4i TextureRenderTarget::getViewPort() const
 {
-	return viewPort ? viewPort.value() : Rect4i(Vector2i(0, 0), getTexture(0)->getSize());
+	return viewPort ? viewPort.value() : Rect4i(Vector2i(0, 0), colourBuffer.empty() ? Vector2i() : getTexture(0)->getSize());
 }
 
 void TextureRenderTarget::setViewPort(Rect4i vp)
