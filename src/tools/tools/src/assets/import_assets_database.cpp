@@ -70,6 +70,18 @@ void ImportAssetsDatabaseEntry::deserialize(Deserializer& s)
 	assetType = ImportAssetType(t);
 }
 
+int64_t ImportAssetsDatabaseEntry::getLatestTimestamp() const
+{
+	int64_t t = 0;
+	for (auto& input: inputFiles) {
+		t = std::max(t, input.getTimestamp());
+	}
+	for (auto& additional: additionalInputFiles) {
+		t = std::max(t, additional.second);
+	}
+	return t;
+}
+
 void ImportAssetsDatabase::AssetEntry::serialize(Serializer& s) const
 {
 	s << asset;
@@ -214,21 +226,18 @@ std::optional<Metadata> ImportAssetsDatabase::getMetadata(const Path& path) cons
 
 std::optional<Metadata> ImportAssetsDatabase::getMetadata(AssetType type, const String& assetId) const
 {
-	// This method is not very efficient
 	std::lock_guard<std::mutex> lock(mutex);
 
-	for (auto& a: assetsImported) {
-		const auto& asset = a.second.asset;
+	if (const auto * entry = findEntry(type, assetId); entry) {
+		const auto& asset = entry->asset;
 		for (auto& o: asset.outputFiles) {
-			if (o.type == type && o.name == assetId) {
-				const auto inputFile = o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).getPath() : o.primaryInputFile;
+			const auto inputFile = o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).getPath() : o.primaryInputFile;
 
-				const auto iter = inputFiles.find(inputFile.toString());
-				if (iter == inputFiles.end()) {
-					return {};
-				}
-				return iter->second.metadata;
+			const auto iter = inputFiles.find(inputFile.toString());
+			if (iter == inputFiles.end()) {
+				return {};
 			}
+			return iter->second.metadata;
 		}
 	}
 
@@ -237,11 +246,10 @@ std::optional<Metadata> ImportAssetsDatabase::getMetadata(AssetType type, const 
 
 Path ImportAssetsDatabase::getPrimaryInputFile(AssetType type, const String& assetId) const
 {
-	// This method is not very efficient
 	std::lock_guard<std::mutex> lock(mutex);
 
-	for (auto& a: assetsImported) {
-		const auto& asset = a.second.asset;
+	if (const auto * entry = findEntry(type, assetId); entry) {
+		const auto& asset = entry->asset;
 		for (auto& o: asset.outputFiles) {
 			if (o.type == type && o.name == assetId) {
 				return o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).getPath() : o.primaryInputFile;
@@ -250,6 +258,17 @@ Path ImportAssetsDatabase::getPrimaryInputFile(AssetType type, const String& ass
 	}
 
 	return {};
+}
+
+int64_t ImportAssetsDatabase::getAssetTimestamp(AssetType type, const String& assetId) const
+{
+	std::lock_guard<std::mutex> lock(mutex);
+
+	if (const auto * entry = findEntry(type, assetId); entry) {
+		return entry->asset.getLatestTimestamp();
+	}
+
+	return 0;
 }
 
 bool ImportAssetsDatabase::needsImporting(const ImportAssetsDatabaseEntry& asset, bool includeFailed) const
@@ -331,6 +350,7 @@ void ImportAssetsDatabase::markAsImported(const ImportAssetsDatabaseEntry& asset
 
 	std::lock_guard<std::mutex> lock(mutex);
 	assetsImported[asset.assetId] = entry;
+	indexDirty = true;
 	
 	auto failIter = assetsFailed.find(asset.assetId);
 	if (failIter != assetsFailed.end()) {
@@ -342,6 +362,7 @@ void ImportAssetsDatabase::markDeleted(const ImportAssetsDatabaseEntry& asset)
 {
 	std::lock_guard<std::mutex> lock(mutex);
 	assetsImported.erase(asset.assetId);
+	indexDirty = true;
 }
 
 void ImportAssetsDatabase::markFailed(const ImportAssetsDatabaseEntry& asset)
@@ -435,8 +456,27 @@ void ImportAssetsDatabase::deserialize(Deserializer& s)
 		if (platformsRead == platforms) {
 			s >> assetsImported;
 			s >> inputFiles;
+			indexDirty = true;
 		}
 	}
+}
+
+const ImportAssetsDatabase::AssetEntry* ImportAssetsDatabase::findEntry(AssetType type, const String& id) const
+{
+	if (indexDirty) {
+		assetIndex.clear();
+		for (auto& a: assetsImported) {
+			for (auto& o: a.second.asset.outputFiles) {
+				assetIndex[std::pair(o.type, o.name)] = &a.second;				
+			}
+		}
+	}
+
+	const auto result = assetIndex.find(std::pair(type, id));
+	if (result == assetIndex.end()) {
+		return result->second;
+	}
+	return nullptr;
 }
 
 std::unique_ptr<AssetDatabase> ImportAssetsDatabase::makeAssetDatabase(const String& platform) const

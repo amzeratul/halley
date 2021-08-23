@@ -63,6 +63,7 @@ namespace Halley
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
+		int64_t getLatestTimestamp() const;
 	};
 
 	class ImportAssetsDatabase
@@ -105,6 +106,7 @@ namespace Halley
 		bool purgeMissingInputs();
 
 		Path getPrimaryInputFile(AssetType type, const String& assetId) const;
+		int64_t getAssetTimestamp(AssetType type, const String& assetId) const;
 
 		bool needsImporting(const ImportAssetsDatabaseEntry& asset, bool includeFailed) const;
 		void markAsImported(const ImportAssetsDatabaseEntry& asset);
@@ -129,7 +131,12 @@ namespace Halley
 		std::map<String, AssetEntry> assetsImported;
 		std::map<String, AssetEntry> assetsFailed; // Ephemeral
 		std::map<String, InputFileEntry> inputFiles;
+
+		mutable std::map<std::pair<AssetType, String>, const AssetEntry*> assetIndex;
+		mutable bool indexDirty = true;
 	
 		mutable std::mutex mutex;
+
+		const AssetEntry* findEntry(AssetType type, const String& id) const;
 	};
 }

@@ -99,7 +99,7 @@ namespace Halley {
 
 		void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 	
-	private:
+	private:		
 		const HalleyAPI& api;
 		UIFactory& uiFactory;
 		Project& project;
@@ -132,6 +132,12 @@ namespace Halley {
 		UndoStack undoStack;
 		bool modified = false;
 		bool buttonsNeedUpdate = false;
+
+		struct AssetPreviewCache {
+			int64_t timestamp;
+			AssetPreviewData data;
+		};
+		std::map<std::pair<AssetType, String>, AssetPreviewCache> previewCache;
 
 		void makeUI();
 		void onEntitySelected(const String& id);

@@ -117,7 +117,7 @@ namespace Halley {
 	struct AssetPreviewData {
 		Sprite sprite;
 		String name;
-		std::unique_ptr<Image> image;
+		std::shared_ptr<Image> image;
 	};
 
     class ISceneEditor {
