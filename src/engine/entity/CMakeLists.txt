@@ -12,7 +12,7 @@ set(SOURCES
         "src/entity_id.cpp"
         "src/entity_scene.cpp"
         "src/entity_stage.cpp"
-        "src/family"
+        "src/family.cpp"
         "src/family_binding.cpp"
         "src/family_mask.cpp"
         "src/message.cpp"

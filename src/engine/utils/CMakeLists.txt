@@ -191,7 +191,7 @@ set(HEADERS
         "include/halley/support/redirect_stream.h"
 
         "include/halley/text/encode.h"
-        "include/halley/text/fuzzy_text_matcher"
+        "include/halley/text/fuzzy_text_matcher.h"
         "include/halley/text/halleystring.h"
         "include/halley/text/halleystring.natvis"
         "include/halley/text/i18n.h"
