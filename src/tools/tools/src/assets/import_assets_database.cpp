@@ -226,11 +226,10 @@ std::optional<Metadata> ImportAssetsDatabase::getMetadata(const Path& path) cons
 
 std::optional<Metadata> ImportAssetsDatabase::getMetadata(AssetType type, const String& assetId) const
 {
-	// This method is not very efficient
 	std::lock_guard<std::mutex> lock(mutex);
 
-	for (auto& a: assetsImported) {
-		const auto& asset = a.second.asset;
+	if (const auto * entry = findEntry(type, assetId); entry) {
+		const auto& asset = entry->asset;
 		for (auto& o: asset.outputFiles) {
 			if (o.type == type && o.name == assetId) {
 				const auto inputFile = o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).getPath() : o.primaryInputFile;
@@ -249,11 +248,10 @@ std::optional<Metadata> ImportAssetsDatabase::getMetadata(AssetType type, const 
 
 Path ImportAssetsDatabase::getPrimaryInputFile(AssetType type, const String& assetId) const
 {
-	// This method is not very efficient
 	std::lock_guard<std::mutex> lock(mutex);
 
-	for (auto& a: assetsImported) {
-		const auto& asset = a.second.asset;
+	if (const auto * entry = findEntry(type, assetId); entry) {
+		const auto& asset = entry->asset;
 		for (auto& o: asset.outputFiles) {
 			if (o.type == type && o.name == assetId) {
 				return o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).getPath() : o.primaryInputFile;
@@ -469,15 +467,16 @@ const ImportAssetsDatabase::AssetEntry* ImportAssetsDatabase::findEntry(AssetTyp
 {
 	if (indexDirty) {
 		assetIndex.clear();
-		for (auto& a: assetsImported) {
-			for (auto& o: a.second.asset.outputFiles) {
+		for (const auto& a: assetsImported) {
+			for (const auto& o: a.second.asset.outputFiles) {
 				assetIndex[std::pair(o.type, o.name)] = &a.second;				
 			}
 		}
+		indexDirty = false;
 	}
 
 	const auto result = assetIndex.find(std::pair(type, id));
-	if (result == assetIndex.end()) {
+	if (result != assetIndex.end()) {
 		return result->second;
 	}
 	return nullptr;
