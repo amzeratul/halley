@@ -226,18 +226,21 @@ std::optional<Metadata> ImportAssetsDatabase::getMetadata(const Path& path) cons
 
 std::optional<Metadata> ImportAssetsDatabase::getMetadata(AssetType type, const String& assetId) const
 {
+	// This method is not very efficient
 	std::lock_guard<std::mutex> lock(mutex);
 
-	if (const auto * entry = findEntry(type, assetId); entry) {
-		const auto& asset = entry->asset;
+	for (auto& a: assetsImported) {
+		const auto& asset = a.second.asset;
 		for (auto& o: asset.outputFiles) {
-			const auto inputFile = o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).getPath() : o.primaryInputFile;
+			if (o.type == type && o.name == assetId) {
+				const auto inputFile = o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).getPath() : o.primaryInputFile;
 
-			const auto iter = inputFiles.find(inputFile.toString());
-			if (iter == inputFiles.end()) {
-				return {};
+				const auto iter = inputFiles.find(inputFile.toString());
+				if (iter == inputFiles.end()) {
+					return {};
+				}
+				return iter->second.metadata;
 			}
-			return iter->second.metadata;
 		}
 	}
 
@@ -246,10 +249,11 @@ std::optional<Metadata> ImportAssetsDatabase::getMetadata(AssetType type, const 
 
 Path ImportAssetsDatabase::getPrimaryInputFile(AssetType type, const String& assetId) const
 {
+	// This method is not very efficient
 	std::lock_guard<std::mutex> lock(mutex);
 
-	if (const auto * entry = findEntry(type, assetId); entry) {
-		const auto& asset = entry->asset;
+	for (auto& a: assetsImported) {
+		const auto& asset = a.second.asset;
 		for (auto& o: asset.outputFiles) {
 			if (o.type == type && o.name == assetId) {
 				return o.primaryInputFile.isEmpty() ? asset.inputFiles.at(0).getPath() : o.primaryInputFile;
