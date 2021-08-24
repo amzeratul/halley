@@ -21,7 +21,7 @@ namespace Halley {
 		void setAssetIds(std::vector<String> _ids, std::vector<String> _names, String _defaultOption);
 
 		void setTitle(LocalisedString title);
-		void setCategoryFilters(std::vector<AssetCategoryFilter> filters);
+		void setCategoryFilters(std::vector<AssetCategoryFilter> filters, const String& defaultOption);
 
     protected:
         bool onKeyPress(KeyboardKeyPress key) override;
@@ -35,6 +35,8 @@ namespace Halley {
 
 		virtual std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch);
 		std::shared_ptr<UISizer> makeItemSizerBigIcon(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label);
+
+        virtual void onCategorySet(const String& id);
 
         virtual void sortItems(std::vector<std::pair<String, String>>& items);
 		void sortItemsByName(std::vector<std::pair<String, String>>& items);
@@ -104,9 +106,12 @@ namespace Halley {
 		LocalisedString getItemLabel(const String& id, const String& name, bool hasSearch) override;
         std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
 		std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch) override;
+		void onCategorySet(const String& id) override;
 		void sortItems(std::vector<std::pair<String, String>>& items) override;
 	
 	private:
+		constexpr const static char* lastCategoryKey = "prefab_picker.last_category";
+		
 		Sprite icon;
 		Sprite emptyPreviewIcon;
 		Sprite emptyPreviewIconSmall;

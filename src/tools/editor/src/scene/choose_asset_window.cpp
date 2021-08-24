@@ -88,6 +88,8 @@ void ChooseAssetWindow::setCategoryFilter(const String& filterId)
 	}
 
 	populateList();
+
+	onCategorySet(filterId);
 }
 
 void ChooseAssetWindow::populateList()
@@ -171,6 +173,10 @@ std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizerBigIcon(std::shared_ptr
 	return sizer;
 }
 
+void ChooseAssetWindow::onCategorySet(const String& id)
+{
+}
+
 void ChooseAssetWindow::sortItems(std::vector<std::pair<String, String>>& items)
 {
 	sortItemsByName(items);
@@ -186,7 +192,7 @@ void ChooseAssetWindow::sortItemsById(std::vector<std::pair<String, String>>& it
 	std::sort(items.begin(), items.end(), [=] (const auto& a, const auto& b) { return a.first < b.first; });
 }
 
-void ChooseAssetWindow::setCategoryFilters(std::vector<AssetCategoryFilter> filters)
+void ChooseAssetWindow::setCategoryFilters(std::vector<AssetCategoryFilter> filters, const String& defaultOption)
 {
 	categoryFilters = std::move(filters);
 	
@@ -199,10 +205,11 @@ void ChooseAssetWindow::setCategoryFilters(std::vector<AssetCategoryFilter> filt
 		auto item = tabs->addTextIconItem(filter.id, filter.showName ? filter.name : LocalisedString(), filter.icon, -1, {}, UISizerAlignFlags::Centre, filter.name);
 	}
 
-	setHandle(UIEventType::ListSelectionChanged, "tabs", [=] (const UIEvent& event)
+	bindData("tabs", defaultOption, [=] (const String& id)
 	{
-		setCategoryFilter(event.getStringData());
+		setCategoryFilter(id);
 	});
+	setCategoryFilter(defaultOption);
 }
 
 void ChooseAssetWindow::setUserFilter(const String& str)
@@ -354,9 +361,16 @@ ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption,
 	: ChooseAssetWindow(factory, std::move(callback), false, UISizerType::Grid, 4)
 	, sceneEditorWindow(sceneEditorWindow)
 {
+	const auto lastCategory = sceneEditorWindow.getSetting(EditorSettingType::Project, lastCategoryKey).asString("");
+
 	setAssetIds(gameResources.ofType(AssetType::Prefab).enumerate(), std::move(defaultOption));
 	setTitle(LocalisedString::fromHardcodedString("Choose Prefab"));
-	setCategoryFilters(sceneEditorWindow.getPrefabCategoryFilters());
+	setCategoryFilters(sceneEditorWindow.getPrefabCategoryFilters(), lastCategory);
+}
+
+void ChoosePrefabWindow::onCategorySet(const String& id)
+{
+	sceneEditorWindow.setSetting(EditorSettingType::Project, lastCategoryKey, ConfigNode(id));
 }
 
 LocalisedString ChoosePrefabWindow::getItemLabel(const String& id, const String& name, bool hasSearch)
