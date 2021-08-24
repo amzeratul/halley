@@ -230,22 +230,24 @@ public:
 		auto dataOutput = std::make_shared<bool>(true);
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
 
+		auto defaultValue = pars.defaultValue.size() == 2 ? Vector2f(pars.defaultValue[0].toFloat(), pars.defaultValue[1].toFloat()) : Vector2f();
+
 		container->add(std::make_shared<UITextInput>("xValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
-		container->bindData("xValue", value.x, [&context, data, dataOutput] (float newVal)
+		container->bindData("xValue", value.x, [&context, data, dataOutput, defaultValue] (float newVal)
 		{
 			if (*dataOutput) {
 				auto& node = data.getFieldData();
-				node = ConfigNode(Vector2f(newVal, node.asVector2f(Vector2f()).y));
+				node = ConfigNode(Vector2f(newVal, node.asVector2f(defaultValue).y));
 				context.onEntityUpdated();
 			}
 		});
 
 		container->add(std::make_shared<UITextInput>("yValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
-		container->bindData("yValue", value.y, [&context, data, dataOutput](float newVal)
+		container->bindData("yValue", value.y, [&context, data, dataOutput, defaultValue](float newVal)
 		{
 			if (*dataOutput) {
 				auto& node = data.getFieldData();
-				node = ConfigNode(Vector2f(node.asVector2f(Vector2f()).x, newVal));
+				node = ConfigNode(Vector2f(node.asVector2f(defaultValue).x, newVal));
 				context.onEntityUpdated();
 			}
 		});
