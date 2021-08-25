@@ -3,6 +3,7 @@
 #include <utility>
 #include <memory>
 #include <functional>
+#include <shared_mutex>
 #include <halley/text/halleystring.h>
 #include <halley/resources/resource_data.h>
 #include <halley/data_structures/hash_map.h>
@@ -70,6 +71,7 @@ namespace Halley
 		AssetType type;
 		ResourceLoaderFunc resourceLoader;
 		ResourceEnumeratorFunc resourceEnumerator;
+		std::shared_mutex mutex;
 	};
 
 	template <typename T>

@@ -112,12 +112,16 @@ std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(con
 std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& assetId, ResourceLoadPriority priority, bool allowFallback)
 {
 	// Look in cache and return if it's there
-	const auto res = resources.find(assetId);
-	if (res != resources.end()) {
-		return res->second.res;
+	{
+		std::shared_lock lock(mutex);
+		const auto res = resources.find(assetId);
+		if (res != resources.end()) {
+			return res->second.res;
+		}
 	}
 	
 	// Load resource from disk
+	std::unique_lock lockWrite(mutex);
 	const auto [newRes, loaded] = loadAsset(assetId, priority, allowFallback);
 
 	// Store in cache
