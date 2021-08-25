@@ -100,7 +100,7 @@ std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(con
 	if (!newRes) {
 		if (allowFallback && !fallback.isEmpty()) {
 			Logger::logError("Resource not found: \"" + toString(type) + ":" + assetId + "\"");
-			return loadAsset(fallback, priority, false);
+			return { loadAsset(fallback, priority, false).first, false };
 		}
 		
 		throw Exception("Resource not found: \"" + toString(type) + ":" + assetId + "\"", HalleyExceptions::Resources);
