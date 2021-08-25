@@ -551,11 +551,12 @@ std::optional<Rect4f> Sprite::getAbsoluteClip() const
 
 Sprite& Sprite::crop(Vector4f sides)
 {
-	if (flip) {
+	const auto scale = getScale();
+	if (flip ^ (scale.x < 0)) {
 		std::swap(sides.x, sides.z);
 	}
-	const auto scale = getScale();
-	sides /= Vector4f(scale.x, scale.y, scale.x, scale.y);
+	const auto absScale = scale.abs();
+	sides /= Vector4f(absScale.x, absScale.y, absScale.x, absScale.y);
 	
 	const auto origSize = getSize();
 	const auto origPivot = getAbsolutePivot();

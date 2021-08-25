@@ -82,14 +82,20 @@ void Transform2DComponent::setGlobalPosition(Vector2f v)
 
 Vector2f Transform2DComponent::getGlobalScale() const
 {
-	// TODO
-	return scale;
+	if (parentTransform) {
+		if (!isCached(CachedIndices::Scale)) {
+			setCached(CachedIndices::Scale);
+			cachedGlobalScale = parentTransform->getGlobalScale() * scale;
+		}
+		return cachedGlobalScale;
+	} else {
+		return scale;
+	}
 }
 
 void Transform2DComponent::setGlobalScale(Vector2f v)
 {
-	// TODO
-	setLocalScale(v);
+	setLocalScale(parentTransform ? v / parentTransform->getGlobalScale() : v);
 }
 
 Angle1f Transform2DComponent::getGlobalRotation() const
@@ -133,8 +139,8 @@ void Transform2DComponent::setSubWorld(int world)
 Vector2f Transform2DComponent::transformPoint(const Vector2f& p) const
 {
 	// TODO, do this properly
+	auto pos = getGlobalPosition() + p * getGlobalScale();
 	
-	auto pos = getGlobalPosition() + p;
 	setCached(CachedIndices::Position); // Important: getGlobalPosition() won't cache if it's the root, but this is important for markDirty
 	return pos;
 }
@@ -142,8 +148,8 @@ Vector2f Transform2DComponent::transformPoint(const Vector2f& p) const
 Vector2f Transform2DComponent::inverseTransformPoint(const Vector2f& p) const
 {
 	// TODO, do this properly
-
-	auto pos = p - getGlobalPosition();
+	auto pos = p / getGlobalScale() - getGlobalPosition();
+	
 	setCached(CachedIndices::Position); // Important: getGlobalPosition() won't cache if it's the root, but this is important for markDirty
 	return pos;
 }
