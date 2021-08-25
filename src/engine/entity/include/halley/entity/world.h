@@ -15,6 +15,7 @@
 #include "service.h"
 #include "create_functions.h"
 #include "halley/utils/attributes.h"
+#include <halley/data_structures/memory_pool.h>
 
 namespace Halley {
 	struct SystemMessageContext;
@@ -150,6 +151,7 @@ namespace Halley {
 
 		std::shared_ptr<MaskStorage> maskStorage;
 		std::shared_ptr<ComponentDeleterTable> componentDeleterTable;
+		std::shared_ptr<PoolAllocator<Entity>> entityPool;
 
 		mutable std::array<StopwatchRollingAveraging, 3> timer;
 

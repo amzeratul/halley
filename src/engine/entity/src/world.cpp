@@ -1,7 +1,6 @@
 #include <iostream>
 #include <chrono>
 #include <halley/support/exception.h>
-#include <halley/data_structures/memory_pool.h>
 #include <halley/utils/utils.h>
 #include "world.h"
 #include "system.h"
@@ -23,6 +22,7 @@ World::World(const HalleyAPI& api, Resources& resources, bool collectMetrics, Cr
 	, collectMetrics(collectMetrics)
 	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
 	, componentDeleterTable(std::make_shared<ComponentDeleterTable>())
+	, entityPool(std::make_shared<PoolAllocator<Entity>>())
 {
 	for (auto& t: timer) {
 		t.setNumSamples(isDevMode() ? 300 : 30);
@@ -188,7 +188,7 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 		uuid = UUID::generate();
 	}
 	
-	Entity* entity = new(PoolAllocator<Entity>::alloc()) Entity();
+	Entity* entity = new(entityPool->alloc()) Entity();
 	if (entity == nullptr) {
 		throw Exception("Error creating entity - out of memory?", HalleyExceptions::Entity);
 	}
@@ -423,7 +423,7 @@ void World::deleteEntity(Entity* entity)
 	Expects (entity);
 	entity->destroyComponents(*componentDeleterTable);
 	entity->~Entity();
-	PoolAllocator<Entity>::free(entity);
+	entityPool->free(entity);
 }
 
 bool World::hasSystemsOnTimeLine(TimeLine timeline) const
