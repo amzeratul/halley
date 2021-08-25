@@ -119,9 +119,15 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& assetId, R
 			return res->second.res;
 		}
 	}
+
+	// Lock mutex, and make sure it's still not there (someone else might have gone through this by now)
+	std::unique_lock lockWrite(mutex);
+	const auto res = resources.find(assetId);
+	if (res != resources.end()) {
+		return res->second.res;
+	}
 	
 	// Load resource from disk
-	std::unique_lock lockWrite(mutex);
 	const auto [newRes, loaded] = loadAsset(assetId, priority, allowFallback);
 
 	// Store in cache
