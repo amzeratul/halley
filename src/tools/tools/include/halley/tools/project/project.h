@@ -122,6 +122,10 @@ namespace Halley
 
 		Game* getGameInstance() const;
 
+		std::optional<AssetPreviewData> getCachedAssetPreview(AssetType type, const String& id);
+		void setCachedAssetPreview(AssetType type, const String& id, AssetPreviewData data);
+		void clearCachedAssetPreviews();
+
 	private:
 		std::vector<String> platforms;
 		Path rootPath;
@@ -143,6 +147,12 @@ namespace Halley
 		std::vector<HalleyPluginPtr> plugins;
 		std::shared_ptr<ProjectDLL> gameDll;
 		std::unique_ptr<Resources> gameResources;
+
+		struct AssetPreviewCache {
+			int64_t timestamp;
+			AssetPreviewData data;
+		};
+		std::map<std::pair<AssetType, String>, AssetPreviewCache> previewCache;
 
 		Path getDLLPath() const;
 		void loadECSData();

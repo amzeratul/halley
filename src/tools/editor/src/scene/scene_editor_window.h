@@ -133,12 +133,6 @@ namespace Halley {
 		bool modified = false;
 		bool buttonsNeedUpdate = false;
 
-		struct AssetPreviewCache {
-			int64_t timestamp;
-			AssetPreviewData data;
-		};
-		std::map<std::pair<AssetType, String>, AssetPreviewCache> previewCache;
-
 		void makeUI();
 		void onEntitySelected(const String& id);
 		void panCameraToEntity(const String& id);

@@ -73,6 +73,7 @@ namespace Halley {
 		virtual void selectEntity(const String& uuid) = 0;
 		virtual Sprite getEntityIcon(const String& uuid) = 0;
 		virtual Sprite getAssetIcon(AssetType type) = 0;
+		virtual void clearAssetCache() = 0;
 	};
 
     class SceneEditorContext {

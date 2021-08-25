@@ -36,6 +36,7 @@ Project::Project(Path projectRootPath, Path halleyRootPath)
 
 Project::~Project()
 {
+	clearCachedAssetPreviews();
 	gameResources.reset();
 	gameDll.reset();
 	assetImporter.reset();
@@ -388,6 +389,29 @@ Game* Project::getGameInstance() const
 		result = &dll.getGame();
 	});
 	return result;
+}
+
+std::optional<AssetPreviewData> Project::getCachedAssetPreview(AssetType type, const String& id)
+{
+	if (const auto previewIter = previewCache.find(std::pair(type, id)); previewIter != previewCache.end()) {
+		const auto& cache = previewIter->second;
+		const auto assetTimestamp = getImportAssetsDatabase().getAssetTimestamp(type, id);
+		if (cache.timestamp == assetTimestamp) {
+			return cache.data;
+		}
+	}
+	return {};
+}
+
+void Project::setCachedAssetPreview(AssetType type, const String& id, AssetPreviewData data)
+{
+	const auto assetTimestamp = getImportAssetsDatabase().getAssetTimestamp(type, id);
+	previewCache[std::pair(type, id)] = AssetPreviewCache{ assetTimestamp, std::move(data) };
+}
+
+void Project::clearCachedAssetPreviews()
+{
+	previewCache.clear();
 }
 
 void Project::loadECSData()

@@ -322,6 +322,11 @@ Sprite SceneEditorGameBridge::getAssetIcon(AssetType type)
 	return factory.makeAssetTypeIcon(type);
 }
 
+void SceneEditorGameBridge::clearAssetCache()
+{
+	project.clearCachedAssetPreviews();
+}
+
 void SceneEditorGameBridge::refreshAssets()
 {
 	if (interfaceReady) {

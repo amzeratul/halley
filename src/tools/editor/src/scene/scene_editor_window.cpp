@@ -949,28 +949,18 @@ std::vector<AssetCategoryFilter> SceneEditorWindow::getPrefabCategoryFilters() c
 
 Future<AssetPreviewData> SceneEditorWindow::getAssetPreviewData(AssetType assetType, const String& id, Vector2i size)
 {
-	const auto assetTimestamp = project.getImportAssetsDatabase().getAssetTimestamp(assetType, id);
-
-	// Retrieve from cache if available
-	if (const auto previewIter = previewCache.find(std::pair(assetType, id)); previewIter != previewCache.end()) {
-		const auto& cache = previewIter->second;
-		if (cache.timestamp == assetTimestamp) {
-			// Convert image to sprite
-			auto data = cache.data;
-			data.sprite.setImage(project.getGameResources(), *api.video, data.image);
-
-			// Dispatch
-			Promise<AssetPreviewData> promise;
-			auto future = promise.getFuture();
-			promise.setValue(data);
-			return future;
-		}
+	auto cached = project.getCachedAssetPreview(assetType, id);
+	if (cached) {
+		// Convert image to sprite
+		auto data = std::move(cached.value());
+		data.sprite.setImage(project.getGameResources(), *api.video, data.image);
+		return Future<AssetPreviewData>::makeImmediate(std::move(data));
 	}
 
 	return gameBridge->getAssetPreviewData(assetType, id, size).then([=] (AssetPreviewData data) -> AssetPreviewData
 	{
 		// Store in cache
-		previewCache[std::pair(assetType, id)] = AssetPreviewCache{ assetTimestamp, data };
+		project.setCachedAssetPreview(assetType, id, data);
 		
 		// Convert image to sprite
 		data.sprite.setImage(project.getGameResources(), *api.video, data.image);

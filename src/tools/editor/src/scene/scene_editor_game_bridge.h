@@ -72,7 +72,8 @@ namespace Halley {
 		void selectEntity(const String& uuid) override;
 		Sprite getEntityIcon(const String& uuid) override;
 		Sprite getAssetIcon(AssetType type) override;
-
+		void clearAssetCache() override;
+	
 	private:
 		const HalleyAPI& api;
 		Resources& resources;

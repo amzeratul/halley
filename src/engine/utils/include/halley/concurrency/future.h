@@ -76,6 +76,14 @@ namespace Halley
 			, cancelled(false)
 		{}
 
+		FutureData(T data)
+			: available(true)
+			, cancelled(false)
+			, data(std::move(data))
+		{
+			makeAvailable();
+		}
+
 		FutureData(FutureData&&) = delete;
 		FutureData(const FutureData&) = delete;
 		FutureData& operator=(FutureData&&) = delete;
@@ -258,6 +266,11 @@ namespace Halley
 			data->addContinuation([joinFuture](typename TaskHelper<T>::DataType /*v*/) mutable {
 				joinFuture.notify();
 			});
+		}
+
+		static Future<T> makeImmediate(DataType value)
+		{
+			return Future<T>(std::make_shared<FutureData<DataType>>(std::move(value)));
 		}
 
 	private:

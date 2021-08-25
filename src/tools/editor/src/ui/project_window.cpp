@@ -202,6 +202,7 @@ void ProjectWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 		for (const auto& ss: project.getGameResources().enumerate<SpriteSheet>()) {
 			project.getGameResources().get<SpriteSheet>(ss)->clearMaterialCache();
 		}
+		project.clearCachedAssetPreviews();
 	}
 
 	updateDLLStatus(status);
