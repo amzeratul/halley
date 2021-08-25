@@ -109,6 +109,8 @@ void SceneEditorCanvas::pressMouse(Vector2f mousePos, int button)
 			lastMousePos = mousePos;
 		}
 	}
+
+	getRoot()->setFocus(shared_from_this());
 }
 
 void SceneEditorCanvas::releaseMouse(Vector2f mousePos, int button)
