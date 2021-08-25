@@ -1,6 +1,7 @@
 #pragma once
 
 #include "flat_map.h"
+#include <mutex>
 
 namespace Halley {
 	class SizePool
@@ -16,6 +17,7 @@ namespace Halley {
 	private:
 		void* pimpl;
 		size_t size;
+		std::mutex mutex;
 	};
 
 	// yo dawg
@@ -34,27 +36,22 @@ namespace Halley {
 	struct PoolAllocator
 	{
 	public:
-		static void* alloc()
-		{
-			return get().pool->alloc();
-		}
-
-		static void free(void* p)
-		{
-			get().pool->free(p);
-		}
-
-	private:
 		PoolAllocator()
 		{
 			pool = new SizePool(sizeof(T));
 		}
-
-		static PoolAllocator& get()
+		
+		void* alloc()
 		{
-			static PoolAllocator instance;
-			return instance;
+			return pool->alloc();
 		}
+
+		void free(void* p)
+		{
+			pool->free(p);
+		}
+
+	private:
 
 		SizePool* pool;
 	};

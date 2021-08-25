@@ -40,10 +40,12 @@ SizePool::~SizePool()
 
 void* SizePool::alloc()
 {
+	std::unique_lock lock(mutex);
 	return reinterpret_cast<PoolType*>(pimpl)->malloc();
 }
 
 void SizePool::free(void* p)
 {
+	std::unique_lock lock(mutex);
 	reinterpret_cast<PoolType*>(pimpl)->free(p);
 }
