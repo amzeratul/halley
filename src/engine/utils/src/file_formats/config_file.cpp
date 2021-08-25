@@ -159,5 +159,5 @@ int ConfigObserver::getAssetVersion() const
 }
 
 
-ConfigNode ConfigNode::undefinedConfigNode;
-String ConfigNode::undefinedConfigNodeName;
+thread_local ConfigNode ConfigNode::undefinedConfigNode;
+thread_local String ConfigNode::undefinedConfigNodeName;
