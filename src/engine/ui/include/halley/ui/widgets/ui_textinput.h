@@ -31,6 +31,8 @@ namespace Halley {
 		String getText() const;
 		UITextInput& setGhostText(LocalisedString text);
 		LocalisedString getGhostText() const;
+		
+		TextRenderer& getTextLabel();
 
 		std::optional<int> getMaxLength() const;
 		void setMaxLength(std::optional<int> length);

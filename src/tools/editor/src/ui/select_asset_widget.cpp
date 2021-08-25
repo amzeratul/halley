@@ -25,6 +25,13 @@ void SelectAssetWidget::setValue(const String& newValue)
 	if (newValue != value) {
 		value = newValue;
 		input->setText(getDisplayName());
+
+		if (gameResources->ofType(type).exists(newValue)) {
+			input->getTextLabel().setColourOverride({});
+		} else {
+			input->getTextLabel().setColourOverride({ColourOverride(0, input->getStyles()[0].getColour("errorColour"))});
+		}
+		
 		updateToolTip();
 		notifyDataBind(value);
 		sendEvent(UIEvent(UIEventType::TextChanged, getId(), value));
@@ -114,7 +121,7 @@ String SelectAssetWidget::getDisplayName() const
 
 String SelectAssetWidget::getDisplayName(const String& name) const
 {
-	if (type == AssetType::Sprite || type == AssetType::Animation) {
+	if (type == AssetType::Sprite || type == AssetType::Animation || type == AssetType::MaterialDefinition) {
 		return Path(name).getFilename().toString();
 	} else {
 		return name;

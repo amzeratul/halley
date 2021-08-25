@@ -60,6 +60,11 @@ LocalisedString UITextInput::getGhostText() const
 	return ghostText;
 }
 
+TextRenderer& UITextInput::getTextLabel()
+{
+	return label;
+}
+
 std::optional<int> UITextInput::getMaxLength() const
 {
 	return text.getMaxLength();
