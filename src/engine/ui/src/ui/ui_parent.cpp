@@ -17,6 +17,7 @@ std::optional<float> UIParent::getMaxChildWidth() const
 
 void UIParent::addChild(std::shared_ptr<UIWidget> widget)
 {
+	Expects(widget);
 	Expects(widget->getParent() == nullptr || widget->getParent() == this);
 
 	if (widget->getParent() == nullptr) {

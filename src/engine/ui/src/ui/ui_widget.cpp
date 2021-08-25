@@ -628,7 +628,9 @@ void UIWidget::notifyTreeRemovedFromRoot(UIRoot& root)
 		c->notifyTreeRemovedFromRoot(root);
 	}
 	for (auto& c: getChildrenWaiting()) {
-		c->notifyTreeRemovedFromRoot(root);
+		if (c) {
+			c->notifyTreeRemovedFromRoot(root);
+		}
 	}
 }
 
