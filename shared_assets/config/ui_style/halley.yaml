@@ -283,7 +283,7 @@ uiStyle:
     texture: $ui_logInfoText
 
   popupMenu:
-    background: { img: $ui_popup, colour: $ui_popupWindowSolid }
+    background: { img: $ui_popup, colour: $ui_popupWindow }
     item:
       normal: ""
       hover: { img: $ui_list_item, colour: $ui_listHover }
@@ -293,8 +293,8 @@ uiStyle:
     innerBorder: [ 4, 4, 4, 4 ]
     extraMouseBorder: [ 1, 1, 1, 1 ]
     selectionChangedSound: ""
-    label: { font: Ubuntu Regular, size: 15, colour: $ui_unselectedText }
-    selectedLabel: { font: Ubuntu Regular, size: 15, colour: $ui_selectedText }
-    disabledLabel: { font: Ubuntu Regular, size: 15, colour: $ui_disabledText }
+    label: { font: Ubuntu Regular, size: 13, colour: $ui_unselectedText }
+    selectedLabel: { font: Ubuntu Regular, size: 13, colour: $ui_selectedText }
+    disabledLabel: { font: Ubuntu Regular, size: 13, colour: $ui_disabledText }
     gap: 1
 ...

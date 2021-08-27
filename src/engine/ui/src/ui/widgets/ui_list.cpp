@@ -643,11 +643,16 @@ void UIList::update(Time t, bool moved)
 	}
 }
 
-void UIList::onItemClicked(UIListItem& item)
+void UIList::onItemClicked(UIListItem& item, int button)
 {
-	setSelectedOption(item.getIndex());
-	if (singleClickAccept) {
+	if (!singleClickAccept || button == 0) {
+		setSelectedOption(item.getIndex());
+	}
+	if (singleClickAccept && button == 0) {
 		onAccept();
+	}
+	if (button == 2) {
+		sendEvent(UIEvent(UIEventType::ListItemRightClicked, getId(), item.getId(), curOption));
 	}
 	focus();
 }
@@ -810,14 +815,14 @@ void UIListItem::pressMouse(Vector2f mousePos, int button)
 		}
 		myStartPos = dragWidget->getPosition();
 		dragWidgetOffset = myStartPos - getPosition();
-
-		parent.onItemClicked(*this);
 	}
 
 	if (button == 2) {
 		held = false;
 		dragged = false;
 	}
+
+	parent.onItemClicked(*this, button);
 }
 
 void UIListItem::releaseMouse(Vector2f mousePos, int button)

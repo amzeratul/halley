@@ -45,7 +45,7 @@ colours:
   ui_scrollBackground: "#2f424b"
   
   ui_backgroundBox: "#22333b"
-  ui_popupWindow: "#22333b"
+  ui_popupWindow: "#1A262D"
   ui_staticBox: "#2f424b"
   ui_staticBoxSubdue: "#2f424b"
 

@@ -112,7 +112,7 @@ namespace Halley {
 
 		bool requiresSelection = true;
 
-		void onItemClicked(UIListItem& item);
+		void onItemClicked(UIListItem& item, int button);
 		void onItemDoubleClicked(UIListItem& item);
 		void onAccept();
 		void onCancel();

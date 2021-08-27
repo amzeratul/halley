@@ -35,10 +35,9 @@ namespace Halley {
 		void onComponentRemoved(const String& name) override;
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName) override;
 
-		void addNewEntity();
-		void addNewPrefab();
-		void addNewPrefab(const String& prefabName);
-		void addEntity(EntityData data);
+		void addNewEntity(std::optional<String> reference = {}, bool childOfReference = false);
+		void addNewPrefab(std::optional<String> reference = {}, bool childOfReference = false);
+		void addNewPrefab(const String& referenceEntityId, bool childOfReference, const String& prefabName);
 		void addEntity(const String& referenceEntityId, bool childOfReference, EntityData data);
 		void addEntity(const String& parentId, int childIndex, EntityData data);
 		void removeEntity();
@@ -53,9 +52,10 @@ namespace Halley {
 		std::shared_ptr<const Prefab> getGamePrefab(const String& id) const;
 
 		void copyEntityToClipboard(const String& id);
-		void pasteEntityFromClipboard(const String& referenceId);
+		void cutEntityToClipboard(const String& id);
+		void pasteEntityFromClipboard(const String& referenceId, bool childOfReference);
 		String copyEntity(const String& id);
-		void pasteEntity(const String& data, const String& referenceId);
+		void pasteEntity(const String& data, const String& referenceId, bool childOfReference);
 		void duplicateEntity(const String& id);
 		void openEditPrefabWindow(const String& name);
 
@@ -91,6 +91,8 @@ namespace Halley {
 		std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const;
 		
 		Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size);
+
+		void onEntityContextMenuAction(const String& actionId, const String& entityId);
 
 	protected:
 		void update(Time t, bool moved) override;

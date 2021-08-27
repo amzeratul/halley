@@ -29,7 +29,7 @@ namespace Halley {
 
 	private:
 		UIFactory& factory;
-		SceneEditorWindow* sceneEditor;
+		SceneEditorWindow* sceneEditorWindow;
 		const EntityIcons* icons = nullptr;
 
 		std::shared_ptr<UITreeList> list;
@@ -41,5 +41,8 @@ namespace Halley {
 		void addEntityTree(const String& parentId, int childIndex, const EntityData& data);
 		std::pair<String, Sprite> getEntityNameAndIcon(const EntityData& data) const;
 		std::pair<String, Sprite> getEntityNameAndIcon(const String& name, const String& icon, const String& prefab) const;
+
+		void openContextMenu(const String& entityId);
+		void onContextMenuAction(const String& actionId, const String& entityId);
 	};
 }

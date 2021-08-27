@@ -274,13 +274,12 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 
 	if (key.is(KeyCode::X, KeyMods::Ctrl)) {
 		const auto sel = entityList->getCurrentSelection();
-		copyEntityToClipboard(sel);
-		removeEntity(sel);
+		cutEntityToClipboard(sel);
 		return true;
 	}
 
 	if (key.is(KeyCode::V, KeyMods::Ctrl)) {
-		pasteEntityFromClipboard(entityList->getCurrentSelection());
+		pasteEntityFromClipboard(entityList->getCurrentSelection(), false);
 		return true;
 	}
 
@@ -312,6 +311,31 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 	}
 
 	return false;
+}
+
+void SceneEditorWindow::onEntityContextMenuAction(const String& actionId, const String& entityId)
+{
+	if (actionId == "copy") {
+		copyEntityToClipboard(entityId);
+	} else if (actionId == "cut") {
+		cutEntityToClipboard(entityId);
+	} else if (actionId == "paste_sibling") {
+		pasteEntityFromClipboard(entityId, false);
+	} else if (actionId == "paste_child") {
+		pasteEntityFromClipboard(entityId, true);
+	} else if (actionId == "delete") {
+		removeEntity(entityId);
+	} else if (actionId == "duplicate") {
+		duplicateEntity(entityId);
+	} else if (actionId == "add_entity_child") {
+		addNewEntity(entityId, true);
+	} else if (actionId == "add_entity_sibling") {
+		addNewEntity(entityId, false);
+	} else if (actionId == "add_prefab_child") {
+		addNewPrefab(entityId, true);
+	} else if (actionId == "add_prefab_sibling") {
+		addNewPrefab(entityId, false);
+	}
 }
 
 void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
@@ -513,13 +537,19 @@ void SceneEditorWindow::copyEntityToClipboard(const String& id)
 	}
 }
 
-void SceneEditorWindow::pasteEntityFromClipboard(const String& referenceId)
+void SceneEditorWindow::cutEntityToClipboard(const String& id)
+{
+	copyEntityToClipboard(id);
+	removeEntity(id);
+}
+
+void SceneEditorWindow::pasteEntityFromClipboard(const String& referenceId, bool childOfReference)
 {
 	const auto clipboard = api.system->getClipboard();
 	if (clipboard) {
 		auto clipboardData = clipboard->getStringData();
 		if (clipboardData) {
-			pasteEntity(clipboardData.value(), referenceId);
+			pasteEntity(clipboardData.value(), referenceId, childOfReference);
 		}
 	}
 }
@@ -529,20 +559,20 @@ String SceneEditorWindow::copyEntity(const String& id)
 	return serializeEntity(sceneData->getEntityNodeData(id).getData());
 }
 
-void SceneEditorWindow::pasteEntity(const String& stringData, const String& referenceId)
+void SceneEditorWindow::pasteEntity(const String& stringData, const String& referenceId, bool childOfReference)
 {
 	Expects(gameBridge);
 	auto data = deserializeEntity(stringData);
 	if (data) {
 		positionEntityAtCursor(data.value());
 		assignUUIDs(data.value());
-		addEntity(referenceId, false, std::move(data.value()));
+		addEntity(referenceId, childOfReference, std::move(data.value()));
 	}
 }
 
 void SceneEditorWindow::duplicateEntity(const String& id)
 {
-	pasteEntity(copyEntity(id), findParent(id));
+	pasteEntity(copyEntity(id), id, false);
 }
 
 void SceneEditorWindow::openEditPrefabWindow(const String& name)
@@ -555,25 +585,25 @@ const std::shared_ptr<ISceneData>& SceneEditorWindow::getSceneData() const
 	return sceneData;
 }
 
-void SceneEditorWindow::addNewEntity()
+void SceneEditorWindow::addNewEntity(std::optional<String> reference, bool childOfReference)
 {
 	EntityData data;
 	data.setInstanceUUID(UUID::generate());
 	data.getComponents().emplace_back("Transform2D", ConfigNode::MapType());
-	addEntity(std::move(data));
+	addEntity(reference.value_or(currentEntityId), childOfReference, std::move(data));
 }
 
-void SceneEditorWindow::addNewPrefab()
+void SceneEditorWindow::addNewPrefab(std::optional<String> reference, bool childOfReference)
 {
 	getRoot()->addChild(std::make_shared<ChoosePrefabWindow>(uiFactory, "", project.getGameResources(), *this, [=] (std::optional<String> result)
 	{
 		if (result) {
-			addNewPrefab(result.value());
+			addNewPrefab(reference.value_or(currentEntityId), childOfReference, result.value());
 		}
 	}));
 }
 
-void SceneEditorWindow::addNewPrefab(const String& prefabName)
+void SceneEditorWindow::addNewPrefab(const String& referenceEntityId, bool childOfReference, const String& prefabName)
 {
 	const auto prefab = getGamePrefab(prefabName);
 	if (prefab) {
@@ -591,13 +621,8 @@ void SceneEditorWindow::addNewPrefab(const String& prefabName)
 		data.setInstanceUUID(UUID::generate());
 		data.setPrefab(prefabName);
 		data.setComponents(components);
-		addEntity(std::move(data));
+		addEntity(referenceEntityId, childOfReference, std::move(data));
 	}
-}
-
-void SceneEditorWindow::addEntity(EntityData data)
-{
-	addEntity(currentEntityId, false, std::move(data));
 }
 
 void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfReference, EntityData data)
