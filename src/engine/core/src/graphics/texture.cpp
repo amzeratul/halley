@@ -26,7 +26,7 @@ std::optional<uint32_t> Texture::getPixel(Vector2f texPos) const
 {
 	if (descriptor.retainPixelData) {
 		const auto* img = descriptor.pixelData.getImage();
-		Vector2i pos = Vector2i((texPos * Vector2f(size)).round());
+		Vector2i pos = Vector2i((texPos * Vector2f(size)).floor());
 		pos = Vector2i::max(Vector2i(), Vector2i::min(size - Vector2i(1, 1), pos)); // Clamp mode
 		
 		if (img) {
