@@ -499,8 +499,11 @@ bool Sprite::isPointVisible(Vector2f point) const
 		const auto tex = material->getTexture(0);
 		if (tex) {
 			auto relPos = (localPoint - aabb.getTopLeft()) / aabb.getSize();
-			if (flip) {
+			if (flip ^ (getScale().x < 0)) {
 				relPos.x = 1.0f - relPos.x;
+			}
+			if (getScale().y < 0) {
+				relPos.y = 1.0f - relPos.y;
 			}
 			
 			const auto texRect = getTexRect0();
