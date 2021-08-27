@@ -166,10 +166,11 @@ String EntityList::getCurrentSelection() const
 void EntityList::openContextMenu(const String& entityId)
 {
 	auto menuOptions = std::vector<UIPopupMenuItem>();
-	auto makeEntry = [&] (const String& id, const String& text, const String& toolTip, const String& icon)
+	auto makeEntry = [&] (const String& id, const String& text, const String& toolTip, const String& icon, bool enabled = true)
 	{
 		auto iconSprite = Sprite().setImage(factory.getResources(), "entity_icons/" + (icon.isEmpty() ? "empty.png" : icon));
 		menuOptions.push_back(UIPopupMenuItem(id, LocalisedString::fromHardcodedString(text), std::move(iconSprite), LocalisedString::fromHardcodedString(toolTip)));
+		menuOptions.back().enabled = enabled;
 	};
 	
 	makeEntry("add_entity_sibling", "Add Entity", "Adds an empty entity as a sibling of this one.", "");
