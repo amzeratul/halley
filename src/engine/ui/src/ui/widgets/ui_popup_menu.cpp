@@ -1,4 +1,6 @@
 #include "widgets/ui_popup_menu.h"
+
+#include "widgets/ui_image.h"
 #include "widgets/ui_list.h"
 
 using namespace Halley;
@@ -42,7 +44,11 @@ void UIPopupMenu::makeUI()
 {
 	itemList = std::make_shared<UIList>("items", style);
 	for (const auto& item : items) {
-		itemList->addTextIconItem(item.id, item.text, item.icon, -1, {}, UISizerFillFlags::Fill, item.tooltip);
+		if (item.isSeparator) {
+			itemList->add(std::make_shared<UIImage>(style.getSprite("separator")));
+		} else {
+			itemList->addTextIconItem(item.id, item.text, item.icon, -1, {}, UISizerFillFlags::Fill, item.tooltip);
+		}
 	}
 
 	itemList->setHandle(UIEventType::ListAccept, [=](const UIEvent& event) {

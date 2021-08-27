@@ -166,16 +166,24 @@ String EntityList::getCurrentSelection() const
 void EntityList::openContextMenu(const String& entityId)
 {
 	auto menuOptions = std::vector<UIPopupMenuItem>();
-	menuOptions.push_back(UIPopupMenuItem("add_entity_sibling", LocalisedString::fromHardcodedString("Add Entity"), LocalisedString::fromHardcodedString("Adds an empty entity as a sibling of this one.")));
-	menuOptions.push_back(UIPopupMenuItem("add_entity_child", LocalisedString::fromHardcodedString("Add Entity (Child)"), LocalisedString::fromHardcodedString("Adds an empty entity as a child of this one.")));
-	menuOptions.push_back(UIPopupMenuItem("add_prefab_sibling", LocalisedString::fromHardcodedString("Add Prefab"), LocalisedString::fromHardcodedString("Adds a prefab as a sibling of this entity.")));
-	menuOptions.push_back(UIPopupMenuItem("add_prefab_child", LocalisedString::fromHardcodedString("Add Prefab (Child)"), LocalisedString::fromHardcodedString("Adds a prefab as a child of this entity.")));
-	menuOptions.push_back(UIPopupMenuItem("copy", LocalisedString::fromHardcodedString("Copy"), LocalisedString::fromHardcodedString("Copy entity to clipboard [Ctrl+C]")));
-	menuOptions.push_back(UIPopupMenuItem("cut", LocalisedString::fromHardcodedString("Cut"), LocalisedString::fromHardcodedString("Cut entity to clipboard [Ctrl+X]")));
-	menuOptions.push_back(UIPopupMenuItem("paste_sibling", LocalisedString::fromHardcodedString("Paste"), LocalisedString::fromHardcodedString("Paste entity as a sibling of the current one. [Ctrl+V]")));
-	menuOptions.push_back(UIPopupMenuItem("paste_child", LocalisedString::fromHardcodedString("Paste (Child)"), LocalisedString::fromHardcodedString("Paste entity as a child of the current one.")));
-	menuOptions.push_back(UIPopupMenuItem("duplicate", LocalisedString::fromHardcodedString("Duplicate"), LocalisedString::fromHardcodedString("Duplicate entity [Ctrl+D]")));
-	menuOptions.push_back(UIPopupMenuItem("delete", LocalisedString::fromHardcodedString("Delete"), LocalisedString::fromHardcodedString("Delete entity [Del]")));
+	auto makeEntry = [&] (const String& id, const String& text, const String& toolTip, const String& icon)
+	{
+		auto iconSprite = Sprite().setImage(factory.getResources(), "entity_icons/" + (icon.isEmpty() ? "empty.png" : icon));
+		menuOptions.push_back(UIPopupMenuItem(id, LocalisedString::fromHardcodedString(text), std::move(iconSprite), LocalisedString::fromHardcodedString(toolTip)));
+	};
+	
+	makeEntry("add_entity_sibling", "Add Entity", "Adds an empty entity as a sibling of this one.", "");
+	makeEntry("add_entity_child", "Add Entity (Child)", "Adds an empty entity as a child of this one.", "");
+	makeEntry("add_prefab_sibling", "Add Prefab", "Adds a prefab as a sibling of this entity.", "");
+	makeEntry("add_prefab_child", "Add Prefab (Child)", "Adds a prefab as a child of this entity.", "");
+	menuOptions.emplace_back();
+	makeEntry("copy", "Copy", "Copy entity to clipboard [Ctrl+C]", "copy.png");
+	makeEntry("cut", "Cut", "Cut entity to clipboard [Ctrl+X]", "cut.png");
+	makeEntry("paste_sibling", "Paste", "Paste entity as a sibling of the current one. [Ctrl+V]", "paste.png");
+	makeEntry("paste_child", "Paste (Child)", "Paste entity as a child of the current one.", "");
+	menuOptions.emplace_back();
+	makeEntry("duplicate", "Duplicate", "Duplicate entity [Ctrl+D]", "");
+	makeEntry("delete", "Delete", "Delete entity [Del]", "delete.png");
 	
 	auto menu = std::make_shared<UIPopupMenu>("entity_list_context_menu", factory.getStyle("popupMenu"), menuOptions);
 	menu->setAnchor(UIAnchor(Vector2f(), Vector2f(), getRoot()->getLastMousePos()));

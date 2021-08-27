@@ -12,6 +12,7 @@ namespace Halley {
 		LocalisedString text;
 		LocalisedString tooltip;
 		Sprite icon;
+		bool isSeparator = false;
 
 		UIPopupMenuItem(String id, LocalisedString text, LocalisedString tooltip)
 			: id(std::move(id))
@@ -34,6 +35,10 @@ namespace Halley {
 			, tooltip(LocalisedString::fromHardcodedString(std::move(tooltip)))
 		{
 		}
+
+		UIPopupMenuItem()
+			: isSeparator(true)
+		{}
 	};
 
 	class UIPopupMenu : public UIWidget {
