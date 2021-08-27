@@ -79,6 +79,7 @@ colours:
   ui_staticListBackgroundAlternate: "#30463ddd"
   ui_staticListBackgroundInvalid: "#644853dd"
 
+  ui_popupWindowSolid: "#FFFFFF"
 
 sprites:
   ui_button: { img: halley_ui/ui_button.png }
@@ -105,4 +106,4 @@ sprites:
   ui_task: { img: halley_ui/ui_input.png, material: Halley/SpriteInverseTint }
   ui_task_fill: { img: halley_ui/ui_list_item.png, material: Halley/SpriteInverseTint }
   ui_scroll_background: { img: halley_ui/checkered.png, material: Halley/SpriteInverseTint }
-  ui_popup: { img: halley_ui/ui_popup.png, material: Halley/Sprite }
+  ui_popup: { img: halley_ui/ui_popup.png, material: Halley/SpriteInverseTint }
