@@ -46,6 +46,9 @@ namespace Halley {
 		void modifyEntity(const String& id, const EntityDataDelta& delta);
 		void moveEntity(const String& id, const String& newParent, int childIndex);
 
+		void extractPrefab(const String& id);
+		void collapsePrefab(const String& id);
+
 		void setTool(String tool);
 		void setTool(String tool, String componentName, String fieldName);
 
@@ -95,6 +98,7 @@ namespace Halley {
 		void onEntityContextMenuAction(const String& actionId, const String& entityId);
 		bool canPasteEntity() const;
 		bool canAddSibling(const String& entityId) const;
+		bool isPrefabInstance(const String& entityId) const;
 
 	protected:
 		void update(Time t, bool moved) override;

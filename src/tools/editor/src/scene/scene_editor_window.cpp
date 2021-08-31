@@ -335,6 +335,10 @@ void SceneEditorWindow::onEntityContextMenuAction(const String& actionId, const 
 		addNewPrefab(entityId, true);
 	} else if (actionId == "add_prefab_sibling") {
 		addNewPrefab(entityId, false);
+	} else if (actionId == "extract_prefab") {
+		extractPrefab(entityId);
+	} else if (actionId == "collapse_prefab") {
+		collapsePrefab(entityId);
 	}
 }
 
@@ -355,6 +359,12 @@ bool SceneEditorWindow::canAddSibling(const String& entityId) const
 {
 	const auto& ref = sceneData->getEntityNodeData(entityId);
 	return prefab->isScene() || !ref.getParentId().isEmpty();
+}
+
+bool SceneEditorWindow::isPrefabInstance(const String& entityId) const
+{
+	const auto& ref = sceneData->getEntityNodeData(entityId);
+	return !ref.getData().getPrefab().isEmpty();
 }
 
 void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
@@ -386,6 +396,23 @@ void SceneEditorWindow::moveEntity(const String& id, const String& newParent, in
 	auto [prevParent, prevIndex] = sceneData->reparentEntity(id, newParent, childIndex);
 	entityList->refreshList();
 	onEntityMoved(id, prevParent, static_cast<int>(prevIndex), newParent, childIndex);
+}
+
+void SceneEditorWindow::extractPrefab(const String& id)
+{
+	auto data = sceneData->getEntityNodeData(id);
+	
+	auto parameters = FileChooserParameters();
+	parameters.fileName = data.getData().getName();
+	parameters.defaultPath = project.getAssetsSrcPath() / "prefab";
+	parameters.fileTypes.emplace_back(FileChooserParameters::FileType{ "Halley Prefab", {"prefab"}, true });
+	parameters.save = true;
+	OS::get().openFileChooser(parameters);
+}
+
+void SceneEditorWindow::collapsePrefab(const String& id)
+{
+	// TODO
 }
 
 void SceneEditorWindow::onEntitySelected(const String& id)
