@@ -132,9 +132,11 @@ bool ImportAssetsTask::doImportAsset(ImportAssetsDatabaseEntry& asset)
 	}
 
 	// Add to list of output assets
-	for (auto& o: result.out) {
+	{
 		std::unique_lock<std::mutex> lock(mutex);
-		outputAssets.insert(toString(o.type) + ":" + o.name);
+		for (auto& o: result.out) {
+			outputAssets.insert(toString(o.type) + ":" + o.name);
+		}
 	}
 
 	// Store output in db

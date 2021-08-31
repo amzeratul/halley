@@ -887,6 +887,9 @@ void SceneEditorWindow::refreshAssets()
 	if (gameBridge) {
 		gameBridge->refreshAssets();
 	}
+
+	// Attempt to reload missing prefabs
+	
 }
 
 void SceneEditorWindow::addComponentToCurrentEntity(const String& componentName)
