@@ -45,7 +45,8 @@ namespace Halley {
 			std::vector<String> extensions; // Should not contain a "."
 			bool makeDefault = false;
 		};
-		
+
+		String fileName;
 		Path defaultPath;
 		bool save = false;
 		bool folderOnly = false;

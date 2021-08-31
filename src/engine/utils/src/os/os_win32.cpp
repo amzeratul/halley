@@ -738,6 +738,16 @@ Future<std::optional<Path>> OSWin32::openFileChooser(FileChooserParameters param
 
 			fileDialog->SetFileTypes(static_cast<UINT>(parameters.fileTypes.size()), spec.data());
 		}
+
+		IShellItem* defaultFolder = nullptr;
+		hr = SHCreateItemFromParsingName(parameters.defaultPath.getNativeString().getUTF16().c_str(), nullptr, IID_IShellItem, reinterpret_cast<void**>(&defaultFolder));
+		if (SUCCEEDED(hr)) {
+			fileDialog->SetFolder(defaultFolder);
+		}
+
+		if (!parameters.fileName.isEmpty()) {
+			fileDialog->SetFileName(parameters.fileName.getUTF16().c_str());
+		}
 		
 		fileDialog->Show(window);
 
@@ -757,6 +767,9 @@ Future<std::optional<Path>> OSWin32::openFileChooser(FileChooserParameters param
 		}
 		
 		fileDialog->Release();
+		if (defaultFolder) {
+			defaultFolder->Release();
+		}
 
 		CoUninitialize();
 	});

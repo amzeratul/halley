@@ -147,9 +147,7 @@ void OS::openURL(const String& url)
 
 Future<std::optional<Path>> OS::openFileChooser(FileChooserParameters)
 {
-	Promise<std::optional<Path>> promise;
-	promise.setValue({});
-	return promise.getFuture();
+	return Future<std::optional<Path>>::makeImmediate({});
 }
 
 OS* OS::osInstance = nullptr;
