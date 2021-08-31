@@ -401,13 +401,49 @@ void SceneEditorWindow::moveEntity(const String& id, const String& newParent, in
 void SceneEditorWindow::extractPrefab(const String& id)
 {
 	auto data = sceneData->getEntityNodeData(id);
+	const auto basePath = project.getAssetsSrcPath() / "prefab";
 	
 	auto parameters = FileChooserParameters();
-	parameters.fileName = data.getData().getName();
-	parameters.defaultPath = project.getAssetsSrcPath() / "prefab";
+	parameters.fileName = data.getData().getName().replaceAll(" ", "_").asciiLower();
+	parameters.defaultPath = basePath;
 	parameters.fileTypes.emplace_back(FileChooserParameters::FileType{ "Halley Prefab", {"prefab"}, true });
 	parameters.save = true;
-	OS::get().openFileChooser(parameters);
+	OS::get().openFileChooser(parameters).then([this, id, basePath] (std::optional<Path> path)
+	{
+		if (path) {
+			extractPrefab(id, path.value().makeRelativeTo(basePath).toString());
+		}
+	});
+}
+
+void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName)
+{
+	auto& entityData = sceneData->getWriteableEntityNodeData(id).getData();
+	const auto uuid = entityData.getInstanceUUID();
+
+	// Generate instance components and clear prefab
+	auto components = std::vector<std::pair<String, ConfigNode>>();
+	for (auto& c: entityData.getComponents()) {
+		if (c.first == "Transform2D" || c.first == "Transform3D") {
+			components.emplace_back(c);
+			c.second = ConfigNode::MapType();
+		}
+	}
+
+	// Write prefab
+	const auto serializedData = serializeEntity(entityData);
+	Path::writeFile(project.getAssetsSrcPath() / "prefab" / prefabName, serializedData);
+
+	// Replace entity with instance
+	EntityData instanceData;
+	instanceData.setInstanceUUID(uuid);
+	instanceData.setPrefab(prefabName);
+	instanceData.setComponents(components);
+
+	// Update entity
+	auto prevData = std::move(entityData);
+	entityData = std::move(instanceData);
+	onEntityModified(id, prevData, entityData);
 }
 
 void SceneEditorWindow::collapsePrefab(const String& id)
@@ -651,6 +687,14 @@ void SceneEditorWindow::addNewPrefab(std::optional<String> reference, bool child
 
 void SceneEditorWindow::addNewPrefab(const String& referenceEntityId, bool childOfReference, const String& prefabName)
 {
+	auto data = makeInstance(prefabName);
+	if (data) {
+		addEntity(referenceEntityId, childOfReference, std::move(data.value()));
+	}
+}
+
+std::optional<EntityData> SceneEditorWindow::makeInstance(const String& prefabName) const
+{
 	const auto prefab = getGamePrefab(prefabName);
 	if (prefab) {
 		const auto& entityData = prefab->getEntityData();
@@ -667,8 +711,10 @@ void SceneEditorWindow::addNewPrefab(const String& referenceEntityId, bool child
 		data.setInstanceUUID(UUID::generate());
 		data.setPrefab(prefabName);
 		data.setComponents(components);
-		addEntity(referenceEntityId, childOfReference, std::move(data));
+		return data;
 	}
+
+	return {};
 }
 
 void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfReference, EntityData data)

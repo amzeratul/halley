@@ -37,6 +37,7 @@ namespace Halley {
 
 		void addNewEntity(std::optional<String> reference = {}, bool childOfReference = false);
 		void addNewPrefab(std::optional<String> reference = {}, bool childOfReference = false);
+		std::optional<EntityData> makeInstance(const String& prefab) const;
 		void addNewPrefab(const String& referenceEntityId, bool childOfReference, const String& prefabName);
 		void addEntity(const String& referenceEntityId, bool childOfReference, EntityData data);
 		void addEntity(const String& parentId, int childIndex, EntityData data);
@@ -47,6 +48,7 @@ namespace Halley {
 		void moveEntity(const String& id, const String& newParent, int childIndex);
 
 		void extractPrefab(const String& id);
+		void extractPrefab(const String& id, const String& prefabName);
 		void collapsePrefab(const String& id);
 
 		void setTool(String tool);
