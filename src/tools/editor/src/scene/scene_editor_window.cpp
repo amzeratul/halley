@@ -32,10 +32,17 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 	{
 		dll.addReloadListener(*this);
 	});
+
+	assetReloadCallbackIdx = project.addAssetReloadCallback([=] (const std::vector<String>& assets)
+	{
+		// TODO
+	});
 }
 
 SceneEditorWindow::~SceneEditorWindow()
 {
+	project.removeAssetReloadCallback(assetReloadCallbackIdx);
+	
 	unloadScene();
 
 	project.withDLL([&] (ProjectDLL& dll)

@@ -17,6 +17,7 @@
 #include "halley/tools/project/project_loader.h"
 #include "halley/core/game/game.h"
 #include "halley/file_formats/yaml_convert.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -190,14 +191,26 @@ void Project::setDevConServer(DevConServer* server)
 	});
 }
 
-void Project::addAssetReloadCallback(AssetReloadCallback callback)
+size_t Project::addAssetReloadCallback(AssetReloadCallback callback)
 {
-	assetReloadCallbacks.push_back(std::move(callback));
+	assetReloadCallbacks.emplace_back(++callbackIdx, std::move(callback));
+	return callbackIdx;
 }
 
-void Project::addAssetPackReloadCallback(AssetReloadCallback callback)
+size_t Project::addAssetPackReloadCallback(AssetReloadCallback callback)
 {
-	assetPackedReloadCallbacks.push_back(std::move(callback));
+	assetPackedReloadCallbacks.emplace_back(++callbackIdx, std::move(callback));
+	return callbackIdx;
+}
+
+void Project::removeAssetReloadCallback(size_t idx)
+{
+	std_ex::erase_if(assetReloadCallbacks, [=] (const auto& e) { return e.first == idx; });
+}
+
+void Project::removeAssetPackReloadCallback(size_t idx)
+{
+	std_ex::erase_if(assetPackedReloadCallbacks, [=] (const auto& e) { return e.first == idx; });
 }
 
 void Project::addAssetLoadedListener(IAssetLoadListener* listener)
@@ -293,7 +306,7 @@ void Project::reloadAssets(const std::set<String>& assets, bool packed)
 
 	// Notify callbacks
 	for (auto& callback: (packed ? assetPackedReloadCallbacks : assetReloadCallbacks)) {
-		callback(assetIds);
+		callback.second(assetIds);
 	}
 }
 

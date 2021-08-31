@@ -74,8 +74,10 @@ namespace Halley
 		std::vector<std::unique_ptr<IAssetImporter>> getAssetImportersFromPlugins(ImportAssetType type) const;
 
 		void setDevConServer(DevConServer* server);
-		void addAssetReloadCallback(AssetReloadCallback callback);
-		void addAssetPackReloadCallback(AssetReloadCallback callback);
+		size_t addAssetReloadCallback(AssetReloadCallback callback);
+		void removeAssetReloadCallback(size_t idx);
+		size_t addAssetPackReloadCallback(AssetReloadCallback callback);
+		void removeAssetPackReloadCallback(size_t idx);
 		void addAssetLoadedListener(IAssetLoadListener* listener);
 		void removeAssetLoadedListener(IAssetLoadListener* listener);
 		
@@ -133,9 +135,10 @@ namespace Halley
 		Path rootPath;
 		Path halleyRootPath;
 		Path assetPackManifest;
+		size_t callbackIdx = 0;
 
-		std::vector<AssetReloadCallback> assetReloadCallbacks;
-		std::vector<AssetReloadCallback> assetPackedReloadCallbacks;
+		std::vector<std::pair<size_t, AssetReloadCallback>> assetReloadCallbacks;
+		std::vector<std::pair<size_t, AssetReloadCallback>> assetPackedReloadCallbacks;
 		std::vector<IAssetLoadListener*> assetLoadedListeners;
 		CheckAssetsTask* checkAssetsTask = nullptr;
 

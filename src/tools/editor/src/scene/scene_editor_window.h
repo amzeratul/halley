@@ -142,6 +142,7 @@ namespace Halley {
 		UndoStack undoStack;
 		bool modified = false;
 		bool buttonsNeedUpdate = false;
+		size_t assetReloadCallbackIdx = 0;
 
 		void makeUI();
 		void onEntitySelected(const String& id);
