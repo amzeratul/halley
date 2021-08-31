@@ -414,6 +414,12 @@ void Project::clearCachedAssetPreviews()
 	previewCache.clear();
 }
 
+void Project::addNewAsset(const Path& path, gsl::span<const gsl::byte> data)
+{
+	
+	Path::writeFile(getAssetsSrcPath() / path, data);
+}
+
 void Project::loadECSData()
 {
 	if (!ecsData) {

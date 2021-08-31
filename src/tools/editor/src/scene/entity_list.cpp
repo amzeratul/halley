@@ -201,8 +201,10 @@ void EntityList::openContextMenu(const String& entityId)
 	menu->setAnchor(UIAnchor(Vector2f(), Vector2f(), getRoot()->getLastMousePos()));
 	getRoot()->addChild(menu);
 
-	menu->setHandle(UIEventType::PopupAccept, [this, entityId] (const UIEvent& e) {
-		onContextMenuAction(e.getStringData(), entityId);
+	menu->setHandle(UIEventType::PopupAccept, [this, entityId] (const UIEvent& e) {\
+		Concurrent::execute(Executors::getMainThread(), [=] () {
+			onContextMenuAction(e.getStringData(), entityId);
+		});
 	});
 }
 

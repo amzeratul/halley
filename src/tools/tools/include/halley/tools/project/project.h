@@ -126,6 +126,8 @@ namespace Halley
 		void setCachedAssetPreview(AssetType type, const String& id, AssetPreviewData data);
 		void clearCachedAssetPreviews();
 
+		void addNewAsset(const Path& path, gsl::span<const gsl::byte> data);
+
 	private:
 		std::vector<String> platforms;
 		Path rootPath;

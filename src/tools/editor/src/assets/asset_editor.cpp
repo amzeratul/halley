@@ -44,7 +44,8 @@ void AssetEditor::reload()
 
 void AssetEditor::refreshAssets()
 {
-	needsLoading = true;
+	// If this is set to true, it causes scenes to re-load when anything is modified
+	//needsLoading = true;
 	tryLoading();
 }
 

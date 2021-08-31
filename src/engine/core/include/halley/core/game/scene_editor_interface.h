@@ -209,26 +209,31 @@ namespace Halley {
         class EntityNodeData {
         	friend class ConstEntityNodeData;
         public:
-            EntityNodeData(EntityData& data, String parentId) : data(data), parentId(std::move(parentId)) {}
+            EntityNodeData(EntityData& data, String parentId, int childIndex) : data(data), parentId(std::move(parentId)), childIndex(childIndex) {}
 
         	EntityData& getData() const { return data; }
         	const String& getParentId() const { return parentId; }
+        	int getChildIndex() const { return childIndex; }
 
         private:
 	        EntityData& data;
         	String parentId;
+			int childIndex;
         };
 
 		class ConstEntityNodeData {
         public:
-            ConstEntityNodeData(EntityData& data, String parentId) : data(data), parentId(std::move(parentId)) {}
-			ConstEntityNodeData(EntityNodeData&& other) noexcept : data(other.data), parentId(std::move(other.parentId)) {}
+            ConstEntityNodeData(EntityData& data, String parentId, int childIndex) : data(data), parentId(std::move(parentId)), childIndex(childIndex) {}
+			ConstEntityNodeData(EntityNodeData&& other) noexcept : data(other.data), parentId(std::move(other.parentId)), childIndex(other.childIndex) {}
+			
         	const EntityData& getData() const { return data; }
         	const String& getParentId() const { return parentId; }
+			int getChildIndex() const { return childIndex; }
 
         private:
 	        EntityData& data;
         	String parentId;
+			int childIndex;
         };
 		
 		virtual ~ISceneData() = default;

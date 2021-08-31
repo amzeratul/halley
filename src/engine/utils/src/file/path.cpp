@@ -259,6 +259,11 @@ std::string Path::string() const
 	return getString().cppStr();
 }
 
+void Path::writeFile(const Path& path, gsl::span<const gsl::byte> data)
+{
+	OS::get().atomicWriteFile(path, data);
+}
+
 void Path::writeFile(const Path& path, const Bytes& data)
 {
 	OS::get().atomicWriteFile(path, gsl::as_bytes(gsl::span<const Byte>(data)));

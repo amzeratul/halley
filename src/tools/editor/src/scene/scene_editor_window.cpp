@@ -386,8 +386,9 @@ void SceneEditorWindow::selectEntity(const String& id)
 void SceneEditorWindow::modifyEntity(const String& id, const EntityDataDelta& delta)
 {
 	auto& data = sceneData->getWriteableEntityNodeData(id).getData();
+	auto oldData = EntityData(data);
 	data.applyDelta(delta);
-	onEntityModified(id, data, data);
+	onEntityModified(id, oldData, data);
 	entityEditor->reloadEntity();
 }
 
@@ -418,7 +419,10 @@ void SceneEditorWindow::extractPrefab(const String& id)
 
 void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName)
 {
-	auto& entityData = sceneData->getWriteableEntityNodeData(id).getData();
+	const auto entityNodeData = sceneData->getEntityNodeData(id);
+	const auto& parentId = entityNodeData.getParentId();
+	const auto childIdx = entityNodeData.getChildIndex();
+	auto entityData = entityNodeData.getData();
 	const auto uuid = entityData.getInstanceUUID();
 
 	// Generate instance components and clear prefab
@@ -432,18 +436,17 @@ void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName
 
 	// Write prefab
 	const auto serializedData = serializeEntity(entityData);
-	Path::writeFile(project.getAssetsSrcPath() / "prefab" / prefabName, serializedData);
+	project.addNewAsset(Path("prefab") / prefabName, gsl::as_bytes(gsl::span<const char>(serializedData.c_str(), serializedData.length())));
 
-	// Replace entity with instance
+	// Delete old entity
+	removeEntity(id);
+
+	// Insert new entity
 	EntityData instanceData;
 	instanceData.setInstanceUUID(uuid);
 	instanceData.setPrefab(prefabName);
 	instanceData.setComponents(components);
-
-	// Update entity
-	auto prevData = std::move(entityData);
-	entityData = std::move(instanceData);
-	onEntityModified(id, prevData, entityData);
+	addEntity(parentId, childIdx, std::move(instanceData));
 }
 
 void SceneEditorWindow::collapsePrefab(const String& id)
