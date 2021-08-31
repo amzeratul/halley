@@ -127,11 +127,18 @@ std::shared_ptr<UILabel> UIList::makeLabel(String id, LocalisedString label, flo
 		widget->setSelectable(style.getTextRenderer("label"), style.getTextRenderer("selectedLabel"));
 	}
 
-	if (style.hasTextRenderer("disabledStyle")) {
-		widget->setDisablable(style.getTextRenderer("label"), style.getTextRenderer("disabledStyle"));
+	if (style.hasTextRenderer("disabledLabel")) {
+		widget->setDisablable(style.getTextRenderer("label"), style.getTextRenderer("disabledLabel"));
 	}
 
 	return widget;
+}
+
+std::shared_ptr<UIImage> UIList::makeIcon(Sprite image) const
+{
+	auto icon = std::make_shared<UIImage>(image);
+	applyImageColour(*icon);	
+	return icon;
 }
 
 std::shared_ptr<UIListItem> UIList::addTextItem(const String& id, LocalisedString label, float maxWidth, bool centre, std::optional<LocalisedString> tooltip)
@@ -163,7 +170,7 @@ std::shared_ptr<UIListItem> UIList::addTextIconItem(const String& id, LocalisedS
 	const bool hasLabel = !label.getString().isEmpty();
 	
 	if (hasIcon) {
-		item->add(std::make_shared<UIImage>(icon), 0, hasLabel ? Vector4f(0, 0, 4, 0) : border, hasLabel ? UISizerAlignFlags::Centre : fillFlags);
+		item->add(makeIcon(icon), 0, hasLabel ? Vector4f(0, 0, 4, 0) : border, hasLabel ? UISizerAlignFlags::Centre : fillFlags);
 	}
 	if (hasLabel) {
 		item->add(makeLabel(id + "_label", std::move(label), maxWidth), 0, border, fillFlags);
@@ -174,22 +181,29 @@ std::shared_ptr<UIListItem> UIList::addTextIconItem(const String& id, LocalisedS
 
 std::shared_ptr<UIListItem> UIList::addImage(const String& id, std::shared_ptr<UIImage> image, float proportion, Vector4f border, int fillFlags, std::optional<UIStyle> styleOverride)
 {
+	applyImageColour(*image);
+	return addItem(id, image, proportion, border, fillFlags, std::move(styleOverride));
+}
+
+void UIList::applyImageColour(UIImage& image) const
+{
 	const auto& style = styles.at(0);
 	Colour4f baseCol;
 	if (style.hasColour("imageColour")) {
 		baseCol = style.getColour("imageColour");
-		image->getSprite().setColour(baseCol);
+		image.getSprite().setColour(baseCol);
 	} else {
-		baseCol = image->getSprite().getColour();
+		baseCol = image.getSprite().getColour();
 	}
 	if (style.hasColour("selectedImageColour")) {
-		image->setSelectable(baseCol, style.getColour("selectedImageColour"));
+		image.setSelectable(baseCol, style.getColour("selectedImageColour"));
 	}
 	if (style.hasColour("hoveredImageColour")) {
-		image->setHoverable(baseCol, style.getColour("hoveredImageColour"));
+		image.setHoverable(baseCol, style.getColour("hoveredImageColour"));
 	}
-
-	return addItem(id, image, proportion, border, fillFlags, std::move(styleOverride));
+	if (style.hasColour("disabledImageColour")) {
+		image.setDisablable(baseCol, style.getColour("disabledImageColour"));
+	}
 }
 
 std::shared_ptr<UIListItem> UIList::addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, std::optional<UIStyle> styleOverride)
@@ -726,6 +740,9 @@ void UIListItem::setStyle(UIStyle style)
 
 void UIListItem::onEnabledChanged()
 {
+	if (!isEnabled() && selected) {
+		setSelected(false);
+	}
 	addNewChildren(getLastInputType());
 	doSetState(getCurState());
 	sendEventDown(UIEvent(UIEventType::SetEnabled, getId(), isEnabled()));

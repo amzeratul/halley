@@ -338,6 +338,25 @@ void SceneEditorWindow::onEntityContextMenuAction(const String& actionId, const 
 	}
 }
 
+bool SceneEditorWindow::canPasteEntity() const
+{
+	const auto clipboard = api.system->getClipboard();
+	if (clipboard) {
+		const auto clipboardData = clipboard->getStringData();
+		if (clipboardData) {
+			const auto data = deserializeEntity(clipboardData.value());
+			return !!data;
+		}
+	}
+	return false;
+}
+
+bool SceneEditorWindow::canAddSibling(const String& entityId) const
+{
+	const auto& ref = sceneData->getEntityNodeData(entityId);
+	return prefab->isScene() || !ref.getParentId().isEmpty();
+}
+
 void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 {
 	if (status == ProjectDLL::Status::Loaded) {

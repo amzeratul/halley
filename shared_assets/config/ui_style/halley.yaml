@@ -296,6 +296,7 @@ uiStyle:
     label: { font: Ubuntu Regular, size: 13, colour: $ui_unselectedText }
     selectedLabel: { font: Ubuntu Regular, size: 13, colour: $ui_selectedText }
     disabledLabel: { font: Ubuntu Regular, size: 13, colour: $ui_disabledText }
+    disabledImageColour: $ui_disabledText
     gap: 1
     separator: { img: $ui_separator, colour: $ui_disabledText }
 ...

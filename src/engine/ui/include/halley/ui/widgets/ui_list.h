@@ -75,6 +75,7 @@ namespace Halley {
 		void setRequiresSelection(bool requireSelection);
 
 		std::shared_ptr<UILabel> makeLabel(String id, LocalisedString label, float maxWidth = 0) const;
+		std::shared_ptr<UIImage> makeIcon(Sprite image) const;
 
 	protected:
 		void draw(UIPainter& painter) const override;
@@ -122,6 +123,8 @@ namespace Halley {
 		void setItemUnderCursor(int itemIdx, bool isMouseOver);
 
 		void resetSelectionIfInvalid();
+		
+		void applyImageColour(UIImage& image) const;
 	};
 
 	class UIListItem : public UIClickable {

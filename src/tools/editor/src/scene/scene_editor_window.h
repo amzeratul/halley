@@ -93,6 +93,8 @@ namespace Halley {
 		Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size);
 
 		void onEntityContextMenuAction(const String& actionId, const String& entityId);
+		bool canPasteEntity() const;
+		bool canAddSibling(const String& entityId) const;
 
 	protected:
 		void update(Time t, bool moved) override;

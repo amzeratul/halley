@@ -47,7 +47,7 @@ void UIPopupMenu::makeUI()
 		if (item.isSeparator) {
 			itemList->add(std::make_shared<UIImage>(style.getSprite("separator")));
 		} else {
-			itemList->addTextIconItem(item.id, item.text, item.icon, -1, {}, UISizerFillFlags::Fill, item.tooltip)->setEnabled(item.enabled);
+			itemList->addTextIconItem(item.id, item.text, item.icon, -1, {}, UISizerAlignFlags::CentreVertical, item.tooltip)->setEnabled(item.enabled);
 		}
 	}
 

@@ -172,16 +172,19 @@ void EntityList::openContextMenu(const String& entityId)
 		menuOptions.push_back(UIPopupMenuItem(id, LocalisedString::fromHardcodedString(text), std::move(iconSprite), LocalisedString::fromHardcodedString(toolTip)));
 		menuOptions.back().enabled = enabled;
 	};
+
+	const bool canPaste = sceneEditorWindow->canPasteEntity();
+	const bool canAddAsSibling = sceneEditorWindow->canAddSibling(entityId);
 	
-	makeEntry("add_entity_sibling", "Add Entity", "Adds an empty entity as a sibling of this one.", "");
+	makeEntry("add_entity_sibling", "Add Entity", "Adds an empty entity as a sibling of this one.", "", canAddAsSibling);
 	makeEntry("add_entity_child", "Add Entity (Child)", "Adds an empty entity as a child of this one.", "");
-	makeEntry("add_prefab_sibling", "Add Prefab", "Adds a prefab as a sibling of this entity.", "");
+	makeEntry("add_prefab_sibling", "Add Prefab", "Adds a prefab as a sibling of this entity.", "", canAddAsSibling);
 	makeEntry("add_prefab_child", "Add Prefab (Child)", "Adds a prefab as a child of this entity.", "");
 	menuOptions.emplace_back();
 	makeEntry("copy", "Copy", "Copy entity to clipboard [Ctrl+C]", "copy.png");
 	makeEntry("cut", "Cut", "Cut entity to clipboard [Ctrl+X]", "cut.png");
-	makeEntry("paste_sibling", "Paste", "Paste entity as a sibling of the current one. [Ctrl+V]", "paste.png");
-	makeEntry("paste_child", "Paste (Child)", "Paste entity as a child of the current one.", "");
+	makeEntry("paste_sibling", "Paste", "Paste entity as a sibling of the current one. [Ctrl+V]", "paste.png", canPaste && canAddAsSibling);
+	makeEntry("paste_child", "Paste (Child)", "Paste entity as a child of the current one.", "", canPaste);
 	menuOptions.emplace_back();
 	makeEntry("duplicate", "Duplicate", "Duplicate entity [Ctrl+D]", "");
 	makeEntry("delete", "Delete", "Delete entity [Del]", "delete.png");
