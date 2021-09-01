@@ -45,6 +45,10 @@ SceneEditorWindow::~SceneEditorWindow()
 	
 	unloadScene();
 
+	entityEditor->unloadIcons();
+	entityEditor.reset();
+	entityIcons.reset();
+	
 	project.withDLL([&] (ProjectDLL& dll)
 	{
 		dll.removeReloadListener(*this);
