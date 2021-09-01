@@ -559,8 +559,6 @@ void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId, 
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	onEntitySelected(id);
 
-	gameBridge->onEntityAdded(UUID(id), data);
-
 	undoStack.pushAdded(modified, id, parentId, childIndex, data);
 	
 	markModified();
@@ -572,8 +570,6 @@ void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId
 
 	undoStack.pushRemoved(modified, id, parentId, childIndex, prevData);
 	
-	gameBridge->onEntityRemoved(UUID(id));
-
 	entityList->onEntityRemoved(id, newSelectionId);
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	onEntitySelected(newSelectionId);
@@ -591,7 +587,6 @@ void SceneEditorWindow::onEntityModified(const String& id, const EntityData& pre
 		if (hadChange) {
 			entityList->onEntityModified(id, data);
 			sceneData->reloadEntity(id);
-			gameBridge->onEntityModified(UUID(id), prevData, newData);
 			markModified();
 		}
 	}
@@ -602,8 +597,6 @@ void SceneEditorWindow::onEntityMoved(const String& id, const String& prevParent
 	if (currentEntityId == id) {
 		onEntitySelected(id);
 	}
-
-	gameBridge->onEntityMoved(UUID(id), sceneData->getEntityNodeData(id).getData());
 
 	undoStack.pushMoved(modified, id, prevParentId, prevChildIndex, newParentId, newChildIndex);
 	

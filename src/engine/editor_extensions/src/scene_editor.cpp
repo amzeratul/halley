@@ -423,46 +423,6 @@ void SceneEditor::setSelectedEntity(const UUID& id, EntityData& entityData)
 	updateEntityFocused();
 }
 
-void SceneEditor::onEntityAdded(const UUID& id, const EntityData& entityData)
-{
-	if (id.isValid()) {
-		onEntityAdded(getEntity(id), entityData);
-	}
-}
-
-void SceneEditor::onEntityRemoved(const UUID& id)
-{
-	if (id.isValid()) {
-		onEntityRemoved(getEntity(id));
-	}
-}
-
-void SceneEditor::onEntityMoved(const UUID& id, const EntityData& entityData)
-{
-	if (id.isValid()) {
-		onEntityMoved(getEntity(id), entityData);
-	}
-}
-
-void SceneEditor::onEntityModified(const UUID& id, const EntityData& entityData)
-{
-	if (id.isValid()) {
-		onEntityModified(getEntity(id), entityData);
-	}
-}
-
-void SceneEditor::onEntityModified(EntityRef entity, const EntityData& entityData)
-{}
-
-void SceneEditor::onEntityAdded(EntityRef entity, const EntityData& entityData)
-{}
-
-void SceneEditor::onEntityRemoved(EntityRef entity)
-{}
-
-void SceneEditor::onEntityMoved(EntityRef entity, const EntityData& entityData)
-{}
-
 void SceneEditor::showEntity(const UUID& id)
 {
 	auto e = getWorld().findEntity(id);
