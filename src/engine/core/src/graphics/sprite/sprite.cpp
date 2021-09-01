@@ -481,7 +481,7 @@ Vector4s Sprite::getSlices() const
 bool Sprite::isPointVisible(Vector2f point) const
 {
 	// Is the sprite visible?
-	if (!visible || getColour().a == 0) {
+	if (!visible || getColour().a < 0.0001f) {
 		return false;
 	}
 
