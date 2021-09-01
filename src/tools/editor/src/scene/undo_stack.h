@@ -11,6 +11,7 @@ namespace Halley {
 		void pushRemoved(bool wasModified, const String& entityId, const String& parent, int childIndex, const EntityData& data);
 		void pushMoved(bool wasModified, const String& entityId, const String& prevParent, int prevIndex, const String& newParent, int newIndex);
 		bool pushModified(bool wasModified, const String& entityId, const EntityData& before, const EntityData& after);
+		bool pushReplaced(bool wasModified, const String& entityId, const EntityData& before, const EntityData& after);
 
 		void undo(SceneEditorWindow& sceneEditorWindow);
 		void redo(SceneEditorWindow& sceneEditorWindow);
@@ -25,7 +26,8 @@ namespace Halley {
 			EntityAdded,
 			EntityRemoved,
 			EntityMoved,
-			EntityModified
+			EntityModified,
+			EntityReplaced
 		};
 
 		class Action {

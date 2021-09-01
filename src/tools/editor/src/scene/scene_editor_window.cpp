@@ -451,15 +451,12 @@ void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName
 		const auto entityNodeData = sceneData->getEntityNodeData(id);
 		const auto uuid = entityNodeData.getData().getInstanceUUID();
 
-		// Delete old entity
-		removeEntity(id);
-
-		// Insert new entity
+		// Replace entity
 		EntityData instanceData;
 		instanceData.setInstanceUUID(uuid);
 		instanceData.setPrefab(prefabName);
 		instanceData.setComponents(components);
-		addEntity(entityNodeData.getParentId(), entityNodeData.getChildIndex(), std::move(instanceData));
+		replaceEntity(id, std::move(instanceData));
 
 		return true;
 	});
@@ -481,14 +478,9 @@ void SceneEditorWindow::collapsePrefab(const String& id)
 	}
 	const auto prefab = project.getGameResources().get<Prefab>(prefabName);
 
-	// Generate data
+	// Update entity
 	EntityData instanceData = prefab->getEntityData().instantiateWithAsCopy(entityNodeData.getData());
-	
-	// Delete old entity
-	removeEntity(id);
-
-	// Insert new entity
-	addEntity(entityNodeData.getParentId(), entityNodeData.getChildIndex(), std::move(instanceData));
+	replaceEntity(id, std::move(instanceData));
 }
 
 void SceneEditorWindow::onEntitySelected(const String& id)
@@ -580,12 +572,27 @@ void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId
 void SceneEditorWindow::onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData)
 {
 	if (!id.isEmpty()) {
-		const auto& data = sceneData->getEntityNodeData(id).getData();
-
 		const bool hadChange = undoStack.pushModified(modified, id, prevData, newData);
 
 		if (hadChange) {
+			const auto& data = sceneData->getEntityNodeData(id).getData();
 			entityList->onEntityModified(id, data);
+			sceneData->reloadEntity(id);
+			markModified();
+		}
+	}
+}
+
+void SceneEditorWindow::onEntityReplaced(const String& id, const String& parentId, int childIndex, const EntityData& prevData, const EntityData& newData)
+{
+	if (!id.isEmpty()) {
+		const bool hadChange = undoStack.pushReplaced(modified, id, prevData, newData);
+
+		if (hadChange) {
+			const auto& data = sceneData->getEntityNodeData(id).getData();
+
+			entityList->onEntityRemoved(id, "");
+			entityList->onEntityAdded(id, parentId, childIndex, data);
 			sceneData->reloadEntity(id);
 			markModified();
 		}
@@ -824,6 +831,14 @@ void SceneEditorWindow::removeEntity(const String& targetId)
 			break;
 		}
 	}
+}
+
+void SceneEditorWindow::replaceEntity(const String& entityId, EntityData newData)
+{
+	auto node = sceneData->getWriteableEntityNodeData(entityId);
+	auto oldData = node.getData();
+	node.getData() = EntityData(newData);
+	onEntityReplaced(entityId, node.getParentId(), node.getChildIndex(), oldData, newData);
 }
 
 String SceneEditorWindow::findParent(const String& entityId) const

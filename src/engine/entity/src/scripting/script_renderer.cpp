@@ -119,11 +119,13 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t 
 					highlighted = true;
 				}
 			} else if (pinConnection.entity.isValid()) {
-				auto entity = world.getEntity(pinConnection.entity);
-				auto* transform = entity.tryGetComponent<Transform2DComponent>();
-				if (transform) {
-					dstPos = transform->getGlobalPosition();
-					dstPinType = ScriptNodePinType{ ScriptNodeElementType::TargetPin, ScriptNodePinDirection::Output };
+				auto entity = world.tryGetEntity(pinConnection.entity);
+				if (entity.isValid()) {
+					auto* transform = entity.tryGetComponent<Transform2DComponent>();
+					if (transform) {
+						dstPos = transform->getGlobalPosition();
+						dstPinType = ScriptNodePinType{ ScriptNodeElementType::TargetPin, ScriptNodePinDirection::Output };
+					}
 				}
 			}
 			
