@@ -51,7 +51,7 @@ public:
 	void onAddedToEntity(Halley::EntityRef& entity);
 	void onHierarchyChanged();
 
-	uint32_t getRevision() const { return revision; }
+	uint16_t getRevision() const { return revision; }
 	uint8_t getWorldPartition() const { return worldPartition; }
 
 	void deserialize(const Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node);
@@ -59,17 +59,17 @@ public:
 private:
 	friend class Halley::EntityRef;
 
-	mutable Halley::EntityRef entity;
 	mutable Transform2DComponent* parentTransform = nullptr;
-	mutable uint32_t revision = 0;
-	mutable uint32_t parentRevision = 0;
+	mutable uint16_t revision = 0;
 	mutable uint8_t worldPartition = 0;
 
-	mutable uint32_t cachedValues = 0;
+	mutable uint8_t cachedValues = 0;
+	mutable int cachedSubWorld = 0;
 	mutable Halley::Vector2f cachedGlobalPos;
 	mutable Halley::Vector2f cachedGlobalScale;
 	mutable Halley::Angle1f cachedGlobalRotation;
-	mutable int cachedSubWorld = 0;
+
+	mutable Halley::EntityRef entity;
 
 	enum class CachedIndices {
 		Position,
