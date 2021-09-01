@@ -34,7 +34,7 @@ void DevConServerConnection::update()
 	}
 }
 
-void DevConServerConnection::reloadAssets(const std::vector<String>& ids)
+void DevConServerConnection::reloadAssets(gsl::span<const String> ids)
 {
 	queue->enqueue(std::make_unique<DevCon::ReloadAssetsMsg>(ids), 0);
 	queue->sendAll();
@@ -66,7 +66,7 @@ void DevConServer::update()
 	}
 }
 
-void DevConServer::reloadAssets(const std::vector<String>& ids)
+void DevConServer::reloadAssets(gsl::span<const String> ids)
 {
 	for (auto& c: connections) {
 		c->reloadAssets(ids);

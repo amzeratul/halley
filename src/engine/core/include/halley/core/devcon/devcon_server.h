@@ -24,7 +24,7 @@ namespace Halley
 		
 		void update();
 		
-		void reloadAssets(const std::vector<String>& assetIds);
+		void reloadAssets(gsl::span<const String> assetIds);
 
 	private:
 		std::shared_ptr<IConnection> connection;
@@ -40,7 +40,7 @@ namespace Halley
 
 		void update();
 
-		void reloadAssets(const std::vector<String>& assetIds);
+		void reloadAssets(gsl::span<const String> assetIds);
 
 	private:
 		std::unique_ptr<NetworkService> service;

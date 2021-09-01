@@ -54,8 +54,8 @@ ReloadAssetsMsg::ReloadAssetsMsg(gsl::span<const gsl::byte> data)
 	s >> ids;
 }
 
-ReloadAssetsMsg::ReloadAssetsMsg(std::vector<String> ids)
-	: ids(ids)
+ReloadAssetsMsg::ReloadAssetsMsg(gsl::span<const String> ids)
+	: ids(ids.begin(), ids.end())
 {}
 
 void ReloadAssetsMsg::serialize(Serializer& s) const

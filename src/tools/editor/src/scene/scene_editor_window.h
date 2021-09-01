@@ -142,7 +142,9 @@ namespace Halley {
 		UndoStack undoStack;
 		bool modified = false;
 		bool buttonsNeedUpdate = false;
+		
 		size_t assetReloadCallbackIdx = 0;
+		std::vector<std::function<bool(gsl::span<const String>)>> assetReloadCallbacks;
 
 		void makeUI();
 		void onEntitySelected(const String& id);

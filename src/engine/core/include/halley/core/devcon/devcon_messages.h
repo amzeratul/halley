@@ -49,7 +49,7 @@ namespace Halley
 		{
 		public:
 			ReloadAssetsMsg(gsl::span<const gsl::byte> data);
-			ReloadAssetsMsg(std::vector<String> ids);
+			ReloadAssetsMsg(gsl::span<const String> ids);
 
 			void serialize(Serializer& s) const override;
 

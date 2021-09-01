@@ -33,9 +33,9 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 		dll.addReloadListener(*this);
 	});
 
-	assetReloadCallbackIdx = project.addAssetReloadCallback([=] (const std::vector<String>& assets)
+	assetReloadCallbackIdx = project.addAssetReloadCallback([=] (gsl::span<const String> assets)
 	{
-		// TODO
+		std_ex::erase_if(assetReloadCallbacks, [&] (auto& callback) { return callback(assets); });
 	});
 }
 
@@ -419,7 +419,9 @@ void SceneEditorWindow::extractPrefab(const String& id)
 	OS::get().openFileChooser(parameters).then([this, id, basePath] (std::optional<Path> path)
 	{
 		if (path) {
-			extractPrefab(id, path.value().makeRelativeTo(basePath).toString());
+			if (path->getExtension() == ".prefab") {
+				extractPrefab(id, path.value().makeRelativeTo(basePath).replaceExtension("").toString());
+			}
 		}
 	});
 }
@@ -427,10 +429,7 @@ void SceneEditorWindow::extractPrefab(const String& id)
 void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName)
 {
 	const auto entityNodeData = sceneData->getEntityNodeData(id);
-	const auto& parentId = entityNodeData.getParentId();
-	const auto childIdx = entityNodeData.getChildIndex();
 	auto entityData = entityNodeData.getData();
-	const auto uuid = entityData.getInstanceUUID();
 
 	// Generate instance components and clear prefab
 	auto components = std::vector<std::pair<String, ConfigNode>>();
@@ -440,20 +439,37 @@ void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName
 			c.second = ConfigNode::MapType();
 		}
 	}
+	
+	// This callback will be invoked once the assets are imported
+	assetReloadCallbacks.push_back([this, prefabName, id, components] (gsl::span<const String> assetIds) -> bool
+	{
+		if (!std_ex::contains(assetIds, "prefab:" + prefabName)) {
+			return false;
+		}
 
+		// Collect data
+		const auto entityNodeData = sceneData->getEntityNodeData(id);
+		const auto& parentId = entityNodeData.getParentId();
+		const auto childIdx = entityNodeData.getChildIndex();
+		auto entityData = entityNodeData.getData();
+		const auto uuid = entityData.getInstanceUUID();
+
+		// Delete old entity
+		removeEntity(id);
+
+		// Insert new entity
+		EntityData instanceData;
+		instanceData.setInstanceUUID(uuid);
+		instanceData.setPrefab(prefabName);
+		instanceData.setComponents(components);
+		addEntity(parentId, childIdx, std::move(instanceData));
+
+		return true;
+	});
+	
 	// Write prefab
 	const auto serializedData = serializeEntity(entityData);
-	project.addNewAsset(Path("prefab") / prefabName, gsl::as_bytes(gsl::span<const char>(serializedData.c_str(), serializedData.length())));
-
-	// Delete old entity
-	removeEntity(id);
-
-	// Insert new entity
-	EntityData instanceData;
-	instanceData.setInstanceUUID(uuid);
-	instanceData.setPrefab(prefabName);
-	instanceData.setComponents(components);
-	addEntity(parentId, childIdx, std::move(instanceData));
+	project.addNewAsset(Path("prefab") / (prefabName + ".prefab"), gsl::as_bytes(gsl::span<const char>(serializedData.c_str(), serializedData.length())));
 }
 
 void SceneEditorWindow::collapsePrefab(const String& id)

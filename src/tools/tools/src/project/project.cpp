@@ -186,7 +186,7 @@ void Project::setAssetPackManifest(const Path& path)
 
 void Project::setDevConServer(DevConServer* server)
 {
-	addAssetPackReloadCallback([=] (const std::vector<String>& assetIds) {
+	addAssetPackReloadCallback([=] (gsl::span<const String> assetIds) {
 		server->reloadAssets(assetIds);
 	});
 }
@@ -429,7 +429,6 @@ void Project::clearCachedAssetPreviews()
 
 void Project::addNewAsset(const Path& path, gsl::span<const gsl::byte> data)
 {
-	
 	Path::writeFile(getAssetsSrcPath() / path, data);
 }
 

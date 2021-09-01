@@ -63,7 +63,7 @@ namespace Halley {
 		void addFileToList(const Path& path);
 
 		void loadAsset(const String& name, bool doubleClick);
-		void refreshAssets(const std::vector<String>& assets);
+		void refreshAssets(gsl::span<const String> assets);
 
 		void addAsset();
 		void removeAsset();
