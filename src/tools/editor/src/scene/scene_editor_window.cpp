@@ -449,10 +449,7 @@ void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName
 
 		// Collect data
 		const auto entityNodeData = sceneData->getEntityNodeData(id);
-		const auto& parentId = entityNodeData.getParentId();
-		const auto childIdx = entityNodeData.getChildIndex();
-		auto entityData = entityNodeData.getData();
-		const auto uuid = entityData.getInstanceUUID();
+		const auto uuid = entityNodeData.getData().getInstanceUUID();
 
 		// Delete old entity
 		removeEntity(id);
@@ -462,7 +459,7 @@ void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName
 		instanceData.setInstanceUUID(uuid);
 		instanceData.setPrefab(prefabName);
 		instanceData.setComponents(components);
-		addEntity(parentId, childIdx, std::move(instanceData));
+		addEntity(entityNodeData.getParentId(), entityNodeData.getChildIndex(), std::move(instanceData));
 
 		return true;
 	});
@@ -474,7 +471,24 @@ void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName
 
 void SceneEditorWindow::collapsePrefab(const String& id)
 {
-	// TODO
+	// Collect data
+	const auto entityNodeData = sceneData->getEntityNodeData(id);
+	const auto prefabName = entityNodeData.getData().getPrefab();
+
+	// Get prefab
+	if (prefabName.isEmpty()) {
+		return;
+	}
+	const auto prefab = project.getGameResources().get<Prefab>(prefabName);
+
+	// Generate data
+	EntityData instanceData = prefab->getEntityData().instantiateWithAsCopy(entityNodeData.getData());
+	
+	// Delete old entity
+	removeEntity(id);
+
+	// Insert new entity
+	addEntity(entityNodeData.getParentId(), entityNodeData.getChildIndex(), std::move(instanceData));
 }
 
 void SceneEditorWindow::onEntitySelected(const String& id)
