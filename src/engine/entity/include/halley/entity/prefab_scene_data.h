@@ -39,5 +39,8 @@ namespace Halley {
         static void addChild(EntityData& parent, int index, EntityData child);
         static EntityData removeChild(EntityData& parent, const String& childId);
         static void moveChild(EntityData& parent, const String& childId, int targetIndex);
+
+    	static void makeTransformRelative(EntityRef entity, std::optional<EntityRef> newParent, EntityData& entityData);
+    	static void makeTransformRelative2D(EntityRef entity, std::optional<EntityRef> newParent, EntityData& entityData);
     };
 }

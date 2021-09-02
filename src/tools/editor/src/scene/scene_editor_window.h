@@ -47,7 +47,7 @@ namespace Halley {
 		void replaceEntity(const String& entityId, EntityData newData);
 		void selectEntity(const String& id);
 		void modifyEntity(const String& id, const EntityDataDelta& delta);
-		void moveEntity(const String& id, const String& newParent, int childIndex);
+		void moveEntity(const String& id, const String& newParent, int childIndex, bool refreshEntityList = true);
 
 		void extractPrefab(const String& id);
 		void extractPrefab(const String& id, const String& prefabName);

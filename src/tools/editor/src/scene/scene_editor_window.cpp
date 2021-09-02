@@ -403,10 +403,12 @@ void SceneEditorWindow::modifyEntity(const String& id, const EntityDataDelta& de
 	entityEditor->reloadEntity();
 }
 
-void SceneEditorWindow::moveEntity(const String& id, const String& newParent, int childIndex)
+void SceneEditorWindow::moveEntity(const String& id, const String& newParent, int childIndex, bool refreshEntityList)
 {
 	auto [prevParent, prevIndex] = sceneData->reparentEntity(id, newParent, childIndex);
-	entityList->refreshList();
+	if (refreshEntityList) {
+		entityList->refreshList();
+	}
 	onEntityMoved(id, prevParent, static_cast<int>(prevIndex), newParent, childIndex);
 }
 

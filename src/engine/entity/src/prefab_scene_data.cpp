@@ -5,6 +5,8 @@
 #include "halley/support/logger.h"
 #include "world.h"
 
+#include "components/transform_2d_component.h"
+
 using namespace Halley;
 
 PrefabSceneData::PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> factory, World& world, Resources& gameResources)
@@ -123,6 +125,11 @@ std::pair<String, size_t> PrefabSceneData::reparentEntity(const String& entityId
 		moveChild(findEntity(newParentId), entityId, static_cast<int>(childIndex)); // INVALIDATES REFERENCES
 		reloadEntity(newParentId.isEmpty() ? entityId : newParentId);
 	} else {
+		// Updates the transform to retain world position
+		const auto newParentEntity = newParentId.isEmpty() ? std::optional<EntityRef>() : world.findEntity(UUID(newParentId));
+		const auto entity = world.findEntity(UUID(entityId));
+		makeTransformRelative(entity.value(), newParentEntity, *data.entity);
+		
 		// The order is very important here
 		// Don't collapse into one sequence point! findEntity(newParentId) MUST execute after removeChild()!
 		auto child = removeChild(findEntity(oldParentId), entityId); // INVALIDATES REFERENCES
@@ -224,5 +231,33 @@ void PrefabSceneData::moveChild(EntityData& parent, const String& childId, int t
 	const int dir = signOf(targetIndex - startIndex);
 	for (int i = startIndex; i != targetIndex; i += dir) {
 		std::swap(seq[i], seq[i + dir]);
+	}
+}
+
+void PrefabSceneData::makeTransformRelative(EntityRef entity, std::optional<EntityRef> newParent, EntityData& entityData)
+{
+	if (entity.hasComponent<Transform2DComponent>()) {
+		makeTransformRelative2D(entity, newParent, entityData);
+	}
+}
+
+void PrefabSceneData::makeTransformRelative2D(EntityRef entity, std::optional<EntityRef> newParent, EntityData& entityData)
+{
+	const auto& transform = entity.getComponent<Transform2DComponent>();
+
+	// TODO: use matrix operations to do this properly
+	const auto pos = transform.getGlobalPosition();
+	Vector2f localPos = pos;
+
+	if (newParent && newParent->hasComponent<Transform2DComponent>()) {
+		const auto& parentTransform = newParent->getComponent<Transform2DComponent>();
+		localPos = parentTransform.inverseTransformPoint(pos);
+	}
+
+	// Apply to data
+	for (auto& c: entityData.getComponents()) {
+		if (c.first == "Transform2D") {
+			c.second["position"] = ConfigNode(localPos);
+		}
 	}
 }
