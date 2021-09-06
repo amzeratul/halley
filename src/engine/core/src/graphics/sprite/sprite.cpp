@@ -385,7 +385,7 @@ Sprite& Sprite::setImage(const SpriteResource& sprite, std::shared_ptr<const Mat
 Sprite& Sprite::setImage(Resources& resources, VideoAPI& videoAPI, std::shared_ptr<Image> image, String materialName)
 {
 	if (image && image->getSize().x > 0 && image->getSize().y > 0) {
-		auto tex = std::shared_ptr(videoAPI.createTexture(image->getSize()));
+		auto tex = std::shared_ptr<Texture>(videoAPI.createTexture(image->getSize()));
 		TextureDescriptor desc(image->getSize(), TextureFormat::RGBA);
 		desc.pixelData = std::move(image);
 		tex->startLoading();
