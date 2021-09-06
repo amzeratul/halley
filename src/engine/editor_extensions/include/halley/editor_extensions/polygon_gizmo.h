@@ -25,7 +25,7 @@ namespace Halley {
 		}
 	};
 
-	class PolygonGizmo final : public SceneEditorGizmo {
+	class PolygonGizmo : public SceneEditorGizmo {
 	public:
 		PolygonGizmo(SnapRules snapRules, String componentName, String fieldName, bool isOpenPolygon, Colour4f colour, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow);
 		void update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState) override;
@@ -40,15 +40,15 @@ namespace Halley {
 	protected:
 		void onEntityChanged() override;
 		void refreshEntity() override;
-	
-	private:
+
 		UIFactory& factory;
 		String componentName;
 		String fieldName;
 		bool isOpenPolygon;
 		Colour4f colour;
 		ISceneEditorWindow& sceneEditorWindow;
-
+	
+	private:
 		std::optional<VertexList> lastStored;
 		std::optional<VertexList> vertices;
 		mutable VertexList worldSpaceVertices;
