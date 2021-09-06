@@ -184,6 +184,7 @@ void Halley::OSWin32::createLogConsole(String winTitle)
 {
 	AllocConsole();
 	SetConsoleTitle(winTitle.c_str());
+	SetConsoleOutputCP(65001);
 
 	// Icon
 	HWND con = GetConsoleWindow();
