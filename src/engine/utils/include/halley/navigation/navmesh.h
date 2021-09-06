@@ -93,6 +93,7 @@ namespace Halley {
 		[[nodiscard]] const std::vector<Node>& getNodes() const { return nodes; }
 		[[nodiscard]] const std::vector<Polygon>& getPolygons() const { return polygons; }
 		[[nodiscard]] const std::vector<Portal>& getPortals() const { return portals; }
+		[[nodiscard]] const std::vector<std::pair<uint16_t, LineSegment>>& getOpenEdges() const { return openEdges; }
 		[[nodiscard]] const Polygon& getPolygon(int id) const;
 		[[nodiscard]] size_t getNumNodes() const { return nodes.size(); }
 		[[nodiscard]] std::optional<NodeId> getNodeAt(Vector2f position) const;

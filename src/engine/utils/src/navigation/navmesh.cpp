@@ -50,6 +50,7 @@ Navmesh::Navmesh(std::vector<PolygonData> polys, const NavmeshBounds& bounds, in
 
 	// Generate edges
 	postProcessPortals();
+	generateOpenEdges();
 }
 
 Navmesh::Navmesh(const ConfigNode& nodeData)
@@ -63,6 +64,7 @@ Navmesh::Navmesh(const ConfigNode& nodeData)
 	subWorld = nodeData["subWorld"].asInt(0);
 
 	processPolygons();
+	generateOpenEdges();
 }
 
 ConfigNode Navmesh::toConfigNode() const
@@ -500,7 +502,6 @@ void Navmesh::processPolygons()
 {
 	addPolygonsToGrid();
 	computeArea();
-	generateOpenEdges();
 }
 
 void Navmesh::addPolygonsToGrid()
@@ -717,6 +718,7 @@ void Navmesh::Portal::postProcess(gsl::span<const Polygon> polygons, std::vector
 		}
 		
 		// TODO: output connections too
+		
 	}
 }
 
@@ -736,7 +738,7 @@ bool Navmesh::Portal::canJoinWith(const Portal& other, float epsilon) const
 
 		const auto n0 = (a1 - a0).normalized();
 		const auto n1 = (b1 - b0).normalized();
-		const auto n2 = (b1 - a0).normalized();
+		const auto n2 = (b0 - a0).squaredLength() > (b1 - a0).squaredLength() ? (b0 - a0).normalized() : (b1 - a0).normalized() ;
 		if (std::abs(n0.dot(n1)) < 0.99f) {
 			// Not pointing the same direction
 			return false;
