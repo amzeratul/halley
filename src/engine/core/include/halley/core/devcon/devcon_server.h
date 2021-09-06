@@ -4,6 +4,7 @@
 #include <memory>
 #include "halley/text/halleystring.h"
 #include <set>
+#include <gsl/span>
 
 namespace Halley
 {
