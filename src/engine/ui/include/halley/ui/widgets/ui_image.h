@@ -1,5 +1,5 @@
 #pragma once
-#include "ui_behaviour.h"
+#include "../ui_behaviour.h"
 #include "../ui_widget.h"
 #include "halley/core/graphics/sprite/sprite.h"
 
