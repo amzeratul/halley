@@ -1081,6 +1081,16 @@ void SceneEditorWindow::setSetting(EditorSettingType type, std::string_view id, 
 	projectWindow.setSetting(type, id, std::move(data));
 }
 
+Path SceneEditorWindow::getPrimaryInputFile(AssetType type, const String& assetId, bool absolute) const
+{
+	auto path = project.getImportAssetsDatabase().getPrimaryInputFile(type, assetId);
+	if (absolute) {
+		return project.getAssetsSrcPath() / path;
+	} else {
+		return path;
+	}
+}
+
 void SceneEditorWindow::onTabbedIn()
 {
 	setTool(getSetting(EditorSettingType::Temp, "tools.curTool").asString("translate"));

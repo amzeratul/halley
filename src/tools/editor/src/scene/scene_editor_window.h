@@ -84,6 +84,8 @@ namespace Halley {
 		const ConfigNode& getSetting(EditorSettingType type, std::string_view id) const override;
 		void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) override;
 
+		Path getPrimaryInputFile(AssetType type, const String& assetId, bool absolute) const override;
+
 		void onTabbedIn();
 
 		float getProjectDefaultZoom() const override;

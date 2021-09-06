@@ -302,6 +302,8 @@ namespace Halley {
 
 		virtual std::shared_ptr<EntityFactory> getEntityFactory() const = 0;
 		virtual void spawnUI(std::shared_ptr<UIWidget> ui) = 0;
+
+		virtual Path getPrimaryInputFile(AssetType type, const String& assetId, bool absolute) const = 0;
 	};
 
 	class IProject {
