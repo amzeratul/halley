@@ -48,10 +48,11 @@ namespace Halley {
 		Colour4f colour;
 		ISceneEditorWindow& sceneEditorWindow;
 	
-	private:
 		std::optional<VertexList> lastStored;
 		std::optional<VertexList> vertices;
 		mutable VertexList worldSpaceVertices;
+
+	private:
 		std::optional<Vertex> preview;
 		size_t previewIndex = 0;
 		std::vector<SceneEditorGizmoHandle> handles;
