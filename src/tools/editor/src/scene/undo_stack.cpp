@@ -47,6 +47,17 @@ bool UndoStack::pushModified(bool wasModified, const String& entityId, const Ent
 	return true;
 }
 
+bool UndoStack::pushReplaced(bool wasModified, const String& entityId, const EntityData& before, const EntityData& after)
+{
+	if (accepting) {
+		auto forward = EntityDataDelta(after);
+		auto back = EntityDataDelta(before);
+		addToStack(Action(Type::EntityReplaced, std::move(forward), entityId), Action(Type::EntityReplaced, std::move(back), entityId), wasModified);
+		return true;
+	}
+	return true;
+}
+
 void UndoStack::undo(SceneEditorWindow& sceneEditorWindow)
 {
 	if (canUndo()) {
@@ -135,6 +146,10 @@ void UndoStack::runAction(const Action& action, SceneEditorWindow& sceneEditorWi
 
 	case Type::EntityModified:
 		sceneEditorWindow.modifyEntity(action.entityId, action.delta);
+		break;
+
+	case Type::EntityReplaced:
+		sceneEditorWindow.replaceEntity(action.entityId, EntityData(action.delta));
 		break;
 	}
 

@@ -31,6 +31,7 @@ namespace Halley {
 		void onEntityAdded(const String& id, const String& parentId, int childIndex) override;
 		void onEntityRemoved(const String& id, const String& parentId, int childIndex, const EntityData& prevData) override;
 		void onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData) override;
+		void onEntityReplaced(const String& id, const String& parentId, int childIndex, const EntityData& prevData, const EntityData& newData) override;
 		void onEntityMoved(const String& id, const String& prevParentId, int prevChildIndex, const String& newParentId, int newChildIndex) override;
 		void onComponentRemoved(const String& name) override;
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName) override;
@@ -43,9 +44,10 @@ namespace Halley {
 		void addEntity(const String& parentId, int childIndex, EntityData data);
 		void removeEntity();
 		void removeEntity(const String& entityId) override;
+		void replaceEntity(const String& entityId, EntityData newData);
 		void selectEntity(const String& id);
 		void modifyEntity(const String& id, const EntityDataDelta& delta);
-		void moveEntity(const String& id, const String& newParent, int childIndex);
+		void moveEntity(const String& id, const String& newParent, int childIndex, bool refreshEntityList = true);
 
 		void extractPrefab(const String& id);
 		void extractPrefab(const String& id, const String& prefabName);
@@ -142,7 +144,9 @@ namespace Halley {
 		UndoStack undoStack;
 		bool modified = false;
 		bool buttonsNeedUpdate = false;
+		
 		size_t assetReloadCallbackIdx = 0;
+		std::vector<std::function<bool(gsl::span<const String>)>> assetReloadCallbacks;
 
 		void makeUI();
 		void onEntitySelected(const String& id);

@@ -33,9 +33,9 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 		dll.addReloadListener(*this);
 	});
 
-	assetReloadCallbackIdx = project.addAssetReloadCallback([=] (const std::vector<String>& assets)
+	assetReloadCallbackIdx = project.addAssetReloadCallback([=] (gsl::span<const String> assets)
 	{
-		// TODO
+		std_ex::erase_if(assetReloadCallbacks, [&] (auto& callback) { return callback(assets); });
 	});
 }
 
@@ -45,6 +45,10 @@ SceneEditorWindow::~SceneEditorWindow()
 	
 	unloadScene();
 
+	entityEditor->unloadIcons();
+	entityEditor.reset();
+	entityIcons.reset();
+	
 	project.withDLL([&] (ProjectDLL& dll)
 	{
 		dll.removeReloadListener(*this);
@@ -399,10 +403,12 @@ void SceneEditorWindow::modifyEntity(const String& id, const EntityDataDelta& de
 	entityEditor->reloadEntity();
 }
 
-void SceneEditorWindow::moveEntity(const String& id, const String& newParent, int childIndex)
+void SceneEditorWindow::moveEntity(const String& id, const String& newParent, int childIndex, bool refreshEntityList)
 {
 	auto [prevParent, prevIndex] = sceneData->reparentEntity(id, newParent, childIndex);
-	entityList->refreshList();
+	if (refreshEntityList) {
+		entityList->refreshList();
+	}
 	onEntityMoved(id, prevParent, static_cast<int>(prevIndex), newParent, childIndex);
 }
 
@@ -419,7 +425,9 @@ void SceneEditorWindow::extractPrefab(const String& id)
 	OS::get().openFileChooser(parameters).then([this, id, basePath] (std::optional<Path> path)
 	{
 		if (path) {
-			extractPrefab(id, path.value().makeRelativeTo(basePath).toString());
+			if (path->getExtension() == ".prefab") {
+				extractPrefab(id, path.value().makeRelativeTo(basePath).replaceExtension("").toString());
+			}
 		}
 	});
 }
@@ -427,10 +435,7 @@ void SceneEditorWindow::extractPrefab(const String& id)
 void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName)
 {
 	const auto entityNodeData = sceneData->getEntityNodeData(id);
-	const auto& parentId = entityNodeData.getParentId();
-	const auto childIdx = entityNodeData.getChildIndex();
 	auto entityData = entityNodeData.getData();
-	const auto uuid = entityData.getInstanceUUID();
 
 	// Generate instance components and clear prefab
 	auto components = std::vector<std::pair<String, ConfigNode>>();
@@ -440,25 +445,48 @@ void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName
 			c.second = ConfigNode::MapType();
 		}
 	}
+	
+	// This callback will be invoked once the assets are imported
+	assetReloadCallbacks.push_back([this, prefabName, id, components] (gsl::span<const String> assetIds) -> bool
+	{
+		if (!std_ex::contains(assetIds, "prefab:" + prefabName)) {
+			return false;
+		}
 
+		// Collect data
+		const auto entityNodeData = sceneData->getEntityNodeData(id);
+		const auto uuid = entityNodeData.getData().getInstanceUUID();
+
+		// Replace entity
+		EntityData instanceData;
+		instanceData.setInstanceUUID(uuid);
+		instanceData.setPrefab(prefabName);
+		instanceData.setComponents(components);
+		replaceEntity(id, std::move(instanceData));
+
+		return true;
+	});
+	
 	// Write prefab
 	const auto serializedData = serializeEntity(entityData);
-	project.addNewAsset(Path("prefab") / prefabName, gsl::as_bytes(gsl::span<const char>(serializedData.c_str(), serializedData.length())));
-
-	// Delete old entity
-	removeEntity(id);
-
-	// Insert new entity
-	EntityData instanceData;
-	instanceData.setInstanceUUID(uuid);
-	instanceData.setPrefab(prefabName);
-	instanceData.setComponents(components);
-	addEntity(parentId, childIdx, std::move(instanceData));
+	project.addNewAsset(Path("prefab") / (prefabName + ".prefab"), gsl::as_bytes(gsl::span<const char>(serializedData.c_str(), serializedData.length())));
 }
 
 void SceneEditorWindow::collapsePrefab(const String& id)
 {
-	// TODO
+	// Collect data
+	const auto entityNodeData = sceneData->getEntityNodeData(id);
+	const auto prefabName = entityNodeData.getData().getPrefab();
+
+	// Get prefab
+	if (prefabName.isEmpty()) {
+		return;
+	}
+	const auto prefab = project.getGameResources().get<Prefab>(prefabName);
+
+	// Update entity
+	EntityData instanceData = prefab->getEntityData().instantiateWithAsCopy(entityNodeData.getData());
+	replaceEntity(id, std::move(instanceData));
 }
 
 void SceneEditorWindow::onEntitySelected(const String& id)
@@ -529,8 +557,6 @@ void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId, 
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	onEntitySelected(id);
 
-	gameBridge->onEntityAdded(UUID(id), data);
-
 	undoStack.pushAdded(modified, id, parentId, childIndex, data);
 	
 	markModified();
@@ -542,8 +568,6 @@ void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId
 
 	undoStack.pushRemoved(modified, id, parentId, childIndex, prevData);
 	
-	gameBridge->onEntityRemoved(UUID(id));
-
 	entityList->onEntityRemoved(id, newSelectionId);
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	onEntitySelected(newSelectionId);
@@ -554,14 +578,28 @@ void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId
 void SceneEditorWindow::onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData)
 {
 	if (!id.isEmpty()) {
-		const auto& data = sceneData->getEntityNodeData(id).getData();
-
 		const bool hadChange = undoStack.pushModified(modified, id, prevData, newData);
 
 		if (hadChange) {
+			const auto& data = sceneData->getEntityNodeData(id).getData();
 			entityList->onEntityModified(id, data);
 			sceneData->reloadEntity(id);
-			gameBridge->onEntityModified(UUID(id), prevData, newData);
+			markModified();
+		}
+	}
+}
+
+void SceneEditorWindow::onEntityReplaced(const String& id, const String& parentId, int childIndex, const EntityData& prevData, const EntityData& newData)
+{
+	if (!id.isEmpty()) {
+		const bool hadChange = undoStack.pushReplaced(modified, id, prevData, newData);
+
+		if (hadChange) {
+			const auto& data = sceneData->getEntityNodeData(id).getData();
+
+			entityList->onEntityRemoved(id, "");
+			entityList->onEntityAdded(id, parentId, childIndex, data);
+			sceneData->reloadEntity(id);
 			markModified();
 		}
 	}
@@ -572,8 +610,6 @@ void SceneEditorWindow::onEntityMoved(const String& id, const String& prevParent
 	if (currentEntityId == id) {
 		onEntitySelected(id);
 	}
-
-	gameBridge->onEntityMoved(UUID(id), sceneData->getEntityNodeData(id).getData());
 
 	undoStack.pushMoved(modified, id, prevParentId, prevChildIndex, newParentId, newChildIndex);
 	
@@ -801,6 +837,14 @@ void SceneEditorWindow::removeEntity(const String& targetId)
 			break;
 		}
 	}
+}
+
+void SceneEditorWindow::replaceEntity(const String& entityId, EntityData newData)
+{
+	auto node = sceneData->getWriteableEntityNodeData(entityId);
+	auto oldData = node.getData();
+	node.getData() = EntityData(newData);
+	onEntityReplaced(entityId, node.getParentId(), node.getChildIndex(), oldData, newData);
 }
 
 String SceneEditorWindow::findParent(const String& entityId) const

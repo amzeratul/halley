@@ -30,6 +30,7 @@ namespace Halley {
 		bool loadEntity(const String& id, EntityData& data, const Prefab* prefabData, bool force, Resources& gameResources);
 		void unloadEntity();
 		void reloadEntity();
+		void unloadIcons();
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
 		void setDefaultName(const String& name, const String& prevName) override;

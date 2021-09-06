@@ -8,7 +8,7 @@ Transform2DComponent::Transform2DComponent() = default;
 
 
 Transform2DComponent::Transform2DComponent(Vector2f localPosition, Angle1f localRotation, Vector2f localScale, int subWorld)
-	: Transform2DComponentBase(localPosition, localRotation, localScale, subWorld)
+	: Transform2DComponentBase(localPosition, localScale, localRotation, subWorld)
 {
 }
 

@@ -144,10 +144,6 @@ namespace Halley {
 
     	virtual void setSelectedEntity(const UUID& id, EntityData& entityData) = 0;
     	virtual void setEntityHighlightedOnList(const UUID& id) = 0;
-        virtual void onEntityAdded(const UUID& id, const EntityData& entityData) = 0;
-        virtual void onEntityRemoved(const UUID& id) = 0;
-        virtual void onEntityModified(const UUID& id, const EntityData& entityData) = 0;
-        virtual void onEntityMoved(const UUID& id, const EntityData& entityData) = 0;
 
     	virtual void showEntity(const UUID& id) = 0;
         virtual void onToolSet(String& tool, String& componentName, String& fieldName) = 0;
@@ -284,6 +280,7 @@ namespace Halley {
 		virtual void onEntityAdded(const String& id, const String& parentId, int childIndex) = 0;
 		virtual void onEntityRemoved(const String& id, const String& parentId, int childIndex, const EntityData& prevData) = 0;
 		virtual void onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData) = 0;
+		virtual void onEntityReplaced(const String& id, const String& parentId, int childIndex, const EntityData& prevData, const EntityData& newData) = 0;
 		virtual void onEntityMoved(const String& id, const String& prevParentId, int prevChildIndex, const String& newParentId, int newChildIndex) = 0;
 		virtual void onComponentRemoved(const String& name) = 0;
 		virtual void onFieldChangedByGizmo(const String& componentName, const String& fieldName) = 0;

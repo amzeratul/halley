@@ -162,35 +162,6 @@ void SceneEditorGameBridge::showEntity(const UUID& uuid)
 	}
 }
 
-void SceneEditorGameBridge::onEntityAdded(const UUID& uuid, const EntityData& data)
-{
-	if (interfaceReady) {
-		interface->onEntityAdded(uuid, data);
-	}
-}
-
-void SceneEditorGameBridge::onEntityRemoved(const UUID& uuid)
-{
-	if (interfaceReady) {
-		interface->onEntityRemoved(uuid);
-	}
-}
-
-void SceneEditorGameBridge::onEntityModified(const UUID& uuid,  const EntityData& oldData, const EntityData& newData)
-{
-	if (interfaceReady) {
-		interface->onEntityModified(uuid, newData);
-	}
-	gizmos->onEntityModified(uuid, oldData, newData);
-}
-
-void SceneEditorGameBridge::onEntityMoved(const UUID& uuid, const EntityData& data)
-{
-	if (interfaceReady) {
-		interface->onEntityMoved(uuid, data);
-	}
-}
-
 void SceneEditorGameBridge::onToolSet(String& tool, String& componentName, String& fieldName)
 {
 	if (interfaceReady) {

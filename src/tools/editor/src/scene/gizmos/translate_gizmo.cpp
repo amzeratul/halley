@@ -113,7 +113,11 @@ Vector2f TranslateGizmo::getObjectOffset() const
 	if (mode == TranslateGizmoMode::Centre) {
 		auto sprite = getComponent<SpriteComponent>();
 		if (sprite) {
-			return sprite->sprite.getAABB().getCenter() - sprite->sprite.getPosition();
+			auto offset = sprite->sprite.getAABB().getCenter() - sprite->sprite.getPosition();
+			if (getSnapRules().grid == GridSnapMode::Pixel) {
+				offset = offset.round();
+			}
+			return offset;
 		}		
 	}
 	return Vector2f();

@@ -39,15 +39,6 @@ namespace Halley {
     	void setSelectedEntity(const UUID& id, EntityData& entityData) override;
     	void setEntityHighlightedOnList(const UUID& id) override;
 
-		void onEntityAdded(const UUID& id, const EntityData& entityData) final override;
-		void onEntityRemoved(const UUID& id) final override;
-		void onEntityMoved(const UUID& id, const EntityData& entityData) final override;
-		void onEntityModified(const UUID& id, const EntityData& entityData) final override;
-		virtual void onEntityAdded(EntityRef entity, const EntityData& entityData);
-		virtual void onEntityRemoved(EntityRef entity);
-		virtual void onEntityMoved(EntityRef entity, const EntityData& entityData);
-		virtual void onEntityModified(EntityRef entity, const EntityData& entityData);
-
 		void showEntity(const UUID& id) override;
 		void onToolSet(String& tool, String& componentName, String& fieldName) override;
     	

@@ -8,15 +8,15 @@ component:
       type: 'Halley::Vector2f'
       access: protected
       displayName: Position
-  - rotation:
-      type: 'Halley::Angle1f'
-      access: protected
-      displayName: Rotation
   - scale:
       type: 'Halley::Vector2f'
       access: protected
       defaultValue: [1.0f, 1.0f]
       displayName: Scale
+  - rotation:
+      type: 'Halley::Angle1f'
+      access: protected
+      displayName: Rotation
   - subWorld:
       type: 'Halley::OptionalLite<int>'
       access: protected

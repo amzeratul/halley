@@ -56,7 +56,7 @@ void AssetsBrowser::replaceAssetTab(AssetType oldType, const String& oldId, Asse
 
 void AssetsBrowser::loadResources()
 {
-	project.addAssetReloadCallback([=] (const std::vector<String>& assets)
+	project.addAssetReloadCallback([=] (gsl::span<const String> assets)
 	{
 		refreshAssets(assets);
 	});
@@ -296,7 +296,7 @@ void AssetsBrowser::loadAsset(const String& name, bool doubleClick)
 	}
 }
 
-void AssetsBrowser::refreshAssets(const std::vector<String>& assets)
+void AssetsBrowser::refreshAssets(gsl::span<const String> assets)
 {
 	assetNames.reset();
 	refreshList();

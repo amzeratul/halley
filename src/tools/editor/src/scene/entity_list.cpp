@@ -42,8 +42,7 @@ void EntityList::makeUI()
 		const auto newParentId = event.getStringData2();
 		const auto childIndex = event.getIntData();
 
-		auto [prevParent, prevIndex] = sceneData->reparentEntity(entityId, newParentId, childIndex);
-		sceneEditorWindow->onEntityMoved(entityId, prevParent, static_cast<int>(prevIndex), newParentId, childIndex);
+		sceneEditorWindow->moveEntity(entityId, newParentId, childIndex, false);
 	});
 
 	setHandle(UIEventType::ListItemRightClicked, [=] (const UIEvent& event)

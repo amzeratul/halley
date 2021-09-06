@@ -169,6 +169,12 @@ void EntityEditor::reloadEntity()
 	}
 }
 
+void EntityEditor::unloadIcons()
+{
+	entityIcon->clear();
+	entityIcon.reset();
+}
+
 void EntityEditor::onFieldChangedByGizmo(const String& componentName, const String& fieldName)
 {
 	sendEventDown(UIEvent(UIEventType::ReloadData, componentName + ":" + fieldName));

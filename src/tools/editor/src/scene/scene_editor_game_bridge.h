@@ -32,10 +32,6 @@ namespace Halley {
 		void setSelectedEntity(const UUID& uuid, EntityData& data);
 		void setEntityHighlightedOnList(const UUID& uuid);
 		void showEntity(const UUID& uuid);
-		void onEntityAdded(const UUID& uuid, const EntityData& data);
-		void onEntityRemoved(const UUID& uuid);
-		void onEntityModified(const UUID& uuid, const EntityData& oldData, const EntityData& newData);
-		void onEntityMoved(const UUID& uuid, const EntityData& data);
 		void onToolSet(String& tool, String& componentName, String& fieldName);
 		void onSceneLoaded(Prefab& scene);
 		void onSceneSaved();

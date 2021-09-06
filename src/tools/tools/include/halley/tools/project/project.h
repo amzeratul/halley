@@ -36,7 +36,7 @@ namespace Halley
 			virtual void onAssetsLoaded() {}
 		};
 		
-		using AssetReloadCallback = std::function<void(const std::vector<String>&)>;
+		using AssetReloadCallback = std::function<void(gsl::span<const String>)>;
 
 		Project(Path projectRootPath, Path halleyRootPath);
 		~Project() override;
