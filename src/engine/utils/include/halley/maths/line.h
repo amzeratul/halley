@@ -83,12 +83,26 @@ namespace Halley {
 		Vector2f a;
 		Vector2f b;
 
+		constexpr Vector2f getPoint(float t) const
+		{
+			return lerp(a, b, t);
+		}
+
 		constexpr Vector2f getClosestPoint(Vector2f point) const
 		{
 			const float len = (b - a).length();
 			const Vector2f dir = (b - a) * (1.0f / len);
 			const float x = (point - a).dot(dir); // position along the A-B segment
 			return a + dir * clamp(x, 0.0f, len);
+		}
+
+		constexpr float getClosestPointParametric(Vector2f point) const
+		{
+			const float len = (b - a).length();
+			const float invLen = 1.0f / len;
+			const Vector2f dir = (b - a) * invLen;
+			const float x = (point - a).dot(dir); // position along the A-B segment
+			return clamp(x * invLen, 0.0f, 1.0f);
 		}
 
 		std::optional<Vector2f> intersection(const LineSegment& other, const float epsilon = 0) const
