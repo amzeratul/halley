@@ -27,7 +27,7 @@ Navmesh::Navmesh(std::vector<PolygonData> polys, const NavmeshBounds& bounds, in
 		node.nConnections = polys[i].connections.size();
 		size_t j = 0;
 		for (auto& connection: polys[i].connections) {
-			const float cost = connection >= 0 ? ((polys[connection].polygon.getCentre() - polys[i].polygon.getCentre()) * scaleFactor).length() : std::numeric_limits<float>::infinity();
+			const float cost = connection >= 0 ? ((polys[connection].polygon.getCentre() - polys[i].polygon.getCentre()) * scaleFactor).length() * polys[connection].weight : std::numeric_limits<float>::infinity();
 			node.connections[j] = connection >= 0 ? OptionalLite<NodeId>(gsl::narrow<NodeId>(connection)) : OptionalLite<NodeId>();
 			node.costs[j] = cost;
 			

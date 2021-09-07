@@ -40,6 +40,7 @@ namespace Halley {
 		public:
 			Polygon polygon;
 			std::vector<int> connections;
+			float weight;
 		};
 
 		class alignas(64) Node {

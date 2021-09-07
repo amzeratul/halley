@@ -13,6 +13,7 @@ namespace Halley {
 			gsl::span<const NavmeshSubworldPortal> subworldPortals;
 			int subWorld = 0;
 			float agentSize = 1.0f;
+			std::function<float(int, const Polygon&)> getPolygonWeightCallback;
 		};
 
 		static NavmeshSet generate(const Params& params);
@@ -75,6 +76,6 @@ namespace Halley {
 
 		static std::optional<size_t> getNavmeshEdge(NavmeshNode& node, size_t side, gsl::span<const Line> mapEdges, gsl::span<const NavmeshSubworldPortal> subworldPortals);
 
-		static Navmesh makeNavmesh(gsl::span<NavmeshNode> nodes, const NavmeshBounds& bounds, gsl::span<const NavmeshSubworldPortal> subworldPortals, int region, int subWorld);
+		static Navmesh makeNavmesh(gsl::span<NavmeshNode> nodes, const NavmeshBounds& bounds, gsl::span<const NavmeshSubworldPortal> subworldPortals, int region, int subWorld, std::function<float(int, const Polygon&)> getPolygonWeightCallback);
 	};
 }

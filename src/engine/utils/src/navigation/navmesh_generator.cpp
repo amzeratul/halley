@@ -51,7 +51,7 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 
 	NavmeshSet result;
 	for (int region = 0; region < nRegions; ++region) {
-		result.add(makeNavmesh(polygons, bounds, params.subworldPortals, region, params.subWorld));
+		result.add(makeNavmesh(polygons, bounds, params.subworldPortals, region, params.subWorld, params.getPolygonWeightCallback));
 	}
 	return result;
 }
@@ -541,7 +541,7 @@ std::optional<size_t> NavmeshGenerator::getNavmeshEdge(NavmeshNode& node, size_t
 	return {};
 }
 
-Navmesh NavmeshGenerator::makeNavmesh(gsl::span<NavmeshNode> nodes, const NavmeshBounds& bounds, gsl::span<const NavmeshSubworldPortal> subworldPortals, int region, int subWorld)
+Navmesh NavmeshGenerator::makeNavmesh(gsl::span<NavmeshNode> nodes, const NavmeshBounds& bounds, gsl::span<const NavmeshSubworldPortal> subworldPortals, int region, int subWorld, std::function<float(int, const Polygon&)> getPolygonWeightCallback)
 {
 	std::vector<Navmesh::PolygonData> output;
 
@@ -582,8 +582,8 @@ Navmesh NavmeshGenerator::makeNavmesh(gsl::span<NavmeshNode> nodes, const Navmes
 					}
 				}
 			}
-			
-			output.push_back(Navmesh::PolygonData{ std::move(node.polygon), std::move(connections) });
+
+			output.push_back(Navmesh::PolygonData{ std::move(node.polygon), std::move(connections), getPolygonWeightCallback(subWorld, node.polygon) });
 		}
 	}
 	
