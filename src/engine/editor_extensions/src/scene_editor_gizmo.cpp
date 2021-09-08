@@ -207,6 +207,9 @@ bool SceneEditorGizmo::hasEntityData() const
 
 ConfigNode* SceneEditorGizmo::getComponentData(const String& name)
 {
+	if (!entityData) {
+		return nullptr;
+	}
 	auto& components = (*entityData).getComponents();
 	for (auto& [curName, value]: components) {
 		if (curName == name) {
