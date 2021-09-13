@@ -59,16 +59,27 @@ public:
 		const auto& defaultValue = pars.getIntDefaultParameter();
 
 		const int value = data.getFieldData().asInt(defaultValue);
+		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
 
-		auto field = std::make_shared<UITextInput>("intValue", context.getUIFactory().getStyle("inputThin"));
-		field->setValidator(std::make_shared<UINumericValidator>(true, false));
+		auto field = std::make_shared<UISpinControl2>("intValue", context.getUIFactory().getStyle("spinControl"), float(value), false);
 		field->bindData("intValue", value, [&context, data](int newVal)
 		{
 			data.getFieldData() = ConfigNode(newVal);
 			context.onEntityUpdated();
 		});
+		container->add(field, 1);
 
-		return field;
+		auto reset = std::make_shared<UIButton>("resetValue", context.getUIFactory().getStyle("buttonThin"), UISizer());
+		reset->setIcon(Sprite().setImage(context.getGameResources(), "entity_icons/reset.png"));
+		reset->setMinSize(Vector2f(22, 22));
+		reset->setToolTip(LocalisedString::fromHardcodedString("Reset to default value"));
+		reset->setHandle(UIEventType::ButtonClicked, "resetValue", [=] (const UIEvent& event)
+		{
+			field->setValue(float(defaultValue));
+		});
+		container->add(reset, 0, Vector4f(-1, 0, 0, 0));
+
+		return container;
 	}
 };
 
@@ -90,16 +101,27 @@ public:
 		const auto& defaultValue = pars.getFloatDefaultParameter();
 
 		const float value = data.getFieldData().asFloat(defaultValue);
+		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
 
-		auto field = std::make_shared<UITextInput>("floatValue", context.getUIFactory().getStyle("inputThin"));
-		field->setValidator(std::make_shared<UINumericValidator>(true, true));
+		auto field = std::make_shared<UISpinControl2>("floatValue", context.getUIFactory().getStyle("spinControl"), value, true);
 		field->bindData("floatValue", value, [&context, data](float newVal)
 		{
 			data.getFieldData() = ConfigNode(newVal);
 			context.onEntityUpdated();
 		});
+		container->add(field, 1);
 
-		return field;
+		auto reset = std::make_shared<UIButton>("resetValue", context.getUIFactory().getStyle("buttonThin"), UISizer());
+		reset->setIcon(Sprite().setImage(context.getGameResources(), "entity_icons/reset.png"));
+		reset->setMinSize(Vector2f(22, 22));
+		reset->setToolTip(LocalisedString::fromHardcodedString("Reset to default value"));
+		reset->setHandle(UIEventType::ButtonClicked, "resetValue", [=] (const UIEvent& event)
+		{
+			field->setValue(defaultValue);
+		});
+		container->add(reset, 0, Vector4f(-1, 0, 0, 0));
+
+		return container;
 	}
 };
 
@@ -161,17 +183,20 @@ public:
 	{
 		auto data = pars.data;
 
-		Vector2i value = Vector2i(pars.getIntDefaultParameter(0), pars.getIntDefaultParameter(1));
+		const auto defaultValue = Vector2i(pars.getIntDefaultParameter(0), pars.getIntDefaultParameter(1));
+		Vector2i value = defaultValue;
 		if (data.getFieldData().getType() != ConfigNodeType::Undefined) {
 			value = data.getFieldData().asVector2i(value);
 		}
 
-		const auto& style = context.getUIFactory().getStyle("inputThin");
+		const auto& style = context.getUIFactory().getStyle("spinControl");
+		const auto& buttonStyle = context.getUIFactory().getStyle("buttonThin");
 
 		auto dataOutput = std::make_shared<bool>(true);
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
 
-		container->add(std::make_shared<UITextInput>("xValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, false)), 1);
+		auto xValue = std::make_shared<UISpinControl2>("xValue", style, float(value.x), false);
+		container->add(xValue, 1);
 		container->bindData("xValue", value.x, [&context, data, dataOutput](int newVal) {
 			if (*dataOutput) {
 				auto& node = data.getFieldData();
@@ -180,7 +205,8 @@ public:
 			}
 		});
 
-		container->add(std::make_shared<UITextInput>("yValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, false)), 1);
+		auto yValue = std::make_shared<UISpinControl2>("yValue", style, float(value.y), false);
+		container->add(yValue, 1);
 		container->bindData("yValue", value.y, [&context, data, dataOutput](int newVal) {
 			if (*dataOutput) {
 				auto& node = data.getFieldData();
@@ -188,6 +214,17 @@ public:
 				context.onEntityUpdated();
 			}
 		});
+		
+		auto reset = std::make_shared<UIButton>("resetValue", buttonStyle, UISizer());
+		reset->setIcon(Sprite().setImage(context.getGameResources(), "entity_icons/reset.png"));
+		reset->setMinSize(Vector2f(22, 22));
+		reset->setToolTip(LocalisedString::fromHardcodedString("Reset to default value"));
+		reset->setHandle(UIEventType::ButtonClicked, "resetValue", [=] (const UIEvent& event)
+		{
+			xValue->setValue(static_cast<float>(defaultValue.x));
+			yValue->setValue(static_cast<float>(defaultValue.y));
+		});
+		container->add(reset, 0, Vector4f(-1, 0, 0, 0));
 
 		container->setHandle(UIEventType::ReloadData, pars.componentName + ":" + data.getName(), [=](const UIEvent& event) {
 			Vector2i newVal;
@@ -220,19 +257,20 @@ public:
 	{
 		auto data = pars.data;
 
-		Vector2f value = Vector2f(pars.getFloatDefaultParameter(0), pars.getFloatDefaultParameter(1));
+		const auto defaultValue = Vector2f(pars.getFloatDefaultParameter(0), pars.getFloatDefaultParameter(1));
+		Vector2f value = defaultValue;
 		if (data.getFieldData().getType() != ConfigNodeType::Undefined) {
 			value = data.getFieldData().asVector2f(value);
 		}
 
-		const auto& style = context.getUIFactory().getStyle("inputThin");
+		const auto& style = context.getUIFactory().getStyle("spinControl");
+		const auto& buttonStyle = context.getUIFactory().getStyle("buttonThin");
 
 		auto dataOutput = std::make_shared<bool>(true);
-		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
+		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 3.0f));
 
-		auto defaultValue = pars.defaultValue.size() == 2 ? Vector2f(pars.defaultValue[0].toFloat(), pars.defaultValue[1].toFloat()) : Vector2f();
-
-		container->add(std::make_shared<UITextInput>("xValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
+		auto xValue = std::make_shared<UISpinControl2>("xValue", style, value.x, true);
+		container->add(xValue, 1);
 		container->bindData("xValue", value.x, [&context, data, dataOutput, defaultValue] (float newVal)
 		{
 			if (*dataOutput) {
@@ -242,7 +280,8 @@ public:
 			}
 		});
 
-		container->add(std::make_shared<UITextInput>("yValue", style, "", LocalisedString(), std::make_shared<UINumericValidator>(true, true)), 1);
+		auto yValue = std::make_shared<UISpinControl2>("yValue", style, value.y, true);
+		container->add(yValue, 1);
 		container->bindData("yValue", value.y, [&context, data, dataOutput, defaultValue](float newVal)
 		{
 			if (*dataOutput) {
@@ -251,6 +290,17 @@ public:
 				context.onEntityUpdated();
 			}
 		});
+		
+		auto reset = std::make_shared<UIButton>("resetValue", buttonStyle, UISizer());
+		reset->setIcon(Sprite().setImage(context.getGameResources(), "entity_icons/reset.png"));
+		reset->setMinSize(Vector2f(22, 22));
+		reset->setToolTip(LocalisedString::fromHardcodedString("Reset to default value"));
+		reset->setHandle(UIEventType::ButtonClicked, "resetValue", [=] (const UIEvent& event)
+		{
+			xValue->setValue(defaultValue.x);
+			yValue->setValue(defaultValue.y);
+		});
+		container->add(reset, 0, Vector4f(-1, 0, 0, 0));
 
 		container->setHandle(UIEventType::ReloadData, pars.componentName + ":" + data.getName(), [=] (const UIEvent& event)
 		{

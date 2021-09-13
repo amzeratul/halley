@@ -306,17 +306,21 @@ void UITextInput::update(Time t, bool moved)
 	}
 }
 
-Rect4f UITextInput::getTextBounds() const
+Vector4f UITextInput::getTextInnerBorder() const
 {
 	Vector4f border = getInnerBorder();
 	if (icon.hasMaterial()) {
 		border.x += icon.getSize().x + iconBorder.x + iconBorder.z;
 	}
-	
+	return border;
+}
+
+Rect4f UITextInput::getTextBounds() const
+{
+	const auto border = getTextInnerBorder();
 	const Vector2f startPos = getPosition() + Vector2f(border.x, border.y);
-	const float capacityX = getSize().x - border.x - border.z;
-	const float capacityY = getSize().y - border.y - border.w;
-	return Rect4f(startPos, capacityX, capacityY);
+	const auto size = getSize() - border.xy() - border.zw();
+	return Rect4f(startPos, size.x, size.y);
 }
 
 void UITextInput::onFocus()

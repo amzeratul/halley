@@ -73,6 +73,8 @@ namespace Halley {
 
 		void readFromDataBind() override;
 
+		virtual Vector4f getTextInnerBorder() const;
+
 	private:
 		void updateCaret();
 		Rect4f getTextBounds() const;
