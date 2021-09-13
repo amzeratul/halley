@@ -27,6 +27,7 @@ colours:
   ui_buttonDisabled: "#4a5e68"
 
   ui_inputNormal: "#d7d8e3"
+  ui_inputNormalActual: "#1D2B34" # Actual display colour of input, considering the image is not white >:(
   ui_inputDown: "#BEBFD1"
   ui_inputHover: "#d7d8e3"
   ui_inputDisabled: "#000000"

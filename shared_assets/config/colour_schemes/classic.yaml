@@ -19,6 +19,7 @@ colours:
   ui_buttonDisabled: "#927B95"
 
   ui_inputNormal: "#9C5BB5"
+  ui_inputNormalActual: "#9C5BB5"
   ui_inputDown: "#913DA3"
   ui_inputHover: "#C080E3"
   ui_inputDisabled: "#927B95"

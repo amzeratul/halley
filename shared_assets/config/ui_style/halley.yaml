@@ -85,7 +85,7 @@ uiStyle:
     upButton: { img: halley_ui/icon_up.png, colour: $ui_text }
     downButton: { img: halley_ui/icon_down.png, colour: $ui_text }
     spinButton:
-      normal: { img: "halley_ui/ui_window.png", colour: $ui_buttonNormal }
+      normal: { img: "halley_ui/ui_window.png", colour: $ui_inputNormalActual }
       down: { img: "halley_ui/ui_window.png", colour: $ui_buttonDown }
       hover: { img: "halley_ui/ui_window.png", colour: $ui_buttonHover }
       disabled: { img: "halley_ui/ui_window.png", colour: $ui_buttonDisabled }
