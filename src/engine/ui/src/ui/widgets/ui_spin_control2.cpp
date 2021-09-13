@@ -73,3 +73,17 @@ Vector4f UISpinControl2::getTextInnerBorder() const
 	value.z += 18;
 	return value;
 }
+
+bool UISpinControl2::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::Up)) {
+		setValue(getValue() + increment);
+		return true;
+	}
+	if (key.is(KeyCode::Down)) {
+		setValue(getValue() - increment);
+		return true;
+	}
+
+	return UITextInput::onKeyPress(key);
+}
