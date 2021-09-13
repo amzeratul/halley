@@ -59,7 +59,7 @@ namespace Halley {
         String defaultOption;
         Colour4f highlightCol;
 		bool canShowBlank = true;
-
+		
         void accept();
         void cancel();
         void setUserFilter(const String& str);
@@ -75,14 +75,26 @@ namespace Halley {
 
 	class ChooseAssetTypeWindow : public ChooseAssetWindow {
 	public:
-        ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, Callback callback);
+        ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, bool hasPreview, Callback callback);
 
     protected:
         std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
+		LocalisedString getItemLabel(const String& id, const String& name, bool hasSearch) override;
+		std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch) override;
+		void sortItems(std::vector<std::pair<String, String>>& items) override;
+
+		LocalisedString getPreviewItemLabel(const String& id, const String& name, bool hasSearch);
+        std::shared_ptr<UIImage> makePreviewIcon(const String& id, bool hasSearch);
+		std::shared_ptr<UISizer> makePreviewItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch);
+
+		SceneEditorWindow& sceneEditorWindow;
+		AssetType type;
 
 	private:
-		AssetType type;
 		Sprite icon;
+		Sprite emptyPreviewIcon;
+		Sprite emptyPreviewIconSmall;
+		bool hasPreview;
 	};
 
 	class ChooseImportAssetWindow : public ChooseAssetWindow {
@@ -98,23 +110,14 @@ namespace Halley {
 		std::map<ImportAssetType, Sprite> icons;
 	};
 
-	class ChoosePrefabWindow : public ChooseAssetWindow {
+	class ChoosePrefabWindow : public ChooseAssetTypeWindow {
 	public:
 		ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, Callback callback);
 	
     protected:
-		LocalisedString getItemLabel(const String& id, const String& name, bool hasSearch) override;
-        std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
-		std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch) override;
 		void onCategorySet(const String& id) override;
-		void sortItems(std::vector<std::pair<String, String>>& items) override;
 	
 	private:
 		constexpr const static char* lastCategoryKey = "prefab_picker.last_category";
-		
-		Sprite icon;
-		Sprite emptyPreviewIcon;
-		Sprite emptyPreviewIconSmall;
-		SceneEditorWindow& sceneEditorWindow;
 	};
 }

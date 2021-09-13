@@ -305,6 +305,9 @@ void ChooseAssetWindow::cancel()
 	destroy();
 }
 
+
+
+
 AddComponentWindow::AddComponentWindow(UIFactory& factory, const std::vector<String>& componentList, Callback callback)
 	: ChooseAssetWindow(factory, std::move(callback), false)
 {
@@ -312,21 +315,7 @@ AddComponentWindow::AddComponentWindow(UIFactory& factory, const std::vector<Str
 	setTitle(LocalisedString::fromHardcodedString("Add Component"));
 }
 
-ChooseAssetTypeWindow::ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, Callback callback)
-	: ChooseAssetWindow(factory, std::move(callback))
-	, type(type)
-{
-	setAssetIds(gameResources.ofType(type).enumerate(), defaultOption);
-	setTitle(LocalisedString::fromHardcodedString("Choose " + toString(type)));
-}
 
-std::shared_ptr<UIImage> ChooseAssetTypeWindow::makeIcon(const String& id, bool hasSearch)
-{
-	if (!icon.hasMaterial()) {
-		icon = getFactory().makeAssetTypeIcon(type);
-	}
-	return std::make_shared<UIImage>(icon);
-}
 
 ChooseImportAssetWindow::ChooseImportAssetWindow(UIFactory& factory, Project& project, Callback callback)
 	: ChooseAssetWindow(factory, std::move(callback), false)
@@ -357,23 +346,58 @@ bool ChooseImportAssetWindow::canShowAll() const
 	return false;
 }
 
-ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, Callback callback)
-	: ChooseAssetWindow(factory, std::move(callback), false, UISizerType::Grid, 4)
+
+
+ChooseAssetTypeWindow::ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, bool hasPreview, Callback callback)
+	: ChooseAssetWindow(factory, std::move(callback), false, UISizerType::Grid, hasPreview ? 4 : 1)
 	, sceneEditorWindow(sceneEditorWindow)
+	, type(type)
+	, hasPreview(hasPreview)
 {
-	const auto lastCategory = sceneEditorWindow.getSetting(EditorSettingType::Project, lastCategoryKey).asString("");
-
-	setAssetIds(gameResources.ofType(AssetType::Prefab).enumerate(), std::move(defaultOption));
-	setTitle(LocalisedString::fromHardcodedString("Choose Prefab"));
-	setCategoryFilters(sceneEditorWindow.getPrefabCategoryFilters(), lastCategory);
+	setAssetIds(gameResources.ofType(type).enumerate(), defaultOption);
+	setTitle(LocalisedString::fromHardcodedString("Choose " + toString(type)));
 }
 
-void ChoosePrefabWindow::onCategorySet(const String& id)
+std::shared_ptr<UIImage> ChooseAssetTypeWindow::makeIcon(const String& id, bool hasSearch)
 {
-	sceneEditorWindow.setSetting(EditorSettingType::Project, lastCategoryKey, ConfigNode(id));
+	if (hasPreview) {
+		return makePreviewIcon(id, hasSearch);
+	} else {
+		if (!icon.hasMaterial()) {
+			icon = getFactory().makeAssetTypeIcon(type);
+		}
+		return std::make_shared<UIImage>(icon);
+	}
 }
 
-LocalisedString ChoosePrefabWindow::getItemLabel(const String& id, const String& name, bool hasSearch)
+LocalisedString ChooseAssetTypeWindow::getItemLabel(const String& id, const String& name, bool hasSearch)
+{
+	if (hasPreview) {
+		return getPreviewItemLabel(id, name, hasSearch);
+	} else {
+		return ChooseAssetWindow::getItemLabel(id, name, hasSearch);
+	}
+}
+
+std::shared_ptr<UISizer> ChooseAssetTypeWindow::makeItemSizer(std::shared_ptr<UIImage> uiImage, std::shared_ptr<UILabel> uiLabel, bool hasSearch)
+{
+	if (hasPreview) {
+		return makePreviewItemSizer(uiImage, uiLabel, hasSearch);
+	} else {
+		return ChooseAssetWindow::makeItemSizer(uiImage, uiLabel, hasSearch);
+	}
+}
+
+void ChooseAssetTypeWindow::sortItems(std::vector<std::pair<String, String>>& values)
+{
+	if (hasPreview) {
+		sortItemsById(values);
+	} else {
+		ChooseAssetWindow::sortItems(values);
+	}
+}
+
+LocalisedString ChooseAssetTypeWindow::getPreviewItemLabel(const String& id, const String& name, bool hasSearch)
 {
 	if (hasSearch) {
 		return LocalisedString::fromUserString(id);
@@ -382,7 +406,7 @@ LocalisedString ChoosePrefabWindow::getItemLabel(const String& id, const String&
 	}
 }
 
-std::shared_ptr<UIImage> ChoosePrefabWindow::makeIcon(const String& id, bool hasSearch)
+std::shared_ptr<UIImage> ChooseAssetTypeWindow::makePreviewIcon(const String& id, bool hasSearch)
 {
 	const Vector2f thumbSizeBig = Vector2f(128, 128);
 	const Vector2f thumbSizeSmall = Vector2f(64, 64);
@@ -391,14 +415,14 @@ std::shared_ptr<UIImage> ChoosePrefabWindow::makeIcon(const String& id, bool has
 	if (!icon.hasMaterial()) {
 		emptyPreviewIcon = Sprite().setImage(getFactory().getResources(), "whitebox.png").setColour(Colour4f(0, 0, 0, 0)).scaleTo(thumbSizeBig);
 		emptyPreviewIconSmall = emptyPreviewIcon.clone().scaleTo(thumbSizeSmall);
-		icon = getFactory().makeAssetTypeIcon(AssetType::Prefab);
+		icon = getFactory().makeAssetTypeIcon(type);
 	}
 	auto image = std::make_shared<UIImage>(hasSearch ? emptyPreviewIconSmall : emptyPreviewIcon);
 	auto imageWeak = std::weak_ptr(image);
 	
 	image->addBehaviour(std::make_shared<UIImageVisibleBehaviour>([imageWeak, this, id, thumbSize] (UIImage& img)
 	{
-		if (auto future = sceneEditorWindow.getAssetPreviewData(AssetType::Prefab, id, Vector2i(thumbSize)); future.isValid()) {
+		if (auto future = sceneEditorWindow.getAssetPreviewData(type, id, Vector2i(thumbSize)); future.isValid()) {
 			future.then(Executors::getMainThread(), [imageWeak, thumbSize] (AssetPreviewData data)
 			{
 				if (auto image = imageWeak.lock(); image) {
@@ -419,7 +443,7 @@ std::shared_ptr<UIImage> ChoosePrefabWindow::makeIcon(const String& id, bool has
 	return image;
 }
 
-std::shared_ptr<UISizer> ChoosePrefabWindow::makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch)
+std::shared_ptr<UISizer> ChooseAssetTypeWindow::makePreviewItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch)
 {
 	if (hasSearch) {
 		return ChooseAssetWindow::makeItemSizer(std::move(icon), std::move(label), hasSearch);
@@ -429,7 +453,17 @@ std::shared_ptr<UISizer> ChoosePrefabWindow::makeItemSizer(std::shared_ptr<UIIma
 	}
 }
 
-void ChoosePrefabWindow::sortItems(std::vector<std::pair<String, String>>& items)
+
+
+
+ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, Callback callback)
+	: ChooseAssetTypeWindow(factory, AssetType::Prefab, defaultOption, gameResources, sceneEditorWindow, true, std::move(callback))
 {
-	sortItemsById(items);
+	const auto lastCategory = sceneEditorWindow.getSetting(EditorSettingType::Project, lastCategoryKey).asString("");
+	setCategoryFilters(sceneEditorWindow.getPrefabCategoryFilters(), lastCategory);
+}
+
+void ChoosePrefabWindow::onCategorySet(const String& id)
+{
+	sceneEditorWindow.setSetting(EditorSettingType::Project, lastCategoryKey, ConfigNode(id));
 }
