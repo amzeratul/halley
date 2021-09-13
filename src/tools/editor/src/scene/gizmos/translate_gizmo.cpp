@@ -97,36 +97,26 @@ std::vector<String> TranslateGizmo::getHighlightedComponents() const
 
 bool TranslateGizmo::onKeyPress(KeyboardKeyPress key)
 {
-	if (key.is(KeyCode::Left)) {
-		moveBy(Vector2i(-1, 0));
+	const bool fast = (int(key.mod) & int(KeyMods::Shift)) != 0;
+	const bool iso = (int(key.mod) & int(KeyMods::Ctrl)) != 0;
+	const int speed = fast ? 5 : 1;
+	const Vector2i xAxis = (iso ? Vector2i(2, 1) : Vector2i(1, 0)) * speed;
+	const Vector2i yAxis = (iso ? Vector2i(2, -1) : Vector2i(0, -1)) * speed;
+
+	if (key.key == KeyCode::Left) {
+		moveBy(-xAxis);
 		return true;
 	}
-	if (key.is(KeyCode::Right)) {
-		moveBy(Vector2i(1, 0));
+	if (key.key == KeyCode::Right) {
+		moveBy(xAxis);
 		return true;
 	}
-	if (key.is(KeyCode::Up)) {
-		moveBy(Vector2i(0, -1));
+	if (key.key == KeyCode::Up) {
+		moveBy(yAxis);
 		return true;
 	}
-	if (key.is(KeyCode::Down)) {
-		moveBy(Vector2i(0, 1));
-		return true;
-	}
-	if (key.is(KeyCode::Left, KeyMods::Shift)) {
-		moveBy(Vector2i(-5, 0));
-		return true;
-	}
-	if (key.is(KeyCode::Right, KeyMods::Shift)) {
-		moveBy(Vector2i(5, 0));
-		return true;
-	}
-	if (key.is(KeyCode::Up, KeyMods::Shift)) {
-		moveBy(Vector2i(0, -5));
-		return true;
-	}
-	if (key.is(KeyCode::Down, KeyMods::Shift)) {
-		moveBy(Vector2i(0, 5));
+	if (key.key == KeyCode::Down) {
+		moveBy(-yAxis);
 		return true;
 	}
 
