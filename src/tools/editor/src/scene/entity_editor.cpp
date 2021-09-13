@@ -49,10 +49,11 @@ void EntityEditor::update(Time t, bool moved)
 	}
 }
 
-void EntityEditor::setSceneEditorWindow(SceneEditorWindow& editor)
+void EntityEditor::setSceneEditorWindow(SceneEditorWindow& editor, const HalleyAPI& api)
 {
 	sceneEditor = &editor;
 	entityIcons = &editor.getEntityIcons();
+	this->api = &api;
 	prefabName->setSceneEditorWindow(editor);
 
 	auto icons = entityIcons->getEntries();
@@ -86,6 +87,11 @@ void EntityEditor::makeUI()
 	setHandle(UIEventType::ButtonClicked, "addComponentButton", [=](const UIEvent& event)
 	{
 		addComponent();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "pasteComponentButton", [=](const UIEvent& event)
+	{
+		pasteComponentsFromClipboard();
 	});
 
 	setHandle(UIEventType::TextSubmit, "entityName", [=] (const UIEvent& event)
@@ -189,6 +195,10 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 	{
 		deleteComponent(componentType);
 	});
+	componentUI->setHandle(UIEventType::ButtonClicked, "copyComponentButton", [=] (const UIEvent& event)
+	{
+		copyComponent(componentType);
+	});
 
 	auto componentFields = componentUI->getWidget("componentFields");
 	
@@ -259,12 +269,12 @@ void EntityEditor::addComponent()
 	getRoot()->addChild(std::make_shared<AddComponentWindow>(factory, componentNames, [=] (std::optional<String> result)
 	{
 		if (result) {
-			addComponent(result.value());
+			addComponent(result.value(), ConfigNode::MapType());
 		}
 	}));
 }
 
-void EntityEditor::addComponent(const String& name)
+void EntityEditor::addComponent(const String& name, ConfigNode data)
 {
 	// Dependencies
 	const auto iter = ecsData->getComponents().find(name);
@@ -281,12 +291,12 @@ void EntityEditor::addComponent(const String& name)
 	auto prefabComponents = getComponentsOnPrefab();
 	for (const auto& dep: deps) {
 		if (existingComponents.find(dep) == existingComponents.end() && prefabComponents.find(dep) == prefabComponents.end()) {
-			addComponent(dep);
+			addComponent(dep, ConfigNode::MapType());
 		}
 	}
 	
 	// Insert
-	components.emplace_back(name, ConfigNode::MapType());
+	components.emplace_back(name, std::move(data));
 
 	// Reload
 	needToReloadUI = true;	
@@ -307,6 +317,99 @@ void EntityEditor::deleteComponent(const String& name)
 			return;
 		}
 	}
+}
+
+void EntityEditor::copyComponent(const String& name)
+{
+	auto& components = getEntityData().getComponents();
+	
+	for (size_t i = 0; i < components.size(); ++i) {
+		if (components[i].first == name) {
+			copyComponentToClipboard(name, components[i].second);
+			return;
+		}
+	}
+}
+
+void EntityEditor::copyComponentToClipboard(const String& name, const ConfigNode& data)
+{
+	auto clipboard = api->system->getClipboard();
+	if (!clipboard) {
+		return;
+	}
+	
+	ConfigNode component = ConfigNode::MapType();
+	component[name] = ConfigNode(data);
+
+	ConfigNode components = ConfigNode::SequenceType();
+	components.asSequence().push_back(std::move(component));
+
+	ConfigNode result = ConfigNode::MapType();
+	result["components"] = std::move(components);
+
+	YAMLConvert::EmitOptions options;
+	clipboard->setData(YAMLConvert::generateYAML(result, options));
+}
+
+void EntityEditor::pasteComponentsFromClipboard()
+{
+	auto clipboard = api->system->getClipboard();
+	if (!clipboard) {
+		return;
+	}
+
+	auto data = clipboard->getStringData();
+	if (!data) {
+		return;
+	}
+
+	ConfigFile file;
+	try {
+		YAMLConvert::parseConfig(file, gsl::as_bytes(gsl::span<const char>(data->c_str(), data->length())));
+		if (isValidComponents(file.getRoot())) {
+			pasteComponents(file.getRoot());
+		}
+	} catch (...) {}
+}
+
+bool EntityEditor::isValidComponents(const ConfigNode& data)
+{
+	if (data.hasKey("components")) {
+		auto& components = data["components"];
+		if (components.getType() == ConfigNodeType::Sequence) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void EntityEditor::pasteComponents(const ConfigNode& data)
+{
+	for (const auto& comp: data["components"].asSequence()) {
+		if (comp.getType() == ConfigNodeType::Map) {
+			for (const auto& [k, v]: comp.asMap()) {
+				pasteComponent(k, ConfigNode(v));
+			}
+		}
+	}
+}
+
+void EntityEditor::pasteComponent(const String& name, ConfigNode data)
+{
+	auto& components = getEntityData().getComponents();
+	
+	for (size_t i = 0; i < components.size(); ++i) {
+		if (components[i].first == name) {
+			components[i].second = std::move(data);
+
+			needToReloadUI = true;
+			onEntityUpdated();
+			return;
+		}
+	}
+
+	// Not found, add it instead
+	addComponent(name, std::move(data));
 }
 
 void EntityEditor::setName(const String& name)

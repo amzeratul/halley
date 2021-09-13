@@ -24,7 +24,7 @@ namespace Halley {
 		
 		void update(Time t, bool moved) override;
 		
-		void setSceneEditorWindow(SceneEditorWindow& sceneEditor);
+		void setSceneEditorWindow(SceneEditorWindow& sceneEditor, const HalleyAPI& api);
 		void setECSData(ECSData& data);
 
 		bool loadEntity(const String& id, EntityData& data, const Prefab* prefabData, bool force, Resources& gameResources);
@@ -36,8 +36,14 @@ namespace Halley {
 		void setDefaultName(const String& name, const String& prevName) override;
 
 		void addComponent();
-		void addComponent(const String& name);
+		void addComponent(const String& name, ConfigNode data);
 		void deleteComponent(const String& name);
+		void copyComponent(const String& name);
+		void copyComponentToClipboard(const String& name, const ConfigNode& data);
+		void pasteComponentsFromClipboard();
+		bool isValidComponents(const ConfigNode& data);
+		void pasteComponents(const ConfigNode& data);
+		void pasteComponent(const String& name, ConfigNode data);
 
 		void setHighlightedComponents(std::vector<String> componentNames);
 
@@ -48,6 +54,7 @@ namespace Halley {
 		UIFactory& factory;
 		ECSData* ecsData = nullptr;
 		SceneEditorWindow* sceneEditor = nullptr;
+		const HalleyAPI* api = nullptr;
 		const EntityIcons* entityIcons = nullptr;
 		std::shared_ptr<EntityEditorFactory> entityEditorFactory;
 		

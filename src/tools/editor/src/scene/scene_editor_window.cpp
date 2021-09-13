@@ -67,7 +67,7 @@ void SceneEditorWindow::makeUI()
 	entityList->setSceneEditorWindow(*this);
 
 	entityEditor = getWidgetAs<EntityEditor>("entityEditor");
-	entityEditor->setSceneEditorWindow(*this);
+	entityEditor->setSceneEditorWindow(*this, api);
 
 	toolMode = getWidgetAs<UIList>("toolMode");
 	
@@ -945,7 +945,7 @@ void SceneEditorWindow::refreshAssets()
 
 void SceneEditorWindow::addComponentToCurrentEntity(const String& componentName)
 {
-	entityEditor->addComponent(componentName);
+	entityEditor->addComponent(componentName, ConfigNode::MapType());
 }
 
 void SceneEditorWindow::setHighlightedComponents(std::vector<String> componentNames)

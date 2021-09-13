@@ -46,4 +46,6 @@ children:
   - widget: { id: fields, class: widget }
     sizer: { type: vertical, gap: 8 }
   - widget: { id: addComponentButton, class: button, text: "Add Component", size: [ 30, 25 ], tooltip: "Add a new Component to this Entity. [Ctrl+T]" }
+  - widget: { id: pasteComponentButton, class: button, text: "Paste Component", size: [ 30, 25 ], tooltip: "Paste a Component to this Entity." }
+    border: [0, -4, 0, 0]
 ...
