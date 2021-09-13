@@ -12,7 +12,7 @@ namespace Halley {
 		void setPosition(Vector2f position) { this->position = position; }
 		
 		bool canInteractWithMouse() const override;
-		void pressMouse(Vector2f mousePos, int button) override;
+		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 		void releaseMouse(Vector2f mousePos, int button) override;
 		void onMouseOver(Vector2f mousePos) override;
 		bool isFocusLocked() const override;

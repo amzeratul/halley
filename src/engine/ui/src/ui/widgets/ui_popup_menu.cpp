@@ -20,7 +20,7 @@ void UIPopupMenu::update(Time t, bool moved)
 	}
 }
 
-void UIPopupMenu::pressMouse(Vector2f mousePos, int button)
+void UIPopupMenu::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	if (!getRect().contains(mousePos)) {
 		destroy();

@@ -131,8 +131,8 @@ namespace Halley {
 	public:
 		explicit UIListItem(const String& id, UIList& parent, UIStyle style, int index, Vector4f extraMouseArea);
 
-		void onClicked(Vector2f mousePos) override;
-		void onDoubleClicked(Vector2f mousePos) override;
+		void onClicked(Vector2f mousePos, KeyMods keyMods) override;
+		void onDoubleClicked(Vector2f mousePos, KeyMods keyMods) override;
 		void setSelected(bool selected);
 
 		void setStyle(UIStyle style);
@@ -160,7 +160,7 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 
 		void onMouseOver(Vector2f mousePos) override;
-		void pressMouse(Vector2f mousePos, int button) override;
+		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 		void releaseMouse(Vector2f mousePos, int button) override;
 		void setDragPos(Vector2f pos);
 		void onEnabledChanged() override;

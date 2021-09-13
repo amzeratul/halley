@@ -23,10 +23,10 @@ namespace Halley {
 
         UIScrollPane* getScrollPane() const;
 
-        void pressMouse(Vector2f mousePos, int button) override;
+        void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 		void releaseMouse(Vector2f mousePos, int button) override;
         void onMouseOver(Vector2f mousePos) override;
-		void onDoubleClicked(Vector2f mousePos) override;
+		void onDoubleClicked(Vector2f mousePos, KeyMods keyMods) override;
     	
     private:
 		Sprite bg;

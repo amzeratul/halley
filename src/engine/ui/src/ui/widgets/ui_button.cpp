@@ -1,6 +1,7 @@
 #include "widgets/ui_button.h"
 #include "ui_style.h"
 #include "ui_painter.h"
+#include "halley/support/logger.h"
 #include "widgets/ui_image.h"
 #include "widgets/ui_label.h"
 
@@ -49,7 +50,7 @@ void UIButton::update(Time t, bool moved)
 	}
 }
 
-void UIButton::onClicked(Vector2f)
+void UIButton::onClicked(Vector2f, KeyMods keyMods)
 {
 	sendEvent(UIEvent(UIEventType::ButtonClicked, getId()));
 }
@@ -83,7 +84,7 @@ bool UIButton::isFocusLocked() const
 
 void UIButton::onManualControlActivate()
 {
-	onClicked(getPosition());
+	onClicked(getPosition(), KeyMods::None);
 }
 
 void UIButton::setCanDoBorderOnly(bool canDo)

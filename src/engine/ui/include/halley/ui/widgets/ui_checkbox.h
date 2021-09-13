@@ -14,7 +14,7 @@ namespace Halley {
         bool isChecked() const;
         void setChecked(bool checked);
 
-		void onClicked(Vector2f mousePos) override;
+		void onClicked(Vector2f mousePos, KeyMods keyMods) override;
 		void doSetState(State state) override;
 
 		void onManualControlCycleValue(int delta) override;

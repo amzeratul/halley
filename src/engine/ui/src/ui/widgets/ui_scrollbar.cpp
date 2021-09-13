@@ -87,7 +87,7 @@ bool UIScrollBar::canInteractWithMouse() const
 	return true;
 }
 
-void UIScrollBar::pressMouse(Vector2f mousePos, int button)
+void UIScrollBar::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	if (isEnabled()) {
 		int axis = direction == UIScrollDirection::Horizontal ? 0 : 1;
@@ -146,9 +146,9 @@ void UIScrollThumb::onMouseOver(Vector2f mousePos)
 	}
 }
 
-void UIScrollThumb::pressMouse(Vector2f mousePos, int button)
+void UIScrollThumb::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
-	UIButton::pressMouse(mousePos, button);
+	UIButton::pressMouse(mousePos, button, keyMods);
 	if (button == 0) {
 		dragging = true;
 		mouseStartPos = mousePos;

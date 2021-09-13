@@ -69,7 +69,7 @@ namespace Halley {
 
 		bool onKeyPress(KeyboardKeyPress key) override;
 		
-		void pressMouse(Vector2f mousePos, int button) override;
+		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 
 		void readFromDataBind() override;
 

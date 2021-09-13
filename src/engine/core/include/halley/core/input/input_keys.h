@@ -138,11 +138,11 @@ namespace Halley {
 		LCtrl = 352,
 		LShift = 353,
 		LAlt = 354,
-		LGui = 355,
+		LMod = 355,
 		RCtrl = 356,
 		RShift = 357,
 		RAlt = 358,
-		RGui = 359,
+		RMod = 359,
 
 		Mode = 385,
 

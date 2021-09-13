@@ -80,7 +80,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 
 		// Update input
 		if (activeInputType == UIInputType::Mouse) {
-			updateMouse(mouse);
+			updateMouse(mouse, getKeyMods());
 		}
 		updateGamepadInput(manual);
 
@@ -239,6 +239,26 @@ void UIRoot::receiveKeyPress(KeyboardKeyPress key)
 	onUnhandledKeyPress(key);
 }
 
+KeyMods UIRoot::getKeyMods()
+{
+	int result = 0;
+	if (keyboard) {
+		if (keyboard->isButtonDown(KeyCode::LCtrl) || keyboard->isButtonDown(KeyCode::RCtrl)) {
+			result |= int(KeyMods::Ctrl);
+		}
+		if (keyboard->isButtonDown(KeyCode::LShift) || keyboard->isButtonDown(KeyCode::RShift)) {
+			result |= int(KeyMods::Shift);
+		}
+		if (keyboard->isButtonDown(KeyCode::LAlt) || keyboard->isButtonDown(KeyCode::RAlt)) {
+			result |= int(KeyMods::Alt);
+		}
+		if (keyboard->isButtonDown(KeyCode::LMod) || keyboard->isButtonDown(KeyCode::RMod)) {
+			result |= int(KeyMods::Mod);
+		}
+	}
+	return KeyMods(result);
+}
+
 void UIRoot::onUnhandledKeyPress(KeyboardKeyPress key)
 {
 	if (unhandledKeyPressListener && unhandledKeyPressListener(key)) {
@@ -288,7 +308,7 @@ Vector2f UIRoot::getLastMousePos() const
 	return lastMousePos;
 }
 
-void UIRoot::updateMouse(const spInputDevice& mouse)
+void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 {
 	// Go through all root-level widgets and find the actual widget under the mouse
 	const Vector2f mousePos = mouseRemap(mouse->getPosition() + uiRect.getTopLeft() - overscan);
@@ -309,7 +329,7 @@ void UIRoot::updateMouse(const spInputDevice& mouse)
 					setFocus(actuallyUnderMouse);
 				}
 				mouse->clearButtonPress(i);
-				actuallyUnderMouse->pressMouse(mousePos, i);
+				actuallyUnderMouse->pressMouse(mousePos, i, keyMods);
 				
 				UIEventType pressEvent;
 				if (i == 0) pressEvent = UIEventType::MousePressLeft;

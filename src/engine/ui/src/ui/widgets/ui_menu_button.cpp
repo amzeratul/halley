@@ -10,7 +10,7 @@ UIMenuButton::UIMenuButton(std::shared_ptr<UIMenuButtonGroup> group, String id, 
 	Expects(group != nullptr);
 }
 
-void UIMenuButton::onClicked(Vector2f mousePos)
+void UIMenuButton::onClicked(Vector2f mousePos, KeyMods keyMods)
 {
 	onOptionChosen();
 }

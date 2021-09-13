@@ -17,7 +17,7 @@ bool UIGraphNode::canInteractWithMouse() const
 	return true;
 }
 
-void UIGraphNode::pressMouse(Vector2f mousePos, int button)
+void UIGraphNode::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	if (button == 0) {
 		Vector2f parentPos;

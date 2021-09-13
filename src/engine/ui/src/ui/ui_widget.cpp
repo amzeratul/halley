@@ -373,7 +373,7 @@ void UIWidget::setMouseOver(bool mo)
 	mouseOver = mo;
 }
 
-void UIWidget::pressMouse(Vector2f mousePos, int button)
+void UIWidget::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 }
 

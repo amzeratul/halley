@@ -713,12 +713,12 @@ UIListItem::UIListItem(const String& id, UIList& parent, UIStyle style, int inde
 	setMinSize(style.getVector2f("minSize", Vector2f()));
 }
 
-void UIListItem::onDoubleClicked(Vector2f mousePos)
+void UIListItem::onDoubleClicked(Vector2f mousePos, KeyMods keyMods)
 {
 	parent.onItemDoubleClicked(*this);
 }
 
-void UIListItem::onClicked(Vector2f mousePos)
+void UIListItem::onClicked(Vector2f mousePos, KeyMods keyMods)
 {
 }
 
@@ -819,9 +819,9 @@ void UIListItem::onMouseOver(Vector2f mousePos)
 	}
 }
 
-void UIListItem::pressMouse(Vector2f mousePos, int button)
+void UIListItem::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
-	UIClickable::pressMouse(mousePos, button);
+	UIClickable::pressMouse(mousePos, button, keyMods);
 	if (button == 0) {
 		held = true;
 		dragged = false;

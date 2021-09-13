@@ -48,7 +48,7 @@ namespace Halley {
 
 		void update(Time t, bool moved) override;
 		
-		void pressMouse(Vector2f mousePos, int button) override;
+		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 
 		void onAddedToRoot(UIRoot& root) override;
 		void setInputButtons(const UIInputButtons& buttons) override;

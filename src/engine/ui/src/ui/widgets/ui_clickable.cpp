@@ -16,30 +16,30 @@ bool UIClickable::canInteractWithMouse() const
 
 bool UIClickable::isFocusLocked() const
 {
-	return held[0];
+	return held[0].first;
 }
 
-void UIClickable::pressMouse(Vector2f, int button)
+void UIClickable::pressMouse(Vector2f, int button, KeyMods keyMods)
 {
 	if (isEnabled()) {
-		held[button] = true;
+		held[button] = { true, keyMods };
 	}
 }
 
 void UIClickable::releaseMouse(Vector2f mousePos, int button)
 {
 	if (isEnabled()) {
-		if (held[button] && isMouseOver()) {
-			onMouseClicked(mousePos, button);
+		if (held[button].first && isMouseOver()) {
+			onMouseClicked(mousePos, button, held[button].second);
 
 			if (clickTime[button] < 0.5 && (mousePos - clickPos[button]).length() < 3.0f) {
-				onMouseDoubleClicked(mousePos, button);
+				onMouseDoubleClicked(mousePos, button, held[button].second);
 			}
 
 			clickTime[button] = 0;
 			clickPos[button] = mousePos;
 		}
-		held[button] = false;
+		held[button] = { false, KeyMods::None };
 	}
 }
 
@@ -56,7 +56,7 @@ UIClickable::State UIClickable::getCurState() const
 bool UIClickable::updateButton()
 {
 	bool dirty = false;
-	if (held[0]) {
+	if (held[0].first) {
 		if (isMouseOver()) {
 			dirty |= setState(State::Down);
 		} else {
@@ -78,23 +78,23 @@ void UIClickable::doForceUpdate()
 	forceUpdate = true;
 }
 
-void UIClickable::onClicked(Vector2f mousePos)
+void UIClickable::onClicked(Vector2f mousePos, KeyMods keyMods)
 {
 }
 
-void UIClickable::onDoubleClicked(Vector2f mousePos)
+void UIClickable::onDoubleClicked(Vector2f mousePos, KeyMods keyMods)
 {
 }
 
-void UIClickable::onRightClicked(Vector2f mousePos)
+void UIClickable::onRightClicked(Vector2f mousePos, KeyMods keyMods)
 {
 }
 
-void UIClickable::onRightDoubleClicked(Vector2f mousePos)
+void UIClickable::onRightDoubleClicked(Vector2f mousePos, KeyMods keyMods)
 {
 }
 
-void UIClickable::onMiddleClicked(Vector2f mousePos)
+void UIClickable::onMiddleClicked(Vector2f mousePos, KeyMods keyMods)
 {
 }
 
@@ -102,7 +102,7 @@ void UIClickable::onGamepadInput(const UIInputResults& input, Time time)
 {
 	if (input.isButtonPressed(UIGamepadInput::Button::Accept)) {
 		onShortcutPressed();
-		onClicked(Vector2f());
+		onClicked(Vector2f(), KeyMods::None);
 	}
 }
 
@@ -140,7 +140,7 @@ void UIClickable::onEnabledChanged()
 {
 	if (!isEnabled()) {
 		for (auto& i : held) {
-			i = false;
+			i = { false, KeyMods::None };
 		}
 	}
 	doForceUpdate();
@@ -150,34 +150,34 @@ void UIClickable::onShortcutPressed()
 {
 }
 
-void UIClickable::onMouseClicked(Vector2f mousePos, int button)
+void UIClickable::onMouseClicked(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	switch (button) {
 	case 0:
-		onClicked(mousePos);
+		onClicked(mousePos, keyMods);
 		break;
 	case 1:
-		onMiddleClicked(mousePos);
+		onMiddleClicked(mousePos, keyMods);
 		break;
 	case 2:
-		onRightClicked(mousePos);
+		onRightClicked(mousePos, keyMods);
 		break;
 	default:
 		Logger::logError("Unhandled mouse button clicked: " + toString(button));
 	}
 }
 
-void UIClickable::onMouseDoubleClicked(Vector2f mousePos, int button)
+void UIClickable::onMouseDoubleClicked(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	switch (button) {
 	case 0:
-		onDoubleClicked(mousePos);
+		onDoubleClicked(mousePos, keyMods);
 		break;
 	case 1:
 		// do nothing
 		break;
 	case 2:
-		onRightDoubleClicked(mousePos);
+		onRightDoubleClicked(mousePos, keyMods);
 		break;
 	default:
 		Logger::logError("Unhandled mouse button double clicked: " + toString(button));

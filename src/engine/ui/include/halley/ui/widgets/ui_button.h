@@ -13,7 +13,7 @@ namespace Halley {
 
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
-		void onClicked(Vector2f mousePos) override;
+		void onClicked(Vector2f mousePos, KeyMods keyMods) override;
 		void setInputType(UIInputType uiInput) override;
 
 		bool canInteractWithMouse() const override;

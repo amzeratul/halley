@@ -164,7 +164,7 @@ bool UISliderBar::isFocusLocked() const
 	return held;
 }
 
-void UISliderBar::pressMouse(Vector2f mousePos, int button)
+void UISliderBar::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	if (button == 0 && isEnabled()) {
 		held = true;

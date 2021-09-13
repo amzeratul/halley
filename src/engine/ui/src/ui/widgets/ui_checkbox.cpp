@@ -41,7 +41,7 @@ void UICheckbox::setChecked(bool c)
 	}
 }
 
-void UICheckbox::onClicked(Vector2f)
+void UICheckbox::onClicked(Vector2f, KeyMods)
 {
 	setChecked(!checked);
 }

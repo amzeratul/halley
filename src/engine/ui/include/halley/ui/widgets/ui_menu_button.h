@@ -10,7 +10,7 @@ namespace Halley {
 
 		UIMenuButton(std::shared_ptr<UIMenuButtonGroup> group, String id, Vector2f minSize = {}, std::optional<UISizer> sizer = {}, Vector4f innerBorder = {});
 
-		void onClicked(Vector2f mousePos) override;
+		void onClicked(Vector2f mousePos, KeyMods keyMods) override;
 		void onOptionChosen();
 		void setGroupFocused(bool focused);
 		bool isGroupFocused() const;

@@ -54,7 +54,7 @@ namespace Halley {
 		
 		bool canInteractWithMouse() const override;
 		bool isFocusLocked() const override;
-	    void pressMouse(Vector2f mousePos, int button) override;
+	    void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 	    void releaseMouse(Vector2f mousePos, int button) override;
 		void onMouseOver(Vector2f mousePos) override;
 		Rect4f getMouseRect() const override;

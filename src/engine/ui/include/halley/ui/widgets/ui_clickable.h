@@ -1,5 +1,6 @@
 #pragma once
 #include "../ui_widget.h"
+#include "halley/core/input/input_keys.h"
 
 namespace Halley {
 	class UIStyle;
@@ -18,18 +19,18 @@ namespace Halley {
 		bool canInteractWithMouse() const override;
 		bool isFocusLocked() const override;
 
-		void pressMouse(Vector2f mousePos, int button) override;
+		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 		void releaseMouse(Vector2f mousePos, int button) override;
 
 		void onClick(UIEventCallback callback);
 		
-		virtual void onClicked(Vector2f mousePos);
-		virtual void onDoubleClicked(Vector2f mousePos);
+		virtual void onClicked(Vector2f mousePos, KeyMods keyMods);
+		virtual void onDoubleClicked(Vector2f mousePos, KeyMods keyMods);
 
-		virtual void onRightClicked(Vector2f mousePos);
-		virtual void onRightDoubleClicked(Vector2f mousePos);
+		virtual void onRightClicked(Vector2f mousePos, KeyMods keyMods);
+		virtual void onRightDoubleClicked(Vector2f mousePos, KeyMods keyMods);
 
-		virtual void onMiddleClicked(Vector2f mousePos);
+		virtual void onMiddleClicked(Vector2f mousePos, KeyMods keyMods);
 		
 		void onGamepadInput(const UIInputResults& input, Time time) override;
 
@@ -51,13 +52,13 @@ namespace Halley {
 	private:
 		State curState = State::Up;
 		std::optional<Vector4f> mouseExtraBorder;
-		bool held[3] = {false, false, false};
+		std::pair<bool, KeyMods> held[3] = {{false, KeyMods::None}, {false, KeyMods::None}, {false, KeyMods::None}};
 		bool forceUpdate = false;
 
 		Vector2f clickPos[3] = {Vector2f(), Vector2f(), Vector2f()};
 		Time clickTime[3] = { 100.0, 100.0, 100.0 };
 
-		void onMouseClicked(Vector2f mousePos, int button);
-		void onMouseDoubleClicked(Vector2f mousePos, int button);
+		void onMouseClicked(Vector2f mousePos, int button, KeyMods keyMods);
+		void onMouseDoubleClicked(Vector2f mousePos, int button, KeyMods keyMods);
 	};
 }

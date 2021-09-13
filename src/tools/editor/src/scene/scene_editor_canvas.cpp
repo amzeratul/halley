@@ -88,7 +88,7 @@ bool SceneEditorCanvas::isFocusLocked() const
 	return inputState.leftClickHeld || inputState.middleClickHeld || inputState.rightClickHeld;
 }
 
-void SceneEditorCanvas::pressMouse(Vector2f mousePos, int button)
+void SceneEditorCanvas::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	switch (button) {
 	case 0:

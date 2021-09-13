@@ -93,7 +93,7 @@ namespace Halley {
 
 		std::shared_ptr<UIToolTip> toolTip;
 
-		void updateMouse(const std::shared_ptr<InputDevice>& mouse);
+		void updateMouse(const std::shared_ptr<InputDevice>& mouse, KeyMods keyMods);
 		void updateGamepadInputTree(const std::shared_ptr<InputDevice>& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting);
 		void updateGamepadInput(const std::shared_ptr<InputDevice>& input);
 
@@ -101,6 +101,7 @@ namespace Halley {
 		void sendKeyPress(KeyboardKeyPress key);
 		void onUnhandledKeyPress(KeyboardKeyPress key);
 		void receiveKeyPress(KeyboardKeyPress key) override;
+		KeyMods getKeyMods();
 
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled = false) const;
 		std::pair<std::shared_ptr<UIWidget>, int> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled = false, int childLayerAdjustment = 0) const;

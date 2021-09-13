@@ -209,7 +209,7 @@ void UIDropdown::update(Time t, bool moved)
 	}
 }
 
-void UIDropdown::onClicked(Vector2f mousePos)
+void UIDropdown::onClicked(Vector2f mousePos, KeyMods keyMods)
 {
 	if (openState == OpenState::Closed) {
 		open();

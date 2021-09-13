@@ -87,7 +87,7 @@ namespace Halley {
 		void setInnerBorder(Vector4f border);
 
 		void setMouseOver(bool mouseOver);
-		virtual void pressMouse(Vector2f mousePos, int button);
+		virtual void pressMouse(Vector2f mousePos, int button, KeyMods keyMods);
 		virtual void releaseMouse(Vector2f mousePos, int button);
 		virtual void onMouseOver(Vector2f mousePos);
 		virtual Rect4f getMouseRect() const;

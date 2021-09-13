@@ -361,7 +361,7 @@ bool UITextInput::onKeyPress(KeyboardKeyPress key)
 	return false;
 }
 
-void UITextInput::pressMouse(Vector2f mousePos, int button)
+void UITextInput::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	if (button == 0) {
 		Vector2f labelClickPos = mousePos - label.getPosition();

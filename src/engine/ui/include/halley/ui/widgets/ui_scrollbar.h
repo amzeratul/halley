@@ -12,7 +12,7 @@ namespace Halley {
 		void setScrollPane(UIScrollPane& pane);
 
 	    bool canInteractWithMouse() const override;
-	    void pressMouse(Vector2f mousePos, int button) override;
+	    void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 	    void releaseMouse(Vector2f mousePos, int button) override;
 
 		void setAlwaysShow(bool show);
@@ -43,7 +43,7 @@ namespace Halley {
 
 	protected:
 		void onMouseOver(Vector2f mousePos) override;
-		void pressMouse(Vector2f mousePos, int button) override;
+		void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 		void releaseMouse(Vector2f mousePos, int button) override;
 
 	private:

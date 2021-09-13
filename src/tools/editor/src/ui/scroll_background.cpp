@@ -57,7 +57,7 @@ UIScrollPane* ScrollBackground::getScrollPane() const
 	return dynamic_cast<UIScrollPane*>(getParent());
 }
 
-void ScrollBackground::pressMouse(Vector2f mousePos, int button)
+void ScrollBackground::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	if (button == 0) {
 		pane = getScrollPane();
@@ -68,7 +68,7 @@ void ScrollBackground::pressMouse(Vector2f mousePos, int button)
 		}
 	}
 
-	UIClickable::pressMouse(mousePos, button);
+	UIClickable::pressMouse(mousePos, button, keyMods);
 }
 
 void ScrollBackground::releaseMouse(Vector2f mousePos, int button)
@@ -97,7 +97,7 @@ void ScrollBackground::onMouseOver(Vector2f mousePos)
 	UIClickable::onMouseOver(mousePos);
 }
 
-void ScrollBackground::onDoubleClicked(Vector2f mousePos)
+void ScrollBackground::onDoubleClicked(Vector2f mousePos, KeyMods keyMods)
 {
 	sendEvent(UIEvent(UIEventType::ButtonDoubleClicked, getId()));
 }
