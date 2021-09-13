@@ -47,6 +47,8 @@ namespace Halley {
 
 		void setHighlightedComponents(std::vector<String> componentNames);
 
+		ISceneEditorWindow& getSceneEditorWindow() const override;
+
 	protected:
 		bool onKeyPress(KeyboardKeyPress key) override;
 

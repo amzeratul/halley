@@ -9,7 +9,7 @@ namespace Halley {
 	class SelectAssetWidget : public UIWidget {
 	public:
 		SelectAssetWidget(const String& id, UIFactory& factory, AssetType type);
-		SelectAssetWidget(const String& id, UIFactory& factory, AssetType type, Resources& gameResources);
+		SelectAssetWidget(const String& id, UIFactory& factory, AssetType type, Resources& gameResources, ISceneEditorWindow& sceneEditorWindow);
 
 		void setValue(const String& newValue);
 		String getValue() const;

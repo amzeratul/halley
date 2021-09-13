@@ -503,6 +503,11 @@ void EntityEditor::setHighlightedComponents(std::vector<String> componentNames)
 	}
 }
 
+ISceneEditorWindow& EntityEditor::getSceneEditorWindow() const
+{
+	return *sceneEditor;
+}
+
 void EntityEditor::setComponentColour(const String& name, UIWidget& component)
 {
 	const bool highlighted = std_ex::contains(highlightedComponents, name);

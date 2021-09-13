@@ -16,6 +16,11 @@ Resources& ComponentEditorContext::getGameResources() const
 	return gameResources;
 }
 
+ISceneEditorWindow& ComponentEditorContext::getSceneEditorWindow() const
+{
+	return entityEditor->getSceneEditorWindow();
+}
+
 UIFactory& ComponentEditorContext::getUIFactory() const
 {
 	return factory;

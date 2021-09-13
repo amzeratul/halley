@@ -14,10 +14,11 @@ SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, Asset
 	makeUI();
 }
 
-SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, AssetType type, Resources& gameResources)
+SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, AssetType type, Resources& gameResources, ISceneEditorWindow& sceneEditorWindow)
 	: SelectAssetWidget(id, factory, type)
 {
 	this->gameResources = &gameResources;
+	this->sceneEditorWindow = &dynamic_cast<SceneEditorWindow&>(sceneEditorWindow);
 }
 
 void SelectAssetWidget::setValue(const String& newValue)
@@ -98,7 +99,7 @@ void SelectAssetWidget::choose()
 			assert(sceneEditorWindow != nullptr);
 			window = std::make_shared<ChoosePrefabWindow>(factory, getValue(), *gameResources, *sceneEditorWindow, callback);
 		} else {
-			window = std::make_shared<ChooseAssetTypeWindow>(factory, type, getValue(), *gameResources, *sceneEditorWindow, false, callback);
+			window = std::make_shared<ChooseAssetTypeWindow>(factory, type, getValue(), *gameResources, *sceneEditorWindow, type == AssetType::Sprite, callback);
 		}
 		getRoot()->addChild(std::move(window));
 	}
