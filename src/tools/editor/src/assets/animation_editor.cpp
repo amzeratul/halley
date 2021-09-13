@@ -123,6 +123,8 @@ AnimationEditorDisplay::AnimationEditorDisplay(String id, Resources& resources)
 	nineSliceVSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
 	nineSliceHSprite.setImage(resources, "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
 	pivotSprite.setImage(resources, "ui/pivot.png").setColour(Colour4f(1, 0, 1));
+	crossHairH.setMaterial(resources, "Halley/SolidColour").setColour(Colour4f(1, 0, 1, 0.4f));
+	crossHairV.setMaterial(resources, "Halley/SolidColour").setColour(Colour4f(1, 0, 1, 0.4f));
 }
 
 void AnimationEditorDisplay::setZoom(float z)
@@ -202,7 +204,7 @@ void AnimationEditorDisplay::update(Time t, bool moved)
 
 	drawSprite = origSprite.clone().setPos(pivotPos).setScale(zoom).setNotSliced();
 	pivotSprite.setPos(displayPivotPos);
-	boundsSprite.setPos(getPosition()).scaleTo(bounds.getSize() * zoom);
+	boundsSprite.setPos(getPosition()).scaleTo((bounds.getSize() * zoom).round());
 
 	const auto slices = getCurrentSlices();
 	if (slices) {
@@ -212,6 +214,9 @@ void AnimationEditorDisplay::update(Time t, bool moved)
 		nineSliceVSprite.setVisible(false);
 		nineSliceHSprite.setVisible(false);
 	}
+
+	crossHairH.setSize(Vector2f(getSize().x, 1.0f)).setPosition(Vector2f(getPosition().x, screenSpaceMousePos.y));
+	crossHairV.setSize(Vector2f(1.0f, getSize().y)).setPosition(Vector2f(screenSpaceMousePos.x, getPosition().y));
 }
 
 void AnimationEditorDisplay::draw(UIPainter& painter) const
@@ -227,10 +232,19 @@ void AnimationEditorDisplay::draw(UIPainter& painter) const
 	if (nineSliceVSprite.isVisible()) {
 		painter.draw(nineSliceVSprite);
 	}
+	
+	const auto rect = getRect();
+	if (rect.getVertical().contains(crossHairH.getPosition().y)) {
+		painter.draw(crossHairH);
+	}
+	if (rect.getHorizontal().contains(crossHairV.getPosition().x)) {
+		painter.draw(crossHairV);
+	}
 }
 
 void AnimationEditorDisplay::onMouseOver(Vector2f mousePos)
 {
+	this->screenSpaceMousePos = mousePos;
 	this->mousePos = screenToImageSpace(mousePos);
 }
 
@@ -243,7 +257,7 @@ void AnimationEditorDisplay::updateBounds()
 {
 	bounds = Rect4f(origBounds);
 	
-	setMinSize(bounds.getSize() * zoom);
+	setMinSize((bounds.getSize() * zoom).round());
 }
 
 Vector2f AnimationEditorDisplay::imageToScreenSpace(Vector2f pos) const

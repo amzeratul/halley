@@ -2,7 +2,7 @@
 name: Halley/SolidColour
 base: sprite_base.yaml
 passes:
-  - blend: Alpha
+  - blend: Alpha Premultiplied
     shader:
     - language: hlsl
       vertex: sprite.vertex.hlsl

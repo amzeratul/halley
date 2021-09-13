@@ -71,6 +71,8 @@ namespace Halley {
 		Sprite nineSliceVSprite;
 		Sprite nineSliceHSprite;
 		Sprite pivotSprite;
+		Sprite crossHairH;
+		Sprite crossHairV;
 
 		std::optional<Vector2i> origPivot;
 		Rect4i origBounds;
@@ -78,6 +80,7 @@ namespace Halley {
 
 		float zoom = 1.0f;
 		Vector2f mousePos;
+		Vector2f screenSpaceMousePos;
 
 		void updateBounds();
 		Vector2f imageToScreenSpace(Vector2f pos) const;
