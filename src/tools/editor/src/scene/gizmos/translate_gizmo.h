@@ -25,7 +25,8 @@ namespace Halley {
 		bool isHighlighted() const override;
 		std::shared_ptr<UIWidget> makeUI() override;
 		std::vector<String> getHighlightedComponents() const override;
-	
+		bool onKeyPress(KeyboardKeyPress key) override;
+
 	private:
 		UIFactory& factory;
 		ISceneEditorWindow& sceneEditorWindow;
@@ -34,10 +35,13 @@ namespace Halley {
 		Vector2f handleOffset;
 		TranslateGizmoMode mode;
 		std::shared_ptr<UIList> uiMode;
+		Vector2i pendingMoveBy;
 
 		Circle getMainHandle() const;
 		void updateEntityData(Vector2f pos);
 		Vector2f getObjectOffset() const;
 		void setMode(TranslateGizmoMode mode);
+		void moveBy(Vector2i delta);
+		void doMoveBy();
 	};
 }

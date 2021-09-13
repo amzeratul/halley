@@ -134,6 +134,12 @@ ISceneEditorWindow& SceneEditorGizmoCollection::getSceneEditorWindow()
 
 bool SceneEditorGizmoCollection::onKeyPress(KeyboardKeyPress key, UIList& list)
 {
+	if (activeGizmo) {
+		if (activeGizmo->onKeyPress(key)) {
+			return true;
+		}
+	}
+
 	for (const auto& t: tools) {
 		if (key == t.shortcut) {
 			list.setSelectedOptionId(t.id);

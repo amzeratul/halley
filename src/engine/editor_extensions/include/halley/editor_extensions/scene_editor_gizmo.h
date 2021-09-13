@@ -94,6 +94,8 @@ namespace Halley {
 		
 		virtual std::vector<String> getHighlightedComponents() const;
 
+		virtual bool onKeyPress(KeyboardKeyPress key);
+
 	protected:
 		virtual void onEntityChanged();
 

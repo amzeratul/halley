@@ -26,6 +26,8 @@ void TranslateGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 		setMode(curMode);
 	}
 	
+	doMoveBy();
+
 	handle.update(inputState);
 
 	const auto transform = getComponent<Transform2DComponent>();
@@ -93,6 +95,44 @@ std::vector<String> TranslateGizmo::getHighlightedComponents() const
 	return { "Transform2D" };
 }
 
+bool TranslateGizmo::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::Left)) {
+		moveBy(Vector2i(-1, 0));
+		return true;
+	}
+	if (key.is(KeyCode::Right)) {
+		moveBy(Vector2i(1, 0));
+		return true;
+	}
+	if (key.is(KeyCode::Up)) {
+		moveBy(Vector2i(0, -1));
+		return true;
+	}
+	if (key.is(KeyCode::Down)) {
+		moveBy(Vector2i(0, 1));
+		return true;
+	}
+	if (key.is(KeyCode::Left, KeyMods::Shift)) {
+		moveBy(Vector2i(-5, 0));
+		return true;
+	}
+	if (key.is(KeyCode::Right, KeyMods::Shift)) {
+		moveBy(Vector2i(5, 0));
+		return true;
+	}
+	if (key.is(KeyCode::Up, KeyMods::Shift)) {
+		moveBy(Vector2i(0, -5));
+		return true;
+	}
+	if (key.is(KeyCode::Down, KeyMods::Shift)) {
+		moveBy(Vector2i(0, 5));
+		return true;
+	}
+
+	return false;
+}
+
 Circle TranslateGizmo::getMainHandle() const
 {
 	const auto pos = handle.getPosition();
@@ -128,4 +168,21 @@ void TranslateGizmo::setMode(TranslateGizmoMode mode)
 	this->mode = mode;
 	uiMode->setSelectedOptionId(toString(mode));
 	sceneEditorWindow.setSetting(EditorSettingType::Editor, "tools.translate.mode", ConfigNode(toString(mode)));
+}
+
+void TranslateGizmo::moveBy(Vector2i delta)
+{
+	pendingMoveBy += delta;
+}
+
+void TranslateGizmo::doMoveBy()
+{
+	const auto transform = getComponent<Transform2DComponent>();
+	if (!handle.isHeld() && transform) {
+		auto newPos = transform->getLocalPosition() + Vector2f(pendingMoveBy);
+		transform->setLocalPosition(newPos);
+		updateEntityData(newPos);
+	}
+
+	pendingMoveBy = Vector2i();
 }

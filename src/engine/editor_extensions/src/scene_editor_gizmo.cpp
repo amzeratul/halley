@@ -192,6 +192,11 @@ std::vector<String> SceneEditorGizmo::getHighlightedComponents() const
 	return {};
 }
 
+bool SceneEditorGizmo::onKeyPress(KeyboardKeyPress key)
+{
+	return false;
+}
+
 void SceneEditorGizmo::onEntityChanged()
 {}
 
