@@ -87,12 +87,12 @@ namespace Halley {
     public:
         ConfigNode serialize(Angle1f value, const ConfigNodeSerializationContext& context)
 		{
-			return ConfigNode(value.toRadians());
+			return ConfigNode(value.toDegrees());
 		}
 		
 		Angle1f deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node)
         {
-			return Angle1f::fromRadians(node.asFloat(0.0f));
+			return Angle1f::fromDegrees(node.asFloat(0.0f));
         }
     };
 
