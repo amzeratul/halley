@@ -98,6 +98,8 @@ namespace Halley {
     	std::vector<EntityRef> getRootEntitiesAt(Vector2f point) const;
        	virtual float getSpriteDepth(EntityRef& e, Vector2f point) const;
 
+		AssetPreviewData makeSpritePreviewData(AssetType assetType, const String& id, Vector2i size, RenderContext& renderContext);
+
 	private:
 		const HalleyAPI* api = nullptr;
 		Resources* resources = nullptr;

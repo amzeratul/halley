@@ -13,6 +13,8 @@
 #include "halley/entity/components/transform_2d_component.h"
 #include "components/sprite_component.h"
 #include "components/camera_component.h"
+#include "halley/core/graphics/render_target/render_surface.h"
+#include "halley/core/graphics/render_target/render_target_texture.h"
 #include "halley/entity/scripting/script_node_type.h"
 #include "halley/utils/algorithm.h"
 #include "halley/ui/widgets/ui_popup_menu.h"
@@ -650,4 +652,35 @@ std::vector<AssetCategoryFilter> SceneEditor::getPrefabCategoryFilters() const
 Future<AssetPreviewData> SceneEditor::getAssetPreviewData(AssetType assetType, const String& id, Vector2i size)
 {
 	return {};
+}
+
+AssetPreviewData SceneEditor::makeSpritePreviewData(AssetType assetType, const String& id, Vector2i size, RenderContext& curRC)
+{
+	RenderSurface surface(*getAPI().video, RenderSurfaceOptions());
+	surface.setSize(size);
+
+	auto image = std::make_shared<Image>(Image::Format::RGBA, size);
+	auto sprite = Sprite().setImage(getGameResources(), id);
+	auto spriteSize = sprite.getAABB().getSize().round();
+	auto ratio = Vector2f(size) / spriteSize;
+	const float zoom = std::min(ratio.x, ratio.y);
+
+	Camera camera;
+	camera.setPosition(sprite.getAABB().getCenter());
+	camera.setZoom(zoom);
+
+	auto rc = curRC.with(surface.getRenderTarget()).with(camera);
+	rc.bind([&] (Painter& painter)
+	{
+		painter.clear(Colour4f(0, 0, 0, 0));
+		sprite.draw(painter);
+	});
+	curRC.bind([&] (Painter& painter)
+	{
+		surface.getRenderTarget().getTexture(0)->copyToImage(painter, *image);
+	});
+
+	AssetPreviewData data;
+	data.image = std::move(image);
+	return data;
 }
