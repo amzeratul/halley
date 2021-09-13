@@ -52,7 +52,7 @@ void UIButton::update(Time t, bool moved)
 
 void UIButton::onClicked(Vector2f, KeyMods keyMods)
 {
-	sendEvent(UIEvent(UIEventType::ButtonClicked, getId()));
+	sendEvent(UIEvent(UIEventType::ButtonClicked, getId(), KeyCode(0), keyMods));
 }
 
 void UIButton::setInputType(UIInputType uiInput)
