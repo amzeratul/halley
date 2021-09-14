@@ -22,19 +22,11 @@ void AssetEditorWindow::onMakeUI()
 {
 	content = getWidgetAs<UIPagedPane>("content");
 	contentList = getWidgetAs<UIList>("contentList");
-	contentListDropdown = getWidgetAs<UIDropdown>("contentListDropdown");
 	metadataEditor = getWidgetAs<MetadataEditor>("metadataEditor");
-	
-	getWidget("contentListDropdownArea")->setActive(false);
 	
 	setHandle(UIEventType::ListSelectionChanged, "contentList", [=] (const UIEvent& event)
 	{
 		content->setPage(event.getStringData().toInteger());
-	});
-
-	setHandle(UIEventType::DropboxSelectionChanged, "contentListDropdown", [=](const UIEvent& event)
-	{
-		loadAsset(loadedAsset, loadedType, false, true);
 	});
 
 	setHandle(UIEventType::ButtonClicked, "openFile", [=] (const UIEvent& event)
@@ -53,13 +45,8 @@ void AssetEditorWindow::setAssetSrcMode(bool assetSrcMode)
 	this->assetSrcMode = assetSrcMode;
 }
 
-void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> type, bool clearDropdown, bool force)
+void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> type, bool force)
 {
-	if (clearDropdown && loadedAsset != name) {
-		contentListDropdown->clear();
-		getWidget("contentListDropdownArea")->setActive(false);
-	}
-
 	bool showMetadataEditor = true;
 
 	if (loadedAsset != name || force) {
@@ -72,6 +59,7 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 
 		if (assetSrcMode) {
 			auto assets = project.getAssetsFromFile(Path(name));
+			lastAssets = assets;
 
 			std::sort(assets.begin(), assets.end(), [] (decltype(assets)::const_reference a, decltype(assets)::const_reference b) -> bool
 			{
@@ -84,27 +72,8 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 				}
 			}
 
-			auto useDropdown = false;
-			std::vector<String> dropdownAssetIds;
-			if (assets.size() > 1) {
-				for (const auto& asset : assets) {
-					if (asset.first == AssetType::Animation) {
-						dropdownAssetIds.push_back(asset.second);
-					}
-				}
-
-				useDropdown = dropdownAssetIds.size() > 1;
-
-				if (useDropdown && clearDropdown) {
-					contentListDropdown->setOptions(dropdownAssetIds, 0);
-				}
-			}
-			getWidget("contentListDropdownArea")->setActive(useDropdown);
-			
 			for (auto& asset: assets) {
-				if (!useDropdown || asset.second == contentListDropdown->getSelectedOptionId() || std::find(dropdownAssetIds.begin(), dropdownAssetIds.end(), asset.second) == dropdownAssetIds.end()) {
-					createEditorTab(Path(name), asset.first, asset.second);
-				}
+				createEditorTab(Path(name), asset.first, asset.second);
 			}
 
 			if (assets.empty()) {
@@ -150,8 +119,13 @@ void AssetEditorWindow::onDoubleClickAsset()
 
 void AssetEditorWindow::refreshAssets()
 {
-	for (auto& editor: curEditors) {
-		editor->refreshAssets();
+	auto assets = project.getAssetsFromFile(Path(loadedAsset));
+	if (assets != lastAssets) {
+		loadAsset(loadedAsset, loadedType, true);
+	} else {
+		for (auto& editor: curEditors) {
+			editor->refreshAssets();
+		}
 	}
 }
 

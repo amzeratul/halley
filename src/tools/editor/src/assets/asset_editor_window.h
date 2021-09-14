@@ -18,7 +18,7 @@ namespace Halley {
 		void onDoubleClickAsset();
 		void refreshAssets();
 
-		void loadAsset(const String& name, std::optional<AssetType> type, bool clearDropdown, bool force = false);
+		void loadAsset(const String& name, std::optional<AssetType> type, bool force = false);
 
 		Path getCurrentAssetPath() const;
 
@@ -34,12 +34,12 @@ namespace Halley {
 		String loadedAsset;
 		std::optional<AssetType> loadedType;
 
-		std::shared_ptr<UIDropdown> contentListDropdown;
 		std::shared_ptr<UIList> contentList;
 		std::shared_ptr<UIPagedPane> content;
 		std::vector<std::shared_ptr<AssetEditor>> curEditors;
 
 		bool modified = false;
+		std::vector<std::pair<AssetType, String>> lastAssets;
 
 		std::shared_ptr<AssetEditor> makeEditor(Path filePath, AssetType type, const String& name);
 		void createEditorTab(Path filePath, AssetType type, const String& name);

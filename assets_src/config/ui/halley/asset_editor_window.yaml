@@ -4,14 +4,11 @@ children:
 - sizer: { type: vertical }
   proportion: 1
   children:
-  - widget: { class: widget, id: contentListDropdownArea }
-    sizer: { type: horizontal}
+  - widget: { class: scrollBarPane, scrollHorizontal: true, scrollVertical: false, autoHide: true, size: [50, 10] }
+    proportion: 0
+    sizer: { type: vertical }
     children:
-      - widget: { class: label, id: contentListDropdownLabel, text: "Sub-asset:"}
-        border: [0, 0, 5, 0]
-        fill: [centreVertical]
-      - widget: { id: contentListDropdown, class: dropdown, size: [200, 22] }
-  - widget: { id: contentList, class: list, style: tabs, type: horizontal }
+    - widget: { id: contentList, class: list, style: tabs, type: horizontal }
   - widget: { id: content, class: pagedPane }
     fill: fill
     sizer: { type: horizontal }

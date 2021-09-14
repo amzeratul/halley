@@ -40,7 +40,7 @@ void AssetBrowserTabs::openTab(std::optional<AssetType> assetType, const String&
 	// Create window
 	auto window = std::make_shared<AssetEditorWindow>(factory, project, projectWindow);
 	window->setAssetSrcMode(srcMode);
-	window->loadAsset(name, assetType, true);
+	window->loadAsset(name, assetType);
 	windows.push_back(window);
 
 	// Add to tabs
@@ -90,7 +90,7 @@ void AssetBrowserTabs::replaceAssetTab(const String& oldName, const String& newN
 	if (contents) {
 		tabs->changeItemId(idx, newName);
 		populateTab(*contents, {}, newName, newName);
-		windows[idx]->loadAsset(newName, {}, true);
+		windows[idx]->loadAsset(newName, {});
 		saveTabs();
 	}
 }
