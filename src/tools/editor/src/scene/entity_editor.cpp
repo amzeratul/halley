@@ -89,7 +89,12 @@ void EntityEditor::makeUI()
 		addComponent();
 	});
 
-	setHandle(UIEventType::ButtonClicked, "pasteComponentButton", [=](const UIEvent& event)
+	setHandle(UIEventType::ButtonClicked, "copyComponentsButton", [=](const UIEvent& event)
+	{
+		copyAllComponentsToClipboard();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "pasteComponentsButton", [=](const UIEvent& event)
 	{
 		pasteComponentsFromClipboard();
 	});
@@ -197,7 +202,8 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 	});
 	componentUI->setHandle(UIEventType::ButtonClicked, "copyComponentButton", [=] (const UIEvent& event)
 	{
-		copyComponent(componentType);
+		const bool ctrlHeld = (static_cast<int>(event.getKeyMods()) & static_cast<int>(KeyMods::Ctrl)) != 0;
+		copyComponentToClipboard(componentType, ctrlHeld);
 	});
 
 	auto componentFields = componentUI->getWidget("componentFields");
@@ -319,57 +325,104 @@ void EntityEditor::deleteComponent(const String& name)
 	}
 }
 
-void EntityEditor::copyComponent(const String& name)
+void EntityEditor::copyAllComponentsToClipboard()
 {
-	auto& components = getEntityData().getComponents();
-	
-	for (size_t i = 0; i < components.size(); ++i) {
-		if (components[i].first == name) {
-			copyComponentToClipboard(name, components[i].second);
-			return;
-		}
+	auto& componentDatas = getEntityData().getComponents();
+	ConfigNode components = ConfigNode::SequenceType();
+
+	for (size_t i = 0; i < componentDatas.size(); ++i) {
+		components.asSequence().push_back(serializeComponent(componentDatas[i].first, componentDatas[i].second));
 	}
+
+	copyComponentsToClipboard(std::move(components));
 }
 
-void EntityEditor::copyComponentToClipboard(const String& name, const ConfigNode& data)
+void EntityEditor::copyComponentToClipboard(const String& name, bool append)
+{
+	auto& componentDatas = getEntityData().getComponents();
+	ConfigNode components = ConfigNode::SequenceType();
+
+	if (append) {
+		auto existingComponents = getComponentsFromClipboard();
+		if (existingComponents.getType() == ConfigNodeType::Sequence) {
+			components = std::move(existingComponents);
+		}
+	}
+
+	for (size_t i = 0; i < componentDatas.size(); ++i) {
+		if (componentDatas[i].first == name) {
+			auto data = serializeComponent(name, componentDatas[i].second);
+			bool found = false;
+			for (auto& existingComp: components.asSequence()) {
+				for (auto& entry: existingComp.asMap()) {
+					if (entry.first == name) {
+						entry.second = std::move(data);
+						found = true;
+						break;
+					}
+				}
+			}
+
+			if (!found) {
+				components.asSequence().push_back(std::move(data));
+			}
+			break;
+		}
+	}
+
+	copyComponentsToClipboard(std::move(components));
+}
+
+void EntityEditor::copyComponentsToClipboard(ConfigNode components)
 {
 	auto clipboard = api->system->getClipboard();
 	if (!clipboard) {
 		return;
 	}
-	
-	ConfigNode component = ConfigNode::MapType();
-	component[name] = ConfigNode(data);
-
-	ConfigNode components = ConfigNode::SequenceType();
-	components.asSequence().push_back(std::move(component));
 
 	ConfigNode result = ConfigNode::MapType();
 	result["components"] = std::move(components);
-
 	YAMLConvert::EmitOptions options;
 	clipboard->setData(YAMLConvert::generateYAML(result, options));
 }
 
-void EntityEditor::pasteComponentsFromClipboard()
+ConfigNode EntityEditor::serializeComponent(const String& name, const ConfigNode& data)
+{
+	ConfigNode component = ConfigNode::MapType();
+	component[name] = ConfigNode(data);
+
+	return component;
+}
+
+ConfigNode EntityEditor::getComponentsFromClipboard()
 {
 	auto clipboard = api->system->getClipboard();
 	if (!clipboard) {
-		return;
+		return {};
 	}
 
 	auto data = clipboard->getStringData();
 	if (!data) {
-		return;
+		return {};
 	}
 
 	ConfigFile file;
 	try {
 		YAMLConvert::parseConfig(file, gsl::as_bytes(gsl::span<const char>(data->c_str(), data->length())));
 		if (isValidComponents(file.getRoot())) {
-			pasteComponents(file.getRoot());
+			return std::move(file.getRoot()["components"]);
 		}
 	} catch (...) {}
+
+	return {};
+}
+
+void EntityEditor::pasteComponentsFromClipboard()
+{
+	const auto components = getComponentsFromClipboard();
+	if (components.getType() == ConfigNodeType::Sequence) {
+		pasteComponents(components);
+	}
 }
 
 bool EntityEditor::isValidComponents(const ConfigNode& data)
@@ -385,7 +438,7 @@ bool EntityEditor::isValidComponents(const ConfigNode& data)
 
 void EntityEditor::pasteComponents(const ConfigNode& data)
 {
-	for (const auto& comp: data["components"].asSequence()) {
+	for (const auto& comp: data.asSequence()) {
 		if (comp.getType() == ConfigNodeType::Map) {
 			for (const auto& [k, v]: comp.asMap()) {
 				pasteComponent(k, ConfigNode(v));

@@ -7,7 +7,7 @@ children:
   - widget: { id: componentType, class: label, text: "Name" }
     fill: centre
     proportion: 1
-  - widget: { id: copyComponentButton, class: button, icon: "entity_icons/copy_small.png", size: [20, 18], style: buttonThin, tooltip: "Copy Component to Clipboard" }
+  - widget: { id: copyComponentButton, class: button, icon: "entity_icons/copy_small.png", size: [20, 18], style: buttonThin, tooltip: "Copy Component to Clipboard. Hold Ctrl to append to existing Clipboard copy." }
   - widget: { id: deleteComponentButton, class: button, text: "x", size: [20, 18], style: buttonThin, tooltip: "Delete Component" }
     border: [0, 0, -2, 0]
 - widget: { id: componentFields, class: widget }

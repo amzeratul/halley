@@ -46,6 +46,11 @@ children:
   - widget: { id: fields, class: widget }
     sizer: { type: vertical, gap: 8 }
   - widget: { id: addComponentButton, class: button, text: "Add Component", size: [ 30, 25 ], tooltip: "Add a new Component to this Entity. [Ctrl+T]" }
-  - widget: { id: pasteComponentButton, class: button, text: "Paste Component", size: [ 30, 25 ], tooltip: "Paste a Component to this Entity." }
+  - sizer: { type: horizontal }
     border: [0, -4, 0, 0]
+    children:
+    - widget: { id: copyComponentsButton, class: button, style: buttonThin, text: "Copy Components", size: [ 30, 25 ], tooltip: "Copy all components to the clipboard." }
+      proportion: 1
+    - widget: { id: pasteComponentsButton, class: button, style: buttonThin, text: "Paste Components", size: [ 30, 25 ], tooltip: "Paste a Component to this Entity." }
+      proportion: 1
 ...

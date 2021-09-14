@@ -38,8 +38,9 @@ namespace Halley {
 		void addComponent();
 		void addComponent(const String& name, ConfigNode data);
 		void deleteComponent(const String& name);
-		void copyComponent(const String& name);
-		void copyComponentToClipboard(const String& name, const ConfigNode& data);
+		void copyAllComponentsToClipboard();
+		void copyComponentToClipboard(const String& name, bool append);
+		void copyComponentsToClipboard(ConfigNode components);
 		void pasteComponentsFromClipboard();
 		bool isValidComponents(const ConfigNode& data);
 		void pasteComponents(const ConfigNode& data);
@@ -97,6 +98,8 @@ namespace Halley {
 		std::set<String> getComponentsOnPrefab() const;
 
 		void setComponentColour(const String& name, UIWidget& component);
+		ConfigNode serializeComponent(const String& name, const ConfigNode& data);
+		ConfigNode getComponentsFromClipboard();
 	};
 
 	class EntityEditorFactory : public IEntityEditorFactory {
