@@ -6,6 +6,7 @@
 #include "graph/render_graph_editor.h"
 #include "halley/tools/project/project.h"
 #include "src/ui/editor_ui_factory.h"
+#include "src/ui/project_window.h"
 using namespace Halley;
 
 AssetEditorWindow::AssetEditorWindow(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow)
@@ -38,12 +39,12 @@ void AssetEditorWindow::onMakeUI()
 
 	setHandle(UIEventType::ButtonClicked, "openFile", [=] (const UIEvent& event)
 	{
-		openFileExternally(getCurrentAssetPath());
+		projectWindow.openFileExternally(getCurrentAssetPath());
 	});
 
 	setHandle(UIEventType::ButtonClicked, "showFile", [=] (const UIEvent& event)
 	{
-		showFileExternally(getCurrentAssetPath());
+		projectWindow.showFileExternally(getCurrentAssetPath());
 	});
 }
 
@@ -190,16 +191,4 @@ std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(Path filePath, AssetT
 		return std::make_shared<RenderGraphEditor>(factory, project.getGameResources(), project, type);
 	}
 	return {};
-}
-
-void AssetEditorWindow::openFileExternally(const Path& path)
-{
-	auto cmd = "start \"\" \"" + path.toString().replaceAll("/", "\\") + "\"";
-	system(cmd.c_str());
-}
-
-void AssetEditorWindow::showFileExternally(const Path& path)
-{
-	auto cmd = "explorer.exe /select,\"" + path.toString().replaceAll("/", "\\") + "\"";
-	system(cmd.c_str());
 }

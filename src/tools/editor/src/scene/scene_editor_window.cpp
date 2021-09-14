@@ -705,7 +705,7 @@ void SceneEditorWindow::duplicateEntity(const String& id)
 
 void SceneEditorWindow::openEditPrefabWindow(const String& name)
 {
-	projectWindow.openAsset(AssetType::Prefab, name);
+	projectWindow.openAsset(AssetType::Prefab, name, true);
 }
 
 const std::shared_ptr<ISceneData>& SceneEditorWindow::getSceneData() const
@@ -1113,7 +1113,7 @@ void SceneEditorWindow::spawnUI(std::shared_ptr<UIWidget> ui)
 
 void SceneEditorWindow::openAsset(AssetType assetType, const String& assetId)
 {
-	projectWindow.openAsset(assetType, assetId);
+	projectWindow.openAsset(assetType, assetId, true);
 }
 
 void SceneEditorWindow::openAssetHere(AssetType assetType, const String& assetId)

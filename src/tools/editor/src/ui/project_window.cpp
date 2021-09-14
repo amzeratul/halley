@@ -80,13 +80,24 @@ void ProjectWindow::makeUI()
 	makePagedPane();
 	uiBottom->add(std::make_shared<TaskBar>(factory, *tasks, api), 1, Vector4f(0, 0, 0, 4));
 
-	setHandle(UIEventType::NavigateTo, [=] (const UIEvent& event)
+	setHandle(UIEventType::NavigateToAsset, [=] (const UIEvent& event)
 	{
 		auto uri = event.getStringData();
 		if (uri.startsWith("asset:")) {
 			auto splitURI = uri.split(':', 3);
 			if (splitURI.size() == 3) {
-				openAsset(fromString<AssetType>(splitURI.at(1)), splitURI.at(2));
+				openAsset(fromString<AssetType>(splitURI.at(1)), splitURI.at(2), true);
+			}
+		}
+	});
+
+	setHandle(UIEventType::NavigateToFile, [=] (const UIEvent& event)
+	{
+		auto uri = event.getStringData();
+		if (uri.startsWith("asset:")) {
+			auto splitURI = uri.split(':', 3);
+			if (splitURI.size() == 3) {
+				openAsset(fromString<AssetType>(splitURI.at(1)), splitURI.at(2), false);
 			}
 		}
 	});
@@ -274,10 +285,15 @@ void ProjectWindow::openFile(const String& assetId)
 	assetEditorWindow->openFile(assetId);
 }
 
-void ProjectWindow::openAsset(AssetType type, const String& assetId)
+void ProjectWindow::openAsset(AssetType type, const String& assetId, bool inEditor)
 {
-	toolbar->getList()->setSelectedOptionId(toString(EditorTabs::Assets));
-	assetEditorWindow->openAsset(type, assetId);
+	if (inEditor) {
+		toolbar->getList()->setSelectedOptionId(toString(EditorTabs::Assets));
+		assetEditorWindow->openAsset(type, assetId);
+	} else {
+		auto path = project.getAssetsSrcPath() / project.getImportAssetsDatabase().getPrimaryInputFile(type, assetId);
+		openFileExternally(path);
+	}
 }
 
 void ProjectWindow::replaceAssetTab(AssetType oldType, const String& oldId, AssetType newType, const String& newId)
@@ -370,6 +386,19 @@ void ProjectWindow::setAssetSetting(std::string_view assetKey, std::string_view 
 	data.ensureType(ConfigNodeType::Map);
 	data[id] = std::move(value);
 }
+
+void ProjectWindow::openFileExternally(const Path& path)
+{
+	auto cmd = "start \"\" \"" + path.toString().replaceAll("/", "\\") + "\"";
+	system(cmd.c_str());
+}
+
+void ProjectWindow::showFileExternally(const Path& path)
+{
+	auto cmd = "explorer.exe /select,\"" + path.toString().replaceAll("/", "\\") + "\"";
+	system(cmd.c_str());
+}
+
 
 ProjectWindow::SettingsStorage::SettingsStorage(std::shared_ptr<ISaveData> saveData, String path)
 	: saveData(std::move(saveData))

@@ -80,7 +80,8 @@ void SelectAssetWidget::makeUI()
 	setHandle(UIEventType::ButtonClicked, "goto", [=] (const UIEvent& event)
 	{
 		auto uri = "asset:" + type + ":" + (value.isEmpty() ? defaultAssetId : value);
-		sendEvent(UIEvent(UIEventType::NavigateTo, getId(), std::move(uri)));
+		const bool ctrlHeld = (static_cast<int>(event.getKeyMods()) & static_cast<int>(KeyMods::Ctrl)) != 0;
+		sendEvent(UIEvent(ctrlHeld ? UIEventType::NavigateToFile : UIEventType::NavigateToAsset, getId(), std::move(uri)));
 	});
 }
 

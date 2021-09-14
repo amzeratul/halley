@@ -26,7 +26,7 @@ namespace Halley {
         void setPage(EditorTabs tab);
         LocalisedString setCustomPage(const String& pageId);
     	void openFile(const String& assetId);
-    	void openAsset(AssetType type, const String& assetId);
+    	void openAsset(AssetType type, const String& assetId, bool inEditor);
         void replaceAssetTab(AssetType oldType, const String& oldId, AssetType newType, const String& newId);
 
     	const HalleyAPI& getAPI() const;
@@ -41,6 +41,9 @@ namespace Halley {
         void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) override;
         const ConfigNode& getAssetSetting(std::string_view assetKey, std::string_view id);
     	void setAssetSetting(std::string_view assetKey, std::string_view id, ConfigNode data);
+
+		void openFileExternally(const Path& path);
+		void showFileExternally(const Path& path);
 
     protected:
         void onProjectDLLStatusChange(ProjectDLL::Status status) override;

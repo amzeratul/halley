@@ -43,8 +43,5 @@ namespace Halley {
 
 		std::shared_ptr<AssetEditor> makeEditor(Path filePath, AssetType type, const String& name);
 		void createEditorTab(Path filePath, AssetType type, const String& name);
-
-		void openFileExternally(const Path& path);
-		void showFileExternally(const Path& path);
 	};
 }
