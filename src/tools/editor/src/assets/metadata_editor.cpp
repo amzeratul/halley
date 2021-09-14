@@ -71,7 +71,7 @@ void MetadataEditor::makeUI()
 		addAssetTypeField("Material", "material", AssetType::MaterialDefinition, "Halley/Sprite");
 		addStringField("Atlas", "atlas", "");
 		addAssetTypeField("Palette", "palette", AssetType::Texture, "");
-		addBoolField("Palette Top Line Only", "paletteTopLineOnly", false);
+		addBoolField("Palette Top\nLine Only", "paletteTopLineOnly", false);
 		addBoolField("Filtering", "filtering", false);
 		addBoolField("Minimap", "minimap", false);
 		addEnumField<TextureFormat>("Format", "format", "rgba");
@@ -190,35 +190,33 @@ String MetadataEditor::getMetaValue(const String& key) const
 
 void MetadataEditor::makeIntField(UISizer& sizer, const String& key, int defaultValue)
 {
-	const auto result = std::make_shared<UITextInput>(key, factory.getStyle("inputThin"));
+	const auto effectiveDefault = effectiveMetadata.getString(":" + key, toString(defaultValue));
+	const auto value = metadata.getInt(key, 0);
+
+	const auto result = std::make_shared<UISpinControl2>(key, factory.getStyle("spinControl"), float(value), false);
 	result->setMinSize(Vector2f(40, 22));
-	result->setValidator(std::make_shared<UINumericValidator>(true, false));
+	result->setGhostText(LocalisedString::fromUserString(effectiveDefault));
 	sizer.add(result, 1);
 
-	const auto effectiveDefault = effectiveMetadata.getString(":" + key, toString(defaultValue));
-	const auto value = metadata.getString(key, "");
-	result->setGhostText(LocalisedString::fromUserString(effectiveDefault));
-
-	bindData(key, value, [=] (const String& value)
+	bindData(key, value, [=] (int value)
 	{
-		updateMetadata(metadata, key, *this, value, toString(defaultValue));
+		updateMetadata(metadata, key, *this, toString(value), toString(defaultValue));
 	});
 }
 
 void MetadataEditor::makeFloatField(UISizer& sizer, const String& key, float defaultValue)
 {
-	const auto result = std::make_shared<UITextInput>(key, factory.getStyle("inputThin"));
+	const auto effectiveDefault = effectiveMetadata.getString(":" + key, toString(defaultValue));
+	const auto value = metadata.getFloat(key, 0);
+
+	const auto result = std::make_shared<UISpinControl2>(key, factory.getStyle("spinControl"), value, true);
 	result->setMinSize(Vector2f(40, 22));
-	result->setValidator(std::make_shared<UINumericValidator>(true, true));
+	result->setGhostText(LocalisedString::fromUserString(effectiveDefault));
 	sizer.add(result, 1);
 
-	const auto effectiveDefault = effectiveMetadata.getString(":" + key, toString(defaultValue));
-	const auto value = metadata.getString(key, "");
-	result->setGhostText(LocalisedString::fromUserString(effectiveDefault));
-
-	bindData(key, value, [=] (const String& value)
+	bindData(key, value, [=] (float value)
 	{
-		updateMetadata(metadata, key, *this, value, toString(defaultValue));
+		updateMetadata(metadata, key, *this, toString(value), toString(defaultValue));
 	});
 }
 

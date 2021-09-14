@@ -1,14 +1,14 @@
 ---
-widget: { class: widget }
+widget: { class: image, image: "halley_ui/ui_window.png", innerBorder: [ 4, 4, 4, 4 ], colour: $ui_backgroundBox }
 sizer: { type: vertical }
 children:
-- widget: { class: image, image: "$ui_title_capsule", innerBorder: [ 4, 1, 4, 4 ], colour: $ui_staticBox, size: [250, 10] }
+- widget: { class: image, image: "$ui_title_capsule", innerBorder: [ 4, 1, 4, 4 ], colour: $ui_staticBox, size: [300, 10] }
   sizer: { type: vertical }
   children:
   - widget: { id: "", class: label, text: "Metadata" }
     fill: centre
   - widget: { id: fields, class: widget, innerBorder: [0, 2, 0, 0] }
-    sizer: { type: grid, columns: 2 }
+    sizer: { type: grid, columns: 2, columnProportions: [0, 1] }
   - widget: { id: applyChanges, class: button, text: "Apply", size: [30, 30] }
     border: [0, 2, 0, 0]
 ...
