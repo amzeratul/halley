@@ -31,7 +31,7 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	auto palette = meta.getString("palette", "");
 	bool paletteTopLineOnly = meta.getBool("paletteTopLineOnly", false);
 	if (palette != "") {
-		auto paletteBytes = collector.readAdditionalFile(palette);
+		auto paletteBytes = collector.readAdditionalFile("image/" + palette);
 		Image paletteImage(gsl::as_bytes(gsl::span<Byte>(paletteBytes)));
 		image = convertToIndexed(mainFile.string(), *image, paletteImage, asset.options, paletteTopLineOnly);
 	}
