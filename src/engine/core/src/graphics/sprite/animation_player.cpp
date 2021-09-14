@@ -172,7 +172,7 @@ void AnimationPlayer::update(Time time)
 
 void AnimationPlayer::updateSprite(Sprite& sprite) const
 {
-	if (animation && hasUpdate) {
+	if (animation && hasUpdate && spriteData) {
 		if (applyMaterial || !sprite.hasMaterial()) {
 			const auto& newMaterial = materialOverride ? materialOverride : animation->getMaterial();
 			if (!sprite.hasCompatibleMaterial(*newMaterial)) {
@@ -353,7 +353,7 @@ void AnimationPlayer::resolveSprite()
 {
 	updateIfNeeded();
 
-	if (curSeq) {
+	if (curSeq && curSeq->numFrames() > 0) {
 		const auto& frame = curSeq->getFrame(curFrame);
 		curFrameLen = std::max(1, frame.getDuration()) * 0.001; // 1ms minimum
 		spriteData = &frame.getSprite(dirId);

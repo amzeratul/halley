@@ -99,7 +99,8 @@ void SelectAssetWidget::choose()
 			assert(sceneEditorWindow != nullptr);
 			window = std::make_shared<ChoosePrefabWindow>(factory, getValue(), *gameResources, *sceneEditorWindow, callback);
 		} else {
-			window = std::make_shared<ChooseAssetTypeWindow>(factory, type, getValue(), *gameResources, *sceneEditorWindow, type == AssetType::Sprite, callback);
+			const bool preview = type == AssetType::Sprite || type == AssetType::Animation;
+			window = std::make_shared<ChooseAssetTypeWindow>(factory, type, getValue(), *gameResources, *sceneEditorWindow, preview, callback);
 		}
 		getRoot()->addChild(std::move(window));
 	}

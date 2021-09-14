@@ -15,6 +15,7 @@
 #include "components/camera_component.h"
 #include "halley/core/graphics/render_target/render_surface.h"
 #include "halley/core/graphics/render_target/render_target_texture.h"
+#include "halley/core/graphics/sprite/animation_player.h"
 #include "halley/entity/scripting/script_node_type.h"
 #include "halley/utils/algorithm.h"
 #include "halley/ui/widgets/ui_popup_menu.h"
@@ -653,7 +654,7 @@ Future<AssetPreviewData> SceneEditor::getAssetPreviewData(AssetType assetType, c
 {
 	if (assetType == AssetType::Prefab || assetType == AssetType::Scene) {
 		return getPrefabPreviewData(assetType, id, size);
-	} else if (assetType == AssetType::Sprite) {
+	} else if (assetType == AssetType::Sprite || assetType == AssetType::Animation) {
 		return getSpritePreviewData(assetType, id, size);
 	}
 
@@ -676,7 +677,16 @@ AssetPreviewData SceneEditor::makeSpritePreviewData(AssetType assetType, const S
 	surface.setSize(size);
 
 	auto image = std::make_shared<Image>(Image::Format::RGBA, size);
-	auto sprite = Sprite().setImage(getGameResources(), id);
+
+	Sprite sprite;
+	if (assetType == AssetType::Sprite) {
+		sprite = Sprite().setImage(getGameResources(), id);
+	} else if (assetType == AssetType::Animation) {
+		auto player = AnimationPlayer(getGameResources().get<Animation>(id));
+		player.update(0);
+		player.updateSprite(sprite);
+	}
+
 	auto spriteSize = sprite.getAABB().getSize().round();
 	const int maxDimension = std::max(8, nextPowerOf2<int>(lroundl(std::max(spriteSize.x, spriteSize.y))));
 	const float zoom = std::min(128.0f / maxDimension, 3.0f);
