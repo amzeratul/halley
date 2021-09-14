@@ -99,6 +99,8 @@ namespace Halley {
        	virtual float getSpriteDepth(EntityRef& e, Vector2f point) const;
 
 		AssetPreviewData makeSpritePreviewData(AssetType assetType, const String& id, Vector2i size, RenderContext& renderContext);
+		virtual Future<AssetPreviewData> getSpritePreviewData(AssetType assetType, const String& id, Vector2i size);
+		virtual Future<AssetPreviewData> getPrefabPreviewData(AssetType assetType, const String& id, Vector2i size);
 
 	private:
 		const HalleyAPI* api = nullptr;

@@ -651,7 +651,23 @@ std::vector<AssetCategoryFilter> SceneEditor::getPrefabCategoryFilters() const
 
 Future<AssetPreviewData> SceneEditor::getAssetPreviewData(AssetType assetType, const String& id, Vector2i size)
 {
-	return {};
+	if (assetType == AssetType::Prefab || assetType == AssetType::Scene) {
+		return getPrefabPreviewData(assetType, id, size);
+	} else if (assetType == AssetType::Sprite) {
+		return getSpritePreviewData(assetType, id, size);
+	}
+
+	return Future<AssetPreviewData>::makeImmediate({});
+}
+
+Future<AssetPreviewData> SceneEditor::getSpritePreviewData(AssetType assetType, const String& id, Vector2i size)
+{
+	return Future<AssetPreviewData>::makeImmediate({});
+}
+
+Future<AssetPreviewData> SceneEditor::getPrefabPreviewData(AssetType assetType, const String& id, Vector2i size)
+{
+	return Future<AssetPreviewData>::makeImmediate({});
 }
 
 AssetPreviewData SceneEditor::makeSpritePreviewData(AssetType assetType, const String& id, Vector2i size, RenderContext& curRC)
@@ -662,8 +678,8 @@ AssetPreviewData SceneEditor::makeSpritePreviewData(AssetType assetType, const S
 	auto image = std::make_shared<Image>(Image::Format::RGBA, size);
 	auto sprite = Sprite().setImage(getGameResources(), id);
 	auto spriteSize = sprite.getAABB().getSize().round();
-	auto ratio = Vector2f(size) / spriteSize;
-	const float zoom = std::min(ratio.x, ratio.y);
+	const int maxDimension = std::max(8, nextPowerOf2<int>(lroundl(std::max(spriteSize.x, spriteSize.y))));
+	const float zoom = std::min(128.0f / maxDimension, 3.0f);
 
 	Camera camera;
 	camera.setPosition(sprite.getAABB().getCenter());
