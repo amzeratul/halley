@@ -167,12 +167,14 @@ void TranslateGizmo::moveBy(Vector2i delta)
 
 void TranslateGizmo::doMoveBy()
 {
-	const auto transform = getComponent<Transform2DComponent>();
-	if (!handle.isHeld() && transform) {
-		auto newPos = transform->getLocalPosition() + Vector2f(pendingMoveBy);
-		transform->setLocalPosition(newPos);
-		updateEntityData(newPos);
-	}
+	if (pendingMoveBy != Vector2i()) {
+		const auto transform = getComponent<Transform2DComponent>();
+		if (!handle.isHeld() && transform) {
+			auto newPos = transform->getLocalPosition() + Vector2f(pendingMoveBy);
+			transform->setLocalPosition(newPos);
+			updateEntityData(newPos);
+		}
 
-	pendingMoveBy = Vector2i();
+		pendingMoveBy = Vector2i();
+	}
 }
