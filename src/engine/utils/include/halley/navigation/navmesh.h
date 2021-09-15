@@ -94,12 +94,13 @@ namespace Halley {
 		[[nodiscard]] const std::vector<Node>& getNodes() const { return nodes; }
 		[[nodiscard]] const std::vector<Polygon>& getPolygons() const { return polygons; }
 		[[nodiscard]] const std::vector<Portal>& getPortals() const { return portals; }
+		[[nodiscard]] const std::vector<float>& getWeights() const { return weights; }
 		[[nodiscard]] const std::vector<std::pair<uint16_t, LineSegment>>& getOpenEdges() const { return openEdges; }
 		[[nodiscard]] const Polygon& getPolygon(int id) const;
 		[[nodiscard]] size_t getNumNodes() const { return nodes.size(); }
 		[[nodiscard]] std::optional<NodeId> getNodeAt(Vector2f position) const;
 		[[nodiscard]] bool containsPoint(Vector2f position) const;
-
+		
 		// Returns empty if no collision is found (i.e. fully contained within navmesh)
 		// Otherwise returns collision point
 		[[nodiscard]] std::optional<Vector2f> findRayCollision(Ray ray, float maxDistance) const;
@@ -142,6 +143,7 @@ namespace Halley {
 		std::vector<Node> nodes;
 		std::vector<Polygon> polygons;
 		std::vector<Portal> portals;
+		std::vector<float> weights;
 		std::vector<std::pair<uint16_t, LineSegment>> openEdges;
 		int subWorld = 0;
 

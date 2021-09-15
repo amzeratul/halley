@@ -46,6 +46,12 @@ Navmesh::Navmesh(std::vector<PolygonData> polys, const NavmeshBounds& bounds, in
 	for (size_t i = 0; i < polys.size(); ++i) {
 		polygons[i] = std::move(polys[i].polygon);
 	}
+
+	// Move Weights
+	weights.resize(polys.size());
+	for (size_t i = 0; i < polys.size(); i++) {
+		weights[i] = polys.at(i).weight;
+	}
 	processPolygons();
 
 	// Generate edges
@@ -62,6 +68,7 @@ Navmesh::Navmesh(const ConfigNode& nodeData)
 	polygons = nodeData["polygons"].asVector<Polygon>();
 	portals = nodeData["portals"].asVector<Portal>();
 	subWorld = nodeData["subWorld"].asInt(0);
+	weights = nodeData["weights"].asVector<float>({});
 
 	processPolygons();
 	generateOpenEdges();
@@ -78,6 +85,7 @@ ConfigNode Navmesh::toConfigNode() const
 	result["polygons"] = polygons;
 	result["portals"] = portals;
 	result["subWorld"] = subWorld;
+	result["weights"] = weights;
 	
 	return result;
 }

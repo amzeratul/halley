@@ -583,10 +583,10 @@ Navmesh NavmeshGenerator::makeNavmesh(gsl::span<NavmeshNode> nodes, const Navmes
 				}
 			}
 
-			output.push_back(Navmesh::PolygonData{ std::move(node.polygon), std::move(connections), getPolygonWeightCallback ? getPolygonWeightCallback(subWorld, node.polygon) : 1.0f });
+			const float weight = getPolygonWeightCallback ? getPolygonWeightCallback(subWorld, node.polygon) : 1.0f;
+			output.push_back(Navmesh::PolygonData{ std::move(node.polygon), std::move(connections), weight });
 		}
 	}
 	
 	return Navmesh(std::move(output), bounds, subWorld);
 }
-
