@@ -134,6 +134,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& assetId, R
 	if (loaded) {
 		newRes->setAssetId(assetId);
 		resources.emplace(assetId, Wrapper(newRes, 0));
+		lockWrite.unlock();
 		newRes->onLoaded(parent);
 	}
 
