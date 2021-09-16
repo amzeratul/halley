@@ -661,6 +661,15 @@ Future<AssetPreviewData> SceneEditor::getAssetPreviewData(AssetType assetType, c
 	return Future<AssetPreviewData>::makeImmediate({});
 }
 
+Transform2DComponent* SceneEditor::getTransform(const String& entityId)
+{
+	auto e = world->findEntity(UUID(entityId));
+	if (e.has_value()) {
+		return e->tryGetComponent<Transform2DComponent>();
+	}
+	return nullptr;
+}
+
 Future<AssetPreviewData> SceneEditor::getSpritePreviewData(AssetType assetType, const String& id, Vector2i size)
 {
 	return Future<AssetPreviewData>::makeImmediate({});

@@ -68,6 +68,8 @@ namespace Halley {
 		std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const override;
     	Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size) override;
 
+		Transform2DComponent* getTransform(const String& entityId) override;
+
     protected:
     	Camera camera;
 		IEditorInterface* editorInterface;

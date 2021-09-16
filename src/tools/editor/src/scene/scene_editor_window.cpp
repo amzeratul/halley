@@ -13,6 +13,7 @@
 #include "scene_editor_canvas.h"
 #include "scene_editor_game_bridge.h"
 #include "scene_editor_gizmo_collection.h"
+#include "halley/entity/components/transform_2d_component.h"
 #include "halley/tools/project/project_properties.h"
 #include "src/ui/project_window.h"
 using namespace Halley;
@@ -692,7 +693,6 @@ void SceneEditorWindow::pasteEntity(const String& stringData, const String& refe
 	Expects(gameBridge);
 	auto data = deserializeEntity(stringData);
 	if (data) {
-		positionEntityAtCursor(data.value());
 		assignUUIDs(data.value());
 		addEntity(referenceId, childOfReference, std::move(data.value()));
 	}
@@ -765,36 +765,38 @@ std::optional<EntityData> SceneEditorWindow::makeInstance(const String& prefabNa
 
 void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfReference, EntityData data)
 {
+	auto [parentId, childIdx] = getParentInsertPos(referenceEntity, childOfReference);
+	positionEntityAtCursor(data, parentId);
+	addEntity(parentId, childIdx, std::move(data));
+}
+
+std::pair<String, int> SceneEditorWindow::getParentInsertPos(const String& referenceEntity, bool childOfReference) const
+{
 	if (referenceEntity.isEmpty()) {
-		addEntity(String(), -1, std::move(data));
+		return { "", -1 };
 	} else {
-		positionEntityAtCursor(data);
-		
 		const bool isScene = prefab->isScene();
 		
 		const auto& ref = sceneData->getEntityNodeData(referenceEntity);
 		const bool canBeSibling = !ref.getParentId().isEmpty() || isScene;
 		const bool canBeChild = ref.getData().getPrefab().isEmpty();
 		if (!canBeChild && !canBeSibling) {
-			return;
+			return { "", -1 };
 		}
 		
 		const bool addAsChild = (childOfReference && canBeChild) || !canBeSibling;
 		
 		if (addAsChild) {
-			const String& parentId = referenceEntity;
-			const int childIndex = -1;
-			addEntity(parentId, childIndex, std::move(data));
+			return { referenceEntity, -1 };
 		} else {
 			const String& parentId = ref.getParentId();
 			const auto& parentRef = sceneData->getEntityNodeData(parentId);
 			const auto idx = parentRef.getData().getChildIndex(UUID(referenceEntity));
 			const int childIndex = idx ? static_cast<int>(idx.value() + 1) : -1;
-			addEntity(parentId, childIndex, std::move(data));
+			return { parentId, childIndex };
 		}
 	}
 }
-
 void SceneEditorWindow::addEntity(const String& parentId, int childIndex, EntityData data)
 {
 	EntityData& parentData = sceneData->getWriteableEntityNodeData(parentId).getData();
@@ -995,10 +997,18 @@ void SceneEditorWindow::assignUUIDs(EntityData& node)
 	}
 }
 
-void SceneEditorWindow::positionEntityAtCursor(EntityData& entityData) const
+void SceneEditorWindow::positionEntityAtCursor(EntityData& entityData, const String& parentId) const
 {
-	const auto pos = gameBridge->getMousePos().value_or(gameBridge->getCameraPos());
-	positionEntity(entityData, pos.round());
+	Vector2f pos = gameBridge->getMousePos().value_or(gameBridge->getCameraPos()).round();
+
+	if (!parentId.isEmpty()) {
+		auto* transform = gameBridge->getTransform(parentId);
+		if (transform) {
+			pos = transform->inverseTransformPoint(pos);
+		}
+	}
+
+	positionEntity(entityData, pos);
 }
 
 void SceneEditorWindow::positionEntity(EntityData& entityData, Vector2f pos) const

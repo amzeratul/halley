@@ -10,6 +10,8 @@
 #include "halley/core/input/input_keyboard.h"
 #include "halley/concurrency/future.h"
 
+class Transform2DComponent;
+
 namespace Halley {
 	class Image;
 	class IEntityEditorFactory;
@@ -172,6 +174,8 @@ namespace Halley {
     	
         virtual std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const = 0;
         virtual Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size) = 0;
+
+    	virtual Transform2DComponent* getTransform(const String& entityId) = 0;
     };
 
 	class EntityTree {

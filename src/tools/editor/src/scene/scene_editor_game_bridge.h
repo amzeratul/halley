@@ -3,6 +3,8 @@
 #include "halley/core/game/scene_editor_interface.h"
 #include "halley/tools/dll/dynamic_library.h"
 
+class Transform2DComponent;
+
 namespace Halley {
 	class SceneEditorWindow;
 	class ProjectWindow;
@@ -50,6 +52,8 @@ namespace Halley {
 		
 		std::vector<AssetCategoryFilter> getPrefabCategoryFilters();
 		Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size);
+		
+		Transform2DComponent* getTransform(const String& entityId);
 
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;

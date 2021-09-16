@@ -158,6 +158,7 @@ namespace Halley {
 		String findParent(const String& entityId) const;
 		const String* findParent(const String& entityId, const EntityTree& tree, const String& prev) const;
 		String getNextSibling(const String& parentId, int childIndex) const;
+		std::pair<String, int> getParentInsertPos(const String& referenceId, bool childOfReference) const;
 
 		void setCustomUI(std::shared_ptr<UIWidget> ui);
 		void setToolUI(std::shared_ptr<UIWidget> ui);
@@ -168,7 +169,7 @@ namespace Halley {
 		std::optional<EntityData> deserializeEntity(const String& data) const;
 
 		void assignUUIDs(EntityData& node);
-		void positionEntityAtCursor(EntityData& entityData) const;
+		void positionEntityAtCursor(EntityData& entityData, const String& parentId) const;
 		void positionEntity(EntityData& entityData, Vector2f pos) const;
 		bool isValidEntityTree(const ConfigNode& node) const;
 

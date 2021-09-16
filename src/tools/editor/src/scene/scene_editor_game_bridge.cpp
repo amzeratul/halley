@@ -352,6 +352,14 @@ Future<AssetPreviewData> SceneEditorGameBridge::getAssetPreviewData(AssetType as
 	return {};
 }
 
+Transform2DComponent* SceneEditorGameBridge::getTransform(const String& entityId)
+{
+	if (interfaceReady) {
+		return interface->getTransform(entityId);
+	}
+	return nullptr;
+}
+
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {
