@@ -29,6 +29,7 @@ uiStyle:
     label: { font: Ubuntu Bold, size: 14, colour: $ui_text }
     disabledLabel: { font: Ubuntu Bold, size: 14, colour: $ui_disabledText }
     labelBorder: [0, 0, 0, 0]
+    iconBorder: [0, 0, 0, 0]
     iconColour: $ui_text
     disabledIconColour: $ui_disabledText
 
@@ -96,6 +97,7 @@ uiStyle:
       label: { font: Ubuntu Bold, size: 14, colour: $ui_text }
       disabledLabel: { font: Ubuntu Bold, size: 14, colour: $ui_disabledText }
       labelBorder: [0, 0, 0, 0]
+      iconBorder: [0, 0, 0, 0]
       iconColour: $ui_text
       disabledIconColour: $ui_disabledText
 
