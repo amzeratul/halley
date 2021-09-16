@@ -138,7 +138,9 @@ void EntityList::onEntityRemoved(const String& id, const String& newSelectionId)
 	list->removeItem(id);
 	list->sortItems();
 	layout();
+	list->setScrollToSelection(false);
 	list->setSelectedOption(-1);
+	list->setScrollToSelection(true);
 	list->setSelectedOptionId(newSelectionId);
 }
 
