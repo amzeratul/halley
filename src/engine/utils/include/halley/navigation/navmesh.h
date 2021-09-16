@@ -164,7 +164,7 @@ namespace Halley {
 		std::optional<NavigationPath> makePath(const NavigationQuery& query, const std::vector<NodeAndConn>& nodePath) const;
 		void postProcessPath(std::vector<Vector2f>& points, NavigationQuery::PostProcessingType type) const;
 
-		std::optional<Vector2f> findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon) const;
+		std::pair<std::optional<Vector2f>, float> findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon) const;
 
 		void processPolygons();
 		void addPolygonsToGrid();

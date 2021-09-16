@@ -375,16 +375,32 @@ void Navmesh::postProcessPath(std::vector<Vector2f>& points, NavigationQuery::Po
 		return;
 	}
 
-	std::vector<NodeId> nodes;
-	nodes.resize(points.size());
+	std::vector<NodeId> nodeIds;
+	nodeIds.resize(points.size());
 	for (size_t i = 0; i < points.size(); ++i) {
-		nodes[i] = getNodeAt(points[i]).value_or(-1);
+		nodeIds[i] = getNodeAt(points[i]).value_or(-1);
+		assert(nodeIds[i] != -1);
+	}
+
+	std::vector<float> pathCosts;
+	pathCosts.resize(points.size());
+	pathCosts[0] = 0.0f;
+	for(size_t i = 1; i < points.size(); i++) {
+		
+		const Vector2f delta = points.at(i) - points.at(i-1);
+		const float len = delta.length();
+		const auto ray = Ray(points.at(i-1), delta / len);
+
+		const auto startPoint = nodeIds[i];
+		const auto col = findRayCollision(ray, len, startPoint);
+		pathCosts[i] = col.second;
 	}
 	
 	int dst = static_cast<int>(points.size()) - 1;
 	while (dst > 2) {
 		const Vector2f dstPoint = points[dst];
 		int lastSafeFrom = dst - 1;
+		float lastSafeCost = -1.0f;
 		for (int i = lastSafeFrom - 1; i >= 0; --i) {
 			const Vector2f curPoint = points[i];
 
@@ -392,22 +408,33 @@ void Navmesh::postProcessPath(std::vector<Vector2f>& points, NavigationQuery::Po
 			const float len = delta.length();
 			const auto ray = Ray(curPoint, delta / len);
 
-			const auto startPoint = nodes[i];
-			
-			const auto col = findRayCollision(ray, len, startPoint);
+			const auto startPoint = nodeIds[i];
+			const auto [col, dist] = findRayCollision(ray, len, startPoint);
 			if (col) {
 				// No shortcut from here, abort
 				break;
-			} else {
-				// This is safe
-				lastSafeFrom = i;
+			} 
+
+			float originalDist = 0.0f;
+			for (int p = i + 1; p <= dst; p++) {
+				originalDist += pathCosts.at(p);
 			}
+
+			if (originalDist < dist) {
+				break;
+			}
+			
+			// This is safe
+			lastSafeFrom = i;
+			lastSafeCost = dist;
 		}
 
 		const int eraseCount = (dst - lastSafeFrom - 1);
 		if (eraseCount > 0) {
 			points.erase(points.begin() + (lastSafeFrom + 1), points.begin() + dst);
-			nodes.erase(nodes.begin() + (lastSafeFrom + 1), nodes.begin() + dst);
+			nodeIds.erase(nodeIds.begin() + (lastSafeFrom + 1), nodeIds.begin() + dst);
+			pathCosts[dst] = lastSafeCost;
+			pathCosts.erase(pathCosts.begin() + (lastSafeFrom + 1), pathCosts.begin() + dst);			
 		}
 
 		if (eraseCount > 0 && type == NavigationQuery::PostProcessingType::Aggressive) {
@@ -422,7 +449,7 @@ std::optional<Vector2f> Navmesh::findRayCollision(Ray ray, float maxDistance) co
 {
 	auto startNode = getNodeAt(ray.p);
 	if (startNode) {
-		return findRayCollision(ray, maxDistance, startNode.value());
+		return findRayCollision(ray, maxDistance, startNode.value()).first;
 	} else {
 		return Vector2f(ray.p);
 	}
@@ -462,9 +489,10 @@ void Navmesh::markPortalsDisconnected()
 	}
 }
 
-std::optional<Vector2f> Navmesh::findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon) const
+std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon) const
 {
 	float distanceLeft = maxDistance;
+	float weightedDistance = 0.0f;
 	NodeId curPoly = initialPolygon;
 	
 	while (distanceLeft > 0) {
@@ -472,7 +500,7 @@ std::optional<Vector2f> Navmesh::findRayCollision(Ray ray, float maxDistance, No
 		const std::optional<size_t> edgeIdx = poly.getExitEdge(ray);
 		if (!edgeIdx) {
 			// Something went wrong
-			return ray.p;
+			return { ray.p, weightedDistance };
 		}
 
 		// Find intersection with that edge
@@ -481,14 +509,15 @@ std::optional<Vector2f> Navmesh::findRayCollision(Ray ray, float maxDistance, No
 		const std::optional<Vector2f> intersection = edgeLine.intersection(Line(ray.p, ray.dir)); // TODO
 		if (!intersection) {
 			// ??
-			return ray.p;
+			return { ray.p, weightedDistance };
 		}
 
 		// Check how much more we have left to go and stop if we reach the destination
 		const float distMoved = (ray.p - intersection.value()).length();
+		weightedDistance += distMoved * (weights.empty() ? 1.0f : weights.at(curPoly));
 		distanceLeft -= distMoved;
 		if (distanceLeft < 0) {
-			return {};
+			return { {}, weightedDistance };
 		}
 
 		// Move to the next polygon on navmesh
@@ -498,12 +527,12 @@ std::optional<Vector2f> Navmesh::findRayCollision(Ray ray, float maxDistance, No
 			ray = Ray(intersection.value(), ray.dir);
 		} else {
 			// Hit the edge of the navmesh
-			return intersection.value();
+			return { intersection.value(), weightedDistance };
 		}
 	}
 
 	// No collisions
-	return {};
+	return { {}, weightedDistance };
 }
 
 void Navmesh::processPolygons()
