@@ -499,6 +499,11 @@ namespace Halley {
 			return entity != nullptr;
 		}
 
+		bool isAlive() const
+		{
+			return entity->isAlive();
+		}
+
 		bool operator==(const EntityRef& other) const
 		{
 			return entity == other.entity && world == other.world;
