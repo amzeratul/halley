@@ -449,7 +449,8 @@ void EntityEditor::pasteComponents(const ConfigNode& data)
 
 void EntityEditor::pasteComponent(const String& name, ConfigNode data)
 {
-	auto& components = getEntityData().getComponents();
+	auto& entityData = getEntityData();
+	auto& components = entityData.getComponents();
 	
 	for (size_t i = 0; i < components.size(); ++i) {
 		if (components[i].first == name) {
@@ -462,7 +463,9 @@ void EntityEditor::pasteComponent(const String& name, ConfigNode data)
 	}
 
 	// Not found, add it instead
-	addComponent(name, std::move(data));
+	if (entityData.getPrefab().isEmpty()) {
+		addComponent(name, std::move(data));
+	}
 }
 
 void EntityEditor::setName(const String& name)
