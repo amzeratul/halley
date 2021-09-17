@@ -46,6 +46,7 @@ set (editor_sources
 	"src/scene/gizmos/scripting/scripting_gizmo.cpp"
 	"src/scene/gizmos/scripting/scripting_node_editor.cpp"
 
+	"src/ui/confirmation_popup.cpp"
 	"src/ui/console_window.cpp"
 	"src/ui/ecs_window.cpp"
 	"src/ui/editor_settings_window.cpp"
@@ -104,6 +105,7 @@ set (editor_headers
 	"src/scene/gizmos/scripting/scripting_gizmo.h"
 	"src/scene/gizmos/scripting/scripting_node_editor.h"
 	
+	"src/ui/confirmation_popup.h"
 	"src/ui/console_window.h"
 	"src/ui/ecs_window.h"
 	"src/ui/editor_settings_window.h"

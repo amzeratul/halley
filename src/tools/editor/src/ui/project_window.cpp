@@ -399,9 +399,24 @@ void ProjectWindow::showFileExternally(const Path& path)
 	system(cmd.c_str());
 }
 
+bool ProjectWindow::requestQuit(std::function<void()> callback)
+{
+	return assetEditorWindow->requestQuit(std::move(callback));
+}
+
 bool ProjectWindow::onQuitRequested()
 {
-	return assetEditorWindow->onQuitRequested();
+	return requestQuit([=] ()
+	{
+		getAPI().core->quit();
+	});
+}
+
+void ProjectWindow::closeProject()
+{
+	if (requestQuit([=] () { destroy(); })) {
+		destroy();
+	}
 }
 
 

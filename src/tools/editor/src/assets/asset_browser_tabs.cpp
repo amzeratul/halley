@@ -2,6 +2,7 @@
 
 #include "asset_editor_window.h"
 #include "halley/tools/project/project.h"
+#include "src/ui/confirmation_popup.h"
 #include "src/ui/editor_ui_factory.h"
 #include "src/ui/project_window.h"
 
@@ -50,7 +51,38 @@ void AssetBrowserTabs::openTab(std::optional<AssetType> assetType, const String&
 	}
 }
 
-void AssetBrowserTabs::closeTab(const String& key)
+bool AssetBrowserTabs::closeTab(const String& key)
+{
+	tabs->setSelectedOptionId(key);
+	auto idx = tabs->getSelectedOption();
+
+	if (windows[idx]->isModified()) {
+		if (!closingTab) {
+			closingTab = true;
+			auto buttons = { ConfirmationPopup::ButtonType::Yes, ConfirmationPopup::ButtonType::No, ConfirmationPopup::ButtonType::Cancel };
+			auto callback = [this, idx, key] (ConfirmationPopup::ButtonType buttonType)
+			{
+				closingTab = false;
+				if (buttonType == ConfirmationPopup::ButtonType::Cancel) {
+					std_ex::erase_if(toClose, [&] (const auto& v) { return v == key; });
+				} else {
+					if (buttonType == ConfirmationPopup::ButtonType::Yes) {
+						windows[idx]->save();
+					}
+					doCloseTab(key);
+				}
+			};
+
+			getRoot()->addChild(std::make_shared<ConfirmationPopup>(factory, "Save Changes?", "Would you like to save your changes to " + windows[idx]->getName() + " before closing the tab?", buttons, std::move(callback)));
+		}
+		return false;
+	} else {
+		doCloseTab(key);
+	}
+	return true;
+}
+
+void AssetBrowserTabs::doCloseTab(const String& key)
 {
 	const auto idx = tabs->tryGetItemId(key);
 	if (idx != -1) {
@@ -95,18 +127,44 @@ void AssetBrowserTabs::replaceAssetTab(const String& oldName, const String& newN
 	}
 }
 
-bool AssetBrowserTabs::onQuitRequested()
+bool AssetBrowserTabs::requestQuit(std::function<void()> callback)
 {
-	for (size_t i = 0; i < windows.size(); ++i) {
+	if (quittingCallback) {
+		return false;
+	}
+
+	quittingCallback = std::move(callback);
+	return proceedQuitRequested(0, false);
+}
+
+bool AssetBrowserTabs::proceedQuitRequested(size_t idx, bool invoke)
+{
+	for (size_t i = idx; i < windows.size(); ++i) {
 		auto& window = windows[i];
 		if (window->isModified()) {
-			return true;
-
-			// TODO
-			//tabs->setSelectedOption(static_cast<int>(i));
-			//return false;
+			tabs->setSelectedOption(static_cast<int>(i));
+			auto buttons = { ConfirmationPopup::ButtonType::Yes, ConfirmationPopup::ButtonType::No, ConfirmationPopup::ButtonType::Cancel };
+			auto callback = [this, i] (ConfirmationPopup::ButtonType buttonType)
+			{
+				if (buttonType == ConfirmationPopup::ButtonType::Cancel) {
+					quittingCallback = {};
+				} else {
+					if (buttonType == ConfirmationPopup::ButtonType::Yes) {
+						windows[i]->save();
+					}
+					proceedQuitRequested(i + 1, true);
+				}
+			};
+			getRoot()->addChild(std::make_shared<ConfirmationPopup>(factory, "Save Changes?", "Would you like to save your changes to " + window->getName() + " before closing the project?", buttons, std::move(callback)));
+			return false;
 		}
 	}
+
+	if (invoke) {
+		quittingCallback();
+	}
+	quittingCallback = {};
+
 	return true;
 }
 
@@ -130,10 +188,10 @@ void AssetBrowserTabs::setAssetSrcMode(bool srcMode)
 
 void AssetBrowserTabs::update(Time t, bool moved)
 {
-	for (auto& key: toClose) {
-		closeTab(key);
+	auto closing = toClose;
+	for (auto& close: closing) {
+		closeTab(close);
 	}
-	toClose.clear();
 
 	int size = static_cast<int>(windows.size());
 	for (int i = 0; i < size; ++i) {

@@ -23,6 +23,8 @@ namespace Halley {
 		Path getCurrentAssetPath() const;
 
 		bool isModified() const;
+		void save();
+		String getName() const;
 
 	private:
 		EditorUIFactory& factory;

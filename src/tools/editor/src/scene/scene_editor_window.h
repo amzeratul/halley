@@ -71,6 +71,8 @@ namespace Halley {
 		void markModified() override;
 		void clearModifiedFlag();
 		bool isModified() const;
+		void saveScene();
+
 		const EntityIcons& getEntityIcons() const;
 
 		void refreshAssets();
@@ -153,7 +155,6 @@ namespace Halley {
 		void makeUI();
 		void onEntitySelected(const String& id);
 		void panCameraToEntity(const String& id);
-		void saveScene();
 
 		String findParent(const String& entityId) const;
 		const String* findParent(const String& entityId, const EntityTree& tree, const String& prev) const;

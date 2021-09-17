@@ -54,9 +54,9 @@ void AssetsBrowser::replaceAssetTab(AssetType oldType, const String& oldId, Asse
 	assetTabs->replaceAssetTab(oldTarget.toString(), newTarget.toString());
 }
 
-bool AssetsBrowser::onQuitRequested()
+bool AssetsBrowser::requestQuit(std::function<void()> callback)
 {
-	return assetTabs->onQuitRequested();
+	return assetTabs->requestQuit(std::move(callback));
 }
 
 void AssetsBrowser::loadResources()

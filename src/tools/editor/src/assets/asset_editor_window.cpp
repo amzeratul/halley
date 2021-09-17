@@ -110,6 +110,23 @@ bool AssetEditorWindow::isModified() const
 	return false;
 }
 
+void AssetEditorWindow::save()
+{
+	if (metadataEditor->isModified()) {
+		metadataEditor->saveMetadata();
+	}
+	for (const auto& editor: curEditors) {
+		if (editor->isModified()) {
+			editor->save();
+		}
+	}
+}
+
+String AssetEditorWindow::getName() const
+{
+	return Path(loadedAsset).getFilename().getString();
+}
+
 void AssetEditorWindow::onDoubleClickAsset()
 {
 	if (!curEditors.empty()) {

@@ -58,6 +58,10 @@ bool AssetEditor::isModified()
 	return false;
 }
 
+void AssetEditor::save()
+{
+}
+
 void AssetEditor::onTabbedIn()
 {
 }

@@ -70,7 +70,7 @@ void Toolbar::makeUI()
 	
 	setHandle(UIEventType::ButtonClicked, "exitProject", [=] (const UIEvent& event)
 	{
-		projectWindow.destroy();
+		projectWindow.closeProject();
 	});
 
 	setHandle(UIEventType::ButtonClicked, "runProject", [=] (const UIEvent& event)

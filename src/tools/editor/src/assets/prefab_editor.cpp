@@ -29,6 +29,13 @@ bool PrefabEditor::isModified()
 	return window && window->isModified();
 }
 
+void PrefabEditor::save()
+{
+	if (window) {
+		window->saveScene();
+	}
+}
+
 void PrefabEditor::update(Time t, bool moved)
 {
 	if (pendingLoad && project.isDLLLoaded()) {

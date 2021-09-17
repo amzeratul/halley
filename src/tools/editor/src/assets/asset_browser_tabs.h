@@ -16,7 +16,8 @@ namespace Halley {
 		void refreshAssets();
 		void setAssetSrcMode(bool srcMode);
 		void replaceAssetTab(const String& oldName, const String& newName);
-		bool onQuitRequested();
+		bool requestQuit(std::function<void()>);
+		bool proceedQuitRequested(size_t idx, bool invoke);
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -33,10 +34,13 @@ namespace Halley {
 
 		bool srcMode = false;
 		bool waitingLoad = true;
+		bool closingTab = false;
+		std::function<void()> quittingCallback;
 
 		void makeUI();
 		void openTab(std::optional<AssetType> assetType, const String& name, bool selected);
-		void closeTab(const String& key);
+		bool closeTab(const String& key);
+		void doCloseTab(const String& key);
 		void populateTab(UIWidget& tab, std::optional<AssetType> assetType, const String& name, const String& key);
 
 		void saveTabs();

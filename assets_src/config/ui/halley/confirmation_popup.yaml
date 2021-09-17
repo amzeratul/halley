@@ -1,0 +1,29 @@
+---
+widget: { class: image, image: whitebox.png, colour: "#00000080", size: [6000, 3000] }
+sizer: { type: vertical }
+fill: centre
+proportion: 1
+children:
+- widget: { class: image, image: "$ui_title_capsule", innerBorder: [ 6, 3, 6, 6 ], colour: $ui_popupWindow, size: [500, 50] }
+  sizer: { type: vertical }
+  fill: centre
+  proportion: 1
+  children:
+  - sizer: { type: horizontal }
+    children:
+    - widget: { class: label, id: title, text: "Confirm?" }
+      fill: centre
+      proportion: 1
+  - widget: { class: label, id: message, text: "Are you sure?" }
+    border: [0, 10, 0, 10]
+  - sizer: { type: horizontal }
+    children:
+    - stretchSpacer: {}
+      proportion: 1
+    - widget: { id: "yes", class: button, text: "Yes", size: [100, 22] }
+    - widget: { id: "no", class: button, text: "No", size: [100, 22] }
+    - widget: { id: ok, class: button, text: OK, size: [100, 22] }
+    - widget: { id: cancel, class: button, text: Cancel, size: [100, 22] }
+    - stretchSpacer: {}
+      proportion: 1
+...

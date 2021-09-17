@@ -10,6 +10,7 @@ namespace Halley {
 		void refreshAssets() override;
 		void onDoubleClick() override;
 		bool isModified() override;
+		void save() override;
 
 	protected:
 		void update(Time t, bool moved) override;

@@ -45,7 +45,9 @@ namespace Halley {
 		void openFileExternally(const Path& path);
 		void showFileExternally(const Path& path);
 
-    	bool onQuitRequested();
+    	bool requestQuit(std::function<void()> callback);
+        bool onQuitRequested();
+        void closeProject();
 
     protected:
         void onProjectDLLStatusChange(ProjectDLL::Status status) override;
