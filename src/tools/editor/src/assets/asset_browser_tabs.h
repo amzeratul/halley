@@ -16,6 +16,7 @@ namespace Halley {
 		void refreshAssets();
 		void setAssetSrcMode(bool srcMode);
 		void replaceAssetTab(const String& oldName, const String& newName);
+		bool onQuitRequested();
 
 	protected:
 		void update(Time t, bool moved) override;

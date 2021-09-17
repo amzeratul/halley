@@ -54,6 +54,11 @@ void AssetsBrowser::replaceAssetTab(AssetType oldType, const String& oldId, Asse
 	assetTabs->replaceAssetTab(oldTarget.toString(), newTarget.toString());
 }
 
+bool AssetsBrowser::onQuitRequested()
+{
+	return assetTabs->onQuitRequested();
+}
+
 void AssetsBrowser::loadResources()
 {
 	project.addAssetReloadCallback([=] (gsl::span<const String> assets)

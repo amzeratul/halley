@@ -21,6 +21,8 @@ namespace Halley {
 		void setSoftCursor(bool enabled);
 		bool isSoftCursor() const;
 
+		bool onQuitRequested() override;
+
 	private:
 		HalleyEditor& editor;
 		I18N i18n;
@@ -37,6 +39,7 @@ namespace Halley {
 		std::unique_ptr<EditorUIFactory> uiFactory;
 		std::unique_ptr<UIRoot> ui;
 		std::shared_ptr<UIWidget> topLevelUI;
+		std::shared_ptr<ProjectWindow> projectWindow;
 
 		std::unique_ptr<DevConServer> devConServer;
 

@@ -23,6 +23,7 @@ EditorRootStage::EditorRootStage(HalleyEditor& editor, std::unique_ptr<Project> 
 EditorRootStage::~EditorRootStage()
 {
 	topLevelUI.reset();
+	projectWindow.reset();
 	ui.reset();
 	uiFactory.reset();
 	project.reset();
@@ -120,6 +121,11 @@ bool EditorRootStage::isSoftCursor() const
 	return softCursor;
 }
 
+bool EditorRootStage::onQuitRequested()
+{
+	return !projectWindow || projectWindow->onQuitRequested();
+}
+
 void EditorRootStage::initSprites()
 {
 	// Colour scheme
@@ -193,13 +199,15 @@ void EditorRootStage::loadProject()
 {
 	project->setDevConServer(devConServer.get());
 
-	setTopLevelUI(std::make_shared<ProjectWindow>(*uiFactory, editor, *project, getResources(), getAPI()));
+	projectWindow = std::make_shared<ProjectWindow>(*uiFactory, editor, *project, getResources(), getAPI());
+	setTopLevelUI(projectWindow);
 }
 
 void EditorRootStage::unloadProject()
 {
 	initSprites();
 	setTopLevelUI({});
+	projectWindow.reset();
 	project.reset();
 }
 

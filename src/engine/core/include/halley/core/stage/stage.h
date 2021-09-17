@@ -27,6 +27,8 @@ namespace Halley
 
 		const HalleyAPI& getAPI() const { return *api; }
 
+		virtual bool onQuitRequested(); // Return true if OK to quit
+
 	protected:
 		explicit Stage(String name = "unnamed");
 

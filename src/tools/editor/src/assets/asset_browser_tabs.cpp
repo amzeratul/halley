@@ -95,6 +95,21 @@ void AssetBrowserTabs::replaceAssetTab(const String& oldName, const String& newN
 	}
 }
 
+bool AssetBrowserTabs::onQuitRequested()
+{
+	for (size_t i = 0; i < windows.size(); ++i) {
+		auto& window = windows[i];
+		if (window->isModified()) {
+			return true;
+
+			// TODO
+			//tabs->setSelectedOption(static_cast<int>(i));
+			//return false;
+		}
+	}
+	return true;
+}
+
 void AssetBrowserTabs::refreshAssets()
 {
 	for (int i = 0; i < pages->getNumberOfPages(); ++i) {

@@ -399,6 +399,11 @@ void ProjectWindow::showFileExternally(const Path& path)
 	system(cmd.c_str());
 }
 
+bool ProjectWindow::onQuitRequested()
+{
+	return assetEditorWindow->onQuitRequested();
+}
+
 
 ProjectWindow::SettingsStorage::SettingsStorage(std::shared_ptr<ISaveData> saveData, String path)
 	: saveData(std::move(saveData))

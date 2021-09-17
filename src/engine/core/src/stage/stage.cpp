@@ -7,6 +7,11 @@ Stage::Stage(String _name)
 {
 }
 
+bool Stage::onQuitRequested()
+{
+	return true;
+}
+
 InputAPI& Stage::getInputAPI() const
 {
 	Expects(api->input);

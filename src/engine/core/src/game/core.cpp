@@ -293,7 +293,10 @@ void Core::pumpEvents(Time time)
 	auto input = dynamic_cast<InputAPIInternal*>(&*api->input);
 	input->beginEvents(time);
 	if (!api->system->generateEvents(video, input)) {
-		quit(0); // System close event
+		// System close event
+		if (!currentStage || currentStage->onQuitRequested()) {
+			quit(0);
+		}
 	}
 
 	if (devConClient) {
