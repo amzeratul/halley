@@ -34,7 +34,6 @@ namespace Halley {
 
 		bool srcMode = false;
 		bool waitingLoad = true;
-		bool closingTab = false;
 		std::function<void()> quittingCallback;
 
 		void makeUI();

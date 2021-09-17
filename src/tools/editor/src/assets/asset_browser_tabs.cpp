@@ -57,12 +57,10 @@ bool AssetBrowserTabs::closeTab(const String& key)
 	auto idx = tabs->getSelectedOption();
 
 	if (windows[idx]->isModified()) {
-		if (!closingTab) {
-			closingTab = true;
+		if (!getRoot()->hasModalUI()) {
 			auto buttons = { ConfirmationPopup::ButtonType::Yes, ConfirmationPopup::ButtonType::No, ConfirmationPopup::ButtonType::Cancel };
 			auto callback = [this, idx, key] (ConfirmationPopup::ButtonType buttonType)
 			{
-				closingTab = false;
 				if (buttonType == ConfirmationPopup::ButtonType::Cancel) {
 					std_ex::erase_if(toClose, [&] (const auto& v) { return v == key; });
 				} else {
@@ -75,6 +73,8 @@ bool AssetBrowserTabs::closeTab(const String& key)
 
 			getRoot()->addChild(std::make_shared<ConfirmationPopup>(factory, "Save Changes?", "Would you like to save your changes to " + windows[idx]->getName() + " before closing the tab?", buttons, std::move(callback)));
 		}
+
+		std_ex::erase_if(toClose, [&] (const auto& v) { return v == key; });
 		return false;
 	} else {
 		doCloseTab(key);
@@ -90,46 +90,13 @@ void AssetBrowserTabs::doCloseTab(const String& key)
 		windows.erase(windows.begin() + idx);
 		tabs->removeItem(key);
 		saveTabs();
-	}
-}
-
-void AssetBrowserTabs::populateTab(UIWidget& tab, std::optional<AssetType> assetType, const String& name, const String& key)
-{
-	Sprite icon;
-	if (assetType) {
-		icon = factory.makeAssetTypeIcon(assetType.value());
-	} else {
-		const auto type = project.getAssetImporter()->getImportAssetType(name, false);
-		icon = factory.makeImportAssetTypeIcon(type);
-	}
-	auto label = LocalisedString::fromUserString(Path(name).getFilename().toString());
-	tab.getWidgetAs<UIImage>("icon")->setSprite(icon);
-	tab.getWidgetAs<UILabel>("label")->setText(std::move(label));
-	tab.setHandle(UIEventType::ButtonClicked, "close", [=] (const UIEvent& event)
-	{
-		toClose.push_back(key);
-	});
-}
-
-void AssetBrowserTabs::replaceAssetTab(const String& oldName, const String& newName)
-{
-	const auto idx = tabs->tryGetItemId(oldName);
-	if (idx == -1) {
-		return;
-	}
-
-	const auto contents = tabs->getItem(idx)->getWidget("tabContents");
-	if (contents) {
-		tabs->changeItemId(idx, newName);
-		populateTab(*contents, {}, newName, newName);
-		windows[idx]->loadAsset(newName, {});
-		saveTabs();
+		std_ex::erase_if(toClose, [&] (const auto& v) { return v == key; });
 	}
 }
 
 bool AssetBrowserTabs::requestQuit(std::function<void()> callback)
 {
-	if (quittingCallback) {
+	if (quittingCallback || getRoot()->hasModalUI()) {
 		return false;
 	}
 
@@ -166,6 +133,40 @@ bool AssetBrowserTabs::proceedQuitRequested(size_t idx, bool invoke)
 	quittingCallback = {};
 
 	return true;
+}
+
+void AssetBrowserTabs::populateTab(UIWidget& tab, std::optional<AssetType> assetType, const String& name, const String& key)
+{
+	Sprite icon;
+	if (assetType) {
+		icon = factory.makeAssetTypeIcon(assetType.value());
+	} else {
+		const auto type = project.getAssetImporter()->getImportAssetType(name, false);
+		icon = factory.makeImportAssetTypeIcon(type);
+	}
+	auto label = LocalisedString::fromUserString(Path(name).getFilename().toString());
+	tab.getWidgetAs<UIImage>("icon")->setSprite(icon);
+	tab.getWidgetAs<UILabel>("label")->setText(std::move(label));
+	tab.setHandle(UIEventType::ButtonClicked, "close", [=] (const UIEvent& event)
+	{
+		toClose.push_back(key);
+	});
+}
+
+void AssetBrowserTabs::replaceAssetTab(const String& oldName, const String& newName)
+{
+	const auto idx = tabs->tryGetItemId(oldName);
+	if (idx == -1) {
+		return;
+	}
+
+	const auto contents = tabs->getItem(idx)->getWidget("tabContents");
+	if (contents) {
+		tabs->changeItemId(idx, newName);
+		populateTab(*contents, {}, newName, newName);
+		windows[idx]->loadAsset(newName, {});
+		saveTabs();
+	}
 }
 
 void AssetBrowserTabs::refreshAssets()

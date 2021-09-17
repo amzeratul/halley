@@ -101,6 +101,8 @@ void ProjectWindow::makeUI()
 			}
 		}
 	});
+
+	setModal(false);
 }
 
 void ProjectWindow::makeToolbar()

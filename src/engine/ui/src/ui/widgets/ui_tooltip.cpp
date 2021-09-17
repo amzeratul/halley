@@ -10,6 +10,8 @@ UIToolTip::UIToolTip(const UIStyle& style)
 	border = style.getBorder("innerBorder");
 	delay = style.getFloat("delay");
 	maxWidth = style.getFloat("maxWidth");
+
+	setModal(false);
 }
 
 void UIToolTip::showToolTipForWidget(const UIWidget& widget, Vector2f mousePos)
