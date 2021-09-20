@@ -60,6 +60,7 @@ namespace Halley {
 		void openAsset(AssetType assetType, const String& assetId) override;
 		void openAssetHere(AssetType assetType, const String& assetId) override;
 		void addTask(std::unique_ptr<Task> task) override;
+		void setAssetSaveNotification(bool enabled) override;
 		
 		const ConfigNode& getSetting(EditorSettingType type, std::string_view id) const override;
 		void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) override;

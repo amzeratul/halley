@@ -233,6 +233,11 @@ void SceneEditorGameBridge::addTask(std::unique_ptr<Task> task)
 	projectWindow.addTask(std::move(task));
 }
 
+void SceneEditorGameBridge::setAssetSaveNotification(bool enabled)
+{
+	project.setAssetSaveNotification(enabled);
+}
+
 const ConfigNode& SceneEditorGameBridge::getSetting(EditorSettingType type, std::string_view id) const
 {
 	return projectWindow.getSetting(type, id);
