@@ -547,8 +547,10 @@ void SceneEditorWindow::saveScene()
 	undoStack.onSave();
 
 	const auto strData = prefab->toYAML();
+	project.setAssetSaveNotification(false);
 	project.writeAssetToDisk(assetPath, gsl::as_bytes(gsl::span<const char>(strData.c_str(), strData.length())));
 	gameBridge->onSceneSaved();
+	project.setAssetSaveNotification(true);
 }
 
 void SceneEditorWindow::markModified()

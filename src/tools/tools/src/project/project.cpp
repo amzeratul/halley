@@ -250,7 +250,16 @@ void Project::writeMetadataToDisk(const Path& filePath, const Metadata& metadata
 
 	const Path metaPath = getAssetsSrcPath() / filePath.replaceExtension(filePath.getExtension() + ".meta");
 	FileSystem::writeFile(metaPath, data);
-	notifyAssetFileModified(filePath);
+	notifyAssetFilesModified(gsl::span<const Path>(&filePath, 1));
+}
+
+void Project::setAssetSaveNotification(bool enabled)
+{
+	assetNotifyImportEnabled = enabled;
+	if (enabled) {
+		notifyAssetFilesModified(assetsToNotifyImport);
+		assetsToNotifyImport.clear();
+	}
 }
 
 bool Project::writeAssetToDisk(const Path& path, gsl::span<const gsl::byte> data)
@@ -261,7 +270,11 @@ bool Project::writeAssetToDisk(const Path& path, gsl::span<const gsl::byte> data
 	
 	if (!std::equal(oldData.begin(), oldData.end(), data.begin(), data.end())) {
 		FileSystem::writeFile(filePath, data);
-		notifyAssetFileModified(path);
+		if (assetNotifyImportEnabled) {
+			notifyAssetFilesModified(gsl::span<const Path>(&path, 1));
+		} else {
+			assetsToNotifyImport.push_back(path);
+		}
 		return true;
 	}
 	return false;
@@ -321,10 +334,10 @@ void Project::setCheckAssetTask(CheckAssetsTask* task)
 	checkAssetsTask = task;
 }
 
-void Project::notifyAssetFileModified(Path path)
+void Project::notifyAssetFilesModified(gsl::span<const Path> paths)
 {
 	if (checkAssetsTask) {
-		checkAssetsTask->requestRefreshAsset(std::move(path));
+		checkAssetsTask->requestRefreshAssets(paths);
 	}
 }
 

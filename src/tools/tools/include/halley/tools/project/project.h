@@ -87,6 +87,7 @@ namespace Halley
 		Metadata readMetadataFromDisk(const Path& filePath) const;
 		void writeMetadataToDisk(const Path& filePath, const Metadata& metadata);
 
+		void setAssetSaveNotification(bool enabled);
 		bool writeAssetToDisk(const Path& filePath, gsl::span<const gsl::byte> data);
 
 		std::vector<String> getAssetSrcList() const;
@@ -96,7 +97,7 @@ namespace Halley
 		void reloadAssets(const std::set<String>& assets, bool packed);
 		void reloadCodegen();
 		void setCheckAssetTask(CheckAssetsTask* checkAssetsTask);
-		void notifyAssetFileModified(Path path);
+		void notifyAssetFilesModified(gsl::span<const Path> paths);
 
 		Path getExecutablePath() const;
 
@@ -152,6 +153,9 @@ namespace Halley
 		std::vector<HalleyPluginPtr> plugins;
 		std::shared_ptr<ProjectDLL> gameDll;
 		std::unique_ptr<Resources> gameResources;
+
+		bool assetNotifyImportEnabled = true;
+		std::vector<Path> assetsToNotifyImport;
 
 		struct AssetPreviewCache {
 			int64_t timestamp;

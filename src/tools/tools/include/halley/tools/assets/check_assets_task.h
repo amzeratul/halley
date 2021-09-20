@@ -12,8 +12,8 @@ namespace Halley
 	public:
 		CheckAssetsTask(Project& project, bool oneShot);
 		~CheckAssetsTask();
-
-		void requestRefreshAsset(Path path);
+		
+		void requestRefreshAssets(gsl::span<const Path> paths);
 
 	protected:
 		void run() override;

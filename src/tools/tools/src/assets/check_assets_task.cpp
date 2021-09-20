@@ -270,7 +270,6 @@ bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, std::map<String, I
 			}
 		}
 
-		logInfo("Assets to be deleted: " + toString(toDelete.size()));
 		addPendingTask(std::make_unique<DeleteAssetsTask>(db, dstPath, std::move(toDelete)));
 	}
 
@@ -278,18 +277,17 @@ bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, std::map<String, I
 	const bool hasImport = hasAssetsToImport(db, assets);
 	if (hasImport || !deletedAssets.empty()) {
 		auto toImport = hasImport ? getAssetsToImport(db, assets) : std::vector<ImportAssetsDatabaseEntry>();
-		logInfo("Importing " + toString(toImport.size()) + " assets and deleting " + toString(deletedAssets.size()) + " assets.");
 		addPendingTask(std::make_unique<ImportAssetsTask>(taskName, db, projectAssetImporter, dstPath, std::move(toImport), std::move(deletedAssets), project, packAfter));
 		return true;
 	}
 	return false;
 }
 
-void CheckAssetsTask::requestRefreshAsset(Path path)
+void CheckAssetsTask::requestRefreshAssets(gsl::span<const Path> paths)
 {
-	if (false) {
+	if (true) {
 		std::unique_lock<std::mutex> lock(mutex);
-		inbox.push_back(std::move(path));
+		inbox.insert(inbox.end(), paths.begin(), paths.end());
 	}
 	condition.notify_one();
 }
