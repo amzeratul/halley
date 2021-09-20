@@ -134,7 +134,12 @@ void SceneEditorWindow::loadScene(const String& name)
 	assetPath = project.getImportAssetsDatabase().getPrimaryInputFile(AssetType::Scene, name);
 
 	if (!name.isEmpty()) {
-		loadScene(AssetType::Scene, *project.getGameResources().get<Scene>(name));
+		const auto assetData = Path::readFile(project.getAssetsSrcPath() / assetPath);
+		Scene scene;
+		scene.parseYAML(gsl::as_bytes(gsl::span<const Byte>(assetData)));
+		scene.setAssetId(name);
+		loadScene(AssetType::Scene, scene);
+		//loadScene(AssetType::Scene, *project.getGameResources().get<Scene>(name));
 	}
 }
 
@@ -144,7 +149,12 @@ void SceneEditorWindow::loadPrefab(const String& name)
 	assetPath = project.getImportAssetsDatabase().getPrimaryInputFile(AssetType::Prefab, name);
 
 	if (!name.isEmpty()) {
-		loadScene(AssetType::Prefab, *project.getGameResources().get<Prefab>(name));
+		const auto assetData = Path::readFile(project.getAssetsSrcPath() / assetPath);
+		Prefab prefab;
+		prefab.parseYAML(gsl::as_bytes(gsl::span<const Byte>(assetData)));
+		prefab.setAssetId(name);
+		loadScene(AssetType::Prefab, prefab);
+		// loadScene(AssetType::Prefab, *project.getGameResources().get<Prefab>(name));
 	}
 }
 

@@ -48,7 +48,7 @@ InputJoystickSDL::InputJoystickSDL(int number)
 
 	// Buttons
 	int buttons = SDL_JoystickNumButtons(joy);
-	init(std::max(buttons, 17));
+	init(std::max(buttons, 64));
 }
 
 InputJoystickSDL::~InputJoystickSDL()
