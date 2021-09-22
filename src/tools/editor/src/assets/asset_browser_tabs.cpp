@@ -46,6 +46,7 @@ void AssetBrowserTabs::openTab(std::optional<AssetType> assetType, const String&
 
 	// Add to tabs
 	pages->addPage()->add(window, 1);
+	layout();
 	if (selected) {
 		tabs->setSelectedOption(int(tabs->getCount()) - 1);
 	}
