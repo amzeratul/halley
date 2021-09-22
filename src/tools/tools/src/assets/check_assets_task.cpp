@@ -55,7 +55,8 @@ void CheckAssetsTask::run()
 				sleep(10);
 			}
 		}
-		
+
+		// Wait for the import to finish, otherwise the DB won't be updated and it'll try updating the same assets twice
 		while (hasPendingTasks()) {
 			sleep(5);
 		}
