@@ -100,7 +100,12 @@ bool AssetBrowserTabs::requestQuit(std::function<void()> callback)
 	if (!getRoot()) {
 		return true;
 	}
-	if (quittingCallback || getRoot()->hasModalUI()) {
+	if (quittingCallback) {
+		Logger::logDev("Ignoring quit request due to another quest being in flight");
+		return false;
+	}
+	if (getRoot()->hasModalUI()) {
+		Logger::logDev("Ignoring quit request due to a modal UI being present: " + getRoot()->getModalUIName());
 		return false;
 	}
 

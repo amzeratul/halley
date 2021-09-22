@@ -47,6 +47,7 @@ namespace Halley {
 		void sendEvent(UIEvent event) const override;
 
 		bool hasModalUI() const;
+		String getModalUIName() const;
 		bool isMouseOverUI() const;
 		std::shared_ptr<UIWidget> getWidgetUnderMouse() const;
 		std::shared_ptr<UIWidget> getWidgetUnderMouseIncludingDisabled() const;

@@ -643,6 +643,16 @@ bool UIRoot::hasModalUI() const
 	return false;
 }
 
+String UIRoot::getModalUIName() const
+{
+	for (const auto& c: getChildren()) {
+		if (c->isActive() && c->isModal()) {
+			return c->getId();
+		}
+	}
+	return "";
+}
+
 bool UIRoot::isMouseOverUI() const
 {
 	return static_cast<bool>(currentMouseOver.lock());
