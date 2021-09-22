@@ -55,6 +55,10 @@ void CheckAssetsTask::run()
 				sleep(10);
 			}
 		}
+		
+		while (hasPendingTasks()) {
+			sleep(5);
+		}
 
 		if (first | monitorAssets.poll() | monitorAssetsSrc.poll() | monitorSharedAssetsSrc.poll()) { // Don't short-circuit
 			logInfo("Scanning for asset changes...");
