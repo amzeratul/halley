@@ -59,9 +59,14 @@ bool AssetsBrowser::requestQuit(std::function<void()> callback)
 	return assetTabs->requestQuit(std::move(callback));
 }
 
-void AssetsBrowser::save()
+void AssetsBrowser::saveTab()
 {
 	assetTabs->saveCurrentTab();
+}
+
+void AssetsBrowser::saveAllTabs()
+{
+	assetTabs->saveAllTabs();
 }
 
 void AssetsBrowser::closeTab()

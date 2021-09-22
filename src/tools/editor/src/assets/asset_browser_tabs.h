@@ -19,6 +19,7 @@ namespace Halley {
 		bool requestQuit(std::function<void()>);
 		bool proceedQuitRequested(size_t idx, bool invoke);
 		void saveCurrentTab();
+		void saveAllTabs();
 		void closeCurrentTab();
 
 	protected:

@@ -199,6 +199,13 @@ void AssetBrowserTabs::saveCurrentTab()
 	}
 }
 
+void AssetBrowserTabs::saveAllTabs()
+{
+	for (auto& window: windows) {
+		window->save();
+	}
+}
+
 void AssetBrowserTabs::closeCurrentTab()
 {
 	const int curPage = pages->getCurrentPage();

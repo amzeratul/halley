@@ -256,7 +256,12 @@ bool ProjectWindow::onKeyPress(KeyboardKeyPress key)
 	}
 
 	if (key.is(KeyCode::S, KeyMods::Ctrl)) {
-		assetEditorWindow->save();
+		assetEditorWindow->saveTab();
+		return true;
+	}
+
+	if (key.is(KeyCode::S, KeyMods::CtrlShift)) {
+		assetEditorWindow->saveAllTabs();
 		return true;
 	}
 
