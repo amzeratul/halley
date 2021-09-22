@@ -59,6 +59,16 @@ bool AssetsBrowser::requestQuit(std::function<void()> callback)
 	return assetTabs->requestQuit(std::move(callback));
 }
 
+void AssetsBrowser::save()
+{
+	assetTabs->saveCurrentTab();
+}
+
+void AssetsBrowser::closeTab()
+{
+	assetTabs->closeCurrentTab();
+}
+
 void AssetsBrowser::loadResources()
 {
 	project.addAssetReloadCallback([=] (gsl::span<const String> assets)

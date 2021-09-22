@@ -269,11 +269,6 @@ void SceneEditorWindow::update(Time t, bool moved)
 
 bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 {
-	if (key.is(KeyCode::S, KeyMods::Ctrl)) {
-		saveScene();
-		return true;
-	}
-
 	if (key.is(KeyCode::Z, KeyMods::Ctrl)) {
 		undo();
 		return true;

@@ -18,6 +18,8 @@ namespace Halley {
 		void replaceAssetTab(const String& oldName, const String& newName);
 		bool requestQuit(std::function<void()>);
 		bool proceedQuitRequested(size_t idx, bool invoke);
+		void saveCurrentTab();
+		void closeCurrentTab();
 
 	protected:
 		void update(Time t, bool moved) override;

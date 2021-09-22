@@ -255,6 +255,16 @@ bool ProjectWindow::onKeyPress(KeyboardKeyPress key)
 		return true;
 	}
 
+	if (key.is(KeyCode::S, KeyMods::Ctrl)) {
+		assetEditorWindow->save();
+		return true;
+	}
+
+	if (key.is(KeyCode::W, KeyMods::Ctrl)) {
+		assetEditorWindow->closeTab();
+		return true;
+	}
+
 	if (key.is(KeyCode::F1)) {
 		toggleDebugConsole();
 		return true;

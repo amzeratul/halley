@@ -22,6 +22,8 @@ namespace Halley {
 		void openFile(const Path& path);
         void replaceAssetTab(AssetType oldType, const String& oldId, AssetType newType, const String& newId);
         bool requestQuit(std::function<void()> callback);
+        void save();
+		void closeTab();
 
     private:
 		EditorUIFactory& factory;

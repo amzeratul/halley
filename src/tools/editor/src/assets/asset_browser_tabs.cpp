@@ -191,6 +191,22 @@ void AssetBrowserTabs::setAssetSrcMode(bool srcMode)
 	}
 }
 
+void AssetBrowserTabs::saveCurrentTab()
+{
+	const int curPage = pages->getCurrentPage();
+	if (curPage >= 0 && curPage < static_cast<int>(windows.size())) {
+		windows[curPage]->save();
+	}
+}
+
+void AssetBrowserTabs::closeCurrentTab()
+{
+	const int curPage = pages->getCurrentPage();
+	if (curPage >= 0 && curPage < static_cast<int>(windows.size())) {
+		closeTab(tabs->getItem(curPage)->getId());
+	}
+}
+
 void AssetBrowserTabs::update(Time t, bool moved)
 {
 	auto closing = toClose;
