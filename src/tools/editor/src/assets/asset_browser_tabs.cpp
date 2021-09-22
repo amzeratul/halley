@@ -57,7 +57,7 @@ bool AssetBrowserTabs::closeTab(const String& key)
 	auto idx = tabs->getSelectedOption();
 
 	if (windows[idx]->isModified()) {
-		if (!getRoot()->hasModalUI()) {
+		if (getRoot() && !getRoot()->hasModalUI()) {
 			auto buttons = { ConfirmationPopup::ButtonType::Yes, ConfirmationPopup::ButtonType::No, ConfirmationPopup::ButtonType::Cancel };
 			auto callback = [this, idx, key] (ConfirmationPopup::ButtonType buttonType)
 			{
@@ -96,6 +96,9 @@ void AssetBrowserTabs::doCloseTab(const String& key)
 
 bool AssetBrowserTabs::requestQuit(std::function<void()> callback)
 {
+	if (!getRoot()) {
+		return true;
+	}
 	if (quittingCallback || getRoot()->hasModalUI()) {
 		return false;
 	}
