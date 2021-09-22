@@ -148,7 +148,7 @@ Vector2f Transform2DComponent::transformPoint(const Vector2f& p) const
 Vector2f Transform2DComponent::inverseTransformPoint(const Vector2f& p) const
 {
 	// TODO, do this properly
-	auto pos = p / getGlobalScale() - getGlobalPosition();
+	auto pos = (p - getGlobalPosition()) / getGlobalScale();
 	
 	setCached(CachedIndices::Position); // Important: getGlobalPosition() won't cache if it's the root, but this is important for markDirty
 	return pos;
