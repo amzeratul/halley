@@ -1357,7 +1357,7 @@ std::optional<size_t> Polygon::getExitEdge(const Ray& ray) const
 
 		Vector2f pa = a - ray.p;
 		Vector2f pb = b - ray.p;
-		if (pa.cross(ray.dir) > 0 && pb.cross(ray.dir) < 0) {
+		if (pa.cross(ray.dir) >= 0 && pb.cross(ray.dir) <= 0) {
 			return i;
 		}
 	}
