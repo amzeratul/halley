@@ -391,13 +391,13 @@ void Navmesh::postProcessPath(std::vector<Vector2f>& points, NavigationQuery::Po
 		const float len = delta.length();
 		const auto ray = Ray(points.at(i-1), delta / len);
 
-		const auto startPoint = nodeIds[i];
+		const auto startPoint = nodeIds[i-1];
 		const auto col = findRayCollision(ray, len, startPoint);
 		pathCosts[i] = col.second;
 	}
 	
 	int dst = static_cast<int>(points.size()) - 1;
-	while (dst > 2) {
+	while (dst > 1) {
 		const Vector2f dstPoint = points[dst];
 		int lastSafeFrom = dst - 1;
 		float lastSafeCost = -1.0f;
@@ -420,7 +420,7 @@ void Navmesh::postProcessPath(std::vector<Vector2f>& points, NavigationQuery::Po
 				originalDist += pathCosts.at(p);
 			}
 
-			if (originalDist < dist) {
+			if (originalDist <= dist) {
 				break;
 			}
 			
@@ -494,10 +494,9 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 	float distanceLeft = maxDistance;
 	float weightedDistance = 0.0f;
 	NodeId curPoly = initialPolygon;
-	
 	while (distanceLeft > 0) {
 		const auto& poly = polygons.at(curPoly);
-		const std::optional<size_t> edgeIdx = poly.getExitEdge(ray);
+		std::optional<size_t> edgeIdx = poly.getExitEdge(ray);
 		if (!edgeIdx) {
 			// Something went wrong
 			return { ray.p, weightedDistance };
@@ -506,10 +505,26 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 		// Find intersection with that edge
 		const auto edge = poly.getEdge(edgeIdx.value());
 		const Line edgeLine(edge.a, (edge.b - edge.a).normalized());
-		const std::optional<Vector2f> intersection = edgeLine.intersection(Line(ray.p, ray.dir)); // TODO
+		std::optional<Vector2f> intersection = edgeLine.intersection(Line(ray.p, ray.dir));
 		if (!intersection) {
-			// ??
-			return { ray.p, weightedDistance };
+			// Parallel - Must be overlapping due to exitEdge test previously
+
+			// ray.p must be between edge.a and edge.b OR be at edge.a or edge.b
+			// The corner intersected by the ray is b if edge goes in the same direction as the ray, a otherwise
+			const bool useEdgeB = (edge.b - edge.a).dot(ray.dir) > 0;
+			const auto endCorner = useEdgeB ? edge.b : edge.a;
+
+			const float intersectDist = std::min(distanceLeft, (endCorner - ray.p).length());
+			intersection = ray.p + ray.dir * intersectDist;
+			
+			if (intersectDist <= 0) {
+				// We are already at end corner, pick the next edge round with the same corner
+				if (useEdgeB) {
+					edgeIdx = (edgeIdx.value() + 1) % poly.getNumSides();
+				} else {
+					edgeIdx = (edgeIdx.value() + poly.getNumSides() - 1) % poly.getNumSides();
+				}
+			}
 		}
 
 		// Check how much more we have left to go and stop if we reach the destination
