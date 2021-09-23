@@ -628,13 +628,18 @@ class Win32Clipboard final : public IClipboard {
 public:
 	void setData(const String& stringData) override
 	{
-		if (!OpenClipboard(nullptr)) {
-			throw Exception("Unable to open clipboard.", HalleyExceptions::OS);
+		for (int i = 0; i < 3 && !OpenClipboard(nullptr); ++i) {
+			if (i == 2) {
+				Logger::logError("Unable to open clipboard.");
+				return;
+			}
+			Sleep(5);
 		}
 		
 		if (!EmptyClipboard()) {
 			CloseClipboard();
-			throw Exception("Unable to empty clipboard", HalleyExceptions::OS);
+			Logger::logError("Unable to empty clipboard.");
+			return;
 		}
 		auto utf16str = stringData.getUTF16();
 		auto data = GlobalAlloc(GMEM_MOVEABLE, (utf16str.length() + 1) * sizeof(wchar_t));
@@ -644,7 +649,8 @@ public:
 
 		if (!SetClipboardData(CF_UNICODETEXT, data)) {
 			CloseClipboard();
-			throw Exception("Unable to set clipboard data", HalleyExceptions::OS);
+			Logger::logError("Unable to set clipboard data.");
+			return;
 		}
 
 		CloseClipboard();
@@ -652,19 +658,25 @@ public:
 
 	std::optional<String> getStringData() override
 	{
-		if (!OpenClipboard(nullptr)) {
-			throw Exception("Unable to open clipboard.", HalleyExceptions::OS);
+		for (int i = 0; i < 3 && !OpenClipboard(nullptr); ++i) {
+			if (i == 2) {
+				Logger::logError("Unable to open clipboard");
+				return {};
+			}
+			Sleep(5);
 		}
 
 		if (!IsClipboardFormatAvailable(CF_UNICODETEXT)) {
 			CloseClipboard();
+			Logger::logError("Clipboard format not available");
 			return {};
 		}
 
 		HANDLE data = GetClipboardData(CF_UNICODETEXT);
 		if (data == nullptr) {
 			CloseClipboard();
-			throw Exception("Unable to read clipboard data.", HalleyExceptions::OS);
+			Logger::logError("Unable to get clipboard data");
+			return {};
 		}
 
 		auto src = reinterpret_cast<const wchar_t*>(GlobalLock(data));
