@@ -516,7 +516,8 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 		const float distMoved = (ray.p - intersection.value()).length();
 		weightedDistance += std::min(distMoved, distanceLeft) * (weights.empty() ? 1.0f : weights.at(curPoly));
 		distanceLeft -= distMoved;
-		if (distanceLeft < 0) {
+		constexpr float epsilon = 0.0001f;
+		if (distanceLeft < epsilon) {
 			return { {}, weightedDistance };
 		}
 
