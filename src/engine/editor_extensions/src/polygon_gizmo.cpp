@@ -25,6 +25,11 @@ PolygonGizmo::PolygonGizmo(SnapRules snapRules, String componentName, String fie
 
 void PolygonGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {
+	if (pendingMode) {
+		setMode(pendingMode.value());
+		pendingMode = {};
+	}
+
 	if (inputState.rightClickPressed) {
 		setMode(PolygonGizmoMode::Move);
 	}
@@ -289,6 +294,11 @@ void PolygonGizmo::setMode(PolygonGizmoMode m)
 	updateUI();
 }
 
+void PolygonGizmo::requestSetMode(PolygonGizmoMode mode)
+{
+	pendingMode = mode;
+}
+
 std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
 {
 	auto ui = factory.makeUI("ui/halley/polygon_gizmo_toolbar");
@@ -301,7 +311,8 @@ std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
 
 	ui->setHandle(UIEventType::ListSelectionChanged, "mode", [=] (const UIEvent& event)
 	{
-		setMode(fromString<PolygonGizmoMode>(event.getStringData()));
+		// Calling setMode() here directly can result in two events being sent in the same frame, resulting in an infinite ping-pong
+		requestSetMode(fromString<PolygonGizmoMode>(event.getStringData()));
 	});
 
 	ui->setHandle(UIEventType::ButtonClicked, "addComponent", [=] (const UIEvent& event)

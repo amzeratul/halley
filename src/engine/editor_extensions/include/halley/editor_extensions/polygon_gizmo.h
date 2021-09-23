@@ -58,6 +58,7 @@ namespace Halley {
 		std::vector<SceneEditorGizmoHandle> handles;
 
 		PolygonGizmoMode mode = PolygonGizmoMode::Move;
+		std::optional<PolygonGizmoMode> pendingMode;
 		std::shared_ptr<UIList> uiMode;
 		std::shared_ptr<UIButton> uiAddComponent;
 
@@ -77,6 +78,7 @@ namespace Halley {
 		int updateHandles(const SceneEditorInputState& inputState);
 
 		void setMode(PolygonGizmoMode mode);
+		void requestSetMode(PolygonGizmoMode mode);
 		void updateUI();
 
 		std::pair<Vertex, size_t> findInsertPoint(Vector2f pos) const;
