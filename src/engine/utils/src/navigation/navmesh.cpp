@@ -514,7 +514,7 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 
 		// Check how much more we have left to go and stop if we reach the destination
 		const float distMoved = (ray.p - intersection.value()).length();
-		weightedDistance += distMoved * (weights.empty() ? 1.0f : weights.at(curPoly));
+		weightedDistance += std::min(distMoved, distanceLeft) * (weights.empty() ? 1.0f : weights.at(curPoly));
 		distanceLeft -= distMoved;
 		if (distanceLeft < 0) {
 			return { {}, weightedDistance };
