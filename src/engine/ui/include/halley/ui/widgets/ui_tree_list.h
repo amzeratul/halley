@@ -73,6 +73,9 @@ namespace Halley {
 
     	bool canHaveChildren() const;
 
+        std::pair<bool, bool> expandParentsOfId(const String& targetId); // returns {containsId, modified}
+        std::optional<String> getLastExpandedItem(const String& targetId);
+
     private:
     	String id;
     	String parentId;
@@ -86,6 +89,7 @@ namespace Halley {
 
     	void doUpdateTree(UITreeList& treeList, std::vector<int>& itemsLeftPerDepth, bool treeExpanded);
         std::optional<FindPositionResult> doFindPosition(UITreeList& tree, Vector2f pos, int depth, bool lasBranch) const;
+        std::optional<String> doGetLastExpandedItem(bool expandedTree, const String& lastId, const String& id);
     };
 	
     class UITreeList : public UIList {
@@ -104,6 +108,9 @@ namespace Halley {
 
         bool canDragListItem(const UIListItem& listItem) override;
 
+        void makeParentsOfItemExpanded(const String& id);
+        bool setSelectedOptionId(const String& id) override;
+
     protected:
         void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;
@@ -111,6 +118,8 @@ namespace Halley {
         void onItemDoneDragging(UIListItem& item, int index, Vector2f pos) override;
     	
     private:
+        friend class UITreeListItem;
+
     	UITreeListItem root;
     	Sprite insertCursor;
     	bool needsRefresh = true;

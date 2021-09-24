@@ -255,7 +255,13 @@ void UIList::resetSelectionIfInvalid()
 
 void UIList::setItemActive(const String& id, bool active)
 {
-	const auto curId = getSelectedOptionId();
+	doSetItemActive(id, active);
+	reassignIds();
+	resetSelectionIfInvalid();
+}
+
+void UIList::doSetItemActive(const String& id, bool active)
+{
 	for (auto& item: items) {
 		if (item->getId() == id) {
 			if (!active) {
@@ -264,8 +270,6 @@ void UIList::setItemActive(const String& id, bool active)
 			item->setActive(active);
 		}
 	}
-	reassignIds();
-	resetSelectionIfInvalid();
 }
 
 void UIList::filterOptions(const String& filter)

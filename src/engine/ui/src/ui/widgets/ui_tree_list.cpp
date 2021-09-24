@@ -112,7 +112,19 @@ void UITreeList::update(Time t, bool moved)
 
 void UITreeList::refresh()
 {
+	const auto sel = getSelectedOptionId();
+
 	root.updateTree(*this);
+
+	reassignIds();
+
+	const auto toSel = root.getLastExpandedItem(sel);
+	if (toSel) {
+		setSelectedOptionId(toSel.value());
+	}
+
+	resetSelectionIfInvalid();
+
 	needsRefresh = false;
 }
 
@@ -271,6 +283,20 @@ bool UITreeList::isSingleRoot() const
 bool UITreeList::canDragListItem(const UIListItem& listItem)
 {
 	return isDragEnabled() && (!singleRoot || listItem.getAbsoluteIndex() != 0);
+}
+
+void UITreeList::makeParentsOfItemExpanded(const String& id)
+{
+	const auto [found, modified] = root.expandParentsOfId(id);
+	if (modified) {
+		refresh();
+	}
+}
+
+bool UITreeList::setSelectedOptionId(const String& id)
+{
+	makeParentsOfItemExpanded(id);
+	return UIList::setSelectedOptionId(id);
 }
 
 UITreeListControls::UITreeListControls(String id, UIStyle style)
@@ -454,7 +480,7 @@ void UITreeListItem::setIcon(Sprite sprite)
 
 void UITreeListItem::setExpanded(bool e)
 {
-	if (!children.empty()) {
+	if (!children.empty() && treeControls) {
 		expanded = e;
 		treeControls->setExpanded(e);
 	}
@@ -579,6 +605,49 @@ bool UITreeListItem::canHaveChildren() const
 	return !forceLeaf;
 }
 
+std::pair<bool, bool> UITreeListItem::expandParentsOfId(const String& id)
+{
+	if (id == this->id) {
+		return { true, false };
+	}
+
+	for (auto& c: children) {
+		const auto [containsId, modified] = c->expandParentsOfId(id);
+		if (containsId) {
+			const bool expanding = !expanded;
+			if (expanding) {
+				setExpanded(true);
+			}
+			return { true, modified || expanding };
+		}
+	}
+
+	return { false, false };
+}
+
+std::optional<String> UITreeListItem::getLastExpandedItem(const String& targetId)
+{
+	return doGetLastExpandedItem(expanded, id, targetId);
+}
+
+std::optional<String> UITreeListItem::doGetLastExpandedItem(bool expandedTree, const String& lastId, const String& targetId)
+{
+	if (targetId == this->id) {
+		return expandedTree ? id : lastId;
+	}
+
+	const bool curExpanded = expanded && expandedTree;
+
+	for (auto& c: children) {
+		auto value = c->doGetLastExpandedItem(curExpanded, expandedTree ? id : lastId, targetId);
+		if (value) {
+			return value;
+		}
+	}
+
+	return {};
+}
+
 void UITreeListItem::updateTree(UITreeList& treeList)
 {
 	std::vector<int> itemsLeftPerDepth;
@@ -598,7 +667,7 @@ void UITreeListItem::collectItems(std::vector<std::shared_ptr<UIListItem>>& item
 
 void UITreeListItem::doUpdateTree(UITreeList& treeList, std::vector<int>& itemsLeftPerDepth, bool treeExpanded)
 {
-	treeList.setItemActive(id, treeExpanded);
+	treeList.doSetItemActive(id, treeExpanded);
 
 	if (listItem && treeControls && treeExpanded) {
 		const float totalIndent = treeControls->updateGuides(itemsLeftPerDepth, !children.empty(), expanded);
