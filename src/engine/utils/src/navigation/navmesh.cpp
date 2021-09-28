@@ -234,21 +234,25 @@ ConfigNode Navmesh::Node::toConfigNode() const
 	return result;
 }
 
-
-std::optional<NavigationPath> Navmesh::pathfind(const NavigationQuery& query) const
+std::optional<std::vector<Navmesh::NodeAndConn>> Navmesh::pathfindNodes(const NavigationQuery& query) const
 {
 	if (query.fromSubWorld != subWorld || query.toSubWorld != subWorld) {
 		return {};
 	}
-	
+
 	auto fromId = getNodeAt(query.from);
 	auto toId = getNodeAt(query.to);
 
 	if (!fromId || !toId) {
 		return {};
 	}
-	
-	auto nodePath = pathfind(fromId.value(), toId.value());
+
+	return pathfind(fromId.value(), toId.value());
+}
+
+std::optional<NavigationPath> Navmesh::pathfind(const NavigationQuery& query) const
+{
+	auto nodePath = pathfindNodes(query);
 	if (!nodePath) {
 		return {};
 	}

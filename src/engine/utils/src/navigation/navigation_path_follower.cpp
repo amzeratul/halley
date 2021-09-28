@@ -96,8 +96,22 @@ void NavigationPathFollower::goToNextRegion(const NavmeshSet& navmeshSet)
 
 		// Run the new query for just this region
 		const int subWorld = regionNavMesh.getSubWorld();
-		const auto query = NavigationQuery(startPos, subWorld, endPos, subWorld, path->query.postProcessingType);
-		auto newPath = navmeshSet.pathfindInRegion(query, region.regionNodeId);
+
+		std::optional<NavigationPath> newPath = {};
+
+		if (isLastRegion || path->query.postProcessingType == NavigationQuery::PostProcessingType::None) {
+			const auto query = NavigationQuery(startPos, subWorld, endPos, subWorld, path->query.postProcessingType);
+			newPath = navmeshSet.pathfindInRegion(query, region.regionNodeId);
+		}else {
+			// Pathfind between regions
+			const auto& secondRegion = path->regions[nextRegionIdx + 1];
+			const auto& secondRegionNavMesh = navmeshSet.getNavmeshes()[secondRegion.regionNodeId];
+			const auto secondEndPos = nextRegionIdx + 1 == path->regions.size() - 1 ? path->query.to : secondRegionNavMesh.getPortals()[secondRegion.exitEdgeId].pos;
+
+			const auto queryStart = NavigationQuery(startPos, subWorld, endPos, subWorld, NavigationQuery::PostProcessingType::None);
+			const auto queryEnd = NavigationQuery(endPos, subWorld, secondEndPos, secondRegionNavMesh.getSubWorld(), NavigationQuery::PostProcessingType::None);
+			newPath = navmeshSet.pathfindBetweenRegions(queryStart, queryEnd, region.regionNodeId, secondRegion.regionNodeId, path->query.postProcessingType);
+		}
 
 		if (newPath && !newPath->path.empty()) {
 			// Set new path

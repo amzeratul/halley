@@ -87,6 +87,7 @@ namespace Halley {
 		Navmesh(const ConfigNode& nodeData);
 		Navmesh(std::vector<PolygonData> polygons, const NavmeshBounds& bounds, int subWorld);
 
+		[[nodiscard]] std::optional<std::vector<NodeAndConn>> pathfindNodes(const NavigationQuery& query) const;
 		[[nodiscard]] std::optional<NavigationPath> pathfind(const NavigationQuery& query) const;
 
 		[[nodiscard]] ConfigNode toConfigNode() const;

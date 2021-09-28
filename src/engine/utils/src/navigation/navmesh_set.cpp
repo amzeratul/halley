@@ -81,6 +81,21 @@ std::optional<NavigationPath> NavmeshSet::pathfindInRegion(const NavigationQuery
 	return navmeshes[regionId].pathfind(query);
 }
 
+std::optional<NavigationPath> NavmeshSet::pathfindBetweenRegions(const NavigationQuery& queryStart, const NavigationQuery& queryEnd, uint16_t startRegionId, uint16_t endRegionId, NavigationQuery::PostProcessingType postProcessing) const
+{
+	const auto firstLeg = navmeshes[startRegionId].pathfindNodes(queryStart);
+	const auto secondLeg = navmeshes[endRegionId].pathfindNodes(queryEnd);
+
+
+	
+	// TODO
+
+
+
+	
+	return {};
+}
+
 const Navmesh* NavmeshSet::getNavMeshAt(Vector2f pos, int subWorld) const
 {
 	for (const auto& navmesh: navmeshes) {
