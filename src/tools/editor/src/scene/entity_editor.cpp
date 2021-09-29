@@ -212,7 +212,7 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 	if (iter != ecsData->getComponents().end()) {
 		const auto& componentData = iter->second;
 		for (auto& member: componentData.members) {
-			if (member.canEdit) {
+			if (member.canEdit && !member.hideInEditor) {
 				auto type = member.type.name;
 				if (type == "float" && member.range) {
 					type = "Halley::Range<" + type + "," + toString(member.range->start) + "," + toString(member.range->end) + ">";

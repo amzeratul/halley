@@ -94,6 +94,7 @@ namespace Halley
 		String displayName;
 		bool canSave = true;
 		bool canEdit = true;
+		bool hideInEditor = false;
 		bool collapse = false;
 		std::optional<Range<float>> range;
 

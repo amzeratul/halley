@@ -31,6 +31,7 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				const String displayName = memberProperties["displayName"].as<std::string>("");
 				const bool canEdit = memberProperties["canEdit"].as<bool>(true);
 				const bool canSave = memberProperties["canSave"].as<bool>(true);
+				const bool hideInEditor = memberProperties["hideInEditor"].as<bool>(false);
 				const bool collapse = memberProperties["collapse"].as<bool>(false);
 				
 				std::optional<Range<float>> range;
@@ -64,6 +65,7 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				field.collapse = collapse;
 				field.canEdit = canEdit;
 				field.canSave = canSave;
+				field.hideInEditor = hideInEditor;
 				field.displayName = displayName;
 				field.range = range;
 			}
