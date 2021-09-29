@@ -166,7 +166,14 @@ ImportAssetsTask::ImportResult ImportAssetsTask::importAsset(const ImportAssetsD
 			auto meta = metadataFetcher(f.getPath());
 			auto data = FileSystem::readFile(asset.srcDir / f.getDataPath());
 			if (data.empty()) {
-				logError("Data for \"" + toString(asset.srcDir / f.getPath()) + "\" is empty.");
+				// Give it a bit and try again if it was empty
+				using namespace std::chrono_literals;
+				std::this_thread::sleep_for(5ms);
+				data = FileSystem::readFile(asset.srcDir / f.getDataPath());
+
+				if (data.empty()) {
+					logError("Data for \"" + toString(asset.srcDir / f.getPath()) + "\" is empty.");
+				}
 			}
 			importingAsset.inputFiles.emplace_back(ImportingAssetFile(f.getPath(), std::move(data), meta ? meta.value() : Metadata()));
 		}
