@@ -98,7 +98,6 @@ void NavigationPathFollower::goToNextRegion(const NavmeshSet& navmeshSet)
 		const int subWorld = regionNavMesh.getSubWorld();
 
 		std::optional<NavigationPath> newPath = {};
-
 		if (isLastRegion || path->query.postProcessingType == NavigationQuery::PostProcessingType::None) {
 			const auto query = NavigationQuery(startPos, subWorld, endPos, subWorld, path->query.postProcessingType);
 			newPath = navmeshSet.pathfindInRegion(query, region.regionNodeId);
