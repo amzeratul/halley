@@ -1,6 +1,7 @@
 #include "halley/navigation/navmesh_set.h"
 
 #include "halley/data_structures/priority_queue.h"
+#include "halley/maths/ray.h"
 #include "halley/support/logger.h"
 using namespace Halley;
 
@@ -81,19 +82,14 @@ std::optional<NavigationPath> NavmeshSet::pathfindInRegion(const NavigationQuery
 	return navmeshes[regionId].pathfind(query);
 }
 
-std::optional<NavigationPath> NavmeshSet::pathfindBetweenRegions(const NavigationQuery& queryStart, const NavigationQuery& queryEnd, uint16_t startRegionId, uint16_t endRegionId, NavigationQuery::PostProcessingType postProcessing) const
+std::optional<NavigationPath> NavmeshSet::pathfindBetweenRegions(const NavigationQuery& queryStart, const NavigationQuery& queryEnd, uint16_t startRegionId, uint16_t endRegionId, const Navmesh::Portal& portal, NavigationQuery::PostProcessingType postProcessing) const
 {
-	const auto firstLeg = navmeshes[startRegionId].pathfindNodes(queryStart);
-	const auto secondLeg = navmeshes[endRegionId].pathfindNodes(queryEnd);
+	auto startLeg = navmeshes[startRegionId].pathfindNodes(queryStart);
+	auto endLeg = navmeshes[endRegionId].pathfindNodes(queryEnd);
 
+	auto points = postProcessPathBetweenRegions(queryStart, queryEnd, startRegionId, endRegionId, portal, std::move(startLeg.value()), std::move(endLeg.value()), postProcessing);
 
-	
-	// TODO
-
-
-
-	
-	return {};
+	return NavigationPath(queryStart, std::move(points));
 }
 
 const Navmesh* NavmeshSet::getNavMeshAt(Vector2f pos, int subWorld) const
@@ -350,4 +346,209 @@ std::pair<uint16_t, uint16_t> NavmeshSet::getPortalDestination(uint16_t region, 
 	}
 	
 	return { maxVal, maxVal };
+}
+
+std::vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
+	const NavigationQuery& queryStart, const NavigationQuery& queryEnd,
+	uint16_t startRegionId, uint16_t endRegionId, const Navmesh::Portal& portal,
+	std::vector<Navmesh::NodeAndConn> startLeg, std::vector<Navmesh::NodeAndConn> endLeg,
+	NavigationQuery::PostProcessingType type) const
+{
+	// Create initial path of points and nodeIds
+	const auto& startNavmesh = navmeshes.at(startRegionId);
+	const auto& endNavmesh = navmeshes.at(endRegionId);
+	
+	std::vector<Vector2f> points;
+	std::vector<NodeId> nodeIds;
+	const size_t pointsCount = 3 + startLeg.size() + endLeg.size();
+	points.reserve(pointsCount); // Start + Midpoint + End + Both Legs
+	nodeIds.reserve(pointsCount);
+	
+	points.emplace_back(queryStart.from);
+	nodeIds.emplace_back(startNavmesh.getNodeAt(queryStart.from).value());
+	for (size_t i = 1; i < startLeg.size(); ++i) {
+		const auto cur = startLeg[i - 1];
+		
+		const auto& prevPoly = startNavmesh.getPolygon(cur.node);
+		const auto edge = prevPoly.getEdge(cur.connectionIdx);
+
+		points.emplace_back(0.5f * (edge.a + edge.b));
+		nodeIds.emplace_back(cur.node);
+	}
+	
+	// Note crossover point
+	int crossoverPoint = static_cast<int>(points.size());
+	points.emplace_back(queryStart.to); // Same as queryEnd.from
+	nodeIds.emplace_back(startNavmesh.getNodeAt(queryStart.to).value());
+	
+	for (size_t i = 1; i < endLeg.size(); ++i) {
+		const auto cur = endLeg[i - 1];
+
+		const auto& prevPoly = endNavmesh.getPolygon(cur.node);
+		const auto edge = prevPoly.getEdge(cur.connectionIdx);
+
+		points.emplace_back(0.5f * (edge.a + edge.b));
+		nodeIds.emplace_back(cur.node);
+	}
+	points.emplace_back(queryEnd.to);
+	nodeIds.emplace_back(endNavmesh.getNodeAt(queryEnd.to).value());
+
+	// Calculate path costs
+	std::vector<float> pathCosts;
+	pathCosts.resize(points.size());
+	pathCosts[0] = 0.0f;
+	for (size_t i = 1; i < points.size(); i++) {
+
+		const Vector2f delta = points.at(i) - points.at(i - 1);
+		const float len = delta.length();
+		const auto ray = Ray(points.at(i - 1), delta / len);
+
+		const auto startNode = static_cast<int>(i - 1)== crossoverPoint ? endNavmesh.getNodeAt(points.at(i-1)).value() : nodeIds[i - 1];
+		const auto& navmesh = static_cast<int>(i) <= crossoverPoint ? startNavmesh : endNavmesh;
+		const auto col = navmesh.findRayCollision(ray, len, startNode);
+		pathCosts[i] = col.second;
+	}
+
+	// TODO: Preprocess Portal?
+
+	// Path Smoothing
+	int dst = static_cast<int>(points.size()) - 1;
+	while (dst > 1) {
+		const Vector2f dstPoint = points[dst];
+		int lastSafeFrom = dst - 1;
+		float lastSafeCost = -1.0f;
+		for (int i = lastSafeFrom - 1; i >= 0; --i) {
+			const Vector2f curPoint = points[i];
+
+			const Vector2f startDelta = dstPoint - curPoint;
+			const float startLen = startDelta.length();
+			const auto startRay = Ray(curPoint, startDelta / startLen);
+
+			const auto startNode = nodeIds[i];
+			float newDist = 0.0f;
+
+			if (i <= crossoverPoint && dst > crossoverPoint) {
+				// TODO: Crossover ray check
+
+				// Raycast from start
+				const auto [startCol, startDist] = startNavmesh.findRayCollision(startRay, startLen, startNode);
+
+				if(!startCol) {
+					// Something went wrong, should have hit the edge of the navmesh or another obstacle
+					const auto [test, testd] = startNavmesh.findRayCollision(startRay, startLen, startNode);
+					throw;
+				}
+				
+				// If hit correct portal, then raycast into end
+				bool raycastValid = false;
+				for(size_t p = 1; p < portal.vertices.size(); p++) {
+					const auto portalStart = portal.vertices.at(p - 1);
+					const auto portalEnd = portal.vertices.at(p);
+
+					const auto portalVector = portalEnd - portalStart;
+					const auto portalVectorNormalised = portalVector.normalized();
+
+					const auto pointVector = startCol.value() - portalStart;
+					const auto pointVectorNormalised = pointVector.normalized();
+					
+					if(portalVectorNormalised.dot(pointVectorNormalised) > 0.999f && pointVector.squaredLength() <= portalVector.squaredLength()) {
+						raycastValid = true;
+						break;
+					}
+				}
+				
+				// Else, break
+				if(!raycastValid) {
+					break;
+				}
+
+				//Raycast end
+				const Vector2f endDelta = dstPoint - startCol.value();
+				const float endLen = endDelta.length();
+				const auto endRay = Ray(startCol.value(), endDelta / endLen);
+				const auto endNode = endNavmesh.getNodeAt(startCol.value());
+				const auto [endCol, endDist] = endNavmesh.findRayCollision(endRay, endLen, endNode.value());
+
+				if(endCol) {
+					// Hit obstacle
+					break;
+				}
+				
+				// Add up distance covered in both
+				newDist = startDist + endDist;
+				
+			} else {
+				const auto& navmesh = i <= crossoverPoint ? startNavmesh : endNavmesh;
+				const auto [col, dist] = navmesh.findRayCollision(startRay, startLen, startNode);
+				if (col) {
+					// No shortcut from here, abort
+					break;
+				}
+				newDist = dist;
+			}
+
+			float originalDist = 0.0f;
+			for (int p = i + 1; p <= dst; p++) {
+				originalDist += pathCosts.at(p);
+			}
+
+			if (originalDist <= newDist) {
+				break;
+			}
+
+			// This is safe
+			lastSafeFrom = i;
+			lastSafeCost = newDist;
+		}
+
+		const int eraseCount = (dst - lastSafeFrom - 1);
+		if (eraseCount > 0) {
+
+			// Update crossover point
+			if(lastSafeFrom <= crossoverPoint && dst > crossoverPoint) {
+				crossoverPoint = lastSafeFrom;
+			}else if(dst <= crossoverPoint) {
+				crossoverPoint = crossoverPoint - (dst - lastSafeFrom - 1);
+			}
+			
+			points.erase(points.begin() + (lastSafeFrom + 1), points.begin() + dst);
+			nodeIds.erase(nodeIds.begin() + (lastSafeFrom + 1), nodeIds.begin() + dst);
+			pathCosts[dst] = lastSafeCost;
+			pathCosts.erase(pathCosts.begin() + (lastSafeFrom + 1), pathCosts.begin() + dst);
+		}
+
+		if (eraseCount > 0 && type == NavigationQuery::PostProcessingType::Aggressive) {
+			dst = static_cast<int>(points.size()) - 1;
+		}
+		else {
+			dst = lastSafeFrom;
+		}
+	}
+
+	// Discard latter part of path
+	points.erase(points.begin() + (crossoverPoint + 2), points.end());
+	for (size_t p = 1; p < portal.vertices.size(); p++) {
+		const auto portalStart = portal.vertices.at(p - 1);
+		const auto portalEnd = portal.vertices.at(p);
+
+		const auto portalVector = portalEnd - portalStart;
+		const auto portalVectorNormalised = portalVector.normalized();
+
+		const auto crossoverPointVector = points.at(crossoverPoint) - portalStart;
+		const auto crossoverPointVectorNormalised = crossoverPointVector.normalized();
+
+		if (portalVectorNormalised.dot(crossoverPointVectorNormalised) > 0.999f && crossoverPointVector.squaredLength() <= portalVector.squaredLength()) {
+			// Crossover point is on portal, discard final point
+			points.erase(points.begin() + crossoverPoint + 1, points.end());
+			break;
+		}
+		
+		const auto intersection = LineSegment(portalStart, portalEnd).intersection(LineSegment(points.at(crossoverPoint), points.at(crossoverPoint + 1)));
+		if(intersection) {
+			points[crossoverPoint + 1] = intersection.value();
+			break;
+		}
+	}
+	
+	return points;
 }

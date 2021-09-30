@@ -459,6 +459,70 @@ std::optional<Vector2f> Navmesh::findRayCollision(Ray ray, float maxDistance) co
 	}
 }
 
+std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon) const
+{
+	float distanceLeft = maxDistance;
+	float weightedDistance = 0.0f;
+	NodeId curPoly = initialPolygon;
+	while (distanceLeft > 0) {
+		const auto& poly = polygons.at(curPoly);
+		std::optional<size_t> edgeIdx = poly.getExitEdge(ray);
+		if (!edgeIdx) {
+			// Something went wrong
+			return { ray.p, weightedDistance };
+		}
+
+		// Find intersection with that edge
+		const auto edge = poly.getEdge(edgeIdx.value());
+		const Line edgeLine(edge.a, (edge.b - edge.a).normalized());
+		std::optional<Vector2f> intersection = edgeLine.intersection(Line(ray.p, ray.dir));
+		if (!intersection) {
+			// Parallel - Must be overlapping due to exitEdge test previously
+
+			// ray.p must be between edge.a and edge.b OR be at edge.a or edge.b
+			// The corner intersected by the ray is b if edge goes in the same direction as the ray, a otherwise
+			const bool useEdgeB = (edge.b - edge.a).dot(ray.dir) > 0;
+			const auto endCorner = useEdgeB ? edge.b : edge.a;
+
+			const float intersectDist = std::min(distanceLeft, (endCorner - ray.p).length());
+			intersection = ray.p + ray.dir * intersectDist;
+
+			if (intersectDist <= 0) {
+				// We are already at end corner, pick the next edge round with the same corner
+				if (useEdgeB) {
+					edgeIdx = (edgeIdx.value() + 1) % poly.getNumSides();
+				}
+				else {
+					edgeIdx = (edgeIdx.value() + poly.getNumSides() - 1) % poly.getNumSides();
+				}
+			}
+		}
+
+		// Check how much more we have left to go and stop if we reach the destination
+		const float distMoved = (ray.p - intersection.value()).length();
+		weightedDistance += std::min(distMoved, distanceLeft) * (weights.empty() ? 1.0f : weights.at(curPoly));
+		distanceLeft -= distMoved;
+		constexpr float epsilon = 0.1f;
+		if (distanceLeft < epsilon) {
+			return { {}, weightedDistance };
+		}
+
+		// Move to the next polygon on navmesh
+		const auto next = nodes[curPoly].connections[edgeIdx.value()];
+		if (next) {
+			curPoly = next.value();
+			ray = Ray(intersection.value(), ray.dir);
+		}
+		else {
+			// Hit the edge of the navmesh
+			return { intersection.value(), weightedDistance };
+		}
+	}
+
+	// No collisions
+	return { {}, weightedDistance };
+}
+
 void Navmesh::setWorldPosition(Vector2f newOffset, Vector2i gridPos)
 {
 	const auto delta = newOffset - offset;
@@ -491,68 +555,6 @@ void Navmesh::markPortalsDisconnected()
 	for (auto& portal: portals) {
 		portal.connected = false;
 	}
-}
-
-std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon) const
-{
-	float distanceLeft = maxDistance;
-	float weightedDistance = 0.0f;
-	NodeId curPoly = initialPolygon;
-	while (distanceLeft > 0) {
-		const auto& poly = polygons.at(curPoly);
-		std::optional<size_t> edgeIdx = poly.getExitEdge(ray);
-		if (!edgeIdx) {
-			// Something went wrong
-			return { ray.p, weightedDistance };
-		}
-
-		// Find intersection with that edge
-		const auto edge = poly.getEdge(edgeIdx.value());
-		const Line edgeLine(edge.a, (edge.b - edge.a).normalized());
-		std::optional<Vector2f> intersection = edgeLine.intersection(Line(ray.p, ray.dir));
-		if (!intersection) {
-			// Parallel - Must be overlapping due to exitEdge test previously
-
-			// ray.p must be between edge.a and edge.b OR be at edge.a or edge.b
-			// The corner intersected by the ray is b if edge goes in the same direction as the ray, a otherwise
-			const bool useEdgeB = (edge.b - edge.a).dot(ray.dir) > 0;
-			const auto endCorner = useEdgeB ? edge.b : edge.a;
-
-			const float intersectDist = std::min(distanceLeft, (endCorner - ray.p).length());
-			intersection = ray.p + ray.dir * intersectDist;
-			
-			if (intersectDist <= 0) {
-				// We are already at end corner, pick the next edge round with the same corner
-				if (useEdgeB) {
-					edgeIdx = (edgeIdx.value() + 1) % poly.getNumSides();
-				} else {
-					edgeIdx = (edgeIdx.value() + poly.getNumSides() - 1) % poly.getNumSides();
-				}
-			}
-		}
-
-		// Check how much more we have left to go and stop if we reach the destination
-		const float distMoved = (ray.p - intersection.value()).length();
-		weightedDistance += std::min(distMoved, distanceLeft) * (weights.empty() ? 1.0f : weights.at(curPoly));
-		distanceLeft -= distMoved;
-		constexpr float epsilon = 0.1f;
-		if (distanceLeft < epsilon) {
-			return { {}, weightedDistance };
-		}
-
-		// Move to the next polygon on navmesh
-		const auto next = nodes[curPoly].connections[edgeIdx.value()];
-		if (next) {
-			curPoly = next.value();
-			ray = Ray(intersection.value(), ray.dir);
-		} else {
-			// Hit the edge of the navmesh
-			return { intersection.value(), weightedDistance };
-		}
-	}
-
-	// No collisions
-	return { {}, weightedDistance };
 }
 
 void Navmesh::processPolygons()
