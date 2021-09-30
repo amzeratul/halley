@@ -360,8 +360,8 @@ std::vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
 	
 	std::vector<Vector2f> points;
 	std::vector<NodeId> nodeIds;
-	const size_t pointsCount = 3 + startLeg.size() + endLeg.size();
-	points.reserve(pointsCount); // Start + Midpoint + End + Both Legs
+	const size_t pointsCount = 3 + startLeg.size() + endLeg.size(); // Start + Midpoint + End + Both Legs
+	points.reserve(pointsCount); 
 	nodeIds.reserve(pointsCount);
 	
 	points.emplace_back(queryStart.from);
@@ -403,13 +403,11 @@ std::vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
 		const float len = delta.length();
 		const auto ray = Ray(points.at(i - 1), delta / len);
 
-		const auto startNode = static_cast<int>(i - 1)== crossoverPoint ? endNavmesh.getNodeAt(points.at(i-1)).value() : nodeIds[i - 1];
 		const auto& navmesh = static_cast<int>(i) <= crossoverPoint ? startNavmesh : endNavmesh;
+		const auto startNode = static_cast<int>(i - 1) == crossoverPoint ? endNavmesh.getNodeAt(points.at(i-1)).value() : nodeIds[i - 1];
 		const auto col = navmesh.findRayCollision(ray, len, startNode);
 		pathCosts[i] = col.second;
 	}
-
-	// TODO: Preprocess Portal?
 
 	// Path Smoothing
 	int dst = static_cast<int>(points.size()) - 1;
@@ -431,31 +429,24 @@ std::vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
 				// Raycast from start
 				const auto [startCol, startDist] = startNavmesh.findRayCollision(startRay, startLen, startNode);
 
-				if(!startCol) {
+				if (!startCol) {
 					// Something went wrong, should have hit the edge of the navmesh or another obstacle
-					throw;
+					throw Halley::Exception("Navmesh pathfind between regions found not boundary between regions.", HalleyExceptions::Utils);
 				}
 				
 				// If hit correct portal, then raycast into end
 				bool raycastValid = false;
-				for(size_t p = 1; p < portal.vertices.size(); p++) {
-					const auto portalStart = portal.vertices.at(p - 1);
-					const auto portalEnd = portal.vertices.at(p);
-
-					const auto portalVector = portalEnd - portalStart;
-					const auto portalVectorNormalised = portalVector.normalized();
-
-					const auto pointVector = startCol.value() - portalStart;
-					const auto pointVectorNormalised = pointVector.normalized();
+				for (size_t p = 1; p < portal.vertices.size(); p++) {
+					const auto portalStart = portal.vertices[p - 1];
+					const auto portalEnd = portal.vertices[p];
 					
-					if(portalVectorNormalised.dot(pointVectorNormalised) > 0.999f && pointVector.squaredLength() <= portalVector.squaredLength()) {
+					if(LineSegment(portalStart, portalEnd).contains(startCol.value())) {
 						raycastValid = true;
 						break;
 					}
 				}
-				
-				// Else, break
-				if(!raycastValid) {
+
+				if (!raycastValid) {
 					break;
 				}
 
@@ -466,7 +457,7 @@ std::vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
 				const auto endNode = endNavmesh.getNodeAt(startCol.value());
 				const auto [endCol, endDist] = endNavmesh.findRayCollision(endRay, endLen, endNode.value());
 
-				if(endCol) {
+				if (endCol) {
 					// Hit obstacle
 					break;
 				}
@@ -502,9 +493,9 @@ std::vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
 		if (eraseCount > 0) {
 
 			// Update crossover point
-			if(lastSafeFrom <= crossoverPoint && dst > crossoverPoint) {
+			if (lastSafeFrom <= crossoverPoint && dst > crossoverPoint) {
 				crossoverPoint = lastSafeFrom;
-			}else if(dst <= crossoverPoint) {
+			} else if (dst <= crossoverPoint) {
 				crossoverPoint = crossoverPoint - (dst - lastSafeFrom - 1);
 			}
 			
@@ -516,8 +507,7 @@ std::vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
 
 		if (eraseCount > 0 && type == NavigationQuery::PostProcessingType::Aggressive) {
 			dst = static_cast<int>(points.size()) - 1;
-		}
-		else {
+		} else {
 			dst = lastSafeFrom;
 		}
 	}

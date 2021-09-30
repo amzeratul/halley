@@ -491,8 +491,7 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 				// We are already at end corner, pick the next edge round with the same corner
 				if (useEdgeB) {
 					edgeIdx = (edgeIdx.value() + 1) % poly.getNumSides();
-				}
-				else {
+				} else {
 					edgeIdx = (edgeIdx.value() + poly.getNumSides() - 1) % poly.getNumSides();
 				}
 			}
@@ -512,8 +511,7 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 		if (next) {
 			curPoly = next.value();
 			ray = Ray(intersection.value(), ray.dir);
-		}
-		else {
+		} else {
 			// Hit the edge of the navmesh
 			return { intersection.value(), weightedDistance };
 		}

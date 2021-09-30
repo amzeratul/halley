@@ -101,7 +101,7 @@ void NavigationPathFollower::goToNextRegion(const NavmeshSet& navmeshSet)
 		if (isLastRegion || path->query.postProcessingType == NavigationQuery::PostProcessingType::None) {
 			const auto query = NavigationQuery(startPos, subWorld, endPos, subWorld, path->query.postProcessingType);
 			newPath = navmeshSet.pathfindInRegion(query, region.regionNodeId);
-		}else {
+		} else {
 			// Pathfind between regions
 			const auto& secondRegion = path->regions[nextRegionIdx + 1];
 			const auto& secondRegionNavMesh = navmeshSet.getNavmeshes()[secondRegion.regionNodeId];
