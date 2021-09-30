@@ -234,21 +234,25 @@ ConfigNode Navmesh::Node::toConfigNode() const
 	return result;
 }
 
-
-std::optional<NavigationPath> Navmesh::pathfind(const NavigationQuery& query) const
+std::optional<std::vector<Navmesh::NodeAndConn>> Navmesh::pathfindNodes(const NavigationQuery& query) const
 {
 	if (query.fromSubWorld != subWorld || query.toSubWorld != subWorld) {
 		return {};
 	}
-	
+
 	auto fromId = getNodeAt(query.from);
 	auto toId = getNodeAt(query.to);
 
 	if (!fromId || !toId) {
 		return {};
 	}
-	
-	auto nodePath = pathfind(fromId.value(), toId.value());
+
+	return pathfind(fromId.value(), toId.value());
+}
+
+std::optional<NavigationPath> Navmesh::pathfind(const NavigationQuery& query) const
+{
+	auto nodePath = pathfindNodes(query);
 	if (!nodePath) {
 		return {};
 	}
@@ -455,40 +459,6 @@ std::optional<Vector2f> Navmesh::findRayCollision(Ray ray, float maxDistance) co
 	}
 }
 
-void Navmesh::setWorldPosition(Vector2f newOffset, Vector2i gridPos)
-{
-	const auto delta = newOffset - offset;
-	offset = newOffset;
-	worldGridPos = gridPos;
-
-	for (auto& node: nodes) {
-		node.pos += delta;
-	}
-	for (auto& poly: polygons) {
-		poly.translate(delta);
-	}
-	for (auto& portal: portals) {
-		portal.translate(delta);
-	}
-	for (auto& edge: openEdges) {
-		edge.second.a += delta;
-		edge.second.b += delta;
-	}
-	origin += delta;
-}
-
-void Navmesh::markPortalConnected(size_t idx)
-{
-	portals[idx].connected = true;
-}
-
-void Navmesh::markPortalsDisconnected()
-{
-	for (auto& portal: portals) {
-		portal.connected = false;
-	}
-}
-
 std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon) const
 {
 	float distanceLeft = maxDistance;
@@ -516,7 +486,7 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 
 			const float intersectDist = std::min(distanceLeft, (endCorner - ray.p).length());
 			intersection = ray.p + ray.dir * intersectDist;
-			
+
 			if (intersectDist <= 0) {
 				// We are already at end corner, pick the next edge round with the same corner
 				if (useEdgeB) {
@@ -549,6 +519,40 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 
 	// No collisions
 	return { {}, weightedDistance };
+}
+
+void Navmesh::setWorldPosition(Vector2f newOffset, Vector2i gridPos)
+{
+	const auto delta = newOffset - offset;
+	offset = newOffset;
+	worldGridPos = gridPos;
+
+	for (auto& node: nodes) {
+		node.pos += delta;
+	}
+	for (auto& poly: polygons) {
+		poly.translate(delta);
+	}
+	for (auto& portal: portals) {
+		portal.translate(delta);
+	}
+	for (auto& edge: openEdges) {
+		edge.second.a += delta;
+		edge.second.b += delta;
+	}
+	origin += delta;
+}
+
+void Navmesh::markPortalConnected(size_t idx)
+{
+	portals[idx].connected = true;
+}
+
+void Navmesh::markPortalsDisconnected()
+{
+	for (auto& portal: portals) {
+		portal.connected = false;
+	}
 }
 
 void Navmesh::processPolygons()

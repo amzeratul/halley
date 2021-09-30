@@ -87,6 +87,7 @@ namespace Halley {
 		Navmesh(const ConfigNode& nodeData);
 		Navmesh(std::vector<PolygonData> polygons, const NavmeshBounds& bounds, int subWorld);
 
+		[[nodiscard]] std::optional<std::vector<NodeAndConn>> pathfindNodes(const NavigationQuery& query) const;
 		[[nodiscard]] std::optional<NavigationPath> pathfind(const NavigationQuery& query) const;
 
 		[[nodiscard]] ConfigNode toConfigNode() const;
@@ -104,6 +105,7 @@ namespace Halley {
 		// Returns empty if no collision is found (i.e. fully contained within navmesh)
 		// Otherwise returns collision point
 		[[nodiscard]] std::optional<Vector2f> findRayCollision(Ray ray, float maxDistance) const;
+		[[nodiscard]] std::pair<std::optional<Vector2f>, float> findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon) const;
 
 		void setWorldPosition(Vector2f offset, Vector2i worldGridPos);
 		[[nodiscard]] Vector2i getWorldGridPos() const { return worldGridPos; }
@@ -163,8 +165,6 @@ namespace Halley {
 		std::vector<NodeAndConn> makeResult(const std::vector<State>& state, int startId, int endId) const;
 		std::optional<NavigationPath> makePath(const NavigationQuery& query, const std::vector<NodeAndConn>& nodePath) const;
 		void postProcessPath(std::vector<Vector2f>& points, NavigationQuery::PostProcessingType type) const;
-
-		std::pair<std::optional<Vector2f>, float> findRayCollision(Ray ray, float maxDistance, NodeId initialPolygon) const;
 
 		void processPolygons();
 		void addPolygonsToGrid();
