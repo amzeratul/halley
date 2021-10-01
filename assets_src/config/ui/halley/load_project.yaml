@@ -19,7 +19,7 @@ children:
     fill: centre
   - widget: { class: scrollBarPane, size: [200, 250] }
     proportion: 1
-    border: [0, 5, 0, 5]
+    border: [0, 5, 0, 2]
     sizer: { type: vertical }
     children:
     - widget: { id: recent, class: list }
@@ -28,7 +28,8 @@ children:
     children:
     - widget: { id: input, class: textInput, size: [400, 22] }
       proportion: 1
-    - widget: { id: ok, class: button, text: "OK", size: [60, 22], tooltip: "Load the selected Project" }
+    - widget: { id: ok, class: button, text: "OK", size: [80, 22], tooltip: "Load the selected Project" }
+      border: [2, 0, 0, 0]
 - stretchSpacer: {}
   proportion: 1
 
