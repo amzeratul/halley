@@ -445,6 +445,9 @@ std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 	if (node.hasKey("marquee")) {
 		label->setMarquee(node["marquee"].asBool());
 	}
+	if (node.hasKey("colour")) {
+		label->setColour(getColour(node["colour"].asString()));
+	}
 	return label;
 }
 
