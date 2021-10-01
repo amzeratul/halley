@@ -5,7 +5,7 @@ enabled: false
 colours:
   background0: "#2f424b"
   background1: "#2f424b"
-  backgroundLogo: "#22333b"
+  backgroundLogo: "#2C3E45"
   
   toolbarNormal: "#5c80c3"   # main theme accent colour
   toolbarHover: "#f6f7f9"
