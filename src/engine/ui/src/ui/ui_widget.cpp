@@ -882,6 +882,20 @@ bool UIWidget::canReceiveFocus() const
 	return false;
 }
 
+std::shared_ptr<UIWidget> UIWidget::getFocusableOrAncestor()
+{
+	if (canReceiveFocus()) {
+		return shared_from_this();
+	}
+	if (parent) {
+		auto widget = dynamic_cast<UIWidget*>(parent);
+		if (widget) {
+			return widget->getFocusableOrAncestor();
+		}
+	}
+	return {};
+}
+
 void UIWidget::onAddedToRoot(UIRoot& root)
 {
 }

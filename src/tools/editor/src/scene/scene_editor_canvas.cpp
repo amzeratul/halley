@@ -88,6 +88,11 @@ bool SceneEditorCanvas::isFocusLocked() const
 	return inputState.leftClickHeld || inputState.middleClickHeld || inputState.rightClickHeld;
 }
 
+bool SceneEditorCanvas::canReceiveFocus() const
+{
+	return true;
+}
+
 void SceneEditorCanvas::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	switch (button) {
@@ -109,8 +114,6 @@ void SceneEditorCanvas::pressMouse(Vector2f mousePos, int button, KeyMods keyMod
 			lastMousePos = mousePos;
 		}
 	}
-
-	getRoot()->setFocus(shared_from_this());
 }
 
 void SceneEditorCanvas::releaseMouse(Vector2f mousePos, int button)

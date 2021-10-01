@@ -325,9 +325,7 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 			mouseExclusive = actuallyUnderMouse;
 
 			if (actuallyUnderMouse) {
-				if (actuallyUnderMouse->canReceiveFocus()) {
-					setFocus(actuallyUnderMouse);
-				}
+				setFocus(actuallyUnderMouse->getFocusableOrAncestor());
 				mouse->clearButtonPress(i);
 				actuallyUnderMouse->pressMouse(mousePos, i, keyMods);
 				

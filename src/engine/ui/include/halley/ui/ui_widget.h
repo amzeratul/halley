@@ -165,6 +165,7 @@ namespace Halley {
 		void markAsNeedingLayout() final override;
 
 		virtual bool canReceiveFocus() const;
+		std::shared_ptr<UIWidget> getFocusableOrAncestor();
 
 		virtual void onAddedToRoot(UIRoot& root);
 		virtual void onRemovedFromRoot(UIRoot& root);
