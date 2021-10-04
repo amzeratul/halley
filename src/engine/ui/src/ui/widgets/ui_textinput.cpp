@@ -246,6 +246,11 @@ void UITextInput::setIcon(Sprite icon, Vector4f border)
 	iconBorder = border;
 }
 
+void UITextInput::setAutoSize(std::optional<Range<float>> range)
+{
+	autoSizeRange = range;
+}
+
 void UITextInput::update(Time t, bool moved)
 {
 	if (isFocused()) {
@@ -272,8 +277,14 @@ void UITextInput::update(Time t, bool moved)
 	ghostLabel.setText(showAutoComplete ? getAutoCompleteCaption() : (showGhost ? ghostText.getString().getUTF32() : StringUTF32()));
 	label.setText(text.getText());
 
-	// Position the text
+	// Size
 	const float length = label.empty() ? ghostLabel.getExtents().x : label.getExtents().x;
+	if (autoSizeRange) {
+		const auto border = getTextInnerBorder();
+		setMinSize(Vector2f(std::clamp(length + border.x + border.z, autoSizeRange->start, autoSizeRange->end), getMinimumSize().y));
+	}
+
+	// Position the text
 	const auto textBounds = getTextBounds();
 	if (length > textBounds.getWidth()) {
 		textScrollPos.x = clamp(textScrollPos.x, std::max(0.0f, caretPhysicalPos - textBounds.getWidth()), std::min(length - textBounds.getWidth(), caretPhysicalPos));
