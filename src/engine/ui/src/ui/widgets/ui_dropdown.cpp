@@ -77,8 +77,13 @@ void UIDropdown::updateOptionLabels() {
 	const auto& style = styles.at(0);
 	auto tempLabel = style.getTextRenderer("label");
 
-	label = tempLabel.clone().setText(options[curOption].label);
-	icon = options[curOption].icon;
+	if (options.empty()) {
+		label = tempLabel.clone();
+		icon = Sprite();
+	} else {
+		label = tempLabel.clone().setText(options[curOption].label);
+		icon = options[curOption].icon;
+	}
 
 	const float iconGap = style.getFloat("iconGap");
 	
@@ -124,6 +129,7 @@ void UIDropdown::setOptions(std::vector<String> oIds, std::vector<LocalisedStrin
 
 void UIDropdown::setOptions(std::vector<Entry> os, int defaultOption)
 {
+	close();
 	options = std::move(os);
 
 	if (options.empty()) {

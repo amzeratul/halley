@@ -182,8 +182,9 @@ void EntityEditor::reloadEntity()
 
 void EntityEditor::unloadIcons()
 {
-	entityIcon->clear();
-	entityIcon.reset();
+	if (entityIcon) {
+		entityIcon->setOptions(std::vector<UIDropdown::Entry>{});
+	}
 }
 
 void EntityEditor::onFieldChangedByGizmo(const String& componentName, const String& fieldName)

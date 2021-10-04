@@ -46,7 +46,6 @@ SceneEditorWindow::~SceneEditorWindow()
 	
 	unloadScene();
 
-	entityEditor->unloadIcons();
 	entityEditor.reset();
 	entityIcons.reset();
 	
@@ -182,6 +181,7 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 		sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, world, project.getGameResources());
 		entityEditorFactory = std::make_shared<EntityEditorFactory>(uiFactory);
 		entityEditorFactory->addFieldFactories(interface.getComponentEditorFieldFactories());
+		entityEditor->setSceneEditorWindow(*this, api);
 		entityEditor->setECSData(project.getECSData());
 		entityEditor->setEntityEditorFactory(entityEditorFactory);
 		entityList->setSceneData(sceneData);
@@ -240,6 +240,7 @@ void SceneEditorWindow::unloadScene()
 	currentEntityScene.reset();
 	entityEditor->unloadEntity();
 	entityEditor->setEntityEditorFactory({});
+	entityEditor->unloadIcons();
 	entityEditorFactory.reset();
 	entityList->setSceneData({});
 }
