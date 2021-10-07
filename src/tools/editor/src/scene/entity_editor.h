@@ -34,6 +34,7 @@ namespace Halley {
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
 		void setDefaultName(const String& name, const String& prevName) override;
+		void focusRenameEntity();
 
 		void addComponent();
 		void addComponent(const String& name, ConfigNode data);

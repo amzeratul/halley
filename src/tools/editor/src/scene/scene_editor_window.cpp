@@ -275,7 +275,7 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 		return true;
 	}
 
-	if (key.is(KeyCode::Y, KeyMods::Ctrl)) {
+	if (key.is(KeyCode::Y, KeyMods::Ctrl) || key.is(KeyCode::Z, KeyMods::CtrlShift)) {
 		redo();
 		return true;
 	}
@@ -318,6 +318,11 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 
 	if (key.is(KeyCode::F1)) {
 		toggleConsole();
+		return true;
+	}
+
+	if (key.is(KeyCode::F2)) {
+		entityEditor->focusRenameEntity();
 		return true;
 	}
 

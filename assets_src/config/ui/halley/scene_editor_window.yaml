@@ -28,7 +28,7 @@ children:
         - widget: { id: saveButton, class: button, style: buttonThin, icon: "entity_icons/save.png", size: [22, 22], tooltip: "Save [Ctrl+S]" }
           border: [0, 0, 10, 0]
         - widget: { id: undoButton, class: button, style: buttonThin, icon: "entity_icons/undo.png", size: [22, 22], tooltip: "Undo [Ctrl+Z]" }
-        - widget: { id: redoButton, class: button, style: buttonThin, icon: "entity_icons/redo.png", size: [22, 22], tooltip: "Redo [Ctrl+Y]" }
+        - widget: { id: redoButton, class: button, style: buttonThin, icon: "entity_icons/redo.png", size: [22, 22], tooltip: "Redo [Ctrl+Y / Ctrl+Shift+Z]" }
         - border: [10, 0, 0, 0]
           widget:
             id: toolMode

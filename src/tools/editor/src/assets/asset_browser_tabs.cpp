@@ -243,6 +243,11 @@ void AssetBrowserTabs::makeUI()
 		pages->setPage(event.getIntData());
 		saveTabs();
 	});
+
+	setHandle(UIEventType::ListItemMiddleClicked, "tabs", [=] (const UIEvent& event)
+	{
+		closeTab(event.getStringData());
+	});
 }
 
 void AssetBrowserTabs::saveTabs()

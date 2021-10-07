@@ -494,6 +494,13 @@ void EntityEditor::setDefaultName(const String& name, const String& prevName)
 	}
 }
 
+void EntityEditor::focusRenameEntity()
+{
+	if (entityName->isActiveInHierarchy()) {
+		getRoot()->setFocus(entityName);
+	}
+}
+
 bool EntityEditor::onKeyPress(KeyboardKeyPress key)
 {
 	if (key.is(KeyCode::T, KeyMods::Ctrl)) {

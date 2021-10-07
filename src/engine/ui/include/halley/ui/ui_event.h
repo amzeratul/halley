@@ -27,6 +27,7 @@ namespace Halley {
 		ListSelectionChanged,
 		ListAccept,
 		ListCancel,
+		ListItemMiddleClicked,
 		ListItemRightClicked,
 		ListItemsSwapped,
 		ListHoveredChanged,

@@ -669,7 +669,9 @@ void UIList::onItemClicked(UIListItem& item, int button)
 	if (singleClickAccept && button == 0) {
 		onAccept();
 	}
-	if (button == 2) {
+	if (button == 1) {
+		sendEvent(UIEvent(UIEventType::ListItemMiddleClicked, getId(), item.getId(), curOption));
+	} else if (button == 2) {
 		sendEvent(UIEvent(UIEventType::ListItemRightClicked, getId(), item.getId(), curOption));
 	}
 	focus();
