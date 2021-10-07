@@ -504,8 +504,18 @@ void UIList::swapItems(int idxA, int idxB)
 	std::swap(items[idxA], items[idxB]);
 	reassignIds();
 	getSizer().swapItems(idxA, idxB);
-	items[idxA]->notifySwap(items[idxB]->getOrigPosition());
-	items[idxB]->notifySwap(items[idxA]->getOrigPosition());
+
+	const auto sizeA = items[idxA]->getSize();
+	const auto sizeB = items[idxB]->getSize();
+	Vector2f deltaSize;
+	if (orientation == UISizerType::Horizontal) {
+		deltaSize.x = sizeB.x - sizeA.x;
+	} else if (orientation == UISizerType::Vertical) {
+		deltaSize.y = sizeB.y - sizeA.y;
+	}
+	items[idxA]->notifySwap(items[idxB]->getOrigPosition() + (idxB < idxA ? deltaSize : Vector2f()));
+	items[idxB]->notifySwap(items[idxA]->getOrigPosition() - (idxB > idxA ? deltaSize : Vector2f()));
+
 	sendEvent(UIEvent(UIEventType::ListItemsSwapped, getId(), idxA, idxB));
 }
 
@@ -701,7 +711,7 @@ void UIList::onItemDragging(UIListItem& item, int index, Vector2f pos)
 
 	if (index < int(items.size()) - 1) {
 		auto& next = items[index + 1];
-		if (next->canSwap() && pos[axis] > next->getPosition()[axis] - 2.0f) {
+		if (next->canSwap() && pos[axis] + item.getSize()[axis] > next->getPosition()[axis] + next->getSize()[axis] - 2.0f) {
 			swapItems(index, index + 1);
 		}
 	}
