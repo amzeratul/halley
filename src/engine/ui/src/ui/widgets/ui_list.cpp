@@ -146,6 +146,16 @@ std::shared_ptr<UIImage> UIList::makeIcon(Sprite image) const
 	return icon;
 }
 
+Vector2f UIList::getDragPositionAdjustment(Vector2f pos, Vector2f startPos) const
+{
+	if (orientation == UISizerType::Horizontal) {
+		pos.y = startPos.y;
+	} else if (orientation == UISizerType::Vertical) {
+		pos.x = startPos.x;
+	}
+	return pos;
+}
+
 std::shared_ptr<UIListItem> UIList::addTextItem(const String& id, LocalisedString label, float maxWidth, bool centre, std::optional<LocalisedString> tooltip)
 {
 	// Use addTextItemAlignedInstead
@@ -836,14 +846,7 @@ void UIListItem::onMouseOver(Vector2f mousePos)
 		setNoClipChildren(parent.isDragOutsideEnabled());
 	}
 	if (dragged) {
-		const auto orientation = parent.getOrientation();
-		auto pos = mousePos - mouseStartPos + myStartPos;
-		if (orientation == UISizerType::Horizontal) {
-			pos.y = myStartPos.y;
-		} else if (orientation == UISizerType::Vertical) {
-			pos.x = myStartPos.x;
-		}
-		setDragPos(pos);
+		setDragPos(parent.getDragPositionAdjustment(mousePos - mouseStartPos + myStartPos, myStartPos));
 	}
 }
 

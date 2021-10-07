@@ -299,6 +299,11 @@ bool UITreeList::setSelectedOptionId(const String& id)
 	return UIList::setSelectedOptionId(id);
 }
 
+Vector2f UITreeList::getDragPositionAdjustment(Vector2f pos, Vector2f startPos) const
+{
+	return pos;
+}
+
 UITreeListControls::UITreeListControls(String id, UIStyle style)
 	: UIWidget(std::move(id), Vector2f(), UISizer(UISizerType::Horizontal, 0))
 {

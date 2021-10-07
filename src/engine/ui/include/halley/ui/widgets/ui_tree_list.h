@@ -111,6 +111,8 @@ namespace Halley {
         void makeParentsOfItemExpanded(const String& id);
         bool setSelectedOptionId(const String& id) override;
 
+        Vector2f getDragPositionAdjustment(Vector2f pos, Vector2f startPos) const override;
+
     protected:
         void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;
