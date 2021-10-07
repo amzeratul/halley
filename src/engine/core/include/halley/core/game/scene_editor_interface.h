@@ -309,6 +309,8 @@ namespace Halley {
 		virtual void spawnUI(std::shared_ptr<UIWidget> ui) = 0;
 
 		virtual Path getPrimaryInputFile(AssetType type, const String& assetId, bool absolute) const = 0;
+
+		virtual String getCurrentAssetId() const = 0;
 	};
 
 	class IProject {

@@ -88,6 +88,8 @@ namespace Halley {
 
 		Path getPrimaryInputFile(AssetType type, const String& assetId, bool absolute) const override;
 
+		String getCurrentAssetId() const override;
+		
 		void onTabbedIn();
 
 		float getProjectDefaultZoom() const override;

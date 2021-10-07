@@ -1114,6 +1114,11 @@ Path SceneEditorWindow::getPrimaryInputFile(AssetType type, const String& assetI
 	}
 }
 
+String SceneEditorWindow::getCurrentAssetId() const
+{
+	return prefab->getAssetId();
+}
+
 void SceneEditorWindow::onTabbedIn()
 {
 	setTool(getSetting(EditorSettingType::Temp, "tools.curTool").asString("translate"));
