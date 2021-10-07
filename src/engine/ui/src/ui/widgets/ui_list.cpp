@@ -211,7 +211,7 @@ std::shared_ptr<UIListItem> UIList::addItem(const String& id, std::shared_ptr<IU
 	const auto& itemStyle = styleOverride ? *styleOverride : styles.at(0);
 	auto item = std::make_shared<UIListItem>(id, *this, itemStyle.getSubStyle("item"), int(getNumberOfItems()), itemStyle.getBorder("extraMouseBorder"));
 	item->add(element, proportion, border, fillFlags);
-	return addItem(item);
+	return addItem(item, Vector4f{}, fillFlags);
 }
 
 void UIList::clear()
