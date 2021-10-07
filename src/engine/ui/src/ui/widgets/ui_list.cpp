@@ -43,6 +43,11 @@ void UIList::setOrientation(UISizerType orientation, int nColumns)
 	}
 }
 
+UISizerType UIList::getOrientation() const
+{
+	return orientation;
+}
+
 bool UIList::setSelectedOption(int option)
 {
 	forceAddChildren(UIInputType::Undefined, false);
@@ -821,7 +826,14 @@ void UIListItem::onMouseOver(Vector2f mousePos)
 		setNoClipChildren(parent.isDragOutsideEnabled());
 	}
 	if (dragged) {
-		setDragPos(mousePos - mouseStartPos + myStartPos);
+		const auto orientation = parent.getOrientation();
+		auto pos = mousePos - mouseStartPos + myStartPos;
+		if (orientation == UISizerType::Horizontal) {
+			pos.y = myStartPos.y;
+		} else if (orientation == UISizerType::Vertical) {
+			pos.x = myStartPos.x;
+		}
+		setDragPos(pos);
 	}
 }
 

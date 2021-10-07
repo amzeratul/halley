@@ -18,6 +18,7 @@ namespace Halley {
 		explicit UIList(String id, UIStyle style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
 
 		void setOrientation(UISizerType orientation, int nColumns = 1);
+		UISizerType getOrientation() const;
 
 		virtual bool setSelectedOption(int option);
 		virtual bool setSelectedOptionId(const String& id);
