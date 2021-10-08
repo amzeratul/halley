@@ -325,10 +325,20 @@ std::optional<int> UIList::removeItem(const String& id)
 		return item->getId() == id;
 	});
 	if (iter != items.end()) {
-		const size_t idx = iter - items.begin();
+		const auto idx = static_cast<int>(iter - items.begin());
+		removeItem(idx);
+		return idx;
+	}
+
+	return {};
+}
+
+void UIList::removeItem(int idx)
+{
+	if (idx >= 0 && idx < static_cast<int>(items.size())) {
 		const auto item = items[idx];
 		remove(*item);
-		items.erase(iter);
+		items.erase(items.begin() + idx);
 
 		layout();
 		reassignIds();
@@ -336,10 +346,7 @@ std::optional<int> UIList::removeItem(const String& id)
 		if (curOption >= static_cast<int>(idx)) {
 			setSelectedOption(curOption - 1);
 		}
-		return static_cast<int>(idx);
 	}
-
-	return {};
 }
 
 void UIList::draw(UIPainter& painter) const
