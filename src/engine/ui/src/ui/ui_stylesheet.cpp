@@ -206,6 +206,11 @@ bool UIStyleDefinition::hasSubStyle(const String& name) const
 	return hasValue(node, name, pimpl->subStyles);
 }
 
+bool UIStyleDefinition::hasSprite(const String& name) const
+{
+	return hasValue(node, name, pimpl->sprites);
+}
+
 Vector4f UIStyleDefinition::getBorder(const String& name) const
 {
 	return getValue(node, styleSheet, styleName, name, pimpl->borders);

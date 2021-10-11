@@ -907,9 +907,9 @@ void UIListItem::doSetState(State state)
 {
 	if (dragged || isManualDragging()) {
 		sprite = style.getSprite("drag");
-	} else if (selected) {
+	} else if (selected && style.hasSprite("selected")) {
 		sprite = style.getSprite("selected");
-	} else if (!isEnabled()) {
+	} else if (!isEnabled() && style.hasSprite("disabled")) {
 		sprite = style.getSprite("disabled");
 	} else {
 		switch (state) {
@@ -924,7 +924,7 @@ void UIListItem::doSetState(State state)
 			sendEvent(UIEvent(UIEventType::SetHovered, getId(), true));
 			break;
 		case State::Down:
-			sprite = style.getSprite("selected");
+			sprite = style.hasSprite("selected") ? style.getSprite("selected") : style.getSprite("hover");
 			break;
 		}
 	}

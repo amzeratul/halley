@@ -36,6 +36,11 @@ const Sprite& UIStyle::getSprite(const String& name) const
 	return style->getSprite(name);
 }
 
+bool UIStyle::hasSprite(const String& name) const
+{
+	return style->hasSprite(name);
+}
+
 const TextRenderer& UIStyle::getTextRenderer(const String& name) const
 {
 	return style->getTextRenderer(name);
