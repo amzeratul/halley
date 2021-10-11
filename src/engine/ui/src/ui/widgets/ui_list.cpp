@@ -972,7 +972,7 @@ void UIListItem::setAbsoluteIndex(int index)
 
 Rect4f UIListItem::getMouseRect() const
 {
-	auto rect = UIWidget::getMouseRect();
+	auto rect = UIClickable::getMouseRect();
 	if (rect.getWidth() <= 0.01f || rect.getHeight() <= 0.01f) {
 		return rect;
 	}
