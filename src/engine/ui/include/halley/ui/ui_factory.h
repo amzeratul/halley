@@ -102,6 +102,7 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeButton(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeTextInput(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeSpinControl(const ConfigNode& entryNode);
+		std::shared_ptr<UIWidget> makeSpinControl2(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makeList(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeDropdown(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeCheckbox(const ConfigNode& node);

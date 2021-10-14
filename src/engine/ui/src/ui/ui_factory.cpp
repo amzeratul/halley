@@ -27,6 +27,7 @@
 #include "widgets/ui_tree_list.h"
 #include "halley/ui/behaviours/ui_reload_ui_behaviour.h"
 #include "widgets/ui_debug_console.h"
+#include "widgets/ui_spin_control2.h"
 
 using namespace Halley;
 
@@ -46,6 +47,7 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	addFactory("button", [=] (const ConfigNode& node) { return makeButton(node); });
 	addFactory("textInput", [=] (const ConfigNode& node) { return makeTextInput(node); });
 	addFactory("spinControl", [=] (const ConfigNode& node) { return makeSpinControl(node); });
+	addFactory("spinControl2", [=] (const ConfigNode& node) { return makeSpinControl2(node); });
 	addFactory("list", [=] (const ConfigNode& node) { return makeList(node); });
 	addFactory("dropdown", [=] (const ConfigNode& node) { return makeDropdown(node); });
 	addFactory("checkbox", [=] (const ConfigNode& node) { return makeCheckbox(node); });
@@ -517,6 +519,27 @@ std::shared_ptr<UIWidget> UIFactory::makeSpinControl(const ConfigNode& entryNode
 	auto style = UIStyle(node["style"].asString("spinControl"), styleSheet);
 
 	auto result = std::make_shared<UISpinControl>(id, style, 0.0f);
+
+	if (node.hasKey("minValue")) {
+		result->setMinimumValue(node["minValue"].asFloat());
+	}
+	if (node.hasKey("maxValue")) {
+		result->setMaximumValue(node["maxValue"].asFloat());
+	}
+	if (node.hasKey("increment")) {
+		result->setIncrement(node["increment"].asFloat());
+	}
+
+	return result;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeSpinControl2(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	auto style = UIStyle(node["style"].asString("spinControl"), styleSheet);
+
+	auto result = std::make_shared<UISpinControl2>(id, style, 0.0f, node["allowFloat"].asBool(false));
 
 	if (node.hasKey("minValue")) {
 		result->setMinimumValue(node["minValue"].asFloat());
