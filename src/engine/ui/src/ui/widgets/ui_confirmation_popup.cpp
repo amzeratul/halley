@@ -1,7 +1,11 @@
-#include "confirmation_popup.h"
+#include "widgets/ui_confirmation_popup.h"
+#include "ui_anchor.h"
+#include "ui_factory.h"
+#include "halley/utils/algorithm.h"
+#include "widgets/ui_label.h"
 using namespace Halley;
 
-ConfirmationPopup::ConfirmationPopup(UIFactory& factory, String title, String message, std::vector<ButtonType> buttons, Callback callback)
+UIConfirmationPopup::UIConfirmationPopup(UIFactory& factory, String title, String message, std::vector<ButtonType> buttons, Callback callback)
 	: UIWidget("confirmationPopup", Vector2f(), UISizer())
 	, title(std::move(title))
 	, message(std::move(message))
@@ -16,7 +20,7 @@ ConfirmationPopup::ConfirmationPopup(UIFactory& factory, String title, String me
 	setAnchor(UIAnchor());
 }
 
-void ConfirmationPopup::onMakeUI()
+void UIConfirmationPopup::onMakeUI()
 {
 	getWidgetAs<UILabel>("title")->setText(LocalisedString::fromUserString(title));
 	getWidgetAs<UILabel>("message")->setText(LocalisedString::fromUserString(message));
