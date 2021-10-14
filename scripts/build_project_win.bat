@@ -18,7 +18,7 @@ set slnName="%~2.sln"
 set binTargetName="%~2-gamebins"
 set exeName="%~2.exe"
 
-taskkill /IM %exeName% /F
+taskkill /IM %exeName% /F >nul 2>nul
 
 IF NOT EXIST %slnName% (
 cmake -G "Visual Studio 16 2019" ^
