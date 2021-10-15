@@ -806,7 +806,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 				}
 			}
 			auto label = parseLabel(tabNode);
-			tabs->addTextItem(id + "_tab_" + toString(tabNodes.size()), label);
+			tabs->addTextItem(tabNode["id"].asString(id + "_tab_" + toString(tabNodes.size())), label);
 			tabNodes.push_back(&tabNode);
 		}
 	}
