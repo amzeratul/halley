@@ -50,9 +50,10 @@ LoadProjectWindow::LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, s
 		recent->addTextItem(p, LocalisedString::fromUserString(p));
 	}
 	recent->addTextItem("", LocalisedString::fromHardcodedString("New location..."));
-	
+
 	setAnchor(UIAnchor());
-	setModal(false);
+	
+	update(0, true);
 }
 
 void LoadProjectWindow::onAddedToRoot(UIRoot& root)
@@ -64,4 +65,5 @@ void LoadProjectWindow::update(Time t, bool moved)
 {
 	const auto size = editor.getAPI().video->getWindow().getDefinition().getSize();
 	setMinSize(Vector2f(size));
+	layout();
 }
