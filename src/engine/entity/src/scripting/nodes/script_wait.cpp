@@ -22,7 +22,7 @@ String ScriptWait::getLabel(const ScriptGraphNode& node) const
 	return toString(node.getSettings()["time"].asFloat(0.0f)) + "s";
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptWait::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptWait::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;

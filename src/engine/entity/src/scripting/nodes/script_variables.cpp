@@ -11,7 +11,7 @@ String ScriptVariable::getShortDescription(const World& world, const ScriptGraph
 	return getLabel(node);
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptVariable::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptVariable::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -53,7 +53,7 @@ String ScriptLiteral::getShortDescription(const World& world, const ScriptGraphN
 	return getLabel(node);
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptLiteral::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptLiteral::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -107,7 +107,7 @@ String ScriptComparison::getShortDescription(const World& world, const ScriptGra
 	return addParentheses(std::move(a)) + " " + std::move(op) + " " + addParentheses(std::move(b));
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptComparison::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptComparison::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -140,7 +140,7 @@ ConfigNode ScriptComparison::doGetData(ScriptEnvironment& environment, const Scr
 
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptSetVariable::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptSetVariable::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;

@@ -9,7 +9,7 @@ namespace Halley {
 		std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const override;
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/start.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Terminator; }
-		gsl::span<const PinType> getPinConfiguration() const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		bool canAdd() const override { return false; }
 		bool canDelete() const override { return false; }
 		
@@ -21,7 +21,7 @@ namespace Halley {
 		String getId() const override { return "restart"; }
 		String getName() const override { return "Restart"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/restart.png"; }
-		gsl::span<const PinType> getPinConfiguration() const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Terminator; }
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
@@ -32,7 +32,7 @@ namespace Halley {
 		String getId() const override { return "stop"; }
 		String getName() const override { return "Stop"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/stop.png"; }
-		gsl::span<const PinType> getPinConfiguration() const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Terminator; }
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;

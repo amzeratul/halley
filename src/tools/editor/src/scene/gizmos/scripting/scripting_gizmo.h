@@ -19,6 +19,7 @@ namespace Halley {
 		void addNode();
 		bool destroyNode(uint32_t id);
 		bool destroyHighlightedNode();
+		ScriptGraph& getGraph();
 		ScriptGraphNode& getNode(uint32_t id);
 
 		ExecutionQueue& getExecutionQueue();

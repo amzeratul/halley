@@ -1,7 +1,7 @@
 #include "script_branching.h"
 using namespace Halley;
 
-gsl::span<const IScriptNodeType::PinType> ScriptBranch::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptBranch::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -41,7 +41,7 @@ std::pair<String, std::vector<ColourOverride>> ScriptBranch::getPinDescription(c
 
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptFork::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptFork::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -63,7 +63,7 @@ IScriptNodeType::Result ScriptFork::doUpdate(ScriptEnvironment& environment, Tim
 
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptMergeAny::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptMergeAny::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -87,7 +87,7 @@ IScriptNodeType::Result ScriptMergeAny::doUpdate(ScriptEnvironment& environment,
 
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptMergeAll::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptMergeAll::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -109,7 +109,7 @@ IScriptNodeType::Result ScriptMergeAll::doUpdate(ScriptEnvironment& environment,
 	auto& counter = environment.getNodeCounter(node.getId());
 
 	size_t expected = 0;
-	const auto& pinConfigs = getPinConfiguration();
+	const auto& pinConfigs = getPinConfiguration(node);
 	const auto& pins = node.getPins();
 	for (size_t i = 0; i < pins.size(); ++i) {
 		if (pinConfigs[i].type == ScriptNodeElementType::FlowPin && pinConfigs[i].direction == ScriptNodePinDirection::Input) {

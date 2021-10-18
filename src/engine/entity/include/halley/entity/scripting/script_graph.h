@@ -104,6 +104,7 @@ namespace Halley {
 		bool connectPin(uint32_t srcNode, uint8_t srcPinN, EntityId target);
 		bool disconnectPin(uint32_t nodeIdx, uint8_t pinN);
 		bool disconnectPinIfSingleConnection(uint32_t nodeIdx, uint8_t pinN);
+		void validateNodePins(uint32_t nodeIdx);
 
 		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 

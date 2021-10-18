@@ -278,6 +278,11 @@ bool ScriptingGizmo::destroyHighlightedNode()
 	return false;
 }
 
+ScriptGraph& ScriptingGizmo::getGraph()
+{
+	return *scriptGraph;
+}
+
 ScriptGraphNode& ScriptingGizmo::getNode(uint32_t id)
 {
 	return scriptGraph->getNodes().at(id);

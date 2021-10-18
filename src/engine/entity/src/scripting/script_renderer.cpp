@@ -97,7 +97,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t 
 	const bool nodeHighlighted = highlightNode && highlightNode->nodeId == nodeIdx;
 
 	for (size_t i = 0; i < node.getPins().size(); ++i) {
-		const auto& srcPinType = nodeType->getPin(i);
+		const auto& srcPinType = nodeType->getPin(node, i);
 		const auto& pin = node.getPins()[i];
 		
 		for (const auto& pinConnection: pin.connections) {
@@ -114,7 +114,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t 
 					continue;
 				}
 				dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom).getCentre();
-				dstPinType = dstNodeType->getPin(dstIdx);
+				dstPinType = dstNodeType->getPin(node, dstIdx);
 				if (highlightNode && highlightNode->nodeId == pinConnection.dstNode.value()) {
 					highlighted = true;
 				}
@@ -251,7 +251,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 	}
 
 	// Draw pins
-	const auto& pins = nodeType->getPinConfiguration();
+	const auto& pins = nodeType->getPinConfiguration(node);
 	for (size_t i = 0; i < pins.size(); ++i) {
 		const auto& pinType = pins[i];
 		const auto circle = getNodeElementArea(*nodeType, basePos, node, i, curZoom);
@@ -279,12 +279,12 @@ Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vecto
 		return (static_cast<float>(idx) - (n - 1) * 0.5f) * spacing;
 	};
 
-	const auto& pin = nodeType.getPin(pinN);
+	const auto& pin = nodeType.getPin(node, pinN);
 	const auto pinSide = pin.getSide();
 	
 	size_t pinsOnSide = 0;
 	size_t idxOnSide = 0;
-	const auto& pins = nodeType.getPinConfiguration();
+	const auto& pins = nodeType.getPinConfiguration(node);
 	for (size_t i = 0; i < pins.size(); ++i) {
 		const auto& pinType = pins[i];
 		if (i == pinN) {
@@ -392,7 +392,7 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 		
 		// Check each pin handle
 		bool foundPin = false;
-		const auto& pins = nodeType->getPinConfiguration();
+		const auto& pins = nodeType->getPinConfiguration(node);
 		for	(size_t j = 0; j < pins.size(); ++j) {
 			const auto& pinType = pins[j];
 			const auto circle = getNodeElementArea(*nodeType, basePos, node, j, curZoom).expand((pinPriority ? 12.0f : 4.0f) / curZoom);

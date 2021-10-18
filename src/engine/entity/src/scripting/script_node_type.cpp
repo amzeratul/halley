@@ -75,7 +75,7 @@ std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getPinDescriptio
 		return nullptr;
 	};
 
-	const auto& config = getPinConfiguration();
+	const auto& config = getPinConfiguration(node);
 	size_t typeIdx = 0;
 	size_t typeTotal = 0;
 	for (size_t i = 0; i < config.size(); ++i) {
@@ -96,9 +96,9 @@ std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getPinDescriptio
 	return builder.moveResults();
 }
 
-IScriptNodeType::PinType IScriptNodeType::getPin(size_t n) const
+IScriptNodeType::PinType IScriptNodeType::getPin(const ScriptGraphNode& node, size_t n) const
 {
-	const auto& pins = getPinConfiguration();
+	const auto& pins = getPinConfiguration(node);
 	if (n < pins.size()) {
 		return pins[n];
 	}
@@ -187,7 +187,7 @@ std::array<OptionalLite<uint32_t>, 8> IScriptNodeType::getOutputNodes(const Scri
 	std::array<OptionalLite<uint32_t>, 8> result;
 	result.fill({});
 	
-	const auto& pinConfig = getPinConfiguration();
+	const auto& pinConfig = getPinConfiguration(node);
 
 	size_t curOutputPin = 0;
 	size_t nOutputsFound = 0;

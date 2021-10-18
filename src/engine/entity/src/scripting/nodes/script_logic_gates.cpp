@@ -9,7 +9,7 @@ String ScriptLogicGateAnd::getShortDescription(const World& world, const ScriptG
 	return addParentheses(std::move(a)) + " AND " + addParentheses(std::move(b));
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptLogicGateAnd::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptLogicGateAnd::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -43,7 +43,7 @@ String ScriptLogicGateOr::getShortDescription(const World& world, const ScriptGr
 	return addParentheses(std::move(a)) + " OR " + addParentheses(std::move(b));
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptLogicGateOr::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptLogicGateOr::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -77,7 +77,7 @@ String ScriptLogicGateXor::getShortDescription(const World& world, const ScriptG
 	return addParentheses(std::move(a)) + " XOR " + addParentheses(std::move(b));
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptLogicGateXor::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptLogicGateXor::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -110,7 +110,7 @@ String ScriptLogicGateNot::getShortDescription(const World& world, const ScriptG
 	return "NOT " + addParentheses(std::move(a));
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptLogicGateNot::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptLogicGateNot::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;

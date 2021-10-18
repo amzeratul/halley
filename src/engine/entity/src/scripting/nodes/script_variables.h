@@ -9,7 +9,7 @@ namespace Halley {
 		String getLabel(const ScriptGraphNode& node) const override;
 		String getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const override;
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/variable.png"; }
-		gsl::span<const PinType> getPinConfiguration() const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		std::vector<SettingType> getSettingTypes() const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Variable; }
 		std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const override;
@@ -25,7 +25,7 @@ namespace Halley {
 		String getLabel(const ScriptGraphNode& node) const override;
 		String getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const override;
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/literal.png"; }
-		gsl::span<const PinType> getPinConfiguration() const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		std::vector<SettingType> getSettingTypes() const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Variable; }
 		std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const override;
@@ -40,7 +40,7 @@ namespace Halley {
 		String getLabel(const ScriptGraphNode& node) const override;
 		String getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const override;
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/comparison.png"; }
-		gsl::span<const PinType> getPinConfiguration() const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		std::vector<SettingType> getSettingTypes() const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Variable; }
 		std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const override;
@@ -53,7 +53,7 @@ namespace Halley {
 		String getId() const override { return "setVariable"; }
 		String getName() const override { return "Variable Set"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/set_variable.png"; }
-		gsl::span<const PinType> getPinConfiguration() const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
 		std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const override;
 

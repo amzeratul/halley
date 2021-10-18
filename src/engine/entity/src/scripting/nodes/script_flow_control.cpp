@@ -7,7 +7,7 @@ std::pair<String, std::vector<ColourOverride>> ScriptStart::getNodeDescription(c
 	return { "Start execution", {} };
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptStart::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptStart::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -21,7 +21,7 @@ IScriptNodeType::Result ScriptStart::doUpdate(ScriptEnvironment& environment, Ti
 }
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptRestart::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptRestart::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -41,7 +41,7 @@ IScriptNodeType::Result ScriptRestart::doUpdate(ScriptEnvironment& environment, 
 
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptStop::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptStop::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;

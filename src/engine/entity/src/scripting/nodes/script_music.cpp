@@ -6,7 +6,7 @@ std::vector<IScriptNodeType::SettingType> ScriptPlayMusic::getSettingTypes() con
 	return { SettingType{ "music", "Halley::String", std::vector<String>{""} } };
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptPlayMusic::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptPlayMusic::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -30,7 +30,7 @@ IScriptNodeType::Result ScriptPlayMusic::doUpdate(ScriptEnvironment& environment
 
 
 
-gsl::span<const IScriptNodeType::PinType> ScriptStopMusic::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptStopMusic::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;

@@ -86,6 +86,7 @@ void ScriptingNodeEditor::applyChanges()
 	
 	Concurrent::execute(gizmo->getExecutionQueue(), [gizmo, nodeId, curSettings = std::move(curSettings)] () {
 		gizmo->getNode(nodeId).getSettings() = std::move(curSettings);
+		gizmo->getGraph().validateNodePins(nodeId);
 		gizmo->saveEntityData();
 	});
 }

@@ -14,7 +14,7 @@ std::vector<IScriptNodeType::SettingType> ScriptSpriteAnimation::getSettingTypes
 	return { SettingType{ "sequence", "Halley::String", std::vector<String>{"default"} } };
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptSpriteAnimation::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptSpriteAnimation::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
@@ -51,7 +51,7 @@ std::vector<IScriptNodeType::SettingType> ScriptSpriteDirection::getSettingTypes
 	return { SettingType{ "direction", "Halley::String", std::vector<String>{"right"} } };
 }
 
-gsl::span<const IScriptNodeType::PinType> ScriptSpriteDirection::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptSpriteDirection::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;

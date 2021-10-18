@@ -47,8 +47,8 @@ namespace Halley {
 		virtual String getIconName(const ScriptGraphNode& node) const = 0;
 		virtual ScriptNodeClassification getClassification() const = 0;
 		
-		virtual gsl::span<const PinType> getPinConfiguration() const = 0;
-        PinType getPin(size_t n) const;
+		virtual gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const = 0;
+        PinType getPin(const ScriptGraphNode& node, size_t n) const;
 
 		virtual bool canAdd() const { return true; }
         virtual bool canDelete() const { return true; }

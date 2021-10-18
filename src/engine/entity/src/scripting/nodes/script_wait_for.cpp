@@ -1,7 +1,7 @@
 #include "script_wait_for.h"
 using namespace Halley;
 
-gsl::span<const IScriptNodeType::PinType> ScriptWaitFor::getPinConfiguration() const
+gsl::span<const IScriptNodeType::PinType> ScriptWaitFor::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;

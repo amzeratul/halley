@@ -121,7 +121,7 @@ const IScriptNodeType& ScriptGraphNode::getNodeType() const
 
 ScriptNodePinType ScriptGraphNode::getPinType(uint8_t idx) const
 {
-	const auto& config = getNodeType().getPinConfiguration();
+	const auto& config = getNodeType().getPinConfiguration(*this);
 	if (idx >= config.size()) {
 		return ScriptNodePinType();
 	}
@@ -238,6 +238,20 @@ bool ScriptGraph::disconnectPinIfSingleConnection(uint32_t nodeIdx, uint8_t pinN
 	}
 
 	return disconnectPin(nodeIdx, pinN);
+}
+
+void ScriptGraph::validateNodePins(uint32_t nodeIdx)
+{
+	auto& node = nodes.at(nodeIdx);
+
+	const size_t nPinsCur = node.getPins().size();
+	const size_t nPinsTarget = node.getNodeType().getPinConfiguration(node).size();
+	if (nPinsCur > nPinsTarget) {
+		for (size_t i = nPinsTarget; i < nPinsCur; ++i) {
+			disconnectPin(nodeIdx, static_cast<uint8_t>(i));
+		}
+		node.getPins().resize(nPinsTarget);
+	}
 }
 
 void ScriptGraph::assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const
