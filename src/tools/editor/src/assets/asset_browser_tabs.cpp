@@ -2,7 +2,6 @@
 
 #include "asset_editor_window.h"
 #include "halley/tools/project/project.h"
-#include "src/ui/confirmation_popup.h"
 #include "src/ui/editor_ui_factory.h"
 #include "src/ui/project_window.h"
 
@@ -59,20 +58,20 @@ bool AssetBrowserTabs::closeTab(const String& key)
 
 	if (windows[idx]->isModified()) {
 		if (getRoot() && !getRoot()->hasModalUI()) {
-			auto buttons = { ConfirmationPopup::ButtonType::Yes, ConfirmationPopup::ButtonType::No, ConfirmationPopup::ButtonType::Cancel };
-			auto callback = [this, idx, key] (ConfirmationPopup::ButtonType buttonType)
+			auto buttons = { UIConfirmationPopup::ButtonType::Yes, UIConfirmationPopup::ButtonType::No, UIConfirmationPopup::ButtonType::Cancel };
+			auto callback = [this, idx, key] (UIConfirmationPopup::ButtonType buttonType)
 			{
-				if (buttonType == ConfirmationPopup::ButtonType::Cancel) {
+				if (buttonType == UIConfirmationPopup::ButtonType::Cancel) {
 					std_ex::erase_if(toClose, [&] (const auto& v) { return v == key; });
 				} else {
-					if (buttonType == ConfirmationPopup::ButtonType::Yes) {
+					if (buttonType == UIConfirmationPopup::ButtonType::Yes) {
 						windows[idx]->save();
 					}
 					doCloseTab(key);
 				}
 			};
 
-			getRoot()->addChild(std::make_shared<ConfirmationPopup>(factory, "Save Changes?", "Would you like to save your changes to " + windows[idx]->getName() + " before closing the tab?", buttons, std::move(callback)));
+			getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Save Changes?", "Would you like to save your changes to " + windows[idx]->getName() + " before closing the tab?", buttons, std::move(callback)));
 		}
 
 		std_ex::erase_if(toClose, [&] (const auto& v) { return v == key; });
@@ -119,19 +118,19 @@ bool AssetBrowserTabs::proceedQuitRequested(size_t idx, bool invoke)
 		auto& window = windows[i];
 		if (window->isModified()) {
 			tabs->setSelectedOption(static_cast<int>(i));
-			auto buttons = { ConfirmationPopup::ButtonType::Yes, ConfirmationPopup::ButtonType::No, ConfirmationPopup::ButtonType::Cancel };
-			auto callback = [this, i] (ConfirmationPopup::ButtonType buttonType)
+			auto buttons = { UIConfirmationPopup::ButtonType::Yes, UIConfirmationPopup::ButtonType::No, UIConfirmationPopup::ButtonType::Cancel };
+			auto callback = [this, i] (UIConfirmationPopup::ButtonType buttonType)
 			{
-				if (buttonType == ConfirmationPopup::ButtonType::Cancel) {
+				if (buttonType == UIConfirmationPopup::ButtonType::Cancel) {
 					quittingCallback = {};
 				} else {
-					if (buttonType == ConfirmationPopup::ButtonType::Yes) {
+					if (buttonType == UIConfirmationPopup::ButtonType::Yes) {
 						windows[i]->save();
 					}
 					proceedQuitRequested(i + 1, true);
 				}
 			};
-			getRoot()->addChild(std::make_shared<ConfirmationPopup>(factory, "Save Changes?", "Would you like to save your changes to " + window->getName() + " before closing the project?", buttons, std::move(callback)));
+			getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Save Changes?", "Would you like to save your changes to " + window->getName() + " before closing the project?", buttons, std::move(callback)));
 			return false;
 		}
 	}

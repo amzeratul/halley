@@ -14,6 +14,7 @@ namespace Halley {
 
 		const String& getName() const;
 		const Sprite& getSprite(const String& name) const;
+		bool hasSprite(const String& name) const;
 		const TextRenderer& getTextRenderer(const String& name) const;
 		bool hasTextRenderer(const String& name) const;
 		Vector4f getBorder(const String& name) const;

@@ -5,7 +5,7 @@ namespace Halley
 {
 	class UIFactory;
 
-	class ConfirmationPopup : public UIWidget
+	class UIConfirmationPopup : public UIWidget
 	{
 	public:
 		enum class ButtonType {
@@ -17,7 +17,7 @@ namespace Halley
 
 		using Callback = std::function<void(ButtonType)>;
 
-		ConfirmationPopup(UIFactory& factory, String title, String message, std::vector<ButtonType> buttons, Callback callback);
+		UIConfirmationPopup(UIFactory& factory, String title, String message, std::vector<ButtonType> buttons, Callback callback);
 
 		void onMakeUI() override;
 
@@ -29,7 +29,7 @@ namespace Halley
 	};
 
 	template <>
-	struct EnumNames<ConfirmationPopup::ButtonType> {
+	struct EnumNames<UIConfirmationPopup::ButtonType> {
 		constexpr std::array<const char*, 4> operator()() const {
 			return{{
 				"yes",

@@ -325,10 +325,20 @@ std::optional<int> UIList::removeItem(const String& id)
 		return item->getId() == id;
 	});
 	if (iter != items.end()) {
-		const size_t idx = iter - items.begin();
+		const auto idx = static_cast<int>(iter - items.begin());
+		removeItem(idx);
+		return idx;
+	}
+
+	return {};
+}
+
+void UIList::removeItem(int idx)
+{
+	if (idx >= 0 && idx < static_cast<int>(items.size())) {
 		const auto item = items[idx];
 		remove(*item);
-		items.erase(iter);
+		items.erase(items.begin() + idx);
 
 		layout();
 		reassignIds();
@@ -336,10 +346,7 @@ std::optional<int> UIList::removeItem(const String& id)
 		if (curOption >= static_cast<int>(idx)) {
 			setSelectedOption(curOption - 1);
 		}
-		return static_cast<int>(idx);
 	}
-
-	return {};
 }
 
 void UIList::draw(UIPainter& painter) const
@@ -900,9 +907,9 @@ void UIListItem::doSetState(State state)
 {
 	if (dragged || isManualDragging()) {
 		sprite = style.getSprite("drag");
-	} else if (selected) {
+	} else if (selected && style.hasSprite("selected")) {
 		sprite = style.getSprite("selected");
-	} else if (!isEnabled()) {
+	} else if (!isEnabled() && style.hasSprite("disabled")) {
 		sprite = style.getSprite("disabled");
 	} else {
 		switch (state) {
@@ -917,7 +924,7 @@ void UIListItem::doSetState(State state)
 			sendEvent(UIEvent(UIEventType::SetHovered, getId(), true));
 			break;
 		case State::Down:
-			sprite = style.getSprite("selected");
+			sprite = style.hasSprite("selected") ? style.getSprite("selected") : style.getSprite("hover");
 			break;
 		}
 	}
@@ -965,7 +972,7 @@ void UIListItem::setAbsoluteIndex(int index)
 
 Rect4f UIListItem::getMouseRect() const
 {
-	auto rect = UIWidget::getMouseRect();
+	auto rect = UIClickable::getMouseRect();
 	if (rect.getWidth() <= 0.01f || rect.getHeight() <= 0.01f) {
 		return rect;
 	}

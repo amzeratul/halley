@@ -84,7 +84,14 @@ namespace Halley {
 		std::optional<String> countryCode;
 	};
 
-	class I18N {
+	class II18N {
+	public:
+		virtual ~II18N() = default;
+
+		virtual LocalisedString get(const String& key) const = 0;
+	};
+
+	class I18N : public II18N {
 	public:
 		I18N();
 
@@ -95,7 +102,7 @@ namespace Halley {
 		void setFallbackLanguage(const I18NLanguage& code);
 		std::vector<I18NLanguage> getLanguagesAvailable() const;
 
-		LocalisedString get(const String& key) const;
+		LocalisedString get(const String& key) const override;
 		std::optional<LocalisedString> get(const String& key, const I18NLanguage& language) const;
 		LocalisedString getPreProcessedUserString(const String& string) const;
 

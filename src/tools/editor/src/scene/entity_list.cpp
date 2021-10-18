@@ -178,11 +178,13 @@ void EntityList::openContextMenu(const String& entityId)
 	const bool canAddAsSibling = sceneEditorWindow->canAddSibling(entityId);
 	const bool isPrefab = sceneEditorWindow->isPrefabInstance(entityId);
 	const bool canExtractPrefab = canAddAsSibling;
+	const bool canAddAsChild = !isPrefab;
+	const bool canRemove = canAddAsSibling;
 	
 	makeEntry("add_entity_sibling", "Add Entity", "Adds an empty entity as a sibling of this one.", "", canAddAsSibling);
-	makeEntry("add_entity_child", "Add Entity (Child)", "Adds an empty entity as a child of this one.", "");
+	makeEntry("add_entity_child", "Add Entity (Child)", "Adds an empty entity as a child of this one.", "", canAddAsChild);
 	makeEntry("add_prefab_sibling", "Add Prefab", "Adds a prefab as a sibling of this entity.", "", canAddAsSibling);
-	makeEntry("add_prefab_child", "Add Prefab (Child)", "Adds a prefab as a child of this entity.", "");
+	makeEntry("add_prefab_child", "Add Prefab (Child)", "Adds a prefab as a child of this entity.", "", canAddAsChild);
 	menuOptions.emplace_back();
 	if (isPrefab) {
 		makeEntry("collapse_prefab", "Collapse Prefab", "Imports the current prefab directly into the scene.", "");
@@ -190,13 +192,13 @@ void EntityList::openContextMenu(const String& entityId)
 		makeEntry("extract_prefab", "Extract Prefab...", "Converts the current entity into a new prefab.", "", canExtractPrefab);
 	}
 	menuOptions.emplace_back();
-	makeEntry("cut", "Cut", "Cut entity to clipboard [Ctrl+X]", "cut.png");
+	makeEntry("cut", "Cut", "Cut entity to clipboard [Ctrl+X]", "cut.png", canRemove);
 	makeEntry("copy", "Copy", "Copy entity to clipboard [Ctrl+C]", "copy.png");
 	makeEntry("paste_sibling", "Paste", "Paste entity as a sibling of the current one. [Ctrl+V]", "paste.png", canPaste && canAddAsSibling);
-	makeEntry("paste_child", "Paste (Child)", "Paste entity as a child of the current one.", "", canPaste);
+	makeEntry("paste_child", "Paste (Child)", "Paste entity as a child of the current one.", "", canPaste && canAddAsChild);
 	menuOptions.emplace_back();
-	makeEntry("duplicate", "Duplicate", "Duplicate entity [Ctrl+D]", "");
-	makeEntry("delete", "Delete", "Delete entity [Del]", "delete.png");
+	makeEntry("duplicate", "Duplicate", "Duplicate entity [Ctrl+D]", "", canAddAsSibling);
+	makeEntry("delete", "Delete", "Delete entity [Del]", "delete.png", canRemove);
 	
 	auto menu = std::make_shared<UIPopupMenu>("entity_list_context_menu", factory.getStyle("popupMenu"), menuOptions);
 	menu->setAnchor(UIAnchor(Vector2f(), Vector2f(), getRoot()->getLastMousePos()));

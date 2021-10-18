@@ -35,6 +35,7 @@ namespace Halley {
 		bool hasTextRenderer(const String& name) const;
 		bool hasColour(const String& name) const;
 		bool hasSubStyle(const String& name) const;
+		bool hasSprite(const String& name) const;
 
 		void reload(const ConfigNode& node);
 

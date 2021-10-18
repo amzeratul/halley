@@ -34,6 +34,7 @@ namespace Halley {
 		std::shared_ptr<UIListItem> addImage(const String& id, std::shared_ptr<UIImage> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, std::optional<UIStyle> styleOverride = {});
 		std::shared_ptr<UIListItem> addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = {}, int fillFlags = UISizerFillFlags::Fill, std::optional<UIStyle> styleOverride = {});
 		std::optional<int> removeItem(const String& id);
+		void removeItem(int idx);
 
 		void clear() override;
 
