@@ -587,6 +587,7 @@ void Sprite::setRectInfo(const RectInfo& info)
 	size = info.size;
 	vertexAttrib.texRect0 = info.texRect0;
 	vertexAttrib.texRect1 = info.texRect1;
+	computeSize();
 }
 
 Sprite Sprite::clone() const
