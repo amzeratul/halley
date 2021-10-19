@@ -243,6 +243,7 @@ void AssetBrowserTabs::makeUI()
 {
 	add(factory.makeUI("ui/halley/asset_browser_tabs"), 1);
 	tabs = getWidgetAs<UIList>("tabs");
+	tabs->setDragEnabled(true);
 	pages = getWidgetAs<UIPagedPane>("pages");
 
 	setHandle(UIEventType::ListSelectionChanged, "tabs", [=] (const UIEvent& event)

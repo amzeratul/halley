@@ -287,6 +287,7 @@ uiStyle:
       hover: { img: $ui_tab_hover, colour: $ui_controlNormal }
       selected: { img: $ui_tab_selected, colour: $ui_controlNormal }
       disabled: { img: $ui_tab_normal, colour: $ui_controlNormal }
+      drag: { img: $ui_tab_selected, colour: $ui_controlNormal }
       innerBorder: [ 5, 6, 5, 2 ]
     innerBorder: [ 10, 0, 10, 0 ]
     extraMouseBorder: [ 0, 0, 0, 0 ]
