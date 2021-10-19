@@ -201,8 +201,7 @@ void EntityList::openContextMenu(const String& entityId)
 	makeEntry("delete", "Delete", "Delete entity [Del]", "delete.png", canRemove);
 	
 	auto menu = std::make_shared<UIPopupMenu>("entity_list_context_menu", factory.getStyle("popupMenu"), menuOptions);
-	menu->setAnchor(UIAnchor(Vector2f(), Vector2f(), getRoot()->getLastMousePos()));
-	getRoot()->addChild(menu);
+	menu->spawnOnRoot(*getRoot());
 
 	menu->setHandle(UIEventType::PopupAccept, [this, entityId] (const UIEvent& e) {\
 		Concurrent::execute(Executors::getMainThread(), [=] () {

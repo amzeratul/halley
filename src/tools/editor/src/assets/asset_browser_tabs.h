@@ -47,5 +47,8 @@ namespace Halley {
 
 		void saveTabs();
 		void loadTabs();
+
+		void openContextMenu(const String& tabId);
+		void onContextMenuAction(const String& action, const String& tabId);
 	};
 }

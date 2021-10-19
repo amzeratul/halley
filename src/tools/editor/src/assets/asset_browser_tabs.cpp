@@ -247,6 +247,11 @@ void AssetBrowserTabs::makeUI()
 	{
 		closeTab(event.getStringData());
 	});
+
+	setHandle(UIEventType::ListItemRightClicked, [=] (const UIEvent& event)
+	{
+		openContextMenu(event.getStringData());
+	});
 }
 
 void AssetBrowserTabs::saveTabs()
@@ -278,4 +283,60 @@ void AssetBrowserTabs::loadTabs()
 
 	const auto curTab = projectWindow.getSetting(EditorSettingType::Project, "currentTab").asString("");
 	tabs->setSelectedOptionId(curTab);
+}
+
+void AssetBrowserTabs::openContextMenu(const String& tabId)
+{
+	auto menuOptions = std::vector<UIPopupMenuItem>();
+	auto makeEntry = [&] (const String& id, const String& text, const String& toolTip, const String& icon, bool enabled = true)
+	{
+		auto iconSprite = Sprite().setImage(factory.getResources(), "entity_icons/" + (icon.isEmpty() ? "empty.png" : icon));
+		menuOptions.push_back(UIPopupMenuItem(id, LocalisedString::fromHardcodedString(text), std::move(iconSprite), LocalisedString::fromHardcodedString(toolTip)));
+		menuOptions.back().enabled = enabled;
+	};
+
+	makeEntry("close_tab", "Close", "Close this tab. [Ctrl+W]", "", true);
+	makeEntry("close_other_tabs", "Close Others", "Close all other tabs.", "", true);
+	makeEntry("close_to_the_right", "Close to the Right", "Close all tabs to the right.", "", true);
+	makeEntry("close_all", "Close All", "Close all tabs.", "", true);
+
+	auto menu = std::make_shared<UIPopupMenu>("entity_list_context_menu", factory.getStyle("popupMenu"), menuOptions);
+	menu->spawnOnRoot(*getRoot());
+
+	menu->setHandle(UIEventType::PopupAccept, [this, tabId] (const UIEvent& e) {\
+		Concurrent::execute(Executors::getMainThread(), [=] () {
+			onContextMenuAction(e.getStringData(), tabId);
+		});
+	});
+}
+
+void AssetBrowserTabs::onContextMenuAction(const String& action, const String& tabId)
+{
+	const int nTabs = static_cast<int>(tabs->getCount());
+
+	if (action == "close_tab") {
+		toClose.push_back(tabId);
+	} else if (action == "close_other_tabs") {
+		for (int i = 0; i < nTabs; ++i) {
+			const auto& id = tabs->getItem(i)->getId();
+			if (id != tabId) {
+				toClose.push_back(tabs->getItem(i)->getId());
+			}
+		}
+	} else if (action == "close_to_the_right") {
+		bool enabled = false;
+		for (int i = 0; i < nTabs; ++i) {
+			const auto& id = tabs->getItem(i)->getId();
+			if (id == tabId) {
+				enabled = true;
+			} else if (enabled) {
+				toClose.push_back(id);
+			}
+		}
+	} else if (action == "close_all") {
+		for (int i = 0; i < nTabs; ++i) {
+			const auto& id = tabs->getItem(i)->getId();
+			toClose.push_back(id);
+		}
+	}
 }

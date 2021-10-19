@@ -52,7 +52,8 @@ namespace Halley {
 
 		void onAddedToRoot(UIRoot& root) override;
 		void setInputButtons(const UIInputButtons& buttons) override;
-		
+		void spawnOnRoot(UIRoot& uiRoot);
+
 	private:
 		UIStyle style;
 		UIInputButtons inputButtons;

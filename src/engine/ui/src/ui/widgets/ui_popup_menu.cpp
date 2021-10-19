@@ -1,5 +1,6 @@
 #include "widgets/ui_popup_menu.h"
 
+#include "ui_anchor.h"
 #include "widgets/ui_image.h"
 #include "widgets/ui_list.h"
 
@@ -38,6 +39,12 @@ void UIPopupMenu::setInputButtons(const UIInputButtons& buttons)
 	if (itemList) {
 		itemList->setInputButtons(buttons);
 	}
+}
+
+void UIPopupMenu::spawnOnRoot(UIRoot& uiRoot)
+{
+	setAnchor(UIAnchor(Vector2f(), Vector2f(), uiRoot.getLastMousePos()));
+	uiRoot.addChild(shared_from_this());
 }
 
 void UIPopupMenu::makeUI()
