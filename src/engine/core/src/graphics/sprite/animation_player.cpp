@@ -26,6 +26,17 @@ AnimationPlayer& AnimationPlayer::playOnce(const String& sequence, const std::op
 	return *this;
 }
 
+AnimationPlayer& AnimationPlayer::stop()
+{
+	curSeq = nullptr;
+	playing = false;
+
+	updateIfNeeded();
+	
+	return *this;
+}
+
+
 AnimationPlayer& AnimationPlayer::setAnimation(std::shared_ptr<const Animation> v, const String& sequence, const String& direction)
 {
 	if (animation != v) {
