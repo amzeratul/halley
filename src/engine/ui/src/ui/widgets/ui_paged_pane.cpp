@@ -89,6 +89,11 @@ std::shared_ptr<UIWidget> UIPagedPane::getPage(int n) const
 	return pages.at(n);
 }
 
+void UIPagedPane::swapPages(int a, int b)
+{
+	std::swap(pages[a], pages[b]);
+}
+
 void UIPagedPane::clear()
 {
 	UIWidget::clear();

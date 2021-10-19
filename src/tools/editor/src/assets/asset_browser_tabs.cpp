@@ -261,6 +261,14 @@ void AssetBrowserTabs::makeUI()
 	{
 		openContextMenu(event.getStringData());
 	});
+
+	setHandle(UIEventType::ListItemsSwapped, [=] (const UIEvent& event)
+	{
+		const int a = event.getIntData();
+		const int b = event.getIntData2();
+		pages->swapPages(a, b);
+		std::swap(windows[a], windows[b]);
+	});
 }
 
 void AssetBrowserTabs::saveTabs()
