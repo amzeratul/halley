@@ -353,6 +353,14 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& dat
 			updateEntityNode(child, getEntity(child.getInstanceUUID(), *context, false), entity, context);
 		}
 	}
+
+	// Ensure children order
+	std::vector<UUID> childInstanceUUIDs;
+	childInstanceUUIDs.reserve(data.getChildren().size());
+	for (const auto& child: data.getChildren()) {
+		childInstanceUUIDs.push_back(child.getInstanceUUID());
+	}
+	entity.sortChildrenByInstanceUUIDs(childInstanceUUIDs);
 }
 
 void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityDataDelta& delta, const std::shared_ptr<EntityFactoryContext>& context)

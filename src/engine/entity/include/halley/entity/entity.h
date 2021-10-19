@@ -129,7 +129,7 @@ namespace Halley {
 		void refresh(MaskStorage& storage, ComponentDeleterTable& table);
 		void destroy();
 		
-		void sortChildrenByPrefabUUIDs(const std::vector<UUID>& uuids);
+		void sortChildrenByInstanceUUIDs(const std::vector<UUID>& uuids);
 
 		bool isEmpty() const;
 
@@ -564,10 +564,10 @@ namespace Halley {
 			return entity->reloaded;
 		}
 
-		void sortChildrenByPrefabUUIDs(const std::vector<UUID>& uuids)
+		void sortChildrenByInstanceUUIDs(const std::vector<UUID>& uuids)
 		{
 			Expects(entity);
-			entity->sortChildrenByPrefabUUIDs(uuids);
+			entity->sortChildrenByInstanceUUIDs(uuids);
 		}
 
 		void setPrefab(std::shared_ptr<const Prefab> prefab, UUID prefabUUID)
