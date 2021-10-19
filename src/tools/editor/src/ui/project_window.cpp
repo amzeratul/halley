@@ -270,6 +270,16 @@ bool ProjectWindow::onKeyPress(KeyboardKeyPress key)
 		return true;
 	}
 
+	if (key.is(KeyCode::Tab, KeyMods::Ctrl)) {
+		assetEditorWindow->moveTabFocus(1);
+		return true;
+	}
+
+	if (key.is(KeyCode::Tab, KeyMods::CtrlShift)) {
+		assetEditorWindow->moveTabFocus(-1);
+		return true;
+	}
+
 	if (key.is(KeyCode::F1)) {
 		toggleDebugConsole();
 		return true;

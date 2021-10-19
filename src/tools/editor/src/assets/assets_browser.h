@@ -25,6 +25,7 @@ namespace Halley {
         void saveTab();
 		void saveAllTabs();
 		void closeTab();
+        void moveTabFocus(int delta);
 
     private:
 		EditorUIFactory& factory;

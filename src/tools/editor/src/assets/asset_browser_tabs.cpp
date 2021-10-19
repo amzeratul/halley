@@ -218,6 +218,14 @@ void AssetBrowserTabs::closeCurrentTab()
 	}
 }
 
+void AssetBrowserTabs::moveTabFocus(int delta)
+{
+	const int nTabs = int(tabs->getCount());
+	if (nTabs > 0) {
+		tabs->setSelectedOption(modulo(tabs->getSelectedOption() + delta, nTabs));
+	}
+}
+
 void AssetBrowserTabs::update(Time t, bool moved)
 {
 	auto closing = toClose;

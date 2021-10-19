@@ -21,6 +21,7 @@ namespace Halley {
 		void saveCurrentTab();
 		void saveAllTabs();
 		void closeCurrentTab();
+		void moveTabFocus(int delta);
 
 	protected:
 		void update(Time t, bool moved) override;

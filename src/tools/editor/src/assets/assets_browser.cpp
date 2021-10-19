@@ -74,6 +74,11 @@ void AssetsBrowser::closeTab()
 	assetTabs->closeCurrentTab();
 }
 
+void AssetsBrowser::moveTabFocus(int delta)
+{
+	assetTabs->moveTabFocus(delta);
+}
+
 void AssetsBrowser::loadResources()
 {
 	project.addAssetReloadCallback([=] (gsl::span<const String> assets)
