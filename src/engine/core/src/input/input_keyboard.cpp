@@ -60,6 +60,12 @@ gsl::span<const KeyboardKeyPress> InputKeyboard::getPendingKeys() const
 void InputKeyboard::onTextEntered(const char* text)
 {
 	const auto str = String(text).getUTF32();
+
+	if (str.size() == 1 && str[0] == ' ' && (isButtonDown(KeyCode::LCtrl) || isButtonDown(KeyCode::RCtrl))) {
+		// Workaround SDL bug
+		return;
+	}
+
 	for (const auto& c: captures) {
 		c->onTextEntered(str);
 	}
