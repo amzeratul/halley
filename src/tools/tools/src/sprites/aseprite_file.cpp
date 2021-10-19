@@ -518,8 +518,7 @@ std::map<String, std::unique_ptr<Image>> AsepriteFile::makeGroupFrameImages(int 
 		if (layer.visibleInHierarchy) {			
 			auto* cel = getCelAt(frameNumber, layerNumber);
 			if (cel) {
-				if (currentGroup == "")
-				{
+				if (currentGroup == "")	{
 					defaultFrameUsed = true;
 				}
 				const uint8_t opacity = uint8_t(clamp((uint32_t(cel->opacity) * uint32_t(layer.opacity)) / 255, uint32_t(0), uint32_t(255)));

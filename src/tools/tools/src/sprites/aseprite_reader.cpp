@@ -61,16 +61,14 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(const St
 			const auto duration = aseFile.getFrame(frameN).duration;
 			const auto hasFrameNumber = t.second.size() > 1;
 
-			for (auto& groupFrameImage : groupFrameImages)
-			{
+			for (auto& groupFrameImage : groupFrameImages) {
 				auto name = sequenceSeparated ? sequence : groupFrameImage.first;
 				
 				std::vector<ImageData> groupFrameData;
 				auto firstImage = frameData.find(name) == frameData.end();
 				addImageData(i, frameN, groupFrameData, std::move(groupFrameImage.second), aseFile, baseName, sequence, direction, duration, trim, padding, hasFrameNumber, name, firstImage, spriteName, filename);
 				
-				if(frameData.find(name) == frameData.end())
-				{
+				if (frameData.find(name) == frameData.end())	{
 					frameData[name] = std::vector<ImageData>();
 				}
 				std::move(groupFrameData.begin(), groupFrameData.end(), std::back_inserter(frameData[name]));
