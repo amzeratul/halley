@@ -43,7 +43,13 @@ void UIPopupMenu::setInputButtons(const UIInputButtons& buttons)
 
 void UIPopupMenu::spawnOnRoot(UIRoot& uiRoot)
 {
-	setAnchor(UIAnchor(Vector2f(), Vector2f(), uiRoot.getLastMousePos()));
+	layout();
+	const auto sz = getSize();
+	const auto rect = uiRoot.getRect();
+	const auto validRect = Rect4f(rect.getTopLeft(), rect.getBottomRight() - sz);
+	const auto pos = validRect.getClosestPoint(uiRoot.getLastMousePos());
+
+	setAnchor(UIAnchor(Vector2f(), Vector2f(), pos));
 	uiRoot.addChild(shared_from_this());
 }
 
