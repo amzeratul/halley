@@ -5,6 +5,7 @@ include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/editor_extens
 set(SOURCES
         "src/component_editor_context.cpp"
         "src/component_field_parameters.cpp"
+        "src/entity_validator.cpp"
         "src/polygon_gizmo.cpp"
         "src/scene_editor.cpp"
         "src/scene_editor_gizmo.cpp"
@@ -17,6 +18,7 @@ set(HEADERS
         "include/halley/editor_extensions/component_editor_context.h"
         "include/halley/editor_extensions/component_field_parameters.h"
         "include/halley/editor_extensions/editor_custom_tools_interface.h"
+        "include/halley/editor_extensions/entity_validator.h"
         "include/halley/editor_extensions/polygon_gizmo.h"
         "include/halley/editor_extensions/scene_editor_input_state.h"
         "include/halley/editor_extensions/scene_editor.h"
