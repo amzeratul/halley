@@ -633,15 +633,46 @@ public:
 
 		auto style = context.getUIFactory().getStyle("buttonThin");
 
-		auto field = std::make_shared<UIButton>("editPolygon", style, LocalisedString::fromHardcodedString("Edit..."));
-		field->setMinSize(Vector2f(30, 22));
+		auto listToString = [] (gsl::span<const Vector2f> points) -> String
+		{
+			String result = "[";
+			bool first = true;
+			for (auto& p: points) {
+				if (!first) {
+					result += ", ";
+				}
+				first = false;
+				result += toString(p);
+			}
+			result += "]";
+			return result;
+		};
 
-		field->setHandle(UIEventType::ButtonClicked, "editPolygon", [=, &context] (const UIEvent& event)
+		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
+
+		String value = listToString(data.getFieldData().asVector<Vector2f>());
+		auto field = std::make_shared<UITextInput>("textValue", context.getUIFactory().getStyle("inputThin"), value);
+		field->setReadOnly(true);
+		container->add(field, 1);
+		
+		auto button = std::make_shared<UIButton>("editPolygon", style, LocalisedString::fromHardcodedString("Edit..."));
+		button->setMinSize(Vector2f(30, 22));
+		container->add(button, 0);
+
+       	container->setHandle(UIEventType::ReloadData, pars.componentName + ":" + data.getName(), [=](const UIEvent& event) {
+			std::vector<Vector2f> newVal;
+			if (data.getFieldData().getType() != ConfigNodeType::Undefined) {
+				newVal = data.getFieldData().asVector<Vector2f>();
+			}
+			event.getCurWidget().getWidgetAs<UITextInput>("textValue")->setText(listToString(newVal));
+		});
+
+		container->setHandle(UIEventType::ButtonClicked, "editPolygon", [=, &context] (const UIEvent& event)
 		{
 			context.setTool("polygon", componentName, data.getName());
 		});
 
-		return field;
+		return container;
 	}
 };
 
