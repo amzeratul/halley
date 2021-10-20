@@ -8,6 +8,7 @@
 #include "src/assets/metadata_editor.h"
 #include "src/scene/entity_editor.h"
 #include "src/scene/entity_list.h"
+#include "src/scene/entity_validator_ui.h"
 #include "src/scene/scene_editor_canvas.h"
 using namespace Halley;
 
@@ -25,6 +26,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("metadataEditor", [=] (const ConfigNode& node) { return makeMetadataEditor(node); });
 	addFactory("sceneEditorCanvas", [=](const ConfigNode& node) { return makeSceneEditorCanvas(node); });
 	addFactory("entityList", [=](const ConfigNode& node) { return makeEntityList(node); });
+	addFactory("entityValidator", [=](const ConfigNode& node) { return makeEntityValidator(node); });
 	addFactory("entityEditor", [=](const ConfigNode& node) { return makeEntityEditor(node); });
 	addFactory("selectAsset", [=](const ConfigNode& node) { return makeSelectAsset(node); });
 }
@@ -80,6 +82,13 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeEntityList(const ConfigNode& entr
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	return std::make_shared<EntityList>(id, *this);
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeEntityValidator(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	return std::make_shared<EntityValidatorUI>(id, *this);
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeEntityEditor(const ConfigNode& entryNode)

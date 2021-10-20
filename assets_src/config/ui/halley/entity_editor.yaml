@@ -53,4 +53,5 @@ children:
       proportion: 1
     - widget: { id: pasteComponentsButton, class: button, style: buttonThin, text: "Paste Components", size: [ 30, 25 ], tooltip: "Paste a Component to this Entity." }
       proportion: 1
+- widget: { id: entityValidatorUI, class: entityValidator }
 ...

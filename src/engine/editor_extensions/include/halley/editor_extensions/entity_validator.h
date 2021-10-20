@@ -18,6 +18,9 @@ namespace Halley {
         struct Result {
             LocalisedString errorMessage;
             std::vector<String> suggestedActions;
+
+            bool operator==(const Result& other) const;
+            bool operator!=(const Result& other) const;
         };
 
     	virtual ~IEntityValidator() = default;

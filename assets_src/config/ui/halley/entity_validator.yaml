@@ -1,0 +1,10 @@
+widget: { class: image, image: "$ui_title_capsule", innerBorder: [ 4, 1, 4, 4 ], colour: "#FF0000" }
+sizer: { type: vertical }
+border: [0, 0, 0, 4]
+children:
+- widget: { id: "", class: label, text: "Validation Errors" }
+  fill: centre
+- widget: { id: validationFields, class: widget }
+  border: [1, 4, 1, 1]
+  sizer: { type: vertical }
+  children: []

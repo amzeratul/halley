@@ -3,6 +3,16 @@
 
 using namespace Halley;
 
+bool IEntityValidator::Result::operator==(const Result& other) const
+{
+	return errorMessage == other.errorMessage && suggestedActions == other.suggestedActions;
+}
+
+bool IEntityValidator::Result::operator!=(const Result& other) const
+{
+	return errorMessage != other.errorMessage || suggestedActions != other.suggestedActions;
+}
+
 std::vector<IEntityValidator::Result> EntityValidator::validateEntity(EntityRef& entity)
 {
 	std::vector<IEntityValidator::Result> result;
