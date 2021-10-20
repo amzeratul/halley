@@ -182,7 +182,7 @@ void PolygonGizmo::loadEntity(PolygonGizmoMode mode)
 {
 	vertices = readPoints();
 
-	setMode(vertices && vertices->empty() ? PolygonGizmoMode::Append : mode);
+	setMode(mode);
 	
 	loadHandlesFromVertices();
 }
