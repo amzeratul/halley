@@ -9,6 +9,7 @@ set(SOURCES
         "src/polygon_gizmo.cpp"
         "src/scene_editor.cpp"
         "src/scene_editor_gizmo.cpp"
+        "src/standard_entity_validators.cpp"
         "src/vertex_gizmo.cpp"
         )
 
@@ -23,6 +24,7 @@ set(HEADERS
         "include/halley/editor_extensions/scene_editor_input_state.h"
         "include/halley/editor_extensions/scene_editor.h"
         "include/halley/editor_extensions/scene_editor_gizmo.h"
+        "include/halley/editor_extensions/standard_entity_validators.h"
         "include/halley/editor_extensions/vertex_gizmo.h"
         )
 

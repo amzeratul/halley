@@ -1,6 +1,8 @@
 #define DONT_INCLUDE_HALLEY_HPP
 
 #include "scene_editor.h"
+
+#include "entity_validator.h"
 #include "halley/entity/world.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/core/game/halley_statics.h"
@@ -672,7 +674,7 @@ Transform2DComponent* SceneEditor::getTransform(const String& entityId)
 
 void SceneEditor::initializeEntityValidator(EntityValidator& validator)
 {
-	// TODO
+	validator.addDefaults();
 }
 
 Future<AssetPreviewData> SceneEditor::getSpritePreviewData(AssetType assetType, const String& id, Vector2i size)

@@ -169,7 +169,7 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 		auto& world = interface.getWorld();
 
 		// Entity validator
-		entityValidator = std::make_shared<EntityValidator>();
+		entityValidator = std::make_shared<EntityValidator>(world);
 		gameBridge->initializeEntityValidator(*entityValidator);
 
 		// Load prefab

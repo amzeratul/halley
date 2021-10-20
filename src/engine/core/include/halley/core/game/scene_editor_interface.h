@@ -56,11 +56,52 @@ namespace Halley {
         struct Action {
 	        LocalisedString label;
             ConfigNode actionData;
+
+			Action() = default;
+
+			Action(LocalisedString label, ConfigNode data)
+				: label(std::move(label))
+				, actionData(std::move(data))
+			{}
+
+        	Action(String label, ConfigNode data)
+        		: label(LocalisedString::fromUserString(label))
+				, actionData(std::move(data))
+			{}
+
+            bool operator==(const Action& other) const;
+            bool operator!=(const Action& other) const;
         };
 
         struct Result {
             LocalisedString errorMessage;
-            std::vector<String> suggestedActions;
+            std::vector<Action> suggestedActions;
+
+			Result() = default;
+
+			Result(String errorMessage, Action suggestedAction)
+				: errorMessage(LocalisedString::fromUserString(errorMessage))
+			{
+				suggestedActions.push_back(std::move(suggestedAction));
+			}
+
+			Result(String errorMessage, std::vector<Action> suggestedActions)
+				: errorMessage(LocalisedString::fromUserString(errorMessage))
+				, suggestedActions(std::move(suggestedActions))
+			{
+			}
+
+			Result(LocalisedString errorMessage, Action suggestedAction)
+				: errorMessage(std::move(errorMessage))
+			{
+				suggestedActions.push_back(std::move(suggestedAction));
+			}
+
+			Result(LocalisedString errorMessage, std::vector<Action> suggestedActions)
+				: errorMessage(std::move(errorMessage))
+				, suggestedActions(std::move(suggestedActions))
+			{
+			}
 
             bool operator==(const Result& other) const;
             bool operator!=(const Result& other) const;
@@ -68,7 +109,7 @@ namespace Halley {
 
     	virtual ~IEntityValidator() = default;
 
-        virtual std::vector<Result> validateEntity(EntityValidator& validator, EntityData& entity) = 0;
+        virtual std::vector<Result> validateEntity(EntityValidator& validator, EntityData& entityData) = 0;
     };
 
     class IEntityValidatorActionHandler {
@@ -76,7 +117,7 @@ namespace Halley {
         virtual ~IEntityValidatorActionHandler() = default;
 
         virtual bool canHandle(const ConfigNode& actionData) = 0;
-        virtual void applyAction(EntityValidator& validator, EntityData& data, const ConfigNode& actionData) = 0;
+        virtual void applyAction(EntityValidator& validator, EntityData& entityData, const ConfigNode& actionData) = 0;
     };
 
 	enum class EditorSettingType {
