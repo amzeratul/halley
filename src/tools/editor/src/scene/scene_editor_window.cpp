@@ -168,6 +168,10 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 		auto& interface = gameBridge->getInterface();
 		auto& world = interface.getWorld();
 
+		// Entity validator
+		entityValidator = std::make_shared<EntityValidator>();
+		gameBridge->initializeEntityValidator(*entityValidator);
+
 		// Load prefab
 		prefab = origPrefab.clone();
 		origPrefabAssetType = assetType;
@@ -388,6 +392,11 @@ bool SceneEditorWindow::isPrefabInstance(const String& entityId) const
 {
 	const auto& ref = sceneData->getEntityNodeData(entityId);
 	return !ref.getData().getPrefab().isEmpty();
+}
+
+EntityValidator& SceneEditorWindow::getEntityValidator()
+{
+	return *entityValidator;
 }
 
 void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)

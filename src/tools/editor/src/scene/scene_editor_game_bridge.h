@@ -6,6 +6,7 @@
 class Transform2DComponent;
 
 namespace Halley {
+	class EntityValidator;
 	class SceneEditorWindow;
 	class ProjectWindow;
 	class Project;
@@ -54,6 +55,8 @@ namespace Halley {
 		Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size);
 		
 		Transform2DComponent* getTransform(const String& entityId);
+
+		void initializeEntityValidator(EntityValidator& validator);
 
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;

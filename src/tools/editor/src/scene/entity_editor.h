@@ -1,5 +1,6 @@
 #pragma once
 #include "entity_icons.h"
+#include "entity_validator_ui.h"
 #include "halley/core/game/scene_editor_interface.h"
 #include "halley/tools/ecs/fields_schema.h"
 #include "halley/ui/ui_widget.h"
@@ -80,6 +81,8 @@ namespace Halley {
 
 		std::map<String, std::shared_ptr<UIWidget>> componentWidgets;
 		std::vector<String> highlightedComponents;
+
+		std::shared_ptr<EntityValidatorUI> entityValidatorUI;
 
 		void makeUI();
 		void loadComponentData(const String& componentType, ConfigNode& data);

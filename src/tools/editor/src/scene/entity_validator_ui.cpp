@@ -17,19 +17,20 @@ void EntityValidatorUI::setValidator(EntityValidator& v)
 	refresh();
 }
 
-void EntityValidatorUI::setEntity(EntityRef& e)
+void EntityValidatorUI::setEntity(EntityData& e)
 {
-	curEntity = e;
+	curEntity = &e;
 	refresh();
+
 }
 
 void EntityValidatorUI::refresh()
 {
-	if (!curEntity.isValid() || !validator) {
+	if (!curEntity || !validator) {
 		return;
 	}
 
-	const auto result = validator->validateEntity(curEntity);
+	const auto result = validator->validateEntity(*curEntity);
 	if (result != curResultSet) {
 		curResultSet = std::move(result);
 		setActive(!curResultSet.empty());

@@ -2,6 +2,7 @@
 
 #include "choose_asset_window.h"
 #include "entity_editor_factories.h"
+#include "entity_validator_ui.h"
 #include "halley/tools/ecs/ecs_data.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/widgets/ui_dropdown.h"
@@ -56,6 +57,8 @@ void EntityEditor::setSceneEditorWindow(SceneEditorWindow& editor, const HalleyA
 	this->api = &api;
 	prefabName->setSceneEditorWindow(editor);
 
+	entityValidatorUI->setValidator(editor.getEntityValidator());
+
 	auto icons = entityIcons->getEntries();
 	std::vector<UIDropdown::Entry> entries;
 	entries.reserve(icons.size());
@@ -83,6 +86,8 @@ void EntityEditor::makeUI()
 		prefabName->setSceneEditorWindow(*sceneEditor);
 	}
 	entityIcon = getWidgetAs<UIDropdown>("entityIcon");
+
+	entityValidatorUI = getWidgetAs<EntityValidatorUI>("entityValidatorUI");
 
 	setHandle(UIEventType::ButtonClicked, "addComponentButton", [=](const UIEvent& event)
 	{
@@ -177,6 +182,8 @@ void EntityEditor::reloadEntity()
 			entityIcon->setSelectedOption(getEntityData().getIcon());
 		}
 		setCanSendEvents(true);
+
+		entityValidatorUI->setEntity(*currentEntityData);
 	}
 }
 

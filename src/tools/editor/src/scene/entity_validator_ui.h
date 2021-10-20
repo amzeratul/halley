@@ -9,14 +9,14 @@ namespace Halley {
 		EntityValidatorUI(String id, UIFactory& factory);
 
 		void setValidator(EntityValidator& validator);
-		void setEntity(EntityRef& entity);
+		void setEntity(EntityData& entity);
 		void refresh();
 
 	private:
 		UIFactory& factory;
 
 		EntityValidator* validator = nullptr;
-		EntityRef curEntity;
+		EntityData* curEntity = nullptr;
 		std::vector<IEntityValidator::Result> curResultSet;
 	};
 }

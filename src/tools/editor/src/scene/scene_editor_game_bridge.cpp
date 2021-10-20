@@ -365,6 +365,12 @@ Transform2DComponent* SceneEditorGameBridge::getTransform(const String& entityId
 	return nullptr;
 }
 
+void SceneEditorGameBridge::initializeEntityValidator(EntityValidator& validator)
+{
+	Expects(interfaceReady);
+	interface->initializeEntityValidator(validator);
+}
+
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {

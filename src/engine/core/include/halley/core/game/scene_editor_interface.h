@@ -49,7 +49,37 @@ namespace Halley {
 	struct SceneEditorOutputState;
 	struct SnapRules;
 	
-    enum class EditorSettingType {
+    class EntityValidator;
+
+    class IEntityValidator {
+    public:
+        struct Action {
+	        LocalisedString label;
+            ConfigNode actionData;
+        };
+
+        struct Result {
+            LocalisedString errorMessage;
+            std::vector<String> suggestedActions;
+
+            bool operator==(const Result& other) const;
+            bool operator!=(const Result& other) const;
+        };
+
+    	virtual ~IEntityValidator() = default;
+
+        virtual std::vector<Result> validateEntity(EntityValidator& validator, EntityData& entity) = 0;
+    };
+
+    class IEntityValidatorActionHandler {
+    public:
+        virtual ~IEntityValidatorActionHandler() = default;
+
+        virtual bool canHandle(const ConfigNode& actionData) = 0;
+        virtual void applyAction(EntityValidator& validator, EntityData& data, const ConfigNode& actionData) = 0;
+    };
+
+	enum class EditorSettingType {
         Editor,
         Project,
         Temp
@@ -177,6 +207,8 @@ namespace Halley {
         virtual Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size) = 0;
 
     	virtual Transform2DComponent* getTransform(const String& entityId) = 0;
+
+    	virtual void initializeEntityValidator(EntityValidator& validator) = 0;
     };
 
 	class EntityTree {

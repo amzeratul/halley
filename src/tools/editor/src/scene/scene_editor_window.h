@@ -110,6 +110,8 @@ namespace Halley {
 		bool canAddSibling(const String& entityId) const;
 		bool isPrefabInstance(const String& entityId) const;
 
+		EntityValidator& getEntityValidator();
+
 	protected:
 		void update(Time t, bool moved) override;
 
@@ -137,6 +139,8 @@ namespace Halley {
 		AssetType origPrefabAssetType;
 		std::shared_ptr<EntityFactory> entityFactory;
 		std::optional<EntityScene> currentEntityScene;
+
+		std::shared_ptr<EntityValidator> entityValidator;
 
 		String currentEntityId;
 

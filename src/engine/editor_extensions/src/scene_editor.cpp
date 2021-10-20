@@ -670,6 +670,11 @@ Transform2DComponent* SceneEditor::getTransform(const String& entityId)
 	return nullptr;
 }
 
+void SceneEditor::initializeEntityValidator(EntityValidator& validator)
+{
+	// TODO
+}
+
 Future<AssetPreviewData> SceneEditor::getSpritePreviewData(AssetType assetType, const String& id, Vector2i size)
 {
 	return Future<AssetPreviewData>::makeImmediate({});

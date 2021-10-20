@@ -70,6 +70,8 @@ namespace Halley {
 
 		Transform2DComponent* getTransform(const String& entityId) override;
 
+		void initializeEntityValidator(EntityValidator& validator) override;
+
     protected:
     	Camera camera;
 		IEditorInterface* editorInterface;
