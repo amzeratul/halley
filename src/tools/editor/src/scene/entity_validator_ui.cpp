@@ -38,11 +38,18 @@ void EntityValidatorUI::refresh()
 		auto parent = getWidget("validationFields");
 		parent->clear();
 
-		for (const auto& result: curResultSet) {
-			// TODO: show error message
-			// result.errorMessage;
-			for (const auto& action: result.suggestedActions) {
-				// TODO: add action button
+		for (const auto& curResult: curResultSet) {
+			auto label = std::make_shared<UILabel>("", factory.getStyle("labelLight"), curResult.errorMessage);
+			label->setMaxWidth(300.0f);
+			parent->add(label);
+
+			for (const auto& action: curResult.suggestedActions) {
+				auto button = std::make_shared<UIButton>("action", factory.getStyle("buttonThin"), action.label);
+				button->setHandle(UIEventType::ButtonClicked, [this, actionData = ConfigNode(action.actionData)] (const UIEvent& event)
+				{
+					validator->applyAction(*curEntity, actionData);
+				});
+				parent->add(button);
 			}
 		}
 	}
