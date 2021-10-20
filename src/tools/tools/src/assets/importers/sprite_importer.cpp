@@ -316,7 +316,8 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, st
 		}
 
 		Logger::logInfo("Trying " + toString(size.x) + "x" + toString(size.y) + " px...");
-		auto res = entries.size() < 50 ? BinPack::pack(entries, size) : BinPack::fastPack(entries, size);
+		//auto res = entries.size() < 50 ? BinPack::pack(entries, size) : BinPack::fastPack(entries, size);
+		auto res = BinPack::fastPack(entries, size);
 		if (res) {
 			// Found a pack
 			if (images.size() > 1) {
