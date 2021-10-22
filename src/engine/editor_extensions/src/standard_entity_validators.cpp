@@ -68,9 +68,9 @@ ConfigNode ModifyFieldsValidatorActionHandler::makeAction(String componentName, 
 	ConfigNode::MapType result;
 
 	result["action"] = "modifyField";
-	result["component"] = componentName;
-	result["field"] = fieldName;
-	result["data"] = fieldData;
+	result["component"] = std::move(componentName);
+	result["field"] = std::move(fieldName);
+	result["data"] = std::move(fieldData);
 
 	return result;
 }
