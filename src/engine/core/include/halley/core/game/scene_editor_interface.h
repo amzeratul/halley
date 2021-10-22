@@ -13,6 +13,7 @@
 class Transform2DComponent;
 
 namespace Halley {
+	class IEntityEditor;
 	class Image;
 	class IEntityEditorFactory;
 	class EntityFactory;
@@ -117,7 +118,7 @@ namespace Halley {
         virtual ~IEntityValidatorActionHandler() = default;
 
         virtual bool canHandle(const ConfigNode& actionData) = 0;
-        virtual void applyAction(EntityValidator& validator, EntityData& entityData, const ConfigNode& actionData) = 0;
+        virtual void applyAction(EntityValidator& validator, IEntityEditor& entityEditor, EntityData& entityData, const ConfigNode& actionData) = 0;
     };
 
 	enum class EditorSettingType {

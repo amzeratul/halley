@@ -3,6 +3,7 @@
 #include "halley/entity/world.h"
 
 #define DONT_INCLUDE_HALLEY_HPP
+#include "component_editor_context.h"
 #include "halley/entity/components/transform_2d_component.h"
 
 using namespace Halley;
@@ -28,4 +29,15 @@ std::vector<IEntityValidator::Result> TransformEntityValidator::validateEntity(E
 	}
 
 	return result;
+}
+
+bool AddComponentValidatorActionHandler::canHandle(const ConfigNode& actionData)
+{
+	return actionData["action"].asString() == "addComponent" && actionData.hasKey("component");
+}
+
+void AddComponentValidatorActionHandler::applyAction(EntityValidator& validator, IEntityEditor& entityEditor, EntityData& entityData, const ConfigNode& actionData)
+{
+	const auto compType = actionData["component"].asString();
+	entityEditor.addComponent(compType, ConfigNode::MapType());
 }

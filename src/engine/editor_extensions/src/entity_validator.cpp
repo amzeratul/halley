@@ -42,11 +42,11 @@ std::vector<IEntityValidator::Result> EntityValidator::validateEntity(EntityData
 	return result;
 }
 
-void EntityValidator::applyAction(EntityData& data, const ConfigNode& actionData)
+void EntityValidator::applyAction(IEntityEditor& entityEditor, EntityData& data, const ConfigNode& actionData)
 {
 	for (const auto& handler: handlers) {
 		if (handler->canHandle(actionData)) {
-			handler->applyAction(*this, data, actionData);
+			handler->applyAction(*this, entityEditor, data, actionData);
 			return;
 		}
 	}
@@ -66,6 +66,8 @@ void EntityValidator::addActionHandler(std::unique_ptr<IEntityValidatorActionHan
 void EntityValidator::addDefaults()
 {
 	addValidator(std::make_unique<TransformEntityValidator>());
+
+	addActionHandler(std::make_unique<AddComponentValidatorActionHandler>());
 }
 
 World& EntityValidator::getWorld()

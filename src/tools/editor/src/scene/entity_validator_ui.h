@@ -9,7 +9,7 @@ namespace Halley {
 		EntityValidatorUI(String id, UIFactory& factory);
 
 		void setValidator(EntityValidator& validator);
-		void setEntity(EntityData& entity);
+		void setEntity(EntityData& entity, IEntityEditor& entityEditor);
 		void refresh();
 
 	private:
@@ -17,6 +17,7 @@ namespace Halley {
 
 		EntityValidator* validator = nullptr;
 		EntityData* curEntity = nullptr;
+		IEntityEditor* entityEditor = nullptr;
 		std::vector<IEntityValidator::Result> curResultSet;
 	};
 }

@@ -183,7 +183,7 @@ void EntityEditor::reloadEntity()
 		}
 		setCanSendEvents(true);
 
-		entityValidatorUI->setEntity(*currentEntityData);
+		entityValidatorUI->setEntity(*currentEntityData, *this);
 	}
 }
 
@@ -546,6 +546,7 @@ void EntityEditor::onEntityUpdated()
 {
 	sceneEditor->onEntityModified(currentId, prevEntityData, *currentEntityData);
 	prevEntityData = EntityData(*currentEntityData);
+	entityValidatorUI->refresh();
 }
 
 void EntityEditor::setTool(const String& tool, const String& componentName, const String& fieldName)

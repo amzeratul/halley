@@ -25,9 +25,13 @@ namespace Halley {
 		virtual ~IEntityEditor() = default;
 
 		virtual void onEntityUpdated() = 0;
+		virtual void reloadEntity() = 0;
 		virtual void setTool(const String& tool, const String& componentName, const String& fieldName) = 0;
 		virtual void setDefaultName(const String& name, const String& prevName) = 0;
 		virtual ISceneEditorWindow& getSceneEditorWindow() const = 0;
+		virtual void addComponent(const String& name, ConfigNode data) = 0;
+		virtual void deleteComponent(const String& name) = 0;
+		virtual void onFieldChangedByGizmo(const String& componentName, const String& fieldName) = 0;
 	};
 
 	class IEntityEditorFactory {

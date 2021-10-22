@@ -17,11 +17,11 @@ void EntityValidatorUI::setValidator(EntityValidator& v)
 	refresh();
 }
 
-void EntityValidatorUI::setEntity(EntityData& e)
+void EntityValidatorUI::setEntity(EntityData& e, IEntityEditor& editor)
 {
 	curEntity = &e;
+	entityEditor = &editor;
 	refresh();
-
 }
 
 void EntityValidatorUI::refresh()
@@ -30,7 +30,7 @@ void EntityValidatorUI::refresh()
 		return;
 	}
 
-	const auto result = validator->validateEntity(*curEntity);
+	auto result = validator->validateEntity(*curEntity);
 	if (result != curResultSet) {
 		curResultSet = std::move(result);
 		setActive(!curResultSet.empty());
@@ -47,7 +47,8 @@ void EntityValidatorUI::refresh()
 				auto button = std::make_shared<UIButton>("action", factory.getStyle("buttonThin"), action.label);
 				button->setHandle(UIEventType::ButtonClicked, [this, actionData = ConfigNode(action.actionData)] (const UIEvent& event)
 				{
-					validator->applyAction(*curEntity, actionData);
+					validator->applyAction(*entityEditor, *curEntity, actionData);
+					entityEditor->reloadEntity();
 				});
 				parent->add(button);
 			}
