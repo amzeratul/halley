@@ -68,6 +68,7 @@ void EntityValidator::addDefaults()
 	addValidator(std::make_unique<TransformEntityValidator>());
 
 	addActionHandler(std::make_unique<AddComponentValidatorActionHandler>());
+	addActionHandler(std::make_unique<ModifyFieldsValidatorActionHandler>());
 }
 
 World& EntityValidator::getWorld()

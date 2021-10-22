@@ -8,4 +8,6 @@ namespace Halley {}
 #include "halley/editor_extensions/polygon_gizmo.h"
 #include "halley/editor_extensions/scene_editor.h"
 #include "halley/editor_extensions/scene_editor_input_state.h"
+#include "halley/editor_extensions/standard_entity_validators.h"
 #include "halley/editor_extensions/vertex_gizmo.h"
+#include "halley/editor_extensions/entity_validator.h"

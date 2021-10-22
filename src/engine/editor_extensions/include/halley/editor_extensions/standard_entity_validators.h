@@ -11,5 +11,18 @@ namespace Halley {
     public:
 	    bool canHandle(const ConfigNode& actionData) override;
 	    void applyAction(EntityValidator& validator, IEntityEditor& entityEditor, EntityData& entityData, const ConfigNode& actionData) override;
+
+        static ConfigNode makeAction(String componentName);
+    };
+
+    class ModifyFieldsValidatorActionHandler : public IEntityValidatorActionHandler {
+    public:
+	    bool canHandle(const ConfigNode& actionData) override;
+	    void applyAction(EntityValidator& validator, IEntityEditor& entityEditor, EntityData& entityData, const ConfigNode& actionData) override;
+
+        static ConfigNode makeAction(String componentName, String fieldName, ConfigNode fieldData);
+
+    private:
+        void applyEntry(IEntityEditor& entityEditor, EntityData& entityData, const ConfigNode& entryData);
     };
 }
