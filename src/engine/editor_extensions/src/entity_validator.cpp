@@ -1,8 +1,19 @@
 #include "entity_validator.h"
+#include "standard_entity_validators.h"
 #include "halley/entity/entity.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;
+
+bool IEntityValidator::Action::operator==(const Action& other) const
+{
+	return label == other.label && actionData == other.actionData;
+}
+
+bool IEntityValidator::Action::operator!=(const Action& other) const
+{
+	return label != other.label || actionData != other.actionData;
+}
 
 bool IEntityValidator::Result::operator==(const Result& other) const
 {
@@ -12,6 +23,11 @@ bool IEntityValidator::Result::operator==(const Result& other) const
 bool IEntityValidator::Result::operator!=(const Result& other) const
 {
 	return errorMessage != other.errorMessage || suggestedActions != other.suggestedActions;
+}
+
+EntityValidator::EntityValidator(World& world)
+	: world(world)
+{
 }
 
 std::vector<IEntityValidator::Result> EntityValidator::validateEntity(EntityData& entity)
@@ -45,4 +61,14 @@ void EntityValidator::addValidator(std::unique_ptr<IEntityValidator> validator)
 void EntityValidator::addActionHandler(std::unique_ptr<IEntityValidatorActionHandler> handler)
 {
 	handlers.push_back(std::move(handler));
+}
+
+void EntityValidator::addDefaults()
+{
+	addValidator(std::make_unique<TransformEntityValidator>());
+}
+
+World& EntityValidator::getWorld()
+{
+	return world;
 }

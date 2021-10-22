@@ -2,8 +2,18 @@ widget: { class: image, image: "$ui_title_capsule", innerBorder: [ 4, 1, 4, 4 ],
 sizer: { type: vertical }
 border: [0, 0, 0, 4]
 children:
-- widget: { id: "", class: label, text: "Validation Errors" }
-  fill: centre
+- sizer: { type: horizontal }
+  children:
+  - stretchSpacer: {}
+    proportion: 1
+  - widget: { class: image, image: ui/warning.png }
+    fill: centre
+  - widget: { class: label, text: "Validation Errors" }
+    fill: centre
+  - widget: { class: image, image: ui/warning.png }
+    fill: centre
+  - stretchSpacer: {}
+    proportion: 1
 - widget: { id: validationFields, class: widget }
   border: [1, 4, 1, 1]
   sizer: { type: vertical }

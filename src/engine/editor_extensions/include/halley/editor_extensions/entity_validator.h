@@ -9,13 +9,20 @@ namespace Halley {
 
     class EntityValidator {
     public:
+        explicit EntityValidator(World& world);
+
         std::vector<IEntityValidator::Result> validateEntity(EntityData& entity);
         void applyAction(EntityData& data, const ConfigNode& actionData);
 
         void addValidator(std::unique_ptr<IEntityValidator> validator);
         void addActionHandler(std::unique_ptr<IEntityValidatorActionHandler> handler);
+        void addDefaults();
+
+        World& getWorld();
 
     private:
+        World& world;
+
         std::vector<std::unique_ptr<IEntityValidator>> validators;
         std::vector<std::unique_ptr<IEntityValidatorActionHandler>> handlers;
     };
