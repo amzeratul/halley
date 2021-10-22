@@ -20,7 +20,7 @@ public:
 
 	ConfigNode getDefaultNode() const override
 	{
-		return ConfigNode("");
+		return ConfigNode(String());
 	}
 
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
@@ -707,7 +707,7 @@ public:
 	}
 
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
-	{
+	{		
 		const auto fieldType = pars.typeParameters.at(0);
 		const auto data = pars.data;
 
@@ -766,6 +766,57 @@ public:
 			}
 			buildList();
 		});
+		
+		return containerPtr;
+	}
+};
+
+class ComponentEditorStdPairFieldFactory : public IComponentEditorFieldFactory
+{
+public:
+	String getFieldType() override
+	{
+		return "std::pair<>";
+	}
+
+	bool isNested() const override
+	{
+		return false;
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(ConfigNode::SequenceType());
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		const auto data = pars.data;
+
+		auto& fieldData = data.getFieldData();
+		if (fieldData.getType() != ConfigNodeType::Sequence) {
+			if (fieldData.getType() == ConfigNodeType::Map) {
+				fieldData.ensureType(ConfigNodeType::Sequence);
+			}
+			else if (fieldData.getType() == ConfigNodeType::Undefined) {
+				fieldData = ConfigNode::SequenceType();
+			}
+			else {
+				fieldData = ConfigNode::SequenceType({ std::move(fieldData) });
+			}
+		}
+
+		ConfigNode::SequenceType fieldDataSequence = fieldData.asSequence();
+		while (fieldDataSequence.size() < 2) {
+			auto defaultNode = context.getDefaultNode(pars.typeParameters.at(fieldDataSequence.size()));
+			fieldDataSequence.emplace_back(std::move(defaultNode));
+		}
+		fieldData = std::move(fieldDataSequence);
+		
+		const auto containerPtr = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Vertical));
+
+		containerPtr->add(context.makeField(String(pars.typeParameters.at(0)).trimBoth(), pars.withSubIndex(0), ComponentEditorLabelCreation::OnlyIfNested), 1);
+		containerPtr->add(context.makeField(String(pars.typeParameters.at(1)).trimBoth(), pars.withSubIndex(1), ComponentEditorLabelCreation::OnlyIfNested), 1);
 		
 		return containerPtr;
 	}
@@ -1131,6 +1182,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorPolygonFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorVertexListFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorStdVectorFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorStdPairFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorStdSetFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorStdOptionalFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorOptionalLiteFieldFactory>());

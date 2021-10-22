@@ -682,9 +682,15 @@ std::pair<String, std::vector<String>> EntityEditorFactory::parseType(const Stri
 
 	const auto openPos = type.find('<');
 	const auto closePos = type.find_last_of('>');
-	if (openPos != String::npos && closePos != String::npos) {
+	if (openPos != String::npos && closePos != String::npos) {		
 		auto base = type.left(openPos) + "<>";
-		auto remain = type.substr(openPos + 1, closePos - openPos - 1).split(',');
+
+		const auto remainSubstr = type.substr(openPos + 1, closePos - openPos - 1);
+		if (remainSubstr.contains('<')) {
+			return { base, {remainSubstr} };
+		}
+		
+		auto remain = remainSubstr.split(',');
 		return {base, remain};
 	}
 	return {type, {}};

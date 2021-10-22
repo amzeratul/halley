@@ -201,6 +201,45 @@ namespace Halley {
         }
 	};
 
+	template <typename A, typename B>
+	class ConfigNodeSerializer<std::pair<A, B>>
+	{
+	public:
+		ConfigNode serialize(const std::pair<A, B>& values, const ConfigNodeSerializationContext& context)
+		{
+			auto serializerA = ConfigNodeSerializer<A>();
+			auto serializerB = ConfigNodeSerializer<B>();
+			ConfigNode::SequenceType result = ConfigNode::SequenceType();
+
+			result.emplace_back(serializerA.serialize(values.first, context));
+			result.emplace_back(serializerB.serialize(values.second, context));
+			
+			return result;
+		}
+
+		std::pair<A, B> deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+		{
+			auto serializerA = ConfigNodeSerializer<A>();
+			auto serializerB = ConfigNodeSerializer<B>();
+
+			std::pair<A, B> result = std::pair<A, B>();
+
+			if (node.getType() == ConfigNodeType::Sequence) {
+				auto& seqNode = node.asSequence();
+
+				if (seqNode.size() > 0) {
+					result.first = serializerA.deserialize(context, seqNode.at(0));
+				}
+
+				if (seqNode.size() > 1) {
+					result.second = serializerB.deserialize(context, seqNode.at(1));
+				}
+			}
+			
+			return result;
+		}
+	};
+
 	template <typename T>
 	class ConfigNodeSerializer<std::set<T>> {
 	public:
