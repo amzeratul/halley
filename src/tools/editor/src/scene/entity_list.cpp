@@ -55,7 +55,7 @@ void EntityList::addEntities(const EntityTree& entity, const String& parentId)
 {
 	// Root is empty, don't add it
 	if (!entity.entityId.isEmpty()) {
-		addEntity(entity.name, entity.entityId, parentId, -1, entity.prefab, entity.icon);
+		addEntity(*entity.data, parentId, -1);
 	}
 
 	for (auto& e: entity.children) {
@@ -63,30 +63,25 @@ void EntityList::addEntities(const EntityTree& entity, const String& parentId)
 	}
 }
 
-void EntityList::addEntity(const String& name, const String& id, const String& parentId, int childIndex, const String& prefab, const String& icon)
+void EntityList::addEntity(const EntityData& data, const String& parentId, int childIndex)
 {
-	const bool isPrefab = !prefab.isEmpty();
-	const auto [displayName, displayIcon] = getEntityNameAndIcon(name, icon, prefab);
+	const bool isPrefab = !data.getPrefab().isEmpty();
+	const auto [displayName, displayIcon] = getEntityNameAndIcon(data);
 	const size_t idx = childIndex >= 0 ? static_cast<size_t>(childIndex) : std::numeric_limits<size_t>::max();
-	list->addTreeItem(id, parentId, idx, LocalisedString::fromUserString(displayName), isPrefab ? "labelSpecial" : "label", displayIcon, isPrefab);
+	list->addTreeItem(data.getInstanceUUID().toString(), parentId, idx, LocalisedString::fromUserString(displayName), isPrefab ? "labelSpecial" : "label", displayIcon, isPrefab);
 }
 
 std::pair<String, Sprite> EntityList::getEntityNameAndIcon(const EntityData& data) const
 {
-	return getEntityNameAndIcon(data.getName(), data.getIcon(), data.getPrefab());
-}
-
-std::pair<String, Sprite> EntityList::getEntityNameAndIcon(const String& name, const String& icon, const String& prefabName) const
-{
-	if (!prefabName.isEmpty()) {
-		const auto prefab = sceneEditorWindow->getGamePrefab(prefabName);
+	if (!data.getPrefab().isEmpty()) {
+		const auto prefab = sceneEditorWindow->getGamePrefab(data.getPrefab());
 		if (prefab) {
 			return { prefab->getPrefabName(), icons->getIcon(prefab->getPrefabIcon()) };
 		} else {
-			return { "Missing prefab! [" + prefabName + "]", icons->getIcon("") };
+			return { "Missing prefab! [" + data.getPrefab() + "]", icons->getIcon("") };
 		}
 	} else {
-		return { name.isEmpty() ? String("Unnamed Entity") : name, icons->getIcon(icon) };
+		return { data.getName().isEmpty() ? String("Unnamed Entity") : data.getName(), icons->getIcon(data.getIcon()) };
 	}
 }
 
@@ -127,7 +122,7 @@ void EntityList::onEntityAdded(const String& id, const String& parentId, int chi
 void EntityList::addEntityTree(const String& parentId, int childIndex, const EntityData& data)
 {
 	const auto& curId = data.getInstanceUUID().toString();
-	addEntity(data.getName(), curId, parentId, childIndex, data.getPrefab(), data.getIcon());
+	addEntity(data, parentId, childIndex);
 	for (const auto& child: data.getChildren()) {
 		addEntityTree(curId, -1, child);
 	}

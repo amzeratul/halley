@@ -261,9 +261,7 @@ namespace Halley {
 	class EntityTree {
 	public:
 		String entityId;
-		String name;
-		String prefab;
-		String icon;
+		const EntityData* data = nullptr;
 		std::vector<EntityTree> children;
 
 		bool contains(const String& id) const
