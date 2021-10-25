@@ -80,6 +80,10 @@ namespace Halley {
 
 			Result() = default;
 
+			Result(String errorMessage)
+				: errorMessage(LocalisedString::fromUserString(errorMessage))
+			{}
+
 			Result(String errorMessage, Action suggestedAction)
 				: errorMessage(LocalisedString::fromUserString(errorMessage))
 			{
