@@ -47,6 +47,25 @@ ConfigNode AddComponentValidatorActionHandler::makeAction(String componentName)
 	return action;
 }
 
+bool RemoveComponentValidatorActionHandler::canHandle(const ConfigNode& actionData)
+{
+	return actionData["action"].asString() == "removeComponent" && actionData.hasKey("component");
+}
+
+void RemoveComponentValidatorActionHandler::applyAction(EntityValidator& validator, IEntityEditor& entityEditor, EntityData& entityData, const ConfigNode& actionData)
+{
+	const auto compType = actionData["component"].asString();
+	entityEditor.deleteComponent(compType);
+}
+
+ConfigNode RemoveComponentValidatorActionHandler::makeAction(String componentName)
+{
+	ConfigNode::MapType action;
+	action["action"] = "removeComponent";
+	action["component"] = std::move(componentName);
+	return action;
+}
+
 bool ModifyFieldsValidatorActionHandler::canHandle(const ConfigNode& actionData)
 {
 	return actionData["action"].asString() == "modifyField" || actionData["action"].asString() == "modifyFields";
