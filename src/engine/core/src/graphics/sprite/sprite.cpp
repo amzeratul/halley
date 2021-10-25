@@ -296,7 +296,10 @@ Sprite& Sprite::setMaterial(std::shared_ptr<Material> m, bool shared)
 	sharedMaterial = shared;
 
 	if (!hadMaterial && !material->getTextures().empty()) {
-		setImageData(*material->getTextures()[0]);
+		const auto& tex0 = material->getTextures()[0];
+		if (tex0) {
+			setImageData(*tex0);
+		}
 	}
 
 	return *this;
@@ -685,18 +688,24 @@ void ConfigNodeSerializer<Sprite>::deserialize(const ConfigNodeSerializationCont
 	};
 
 	if (material) {
-		// Load each texture
-		size_t i = 0;
-		for (const auto& tex: material->getTextures()) {
-			const bool loaded = loadTexture("tex_" + tex.name, i);
-			if (!loaded) {
-				if (i == 0) {
-					loadTexture("image", i);
-				} else if (i == 1) {
-					loadTexture("image1", i);
+		if (material->getTextures().empty()) {
+			sprite.setMaterial(std::make_shared<Material>(material));
+		} else {
+			// Load each texture
+			size_t i = 0;
+			for (const auto& tex: material->getTextures()) {
+				const bool loaded = loadTexture("tex_" + tex.name, i);
+				if (!loaded) {
+					if (i == 0) {
+						if (!loadTexture("image", i)) {
+							sprite.setMaterial(std::make_shared<Material>(material));
+						}
+					} else if (i == 1) {
+						loadTexture("image1", i);
+					}
 				}
+				i++;
 			}
-			i++;
 		}
 
 		// Load material parameters
