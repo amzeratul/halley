@@ -93,11 +93,13 @@ EntityList::EntityInfo EntityList::getEntityNameAndIcon(const EntityData& data) 
 		result.icon = icons->getIcon(data.getIcon());
 	}
 
+	/*
 	const auto validateResult = sceneEditorWindow->getEntityValidator().validateEntity(data);
 	if (!validateResult.empty()) {
 		result.icon = icons->getInvalidEntityIcon();
 		result.valid = false;
 	}
+	*/
 
 	return result;
 }
