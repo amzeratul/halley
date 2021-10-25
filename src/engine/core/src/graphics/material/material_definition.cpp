@@ -171,6 +171,7 @@ void MaterialDefinition::load(const ConfigNode& root)
 	// Load name
 	name = root["name"].asString("Unknown");
 	defaultMask = root["defaultMask"].asInt(1);
+	tags = root["tags"].asVector<String>({});
 
 	// Load attributes & uniforms
 	if (root.hasKey("attributes")) {
@@ -248,6 +249,11 @@ std::unique_ptr<MaterialDefinition> MaterialDefinition::loadResource(ResourceLoa
 	return std::make_unique<MaterialDefinition>(loader);
 }
 
+bool MaterialDefinition::hasTag(const String& tag) const
+{
+	return std_ex::contains(tags, tag);
+}
+
 void MaterialDefinition::serialize(Serializer& s) const
 {
 	s << name;
@@ -258,6 +264,7 @@ void MaterialDefinition::serialize(Serializer& s) const
 	s << vertexSize;
 	s << vertexPosOffset;
 	s << defaultMask;
+	s << tags;
 }
 
 void MaterialDefinition::deserialize(Deserializer& s)
@@ -270,6 +277,7 @@ void MaterialDefinition::deserialize(Deserializer& s)
 	s >> vertexSize;
 	s >> vertexPosOffset;
 	s >> defaultMask;
+	s >> tags;
 }
 
 bool MaterialDefinition::isColumnMajor() const

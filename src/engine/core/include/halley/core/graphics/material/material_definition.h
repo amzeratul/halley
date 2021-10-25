@@ -209,7 +209,10 @@ namespace Halley
 
 		static std::unique_ptr<MaterialDefinition> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::MaterialDefinition; }
-
+		
+		const std::vector<String>& getTags() const { return tags; }
+		bool hasTag(const String& tag) const;
+		
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
@@ -229,6 +232,7 @@ namespace Halley
 		bool columnMajor = false;
 
 		std::shared_ptr<const Texture> fallbackTexture;
+		std::vector<String> tags;
 
 		void loadUniforms(const ConfigNode& node);
 		void loadTextures(const ConfigNode& node);
