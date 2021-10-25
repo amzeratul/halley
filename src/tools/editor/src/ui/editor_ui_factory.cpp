@@ -27,6 +27,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("sceneEditorCanvas", [=](const ConfigNode& node) { return makeSceneEditorCanvas(node); });
 	addFactory("entityList", [=](const ConfigNode& node) { return makeEntityList(node); });
 	addFactory("entityValidator", [=](const ConfigNode& node) { return makeEntityValidator(node); });
+	addFactory("entityValidatorList", [=](const ConfigNode& node) { return makeEntityValidatorList(node); });
 	addFactory("entityEditor", [=](const ConfigNode& node) { return makeEntityEditor(node); });
 	addFactory("selectAsset", [=](const ConfigNode& node) { return makeSelectAsset(node); });
 }
@@ -89,6 +90,13 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeEntityValidator(const ConfigNode&
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	return std::make_shared<EntityValidatorUI>(id, *this);
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeEntityValidatorList(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	return std::make_shared<EntityValidatorListUI>(id, *this);
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeEntityEditor(const ConfigNode& entryNode)

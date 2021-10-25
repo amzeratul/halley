@@ -11,6 +11,7 @@ children:
       children:
         - widget: { id: entityList, class: entityList }
           proportion: 1
+    - widget: { id: entityValidatorListUI, class: entityValidatorList }
     - sizer: { type: horizontal }
       children:
         - widget: { id: addEntity, class: button, text: Add Entity, tooltip: "Adds a blank new entity as a child of the current selection. [Ctrl+N]" }

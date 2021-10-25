@@ -1,5 +1,6 @@
 #include "entity_validator_ui.h"
 
+#include "entity_list.h"
 #include "halley/editor_extensions/entity_validator.h"
 using namespace Halley;
 
@@ -65,5 +66,67 @@ void EntityValidatorUI::refresh()
 				}
 			}
 		}
+	}
+}
+
+EntityValidatorListUI::EntityValidatorListUI(String id, UIFactory& factory)
+	: UIWidget(std::move(id), {}, UISizer())
+	, factory(factory)
+{
+	factory.loadUI(*this, "ui/halley/entity_validator_list");
+	setActive(false);
+}
+
+void EntityValidatorListUI::onMakeUI()
+{
+	setHandle(UIEventType::ButtonClicked, "prev", [=] (const UIEvent& event)
+	{
+		move(-1);
+	});
+
+	setHandle(UIEventType::ButtonClicked, "next", [=] (const UIEvent& event)
+	{
+		move(1);
+	});
+}
+
+void EntityValidatorListUI::setList(std::weak_ptr<EntityList> list)
+{
+	entityList = list;
+}
+
+void EntityValidatorListUI::setInvalidEntities(std::vector<int> entities)
+{
+	invalidEntities = std::move(entities);
+	setActive(!invalidEntities.empty());
+}
+
+void EntityValidatorListUI::move(int delta)
+{
+	auto& list = entityList.lock()->getList();
+	const auto curSel = list.getSelectedOption();
+	int newSel = curSel;
+
+	if (delta == 1) {
+		newSel = invalidEntities.front();
+		for (int e: invalidEntities) {
+			if (e > curSel) {
+				newSel = e;
+				break;
+			}
+		}
+	} else if (delta == -1) {
+		newSel = invalidEntities.back();
+		for (int i = int(invalidEntities.size()); --i >= 0;) {
+			int e = invalidEntities[i];
+			if (e < curSel) {
+				newSel = e;
+				break;
+			}
+		}
+	}
+
+	if (newSel != curSel) {
+		list.setSelectedOption(newSel);
 	}
 }

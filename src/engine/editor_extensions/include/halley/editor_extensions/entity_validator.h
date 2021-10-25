@@ -12,7 +12,7 @@ namespace Halley {
     public:
         explicit EntityValidator(World& world);
 
-        std::vector<IEntityValidator::Result> validateEntity(EntityData& entity);
+        std::vector<IEntityValidator::Result> validateEntity(const EntityData& entity);
         void applyAction(IEntityEditor& entityEditor, EntityData& data, const ConfigNode& actionData);
 		bool canApplyAction(const IEntityEditor& entityEditor, const EntityData& data, const ConfigNode& actionData);
 

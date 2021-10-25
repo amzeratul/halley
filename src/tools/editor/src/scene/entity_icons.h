@@ -19,6 +19,7 @@ namespace Halley {
 
     	const Sprite& getIcon(const String& id) const;
     	const String& getName(const String& id) const;
+        const Sprite& getInvalidEntityIcon() const;
 
     	const std::vector<Entry>& getEntries() const;
 
@@ -29,6 +30,7 @@ namespace Halley {
     	std::vector<Entry> entries;
     	std::unordered_map<String, size_t> entryMap;
     	Entry defaultEntry;
+        Sprite invalidEntityIcon;
 
     	const Entry& getEntry(const String& id) const;
        	void load(const ConfigNode& node);

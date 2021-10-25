@@ -30,7 +30,7 @@ EntityValidator::EntityValidator(World& world)
 {
 }
 
-std::vector<IEntityValidator::Result> EntityValidator::validateEntity(EntityData& entity)
+std::vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityData& entity)
 {
 	std::vector<IEntityValidator::Result> result;
 

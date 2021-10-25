@@ -66,6 +66,10 @@ void SceneEditorWindow::makeUI()
 	entityList = getWidgetAs<EntityList>("entityList");
 	entityList->setSceneEditorWindow(*this);
 
+	const auto validatorList = getWidgetAs<EntityValidatorListUI>("entityValidatorListUI");
+	entityList->setEntityValidatorList(validatorList);
+	validatorList->setList(entityList);
+
 	entityEditor = getWidgetAs<EntityEditor>("entityEditor");
 	entityEditor->setSceneEditorWindow(*this, api);
 
@@ -609,9 +613,8 @@ void SceneEditorWindow::onEntityModified(const String& id, const EntityData& pre
 		const bool hadChange = undoStack.pushModified(modified, id, prevData, newData);
 
 		if (hadChange) {
-			const auto& data = sceneData->getEntityNodeData(id).getData();
-			entityList->onEntityModified(id, data);
 			sceneData->reloadEntity(id);
+			entityList->onEntityModified(id, newData);
 			markModified();
 		}
 	}

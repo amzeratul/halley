@@ -10,6 +10,8 @@ EntityIcons::EntityIcons(Resources& resources, const UIColourScheme& colourSchem
 			load(resources.get<ConfigFile>(configId)->getRoot());
 		}
 	}
+
+	invalidEntityIcon.setImage(resources, "entity_icons/warning.png").setColour(colourScheme.getColour("taskError"));
 }
 
 const EntityIcons::Entry& EntityIcons::getEntry(const String& id) const
@@ -47,6 +49,11 @@ const Sprite& EntityIcons::getIcon(const String& id) const
 const String& EntityIcons::getName(const String& id) const
 {
 	return getEntry(id).name;
+}
+
+const Sprite& EntityIcons::getInvalidEntityIcon() const
+{
+	return invalidEntityIcon;
 }
 
 const std::vector<EntityIcons::Entry>& EntityIcons::getEntries() const

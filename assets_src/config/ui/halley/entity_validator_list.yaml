@@ -1,0 +1,24 @@
+widget: { class: image, image: "$ui_title_capsule", innerBorder: [ 4, 1, 4, 4 ], colour: $taskError }
+sizer: { type: vertical }
+border: [0, 0, 0, 4]
+children:
+- sizer: { type: horizontal }
+  children:
+  - stretchSpacer: {}
+    proportion: 1
+  - widget: { class: image, image: ui/warning.png }
+    fill: centre
+  - widget: { class: label, text: "Validation Errors" }
+    fill: centre
+  - widget: { class: image, image: ui/warning.png }
+    fill: centre
+  - stretchSpacer: {}
+    proportion: 1
+- widget: { id: validationFields, class: widget }
+  border: [1, 4, 1, 1]
+  sizer: { type: horizontal }
+  children:
+  - widget: { id: prev, class: button, style: buttonThin, text: Previous }
+    proportion: 1
+  - widget: { id: next, class: button, style: buttonThin, text: Next }
+    proportion: 1

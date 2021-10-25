@@ -1,4 +1,5 @@
 #pragma once
+#include "entity_validator_ui.h"
 #include "halley/ui/ui_widget.h"
 #include "halley/ui/widgets/ui_tree_list.h"
 
@@ -27,21 +28,35 @@ namespace Halley {
 		UUID getEntityUnderCursor() const;
 		String getCurrentSelection() const;
 
+		void setEntityValidatorList(std::shared_ptr<EntityValidatorListUI> validatorList);
+
+		UITreeList& getList();
+
 	private:
+		struct EntityInfo {
+			String name;
+			Sprite icon;
+			bool valid = true;
+		};
+
 		UIFactory& factory;
 		SceneEditorWindow* sceneEditorWindow;
 		const EntityIcons* icons = nullptr;
 
 		std::shared_ptr<UITreeList> list;
 		std::shared_ptr<ISceneData> sceneData;
+		std::shared_ptr<EntityValidatorListUI> validatorList;
+		std::set<UUID> invalidEntities;
 
 		void makeUI();
 		void addEntities(const EntityTree& entity, const String& parentId);
 		void addEntity(const EntityData& data, const String& parentId, int childIndex);
 		void addEntityTree(const String& parentId, int childIndex, const EntityData& data);
-		std::pair<String, Sprite> getEntityNameAndIcon(const EntityData& data) const;
+		EntityInfo getEntityNameAndIcon(const EntityData& data) const;
 
 		void openContextMenu(const String& entityId);
 		void onContextMenuAction(const String& actionId, const String& entityId);
+
+		void notifyValidatorList();
 	};
 }
