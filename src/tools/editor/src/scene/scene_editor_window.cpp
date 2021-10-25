@@ -399,6 +399,11 @@ EntityValidator& SceneEditorWindow::getEntityValidator()
 	return *entityValidator;
 }
 
+void SceneEditorWindow::refreshGizmos()
+{
+	gameBridge->getGizmos().refreshEntity();
+}
+
 void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 {
 	if (status == ProjectDLL::Status::Loaded) {
@@ -1092,14 +1097,14 @@ void SceneEditorWindow::updateButtons()
 void SceneEditorWindow::undo()
 {
 	undoStack.undo(*this);
-	gameBridge->getGizmos().refreshEntity();
+	refreshGizmos();
 	updateButtons();
 }
 
 void SceneEditorWindow::redo()
 {
 	undoStack.redo(*this);
-	gameBridge->getGizmos().refreshEntity();
+	refreshGizmos();
 	updateButtons();
 }
 

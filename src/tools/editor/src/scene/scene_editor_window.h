@@ -111,6 +111,7 @@ namespace Halley {
 		bool isPrefabInstance(const String& entityId) const;
 
 		EntityValidator& getEntityValidator();
+		void refreshGizmos();
 
 	protected:
 		void update(Time t, bool moved) override;

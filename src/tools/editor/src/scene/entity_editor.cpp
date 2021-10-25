@@ -200,6 +200,13 @@ void EntityEditor::onFieldChangedByGizmo(const String& componentName, const Stri
 	onEntityUpdated();
 }
 
+void EntityEditor::onFieldChangedProcedurally(const String& componentName, const String& fieldName)
+{
+	sendEventDown(UIEvent(UIEventType::ReloadData, componentName + ":" + fieldName));
+	onEntityUpdated();
+	sceneEditor->refreshGizmos();
+}
+
 void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data)
 {
 	auto componentUI = factory.makeUI("ui/halley/entity_editor_component");

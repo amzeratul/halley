@@ -32,6 +32,7 @@ namespace Halley {
 		virtual void addComponent(const String& name, ConfigNode data) = 0;
 		virtual void deleteComponent(const String& name) = 0;
 		virtual void onFieldChangedByGizmo(const String& componentName, const String& fieldName) = 0;
+		virtual void onFieldChangedProcedurally(const String& componentName, const String& fieldName) = 0;
 	};
 
 	class IEntityEditorFactory {

@@ -33,6 +33,7 @@ namespace Halley {
 		void reloadEntity() override;
 		void unloadIcons();
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName) override;
+		void onFieldChangedProcedurally(const String& componentName, const String& fieldName) override;
 
 		void setDefaultName(const String& name, const String& prevName) override;
 		void focusRenameEntity();

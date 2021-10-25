@@ -89,7 +89,7 @@ void ModifyFieldsValidatorActionHandler::applyEntry(IEntityEditor& entityEditor,
 	}
 
 	if (found) {
-		entityEditor.onFieldChangedByGizmo(component, field);
+		entityEditor.onFieldChangedProcedurally(component, field);
 	}
 }
 
