@@ -330,6 +330,11 @@ const std::shared_ptr<const Texture>& Material::getTexture(int textureUnit) cons
 	return tex;
 }
 
+std::shared_ptr<const Texture> Material::getRawTexture(int textureUnit) const
+{
+	return textureUnit >= 0 && textureUnit < int(textures.size()) ? textures[textureUnit] : std::shared_ptr<const Texture>();
+}
+
 const Vector<MaterialParameter>& Material::getUniforms() const
 {
 	return uniforms;

@@ -63,7 +63,7 @@ namespace Halley
 		Sprite& setMaterial(std::shared_ptr<Material> m, bool shared = true);
 		Sprite& setMaterial(std::unique_ptr<Material> m);
 		Material& getMutableMaterial();
-		std::shared_ptr<Material> getMutableMaterialPtr();
+		const std::shared_ptr<Material>& getMutableMaterialPtr();
 		const Material& getMaterial() const
 		{
 			Expects(material);

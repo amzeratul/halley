@@ -316,7 +316,7 @@ Material& Sprite::getMutableMaterial()
 	return *getMutableMaterialPtr();
 }
 
-std::shared_ptr<Material> Sprite::getMutableMaterialPtr()
+const std::shared_ptr<Material>& Sprite::getMutableMaterialPtr()
 {
 	Expects(material);
 	if (sharedMaterial) {
