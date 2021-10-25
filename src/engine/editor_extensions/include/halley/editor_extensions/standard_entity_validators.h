@@ -24,5 +24,6 @@ namespace Halley {
 
     private:
         void applyEntry(IEntityEditor& entityEditor, EntityData& entityData, const ConfigNode& entryData);
+        bool applyField(ConfigNode& dst, const String& fieldName, const ConfigNode& entryData);
     };
 }

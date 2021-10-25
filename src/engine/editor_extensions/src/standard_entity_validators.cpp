@@ -83,14 +83,27 @@ void ModifyFieldsValidatorActionHandler::applyEntry(IEntityEditor& entityEditor,
 	bool found = false;
 	for (auto& comp: entityData.getComponents()) {
 		if (comp.first == component) {
-			auto& compData = comp.second.asMap();
-			compData[field] = ConfigNode(entry["data"]);
-			found = true;
+			found = applyField(comp.second, field, entry["data"]);
 			break;
 		}
 	}
 
 	if (found) {
 		entityEditor.onFieldChangedByGizmo(component, field);
+	}
+}
+
+bool ModifyFieldsValidatorActionHandler::applyField(ConfigNode& dst, const String& fieldName, const ConfigNode& entryData)
+{
+	dst.ensureType(ConfigNodeType::Map);
+
+	const auto slashPos = fieldName.find('/');
+	if (slashPos != String::npos) {
+		auto p0 = fieldName.substr(0, slashPos);
+		auto p1 = fieldName.mid(slashPos + 1);
+		return applyField(dst[p0], p1, entryData);
+	} else {
+		dst[fieldName] = ConfigNode(entryData);
+		return true;
 	}
 }
