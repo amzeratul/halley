@@ -383,6 +383,18 @@ namespace Halley {
 			return false;
 		}
 
+		template <typename T>
+		bool hasComponentInAncestors() const
+		{
+			if (hasComponent<T>()) {
+				return true;
+			}
+			if (const auto parent = getParent(); parent.isValid()) {
+				return parent.hasComponentInAncestors<T>();
+			}
+			return false;
+		}
+
 		const String& getName() const
 		{
 			Expects(entity != nullptr);
