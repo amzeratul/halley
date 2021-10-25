@@ -50,17 +50,19 @@ void EntityValidatorUI::refresh()
 			auto label = std::make_shared<UILabel>("", factory.getStyle("labelLight"), curResult.errorMessage);
 			label->setMaxWidth(300.0f);
 			parent->add(label);
-
+			
 			for (const auto& action: curResult.suggestedActions) {
-				auto button = std::make_shared<UIButton>("action", factory.getStyle("buttonThin"), action.label);
-				button->setHandle(UIEventType::ButtonClicked, [this, actionData = ConfigNode(action.actionData)] (const UIEvent& event)
-				{
-					Concurrent::execute(Executors::getMainThread(), [=] () {
-						validator->applyAction(*entityEditor, *curEntity, actionData);
-						entityEditor->reloadEntity();
+				if (validator->canApplyAction(*entityEditor, *curEntity, action.actionData)) {
+					auto button = std::make_shared<UIButton>("action", factory.getStyle("buttonThin"), action.label);
+					button->setHandle(UIEventType::ButtonClicked, [this, actionData = ConfigNode(action.actionData)] (const UIEvent& event)
+					{
+						Concurrent::execute(Executors::getMainThread(), [=] () {
+							validator->applyAction(*entityEditor, *curEntity, actionData);
+							entityEditor->reloadEntity();
+						});
 					});
-				});
-				parent->add(button);
+					parent->add(button);
+				}
 			}
 		}
 	}

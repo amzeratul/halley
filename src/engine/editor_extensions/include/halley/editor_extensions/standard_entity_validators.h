@@ -10,6 +10,7 @@ namespace Halley {
     class AddComponentValidatorActionHandler : public IEntityValidatorActionHandler {
     public:
 	    bool canHandle(const ConfigNode& actionData) override;
+        bool canApplyAction(EntityValidator& validator, const IEntityEditor& entityEditor, const EntityData& entityData, const ConfigNode& actionData) override;
 	    void applyAction(EntityValidator& validator, IEntityEditor& entityEditor, EntityData& entityData, const ConfigNode& actionData) override;
 
         static ConfigNode makeAction(String componentName);
@@ -18,6 +19,7 @@ namespace Halley {
     class RemoveComponentValidatorActionHandler : public IEntityValidatorActionHandler {
     public:
 	    bool canHandle(const ConfigNode& actionData) override;
+        bool canApplyAction(EntityValidator& validator, const IEntityEditor& entityEditor, const EntityData& entityData, const ConfigNode& actionData) override;
 	    void applyAction(EntityValidator& validator, IEntityEditor& entityEditor, EntityData& entityData, const ConfigNode& actionData) override;
 
         static ConfigNode makeAction(String componentName);
@@ -26,6 +28,7 @@ namespace Halley {
     class ModifyFieldsValidatorActionHandler : public IEntityValidatorActionHandler {
     public:
 	    bool canHandle(const ConfigNode& actionData) override;
+        bool canApplyAction(EntityValidator& validator, const IEntityEditor& entityEditor, const EntityData& entityData, const ConfigNode& actionData) override;
 	    void applyAction(EntityValidator& validator, IEntityEditor& entityEditor, EntityData& entityData, const ConfigNode& actionData) override;
 
         static ConfigNode makeAction(String componentName, String fieldName, ConfigNode fieldData);

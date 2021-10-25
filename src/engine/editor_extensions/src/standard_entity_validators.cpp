@@ -33,6 +33,11 @@ bool AddComponentValidatorActionHandler::canHandle(const ConfigNode& actionData)
 	return actionData["action"].asString() == "addComponent" && actionData.hasKey("component");
 }
 
+bool AddComponentValidatorActionHandler::canApplyAction(EntityValidator& validator, const IEntityEditor& entityEditor, const EntityData& entityData, const ConfigNode& actionData)
+{
+	return entityData.getPrefab().isEmpty();
+}
+
 void AddComponentValidatorActionHandler::applyAction(EntityValidator& validator, IEntityEditor& entityEditor, EntityData& entityData, const ConfigNode& actionData)
 {
 	const auto compType = actionData["component"].asString();
@@ -52,6 +57,11 @@ bool RemoveComponentValidatorActionHandler::canHandle(const ConfigNode& actionDa
 	return actionData["action"].asString() == "removeComponent" && actionData.hasKey("component");
 }
 
+bool RemoveComponentValidatorActionHandler::canApplyAction(EntityValidator& validator, const IEntityEditor& entityEditor, const EntityData& entityData,	const ConfigNode& actionData)
+{
+	return entityData.getPrefab().isEmpty();
+}
+
 void RemoveComponentValidatorActionHandler::applyAction(EntityValidator& validator, IEntityEditor& entityEditor, EntityData& entityData, const ConfigNode& actionData)
 {
 	const auto compType = actionData["component"].asString();
@@ -69,6 +79,24 @@ ConfigNode RemoveComponentValidatorActionHandler::makeAction(String componentNam
 bool ModifyFieldsValidatorActionHandler::canHandle(const ConfigNode& actionData)
 {
 	return actionData["action"].asString() == "modifyField" || actionData["action"].asString() == "modifyFields";
+}
+
+bool ModifyFieldsValidatorActionHandler::canApplyAction(EntityValidator& validator, const IEntityEditor& entityEditor, const EntityData& entityData, const ConfigNode& actionData)
+{
+	if (actionData["action"].asString() == "modifyField") {
+		const auto& comp = actionData["component"].asString();
+		return entityData.hasComponent(comp);
+	} else if (actionData["action"].asString() == "modifyFields") {
+		for (const auto& entry: actionData["entries"].asSequence()) {
+			const auto& comp = entry["component"].asString();
+			if (!entityData.hasComponent(comp)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	return false;
 }
 
 void ModifyFieldsValidatorActionHandler::applyAction(EntityValidator& validator, IEntityEditor& entityEditor, EntityData& entityData, const ConfigNode& actionData)

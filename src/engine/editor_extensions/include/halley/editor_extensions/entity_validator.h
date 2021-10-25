@@ -14,6 +14,7 @@ namespace Halley {
 
         std::vector<IEntityValidator::Result> validateEntity(EntityData& entity);
         void applyAction(IEntityEditor& entityEditor, EntityData& data, const ConfigNode& actionData);
+		bool canApplyAction(const IEntityEditor& entityEditor, const EntityData& data, const ConfigNode& actionData);
 
         void addValidator(std::unique_ptr<IEntityValidator> validator);
         void addActionHandler(std::unique_ptr<IEntityValidatorActionHandler> handler);

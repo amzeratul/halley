@@ -53,6 +53,16 @@ void EntityValidator::applyAction(IEntityEditor& entityEditor, EntityData& data,
 	Logger::logError("No handler found for EntityValidator action.");
 }
 
+bool EntityValidator::canApplyAction(const IEntityEditor& entityEditor, const EntityData& data, const ConfigNode& actionData)
+{
+	for (const auto& handler: handlers) {
+		if (handler->canHandle(actionData)) {
+			return handler->canApplyAction(*this, entityEditor, data, actionData);
+		}
+	}
+	return false;
+}
+
 void EntityValidator::addValidator(std::unique_ptr<IEntityValidator> validator)
 {
 	validators.push_back(std::move(validator));

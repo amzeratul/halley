@@ -120,6 +120,16 @@ void EntityData::deserialize(Deserializer& s)
 	applyDelta(delta);
 }
 
+bool EntityData::hasComponent(const String& componentName) const
+{
+	for (const auto& c: components) {
+		if (c.first == componentName) {
+			return true;
+		}
+	}
+	return false;
+}
+
 const EntityData* EntityData::tryGetPrefabUUID(const UUID& uuid) const
 {
 	Expects(uuid.isValid());

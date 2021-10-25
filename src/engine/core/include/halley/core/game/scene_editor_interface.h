@@ -123,6 +123,7 @@ namespace Halley {
 
         virtual bool canHandle(const ConfigNode& actionData) = 0;
         virtual void applyAction(EntityValidator& validator, IEntityEditor& entityEditor, EntityData& entityData, const ConfigNode& actionData) = 0;
+        virtual bool canApplyAction(EntityValidator& validator, const IEntityEditor& entityEditor, const EntityData& entityData, const ConfigNode& actionData) = 0;
     };
 
 	enum class EditorSettingType {
