@@ -51,6 +51,8 @@ namespace Halley {
 		std::shared_ptr<EntityValidatorListUI> validatorList;
 		std::set<UUID> invalidEntities;
 		bool needsToNotifyValidatorList = false;
+		bool needsToValidateAllEntities = true;
+		Time validationTimeout = 0;
 
 		void makeUI();
 		void addEntities(const EntityTree& entity, const String& parentId);
@@ -64,6 +66,7 @@ namespace Halley {
 		bool markAllValid();
 		bool markValid(const UUID& uuid, bool valid);
 		void notifyValidatorList();
+		void doValidateAllEntities();
 		void onEntityModified(const String& id, const EntityData& node, bool onlyRefreshValidation);
 
 		bool isEntityValid(const EntityData& entityData, bool recursive) const;

@@ -19,6 +19,14 @@ void EntityList::update(Time t, bool moved)
 		needsToNotifyValidatorList = false;
 		notifyValidatorList();
 	}
+
+	if (validationTimeout >= 0) {
+		validationTimeout -= t;
+	} else if (needsToValidateAllEntities) {
+		validationTimeout = 0.4;
+		needsToValidateAllEntities = false;
+		doValidateAllEntities();
+	}
 }
 
 void EntityList::setSceneEditorWindow(SceneEditorWindow& editor)
@@ -299,6 +307,11 @@ void EntityList::notifyValidatorList()
 }
 
 void EntityList::validateAllEntities()
+{
+	needsToValidateAllEntities = true;
+}
+
+void EntityList::doValidateAllEntities()
 {
 	const auto& sceneData = sceneEditorWindow->getSceneData();
 	
