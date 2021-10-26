@@ -199,3 +199,30 @@ void UIImage::setHoverable(Sprite normalSprite, Sprite selectedSprite)
 		dirty = true;
 	});
 }
+
+
+UIPulseSpriteBehaviour::UIPulseSpriteBehaviour(Colour4f colour, Time period, Time startTime)
+	: colour(colour)
+	, curTime(startTime)
+	, period(period)
+{
+}
+
+void UIPulseSpriteBehaviour::init()
+{
+	auto* image = dynamic_cast<UIImage*>(getWidget());
+	if (image) {
+		initialColour = image->getSprite().getColour();
+	}
+}
+
+void UIPulseSpriteBehaviour::update(Time time)
+{
+	curTime = std::fmod(curTime + time, period);
+	auto* image = dynamic_cast<UIImage*>(getWidget());
+	if (image) {
+		const auto t = curTime / period;
+		const auto col = lerp(colour, initialColour, std::cos(static_cast<float>(t * 2.0 * pi())) * 0.5f + 0.5f);
+		image->getSprite().setColour(col);
+	}
+}

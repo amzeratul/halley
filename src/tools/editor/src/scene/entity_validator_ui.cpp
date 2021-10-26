@@ -12,6 +12,11 @@ EntityValidatorUI::EntityValidatorUI(String id, UIFactory& factory)
 	setActive(false);
 }
 
+void EntityValidatorUI::onMakeUI()
+{
+	getWidgetAs<UIImage>("capsule")->addBehaviour(std::make_shared<UIPulseSpriteBehaviour>(Colour4f(1, 0, 0), 2.0, 1.0));
+}
+
 void EntityValidatorUI::setValidator(EntityValidator& v)
 {
 	validator = &v;
@@ -102,6 +107,21 @@ void EntityValidatorListUI::onMakeUI()
 	{
 		move(1);
 	});
+
+	getWidgetAs<UIImage>("capsule")->addBehaviour(std::make_shared<UIPulseSpriteBehaviour>(Colour4f(1, 0, 0), 2.0, 1.0));
+	description = getWidgetAs<UILabel>("description");
+}
+
+void EntityValidatorListUI::update(Time t, bool moved)
+{
+	const auto entityListStrong = entityList.lock();
+	if (entityListStrong) {
+		const auto& list = entityListStrong->getList();
+		const auto curSel = list.getSelectedOption();
+		const auto iter = std::find(invalidEntities.begin(), invalidEntities.end(), curSel);
+		const int curPos = iter != invalidEntities.end() ? static_cast<int>(iter - invalidEntities.begin() + 1) : 0;
+		description->setText(LocalisedString::fromHardcodedString("Entities have validation errors [" + (curPos > 0 ? toString(curPos) : "-") + "/" + toString(invalidEntities.size()) + "]"));
+	}
 }
 
 void EntityValidatorListUI::setList(std::weak_ptr<EntityList> list)

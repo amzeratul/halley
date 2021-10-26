@@ -52,4 +52,18 @@ namespace Halley {
 
 		void setParentVisible(bool visible);
 	};
+
+	class UIPulseSpriteBehaviour : public UIBehaviour {
+	public:
+		UIPulseSpriteBehaviour(Colour4f colour, Time period, Time startTime = 0.0);
+
+		void init() override;
+		void update(Time time) override;
+
+	private:
+		Colour4f initialColour;
+		Colour4f colour;
+		Time curTime = 0;
+		Time period = 0;
+	};
 }

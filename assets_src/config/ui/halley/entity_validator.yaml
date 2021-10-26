@@ -1,4 +1,4 @@
-widget: { class: image, image: "$ui_title_capsule", innerBorder: [ 4, 1, 4, 4 ], colour: $taskError }
+widget: { id: capsule, class: image, image: "$ui_title_capsule", innerBorder: [ 4, 1, 4, 4 ], colour: $ui_staticBox }
 sizer: { type: vertical }
 border: [0, 0, 0, 4]
 children:

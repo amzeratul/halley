@@ -9,6 +9,8 @@ namespace Halley {
 	public:
 		EntityValidatorUI(String id, UIFactory& factory);
 
+		void onMakeUI() override;
+
 		void setValidator(EntityValidator& validator);
 		void setEntity(EntityData& entity, IEntityEditor& entityEditor, Resources& gameResources);
 		void refresh();
@@ -30,8 +32,9 @@ namespace Halley {
 	class EntityValidatorListUI : public UIWidget {
 	public:
 		EntityValidatorListUI(String id, UIFactory& factory);
-
+		
 		void onMakeUI() override;
+		void update(Time t, bool moved) override;
 
 		void setList(std::weak_ptr<EntityList> entityList);
 		void setInvalidEntities(std::vector<int> entities);
@@ -40,6 +43,7 @@ namespace Halley {
 		UIFactory& factory;
 		std::weak_ptr<EntityList> entityList;
 		std::vector<int> invalidEntities;
+		std::shared_ptr<UILabel> description;
 
 		void move(int delta);
 	};

@@ -1,4 +1,4 @@
-widget: { class: image, image: "$ui_title_capsule", innerBorder: [ 4, 1, 4, 4 ], colour: $taskError }
+widget: { id: capsule, class: image, image: "$ui_title_capsule", innerBorder: [ 4, 1, 4, 4 ], colour: $ui_staticBox }
 sizer: { type: vertical }
 border: [0, 0, 0, 4]
 children:
@@ -14,9 +14,11 @@ children:
     fill: centre
   - stretchSpacer: {}
     proportion: 1
-- widget: { id: validationFields, class: widget }
+- widget: { id: description, class: label, text: "X entities have errors", style: labelLight, maxWidth: 300 }
+  fill: centre
   border: [1, 4, 1, 1]
-  sizer: { type: horizontal }
+- sizer: { type: horizontal }
+  border: [1, 4, 1, 1] 
   children:
   - widget: { id: prev, class: button, style: buttonThin, text: Previous }
     proportion: 1
