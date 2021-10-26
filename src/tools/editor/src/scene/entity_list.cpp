@@ -132,9 +132,16 @@ void EntityList::refreshNames()
 
 void EntityList::onEntityModified(const String& id, const EntityData& node)
 {
+	onEntityModified(id, node, false);
+}
+
+void EntityList::onEntityModified(const String& id, const EntityData& node, bool onlyRefreshValidation)
+{
 	const auto info = getEntityInfo(node);
-	list->setLabel(id, LocalisedString::fromUserString(info.name), info.icon);
-	markValid(node.getInstanceUUID(), info.valid);
+	const bool validationChanged = markValid(node.getInstanceUUID(), info.valid);
+	if (validationChanged || !onlyRefreshValidation) {
+		list->setLabel(id, LocalisedString::fromUserString(info.name), std::move(info.icon));
+	}
 }
 
 void EntityList::onEntityAdded(const String& id, const String& parentId, int childIndex, const EntityData& data)
@@ -194,18 +201,6 @@ void EntityList::setEntityValidatorList(std::shared_ptr<EntityValidatorListUI> v
 	validatorList = std::move(validator);
 }
 
-void EntityList::validateAllEntities()
-{
-	const auto& sceneData = sceneEditorWindow->getSceneData();
-	
-	const auto n = list->getCount();
-	for (size_t i = 0; i < n; ++i) {
-		const auto& id = list->getItem(static_cast<int>(i))->getId();
-		const auto& entityData = sceneData->getEntityNodeData(id);
-		onEntityModified(id, entityData.getData());
-	}
-}
-
 UITreeList& EntityList::getList()
 {
 	return *list;
@@ -262,15 +257,17 @@ void EntityList::onContextMenuAction(const String& actionId, const String& entit
 	sceneEditorWindow->onEntityContextMenuAction(actionId, entityId);
 }
 
-void EntityList::markAllValid()
+bool EntityList::markAllValid()
 {
 	if (!invalidEntities.empty()) {
 		invalidEntities.clear();
 		notifyValidatorList();
+		return true;
 	}
+	return false;
 }
 
-void EntityList::markValid(const UUID& uuid, bool valid)
+bool EntityList::markValid(const UUID& uuid, bool valid)
 {
 	bool modified = false;
 	if (valid) {
@@ -283,6 +280,7 @@ void EntityList::markValid(const UUID& uuid, bool valid)
 	if (modified) {
 		needsToNotifyValidatorList = true;
 	}
+	return modified;
 }
 
 void EntityList::notifyValidatorList()
@@ -298,6 +296,18 @@ void EntityList::notifyValidatorList()
 		}
 	}
 	validatorList->setInvalidEntities(std::move(result));
+}
+
+void EntityList::validateAllEntities()
+{
+	const auto& sceneData = sceneEditorWindow->getSceneData();
+	
+	const auto n = list->getCount();
+	for (size_t i = 0; i < n; ++i) {
+		const auto& id = list->getItem(static_cast<int>(i))->getId();
+		const auto& entityData = sceneData->getEntityNodeData(id);
+		onEntityModified(id, entityData.getData(), true);
+	}
 }
 
 bool EntityList::isEntityValid(const EntityData& entityData, bool recursive) const

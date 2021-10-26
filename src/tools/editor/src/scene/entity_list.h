@@ -61,9 +61,10 @@ namespace Halley {
 		void openContextMenu(const String& entityId);
 		void onContextMenuAction(const String& actionId, const String& entityId);
 
-		void markAllValid();
-		void markValid(const UUID& uuid, bool valid);
+		bool markAllValid();
+		bool markValid(const UUID& uuid, bool valid);
 		void notifyValidatorList();
+		void onEntityModified(const String& id, const EntityData& node, bool onlyRefreshValidation);
 
 		bool isEntityValid(const EntityData& entityData, bool recursive) const;
 	};
