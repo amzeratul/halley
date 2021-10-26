@@ -18,10 +18,18 @@ void EntityValidatorUI::setValidator(EntityValidator& v)
 	refresh();
 }
 
-void EntityValidatorUI::setEntity(EntityData& e, IEntityEditor& editor)
+void EntityValidatorUI::setEntity(EntityData& e, IEntityEditor& editor, Resources& resources)
 {
 	curEntity = &e;
 	entityEditor = &editor;
+	gameResources = &resources;
+
+	isPrefab = !curEntity->getPrefab().isEmpty() && gameResources->exists<Prefab>(curEntity->getPrefab());
+	if (isPrefab) {
+		const auto prefab = gameResources->get<Prefab>(curEntity->getPrefab());
+		curEntityInstance = prefab->getEntityData().instantiateWithAsCopy(*curEntity);
+	}
+	
 	refresh();
 }
 
@@ -30,8 +38,14 @@ void EntityValidatorUI::refresh()
 	if (!curEntity || !validator) {
 		return;
 	}
-
-	auto result = validator->validateEntity(*curEntity, false);
+	
+	std::vector<IEntityValidator::Result> result;
+	if (isPrefab) {
+		result = validator->validateEntity(curEntityInstance, true);
+	} else {
+		result = validator->validateEntity(*curEntity, false);
+	}
+	
 	if (result != curResultSet) {
 		curResultSet = std::move(result);
 		setActive(!curResultSet.empty());

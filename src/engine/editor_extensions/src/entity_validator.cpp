@@ -41,6 +41,11 @@ void EntityValidator::validateEntity(const EntityData& entity, bool recursive, s
 {
 	for (const auto& validator: validators) {
 		auto r = validator->validateEntity(*this, entity);
+		for (auto& v: r) {
+			for (auto& a: v.suggestedActions) {
+				a.actionData["entity"] = entity.getInstanceUUID().toString();
+			}
+		}
 		result.insert(result.end(), r.begin(), r.end());
 	}
 
@@ -64,6 +69,10 @@ void EntityValidator::applyAction(IEntityEditor& entityEditor, EntityData& data,
 
 bool EntityValidator::canApplyAction(const IEntityEditor& entityEditor, const EntityData& data, const ConfigNode& actionData)
 {
+	if (actionData["entity"].asString("") != data.getInstanceUUID().toString()) {
+		return false;
+	}
+	
 	for (const auto& handler: handlers) {
 		if (handler->canHandle(actionData)) {
 			return handler->canApplyAction(*this, entityEditor, data, actionData);

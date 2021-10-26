@@ -183,7 +183,7 @@ void EntityEditor::reloadEntity()
 		}
 		setCanSendEvents(true);
 
-		entityValidatorUI->setEntity(*currentEntityData, *this);
+		entityValidatorUI->setEntity(*currentEntityData, *this, *gameResources);
 	}
 }
 
