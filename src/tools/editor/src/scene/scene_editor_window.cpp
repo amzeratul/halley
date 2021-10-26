@@ -408,6 +408,11 @@ void SceneEditorWindow::refreshGizmos()
 	gameBridge->getGizmos().refreshEntity();
 }
 
+void SceneEditorWindow::validateAllEntities()
+{
+	entityList->validateAllEntities();
+}
+
 void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 {
 	if (status == ProjectDLL::Status::Loaded) {

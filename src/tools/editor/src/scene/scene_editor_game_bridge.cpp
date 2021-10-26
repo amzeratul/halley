@@ -371,6 +371,11 @@ void SceneEditorGameBridge::initializeEntityValidator(EntityValidator& validator
 	interface->initializeEntityValidator(validator);
 }
 
+void SceneEditorGameBridge::validateAllEntities()
+{
+	sceneEditorWindow.validateAllEntities();
+}
+
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {

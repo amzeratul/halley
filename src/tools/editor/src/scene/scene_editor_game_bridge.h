@@ -57,7 +57,8 @@ namespace Halley {
 		Transform2DComponent* getTransform(const String& entityId);
 
 		void initializeEntityValidator(EntityValidator& validator);
-
+		void validateAllEntities() override;
+	
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
 		void openAsset(AssetType assetType, const String& assetId) override;

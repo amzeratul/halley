@@ -112,6 +112,7 @@ namespace Halley {
 
 		EntityValidator& getEntityValidator();
 		void refreshGizmos();
+		void validateAllEntities();
 
 	protected:
 		void update(Time t, bool moved) override;

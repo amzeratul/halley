@@ -14,6 +14,8 @@ namespace Halley {
 	public:
 		EntityList(String id, UIFactory& factory);
 
+		void update(Time t, bool moved) override;
+		
 		void setSceneEditorWindow(SceneEditorWindow& sceneEditor);
 		void setSceneData(std::shared_ptr<ISceneData> sceneData);
 
@@ -29,6 +31,7 @@ namespace Halley {
 		String getCurrentSelection() const;
 
 		void setEntityValidatorList(std::shared_ptr<EntityValidatorListUI> validatorList);
+		void validateAllEntities();
 
 		UITreeList& getList();
 
@@ -47,6 +50,7 @@ namespace Halley {
 		std::shared_ptr<ISceneData> sceneData;
 		std::shared_ptr<EntityValidatorListUI> validatorList;
 		std::set<UUID> invalidEntities;
+		bool needsToNotifyValidatorList = false;
 
 		void makeUI();
 		void addEntities(const EntityTree& entity, const String& parentId);
@@ -58,8 +62,7 @@ namespace Halley {
 		void onContextMenuAction(const String& actionId, const String& entityId);
 
 		void markAllValid();
-		void markValid(const UUID& uuid);
-		void markInvalid(const UUID& uuid);
+		void markValid(const UUID& uuid, bool valid);
 		void notifyValidatorList();
 
 		bool isEntityValid(const EntityData& entityData, bool recursive) const;
