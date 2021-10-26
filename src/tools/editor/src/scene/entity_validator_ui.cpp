@@ -31,7 +31,7 @@ void EntityValidatorUI::refresh()
 		return;
 	}
 
-	auto result = validator->validateEntity(*curEntity);
+	auto result = validator->validateEntity(*curEntity, false);
 	if (result != curResultSet) {
 		curResultSet = std::move(result);
 		setActive(!curResultSet.empty());

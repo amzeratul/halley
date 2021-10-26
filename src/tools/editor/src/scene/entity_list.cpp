@@ -43,6 +43,7 @@ void EntityList::makeUI()
 		const auto childIndex = event.getIntData();
 
 		sceneEditorWindow->moveEntity(entityId, newParentId, childIndex, false);
+		notifyValidatorList();
 	});
 
 	setHandle(UIEventType::ListItemRightClicked, [=] (const UIEvent& event)
@@ -66,40 +67,38 @@ void EntityList::addEntities(const EntityTree& entity, const String& parentId)
 void EntityList::addEntity(const EntityData& data, const String& parentId, int childIndex)
 {
 	const bool isPrefab = !data.getPrefab().isEmpty();
-	const auto info = getEntityNameAndIcon(data);
+	const auto info = getEntityInfo(data);
 	const size_t idx = childIndex >= 0 ? static_cast<size_t>(childIndex) : std::numeric_limits<size_t>::max();
 	list->addTreeItem(data.getInstanceUUID().toString(), parentId, idx, LocalisedString::fromUserString(info.name), isPrefab ? "labelSpecial" : "label", info.icon, isPrefab);
 
 	if (!info.valid) {
-		invalidEntities.insert(data.getInstanceUUID());
-		notifyValidatorList();
+		markInvalid(data.getInstanceUUID());
 	}
 }
 
-EntityList::EntityInfo EntityList::getEntityNameAndIcon(const EntityData& data) const
+EntityList::EntityInfo EntityList::getEntityInfo(const EntityData& data) const
 {
 	EntityInfo result;
 
-	if (!data.getPrefab().isEmpty()) {
+	if (data.getPrefab().isEmpty()) {
+		result.name = data.getName().isEmpty() ? String("Unnamed Entity") : data.getName();
+		result.icon = icons->getIcon(data.getIcon());
+		result.valid = isEntityValid(data, false);
+	} else {
 		if (const auto prefab = sceneEditorWindow->getGamePrefab(data.getPrefab())) {
 			result.name = prefab->getPrefabName();
 			result.icon = icons->getIcon(prefab->getPrefabIcon());
+			result.valid = isEntityValid(prefab->getEntityData().instantiateWithAsCopy(data), true);
 		} else {
 			result.name = "Missing prefab! [" + data.getPrefab() + "]";
 			result.icon = icons->getIcon("");
+			result.valid = false;
 		}
-	} else {
-		result.name = data.getName().isEmpty() ? String("Unnamed Entity") : data.getName();
-		result.icon = icons->getIcon(data.getIcon());
 	}
 
-	/*
-	const auto validateResult = sceneEditorWindow->getEntityValidator().validateEntity(data);
-	if (!validateResult.empty()) {
+	if (!result.valid) {
 		result.icon = icons->getInvalidEntityIcon();
-		result.valid = false;
 	}
-	*/
 
 	return result;
 }
@@ -108,9 +107,10 @@ void EntityList::refreshList()
 {
 	const auto prevId = list->getSelectedOptionId();
 
+	markAllValid();
+
 	list->setScrollToSelection(false);
 	list->clear();
-	invalidEntities.clear();
 	if (sceneData) {
 		addEntities(sceneData->getEntityTree(), "");
 	}
@@ -118,8 +118,6 @@ void EntityList::refreshList()
 	list->setScrollToSelection(true);
 
 	list->setSelectedOptionId(prevId);
-
-	notifyValidatorList();
 }
 
 void EntityList::refreshNames()
@@ -129,15 +127,14 @@ void EntityList::refreshNames()
 
 void EntityList::onEntityModified(const String& id, const EntityData& node)
 {
-	const auto info = getEntityNameAndIcon(node);
+	const auto info = getEntityInfo(node);
 	list->setLabel(id, LocalisedString::fromUserString(info.name), info.icon);
 
 	if (info.valid) {
-		invalidEntities.erase(node.getInstanceUUID());
+		markValid(node.getInstanceUUID());
 	} else {
-		invalidEntities.insert(node.getInstanceUUID());
+		markInvalid(node.getInstanceUUID());
 	}
-	notifyValidatorList();
 }
 
 void EntityList::onEntityAdded(const String& id, const String& parentId, int childIndex, const EntityData& data)
@@ -169,8 +166,7 @@ void EntityList::onEntityRemoved(const String& id, const String& newSelectionId)
 	list->setScrollToSelection(true);
 	list->setSelectedOptionId(newSelectionId);
 
-	invalidEntities.erase(UUID(id));
-	notifyValidatorList();
+	markValid(UUID(id));
 }
 
 void EntityList::select(const String& id)
@@ -254,6 +250,24 @@ void EntityList::onContextMenuAction(const String& actionId, const String& entit
 	sceneEditorWindow->onEntityContextMenuAction(actionId, entityId);
 }
 
+void EntityList::markAllValid()
+{
+	invalidEntities.clear();
+	notifyValidatorList();
+}
+
+void EntityList::markValid(const UUID& uuid)
+{
+	invalidEntities.erase(uuid);
+	notifyValidatorList();
+}
+
+void EntityList::markInvalid(const UUID& uuid)
+{
+	invalidEntities.insert(uuid);
+	notifyValidatorList();
+}
+
 void EntityList::notifyValidatorList()
 {
 	std::vector<int> result;
@@ -267,4 +281,9 @@ void EntityList::notifyValidatorList()
 		}
 	}
 	validatorList->setInvalidEntities(std::move(result));
+}
+
+bool EntityList::isEntityValid(const EntityData& entityData, bool recursive) const
+{
+	return sceneEditorWindow->getEntityValidator().validateEntity(entityData, recursive).empty();
 }

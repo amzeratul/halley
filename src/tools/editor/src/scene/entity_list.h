@@ -52,11 +52,16 @@ namespace Halley {
 		void addEntities(const EntityTree& entity, const String& parentId);
 		void addEntity(const EntityData& data, const String& parentId, int childIndex);
 		void addEntityTree(const String& parentId, int childIndex, const EntityData& data);
-		EntityInfo getEntityNameAndIcon(const EntityData& data) const;
+		EntityInfo getEntityInfo(const EntityData& data) const;
 
 		void openContextMenu(const String& entityId);
 		void onContextMenuAction(const String& actionId, const String& entityId);
 
+		void markAllValid();
+		void markValid(const UUID& uuid);
+		void markInvalid(const UUID& uuid);
 		void notifyValidatorList();
+
+		bool isEntityValid(const EntityData& entityData, bool recursive) const;
 	};
 }

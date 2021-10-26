@@ -30,16 +30,25 @@ EntityValidator::EntityValidator(World& world)
 {
 }
 
-std::vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityData& entity)
+std::vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityData& entity, bool recursive)
 {
 	std::vector<IEntityValidator::Result> result;
+	validateEntity(entity, recursive, result);
+	return result;
+}
 
+void EntityValidator::validateEntity(const EntityData& entity, bool recursive, std::vector<IEntityValidator::Result>& result)
+{
 	for (const auto& validator: validators) {
 		auto r = validator->validateEntity(*this, entity);
 		result.insert(result.end(), r.begin(), r.end());
 	}
 
-	return result;
+	if (recursive) {
+		for (const auto& c: entity.getChildren()) {
+			validateEntity(c, recursive, result);
+		}
+	}
 }
 
 void EntityValidator::applyAction(IEntityEditor& entityEditor, EntityData& data, const ConfigNode& actionData)
