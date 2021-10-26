@@ -62,7 +62,7 @@ void EntityValidatorUI::refresh()
 
 		for (const auto& curResult: curResultSet) {
 			if (!first) {
-				auto col = factory.getColourScheme()->getColour("taskError");
+				auto col = factory.getColourScheme()->getColour("ui_text");
 				parent->add(std::make_shared<UIImage>(Sprite().setImage(factory.getResources(), "halley_ui/ui_separator.png").setColour(col)), 0, Vector4f(0, 4, 0, 4));
 			}
 			first = false;
