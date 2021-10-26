@@ -48,7 +48,7 @@ void SceneEditorGameBridge::update(Time t, SceneEditorInputState inputState, Sce
 
 	if (interface) {
 		initializeInterfaceIfNeeded(false);
-		if (interfaceReady) {
+		if (interfaceReady && t > 0.0001) {
 			interface->update(t, inputState, outputState);
 		}
 	}

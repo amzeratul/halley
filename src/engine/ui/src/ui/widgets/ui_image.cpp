@@ -11,7 +11,7 @@ UIImage::UIImage(Sprite s, std::optional<UISizer> sizer, Vector4f innerBorder)
 UIImage::UIImage(String id, Sprite s, std::optional<UISizer> sizer, Vector4f innerBorder)
 	: UIWidget(std::move(id), {}, std::move(sizer), innerBorder)
 {
-	setSprite(s);
+	setSprite(std::move(s));
 }
 
 void UIImage::draw(UIPainter& painter) const

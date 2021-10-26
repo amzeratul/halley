@@ -91,7 +91,7 @@ void UITreeList::setLabel(const String& id, const LocalisedString& label, Sprite
 	auto item = root.tryFindId(id);
 	if (item) {
 		item->setLabel(label);
-		item->setIcon(icon);
+		item->setIcon(std::move(icon));
 	}
 }
 
@@ -479,7 +479,7 @@ void UITreeListItem::setLabel(const LocalisedString& text)
 void UITreeListItem::setIcon(Sprite sprite)
 {
 	if (icon) {
-		icon->setSprite(sprite);
+		icon->setSprite(std::move(sprite));
 	}
 }
 
