@@ -48,51 +48,37 @@ UISizerType UIList::getOrientation() const
 	return orientation;
 }
 
-bool UIList::setSelectedOption(int option)
+bool UIList::setSelectedOption(int option, SelectionMode mode)
 {
+	if (!multiSelect) {
+		mode = SelectionMode::Normal;
+	}
+	
 	forceAddChildren(UIInputType::Undefined, false);
 
 	const auto numberOfItems = int(getNumberOfItems());
 	if (numberOfItems == 0) {
 		return false;
 	}
+	const auto newSel = clamp(option, 0, numberOfItems - 1);
 
 	if (!requiresSelection && option < 0) {
-		if (curOption >= 0) {
-			getItem(curOption)->setSelected(false);
-		}
-		
+		deselectAll();
 		curOption = -1;
 		return false;
 	}
 	
-	const auto newSel = clamp(option, 0, numberOfItems - 1);
 	if (newSel != curOption) {
-		if (!getItem(newSel)->isEnabled()) {
-			return false;
-		}
+		changeSelection(curOption, newSel, mode);
 
-		if (curOption >= 0 && curOption < numberOfItems) {
-			getItem(curOption)->setSelected(false);
+		if (mode != SelectionMode::ShiftSelect) {
+			const auto curItem = getItem(newSel);
+			if (curItem->isEnabled()) {
+				notifyNewItemSelected(newSel, curItem->getId());
+				curOption = newSel;
+				return true;
+			}
 		}
-		curOption = newSel;
-		auto curItem = getItem(curOption);
-		curItem->setSelected(true);
-
-		playSound(styles.at(0).getString("selectionChangedSound"));
-
-		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), curItem->getId(), curOption));
-		if (scrollToSelection) {
-			sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), getOptionRect(curOption)));
-		}
-		
-		if (getDataBindFormat() == UIDataBind::Format::String) {
-			notifyDataBind(curItem->getId());
-		} else {
-			notifyDataBind(curOption);
-		}
-
-		return true;
 	}
 	return false;
 }
@@ -221,6 +207,52 @@ void UIList::applyImageColour(UIImage& image) const
 	}
 }
 
+void UIList::changeSelection(int oldItem, int newItem, SelectionMode mode)
+{
+	if (mode == SelectionMode::Normal || mode == SelectionMode::ShiftSelect) {
+		deselectAll();
+	}
+
+	if (mode == SelectionMode::Normal || mode == SelectionMode::CtrlSelect) {
+		const auto curItem = tryGetItem(newItem);
+		if (curItem->isEnabled()) {
+			curItem->setSelected(mode == SelectionMode::Normal ? true : !curItem->isSelected());
+		}
+	} else if (mode == SelectionMode::ShiftSelect) {
+		const int a = std::min(oldItem, newItem);
+		const int b = std::max(oldItem, newItem);
+		for (int i = a; i <= b; ++i) {
+			const auto curItem = tryGetItem(i);
+			if (curItem->isEnabled()) {
+				curItem->setSelected(true);
+			}
+		}
+	}
+}
+
+void UIList::deselectAll()
+{
+	for (auto& item: items) {
+		item->setSelected(false);
+	}
+}
+
+void UIList::notifyNewItemSelected(int itemIdx, const String& itemId)
+{
+	playSound(styles.at(0).getString("selectionChangedSound"));
+
+	sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), itemId, itemIdx));
+	if (scrollToSelection) {
+		sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), getOptionRect(itemIdx)));
+	}
+	
+	if (getDataBindFormat() == UIDataBind::Format::String) {
+		notifyDataBind(itemId);
+	} else {
+		notifyDataBind(itemIdx);
+	}
+}
+
 std::shared_ptr<UIListItem> UIList::addItem(const String& id, std::shared_ptr<IUIElement> element, float proportion, Vector4f border, int fillFlags, std::optional<UIStyle> styleOverride)
 {
 	const auto& itemStyle = styleOverride ? *styleOverride : styles.at(0);
@@ -310,7 +342,7 @@ std::shared_ptr<UIListItem> UIList::addItem(std::shared_ptr<UIListItem> item, Ve
 	add(item, uniformSizedItems ? 1.0f : 0.0f, border, fillFlags);
 	items.push_back(item);
 
-	if (getNumberOfItems() == 1) {
+	if (getNumberOfItems() == 1 && requiresSelection) {
 		curOption = -1;
 		setSelectedOption(0);
 	}
@@ -343,7 +375,7 @@ void UIList::removeItem(int idx)
 		layout();
 		reassignIds();
 
-		if (curOption >= static_cast<int>(idx)) {
+		if (curOption >= idx) {
 			setSelectedOption(curOption - 1);
 		}
 	}
@@ -359,12 +391,12 @@ void UIList::draw(UIPainter& painter) const
 
 void UIList::onAccept()
 {
-	sendEvent(UIEvent(UIEventType::ListAccept, getId(), getItem(curOption)->getId(), curOption));
+	sendEvent(UIEvent(UIEventType::ListAccept, getId(), getSelectedOptionId(), curOption));
 }
 
 void UIList::onCancel()
 {
-	sendEvent(UIEvent(UIEventType::ListCancel, getId(), getItem(curOption)->getId(), curOption));
+	sendEvent(UIEvent(UIEventType::ListCancel, getId(), getSelectedOptionId(), curOption));
 }
 
 void UIList::reassignIds()
@@ -418,6 +450,19 @@ int UIList::tryGetItemId(const String& id) const
 		return static_cast<int>(idx);
 	}
 	return -1;
+}
+
+std::shared_ptr<UIListItem> UIList::tryGetItem(int n) const
+{
+	int i = 0;
+	for (auto& item: items) {
+		if (item->isActive() && item->isEnabled()) {
+			if (i++ == n) {
+				return item;
+			}
+		}
+	}
+	return {};
 }
 
 std::shared_ptr<UIListItem> UIList::tryGetItem(const String& id) const
@@ -492,6 +537,16 @@ bool UIList::canReceiveFocus() const
 void UIList::setFocusable(bool f)
 {
 	focusable = f;
+}
+
+bool UIList::isMultiSelect() const
+{
+	return multiSelect;
+}
+
+void UIList::setMultiSelect(bool enabled)
+{
+	multiSelect = enabled;
 }
 
 void UIList::setRequiresSelection(bool r)
@@ -693,12 +748,14 @@ void UIList::update(Time t, bool moved)
 	}
 }
 
-void UIList::onItemClicked(UIListItem& item, int button)
+void UIList::onItemClicked(UIListItem& item, int button, KeyMods keyMods)
 {
-	if (!singleClickAccept || button == 0) {
-		setSelectedOption(item.getIndex());
+	if (button == 0 || !singleClickAccept) {
+		const bool shiftHeld = (static_cast<int>(keyMods) & static_cast<int>(KeyMods::Shift)) != 0;
+		const bool ctrlHeld = (static_cast<int>(keyMods) & static_cast<int>(KeyMods::Ctrl)) != 0;
+		setSelectedOption(item.getIndex(), shiftHeld ? SelectionMode::ShiftSelect : (ctrlHeld ? SelectionMode::CtrlSelect : SelectionMode::Normal));
 	}
-	if (singleClickAccept && button == 0) {
+	if (button == 0 && singleClickAccept) {
 		onAccept();
 	}
 	if (button == 1) {
@@ -768,6 +825,11 @@ void UIListItem::setSelected(bool s)
 
 		sendEventDown(UIEvent(UIEventType::SetSelected, getId(), selected));
 	}
+}
+
+bool UIListItem::isSelected() const
+{
+	return selected;
 }
 
 void UIListItem::setStyle(UIStyle style)
@@ -877,7 +939,7 @@ void UIListItem::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 		dragged = false;
 	}
 
-	parent.onItemClicked(*this, button);
+	parent.onItemClicked(*this, button, keyMods);
 }
 
 void UIListItem::releaseMouse(Vector2f mousePos, int button)
@@ -1019,12 +1081,12 @@ void UIListItem::setDraggableSubWidget(UIWidget* widget)
 	dragWidget = widget;
 }
 
-bool UIList::setSelectedOptionId(const String& id)
+bool UIList::setSelectedOptionId(const String& id, SelectionMode mode)
 {
 	for (auto& i: items) {
 		if (i->getId() == id) {
 			if (i->isActive()) {
-				setSelectedOption(i->getIndex());
+				setSelectedOption(i->getIndex(), mode);
 				return true;
 			}
 		}

@@ -109,7 +109,7 @@ namespace Halley {
         bool canDragListItem(const UIListItem& listItem) override;
 
         void makeParentsOfItemExpanded(const String& id);
-        bool setSelectedOptionId(const String& id) override;
+        bool setSelectedOptionId(const String& id, SelectionMode mode = SelectionMode::Normal) override;
 
         Vector2f getDragPositionAdjustment(Vector2f pos, Vector2f startPos) const override;
 

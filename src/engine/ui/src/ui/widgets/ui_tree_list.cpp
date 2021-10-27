@@ -250,7 +250,7 @@ void UITreeList::reparentItem(const String& itemId, const String& newParentId, i
 void UITreeList::sortItems()
 {
 	// Store previous curOption
-	const auto oldOption = curOption >= 0 && curOption < gsl::narrow_cast<int>(items.size()) ? items[curOption]->getId() : "";
+	const auto oldOption = getSelectedOptionId();
 	
 	// Update list representation
 	items.clear();
@@ -293,10 +293,10 @@ void UITreeList::makeParentsOfItemExpanded(const String& id)
 	}
 }
 
-bool UITreeList::setSelectedOptionId(const String& id)
+bool UITreeList::setSelectedOptionId(const String& id, SelectionMode mode)
 {
 	makeParentsOfItemExpanded(id);
-	return UIList::setSelectedOptionId(id);
+	return UIList::setSelectedOptionId(id, mode);
 }
 
 Vector2f UITreeList::getDragPositionAdjustment(Vector2f pos, Vector2f startPos) const

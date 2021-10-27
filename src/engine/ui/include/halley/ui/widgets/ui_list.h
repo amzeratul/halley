@@ -14,14 +14,20 @@ namespace Halley {
 	class UIList : public UIWidget {
 		friend class UIListItem;
 
-	public:		
+	public:
+		enum class SelectionMode {
+			Normal,
+			CtrlSelect,
+			ShiftSelect
+		};
+		
 		explicit UIList(String id, UIStyle style, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
 
 		void setOrientation(UISizerType orientation, int nColumns = 1);
 		UISizerType getOrientation() const;
 
-		virtual bool setSelectedOption(int option);
-		virtual bool setSelectedOptionId(const String& id);
+		virtual bool setSelectedOption(int option, SelectionMode mode = SelectionMode::Normal);
+		virtual bool setSelectedOptionId(const String& id, SelectionMode mode = SelectionMode::Normal);
 		int getSelectedOption() const;
 		String getSelectedOptionId() const;
 		size_t getCount() const;
@@ -52,6 +58,7 @@ namespace Halley {
 		std::shared_ptr<UIListItem> getItem(int n) const;
 		std::shared_ptr<UIListItem> getItem(const String& id) const;
 		int tryGetItemId(const String& id) const;
+		std::shared_ptr<UIListItem> tryGetItem(int n) const;
 		std::shared_ptr<UIListItem> tryGetItem(const String& id) const;
 		std::shared_ptr<UIListItem> getItemUnderCursor() const;
 		void changeItemId(int idx, const String& newId);
@@ -73,6 +80,9 @@ namespace Halley {
 
 		bool canReceiveFocus() const override;
 		void setFocusable(bool focusable);
+
+		bool isMultiSelect() const;
+		void setMultiSelect(bool enabled);
 
 		void setRequiresSelection(bool requireSelection);
 
@@ -116,11 +126,12 @@ namespace Halley {
 		bool singleClickAccept = true;
 		bool focusable = true;
 		bool scrollToSelection = true;
+		bool multiSelect = false;
 		int itemUnderCursor = -1;
 
 		bool requiresSelection = true;
 
-		void onItemClicked(UIListItem& item, int button);
+		void onItemClicked(UIListItem& item, int button, KeyMods keyMods);
 		void onItemDoubleClicked(UIListItem& item);
 		void onAccept();
 		void onCancel();
@@ -130,6 +141,10 @@ namespace Halley {
 		void setItemUnderCursor(int itemIdx, bool isMouseOver);
 
 		void applyImageColour(UIImage& image) const;
+
+		void changeSelection(int oldItem, int newItem, SelectionMode mode);
+		void deselectAll();
+		void notifyNewItemSelected(int itemIdx, const String& itemId);
 	};
 
 	class UIListItem : public UIClickable {
@@ -138,7 +153,9 @@ namespace Halley {
 
 		void onClicked(Vector2f mousePos, KeyMods keyMods) override;
 		void onDoubleClicked(Vector2f mousePos, KeyMods keyMods) override;
+
 		void setSelected(bool selected);
+		bool isSelected() const;
 
 		void setStyle(UIStyle style);
 
