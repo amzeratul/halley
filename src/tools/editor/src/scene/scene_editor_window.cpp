@@ -195,9 +195,9 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 		entityList->setSceneData(sceneData);
 
 		// Select entity
-		const auto& initialEntity = projectWindow.getAssetSetting(getAssetKey(), "currentEntity");
-		if (initialEntity.getType() != ConfigNodeType::Undefined) {
-			selectEntity(initialEntity.asString());
+		const auto& initialEntities = projectWindow.getAssetSetting(getAssetKey(), "currentEntities");
+		if (initialEntities.getType() != ConfigNodeType::Undefined) {
+			selectEntities(initialEntities.asVector<String>());
 		}
 
 		// Setup tools
@@ -427,6 +427,11 @@ void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 void SceneEditorWindow::selectEntity(const String& id)
 {
 	entityList->select(id);
+}
+
+void SceneEditorWindow::selectEntities(gsl::span<const String> ids)
+{
+	entityList->select(ids);
 }
 
 void SceneEditorWindow::modifyEntity(const String& id, const EntityDataDelta& delta)

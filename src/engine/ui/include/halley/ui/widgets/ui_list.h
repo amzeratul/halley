@@ -28,6 +28,8 @@ namespace Halley {
 
 		virtual bool setSelectedOption(int option, SelectionMode mode = SelectionMode::Normal);
 		virtual bool setSelectedOptionId(const String& id, SelectionMode mode = SelectionMode::Normal);
+		bool setSelectedOptionIds(gsl::span<const String> ids);
+
 		int getSelectedOption() const;
 		String getSelectedOptionId() const;
 		std::vector<int> getSelectedOptions() const;

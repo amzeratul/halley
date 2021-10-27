@@ -1116,6 +1116,24 @@ bool UIList::setSelectedOptionId(const String& id, SelectionMode mode)
 	return false;
 }
 
+bool UIList::setSelectedOptionIds(gsl::span<const String> ids)
+{
+   	if (ids.empty()) {
+		return setSelectedOptionId("");
+	} else {
+		bool modified = false;
+		bool first = true;
+		for (auto& id: ids) {
+			const bool value = setSelectedOptionId(id, first ? UIList::SelectionMode::Normal : UIList::SelectionMode::CtrlSelect);
+			if (first) {
+				modified = value;
+				first = false;
+			}
+		}
+		return modified;
+	}
+}
+
 Rect4f UIList::getOptionRect(int curOption) const
 {
 	if (getNumberOfItems() == 0) {

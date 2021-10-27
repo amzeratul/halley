@@ -190,6 +190,11 @@ void EntityList::select(const String& id)
 	list->setSelectedOptionId(id);
 }
 
+void EntityList::select(gsl::span<const String> ids)
+{
+	list->setSelectedOptionIds(ids);
+}
+
 UUID EntityList::getEntityUnderCursor() const
 {
 	const auto item = list->getItemUnderCursor();

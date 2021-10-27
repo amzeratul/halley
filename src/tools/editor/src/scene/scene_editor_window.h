@@ -46,6 +46,7 @@ namespace Halley {
 		void removeEntity(const String& entityId) override;
 		void replaceEntity(const String& entityId, EntityData newData);
 		void selectEntity(const String& id);
+		void selectEntities(gsl::span<const String> ids);
 		void modifyEntity(const String& id, const EntityDataDelta& delta);
 		void moveEntity(const String& id, const String& newParent, int childIndex, bool refreshEntityList = true);
 
