@@ -30,6 +30,9 @@ namespace Halley {
 		virtual bool setSelectedOptionId(const String& id, SelectionMode mode = SelectionMode::Normal);
 		int getSelectedOption() const;
 		String getSelectedOptionId() const;
+		std::vector<int> getSelectedOptions() const;
+		std::vector<String> getSelectedOptionIds() const;
+
 		size_t getCount() const;
 
 		UIStyle getStyle() const;

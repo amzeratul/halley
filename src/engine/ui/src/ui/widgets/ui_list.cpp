@@ -68,10 +68,10 @@ bool UIList::setSelectedOption(int option, SelectionMode mode)
 		return false;
 	}
 	
-	if (newSel != curOption) {
+	if (newSel != curOption || mode == SelectionMode::CtrlSelect) {
 		changeSelection(curOption, newSel, mode);
 
-		if (mode != SelectionMode::ShiftSelect) {
+		if (mode != SelectionMode::ShiftSelect && newSel != curOption) {
 			const auto curItem = getItem(newSel);
 			if (curItem->isEnabled()) {
 				notifyNewItemSelected(newSel, curItem->getId());
@@ -94,6 +94,28 @@ String UIList::getSelectedOptionId() const
 		return "";
 	}
 	return getItem(curOption)->getId();
+}
+
+std::vector<int> UIList::getSelectedOptions() const
+{
+	std::vector<int> result;
+	for (const auto& item: items) {
+		if (item->isSelected()) {
+			result.push_back(item->getIndex());
+		}
+	}
+	return result;
+}
+
+std::vector<String> UIList::getSelectedOptionIds() const
+{
+	std::vector<String> result;
+	for (const auto& item: items) {
+		if (item->isSelected()) {
+			result.push_back(item->getId());
+		}
+	}
+	return result;
 }
 
 size_t UIList::getCount() const
