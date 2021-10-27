@@ -412,8 +412,14 @@ void SceneEditor::setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizm
 	gizmoCollection.generateList(toolList);
 }
 
-void SceneEditor::setSelectedEntity(const UUID& id, EntityData& entityData)
+void SceneEditor::setSelectedEntities(std::vector<UUID> uuids, std::vector<EntityData*> datas)
 {
+	Expects(uuids.size() == datas.size());
+	Expects(!datas.empty());
+	
+	const auto& id = uuids.empty() ? UUID() : uuids.front();
+	auto& entityData = *datas.front();
+
 	const auto curId = selectedEntity ? selectedEntity.value().getInstanceUUID() : UUID();
 	if (id != curId) {
 		selectedEntity.reset();

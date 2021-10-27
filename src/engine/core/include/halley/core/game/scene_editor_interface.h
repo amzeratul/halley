@@ -224,7 +224,7 @@ namespace Halley {
     	virtual bool loadCameraPos() = 0;
         virtual void changeZoom(int amount, Vector2f cursorPosRelToCamera) = 0;
 
-    	virtual void setSelectedEntity(const UUID& id, EntityData& entityData) = 0;
+    	virtual void setSelectedEntities(std::vector<UUID> uuids, std::vector<EntityData*> datas) = 0;
     	virtual void setEntityHighlightedOnList(const UUID& id) = 0;
 
     	virtual void showEntity(const UUID& id) = 0;

@@ -557,7 +557,16 @@ void SceneEditorWindow::onEntitiesSelected(std::vector<String> selectedEntities)
 		}
 		entityEditor->loadEntity(firstId, firstEntityData, prefabData, false, project.getGameResources());
 
-		gameBridge->setSelectedEntity(UUID(firstId), firstEntityData); // TODO: support multiple entities
+		std::vector<UUID> uuids;
+		std::vector<EntityData*> datas;
+		uuids.reserve(selectedEntities.size());
+		datas.reserve(selectedEntities.size());
+		for (const auto& id: selectedEntities) {
+			uuids.push_back(UUID(id));
+			datas.push_back(&sceneData->getWriteableEntityNodeData(id).getData());
+		}
+		gameBridge->setSelectedEntities(std::move(uuids), std::move(datas));
+		
 		currentEntityIds = selectedEntities;
 		projectWindow.setAssetSetting(getAssetKey(), "currentEntities", ConfigNode(currentEntityIds));
 	} catch (const std::exception& e) {

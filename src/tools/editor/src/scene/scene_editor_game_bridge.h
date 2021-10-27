@@ -32,7 +32,7 @@ namespace Halley {
 		void moveCamera(Vector2f pos);
 		bool loadCameraPos();
 		std::shared_ptr<UIWidget> makeCustomUI() const;
-		void setSelectedEntity(const UUID& uuid, EntityData& data);
+		void setSelectedEntities(std::vector<UUID> uuids, std::vector<EntityData*> datas);
 		void setEntityHighlightedOnList(const UUID& uuid);
 		void showEntity(const UUID& uuid);
 		void onToolSet(String& tool, String& componentName, String& fieldName);

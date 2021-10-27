@@ -1124,7 +1124,7 @@ bool UIList::setSelectedOptionIds(gsl::span<const String> ids)
 		bool modified = false;
 		bool first = true;
 		for (auto& id: ids) {
-			const bool value = setSelectedOptionId(id, first ? UIList::SelectionMode::Normal : UIList::SelectionMode::CtrlSelect);
+			const bool value = setSelectedOptionId(id, first ? SelectionMode::Normal : SelectionMode::CtrlSelect);
 			if (first) {
 				modified = value;
 				first = false;

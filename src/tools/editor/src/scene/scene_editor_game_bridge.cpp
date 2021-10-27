@@ -141,10 +141,10 @@ std::shared_ptr<UIWidget> SceneEditorGameBridge::makeCustomUI() const
 	return result;
 }
 
-void SceneEditorGameBridge::setSelectedEntity(const UUID& uuid, EntityData& data)
+void SceneEditorGameBridge::setSelectedEntities(std::vector<UUID> uuids, std::vector<EntityData*> datas)
 {
 	if (interfaceReady) {
-		interface->setSelectedEntity(uuid, data);
+		interface->setSelectedEntities(std::move(uuids), std::move(datas));
 	}
 }
 
