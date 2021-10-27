@@ -49,6 +49,7 @@ void EntityList::makeUI()
 	list = std::make_shared<UITreeList>(getId() + "_list", factory.getStyle("treeList"));
 	list->setSingleClickAccept(false);
 	list->setDragEnabled(true);
+	list->setMultiSelect(true);
 	//list->setDragOutsideEnabled(true);
 	add(list, 1);
 
@@ -202,6 +203,20 @@ UUID EntityList::getEntityUnderCursor() const
 String EntityList::getCurrentSelection() const
 {
 	return list->getSelectedOptionId();
+}
+
+std::vector<String> EntityList::getCurrentSelections() const
+{
+	// Ensures the active selection is always the first one
+	
+	auto first = list->getSelectedOptionId();
+	auto all = list->getSelectedOptionIds();
+	std_ex::erase_if(all, [&] (const auto& v) { return v == first; });
+	std::vector<String> result;
+	result.reserve(1 + all.size());
+	result.push_back(first);
+	result.insert(result.end(), all.begin(), all.end());
+	return result;
 }
 
 void EntityList::setEntityValidatorList(std::shared_ptr<EntityValidatorListUI> validator)

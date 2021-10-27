@@ -29,6 +29,7 @@ namespace Halley {
 
 		UUID getEntityUnderCursor() const;
 		String getCurrentSelection() const;
+		std::vector<String> getCurrentSelections() const;
 
 		void setEntityValidatorList(std::shared_ptr<EntityValidatorListUI> validatorList);
 		void validateAllEntities();

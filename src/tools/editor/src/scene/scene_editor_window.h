@@ -144,7 +144,7 @@ namespace Halley {
 
 		std::shared_ptr<EntityValidator> entityValidator;
 
-		String currentEntityId;
+		std::vector<String> currentEntityIds;
 
 		std::shared_ptr<UIWidget> curCustomUI;
 		std::shared_ptr<UIWidget> curToolUI;
@@ -161,7 +161,7 @@ namespace Halley {
 		std::vector<std::function<bool(gsl::span<const String>)>> assetReloadCallbacks;
 
 		void makeUI();
-		void onEntitySelected(const String& id);
+		void onEntitiesSelected(std::vector<String> selectedEntities);
 		void panCameraToEntity(const String& id);
 
 		String findParent(const String& entityId) const;
