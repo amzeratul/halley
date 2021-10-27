@@ -590,8 +590,8 @@ void SceneEditorWindow::clearModifiedFlag()
 void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId, int childIndex)
 {
 	const auto& data = sceneData->getEntityNodeData(id).getData();
-	entityList->onEntityAdded(id, parentId, childIndex, data);
 	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
+	entityList->onEntityAdded(id, parentId, childIndex, data);
 	onEntitySelected(id);
 
 	undoStack.pushAdded(modified, id, parentId, childIndex, data);
