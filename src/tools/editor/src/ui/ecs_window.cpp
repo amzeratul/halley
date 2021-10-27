@@ -28,13 +28,23 @@ void ECSWindow::onMakeUI()
 	{
 		populateComponent(event.getStringData());
 	});
-	
+
+	std::vector<String> systemNames;
 	for (const auto& system: ecsData.getSystems()) {
-		systemList->addTextItem(system.first, LocalisedString::fromUserString(system.first));
+		systemNames.push_back(system.first);
 	}
-	
-	for (const auto& system: ecsData.getComponents()) {
-		componentList->addTextItem(system.first, LocalisedString::fromUserString(system.first));
+	std::sort(systemNames.begin(), systemNames.end());
+	for (const auto& system: systemNames) {
+		systemList->addTextItem(system, LocalisedString::fromUserString(system));
+	}
+
+	std::vector<String> componentNames;
+	for (const auto& component: ecsData.getComponents()) {
+		componentNames.push_back(component.first);
+	}
+	std::sort(componentNames.begin(), componentNames.end());
+	for (const auto& component: componentNames) {
+		componentList->addTextItem(component, LocalisedString::fromUserString(component));
 	}
 
 	setHandle(UIEventType::ListSelectionChanged, "tabs", [=] (const UIEvent& event)
