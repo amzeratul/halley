@@ -90,7 +90,7 @@ namespace Halley {
 
     	virtual std::vector<EntityId> createCamera();
 
-    	virtual void onEntitySelected(std::optional<EntityRef> entity);
+    	virtual void onEntitiesSelected(std::vector<EntityRef> entityIds);
     	virtual void setEntityFocus(std::vector<EntityId> entityIds);
 		void cycleHighlight(int delta) override;
 
@@ -115,7 +115,7 @@ namespace Halley {
 
 		std::vector<EntityId> cameraEntityIds;
     	
-		std::optional<EntityRef> selectedEntity;
+		std::vector<EntityRef> selectedEntities;
     	std::optional<EntityRef> forceFocusEntity;
     	EntityRef focusedEntity;
 		EntityRef entityHighlightedOnList;

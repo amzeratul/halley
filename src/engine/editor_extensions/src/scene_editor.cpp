@@ -223,8 +223,8 @@ void SceneEditor::drawOverlay(Painter& painter, Rect4f view)
 			drawStr += "\nWorld: " + Vector2i(worldPos);
 		}
 
-		if (selectedEntity) {
-			const auto* t2d = selectedEntity.value().tryGetComponent<Transform2DComponent>();
+		if (!selectedEntities.empty()) {
+			const auto* t2d = selectedEntities.front().tryGetComponent<Transform2DComponent>();
 			colours.emplace_back(drawStr.size(), Colour4f(0.8f, 0.8f, 1.0f));
 			if (t2d) {
 				const auto objectPos = Vector2i(t2d->inverseTransformPoint(Vector2f(scenePos)));
@@ -253,7 +253,7 @@ std::vector<EntityId> SceneEditor::createCamera()
 	});
 }
 
-void SceneEditor::onEntitySelected(std::optional<EntityRef> entity)
+void SceneEditor::onEntitiesSelected(std::vector<EntityRef> entities)
 {
 }
 
@@ -412,25 +412,27 @@ void SceneEditor::setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizm
 	gizmoCollection.generateList(toolList);
 }
 
-void SceneEditor::setSelectedEntities(std::vector<UUID> uuids, std::vector<EntityData*> datas)
+void SceneEditor::setSelectedEntities(std::vector<UUID> uuids, std::vector<EntityData*> entityDatas)
 {
-	Expects(uuids.size() == datas.size());
-	Expects(!datas.empty());
+	Expects(uuids.size() == entityDatas.size());
+	Expects(!entityDatas.empty());
 	
-	const auto& id = uuids.empty() ? UUID() : uuids.front();
-	auto& entityData = *datas.front();
-
-	const auto curId = selectedEntity ? selectedEntity.value().getInstanceUUID() : UUID();
-	if (id != curId) {
-		selectedEntity.reset();
-		if (id.isValid()) {
-			selectedEntity = getWorld().findEntity(id);
+	selectedEntities.resize(uuids.size());
+	for (size_t i = 0; i < uuids.size(); ++i) {
+		auto& selectedEntity = selectedEntities[i];
+		const auto& id = uuids[i];
+		const auto& curId = selectedEntity.isValid() ? selectedEntity.getInstanceUUID() : UUID();
+		if (id != curId) {
+			selectedEntity = EntityRef();
+			if (id.isValid()) {
+				selectedEntity = getWorld().findEntity(id).value_or(EntityRef());
+			}
 		}
-	}	
+	}
 
-	gizmoCollection->setSelectedEntity(selectedEntity, entityData);
+	gizmoCollection->setSelectedEntities(selectedEntities, std::move(entityDatas));
 
-	onEntitySelected(selectedEntity);
+	onEntitiesSelected(selectedEntities);
 	updateEntityFocused();
 }
 
@@ -549,12 +551,13 @@ void SceneEditor::onInit(std::shared_ptr<const UIColourScheme> colourScheme)
 
 EntityRef SceneEditor::getEntity(const UUID& id) const
 {
-	const auto curId = selectedEntity ? selectedEntity.value().getInstanceUUID() : UUID();
-	if (curId == id) {
-		return selectedEntity.value();
-	} else {
-		return getWorld().findEntity(id).value();
+	// Optimization: this will most likely be a selected entity
+	for (const auto& e: selectedEntities) {
+		if (e.getInstanceUUID() == id) {
+			return e;
+		}
 	}
+	return getWorld().findEntity(id).value();
 }
 
 bool SceneEditor::isPointInSprite(EntityRef& e, Vector2f point) const

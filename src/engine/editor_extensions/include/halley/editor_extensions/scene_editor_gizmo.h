@@ -83,7 +83,7 @@ namespace Halley {
 		virtual void draw(Painter& painter) const;
 		virtual std::shared_ptr<UIWidget> makeUI();
 
-		void setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& entityData);
+		void setSelectedEntities(std::vector<EntityRef> entities, std::vector<EntityData*> entityDatas);
 		virtual void refreshEntity();
 
 		void setCamera(const Camera& camera);
@@ -99,8 +99,8 @@ namespace Halley {
 	protected:
 		virtual void onEntityChanged();
 
-		const std::optional<EntityRef>& getEntity() const;
-		std::optional<EntityRef>& getEntity();
+		std::optional<EntityRef> getEntity() const;
+		std::optional<EntityRef> getEntity();
 
 		EntityData& getEntityData();
 		bool hasEntityData() const;
@@ -116,8 +116,8 @@ namespace Halley {
 		template <typename T>
 		T* getComponent()
 		{
-			if (curEntity) {
-				return curEntity->tryGetComponent<T>();
+			if (!curEntities.empty()) {
+				return curEntities.front().tryGetComponent<T>();
 			} else {
 				return nullptr;
 			}
@@ -126,16 +126,17 @@ namespace Halley {
 		template <typename T>
 		const T* getComponent() const
 		{
-			if (curEntity) {
-				return curEntity->tryGetComponent<T>();
+			if (!curEntities.empty()) {
+				return curEntities.front().tryGetComponent<T>();
 			} else {
 				return nullptr;
 			}
 		}
 
 	private:
-		std::optional<EntityRef> curEntity;
-		EntityData* entityData = nullptr;
+		std::vector<EntityRef> curEntities;
+		std::vector<EntityData*> entityDatas;
+		
 		SceneEditorOutputState* outputState = nullptr;
 		float zoom = 1.0f;
 

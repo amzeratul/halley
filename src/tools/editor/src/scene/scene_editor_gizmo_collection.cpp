@@ -50,15 +50,15 @@ void SceneEditorGizmoCollection::draw(Painter& painter)
 	}
 }
 
-void SceneEditorGizmoCollection::setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& data)
+void SceneEditorGizmoCollection::setSelectedEntities(std::vector<EntityRef> entities, std::vector<EntityData*> datas)
 {
-	selectedEntity = entity;
-	entityData = &data;
+	selectedEntities = std::move(entities);
+	entityDatas = std::move(datas);
 	
-	selectedBoundsGizmo->setSelectedEntity(entity, *entityData);
+	selectedBoundsGizmo->setSelectedEntities(selectedEntities, entityDatas);
 	
 	if (activeGizmo) {
-		activeGizmo->setSelectedEntity(entity, *entityData);
+		activeGizmo->setSelectedEntities(selectedEntities, entityDatas);
 	}
 }
 
@@ -72,7 +72,7 @@ void SceneEditorGizmoCollection::refreshEntity()
 
 void SceneEditorGizmoCollection::onEntityModified(const UUID& uuid, const EntityData& oldData, const EntityData& newData)
 {
-	if (selectedEntity && selectedEntity->getInstanceUUID() == uuid) {
+	if (std_ex::contains_if(selectedEntities, [&] (const auto& e) { return e.getInstanceUUID() == uuid; })) {
 		if (newData.getComponents().size() != oldData.getComponents().size()) {
 			refreshEntity();
 		}
@@ -101,8 +101,8 @@ std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(const String& tool
 	}
 
 	if (activeGizmo) {
-		if (selectedEntity && entityData) {
-			activeGizmo->setSelectedEntity(selectedEntity, *entityData);
+		if (!selectedEntities.empty()) {
+			activeGizmo->setSelectedEntities(selectedEntities, entityDatas);
 		}
 		return activeGizmo->makeUI();
 	}

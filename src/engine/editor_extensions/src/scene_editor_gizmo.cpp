@@ -154,11 +154,11 @@ std::shared_ptr<UIWidget> SceneEditorGizmo::makeUI()
 	return {};
 }
 
-void SceneEditorGizmo::setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& data)
+void SceneEditorGizmo::setSelectedEntities(std::vector<EntityRef> entities, std::vector<EntityData*> datas)
 {
-	entityData = &data;
-	if (curEntity != entity) {
-		curEntity = entity;
+	entityDatas = std::move(datas);
+	if (curEntities != entities) {
+		curEntities = std::move(entities);
 		onEntityChanged();
 	}
 }
@@ -202,20 +202,20 @@ void SceneEditorGizmo::onEntityChanged()
 
 EntityData& SceneEditorGizmo::getEntityData()
 {
-	return *entityData;
+	return *entityDatas.front();
 }
 
 bool SceneEditorGizmo::hasEntityData() const
 {
-	return !!entityData;
+	return !entityDatas.empty();
 }
 
 ConfigNode* SceneEditorGizmo::getComponentData(const String& name)
 {
-	if (!entityData) {
+	if (entityDatas.empty()) {
 		return nullptr;
 	}
-	auto& components = (*entityData).getComponents();
+	auto& components = (*entityDatas.front()).getComponents();
 	for (auto& [curName, value]: components) {
 		if (curName == name) {
 			return &value;
@@ -226,7 +226,7 @@ ConfigNode* SceneEditorGizmo::getComponentData(const String& name)
 
 const ConfigNode* SceneEditorGizmo::getComponentData(const String& name) const
 {
-	auto& components = (*entityData).getComponents();
+	auto& components = (*entityDatas.front()).getComponents();
 	for (auto& [curName, value]: components) {
 		if (curName == name) {
 			return &value;
@@ -244,14 +244,14 @@ void SceneEditorGizmo::markModified(const String& component, const String& field
 	}
 }
 
-const std::optional<EntityRef>& SceneEditorGizmo::getEntity() const
+std::optional<EntityRef> SceneEditorGizmo::getEntity() const
 {
-	return curEntity;
+	return curEntities.empty() ? std::optional<EntityRef>() : curEntities.front();
 }
 
-std::optional<EntityRef>& SceneEditorGizmo::getEntity()
+std::optional<EntityRef> SceneEditorGizmo::getEntity()
 {
-	return curEntity;
+	return curEntities.empty() ? std::optional<EntityRef>() : curEntities.front();
 }
 
 float SceneEditorGizmo::getZoom() const

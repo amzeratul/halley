@@ -346,7 +346,7 @@ namespace Halley {
 
         virtual bool update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) = 0;
         virtual void draw(Painter& painter) = 0;
-        virtual void setSelectedEntity(const std::optional<EntityRef>& entity, EntityData& entityData) = 0;
+        virtual void setSelectedEntities(std::vector<EntityRef> entities, std::vector<EntityData*> entityDatas) = 0;
 		virtual void refreshEntity() = 0;
         virtual std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName) = 0;
 		virtual void deselect() = 0;
