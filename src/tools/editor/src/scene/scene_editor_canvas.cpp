@@ -191,7 +191,8 @@ void SceneEditorCanvas::updateInputState()
 void SceneEditorCanvas::notifyOutputState()
 {
 	for (auto& m: outputState.fieldsChanged) {
-		editorWindow->onFieldChangedByGizmo(m.first, m.second);
+		editorWindow->onEntityModified(m.entityId.toString(), m.oldData, *m.newData);
+		editorWindow->onFieldChangedByGizmo(m.componentName, m.fieldName);
 	}
 	outputState.fieldsChanged.clear();
 

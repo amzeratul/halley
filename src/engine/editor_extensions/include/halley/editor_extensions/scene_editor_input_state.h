@@ -29,7 +29,15 @@ namespace Halley {
     };
 
 	struct SceneEditorOutputState {
-		std::vector<std::pair<String, String>> fieldsChanged;
+		struct FieldChange {
+			String componentName;
+			String fieldName;
+			UUID entityId;
+			EntityData oldData;
+			EntityData* newData = nullptr;
+		};
+		
+		std::vector<FieldChange> fieldsChanged;
 		std::optional<UUID> newSelection;
 		std::optional<UUID> mouseOver;
 

@@ -265,8 +265,12 @@ namespace Halley {
 		World& world;
 	};
 
+	class ConstEntityRef;
+
 	class EntityRef
 	{
+		friend class ConstEntityRef;
+	
 	public:
 		EntityRef() = default;
 		EntityRef(const EntityRef& other) = default;
@@ -626,6 +630,11 @@ namespace Halley {
 		ConstEntityRef(const Entity& e, const World& w)
 			: entity(&e)
 			, world(&w)
+		{}
+
+		ConstEntityRef(const EntityRef& e)
+			: entity(e.entity)
+			, world(e.world)
 		{}
 		
 		template <typename T>

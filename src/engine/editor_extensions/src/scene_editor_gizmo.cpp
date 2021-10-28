@@ -157,14 +157,25 @@ std::shared_ptr<UIWidget> SceneEditorGizmo::makeUI()
 void SceneEditorGizmo::setSelectedEntities(std::vector<EntityRef> entities, std::vector<EntityData*> datas)
 {
 	entityDatas = std::move(datas);
+	copyEntityDatasToOld();
+	
 	if (curEntities != entities) {
 		curEntities = std::move(entities);
 		onEntityChanged();
 	}
 }
 
+void SceneEditorGizmo::copyEntityDatasToOld()
+{
+	oldEntityDatas.resize(entityDatas.size());
+	for (size_t i = 0; i < entityDatas.size(); ++i) {
+		oldEntityDatas[i] = EntityData(*entityDatas[i]);
+	}
+}
+
 void SceneEditorGizmo::refreshEntity()
 {
+	copyEntityDatasToOld();
 	onEntityChanged();
 }
 
@@ -200,9 +211,14 @@ bool SceneEditorGizmo::onKeyPress(KeyboardKeyPress key)
 void SceneEditorGizmo::onEntityChanged()
 {}
 
-EntityData& SceneEditorGizmo::getEntityData()
+EntityData& SceneEditorGizmo::getEntityData(size_t entityIdx)
 {
-	return *entityDatas.front();
+	return *entityDatas.at(entityIdx);
+}
+
+const std::vector<EntityData*>& SceneEditorGizmo::getEntityDatas()
+{
+	return entityDatas;
 }
 
 bool SceneEditorGizmo::hasEntityData() const
@@ -210,12 +226,12 @@ bool SceneEditorGizmo::hasEntityData() const
 	return !entityDatas.empty();
 }
 
-ConfigNode* SceneEditorGizmo::getComponentData(const String& name)
+ConfigNode* SceneEditorGizmo::getComponentData(const String& name, size_t entityIdx)
 {
-	if (entityDatas.empty()) {
+	if (entityIdx >= entityDatas.size()) {
 		return nullptr;
 	}
-	auto& components = (*entityDatas.front()).getComponents();
+	auto& components = (*entityDatas.at(entityIdx)).getComponents();
 	for (auto& [curName, value]: components) {
 		if (curName == name) {
 			return &value;
@@ -224,9 +240,9 @@ ConfigNode* SceneEditorGizmo::getComponentData(const String& name)
 	return nullptr;
 }
 
-const ConfigNode* SceneEditorGizmo::getComponentData(const String& name) const
+const ConfigNode* SceneEditorGizmo::getComponentData(const String& name, size_t entityIdx) const
 {
-	auto& components = (*entityDatas.front()).getComponents();
+	auto& components = (*entityDatas.at(entityIdx)).getComponents();
 	for (auto& [curName, value]: components) {
 		if (curName == name) {
 			return &value;
@@ -235,23 +251,28 @@ const ConfigNode* SceneEditorGizmo::getComponentData(const String& name) const
 	return nullptr;
 }
 
-void SceneEditorGizmo::markModified(const String& component, const String& field)
+void SceneEditorGizmo::markModified(const String& component, const String& field, size_t entityIdx)
 {
-	if (outputState) {
-		outputState->fieldsChanged.emplace_back(component, field);
-	} else {
-		Logger::logError("Gizmo trying to markModified with not outputState bound");
-	}
+	Expects(outputState);
+
+	outputState->fieldsChanged.emplace_back(SceneEditorOutputState::FieldChange{ component, field, entityDatas.at(entityIdx)->getInstanceUUID(), EntityData(oldEntityDatas.at(entityIdx)), entityDatas.at(entityIdx) });
+
+	oldEntityDatas[entityIdx] = EntityData(*entityDatas[entityIdx]);
 }
 
-std::optional<EntityRef> SceneEditorGizmo::getEntity() const
+std::optional<ConstEntityRef> SceneEditorGizmo::getEntity(size_t entityIdx) const
 {
-	return curEntities.empty() ? std::optional<EntityRef>() : curEntities.front();
+	return entityIdx >= curEntities.size() ? std::optional<ConstEntityRef>() : ConstEntityRef(curEntities.at(entityIdx));
 }
 
-std::optional<EntityRef> SceneEditorGizmo::getEntity()
+std::optional<EntityRef> SceneEditorGizmo::getEntity(size_t entityIdx)
 {
-	return curEntities.empty() ? std::optional<EntityRef>() : curEntities.front();
+	return entityIdx >= curEntities.size() ? std::optional<EntityRef>() : curEntities.at(entityIdx);
+}
+
+const std::vector<EntityRef>& SceneEditorGizmo::getEntities() const
+{
+	return curEntities;
 }
 
 float SceneEditorGizmo::getZoom() const
@@ -339,4 +360,3 @@ std::optional<Line> SceneEditorGizmo::findSnapLine(Vector2f cur, Vector2f ref) c
 		return Line(ref, dirs[bestDir]);
 	}
 }
-

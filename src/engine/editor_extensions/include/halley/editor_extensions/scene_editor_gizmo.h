@@ -99,42 +99,37 @@ namespace Halley {
 	protected:
 		virtual void onEntityChanged();
 
-		std::optional<EntityRef> getEntity() const;
-		std::optional<EntityRef> getEntity();
+		std::optional<ConstEntityRef> getEntity(size_t entityIdx = 0) const;
+		std::optional<EntityRef> getEntity(size_t entityIdx = 0);
+		const std::vector<EntityRef>& getEntities() const;
 
-		EntityData& getEntityData();
+		EntityData& getEntityData(size_t entityIdx = 0);
+		const std::vector<EntityData*>& getEntityDatas();
 		bool hasEntityData() const;
-		ConfigNode* getComponentData(const String& name);
-		const ConfigNode* getComponentData(const String& name) const;
+		ConfigNode* getComponentData(const String& name, size_t entityIdx = 0);
+		const ConfigNode* getComponentData(const String& name, size_t entityIdx = 0) const;
 
-		void markModified(const String& component, const String& field);
+		void markModified(const String& component, const String& field, size_t entityIdx = 0);
 		
 		float getZoom() const;
 		SnapRules getSnapRules() const;
 		Vector2f solveLineSnap(Vector2f cur, std::optional<Vector2f> prev, std::optional<Vector2f> next) const;
 
 		template <typename T>
-		T* getComponent()
+		T* getComponent(size_t idx = 0)
 		{
-			if (!curEntities.empty()) {
-				return curEntities.front().tryGetComponent<T>();
-			} else {
-				return nullptr;
-			}
+			return idx >= curEntities.size() ? nullptr : curEntities.at(idx).tryGetComponent<T>();
 		}
-		
+
 		template <typename T>
-		const T* getComponent() const
+		const T* getComponent(size_t idx = 0) const
 		{
-			if (!curEntities.empty()) {
-				return curEntities.front().tryGetComponent<T>();
-			} else {
-				return nullptr;
-			}
+			return idx >= curEntities.size() ? nullptr : curEntities.at(idx).tryGetComponent<T>();
 		}
 
 	private:
 		std::vector<EntityRef> curEntities;
+		std::vector<EntityData> oldEntityDatas;
 		std::vector<EntityData*> entityDatas;
 		
 		SceneEditorOutputState* outputState = nullptr;
@@ -143,5 +138,6 @@ namespace Halley {
 		SnapRules snapRules;
 
 		std::optional<Line> findSnapLine(Vector2f cur, Vector2f ref) const;
+		void copyEntityDatasToOld();
 	};
 }

@@ -129,13 +129,13 @@ Circle TranslateGizmo::getMainHandle() const
 	return Circle(pos, 10.0f / getZoom());
 }
 
-void TranslateGizmo::updateEntityData(Vector2f pos)
+void TranslateGizmo::updateEntityData(Vector2f pos, size_t idx)
 {
-	auto* data = getComponentData("Transform2D");
+	auto* data = getComponentData("Transform2D", idx);
 	if (data) {
 		(*data)["position"] = pos;
 	}
-	markModified("Transform2D", "position");
+	markModified("Transform2D", "position", idx);
 }
 
 Vector2f TranslateGizmo::getObjectOffset() const
@@ -168,11 +168,15 @@ void TranslateGizmo::moveBy(Vector2i delta)
 void TranslateGizmo::doMoveBy()
 {
 	if (pendingMoveBy != Vector2i()) {
-		const auto transform = getComponent<Transform2DComponent>();
-		if (!handle.isHeld() && transform) {
-			auto newPos = transform->getLocalPosition() + Vector2f(pendingMoveBy);
-			transform->setLocalPosition(newPos);
-			updateEntityData(newPos);
+		size_t n = getEntities().size();
+		
+		for (size_t i = 0; i < n; ++i) {
+			const auto transform = getComponent<Transform2DComponent>(i);
+			if (!handle.isHeld() && transform) {
+				auto newPos = transform->getLocalPosition() + Vector2f(pendingMoveBy);
+				transform->setLocalPosition(newPos);
+				updateEntityData(newPos, i);
+			}
 		}
 
 		pendingMoveBy = Vector2i();

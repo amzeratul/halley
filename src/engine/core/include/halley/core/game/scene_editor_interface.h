@@ -367,7 +367,6 @@ namespace Halley {
 		virtual void onEntityReplaced(const String& id, const String& parentId, int childIndex, const EntityData& prevData, const EntityData& newData) = 0;
 		virtual void onEntityMoved(const String& id, const String& prevParentId, int prevChildIndex, const String& newParentId, int newChildIndex) = 0;
 		virtual void onComponentRemoved(const String& name) = 0;
-		virtual void onFieldChangedByGizmo(const String& componentName, const String& fieldName) = 0;
 
 		virtual void removeEntity(const String& entityId) = 0;
 		

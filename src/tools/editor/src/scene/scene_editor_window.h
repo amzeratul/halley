@@ -34,7 +34,7 @@ namespace Halley {
 		void onEntityReplaced(const String& id, const String& parentId, int childIndex, const EntityData& prevData, const EntityData& newData) override;
 		void onEntityMoved(const String& id, const String& prevParentId, int prevChildIndex, const String& newParentId, int newChildIndex) override;
 		void onComponentRemoved(const String& name) override;
-		void onFieldChangedByGizmo(const String& componentName, const String& fieldName) override;
+		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
 		void addNewEntity(std::optional<String> reference = {}, bool childOfReference = false);
 		void addNewPrefab(std::optional<String> reference = {}, bool childOfReference = false);

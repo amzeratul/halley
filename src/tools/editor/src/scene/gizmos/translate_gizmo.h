@@ -38,7 +38,7 @@ namespace Halley {
 		Vector2i pendingMoveBy;
 
 		Circle getMainHandle() const;
-		void updateEntityData(Vector2f pos);
+		void updateEntityData(Vector2f pos, size_t idx = 0);
 		Vector2f getObjectOffset() const;
 		void setMode(TranslateGizmoMode mode);
 		void moveBy(Vector2i delta);

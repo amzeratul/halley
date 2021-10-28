@@ -197,7 +197,7 @@ void EntityEditor::unloadIcons()
 void EntityEditor::onFieldChangedByGizmo(const String& componentName, const String& fieldName)
 {
 	sendEventDown(UIEvent(UIEventType::ReloadData, componentName + ":" + fieldName));
-	onEntityUpdated();
+	refreshEntityData();
 }
 
 void EntityEditor::onFieldChangedProcedurally(const String& componentName, const String& fieldName)
@@ -549,11 +549,16 @@ void EntityEditor::editPrefab()
 	}
 }
 
+void EntityEditor::refreshEntityData()
+{
+	prevEntityData = EntityData(*currentEntityData);
+	entityValidatorUI->refresh();
+}
+
 void EntityEditor::onEntityUpdated()
 {
 	sceneEditor->onEntityModified(currentId, prevEntityData, *currentEntityData);
-	prevEntityData = EntityData(*currentEntityData);
-	entityValidatorUI->refresh();
+	refreshEntityData();
 }
 
 void EntityEditor::setTool(const String& tool, const String& componentName, const String& fieldName)

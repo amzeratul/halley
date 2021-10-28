@@ -94,6 +94,7 @@ namespace Halley {
 		void editPrefab();
 		void setIcon(const String& icon);
 
+		void refreshEntityData();
 		void onEntityUpdated() override;
 		void setTool(const String& tool, const String& componentName, const String& fieldName) override;
 		EntityData& getEntityData();
