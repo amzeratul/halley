@@ -628,14 +628,27 @@ void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId
 
 void SceneEditorWindow::onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData)
 {
-	if (!id.isEmpty()) {
-		const bool hadChange = undoStack.pushModified(modified, id, prevData, newData);
+	const auto* oldPtr = &prevData;
+	const auto* newPtr = &newData;
+	onEntitiesModified(gsl::span<const String>(&id, 1), gsl::span<const EntityData*>(&oldPtr, 1), gsl::span<const EntityData*>(&newPtr, 1));
+}
 
-		if (hadChange) {
-			sceneData->reloadEntity(id);
-			entityList->onEntityModified(id, newData);
-			markModified();
+void SceneEditorWindow::onEntitiesModified(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<const EntityData*> newDatas)
+{
+	Expects(ids.size() == prevDatas.size());
+	Expects(ids.size() == newDatas.size());
+
+	bool hadAnyChange = false;
+	for (size_t i = 0; i < ids.size(); ++i) {
+		if (undoStack.pushModified(modified, ids[i], *prevDatas[i], *newDatas[i])) {
+			sceneData->reloadEntity(ids[i]);
+			entityList->onEntityModified(ids[i], *newDatas[i]);
+			hadAnyChange = true;
 		}
+	}
+
+	if (hadAnyChange) {
+		markModified();
 	}
 }
 

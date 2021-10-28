@@ -30,23 +30,23 @@ namespace Halley {
 			EntityReplaced
 		};
 
-		class Action {
-		public:
-			Type type;
+		struct EntityPatch {
 			EntityDataDelta delta;
 			String entityId;
 			String parent;
 			int childIndex;
+			
+			bool isCompatibleWith(const EntityPatch& other, Type type) const;
+		};
+		
+		class Action {
+		public:
+			Type type;
+			std::vector<EntityPatch> patches;
 			bool clearModified = false;
 
 			Action() = default;
-			Action(Type type, EntityDataDelta delta, String entityId, String parent = "", int childIndex = -1)
-				: type(type)
-				, delta(std::move(delta))
-				, entityId(std::move(entityId))
-				, parent(std::move(parent))
-				, childIndex(childIndex)
-			{}
+			Action(Type type, EntityDataDelta delta, String entityId, String parent = "", int childIndex = -1);
 		};
 
 		struct ActionPair {

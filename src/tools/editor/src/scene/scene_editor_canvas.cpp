@@ -190,11 +190,27 @@ void SceneEditorCanvas::updateInputState()
 
 void SceneEditorCanvas::notifyOutputState()
 {
-	for (auto& m: outputState.fieldsChanged) {
-		editorWindow->onEntityModified(m.entityId.toString(), m.oldData, *m.newData);
-		editorWindow->onFieldChangedByGizmo(m.componentName, m.fieldName);
+	auto& fields = outputState.fieldsChanged;
+	if (!fields.empty()) {
+		const auto n = fields.size();
+		std::vector<String> ids;
+		std::vector<const EntityData*> oldDatas;
+		std::vector<const EntityData*> newDatas;
+		ids.reserve(n);
+		oldDatas.reserve(n);
+		newDatas.reserve(n);
+		for (size_t i = 0; i < n; ++i) {
+			auto& f = fields[i];
+			ids.push_back(f.entityId.toString());
+			oldDatas.push_back(&f.oldData);
+			newDatas.push_back(f.newData);
+		}
+		
+		editorWindow->onEntitiesModified(ids, oldDatas, newDatas);
+		editorWindow->onFieldChangedByGizmo(fields[0].componentName, fields[0].fieldName);
+		
+		fields.clear();
 	}
-	outputState.fieldsChanged.clear();
 
 	if (!outputState.newSelection.empty()) {
 		std::vector<String> ids;

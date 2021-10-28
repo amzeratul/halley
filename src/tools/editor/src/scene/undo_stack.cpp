@@ -3,6 +3,19 @@
 #include "scene_editor_window.h"
 using namespace Halley;
 
+bool UndoStack::EntityPatch::isCompatibleWith(const EntityPatch& other, Type type) const
+{
+	if (entityId != other.entityId) {
+		return false;
+	}
+
+	if (type == Type::EntityModified) {
+		return delta.modifiesTheSameAs(other.delta);
+	}
+
+	return true;
+}
+
 UndoStack::UndoStack()
 	: maxSize(50)
 	, accepting(true)
@@ -92,17 +105,30 @@ bool UndoStack::canRedo() const
 	return stackPos < stack.size();
 }
 
+UndoStack::Action::Action(Type type, EntityDataDelta delta, String entityId, String parent, int childIndex)
+	: type(type)
+{
+	auto& a = patches.emplace_back();
+	a.delta = std::move(delta);
+	a.entityId = std::move(entityId);
+	a.parent = std::move(parent);
+	a.childIndex = childIndex;
+}
+
 bool UndoStack::ActionPair::isCompatibleWith(const Action& newForward) const
 {
-	if (forward.type != newForward.type || forward.entityId != newForward.entityId) {
+	if (forward.type != newForward.type || forward.patches.size() != newForward.patches.size()) {
 		return false;
 	}
 
-	if (forward.type == Type::EntityModified) {
-		return forward.delta.modifiesTheSameAs(newForward.delta);
+	// Check patch compatibility
+	for (size_t i = 0; i < forward.patches.size(); ++i) {
+		if (!forward.patches[i].isCompatibleWith(newForward.patches[i], forward.type)) {
+			return false;
+		}
 	}
-	
-	return false;
+
+	return true;
 }
 
 void UndoStack::addToStack(Action forward, Action back, bool wasModified)
@@ -131,25 +157,27 @@ void UndoStack::runAction(const Action& action, SceneEditorWindow& sceneEditorWi
 {
 	accepting = false;
 
+	auto& patch = action.patches.front(); // HACK
+
 	switch (action.type) {
 	case Type::EntityAdded:
-		sceneEditorWindow.addEntity(action.parent, action.childIndex, EntityData(action.delta));
+		sceneEditorWindow.addEntity(patch.parent, patch.childIndex, EntityData(patch.delta));
 		break;
 
 	case Type::EntityRemoved:
-		sceneEditorWindow.removeEntity(action.entityId);
+		sceneEditorWindow.removeEntity(patch.entityId);
 		break;
 		
 	case Type::EntityMoved:
-		sceneEditorWindow.moveEntity(action.entityId, action.parent, action.childIndex);
+		sceneEditorWindow.moveEntity(patch.entityId, patch.parent, patch.childIndex);
 		break;
 
 	case Type::EntityModified:
-		sceneEditorWindow.modifyEntity(action.entityId, action.delta);
+		sceneEditorWindow.modifyEntity(patch.entityId, patch.delta);
 		break;
 
 	case Type::EntityReplaced:
-		sceneEditorWindow.replaceEntity(action.entityId, EntityData(action.delta));
+		sceneEditorWindow.replaceEntity(patch.entityId, EntityData(patch.delta));
 		break;
 	}
 
