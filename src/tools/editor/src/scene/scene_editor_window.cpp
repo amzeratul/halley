@@ -424,14 +424,14 @@ void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 	}
 }
 
-void SceneEditorWindow::selectEntity(const String& id)
+void SceneEditorWindow::selectEntity(const String& id, UIList::SelectionMode mode)
 {
-	entityList->select(id);
+	entityList->select(id, mode);
 }
 
-void SceneEditorWindow::selectEntities(gsl::span<const String> ids)
+void SceneEditorWindow::selectEntities(gsl::span<const String> ids, UIList::SelectionMode mode)
 {
-	entityList->select(ids);
+	entityList->select(ids, mode);
 }
 
 void SceneEditorWindow::modifyEntity(const String& id, const EntityDataDelta& delta)

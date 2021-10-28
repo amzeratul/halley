@@ -642,17 +642,16 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 {
 	if (!input.mousePos) {
 		return;
-	}
-	if (input.spaceHeld || input.ctrlHeld || input.shiftHeld) {
+	} 
+	if (input.spaceHeld || input.shiftHeld) {
 		return;
 	}
-	
-	const auto bestEntity = getRootEntityAt(input.mousePos.value());
 
-	if (bestEntity.isValid()) {
-		output.newSelection = bestEntity.getInstanceUUID();
+	if (const auto bestEntity = getRootEntityAt(input.mousePos.value()); bestEntity.isValid()) {
+		output.newSelection.push_back(bestEntity.getInstanceUUID());
+		output.selectionMode = input.ctrlHeld ? UIList::SelectionMode::CtrlSelect : UIList::SelectionMode::Normal;
 	} else {
-		output.newSelection.reset();
+		output.newSelection.clear();
 	}
 }
 

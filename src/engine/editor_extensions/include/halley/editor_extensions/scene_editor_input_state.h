@@ -3,6 +3,8 @@
 #include <halley/maths/vector2.h>
 #include <halley/maths/rect.h>
 
+#include "halley/ui/widgets/ui_list.h"
+
 namespace Halley {
    	struct SceneEditorInputState {
 		// Filled on editor side
@@ -38,13 +40,15 @@ namespace Halley {
 		};
 		
 		std::vector<FieldChange> fieldsChanged;
-		std::optional<UUID> newSelection;
+		std::vector<UUID> newSelection;
+		UIList::SelectionMode selectionMode;
 		std::optional<UUID> mouseOver;
 
 		void clear()
 		{
 			fieldsChanged.clear();
-			newSelection.reset();
+			newSelection.clear();
+			selectionMode = UIList::SelectionMode::Normal;
 			mouseOver.reset();
 		}
 	};

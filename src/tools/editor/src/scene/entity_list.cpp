@@ -185,14 +185,14 @@ void EntityList::onEntityRemoved(const String& id, const String& newSelectionId)
 	markValid(UUID(id), true);
 }
 
-void EntityList::select(const String& id)
+void EntityList::select(const String& id, UIList::SelectionMode mode)
 {
-	list->setSelectedOptionId(id);
+	list->setSelectedOptionId(id, mode);
 }
 
-void EntityList::select(gsl::span<const String> ids)
+void EntityList::select(gsl::span<const String> ids, UIList::SelectionMode mode)
 {
-	list->setSelectedOptionIds(ids);
+	list->setSelectedOptionIds(ids, mode);
 }
 
 UUID EntityList::getEntityUnderCursor() const

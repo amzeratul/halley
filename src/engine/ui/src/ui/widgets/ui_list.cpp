@@ -235,10 +235,10 @@ void UIList::changeSelection(int oldItem, int newItem, SelectionMode mode)
 		deselectAll();
 	}
 
-	if (mode == SelectionMode::Normal || mode == SelectionMode::CtrlSelect) {
+	if (mode == SelectionMode::Normal || mode == SelectionMode::CtrlSelect || mode == SelectionMode::AddToSelect) {
 		const auto curItem = tryGetItem(newItem);
 		if (curItem->isEnabled()) {
-			curItem->setSelected(mode == SelectionMode::Normal ? true : !curItem->isSelected());
+			curItem->setSelected(mode == SelectionMode::Normal || mode == SelectionMode::AddToSelect ? true : !curItem->isSelected());
 		}
 	} else if (mode == SelectionMode::ShiftSelect) {
 		const int a = std::min(oldItem, newItem);
@@ -1116,22 +1116,30 @@ bool UIList::setSelectedOptionId(const String& id, SelectionMode mode)
 	return false;
 }
 
-bool UIList::setSelectedOptionIds(gsl::span<const String> ids)
+bool UIList::setSelectedOptionIds(gsl::span<const String> ids, SelectionMode mode)
 {
    	if (ids.empty()) {
-		return setSelectedOptionId("");
-	} else {
-		bool modified = false;
-		bool first = true;
-		for (auto& id: ids) {
-			const bool value = setSelectedOptionId(id, first ? SelectionMode::Normal : SelectionMode::CtrlSelect);
-			if (first) {
-				modified = value;
-				first = false;
-			}
+   		if (mode == SelectionMode::Normal) {
+			return setSelectedOptionId("");
+		} else {
+			return false;
 		}
-		return modified;
 	}
+
+	if (mode == SelectionMode::ShiftSelect) {
+		return setSelectedOptionId(ids.front(), mode);
+	}
+
+	bool modified = false;
+	bool first = true;
+	for (auto& id: ids) {
+		const bool value = setSelectedOptionId(id, mode == SelectionMode::Normal ? (first ? SelectionMode::Normal : SelectionMode::AddToSelect) : mode);
+		if (first) {
+			modified = value;
+			first = false;
+		}
+	}
+	return modified;
 }
 
 Rect4f UIList::getOptionRect(int curOption) const

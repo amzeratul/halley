@@ -26,8 +26,8 @@ namespace Halley {
 		void onEntityAdded(const String& id, const String& parentId, int childIndex, const EntityData& data);
 		void onEntityRemoved(const String& id, const String& newSelectionId);
 
-		void select(const String& id);
-		void select(gsl::span<const String> ids);
+		void select(const String& id, UIList::SelectionMode mode = UIList::SelectionMode::Normal);
+		void select(gsl::span<const String> ids, UIList::SelectionMode mode = UIList::SelectionMode::Normal);
 
 		UUID getEntityUnderCursor() const;
 		String getCurrentSelection() const;
