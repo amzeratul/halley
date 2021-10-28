@@ -13,17 +13,15 @@ SelectedBoundsGizmo::SelectedBoundsGizmo(SnapRules snapRules, Resources& resourc
 
 void SelectedBoundsGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {
-	const auto& e = getEntity();
-	if (e) {
-		bounds = sceneEditor.getSpriteTreeBounds(e.value());
-	} else {
-		bounds.reset();
+	bounds.clear();
+	for (auto& e: getEntities()) {
+		bounds.push_back(sceneEditor.getSpriteTreeBounds(e));
 	}
 }
 
 void SelectedBoundsGizmo::draw(Painter& painter) const
 {
-	if (bounds) {
-		painter.drawRect(bounds.value(), 1.0f / getZoom(), Colour4f(1, 1, 1), material);
+	for (auto& b: bounds) {
+		painter.drawRect(b, 1.0f / getZoom(), Colour4f(1, 1, 1), material);
 	}
 }

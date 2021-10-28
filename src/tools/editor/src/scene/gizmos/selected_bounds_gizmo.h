@@ -13,7 +13,7 @@ namespace Halley {
 		void draw(Painter& painter) const override;
 
 	private:
-		std::optional<Rect4f> bounds;
+		std::vector<Rect4f> bounds;
 		std::shared_ptr<Material> material;
 	};
 }
