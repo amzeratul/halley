@@ -434,12 +434,27 @@ void SceneEditorWindow::selectEntities(gsl::span<const String> ids, UIList::Sele
 	entityList->select(ids, mode);
 }
 
-void SceneEditorWindow::modifyEntity(const String& id, const EntityDataDelta& delta)
+void SceneEditorWindow::modifyEntities(gsl::span<const EntityPatch> patches)
 {
-	auto& data = sceneData->getWriteableEntityNodeData(id).getData();
-	auto oldData = EntityData(data);
-	data.applyDelta(delta);
-	onEntityModified(id, oldData, data);
+	std::vector<String> ids;
+	std::vector<EntityData> oldDatas;
+	std::vector<const EntityData*> oldDataPtrs;
+	std::vector<const EntityData*> newDataPtrs;
+	ids.reserve(ids.size());
+	oldDatas.reserve(patches.size());
+	oldDataPtrs.reserve(patches.size());
+	newDataPtrs.reserve(patches.size());
+	
+	for (const auto& patch: patches) {
+		auto& data = sceneData->getWriteableEntityNodeData(patch.entityId).getData();
+		ids.emplace_back(patch.entityId);
+		oldDatas.emplace_back(EntityData(data));
+		oldDataPtrs.emplace_back(&oldDatas.back()); // This is only OK because of the reserve above, otherwise the pointer might be invalidated
+		newDataPtrs.emplace_back(&data);
+		data.applyDelta(patch.delta);
+	}
+	
+	onEntitiesModified(ids, oldDataPtrs, newDataPtrs);
 	entityEditor->reloadEntity();
 }
 
@@ -638,16 +653,11 @@ void SceneEditorWindow::onEntitiesModified(gsl::span<const String> ids, gsl::spa
 	Expects(ids.size() == prevDatas.size());
 	Expects(ids.size() == newDatas.size());
 
-	bool hadAnyChange = false;
-	for (size_t i = 0; i < ids.size(); ++i) {
-		if (undoStack.pushModified(modified, ids[i], *prevDatas[i], *newDatas[i])) {
+	if (undoStack.pushModified(modified, ids, prevDatas, newDatas)) {
+		for (size_t i = 0; i < ids.size(); ++i) {
 			sceneData->reloadEntity(ids[i]);
 			entityList->onEntityModified(ids[i], *newDatas[i]);
-			hadAnyChange = true;
 		}
-	}
-
-	if (hadAnyChange) {
 		markModified();
 	}
 }

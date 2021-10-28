@@ -3,6 +3,13 @@
 namespace Halley {
 	class SceneEditorWindow;
 
+	struct EntityPatch {
+		EntityDataDelta delta;
+		String entityId;
+		String parent;
+		int childIndex;
+	};
+
 	class UndoStack {
 	public:
 		UndoStack();
@@ -10,7 +17,7 @@ namespace Halley {
 		void pushAdded(bool wasModified, const String& entityId, const String& parent, int childIndex, const EntityData& data);
 		void pushRemoved(bool wasModified, const String& entityId, const String& parent, int childIndex, const EntityData& data);
 		void pushMoved(bool wasModified, const String& entityId, const String& prevParent, int prevIndex, const String& newParent, int newIndex);
-		bool pushModified(bool wasModified, const String& entityId, const EntityData& before, const EntityData& after);
+		bool pushModified(bool wasModified, gsl::span<const String> entityIds, gsl::span<const EntityData*> before, gsl::span<const EntityData*> after);
 		bool pushReplaced(bool wasModified, const String& entityId, const EntityData& before, const EntityData& after);
 
 		void undo(SceneEditorWindow& sceneEditorWindow);
@@ -29,15 +36,6 @@ namespace Halley {
 			EntityModified,
 			EntityReplaced
 		};
-
-		struct EntityPatch {
-			EntityDataDelta delta;
-			String entityId;
-			String parent;
-			int childIndex;
-			
-			bool isCompatibleWith(const EntityPatch& other, Type type) const;
-		};
 		
 		class Action {
 		public:
@@ -47,6 +45,7 @@ namespace Halley {
 
 			Action() = default;
 			Action(Type type, EntityDataDelta delta, String entityId, String parent = "", int childIndex = -1);
+			Action(Type type, std::vector<EntityPatch> patches);
 		};
 
 		struct ActionPair {
@@ -58,6 +57,7 @@ namespace Halley {
 			ActionPair(Action forward, Action back) : forward(std::move(forward)), back(std::move(back)) {}
 
 			bool isCompatibleWith(const Action& newForward) const;
+			bool arePatchesCompatible(const EntityPatch& a, const EntityPatch& b, Type type) const;
 		};
 
 		std::vector<std::unique_ptr<ActionPair>> stack;

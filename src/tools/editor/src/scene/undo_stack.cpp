@@ -3,19 +3,6 @@
 #include "scene_editor_window.h"
 using namespace Halley;
 
-bool UndoStack::EntityPatch::isCompatibleWith(const EntityPatch& other, Type type) const
-{
-	if (entityId != other.entityId) {
-		return false;
-	}
-
-	if (type == Type::EntityModified) {
-		return delta.modifiesTheSameAs(other.delta);
-	}
-
-	return true;
-}
-
 UndoStack::UndoStack()
 	: maxSize(50)
 	, accepting(true)
@@ -45,19 +32,34 @@ void UndoStack::pushMoved(bool wasModified, const String& entityId, const String
 	}
 }
 
-bool UndoStack::pushModified(bool wasModified, const String& entityId, const EntityData& before, const EntityData& after)
+bool UndoStack::pushModified(bool wasModified, gsl::span<const String> entityIds, gsl::span<const EntityData*> before, gsl::span<const EntityData*> after)
 {
-	if (accepting) {
-		auto forward = EntityDataDelta(before, after);
-		if (forward.hasChange()) {
-			auto back = EntityDataDelta(after, before);
-			addToStack(Action(Type::EntityModified, std::move(forward), entityId), Action(Type::EntityModified, std::move(back), entityId), wasModified);
-			return true;
-		} else {
-			return false;
-		}
+	Expects(entityIds.size() == before.size());
+	Expects(entityIds.size() == after.size());
+	
+	if (!accepting) {
+		return true;
 	}
-	return true;
+
+	std::vector<EntityPatch> forwardPatches;
+	std::vector<EntityPatch> backPatches;
+	forwardPatches.reserve(entityIds.size());
+	backPatches.reserve(entityIds.size());
+	bool hasAnyChange = false;
+	for (size_t i = 0; i < entityIds.size(); ++i) {
+		auto forward = EntityDataDelta(*before[i], *after[i]);
+		auto back = EntityDataDelta(*after[i], *before[i]);
+		hasAnyChange = hasAnyChange || forward.hasChange();
+		forwardPatches.emplace_back(EntityPatch{ forward, entityIds[i] });
+		backPatches.emplace_back(EntityPatch{ back, entityIds[i] });
+	}
+	
+	if (hasAnyChange) {
+		addToStack(Action(Type::EntityModified, std::move(forwardPatches)), Action(Type::EntityModified, std::move(backPatches)), wasModified);
+		return true;
+	} else {
+		return false;
+	}
 }
 
 bool UndoStack::pushReplaced(bool wasModified, const String& entityId, const EntityData& before, const EntityData& after)
@@ -115,6 +117,12 @@ UndoStack::Action::Action(Type type, EntityDataDelta delta, String entityId, Str
 	a.childIndex = childIndex;
 }
 
+UndoStack::Action::Action(Type type, std::vector<EntityPatch> patches)
+	: type(type)
+	, patches(std::move(patches))
+{
+}
+
 bool UndoStack::ActionPair::isCompatibleWith(const Action& newForward) const
 {
 	if (forward.type != newForward.type || forward.patches.size() != newForward.patches.size()) {
@@ -123,12 +131,25 @@ bool UndoStack::ActionPair::isCompatibleWith(const Action& newForward) const
 
 	// Check patch compatibility
 	for (size_t i = 0; i < forward.patches.size(); ++i) {
-		if (!forward.patches[i].isCompatibleWith(newForward.patches[i], forward.type)) {
+		if (!arePatchesCompatible(forward.patches[i], newForward.patches[i], forward.type)) {
 			return false;
 		}
 	}
 
 	return true;
+}
+
+bool UndoStack::ActionPair::arePatchesCompatible(const EntityPatch& a, const EntityPatch& b, Type type) const
+{
+	if (a.entityId != b.entityId) {
+		return false;
+	}
+
+	if (type == Type::EntityModified) {
+		return a.delta.modifiesTheSameAs(b.delta);
+	}
+
+	return true;	
 }
 
 void UndoStack::addToStack(Action forward, Action back, bool wasModified)
@@ -173,7 +194,7 @@ void UndoStack::runAction(const Action& action, SceneEditorWindow& sceneEditorWi
 		break;
 
 	case Type::EntityModified:
-		sceneEditorWindow.modifyEntity(patch.entityId, patch.delta);
+		sceneEditorWindow.modifyEntities(action.patches);
 		break;
 
 	case Type::EntityReplaced:
