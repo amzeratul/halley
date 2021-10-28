@@ -50,7 +50,11 @@ namespace Halley {
 		void selectEntities(gsl::span<const String> ids, UIList::SelectionMode mode = UIList::SelectionMode::Normal);
 		void moveEntity(const String& id, const String& newParent, int childIndex, bool refreshEntityList = true);
 
+		void addEntities(gsl::span<const EntityPatch> patches);
+		void removeEntities(gsl::span<const EntityPatch> patches);
 		void modifyEntities(gsl::span<const EntityPatch> patches);
+		void moveEntities(gsl::span<const EntityPatch> patches);
+		void replaceEntities(gsl::span<const EntityPatch> patches);
 
 		void extractPrefab(const String& id);
 		void extractPrefab(const String& id, const String& prefabName);

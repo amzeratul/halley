@@ -177,20 +177,18 @@ void UndoStack::addToStack(Action forward, Action back, bool wasModified)
 void UndoStack::runAction(const Action& action, SceneEditorWindow& sceneEditorWindow)
 {
 	accepting = false;
-
-	auto& patch = action.patches.front(); // HACK
-
+	
 	switch (action.type) {
 	case Type::EntityAdded:
-		sceneEditorWindow.addEntity(patch.parent, patch.childIndex, EntityData(patch.delta));
+		sceneEditorWindow.addEntities(action.patches);
 		break;
 
 	case Type::EntityRemoved:
-		sceneEditorWindow.removeEntity(patch.entityId);
+		sceneEditorWindow.removeEntities(action.patches);
 		break;
 		
 	case Type::EntityMoved:
-		sceneEditorWindow.moveEntity(patch.entityId, patch.parent, patch.childIndex);
+		sceneEditorWindow.moveEntities(action.patches);
 		break;
 
 	case Type::EntityModified:
@@ -198,7 +196,7 @@ void UndoStack::runAction(const Action& action, SceneEditorWindow& sceneEditorWi
 		break;
 
 	case Type::EntityReplaced:
-		sceneEditorWindow.replaceEntity(patch.entityId, EntityData(patch.delta));
+		sceneEditorWindow.replaceEntities(action.patches);
 		break;
 	}
 

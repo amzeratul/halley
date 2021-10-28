@@ -434,6 +434,20 @@ void SceneEditorWindow::selectEntities(gsl::span<const String> ids, UIList::Sele
 	entityList->select(ids, mode);
 }
 
+void SceneEditorWindow::addEntities(gsl::span<const EntityPatch> patches)
+{
+	// TODO
+	Expects(patches.size() == 1);
+	addEntity(patches.front().parent, patches.front().childIndex, EntityData(patches.front().delta));
+}
+
+void SceneEditorWindow::removeEntities(gsl::span<const EntityPatch> patches)
+{
+	// TODO
+	Expects(patches.size() == 1);
+	removeEntity(patches.front().entityId);
+}
+
 void SceneEditorWindow::modifyEntities(gsl::span<const EntityPatch> patches)
 {
 	std::vector<String> ids;
@@ -456,6 +470,20 @@ void SceneEditorWindow::modifyEntities(gsl::span<const EntityPatch> patches)
 	
 	onEntitiesModified(ids, oldDataPtrs, newDataPtrs);
 	entityEditor->reloadEntity();
+}
+
+void SceneEditorWindow::moveEntities(gsl::span<const EntityPatch> patches)
+{
+	// TODO
+	Expects(patches.size() == 1);
+	moveEntity(patches.front().entityId, patches.front().parent, patches.front().childIndex);
+}
+
+void SceneEditorWindow::replaceEntities(gsl::span<const EntityPatch> patches)
+{
+	// TODO
+	Expects(patches.size() == 1);
+	replaceEntity(patches.front().entityId, EntityData(patches.front().delta));
 }
 
 void SceneEditorWindow::moveEntity(const String& id, const String& newParent, int childIndex, bool refreshEntityList)
