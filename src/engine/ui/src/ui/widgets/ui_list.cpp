@@ -69,16 +69,7 @@ bool UIList::setSelectedOption(int option, SelectionMode mode)
 	}
 	
 	if (newSel != curOption || mode == SelectionMode::CtrlSelect) {
-		changeSelection(curOption, newSel, mode);
-
-		if (mode != SelectionMode::ShiftSelect && newSel != curOption) {
-			const auto curItem = getItem(newSel);
-			if (curItem->isEnabled()) {
-				notifyNewItemSelected(newSel, curItem->getId());
-				curOption = newSel;
-				return true;
-			}
-		}
+		return changeSelection(curOption, newSel, mode);
 	}
 	return false;
 }
@@ -229,16 +220,38 @@ void UIList::applyImageColour(UIImage& image) const
 	}
 }
 
-void UIList::changeSelection(int oldItem, int newItem, SelectionMode mode)
+bool UIList::changeSelection(int oldItem, int newItem, SelectionMode mode)
 {
+	std::optional<int> newItemToFocus;
+	bool shouldFocusElsewhere = false;
+	bool changed = false;
+
 	if (mode == SelectionMode::Normal || mode == SelectionMode::ShiftSelect) {
 		deselectAll();
 	}
 
-	if (mode == SelectionMode::Normal || mode == SelectionMode::CtrlSelect || mode == SelectionMode::AddToSelect) {
+	if (mode == SelectionMode::Normal || mode == SelectionMode::AddToSelect) {
 		const auto curItem = tryGetItem(newItem);
 		if (curItem->isEnabled()) {
-			curItem->setSelected(mode == SelectionMode::Normal || mode == SelectionMode::AddToSelect ? true : !curItem->isSelected());
+			if (!curItem->isSelected()) {
+				changed = true;
+			}
+			curItem->setSelected(true);
+			if (oldItem != newItem) {
+				newItemToFocus = newItem;
+			}
+		}
+	} else if (mode == SelectionMode::CtrlSelect) {
+		const auto curItem = tryGetItem(newItem);
+		if (curItem->isEnabled()) {
+			const bool wasSelected = curItem->isSelected();
+			curItem->setSelected(!wasSelected);
+			if (wasSelected) {
+				shouldFocusElsewhere = true;
+			} else {
+				newItemToFocus = newItem;
+			}
+			changed = true;
 		}
 	} else if (mode == SelectionMode::ShiftSelect) {
 		const int a = std::min(oldItem, newItem);
@@ -249,7 +262,34 @@ void UIList::changeSelection(int oldItem, int newItem, SelectionMode mode)
 				curItem->setSelected(true);
 			}
 		}
+		changed = true;
 	}
+
+	if (shouldFocusElsewhere) {
+		const auto& sels = getSelectedOptions();
+		const int fallback = sels.empty() ? newItem : sels.front();
+		if (sels.empty()) {
+			auto curItem = tryGetItem(fallback);
+			if (curItem && curItem->isEnabled()) {
+				curItem->setSelected(true);
+			}
+		}
+		if (curOption != fallback) {
+			newItemToFocus = fallback;
+		}
+	}
+
+	if (newItemToFocus) {
+		const auto curItem = getItem(newItemToFocus.value());
+		curOption = newItemToFocus.value();
+		changed = true;
+	}
+
+	if (changed) {
+		notifyNewItemSelected(curOption, getSelectedOptionId());
+	}
+
+	return changed;
 }
 
 void UIList::deselectAll()

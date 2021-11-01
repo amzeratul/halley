@@ -92,12 +92,7 @@ void TranslateGizmo::draw(Painter& painter) const
 
 bool TranslateGizmo::isHighlighted() const
 {
-	for (auto& handle: handles) {
-		if (handle.isOver()) {
-			return true;
-		}
-	}
-	return false;
+	return std::any_of(handles.begin(), handles.end(), [=] (const auto& e) { return e.isOver(); });
 }
 
 std::shared_ptr<UIWidget> TranslateGizmo::makeUI()

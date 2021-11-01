@@ -148,7 +148,7 @@ namespace Halley {
 
 		void applyImageColour(UIImage& image) const;
 
-		void changeSelection(int oldItem, int newItem, SelectionMode mode);
+		bool changeSelection(int oldItem, int newItem, SelectionMode mode);
 		void deselectAll();
 		void notifyNewItemSelected(int itemIdx, const String& itemId);
 	};
