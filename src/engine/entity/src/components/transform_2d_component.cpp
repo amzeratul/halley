@@ -147,11 +147,15 @@ Vector2f Transform2DComponent::transformPoint(const Vector2f& p) const
 
 Vector2f Transform2DComponent::inverseTransformPoint(const Vector2f& p) const
 {
-	// TODO, do this properly
-	auto pos = (p - getGlobalPosition()) / getGlobalScale();
-	
-	setCached(CachedIndices::Position); // Important: getGlobalPosition() won't cache if it's the root, but this is important for markDirty
-	return pos;
+	const auto s = getGlobalScale();
+	if (std::abs(s.x) < 0.001f || std::abs(s.y) < 0.001f) {
+		return Vector2f(); // Degenerate case
+	} else {
+		// TODO, do this properly
+		auto pos = (p - getGlobalPosition()) / s;
+		setCached(CachedIndices::Position); // Important: getGlobalPosition() won't cache if it's the root, but this is important for markDirty
+		return pos;
+	}
 }
 
 Rect4f Transform2DComponent::getSpriteAABB(const Sprite& sprite) const

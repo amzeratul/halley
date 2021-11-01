@@ -27,21 +27,27 @@ namespace Halley {
 		std::vector<String> getHighlightedComponents() const override;
 		bool onKeyPress(KeyboardKeyPress key) override;
 
+	protected:
+		void onEntityChanged() override;
+
 	private:
 		UIFactory& factory;
 		ISceneEditorWindow& sceneEditorWindow;
-		bool visible = false;
-		SceneEditorGizmoHandle handle;
-		Vector2f handleOffset;
+
+		std::vector<SceneEditorGizmoHandle> handles;
+		std::vector<Vector2f> handleOffsets;
+
 		TranslateGizmoMode mode;
 		std::shared_ptr<UIList> uiMode;
-		Vector2i pendingMoveBy;
+		Vector2f pendingMoveBy;
 
-		Circle getMainHandle() const;
-		void updateEntityData(Vector2f pos, size_t idx = 0);
-		Vector2f getObjectOffset() const;
+		Circle getHandleBounds(const SceneEditorGizmoHandle& handle) const;
+		void updateEntityData(Vector2f pos, size_t idx);
+		Vector2f getObjectOffset(size_t idx) const;
 		void setMode(TranslateGizmoMode mode);
 		void moveBy(Vector2i delta);
 		void doMoveBy();
+		void doMoveBy(Vector2f delta);
+		void loadHandles();
 	};
 }
