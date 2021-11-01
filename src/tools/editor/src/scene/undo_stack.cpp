@@ -47,8 +47,10 @@ bool UndoStack::pushModified(bool wasModified, gsl::span<const String> entityIds
 	backPatches.reserve(entityIds.size());
 	bool hasAnyChange = false;
 	for (size_t i = 0; i < entityIds.size(); ++i) {
-		auto forward = EntityDataDelta(*before[i], *after[i]);
-		auto back = EntityDataDelta(*after[i], *before[i]);
+		EntityDataDelta::Options options;
+		options.shallow = true;
+		auto forward = EntityDataDelta(*before[i], *after[i], options);
+		auto back = EntityDataDelta(*after[i], *before[i], options);
 		hasAnyChange = hasAnyChange || forward.hasChange();
 		forwardPatches.emplace_back(EntityPatch{ forward, entityIds[i] });
 		backPatches.emplace_back(EntityPatch{ back, entityIds[i] });

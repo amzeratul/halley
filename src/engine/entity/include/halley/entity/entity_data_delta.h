@@ -13,7 +13,8 @@ namespace Halley {
         public:
             Options();
         	
-	        bool preserveOrder;
+	        bool preserveOrder = false;
+			bool shallow = false;
         	std::set<String> ignoreComponents;
         };
 		
