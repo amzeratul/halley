@@ -16,11 +16,25 @@ void UndoStack::pushAdded(bool wasModified, const String& entityId, const String
 	}
 }
 
-void UndoStack::pushRemoved(bool wasModified, const String& entityId, const String& parent, int childIndex, const EntityData& data)
+void UndoStack::pushRemoved(bool wasModified, gsl::span<const String> entityIds, gsl::span<const std::pair<String, int>> parents, gsl::span<const EntityData> datas)
 {
-	if (accepting) {
-		addToStack(Action(Type::EntityRemoved, EntityDataDelta(), entityId), Action(Type::EntityAdded, EntityDataDelta(data), entityId, parent, childIndex), wasModified);
+	if (!accepting) {
+		return;
 	}
+
+	std::vector<EntityPatch> forwardPatches;
+	std::vector<EntityPatch> backPatches;
+	forwardPatches.reserve(entityIds.size());
+	backPatches.reserve(entityIds.size());
+
+	for (size_t i = 0; i < entityIds.size(); ++i) {
+		auto forward = EntityDataDelta();
+		auto back = EntityDataDelta(datas[i]);
+		forwardPatches.emplace_back(EntityPatch{ std::move(forward), entityIds[i] });
+		backPatches.emplace_back(EntityPatch{ std::move(back), entityIds[i], parents[i].first, parents[i].second });
+	}
+
+	addToStack(Action(Type::EntityRemoved, std::move(forwardPatches)), Action(Type::EntityAdded, std::move(backPatches)), wasModified);
 }
 
 void UndoStack::pushMoved(bool wasModified, const String& entityId, const String& prevParent, int prevIndex, const String& newParent, int newIndex)
@@ -52,8 +66,8 @@ bool UndoStack::pushModified(bool wasModified, gsl::span<const String> entityIds
 		auto forward = EntityDataDelta(*before[i], *after[i], options);
 		auto back = EntityDataDelta(*after[i], *before[i], options);
 		hasAnyChange = hasAnyChange || forward.hasChange();
-		forwardPatches.emplace_back(EntityPatch{ forward, entityIds[i] });
-		backPatches.emplace_back(EntityPatch{ back, entityIds[i] });
+		forwardPatches.emplace_back(EntityPatch{ std::move(forward), entityIds[i] });
+		backPatches.emplace_back(EntityPatch{ std::move(back), entityIds[i] });
 	}
 	
 	if (hasAnyChange) {

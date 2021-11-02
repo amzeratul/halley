@@ -815,7 +815,8 @@ void UIList::onItemClicked(UIListItem& item, int button, KeyMods keyMods)
 	if (button == 0 || !singleClickAccept) {
 		const bool shiftHeld = (static_cast<int>(keyMods) & static_cast<int>(KeyMods::Shift)) != 0;
 		const bool ctrlHeld = (static_cast<int>(keyMods) & static_cast<int>(KeyMods::Ctrl)) != 0;
-		setSelectedOption(item.getIndex(), shiftHeld ? SelectionMode::ShiftSelect : (ctrlHeld ? SelectionMode::CtrlSelect : SelectionMode::Normal));
+		const auto mode = button == 0 ? (shiftHeld ? SelectionMode::ShiftSelect : (ctrlHeld ? SelectionMode::CtrlSelect : SelectionMode::Normal)) : SelectionMode::Normal;
+		setSelectedOption(item.getIndex(), mode);
 	}
 	if (button == 0 && singleClickAccept) {
 		onAccept();

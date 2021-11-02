@@ -122,7 +122,7 @@ void SceneEditorWindow::makeUI()
 
 	setHandle(UIEventType::ButtonClicked, "removeEntity", [=] (const UIEvent& event)
 	{
-		removeEntity();
+		removeSelectedEntities();
 	});
 }
 
@@ -289,7 +289,7 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 	}
 	
 	if (key.is(KeyCode::Delete)) {
-		removeEntity(entityList->getCurrentSelection());
+		removeSelectedEntities();
 		return true;
 	}
 
@@ -355,7 +355,7 @@ void SceneEditorWindow::onEntityContextMenuAction(const String& actionId, const 
 	} else if (actionId == "paste_child") {
 		pasteEntityFromClipboard(entityId, true);
 	} else if (actionId == "delete") {
-		removeEntity(entityId);
+		removeEntities(gsl::span<const String>(&entityId, 1));
 	} else if (actionId == "duplicate") {
 		duplicateEntity(entityId);
 	} else if (actionId == "add_entity_child") {
@@ -443,9 +443,12 @@ void SceneEditorWindow::addEntities(gsl::span<const EntityPatch> patches)
 
 void SceneEditorWindow::removeEntities(gsl::span<const EntityPatch> patches)
 {
-	// TODO
-	Expects(patches.size() == 1);
-	removeEntity(patches.front().entityId);
+	std::vector<String> ids;
+	ids.reserve(patches.size());
+	for (const auto& p: patches) {
+		ids.push_back(p.entityId);
+	}
+	removeEntities(ids);
 }
 
 void SceneEditorWindow::modifyEntities(gsl::span<const EntityPatch> patches)
@@ -656,19 +659,6 @@ void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId, 
 	markModified();
 }
 
-void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId, int childIndex, const EntityData& prevData)
-{
-	const String& newSelectionId = getNextSibling(parentId, childIndex);
-
-	undoStack.pushRemoved(modified, id, parentId, childIndex, prevData);
-	
-	entityList->onEntityRemoved(id, newSelectionId);
-	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
-	onEntitiesSelected(entityList->getCurrentSelections());
-
-	markModified();
-}
-
 void SceneEditorWindow::onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData)
 {
 	const auto* oldPtr = &prevData;
@@ -769,7 +759,7 @@ void SceneEditorWindow::copyEntityToClipboard(const String& id)
 void SceneEditorWindow::cutEntityToClipboard(const String& id)
 {
 	copyEntityToClipboard(id);
-	removeEntity(id);
+	removeEntities(gsl::span<const String>(&id, 1));
 }
 
 void SceneEditorWindow::pasteEntityFromClipboard(const String& referenceId, bool childOfReference)
@@ -911,15 +901,20 @@ void SceneEditorWindow::addEntity(const String& parentId, int childIndex, Entity
 	}
 }
 
-void SceneEditorWindow::removeEntity()
+void SceneEditorWindow::removeSelectedEntities()
 {
-	for (const auto& id: currentEntityIds) {
-		removeEntity(id);
-	}
+	removeEntities(currentEntityIds);
 }
 
-void SceneEditorWindow::removeEntity(const String& targetId)
+void SceneEditorWindow::removeEntities(gsl::span<const String> targetIds)
 {
+	if (targetIds.empty()) {
+		return;
+	}
+
+	// TODO: support the other ones
+	const auto& targetId = targetIds.front();
+
 	const String& parentId = findParent(targetId);
 
 	auto& data = sceneData->getWriteableEntityNodeData(parentId).getData();
@@ -935,10 +930,24 @@ void SceneEditorWindow::removeEntity(const String& targetId)
 			const auto data = std::move(*iter);
 			const int idx = static_cast<int>(iter - children.begin());
 			children.erase(iter);
-			onEntityRemoved(targetId, parentId, idx, data);
+			onEntityRemoved(targetId, parentId, idx, std::move(data));
 			break;
 		}
 	}
+}
+
+void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId, int childIndex, EntityData prevData)
+{
+	const String& newSelectionId = getNextSibling(parentId, childIndex);
+
+	const auto parenting = std::pair<String, int>(parentId, childIndex);
+	undoStack.pushRemoved(modified, gsl::span<const String>(&id, 1), gsl::span<const std::pair<String, int>>(&parenting, 1), gsl::span(&prevData, 1));
+	
+	entityList->onEntityRemoved(id, newSelectionId);
+	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
+	onEntitiesSelected(entityList->getCurrentSelections());
+
+	markModified();
 }
 
 void SceneEditorWindow::replaceEntity(const String& entityId, EntityData newData)

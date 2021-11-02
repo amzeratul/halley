@@ -29,7 +29,7 @@ namespace Halley {
 		void unloadScene();
 
 		void onEntityAdded(const String& id, const String& parentId, int childIndex) override;
-		void onEntityRemoved(const String& id, const String& parentId, int childIndex, const EntityData& prevData) override;
+		void onEntityRemoved(const String& id, const String& parentId, int childIndex, EntityData prevData) override;
 		void onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData) override;
 		void onEntitiesModified(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<const EntityData*> newData) override;
 		void onEntityReplaced(const String& id, const String& parentId, int childIndex, const EntityData& prevData, const EntityData& newData) override;
@@ -43,8 +43,8 @@ namespace Halley {
 		void addNewPrefab(const String& referenceEntityId, bool childOfReference, const String& prefabName);
 		void addEntity(const String& referenceEntityId, bool childOfReference, EntityData data);
 		void addEntity(const String& parentId, int childIndex, EntityData data);
-		void removeEntity();
-		void removeEntity(const String& entityId) override;
+		void removeSelectedEntities();
+		void removeEntities(gsl::span<const String> entityIds) override;
 		void replaceEntity(const String& entityId, EntityData newData);
 		void selectEntity(const String& id, UIList::SelectionMode mode = UIList::SelectionMode::Normal);
 		void selectEntities(gsl::span<const String> ids, UIList::SelectionMode mode = UIList::SelectionMode::Normal);
