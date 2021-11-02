@@ -23,8 +23,8 @@ namespace Halley {
 		void refreshNames();
 
 		void onEntityModified(const String& id, const EntityData& node);
-		void onEntityAdded(const String& id, const String& parentId, int childIndex, const EntityData& data);
-		void onEntityRemoved(const String& id, const String& newSelectionId);
+		void onEntitiesAdded(gsl::span<const String> ids, const String& parentId, int childIndex, gsl::span<const EntityData> datas);
+		void onEntitiesRemoved(gsl::span<const String> ids, const String& newSelectionId);
 
 		void select(const String& id, UIList::SelectionMode mode = UIList::SelectionMode::Normal);
 		void select(gsl::span<const String> ids, UIList::SelectionMode mode = UIList::SelectionMode::Normal);

@@ -436,9 +436,36 @@ void SceneEditorWindow::selectEntities(gsl::span<const String> ids, UIList::Sele
 
 void SceneEditorWindow::addEntities(gsl::span<const EntityPatch> patches)
 {
-	// TODO
-	Expects(patches.size() == 1);
-	addEntity(patches.front().parent, patches.front().childIndex, EntityData(patches.front().delta));
+	if (patches.empty()) {
+		return;
+	}
+
+	std::vector<EntityData> datas;
+	datas.reserve(patches.size());
+	for (auto& p: patches) {
+		datas.emplace_back(p.delta);
+	}
+	addEntities(patches.front().parent, patches.front().childIndex, std::move(datas));
+}
+
+void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfReference, EntityData data)
+{
+	auto [parentId, childIdx] = getParentInsertPos(referenceEntity, childOfReference);
+	positionEntityAtCursor(data, parentId);
+	addEntities(parentId, childIdx, std::vector<EntityData>{std::move(data)});
+}
+
+void SceneEditorWindow::addEntities(const String& parentId, int childIndex, std::vector<EntityData> datas)
+{
+	EntityData& parentData = sceneData->getWriteableEntityNodeData(parentId).getData();
+	if (parentData.getPrefab().isEmpty() && (parentId != "" || parentData.isSceneRoot())) {
+
+		const size_t insertPos = childIndex >= 0 ? static_cast<size_t>(childIndex) : std::numeric_limits<size_t>::max();
+		auto& seq = parentData.getChildren();
+				
+		seq.insert(seq.begin() + std::min(insertPos, seq.size()), datas.begin(), datas.end());
+		onEntitiesAdded(parentId, childIndex, datas);
+	}
 }
 
 void SceneEditorWindow::removeEntities(gsl::span<const EntityPatch> patches)
@@ -647,14 +674,20 @@ void SceneEditorWindow::clearModifiedFlag()
 	setModified(false);
 }
 
-void SceneEditorWindow::onEntityAdded(const String& id, const String& parentId, int childIndex)
+void SceneEditorWindow::onEntitiesAdded(const String& parentId, int childIndex, gsl::span<EntityData> datas)
 {
-	const auto& data = sceneData->getEntityNodeData(id).getData();
-	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
-	entityList->onEntityAdded(id, parentId, childIndex, data);
+	std::vector<String> ids;
+	ids.reserve(datas.size());
+	for (const auto& data: datas) {
+		const auto& id = data.getInstanceUUID().toString();
+		sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
+		ids.push_back(id);
+	}
+
+	entityList->onEntitiesAdded(ids, parentId, childIndex, datas);
 	onEntitiesSelected(entityList->getCurrentSelections());
 
-	undoStack.pushAdded(modified, id, parentId, childIndex, data);
+	undoStack.pushAdded(modified, parentId, childIndex, datas);
 	
 	markModified();
 }
@@ -688,8 +721,8 @@ void SceneEditorWindow::onEntityReplaced(const String& id, const String& parentI
 		if (hadChange) {
 			const auto& data = sceneData->getEntityNodeData(id).getData();
 
-			entityList->onEntityRemoved(id, "");
-			entityList->onEntityAdded(id, parentId, childIndex, data);
+			entityList->onEntitiesRemoved(gsl::span<const String>(&id, 1), "");
+			entityList->onEntitiesAdded(gsl::span<const String>(&id, 1), parentId, childIndex, gsl::span<const EntityData>(&data, 1));
 			sceneData->reloadEntity(id);
 			markModified();
 		}
@@ -853,13 +886,6 @@ std::optional<EntityData> SceneEditorWindow::makeInstance(const String& prefabNa
 	return {};
 }
 
-void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfReference, EntityData data)
-{
-	auto [parentId, childIdx] = getParentInsertPos(referenceEntity, childOfReference);
-	positionEntityAtCursor(data, parentId);
-	addEntity(parentId, childIdx, std::move(data));
-}
-
 std::pair<String, int> SceneEditorWindow::getParentInsertPos(const String& referenceEntity, bool childOfReference) const
 {
 	if (referenceEntity.isEmpty()) {
@@ -887,19 +913,6 @@ std::pair<String, int> SceneEditorWindow::getParentInsertPos(const String& refer
 		}
 	}
 }
-void SceneEditorWindow::addEntity(const String& parentId, int childIndex, EntityData data)
-{
-	EntityData& parentData = sceneData->getWriteableEntityNodeData(parentId).getData();
-	if (parentData.getPrefab().isEmpty() && (parentId != "" || parentData.isSceneRoot())) {
-		const auto uuid = data.getInstanceUUID().toString();
-
-		const size_t insertPos = childIndex >= 0 ? static_cast<size_t>(childIndex) : std::numeric_limits<size_t>::max();
-		auto& seq = parentData.getChildren();
-		seq.insert(seq.begin() + std::min(insertPos, seq.size()), std::move(data));
-
-		onEntityAdded(uuid, parentId, childIndex);
-	}
-}
 
 void SceneEditorWindow::removeSelectedEntities()
 {
@@ -912,39 +925,51 @@ void SceneEditorWindow::removeEntities(gsl::span<const String> targetIds)
 		return;
 	}
 
-	// TODO: support the other ones
-	const auto& targetId = targetIds.front();
+	std::vector<String> entityIds;
+	std::vector<std::pair<String, int>> parenting;
+	std::vector<EntityData> prevDatas;
 
-	const String& parentId = findParent(targetId);
+	for (const auto& targetId: targetIds) {
+		const String& parentId = findParent(targetId);
 
-	auto& data = sceneData->getWriteableEntityNodeData(parentId).getData();
-	const bool isSceneRoot = parentId.isEmpty() && data.isSceneRoot();
-	if (parentId.isEmpty() && !isSceneRoot) {
-		// Don't delete root of prefab
+		auto& data = sceneData->getWriteableEntityNodeData(parentId).getData();
+		const auto canDelete = !parentId.isEmpty() || data.isSceneRoot(); // Don't delete root of prefab
+
+		if (canDelete) {
+			auto& children = data.getChildren();
+			for (auto iter = children.begin(); iter != children.end(); ++iter) {
+				if (iter->getInstanceUUID().toString() == targetId) {
+					entityIds.push_back(targetId);
+					prevDatas.emplace_back(std::move(*iter));
+					parenting.emplace_back(parentId, static_cast<int>(iter - children.begin()));
+
+					children.erase(iter);
+
+					break;
+				}
+			}
+		}
+	}
+
+	onEntitiesRemoved(entityIds, parenting, prevDatas);
+}
+
+void SceneEditorWindow::onEntitiesRemoved(gsl::span<const String> ids, gsl::span<const std::pair<String, int>> parents, gsl::span<EntityData> prevDatas)
+{
+	Expects(ids.size() == parents.size());
+	Expects(ids.size() == prevDatas.size());
+	if (ids.empty()) {
 		return;
 	}
 
-	auto& children = data.getChildren();
-	for (auto iter = children.begin(); iter != children.end(); ++iter) {
-		if (iter->getInstanceUUID().toString() == targetId) {
-			const auto data = std::move(*iter);
-			const int idx = static_cast<int>(iter - children.begin());
-			children.erase(iter);
-			onEntityRemoved(targetId, parentId, idx, std::move(data));
-			break;
-		}
+	undoStack.pushRemoved(modified, ids, parents, prevDatas);
+
+	const String& newSelectionId = getNextSibling(parents.front().first, parents.front().second);
+	entityList->onEntitiesRemoved(ids, newSelectionId);
+
+	for (size_t i = 0; i < ids.size(); ++i) {
+		sceneData->reloadEntity(parents[i].first.isEmpty() ? ids[i] : parents[i].first);
 	}
-}
-
-void SceneEditorWindow::onEntityRemoved(const String& id, const String& parentId, int childIndex, EntityData prevData)
-{
-	const String& newSelectionId = getNextSibling(parentId, childIndex);
-
-	const auto parenting = std::pair<String, int>(parentId, childIndex);
-	undoStack.pushRemoved(modified, gsl::span<const String>(&id, 1), gsl::span<const std::pair<String, int>>(&parenting, 1), gsl::span(&prevData, 1));
-	
-	entityList->onEntityRemoved(id, newSelectionId);
-	sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	onEntitiesSelected(entityList->getCurrentSelections());
 
 	markModified();

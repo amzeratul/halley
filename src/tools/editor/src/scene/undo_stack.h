@@ -14,7 +14,7 @@ namespace Halley {
 	public:
 		UndoStack();
 		
-		void pushAdded(bool wasModified, const String& entityId, const String& parent, int childIndex, const EntityData& data);
+		void pushAdded(bool wasModified, const String& parent, int childIndex, gsl::span<const EntityData> datas);
 		void pushRemoved(bool wasModified, gsl::span<const String> entityIds, gsl::span<const std::pair<String, int>> parents, gsl::span<const EntityData> datas);
 		void pushMoved(bool wasModified, const String& entityId, const String& prevParent, int prevIndex, const String& newParent, int newIndex);
 		bool pushModified(bool wasModified, gsl::span<const String> entityIds, gsl::span<const EntityData*> before, gsl::span<const EntityData*> after);

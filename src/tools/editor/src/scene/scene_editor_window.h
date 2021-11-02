@@ -28,12 +28,6 @@ namespace Halley {
 		void loadScene(AssetType type, const Prefab& prefab);
 		void unloadScene();
 
-		void onEntityAdded(const String& id, const String& parentId, int childIndex) override;
-		void onEntityRemoved(const String& id, const String& parentId, int childIndex, EntityData prevData) override;
-		void onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData) override;
-		void onEntitiesModified(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<const EntityData*> newData) override;
-		void onEntityReplaced(const String& id, const String& parentId, int childIndex, const EntityData& prevData, const EntityData& newData) override;
-		void onEntityMoved(const String& id, const String& prevParentId, int prevChildIndex, const String& newParentId, int newChildIndex) override;
 		void onComponentRemoved(const String& name) override;
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
 
@@ -42,13 +36,16 @@ namespace Halley {
 		std::optional<EntityData> makeInstance(const String& prefab) const;
 		void addNewPrefab(const String& referenceEntityId, bool childOfReference, const String& prefabName);
 		void addEntity(const String& referenceEntityId, bool childOfReference, EntityData data);
-		void addEntity(const String& parentId, int childIndex, EntityData data);
+		void addEntities(const String& parentId, int childIndex, std::vector<EntityData> data);
 		void removeSelectedEntities();
 		void removeEntities(gsl::span<const String> entityIds) override;
 		void replaceEntity(const String& entityId, EntityData newData);
 		void selectEntity(const String& id, UIList::SelectionMode mode = UIList::SelectionMode::Normal);
 		void selectEntities(gsl::span<const String> ids, UIList::SelectionMode mode = UIList::SelectionMode::Normal);
 		void moveEntity(const String& id, const String& newParent, int childIndex, bool refreshEntityList = true);
+
+		void onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData) override;
+		void onEntitiesModified(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<const EntityData*> newData) override;
 
 		void addEntities(gsl::span<const EntityPatch> patches);
 		void removeEntities(gsl::span<const EntityPatch> patches);
@@ -127,7 +124,12 @@ namespace Halley {
 		bool onKeyPress(KeyboardKeyPress key) override;
 
 		void onProjectDLLStatusChange(ProjectDLL::Status status) override;
-	
+
+		void onEntitiesAdded(const String& parentId, int childIndex, gsl::span<EntityData> datas);
+		void onEntitiesRemoved(gsl::span<const String> ids, gsl::span<const std::pair<String, int>> parents, gsl::span<EntityData> prevDatas);
+		void onEntityReplaced(const String& id, const String& parentId, int childIndex, const EntityData& prevData, const EntityData& newData);
+		void onEntityMoved(const String& id, const String& prevParentId, int prevChildIndex, const String& newParentId, int newChildIndex);
+
 	private:		
 		const HalleyAPI& api;
 		UIFactory& uiFactory;

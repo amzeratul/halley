@@ -90,6 +90,15 @@ void EntityList::addEntity(const EntityData& data, const String& parentId, int c
 	markValid(data.getInstanceUUID(), info.valid);
 }
 
+void EntityList::addEntityTree(const String& parentId, int childIndex, const EntityData& data)
+{
+	const auto& curId = data.getInstanceUUID().toString();
+	addEntity(data, parentId, childIndex);
+	for (const auto& child: data.getChildren()) {
+		addEntityTree(curId, -1, child);
+	}
+}
+
 EntityList::EntityInfo EntityList::getEntityInfo(const EntityData& data) const
 {
 	EntityInfo result;
@@ -153,36 +162,34 @@ void EntityList::onEntityModified(const String& id, const EntityData& node, bool
 	}
 }
 
-void EntityList::onEntityAdded(const String& id, const String& parentId, int childIndex, const EntityData& data)
+void EntityList::onEntitiesAdded(gsl::span<const String> ids, const String& parentId, int childIndex, gsl::span<const EntityData> datas)
 {
-	addEntityTree(parentId, childIndex, data);
+	for (const auto& data: datas) {
+		addEntityTree(parentId, childIndex, data);
+		if (childIndex >= 0) {
+			++childIndex;
+		}
+	}
+
 	list->sortItems();
 	layout();
-	list->setSelectedOptionId(id);
+	list->setSelectedOptionIds(ids);
 
 	notifyValidatorList();
 }
 
-void EntityList::addEntityTree(const String& parentId, int childIndex, const EntityData& data)
+void EntityList::onEntitiesRemoved(gsl::span<const String> ids, const String& newSelectionId)
 {
-	const auto& curId = data.getInstanceUUID().toString();
-	addEntity(data, parentId, childIndex);
-	for (const auto& child: data.getChildren()) {
-		addEntityTree(curId, -1, child);
+	for (const auto& id: ids) {
+		list->removeItem(id);
+		markValid(UUID(id), true);
 	}
-}
-
-void EntityList::onEntityRemoved(const String& id, const String& newSelectionId)
-{
-	list->removeItem(id);
 	list->sortItems();
 	layout();
 	list->setScrollToSelection(false);
 	list->setSelectedOption(-1);
 	list->setScrollToSelection(true);
 	list->setSelectedOptionId(newSelectionId);
-
-	markValid(UUID(id), true);
 }
 
 void EntityList::select(const String& id, UIList::SelectionMode mode)

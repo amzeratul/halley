@@ -9,11 +9,26 @@ UndoStack::UndoStack()
 {
 }
 
-void UndoStack::pushAdded(bool wasModified, const String& entityId, const String& parent, int childIndex, const EntityData& data)
+void UndoStack::pushAdded(bool wasModified, const String& parent, int childIndex, gsl::span<const EntityData> datas)
 {
-	if (accepting) {
-		addToStack(Action(Type::EntityAdded, EntityDataDelta(data), entityId, parent, childIndex), Action(Type::EntityRemoved, EntityDataDelta(), entityId), wasModified);
+	if (!accepting) {
+		return;
 	}
+
+	std::vector<EntityPatch> forwardPatches;
+	std::vector<EntityPatch> backPatches;
+	forwardPatches.reserve(datas.size());
+	backPatches.reserve(datas.size());
+
+	for (size_t i = 0; i < datas.size(); ++i) {
+		auto forward = EntityDataDelta(datas[i]);
+		auto back = EntityDataDelta(datas[i]);
+		const auto& entityId = datas[i].getInstanceUUID().toString();
+		forwardPatches.emplace_back(EntityPatch{ std::move(forward), entityId, parent, childIndex });
+		backPatches.emplace_back(EntityPatch{ std::move(back), entityId });
+	}
+
+	addToStack(Action(Type::EntityAdded, std::move(forwardPatches)), Action(Type::EntityAdded, std::move(backPatches)), wasModified);
 }
 
 void UndoStack::pushRemoved(bool wasModified, gsl::span<const String> entityIds, gsl::span<const std::pair<String, int>> parents, gsl::span<const EntityData> datas)
