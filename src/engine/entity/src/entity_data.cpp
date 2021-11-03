@@ -7,6 +7,22 @@
 #include "halley/utils/algorithm.h"
 using namespace Halley;
 
+EntityChangeOperation EntityChangeOperation::clone() const
+{
+	EntityChangeOperation result;
+	result.entityId = entityId;
+	result.parent = parent;
+	result.childIndex = childIndex;
+
+	if (data->isDelta()) {
+		result.data = std::make_unique<EntityDataDelta>(data->asEntityDataDelta());
+	} else {
+		result.data = std::make_unique<EntityData>(data->asEntityData());
+	}
+
+	return result;
+}
+
 EntityData::EntityData()
 {}
 

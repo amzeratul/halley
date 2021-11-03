@@ -162,13 +162,13 @@ void EntityList::onEntityModified(const String& id, const EntityData& node, bool
 	}
 }
 
-void EntityList::onEntitiesAdded(gsl::span<const String> ids, const String& parentId, int childIndex, gsl::span<const EntityData> datas)
+void EntityList::onEntitiesAdded(gsl::span<const EntityChangeOperation> changes)
 {
-	for (const auto& data: datas) {
-		addEntityTree(parentId, childIndex, data);
-		if (childIndex >= 0) {
-			++childIndex;
-		}
+	std::vector<String> ids;
+
+	for (const auto& change: changes) {
+		addEntityTree(change.parent, change.childIndex, change.data->asEntityData());
+		ids.push_back(change.entityId);
 	}
 
 	list->sortItems();

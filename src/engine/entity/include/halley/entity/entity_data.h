@@ -9,12 +9,20 @@ namespace Halley {
 
 	class IEntityData {
 	public:
+		virtual ~IEntityData() = default;
+
 		virtual bool isDelta() const = 0;
 		virtual const EntityData& asEntityData() const = 0;
 		virtual const EntityDataDelta& asEntityDataDelta() const = 0;
-		
-	protected:
-		virtual ~IEntityData() = default;
+	};
+
+	struct EntityChangeOperation {
+		std::unique_ptr<IEntityData> data;
+		String entityId;
+		String parent;
+		int childIndex;
+
+		EntityChangeOperation clone() const;
 	};
 	
     class EntityData : public IEntityData {

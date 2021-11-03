@@ -434,41 +434,50 @@ void SceneEditorWindow::selectEntities(gsl::span<const String> ids, UIList::Sele
 	entityList->select(ids, mode);
 }
 
-void SceneEditorWindow::addEntities(gsl::span<const EntityPatch> patches)
+void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfReference, EntityData data)
 {
-	if (patches.empty()) {
+	auto parentInfo = getParentInsertPos(referenceEntity, childOfReference);
+	positionEntityAtCursor(data, parentInfo.first);
+	const auto& id = data.getInstanceUUID().toString();
+	auto op = EntityChangeOperation{ std::make_unique<EntityData>(std::move(data)), id, parentInfo.first, parentInfo.second};
+	addEntities(gsl::span<const EntityChangeOperation>(&op, 1));
+}
+
+void SceneEditorWindow::addEntities(gsl::span<const EntityChangeOperation> changes)
+{
+	if (changes.empty()) {
 		return;
 	}
 
-	std::vector<EntityData> datas;
-	datas.reserve(patches.size());
-	for (auto& p: patches) {
-		datas.emplace_back(p.delta);
+	for (const auto& change: changes) {
+		EntityData& parentData = sceneData->getWriteableEntityNodeData(change.parent).getData();
+		if (parentData.getPrefab().isEmpty() && (change.parent != "" || parentData.isSceneRoot())) {
+			const size_t insertPos = change.childIndex >= 0 ? static_cast<size_t>(change.childIndex) : std::numeric_limits<size_t>::max();
+			auto& seq = parentData.getChildren();
+
+			seq.insert(seq.begin() + std::min(insertPos, seq.size()), change.data->asEntityData());
+		}
 	}
-	addEntities(patches.front().parent, patches.front().childIndex, std::move(datas));
+
+	onEntitiesAdded(changes);
 }
 
-void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfReference, EntityData data)
+void SceneEditorWindow::onEntitiesAdded(gsl::span<const EntityChangeOperation> changes)
 {
-	auto [parentId, childIdx] = getParentInsertPos(referenceEntity, childOfReference);
-	positionEntityAtCursor(data, parentId);
-	addEntities(parentId, childIdx, std::vector<EntityData>{std::move(data)});
-}
-
-void SceneEditorWindow::addEntities(const String& parentId, int childIndex, std::vector<EntityData> datas)
-{
-	EntityData& parentData = sceneData->getWriteableEntityNodeData(parentId).getData();
-	if (parentData.getPrefab().isEmpty() && (parentId != "" || parentData.isSceneRoot())) {
-
-		const size_t insertPos = childIndex >= 0 ? static_cast<size_t>(childIndex) : std::numeric_limits<size_t>::max();
-		auto& seq = parentData.getChildren();
-				
-		seq.insert(seq.begin() + std::min(insertPos, seq.size()), datas.begin(), datas.end());
-		onEntitiesAdded(parentId, childIndex, datas);
+	for (const auto& change: changes) {
+		const auto& id = change.data->asEntityData().getInstanceUUID().toString();
+		const auto& parentId = change.parent;
+		sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	}
+
+	entityList->onEntitiesAdded(changes);
+	onEntitiesSelected(entityList->getCurrentSelections());
+	undoStack.pushAdded(modified, changes);
+	
+	markModified();
 }
 
-void SceneEditorWindow::removeEntities(gsl::span<const EntityPatch> patches)
+void SceneEditorWindow::removeEntities(gsl::span<const EntityChangeOperation> patches)
 {
 	std::vector<String> ids;
 	ids.reserve(patches.size());
@@ -478,7 +487,7 @@ void SceneEditorWindow::removeEntities(gsl::span<const EntityPatch> patches)
 	removeEntities(ids);
 }
 
-void SceneEditorWindow::modifyEntities(gsl::span<const EntityPatch> patches)
+void SceneEditorWindow::modifyEntities(gsl::span<const EntityChangeOperation> patches)
 {
 	std::vector<String> ids;
 	std::vector<EntityData> oldDatas;
@@ -495,25 +504,25 @@ void SceneEditorWindow::modifyEntities(gsl::span<const EntityPatch> patches)
 		oldDatas.emplace_back(EntityData(data));
 		oldDataPtrs.emplace_back(&oldDatas.back()); // This is only OK because of the reserve above, otherwise the pointer might be invalidated
 		newDataPtrs.emplace_back(&data);
-		data.applyDelta(patch.delta);
+		data.applyDelta(patch.data->asEntityDataDelta());
 	}
 	
 	onEntitiesModified(ids, oldDataPtrs, newDataPtrs);
 	entityEditor->reloadEntity();
 }
 
-void SceneEditorWindow::moveEntities(gsl::span<const EntityPatch> patches)
+void SceneEditorWindow::moveEntities(gsl::span<const EntityChangeOperation> patches)
 {
 	// TODO
 	Expects(patches.size() == 1);
 	moveEntity(patches.front().entityId, patches.front().parent, patches.front().childIndex);
 }
 
-void SceneEditorWindow::replaceEntities(gsl::span<const EntityPatch> patches)
+void SceneEditorWindow::replaceEntities(gsl::span<const EntityChangeOperation> patches)
 {
 	// TODO
 	Expects(patches.size() == 1);
-	replaceEntity(patches.front().entityId, EntityData(patches.front().delta));
+	replaceEntity(patches.front().entityId, EntityData(patches.front().data->asEntityData()));
 }
 
 void SceneEditorWindow::moveEntity(const String& id, const String& newParent, int childIndex, bool refreshEntityList)
@@ -674,24 +683,6 @@ void SceneEditorWindow::clearModifiedFlag()
 	setModified(false);
 }
 
-void SceneEditorWindow::onEntitiesAdded(const String& parentId, int childIndex, gsl::span<EntityData> datas)
-{
-	std::vector<String> ids;
-	ids.reserve(datas.size());
-	for (const auto& data: datas) {
-		const auto& id = data.getInstanceUUID().toString();
-		sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
-		ids.push_back(id);
-	}
-
-	entityList->onEntitiesAdded(ids, parentId, childIndex, datas);
-	onEntitiesSelected(entityList->getCurrentSelections());
-
-	undoStack.pushAdded(modified, parentId, childIndex, datas);
-	
-	markModified();
-}
-
 void SceneEditorWindow::onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData)
 {
 	const auto* oldPtr = &prevData;
@@ -719,11 +710,12 @@ void SceneEditorWindow::onEntityReplaced(const String& id, const String& parentI
 		const bool hadChange = undoStack.pushReplaced(modified, id, prevData, newData);
 
 		if (hadChange) {
-			const auto& data = sceneData->getEntityNodeData(id).getData();
-
-			entityList->onEntitiesRemoved(gsl::span<const String>(&id, 1), "");
-			entityList->onEntitiesAdded(gsl::span<const String>(&id, 1), parentId, childIndex, gsl::span<const EntityData>(&data, 1));
 			sceneData->reloadEntity(id);
+
+			const auto op = EntityChangeOperation{ std::make_unique<EntityData>(newData), id, parentId, childIndex };
+			entityList->onEntitiesRemoved(gsl::span<const String>(&id, 1), "");
+			entityList->onEntitiesAdded(gsl::span<const EntityChangeOperation>(&op, 1));
+
 			markModified();
 		}
 	}

@@ -36,7 +36,6 @@ namespace Halley {
 		std::optional<EntityData> makeInstance(const String& prefab) const;
 		void addNewPrefab(const String& referenceEntityId, bool childOfReference, const String& prefabName);
 		void addEntity(const String& referenceEntityId, bool childOfReference, EntityData data);
-		void addEntities(const String& parentId, int childIndex, std::vector<EntityData> data);
 		void removeSelectedEntities();
 		void removeEntities(gsl::span<const String> entityIds) override;
 		void replaceEntity(const String& entityId, EntityData newData);
@@ -47,11 +46,11 @@ namespace Halley {
 		void onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData) override;
 		void onEntitiesModified(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<const EntityData*> newData) override;
 
-		void addEntities(gsl::span<const EntityPatch> patches);
-		void removeEntities(gsl::span<const EntityPatch> patches);
-		void modifyEntities(gsl::span<const EntityPatch> patches);
-		void moveEntities(gsl::span<const EntityPatch> patches);
-		void replaceEntities(gsl::span<const EntityPatch> patches);
+		void addEntities(gsl::span<const EntityChangeOperation> patches);
+		void removeEntities(gsl::span<const EntityChangeOperation> patches);
+		void modifyEntities(gsl::span<const EntityChangeOperation> patches);
+		void moveEntities(gsl::span<const EntityChangeOperation> patches);
+		void replaceEntities(gsl::span<const EntityChangeOperation> patches);
 
 		void extractPrefab(const String& id);
 		void extractPrefab(const String& id, const String& prefabName);
@@ -125,7 +124,7 @@ namespace Halley {
 
 		void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 
-		void onEntitiesAdded(const String& parentId, int childIndex, gsl::span<EntityData> datas);
+		void onEntitiesAdded(gsl::span<const EntityChangeOperation> patches);
 		void onEntitiesRemoved(gsl::span<const String> ids, gsl::span<const std::pair<String, int>> parents, gsl::span<EntityData> prevDatas);
 		void onEntityReplaced(const String& id, const String& parentId, int childIndex, const EntityData& prevData, const EntityData& newData);
 		void onEntityMoved(const String& id, const String& prevParentId, int prevChildIndex, const String& newParentId, int newChildIndex);

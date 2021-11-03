@@ -9,26 +9,23 @@ UndoStack::UndoStack()
 {
 }
 
-void UndoStack::pushAdded(bool wasModified, const String& parent, int childIndex, gsl::span<const EntityData> datas)
+void UndoStack::pushAdded(bool wasModified, gsl::span<const EntityChangeOperation> changes)
 {
 	if (!accepting) {
 		return;
 	}
 
-	std::vector<EntityPatch> forwardPatches;
-	std::vector<EntityPatch> backPatches;
-	forwardPatches.reserve(datas.size());
-	backPatches.reserve(datas.size());
+	std::vector<EntityChangeOperation> forwardPatches;
+	std::vector<EntityChangeOperation> backPatches;
+	forwardPatches.reserve(changes.size());
+	backPatches.reserve(changes.size());
 
-	for (size_t i = 0; i < datas.size(); ++i) {
-		auto forward = EntityDataDelta(datas[i]);
-		auto back = EntityDataDelta(datas[i]);
-		const auto& entityId = datas[i].getInstanceUUID().toString();
-		forwardPatches.emplace_back(EntityPatch{ std::move(forward), entityId, parent, childIndex });
-		backPatches.emplace_back(EntityPatch{ std::move(back), entityId });
+	for (auto& change: changes) {
+		forwardPatches.emplace_back(change.clone());
+		backPatches.emplace_back(change.clone());
 	}
 
-	addToStack(Action(Type::EntityAdded, std::move(forwardPatches)), Action(Type::EntityAdded, std::move(backPatches)), wasModified);
+	addToStack(Action(Type::EntityAdded, std::move(forwardPatches)), Action(Type::EntityRemoved, std::move(backPatches)), wasModified);
 }
 
 void UndoStack::pushRemoved(bool wasModified, gsl::span<const String> entityIds, gsl::span<const std::pair<String, int>> parents, gsl::span<const EntityData> datas)
@@ -37,16 +34,14 @@ void UndoStack::pushRemoved(bool wasModified, gsl::span<const String> entityIds,
 		return;
 	}
 
-	std::vector<EntityPatch> forwardPatches;
-	std::vector<EntityPatch> backPatches;
+	std::vector<EntityChangeOperation> forwardPatches;
+	std::vector<EntityChangeOperation> backPatches;
 	forwardPatches.reserve(entityIds.size());
 	backPatches.reserve(entityIds.size());
 
 	for (size_t i = 0; i < entityIds.size(); ++i) {
-		auto forward = EntityDataDelta();
-		auto back = EntityDataDelta(datas[i]);
-		forwardPatches.emplace_back(EntityPatch{ std::move(forward), entityIds[i] });
-		backPatches.emplace_back(EntityPatch{ std::move(back), entityIds[i], parents[i].first, parents[i].second });
+		forwardPatches.emplace_back(EntityChangeOperation{ {}, entityIds[i] });
+		backPatches.emplace_back(EntityChangeOperation{ std::make_unique<EntityData>(datas[i]), entityIds[i], parents[i].first, parents[i].second });
 	}
 
 	addToStack(Action(Type::EntityRemoved, std::move(forwardPatches)), Action(Type::EntityAdded, std::move(backPatches)), wasModified);
@@ -70,19 +65,19 @@ bool UndoStack::pushModified(bool wasModified, gsl::span<const String> entityIds
 		return true;
 	}
 
-	std::vector<EntityPatch> forwardPatches;
-	std::vector<EntityPatch> backPatches;
+	std::vector<EntityChangeOperation> forwardPatches;
+	std::vector<EntityChangeOperation> backPatches;
 	forwardPatches.reserve(entityIds.size());
 	backPatches.reserve(entityIds.size());
 	bool hasAnyChange = false;
 	for (size_t i = 0; i < entityIds.size(); ++i) {
 		EntityDataDelta::Options options;
 		options.shallow = true;
-		auto forward = EntityDataDelta(*before[i], *after[i], options);
-		auto back = EntityDataDelta(*after[i], *before[i], options);
-		hasAnyChange = hasAnyChange || forward.hasChange();
-		forwardPatches.emplace_back(EntityPatch{ std::move(forward), entityIds[i] });
-		backPatches.emplace_back(EntityPatch{ std::move(back), entityIds[i] });
+		auto forward = std::make_unique<EntityDataDelta>(*before[i], *after[i], options);
+		auto back = std::make_unique<EntityDataDelta>(*after[i], *before[i], options);
+		hasAnyChange = hasAnyChange || forward->hasChange();
+		forwardPatches.emplace_back(EntityChangeOperation{ std::move(forward), entityIds[i] });
+		backPatches.emplace_back(EntityChangeOperation{ std::move(back), entityIds[i] });
 	}
 	
 	if (hasAnyChange) {
@@ -142,13 +137,13 @@ UndoStack::Action::Action(Type type, EntityDataDelta delta, String entityId, Str
 	: type(type)
 {
 	auto& a = patches.emplace_back();
-	a.delta = std::move(delta);
+	a.data = std::make_unique<EntityDataDelta>(std::move(delta));
 	a.entityId = std::move(entityId);
 	a.parent = std::move(parent);
 	a.childIndex = childIndex;
 }
 
-UndoStack::Action::Action(Type type, std::vector<EntityPatch> patches)
+UndoStack::Action::Action(Type type, std::vector<EntityChangeOperation> patches)
 	: type(type)
 	, patches(std::move(patches))
 {
@@ -170,14 +165,14 @@ bool UndoStack::ActionPair::isCompatibleWith(const Action& newForward) const
 	return true;
 }
 
-bool UndoStack::ActionPair::arePatchesCompatible(const EntityPatch& a, const EntityPatch& b, Type type) const
+bool UndoStack::ActionPair::arePatchesCompatible(const EntityChangeOperation& a, const EntityChangeOperation& b, Type type) const
 {
 	if (a.entityId != b.entityId) {
 		return false;
 	}
 
 	if (type == Type::EntityModified) {
-		return a.delta.modifiesTheSameAs(b.delta);
+		return a.data->asEntityDataDelta().modifiesTheSameAs(b.data->asEntityDataDelta());
 	}
 
 	return true;	
