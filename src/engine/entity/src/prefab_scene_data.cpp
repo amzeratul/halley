@@ -132,6 +132,19 @@ std::pair<String, size_t> PrefabSceneData::reparentEntity(const String& entityId
 	return { oldParentId, oldChildIndex };
 }
 
+std::pair<String, size_t> PrefabSceneData::getEntityParenting(const String& entityId)
+{
+	const auto data = findEntityAndParent(prefab.getEntityDatas(), nullptr, 0, entityId);
+	const auto oldParent = data.parent;
+	const auto oldChildIndex = data.childIdx;
+
+	if (!data.entity) {
+		throw Exception("Entity not found: " + entityId, HalleyExceptions::Tools);
+	}
+	const String oldParentId = oldParent ? (*oldParent).getInstanceUUID().toString() : "";
+	return { oldParentId, oldChildIndex };
+}
+
 bool PrefabSceneData::isSingleRoot()
 {
 	return !prefab.isScene();

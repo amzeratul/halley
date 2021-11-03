@@ -60,5 +60,6 @@ namespace Halley {
 
 		void addToStack(Action forward, Action back, bool wasModified);
 		void runAction(const Action& action, SceneEditorWindow& sceneEditorWindow);
+		void sortPatches(std::vector<EntityChangeOperation>& patches);
 	};
 }

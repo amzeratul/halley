@@ -511,17 +511,34 @@ void SceneEditorWindow::modifyEntities(gsl::span<const EntityChangeOperation> pa
 	entityEditor->reloadEntity();
 }
 
-void SceneEditorWindow::moveEntities(gsl::span<const EntityChangeOperation> changes, bool refreshEntityList)
+void SceneEditorWindow::moveEntities(gsl::span<const EntityChangeOperation> origChanges, bool refreshEntityList)
 {
+	std::vector<EntityChangeOperation> forward;
 	std::vector<EntityChangeOperation> back;
 	std::vector<String> ids;
-	back.reserve(changes.size());
-	ids.reserve(changes.size());
+	forward.reserve(origChanges.size());
+	back.reserve(origChanges.size());
+	ids.reserve(origChanges.size());
 
-	for (auto& c: changes) {
-		auto [prevParent, prevIndex] = sceneData->reparentEntity(c.entityId, c.parent, c.childIndex);
-		back.push_back(EntityChangeOperation{ {}, c.entityId, prevParent, int(prevIndex) });
+	for (auto& c: origChanges) {
+		forward.push_back(c.clone());
+	}
+
+	for (auto& c: forward) {
+		auto [prevParent, prevIndex] = sceneData->getEntityParenting(c.entityId);
+		back.push_back(EntityChangeOperation{ {}, c.entityId, prevParent, static_cast<int>(prevIndex) });
 		ids.push_back(c.entityId);
+	}
+
+	std::sort(forward.begin(), forward.end(), [&] (const EntityChangeOperation& a, const EntityChangeOperation& b)
+	{
+		if (a.parent != b.parent) {
+			return a.parent < b.parent;
+		}
+		return a.childIndex < b.childIndex;
+	});
+	for (auto& c: forward) {
+		sceneData->reparentEntity(c.entityId, c.parent, c.childIndex);
 	}
 
 	if (refreshEntityList) {
@@ -536,7 +553,7 @@ void SceneEditorWindow::moveEntities(gsl::span<const EntityChangeOperation> chan
 		onEntitiesSelected(entityList->getCurrentSelections());
 	}
 
-	undoStack.pushMoved(modified, changes, back);
+	undoStack.pushMoved(modified, forward, back);
 	
 	markModified();
 }

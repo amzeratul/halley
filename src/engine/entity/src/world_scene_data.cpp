@@ -31,6 +31,11 @@ std::pair<String, size_t> WorldSceneData::reparentEntity(const String& entityId,
 	throw Exception("Not implemented", HalleyExceptions::Entity);
 }
 
+std::pair<String, size_t> WorldSceneData::getEntityParenting(const String& entityId)
+{
+	return {"", 0};
+}
+
 bool WorldSceneData::isSingleRoot()
 {
 	return false;

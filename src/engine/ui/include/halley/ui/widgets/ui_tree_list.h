@@ -129,7 +129,7 @@ namespace Halley {
 
     	UITreeListItem& getItemOrRoot(const String& id);
         void setupEvents();
-    	void reparentItem(const String& id, const String& newParentId, int childIndex);
+    	void reparentItems(gsl::span<const String> ids, const String& newParentId, int childIndex);
     	void removeTree(const UITreeListItem& tree);
     	void refresh();
     };

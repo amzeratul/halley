@@ -1002,7 +1002,7 @@ void UIListItem::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 		dragged = false;
 	}
 
-	parent.onItemClicked(*this, button, keyMods);
+	lastMods = keyMods;
 }
 
 void UIListItem::releaseMouse(Vector2f mousePos, int button)
@@ -1017,6 +1017,8 @@ void UIListItem::releaseMouse(Vector2f mousePos, int button)
 				dragged = false;
 				setNoClipChildren(false);
 				parent.onItemDoneDragging(*this, index, curDragPos);
+			} else {
+				parent.onItemClicked(*this, button, lastMods);
 			}
 		}
 	}

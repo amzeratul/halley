@@ -323,6 +323,7 @@ namespace Halley {
 		virtual void reloadEntity(const String& id) = 0;
 		virtual EntityTree getEntityTree() const = 0;
 		virtual std::pair<String, size_t> reparentEntity(const String& entityId, const String& newParentId, size_t childIndex) = 0;
+		virtual std::pair<String, size_t> getEntityParenting(const String& entityId) = 0;
         virtual bool isSingleRoot() = 0;
 	};
 

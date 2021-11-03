@@ -44,15 +44,7 @@ void UndoStack::pushRemoved(bool wasModified, gsl::span<const String> entityIds,
 		backPatches.emplace_back(EntityChangeOperation{ std::make_unique<EntityData>(datas[i]), entityIds[i], parents[i].first, parents[i].second });
 	}
 
-	// Sort back patches by parentId/childIdx, that way we ensure that entities are added from top to bottom on every parent
-	std::sort(backPatches.begin(), backPatches.end(), [&] (const EntityChangeOperation& a, const EntityChangeOperation& b)
-	{
-		if (a.parent != b.parent) {
-			return a.parent < b.parent;
-		}
-		return a.childIndex < b.childIndex;
-	});
-
+	sortPatches(backPatches);
 	addToStack(Action(Type::EntityRemoved, std::move(forwardPatches)), Action(Type::EntityAdded, std::move(backPatches)), wasModified);
 }
 
@@ -72,6 +64,9 @@ void UndoStack::pushMoved(bool wasModified, gsl::span<const EntityChangeOperatio
 		for (auto& e: previousState) {
 			backPatches.push_back(e.clone());
 		}
+
+		sortPatches(forwardPatches);
+		sortPatches(backPatches);
 
 		addToStack(Action(Type::EntityMoved, std::move(forwardPatches)), Action(Type::EntityMoved, std::move(backPatches)), wasModified);
 	}
@@ -252,4 +247,16 @@ void UndoStack::runAction(const Action& action, SceneEditorWindow& sceneEditorWi
 	}
 	
 	accepting = true;
+}
+
+void UndoStack::sortPatches(std::vector<EntityChangeOperation>& patches)
+{
+	// Sort back patches by parentId/childIdx, that way we ensure that entities are added from top to bottom on every parent
+	std::sort(patches.begin(), patches.end(), [&] (const EntityChangeOperation& a, const EntityChangeOperation& b)
+	{
+		if (a.parent != b.parent) {
+			return a.parent < b.parent;
+		}
+		return a.childIndex < b.childIndex;
+	});
 }

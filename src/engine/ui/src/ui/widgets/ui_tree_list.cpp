@@ -179,7 +179,7 @@ void UITreeList::onItemDoneDragging(UIListItem& item, int index, Vector2f pos)
 			newChildIndex = siblingIndex + (resData.type == UITreeListItem::PositionType::Before ? 0 : 1);
 		}
 
-		reparentItem(itemId, newParentId, int(newChildIndex));
+		reparentItems(getSelectedOptionIds(), newParentId, static_cast<int>(newChildIndex));
 	}
 	insertCursor = Sprite();
 }
@@ -214,42 +214,53 @@ void UITreeList::setupEvents()
 	});
 }
 
-void UITreeList::reparentItem(const String& itemId, const String& newParentId, int newChildIndex)
+void UITreeList::reparentItems(gsl::span<const String> itemIds, const String& newParentId, int origNewChildIndex)
 {
-	if (itemId == newParentId) {
-		return;
-	}
-	
-	const auto& curItem = *root.tryFindId(itemId);
-	const String& oldParentId = curItem.getParentId();
-	auto& oldParent = *root.tryFindId(oldParentId);
-	const size_t oldChildIndex = int(oldParent.getChildIndex(itemId));
-
 	ConfigNode::SequenceType reparentNode;
+	int newChildIndex = origNewChildIndex;
+	int curOffset = 0;
 
-	if (oldParentId != newParentId || oldChildIndex != newChildIndex) {
-		int realNewChildIndex = newChildIndex;
-		if (oldParentId == newParentId) {
-			oldParent.moveChild(oldChildIndex, newChildIndex);
-
-			// This requires some explanation:
-			// The index returned here assumes that the item is still present, so it's inflated by one if moving forwards in the same child
-			// We'll subtract one before reporting as an event
-			if (realNewChildIndex > oldChildIndex) {
-				--realNewChildIndex;
-			}
-		} else {
-			auto& newParent = *root.tryFindId(newParentId);
-			newParent.addChild(oldParent.removeChild(itemId), newChildIndex);
+	for (const auto& itemId: itemIds) {
+		if (itemId == newParentId) {
+			continue;
 		}
 
-		auto& entry = reparentNode.emplace_back(ConfigNode::MapType());
-		entry["itemId"] = itemId;
-		entry["parentId"] = newParentId;
-		entry["childIdx"] = realNewChildIndex;
+		const auto& curItem = *root.tryFindId(itemId);
+		const String& oldParentId = curItem.getParentId();
+		auto& oldParent = *root.tryFindId(oldParentId);
+		const size_t oldChildIndex = static_cast<int>(oldParent.getChildIndex(itemId));
+
+		if (oldParentId != newParentId || oldChildIndex != newChildIndex) {
+			if (oldParentId == newParentId) {
+				oldParent.moveChild(oldChildIndex, newChildIndex);
+
+				// This requires some explanation:
+				// The index returned here assumes that the item is still present, so it's inflated by one if moving forwards in the same child
+				// We'll accumulate all those offsets first, then apply to all entities at the end
+				if (newChildIndex > oldChildIndex) {
+					--curOffset;
+				}
+			} else {
+				auto& newParent = *root.tryFindId(newParentId);
+				newParent.addChild(oldParent.removeChild(itemId), newChildIndex);
+			}
+
+			auto& entry = reparentNode.emplace_back(ConfigNode::MapType());
+			entry["itemId"] = itemId;
+			entry["parentId"] = newParentId;
+			entry["childIdx"] = newChildIndex;
+
+			++newChildIndex;
+		}
 	}
 
 	if (!reparentNode.empty()) {
+		if (curOffset != 0) {
+			for (auto& e: reparentNode) {
+				e["childIdx"] = e["childIdx"].asInt() + curOffset;
+			}
+		}
+
 		sortItems();
 		needsRefresh = true;
 
