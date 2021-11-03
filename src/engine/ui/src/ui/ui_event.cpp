@@ -10,116 +10,132 @@ UIEvent::UIEvent()
 UIEvent::UIEvent(UIEventType type, String sourceId, String data)
 	: type(type)
 	, sourceId(std::move(sourceId))
-	, strData(std::move(data))
+	, configData(ConfigNode::MapType())
 {
+	configData["str"] = std::move(data);
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, bool data)
 	: type(type)
 	, sourceId(std::move(sourceId))
-	, boolData(data)
+	, configData(ConfigNode::MapType())
 {
+	configData["bool"] = data;
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, int data)
 	: type(type)
-	, intData(data)
 	, sourceId(std::move(sourceId))
+	, configData(ConfigNode::MapType())
 {
+	configData["int"] = data;
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, int data1, int data2)
 	: type(type)
-	, intData(data1)
-	, intData2(data2)
 	, sourceId(std::move(sourceId))
+	, configData(ConfigNode::MapType())
 {
+	configData["int"] = data1;
+	configData["int2"] = data2;
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, KeyCode keyCode, KeyMods keyMods)
 	: type(type)
-	, intData(static_cast<int>(keyCode))
-	, intData2(static_cast<int>(keyMods))
 	, sourceId(std::move(sourceId))
+	, configData(ConfigNode::MapType())
 {
+	configData["keyCode"] = static_cast<int>(keyCode);
+	configData["keyMods"] = static_cast<int>(keyMods);
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, float data)
 	: type(type)
-	, floatData(data)
 	, sourceId(std::move(sourceId))
+	, configData(ConfigNode::MapType())
 {
+	configData["float"] = data;
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, String data, int intData)
 	: type(type)
-	, intData(intData)
 	, sourceId(std::move(sourceId))
-	, strData(std::move(data))
+	, configData(ConfigNode::MapType())
 {
+	configData["int"] = intData;
+	configData["str"] = std::move(data);
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, String data, String data2, int intData)
 	: type(type)
-	, intData(intData)
 	, sourceId(std::move(sourceId))
-	, strData(std::move(data))
-	, strData2(std::move(data2))
+	, configData(ConfigNode::MapType())
 {
+	configData["int"] = intData;
+	configData["str"] = std::move(data);
+	configData["str2"] = std::move(data2);
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, Vector2f data)
 	: type(type)
 	, sourceId(std::move(sourceId))
-	, vectorData(data)
+	, configData(ConfigNode::MapType())
 {
+	configData["vector"] = data;
 }
 
 UIEvent::UIEvent(UIEventType type, String sourceId, Rect4f data)
 	: type(type)
 	, sourceId(std::move(sourceId))
-	, rectData(data)
+	, configData(ConfigNode::MapType())
 {
+	configData["rect0"] = data.getTopLeft();
+	configData["rect1"] = data.getBottomRight();
 }
 
 bool UIEvent::getBoolData() const
 {
-	return boolData;
+	return configData["bool"].asBool();
 }
 
 int UIEvent::getIntData() const
 {
-	return intData;
+	return configData["int"].asInt();
 }
 
 int UIEvent::getIntData2() const
 {
-	return intData2;
+	return configData["int2"].asInt();
 }
 
 KeyCode UIEvent::getKeyCode() const
 {
-	return KeyCode(intData);
+	return KeyCode(configData["keyCode"].asInt());
 }
 
 KeyMods UIEvent::getKeyMods() const
 {
-	return KeyMods(intData2);
+	return KeyMods(configData["keyMods"].asInt());
 }
 
 float UIEvent::getFloatData() const
 {
-	return floatData;
+	return configData["float"].asFloat();
 }
 
 Vector2f UIEvent::getVectorData() const
 {
-	return vectorData;
+	return configData["vector"].asVector2f();
 }
 
 Rect4f UIEvent::getRectData() const
 {
-	return rectData;
+	return Rect4f(configData["rect0"].asVector2f(), configData["rect1"].asVector2f());
+}
+
+const ConfigNode& UIEvent::getConfigData() const
+{
+	return configData;
 }
 
 UIWidget& UIEvent::getCurWidget() const
@@ -144,15 +160,15 @@ const String& UIEvent::getSourceId() const
 
 String UIEvent::getData() const
 {
-	return strData;
+	return configData["str"].asString();
 }
 
-const String& UIEvent::getStringData() const
+String UIEvent::getStringData() const
 {
-	return strData;
+	return configData["str"].asString();
 }
 
-const String& UIEvent::getStringData2() const
+String UIEvent::getStringData2() const
 {
-	return strData2;
+	return configData["str2"].asString();
 }

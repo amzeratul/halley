@@ -1,4 +1,5 @@
 #pragma once
+#include "halley/data_structures/config_node.h"
 #include "halley/text/halleystring.h"
 #include "halley/maths/vector2.h"
 #include "halley/maths/rect.h"
@@ -80,12 +81,13 @@ namespace Halley {
 		UIEvent(UIEventType type, String sourceId, String data, String data2, int intData);
 		UIEvent(UIEventType type, String sourceId, Vector2f data);
 		UIEvent(UIEventType type, String sourceId, Rect4f data);
+		UIEvent(UIEventType type, String sourceId, ConfigNode data);
 		
     	UIEventType getType() const;
 		const String& getSourceId() const;
 		[[deprecated]] String getData() const;
-    	const String& getStringData() const;
-    	const String& getStringData2() const;
+    	String getStringData() const;
+    	String getStringData2() const;
 		bool getBoolData() const;
 		int getIntData() const;
 		int getIntData2() const;
@@ -94,22 +96,16 @@ namespace Halley {
 		float getFloatData() const;
 		Vector2f getVectorData() const;
 		Rect4f getRectData() const;
+		const ConfigNode& getConfigData() const;
 		UIWidget& getCurWidget() const;
 	    
 	    void setCurWidget(UIWidget* widget);
 
     private:
 		UIEventType type;
-		int intData = 0;
-		int intData2 = 0;
-		float floatData = 0.0f;
 		String sourceId;
-		String strData;
-    	String strData2;
-		Vector2f vectorData;
-		Rect4f rectData;
+		ConfigNode configData;
 		UIWidget* curWidget = nullptr;
-		bool boolData = false;
 	};
 
 	using UIEventCallback = std::function<void(const UIEvent&)>;
