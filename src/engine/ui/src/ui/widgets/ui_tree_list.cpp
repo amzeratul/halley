@@ -225,6 +225,8 @@ void UITreeList::reparentItem(const String& itemId, const String& newParentId, i
 	auto& oldParent = *root.tryFindId(oldParentId);
 	const size_t oldChildIndex = int(oldParent.getChildIndex(itemId));
 
+	ConfigNode::SequenceType reparentNode;
+
 	if (oldParentId != newParentId || oldChildIndex != newChildIndex) {
 		int realNewChildIndex = newChildIndex;
 		if (oldParentId == newParentId) {
@@ -240,10 +242,18 @@ void UITreeList::reparentItem(const String& itemId, const String& newParentId, i
 			auto& newParent = *root.tryFindId(newParentId);
 			newParent.addChild(oldParent.removeChild(itemId), newChildIndex);
 		}
+
+		auto& entry = reparentNode.emplace_back(ConfigNode::MapType());
+		entry["itemId"] = itemId;
+		entry["parentId"] = newParentId;
+		entry["childIdx"] = realNewChildIndex;
+	}
+
+	if (!reparentNode.empty()) {
 		sortItems();
 		needsRefresh = true;
 
-		sendEvent(UIEvent(UIEventType::TreeItemReparented, getId(), itemId, newParentId, realNewChildIndex));
+		sendEvent(UIEvent(UIEventType::TreeItemReparented, getId(), std::move(reparentNode)));
 	}
 }
 

@@ -14,13 +14,35 @@ EntityChangeOperation EntityChangeOperation::clone() const
 	result.parent = parent;
 	result.childIndex = childIndex;
 
-	if (data->isDelta()) {
-		result.data = std::make_unique<EntityDataDelta>(data->asEntityDataDelta());
-	} else {
-		result.data = std::make_unique<EntityData>(data->asEntityData());
+	if (data) {
+		if (data->isDelta()) {
+			result.data = std::make_unique<EntityDataDelta>(data->asEntityDataDelta());
+		} else {
+			result.data = std::make_unique<EntityData>(data->asEntityData());
+		}
 	}
 
 	return result;
+}
+
+bool EntityChangeOperation::operator==(const EntityChangeOperation& other) const
+{
+	if (!!data ^ !other.data) {
+		return false;
+	}
+	if (data && other.data) {
+		if (data->isDelta() != other.data->isDelta()) {
+			return false;
+		}
+		// TODO, compare datas
+	}
+
+	return entityId == other.entityId && parent == other.parent && childIndex == other.childIndex;
+}
+
+bool EntityChangeOperation::operator!=(const EntityChangeOperation& other) const
+{
+	return !(*this == other);
 }
 
 EntityData::EntityData()

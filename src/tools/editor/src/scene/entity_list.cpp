@@ -55,11 +55,14 @@ void EntityList::makeUI()
 
 	setHandle(UIEventType::TreeItemReparented, [=] (const UIEvent& event)
 	{
-		const auto entityId = event.getStringData();
-		const auto newParentId = event.getStringData2();
-		const auto childIndex = event.getIntData();
+		const auto& src = event.getConfigData().asSequence();
+		std::vector<EntityChangeOperation> changes;
+		changes.reserve(src.size());
+		for (const auto& e: src) {
+			changes.emplace_back(EntityChangeOperation{ {}, e["itemId"].asString(), e["parentId"].asString(), e["childIdx"].asInt() });
+		}
 
-		sceneEditorWindow->moveEntity(entityId, newParentId, childIndex, false);
+		sceneEditorWindow->moveEntities(changes, false);
 		notifyValidatorList();
 	});
 

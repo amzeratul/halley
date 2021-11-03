@@ -41,7 +41,7 @@ namespace Halley {
 		void replaceEntity(const String& entityId, EntityData newData);
 		void selectEntity(const String& id, UIList::SelectionMode mode = UIList::SelectionMode::Normal);
 		void selectEntities(gsl::span<const String> ids, UIList::SelectionMode mode = UIList::SelectionMode::Normal);
-		void moveEntity(const String& id, const String& newParent, int childIndex, bool refreshEntityList = true);
+		void moveEntities(gsl::span<const EntityChangeOperation> changes, bool refreshEntityList = true);
 
 		void onEntityModified(const String& id, const EntityData& prevData, const EntityData& newData) override;
 		void onEntitiesModified(gsl::span<const String> ids, gsl::span<const EntityData*> prevDatas, gsl::span<const EntityData*> newData) override;
@@ -49,7 +49,6 @@ namespace Halley {
 		void addEntities(gsl::span<const EntityChangeOperation> patches);
 		void removeEntities(gsl::span<const EntityChangeOperation> patches);
 		void modifyEntities(gsl::span<const EntityChangeOperation> patches);
-		void moveEntities(gsl::span<const EntityChangeOperation> patches);
 		void replaceEntities(gsl::span<const EntityChangeOperation> patches);
 
 		void extractPrefab(const String& id);
@@ -127,7 +126,6 @@ namespace Halley {
 		void onEntitiesAdded(gsl::span<const EntityChangeOperation> patches);
 		void onEntitiesRemoved(gsl::span<const String> ids, gsl::span<const std::pair<String, int>> parents, gsl::span<EntityData> prevDatas);
 		void onEntityReplaced(const String& id, const String& parentId, int childIndex, const EntityData& prevData, const EntityData& newData);
-		void onEntityMoved(const String& id, const String& prevParentId, int prevChildIndex, const String& newParentId, int newChildIndex);
 
 	private:		
 		const HalleyAPI& api;

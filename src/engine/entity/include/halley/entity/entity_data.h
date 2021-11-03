@@ -23,6 +23,8 @@ namespace Halley {
 		int childIndex;
 
 		EntityChangeOperation clone() const;
+        bool operator==(const EntityChangeOperation& other) const;
+        bool operator!=(const EntityChangeOperation& other) const;
 	};
 	
     class EntityData : public IEntityData {

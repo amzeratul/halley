@@ -511,11 +511,34 @@ void SceneEditorWindow::modifyEntities(gsl::span<const EntityChangeOperation> pa
 	entityEditor->reloadEntity();
 }
 
-void SceneEditorWindow::moveEntities(gsl::span<const EntityChangeOperation> patches)
+void SceneEditorWindow::moveEntities(gsl::span<const EntityChangeOperation> changes, bool refreshEntityList)
 {
-	// TODO
-	Expects(patches.size() == 1);
-	moveEntity(patches.front().entityId, patches.front().parent, patches.front().childIndex);
+	std::vector<EntityChangeOperation> back;
+	std::vector<String> ids;
+	back.reserve(changes.size());
+	ids.reserve(changes.size());
+
+	for (auto& c: changes) {
+		auto [prevParent, prevIndex] = sceneData->reparentEntity(c.entityId, c.parent, c.childIndex);
+		back.push_back(EntityChangeOperation{ {}, c.entityId, prevParent, int(prevIndex) });
+		ids.push_back(c.entityId);
+	}
+
+	if (refreshEntityList) {
+		entityList->refreshList();
+	}
+
+	// Not sure why this is all needed
+	auto curSorted = currentEntityIds;
+	std::sort(curSorted.begin(), curSorted.end());
+	std::sort(ids.begin(), ids.end());
+	if (!curSorted.empty() && curSorted == ids) {
+		onEntitiesSelected(entityList->getCurrentSelections());
+	}
+
+	undoStack.pushMoved(modified, changes, back);
+	
+	markModified();
 }
 
 void SceneEditorWindow::replaceEntities(gsl::span<const EntityChangeOperation> patches)
@@ -523,15 +546,6 @@ void SceneEditorWindow::replaceEntities(gsl::span<const EntityChangeOperation> p
 	// TODO
 	Expects(patches.size() == 1);
 	replaceEntity(patches.front().entityId, EntityData(patches.front().data->asEntityData()));
-}
-
-void SceneEditorWindow::moveEntity(const String& id, const String& newParent, int childIndex, bool refreshEntityList)
-{
-	auto [prevParent, prevIndex] = sceneData->reparentEntity(id, newParent, childIndex);
-	if (refreshEntityList) {
-		entityList->refreshList();
-	}
-	onEntityMoved(id, prevParent, static_cast<int>(prevIndex), newParent, childIndex);
 }
 
 void SceneEditorWindow::extractPrefab(const String& id)
@@ -719,17 +733,6 @@ void SceneEditorWindow::onEntityReplaced(const String& id, const String& parentI
 			markModified();
 		}
 	}
-}
-
-void SceneEditorWindow::onEntityMoved(const String& id, const String& prevParentId, int prevChildIndex, const String& newParentId, int newChildIndex)
-{
-	if (!currentEntityIds.empty() && currentEntityIds.front() == id) {
-		onEntitiesSelected(entityList->getCurrentSelections());
-	}
-
-	undoStack.pushMoved(modified, id, prevParentId, prevChildIndex, newParentId, newChildIndex);
-	
-	markModified();
 }
 
 void SceneEditorWindow::onComponentRemoved(const String& name)

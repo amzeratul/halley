@@ -9,7 +9,7 @@ namespace Halley {
 		
 		void pushAdded(bool wasModified, gsl::span<const EntityChangeOperation> changes);
 		void pushRemoved(bool wasModified, gsl::span<const String> entityIds, gsl::span<const std::pair<String, int>> parents, gsl::span<const EntityData> datas);
-		void pushMoved(bool wasModified, const String& entityId, const String& prevParent, int prevIndex, const String& newParent, int newIndex);
+		void pushMoved(bool wasModified, gsl::span<const EntityChangeOperation> curState, gsl::span<const EntityChangeOperation> previousState);
 		bool pushModified(bool wasModified, gsl::span<const String> entityIds, gsl::span<const EntityData*> before, gsl::span<const EntityData*> after);
 		bool pushReplaced(bool wasModified, const String& entityId, const EntityData& before, const EntityData& after);
 

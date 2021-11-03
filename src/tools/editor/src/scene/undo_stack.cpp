@@ -56,12 +56,24 @@ void UndoStack::pushRemoved(bool wasModified, gsl::span<const String> entityIds,
 	addToStack(Action(Type::EntityRemoved, std::move(forwardPatches)), Action(Type::EntityAdded, std::move(backPatches)), wasModified);
 }
 
-void UndoStack::pushMoved(bool wasModified, const String& entityId, const String& prevParent, int prevIndex, const String& newParent, int newIndex)
+void UndoStack::pushMoved(bool wasModified, gsl::span<const EntityChangeOperation> curState, gsl::span<const EntityChangeOperation> previousState)
 {
-	if (accepting) {
-		if (prevParent != newParent || prevIndex != newIndex) {
-			addToStack(Action(Type::EntityMoved, EntityDataDelta(), entityId, newParent, newIndex), Action(Type::EntityMoved, EntityDataDelta(), entityId, prevParent, prevIndex), wasModified);
+	if (!accepting) {
+		return;
+	}
+
+	if (curState != previousState) {
+		std::vector<EntityChangeOperation> forwardPatches;
+		std::vector<EntityChangeOperation> backPatches;
+
+		for (auto& e: curState) {
+			forwardPatches.push_back(e.clone());
 		}
+		for (auto& e: previousState) {
+			backPatches.push_back(e.clone());
+		}
+
+		addToStack(Action(Type::EntityMoved, std::move(forwardPatches)), Action(Type::EntityMoved, std::move(backPatches)), wasModified);
 	}
 }
 
@@ -89,7 +101,7 @@ bool UndoStack::pushModified(bool wasModified, gsl::span<const String> entityIds
 		backPatches.emplace_back(EntityChangeOperation{ std::move(back), entityIds[i] });
 	}
 	
-	if (hasAnyChange) {
+	if (hasAnyChange) { 
 		addToStack(Action(Type::EntityModified, std::move(forwardPatches)), Action(Type::EntityModified, std::move(backPatches)), wasModified);
 		return true;
 	} else {
