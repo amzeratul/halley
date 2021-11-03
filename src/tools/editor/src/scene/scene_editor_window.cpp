@@ -917,28 +917,40 @@ void SceneEditorWindow::removeEntities(gsl::span<const String> targetIds)
 		return;
 	}
 
+	std::set<String> idSet;
+	for (const auto& targetId: targetIds) {
+		idSet.insert(targetId);
+	}
+
 	std::vector<String> entityIds;
 	std::vector<std::pair<String, int>> parenting;
 	std::vector<EntityData> prevDatas;
 
 	for (const auto& targetId: targetIds) {
-		const String& parentId = findParent(targetId);
+		const auto parentId = findParent(targetId, &idSet);
+		if (!parentId) {
+			// Excluded, presumably because one of its ancestors is already included
+			continue;
+		}
 
-		auto& data = sceneData->getWriteableEntityNodeData(parentId).getData();
-		const auto canDelete = !parentId.isEmpty() || data.isSceneRoot(); // Don't delete root of prefab
+		auto& data = sceneData->getWriteableEntityNodeData(parentId.value()).getData();
 
-		if (canDelete) {
-			auto& children = data.getChildren();
-			for (auto iter = children.begin(); iter != children.end(); ++iter) {
-				if (iter->getInstanceUUID().toString() == targetId) {
-					entityIds.push_back(targetId);
-					prevDatas.emplace_back(std::move(*iter));
-					parenting.emplace_back(parentId, static_cast<int>(iter - children.begin()));
+		// Don't delete root of prefab
+		const auto canDelete = !parentId.value().isEmpty() || data.isSceneRoot();
+		if (!canDelete) {
+			continue;
+		}
 
-					children.erase(iter);
+		auto& children = data.getChildren();
+		for (auto iter = children.begin(); iter != children.end(); ++iter) {
+			if (iter->getInstanceUUID().toString() == targetId) {
+				entityIds.push_back(targetId);
+				prevDatas.emplace_back(std::move(*iter));
+				parenting.emplace_back(parentId.value(), static_cast<int>(iter - children.begin()));
 
-					break;
-				}
+				children.erase(iter);
+
+				break;
 			}
 		}
 	}
@@ -975,23 +987,26 @@ void SceneEditorWindow::replaceEntity(const String& entityId, EntityData newData
 	onEntityReplaced(entityId, node.getParentId(), node.getChildIndex(), oldData, newData);
 }
 
-String SceneEditorWindow::findParent(const String& entityId) const
+std::optional<String> SceneEditorWindow::findParent(const String& entityId, std::set<String>* invalidParents) const
 {
+	const String rootId = "";
 	const auto tree = sceneData->getEntityTree();
-	const auto res = findParent(entityId, tree, "");
-	return res ? *res : "";
+	const auto res = findParent(entityId, tree, rootId, invalidParents);
+	return res ? *res : std::optional<String>();
 }
 
-const String* SceneEditorWindow::findParent(const String& entityId, const EntityTree& tree, const String& prev) const
+const String* SceneEditorWindow::findParent(const String& targetEntityId, const EntityTree& tree, const String& parentEntityId, std::set<String>* invalidParents) const
 {
-	if (tree.entityId == entityId) {
-		return &prev;
+	if (tree.entityId == targetEntityId) {
+		return &parentEntityId;
 	}
-
-	for (auto& c: tree.children) {
-		const auto res = findParent(entityId, c, tree.entityId);
-		if (res) {
-			return res;
+	
+	if (!invalidParents || !std_ex::contains(*invalidParents, tree.entityId)) {
+		for (auto& c: tree.children) {
+			const auto res = findParent(targetEntityId, c, tree.entityId, invalidParents);
+			if (res) {
+				return res;
+			}
 		}
 	}
 

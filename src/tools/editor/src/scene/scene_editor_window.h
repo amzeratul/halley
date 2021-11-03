@@ -172,8 +172,8 @@ namespace Halley {
 		void onEntitiesSelected(std::vector<String> selectedEntities);
 		void panCameraToEntity(const String& id);
 
-		String findParent(const String& entityId) const;
-		const String* findParent(const String& entityId, const EntityTree& tree, const String& prev) const;
+		std::optional<String> findParent(const String& entityId, std::set<String>* invalidParents = nullptr) const;
+		const String* findParent(const String& targetEntityId, const EntityTree& tree, const String& parentEntityId, std::set<String>* invalidParents) const;
 		String getNextSibling(const String& parentId, int childIndex) const;
 		std::pair<String, int> getParentInsertPos(const String& referenceId, bool childOfReference) const;
 
