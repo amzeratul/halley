@@ -93,6 +93,13 @@ UIEvent::UIEvent(UIEventType type, String sourceId, Rect4f data)
 	configData["rect1"] = data.getBottomRight();
 }
 
+UIEvent::UIEvent(UIEventType type, String sourceId, ConfigNode data)
+	: type(type)
+	, sourceId(std::move(sourceId))
+	, configData(std::move(data))
+{
+}
+
 bool UIEvent::getBoolData() const
 {
 	return configData["bool"].asBool();
