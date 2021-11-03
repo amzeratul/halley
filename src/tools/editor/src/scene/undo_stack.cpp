@@ -44,6 +44,15 @@ void UndoStack::pushRemoved(bool wasModified, gsl::span<const String> entityIds,
 		backPatches.emplace_back(EntityChangeOperation{ std::make_unique<EntityData>(datas[i]), entityIds[i], parents[i].first, parents[i].second });
 	}
 
+	// Sort back patches by parentId/childIdx, that way we ensure that entities are added from top to bottom on every parent
+	std::sort(backPatches.begin(), backPatches.end(), [&] (const EntityChangeOperation& a, const EntityChangeOperation& b)
+	{
+		if (a.parent != b.parent) {
+			return a.parent < b.parent;
+		}
+		return a.childIndex < b.childIndex;
+	});
+
 	addToStack(Action(Type::EntityRemoved, std::move(forwardPatches)), Action(Type::EntityAdded, std::move(backPatches)), wasModified);
 }
 
