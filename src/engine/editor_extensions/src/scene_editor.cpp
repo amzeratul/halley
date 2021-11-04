@@ -593,7 +593,7 @@ std::vector<EntityRef> SceneEditor::getEntitiesAt(Rect4f area) const
 	std::vector<std::pair<EntityRef, float>> temp;
 	
 	for (auto& e: world->getEntities()) {
-		if (doesAreaOverlapSprite(e, area)) {
+		if (e.isSelectable() && doesAreaOverlapSprite(e, area)) {
 			const float depth = getSpriteDepth(e, area);
 			temp.emplace_back(e, depth);
 		}

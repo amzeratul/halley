@@ -145,6 +145,8 @@ namespace Halley {
 		bool alive : 1;
 		bool serializable : 1;
 		bool reloaded : 1;
+		bool active : 1; // Reserved for future use
+		bool selectable : 1;
 		
 		uint8_t childrenRevision = 0;
 		uint8_t worldPartition = 0;
@@ -518,6 +520,16 @@ namespace Halley {
 		bool isAlive() const
 		{
 			return entity->isAlive();
+		}
+
+		bool isSelectable() const
+		{
+			return entity->selectable;
+		}
+
+		void setSelectable(bool selectable)
+		{
+			entity->selectable = selectable;
 		}
 
 		bool operator==(const EntityRef& other) const

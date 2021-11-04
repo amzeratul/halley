@@ -11,6 +11,8 @@ Entity::Entity()
 	, alive(true)
 	, serializable(true)
 	, reloaded(false)
+	, active(true)
+	, selectable(true)
 {
 
 }
