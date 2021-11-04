@@ -357,7 +357,15 @@ void UIList::setItemEnabled(const String& id, bool enabled)
 
 void UIList::resetSelectionIfInvalid()
 {
-	if (!setSelectedOptionId(getSelectedOptionId())) {
+	bool valid = true;
+	for (const auto& id: getSelectedOptionIds()) {
+		if (!isValidSelection(id)) {
+			valid = false;
+			break;
+		}
+	}
+
+	if (!valid) {
 		const auto shouldResetSelection = (requiresSelection || curOption >= 0);
 		curOption = -1;
 		if (shouldResetSelection) {
@@ -1177,6 +1185,18 @@ bool UIList::setSelectedOptionId(const String& id, SelectionMode mode)
 		if (i->getId() == id) {
 			if (i->isActive()) {
 				setSelectedOption(i->getIndex(), mode);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool UIList::isValidSelection(const String& id)
+{
+	for (auto& i: items) {
+		if (i->getId() == id) {
+			if (i->isActive()) {
 				return true;
 			}
 		}

@@ -66,7 +66,7 @@ namespace Halley {
 		void pasteEntitiesFromClipboard(const String& referenceId, bool childOfReference);
 		String copyEntities(gsl::span<const String> ids);
 		void pasteEntities(const String& data, const String& referenceId, bool childOfReference);
-		void duplicateEntity(const String& id);
+		void duplicateEntities(gsl::span<const String> ids);
 		void openEditPrefabWindow(const String& name);
 
 		const std::shared_ptr<ISceneData>& getSceneData() const override;

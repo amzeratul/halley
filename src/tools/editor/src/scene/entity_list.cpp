@@ -247,7 +247,7 @@ UITreeList& EntityList::getList()
 	return *list;
 }
 
-void EntityList::openContextMenu(gsl::span<const String> entityIds)
+void EntityList::openContextMenu(std::vector<String> entityIds)
 {
 	auto menuOptions = std::vector<UIPopupMenuItem>();
 	auto makeEntry = [&] (const String& id, const String& text, const String& toolTip, const String& icon, bool enabled = true)

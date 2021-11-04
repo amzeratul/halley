@@ -120,7 +120,7 @@ void UITreeList::refresh()
 
 	const auto toSel = root.getLastExpandedItem(sel);
 	if (toSel) {
-		setSelectedOptionId(toSel.value());
+		setSelectedOptionId(toSel.value(), SelectionMode::AddToSelect);
 	}
 
 	resetSelectionIfInvalid();

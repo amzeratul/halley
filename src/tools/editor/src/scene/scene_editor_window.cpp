@@ -309,7 +309,7 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 	}
 
 	if (key.is(KeyCode::D, KeyMods::Ctrl)) {
-		duplicateEntity(entityList->getCurrentSelection());
+		duplicateEntities(entityList->getCurrentSelections());
 		return true;
 	}
 
@@ -356,7 +356,7 @@ void SceneEditorWindow::onEntityContextMenuAction(const String& actionId, gsl::s
 	} else if (actionId == "delete") {
 		removeEntities(entityIds);
 	} else if (actionId == "duplicate") {
-		duplicateEntity(entityIds.front());
+		duplicateEntities(entityIds);
 	} else if (actionId == "add_entity_child") {
 		addNewEntity(entityIds.front(), true);
 	} else if (actionId == "add_entity_sibling") {
@@ -853,9 +853,11 @@ void SceneEditorWindow::pasteEntities(const String& stringData, const String& re
 	}
 }
 
-void SceneEditorWindow::duplicateEntity(const String& id)
+void SceneEditorWindow::duplicateEntities(gsl::span<const String> ids)
 {
-	pasteEntities(copyEntities(gsl::span<const String>(&id, 1)), id, false);
+	if (!ids.empty()) {
+		pasteEntities(copyEntities(ids), ids.back(), false);
+	}
 }
 
 void SceneEditorWindow::openEditPrefabWindow(const String& name)
