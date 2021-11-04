@@ -74,14 +74,21 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	}
 	if (mousePos) {
 		if (holdMouseStart && (holdMouseStart.value() - mousePos.value()).length() > 3) {
+			if (!selBox) {
+				selBoxStartSelectedEntities = selectedEntities;
+			}
 			selBox = Rect4f(holdMouseStart.value(), mousePos.value());
 		}
 	}
 	inputState.selectionBox = selBox;
+	if (selBox) {
+		onSelectionBox(inputState, outputState);
+	}
 	if (!inputState.leftClickHeld) {
 		// Make sure this happens after inputState.selectionBox is set
 		// This is so you still get a final selection box on release
 		selBox.reset();
+		selBoxStartSelectedEntities.clear();
 	}
 
 	// Update gizmos
@@ -560,7 +567,7 @@ EntityRef SceneEditor::getEntity(const UUID& id) const
 	return getWorld().findEntity(id).value();
 }
 
-bool SceneEditor::isPointInSprite(EntityRef& e, Vector2f point) const
+bool SceneEditor::doesAreaOverlapSprite(EntityRef& e, Rect4f area) const
 {
 	const auto* spriteComponent = e.tryGetComponent<SpriteComponent>();
 	if (!spriteComponent) {
@@ -568,10 +575,10 @@ bool SceneEditor::isPointInSprite(EntityRef& e, Vector2f point) const
 	}
 	
 	const auto& sprite = spriteComponent->sprite;
-	return sprite.isPointVisible(point);
+	return sprite.hasPointVisible(area);
 }
 
-float SceneEditor::getSpriteDepth(EntityRef& e, Vector2f pos) const
+float SceneEditor::getSpriteDepth(EntityRef& e, Rect4f rect) const
 {
 	const auto* sprite = e.tryGetComponent<SpriteComponent>();
 	if (sprite) {
@@ -581,13 +588,13 @@ float SceneEditor::getSpriteDepth(EntityRef& e, Vector2f pos) const
 	}
 }
 
-std::vector<EntityRef> SceneEditor::getEntitiesAt(Vector2f point) const
+std::vector<EntityRef> SceneEditor::getEntitiesAt(Rect4f area) const
 {
 	std::vector<std::pair<EntityRef, float>> temp;
 	
 	for (auto& e: world->getEntities()) {
-		if (isPointInSprite(e, point)) {
-			const float depth = getSpriteDepth(e, point);
+		if (doesAreaOverlapSprite(e, area)) {
+			const float depth = getSpriteDepth(e, area);
 			temp.emplace_back(e, depth);
 		}
 	}
@@ -606,7 +613,12 @@ std::vector<EntityRef> SceneEditor::getEntitiesAt(Vector2f point) const
 
 std::vector<EntityRef> SceneEditor::getRootEntitiesAt(Vector2f point) const
 {
-	const auto entities = getEntitiesAt(point);
+	return getRootEntitiesAt(Rect4f(point, point));
+}
+
+std::vector<EntityRef> SceneEditor::getRootEntitiesAt(Rect4f area) const
+{
+	const auto entities = getEntitiesAt(area);
 
 	std::vector<EntityRef> result;
 	for (const auto& e: entities) {
@@ -653,6 +665,11 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 	} else {
 		output.newSelection.clear();
 	}
+}
+
+void SceneEditor::onSelectionBox(const SceneEditorInputState& input, SceneEditorOutputState& output)
+{
+
 }
 
 std::vector<AssetCategoryFilter> SceneEditor::getPrefabCategoryFilters() const

@@ -481,8 +481,10 @@ Vector4s Sprite::getSlices() const
 	return slices;
 }
 
-bool Sprite::isPointVisible(Vector2f point) const
+bool Sprite::hasPointVisible(Rect4f area) const
 {
+	Vector2f point = area.getCenter(); // TODO
+
 	// Is the sprite visible?
 	if (!visible || getColour().a < 0.0001f) {
 		return false;

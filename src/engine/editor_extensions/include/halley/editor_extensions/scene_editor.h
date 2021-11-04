@@ -97,10 +97,11 @@ namespace Halley {
 		virtual std::optional<Vector2f> getWorldOffset() const;
 		std::unique_ptr<World> doCreateWorld(const String& stageName) const;
 
-    	virtual std::vector<EntityRef> getEntitiesAt(Vector2f point) const;
+    	virtual std::vector<EntityRef> getEntitiesAt(Rect4f area) const;
     	EntityRef getRootEntityAt(Vector2f point) const;
-    	std::vector<EntityRef> getRootEntitiesAt(Vector2f point) const;
-       	virtual float getSpriteDepth(EntityRef& e, Vector2f point) const;
+		std::vector<EntityRef> getRootEntitiesAt(Vector2f point) const;
+    	std::vector<EntityRef> getRootEntitiesAt(Rect4f area) const;
+       	virtual float getSpriteDepth(EntityRef& e, Rect4f area) const;
 
 		AssetPreviewData makeSpritePreviewData(AssetType assetType, const String& id, Vector2i size, RenderContext& renderContext);
 		virtual Future<AssetPreviewData> getSpritePreviewData(AssetType assetType, const String& id, Vector2i size);
@@ -127,6 +128,7 @@ namespace Halley {
 		std::optional<Vector2f> mousePos;
     	std::optional<Vector2f> holdMouseStart;
     	std::optional<Rect4f> selBox;
+		std::vector<EntityRef> selBoxStartSelectedEntities;
 
     	void moveCameraTo2D(Vector2f pos);
 		void doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect) const;
@@ -134,8 +136,9 @@ namespace Halley {
 		Vector2f roundPosition(Vector2f pos, float zoom) const;
     	EntityRef getEntity(const UUID& uuid) const;
 
-    	bool isPointInSprite(EntityRef& e, Vector2f point) const;
+    	bool doesAreaOverlapSprite(EntityRef& e, Rect4f area) const;
     	void onClick(const SceneEditorInputState& input, SceneEditorOutputState& output);
+		void onSelectionBox(const SceneEditorInputState& input, SceneEditorOutputState& output);
 
     	EntityRef getEntityToFocus();
 		void updateEntityFocused();

@@ -140,7 +140,7 @@ namespace Halley
 		Sprite& setVisible(bool visible) { this->visible = visible; return *this; }
 		bool isVisible() const { return visible; }
 
-		bool isPointVisible(Vector2f point) const;
+		bool hasPointVisible(Rect4f area) const;
 
 		Sprite& setClip(Rect4f clip);
 		Sprite& setAbsoluteClip(Rect4f clip);
