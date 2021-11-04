@@ -42,7 +42,7 @@ void TranslateGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 	// Drag
 	for (size_t i = 0; i < n; ++i) {
 		auto& handle = handles[i];
-		handle.update(inputState);
+		handle.update(inputState, handles);
 		if (handle.isHeld()) {
 			const auto transform = getComponent<Transform2DComponent>(i);
 			const auto oldPos = transform->getGlobalPosition();
@@ -205,7 +205,8 @@ void TranslateGizmo::doMoveBy()
 
 void TranslateGizmo::doMoveBy(Vector2f delta)
 {
-	const size_t n = getEntities().size();
+	const auto& entities = getEntities();
+	const size_t n = entities.size();
 	Expects(handles.size() == n);
 
 	std::vector<Vector2f> targetPos;
@@ -218,10 +219,25 @@ void TranslateGizmo::doMoveBy(Vector2f delta)
 	}
 	
 	for (size_t i = 0; i < n; ++i) {
-		if (const auto transform = getComponent<Transform2DComponent>(i)) {
-			transform->setGlobalPosition(targetPos[i]);
-			const auto newLocalPos = transform->getLocalPosition();
-			updateEntityData(newLocalPos, i);
+		if (!isDescendentOf(entities[i], entities)) {
+			if (const auto transform = getComponent<Transform2DComponent>(i)) {
+				transform->setGlobalPosition(targetPos[i]);
+				const auto newLocalPos = transform->getLocalPosition();
+				updateEntityData(newLocalPos, i);
+			}
 		}
 	}
+}
+
+bool TranslateGizmo::isDescendentOf(EntityRef e, gsl::span<const EntityRef> entities) const
+{
+	if (!e.hasParent()) {
+		return false;
+	}
+
+	if (std_ex::contains(entities, e.getParent())) {
+		return true;
+	}
+
+	return isDescendentOf(e.getParent(), entities);
 }

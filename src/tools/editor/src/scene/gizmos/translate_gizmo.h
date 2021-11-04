@@ -49,5 +49,6 @@ namespace Halley {
 		void doMoveBy();
 		void doMoveBy(Vector2f delta);
 		void loadHandles();
+		bool isDescendentOf(EntityRef e, gsl::span<const EntityRef> entities) const;
 	};
 }
