@@ -138,6 +138,8 @@ namespace Halley {
 		bool requiresSelection = true;
 
 		void onItemClicked(UIListItem& item, int button, KeyMods keyMods);
+		void onItemClickReleased(UIListItem& item, int button, KeyMods keyMods);
+		SelectionMode getMode(KeyMods mods, int button) const;
 		void onItemDoubleClicked(UIListItem& item);
 		void onAccept();
 		void onCancel();

@@ -813,10 +813,12 @@ void UIList::update(Time t, bool moved)
 void UIList::onItemClicked(UIListItem& item, int button, KeyMods keyMods)
 {
 	if (button == 0 || !singleClickAccept) {
-		const bool shiftHeld = (static_cast<int>(keyMods) & static_cast<int>(KeyMods::Shift)) != 0;
-		const bool ctrlHeld = (static_cast<int>(keyMods) & static_cast<int>(KeyMods::Ctrl)) != 0;
-		const auto mode = button == 0 ? (shiftHeld ? SelectionMode::ShiftSelect : (ctrlHeld ? SelectionMode::CtrlSelect : SelectionMode::Normal)) : SelectionMode::Normal;
-		setSelectedOption(item.getIndex(), mode);
+		const auto mode = getMode(keyMods, button);
+
+		// If you click an item that's already selected, that doesn't cause any changes until release. This is important for dragging.
+		if (mode != SelectionMode::Normal || !item.isSelected()) {
+			setSelectedOption(item.getIndex(), mode);
+		}
 	}
 	if (button == 0 && singleClickAccept) {
 		onAccept();
@@ -827,6 +829,23 @@ void UIList::onItemClicked(UIListItem& item, int button, KeyMods keyMods)
 		sendEvent(UIEvent(UIEventType::ListItemRightClicked, getId(), item.getId(), curOption));
 	}
 	focus();
+}
+
+void UIList::onItemClickReleased(UIListItem& item, int button, KeyMods keyMods)
+{
+	if (button == 0) {
+		const auto mode = getMode(keyMods, button);
+		if (mode == SelectionMode::Normal && item.isSelected()) {
+			setSelectedOption(item.getIndex(), mode);
+		}
+	}
+}
+
+UIList::SelectionMode UIList::getMode(KeyMods keyMods, int button) const
+{
+	const bool shiftHeld = (static_cast<int>(keyMods) & static_cast<int>(KeyMods::Shift)) != 0;
+	const bool ctrlHeld = (static_cast<int>(keyMods) & static_cast<int>(KeyMods::Ctrl)) != 0;
+	return button == 0 ? (shiftHeld ? SelectionMode::ShiftSelect : (ctrlHeld ? SelectionMode::CtrlSelect : SelectionMode::Normal)) : SelectionMode::Normal;
 }
 
 void UIList::onItemDoubleClicked(UIListItem& item)
@@ -1003,6 +1022,7 @@ void UIListItem::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 	}
 
 	lastMods = keyMods;
+	parent.onItemClicked(*this, button, lastMods);
 }
 
 void UIListItem::releaseMouse(Vector2f mousePos, int button)
@@ -1017,11 +1037,10 @@ void UIListItem::releaseMouse(Vector2f mousePos, int button)
 				dragged = false;
 				setNoClipChildren(false);
 				parent.onItemDoneDragging(*this, index, curDragPos);
-			} else {
-				parent.onItemClicked(*this, button, lastMods);
 			}
 		}
 	}
+	parent.onItemClickReleased(*this, button, lastMods);
 }
 
 void UIListItem::setDragPos(Vector2f pos)
