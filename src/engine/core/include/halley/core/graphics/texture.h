@@ -19,6 +19,8 @@ namespace Halley
 		void load(TextureDescriptor descriptor);
 
 		std::optional<uint32_t> getPixel(Vector2f texPos) const;
+		std::optional<uint32_t> getPixel(Vector2i pixelPos) const;
+		bool hasOpaquePixels(Rect4i pixelBounds) const;
 
 		static std::shared_ptr<Texture> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Texture; }

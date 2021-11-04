@@ -483,19 +483,17 @@ Vector4s Sprite::getSlices() const
 
 bool Sprite::hasPointVisible(Rect4f area) const
 {
-	Vector2f point = area.getCenter(); // TODO
-
 	// Is the sprite visible?
 	if (!visible || getColour().a < 0.0001f) {
 		return false;
 	}
 
 	// Compute local space point
-	const auto localPoint = point - getPosition();
+	const auto localArea = area - getPosition();
 
 	// Check AABB first
 	const auto aabb = getLocalAABB();
-	if (!aabb.contains(localPoint)) {
+	if (!aabb.overlaps(localArea)) {
 		return false;
 	}
 
@@ -503,21 +501,23 @@ bool Sprite::hasPointVisible(Rect4f area) const
 	if (material) {
 		const auto tex = material->getTexture(0);
 		if (tex) {
-			auto relPos = (localPoint - aabb.getTopLeft()) / aabb.getSize();
+			auto overlapArea = localArea.intersection(aabb);
+
+			Rect4f relPos = (overlapArea - aabb.getTopLeft()) / aabb.getSize();
 			if (flip ^ (getScale().x < 0)) {
-				relPos.x = 1.0f - relPos.x;
+				relPos.getP1().x = 1.0f - relPos.getP1().x;
+				relPos.getP2().x = 1.0f - relPos.getP2().x;
 			}
 			if (getScale().y < 0) {
-				relPos.y = 1.0f - relPos.y;
+				relPos.getP1().y = 1.0f - relPos.getP1().y;
+				relPos.getP2().y = 1.0f - relPos.getP2().y;
 			}
 			
 			const auto texRect = getTexRect0();
-			const auto texelPos = relPos * texRect.getSize() + texRect.getTopLeft();
-			const auto px = tex->getPixel(texelPos);
-			if (px) {
-				const auto pxColour = Image::convertIntToColour(px.value());
-				return pxColour.a > 0.01f;
-			}
+			const auto texelRect = relPos.mult(texRect.getSize()) + texRect.getTopLeft(); // lol hack
+			const auto pixelRect = texelRect.mult(Vector2f(tex->getSize()));
+			const auto pixelBounds = Rect4i(Vector2i(pixelRect.getTopLeft().floor()), Vector2i(pixelRect.getBottomRight().floor()));
+			return tex->hasOpaquePixels(pixelBounds);
 		}
 	}
 

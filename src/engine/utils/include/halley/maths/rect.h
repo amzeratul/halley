@@ -161,6 +161,9 @@ namespace Halley {
 		constexpr Vector2D<T> getTopRight() const { return Vector2D<T>(p2.x, p1.y); }
 		constexpr Vector2D<T> getSize() const { return p2 - p1; }
 
+		constexpr Vector2D<T>& getP1() { return p1; }
+		constexpr Vector2D<T>& getP2() { return p2; }
+
 		constexpr T getWidth() const { return p2.x - p1.x; }
 		constexpr T getHeight() const { return p2.y - p1.y; }
 		constexpr T getX() const { return p1.x; }
@@ -281,6 +284,13 @@ namespace Halley {
 
 		template <typename V>
 		constexpr Rect2D operator * (const V param) const
+		{
+			return Rect2D(p1 * param, p2 * param);
+		}
+
+		// HACK
+		template <typename V>
+		constexpr Rect2D mult(const V param) const
 		{
 			return Rect2D(p1 * param, p2 * param);
 		}
