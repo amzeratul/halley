@@ -63,15 +63,12 @@ bool UIList::setSelectedOption(int option, SelectionMode mode)
 	const auto newSel = clamp(option, 0, numberOfItems - 1);
 
 	if (!requiresSelection && option < 0) {
-		deselectAll();
+		deselectAll({});
 		curOption = -1;
 		return false;
 	}
 	
-	if (newSel != curOption || mode == SelectionMode::CtrlSelect) {
-		return changeSelection(curOption, newSel, mode);
-	}
-	return false;
+	return changeSelection(curOption, newSel, mode);
 }
 
 int UIList::getSelectedOption() const
@@ -227,7 +224,9 @@ bool UIList::changeSelection(int oldItem, int newItem, SelectionMode mode)
 	bool changed = false;
 
 	if (mode == SelectionMode::Normal || mode == SelectionMode::ShiftSelect) {
-		deselectAll();
+		if (deselectAll(newItem)) {
+			changed = true;
+		}
 	}
 
 	if (mode == SelectionMode::Normal || mode == SelectionMode::AddToSelect) {
@@ -292,11 +291,16 @@ bool UIList::changeSelection(int oldItem, int newItem, SelectionMode mode)
 	return changed;
 }
 
-void UIList::deselectAll()
+bool UIList::deselectAll(std::optional<int> exceptFor)
 {
+	bool changed = false;
 	for (auto& item: items) {
-		item->setSelected(false);
+		if (item->getIndex() != exceptFor && item->isSelected()) {
+			item->setSelected(false);
+			changed = true;
+		}
 	}
+	return changed;
 }
 
 void UIList::notifyNewItemSelected(int itemIdx, const String& itemId)
@@ -848,10 +852,12 @@ UIList::SelectionMode UIList::getMode(KeyMods keyMods, int button) const
 	return button == 0 ? (shiftHeld ? SelectionMode::ShiftSelect : (ctrlHeld ? SelectionMode::CtrlSelect : SelectionMode::Normal)) : SelectionMode::Normal;
 }
 
-void UIList::onItemDoubleClicked(UIListItem& item)
+void UIList::onItemDoubleClicked(UIListItem& item, KeyMods mods)
 {
-	setSelectedOption(item.getIndex());
-	onAccept();
+	if (mods == KeyMods::None) {
+		setSelectedOption(item.getIndex());
+		onAccept();
+	}
 }
 
 void UIList::onItemDragging(UIListItem& item, int index, Vector2f pos)
@@ -888,11 +894,6 @@ UIListItem::UIListItem(const String& id, UIList& parent, UIStyle style, int inde
 {
 	sprite = style.getSprite("normal");
 	setMinSize(style.getVector2f("minSize", Vector2f()));
-}
-
-void UIListItem::onDoubleClicked(Vector2f mousePos, KeyMods keyMods)
-{
-	parent.onItemDoubleClicked(*this);
 }
 
 void UIListItem::onClicked(Vector2f mousePos, KeyMods keyMods)
@@ -1041,6 +1042,11 @@ void UIListItem::releaseMouse(Vector2f mousePos, int button)
 		}
 	}
 	parent.onItemClickReleased(*this, button, lastMods);
+}
+
+void UIListItem::onDoubleClicked(Vector2f mousePos, KeyMods keyMods)
+{
+	parent.onItemDoubleClicked(*this, keyMods);
 }
 
 void UIListItem::setDragPos(Vector2f pos)

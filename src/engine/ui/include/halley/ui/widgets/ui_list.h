@@ -140,7 +140,7 @@ namespace Halley {
 		void onItemClicked(UIListItem& item, int button, KeyMods keyMods);
 		void onItemClickReleased(UIListItem& item, int button, KeyMods keyMods);
 		SelectionMode getMode(KeyMods mods, int button) const;
-		void onItemDoubleClicked(UIListItem& item);
+		void onItemDoubleClicked(UIListItem& item, KeyMods mods);
 		void onAccept();
 		void onCancel();
 
@@ -151,7 +151,7 @@ namespace Halley {
 		void applyImageColour(UIImage& image) const;
 
 		bool changeSelection(int oldItem, int newItem, SelectionMode mode);
-		void deselectAll();
+		bool deselectAll(std::optional<int> exceptFor);
 		void notifyNewItemSelected(int itemIdx, const String& itemId);
 	};
 
