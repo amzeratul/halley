@@ -669,7 +669,15 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 
 void SceneEditor::onSelectionBox(const SceneEditorInputState& input, SceneEditorOutputState& output)
 {
-
+	const auto& entities = getRootEntitiesAt(*input.selectionBox);
+	if (!entities.empty()) {
+		std::vector<UUID> results;
+		for (auto& e: entities) {
+			results.push_back(e.getInstanceUUID());
+		}
+		output.newSelection = std::move(results);
+		output.selectionMode = UIList::SelectionMode::Normal; // TODO
+	}
 }
 
 std::vector<AssetCategoryFilter> SceneEditor::getPrefabCategoryFilters() const

@@ -202,7 +202,14 @@ void EntityList::select(const String& id, UIList::SelectionMode mode)
 
 void EntityList::select(gsl::span<const String> ids, UIList::SelectionMode mode)
 {
-	list->setSelectedOptionIds(ids, mode);
+	auto incoming = std::vector<String>(ids.begin(), ids.end());
+	auto current = getCurrentSelections();
+	std::sort(incoming.begin(), incoming.end());
+	std::sort(current.begin(), current.end());
+
+	if (mode != UIList::SelectionMode::Normal || incoming != current) {
+		list->setSelectedOptionIds(ids, mode);
+	}
 }
 
 UUID EntityList::getEntityUnderCursor() const
