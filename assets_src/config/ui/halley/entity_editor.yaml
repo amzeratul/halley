@@ -1,5 +1,5 @@
 ---
-widget: { class: image, image: "halley_ui/ui_window.png", innerBorder: [ 4, 4, 4, 4 ], colour: $ui_backgroundBox }
+widget: { class: image, image: "halley_ui/ui_window.png", innerBorder: [ 4, 4, 4, 4 ], colour: $ui_backgroundBox, size: [330, 10] }
 sizer: { type: vertical }
 children:
 - widget: { id: scrollBarPane, class: scrollBarPane }
@@ -45,13 +45,18 @@ children:
     - widget: { id: editPrefab, class: button, text: Edit, tooltip: "Open this prefab to edit." }
   - widget: { id: fields, class: widget }
     sizer: { type: vertical, gap: 8 }
-  - widget: { id: addComponentButton, class: button, text: "Add Component", size: [ 30, 25 ], tooltip: "Add a new Component to this Entity. [Ctrl+T]" }
-  - sizer: { type: horizontal }
-    border: [0, -4, 0, 0]
+  - widget: { id: componentButtons, class: widget }
+    sizer: { type: vertical, gap: 4 }
     children:
-    - widget: { id: copyComponentsButton, class: button, style: buttonThin, text: "Copy Components", size: [ 30, 25 ], tooltip: "Copy all components to the clipboard." }
-      proportion: 1
-    - widget: { id: pasteComponentsButton, class: button, style: buttonThin, text: "Paste Components", size: [ 30, 25 ], tooltip: "Paste a Component to this Entity." }
-      proportion: 1
+    - widget: { id: addComponentButton, class: button, text: "Add Component", size: [ 30, 25 ], tooltip: "Add a new Component to this Entity. [Ctrl+T]" }
+    - sizer: { type: horizontal, gap: 4 }
+      children:
+      - widget: { id: copyComponentsButton, class: button, style: buttonThin, text: "Copy Components", size: [ 30, 25 ], tooltip: "Copy all components to the clipboard." }
+        proportion: 1
+      - widget: { id: pasteComponentsButton, class: button, style: buttonThin, text: "Paste Components", size: [ 30, 25 ], tooltip: "Paste a Component to this Entity." }
+        proportion: 1
+- widget: { id: message, class: label, text: Multiple Entities Selected }
+  proportion: 1
+  fill: centre
 - widget: { id: entityValidatorUI, class: entityValidator }
 ...

@@ -150,21 +150,28 @@ bool EntityEditor::loadEntity(const String& id, EntityData& data, const Prefab* 
 	return true;
 }
 
-void EntityEditor::unloadEntity()
+void EntityEditor::unloadEntity(bool becauseHasMultiple)
 {
 	currentEntityData = nullptr;
 	prevEntityData = EntityData();
 	prefabData = nullptr;
 	currentId = "";
 	isPrefab = false;
+	unloadedBecauseHasMultiple = becauseHasMultiple;
 	reloadEntity();
 }
 
 void EntityEditor::reloadEntity()
 {
+	getWidget("scrollBarPane")->setActive(currentEntityData);
 	getWidget("entityHeader")->setActive(currentEntityData && !isPrefab);
 	getWidget("prefabHeader")->setActive(currentEntityData && isPrefab);
-	getWidget("addComponentButton")->setActive(currentEntityData);
+	getWidget("componentButtons")->setActive(currentEntityData);
+
+	auto msg = getWidgetAs<UILabel>("message");
+	msg->setActive(!currentEntityData);
+	msg->setText(LocalisedString::fromHardcodedString(unloadedBecauseHasMultiple ? "Multiple Entities Selected" : "No Entities Selected"));
+
 	fields->clear();
 	componentWidgets.clear();
 
@@ -196,15 +203,19 @@ void EntityEditor::unloadIcons()
 
 void EntityEditor::onFieldChangedByGizmo(const String& componentName, const String& fieldName)
 {
-	sendEventDown(UIEvent(UIEventType::ReloadData, componentName + ":" + fieldName));
-	refreshEntityData();
+	if (currentEntityData) {
+		sendEventDown(UIEvent(UIEventType::ReloadData, componentName + ":" + fieldName));
+		refreshEntityData();
+	}
 }
 
 void EntityEditor::onFieldChangedProcedurally(const String& componentName, const String& fieldName)
 {
-	sendEventDown(UIEvent(UIEventType::ReloadData, componentName + ":" + fieldName));
-	onEntityUpdated();
-	sceneEditor->refreshGizmos();
+	if (currentEntityData) {
+		sendEventDown(UIEvent(UIEventType::ReloadData, componentName + ":" + fieldName));
+		onEntityUpdated();
+		sceneEditor->refreshGizmos();
+	}
 }
 
 void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data)
@@ -551,14 +562,18 @@ void EntityEditor::editPrefab()
 
 void EntityEditor::refreshEntityData()
 {
-	prevEntityData = EntityData(*currentEntityData);
-	entityValidatorUI->refresh();
+	if (currentEntityData) {
+		prevEntityData = EntityData(*currentEntityData);
+		entityValidatorUI->refresh();
+	}
 }
 
 void EntityEditor::onEntityUpdated()
 {
-	sceneEditor->onEntityModified(currentId, prevEntityData, *currentEntityData);
-	refreshEntityData();
+	if (currentEntityData) {
+		sceneEditor->onEntityModified(currentId, prevEntityData, *currentEntityData);
+		refreshEntityData();
+	}
 }
 
 void EntityEditor::setTool(const String& tool, const String& componentName, const String& fieldName)
@@ -647,8 +662,6 @@ std::shared_ptr<IUIElement> EntityEditorFactory::makeField(const String& rawFiel
 
 		return container;
 	}
-
-	return {};
 }
 
 ConfigNode EntityEditorFactory::getDefaultNode(const String& fieldType) const

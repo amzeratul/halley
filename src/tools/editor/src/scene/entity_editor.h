@@ -29,7 +29,7 @@ namespace Halley {
 		void setECSData(ECSData& data);
 
 		bool loadEntity(const String& id, EntityData& data, const Prefab* prefabData, bool force, Resources& gameResources);
-		void unloadEntity();
+		void unloadEntity(bool becauseHasMultiple);
 		void reloadEntity() override;
 		void unloadIcons();
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName) override;
@@ -76,6 +76,7 @@ namespace Halley {
 		const Prefab* prefabData = nullptr;
 		bool needToReloadUI = false;
 		bool isPrefab = false;
+		bool unloadedBecauseHasMultiple = false;
 		Resources* gameResources = nullptr;
 
 		int ecsDataRevision = 0;

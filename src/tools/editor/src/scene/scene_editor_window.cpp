@@ -246,7 +246,7 @@ void SceneEditorWindow::unloadScene()
 	entityFactory.reset();
 	sceneData.reset();
 	currentEntityScene.reset();
-	entityEditor->unloadEntity();
+	entityEditor->unloadEntity(false);
 	entityEditor->setEntityEditorFactory({});
 	entityEditor->unloadIcons();
 	entityEditorFactory.reset();
@@ -659,8 +659,7 @@ void SceneEditorWindow::onEntitiesSelected(std::vector<String> selectedEntities)
 		const auto& tree = sceneData->getEntityTree();
 		if (tree.entityId.isEmpty()) {
 			if (tree.children.empty()) {
-				EntityData empty;
-				entityEditor->loadEntity("", empty, nullptr, false, project.getGameResources());
+				entityEditor->unloadEntity(false);
 				currentEntityIds = {};
 				return;
 			} else {
@@ -672,14 +671,18 @@ void SceneEditorWindow::onEntitiesSelected(std::vector<String> selectedEntities)
 	}
 
 	try {
-		const auto& firstId = selectedEntities.front();
-		auto& firstEntityData = sceneData->getWriteableEntityNodeData(firstId).getData();
-		const Prefab* prefabData = nullptr;
-		const String prefabName = firstEntityData.getPrefab();
-		if (!prefabName.isEmpty()) {
-			prefabData = getGamePrefab(prefabName).get();
+		if (selectedEntities.size() == 1) {
+			const auto& entityId = selectedEntities.front();
+			auto& firstEntityData = sceneData->getWriteableEntityNodeData(entityId).getData();
+			const Prefab* prefabData = nullptr;
+			const String prefabName = firstEntityData.getPrefab();
+			if (!prefabName.isEmpty()) {
+				prefabData = getGamePrefab(prefabName).get();
+			}
+			entityEditor->loadEntity(entityId, firstEntityData, prefabData, false, project.getGameResources());
+		} else {
+			entityEditor->unloadEntity(true);
 		}
-		entityEditor->loadEntity(firstId, firstEntityData, prefabData, false, project.getGameResources());
 
 		std::vector<UUID> uuids;
 		std::vector<EntityData*> datas;
