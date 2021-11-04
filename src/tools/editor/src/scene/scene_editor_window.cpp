@@ -962,6 +962,7 @@ void SceneEditorWindow::removeEntities(gsl::span<const String> targetIds)
 	std::vector<String> entityIds;
 	std::vector<std::pair<String, int>> parenting;
 	std::vector<EntityData> prevDatas;
+	std::vector<std::vector<EntityData>*> toClean;
 
 	for (const auto& targetId: targetIds) {
 		const auto parentId = findParent(targetId, &idSet);
@@ -985,11 +986,18 @@ void SceneEditorWindow::removeEntities(gsl::span<const String> targetIds)
 				prevDatas.emplace_back(std::move(*iter));
 				parenting.emplace_back(parentId.value(), static_cast<int>(iter - children.begin()));
 
-				children.erase(iter);
+				// Mark it empty, will swipe later and delete those
+				// We don't want to delete them right now or it'll affect the index of other entities being deleted
+				iter->setInstanceUUID(UUID());
+				toClean.push_back(&children);
 
 				break;
 			}
 		}
+	}
+
+	for (auto& c: toClean) {
+		std_ex::erase_if(*c, [] (const EntityData& data) { return !data.getInstanceUUID().isValid(); });
 	}
 
 	onEntitiesRemoved(entityIds, parenting, prevDatas);
