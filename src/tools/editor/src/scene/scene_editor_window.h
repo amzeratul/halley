@@ -36,6 +36,7 @@ namespace Halley {
 		std::optional<EntityData> makeInstance(const String& prefab) const;
 		void addNewPrefab(const String& referenceEntityId, bool childOfReference, const String& prefabName);
 		void addEntity(const String& referenceEntityId, bool childOfReference, EntityData data);
+		void addEntities(const String& referenceEntityId, bool childOfReference, std::vector<EntityData> data);
 		void removeSelectedEntities();
 		void removeEntities(gsl::span<const String> entityIds) override;
 		void replaceEntity(const String& entityId, EntityData newData);
@@ -60,11 +61,11 @@ namespace Halley {
 
 		std::shared_ptr<const Prefab> getGamePrefab(const String& id) const;
 
-		void copyEntityToClipboard(const String& id);
-		void cutEntityToClipboard(const String& id);
-		void pasteEntityFromClipboard(const String& referenceId, bool childOfReference);
-		String copyEntity(const String& id);
-		void pasteEntity(const String& data, const String& referenceId, bool childOfReference);
+		void copyEntitiesToClipboard(gsl::span<const String> ids);
+		void cutEntitiesToClipboard(gsl::span<const String> ids);
+		void pasteEntitiesFromClipboard(const String& referenceId, bool childOfReference);
+		String copyEntities(gsl::span<const String> ids);
+		void pasteEntities(const String& data, const String& referenceId, bool childOfReference);
 		void duplicateEntity(const String& id);
 		void openEditPrefabWindow(const String& name);
 
@@ -107,7 +108,7 @@ namespace Halley {
 		
 		Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size);
 
-		void onEntityContextMenuAction(const String& actionId, const String& entityId);
+		void onEntityContextMenuAction(const String& actionId, gsl::span<const String> entityIds);
 		bool canPasteEntity() const;
 		bool canAddSibling(const String& entityId) const;
 		bool isPrefabInstance(const String& entityId) const;
@@ -180,8 +181,8 @@ namespace Halley {
 
 		void setModified(bool enabled);
 
-		String serializeEntity(const EntityData& node) const;
-		std::optional<EntityData> deserializeEntity(const String& data) const;
+		String serializeEntities(gsl::span<const EntityData> node) const;
+		std::vector<EntityData> deserializeEntities(const String& data) const;
 
 		void assignUUIDs(EntityData& node);
 		void positionEntityAtCursor(EntityData& entityData, const String& parentId) const;

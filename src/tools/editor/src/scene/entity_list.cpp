@@ -68,7 +68,7 @@ void EntityList::makeUI()
 
 	setHandle(UIEventType::ListItemRightClicked, [=] (const UIEvent& event)
 	{
-		openContextMenu(event.getStringData());
+		openContextMenu(list->getSelectedOptionIds());
 	});
 }
 
@@ -222,8 +222,10 @@ String EntityList::getCurrentSelection() const
 
 std::vector<String> EntityList::getCurrentSelections() const
 {
-	// Ensures the active selection is always the first one
-	
+	return list->getSelectedOptionIds();
+
+	/*
+	// Ensures the active selection is always the first one 
 	auto first = list->getSelectedOptionId();
 	auto all = list->getSelectedOptionIds();
 	std_ex::erase_if(all, [&] (const auto& v) { return v == first; });
@@ -232,6 +234,7 @@ std::vector<String> EntityList::getCurrentSelections() const
 	result.push_back(first);
 	result.insert(result.end(), all.begin(), all.end());
 	return result;
+	*/
 }
 
 void EntityList::setEntityValidatorList(std::shared_ptr<EntityValidatorListUI> validator)
@@ -244,7 +247,7 @@ UITreeList& EntityList::getList()
 	return *list;
 }
 
-void EntityList::openContextMenu(const String& entityId)
+void EntityList::openContextMenu(gsl::span<const String> entityIds)
 {
 	auto menuOptions = std::vector<UIPopupMenuItem>();
 	auto makeEntry = [&] (const String& id, const String& text, const String& toolTip, const String& icon, bool enabled = true)
@@ -255,44 +258,53 @@ void EntityList::openContextMenu(const String& entityId)
 	};
 
 	const bool canPaste = sceneEditorWindow->canPasteEntity();
-	const bool canAddAsSibling = sceneEditorWindow->canAddSibling(entityId);
-	const bool isPrefab = sceneEditorWindow->isPrefabInstance(entityId);
+	const bool canAddAsSibling = !entityIds.empty() && sceneEditorWindow->canAddSibling(entityIds.front());
+	const bool isPrefab = !entityIds.empty() && sceneEditorWindow->isPrefabInstance(entityIds.front());
 	const bool canExtractPrefab = canAddAsSibling;
 	const bool canAddAsChild = !isPrefab;
 	const bool canRemove = canAddAsSibling;
-	
-	makeEntry("add_entity_sibling", "Add Entity", "Adds an empty entity as a sibling of this one.", "", canAddAsSibling);
-	makeEntry("add_entity_child", "Add Entity (Child)", "Adds an empty entity as a child of this one.", "", canAddAsChild);
-	makeEntry("add_prefab_sibling", "Add Prefab", "Adds a prefab as a sibling of this entity.", "", canAddAsSibling);
-	makeEntry("add_prefab_child", "Add Prefab (Child)", "Adds a prefab as a child of this entity.", "", canAddAsChild);
-	menuOptions.emplace_back();
-	if (isPrefab) {
-		makeEntry("collapse_prefab", "Collapse Prefab", "Imports the current prefab directly into the scene.", "");
+	const bool isSingle = entityIds.size() == 1;
+
+	if (isSingle) {
+		makeEntry("add_entity_sibling", "Add Entity", "Adds an empty entity as a sibling of this one.", "", canAddAsSibling);
+		makeEntry("add_entity_child", "Add Entity (Child)", "Adds an empty entity as a child of this one.", "", canAddAsChild);
+		makeEntry("add_prefab_sibling", "Add Prefab", "Adds a prefab as a sibling of this entity.", "", canAddAsSibling);
+		makeEntry("add_prefab_child", "Add Prefab (Child)", "Adds a prefab as a child of this entity.", "", canAddAsChild);
+		menuOptions.emplace_back();
+		if (isPrefab) {
+			makeEntry("collapse_prefab", "Collapse Prefab", "Imports the current prefab directly into the scene.", "");
+		} else {
+			makeEntry("extract_prefab", "Extract Prefab...", "Converts the current entity into a new prefab.", "", canExtractPrefab);
+		}
+		menuOptions.emplace_back();
+		makeEntry("cut", "Cut", "Cut entity to clipboard [Ctrl+X]", "cut.png", canRemove);
+		makeEntry("copy", "Copy", "Copy entity to clipboard [Ctrl+C]", "copy.png");
+		makeEntry("paste_sibling", "Paste", "Paste entities as a sibling of the current one. [Ctrl+V]", "paste.png", canPaste && canAddAsSibling);
+		makeEntry("paste_child", "Paste (Child)", "Paste entity as a child of the current one.", "", canPaste && canAddAsChild);
+		menuOptions.emplace_back();
+		makeEntry("duplicate", "Duplicate", "Duplicate entity [Ctrl+D]", "", canAddAsSibling);
+		makeEntry("delete", "Delete", "Delete entity [Del]", "delete.png", canRemove);
 	} else {
-		makeEntry("extract_prefab", "Extract Prefab...", "Converts the current entity into a new prefab.", "", canExtractPrefab);
+		makeEntry("cut", "Cut", "Cut entities to clipboard [Ctrl+X]", "cut.png", canRemove);
+		makeEntry("copy", "Copy", "Copy entities to clipboard [Ctrl+C]", "copy.png");
+		menuOptions.emplace_back();
+		makeEntry("duplicate", "Duplicate", "Duplicate entities [Ctrl+D]", "", canAddAsSibling);
+		makeEntry("delete", "Delete", "Delete entities [Del]", "delete.png", canRemove);
 	}
-	menuOptions.emplace_back();
-	makeEntry("cut", "Cut", "Cut entity to clipboard [Ctrl+X]", "cut.png", canRemove);
-	makeEntry("copy", "Copy", "Copy entity to clipboard [Ctrl+C]", "copy.png");
-	makeEntry("paste_sibling", "Paste", "Paste entity as a sibling of the current one. [Ctrl+V]", "paste.png", canPaste && canAddAsSibling);
-	makeEntry("paste_child", "Paste (Child)", "Paste entity as a child of the current one.", "", canPaste && canAddAsChild);
-	menuOptions.emplace_back();
-	makeEntry("duplicate", "Duplicate", "Duplicate entity [Ctrl+D]", "", canAddAsSibling);
-	makeEntry("delete", "Delete", "Delete entity [Del]", "delete.png", canRemove);
 	
 	auto menu = std::make_shared<UIPopupMenu>("entity_list_context_menu", factory.getStyle("popupMenu"), menuOptions);
 	menu->spawnOnRoot(*getRoot());
 
-	menu->setHandle(UIEventType::PopupAccept, [this, entityId] (const UIEvent& e) {\
+	menu->setHandle(UIEventType::PopupAccept, [this, entityIds] (const UIEvent& e) {
 		Concurrent::execute(Executors::getMainThread(), [=] () {
-			onContextMenuAction(e.getStringData(), entityId);
+			onContextMenuAction(e.getStringData(), entityIds);
 		});
 	});
 }
 
-void EntityList::onContextMenuAction(const String& actionId, const String& entityId)
+void EntityList::onContextMenuAction(const String& actionId, gsl::span<const String> entityIds)
 {
-	sceneEditorWindow->onEntityContextMenuAction(actionId, entityId);
+	sceneEditorWindow->onEntityContextMenuAction(actionId, entityIds);
 }
 
 bool EntityList::markAllValid()

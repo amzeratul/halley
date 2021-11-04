@@ -63,8 +63,8 @@ namespace Halley {
 		void addEntityTree(const String& parentId, int childIndex, const EntityData& data);
 		EntityInfo getEntityInfo(const EntityData& data) const;
 
-		void openContextMenu(const String& entityId);
-		void onContextMenuAction(const String& actionId, const String& entityId);
+		void openContextMenu(gsl::span<const String> entityIds);
+		void onContextMenuAction(const String& actionId, gsl::span<const String> entityIds);
 
 		bool markAllValid();
 		bool markValid(const UUID& uuid, bool valid);

@@ -294,18 +294,17 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 	}
 
 	if (key.is(KeyCode::C, KeyMods::Ctrl)) {
-		copyEntityToClipboard(entityList->getCurrentSelection());
+		copyEntitiesToClipboard(entityList->getCurrentSelections());
 		return true;
 	}
 
 	if (key.is(KeyCode::X, KeyMods::Ctrl)) {
-		const auto sel = entityList->getCurrentSelection();
-		cutEntityToClipboard(sel);
+		cutEntitiesToClipboard(entityList->getCurrentSelections());
 		return true;
 	}
 
 	if (key.is(KeyCode::V, KeyMods::Ctrl)) {
-		pasteEntityFromClipboard(entityList->getCurrentSelection(), false);
+		pasteEntitiesFromClipboard(entityList->getCurrentSelection(), false);
 		return true;
 	}
 
@@ -344,32 +343,32 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 	return false;
 }
 
-void SceneEditorWindow::onEntityContextMenuAction(const String& actionId, const String& entityId)
+void SceneEditorWindow::onEntityContextMenuAction(const String& actionId, gsl::span<const String> entityIds)
 {
 	if (actionId == "copy") {
-		copyEntityToClipboard(entityId);
+		copyEntitiesToClipboard(entityIds);
 	} else if (actionId == "cut") {
-		cutEntityToClipboard(entityId);
+		cutEntitiesToClipboard(entityIds);
 	} else if (actionId == "paste_sibling") {
-		pasteEntityFromClipboard(entityId, false);
+		pasteEntitiesFromClipboard(entityIds.front(), false);
 	} else if (actionId == "paste_child") {
-		pasteEntityFromClipboard(entityId, true);
+		pasteEntitiesFromClipboard(entityIds.front(), true);
 	} else if (actionId == "delete") {
-		removeEntities(gsl::span<const String>(&entityId, 1));
+		removeEntities(entityIds);
 	} else if (actionId == "duplicate") {
-		duplicateEntity(entityId);
+		duplicateEntity(entityIds.front());
 	} else if (actionId == "add_entity_child") {
-		addNewEntity(entityId, true);
+		addNewEntity(entityIds.front(), true);
 	} else if (actionId == "add_entity_sibling") {
-		addNewEntity(entityId, false);
+		addNewEntity(entityIds.front(), false);
 	} else if (actionId == "add_prefab_child") {
-		addNewPrefab(entityId, true);
+		addNewPrefab(entityIds.front(), true);
 	} else if (actionId == "add_prefab_sibling") {
-		addNewPrefab(entityId, false);
+		addNewPrefab(entityIds.front(), false);
 	} else if (actionId == "extract_prefab") {
-		extractPrefab(entityId);
+		extractPrefab(entityIds.front());
 	} else if (actionId == "collapse_prefab") {
-		collapsePrefab(entityId);
+		collapsePrefab(entityIds.front());
 	}
 }
 
@@ -379,8 +378,8 @@ bool SceneEditorWindow::canPasteEntity() const
 	if (clipboard) {
 		const auto clipboardData = clipboard->getStringData();
 		if (clipboardData) {
-			const auto data = deserializeEntity(clipboardData.value());
-			return !!data;
+			const auto data = deserializeEntities(clipboardData.value());
+			return !data.empty();
 		}
 	}
 	return false;
@@ -436,11 +435,23 @@ void SceneEditorWindow::selectEntities(gsl::span<const String> ids, UIList::Sele
 
 void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfReference, EntityData data)
 {
+	addEntities(referenceEntity, childOfReference, std::vector<EntityData>({ std::move(data) }));
+}
+
+void SceneEditorWindow::addEntities(const String& referenceEntity, bool childOfReference, std::vector<EntityData> datas)
+{
 	auto parentInfo = getParentInsertPos(referenceEntity, childOfReference);
-	positionEntityAtCursor(data, parentInfo.first);
-	const auto& id = data.getInstanceUUID().toString();
-	auto op = EntityChangeOperation{ std::make_unique<EntityData>(std::move(data)), id, parentInfo.first, parentInfo.second};
-	addEntities(gsl::span<const EntityChangeOperation>(&op, 1));
+	int childPos = parentInfo.second;
+	std::vector<EntityChangeOperation> ops;
+	for (auto& data: datas) {
+		positionEntityAtCursor(data, parentInfo.first);
+		const auto& id = data.getInstanceUUID().toString();
+		ops.emplace_back(EntityChangeOperation{ std::make_unique<EntityData>(std::move(data)), id, parentInfo.first, childPos});
+		if (childPos >= 0) {
+			++childPos;
+		}
+	}
+	addEntities(ops);
 }
 
 void SceneEditorWindow::addEntities(gsl::span<const EntityChangeOperation> changes)
@@ -621,7 +632,7 @@ void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName
 	});
 	
 	// Write prefab
-	const auto serializedData = serializeEntity(entityData);
+	const auto serializedData = serializeEntities(gsl::span<const EntityData>(&entityData, 1));
 	project.addNewAsset(Path("prefab") / (prefabName + ".prefab"), gsl::as_bytes(gsl::span<const char>(serializedData.c_str(), serializedData.length())));
 }
 
@@ -793,49 +804,55 @@ std::shared_ptr<const Prefab> SceneEditorWindow::getGamePrefab(const String& id)
 	return {};
 }
 
-void SceneEditorWindow::copyEntityToClipboard(const String& id)
+void SceneEditorWindow::copyEntitiesToClipboard(gsl::span<const String> ids)
 {
 	const auto clipboard = api.system->getClipboard();
 	if (clipboard) {
-		clipboard->setData(copyEntity(id));
+		clipboard->setData(copyEntities(ids));
 	}
 }
 
-void SceneEditorWindow::cutEntityToClipboard(const String& id)
+void SceneEditorWindow::cutEntitiesToClipboard(gsl::span<const String> ids)
 {
-	copyEntityToClipboard(id);
-	removeEntities(gsl::span<const String>(&id, 1));
+	copyEntitiesToClipboard(ids);
+	removeEntities(ids);
 }
 
-void SceneEditorWindow::pasteEntityFromClipboard(const String& referenceId, bool childOfReference)
+void SceneEditorWindow::pasteEntitiesFromClipboard(const String& referenceId, bool childOfReference)
 {
 	const auto clipboard = api.system->getClipboard();
 	if (clipboard) {
 		auto clipboardData = clipboard->getStringData();
 		if (clipboardData) {
-			pasteEntity(clipboardData.value(), referenceId, childOfReference);
+			pasteEntities(clipboardData.value(), referenceId, childOfReference);
 		}
 	}
 }
 
-String SceneEditorWindow::copyEntity(const String& id)
+String SceneEditorWindow::copyEntities(gsl::span<const String> ids)
 {
-	return serializeEntity(sceneData->getEntityNodeData(id).getData());
+	std::vector<EntityData> datas;
+	for (const auto& id: ids) {
+		datas.push_back(sceneData->getEntityNodeData(id).getData());
+	}
+	return serializeEntities(datas);
 }
 
-void SceneEditorWindow::pasteEntity(const String& stringData, const String& referenceId, bool childOfReference)
+void SceneEditorWindow::pasteEntities(const String& stringData, const String& referenceId, bool childOfReference)
 {
 	Expects(gameBridge);
-	auto data = deserializeEntity(stringData);
-	if (data) {
-		assignUUIDs(data.value());
-		addEntity(referenceId, childOfReference, std::move(data.value()));
+	auto datas = deserializeEntities(stringData);
+	if (!datas.empty()) {
+		for (auto& data: datas) {
+			assignUUIDs(data);
+		}
+		addEntities(referenceId, childOfReference, std::move(datas));
 	}
 }
 
 void SceneEditorWindow::duplicateEntity(const String& id)
 {
-	pasteEntity(copyEntity(id), id, false);
+	pasteEntities(copyEntities(gsl::span<const String>(&id, 1)), id, false);
 }
 
 void SceneEditorWindow::openEditPrefabWindow(const String& name)
@@ -1129,22 +1146,45 @@ std::shared_ptr<ScriptNodeTypeCollection> SceneEditorWindow::getScriptNodeTypes(
 	return {};
 }
 
-String SceneEditorWindow::serializeEntity(const EntityData& node) const
+String SceneEditorWindow::serializeEntities(gsl::span<const EntityData> nodes) const
 {
 	YAMLConvert::EmitOptions options;
 	options.mapKeyOrder = {{ "name", "icon", "prefab", "uuid", "components", "children" }};
-	return YAMLConvert::generateYAML(node.toConfigNode(false), options);
+
+	ConfigNode result;
+	if (nodes.size() == 1) {
+		result = nodes.front().toConfigNode(false);
+	} else {
+		auto seq = ConfigNode::SequenceType();
+		for (auto& node: nodes) {
+			seq.emplace_back(node.toConfigNode(false));
+		}
+		result = std::move(seq);
+	}
+
+	return YAMLConvert::generateYAML(result, options);
 }
 
-std::optional<EntityData> SceneEditorWindow::deserializeEntity(const String& data) const
+std::vector<EntityData> SceneEditorWindow::deserializeEntities(const String& data) const
 {
 	ConfigFile file;
 	try {
 		YAMLConvert::parseConfig(file, gsl::as_bytes(gsl::span<const char>(data.c_str(), data.length())));
-		if (!isValidEntityTree(file.getRoot())) {
-			return {};
+		std::vector<EntityData> result;
+		if (file.getRoot().getType() == ConfigNodeType::Sequence) {
+			for (auto& n: file.getRoot().asSequence()) {
+				if (!isValidEntityTree(n)) {
+					return {};
+				}
+				result.emplace_back(n, false);
+			}
+		} else {
+			if (!isValidEntityTree(file.getRoot())) {
+				return {};
+			}
+			result.emplace_back(file.getRoot(), false);
 		}
-		return EntityData(file.getRoot(), false);
+		return result;
 	} catch (...) {
 		return {};
 	}
