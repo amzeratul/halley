@@ -213,15 +213,13 @@ void TranslateGizmo::doMoveBy(Vector2f delta)
 
 	for (size_t i = 0; i < n; ++i) {
 		if (const auto transform = getComponent<Transform2DComponent>(i)) {
-			targetPos[i] = transform->getGlobalPosition() + Vector2f(delta);
+			targetPos[i] = transform->getGlobalPosition() + (handles[i].isHeld() ? Vector2f() : Vector2f(delta));
 		}
 	}
 	
 	for (size_t i = 0; i < n; ++i) {
-		const auto transform = getComponent<Transform2DComponent>(i);
-		if (!handles[i].isHeld() && transform) {
-			const auto newPos = targetPos[i];
-			transform->setGlobalPosition(newPos);
+		if (const auto transform = getComponent<Transform2DComponent>(i)) {
+			transform->setGlobalPosition(targetPos[i]);
 			const auto newLocalPos = transform->getLocalPosition();
 			updateEntityData(newLocalPos, i);
 		}
