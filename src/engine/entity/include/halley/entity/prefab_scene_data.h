@@ -8,6 +8,7 @@ namespace Halley {
     	PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> factory, World& world, Resources& gameResources);
 
         EntityNodeData getWriteableEntityNodeData(const String& id) override;
+        std::vector<EntityData*> getWriteableEntityDatas(gsl::span<const String> ids) override;
         ConstEntityNodeData getEntityNodeData(const String& id) override;
         void reloadEntity(const String& id) override;
         EntityTree getEntityTree() const override;
@@ -36,6 +37,8 @@ namespace Halley {
     	static EntityData* findEntity(gsl::span<EntityData> node, const String& id);
     	static EntityAndParent findEntityAndParent(gsl::span<EntityData> node, EntityData* previous, size_t idx, const String& id);
         static EntityAndParent findEntityAndParent(EntityData& node, EntityData* previous, size_t idx, const String& id);
+
+        void getWriteableEntityDatas(std::vector<EntityData*>& result, gsl::span<EntityData> datas, gsl::span<const UUID> sortedIds);
 
         static void addChild(EntityData& parent, int index, EntityData child);
         static EntityData removeChild(EntityData& parent, const String& childId);

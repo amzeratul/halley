@@ -9,6 +9,7 @@ namespace Halley {
     	explicit WorldSceneData(World& world);
 
     	EntityNodeData getWriteableEntityNodeData(const String& id) override;
+        std::vector<EntityData*> getWriteableEntityDatas(gsl::span<const String> ids) override;
         ConstEntityNodeData getEntityNodeData(const String& id) override;
         void reloadEntity(const String& id) override;
         EntityTree getEntityTree() const override;

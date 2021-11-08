@@ -319,6 +319,7 @@ namespace Halley {
 		virtual ~ISceneData() = default;
 
 		virtual EntityNodeData getWriteableEntityNodeData(const String& id) = 0;
+		virtual std::vector<EntityData*> getWriteableEntityDatas(gsl::span<const String> ids) = 0;
 		virtual ConstEntityNodeData getEntityNodeData(const String& id) = 0;
 		virtual void reloadEntity(const String& id) = 0;
 		virtual EntityTree getEntityTree() const = 0;
