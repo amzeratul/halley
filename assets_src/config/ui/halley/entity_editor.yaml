@@ -7,42 +7,52 @@ children:
   proportion: 1
   border: [0, 0, 0, 0]
   children:
-  - widget: { id: entityHeader, class: image, image: "$ui_title_capsule", innerBorder: [ 4, 1, 4, 4 ], colour: $ui_staticBoxSubdue }
+  - widget: { id: header, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
     sizer: { type: vertical }
-    border: [0, 0, 0, 4]
     children:
-    - widget: { id: "", class: label, text: "Entity" }
+    - widget: { id: "title", class: label, text: "Entity", innerBorder: [1, 4, 1, 1] }
       fill: centre
-    - widget: { id: entityFields, class: widget }
-      border: [1, 4, 1, 1]
-      sizer: { type: grid, gap: 2, columns: 2, columnProportion: [0, 1] }
-      fill: fill
+    - widget: { class: widget }
+      border: [ 4, 4, 4, 4 ]
+      sizer: { type: vertical }
       children:
-      - widget: { class: widget, size: [100, 20] }
+      - widget: { id: commonFields, class: widget }
+        sizer: { type: grid, gap: 2, columns: 2, columnProportion: [0, 1] }
+        fill: fill
         children:
-        - widget: { id: "", class: label, text: "Name", style: "labelLight" }
-      - widget: { id: entityName, class: textInput, size: [200, 22], style: inputThin }
-        proportion: 1
-      - widget: { id: "", class: label, text: "Icon", style: "labelLight" }
-      - widget: { id: entityIcon, class: dropdown, size: [200, 22], style: dropdownLight }
-        proportion: 1
-  - widget: { id: prefabHeader, class: image, image: "$ui_title_capsule", innerBorder: [ 4, 1, 4, 4 ], colour: $ui_staticBoxSubdue }
-    sizer: { type: vertical }
-    border: [0, 0, 0, 4]
-    children:
-    - widget: { id: "", class: label, text: "Prefab" }
-      fill: centre
-    - widget: { id: prefabFields, class: widget }
-      border: [1, 4, 1, 1]
-      sizer: { type: grid, gap: 2, columns: 2, columnProportion: [0, 1] }
-      fill: fill
-      children:
-      - widget: { class: widget, size: [100, 20] }
+        - widget: { class: widget, size: [100, 20] }
+          children:
+          - widget: { id: "", class: label, text: "Selectable", style: "labelLight" }
+            fill: centreVertical
+        - widget: { id: selectable, class: checkbox }
+          proportion: 1
+      - widget: { id: entityFields, class: widget }
+        sizer: { type: grid, gap: 2, columns: 2, columnProportion: [0, 1] }
+        fill: fill
         children:
-        - widget: { id: "", class: label, text: "Prefab", style: "labelLight" }
-      - widget: { id: prefabName, class: selectAsset, assetType: prefab, size: [200, 20] }
-        proportion: 1
-    - widget: { id: editPrefab, class: button, text: Edit, tooltip: "Open this prefab to edit." }
+        - widget: { class: widget, size: [100, 20] }
+          children:
+          - widget: { id: "", class: label, text: "Name", style: "labelLight" }
+            fill: centre
+        - widget: { id: entityName, class: textInput, size: [200, 22], style: inputThin }
+          proportion: 1
+        - widget: { id: "", class: label, text: "Icon", style: "labelLight" }
+          fill: centreVertical
+        - widget: { id: entityIcon, class: dropdown, size: [200, 22], style: dropdownLight }
+          proportion: 1
+      - widget: { id: prefabFields, class: widget }
+        sizer: { type: vertical }
+        children:
+        - sizer: { type: grid, gap: 2, columns: 2, columnProportion: [0, 1] }
+          fill: fill
+          children:
+          - widget: { class: widget, size: [100, 20] }
+            children:
+            - widget: { id: "", class: label, text: "Prefab", style: "labelLight" }
+              fill: centreVertical
+          - widget: { id: prefabName, class: selectAsset, assetType: prefab, size: [200, 20] }
+            proportion: 1
+        - widget: { id: editPrefab, class: button, text: Edit, tooltip: "Open this prefab to edit.", style: buttonThin, size: [20, 23] }
   - widget: { id: fields, class: widget }
     sizer: { type: vertical, gap: 8 }
   - widget: { id: componentButtons, class: widget }

@@ -31,6 +31,10 @@ namespace Halley {
     	friend class EntityDataDelta;
     	
     public:
+        enum class Flag : uint8_t {
+	        NotSelectable = 1
+        };
+
     	EntityData();
     	
         explicit EntityData(UUID instanceUUID);
@@ -50,6 +54,8 @@ namespace Halley {
     	const String& getName() const { return name; }
     	const String& getPrefab() const { return prefab; }
     	const String& getIcon() const { return icon; }
+        uint8_t getFlags() const { return flags; }
+        bool getFlag(Flag flag) const;
     	const UUID& getInstanceUUID() const { return instanceUUID; }
     	const UUID& getPrefabUUID() const { return prefabUUID; }
     	const UUID& getParentUUID() const { return parentUUID; }
@@ -67,6 +73,7 @@ namespace Halley {
     	void setName(String name);
     	void setPrefab(String prefab);
     	void setIcon(String icon);
+        void setFlag(Flag flag, bool value);
     	void setInstanceUUID(UUID instanceUUID);
     	void setPrefabUUID(UUID prefabUUID);
         void setParentUUID(UUID parentUUID);
@@ -95,9 +102,11 @@ namespace Halley {
         std::optional<size_t> getChildIndex(const UUID& uuid) const;
 
     private:
+
     	String name;
     	String prefab;
     	String icon;
+        uint8_t flags = 0;
     	UUID instanceUUID;
     	UUID prefabUUID;
     	UUID parentUUID;

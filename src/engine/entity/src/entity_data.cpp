@@ -58,6 +58,7 @@ EntityData::EntityData(const ConfigNode& data, bool isPrefab)
 	name = data["name"].asString("");
 	prefab = data["prefab"].asString("");
 	icon = data["icon"].asString("");
+	flags = static_cast<uint8_t>(data["flags"].asInt(0));
 
 	if (isPrefab) {
 		parseUUID(prefabUUID, data["uuid"]);
@@ -117,6 +118,9 @@ ConfigNode EntityData::toConfigNode(bool allowPrefabUUID) const
 	if (parentUUID.isValid()) {
 		result["parent"] = parentUUID.toString();
 	}
+	if (flags != 0) {
+		result["flags"] = static_cast<int>(flags);
+	}
 
 	if (!components.empty()) {
 		ConfigNode::SequenceType compNodes;
@@ -142,7 +146,7 @@ ConfigNode EntityData::toConfigNode(bool allowPrefabUUID) const
 String EntityData::toYAML() const
 {
 	YAMLConvert::EmitOptions options;
-	options.mapKeyOrder = {{ "name", "prefab", "icon", "uuid", "prefabUUID", "parent", "components", "children" }};
+	options.mapKeyOrder = {{ "name", "prefab", "icon", "flags", "uuid", "prefabUUID", "parent", "components", "children" }};
 	return YAMLConvert::generateYAML(toConfigNode(true), options);
 }
 
@@ -156,6 +160,11 @@ void EntityData::deserialize(Deserializer& s)
 	EntityDataDelta delta;
 	s >> delta;
 	applyDelta(delta);
+}
+
+bool EntityData::getFlag(Flag flag) const
+{
+	return (flags & static_cast<uint8_t>(flag)) != 0;
 }
 
 bool EntityData::hasComponent(const String& componentName) const
@@ -237,6 +246,12 @@ void EntityData::setIcon(String icon)
 	this->icon = std::move(icon);
 }
 
+void EntityData::setFlag(Flag f, bool value)
+{
+	const auto flag = static_cast<uint8_t>(f);
+	flags = (flags & ~flag) | (value ? flag : 0);
+}
+
 void EntityData::setInstanceUUID(UUID instanceUUID)
 {
 	this->instanceUUID = std::move(instanceUUID);
@@ -286,6 +301,9 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 	}
 	if (delta.icon) {
 		icon = delta.icon.value();
+	}
+	if (delta.flags) {
+		flags = delta.flags.value();
 	}
 	if (delta.instanceUUID) {
 		instanceUUID = delta.instanceUUID.value();

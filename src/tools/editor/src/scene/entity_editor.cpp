@@ -104,6 +104,11 @@ void EntityEditor::makeUI()
 		pasteComponentsFromClipboard();
 	});
 
+	setHandle(UIEventType::CheckboxUpdated, "selectable", [=] (const UIEvent& event)
+	{
+		setSelectable(event.getBoolData());
+	});
+
 	setHandle(UIEventType::TextSubmit, "entityName", [=] (const UIEvent& event)
 	{
 		setName(event.getStringData());
@@ -163,9 +168,10 @@ void EntityEditor::unloadEntity(bool becauseHasMultiple)
 
 void EntityEditor::reloadEntity()
 {
+	getWidgetAs<UILabel>("title")->setText(LocalisedString::fromHardcodedString(isPrefab ? "Prefab" : "Entity"));
 	getWidget("scrollBarPane")->setActive(currentEntityData);
-	getWidget("entityHeader")->setActive(currentEntityData && !isPrefab);
-	getWidget("prefabHeader")->setActive(currentEntityData && isPrefab);
+	getWidget("entityFields")->setActive(currentEntityData && !isPrefab);
+	getWidget("prefabFields")->setActive(currentEntityData && isPrefab);
 	getWidget("componentButtons")->setActive(currentEntityData);
 
 	auto msg = getWidgetAs<UILabel>("message");
@@ -188,6 +194,7 @@ void EntityEditor::reloadEntity()
 			entityName->setText(getEntityData().getName());
 			entityIcon->setSelectedOption(getEntityData().getIcon());
 		}
+		getWidgetAs<UICheckbox>("selectable")->setChecked(!getEntityData().getFlag(EntityData::Flag::NotSelectable));
 		setCanSendEvents(true);
 
 		entityValidatorUI->setEntity(*currentEntityData, *this, *gameResources);
@@ -549,6 +556,14 @@ void EntityEditor::setPrefabName(const String& prefab)
 			getEntityData().setPrefab(prefab);
 			onEntityUpdated();
 		}
+	}
+}
+
+void EntityEditor::setSelectable(bool selectable)
+{
+	if (getEntityData().getFlag(EntityData::Flag::NotSelectable) == selectable) {
+		getEntityData().setFlag(EntityData::Flag::NotSelectable, !selectable);
+		onEntityUpdated();
 	}
 }
 

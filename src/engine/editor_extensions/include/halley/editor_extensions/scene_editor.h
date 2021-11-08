@@ -97,10 +97,10 @@ namespace Halley {
 		virtual std::optional<Vector2f> getWorldOffset() const;
 		std::unique_ptr<World> doCreateWorld(const String& stageName) const;
 
-    	virtual std::vector<EntityRef> getEntitiesAt(Rect4f area) const;
-    	EntityRef getRootEntityAt(Vector2f point) const;
-		std::vector<EntityRef> getRootEntitiesAt(Vector2f point) const;
-    	std::vector<EntityRef> getRootEntitiesAt(Rect4f area) const;
+    	virtual std::vector<EntityRef> getEntitiesAt(Rect4f area, bool allowUnselectable) const;
+    	EntityRef getRootEntityAt(Vector2f point, bool allowUnselectable) const;
+		std::vector<EntityRef> getRootEntitiesAt(Vector2f point, bool allowUnselectable) const;
+    	std::vector<EntityRef> getRootEntitiesAt(Rect4f area, bool allowUnselectable) const;
        	virtual float getSpriteDepth(EntityRef& e, Rect4f area) const;
 
 		AssetPreviewData makeSpritePreviewData(AssetType assetType, const String& id, Vector2i size, RenderContext& renderContext);

@@ -288,7 +288,7 @@ EntityRef SceneEditor::getEntityToFocus()
 		return EntityRef();
 	}
 
-	EntityRef underMouse = mousePos ? getRootEntityAt(mousePos.value()) : EntityRef();
+	EntityRef underMouse = mousePos ? getRootEntityAt(mousePos.value(), false) : EntityRef();
 	if (!underMouse.isValid()) {
 		return entityHighlightedOnList;
 	}
@@ -588,12 +588,12 @@ float SceneEditor::getSpriteDepth(EntityRef& e, Rect4f rect) const
 	}
 }
 
-std::vector<EntityRef> SceneEditor::getEntitiesAt(Rect4f area) const
+std::vector<EntityRef> SceneEditor::getEntitiesAt(Rect4f area, bool allowUnselectable) const
 {
 	std::vector<std::pair<EntityRef, float>> temp;
 	
 	for (auto& e: world->getEntities()) {
-		if (e.isSelectable() && doesAreaOverlapSprite(e, area)) {
+		if ((allowUnselectable || e.isSelectable()) && doesAreaOverlapSprite(e, area)) {
 			const float depth = getSpriteDepth(e, area);
 			temp.emplace_back(e, depth);
 		}
@@ -611,14 +611,14 @@ std::vector<EntityRef> SceneEditor::getEntitiesAt(Rect4f area) const
 	return result;
 }
 
-std::vector<EntityRef> SceneEditor::getRootEntitiesAt(Vector2f point) const
+std::vector<EntityRef> SceneEditor::getRootEntitiesAt(Vector2f point, bool allowUnselectable) const
 {
-	return getRootEntitiesAt(Rect4f(point, point));
+	return getRootEntitiesAt(Rect4f(point, point), allowUnselectable);
 }
 
-std::vector<EntityRef> SceneEditor::getRootEntitiesAt(Rect4f area) const
+std::vector<EntityRef> SceneEditor::getRootEntitiesAt(Rect4f area, bool allowUnselectable) const
 {
-	const auto entities = getEntitiesAt(area);
+	const auto entities = getEntitiesAt(area, allowUnselectable);
 
 	std::vector<EntityRef> result;
 	for (const auto& e: entities) {
@@ -637,9 +637,9 @@ std::vector<EntityRef> SceneEditor::getRootEntitiesAt(Rect4f area) const
 	return result;
 }
 
-EntityRef SceneEditor::getRootEntityAt(Vector2f point) const
+EntityRef SceneEditor::getRootEntityAt(Vector2f point, bool allowUnselectable) const
 {
-	const auto entities = getRootEntitiesAt(point);
+	const auto entities = getRootEntitiesAt(point, allowUnselectable);
 	if (entities.empty()) {
 		highlightDelta = 0;
 		return EntityRef();
@@ -659,7 +659,7 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 		return;
 	}
 
-	if (const auto bestEntity = getRootEntityAt(input.mousePos.value()); bestEntity.isValid()) {
+	if (const auto bestEntity = getRootEntityAt(input.mousePos.value(), false); bestEntity.isValid()) {
 		output.newSelection.push_back(bestEntity.getInstanceUUID());
 		output.selectionMode = input.ctrlHeld ? UIList::SelectionMode::CtrlSelect : UIList::SelectionMode::Normal;
 	} else {
@@ -669,7 +669,7 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 
 void SceneEditor::onSelectionBox(const SceneEditorInputState& input, SceneEditorOutputState& output)
 {
-	const auto& entities = getRootEntitiesAt(*input.selectionBox);
+	const auto& entities = getRootEntitiesAt(*input.selectionBox, false);
 	if (!entities.empty()) {
 		std::vector<UUID> results;
 		for (auto& e: entities) {

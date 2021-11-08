@@ -51,6 +51,7 @@ EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationO
 
 	// Properties
 	result.setName(entity.getName());
+	result.setFlag(EntityData::Flag::NotSelectable, !entity.isSelectable());
 	result.setInstanceUUID(entity.getInstanceUUID());
 	result.setPrefabUUID(entity.getPrefabUUID());
 
@@ -259,12 +260,16 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 		if (delta.getName()) {
 			entity.setName(delta.getName().value());
 		}
+		if (delta.getFlags()) {
+			entity.setSelectable((delta.getFlags().value() & static_cast<uint8_t>(EntityData::Flag::NotSelectable)) == 0);
+		}
 		entity.setPrefab(context->getPrefab(), delta.getPrefabUUID().value_or(entity.getPrefabUUID()));
 		updateEntityComponentsDelta(entity, delta, *context);
 		updateEntityChildrenDelta(entity, delta, context);
 	} else {
 		const auto& data = iData.asEntityData();
 		entity.setName(data.getName());
+		entity.setSelectable(!data.getFlag(EntityData::Flag::NotSelectable));
 		if (data.getPrefabUUID().isValid()) {
 			entity.setPrefab(context->getPrefab(), data.getPrefabUUID());
 		}
