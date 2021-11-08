@@ -128,7 +128,7 @@ namespace Halley {
 		std::optional<Vector2f> mousePos;
     	std::optional<Vector2f> holdMouseStart;
     	std::optional<Rect4f> selBox;
-		std::vector<EntityRef> selBoxStartSelectedEntities;
+		std::vector<UUID> selBoxStartSelectedEntities;
 
     	void moveCameraTo2D(Vector2f pos);
 		void doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect) const;
@@ -138,6 +138,7 @@ namespace Halley {
 
     	bool doesAreaOverlapSprite(EntityRef& e, Rect4f area) const;
     	void onClick(const SceneEditorInputState& input, SceneEditorOutputState& output);
+		void onStartSelectionBox();
 		void onSelectionBox(const SceneEditorInputState& input, SceneEditorOutputState& output);
 
     	EntityRef getEntityToFocus();

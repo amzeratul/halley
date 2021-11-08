@@ -74,10 +74,7 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	}
 	if (mousePos) {
 		if (holdMouseStart && (holdMouseStart.value() - mousePos.value()).length() > 3) {
-			if (!selBox) {
-				selBoxStartSelectedEntities = selectedEntities;
-			}
-			selBox = Rect4f(holdMouseStart.value(), mousePos.value());
+			onStartSelectionBox();
 		}
 	}
 	inputState.selectionBox = selBox;
@@ -103,7 +100,7 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 		holdMouseStart = mousePos;
 	}
 
-	focusEntityEnabled = inputState.altHeld;
+	focusEntityEnabled = inputState.altHeld && inputState.ctrlHeld;
 	if (!focusEntityEnabled) {
 		highlightDelta = 0;
 	}
@@ -654,7 +651,7 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 	if (!input.mousePos) {
 		return;
 	} 
-	if (input.spaceHeld || input.shiftHeld) {
+	if (input.spaceHeld || input.shiftHeld || (input.altHeld && !input.ctrlHeld)) {
 		return;
 	}
 
@@ -665,16 +662,51 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 	}
 }
 
+void SceneEditor::onStartSelectionBox()
+{
+	if (!selBox) {
+		selBoxStartSelectedEntities.clear();
+		selBoxStartSelectedEntities.reserve(selectedEntities.size());
+		for (const auto& e: selectedEntities) {
+			selBoxStartSelectedEntities.push_back(e.getInstanceUUID());
+		}
+	}
+	selBox = Rect4f(holdMouseStart.value(), mousePos.value());
+}
+
 void SceneEditor::onSelectionBox(const SceneEditorInputState& input, SceneEditorOutputState& output)
 {
 	const auto& entities = getRootEntitiesAt(*input.selectionBox, false);
 	if (!entities.empty()) {
 		std::vector<UUID> results;
-		for (auto& e: entities) {
-			results.push_back(e.getInstanceUUID());
+
+		if (input.shiftHeld || input.altHeld) {
+			results = selBoxStartSelectedEntities;
+
+			if (input.shiftHeld) {
+				// Add to selection
+				for (auto& e: entities) {
+					if (!std_ex::contains(results, e.getInstanceUUID())) {
+						results.push_back(e.getInstanceUUID());
+					}
+				}
+			} else if (input.altHeld) {
+				// Subtract from selection
+				std::set<UUID> toErase;
+				for (auto& e: entities) {
+					toErase.insert(e.getInstanceUUID());
+				}
+				std_ex::erase_if(results, [&] (UUID id) { return std_ex::contains(toErase, id); });
+			}
+		} else {
+			results.reserve(entities.size());
+			for (auto& e: entities) {
+				results.push_back(e.getInstanceUUID());
+			}
 		}
+
 		output.newSelection = std::move(results);
-		output.selectionMode = UIList::SelectionMode::Normal; // TODO
+		output.selectionMode = UIList::SelectionMode::Normal;
 	}
 }
 

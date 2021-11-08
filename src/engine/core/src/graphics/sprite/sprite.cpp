@@ -493,7 +493,7 @@ bool Sprite::hasPointVisible(Rect4f area) const
 
 	// Check AABB first
 	const auto aabb = getLocalAABB();
-	if (!aabb.overlaps(localArea)) {
+	if (aabb.isEmpty() || !aabb.overlaps(localArea)) {
 		return false;
 	}
 
