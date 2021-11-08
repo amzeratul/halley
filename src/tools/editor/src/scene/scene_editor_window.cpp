@@ -855,7 +855,13 @@ String SceneEditorWindow::copyEntities(gsl::span<const String> ids)
 {
 	std::vector<EntityData> datas;
 	for (const auto& id: ids) {
-		datas.push_back(sceneData->getEntityNodeData(id).getData());
+		auto data = sceneData->getEntityNodeData(id).getData();
+
+		if (const auto* transform = gameBridge->getTransform(id)) {
+			positionEntity(data, transform->getGlobalPosition());
+		}
+
+		datas.push_back(std::move(data));
 	}
 	return serializeEntities(datas);
 }
