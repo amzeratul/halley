@@ -173,6 +173,8 @@ namespace Halley {
 
 		std::optional<String> findParent(const String& entityId, std::set<String>* invalidParents = nullptr) const;
 		const String* findParent(const String& targetEntityId, const EntityTree& tree, const String& parentEntityId, std::set<String>* invalidParents) const;
+		std::vector<std::pair<String, std::optional<String>>> findUniqueParents(gsl::span<const String> entityIds) const;
+
 		String getNextSibling(const String& parentId, int childIndex) const;
 		std::pair<String, int> getParentInsertPos(const String& referenceId, bool childOfReference) const;
 

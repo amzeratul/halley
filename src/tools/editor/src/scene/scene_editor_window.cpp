@@ -854,7 +854,11 @@ void SceneEditorWindow::pasteEntitiesFromClipboard(const String& referenceId, bo
 String SceneEditorWindow::copyEntities(gsl::span<const String> ids)
 {
 	std::vector<EntityData> datas;
-	for (const auto& id: ids) {
+
+	for (const auto& [id, parentId]: findUniqueParents(ids)) {
+		if (!parentId) {
+			continue;
+		}
 		auto data = sceneData->getEntityNodeData(id).getData();
 
 		if (const auto* transform = gameBridge->getTransform(id)) {
@@ -984,20 +988,13 @@ void SceneEditorWindow::removeEntities(gsl::span<const String> targetIds)
 		return;
 	}
 
-	std::set<String> idSet;
-	for (const auto& targetId: targetIds) {
-		idSet.insert(targetId);
-	}
-
 	std::vector<String> entityIds;
 	std::vector<std::pair<String, int>> parenting;
 	std::vector<EntityData> prevDatas;
 	std::vector<String> toClean;
-
-	for (const auto& targetId: targetIds) {
-		const auto parentId = findParent(targetId, &idSet);
+	
+	for (const auto& [targetId, parentId]: findUniqueParents(targetIds)) {
 		if (!parentId) {
-			// Excluded, presumably because one of its ancestors is already included
 			continue;
 		}
 
@@ -1087,6 +1084,19 @@ const String* SceneEditorWindow::findParent(const String& targetEntityId, const 
 	}
 
 	return nullptr;
+}
+
+std::vector<std::pair<String, std::optional<String>>> SceneEditorWindow::findUniqueParents(gsl::span<const String> entityIds) const
+{
+	std::vector<std::pair<String, std::optional<String>>> result;
+	std::set<String> idSet;
+	for (const auto& entityId: entityIds) {
+		idSet.insert(entityId);
+	}
+	for (const auto& entityId: entityIds) {
+		result.emplace_back(entityId, findParent(entityId, &idSet));
+	}
+	return result;
 }
 
 String SceneEditorWindow::getNextSibling(const String& parentId, int childIndex) const
