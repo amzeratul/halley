@@ -212,10 +212,10 @@ void SceneEditorCanvas::notifyOutputState()
 		fields.clear();
 	}
 
-	if (!outputState.newSelection.empty()) {
+	if (outputState.newSelection) {
 		std::vector<String> ids;
-		ids.reserve(outputState.newSelection.size());
-		for (auto& uuid: outputState.newSelection) {
+		ids.reserve(outputState.newSelection->size());
+		for (auto& uuid: outputState.newSelection.value()) {
 			ids.push_back(uuid.toString());
 		}
 		editorWindow->selectEntities(ids, outputState.selectionMode);

@@ -285,7 +285,7 @@ bool UIList::changeSelection(int oldItem, int newItem, SelectionMode mode)
 	}
 
 	if (changed) {
-		notifyNewItemSelected(curOption, getSelectedOptionId());
+		notifyNewItemSelected();
 	}
 
 	return changed;
@@ -303,19 +303,20 @@ bool UIList::deselectAll(std::optional<int> exceptFor)
 	return changed;
 }
 
-void UIList::notifyNewItemSelected(int itemIdx, const String& itemId)
+void UIList::notifyNewItemSelected()
 {
+	const auto& itemId = getSelectedOptionId();
 	playSound(styles.at(0).getString("selectionChangedSound"));
 
-	sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), itemId, itemIdx));
+	sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), itemId, curOption));
 	if (scrollToSelection) {
-		sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), getOptionRect(itemIdx)));
+		sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), getOptionRect(curOption)));
 	}
 	
 	if (getDataBindFormat() == UIDataBind::Format::String) {
 		notifyDataBind(itemId);
 	} else {
-		notifyDataBind(itemIdx);
+		notifyDataBind(curOption);
 	}
 }
 
@@ -1208,7 +1209,12 @@ bool UIList::setSelectedOptionIds(gsl::span<const String> ids, SelectionMode mod
 {
    	if (ids.empty()) {
    		if (mode == SelectionMode::Normal) {
-			return setSelectedOptionId("");
+			const bool changed = deselectAll({});
+			setSelectedOptionId("");
+			if (changed) {
+				notifyNewItemSelected();
+			}
+			return changed;
 		} else {
 			return false;
 		}

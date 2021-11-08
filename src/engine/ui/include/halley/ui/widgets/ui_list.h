@@ -153,7 +153,7 @@ namespace Halley {
 
 		bool changeSelection(int oldItem, int newItem, SelectionMode mode);
 		bool deselectAll(std::optional<int> exceptFor);
-		void notifyNewItemSelected(int itemIdx, const String& itemId);
+		void notifyNewItemSelected();
 	};
 
 	class UIListItem : public UIClickable {

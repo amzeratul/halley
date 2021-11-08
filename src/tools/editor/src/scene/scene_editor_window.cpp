@@ -674,21 +674,6 @@ void SceneEditorWindow::collapsePrefab(const String& id)
 
 void SceneEditorWindow::onEntitiesSelected(std::vector<String> selectedEntities)
 {
-	if (selectedEntities.empty()) {
-		const auto& tree = sceneData->getEntityTree();
-		if (tree.entityId.isEmpty()) {
-			if (tree.children.empty()) {
-				entityEditor->unloadEntity(false);
-				currentEntityIds = {};
-				return;
-			} else {
-				selectedEntities.emplace_back(tree.children[0].entityId);
-			}
-		} else {
-			selectedEntities.emplace_back(tree.entityId);
-		}
-	}
-
 	try {
 		if (selectedEntities.size() == 1) {
 			const auto& entityId = selectedEntities.front();
@@ -700,7 +685,7 @@ void SceneEditorWindow::onEntitiesSelected(std::vector<String> selectedEntities)
 			}
 			entityEditor->loadEntity(entityId, firstEntityData, prefabData, false, project.getGameResources());
 		} else {
-			entityEditor->unloadEntity(true);
+			entityEditor->unloadEntity(!selectedEntities.empty());
 		}
 
 		std::vector<UUID> uuids;

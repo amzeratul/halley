@@ -422,7 +422,6 @@ void SceneEditor::setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizm
 void SceneEditor::setSelectedEntities(std::vector<UUID> uuids, std::vector<EntityData*> entityDatas)
 {
 	Expects(uuids.size() == entityDatas.size());
-	Expects(!entityDatas.empty());
 	
 	selectedEntities.resize(uuids.size());
 	for (size_t i = 0; i < uuids.size(); ++i) {
@@ -659,11 +658,10 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 		return;
 	}
 
+	output.newSelection = std::vector<UUID>();
+	output.selectionMode = input.ctrlHeld ? UIList::SelectionMode::CtrlSelect : UIList::SelectionMode::Normal;
 	if (const auto bestEntity = getRootEntityAt(input.mousePos.value(), false); bestEntity.isValid()) {
-		output.newSelection.push_back(bestEntity.getInstanceUUID());
-		output.selectionMode = input.ctrlHeld ? UIList::SelectionMode::CtrlSelect : UIList::SelectionMode::Normal;
-	} else {
-		output.newSelection.clear();
+		output.newSelection->push_back(bestEntity.getInstanceUUID());
 	}
 }
 
