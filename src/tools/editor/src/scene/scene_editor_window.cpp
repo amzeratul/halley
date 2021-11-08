@@ -967,7 +967,7 @@ void SceneEditorWindow::removeEntities(gsl::span<const String> targetIds)
 	std::vector<String> entityIds;
 	std::vector<std::pair<String, int>> parenting;
 	std::vector<EntityData> prevDatas;
-	std::vector<std::vector<EntityData>*> toClean;
+	std::vector<String> toClean;
 
 	for (const auto& targetId: targetIds) {
 		const auto parentId = findParent(targetId, &idSet);
@@ -976,15 +976,15 @@ void SceneEditorWindow::removeEntities(gsl::span<const String> targetIds)
 			continue;
 		}
 
-		auto& data = sceneData->getWriteableEntityNodeData(parentId.value()).getData();
+		auto& parentData = sceneData->getWriteableEntityNodeData(parentId.value()).getData();
 
 		// Don't delete root of prefab
-		const auto canDelete = !parentId.value().isEmpty() || data.isSceneRoot();
+		const auto canDelete = !parentId.value().isEmpty() || parentData.isSceneRoot();
 		if (!canDelete) {
 			continue;
 		}
 
-		auto& children = data.getChildren();
+		auto& children = parentData.getChildren();
 		for (auto iter = children.begin(); iter != children.end(); ++iter) {
 			if (iter->getInstanceUUID().toString() == targetId) {
 				entityIds.push_back(targetId);
@@ -994,15 +994,16 @@ void SceneEditorWindow::removeEntities(gsl::span<const String> targetIds)
 				// Mark it empty, will swipe later and delete those
 				// We don't want to delete them right now or it'll affect the index of other entities being deleted
 				iter->setInstanceUUID(UUID());
-				toClean.push_back(&children);
+				toClean.push_back(parentId.value());
 
 				break;
 			}
 		}
 	}
 
-	for (auto& c: toClean) {
-		std_ex::erase_if(*c, [] (const EntityData& data) { return !data.getInstanceUUID().isValid(); });
+	for (auto& id: toClean) {
+		auto& datas = sceneData->getWriteableEntityNodeData(id).getData();
+		std_ex::erase_if(datas.getChildren(), [] (const EntityData& data) { return !data.getInstanceUUID().isValid(); });
 	}
 
 	onEntitiesRemoved(entityIds, parenting, prevDatas);
