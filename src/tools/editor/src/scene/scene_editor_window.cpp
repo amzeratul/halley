@@ -744,7 +744,7 @@ void SceneEditorWindow::onEntitiesModified(gsl::span<const String> ids, gsl::spa
 
 	if (undoStack.pushModified(modified, ids, prevDatas, newDatas)) {
 		for (size_t i = 0; i < ids.size(); ++i) {
-			sceneData->reloadEntity(ids[i]);
+			sceneData->reloadEntity(ids[i], newDatas[i]);
 			entityList->onEntityModified(ids[i], *newDatas[i]);
 		}
 		markModified();

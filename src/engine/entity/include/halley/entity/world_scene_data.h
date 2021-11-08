@@ -11,7 +11,7 @@ namespace Halley {
     	EntityNodeData getWriteableEntityNodeData(const String& id) override;
         std::vector<EntityData*> getWriteableEntityDatas(gsl::span<const String> ids) override;
         ConstEntityNodeData getEntityNodeData(const String& id) override;
-        void reloadEntity(const String& id) override;
+        void reloadEntity(const String& id, const EntityData* data) override;
         EntityTree getEntityTree() const override;
         std::pair<String, size_t> reparentEntity(const String& entityId, const String& newParentId, size_t childIndex) override;
         std::pair<String, size_t> getEntityParenting(const String& entityId) override;

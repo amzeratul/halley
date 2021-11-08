@@ -21,7 +21,7 @@ ISceneData::ConstEntityNodeData WorldSceneData::getEntityNodeData(const String& 
 	throw Exception("Not implemented", HalleyExceptions::Entity);
 }
 
-void WorldSceneData::reloadEntity(const String& id)
+void WorldSceneData::reloadEntity(const String& id, const EntityData* data)
 {
 	throw Exception("Not implemented", HalleyExceptions::Entity);
 }

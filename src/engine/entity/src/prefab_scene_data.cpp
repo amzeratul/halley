@@ -51,16 +51,16 @@ ISceneData::ConstEntityNodeData PrefabSceneData::getEntityNodeData(const String&
 	return ConstEntityNodeData(getWriteableEntityNodeData(id));
 }
 
-void PrefabSceneData::reloadEntity(const String& id)
+void PrefabSceneData::reloadEntity(const String& id, const EntityData* data)
 {
-	if (!id.isEmpty()) {
-		reloadEntity(id, findEntity(prefab.getEntityDatas(), id));
-		world.spawnPending();
+	if (id.isEmpty()) {
+		return;
 	}
-}
 
-void PrefabSceneData::reloadEntity(const String& id, EntityData* data)
-{
+	if (!data) {
+		data = findEntity(prefab.getEntityDatas(), id);
+	}
+
 	auto entity = world.findEntity(UUID(id));
 	if (entity) {
 		if (data) {
@@ -76,6 +76,7 @@ void PrefabSceneData::reloadEntity(const String& id, EntityData* data)
 			factory->createEntity(*data);
 		}
 	}
+	world.spawnPending();
 }
 
 EntityTree PrefabSceneData::getEntityTree() const

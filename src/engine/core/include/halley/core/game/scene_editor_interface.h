@@ -321,7 +321,7 @@ namespace Halley {
 		virtual EntityNodeData getWriteableEntityNodeData(const String& id) = 0;
 		virtual std::vector<EntityData*> getWriteableEntityDatas(gsl::span<const String> ids) = 0;
 		virtual ConstEntityNodeData getEntityNodeData(const String& id) = 0;
-		virtual void reloadEntity(const String& id) = 0;
+		virtual void reloadEntity(const String& id, const EntityData* data = nullptr) = 0;
 		virtual EntityTree getEntityTree() const = 0;
 		virtual std::pair<String, size_t> reparentEntity(const String& entityId, const String& newParentId, size_t childIndex) = 0;
 		virtual std::pair<String, size_t> getEntityParenting(const String& entityId) = 0;
