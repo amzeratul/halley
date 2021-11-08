@@ -185,8 +185,9 @@ namespace Halley {
 		std::vector<EntityData> deserializeEntities(const String& data) const;
 
 		void assignUUIDs(EntityData& node);
-		void positionEntityAtCursor(EntityData& entityData, const String& parentId) const;
 		void positionEntity(EntityData& entityData, Vector2f pos) const;
+		Vector2f getEntityPosition(const EntityData& entityData) const;
+		Vector2f getPositionClosestToAverage(gsl::span<const EntityData> datas) const;
 		bool isValidEntityTree(const ConfigNode& node) const;
 
 		void toggleConsole();

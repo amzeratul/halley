@@ -440,13 +440,32 @@ void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfRef
 
 void SceneEditorWindow::addEntities(const String& referenceEntity, bool childOfReference, std::vector<EntityData> datas)
 {
-	auto parentInfo = getParentInsertPos(referenceEntity, childOfReference);
+	if (datas.empty()) {
+		return;
+	}
+
+	const auto parentInfo = getParentInsertPos(referenceEntity, childOfReference);
+	const auto& parentId = parentInfo.first;
 	int childPos = parentInfo.second;
+
+	// Find the placement position
+	// This is based on the anchor closest to the average pos, and the cursor pos
+	const Vector2f targetPos = getPositionClosestToAverage(datas);
+	const Vector2f basePos = gameBridge->getMousePos().value_or(gameBridge->getCameraPos()).round() - targetPos;
+
+	// Find the relevant transform
+	const Transform2DComponent identity;
+	const Transform2DComponent* transform = parentId.isEmpty() ? &identity : gameBridge->getTransform(parentId);
+	if (!transform) {
+		transform = &identity;
+	}
+
 	std::vector<EntityChangeOperation> ops;
 	for (auto& data: datas) {
-		positionEntityAtCursor(data, parentInfo.first);
+		positionEntity(data, transform->inverseTransformPoint(basePos + getEntityPosition(data)));
+
 		const auto& id = data.getInstanceUUID().toString();
-		ops.emplace_back(EntityChangeOperation{ std::make_unique<EntityData>(std::move(data)), id, parentInfo.first, childPos});
+		ops.emplace_back(EntityChangeOperation{ std::make_unique<EntityData>(std::move(data)), id, parentId, childPos});
 		if (childPos >= 0) {
 			++childPos;
 		}
@@ -1212,20 +1231,6 @@ void SceneEditorWindow::assignUUIDs(EntityData& node)
 	}
 }
 
-void SceneEditorWindow::positionEntityAtCursor(EntityData& entityData, const String& parentId) const
-{
-	Vector2f pos = gameBridge->getMousePos().value_or(gameBridge->getCameraPos()).round();
-
-	if (!parentId.isEmpty()) {
-		auto* transform = gameBridge->getTransform(parentId);
-		if (transform) {
-			pos = transform->inverseTransformPoint(pos);
-		}
-	}
-
-	positionEntity(entityData, pos);
-}
-
 void SceneEditorWindow::positionEntity(EntityData& entityData, Vector2f pos) const
 {
 	for (auto& [componentName, component]: entityData.getComponents()) {
@@ -1233,6 +1238,36 @@ void SceneEditorWindow::positionEntity(EntityData& entityData, Vector2f pos) con
 			component.asMap()["position"] = pos;
 		}
 	}
+}
+
+Vector2f SceneEditorWindow::getEntityPosition(const EntityData& entityData) const
+{
+	for (auto& [componentName, component]: entityData.getComponents()) {
+		if (componentName == "Transform2D") {
+			return component["position"].asVector2f();
+		}
+	}
+	return Vector2f();
+}
+
+Vector2f SceneEditorWindow::getPositionClosestToAverage(gsl::span<const EntityData> datas) const
+{
+	Vector2f averagePos;
+	for (const auto& data: datas) {
+		averagePos += getEntityPosition(data);
+	}
+	averagePos /= static_cast<float>(datas.size());
+	float bestDist = std::numeric_limits<float>::infinity();
+	Vector2f bestPos;
+	for (const auto& data: datas) {
+		const auto pos = getEntityPosition(data);
+		const auto dist = (pos - averagePos).length();
+		if (dist < bestDist) {
+			bestDist = dist;
+			bestPos = pos;
+		}
+	}
+	return bestPos;
 }
 
 bool SceneEditorWindow::isValidEntityTree(const ConfigNode& node) const
