@@ -145,6 +145,11 @@ bool TranslateGizmo::onKeyPress(KeyboardKeyPress key)
 	return false;
 }
 
+bool TranslateGizmo::canBoxSelectEntities() const
+{
+	return true;
+}
+
 void TranslateGizmo::onEntityChanged()
 {
 	loadHandles();

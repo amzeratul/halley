@@ -208,6 +208,11 @@ bool SceneEditorGizmo::onKeyPress(KeyboardKeyPress key)
 	return false;
 }
 
+bool SceneEditorGizmo::canBoxSelectEntities() const
+{
+	return false;
+}
+
 void SceneEditorGizmo::onEntityChanged()
 {}
 

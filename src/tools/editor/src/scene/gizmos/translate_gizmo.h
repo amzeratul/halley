@@ -26,6 +26,7 @@ namespace Halley {
 		std::shared_ptr<UIWidget> makeUI() override;
 		std::vector<String> getHighlightedComponents() const override;
 		bool onKeyPress(KeyboardKeyPress key) override;
+		bool canBoxSelectEntities() const override;
 
 	protected:
 		void onEntityChanged() override;

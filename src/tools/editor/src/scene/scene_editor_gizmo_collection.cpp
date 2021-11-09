@@ -62,6 +62,14 @@ void SceneEditorGizmoCollection::setSelectedEntities(std::vector<EntityRef> enti
 	}
 }
 
+bool SceneEditorGizmoCollection::canBoxSelectEntities()
+{
+	if (activeGizmo) {
+		return activeGizmo->canBoxSelectEntities();
+	}
+	return true;
+}
+
 void SceneEditorGizmoCollection::refreshEntity()
 {
 	selectedBoundsGizmo->refreshEntity();

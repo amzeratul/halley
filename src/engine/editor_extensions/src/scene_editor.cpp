@@ -72,13 +72,16 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	if (!inputState.leftClickHeld) {
 		holdMouseStart.reset();
 	}
+
+	// Box selection
 	if (mousePos) {
 		if (holdMouseStart && (holdMouseStart.value() - mousePos.value()).length() > 3) {
 			onStartSelectionBox();
 		}
 	}
 	inputState.selectionBox = selBox;
-	if (selBox) {
+	const bool canBoxSelect = gizmoCollection->canBoxSelectEntities();
+	if (selBox && canBoxSelect) {
 		onSelectionBox(inputState, outputState);
 	}
 	if (!inputState.leftClickHeld) {

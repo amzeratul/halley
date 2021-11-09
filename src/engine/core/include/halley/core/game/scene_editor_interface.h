@@ -355,6 +355,7 @@ namespace Halley {
 		virtual void addTool(const Tool& tool, GizmoFactory gizmoFactory) = 0;
 		virtual void generateList(UIList& list) = 0;
 		virtual ISceneEditorWindow& getSceneEditorWindow() = 0;
+		virtual bool canBoxSelectEntities() = 0;
 	};
 	
 	class ISceneEditorWindow {

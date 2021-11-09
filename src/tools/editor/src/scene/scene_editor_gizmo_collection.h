@@ -15,6 +15,7 @@ namespace Halley {
 		bool update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) override;
 		void draw(Painter& painter) override;
 		void setSelectedEntities(std::vector<EntityRef> entities, std::vector<EntityData*> entityDatas) override;
+		bool canBoxSelectEntities() override;
 		void refreshEntity() override;
 		void onEntityModified(const UUID& uuid, const EntityData& oldData, const EntityData& newData);
 		std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName) override;
