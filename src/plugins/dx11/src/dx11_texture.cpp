@@ -40,6 +40,7 @@ DX11Texture& DX11Texture::operator=(DX11Texture&& other) noexcept
 	samplerState = other.samplerState;
 	format = other.format;
 	size = other.size;
+	descriptor = std::move(other.descriptor);
 
 	other.texture = nullptr;
 	other.srv = nullptr;
