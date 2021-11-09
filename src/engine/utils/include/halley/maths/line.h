@@ -91,6 +91,9 @@ namespace Halley {
 		constexpr Vector2f getClosestPoint(Vector2f point) const
 		{
 			const float len = (b - a).length();
+			if (len < 0.00001f) {
+				return a;
+			}
 			const Vector2f dir = (b - a) * (1.0f / len);
 			const float x = (point - a).dot(dir); // position along the A-B segment
 			return a + dir * clamp(x, 0.0f, len);
@@ -99,6 +102,9 @@ namespace Halley {
 		constexpr float getClosestPointParametric(Vector2f point) const
 		{
 			const float len = (b - a).length();
+			if (len < 0.00001f) {
+				return 0.0f;
+			}
 			const float invLen = 1.0f / len;
 			const Vector2f dir = (b - a) * invLen;
 			const float x = (point - a).dot(dir); // position along the A-B segment
