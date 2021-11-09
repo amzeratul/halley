@@ -18,11 +18,13 @@ UIScrollPane::UIScrollPane(String id, Vector2f clipSize, UISizer&& sizer, bool s
 
 	setHandle(UIEventType::MakeAreaVisible, [this] (const UIEvent& event)
 	{
+		refresh();
 		scrollToShow(event.getRectData() + getBasePosition(event.getSourceId()), false);
 	});
 
 	setHandle(UIEventType::MakeAreaVisibleCentered, [this] (const UIEvent& event)
 	{
+		refresh();
 		scrollToShow(event.getRectData() + getBasePosition(event.getSourceId()), true);
 	});
 }
