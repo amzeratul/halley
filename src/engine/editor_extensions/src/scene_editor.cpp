@@ -515,7 +515,17 @@ std::shared_ptr<ScriptNodeTypeCollection> SceneEditor::getScriptNodeTypes()
 
 std::vector<UIPopupMenuItem> SceneEditor::getSceneContextMenu(const Vector2f& mousePos) const
 {
-	return {};
+	std::vector<UIPopupMenuItem> result;
+
+	const auto entities = getRootEntitiesAt(mousePos, true);
+	for (const auto& e: entities) {
+		const auto name = LocalisedString::fromHardcodedString("Select: " + e.getName());
+		const auto tooltip = LocalisedString::fromHardcodedString("Selects entity o" + e.getName());
+		const auto icon = editorInterface->getEntityIcon(e.getInstanceUUID().toString());
+		result.emplace_back(UIPopupMenuItem{ "entity:" + e.getInstanceUUID(), name, icon, tooltip });
+	}
+
+	return result;
 }
 
 void SceneEditor::onSceneContextMenuSelection(const String& id)

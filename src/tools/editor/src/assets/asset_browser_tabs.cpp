@@ -168,12 +168,31 @@ void AssetBrowserTabs::replaceAssetTab(const String& oldName, const String& newN
 		return;
 	}
 
-	const auto contents = tabs->getItem(idx)->getWidget("tabContents");
-	if (contents) {
-		tabs->changeItemId(idx, newName);
-		populateTab(*contents, {}, newName, newName);
-		windows[idx]->loadAsset(newName, {});
-		saveTabs();
+	auto doChangeTab = [this, idx, newName] ()
+	{
+		const auto contents = tabs->getItem(idx)->getWidget("tabContents");
+		if (contents) {
+			tabs->changeItemId(idx, newName);
+			populateTab(*contents, {}, newName, newName);
+			windows[idx]->loadAsset(newName, {});
+			saveTabs();
+		}
+	};
+
+	if (windows[idx]->isModified()) {
+		auto buttons = { UIConfirmationPopup::ButtonType::Yes, UIConfirmationPopup::ButtonType::No, UIConfirmationPopup::ButtonType::Cancel };
+		auto callback = [this, idx, doChangeTab] (UIConfirmationPopup::ButtonType buttonType)
+		{
+			if (buttonType != UIConfirmationPopup::ButtonType::Cancel) {
+				if (buttonType == UIConfirmationPopup::ButtonType::Yes) {
+					windows[idx]->save();
+				}
+				doChangeTab();
+			}
+		};
+		getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Save Changes?", "Would you like to save your changes to " + windows[idx]->getName() + " before changing to another asset?", buttons, std::move(callback)));
+	} else {
+		doChangeTab();
 	}
 }
 
