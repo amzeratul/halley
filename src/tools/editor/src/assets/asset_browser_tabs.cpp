@@ -168,6 +168,11 @@ void AssetBrowserTabs::replaceAssetTab(const String& oldName, const String& newN
 		return;
 	}
 
+	// Check if it's already open
+	if (tabs->setSelectedOptionId(newName)) {
+		return;
+	}
+
 	auto doChangeTab = [this, idx, newName] ()
 	{
 		const auto contents = tabs->getItem(idx)->getWidget("tabContents");
