@@ -213,7 +213,8 @@ void AssetsBrowser::setListContents(std::vector<String> assets, const Path& curP
 		}
 		curDirHash = hash;
 	}
-	
+
+	assetList->setScrollToSelection(false);
 	clearAssetList();
 
 	if (flat) {
@@ -244,6 +245,13 @@ void AssetsBrowser::setListContents(std::vector<String> assets, const Path& curP
 
 	if (selectOption) {
 		assetList->setSelectedOptionId(selectOption.value());
+	}
+	assetList->setScrollToSelection(true);
+
+	if (pendingOpen) {
+		assetList->setSelectedOptionId(pendingOpen->toString());
+		loadAsset(pendingOpen->toString(), true);
+		pendingOpen.reset();
 	}
 }
 
@@ -345,7 +353,6 @@ void AssetsBrowser::addAsset()
 	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
 	
 	const auto assetType = curSrcPath.getFront(1).string();
-	const auto dstPath = project.getAssetsSrcPath() / curSrcPath;
 
 	getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, [=] (std::optional<String> newName)
 	{
@@ -353,14 +360,21 @@ void AssetsBrowser::addAsset()
 			if (assetType == "prefab") {
 				Prefab prefab;
 				prefab.makeDefault();
-				FileSystem::writeFile(dstPath / (newName.value() + ".prefab"), prefab.toYAML());
+				addAsset(newName.value() + ".prefab", prefab.toYAML());
 			} else if (assetType == "scene") {
 				Scene scene;
 				scene.makeDefault();
-				FileSystem::writeFile(dstPath / (newName.value() + ".scene"), scene.toYAML());
+				addAsset(newName.value() + ".scene", scene.toYAML());
 			}
 		}
 	}));
+}
+
+void AssetsBrowser::addAsset(Path path, std::string_view data)
+{
+	const auto fullPath = curSrcPath / path;
+	pendingOpen = fullPath;
+	project.writeAssetToDisk(fullPath, data);
 }
 
 void AssetsBrowser::removeAsset()

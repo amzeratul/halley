@@ -89,6 +89,7 @@ namespace Halley
 
 		void setAssetSaveNotification(bool enabled);
 		bool writeAssetToDisk(const Path& filePath, gsl::span<const gsl::byte> data) override;
+		bool writeAssetToDisk(const Path& filePath, std::string_view str) override;
 
 		std::vector<String> getAssetSrcList() const;
 		std::vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& path) const;
@@ -128,8 +129,6 @@ namespace Halley
 		std::optional<AssetPreviewData> getCachedAssetPreview(AssetType type, const String& id);
 		void setCachedAssetPreview(AssetType type, const String& id, AssetPreviewData data);
 		void clearCachedAssetPreviews();
-
-		void addNewAsset(const Path& path, gsl::span<const gsl::byte> data);
 
 	private:
 		std::vector<String> platforms;

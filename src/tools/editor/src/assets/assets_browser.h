@@ -38,6 +38,7 @@ namespace Halley {
 
 		bool assetSrcMode = true;
 		std::optional<std::vector<String>> assetNames;
+		std::optional<Path> pendingOpen;
 
 		FuzzyTextMatcher fuzzyMatcher;
 		String filter;
@@ -71,6 +72,7 @@ namespace Halley {
 		void refreshAssets(gsl::span<const String> assets);
 
 		void addAsset();
+		void addAsset(Path path, std::string_view data);
 		void removeAsset();
 
 		void setCollapsed(bool collapsed);

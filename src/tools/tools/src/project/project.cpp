@@ -280,6 +280,11 @@ bool Project::writeAssetToDisk(const Path& path, gsl::span<const gsl::byte> data
 	return false;
 }
 
+bool Project::writeAssetToDisk(const Path& filePath, std::string_view str)
+{
+	return writeAssetToDisk(filePath, gsl::as_bytes(gsl::span<const char>(str)));
+}
+
 std::vector<String> Project::getAssetSrcList() const
 {
 	return importAssetsDatabase->getInputFiles();
@@ -438,11 +443,6 @@ void Project::setCachedAssetPreview(AssetType type, const String& id, AssetPrevi
 void Project::clearCachedAssetPreviews()
 {
 	previewCache.clear();
-}
-
-void Project::addNewAsset(const Path& path, gsl::span<const gsl::byte> data)
-{
-	Path::writeFile(getAssetsSrcPath() / path, data);
 }
 
 void Project::loadECSData()

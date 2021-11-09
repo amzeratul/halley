@@ -652,7 +652,7 @@ void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName
 	
 	// Write prefab
 	const auto serializedData = serializeEntities(gsl::span<const EntityData>(&entityData, 1));
-	project.addNewAsset(Path("prefab") / (prefabName + ".prefab"), gsl::as_bytes(gsl::span<const char>(serializedData.c_str(), serializedData.length())));
+	project.writeAssetToDisk(Path("prefab") / (prefabName + ".prefab"), serializedData);
 }
 
 void SceneEditorWindow::collapsePrefab(const String& id)
