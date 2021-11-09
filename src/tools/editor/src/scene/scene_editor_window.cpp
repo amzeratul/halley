@@ -1243,7 +1243,7 @@ Vector2f SceneEditorWindow::getEntityPosition(const EntityData& entityData) cons
 {
 	for (auto& [componentName, component]: entityData.getComponents()) {
 		if (componentName == "Transform2D") {
-			return component["position"].asVector2f();
+			return component["position"].asVector2f(Vector2f());
 		}
 	}
 	return Vector2f();
