@@ -82,6 +82,11 @@ void Polygon::checkConvex()
 		auto a = vertices[i];
 		auto b = vertices[(i + 1) % n];
 		auto c = vertices[(i + 2) % n];
+		if ((b - a).length() < 0.000001f) {
+			valid = false;
+			return;
+		}
+
 		const float cross = (b - a).normalized().cross((c - b).normalized());
 		if (cross > epsilon) {
 			right++;
