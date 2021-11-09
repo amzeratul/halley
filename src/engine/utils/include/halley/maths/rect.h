@@ -179,6 +179,11 @@ namespace Halley {
 			return (p.x >= p1.x && p.x < p2.x && p.y >= p1.y && p.y < p2.y);
 		}
 
+		[[nodiscard]] constexpr bool contains(Rect2D r) const
+		{
+			return getHorizontal().contains(r.getHorizontal()) && getVertical().contains(r.getVertical());
+		}
+
 		[[nodiscard]] constexpr Vector2D<T> getClosestPoint(Vector2D<T> p) const
 		{
 			p.x = clamp(p.x, p1.x, p2.x - 1);

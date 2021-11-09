@@ -497,6 +497,11 @@ bool Sprite::hasPointVisible(Rect4f area) const
 		return false;
 	}
 
+	// If the local area completely envelopes the aabb, then there's no need to check for pixels, we'll consider it to count
+	if (localArea.contains(aabb)) {
+		return true;
+	}
+
 	// Check against texture
 	if (material) {
 		const auto tex = material->getTexture(0);
