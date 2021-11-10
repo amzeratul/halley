@@ -544,10 +544,10 @@ void SceneEditor::onSceneContextMenuSelection(const String& id)
 
 void SceneEditor::onSceneContextMenuHighlight(const String& id)
 {
-	if (id.isEmpty()) {
-		forceFocusEntity.reset();
-	} else if (id.startsWith("entity:")) {
+	if (id.startsWith("entity:")) {
 		forceFocusEntity = getEntity(UUID(id.mid(7)));
+	} else {
+		forceFocusEntity.reset();
 	}
 }
 
@@ -690,37 +690,35 @@ void SceneEditor::onStartSelectionBox()
 void SceneEditor::onSelectionBox(const SceneEditorInputState& input, SceneEditorOutputState& output)
 {
 	const auto& entities = getRootEntitiesAt(*input.selectionBox, false);
-	if (!entities.empty()) {
-		std::vector<UUID> results;
+	std::vector<UUID> results;
 
-		if (input.shiftHeld || input.altHeld) {
-			results = selBoxStartSelectedEntities;
+	if (input.shiftHeld || input.altHeld) {
+		results = selBoxStartSelectedEntities;
 
-			if (input.shiftHeld) {
-				// Add to selection
-				for (auto& e: entities) {
-					if (!std_ex::contains(results, e.getInstanceUUID())) {
-						results.push_back(e.getInstanceUUID());
-					}
-				}
-			} else if (input.altHeld) {
-				// Subtract from selection
-				std::set<UUID> toErase;
-				for (auto& e: entities) {
-					toErase.insert(e.getInstanceUUID());
-				}
-				std_ex::erase_if(results, [&] (UUID id) { return std_ex::contains(toErase, id); });
-			}
-		} else {
-			results.reserve(entities.size());
+		if (input.shiftHeld) {
+			// Add to selection
 			for (auto& e: entities) {
-				results.push_back(e.getInstanceUUID());
+				if (!std_ex::contains(results, e.getInstanceUUID())) {
+					results.push_back(e.getInstanceUUID());
+				}
 			}
+		} else if (input.altHeld) {
+			// Subtract from selection
+			std::set<UUID> toErase;
+			for (auto& e: entities) {
+				toErase.insert(e.getInstanceUUID());
+			}
+			std_ex::erase_if(results, [&] (UUID id) { return std_ex::contains(toErase, id); });
 		}
-
-		output.newSelection = std::move(results);
-		output.selectionMode = UIList::SelectionMode::Normal;
+	} else {
+		results.reserve(entities.size());
+		for (auto& e: entities) {
+			results.push_back(e.getInstanceUUID());
+		}
 	}
+
+	output.newSelection = std::move(results);
+	output.selectionMode = UIList::SelectionMode::Normal;
 }
 
 std::vector<AssetCategoryFilter> SceneEditor::getPrefabCategoryFilters() const
