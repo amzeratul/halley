@@ -63,8 +63,31 @@ void SelectedBoundsGizmo::drawStencilSprite(Painter& painter, const Sprite& spri
 
 void SelectedBoundsGizmo::drawOutlineSprite(Painter& painter, const Sprite& sprite) const
 {
+	const auto tex0 = sprite.getMaterial().getTexture(0);
+
+	const auto outline = Vector2f(2, 2) / painter.getCurrentCamera().getZoom();
+	const auto origRect0 = sprite.getTexRect0();
+	//const auto ro = outline / Vector2f(tex0->getSize());
+	const auto ro = outline * origRect0.getSize() / sprite.getSize();
+	const auto texRect1 = Rect4f(-ro, Vector2f(1, 1) + ro);
+
+	const float x0 = lerp(origRect0.getLeft(), origRect0.getRight(), texRect1.getLeft());
+	const float x1 = lerp(origRect0.getLeft(), origRect0.getRight(), texRect1.getRight());
+	const float y0 = lerp(origRect0.getTop(), origRect0.getBottom(), texRect1.getTop());
+	const float y1 = lerp(origRect0.getTop(), origRect0.getBottom(), texRect1.getBottom());
+	const auto texRect0 = Rect4f(Vector2f(x0, y0), Vector2f(x1, y1));
+
 	Sprite s = sprite;
 	s.setMaterial(outlineMaterial, false);
-	s.getMutableMaterial().set(0, sprite.getMaterial().getTexture(0));
+	s.getMutableMaterial().set(0, tex0);
+	s.setTexRect0(texRect0);
+	s.setTexRect1(texRect1);
+
+	// TODO: account for scale
+	auto oldPivot = s.getAbsolutePivot();
+	s.setSize(s.getSize() + 2 * outline);
+	s.setPos(s.getPosition());
+	s.setAbsolutePivot(oldPivot + outline);
+
 	s.draw(painter);
 }
