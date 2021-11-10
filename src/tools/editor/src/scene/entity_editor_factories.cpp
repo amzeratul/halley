@@ -555,6 +555,11 @@ public:
 		container->getSizer().setColumnProportions({{0, 1}});
 		container->add(context.makeLabel("Animation"));
 		container->add(std::make_shared<SelectAssetWidget>("animation", context.getUIFactory(), AssetType::Animation, context.getGameResources(), context.getSceneEditorWindow()));
+		container->add(context.makeLabel("Material"));
+		auto material = std::make_shared<UITextInput>("material", context.getUIFactory().getStyle("inputThin"), "");
+		material->setReadOnly(true);
+		material->setEnabled(false);
+		container->add(material);
 		container->add(context.makeLabel("Sequence"));
 		container->add(std::make_shared<UIDropdown>("sequence", dropStyle));
 		container->add(context.makeLabel("Direction"));
@@ -571,10 +576,20 @@ public:
 			std::vector<String> sequences;
 			std::vector<String> directions;
 
-			if (!animName.isEmpty()) {
+			auto material = container->getWidgetAs<UITextInput>("material");
+			if (animName.isEmpty()) {
+				material->setGhostText(LocalisedString());
+			} else {
 				const auto anim = resources.get<Animation>(animName);
 				directions = anim->getDirectionNames();
 				sequences = anim->getSequenceNames();
+
+				auto mat = anim->getMaterial();
+				if (mat) {
+					material->setGhostText(LocalisedString::fromUserString(mat->getDefinition().getName()));
+				} else {
+					material->setGhostText(LocalisedString());
+				}
 			}
 
 			auto sequence = container->getWidgetAs<UIDropdown>("sequence");
