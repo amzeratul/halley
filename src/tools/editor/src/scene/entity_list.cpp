@@ -230,18 +230,6 @@ String EntityList::getCurrentSelection() const
 std::vector<String> EntityList::getCurrentSelections() const
 {
 	return list->getSelectedOptionIds();
-
-	/*
-	// Ensures the active selection is always the first one 
-	auto first = list->getSelectedOptionId();
-	auto all = list->getSelectedOptionIds();
-	std_ex::erase_if(all, [&] (const auto& v) { return v == first; });
-	std::vector<String> result;
-	result.reserve(1 + all.size());
-	result.push_back(first);
-	result.insert(result.end(), all.begin(), all.end());
-	return result;
-	*/
 }
 
 void EntityList::setEntityValidatorList(std::shared_ptr<EntityValidatorListUI> validator)
