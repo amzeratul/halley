@@ -16,6 +16,7 @@ namespace Halley {
 		std::shared_ptr<Material> stencilMaterial;
 		std::shared_ptr<Material> outlineMaterial;
 
+		bool shouldInclude(const Sprite& sprite) const;
 		void drawEntity(Painter& painter, EntityRef entity) const;
 		void drawStencilTree(Painter& painter, EntityRef entity) const;
 		void drawOutlineTree(Painter& painter, EntityRef entity) const;

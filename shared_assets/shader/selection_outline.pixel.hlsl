@@ -16,18 +16,19 @@ float4 main(VOut input) : SV_TARGET {
 
 	float2 texCoord0Grad = float2(ddx(input.texCoord0.x), ddy(input.texCoord0.y));
 	float2 texCoord1Grad = float2(ddx(input.texCoord1.x), ddy(input.texCoord1.y));
+	//float2 texCoord0Grad = input.custom0.xy;
+	//float2 texCoord1Grad = input.custom0.zw;
 
 	float colCentre = sampleAlpha(input.texCoord0.xy, input.texCoord1.xy);
 	if (colCentre >= threshold) {
 		discard;
 	}
 
-	for (int x = -thickness; x <= thickness; ++x) {
-		for (int y = -thickness; y <= thickness; ++y) {
-			float col = sampleAlpha(input.texCoord0.xy + float2(x, y) * texCoord0Grad, input.texCoord1.xy + float2(x, y) * texCoord1Grad);
-			if (col >= threshold) {
-				return float4(1, 1, 0, 1);
-			}
+	float2 samples[12] = { float2(1, 0), float2(1, 1), float2(0, 1), float2(-1, 1), float2(-1, 0), float2(-1, -1), float2(0, -1), float2(1, -1), float2(2, 0), float2(-2, 0), float2(0, -2), float2(0, 2) };
+	for (int i = 0; i < 12; ++i) {
+		float col = sampleAlpha(input.texCoord0.xy + samples[i] * texCoord0Grad, input.texCoord1.xy + samples[i] * texCoord1Grad);
+		if (col >= threshold) {
+			return float4(1, 1, 0, 1);
 		}
 	}
 
