@@ -1,0 +1,18 @@
+---
+name: Halley/SelectionStencil
+base: sprite_base.yaml
+textures:
+  - image: sampler2D
+passes:
+  - blend: Alpha
+    shader:
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: selection_stencil.pixel.hlsl
+    stencil:
+      test: true
+      comparison: Always
+      opPass: Replace
+      writeMask: 1
+      reference: 1
+...

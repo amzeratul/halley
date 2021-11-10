@@ -38,6 +38,7 @@ component:
   - player:
       type: 'Halley::AnimationPlayer'
       displayName: Player
+      collapse: true
 
 ---
 

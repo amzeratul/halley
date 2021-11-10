@@ -13,7 +13,13 @@ namespace Halley {
 		void draw(Painter& painter) const override;
 
 	private:
-		std::vector<Rect4f> bounds;
-		std::shared_ptr<Material> material;
+		std::shared_ptr<Material> stencilMaterial;
+		std::shared_ptr<Material> outlineMaterial;
+
+		void drawEntity(Painter& painter, EntityRef entity) const;
+		void drawStencilTree(Painter& painter, EntityRef entity) const;
+		void drawOutlineTree(Painter& painter, EntityRef entity) const;
+		void drawStencilSprite(Painter& painter, const Sprite& sprite) const;
+		void drawOutlineSprite(Painter& painter, const Sprite& sprite) const;
 	};
 }
