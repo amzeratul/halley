@@ -934,11 +934,15 @@ std::optional<EntityData> SceneEditorWindow::makeInstance(const String& prefabNa
 
 std::pair<String, int> SceneEditorWindow::getParentInsertPos(const String& referenceEntity, bool childOfReference) const
 {
+	const bool isScene = prefab->isScene();
+
 	if (referenceEntity.isEmpty()) {
-		return { "", -1 };
+		if (isScene) {
+			return { "", -1 };
+		} else {
+			return { sceneData->getEntityTree().children.at(0).entityId, -1 };
+		}
 	} else {
-		const bool isScene = prefab->isScene();
-		
 		const auto& ref = sceneData->getEntityNodeData(referenceEntity);
 		const bool canBeSibling = !ref.getParentId().isEmpty() || isScene;
 		const bool canBeChild = ref.getData().getPrefab().isEmpty();
