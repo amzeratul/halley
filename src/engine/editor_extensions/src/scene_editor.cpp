@@ -75,7 +75,7 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 
 	// Box selection
 	if (mousePos) {
-		if (holdMouseStart && (holdMouseStart.value() - mousePos.value()).length() > 3) {
+		if (holdMouseStart && (holdMouseStart.value() - mousePos.value()).length() > 3 / getZoom()) {
 			onStartSelectionBox();
 		}
 	}
@@ -327,6 +327,11 @@ std::optional<Vector2f> SceneEditor::getMousePos() const
 Vector2f SceneEditor::getCameraPos() const
 {
 	return camera.getPosition().xy();
+}
+
+float SceneEditor::getZoom() const
+{
+	return camera.getZoom();
 }
 
 std::optional<Vector2f> SceneEditor::getWorldOffset() const
