@@ -13,24 +13,27 @@ float sampleAlpha(float2 coord0, float2 coord1) {
 float4 main(VOut input) : SV_TARGET {
 	const float threshold = 0.01;
 	const int thickness = 2;
+	const float4 outlineCol = input.colour;
 
-	float2 texCoord0Grad = float2(ddx(input.texCoord0.x), ddy(input.texCoord0.y));
+	//float2 texCoord0Grad = float2(ddx(input.texCoord0.x), ddy(input.texCoord0.y));
 	float2 texCoord1Grad = float2(ddx(input.texCoord1.x), ddy(input.texCoord1.y));
-	//float2 texCoord0Grad = input.custom0.xy;
-	//float2 texCoord1Grad = input.custom0.zw;
+	float2 texCoord0Grad = input.custom0.xy;
 
 	float colCentre = sampleAlpha(input.texCoord0.xy, input.texCoord1.xy);
+	bool hasOutline = false;
+
 	if (colCentre >= threshold) {
-		discard;
+		//discard;
+		return outlineCol;
 	}
 
 	float2 samples[12] = { float2(1, 0), float2(1, 1), float2(0, 1), float2(-1, 1), float2(-1, 0), float2(-1, -1), float2(0, -1), float2(1, -1), float2(2, 0), float2(-2, 0), float2(0, -2), float2(0, 2) };
 	for (int i = 0; i < 12; ++i) {
 		float col = sampleAlpha(input.texCoord0.xy + samples[i] * texCoord0Grad, input.texCoord1.xy + samples[i] * texCoord1Grad);
 		if (col >= threshold) {
-			return float4(1, 1, 0, 1);
+			hasOutline = true;
 		}
 	}
 
-	return float4(0, 0, 0, 0);
+	return hasOutline ? outlineCol : float4(0, 0, 0, 0);
 }

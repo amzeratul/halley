@@ -34,7 +34,7 @@ bool SelectedBoundsGizmo::shouldInclude(const Sprite& sprite) const
 
 	// TODO: let game decide
 	const auto mask = sprite.getMaterial().getDefinition().getDefaultMask();
-	return mask == 2 || mask == 4;
+	return mask == 1 || mask == 2 || mask == 4;
 }
 
 void SelectedBoundsGizmo::drawEntity(Painter& painter, EntityRef entity) const
@@ -80,35 +80,26 @@ void SelectedBoundsGizmo::drawOutlineSprite(Painter& painter, const Sprite& spri
 {
 	const auto tex0 = sprite.getMaterial().getTexture(0);
 
-	const auto outline = Vector2f(2, 2) / painter.getCurrentCamera().getZoom();
-	const auto origRect0 = sprite.getTexRect0();
-	//const auto ro = outline / Vector2f(tex0->getSize());
-	const auto ro = outline * origRect0.getSize() / sprite.getSize();
+	const auto zoom = std::max(1.0f, getZoom());
+	const float outline = 2 / zoom;
+	const float padding = std::ceil(outline);
+
+	const auto texelSize = Vector2f(1.0f, 1.0f) / Vector2f(tex0->getSize());
+	const auto ro = padding * texelSize;
 	const auto texRect1 = Rect4f(-ro, Vector2f(1, 1) + ro);
-	const auto newSize = sprite.getSize() + 2 * outline;
+	const auto newSize = sprite.getSize() + 2 * Vector2f(padding, padding);
 
-	const float x0 = lerp(origRect0.getLeft(), origRect0.getRight(), texRect1.getLeft());
-	const float x1 = lerp(origRect0.getLeft(), origRect0.getRight(), texRect1.getRight());
-	const float y0 = lerp(origRect0.getTop(), origRect0.getBottom(), texRect1.getTop());
-	const float y1 = lerp(origRect0.getTop(), origRect0.getBottom(), texRect1.getBottom());
-	const auto texRect0 = Rect4f(Vector2f(x0, y0), Vector2f(x1, y1));
-
-	//const auto texGrad0 = texRect0.getSize() / newSize;
-	//const auto texGrad1 = texRect1.getSize() / newSize;
-	//const auto texGrads = Vector4f(texGrad0.x, texGrad0.y, texGrad1.x, texGrad1.y);
+	const auto texGrad0 = texelSize / zoom;
+	const auto texGrad1 = texRect1.getSize() / newSize;
+	const auto texGrads = Vector4f(texGrad0.x, texGrad0.y, texGrad1.x, texGrad1.y);
 
 	Sprite s = sprite;
 	s.setMaterial(outlineMaterial, false);
+	s.setColour(Colour4f(1, 0, 1, 1));
 	s.getMutableMaterial().set(0, tex0);
-	s.setTexRect0(texRect0);
-	s.setTexRect1(texRect1);
-
-	// TODO: account for scale
-	auto oldPivot = s.getAbsolutePivot();
-	s.setSize(newSize);
-	s.setPos(s.getPosition());
-	s.setAbsolutePivot(oldPivot + outline);
-	//s.setCustom0(texGrads);
+	s.setCustom0(texGrads);
+	s.setTexRect1(Rect4f(0, 0, 1, 1));
+	s.crop(Vector4f(-padding, -padding, -padding, -padding));
 
 	s.draw(painter);
 }
