@@ -238,7 +238,7 @@ namespace Halley {
 	
 	////////////
 	// Typedefs
-	typedef Vector2D<double,Angle<double> > Vector2d;
+	typedef Vector2D<double> Vector2d;
 	typedef Vector2D<> Vector2f;
 	typedef Vector2D<int> Vector2i;
 	typedef Vector2D<short> Vector2s;

@@ -390,5 +390,6 @@ namespace Halley {
 	}
 
 	typedef Rect2D<float> Rect4f;
+	typedef Rect2D<double> Rect4d;
 	typedef Rect2D<int> Rect4i;
 }
