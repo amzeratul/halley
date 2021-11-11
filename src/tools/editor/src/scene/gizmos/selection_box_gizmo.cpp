@@ -13,7 +13,7 @@ void SelectionBoxGizmo::update(Time time, const ISceneEditor& sceneEditor, const
 	bounds = inputState.selectionBox;
 }
 
-void SelectionBoxGizmo::draw(Painter& painter) const
+void SelectionBoxGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) const
 {
 	if (bounds) {
 		const auto rect = bounds.value() + Vector2f(0.5f, 0.5f) / getZoom();

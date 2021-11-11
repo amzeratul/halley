@@ -13,7 +13,7 @@ namespace Halley {
 		SceneEditorGizmoCollection(UIFactory& factory, Resources& resources, ISceneEditorWindow& sceneEditorWindow);
 		
 		bool update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) override;
-		void draw(Painter& painter) override;
+		void draw(Painter& painter, const ISceneEditor& sceneEditor) override;
 		void setSelectedEntities(std::vector<EntityRef> entities, std::vector<EntityData*> entityDatas) override;
 		bool canBoxSelectEntities() override;
 		void refreshEntity() override;

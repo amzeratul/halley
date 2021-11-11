@@ -146,7 +146,7 @@ SceneEditorGizmo::SceneEditorGizmo(SnapRules rules)
 void SceneEditorGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {}
 
-void SceneEditorGizmo::draw(Painter& painter) const
+void SceneEditorGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) const
 {}
 
 std::shared_ptr<UIWidget> SceneEditorGizmo::makeUI()

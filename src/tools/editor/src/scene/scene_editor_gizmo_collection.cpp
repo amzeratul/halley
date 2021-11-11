@@ -40,13 +40,13 @@ bool SceneEditorGizmoCollection::update(Time time, const Camera& camera, const I
 	return false;
 }
 
-void SceneEditorGizmoCollection::draw(Painter& painter)
+void SceneEditorGizmoCollection::draw(Painter& painter, const ISceneEditor& sceneEditor)
 {
-	selectedBoundsGizmo->draw(painter);
-	selectionBoxGizmo->draw(painter);
+	selectedBoundsGizmo->draw(painter, sceneEditor);
+	selectionBoxGizmo->draw(painter, sceneEditor);
 	
 	if (activeGizmo) {
-		activeGizmo->draw(painter);
+		activeGizmo->draw(painter, sceneEditor);
 	}
 }
 

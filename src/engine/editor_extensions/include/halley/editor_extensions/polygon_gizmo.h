@@ -29,7 +29,7 @@ namespace Halley {
 	public:
 		PolygonGizmo(SnapRules snapRules, String componentName, String fieldName, bool isOpenPolygon, Colour4f colour, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow);
 		void update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState) override;
-		void draw(Painter& painter) const override;
+		void draw(Painter& painter, const ISceneEditor& sceneEditor) const override;
 		std::shared_ptr<UIWidget> makeUI() override;
 
 		bool isHighlighted() const override;

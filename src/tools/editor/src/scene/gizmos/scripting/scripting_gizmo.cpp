@@ -175,7 +175,7 @@ void ScriptingGizmo::compileEntityTargetList()
 	}
 }
 
-void ScriptingGizmo::draw(Painter& painter) const
+void ScriptingGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) const
 {
 	if (!renderer) {
 		return;

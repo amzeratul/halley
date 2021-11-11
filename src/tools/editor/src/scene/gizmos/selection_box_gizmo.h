@@ -10,7 +10,7 @@ namespace Halley {
 		SelectionBoxGizmo(SnapRules snapRules, Resources& resources);
 
 		void update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState) override;
-		void draw(Painter& painter) const override;
+		void draw(Painter& painter, const ISceneEditor& sceneEditor) const override;
 
 	private:
 		std::optional<Rect4f> bounds;

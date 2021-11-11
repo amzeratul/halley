@@ -19,52 +19,50 @@ void SelectedBoundsGizmo::update(Time time, const ISceneEditor& sceneEditor, con
 {
 }
 
-void SelectedBoundsGizmo::draw(Painter& painter) const
+void SelectedBoundsGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) const
 {
 	for (auto& e: getEntities()) {
-		drawEntity(painter, e);
+		drawEntity(painter, e, sceneEditor);
 	}
 }
 
-bool SelectedBoundsGizmo::shouldInclude(const Sprite& sprite) const
+bool SelectedBoundsGizmo::shouldInclude(const Sprite& sprite, const ISceneEditor& sceneEditor) const
 {
 	if (!sprite.hasMaterial() || !sprite.isVisible()) {
 		return false;
 	}
 
-	// TODO: let game decide
-	const auto mask = sprite.getMaterial().getDefinition().getDefaultMask();
-	return mask == 1 || mask == 2 || mask == 4;
+	return sceneEditor.shouldDrawOutline(sprite);
 }
 
-void SelectedBoundsGizmo::drawEntity(Painter& painter, EntityRef entity) const
+void SelectedBoundsGizmo::drawEntity(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor) const
 {
 	painter.clear({}, {}, 0);
-	drawStencilTree(painter, entity);
-	drawOutlineTree(painter, entity);
+	drawStencilTree(painter, entity, sceneEditor);
+	drawOutlineTree(painter, entity, sceneEditor);
 }
 
-void SelectedBoundsGizmo::drawStencilTree(Painter& painter, EntityRef entity) const
+void SelectedBoundsGizmo::drawStencilTree(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor) const
 {
 	if (const auto* sprite = entity.tryGetComponent<SpriteComponent>()) {
-		if (shouldInclude(sprite->sprite)) {
+		if (shouldInclude(sprite->sprite, sceneEditor)) {
 			drawStencilSprite(painter, sprite->sprite);
 		}
 	}
 	for (const auto c: entity.getChildren()) {
-		drawStencilTree(painter, c);
+		drawStencilTree(painter, c, sceneEditor);
 	}
 }
 
-void SelectedBoundsGizmo::drawOutlineTree(Painter& painter, EntityRef entity) const
+void SelectedBoundsGizmo::drawOutlineTree(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor) const
 {
 	if (const auto* sprite = entity.tryGetComponent<SpriteComponent>()) {
-		if (shouldInclude(sprite->sprite)) {
+		if (shouldInclude(sprite->sprite, sceneEditor)) {
 			drawOutlineSprite(painter, sprite->sprite);
 		}
 	}
 	for (const auto c: entity.getChildren()) {
-		drawOutlineTree(painter, c);
+		drawOutlineTree(painter, c, sceneEditor);
 	}
 }
 

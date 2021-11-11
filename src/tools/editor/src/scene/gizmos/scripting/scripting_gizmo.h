@@ -7,7 +7,7 @@ namespace Halley {
 		ScriptingGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes);
 
 		void update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState) override;
-		void draw(Painter& painter) const override;
+		void draw(Painter& painter, const ISceneEditor& sceneEditor) const override;
 		bool isHighlighted() const override;
 		std::shared_ptr<UIWidget> makeUI() override;
 		std::vector<String> getHighlightedComponents() const override;

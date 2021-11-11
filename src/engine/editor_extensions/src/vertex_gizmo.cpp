@@ -38,7 +38,7 @@ void VertexGizmo::update(Time time, const ISceneEditor& sceneEditor, const Scene
 	}
 }
 
-void VertexGizmo::draw(Painter& painter) const
+void VertexGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) const
 {
 	if (visible) {
 		const float zoom = getZoom();

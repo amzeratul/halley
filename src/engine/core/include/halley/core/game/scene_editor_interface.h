@@ -258,6 +258,7 @@ namespace Halley {
     	virtual Transform2DComponent* getTransform(const String& entityId) = 0;
 
     	virtual void initializeEntityValidator(EntityValidator& validator) = 0;
+        virtual bool shouldDrawOutline(const Sprite& sprite) const = 0;
     };
 
 	class EntityTree {
@@ -347,7 +348,7 @@ namespace Halley {
 		virtual ~ISceneEditorGizmoCollection() = default;
 
         virtual bool update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) = 0;
-        virtual void draw(Painter& painter) = 0;
+        virtual void draw(Painter& painter, const ISceneEditor& sceneEditor) = 0;
         virtual void setSelectedEntities(std::vector<EntityRef> entities, std::vector<EntityData*> entityDatas) = 0;
 		virtual void refreshEntity() = 0;
         virtual std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName) = 0;

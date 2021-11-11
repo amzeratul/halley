@@ -116,7 +116,7 @@ void SceneEditor::render(RenderContext& rc)
 
 	rc.with(camera).bind([&] (Painter& painter)
 	{
-		gizmoCollection->draw(painter);
+		gizmoCollection->draw(painter, *this);
 	});
 
 	Camera uiCamera;
@@ -754,6 +754,11 @@ Transform2DComponent* SceneEditor::getTransform(const String& entityId)
 void SceneEditor::initializeEntityValidator(EntityValidator& validator)
 {
 	validator.addDefaults();
+}
+
+bool SceneEditor::shouldDrawOutline(const Sprite& sprite) const
+{
+	return true;
 }
 
 Future<AssetPreviewData> SceneEditor::getSpritePreviewData(AssetType assetType, const String& id, Vector2i size)

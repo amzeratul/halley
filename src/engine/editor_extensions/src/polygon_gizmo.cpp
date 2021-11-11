@@ -110,7 +110,7 @@ int PolygonGizmo::updateHandles(const SceneEditorInputState& inputState)
 	return curFocus;
 }
 
-void PolygonGizmo::draw(Painter& painter) const
+void PolygonGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) const
 {
 	const auto zoom = getZoom();
 	const auto highCol = Colour4f(1, 1, 1);

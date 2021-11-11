@@ -67,7 +67,7 @@ void TranslateGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 	}
 }
 
-void TranslateGizmo::draw(Painter& painter) const
+void TranslateGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) const
 {
 	for (const auto& handle: handles) {
 		if (handle.isEnabled()) {

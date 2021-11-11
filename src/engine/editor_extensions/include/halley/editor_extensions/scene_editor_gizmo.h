@@ -80,7 +80,7 @@ namespace Halley {
 		virtual ~SceneEditorGizmo() = default;
 
 		virtual void update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState);
-		virtual void draw(Painter& painter) const;
+		virtual void draw(Painter& painter, const ISceneEditor& sceneEditor) const;
 		virtual std::shared_ptr<UIWidget> makeUI();
 
 		void setSelectedEntities(std::vector<EntityRef> entities, std::vector<EntityData*> entityDatas);

@@ -73,6 +73,8 @@ namespace Halley {
 
 		void initializeEntityValidator(EntityValidator& validator) override;
 
+		bool shouldDrawOutline(const Sprite& sprite) const override;
+
     protected:
     	Camera camera;
 		IEditorInterface* editorInterface;

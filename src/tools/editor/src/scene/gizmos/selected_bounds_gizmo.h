@@ -10,16 +10,16 @@ namespace Halley {
 		SelectedBoundsGizmo(SnapRules snapRules, Resources& resources);
 
 		void update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState) override;
-		void draw(Painter& painter) const override;
+		void draw(Painter& painter, const ISceneEditor& sceneEditor) const override;
 
 	private:
 		std::shared_ptr<Material> stencilMaterial;
 		std::shared_ptr<Material> outlineMaterial;
 
-		bool shouldInclude(const Sprite& sprite) const;
-		void drawEntity(Painter& painter, EntityRef entity) const;
-		void drawStencilTree(Painter& painter, EntityRef entity) const;
-		void drawOutlineTree(Painter& painter, EntityRef entity) const;
+		bool shouldInclude(const Sprite& sprite, const ISceneEditor& sceneEditor) const;
+		void drawEntity(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor) const;
+		void drawStencilTree(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor) const;
+		void drawOutlineTree(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor) const;
 		void drawStencilSprite(Painter& painter, const Sprite& sprite) const;
 		void drawOutlineSprite(Painter& painter, const Sprite& sprite) const;
 	};

@@ -21,7 +21,7 @@ namespace Halley {
 	public:
 		explicit TranslateGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow);
 		void update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState) override;
-		void draw(Painter& painter) const override;
+		void draw(Painter& painter, const ISceneEditor& sceneEditor) const override;
 		bool isHighlighted() const override;
 		std::shared_ptr<UIWidget> makeUI() override;
 		std::vector<String> getHighlightedComponents() const override;
