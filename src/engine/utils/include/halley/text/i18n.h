@@ -2,6 +2,8 @@
 
 #include "halleystring.h"
 #include <map>
+
+#include "halley/core/resources/resources.h"
 #include "halley/data_structures/maybe.h"
 
 namespace Halley {
@@ -94,8 +96,10 @@ namespace Halley {
 	class I18N : public II18N {
 	public:
 		I18N();
+		I18N(Resources& resources, I18NLanguage currentLanguage = I18NLanguage("en-GB"));
 
 		void update();
+		void loadStrings(Resources& resources);
 		void loadLocalisationFile(const ConfigFile& config);
 
 		void setCurrentLanguage(const I18NLanguage& code);

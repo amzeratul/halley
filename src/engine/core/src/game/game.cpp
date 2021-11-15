@@ -1,4 +1,6 @@
 #include "halley/core/game/game.h"
+
+#include "halley/ui/ui_factory.h"
 using namespace Halley;
 
 Game::~Game() = default;
@@ -55,6 +57,11 @@ std::unique_ptr<ISceneEditor> Game::createSceneEditorInterface()
 std::unique_ptr<IEditorCustomTools> Game::createEditorCustomToolsInterface()
 {
 	return {};
+}
+
+std::unique_ptr<UIFactory> Game::createUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n)
+{
+	return std::make_unique<UIFactory>(api, resources, i18n);
 }
 
 void Game::attachToEditorDebugConsole(UIDebugConsoleCommands& commands, Resources& gameResources, IProject& project)

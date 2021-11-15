@@ -8,12 +8,28 @@ I18N::I18N()
 {
 }
 
+I18N::I18N(Resources& resources, I18NLanguage currentLanguage)
+{
+	loadStrings(resources);
+	setCurrentLanguage(currentLanguage);
+}
+
 void I18N::update()
 {
 	for (auto& o: observers) {
 		if (o.second.needsUpdate()) {
 			o.second.update();
 			loadLocalisation(o.second.getRoot());
+		}
+	}
+}
+
+void I18N::loadStrings(Resources& resources)
+{
+	for (auto& assetName : resources.enumerate<ConfigFile>()) {
+		if (assetName.startsWith("strings/")) {
+			resources.of<ConfigFile>().unload(assetName);
+			loadLocalisationFile(*resources.get<ConfigFile>(assetName));
 		}
 	}
 }

@@ -1,0 +1,18 @@
+---
+widget: { class: widget }
+sizer: { type: horizontal }
+children:
+- widget: { id: contents, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, mouseWheelEnabled: false }
+  proportion: 1
+  fill: fill
+  sizer: { type: vertical }
+  children:
+  - widget: { class: scrollBackground, id: scrollBackground }
+    proportion: 1
+    children:
+    - widget: { class: widget, id: display }
+      proportion: 1
+      fill: centre
+      sizer: { type: vertical }
+      children: []
+...
