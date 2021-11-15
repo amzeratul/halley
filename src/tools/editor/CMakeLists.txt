@@ -21,6 +21,8 @@ set (editor_sources
 	"src/assets/prefab_editor.cpp"
 
 	"src/assets/ui_editor/ui_editor.cpp"
+	"src/assets/ui_editor/ui_widget_editor.cpp"
+	"src/assets/ui_editor/ui_widget_list.cpp"
 
 	"src/assets/graph/graph_editor.cpp"
 	"src/assets/graph/render_graph_editor.cpp"
@@ -82,6 +84,8 @@ set (editor_headers
 	"src/assets/prefab_editor.h"
 
 	"src/assets/ui_editor/ui_editor.h"
+	"src/assets/ui_editor/ui_widget_editor.h"
+	"src/assets/ui_editor/ui_widget_list.h"
 
 	"src/assets/graph/graph_editor.h"
 	"src/assets/graph/render_graph_editor.h"

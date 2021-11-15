@@ -23,6 +23,8 @@ namespace Halley {
         std::shared_ptr<UIWidget> makeEntityValidatorList(const ConfigNode& entryNode);
         std::shared_ptr<UIWidget> makeEntityEditor(const ConfigNode& entryNode);
         std::shared_ptr<UIWidget> makeSelectAsset(const ConfigNode& entryNode);
+        std::shared_ptr<UIWidget> makeUIWidgetEditor(const ConfigNode& entryNode);
+        std::shared_ptr<UIWidget> makeUIWidgetList(const ConfigNode& entryNode);
 
     	void loadColourSchemes();
     	void reloadStyleSheet();

@@ -12,6 +12,7 @@
 
 namespace Halley
 {
+	class UIList;
 	class UIDefinition;
 	class HalleyAPI;
 	class ConfigNode;
@@ -104,7 +105,6 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeTextInput(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeSpinControl(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makeSpinControl2(const ConfigNode& entryNode);
-		std::shared_ptr<UIWidget> makeList(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeDropdown(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeCheckbox(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeImage(const ConfigNode& node);
@@ -122,9 +122,12 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeHybridList(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makeSpinList(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makeOptionListMorpher(const ConfigNode& entryNode);
-		std::shared_ptr<UIWidget> makeTreeList(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeDebugConsole(const ConfigNode& node);
 
+		std::shared_ptr<UIWidget> makeList(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeTreeList(const ConfigNode& node);
+		void applyListProperties(UIList& list, const ConfigNode& widgetNode, const String& inputConfigName);
+		
 		bool hasCondition(const String& condition) const;
 		bool resolveConditions(const ConfigNode& node) const;
 

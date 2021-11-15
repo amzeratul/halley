@@ -1,0 +1,5 @@
+widget: { class: scrollBarPane, size: [150, 250] }
+border: [0, 0, 10, 0]
+children:
+- widget: { class: treeList, id: widgetList, multiSelect: true, canDrag: true, singleClickAccept: false }
+  proportion: 1

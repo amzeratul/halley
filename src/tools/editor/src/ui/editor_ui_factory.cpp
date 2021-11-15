@@ -6,6 +6,8 @@
 #include "src/assets/animation_editor.h"
 #include "src/assets/asset_editor_window.h"
 #include "src/assets/metadata_editor.h"
+#include "src/assets/ui_editor/ui_widget_editor.h"
+#include "src/assets/ui_editor/ui_widget_list.h"
 #include "src/scene/entity_editor.h"
 #include "src/scene/entity_list.h"
 #include "src/scene/entity_validator_ui.h"
@@ -30,6 +32,8 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("entityValidatorList", [=](const ConfigNode& node) { return makeEntityValidatorList(node); });
 	addFactory("entityEditor", [=](const ConfigNode& node) { return makeEntityEditor(node); });
 	addFactory("selectAsset", [=](const ConfigNode& node) { return makeSelectAsset(node); });
+	addFactory("uiWidgetList", [=](const ConfigNode& node) { return makeUIWidgetList(node); });
+	addFactory("uiWidgetEditor", [=](const ConfigNode& node) { return makeUIWidgetEditor(node); });
 }
 
 Sprite EditorUIFactory::makeAssetTypeIcon(AssetType type) const
@@ -111,6 +115,20 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeSelectAsset(const ConfigNode& ent
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	return std::make_shared<SelectAssetWidget>(id, *this, fromString<AssetType>(node["assetType"].asString()));
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeUIWidgetEditor(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	return std::make_shared<UIWidgetEditor>(id, *this);
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeUIWidgetList(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	return std::make_shared<UIWidgetList>(id, *this);
 }
 
 void EditorUIFactory::loadColourSchemes()

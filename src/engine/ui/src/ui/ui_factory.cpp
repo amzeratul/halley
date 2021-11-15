@@ -559,54 +559,6 @@ std::shared_ptr<UIWidget> UIFactory::makeSpinControl2(const ConfigNode& entryNod
 	return result;
 }
 
-std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
-{
-	auto& node = entryNode["widget"];
-	auto style = UIStyle(node["style"].asString("list"), styleSheet);
-	auto label = parseLabel(node);
-
-	auto orientation = fromString<UISizerType>(node["type"].asString("vertical"));
-	int nColumns = node["columns"].asInt(1);
-	auto options = parseOptions(node["options"]);
-
-	auto widget = std::make_shared<UIList>(node["id"].asString(), style, orientation, nColumns);
-	applyInputButtons(*widget, node["inputButtons"].asString("list"));
-	for (auto& o: options) {
-		if (!o.image.isEmpty() || !o.sprite.isEmpty()) {
-			Sprite normalSprite;
-			
-			if (!o.image.isEmpty()) {
-				normalSprite.setImage(resources, o.image);
-			} else {
-				normalSprite.setSprite(resources, o.spriteSheet, o.sprite);
-			}
-			
-			auto image = std::make_shared<UIImage>(normalSprite);
-
-			if (!o.inactiveImage.isEmpty()) {
-				Sprite inactiveSprite = Sprite().setImage(resources, o.inactiveImage);
-				image->setSelectable(inactiveSprite, normalSprite);
-				image->setSprite(inactiveSprite);
-			}
-
-			widget->addImage(o.id, image, 1, o.border, UISizerAlignFlags::Centre);
-		} else {
-			widget->addTextItem(o.id, o.text);
-		}
-
-		if (!o.tooltip.getString().isEmpty()) {
-			widget->getItem(o.id)->setToolTip(o.tooltip);
-		}
-
-		widget->setItemActive(o.id, o.active);
-	}
-
-	widget->setDragEnabled(node["canDrag"].asBool(false));
-	widget->setUniformSizedItems(node["uniformSizedItems"].asBool(false));
-
-	return widget;
-}
-
 std::shared_ptr<UIWidget> UIFactory::makeDropdown(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
@@ -940,6 +892,20 @@ std::shared_ptr<UIWidget> UIFactory::makeOptionListMorpher(const ConfigNode& ent
 	widget->setOptions(optionIds, optionLabels);
 	return widget;
 }
+std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto style = UIStyle(node["style"].asString("list"), styleSheet);
+	auto label = parseLabel(node);
+
+	auto orientation = fromString<UISizerType>(node["type"].asString("vertical"));
+	int nColumns = node["columns"].asInt(1);
+
+	auto widget = std::make_shared<UIList>(node["id"].asString(), style, orientation, nColumns);
+	applyListProperties(*widget, node, "list");
+
+	return widget;
+}
 
 std::shared_ptr<UIWidget> UIFactory::makeTreeList(const ConfigNode& entryNode)
 {
@@ -949,11 +915,50 @@ std::shared_ptr<UIWidget> UIFactory::makeTreeList(const ConfigNode& entryNode)
 	auto label = parseLabel(node);
 
 	auto widget = std::make_shared<UITreeList>(id, style);
-	applyInputButtons(*widget, node["inputButtons"].asString("treeList"));
-
-	widget->setDragEnabled(node["canDrag"].asBool(false));
+	applyListProperties(*widget, node, "treeList");
 
 	return widget;
+}
+
+void UIFactory::applyListProperties(UIList& list, const ConfigNode& node, const String& inputConfigName)
+{
+	applyInputButtons(list, node["inputButtons"].asString(inputConfigName));
+
+	auto options = parseOptions(node["options"]);
+	for (auto& o: options) {
+		if (!o.image.isEmpty() || !o.sprite.isEmpty()) {
+			Sprite normalSprite;
+			
+			if (!o.image.isEmpty()) {
+				normalSprite.setImage(resources, o.image);
+			} else {
+				normalSprite.setSprite(resources, o.spriteSheet, o.sprite);
+			}
+			
+			auto image = std::make_shared<UIImage>(normalSprite);
+
+			if (!o.inactiveImage.isEmpty()) {
+				Sprite inactiveSprite = Sprite().setImage(resources, o.inactiveImage);
+				image->setSelectable(inactiveSprite, normalSprite);
+				image->setSprite(inactiveSprite);
+			}
+
+			list.addImage(o.id, image, 1, o.border, UISizerAlignFlags::Centre);
+		} else {
+			list.addTextItem(o.id, o.text);
+		}
+
+		if (!o.tooltip.getString().isEmpty()) {
+			list.getItem(o.id)->setToolTip(o.tooltip);
+		}
+
+		list.setItemActive(o.id, o.active);
+	}
+
+	list.setDragEnabled(node["canDrag"].asBool(false));
+	list.setUniformSizedItems(node["uniformSizedItems"].asBool(false));
+	list.setSingleClickAccept(node["singleClickAccept"].asBool(true));
+	list.setMultiSelect(node["multiSelect"].asBool(false));
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeDebugConsole(const ConfigNode& entryNode)

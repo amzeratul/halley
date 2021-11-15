@@ -2,6 +2,7 @@
 widget: { class: widget }
 sizer: { type: horizontal }
 children:
+- widget: { id: widgetList, class: uiWidgetList }
 - widget: { id: contents, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, mouseWheelEnabled: false }
   proportion: 1
   fill: fill
@@ -15,4 +16,5 @@ children:
       fill: centre
       sizer: { type: vertical }
       children: []
+- widget: { id: widgetEditor, class: uiWidgetEditor }
 ...
