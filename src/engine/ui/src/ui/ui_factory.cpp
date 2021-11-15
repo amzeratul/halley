@@ -911,7 +911,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTreeList(const ConfigNode& entryNode)
 {
 	const auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
-	auto style = UIStyle(node["style"].asString("list"), styleSheet);
+	auto style = UIStyle(node["style"].asString("treeList"), styleSheet);
 	auto label = parseLabel(node);
 
 	auto widget = std::make_shared<UITreeList>(id, style);

@@ -1,5 +1,7 @@
 #include "ui_editor.h"
 
+#include "ui_widget_editor.h"
+#include "ui_widget_list.h"
 #include "halley/tools/project/project.h"
 using namespace Halley;
 
@@ -14,6 +16,9 @@ UIEditor::UIEditor(UIFactory& factory, Resources& gameResources, Project& projec
 void UIEditor::onMakeUI()
 {
 	display = getWidget("display");
+	widgetList = getWidgetAs<UIWidgetList>("widgetList");
+	widgetEditor = getWidgetAs<UIWidgetEditor>("widgetEditor");
+
 	doLoadUI();
 }
 
@@ -25,6 +30,9 @@ void UIEditor::reload()
 std::shared_ptr<const Resource> UIEditor::loadResource(const String& id)
 {
 	uiDefinition = gameResources.get<UIDefinition>(id);
+
+	widgetList->setDefinition(uiDefinition);
+
 	return uiDefinition;
 }
 

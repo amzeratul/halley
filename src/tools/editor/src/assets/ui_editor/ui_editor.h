@@ -1,5 +1,10 @@
 #pragma once
 
+#include <memory>
+#include <memory>
+
+#include "ui_widget_editor.h"
+#include "ui_widget_list.h"
 #include "../asset_editor.h"
 
 namespace Halley {
@@ -19,6 +24,8 @@ namespace Halley {
 		std::shared_ptr<UIWidget> display;
 		std::unique_ptr<UIFactory> gameFactory;
 		std::unique_ptr<I18N> gameI18N;
+		std::shared_ptr<UIWidgetList> widgetList;
+		std::shared_ptr<UIWidgetEditor> widgetEditor;
 
 		void doLoadUI();
 	};
