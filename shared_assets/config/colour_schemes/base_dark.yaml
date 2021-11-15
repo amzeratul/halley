@@ -42,7 +42,7 @@ colours:
   backgroundLogo: "#101010"
   logo: "#FC2847"
 
-  scrollBackground: "#111111"
+  scrollBackground: "#808080"
 
   taskbarLogoBackground: "#1D1D1D"
   taskRunning: "#2E87DE"
