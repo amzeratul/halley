@@ -78,7 +78,7 @@ void SelectedBoundsGizmo::drawOutlineSprite(Painter& painter, const Sprite& spri
 {
 	const auto tex0 = sprite.getMaterial().getTexture(0);
 
-	const auto zoom = std::max(1.0f, getZoom());
+	const auto zoom = getZoom();
 	const float outline = 2 / zoom;
 	const float padding = std::ceil(outline);
 
