@@ -15,6 +15,7 @@ colours:
   icon_configFile: "#23E232"
   icon_localisation: "#43FA52"
   icon_variableTable: "#50E9BB"
+  icon_uiDefinition: "#21B4E4"
   
   icon_audioClip: "#E39343"
   icon_audioEvent: "#A2630D"

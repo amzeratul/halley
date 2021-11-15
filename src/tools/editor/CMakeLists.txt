@@ -20,6 +20,8 @@ set (editor_sources
 	"src/assets/new_asset_window.cpp"
 	"src/assets/prefab_editor.cpp"
 
+	"src/assets/ui_editor/ui_editor.cpp"
+
 	"src/assets/graph/graph_editor.cpp"
 	"src/assets/graph/render_graph_editor.cpp"
 	"src/assets/graph/ui_graph_node.cpp"
@@ -78,6 +80,8 @@ set (editor_headers
 	"src/assets/metadata_editor.h"
 	"src/assets/new_asset_window.h"
 	"src/assets/prefab_editor.h"
+
+	"src/assets/ui_editor/ui_editor.h"
 
 	"src/assets/graph/graph_editor.h"
 	"src/assets/graph/render_graph_editor.h"

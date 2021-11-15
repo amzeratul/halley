@@ -11,7 +11,6 @@
 #include "new_asset_window.h"
 #include "prefab_editor.h"
 #include "halley/tools/file/filesystem.h"
-#include "halley/file_formats/yaml_convert.h"
 #include "src/ui/editor_ui_factory.h"
 #include "src/ui/project_window.h"
 

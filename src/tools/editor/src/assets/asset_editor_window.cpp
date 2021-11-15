@@ -7,6 +7,7 @@
 #include "halley/tools/project/project.h"
 #include "src/ui/editor_ui_factory.h"
 #include "src/ui/project_window.h"
+#include "ui_editor/ui_editor.h"
 using namespace Halley;
 
 AssetEditorWindow::AssetEditorWindow(EditorUIFactory& factory, Project& project, ProjectWindow& projectWindow)
@@ -67,7 +68,7 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 			});
 
 			for (const auto& asset: assets) {
-				if (asset.first == AssetType::Prefab || asset.first == AssetType::Scene) {
+				if (asset.first == AssetType::Prefab || asset.first == AssetType::Scene || asset.first == AssetType::UIDefinition) {
 					showMetadataEditor = false;
 				}
 			}
@@ -180,6 +181,8 @@ std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(Path filePath, AssetT
 		return std::make_shared<PrefabEditor>(factory, project.getGameResources(), type, project, projectWindow);
 	case AssetType::RenderGraphDefinition:
 		return std::make_shared<RenderGraphEditor>(factory, project.getGameResources(), project, type);
+	case AssetType::UIDefinition:
+		return std::make_shared<UIEditor>(factory, project.getGameResources(), project);
 	}
 	return {};
 }
