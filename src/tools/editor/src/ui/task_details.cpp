@@ -6,7 +6,7 @@ TaskDetails::TaskDetails(UIFactory& factory, std::shared_ptr<IClipboard> clipboa
 	, factory(factory)
 	, clipboard(std::move(clipboard))
 {
-	factory.loadUI(*this, "ui/halley/task_details");
+	factory.loadUI(*this, "halley/task_details");
 	setMouseBlocker(false);
 	setModal(false);
 }

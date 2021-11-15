@@ -9,7 +9,7 @@ GraphEditor::GraphEditor(UIFactory& factory, Resources& gameResources, Project& 
 	: AssetEditor(factory, gameResources, project, type)
 	, connectionsStyle(factory.getStyle("graphConnections"))
 {
-	factory.loadUI(*this, "ui/halley/graph_editor");
+	factory.loadUI(*this, "halley/graph_editor");
 }
 
 void GraphEditor::reload()

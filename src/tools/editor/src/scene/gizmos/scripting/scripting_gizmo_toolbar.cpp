@@ -7,7 +7,7 @@ ScriptingGizmoToolbar::ScriptingGizmoToolbar(UIFactory& factory, ScriptingGizmo&
 	, gizmo(gizmo)
 	, factory(factory)
 {
-	factory.loadUI(*this, "ui/halley/scripting_gizmo_toolbar");
+	factory.loadUI(*this, "halley/scripting_gizmo_toolbar");
 	setInteractWithMouse(true);
 }
 

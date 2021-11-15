@@ -12,6 +12,7 @@
 
 namespace Halley
 {
+	class UIDefinition;
 	class HalleyAPI;
 	class ConfigNode;
 	class Resources;
@@ -45,7 +46,7 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeUIFromNode(const ConfigNode& node);
 
 		void loadUI(UIWidget& target, const String& configName);
-		void loadUI(UIWidget& target, const ConfigFile& configFile);
+		void loadUI(UIWidget& target, const UIDefinition& uiDefinition);
 
 		void setInputButtons(const String& key, UIInputButtons buttons);
 		void applyInputButtons(UIWidget& widget, const String& key);

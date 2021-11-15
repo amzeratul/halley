@@ -76,7 +76,7 @@ void EntityEditor::setECSData(ECSData& ecs)
 
 void EntityEditor::makeUI()
 {
-	add(factory.makeUI("ui/halley/entity_editor"), 1);
+	add(factory.makeUI("halley/entity_editor"), 1);
 	fields = getWidget("fields");
 	fields->setMinSize(Vector2f(300, 20));
 
@@ -227,7 +227,7 @@ void EntityEditor::onFieldChangedProcedurally(const String& componentName, const
 
 void EntityEditor::loadComponentData(const String& componentType, ConfigNode& data)
 {
-	auto componentUI = factory.makeUI("ui/halley/entity_editor_component");
+	auto componentUI = factory.makeUI("halley/entity_editor_component");
 	componentUI->getWidgetAs<UILabel>("componentType")->setText(LocalisedString::fromUserString(componentType));
 	componentUI->setHandle(UIEventType::ButtonClicked, "deleteComponentButton", [=] (const UIEvent& event)
 	{
@@ -659,7 +659,7 @@ std::shared_ptr<IUIElement> EntityEditorFactory::makeField(const String& rawFiel
 	if (createLabel == ComponentEditorLabelCreation::Always && compFieldFactory && compFieldFactory->canCreateLabel()) {
 		return compFieldFactory->createLabelAndField(*context, parameters);
 	} else if (createLabel != ComponentEditorLabelCreation::Never && compFieldFactory && compFieldFactory->isNested()) {
-		auto field = factory.makeUI("ui/halley/entity_editor_compound_field");
+		auto field = factory.makeUI("halley/entity_editor_compound_field");
 		field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(parameters.data.getLabelName()));
 		field->getWidget("fields")->add(compFieldFactory->createField(*context, parameters));
 		return field;

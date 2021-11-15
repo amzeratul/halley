@@ -10,14 +10,14 @@ namespace Halley {
 
 	class UIReloadUIBehaviour final : public UIBehaviour {
 	public:
-		UIReloadUIBehaviour(UIFactory& factory, ConfigObserver observer);
+		UIReloadUIBehaviour(UIFactory& factory, ResourceObserver observer);
 
 		void init() override;
 		void update(Time time) override;
 		
 	private:
 		UIFactory& factory;
-		ConfigObserver observer;
+		ResourceObserver observer;
 		std::vector<std::pair<String, int>> uiStyleObservers;
 
 		bool requireStyleUpdate() const;

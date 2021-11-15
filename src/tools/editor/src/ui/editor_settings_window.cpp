@@ -13,7 +13,7 @@ EditorSettingsWindow::EditorSettingsWindow(EditorUIFactory& factory, Preferences
 	, projectLoader(projectLoader)
 	, projectWindow(projectWindow)
 {
-	factory.loadUI(*this, "ui/halley/editor_settings");
+	factory.loadUI(*this, "halley/editor_settings");
 }
 
 void EditorSettingsWindow::onMakeUI()

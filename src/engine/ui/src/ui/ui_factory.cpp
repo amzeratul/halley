@@ -2,6 +2,8 @@
 #include "halley/file_formats/config_file.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/ui/ui_factory.h"
+
+#include "ui_definition.h"
 #include "halley/ui/ui_widget.h"
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/ui/widgets/ui_button.h"
@@ -100,7 +102,7 @@ void UIFactory::popConditions()
 
 std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName)
 {
-	return makeUIFromNode(resources.get<ConfigFile>(configName)->getRoot());
+	return makeUIFromNode(resources.get<UIDefinition>(configName)->getRoot());
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName, std::vector<String> conditions)
@@ -123,19 +125,19 @@ std::shared_ptr<UIWidget> UIFactory::makeUIFromNode(const ConfigNode& node)
 
 void UIFactory::loadUI(UIWidget& target, const String& configName)
 {
-	loadUI(target, *resources.get<ConfigFile>(configName));
+	loadUI(target, *resources.get<UIDefinition>(configName));
 }
 
-void UIFactory::loadUI(UIWidget& target, const ConfigFile& configFile)
+void UIFactory::loadUI(UIWidget& target, const UIDefinition& uiDefinition)
 {
 	try {
-		target.add(makeUIFromNode(configFile.getRoot()), 1);
+		target.add(makeUIFromNode(uiDefinition.getRoot()), 1);
 		target.onMakeUI();
 	} catch (const std::exception& e) {
 		Logger::logException(e);
 	}
 	
-	target.addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ConfigObserver(configFile)));
+	target.addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ResourceObserver(uiDefinition)));
 }
 
 void UIFactory::setInputButtons(const String& key, UIInputButtons buttons)

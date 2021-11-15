@@ -36,11 +36,12 @@ namespace Halley
 		RenderGraphDefinition,
 		Prefab,
 		Scene,
+		UIDefinition
 	};
 
 	template <>
 	struct EnumNames<ImportAssetType> {
-		constexpr std::array<const char*, 21> operator()() const {
+		constexpr std::array<const char*, 22> operator()() const {
 			return{{
 				"undefined",
 				"skip",
@@ -62,7 +63,8 @@ namespace Halley
 				"variableTable",
 				"renderGraphDefinition",
 				"prefab",
-				"scene"
+				"scene",
+				"uiDefinition"
 			}};
 		}
 	};
@@ -90,12 +92,13 @@ namespace Halley
 		VariableTable,
 		RenderGraphDefinition,
 		Prefab,
-		Scene
+		Scene,
+		UIDefinition
 	};
 
 	template <>
 	struct EnumNames<AssetType> {
-		constexpr std::array<const char*, 19> operator()() const {
+		constexpr std::array<const char*, 20> operator()() const {
 			return{{
 				"binaryFile",
 				"textFile",
@@ -115,7 +118,8 @@ namespace Halley
 				"variableTable",
 				"renderGraphDefinition",
 				"prefab",
-				"scene"
+				"scene",
+				"uiDefinition"
 			}};
 		}
 	};

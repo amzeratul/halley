@@ -32,7 +32,7 @@ void AssetBrowserTabs::openTab(std::optional<AssetType> assetType, const String&
 	}
 
 	// Create tab
-	auto tabContents = factory.makeUI("ui/halley/asset_browser_tab_contents");
+	auto tabContents = factory.makeUI("halley/asset_browser_tab_contents");
 	tabContents->setId("tabContents");
 	populateTab(*tabContents, assetType, name, key);
 	tabs->addItem(key, tabContents);
@@ -265,7 +265,7 @@ void AssetBrowserTabs::update(Time t, bool moved)
 
 void AssetBrowserTabs::makeUI()
 {
-	add(factory.makeUI("ui/halley/asset_browser_tabs"), 1);
+	add(factory.makeUI("halley/asset_browser_tabs"), 1);
 	tabs = getWidgetAs<UIList>("tabs");
 	tabs->setDragEnabled(true);
 	pages = getWidgetAs<UIPagedPane>("pages");

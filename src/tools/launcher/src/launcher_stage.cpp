@@ -67,7 +67,7 @@ void LauncherStage::makeUI()
 	ui = std::make_unique<UIRoot>(getAPI());
 	ui->makeToolTip(uiFactory->getStyle("tooltip"));
 
-	topLevelUI = uiFactory->makeUI("ui/background");
+	topLevelUI = uiFactory->makeUI("background");
 	ui->addChild(topLevelUI);
 
 	setCurrentUI(std::make_shared<ChooseProject>(*uiFactory));

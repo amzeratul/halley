@@ -49,7 +49,7 @@ bool MetadataEditor::isModified() const
 void MetadataEditor::makeUI()
 {
 	clear();
-	add(factory.makeUI("ui/halley/metadata_editor"));
+	add(factory.makeUI("halley/metadata_editor"));
 	fields = getWidget("fields");
 	getWidget("applyChanges")->setEnabled(false);
 

@@ -10,7 +10,7 @@ ECSWindow::ECSWindow(UIFactory& factory, Project& project)
 	, factory(factory)
 	, project(project)
 {
-	factory.loadUI(*this, "ui/halley/ecs");
+	factory.loadUI(*this, "halley/ecs");
 }
 
 void ECSWindow::onMakeUI()

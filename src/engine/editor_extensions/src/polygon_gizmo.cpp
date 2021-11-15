@@ -301,7 +301,7 @@ void PolygonGizmo::requestSetMode(PolygonGizmoMode mode)
 
 std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
 {
-	auto ui = factory.makeUI("ui/halley/polygon_gizmo_toolbar");
+	auto ui = factory.makeUI("halley/polygon_gizmo_toolbar");
 	ui->setInteractWithMouse(true);
 
 	uiMode = ui->getWidgetAs<UIList>("mode");

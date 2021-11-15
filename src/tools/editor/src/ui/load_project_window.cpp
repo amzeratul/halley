@@ -7,7 +7,7 @@ LoadProjectWindow::LoadProjectWindow(UIFactory& factory, HalleyEditor& editor, s
 	: UIWidget("load_project", {}, UISizer(UISizerType::Vertical))
 	, editor(editor)
 {
-	UIWidget::add(factory.makeUI("ui/halley/load_project"), 1, {}, UISizerAlignFlags::CentreHorizontal | UISizerFillFlags::FillVertical);
+	UIWidget::add(factory.makeUI("halley/load_project"), 1, {}, UISizerAlignFlags::CentreHorizontal | UISizerFillFlags::FillVertical);
 
 	{
 		auto logo = getWidgetAs<UIImage>("logo");

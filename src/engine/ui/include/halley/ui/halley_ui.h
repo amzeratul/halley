@@ -6,6 +6,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "ui_behaviour.h"
 #include "ui_colour_scheme.h"
 #include "ui_data_bind.h"
+#include "ui_definition.h"
 #include "ui_element.h"
 #include "ui_event.h"
 #include "ui_event_handler.h"

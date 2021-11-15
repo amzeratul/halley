@@ -21,7 +21,7 @@ ChooseAssetWindow::ChooseAssetWindow(UIFactory& factory, Callback callback, bool
 {
 	highlightCol = factory.getColourScheme()->getColour("ui_stringMatchText");
 
-	factory.loadUI(*this, "ui/halley/choose_asset_window");
+	factory.loadUI(*this, "halley/choose_asset_window");
 	
 	setModal(true);
 	setAnchor(UIAnchor());

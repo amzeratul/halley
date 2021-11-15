@@ -26,7 +26,7 @@ const std::shared_ptr<UIList>& Toolbar::getList() const
 
 void Toolbar::makeUI()
 {
-	add(factory.makeUI("ui/halley/toolbar"), 1);
+	add(factory.makeUI("halley/toolbar"), 1);
 
 	getWidgetAs<UILabel>("gameName")->setText(LocalisedString::fromUserString(project.getProperties().getName()));
 	list = getWidgetAs<UIList>("toolbarList");

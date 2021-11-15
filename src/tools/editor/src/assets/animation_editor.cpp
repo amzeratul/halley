@@ -56,7 +56,7 @@ std::shared_ptr<const Resource> AnimationEditor::loadResource(const String& asse
 
 void AnimationEditor::setupWindow()
 {
-	add(factory.makeUI("ui/halley/animation_editor"), 1);
+	add(factory.makeUI("halley/animation_editor"), 1);
 	animationDisplay = getWidgetAs<AnimationEditorDisplay>("display");
 	animationDisplay->setMetadataEditor(metadataEditor);
 	

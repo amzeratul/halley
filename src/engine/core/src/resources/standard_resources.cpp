@@ -16,6 +16,7 @@
 #include "halley/file_formats/image.h"
 #include "halley/core/graphics/mesh/mesh.h"
 #include "halley/entity/prefab.h"
+#include "halley/ui/ui_definition.h"
 #include "halley/utils/variable.h"
 
 using namespace Halley;
@@ -40,6 +41,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<Prefab>();
 	resources.init<Scene>();
 	resources.init<RenderGraphDefinition>();
+	resources.init<UIDefinition>();
 
 	resources.setFallback<Animation>("missing_image");
 	resources.setFallback<SpriteSheet>("missing_image");

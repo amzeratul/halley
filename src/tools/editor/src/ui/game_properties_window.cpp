@@ -5,7 +5,7 @@ GamePropertiesWindow::GamePropertiesWindow(UIFactory& factory, Project& project)
 	: UIWidget("game_properties_window", Vector2f(), UISizer())
 	, project(project)
 {
-	factory.loadUI(*this, "ui/halley/game_properties");
+	factory.loadUI(*this, "halley/game_properties");
 }
 
 void GamePropertiesWindow::onMakeUI()

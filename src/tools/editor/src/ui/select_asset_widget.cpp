@@ -65,7 +65,7 @@ void SelectAssetWidget::setSceneEditorWindow(SceneEditorWindow& window)
 
 void SelectAssetWidget::makeUI()
 {
-	add(factory.makeUI("ui/halley/select_asset_widget"), 1);
+	add(factory.makeUI("halley/select_asset_widget"), 1);
 
 	input = getWidgetAs<UITextInput>("input");
 	input->setIcon(factory.makeAssetTypeIcon(type), Vector4f(-2, 0, 2, 0));

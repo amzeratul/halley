@@ -97,7 +97,7 @@ bool TranslateGizmo::isHighlighted() const
 
 std::shared_ptr<UIWidget> TranslateGizmo::makeUI()
 {
-	auto ui = factory.makeUI("ui/halley/translate_gizmo_toolbar");
+	auto ui = factory.makeUI("halley/translate_gizmo_toolbar");
 	ui->setInteractWithMouse(true);
 
 	uiMode = ui->getWidgetAs<UIList>("mode");

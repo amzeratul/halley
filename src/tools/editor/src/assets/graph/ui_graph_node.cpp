@@ -78,7 +78,7 @@ UIRenderGraphNode::UIRenderGraphNode(GraphEditor& editor, const RenderGraphDefin
 	, node(node)
 {
 	setPosition(node.position);
-	factory.loadUI(*this, "ui/halley/graph_node");
+	factory.loadUI(*this, "halley/graph_node");
 }
 
 void UIRenderGraphNode::onMakeUI()

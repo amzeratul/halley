@@ -8,7 +8,7 @@ EntityValidatorUI::EntityValidatorUI(String id, UIFactory& factory)
 	: UIWidget(std::move(id), {}, UISizer())
 	, factory(factory)
 {
-	factory.loadUI(*this, "ui/halley/entity_validator");
+	factory.loadUI(*this, "halley/entity_validator");
 	setActive(false);
 }
 
@@ -92,7 +92,7 @@ EntityValidatorListUI::EntityValidatorListUI(String id, UIFactory& factory)
 	: UIWidget(std::move(id), {}, UISizer())
 	, factory(factory)
 {
-	factory.loadUI(*this, "ui/halley/entity_validator_list");
+	factory.loadUI(*this, "halley/entity_validator_list");
 	setActive(false);
 }
 

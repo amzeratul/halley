@@ -52,7 +52,7 @@ void ScriptingNodeEditor::onMakeUI()
 
 void ScriptingNodeEditor::onAddedToRoot(UIRoot& root)
 {
-	factory.loadUI(*this, "ui/halley/scripting_node_editor");
+	factory.loadUI(*this, "halley/scripting_node_editor");
 
 	root.registerKeyPressListener(shared_from_this());
 }

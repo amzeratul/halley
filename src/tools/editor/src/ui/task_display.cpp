@@ -10,7 +10,7 @@ TaskDisplay::TaskDisplay(UIFactory& factory, std::shared_ptr<TaskAnchor> task, T
 	, task(std::move(task))
 	, taskBar(taskBar)
 {
-	factory.loadUI(*this, "ui/halley/task");
+	factory.loadUI(*this, "halley/task");
 }
 
 void TaskDisplay::update(Time t, bool moved)

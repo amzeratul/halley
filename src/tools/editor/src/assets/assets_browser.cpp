@@ -89,7 +89,7 @@ void AssetsBrowser::loadResources()
 
 void AssetsBrowser::makeUI()
 {
-	UIWidget::add(factory.makeUI("ui/halley/assets_browser"), 1);
+	UIWidget::add(factory.makeUI("halley/assets_browser"), 1);
 
 	assetList = getWidgetAs<UIList>("assetList");
 	assetList->setSingleClickAccept(false);

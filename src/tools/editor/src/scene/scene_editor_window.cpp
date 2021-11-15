@@ -57,7 +57,7 @@ SceneEditorWindow::~SceneEditorWindow()
 
 void SceneEditorWindow::makeUI()
 {
-	add(uiFactory.makeUI("ui/halley/scene_editor_window"), 1);
+	add(uiFactory.makeUI("halley/scene_editor_window"), 1);
 	
 	canvas = getWidgetAs<SceneEditorCanvas>("canvas");
 	canvas->setSceneEditorWindow(*this);

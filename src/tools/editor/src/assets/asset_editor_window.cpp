@@ -15,7 +15,7 @@ AssetEditorWindow::AssetEditorWindow(EditorUIFactory& factory, Project& project,
 	, project(project)
 	, projectWindow(projectWindow)
 {
-	factory.loadUI(*this, "ui/halley/asset_editor_window");
+	factory.loadUI(*this, "halley/asset_editor_window");
 }
 
 void AssetEditorWindow::onMakeUI()

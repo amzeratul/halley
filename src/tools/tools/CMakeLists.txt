@@ -10,6 +10,7 @@ include_directories(
     "../../engine/audio/include"
     "../../engine/net/include"
     "../../engine/entity/include"
+    "../../engine/ui/include"
     "../../engine/editor_extensions/include"
     "../../contrib/libogg/include"
     "../../contrib/libvorbis/include"
@@ -43,6 +44,7 @@ set(SOURCES
     "src/assets/importers/shader_importer.cpp"
     "src/assets/importers/texture_importer.cpp"
     "src/assets/importers/variable_importer.cpp"
+    "src/assets/importers/ui_importer.cpp"
 
     "src/codegen/cpp/codegen_cpp.cpp"
     "src/codegen/cpp/cpp_class_gen.cpp"
@@ -173,6 +175,7 @@ set(HEADERS
     "src/assets/importers/shader_importer.h"
     "src/assets/importers/texture_importer.h"
     "src/assets/importers/variable_importer.h"
+    "src/assets/importers/ui_importer.h"
 
     "src/codegen/cpp/codegen_cpp.h"
     "src/codegen/cpp/cpp_class_gen.h"
@@ -193,6 +196,7 @@ target_link_libraries (halley-tools
     halley-audio
     halley-net
     halley-entity
+    halley-ui
     ${FREETYPE_LIBRARIES}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}

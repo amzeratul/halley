@@ -18,7 +18,7 @@ void NewAssetWindow::onAddedToRoot(UIRoot& root)
 
 void NewAssetWindow::makeUI()
 {
-	add(factory.makeUI("ui/halley/new_asset_window"));
+	add(factory.makeUI("halley/new_asset_window"));
 
 	const auto name = getWidgetAs<UITextInput>("name");
 	getWidget("ok")->setEnabled(false);

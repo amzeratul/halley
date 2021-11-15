@@ -12,7 +12,7 @@ UIConfirmationPopup::UIConfirmationPopup(UIFactory& factory, String title, Strin
 	, buttons(std::move(buttons))
 	, callback(std::move(callback))
 {
-	factory.loadUI(*this, "ui/halley/confirmation_popup");
+	factory.loadUI(*this, "halley/confirmation_popup");
 
 	setChildLayerAdjustment(100);
 	setModal(true);

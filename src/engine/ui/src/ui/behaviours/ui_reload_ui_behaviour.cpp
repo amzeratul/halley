@@ -4,10 +4,11 @@
 #include "ui_widget.h"
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/support/logger.h"
+#include "ui_definition.h"
 
 using namespace Halley;
 
-UIReloadUIBehaviour::UIReloadUIBehaviour(UIFactory& factory, ConfigObserver observer)
+UIReloadUIBehaviour::UIReloadUIBehaviour(UIFactory& factory, ResourceObserver observer)
 	: factory(factory)
 	, observer(observer)
 {}
@@ -23,7 +24,7 @@ void UIReloadUIBehaviour::update(Time time)
 		observer.update();
 
 		try {
-			auto ui = factory.makeUIFromNode(observer.getRoot());
+			auto ui = factory.makeUIFromNode(dynamic_cast<const UIDefinition*>(observer.getResourceBeingObserved())->getRoot());
 
 			// The above might throw, don't clear until after we know it hasn't
 			getWidget()->clear();
