@@ -100,9 +100,16 @@ void UIWidgetEditor::populateFillBox(UIWidget& root, ConfigNode& node)
 
 void UIWidgetEditor::populateSizerBox(UIWidget& root, ConfigNode& node)
 {
+	node.ensureType(ConfigNodeType::Map);
 	root.clear();
 
-	// TODO
+	std::array<Entry, 4> entries = {
+		Entry{ "Type", "type", "Halley::String", std::vector<String>{"horizontal"} },
+		Entry{ "Gap", "gap", "float", std::vector<String>{"1"} },
+		Entry{ "Columns", "columns", "int", std::vector<String>{"1"}},
+		Entry{ "Column Proportions", "columnProportions", "std::vector<int>", std::vector<String>{}}
+	};
+	populateBox(root, node, entries);
 }
 
 void UIWidgetEditor::populateBox(UIWidget& root, ConfigNode& node, gsl::span<Entry> entries)
