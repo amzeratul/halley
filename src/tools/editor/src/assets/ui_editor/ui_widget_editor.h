@@ -22,18 +22,11 @@ namespace Halley {
         ConfigNode* curNode = nullptr;
         std::shared_ptr<EntityEditorFactory> entityFieldFactory;
 
-        struct Entry {
-            String label;
-	        String name;
-            String type;
-            std::vector<String> defaultValue;
-        };
-
         void refresh();
         void populateWidgetBox(UIWidget& root, ConfigNode& widgetNode);
         void populateFillBox(UIWidget& root, ConfigNode& widgetNode);
         void populateSizerBox(UIWidget& root, ConfigNode& widgetNode);
 
-        void populateBox(UIWidget& root, ConfigNode& node, gsl::span<Entry> entries);
+        void populateBox(UIWidget& root, ConfigNode& node, gsl::span<const UIFactoryWidgetProperties::Entry> entries);
     };
 }

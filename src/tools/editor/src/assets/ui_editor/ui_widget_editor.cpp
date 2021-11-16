@@ -83,13 +83,14 @@ void UIWidgetEditor::populateWidgetBox(UIWidget& root, ConfigNode& node)
 {
 	root.clear();
 
-	// TODO
+	populateBox(root, node, factory.getPropertiesForWidget(node["class"].asString()).entries);
 }
 
 void UIWidgetEditor::populateFillBox(UIWidget& root, ConfigNode& node)
 {
 	root.clear();
 
+	using Entry = UIFactoryWidgetProperties::Entry;
 	std::array<Entry, 3> entries = {
 		Entry{ "Fill", "fill", "Halley::String", std::vector<String>{"fill"} },
 		Entry{ "Proportion", "proportion", "int", std::vector<String>{"0"} },
@@ -103,6 +104,7 @@ void UIWidgetEditor::populateSizerBox(UIWidget& root, ConfigNode& node)
 	node.ensureType(ConfigNodeType::Map);
 	root.clear();
 
+	using Entry = UIFactoryWidgetProperties::Entry;
 	std::array<Entry, 4> entries = {
 		Entry{ "Type", "type", "Halley::String", std::vector<String>{"horizontal"} },
 		Entry{ "Gap", "gap", "float", std::vector<String>{"1"} },
@@ -112,7 +114,7 @@ void UIWidgetEditor::populateSizerBox(UIWidget& root, ConfigNode& node)
 	populateBox(root, node, entries);
 }
 
-void UIWidgetEditor::populateBox(UIWidget& root, ConfigNode& node, gsl::span<Entry> entries)
+void UIWidgetEditor::populateBox(UIWidget& root, ConfigNode& node, gsl::span<const UIFactoryWidgetProperties::Entry> entries)
 {
 	for (const auto& e: entries) {
 		const auto params = ComponentFieldParameters("", ComponentDataRetriever(node, e.name, e.label), e.defaultValue);

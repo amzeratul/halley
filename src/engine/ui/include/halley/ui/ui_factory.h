@@ -24,6 +24,22 @@ namespace Halley
 	class IClipboard;
 	class InputKeyboard;
 
+	class UIFactoryWidgetProperties {
+	public:
+		struct Entry {
+            String label;
+	        String name;
+            String type;
+            std::vector<String> defaultValue;
+
+			Entry() = default;
+			Entry(String label, String name, String type, std::vector<String> defaultValue = {});
+			Entry(String label, String name, String type, String defaultValue);
+        };
+
+		std::vector<Entry> entries;
+	};
+
 	class UIFactory
 	{
 	public:
@@ -37,7 +53,7 @@ namespace Halley
 		UIFactory& operator=(const UIFactory& other) = delete;
 		UIFactory& operator=(UIFactory&& other) = delete;
 
-		void addFactory(const String& key, WidgetFactory factory);
+		void addFactory(const String& key, WidgetFactory factory, UIFactoryWidgetProperties properties = {});
 		
 		void pushConditions(std::vector<String> conditions);
 		void popConditions();
@@ -48,6 +64,8 @@ namespace Halley
 
 		void loadUI(UIWidget& target, const String& configName);
 		void loadUI(UIWidget& target, const UIDefinition& uiDefinition);
+
+		const UIFactoryWidgetProperties& getPropertiesForWidget(const String& widgetClass) const;
 
 		void setInputButtons(const String& key, UIInputButtons buttons);
 		void applyInputButtons(UIWidget& widget, const String& key);
@@ -123,10 +141,11 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeSpinList(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makeOptionListMorpher(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makeDebugConsole(const ConfigNode& node);
-
 		std::shared_ptr<UIWidget> makeList(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeTreeList(const ConfigNode& node);
 		void applyListProperties(UIList& list, const ConfigNode& widgetNode, const String& inputConfigName);
+
+		UIFactoryWidgetProperties getBaseWidgetProperties() const;
 		
 		bool hasCondition(const String& condition) const;
 		bool resolveConditions(const ConfigNode& node) const;
@@ -140,6 +159,7 @@ namespace Halley
 		std::vector<size_t> conditionStack;
 
 		std::map<String, WidgetFactory> factories;
+		std::map<String, UIFactoryWidgetProperties> properties;
 		std::map<String, UIInputButtons> inputButtons;
 	};
 }

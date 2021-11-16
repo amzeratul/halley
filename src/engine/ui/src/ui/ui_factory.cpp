@@ -33,6 +33,22 @@
 
 using namespace Halley;
 
+UIFactoryWidgetProperties::Entry::Entry(String label, String name, String type, std::vector<String> defaultValue)
+	: label(std::move(label))
+	, name(std::move(name))
+	, type(std::move(type))
+	, defaultValue(std::move(defaultValue))
+{
+}
+
+UIFactoryWidgetProperties::Entry::Entry(String label, String name, String type, String defaultValue)
+	: label(std::move(label))
+	, name(std::move(name))
+	, type(std::move(type))
+{
+	this->defaultValue.emplace_back(std::move(defaultValue));
+}
+
 UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet, std::shared_ptr<const UIColourScheme> colourScheme)
 	: api(api)
 	, resources(resources)
@@ -76,9 +92,16 @@ UIFactory::~UIFactory()
 {
 }
 
-void UIFactory::addFactory(const String& key, WidgetFactory factory)
+void UIFactory::addFactory(const String& key, WidgetFactory factory, UIFactoryWidgetProperties srcProps)
 {
-	factories[key] = factory;
+	auto dstProps = getBaseWidgetProperties();
+	dstProps.entries.reserve(dstProps.entries.size() + srcProps.entries.size());
+	for (auto& e: srcProps.entries) {
+		dstProps.entries.emplace_back(std::move(e));
+	}
+
+	factories[key] = std::move(factory);
+	properties[key] = std::move(dstProps);
 }
 
 void UIFactory::pushConditions(std::vector<String> conds)
@@ -138,6 +161,15 @@ void UIFactory::loadUI(UIWidget& target, const UIDefinition& uiDefinition)
 	}
 	
 	target.addBehaviour(std::make_shared<UIReloadUIBehaviour>(*this, ResourceObserver(uiDefinition)));
+}
+
+const UIFactoryWidgetProperties& UIFactory::getPropertiesForWidget(const String& widgetClass) const
+{
+	const auto iter = properties.find(widgetClass);
+	if (iter == properties.end()) {
+		throw Exception("Unknown widget type: " + widgetClass, HalleyExceptions::Entity);
+	}
+	return iter->second;
 }
 
 void UIFactory::setInputButtons(const String& key, UIInputButtons buttons)
@@ -223,6 +255,18 @@ std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 		widget->setToolTip(i18n.get(widgetNode["tooltipKey"].asString()));
 	}
 	return widget;
+}
+
+UIFactoryWidgetProperties UIFactory::getBaseWidgetProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.entries.emplace_back("Active", "active", "bool", "true");
+	result.entries.emplace_back("Enabled", "enabled", "bool", "true");
+	result.entries.emplace_back("Minimum Size", "size", "Halley::Vector2f");
+	result.entries.emplace_back("Child Layer Adjustment", "childLayerAdjustment", "int", "0");
+	result.entries.emplace_back("Tooltip", "tooltip", "Halley::String");
+	result.entries.emplace_back("Tooltip (Key)", "tooltipKey", "Halley::String");
+	return result;
 }
 
 std::optional<UISizer> UIFactory::makeSizer(const ConfigNode& entryNode)
