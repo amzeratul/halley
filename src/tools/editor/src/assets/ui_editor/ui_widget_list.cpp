@@ -11,7 +11,7 @@ UIWidgetList::UIWidgetList(String id, UIFactory& factory)
 
 void UIWidgetList::onMakeUI()
 {
-	list = getWidgetAs<UITreeList>("list");
+	list = getWidgetAs<UITreeList>("widgetsList");
 	populateList();
 }
 

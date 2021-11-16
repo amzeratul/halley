@@ -281,7 +281,7 @@ void AssetBrowserTabs::makeUI()
 		closeTab(event.getStringData());
 	});
 
-	setHandle(UIEventType::ListItemRightClicked, [=] (const UIEvent& event)
+	setHandle(UIEventType::ListItemRightClicked, "tabs", [=](const UIEvent& event)
 	{
 		openContextMenu(event.getStringData());
 	});
