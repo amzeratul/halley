@@ -31,8 +31,19 @@ void UIWidgetList::populateList()
 void UIWidgetList::populateList(const ConfigNode& curNode, String parentId)
 {
 	const String id = UUID::generate().toString();
+	String name;
 
-	list->addTreeItem(id, parentId, -1, LocalisedString::fromUserString(id));
+	if (curNode.hasKey("widget")) {
+		const auto& widgetNode = curNode["widget"];
+		name = widgetNode["class"].asString();
+		if (widgetNode.hasKey("id")) {
+			name += ":" + widgetNode["id"].asString();
+		}
+	} else {
+		name = "sizer";
+	}
+
+	list->addTreeItem(id, parentId, -1, LocalisedString::fromUserString(name));
 
 	if (curNode.hasKey("children")) {
 		for (const auto& c: curNode["children"].asSequence()) {
