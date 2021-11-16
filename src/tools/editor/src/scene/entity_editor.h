@@ -114,7 +114,7 @@ namespace Halley {
 	public:
 		EntityEditorFactory(UIFactory& factory);
 		
-		void setEntityEditor(IEntityEditor& entityEditor);
+		void setCallbacks(IEntityEditorCallbacks& callbacks);
 		void setGameResources(Resources& resources);
 
 		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
@@ -126,7 +126,7 @@ namespace Halley {
 
 	private:
 		UIFactory& factory;
-		IEntityEditor* entityEditor = nullptr;
+		IEntityEditorCallbacks* callbacks = nullptr;
 		Resources* gameResources = nullptr;
 		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
 

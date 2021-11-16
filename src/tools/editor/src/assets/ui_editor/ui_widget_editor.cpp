@@ -1,5 +1,7 @@
 #include "ui_widget_editor.h"
 
+#include "src/scene/entity_editor.h"
+
 using namespace Halley;
 
 UIWidgetEditor::UIWidgetEditor(String id, UIFactory& factory)
@@ -15,6 +17,35 @@ void UIWidgetEditor::setSelectedWidget(const String& id, ConfigNode* node)
 	refresh();
 }
 
+void UIWidgetEditor::setGameResources(Resources& resources)
+{
+	entityFieldFactory = std::make_shared<EntityEditorFactory>(factory);
+	entityFieldFactory->setGameResources(resources);
+	entityFieldFactory->setCallbacks(*this);
+	refresh();
+}
+
+void UIWidgetEditor::onEntityUpdated()
+{
+}
+
+void UIWidgetEditor::reloadEntity()
+{
+}
+
+void UIWidgetEditor::setTool(const String& tool, const String& componentName, const String& fieldName)
+{
+}
+
+void UIWidgetEditor::setDefaultName(const String& name, const String& prevName)
+{
+}
+
+ISceneEditorWindow& UIWidgetEditor::getSceneEditorWindow() const
+{
+	throw Exception("Not implemented", 0);
+}
+
 void UIWidgetEditor::refresh()
 {
 	auto widgetBox = getWidget("widgetBox");
@@ -22,7 +53,7 @@ void UIWidgetEditor::refresh()
 	auto sizerBox = getWidget("sizerBox");
 	auto classLabel = getWidgetAs<UILabel>("classLabel");
 
-	if (curNode) {
+	if (curNode && entityFieldFactory) {
 		if (curNode->hasKey("widget")) {
 			auto& widgetNode = (*curNode)["widget"];
 			const auto widgetClass = widgetNode["class"].asString();
@@ -37,6 +68,9 @@ void UIWidgetEditor::refresh()
 
 		fillBox->setActive(true);
 		sizerBox->setActive(true);
+
+		populateFillBox(*fillBox->getWidget("fillContents"), *curNode);
+		populateSizerBox(*sizerBox->getWidget("sizerContents"), (*curNode)["sizer"]);
 	} else {
 		classLabel->setText(LocalisedString());
 		widgetBox->setActive(false);
@@ -45,9 +79,37 @@ void UIWidgetEditor::refresh()
 	}
 }
 
-void UIWidgetEditor::populateWidgetBox(UIWidget& root, ConfigNode& widgetNode)
+void UIWidgetEditor::populateWidgetBox(UIWidget& root, ConfigNode& node)
 {
 	root.clear();
 
 	// TODO
+}
+
+void UIWidgetEditor::populateFillBox(UIWidget& root, ConfigNode& node)
+{
+	root.clear();
+
+	std::array<Entry, 3> entries = {
+		Entry{ "Fill", "fill", "Halley::String", std::vector<String>{"fill"} },
+		Entry{ "Proportion", "proportion", "int", std::vector<String>{"0"} },
+		Entry{ "Border", "border", "Halley::Vector4f", std::vector<String>{"0", "0", "0", "0"}}
+	};
+	populateBox(root, node, entries);
+}
+
+void UIWidgetEditor::populateSizerBox(UIWidget& root, ConfigNode& node)
+{
+	root.clear();
+
+	// TODO
+}
+
+void UIWidgetEditor::populateBox(UIWidget& root, ConfigNode& node, gsl::span<Entry> entries)
+{
+	for (const auto& e: entries) {
+		const auto params = ComponentFieldParameters("", ComponentDataRetriever(node, e.name, e.label), e.defaultValue);
+		auto field = entityFieldFactory->makeField(e.type, params, ComponentEditorLabelCreation::Always);
+		root.add(field);
+	}
 }

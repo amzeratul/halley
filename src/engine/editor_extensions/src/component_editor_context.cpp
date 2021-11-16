@@ -4,7 +4,7 @@
 
 using namespace Halley;
 
-ComponentEditorContext::ComponentEditorContext(IEntityEditorFactory& entityEditorFactory, IEntityEditor* entityEditor, UIFactory& factory, Resources& gameResources)
+ComponentEditorContext::ComponentEditorContext(IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources& gameResources)
 	: entityEditorFactory(entityEditorFactory)
 	, entityEditor(entityEditor)
 	, factory(factory)

@@ -23,7 +23,7 @@ void EntityEditor::setEntityEditorFactory(std::shared_ptr<EntityEditorFactory> f
 {
 	entityEditorFactory = std::move(factory);
 	if (entityEditorFactory) {
-		entityEditorFactory->setEntityEditor(*this);
+		entityEditorFactory->setCallbacks(*this);
 	}
 }
 
@@ -702,9 +702,9 @@ void EntityEditorFactory::resetFieldFactories()
 	addFieldFactories(EntityEditorFactories::getDefaultFactories());
 }
 
-void EntityEditorFactory::setEntityEditor(IEntityEditor& editor)
+void EntityEditorFactory::setCallbacks(IEntityEditorCallbacks& editor)
 {
-	entityEditor = &editor;
+	callbacks = &editor;
 	makeContext();
 }
 
@@ -739,5 +739,5 @@ std::pair<String, std::vector<String>> EntityEditorFactory::parseType(const Stri
 
 void EntityEditorFactory::makeContext()
 {
-	context = std::make_unique<ComponentEditorContext>(*this, entityEditor, factory, *gameResources);
+	context = std::make_unique<ComponentEditorContext>(*this, callbacks, factory, *gameResources);
 }
