@@ -32,6 +32,11 @@ bool SelectedBoundsGizmo::shouldInclude(const Sprite& sprite, const ISceneEditor
 		return false;
 	}
 
+	const auto scale = sprite.getScale().abs();
+	if (scale.x < 0.0001f || scale.y < 0.0001f) {
+		return false;
+	}
+
 	return sceneEditor.shouldDrawOutline(sprite);
 }
 
