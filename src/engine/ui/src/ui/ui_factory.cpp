@@ -102,7 +102,7 @@ void UIFactory::popConditions()
 
 std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName)
 {
-	return makeUIFromNode(resources.get<UIDefinition>(configName)->getRoot());
+	return makeUI(*resources.get<UIDefinition>(configName));
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName, std::vector<String> conditions)
@@ -118,9 +118,9 @@ std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName, std::vecto
 	}
 }
 
-std::shared_ptr<UIWidget> UIFactory::makeUIFromNode(const ConfigNode& node)
+std::shared_ptr<UIWidget> UIFactory::makeUI(const UIDefinition& definition)
 {
-	return makeWidget(node);
+	return makeWidget(definition.getRoot());
 }
 
 void UIFactory::loadUI(UIWidget& target, const String& configName)
@@ -131,7 +131,7 @@ void UIFactory::loadUI(UIWidget& target, const String& configName)
 void UIFactory::loadUI(UIWidget& target, const UIDefinition& uiDefinition)
 {
 	try {
-		target.add(makeUIFromNode(uiDefinition.getRoot()), 1);
+		target.add(makeUI(uiDefinition), 1);
 		target.onMakeUI();
 	} catch (const std::exception& e) {
 		Logger::logException(e);

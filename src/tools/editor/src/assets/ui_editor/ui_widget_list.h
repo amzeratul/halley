@@ -7,11 +7,11 @@ namespace Halley {
 
         void onMakeUI() override;
 
-        void setDefinition(std::shared_ptr<const UIDefinition> definition);
+        void setDefinition(std::shared_ptr<UIDefinition> definition);
 
     private:
         UIFactory& factory;
-        std::shared_ptr<const UIDefinition> definition;
+        std::shared_ptr<UIDefinition> definition;
         std::shared_ptr<UITreeList> list;
 
         void populateList();

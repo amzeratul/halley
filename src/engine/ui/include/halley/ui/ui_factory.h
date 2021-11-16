@@ -44,7 +44,7 @@ namespace Halley
 
 		std::shared_ptr<UIWidget> makeUI(const String& configName);
 		std::shared_ptr<UIWidget> makeUI(const String& configName, std::vector<String> conditions);
-		std::shared_ptr<UIWidget> makeUIFromNode(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeUI(const UIDefinition& definition);
 
 		void loadUI(UIWidget& target, const String& configName);
 		void loadUI(UIWidget& target, const UIDefinition& uiDefinition);

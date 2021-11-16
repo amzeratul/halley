@@ -19,6 +19,11 @@ void UIEditor::onMakeUI()
 	widgetList = getWidgetAs<UIWidgetList>("widgetList");
 	widgetEditor = getWidgetAs<UIWidgetEditor>("widgetEditor");
 
+	setHandle(UIEventType::ListSelectionChanged, "widgetsList", [=] (const UIEvent& event)
+	{
+		setSelectedWidget(event.getStringData());
+	});
+
 	doLoadUI();
 }
 
@@ -29,7 +34,7 @@ void UIEditor::reload()
 
 std::shared_ptr<const Resource> UIEditor::loadResource(const String& id)
 {
-	uiDefinition = gameResources.get<UIDefinition>(id);
+	uiDefinition = std::make_shared<UIDefinition>(*gameResources.get<UIDefinition>(id));
 
 	widgetList->setDefinition(uiDefinition);
 
@@ -42,4 +47,9 @@ void UIEditor::doLoadUI()
 		display->clear();
 		gameFactory->loadUI(*display, *uiDefinition);
 	}
+}
+
+void UIEditor::setSelectedWidget(const String& id)
+{
+	widgetEditor->setSelectedWidget(id, uiDefinition->findUUID(id));
 }

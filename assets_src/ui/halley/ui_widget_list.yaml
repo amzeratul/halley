@@ -1,4 +1,4 @@
-widget: { class: scrollBarPane, size: [150, 250] }
+widget: { class: scrollBarPane, size: [250, 250], scrollHorizontal: true, scrollVertical: true }
 border: [0, 0, 10, 0]
 children:
 - widget: { class: treeList, id: widgetsList, multiSelect: false, canDrag: false, singleClickAccept: false }

@@ -15,7 +15,7 @@ void UIWidgetList::onMakeUI()
 	populateList();
 }
 
-void UIWidgetList::setDefinition(std::shared_ptr<const UIDefinition> def)
+void UIWidgetList::setDefinition(std::shared_ptr<UIDefinition> def)
 {
 	definition = std::move(def);
 	populateList();
@@ -30,17 +30,17 @@ void UIWidgetList::populateList()
 
 void UIWidgetList::populateList(const ConfigNode& curNode, String parentId)
 {
-	const String id = UUID::generate().toString();
-	String name;
+	const String id = curNode["uuid"].asString();
 
+	String name;
 	if (curNode.hasKey("widget")) {
 		const auto& widgetNode = curNode["widget"];
-		name = widgetNode["class"].asString();
 		if (widgetNode.hasKey("id")) {
-			name += ":" + widgetNode["id"].asString();
+			name += widgetNode["id"].asString() + " ";
 		}
+		name += "[" + widgetNode["class"].asString() + "]";
 	} else {
-		name = "sizer";
+		name = "[sizer]";
 	}
 
 	list->addTreeItem(id, parentId, -1, LocalisedString::fromUserString(name));

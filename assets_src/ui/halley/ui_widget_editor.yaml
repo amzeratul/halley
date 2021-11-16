@@ -1,0 +1,37 @@
+widget: { class: image, image: "halley_ui/ui_window.png", innerBorder: [ 4, 4, 4, 4 ], colour: $ui_backgroundBox, size: [330, 10] }
+sizer: { type: vertical }
+children:
+- widget: { id: scrollBarPane, class: scrollBarPane }
+  sizer: { type: vertical, gap: 8 }
+  proportion: 1
+  border: [0, 0, 0, 0]
+  children:
+  - widget: { id: classLabel, class: label, text: Class }
+    fill: centre
+  - widget: { id: widgetBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
+    sizer: { type: vertical }
+    children:
+    - widget: { class: label, text: Widget }
+      fill: centre
+    - widget: { id: widgetContents, class: widget }
+      border: [ 4, 4, 4, 4 ]
+      sizer: { type: vertical }
+      children: []
+  - widget: { id: fillBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
+    sizer: { type: vertical }
+    children:
+    - widget: { class: label, text: Fill }
+      fill: centre
+    - widget: { id: fillContents, class: widget }
+      border: [ 4, 4, 4, 4 ]
+      sizer: { type: vertical }
+      children: []
+  - widget: { id: sizerBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
+    sizer: { type: vertical }
+    children:
+    - widget: { class: label, text: Sizer }
+      fill: centre
+    - widget: { id: sizerContents, class: widget }
+      border: [ 4, 4, 4, 4 ]
+      sizer: { type: vertical }
+      children: []

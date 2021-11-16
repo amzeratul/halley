@@ -20,7 +20,7 @@ namespace Halley {
 	protected:
 		std::shared_ptr<const Resource> loadResource(const String& assetId) override;
 		
-		std::shared_ptr<const UIDefinition> uiDefinition;
+		std::shared_ptr<UIDefinition> uiDefinition;
 		std::shared_ptr<UIWidget> display;
 		std::unique_ptr<UIFactory> gameFactory;
 		std::unique_ptr<I18N> gameI18N;
@@ -28,5 +28,6 @@ namespace Halley {
 		std::shared_ptr<UIWidgetEditor> widgetEditor;
 
 		void doLoadUI();
+		void setSelectedWidget(const String& id);
 	};
 }

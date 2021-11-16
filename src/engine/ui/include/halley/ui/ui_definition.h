@@ -6,6 +6,8 @@ namespace Halley {
     class UIDefinition : public Resource {
     public:
         UIDefinition();
+        UIDefinition(UIDefinition&& other) = default;
+        UIDefinition(const UIDefinition& other) = default;
         UIDefinition(ConfigNode node);
         UIDefinition(ConfigFile file);
 
@@ -20,7 +22,12 @@ namespace Halley {
     	const ConfigNode& getRoot() const;
         ConfigNode& getRoot();
 
+        ConfigNode* findUUID(const String& id);
+
     private:
         ConfigFile data;
+
+        void assignIds(ConfigNode& node);
+        ConfigNode* findUUID(ConfigNode& node, const String& id);
     };
 }

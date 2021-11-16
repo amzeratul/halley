@@ -24,7 +24,7 @@ void UIReloadUIBehaviour::update(Time time)
 		observer.update();
 
 		try {
-			auto ui = factory.makeUIFromNode(dynamic_cast<const UIDefinition*>(observer.getResourceBeingObserved())->getRoot());
+			auto ui = factory.makeUI(*dynamic_cast<const UIDefinition*>(observer.getResourceBeingObserved()));
 
 			// The above might throw, don't clear until after we know it hasn't
 			getWidget()->clear();

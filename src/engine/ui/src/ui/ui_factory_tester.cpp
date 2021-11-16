@@ -48,7 +48,7 @@ void UIFactoryTester::loadFromObserver()
 
 	if (curObserver) {
 		try {
-			curUI = factory.makeUIFromNode(curObserver->getRoot());
+			//curUI = factory.makeUIFromNode(curObserver->getRoot());
 			curUI->setAnchor(UIAnchor());
 			curUI->setMouseBlocker(false);
 			parent.addChild(curUI);
