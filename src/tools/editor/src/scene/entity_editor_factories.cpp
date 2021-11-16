@@ -166,101 +166,34 @@ public:
 	}
 };
 
-class ComponentEditorVector2iFieldFactory : public IComponentEditorFieldFactory
-{
+template <typename VecType, size_t nDimensions>
+class ComponentEditorVectorFieldFactory : public IComponentEditorFieldFactory {
 public:
+	using ScalarType = typename VecType::ScalarType;
+
+	ComponentEditorVectorFieldFactory(String name) : name(std::move(name)) {}
+
 	String getFieldType() override
 	{
-		return "Halley::Vector2i";
+		return name;
 	}
 
 	ConfigNode getDefaultNode() const override
 	{
-		return ConfigNode(Vector2i());
+		return ConfigNode(VecType());
 	}
 
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
 		auto data = pars.data;
 
-		const auto defaultValue = Vector2i(pars.getIntDefaultParameter(0), pars.getIntDefaultParameter(1));
-		Vector2i value = defaultValue;
-		if (data.getFieldData().getType() != ConfigNodeType::Undefined) {
-			value = data.getFieldData().asVector2i(value);
+		VecType defaultValue;
+		for (size_t i = 0; i < nDimensions; ++i) {
+			pars.getDefaultParameter(defaultValue[i], i);
 		}
-
-		const auto& style = context.getUIFactory().getStyle("spinControl");
-		const auto& buttonStyle = context.getUIFactory().getStyle("buttonThin");
-
-		auto dataOutput = std::make_shared<bool>(true);
-		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 4.0f));
-
-		auto xValue = std::make_shared<UISpinControl2>("xValue", style, float(value.x), false);
-		container->add(xValue, 1);
-		container->bindData("xValue", value.x, [&context, data, dataOutput](int newVal) {
-			if (*dataOutput) {
-				auto& node = data.getFieldData();
-				node = ConfigNode(Vector2i(newVal, node.asVector2i(Vector2i()).y));
-				context.onEntityUpdated();
-			}
-		});
-
-		auto yValue = std::make_shared<UISpinControl2>("yValue", style, float(value.y), false);
-		container->add(yValue, 1);
-		container->bindData("yValue", value.y, [&context, data, dataOutput](int newVal) {
-			if (*dataOutput) {
-				auto& node = data.getFieldData();
-				node = ConfigNode(Vector2i(node.asVector2i(Vector2i()).x, newVal));
-				context.onEntityUpdated();
-			}
-		});
-		
-		auto reset = std::make_shared<UIButton>("resetValue", buttonStyle, UISizer());
-		reset->setIcon(Sprite().setImage(context.getGameResources(), "entity_icons/reset.png"));
-		reset->setMinSize(Vector2f(22, 22));
-		reset->setToolTip(LocalisedString::fromHardcodedString("Reset to default value"));
-		reset->setHandle(UIEventType::ButtonClicked, "resetValue", [=] (const UIEvent& event)
-		{
-			xValue->setValue(static_cast<float>(defaultValue.x));
-			yValue->setValue(static_cast<float>(defaultValue.y));
-		});
-		container->add(reset, 0, Vector4f(-1, 0, 0, 0));
-
-		container->setHandle(UIEventType::ReloadData, pars.componentName + ":" + data.getName(), [=](const UIEvent& event) {
-			Vector2i newVal;
-			if (data.getFieldData().getType() != ConfigNodeType::Undefined) {
-				newVal = data.getFieldData().asVector2i();
-			}
-			*dataOutput = false;
-			event.getCurWidget().getWidgetAs<UITextInput>("xValue")->setText(toString(newVal.x));
-			event.getCurWidget().getWidgetAs<UITextInput>("yValue")->setText(toString(newVal.y));
-			*dataOutput = true;
-		});
-
-		return container;
-	}
-};
-
-class ComponentEditorVector2fFieldFactory : public IComponentEditorFieldFactory {
-public:
-	String getFieldType() override
-	{
-		return "Halley::Vector2f";
-	}
-
-	ConfigNode getDefaultNode() const override
-	{
-		return ConfigNode(Vector2f());
-	}
-
-	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
-	{
-		auto data = pars.data;
-
-		const auto defaultValue = Vector2f(pars.getFloatDefaultParameter(0), pars.getFloatDefaultParameter(1));
-		Vector2f value = defaultValue;
+		VecType value = defaultValue;
 		if (data.getFieldData().getType() != ConfigNodeType::Undefined) {
-			value = data.getFieldData().asVector2f(value);
+			value = data.getFieldData().asType<VecType>(value);
 		}
 
 		const auto& style = context.getUIFactory().getStyle("spinControl");
@@ -269,27 +202,21 @@ public:
 		auto dataOutput = std::make_shared<bool>(true);
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Horizontal, 3.0f));
 
-		auto xValue = std::make_shared<UISpinControl2>("xValue", style, value.x, true);
-		container->add(xValue, 1);
-		container->bindData("xValue", value.x, [&context, data, dataOutput, defaultValue] (float newVal)
-		{
-			if (*dataOutput) {
-				auto& node = data.getFieldData();
-				node = ConfigNode(Vector2f(newVal, node.asVector2f(defaultValue).y));
-				context.onEntityUpdated();
-			}
-		});
-
-		auto yValue = std::make_shared<UISpinControl2>("yValue", style, value.y, true);
-		container->add(yValue, 1);
-		container->bindData("yValue", value.y, [&context, data, dataOutput, defaultValue](float newVal)
-		{
-			if (*dataOutput) {
-				auto& node = data.getFieldData();
-				node = ConfigNode(Vector2f(node.asVector2f(defaultValue).x, newVal));
-				context.onEntityUpdated();
-			}
-		});
+		std::array<std::shared_ptr<UISpinControl2>, nDimensions> values;
+		for (int i = 0; i < nDimensions; ++i) {
+			values[i] = std::make_shared<UISpinControl2>("value" + toString(i), style, static_cast<float>(value[i]), true);
+			container->add(values[i], 1);
+			container->bindData("value" + toString(i), value[i], [&context, data, dataOutput, defaultValue, i] (ScalarType newVal)
+			{
+				if (*dataOutput) {
+					auto& node = data.getFieldData();
+					VecType val = node.asType<VecType>(defaultValue);
+					val[i] = newVal;
+					node = val;
+					context.onEntityUpdated();
+				}
+			});
+		}
 		
 		auto reset = std::make_shared<UIButton>("resetValue", buttonStyle, UISizer());
 		reset->setIcon(Sprite().setImage(context.getGameResources(), "entity_icons/reset.png"));
@@ -297,25 +224,30 @@ public:
 		reset->setToolTip(LocalisedString::fromHardcodedString("Reset to default value"));
 		reset->setHandle(UIEventType::ButtonClicked, "resetValue", [=] (const UIEvent& event)
 		{
-			xValue->setValue(defaultValue.x);
-			yValue->setValue(defaultValue.y);
+			for (size_t i = 0; i < nDimensions; ++i) {
+				values[i]->setValue(static_cast<float>(defaultValue[i]));
+			}
 		});
 		container->add(reset, 0, Vector4f(-1, 0, 0, 0));
 
 		container->setHandle(UIEventType::ReloadData, pars.componentName + ":" + data.getName(), [=] (const UIEvent& event)
 		{
-			Vector2f newVal;
+			VecType newVal;
 			if (data.getFieldData().getType() != ConfigNodeType::Undefined) {
-				newVal = data.getFieldData().asVector2f();
+				newVal = data.getFieldData().asType<VecType>();
 			}
 			*dataOutput = false;
-			event.getCurWidget().getWidgetAs<UITextInput>("xValue")->setText(toString(newVal.x));
-			event.getCurWidget().getWidgetAs<UITextInput>("yValue")->setText(toString(newVal.y));
+			for (size_t i = 0; i < nDimensions; ++i) {
+				event.getCurWidget().getWidgetAs<UITextInput>("value" + toString(i))->setText(toString(newVal[i]));
+			}
 			*dataOutput = true;
 		});
 
 		return container;
 	}
+
+private:
+	String name;
 };
 
 class ComponentEditorVertexFieldFactory : public IComponentEditorFieldFactory {
@@ -1189,8 +1121,12 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorFloatFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorAngle1fFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorBoolFieldFactory>());
-	factories.emplace_back(std::make_unique<ComponentEditorVector2iFieldFactory>());
-	factories.emplace_back(std::make_unique<ComponentEditorVector2fFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector2i, 2>>("Halley::Vector2i"));
+	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector2f, 2>>("Halley::Vector2f"));
+	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector3i, 3>>("Halley::Vector3i"));
+	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector3f, 3>>("Halley::Vector3f"));
+	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector4f, 4>>("Halley::Vector4f"));
+	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector4i, 4>>("Halley::Vector4i"));
 	factories.emplace_back(std::make_unique<ComponentEditorVertexFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorSpriteFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorAnimationPlayerFieldFactory>());

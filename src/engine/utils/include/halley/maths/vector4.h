@@ -37,6 +37,7 @@ namespace Halley {
 		constexpr inline T mod(T a, T b) const { return a % b; }
 
 	public:
+		using ScalarType = T;
 		T x, y, z, w;
 
 		struct Uninitialized {};

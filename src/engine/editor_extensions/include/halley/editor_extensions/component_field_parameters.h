@@ -41,6 +41,9 @@ namespace Halley {
 		bool getBoolDefaultParameter(size_t n = 0) const;
 		int getIntDefaultParameter(size_t n = 0) const;
 		float getFloatDefaultParameter(size_t n = 0) const;
+
+		void getDefaultParameter(float& dst, size_t n = 0) const { dst = getFloatDefaultParameter(n); }
+		void getDefaultParameter(int& dst, size_t n = 0) const { dst = getIntDefaultParameter(n); }
 		
 		String componentName;
 		ComponentDataRetriever data;

@@ -45,6 +45,7 @@ namespace Halley {
 		constexpr static T mod(T a, T b) noexcept { return a % b; }
 
 	public:
+		using ScalarType = T;
 		T x,y;
 
 		// Constructors

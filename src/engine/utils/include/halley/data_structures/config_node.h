@@ -118,6 +118,10 @@ namespace Halley {
 		explicit ConfigNode(float value);
 		explicit ConfigNode(Vector2i value);
 		explicit ConfigNode(Vector2f value);
+		explicit ConfigNode(Vector3i value);
+		explicit ConfigNode(Vector3f value);
+		explicit ConfigNode(Vector4i value);
+		explicit ConfigNode(Vector4f value);
 		explicit ConfigNode(Bytes value);
 		explicit ConfigNode(NoopType value);
 		explicit ConfigNode(DelType value);
@@ -144,6 +148,10 @@ namespace Halley {
 		ConfigNode& operator=(float value);
 		ConfigNode& operator=(Vector2i value);
 		ConfigNode& operator=(Vector2f value);
+		ConfigNode& operator=(Vector3i value);
+		ConfigNode& operator=(Vector3f value);
+		ConfigNode& operator=(Vector4i value);
+		ConfigNode& operator=(Vector4f value);
 
 		ConfigNode& operator=(MapType entryMap);
 		ConfigNode& operator=(SequenceType entryList);
@@ -272,6 +280,21 @@ namespace Halley {
 			} else {
 				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to std::map<K, V>.", HalleyExceptions::Resources);
 			}
+		}
+
+		template <typename T>
+		T asType() const
+		{
+			return convertTo(Tag<T>());
+		}
+
+		template <typename T>
+		T asType(T defaultValue) const
+		{
+			if (getType() == ConfigNodeType::Undefined) {
+				return defaultValue;
+			}
+			return convertTo(Tag<T>());
 		}
 		
 		const SequenceType& asSequence() const;

@@ -260,6 +260,7 @@ std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 UIFactoryWidgetProperties UIFactory::getBaseWidgetProperties() const
 {
 	UIFactoryWidgetProperties result;
+	result.entries.emplace_back("Id", "id", "Halley::String", "");
 	result.entries.emplace_back("Active", "active", "bool", "true");
 	result.entries.emplace_back("Enabled", "enabled", "bool", "true");
 	result.entries.emplace_back("Minimum Size", "size", "Halley::Vector2f");

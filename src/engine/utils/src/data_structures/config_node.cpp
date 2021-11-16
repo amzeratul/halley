@@ -63,6 +63,26 @@ ConfigNode::ConfigNode(Vector2f value)
 	operator=(value);
 }
 
+ConfigNode::ConfigNode(Vector3i value)
+{
+	operator=(value);
+}
+
+ConfigNode::ConfigNode(Vector3f value)
+{
+	operator=(value);
+}
+
+ConfigNode::ConfigNode(Vector4i value)
+{
+	operator=(value);
+}
+
+ConfigNode::ConfigNode(Vector4f value)
+{
+	operator=(value);
+}
+
 ConfigNode::ConfigNode(Bytes value)
 {
 	operator=(std::move(value));
@@ -196,6 +216,30 @@ ConfigNode& ConfigNode::operator=(Vector2f value)
 	type = ConfigNodeType::Float2;
 	vec2fData = value;
 	return *this;
+}
+
+ConfigNode& ConfigNode::operator=(Vector3i value)
+{
+	auto seq = SequenceType({ ConfigNode(value.x), ConfigNode(value.y), ConfigNode(value.z) });
+	return *this = std::move(seq);
+}
+
+ConfigNode& ConfigNode::operator=(Vector3f value)
+{
+	auto seq = SequenceType({ ConfigNode(value.x), ConfigNode(value.y), ConfigNode(value.z) });
+	return *this = std::move(seq);
+}
+
+ConfigNode& ConfigNode::operator=(Vector4i value)
+{
+	auto seq = SequenceType({ ConfigNode(value.x), ConfigNode(value.y), ConfigNode(value.z), ConfigNode(value.w) });
+	return *this = std::move(seq);
+}
+
+ConfigNode& ConfigNode::operator=(Vector4f value)
+{
+	auto seq = SequenceType({ ConfigNode(value.x), ConfigNode(value.y), ConfigNode(value.z), ConfigNode(value.w) });
+	return *this = std::move(seq);
 }
 
 ConfigNode& ConfigNode::operator=(const std::string_view& value)

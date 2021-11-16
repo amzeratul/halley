@@ -1,4 +1,4 @@
-widget: { class: image, image: "halley_ui/ui_window.png", innerBorder: [ 4, 4, 4, 4 ], colour: $ui_backgroundBox, size: [330, 10] }
+widget: { class: image, image: "halley_ui/ui_window.png", innerBorder: [ 4, 4, 4, 4 ], colour: $ui_backgroundBox, size: [400, 10] }
 sizer: { type: vertical }
 children:
 - widget: { id: scrollBarPane, class: scrollBarPane }

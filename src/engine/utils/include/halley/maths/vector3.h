@@ -34,6 +34,7 @@ namespace Halley {
 		constexpr T Mod(T a, T b) const { return a % b; }
 
 	public:
+		using ScalarType = T;
 		T x, y, z;
 
 	private:
