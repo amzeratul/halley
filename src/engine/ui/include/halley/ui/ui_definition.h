@@ -23,6 +23,9 @@ namespace Halley {
         ConfigNode& getRoot();
 
         ConfigNode* findUUID(const String& id);
+        
+        void parseYAML(gsl::span<const gsl::byte> yaml);
+		String toYAML() const;
 
     private:
         ConfigFile data;

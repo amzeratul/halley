@@ -32,6 +32,25 @@ void UIEditor::onMakeUI()
 void UIEditor::onWidgetModified()
 {
 	uiDefinition->increaseAssetVersion();
+	modified = true;
+}
+
+bool UIEditor::isModified()
+{
+	return modified;
+}
+
+void UIEditor::save()
+{
+	if (modified) {
+		modified = false;
+
+		const auto assetPath = Path("ui/" + uiDefinition->getAssetId() + ".yaml");
+		const auto strData = uiDefinition->toYAML();
+
+		project.setAssetSaveNotification(false);
+		project.writeAssetToDisk(assetPath, gsl::as_bytes(gsl::span<const char>(strData.c_str(), strData.length())));
+	}
 }
 
 void UIEditor::reload()

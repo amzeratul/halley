@@ -1,5 +1,6 @@
 #include "halley/ui/ui_definition.h"
 
+#include "halley/file_formats/yaml_convert.h"
 #include "halley/maths/uuid.h"
 #include "halley/resources/resource_data.h"
 
@@ -63,6 +64,18 @@ ConfigNode& UIDefinition::getRoot()
 ConfigNode* UIDefinition::findUUID(const String& id)
 {
 	return findUUID(data.getRoot(), id);
+}
+
+void UIDefinition::parseYAML(gsl::span<const gsl::byte> yaml)
+{
+	YAMLConvert::parseConfig(data, yaml);
+}
+
+String UIDefinition::toYAML() const
+{
+	YAMLConvert::EmitOptions options;
+	options.mapKeyOrder = {{ "uuid", "proportion", "border", "sizer", "widget", "children" }};
+	return YAMLConvert::generateYAML(data.getRoot(), options);
 }
 
 ConfigNode* UIDefinition::findUUID(ConfigNode& node, const String& id)

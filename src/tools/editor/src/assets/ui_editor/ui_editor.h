@@ -18,6 +18,9 @@ namespace Halley {
 		void onMakeUI() override;
 		void onWidgetModified();
 
+		bool isModified() override;
+		void save() override;
+
 	protected:
 		std::shared_ptr<const Resource> loadResource(const String& assetId) override;
 		
@@ -29,6 +32,7 @@ namespace Halley {
 		std::shared_ptr<UIDefinition> uiDefinition;
 		std::shared_ptr<UIWidget> display;
 		bool loaded = false;
+		bool modified = false;
 
 		void doLoadUI();
 		void setSelectedWidget(const String& id);
