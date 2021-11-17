@@ -19,6 +19,7 @@ void UIEditor::onMakeUI()
 	widgetList = getWidgetAs<UIWidgetList>("widgetList");
 	widgetEditor = getWidgetAs<UIWidgetEditor>("widgetEditor");
 	widgetEditor->setGameResources(gameResources);
+	widgetEditor->setUIEditor(*this);
 
 	setHandle(UIEventType::ListSelectionChanged, "widgetsList", [=] (const UIEvent& event)
 	{
@@ -26,6 +27,11 @@ void UIEditor::onMakeUI()
 	});
 
 	doLoadUI();
+}
+
+void UIEditor::onWidgetModified()
+{
+	uiDefinition->increaseAssetVersion();
 }
 
 void UIEditor::reload()
@@ -44,9 +50,10 @@ std::shared_ptr<const Resource> UIEditor::loadResource(const String& id)
 
 void UIEditor::doLoadUI()
 {
-	if (uiDefinition && display) {
+	if (uiDefinition && display && !loaded) {
 		display->clear();
 		gameFactory->loadUI(*display, *uiDefinition);
+		loaded = true;
 	}
 }
 

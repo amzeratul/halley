@@ -237,7 +237,7 @@ std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 	
 	auto widget = iter->second(entryNode);
 	if (widgetNode.hasKey("size")) {
-		widget->setMinSize(asVector2f(widgetNode["size"], {}));
+		widget->setMinSize(widgetNode["size"].asVector2f({}));
 	}
 	if (widgetNode.hasKey("enabled")) {
 		widget->setEnabled(widgetNode["enabled"].asBool(true));
@@ -329,7 +329,7 @@ void UIFactory::loadSizerChildren(UISizer& sizer, const ConfigNode& node)
 	if (node.getType() == ConfigNodeType::Sequence) {
 		for (auto& childNode: node.asSequence()) {
 			float proportion = childNode["proportion"].asFloat(0);
-			Vector4f border = asVector4f(childNode["border"], Vector4f());
+			Vector4f border = childNode["border"].asVector4f(Vector4f());
 			int fill = 0;
 
 			auto addFill = [&] (const String& fillName)
@@ -392,28 +392,6 @@ void UIFactory::applyInputButtons(UIWidget& widget, const String& key)
 	}
 }
 
-std::optional<Vector2f> UIFactory::asMaybeVector2f(const ConfigNode& node)
-{
-	if (node.getType() == ConfigNodeType::Sequence) {
-		auto seq = node.asSequence();
-		return Vector2f(seq.at(0).asFloat(), seq.at(1).asFloat());
-	} else {
-		return {};
-	}
-}
-
-Vector2f UIFactory::asVector2f(const ConfigNode& node, std::optional<Vector2f> defaultValue)
-{
-	if (node.getType() == ConfigNodeType::Sequence) {
-		auto seq = node.asSequence();
-		return Vector2f(seq.at(0).asFloat(), seq.at(1).asFloat());
-	} else if (defaultValue) {
-		return defaultValue.value();
-	} else {
-		throw Exception("Unable to parse node as Vector2f.", HalleyExceptions::UI);
-	}
-}
-
 LocalisedString UIFactory::parseLabel(const ConfigNode& node, const String& defaultOption, const String& key) {
 	LocalisedString label;
 	if (node.hasKey(key + "Key")) {
@@ -442,7 +420,7 @@ std::vector<UIFactory::ParsedOption> UIFactory::parseOptions(const ConfigNode& n
 			option.inactiveImage = n["inactiveImage"].asString("");
 			option.spriteSheet = n["spriteSheet"].asString("");
 			option.sprite = n["sprite"].asString("");
-			option.border = asVector4f(n["border"], Vector4f());
+			option.border = n["border"].asVector4f(Vector4f());
 			option.active = n["active"].asBool(true);
 			option.tooltip = parseLabel(n, "", "tooltip");
 			option.iconColour = n["iconColour"].asString("");
@@ -452,24 +430,12 @@ std::vector<UIFactory::ParsedOption> UIFactory::parseOptions(const ConfigNode& n
 	return result;
 }
 
-Vector4f UIFactory::asVector4f(const ConfigNode& node, std::optional<Vector4f> defaultValue)
-{
-	if (node.getType() == ConfigNodeType::Sequence) {
-		auto seq = node.asSequence();
-		return Vector4f(seq.at(0).asFloat(), seq.at(1).asFloat(), seq.at(2).asFloat(), seq.at(3).asFloat());
-	} else if (defaultValue) {
-		return defaultValue.value();
-	} else {
-		throw Exception("Unable to parse node as Vector2f.", HalleyExceptions::UI);
-	}
-}
-
 std::shared_ptr<UIWidget> UIFactory::makeBaseWidget(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString("");
-	auto minSize = asVector2f(node["minSize"], Vector2f(0, 0));
-	auto innerBorder = asVector4f(node["innerBorder"], Vector4f(0, 0, 0, 0));
+	auto minSize = node["minSize"].asVector2f(Vector2f(0, 0));
+	auto innerBorder = node["innerBorder"].asVector4f(Vector4f(0, 0, 0, 0));
 	return std::make_shared<UIWidget>(id, minSize, makeSizer(entryNode), innerBorder);
 }
 
@@ -522,7 +488,7 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 	}
 
 	if (node.hasKey("mouseBorder")) {
-		result->setMouseExtraBorder(asVector4f(node["mouseBorder"], Vector4f()));
+		result->setMouseExtraBorder(node["mouseBorder"].asVector4f(Vector4f()));
 	}
 
 	return result;
@@ -645,7 +611,7 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 	auto materialName = node["material"].asString("");
 	auto col = node["colour"].asString("#FFFFFF");
 	auto flip = node["flip"].asBool(false);
-	auto pivot = asMaybeVector2f(node["pivot"]);
+	auto pivot = node.hasKey("pivot") ? node["pivot"].asVector2f() : std::optional<Vector2f>{};
 	auto rotation = Angle1f::fromDegrees(node["rotation"].asFloat(0.0f));
 
 	auto sprite = Sprite();
@@ -668,7 +634,7 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 	if (pivot) {
 		sprite.setPivot(pivot.value());
 	}
-	Vector4f innerBorder = asVector4f(node["innerBorder"], Vector4f());
+	Vector4f innerBorder = node["innerBorder"].asVector4f(Vector4f());
 
 	auto image = std::make_shared<UIImage>(id, sprite, makeSizer(entryNode), innerBorder);
 	if (node.hasKey("layerAdjustment")) {
@@ -681,7 +647,7 @@ std::shared_ptr<UIWidget> UIFactory::makeMultiImage(const ConfigNode& entryNode)
 {
 	const auto& node = entryNode["widget"];
 	const auto id = node["id"].asString("");
-	const auto size = asVector2f(node["size"], Vector2f());
+	const auto size = node["size"].asVector2f(Vector2f());
 	const auto materialName = node["material"].asString("");
 
 	std::vector<Sprite> sprites = {};
@@ -707,8 +673,8 @@ std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
-	auto size = asVector2f(node["size"], Vector2f());
-	auto animationOffset = asVector2f(node["offset"], Vector2f());
+	auto size = node["size"].asVector2f(Vector2f());
+	auto animationOffset = node["offset"].asVector2f(Vector2f());
 	auto animationName = node["animation"].asString("");
 	auto sequence = node["sequence"].asString("default");
 	auto direction = node["direction"].asString("default");
@@ -722,7 +688,7 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollPane(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString("");
-	auto clipSize = asVector2f(node["clipSize"], Vector2f());
+	auto clipSize = node["clipSize"].asVector2f(Vector2f());
 	auto scrollHorizontal = node["scrollHorizontal"].asBool(false);
 	auto scrollVertical = node["scrollVertical"].asBool(true);
 	auto mouseWheelEnabled = node["mouseWheelEnabled"].asBool(true);
@@ -747,7 +713,7 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollBarPane(const ConfigNode& entryNo
 {
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString("");
-	auto clipSize = asVector2f(node["clipSize"], Vector2f());
+	auto clipSize = node["clipSize"].asVector2f(Vector2f());
 	auto style = UIStyle(node["style"].asString("scrollbar"), styleSheet);
 	auto scrollHorizontal = node["scrollHorizontal"].asBool(false);
 	auto scrollVertical = node["scrollVertical"].asBool(true);
@@ -862,8 +828,8 @@ std::shared_ptr<UIWidget> UIFactory::makeFramedImage(const ConfigNode& entryNode
 	auto& node = entryNode["widget"];
 
 	const auto id = node["id"].asString("");
-	const auto scrollPos = asVector2f(node["scrollPos"], Vector2f());
-	const auto scrollSpeed = asVector2f(node["scrollSpeed"], Vector2f());
+	const auto scrollPos = node["scrollPos"].asVector2f(Vector2f());
+	const auto scrollSpeed = node["scrollSpeed"].asVector2f(Vector2f());
 	const auto style = getStyle(node["style"].asString());
 	
 	auto image = std::make_shared<UIFramedImage>(id, style, makeSizer(entryNode));

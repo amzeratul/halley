@@ -24,6 +24,11 @@ void Resource::onLoaded(Resources& resources)
 {
 }
 
+void Resource::increaseAssetVersion()
+{
+	++assetVersion;
+}
+
 void Resource::reloadResource(Resource&& resource)
 {
 	++assetVersion;

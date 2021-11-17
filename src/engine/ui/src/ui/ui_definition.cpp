@@ -35,7 +35,8 @@ std::unique_ptr<UIDefinition> UIDefinition::loadResource(ResourceLoader& loader)
 
 void UIDefinition::reload(Resource&& resource)
 {
-	// TODO
+	auto& other = dynamic_cast<UIDefinition&>(resource);
+	data = std::move(other.data);
 }
 
 void UIDefinition::serialize(Serializer& s) const

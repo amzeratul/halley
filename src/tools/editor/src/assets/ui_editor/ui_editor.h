@@ -16,16 +16,19 @@ namespace Halley {
 
 		void reload() override;
 		void onMakeUI() override;
+		void onWidgetModified();
 
 	protected:
 		std::shared_ptr<const Resource> loadResource(const String& assetId) override;
 		
-		std::shared_ptr<UIDefinition> uiDefinition;
-		std::shared_ptr<UIWidget> display;
 		std::unique_ptr<UIFactory> gameFactory;
 		std::unique_ptr<I18N> gameI18N;
 		std::shared_ptr<UIWidgetList> widgetList;
 		std::shared_ptr<UIWidgetEditor> widgetEditor;
+
+		std::shared_ptr<UIDefinition> uiDefinition;
+		std::shared_ptr<UIWidget> display;
+		bool loaded = false;
 
 		void doLoadUI();
 		void setSelectedWidget(const String& id);

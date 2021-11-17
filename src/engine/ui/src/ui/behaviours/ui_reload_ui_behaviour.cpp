@@ -27,9 +27,11 @@ void UIReloadUIBehaviour::update(Time time)
 			auto ui = factory.makeUI(*dynamic_cast<const UIDefinition*>(observer.getResourceBeingObserved()));
 
 			// The above might throw, don't clear until after we know it hasn't
-			getWidget()->clear();
-			getWidget()->add(std::move(ui), 1);
-			getWidget()->onMakeUI();
+			auto& widget = *getWidget();
+			widget.clear();
+			widget.add(std::move(ui), 1);
+			widget.onMakeUI();
+			widget.layout();
 
 			setupUIStyleObservers(); // Different styles may be used, so need to reset
 		} catch (const std::exception& e) {

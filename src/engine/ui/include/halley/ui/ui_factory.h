@@ -111,9 +111,6 @@ namespace Halley
 		UISizer makeSizerOrDefault(const ConfigNode& node, UISizer&& defaultSizer);
 		void loadSizerChildren(UISizer& sizer, const ConfigNode& node);
 
-		static std::optional<Vector2f> asMaybeVector2f(const ConfigNode& node);
-		static Vector2f asVector2f(const ConfigNode& node, std::optional<Vector2f> defaultValue);
-		static Vector4f asVector4f(const ConfigNode& node, std::optional<Vector4f> defaultValue);
 		LocalisedString parseLabel(const ConfigNode& node, const String& defaultOption = "", const String& key = "text");
 		std::vector<ParsedOption> parseOptions(const ConfigNode& node);
 

@@ -2,6 +2,7 @@
 
 namespace Halley {
 	class EntityEditorFactory;
+    class UIEditor;
 
 	class UIWidgetEditor : public UIWidget, private IEntityEditorCallbacks {
     public:
@@ -9,8 +10,9 @@ namespace Halley {
 
     	void setSelectedWidget(const String& id, ConfigNode* node);
         void setGameResources(Resources& resources);
+        void setUIEditor(UIEditor& uiEditor);
 
-	protected:
+    protected:
         void onEntityUpdated() override;
         void reloadEntity() override;
         void setTool(const String& tool, const String& componentName, const String& fieldName) override;
@@ -20,6 +22,7 @@ namespace Halley {
     private:
         UIFactory& factory;
         ConfigNode* curNode = nullptr;
+        UIEditor* uiEditor = nullptr;
         std::shared_ptr<EntityEditorFactory> entityFieldFactory;
 
         void refresh();

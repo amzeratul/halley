@@ -141,6 +141,7 @@ namespace Halley
 		virtual void onLoaded(Resources& resources);
 		
 		int getAssetVersion() const { return assetVersion; }
+		void increaseAssetVersion();
 		void reloadResource(Resource&& resource);
 
 	protected:

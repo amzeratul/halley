@@ -1,5 +1,6 @@
 #include "ui_widget_editor.h"
 
+#include "ui_editor.h"
 #include "src/scene/entity_editor.h"
 
 using namespace Halley;
@@ -25,8 +26,14 @@ void UIWidgetEditor::setGameResources(Resources& resources)
 	refresh();
 }
 
+void UIWidgetEditor::setUIEditor(UIEditor& editor)
+{
+	uiEditor = &editor;
+}
+
 void UIWidgetEditor::onEntityUpdated()
 {
+	uiEditor->onWidgetModified();
 }
 
 void UIWidgetEditor::reloadEntity()
