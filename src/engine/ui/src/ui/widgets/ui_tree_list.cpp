@@ -481,7 +481,7 @@ void UITreeListItem::moveChild(size_t startIndex, size_t targetIndex)
 	Expects(!forceLeaf);
 	
 	// If moving forwards, subtract one to account for the fact that the currently occupied slot will be removed
-	const size_t finalIndex = targetIndex > startIndex ? targetIndex - 1 : targetIndex;
+	const size_t finalIndex = std::min(children.size() - 1, targetIndex > startIndex ? targetIndex - 1 : targetIndex);
 
 	// Swap from start to end
 	const int dir = finalIndex > startIndex ? 1 : -1;
