@@ -3,6 +3,7 @@
 #include "ui_widget_editor.h"
 #include "ui_widget_list.h"
 #include "halley/tools/project/project.h"
+#include "src/scene/choose_asset_window.h"
 using namespace Halley;
 
 UIEditor::UIEditor(UIFactory& factory, Resources& gameResources, Project& project, const HalleyAPI& api)
@@ -25,6 +26,16 @@ void UIEditor::onMakeUI()
 	setHandle(UIEventType::ListSelectionChanged, "widgetsList", [=] (const UIEvent& event)
 	{
 		setSelectedWidget(event.getStringData());
+	});
+
+	setHandle(UIEventType::ButtonClicked, "addWidget", [=] (const UIEvent& event)
+	{
+		addWidget();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "removeWidget", [=] (const UIEvent& event)
+	{
+		removeWidget();
 	});
 
 	doLoadUI();
@@ -85,4 +96,27 @@ void UIEditor::doLoadUI()
 void UIEditor::setSelectedWidget(const String& id)
 {
 	widgetEditor->setSelectedWidget(id, uiDefinition->findUUID(id).result);
+}
+
+void UIEditor::addWidget()
+{
+	const auto window = std::make_shared<ChooseAssetWindow>(factory, [=] (std::optional<String> result)
+	{
+		if (result) {
+			addWidget(result.value());
+		}
+	}, false);
+	window->setAssetIds(gameFactory->getWidgetClassList(), "widget");
+	window->setTitle(LocalisedString::fromHardcodedString("Choose Widget"));
+	getRoot()->addChild(window);
+}
+
+void UIEditor::addWidget(const String& widgetClass)
+{
+	// TODO
+}
+
+void UIEditor::removeWidget()
+{
+	// TODO
 }

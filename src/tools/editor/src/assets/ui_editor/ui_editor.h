@@ -23,7 +23,7 @@ namespace Halley {
 
 		UIFactory& getGameFactory();
 
-	protected:
+	private:
 		std::shared_ptr<const Resource> loadResource(const String& assetId) override;
 		
 		std::unique_ptr<UIFactory> gameFactory;
@@ -38,5 +38,9 @@ namespace Halley {
 
 		void doLoadUI();
 		void setSelectedWidget(const String& id);
+
+		void addWidget();
+		void addWidget(const String& widgetClass);
+		void removeWidget();
 	};
 }

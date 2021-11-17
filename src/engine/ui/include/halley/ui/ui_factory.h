@@ -67,6 +67,7 @@ namespace Halley
 		void loadUI(UIWidget& target, const UIDefinition& uiDefinition);
 
 		const UIFactoryWidgetProperties& getPropertiesForWidget(const String& widgetClass) const;
+		std::vector<String> getWidgetClassList() const;
 
 		void setInputButtons(const String& key, UIInputButtons buttons);
 		void applyInputButtons(UIWidget& widget, const String& key);

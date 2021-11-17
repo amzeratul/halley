@@ -1,5 +1,16 @@
-widget: { class: scrollBarPane, size: [250, 250], scrollHorizontal: true, scrollVertical: true }
+widget: { class: widget }
+sizer: { type: vertical }
+proportion: 1
 border: [0, 0, 10, 0]
 children:
-- widget: { class: treeList, id: widgetsList, multiSelect: false, canDrag: true, singleClickAccept: false }
+- widget: { class: scrollBarPane, size: [250, 250], scrollHorizontal: true, scrollVertical: true }
   proportion: 1
+  children:
+  - widget: { class: treeList, id: widgetsList, multiSelect: false, canDrag: true, singleClickAccept: false }
+    proportion: 1
+- sizer: { type: horizontal }
+  children:
+  - widget: { class: button, id: addWidget, text: Add Widget }
+    proportion: 1
+  - widget: { class: button, id: removeWidget, text: Remove Widget }
+    proportion: 1

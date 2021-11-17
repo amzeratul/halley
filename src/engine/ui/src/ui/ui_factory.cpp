@@ -169,6 +169,16 @@ const UIFactoryWidgetProperties& UIFactory::getPropertiesForWidget(const String&
 	return iter->second;
 }
 
+std::vector<String> UIFactory::getWidgetClassList() const
+{
+	std::vector<String> result;
+	result.reserve(properties.size());
+	for (auto& p: properties) {
+		result.push_back(p.first);
+	}
+	return result;
+}
+
 void UIFactory::setInputButtons(const String& key, UIInputButtons buttons)
 {
 	inputButtons[key] = buttons;
