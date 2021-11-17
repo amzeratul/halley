@@ -12,6 +12,8 @@ namespace Halley {
         void setDefinition(std::shared_ptr<UIDefinition> definition);
         void setUIEditor(UIEditor& editor);
 
+        UITreeList& getList();
+
     private:
         struct MoveOperation {
             String itemId;

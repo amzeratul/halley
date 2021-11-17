@@ -40,6 +40,11 @@ void UIWidgetList::setUIEditor(UIEditor& editor)
 	uiEditor = &editor;
 }
 
+UITreeList& UIWidgetList::getList()
+{
+	return *list;
+}
+
 void UIWidgetList::populateList()
 {
 	if (list && definition) {

@@ -23,6 +23,8 @@ namespace Halley {
 
 		UIFactory& getGameFactory();
 
+		bool onKeyPress(KeyboardKeyPress key) override;
+
 	private:
 		std::shared_ptr<const Resource> loadResource(const String& assetId) override;
 		
@@ -36,11 +38,14 @@ namespace Halley {
 		bool loaded = false;
 		bool modified = false;
 
+		String curSelection;
+
 		void doLoadUI();
 		void setSelectedWidget(const String& id);
 
 		void addWidget();
 		void addWidget(const String& widgetClass);
 		void removeWidget();
+		void removeWidget(const String& id);
 	};
 }

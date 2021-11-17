@@ -70,6 +70,15 @@ UIFactory& UIEditor::getGameFactory()
 	return *gameFactory;
 }
 
+bool UIEditor::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::Delete)) {
+		removeWidget();
+	}
+
+	return false;
+}
+
 void UIEditor::reload()
 {
 	doLoadUI();
@@ -95,6 +104,7 @@ void UIEditor::doLoadUI()
 
 void UIEditor::setSelectedWidget(const String& id)
 {
+	curSelection = id;
 	widgetEditor->setSelectedWidget(id, uiDefinition->findUUID(id).result);
 }
 
@@ -118,5 +128,16 @@ void UIEditor::addWidget(const String& widgetClass)
 
 void UIEditor::removeWidget()
 {
-	// TODO
+	removeWidget(curSelection);
+}
+
+void UIEditor::removeWidget(const String& id)
+{
+	auto result = uiDefinition->findUUID(id);
+	if (result.result && result.parent) {
+		auto& parentChildren = (*result.parent)["children"].asSequence();
+		std_ex::erase_if(parentChildren, [=] (const ConfigNode& n) { return &n == result.result; });
+		onWidgetModified();
+		widgetList->getList().removeItem(id);
+	}
 }
