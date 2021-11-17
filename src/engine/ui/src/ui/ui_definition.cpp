@@ -61,38 +61,26 @@ ConfigNode& UIDefinition::getRoot()
 	return data.getRoot();
 }
 
-ConfigNode* UIDefinition::findUUID(const String& id)
+UIDefinition::FindResult UIDefinition::findUUID(const String& id)
 {
-	return findUUID(data.getRoot(), id);
+	return findUUID(nullptr, data.getRoot(), id);
 }
 
-void UIDefinition::parseYAML(gsl::span<const gsl::byte> yaml)
-{
-	YAMLConvert::parseConfig(data, yaml);
-}
-
-String UIDefinition::toYAML() const
-{
-	YAMLConvert::EmitOptions options;
-	options.mapKeyOrder = {{ "uuid", "proportion", "border", "sizer", "widget", "children" }};
-	return YAMLConvert::generateYAML(data.getRoot(), options);
-}
-
-ConfigNode* UIDefinition::findUUID(ConfigNode& node, const String& id)
+UIDefinition::FindResult UIDefinition::findUUID(ConfigNode* parent, ConfigNode& node, const String& id)
 {
 	if (node["uuid"].asString() == id) {
-		return &node;
+		return FindResult{ &node, parent };
 	}
 
 	if (node.hasKey("children")) {
 		for (auto& c: node["children"].asSequence()) {
-			if (auto r = findUUID(c, id); r != nullptr) {
+			if (auto r = findUUID(&node, c, id); r.result != nullptr) {
 				return r;
 			}
 		}
 	}
 
-	return nullptr;
+	return FindResult{ nullptr, nullptr };
 }
 
 void UIDefinition::assignIds(ConfigNode& node)
@@ -105,4 +93,16 @@ void UIDefinition::assignIds(ConfigNode& node)
 			assignIds(c);
 		}
 	}
+}
+
+void UIDefinition::parseYAML(gsl::span<const gsl::byte> yaml)
+{
+	YAMLConvert::parseConfig(data, yaml);
+}
+
+String UIDefinition::toYAML() const
+{
+	YAMLConvert::EmitOptions options;
+	options.mapKeyOrder = {{ "uuid", "proportion", "border", "sizer", "widget", "children" }};
+	return YAMLConvert::generateYAML(data.getRoot(), options);
 }

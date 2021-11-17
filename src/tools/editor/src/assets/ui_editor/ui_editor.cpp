@@ -17,6 +17,7 @@ void UIEditor::onMakeUI()
 {
 	display = getWidget("display");
 	widgetList = getWidgetAs<UIWidgetList>("widgetList");
+	widgetList->setUIEditor(*this);
 	widgetEditor = getWidgetAs<UIWidgetEditor>("widgetEditor");
 	widgetEditor->setGameResources(gameResources);
 	widgetEditor->setUIEditor(*this);
@@ -53,6 +54,11 @@ void UIEditor::save()
 	}
 }
 
+UIFactory& UIEditor::getGameFactory()
+{
+	return *gameFactory;
+}
+
 void UIEditor::reload()
 {
 	doLoadUI();
@@ -78,5 +84,5 @@ void UIEditor::doLoadUI()
 
 void UIEditor::setSelectedWidget(const String& id)
 {
-	widgetEditor->setSelectedWidget(id, uiDefinition->findUUID(id));
+	widgetEditor->setSelectedWidget(id, uiDefinition->findUUID(id).result);
 }

@@ -90,7 +90,7 @@ void UIWidgetEditor::populateWidgetBox(UIWidget& root, ConfigNode& node)
 {
 	root.clear();
 
-	populateBox(root, node, factory.getPropertiesForWidget(node["class"].asString()).entries);
+	populateBox(root, node, uiEditor->getGameFactory().getPropertiesForWidget(node["class"].asString()).entries);
 }
 
 void UIWidgetEditor::populateFillBox(UIWidget& root, ConfigNode& node)

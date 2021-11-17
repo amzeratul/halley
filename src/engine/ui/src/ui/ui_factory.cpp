@@ -60,8 +60,8 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 		loadDefaultColourScheme();
 	}
 	
-	addFactory("widget", [=] (const ConfigNode& node) { return makeBaseWidget(node); });
-	addFactory("label", [=] (const ConfigNode& node) { return makeLabel(node); });
+	addFactory("widget", [=] (const ConfigNode& node) { return makeBaseWidget(node); }, getBaseWidgetProperties());
+	addFactory("label", [=] (const ConfigNode& node) { return makeLabel(node); }, getLabelProperties());
 	addFactory("button", [=] (const ConfigNode& node) { return makeButton(node); });
 	addFactory("textInput", [=] (const ConfigNode& node) { return makeTextInput(node); });
 	addFactory("spinControl", [=] (const ConfigNode& node) { return makeSpinControl(node); });
@@ -92,16 +92,13 @@ UIFactory::~UIFactory()
 {
 }
 
-void UIFactory::addFactory(const String& key, WidgetFactory factory, UIFactoryWidgetProperties srcProps)
+void UIFactory::addFactory(const String& key, WidgetFactory factory, UIFactoryWidgetProperties props)
 {
-	auto dstProps = getBaseWidgetProperties();
-	dstProps.entries.reserve(dstProps.entries.size() + srcProps.entries.size());
-	for (auto& e: srcProps.entries) {
-		dstProps.entries.emplace_back(std::move(e));
-	}
+	const auto& baseProps = getGlobalWidgetProperties();
+	props.entries.insert(props.entries.begin(), baseProps.entries.begin(), baseProps.entries.end());
 
 	factories[key] = std::move(factory);
-	properties[key] = std::move(dstProps);
+	properties[key] = std::move(props);
 }
 
 void UIFactory::pushConditions(std::vector<String> conds)
@@ -257,7 +254,7 @@ std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 	return widget;
 }
 
-UIFactoryWidgetProperties UIFactory::getBaseWidgetProperties() const
+UIFactoryWidgetProperties UIFactory::getGlobalWidgetProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.entries.emplace_back("Id", "id", "Halley::String", "");
@@ -439,6 +436,13 @@ std::shared_ptr<UIWidget> UIFactory::makeBaseWidget(const ConfigNode& entryNode)
 	return std::make_shared<UIWidget>(id, minSize, makeSizer(entryNode), innerBorder);
 }
 
+UIFactoryWidgetProperties UIFactory::getBaseWidgetProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.entries.emplace_back("Inner Border", "innerBorder", "Halley::Vector4f", std::vector<String>{"", "", "", ""});
+	return result;
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
@@ -467,6 +471,21 @@ std::shared_ptr<UIWidget> UIFactory::makeLabel(const ConfigNode& entryNode)
 		label->getTextRenderer().setSize(node["fontSize"].asFloat());
 	}
 	return label;
+}
+
+UIFactoryWidgetProperties UIFactory::getLabelProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.canHaveChildren = false;
+	result.entries.emplace_back("Style", "style", "Halley::String", "label");
+	result.entries.emplace_back("Max Width", "maxWidth", "float", "");
+	result.entries.emplace_back("Max Height", "maxHeight", "float", "");
+	result.entries.emplace_back("Alignment", "alignment", "float", "");
+	result.entries.emplace_back("Font Size", "fontSize", "float", "");
+	result.entries.emplace_back("Marquee", "marquee", "bool", "");
+	result.entries.emplace_back("Word Wrap", "wordWrapped", "bool", "");
+	result.entries.emplace_back("Colour", "colour", "Halley::String", "");
+	return result;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)

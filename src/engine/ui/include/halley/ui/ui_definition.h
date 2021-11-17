@@ -5,6 +5,11 @@
 namespace Halley {
     class UIDefinition : public Resource {
     public:
+        struct FindResult {
+	        ConfigNode* result = nullptr;
+            ConfigNode* parent = nullptr;
+        };
+
         UIDefinition();
         UIDefinition(UIDefinition&& other) = default;
         UIDefinition(const UIDefinition& other) = default;
@@ -22,7 +27,7 @@ namespace Halley {
     	const ConfigNode& getRoot() const;
         ConfigNode& getRoot();
 
-        ConfigNode* findUUID(const String& id);
+        FindResult findUUID(const String& id);
         
         void parseYAML(gsl::span<const gsl::byte> yaml);
 		String toYAML() const;
@@ -31,6 +36,6 @@ namespace Halley {
         ConfigFile data;
 
         void assignIds(ConfigNode& node);
-        ConfigNode* findUUID(ConfigNode& node, const String& id);
+        FindResult findUUID(ConfigNode* parent, ConfigNode& node, const String& id);
     };
 }

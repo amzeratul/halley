@@ -38,6 +38,7 @@ namespace Halley
         };
 
 		std::vector<Entry> entries;
+		bool canHaveChildren = true;
 	};
 
 	class UIFactory
@@ -142,7 +143,9 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeTreeList(const ConfigNode& node);
 		void applyListProperties(UIList& list, const ConfigNode& widgetNode, const String& inputConfigName);
 
+		UIFactoryWidgetProperties getGlobalWidgetProperties() const;
 		UIFactoryWidgetProperties getBaseWidgetProperties() const;
+		UIFactoryWidgetProperties getLabelProperties() const;
 		
 		bool hasCondition(const String& condition) const;
 		bool resolveConditions(const ConfigNode& node) const;

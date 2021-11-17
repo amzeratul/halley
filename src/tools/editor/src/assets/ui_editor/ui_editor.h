@@ -21,6 +21,8 @@ namespace Halley {
 		bool isModified() override;
 		void save() override;
 
+		UIFactory& getGameFactory();
+
 	protected:
 		std::shared_ptr<const Resource> loadResource(const String& assetId) override;
 		
