@@ -52,7 +52,16 @@ void UIWidgetList::populateList()
 	}
 }
 
-void UIWidgetList::addWidget(const ConfigNode& curNode, String parentId)
+void UIWidgetList::addWidget(const ConfigNode& curNode, String parentId, size_t childIdx)
+{
+	doAddWidget(curNode, parentId, childIdx);
+
+	list->sortItems();
+	layout();
+	list->setSelectedOptionId(curNode["uuid"].asString());
+}
+
+void UIWidgetList::doAddWidget(const ConfigNode& curNode, String parentId, size_t childIdx)
 {
 	const String id = curNode["uuid"].asString();
 
@@ -74,11 +83,11 @@ void UIWidgetList::addWidget(const ConfigNode& curNode, String parentId)
 		name = "[sizer]";
 	}
 
-	list->addTreeItem(id, parentId, -1, LocalisedString::fromUserString(name), "label", icon, !canHaveChildren);
+	list->addTreeItem(id, parentId, childIdx, LocalisedString::fromUserString(name), "label", icon, !canHaveChildren);
 
 	if (curNode.hasKey("children")) {
 		for (const auto& c: curNode["children"].asSequence()) {
-			addWidget(c, id);
+			doAddWidget(c, id);
 		}
 	}
 }

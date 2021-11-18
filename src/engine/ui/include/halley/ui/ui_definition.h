@@ -8,6 +8,7 @@ namespace Halley {
         struct FindResult {
 	        ConfigNode* result = nullptr;
             ConfigNode* parent = nullptr;
+            int childIdx = -1;
         };
 
         UIDefinition();
@@ -36,6 +37,6 @@ namespace Halley {
         ConfigFile data;
 
         void assignIds(ConfigNode& node);
-        FindResult findUUID(ConfigNode* parent, ConfigNode& node, const String& id);
+        FindResult findUUID(ConfigNode* parent, int childIdx, ConfigNode& node, const String& id);
     };
 }

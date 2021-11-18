@@ -63,24 +63,25 @@ ConfigNode& UIDefinition::getRoot()
 
 UIDefinition::FindResult UIDefinition::findUUID(const String& id)
 {
-	return findUUID(nullptr, data.getRoot(), id);
+	return findUUID(nullptr, -1, data.getRoot(), id);
 }
 
-UIDefinition::FindResult UIDefinition::findUUID(ConfigNode* parent, ConfigNode& node, const String& id)
+UIDefinition::FindResult UIDefinition::findUUID(ConfigNode* parent, int childIdx, ConfigNode& node, const String& id)
 {
 	if (node["uuid"].asString() == id) {
-		return FindResult{ &node, parent };
+		return FindResult{ &node, parent, childIdx };
 	}
 
 	if (node.hasKey("children")) {
-		for (auto& c: node["children"].asSequence()) {
-			if (auto r = findUUID(&node, c, id); r.result != nullptr) {
+		auto& children = node["children"].asSequence();
+		for (size_t i = 0; i < children.size(); ++i) {
+			if (auto r = findUUID(&node, static_cast<int>(i), children[i], id); r.result != nullptr) {
 				return r;
 			}
 		}
 	}
 
-	return FindResult{ nullptr, nullptr };
+	return FindResult{ nullptr, nullptr, -1 };
 }
 
 void UIDefinition::assignIds(ConfigNode& node)

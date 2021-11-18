@@ -11,7 +11,8 @@ namespace Halley {
 
         void setDefinition(std::shared_ptr<UIDefinition> definition);
         void setUIEditor(UIEditor& editor);
-        void addWidget(const ConfigNode& node, String parentId);
+        void addWidget(const ConfigNode& node, String parentId, size_t childIdx = std::numeric_limits<size_t>::max());
+        void doAddWidget(const ConfigNode& node, String parentId, size_t childIdx = std::numeric_limits<size_t>::max());
 
         UITreeList& getList();
 

@@ -146,9 +146,10 @@ void UIEditor::addWidget(const String& referenceId, bool requestedAsChild, Confi
 
 		auto& parent = asChild ? *result.result : *result.parent;
 		auto& parentChildren = parent["children"].asSequence();
+		const auto childIdx = std::min(parentChildren.size(), asChild ? std::numeric_limits<size_t>::max() : size_t(result.childIdx + 1));
 
-		widgetList->addWidget(data, parent["uuid"].asString());
-		parentChildren.push_back(std::move(data));
+		widgetList->addWidget(data, parent["uuid"].asString(), childIdx);
+		parentChildren.insert(parentChildren.begin() + childIdx, std::move(data));
 	}
 }
 
