@@ -188,7 +188,7 @@ ChooseUIWidgetWindow::ChooseUIWidgetWindow(UIFactory& factory, UIFactory& gameFa
 std::shared_ptr<UIImage> ChooseUIWidgetWindow::makeIcon(const String& id, bool hasSearch)
 {
 	const auto props = gameFactory.getPropertiesForWidget(id);
-	auto sprite = props.iconName.isEmpty() ? Sprite() : Sprite().setImage(factory.getResources(), props.iconName);
+	auto sprite = props.iconName.isEmpty() ? Sprite() : Sprite().setImage(gameFactory.getResources(), props.iconName);
 	return std::make_shared<UIImage>(std::move(sprite));
 }
 

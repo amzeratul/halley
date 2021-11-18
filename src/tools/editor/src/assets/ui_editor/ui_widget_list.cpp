@@ -119,7 +119,7 @@ UIWidgetList::EntryInfo UIWidgetList::getEntryInfo(const ConfigNode& data) const
 		result.label += "[" + properties.name + "]";
 
 		if (!properties.iconName.isEmpty()) {
-			result.icon = Sprite().setImage(factory.getResources(), properties.iconName);
+			result.icon = Sprite().setImage(uiEditor->getGameFactory().getResources(), properties.iconName);
 		}
 	} else {
 		result.label = "[sizer]";

@@ -280,7 +280,7 @@ UIFactoryWidgetProperties UIFactory::getGlobalWidgetProperties() const
 	result.entries.emplace_back("Child Layer Adjustment", "childLayerAdjustment", "int", "0");
 	result.entries.emplace_back("Tooltip", "tooltip", "Halley::String");
 	result.entries.emplace_back("Tooltip (Key)", "tooltipKey", "Halley::String");
-	result.iconName = "ui/widgetTypes/generic.png";
+	result.iconName = "widget_icons/generic.png";
 	return result;
 }
 
@@ -458,7 +458,7 @@ UIFactoryWidgetProperties UIFactory::getBaseWidgetProperties() const
 	UIFactoryWidgetProperties result;
 	result.entries.emplace_back("Inner Border", "innerBorder", "Halley::Vector4f", std::vector<String>{"", "", "", ""});
 	result.name = "Widget";
-	result.iconName = "ui/widgetTypes/widget.png";
+	result.iconName = "widget_icons/widget.png";
 	return result;
 }
 
@@ -506,7 +506,7 @@ UIFactoryWidgetProperties UIFactory::getLabelProperties() const
 	result.entries.emplace_back("Colour", "colour", "Halley::String", "");
 
 	result.name = "Label";
-	result.iconName = "ui/widgetTypes/label.png";
+	result.iconName = "widget_icons/label.png";
 
 	return result;
 }
@@ -515,7 +515,7 @@ UIFactoryWidgetProperties UIFactory::getButtonProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Button";
-	result.iconName = "ui/widgetTypes/button.png";
+	result.iconName = "widget_icons/button.png";
 	return result;
 }
 
@@ -523,7 +523,7 @@ UIFactoryWidgetProperties UIFactory::getTextInputProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Text Input";
-	result.iconName = "ui/widgetTypes/textInput.png";
+	result.iconName = "widget_icons/textInput.png";
 	return result;
 }
 
@@ -531,7 +531,7 @@ UIFactoryWidgetProperties UIFactory::getSpinControlProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Spin Control";
-	result.iconName = "ui/widgetTypes/spinControl.png";
+	result.iconName = "widget_icons/spinControl.png";
 	return result;
 }
 
@@ -539,7 +539,7 @@ UIFactoryWidgetProperties UIFactory::getSpinControl2Properties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Spin Control 2";
-	result.iconName = "ui/widgetTypes/spinControl.png";
+	result.iconName = "widget_icons/spinControl.png";
 	return result;
 }
 
@@ -547,7 +547,7 @@ UIFactoryWidgetProperties UIFactory::getDropdownProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Dropdown";
-	//result.iconName = "ui/widgetTypes/dropdown.png";
+	result.iconName = "widget_icons/dropdown.png";
 	return result;
 }
 
@@ -555,15 +555,7 @@ UIFactoryWidgetProperties UIFactory::getCheckboxProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Checkbox";
-	result.iconName = "ui/widgetTypes/checkbox.png";
-	return result;
-}
-
-UIFactoryWidgetProperties UIFactory::getImageProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Image";
-	result.iconName = "ui/widgetTypes/image.png";
+	result.iconName = "widget_icons/checkbox.png";
 	return result;
 }
 
@@ -571,7 +563,7 @@ UIFactoryWidgetProperties UIFactory::getMultiImageProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Multi-Image";
-	result.iconName = "ui/widgetTypes/multiImage.png";
+	result.iconName = "widget_icons/multiImage.png";
 	return result;
 }
 
@@ -579,7 +571,7 @@ UIFactoryWidgetProperties UIFactory::getAnimationProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Animation";
-	result.iconName = "ui/widgetTypes/animation.png";
+	result.iconName = "widget_icons/animation.png";
 	return result;
 }
 
@@ -587,7 +579,7 @@ UIFactoryWidgetProperties UIFactory::getScrollPaneProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Scroll Pane";
-	//result.iconName = "ui/widgetTypes/scrollPane.png";
+	//result.iconName = "widget_icons/scrollPane.png";
 	return result;
 }
 
@@ -595,7 +587,7 @@ UIFactoryWidgetProperties UIFactory::getScrollBarProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Scrollbar";
-	result.iconName = "ui/widgetTypes/scrollBar.png";
+	result.iconName = "widget_icons/scrollBar.png";
 	return result;
 }
 
@@ -603,7 +595,7 @@ UIFactoryWidgetProperties UIFactory::getScrollBarPaneProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Scrollbar Pane";
-	//result.iconName = "ui/widgetTypes/dropdown.png";
+	//result.iconName = "widget_icons/dropdown.png";
 	return result;
 }
 
@@ -611,7 +603,7 @@ UIFactoryWidgetProperties UIFactory::getSliderProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Slider";
-	result.iconName = "ui/widgetTypes/slider.png";
+	result.iconName = "widget_icons/slider.png";
 	return result;
 }
 
@@ -619,7 +611,7 @@ UIFactoryWidgetProperties UIFactory::getHorizontalDivProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Horizontal Divider";
-	result.iconName = "ui/widgetTypes/horizontalDiv.png";
+	result.iconName = "widget_icons/horizontalDiv.png";
 	return result;
 }
 
@@ -627,7 +619,7 @@ UIFactoryWidgetProperties UIFactory::getVerticalDivProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Vertical Divider";
-	result.iconName = "ui/widgetTypes/verticalDiv.png";
+	result.iconName = "widget_icons/verticalDiv.png";
 	return result;
 }
 
@@ -635,7 +627,7 @@ UIFactoryWidgetProperties UIFactory::getTabbedPaneProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Tabbed Pane";
-	result.iconName = "ui/widgetTypes/tabbedPane.png";
+	result.iconName = "widget_icons/tabbedPane.png";
 	return result;
 }
 
@@ -643,7 +635,7 @@ UIFactoryWidgetProperties UIFactory::getPagedPaneProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Paged Pane";
-	result.iconName = "ui/widgetTypes/pagedPane.png";
+	result.iconName = "widget_icons/pagedPane.png";
 	return result;
 }
 
@@ -651,7 +643,7 @@ UIFactoryWidgetProperties UIFactory::getFramedImageProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Framed Image";
-	result.iconName = "ui/widgetTypes/framedImage.png";
+	result.iconName = "widget_icons/framedImage.png";
 	return result;
 }
 
@@ -659,7 +651,7 @@ UIFactoryWidgetProperties UIFactory::getHybridListProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Hybrid List";
-	result.iconName = "ui/widgetTypes/hybridList.png";
+	result.iconName = "widget_icons/hybridList.png";
 	return result;
 }
 
@@ -667,7 +659,7 @@ UIFactoryWidgetProperties UIFactory::getSpinListProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Spin List";
-	//result.iconName = "ui/widgetTypes/spinList.png";
+	//result.iconName = "widget_icons/spinList.png";
 	return result;
 }
 
@@ -675,7 +667,7 @@ UIFactoryWidgetProperties UIFactory::getOptionListMorpherProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Option List Morpher";
-	//result.iconName = "ui/widgetTypes/optionListMorpher.png";
+	//result.iconName = "widget_icons/optionListMorpher.png";
 	return result;
 }
 
@@ -683,7 +675,7 @@ UIFactoryWidgetProperties UIFactory::getDebugConsoleProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Debug Console";
-	result.iconName = "ui/widgetTypes/debugConsole.png";
+	result.iconName = "widget_icons/debugConsole.png";
 	return result;
 }
 
@@ -691,7 +683,7 @@ UIFactoryWidgetProperties UIFactory::getListProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "List";
-	result.iconName = "ui/widgetTypes/list.png";
+	result.iconName = "widget_icons/list.png";
 	return result;
 }
 
@@ -699,7 +691,7 @@ UIFactoryWidgetProperties UIFactory::getTreeListProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.name = "Tree List";
-	result.iconName = "ui/widgetTypes/treeList.png";
+	result.iconName = "widget_icons/treeList.png";
 	return result;
 }
 
@@ -875,6 +867,14 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 		image->setLayerAdjustment(node["layerAdjustment"].asInt());
 	}
 	return image;
+}
+
+UIFactoryWidgetProperties UIFactory::getImageProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Image";
+	result.iconName = "widget_icons/image.png";
+	return result;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeMultiImage(const ConfigNode& entryNode)
