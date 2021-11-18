@@ -63,13 +63,16 @@ void UIWidgetEditor::refresh()
 	auto sizerBox = getWidget("sizerBox");
 
 	if (curNode && entityFieldFactory) {
+		bool hasSizer = true;
 		if (curNode->hasKey("widget")) {
 			auto& widgetNode = (*curNode)["widget"];
 			const auto widgetClass = widgetNode["class"].asString();
 
 			if (widgetClass != "widget") {
 				widgetBox->setActive(true);
-				populateWidgetBox(*widgetBox->getWidget("widgetContents"), widgetNode, *getWidgetAs<UILabel>("classLabel"));
+				const auto properties = uiEditor->getGameFactory().getPropertiesForWidget(widgetNode["class"].asString());
+				populateWidgetBox(*widgetBox->getWidget("widgetContents"), widgetNode, properties);
+				hasSizer = properties.canHaveChildren;
 			} else {
 				widgetBox->setActive(false);
 			}
@@ -82,10 +85,12 @@ void UIWidgetEditor::refresh()
 		}
 
 		fillBox->setActive(true);
-		sizerBox->setActive(true);
-
 		populateFillBox(*fillBox->getWidget("fillContents"), *curNode);
-		populateSizerBox(*sizerBox->getWidget("sizerContents"), (*curNode)["sizer"]);
+
+		sizerBox->setActive(hasSizer);
+		if (hasSizer) {
+			populateSizerBox(*sizerBox->getWidget("sizerContents"), (*curNode)["sizer"]);
+		}
 	} else {
 		widgetBox->setActive(false);
 		genericWidgetBox->setActive(false);
@@ -94,12 +99,15 @@ void UIWidgetEditor::refresh()
 	}
 }
 
-void UIWidgetEditor::populateWidgetBox(UIWidget& root, ConfigNode& node, UILabel& label)
+void UIWidgetEditor::populateWidgetBox(UIWidget& root, ConfigNode& node, const UIFactoryWidgetProperties& properties)
 {
 	root.clear();
 
-	const auto properties = uiEditor->getGameFactory().getPropertiesForWidget(node["class"].asString());
-	label.setText(LocalisedString::fromUserString(properties.name));
+	auto icon = getWidgetAs<UIImage>("classIcon");
+	auto label = getWidgetAs<UILabel>("classLabel");
+	label->setText(LocalisedString::fromUserString(properties.name));
+	icon->setSprite(Sprite().setImage(uiEditor->getGameFactory().getResources(), properties.iconName));
+
 	populateBox(root, node, properties.entries);
 }
 

@@ -3,7 +3,7 @@ sizer: { type: vertical }
 proportion: 1
 border: [0, 0, 10, 0]
 children:
-- widget: { class: scrollBarPane, size: [250, 250], scrollHorizontal: true, scrollVertical: true }
+- widget: { class: scrollBarPane, size: [350, 250], scrollHorizontal: true, scrollVertical: true }
   proportion: 1
   children:
   - widget: { class: treeList, id: widgetsList, multiSelect: false, canDrag: true, singleClickAccept: false }

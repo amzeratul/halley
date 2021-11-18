@@ -9,8 +9,14 @@ children:
   - widget: { id: widgetBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
     sizer: { type: vertical }
     children:
-    - widget: { id: classLabel, class: label, text: Widget }
+    - sizer: { type: horizontal }
       fill: centre
+      children:
+      - widget: { id: classIcon, class: image }
+        border: [0, 0, 4, 0]
+        fill: centre
+      - widget: { id: classLabel, class: label, text: Widget }
+        fill: centre
     - widget: { id: widgetContents, class: widget }
       border: [ 4, 4, 4, 4 ]
       sizer: { type: vertical }

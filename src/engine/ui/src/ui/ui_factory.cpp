@@ -566,14 +566,6 @@ UIFactoryWidgetProperties UIFactory::getMultiImageProperties() const
 	return result;
 }
 
-UIFactoryWidgetProperties UIFactory::getAnimationProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Animation";
-	result.iconName = "widget_icons/animation.png";
-	return result;
-}
-
 UIFactoryWidgetProperties UIFactory::getScrollPaneProperties() const
 {
 	UIFactoryWidgetProperties result;
@@ -877,6 +869,7 @@ UIFactoryWidgetProperties UIFactory::getImageProperties() const
 	result.entries.emplace_back("Flip", "flip", "bool", "false");
 	result.entries.emplace_back("Pivot", "pivot", "std::optional<Halley::Vector2f>", "");
 	result.entries.emplace_back("Rotation", "rotation", "Halley::Angle1f", "0");
+	result.entries.emplace_back("Layer Adjustment", "layerAdjustment", "std::optional<int>", "");
 
 	result.name = "Image";
 	result.iconName = "widget_icons/image.png";
@@ -922,6 +915,18 @@ std::shared_ptr<UIWidget> UIFactory::makeAnimation(const ConfigNode& entryNode)
 	auto animation = AnimationPlayer(animationName.isEmpty() ? std::shared_ptr<const Animation>() : resources.get<Animation>(animationName), sequence, direction);
 
 	return std::make_shared<UIAnimation>(id, size, animationOffset, animation);
+}
+
+UIFactoryWidgetProperties UIFactory::getAnimationProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Animation";
+	result.iconName = "widget_icons/animation.png";
+	result.entries.emplace_back("Animation", "animation", "Halley::ResourceReference<Halley::Animation>", "");
+	result.entries.emplace_back("Sequence", "sequence", "Halley::String", "default");
+	result.entries.emplace_back("Direction", "direction", "Halley::String", "default");
+	result.entries.emplace_back("Offset", "offset", "std::optional<Halley::Vector2f>", "");
+	return result;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeScrollPane(const ConfigNode& entryNode)

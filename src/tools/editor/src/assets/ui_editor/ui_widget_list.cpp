@@ -113,10 +113,10 @@ UIWidgetList::EntryInfo UIWidgetList::getEntryInfo(const ConfigNode& data) const
 		const auto properties = uiEditor->getGameFactory().getPropertiesForWidget(widgetNode["class"].asString());
 		result.canHaveChildren = properties.canHaveChildren;
 
+		result.label = properties.name;
 		if (widgetNode.hasKey("id") && !widgetNode["id"].asString().isEmpty()) {
-			result.label += widgetNode["id"].asString() + " ";
+			result.label += " \"" + widgetNode["id"].asString() + "\"";
 		}
-		result.label += "[" + properties.name + "]";
 
 		if (!properties.iconName.isEmpty()) {
 			result.icon = Sprite().setImage(uiEditor->getGameFactory().getResources(), properties.iconName);
