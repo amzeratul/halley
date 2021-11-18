@@ -11,6 +11,7 @@ namespace Halley {
 
         void setDefinition(std::shared_ptr<UIDefinition> definition);
         void setUIEditor(UIEditor& editor);
+        void addWidget(const ConfigNode& node, String parentId);
 
         UITreeList& getList();
 
@@ -27,7 +28,6 @@ namespace Halley {
         UIEditor* uiEditor;
 
         void populateList();
-        void populateList(const ConfigNode& curNode, String parentId);
 
         void moveItems(gsl::span<const MoveOperation> changes);
     };

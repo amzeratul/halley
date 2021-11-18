@@ -45,6 +45,7 @@ namespace Halley {
 
 		void addWidget();
 		void addWidget(const String& widgetClass);
+		void addWidget(const String& referenceId, bool asChild, ConfigNode data);
 		void removeWidget();
 		void removeWidget(const String& id);
 	};

@@ -48,11 +48,11 @@ UITreeList& UIWidgetList::getList()
 void UIWidgetList::populateList()
 {
 	if (list && definition) {
-		populateList(definition->getRoot(), "");
+		addWidget(definition->getRoot(), "");
 	}
 }
 
-void UIWidgetList::populateList(const ConfigNode& curNode, String parentId)
+void UIWidgetList::addWidget(const ConfigNode& curNode, String parentId)
 {
 	const String id = curNode["uuid"].asString();
 
@@ -78,7 +78,7 @@ void UIWidgetList::populateList(const ConfigNode& curNode, String parentId)
 
 	if (curNode.hasKey("children")) {
 		for (const auto& c: curNode["children"].asSequence()) {
-			populateList(c, id);
+			addWidget(c, id);
 		}
 	}
 }

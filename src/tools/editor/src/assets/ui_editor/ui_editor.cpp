@@ -123,7 +123,33 @@ void UIEditor::addWidget()
 
 void UIEditor::addWidget(const String& widgetClass)
 {
-	// TODO
+	ConfigNode data = ConfigNode::MapType();
+	ConfigNode::MapType widget;
+	widget["class"] = widgetClass;
+	data["widget"] = std::move(widget);
+	data["uuid"] = UUID::generate().toString();
+
+	addWidget(curSelection, false, std::move(data));
+}
+
+void UIEditor::addWidget(const String& referenceId, bool requestedAsChild, ConfigNode data)
+{
+	auto result = uiDefinition->findUUID(referenceId);
+	if (result.result) {
+		bool canHaveChildren = true; // TODO
+		const bool canHaveSiblings = result.parent != nullptr;
+		if (!canHaveChildren && !canHaveSiblings) {
+			// Give up
+			return;
+		}
+		const bool asChild = (requestedAsChild && canHaveChildren) || (!canHaveSiblings);
+
+		auto& parent = asChild ? *result.result : *result.parent;
+		auto& parentChildren = parent["children"].asSequence();
+
+		widgetList->addWidget(data, parent["uuid"].asString());
+		parentChildren.push_back(std::move(data));
+	}
 }
 
 void UIEditor::removeWidget()
