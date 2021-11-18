@@ -94,10 +94,8 @@ UIFactory::~UIFactory()
 
 void UIFactory::addFactory(const String& key, WidgetFactory factory, UIFactoryWidgetProperties props)
 {
-	const auto& baseProps = getGlobalWidgetProperties();
-	props.entries.insert(props.entries.begin(), baseProps.entries.begin(), baseProps.entries.end());
 	if (props.iconName.isEmpty()) {
-		props.iconName = baseProps.iconName;
+		props.iconName = "widget_icons/generic.png";
 	}
 	if (props.name.isEmpty()) {
 		props.name = key;
@@ -280,7 +278,6 @@ UIFactoryWidgetProperties UIFactory::getGlobalWidgetProperties() const
 	result.entries.emplace_back("Child Layer Adjustment", "childLayerAdjustment", "int", "0");
 	result.entries.emplace_back("Tooltip", "tooltip", "Halley::String");
 	result.entries.emplace_back("Tooltip (Key)", "tooltipKey", "Halley::String");
-	result.iconName = "widget_icons/generic.png";
 	return result;
 }
 
@@ -496,14 +493,16 @@ UIFactoryWidgetProperties UIFactory::getLabelProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.canHaveChildren = false;
+	result.entries.emplace_back("Text", "text", "Halley::String", "");
+	result.entries.emplace_back("Text (Loc Key)", "textKey", "Halley::String", "");
 	result.entries.emplace_back("Style", "style", "Halley::String", "label");
-	result.entries.emplace_back("Max Width", "maxWidth", "float", "");
-	result.entries.emplace_back("Max Height", "maxHeight", "float", "");
-	result.entries.emplace_back("Alignment", "alignment", "float", "");
-	result.entries.emplace_back("Font Size", "fontSize", "float", "");
-	result.entries.emplace_back("Marquee", "marquee", "bool", "");
-	result.entries.emplace_back("Word Wrap", "wordWrapped", "bool", "");
-	result.entries.emplace_back("Colour", "colour", "Halley::String", "");
+	result.entries.emplace_back("Max Width", "maxWidth", "std::optional<float>", "");
+	result.entries.emplace_back("Max Height", "maxHeight", "std::optional<float>", "");
+	result.entries.emplace_back("Alignment", "alignment", "std::optional<float>", "");
+	result.entries.emplace_back("Font Size", "fontSize", "std::optional<float>", "");
+	result.entries.emplace_back("Marquee", "marquee", "std::optional<bool>", "");
+	result.entries.emplace_back("Word Wrap", "wordWrapped", "std::optional<bool>", "");
+	result.entries.emplace_back("Colour", "colour", "Halley::Colour4f", "#FFFFFF");
 
 	result.name = "Label";
 	result.iconName = "widget_icons/label.png";
@@ -872,6 +871,13 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 UIFactoryWidgetProperties UIFactory::getImageProperties() const
 {
 	UIFactoryWidgetProperties result;
+	result.entries.emplace_back("Image", "image", "Halley::ResourceReference<Halley::SpriteResource>", "");
+	result.entries.emplace_back("Material", "material", "Halley::ResourceReference<Halley::MaterialDefinition>", "Halley/Sprite");
+	result.entries.emplace_back("Colour", "colour", "Halley::Colour4f", "#FFFFFF");
+	result.entries.emplace_back("Flip", "flip", "bool", "false");
+	result.entries.emplace_back("Pivot", "pivot", "std::optional<Halley::Vector2f>", "");
+	result.entries.emplace_back("Rotation", "rotation", "Halley::Angle1f", "0");
+
 	result.name = "Image";
 	result.iconName = "widget_icons/image.png";
 	return result;

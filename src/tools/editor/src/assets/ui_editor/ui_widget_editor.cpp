@@ -51,27 +51,34 @@ void UIWidgetEditor::setDefaultName(const String& name, const String& prevName)
 
 ISceneEditorWindow& UIWidgetEditor::getSceneEditorWindow() const
 {
-	throw Exception("Not implemented", 0);
+	ISceneEditorWindow* badPtr = nullptr;
+	return *badPtr;
 }
 
 void UIWidgetEditor::refresh()
 {
 	auto widgetBox = getWidget("widgetBox");
+	auto genericWidgetBox = getWidget("genericWidgetBox");
 	auto fillBox = getWidget("fillBox");
 	auto sizerBox = getWidget("sizerBox");
-	auto classLabel = getWidgetAs<UILabel>("classLabel");
 
 	if (curNode && entityFieldFactory) {
 		if (curNode->hasKey("widget")) {
 			auto& widgetNode = (*curNode)["widget"];
 			const auto widgetClass = widgetNode["class"].asString();
-			classLabel->setText(LocalisedString::fromUserString(widgetClass));
-			widgetBox->setActive(true);
 
-			populateWidgetBox(*widgetBox->getWidget("widgetContents"), widgetNode);
+			if (widgetClass != "widget") {
+				widgetBox->setActive(true);
+				populateWidgetBox(*widgetBox->getWidget("widgetContents"), widgetNode, *getWidgetAs<UILabel>("classLabel"));
+			} else {
+				widgetBox->setActive(false);
+			}
+
+			genericWidgetBox->setActive(true);
+			populateGenericWidgetBox(*genericWidgetBox->getWidget("genericWidgetContents"), widgetNode);
 		} else {
-			classLabel->setText(LocalisedString::fromUserString("sizer"));
 			widgetBox->setActive(false);
+			genericWidgetBox->setActive(false);
 		}
 
 		fillBox->setActive(true);
@@ -80,18 +87,27 @@ void UIWidgetEditor::refresh()
 		populateFillBox(*fillBox->getWidget("fillContents"), *curNode);
 		populateSizerBox(*sizerBox->getWidget("sizerContents"), (*curNode)["sizer"]);
 	} else {
-		classLabel->setText(LocalisedString());
 		widgetBox->setActive(false);
+		genericWidgetBox->setActive(false);
 		fillBox->setActive(false);
 		sizerBox->setActive(false);
 	}
 }
 
-void UIWidgetEditor::populateWidgetBox(UIWidget& root, ConfigNode& node)
+void UIWidgetEditor::populateWidgetBox(UIWidget& root, ConfigNode& node, UILabel& label)
 {
 	root.clear();
 
-	populateBox(root, node, uiEditor->getGameFactory().getPropertiesForWidget(node["class"].asString()).entries);
+	const auto properties = uiEditor->getGameFactory().getPropertiesForWidget(node["class"].asString());
+	label.setText(LocalisedString::fromUserString(properties.name));
+	populateBox(root, node, properties.entries);
+}
+
+void UIWidgetEditor::populateGenericWidgetBox(UIWidget& root, ConfigNode& node)
+{
+	root.clear();
+
+	populateBox(root, node, uiEditor->getGameFactory().getGlobalWidgetProperties().entries);
 }
 
 void UIWidgetEditor::populateFillBox(UIWidget& root, ConfigNode& node)

@@ -27,7 +27,8 @@ namespace Halley {
         std::shared_ptr<EntityEditorFactory> entityFieldFactory;
 
         void refresh();
-        void populateWidgetBox(UIWidget& root, ConfigNode& widgetNode);
+        void populateWidgetBox(UIWidget& root, ConfigNode& widgetNode, UILabel& title);
+        void populateGenericWidgetBox(UIWidget& root, ConfigNode& widgetNode);
         void populateFillBox(UIWidget& root, ConfigNode& widgetNode);
         void populateSizerBox(UIWidget& root, ConfigNode& widgetNode);
 

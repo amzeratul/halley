@@ -69,6 +69,7 @@ namespace Halley
 		void loadUI(UIWidget& target, const UIDefinition& uiDefinition);
 
 		const UIFactoryWidgetProperties& getPropertiesForWidget(const String& widgetClass) const;
+		UIFactoryWidgetProperties getGlobalWidgetProperties() const;
 		std::vector<String> getWidgetClassList() const;
 
 		void setInputButtons(const String& key, UIInputButtons buttons);
@@ -146,7 +147,6 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeTreeList(const ConfigNode& node);
 		void applyListProperties(UIList& list, const ConfigNode& widgetNode, const String& inputConfigName);
 
-		UIFactoryWidgetProperties getGlobalWidgetProperties() const;
 		UIFactoryWidgetProperties getBaseWidgetProperties() const;
 		UIFactoryWidgetProperties getLabelProperties() const;
 		UIFactoryWidgetProperties getButtonProperties() const;

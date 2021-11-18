@@ -6,14 +6,21 @@ children:
   proportion: 1
   border: [0, 0, 0, 0]
   children:
-  - widget: { id: classLabel, class: label, text: Class }
-    fill: centre
   - widget: { id: widgetBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
+    sizer: { type: vertical }
+    children:
+    - widget: { id: classLabel, class: label, text: Widget }
+      fill: centre
+    - widget: { id: widgetContents, class: widget }
+      border: [ 4, 4, 4, 4 ]
+      sizer: { type: vertical }
+      children: []
+  - widget: { id: genericWidgetBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
     sizer: { type: vertical }
     children:
     - widget: { class: label, text: Widget }
       fill: centre
-    - widget: { id: widgetContents, class: widget }
+    - widget: { id: genericWidgetContents, class: widget }
       border: [ 4, 4, 4, 4 ]
       sizer: { type: vertical }
       children: []
