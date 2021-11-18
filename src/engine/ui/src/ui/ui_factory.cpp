@@ -62,30 +62,30 @@ UIFactory::UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18
 	
 	addFactory("widget", [=] (const ConfigNode& node) { return makeBaseWidget(node); }, getBaseWidgetProperties());
 	addFactory("label", [=] (const ConfigNode& node) { return makeLabel(node); }, getLabelProperties());
-	addFactory("button", [=] (const ConfigNode& node) { return makeButton(node); });
-	addFactory("textInput", [=] (const ConfigNode& node) { return makeTextInput(node); });
-	addFactory("spinControl", [=] (const ConfigNode& node) { return makeSpinControl(node); });
-	addFactory("spinControl2", [=] (const ConfigNode& node) { return makeSpinControl2(node); });
-	addFactory("list", [=] (const ConfigNode& node) { return makeList(node); });
-	addFactory("dropdown", [=] (const ConfigNode& node) { return makeDropdown(node); });
-	addFactory("checkbox", [=] (const ConfigNode& node) { return makeCheckbox(node); });
-	addFactory("image", [=] (const ConfigNode& node) { return makeImage(node); });
-	addFactory("multiImage", [=](const ConfigNode& node) { return makeMultiImage(node); });
-	addFactory("animation", [=] (const ConfigNode& node) { return makeAnimation(node); });
-	addFactory("scrollBar", [=] (const ConfigNode& node) { return makeScrollBar(node); });
-	addFactory("scrollPane", [=] (const ConfigNode& node) { return makeScrollPane(node); });
-	addFactory("scrollBarPane", [=] (const ConfigNode& node) { return makeScrollBarPane(node); });
-	addFactory("slider", [=] (const ConfigNode& node) { return makeSlider(node); });
-	addFactory("horizontalDiv", [=] (const ConfigNode& node) { return makeHorizontalDiv(node); });
-	addFactory("verticalDiv", [=] (const ConfigNode& node) { return makeVerticalDiv(node); });
-	addFactory("tabbedPane", [=] (const ConfigNode& node) { return makeTabbedPane(node); });
-	addFactory("pagedPane", [=] (const ConfigNode& node) { return makePagedPane(node); });
-	addFactory("framedImage", [=] (const ConfigNode& node) { return makeFramedImage(node); });
-	addFactory("hybridList", [=] (const ConfigNode& node) { return makeHybridList(node); });
-	addFactory("spinList", [=](const ConfigNode& node) { return makeSpinList(node); });
-	addFactory("optionListMorpher", [=](const ConfigNode& node) { return makeOptionListMorpher(node); });
-	addFactory("treeList", [=](const ConfigNode& node) { return makeTreeList(node); });
-	addFactory("debugConsole", [=](const ConfigNode& node) { return makeDebugConsole(node); });
+	addFactory("button", [=] (const ConfigNode& node) { return makeButton(node); }, getButtonProperties());
+	addFactory("textInput", [=] (const ConfigNode& node) { return makeTextInput(node); }, getTextInputProperties());
+	addFactory("spinControl", [=] (const ConfigNode& node) { return makeSpinControl(node); }, getSpinControlProperties());
+	addFactory("spinControl2", [=] (const ConfigNode& node) { return makeSpinControl2(node); }, getSpinControl2Properties());
+	addFactory("list", [=] (const ConfigNode& node) { return makeList(node); }, getListProperties());
+	addFactory("dropdown", [=] (const ConfigNode& node) { return makeDropdown(node); }, getDropdownProperties());
+	addFactory("checkbox", [=] (const ConfigNode& node) { return makeCheckbox(node); }, getCheckboxProperties());
+	addFactory("image", [=] (const ConfigNode& node) { return makeImage(node); }, getImageProperties());
+	addFactory("multiImage", [=](const ConfigNode& node) { return makeMultiImage(node); }, getMultiImageProperties());
+	addFactory("animation", [=] (const ConfigNode& node) { return makeAnimation(node); }, getAnimationProperties());
+	addFactory("scrollBar", [=] (const ConfigNode& node) { return makeScrollBar(node); }, getScrollBarProperties());
+	addFactory("scrollPane", [=] (const ConfigNode& node) { return makeScrollPane(node); }, getScrollPaneProperties());
+	addFactory("scrollBarPane", [=] (const ConfigNode& node) { return makeScrollBarPane(node); }, getScrollBarPaneProperties());
+	addFactory("slider", [=] (const ConfigNode& node) { return makeSlider(node); }, getSliderProperties());
+	addFactory("horizontalDiv", [=] (const ConfigNode& node) { return makeHorizontalDiv(node); }, getHorizontalDivProperties());
+	addFactory("verticalDiv", [=] (const ConfigNode& node) { return makeVerticalDiv(node); }, getVerticalDivProperties());
+	addFactory("tabbedPane", [=] (const ConfigNode& node) { return makeTabbedPane(node); }, getTabbedPaneProperties());
+	addFactory("pagedPane", [=] (const ConfigNode& node) { return makePagedPane(node); }, getPagedPaneProperties());
+	addFactory("framedImage", [=] (const ConfigNode& node) { return makeFramedImage(node); }, getFramedImageProperties());
+	addFactory("hybridList", [=] (const ConfigNode& node) { return makeHybridList(node); }, getHybridListProperties());
+	addFactory("spinList", [=](const ConfigNode& node) { return makeSpinList(node); }, getSpinListProperties());
+	addFactory("optionListMorpher", [=](const ConfigNode& node) { return makeOptionListMorpher(node); }, getOptionListMorpherProperties());
+	addFactory("treeList", [=](const ConfigNode& node) { return makeTreeList(node); }, getTreeListProperties());
+	addFactory("debugConsole", [=](const ConfigNode& node) { return makeDebugConsole(node); }, getDebugConsoleProperties());
 }
 
 UIFactory::~UIFactory()
@@ -96,6 +96,12 @@ void UIFactory::addFactory(const String& key, WidgetFactory factory, UIFactoryWi
 {
 	const auto& baseProps = getGlobalWidgetProperties();
 	props.entries.insert(props.entries.begin(), baseProps.entries.begin(), baseProps.entries.end());
+	if (props.iconName.isEmpty()) {
+		props.iconName = baseProps.iconName;
+	}
+	if (props.name.isEmpty()) {
+		props.name = key;
+	}
 
 	factories[key] = std::move(factory);
 	properties[key] = std::move(props);
@@ -274,6 +280,7 @@ UIFactoryWidgetProperties UIFactory::getGlobalWidgetProperties() const
 	result.entries.emplace_back("Child Layer Adjustment", "childLayerAdjustment", "int", "0");
 	result.entries.emplace_back("Tooltip", "tooltip", "Halley::String");
 	result.entries.emplace_back("Tooltip (Key)", "tooltipKey", "Halley::String");
+	result.iconName = "ui/widgetTypes/generic.png";
 	return result;
 }
 
@@ -450,6 +457,8 @@ UIFactoryWidgetProperties UIFactory::getBaseWidgetProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.entries.emplace_back("Inner Border", "innerBorder", "Halley::Vector4f", std::vector<String>{"", "", "", ""});
+	result.name = "Widget";
+	result.iconName = "ui/widgetTypes/widget.png";
 	return result;
 }
 
@@ -495,6 +504,202 @@ UIFactoryWidgetProperties UIFactory::getLabelProperties() const
 	result.entries.emplace_back("Marquee", "marquee", "bool", "");
 	result.entries.emplace_back("Word Wrap", "wordWrapped", "bool", "");
 	result.entries.emplace_back("Colour", "colour", "Halley::String", "");
+
+	result.name = "Label";
+	result.iconName = "ui/widgetTypes/label.png";
+
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getButtonProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Button";
+	result.iconName = "ui/widgetTypes/button.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getTextInputProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Text Input";
+	result.iconName = "ui/widgetTypes/textInput.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getSpinControlProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Spin Control";
+	result.iconName = "ui/widgetTypes/spinControl.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getSpinControl2Properties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Spin Control 2";
+	result.iconName = "ui/widgetTypes/spinControl.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getDropdownProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Dropdown";
+	//result.iconName = "ui/widgetTypes/dropdown.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getCheckboxProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Checkbox";
+	result.iconName = "ui/widgetTypes/checkbox.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getImageProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Image";
+	result.iconName = "ui/widgetTypes/image.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getMultiImageProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Multi-Image";
+	result.iconName = "ui/widgetTypes/multiImage.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getAnimationProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Animation";
+	result.iconName = "ui/widgetTypes/animation.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getScrollPaneProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Scroll Pane";
+	//result.iconName = "ui/widgetTypes/scrollPane.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getScrollBarProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Scrollbar";
+	result.iconName = "ui/widgetTypes/scrollBar.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getScrollBarPaneProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Scrollbar Pane";
+	//result.iconName = "ui/widgetTypes/dropdown.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getSliderProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Slider";
+	result.iconName = "ui/widgetTypes/slider.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getHorizontalDivProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Horizontal Divider";
+	result.iconName = "ui/widgetTypes/horizontalDiv.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getVerticalDivProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Vertical Divider";
+	result.iconName = "ui/widgetTypes/verticalDiv.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getTabbedPaneProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Tabbed Pane";
+	result.iconName = "ui/widgetTypes/tabbedPane.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getPagedPaneProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Paged Pane";
+	result.iconName = "ui/widgetTypes/pagedPane.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getFramedImageProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Framed Image";
+	result.iconName = "ui/widgetTypes/framedImage.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getHybridListProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Hybrid List";
+	result.iconName = "ui/widgetTypes/hybridList.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getSpinListProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Spin List";
+	//result.iconName = "ui/widgetTypes/spinList.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getOptionListMorpherProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Option List Morpher";
+	//result.iconName = "ui/widgetTypes/optionListMorpher.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getDebugConsoleProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Debug Console";
+	result.iconName = "ui/widgetTypes/debugConsole.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getListProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "List";
+	result.iconName = "ui/widgetTypes/list.png";
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getTreeListProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Tree List";
+	result.iconName = "ui/widgetTypes/treeList.png";
 	return result;
 }
 

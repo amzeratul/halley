@@ -116,7 +116,11 @@ UIWidgetList::EntryInfo UIWidgetList::getEntryInfo(const ConfigNode& data) const
 		if (widgetNode.hasKey("id") && !widgetNode["id"].asString().isEmpty()) {
 			result.label += widgetNode["id"].asString() + " ";
 		}
-		result.label += "[" + widgetNode["class"].asString() + "]";
+		result.label += "[" + properties.name + "]";
+
+		if (!properties.iconName.isEmpty()) {
+			result.icon = Sprite().setImage(factory.getResources(), properties.iconName);
+		}
 	} else {
 		result.label = "[sizer]";
 	}

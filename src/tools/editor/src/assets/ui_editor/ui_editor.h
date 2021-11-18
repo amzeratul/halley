@@ -6,6 +6,7 @@
 #include "ui_widget_editor.h"
 #include "ui_widget_list.h"
 #include "../asset_editor.h"
+#include "src/scene/choose_asset_window.h"
 
 namespace Halley {
 	class UIGraphNode;
@@ -49,5 +50,18 @@ namespace Halley {
 		void addWidget(const String& referenceId, bool asChild, ConfigNode data);
 		void removeWidget();
 		void removeWidget(const String& id);
+	};
+
+	class ChooseUIWidgetWindow : public ChooseAssetWindow {
+	public:
+		ChooseUIWidgetWindow(UIFactory& factory, UIFactory& gameFactory, Callback callback);
+
+	protected:
+		std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
+		LocalisedString getItemLabel(const String& id, const String& name, bool hasSearch) override;
+
+	private:
+		UIFactory& factory;
+		UIFactory& gameFactory;
 	};
 }

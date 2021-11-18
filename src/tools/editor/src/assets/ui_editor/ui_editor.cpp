@@ -119,14 +119,12 @@ void UIEditor::setSelectedWidget(const String& id)
 
 void UIEditor::addWidget()
 {
-	const auto window = std::make_shared<ChooseAssetWindow>(factory, [=] (std::optional<String> result)
+	const auto window = std::make_shared<ChooseUIWidgetWindow>(factory, *gameFactory, [=] (std::optional<String> result)
 	{
 		if (result) {
 			addWidget(result.value());
 		}
-	}, false);
-	window->setAssetIds(gameFactory->getWidgetClassList(), "widget");
-	window->setTitle(LocalisedString::fromHardcodedString("Choose Widget"));
+	});
 	getRoot()->addChild(window);
 }
 
@@ -176,4 +174,26 @@ void UIEditor::removeWidget(const String& id)
 		markModified();
 		widgetList->getList().removeItem(id);
 	}
+}
+
+ChooseUIWidgetWindow::ChooseUIWidgetWindow(UIFactory& factory, UIFactory& gameFactory, Callback callback)
+	: ChooseAssetWindow(factory, std::move(callback), false, UISizerType::Grid, 3)
+	, factory(factory)
+	, gameFactory(gameFactory)
+{
+	setAssetIds(gameFactory.getWidgetClassList(), "widget");
+	setTitle(LocalisedString::fromHardcodedString("Choose Widget"));
+}
+
+std::shared_ptr<UIImage> ChooseUIWidgetWindow::makeIcon(const String& id, bool hasSearch)
+{
+	const auto props = gameFactory.getPropertiesForWidget(id);
+	auto sprite = props.iconName.isEmpty() ? Sprite() : Sprite().setImage(factory.getResources(), props.iconName);
+	return std::make_shared<UIImage>(std::move(sprite));
+}
+
+LocalisedString ChooseUIWidgetWindow::getItemLabel(const String& id, const String& name, bool hasSearch)
+{
+	const auto props = gameFactory.getPropertiesForWidget(id);
+	return LocalisedString::fromUserString(props.name);
 }

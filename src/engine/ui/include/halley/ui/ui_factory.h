@@ -38,6 +38,8 @@ namespace Halley
         };
 
 		std::vector<Entry> entries;
+		String name;
+		String iconName;
 		bool canHaveChildren = true;
 	};
 
@@ -147,6 +149,30 @@ namespace Halley
 		UIFactoryWidgetProperties getGlobalWidgetProperties() const;
 		UIFactoryWidgetProperties getBaseWidgetProperties() const;
 		UIFactoryWidgetProperties getLabelProperties() const;
+		UIFactoryWidgetProperties getButtonProperties() const;
+		UIFactoryWidgetProperties getTextInputProperties() const;
+		UIFactoryWidgetProperties getSpinControlProperties() const;
+		UIFactoryWidgetProperties getSpinControl2Properties() const;
+		UIFactoryWidgetProperties getDropdownProperties() const;
+		UIFactoryWidgetProperties getCheckboxProperties() const;
+		UIFactoryWidgetProperties getImageProperties() const;
+		UIFactoryWidgetProperties getMultiImageProperties() const;
+		UIFactoryWidgetProperties getAnimationProperties() const;
+		UIFactoryWidgetProperties getScrollPaneProperties() const;
+		UIFactoryWidgetProperties getScrollBarProperties() const;
+		UIFactoryWidgetProperties getScrollBarPaneProperties() const;
+		UIFactoryWidgetProperties getSliderProperties() const;
+		UIFactoryWidgetProperties getHorizontalDivProperties() const;
+		UIFactoryWidgetProperties getVerticalDivProperties() const;
+		UIFactoryWidgetProperties getTabbedPaneProperties() const;
+		UIFactoryWidgetProperties getPagedPaneProperties() const;
+		UIFactoryWidgetProperties getFramedImageProperties() const;
+		UIFactoryWidgetProperties getHybridListProperties() const;
+		UIFactoryWidgetProperties getSpinListProperties() const;
+		UIFactoryWidgetProperties getOptionListMorpherProperties() const;
+		UIFactoryWidgetProperties getDebugConsoleProperties() const;
+		UIFactoryWidgetProperties getListProperties() const;
+		UIFactoryWidgetProperties getTreeListProperties() const;
 		
 		bool hasCondition(const String& condition) const;
 		bool resolveConditions(const ConfigNode& node) const;
