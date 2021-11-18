@@ -180,9 +180,19 @@ void PolygonGizmo::refreshEntity()
 
 void PolygonGizmo::loadEntity(PolygonGizmoMode mode)
 {
-	vertices = readPoints();
-
-	setMode(mode);
+	if (getEntityDatas().empty()) {
+		vertices.reset();
+		setMode(PolygonGizmoMode::Move);
+		if (uiRoot) {
+			uiRoot->setActive(false);
+		}
+	} else {
+		vertices = readPoints();
+		setMode(mode);
+		if (uiRoot) {
+			uiRoot->setActive(true);
+		}
+	}
 	
 	loadHandlesFromVertices();
 }
@@ -304,6 +314,7 @@ std::shared_ptr<UIWidget> PolygonGizmo::makeUI()
 	auto ui = factory.makeUI("halley/polygon_gizmo_toolbar");
 	ui->setInteractWithMouse(true);
 
+	uiRoot = ui;
 	uiMode = ui->getWidgetAs<UIList>("mode");
 	uiAddComponent = ui->getWidgetAs<UIButton>("addComponent");
 	

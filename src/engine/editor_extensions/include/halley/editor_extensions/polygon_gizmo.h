@@ -59,6 +59,7 @@ namespace Halley {
 
 		PolygonGizmoMode mode = PolygonGizmoMode::Move;
 		std::optional<PolygonGizmoMode> pendingMode;
+		std::shared_ptr<UIWidget> uiRoot;
 		std::shared_ptr<UIList> uiMode;
 		std::shared_ptr<UIButton> uiAddComponent;
 
