@@ -57,6 +57,7 @@ namespace Halley {
         void setLabel(const LocalisedString& label);
     	void setIcon(Sprite icon);
         void setExpanded(bool expanded);
+        void setForceLeaf(bool leaf);
 
         std::unique_ptr<UITreeListItem> removeFromTree(const String& id);
         void updateTree(UITreeList& treeList);
@@ -99,6 +100,7 @@ namespace Halley {
         void addTreeItem(const String& id, const String& parentId, size_t childIndex, const LocalisedString& label, const String& labelStyle = "label", Sprite icon = Sprite(), bool forceLeaf = false);
         void removeItem(const String& id, bool immediate = true);
         void setLabel(const String& id, const LocalisedString& label, Sprite icon);
+        void setForceLeaf(const String& id, bool forceLeaf);
 
         void clear() override;
         void sortItems();

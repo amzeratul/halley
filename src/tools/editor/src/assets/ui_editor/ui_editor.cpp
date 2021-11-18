@@ -41,10 +41,19 @@ void UIEditor::onMakeUI()
 	doLoadUI();
 }
 
-void UIEditor::onWidgetModified()
+void UIEditor::markModified()
 {
 	uiDefinition->increaseAssetVersion();
 	modified = true;
+}
+
+void UIEditor::onWidgetModified(const String& id)
+{
+	auto data = uiDefinition->findUUID(id);
+	if (data.result) {
+		widgetList->onWidgetModified(id, *data.result);
+	}
+	markModified();
 }
 
 bool UIEditor::isModified()
@@ -136,7 +145,7 @@ void UIEditor::addWidget(const String& referenceId, bool requestedAsChild, Confi
 {
 	auto result = uiDefinition->findUUID(referenceId);
 	if (result.result) {
-		bool canHaveChildren = true; // TODO
+		const bool canHaveChildren = gameFactory->getPropertiesForWidget((*result.result)["class"].asString()).canHaveChildren;
 		const bool canHaveSiblings = result.parent != nullptr;
 		if (!canHaveChildren && !canHaveSiblings) {
 			// Give up
@@ -164,7 +173,7 @@ void UIEditor::removeWidget(const String& id)
 	if (result.result && result.parent) {
 		auto& parentChildren = (*result.parent)["children"].asSequence();
 		std_ex::erase_if(parentChildren, [=] (const ConfigNode& n) { return &n == result.result; });
-		onWidgetModified();
+		markModified();
 		widgetList->getList().removeItem(id);
 	}
 }

@@ -14,6 +14,7 @@ UIWidgetEditor::UIWidgetEditor(String id, UIFactory& factory)
 
 void UIWidgetEditor::setSelectedWidget(const String& id, ConfigNode* node)
 {
+	curId = id;
 	curNode = node;
 	refresh();
 }
@@ -33,7 +34,7 @@ void UIWidgetEditor::setUIEditor(UIEditor& editor)
 
 void UIWidgetEditor::onEntityUpdated()
 {
-	uiEditor->onWidgetModified();
+	uiEditor->onWidgetModified(curId);
 }
 
 void UIWidgetEditor::reloadEntity()

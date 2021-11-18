@@ -52,7 +52,7 @@ void UIWidgetList::populateList()
 	}
 }
 
-void UIWidgetList::addWidget(const ConfigNode& curNode, String parentId, size_t childIdx)
+void UIWidgetList::addWidget(const ConfigNode& curNode, const String& parentId, size_t childIdx)
 {
 	doAddWidget(curNode, parentId, childIdx);
 
@@ -61,35 +61,25 @@ void UIWidgetList::addWidget(const ConfigNode& curNode, String parentId, size_t 
 	list->setSelectedOptionId(curNode["uuid"].asString());
 }
 
-void UIWidgetList::doAddWidget(const ConfigNode& curNode, String parentId, size_t childIdx)
+void UIWidgetList::doAddWidget(const ConfigNode& curNode, const String& parentId, size_t childIdx)
 {
 	const String id = curNode["uuid"].asString();
+	const auto info = getEntryInfo(curNode);
 
-	String name;
-	Sprite icon;
-	bool canHaveChildren = true;
-
-	if (curNode.hasKey("widget")) {
-		const auto& widgetNode = curNode["widget"];
-
-		const auto properties = uiEditor->getGameFactory().getPropertiesForWidget(widgetNode["class"].asString());
-		canHaveChildren = properties.canHaveChildren;
-
-		if (widgetNode.hasKey("id")) {
-			name += widgetNode["id"].asString() + " ";
-		}
-		name += "[" + widgetNode["class"].asString() + "]";
-	} else {
-		name = "[sizer]";
-	}
-
-	list->addTreeItem(id, parentId, childIdx, LocalisedString::fromUserString(name), "label", icon, !canHaveChildren);
+	list->addTreeItem(id, parentId, childIdx, LocalisedString::fromUserString(info.label), "label", info.icon, !info.canHaveChildren);
 
 	if (curNode.hasKey("children")) {
 		for (const auto& c: curNode["children"].asSequence()) {
 			doAddWidget(c, id);
 		}
 	}
+}
+
+void UIWidgetList::onWidgetModified(const String& id, const ConfigNode& data)
+{
+	const auto info = getEntryInfo(data);
+	list->setLabel(id, LocalisedString::fromUserString(info.label), info.icon);
+	list->setForceLeaf(id, info.canHaveChildren);
 }
 
 void UIWidgetList::moveItems(gsl::span<const MoveOperation> changes)
@@ -110,5 +100,25 @@ void UIWidgetList::moveItems(gsl::span<const MoveOperation> changes)
 		}
 	}
 
-	uiEditor->onWidgetModified();
+	uiEditor->markModified();
+}
+
+UIWidgetList::EntryInfo UIWidgetList::getEntryInfo(const ConfigNode& data) const
+{
+	EntryInfo result;
+	
+	if (data.hasKey("widget")) {
+		const auto& widgetNode = data["widget"];
+
+		const auto properties = uiEditor->getGameFactory().getPropertiesForWidget(widgetNode["class"].asString());
+		result.canHaveChildren = properties.canHaveChildren;
+
+		if (widgetNode.hasKey("id") && !widgetNode["id"].asString().isEmpty()) {
+			result.label += widgetNode["id"].asString() + " ";
+		}
+		result.label += "[" + widgetNode["class"].asString() + "]";
+	} else {
+		result.label = "[sizer]";
+	}
+	return result;
 }

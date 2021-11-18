@@ -21,6 +21,7 @@ namespace Halley {
 
     private:
         UIFactory& factory;
+        String curId;
         ConfigNode* curNode = nullptr;
         UIEditor* uiEditor = nullptr;
         std::shared_ptr<EntityEditorFactory> entityFieldFactory;

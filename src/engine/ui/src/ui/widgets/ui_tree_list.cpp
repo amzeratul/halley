@@ -95,6 +95,14 @@ void UITreeList::setLabel(const String& id, const LocalisedString& label, Sprite
 	}
 }
 
+void UITreeList::setForceLeaf(const String& id, bool forceLeaf)
+{
+	auto item = root.tryFindId(id);
+	if (item) {
+		item->setForceLeaf(forceLeaf);
+	}
+}
+
 void UITreeList::clear()
 {
 	UIList::clear();
@@ -510,6 +518,11 @@ void UITreeListItem::setExpanded(bool e)
 		expanded = e;
 		treeControls->setExpanded(e);
 	}
+}
+
+void UITreeListItem::setForceLeaf(bool leaf)
+{
+	forceLeaf = leaf;
 }
 
 std::unique_ptr<UITreeListItem> UITreeListItem::removeFromTree(const String& id)

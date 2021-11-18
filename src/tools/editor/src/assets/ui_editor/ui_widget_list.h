@@ -11,8 +11,9 @@ namespace Halley {
 
         void setDefinition(std::shared_ptr<UIDefinition> definition);
         void setUIEditor(UIEditor& editor);
-        void addWidget(const ConfigNode& node, String parentId, size_t childIdx = std::numeric_limits<size_t>::max());
-        void doAddWidget(const ConfigNode& node, String parentId, size_t childIdx = std::numeric_limits<size_t>::max());
+        void addWidget(const ConfigNode& node, const String& parentId, size_t childIdx = std::numeric_limits<size_t>::max());
+        void doAddWidget(const ConfigNode& node, const String& parentId, size_t childIdx = std::numeric_limits<size_t>::max());
+        void onWidgetModified(const String& id, const ConfigNode& data);
 
         UITreeList& getList();
 
@@ -23,6 +24,12 @@ namespace Halley {
             int childIdx;
         };
 
+        struct EntryInfo {
+	        String label;
+            Sprite icon;
+            bool canHaveChildren = true;
+        };
+
         UIFactory& factory;
         std::shared_ptr<UIDefinition> definition;
         std::shared_ptr<UITreeList> list;
@@ -31,5 +38,6 @@ namespace Halley {
         void populateList();
 
         void moveItems(gsl::span<const MoveOperation> changes);
+        EntryInfo getEntryInfo(const ConfigNode& data) const;
     };
 }
