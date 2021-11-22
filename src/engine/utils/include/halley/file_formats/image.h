@@ -48,6 +48,7 @@ namespace Halley {
 		Image(gsl::span<const gsl::byte> bytes, Format format = Format::Undefined);
 		explicit Image(const ResourceDataStatic& data);
 		Image(const ResourceDataStatic& data, const Metadata& meta);
+		Image(Image&& other);
 		~Image();
 
 		std::unique_ptr<Image> clone();

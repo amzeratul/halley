@@ -58,6 +58,8 @@ Image::Image(const ResourceDataStatic& data, const Metadata& meta)
 	load(data.getSpan(), format);
 }
 
+Image::Image(Image&& other) = default;
+
 Image::~Image()
 {
 	px.reset();
