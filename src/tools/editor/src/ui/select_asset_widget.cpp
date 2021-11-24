@@ -97,7 +97,7 @@ void SelectAssetWidget::choose()
 
 		std::shared_ptr<UIWidget> window;
 		if (type == AssetType::Prefab) {
-			assert(sceneEditorWindow != nullptr);
+			assert(projectWindow != nullptr);
 			window = std::make_shared<ChoosePrefabWindow>(factory, getValue(), *gameResources, *projectWindow, callback);
 		} else {
 			const bool preview = type == AssetType::Sprite || type == AssetType::Animation;
