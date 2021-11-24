@@ -13,6 +13,7 @@
 class Transform2DComponent;
 
 namespace Halley {
+	struct AssetPreviewData;
 	class IEntityEditor;
 	class Image;
 	class IEntityEditorFactory;
@@ -197,12 +198,6 @@ namespace Halley {
 		}
 	};
 
-	struct AssetPreviewData {
-		Sprite sprite;
-		String name;
-		std::shared_ptr<Image> image;
-	};
-
     class ISceneEditor {
     public:    	
         virtual ~ISceneEditor() = default;
@@ -238,8 +233,6 @@ namespace Halley {
         virtual void refreshAssets() = 0;
 
     	virtual void setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizmoCollection) = 0;
-
-    	virtual Rect4f getSpriteTreeBounds(const EntityRef& e) const = 0;
 
     	virtual void cycleHighlight(int delta) = 0;
 

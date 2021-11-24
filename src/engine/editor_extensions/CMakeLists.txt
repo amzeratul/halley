@@ -3,6 +3,7 @@ project (halley-editor-extensions)
 include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/editor_extensions" "../core/include" "../utils/include" "../entity/include" "../ui/include" "../../../shared_gen/cpp")
 
 set(SOURCES
+        "src/asset_preview_generator.cpp"
         "src/component_editor_context.cpp"
         "src/component_field_parameters.cpp"
         "src/entity_validator.cpp"
@@ -16,6 +17,7 @@ set(SOURCES
 set(HEADERS
         "include/halley/editor_extensions/halley_editor_extensions.h"
 
+        "include/halley/editor_extensions/asset_preview_generator.h"
         "include/halley/editor_extensions/component_editor_context.h"
         "include/halley/editor_extensions/component_field_parameters.h"
         "include/halley/editor_extensions/editor_custom_tools_interface.h"

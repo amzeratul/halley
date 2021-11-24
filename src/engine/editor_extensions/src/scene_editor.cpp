@@ -15,6 +15,8 @@
 #include "halley/entity/components/transform_2d_component.h"
 #include "components/sprite_component.h"
 #include "components/camera_component.h"
+#include "halley/core/graphics/material/material.h"
+#include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/graphics/render_target/render_surface.h"
 #include "halley/core/graphics/render_target/render_target_texture.h"
 #include "halley/core/graphics/sprite/animation_player.h"
@@ -112,6 +114,10 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 
 void SceneEditor::render(RenderContext& rc)
 {
+	if (assetPreviewGenerator) {
+		assetPreviewGenerator->render(rc);
+	}
+
 	world->render(rc);
 
 	rc.with(camera).bind([&] (Painter& painter)
@@ -452,60 +458,13 @@ void SceneEditor::showEntity(const UUID& id)
 	auto e = getWorld().findEntity(id);
 	
 	if (e) {
-		const auto aabb = getSpriteTreeBounds(e.value());
+		const auto aabb = getAssetPreviewGenerator().getSpriteTreeBounds(e.value());
 		moveCameraTo2D(aabb.getCenter());
 	}
 }
 
 void SceneEditor::onToolSet(String& tool, String& componentName, String& fieldName)
 {
-}
-
-Rect4f SceneEditor::getSpriteTreeBounds(const EntityRef& e) const
-{
-	std::optional<Rect4f> rect;
-	doGetSpriteTreeBounds(e, rect);
-	return rect.value_or(Rect4f());
-}
-
-void SceneEditor::doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect) const
-{
-	auto cur = getSpriteBounds(e);
-	if (!rect) {
-		rect = cur;
-	}
-	if (cur) {
-		rect = rect->merge(*cur);
-	}
-
-	for (auto& c: e.getRawChildren()) {
-		auto child = EntityRef(*c, e.getWorld());
-		doGetSpriteTreeBounds(child, rect);
-	}
-}
-
-std::optional<Rect4f> SceneEditor::getSpriteBounds(const EntityRef& e) const
-{
-	const auto transform2d = e.tryGetComponent<Transform2DComponent>();
-
-	if (transform2d) {
-		const auto sprite = e.tryGetComponent<SpriteComponent>();
-
-		if (sprite) {
-			if (isSpriteVisibleOnCamera(sprite->sprite, sprite->mask)) {
-				return transform2d->getSpriteAABB(sprite->sprite);
-			}
-		} else {
-			auto pos = transform2d->getGlobalPosition();
-			return Rect4f(pos, pos);
-		}
-	}
-	return {};
-}
-
-bool SceneEditor::isSpriteVisibleOnCamera(const Sprite& sprite, OptionalLite<int> mask) const
-{
-	return true;
 }
 
 void SceneEditor::setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor)
@@ -733,13 +692,20 @@ std::vector<AssetCategoryFilter> SceneEditor::getPrefabCategoryFilters() const
 
 Future<AssetPreviewData> SceneEditor::getAssetPreviewData(AssetType assetType, const String& id, Vector2i size)
 {
-	if (assetType == AssetType::Prefab || assetType == AssetType::Scene) {
-		return getPrefabPreviewData(assetType, id, size);
-	} else if (assetType == AssetType::Sprite || assetType == AssetType::Animation) {
-		return getSpritePreviewData(assetType, id, size);
-	}
+	return getAssetPreviewGenerator().getAssetPreviewData(assetType, id, size);
+}
 
-	return Future<AssetPreviewData>::makeImmediate({});
+AssetPreviewGenerator& SceneEditor::getAssetPreviewGenerator()
+{
+	if (!assetPreviewGenerator) {
+		assetPreviewGenerator = makeAssetPreviewGenerator();
+	}
+	return *assetPreviewGenerator;
+}
+
+std::unique_ptr<AssetPreviewGenerator> SceneEditor::makeAssetPreviewGenerator()
+{
+	return std::make_unique<AssetPreviewGenerator>(getAPI(), getGameResources());
 }
 
 Transform2DComponent* SceneEditor::getTransform(const String& entityId)
@@ -759,54 +725,4 @@ void SceneEditor::initializeEntityValidator(EntityValidator& validator)
 bool SceneEditor::shouldDrawOutline(const Sprite& sprite) const
 {
 	return true;
-}
-
-Future<AssetPreviewData> SceneEditor::getSpritePreviewData(AssetType assetType, const String& id, Vector2i size)
-{
-	return Future<AssetPreviewData>::makeImmediate({});
-}
-
-Future<AssetPreviewData> SceneEditor::getPrefabPreviewData(AssetType assetType, const String& id, Vector2i size)
-{
-	return Future<AssetPreviewData>::makeImmediate({});
-}
-
-AssetPreviewData SceneEditor::makeSpritePreviewData(AssetType assetType, const String& id, Vector2i size, RenderContext& curRC)
-{
-	RenderSurface surface(*getAPI().video, RenderSurfaceOptions());
-	surface.setSize(size);
-
-	auto image = std::make_shared<Image>(Image::Format::RGBA, size);
-
-	Sprite sprite;
-	if (assetType == AssetType::Sprite) {
-		sprite = Sprite().setImage(getGameResources(), id);
-	} else if (assetType == AssetType::Animation) {
-		auto player = AnimationPlayer(getGameResources().get<Animation>(id));
-		player.update(0);
-		player.updateSprite(sprite);
-	}
-
-	auto spriteSize = sprite.getAABB().getSize().round();
-	const int maxDimension = std::max(8, nextPowerOf2<int>(lroundl(std::max(spriteSize.x, spriteSize.y))));
-	const float zoom = std::min(128.0f / maxDimension, 3.0f);
-
-	Camera camera;
-	camera.setPosition(sprite.getAABB().getCenter());
-	camera.setZoom(zoom);
-
-	auto rc = curRC.with(surface.getRenderTarget()).with(camera);
-	rc.bind([&] (Painter& painter)
-	{
-		painter.clear(Colour4f(0, 0, 0, 0));
-		sprite.draw(painter);
-	});
-	curRC.bind([&] (Painter& painter)
-	{
-		surface.getRenderTarget().getTexture(0)->copyToImage(painter, *image);
-	});
-
-	AssetPreviewData data;
-	data.image = std::move(image);
-	return data;
 }

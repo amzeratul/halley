@@ -1,5 +1,6 @@
 #pragma once
 
+#include "asset_preview_generator.h"
 #include "halley/core/game/scene_editor_interface.h"
 #include "halley/core/graphics/camera.h"
 #include "halley/entity/entity.h"
@@ -47,10 +48,6 @@ namespace Halley {
 
 		void onSceneLoaded(Prefab& scene) override;
     	void onSceneSaved() override;
-    	
-		Rect4f getSpriteTreeBounds(const EntityRef& e) const override;
-		std::optional<Rect4f> getSpriteBounds(const EntityRef& e) const;
-		virtual bool isSpriteVisibleOnCamera(const Sprite& sprite, OptionalLite<int> mask) const;
 
     	std::optional<Vector2f> getMousePos() const override;
 		Vector2f getCameraPos() const override;
@@ -106,9 +103,7 @@ namespace Halley {
     	std::vector<EntityRef> getRootEntitiesAt(Rect4f area, bool allowUnselectable) const;
        	virtual float getSpriteDepth(EntityRef& e, Rect4f area) const;
 
-		AssetPreviewData makeSpritePreviewData(AssetType assetType, const String& id, Vector2i size, RenderContext& renderContext);
-		virtual Future<AssetPreviewData> getSpritePreviewData(AssetType assetType, const String& id, Vector2i size);
-		virtual Future<AssetPreviewData> getPrefabPreviewData(AssetType assetType, const String& id, Vector2i size);
+    	virtual std::unique_ptr<AssetPreviewGenerator> makeAssetPreviewGenerator();
 
 	private:
 		const HalleyAPI* api = nullptr;
@@ -133,8 +128,10 @@ namespace Halley {
     	std::optional<Rect4f> selBox;
 		std::vector<UUID> selBoxStartSelectedEntities;
 
+		std::unique_ptr<AssetPreviewGenerator> assetPreviewGenerator;
+		AssetPreviewGenerator& getAssetPreviewGenerator();
+
     	void moveCameraTo2D(Vector2f pos);
-		void doGetSpriteTreeBounds(const EntityRef& e, std::optional<Rect4f>& rect) const;
     	Vector2f roundPosition(Vector2f pos) const;
 		Vector2f roundPosition(Vector2f pos, float zoom) const;
     	EntityRef getEntity(const UUID& uuid) const;
