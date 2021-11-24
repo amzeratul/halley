@@ -3,7 +3,7 @@
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/widgets/ui_textinput.h"
 #include "src/scene/choose_asset_window.h"
-#include "src/scene/scene_editor_window.h"
+#include "src/ui/project_window.h"
 using namespace Halley;
 
 SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, AssetType type)
@@ -14,11 +14,11 @@ SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, Asset
 	makeUI();
 }
 
-SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, AssetType type, Resources& gameResources, ISceneEditorWindow& sceneEditorWindow)
+SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, AssetType type, Resources& gameResources, IProjectWindow& projectWindow)
 	: SelectAssetWidget(id, factory, type)
 {
 	this->gameResources = &gameResources;
-	this->sceneEditorWindow = &dynamic_cast<SceneEditorWindow&>(sceneEditorWindow);
+	this->projectWindow = &dynamic_cast<ProjectWindow&>(projectWindow);
 }
 
 void SelectAssetWidget::setValue(const String& newValue)
@@ -58,9 +58,9 @@ void SelectAssetWidget::setDefaultAssetId(String assetId)
 	}
 }
 
-void SelectAssetWidget::setSceneEditorWindow(SceneEditorWindow& window)
+void SelectAssetWidget::setProjectWindow(ProjectWindow& window)
 {
-	sceneEditorWindow = &window;
+	projectWindow = &window;
 }
 
 void SelectAssetWidget::makeUI()
@@ -98,10 +98,10 @@ void SelectAssetWidget::choose()
 		std::shared_ptr<UIWidget> window;
 		if (type == AssetType::Prefab) {
 			assert(sceneEditorWindow != nullptr);
-			window = std::make_shared<ChoosePrefabWindow>(factory, getValue(), *gameResources, *sceneEditorWindow, callback);
+			window = std::make_shared<ChoosePrefabWindow>(factory, getValue(), *gameResources, *projectWindow, callback);
 		} else {
 			const bool preview = type == AssetType::Sprite || type == AssetType::Animation;
-			window = std::make_shared<ChooseAssetTypeWindow>(factory, type, getValue(), *gameResources, *sceneEditorWindow, preview, callback);
+			window = std::make_shared<ChooseAssetTypeWindow>(factory, type, getValue(), *gameResources, *projectWindow, preview, callback);
 		}
 		getRoot()->addChild(std::move(window));
 	}

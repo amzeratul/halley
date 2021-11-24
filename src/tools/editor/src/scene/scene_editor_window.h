@@ -117,6 +117,8 @@ namespace Halley {
 		void refreshGizmos();
 		void validateAllEntities();
 
+		ProjectWindow& getProjectWindow() const;
+
 	protected:
 		void update(Time t, bool moved) override;
 

@@ -8,6 +8,7 @@
 #include "halley/ui/widgets/ui_dropdown.h"
 #include "halley/ui/widgets/ui_textinput.h"
 #include "scene_editor_window.h"
+#include "src/ui/project_window.h"
 #include "src/ui/select_asset_widget.h"
 using namespace Halley;
 
@@ -55,7 +56,7 @@ void EntityEditor::setSceneEditorWindow(SceneEditorWindow& editor, const HalleyA
 	sceneEditor = &editor;
 	entityIcons = &editor.getEntityIcons();
 	this->api = &api;
-	prefabName->setSceneEditorWindow(editor);
+	prefabName->setProjectWindow(editor.getProjectWindow());
 
 	entityValidatorUI->setValidator(editor.getEntityValidator());
 
@@ -83,7 +84,7 @@ void EntityEditor::makeUI()
 	entityName = getWidgetAs<UITextInput>("entityName");
 	prefabName = getWidgetAs<SelectAssetWidget>("prefabName");
 	if (sceneEditor) {
-		prefabName->setSceneEditorWindow(*sceneEditor);
+		prefabName->setProjectWindow(sceneEditor->getProjectWindow());
 	}
 	entityIcon = getWidgetAs<UIDropdown>("entityIcon");
 
@@ -617,9 +618,9 @@ void EntityEditor::setHighlightedComponents(std::vector<String> componentNames)
 	}
 }
 
-ISceneEditorWindow& EntityEditor::getSceneEditorWindow() const
+IProjectWindow& EntityEditor::getProjectWindow() const
 {
-	return *sceneEditor;
+	return sceneEditor->getProjectWindow();
 }
 
 void EntityEditor::setComponentColour(const String& name, UIWidget& component)

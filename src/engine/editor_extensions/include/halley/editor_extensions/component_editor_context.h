@@ -3,6 +3,7 @@
 #include <memory>
 
 namespace Halley {
+	class IProjectWindow;
 	class ISceneEditorWindow;
 	class IUISizer;
 	class ComponentFieldParameters;
@@ -28,7 +29,7 @@ namespace Halley {
 		virtual void reloadEntity() = 0;
 		virtual void setTool(const String& tool, const String& componentName, const String& fieldName) = 0;
 		virtual void setDefaultName(const String& name, const String& prevName) = 0;
-		virtual ISceneEditorWindow& getSceneEditorWindow() const = 0;
+		virtual IProjectWindow& getProjectWindow() const = 0;
 	};
 
 	class IEntityEditor : public IEntityEditorCallbacks {
@@ -56,7 +57,7 @@ namespace Halley {
 
         UIFactory& getUIFactory() const;
 	    Resources& getGameResources() const;
-		ISceneEditorWindow& getSceneEditorWindow() const;
+		IProjectWindow& getProjectWindow() const;
         void onEntityUpdated() const;
 	    void setTool(const String& tool, const String& componentName, const String& fieldName) const;
     	

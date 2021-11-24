@@ -4,7 +4,7 @@
 #include <optional>
 
 namespace Halley {
-	class SceneEditorWindow;
+	class ProjectWindow;
 	class EditorUIFactory;
 	class UIFactory;
 	class UIList;
@@ -75,7 +75,7 @@ namespace Halley {
 
 	class ChooseAssetTypeWindow : public ChooseAssetWindow {
 	public:
-        ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, bool hasPreview, Callback callback);
+        ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, bool hasPreview, Callback callback);
 
     protected:
         std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
@@ -87,7 +87,7 @@ namespace Halley {
         std::shared_ptr<UIImage> makePreviewIcon(const String& id, bool hasSearch);
 		std::shared_ptr<UISizer> makePreviewItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch);
 
-		SceneEditorWindow& sceneEditorWindow;
+		ProjectWindow& projectWindow;
 		AssetType type;
 
 	private:
@@ -112,7 +112,7 @@ namespace Halley {
 
 	class ChoosePrefabWindow : public ChooseAssetTypeWindow {
 	public:
-		ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, Callback callback);
+		ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, Callback callback);
 	
     protected:
 		void onCategorySet(const String& id) override;

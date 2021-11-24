@@ -685,11 +685,6 @@ void SceneEditor::onSelectionBox(const SceneEditorInputState& input, SceneEditor
 	output.selectionMode = UIList::SelectionMode::Normal;
 }
 
-std::vector<AssetCategoryFilter> SceneEditor::getPrefabCategoryFilters() const
-{
-	return {};
-}
-
 void SceneEditor::setAssetPreviewGenerator(AssetPreviewGenerator& generator)
 {
 	assetPreviewGenerator = &generator;

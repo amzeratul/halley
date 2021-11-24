@@ -179,25 +179,6 @@ namespace Halley {
         virtual std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& parameters) = 0;
         virtual ConfigNode getDefaultNode() const { return ConfigNode(); }
     };
-	
-	class AssetCategoryFilter {
-	public:
-		String id;
-		LocalisedString name;
-		Sprite icon;
-		std::vector<String> prefixes;
-		bool showName = false;
-
-		bool matches(const String& id) const
-		{
-			for (const auto& prefix: prefixes) {
-				if (id.startsWith(prefix)) {
-					return true;
-				}
-			}
-			return false;
-		}
-	};
 
     class ISceneEditor {
     public:    	
@@ -246,7 +227,6 @@ namespace Halley {
         virtual void onSceneContextMenuSelection(const String& id) = 0;
     	virtual void onSceneContextMenuHighlight(const String& id) = 0;
     	
-        virtual std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const = 0;
         virtual void setAssetPreviewGenerator(AssetPreviewGenerator& generator) = 0;
 
     	virtual Transform2DComponent* getTransform(const String& entityId) = 0;

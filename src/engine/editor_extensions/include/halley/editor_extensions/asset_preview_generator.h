@@ -5,6 +5,7 @@
 #include "halley/entity/world.h"
 #include "halley/maths/vector2.h"
 #include "halley/resources/resource.h"
+#include "halley/text/i18n.h"
 
 namespace Halley {
 	class EntityFactory;
@@ -22,6 +23,25 @@ namespace Halley {
 		String name;
 		std::shared_ptr<Image> image;
 	};
+	
+	class AssetCategoryFilter {
+	public:
+		String id;
+		LocalisedString name;
+		Sprite icon;
+		std::vector<String> prefixes;
+		bool showName = false;
+
+		bool matches(const String& id) const
+		{
+			for (const auto& prefix: prefixes) {
+				if (id.startsWith(prefix)) {
+					return true;
+				}
+			}
+			return false;
+		}
+	};
 
 	class AssetPreviewGenerator {
 	public:
@@ -29,11 +49,13 @@ namespace Halley {
 		virtual ~AssetPreviewGenerator() = default;
 
 		Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size);
-		void render(RenderContext& rc);
+		virtual std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const;
 
 		Rect4f getSpriteTreeBounds(const EntityRef& e) const;
 		std::optional<Rect4f> getSpriteBounds(const EntityRef& e) const;
 
+		void render(RenderContext& rc);
+		
 	protected:
 		const HalleyAPI& api;
 		Resources& resources;

@@ -63,7 +63,6 @@ namespace Halley {
     	void onSceneContextMenuSelection(const String& id) override;
     	void onSceneContextMenuHighlight(const String& id) override;
 
-		std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const override;
     	void setAssetPreviewGenerator(AssetPreviewGenerator& generator) override;
 
 		Transform2DComponent* getTransform(const String& entityId) override;

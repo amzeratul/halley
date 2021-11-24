@@ -412,6 +412,11 @@ void SceneEditorWindow::validateAllEntities()
 	entityList->validateAllEntities();
 }
 
+ProjectWindow& SceneEditorWindow::getProjectWindow() const
+{
+	return projectWindow;
+}
+
 void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 {
 	if (status == ProjectDLL::Status::Loaded) {
@@ -892,7 +897,7 @@ void SceneEditorWindow::addNewEntity(std::optional<String> reference, bool child
 
 void SceneEditorWindow::addNewPrefab(std::optional<String> reference, bool childOfReference)
 {
-	getRoot()->addChild(std::make_shared<ChoosePrefabWindow>(uiFactory, "", project.getGameResources(), *this, [=] (std::optional<String> result)
+	getRoot()->addChild(std::make_shared<ChoosePrefabWindow>(uiFactory, "", project.getGameResources(), projectWindow, [=] (std::optional<String> result)
 	{
 		if (result) {
 			addNewPrefab(reference.value_or(currentEntityIds.empty() ? "" : currentEntityIds.front()), childOfReference, result.value());
@@ -1392,11 +1397,6 @@ void SceneEditorWindow::openAssetHere(AssetType assetType, const String& assetId
 String SceneEditorWindow::getAssetKey() const
 {
 	return origPrefabAssetType + ":" + prefab->getAssetId();
-}
-
-std::vector<AssetCategoryFilter> SceneEditorWindow::getPrefabCategoryFilters() const
-{
-	return gameBridge->getPrefabCategoryFilters();
 }
 
 Future<AssetPreviewData> SceneEditorWindow::getAssetPreviewData(AssetType assetType, const String& id, Vector2i size)

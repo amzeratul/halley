@@ -6,8 +6,9 @@
 #include "src/scene/choose_asset_window.h"
 using namespace Halley;
 
-UIEditor::UIEditor(UIFactory& factory, Resources& gameResources, Project& project, const HalleyAPI& api)
+UIEditor::UIEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow, const HalleyAPI& api)
 	: AssetEditor(factory, gameResources, project, AssetType::UIDefinition)
+	, projectWindow(projectWindow)
 {
 	gameI18N = std::make_unique<I18N>(gameResources, I18NLanguage("en-GB"));
 	gameFactory = project.getGameInstance()->createUIFactory(api, gameResources, *gameI18N);
@@ -21,7 +22,7 @@ void UIEditor::onMakeUI()
 	widgetList->setUIEditor(*this);
 	widgetEditor = getWidgetAs<UIWidgetEditor>("widgetEditor");
 	widgetEditor->setGameResources(gameResources);
-	widgetEditor->setUIEditor(*this);
+	widgetEditor->setUIEditor(*this, projectWindow);
 
 	setHandle(UIEventType::ListSelectionChanged, "widgetsList", [=] (const UIEvent& event)
 	{

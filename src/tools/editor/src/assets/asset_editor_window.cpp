@@ -182,7 +182,7 @@ std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(Path filePath, AssetT
 	case AssetType::RenderGraphDefinition:
 		return std::make_shared<RenderGraphEditor>(factory, project.getGameResources(), project, type);
 	case AssetType::UIDefinition:
-		return std::make_shared<UIEditor>(factory, project.getGameResources(), project, projectWindow.getAPI());
+		return std::make_shared<UIEditor>(factory, project.getGameResources(), project, projectWindow, projectWindow.getAPI());
 	}
 	return {};
 }

@@ -305,7 +305,7 @@ public:
 		auto& fieldData = data.getFieldData();
 		fieldData.ensureType(ConfigNodeType::Map);
 
-		auto materialWidget = std::make_shared<SelectAssetWidget>("material", context.getUIFactory(), AssetType::MaterialDefinition, context.getGameResources(), context.getSceneEditorWindow());
+		auto materialWidget = std::make_shared<SelectAssetWidget>("material", context.getUIFactory(), AssetType::MaterialDefinition, context.getGameResources(), context.getProjectWindow());
 		materialWidget->setDefaultAssetId("Halley/Sprite");
 		
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
@@ -359,7 +359,7 @@ public:
 				const String& srcData = fieldData[fieldData.hasKey(key) || backupKey.isEmpty() ? key : backupKey].asString("");
 
 				const auto label = context.makeLabel("- " + tex.name);
-				const auto widget = std::make_shared<SelectAssetWidget>(key, context.getUIFactory(), AssetType::Sprite, context.getGameResources(), context.getSceneEditorWindow());
+				const auto widget = std::make_shared<SelectAssetWidget>(key, context.getUIFactory(), AssetType::Sprite, context.getGameResources(), context.getProjectWindow());
 				widget->setDefaultAssetId(tex.defaultTextureName);
 				
 				container->add(label, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
@@ -486,7 +486,7 @@ public:
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 		container->getSizer().setColumnProportions({{0, 1}});
 		container->add(context.makeLabel("Animation"));
-		container->add(std::make_shared<SelectAssetWidget>("animation", context.getUIFactory(), AssetType::Animation, context.getGameResources(), context.getSceneEditorWindow()));
+		container->add(std::make_shared<SelectAssetWidget>("animation", context.getUIFactory(), AssetType::Animation, context.getGameResources(), context.getProjectWindow()));
 		container->add(context.makeLabel("Material"));
 		auto material = std::make_shared<UITextInput>("material", context.getUIFactory().getStyle("inputThin"), "");
 		material->setReadOnly(true);
@@ -1007,7 +1007,7 @@ public:
 
 		std::shared_ptr<IUIElement> result;
 		if (type) {
-			auto widget = std::make_shared<SelectAssetWidget>("asset", context.getUIFactory(), type.value(), context.getGameResources(), context.getSceneEditorWindow());
+			auto widget = std::make_shared<SelectAssetWidget>("asset", context.getUIFactory(), type.value(), context.getGameResources(), context.getProjectWindow());
 			widget->bindData("asset", assetName.asString(""), [&context, data](String newVal)
 			{
 				auto& fieldData = data.getFieldData();

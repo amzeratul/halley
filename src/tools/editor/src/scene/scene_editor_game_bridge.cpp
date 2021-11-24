@@ -342,14 +342,6 @@ void SceneEditorGameBridge::onSceneContextMenuHighlight(const String& id)
 	}
 }
 
-std::vector<AssetCategoryFilter> SceneEditorGameBridge::getPrefabCategoryFilters()
-{
-	if (interfaceReady) {
-		return interface->getPrefabCategoryFilters();
-	}
-	return {};
-}
-
 Transform2DComponent* SceneEditorGameBridge::getTransform(const String& entityId)
 {
 	if (interfaceReady) {

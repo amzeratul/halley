@@ -1,12 +1,12 @@
 #include "choose_asset_window.h"
 
-#include "scene_editor_window.h"
 #include "halley/ui/ui_anchor.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/ui/widgets/ui_list.h"
 #include "src/ui/editor_ui_factory.h"
 #include "halley/tools/project/project.h"
+#include "src/ui/project_window.h"
 
 using namespace Halley;
 
@@ -348,9 +348,9 @@ bool ChooseImportAssetWindow::canShowAll() const
 
 
 
-ChooseAssetTypeWindow::ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, bool hasPreview, Callback callback)
+ChooseAssetTypeWindow::ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, bool hasPreview, Callback callback)
 	: ChooseAssetWindow(factory, std::move(callback), false, UISizerType::Grid, hasPreview ? 4 : 1)
-	, sceneEditorWindow(sceneEditorWindow)
+	, projectWindow(projectWindow)
 	, type(type)
 	, hasPreview(hasPreview)
 {
@@ -422,7 +422,7 @@ std::shared_ptr<UIImage> ChooseAssetTypeWindow::makePreviewIcon(const String& id
 	
 	image->addBehaviour(std::make_shared<UIImageVisibleBehaviour>([imageWeak, this, id, thumbSize] (UIImage& img)
 	{
-		if (auto future = sceneEditorWindow.getAssetPreviewData(type, id, Vector2i(thumbSize)); future.isValid()) {
+		if (auto future = projectWindow.getAssetPreviewData(type, id, Vector2i(thumbSize)); future.isValid()) {
 			future.then(Executors::getMainThread(), [imageWeak, thumbSize] (AssetPreviewData data)
 			{
 				if (auto image = imageWeak.lock(); image) {
@@ -456,14 +456,14 @@ std::shared_ptr<UISizer> ChooseAssetTypeWindow::makePreviewItemSizer(std::shared
 
 
 
-ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, SceneEditorWindow& sceneEditorWindow, Callback callback)
-	: ChooseAssetTypeWindow(factory, AssetType::Prefab, defaultOption, gameResources, sceneEditorWindow, true, std::move(callback))
+ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, Callback callback)
+	: ChooseAssetTypeWindow(factory, AssetType::Prefab, defaultOption, gameResources, projectWindow, true, std::move(callback))
 {
-	const auto lastCategory = sceneEditorWindow.getSetting(EditorSettingType::Project, lastCategoryKey).asString("");
-	setCategoryFilters(sceneEditorWindow.getPrefabCategoryFilters(), lastCategory);
+	const auto lastCategory = projectWindow.getSetting(EditorSettingType::Project, lastCategoryKey).asString("");
+	setCategoryFilters(projectWindow.getAssetPreviewGenerator().getPrefabCategoryFilters(), lastCategory);
 }
 
 void ChoosePrefabWindow::onCategorySet(const String& id)
 {
-	sceneEditorWindow.setSetting(EditorSettingType::Project, lastCategoryKey, ConfigNode(id));
+	projectWindow.setSetting(EditorSettingType::Project, lastCategoryKey, ConfigNode(id));
 }

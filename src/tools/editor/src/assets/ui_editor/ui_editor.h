@@ -13,7 +13,7 @@ namespace Halley {
 
 	class UIEditor : public AssetEditor {
 	public:
-		UIEditor(UIFactory& factory, Resources& gameResources, Project& project, const HalleyAPI& api);
+		UIEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow, const HalleyAPI& api);
 
 		void reload() override;
 		void onMakeUI() override;
@@ -34,6 +34,7 @@ namespace Halley {
 		std::unique_ptr<I18N> gameI18N;
 		std::shared_ptr<UIWidgetList> widgetList;
 		std::shared_ptr<UIWidgetEditor> widgetEditor;
+		ProjectWindow& projectWindow;
 
 		std::shared_ptr<UIDefinition> uiDefinition;
 		std::shared_ptr<UIWidget> display;

@@ -2,6 +2,7 @@
 
 #include "ui_editor.h"
 #include "src/scene/entity_editor.h"
+#include "src/ui/project_window.h"
 
 using namespace Halley;
 
@@ -27,9 +28,10 @@ void UIWidgetEditor::setGameResources(Resources& resources)
 	refresh();
 }
 
-void UIWidgetEditor::setUIEditor(UIEditor& editor)
+void UIWidgetEditor::setUIEditor(UIEditor& editor, ProjectWindow& project)
 {
 	uiEditor = &editor;
+	projectWindow = &project;
 }
 
 void UIWidgetEditor::onEntityUpdated()
@@ -49,10 +51,9 @@ void UIWidgetEditor::setDefaultName(const String& name, const String& prevName)
 {
 }
 
-ISceneEditorWindow& UIWidgetEditor::getSceneEditorWindow() const
+IProjectWindow& UIWidgetEditor::getProjectWindow() const
 {
-	ISceneEditorWindow* badPtr = nullptr;
-	return *badPtr;
+	return *projectWindow;
 }
 
 void UIWidgetEditor::refresh()

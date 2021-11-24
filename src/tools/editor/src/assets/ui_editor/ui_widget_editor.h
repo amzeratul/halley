@@ -1,6 +1,7 @@
 #pragma once
 
 namespace Halley {
+	class ProjectWindow;
 	class EntityEditorFactory;
     class UIEditor;
 
@@ -10,20 +11,21 @@ namespace Halley {
 
     	void setSelectedWidget(const String& id, ConfigNode* node);
         void setGameResources(Resources& resources);
-        void setUIEditor(UIEditor& uiEditor);
+        void setUIEditor(UIEditor& uiEditor, ProjectWindow& projectWindow);
 
     protected:
         void onEntityUpdated() override;
         void reloadEntity() override;
         void setTool(const String& tool, const String& componentName, const String& fieldName) override;
         void setDefaultName(const String& name, const String& prevName) override;
-        ISceneEditorWindow& getSceneEditorWindow() const override;
+        IProjectWindow& getProjectWindow() const override;
 
     private:
         UIFactory& factory;
         String curId;
         ConfigNode* curNode = nullptr;
         UIEditor* uiEditor = nullptr;
+        ProjectWindow* projectWindow = nullptr;
         std::shared_ptr<EntityEditorFactory> entityFieldFactory;
 
         void refresh();
