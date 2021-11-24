@@ -114,10 +114,6 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 
 void SceneEditor::render(RenderContext& rc)
 {
-	if (assetPreviewGenerator) {
-		assetPreviewGenerator->render(rc);
-	}
-
 	world->render(rc);
 
 	rc.with(camera).bind([&] (Painter& painter)

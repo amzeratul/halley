@@ -52,6 +52,8 @@ namespace Halley {
         AssetPreviewGenerator& getAssetPreviewGenerator();
         Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size);
 
+        void render(RenderContext& rc) const override;
+
     protected:
         void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 

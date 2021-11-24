@@ -471,7 +471,7 @@ Future<AssetPreviewData> ProjectWindow::getAssetPreviewData(AssetType assetType,
 		return Future<AssetPreviewData>::makeImmediate(std::move(data));
 	}
 
-	return assetPreviewGenerator->getAssetPreviewData(assetType, id, size).then([=] (AssetPreviewData data) -> AssetPreviewData
+	return getAssetPreviewGenerator().getAssetPreviewData(assetType, id, size).then([=] (AssetPreviewData data) -> AssetPreviewData
 	{
 		// Store in cache
 		project.setCachedAssetPreview(assetType, id, data);
@@ -480,6 +480,13 @@ Future<AssetPreviewData> ProjectWindow::getAssetPreviewData(AssetType assetType,
 		data.sprite.setImage(project.getGameResources(), *api.video, data.image);
 		return data;
 	});
+}
+
+void ProjectWindow::render(RenderContext& rc) const
+{
+	if (assetPreviewGenerator) {
+		assetPreviewGenerator->render(rc);
+	}
 }
 
 
