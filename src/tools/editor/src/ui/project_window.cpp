@@ -446,6 +446,21 @@ void ProjectWindow::closeProject()
 	}
 }
 
+AssetPreviewGenerator& ProjectWindow::getAssetPreviewGenerator()
+{
+	if (!assetPreviewGenerator) {
+		if (hasDLL) {
+			project.withLoadedDLL([&] (ProjectDLL& dll)
+			{
+				assetPreviewGenerator = dll.getGame().createAssetPreviewGenerator(getAPI(), project.getGameResources());
+			});
+		} else {
+			throw Exception("Unable to create Asset Preview Generator", HalleyExceptions::Core);
+		}
+	}
+	return *assetPreviewGenerator;
+}
+
 
 ProjectWindow::SettingsStorage::SettingsStorage(std::shared_ptr<ISaveData> saveData, String path)
 	: saveData(std::move(saveData))

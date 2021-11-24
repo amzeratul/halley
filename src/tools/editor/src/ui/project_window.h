@@ -49,6 +49,8 @@ namespace Halley {
         bool onQuitRequested();
         void closeProject();
 
+        AssetPreviewGenerator& getAssetPreviewGenerator();
+
     protected:
         void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 
@@ -102,6 +104,8 @@ namespace Halley {
     	std::shared_ptr<AssetsBrowser> assetEditorWindow;
         std::shared_ptr<ConsoleWindow> consoleWindow;
         std::shared_ptr<ChooseImportAssetWindow> assetFinder;
+
+        std::unique_ptr<AssetPreviewGenerator> assetPreviewGenerator;
 
     	std::shared_ptr<UIDebugConsoleController> debugConsoleController;
     	std::shared_ptr<UIDebugConsoleCommands> debugConsoleCommands;

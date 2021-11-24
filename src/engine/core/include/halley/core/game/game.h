@@ -14,6 +14,7 @@ namespace Halley
 	class GameConsole;
 	class ISceneEditor;
 	class IEditorCustomTools;
+	class AssetPreviewGenerator;
 	
 	class Game
 	{
@@ -45,6 +46,7 @@ namespace Halley
 
 		virtual std::unique_ptr<ISceneEditor> createSceneEditorInterface();
 		virtual std::unique_ptr<IEditorCustomTools> createEditorCustomToolsInterface();
+		virtual std::unique_ptr<AssetPreviewGenerator> createAssetPreviewGenerator(const HalleyAPI& api, Resources& resources);
 		virtual std::unique_ptr<UIFactory> createUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n);
 		virtual void attachToEditorDebugConsole(UIDebugConsoleCommands& commands, Resources& gameResources, IProject& project);
 

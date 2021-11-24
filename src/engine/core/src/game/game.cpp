@@ -1,5 +1,6 @@
 #include "halley/core/game/game.h"
 
+#include "halley/editor_extensions/asset_preview_generator.h"
 #include "halley/ui/ui_factory.h"
 using namespace Halley;
 
@@ -57,6 +58,11 @@ std::unique_ptr<ISceneEditor> Game::createSceneEditorInterface()
 std::unique_ptr<IEditorCustomTools> Game::createEditorCustomToolsInterface()
 {
 	return {};
+}
+
+std::unique_ptr<AssetPreviewGenerator> Game::createAssetPreviewGenerator(const HalleyAPI& api, Resources& resources)
+{
+	return std::make_unique<AssetPreviewGenerator>(api, resources);
 }
 
 std::unique_ptr<UIFactory> Game::createUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n)
