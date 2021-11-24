@@ -458,7 +458,7 @@ void SceneEditor::showEntity(const UUID& id)
 	auto e = getWorld().findEntity(id);
 	
 	if (e) {
-		const auto aabb = getAssetPreviewGenerator().getSpriteTreeBounds(e.value());
+		const auto aabb = assetPreviewGenerator->getSpriteTreeBounds(e.value());
 		moveCameraTo2D(aabb.getCenter());
 	}
 }
@@ -692,20 +692,12 @@ std::vector<AssetCategoryFilter> SceneEditor::getPrefabCategoryFilters() const
 
 Future<AssetPreviewData> SceneEditor::getAssetPreviewData(AssetType assetType, const String& id, Vector2i size)
 {
-	return getAssetPreviewGenerator().getAssetPreviewData(assetType, id, size);
+	return assetPreviewGenerator->getAssetPreviewData(assetType, id, size);
 }
 
-AssetPreviewGenerator& SceneEditor::getAssetPreviewGenerator()
+void SceneEditor::setAssetPreviewGenerator(AssetPreviewGenerator& generator)
 {
-	if (!assetPreviewGenerator) {
-		assetPreviewGenerator = makeAssetPreviewGenerator();
-	}
-	return *assetPreviewGenerator;
-}
-
-std::unique_ptr<AssetPreviewGenerator> SceneEditor::makeAssetPreviewGenerator()
-{
-	return std::make_unique<AssetPreviewGenerator>(getAPI(), getGameResources());
+	assetPreviewGenerator = &generator;
 }
 
 Transform2DComponent* SceneEditor::getTransform(const String& entityId)

@@ -65,6 +65,7 @@ namespace Halley {
 
 		std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const override;
     	Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size) override;
+    	void setAssetPreviewGenerator(AssetPreviewGenerator& generator) override;
 
 		Transform2DComponent* getTransform(const String& entityId) override;
 
@@ -103,8 +104,6 @@ namespace Halley {
     	std::vector<EntityRef> getRootEntitiesAt(Rect4f area, bool allowUnselectable) const;
        	virtual float getSpriteDepth(EntityRef& e, Rect4f area) const;
 
-    	virtual std::unique_ptr<AssetPreviewGenerator> makeAssetPreviewGenerator();
-
 	private:
 		const HalleyAPI* api = nullptr;
 		Resources* resources = nullptr;
@@ -128,8 +127,7 @@ namespace Halley {
     	std::optional<Rect4f> selBox;
 		std::vector<UUID> selBoxStartSelectedEntities;
 
-		std::unique_ptr<AssetPreviewGenerator> assetPreviewGenerator;
-		AssetPreviewGenerator& getAssetPreviewGenerator();
+		AssetPreviewGenerator* assetPreviewGenerator = nullptr;
 
     	void moveCameraTo2D(Vector2f pos);
     	Vector2f roundPosition(Vector2f pos) const;

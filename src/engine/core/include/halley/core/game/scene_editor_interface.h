@@ -45,6 +45,7 @@ namespace Halley {
 	class SceneEditorGizmo;
 	class UIList;
 	class EntityIcons;
+	class AssetPreviewGenerator;
 	struct UIPopupMenuItem;
     struct EntityId;
 	struct SceneEditorInputState;
@@ -247,6 +248,7 @@ namespace Halley {
     	
         virtual std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const = 0;
         virtual Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size) = 0;
+        virtual void setAssetPreviewGenerator(AssetPreviewGenerator& generator) = 0;
 
     	virtual Transform2DComponent* getTransform(const String& entityId) = 0;
 
