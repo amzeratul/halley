@@ -29,7 +29,7 @@ UIRoot::UIRoot(const HalleyAPI& api, Rect4f rect)
 
 UIRoot::~UIRoot()
 {
-	Logger::logInfo(toString(keyPressListeners.size()) + " key press listeners left.");
+	//Logger::logInfo(toString(keyPressListeners.size()) + " key press listeners left.");
 	keyPressListeners.clear();
 	UIParent::clear();
 }
