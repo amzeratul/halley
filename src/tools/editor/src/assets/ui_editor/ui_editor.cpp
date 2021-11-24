@@ -144,7 +144,9 @@ void UIEditor::addWidget(const String& referenceId, bool requestedAsChild, Confi
 {
 	auto result = uiDefinition->findUUID(referenceId);
 	if (result.result) {
-		const bool canHaveChildren = gameFactory->getPropertiesForWidget((*result.result)["class"].asString()).canHaveChildren;
+		auto& referenceNode = *result.result;
+		const auto widgetClass = referenceNode.hasKey("widget") ? referenceNode["widget"]["class"].asString("") : "sizer";
+		const bool canHaveChildren = gameFactory->getPropertiesForWidget(widgetClass).canHaveChildren;
 		const bool canHaveSiblings = result.parent != nullptr;
 		if (!canHaveChildren && !canHaveSiblings) {
 			// Give up
@@ -152,7 +154,7 @@ void UIEditor::addWidget(const String& referenceId, bool requestedAsChild, Confi
 		}
 		const bool asChild = (requestedAsChild && canHaveChildren) || (!canHaveSiblings);
 
-		auto& parent = asChild ? *result.result : *result.parent;
+		auto& parent = asChild ? referenceNode : *result.parent;
 		auto& parentChildren = parent["children"].asSequence();
 		const auto childIdx = std::min(parentChildren.size(), asChild ? std::numeric_limits<size_t>::max() : size_t(result.childIdx + 1));
 
