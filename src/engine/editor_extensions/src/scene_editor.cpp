@@ -690,11 +690,6 @@ std::vector<AssetCategoryFilter> SceneEditor::getPrefabCategoryFilters() const
 	return {};
 }
 
-Future<AssetPreviewData> SceneEditor::getAssetPreviewData(AssetType assetType, const String& id, Vector2i size)
-{
-	return assetPreviewGenerator->getAssetPreviewData(assetType, id, size);
-}
-
 void SceneEditor::setAssetPreviewGenerator(AssetPreviewGenerator& generator)
 {
 	assetPreviewGenerator = &generator;

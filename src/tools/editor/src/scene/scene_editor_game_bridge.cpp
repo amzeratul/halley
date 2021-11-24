@@ -350,14 +350,6 @@ std::vector<AssetCategoryFilter> SceneEditorGameBridge::getPrefabCategoryFilters
 	return {};
 }
 
-Future<AssetPreviewData> SceneEditorGameBridge::getAssetPreviewData(AssetType assetType, const String& id, Vector2i size)
-{
-	if (interfaceReady) {
-		return interface->getAssetPreviewData(assetType, id, size);
-	}
-	return {};
-}
-
 Transform2DComponent* SceneEditorGameBridge::getTransform(const String& entityId)
 {
 	if (interfaceReady) {

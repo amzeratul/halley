@@ -52,7 +52,6 @@ namespace Halley {
 		void onSceneContextMenuHighlight(const String& id);
 		
 		std::vector<AssetCategoryFilter> getPrefabCategoryFilters();
-		Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size);
 		
 		Transform2DComponent* getTransform(const String& entityId);
 

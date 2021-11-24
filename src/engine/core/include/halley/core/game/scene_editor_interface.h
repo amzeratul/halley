@@ -247,7 +247,6 @@ namespace Halley {
     	virtual void onSceneContextMenuHighlight(const String& id) = 0;
     	
         virtual std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const = 0;
-        virtual Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size) = 0;
         virtual void setAssetPreviewGenerator(AssetPreviewGenerator& generator) = 0;
 
     	virtual Transform2DComponent* getTransform(const String& entityId) = 0;

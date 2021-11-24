@@ -461,6 +461,27 @@ AssetPreviewGenerator& ProjectWindow::getAssetPreviewGenerator()
 	return *assetPreviewGenerator;
 }
 
+Future<AssetPreviewData> ProjectWindow::getAssetPreviewData(AssetType assetType, const String& id, Vector2i size)
+{
+	auto cached = project.getCachedAssetPreview(assetType, id);
+	if (cached) {
+		// Convert image to sprite
+		auto data = std::move(cached.value());
+		data.sprite.setImage(project.getGameResources(), *api.video, data.image);
+		return Future<AssetPreviewData>::makeImmediate(std::move(data));
+	}
+
+	return assetPreviewGenerator->getAssetPreviewData(assetType, id, size).then([=] (AssetPreviewData data) -> AssetPreviewData
+	{
+		// Store in cache
+		project.setCachedAssetPreview(assetType, id, data);
+		
+		// Convert image to sprite
+		data.sprite.setImage(project.getGameResources(), *api.video, data.image);
+		return data;
+	});
+}
+
 
 ProjectWindow::SettingsStorage::SettingsStorage(std::shared_ptr<ISaveData> saveData, String path)
 	: saveData(std::move(saveData))

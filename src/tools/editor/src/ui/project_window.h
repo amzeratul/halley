@@ -50,6 +50,7 @@ namespace Halley {
         void closeProject();
 
         AssetPreviewGenerator& getAssetPreviewGenerator();
+        Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size);
 
     protected:
         void onProjectDLLStatusChange(ProjectDLL::Status status) override;

@@ -1401,21 +1401,5 @@ std::vector<AssetCategoryFilter> SceneEditorWindow::getPrefabCategoryFilters() c
 
 Future<AssetPreviewData> SceneEditorWindow::getAssetPreviewData(AssetType assetType, const String& id, Vector2i size)
 {
-	auto cached = project.getCachedAssetPreview(assetType, id);
-	if (cached) {
-		// Convert image to sprite
-		auto data = std::move(cached.value());
-		data.sprite.setImage(project.getGameResources(), *api.video, data.image);
-		return Future<AssetPreviewData>::makeImmediate(std::move(data));
-	}
-
-	return gameBridge->getAssetPreviewData(assetType, id, size).then([=] (AssetPreviewData data) -> AssetPreviewData
-	{
-		// Store in cache
-		project.setCachedAssetPreview(assetType, id, data);
-		
-		// Convert image to sprite
-		data.sprite.setImage(project.getGameResources(), *api.video, data.image);
-		return data;
-	});
+	return projectWindow.getAssetPreviewData(assetType, id, size);
 }
