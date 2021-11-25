@@ -301,14 +301,12 @@ namespace Halley {
 	public:
 		ConfigNode serialize(const ResourceReference<T>& value, const ConfigNodeSerializationContext& context)
 		{
-        	ConfigNode result = ConfigNode::MapType();
-			result["asset"] = value.getId();
-			return result;
+			return ConfigNode(value.getId());
 		}
 		
         ResourceReference<T> deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
 		{
-			const auto assetId = node["asset"].asString("");
+			const auto assetId = node.hasKey("asset") ? node["asset"].asString("") : node.asString("");
 			return ResourceReference<T>(assetId.isEmpty() ? std::shared_ptr<const T>() : context.resources->get<T>(assetId));
 		}
 	};

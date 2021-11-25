@@ -998,26 +998,21 @@ public:
 		const auto fieldType = pars.typeParameters.at(0);
 		const auto data = pars.data;
 		auto& fieldData = data.getFieldData();
-		if (fieldData.getType() != ConfigNodeType::String) {
-			fieldData.ensureType(ConfigNodeType::Map);
-		}
-		auto& assetName = fieldData.getType() == ConfigNodeType::String ? fieldData : fieldData["asset"];
+		const auto& assetName = fieldData.hasKey("asset") ? fieldData["asset"].asString("") : (fieldData.getType() == ConfigNodeType::String ? fieldData.asString("") : "");
+		const auto& defaultValue = pars.getStringDefaultParameter();
 		
 		const std::optional<AssetType> type = getType(fieldType);
 
 		std::shared_ptr<IUIElement> result;
 		if (type) {
 			auto widget = std::make_shared<SelectAssetWidget>("asset", context.getUIFactory(), type.value(), context.getGameResources(), context.getProjectWindow());
-			widget->bindData("asset", assetName.asString(""), [&context, data](String newVal)
+			widget->bindData("asset", assetName, [&context, data](String newVal)
 			{
 				auto& fieldData = data.getFieldData();
-				if (fieldData.getType() == ConfigNodeType::String) {
-					fieldData = ConfigNode(std::move(newVal)); 
-				} else {
-					fieldData["asset"] = ConfigNode(std::move(newVal));
-				}
+				fieldData = ConfigNode(std::move(newVal)); 
 				context.onEntityUpdated();
 			});
+			widget->setDefaultAssetId(defaultValue);
 			result = widget;
 		} else {
 			result = context.makeLabel("N/A");
