@@ -443,7 +443,8 @@ namespace Halley {
 		EntityRef getParent() const
 		{
 			validate();
-			return EntityRef(*entity->getParent(), *world);
+			auto parent = entity->getParent();
+			return parent ? EntityRef(*parent, *world) : EntityRef();
 		}
 
 		std::optional<EntityRef> tryGetParent() const
@@ -712,7 +713,8 @@ namespace Halley {
 
 		ConstEntityRef getParent() const
 		{
-			return ConstEntityRef(*entity->getParent(), *world);
+			auto parent = entity->getParent();
+			return parent != nullptr ? ConstEntityRef(*parent, *world) : ConstEntityRef();
 		}
 
 		std::optional<ConstEntityRef> tryGetParent() const
