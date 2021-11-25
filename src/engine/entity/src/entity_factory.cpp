@@ -114,9 +114,10 @@ std::shared_ptr<const Prefab> EntityFactory::getPrefab(std::optional<EntityRef> 
 	}
 }
 
-EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, bool update, std::shared_ptr<const Prefab> _prefab, const IEntityData* origEntityData, EntityScene* scene)
+EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, bool update, std::shared_ptr<const Prefab> _prefab, const IEntityData* origEntityData, EntityScene* scene, EntityFactoryContext* parent)
 	: world(&world)
 	, scene(scene)
+	, parent(parent)
 	, update(update)
 {
 	prefab = std::move(_prefab);
@@ -160,7 +161,11 @@ EntityRef EntityFactoryContext::getEntity(const UUID& uuid, bool allowPrefabUUID
 		}
 	}
 
-	return allowWorldLookup ? world->findEntity(uuid, true).value_or(EntityRef()) : EntityRef();
+	if (parent) {
+		return parent->getEntity(uuid, allowPrefabUUID, allowWorldLookup);
+	} else {
+		return allowWorldLookup ? world->findEntity(uuid, true).value_or(EntityRef()) : EntityRef();
+	}
 }
 
 bool EntityFactoryContext::needsNewContextFor(const EntityData& data) const
@@ -236,9 +241,9 @@ void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, int
 	updateEntityNode(context->getRootEntityData(), entity, {}, context);
 }
 
-std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask)
+std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent)
 {
-	auto context = std::make_shared<EntityFactoryContext>(world, resources, serializationMask, updateContext, getPrefab(existing, data), &data, scene);
+	auto context = std::make_shared<EntityFactoryContext>(world, resources, serializationMask, updateContext, getPrefab(existing, data), &data, scene, parent);
 
 	if (existing) {
 		context->notifyEntity(existing.value());
@@ -363,7 +368,7 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& dat
 	// Update children
 	for (const auto& child: data.getChildren()) {
 		if (context->needsNewContextFor(child)) {
-			const auto newContext = makeContext(child, entity, context->getScene(), context->isUpdateContext(), context->getConfigNodeContext().entitySerializationTypeMask);
+			const auto newContext = makeContext(child, entity, context->getScene(), context->isUpdateContext(), context->getConfigNodeContext().entitySerializationTypeMask, context.get());
 			updateEntityNode(newContext->getRootEntityData(), getEntity(child.getInstanceUUID(), *newContext, false), entity, newContext);
 		} else {
 			updateEntityNode(child, getEntity(child.getInstanceUUID(), *context, false), entity, context);
@@ -460,14 +465,6 @@ EntityRef EntityFactory::tryGetEntity(const UUID& instanceUUID, EntityFactoryCon
 	const auto result = context.getEntity(instanceUUID, false, allowWorldLookup);
 	if (result.isValid()) {
 		return result;
-	}
-
-	if (allowWorldLookup) {
-		auto worldResult = world.findEntity(instanceUUID, true);
-		if (worldResult) {
-			context.addEntity(*worldResult); // Should this be added to the context?
-			return *worldResult;
-		}
 	}
 
 	return EntityRef();
