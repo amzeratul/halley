@@ -33,7 +33,7 @@ public:
 		auto field = std::make_shared<UITextInput>("textValue", context.getUIFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
 		field->bindData("textValue", value, [&context, data](String newVal)
 		{
-			data.getFieldData() = ConfigNode(std::move(newVal));
+			data.getWriteableFieldData() = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
@@ -64,7 +64,7 @@ public:
 		auto field = std::make_shared<UISpinControl2>("intValue", context.getUIFactory().getStyle("spinControl"), float(value), false);
 		field->bindData("intValue", value, [&context, data](int newVal)
 		{
-			data.getFieldData() = ConfigNode(newVal);
+			data.getWriteableFieldData() = ConfigNode(newVal);
 			context.onEntityUpdated();
 		});
 		container->add(field, 1);
@@ -106,7 +106,7 @@ public:
 		auto field = std::make_shared<UISpinControl2>("floatValue", context.getUIFactory().getStyle("spinControl"), value, true);
 		field->bindData("floatValue", value, [&context, data](float newVal)
 		{
-			data.getFieldData() = ConfigNode(newVal);
+			data.getWriteableFieldData() = ConfigNode(newVal);
 			context.onEntityUpdated();
 		});
 		container->add(field, 1);
@@ -155,7 +155,7 @@ public:
 		auto field = std::make_shared<UICheckbox>("boolValue", context.getUIFactory().getStyle("checkbox"), value);
 		field->bindData("boolValue", value, [&context, data](bool newVal)
 		{
-			data.getFieldData() = ConfigNode(newVal);
+			data.getWriteableFieldData() = ConfigNode(newVal);
 			context.onEntityUpdated();
 		});
 
@@ -209,7 +209,7 @@ public:
 			container->bindData("value" + toString(i), value[i], [&context, data, dataOutput, defaultValue, i] (ScalarType newVal)
 			{
 				if (*dataOutput) {
-					auto& node = data.getFieldData();
+					auto& node = data.getWriteableFieldData();
 					VecType val = node.asType<VecType>(defaultValue);
 					val[i] = newVal;
 					node = val;
@@ -302,7 +302,7 @@ public:
 	{
 		const auto& data = pars.data;
 
-		auto& fieldData = data.getFieldData();
+		auto& fieldData = data.getWriteableFieldData(); // HACK
 		fieldData.ensureType(ConfigNodeType::Map);
 
 		auto materialWidget = std::make_shared<SelectAssetWidget>("material", context.getUIFactory(), AssetType::MaterialDefinition, context.getGameResources(), context.getProjectWindow());
@@ -383,7 +383,7 @@ public:
 						}
 					}
 
-					data.getFieldData()[key] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
+					data.getWriteableFieldData()[key] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
 					context.onEntityUpdated();
 				});
 				
@@ -427,7 +427,7 @@ public:
 					auto& fieldData = data.getFieldData();
 					container->bindData(key, fieldData[key].asString(""), [&context, data, containerWeak, key](String newVal)
 					{
-						data.getFieldData()[key] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
+						data.getWriteableFieldData()[key] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
 						context.onEntityUpdated();
 					});
 				}
@@ -437,7 +437,7 @@ public:
 		container->bindData("material", fieldData["material"].asString(""), [&context, data, addMaterialParameters](String newVal)
 		{
 			addMaterialParameters(newVal);
-			data.getFieldData()["material"] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
+			data.getWriteableFieldData()["material"] = newVal.isEmpty() ? ConfigNode() : ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 		addMaterialParameters(fieldData["material"].asString(""));
@@ -477,7 +477,7 @@ public:
 	{
 		auto data = pars.data;
 
-		auto& fieldData = data.getFieldData();
+		auto& fieldData = data.getWriteableFieldData(); // HACK
 		fieldData.ensureType(ConfigNodeType::Map);
 
 		auto& resources = context.getGameResources();
@@ -536,19 +536,19 @@ public:
 		container->bindData("animation", fieldData["animation"].asString(""), [&context, data, updateAnimation](String newVal)
 		{
 			updateAnimation(newVal);
-			data.getFieldData()["animation"] = ConfigNode(std::move(newVal));
+			data.getWriteableFieldData()["animation"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
 		container->bindData("sequence", fieldData["sequence"].asString(""), [&context, data](String newVal)
 		{
-			data.getFieldData()["sequence"] = ConfigNode(std::move(newVal));
+			data.getWriteableFieldData()["sequence"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
 		container->bindData("direction", fieldData["direction"].asString(""), [&context, data](String newVal)
 		{
-			data.getFieldData()["direction"] = ConfigNode(std::move(newVal));
+			data.getWriteableFieldData()["direction"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
@@ -658,7 +658,7 @@ public:
 		const auto fieldType = pars.typeParameters.at(0);
 		const auto data = pars.data;
 
-		auto& fieldData = data.getFieldData();
+		auto& fieldData = data.getWriteableFieldData(); // HACK
 		if (fieldData.getType() != ConfigNodeType::Sequence) {
 			if (fieldData.getType() == ConfigNodeType::Map) {
 				fieldData.ensureType(ConfigNodeType::Sequence);
@@ -702,7 +702,7 @@ public:
 
 		containerPtr->setHandle(UIEventType::ButtonClicked, [=, buildList = std::move(buildList)] (const UIEvent& event)
 		{
-			auto& seq = data.getFieldData().asSequence();
+			auto& seq = data.getWriteableFieldData().asSequence();
 			if (event.getSourceId() == "add") {
 				seq.emplace_back(ConfigNode());
 				context.onEntityUpdated();
@@ -740,7 +740,7 @@ public:
 	{
 		const auto data = pars.data;
 
-		auto& fieldData = data.getFieldData();
+		auto& fieldData = data.getWriteableFieldData(); // HACK
 		if (fieldData.getType() != ConfigNodeType::Sequence) {
 			if (fieldData.getType() == ConfigNodeType::Map) {
 				fieldData.ensureType(ConfigNodeType::Sequence);
@@ -812,12 +812,12 @@ public:
 		{
 			if (newVal) {
 				if (data.getFieldData().getType() == ConfigNodeType::Undefined) {
-					data.getFieldData() = context.getDefaultNode(fieldType);
+					data.getWriteableFieldData() = context.getDefaultNode(fieldType);
 				}
 				container->add(context.makeField(fieldType, pars, ComponentEditorLabelCreation::OnlyIfNested));
 			} else {
 				container->clear();
-				data.getFieldData() = ConfigNode();
+				data.getWriteableFieldData() = ConfigNode();
 			}
 		};
 		setState(initialValue);
@@ -875,7 +875,7 @@ public:
 		field->bindData("colourHex", value, [&context, data, colourPreview](String newVal)
 		{
 			colourPreview->getSprite().setColour(Colour4f::fromString(newVal));
-			data.getFieldData() = ConfigNode(std::move(newVal));
+			data.getWriteableFieldData() = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
@@ -904,7 +904,7 @@ public:
 	{
 		auto data = pars.data;
 
-		auto& fieldData = data.getFieldData();
+		auto& fieldData = data.getWriteableFieldData(); // HACK
 		fieldData.ensureType(ConfigNodeType::Map);
 
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
@@ -1008,7 +1008,7 @@ public:
 			auto widget = std::make_shared<SelectAssetWidget>("asset", context.getUIFactory(), type.value(), context.getGameResources(), context.getProjectWindow());
 			widget->bindData("asset", assetName, [&context, data](String newVal)
 			{
-				auto& fieldData = data.getFieldData();
+				auto& fieldData = data.getWriteableFieldData();
 				fieldData = ConfigNode(std::move(newVal)); 
 				context.onEntityUpdated();
 			});
@@ -1092,7 +1092,7 @@ public:
 			const int value = data.getFieldData().asInt(defaultValue);
 			field->bindData("range", value, [&context, data](int newVal)
 			{
-				data.getFieldData() = ConfigNode(newVal);
+				data.getWriteableFieldData() = ConfigNode(newVal);
 				context.onEntityUpdated();
 			});
 		} else {
@@ -1100,7 +1100,7 @@ public:
 			const float value = data.getFieldData().asFloat(defaultValue);
 			field->bindData("range", value, [&context, data](float newVal)
 			{
-				data.getFieldData() = ConfigNode(newVal);
+				data.getWriteableFieldData() = ConfigNode(newVal);
 				context.onEntityUpdated();
 			});
 		}

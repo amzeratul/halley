@@ -15,7 +15,8 @@ namespace Halley {
 		ComponentDataRetriever getSubIndex(size_t index) const;
 		ComponentDataRetriever getSubKey(const String& key) const;
 		
-		ConfigNode& getFieldData() const;
+		const ConfigNode& getFieldData() const;
+		ConfigNode& getWriteableFieldData() const;
 		const String& getName() const;
 		const String& getLabelName() const;
 

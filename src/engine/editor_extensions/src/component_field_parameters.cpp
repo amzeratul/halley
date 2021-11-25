@@ -48,7 +48,12 @@ ComponentDataRetriever ComponentDataRetriever::getSubKey(const String& key) cons
 	});
 }
 
-ConfigNode& ComponentDataRetriever::getFieldData() const
+const ConfigNode& ComponentDataRetriever::getFieldData() const
+{
+	return retriever();
+}
+
+ConfigNode& ComponentDataRetriever::getWriteableFieldData() const
 {
 	return retriever();
 }
