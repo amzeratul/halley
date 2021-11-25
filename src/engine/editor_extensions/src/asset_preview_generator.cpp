@@ -117,7 +117,8 @@ Future<AssetPreviewData> AssetPreviewGenerator::getPrefabPreviewData(AssetType a
 		// Get main entity info
 		Rect4f spriteBounds;
 		String name;
-		for (auto& e: sceneCreated.getEntities()) {
+		for (auto id: sceneCreated.getEntities()) {
+			auto e = world->getEntity(id);
 			if (!e.hasParent()) {
 				spriteBounds = getSpriteTreeBounds(e);
 				name = e.getName();

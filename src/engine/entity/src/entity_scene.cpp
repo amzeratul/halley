@@ -12,12 +12,12 @@ EntityScene::EntityScene(bool allowReload, uint8_t worldPartition)
 {
 }
 
-std::vector<EntityRef>& EntityScene::getEntities()
+std::vector<EntityId>& EntityScene::getEntities()
 {
 	return entities;
 }
 
-const std::vector<EntityRef>& EntityScene::getEntities() const
+const std::vector<EntityId>& EntityScene::getEntities() const
 {
 	return entities;
 }
@@ -65,7 +65,7 @@ void EntityScene::addPrefabReference(const std::shared_ptr<const Prefab>& prefab
 
 void EntityScene::addRootEntity(EntityRef entity)
 {
-	entities.emplace_back(entity);
+	entities.emplace_back(entity.getEntityId());
 }
 
 uint8_t EntityScene::getWorldPartition() const
@@ -75,12 +75,29 @@ uint8_t EntityScene::getWorldPartition() const
 
 void EntityScene::validate(uint8_t worldPartition, World& world)
 {
-	for (const auto& e: entities) {
-		if (e.getWorldPartition() != worldPartition) {
-			Logger::logError("Entity \"" + e.getName() + "\" with id 0x" + toString(e.getEntityId().value, 16) + " is in the wrong world partition!");
+	for (const auto& id: entities) {
+		auto e = world.tryGetEntity(id);
+		if (e.isValid()) {
+			if (e.getWorldPartition() != worldPartition) {
+				Logger::logError("Entity \"" + e.getName() + "\" with id 0x" + toString(e.getEntityId().value, 16) + " and prefab " + e.getPrefabAssetId().value_or("<none>") + " is in world partition " + toString(int(e.getWorldPartition())) + " instead of " + toString(int(worldPartition)));
+			}
+			if (!e.isAlive()) {
+				Logger::logError("Entity \"" + e.getName() + "\" is dead!");
+			}
 		}
-		if (!e.isAlive()) {
-			Logger::logError("Entity \"" + e.getName() + "\" is dead!");
+	}
+}
+
+void EntityScene::destroyEntities(World& world)
+{
+	for (const auto id: entities) {
+		auto e = world.tryGetEntity(id);
+		if (e.isValid()) {
+			if (e.getWorldPartition() != worldPartition) {
+				Logger::logError("Unloading entity \"" + e.getName() + "\" from the wrong world partition! Entity at " + toString(int(e.getWorldPartition())) + ", worldPartition at " + toString(int(worldPartition)));
+			}
+
+			world.destroyEntity(e);
 		}
 	}
 }

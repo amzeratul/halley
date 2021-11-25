@@ -23,8 +23,8 @@ namespace Halley {
 		
 		explicit EntityScene(bool allowReload = false, uint8_t worldPartition = 0);
 		
-		std::vector<EntityRef>& getEntities();
-		const std::vector<EntityRef>& getEntities() const;
+		std::vector<EntityId>& getEntities();
+		const std::vector<EntityId>& getEntities() const;
 
 		bool needsUpdate() const;
 		void update(EntityFactory& factory, IEntitySceneUpdateCallbacks* callbacks = nullptr);
@@ -34,6 +34,8 @@ namespace Halley {
 
 		uint8_t getWorldPartition() const;
 		void validate(uint8_t worldPartition, World& world);
+
+		void destroyEntities(World& world);
 
 	private:
 		class PrefabObserver {
@@ -57,7 +59,7 @@ namespace Halley {
 			std::vector<EntityRef> getEntities(World& world) const;
 		};
 
-		std::vector<EntityRef> entities;
+		std::vector<EntityId> entities;
 		std::vector<PrefabObserver> prefabObservers;
 		std::vector<PrefabObserver> sceneObservers;
 		bool allowReload = false;

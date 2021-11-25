@@ -208,7 +208,8 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 		// Move camera
 		if (!gameBridge->loadCameraPos()) {
 			if (!sceneCreated.getEntities().empty()) {
-				panCameraToEntity(sceneCreated.getEntities().at(0).getInstanceUUID().toString());
+				auto id = sceneCreated.getEntities().at(0);
+				panCameraToEntity(world.getEntity(id).getInstanceUUID().toString());
 			}
 		}
 		
