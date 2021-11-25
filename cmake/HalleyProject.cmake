@@ -519,6 +519,8 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 		target_link_libraries(${name}-dll ${name}-game ${LINK_LIBRARIES})
 	endif()
 
+	set_property(TARGET ${name} PROPERTY VS_DPI_AWARE "PerMonitor")
+
 	if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
 		set_target_properties(${name} PROPERTIES DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX})
 		if (TARGET ${name}-game)
