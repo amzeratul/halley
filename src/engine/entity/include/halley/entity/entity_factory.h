@@ -103,7 +103,7 @@ namespace Halley {
 
 		void addEntity(EntityRef entity);
 		void notifyEntity(const EntityRef& entity) const;
-		EntityRef getEntity(const UUID& uuid, bool allowPrefabUUID) const;
+		EntityRef getEntity(const UUID& uuid, bool allowPrefabUUID, bool allowWorldLookup) const;
 
 		bool needsNewContextFor(const EntityData& value) const;
 		bool isUpdateContext() const;
@@ -111,6 +111,7 @@ namespace Halley {
 		const IEntityData& getRootEntityData() const;
 		EntityScene* getScene() const;
 		uint8_t getWorldPartition() const;
+		void setWorldPartition(uint8_t partition);
 
 	private:
 		ConfigNodeSerializationContext configNodeContext;
@@ -119,6 +120,7 @@ namespace Halley {
 		EntityScene* scene;
 		std::vector<EntityRef> entities;
 		bool update = false;
+		uint8_t worldPartition = 0;
 
 		const IEntityData* entityData = nullptr;
 		EntityData instancedEntityData;

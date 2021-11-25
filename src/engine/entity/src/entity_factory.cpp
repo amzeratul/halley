@@ -42,6 +42,7 @@ EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& pref
 		curScene.addPrefabReference(prefab, entity);
 		curScene.addRootEntity(entity);	
 	}
+	curScene.validate(worldPartition);
 	return curScene;
 }
 
@@ -122,6 +123,7 @@ EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, i
 	configNodeContext.resources = &resources;
 	configNodeContext.entityContext = this;
 	configNodeContext.entitySerializationTypeMask = entitySerializationMask;
+	worldPartition = scene ? scene->getWorldPartition() : 0;
 
 	if (origEntityData) {
 		setEntityData(*origEntityData);
@@ -130,7 +132,7 @@ EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, i
 
 EntityId EntityFactoryContext::getEntityIdFromUUID(const UUID& uuid) const
 {
-	const auto result = getEntity(uuid, true);
+	const auto result = getEntity(uuid, true, true);
 	if (result.isValid()) {
 		return result.getEntityId();
 	}
@@ -140,10 +142,13 @@ EntityId EntityFactoryContext::getEntityIdFromUUID(const UUID& uuid) const
 
 void EntityFactoryContext::addEntity(EntityRef entity)
 {
+	if (entity.getWorldPartition() != getWorldPartition()) {
+		Logger::logError("Loading entity \"" + entity.getName() + "\" with the wrong world partition! Entity at " + toString(int(entity.getWorldPartition())) + ", scene at " + toString(int(getWorldPartition())));
+	}
 	entities.push_back(entity);
 }
 
-EntityRef EntityFactoryContext::getEntity(const UUID& uuid, bool allowPrefabUUID) const
+EntityRef EntityFactoryContext::getEntity(const UUID& uuid, bool allowPrefabUUID, bool allowWorldLookup) const
 {
 	if (!uuid.isValid()) {
 		return EntityRef();
@@ -155,7 +160,7 @@ EntityRef EntityFactoryContext::getEntity(const UUID& uuid, bool allowPrefabUUID
 		}
 	}
 
-	return world->findEntity(uuid, true).value_or(EntityRef());
+	return allowWorldLookup ? world->findEntity(uuid, true).value_or(EntityRef()) : EntityRef();
 }
 
 bool EntityFactoryContext::needsNewContextFor(const EntityData& data) const
@@ -182,7 +187,12 @@ EntityScene* EntityFactoryContext::getScene() const
 
 uint8_t EntityFactoryContext::getWorldPartition() const
 {
-	return scene ? scene->getWorldPartition() : 0;
+	return worldPartition;
+}
+
+void EntityFactoryContext::setWorldPartition(uint8_t partition)
+{
+	worldPartition = partition;
 }
 
 void EntityFactoryContext::setEntityData(const IEntityData& iData)
@@ -196,7 +206,7 @@ void EntityFactoryContext::setEntityData(const IEntityData& iData)
 			entityData = &iData;
 		} else {
 			instancedEntityData = prefab->getEntityData().instantiateWithAsCopy(iData.asEntityData());
-			entityData = &instancedEntityData;						
+			entityData = &instancedEntityData;
 		}
 	} else {
 		entityData = &iData;
@@ -233,6 +243,7 @@ std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityDa
 	if (existing) {
 		context->notifyEntity(existing.value());
 		if (updateContext) {
+			context->setWorldPartition(existing->getWorldPartition());
 			collectExistingEntities(existing.value(), *context);
 		}
 	}
@@ -402,7 +413,7 @@ void EntityFactory::preInstantiateEntities(const IEntityData& iData, EntityFacto
 		}
 	} else {
 		const auto& data = iData.asEntityData();
-		const auto entity = instantiateEntity(data, context, depth == 0);
+		const auto entity = instantiateEntity(data, context, context.isUpdateContext() && depth == 0);
 		if (depth == 0) {
 			context.notifyEntity(entity);
 		}
@@ -446,7 +457,7 @@ void EntityFactory::collectExistingEntities(EntityRef entity, EntityFactoryConte
 EntityRef EntityFactory::tryGetEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup)
 {
 	Expects(instanceUUID.isValid());
-	const auto result = context.getEntity(instanceUUID, false);
+	const auto result = context.getEntity(instanceUUID, false, allowWorldLookup);
 	if (result.isValid()) {
 		return result;
 	}

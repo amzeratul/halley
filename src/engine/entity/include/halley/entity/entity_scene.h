@@ -33,6 +33,7 @@ namespace Halley {
 		void addRootEntity(EntityRef entity);
 
 		uint8_t getWorldPartition() const;
+		void validate(uint8_t worldPartition);
 
 	private:
 		class PrefabObserver {

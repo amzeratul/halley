@@ -73,6 +73,15 @@ uint8_t EntityScene::getWorldPartition() const
 	return worldPartition;
 }
 
+void EntityScene::validate(uint8_t worldPartition)
+{
+	for (const auto& e: entities) {
+		if (e.getWorldPartition() != worldPartition) {
+			Logger::logError("Entity \"" + e.getName() + "\" was instantiated with the wrong world partition!");
+		}
+	}
+}
+
 EntityScene::PrefabObserver::PrefabObserver(std::shared_ptr<const Prefab> prefab)
 	: prefab(std::move(prefab))
 {
