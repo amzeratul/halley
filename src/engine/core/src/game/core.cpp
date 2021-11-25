@@ -640,6 +640,17 @@ void Core::log(LoggerLevel level, const String& msg)
 	} else if (level == LoggerLevel::Dev) {
 		std::cout << ConsoleColour(Console::CYAN);
 	}
+
+	/*
+	// Print timestamp
+	const auto now = std::chrono::system_clock::now();
+	const auto nowTimeT = std::chrono::system_clock::to_time_t(now);
+	const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+	tm buffer;
+	localtime_s(&buffer, &nowTimeT);
+	std::cout << std::put_time(&buffer, "%T")  << '.' << std::setfill('0') << std::setw(3) << ms.count() << " ";
+	*/
+
 	std::cout << msg << ConsoleColour() << std::endl;
 }
 

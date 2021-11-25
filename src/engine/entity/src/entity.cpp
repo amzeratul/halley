@@ -138,13 +138,11 @@ void Entity::setParent(Entity* newParent, bool propagate, size_t childIdx)
 		if (newParent) {
 			parent = newParent;
 			if (worldPartition != newParent->worldPartition) {
-				worldPartition = newParent->worldPartition;				
-				propagateChildWorldPartition(worldPartition);
+				propagateChildWorldPartition(newParent->worldPartition);
 			}
 			if (childIdx >= parent->children.size()) {
 				parent->children.push_back(this);
-			}
-			else {
+			} else {
 				parent->children.insert(parent->children.begin() + childIdx, this);
 			}
 			parent->propagateChildrenChange();

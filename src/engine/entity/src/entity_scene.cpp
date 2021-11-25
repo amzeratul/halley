@@ -73,11 +73,14 @@ uint8_t EntityScene::getWorldPartition() const
 	return worldPartition;
 }
 
-void EntityScene::validate(uint8_t worldPartition)
+void EntityScene::validate(uint8_t worldPartition, World& world)
 {
 	for (const auto& e: entities) {
 		if (e.getWorldPartition() != worldPartition) {
-			Logger::logError("Entity \"" + e.getName() + "\" was instantiated with the wrong world partition!");
+			Logger::logError("Entity \"" + e.getName() + "\" with id 0x" + toString(e.getEntityId().value, 16) + " is in the wrong world partition!");
+		}
+		if (!e.isAlive()) {
+			Logger::logError("Entity \"" + e.getName() + "\" is dead!");
 		}
 	}
 }

@@ -42,7 +42,6 @@ EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& pref
 		curScene.addPrefabReference(prefab, entity);
 		curScene.addRootEntity(entity);	
 	}
-	curScene.validate(worldPartition);
 	return curScene;
 }
 
