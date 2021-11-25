@@ -265,13 +265,13 @@ ConstEntityRef World::getEntity(EntityId id) const
 EntityRef World::tryGetEntity(EntityId id)
 {
 	Entity* entity = tryGetRawEntity(id);
-	return EntityRef(*entity, *this);
+	return entity ? EntityRef(*entity, *this) : EntityRef();
 }
 
 ConstEntityRef World::tryGetEntity(EntityId id) const
 {
 	const Entity* entity = tryGetRawEntity(id);
-	return ConstEntityRef(*entity, *this);
+	return entity ? ConstEntityRef(*entity, *this) : ConstEntityRef();
 }
 
 Entity* World::tryGetRawEntity(EntityId id)

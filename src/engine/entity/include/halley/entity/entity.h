@@ -284,14 +284,18 @@ namespace Halley {
 		EntityRef(Entity& e, World& w)
 			: entity(&e)
 			, world(&w)
-		{}
+		{
+#ifdef _DEBUG
+			entityId = entity->getEntityId();
+#endif
+		}
 
 		~EntityRef() = default;
 
 		template <typename T>
 		EntityRef& addComponent(T&& component)
 		{
-			Expects(entity != nullptr);
+			validate();
 			
 			static_assert(!std::is_pointer<T>::value, "Cannot pass pointer to component");
 			static_assert(!std::is_same<T, Component>::value, "Cannot add base class Component to entity, make sure type isn't being erased");
@@ -312,24 +316,21 @@ namespace Halley {
 		template <typename T>
 		EntityRef& removeComponent()
 		{
-			Expects(entity != nullptr);
-			Expects(world != nullptr);
+			validate();
 			entity->removeComponent<T>(*world);
 			return *this;
 		}
 
 		EntityRef& removeComponentById(int id)
 		{
-			Expects(entity != nullptr);
-			Expects(world != nullptr);
+			validate();
 			entity->removeComponentById(*world, id);
 			return *this;
 		}
 
 		EntityRef& removeAllComponents()
 		{
-			Expects(entity != nullptr);
-			Expects(world != nullptr);
+			validate();
 			entity->removeAllComponents(*world);
 			return *this;
 		}
@@ -337,41 +338,41 @@ namespace Halley {
 		template <typename T>
 		T& getComponent()
 		{
-			Expects(entity != nullptr);
+			validate();
 			return entity->getComponent<T>();
 		}
 
 		template <typename T>
 		const T& getComponent() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			return entity->getComponent<T>();
 		}
 
 		template <typename T>
 		T* tryGetComponent()
 		{
-			Expects(entity != nullptr);
+			validate();
 			return entity->tryGetComponent<T>();
 		}
 
 		template <typename T>
 		const T* tryGetComponent() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			return entity->tryGetComponent<T>();
 		}
 
 		EntityId getEntityId() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			return entity->getEntityId();
 		}
 
 		template <typename T>
 		bool hasComponent() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			return entity->hasComponent<T>(*world);
 		}
 
@@ -403,13 +404,13 @@ namespace Halley {
 
 		const String& getName() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			return entity->name;
 		}
 
 		void setName(const String& name)
 		{
-			Expects(entity != nullptr);
+			validate();
 			if (entity->name != name) {
 				entity->name = name;
 			}
@@ -417,118 +418,125 @@ namespace Halley {
 
 		const UUID& getInstanceUUID() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			return entity->instanceUUID;
 		}
 
 		const UUID& getPrefabUUID() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			return entity->prefabUUID;
 		}
 		
 		void keepOnlyComponentsWithIds(const std::vector<int>& ids)
 		{
-			Expects(entity != nullptr);
+			validate();
 			entity->keepOnlyComponentsWithIds(ids, *world);
 		}
 
 		bool hasParent() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			return entity->getParent() != nullptr;
 		}
 		
 		EntityRef getParent() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			return EntityRef(*entity->getParent(), *world);
 		}
 
 		std::optional<EntityRef> tryGetParent() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			const auto parent = entity->getParent();
 			return parent != nullptr ? EntityRef(*parent, *world) : std::optional<EntityRef>();
 		}
 
 		void setParent(EntityRef& parent, size_t childIdx = -1)
 		{
-			Expects(entity != nullptr);
+			validate();
 			entity->setParent(parent.entity, true, childIdx);
 		}
 
 		void setParent()
 		{
-			Expects(entity != nullptr);
+			validate();
 			entity->setParent(nullptr);
 		}
 
 		const std::vector<Entity*>& getRawChildren() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			return entity->getChildren();
 		}
 
 		EntityRefIterable getChildren() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			return EntityRefIterable(entity->getChildren(), *world);
 		}
 
 		bool hasChildren() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			return !entity->getChildren().empty();
 		}
 
 		void addChild(EntityRef& child)
 		{
-			Expects(entity != nullptr);
+			validate();
 			entity->addChild(*child.entity);
 		}
 
 		void detachChildren()
 		{
-			Expects(entity != nullptr);
+			validate();
 			entity->detachChildren();
 		}
 
 		uint8_t getHierarchyRevision() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			return entity->hierarchyRevision;
 		}
 
 		uint8_t getChildrenRevision() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			return entity->childrenRevision;
 		}
 
 		uint8_t getWorldPartition() const
 		{
-			Expects(entity != nullptr);
+			validate();
 			return entity->worldPartition;
 		}
 
 		bool isValid() const
 		{
-			return entity != nullptr;
+			return entity != nullptr && world != nullptr
+#ifdef _DEBUG
+			&& entity->getEntityId() == entityId
+#endif
+			;
 		}
 
 		bool isAlive() const
 		{
+			validate();
 			return entity->isAlive();
 		}
 
 		bool isSelectable() const
 		{
+			validate();
 			return entity->selectable;
 		}
 
 		void setSelectable(bool selectable)
 		{
+			validate();
 			entity->selectable = selectable;
 		}
 
@@ -544,43 +552,44 @@ namespace Halley {
 
 		World& getWorld() const
 		{
+			validate();
 			return *world;
 		}
 
 		size_t getNumComponents() const
 		{
-			Expects(entity);
+			validate();
 			return static_cast<size_t>(entity->liveComponents);
 		}
 
 		std::pair<int, Component*> getRawComponent(size_t idx) const
 		{
-			Expects(entity);
+			validate();
 			return entity->components[idx];
 		}
 
 		std::vector<std::pair<int, Component*>>::iterator begin() const
 		{
-			Expects(entity);
+			validate();
 			return entity->components.begin();
 		}
 
 		std::vector<std::pair<int, Component*>>::iterator end() const
 		{
-			Expects(entity);
+			validate();
 			return entity->components.begin() + entity->liveComponents;
 		}
 
 		EntityRef& setSerializable(bool serializable)
 		{
-			Expects(entity);
+			validate();
 			entity->serializable = serializable;
 			return *this;
 		}
 
 		bool isSerializable() const
 		{
-			Expects(entity);
+			validate();
 			return entity->serializable;
 		}
 
@@ -588,19 +597,19 @@ namespace Halley {
 
 		bool wasReloaded()
 		{
-			Expects(entity);
+			validate();
 			return entity->reloaded;
 		}
 
 		void sortChildrenByInstanceUUIDs(const std::vector<UUID>& uuids)
 		{
-			Expects(entity);
+			validate();
 			entity->sortChildrenByInstanceUUIDs(uuids);
 		}
 
 		void setPrefab(std::shared_ptr<const Prefab> prefab, UUID prefabUUID)
 		{
-			Expects(entity);
+			validate();
 			Expects(!prefab || prefabUUID.isValid());
 			entity->prefab = std::move(prefab);
 			entity->prefabUUID = prefabUUID;
@@ -608,7 +617,7 @@ namespace Halley {
 
 		const std::shared_ptr<const Prefab>& getPrefab() const
 		{
-			Expects(entity);
+			validate();
 			return entity->prefab;
 		}
 
@@ -622,11 +631,20 @@ namespace Halley {
 			return !entity || entity->isEmpty();
 		}
 
+		void validate() const
+		{
+			Expects(isValid());
+		}
+
 	private:
 		friend class World;
 
 		Entity* entity = nullptr;
 		World* world = nullptr;
+
+#ifdef _DEBUG
+		EntityId entityId;
+#endif
 	};
 	
 	class ConstEntityRef
