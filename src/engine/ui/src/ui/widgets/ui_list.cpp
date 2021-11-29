@@ -1222,17 +1222,44 @@ bool UIList::setSelectedOptionIds(gsl::span<const String> ids, SelectionMode mod
 		}
 	}
 
+	if (ids.size() > 1 && !multiSelect) {
+		return setSelectedOptionId(ids[0], mode);
+	}
+
 	notifyItemSelectionEnabled = false;
 	bool modified = false;
 	if (mode == SelectionMode::ShiftSelect) {
 		modified = setSelectedOptionId(ids.front(), mode);
 	} else {
+		/*
 		bool first = true;
 		for (auto& id: ids) {
 			const bool value = setSelectedOptionId(id, mode == SelectionMode::Normal ? (first ? SelectionMode::Normal : SelectionMode::AddToSelect) : mode);
 			if (first) {
 				modified = value;
 				first = false;
+			}
+		}
+		*/
+		forceAddChildren(UIInputType::Undefined, false);
+
+		auto sortedIds = std::vector<String>(ids.begin(), ids.end());
+		std::sort(sortedIds.begin(), sortedIds.end());
+		for (auto& item: items) {
+			if (item->isActive() && item->isEnabled() && std::binary_search(sortedIds.begin(), sortedIds.end(), item->getId())) {
+				if (!item->isSelected()) {
+					item->setSelected(true);
+					modified = true;
+				}
+				if (item->getId() == ids[0]) {
+					if (curOption != item->getIndex()) {
+						curOption = item->getIndex();
+						modified = true;
+					}
+				}
+			} else if (item->isSelected()) {
+				item->setSelected(false);
+				modified = true;
 			}
 		}
 	}
