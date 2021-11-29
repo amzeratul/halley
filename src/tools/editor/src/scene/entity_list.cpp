@@ -350,13 +350,16 @@ void EntityList::validateAllEntities()
 
 void EntityList::doValidateAllEntities()
 {
-	const auto& sceneData = sceneEditorWindow->getSceneData();
-	
-	const auto n = list->getCount();
-	for (size_t i = 0; i < n; ++i) {
-		const auto& id = list->getItem(static_cast<int>(i))->getId();
-		const auto& entityData = sceneData->getEntityNodeData(id);
-		onEntityModified(id, entityData.getData(), true);
+	validateEntityTree(sceneEditorWindow->getSceneData()->getEntityTree());
+}
+
+void EntityList::validateEntityTree(const EntityTree& entityTree)
+{
+	if (entityTree.data) {
+		onEntityModified(entityTree.entityId, *entityTree.data, true);
+	}
+	for (auto& c: entityTree.children) {
+		validateEntityTree(c);
 	}
 }
 

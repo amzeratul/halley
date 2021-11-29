@@ -70,6 +70,7 @@ namespace Halley {
 		bool markValid(const UUID& uuid, bool valid);
 		void notifyValidatorList();
 		void doValidateAllEntities();
+		void validateEntityTree(const EntityTree& entityTree);
 		void onEntityModified(const String& id, const EntityData& node, bool onlyRefreshValidation);
 
 		bool isEntityValid(const EntityData& entityData, bool recursive) const;
