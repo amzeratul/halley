@@ -178,7 +178,7 @@ namespace Halley {
 					seq.push_back(ConfigNode(e));
 				}
 			}
-			return *this = seq;
+			return *this = std::move(seq);
 		}
 
 		template <typename K, typename V>
@@ -194,7 +194,7 @@ namespace Halley {
 					map[std::move(key)] = ConfigNode(v);
 				}
 			}
-			return *this = map;
+			return *this = std::move(map);
 		}
 
 		bool operator==(const ConfigNode& other) const;
