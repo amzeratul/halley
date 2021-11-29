@@ -1246,8 +1246,13 @@ bool UIList::setSelectedOptionIds(gsl::span<const String> ids, SelectionMode mod
 		auto sortedIds = std::vector<String>(ids.begin(), ids.end());
 		std::sort(sortedIds.begin(), sortedIds.end());
 		for (auto& item: items) {
-			if (item->isActive() && item->isEnabled() && std::binary_search(sortedIds.begin(), sortedIds.end(), item->getId())) {
-				if (!item->isSelected()) {
+			const bool inSet = std::binary_search(sortedIds.begin(), sortedIds.end(), item->getId());
+			const bool wasSelected = item->isSelected();
+			const bool shouldBeSelected = (mode == SelectionMode::Normal && inSet) || (mode == SelectionMode::AddToSelect && inSet) || (mode == SelectionMode::CtrlSelect && inSet && !wasSelected);
+			const bool shouldDeselect = (mode == SelectionMode::Normal && !shouldBeSelected) || (mode == SelectionMode::CtrlSelect && inSet && wasSelected);
+
+			if (item->isActive() && item->isEnabled() && shouldBeSelected) {
+				if (!wasSelected) {
 					item->setSelected(true);
 					modified = true;
 				}
@@ -1257,7 +1262,7 @@ bool UIList::setSelectedOptionIds(gsl::span<const String> ids, SelectionMode mod
 						modified = true;
 					}
 				}
-			} else if (item->isSelected()) {
+			} else if (item->isSelected() && shouldDeselect) {
 				item->setSelected(false);
 				modified = true;
 			}
