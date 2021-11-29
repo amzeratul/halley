@@ -509,6 +509,12 @@ void Painter::setClip()
 Rect4i Painter::getRectangleForActiveRenderTarget(Rect4i r)
 {
 	Expects(activeRenderTarget);
+	if (r.getWidth() % 2 == 1) {
+		r = r.grow(0, 0, 1, 0);
+	}
+	if (r.getHeight() % 2 == 1) {
+		r = r.grow(0, 0, 0, 1);
+	}
 	int h = activeRenderTarget->getViewPort().getHeight();
 	if (activeRenderTarget->getViewportFlipVertical()) {
 		int y = h - r.getBottom();
@@ -668,9 +674,11 @@ void Painter::updateProjection()
 	camera.updateProjection(activeRenderTarget->getProjectionFlipVertical());
 	projection = camera.getProjection();
 
+	auto viewPortSize = (Vector2f(camera.getActiveViewPort().getSize()) / Vector2f(2, 2)).ceil() * Vector2f(2, 2);
+
 	const auto oldHash = halleyGlobalMaterial->getHash();
 	halleyGlobalMaterial->set("u_mvp", projection);
-	halleyGlobalMaterial->set("u_viewPortSize", Vector2f(camera.getActiveViewPort().getSize()));
+	halleyGlobalMaterial->set("u_viewPortSize", viewPortSize);
 	if (oldHash != halleyGlobalMaterial->getHash()) {
 		onUpdateProjection(*halleyGlobalMaterial);
 	}
