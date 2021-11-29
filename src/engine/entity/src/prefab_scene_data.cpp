@@ -35,9 +35,10 @@ ISceneData::EntityNodeData PrefabSceneData::getWriteableEntityNodeData(const Str
 	return EntityNodeData(*data.entity, parentId, static_cast<int>(data.childIdx));
 }
 
-std::vector<EntityData*> PrefabSceneData::getWriteableEntityDatas(gsl::span<const String> ids)
+std::vector<EntityData*> PrefabSceneData::getWriteableEntityDatas(gsl::span<const UUID> ids)
 {
 	std::vector<EntityData*> result;
+	result.reserve(ids.size());
 
 	std::vector<UUID> sortedIds(ids.begin(), ids.end());
 	std::sort(sortedIds.begin(), sortedIds.end());

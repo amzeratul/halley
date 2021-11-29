@@ -39,11 +39,12 @@ UUID::UUID(const String& str)
 		throw Exception("Invalid UUID format", HalleyExceptions::Utils);
 	}
 	const auto span = gsl::span<Byte, 16>(bytes.data(), 16);
-	Encode::decodeBase16(str.substr(0, 8), span.subspan(0, 4));
-	Encode::decodeBase16(str.substr(9, 4), span.subspan(4, 2));
-	Encode::decodeBase16(str.substr(14, 4), span.subspan(6, 2));
-	Encode::decodeBase16(str.substr(19, 4), span.subspan(8, 2));
-	Encode::decodeBase16(str.substr(24, 12), span.subspan(10, 6));
+	const std::string_view strView = str;
+	Encode::decodeBase16(strView.substr(0, 8), span.subspan(0, 4));
+	Encode::decodeBase16(strView.substr(9, 4), span.subspan(4, 2));
+	Encode::decodeBase16(strView.substr(14, 4), span.subspan(6, 2));
+	Encode::decodeBase16(strView.substr(19, 4), span.subspan(8, 2));
+	Encode::decodeBase16(strView.substr(24, 12), span.subspan(10, 6));
 }
 
 bool UUID::operator==(const UUID& other) const

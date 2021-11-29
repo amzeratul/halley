@@ -60,7 +60,7 @@ String Encode::encodeBase16(gsl::span<const Byte> in)
 	return result;
 }
 
-void Encode::decodeBase16(const String& in, gsl::span<Byte> bytes)
+void Encode::decodeBase16(std::string_view in, gsl::span<Byte> bytes)
 {
 	auto charToVal = [&] (char character) -> uint32_t
 	{
@@ -71,7 +71,7 @@ void Encode::decodeBase16(const String& in, gsl::span<Byte> bytes)
 		} else if (character >= 'a' && character <= 'f') {
 			return character - 'a' + 10;
 		} else {
-			throw Exception("Invalid hex string \"" + in + "\".", HalleyExceptions::Utils);
+			throw Exception("Invalid hex string \"" + String(in) + "\".", HalleyExceptions::Utils);
 		}
 	};
 	
