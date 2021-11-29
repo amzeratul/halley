@@ -510,14 +510,6 @@ UIFactoryWidgetProperties UIFactory::getLabelProperties() const
 	return result;
 }
 
-UIFactoryWidgetProperties UIFactory::getButtonProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Button";
-	result.iconName = "widget_icons/button.png";
-	return result;
-}
-
 UIFactoryWidgetProperties UIFactory::getTextInputProperties() const
 {
 	UIFactoryWidgetProperties result;
@@ -708,6 +700,20 @@ std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 		result->setMouseExtraBorder(node["mouseBorder"].asVector4f(Vector4f()));
 	}
 
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getButtonProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Button";
+	result.iconName = "widget_icons/button.png";
+	result.canHaveChildren = true;
+	result.entries.emplace_back("Text", "text", "Halley::String", "");
+	result.entries.emplace_back("Text (Loc Key)", "textKey", "Halley::String", "");
+	result.entries.emplace_back("Style", "style", "Halley::String", "label");
+	result.entries.emplace_back("Icon", "icon", "Halley::ResourceReference<Halley::SpriteResource>", "");
+	result.entries.emplace_back("Mouse Border", "mouseBorder", "Halley::Vector4f", std::vector<String>{"0", "0", "0", "0"});
 	return result;
 }
 
