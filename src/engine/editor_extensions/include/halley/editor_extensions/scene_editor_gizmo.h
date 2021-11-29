@@ -34,7 +34,7 @@ namespace Halley {
 		using BoundsCheckFunction = std::function<bool(Vector2f, Vector2f)>;
 
 		SceneEditorGizmoHandle(String id = "");
-		void update(const SceneEditorInputState& inputState, gsl::span<SceneEditorGizmoHandle> handles = {});
+		std::optional<Vector2f> update(const SceneEditorInputState& inputState, gsl::span<SceneEditorGizmoHandle> handles = {});
 
 		void setIndex(int index);
 		int getIndex() const;

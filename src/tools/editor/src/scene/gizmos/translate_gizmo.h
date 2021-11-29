@@ -35,8 +35,8 @@ namespace Halley {
 		UIFactory& factory;
 		ISceneEditorWindow& sceneEditorWindow;
 
-		std::vector<SceneEditorGizmoHandle> handles;
-		std::vector<Vector2f> handleOffsets;
+		std::optional<SceneEditorGizmoHandle> handle;
+		Vector2f handleOffset;
 
 		TranslateGizmoMode mode;
 		std::shared_ptr<UIList> uiMode;

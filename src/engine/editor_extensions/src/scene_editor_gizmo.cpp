@@ -11,8 +11,9 @@ SceneEditorGizmoHandle::SceneEditorGizmoHandle(String id)
 {
 }
 
-void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl::span<SceneEditorGizmoHandle> handles)
+std::optional<Vector2f> SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl::span<SceneEditorGizmoHandle> handles)
 {
+	std::optional<Vector2f> result;
 	const bool overAnother = std::any_of(handles.begin(), handles.end(), [&] (const SceneEditorGizmoHandle& handle) { return &handle != this && handle.isOver(); });
 	
 	if (!holding) {
@@ -29,6 +30,7 @@ void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl
 			setPosition(inputState.mousePos.value() + startOffset, true);
 		}
 		const Vector2f delta = pos - oldPos;
+		result = delta;
 
 		// Drag all other selected handles too
 		for (auto& handle: handles) {
@@ -45,6 +47,8 @@ void SceneEditorGizmoHandle::update(const SceneEditorInputState& inputState, gsl
 	if (inputState.selectionBox) {
 		selected = (selected && inputState.shiftHeld) || (inputState.selectionBox.has_value() && inputState.selectionBox.value().contains(pos));
 	}
+
+	return result;
 }
 
 void SceneEditorGizmoHandle::setIndex(int index)
