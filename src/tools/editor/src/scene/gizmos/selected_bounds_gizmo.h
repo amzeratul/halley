@@ -17,10 +17,12 @@ namespace Halley {
 		std::shared_ptr<Material> outlineMaterial;
 
 		bool shouldInclude(const Sprite& sprite, const ISceneEditor& sceneEditor) const;
-		void drawEntity(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor) const;
+
+		void drawSplit(Painter& painter, const ISceneEditor& sceneEditor, float width, Colour4f colour) const;
+		void drawMerged(Painter& painter, const ISceneEditor& sceneEditor, float width, Colour4f colour) const;
 		void drawStencilTree(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor) const;
-		void drawOutlineTree(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor) const;
+		void drawOutlineTree(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor, float width, Colour4f colour) const;
 		void drawStencilSprite(Painter& painter, const Sprite& sprite) const;
-		void drawOutlineSprite(Painter& painter, const Sprite& sprite) const;
+		void drawOutlineSprite(Painter& painter, const Sprite& sprite, float width, Colour4f colour) const;
 	};
 }

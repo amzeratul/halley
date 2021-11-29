@@ -19,13 +19,6 @@ void SelectedBoundsGizmo::update(Time time, const ISceneEditor& sceneEditor, con
 {
 }
 
-void SelectedBoundsGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) const
-{
-	for (auto& e: getEntities()) {
-		drawEntity(painter, e, sceneEditor);
-	}
-}
-
 bool SelectedBoundsGizmo::shouldInclude(const Sprite& sprite, const ISceneEditor& sceneEditor) const
 {
 	if (!sprite.hasMaterial() || !sprite.isVisible()) {
@@ -40,11 +33,39 @@ bool SelectedBoundsGizmo::shouldInclude(const Sprite& sprite, const ISceneEditor
 	return sceneEditor.shouldDrawOutline(sprite);
 }
 
-void SelectedBoundsGizmo::drawEntity(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor) const
+void SelectedBoundsGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) const
 {
+	const float width = 2;
+	const auto colour = Colour4f(1, 0, 1, 1);
+
+	constexpr bool mergeOutlines = true;
+	if (mergeOutlines) {
+		drawMerged(painter, sceneEditor, width, colour);
+	} else {
+		drawSplit(painter, sceneEditor, width, colour);
+	}
+}
+
+void SelectedBoundsGizmo::drawSplit(Painter& painter, const ISceneEditor& sceneEditor, float width, Colour4f colour) const
+{
+	for (auto& e: getEntities()) {
+		painter.clear({}, {}, 0);
+		drawStencilTree(painter, e, sceneEditor);
+		drawOutlineTree(painter, e, sceneEditor, width, colour);
+	}
+}
+
+void SelectedBoundsGizmo::drawMerged(Painter& painter, const ISceneEditor& sceneEditor, float width, Colour4f colour) const
+{
+	drawSplit(painter, sceneEditor, width, colour.multiplyAlpha(0.4f));
+
 	painter.clear({}, {}, 0);
-	drawStencilTree(painter, entity, sceneEditor);
-	drawOutlineTree(painter, entity, sceneEditor);
+	for (auto& e: getEntities()) {
+		drawStencilTree(painter, e, sceneEditor);
+	}
+	for (auto& e: getEntities()) {
+		drawOutlineTree(painter, e, sceneEditor, width, colour);
+	}
 }
 
 void SelectedBoundsGizmo::drawStencilTree(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor) const
@@ -59,15 +80,15 @@ void SelectedBoundsGizmo::drawStencilTree(Painter& painter, EntityRef entity, co
 	}
 }
 
-void SelectedBoundsGizmo::drawOutlineTree(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor) const
+void SelectedBoundsGizmo::drawOutlineTree(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor, float width, Colour4f colour) const
 {
 	if (const auto* sprite = entity.tryGetComponent<SpriteComponent>()) {
 		if (shouldInclude(sprite->sprite, sceneEditor)) {
-			drawOutlineSprite(painter, sprite->sprite);
+			drawOutlineSprite(painter, sprite->sprite, width, colour);
 		}
 	}
 	for (const auto c: entity.getChildren()) {
-		drawOutlineTree(painter, c, sceneEditor);
+		drawOutlineTree(painter, c, sceneEditor, width, colour);
 	}
 }
 
@@ -79,12 +100,12 @@ void SelectedBoundsGizmo::drawStencilSprite(Painter& painter, const Sprite& spri
 	s.draw(painter);
 }
 
-void SelectedBoundsGizmo::drawOutlineSprite(Painter& painter, const Sprite& sprite) const
+void SelectedBoundsGizmo::drawOutlineSprite(Painter& painter, const Sprite& sprite, float width, Colour4f colour) const
 {
 	const auto tex0 = sprite.getMaterial().getTexture(0);
 
 	const auto zoom = getZoom();
-	const float outline = 2 / zoom;
+	const float outline = width / zoom;
 	const float padding = std::ceil(outline);
 
 	const auto texelSize = Vector2f(1.0f, 1.0f) / Vector2f(tex0->getSize());
@@ -98,7 +119,7 @@ void SelectedBoundsGizmo::drawOutlineSprite(Painter& painter, const Sprite& spri
 
 	Sprite s = sprite;
 	s.setMaterial(outlineMaterial->clone());
-	s.setColour(Colour4f(1, 0, 1, 1));
+	s.setColour(colour);
 	s.getMutableMaterial().set(0, tex0);
 	s.setCustom0(texGrads);
 	s.setTexRect1(Rect4f(0, 0, 1, 1));
