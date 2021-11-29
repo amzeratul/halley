@@ -204,6 +204,8 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 	if (parent) {
 		e.setParent(parent.value());
 	}
+
+	uuidMap[uuid] = entity;
 	
 	return e;
 }
@@ -240,6 +242,7 @@ void World::doDestroyEntity(EntityId id)
 
 void World::doDestroyEntity(Entity* e)
 {
+	uuidMap.erase(e->getInstanceUUID());
 	e->destroy();
 	entityDirty = true;
 }
@@ -294,6 +297,7 @@ const Entity* World::tryGetRawEntity(EntityId id) const
 
 std::optional<EntityRef> World::findEntity(const UUID& id, bool includePending)
 {
+	/*
 	for (auto& e: entities) {
 		if (e->getInstanceUUID() == id && e->isAlive()) {
 			return EntityRef(*e, *this);
@@ -309,6 +313,14 @@ std::optional<EntityRef> World::findEntity(const UUID& id, bool includePending)
 	}
 	
 	return std::optional<EntityRef>();
+	*/
+
+	const auto result = uuidMap.find(id);
+	if (result != uuidMap.end()) {
+		Ensures(result->second->getInstanceUUID() == id);
+		return EntityRef(*result->second, *this);
+	}
+	return {};
 }
 
 size_t World::numEntities() const
