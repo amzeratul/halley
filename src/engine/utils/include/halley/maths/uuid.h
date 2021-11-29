@@ -28,15 +28,26 @@ namespace Halley {
     	bool isValid() const;
 
         gsl::span<const gsl::byte> getBytes() const;
-		gsl::span<gsl::byte> getBytes();
+		gsl::span<gsl::byte> getWriteableBytes();
+        gsl::span<const uint64_t> getUint64Bytes() const;
 
     	void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
     private:
-		std::array<Byte, 16> bytes;
+        std::array<uint64_t, 2> bytes;
     };
 }
+
+template<>
+struct std::hash<Halley::UUID>
+{
+    std::size_t operator() (const Halley::UUID& uuid) const noexcept
+    {
+        const auto& bytes = uuid.getUint64Bytes();
+        return bytes[0] ^ bytes[1];
+    }
+};
 
 namespace natvis {
     struct x4lo {

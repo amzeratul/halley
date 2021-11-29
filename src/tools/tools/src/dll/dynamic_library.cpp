@@ -2,6 +2,7 @@
 #include <halley/support/exception.h>
 
 #include "halley/maths/random.h"
+#include "halley/maths/uuid.h"
 #include "halley/support/logger.h"
 #include "halley/text/encode.h"
 #include "halley/text/string_converter.h"
@@ -45,10 +46,8 @@ bool DynamicLibrary::load(bool withAnotherName)
 	if (withAnotherName) {
 		auto tmpPath = getTempPath();
 		create_directories(tmpPath);
-
-		Bytes randomBytes(8);
-		Random::getGlobal().getBytes(randomBytes);
-		libPath = tmpPath / String("halley-" + Encode::encodeBase16(randomBytes) + ".dll").cppStr();
+		
+		libPath = tmpPath / String("halley-" + UUID::generate().toString() + ".dll").cppStr();
 
 		boost::system::error_code ec;
 		bool success = false;

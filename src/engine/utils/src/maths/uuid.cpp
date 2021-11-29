@@ -9,7 +9,7 @@ using namespace Halley;
 
 UUID::UUID()
 {
-	memset(bytes.data(), 0, 16);
+	bytes.fill(0);
 }
 
 UUID::UUID(std::array<Byte, 16> b)
@@ -38,7 +38,7 @@ UUID::UUID(const String& str)
 	if (str.length() != 36) {
 		throw Exception("Invalid UUID format", HalleyExceptions::Utils);
 	}
-	const auto span = gsl::span<Byte, 16>(bytes.data(), 16);
+	const auto span = getWriteableBytes();
 	const std::string_view strView = str;
 	Encode::decodeBase16(strView.substr(0, 8), span.subspan(0, 4));
 	Encode::decodeBase16(strView.substr(9, 4), span.subspan(4, 2));
@@ -49,23 +49,23 @@ UUID::UUID(const String& str)
 
 bool UUID::operator==(const UUID& other) const
 {
-	return memcmp(bytes.data(), other.bytes.data(), size_t(bytes.size())) == 0;
+	return bytes == other.bytes;
 }
 
 bool UUID::operator!=(const UUID& other) const
 {
-	return memcmp(bytes.data(), other.bytes.data(), size_t(bytes.size())) != 0;
+	return bytes != other.bytes;
 }
 
 bool UUID::operator<(const UUID& other) const
 {
-	return memcmp(bytes.data(), other.bytes.data(), size_t(bytes.size())) == -1;
+	return bytes < other.bytes;
 }
 
 String UUID::toString() const
 {
 	using namespace Encode;
-	const auto span = gsl::span<const Byte, 16>(bytes.data(), 16);
+	const auto span = getBytes();
 	return encodeBase16(span.subspan(0, 4)) + "-"
  		 + encodeBase16(span.subspan(4, 2)) + "-"
 		 + encodeBase16(span.subspan(6, 2)) + "-"
@@ -76,10 +76,11 @@ String UUID::toString() const
 UUID UUID::generate()
 {
 	UUID result;
-	auto& bs = result.bytes;
-	Random::getGlobal().getBytes(gsl::span<Byte>(bs.data(), bs.size()));
-	bs[6] = (bs[6] & 0b00001111) | (4 << 4); // Version 4
-	bs[8] = (bs[8] & 0b00111111) | (0b10 << 6); // Variant 1
+	auto bs = result.getWriteableBytes();
+	auto bytes = gsl::span<uint8_t>(reinterpret_cast<uint8_t*>(bs.data()), 16);
+	Random::getGlobal().getBytes(bs);
+	bytes[6] = (bytes[6] & 0b00001111) | (4 << 4); // Version 4
+	bytes[8] = (bytes[8] & 0b00111111) | (0b10 << 6); // Variant 1
 	return result;
 }
 
@@ -91,18 +92,19 @@ UUID UUID::generateFromUUIDs(const UUID& one, const UUID& two)
 	Expects(oneBytes.size() == twoBytes.size());
 	
 	UUID result;
-	auto& bs = result.bytes;
+	auto bs = result.getWriteableBytes();
+	auto bytes = gsl::span<uint8_t>(reinterpret_cast<uint8_t*>(bs.data()), 16);
 	for (auto i = 0; i < oneBytes.size(); i++) {
-		bs[i] = Byte(oneBytes[i] ^ twoBytes[i]);
+		bytes[i] = Byte(oneBytes[i] ^ twoBytes[i]);
 	}
-	bs[6] = (bs[6] & 0b00001111) | (4 << 4); // Version 4
-	bs[8] = (bs[8] & 0b00111111) | (0b10 << 6); // Variant 1
+	bytes[6] = (bytes[6] & 0b00001111) | (4 << 4); // Version 4
+	bytes[8] = (bytes[8] & 0b00111111) | (0b10 << 6); // Variant 1
 	return result;
 }
 
 bool UUID::isValid() const
 {
-	for (size_t i = 0; i < 16; ++i) {
+	for (size_t i = 0; i < bytes.size(); ++i) {
 		if (bytes[i] != 0) {
 			return true;
 		}
@@ -112,12 +114,17 @@ bool UUID::isValid() const
 
 gsl::span<const gsl::byte> UUID::getBytes() const
 {
-	return gsl::as_bytes(gsl::span<const Byte>(bytes));
+	return gsl::as_bytes(gsl::span<const uint64_t>(bytes));
 }
 
-gsl::span<gsl::byte> UUID::getBytes()
+gsl::span<gsl::byte> UUID::getWriteableBytes()
 {
-	return gsl::as_writable_bytes(gsl::span<Byte>(bytes));
+	return gsl::as_writable_bytes(gsl::span<uint64_t>(bytes));
+}
+
+gsl::span<const uint64_t> UUID::getUint64Bytes() const
+{
+	return bytes;
 }
 
 void UUID::serialize(Serializer& s) const
@@ -127,5 +134,5 @@ void UUID::serialize(Serializer& s) const
 
 void UUID::deserialize(Deserializer& s)
 {
-	s >> getBytes();
+	s >> getWriteableBytes();
 }

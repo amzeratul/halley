@@ -42,9 +42,7 @@ static void initBase64()
 	}
 }
 
-typedef unsigned char uchar;
-
-String Encode::encodeBase16(gsl::span<const Byte> in)
+String Encode::encodeBase16(gsl::span<const gsl::byte> in)
 {
 	const char characters[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
@@ -52,7 +50,7 @@ String Encode::encodeBase16(gsl::span<const Byte> in)
 	size_t size = size_t(in.size());
 	result.cppStr().resize(size * 2, '0');
 	for (size_t i = 0; i < size; ++i) {
-		unsigned char c = in[i];
+		const auto c = reinterpret_cast<const uint8_t*>(in.data())[i];
 		result[i * 2] = characters[(c & 0xF0) >> 4];
 		result[i * 2 + 1] = characters[c & 0x0F];
 	}
@@ -60,7 +58,7 @@ String Encode::encodeBase16(gsl::span<const Byte> in)
 	return result;
 }
 
-void Encode::decodeBase16(std::string_view in, gsl::span<Byte> bytes)
+void Encode::decodeBase16(std::string_view in, gsl::span<gsl::byte> bytes)
 {
 	auto charToVal = [&] (char character) -> uint32_t
 	{
@@ -83,13 +81,8 @@ void Encode::decodeBase16(std::string_view in, gsl::span<Byte> bytes)
 	for (size_t i = 0; i < outSize; ++i) {
 		const auto high = charToVal(in[i * 2]);
 		const auto low = charToVal(in[i * 2 + 1]);
-		bytes[i] = (high << 4) | low;
+		bytes[i] = gsl::byte((high << 4) | low);
 	}
-}
-
-String Encode::encodeBase16(const Bytes& in)
-{
-	return encodeBase16(gsl::span<const Byte>(in.data(), in.size()));
 }
 
 String Encode::encodeBase64(const Bytes& in)
@@ -101,7 +94,7 @@ String Encode::encodeBase64(const Bytes& in)
 		// Input bytes
 		int available = std::min(int(sz-i), 3);
 		assert (available >= 1);
-		unsigned int inByte = (uchar(in[i]) << 16) | (available >= 2 ? uchar(in[i+1]) << 8 : 0u) | (available >= 3 ? uchar(in[i+2]) : 0u);
+		unsigned int inByte = (uint8_t(in[i]) << 16) | (available >= 2 ? uint8_t(in[i+1]) << 8 : 0u) | (available >= 3 ? uint8_t(in[i+2]) : 0u);
 
 		// Output bytes
 		unsigned int o0 = (inByte >> 18) & 0x3F;
