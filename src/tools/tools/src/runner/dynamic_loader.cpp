@@ -67,7 +67,7 @@ void DynamicGameLoader::load()
 	}
 
 	entry = getHalleyEntry();
-	if (entry->getApiVersion() != HALLEY_DLL_API_VERSION) {
+	if (entry->getApiVersion() != getHalleyDLLAPIVersion()) {
 		lib.unload();
 		throw Exception("Halley API mismatch.", HalleyExceptions::Core);
 	}

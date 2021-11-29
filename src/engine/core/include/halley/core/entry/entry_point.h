@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <cstdint>
 #include "halley/core/game/main_loop.h"
 
 #ifdef _WIN32
@@ -16,14 +17,14 @@ namespace Halley
 	class Core;
 	class HalleyStatics;
 
-	constexpr static uint32_t HALLEY_DLL_API_VERSION = 107;
-	
+	uint32_t getHalleyDLLAPIVersion();
+
 	class IHalleyEntryPoint
 	{
 	public:
 		virtual ~IHalleyEntryPoint() = default;
 
-		virtual uint32_t getApiVersion() { return HALLEY_DLL_API_VERSION; }
+		virtual uint32_t getApiVersion() { return getHalleyDLLAPIVersion(); }
 		virtual std::unique_ptr<Core> createCore(const std::vector<std::string>& args) = 0;
 		virtual std::unique_ptr<Game> createGame() = 0;
 		virtual void initSharedStatics(const HalleyStatics& parent);

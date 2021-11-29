@@ -48,7 +48,7 @@ void ProjectDLL::load()
 
 	auto* entry = getHalleyEntry();
 	const auto dllVersion = entry->getApiVersion();
-	const auto editorVersion = HALLEY_DLL_API_VERSION;
+	const auto editorVersion = getHalleyDLLAPIVersion();
 	if (dllVersion != editorVersion) {
 		// Incompatible version
 		setStatus(dllVersion < editorVersion ? Status::DLLVersionTooLow : Status::DLLVersionTooHigh);

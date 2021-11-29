@@ -3,6 +3,7 @@
 #include <halley/plugin/plugin.h>
 #include "halley/audio/audio_facade.h"
 #include "halley/support/logger.h"
+#include "entry/entry_point.h"
 
 using namespace Halley;
 
@@ -157,4 +158,9 @@ void HalleyAPI::replaceCoreAPI(CoreAPIInternal* coreAPI)
 {
 	coreInternal = coreAPI;
 	core = coreAPI;
+}
+
+uint32_t Halley::getHalleyDLLAPIVersion()
+{
+	return 109;
 }
