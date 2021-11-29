@@ -101,11 +101,10 @@ namespace Halley {
 		virtual void onEntityChanged();
 
 		std::optional<ConstEntityRef> getEntity(size_t entityIdx = 0) const;
-		std::optional<EntityRef> getEntity(size_t entityIdx = 0);
 		const std::vector<EntityRef>& getEntities() const;
 
-		EntityData& getEntityData(size_t entityIdx = 0);
-		const std::vector<EntityData*>& getEntityDatas();
+		const EntityData& getEntityData(size_t entityIdx = 0) const;
+		gsl::span<const EntityData*> getEntityDatas() const;
 		bool hasEntityData() const;
 		ConfigNode* getComponentData(const String& name, size_t entityIdx = 0);
 		const ConfigNode* getComponentData(const String& name, size_t entityIdx = 0) const;
@@ -135,10 +134,11 @@ namespace Halley {
 		
 		SceneEditorOutputState* outputState = nullptr;
 		float zoom = 1.0f;
+		bool needsToCopy = false;
 
 		SnapRules snapRules;
 
 		std::optional<Line> findSnapLine(Vector2f cur, Vector2f ref) const;
-		void copyEntityDatasToOld();
+		void copyEntityDatasToOldIfNeeded();
 	};
 }

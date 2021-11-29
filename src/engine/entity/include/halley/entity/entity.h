@@ -408,12 +408,10 @@ namespace Halley {
 			return entity->name;
 		}
 
-		void setName(const String& name)
+		void setName(String name)
 		{
 			validate();
-			if (entity->name != name) {
-				entity->name = name;
-			}
+			entity->name = std::move(name);
 		}
 
 		const UUID& getInstanceUUID() const
@@ -516,11 +514,7 @@ namespace Halley {
 
 		bool isValid() const
 		{
-			return entity != nullptr && world != nullptr
-#ifdef _DEBUG
-			&& entity->getEntityId() == entityId
-#endif
-			;
+			return entity != nullptr && world != nullptr;
 		}
 
 		bool isAlive() const
@@ -635,6 +629,9 @@ namespace Halley {
 		void validate() const
 		{
 			Expects(isValid());
+#ifdef _DEBUG
+			Expects(entity->getEntityId() == entityId);
+#endif
 		}
 
 	private:

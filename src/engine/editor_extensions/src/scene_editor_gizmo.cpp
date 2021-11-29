@@ -157,7 +157,7 @@ std::shared_ptr<UIWidget> SceneEditorGizmo::makeUI()
 void SceneEditorGizmo::setSelectedEntities(std::vector<EntityRef> entities, std::vector<EntityData*> datas)
 {
 	entityDatas = std::move(datas);
-	copyEntityDatasToOld();
+	needsToCopy = true;
 	
 	if (curEntities != entities) {
 		curEntities = std::move(entities);
@@ -165,17 +165,20 @@ void SceneEditorGizmo::setSelectedEntities(std::vector<EntityRef> entities, std:
 	}
 }
 
-void SceneEditorGizmo::copyEntityDatasToOld()
+void SceneEditorGizmo::copyEntityDatasToOldIfNeeded()
 {
-	oldEntityDatas.resize(entityDatas.size());
-	for (size_t i = 0; i < entityDatas.size(); ++i) {
-		oldEntityDatas[i] = EntityData(*entityDatas[i]);
+	if (needsToCopy) {
+		oldEntityDatas.resize(entityDatas.size());
+		for (size_t i = 0; i < entityDatas.size(); ++i) {
+			oldEntityDatas[i] = EntityData(*entityDatas[i]);
+		}
+		needsToCopy = false;
 	}
 }
 
 void SceneEditorGizmo::refreshEntity()
 {
-	copyEntityDatasToOld();
+	needsToCopy = true;
 	onEntityChanged();
 }
 
@@ -216,14 +219,14 @@ bool SceneEditorGizmo::canBoxSelectEntities() const
 void SceneEditorGizmo::onEntityChanged()
 {}
 
-EntityData& SceneEditorGizmo::getEntityData(size_t entityIdx)
+const EntityData& SceneEditorGizmo::getEntityData(size_t entityIdx) const
 {
 	return *entityDatas.at(entityIdx);
 }
 
-const std::vector<EntityData*>& SceneEditorGizmo::getEntityDatas()
+gsl::span<const EntityData*> SceneEditorGizmo::getEntityDatas() const
 {
-	return entityDatas;
+	return gsl::span<const EntityData*>(const_cast<const EntityData**>(entityDatas.data()), entityDatas.size());
 }
 
 bool SceneEditorGizmo::hasEntityData() const
@@ -233,6 +236,8 @@ bool SceneEditorGizmo::hasEntityData() const
 
 ConfigNode* SceneEditorGizmo::getComponentData(const String& name, size_t entityIdx)
 {
+	copyEntityDatasToOldIfNeeded();
+
 	if (entityIdx >= entityDatas.size()) {
 		return nullptr;
 	}
@@ -268,11 +273,6 @@ void SceneEditorGizmo::markModified(const String& component, const String& field
 std::optional<ConstEntityRef> SceneEditorGizmo::getEntity(size_t entityIdx) const
 {
 	return entityIdx >= curEntities.size() ? std::optional<ConstEntityRef>() : ConstEntityRef(curEntities.at(entityIdx));
-}
-
-std::optional<EntityRef> SceneEditorGizmo::getEntity(size_t entityIdx)
-{
-	return entityIdx >= curEntities.size() ? std::optional<EntityRef>() : curEntities.at(entityIdx);
 }
 
 const std::vector<EntityRef>& SceneEditorGizmo::getEntities() const
