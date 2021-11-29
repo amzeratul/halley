@@ -21,7 +21,7 @@ ISceneData::ConstEntityNodeData WorldSceneData::getEntityNodeData(const String& 
 	throw Exception("Not implemented", HalleyExceptions::Entity);
 }
 
-void WorldSceneData::reloadEntity(const String& id, const EntityData* data)
+void WorldSceneData::reloadEntities(gsl::span<const String> ids, gsl::span<const EntityData*> datas)
 {
 	throw Exception("Not implemented", HalleyExceptions::Entity);
 }

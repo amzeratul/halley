@@ -25,6 +25,11 @@ bool IEntityValidator::Result::operator!=(const Result& other) const
 	return errorMessage != other.errorMessage || suggestedActions != other.suggestedActions;
 }
 
+void ISceneData::reloadEntity(const String& id, const EntityData* data)
+{
+	return reloadEntities(gsl::span<const String>(&id, 1), gsl::span<const EntityData*>(&data, 1));
+}
+
 EntityValidator::EntityValidator(World& world)
 	: world(world)
 {

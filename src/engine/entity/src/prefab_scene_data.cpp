@@ -52,31 +52,39 @@ ISceneData::ConstEntityNodeData PrefabSceneData::getEntityNodeData(const String&
 	return ConstEntityNodeData(getWriteableEntityNodeData(id));
 }
 
-void PrefabSceneData::reloadEntity(const String& id, const EntityData* data)
+void PrefabSceneData::reloadEntities(gsl::span<const String> ids, gsl::span<const EntityData*> datas)
 {
-	if (id.isEmpty()) {
-		return;
-	}
+	Expects(ids.size() == datas.size());
 
-	if (!data) {
-		data = findEntity(prefab.getEntityDatas(), id);
-	}
+	for (size_t i = 0; i < ids.size(); ++i) {
+		auto& id = ids[i];
+		auto& data = datas[i];
 
-	auto entity = world.findEntity(UUID(id));
-	if (entity) {
-		if (data) {
-			// Update
-			factory->updateEntity(*entity, *data, static_cast<int>(EntitySerialization::Type::Prefab));
+		if (id.isEmpty()) {
+			return;
+		}
+
+		if (!data) {
+			data = findEntity(prefab.getEntityDatas(), id);
+		}
+
+		auto entity = world.findEntity(UUID(id));
+		if (entity) {
+			if (data) {
+				// Update
+				factory->updateEntity(*entity, *data, static_cast<int>(EntitySerialization::Type::Prefab));
+			} else {
+				// Destroy
+				world.destroyEntity(entity.value());
+			}
 		} else {
-			// Destroy
-			world.destroyEntity(entity.value());
-		}
-	} else {
-		if (data) {
-			// Create
-			factory->createEntity(*data);
+			if (data) {
+				// Create
+				factory->createEntity(*data);
+			}
 		}
 	}
+
 	world.spawnPending();
 }
 
