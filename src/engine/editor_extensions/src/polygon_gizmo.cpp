@@ -201,10 +201,6 @@ std::optional<VertexList> PolygonGizmo::readPoints()
 {
 	std::optional<VertexList> result;
 
-	if (!getEntityData().getPrefab().isEmpty()) {
-		return result;
-	}
-	
 	auto* data = getComponentData(componentName);
 	if (data) {
 		auto& field = getField(*data, fieldName);		
