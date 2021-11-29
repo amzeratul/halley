@@ -305,18 +305,20 @@ bool UIList::deselectAll(std::optional<int> exceptFor)
 
 void UIList::notifyNewItemSelected()
 {
-	const auto& itemId = getSelectedOptionId();
-	playSound(styles.at(0).getString("selectionChangedSound"));
+	if (notifyItemSelectionEnabled) {
+		const auto& itemId = getSelectedOptionId();
+		playSound(styles.at(0).getString("selectionChangedSound"));
 
-	sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), itemId, curOption));
-	if (scrollToSelection) {
-		sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), getOptionRect(curOption)));
-	}
-	
-	if (getDataBindFormat() == UIDataBind::Format::String) {
-		notifyDataBind(itemId);
-	} else {
-		notifyDataBind(curOption);
+		sendEvent(UIEvent(UIEventType::ListSelectionChanged, getId(), itemId, curOption));
+		if (scrollToSelection) {
+			sendEvent(UIEvent(UIEventType::MakeAreaVisible, getId(), getOptionRect(curOption)));
+		}
+		
+		if (getDataBindFormat() == UIDataBind::Format::String) {
+			notifyDataBind(itemId);
+		} else {
+			notifyDataBind(curOption);
+		}
 	}
 }
 
@@ -1220,18 +1222,24 @@ bool UIList::setSelectedOptionIds(gsl::span<const String> ids, SelectionMode mod
 		}
 	}
 
-	if (mode == SelectionMode::ShiftSelect) {
-		return setSelectedOptionId(ids.front(), mode);
-	}
-
+	notifyItemSelectionEnabled = false;
 	bool modified = false;
-	bool first = true;
-	for (auto& id: ids) {
-		const bool value = setSelectedOptionId(id, mode == SelectionMode::Normal ? (first ? SelectionMode::Normal : SelectionMode::AddToSelect) : mode);
-		if (first) {
-			modified = value;
-			first = false;
+	if (mode == SelectionMode::ShiftSelect) {
+		modified = setSelectedOptionId(ids.front(), mode);
+	} else {
+		bool first = true;
+		for (auto& id: ids) {
+			const bool value = setSelectedOptionId(id, mode == SelectionMode::Normal ? (first ? SelectionMode::Normal : SelectionMode::AddToSelect) : mode);
+			if (first) {
+				modified = value;
+				first = false;
+			}
 		}
+	}
+	notifyItemSelectionEnabled = true;
+
+	if (modified) {
+		notifyNewItemSelected();
 	}
 	return modified;
 }

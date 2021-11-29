@@ -134,6 +134,7 @@ namespace Halley {
 		bool focusable = true;
 		bool scrollToSelection = true;
 		bool multiSelect = false;
+		bool notifyItemSelectionEnabled = true;
 		int itemUnderCursor = -1;
 
 		bool requiresSelection = true;
