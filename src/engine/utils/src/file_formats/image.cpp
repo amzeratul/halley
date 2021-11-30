@@ -489,7 +489,7 @@ void Image::deserialize(Deserializer& s)
 
 void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
 {
-	if (isPNG(bytes)) {
+	if (false && isPNG(bytes)) {
 		unsigned char* pixels;
 		unsigned int x, y;
 		lodepng::State state;
@@ -514,10 +514,24 @@ void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
 		dataLen = w * h * getBytesPerPixel();
 	} else {
 		int x, y, nComp;
-		format = Format::RGBA;
-		unsigned char *pixels = reinterpret_cast<unsigned char*>(stbi_load_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &x, &y, &nComp, 4));
+
+		int channels = 0;
+		switch (targetFormat) {
+		case Format::Indexed:
+		case Format::SingleChannel:
+			channels = 1;
+			break;
+		case Format::RGB:
+			channels = 3;
+			break;
+		default:
+			channels = 4;
+		}
+		format = targetFormat != Format::Undefined ? targetFormat : Format::RGBA;
+
+		uint8_t *pixels = stbi_load_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &x, &y, &nComp, channels);
 		if (!pixels) {
-			throw Exception("Unable to load image data.", HalleyExceptions::Utils);
+			throw Exception("Unable to load image data: " + String(stbi_failure_reason()), HalleyExceptions::Utils);
 		}
 		px = std::unique_ptr<unsigned char, void(*)(unsigned char*)>(pixels, [](unsigned char* data) { stbi_image_free(data); });
 		w = x;
