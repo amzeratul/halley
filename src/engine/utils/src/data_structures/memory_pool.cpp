@@ -1,3 +1,4 @@
+#define _LIBCPP_DISABLE_DEPRECATION_WARNINGS
 #include <boost/pool/pool.hpp>
 #include "halley/data_structures/memory_pool.h"
 

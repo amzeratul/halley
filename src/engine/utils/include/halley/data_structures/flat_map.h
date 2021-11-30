@@ -10,6 +10,9 @@ namespace Halley {
 
 #else
 
+#ifndef _LIBCPP_DISABLE_DEPRECATION_WARNINGS
+#define _LIBCPP_DISABLE_DEPRECATION_WARNINGS
+#endif
 #include <boost/container/flat_map.hpp>
 
 namespace Halley
