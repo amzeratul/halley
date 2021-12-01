@@ -12,6 +12,7 @@ namespace Halley {
 		void setUIEditor(UIEditor& uiEditor);
 
 		void drawAfterChildren(UIPainter& painter) const override;
+		void update(Time t, bool moved) override;
 
 		void setSelectedWidget(const String& id);
 		void loadDisplay(const UIDefinition& uiDefinition);
@@ -20,5 +21,7 @@ namespace Halley {
 		UIEditor* editor;
 		std::map<UUID, std::shared_ptr<UIWidget>> widgets;
 		std::shared_ptr<UIWidget> curWidget;
+
+		Sprite boundsSprite;
 	};
 }

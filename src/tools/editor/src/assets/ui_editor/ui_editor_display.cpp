@@ -12,12 +12,22 @@ UIEditorDisplay::UIEditorDisplay(String id, Vector2f minSize, UISizer sizer)
 void UIEditorDisplay::setUIEditor(UIEditor& uiEditor)
 {
 	editor = &uiEditor;
+	boundsSprite.setImage(uiEditor.getGameFactory().getResources(), "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
 }
 
 void UIEditorDisplay::drawAfterChildren(UIPainter& painter) const
 {
 	if (curWidget) {
-		// TODO
+		painter.withAdjustedLayer(1000).draw(boundsSprite);
+	}
+}
+
+void UIEditorDisplay::update(Time time, bool moved)
+{
+	if (curWidget) {
+		boundsSprite
+			.setPosition(curWidget->getPosition())
+			.scaleTo(curWidget->getSize());
 	}
 }
 

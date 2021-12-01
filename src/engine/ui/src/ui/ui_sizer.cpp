@@ -289,24 +289,27 @@ bool UISizer::isActive() const
 
 void UISizer::setColumnProportions(const std::vector<float>& values)
 {
-	Expects(gridProportions);
-	gridProportions->columnProportions = values;
+	if (gridProportions) {
+		gridProportions->columnProportions = values;
+	}
 }
 
 void UISizer::setEvenColumns()
 {
-	Expects(gridProportions);
-	gridProportions->columnProportions.resize(gridProportions->nColumns);
-	for (auto& c: gridProportions->columnProportions) {
-		c = 1.0f;
+	if (gridProportions) {
+		gridProportions->columnProportions.resize(gridProportions->nColumns);
+		for (auto& c: gridProportions->columnProportions) {
+			c = 1.0f;
+		}
 	}
 }
 
 
 void UISizer::setRowProportions(const std::vector<float>& values)
 {
-	Expects(gridProportions);
-	gridProportions->rowProportions = values;
+	if (gridProportions) {
+		gridProportions->rowProportions = values;
+	}
 }
 
 Vector2f UISizer::computeMinimumSizeBox(bool includeProportional) const
