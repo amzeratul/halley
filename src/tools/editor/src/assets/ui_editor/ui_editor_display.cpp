@@ -11,9 +11,22 @@ UIEditorDisplay::UIEditorDisplay(String id, Vector2f minSize, UISizer sizer)
 
 void UIEditorDisplay::setUIEditor(UIEditor& uiEditor)
 {
-	editor = &uiEditor;
-	boundsSprite.setImage(uiEditor.getGameFactory().getResources(), "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
-	sizerSprite.setImage(uiEditor.getGameFactory().getResources(), "whitebox_outline.png").setColour(Colour4f(1, 1, 1));
+	factory = &uiEditor.getGameFactory();
+	factory->setConstructionCallback([=] (const std::shared_ptr<UIWidget>& widget, const String& uuid)
+	{
+		if (!uuid.isEmpty()) {
+			widgets[UUID(uuid)] = widget;
+		}
+		maxAdjustment = std::max(maxAdjustment, widget->getChildLayerAdjustment());
+	});
+
+	boundsSprite.setImage(factory->getResources(), "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
+	sizerSprite.setImage(factory->getResources(), "whitebox_outline.png").setColour(Colour4f(0.7f, 0.7f, 0.7f));
+}
+
+void UIEditorDisplay::onMakeUI()
+{
+	updateCurWidget();
 }
 
 void UIEditorDisplay::drawAfterChildren(UIPainter& painter) const
@@ -37,22 +50,13 @@ void UIEditorDisplay::update(Time time, bool moved)
 		boundsSprite
 			.setPosition(curWidget->getPosition())
 			.scaleTo(curWidget->getSize());
-
-		curSizer = nullptr;
-		sizerRects.clear();
-		layout(this);
-		makeSizerSprites();
 	}
 }
 
 void UIEditorDisplay::setSelectedWidget(const String& id)
 {
-	auto iter = widgets.find(UUID(id));
-	if (iter != widgets.end()) {
-		curWidget = iter->second;
-	} else {
-		curWidget = {};
-	}
+	curSelection = id;
+	updateCurWidget();
 }
 
 void UIEditorDisplay::loadDisplay(const UIDefinition& uiDefinition)
@@ -61,15 +65,7 @@ void UIEditorDisplay::loadDisplay(const UIDefinition& uiDefinition)
 	widgets.clear();
 	maxAdjustment = 0;
 
-	editor->getGameFactory().setConstructionCallback([=] (const std::shared_ptr<UIWidget>& widget, const String& uuid)
-	{
-		if (!uuid.isEmpty()) {
-			widgets[UUID(uuid)] = widget;
-		}
-		maxAdjustment = std::max(maxAdjustment, widget->getChildLayerAdjustment());
-	});
-	editor->getGameFactory().loadUI(*this, uiDefinition);
-	editor->getGameFactory().setConstructionCallback({});
+	factory->loadUI(*this, uiDefinition);
 }
 
 void UIEditorDisplay::onPlaceInside(Rect4f rect, const std::shared_ptr<IUIElement>& element, UISizer& sizer)
@@ -77,7 +73,24 @@ void UIEditorDisplay::onPlaceInside(Rect4f rect, const std::shared_ptr<IUIElemen
 	if (element == curWidget) {
 		curSizer = &sizer;
 	}
-	sizerRects[&sizer].push_back(rect);
+	sizerRects[&sizer].emplace_back(rect, element == curWidget);
+}
+
+void UIEditorDisplay::updateCurWidget()
+{
+	curWidget = {};
+	curSizer = nullptr;
+	sizerRects.clear();
+
+	if (!curSelection.isEmpty()) {
+		const auto iter = widgets.find(UUID(curSelection));
+		if (iter != widgets.end()) {
+			curWidget = iter->second;
+		}
+
+		layout(this);
+		makeSizerSprites();
+	}
 }
 
 void UIEditorDisplay::makeSizerSprites()
@@ -87,7 +100,11 @@ void UIEditorDisplay::makeSizerSprites()
 		const auto& rects = sizerRects[curSizer];
 		for (const auto& rect: rects) {
 			sizerSprites.push_back(sizerSprite);
-			sizerSprites.back().setPosition(rect.getTopLeft()).scaleTo(rect.getSize());
+			sizerSprites.back().setPosition(rect.first.getTopLeft()).scaleTo(rect.first.getSize());
+			if (rect.second) {
+				sizerSprites.back().setColour(Colour4f(1, 1, 1, 1));
+			}
 		}
 	}
+	sizerRects.clear();
 }

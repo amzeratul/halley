@@ -11,6 +11,7 @@ namespace Halley {
 
 		void setUIEditor(UIEditor& uiEditor);
 
+		void onMakeUI() override;
 		void drawAfterChildren(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 
@@ -20,17 +21,20 @@ namespace Halley {
 		void onPlaceInside(Rect4f rect, const std::shared_ptr<IUIElement>& element, UISizer& sizer) override;
 
 	private:
-		UIEditor* editor;
+		UIFactory* factory = nullptr;
 		std::map<UUID, std::shared_ptr<UIWidget>> widgets;
 		std::shared_ptr<const UIWidget> curWidget;
 		int maxAdjustment = 0;
 
+		String curSelection;
+
 		Sprite boundsSprite;
 		Sprite sizerSprite;
 		std::vector<Sprite> sizerSprites;
-		std::map<UISizer*, std::vector<Rect4f>> sizerRects;
+		std::map<UISizer*, std::vector<std::pair<Rect4f, bool>>> sizerRects;
 		UISizer* curSizer = nullptr;
 
+		void updateCurWidget();
 		void makeSizerSprites();
 	};
 }

@@ -203,11 +203,21 @@ Resources& UIFactory::getResources() const
 	return resources;
 }
 
-std::unique_ptr<UIFactory> UIFactory::withResources(Resources& newResources) const
+std::unique_ptr<UIFactory> UIFactory::clone() const
 {
-	auto result = std::make_unique<UIFactory>(api, newResources, i18n, styleSheet, colourScheme);
+	return cloneWithResources(resources);
+}
+
+std::unique_ptr<UIFactory> UIFactory::cloneWithResources(Resources& newResources) const
+{
+	auto result = make(api, newResources, i18n, styleSheet, colourScheme);
 	result->inputButtons = inputButtons;
 	return result;
+}
+
+std::unique_ptr<UIFactory> UIFactory::make(const HalleyAPI& api, Resources& resources, const I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet, std::shared_ptr<const UIColourScheme> colourScheme) const
+{
+	return std::make_unique<UIFactory>(api, resources, i18n, styleSheet, colourScheme);
 }
 
 const I18N& UIFactory::getI18N() const

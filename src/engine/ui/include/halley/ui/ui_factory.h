@@ -81,7 +81,9 @@ namespace Halley
 
 		Resources& getResources() const;
 
-		std::unique_ptr<UIFactory> withResources(Resources& newResources) const;
+		std::unique_ptr<UIFactory> clone() const;
+		std::unique_ptr<UIFactory> cloneWithResources(Resources& newResources) const;
+		virtual std::unique_ptr<UIFactory> make(const HalleyAPI& api, Resources& resources, const I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet = {}, std::shared_ptr<const UIColourScheme> colourScheme = {}) const;
 
 		const I18N& getI18N() const;
 
