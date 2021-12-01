@@ -1,14 +1,13 @@
 #pragma once
 
-#include <memory>
-#include <memory>
-
+#include <halley.hpp>
 #include "ui_widget_editor.h"
 #include "ui_widget_list.h"
 #include "../asset_editor.h"
 #include "src/scene/choose_asset_window.h"
 
 namespace Halley {
+	class UIEditorDisplay;
 	class UIGraphNode;
 
 	class UIEditor : public AssetEditor {
@@ -37,7 +36,7 @@ namespace Halley {
 		ProjectWindow& projectWindow;
 
 		std::shared_ptr<UIDefinition> uiDefinition;
-		std::shared_ptr<UIWidget> display;
+		std::shared_ptr<UIEditorDisplay> display;
 		bool loaded = false;
 		bool modified = false;
 

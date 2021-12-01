@@ -11,7 +11,7 @@ children:
   - widget: { class: scrollBackground, id: scrollBackground }
     proportion: 1
     children:
-    - widget: { class: widget, id: display }
+    - widget: { class: uiEditorDisplay, id: display }
       proportion: 1
       fill: centre
       sizer: { type: vertical }

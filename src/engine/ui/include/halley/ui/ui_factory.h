@@ -47,6 +47,7 @@ namespace Halley
 	{
 	public:
 		using WidgetFactory = std::function<std::shared_ptr<UIWidget>(const ConfigNode&)>;
+		using ConstructionCallback = std::function<void(const std::shared_ptr<UIWidget>&, const String& uuid)>;
 
 		UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet = {}, std::shared_ptr<const UIColourScheme> colourScheme = {});
 		UIFactory(const UIFactory& other) = delete;
@@ -90,6 +91,8 @@ namespace Halley
 		void update();
 
 		virtual Sprite makeAssetTypeIcon(AssetType type) const;
+
+		void setConstructionCallback(ConstructionCallback callback);
 
 	protected:
 		struct ParsedOption {
@@ -188,5 +191,7 @@ namespace Halley
 		std::map<String, WidgetFactory> factories;
 		std::map<String, UIFactoryWidgetProperties> properties;
 		std::map<String, UIInputButtons> inputButtons;
+
+		ConstructionCallback constructionCallback;
 	};
 }

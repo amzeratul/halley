@@ -114,8 +114,11 @@ Vector2f UISizerEntry::getPosition() const
 UISizer::UISizer(UISizerType type, float gap, int nColumns)
 	: type(type)
 	, gap(gap)
-	, nColumns(nColumns)
 {
+	if (type == UISizerType::Grid) {
+		gridProportions = std::make_unique<GridProportions>();
+		gridProportions->nColumns = nColumns;
+	}
 }
 
 UISizer::UISizer(UISizer&& other) noexcept
@@ -127,11 +130,9 @@ UISizer& UISizer::operator=(UISizer&& other) noexcept
 {
 	type = other.type;
 	gap = other.gap;
-	nColumns = other.nColumns;
+	gridProportions = std::move(other.gridProportions);
 
 	entries = std::move(other.entries);
-	columnProportions = std::move(other.columnProportions);
-	rowProportions = std::move(other.rowProportions);
 
 	curParent = other.curParent;
 
@@ -288,13 +289,15 @@ bool UISizer::isActive() const
 
 void UISizer::setColumnProportions(const std::vector<float>& values)
 {
-	columnProportions = values;
+	Expects(gridProportions);
+	gridProportions->columnProportions = values;
 }
 
 void UISizer::setEvenColumns()
 {
-	columnProportions.resize(nColumns);
-	for (auto& c: columnProportions) {
+	Expects(gridProportions);
+	gridProportions->columnProportions.resize(gridProportions->nColumns);
+	for (auto& c: gridProportions->columnProportions) {
 		c = 1.0f;
 	}
 }
@@ -302,7 +305,8 @@ void UISizer::setEvenColumns()
 
 void UISizer::setRowProportions(const std::vector<float>& values)
 {
-	rowProportions = values;
+	Expects(gridProportions);
+	gridProportions->rowProportions = values;
 }
 
 Vector2f UISizer::computeMinimumSizeBox(bool includeProportional) const
@@ -442,6 +446,9 @@ void UISizer::setRectBoxFree(Rect4f rect)
 
 void UISizer::computeGridSizes(std::vector<float>& colSize, std::vector<float>& rowSize) const
 {
+	Expects(gridProportions);
+	auto& nColumns = gridProportions->nColumns;
+
 	Expects(nColumns > 0);
 	int nRows = std::max(1, int((entries.size() + nColumns - 1) / nColumns));
 
@@ -517,6 +524,11 @@ Vector2f UISizer::computeMinimumSizeGrid() const
 
 void UISizer::setRectGrid(Rect4f rect)
 {
+	Expects(gridProportions);
+	auto& nColumns = gridProportions->nColumns;
+	auto& columnProportions = gridProportions->columnProportions;
+	auto& rowProportions = gridProportions->rowProportions;
+
 	Expects(nColumns > 0);
 	int nRows = int((entries.size() + nColumns - 1) / nColumns);
 	
@@ -595,6 +607,9 @@ void UISizer::setRectGrid(Rect4f rect)
 
 float UISizer::getColumnProportion(int col) const
 {
+	Expects(gridProportions);
+	auto& columnProportions = gridProportions->columnProportions;
+
 	if (col >= 0 && col < int(columnProportions.size())) {
 		return columnProportions[col];
 	}
@@ -603,6 +618,9 @@ float UISizer::getColumnProportion(int col) const
 
 float UISizer::getRowProportion(int row) const
 {
+	Expects(gridProportions);
+	auto& rowProportions = gridProportions->rowProportions;
+
 	if (row >= 0 && row < int(rowProportions.size())) {
 		return rowProportions[row];
 	}

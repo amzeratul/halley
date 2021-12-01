@@ -21,6 +21,7 @@ set (editor_sources
 	"src/assets/prefab_editor.cpp"
 
 	"src/assets/ui_editor/ui_editor.cpp"
+	"src/assets/ui_editor/ui_editor_display.cpp"
 	"src/assets/ui_editor/ui_widget_editor.cpp"
 	"src/assets/ui_editor/ui_widget_list.cpp"
 
@@ -84,6 +85,7 @@ set (editor_headers
 	"src/assets/prefab_editor.h"
 
 	"src/assets/ui_editor/ui_editor.h"
+	"src/assets/ui_editor/ui_editor_display.h"
 	"src/assets/ui_editor/ui_widget_editor.h"
 	"src/assets/ui_editor/ui_widget_list.h"
 

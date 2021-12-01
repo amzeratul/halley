@@ -1,5 +1,7 @@
 #pragma once
 
+#include <halley.hpp>
+
 namespace Halley {
 	class ProjectWindow;
 	class EntityEditorFactory;

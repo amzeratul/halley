@@ -173,7 +173,7 @@ namespace Halley {
 		
 		virtual void onMakeUI();
 
-		const LocalisedString& getToolTip() const;
+		LocalisedString getToolTip() const;
 		void setToolTip(LocalisedString toolTip);
 
 		bool hasStyle() const;
@@ -215,7 +215,6 @@ namespace Halley {
 
 		virtual void checkActive();
 
-		UIInputType lastInputType = UIInputType::Undefined;
 		std::vector<UIStyle> styles = {};
 
 	private:
@@ -236,7 +235,11 @@ namespace Halley {
 		
 		std::unique_ptr<UIInputButtons> gamepadInputButtons;
 		UIInputResults gamepadInputResults;
-
+	protected:
+		UIInputType lastInputType = UIInputType::Undefined;
+	private:
+		mutable int layoutNeeded = 1;
+		
 		Vector2f position;
 		Vector2f size;
 		Vector2f minSize;
@@ -246,7 +249,6 @@ namespace Halley {
 		std::optional<UISizer> sizer;
 
 		mutable Vector2f layoutSize;
-		mutable int layoutNeeded = 1;
 
 		std::shared_ptr<UIEventHandler> eventHandler;
 		std::shared_ptr<UIValidator> validator;
@@ -254,7 +256,7 @@ namespace Halley {
 		std::unique_ptr<UIAnchor> anchor;
 		std::vector<std::shared_ptr<UIBehaviour>> behaviours;
 
-		LocalisedString toolTip;
+		std::unique_ptr<LocalisedString> toolTip;
 
 		int childLayerAdjustment = 0;
 

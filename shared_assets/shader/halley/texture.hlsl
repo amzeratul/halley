@@ -1,6 +1,6 @@
 
 float2 getTextureSize(Texture2D tex) {
-    uint w, h;
+    float w, h;
     tex.GetDimensions(w, h);
     return float2(w, h);
 }

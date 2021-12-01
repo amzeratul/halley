@@ -13,7 +13,9 @@ UIList::UIList(String id, UIStyle style, UISizerType orientation, int nColumns)
 	, nColumns(nColumns)
 {
 	styles.emplace_back(style);
-	getSizer().setEvenColumns();
+	if (orientation == UISizerType::Grid) {
+		getSizer().setEvenColumns();
+	}
 	sprite = style.getSprite("background");
 
 	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event) {});

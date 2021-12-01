@@ -137,13 +137,17 @@ namespace Halley {
 		}
 
 	private:
+		struct GridProportions {
+			std::vector<float> columnProportions;
+			std::vector<float> rowProportions;
+			int nColumns = 0;
+		};
+
 		std::vector<UISizerEntry> entries;
-		std::vector<float> columnProportions;
-		std::vector<float> rowProportions;
+		std::unique_ptr<GridProportions> gridProportions;
 
 		UISizerType type = UISizerType::Undefined;
 		float gap = 1.0f;
-		int nColumns = false;
 
 		UIParent* curParent = nullptr;
 

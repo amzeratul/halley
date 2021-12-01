@@ -1,5 +1,6 @@
 #include "ui_editor.h"
 
+#include "ui_editor_display.h"
 #include "ui_widget_editor.h"
 #include "ui_widget_list.h"
 #include "halley/tools/project/project.h"
@@ -17,7 +18,8 @@ UIEditor::UIEditor(UIFactory& factory, Resources& gameResources, Project& projec
 
 void UIEditor::onMakeUI()
 {
-	display = getWidget("display");
+	display = getWidgetAs<UIEditorDisplay>("display");
+	display->setUIEditor(*this);
 	widgetList = getWidgetAs<UIWidgetList>("widgetList");
 	widgetList->setUIEditor(*this);
 	widgetEditor = getWidgetAs<UIWidgetEditor>("widgetEditor");
@@ -106,8 +108,7 @@ std::shared_ptr<const Resource> UIEditor::loadResource(const String& id)
 void UIEditor::doLoadUI()
 {
 	if (uiDefinition && display && !loaded) {
-		display->clear();
-		gameFactory->loadUI(*display, *uiDefinition);
+		display->loadDisplay(*uiDefinition);
 		loaded = true;
 	}
 }
@@ -116,6 +117,7 @@ void UIEditor::setSelectedWidget(const String& id)
 {
 	curSelection = id;
 	widgetEditor->setSelectedWidget(id, uiDefinition->findUUID(id).result);
+	display->setSelectedWidget(id);
 }
 
 void UIEditor::addWidget()

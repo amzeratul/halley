@@ -6,6 +6,7 @@
 #include "src/assets/animation_editor.h"
 #include "src/assets/asset_editor_window.h"
 #include "src/assets/metadata_editor.h"
+#include "src/assets/ui_editor/ui_editor_display.h"
 #include "src/assets/ui_editor/ui_widget_editor.h"
 #include "src/assets/ui_editor/ui_widget_list.h"
 #include "src/scene/entity_editor.h"
@@ -34,6 +35,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("selectAsset", [=](const ConfigNode& node) { return makeSelectAsset(node); });
 	addFactory("uiWidgetList", [=](const ConfigNode& node) { return makeUIWidgetList(node); });
 	addFactory("uiWidgetEditor", [=](const ConfigNode& node) { return makeUIWidgetEditor(node); });
+	addFactory("uiEditorDisplay", [=](const ConfigNode& node) { return makeUIEditorDisplay(node); });
 }
 
 Sprite EditorUIFactory::makeAssetTypeIcon(AssetType type) const
@@ -129,6 +131,13 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeUIWidgetList(const ConfigNode& en
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	return std::make_shared<UIWidgetList>(id, *this);
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeUIEditorDisplay(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	return std::make_shared<UIEditorDisplay>(id, Vector2f{}, makeSizer(entryNode).value_or(UISizer()));
 }
 
 void EditorUIFactory::loadColourSchemes()

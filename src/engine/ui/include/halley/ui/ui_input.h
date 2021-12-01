@@ -72,7 +72,7 @@ namespace Halley {
 		std::array<bool, UIGamepadInput::NumberOfButtons> buttonsPressed;
 		std::array<bool, UIGamepadInput::NumberOfButtons> buttonsReleased;
 		std::array<bool, UIGamepadInput::NumberOfButtons> buttonsHeld;
-		std::array<float, UIGamepadInput::NumberOfAxes> axes;
 		std::array<int8_t, UIGamepadInput::NumberOfAxes> axesRepeat;
+		std::array<float, UIGamepadInput::NumberOfAxes> axes;
 	};
 }

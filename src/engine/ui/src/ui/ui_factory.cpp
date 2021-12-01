@@ -235,6 +235,11 @@ Sprite UIFactory::makeAssetTypeIcon(AssetType type) const
 	return Sprite();
 }
 
+void UIFactory::setConstructionCallback(ConstructionCallback callback)
+{
+	constructionCallback = std::move(callback);
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 {
 	styleSheet->updateIfNeeded();
@@ -265,6 +270,11 @@ std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
 	if (widgetNode.hasKey("tooltipKey")) {
 		widget->setToolTip(i18n.get(widgetNode["tooltipKey"].asString()));
 	}
+
+	if (constructionCallback) {
+		constructionCallback(widget, entryNode["uuid"].asString(""));
+	}
+
 	return widget;
 }
 

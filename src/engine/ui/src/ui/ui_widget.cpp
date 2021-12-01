@@ -752,9 +752,13 @@ Rect4f UIWidget::getMouseRect() const
 	}
 }
 
-void UIWidget::setToolTip(LocalisedString toolTip)
+void UIWidget::setToolTip(LocalisedString tip)
 {
-	this->toolTip = std::move(toolTip);
+	if (!toolTip) {
+		toolTip = std::make_unique<LocalisedString>(tip);
+	} else {
+		*toolTip = std::move(tip);
+	}
 }
 
 bool UIWidget::hasStyle() const
@@ -917,9 +921,9 @@ void UIWidget::onMakeUI()
 {
 }
 
-const LocalisedString& UIWidget::getToolTip() const
+LocalisedString UIWidget::getToolTip() const
 {
-	return toolTip;
+	return toolTip ? *toolTip : LocalisedString();
 }
 
 void UIWidget::checkActive()
