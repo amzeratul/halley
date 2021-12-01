@@ -40,13 +40,13 @@ namespace Halley {
 		void doRender(RenderContext& rc);
 
 		Vector2f getLayoutMinimumSize(bool force) const override;
-		void setRect(Rect4f rect) final override;
+		void setRect(Rect4f rect, IUIElementListener* listener) final override;
 
 		UIRoot* getRoot() final override;
 		const UIRoot* getRoot() const final override;
 		UIParent* getParent() const;
 
-		void layout();
+		void layout(IUIElementListener* listener = nullptr);
 
 		virtual void alignAt(const UIAnchor& anchor);
 		void alignAtAnchor();
@@ -54,6 +54,7 @@ namespace Halley {
 		void setAnchor();
 
 		virtual std::optional<UISizer>& tryGetSizer();
+		virtual const std::optional<UISizer>& tryGetSizer() const;
 		virtual UISizer& getSizer();
 		void setSizer(std::optional<UISizer> sizer);
 

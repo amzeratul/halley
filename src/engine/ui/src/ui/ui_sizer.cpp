@@ -27,8 +27,12 @@ Vector2f UISizerEntry::getMinimumSize() const
 	return widget ? widget->getLayoutMinimumSize(false) : Vector2f();
 }
 
-void UISizerEntry::placeInside(Rect4f rect, Vector2f minSize)
+void UISizerEntry::placeInside(Rect4f rect, Rect4f origRect, Vector2f minSize, IUIElement::IUIElementListener* listener, UISizer& sizer)
 {
+	if (listener) {
+		listener->onPlaceInside(origRect, widget, sizer);
+	}
+
 	Vector2f cellSize = rect.getSize();
 	Vector2f anchoring;
 	Vector2f size = minSize;
@@ -62,7 +66,7 @@ void UISizerEntry::placeInside(Rect4f rect, Vector2f minSize)
 	Vector2f pos = (rect.getTopLeft() + spareSize * anchoring).round();
 
 	if (widget) {
-		widget->setRect(Rect4f(pos, pos + size));
+		widget->setRect(Rect4f(pos, pos + size), listener);
 	}
 }
 
@@ -156,14 +160,14 @@ Vector2f UISizer::computeMinimumSize(bool includeProportional) const
 	}
 }
 
-void UISizer::setRect(Rect4f rect)
+void UISizer::setRect(Rect4f rect, IUIElementListener* listener)
 {
 	if (type == UISizerType::Horizontal || type == UISizerType::Vertical) {
-		setRectBox(rect);
+		setRectBox(rect, listener);
 	} else if (type == UISizerType::Free) {
-		setRectBoxFree(rect);
+		setRectFree(rect, listener);
 	} else {
-		setRectGrid(rect);
+		setRectGrid(rect, listener);
 	}
 }
 
@@ -366,7 +370,7 @@ Vector2f UISizer::computeMinimumSizeBox(bool includeProportional) const
 }
 
 
-void UISizer::setRectBox(Rect4f rect)
+void UISizer::setRectBox(Rect4f rect, IUIElementListener* listener)
 {
 	Vector2f pos = rect.getTopLeft();
 
@@ -406,8 +410,10 @@ void UISizer::setRectBox(Rect4f rect)
 		}
 		cellSize[otherAxis] = rect.getSize()[otherAxis] - border[otherAxis] - border[otherAxis + 2];
 
-		Vector2f curPos = pos + Vector2f(border.x, border.y);
-		e.placeInside(Rect4f(curPos, curPos + cellSize), minSize);
+		Vector2f curPos = pos + border.xy();
+		const auto rect = Rect4f(curPos, curPos + cellSize);
+		const auto origRect = Rect4f(rect.getTopLeft() - border.xy(), rect.getBottomRight() + border.zw());
+		e.placeInside(rect, origRect, minSize, listener, *this);
 
 		pos[mainAxis] += cellSize[mainAxis] + border[mainAxis] + border[mainAxis + 2];
 	}
@@ -431,7 +437,7 @@ Vector2f UISizer::computeMinimumSizeBoxFree() const
 	return rect.getSize();
 }
 
-void UISizer::setRectBoxFree(Rect4f rect)
+void UISizer::setRectFree(Rect4f rect, IUIElementListener* listener)
 {
 	const auto startPos = rect.getTopLeft();
 
@@ -443,7 +449,8 @@ void UISizer::setRectBoxFree(Rect4f rect)
 		const auto minSize = e.getMinimumSize();
 		const auto cellSize = rect.getSize() - e.getPosition();
 		const auto curPos = startPos + e.getPosition();
-		e.placeInside(Rect4f(curPos, curPos + cellSize), minSize);
+		const auto rect = Rect4f(curPos, curPos + cellSize);
+		e.placeInside(rect, rect, minSize, listener, *this);
 	}
 }
 
@@ -525,7 +532,7 @@ Vector2f UISizer::computeMinimumSizeGrid() const
 	return result;
 }
 
-void UISizer::setRectGrid(Rect4f rect)
+void UISizer::setRectGrid(Rect4f rect, IUIElementListener* listener)
 {
 	Expects(gridProportions);
 	auto& nColumns = gridProportions->nColumns;
@@ -604,7 +611,7 @@ void UISizer::setRectGrid(Rect4f rect)
 		Vector2f sz = e.getMinimumSize();
 		auto border = e.getBorder();
 		Vector2f curPos = Vector2f(cols[x], rows[y]) + startPos + Vector2f(border.x, border.y);
-		e.placeInside(Rect4f(curPos, curPos + cellSize), sz);
+		e.placeInside(Rect4f(curPos, curPos + cellSize), Rect4f(startPos, startPos + cellSize), sz, listener, *this);
 	}
 }
 

@@ -139,13 +139,13 @@ Vector2f UIWidget::getLayoutMinimumSize(bool force) const
 	return minSize;
 }
 
-void UIWidget::setRect(Rect4f rect)
+void UIWidget::setRect(Rect4f rect, IUIElementListener* listener)
 {
 	setWidgetRect(rect);
 	if (sizer) {
 		auto border = getInnerBorder();
 		auto p0 = getLayoutOriginPosition();
-		sizer->setRect(Rect4f(p0 + Vector2f(border.x, border.y), p0 + rect.getSize() - Vector2f(border.z, border.w)));
+		sizer->setRect(Rect4f(p0 + Vector2f(border.x, border.y), p0 + rect.getSize() - Vector2f(border.z, border.w)), listener);
 	} else {
 		for (auto& c: getChildren()) {
 			c->layout();
@@ -153,12 +153,12 @@ void UIWidget::setRect(Rect4f rect)
 	}
 }
 
-void UIWidget::layout()
+void UIWidget::layout(IUIElementListener* listener)
 {
 	checkActive();
 	Vector2f minimumSize = getLayoutMinimumSize(false);
 	Vector2f targetSize = Vector2f::max(shrinkOnLayout ? Vector2f() : size, minimumSize);
-	setRect(Rect4f(getPosition(), getPosition() + targetSize));
+	setRect(Rect4f(getPosition(), getPosition() + targetSize), listener);
 
 	alignAtAnchor();
 	onLayout();
@@ -194,6 +194,11 @@ void UIWidget::setAnchor()
 }
 
 std::optional<UISizer>& UIWidget::tryGetSizer()
+{
+	return sizer;
+}
+
+const std::optional<UISizer>& UIWidget::tryGetSizer() const
 {
 	return sizer;
 }

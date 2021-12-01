@@ -6,6 +6,8 @@
 #include "ui_element.h"
 
 namespace Halley {
+	class UISizer;
+
 	enum class UISizerType {
 		Undefined,
 		Horizontal,
@@ -59,7 +61,7 @@ namespace Halley {
 		int getFillFlags() const;
 		Vector2f getPosition() const;
 
-		void placeInside(Rect4f rect, Vector2f minSize);
+		void placeInside(Rect4f rect, Rect4f origRect, Vector2f minSize, IUIElement::IUIElementListener* listener, UISizer& sizer);
 
 		UIElementPtr getPointer() const;
 
@@ -104,7 +106,7 @@ namespace Halley {
 		UISizer& operator=(const UISizer& other) = delete;
 
 		Vector2f getLayoutMinimumSize(bool force) const override;
-		void setRect(Rect4f rect) override;
+		void setRect(Rect4f rect, IUIElementListener* listener) override;
 
 		void add(std::shared_ptr<IUIElement> element, float proportion = 0, Vector4f border = Vector4f(), int fillFlags = UISizerFillFlags::Fill, Vector2f position = Vector2f(), size_t insertPos = std::numeric_limits<size_t>::max()) override;
 		void addSpacer(float size) override;
@@ -157,14 +159,14 @@ namespace Halley {
 		Vector2f computeMinimumSize(bool includeProportional) const;
 
 		Vector2f computeMinimumSizeBox(bool includeProportional) const;
-		void setRectBox(Rect4f rect);
+		void setRectBox(Rect4f rect, IUIElementListener* listener);
 
 		Vector2f computeMinimumSizeBoxFree() const;
-		void setRectBoxFree(Rect4f rect);
+		void setRectFree(Rect4f rect, IUIElementListener* listener);
 
 		void computeGridSizes(std::vector<float>& cols, std::vector<float>& rows) const;
 		Vector2f computeMinimumSizeGrid() const;
-		void setRectGrid(Rect4f rect);
+		void setRectGrid(Rect4f rect, IUIElementListener* listener);
 		float getColumnProportion(int column) const;
 		float getRowProportion(int row) const;
 

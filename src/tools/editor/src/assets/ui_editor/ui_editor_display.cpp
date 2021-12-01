@@ -13,21 +13,35 @@ void UIEditorDisplay::setUIEditor(UIEditor& uiEditor)
 {
 	editor = &uiEditor;
 	boundsSprite.setImage(uiEditor.getGameFactory().getResources(), "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
+	sizerSprite.setImage(uiEditor.getGameFactory().getResources(), "whitebox_outline.png").setColour(Colour4f(1, 1, 1));
 }
 
 void UIEditorDisplay::drawAfterChildren(UIPainter& painter) const
 {
 	if (curWidget) {
-		painter.withAdjustedLayer(maxAdjustment + 1).draw(boundsSprite);
+		auto p = painter.withAdjustedLayer(maxAdjustment + 1);
+
+		for (const auto& s: sizerSprites) {
+			p.draw(s);
+		}
+
+		p.draw(boundsSprite);
 	}
 }
 
 void UIEditorDisplay::update(Time time, bool moved)
 {
+	sizerSprites.clear();
+
 	if (curWidget) {
 		boundsSprite
 			.setPosition(curWidget->getPosition())
 			.scaleTo(curWidget->getSize());
+
+		curSizer = nullptr;
+		sizerRects.clear();
+		layout(this);
+		makeSizerSprites();
 	}
 }
 
@@ -49,9 +63,31 @@ void UIEditorDisplay::loadDisplay(const UIDefinition& uiDefinition)
 
 	editor->getGameFactory().setConstructionCallback([=] (const std::shared_ptr<UIWidget>& widget, const String& uuid)
 	{
-		widgets[UUID(uuid)] = widget;
+		if (!uuid.isEmpty()) {
+			widgets[UUID(uuid)] = widget;
+		}
 		maxAdjustment = std::max(maxAdjustment, widget->getChildLayerAdjustment());
 	});
 	editor->getGameFactory().loadUI(*this, uiDefinition);
 	editor->getGameFactory().setConstructionCallback({});
+}
+
+void UIEditorDisplay::onPlaceInside(Rect4f rect, const std::shared_ptr<IUIElement>& element, UISizer& sizer)
+{
+	if (element == curWidget) {
+		curSizer = &sizer;
+	}
+	sizerRects[&sizer].push_back(rect);
+}
+
+void UIEditorDisplay::makeSizerSprites()
+{
+	sizerSprites.clear();
+	if (curSizer) {
+		const auto& rects = sizerRects[curSizer];
+		for (const auto& rect: rects) {
+			sizerSprites.push_back(sizerSprite);
+			sizerSprites.back().setPosition(rect.getTopLeft()).scaleTo(rect.getSize());
+		}
+	}
 }
