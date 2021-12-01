@@ -18,7 +18,7 @@ void UIEditorDisplay::setUIEditor(UIEditor& uiEditor)
 void UIEditorDisplay::drawAfterChildren(UIPainter& painter) const
 {
 	if (curWidget) {
-		painter.withAdjustedLayer(1000).draw(boundsSprite);
+		painter.withAdjustedLayer(maxAdjustment + 1).draw(boundsSprite);
 	}
 }
 
@@ -45,10 +45,12 @@ void UIEditorDisplay::loadDisplay(const UIDefinition& uiDefinition)
 {
 	clear();
 	widgets.clear();
+	maxAdjustment = 0;
 
 	editor->getGameFactory().setConstructionCallback([=] (const std::shared_ptr<UIWidget>& widget, const String& uuid)
 	{
 		widgets[UUID(uuid)] = widget;
+		maxAdjustment = std::max(maxAdjustment, widget->getChildLayerAdjustment());
 	});
 	editor->getGameFactory().loadUI(*this, uiDefinition);
 	editor->getGameFactory().setConstructionCallback({});

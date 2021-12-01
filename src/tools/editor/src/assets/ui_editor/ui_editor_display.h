@@ -21,6 +21,7 @@ namespace Halley {
 		UIEditor* editor;
 		std::map<UUID, std::shared_ptr<UIWidget>> widgets;
 		std::shared_ptr<UIWidget> curWidget;
+		int maxAdjustment = 0;
 
 		Sprite boundsSprite;
 	};
