@@ -242,7 +242,6 @@ void World::doDestroyEntity(EntityId id)
 
 void World::doDestroyEntity(Entity* e)
 {
-	uuidMap.erase(e->getInstanceUUID());
 	e->destroy();
 	entityDirty = true;
 }
@@ -614,6 +613,7 @@ void World::updateEntities()
 
 			// Remove
 			entityMap.freeId(entity.getEntityId().value);
+			uuidMap.erase(entity.getInstanceUUID());
 			deleteEntity(&entity);
 
 			// Put it at the back of the array, so it's removed when the array gets resized
