@@ -144,7 +144,7 @@ std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName, std::vecto
 
 std::shared_ptr<UIWidget> UIFactory::makeUI(const UIDefinition& definition)
 {
-	return makeWidget(definition.getRoot());
+	return std::dynamic_pointer_cast<UIWidget>(makeWidget(definition.getRoot()));
 }
 
 void UIFactory::loadUI(UIWidget& target, const String& configName)
@@ -250,42 +250,53 @@ void UIFactory::setConstructionCallback(ConstructionCallback callback)
 	constructionCallback = std::move(callback);
 }
 
-std::shared_ptr<UIWidget> UIFactory::makeWidget(const ConfigNode& entryNode)
+std::shared_ptr<IUIElement> UIFactory::makeWidget(const ConfigNode& entryNode)
 {
-	styleSheet->updateIfNeeded();
-	
-	auto& widgetNode = entryNode["widget"];
-	auto widgetClass = widgetNode["class"].asString();
-	auto iter = factories.find(widgetClass);
-	if (iter == factories.end()) {
-		throw Exception("Unknown widget class: " + widgetClass, HalleyExceptions::UI);
-	}
-	
-	auto widget = iter->second(entryNode);
-	if (widgetNode.hasKey("size")) {
-		widget->setMinSize(widgetNode["size"].asVector2f({}));
-	}
-	if (widgetNode.hasKey("enabled")) {
-		widget->setEnabled(widgetNode["enabled"].asBool(true));
-	}
-	if (widgetNode.hasKey("active")) {
-		widget->setActive(widgetNode["active"].asBool(true));
-	}
-	if (widgetNode.hasKey("childLayerAdjustment")) {
-		widget->setChildLayerAdjustment(widgetNode["childLayerAdjustment"].asInt());
-	}
-	if (widgetNode.hasKey("tooltip")) {
-		widget->setToolTip(LocalisedString::fromUserString(widgetNode["tooltip"].asString()));
-	}
-	if (widgetNode.hasKey("tooltipKey")) {
-		widget->setToolTip(i18n.get(widgetNode["tooltipKey"].asString()));
+	std::shared_ptr<IUIElement> element;
+
+	if (entryNode.hasKey("widget")) {
+		styleSheet->updateIfNeeded();
+		
+		auto& widgetNode = entryNode["widget"];
+		auto widgetClass = widgetNode["class"].asString();
+		auto iter = factories.find(widgetClass);
+		if (iter == factories.end()) {
+			throw Exception("Unknown widget class: " + widgetClass, HalleyExceptions::UI);
+		}
+		
+		auto widget = iter->second(entryNode);
+		if (widgetNode.hasKey("size")) {
+			widget->setMinSize(widgetNode["size"].asVector2f({}));
+		}
+		if (widgetNode.hasKey("enabled")) {
+			widget->setEnabled(widgetNode["enabled"].asBool(true));
+		}
+		if (widgetNode.hasKey("active")) {
+			widget->setActive(widgetNode["active"].asBool(true));
+		}
+		if (widgetNode.hasKey("childLayerAdjustment")) {
+			widget->setChildLayerAdjustment(widgetNode["childLayerAdjustment"].asInt());
+		}
+		if (widgetNode.hasKey("tooltip")) {
+			widget->setToolTip(LocalisedString::fromUserString(widgetNode["tooltip"].asString()));
+		}
+		if (widgetNode.hasKey("tooltipKey")) {
+			widget->setToolTip(i18n.get(widgetNode["tooltipKey"].asString()));
+		}
+
+		element = widget;
+	} else {
+		auto sizer = makeSizer(entryNode);
+		if (sizer) {
+			element = std::make_shared<UISizer>(std::move(sizer.value()));
+		}
 	}
 
-	if (constructionCallback) {
-		constructionCallback(widget, entryNode["uuid"].asString(""));
+	if (element && constructionCallback) {
+		constructionCallback(element, entryNode["uuid"].asString(""));
 	}
 
-	return widget;
+	return element;
 }
 
 UIFactoryWidgetProperties UIFactory::getGlobalWidgetProperties() const
@@ -339,16 +350,6 @@ UISizer UIFactory::makeSizerOrDefault(const ConfigNode& entryNode, UISizer&& def
 	}
 }
 
-std::shared_ptr<UISizer> UIFactory::makeSizerPtr(const ConfigNode& entryNode)
-{
-	auto sizer = makeSizer(entryNode);
-	if (sizer) {
-		return std::make_shared<UISizer>(std::move(sizer.value()));
-	} else {
-		return {};
-	}
-}
-
 void UIFactory::loadSizerChildren(UISizer& sizer, const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Sequence) {
@@ -392,10 +393,8 @@ void UIFactory::loadSizerChildren(UISizer& sizer, const ConfigNode& node)
 				fill = UISizerFillFlags::Fill;
 			}
 
-			if (childNode.hasKey("widget")) {
+			if (childNode.hasKey("widget") || childNode.hasKey("sizer") || childNode.hasKey("children")) {
 				sizer.add(makeWidget(childNode), proportion, border, fill);
-			} else if (childNode.hasKey("sizer") || childNode.hasKey("children")) {
-				sizer.add(makeSizerPtr(childNode), proportion, border, fill);
 			} else if (childNode.hasKey("spacer")) {
 				sizer.addSpacer(proportion);
 			} else if (childNode.hasKey("stretchSpacer")) {
@@ -1047,7 +1046,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 	auto pane = std::make_shared<UIPagedPane>(id + "_pagedPane", int(tabNodes.size()), Vector2f());
 	for (int i = 0; i < int(tabNodes.size()); ++i) {
 		auto& tabNode = *tabNodes[i];
-		pane->getPage(i)->add(makeSizerPtr(tabNode), 1);
+		pane->getPage(i)->add(makeWidget(tabNode), 1);
 	}
 
 	tabs->setHandle(UIEventType::ListSelectionChanged, [pane] (const UIEvent& event)
@@ -1080,9 +1079,7 @@ std::shared_ptr<UIWidget> UIFactory::makePagedPane(const ConfigNode& entryNode)
 
 	auto pane = std::make_shared<UIPagedPane>(widgetNode["id"].asString(), int(pageNodes.size()));
 	for (int i = 0; i < int(pageNodes.size()); ++i) {
-		auto& pageNode = *pageNodes[i];
-		const auto element = pageNode.hasKey("widget") ? std::shared_ptr<IUIElement>(makeWidget(pageNode)) : makeSizerPtr(pageNode);
-		pane->getPage(i)->add(element, 1);
+		pane->getPage(i)->add(makeWidget(*pageNodes[i]), 1);
 	}
 
 	return pane;

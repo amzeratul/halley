@@ -47,7 +47,7 @@ namespace Halley
 	{
 	public:
 		using WidgetFactory = std::function<std::shared_ptr<UIWidget>(const ConfigNode&)>;
-		using ConstructionCallback = std::function<void(const std::shared_ptr<UIWidget>&, const String& uuid)>;
+		using ConstructionCallback = std::function<void(const std::shared_ptr<IUIElement>&, const String& uuid)>;
 
 		UIFactory(const HalleyAPI& api, Resources& resources, const I18N& i18n, std::shared_ptr<UIStyleSheet> styleSheet = {}, std::shared_ptr<const UIColourScheme> colourScheme = {});
 		UIFactory(const UIFactory& other) = delete;
@@ -115,8 +115,7 @@ namespace Halley
 		const I18N& i18n;
 		std::shared_ptr<const UIColourScheme> colourScheme;
 
-		std::shared_ptr<UIWidget> makeWidget(const ConfigNode& node);
-		std::shared_ptr<UISizer> makeSizerPtr(const ConfigNode& node);
+		std::shared_ptr<IUIElement> makeWidget(const ConfigNode& node);
 		std::optional<UISizer> makeSizer(const ConfigNode& node);
 		UISizer makeSizerOrDefault(const ConfigNode& node, UISizer&& defaultSizer);
 		void loadSizerChildren(UISizer& sizer, const ConfigNode& node);

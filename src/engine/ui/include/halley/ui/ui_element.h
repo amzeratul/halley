@@ -11,7 +11,7 @@ namespace Halley {
 		class IUIElementListener {
 		public:
 			virtual ~IUIElementListener() = default;
-			virtual void onPlaceInside(Rect4f rect, const std::shared_ptr<IUIElement>& element, UISizer& sizer) = 0;
+			virtual void onPlaceInside(Rect4f rect, Rect4f origRect, const std::shared_ptr<IUIElement>& element, UISizer& sizer) = 0;
 		};
 
 		virtual ~IUIElement() {}

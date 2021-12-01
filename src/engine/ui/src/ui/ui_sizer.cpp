@@ -29,10 +29,6 @@ Vector2f UISizerEntry::getMinimumSize() const
 
 void UISizerEntry::placeInside(Rect4f rect, Rect4f origRect, Vector2f minSize, IUIElement::IUIElementListener* listener, UISizer& sizer)
 {
-	if (listener) {
-		listener->onPlaceInside(origRect, widget, sizer);
-	}
-
 	Vector2f cellSize = rect.getSize();
 	Vector2f anchoring;
 	Vector2f size = minSize;
@@ -62,11 +58,16 @@ void UISizerEntry::placeInside(Rect4f rect, Rect4f origRect, Vector2f minSize, I
 		size.y = std::max(minSize.y, cellSize.y);
 	}
 
-	Vector2f spareSize = cellSize - size;
-	Vector2f pos = (rect.getTopLeft() + spareSize * anchoring).round();
+	const Vector2f spareSize = cellSize - size;
+	const Vector2f pos = (rect.getTopLeft() + spareSize * anchoring).round();
+	const auto finalRect = Rect4f(pos, pos + size);
+
+	if (listener) {
+		listener->onPlaceInside(finalRect, origRect, widget, sizer);
+	}
 
 	if (widget) {
-		widget->setRect(Rect4f(pos, pos + size), listener);
+		widget->setRect(finalRect, listener);
 	}
 }
 

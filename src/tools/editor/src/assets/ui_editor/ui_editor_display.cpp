@@ -12,12 +12,15 @@ UIEditorDisplay::UIEditorDisplay(String id, Vector2f minSize, UISizer sizer)
 void UIEditorDisplay::setUIEditor(UIEditor& uiEditor)
 {
 	factory = &uiEditor.getGameFactory();
-	factory->setConstructionCallback([=] (const std::shared_ptr<UIWidget>& widget, const String& uuid)
+	factory->setConstructionCallback([=] (const std::shared_ptr<IUIElement>& element, const String& uuid)
 	{
 		if (!uuid.isEmpty()) {
-			widgets[UUID(uuid)] = widget;
+			elements[UUID(uuid)] = element;
 		}
-		maxAdjustment = std::max(maxAdjustment, widget->getChildLayerAdjustment());
+		const auto widget = std::dynamic_pointer_cast<UIWidget>(element);
+		if (widget) {
+			maxAdjustment = std::max(maxAdjustment, widget->getChildLayerAdjustment());
+		}
 	});
 
 	boundsSprite.setImage(factory->getResources(), "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
@@ -31,7 +34,7 @@ void UIEditorDisplay::onMakeUI()
 
 void UIEditorDisplay::drawAfterChildren(UIPainter& painter) const
 {
-	if (curWidget) {
+	if (curElement) {
 		auto p = painter.withAdjustedLayer(maxAdjustment + 1);
 
 		for (const auto& s: sizerSprites) {
@@ -44,13 +47,14 @@ void UIEditorDisplay::drawAfterChildren(UIPainter& painter) const
 
 void UIEditorDisplay::update(Time time, bool moved)
 {
-	sizerSprites.clear();
-
-	if (curWidget) {
-		boundsSprite
-			.setPosition(curWidget->getPosition())
-			.scaleTo(curWidget->getSize());
+	if (moved) {
+		layout(this);
 	}
+}
+
+void UIEditorDisplay::onLayout()
+{
+	makeSizerSprites();
 }
 
 void UIEditorDisplay::setSelectedWidget(const String& id)
@@ -62,34 +66,45 @@ void UIEditorDisplay::setSelectedWidget(const String& id)
 void UIEditorDisplay::loadDisplay(const UIDefinition& uiDefinition)
 {
 	clear();
-	widgets.clear();
+	elements.clear();
 	maxAdjustment = 0;
 
 	factory->loadUI(*this, uiDefinition);
 }
 
-void UIEditorDisplay::onPlaceInside(Rect4f rect, const std::shared_ptr<IUIElement>& element, UISizer& sizer)
+void UIEditorDisplay::onPlaceInside(Rect4f rect, Rect4f origRect, const std::shared_ptr<IUIElement>& element, UISizer& sizer)
 {
-	if (element == curWidget) {
+	if (rect.getWidth() == 0) {
+		rect = rect.grow(0, 0, 1, 0);
+	}
+	if (rect.getHeight() == 0) {
+		rect = rect.grow(0, 0, 0, 1);
+	}
+	if (origRect.getWidth() == 0) {
+		origRect = origRect.grow(0, 0, 1, 0);
+	}
+	if (origRect.getHeight() == 0) {
+		origRect = origRect.grow(0, 0, 0, 1);
+	}
+
+	if (element == curElement) {
+		curRect = rect;
 		curSizer = &sizer;
 	}
-	sizerRects[&sizer].emplace_back(rect, element == curWidget);
+	sizerRects[&sizer].emplace_back(origRect, element == curElement);
 }
 
 void UIEditorDisplay::updateCurWidget()
 {
-	curWidget = {};
-	curSizer = nullptr;
-	sizerRects.clear();
+	curElement = {};
 
 	if (!curSelection.isEmpty()) {
-		const auto iter = widgets.find(UUID(curSelection));
-		if (iter != widgets.end()) {
-			curWidget = iter->second;
+		const auto iter = elements.find(UUID(curSelection));
+		if (iter != elements.end()) {
+			curElement = iter->second;
 		}
 
 		layout(this);
-		makeSizerSprites();
 	}
 }
 
@@ -106,5 +121,12 @@ void UIEditorDisplay::makeSizerSprites()
 			}
 		}
 	}
+
+	boundsSprite
+		.setPosition(curRect.getTopLeft())
+		.scaleTo(curRect.getSize());
+
 	sizerRects.clear();
+	curSizer = nullptr;
+	curRect = Rect4f();
 }
