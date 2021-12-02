@@ -1041,8 +1041,9 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 	applyInputButtons(*tabs, widgetNode["inputButtons"].asString("tabs"));
 
 	std::vector<const ConfigNode*> tabNodes;
-	if (widgetNode.hasKey("tabs")) {
-		for (auto& tabNode: widgetNode["tabs"].asSequence()) {
+	auto loadChildren = [&] (const ConfigNode& root)
+	{
+		for (auto& tabNode: root.asSequence()) {
 			if (tabNode.hasKey("if")) {
 				if (!resolveConditions(tabNode["if"])) {
 					continue;
@@ -1052,6 +1053,12 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 			tabs->addTextItem(tabNode["id"].asString(id + "_tab_" + toString(tabNodes.size())), label);
 			tabNodes.push_back(&tabNode);
 		}
+	};
+
+	if (widgetNode.hasKey("tabs")) {
+		loadChildren(widgetNode["tabs"]);
+	} else if (entryNode.hasKey("children")) {
+		loadChildren(entryNode["children"]);
 	}
 
 	auto pane = std::make_shared<UIPagedPane>(id + "_pagedPane", int(tabNodes.size()), Vector2f());
@@ -1077,8 +1084,9 @@ std::shared_ptr<UIWidget> UIFactory::makePagedPane(const ConfigNode& entryNode)
 	const auto& widgetNode = entryNode["widget"];
 
 	std::vector<const ConfigNode*> pageNodes;
-	if (widgetNode.hasKey("pages")) {
-		for (auto& pageNode: widgetNode["pages"].asSequence()) {
+	auto loadChildren = [&] (const ConfigNode& root)
+	{
+		for (auto& pageNode: root.asSequence()) {
 			if (pageNode.hasKey("if")) {
 				if (!resolveConditions(pageNode["if"])) {
 					continue;
@@ -1086,6 +1094,12 @@ std::shared_ptr<UIWidget> UIFactory::makePagedPane(const ConfigNode& entryNode)
 			}
 			pageNodes.push_back(&pageNode);
 		}
+	};
+
+	if (widgetNode.hasKey("pages")) {
+		loadChildren(widgetNode["pages"]);
+	} else if (entryNode.hasKey("children")) {
+		loadChildren(entryNode["children"]);
 	}
 
 	auto pane = std::make_shared<UIPagedPane>(widgetNode["id"].asString(), int(pageNodes.size()));

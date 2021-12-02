@@ -186,19 +186,47 @@ ChooseUIWidgetWindow::ChooseUIWidgetWindow(UIFactory& factory, UIFactory& gameFa
 	, factory(factory)
 	, gameFactory(gameFactory)
 {
-	setAssetIds(gameFactory.getWidgetClassList(), "widget");
+	auto ids = gameFactory.getWidgetClassList();
+	ids.push_back("sizer");
+	ids.push_back("spacer");
+	ids.push_back("stretchSpacer");
+
+	setAssetIds(std::move(ids), "widget");
 	setTitle(LocalisedString::fromHardcodedString("Choose Widget"));
 }
 
 std::shared_ptr<UIImage> ChooseUIWidgetWindow::makeIcon(const String& id, bool hasSearch)
 {
-	const auto props = gameFactory.getPropertiesForWidget(id);
-	auto sprite = props.iconName.isEmpty() ? Sprite() : Sprite().setImage(gameFactory.getResources(), props.iconName);
+	String iconName;
+	if (id == "sizer") {
+		iconName = "widget_icons/sizer_horizontal.png";
+	} else if (id == "spacer") {
+		iconName = "widget_icons/spacer.png";
+	} else if (id == "stretchSpacer") {
+		iconName = "widget_icons/spacer.png";
+	} else {
+		iconName = gameFactory.getPropertiesForWidget(id).iconName;
+	}
+	auto sprite = iconName.isEmpty() ? Sprite() : Sprite().setImage(gameFactory.getResources(), iconName);
 	return std::make_shared<UIImage>(std::move(sprite));
 }
 
 LocalisedString ChooseUIWidgetWindow::getItemLabel(const String& id, const String& name, bool hasSearch)
 {
-	const auto props = gameFactory.getPropertiesForWidget(id);
-	return LocalisedString::fromUserString(props.name);
+	String label;
+	if (id == "sizer") {
+		label = "Sizer";
+	} else if (id == "spacer") {
+		label = "Spacer";
+	} else if (id == "stretchSpacer") {
+		label = "Stretch Spacer";
+	} else {
+		label = gameFactory.getPropertiesForWidget(id).name;
+	}
+
+	return LocalisedString::fromUserString(label);
+}
+
+void ChooseUIWidgetWindow::sortItems(std::vector<std::pair<String, String>>& values)
+{
 }
