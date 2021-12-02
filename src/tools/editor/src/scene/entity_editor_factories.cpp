@@ -31,7 +31,6 @@ public:
 		String value = data.getFieldData().asString("");
 
 		auto field = std::make_shared<UITextInput>("textValue", context.getUIFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
-		field->setGhostText(LocalisedString::fromUserString(defaultValue));
 		field->bindData("textValue", value, [&context, data](String newVal)
 		{
 			data.getWriteableFieldData() = ConfigNode(std::move(newVal));
