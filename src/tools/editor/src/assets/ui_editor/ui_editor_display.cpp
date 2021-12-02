@@ -7,6 +7,7 @@ using namespace Halley;
 UIEditorDisplay::UIEditorDisplay(String id, Vector2f minSize, UISizer sizer)
 	: UIWidget(std::move(id), minSize, std::move(sizer))
 {
+	setCanSendEvents(false);
 }
 
 void UIEditorDisplay::setUIEditor(UIEditor& uiEditor)

@@ -100,7 +100,7 @@ void UIWidgetEditor::refresh()
 
 		if (curNode->hasKey("spacer") || curNode->hasKey("stretchSpacer")) {
 			spacerBox->setActive(true);
-			populateSpacerBox(*spacerBox->getWidget("spacerContents"), (*curNode)[curNode->hasKey("stretchSpacer") ? "stretchSpacer" : "spacer"]);
+			populateSpacerBox(*spacerBox->getWidget("spacerContents"), (*curNode)[curNode->hasKey("stretchSpacer") ? "stretchSpacer" : "spacer"], *curNode);
 		} else {
 			fillBox->setActive(true);
 			populateFillBox(*fillBox->getWidget("fillContents"), *curNode);
@@ -162,16 +162,19 @@ void UIWidgetEditor::populateFillBox(UIWidget& root, ConfigNode& node)
 	populateBox(root, node, entries);
 }
 
-void UIWidgetEditor::populateSpacerBox(UIWidget& root, ConfigNode& node)
+void UIWidgetEditor::populateSpacerBox(UIWidget& root, ConfigNode& node, ConfigNode& rootNode)
 {
 	root.clear();
 
 	using Entry = UIFactoryWidgetProperties::Entry;
-	std::array<Entry, 2> entries = {
-		Entry{ "Size", "size", "Halley::Vector2f", std::vector<String>{"0", "0"}},
+	std::array<Entry, 1> sizeEntry = {
+		Entry{ "Size", "size", "float", std::vector<String>{"0"}},
+	};
+	std::array<Entry, 1> proportionEntry = {
 		Entry{ "Proportion", "proportion", "int", std::vector<String>{"0"} },
 	};
-	populateBox(root, node, entries);
+	populateBox(root, node, sizeEntry);
+	populateBox(root, rootNode, proportionEntry);
 }
 
 void UIWidgetEditor::populateSizerBox(UIWidget& root, ConfigNode& node)
