@@ -74,12 +74,12 @@ namespace Halley {
 		void setPosition(Vector2f pos);
 
 	private:
-		UIElementPtr widget;
-		float proportion;
-		int fillFlags;
-		mutable bool enabled = true;
+		UIElementPtr element;
 		Vector4f border;
 		Vector2f position;
+		float proportion;
+		uint16_t fillFlags;
+		mutable bool enabled = true;
 	};
 
 	class UIWidget;
@@ -94,6 +94,18 @@ namespace Halley {
 		virtual void addSpacer(float size) = 0;
 		virtual void addStretchSpacer(float proportion = 0) = 0;
 		virtual void remove(IUIElement& element) = 0;
+	};
+
+	class UISizerSpacer final : public IUIElement {
+	public:
+		UISizerSpacer(Vector2f size = Vector2f()) : size(size) {}
+
+		Vector2f getLayoutMinimumSize(bool force) const override { return size; }
+		void setRect(Rect4f, IUIElementListener*) override {}
+		bool isActive() const override { return true; }
+
+	private:
+		Vector2f size;
 	};
 
 	class UISizer final : public IUIElement, public IUISizer {

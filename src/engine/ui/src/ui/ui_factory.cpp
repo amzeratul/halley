@@ -395,10 +395,21 @@ void UIFactory::loadSizerChildren(UISizer& sizer, const ConfigNode& node)
 
 			if (childNode.hasKey("widget") || childNode.hasKey("sizer") || childNode.hasKey("children")) {
 				sizer.add(makeWidget(childNode), proportion, border, fill);
-			} else if (childNode.hasKey("spacer")) {
-				sizer.addSpacer(proportion);
-			} else if (childNode.hasKey("stretchSpacer")) {
-				sizer.addStretchSpacer(proportion);
+			} else if (childNode.hasKey("spacer") || childNode.hasKey("stretchSpacer")) {
+				std::shared_ptr<IUIElement> element;
+				if (childNode.hasKey("spacer")) {
+					auto size2d = Vector2f(sizer.getType() == UISizerType::Horizontal ? proportion : 0.0f, sizer.getType() == UISizerType::Vertical ? proportion : 0.0f);
+					element = std::make_shared<UISizerSpacer>(size2d);
+					proportion = 0;
+				} else {
+					element = std::make_shared<UISizerSpacer>();
+				}
+				
+				if (constructionCallback) {
+					constructionCallback(element, childNode["uuid"].asString(""));
+				}
+
+				sizer.add(element, proportion);
 			}
 		}
 	}

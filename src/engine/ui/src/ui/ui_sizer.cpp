@@ -8,7 +8,7 @@ UISizerEntry::UISizerEntry()
 }
 
 UISizerEntry::UISizerEntry(UIElementPtr widget, float proportion, Vector4f border, int fillFlags, Vector2f position)
-	: widget(widget)
+	: element(widget)
 	, proportion(proportion)
 	, fillFlags(fillFlags)
 	, border(border)
@@ -24,7 +24,7 @@ float UISizerEntry::getProportion() const
 
 Vector2f UISizerEntry::getMinimumSize() const
 {
-	return widget ? widget->getLayoutMinimumSize(false) : Vector2f();
+	return element ? element->getLayoutMinimumSize(false) : Vector2f();
 }
 
 void UISizerEntry::placeInside(Rect4f rect, Rect4f origRect, Vector2f minSize, IUIElement::IUIElementListener* listener, UISizer& sizer)
@@ -63,17 +63,17 @@ void UISizerEntry::placeInside(Rect4f rect, Rect4f origRect, Vector2f minSize, I
 	const auto finalRect = Rect4f(pos, pos + size);
 
 	if (listener) {
-		listener->onPlaceInside(finalRect, origRect, widget, sizer);
+		listener->onPlaceInside(finalRect, origRect, element, sizer);
 	}
 
-	if (widget) {
-		widget->setRect(finalRect, listener);
+	if (element) {
+		element->setRect(finalRect, listener);
 	}
 }
 
 UIElementPtr UISizerEntry::getPointer() const
 {
-	return widget;
+	return element;
 }
 
 bool UISizerEntry::isEnabled() const
@@ -83,7 +83,7 @@ bool UISizerEntry::isEnabled() const
 
 void UISizerEntry::updateEnabled() const
 {
-	enabled = !widget || widget->isActive();
+	enabled = !element || element->isActive();
 }
 
 void UISizerEntry::setBorder(const Vector4f& b)
@@ -180,12 +180,13 @@ void UISizer::add(std::shared_ptr<IUIElement> element, float proportion, Vector4
 
 void UISizer::addSpacer(float size)
 {
-	entries.emplace_back(UISizerEntry({}, 0, Vector4f(type == UISizerType::Horizontal ? size : 0.0f, type == UISizerType::Vertical ? size : 0.0f, 0.0f, 0.0f), {}, {}));
+	auto size2d = Vector2f(type == UISizerType::Horizontal ? size : 0.0f, type == UISizerType::Vertical ? size : 0.0f);
+	add(std::make_shared<UISizerSpacer>(size2d));
 }
 
 void UISizer::addStretchSpacer(float proportion)
 {
-	entries.emplace_back(UISizerEntry({}, proportion, {}, {}, {}));
+	add(std::make_shared<UISizerSpacer>(), proportion);
 }
 
 void UISizer::remove(IUIElement& element)
@@ -395,9 +396,10 @@ void UISizer::setRectBox(Rect4f rect, IUIElementListener* listener)
 		}
 
 		float p = e.getProportion();
-		auto border = e.getBorder();
+		const auto border = e.getBorder();
+		Vector2f gapOffset;
 		if (!first) {
-			border[mainAxis] += gap;
+			gapOffset[mainAxis] += gap;
 		}
 		first = false;
 
@@ -411,12 +413,12 @@ void UISizer::setRectBox(Rect4f rect, IUIElementListener* listener)
 		}
 		cellSize[otherAxis] = rect.getSize()[otherAxis] - border[otherAxis] - border[otherAxis + 2];
 
-		Vector2f curPos = pos + border.xy();
+		Vector2f curPos = pos + border.xy() + gapOffset;
 		const auto rect = Rect4f(curPos, curPos + cellSize);
 		const auto origRect = Rect4f(rect.getTopLeft() - border.xy(), rect.getBottomRight() + border.zw());
 		e.placeInside(rect, origRect, minSize, listener, *this);
 
-		pos[mainAxis] += cellSize[mainAxis] + border[mainAxis] + border[mainAxis + 2];
+		pos[mainAxis] += cellSize[mainAxis] + border[mainAxis] + border[mainAxis + 2] + gapOffset[mainAxis];
 	}
 }
 

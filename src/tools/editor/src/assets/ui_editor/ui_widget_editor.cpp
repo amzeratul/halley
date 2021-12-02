@@ -64,7 +64,8 @@ void UIWidgetEditor::refresh()
 	auto sizerBox = getWidget("sizerBox");
 
 	if (curNode && entityFieldFactory) {
-		bool hasSizer = true;
+		bool hasSizer = curNode->hasKey("sizer") || curNode->hasKey("children");
+
 		if (curNode->hasKey("widget")) {
 			auto& widgetNode = (*curNode)["widget"];
 			const auto widgetClass = widgetNode["class"].asString();

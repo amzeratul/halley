@@ -74,16 +74,16 @@ void UIEditorDisplay::loadDisplay(const UIDefinition& uiDefinition)
 
 void UIEditorDisplay::onPlaceInside(Rect4f rect, Rect4f origRect, const std::shared_ptr<IUIElement>& element, UISizer& sizer)
 {
-	if (rect.getWidth() == 0) {
+	if (rect.getWidth() < 0.0001f) {
 		rect = rect.grow(0, 0, 1, 0);
 	}
-	if (rect.getHeight() == 0) {
+	if (rect.getHeight() < 0.0001f) {
 		rect = rect.grow(0, 0, 0, 1);
 	}
-	if (origRect.getWidth() == 0) {
+	if (origRect.getWidth() < 0.0001f) {
 		origRect = origRect.grow(0, 0, 1, 0);
 	}
-	if (origRect.getHeight() == 0) {
+	if (origRect.getHeight() < 0.0001f) {
 		origRect = origRect.grow(0, 0, 0, 1);
 	}
 

@@ -106,23 +106,45 @@ void UIWidgetList::moveItems(gsl::span<const MoveOperation> changes)
 UIWidgetList::EntryInfo UIWidgetList::getEntryInfo(const ConfigNode& data) const
 {
 	EntryInfo result;
+
+	String className;
+	String id;
+	String iconName;
 	
 	if (data.hasKey("widget")) {
 		const auto& widgetNode = data["widget"];
+		id = widgetNode["id"].asString("");
 
 		const auto properties = uiEditor->getGameFactory().getPropertiesForWidget(widgetNode["class"].asString());
+		className = properties.name;
+		iconName = properties.iconName;
+
 		result.canHaveChildren = properties.canHaveChildren;
-
-		result.label = properties.name;
-		if (widgetNode.hasKey("id") && !widgetNode["id"].asString().isEmpty()) {
-			result.label += " \"" + widgetNode["id"].asString() + "\"";
-		}
-
-		if (!properties.iconName.isEmpty()) {
-			result.icon = Sprite().setImage(uiEditor->getGameFactory().getResources(), properties.iconName);
-		}
+	} else if (data.hasKey("spacer")) {
+		className = "Spacer";
+		iconName = "widget_icons/spacer.png";
+	} else if (data.hasKey("stretchSpacer")) {
+		className = "Stretch Spacer";
+		iconName = "widget_icons/spacer.png";
 	} else {
-		result.label = "[sizer]";
+		className = "Sizer";
+		String sizerType = "horizontal";
+
+		if (data.hasKey("sizer")) {
+			sizerType = data["sizer"]["type"].asString("horizontal");
+		}
+
+		iconName = "widget_icons/sizer_" + sizerType + ".png";
+	} 
+
+	result.label = className;
+	if (!id.isEmpty()) {
+		result.label += " \"" + id + "\"";
 	}
+
+	if (!iconName.isEmpty()) {
+		result.icon = Sprite().setImage(uiEditor->getGameFactory().getResources(), iconName);
+	}
+
 	return result;
 }
