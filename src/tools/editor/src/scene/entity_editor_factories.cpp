@@ -1174,6 +1174,7 @@ public:
 			value |= alignCurSel.isInteger() ? alignCurSel.toInteger() : 0;
 
 			data.getWriteableFieldData() = UIFactory::makeSizerAlignFlagsNode(UISizerAlignFlags::Type(value));
+			context.onEntityUpdated();
 		};
 
 		auto updateAlignList = [=] ()
@@ -1229,7 +1230,7 @@ public:
 			updateValue();
 		});
 
-		topWidget->bindData("align", toString(int(value)), [=] (String newValue)
+		topWidget->bindData("align", toString(int(UIFactory::normalizeDirection(value, true))), [=] (String newValue)
 		{
 			updateValue();
 		});

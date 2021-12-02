@@ -300,7 +300,8 @@ UISizerAlignFlags::Type UIFactory::parseSizerAlignFlags(const ConfigNode& node, 
 	if (fill == 0) {
 		fill = defaultValue;
 	}
-	return UISizerAlignFlags::Type(fill);
+
+	return static_cast<UISizerAlignFlags::Type>(fill);
 }
 
 ConfigNode UIFactory::makeSizerAlignFlagsNode(UISizerAlignFlags::Type align)
@@ -332,6 +333,26 @@ ConfigNode UIFactory::makeSizerAlignFlagsNode(UISizerAlignFlags::Type align)
 	result.push_back(ConfigNode(horizontal));
 	result.push_back(ConfigNode(vertical));
 	return result;
+}
+
+UISizerAlignFlags::Type UIFactory::normalizeDirection(UISizerAlignFlags::Type align, bool removeFill)
+{
+	int value = static_cast<int>(align);
+	const int horizontalMask = UISizerAlignFlags::FillHorizontal | UISizerAlignFlags::Left | UISizerAlignFlags::CentreHorizontal | UISizerAlignFlags::Right;
+	const int verticalMask = UISizerAlignFlags::FillVertical | UISizerAlignFlags::Top | UISizerAlignFlags::CentreVertical | UISizerAlignFlags::Bottom;
+
+	if (removeFill) {
+		value &= ~UISizerAlignFlags::Fill;
+	}
+	
+	if ((value & horizontalMask) == 0) {
+		value |= UISizerAlignFlags::CentreHorizontal;
+	}
+	if ((value & verticalMask) == 0) {
+		value |= UISizerAlignFlags::CentreVertical;
+	}
+
+	return UISizerAlignFlags::Type(value);
 }
 
 std::shared_ptr<IUIElement> UIFactory::makeWidget(const ConfigNode& entryNode)
