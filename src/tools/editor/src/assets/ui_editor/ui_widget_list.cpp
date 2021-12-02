@@ -91,6 +91,7 @@ void UIWidgetList::moveItems(gsl::span<const MoveOperation> changes)
 		auto* newParent = definition->findUUID(c.parentId).result;
 		if (widgetPtr && oldParent && newParent) {
 			auto widget = ConfigNode(std::move(*widgetPtr));
+			(*newParent)["children"].ensureType(ConfigNodeType::Sequence);
 			auto& oldChildren = (*oldParent)["children"].asSequence();
 			auto& newChildren = (*newParent)["children"].asSequence();
 			std_ex::erase_if(oldChildren, [=] (const ConfigNode& n) { return &n == widgetPtr; });
