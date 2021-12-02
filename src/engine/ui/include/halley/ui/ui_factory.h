@@ -38,8 +38,10 @@ namespace Halley
         };
 
 		std::vector<Entry> entries;
+		std::vector<Entry> childEntries;
 		String name;
 		String iconName;
+		String childName;
 		bool canHaveChildren = true;
 	};
 

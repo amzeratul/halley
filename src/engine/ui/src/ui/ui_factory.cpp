@@ -630,22 +630,6 @@ UIFactoryWidgetProperties UIFactory::getVerticalDivProperties() const
 	return result;
 }
 
-UIFactoryWidgetProperties UIFactory::getTabbedPaneProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Tabbed Pane";
-	result.iconName = "widget_icons/tabbedPane.png";
-	return result;
-}
-
-UIFactoryWidgetProperties UIFactory::getPagedPaneProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Paged Pane";
-	result.iconName = "widget_icons/pagedPane.png";
-	return result;
-}
-
 UIFactoryWidgetProperties UIFactory::getFramedImageProperties() const
 {
 	UIFactoryWidgetProperties result;
@@ -1037,7 +1021,8 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 {
 	const auto& widgetNode = entryNode["widget"];
 	auto id = widgetNode["id"].asString();
-	auto tabs = std::make_shared<UIList>(id, getStyle("tabs"), UISizerType::Horizontal, 1);
+	auto style = widgetNode["style"].asString("tabs");
+	auto tabs = std::make_shared<UIList>(id, getStyle(style), UISizerType::Horizontal, 1);
 	applyInputButtons(*tabs, widgetNode["inputButtons"].asString("tabs"));
 
 	std::vector<const ConfigNode*> tabNodes;
@@ -1079,6 +1064,23 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 	return result;
 }
 
+UIFactoryWidgetProperties UIFactory::getTabbedPaneProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Tabbed Pane";
+	result.iconName = "widget_icons/tabbedPane.png";
+	result.childName = "Tab";
+
+	result.entries.emplace_back("Style", "style", "Halley::String", "tabs");
+
+	result.childEntries.emplace_back("Id", "id", "Halley::String", "");
+	result.childEntries.emplace_back("Text", "text", "Halley::String", "");
+	result.childEntries.emplace_back("Text (Key)", "textKey", "Halley::String", "");
+	result.childEntries.emplace_back("If", "if", "std::vector<Halley::String>", std::vector<String>());
+
+	return result;
+}
+
 std::shared_ptr<UIWidget> UIFactory::makePagedPane(const ConfigNode& entryNode)
 {
 	const auto& widgetNode = entryNode["widget"];
@@ -1108,6 +1110,21 @@ std::shared_ptr<UIWidget> UIFactory::makePagedPane(const ConfigNode& entryNode)
 	}
 
 	return pane;
+}
+
+UIFactoryWidgetProperties UIFactory::getPagedPaneProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Paged Pane";
+	result.iconName = "widget_icons/pagedPane.png";
+	result.childName = "Page";
+
+	result.childEntries.emplace_back("Id", "id", "Halley::String", "");
+	result.childEntries.emplace_back("Text", "text", "Halley::String", "");
+	result.childEntries.emplace_back("Text (Key)", "textKey", "Halley::String", "");
+	result.childEntries.emplace_back("If", "if", "std::vector<Halley::String>", std::vector<String>());
+
+	return result;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeFramedImage(const ConfigNode& entryNode)

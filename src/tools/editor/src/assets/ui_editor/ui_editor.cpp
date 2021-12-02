@@ -116,7 +116,8 @@ void UIEditor::doLoadUI()
 void UIEditor::setSelectedWidget(const String& id)
 {
 	curSelection = id;
-	widgetEditor->setSelectedWidget(id, uiDefinition->findUUID(id).result);
+	const auto result = uiDefinition->findUUID(id);
+	widgetEditor->setSelectedWidget(id, result.result, result.parent);
 	display->setSelectedWidget(id);
 }
 
@@ -189,7 +190,6 @@ ChooseUIWidgetWindow::ChooseUIWidgetWindow(UIFactory& factory, UIFactory& gameFa
 	auto ids = gameFactory.getWidgetClassList();
 	ids.push_back("sizer");
 	ids.push_back("spacer");
-	ids.push_back("stretchSpacer");
 
 	setAssetIds(std::move(ids), "widget");
 	setTitle(LocalisedString::fromHardcodedString("Choose Widget"));
@@ -201,8 +201,6 @@ std::shared_ptr<UIImage> ChooseUIWidgetWindow::makeIcon(const String& id, bool h
 	if (id == "sizer") {
 		iconName = "widget_icons/sizer_horizontal.png";
 	} else if (id == "spacer") {
-		iconName = "widget_icons/spacer.png";
-	} else if (id == "stretchSpacer") {
 		iconName = "widget_icons/spacer.png";
 	} else {
 		iconName = gameFactory.getPropertiesForWidget(id).iconName;
@@ -218,8 +216,6 @@ LocalisedString ChooseUIWidgetWindow::getItemLabel(const String& id, const Strin
 		label = "Sizer";
 	} else if (id == "spacer") {
 		label = "Spacer";
-	} else if (id == "stretchSpacer") {
-		label = "Stretch Spacer";
 	} else {
 		label = gameFactory.getPropertiesForWidget(id).name;
 	}

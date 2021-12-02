@@ -6,6 +6,15 @@ children:
   proportion: 1
   border: [0, 0, 0, 0]
   children:
+  - widget: { id: parentWidgetBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
+    sizer: { type: vertical }
+    children:
+    - widget: { class: label, id: parentClassLabel, text: Parent }
+      fill: centre
+    - widget: { id: parentWidgetContents, class: widget }
+      border: [ 4, 4, 4, 4 ]
+      sizer: { type: vertical }
+      children: []
   - widget: { id: widgetBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
     sizer: { type: vertical }
     children:
@@ -24,7 +33,7 @@ children:
   - widget: { id: genericWidgetBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
     sizer: { type: vertical }
     children:
-    - widget: { class: label, text: Widget }
+    - widget: { class: label, text: Base Widget }
       fill: centre
     - widget: { id: genericWidgetContents, class: widget }
       border: [ 4, 4, 4, 4 ]
@@ -36,6 +45,15 @@ children:
     - widget: { class: label, text: Fill }
       fill: centre
     - widget: { id: fillContents, class: widget }
+      border: [ 4, 4, 4, 4 ]
+      sizer: { type: vertical }
+      children: []
+  - widget: { id: spacerBox, class: image, image: "$ui_title_capsule", colour: $ui_staticBoxSubdue }
+    sizer: { type: vertical }
+    children:
+    - widget: { class: label, text: Spacer }
+      fill: centre
+    - widget: { id: spacerContents, class: widget }
       border: [ 4, 4, 4, 4 ]
       sizer: { type: vertical }
       children: []
