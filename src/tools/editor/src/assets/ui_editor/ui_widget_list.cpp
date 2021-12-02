@@ -124,9 +124,11 @@ UIWidgetList::EntryInfo UIWidgetList::getEntryInfo(const ConfigNode& data) const
 	} else if (data.hasKey("spacer")) {
 		className = "Spacer";
 		iconName = "widget_icons/spacer.png";
+		result.canHaveChildren = false;
 	} else if (data.hasKey("stretchSpacer")) {
 		className = "Stretch Spacer";
 		iconName = "widget_icons/spacer.png";
+		result.canHaveChildren = false;
 	} else {
 		className = "Sizer";
 		String sizerType = "horizontal";
@@ -136,6 +138,7 @@ UIWidgetList::EntryInfo UIWidgetList::getEntryInfo(const ConfigNode& data) const
 		}
 
 		iconName = "widget_icons/sizer_" + sizerType + ".png";
+		result.canHaveChildren = true;
 	} 
 
 	result.label = className;

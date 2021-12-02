@@ -755,7 +755,7 @@ UIFactoryWidgetProperties UIFactory::getTreeListProperties() const
 std::shared_ptr<UIWidget> UIFactory::makeButton(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
-	auto id = node["id"].asString();
+	auto id = node["id"].asString("");
 	auto style = UIStyle(node["style"].asString("button"), styleSheet);
 	auto label = parseLabel(node);
 

@@ -135,9 +135,15 @@ void UIEditor::addWidget()
 void UIEditor::addWidget(const String& widgetClass)
 {
 	ConfigNode data = ConfigNode::MapType();
-	ConfigNode::MapType widget;
-	widget["class"] = widgetClass;
-	data["widget"] = std::move(widget);
+	if (widgetClass == "sizer") {
+		data["sizer"] = ConfigNode::MapType();
+	} else if (widgetClass == "spacer") {
+		data["spacer"] = ConfigNode::MapType();
+	} else {
+		ConfigNode::MapType widget;
+		widget["class"] = widgetClass;
+		data["widget"] = std::move(widget);
+	}
 	data["uuid"] = UUID::generate().toString();
 
 	addWidget(curSelection, false, std::move(data));
