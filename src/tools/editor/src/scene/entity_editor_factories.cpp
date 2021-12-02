@@ -1118,18 +1118,32 @@ public:
 
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
+		auto data = pars.data;
+		const auto defaultValue = UIFactory::parseSizerAlignFlags(ConfigNode(pars.defaultValue));
+		const auto value = UIFactory::parseSizerAlignFlags(data.getFieldData(), defaultValue);
+
 		auto& res = context.getGameResources();
 
+		auto fillHorizontal = std::make_shared<UICheckbox>("fillHorizontal", context.getUIFactory().getStyle("checkbox"), false);
+		auto fillVertical = std::make_shared<UICheckbox>("fillVertical", context.getUIFactory().getStyle("checkbox"), false);
+		const auto fillHWeak = std::weak_ptr<UICheckbox>(fillHorizontal);
+		const auto fillVWeak = std::weak_ptr<UICheckbox>(fillVertical);
+
 		auto fillSizer = std::make_shared<UISizer>(UISizerType::Grid, 1.0f, 2);
-		fillSizer->add(std::make_shared<UICheckbox>("fillHorizontal", context.getUIFactory().getStyle("checkbox"), false), 0, {}, UISizerAlignFlags::Centre);
+		fillSizer->add(std::move(fillHorizontal), 0, {}, UISizerAlignFlags::Centre);
 		fillSizer->add(std::make_shared<UIImage>(Sprite().setImage(res, "arrows/arrow_left_right.png")), 0, {}, UISizerAlignFlags::Centre);
-		fillSizer->add(std::make_shared<UICheckbox>("fillVertical", context.getUIFactory().getStyle("checkbox"), false), 0, {}, UISizerAlignFlags::Centre);
+		fillSizer->add(std::move(fillVertical), 0, {}, UISizerAlignFlags::Centre);
 		fillSizer->add(std::make_shared<UIImage>(Sprite().setImage(res, "arrows/arrow_up_down.png")), 0, {}, UISizerAlignFlags::Centre);
 
+		std::vector<String> listIds;
 		auto alignList = std::make_shared<UIList>("align", context.getUIFactory().getStyle("list"), UISizerType::Grid, 3);
 		auto addDir = [&] (int dir, std::string_view imageName)
 		{
-			alignList->addImage(toString(dir), std::make_shared<UIImage>(Sprite().setImage(res, imageName)), 0, {}, UISizerAlignFlags::Centre);
+			auto id = toString(dir);
+			listIds.push_back(id);
+			auto img = std::make_shared<UIImage>(Sprite().setImage(res, imageName));
+			img->setDisablable(Colour4f(1, 1, 1, 1), Colour4f(1, 1, 1, 0.5f));
+			alignList->addImage(id, img, 0, {}, UISizerAlignFlags::Centre);
 		};
 		addDir(UISizerAlignFlags::Top | UISizerAlignFlags::Left, "arrows/arrow_top_left.png");
 		addDir(UISizerAlignFlags::Top | UISizerAlignFlags::CentreHorizontal, "arrows/arrow_top.png");
@@ -1141,10 +1155,81 @@ public:
 		addDir(UISizerAlignFlags::Bottom | UISizerAlignFlags::CentreHorizontal, "arrows/arrow_bottom.png");
 		addDir(UISizerAlignFlags::Bottom | UISizerAlignFlags::Right, "arrows/arrow_bottom_right.png");
 
-		auto topSizer = std::make_shared<UISizer>(UISizerType::Horizontal, 10.0f);
-		topSizer->add(std::move(fillSizer), 0, {}, UISizerAlignFlags::Centre);
-		topSizer->add(std::move(alignList), 0, {}, UISizerAlignFlags::Centre);
-		return topSizer;
+		const auto alignWeak = std::weak_ptr<UIList>(alignList);
+
+		auto topWidget = std::make_shared<UIWidget>("alignWidget", Vector2f{}, UISizer(UISizerType::Horizontal, 10.0f));
+		topWidget->add(std::move(fillSizer), 0, {}, UISizerAlignFlags::Centre);
+		topWidget->add(std::move(alignList), 0, {}, UISizerAlignFlags::Centre);
+
+		auto updateValue = [=] ()
+		{
+			int value = 0;
+			if (fillHWeak.lock()->isChecked()) {
+				value |= UISizerAlignFlags::FillHorizontal;
+			}
+			if (fillVWeak.lock()->isChecked()) {
+				value |= UISizerAlignFlags::FillVertical;
+			}
+			const auto& alignCurSel = alignWeak.lock()->getSelectedOptionId();
+			value |= alignCurSel.isInteger() ? alignCurSel.toInteger() : 0;
+
+			data.getWriteableFieldData() = UIFactory::makeSizerAlignFlagsNode(UISizerAlignFlags::Type(value));
+		};
+
+		auto updateAlignList = [=] ()
+		{
+			const int horizontalFlags = UISizerAlignFlags::Left | UISizerAlignFlags::Right | UISizerAlignFlags::CentreHorizontal;
+			const int verticalFlags = UISizerAlignFlags::Top | UISizerAlignFlags::Bottom | UISizerAlignFlags::CentreVertical;
+			int valid = 0;
+			if (!fillHWeak.lock()->isChecked()) {
+				valid |= horizontalFlags;
+			} else {
+				valid |= UISizerAlignFlags::CentreHorizontal;
+			}
+			if (!fillVWeak.lock()->isChecked()) {
+				valid |= verticalFlags;
+			} else {
+				valid |= UISizerAlignFlags::CentreVertical;
+			}
+
+			auto list = alignWeak.lock();
+			
+			std::optional<int> newSelection;
+			for (const auto& idStr: listIds) {
+				const auto item = list->getItem(idStr);
+				const auto id = idStr.toInteger();
+				const bool selected = item->isSelected();
+				const bool enabled = (id & valid) == id;
+				item->setEnabled(enabled);
+				if (selected && !enabled) {
+					newSelection = id & valid;
+				}
+			}
+			if (newSelection) {
+				list->setSelectedOptionId(toString(newSelection.value()));
+			}
+		};
+
+		topWidget->bindData("fillHorizontal", (value & UISizerAlignFlags::FillHorizontal) != 0, [=] (bool newValue)
+		{
+			updateAlignList();
+			updateValue();
+		});
+
+		topWidget->bindData("fillVertical", (value & UISizerAlignFlags::FillVertical) != 0, [=] (bool newValue)
+		{
+			updateAlignList();
+			updateValue();
+		});
+
+		topWidget->bindData("align", toString(int(value)), [=] (String newValue)
+		{
+			//updateValue();
+		});
+
+		updateAlignList();
+
+		return topWidget;
 	}
 };
 

@@ -98,6 +98,9 @@ namespace Halley
 
 		void setConstructionCallback(ConstructionCallback callback);
 
+		static UISizerAlignFlags::Type parseSizerAlignFlags(const ConfigNode& node, UISizerAlignFlags::Type defaultValue = UISizerAlignFlags::Fill);
+		static ConfigNode makeSizerAlignFlagsNode(UISizerAlignFlags::Type align);
+
 	protected:
 		struct ParsedOption {
 			String id;

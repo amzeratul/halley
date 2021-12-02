@@ -250,6 +250,90 @@ void UIFactory::setConstructionCallback(ConstructionCallback callback)
 	constructionCallback = std::move(callback);
 }
 
+UISizerAlignFlags::Type UIFactory::parseSizerAlignFlags(const ConfigNode& node, UISizerAlignFlags::Type defaultValue)
+{
+	int fill = 0;
+	const int horizontalMask = UISizerAlignFlags::FillHorizontal | UISizerAlignFlags::Left | UISizerAlignFlags::CentreHorizontal | UISizerAlignFlags::Right;
+	const int verticalMask = UISizerAlignFlags::FillVertical | UISizerAlignFlags::Top | UISizerAlignFlags::CentreVertical | UISizerAlignFlags::Bottom;
+
+	auto addFill = [&] (const String& fillName)
+	{
+		int val = 0;
+		if (fillName == "fill") {
+			val = UISizerFillFlags::Fill;
+		} else if (fillName == "fillHorizontal") {
+			val = UISizerFillFlags::FillHorizontal;
+		} else if (fillName == "fillVertical") {
+			val = UISizerFillFlags::FillVertical;
+		} else if (fillName == "centre") {
+			val = UISizerAlignFlags::Centre;
+		} else if (fillName == "left") {
+			val = UISizerAlignFlags::Left;
+		} else if (fillName == "right") {
+			val = UISizerAlignFlags::Right;
+		} else if (fillName == "top") {
+			val = UISizerAlignFlags::Top;
+		} else if (fillName == "bottom") {
+			val = UISizerAlignFlags::Bottom;
+		} else if (fillName == "centreHorizontal") {
+			val = UISizerAlignFlags::CentreHorizontal;
+		} else if (fillName == "centreVertical") {
+			val = UISizerAlignFlags::CentreVertical;
+		}
+
+		if ((val & horizontalMask) != 0 && (fill & horizontalMask) == 0) {
+			fill |= val;
+		}
+		if ((val & verticalMask) != 0 && (fill & verticalMask) == 0) {
+			fill |= val;
+		}
+	};
+
+	if (node.getType() == ConfigNodeType::String) {
+		addFill(node.asString());
+	} else if (node.getType() == ConfigNodeType::Sequence) {
+		for (auto& fillNode: node.asSequence()) {
+			addFill(fillNode.asString());
+		}
+	}
+
+	if (fill == 0) {
+		fill = defaultValue;
+	}
+	return UISizerAlignFlags::Type(fill);
+}
+
+ConfigNode UIFactory::makeSizerAlignFlagsNode(UISizerAlignFlags::Type align)
+{
+	String horizontal;
+	String vertical;
+
+	if (align & UISizerAlignFlags::FillHorizontal) {
+		horizontal = "fillHorizontal";
+	} else if (align & UISizerAlignFlags::CentreHorizontal) {
+		horizontal = "centreHorizontal";
+	} else if (align & UISizerAlignFlags::Left) {
+		horizontal = "left";
+	} else if (align & UISizerAlignFlags::Right) {
+		horizontal = "right";
+	}
+
+	if (align & UISizerAlignFlags::FillVertical) {
+		vertical = "fillVertical";
+	} else if (align & UISizerAlignFlags::CentreVertical) {
+		vertical = "centreVertical";
+	} else if (align & UISizerAlignFlags::Top) {
+		vertical = "top";
+	} else if (align & UISizerAlignFlags::Bottom) {
+		vertical = "bottom";
+	}
+
+	ConfigNode::SequenceType result;
+	result.push_back(ConfigNode(horizontal));
+	result.push_back(ConfigNode(vertical));
+	return result;
+}
+
 std::shared_ptr<IUIElement> UIFactory::makeWidget(const ConfigNode& entryNode)
 {
 	std::shared_ptr<IUIElement> element;
@@ -356,44 +440,9 @@ void UIFactory::loadSizerChildren(UISizer& sizer, const ConfigNode& node)
 		for (auto& childNode: node.asSequence()) {
 			float proportion = childNode["proportion"].asFloat(0);
 			Vector4f border = childNode["border"].asVector4f(Vector4f());
-			int fill = 0;
-
-			auto addFill = [&] (const String& fillName)
-			{
-				if (fillName == "fill") {
-					fill |= UISizerFillFlags::Fill;
-				} else if (fillName == "fillHorizontal") {
-					fill |= UISizerFillFlags::FillHorizontal;
-				} else if (fillName == "fillVertical") {
-					fill |= UISizerFillFlags::FillVertical;
-				} else if (fillName == "centre") {
-					fill |= UISizerAlignFlags::Centre;
-				} else if (fillName == "left") {
-					fill |= UISizerAlignFlags::Left;
-				} else if (fillName == "right") {
-					fill |= UISizerAlignFlags::Right;
-				} else if (fillName == "top") {
-					fill |= UISizerAlignFlags::Top;
-				} else if (fillName == "bottom") {
-					fill |= UISizerAlignFlags::Bottom;
-				} else if (fillName == "centreHorizontal") {
-					fill |= UISizerAlignFlags::CentreHorizontal;
-				} else if (fillName == "centreVertical") {
-					fill |= UISizerAlignFlags::CentreVertical;
-				}
-			};
-
-			if (childNode["fill"].getType() == ConfigNodeType::String) {
-				addFill(childNode["fill"].asString());
-			} else if (childNode["fill"].getType() == ConfigNodeType::Sequence) {
-				for (auto& fillNode: childNode["fill"].asSequence()) {
-					addFill(fillNode.asString());
-				}
-			} else {
-				fill = UISizerFillFlags::Fill;
-			}
 
 			if (childNode.hasKey("widget") || childNode.hasKey("sizer") || childNode.hasKey("children")) {
+				const auto fill = parseSizerAlignFlags(childNode["fill"]);
 				sizer.add(makeWidget(childNode), proportion, border, fill);
 			} else if (childNode.hasKey("spacer") || childNode.hasKey("stretchSpacer")) {
 				auto& spacerNode = childNode[childNode.hasKey("spacer") ? "spacer" : "stretchSpacer"];
