@@ -28,9 +28,10 @@ public:
 		auto data = pars.data;
 		const auto& defaultValue = pars.getStringDefaultParameter();
 
-		String value = data.getFieldData().asString(defaultValue);
+		String value = data.getFieldData().asString("");
 
 		auto field = std::make_shared<UITextInput>("textValue", context.getUIFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
+		field->setGhostText(LocalisedString::fromUserString(defaultValue));
 		field->bindData("textValue", value, [&context, data](String newVal)
 		{
 			data.getWriteableFieldData() = ConfigNode(std::move(newVal));

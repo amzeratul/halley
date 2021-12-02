@@ -715,7 +715,7 @@ UIFactoryWidgetProperties UIFactory::getButtonProperties() const
 	result.canHaveChildren = true;
 	result.entries.emplace_back("Text", "text", "Halley::String", "");
 	result.entries.emplace_back("Text (Loc Key)", "textKey", "Halley::String", "");
-	result.entries.emplace_back("Style", "style", "Halley::String", "label");
+	result.entries.emplace_back("Style", "style", "Halley::String", "button");
 	result.entries.emplace_back("Icon", "icon", "Halley::ResourceReference<Halley::SpriteResource>", "");
 	result.entries.emplace_back("Mouse Border", "mouseBorder", "Halley::Vector4f", std::vector<String>{"0", "0", "0", "0"});
 	return result;
