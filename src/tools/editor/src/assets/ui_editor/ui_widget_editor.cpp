@@ -184,7 +184,7 @@ void UIWidgetEditor::populateSizerBox(UIWidget& root, ConfigNode& node)
 
 	using Entry = UIFactoryWidgetProperties::Entry;
 	std::array<Entry, 4> entries = {
-		Entry{ "Type", "type", "Halley::String", std::vector<String>{"horizontal"} },
+		Entry{ "Type", "type", "Halley::UISizerType", std::vector<String>{"horizontal"} },
 		Entry{ "Gap", "gap", "float", std::vector<String>{"1"} },
 		Entry{ "Columns", "columns", "int", std::vector<String>{"1"}},
 		Entry{ "Column Proportions", "columnProportions", "std::vector<int>", std::vector<String>{}}

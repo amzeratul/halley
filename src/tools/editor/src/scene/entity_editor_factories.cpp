@@ -1140,5 +1140,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorScriptGraphFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorRangeFieldFactory>());
 
+	factories.emplace_back(EnumFieldFactory::makeEnumFactory<UISizerType>("Halley::UISizerType"));
+
 	return factories;
 }
