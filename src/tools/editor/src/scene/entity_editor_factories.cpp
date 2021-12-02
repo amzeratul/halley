@@ -1193,16 +1193,23 @@ public:
 			}
 
 			auto list = alignWeak.lock();
-			
+
+			auto prevSel = list->getSelectedOptionId();
 			std::optional<int> newSelection;
 			for (const auto& idStr: listIds) {
-				const auto item = list->getItem(idStr);
 				const auto id = idStr.toInteger();
-				const bool selected = item->isSelected();
+				const bool selected = idStr == prevSel;
 				const bool enabled = (id & valid) == id;
-				item->setEnabled(enabled);
+				list->setItemEnabled(idStr, enabled);
 				if (selected && !enabled) {
-					newSelection = id & valid;
+					auto newTarget = id & valid;
+					if ((newTarget & horizontalFlags) == 0) {
+						newTarget |= UISizerAlignFlags::CentreHorizontal;
+					}
+					if ((newTarget & verticalFlags) == 0) {
+						newTarget |= UISizerAlignFlags::CentreVertical;
+					}
+					newSelection = newTarget;
 				}
 			}
 			if (newSelection) {
@@ -1224,7 +1231,7 @@ public:
 
 		topWidget->bindData("align", toString(int(value)), [=] (String newValue)
 		{
-			//updateValue();
+			updateValue();
 		});
 
 		updateAlignList();
