@@ -1109,6 +1109,45 @@ public:
 	}
 };
 
+class ComponentEditorUIAlignFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::UISizerAlignFlags::Type";
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		auto& res = context.getGameResources();
+
+		auto fillSizer = std::make_shared<UISizer>(UISizerType::Grid, 1.0f, 2);
+		fillSizer->add(std::make_shared<UICheckbox>("fillHorizontal", context.getUIFactory().getStyle("checkbox"), false), 0, {}, UISizerAlignFlags::Centre);
+		fillSizer->add(std::make_shared<UIImage>(Sprite().setImage(res, "arrows/arrow_left_right.png")), 0, {}, UISizerAlignFlags::Centre);
+		fillSizer->add(std::make_shared<UICheckbox>("fillVertical", context.getUIFactory().getStyle("checkbox"), false), 0, {}, UISizerAlignFlags::Centre);
+		fillSizer->add(std::make_shared<UIImage>(Sprite().setImage(res, "arrows/arrow_up_down.png")), 0, {}, UISizerAlignFlags::Centre);
+
+		auto alignList = std::make_shared<UIList>("align", context.getUIFactory().getStyle("list"), UISizerType::Grid, 3);
+		auto addDir = [&] (int dir, std::string_view imageName)
+		{
+			alignList->addImage(toString(dir), std::make_shared<UIImage>(Sprite().setImage(res, imageName)), 0, {}, UISizerAlignFlags::Centre);
+		};
+		addDir(UISizerAlignFlags::Top | UISizerAlignFlags::Left, "arrows/arrow_top_left.png");
+		addDir(UISizerAlignFlags::Top | UISizerAlignFlags::CentreHorizontal, "arrows/arrow_top.png");
+		addDir(UISizerAlignFlags::Top | UISizerAlignFlags::Right, "arrows/arrow_top_right.png");
+		addDir(UISizerAlignFlags::CentreVertical | UISizerAlignFlags::Left, "arrows/arrow_left.png");
+		addDir(UISizerAlignFlags::CentreVertical | UISizerAlignFlags::CentreHorizontal, "arrows/arrow_centre.png");
+		addDir(UISizerAlignFlags::CentreVertical | UISizerAlignFlags::Right, "arrows/arrow_right.png");
+		addDir(UISizerAlignFlags::Bottom | UISizerAlignFlags::Left, "arrows/arrow_bottom_left.png");
+		addDir(UISizerAlignFlags::Bottom | UISizerAlignFlags::CentreHorizontal, "arrows/arrow_bottom.png");
+		addDir(UISizerAlignFlags::Bottom | UISizerAlignFlags::Right, "arrows/arrow_bottom_right.png");
+
+		auto topSizer = std::make_shared<UISizer>(UISizerType::Horizontal, 10.0f);
+		topSizer->add(std::move(fillSizer), 0, {}, UISizerAlignFlags::Centre);
+		topSizer->add(std::move(alignList), 0, {}, UISizerAlignFlags::Centre);
+		return topSizer;
+	}
+};
+
 std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
 	std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
@@ -1139,6 +1178,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorResourceReferenceFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorScriptGraphFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorRangeFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorUIAlignFactory>());
 
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<UISizerType>("Halley::UISizerType"));
 

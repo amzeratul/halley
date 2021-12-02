@@ -29,16 +29,10 @@ namespace Halley {
 		}
 	};
 
-	namespace UISizerFillFlags {
+	namespace UISizerAlignFlags {
 		enum Type {
 			FillHorizontal = 0x1,
 			FillVertical = 0x2,
-			Fill = FillHorizontal | FillVertical
-		};
-	}
-
-	namespace UISizerAlignFlags {
-		enum Type {
 			Left = 0x4,
 			Right = 0x8,
 			Top = 0x10,
@@ -46,9 +40,12 @@ namespace Halley {
 			CentreHorizontal = 0x40,
 			CentreVertical = 0x80,
 
-			Centre = CentreHorizontal | CentreVertical
+			Centre = CentreHorizontal | CentreVertical,
+			Fill = FillHorizontal | FillVertical
 		};
 	}
+
+	namespace UISizerFillFlags = UISizerAlignFlags;
 
 	class UISizerEntry {
 	public:
