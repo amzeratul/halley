@@ -97,7 +97,10 @@ void UIEditorDisplay::onPlaceInside(Rect4f rect, Rect4f origRect, const std::sha
 
 void UIEditorDisplay::updateCurWidget()
 {
+	curSizer = nullptr;
+	curRect = Rect4f();
 	curElement = {};
+	sizerRects.clear();
 
 	if (!curSelection.isEmpty()) {
 		const auto iter = elements.find(UUID(curSelection));
@@ -126,8 +129,4 @@ void UIEditorDisplay::makeSizerSprites()
 	boundsSprite
 		.setPosition(curRect.getTopLeft())
 		.scaleTo(curRect.getSize());
-
-	sizerRects.clear();
-	curSizer = nullptr;
-	curRect = Rect4f();
 }
