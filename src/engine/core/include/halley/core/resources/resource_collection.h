@@ -20,11 +20,6 @@ namespace Halley
 		class Wrapper
 		{
 		public:
-			Wrapper(Wrapper&& other) noexcept
-				: res(std::move(other.res))
-				, depth(other.depth)
-			{}
-
 			Wrapper(std::shared_ptr<Resource> resource, int loadDepth)
 				: res(std::move(resource))
 				, depth(loadDepth)

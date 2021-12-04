@@ -1,4 +1,6 @@
 #include "halley/tools/dll/dynamic_library.h"
+
+#include <boost/filesystem.hpp>
 #include <halley/support/exception.h>
 
 #include "halley/maths/random.h"
@@ -37,7 +39,7 @@ bool DynamicLibrary::load(bool withAnotherName)
 
 	// Does the path exist?
 	if (boost::system::error_code ec; !exists(libOrigPath, ec) || ec.failed()) {
-		Logger::logError("Library doesn't exist: " + libOrigPath.string());
+		Logger::logError("Library doesn't exist: " + libOrigPath);
 		return false;
 	}
 
@@ -47,7 +49,7 @@ bool DynamicLibrary::load(bool withAnotherName)
 		auto tmpPath = getTempPath();
 		create_directories(tmpPath);
 		
-		libPath = tmpPath / String("halley-" + UUID::generate().toString() + ".dll").cppStr();
+		libPath = (boost::filesystem::path(tmpPath) / String("halley-" + UUID::generate().toString() + ".dll").cppStr()).string();
 
 		boost::system::error_code ec;
 		bool success = false;
@@ -62,7 +64,7 @@ bool DynamicLibrary::load(bool withAnotherName)
 		}
 
 		if (!success) {
-			Logger::logError("Error copying DLL \"" + libOrigPath.string() + "\": " + ec.message());
+			Logger::logError("Error copying DLL \"" + libOrigPath + "\": " + ec.message());
 			return false;
 		}
 	} else {
@@ -73,7 +75,7 @@ bool DynamicLibrary::load(bool withAnotherName)
 	if (includeDebugSymbols) {
 		debugSymbolsOrigPath = libOrigPath;
 		#ifdef _WIN32
-		debugSymbolsOrigPath.replace_extension("pdb");
+		debugSymbolsOrigPath = boost::filesystem::path(debugSymbolsOrigPath).replace_extension("pdb").string();
 		#endif
 		hasDebugSymbols = exists(debugSymbolsOrigPath);
 	}
@@ -93,10 +95,10 @@ bool DynamicLibrary::load(bool withAnotherName)
 
 	// Load
 	#ifdef _WIN32
-	handle = LoadLibraryW(libPath.wstring().c_str());
+	handle = LoadLibraryW(boost::filesystem::path(libPath).wstring().c_str());
 	#endif
 	if (!handle) {
-		Logger::logError("Unable to load library: " + libPath.string());
+		Logger::logError("Unable to load library: " + libPath);
 		unload();
 		return false;
 	}
@@ -129,7 +131,7 @@ void DynamicLibrary::unload()
 	if (loaded) {
 		#ifdef _WIN32
 		if (!FreeLibrary(static_cast<HMODULE>(handle))) {
-			throw Exception("Unable to release library " + libPath.string() + " due to error " + toString(GetLastError()), HalleyExceptions::Core);
+			throw Exception("Unable to release library " + libPath + " due to error " + toString(GetLastError()), HalleyExceptions::Core);
 		}
 		#endif
 		handle = nullptr;
@@ -274,7 +276,7 @@ void DynamicLibrary::flushLoaded() const
 	toDelete = std::move(remaining);
 }
 
-path DynamicLibrary::getTempPath() const
+std::string DynamicLibrary::getTempPath() const
 {
-	return libOrigPath.parent_path() / "halley_tmp";
+	return (boost::filesystem::path(libOrigPath).parent_path() / "halley_tmp").string();
 }

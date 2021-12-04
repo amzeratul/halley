@@ -23,7 +23,7 @@
 #pragma once
 
 #include <cmath>
-#include <iostream>
+#include <ostream>
 #include "angle.h"
 #include <halley/utils/utils.h>
 #include "halley/text/string_converter.h"
