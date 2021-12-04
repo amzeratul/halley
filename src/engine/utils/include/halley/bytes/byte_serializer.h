@@ -363,7 +363,8 @@ namespace Halley {
 			for (unsigned int i = 0; i < sz; i++) {
 				*this >> tmpData[i].first >> tmpData[i].second;
 			}
-			val = FlatMap<T, U>(boost::container::ordered_unique_range_t(), tmpData.begin(), tmpData.end());
+			//val = FlatMap<T, U>(boost::container::ordered_unique_range_t(), tmpData.begin(), tmpData.end());
+			val = FlatMap<T, U>(tmpData.begin(), tmpData.end());
 			return *this;
 		}
 
@@ -373,7 +374,7 @@ namespace Halley {
 			unsigned int sz;
 			*this >> sz;
 			ensureSufficientBytesRemaining(size_t(sz) * 2); // Expect at least two bytes per map entry
-
+			
 			for (unsigned int i = 0; i < sz; i++) {
 				K key;
 				V value;

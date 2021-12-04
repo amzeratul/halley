@@ -1,5 +1,7 @@
 #include "halley/navigation/navmesh.h"
 
+#include <cassert>
+
 #include "halley/data_structures/priority_queue.h"
 #include "halley/maths/random.h"
 #include "halley/maths/ray.h"

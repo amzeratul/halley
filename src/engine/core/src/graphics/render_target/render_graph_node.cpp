@@ -1,4 +1,7 @@
 #include "graphics/render_target/render_graph_node.h"
+
+#include <cassert>
+
 #include "graphics/render_target/render_graph.h"
 #include "api/video_api.h"
 #include "graphics/render_context.h"

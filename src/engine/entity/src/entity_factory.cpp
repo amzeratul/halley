@@ -1,5 +1,7 @@
 #include "entity_factory.h"
 
+#include <cassert>
+
 
 #include "component_reflector.h"
 #include "entity_scene.h"

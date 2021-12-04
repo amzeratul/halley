@@ -1,5 +1,7 @@
 #include "entity_scene.h"
 
+#include <cassert>
+
 #include "entity_factory.h"
 #include "world.h"
 #include "halley/support/logger.h"

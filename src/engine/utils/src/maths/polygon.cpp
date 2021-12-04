@@ -21,6 +21,8 @@
 
 
 #include "halley/maths/polygon.h"
+
+#include <cassert>
 #include <limits>
 
 #include "halley/file_formats/config_file.h"

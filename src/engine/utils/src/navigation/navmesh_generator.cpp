@@ -1,4 +1,7 @@
 #include "halley/navigation/navmesh_generator.h"
+
+#include <cassert>
+
 #include "halley/navigation/navmesh_set.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"

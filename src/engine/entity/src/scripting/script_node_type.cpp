@@ -1,5 +1,7 @@
 #include "scripting/script_node_type.h"
 
+#include <cassert>
+
 
 #include "world.h"
 #include "nodes/script_branching.h"

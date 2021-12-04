@@ -1,4 +1,7 @@
 #include "entity_data_delta.h"
+
+#include <cassert>
+
 #include "entity_data.h"
 
 #include "halley/bytes/byte_serializer.h"
