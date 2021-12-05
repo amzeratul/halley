@@ -12,6 +12,8 @@
 #include <cstdint>
 #include <utility>
 #include <set>
+
+#include "halley/data_structures/hash_map.h"
 #include "halley/data_structures/maybe.h"
 #include "halley/maths/colour.h"
 #include "halley/maths/vector4.h"
@@ -138,6 +140,16 @@ namespace Halley {
 
 		template <typename K, typename V, typename Cmp, typename Allocator>
 		Serializer& operator<<(const std::map<K, V, Cmp, Allocator>& val)
+		{
+			*this << static_cast<unsigned int>(val.size());
+			for (auto& kv : val) {
+				*this << kv.first << kv.second;
+			}
+			return *this;
+		}
+
+		template <typename K, typename V>
+		Serializer& operator<<(const HashMap<K, V>& val)
 		{
 			*this << static_cast<unsigned int>(val.size());
 			for (auto& kv : val) {
@@ -363,8 +375,23 @@ namespace Halley {
 			for (unsigned int i = 0; i < sz; i++) {
 				*this >> tmpData[i].first >> tmpData[i].second;
 			}
-			//val = FlatMap<T, U>(boost::container::ordered_unique_range_t(), tmpData.begin(), tmpData.end());
 			val = FlatMap<T, U>(tmpData.begin(), tmpData.end());
+			return *this;
+		}
+
+		template <typename T, typename U>
+		Deserializer& operator>>(HashMap<T, U>& val)
+		{
+			unsigned int sz;
+			*this >> sz;
+			ensureSufficientBytesRemaining(sz * 2); // Expect at least two bytes per map entry
+
+			for (unsigned int i = 0; i < sz; i++) {
+				T key;
+				U value;
+				*this >> key >> value;
+				val[key] = std::move(value);
+			}
 			return *this;
 		}
 
