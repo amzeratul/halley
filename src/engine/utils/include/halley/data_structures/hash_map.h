@@ -29,5 +29,5 @@ namespace Halley {
 
 namespace Halley {
 	
-	template<typename K, typename V> using HashMap = ska::flat_hash_map<K, V>;
+	template<typename Key, typename Value, typename Hash = std::hash<Key>> using HashMap = ska::flat_hash_map<Key, Value, Hash>;
 }

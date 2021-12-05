@@ -2,7 +2,6 @@
 
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/core/graphics/text/text_renderer.h"
-#include <unordered_map>
 #include <map>
 
 namespace Halley {
@@ -72,9 +71,9 @@ namespace Halley {
 		const ConfigObserver& getStyleObserver(const String& styleName) const;
 	private:
 		Resources& resources;
-		std::unordered_map<String, std::shared_ptr<UIStyleDefinition>> styles;
+		HashMap<String, std::shared_ptr<UIStyleDefinition>> styles;
 		std::map<String, ConfigObserver> observers;
-		std::unordered_map<String, String> styleToObserver;
+		HashMap<String, String> styleToObserver;
 		std::shared_ptr<const UIColourScheme> lastColourScheme = nullptr;
 
 		void load(const ConfigNode& node, const String& assetId, std::shared_ptr<const UIColourScheme> colourScheme);

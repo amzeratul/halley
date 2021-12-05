@@ -70,7 +70,7 @@ namespace Halley
 			std::size_t operator()(Sprite* ptr) const noexcept;
 		};
 		
-		mutable std::unordered_map<Sprite*, uint32_t, SpritePointerHasher> spriteRefs;
+		mutable HashMap<Sprite*, uint32_t, SpritePointerHasher> spriteRefs;
 #endif
 	};
 	

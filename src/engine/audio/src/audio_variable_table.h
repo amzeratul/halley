@@ -1,6 +1,7 @@
 #pragma once
-#include <unordered_map>
 #include <halley/text/halleystring.h>
+
+#include "halley/data_structures/hash_map.h"
 
 namespace Halley {
 	class String;
@@ -13,6 +14,6 @@ namespace Halley {
 		float get(const String& name) const;
 
 	private:
-		std::unordered_map<String, float> variables;
+		HashMap<String, float> variables;
     };
 }

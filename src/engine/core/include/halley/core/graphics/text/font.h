@@ -2,9 +2,9 @@
 
 #include <cstdint>
 #include <memory>
-#include <unordered_map>
 #include "halley/core/graphics/texture.h"
 #include "halley/core/graphics/sprite/sprite.h"
+#include "halley/data_structures/hash_map.h"
 
 namespace Halley
 {
@@ -81,6 +81,6 @@ namespace Halley
 		std::vector<String> fallback;
 
 		std::shared_ptr<Material> material;
-		std::unordered_map<int, Glyph> glyphs;
+		HashMap<int, Glyph> glyphs;
 	};
 }

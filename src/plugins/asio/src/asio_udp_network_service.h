@@ -7,10 +7,11 @@
 #define BOOST_SYSTEM_NO_DEPRECATED
 #define BOOST_ERROR_CODE_HEADER_ONLY
 #include <boost/asio.hpp>
+
+#include "halley/data_structures/hash_map.h"
 namespace asio = boost::asio;
 
 #include "asio_udp_connection.h"
-#include <unordered_map>
 
 namespace Halley
 {
@@ -35,7 +36,7 @@ namespace Halley
 		UDPEndpoint remoteEndpoint;
 		asio::ip::udp::socket socket;
 		std::list<UDPEndpoint> pendingIncomingConnections;
-		std::unordered_map<short, std::shared_ptr<AsioUDPConnection>> activeConnections;
+		HashMap<short, std::shared_ptr<AsioUDPConnection>> activeConnections;
 
 		std::array<gsl::byte, 2048> receiveBuffer;
 

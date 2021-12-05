@@ -6,6 +6,7 @@
 #include "dx11_rasterizer.h"
 #include "dx11_blend.h"
 #include "dx11_depth_stencil.h"
+#include "halley/data_structures/hash_map.h"
 
 namespace Halley
 {
@@ -46,7 +47,7 @@ namespace Halley
 		std::map<DX11RasterizerOptions, std::unique_ptr<DX11Rasterizer>> rasterizers;
 		DX11Rasterizer* curRaster = nullptr;
 
-		std::unordered_map<MaterialDepthStencil, std::unique_ptr<DX11DepthStencil>> depthStencils;
+		HashMap<MaterialDepthStencil, std::unique_ptr<DX11DepthStencil>> depthStencils;
 		DX11DepthStencil* curDepthStencil = nullptr;
 
 		size_t curBuffer = 0;

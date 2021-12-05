@@ -1,10 +1,11 @@
 #include "halley/tools/runner/memory_patcher.h"
 #include <iostream>
-#include <unordered_map>
 #include <algorithm>
 #include <cassert>
 #include <functional>
 #include <gsl/gsl_assert>
+
+#include "halley/data_structures/hash_map.h"
 
 using namespace Halley;
 
@@ -20,7 +21,7 @@ void MemoryPatchingMappings::generate(const Vector<DebugSymbol>& prev, const Vec
 	};
 
 	// Construct mapping
-	std::unordered_map<std::string, Mapping> mapping;
+	HashMap<std::string, Mapping> mapping;
 	for (const auto& p: prev) {
 		mapping[p.getName()].from = p.getAddress();
 	}

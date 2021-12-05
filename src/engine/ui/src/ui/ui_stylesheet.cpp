@@ -107,7 +107,7 @@ void loadStyleData(UIStyleSheet& styleSheet, const String& name, const ConfigNod
 }
 
 template <typename T>
-const T& getValue(const ConfigNode* node, UIStyleSheet& styleSheet, const String& name, const String& key, std::unordered_map<String, T>& cache)
+const T& getValue(const ConfigNode* node, UIStyleSheet& styleSheet, const String& name, const String& key, HashMap<String, T>& cache)
 {
 	Expects(node);
 	node->assertValid();
@@ -137,7 +137,7 @@ const T& getValue(const ConfigNode* node, UIStyleSheet& styleSheet, const String
 }
 
 template <typename T>
-bool hasValue(const ConfigNode* node, const String& key, std::unordered_map<String, T>& cache)
+bool hasValue(const ConfigNode* node, const String& key, HashMap<String, T>& cache)
 {
 	// Is it already in cache?
 	const auto iter = cache.find(key);
@@ -150,14 +150,14 @@ bool hasValue(const ConfigNode* node, const String& key, std::unordered_map<Stri
 
 class UIStyleDefinition::Pimpl {
 public:
-	mutable std::unordered_map<String, Sprite> sprites;
-	mutable std::unordered_map<String, TextRenderer> textRenderers;
-	mutable std::unordered_map<String, Vector4f> borders;
-	mutable std::unordered_map<String, String> strings;
-	mutable std::unordered_map<String, float> floats;
-	mutable std::unordered_map<String, Vector2f> vector2fs;
-	mutable std::unordered_map<String, Colour4f> colours;
-	mutable std::unordered_map<String, std::shared_ptr<UIStyleDefinition>> subStyles;
+	mutable HashMap<String, Sprite> sprites;
+	mutable HashMap<String, TextRenderer> textRenderers;
+	mutable HashMap<String, Vector4f> borders;
+	mutable HashMap<String, String> strings;
+	mutable HashMap<String, float> floats;
+	mutable HashMap<String, Vector2f> vector2fs;
+	mutable HashMap<String, Colour4f> colours;
+	mutable HashMap<String, std::shared_ptr<UIStyleDefinition>> subStyles;
 };
 
 UIStyleDefinition::UIStyleDefinition(String styleName, const ConfigNode& node, UIStyleSheet& styleSheet)

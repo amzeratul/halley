@@ -3,7 +3,8 @@
 #include <set>
 #include <map>
 #include <vector>
-#include <unordered_map>
+
+#include "halley/data_structures/hash_map.h"
 
 namespace Halley
 {
@@ -106,7 +107,7 @@ namespace std_ex {
 	}
 
 	template <typename K, typename V>
-	bool contains(const std::unordered_map<K, V>& container, const K& key)
+	bool contains(const Halley::HashMap<K, V>& container, const K& key)
 	{
 		return container.find(key) != container.end();
 	}

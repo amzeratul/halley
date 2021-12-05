@@ -452,7 +452,7 @@ std::vector<ImageData> SpriteImporter::splitImagesInGrid(const std::vector<Image
 
 void SpriteImporter::markDuplicates(std::vector<ImageData>& images) const
 {
-	std::unordered_map<uint64_t, ImageData*> hashes;
+	HashMap<uint64_t, ImageData*> hashes;
 	
 	for (auto& image: images) {
 		Hash::Hasher hasher;

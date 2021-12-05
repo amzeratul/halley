@@ -96,13 +96,13 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const String& fileName, c
 	return result;
 }
 
-std::unordered_map<uint32_t, uint32_t> ImageImporter::makePaletteConversion(const Image& palette, bool readTopLineOnly)
+HashMap<uint32_t, uint32_t> ImageImporter::makePaletteConversion(const Image& palette, bool readTopLineOnly)
 {
 	auto src = palette.getPixels4BPP();
 	size_t w = palette.getWidth();
 	size_t h = readTopLineOnly ? 1 : palette.getHeight();
 
-	std::unordered_map<uint32_t, uint32_t> lookup;
+	HashMap<uint32_t, uint32_t> lookup;
 	for (size_t y = 0; y < h; ++y) {
 		for (size_t x = 0; x < w; ++x) {
 			auto colour = src[y * w + x];

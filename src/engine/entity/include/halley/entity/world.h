@@ -142,7 +142,7 @@ namespace Halley {
 		Vector<Entity*> entities;
 		Vector<Entity*> entitiesPendingCreation;
 		MappedPool<Entity*> entityMap;
-		std::unordered_map<UUID, Entity*> uuidMap;
+		HashMap<UUID, Entity*> uuidMap;
 
 		//TreeMap<FamilyMaskType, std::unique_ptr<Family>> families;
 		Vector<std::unique_ptr<Family>> families;

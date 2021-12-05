@@ -4,7 +4,6 @@
 #include "asio_udp_network_service.h"
 #include "asio_udp_connection.h"
 #include <iostream>
-#include <unordered_map>
 #include <halley/support/exception.h>
 
 using namespace Halley;

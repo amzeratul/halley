@@ -8,7 +8,6 @@
 #include "halley/maths/rect.h"
 #include "halley/file/path.h"
 #include <map>
-#include <unordered_map>
 #include <cstdint>
 #include <utility>
 #include <set>

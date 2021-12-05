@@ -1,9 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-
-
-
 #include "halley/core/graphics/sprite/particles.h"
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/maths/colour.h"
@@ -30,8 +26,8 @@ namespace Halley {
 		String name;
 		Colour4f defaultColour;
 		bool enabled = true;
-        std::unordered_map<String, Colour4f> colours;
-		std::unordered_map<String, Sprite> sprites;
+        HashMap<String, Colour4f> colours;
+		HashMap<String, Sprite> sprites;
 
 		Sprite background;
 		Particles backgroundParticles;

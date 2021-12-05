@@ -3,7 +3,8 @@
 #include <gsl/gsl>
 #include <halley/text/halleystring.h>
 #include "lua_reference.h"
-#include <unordered_map>
+
+#include "halley/data_structures/hash_map.h"
 
 struct lua_State;
 
@@ -39,7 +40,7 @@ namespace Halley {
 		std::vector<lua_State*> pushedStates;
 		Resources* resources;
 
-		std::unordered_map<String, LuaReference> modules;
+		HashMap<String, LuaReference> modules;
 		std::vector<std::unique_ptr<LuaCallback>> closures;
 		std::unique_ptr<LuaReference> errorHandlerRef;
 		std::vector<int> errorHandlerStackPos;

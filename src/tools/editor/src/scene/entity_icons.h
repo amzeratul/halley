@@ -1,7 +1,5 @@
 #pragma once
 
-#include <unordered_map>
-
 namespace Halley {
     class EntityIcons {
     public:
@@ -28,7 +26,7 @@ namespace Halley {
     	const UIColourScheme& colourScheme;
     	
     	std::vector<Entry> entries;
-    	std::unordered_map<String, size_t> entryMap;
+    	HashMap<String, size_t> entryMap;
     	Entry defaultEntry;
         Sprite invalidEntityIcon;
 
