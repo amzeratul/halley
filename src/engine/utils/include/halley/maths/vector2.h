@@ -23,7 +23,6 @@
 #pragma once
 
 #include <cmath>
-#include <ostream>
 #include "angle.h"
 #include <halley/utils/utils.h>
 #include "halley/text/string_converter.h"
@@ -229,12 +228,6 @@ namespace Halley {
 	inline Vector2D<T,U> operator * (V f, const Vector2D<T,U> &v)
 	{
 		return Vector2D<T,U>(T(v.x * f),T(v.y * f));
-	}
-
-	template <typename T,class U>
-	std::ostream& operator<< (std::ostream& ostream, const Vector2D<T, U>& v)
-	{
-		ostream << "(" << v.x << "," << v.y << ")" ; return ostream;
 	}
 	
 	////////////

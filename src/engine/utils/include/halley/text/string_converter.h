@@ -8,14 +8,11 @@
 #include <halley/support/exception.h>
 #include <array>
 #include <optional>
+#include <iomanip>
+#include "enum_names.h"
 
 namespace Halley
 {
-
-	template <typename T>
-	struct EnumNames {
-	};
-
 
 	
 	struct UserConverter

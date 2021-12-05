@@ -2,7 +2,7 @@
 
 #include <array>
 #include <halley/utils/utils.h>
-#include <halley/text/string_converter.h>
+#include <halley/text/enum_names.h>
 #include <limits>
 
 #ifdef max
@@ -10,6 +10,8 @@
 #endif
 
 namespace Halley {
+	class String;
+	
 	enum class SaveDataType {
 		SaveRoaming,
 		SaveLocal,

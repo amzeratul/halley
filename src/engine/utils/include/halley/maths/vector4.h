@@ -23,7 +23,6 @@
 #pragma once
 
 #include <cmath>
-#include <ostream>
 #include "angle.h"
 #include "vector2.h"
 #include "vector3.h"
@@ -213,12 +212,6 @@ namespace Halley {
 	constexpr inline Vector4D<T> operator * (V f, const Vector4D<T> &v)
 	{
 		return Vector4D<T>(T(v.x * f), T(v.y * f), T(v.z * f), T(v.w * f));
-	}
-
-	template <typename T >
-	std::ostream& operator<< (std::ostream& ostream, const Vector4D<T>& v)
-	{
-		ostream << "(" << v.x << "," << v.y << "," << v.z << "," << v.w << ")" ; return ostream;
 	}
 
 	////////////

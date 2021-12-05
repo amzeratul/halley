@@ -3,8 +3,20 @@
 #include "world.h"
 #include "halley/maths/uuid.h"
 #include "halley/entity/entity_factory.h"
+#include "halley/text/string_converter.h"
+#include "halley/text/halleystring.h"
 
 using namespace Halley;
+
+EntityId::EntityId(const String& str)
+{
+	value = str.toInteger64();
+}
+
+String EntityId::toString() const
+{
+	return Halley::toString(value);
+}
 
 String EntityId::toUUID(const EntityId& id, const ConfigNodeSerializationContext& context)
 {

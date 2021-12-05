@@ -22,6 +22,7 @@
 #pragma once
 
 #include <iostream>
+#include "halley/utils/halley_iostream.h"
 
 namespace Halley {
 	class Console {

@@ -5,7 +5,7 @@
 #include <array>
 #include <condition_variable>
 #include "metadata.h"
-#include "halley/text/string_converter.h"
+#include "halley/text/enum_names.h"
 
 #if defined(DEV_BUILD) && !defined(__NX_TOOLCHAIN_MAJOR__)
 #define ENABLE_HOT_RELOAD

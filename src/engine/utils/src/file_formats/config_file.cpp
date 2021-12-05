@@ -3,8 +3,14 @@
 #include "halley/support/exception.h"
 #include "halley/core/resources/resource_collection.h"
 #include "halley/file_formats/yaml_convert.h"
+#include "config_file_serialization_state.h"
 
 using namespace Halley;
+
+class ConfigFileSerializationState : public SerializerState {
+public:
+	bool storeFilePosition = false;
+};
 
 ConfigFile::ConfigFile()
 {

@@ -2,6 +2,7 @@
 #include "halley/bytes/byte_serializer.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/support/exception.h"
+#include "../file_formats/config_file_serialization_state.h"
 using namespace Halley;
 
 ConfigNode::ConfigNode()

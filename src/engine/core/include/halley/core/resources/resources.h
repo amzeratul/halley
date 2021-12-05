@@ -26,7 +26,7 @@
 #include <halley/support/exception.h>
 #include "halley/resources/resource.h"
 #include "resource_collection.h"
-#include "halley/text/string_converter.h"
+#include "halley/text/enum_names.h"
 
 namespace Halley {
 	

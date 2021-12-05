@@ -1,7 +1,7 @@
 #pragma once
 
 #include <halley/text/halleystring.h>
-#include <halley/text/string_converter.h>
+#include <halley/text/enum_names.h>
 #include <array>
 #include <optional>
 #include <utility>

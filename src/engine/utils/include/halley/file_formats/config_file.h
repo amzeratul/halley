@@ -1,17 +1,11 @@
 #pragma once
 
-#include "halley/bytes/byte_serializer.h"
 #include "halley/data_structures/config_node.h"
 
 namespace Halley
 {
 	class ResourceLoader;
 	class EntityData;
-
-	class ConfigFileSerializationState : public SerializerState {
-	public:
-		bool storeFilePosition = false;
-	};
 
 	class ConfigFile : public Resource
 	{

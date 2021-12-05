@@ -21,6 +21,7 @@
 #include "entry/entry_point.h"
 #include "halley/core/devcon/devcon_client.h"
 #include "halley/net/connection/network_service.h"
+#include "halley/utils/halley_iostream.h"
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)

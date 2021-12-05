@@ -1,4 +1,6 @@
 #include "scripting/script_state.h"
+
+#include "halley/bytes/byte_serializer.h"
 using namespace Halley;
 
 ScriptStateThread::ScriptStateThread()

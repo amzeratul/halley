@@ -22,6 +22,7 @@ set(SOURCES
         "src/game/halley_statics.cpp"
         "src/game/main_loop.cpp"
 
+        "src/graphics/blend.cpp"
         "src/graphics/camera.cpp"
         "src/graphics/material/material.cpp"
         "src/graphics/material/material_definition.cpp"

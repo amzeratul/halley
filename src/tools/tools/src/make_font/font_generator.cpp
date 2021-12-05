@@ -271,9 +271,6 @@ std::vector<Path> FontGeneratorResult::write(Path dir, bool verbose) const
 	Path pngPath = imgName;
 	Path binPath = fileName.replaceExtension(".font");
 	Path metaPath = pngPath.replaceExtension(".png.meta");
-	if (verbose) {
-		std::cout << "Saving " << pngPath << ", " << binPath << ", and " << metaPath << std::endl;
-	}
 
 	FileSystem::writeFile(dir / pngPath, image->savePNGToBytes());
 	FileSystem::writeFile(dir / binPath, Serializer::toBytes(*font));

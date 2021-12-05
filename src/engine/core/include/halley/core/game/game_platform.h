@@ -4,7 +4,7 @@
 #include "TargetConditionals.h"
 #endif
 
-#include "halley/text/string_converter.h"
+#include "halley/text/enum_names.h"
 
 namespace Halley {
 	enum class GamePlatform {
