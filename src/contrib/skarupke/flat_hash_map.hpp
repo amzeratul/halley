@@ -162,8 +162,9 @@ struct sherwood_v3_entry
     sherwood_v3_entry()
     {
     }
-    sherwood_v3_entry(int8_t distance_from_desired)
+    sherwood_v3_entry(int8_t distance_from_desired, bool isDefault = false)
         : distance_from_desired(distance_from_desired)
+		, isDefault(isDefault)
     {
     }
     ~sherwood_v3_entry()
@@ -171,7 +172,7 @@ struct sherwood_v3_entry
     }
     static sherwood_v3_entry * empty_default_table()
     {
-        static sherwood_v3_entry result[min_lookups] = { {}, {}, {}, {special_end_value} };
+        static sherwood_v3_entry result[min_lookups] = { {-1, true}, {}, {}, {special_end_value} };
         return result;
     }
 
@@ -201,6 +202,7 @@ struct sherwood_v3_entry
     }
 
     int8_t distance_from_desired = -1;
+	bool isDefault = false;
     static constexpr int8_t special_end_value = 0;
     union { T value; };
 };
@@ -878,7 +880,7 @@ private:
 
     void deallocate_data(EntryPointer begin, size_t num_slots_minus_one, int8_t max_lookups)
     {
-        if (begin != Entry::empty_default_table())
+        if (!static_cast<sherwood_v3_entry<T>*>(begin)[0].isDefault)
         {
             AllocatorTraits::deallocate(*this, begin, num_slots_minus_one + max_lookups + 1);
         }

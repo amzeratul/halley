@@ -129,13 +129,14 @@ namespace Halley {
 		}
 
 		template <typename T, typename U>
-		Serializer& operator<<(const FlatMap<T, U>& val)
+		Serializer& operator<<(const HashMap<T, U>& val)
 		{
-			*this << static_cast<unsigned int>(val.size());
-			for (auto& kv : val) {
-				*this << kv.first << kv.second; 
+			// Convert to map first to make order deterministic
+			std::map<T, U> m;
+			for (auto& kv: val) {
+				m[kv.first] = kv.second;
 			}
-			return *this;
+			return (*this << m);
 		}
 
 		template <typename K, typename V, typename Cmp, typename Allocator>
@@ -151,6 +152,7 @@ namespace Halley {
 		template <typename T, typename U>
 		Serializer& operator<<(const std::unordered_map<T, U>& val)
 		{
+			// Convert to map first to make order deterministic
 			std::map<T, U> m;
 			for (auto& kv: val) {
 				m[kv.first] = kv.second;
@@ -355,7 +357,7 @@ namespace Halley {
 		}
 
 		template <typename T, typename U>
-		Deserializer& operator>>(FlatMap<T, U>& val)
+		Deserializer& operator>>(HashMap<T, U>& val)
 		{
 			unsigned int sz;
 			*this >> sz;
