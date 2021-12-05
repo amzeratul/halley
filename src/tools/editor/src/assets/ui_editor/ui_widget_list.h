@@ -35,7 +35,7 @@ namespace Halley {
         UIFactory& factory;
         std::shared_ptr<UIDefinition> definition;
         std::shared_ptr<UITreeList> list;
-        UIEditor* uiEditor;
+        UIEditor* uiEditor = nullptr;
 
         void populateList();
 

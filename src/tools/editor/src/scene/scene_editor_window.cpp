@@ -684,12 +684,12 @@ void SceneEditorWindow::onEntitiesSelected(std::vector<String> selectedEntities)
 		if (selectedEntities.size() == 1) {
 			const auto& entityId = selectedEntities.front();
 			auto& firstEntityData = sceneData->getWriteableEntityNodeData(entityId).getData();
-			const Prefab* prefabData = nullptr;
+			std::shared_ptr<const Prefab> prefabData;
 			const String prefabName = firstEntityData.getPrefab();
 			if (!prefabName.isEmpty()) {
-				prefabData = getGamePrefab(prefabName).get();
+				prefabData = getGamePrefab(prefabName);
 			}
-			entityEditor->loadEntity(entityId, firstEntityData, prefabData, false, project.getGameResources());
+			entityEditor->loadEntity(entityId, firstEntityData, prefabData.get(), false, project.getGameResources());
 		} else {
 			entityEditor->unloadEntity(!selectedEntities.empty());
 		}

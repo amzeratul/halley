@@ -71,7 +71,7 @@ namespace Halley
 		struct AssetEntry
 		{
 			ImportAssetsDatabaseEntry asset;
-			bool present;
+			bool present = false;
 
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);

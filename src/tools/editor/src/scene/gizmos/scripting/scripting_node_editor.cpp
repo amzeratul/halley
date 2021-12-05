@@ -84,7 +84,7 @@ void ScriptingNodeEditor::applyChanges()
 	const auto nodeId = this->nodeId;
 	auto curSettings = ConfigNode(this->curSettings);
 	
-	Concurrent::execute(gizmo->getExecutionQueue(), [gizmo, nodeId, curSettings = std::move(curSettings)] () {
+	Concurrent::execute(gizmo->getExecutionQueue(), [gizmo, nodeId, curSettings = std::move(curSettings)] () mutable {
 		gizmo->getNode(nodeId).getSettings() = std::move(curSettings);
 		gizmo->getGraph().validateNodePins(nodeId);
 		gizmo->saveEntityData();

@@ -20,7 +20,7 @@ namespace Halley {
 		std::unique_ptr<IEntityData> data;
 		String entityId;
 		String parent;
-		int childIndex;
+		int childIndex = -1;
 
 		EntityChangeOperation clone() const;
         bool operator==(const EntityChangeOperation& other) const;
@@ -40,9 +40,9 @@ namespace Halley {
         explicit EntityData(UUID instanceUUID);
     	EntityData(const ConfigNode& data, bool isPrefab);
         EntityData(const EntityData& other) = default;
-    	EntityData(EntityData&& other) = default;
+    	EntityData(EntityData&& other) noexcept = default;
     	EntityData& operator=(const EntityData& other) = delete;
-    	EntityData& operator=(EntityData&& other) = default;
+    	EntityData& operator=(EntityData&& other) noexcept = default;
         explicit EntityData(const EntityDataDelta& delta);
 
     	ConfigNode toConfigNode(bool allowPrefabUUID) const;

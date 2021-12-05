@@ -65,7 +65,7 @@ EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationO
 	}
 
 	// Children
-	for (const auto child: entity.getChildren()) {
+	for (const auto& child: entity.getChildren()) {
 		if (child.isSerializable()) {
 			if (options.serializeAsStub && options.serializeAsStub(child)) {
 				// Store just a stub

@@ -41,7 +41,7 @@ namespace Halley {
 		
 		std::vector<FieldChange> fieldsChanged;
 		std::optional<std::vector<UUID>> newSelection;
-		UIList::SelectionMode selectionMode;
+		UIList::SelectionMode selectionMode = UIList::SelectionMode::Normal;
 		std::optional<UUID> mouseOver;
 
 		void clear()

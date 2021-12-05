@@ -235,7 +235,7 @@ void SceneEditorCanvas::clearInputState()
 void SceneEditorCanvas::openRightClickMenu()
 {
 	if (gameBridge && gameBridge->getMousePos() && inputState.rawMousePos) {
-		const auto& mousePos = gameBridge->getMousePos().value();
+		const auto mousePos = gameBridge->getMousePos().value();
 		const auto menuOptions = gameBridge->getSceneContextMenu(mousePos);
 
 		if (menuOptions.empty()) {

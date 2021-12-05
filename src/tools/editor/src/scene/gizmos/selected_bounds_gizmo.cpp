@@ -75,7 +75,7 @@ void SelectedBoundsGizmo::drawStencilTree(Painter& painter, EntityRef entity, co
 			drawStencilSprite(painter, sprite->sprite);
 		}
 	}
-	for (const auto c: entity.getChildren()) {
+	for (const auto& c: entity.getChildren()) {
 		drawStencilTree(painter, c, sceneEditor);
 	}
 }
@@ -87,7 +87,7 @@ void SelectedBoundsGizmo::drawOutlineTree(Painter& painter, EntityRef entity, co
 			drawOutlineSprite(painter, sprite->sprite, width, colour);
 		}
 	}
-	for (const auto c: entity.getChildren()) {
+	for (const auto& c: entity.getChildren()) {
 		drawOutlineTree(painter, c, sceneEditor, width, colour);
 	}
 }

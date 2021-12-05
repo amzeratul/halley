@@ -28,7 +28,7 @@ namespace Halley
 		Metadata origMetadata;
 		Metadata effectiveMetadata;
 		Project* project = nullptr;
-		AssetType assetType;
+		AssetType assetType = AssetType::BinaryFile;
 		Path filePath;
 		bool changed = false;
 

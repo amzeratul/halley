@@ -57,9 +57,9 @@ namespace Halley {
 		explicit Polygon(const ConfigNode& node);
 
 		Polygon(const Polygon& other) = default;
-		Polygon(Polygon&& other) = default;
+		Polygon(Polygon&& other) noexcept = default;
 		Polygon& operator=(const Polygon& other) = default;
-		Polygon& operator=(Polygon&& other) = default;
+		Polygon& operator=(Polygon&& other) noexcept = default;
 
 		static Polygon makePolygon(Vector2f origin, float w, float h);
 
@@ -122,11 +122,11 @@ namespace Halley {
 	private:
 		Circle circle;
 		VertexList vertices;
-		Rect4f aabb;
 		bool convex = false;
 		bool clockwise = false;
 		bool valid = false;
 		float area = 0;
+		Rect4f aabb;
 
 		bool isPointInsideConvex(Vector2f point) const;
 		bool isPointInsideConcave(Vector2f point) const;

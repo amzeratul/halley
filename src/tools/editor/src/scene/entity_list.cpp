@@ -158,7 +158,7 @@ void EntityList::onEntityModified(const String& id, const EntityData& node)
 
 void EntityList::onEntityModified(const String& id, const EntityData& node, bool onlyRefreshValidation)
 {
-	const auto info = getEntityInfo(node);
+	auto info = getEntityInfo(node);
 	const bool validationChanged = markValid(node.getInstanceUUID(), info.valid);
 	if (validationChanged || !onlyRefreshValidation) {
 		list->setLabel(id, LocalisedString::fromUserString(info.name), std::move(info.icon));
