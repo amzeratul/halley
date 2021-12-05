@@ -1,6 +1,7 @@
 #include "prefab.h"
 
 #include "entity_data_delta.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/resources/resource_data.h"
 

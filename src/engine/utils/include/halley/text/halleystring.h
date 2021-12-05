@@ -23,10 +23,8 @@
 #pragma once
 
 #include <string>
-#include <sstream>
 #include <halley/data_structures/vector.h>
 #include <gsl/gsl_assert>
-#include <iomanip>
 #include <cstdint>
 #include <limits>
 

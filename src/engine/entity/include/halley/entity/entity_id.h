@@ -1,8 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include "halley/text/halleystring.h"
-#include "halley/text/string_converter.h"
 #include "halley/bytes/config_node_serializer.h"
 
 namespace Halley {
@@ -10,12 +8,9 @@ namespace Halley {
 		int64_t value;
 
 		EntityId() : value(-1) {}
-		
-		explicit EntityId(const String& str)
-		{
-			value = str.toInteger64();
-		}
-		
+
+		explicit EntityId(const String& str);
+
 		bool isValid() const { return value != -1; }
 		bool operator==(const EntityId& other) const { return value == other.value; }
 		bool operator!=(const EntityId& other) const { return value != other.value; }
@@ -24,11 +19,7 @@ namespace Halley {
 		bool operator<=(const EntityId& other) const { return value <= other.value; }
 		bool operator>=(const EntityId& other) const { return value >= other.value; }
 
-		String toString() const
-		{
-			return Halley::toString(value);
-		}
-
+		String toString() const;
 		static String toUUID(const EntityId& id, const ConfigNodeSerializationContext& context);
 		static EntityId fromUUID(const String& uuidStr, const ConfigNodeSerializationContext& context);
 	};

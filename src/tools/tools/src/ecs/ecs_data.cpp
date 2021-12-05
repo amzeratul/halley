@@ -2,6 +2,8 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include "halley/support/exception.h"
+#include "halley/text/string_converter.h"
 #include "halley/tools/ecs/system_message_schema.h"
 using namespace Halley;
 

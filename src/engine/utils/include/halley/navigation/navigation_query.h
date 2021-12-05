@@ -1,7 +1,7 @@
 #pragma once
 
 #include "halley/data_structures/config_node.h"
-#include "halley/text/string_converter.h"
+#include "halley/text/enum_names.h"
 
 namespace Halley {
 	class NavigationQuery {

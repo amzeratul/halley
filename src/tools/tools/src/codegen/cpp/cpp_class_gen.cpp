@@ -1,6 +1,8 @@
 #include <halley/support/exception.h>
 #include "cpp_class_gen.h"
 
+#include "halley/text/string_converter.h"
+
 using namespace Halley;
 
 CPPClassGenerator::CPPClassGenerator(String name)

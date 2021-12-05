@@ -1,11 +1,13 @@
 #pragma once
 
 #include <array>
-#include <halley/text/string_converter.h>
-#include <halley/bytes/byte_serializer.h>
+#include "halley/text/enum_names.h"
 
 namespace Halley
 {
+	class Deserializer;
+	class Serializer;
+
 	enum class BlendMode {
 		Undefined,
 		Opaque,
@@ -41,41 +43,15 @@ namespace Halley
 		bool premultiplied = false;
 
 		BlendType() = default;
-		BlendType(BlendMode mode, bool premultiplied = false) : mode(mode), premultiplied(premultiplied) {}
+		BlendType(BlendMode mode, bool premultiplied = false);
 
-		bool operator==(const BlendType& other) const
-		{
-			return mode == other.mode && premultiplied == other.premultiplied;
-		}
+		bool operator==(const BlendType& other) const;
+		bool operator!=(const BlendType& other) const;
+		bool operator<(const BlendType& other) const;
 
-		bool operator!=(const BlendType& other) const
-		{
-			return mode != other.mode && premultiplied != other.premultiplied;
-		}
+		bool hasBlend() const;
 
-		bool operator<(const BlendType& other) const
-		{
-			if (mode != other.mode) {
-				return mode < other.mode;
-			}
-			return premultiplied < other.premultiplied;
-		}
-
-		bool hasBlend() const
-		{
-			return mode != BlendMode::Undefined && mode != BlendMode::Opaque;
-		}
-
-		void serialize(Serializer& s) const
-		{
-			s << mode;
-			s << premultiplied;
-		}
-
-		void deserialize(Deserializer& s)
-		{
-			s >> mode;
-			s >> premultiplied;
-		}
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 	};
 }

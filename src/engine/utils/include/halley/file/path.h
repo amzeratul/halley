@@ -2,7 +2,6 @@
 
 #include "halley/text/halleystring.h"
 #include "halley/utils/utils.h"
-#include <iostream>
 #include <gsl/span>
 
 namespace Halley
@@ -76,6 +75,4 @@ namespace Halley
 	};
 
 	using TimestampedPath = std::pair<Path, int64_t>;
-
-	std::ostream& operator<<(std::ostream& os, const Path& p);
 }

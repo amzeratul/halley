@@ -127,6 +127,7 @@ set(HEADERS
         "include/halley/file/directory_monitor.h"
         "include/halley/file/path.h"
         
+        "src/file_formats/config_file_serialization_state.h"
         "include/halley/file_formats/binary_file.h"
         "include/halley/file_formats/config_file.h"
         "include/halley/file_formats/halley-yamlcpp.h"
@@ -191,6 +192,7 @@ set(HEADERS
         "include/halley/support/redirect_stream.h"
 
         "include/halley/text/encode.h"
+        "include/halley/text/enum_names.h"
         "include/halley/text/fuzzy_text_matcher.h"
         "include/halley/text/halleystring.h"
         "include/halley/text/halleystring.natvis"
@@ -205,6 +207,7 @@ set(HEADERS
         "include/halley/utils/attributes.h"
         "include/halley/utils/encrypt.h"
         "include/halley/utils/hash.h"
+        "include/halley/utils/halley_iostream.h"
         "include/halley/utils/type_traits.h"
         "include/halley/utils/utils.h"
         "include/halley/utils/variable.h"
