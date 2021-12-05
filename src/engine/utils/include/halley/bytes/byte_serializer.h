@@ -148,16 +148,6 @@ namespace Halley {
 			return *this;
 		}
 
-		template <typename K, typename V>
-		Serializer& operator<<(const HashMap<K, V>& val)
-		{
-			*this << static_cast<unsigned int>(val.size());
-			for (auto& kv : val) {
-				*this << kv.first << kv.second;
-			}
-			return *this;
-		}
-
 		template <typename T, typename U>
 		Serializer& operator<<(const std::unordered_map<T, U>& val)
 		{
@@ -376,22 +366,6 @@ namespace Halley {
 				*this >> tmpData[i].first >> tmpData[i].second;
 			}
 			val = FlatMap<T, U>(tmpData.begin(), tmpData.end());
-			return *this;
-		}
-
-		template <typename T, typename U>
-		Deserializer& operator>>(HashMap<T, U>& val)
-		{
-			unsigned int sz;
-			*this >> sz;
-			ensureSufficientBytesRemaining(sz * 2); // Expect at least two bytes per map entry
-
-			for (unsigned int i = 0; i < sz; i++) {
-				T key;
-				U value;
-				*this >> key >> value;
-				val[key] = std::move(value);
-			}
 			return *this;
 		}
 
