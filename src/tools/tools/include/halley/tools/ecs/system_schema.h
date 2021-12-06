@@ -2,7 +2,8 @@
 
 #include <halley/text/halleystring.h>
 #include <halley/data_structures/vector.h>
-#include <unordered_set>
+
+#include "halley/data_structures/hash_map.h"
 
 namespace YAML
 {
@@ -84,7 +85,7 @@ namespace Halley
 		int smearing = 0;
 		bool generate = false;
 
-		std::unordered_set<String> includeFiles;
+		HashSet<String> includeFiles;
 
 		Vector<FamilySchema> families;
 		Vector<MessageReferenceSchema> messages;

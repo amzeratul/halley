@@ -48,7 +48,7 @@ class MaskStorage
 {
 public:
 	Vector<MaskEntry*> values;
-	std::unordered_set<MaskEntry> entries;
+	std::unordered_set<MaskEntry> entries; // This can't be a container that invalidates iterators on re-hash
 
 	int getHandle(const RealType& value)
 	{
