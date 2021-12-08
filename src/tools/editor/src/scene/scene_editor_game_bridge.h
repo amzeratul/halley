@@ -1,5 +1,5 @@
 #pragma once
-#include "choose_asset_window.h"
+#include "choose_window.h"
 #include "halley/core/game/scene_editor_interface.h"
 #include "halley/tools/dll/dynamic_library.h"
 

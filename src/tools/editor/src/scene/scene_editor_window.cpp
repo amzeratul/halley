@@ -1,5 +1,5 @@
 #include "scene_editor_window.h"
-#include "choose_asset_window.h"
+#include "choose_window.h"
 #include "entity_editor.h"
 #include "entity_icons.h"
 #include "entity_list.h"

@@ -31,7 +31,7 @@ set (editor_sources
 	
 	"src/project/core_api_wrapper.cpp"
 
-	"src/scene/choose_asset_window.cpp"
+	"src/scene/choose_window.cpp"
 	"src/scene/entity_editor.cpp"
 	"src/scene/entity_editor_factories.cpp"
 	"src/scene/entity_icons.cpp"
@@ -95,7 +95,7 @@ set (editor_headers
 
 	"src/project/core_api_wrapper.h"
 
-	"src/scene/choose_asset_window.h"
+	"src/scene/choose_window.h"
 	"src/scene/entity_editor.h"
 	"src/scene/entity_editor_factories.h"
 	"src/scene/entity_icons.h"

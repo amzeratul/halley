@@ -1,6 +1,6 @@
 #pragma once
 
-#include "src/scene/choose_asset_window.h"
+#include "src/scene/choose_window.h"
 
 namespace Halley {
 	class ScriptingChooseNode final : public ChooseAssetWindow {

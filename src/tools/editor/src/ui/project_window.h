@@ -7,7 +7,7 @@
 #include "halley/tools/project/project.h"
 #include "src/assets/assets_browser.h"
 #include "src/scene/entity_editor.h"
-#include "src/scene/choose_asset_window.h"
+#include "src/scene/choose_window.h"
 
 namespace Halley {
     class UIFactory;

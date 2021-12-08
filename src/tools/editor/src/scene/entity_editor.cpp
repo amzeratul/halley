@@ -1,6 +1,6 @@
 #include "entity_editor.h"
 
-#include "choose_asset_window.h"
+#include "choose_window.h"
 #include "entity_editor_factories.h"
 #include "entity_validator_ui.h"
 #include "halley/tools/ecs/ecs_data.h"

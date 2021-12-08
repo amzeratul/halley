@@ -4,7 +4,7 @@
 #include "ui_widget_editor.h"
 #include "ui_widget_list.h"
 #include "halley/tools/project/project.h"
-#include "src/scene/choose_asset_window.h"
+#include "src/scene/choose_window.h"
 using namespace Halley;
 
 UIEditor::UIEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow, const HalleyAPI& api)

@@ -2,7 +2,7 @@
 
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/widgets/ui_textinput.h"
-#include "src/scene/choose_asset_window.h"
+#include "src/scene/choose_window.h"
 #include "src/ui/project_window.h"
 using namespace Halley;
 

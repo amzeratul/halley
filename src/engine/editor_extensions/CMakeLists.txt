@@ -4,6 +4,7 @@ include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/editor_extens
 
 set(SOURCES
         "src/asset_preview_generator.cpp"
+        "src/choose_asset_window.cpp"
         "src/component_editor_context.cpp"
         "src/component_field_parameters.cpp"
         "src/entity_validator.cpp"
@@ -19,6 +20,7 @@ set(HEADERS
         "include/halley/editor_extensions/halley_editor_extensions.h"
 
         "include/halley/editor_extensions/asset_preview_generator.h"
+        "include/halley/editor_extensions/choose_asset_window.h"
         "include/halley/editor_extensions/component_editor_context.h"
         "include/halley/editor_extensions/component_field_parameters.h"
         "include/halley/editor_extensions/editor_custom_tools_interface.h"

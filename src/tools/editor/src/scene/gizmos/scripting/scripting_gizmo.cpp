@@ -8,7 +8,7 @@
 #include "scripting_gizmo_toolbar.h"
 #include "scripting_node_editor.h"
 #include "halley/entity/components/transform_2d_component.h"
-#include "src/scene/choose_asset_window.h"
+#include "src/scene/choose_window.h"
 
 using namespace Halley;
 
