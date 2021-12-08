@@ -45,17 +45,13 @@ void SceneEditorCanvas::update(Time t, bool moved)
 	notifyOutputState();
 	clearInputState();
 
-	surface->setSize(Vector2i(getSize()) - Vector2i(2, 2));
+	surface->setSize(getCanvasSize());
 }
 
 void SceneEditorCanvas::draw(UIPainter& painter) const
 {
 	const auto pos = getPosition();
 	const auto size = getSize();
-	painter.draw(border.clone().setPos(pos).setSize(Vector2f(size.x, 1)), true);
-	painter.draw(border.clone().setPos(pos + Vector2f(0, size.y - 1)).setSize(Vector2f(size.x, 1)), true);
-	painter.draw(border.clone().setPos(pos).setSize(Vector2f(1, size.y)), true);
-	painter.draw(border.clone().setPos(pos + Vector2f(size.x - 1, 0)).setSize(Vector2f(1, size.y)), true);
 
 	Sprite canvas;
 
@@ -65,9 +61,14 @@ void SceneEditorCanvas::draw(UIPainter& painter) const
 		canvas.setImage(resources, "whitebox.png").setColour(Colour4f(0.2f, 0.2f, 0.2f));
 	}
 
-	canvas.setPos(getPosition() + Vector2f(1, 1)).setSize(getSize() - Vector2f(2, 2));
+	canvas.setPos(getPosition() + Vector2f(1, 1)).setSize(Vector2f(getCanvasSize()));
 
 	painter.draw(canvas, true);
+
+	painter.draw(border.clone().setPos(pos).setSize(Vector2f(size.x, 1)), true);
+	painter.draw(border.clone().setPos(pos + Vector2f(0, size.y - 1)).setSize(Vector2f(size.x, 1)), true);
+	painter.draw(border.clone().setPos(pos).setSize(Vector2f(1, size.y)), true);
+	painter.draw(border.clone().setPos(pos + Vector2f(size.x - 1, 0)).setSize(Vector2f(1, size.y)), true);
 }
 
 void SceneEditorCanvas::render(RenderContext& rc) const
@@ -259,4 +260,11 @@ void SceneEditorCanvas::openRightClickMenu()
 
 		menu->spawnOnRoot(*getRoot());
 	}
+}
+
+Vector2i SceneEditorCanvas::getCanvasSize() const
+{
+	auto size = Vector2i(getSize()) - Vector2i(2, 2);
+	size += size.modulo(Vector2i(2, 2)); // Make even
+	return size;
 }

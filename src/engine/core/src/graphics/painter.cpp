@@ -509,12 +509,6 @@ void Painter::setClip()
 Rect4i Painter::getRectangleForActiveRenderTarget(Rect4i r)
 {
 	Expects(activeRenderTarget);
-	if (r.getWidth() % 2 == 1) {
-		r = r.grow(0, 0, 1, 0);
-	}
-	if (r.getHeight() % 2 == 1) {
-		r = r.grow(0, 0, 0, 1);
-	}
 	int h = activeRenderTarget->getViewPort().getHeight();
 	if (activeRenderTarget->getViewportFlipVertical()) {
 		int y = h - r.getBottom();
