@@ -393,7 +393,7 @@ void Project::loadGameResources(const HalleyAPI& api)
 		locator->addFileSystem(getUnpackedAssetsPath());
 	} catch (...) {}
 
-	gameResources = std::make_unique<Resources>(std::move(locator), api, Resources::Options(true));
+	gameResources = std::make_unique<Resources>(std::move(locator), api, ResourceOptions(true));
 	StandardResources::initialize(*gameResources);
 }
 

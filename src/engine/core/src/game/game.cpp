@@ -9,7 +9,7 @@ Game::~Game() = default;
 void Game::init(const Environment&, const Vector<String>&)
 {}
 
-Resources::Options Game::initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator)
+ResourceOptions Game::initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator)
 {
 	return {};
 }

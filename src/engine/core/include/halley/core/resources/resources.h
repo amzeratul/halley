@@ -37,16 +37,7 @@ namespace Halley {
 		friend class ResourceCollectionBase;
 
 	public:
-		struct Options {
-			bool retainPixelData = false;
-
-			Options() = default;
-			Options(bool retainPixelData)
-				: retainPixelData(retainPixelData)
-			{}
-		};
-		
-		Resources(std::unique_ptr<ResourceLocator> locator, const HalleyAPI& api, Options options);
+		Resources(std::unique_ptr<ResourceLocator> locator, const HalleyAPI& api, ResourceOptions options);
 		~Resources();
 
 		template <typename T>
@@ -113,12 +104,12 @@ namespace Halley {
 		void reloadAssets(const std::vector<String>& ids); // ids are in "type:name" format
 		void reloadAssets(const std::map<AssetType, std::vector<String>>& byType);
 
-		const Options& getOptions() const { return options; }
+		const ResourceOptions& getOptions() const { return options; }
 
 	private:
 		const std::unique_ptr<ResourceLocator> locator;
 		Vector<std::unique_ptr<ResourceCollectionBase>> resources;
 		const HalleyAPI* const api;
-		Options options;
+		ResourceOptions options;
 	};
 }

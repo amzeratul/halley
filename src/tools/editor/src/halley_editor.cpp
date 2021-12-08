@@ -42,10 +42,10 @@ int HalleyEditor::initPlugins(IPluginRegistry &registry)
 	return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input | HalleyAPIFlags::Network;
 }
 
-Resources::Options HalleyEditor::initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator)
+ResourceOptions HalleyEditor::initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator)
 {
 	locator.addFileSystem(unpackedAssetsPath);
-	return Resources::Options(true);
+	return ResourceOptions(true);
 }
 
 String HalleyEditor::getName() const

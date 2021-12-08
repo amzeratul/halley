@@ -39,7 +39,7 @@ int HalleyLauncher::initPlugins(IPluginRegistry& registry)
 	return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input | HalleyAPIFlags::Network;
 }
 
-Resources::Options HalleyLauncher::initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator)
+ResourceOptions HalleyLauncher::initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator)
 {
 	locator.addFileSystem(unpackedAssetsPath);
 	return {};
