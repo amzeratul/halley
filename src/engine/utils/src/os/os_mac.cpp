@@ -28,6 +28,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <mach-o/dyld.h>
+#include "halley/utils/halley_iostream.h"
 
 using namespace Halley;
 
