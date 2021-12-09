@@ -1,5 +1,6 @@
 #include "metal_shader.h"
 #include "metal_video.h"
+#include <iostream>
 
 using namespace Halley;
 
