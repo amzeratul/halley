@@ -123,6 +123,16 @@ double Random::getDouble(double min, double max)
 	return getRawDouble() * (max - min) + min;
 }
 
+int32_t Random::get(int32_t min, int32_t max)
+{
+	return getInt(min, max - 1);
+}
+
+float Random::get(float min, float max)
+{
+	return getFloat(min, max);
+}
+
 Random& Random::getGlobal()
 {
 	static Random* global = nullptr;

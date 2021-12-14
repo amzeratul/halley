@@ -72,6 +72,78 @@ namespace Halley
 		return *(begin + rng.getSizeT(decltype(size)(0), size - 1));
 	}
 
+	template<typename Iter, typename W, typename R>
+	auto pickRandomWeighted(Iter begin, Iter end, W weightFunc, R& rng) -> Iter
+	{
+		using WeightType = decltype(weightFunc(*begin));
+		WeightType totalWeight = 0;
+
+		for (Iter iter = begin; iter != end; ++iter) {
+			totalWeight += weightFunc(*iter);
+		}
+	
+		if (totalWeight == 0) {
+			return end;
+		}
+
+		const WeightType pick = rng.get(0, totalWeight);
+		assert(pick >= 0 && pick < totalWeight);
+		WeightType accum = 0;
+		for (Iter iter = begin; iter != end; ) {
+			accum += weightFunc(*iter);
+			if (accum > pick) {
+				return iter;
+			}
+
+			auto next = ++iter;
+			if (next == end) {
+				return iter;
+			}
+			iter = next;
+		}
+
+		return end;
+	}
+
+	template<typename Iter, typename W, typename R>
+	auto pickRandomWeightedOneCall(Iter begin, Iter end, W weightFunc, R& rng) -> Iter
+	{
+		using WeightType = decltype(weightFunc(*begin));
+		const size_t n = end - begin;
+
+		WeightType totalWeight = 0;
+		std::vector<WeightType> weights;
+		weights.reserve(n);
+
+		for (Iter iter = begin; iter != end; ++iter) {
+			const auto w = weightFunc(*iter);
+			weights[iter - begin] = w;
+			totalWeight += w;
+		}
+	
+		if (totalWeight == 0) {
+			return end;
+		}
+
+		const WeightType pick = rng.get(0, totalWeight);
+		assert(pick >= 0 && pick < totalWeight);
+		WeightType accum = 0;
+		for (Iter iter = begin; iter != end; ) {
+			accum += weights[iter - begin];
+			if (accum > pick) {
+				return iter;
+			}
+
+			auto next = ++iter;
+			if (next == end) {
+				return iter;
+			}
+			iter = next;
+		}
+
+		return end;
+	}
+
 	template<typename Iter, typename R>
 	void shuffle(Iter begin, Iter end, R& rng)
 	{
