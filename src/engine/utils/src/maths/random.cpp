@@ -125,12 +125,20 @@ double Random::getDouble(double min, double max)
 
 int32_t Random::get(int32_t min, int32_t max)
 {
-	return getInt(min, max - 1);
+	Expects(max >= min);
+	const auto value = getInt(min, max - 1);
+	Ensures(value >= min);
+	Ensures(value < max);
+	return value;
 }
 
 float Random::get(float min, float max)
 {
-	return getFloat(min, max);
+	Expects(max >= min);
+	const auto value = getFloat(min, max);
+	Ensures(value >= min);
+	Ensures(value < max);
+	return value;
 }
 
 Random& Random::getGlobal()

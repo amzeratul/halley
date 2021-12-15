@@ -82,12 +82,11 @@ namespace Halley
 			totalWeight += weightFunc(*iter);
 		}
 	
-		if (totalWeight == 0) {
+		if (totalWeight <= 0) {
 			return end;
 		}
 
 		const WeightType pick = rng.get(0, totalWeight);
-		assert(pick >= 0 && pick < totalWeight);
 		WeightType accum = 0;
 		for (Iter iter = begin; iter != end; ) {
 			accum += weightFunc(*iter);
@@ -121,12 +120,11 @@ namespace Halley
 			totalWeight += w;
 		}
 	
-		if (totalWeight == 0) {
+		if (totalWeight <= 0) {
 			return end;
 		}
 
 		const WeightType pick = rng.get(0, totalWeight);
-		assert(pick >= 0 && pick < totalWeight);
 		WeightType accum = 0;
 		for (Iter iter = begin; iter != end; ) {
 			accum += weights[iter - begin];
