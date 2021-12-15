@@ -72,14 +72,30 @@ namespace Halley
 		return *(begin + rng.getSizeT(decltype(size)(0), size - 1));
 	}
 
-	template<typename Iter, typename W, typename R>
-	auto pickRandomWeighted(Iter begin, Iter end, W weightFunc, R& rng) -> Iter
+	template <typename T>
+	struct DeReference {
+		auto operator()(T& v) -> decltype(*T())
+		{
+			return *v;
+		}
+	};
+
+	template <typename T>
+	struct DontDeReference {
+		T& operator()(T& v)
+		{
+			return v;
+		}
+	};
+
+	template<typename Iter, typename W, typename R, typename F>
+	auto pickRandomWeighted(Iter begin, Iter end, W weightFunc, R& rng, F deRefFunc) -> Iter
 	{
-		using WeightType = decltype(weightFunc(*begin));
+		using WeightType = decltype(weightFunc(deRefFunc(begin)));
 		WeightType totalWeight = 0;
 
 		for (Iter iter = begin; iter != end; ++iter) {
-			totalWeight += weightFunc(*iter);
+			totalWeight += weightFunc(deRefFunc(iter));
 		}
 	
 		if (totalWeight <= 0) {
@@ -89,7 +105,7 @@ namespace Halley
 		const WeightType pick = rng.get(0, totalWeight);
 		WeightType accum = 0;
 		for (Iter iter = begin; iter != end; ) {
-			accum += weightFunc(*iter);
+			accum += weightFunc(deRefFunc(iter));
 			if (accum > pick) {
 				return iter;
 			}
@@ -104,18 +120,18 @@ namespace Halley
 		return end;
 	}
 
-	template<typename Iter, typename W, typename R>
-	auto pickRandomWeightedOneCall(Iter begin, Iter end, W weightFunc, R& rng) -> Iter
+	template<typename Iter, typename W, typename R, typename F>
+	auto pickRandomWeightedOneCall(Iter begin, Iter end, W weightFunc, R& rng, F deRefFunc) -> Iter
 	{
-		using WeightType = decltype(weightFunc(*begin));
-		const size_t n = end - begin;
+		using WeightType = decltype(weightFunc(deRefFunc(begin)));
+		const size_t n = static_cast<size_t>(end - begin);
 
 		WeightType totalWeight = 0;
 		std::vector<WeightType> weights;
-		weights.reserve(n);
+		weights.resize(n);
 
 		for (Iter iter = begin; iter != end; ++iter) {
-			const auto w = weightFunc(*iter);
+			const auto w = weightFunc(deRefFunc(iter));
 			weights[iter - begin] = w;
 			totalWeight += w;
 		}
@@ -140,6 +156,18 @@ namespace Halley
 		}
 
 		return end;
+	}
+
+	template<typename Iter, typename W, typename R>
+	auto pickRandomWeighted(Iter begin, Iter end, W weightFunc, R& rng)
+	{
+		return pickRandomWeighted(begin, end, weightFunc, rng, DeReference<Iter>());
+	}
+
+	template<typename Iter, typename W, typename R>
+	auto pickRandomWeightedOneCall(Iter begin, Iter end, W weightFunc, R& rng)
+	{
+		return pickRandomWeightedOneCall(begin, end, weightFunc, rng, DeReference<Iter>());
 	}
 
 	template<typename Iter, typename R>
