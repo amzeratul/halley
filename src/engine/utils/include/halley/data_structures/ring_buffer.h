@@ -93,7 +93,8 @@ namespace Halley {
     	T readOne()
     	{
             Expects(canRead(1));
-            T v = entries[readPos];
+            T v = std::move(entries[readPos]);
+    		entries[readPos] = T();
             readPos = (readPos + 1) % entries.size();
             --numEntries;
             return v;
@@ -108,11 +109,13 @@ namespace Halley {
 
             for (size_t i = 0; i < nToRead1; ++i) {
                 es[i] = std::move(entries[readPos + i]);
+            	entries[readPos + i] = T();
             }
 
             const size_t nToRead2 = numToRead - nToRead1;
             for (size_t i = 0; i < nToRead2; ++i) {
                 es[i + nToRead1] = std::move(entries[i]);
+            	entries[i] = T();
             }
 
             readPos = (readPos + numToRead) % entries.size();
