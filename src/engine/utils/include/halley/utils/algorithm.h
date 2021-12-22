@@ -72,6 +72,104 @@ namespace Halley
 		return *(begin + rng.getSizeT(decltype(size)(0), size - 1));
 	}
 
+	template <typename T>
+	struct DeReference {
+		auto operator()(T& v) -> decltype(*T())
+		{
+			return *v;
+		}
+	};
+
+	template <typename T>
+	struct DontDeReference {
+		T& operator()(T& v)
+		{
+			return v;
+		}
+	};
+
+	template<typename Iter, typename W, typename R, typename F>
+	auto pickRandomWeighted(Iter begin, Iter end, W weightFunc, R& rng, F deRefFunc) -> Iter
+	{
+		using WeightType = decltype(weightFunc(deRefFunc(begin)));
+		WeightType totalWeight = 0;
+
+		for (Iter iter = begin; iter != end; ++iter) {
+			totalWeight += weightFunc(deRefFunc(iter));
+		}
+	
+		if (totalWeight <= 0) {
+			return end;
+		}
+
+		const WeightType pick = rng.get(0, totalWeight);
+		WeightType accum = 0;
+		for (Iter iter = begin; iter != end; ) {
+			accum += weightFunc(deRefFunc(iter));
+			if (accum > pick) {
+				return iter;
+			}
+
+			auto next = ++iter;
+			if (next == end) {
+				return iter;
+			}
+			iter = next;
+		}
+
+		return end;
+	}
+
+	template<typename Iter, typename W, typename R, typename F>
+	auto pickRandomWeightedOneCall(Iter begin, Iter end, W weightFunc, R& rng, F deRefFunc) -> Iter
+	{
+		using WeightType = decltype(weightFunc(deRefFunc(begin)));
+		const size_t n = static_cast<size_t>(end - begin);
+
+		WeightType totalWeight = 0;
+		std::vector<WeightType> weights;
+		weights.resize(n);
+
+		for (Iter iter = begin; iter != end; ++iter) {
+			const auto w = weightFunc(deRefFunc(iter));
+			weights[iter - begin] = w;
+			totalWeight += w;
+		}
+	
+		if (totalWeight <= 0) {
+			return end;
+		}
+
+		const WeightType pick = rng.get(0, totalWeight);
+		WeightType accum = 0;
+		for (Iter iter = begin; iter != end; ) {
+			accum += weights[iter - begin];
+			if (accum > pick) {
+				return iter;
+			}
+
+			auto next = ++iter;
+			if (next == end) {
+				return iter;
+			}
+			iter = next;
+		}
+
+		return end;
+	}
+
+	template<typename Iter, typename W, typename R>
+	auto pickRandomWeighted(Iter begin, Iter end, W weightFunc, R& rng)
+	{
+		return pickRandomWeighted(begin, end, weightFunc, rng, DeReference<Iter>());
+	}
+
+	template<typename Iter, typename W, typename R>
+	auto pickRandomWeightedOneCall(Iter begin, Iter end, W weightFunc, R& rng)
+	{
+		return pickRandomWeightedOneCall(begin, end, weightFunc, rng, DeReference<Iter>());
+	}
+
 	template<typename Iter, typename R>
 	void shuffle(Iter begin, Iter end, R& rng)
 	{

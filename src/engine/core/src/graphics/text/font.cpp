@@ -6,6 +6,7 @@
 #include "halley/bytes/byte_serializer.h"
 #include "resources/resources.h"
 #include "halley/text/string_converter.h"
+#include <iostream>
 
 using namespace Halley;
 

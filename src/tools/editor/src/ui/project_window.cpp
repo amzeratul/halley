@@ -13,7 +13,7 @@
 #include "src/editor_root_stage.h"
 #include "src/halley_editor.h"
 #include "src/assets/assets_browser.h"
-#include "src/scene/choose_asset_window.h"
+#include "src/scene/choose_window.h"
 #include "src/scene/scene_editor_window.h"
 #include "src/ui/editor_ui_factory.h"
 

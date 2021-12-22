@@ -148,17 +148,6 @@ namespace Halley {
 			return *this;
 		}
 
-		template <typename T, typename U>
-		Serializer& operator<<(const std::unordered_map<T, U>& val)
-		{
-			// Convert to map first to make order deterministic
-			std::map<T, U> m;
-			for (auto& kv: val) {
-				m[kv.first] = kv.second;
-			}
-			return (*this << m);
-		}
-
 		template <typename T>
 		Serializer& operator<<(const std::set<T>& val)
 		{
@@ -362,11 +351,14 @@ namespace Halley {
 			*this >> sz;
 			ensureSufficientBytesRemaining(sz * 2); // Expect at least two bytes per map entry
 
-			std::vector<std::pair<T, U>> tmpData(sz);
+			val.clear();
+			val.reserve(sz);
 			for (unsigned int i = 0; i < sz; i++) {
-				*this >> tmpData[i].first >> tmpData[i].second;
+				T key;
+				U value;
+				*this >> key >> value;
+				val[key] = std::move(value);
 			}
-			val = FlatMap<T, U>(tmpData.begin(), tmpData.end());
 			return *this;
 		}
 
@@ -380,22 +372,6 @@ namespace Halley {
 			for (unsigned int i = 0; i < sz; i++) {
 				K key;
 				V value;
-				*this >> key >> value;
-				val[key] = std::move(value);
-			}
-			return *this;
-		}
-
-		template <typename T, typename U>
-		Deserializer& operator >> (std::unordered_map<T, U>& val)
-		{
-			unsigned int sz;
-			*this >> sz;
-			ensureSufficientBytesRemaining(sz * 2); // Expect at least two bytes per map entry
-
-			for (unsigned int i = 0; i < sz; i++) {
-				T key;
-				U value;
 				*this >> key >> value;
 				val[key] = std::move(value);
 			}

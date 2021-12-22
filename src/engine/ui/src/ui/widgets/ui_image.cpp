@@ -39,7 +39,7 @@ void UIImage::update(Time t, bool moved)
 		if (sprite.getClip()) {
 			auto c = sprite.getClip().value();
 			basePos -= c.getTopLeft();
-			imgBaseSize = std::min(c.getSize(), imgBaseSize);
+			imgBaseSize = Vector2f::min(c.getSize(), imgBaseSize);
 		}
 		sprite
 			.setPos(basePos)

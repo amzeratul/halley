@@ -123,6 +123,24 @@ double Random::getDouble(double min, double max)
 	return getRawDouble() * (max - min) + min;
 }
 
+int32_t Random::get(int32_t min, int32_t max)
+{
+	Expects(max >= min);
+	const auto value = getInt(min, max - 1);
+	Ensures(value >= min);
+	Ensures(value < max);
+	return value;
+}
+
+float Random::get(float min, float max)
+{
+	Expects(max >= min);
+	const auto value = getFloat(min, max);
+	Ensures(value >= min);
+	Ensures(value < max);
+	return value;
+}
+
 Random& Random::getGlobal()
 {
 	static Random* global = nullptr;

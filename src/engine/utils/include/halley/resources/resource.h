@@ -192,4 +192,13 @@ namespace Halley
 		mutable std::condition_variable loadWait;
 		mutable std::mutex loadMutex;
 	};
+
+	struct ResourceOptions {
+		bool retainPixelData = false;
+
+		ResourceOptions() = default;
+		ResourceOptions(bool retainPixelData)
+			: retainPixelData(retainPixelData)
+		{}
+	};
 }

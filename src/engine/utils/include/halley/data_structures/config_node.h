@@ -10,6 +10,7 @@
 #include <map>
 #include <vector>
 
+#include "hash_map.h"
 #include "halley/utils/type_traits.h"
 
 #if defined(DEV_BUILD)
@@ -197,6 +198,22 @@ namespace Halley {
 			return *this = std::move(map);
 		}
 
+		template <typename K, typename V>
+		ConfigNode& operator=(const HashMap<K, V>& values)
+		{
+			MapType map;
+			for (const auto& [k, v]: values) {
+				String key = toString(k);
+
+				if constexpr (HasToConfigNode<V>::value) {
+					map[std::move(key)] = v.toConfigNode();
+				} else {
+					map[std::move(key)] = ConfigNode(v);
+				}
+			}
+			return *this = std::move(map);
+		}
+
 		bool operator==(const ConfigNode& other) const;
 		bool operator!=(const ConfigNode& other) const;
 
@@ -279,6 +296,28 @@ namespace Halley {
 				return {};
 			} else {
 				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to std::map<K, V>.", HalleyExceptions::Resources);
+			}
+		}
+
+		template <typename K, typename V>
+		HashMap<K, V> asHashMap() const
+		{
+			if (type == ConfigNodeType::Map) {
+				HashMap<K, V> result;
+				for (const auto& [k, v] : asMap()) {
+					const K key = fromString<K>(k);
+					
+					if constexpr (HasConfigNodeConstructor<V>::value) {
+						result[std::move(key)] = V(v);
+					} else {
+						result[std::move(key)] = v.convertTo(Tag<V>());
+					}
+				}
+				return result;
+			} else if (type == ConfigNodeType::Undefined) {
+				return {};
+			} else {
+				throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to HashMap<K, V>.", HalleyExceptions::Resources);
 			}
 		}
 
@@ -415,6 +454,12 @@ namespace Halley {
 		Range<float> convertTo(Tag<Range<float>> tag) const;
 		String convertTo(Tag<String> tag) const;
 		const Bytes& convertTo(Tag<Bytes&> tag) const;
+
+		template <typename T>
+		std::vector<T> convertTo(Tag<std::vector<T>> tag) const
+		{
+			return asVector<T>();
+		}
 
 		bool isNullOrEmpty() const;
 

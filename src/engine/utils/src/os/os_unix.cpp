@@ -33,6 +33,7 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include "halley/utils/halley_iostream.h"
 
 using namespace Halley;
 

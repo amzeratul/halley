@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fields_schema.h"
-#include <unordered_set>
+#include "halley/data_structures/hash_map.h"
 
 namespace YAML
 {
@@ -19,7 +19,7 @@ namespace Halley
 		int id = -1;
 		String name;
 		Vector<MemberSchema> members;
-		std::unordered_set<String> includeFiles;
+		HashSet<String> includeFiles;
 		bool generate = false;
 	};
 }

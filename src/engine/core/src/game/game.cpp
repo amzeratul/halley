@@ -9,8 +9,10 @@ Game::~Game() = default;
 void Game::init(const Environment&, const Vector<String>&)
 {}
 
-void Game::initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator)
-{}
+ResourceOptions Game::initResourceLocator(const Path& gamePath, const Path& assetsPath, const Path& unpackedAssetsPath, ResourceLocator& locator)
+{
+	return {};
+}
 
 bool Game::shouldCreateSeparateConsole() const
 {

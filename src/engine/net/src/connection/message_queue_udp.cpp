@@ -1,4 +1,5 @@
 #include "halley/net/connection/message_queue_udp.h"
+#include <iostream>
 using namespace Halley;
 
 ChannelSettings::ChannelSettings(bool reliable, bool ordered, bool keepLastSent)

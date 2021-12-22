@@ -3,6 +3,7 @@
 #include "metal_render_target.h"
 #include "metal_texture.h"
 #include "metal_video.h"
+#include <iostream>
 
 using namespace Halley;
 

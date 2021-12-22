@@ -44,6 +44,7 @@ namespace Halley {
 		Random& operator=(const Random& other) = delete;
 		Random& operator=(Random&& other) noexcept;
 
+		// NOTE THAT THIS IS INCLUSIVE ON MAX FOR INTEGER TYPES ONLY
 		int32_t getInt(int32_t min, int32_t max); // [min, max]
 		uint32_t getInt(uint32_t min, uint32_t max); // [min, max]
 		int64_t getInt(int64_t min, int64_t max); // [min, max]
@@ -51,6 +52,10 @@ namespace Halley {
 		size_t getSizeT(size_t min, size_t max); // [min, max]
 		float getFloat(float min, float max); // [min, max)
 		double getDouble(double min, double max); // [min, max)
+
+		// NOTE THAT THIS IS ALWAYS EXCLUSIVE ON MAX
+		int32_t get(int32_t min, int32_t max); // [min, max)
+		float get(float min, float max); // [min, max)
 
 		template <typename T>
 		size_t getRandomIndex(const T& vec)

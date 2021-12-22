@@ -57,5 +57,7 @@ namespace Halley {
 		void clearInputState();
 
 		void openRightClickMenu();
+
+		Vector2i getCanvasSize() const;
 	};
 }

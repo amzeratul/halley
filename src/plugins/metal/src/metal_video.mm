@@ -7,6 +7,7 @@
 #include <halley/core/graphics/texture.h>
 #include <halley/core/graphics/shader.h>
 #include <SDL2/SDL.h>
+#include <iostream>
 
 using namespace Halley;
 
