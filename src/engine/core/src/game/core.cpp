@@ -22,6 +22,7 @@
 #include "halley/core/devcon/devcon_client.h"
 #include "halley/net/connection/network_service.h"
 #include "halley/support/profiler.h"
+#include "halley/utils/algorithm.h"
 #include "halley/utils/halley_iostream.h"
 
 #ifdef _MSC_VER
@@ -341,10 +342,10 @@ void Core::onFixedUpdate(Time time)
 
 void Core::onTick(Time time)
 {
-	const bool record = false;
-	const bool capture = false;
-	
-	ProfileCapture::get().startFrame(record);
+	const bool record = !profileCallbacks.empty();
+
+	auto& capture = ProfileCapture::get();
+	capture.startFrame(record);
 	
 	if (api->system) {
 		api->systemInternal->onTickMainLoop();
@@ -363,7 +364,10 @@ void Core::onTick(Time time)
 		doRender(time);
 	}
 
-	ProfileCapture::get().endFrame(capture);
+	capture.endFrame();
+	if (record && capture.getFrameTime() >= getProfileCaptureThreshold()) {
+		onProfileData(std::make_shared<ProfilerData>(capture.getCapture()));
+	}
 }
 
 void Core::doFixedUpdate(Time time)
@@ -598,4 +602,32 @@ void IHalleyEntryPoint::initSharedStatics(const HalleyStatics& parent)
 {
 	static HalleyStatics statics(parent);
 	statics.setupGlobals();
+}
+
+void Core::onProfileData(std::shared_ptr<ProfilerData> data)
+{
+	for (auto* c: profileCallbacks) {
+		c->onData(data);
+	}
+}
+
+Time Core::getProfileCaptureThreshold() const
+{
+	Time t = std::numeric_limits<Time>::infinity();
+	for (const auto* c: profileCallbacks) {
+		t = std::min(t, c->getThreshold());
+	}
+	return t;
+}
+
+void Core::addProfilerCallback(IProfileCallback* callback)
+{
+	if (!std_ex::contains(profileCallbacks, callback)) {
+		profileCallbacks.push_back(callback);
+	}
+}
+
+void Core::removeProfilerCallback(IProfileCallback* callback)
+{
+	std_ex::erase_if(profileCallbacks, [&] (const auto& c) { return c == callback; });
 }

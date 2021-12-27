@@ -58,3 +58,13 @@ bool CoreAPIWrapper::isDevMode()
 {
 	return parent.isDevMode();
 }
+
+void CoreAPIWrapper::addProfilerCallback(IProfileCallback* callback)
+{
+	parent.addProfilerCallback(callback);
+}
+
+void CoreAPIWrapper::removeProfilerCallback(IProfileCallback* callback)
+{
+	parent.removeProfilerCallback(callback);
+}

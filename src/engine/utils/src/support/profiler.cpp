@@ -48,7 +48,10 @@ void ProfileCapture::startFrame(bool rec, size_t maxFrames)
 	recording = rec;
 	if (state == State::Idle) {
 		frameStartTime = std::chrono::high_resolution_clock::now();
+	} else {
+		frameStartTime = frameEndTime;
 	}
+	frameEndTime = {};
 	events.clear();
 
 	if (rec) {
@@ -58,22 +61,26 @@ void ProfileCapture::startFrame(bool rec, size_t maxFrames)
 	state = State::FrameStarted;
 }
 
-std::optional<ProfilerData> ProfileCapture::endFrame(bool capture)
+void ProfileCapture::endFrame()
 {
 	Expects(state == State::FrameStarted);
 	
-	const auto now = std::chrono::high_resolution_clock::now();
-
-	std::optional<ProfilerData> result;
-	if (capture) {
-		result = ProfilerData{ frameStartTime, now, std::move(events) };
-		events.clear();
-	}
-
-	frameStartTime = now;
+	frameEndTime = std::chrono::high_resolution_clock::now();
 	state = State::FrameEnded;
+}
 
-	return result;
+ProfilerData ProfileCapture::getCapture()
+{
+	Expects(state == State::FrameEnded);
+	
+	return ProfilerData{ frameStartTime, frameEndTime, std::move(events) };
+}
+
+Time ProfileCapture::getFrameTime() const
+{
+	Expects(state == State::FrameEnded);
+	
+	return std::chrono::duration<Time>(frameEndTime - frameStartTime).count();
 }
 
 

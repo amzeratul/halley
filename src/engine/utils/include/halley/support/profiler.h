@@ -4,6 +4,7 @@
 #include <thread>
 
 #include "halley/data_structures/hash_map.h"
+#include "halley/time/halleytime.h"
 
 namespace Halley {
 	enum class ProfilerEventType {
@@ -57,7 +58,10 @@ namespace Halley {
     	[[nodiscard]] bool isRecording() const;
 
     	void startFrame(bool record, size_t maxEvents = 10240);
-    	[[maybe_unused]] std::optional<ProfilerData> endFrame(bool capture);
+    	void endFrame();
+		ProfilerData getCapture();
+
+    	Time getFrameTime() const;
 
     private:
     	enum class State {
@@ -69,6 +73,7 @@ namespace Halley {
     	bool recording = false;
     	std::atomic<uint32_t> curId;
     	std::chrono::high_resolution_clock::time_point frameStartTime;
+    	std::chrono::high_resolution_clock::time_point frameEndTime;
     	std::vector<ProfilerData::Event> events;
         State state = State::Idle;
     };

@@ -16,7 +16,9 @@ namespace Halley {
 		HalleyStatics& getStatics() override;
 		const Environment& getEnvironment() override;
 		bool isDevMode() override;
-		
+		void addProfilerCallback(IProfileCallback* callback) override;
+		void removeProfilerCallback(IProfileCallback* callback) override;
+	
 	private:
 		CoreAPI& parent;
 	};
