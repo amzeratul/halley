@@ -45,12 +45,6 @@ namespace Halley {
 		size_t getEntityCount() const;
 		bool tryInit();
 
-		long long getNanoSecondsTaken() const { return timer.lastElapsedNanoSeconds(); }
-		long long getNanoSecondsTakenAvg() const { return timer.averageElapsedNanoSeconds(); }
-		long long getNanoSecondsTakenMin() const { return timer.minElapsedNanoSeconds(); }
-		long long getNanoSecondsTakenMax() const { return timer.maxElapsedNanoSeconds(); }
-		void setCollectSamples(bool collect);
-
 		virtual bool canHandleSystemMessage(int messageId, const String& targetSystem) const { return false; }
 		void receiveSystemMessage(const SystemMessageContext& context);
 		void prepareSystemMessages();
@@ -190,9 +184,6 @@ namespace Halley {
 		String name;
 		int systemId = -1;
 		bool initialised = false;
-		bool collectSamples = false;
-
-		StopwatchRollingAveraging timer;
 
 		void doUpdate(Time time);
 		void doRender(RenderContext& rc);

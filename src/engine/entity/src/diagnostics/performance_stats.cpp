@@ -109,6 +109,7 @@ void PerformanceStatsView::collectTimelineData(TimeLine timeline)
 
 void PerformanceStatsView::tryInsert(std::vector<SystemData>& curTop, const System& system)
 {
+	/*
 	const auto avg = system.getNanoSecondsTakenAvg();
 	const auto max = system.getNanoSecondsTakenMax();
 	const auto score = (avg + max) / 2;
@@ -128,6 +129,7 @@ void PerformanceStatsView::tryInsert(std::vector<SystemData>& curTop, const Syst
 
 		std::sort(curTop.begin(), curTop.end(), [=](const SystemData& a, const SystemData& b) { return a.score > b.score; });
 	}
+	*/
 }
 
 void PerformanceStatsView::drawHeader(Painter& painter)

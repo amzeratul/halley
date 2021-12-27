@@ -15,13 +15,13 @@ ProfileCapture& ProfileCapture::get()
 	return profiler;
 }
 
-uint32_t ProfileCapture::recordEventStart(std::string_view name)
+uint32_t ProfileCapture::recordEventStart(ProfilerEventType type, std::string_view name)
 {
 	if (recording) {
 		const auto id = curId++;
 		const auto threadId = std::this_thread::get_id();
 		const auto time = std::chrono::high_resolution_clock::now();
-		events[id] = ProfilerData::Event{ name, threadId, id, time, {} };
+		events[id] = ProfilerData::Event{ name, threadId, type, id, time, {} };
 		return id;
 	} else {
 		return std::numeric_limits<uint32_t>::max();
@@ -43,28 +43,42 @@ bool ProfileCapture::isRecording() const
 
 void ProfileCapture::startFrame(bool rec, size_t maxFrames)
 {
+	Expects(state != State::FrameStarted);
+	
 	recording = rec;
-	frameStartTime = std::chrono::high_resolution_clock::now();
+	if (state == State::Idle) {
+		frameStartTime = std::chrono::high_resolution_clock::now();
+	}
 	events.clear();
 
 	if (rec) {
 		events.resize(maxFrames);
 	}
+
+	state = State::FrameStarted;
 }
 
-ProfilerData ProfileCapture::endFrame()
+std::optional<ProfilerData> ProfileCapture::endFrame(bool capture)
 {
-	ProfilerData result;
-	result.frameStartTime = frameStartTime;
-	result.frameEndTime = std::chrono::high_resolution_clock::now();
-	result.events = std::move(events);
-	events.clear();
+	Expects(state == State::FrameStarted);
+	
+	const auto now = std::chrono::high_resolution_clock::now();
+
+	std::optional<ProfilerData> result;
+	if (capture) {
+		result = ProfilerData{ frameStartTime, now, std::move(events) };
+		events.clear();
+	}
+
+	frameStartTime = now;
+	state = State::FrameEnded;
+
 	return result;
 }
 
 
-ProfileEvent::ProfileEvent(std::string_view name)
-	: id(ProfileCapture::get().recordEventStart(name))
+ProfileEvent::ProfileEvent(ProfilerEventType type, std::string_view name)
+	: id(ProfileCapture::get().recordEventStart(type, name))
 {
 }
 

@@ -1,6 +1,7 @@
 #include "system.h"
 #include <halley/data_structures/flat_map.h>
 #include "halley/support/debug.h"
+#include "halley/support/profiler.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
@@ -8,7 +9,6 @@ using namespace Halley;
 System::System(Vector<FamilyBindingBase*> uninitializedFamilies, Vector<int> messageTypesReceived)
 	: families(std::move(uninitializedFamilies))
 	, messageTypesReceived(std::move(messageTypesReceived))
-	, timer(0)
 {
 }
 
@@ -31,18 +31,12 @@ bool System::tryInit()
 	return false;
 }
 
-void System::setCollectSamples(bool collect)
-{
-	collectSamples = collect;
-}
-
 void System::onAddedToWorld(World& w, int id) {
 	world = &w;
 	systemId = id;
 	for (auto f : families) {
 		f->bindFamily(*f, w);
 	}
-	timer.setNumSamples(world->isDevMode() ? 300 : 30);
 }
 
 void System::purgeMessages()
@@ -144,9 +138,7 @@ size_t System::getSystemMessagesInInbox() const
 
 void System::doUpdate(Time time) {
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
-	if (collectSamples) {
-		timer.beginSample();
-	}
+	ProfileEvent event(ProfilerEventType::WorldSystemUpdate, name);
 
 	purgeMessages();
 	if (!messageTypesReceived.empty()) {
@@ -155,10 +147,6 @@ void System::doUpdate(Time time) {
 	
 	updateBase(time);
 	dispatchMessages();
-
-	if (collectSamples) {
-		timer.endSample();
-	}
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 }
 
@@ -167,15 +155,8 @@ void System::doRender(RenderContext& rc) {
 		throw Exception("System " + name + " is being rendered before being initialised. Make sure a World::step() happens before World::render().", HalleyExceptions::Entity);
 	}
 	
-	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
-	if (collectSamples) {
-		timer.beginSample();
-	}
-
+	ProfileEvent event(ProfilerEventType::WorldSystemRender, name);
 	renderBase(rc);
 
-	if (collectSamples) {
-		timer.endSample();
-	}
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 }

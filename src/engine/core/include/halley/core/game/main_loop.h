@@ -16,7 +16,7 @@ namespace Halley
 		virtual const HalleyAPI& getAPI() const = 0;
 		virtual bool transitionStage() = 0;
 		virtual bool isRunning() const = 0;
-		virtual void onVariableUpdate(Time delta) = 0;
+		virtual void onTick(Time delta) = 0;
 		virtual void onFixedUpdate(Time delta) = 0;
 
 		virtual void init() = 0;

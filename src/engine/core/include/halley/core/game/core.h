@@ -40,7 +40,7 @@ namespace Halley
 		bool isDevMode() override;
 		
 		void onFixedUpdate(Time time) override;
-		void onVariableUpdate(Time time) override;
+		void onTick(Time time) override;
 		bool isRunning() const override	{ return running; }
 		bool transitionStage() override;
 		const HalleyAPI& getAPI() const override { return *api; }
@@ -75,6 +75,8 @@ namespace Halley
 
 		void pumpEvents(Time time);
 		void pumpAudio();
+		void updateSystem(Time time);
+		void updatePlatform();
 
 		Vector<String> args;
 

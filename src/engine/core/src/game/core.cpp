@@ -292,7 +292,7 @@ void Core::pumpEvents(Time time)
 	auto input = dynamic_cast<InputAPIInternal*>(&*api->input);
 
 	{
-		ProfileEvent event("Halley::Core::PumpEvents");
+		ProfileEvent event(ProfilerEventType::CorePumpEvents);
 		input->beginEvents(time);
 		if (!api->system->generateEvents(video, input)) {
 			// System close event
@@ -303,7 +303,7 @@ void Core::pumpEvents(Time time)
 	}
 
 	if (devConClient) {
-		ProfileEvent event("Halley::Core::DevConClient");
+		ProfileEvent event(ProfilerEventType::CoreDevConClient);
 		devConClient->update();
 	}
 }
@@ -311,10 +311,24 @@ void Core::pumpEvents(Time time)
 void Core::pumpAudio()
 {
 	if (api->audio) {
-		ProfileEvent event("Halley::Core::PumpAudio");
-		HALLEY_DEBUG_TRACE();
+		ProfileEvent event(ProfilerEventType::CorePumpAudio);
 		api->audioInternal->pump();
-		HALLEY_DEBUG_TRACE();
+	}
+}
+
+void Core::updateSystem(Time time)
+{
+	if (api->system) {
+		ProfileEvent event(ProfilerEventType::CoreUpdateSystem);
+		api->systemInternal->update(time);
+	}
+}
+
+void Core::updatePlatform()
+{
+	if (api->platform) {
+		ProfileEvent event(ProfilerEventType::CoreUpdatePlatform);
+		api->platformInternal->update();
 	}
 }
 
@@ -325,24 +339,31 @@ void Core::onFixedUpdate(Time time)
 	}
 }
 
-void Core::onVariableUpdate(Time time)
+void Core::onTick(Time time)
 {
-	ProfileCapture::get().startFrame(false);
+	const bool record = false;
+	const bool capture = false;
+	
+	ProfileCapture::get().startFrame(record);
 	
 	if (api->system) {
-		ProfileEvent event("System API");
 		api->systemInternal->onTickMainLoop();
 	}
 	
 	if (isRunning()) {
-		doVariableUpdate(time);
-	}
+		pumpEvents(time);
 
-	if (isRunning()) {
+		doVariableUpdate(time);
+		
+		pumpAudio();
+		updatePlatform();
+		updateSystem(time);
+	}
+	if (isRunning()) { // Check again, it might have changed
 		doRender(time);
 	}
 
-	ProfileCapture::get().endFrame();
+	ProfileCapture::get().endFrame(capture);
 }
 
 void Core::doFixedUpdate(Time time)
@@ -350,7 +371,7 @@ void Core::doFixedUpdate(Time time)
 	HALLEY_DEBUG_TRACE();
 	
 	if (running && currentStage) {
-		ProfileEvent event("Halley::Core::FixedUpdate");
+		ProfileEvent event(ProfilerEventType::CoreFixedUpdate);
 		try {
 			currentStage->onFixedUpdate(time);
 		} catch (Exception& e) {
@@ -364,27 +385,14 @@ void Core::doFixedUpdate(Time time)
 void Core::doVariableUpdate(Time time)
 {
 	HALLEY_DEBUG_TRACE();
-	
-	pumpEvents(time);
-	
+		
 	if (running && currentStage) {
-		ProfileEvent event("Halley::Core::VariableUpdate");
+		ProfileEvent event(ProfilerEventType::CoreVariableUpdate);
 		try {
 			currentStage->onVariableUpdate(time);
 		} catch (Exception& e) {
 			game->onUncaughtException(e, TimeLine::VariableUpdate);
 		}
-	}
-
-	pumpAudio();
-
-	if (api->platform) {
-		ProfileEvent event("Halley::Core::UpdatePlatform");
-		api->platformInternal->update();
-	}
-	if (api->system) {
-		ProfileEvent event("Halley::Core::UpdateSystem");
-		api->systemInternal->update(time);
 	}
 	
 	HALLEY_DEBUG_TRACE();
@@ -396,12 +404,12 @@ void Core::doRender(Time)
 
 	if (api->video) {
 		{
-			ProfileEvent event("Halley::Core::StartRender");
+			ProfileEvent event(ProfilerEventType::CoreStartRender);
 			api->video->startRender();
 		}
 
 		{
-			ProfileEvent event("Halley::Core::Render");
+			ProfileEvent event(ProfilerEventType::CoreRender);
 
 			painter->startRender();
 			if (currentStage) {
@@ -424,7 +432,7 @@ void Core::doRender(Time)
 			painter->endRender();
 		}
 
-		ProfileEvent event("Halley::Core::VSync");
+		ProfileEvent event(ProfilerEventType::CoreVSync);
 		api->video->finishRender();
 	}
 
