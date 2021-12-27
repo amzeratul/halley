@@ -74,6 +74,7 @@ set(SOURCES
         "src/support/exception.cpp"
         "src/support/logger.cpp"
         "src/support/redirect_stream.cpp"
+        "src/support/profiler.cpp"
         "src/support/StackWalker/StackWalker.cpp"
         
         "src/text/encode.cpp"
@@ -190,6 +191,7 @@ set(HEADERS
         "include/halley/support/exception.h"
         "include/halley/support/logger.h"
         "include/halley/support/redirect_stream.h"
+        "include/halley/support/profiler.h"
 
         "include/halley/text/encode.h"
         "include/halley/text/enum_names.h"
