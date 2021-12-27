@@ -37,8 +37,6 @@ namespace Halley
 		Stage& getCurrentStage() override;
 		void quit(int exitCode = 0) override;
 		const Environment& getEnvironment() override;
-		int64_t getTime(CoreAPITimer timer, TimeLine tl, StopwatchRollingAveraging::Mode mode) const override;
-		void setTimerPaused(CoreAPITimer timer, TimeLine tl, bool paused) override;
 		bool isDevMode() override;
 		
 		void onFixedUpdate(Time time) override;
@@ -77,15 +75,6 @@ namespace Halley
 
 		void pumpEvents(Time time);
 		void pumpAudio();
-
-		void setupTimers();
-		const StopwatchRollingAveraging& getTimer(CoreAPITimer timer, TimeLine tl) const;
-		StopwatchRollingAveraging& getTimer(CoreAPITimer timer, TimeLine tl);
-
-		std::array<StopwatchRollingAveraging, int(TimeLine::NUMBER_OF_TIMELINES)> engineTimers;
-		std::array<StopwatchRollingAveraging, int(TimeLine::NUMBER_OF_TIMELINES)> gameTimers;
-		StopwatchRollingAveraging vsyncTimer;
-		StopwatchRollingAveraging dummyTimer;
 
 		Vector<String> args;
 

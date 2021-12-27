@@ -64,7 +64,7 @@ void PerformanceStatsView::collectData()
 	for (const auto timeline: timelines) {
 		collectTimelineData(timeline);
 	}
-	vsyncTime = api.core->getTime(CoreAPITimer::Vsync, TimeLine::Render, StopwatchRollingAveraging::Mode::Average);
+	//vsyncTime = api.core->getTime(CoreAPITimer::Vsync, TimeLine::Render, StopwatchRollingAveraging::Mode::Average);
 
 	auto getTime = [&](TimeLine timeline) -> int
 	{
@@ -81,6 +81,7 @@ void PerformanceStatsView::collectData()
 
 void PerformanceStatsView::collectTimelineData(TimeLine timeline)
 {
+	/*
 	auto& tl = timelineData[static_cast<int>(timeline)];
 	auto& curTop = tl.topSystems;
 	curTop.clear();
@@ -103,6 +104,7 @@ void PerformanceStatsView::collectTimelineData(TimeLine timeline)
 			tryInsert(curTop, *system);
 		}
 	}
+	*/
 }
 
 void PerformanceStatsView::tryInsert(std::vector<SystemData>& curTop, const System& system)
@@ -242,9 +244,12 @@ void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
 
 int64_t PerformanceStatsView::getTimeNs(TimeLine timeline)
 {
+	/*
 	auto ns = api.core->getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Latest) + api.core->getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Latest);
 	if (timeline == TimeLine::Render) {
 		ns -= timer.lastElapsedNanoSeconds();
 	}
 	return ns;
+	*/
+	return 1;
 }

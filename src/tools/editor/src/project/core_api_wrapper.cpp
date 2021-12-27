@@ -54,16 +54,6 @@ const Environment& CoreAPIWrapper::getEnvironment()
 	return parent.getEnvironment();
 }
 
-int64_t CoreAPIWrapper::getTime(CoreAPITimer timer, TimeLine tl, StopwatchRollingAveraging::Mode mode) const
-{
-	return parent.getTime(timer, tl, mode);
-}
-
-void CoreAPIWrapper::setTimerPaused(CoreAPITimer timer, TimeLine tl, bool paused)
-{
-	parent.setTimerPaused(timer, tl, paused);
-}
-
 bool CoreAPIWrapper::isDevMode()
 {
 	return parent.isDevMode();
