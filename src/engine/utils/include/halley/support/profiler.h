@@ -23,12 +23,15 @@ namespace Halley {
 		CoreVSync,
 
 		PainterDrawCall,
+		PainterEndRender,
 
 		WorldVariableUpdate,
 		WorldFixedUpdate,
 		WorldRender,
 		WorldSystemUpdate,
 		WorldSystemRender,
+
+		StatsView,
 
 		Game
     };	

@@ -54,6 +54,8 @@ void Painter::startRender()
 void Painter::endRender()
 {
 	flush();
+	
+	ProfileEvent event(ProfilerEventType::PainterEndRender);
 	doEndRender();
 	camera = Camera();
 	viewPort = Rect4i(0, 0, 0, 0);

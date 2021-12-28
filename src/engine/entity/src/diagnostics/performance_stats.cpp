@@ -41,6 +41,7 @@ void PerformanceStatsView::update()
 
 void PerformanceStatsView::paint(Painter& painter)
 {
+	ProfileEvent event(ProfilerEventType::StatsView);
 	painter.setLogging(false);
 
 	whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(painter.getViewPort().getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
@@ -211,6 +212,10 @@ Colour4f PerformanceStatsView::getEventColour(const ProfilerData::Event& event) 
 		return Colour4f(0.7f, 0.1f, 0.1f);
 	case ProfilerEventType::PainterDrawCall:
 		return Colour4f(0.97f, 0.51f, 0.65f);
+	case ProfilerEventType::PainterEndRender:
+		return Colour4f(1.0f, 0.61f, 0.75f);
+	case ProfilerEventType::StatsView:
+		return Colour4f(0.7f, 0.7f, 0.7f);
 	default:
 		return Colour4f(0.1f, 0.7f, 0.1f);
 	}
