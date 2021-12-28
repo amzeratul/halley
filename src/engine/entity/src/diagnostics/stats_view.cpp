@@ -16,7 +16,10 @@ void ScreenOverlay::draw(RenderContext& context)
 	const auto zoom2d = viewPort.getSize() / targetSize;
 	const float zoom = std::min(zoom2d.x, zoom2d.y);
 
-	auto camera = Camera(viewPort.getSize() / zoom * 0.5f).setZoom(zoom);
+	const auto camera = Camera(viewPort.getSize() / zoom * 0.5f)
+		.setZoom(zoom);
+		//.setViewPort(Rect4i(viewPort + ));
+
 	context.with(camera).bind([&](Painter& painter) {
 		paint(painter);
 		painter.flush();

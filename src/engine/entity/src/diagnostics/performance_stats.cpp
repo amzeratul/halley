@@ -15,7 +15,7 @@ using namespace Halley;
 
 PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI& api)
 	: StatsView(resources, api)
-	, bg(Sprite().setImage(resources, "halley/perf_graph.png"))
+	, timelineBg(Sprite().setImage(resources, "halley/perf_graph.png"))
 	, whitebox(Sprite().setImage(resources, "whitebox.png"))
 {
 	api.core->addProfilerCallback(this);
@@ -43,8 +43,11 @@ void PerformanceStatsView::paint(Painter& painter)
 {
 	painter.setLogging(false);
 
+	whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(painter.getViewPort().getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
+	
 	drawHeader(painter);
-	drawGraph(painter, Vector2f(20, 80));
+	drawTimeline(painter, Rect4f(20, 80,	1240, 100));
+	drawTimeGraph(painter, Rect4f(20, 80, 1240, 400));
 	
 	painter.flush();
 	painter.setLogging(true);
@@ -93,14 +96,15 @@ void PerformanceStatsView::drawHeader(Painter& painter)
 		.draw(painter);
 }
 
-void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
+void PerformanceStatsView::drawTimeline(Painter& painter, Rect4f rect)
 {
-	const Vector2f displaySize = Vector2f(1200, 100);
+	const Vector2f displaySize = rect.getSize() - Vector2f(40, 0);
+	const auto pos = rect.getTopLeft();
 	const float maxFPS = 20.0f;
 	const float scale = maxFPS / 1'000'000.0f * displaySize.y;
 
 	const Vector2f boxPos = pos + Vector2f(20, 0);
-	bg
+	timelineBg
 		.clone()
 		.setPosition(boxPos - Vector2f(2, 2))
 		.scaleTo(displaySize + Vector2f(4, 4))
@@ -129,8 +133,8 @@ void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
 		const float x = xPos(i);
 		const float w = xPos(i + 1) - x;
 		const Vector2f p = boxPos + Vector2f(x, displaySize.y);
-		const Vector2f s1 = Vector2f(w, frameData[index].variableTime * scale);
-		const Vector2f s2 = Vector2f(w, frameData[index].renderTime * scale);
+		const Vector2f s1 = Vector2f(w, std::min(frameData[index].variableTime * scale, displaySize.y));
+		const Vector2f s2 = Vector2f(w, std::min(frameData[index].renderTime * scale, displaySize.y - s1.y));
 		variableSprite
 			.setPosition(p)
 			.setSize(s1)
@@ -143,6 +147,11 @@ void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
 
 	graphFPS.setPosition(pos + Vector2f(5.0f, 10.0f)).draw(painter);
 	graphFPS.setPosition(pos + Vector2f(displaySize.x + 35.0f, 10.0f)).draw(painter);
+}
+
+void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
+{
+	
 }
 
 int64_t PerformanceStatsView::getTimeNs(TimeLine timeline, const ProfilerData& data)

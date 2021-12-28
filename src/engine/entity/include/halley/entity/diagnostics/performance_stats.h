@@ -35,11 +35,12 @@ namespace Halley
 		std::vector<FrameData> frameData;
 		size_t lastFrameData = 0;
 
-		const Sprite bg;
+		const Sprite timelineBg;
 		const Sprite whitebox;
 
 		void drawHeader(Painter& painter);
-		void drawGraph(Painter& painter, Vector2f pos);
+		void drawTimeline(Painter& painter, Rect4f rect);
+		void drawTimeGraph(Painter& painter, Rect4f rect);
 
 		int64_t getTimeNs(TimeLine timeline, const ProfilerData& data);
 	};
