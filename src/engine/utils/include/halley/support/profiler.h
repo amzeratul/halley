@@ -39,17 +39,38 @@ namespace Halley {
 	        String name;
         	std::thread::id threadId;
 			ProfilerEventType type;
+			int depth;
         	uint32_t id;
         	TimePoint startTime;
         	TimePoint endTime;
         };
 
+    	class ThreadInfo {
+    	public:
+    		std::thread::id id;
+    		int maxDepth = 0;
+    		String name;
+    	};
+
+    	ProfilerData() = default;
+    	ProfilerData(TimePoint frameStartTime, TimePoint frameEndTime, std::vector<Event> events);
+
+    	TimePoint getStartTime() const;
+    	TimePoint getEndTime() const;
+    	const std::vector<Event>& getEvents() const;
+    	Duration getTotalElapsedTime() const;
+		Duration getElapsedTime(ProfilerEventType eventType) const;
+
+    	gsl::span<const ThreadInfo> getThreads() const;
+
+    private:
     	TimePoint frameStartTime;
     	TimePoint frameEndTime;
     	std::vector<Event> events;
 
-    	Duration getTotalElapsedTime() const;
-		Duration getElapsedTime(ProfilerEventType eventType) const;
+    	std::vector<ThreadInfo> threads;
+
+    	void processEvents();
     };
 	
     class ProfileCapture {

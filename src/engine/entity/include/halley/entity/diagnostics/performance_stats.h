@@ -2,6 +2,7 @@
 
 #include "stats_view.h"
 #include "halley/core/api/core_api.h"
+#include "halley/support/profiler.h"
 
 namespace Halley
 {
@@ -37,10 +38,13 @@ namespace Halley
 
 		const Sprite timelineBg;
 		const Sprite whitebox;
+		
+		std::shared_ptr<ProfilerData> lastProfileData;
 
 		void drawHeader(Painter& painter);
 		void drawTimeline(Painter& painter, Rect4f rect);
 		void drawTimeGraph(Painter& painter, Rect4f rect);
+		void drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo);
 
 		int64_t getTimeNs(TimeLine timeline, const ProfilerData& data);
 	};

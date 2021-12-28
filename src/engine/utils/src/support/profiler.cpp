@@ -1,7 +1,32 @@
 #include "halley/support/profiler.h"
 
+#include "halley/utils/algorithm.h"
+
 using namespace Halley;
 
+
+ProfilerData::ProfilerData(TimePoint frameStartTime, TimePoint frameEndTime, std::vector<Event> events)
+	: frameStartTime(frameStartTime)
+	, frameEndTime(frameEndTime)
+	, events(std::move(events))
+{
+	processEvents();
+}
+
+ProfilerData::TimePoint ProfilerData::getStartTime() const
+{
+	return frameStartTime;
+}
+
+ProfilerData::TimePoint ProfilerData::getEndTime() const
+{
+	return frameEndTime;
+}
+
+const std::vector<ProfilerData::Event>& ProfilerData::getEvents() const
+{
+	return events;
+}
 
 ProfilerData::Duration ProfilerData::getTotalElapsedTime() const
 {
@@ -27,6 +52,41 @@ ProfilerData::Duration ProfilerData::getElapsedTime(ProfilerEventType eventType)
 	return end - start;
 }
 
+gsl::span<const ProfilerData::ThreadInfo> ProfilerData::getThreads() const
+{
+	return threads;
+}
+
+void ProfilerData::processEvents()
+{
+	struct ThreadCurInfo {
+		size_t maxDepth = 0;
+		std::vector<TimePoint> stackEnds;
+	};
+	HashMap<std::thread::id, ThreadCurInfo> threadInfo;
+
+	// Process each event
+	for (auto& e: events) {
+		auto& curThread = threadInfo[e.threadId];
+
+		// If this event starts after the end of the previous stack, then it's not nested in it, pop previous.
+		// Repeat for as many levels as needed, up to the root
+		while (!curThread.stackEnds.empty() && e.startTime >= curThread.stackEnds.back()) {
+			curThread.stackEnds.pop_back();
+		}
+		const auto depth = curThread.stackEnds.size();
+		curThread.maxDepth = std::max(curThread.maxDepth, depth);
+		e.depth = static_cast<int>(depth);
+		curThread.stackEnds.push_back(e.endTime);
+	}
+
+	// Generate the thread list
+	for (const auto& [k, v]: threadInfo) {
+		const String name; // TODO
+		threads.emplace_back(ThreadInfo{ k, static_cast<int>(v.maxDepth), name });
+	}
+}
+
 ProfileCapture::ProfileCapture()
 	: curId(0)
 {
@@ -48,7 +108,7 @@ uint32_t ProfileCapture::recordEventStart(ProfilerEventType type, std::string_vi
 		if (id < events.size()) {
 			const auto threadId = std::this_thread::get_id();
 			const auto time = std::chrono::high_resolution_clock::now();
-			events[id] = ProfilerData::Event{ name, threadId, type, id, time, {} };
+			events[id] = ProfilerData::Event{ name, threadId, type, 0, id, time, {} };
 			return id;
 		}
 	}
@@ -103,7 +163,7 @@ ProfilerData ProfileCapture::getCapture()
 {
 	Expects(state == State::FrameEnded);
 	
-	return ProfilerData{ frameStartTime, frameEndTime, std::move(events) };
+	return ProfilerData(frameStartTime, frameEndTime, std::move(events));
 }
 
 Time ProfileCapture::getFrameTime() const

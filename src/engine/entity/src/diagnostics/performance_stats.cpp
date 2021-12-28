@@ -47,7 +47,7 @@ void PerformanceStatsView::paint(Painter& painter)
 	
 	drawHeader(painter);
 	drawTimeline(painter, Rect4f(20, 80,	1240, 100));
-	drawTimeGraph(painter, Rect4f(20, 80, 1240, 400));
+	drawTimeGraph(painter, Rect4f(20, 200, 1240, 500));
 	
 	painter.flush();
 	painter.setLogging(true);
@@ -70,6 +70,8 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	curFrameData.fixedTime = getTime(TimeLine::FixedUpdate);
 	curFrameData.variableTime = getTime(TimeLine::VariableUpdate);
 	curFrameData.renderTime = getTime(TimeLine::Render);
+
+	lastProfileData = std::move(data);
 }
 
 void PerformanceStatsView::drawHeader(Painter& painter)
@@ -151,13 +153,45 @@ void PerformanceStatsView::drawTimeline(Painter& painter, Rect4f rect)
 
 void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 {
-	
+	if (!lastProfileData) {
+		return;
+	}
+
+	const auto threads = lastProfileData->getThreads();
+	const float threadHeight = std::min(160.0f, std::floor(rect.getHeight() / threads.size()));
+	int i = 0;
+	for (const auto threadInfo: threads) {
+		drawTimeGraphThread(painter, Rect4f(rect.getLeft(), rect.getTop() + i * threadHeight, rect.getWidth(), threadHeight), threadInfo);
+		++i;
+	}
+}
+
+void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo)
+{
+	auto box = whitebox.clone().setColour(Colour4f(0.7f, 0.1f, 0.1f, 0.8f));
+	const auto frameStartTime = lastProfileData->getStartTime();
+	const auto frameEndTime = lastProfileData->getEndTime();
+	const auto frameLength = frameEndTime - frameStartTime;
+
+	const auto startPos = rect.getTopLeft();
+	const auto lineHeight = std::floor(rect.getHeight() / static_cast<float>(threadInfo.maxDepth));
+
+	for (const auto& e: lastProfileData->getEvents()) {
+		if (e.threadId == threadInfo.id) {
+			const float relativeLen = static_cast<float>((e.endTime - e.startTime).count()) / static_cast<float>(frameLength.count());
+			const float relativeStart = static_cast<float>((e.startTime - frameStartTime).count()) / static_cast<float>(frameLength.count());
+			
+			const auto eventRect = startPos + Rect4f(relativeStart * rect.getWidth(), e.depth * lineHeight, relativeLen * rect.getWidth(), lineHeight);
+
+			box.setPosition(eventRect.getTopLeft()).scaleTo(eventRect.getSize()).draw(painter);
+		}
+	}
 }
 
 int64_t PerformanceStatsView::getTimeNs(TimeLine timeline, const ProfilerData& data)
 {
 	// Total time
-	const auto totalTime = data.frameEndTime - data.frameStartTime;
+	const auto totalTime = data.getTotalElapsedTime();
 
 	// Render time
 	const auto renderTime = data.getElapsedTime(ProfilerEventType::CoreRender);
