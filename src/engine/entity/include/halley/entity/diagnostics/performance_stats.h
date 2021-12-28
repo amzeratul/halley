@@ -1,18 +1,22 @@
 #pragma once
 
 #include "stats_view.h"
+#include "halley/core/api/core_api.h"
 
 namespace Halley
 {
 	class System;
 
-	class PerformanceStatsView : public StatsView
+	class PerformanceStatsView : public StatsView, public CoreAPI::IProfileCallback
 	{
 	public:
 		PerformanceStatsView(Resources& resources, const HalleyAPI& api);
+		~PerformanceStatsView() override;
 
 		void update() override;
 		void paint(Painter& painter) override;
+
+		void onProfileData(std::shared_ptr<ProfilerData> data) override;
 
 	private:
 		class SystemData {
@@ -56,7 +60,6 @@ namespace Halley
 		const Sprite bg;
 		const Sprite whitebox;
 
-		void collectData();
 		void collectTimelineData(TimeLine timeline);
 		void tryInsert(std::vector<SystemData>& curTop, const System& system);
 
@@ -64,6 +67,6 @@ namespace Halley
 		void drawTimeline(Painter& painter, const String& label, TimeLine timeline, Vector2f pos);
 		void drawGraph(Painter& painter, Vector2f pos);
 
-		int64_t getTimeNs(TimeLine timeline);
+		int64_t getTimeNs(TimeLine timeline, const ProfilerData& data);
 	};
 }

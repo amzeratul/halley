@@ -26,7 +26,7 @@ namespace Halley
 		public:
 			virtual ~IProfileCallback() = default;
 			virtual Time getThreshold() const { return 0.0; }
-			virtual void onData(std::shared_ptr<ProfilerData> data) = 0;
+			virtual void onProfileData(std::shared_ptr<ProfilerData> data) = 0;
 		};
 		
 		virtual ~CoreAPI() {}

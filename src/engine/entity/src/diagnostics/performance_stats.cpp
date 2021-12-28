@@ -7,6 +7,7 @@
 #include "halley/core/graphics/painter.h"
 #include "halley/core/resources/resources.h"
 #include "halley/support/logger.h"
+#include "halley/support/profiler.h"
 #include "halley/time/halleytime.h"
 #include "halley/time/stopwatch.h"
 
@@ -17,6 +18,8 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI
 	, bg(Sprite().setImage(resources, "halley/perf_graph.png"))
 	, whitebox(Sprite().setImage(resources, "whitebox.png"))
 {
+	api.core->addProfilerCallback(this);
+	
 	headerText = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
 	timelineData[0].setText(headerText);
 	timelineData[1].setText(headerText);
@@ -29,10 +32,14 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI
 	lastFrameData = frameDataCapacity - 1;
 }
 
+PerformanceStatsView::~PerformanceStatsView()
+{
+	api.core->removeProfilerCallback(this);
+}
+
 void PerformanceStatsView::update()
 {
 	StatsView::update();
-	collectData();
 }
 
 void PerformanceStatsView::paint(Painter& painter)
@@ -56,7 +63,8 @@ void PerformanceStatsView::TimeLineData::setText(const TextRenderer& text)
 	col2Text = text;
 }
 
-void PerformanceStatsView::collectData()
+
+void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 {
 	totalFrameTime = 0;
 
@@ -68,7 +76,7 @@ void PerformanceStatsView::collectData()
 
 	auto getTime = [&](TimeLine timeline) -> int
 	{
-		const auto ns = getTimeNs(timeline);
+		const auto ns = getTimeNs(timeline, *data);
 		return static_cast<int>((ns + 500) / 1000);
 	};
 
@@ -244,14 +252,27 @@ void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
 	graphFPS.setPosition(pos + Vector2f(displaySize.x + 35.0f, 10.0f)).draw(painter);
 }
 
-int64_t PerformanceStatsView::getTimeNs(TimeLine timeline)
+int64_t PerformanceStatsView::getTimeNs(TimeLine timeline, const ProfilerData& data)
 {
-	/*
-	auto ns = api.core->getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Latest) + api.core->getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Latest);
-	if (timeline == TimeLine::Render) {
-		ns -= timer.lastElapsedNanoSeconds();
+	// Total time
+	const std::chrono::duration<int64_t, std::nano> totalTime = data.frameEndTime - data.frameStartTime;
+
+	// Render time
+	std::chrono::duration<int64_t, std::nano> renderTime = {};
+	std::chrono::duration<int64_t, std::nano> vsyncTime = {};
+	for (const auto& e: data.events) {
+		if (e.type == ProfilerEventType::CoreRender) {
+			renderTime += e.endTime - e.startTime;
+		} else if (e.type == ProfilerEventType::CoreVSync) {
+			vsyncTime += e.endTime - e.startTime;
+		}
 	}
-	return ns;
-	*/
-	return 1;
+	
+	if (timeline == TimeLine::VariableUpdate) {
+		return (totalTime - renderTime - vsyncTime).count();
+	} else if (timeline == TimeLine::Render) {
+		return renderTime.count();
+	} else {
+		return 0;
+	}
 }

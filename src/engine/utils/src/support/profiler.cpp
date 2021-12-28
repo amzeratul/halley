@@ -17,6 +17,8 @@ ProfileCapture& ProfileCapture::get()
 
 uint32_t ProfileCapture::recordEventStart(ProfilerEventType type, std::string_view name)
 {
+	Expects(state == State::FrameStarted);
+	
 	if (recording) {
 		const auto id = curId++;
 		const auto threadId = std::this_thread::get_id();
@@ -30,6 +32,8 @@ uint32_t ProfileCapture::recordEventStart(ProfilerEventType type, std::string_vi
 
 void ProfileCapture::recordEventEnd(uint32_t id)
 {
+	Expects(state == State::FrameStarted);
+	
 	if (recording && id != std::numeric_limits<uint32_t>::max()) {
 		const auto time = std::chrono::high_resolution_clock::now();
 		events[id].endTime = time;

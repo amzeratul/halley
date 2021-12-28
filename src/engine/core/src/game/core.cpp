@@ -372,6 +372,7 @@ void Core::onTick(Time time)
 
 void Core::doFixedUpdate(Time time)
 {
+	/*
 	HALLEY_DEBUG_TRACE();
 	
 	if (running && currentStage) {
@@ -384,6 +385,7 @@ void Core::doFixedUpdate(Time time)
 	}
 
 	HALLEY_DEBUG_TRACE();
+	*/
 }
 
 void Core::doVariableUpdate(Time time)
@@ -607,7 +609,7 @@ void IHalleyEntryPoint::initSharedStatics(const HalleyStatics& parent)
 void Core::onProfileData(std::shared_ptr<ProfilerData> data)
 {
 	for (auto* c: profileCallbacks) {
-		c->onData(data);
+		c->onProfileData(data);
 	}
 }
 
