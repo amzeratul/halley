@@ -670,6 +670,8 @@ void Painter::generateQuadIndicesOffset(IndexType pos, IndexType lineStride, Ind
 
 void Painter::updateProjection()
 {
+	ProfileEvent event(ProfilerEventType::PainterUpdateProjection);
+	
 	camera.updateProjection(activeRenderTarget->getProjectionFlipVertical());
 	projection = camera.getProjection();
 

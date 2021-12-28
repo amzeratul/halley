@@ -24,6 +24,7 @@ namespace Halley {
 
 		PainterDrawCall,
 		PainterEndRender,
+		PainterUpdateProjection,
 
 		WorldVariableUpdate,
 		WorldFixedUpdate,

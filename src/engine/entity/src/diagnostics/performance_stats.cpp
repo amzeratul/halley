@@ -174,20 +174,27 @@ void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, co
 	const auto frameEndTime = lastProfileData->getEndTime();
 	const auto frameLength = frameEndTime - frameStartTime;
 
-	const auto startPos = rect.getTopLeft();
+	const auto origin = rect.getTopLeft();
 	const auto lineHeight = std::floor(rect.getHeight() / static_cast<float>(threadInfo.maxDepth + 1));
 
 	for (const auto& e: lastProfileData->getEvents()) {
 		if (e.threadId == threadInfo.id) {
-			const float relativeLen = static_cast<float>((e.endTime - e.startTime).count()) / static_cast<float>(frameLength.count());
 			const float relativeStart = static_cast<float>((e.startTime - frameStartTime).count()) / static_cast<float>(frameLength.count());
-			
-			const auto eventRect = startPos + Rect4f(relativeStart * rect.getWidth(), e.depth * lineHeight, relativeLen * rect.getWidth(), lineHeight);
+			const float relativeEnd = static_cast<float>((e.endTime - frameStartTime).count()) / static_cast<float>(frameLength.count());
 
+			const float startPos = std::floor(relativeStart * rect.getWidth());
+			const float endPos = std::floor(relativeEnd * rect.getWidth());
+			const auto eventRect = origin + Rect4f(startPos, e.depth * lineHeight, std::max(endPos - startPos, 1.0f), lineHeight);
+
+			const auto col = getEventColour(e);
 			box
-				.setColour(getEventColour(e).multiplyAlpha(0.8f))
+				.setColour(col)
 				.setPosition(eventRect.getTopLeft())
 				.scaleTo(eventRect.getSize())
+				.draw(painter);
+			box
+				.setColour(col.inverseMultiplyLuma(0.5f))
+				.scaleTo(Vector2f(1.0f, eventRect.getHeight()))
 				.draw(painter);
 		}
 	}
@@ -214,6 +221,8 @@ Colour4f PerformanceStatsView::getEventColour(const ProfilerData::Event& event) 
 		return Colour4f(0.97f, 0.51f, 0.65f);
 	case ProfilerEventType::PainterEndRender:
 		return Colour4f(1.0f, 0.61f, 0.75f);
+	case ProfilerEventType::PainterUpdateProjection:
+		return Colour4f(1.0f, 0.71f, 0.85f);
 	case ProfilerEventType::StatsView:
 		return Colour4f(0.7f, 0.7f, 0.7f);
 	default:
