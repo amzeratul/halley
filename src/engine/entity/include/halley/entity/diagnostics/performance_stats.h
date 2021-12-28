@@ -45,6 +45,7 @@ namespace Halley
 		void drawTimeline(Painter& painter, Rect4f rect);
 		void drawTimeGraph(Painter& painter, Rect4f rect);
 		void drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo);
+		Colour4f getEventColour(const ProfilerData::Event& event) const;
 
 		int64_t getTimeNs(TimeLine timeline, const ProfilerData& data);
 	};

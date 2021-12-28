@@ -168,7 +168,7 @@ void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 
 void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo)
 {
-	auto box = whitebox.clone().setColour(Colour4f(0.7f, 0.1f, 0.1f, 0.8f));
+	auto box = whitebox.clone();
 	const auto frameStartTime = lastProfileData->getStartTime();
 	const auto frameEndTime = lastProfileData->getEndTime();
 	const auto frameLength = frameEndTime - frameStartTime;
@@ -183,8 +183,34 @@ void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, co
 			
 			const auto eventRect = startPos + Rect4f(relativeStart * rect.getWidth(), e.depth * lineHeight, relativeLen * rect.getWidth(), lineHeight);
 
-			box.setPosition(eventRect.getTopLeft()).scaleTo(eventRect.getSize()).draw(painter);
+			box
+				.setColour(getEventColour(e).multiplyAlpha(0.8f))
+				.setPosition(eventRect.getTopLeft())
+				.scaleTo(eventRect.getSize())
+				.draw(painter);
 		}
+	}
+}
+
+Colour4f PerformanceStatsView::getEventColour(const ProfilerData::Event& event) const
+{
+	switch (event.type) {
+	case ProfilerEventType::CoreVSync:
+		return Colour4f(0.8f, 0.8f, 0.1f);
+	case ProfilerEventType::CoreUpdate:
+	case ProfilerEventType::CoreFixedUpdate:
+	case ProfilerEventType::CoreVariableUpdate:
+	case ProfilerEventType::WorldSystemUpdate:
+	case ProfilerEventType::WorldFixedUpdate:
+	case ProfilerEventType::WorldVariableUpdate:
+		return Colour4f(0.1f, 0.1f, 0.7f);
+	case ProfilerEventType::CoreStartRender:
+	case ProfilerEventType::CoreRender:
+	case ProfilerEventType::WorldSystemRender:
+	case ProfilerEventType::WorldRender:
+		return Colour4f(0.7f, 0.1f, 0.1f);
+	default:
+		return Colour4f(0.1f, 0.7f, 0.1f);
 	}
 }
 
