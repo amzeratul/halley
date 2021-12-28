@@ -174,7 +174,7 @@ void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, co
 	const auto frameLength = frameEndTime - frameStartTime;
 
 	const auto startPos = rect.getTopLeft();
-	const auto lineHeight = std::floor(rect.getHeight() / static_cast<float>(threadInfo.maxDepth));
+	const auto lineHeight = std::floor(rect.getHeight() / static_cast<float>(threadInfo.maxDepth + 1));
 
 	for (const auto& e: lastProfileData->getEvents()) {
 		if (e.threadId == threadInfo.id) {

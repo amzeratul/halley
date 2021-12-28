@@ -162,7 +162,8 @@ void ProfileCapture::endFrame()
 ProfilerData ProfileCapture::getCapture()
 {
 	Expects(state == State::FrameEnded);
-	
+
+	events.resize(curId);
 	return ProfilerData(frameStartTime, frameEndTime, std::move(events));
 }
 
