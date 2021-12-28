@@ -166,7 +166,7 @@ void AudioEngine::generateBuffer()
 	}
 
 	timer.pause();
-	lastTimeElapsed = timer.elapsedNanoseconds();
+	lastTimeElapsed += timer.elapsedNanoseconds();
 }
 
 void AudioEngine::queueAudioFloat(gsl::span<const float> data)
@@ -335,9 +335,9 @@ void AudioEngine::setVariable(const String& name, float value)
 	variableTable->set(name, value);
 }
 
-int64_t AudioEngine::getLastTimeElapsed() const
+int64_t AudioEngine::getLastTimeElapsed()
 {
-	return lastTimeElapsed.load();
+	return lastTimeElapsed.exchange(0);
 }
 
 float AudioEngine::getGroupGain(uint8_t id) const

@@ -49,7 +49,7 @@ namespace Halley {
 
     	void setVariable(const String& name, float value);
 
-		int64_t getLastTimeElapsed() const;
+		int64_t getLastTimeElapsed();
 
     private:
 		AudioSpec spec;

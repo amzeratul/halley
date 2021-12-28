@@ -3,6 +3,30 @@
 using namespace Halley;
 
 
+ProfilerData::Duration ProfilerData::getTotalElapsedTime() const
+{
+	return frameEndTime - frameStartTime;
+}
+
+ProfilerData::Duration ProfilerData::getElapsedTime(ProfilerEventType eventType) const
+{
+	TimePoint start = {};
+	TimePoint end = {};
+	bool first = true;
+	
+	for (const auto& e: events) {
+		if (e.type == eventType) {
+			if (first) {
+				start = e.startTime;
+				first = false;
+			}
+			end = e.endTime;
+		}
+	}
+
+	return end - start;
+}
+
 ProfileCapture::ProfileCapture()
 	: curId(0)
 {

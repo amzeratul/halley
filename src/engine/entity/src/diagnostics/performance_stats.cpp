@@ -21,9 +21,6 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI
 	api.core->addProfilerCallback(this);
 	
 	headerText = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
-	timelineData[0].setText(headerText);
-	timelineData[1].setText(headerText);
-	timelineData[2].setText(headerText);
 	graphFPS = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f))
 		.setText("20\n\n30\n\n60").setAlignment(0.5f);
 
@@ -48,31 +45,16 @@ void PerformanceStatsView::paint(Painter& painter)
 
 	drawHeader(painter);
 	drawGraph(painter, Vector2f(20, 80));
-	drawTimeline(painter, "Fixed", TimeLine::FixedUpdate, Vector2f(25, 200));
-	drawTimeline(painter, "Variable", TimeLine::VariableUpdate, Vector2f(25 + 410, 200));
-	drawTimeline(painter, "Render", TimeLine::Render, Vector2f(25 + 410 * 2, 200));
 	
 	painter.flush();
 	painter.setLogging(true);
 }
 
-void PerformanceStatsView::TimeLineData::setText(const TextRenderer& text)
-{
-	col0Text = text;
-	col1Text = text;
-	col2Text = text;
-}
-
 
 void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 {
-	totalFrameTime = 0;
-
-	const TimeLine timelines[] = { TimeLine::FixedUpdate, TimeLine::VariableUpdate, TimeLine::Render };
-	for (const auto timeline: timelines) {
-		collectTimelineData(timeline);
-	}
-	//vsyncTime = api.core->getTime(CoreAPITimer::Vsync, TimeLine::Render, StopwatchRollingAveraging::Mode::Average);
+	vsyncTime = data->getElapsedTime(ProfilerEventType::CoreVSync).count();
+	totalFrameTime = data->getTotalElapsedTime().count() - vsyncTime;
 
 	auto getTime = [&](TimeLine timeline) -> int
 	{
@@ -85,59 +67,6 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	curFrameData.fixedTime = getTime(TimeLine::FixedUpdate);
 	curFrameData.variableTime = getTime(TimeLine::VariableUpdate);
 	curFrameData.renderTime = getTime(TimeLine::Render);
-}
-
-void PerformanceStatsView::collectTimelineData(TimeLine timeline)
-{
-	/*
-	auto& tl = timelineData[static_cast<int>(timeline)];
-	auto& curTop = tl.topSystems;
-	curTop.clear();
-
-	auto& coreAPI = *api.core;
-	const auto engineTime = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Average);
-	const auto gameTime = coreAPI.getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Average);
-	const auto engineTimeMax = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Max);
-	const auto gameTimeMax = coreAPI.getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Max);
-	
-	tl.average = engineTime + gameTime;
-	tl.max = engineTimeMax + gameTimeMax;
-	totalFrameTime += tl.average;
-	if (timeline == TimeLine::Render) {
-		tl.average -= timer.averageElapsedNanoSeconds();
-	}
-
-	if (world) {
-		for (const auto& system : world->getSystems(timeline)) {
-			tryInsert(curTop, *system);
-		}
-	}
-	*/
-}
-
-void PerformanceStatsView::tryInsert(std::vector<SystemData>& curTop, const System& system)
-{
-	/*
-	const auto avg = system.getNanoSecondsTakenAvg();
-	const auto max = system.getNanoSecondsTakenMax();
-	const auto score = (avg + max) / 2;
-	
-	constexpr int systemsToTrack = 5;
-	const int64_t minScore = curTop.size() < systemsToTrack ? -1 : curTop.back().score;
-	if (curTop.size() < systemsToTrack) {
-		curTop.emplace_back();
-	}
-
-	if (score > minScore) {
-		auto& sys = curTop.back();
-		sys.name = system.getName();
-		sys.max = max;
-		sys.average = avg;
-		sys.score = score;
-
-		std::sort(curTop.begin(), curTop.end(), [=](const SystemData& a, const SystemData& b) { return a.score > b.score; });
-	}
-	*/
 }
 
 void PerformanceStatsView::drawHeader(Painter& painter)
@@ -161,42 +90,6 @@ void PerformanceStatsView::drawHeader(Painter& painter)
 	headerText
 		.setText(str)
 		.setPosition(Vector2f(20, 20))
-		.draw(painter);
-}
-
-void PerformanceStatsView::drawTimeline(Painter& painter, const String& label, TimeLine timeline, Vector2f pos)
-{
-	String col0 = label;
-	String col1 = "Avg";
-	String col2 = "Max";
-
-	auto addEntry = [&](const String str, int64_t avg, int64_t max)
-	{
-		col0 += "\n  " + str;
-		col1 += "\n" + formatTime(avg);
-		col2 += "\n" + formatTime(max);
-	};
-
-	auto& tl = timelineData[static_cast<int>(timeline)];
-	addEntry("Total", tl.average, tl.max);
-	
-	int i = 1;
-	for (const auto& system : tl.topSystems) {
-		addEntry(toString(i) + ". " + system.name, system.average, system.max);
-		++i;
-	}
-	
-	tl.col0Text
-		.setText(col0)
-		.setPosition(pos)
-		.draw(painter);
-	tl.col1Text
-		.setText(col1)
-		.setPosition(pos + Vector2f(250, 0))
-		.draw(painter);
-	tl.col2Text
-		.setText(col2)
-		.setPosition(pos + Vector2f(320, 0))
 		.draw(painter);
 }
 
@@ -255,18 +148,11 @@ void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
 int64_t PerformanceStatsView::getTimeNs(TimeLine timeline, const ProfilerData& data)
 {
 	// Total time
-	const std::chrono::duration<int64_t, std::nano> totalTime = data.frameEndTime - data.frameStartTime;
+	const auto totalTime = data.frameEndTime - data.frameStartTime;
 
 	// Render time
-	std::chrono::duration<int64_t, std::nano> renderTime = {};
-	std::chrono::duration<int64_t, std::nano> vsyncTime = {};
-	for (const auto& e: data.events) {
-		if (e.type == ProfilerEventType::CoreRender) {
-			renderTime += e.endTime - e.startTime;
-		} else if (e.type == ProfilerEventType::CoreVSync) {
-			vsyncTime += e.endTime - e.startTime;
-		}
-	}
+	const auto renderTime = data.getElapsedTime(ProfilerEventType::CoreRender);
+	const auto vsyncTime = data.getElapsedTime(ProfilerEventType::CoreVSync);
 	
 	if (timeline == TimeLine::VariableUpdate) {
 		return (totalTime - renderTime - vsyncTime).count();

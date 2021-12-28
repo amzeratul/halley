@@ -31,19 +31,25 @@ namespace Halley {
 
     class ProfilerData {
     public:
+        using TimePoint = std::chrono::high_resolution_clock::time_point;
+    	using Duration = std::chrono::duration<int64_t, std::nano>;
+    	
 		class Event {
         public:
 	        String name;
         	std::thread::id threadId;
 			ProfilerEventType type;
         	uint32_t id;
-        	std::chrono::high_resolution_clock::time_point startTime;
-        	std::chrono::high_resolution_clock::time_point endTime;
+        	TimePoint startTime;
+        	TimePoint endTime;
         };
 
-    	std::chrono::high_resolution_clock::time_point frameStartTime;
-    	std::chrono::high_resolution_clock::time_point frameEndTime;
+    	TimePoint frameStartTime;
+    	TimePoint frameEndTime;
     	std::vector<Event> events;
+
+    	Duration getTotalElapsedTime() const;
+		Duration getElapsedTime(ProfilerEventType eventType) const;
     };
 	
     class ProfileCapture {
