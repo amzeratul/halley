@@ -21,13 +21,14 @@ uint32_t ProfileCapture::recordEventStart(ProfilerEventType type, std::string_vi
 	
 	if (recording) {
 		const auto id = curId++;
-		const auto threadId = std::this_thread::get_id();
-		const auto time = std::chrono::high_resolution_clock::now();
-		events[id] = ProfilerData::Event{ name, threadId, type, id, time, {} };
-		return id;
-	} else {
-		return std::numeric_limits<uint32_t>::max();
+		if (id < events.size()) {
+			const auto threadId = std::this_thread::get_id();
+			const auto time = std::chrono::high_resolution_clock::now();
+			events[id] = ProfilerData::Event{ name, threadId, type, id, time, {} };
+			return id;
+		}
 	}
+	return std::numeric_limits<uint32_t>::max();
 }
 
 void ProfileCapture::recordEventEnd(uint32_t id)
@@ -57,6 +58,7 @@ void ProfileCapture::startFrame(bool rec, size_t maxFrames)
 	}
 	frameEndTime = {};
 	events.clear();
+	curId = 0;
 
 	if (rec) {
 		events.resize(maxFrames);
