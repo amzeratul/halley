@@ -160,7 +160,7 @@ void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 	const auto threads = lastProfileData->getThreads();
 	const float threadHeight = std::min(160.0f, std::floor(rect.getHeight() / threads.size()));
 	int i = 0;
-	for (const auto threadInfo: threads) {
+	for (const auto& threadInfo: threads) {
 		drawTimeGraphThread(painter, Rect4f(rect.getLeft(), rect.getTop() + i * threadHeight, rect.getWidth(), threadHeight), threadInfo);
 		++i;
 	}
@@ -209,6 +209,8 @@ Colour4f PerformanceStatsView::getEventColour(const ProfilerData::Event& event) 
 	case ProfilerEventType::WorldSystemRender:
 	case ProfilerEventType::WorldRender:
 		return Colour4f(0.7f, 0.1f, 0.1f);
+	case ProfilerEventType::PainterDrawCall:
+		return Colour4f(0.97f, 0.51f, 0.65f);
 	default:
 		return Colour4f(0.1f, 0.7f, 0.1f);
 	}

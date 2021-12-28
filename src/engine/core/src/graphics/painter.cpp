@@ -13,6 +13,7 @@
 
 #include "halley/maths/bezier.h"
 #include "halley/maths/polygon.h"
+#include "halley/support/profiler.h"
 #include "resources/resources.h"
 
 using namespace Halley;
@@ -564,6 +565,8 @@ void Painter::resetPending()
 void Painter::executeDrawPrimitives(Material& material, size_t numVertices, void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType)
 {
 	Expects(primitiveType == PrimitiveType::Triangle);
+
+	ProfileEvent event(ProfilerEventType::PainterDrawCall);
 
 	startDrawCall();
 

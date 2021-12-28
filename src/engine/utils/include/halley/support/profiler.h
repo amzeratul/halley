@@ -2,6 +2,8 @@
 
 #include "halley/text/halleystring.h"
 #include <thread>
+#include <gsl/span>
+#include <atomic>
 
 #include "halley/data_structures/hash_map.h"
 #include "halley/time/halleytime.h"
@@ -19,6 +21,8 @@ namespace Halley {
 		CoreStartRender,
 		CoreRender,
 		CoreVSync,
+
+		PainterDrawCall,
 
 		WorldVariableUpdate,
 		WorldFixedUpdate,
