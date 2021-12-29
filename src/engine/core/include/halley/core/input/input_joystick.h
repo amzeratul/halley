@@ -91,6 +91,8 @@ namespace Halley {
 
 	private:
 		Vector<spInputVibration> vibs;
+		float curLowVib = 0;
+		float curHighVib = 0;
 		std::chrono::steady_clock::time_point lastTime;
 		bool enabled = false;
 

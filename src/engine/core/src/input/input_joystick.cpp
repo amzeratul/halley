@@ -160,15 +160,20 @@ void InputJoystick::updateVibration(Time t)
 	Vector<spInputVibration> vibs2 = std::move(vibs);
 	vibs.clear();
 	
-	for (size_t i = 0; i < vibs2.size(); i++) {
+	for (auto& i : vibs2) {
 		float h = 0;
 		float l = 0;
-		bool result = vibs2[i]->getState(t, h, l);
+		bool result = i->getState(t, h, l);
 		if (result) {
-			vibs.push_back(vibs2[i]);
+			vibs.push_back(i);
 		}
 		high += h;
 		low += l;
 	}
-	setVibration(low, high);
+
+	if (curLowVib != low || curHighVib != high) {
+		curLowVib = low;
+		curHighVib = high;
+		setVibration(low, high);
+	}
 }
