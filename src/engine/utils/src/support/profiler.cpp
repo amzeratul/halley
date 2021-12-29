@@ -70,8 +70,12 @@ void ProfilerData::processEvents()
 		auto& curThread = threadInfo[e.threadId];
 
 		// Normalize ends
-		e.startTime = clamp(e.startTime, frameStartTime, frameEndTime);
-		e.endTime = clamp(e.endTime, frameStartTime, frameEndTime);
+		if (e.startTime == TimePoint{}) {
+			e.startTime = frameStartTime;
+		}
+		if (e.endTime == TimePoint{}) {
+			e.endTime = frameEndTime;
+		}
 		
 		// If this event starts after the end of the previous stack, then it's not nested in it, pop previous.
 		// Repeat for as many levels as needed, up to the root
@@ -111,7 +115,7 @@ ProfilerCapture::EventId ProfilerCapture::recordEventStart(ProfilerEventType typ
 		const auto id = curId++;
 		if (id < events.size()) {
 			const auto threadId = std::this_thread::get_id();
-			const auto time = std::chrono::high_resolution_clock::now();
+			const auto time = std::chrono::steady_clock::now();
 			events[id] = ProfilerData::Event{ name, threadId, type, 0, id, time, {} };
 			return { id, curFrame };
 		}
@@ -122,7 +126,7 @@ ProfilerCapture::EventId ProfilerCapture::recordEventStart(ProfilerEventType typ
 void ProfilerCapture::recordEventEnd(EventId id)
 {
 	if (recording && id.id != std::numeric_limits<uint32_t>::max()) {
-		const auto time = std::chrono::high_resolution_clock::now();
+		const auto time = std::chrono::steady_clock::now();
 		if (id.frameN == curFrame) {
 			events[id.id].endTime = time;
 		} else {
@@ -142,12 +146,12 @@ void ProfilerCapture::startFrame(bool rec, size_t maxFrames)
 	Expects(state != State::FrameStarted);
 	
 	if (state == State::Idle) {
-		frameStartTime = std::chrono::high_resolution_clock::now();
+		frameStartTime = std::chrono::steady_clock::now();
 	} else {
 		frameStartTime = frameEndTime;
 	}
 	frameEndTime = {};
-	events.clear();
+	//events.clear();
 	curId = 0;
 	++curFrame;
 
@@ -163,16 +167,15 @@ void ProfilerCapture::endFrame()
 {
 	Expects(state == State::FrameStarted);
 	
-	frameEndTime = std::chrono::high_resolution_clock::now();
+	frameEndTime = std::chrono::steady_clock::now();
 	state = State::FrameEnded;
 }
 
 ProfilerData ProfilerCapture::getCapture()
 {
 	Expects(state == State::FrameEnded);
-
-	events.resize(curId);
-	return ProfilerData(frameStartTime, frameEndTime, std::move(events));
+	
+	return ProfilerData(frameStartTime, frameEndTime, std::vector<ProfilerData::Event>(events.begin(), events.begin() + curId));
 }
 
 Time ProfilerCapture::getFrameTime() const

@@ -41,7 +41,7 @@ namespace Halley {
 
     class ProfilerData {
     public:
-        using TimePoint = std::chrono::high_resolution_clock::time_point;
+        using TimePoint = std::chrono::steady_clock::time_point;
     	using Duration = std::chrono::duration<int64_t, std::nano>;
     	
 		class Event {
@@ -118,8 +118,8 @@ namespace Halley {
     	std::atomic<uint32_t> curId;
     	std::atomic<uint32_t> curFrame;
     	
-    	std::chrono::high_resolution_clock::time_point frameStartTime;
-    	std::chrono::high_resolution_clock::time_point frameEndTime;
+    	std::chrono::steady_clock::time_point frameStartTime;
+    	std::chrono::steady_clock::time_point frameEndTime;
 
     	std::vector<ProfilerData::Event> events;
     };

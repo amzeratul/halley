@@ -272,13 +272,15 @@ void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, co
 			const auto eventRect = origin + Rect4f(startPos, e.depth * lineHeight, std::max(endPos - startPos, 1.0f), lineHeight);
 
 			const auto col = getEventColour(e);
+			if (eventRect.getSize().x > 0.95f) {
+				box
+					.setColour(col.multiplyAlpha(0.5f))
+					.setPosition(eventRect.getTopLeft() + Vector2f(1, 0))
+					.scaleTo(eventRect.getSize() - Vector2f(1, 0))
+					.draw(painter);
+			}
 			box
 				.setColour(col)
-				.setPosition(eventRect.getTopLeft())
-				.scaleTo(eventRect.getSize())
-				.draw(painter);
-			box
-				.setColour(col.inverseMultiplyLuma(0.5f))
 				.scaleTo(Vector2f(1.0f, eventRect.getHeight()))
 				.draw(painter);
 		}

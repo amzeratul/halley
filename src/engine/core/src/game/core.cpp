@@ -342,9 +342,8 @@ void Core::onFixedUpdate(Time time)
 
 void Core::onTick(Time time)
 {
-	const bool record = !profileCallbacks.empty();
-
 	auto& capture = ProfilerCapture::get();
+	const bool record = !profileCallbacks.empty();
 	capture.startFrame(record);
 	
 	if (api->system) {
@@ -372,9 +371,7 @@ void Core::onTick(Time time)
 
 void Core::doFixedUpdate(Time time)
 {
-	/*
-	HALLEY_DEBUG_TRACE();
-	
+	/*	
 	if (running && currentStage) {
 		ProfileEvent event(ProfilerEventType::CoreFixedUpdate);
 		try {
@@ -383,15 +380,11 @@ void Core::doFixedUpdate(Time time)
 			game->onUncaughtException(e, TimeLine::FixedUpdate);
 		}
 	}
-
-	HALLEY_DEBUG_TRACE();
 	*/
 }
 
 void Core::doVariableUpdate(Time time)
-{
-	HALLEY_DEBUG_TRACE();
-		
+{		
 	if (running && currentStage) {
 		ProfilerEvent event(ProfilerEventType::CoreVariableUpdate);
 		try {
@@ -400,14 +393,10 @@ void Core::doVariableUpdate(Time time)
 			game->onUncaughtException(e, TimeLine::VariableUpdate);
 		}
 	}
-	
-	HALLEY_DEBUG_TRACE();
 }
 
 void Core::doRender(Time)
 {
-	HALLEY_DEBUG_TRACE();
-
 	if (api->video) {
 		{
 			ProfilerEvent event(ProfilerEventType::CoreStartRender);
@@ -441,8 +430,6 @@ void Core::doRender(Time)
 		ProfilerEvent event(ProfilerEventType::CoreVSync);
 		api->video->finishRender();
 	}
-
-	HALLEY_DEBUG_TRACE();
 }
 
 void Core::showComputerInfo() const
