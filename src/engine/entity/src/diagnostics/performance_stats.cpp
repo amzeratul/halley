@@ -299,13 +299,13 @@ Colour4f PerformanceStatsView::getEventColour(const ProfilerData::Event& event) 
 	case ProfilerEventType::WorldFixedUpdate:
 	case ProfilerEventType::WorldVariableUpdate:
 		return Colour4f(0.1f, 0.1f, 0.7f);
-	case ProfilerEventType::CoreStartRender:
 	case ProfilerEventType::CoreRender:
 	case ProfilerEventType::WorldSystemRender:
 	case ProfilerEventType::WorldRender:
 		return Colour4f(0.7f, 0.1f, 0.1f);
 	case ProfilerEventType::PainterDrawCall:
 		return Colour4f(0.97f, 0.51f, 0.65f);
+	case ProfilerEventType::CoreStartRender:
 	case ProfilerEventType::PainterEndRender:
 		return Colour4f(1.0f, 0.61f, 0.75f);
 	case ProfilerEventType::PainterUpdateProjection:

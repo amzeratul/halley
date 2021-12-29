@@ -86,8 +86,8 @@ namespace Halley {
     class ProfilerCapture {
     public:
         struct EventId {
-	        uint32_t id;
-        	uint32_t frameN;
+	        uint32_t id = 0;
+        	uint32_t frameN = 0;
         };
     	
         ProfilerCapture();

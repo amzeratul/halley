@@ -185,13 +185,37 @@ Time ProfilerCapture::getFrameTime() const
 	return std::chrono::duration<Time>(frameEndTime - frameStartTime).count();
 }
 
+constexpr static bool isDevMode()
+{
+#ifdef DEV_BUILD
+	return true;
+#else
+	return false;
+#endif
+}
+
+constexpr static bool alwaysLogType(ProfilerEventType type)
+{
+	switch (type) {
+	case ProfilerEventType::CoreRender:
+	case ProfilerEventType::CoreVSync:
+	case ProfilerEventType::CoreFixedUpdate:
+	case ProfilerEventType::CoreVariableUpdate:
+		return true;
+	}
+	return false;
+}
 
 ProfilerEvent::ProfilerEvent(ProfilerEventType type, std::string_view name)
-	: id(ProfilerCapture::get().recordEventStart(type, name))
 {
+	if (isDevMode() || alwaysLogType(type)) {
+		id = ProfilerCapture::get().recordEventStart(type, name);
+	}
 }
 
 ProfilerEvent::~ProfilerEvent() noexcept
 {
-	ProfilerCapture::get().recordEventEnd(id);
+	if (id.id != std::numeric_limits<uint32_t>::max()) {
+		ProfilerCapture::get().recordEventEnd(id);
+	}
 }
