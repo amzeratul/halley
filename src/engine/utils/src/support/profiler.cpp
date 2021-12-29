@@ -107,8 +107,6 @@ ProfilerCapture& ProfilerCapture::get()
 
 ProfilerCapture::EventId ProfilerCapture::recordEventStart(ProfilerEventType type, std::string_view name)
 {
-	Expects(state == State::FrameStarted);
-	
 	if (recording) {
 		const auto id = curId++;
 		if (id < events.size()) {
@@ -123,8 +121,6 @@ ProfilerCapture::EventId ProfilerCapture::recordEventStart(ProfilerEventType typ
 
 void ProfilerCapture::recordEventEnd(EventId id)
 {
-	Expects(state == State::FrameStarted);
-	
 	if (recording && id.id != std::numeric_limits<uint32_t>::max()) {
 		const auto time = std::chrono::high_resolution_clock::now();
 		if (id.frameN == curFrame) {

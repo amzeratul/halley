@@ -31,7 +31,8 @@ namespace Halley
 		};
 		
 		TextRenderer headerText;
-		TextRenderer graphFPS;
+		TextRenderer fpsLabel;
+		TextRenderer graphLabel;
 
 		AveragingLatched<int64_t> totalFrameTime;
 		AveragingLatched<int64_t> vsyncTime;
@@ -39,7 +40,7 @@ namespace Halley
 		std::vector<FrameData> frameData;
 		size_t lastFrameData = 0;
 
-		const Sprite timelineBg;
+		const Sprite boxBg;
 		const Sprite whitebox;
 		
 		std::shared_ptr<ProfilerData> lastProfileData;
@@ -47,7 +48,8 @@ namespace Halley
 		void drawHeader(Painter& painter, bool simple);
 		void drawTimeline(Painter& painter, Rect4f rect);
 		void drawTimeGraph(Painter& painter, Rect4f rect);
-		void drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo);
+		void drawTimeGraphThreads(Painter& painter, Rect4f rect, Range<ProfilerData::TimePoint> timeRange);
+		void drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo, Range<ProfilerData::TimePoint> timeRange);
 		Colour4f getEventColour(const ProfilerData::Event& event) const;
 
 		int64_t getTimeNs(TimeLine timeline, const ProfilerData& data);

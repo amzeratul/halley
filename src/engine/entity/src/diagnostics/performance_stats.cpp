@@ -15,14 +15,15 @@ using namespace Halley;
 
 PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI& api)
 	: StatsView(resources, api)
-	, timelineBg(Sprite().setImage(resources, "halley/perf_graph.png"))
+	, boxBg(Sprite().setImage(resources, "halley/box_2px_outline.png"))
 	, whitebox(Sprite().setImage(resources, "whitebox.png"))
 {
 	api.core->addProfilerCallback(this);
 	
 	headerText = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
-	graphFPS = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f))
+	fpsLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f))
 		.setText("20\n\n30\n\n60").setAlignment(0.5f);
+	graphLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f)).setAlignment(0.5f);
 
 	constexpr size_t frameDataCapacity = 300;
 	frameData.resize(frameDataCapacity);
@@ -123,10 +124,26 @@ void PerformanceStatsView::drawTimeline(Painter& painter, Rect4f rect)
 	const float scale = maxFPS / 1'000'000.0f * displaySize.y;
 
 	const Vector2f boxPos = pos + Vector2f(20, 0);
-	timelineBg
+	boxBg
 		.clone()
 		.setPosition(boxPos - Vector2f(2, 2))
 		.scaleTo(displaySize + Vector2f(4, 4))
+		.draw(painter);
+
+	// 30 FPS bar
+	whitebox
+		.clone()
+		.setPosition(boxPos + Vector2f(0, displaySize.y / 3))
+		.scaleTo(Vector2f(displaySize.x, 1))
+		.setColour(Colour4f(0.75f))
+		.draw(painter);
+
+	// 60 FPS bar
+	whitebox
+		.clone()
+		.setPosition(boxPos + Vector2f(0, 2 * displaySize.y / 3))
+		.scaleTo(Vector2f(displaySize.x, 1))
+		.setColour(Colour4f(0.75f))
 		.draw(painter);
 
 	auto variableSprite = whitebox
@@ -164,8 +181,8 @@ void PerformanceStatsView::drawTimeline(Painter& painter, Rect4f rect)
 			.draw(painter);
 	}
 
-	graphFPS.setPosition(pos + Vector2f(5.0f, 10.0f)).draw(painter);
-	graphFPS.setPosition(pos + Vector2f(displaySize.x + 35.0f, 10.0f)).draw(painter);
+	fpsLabel.setPosition(pos + Vector2f(5.0f, 10.0f)).draw(painter);
+	fpsLabel.setPosition(pos + Vector2f(displaySize.x + 35.0f, 10.0f)).draw(painter);
 }
 
 void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
@@ -174,6 +191,50 @@ void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 		return;
 	}
 
+	const auto duration = std::chrono::duration<int64_t, std::nano>(16'999'999);
+	const auto timeRange = Range<ProfilerData::TimePoint>(lastProfileData->getStartTime(), lastProfileData->getStartTime() + duration);
+	const int64_t numMs = timeRange.getLength().count() / 1'000'000;
+
+	boxBg
+		.clone()
+		.setPosition(rect.getTopLeft())
+		.scaleTo(rect.getSize())
+		.draw(painter);
+
+	// Vertical dividers
+	const float divPerNs = rect.getWidth() / static_cast<float>(timeRange.getLength().count());
+	auto drawDivider = [&] (int64_t ns, Colour4f col, String label)
+	{
+		const float xPos = static_cast<float>(ns) * divPerNs;
+		whitebox
+			.clone()
+			.setPosition(rect.getTopLeft() + Vector2f(xPos, 0))
+			.scaleTo(Vector2f(1, rect.getHeight()))
+			.setColour(col)
+			.draw(painter);
+
+		if (!label.isEmpty()) {
+			graphLabel
+				.setPosition(rect.getBottomLeft() + Vector2f(xPos, 0))
+				.setColour(col)
+				.setText(label)
+				.draw(painter);
+		}
+	};
+
+	// 1 ms dividers
+	for (int64_t i = 1; i <= numMs; ++i) {
+		drawDivider(i * 1'000'000, Colour4f(0.75f), toString(i) + " ms");
+	}
+
+	// Vsync divider
+	drawDivider(16'666'666, Colour4f(1.0f, 0.75f, 0.0f), "vsync");
+
+	drawTimeGraphThreads(painter, rect.shrink(2), timeRange);
+}
+
+void PerformanceStatsView::drawTimeGraphThreads(Painter& painter, Rect4f rect, Range<ProfilerData::TimePoint> timeRange)
+{
 	const auto& threads = lastProfileData->getThreads();
 
 	int totalThreadDepth = 0;
@@ -186,16 +247,16 @@ void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 	int heightSoFar = 0;
 	for (const auto& threadInfo: threads) {
 		const int depth = threadInfo.maxDepth + 1;
-		drawTimeGraphThread(painter, Rect4f(rect.getLeft(), rect.getTop() + heightSoFar * threadHeight, rect.getWidth(), threadHeight * depth), threadInfo);
+		drawTimeGraphThread(painter, Rect4f(rect.getLeft(), rect.getTop() + heightSoFar * threadHeight, rect.getWidth(), threadHeight * depth), threadInfo, timeRange);
 		heightSoFar += depth;
 	}
 }
 
-void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo)
+void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo, Range<ProfilerData::TimePoint> timeRange)
 {
 	auto box = whitebox.clone();
-	const auto frameStartTime = lastProfileData->getStartTime();
-	const auto frameEndTime = lastProfileData->getEndTime();
+	const auto frameStartTime = timeRange.start;
+	const auto frameEndTime = timeRange.end;
 	const auto frameLength = frameEndTime - frameStartTime;
 
 	const auto origin = rect.getTopLeft();
