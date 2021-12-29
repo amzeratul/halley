@@ -138,7 +138,7 @@ size_t System::getSystemMessagesInInbox() const
 
 void System::doUpdate(Time time) {
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
-	ProfileEvent event(ProfilerEventType::WorldSystemUpdate, name);
+	ProfilerEvent event(ProfilerEventType::WorldSystemUpdate, name);
 
 	purgeMessages();
 	if (!messageTypesReceived.empty()) {
@@ -155,7 +155,7 @@ void System::doRender(RenderContext& rc) {
 		throw Exception("System " + name + " is being rendered before being initialised. Make sure a World::step() happens before World::render().", HalleyExceptions::Entity);
 	}
 	
-	ProfileEvent event(ProfilerEventType::WorldSystemRender, name);
+	ProfilerEvent event(ProfilerEventType::WorldSystemRender, name);
 	renderBase(rc);
 
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());

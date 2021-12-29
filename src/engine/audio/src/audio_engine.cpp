@@ -10,6 +10,7 @@
 #include "halley/support/logger.h"
 #include "halley/core/api/audio_api.h"
 #include "audio_variable_table.h"
+#include "halley/support/profiler.h"
 #include "halley/time/stopwatch.h"
 
 using namespace Halley;
@@ -126,6 +127,7 @@ void AudioEngine::pause()
 
 void AudioEngine::generateBuffer()
 {
+	//ProfileEvent event(ProfilerEventType::AudioGenerateBuffer);
 	Stopwatch timer;
 	timer.start();
 	

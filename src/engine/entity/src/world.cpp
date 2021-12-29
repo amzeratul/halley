@@ -440,7 +440,7 @@ bool World::hasSystemsOnTimeLine(TimeLine timeline) const
 
 void World::step(TimeLine timeline, Time elapsed)
 {
-	ProfileEvent event(timeline == TimeLine::FixedUpdate ? ProfilerEventType::WorldFixedUpdate : ProfilerEventType::WorldVariableUpdate);
+	ProfilerEvent event(timeline == TimeLine::FixedUpdate ? ProfilerEventType::WorldFixedUpdate : ProfilerEventType::WorldVariableUpdate);
 
 	spawnPending();
 
@@ -451,7 +451,7 @@ void World::step(TimeLine timeline, Time elapsed)
 
 void World::render(RenderContext& rc) const
 {
-	ProfileEvent event(ProfilerEventType::WorldSystemRender);
+	ProfilerEvent event(ProfilerEventType::WorldSystemRender);
 
 	renderSystems(rc);
 	rc.flush();

@@ -41,7 +41,7 @@ void PerformanceStatsView::update()
 
 void PerformanceStatsView::paint(Painter& painter)
 {
-	ProfileEvent event(ProfilerEventType::StatsView);
+	ProfilerEvent event(ProfilerEventType::StatsView);
 	painter.setLogging(false);
 
 	whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(painter.getViewPort().getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
@@ -158,12 +158,20 @@ void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 		return;
 	}
 
-	const auto threads = lastProfileData->getThreads();
-	const float threadHeight = std::min(160.0f, std::floor(rect.getHeight() / threads.size()));
-	int i = 0;
+	const auto& threads = lastProfileData->getThreads();
+
+	int totalThreadDepth = 0;
 	for (const auto& threadInfo: threads) {
-		drawTimeGraphThread(painter, Rect4f(rect.getLeft(), rect.getTop() + i * threadHeight, rect.getWidth(), threadHeight), threadInfo);
-		++i;
+		totalThreadDepth += threadInfo.maxDepth + 1;
+	}
+
+	const float threadSpacing = 10.0f;
+	const float threadHeight = std::min(50.0f, std::floor((rect.getHeight() - (threads.size() - 1) * threadSpacing) / static_cast<float>(totalThreadDepth)));
+	int heightSoFar = 0;
+	for (const auto& threadInfo: threads) {
+		const int depth = threadInfo.maxDepth + 1;
+		drawTimeGraphThread(painter, Rect4f(rect.getLeft(), rect.getTop() + heightSoFar * threadHeight, rect.getWidth(), threadHeight * depth), threadInfo);
+		heightSoFar += depth;
 	}
 }
 
@@ -225,6 +233,8 @@ Colour4f PerformanceStatsView::getEventColour(const ProfilerData::Event& event) 
 		return Colour4f(1.0f, 0.71f, 0.85f);
 	case ProfilerEventType::StatsView:
 		return Colour4f(0.7f, 0.7f, 0.7f);
+	case ProfilerEventType::AudioGenerateBuffer:
+		return Colour4f(0.5f, 0.8f, 1.0f);
 	default:
 		return Colour4f(0.1f, 0.7f, 0.1f);
 	}

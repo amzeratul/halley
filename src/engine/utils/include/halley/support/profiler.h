@@ -32,6 +32,8 @@ namespace Halley {
 		WorldSystemUpdate,
 		WorldSystemRender,
 
+		AudioGenerateBuffer,
+
 		StatsView,
 
 		Game
@@ -81,14 +83,19 @@ namespace Halley {
     	void processEvents();
     };
 	
-    class ProfileCapture {
+    class ProfilerCapture {
     public:
-        ProfileCapture();
+        struct EventId {
+	        uint32_t id;
+        	uint32_t frameN;
+        };
     	
-    	[[nodiscard]] static ProfileCapture& get();
+        ProfilerCapture();
+    	
+    	[[nodiscard]] static ProfilerCapture& get();
 
-    	[[nodiscard]] uint32_t recordEventStart(ProfilerEventType type, std::string_view name);
-    	void recordEventEnd(uint32_t id);
+    	[[nodiscard]] EventId recordEventStart(ProfilerEventType type, std::string_view name);
+    	void recordEventEnd(EventId id);
 
     	[[nodiscard]] bool isRecording() const;
 
@@ -105,25 +112,29 @@ namespace Halley {
     		FrameEnded
     	};
 
-    	bool recording = false;
+    	std::atomic<bool> recording;
+        State state = State::Idle;
+
     	std::atomic<uint32_t> curId;
+    	std::atomic<uint32_t> curFrame;
+    	
     	std::chrono::high_resolution_clock::time_point frameStartTime;
     	std::chrono::high_resolution_clock::time_point frameEndTime;
+
     	std::vector<ProfilerData::Event> events;
-        State state = State::Idle;
     };
 
-	class ProfileEvent {
+	class ProfilerEvent {
 	public:
-		ProfileEvent(ProfilerEventType type, std::string_view name = "");
-		~ProfileEvent() noexcept;
+		ProfilerEvent(ProfilerEventType type, std::string_view name = "");
+		~ProfilerEvent() noexcept;
 
-		ProfileEvent(const ProfileEvent& other) = delete;
-		ProfileEvent(ProfileEvent&& other) = delete;
-		ProfileEvent& operator=(const ProfileEvent& other) = delete;
-		ProfileEvent& operator=(ProfileEvent&& other) = delete;
+		ProfilerEvent(const ProfilerEvent& other) = delete;
+		ProfilerEvent(ProfilerEvent&& other) = delete;
+		ProfilerEvent& operator=(const ProfilerEvent& other) = delete;
+		ProfilerEvent& operator=(ProfilerEvent&& other) = delete;
 
 	private:
-		uint32_t id;
+		ProfilerCapture::EventId id;
 	};
 }

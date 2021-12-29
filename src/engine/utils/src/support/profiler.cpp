@@ -69,6 +69,10 @@ void ProfilerData::processEvents()
 	for (auto& e: events) {
 		auto& curThread = threadInfo[e.threadId];
 
+		// Normalize ends
+		e.startTime = clamp(e.startTime, frameStartTime, frameEndTime);
+		e.endTime = clamp(e.endTime, frameStartTime, frameEndTime);
+		
 		// If this event starts after the end of the previous stack, then it's not nested in it, pop previous.
 		// Repeat for as many levels as needed, up to the root
 		while (!curThread.stackEnds.empty() && e.startTime >= curThread.stackEnds.back()) {
@@ -87,19 +91,21 @@ void ProfilerData::processEvents()
 	}
 }
 
-ProfileCapture::ProfileCapture()
-	: curId(0)
+ProfilerCapture::ProfilerCapture()
+	: recording(false)
+	, curId(0)
+	, curFrame(0)
 {
 }
 
-ProfileCapture& ProfileCapture::get()
+ProfilerCapture& ProfilerCapture::get()
 {
 	// TODO: move to HalleyStatics?
-	static ProfileCapture profiler;
+	static ProfilerCapture profiler;
 	return profiler;
 }
 
-uint32_t ProfileCapture::recordEventStart(ProfilerEventType type, std::string_view name)
+ProfilerCapture::EventId ProfilerCapture::recordEventStart(ProfilerEventType type, std::string_view name)
 {
 	Expects(state == State::FrameStarted);
 	
@@ -109,32 +115,36 @@ uint32_t ProfileCapture::recordEventStart(ProfilerEventType type, std::string_vi
 			const auto threadId = std::this_thread::get_id();
 			const auto time = std::chrono::high_resolution_clock::now();
 			events[id] = ProfilerData::Event{ name, threadId, type, 0, id, time, {} };
-			return id;
+			return { id, curFrame };
 		}
 	}
-	return std::numeric_limits<uint32_t>::max();
+	return { std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max() };
 }
 
-void ProfileCapture::recordEventEnd(uint32_t id)
+void ProfilerCapture::recordEventEnd(EventId id)
 {
 	Expects(state == State::FrameStarted);
 	
-	if (recording && id != std::numeric_limits<uint32_t>::max()) {
+	if (recording && id.id != std::numeric_limits<uint32_t>::max()) {
 		const auto time = std::chrono::high_resolution_clock::now();
-		events[id].endTime = time;
+		if (id.frameN == curFrame) {
+			events[id.id].endTime = time;
+		} else {
+			// Event is from a previous frame, insert again
+			// TODO
+		}
 	}
 }
 
-bool ProfileCapture::isRecording() const
+bool ProfilerCapture::isRecording() const
 {
 	return recording;
 }
 
-void ProfileCapture::startFrame(bool rec, size_t maxFrames)
+void ProfilerCapture::startFrame(bool rec, size_t maxFrames)
 {
 	Expects(state != State::FrameStarted);
 	
-	recording = rec;
 	if (state == State::Idle) {
 		frameStartTime = std::chrono::high_resolution_clock::now();
 	} else {
@@ -143,15 +153,17 @@ void ProfileCapture::startFrame(bool rec, size_t maxFrames)
 	frameEndTime = {};
 	events.clear();
 	curId = 0;
+	++curFrame;
 
 	if (rec) {
 		events.resize(maxFrames);
 	}
 
+	recording = rec;
 	state = State::FrameStarted;
 }
 
-void ProfileCapture::endFrame()
+void ProfilerCapture::endFrame()
 {
 	Expects(state == State::FrameStarted);
 	
@@ -159,7 +171,7 @@ void ProfileCapture::endFrame()
 	state = State::FrameEnded;
 }
 
-ProfilerData ProfileCapture::getCapture()
+ProfilerData ProfilerCapture::getCapture()
 {
 	Expects(state == State::FrameEnded);
 
@@ -167,7 +179,7 @@ ProfilerData ProfileCapture::getCapture()
 	return ProfilerData(frameStartTime, frameEndTime, std::move(events));
 }
 
-Time ProfileCapture::getFrameTime() const
+Time ProfilerCapture::getFrameTime() const
 {
 	Expects(state == State::FrameEnded);
 	
@@ -175,12 +187,12 @@ Time ProfileCapture::getFrameTime() const
 }
 
 
-ProfileEvent::ProfileEvent(ProfilerEventType type, std::string_view name)
-	: id(ProfileCapture::get().recordEventStart(type, name))
+ProfilerEvent::ProfilerEvent(ProfilerEventType type, std::string_view name)
+	: id(ProfilerCapture::get().recordEventStart(type, name))
 {
 }
 
-ProfileEvent::~ProfileEvent() noexcept
+ProfilerEvent::~ProfilerEvent() noexcept
 {
-	ProfileCapture::get().recordEventEnd(id);
+	ProfilerCapture::get().recordEventEnd(id);
 }

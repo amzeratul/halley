@@ -293,7 +293,7 @@ void Core::pumpEvents(Time time)
 	auto input = dynamic_cast<InputAPIInternal*>(&*api->input);
 
 	{
-		ProfileEvent event(ProfilerEventType::CorePumpEvents);
+		ProfilerEvent event(ProfilerEventType::CorePumpEvents);
 		input->beginEvents(time);
 		if (!api->system->generateEvents(video, input)) {
 			// System close event
@@ -304,7 +304,7 @@ void Core::pumpEvents(Time time)
 	}
 
 	if (devConClient) {
-		ProfileEvent event(ProfilerEventType::CoreDevConClient);
+		ProfilerEvent event(ProfilerEventType::CoreDevConClient);
 		devConClient->update();
 	}
 }
@@ -312,7 +312,7 @@ void Core::pumpEvents(Time time)
 void Core::pumpAudio()
 {
 	if (api->audio) {
-		ProfileEvent event(ProfilerEventType::CorePumpAudio);
+		ProfilerEvent event(ProfilerEventType::CorePumpAudio);
 		api->audioInternal->pump();
 	}
 }
@@ -320,7 +320,7 @@ void Core::pumpAudio()
 void Core::updateSystem(Time time)
 {
 	if (api->system) {
-		ProfileEvent event(ProfilerEventType::CoreUpdateSystem);
+		ProfilerEvent event(ProfilerEventType::CoreUpdateSystem);
 		api->systemInternal->update(time);
 	}
 }
@@ -328,7 +328,7 @@ void Core::updateSystem(Time time)
 void Core::updatePlatform()
 {
 	if (api->platform) {
-		ProfileEvent event(ProfilerEventType::CoreUpdatePlatform);
+		ProfilerEvent event(ProfilerEventType::CoreUpdatePlatform);
 		api->platformInternal->update();
 	}
 }
@@ -344,7 +344,7 @@ void Core::onTick(Time time)
 {
 	const bool record = !profileCallbacks.empty();
 
-	auto& capture = ProfileCapture::get();
+	auto& capture = ProfilerCapture::get();
 	capture.startFrame(record);
 	
 	if (api->system) {
@@ -393,7 +393,7 @@ void Core::doVariableUpdate(Time time)
 	HALLEY_DEBUG_TRACE();
 		
 	if (running && currentStage) {
-		ProfileEvent event(ProfilerEventType::CoreVariableUpdate);
+		ProfilerEvent event(ProfilerEventType::CoreVariableUpdate);
 		try {
 			currentStage->onVariableUpdate(time);
 		} catch (Exception& e) {
@@ -410,12 +410,12 @@ void Core::doRender(Time)
 
 	if (api->video) {
 		{
-			ProfileEvent event(ProfilerEventType::CoreStartRender);
+			ProfilerEvent event(ProfilerEventType::CoreStartRender);
 			api->video->startRender();
 		}
 
 		{
-			ProfileEvent event(ProfilerEventType::CoreRender);
+			ProfilerEvent event(ProfilerEventType::CoreRender);
 
 			painter->startRender();
 			if (currentStage) {
@@ -438,7 +438,7 @@ void Core::doRender(Time)
 			painter->endRender();
 		}
 
-		ProfileEvent event(ProfilerEventType::CoreVSync);
+		ProfilerEvent event(ProfilerEventType::CoreVSync);
 		api->video->finishRender();
 	}
 

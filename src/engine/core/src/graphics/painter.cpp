@@ -55,7 +55,7 @@ void Painter::endRender()
 {
 	flush();
 	
-	ProfileEvent event(ProfilerEventType::PainterEndRender);
+	ProfilerEvent event(ProfilerEventType::PainterEndRender);
 	doEndRender();
 	camera = Camera();
 	viewPort = Rect4i(0, 0, 0, 0);
@@ -568,7 +568,7 @@ void Painter::executeDrawPrimitives(Material& material, size_t numVertices, void
 {
 	Expects(primitiveType == PrimitiveType::Triangle);
 
-	ProfileEvent event(ProfilerEventType::PainterDrawCall);
+	ProfilerEvent event(ProfilerEventType::PainterDrawCall);
 
 	startDrawCall();
 
@@ -670,7 +670,7 @@ void Painter::generateQuadIndicesOffset(IndexType pos, IndexType lineStride, Ind
 
 void Painter::updateProjection()
 {
-	ProfileEvent event(ProfilerEventType::PainterUpdateProjection);
+	ProfilerEvent event(ProfilerEventType::PainterUpdateProjection);
 	
 	camera.updateProjection(activeRenderTarget->getProjectionFlipVertical());
 	projection = camera.getProjection();
