@@ -9,7 +9,7 @@
 
 using namespace Halley;
 
-void ScreenOverlay::draw(RenderContext& context)
+void ScreenOverlay::draw(RenderContext& context, bool fullDraw)
 {
 	const auto viewPort = Rect4f(context.getDefaultRenderTarget().getViewPort());
 	const auto targetSize = Vector2f(1280, 720);
@@ -21,32 +21,30 @@ void ScreenOverlay::draw(RenderContext& context)
 		//.setViewPort(Rect4i(viewPort + ));
 
 	context.with(camera).bind([&](Painter& painter) {
-		paint(painter);
-		painter.flush();
+		if (fullDraw) {
+			paint(painter);
+		} else {
+			paintHidden(painter);
+		}
 	});
+}
+
+void ScreenOverlay::paintHidden(Painter& painter)
+{
 }
 
 StatsView::StatsView(Resources& resources, const HalleyAPI& api)
 	: resources(resources)
 	, api(api)
-	, timer(api.core->isDevMode() ? 300 : 30)
 {}
 
 void StatsView::update()
 {
-	if (!drawing) {
-		timer.beginSample();
-		timer.endSample();
-	}
-	drawing = false;
 }
 
-void StatsView::draw(RenderContext& context)
+void StatsView::draw(RenderContext& context, bool fullDraw)
 {
-	timer.beginSample();
-	ScreenOverlay::draw(context);
-	timer.endSample();
-	drawing = true;
+	ScreenOverlay::draw(context, fullDraw);
 }
 
 void StatsView::setWorld(const World* world)
@@ -57,5 +55,5 @@ void StatsView::setWorld(const World* world)
 String StatsView::formatTime(int64_t ns) const
 {
 	const int64_t us = (ns + 500) / 1000;
-	return toString(us / 1000) + "." + toString(us % 1000, 10, 3);
+	return toString(us / 1000, 10, 2, ' ') + "." + toString(us % 1000, 10, 3);
 }

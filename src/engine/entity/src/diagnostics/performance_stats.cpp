@@ -46,7 +46,7 @@ void PerformanceStatsView::paint(Painter& painter)
 
 	whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(painter.getViewPort().getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
 	
-	drawHeader(painter);
+	drawHeader(painter, false);
 	drawTimeline(painter, Rect4f(20, 80,	1240, 100));
 	drawTimeGraph(painter, Rect4f(20, 200, 1240, 500));
 	
@@ -54,11 +54,19 @@ void PerformanceStatsView::paint(Painter& painter)
 	painter.setLogging(true);
 }
 
+void PerformanceStatsView::paintHidden(Painter& painter)
+{
+	ProfilerEvent event(ProfilerEventType::StatsView);
+	painter.setLogging(false);
+	drawHeader(painter, true);
+	painter.setLogging(true);
+}
+
 
 void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 {
-	vsyncTime = data->getElapsedTime(ProfilerEventType::CoreVSync).count();
-	totalFrameTime = data->getTotalElapsedTime().count() - vsyncTime;
+	vsyncTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVSync).count());
+	totalFrameTime.pushValue(data->getTotalElapsedTime().count() - vsyncTime.getLatest());
 
 	auto getTime = [&](TimeLine timeline) -> int
 	{
@@ -75,27 +83,35 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	lastProfileData = std::move(data);
 }
 
-void PerformanceStatsView::drawHeader(Painter& painter)
+void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 {
-	const int curFPS = static_cast<int>(lround(1'000'000'000.0 / (totalFrameTime + vsyncTime)));
-	const int maxFPS = static_cast<int>(lround(1'000'000'000.0 / totalFrameTime));
+	const auto frameAvgTime = totalFrameTime.getAverage();
+	const auto vsyncAvgTime = vsyncTime.getAverage();
+	const int curFPS = static_cast<int>(lround(1'000'000'000.0 / (frameAvgTime + vsyncAvgTime)));
+	const int maxFPS = static_cast<int>(lround(1'000'000'000.0 / frameAvgTime));
 
+	String str = toString(curFPS, 10, 3, ' ') + " FPS / " + toString(maxFPS, 10, 4, ' ') + " FPS / " + formatTime(frameAvgTime) + " ms";
 	
-	String str = "Capped: " + formatTime(totalFrameTime + vsyncTime) + " ms [" + toString(curFPS) + " FPS] | Uncapped: " + formatTime(totalFrameTime) + " ms [" + toString(maxFPS) + " FPS].\n"
-		+ toString(painter.getPrevDrawCalls()) + " draw calls, " + toString(painter.getPrevTriangles()) + " triangles, " + toString(painter.getPrevVertices()) + " vertices.";
+	if (!simple) {
+		str += "\n" + toString(painter.getPrevDrawCalls()) + " calls, " + toString(painter.getPrevTriangles()) + " tris, " + toString(painter.getPrevVertices()) + " verts";
 
-	const auto audioSpec = api.audio->getAudioSpec();
-	if (audioSpec) {
-		const auto audioTime = api.audio->getLastTimeElapsed();
-		const float totalTimePerBuffer = static_cast<float>(audioSpec->bufferSize) / static_cast<float>(audioSpec->sampleRate);
-		const float audioTimeFloat = audioTime / 1'000'000'000.0f;
-		const int percent = lround(audioTimeFloat / totalTimePerBuffer * 100.0f);
-		str += "\nAudio time: " + formatTime(audioTime) + " ms (" + toString(percent) + "%)";
+		const auto audioSpec = api.audio->getAudioSpec();
+		if (audioSpec) {
+			const auto audioTime = api.audio->getLastTimeElapsed();
+			const int64_t totalTimePerBuffer = int64_t(audioSpec->bufferSize) * 1'000'000'000 / int64_t(audioSpec->sampleRate);
+			const int percent = lround(audioTime * 100 / totalTimePerBuffer * 100.0f);
+			str += "\nAudio time: " + formatTime(audioTime) + " ms / " + formatTime(totalTimePerBuffer) + " ms (" + toString(percent) + "%)";
+		}
+	}
+
+	if (simple) {
+		headerText.setPosition(Vector2f(1260, 700)).setOffset(Vector2f(1, 1)).setOutline(2.0f);
+	} else {
+		headerText.setPosition(Vector2f(10, 10)).setOffset(Vector2f()).setOutline(1.0f);
 	}
 	
 	headerText
 		.setText(str)
-		.setPosition(Vector2f(20, 20))
 		.draw(painter);
 }
 

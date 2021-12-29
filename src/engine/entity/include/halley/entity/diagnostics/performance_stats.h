@@ -1,5 +1,7 @@
 #pragma once
 
+#include <halley/utils/averaging.h>
+
 #include "stats_view.h"
 #include "halley/core/api/core_api.h"
 #include "halley/support/profiler.h"
@@ -16,6 +18,7 @@ namespace Halley
 
 		void update() override;
 		void paint(Painter& painter) override;
+		void paintHidden(Painter& painter) override;
 
 		void onProfileData(std::shared_ptr<ProfilerData> data) override;
 
@@ -30,8 +33,8 @@ namespace Halley
 		TextRenderer headerText;
 		TextRenderer graphFPS;
 
-		int64_t totalFrameTime = 0;
-		int64_t vsyncTime = 0;
+		AveragingLatched<int64_t> totalFrameTime;
+		AveragingLatched<int64_t> vsyncTime;
 		
 		std::vector<FrameData> frameData;
 		size_t lastFrameData = 0;
@@ -41,7 +44,7 @@ namespace Halley
 		
 		std::shared_ptr<ProfilerData> lastProfileData;
 
-		void drawHeader(Painter& painter);
+		void drawHeader(Painter& painter, bool simple);
 		void drawTimeline(Painter& painter, Rect4f rect);
 		void drawTimeGraph(Painter& painter, Rect4f rect);
 		void drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo);
