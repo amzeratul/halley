@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <numeric>
 
 namespace Halley {
     template <typename T, size_t nSamples = 30>
