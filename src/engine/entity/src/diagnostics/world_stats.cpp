@@ -18,6 +18,7 @@ WorldStatsView::WorldStatsView(Resources& resources, const HalleyAPI& api)
 
 void WorldStatsView::paint(Painter& painter)
 {
+	/*
 	int64_t grandTotal = 0;
 
 	TimeLine timelines[] = { TimeLine::FixedUpdate, TimeLine::VariableUpdate, TimeLine::Render };
@@ -87,4 +88,5 @@ void WorldStatsView::paint(Painter& painter)
 		.setText("Total elapsed: " + formatTime(grandTotal) + " ms [" + toString(maxFPS) + " FPS maximum].\n" + toString(painter.getPrevDrawCalls()) + " draw calls, " + toString(painter.getPrevTriangles()) + " triangles, " + toString(painter.getPrevVertices()) + " vertices.")
 		.setPosition(Vector2f(20, 20))
 		.draw(painter);
+	*/
 }

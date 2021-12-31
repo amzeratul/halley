@@ -12,21 +12,18 @@
 #include "halley/core/api/halley_api.h"
 #include "halley/core/graphics/render_context.h"
 #include "halley/support/logger.h"
+#include "halley/support/profiler.h"
 
 using namespace Halley;
 
-World::World(const HalleyAPI& api, Resources& resources, bool collectMetrics, CreateComponentFunction createComponent)
+World::World(const HalleyAPI& api, Resources& resources, CreateComponentFunction createComponent)
 	: api(api)
 	, resources(resources)
 	, createComponent(std::move(createComponent))
-	, collectMetrics(collectMetrics)
 	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
 	, componentDeleterTable(std::make_shared<ComponentDeleterTable>())
 	, entityPool(std::make_shared<PoolAllocator<Entity>>())
 {
-	for (auto& t: timer) {
-		t.setNumSamples(isDevMode() ? 300 : 30);
-	}
 }
 
 World::~World()
@@ -56,7 +53,7 @@ World::~World()
 
 std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode)
 {
-	auto world = std::make_unique<World>(api, resources, devMode, CreateEntityFunctions::getCreateComponent());
+	auto world = std::make_unique<World>(api, resources, CreateEntityFunctions::getCreateComponent());
 	const auto& sceneConfig = resources.get<ConfigFile>(sceneName)->getRoot();
 	world->loadSystems(sceneConfig, CreateEntityFunctions::getCreateSystem());
 	return world;
@@ -66,7 +63,6 @@ System& World::addSystem(std::unique_ptr<System> system, TimeLine timelineType)
 {
 	system->api = &api;
 	system->resources = &resources;
-	system->setCollectSamples(collectMetrics);
 	auto& ref = *system.get();
 	auto& timeline = getSystems(timelineType);
 	timeline.emplace_back(std::move(system));
@@ -442,42 +438,23 @@ bool World::hasSystemsOnTimeLine(TimeLine timeline) const
 	return !getSystems(timeline).empty();
 }
 
-int64_t World::getAverageTime(TimeLine timeline) const
-{
-	return timer[static_cast<int>(timeline)].averageElapsedNanoSeconds();
-}
-
 void World::step(TimeLine timeline, Time elapsed)
 {
-	auto& t = timer[static_cast<int>(timeline)];
-	if (collectMetrics) {
-		t.beginSample();
-	}
+	//ProfilerEvent event(timeline == TimeLine::FixedUpdate ? ProfilerEventType::WorldFixedUpdate : ProfilerEventType::WorldVariableUpdate);
 
 	spawnPending();
 
 	initSystems();
 	updateSystems(timeline, elapsed);
 	processSystemMessages(timeline);
-
-	if (collectMetrics) {
-		t.endSample();
-	}
 }
 
 void World::render(RenderContext& rc) const
 {
-	auto& t = timer[static_cast<int>(TimeLine::Render)];
-	if (collectMetrics) {
-		t.beginSample();
-	}
+	//ProfilerEvent event(ProfilerEventType::WorldSystemRender);
 
 	renderSystems(rc);
 	rc.flush();
-
-	if (collectMetrics) {
-		t.endSample();
-	}
 }
 
 void World::allocateEntity(Entity* entity) {

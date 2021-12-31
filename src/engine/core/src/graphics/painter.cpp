@@ -13,6 +13,7 @@
 
 #include "halley/maths/bezier.h"
 #include "halley/maths/polygon.h"
+#include "halley/support/profiler.h"
 #include "resources/resources.h"
 
 using namespace Halley;
@@ -53,6 +54,8 @@ void Painter::startRender()
 void Painter::endRender()
 {
 	flush();
+	
+	ProfilerEvent event(ProfilerEventType::PainterEndRender);
 	doEndRender();
 	camera = Camera();
 	viewPort = Rect4i(0, 0, 0, 0);
@@ -565,6 +568,8 @@ void Painter::executeDrawPrimitives(Material& material, size_t numVertices, void
 {
 	Expects(primitiveType == PrimitiveType::Triangle);
 
+	ProfilerEvent event(ProfilerEventType::PainterDrawCall);
+
 	startDrawCall();
 
 	// Load vertices
@@ -665,6 +670,8 @@ void Painter::generateQuadIndicesOffset(IndexType pos, IndexType lineStride, Ind
 
 void Painter::updateProjection()
 {
+	ProfilerEvent event(ProfilerEventType::PainterUpdateProjection);
+	
 	camera.updateProjection(activeRenderTarget->getProjectionFlipVertical());
 	projection = camera.getProjection();
 

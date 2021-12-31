@@ -64,7 +64,10 @@ namespace Halley {
 			return (start <= p.start) && (end >= p.end);
 		}
 
-		constexpr T getLength() const { return end - start; }
+		constexpr auto getLength() const -> decltype(end - start)
+		{
+			return end - start;
+		}
 
 		constexpr bool overlaps(const Range &p) const
 		{

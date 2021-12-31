@@ -32,14 +32,16 @@ namespace Halley {
 		void update() override;
 		void draw(RenderContext& context) override;
 
+		void setActive(bool active);
+		bool isActive() const;
+
 		void setWorld(const World* world);
 
     protected:
         Resources& resources;
         const HalleyAPI& api;
         const World* world = nullptr;
-        StopwatchRollingAveraging timer;
-        bool drawing = false;
+		bool active = true;
 
         String formatTime(int64_t ns) const;
     };

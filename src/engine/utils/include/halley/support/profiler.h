@@ -2,53 +2,139 @@
 
 #include "halley/text/halleystring.h"
 #include <thread>
+#include <gsl/span>
+#include <atomic>
 
 #include "halley/data_structures/hash_map.h"
+#include "halley/time/halleytime.h"
 
 namespace Halley {
+	enum class ProfilerEventType {
+	    CorePumpEvents,
+		CoreDevConClient,
+		CorePumpAudio,
+		CoreFixedUpdate,
+		CoreVariableUpdate,
+		CoreUpdateSystem,
+		CoreUpdatePlatform,
+		CoreUpdate,
+		CoreStartRender,
+		CoreRender,
+		CoreVSync,
+
+		PainterDrawCall,
+		PainterEndRender,
+		PainterUpdateProjection,
+
+		WorldVariableUpdate,
+		WorldFixedUpdate,
+		WorldRender,
+		WorldSystemUpdate,
+		WorldSystemRender,
+
+		AudioGenerateBuffer,
+
+		StatsView,
+
+		Game
+    };	
+
     class ProfilerData {
     public:
+        using TimePoint = std::chrono::steady_clock::time_point;
+    	using Duration = std::chrono::duration<int64_t, std::nano>;
+    	
 		class Event {
         public:
 	        String name;
         	std::thread::id threadId;
+			ProfilerEventType type;
+			int depth;
         	uint32_t id;
-        	std::chrono::high_resolution_clock::time_point startTime;
-        	std::chrono::high_resolution_clock::time_point endTime;
+        	TimePoint startTime;
+        	TimePoint endTime;
         };
 
-    	std::chrono::high_resolution_clock::time_point frameStartTime;
-    	std::chrono::high_resolution_clock::time_point frameEndTime;
-    	std::vector<Event> events;
-    };
-	
-    class ProfileCapture {
-    public:
-        ProfileCapture();
-    	
-    	static ProfileCapture& get();
+    	class ThreadInfo {
+    	public:
+    		std::thread::id id;
+    		int maxDepth = 0;
+    		String name;
+    	};
 
-    	uint32_t recordEventStart(std::string_view name);
-    	void recordEventEnd(uint32_t id);
+    	ProfilerData() = default;
+    	ProfilerData(TimePoint frameStartTime, TimePoint frameEndTime, std::vector<Event> events);
 
-    	bool isRecording() const;
+    	TimePoint getStartTime() const;
+    	TimePoint getEndTime() const;
+    	const std::vector<Event>& getEvents() const;
+    	Duration getTotalElapsedTime() const;
+		Duration getElapsedTime(ProfilerEventType eventType) const;
 
-    	void startFrame(bool record, size_t maxEvents = 10240);
-    	ProfilerData endFrame();
+    	gsl::span<const ThreadInfo> getThreads() const;
 
     private:
-    	bool recording = false;
+    	TimePoint frameStartTime;
+    	TimePoint frameEndTime;
+    	std::vector<Event> events;
+
+    	std::vector<ThreadInfo> threads;
+
+    	void processEvents();
+    };
+	
+    class ProfilerCapture {
+    public:
+        struct EventId {
+	        uint32_t id = 0;
+        	uint32_t frameN = 0;
+        };
+    	
+        ProfilerCapture();
+    	
+    	[[nodiscard]] static ProfilerCapture& get();
+
+    	[[nodiscard]] EventId recordEventStart(ProfilerEventType type, std::string_view name);
+    	void recordEventEnd(EventId id);
+
+    	[[nodiscard]] bool isRecording() const;
+
+    	void startFrame(bool record, size_t maxEvents = 10240);
+    	void endFrame();
+		ProfilerData getCapture();
+
+    	Time getFrameTime() const;
+
+    private:
+    	enum class State {
+    		Idle,
+    		FrameStarted,
+    		FrameEnded
+    	};
+
+    	std::atomic<bool> recording;
+        State state = State::Idle;
+
     	std::atomic<uint32_t> curId;
-    	std::chrono::high_resolution_clock::time_point frameStartTime;
+    	std::atomic<uint32_t> curFrame;
+    	
+    	std::chrono::steady_clock::time_point frameStartTime;
+    	std::chrono::steady_clock::time_point frameEndTime;
+
     	std::vector<ProfilerData::Event> events;
     };
 
-	class ProfileEvent {
+	class ProfilerEvent {
 	public:
-		ProfileEvent(std::string_view name);
-		~ProfileEvent() noexcept;
+		ProfilerEvent(ProfilerEventType type, std::string_view name = "");
+		~ProfilerEvent() noexcept;
+
+		ProfilerEvent(const ProfilerEvent& other) = delete;
+		ProfilerEvent(ProfilerEvent&& other) = delete;
+		ProfilerEvent& operator=(const ProfilerEvent& other) = delete;
+		ProfilerEvent& operator=(ProfilerEvent&& other) = delete;
 
 	private:
-		uint32_t id;
+		ProfilerCapture::EventId id;
 	};
 }

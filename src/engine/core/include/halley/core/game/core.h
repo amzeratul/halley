@@ -12,6 +12,7 @@
 #include "halley_statics.h"
 #include <halley/data_structures/tree_map.h>
 #include "halley/support/logger.h"
+#include "halley/support/profiler.h"
 
 namespace Halley
 {
@@ -37,12 +38,10 @@ namespace Halley
 		Stage& getCurrentStage() override;
 		void quit(int exitCode = 0) override;
 		const Environment& getEnvironment() override;
-		int64_t getTime(CoreAPITimer timer, TimeLine tl, StopwatchRollingAveraging::Mode mode) const override;
-		void setTimerPaused(CoreAPITimer timer, TimeLine tl, bool paused) override;
 		bool isDevMode() override;
 		
 		void onFixedUpdate(Time time) override;
-		void onVariableUpdate(Time time) override;
+		void onTick(Time time) override;
 		bool isRunning() const override	{ return running; }
 		bool transitionStage() override;
 		const HalleyAPI& getAPI() const override { return *api; }
@@ -61,6 +60,9 @@ namespace Halley
 
 		void log(LoggerLevel level, const String& msg) override;
 
+		void addProfilerCallback(IProfileCallback* callback) override;
+		void removeProfilerCallback(IProfileCallback* callback) override;
+
 		int getExitCode() const { return exitCode; }
 
 	private:
@@ -77,15 +79,11 @@ namespace Halley
 
 		void pumpEvents(Time time);
 		void pumpAudio();
+		void updateSystem(Time time);
+		void updatePlatform();
 
-		void setupTimers();
-		const StopwatchRollingAveraging& getTimer(CoreAPITimer timer, TimeLine tl) const;
-		StopwatchRollingAveraging& getTimer(CoreAPITimer timer, TimeLine tl);
-
-		std::array<StopwatchRollingAveraging, int(TimeLine::NUMBER_OF_TIMELINES)> engineTimers;
-		std::array<StopwatchRollingAveraging, int(TimeLine::NUMBER_OF_TIMELINES)> gameTimers;
-		StopwatchRollingAveraging vsyncTimer;
-		StopwatchRollingAveraging dummyTimer;
+		void onProfileData(std::shared_ptr<ProfilerData> data);
+		Time getProfileCaptureThreshold() const;
 
 		Vector<String> args;
 
@@ -112,6 +110,8 @@ namespace Halley
 
 		std::unique_ptr<DevConClient> devConClient;
 
+		std::vector<IProfileCallback*> profileCallbacks;
+		
 		TreeMap<PluginType, Vector<std::unique_ptr<Plugin>>> plugins;
 		HalleyStatics statics;
 	};

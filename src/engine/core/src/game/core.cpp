@@ -21,6 +21,8 @@
 #include "entry/entry_point.h"
 #include "halley/core/devcon/devcon_client.h"
 #include "halley/net/connection/network_service.h"
+#include "halley/support/profiler.h"
+#include "halley/utils/algorithm.h"
 #include "halley/utils/halley_iostream.h"
 
 #ifdef _MSC_VER
@@ -199,9 +201,6 @@ void Core::init()
 
 	// Start game
 	setStage(game->startGame());
-
-	// Init timers
-	setupTimers();
 	
 	// Get video resources
 	if (api->video) {
@@ -292,15 +291,20 @@ void Core::pumpEvents(Time time)
 {
 	auto video = dynamic_cast<VideoAPIInternal*>(&*api->video);
 	auto input = dynamic_cast<InputAPIInternal*>(&*api->input);
-	input->beginEvents(time);
-	if (!api->system->generateEvents(video, input)) {
-		// System close event
-		if (!currentStage || currentStage->onQuitRequested()) {
-			quit(0);
+
+	{
+		ProfilerEvent event(ProfilerEventType::CorePumpEvents);
+		input->beginEvents(time);
+		if (!api->system->generateEvents(video, input)) {
+			// System close event
+			if (!currentStage || currentStage->onQuitRequested()) {
+				quit(0);
+			}
 		}
 	}
 
 	if (devConClient) {
+		ProfilerEvent event(ProfilerEventType::CoreDevConClient);
 		devConClient->update();
 	}
 }
@@ -308,24 +312,25 @@ void Core::pumpEvents(Time time)
 void Core::pumpAudio()
 {
 	if (api->audio) {
-		HALLEY_DEBUG_TRACE();
+		ProfilerEvent event(ProfilerEventType::CorePumpAudio);
 		api->audioInternal->pump();
-		HALLEY_DEBUG_TRACE();
 	}
 }
 
-void Core::setupTimers()
+void Core::updateSystem(Time time)
 {
-	const bool devMode = isDevMode();
-	const size_t nSamples = devMode ? 300 : 30;
-	for (auto& timer: engineTimers) {
-		timer.setNumSamples(nSamples);
+	if (api->system) {
+		ProfilerEvent event(ProfilerEventType::CoreUpdateSystem);
+		api->systemInternal->update(time);
 	}
-	for (auto& timer : gameTimers) {
-		timer.setNumSamples(nSamples);
+}
+
+void Core::updatePlatform()
+{
+	if (api->platform) {
+		ProfilerEvent event(ProfilerEventType::CoreUpdatePlatform);
+		api->platformInternal->update();
 	}
-	vsyncTimer.setNumSamples(nSamples);
-	dummyTimer.setNumSamples(nSamples);
 }
 
 void Core::onFixedUpdate(Time time)
@@ -335,129 +340,96 @@ void Core::onFixedUpdate(Time time)
 	}
 }
 
-void Core::onVariableUpdate(Time time)
+void Core::onTick(Time time)
 {
+	auto& capture = ProfilerCapture::get();
+	const bool record = !profileCallbacks.empty();
+	capture.startFrame(record);
+	
 	if (api->system) {
 		api->systemInternal->onTickMainLoop();
 	}
 	
 	if (isRunning()) {
+		pumpEvents(time);
+
 		doVariableUpdate(time);
+		
+		pumpAudio();
+		updatePlatform();
+		updateSystem(time);
+	}
+	if (isRunning()) { // Check again, it might have changed
+		doRender(time);
 	}
 
-	if (isRunning()) {
-		doRender(time);
+	capture.endFrame();
+	if (record && capture.getFrameTime() >= getProfileCaptureThreshold()) {
+		onProfileData(std::make_shared<ProfilerData>(capture.getCapture()));
 	}
 }
 
 void Core::doFixedUpdate(Time time)
 {
-	HALLEY_DEBUG_TRACE();
-	auto& engineTimer = engineTimers[int(TimeLine::FixedUpdate)];
-	auto& gameTimer = gameTimers[int(TimeLine::FixedUpdate)];
-
-	gameTimer.beginSample();
+	/*	
 	if (running && currentStage) {
+		ProfileEvent event(ProfilerEventType::CoreFixedUpdate);
 		try {
 			currentStage->onFixedUpdate(time);
 		} catch (Exception& e) {
 			game->onUncaughtException(e, TimeLine::FixedUpdate);
 		}
 	}
-	gameTimer.endSample();
-
-	engineTimer.beginSample();
-	pumpAudio();
-	engineTimer.endSample();
-	HALLEY_DEBUG_TRACE();
+	*/
 }
 
 void Core::doVariableUpdate(Time time)
-{
-	HALLEY_DEBUG_TRACE();
-	auto& engineTimer = engineTimers[int(TimeLine::VariableUpdate)];
-	auto& gameTimer = gameTimers[int(TimeLine::VariableUpdate)];
-
-	engineTimer.beginSample();
-	pumpEvents(time);
-	engineTimer.pause();
-	
-	gameTimer.beginSample();
+{		
 	if (running && currentStage) {
+		ProfilerEvent event(ProfilerEventType::CoreVariableUpdate);
 		try {
 			currentStage->onVariableUpdate(time);
 		} catch (Exception& e) {
 			game->onUncaughtException(e, TimeLine::VariableUpdate);
 		}
 	}
-	gameTimer.endSample();
-
-	engineTimer.resume();
-	pumpAudio();
-
-	if (api->platform) {
-		api->platformInternal->update();
-	}
-	if (api->system) {
-		api->systemInternal->update(time);
-	}
-
-	engineTimer.endSample();
-	HALLEY_DEBUG_TRACE();
 }
 
 void Core::doRender(Time)
 {
-	HALLEY_DEBUG_TRACE();
-	auto& engineTimer = engineTimers[int(TimeLine::Render)];
-	auto& gameTimer = gameTimers[int(TimeLine::Render)];
-	bool gameSampled = false;
-	engineTimer.beginSample();
-
 	if (api->video) {
-		api->video->startRender();
-		painter->startRender();
-
-		if (currentStage) {
-			auto windowSize = api->video->getWindow().getDefinition().getSize();
-			if (windowSize != prevWindowSize) {
-				screenTarget.reset();
-				screenTarget = api->video->createScreenRenderTarget();
-				camera = std::make_unique<Camera>(Vector2f(windowSize) * 0.5f);
-				prevWindowSize = windowSize;
-			}
-			RenderContext context(*painter, *camera, *screenTarget);
-
-			engineTimer.pause();
-			gameTimer.beginSample();
-
-			try {
-				currentStage->onRender(context);
-			} catch (Exception& e) {
-				game->onUncaughtException(e, TimeLine::Render);
-			}
-
-			gameTimer.endSample();
-			engineTimer.resume();
-			gameSampled = true;
+		{
+			ProfilerEvent event(ProfilerEventType::CoreStartRender);
+			api->video->startRender();
 		}
 
-		painter->endRender();
+		{
+			ProfilerEvent event(ProfilerEventType::CoreRender);
 
-		engineTimer.pause();
-		vsyncTimer.beginSample();
+			painter->startRender();
+			if (currentStage) {
+				auto windowSize = api->video->getWindow().getDefinition().getSize();
+				if (windowSize != prevWindowSize) {
+					screenTarget.reset();
+					screenTarget = api->video->createScreenRenderTarget();
+					camera = std::make_unique<Camera>(Vector2f(windowSize) * 0.5f);
+					prevWindowSize = windowSize;
+				}
+				RenderContext context(*painter, *camera, *screenTarget);
+
+				try {
+					currentStage->onRender(context);
+				} catch (Exception& e) {
+					game->onUncaughtException(e, TimeLine::Render);
+				}
+			}
+
+			painter->endRender();
+		}
+
+		ProfilerEvent event(ProfilerEventType::CoreVSync);
 		api->video->finishRender();
-		vsyncTimer.endSample();
-		engineTimer.resume();
 	}
-
-	if (!gameSampled) {
-		gameTimer.beginSample();
-		gameTimer.endSample();
-	}
-
-	engineTimer.endSample();
-	HALLEY_DEBUG_TRACE();
 }
 
 void Core::showComputerInfo() const
@@ -508,46 +480,6 @@ const Environment& Core::getEnvironment()
 {
 	Expects(environment != nullptr);
 	return *environment;
-}
-
-const StopwatchRollingAveraging& Core::getTimer(CoreAPITimer timer, TimeLine tl) const
-{
-	switch (timer) {
-	case CoreAPITimer::Engine:
-		return engineTimers[int(tl)];
-	case CoreAPITimer::Game:
-		return gameTimers[int(tl)];
-	case CoreAPITimer::Vsync:
-		return vsyncTimer;
-	}
-	return dummyTimer;
-}
-
-StopwatchRollingAveraging& Core::getTimer(CoreAPITimer timer, TimeLine tl)
-{
-	switch (timer) {
-	case CoreAPITimer::Engine:
-		return engineTimers[int(tl)];
-	case CoreAPITimer::Game:
-		return gameTimers[int(tl)];
-	case CoreAPITimer::Vsync:
-		return vsyncTimer;
-	}
-	return dummyTimer;
-}
-
-int64_t Core::getTime(CoreAPITimer timerType, TimeLine tl, StopwatchRollingAveraging::Mode mode) const
-{
-	return getTimer(timerType, tl).elapsedNanoSeconds(mode);
-}
-
-void Core::setTimerPaused(CoreAPITimer timer, TimeLine tl, bool paused)
-{
-	if (paused) {
-		getTimer(timer, tl).pause();
-	} else {
-		getTimer(timer, tl).resume();
-	}
 }
 
 bool Core::isDevMode()
@@ -659,4 +591,32 @@ void IHalleyEntryPoint::initSharedStatics(const HalleyStatics& parent)
 {
 	static HalleyStatics statics(parent);
 	statics.setupGlobals();
+}
+
+void Core::onProfileData(std::shared_ptr<ProfilerData> data)
+{
+	for (auto* c: profileCallbacks) {
+		c->onProfileData(data);
+	}
+}
+
+Time Core::getProfileCaptureThreshold() const
+{
+	Time t = std::numeric_limits<Time>::infinity();
+	for (const auto* c: profileCallbacks) {
+		t = std::min(t, c->getThreshold());
+	}
+	return t;
+}
+
+void Core::addProfilerCallback(IProfileCallback* callback)
+{
+	if (!std_ex::contains(profileCallbacks, callback)) {
+		profileCallbacks.push_back(callback);
+	}
+}
+
+void Core::removeProfilerCallback(IProfileCallback* callback)
+{
+	std_ex::erase_if(profileCallbacks, [&] (const auto& c) { return c == callback; });
 }

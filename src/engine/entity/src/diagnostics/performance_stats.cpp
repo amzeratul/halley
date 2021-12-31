@@ -7,6 +7,7 @@
 #include "halley/core/graphics/painter.h"
 #include "halley/core/resources/resources.h"
 #include "halley/support/logger.h"
+#include "halley/support/profiler.h"
 #include "halley/time/halleytime.h"
 #include "halley/time/stopwatch.h"
 
@@ -14,61 +15,66 @@ using namespace Halley;
 
 PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI& api)
 	: StatsView(resources, api)
-	, bg(Sprite().setImage(resources, "halley/perf_graph.png"))
+	, boxBg(Sprite().setImage(resources, "halley/box_2px_outline.png"))
 	, whitebox(Sprite().setImage(resources, "whitebox.png"))
 {
+	api.core->addProfilerCallback(this);
+	
 	headerText = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
-	timelineData[0].setText(headerText);
-	timelineData[1].setText(headerText);
-	timelineData[2].setText(headerText);
-	graphFPS = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f))
+	fpsLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f))
 		.setText("20\n\n30\n\n60").setAlignment(0.5f);
+	graphLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f)).setAlignment(0.5f);
+
+	for (size_t i = 0; i < 5; ++i) {
+		systemLabels.push_back(headerText.clone());
+	}
 
 	constexpr size_t frameDataCapacity = 300;
 	frameData.resize(frameDataCapacity);
 	lastFrameData = frameDataCapacity - 1;
 }
 
+PerformanceStatsView::~PerformanceStatsView()
+{
+	api.core->removeProfilerCallback(this);
+}
+
 void PerformanceStatsView::update()
 {
 	StatsView::update();
-	collectData();
 }
 
 void PerformanceStatsView::paint(Painter& painter)
 {
+	ProfilerEvent event(ProfilerEventType::StatsView);
 	painter.setLogging(false);
 
-	drawHeader(painter);
-	drawGraph(painter, Vector2f(20, 80));
-	drawTimeline(painter, "Fixed", TimeLine::FixedUpdate, Vector2f(25, 200));
-	drawTimeline(painter, "Variable", TimeLine::VariableUpdate, Vector2f(25 + 410, 200));
-	drawTimeline(painter, "Render", TimeLine::Render, Vector2f(25 + 410 * 2, 200));
+	if (active) {
+		whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(painter.getViewPort().getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
+		
+		drawHeader(painter, false);
+		drawTimeline(painter, Rect4f(20, 80,	1240, 100));
+
+		if (page == 0) {
+			drawTimeGraph(painter, Rect4f(20, 200, 1240, 500));
+		} else if (page == 1) {
+			drawTopSystems(painter, Rect4f(20, 200, 1240, 500));
+		}
+	} else {
+		drawHeader(painter, true);
+	}
 	
-	painter.flush();
 	painter.setLogging(true);
 }
 
-void PerformanceStatsView::TimeLineData::setText(const TextRenderer& text)
+void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 {
-	col0Text = text;
-	col1Text = text;
-	col2Text = text;
-}
-
-void PerformanceStatsView::collectData()
-{
-	totalFrameTime = 0;
-
-	const TimeLine timelines[] = { TimeLine::FixedUpdate, TimeLine::VariableUpdate, TimeLine::Render };
-	for (const auto timeline: timelines) {
-		collectTimelineData(timeline);
-	}
-	vsyncTime = api.core->getTime(CoreAPITimer::Vsync, TimeLine::Render, StopwatchRollingAveraging::Mode::Average);
+	vsyncTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVSync).count());
+	totalFrameTime.pushValue(data->getTotalElapsedTime().count() - vsyncTime.getLatest());
 
 	auto getTime = [&](TimeLine timeline) -> int
 	{
-		const auto ns = getTimeNs(timeline);
+		const auto ns = getTimeNs(timeline, *data);
 		return static_cast<int>((ns + 500) / 1000);
 	};
 
@@ -77,128 +83,127 @@ void PerformanceStatsView::collectData()
 	curFrameData.fixedTime = getTime(TimeLine::FixedUpdate);
 	curFrameData.variableTime = getTime(TimeLine::VariableUpdate);
 	curFrameData.renderTime = getTime(TimeLine::Render);
-}
 
-void PerformanceStatsView::collectTimelineData(TimeLine timeline)
-{
-	auto& tl = timelineData[static_cast<int>(timeline)];
-	auto& curTop = tl.topSystems;
-	curTop.clear();
-
-	auto& coreAPI = *api.core;
-	const auto engineTime = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Average);
-	const auto gameTime = coreAPI.getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Average);
-	const auto engineTimeMax = coreAPI.getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Max);
-	const auto gameTimeMax = coreAPI.getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Max);
-	
-	tl.average = engineTime + gameTime;
-	tl.max = engineTimeMax + gameTimeMax;
-	totalFrameTime += tl.average;
-	if (timeline == TimeLine::Render) {
-		tl.average -= timer.averageElapsedNanoSeconds();
-	}
-
-	if (world) {
-		for (const auto& system : world->getSystems(timeline)) {
-			tryInsert(curTop, *system);
+	for (const auto& e: data->getEvents()) {
+		if (e.type == ProfilerEventType::WorldSystemUpdate || e.type == ProfilerEventType::WorldSystemRender) {
+			eventHistory[e.name].update(e.type, (e.endTime - e.startTime).count());
 		}
 	}
-}
 
-void PerformanceStatsView::tryInsert(std::vector<SystemData>& curTop, const System& system)
-{
-	const auto avg = system.getNanoSecondsTakenAvg();
-	const auto max = system.getNanoSecondsTakenMax();
-	const auto score = (avg + max) / 2;
-	
-	constexpr int systemsToTrack = 5;
-	const int64_t minScore = curTop.size() < systemsToTrack ? -1 : curTop.back().score;
-	if (curTop.size() < systemsToTrack) {
-		curTop.emplace_back();
-	}
-
-	if (score > minScore) {
-		auto& sys = curTop.back();
-		sys.name = system.getName();
-		sys.max = max;
-		sys.average = avg;
-		sys.score = score;
-
-		std::sort(curTop.begin(), curTop.end(), [=](const SystemData& a, const SystemData& b) { return a.score > b.score; });
+	if (capturing) {
+		lastProfileData = std::move(data);
 	}
 }
 
-void PerformanceStatsView::drawHeader(Painter& painter)
+int PerformanceStatsView::getPage() const
 {
-	const int curFPS = static_cast<int>(lround(1'000'000'000.0 / (totalFrameTime + vsyncTime)));
-	const int maxFPS = static_cast<int>(lround(1'000'000'000.0 / totalFrameTime));
+	return page;
+}
 
+void PerformanceStatsView::setPage(int page)
+{
+	this->page = page;
+}
+
+PerformanceStatsView::EventHistoryData::EventHistoryData()
+	: average(120)
+{
+}
+
+void PerformanceStatsView::EventHistoryData::update(ProfilerEventType type, int64_t value)
+{
+	this->type = type;
+	const bool reset = average.pushValue(value);
+	if (reset) {
+		lastHighest = highest;
+		lastLowest = lowest;
+		highest = 0;
+		lowest = std::numeric_limits<int64_t>::max();
+	}
+	highest = std::max(highest, value);
+	lowest = std::min(lowest, value);
+}
+
+int64_t PerformanceStatsView::EventHistoryData::getAverage() const
+{
+	return average.getAverage();
+}
+
+int64_t PerformanceStatsView::EventHistoryData::getHighest() const
+{
+	return lastHighest;
+}
+
+int64_t PerformanceStatsView::EventHistoryData::getLowest() const
+{
+	return lastLowest;
+}
+
+ProfilerEventType PerformanceStatsView::EventHistoryData::getType() const
+{
+	return type;
+}
+
+void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
+{
+	const auto frameAvgTime = totalFrameTime.getAverage();
+	const auto vsyncAvgTime = vsyncTime.getAverage();
+	const int curFPS = static_cast<int>(lround(1'000'000'000.0 / (frameAvgTime + vsyncAvgTime)));
+	const int maxFPS = static_cast<int>(lround(1'000'000'000.0 / frameAvgTime));
+
+	String str = toString(curFPS, 10, 3, ' ') + " FPS / " + toString(maxFPS, 10, 4, ' ') + " FPS / " + formatTime(frameAvgTime) + " ms";
 	
-	String str = "Capped: " + formatTime(totalFrameTime + vsyncTime) + " ms [" + toString(curFPS) + " FPS] | Uncapped: " + formatTime(totalFrameTime) + " ms [" + toString(maxFPS) + " FPS].\n"
-		+ toString(painter.getPrevDrawCalls()) + " draw calls, " + toString(painter.getPrevTriangles()) + " triangles, " + toString(painter.getPrevVertices()) + " vertices.";
+	if (!simple) {
+		str += "\n" + toString(painter.getPrevDrawCalls()) + " calls, " + toString(painter.getPrevTriangles()) + " tris, " + toString(painter.getPrevVertices()) + " verts";
 
-	const auto audioSpec = api.audio->getAudioSpec();
-	if (audioSpec) {
-		const auto audioTime = api.audio->getLastTimeElapsed();
-		const float totalTimePerBuffer = static_cast<float>(audioSpec->bufferSize) / static_cast<float>(audioSpec->sampleRate);
-		const float audioTimeFloat = audioTime / 1'000'000'000.0f;
-		const int percent = lround(audioTimeFloat / totalTimePerBuffer * 100.0f);
-		str += "\nAudio time: " + formatTime(audioTime) + " ms (" + toString(percent) + "%)";
+		const auto audioSpec = api.audio->getAudioSpec();
+		if (audioSpec) {
+			const auto audioTime = api.audio->getLastTimeElapsed();
+			const int64_t totalTimePerBuffer = int64_t(audioSpec->bufferSize) * 1'000'000'000 / int64_t(audioSpec->sampleRate);
+			const int percent = lround(audioTime * 100 / totalTimePerBuffer * 100.0f);
+			str += "\nAudio time: " + formatTime(audioTime) + " ms / " + formatTime(totalTimePerBuffer) + " ms (" + toString(percent) + "%)";
+		}
+	}
+
+	if (simple) {
+		headerText.setPosition(Vector2f(1260, 700)).setOffset(Vector2f(1, 1)).setOutline(2.0f);
+	} else {
+		headerText.setPosition(Vector2f(10, 10)).setOffset(Vector2f()).setOutline(1.0f);
 	}
 	
 	headerText
 		.setText(str)
-		.setPosition(Vector2f(20, 20))
 		.draw(painter);
 }
 
-void PerformanceStatsView::drawTimeline(Painter& painter, const String& label, TimeLine timeline, Vector2f pos)
+void PerformanceStatsView::drawTimeline(Painter& painter, Rect4f rect)
 {
-	String col0 = label;
-	String col1 = "Avg";
-	String col2 = "Max";
-
-	auto addEntry = [&](const String str, int64_t avg, int64_t max)
-	{
-		col0 += "\n  " + str;
-		col1 += "\n" + formatTime(avg);
-		col2 += "\n" + formatTime(max);
-	};
-
-	auto& tl = timelineData[static_cast<int>(timeline)];
-	addEntry("Total", tl.average, tl.max);
-	
-	int i = 1;
-	for (const auto& system : tl.topSystems) {
-		addEntry(toString(i) + ". " + system.name, system.average, system.max);
-		++i;
-	}
-	
-	tl.col0Text
-		.setText(col0)
-		.setPosition(pos)
-		.draw(painter);
-	tl.col1Text
-		.setText(col1)
-		.setPosition(pos + Vector2f(250, 0))
-		.draw(painter);
-	tl.col2Text
-		.setText(col2)
-		.setPosition(pos + Vector2f(320, 0))
-		.draw(painter);
-}
-
-void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
-{
-	const Vector2f displaySize = Vector2f(1200, 100);
+	const Vector2f displaySize = rect.getSize() - Vector2f(40, 0);
+	const auto pos = rect.getTopLeft();
 	const float maxFPS = 20.0f;
 	const float scale = maxFPS / 1'000'000.0f * displaySize.y;
 
 	const Vector2f boxPos = pos + Vector2f(20, 0);
-	bg
+	boxBg
 		.clone()
 		.setPosition(boxPos - Vector2f(2, 2))
 		.scaleTo(displaySize + Vector2f(4, 4))
+		.draw(painter);
+
+	// 30 FPS bar
+	whitebox
+		.clone()
+		.setPosition(boxPos + Vector2f(0, displaySize.y / 3))
+		.scaleTo(Vector2f(displaySize.x, 1))
+		.setColour(Colour4f(0.75f))
+		.draw(painter);
+
+	// 60 FPS bar
+	whitebox
+		.clone()
+		.setPosition(boxPos + Vector2f(0, 2 * displaySize.y / 3))
+		.scaleTo(Vector2f(displaySize.x, 1))
+		.setColour(Colour4f(0.75f))
 		.draw(painter);
 
 	auto variableSprite = whitebox
@@ -224,8 +229,8 @@ void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
 		const float x = xPos(i);
 		const float w = xPos(i + 1) - x;
 		const Vector2f p = boxPos + Vector2f(x, displaySize.y);
-		const Vector2f s1 = Vector2f(w, frameData[index].variableTime * scale);
-		const Vector2f s2 = Vector2f(w, frameData[index].renderTime * scale);
+		const Vector2f s1 = Vector2f(w, std::min(frameData[index].variableTime * scale, displaySize.y));
+		const Vector2f s2 = Vector2f(w, std::min(frameData[index].renderTime * scale, displaySize.y - s1.y));
 		variableSprite
 			.setPosition(p)
 			.setSize(s1)
@@ -236,15 +241,215 @@ void PerformanceStatsView::drawGraph(Painter& painter, Vector2f pos)
 			.draw(painter);
 	}
 
-	graphFPS.setPosition(pos + Vector2f(5.0f, 10.0f)).draw(painter);
-	graphFPS.setPosition(pos + Vector2f(displaySize.x + 35.0f, 10.0f)).draw(painter);
+	fpsLabel.setPosition(pos + Vector2f(5.0f, 10.0f)).draw(painter);
+	fpsLabel.setPosition(pos + Vector2f(displaySize.x + 35.0f, 10.0f)).draw(painter);
 }
 
-int64_t PerformanceStatsView::getTimeNs(TimeLine timeline)
+void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)
 {
-	auto ns = api.core->getTime(CoreAPITimer::Engine, timeline, StopwatchRollingAveraging::Mode::Latest) + api.core->getTime(CoreAPITimer::Game, timeline, StopwatchRollingAveraging::Mode::Latest);
-	if (timeline == TimeLine::Render) {
-		ns -= timer.lastElapsedNanoSeconds();
+	if (!lastProfileData) {
+		return;
 	}
-	return ns;
+
+	const auto duration = std::chrono::duration<int64_t, std::nano>(16'999'999);
+	const auto timeRange = Range<ProfilerData::TimePoint>(lastProfileData->getStartTime(), lastProfileData->getStartTime() + duration);
+	const int64_t numMs = timeRange.getLength().count() / 1'000'000;
+
+	boxBg
+		.clone()
+		.setPosition(rect.getTopLeft())
+		.scaleTo(rect.getSize())
+		.draw(painter);
+
+	// Vertical dividers
+	const float divPerNs = rect.getWidth() / static_cast<float>(timeRange.getLength().count());
+	auto drawDivider = [&] (int64_t ns, Colour4f col, String label)
+	{
+		const float xPos = static_cast<float>(ns) * divPerNs;
+		whitebox
+			.clone()
+			.setPosition(rect.getTopLeft() + Vector2f(xPos, 0))
+			.scaleTo(Vector2f(1, rect.getHeight()))
+			.setColour(col)
+			.draw(painter);
+
+		if (!label.isEmpty()) {
+			graphLabel
+				.setPosition(rect.getBottomLeft() + Vector2f(xPos, 0))
+				.setColour(col)
+				.setText(label)
+				.draw(painter);
+		}
+	};
+
+	// 1 ms dividers
+	for (int64_t i = 1; i <= numMs; ++i) {
+		drawDivider(i * 1'000'000, Colour4f(0.75f), toString(i) + " ms");
+	}
+
+	// Vsync divider
+	drawDivider(16'666'666, Colour4f(1.0f, 0.75f, 0.0f), "vsync");
+
+	drawTimeGraphThreads(painter, rect.shrink(2), timeRange);
+}
+
+void PerformanceStatsView::drawTimeGraphThreads(Painter& painter, Rect4f rect, Range<ProfilerData::TimePoint> timeRange)
+{
+	const auto& threads = lastProfileData->getThreads();
+
+	int totalThreadDepth = 0;
+	for (const auto& threadInfo: threads) {
+		totalThreadDepth += threadInfo.maxDepth + 1;
+	}
+
+	const float threadSpacing = 10.0f;
+	const float threadHeight = std::min(50.0f, std::floor((rect.getHeight() - (threads.size() - 1) * threadSpacing) / static_cast<float>(totalThreadDepth)));
+	int heightSoFar = 0;
+	for (const auto& threadInfo: threads) {
+		const int depth = threadInfo.maxDepth + 1;
+		drawTimeGraphThread(painter, Rect4f(rect.getLeft(), rect.getTop() + heightSoFar * threadHeight, rect.getWidth(), threadHeight * depth), threadInfo, timeRange);
+		heightSoFar += depth;
+	}
+}
+
+void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo, Range<ProfilerData::TimePoint> timeRange)
+{
+	auto box = whitebox.clone();
+	const auto frameStartTime = timeRange.start;
+	const auto frameEndTime = timeRange.end;
+	const auto frameLength = frameEndTime - frameStartTime;
+
+	const auto origin = rect.getTopLeft();
+	const auto lineHeight = std::floor(rect.getHeight() / static_cast<float>(threadInfo.maxDepth + 1));
+
+	for (const auto& e: lastProfileData->getEvents()) {
+		if (e.threadId == threadInfo.id) {
+			const float relativeStart = static_cast<float>((e.startTime - frameStartTime).count()) / static_cast<float>(frameLength.count());
+			const float relativeEnd = static_cast<float>((e.endTime - frameStartTime).count()) / static_cast<float>(frameLength.count());
+
+			const float startPos = std::floor(relativeStart * rect.getWidth());
+			const float endPos = std::floor(relativeEnd * rect.getWidth());
+			const auto eventRect = origin + Rect4f(startPos, e.depth * lineHeight, std::max(endPos - startPos, 1.0f), lineHeight);
+
+			const auto col = getEventColour(e.type);
+			if (eventRect.getSize().x > 0.95f) {
+				box
+					.setColour(col.multiplyAlpha(0.5f))
+					.setPosition(eventRect.getTopLeft() + Vector2f(1, 0))
+					.scaleTo(eventRect.getSize() - Vector2f(1, 0))
+					.draw(painter);
+			}
+			box
+				.setColour(col)
+				.scaleTo(Vector2f(1.0f, eventRect.getHeight()))
+				.draw(painter);
+		}
+	}
+}
+
+Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
+{
+	switch (type) {
+	case ProfilerEventType::CoreVSync:
+		return Colour4f(0.8f, 0.8f, 0.1f);
+	case ProfilerEventType::CoreUpdate:
+	case ProfilerEventType::CoreFixedUpdate:
+	case ProfilerEventType::CoreVariableUpdate:
+	case ProfilerEventType::WorldSystemUpdate:
+	case ProfilerEventType::WorldFixedUpdate:
+	case ProfilerEventType::WorldVariableUpdate:
+		return Colour4f(0.1f, 0.1f, 0.7f);
+	case ProfilerEventType::CoreRender:
+	case ProfilerEventType::WorldSystemRender:
+	case ProfilerEventType::WorldRender:
+		return Colour4f(0.7f, 0.1f, 0.1f);
+	case ProfilerEventType::PainterDrawCall:
+		return Colour4f(0.97f, 0.51f, 0.65f);
+	case ProfilerEventType::CoreStartRender:
+	case ProfilerEventType::PainterEndRender:
+		return Colour4f(1.0f, 0.61f, 0.75f);
+	case ProfilerEventType::PainterUpdateProjection:
+		return Colour4f(1.0f, 0.71f, 0.85f);
+	case ProfilerEventType::StatsView:
+		return Colour4f(0.7f, 0.7f, 0.7f);
+	case ProfilerEventType::AudioGenerateBuffer:
+		return Colour4f(0.5f, 0.8f, 1.0f);
+	default:
+		return Colour4f(0.1f, 0.7f, 0.1f);
+	}
+}
+
+void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
+{
+	struct CurEventData {
+		const String* name;
+		ProfilerEventType type;
+		int64_t avg;
+		int64_t high;
+		int64_t low;
+
+		bool operator< (const CurEventData& other) const
+		{
+			return high > other.high;
+		}
+	};
+
+	const auto getTimeLabel = [&] (int64_t t) { return toString((t + 500) / 1000); };
+
+	std::vector<CurEventData> curEvents;
+	curEvents.reserve(eventHistory.size());
+	for (const auto& [k, v]: eventHistory) {
+		curEvents.emplace_back(CurEventData{ &k, v.getType(), v.getAverage(), v.getHighest(), v.getLowest() });
+	}
+	std::sort(curEvents.begin(), curEvents.end());
+
+	std::vector<ColourStringBuilder> columns;
+	columns.resize(systemLabels.size());
+
+	columns[0].append("Name:\n");
+	columns[1].append("Avg:\n");
+	columns[2].append("Min:\n");
+	columns[3].append("Max:\n");
+	columns[4].append("Var:\n");
+
+	const size_t nToShow = 25;
+	for (size_t i = 0; i < nToShow; ++i) {
+		const auto& system = curEvents[i];
+		columns[0].append(toString(i + 1) + ": ");
+		columns[0].append(*system.name + "\n", getEventColour(system.type).inverseMultiplyLuma(0.5f));
+		columns[1].append(getTimeLabel(system.avg) + " us\n");
+		columns[2].append(getTimeLabel(system.low) + " us\n");
+		columns[3].append(getTimeLabel(system.high) + " us\n");
+		columns[4].append(getTimeLabel(system.high - system.low) + " us\n");
+	}
+
+	std::array<float, 5> xPos = { 0, 350, 500, 650, 800 };
+
+	for (size_t i = 1; i < systemLabels.size(); ++i) {
+		systemLabels[i].setAlignment(1);
+	}
+
+	for (size_t i = 0; i < systemLabels.size(); ++i) {
+		auto [str, cols] = columns[i].moveResults();
+		systemLabels[i].setText(str).setColourOverride(cols);
+		systemLabels[i].setPosition(rect.getTopLeft() + Vector2f(xPos[i], 0)).draw(painter);
+	}
+}
+
+int64_t PerformanceStatsView::getTimeNs(TimeLine timeline, const ProfilerData& data)
+{
+	// Total time
+	const auto totalTime = data.getTotalElapsedTime();
+
+	// Render time
+	const auto renderTime = data.getElapsedTime(ProfilerEventType::CoreRender);
+	const auto vsyncTime = data.getElapsedTime(ProfilerEventType::CoreVSync);
+	
+	if (timeline == TimeLine::VariableUpdate) {
+		return (totalTime - renderTime - vsyncTime).count();
+	} else if (timeline == TimeLine::Render) {
+		return renderTime.count();
+	} else {
+		return 0;
+	}
 }

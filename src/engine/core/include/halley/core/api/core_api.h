@@ -10,6 +10,7 @@ namespace Halley
 	class Resources;
 	class Stage;
 	class HalleyStatics;
+	class ProfilerData;
 
 	enum class CoreAPITimer
 	{
@@ -21,6 +22,13 @@ namespace Halley
 	class CoreAPI
 	{
 	public:
+		class IProfileCallback {
+		public:
+			virtual ~IProfileCallback() = default;
+			virtual Time getThreshold() const { return 0.0; }
+			virtual void onProfileData(std::shared_ptr<ProfilerData> data) = 0;
+		};
+		
 		virtual ~CoreAPI() {}
 		virtual void quit(int exitCode = 0) = 0;
 		virtual void setStage(StageID stage) = 0;
@@ -31,8 +39,8 @@ namespace Halley
 		virtual HalleyStatics& getStatics() = 0;
 		virtual const Environment& getEnvironment() = 0;
 
-		virtual int64_t getTime(CoreAPITimer timer, TimeLine tl, StopwatchRollingAveraging::Mode mode) const = 0;
-		virtual void setTimerPaused(CoreAPITimer timer, TimeLine tl, bool paused) = 0;
+		virtual void addProfilerCallback(IProfileCallback* callback) = 0;
+		virtual void removeProfilerCallback(IProfileCallback* callback) = 0;
 
 		virtual bool isDevMode() = 0;
 	};

@@ -16,34 +16,37 @@ void ScreenOverlay::draw(RenderContext& context)
 	const auto zoom2d = viewPort.getSize() / targetSize;
 	const float zoom = std::min(zoom2d.x, zoom2d.y);
 
-	auto camera = Camera(viewPort.getSize() / zoom * 0.5f).setZoom(zoom);
+	const auto camera = Camera(viewPort.getSize() / zoom * 0.5f)
+		.setZoom(zoom);
+		//.setViewPort(Rect4i(viewPort + ));
+
 	context.with(camera).bind([&](Painter& painter) {
 		paint(painter);
-		painter.flush();
 	});
 }
 
 StatsView::StatsView(Resources& resources, const HalleyAPI& api)
 	: resources(resources)
 	, api(api)
-	, timer(api.core->isDevMode() ? 300 : 30)
 {}
 
 void StatsView::update()
 {
-	if (!drawing) {
-		timer.beginSample();
-		timer.endSample();
-	}
-	drawing = false;
 }
 
 void StatsView::draw(RenderContext& context)
 {
-	timer.beginSample();
 	ScreenOverlay::draw(context);
-	timer.endSample();
-	drawing = true;
+}
+
+void StatsView::setActive(bool active)
+{
+	this->active = active;
+}
+
+bool StatsView::isActive() const
+{
+	return active;
 }
 
 void StatsView::setWorld(const World* world)
