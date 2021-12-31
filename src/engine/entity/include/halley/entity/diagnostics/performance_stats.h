@@ -21,6 +21,9 @@ namespace Halley
 
 		void onProfileData(std::shared_ptr<ProfilerData> data) override;
 
+		int getPage() const;
+		void setPage(int page);
+
 	private:
 		class FrameData {
 		public:

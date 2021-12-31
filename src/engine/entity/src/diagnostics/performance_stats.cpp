@@ -32,8 +32,6 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI
 	constexpr size_t frameDataCapacity = 300;
 	frameData.resize(frameDataCapacity);
 	lastFrameData = frameDataCapacity - 1;
-
-	page = 1;
 }
 
 PerformanceStatsView::~PerformanceStatsView()
@@ -95,6 +93,16 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	if (capturing) {
 		lastProfileData = std::move(data);
 	}
+}
+
+int PerformanceStatsView::getPage() const
+{
+	return page;
+}
+
+void PerformanceStatsView::setPage(int page)
+{
+	this->page = page;
 }
 
 PerformanceStatsView::EventHistoryData::EventHistoryData()
