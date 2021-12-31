@@ -218,11 +218,6 @@ bool Material::operator==(const Material& other) const
 		return true;
 	}
 
-	// Different definitions
-	if (materialDefinition != other.materialDefinition) {
-		return false;
-	}
-
 	constexpr bool useHash = true;
 
 	if (useHash) {
@@ -232,6 +227,11 @@ bool Material::operator==(const Material& other) const
 		// :D :D :D
 		return getHash() == other.getHash();
 	} else {
+		// Different definitions
+		if (materialDefinition != other.materialDefinition) {
+			return false;
+		}
+		
 		// Different textures (only need to check pointer equality)
 		for (size_t i = 0; i < textures.size(); ++i) {
 			if (textures[i] != other.textures[i]) {
@@ -299,6 +299,8 @@ bool Material::setUniform(int blockNumber, size_t offset, ShaderParameterType ty
 uint64_t Material::computeHash() const
 {
 	Hash::Hasher hasher;
+
+	hasher.feed(materialDefinition.get());
 	
 	for (const auto& texture: textures) {
 		hasher.feed(texture.get());
