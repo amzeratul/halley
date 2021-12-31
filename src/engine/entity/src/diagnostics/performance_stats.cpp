@@ -25,9 +25,15 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI
 		.setText("20\n\n30\n\n60").setAlignment(0.5f);
 	graphLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f)).setAlignment(0.5f);
 
+	for (size_t i = 0; i < 5; ++i) {
+		systemLabels.push_back(headerText.clone());
+	}
+
 	constexpr size_t frameDataCapacity = 300;
 	frameData.resize(frameDataCapacity);
 	lastFrameData = frameDataCapacity - 1;
+
+	page = 1;
 }
 
 PerformanceStatsView::~PerformanceStatsView()
@@ -45,24 +51,23 @@ void PerformanceStatsView::paint(Painter& painter)
 	ProfilerEvent event(ProfilerEventType::StatsView);
 	painter.setLogging(false);
 
-	whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(painter.getViewPort().getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
+	if (active) {
+		whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(painter.getViewPort().getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
+		
+		drawHeader(painter, false);
+		drawTimeline(painter, Rect4f(20, 80,	1240, 100));
+
+		if (page == 0) {
+			drawTimeGraph(painter, Rect4f(20, 200, 1240, 500));
+		} else if (page == 1) {
+			drawTopSystems(painter, Rect4f(20, 200, 1240, 500));
+		}
+	} else {
+		drawHeader(painter, true);
+	}
 	
-	drawHeader(painter, false);
-	drawTimeline(painter, Rect4f(20, 80,	1240, 100));
-	drawTimeGraph(painter, Rect4f(20, 200, 1240, 500));
-	
-	painter.flush();
 	painter.setLogging(true);
 }
-
-void PerformanceStatsView::paintHidden(Painter& painter)
-{
-	ProfilerEvent event(ProfilerEventType::StatsView);
-	painter.setLogging(false);
-	drawHeader(painter, true);
-	painter.setLogging(true);
-}
-
 
 void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 {
@@ -81,7 +86,54 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	curFrameData.variableTime = getTime(TimeLine::VariableUpdate);
 	curFrameData.renderTime = getTime(TimeLine::Render);
 
-	lastProfileData = std::move(data);
+	for (const auto& e: data->getEvents()) {
+		if (e.type == ProfilerEventType::WorldSystemUpdate || e.type == ProfilerEventType::WorldSystemRender) {
+			eventHistory[e.name].update(e.type, (e.endTime - e.startTime).count());
+		}
+	}
+
+	if (capturing) {
+		lastProfileData = std::move(data);
+	}
+}
+
+PerformanceStatsView::EventHistoryData::EventHistoryData()
+	: average(120)
+{
+}
+
+void PerformanceStatsView::EventHistoryData::update(ProfilerEventType type, int64_t value)
+{
+	this->type = type;
+	const bool reset = average.pushValue(value);
+	if (reset) {
+		lastHighest = highest;
+		lastLowest = lowest;
+		highest = 0;
+		lowest = std::numeric_limits<int64_t>::max();
+	}
+	highest = std::max(highest, value);
+	lowest = std::min(lowest, value);
+}
+
+int64_t PerformanceStatsView::EventHistoryData::getAverage() const
+{
+	return average.getAverage();
+}
+
+int64_t PerformanceStatsView::EventHistoryData::getHighest() const
+{
+	return lastHighest;
+}
+
+int64_t PerformanceStatsView::EventHistoryData::getLowest() const
+{
+	return lastLowest;
+}
+
+ProfilerEventType PerformanceStatsView::EventHistoryData::getType() const
+{
+	return type;
 }
 
 void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
@@ -271,7 +323,7 @@ void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, co
 			const float endPos = std::floor(relativeEnd * rect.getWidth());
 			const auto eventRect = origin + Rect4f(startPos, e.depth * lineHeight, std::max(endPos - startPos, 1.0f), lineHeight);
 
-			const auto col = getEventColour(e);
+			const auto col = getEventColour(e.type);
 			if (eventRect.getSize().x > 0.95f) {
 				box
 					.setColour(col.multiplyAlpha(0.5f))
@@ -287,9 +339,9 @@ void PerformanceStatsView::drawTimeGraphThread(Painter& painter, Rect4f rect, co
 	}
 }
 
-Colour4f PerformanceStatsView::getEventColour(const ProfilerData::Event& event) const
+Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 {
-	switch (event.type) {
+	switch (type) {
 	case ProfilerEventType::CoreVSync:
 		return Colour4f(0.8f, 0.8f, 0.1f);
 	case ProfilerEventType::CoreUpdate:
@@ -316,6 +368,63 @@ Colour4f PerformanceStatsView::getEventColour(const ProfilerData::Event& event) 
 		return Colour4f(0.5f, 0.8f, 1.0f);
 	default:
 		return Colour4f(0.1f, 0.7f, 0.1f);
+	}
+}
+
+void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
+{
+	struct CurEventData {
+		const String* name;
+		ProfilerEventType type;
+		int64_t avg;
+		int64_t high;
+		int64_t low;
+
+		bool operator< (const CurEventData& other) const
+		{
+			return high > other.high;
+		}
+	};
+
+	const auto getTimeLabel = [&] (int64_t t) { return toString((t + 500) / 1000); };
+
+	std::vector<CurEventData> curEvents;
+	curEvents.reserve(eventHistory.size());
+	for (const auto& [k, v]: eventHistory) {
+		curEvents.emplace_back(CurEventData{ &k, v.getType(), v.getAverage(), v.getHighest(), v.getLowest() });
+	}
+	std::sort(curEvents.begin(), curEvents.end());
+
+	std::vector<ColourStringBuilder> columns;
+	columns.resize(systemLabels.size());
+
+	columns[0].append("Name:\n");
+	columns[1].append("Avg:\n");
+	columns[2].append("Min:\n");
+	columns[3].append("Max:\n");
+	columns[4].append("Var:\n");
+
+	const size_t nToShow = 25;
+	for (size_t i = 0; i < nToShow; ++i) {
+		const auto& system = curEvents[i];
+		columns[0].append(toString(i + 1) + ": ");
+		columns[0].append(*system.name + "\n", getEventColour(system.type).inverseMultiplyLuma(0.5f));
+		columns[1].append(getTimeLabel(system.avg) + " us\n");
+		columns[2].append(getTimeLabel(system.low) + " us\n");
+		columns[3].append(getTimeLabel(system.high) + " us\n");
+		columns[4].append(getTimeLabel(system.high - system.low) + " us\n");
+	}
+
+	std::array<float, 5> xPos = { 0, 350, 500, 650, 800 };
+
+	for (size_t i = 1; i < systemLabels.size(); ++i) {
+		systemLabels[i].setAlignment(1);
+	}
+
+	for (size_t i = 0; i < systemLabels.size(); ++i) {
+		auto [str, cols] = columns[i].moveResults();
+		systemLabels[i].setText(str).setColourOverride(cols);
+		systemLabels[i].setPosition(rect.getTopLeft() + Vector2f(xPos[i], 0)).draw(painter);
 	}
 }
 

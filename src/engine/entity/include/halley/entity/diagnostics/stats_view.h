@@ -16,13 +16,12 @@ namespace Halley {
 	public:
 		virtual ~ScreenOverlay() = default;
 		
-        virtual void draw(RenderContext& context, bool fullDraw);
+        virtual void draw(RenderContext& context);
 
 		virtual void update() = 0;
 
 	protected:
         virtual void paint(Painter& painter) = 0;
-		virtual void paintHidden(Painter& painter);
 	};
 
 	class StatsView : public ScreenOverlay {
@@ -31,7 +30,10 @@ namespace Halley {
         virtual ~StatsView() = default;
 
 		void update() override;
-		void draw(RenderContext& context, bool fullDraw) override;
+		void draw(RenderContext& context) override;
+
+		void setActive(bool active);
+		bool isActive() const;
 
 		void setWorld(const World* world);
 
@@ -39,6 +41,7 @@ namespace Halley {
         Resources& resources;
         const HalleyAPI& api;
         const World* world = nullptr;
+		bool active = true;
 
         String formatTime(int64_t ns) const;
     };

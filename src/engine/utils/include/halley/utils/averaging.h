@@ -51,10 +51,14 @@ namespace Halley {
         }
     };
 	
-    template <typename T, size_t nSamples = 30>
+    template <typename T>
     class AveragingLatched {
     public:
-        void pushValue(T value) {
+    	AveragingLatched(uint32_t nSamples = 30)
+    		: nSamples(nSamples)
+    	{}
+    	
+        bool pushValue(T value) {
         	latest = value;
 	        totalValue += value;
             ++nValues;
@@ -67,7 +71,9 @@ namespace Halley {
                 }
         		totalValue = 0;
         		nValues = 0;
+        		return true;
             }
+        	return false;
         }
 
         T getAverage() const {
@@ -80,6 +86,7 @@ namespace Halley {
 
     private:
         uint32_t nValues = 0;
+    	uint32_t nSamples;
         T totalValue = {};
     	T latched = {};
     	T latest = {};
