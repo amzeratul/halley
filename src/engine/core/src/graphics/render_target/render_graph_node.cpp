@@ -250,8 +250,10 @@ void RenderGraphNode::renderNodePaintMethod(const RenderGraph& graph, const Rend
 	if (camera && paintMethod) {
 		getTargetRenderContext(rc).with(*camera).bind([this, paintMethod] (Painter& painter)
 		{
+			painter.pushDebugGroup(id);
 			painter.clear(colourClear, depthClear, stencilClear);
 			(*paintMethod)(painter);
+			painter.popDebugGroup();
 		});
 	}
 }
@@ -273,12 +275,14 @@ void RenderGraphNode::renderNodeOverlayMethod(const RenderGraph& graph, const Re
 	const auto camera = Camera(Vector2f(currentSize) * 0.5f);
 	getTargetRenderContext(rc).with(camera).bind([=] (Painter& painter)
 	{
+		painter.pushDebugGroup(id);
 		const auto& tex = overlayMethod->getTexture(0);
 		Sprite()
 			.setMaterial(overlayMethod, false)
 			.setSize(Vector2f(currentSize))
 			.setTexRect(Rect4f(Vector2f(), Vector2f(currentSize) / Vector2f(tex->getSize())))
 			.draw(painter);
+		painter.popDebugGroup();
 	});
 }
 
@@ -290,7 +294,9 @@ void RenderGraphNode::renderNodeImageOutputMethod(const RenderGraph& graph, cons
 		if (img) {
 			getTargetRenderContext(rc).bind([=] (Painter& painter)
 			{
+				painter.pushDebugGroup(id);
 				srcTexture->copyToImage(painter, *img);
+				painter.popDebugGroup();
 			});
 			graph.notifyImage(id);
 		}
@@ -301,7 +307,9 @@ void RenderGraphNode::renderNodeBlitTexture(std::shared_ptr<const Texture> textu
 {
 	getTargetRenderContext(rc).bind([=] (Painter& painter)
 	{
+		painter.pushDebugGroup(id);
 		painter.blitTexture(texture);
+		painter.popDebugGroup();
 	});
 }
 

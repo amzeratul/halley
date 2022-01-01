@@ -100,6 +100,9 @@ namespace Halley
 
 		void setLogging(bool logging);
 
+		void pushDebugGroup(const String& id);
+		void popDebugGroup();
+
 	protected:
 		virtual void startDrawCall() {}
 		virtual void endDrawCall() {}
@@ -114,6 +117,8 @@ namespace Halley
 		virtual void onUpdateProjection(Material& material) = 0;
 		void generateQuadIndices(IndexType firstVertex, size_t numQuads, IndexType* target);
 		RenderTarget& getActiveRenderTarget();
+
+		const Vector<String>& getPendingDebugGroupStack() const;
 
 		std::unique_ptr<Material> halleyGlobalMaterial;
 
@@ -147,6 +152,9 @@ namespace Halley
 		Vector<IndexType> stdQuadIndexCache;
 		std::optional<Rect4i> curClip;
 		std::optional<Rect4i> pendingClip;
+
+		Vector<String> curDebugGroupStack;
+		Vector<String> pendingDebugGroupStack;
 
 		void bind(RenderContext& context);
 		void unbind(RenderContext& context);

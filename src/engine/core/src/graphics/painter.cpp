@@ -114,6 +114,8 @@ Painter::PainterVertexData Painter::addDrawData(const std::shared_ptr<Material>&
 	bytesPending += result.dataSize;
 	allIndicesAreQuads &= standardQuadsOnly;
 
+	pendingDebugGroupStack = curDebugGroupStack;
+
 	return result;
 }
 
@@ -437,6 +439,18 @@ void Painter::setLogging(bool logging)
 	this->logging = logging;
 }
 
+void Painter::pushDebugGroup(const String& id)
+{
+	flush();
+	curDebugGroupStack.push_back(id);
+}
+
+void Painter::popDebugGroup()
+{
+	flush();
+	curDebugGroupStack.pop_back();
+}
+
 void Painter::makeSpaceForPendingVertices(size_t numBytes)
 {
 	size_t requiredSize = bytesPending + numBytes;
@@ -535,7 +549,7 @@ void Painter::startDrawCall(const std::shared_ptr<Material>& material)
 {
 	constexpr bool enableDynamicBatching = true;
 
-	if (material != materialPending) {
+	if (material != materialPending || pendingDebugGroupStack != curDebugGroupStack) {
 		if (!enableDynamicBatching || (materialPending != std::shared_ptr<Material>() && !(*material == *materialPending))) {
 			flushPending();
 		}
@@ -562,6 +576,7 @@ void Painter::resetPending()
 		Material::resetBindCache();
 		materialPending.reset();
 	}
+	pendingDebugGroupStack = curDebugGroupStack;
 }
 
 void Painter::executeDrawPrimitives(Material& material, size_t numVertices, void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType)
@@ -651,6 +666,11 @@ RenderTarget& Painter::getActiveRenderTarget()
 {
 	Expects(activeRenderTarget);
 	return *activeRenderTarget;
+}
+
+const Vector<String>& Painter::getPendingDebugGroupStack() const
+{
+	return pendingDebugGroupStack;
 }
 
 void Painter::generateQuadIndicesOffset(IndexType pos, IndexType lineStride, IndexType* target)
