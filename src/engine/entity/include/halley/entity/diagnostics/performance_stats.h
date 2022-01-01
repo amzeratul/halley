@@ -59,6 +59,7 @@ namespace Halley
 
 		AveragingLatched<int64_t> totalFrameTime;
 		AveragingLatched<int64_t> vsyncTime;
+		AveragingLatched<int64_t> audioTime;
 		
 		std::vector<FrameData> frameData;
 		size_t lastFrameData = 0;

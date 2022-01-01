@@ -17,6 +17,9 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI
 	: StatsView(resources, api)
 	, boxBg(Sprite().setImage(resources, "halley/box_2px_outline.png"))
 	, whitebox(Sprite().setImage(resources, "whitebox.png"))
+	, audioTime(60)
+	, vsyncTime(60)
+	, totalFrameTime(60)
 {
 	api.core->addProfilerCallback(this);
 	
@@ -71,6 +74,7 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 {
 	vsyncTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVSync).count());
 	totalFrameTime.pushValue(data->getTotalElapsedTime().count() - vsyncTime.getLatest());
+	audioTime.pushValue(api.audio->getLastTimeElapsed());
 
 	auto getTime = [&](TimeLine timeline) -> int
 	{
@@ -148,20 +152,32 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 {
 	const auto frameAvgTime = totalFrameTime.getAverage();
 	const auto vsyncAvgTime = vsyncTime.getAverage();
+	const auto audioAvgTime = audioTime.getAverage();
 	const int curFPS = static_cast<int>(lround(1'000'000'000.0 / (frameAvgTime + vsyncAvgTime)));
 	const int maxFPS = static_cast<int>(lround(1'000'000'000.0 / frameAvgTime));
 
-	String str = toString(curFPS, 10, 3, ' ') + " FPS / " + toString(maxFPS, 10, 4, ' ') + " FPS / " + formatTime(frameAvgTime) + " ms";
-	
-	if (!simple) {
-		str += "\n" + toString(painter.getPrevDrawCalls()) + " calls, " + toString(painter.getPrevTriangles()) + " tris, " + toString(painter.getPrevVertices()) + " verts";
+	ColourStringBuilder strBuilder;
+	strBuilder.append(toString(curFPS, 10, 3, ' '));
+	strBuilder.append(" FPS / ");
+	strBuilder.append(toString(maxFPS, 10, 4, ' '));
+	strBuilder.append(" FPS / ");
+	strBuilder.append(formatTime(frameAvgTime));
+	strBuilder.append(" ms / ");
+	strBuilder.append(toString(painter.getPrevDrawCalls()));
+	strBuilder.append(" calls / ");
+	strBuilder.append(toString(painter.getPrevTriangles()));
+	strBuilder.append(" tris");
 
+	if (!simple) {
 		const auto audioSpec = api.audio->getAudioSpec();
 		if (audioSpec) {
-			const auto audioTime = api.audio->getLastTimeElapsed();
 			const int64_t totalTimePerBuffer = int64_t(audioSpec->bufferSize) * 1'000'000'000 / int64_t(audioSpec->sampleRate);
-			const int percent = lround(audioTime * 100 / totalTimePerBuffer * 100.0f);
-			str += "\nAudio time: " + formatTime(audioTime) + " ms / " + formatTime(totalTimePerBuffer) + " ms (" + toString(percent) + "%)";
+			const auto percent = (audioAvgTime * 100.0f) / static_cast<float>(totalTimePerBuffer);
+			strBuilder.append(" / ");
+			strBuilder.append(formatTime(audioAvgTime));
+			strBuilder.append(" ms audio (");
+			strBuilder.append(toString(percent, 1));
+			strBuilder.append("%)");
 		}
 	}
 
@@ -170,9 +186,12 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	} else {
 		headerText.setPosition(Vector2f(10, 10)).setOffset(Vector2f()).setOutline(1.0f);
 	}
+
+	auto [str, colours] = strBuilder.moveResults();
 	
 	headerText
 		.setText(str)
+		.setColourOverride(colours)
 		.draw(painter);
 }
 
