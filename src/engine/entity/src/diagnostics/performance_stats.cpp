@@ -28,7 +28,7 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI
 		.setText("20\n\n30\n\n60").setAlignment(0.5f);
 	graphLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f)).setAlignment(0.5f);
 
-	for (size_t i = 0; i < 5; ++i) {
+	for (size_t i = 0; i < 8; ++i) {
 		systemLabels.push_back(headerText.clone());
 	}
 
@@ -126,6 +126,8 @@ void PerformanceStatsView::EventHistoryData::update(ProfilerEventType type, int6
 	}
 	highest = std::max(highest, value);
 	lowest = std::min(lowest, value);
+	highestEver = std::max(highestEver, value);
+	lowestEver = std::min(lowestEver, value);
 }
 
 int64_t PerformanceStatsView::EventHistoryData::getAverage() const
@@ -141,6 +143,16 @@ int64_t PerformanceStatsView::EventHistoryData::getHighest() const
 int64_t PerformanceStatsView::EventHistoryData::getLowest() const
 {
 	return lastLowest;
+}
+
+int64_t PerformanceStatsView::EventHistoryData::getHighestEver() const
+{
+	return highestEver;
+}
+
+int64_t PerformanceStatsView::EventHistoryData::getLowestEver() const
+{
+	return lowestEver;
 }
 
 ProfilerEventType PerformanceStatsView::EventHistoryData::getType() const
@@ -406,6 +418,8 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
 		int64_t avg;
 		int64_t high;
 		int64_t low;
+		int64_t highEver;
+		int64_t lowEver;
 
 		bool operator< (const CurEventData& other) const
 		{
@@ -418,7 +432,7 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
 	std::vector<CurEventData> curEvents;
 	curEvents.reserve(eventHistory.size());
 	for (const auto& [k, v]: eventHistory) {
-		curEvents.emplace_back(CurEventData{ &k, v.getType(), v.getAverage(), v.getHighest(), v.getLowest() });
+		curEvents.emplace_back(CurEventData{ &k, v.getType(), v.getAverage(), v.getHighest(), v.getLowest(), v.getHighestEver(), v.getLowestEver() });
 	}
 	std::sort(curEvents.begin(), curEvents.end());
 
@@ -427,9 +441,12 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
 
 	columns[0].append("Name:\n");
 	columns[1].append("Avg:\n");
-	columns[2].append("Min:\n");
-	columns[3].append("Max:\n");
-	columns[4].append("Var:\n");
+	columns[2].append("Loc Min:\n");
+	columns[3].append("Loc Max:\n");
+	columns[4].append("Loc Var:\n");
+	columns[5].append("Min:\n");
+	columns[6].append("Max:\n");
+	columns[7].append("Var:\n");
 
 	const size_t nToShow = 25;
 	for (size_t i = 0; i < nToShow; ++i) {
@@ -440,9 +457,12 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
 		columns[2].append(getTimeLabel(system.low) + " us\n");
 		columns[3].append(getTimeLabel(system.high) + " us\n");
 		columns[4].append(getTimeLabel(system.high - system.low) + " us\n");
+		columns[5].append(getTimeLabel(system.lowEver) + " us\n");
+		columns[6].append(getTimeLabel(system.highEver) + " us\n");
+		columns[7].append(getTimeLabel(system.highEver - system.lowEver) + " us\n");
 	}
 
-	std::array<float, 5> xPos = { 0, 350, 500, 650, 800 };
+	std::array<float, 8> xPos = { 0, 350, 450, 550, 650, 750, 850, 950 };
 
 	for (size_t i = 1; i < systemLabels.size(); ++i) {
 		systemLabels[i].setAlignment(1);

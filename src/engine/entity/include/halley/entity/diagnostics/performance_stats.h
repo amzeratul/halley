@@ -41,6 +41,8 @@ namespace Halley
 			int64_t getAverage() const;
 			int64_t getHighest() const;
 			int64_t getLowest() const;
+			int64_t getHighestEver() const;
+			int64_t getLowestEver() const;
 			ProfilerEventType getType() const;
 
 		private:
@@ -49,6 +51,8 @@ namespace Halley
 			int64_t lowest = std::numeric_limits<int64_t>::max();
 			int64_t lastHighest = 0;
 			int64_t lastLowest = 0;
+			int64_t highestEver = 0;
+			int64_t lowestEver = std::numeric_limits<int64_t>::max();
 			AveragingLatched<int64_t> average;
 		};
 		
