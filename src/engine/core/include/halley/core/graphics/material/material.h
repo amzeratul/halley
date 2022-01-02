@@ -5,6 +5,7 @@
 #include "halley/core/graphics/texture.h"
 #include "halley/core/graphics/material/material_parameter.h"
 #include <gsl/gsl>
+#include <bitset>
 
 namespace Halley
 {
@@ -125,13 +126,12 @@ namespace Halley
 		Vector<MaterialTextureParameter> textureUniforms;
 		Vector<MaterialDataBlock> dataBlocks;
 		std::vector<std::shared_ptr<const Texture>> textures;
-		std::array<bool, 8> passEnabled;
 
 		mutable uint64_t hashValue = 0;
 		mutable bool needToUpdateHash = true;
 		bool needToUploadData = true;
-
 		std::optional<uint8_t> stencilReferenceOverride;
+		std::bitset<8> passEnabled;
 
 		void initUniforms(bool forceLocalBlocks);
 		MaterialParameter& getParameter(const String& name);

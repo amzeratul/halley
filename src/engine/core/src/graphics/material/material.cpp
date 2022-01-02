@@ -312,8 +312,7 @@ uint64_t Material::computeHash() const
 
 	hasher.feed(stencilReferenceOverride.has_value());
 	hasher.feed(stencilReferenceOverride.value_or(0));
-
-	hasher.feedBytes(gsl::as_bytes(gsl::span<const bool>(passEnabled.data(), passEnabled.size())));
+	hasher.feed(passEnabled.to_ulong());
 
 	return hasher.digest();
 }
@@ -349,10 +348,9 @@ const Vector<MaterialDataBlock>& Material::getDataBlocks() const
 
 void Material::setPassEnabled(int pass, bool enabled)
 {
-	auto& p = passEnabled.at(pass);
-	if (p != enabled) {
+	if (passEnabled[pass] != enabled) {
 		needToUpdateHash = true;
-		p = enabled;
+		passEnabled[pass] = enabled;
 	}
 }
 
