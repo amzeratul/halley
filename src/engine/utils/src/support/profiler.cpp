@@ -5,6 +5,11 @@
 using namespace Halley;
 
 
+bool ProfilerData::ThreadInfo::operator<(const ThreadInfo& other) const
+{
+	return totalTime > other.totalTime;
+}
+
 ProfilerData::ProfilerData(TimePoint frameStartTime, TimePoint frameEndTime, std::vector<Event> events)
 	: frameStartTime(frameStartTime)
 	, frameEndTime(frameEndTime)
@@ -62,6 +67,10 @@ void ProfilerData::processEvents()
 	struct ThreadCurInfo {
 		size_t maxDepth = 0;
 		std::vector<TimePoint> stackEnds;
+		TimePoint start;
+		TimePoint end;
+		Duration totalTime;
+		bool first = true;
 	};
 	HashMap<std::thread::id, ThreadCurInfo> threadInfo;
 
@@ -76,7 +85,8 @@ void ProfilerData::processEvents()
 		if (e.endTime == TimePoint{}) {
 			e.endTime = frameEndTime;
 		}
-		
+
+		// Compute depth
 		// If this event starts after the end of the previous stack, then it's not nested in it, pop previous.
 		// Repeat for as many levels as needed, up to the root
 		while (!curThread.stackEnds.empty() && e.startTime >= curThread.stackEnds.back()) {
@@ -86,13 +96,25 @@ void ProfilerData::processEvents()
 		curThread.maxDepth = std::max(curThread.maxDepth, depth);
 		e.depth = static_cast<int>(depth);
 		curThread.stackEnds.push_back(e.endTime);
+
+		// Store timing
+		if (curThread.first) {
+			curThread.start = e.startTime;
+		} else {
+			curThread.start = std::min(curThread.start, e.startTime);
+		}
+		curThread.end = std::max(curThread.end, e.endTime);
+		if (e.type != ProfilerEventType::CoreVSync && e.depth == 0) {
+			curThread.totalTime += e.endTime - e.startTime;
+		}
 	}
 
 	// Generate the thread list
 	for (const auto& [k, v]: threadInfo) {
 		const String name; // TODO
-		threads.emplace_back(ThreadInfo{ k, static_cast<int>(v.maxDepth), name });
+		threads.emplace_back(ThreadInfo{ k, static_cast<int>(v.maxDepth), name, v.start, v.end, v.totalTime });
 	}
+	std::sort(threads.begin(), threads.end());
 }
 
 ProfilerCapture::ProfilerCapture(size_t maxEvents)

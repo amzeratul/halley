@@ -62,6 +62,11 @@ namespace Halley {
     		std::thread::id id;
     		int maxDepth = 0;
     		String name;
+    		TimePoint startTime;
+    		TimePoint endTime;
+    		Duration totalTime;
+
+    		bool operator< (const ThreadInfo& other) const;
     	};
 
     	ProfilerData() = default;

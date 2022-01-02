@@ -44,6 +44,7 @@ PerformanceStatsView::~PerformanceStatsView()
 
 void PerformanceStatsView::update()
 {
+	//capturing = !active;
 	StatsView::update();
 }
 
