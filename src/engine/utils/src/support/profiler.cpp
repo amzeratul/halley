@@ -95,11 +95,11 @@ void ProfilerData::processEvents()
 	}
 }
 
-ProfilerCapture::ProfilerCapture()
+ProfilerCapture::ProfilerCapture(size_t maxEvents)
 	: recording(false)
 	, curId(0)
-	, curFrame(0)
 {
+	events.resize(maxEvents);
 }
 
 ProfilerCapture& ProfilerCapture::get()
@@ -112,26 +112,27 @@ ProfilerCapture& ProfilerCapture::get()
 ProfilerCapture::EventId ProfilerCapture::recordEventStart(ProfilerEventType type, std::string_view name)
 {
 	if (recording) {
-		const auto id = curId++;
-		if (id < events.size()) {
+		const auto id = curId++; // I think this is thread-safe?
+		if (id < endId) {
+			const auto pos = id % events.size();
 			const auto threadId = std::this_thread::get_id();
 			const auto time = std::chrono::steady_clock::now();
-			events[id] = ProfilerData::Event{ name, threadId, type, 0, id, time, {} };
-			return { id, curFrame };
+			events[pos] = ProfilerData::Event{ name, threadId, type, 0, id, time, {} };
+			return id;
+		} else {
+			--curId;
 		}
 	}
-	return { std::numeric_limits<uint32_t>::max(), std::numeric_limits<uint32_t>::max() };
+	return 0;
 }
 
 void ProfilerCapture::recordEventEnd(EventId id)
 {
-	if (recording && id.id != std::numeric_limits<uint32_t>::max()) {
+	if (recording && id != 0) {
 		const auto time = std::chrono::steady_clock::now();
-		if (id.frameN == curFrame) {
-			events[id.id].endTime = time;
-		} else {
-			// Event is from a previous frame, insert again
-			// TODO
+		const auto pos = id % events.size();
+		if (events[pos].id == id) { // Dodgy, potential race condition here
+			events[pos].endTime = time;
 		}
 	}
 }
@@ -141,7 +142,7 @@ bool ProfilerCapture::isRecording() const
 	return recording;
 }
 
-void ProfilerCapture::startFrame(bool rec, size_t maxFrames)
+void ProfilerCapture::startFrame(bool rec)
 {
 	Expects(state != State::FrameStarted);
 	
@@ -151,13 +152,9 @@ void ProfilerCapture::startFrame(bool rec, size_t maxFrames)
 		frameStartTime = frameEndTime;
 	}
 	frameEndTime = {};
-	//events.clear();
-	curId = 0;
-	++curFrame;
 
-	if (rec) {
-		events.resize(maxFrames);
-	}
+	startId = curId.fetch_add(events.size()) + events.size();
+	endId = startId + events.size();
 
 	recording = rec;
 	state = State::FrameStarted;
@@ -174,8 +171,19 @@ void ProfilerCapture::endFrame()
 ProfilerData ProfilerCapture::getCapture()
 {
 	Expects(state == State::FrameEnded);
+
+	const auto startIdx = startId % events.size();
+	const auto endIdx = curId % events.size();
+
+	std::vector<ProfilerData::Event> eventsCopy;
+	if (startIdx < endIdx) {
+		eventsCopy.insert(eventsCopy.end(), events.begin() + startIdx, events.begin() + endIdx);
+	} else {
+		eventsCopy.insert(eventsCopy.end(), events.begin() + startIdx, events.end());
+		eventsCopy.insert(eventsCopy.end(), events.begin(), events.begin() + endIdx);
+	}
 	
-	return ProfilerData(frameStartTime, frameEndTime, std::vector<ProfilerData::Event>(events.begin(), events.begin() + curId));
+	return ProfilerData(frameStartTime, frameEndTime, std::move(eventsCopy));
 }
 
 Time ProfilerCapture::getFrameTime() const
@@ -215,7 +223,7 @@ ProfilerEvent::ProfilerEvent(ProfilerEventType type, std::string_view name)
 
 ProfilerEvent::~ProfilerEvent() noexcept
 {
-	if (id.id != std::numeric_limits<uint32_t>::max()) {
+	if (id != 0) {
 		ProfilerCapture::get().recordEventEnd(id);
 	}
 }

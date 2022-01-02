@@ -34,6 +34,8 @@ namespace Halley {
 
 		AudioGenerateBuffer,
 
+		DiskIO,
+
 		StatsView,
 
 		Game
@@ -50,7 +52,7 @@ namespace Halley {
         	std::thread::id threadId;
 			ProfilerEventType type;
 			int depth;
-        	uint32_t id;
+        	uint64_t id;
         	TimePoint startTime;
         	TimePoint endTime;
         };
@@ -85,12 +87,9 @@ namespace Halley {
 	
     class ProfilerCapture {
     public:
-        struct EventId {
-	        uint32_t id = 0;
-        	uint32_t frameN = 0;
-        };
+        using EventId = uint64_t;
     	
-        ProfilerCapture();
+        ProfilerCapture(size_t maxEvents = 16384);
     	
     	[[nodiscard]] static ProfilerCapture& get();
 
@@ -99,7 +98,7 @@ namespace Halley {
 
     	[[nodiscard]] bool isRecording() const;
 
-    	void startFrame(bool record, size_t maxEvents = 10240);
+    	void startFrame(bool record);
     	void endFrame();
 		ProfilerData getCapture();
 
@@ -113,10 +112,10 @@ namespace Halley {
     	};
 
     	std::atomic<bool> recording;
+    	std::atomic<uint64_t> curId;
+    	uint64_t startId;
+    	std::atomic<uint64_t> endId;
         State state = State::Idle;
-
-    	std::atomic<uint32_t> curId;
-    	std::atomic<uint32_t> curFrame;
     	
     	std::chrono::steady_clock::time_point frameStartTime;
     	std::chrono::steady_clock::time_point frameEndTime;

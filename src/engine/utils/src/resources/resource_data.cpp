@@ -5,6 +5,7 @@
 #include <halley/concurrency/concurrent.h>
 #include "halley/bytes/compression.h"
 #include "halley/core/api/halley_api.h"
+#include "halley/support/profiler.h"
 
 using namespace Halley;
 
@@ -176,6 +177,7 @@ Future<std::unique_ptr<ResourceDataStatic>> ResourceLoader::getAsync(bool throwO
 	auto meta = getMeta();
 	return Concurrent::execute(Executors::getDiskIO(), [meta, loc, n, t, throwOnFail] () -> std::unique_ptr<ResourceDataStatic>
 	{
+		ProfilerEvent event(ProfilerEventType::DiskIO);
 		auto result = loc.get().getStatic(n, t, throwOnFail);
 		if (meta.getString("asset_compression", "") == "deflate") {
 			result->inflate();

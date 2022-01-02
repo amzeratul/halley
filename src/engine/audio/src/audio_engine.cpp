@@ -127,7 +127,7 @@ void AudioEngine::pause()
 
 void AudioEngine::generateBuffer()
 {
-	//ProfileEvent event(ProfilerEventType::AudioGenerateBuffer);
+	ProfilerEvent event(ProfilerEventType::AudioGenerateBuffer);
 	Stopwatch timer;
 	timer.start();
 	

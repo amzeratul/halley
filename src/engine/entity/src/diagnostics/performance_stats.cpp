@@ -333,13 +333,13 @@ void PerformanceStatsView::drawTimeGraphThreads(Painter& painter, Rect4f rect, R
 		totalThreadDepth += threadInfo.maxDepth + 1;
 	}
 
-	const float threadSpacing = 10.0f;
+	const float threadSpacing = 20.0f;
 	const float threadHeight = std::min(50.0f, std::floor((rect.getHeight() - (threads.size() - 1) * threadSpacing) / static_cast<float>(totalThreadDepth)));
-	int heightSoFar = 0;
+	float heightSoFar = 0;
 	for (const auto& threadInfo: threads) {
 		const int depth = threadInfo.maxDepth + 1;
-		drawTimeGraphThread(painter, Rect4f(rect.getLeft(), rect.getTop() + heightSoFar * threadHeight, rect.getWidth(), threadHeight * depth), threadInfo, timeRange);
-		heightSoFar += depth;
+		drawTimeGraphThread(painter, Rect4f(rect.getLeft(), rect.getTop() + heightSoFar, rect.getWidth(), threadHeight * depth), threadInfo, timeRange);
+		heightSoFar += static_cast<float>(depth) * threadHeight + threadSpacing;
 	}
 }
 
