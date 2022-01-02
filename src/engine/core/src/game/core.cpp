@@ -307,6 +307,13 @@ void Core::processEvents(Time time)
 	}
 }
 
+void Core::runStartFrame()
+{
+	if (currentStage) {
+		currentStage->onStartFrame();
+	}
+}
+
 void Core::runPreVariableUpdate(Time time)
 {
 	if (devConClient) {
@@ -377,6 +384,8 @@ void Core::tickFrame(Time time)
 	}
 
 	const bool multithreaded = currentStage && currentStage->hasMultithreadedRendering();
+
+	runStartFrame();
 	
 	if (multithreaded) {
 		auto updateTask = Concurrent::execute([&] () {

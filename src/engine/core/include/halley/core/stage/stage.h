@@ -19,11 +19,12 @@ namespace Halley
 	public:
 		virtual ~Stage() {}
 
+		virtual void init() {}
+
+		virtual void onStartFrame() {}
 		virtual void onFixedUpdate(Time) {}
 		virtual void onVariableUpdate(Time) {}
 		virtual void onRender(RenderContext&) const {}
-
-		virtual void init() {}
 
 		const HalleyAPI& getAPI() const { return *api; }
 

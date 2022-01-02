@@ -444,7 +444,7 @@ void World::step(TimeLine timeline, Time elapsed)
 
 	spawnPending();
 
-	initSystems(std::array<TimeLine, 2>{ TimeLine::FixedUpdate, TimeLine::VariableUpdate });
+	initSystems(std::array<TimeLine, 1>{ timeline });
 	updateSystems(timeline, elapsed);
 	processSystemMessages(timeline);
 }
