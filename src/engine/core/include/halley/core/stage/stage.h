@@ -29,6 +29,8 @@ namespace Halley
 
 		virtual bool onQuitRequested(); // Return true if OK to quit
 
+		virtual bool hasMultithreadedRendering() const;
+
 	protected:
 		explicit Stage(String name = "unnamed");
 

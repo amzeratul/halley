@@ -36,7 +36,7 @@ namespace Halley {
 		static std::unique_ptr<World> make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode);
 
 		void step(TimeLine timeline, Time elapsed);
-		void render(RenderContext& rc) const;
+		void render(RenderContext& rc);
 		bool hasSystemsOnTimeLine(TimeLine timeline) const;
 		
 		System& addSystem(std::unique_ptr<System> system, TimeLine timeline);
@@ -155,7 +155,7 @@ namespace Halley {
 
 		void allocateEntity(Entity* entity);
 		void updateEntities();
-		void initSystems();
+		void initSystems(gsl::span<const TimeLine> timelines);
 
 		void doDestroyEntity(EntityId id);
 		void doDestroyEntity(Entity* entity);

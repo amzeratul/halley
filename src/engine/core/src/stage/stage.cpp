@@ -12,6 +12,11 @@ bool Stage::onQuitRequested()
 	return true;
 }
 
+bool Stage::hasMultithreadedRendering() const
+{
+	return false;
+}
+
 InputAPI& Stage::getInputAPI() const
 {
 	Expects(api->input);

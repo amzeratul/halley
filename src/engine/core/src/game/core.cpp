@@ -376,7 +376,7 @@ void Core::tickFrame(Time time)
 		return;
 	}
 
-	const bool multithreaded = false;
+	const bool multithreaded = currentStage && currentStage->hasMultithreadedRendering();
 	
 	if (multithreaded) {
 		auto updateTask = Concurrent::execute([&] () {

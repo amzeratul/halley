@@ -444,15 +444,16 @@ void World::step(TimeLine timeline, Time elapsed)
 
 	spawnPending();
 
-	initSystems();
+	initSystems(std::array<TimeLine, 2>{ TimeLine::FixedUpdate, TimeLine::VariableUpdate });
 	updateSystems(timeline, elapsed);
 	processSystemMessages(timeline);
 }
 
-void World::render(RenderContext& rc) const
+void World::render(RenderContext& rc)
 {
 	//ProfilerEvent event(ProfilerEventType::WorldSystemRender);
 
+	initSystems(std::array<TimeLine, 1>{ TimeLine::Render });
 	renderSystems(rc);
 	rc.flush();
 }
@@ -602,10 +603,10 @@ void World::updateEntities()
 	HALLEY_DEBUG_TRACE();
 }
 
-void World::initSystems()
+void World::initSystems(gsl::span<const TimeLine> timelines)
 {
-	for (auto& tl: systems) {
-		for (auto& system : tl) {
+	for (auto& tl: timelines) {
+		for (auto& system : systems[int(tl)]) {
 			// If the system is initialised, also check for any entities that need spawning
 			if (system->tryInit()) {
 				spawnPending();
