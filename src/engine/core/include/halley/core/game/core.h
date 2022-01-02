@@ -104,6 +104,7 @@ namespace Halley
 
 		std::unique_ptr<Stage> currentStage;
 		std::unique_ptr<Stage> nextStage;
+		uint32_t curStageFrames = 0;
 		bool pendingStageTransition = false;
 
 		bool initialized = false;

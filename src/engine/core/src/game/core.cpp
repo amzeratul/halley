@@ -393,7 +393,9 @@ void Core::tickFrame(Time time)
 			runVariableUpdate(time);
 			runPostVariableUpdate(time);
 		});
-		render();
+		if (curStageFrames > 0) {
+			render();
+		}
 		updateTask.wait();
 		waitForRenderEnd();
 	} else {
@@ -405,6 +407,8 @@ void Core::tickFrame(Time time)
 			waitForRenderEnd();
 		}
 	}
+
+	curStageFrames++;
 }
 
 void Core::doFixedUpdate(Time time)
@@ -558,6 +562,7 @@ bool Core::transitionStage()
 
 		// Update stage
 		currentStage = std::move(nextStage);
+		curStageFrames = 0;
 
 		// Prepare next stage
 		if (currentStage) {
