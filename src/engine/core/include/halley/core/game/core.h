@@ -72,12 +72,16 @@ namespace Halley
 		void setOutRedirect(bool appendToExisting);
 
 		void doFixedUpdate(Time time);
-		void doVariableUpdate(Time time);
-		void doRender(Time time);
+		void tickFrame(Time time);
+		void render();
+		void waitForRenderEnd();
 
 		void showComputerInfo() const;
 
-		void pumpEvents(Time time);
+		void processEvents(Time time);
+		void runPreVariableUpdate(Time time);
+		void runVariableUpdate(Time time);
+		void runPostVariableUpdate(Time time);
 		void pumpAudio();
 		void updateSystem(Time time);
 		void updatePlatform();

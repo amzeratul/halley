@@ -287,14 +287,17 @@ void Core::setOutRedirect(bool appendToExisting)
 #endif
 }
 
-void Core::pumpEvents(Time time)
+void Core::processEvents(Time time)
 {
-	auto video = dynamic_cast<VideoAPIInternal*>(&*api->video);
-	auto input = dynamic_cast<InputAPIInternal*>(&*api->input);
+	ProfilerEvent event(ProfilerEventType::CorePumpEvents);
 
-	{
-		ProfilerEvent event(ProfilerEventType::CorePumpEvents);
-		input->beginEvents(time);
+	auto* video = dynamic_cast<VideoAPIInternal*>(&*api->video);
+	auto* input = dynamic_cast<InputAPIInternal*>(&*api->input);
+	input->beginEvents(time);
+
+	if (api->system) {
+		api->systemInternal->onTickMainLoop();
+
 		if (!api->system->generateEvents(video, input)) {
 			// System close event
 			if (!currentStage || currentStage->onQuitRequested()) {
@@ -302,11 +305,21 @@ void Core::pumpEvents(Time time)
 			}
 		}
 	}
+}
 
+void Core::runPreVariableUpdate(Time time)
+{
 	if (devConClient) {
 		ProfilerEvent event(ProfilerEventType::CoreDevConClient);
 		devConClient->update();
 	}
+}
+
+void Core::runPostVariableUpdate(Time time)
+{
+	pumpAudio();
+	updatePlatform();
+	updateSystem(time);
 }
 
 void Core::pumpAudio()
@@ -336,7 +349,8 @@ void Core::updatePlatform()
 void Core::onFixedUpdate(Time time)
 {
 	if (isRunning()) {
-		doFixedUpdate(time);
+		// TODO: move this to onTick
+		//doFixedUpdate(time);
 	}
 }
 
@@ -346,22 +360,9 @@ void Core::onTick(Time time)
 	const bool record = !profileCallbacks.empty();
 	capture.startFrame(record);
 	
-	if (api->system) {
-		api->systemInternal->onTickMainLoop();
-	}
-	
-	if (isRunning()) {
-		pumpEvents(time);
+	processEvents(time);
 
-		doVariableUpdate(time);
-		
-		pumpAudio();
-		updatePlatform();
-		updateSystem(time);
-	}
-	if (isRunning()) { // Check again, it might have changed
-		doRender(time);
-	}
+	tickFrame(time);
 
 	capture.endFrame();
 	if (record && capture.getFrameTime() >= getProfileCaptureThreshold()) {
@@ -369,21 +370,47 @@ void Core::onTick(Time time)
 	}
 }
 
+void Core::tickFrame(Time time)
+{
+	if (!isRunning()) {
+		return;
+	}
+
+	const bool multithreaded = false;
+	
+	if (multithreaded) {
+		auto updateTask = Concurrent::execute([&] () {
+			runPreVariableUpdate(time);
+			runVariableUpdate(time);
+			runPostVariableUpdate(time);
+		});
+		render();
+		updateTask.wait();
+		waitForRenderEnd();
+	} else {
+		runPreVariableUpdate(time);
+		runVariableUpdate(time);
+		runPostVariableUpdate(time);
+		if (isRunning()) { // Check again, it might have changed
+			render();
+			waitForRenderEnd();
+		}
+	}
+}
+
 void Core::doFixedUpdate(Time time)
 {
-	/*	
 	if (running && currentStage) {
-		ProfileEvent event(ProfilerEventType::CoreFixedUpdate);
+		ProfilerEvent event(ProfilerEventType::CoreFixedUpdate);
 		try {
 			currentStage->onFixedUpdate(time);
 		} catch (Exception& e) {
 			game->onUncaughtException(e, TimeLine::FixedUpdate);
 		}
 	}
-	*/
 }
 
-void Core::doVariableUpdate(Time time)
+void Core::runVariableUpdate(Time time)
 {		
 	if (running && currentStage) {
 		ProfilerEvent event(ProfilerEventType::CoreVariableUpdate);
@@ -395,7 +422,7 @@ void Core::doVariableUpdate(Time time)
 	}
 }
 
-void Core::doRender(Time)
+void Core::render()
 {
 	if (api->video) {
 		{
@@ -426,7 +453,12 @@ void Core::doRender(Time)
 
 			painter->endRender();
 		}
+	}
+}
 
+void Core::waitForRenderEnd()
+{
+	if (api->video) {
 		ProfilerEvent event(ProfilerEventType::CoreVSync);
 		api->video->finishRender();
 	}
