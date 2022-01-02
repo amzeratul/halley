@@ -55,8 +55,7 @@ namespace Halley
 	class SpritePainter
 	{
 	public:
-		void start();
-		[[deprecated]] void start(size_t nSprites);
+		void start(bool forceCopy = false);
 		
 		void add(const Sprite& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
 		void addCopy(const Sprite& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip = {});
@@ -74,6 +73,7 @@ namespace Halley
 		Vector<TextRenderer> cachedText;
 		Vector<SpritePainterEntry::Callback> callbacks;
 		bool dirty = false;
+		bool forceCopy = false;
 
 		void draw(gsl::span<const Sprite> sprite, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;
 		void draw(gsl::span<const TextRenderer> text, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;

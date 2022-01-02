@@ -271,4 +271,14 @@ namespace std_ex {
 	{
 		return std::find_if(container.begin(), container.end(), predicate);
 	}
+
+	template <typename C, typename S>
+	auto move_push_back(C& destination, S& source)
+	{
+		destination.reserve(destination.size() + source.size());
+		for (const auto& s: source) {
+			destination.push_back(std::move(s));
+		}
+		source.clear();
+	};
 }

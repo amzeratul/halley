@@ -22,7 +22,7 @@ MaterialDataBlock::MaterialDataBlock(MaterialDataBlockType type, size_t size, in
 	: data(type == MaterialDataBlockType::SharedExternal ? 0 : size, 0)
 	, addresses(def.getNumPasses() * shaderStageCount)
 	, dataBlockType(type)
-	, bindPoint(bindPoint)
+	, bindPoint(static_cast<int16_t>(bindPoint))
 {
 	for (int i = 0; i < def.getNumPasses(); ++i) {
 		auto& shader = def.getPass(i).getShader();

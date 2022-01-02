@@ -28,7 +28,7 @@ namespace Halley
 		virtual void update(const MaterialDataBlock& dataBlock) = 0;
 	};
 
-	enum class MaterialDataBlockType
+	enum class MaterialDataBlockType : uint8_t
 	{
 		// Shared blocks are not stored locally in the material (e.g. the HalleyBlock, stored by the engine)
 		SharedLocal,    // Shared, this keeps the canonical copy
@@ -57,7 +57,7 @@ namespace Halley
 		Bytes data;
 		Vector<int> addresses;
 		MaterialDataBlockType dataBlockType = MaterialDataBlockType::Local;
-		int bindPoint = 0;
+		int16_t bindPoint = 0;
 		bool dirty = true;
 
 		bool setUniform(size_t offset, ShaderParameterType type, const void* data);

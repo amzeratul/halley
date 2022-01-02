@@ -91,23 +91,23 @@ const std::optional<Rect4f>& SpritePainterEntry::getClip() const
 	return clip;
 }
 
-void SpritePainter::start()
+void SpritePainter::start(bool forceCopy)
 {
+	this->forceCopy = forceCopy;
 	sprites.clear();
 	cachedSprites.clear();
 	cachedText.clear();
 }
 
-void SpritePainter::start(size_t)
-{
-	start();
-}
-
 void SpritePainter::add(const Sprite& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
-	Expects(mask >= 0);
-	sprites.push_back(SpritePainterEntry(gsl::span<const Sprite>(&sprite, 1), mask, layer, tieBreaker, sprites.size(), std::move(clip)));
-	dirty = true;
+	if (forceCopy) {
+		addCopy(sprite, mask, layer, tieBreaker, clip);
+	} else {
+		Expects(mask >= 0);
+		sprites.push_back(SpritePainterEntry(gsl::span<const Sprite>(&sprite, 1), mask, layer, tieBreaker, sprites.size(), std::move(clip)));
+		dirty = true;
+	}
 }
 
 void SpritePainter::addCopy(const Sprite& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
@@ -120,10 +120,14 @@ void SpritePainter::addCopy(const Sprite& sprite, int mask, int layer, float tie
 
 void SpritePainter::add(gsl::span<const Sprite> sprites, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
-	Expects(mask >= 0);
 	if (!sprites.empty()) {
-		this->sprites.push_back(SpritePainterEntry(sprites, mask, layer, tieBreaker, this->sprites.size(), std::move(clip)));
-		dirty = true;
+		if (forceCopy) {
+			addCopy(sprites, mask, layer, tieBreaker, clip);
+		} else {
+			Expects(mask >= 0);
+			this->sprites.push_back(SpritePainterEntry(sprites, mask, layer, tieBreaker, this->sprites.size(), std::move(clip)));
+			dirty = true;
+		}
 	}
 }
 
@@ -139,9 +143,13 @@ void SpritePainter::addCopy(gsl::span<const Sprite> sprites, int mask, int layer
 
 void SpritePainter::add(const TextRenderer& text, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
-	Expects(mask >= 0);
-	sprites.push_back(SpritePainterEntry(gsl::span<const TextRenderer>(&text, 1), mask, layer, tieBreaker, sprites.size(), std::move(clip)));
-	dirty = true;
+	if (forceCopy) {
+		addCopy(text, mask, layer, tieBreaker, clip);
+	} else {
+		Expects(mask >= 0);
+		sprites.push_back(SpritePainterEntry(gsl::span<const TextRenderer>(&text, 1), mask, layer, tieBreaker, sprites.size(), std::move(clip)));
+		dirty = true;
+	}
 }
 
 void SpritePainter::addCopy(const TextRenderer& text, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
