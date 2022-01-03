@@ -2,9 +2,47 @@
 #include "graphics/sprite/sprite.h"
 #include "graphics/painter.h"
 #include <gsl/gsl>
+
+#include "graphics/material/material.h"
 #include "graphics/text/text_renderer.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
+
+void MaterialRecycler::startFrame()
+{
+	for (auto& [k, v]: entries) {
+		++v.age;
+	}
+	std_ex::erase_if_value(entries, [] (const Entry& e)
+	{
+		return e.age >= 3;
+	});
+}
+
+std::shared_ptr<Material> MaterialRecycler::cloneMaterial(const Material& material)
+{
+	const auto iter = entries.find(material.getHash());
+	if (iter == entries.end()) {
+		auto m = material.clone();
+		entries[material.getHash()] = Entry{ m, 0 };
+		return m;
+	} else {
+		iter->second.age = 0;
+		return iter->second.material;
+	}
+}
+
+Sprite MaterialRecycler::clone(const Sprite& sprite)
+{
+	return sprite.clone().setMaterial(cloneMaterial(sprite.getMaterial()));
+}
+
+TextRenderer MaterialRecycler::clone(const TextRenderer& text)
+{
+	// TODO: clone materials
+	return text.clone();
+}
 
 SpritePainterEntry::SpritePainterEntry(gsl::span<const Sprite> sprites, int mask, int layer, float tieBreaker, size_t insertOrder, std::optional<Rect4f> clip)
 	: ptr(sprites.empty() ? nullptr : &sprites[0])
@@ -97,6 +135,7 @@ void SpritePainter::start(bool forceCopy)
 	sprites.clear();
 	cachedSprites.clear();
 	cachedText.clear();
+	materialRecycler.startFrame();
 }
 
 void SpritePainter::add(const Sprite& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
@@ -114,7 +153,7 @@ void SpritePainter::addCopy(const Sprite& sprite, int mask, int layer, float tie
 {
 	Expects(mask >= 0);
 	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::SpriteCached, cachedSprites.size(), 1, mask, layer, tieBreaker, sprites.size(), std::move(clip)));
-	cachedSprites.push_back(sprite);
+	cachedSprites.push_back(materialRecycler.clone(sprite));
 	dirty = true;
 }
 
@@ -136,7 +175,10 @@ void SpritePainter::addCopy(gsl::span<const Sprite> sprites, int mask, int layer
 	Expects(mask >= 0);
 	if (!sprites.empty()) {
 		this->sprites.push_back(SpritePainterEntry(SpritePainterEntryType::SpriteCached, cachedSprites.size(), sprites.size(), mask, layer, tieBreaker, this->sprites.size(), std::move(clip)));
-		cachedSprites.insert(cachedSprites.end(), sprites.begin(), sprites.end());
+		cachedSprites.reserve(cachedSprites.size() + sprites.size());
+		for (auto& s: sprites) {
+			cachedSprites.push_back(materialRecycler.clone(s));
+		}
 		dirty = true;
 	}
 }
@@ -156,7 +198,7 @@ void SpritePainter::addCopy(const TextRenderer& text, int mask, int layer, float
 {
 	Expects(mask >= 0);
 	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::TextCached, cachedText.size(), 1, mask, layer, tieBreaker, sprites.size(), std::move(clip)));
-	cachedText.push_back(text);
+	cachedText.push_back(materialRecycler.clone(text));
 	dirty = true;
 }
 

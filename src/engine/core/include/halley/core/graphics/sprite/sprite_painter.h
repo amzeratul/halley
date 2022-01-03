@@ -6,12 +6,31 @@
 #include <limits>
 #include <optional>
 
+#include "halley/data_structures/hash_map.h"
+
 namespace Halley
 {
 	class TextRenderer;
 	class String;
 	class Sprite;
 	class Painter;
+	class Material;
+
+	class MaterialRecycler {
+	public:
+		void startFrame();
+		std::shared_ptr<Material> cloneMaterial(const Material& material);
+		Sprite clone(const Sprite& sprite);
+		TextRenderer clone(const TextRenderer& text);
+
+	private:
+		class Entry {
+		public:
+			std::shared_ptr<Material> material;
+			int age = 0;
+		};
+		HashMap<uint64_t, Entry> entries;
+	};
 
 	enum class SpritePainterEntryType
 	{
@@ -74,6 +93,8 @@ namespace Halley
 		Vector<SpritePainterEntry::Callback> callbacks;
 		bool dirty = false;
 		bool forceCopy = false;
+
+		MaterialRecycler materialRecycler;
 
 		void draw(gsl::span<const Sprite> sprite, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;
 		void draw(gsl::span<const TextRenderer> text, Painter& painter, Rect4f view, const std::optional<Rect4f>& clip) const;

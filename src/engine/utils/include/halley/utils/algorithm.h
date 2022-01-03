@@ -216,8 +216,8 @@ namespace std_ex {
 		return std::find_if(container.begin(), container.end(), predicate) != container.end();
 	}
 
-	template <typename K, typename V, typename F>
-	void erase_if_value(std::map<K, V>& map, F predicate)
+	template <typename C, typename F>
+	void erase_if_value(C& map, F predicate)
 	{
 		const auto endIter = map.end();
 		for (auto iter = map.begin(); iter != endIter;) {
@@ -229,8 +229,8 @@ namespace std_ex {
 		}		
 	}
 
-	template <typename K, typename V, typename F>
-	void erase_if_key(std::map<K, V>& map, F predicate)
+	template <typename C, typename F>
+	void erase_if_key(C& map, F predicate)
 	{
 		const auto endIter = map.end();
 		for (auto iter = map.begin(); iter != endIter;) {
