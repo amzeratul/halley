@@ -98,7 +98,7 @@ int DummyShader::getBlockLocation(const String&, ShaderType)
 	return 0;
 }
 
-void DummyMaterialConstantBuffer::update(const MaterialDataBlock&) {}
+void DummyMaterialConstantBuffer::update(gsl::span<const gsl::byte> data) {}
 
 DummyPainter::DummyPainter(Resources& resources)
 	: Painter(resources)

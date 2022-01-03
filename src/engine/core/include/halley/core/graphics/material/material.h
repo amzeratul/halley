@@ -57,8 +57,8 @@ namespace Halley
 		Bytes data;
 		Vector<int> addresses;
 		MaterialDataBlockType dataBlockType = MaterialDataBlockType::Local;
-		int16_t bindPoint = 0;
 		bool dirty = true;
+		int16_t bindPoint = 0;
 
 		bool setUniform(size_t offset, ShaderParameterType type, const void* data);
 		void upload(VideoAPI* api);

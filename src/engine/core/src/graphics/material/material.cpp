@@ -100,7 +100,7 @@ void MaterialDataBlock::upload(VideoAPI* api)
 			dirty = true;
 		}
 		if (dirty) {
-			constantBuffer->update(*this);
+			constantBuffer->update(getData());
 			dirty = false;
 		}
 	}
