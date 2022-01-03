@@ -220,8 +220,6 @@ namespace Halley
 		bool isColumnMajor() const;
 
 	private:
-		VideoAPI* api = nullptr;
-
 		String name;
 		Vector<MaterialPass> passes;
 		Vector<MaterialTexture> textures;

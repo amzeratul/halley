@@ -144,12 +144,11 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 	Deserializer s(data->getSpan());
 	s >> *this;
 
-	api = loader.getAPI().video;
 	int i = 0;
 	for (auto& p: passes) {
 		p.createShader(loader, name + "/pass" + toString(i++), attributes);
 	}
-	columnMajor = api->isColumnMajor();
+	columnMajor = loader.getAPI().video->isColumnMajor();
 
 	// Load textures
 	fallbackTexture = loader.getResources().get<Texture>("whitebox.png");
