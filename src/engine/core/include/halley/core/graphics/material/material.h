@@ -25,7 +25,7 @@ namespace Halley
 	public:
 		virtual ~MaterialConstantBuffer() {}
 
-		virtual void update(const MaterialDataBlock& dataBlock) = 0;
+		virtual void update(gsl::span<const gsl::byte> data) = 0;
 	};
 
 	enum class MaterialDataBlockType : uint8_t

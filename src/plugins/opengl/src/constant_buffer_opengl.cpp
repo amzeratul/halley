@@ -17,9 +17,9 @@ ConstantBufferOpenGL::~ConstantBufferOpenGL()
 	
 }
 
-void ConstantBufferOpenGL::update(const MaterialDataBlock& dataBlock)
+void ConstantBufferOpenGL::update(gsl::span<const gsl::byte> data)
 {
-	buffer.setData(dataBlock.getData());
+	buffer.setData(data);
 }
 
 void ConstantBufferOpenGL::bind(int bindPoint)

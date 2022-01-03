@@ -9,7 +9,7 @@ namespace Halley
 	public:
 		DX11MaterialConstantBuffer(DX11Video& video);
 
-		void update(const MaterialDataBlock& dataBlock) override;
+		void update(gsl::span<const gsl::byte> data) override;
 		DX11Buffer& getBuffer();
 
 	private:
