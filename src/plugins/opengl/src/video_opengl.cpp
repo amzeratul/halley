@@ -271,7 +271,7 @@ bool VideoOpenGL::isColumnMajor() const
 
 std::unique_ptr<Painter> VideoOpenGL::makePainter(Resources& resources)
 {
-	return std::make_unique<PainterOpenGL>(resources);
+	return std::make_unique<PainterOpenGL>(*this, resources);
 }
 
 std::unique_ptr<Texture> VideoOpenGL::createTexture(Vector2i size)

@@ -15,8 +15,8 @@
 using namespace Halley;
 
 DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
-	: Painter(resources)
-	, video(video)
+	: Painter(video, resources)
+	, dx11Video(video)
 {
 #ifdef WINDOWS_STORE
 	// Due to the architecture of "some" platforms available here, updating a dynamic buffer is extremely slow if it's still in use
@@ -48,7 +48,7 @@ void DX11Painter::clear(std::optional<Colour> colour, std::optional<float> depth
 	if (colour) {
 		const auto& c = colour.value();
 		const float col[] = { c.r, c.g, c.b, c.a };
-		video.getDeviceContext().ClearRenderTargetView(renderTarget.getRenderTargetView(), col);
+		dx11Video.getDeviceContext().ClearRenderTargetView(renderTarget.getRenderTargetView(), col);
 	}
 
 	if (depth || stencil) {
@@ -61,7 +61,7 @@ void DX11Painter::clear(std::optional<Colour> colour, std::optional<float> depth
 			if (stencil) {
 				flags |= D3D11_CLEAR_STENCIL;
 			}
-			video.getDeviceContext().ClearDepthStencilView(depthStencilView, flags, depth.value_or(1.0f), stencil.value_or(0));
+			dx11Video.getDeviceContext().ClearDepthStencilView(depthStencilView, flags, depth.value_or(1.0f), stencil.value_or(0));
 		}
 	}
 }
@@ -76,11 +76,11 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 
 	// Shader
 	auto& shader = static_cast<DX11Shader&>(pass.getShader());
-	shader.setMaterialLayout(video, material.getDefinition().getAttributes());
-	shader.bind(video);
+	shader.setMaterialLayout(dx11Video, material.getDefinition().getAttributes());
+	shader.bind(dx11Video);
 
 	// Blend
-	getBlendMode(pass.getBlend()).bind(video);
+	getBlendMode(pass.getBlend()).bind(dx11Video);
 
 	// Texture
 	int textureUnit = 0;
@@ -90,7 +90,7 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 		if (!texture) {
 			throw Exception("Error binding texture to texture unit #" + toString(textureUnit) + " with material \"" + material.getDefinition().getName() + "\": texture is null.", HalleyExceptions::VideoPlugin);
 		} else {
-			texture->bind(video, textureUnit, tex.getSamplerType());
+			texture->bind(dx11Video, textureUnit, tex.getSamplerType());
 		}
 		if (texture->getDescriptor().isRenderTarget) {
 			// Remember units for textures which are also render targets
@@ -103,10 +103,10 @@ void DX11Painter::setMaterialPass(const Material& material, int passN)
 
 void DX11Painter::setMaterialData(const Material& material)
 {
-	auto& devCon = video.getDeviceContext();
+	auto& devCon = dx11Video.getDeviceContext();
 	for (auto& block: material.getDataBlocks()) {
 		if (block.getType() != MaterialDataBlockType::SharedExternal) {
-			auto& buffer = static_cast<DX11MaterialConstantBuffer&>(block.getConstantBuffer()).getBuffer();
+			auto& buffer = static_cast<DX11MaterialConstantBuffer&>(getConstantBuffer(block)).getBuffer();
 			auto dxBuffer = buffer.getBuffer();
 			if (Halley::getPlatform() == GamePlatform::UWP || Halley::getPlatform() == GamePlatform::XboxOne) {
 				UINT firstConstant[] = { buffer.getOffset() / 16 };
@@ -136,19 +136,19 @@ void DX11Painter::setVertices(const MaterialDefinition& material, size_t numVert
 		ID3D11Buffer* buffers[] = { vb.getBuffer() };
 		UINT strides[] = { UINT(stride) };
 		UINT offsets[] = { vb.getOffset() };
-		video.getDeviceContext().IASetVertexBuffers(0, 1, buffers, strides, offsets);
+		dx11Video.getDeviceContext().IASetVertexBuffers(0, 1, buffers, strides, offsets);
 	}
 
 	{
 		auto& ib = indexBuffers[curBuffer];
 		ib.setData(gsl::as_bytes(gsl::span<unsigned short>(indices, numIndices)));
-		video.getDeviceContext().IASetIndexBuffer(ib.getBuffer(), DXGI_FORMAT_R16_UINT, ib.getOffset());
+		dx11Video.getDeviceContext().IASetIndexBuffer(ib.getBuffer(), DXGI_FORMAT_R16_UINT, ib.getOffset());
 	}
 }
 
 void DX11Painter::drawTriangles(size_t numIndices)
 {
-	auto& devCon = video.getDeviceContext();
+	auto& devCon = dx11Video.getDeviceContext();
 	devCon.IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	devCon.DrawIndexed(UINT(numIndices), 0, 0);
 }
@@ -165,7 +165,7 @@ void DX11Painter::setViewPort(Rect4i rect)
 	viewport.MinDepth = 0.0f;
 	viewport.MaxDepth = 1.0f;
 
-	video.getDeviceContext().RSSetViewports(1, &viewport);
+	dx11Video.getDeviceContext().RSSetViewports(1, &viewport);
 }
 
 void DX11Painter::setClip(Rect4i clip, bool enable)
@@ -175,7 +175,6 @@ void DX11Painter::setClip(Rect4i clip, bool enable)
 
 void DX11Painter::onUpdateProjection(Material& material)
 {
-	material.uploadData(*this);
 	setMaterialData(material);
 }
 
@@ -186,7 +185,7 @@ DX11Blend& DX11Painter::getBlendMode(BlendType type)
 		return iter->second;
 	}
 
-	blendModes.emplace(std::make_pair(type, DX11Blend(video, type)));
+	blendModes.emplace(std::make_pair(type, DX11Blend(dx11Video, type)));
 	return getBlendMode(type);
 }
 
@@ -204,7 +203,7 @@ DX11Rasterizer& DX11Painter::getRasterizer(const DX11RasterizerOptions& options)
 	if (iter != rasterizers.end()) {
 		return *iter->second;
 	}
-	rasterizers[options] = std::make_unique<DX11Rasterizer>(video, options);
+	rasterizers[options] = std::make_unique<DX11Rasterizer>(dx11Video, options);
 	return *rasterizers[options];
 }
 
@@ -221,7 +220,7 @@ void DX11Painter::setRasterizer(const DX11RasterizerOptions& options)
 	if (!curRaster || curRaster->getOptions() != options) {
 		auto& raster = getRasterizer(options);
 		curRaster = &raster;
-		raster.bind(video);	
+		raster.bind(dx11Video);	
 	}
 
 	if (options.scissor) {
@@ -231,7 +230,7 @@ void DX11Painter::setRasterizer(const DX11RasterizerOptions& options)
 		rect.bottom = clip.getBottom();
 		rect.left = clip.getLeft();
 		rect.right = clip.getRight();
-		video.getDeviceContext().RSSetScissorRects(1, &rect);
+		dx11Video.getDeviceContext().RSSetScissorRects(1, &rect);
 	}
 }
 
@@ -239,7 +238,7 @@ DX11DepthStencil& DX11Painter::getDepthStencil(const MaterialDepthStencil& depth
 {
 	const auto iter = depthStencils.find(depthStencilDefinition);
 	if (iter == depthStencils.end()) {
-		auto depthStencil = std::make_unique<DX11DepthStencil>(video, depthStencilDefinition);
+		auto depthStencil = std::make_unique<DX11DepthStencil>(dx11Video, depthStencilDefinition);
 		const auto result = depthStencil.get();
 		depthStencils[depthStencilDefinition] = std::move(depthStencil);
 		return *result;
@@ -266,7 +265,7 @@ void DX11Painter::unbindRenderTargetTextureUnits(size_t lastIndex, int minimumTe
 		int textureUnit = renderTargetTextureUnits[idx];
 		if (textureUnit >= minimumTextureUnit) {
 			ID3D11ShaderResourceView* null_views[] = { nullptr };
-			video.getDeviceContext().PSSetShaderResources(textureUnit, 1, null_views);
+			dx11Video.getDeviceContext().PSSetShaderResources(textureUnit, 1, null_views);
 		}
 	}
 	// Remove units stored from the previous pass. Keep values of the current pass.

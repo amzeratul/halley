@@ -70,7 +70,7 @@ void DummyVideoAPI::deInit()
 
 std::unique_ptr<Painter> DummyVideoAPI::makePainter(Resources& resources)
 {
-	return std::make_unique<DummyPainter>(resources);
+	return std::make_unique<DummyPainter>(*this, resources);
 }
 
 String DummyVideoAPI::getShaderLanguage()
@@ -100,8 +100,8 @@ int DummyShader::getBlockLocation(const String&, ShaderType)
 
 void DummyMaterialConstantBuffer::update(gsl::span<const gsl::byte> data) {}
 
-DummyPainter::DummyPainter(Resources& resources)
-	: Painter(resources)
+DummyPainter::DummyPainter(VideoAPI& video, Resources& resources)
+	: Painter(video, resources)
 {}
 
 void DummyPainter::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil) {}

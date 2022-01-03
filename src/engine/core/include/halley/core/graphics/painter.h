@@ -8,10 +8,14 @@
 
 
 #include "texture.h"
+#include "halley/data_structures/hash_map.h"
 #include "halley/maths/circle.h"
 
 namespace Halley
 {
+	class VideoAPI;
+	class MaterialDataBlock;
+	class MaterialConstantBuffer;
 	class BezierCubic;
 	class BezierQuadratic;
 	class Polygon;
@@ -39,7 +43,7 @@ namespace Halley
 		};
 
 	public:
-		Painter(Resources& resources);
+		Painter(VideoAPI& video, Resources& resources);
 		virtual ~Painter();
 
 		void flush();
@@ -120,10 +124,19 @@ namespace Halley
 
 		const Vector<String>& getPendingDebugGroupStack() const;
 
+		MaterialConstantBuffer& getConstantBuffer(const MaterialDataBlock& dataBlock);
+
 		std::unique_ptr<Material> halleyGlobalMaterial;
 
 	private:
+		class ConstantBufferEntry {
+		public:
+			std::shared_ptr<MaterialConstantBuffer> buffer;
+			int age = 0;
+		};
+		
 		Resources& resources;
+		VideoAPI& video;
 		RenderContext* activeContext = nullptr;
 		RenderTarget* activeRenderTarget = nullptr;
 		Matrix4f projection;
@@ -156,6 +169,8 @@ namespace Halley
 		Vector<String> curDebugGroupStack;
 		Vector<String> pendingDebugGroupStack;
 
+		HashMap<uint64_t, ConstantBufferEntry> constantBuffers;
+
 		void bind(RenderContext& context);
 		void unbind(RenderContext& context);
 		
@@ -181,5 +196,7 @@ namespace Halley
 
 		std::shared_ptr<Material> getSolidLineMaterial();
 		std::shared_ptr<Material> getSolidPolygonMaterial();
+
+		void refreshConstantBufferCache();
 	};
 }

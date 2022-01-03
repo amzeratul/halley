@@ -232,8 +232,9 @@ constexpr static bool alwaysLogType(ProfilerEventType type)
 	case ProfilerEventType::CoreFixedUpdate:
 	case ProfilerEventType::CoreVariableUpdate:
 		return true;
+	default:
+		return false;
 	}
-	return false;
 }
 
 ProfilerEvent::ProfilerEvent(ProfilerEventType type, std::string_view name)

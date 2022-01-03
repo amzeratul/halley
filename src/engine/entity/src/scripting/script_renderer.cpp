@@ -310,6 +310,8 @@ Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vecto
 	case ScriptPinSide::Bottom:
 		offset = Vector2f(sideOffset, nodeSize.y * 0.5f);
 		break;
+	default:
+		break;
 	}
 	
 	const Vector2f pos = basePos + node.getPosition();

@@ -37,7 +37,7 @@ namespace Halley
 		void onUpdateProjection(Material& material) override;
 
 	private:
-		DX11Video& video;
+		DX11Video& dx11Video;
 
 		std::vector<DX11Buffer> vertexBuffers;
 		std::vector<DX11Buffer> indexBuffers;

@@ -12,7 +12,7 @@ namespace Halley
 	class PainterOpenGL final : public Painter
 	{
 	public:
-		PainterOpenGL(Resources& resources);
+		PainterOpenGL(VideoAPI& video, Resources& resources);
 		~PainterOpenGL();
 
 		void doStartRender() override;

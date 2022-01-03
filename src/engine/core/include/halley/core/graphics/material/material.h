@@ -46,22 +46,21 @@ namespace Halley
 		MaterialDataBlock(const MaterialDataBlock& other);
 		MaterialDataBlock(MaterialDataBlock&& other) noexcept;
 
-		MaterialConstantBuffer& getConstantBuffer() const;
 		int getAddress(int pass, ShaderType stage) const;
 		int getBindPoint() const;
 		gsl::span<const gsl::byte> getData() const;
 		MaterialDataBlockType getType() const;
+		uint64_t getHash() const;
 
 	private:
-		std::unique_ptr<MaterialConstantBuffer> constantBuffer;
 		Bytes data;
 		Vector<int> addresses;
 		MaterialDataBlockType dataBlockType = MaterialDataBlockType::Local;
-		bool dirty = true;
+		mutable bool needToUpdateHash = true;
 		int16_t bindPoint = 0;
+		mutable uint64_t hash = 0;
 
 		bool setUniform(size_t offset, ShaderParameterType type, const void* data);
-		void upload(VideoAPI* api);
 	};
 	
 	class Material
@@ -74,7 +73,6 @@ namespace Halley
 		explicit Material(std::shared_ptr<const MaterialDefinition> materialDefinition, bool forceLocalBlocks = false); // forceLocalBlocks is for engine use only
 
 		void bind(int pass, Painter& painter);
-		void uploadData(Painter& painter);
 		static void resetBindCache();
 
 		bool operator==(const Material& material) const;
@@ -129,7 +127,6 @@ namespace Halley
 
 		mutable uint64_t hashValue = 0;
 		mutable bool needToUpdateHash = true;
-		bool needToUploadData = true;
 		std::optional<uint8_t> stencilReferenceOverride;
 		std::bitset<8> passEnabled;
 

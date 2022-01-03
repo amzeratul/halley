@@ -8,8 +8,8 @@
 
 using namespace Halley;
 
-PainterOpenGL::PainterOpenGL(Resources& resources)
-	: Painter(resources)
+PainterOpenGL::PainterOpenGL(VideoAPI& video, Resources& resources)
+	: Painter(video, resources)
 {}
 
 PainterOpenGL::~PainterOpenGL()
@@ -129,7 +129,7 @@ void PainterOpenGL::setMaterialData(const Material& material)
 {
 	for (auto& dataBlock: material.getDataBlocks()) {
 		if (dataBlock.getType() != MaterialDataBlockType::SharedExternal) {
-			static_cast<ConstantBufferOpenGL&>(dataBlock.getConstantBuffer()).bind(dataBlock.getBindPoint());
+			static_cast<ConstantBufferOpenGL&>(getConstantBuffer(dataBlock)).bind(dataBlock.getBindPoint());
 		}
 	}
 }
@@ -146,7 +146,6 @@ void PainterOpenGL::setViewPort(Rect4i rect)
 
 void PainterOpenGL::onUpdateProjection(Material& material)
 {
-	material.uploadData(*this);
 	setMaterialData(material);
 }
 
