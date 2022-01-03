@@ -395,9 +395,9 @@ void Core::tickFrame(Time time)
 		});
 		if (curStageFrames > 0) {
 			render();
+			waitForRenderEnd();
 		}
 		updateTask.wait();
-		waitForRenderEnd();
 	} else {
 		runPreVariableUpdate(time);
 		runVariableUpdate(time);
