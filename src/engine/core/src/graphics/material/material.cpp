@@ -108,6 +108,7 @@ Material::Material(const Material& other)
 	, dataBlocks(other.dataBlocks)
 	, textures(other.textures)
 	, passEnabled(other.passEnabled)
+	, stencilReferenceOverride(other.stencilReferenceOverride)
 {
 	for (auto& u: uniforms) {
 		u.rebind(*this);
@@ -121,6 +122,7 @@ Material::Material(Material&& other) noexcept
 	, dataBlocks(std::move(other.dataBlocks))
 	, textures(std::move(other.textures))
 	, passEnabled(other.passEnabled)
+	, stencilReferenceOverride(other.stencilReferenceOverride)
 {
 	for (auto& u: uniforms) {
 		u.rebind(*this);
