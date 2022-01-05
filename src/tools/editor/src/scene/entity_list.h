@@ -36,9 +36,11 @@ namespace Halley {
 		void setEntityValidatorList(std::shared_ptr<EntityValidatorListUI> validatorList);
 		void validateAllEntities();
 		IEntityValidator::Severity getValidationSeverity() const;
+		bool isWaitingToValidate() const;
+		void forceValidationIfWaiting();
 
 		UITreeList& getList();
-	
+
 	private:
 		struct EntityInfo {
 			String name;

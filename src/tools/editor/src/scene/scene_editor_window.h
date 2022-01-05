@@ -75,7 +75,7 @@ namespace Halley {
 		void clearModifiedFlag();
 		bool isModified() const;
 		void saveScene();
-		bool canSave() const;
+		bool canSave(bool forceInstantCheck) const;
 
 		const EntityIcons& getEntityIcons() const;
 

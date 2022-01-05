@@ -11,7 +11,8 @@ EntityIcons::EntityIcons(Resources& resources, const UIColourScheme& colourSchem
 		}
 	}
 
-	invalidEntityIcon.setImage(resources, "entity_icons/warning.png").setColour(colourScheme.getColour("taskError"));
+	invalidEntityErrorIcon.setImage(resources, "entity_icons/warning.png").setColour(colourScheme.getColour("taskError"));
+	invalidEntityWarningIcon.setImage(resources, "entity_icons/warning.png").setColour(colourScheme.getColour("taskWarning"));
 }
 
 const EntityIcons::Entry& EntityIcons::getEntry(const String& id) const
@@ -51,9 +52,9 @@ const String& EntityIcons::getName(const String& id) const
 	return getEntry(id).name;
 }
 
-const Sprite& EntityIcons::getInvalidEntityIcon() const
+const Sprite& EntityIcons::getInvalidEntityIcon(IEntityValidator::Severity severity) const
 {
-	return invalidEntityIcon;
+	return severity == IEntityValidator::Severity::Error ? invalidEntityErrorIcon : invalidEntityWarningIcon;
 }
 
 const std::vector<EntityIcons::Entry>& EntityIcons::getEntries() const

@@ -17,7 +17,7 @@ namespace Halley {
 
     	const Sprite& getIcon(const String& id) const;
     	const String& getName(const String& id) const;
-        const Sprite& getInvalidEntityIcon() const;
+        const Sprite& getInvalidEntityIcon(IEntityValidator::Severity severity) const;
 
     	const std::vector<Entry>& getEntries() const;
 
@@ -28,7 +28,8 @@ namespace Halley {
     	std::vector<Entry> entries;
     	HashMap<String, size_t> entryMap;
     	Entry defaultEntry;
-        Sprite invalidEntityIcon;
+        Sprite invalidEntityWarningIcon;
+    	Sprite invalidEntityErrorIcon;
 
     	const Entry& getEntry(const String& id) const;
        	void load(const ConfigNode& node);

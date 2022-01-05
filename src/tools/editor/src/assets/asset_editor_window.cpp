@@ -111,10 +111,10 @@ bool AssetEditorWindow::isModified() const
 	return false;
 }
 
-bool AssetEditorWindow::canSave() const
+bool AssetEditorWindow::canSave(bool forceInstantCheck) const
 {
 	for (const auto& editor: curEditors) {
-		if (!editor->canSave()) {
+		if (!editor->canSave(forceInstantCheck)) {
 			return false;
 		}
 	}
@@ -127,7 +127,7 @@ void AssetEditorWindow::save()
 		metadataEditor->saveMetadata();
 	}
 	for (const auto& editor: curEditors) {
-		if (editor->canSave() && editor->isModified()) {
+		if (editor->canSave(true) && editor->isModified()) {
 			editor->save();
 		}
 	}

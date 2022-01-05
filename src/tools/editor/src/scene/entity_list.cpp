@@ -23,8 +23,6 @@ void EntityList::update(Time t, bool moved)
 	if (validationTimeout >= 0) {
 		validationTimeout -= t;
 	} else if (needsToValidateAllEntities) {
-		validationTimeout = 0.4;
-		needsToValidateAllEntities = false;
 		doValidateAllEntities();
 	}
 }
@@ -123,7 +121,7 @@ EntityList::EntityInfo EntityList::getEntityInfo(const EntityData& data) const
 	}
 
 	if (result.severity != IEntityValidator::Severity::None) {
-		result.icon = icons->getInvalidEntityIcon();
+		result.icon = icons->getInvalidEntityIcon(result.severity);
 	}
 
 	return result;
@@ -364,8 +362,25 @@ IEntityValidator::Severity EntityList::getValidationSeverity() const
 	return validationSeverity;
 }
 
+bool EntityList::isWaitingToValidate() const
+{
+	return needsToValidateAllEntities;
+}
+
+void EntityList::forceValidationIfWaiting()
+{
+	if (needsToValidateAllEntities) {
+		doValidateAllEntities();
+	}
+	if (needsToNotifyValidatorList) {
+		notifyValidatorList();
+	}
+}
+
 void EntityList::doValidateAllEntities()
 {
+	validationTimeout = 0.1;
+	needsToValidateAllEntities = false;
 	validateEntityTree(sceneEditorWindow->getSceneData()->getEntityTree());
 }
 

@@ -36,9 +36,9 @@ void PrefabEditor::save()
 	}
 }
 
-bool PrefabEditor::canSave() const
+bool PrefabEditor::canSave(bool forceInstantCheck) const
 {
-	return window && window->canSave();
+	return window && window->canSave(forceInstantCheck);
 }
 
 void PrefabEditor::update(Time t, bool moved)

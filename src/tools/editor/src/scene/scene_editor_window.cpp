@@ -713,7 +713,7 @@ void SceneEditorWindow::panCameraToEntity(const String& id)
 
 void SceneEditorWindow::saveScene()
 {
-	if (canSave()) {
+	if (canSave(false)) {
 		clearModifiedFlag();
 		undoStack.onSave();
 
@@ -725,8 +725,11 @@ void SceneEditorWindow::saveScene()
 	}
 }
 
-bool SceneEditorWindow::canSave() const
+bool SceneEditorWindow::canSave(bool forceInstantCheck) const
 {
+	if (forceInstantCheck) {
+		entityList->forceValidationIfWaiting();
+	}
 	return entityList->getValidationSeverity() != IEntityValidator::Severity::Error;
 }
 
@@ -1328,7 +1331,7 @@ void SceneEditorWindow::setupConsoleCommands()
 
 void SceneEditorWindow::updateButtons()
 {
-	getWidgetAs<UIButton>("saveButton")->setEnabled(modified && canSave());
+	getWidgetAs<UIButton>("saveButton")->setEnabled(modified && canSave(false));
 	getWidgetAs<UIButton>("undoButton")->setEnabled(undoStack.canUndo());
 	getWidgetAs<UIButton>("redoButton")->setEnabled(undoStack.canRedo());
 }

@@ -70,7 +70,7 @@ bool AssetBrowserTabs::closeTab(const String& key)
 
 	if (windows[idx]->isModified()) {
 		if (getRoot() && !getRoot()->hasModalUI()) {
-			auto buttons = makeButtons(windows[idx]->canSave());
+			auto buttons = makeButtons(windows[idx]->canSave(true));
 			
 			auto callback = [this, idx, key] (UIConfirmationPopup::ButtonType buttonType)
 			{
@@ -131,7 +131,7 @@ bool AssetBrowserTabs::proceedQuitRequested(size_t idx, bool invoke)
 		auto& window = windows[i];
 		if (window->isModified()) {
 			tabs->setSelectedOption(static_cast<int>(i));
-			auto buttons = makeButtons(window->canSave());
+			auto buttons = makeButtons(window->canSave(true));
 			auto callback = [this, i] (UIConfirmationPopup::ButtonType buttonType)
 			{
 				if (buttonType == UIConfirmationPopup::ButtonType::Cancel) {
@@ -198,7 +198,7 @@ void AssetBrowserTabs::replaceAssetTab(const String& oldName, const String& newN
 	};
 
 	if (windows[idx]->isModified()) {
-		auto buttons = makeButtons(windows[idx]->canSave());
+		auto buttons = makeButtons(windows[idx]->canSave(true));
 		auto callback = [this, idx, doChangeTab] (UIConfirmationPopup::ButtonType buttonType)
 		{
 			if (buttonType != UIConfirmationPopup::ButtonType::Cancel) {
@@ -236,12 +236,12 @@ void AssetBrowserTabs::saveCurrentTab()
 {
 	const int curPage = pages->getCurrentPage();
 	if (curPage >= 0 && curPage < static_cast<int>(windows.size())) {
-		if (windows[curPage]->canSave()) {
+		if (windows[curPage]->canSave(true)) {
 			windows[curPage]->save();
 		} else {
 			auto buttons = std::vector<UIConfirmationPopup::ButtonType>{ UIConfirmationPopup::ButtonType::Ok };
 			getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Can't save", "Unable to save " + windows[curPage]->getName() + " due to entity validation errors.", buttons, [] (UIConfirmationPopup::ButtonType)
-			{				
+			{
 			}));
 		}
 	}

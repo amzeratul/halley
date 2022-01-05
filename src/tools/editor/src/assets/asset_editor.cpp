@@ -62,7 +62,7 @@ void AssetEditor::save()
 {
 }
 
-bool AssetEditor::canSave() const
+bool AssetEditor::canSave(bool forceInstantCheck) const
 {
 	return true;
 }
