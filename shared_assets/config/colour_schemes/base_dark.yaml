@@ -48,6 +48,7 @@ colours:
   taskRunning: "#2E87DE"
   taskComplete: "#29B057"
   taskError: "#ED3333"
+  taskWarning: "#F4CD55"
   taskStatusBackground: "#00000080"
 
   toolbarNormal: "#FC2847"

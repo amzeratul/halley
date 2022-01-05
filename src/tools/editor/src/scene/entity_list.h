@@ -42,7 +42,7 @@ namespace Halley {
 		struct EntityInfo {
 			String name;
 			Sprite icon;
-			bool valid = true;
+			IEntityValidator::Severity severity;
 		};
 
 		UIFactory& factory;
@@ -52,7 +52,7 @@ namespace Halley {
 		std::shared_ptr<UITreeList> list;
 		std::shared_ptr<ISceneData> sceneData;
 		std::shared_ptr<EntityValidatorListUI> validatorList;
-		std::set<UUID> invalidEntities;
+		std::map<UUID, IEntityValidator::Severity> invalidEntities;
 		bool needsToNotifyValidatorList = false;
 		bool needsToValidateAllEntities = true;
 		Time validationTimeout = 0;
@@ -67,12 +67,12 @@ namespace Halley {
 		void onContextMenuAction(const String& actionId, gsl::span<const String> entityIds);
 
 		bool markAllValid();
-		bool markValid(const UUID& uuid, bool valid);
+		bool markValid(const UUID& uuid, IEntityValidator::Severity severity);
 		void notifyValidatorList();
 		void doValidateAllEntities();
 		void validateEntityTree(const EntityTree& entityTree);
 		void onEntityModified(const String& id, const EntityData& node, bool onlyRefreshValidation);
 
-		bool isEntityValid(const EntityData& entityData, bool recursive) const;
+		IEntityValidator::Severity getEntitySeverity(const EntityData& entityData, bool recursive) const;
 	};
 }

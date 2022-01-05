@@ -17,9 +17,9 @@ std::vector<IEntityValidator::Result> TransformEntityValidator::validateEntity(E
 		const bool hasTransform = entity->hasComponent<Transform2DComponent>();
 
 		if (!hasTransform) {
-			for (auto c: entity->getChildren()) {
+			for (const auto& c: entity->getChildren()) {
 				if (c.hasComponent<Transform2DComponent>()) {
-					result.emplace_back("Entity has no Transform2D component, but some of its children do.", Action("Add Component", AddComponentValidatorActionHandler::makeAction("Transform2D")));
+					result.emplace_back(Severity::Error, "Entity has no Transform2D component, but some of its children do.", Action("Add Component", AddComponentValidatorActionHandler::makeAction("Transform2D")));
 				}
 			}
 		}

@@ -76,37 +76,49 @@ namespace Halley {
             bool operator!=(const Action& other) const;
         };
 
+    	enum class Severity {
+    		None,
+    		Warning,
+    		Error
+    	};
+
         struct Result {
             LocalisedString errorMessage;
             std::vector<Action> suggestedActions;
+        	Severity severity = Severity::Error;
 
 			Result() = default;
 
-			Result(String errorMessage)
+			Result(Severity severity, String errorMessage)
 				: errorMessage(LocalisedString::fromUserString(errorMessage))
+        		, severity(severity)
 			{}
 
-			Result(String errorMessage, Action suggestedAction)
+			Result(Severity severity, String errorMessage, Action suggestedAction)
 				: errorMessage(LocalisedString::fromUserString(errorMessage))
+        		, severity(severity)
 			{
 				suggestedActions.push_back(std::move(suggestedAction));
 			}
 
-			Result(String errorMessage, std::vector<Action> suggestedActions)
+			Result(Severity severity, String errorMessage, std::vector<Action> suggestedActions)
 				: errorMessage(LocalisedString::fromUserString(errorMessage))
 				, suggestedActions(std::move(suggestedActions))
+        		, severity(severity)
 			{
 			}
 
-			Result(LocalisedString errorMessage, Action suggestedAction)
+			Result(Severity severity, LocalisedString errorMessage, Action suggestedAction)
 				: errorMessage(std::move(errorMessage))
+        		, severity(severity)
 			{
 				suggestedActions.push_back(std::move(suggestedAction));
 			}
 
-			Result(LocalisedString errorMessage, std::vector<Action> suggestedActions)
+			Result(Severity severity, LocalisedString errorMessage, std::vector<Action> suggestedActions)
 				: errorMessage(std::move(errorMessage))
 				, suggestedActions(std::move(suggestedActions))
+        		, severity(severity)
 			{
 			}
 

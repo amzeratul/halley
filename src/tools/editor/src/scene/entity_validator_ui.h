@@ -15,6 +15,8 @@ namespace Halley {
 		void setEntity(EntityData& entity, IEntityEditor& entityEditor, Resources& gameResources);
 		void refresh();
 
+		static void setSeverity(UIWidget& widget, UIFactory& factory, IEntityValidator::Severity severity);
+
 	private:
 		UIFactory& factory;
 
@@ -37,7 +39,7 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 
 		void setList(std::weak_ptr<EntityList> entityList);
-		void setInvalidEntities(std::vector<int> entities);
+		void setInvalidEntities(std::vector<std::pair<int, IEntityValidator::Severity>> entities);
 
 	private:
 		UIFactory& factory;

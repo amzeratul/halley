@@ -205,14 +205,26 @@ UIPulseSpriteBehaviour::UIPulseSpriteBehaviour(Colour4f colour, Time period, Tim
 	: colour(colour)
 	, curTime(startTime)
 	, period(period)
+	, waitingForInitialColour(true)
+{
+}
+
+UIPulseSpriteBehaviour::UIPulseSpriteBehaviour(Colour4f col0, Colour col1, Time period, Time startTime)
+	: initialColour(col0)
+	, colour(col1)
+	, curTime(startTime)
+	, period(period)
 {
 }
 
 void UIPulseSpriteBehaviour::init()
 {
-	auto* image = dynamic_cast<UIImage*>(getWidget());
-	if (image) {
-		initialColour = image->getSprite().getColour();
+	if (waitingForInitialColour) {
+		auto* image = dynamic_cast<UIImage*>(getWidget());
+		if (image) {
+			initialColour = image->getSprite().getColour();
+		}
+		waitingForInitialColour = false;
 	}
 }
 

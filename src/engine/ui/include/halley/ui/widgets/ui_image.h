@@ -56,6 +56,7 @@ namespace Halley {
 	class UIPulseSpriteBehaviour : public UIBehaviour {
 	public:
 		UIPulseSpriteBehaviour(Colour4f colour, Time period, Time startTime = 0.0);
+		UIPulseSpriteBehaviour(Colour4f col0, Colour col1, Time period, Time startTime = 0.0);
 
 		void init() override;
 		void update(Time time) override;
@@ -65,5 +66,6 @@ namespace Halley {
 		Colour4f colour;
 		Time curTime = 0;
 		Time period = 0;
+		bool waitingForInitialColour = false;
 	};
 }

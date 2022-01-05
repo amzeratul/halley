@@ -14,7 +14,6 @@ EntityValidatorUI::EntityValidatorUI(String id, UIFactory& factory)
 
 void EntityValidatorUI::onMakeUI()
 {
-	getWidgetAs<UIImage>("capsule")->addBehaviour(std::make_shared<UIPulseSpriteBehaviour>(Colour4f(1, 0, 0), 2.0, 1.0));
 }
 
 void EntityValidatorUI::setValidator(EntityValidator& v)
@@ -59,8 +58,11 @@ void EntityValidatorUI::refresh()
 		parent->clear();
 
 		bool first = true;
+		auto severity = IEntityValidator::Severity::None;
 
 		for (const auto& curResult: curResultSet) {
+			severity = std::max(severity, curResult.severity);
+
 			if (!first) {
 				auto col = factory.getColourScheme()->getColour("ui_text");
 				parent->add(std::make_shared<UIImage>(Sprite().setImage(factory.getResources(), "halley_ui/ui_separator.png").setColour(col)), 0, Vector4f(0, 4, 0, 4));
@@ -85,6 +87,20 @@ void EntityValidatorUI::refresh()
 				}
 			}
 		}
+
+		setSeverity(*this, factory, severity);
+	}
+}
+
+void EntityValidatorUI::setSeverity(UIWidget& widget, UIFactory& factory, IEntityValidator::Severity severity)
+{
+	auto capsule = widget.getWidgetAs<UIImage>("capsule");
+	capsule->clearBehaviours();
+
+	if (severity != IEntityValidator::Severity::None) {
+		auto c0 = factory.getColourScheme()->getColour("ui_staticBox");
+		auto c1 = factory.getColourScheme()->getColour(severity == IEntityValidator::Severity::Error ? "taskError" : "taskWarning");
+		capsule->addBehaviour(std::make_shared<UIPulseSpriteBehaviour>(c0, c1, 2.0, 1.0));
 	}
 }
 
@@ -108,7 +124,6 @@ void EntityValidatorListUI::onMakeUI()
 		move(1);
 	});
 
-	getWidgetAs<UIImage>("capsule")->addBehaviour(std::make_shared<UIPulseSpriteBehaviour>(Colour4f(1, 0, 0), 2.0, 1.0));
 	description = getWidgetAs<UILabel>("description");
 }
 
@@ -129,10 +144,16 @@ void EntityValidatorListUI::setList(std::weak_ptr<EntityList> list)
 	entityList = list;
 }
 
-void EntityValidatorListUI::setInvalidEntities(std::vector<int> entities)
+void EntityValidatorListUI::setInvalidEntities(std::vector<std::pair<int, IEntityValidator::Severity>> entities)
 {
-	invalidEntities = std::move(entities);
+	auto severity = IEntityValidator::Severity::None;
+	invalidEntities.resize(entities.size());
+	for (size_t i = 0; i < entities.size(); ++i) {
+		invalidEntities[i] = entities[i].first;
+		severity = std::max(severity, entities[i].second);
+	}
 	setActive(!invalidEntities.empty());
+	EntityValidatorUI::setSeverity(*this, factory, severity);
 }
 
 void EntityValidatorListUI::move(int delta)
