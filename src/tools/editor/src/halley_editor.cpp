@@ -112,7 +112,7 @@ std::unique_ptr<Stage> HalleyEditor::startGame()
 {
 	auto& api = getAPI();
 	preferences = std::make_unique<Preferences>();
-	preferences->setEditorVersion("2022-02-02");
+	preferences->setEditorVersion("2022-01-05");
 	preferences->loadFromFile(*api.system);
 
 	projectLoader = std::make_unique<ProjectLoader>(api.core->getStatics(), rootPath, preferences->getDisabledPlatforms());
