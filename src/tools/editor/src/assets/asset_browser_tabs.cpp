@@ -236,7 +236,14 @@ void AssetBrowserTabs::saveCurrentTab()
 {
 	const int curPage = pages->getCurrentPage();
 	if (curPage >= 0 && curPage < static_cast<int>(windows.size())) {
-		windows[curPage]->save();
+		if (windows[curPage]->canSave()) {
+			windows[curPage]->save();
+		} else {
+			auto buttons = std::vector<UIConfirmationPopup::ButtonType>{ UIConfirmationPopup::ButtonType::Ok };
+			getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Can't save", "Unable to save " + windows[curPage]->getName() + " due to entity validation errors.", buttons, [] (UIConfirmationPopup::ButtonType)
+			{				
+			}));
+		}
 	}
 }
 
