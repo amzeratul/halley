@@ -35,9 +35,10 @@ namespace Halley {
 
 		void setEntityValidatorList(std::shared_ptr<EntityValidatorListUI> validatorList);
 		void validateAllEntities();
+		IEntityValidator::Severity getValidationSeverity() const;
 
 		UITreeList& getList();
-
+	
 	private:
 		struct EntityInfo {
 			String name;
@@ -53,6 +54,7 @@ namespace Halley {
 		std::shared_ptr<ISceneData> sceneData;
 		std::shared_ptr<EntityValidatorListUI> validatorList;
 		std::map<UUID, IEntityValidator::Severity> invalidEntities;
+		IEntityValidator::Severity validationSeverity;
 		bool needsToNotifyValidatorList = false;
 		bool needsToValidateAllEntities = true;
 		Time validationTimeout = 0;

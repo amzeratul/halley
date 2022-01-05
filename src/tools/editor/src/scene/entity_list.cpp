@@ -340,6 +340,7 @@ void EntityList::notifyValidatorList()
 {
 	std::vector<std::pair<int, IEntityValidator::Severity>> result;
 	result.reserve(invalidEntities.size());
+	validationSeverity = IEntityValidator::Severity::None;
 
 	const auto n = list->getCount();
 	for (size_t i = 0; i < n; ++i) {
@@ -347,6 +348,7 @@ void EntityList::notifyValidatorList()
 		const auto iter = invalidEntities.find(UUID(id));
 		if (iter != invalidEntities.end()) {
 			result.emplace_back(static_cast<int>(i), iter->second);
+			validationSeverity = std::max(validationSeverity, iter->second);
 		}
 	}
 	validatorList->setInvalidEntities(std::move(result));
@@ -355,6 +357,11 @@ void EntityList::notifyValidatorList()
 void EntityList::validateAllEntities()
 {
 	needsToValidateAllEntities = true;
+}
+
+IEntityValidator::Severity EntityList::getValidationSeverity() const
+{
+	return validationSeverity;
 }
 
 void EntityList::doValidateAllEntities()

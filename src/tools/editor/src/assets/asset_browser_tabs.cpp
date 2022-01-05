@@ -51,6 +51,18 @@ void AssetBrowserTabs::openTab(std::optional<AssetType> assetType, const String&
 	}
 }
 
+static std::vector<UIConfirmationPopup::ButtonType> makeButtons(bool canSave)
+{
+	std::vector<UIConfirmationPopup::ButtonType> buttons;
+	if (canSave) {
+		buttons.push_back(UIConfirmationPopup::ButtonType::Yes);
+	}
+	buttons.push_back(UIConfirmationPopup::ButtonType::No);
+	buttons.push_back(UIConfirmationPopup::ButtonType::Cancel);
+
+	return buttons;
+}
+
 bool AssetBrowserTabs::closeTab(const String& key)
 {
 	tabs->setSelectedOptionId(key);
@@ -58,7 +70,8 @@ bool AssetBrowserTabs::closeTab(const String& key)
 
 	if (windows[idx]->isModified()) {
 		if (getRoot() && !getRoot()->hasModalUI()) {
-			auto buttons = { UIConfirmationPopup::ButtonType::Yes, UIConfirmationPopup::ButtonType::No, UIConfirmationPopup::ButtonType::Cancel };
+			auto buttons = makeButtons(windows[idx]->canSave());
+			
 			auto callback = [this, idx, key] (UIConfirmationPopup::ButtonType buttonType)
 			{
 				if (buttonType == UIConfirmationPopup::ButtonType::Cancel) {
@@ -71,7 +84,7 @@ bool AssetBrowserTabs::closeTab(const String& key)
 				}
 			};
 
-			getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Save Changes?", "Would you like to save your changes to " + windows[idx]->getName() + " before closing the tab?", buttons, std::move(callback)));
+			getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Save Changes?", "Would you like to save your changes to " + windows[idx]->getName() + " before closing the tab?", std::move(buttons), std::move(callback)));
 		}
 
 		std_ex::erase_if(toClose, [&] (const auto& v) { return v == key; });
@@ -118,7 +131,7 @@ bool AssetBrowserTabs::proceedQuitRequested(size_t idx, bool invoke)
 		auto& window = windows[i];
 		if (window->isModified()) {
 			tabs->setSelectedOption(static_cast<int>(i));
-			auto buttons = { UIConfirmationPopup::ButtonType::Yes, UIConfirmationPopup::ButtonType::No, UIConfirmationPopup::ButtonType::Cancel };
+			auto buttons = makeButtons(window->canSave());
 			auto callback = [this, i] (UIConfirmationPopup::ButtonType buttonType)
 			{
 				if (buttonType == UIConfirmationPopup::ButtonType::Cancel) {
@@ -185,7 +198,7 @@ void AssetBrowserTabs::replaceAssetTab(const String& oldName, const String& newN
 	};
 
 	if (windows[idx]->isModified()) {
-		auto buttons = { UIConfirmationPopup::ButtonType::Yes, UIConfirmationPopup::ButtonType::No, UIConfirmationPopup::ButtonType::Cancel };
+		auto buttons = makeButtons(windows[idx]->canSave());
 		auto callback = [this, idx, doChangeTab] (UIConfirmationPopup::ButtonType buttonType)
 		{
 			if (buttonType != UIConfirmationPopup::ButtonType::Cancel) {

@@ -23,6 +23,7 @@ namespace Halley {
         virtual void onDoubleClick();
         virtual bool isModified();
         virtual void save();
+		virtual bool canSave() const;
 
     protected:
 		virtual std::shared_ptr<const Resource> loadResource(const String& assetId) = 0;

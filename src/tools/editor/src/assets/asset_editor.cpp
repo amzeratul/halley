@@ -62,6 +62,11 @@ void AssetEditor::save()
 {
 }
 
+bool AssetEditor::canSave() const
+{
+	return true;
+}
+
 void AssetEditor::onTabbedIn()
 {
 }
