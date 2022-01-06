@@ -11,10 +11,9 @@ MetalMaterialConstantBuffer::MetalMaterialConstantBuffer(MetalVideo& video)
 
 MetalMaterialConstantBuffer::~MetalMaterialConstantBuffer() {}
 
-void MetalMaterialConstantBuffer::update(const MaterialDataBlock& dataBlock) {
+void MetalMaterialConstantBuffer::update(gsl::span<const gsl::byte> data) {
   // We must pad up to a multiple of 16 (float4)
   // TODO we ought to move this somewhere it won't be called so often.
-  auto data = dataBlock.getData();
   const size_t padding = alignUp<char>(data.size_bytes(), 16);
 
   auto padded = malloc(data.size_bytes() + padding);

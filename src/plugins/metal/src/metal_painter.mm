@@ -8,7 +8,7 @@
 using namespace Halley;
 
 MetalPainter::MetalPainter(MetalVideo& video, Resources& resources)
-	: Painter(resources)
+	: Painter(video, resources)
 	, video(video)
 	, indexBuffer(nil)
 {}
@@ -43,7 +43,8 @@ void MetalPainter::setMaterialPass(const Material& material, int passNumber) {
 	[encoder setRenderPipelineState:pipelineState];
 
 	// Metal requires the global material to be bound for each material pass, as it has no 'global' state.
-	static_cast<MetalMaterialConstantBuffer&>(halleyGlobalMaterial->getDataBlocks().front().getConstantBuffer()).bindVertex(encoder, 0);
+	// static_cast<MetalMaterialConstantBuffer&>(halleyGlobalMaterial->getDataBlocks().front().getConstantBuffer()).bindVertex(encoder, 0);
+	static_cast<MetalMaterialConstantBuffer&>(getConstantBuffer(halleyGlobalMaterial->getDataBlocks().front())).bindVertex(encoder, 0);
 
 	// Bind textures
 	int texIndex = 0;
@@ -127,13 +128,12 @@ void MetalPainter::setClip(Rect4i rect, bool) {
 void MetalPainter::setMaterialData(const Material& material) {
 	for (auto& dataBlock : material.getDataBlocks()) {
 		if (dataBlock.getType() != MaterialDataBlockType::SharedExternal) {
-			static_cast<MetalMaterialConstantBuffer&>(dataBlock.getConstantBuffer()).bindFragment(encoder, 0);
+			static_cast<MetalMaterialConstantBuffer&>(getConstantBuffer(dataBlock)).bindFragment(encoder, 0);
 		}
 	}
 }
 
 void MetalPainter::onUpdateProjection(Material& material) {
-	material.uploadData(*this);
 	setMaterialData(material);
 }
 
