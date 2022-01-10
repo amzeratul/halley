@@ -132,9 +132,11 @@ void MetalPainter::setMaterialData(const Material& material) {
 	}
 }
 
-void MetalPainter::onUpdateProjection(Material& material) {
-	material.uploadData(*this);
-	setMaterialData(material);
+void MetalPainter::onUpdateProjection(Material& material, bool hashChanged) {
+	if (hashChanged) {
+		material.uploadData(*this);
+		setMaterialData(material);
+	}
 }
 
 void MetalPainter::setBlending(BlendType blendType, MTLRenderPipelineColorAttachmentDescriptor* colorAttachment) {
