@@ -8,3 +8,6 @@ HALLEY_EXPORT IHalleyEntryPoint* getHalleyEntry()
 {
     return getHalleyEntryStatic();
 }
+
+// Dummy implementation
+void initSteamPlugin(Halley::IPluginRegistry& registry, int steamId, Halley::String initialLobby) {}

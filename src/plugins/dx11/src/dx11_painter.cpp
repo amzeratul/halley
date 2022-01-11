@@ -173,9 +173,11 @@ void DX11Painter::setClip(Rect4i clip, bool enable)
 	clipping = enable ? clip : std::optional<Rect4i>();
 }
 
-void DX11Painter::onUpdateProjection(Material& material)
+void DX11Painter::onUpdateProjection(Material& material, bool hashChanged)
 {
-	setMaterialData(material);
+	if (hashChanged) {
+		setMaterialData(material);
+	}
 }
 
 DX11Blend& DX11Painter::getBlendMode(BlendType type)
