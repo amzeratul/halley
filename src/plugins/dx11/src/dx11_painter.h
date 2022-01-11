@@ -34,7 +34,7 @@ namespace Halley
 		void setViewPort(Rect4i rect) override;
 		void setClip(Rect4i clip, bool enable) override;
 
-		void onUpdateProjection(Material& material) override;
+		void onUpdateProjection(Material& material, bool hashChanged) override;
 
 	private:
 		DX11Video& dx11Video;

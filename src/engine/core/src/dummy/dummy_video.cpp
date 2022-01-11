@@ -122,4 +122,4 @@ void DummyPainter::setClip(Rect4i, bool) {}
 
 void DummyPainter::setMaterialData(const Material&) {}
 
-void DummyPainter::onUpdateProjection(Material&) {}
+void DummyPainter::onUpdateProjection(Material&, bool) {}
