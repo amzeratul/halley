@@ -28,7 +28,7 @@ set (editor_sources
 	"src/assets/graph/graph_editor.cpp"
 	"src/assets/graph/render_graph_editor.cpp"
 	"src/assets/graph/ui_graph_node.cpp"
-	
+
 	"src/project/core_api_wrapper.cpp"
 
 	"src/scene/choose_window.cpp"
@@ -115,7 +115,7 @@ set (editor_headers
 	"src/scene/gizmos/scripting/scripting_gizmo_toolbar.h"
 	"src/scene/gizmos/scripting/scripting_gizmo.h"
 	"src/scene/gizmos/scripting/scripting_node_editor.h"
-	
+
 	"src/ui/console_window.h"
 	"src/ui/ecs_window.h"
 	"src/ui/editor_settings_window.h"
@@ -143,8 +143,10 @@ set (editor_gen_definitions
 	)
 
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND USE_METAL EQUAL 1)
 	set(EXTRA_LIBS bz2 z halley-metal)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	set(EXTRA_LIBS bz2 z)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	set(EXTRA_LIBS pthread)
 endif()
@@ -153,7 +155,7 @@ include_directories(${FREETYPE_INCLUDE_DIR} "../tools/include")
 
 halleyProjectCodegen(halley-editor "${editor_sources}" "${editor_headers}" "${editor_resources}" "${editor_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/../../../bin)
 add_dependencies(halley-editor halley-cmd halley-core halley-net halley-sdl halley-opengl)
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND USE_METAL EQUAL 1)
 	add_dependencies(halley-editor halley-metal)
 endif()
 
