@@ -48,7 +48,7 @@ include_directories(${FREETYPE_INCLUDE_DIR} "../tools/include")
 halleyProjectCodegen(halley-launcher "${launcher_sources}" "${launcher_headers}" "" "${launcher_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 add_dependencies(halley-launcher halley-cmd halley-core halley-net halley-sdl halley-opengl)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND USE_METAL EQUAL 1)
-	add_dependencies(halley-editor halley-metal)
+	add_dependencies(halley-launcher halley-metal)
 endif()
 
 get_property(deps GLOBAL PROPERTY halley_external_plugin_dependencies)
