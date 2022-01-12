@@ -32,7 +32,7 @@ namespace Halley
 		void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue) override;
 		bool isAchievementUnlocked(const String& achievementId, bool defaultValue) override;
 
-		std::unique_ptr<MultiplayerSession> makeMultiplayerSession(const String& key);
+		std::unique_ptr<MultiplayerLobby> makeMultiplayerLobby(const String& key);
 
 		void multiplayerInvitationCancel() override;
 

@@ -139,9 +139,9 @@ namespace Halley
 		}
 	};
 
-	class MultiplayerSession {
+	class MultiplayerLobby {
 	public:
-		virtual ~MultiplayerSession() = default;
+		virtual ~MultiplayerLobby() = default;
 		virtual MultiplayerStatus getStatus() const = 0;
 		virtual void showInviteUI(int maxPlayers, const std::map<I18NLanguage, String>& messagePerLanguage) = 0;
 		virtual void setPrivacy(MultiplayerPrivacy privacy) { }
@@ -175,53 +175,59 @@ namespace Halley
 	public:
 		virtual ~PlatformAPI() {}
 
-		virtual String getId() { return ""; }
+		virtual String getId() = 0; // Platform id
 		virtual void update() = 0;
+
+		
+		////////
+		// HTTP
+
+		virtual std::unique_ptr<HTTPRequest> makeHTTPRequest(const String& method, const String& url) = 0;
+
+		
+		//////////////////////////
+		// Login & authentication
 
 		virtual bool needsSignIn() const { return false; }
 		virtual Future<PlatformSignInResult> signIn()
 		{
-			Promise<PlatformSignInResult> p;
-			p.setValue(PlatformSignInResult(true, false, 0));
-			return p.getFuture();
+			return Future<PlatformSignInResult>::makeImmediate(PlatformSignInResult(true, false, 0));
 		}
 		virtual bool isSignedIn() const { return true; }
-
-		virtual std::unique_ptr<HTTPRequest> makeHTTPRequest(const String& method, const String& url) = 0;
+		virtual bool playerHasLoggedOut() { return false; }
 
 		virtual bool canProvideAuthToken() const = 0;
 		virtual Future<AuthTokenResult> getAuthToken(const AuthTokenParameters& parameters) = 0;
 
+		virtual String getPlayerName() { return "Player"; }
+		virtual String getUniquePlayerIdString() { return ""; } // This has to be a valid filename
+
+
+		//////////////
+		// Cloud save
+
 		virtual bool canProvideCloudSave() const { return false; }
 		virtual std::shared_ptr<ISaveData> getCloudSaveContainer(const String& containerName = "") { return {}; }
 
-		virtual bool canShowSubscriptionNeeded() const { return false; }
-		virtual bool showSubscriptionNeeded() const { return true; }
-		virtual bool canShowEULA() const { return true; }
+		
+		////////////////////////
+		// Stats & Achievements
 
-		virtual String getPlayerName() { return "Player"; }
-		virtual String getUniquePlayerIdString() { return ""; } // This has to be a valid filename
-		virtual bool playerHasLoggedOut() { return false; }
-
-		// Achievements
-		// Complete when currentProgress == maximumValue
-		virtual void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue) {}
+		virtual void setAchievementProgress(const String& achievementId, int currentProgress, int maximumValue) {} // Complete when currentProgress == maximumValue
 		virtual bool isAchievementUnlocked(const String& achievementId, bool defaultValue) { return defaultValue; }
 		virtual bool isAchievementSystemReady() const { return true; }
 		virtual bool mustUnlockAchievementsOnUserAction() const { return false; }
-
-		// Stats
 		virtual void setStat(const String& statId, int value) {}
 		virtual int getStatInt(const String& statId) { return 0; }
 		virtual void incrementStat(const String& statId) { setStat(statId, getStatInt(statId) + 1); }
 		virtual bool isStatsSystemReady() const { return true; }
 
-		// Some platforms require custom handling when missing UGC capabilities
-		virtual bool hasOfflineUGCCapabilities() { return true; }
-		virtual bool handleMissingUGCCapabilities() { return false; } //returns true if has handled ugc access errors
 
-		virtual bool customHandlesOnlineErrors() const { return false; }
-		virtual void handleOnlineError() {}
+		/////////////
+		// UGC & DLC
+
+		virtual bool hasOfflineUGCCapabilities() { return true; } // Some platforms require custom handling when missing UGC capabilities
+		virtual bool handleMissingUGCCapabilities() { return false; } // Returns true if has handled ugc access errors
 
 		virtual bool hasDLC(const String& key) const { return false; }
 		virtual Future<bool> requestGetDLC(const String& key)
@@ -231,8 +237,11 @@ namespace Halley
 			return result.getFuture();
 		}
 
+		///////////////////
+		// Lobbies/invites
+
 		// Return empty unique_ptr if not supported
-		virtual std::unique_ptr<MultiplayerSession> makeMultiplayerSession(const String& key) { return {}; }
+		virtual std::unique_ptr<MultiplayerLobby> makeMultiplayerLobby(const String& key) { return {}; }
 		virtual bool canSetLobbyPrivacy() { return false; }
 
 		virtual void multiplayerInvitationCancel() { }
@@ -247,13 +256,16 @@ namespace Halley
 		virtual String inviteExtraDataFile() const { return ""; }
 		virtual void setInviteExtraData(const Bytes& data) {};
 
+
+		///////////////////////
+		// Player info/profile
+		
 		virtual bool canShowPlayerInfo() const { return false; }
 		virtual void showPlayerInfo(String playerId) {}
 
-		virtual I18NLanguage getSystemLanguage() const { return I18NLanguage("en-GB"); }
-		virtual bool useSystemOverscan() const { return false; }
-		virtual float getSystemOverscan() const { return 1.0f; }
 
+		////////////////////////////
+		// Profanity/child controls
 		virtual bool canShowReportedUserContent() const { return true; }
 
 		virtual bool needsStringFiltering() const { return false; }
@@ -275,9 +287,27 @@ namespace Halley
 			return promise.getFuture();
 		}
 
+
+		/////////////////
+		// Soft keyboard
 		virtual bool hasKeyboard() const { return false; }
 		virtual std::shared_ptr<InputKeyboard> getKeyboard() const { return {}; }
 
+
+		//////////////////////
+		// Misc platform data
+
+		virtual bool customHandlesOnlineErrors() const { return false; }
+		virtual void handleOnlineError() {}
+
+		virtual I18NLanguage getSystemLanguage() const { return I18NLanguage("en-GB"); }
+		virtual bool useSystemOverscan() const { return false; }
+		virtual float getSystemOverscan() const { return 1.0f; }
+
+		virtual bool canShowSubscriptionNeeded() const { return false; }
+		virtual bool showSubscriptionNeeded() const { return true; }
+		virtual bool canShowEULA() const { return true; }
+		
 		// Returns arbitrary platform-specific data
 		virtual String getStringData(const String& key) { return ""; }
 	};

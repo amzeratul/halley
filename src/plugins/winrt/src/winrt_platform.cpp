@@ -69,9 +69,9 @@ bool WinRTPlatform::isAchievementUnlocked(const String& achievementId, bool defa
 	return xbl->isAchievementUnlocked(achievementId, defaultValue);
 }
 
-std::unique_ptr<MultiplayerSession> WinRTPlatform::makeMultiplayerSession(const String& key)
+std::unique_ptr<MultiplayerLobby> WinRTPlatform::makeMultiplayerLobby(const String& key)
 {
-	return xbl->makeMultiplayerSession(key);
+	return xbl->makeMultiplayerLobby(key);
 }
 
 void WinRTPlatform::multiplayerInvitationCancel()
