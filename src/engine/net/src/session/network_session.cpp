@@ -2,6 +2,7 @@
 #include "session/network_session_control_messages.h"
 #include "connection/network_service.h"
 #include "connection/network_packet.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 NetworkSession::NetworkSession(NetworkService& service)
@@ -23,6 +24,7 @@ void NetworkSession::host()
 
 	type = NetworkSessionType::Host;
 	sessionSharedData = makeSessionSharedData();
+	service.setAcceptingConnections(true);
 
 	onStartSession();
 	setMyPeerId(0);
@@ -204,10 +206,12 @@ void NetworkSession::onHosting()
 
 void NetworkSession::onConnected(int peerId)
 {
+	Logger::logDev("Peer connected to network: " + toString(peerId));
 }
 
 void NetworkSession::onDisconnected(int peerId)
 {
+	Logger::logDev("Peer disconnected from network: " + toString(peerId));
 }
 
 ConnectionStatus NetworkSession::getStatus() const

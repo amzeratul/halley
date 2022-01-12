@@ -40,7 +40,7 @@ ConnectionStatus InstabilitySimulator::getStatus() const
 	return parent->getStatus();
 }
 
-void InstabilitySimulator::send(OutboundNetworkPacket&& packet)
+void InstabilitySimulator::send(OutboundNetworkPacket packet)
 {
 	auto& rng = Random::getGlobal();
 

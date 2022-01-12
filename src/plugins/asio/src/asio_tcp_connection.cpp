@@ -92,7 +92,7 @@ ConnectionStatus AsioTCPConnection::getStatus() const
 	return status;
 }
 
-void AsioTCPConnection::send(OutboundNetworkPacket&& packet)
+void AsioTCPConnection::send(OutboundNetworkPacket packet)
 {
 	packet.addHeader(uint32_t(packet.getSize()));
 	auto bytes = packet.getBytes();

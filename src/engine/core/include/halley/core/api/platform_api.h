@@ -256,7 +256,7 @@ namespace Halley
 		virtual String inviteExtraDataFile() const { return ""; }
 		virtual void setInviteExtraData(const Bytes& data) {}
 
-		std::shared_ptr<NetworkService> createNetworkService() { return {}; }
+		virtual std::shared_ptr<NetworkService> createNetworkService() { return {}; }
 
 		
 		///////////////////////
