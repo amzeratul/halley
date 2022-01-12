@@ -254,9 +254,11 @@ namespace Halley
 
 		virtual bool needsInviteExtraData() const { return false; }
 		virtual String inviteExtraDataFile() const { return ""; }
-		virtual void setInviteExtraData(const Bytes& data) {};
+		virtual void setInviteExtraData(const Bytes& data) {}
 
+		std::shared_ptr<NetworkService> createNetworkService() { return {}; }
 
+		
 		///////////////////////
 		// Player info/profile
 		

@@ -14,7 +14,7 @@ namespace Halley
 	class NetworkService
 	{
 	public:
-		virtual ~NetworkService() {}
+		virtual ~NetworkService() = default;
 
 		virtual void update() = 0;
 

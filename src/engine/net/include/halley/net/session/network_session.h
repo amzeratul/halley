@@ -10,13 +10,13 @@
 namespace Halley {
 	class NetworkService;
 
-	class NetworkSession : public IConnection {
+	class NetworkSession {
 	public:
 		NetworkSession(NetworkService& service);
 		virtual ~NetworkSession();
 
-		void host(int port);
-		void join(const String& address, int port);
+		void host();
+		void join(const String& address, int port = 0);
 
 		void setMaxClients(int clients);
 		int getMaxClients() const;
@@ -29,10 +29,10 @@ namespace Halley {
 
 		NetworkSessionType getType() const;
 
-		void close() final override; // Called from destructor, hence final
-		ConnectionStatus getStatus() const override;
-		void send(OutboundNetworkPacket&& packet) override;
-		bool receive(InboundNetworkPacket& packet) override;
+		void close(); // Called from destructor, hence final
+		ConnectionStatus getStatus() const;
+		void send(OutboundNetworkPacket packet);
+		bool receive(InboundNetworkPacket& packet);
 
 	protected:
 		SharedData& doGetMySharedData();
@@ -64,7 +64,7 @@ namespace Halley {
 		std::vector<InboundNetworkPacket> inbox;
 
 		OutboundNetworkPacket makeOutbound(gsl::span<const gsl::byte> data, NetworkSessionMessageHeader header);
-		void sendToAll(OutboundNetworkPacket&& packet, int except = -1);
+		void sendToAll(OutboundNetworkPacket packet, int except = -1);
 		void closeConnection(int peerId, const String& reason);
 		void processReceive();
 
@@ -79,7 +79,7 @@ namespace Halley {
 		void checkForOutboundStateChanges(int ownerId);
 		OutboundNetworkPacket makeUpdateSharedDataPacket(int ownerId);
 		
-		OutboundNetworkPacket doMakeControlPacket(NetworkSessionControlMessageType msgType, OutboundNetworkPacket&& packet);
+		OutboundNetworkPacket doMakeControlPacket(NetworkSessionControlMessageType msgType, OutboundNetworkPacket packet);
 	};
 
 	template <typename SessionSharedDataType, typename PeerSharedDataType>

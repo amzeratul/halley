@@ -14,10 +14,10 @@ NetworkSession::~NetworkSession()
 	if (type == NetworkSessionType::Host) {
 		service.setAcceptingConnections(false);
 	}
-	NetworkSession::close();
+	close();
 }
 
-void NetworkSession::host(int port)
+void NetworkSession::host()
 {
 	Expects(type == NetworkSessionType::Undefined);
 
@@ -69,7 +69,7 @@ int NetworkSession::getMyPeerId() const
 int NetworkSession::getClientCount() const
 {
 	if (type == NetworkSessionType::Client) {
-		throw Exception("Client shouldn't bet rying to query client count!", HalleyExceptions::Network);
+		throw Exception("Client shouldn't be trying to query client count!", HalleyExceptions::Network);
 		//return getStatus() != ConnectionStatus::Open ? 0 : 2; // TODO
 	} else if (type == NetworkSessionType::Host) {
 		int i = 1;
@@ -238,7 +238,7 @@ OutboundNetworkPacket NetworkSession::makeOutbound(gsl::span<const gsl::byte> da
 	return packet;
 }
 
-void NetworkSession::sendToAll(OutboundNetworkPacket&& packet, int except)
+void NetworkSession::sendToAll(OutboundNetworkPacket packet, int except)
 {
 	for (size_t i = 0; i < connections.size(); ++i) {
 		if (int(i) != except) {
@@ -247,7 +247,7 @@ void NetworkSession::sendToAll(OutboundNetworkPacket&& packet, int except)
 	}
 }
 
-void NetworkSession::send(OutboundNetworkPacket&& packet)
+void NetworkSession::send(OutboundNetworkPacket packet)
 {
 	NetworkSessionMessageHeader header;
 	header.type = NetworkSessionMessageType::ToPeers;
@@ -438,7 +438,7 @@ OutboundNetworkPacket NetworkSession::makeUpdateSharedDataPacket(int ownerId)
 	}
 }
 
-OutboundNetworkPacket NetworkSession::doMakeControlPacket(NetworkSessionControlMessageType msgType, OutboundNetworkPacket&& packet)
+OutboundNetworkPacket NetworkSession::doMakeControlPacket(NetworkSessionControlMessageType msgType, OutboundNetworkPacket packet)
 {
 	ControlMsgHeader ctrlHeader;
 	ctrlHeader.type = msgType;
