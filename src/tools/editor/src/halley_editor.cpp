@@ -33,12 +33,12 @@ int HalleyEditor::initPlugins(IPluginRegistry &registry)
 
 #ifdef _WIN32
 	initDX11Plugin(registry);
-#elif __APPLE__
+#elif defined(__APPLE__) && defined(USE_METAL)
 	initMetalPlugin(registry);
 #else
 	initOpenGLPlugin(registry);
 #endif
-	
+
 	return HalleyAPIFlags::Video | HalleyAPIFlags::Audio | HalleyAPIFlags::Input | HalleyAPIFlags::Network;
 }
 
@@ -138,7 +138,7 @@ std::unique_ptr<Project> HalleyEditor::loadProject(Path path)
 	project->loadGameResources(getAPI());
 
 	preferences->addRecent(path.string());
-	
+
 	return project;
 }
 
@@ -153,7 +153,7 @@ std::unique_ptr<Project> HalleyEditor::createProject(Path path)
 	}
 
 	preferences->addRecent(path.string());
-	
+
 	return project;
 }
 

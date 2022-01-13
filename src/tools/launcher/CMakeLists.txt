@@ -35,8 +35,10 @@ set (launcher_gen_definitions
 	)
 
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND USE_METAL EQUAL 1)
 	set(EXTRA_LIBS bz2 z halley-metal)
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	set(EXTRA_LIBS bz2 z)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 	set(EXTRA_LIBS pthread)
 endif()
@@ -45,7 +47,7 @@ include_directories(${FREETYPE_INCLUDE_DIR} "../tools/include")
 
 halleyProjectCodegen(halley-launcher "${launcher_sources}" "${launcher_headers}" "" "${launcher_gen_definitions}" ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 add_dependencies(halley-launcher halley-cmd halley-core halley-net halley-sdl halley-opengl)
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND USE_METAL EQUAL 1)
 	add_dependencies(halley-launcher halley-metal)
 endif()
 

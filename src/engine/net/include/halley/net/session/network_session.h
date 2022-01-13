@@ -6,7 +6,7 @@
 #include "network_session_messages.h"
 #include "shared_data.h"
 #include "network_session_control_messages.h"
-#include "connection/network_service.h"
+#include "../connection/network_service.h"
 
 namespace Halley {
 	class NetworkService;
@@ -50,7 +50,7 @@ namespace Halley {
 		virtual void onHosting();
 		virtual void onConnected(int peerId);
 		virtual void onDisconnected(int peerId);
-		
+
 	private:
 		NetworkService& service;
 		NetworkSessionType type = NetworkSessionType::Undefined;
@@ -79,7 +79,7 @@ namespace Halley {
 
 		void checkForOutboundStateChanges(int ownerId);
 		OutboundNetworkPacket makeUpdateSharedDataPacket(int ownerId);
-		
+
 		OutboundNetworkPacket doMakeControlPacket(NetworkSessionControlMessageType msgType, OutboundNetworkPacket packet);
 
 		void onConnection(NetworkService::Acceptor& acceptor);
@@ -95,7 +95,7 @@ namespace Halley {
 		{
 			return static_cast<SessionSharedDataType&>(doGetMutableSessionSharedData());
 		}
-		
+
 		const SessionSharedDataType& getSessionSharedData() const
 		{
 			return static_cast<const SessionSharedDataType&>(doGetSessionSharedData());
@@ -121,7 +121,7 @@ namespace Halley {
 		{
 			return std::make_unique<SessionSharedDataType>();
 		}
-		
+
 		std::unique_ptr<SharedData> makePeerSharedData() override final
 		{
 			return std::make_unique<PeerSharedDataType>();
