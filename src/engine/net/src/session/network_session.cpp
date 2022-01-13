@@ -13,7 +13,7 @@ NetworkSession::NetworkSession(NetworkService& service)
 NetworkSession::~NetworkSession()
 {
 	if (type == NetworkSessionType::Host) {
-		service.setAcceptingConnections(false);
+		service.stopListening();
 	}
 	close();
 }
@@ -24,7 +24,7 @@ void NetworkSession::host()
 
 	type = NetworkSessionType::Host;
 	sessionSharedData = makeSessionSharedData();
-	service.setAcceptingConnections(true);
+	service.startListening([=](NetworkService::Acceptor& a) { onConnection(a); });
 
 	onStartSession();
 	setMyPeerId(0);
@@ -111,16 +111,6 @@ void NetworkSession::update()
 	connections.erase(std::remove_if(connections.begin(), connections.end(), [] (const std::shared_ptr<IConnection>& c) { return c->getStatus() == ConnectionStatus::Closed; }), connections.end());
 
 	if (type == NetworkSessionType::Host) {
-		if (getClientCount() < maxClients) { // I'm also a client!
-			service.setAcceptingConnections(true);
-			auto incoming = service.tryAcceptConnection();
-			if (incoming) {
-				acceptConnection(std::move(incoming));
-			}
-		} else {
-			service.setAcceptingConnections(false);
-		}
-
 		checkForOutboundStateChanges(-1);
 	}
 
@@ -454,4 +444,13 @@ OutboundNetworkPacket NetworkSession::doMakeControlPacket(NetworkSessionControlM
 	packet.addHeader(header);
 
 	return packet;
+}
+
+void NetworkSession::onConnection(NetworkService::Acceptor& acceptor)
+{
+	if (getClientCount() < maxClients) { // I'm also a client!
+		acceptConnection(acceptor.accept());
+	} else {
+		acceptor.reject();
+	}
 }

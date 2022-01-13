@@ -11,17 +11,13 @@ std::unique_ptr<NetworkService> DummyNetworkAPI::createService(NetworkProtocol p
 }
 
 void DummyNetworkService::update()
-{	
-}
+{}
 
-void DummyNetworkService::setAcceptingConnections(bool accepting)
-{
-}
+void DummyNetworkService::startListening(AcceptCallback callback)
+{}
 
-std::shared_ptr<IConnection> DummyNetworkService::tryAcceptConnection()
-{
-	return std::shared_ptr<IConnection>();
-}
+void DummyNetworkService::stopListening()
+{}
 
 std::shared_ptr<IConnection> DummyNetworkService::connect(const String& address)
 {

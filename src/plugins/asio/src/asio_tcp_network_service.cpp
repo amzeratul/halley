@@ -27,35 +27,27 @@ void AsioTCPNetworkService::update()
 	activeConnections.erase(std::remove_if(activeConnections.begin(), activeConnections.end(), [] (const std::shared_ptr<IConnection>& conn) { return conn->getStatus() == ConnectionStatus::Closed; }), activeConnections.end());
 }
 
-void AsioTCPNetworkService::setAcceptingConnections(bool accepting)
+void AsioTCPNetworkService::startListening(AcceptCallback callback)
 {
-	if (acceptingConnection != accepting) {
-		acceptingConnection = accepting;
-
-		if (accepting) {
-			acceptingSocket = TCPSocket(service);
-			acceptor.async_accept(acceptingSocket.value(), [this] (const boost::system::error_code& ec) {
-				if (ec) {
-					Logger::logError("Error accepting connection: " + ec.message());
-				} else {
-					if (acceptingConnection) {
-						onConnectionAccepted();
-					}
-				}
-			});
+	acceptCallback = std::move(callback);
+	
+	acceptingSocket = TCPSocket(service);
+	acceptor.async_accept(acceptingSocket.value(), [this] (const boost::system::error_code& ec) {
+		if (ec) {
+			Logger::logError("Error accepting connection: " + ec.message());
+		} else {
+			auto a = TCPAcceptor(*this);
+			if (acceptCallback) {
+				acceptCallback(a);
+			}
+			a.ensureChoiceMade();
 		}
-	}
+	});
 }
 
-std::shared_ptr<IConnection> AsioTCPNetworkService::tryAcceptConnection()
+void AsioTCPNetworkService::stopListening()
 {
-	if (!pendingConnections.empty()) {
-		auto res = pendingConnections.front();
-		pendingConnections.erase(pendingConnections.begin());
-		return res;
-	} else {
-		return {};
-	}
+	acceptCallback = {};
 }
 
 std::shared_ptr<IConnection> AsioTCPNetworkService::connect(const String& address)
@@ -66,14 +58,28 @@ std::shared_ptr<IConnection> AsioTCPNetworkService::connect(const String& addres
 	return conn;
 }
 
-void AsioTCPNetworkService::onConnectionAccepted()
-{
-	// Move socket into a new connection
-	pendingConnections.push_back(std::make_shared<AsioTCPConnection>(service, std::move(acceptingSocket.value())));
-	activeConnections.push_back(pendingConnections.back());
-	acceptingSocket = {};
+AsioTCPNetworkService::TCPAcceptor::TCPAcceptor(AsioTCPNetworkService& service)
+	: service(service)
+{}
 
-	// Accept more
-	acceptingConnection = false;
-	setAcceptingConnections(true);
+std::shared_ptr<IConnection> AsioTCPNetworkService::TCPAcceptor::doAccept()
+{
+	return service.acceptConnection();
+}
+
+void AsioTCPNetworkService::TCPAcceptor::doReject()
+{
+	service.rejectConnection();
+}
+
+std::shared_ptr<AsioTCPConnection> AsioTCPNetworkService::acceptConnection()
+{
+	auto conn = std::make_shared<AsioTCPConnection>(service, std::move(acceptingSocket.value()));
+	activeConnections.push_back(conn);
+	acceptingSocket = {};
+	return conn;
+}
+
+void AsioTCPNetworkService::rejectConnection()
+{
 }

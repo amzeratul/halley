@@ -48,18 +48,16 @@ void DevConServerConnection::onReceiveLogMsg(const DevCon::LogMsg& msg)
 DevConServer::DevConServer(std::unique_ptr<NetworkService> s, int port)
 	: service(std::move(s))
 {
-	service->setAcceptingConnections(true);
+	service->startListening([=] (NetworkService::Acceptor& a)
+	{
+		Logger::logInfo("New incoming DevCon connection.");
+		connections.push_back(std::make_shared<DevConServerConnection>(a.accept()));
+	});
 }
 
 void DevConServer::update()
 {
 	service->update();
-
-	auto newCon = service->tryAcceptConnection();
-	if (newCon) {
-		Logger::logInfo("New incoming DevCon connection.");
-		connections.push_back(std::make_shared<DevConServerConnection>(newCon));
-	}
 
 	for (auto& c: connections) {
 		c->update();

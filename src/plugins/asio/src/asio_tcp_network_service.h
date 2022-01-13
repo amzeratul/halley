@@ -11,22 +11,32 @@ namespace Halley
 		AsioTCPNetworkService(int port, IPVersion version = IPVersion::IPv4);
 
 		void update() override;
-		void setAcceptingConnections(bool accepting) override;
-		std::shared_ptr<IConnection> tryAcceptConnection() override;
+		void startListening(AcceptCallback callback) override;
+		void stopListening() override;
 		std::shared_ptr<IConnection> connect(const String& address) override;
 
 	private:
+		class TCPAcceptor : public Acceptor {
+		public:
+			TCPAcceptor(AsioTCPNetworkService& service);
+			std::shared_ptr<IConnection> doAccept() override;
+			void doReject() override;
+
+		private:
+			AsioTCPNetworkService& service;
+		};
+		
 		asio::io_service service;
 		asio::io_service::work work;
 		TCPEndpoint localEndpoint;
 		asio::ip::tcp::acceptor acceptor;
 
-		bool acceptingConnection = false;
+		AcceptCallback acceptCallback;
 		std::optional<TCPSocket> acceptingSocket;
-
-		std::vector<std::shared_ptr<AsioTCPConnection>> pendingConnections;
+		
 		std::vector<std::shared_ptr<AsioTCPConnection>> activeConnections;
 
-		void onConnectionAccepted();
+		std::shared_ptr<AsioTCPConnection> acceptConnection();
+		void rejectConnection();
 	};
 }
