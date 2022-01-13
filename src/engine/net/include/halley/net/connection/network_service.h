@@ -20,6 +20,6 @@ namespace Halley
 
 		virtual void setAcceptingConnections(bool accepting) = 0;
 		virtual std::shared_ptr<IConnection> tryAcceptConnection() = 0;
-		virtual std::shared_ptr<IConnection> connect(String address, int port) = 0;
+		virtual std::shared_ptr<IConnection> connect(const String& address) = 0;
 	};
 }

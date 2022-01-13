@@ -23,7 +23,7 @@ std::shared_ptr<IConnection> DummyNetworkService::tryAcceptConnection()
 	return std::shared_ptr<IConnection>();
 }
 
-std::shared_ptr<IConnection> DummyNetworkService::connect(String address, int port)
+std::shared_ptr<IConnection> DummyNetworkService::connect(const String& address)
 {
 	return std::shared_ptr<IConnection>();
 }

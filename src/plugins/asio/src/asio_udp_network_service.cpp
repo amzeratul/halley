@@ -96,10 +96,14 @@ std::shared_ptr<IConnection> AsioUDPNetworkService::tryAcceptConnection()
 	}
 }
 
-std::shared_ptr<IConnection> AsioUDPNetworkService::connect(String addr, int port)
+std::shared_ptr<IConnection> AsioUDPNetworkService::connect(const String& address)
 {
-	Expects(port > 1024);
-	Expects(port < 65536);
+	const auto splitAddr = address.split(':');
+	const auto addr = splitAddr.at(0);
+	const auto port = splitAddr.at(1).toInteger();
+	
+	assert(port > 1024);
+	assert(port < 65536);
 	auto remoteAddr = asio::ip::address::from_string(addr.cppStr());
 	auto remote = UDPEndpoint(remoteAddr, static_cast<unsigned short>(port)); 
 	auto conn = std::make_shared<AsioUDPConnection>(socket, remote);

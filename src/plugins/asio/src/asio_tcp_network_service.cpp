@@ -58,9 +58,10 @@ std::shared_ptr<IConnection> AsioTCPNetworkService::tryAcceptConnection()
 	}
 }
 
-std::shared_ptr<IConnection> AsioTCPNetworkService::connect(String address, int port)
+std::shared_ptr<IConnection> AsioTCPNetworkService::connect(const String& address)
 {
-	auto conn = std::make_shared<AsioTCPConnection>(service, address, port);
+	const auto splitAddr = address.split(':');
+	auto conn = std::make_shared<AsioTCPConnection>(service, splitAddr.at(0), splitAddr.at(1).toInteger());
 	activeConnections.push_back(conn);
 	return conn;
 }

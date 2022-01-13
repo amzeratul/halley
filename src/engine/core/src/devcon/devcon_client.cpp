@@ -54,7 +54,7 @@ void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
 
 void DevConClient::connect()
 {
-	queue = std::make_shared<MessageQueueTCP>(service->connect(address, port));
+	queue = std::make_shared<MessageQueueTCP>(service->connect(address + ":" + toString(port)));
 	DevCon::setupMessageQueue(*queue);
 }
 

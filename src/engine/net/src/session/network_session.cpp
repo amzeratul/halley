@@ -31,11 +31,11 @@ void NetworkSession::host()
 	onHosting();
 }
 
-void NetworkSession::join(const String& address, int port)
+void NetworkSession::join(const String& address)
 {
 	Expects(type == NetworkSessionType::Undefined);
 
-	connections.emplace_back(service.connect(address, port));
+	connections.emplace_back(service.connect(address));
 	
 	type = NetworkSessionType::Client;
 

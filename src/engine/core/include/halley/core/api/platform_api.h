@@ -242,6 +242,7 @@ namespace Halley
 
 		// Return empty unique_ptr if not supported
 		virtual std::unique_ptr<MultiplayerLobby> makeMultiplayerLobby(const String& key) { return {}; }
+		[[deprecated]] std::unique_ptr<MultiplayerLobby> makeMultiplayerSession(const String& key) { return makeMultiplayerLobby(key); }
 		virtual bool canSetLobbyPrivacy() { return false; }
 
 		virtual void multiplayerInvitationCancel() { }

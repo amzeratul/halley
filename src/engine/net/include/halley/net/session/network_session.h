@@ -16,7 +16,7 @@ namespace Halley {
 		virtual ~NetworkSession();
 
 		void host();
-		void join(const String& address, int port = 0);
+		void join(const String& address);
 
 		void setMaxClients(int clients);
 		int getMaxClients() const;
