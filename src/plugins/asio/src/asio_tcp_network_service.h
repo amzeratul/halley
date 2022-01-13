@@ -38,5 +38,6 @@ namespace Halley
 
 		std::shared_ptr<AsioTCPConnection> acceptConnection();
 		void rejectConnection();
+		void doStartListening();
 	};
 }

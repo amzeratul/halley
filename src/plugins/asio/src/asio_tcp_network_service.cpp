@@ -31,6 +31,12 @@ void AsioTCPNetworkService::startListening(AcceptCallback callback)
 {
 	acceptCallback = std::move(callback);
 	
+	doStartListening();
+}
+
+void AsioTCPNetworkService::doStartListening()
+{
+	acceptor.cancel();
 	acceptingSocket = TCPSocket(service);
 	acceptor.async_accept(acceptingSocket.value(), [this] (const boost::system::error_code& ec) {
 		if (ec) {
@@ -48,6 +54,7 @@ void AsioTCPNetworkService::startListening(AcceptCallback callback)
 void AsioTCPNetworkService::stopListening()
 {
 	acceptCallback = {};
+	acceptor.cancel();
 }
 
 std::shared_ptr<IConnection> AsioTCPNetworkService::connect(const String& address)
@@ -76,10 +83,12 @@ std::shared_ptr<AsioTCPConnection> AsioTCPNetworkService::acceptConnection()
 {
 	auto conn = std::make_shared<AsioTCPConnection>(service, std::move(acceptingSocket.value()));
 	activeConnections.push_back(conn);
-	acceptingSocket = {};
+	doStartListening();
 	return conn;
 }
 
 void AsioTCPNetworkService::rejectConnection()
 {
+	doStartListening();
 }
+
