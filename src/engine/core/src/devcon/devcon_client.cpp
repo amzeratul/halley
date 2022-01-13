@@ -24,6 +24,7 @@ DevConClient::~DevConClient()
 {
 	Logger::removeSink(*this);
 	queue.reset();
+	service.reset();
 }
 
 void DevConClient::update()

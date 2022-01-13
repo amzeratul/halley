@@ -7,9 +7,15 @@ MessageQueueTCP::MessageQueueTCP(std::shared_ptr<IConnection> connection)
 {
 }
 
+MessageQueueTCP::~MessageQueueTCP()
+{
+	connection->close();
+	connection.reset();
+}
+
 bool MessageQueueTCP::isConnected() const
 {
-	return connection->getStatus() == ConnectionStatus::Connected;
+	return connection->getStatus() == ConnectionStatus::Connected || connection->getStatus() == ConnectionStatus::Connecting;
 }
 
 void MessageQueueTCP::enqueue(std::unique_ptr<NetworkMessage> msg, int channel)
