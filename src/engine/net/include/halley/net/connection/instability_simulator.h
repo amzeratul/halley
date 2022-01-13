@@ -25,7 +25,7 @@ namespace Halley
 		explicit InstabilitySimulator(std::shared_ptr<IConnection> parent, float avgLag, float lagVariance, float packetLoss, float duplication);
 		void close() override;
 		ConnectionStatus getStatus() const override;
-		void send(OutboundNetworkPacket&& packet) override;
+		void send(OutboundNetworkPacket packet) override;
 		bool receive(InboundNetworkPacket& packet) override;
 
 	private:

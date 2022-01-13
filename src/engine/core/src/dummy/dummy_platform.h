@@ -7,6 +7,7 @@ namespace Halley {
 		void init() override;
 		void deInit() override;
 
+		String getId() override;
 		void update() override;
 
 		std::unique_ptr<HTTPRequest> makeHTTPRequest(const String& method, const String& url) override;

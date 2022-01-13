@@ -16,8 +16,8 @@ namespace Halley {
 	{
 	public:
 		void update() override;
-		void setAcceptingConnections(bool accepting) override;
-		std::shared_ptr<IConnection> tryAcceptConnection() override;
-		std::shared_ptr<IConnection> connect(String address, int port) override;
+		void startListening(AcceptCallback callback) override;
+		void stopListening() override;
+		std::shared_ptr<IConnection> connect(const String& address) override;
 	};
 }

@@ -69,37 +69,14 @@ void AsioUDPNetworkService::update()
 	service.poll();
 }
 
-void AsioUDPNetworkService::setAcceptingConnections(bool accepting)
+std::shared_ptr<IConnection> AsioUDPNetworkService::connect(const String& address)
 {
-	acceptingConnections = accepting;
-	if (accepting) {
-		startListening();
-	} else {
-		pendingIncomingConnections.clear();
-	}
-}
-
-std::shared_ptr<IConnection> AsioUDPNetworkService::tryAcceptConnection()
-{
-	auto& pending = pendingIncomingConnections;
-
-	if (pending.empty()) {
-		return nullptr;
-	} else {
-		auto conn = std::make_shared<AsioUDPConnection>(socket, pending.front());
-		short id = getFreeId();
-		conn->open(id);
-
-		activeConnections[id] = conn;
-		pending.pop_front();
-		return conn;
-	}
-}
-
-std::shared_ptr<IConnection> AsioUDPNetworkService::connect(String addr, int port)
-{
-	Expects(port > 1024);
-	Expects(port < 65536);
+	const auto splitAddr = address.split(':');
+	const auto addr = splitAddr.at(0);
+	const auto port = splitAddr.at(1).toInteger();
+	
+	assert(port > 1024);
+	assert(port < 65536);
 	auto remoteAddr = asio::ip::address::from_string(addr.cppStr());
 	auto remote = UDPEndpoint(remoteAddr, static_cast<unsigned short>(port)); 
 	auto conn = std::make_shared<AsioUDPConnection>(socket, remote);
@@ -109,17 +86,23 @@ std::shared_ptr<IConnection> AsioUDPNetworkService::connect(String addr, int por
 	HandshakeOpen open;
 	conn->send(OutboundNetworkPacket(gsl::as_bytes(gsl::span<HandshakeOpen>(&open, 1))));
 
-	startListening();
+	startListening({}); // Hmm, this might not be right
 
 	return conn;
 }
 
-void AsioUDPNetworkService::startListening()
+void AsioUDPNetworkService::startListening(AcceptCallback callback)
 {
+	acceptCallback = std::move(callback);
 	if (!startedListening) {
 		startedListening = true;
 		receiveNext();
 	}
+}
+
+void AsioUDPNetworkService::stopListening()
+{
+	acceptCallback = {};
 }
 
 void AsioUDPNetworkService::receiveNext()
@@ -185,11 +168,11 @@ void AsioUDPNetworkService::receivePacket(gsl::span<gsl::byte> received, std::st
 
 	// No connection id, check if it's a connection request
 	if (id == 0 && isValidConnectionRequest(received)) {
-		auto& pending = pendingIncomingConnections;
-		if (std::find(pending.begin(), pending.end(), remoteEndpoint) == pending.end()) {
-			pending.push_back(remoteEndpoint);
+		auto a = UDPAcceptor(*this, remoteEndpoint);
+		if (acceptCallback) {
+			acceptCallback(a);
 		}
-		// Pending connection is valid
+		a.ensureChoiceMade();
 		return;
 	}
 
@@ -238,7 +221,7 @@ void AsioUDPNetworkService::receivePacket(gsl::span<gsl::byte> received, std::st
 bool AsioUDPNetworkService::isValidConnectionRequest(gsl::span<const gsl::byte> data)
 {
 	HandshakeOpen open;
-	return acceptingConnections && data.size() == sizeof(open) && memcmp(data.data(), &open, sizeof(open.handshake)) == 0;
+	return acceptCallback && data.size() == sizeof(open) && memcmp(data.data(), &open, sizeof(open.handshake)) == 0;
 }
 
 short AsioUDPNetworkService::getFreeId() const
@@ -249,4 +232,34 @@ short AsioUDPNetworkService::getFreeId() const
 		}
 	}
 	throw Exception("Unable to find empty connection id", HalleyExceptions::NetworkPlugin);
+}
+
+std::shared_ptr<AsioUDPConnection> AsioUDPNetworkService::acceptConnection(UDPEndpoint endPoint)
+{
+	auto conn = std::make_shared<AsioUDPConnection>(socket, endPoint);
+	short id = getFreeId();
+	conn->open(id);
+
+	activeConnections[id] = conn;
+	return conn;
+}
+
+void AsioUDPNetworkService::rejectConnection()
+{
+	
+}
+
+AsioUDPNetworkService::UDPAcceptor::UDPAcceptor(AsioUDPNetworkService& service, UDPEndpoint endPoint)
+	: service(service)
+	, endPoint(endPoint)
+{}
+
+std::shared_ptr<IConnection> AsioUDPNetworkService::UDPAcceptor::doAccept()
+{
+	return service.acceptConnection(endPoint);
+}
+
+void AsioUDPNetworkService::UDPAcceptor::doReject()
+{
+	return service.rejectConnection();
 }

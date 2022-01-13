@@ -42,7 +42,7 @@ ConnectionStatus ReliableConnection::getStatus() const
 	return parent->getStatus();
 }
 
-void ReliableConnection::send(OutboundNetworkPacket&& packet)
+void ReliableConnection::send(OutboundNetworkPacket packet)
 {
 	ReliableSubPacket subPacket;
 	subPacket.data.resize(packet.getSize());

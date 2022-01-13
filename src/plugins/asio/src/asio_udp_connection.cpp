@@ -40,7 +40,7 @@ void AsioUDPConnection::terminateConnection()
 	}
 }
 
-void AsioUDPConnection::send(OutboundNetworkPacket&& packet)
+void AsioUDPConnection::send(OutboundNetworkPacket packet)
 {
 	if (status == ConnectionStatus::Connected || status == ConnectionStatus::Connecting) {
 		// Insert header

@@ -60,7 +60,7 @@ OS* OS::createOS()
 #endif
 }
 
-void Halley::OS::createLogConsole(String /*name*/)
+void OS::createLogConsole(String /*name*/, std::optional<size_t> monitor, Vector2f align)
 {
 }
 

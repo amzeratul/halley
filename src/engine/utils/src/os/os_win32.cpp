@@ -46,6 +46,10 @@
 //#pragma comment(lib, "comsupp.lib")
 #pragma comment(lib, "comsuppw.lib")
 
+#ifdef min
+#undef min
+#endif
+
 
 using namespace Halley;
 
@@ -150,23 +154,6 @@ Halley::String Halley::OSWin32::runWMIQuery(String query, String parameter) cons
 
 
 
-struct MonitorInfo {
-public:
-	int n;
-	int x, y, w, h;
-};
-
-BOOL CALLBACK onMonitorInfo(HMONITOR /*hMonitor*/, HDC /*hdcMonitor*/, LPRECT lprcMonitor, LPARAM dwData)
-{
-	MonitorInfo* info = reinterpret_cast<MonitorInfo*>(dwData);
-	info->n++;
-	info->x = lprcMonitor->left;
-	info->y = lprcMonitor->top;
-	info->w = lprcMonitor->right - lprcMonitor->left;
-	info->h = lprcMonitor->bottom - lprcMonitor->top;
-	return (info->n != 2);
-}
-
 void OSWin32::loadWindowIcon(HWND hwnd)
 {
 	if (icon != nullptr) {
@@ -180,7 +167,18 @@ void OSWin32::onWindowCreated(void* window)
 	loadWindowIcon(reinterpret_cast<HWND>(window));
 }
 
-void Halley::OSWin32::createLogConsole(String winTitle)
+struct MonitorInfo {
+	std::vector<Rect4i> rects;
+};
+
+BOOL CALLBACK onMonitorInfo(HMONITOR /*hMonitor*/, HDC /*hdcMonitor*/, LPRECT lprcMonitor, LPARAM dwData)
+{
+	MonitorInfo* info = reinterpret_cast<MonitorInfo*>(dwData);
+	info->rects.push_back(Rect4i(lprcMonitor->left, lprcMonitor->top, lprcMonitor->right - lprcMonitor->left, lprcMonitor->bottom - lprcMonitor->top - 64));
+	return true;
+}
+
+void OSWin32::createLogConsole(String winTitle, std::optional<size_t> monitor, Vector2f align)
 {
 	AllocConsole();
 	SetConsoleTitle(winTitle.c_str());
@@ -192,15 +190,16 @@ void Halley::OSWin32::createLogConsole(String winTitle)
 
 	// Position console
 	MonitorInfo info;
-	info.n = 0;
 	EnumDisplayMonitors(nullptr, nullptr, onMonitorInfo, LPARAM(&info));
-	if (info.n > 1) {
-		RECT rect;
-		GetWindowRect(con, &rect);
-		int w = rect.right - rect.left;
-		int h = info.h;
-		//MoveWindow(con, (info.w - w)/2 + info.x, (info.h - h)/2 + info.h, w, h, true);
-		SetWindowPos(con, HWND_TOP, (info.w - w)/2 + info.x, (info.h - h)/2 + info.y, w, h, 0);
+	if (!info.rects.empty()) {
+		const size_t n = std::min(monitor.value_or(0), info.rects.size() - 1);
+		const auto curMonitor = info.rects[n];
+		
+		RECT curRect;
+		GetWindowRect(con, &curRect);
+		const auto targetSize = Vector2i(curRect.right - curRect.left, curMonitor.getHeight() - 64);
+		
+		SetWindowPos(con, HWND_TOP, int((curMonitor.getWidth() - targetSize.x) * align.x), int((curMonitor.getHeight() - targetSize.y) * align.y), targetSize.x, targetSize.y, 0);
 	}
 }
 

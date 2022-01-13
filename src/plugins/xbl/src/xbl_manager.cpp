@@ -762,9 +762,9 @@ void XBLManager::update()
 	multiplayerUpdate();
 }
 
-std::unique_ptr<MultiplayerSession> XBLManager::makeMultiplayerSession(const String& key)
+std::unique_ptr<MultiplayerLobby> XBLManager::makeMultiplayerLobby(const String& key)
 {
-	return std::make_unique<XBLMultiplayerSession>(*this, key);
+	return std::make_unique<XBLMultiplayerLobby>(*this, key);
 }
 
 void XBLManager::invitationArrived (const std::wstring& uri)
@@ -1427,7 +1427,7 @@ void XBLManager::setJoinErrorCallback(PlatformJoinErrorCallback callback)
 	}
 }
 
- XBLMultiplayerSession::XBLMultiplayerSession(XBLManager& manager,const String& key) 
+ XBLMultiplayerLobby::XBLMultiplayerLobby(XBLManager& manager,const String& key) 
 	: manager(manager)
 	, key(key)
 	, sessionId(-1)
@@ -1435,17 +1435,17 @@ void XBLManager::setJoinErrorCallback(PlatformJoinErrorCallback callback)
 	sessionId = manager.openHost ( key );
 }
 
-XBLMultiplayerSession::~XBLMultiplayerSession()
+XBLMultiplayerLobby::~XBLMultiplayerLobby()
 {
 	manager.closeMultiplayer(false, sessionId);
 }
 
-MultiplayerStatus XBLMultiplayerSession::getStatus() const
+MultiplayerStatus XBLMultiplayerLobby::getStatus() const
 {
 	return manager.getMultiplayerStatus ( sessionId );
 }
 
-void XBLMultiplayerSession::showInviteUI(int maxPlayers, const std::map<I18NLanguage, String>& messagePerLanguage)
+void XBLMultiplayerLobby::showInviteUI(int maxPlayers, const std::map<I18NLanguage, String>& messagePerLanguage)
 {
 	manager.showInviteUI ();
 }

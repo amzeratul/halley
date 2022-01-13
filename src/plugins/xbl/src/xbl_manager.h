@@ -104,7 +104,7 @@ namespace Halley {
 
 		void update();
 
-		std::unique_ptr<MultiplayerSession> makeMultiplayerSession(const String& key);
+		std::unique_ptr<MultiplayerLobby> makeMultiplayerLobby(const String& key);
 
 		void invitationArrived(const std::wstring& uri);
 		bool incommingInvitation();
@@ -224,10 +224,10 @@ namespace Halley {
 		void updateContainer() const;
 	};
 
-	class XBLMultiplayerSession : public MultiplayerSession {
+	class XBLMultiplayerLobby : public MultiplayerLobby {
 	public:
-		explicit XBLMultiplayerSession(XBLManager& manager,const String& key);
-		virtual ~XBLMultiplayerSession();
+		explicit XBLMultiplayerLobby(XBLManager& manager,const String& key);
+		virtual ~XBLMultiplayerLobby();
 
 		MultiplayerStatus getStatus() const override;
 		void showInviteUI(int maxPlayers, const std::map<I18NLanguage, String>& messagePerLanguage) override;

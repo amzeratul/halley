@@ -23,18 +23,17 @@ AsioTCPConnection::AsioTCPConnection(asio::io_service& service, String host, int
 			Logger::logError("Error trying to connect to " + host + ":" + toString(port) + ": " + ec.message());
 		} else {
 			for (auto& r: result) {
-				boost::system::error_code ec2;
-				socket.connect(r, ec2);
-				if (!ec2) {
-					Logger::logDev("Connected to " + host + ":" + toString(port));
-					status = ConnectionStatus::Connected;
-					break;
-				}
-			}
-
-			if (status != ConnectionStatus::Connected) {
-				Logger::logError("Error trying to connect to " + host + ":" + toString(port) + ".");
-				status = ConnectionStatus::Closing;
+				socket.async_connect(r, [=] (const boost::system::error_code ec2)
+				{
+					if (!ec2) {
+						Logger::logDev("Connected to " + host + ":" + toString(port));
+						status = ConnectionStatus::Connected;
+					} else {
+						Logger::logError("Error trying to connect to " + host + ":" + toString(port) + ".");
+						status = ConnectionStatus::Closing;
+					}
+				});
+				break;
 			}
 		}
 	});
@@ -53,15 +52,16 @@ void AsioTCPConnection::update()
 		close();
 	}
 	if (status == ConnectionStatus::Connected) {
+		if (!socket.is_open()) {
+			close();
+			return;
+		}
+
 		{
 			std::unique_lock<std::mutex> lock(mutex);
 			needsPoll = false;
 			tryReceive();
 			trySend();
-		}
-
-		if (!socket.is_open()) {
-			close();
 		}
 	}
 }
@@ -92,7 +92,7 @@ ConnectionStatus AsioTCPConnection::getStatus() const
 	return status;
 }
 
-void AsioTCPConnection::send(OutboundNetworkPacket&& packet)
+void AsioTCPConnection::send(OutboundNetworkPacket packet)
 {
 	packet.addHeader(uint32_t(packet.getSize()));
 	auto bytes = packet.getBytes();

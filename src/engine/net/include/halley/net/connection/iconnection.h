@@ -21,7 +21,7 @@ namespace Halley
 
 		virtual void close() = 0;
 		virtual ConnectionStatus getStatus() const = 0;
-		virtual void send(OutboundNetworkPacket&& packet) = 0;
+		virtual void send(OutboundNetworkPacket packet) = 0;
 		virtual bool receive(InboundNetworkPacket& packet) = 0;
 	};
 }

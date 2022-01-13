@@ -6,33 +6,34 @@
 #include "network_session_messages.h"
 #include "shared_data.h"
 #include "network_session_control_messages.h"
+#include "connection/network_service.h"
 
 namespace Halley {
 	class NetworkService;
 
-	class NetworkSession : public IConnection {
+	class NetworkSession {
 	public:
 		NetworkSession(NetworkService& service);
 		virtual ~NetworkSession();
 
-		void host(int port);
-		void join(const String& address, int port);
+		void host(uint16_t maxClients);
+		void join(const String& address);
 
-		void setMaxClients(int clients);
-		int getMaxClients() const;
+		void setMaxClients(uint16_t clients);
+		uint16_t getMaxClients() const;
 
 		int getMyPeerId() const;
 
-		int getClientCount() const;
+		uint16_t getClientCount() const;
 		void acceptConnection(std::shared_ptr<IConnection> move);
 		void update();
 
 		NetworkSessionType getType() const;
 
-		void close() final override; // Called from destructor, hence final
-		ConnectionStatus getStatus() const override;
-		void send(OutboundNetworkPacket&& packet) override;
-		bool receive(InboundNetworkPacket& packet) override;
+		void close(); // Called from destructor, hence final
+		ConnectionStatus getStatus() const;
+		void send(OutboundNetworkPacket packet);
+		bool receive(InboundNetworkPacket& packet);
 
 	protected:
 		SharedData& doGetMySharedData();
@@ -54,7 +55,7 @@ namespace Halley {
 		NetworkService& service;
 		NetworkSessionType type = NetworkSessionType::Undefined;
 
-		int maxClients = 0;
+		uint16_t maxClients = 0;
 		int myPeerId = -1;
 
 		std::unique_ptr<SharedData> sessionSharedData;
@@ -64,7 +65,7 @@ namespace Halley {
 		std::vector<InboundNetworkPacket> inbox;
 
 		OutboundNetworkPacket makeOutbound(gsl::span<const gsl::byte> data, NetworkSessionMessageHeader header);
-		void sendToAll(OutboundNetworkPacket&& packet, int except = -1);
+		void sendToAll(OutboundNetworkPacket packet, int except = -1);
 		void closeConnection(int peerId, const String& reason);
 		void processReceive();
 
@@ -79,7 +80,9 @@ namespace Halley {
 		void checkForOutboundStateChanges(int ownerId);
 		OutboundNetworkPacket makeUpdateSharedDataPacket(int ownerId);
 		
-		OutboundNetworkPacket doMakeControlPacket(NetworkSessionControlMessageType msgType, OutboundNetworkPacket&& packet);
+		OutboundNetworkPacket doMakeControlPacket(NetworkSessionControlMessageType msgType, OutboundNetworkPacket packet);
+
+		void onConnection(NetworkService::Acceptor& acceptor);
 	};
 
 	template <typename SessionSharedDataType, typename PeerSharedDataType>

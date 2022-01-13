@@ -2,6 +2,7 @@
 #include "session/network_session_control_messages.h"
 #include "connection/network_service.h"
 #include "connection/network_packet.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 NetworkSession::NetworkSession(NetworkService& service)
@@ -12,28 +13,30 @@ NetworkSession::NetworkSession(NetworkService& service)
 NetworkSession::~NetworkSession()
 {
 	if (type == NetworkSessionType::Host) {
-		service.setAcceptingConnections(false);
+		service.stopListening();
 	}
-	NetworkSession::close();
+	close();
 }
 
-void NetworkSession::host(int port)
+void NetworkSession::host(uint16_t maxClients)
 {
 	Expects(type == NetworkSessionType::Undefined);
 
+	this->maxClients = maxClients;
 	type = NetworkSessionType::Host;
 	sessionSharedData = makeSessionSharedData();
+	service.startListening([=](NetworkService::Acceptor& a) { onConnection(a); });
 
 	onStartSession();
 	setMyPeerId(0);
 	onHosting();
 }
 
-void NetworkSession::join(const String& address, int port)
+void NetworkSession::join(const String& address)
 {
 	Expects(type == NetworkSessionType::Undefined);
 
-	connections.emplace_back(service.connect(address, port));
+	connections.emplace_back(service.connect(address));
 	
 	type = NetworkSessionType::Client;
 
@@ -51,12 +54,12 @@ void NetworkSession::close()
 	myPeerId = -1;
 }
 
-void NetworkSession::setMaxClients(int clients)
+void NetworkSession::setMaxClients(uint16_t clients)
 {
 	maxClients = clients;
 }
 
-int NetworkSession::getMaxClients() const
+uint16_t NetworkSession::getMaxClients() const
 {
 	return maxClients;
 }
@@ -66,13 +69,13 @@ int NetworkSession::getMyPeerId() const
 	return myPeerId;
 }
 
-int NetworkSession::getClientCount() const
+uint16_t NetworkSession::getClientCount() const
 {
 	if (type == NetworkSessionType::Client) {
-		throw Exception("Client shouldn't bet rying to query client count!", HalleyExceptions::Network);
+		throw Exception("Client shouldn't be trying to query client count!", HalleyExceptions::Network);
 		//return getStatus() != ConnectionStatus::Open ? 0 : 2; // TODO
 	} else if (type == NetworkSessionType::Host) {
-		int i = 1;
+		uint16_t i = 1;
 		for (auto& c: connections) {
 			if (c->getStatus() == ConnectionStatus::Connected) {
 				++i;
@@ -109,16 +112,6 @@ void NetworkSession::update()
 	connections.erase(std::remove_if(connections.begin(), connections.end(), [] (const std::shared_ptr<IConnection>& c) { return c->getStatus() == ConnectionStatus::Closed; }), connections.end());
 
 	if (type == NetworkSessionType::Host) {
-		if (getClientCount() < maxClients) { // I'm also a client!
-			service.setAcceptingConnections(true);
-			auto incoming = service.tryAcceptConnection();
-			if (incoming) {
-				acceptConnection(std::move(incoming));
-			}
-		} else {
-			service.setAcceptingConnections(false);
-		}
-
 		checkForOutboundStateChanges(-1);
 	}
 
@@ -204,10 +197,12 @@ void NetworkSession::onHosting()
 
 void NetworkSession::onConnected(int peerId)
 {
+	Logger::logDev("Peer connected to network: " + toString(peerId));
 }
 
 void NetworkSession::onDisconnected(int peerId)
 {
+	Logger::logDev("Peer disconnected from network: " + toString(peerId));
 }
 
 ConnectionStatus NetworkSession::getStatus() const
@@ -238,7 +233,7 @@ OutboundNetworkPacket NetworkSession::makeOutbound(gsl::span<const gsl::byte> da
 	return packet;
 }
 
-void NetworkSession::sendToAll(OutboundNetworkPacket&& packet, int except)
+void NetworkSession::sendToAll(OutboundNetworkPacket packet, int except)
 {
 	for (size_t i = 0; i < connections.size(); ++i) {
 		if (int(i) != except) {
@@ -247,7 +242,7 @@ void NetworkSession::sendToAll(OutboundNetworkPacket&& packet, int except)
 	}
 }
 
-void NetworkSession::send(OutboundNetworkPacket&& packet)
+void NetworkSession::send(OutboundNetworkPacket packet)
 {
 	NetworkSessionMessageHeader header;
 	header.type = NetworkSessionMessageType::ToPeers;
@@ -438,7 +433,7 @@ OutboundNetworkPacket NetworkSession::makeUpdateSharedDataPacket(int ownerId)
 	}
 }
 
-OutboundNetworkPacket NetworkSession::doMakeControlPacket(NetworkSessionControlMessageType msgType, OutboundNetworkPacket&& packet)
+OutboundNetworkPacket NetworkSession::doMakeControlPacket(NetworkSessionControlMessageType msgType, OutboundNetworkPacket packet)
 {
 	ControlMsgHeader ctrlHeader;
 	ctrlHeader.type = msgType;
@@ -450,4 +445,14 @@ OutboundNetworkPacket NetworkSession::doMakeControlPacket(NetworkSessionControlM
 	packet.addHeader(header);
 
 	return packet;
+}
+
+void NetworkSession::onConnection(NetworkService::Acceptor& acceptor)
+{
+	if (getClientCount() < maxClients) { // I'm also a client!
+		acceptConnection(acceptor.accept());
+	} else {
+		Logger::logInfo("Rejecting network session connection as we're already at max clients.");
+		acceptor.reject();
+	}
 }
