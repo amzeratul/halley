@@ -34,7 +34,7 @@ namespace Halley {
 		OSWin32();
 		~OSWin32();
 
-		void createLogConsole(String name) override;
+		void createLogConsole(String name, std::optional<size_t> monitor, Vector2f align) override;
 		void initializeConsole() override;
 
 		ComputerData getComputerData() override;

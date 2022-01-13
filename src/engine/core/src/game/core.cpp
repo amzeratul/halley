@@ -53,7 +53,7 @@ Core::Core(std::unique_ptr<Game> g, Vector<std::string> _args)
 	// Console
 	if (game->shouldCreateSeparateConsole()) {
 		hasConsole = true;
-		OS::get().createLogConsole(game->getName());
+		OS::get().createLogConsole("[Console] " + game->getName(), {}, Vector2f(0.5f, 0.5f));
 		OS::get().initializeConsole();
 	}
 	setOutRedirect(false);
