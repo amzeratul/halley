@@ -18,10 +18,11 @@ NetworkSession::~NetworkSession()
 	close();
 }
 
-void NetworkSession::host()
+void NetworkSession::host(uint16_t maxClients)
 {
 	Expects(type == NetworkSessionType::Undefined);
 
+	this->maxClients = maxClients;
 	type = NetworkSessionType::Host;
 	sessionSharedData = makeSessionSharedData();
 	service.startListening([=](NetworkService::Acceptor& a) { onConnection(a); });
@@ -53,12 +54,12 @@ void NetworkSession::close()
 	myPeerId = -1;
 }
 
-void NetworkSession::setMaxClients(int clients)
+void NetworkSession::setMaxClients(uint16_t clients)
 {
 	maxClients = clients;
 }
 
-int NetworkSession::getMaxClients() const
+uint16_t NetworkSession::getMaxClients() const
 {
 	return maxClients;
 }
@@ -68,13 +69,13 @@ int NetworkSession::getMyPeerId() const
 	return myPeerId;
 }
 
-int NetworkSession::getClientCount() const
+uint16_t NetworkSession::getClientCount() const
 {
 	if (type == NetworkSessionType::Client) {
 		throw Exception("Client shouldn't be trying to query client count!", HalleyExceptions::Network);
 		//return getStatus() != ConnectionStatus::Open ? 0 : 2; // TODO
 	} else if (type == NetworkSessionType::Host) {
-		int i = 1;
+		uint16_t i = 1;
 		for (auto& c: connections) {
 			if (c->getStatus() == ConnectionStatus::Connected) {
 				++i;
@@ -451,6 +452,7 @@ void NetworkSession::onConnection(NetworkService::Acceptor& acceptor)
 	if (getClientCount() < maxClients) { // I'm also a client!
 		acceptConnection(acceptor.accept());
 	} else {
+		Logger::logInfo("Rejecting network session connection as we're already at max clients.");
 		acceptor.reject();
 	}
 }

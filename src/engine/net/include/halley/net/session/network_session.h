@@ -16,15 +16,15 @@ namespace Halley {
 		NetworkSession(NetworkService& service);
 		virtual ~NetworkSession();
 
-		void host();
+		void host(uint16_t maxClients);
 		void join(const String& address);
 
-		void setMaxClients(int clients);
-		int getMaxClients() const;
+		void setMaxClients(uint16_t clients);
+		uint16_t getMaxClients() const;
 
 		int getMyPeerId() const;
 
-		int getClientCount() const;
+		uint16_t getClientCount() const;
 		void acceptConnection(std::shared_ptr<IConnection> move);
 		void update();
 
@@ -55,7 +55,7 @@ namespace Halley {
 		NetworkService& service;
 		NetworkSessionType type = NetworkSessionType::Undefined;
 
-		int maxClients = 0;
+		uint16_t maxClients = 0;
 		int myPeerId = -1;
 
 		std::unique_ptr<SharedData> sessionSharedData;
