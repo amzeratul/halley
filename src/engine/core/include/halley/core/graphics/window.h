@@ -40,19 +40,21 @@ namespace Halley
 	class WindowDefinition
 	{
 	public:
-		WindowDefinition(WindowType windowType, Vector2i size, String title, bool showOnCreation = true)
+		WindowDefinition(WindowType windowType, Vector2i size, String title, bool showOnCreation = true, int screen = 0)
 			: windowType(windowType)
 			, size(size)
 			, title(std::move(title))
 			, showOnCreation(showOnCreation)
+			, screen(screen)
 		{}
 
-		WindowDefinition(WindowType windowType, std::optional<Vector2i> position, Vector2i size, String title, bool showOnCreation = true)
+		WindowDefinition(WindowType windowType, std::optional<Vector2i> position, Vector2i size, String title, bool showOnCreation = true, int screen = 0)
 			: windowType(windowType)
 			, position(position)
 			, size(size)
 			, title(std::move(title))
 			, showOnCreation(showOnCreation)
+			, screen(screen)
 		{}
 
 		WindowType getWindowType() const { return windowType; }
@@ -62,6 +64,7 @@ namespace Halley
 		String getTitle() const { return title; }
 		std::optional<Path> getIcon() const { return icon; }
 		bool isShowOnCreation() const { return showOnCreation; }
+		int getScreen() const { return screen; }
 
 		WindowDefinition withPosition(std::optional<Vector2i> newPos) const
 		{
@@ -99,6 +102,7 @@ namespace Halley
 		String title;
 		std::optional<Path> icon;
 		bool showOnCreation = true;
+		int screen = 0;
 	};
 
 	class Window

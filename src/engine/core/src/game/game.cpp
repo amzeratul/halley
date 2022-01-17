@@ -19,6 +19,11 @@ bool Game::shouldCreateSeparateConsole() const
 	return isDevMode();
 }
 
+Game::ConsoleInfo Game::getConsoleInfo() const
+{
+	return ConsoleInfo{ "[Console] " + getName(), {}, Vector2f(0.5f, 0.5f) };
+}
+
 void Game::endGame()
 {}
 

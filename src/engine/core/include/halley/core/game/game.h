@@ -19,6 +19,12 @@ namespace Halley
 	class Game
 	{
 	public:
+		struct ConsoleInfo {
+			String name;
+			std::optional<int> monitor;
+			Vector2f monitorAlign;
+		};
+		
 		virtual ~Game();
 
 		virtual void init(const Environment&, const Vector<String>& /*args*/);
@@ -29,6 +35,7 @@ namespace Halley
 		virtual String getDataPath() const = 0;
 		virtual bool isDevMode() const = 0;
 		virtual bool shouldCreateSeparateConsole() const;
+		virtual ConsoleInfo getConsoleInfo() const;
 
 		virtual std::unique_ptr<Stage> startGame() = 0;
 		virtual void endGame();
