@@ -92,7 +92,12 @@ ConnectionStatus AsioTCPConnection::getStatus() const
 	return status;
 }
 
-void AsioTCPConnection::send(OutboundNetworkPacket packet)
+bool AsioTCPConnection::isSupported(TransmissionType type) const
+{
+	return type == TransmissionType::Reliable;
+}
+
+void AsioTCPConnection::send(TransmissionType type, OutboundNetworkPacket packet)
 {
 	packet.addHeader(uint32_t(packet.getSize()));
 	auto bytes = packet.getBytes();

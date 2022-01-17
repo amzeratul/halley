@@ -28,7 +28,8 @@ namespace Halley
 
 		void close() override;
 		ConnectionStatus getStatus() const override { return status; }
-		void send(OutboundNetworkPacket packet) override;
+		bool isSupported(TransmissionType type) const override;
+		void send(TransmissionType type, OutboundNetworkPacket packet) override;
 		bool receive(InboundNetworkPacket& packet) override;
 		
 		bool matchesEndpoint(const UDPEndpoint& remoteEndpoint) const;

@@ -10,16 +10,16 @@ using namespace Halley;
 
 struct ReliableHeader
 {
-	unsigned short sequence = 0xFFFF;
-	unsigned short ack = 0xFFFF;
-	unsigned int ackBits = 0xFFFFFFFF;
+	uint16_t sequence = 0xFFFF;
+	uint16_t ack = 0xFFFF;
+	uint32_t ackBits = 0xFFFFFFFF;
 };
 
 struct ReliableSubHeader
 {
-	unsigned char sizeA;
-	unsigned char sizeB;
-	unsigned short resend;
+	uint8_t sizeA;
+	uint8_t sizeB;
+	uint16_t resend;
 };
 
 constexpr size_t BUFFER_SIZE = 1024;
@@ -42,7 +42,12 @@ ConnectionStatus ReliableConnection::getStatus() const
 	return parent->getStatus();
 }
 
-void ReliableConnection::send(OutboundNetworkPacket packet)
+bool ReliableConnection::isSupported(TransmissionType type) const
+{
+	return true;
+}
+
+void ReliableConnection::send(TransmissionType type, OutboundNetworkPacket packet)
 {
 	ReliableSubPacket subPacket;
 	subPacket.data.resize(packet.getSize());
@@ -118,7 +123,7 @@ void ReliableConnection::sendTagged(gsl::span<ReliableSubPacket> subPackets)
 #endif
 
 	// Send
-	parent->send(OutboundNetworkPacket(dst.subspan(0, pos)));
+	parent->send(TransmissionType::Unreliable, OutboundNetworkPacket(dst.subspan(0, pos)));
 }
 
 bool ReliableConnection::receive(InboundNetworkPacket& packet)

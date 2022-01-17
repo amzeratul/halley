@@ -13,11 +13,12 @@ namespace Halley
 		class DelayedPacket
 		{
 		public:
-			DelayedPacket(std::chrono::system_clock::time_point when, OutboundNetworkPacket packet);
+			DelayedPacket(std::chrono::system_clock::time_point when, TransmissionType type, OutboundNetworkPacket packet);
 			bool operator<(const DelayedPacket& other) const;
 			bool isReady() const;
 
 			std::chrono::system_clock::time_point when;
+			TransmissionType type;
 			OutboundNetworkPacket packet;
 		};
 
@@ -25,7 +26,8 @@ namespace Halley
 		explicit InstabilitySimulator(std::shared_ptr<IConnection> parent, float avgLag, float lagVariance, float packetLoss, float duplication);
 		void close() override;
 		ConnectionStatus getStatus() const override;
-		void send(OutboundNetworkPacket packet) override;
+		bool isSupported(TransmissionType type) const override;
+		void send(TransmissionType type, OutboundNetworkPacket packet) override;
 		bool receive(InboundNetworkPacket& packet) override;
 
 	private:

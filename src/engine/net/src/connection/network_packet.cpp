@@ -60,7 +60,7 @@ OutboundNetworkPacket::OutboundNetworkPacket(const Bytes& data)
 
 void OutboundNetworkPacket::addHeader(gsl::span<const gsl::byte> src)
 {
-	Expects(src.size_bytes() <= signed(dataStart));
+	Expects(src.size_bytes() <= dataStart);
 	
 	dataStart -= src.size_bytes();
 	memcpy(data.data() + dataStart, src.data(), src.size_bytes());
@@ -68,7 +68,7 @@ void OutboundNetworkPacket::addHeader(gsl::span<const gsl::byte> src)
 
 OutboundNetworkPacket& OutboundNetworkPacket::operator=(OutboundNetworkPacket&& other) noexcept
 {
-	data = other.data;
+	data = std::move(other.data);
 	dataStart = other.dataStart;
 	other.dataStart = 0;
 	return *this;
@@ -81,7 +81,7 @@ InboundNetworkPacket::InboundNetworkPacket()
 InboundNetworkPacket::InboundNetworkPacket(InboundNetworkPacket&& other) noexcept
 	: NetworkPacketBase()
 {
-	data = other.data;
+	data = std::move(other.data);
 	dataStart = other.dataStart;
 	other.dataStart = 0;
 }

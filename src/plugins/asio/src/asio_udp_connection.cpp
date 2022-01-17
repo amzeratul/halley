@@ -33,6 +33,11 @@ void AsioUDPConnection::close()
 	status = ConnectionStatus::Closing;
 }
 
+bool AsioUDPConnection::isSupported(TransmissionType type) const
+{
+	return type == TransmissionType::Unreliable;
+}
+
 void AsioUDPConnection::terminateConnection()
 {
 	if (status != ConnectionStatus::Closed) {
@@ -40,8 +45,10 @@ void AsioUDPConnection::terminateConnection()
 	}
 }
 
-void AsioUDPConnection::send(OutboundNetworkPacket packet)
+void AsioUDPConnection::send(TransmissionType type, OutboundNetworkPacket packet)
 {
+	Expects(type == TransmissionType::Unreliable);
+	
 	if (status == ConnectionStatus::Connected || status == ConnectionStatus::Connecting) {
 		// Insert header
 		std::array<unsigned char, 2> id = { 0, 0 };
@@ -111,7 +118,7 @@ void AsioUDPConnection::open(short id)
 		// Handshake
 		HandshakeAccept accept;
 		accept.id = id;
-		send(OutboundNetworkPacket(gsl::as_bytes(gsl::span<HandshakeAccept>(&accept, 1))));
+		send(TransmissionType::Unreliable, OutboundNetworkPacket(gsl::as_bytes(gsl::span<HandshakeAccept>(&accept, 1))));
 
 		onOpen(id);
 	}

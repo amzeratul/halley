@@ -23,7 +23,7 @@ void MessageQueueTCP::enqueue(std::unique_ptr<NetworkMessage> msg, int channel)
 	if (isConnected()) {
 		auto packet = OutboundNetworkPacket(Serializer::toBytes(*msg));
 		packet.addHeader(getMessageType(*msg));
-		connection->send(std::move(packet));
+		connection->send(IConnection::TransmissionType::Reliable, std::move(packet));
 	}
 }
 

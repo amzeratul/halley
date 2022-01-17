@@ -84,7 +84,7 @@ std::shared_ptr<IConnection> AsioUDPNetworkService::connect(const String& addres
 
 	// Handshake
 	HandshakeOpen open;
-	conn->send(OutboundNetworkPacket(gsl::as_bytes(gsl::span<HandshakeOpen>(&open, 1))));
+	conn->send(IConnection::TransmissionType::Unreliable, OutboundNetworkPacket(gsl::as_bytes(gsl::span<HandshakeOpen>(&open, 1))));
 
 	startListening({}); // Hmm, this might not be right
 

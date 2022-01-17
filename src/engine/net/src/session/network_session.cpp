@@ -107,10 +107,10 @@ void NetworkSession::acceptConnection(std::shared_ptr<IConnection> incoming)
 	sharedData[msg.peerId] = makePeerSharedData();
 
 	auto& conn = *peer.connection;
-	conn.send(doMakeControlPacket(NetworkSessionControlMessageType::SetPeerId, OutboundNetworkPacket(bytes)));
-	conn.send(makeUpdateSharedDataPacket({}));
+	conn.send(IConnection::TransmissionType::Reliable, doMakeControlPacket(NetworkSessionControlMessageType::SetPeerId, OutboundNetworkPacket(bytes)));
+	conn.send(IConnection::TransmissionType::Reliable, makeUpdateSharedDataPacket({}));
 	for (auto& i: sharedData) {
-		conn.send(makeUpdateSharedDataPacket(i.first));
+		conn.send(IConnection::TransmissionType::Reliable, makeUpdateSharedDataPacket(i.first));
 	}
 	onConnected(peer.peerId);
 }
@@ -255,7 +255,7 @@ void NetworkSession::sendToAll(OutboundNetworkPacket packet, int except)
 {
 	for (size_t i = 0; i < peers.size(); ++i) {
 		if (peers[i].peerId != except) {
-			peers[i].connection->send(OutboundNetworkPacket(packet));
+			peers[i].connection->send(IConnection::TransmissionType::Reliable, OutboundNetworkPacket(packet));
 		}
 	}
 }
@@ -268,7 +268,7 @@ void NetworkSession::send(OutboundNetworkPacket packet)
 
 	auto out = makeOutbound(packet.getBytes(), header);
 	for (auto& peer: peers) {
-		peer.connection->send(OutboundNetworkPacket(out));
+		peer.connection->send(IConnection::TransmissionType::Reliable, OutboundNetworkPacket(out));
 	}
 }
 
