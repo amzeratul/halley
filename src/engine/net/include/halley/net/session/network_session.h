@@ -13,6 +13,8 @@ namespace Halley {
 
 	class NetworkSession {
 	public:
+		using PeerId = uint8_t;
+
 		NetworkSession(NetworkService& service);
 		virtual ~NetworkSession();
 
@@ -22,7 +24,7 @@ namespace Halley {
 		void setMaxClients(uint16_t clients);
 		uint16_t getMaxClients() const;
 
-		int getMyPeerId() const;
+		std::optional<PeerId> getMyPeerId() const;
 
 		uint16_t getClientCount() const;
 		void acceptConnection(std::shared_ptr<IConnection> move);
@@ -39,8 +41,8 @@ namespace Halley {
 		SharedData& doGetMySharedData();
 		SharedData& doGetMutableSessionSharedData();
 		const SharedData& doGetSessionSharedData() const;
-		const SharedData& doGetClientSharedData(int clientId) const;
-		const SharedData* doTryGetClientSharedData(int clientId) const;
+		const SharedData& doGetClientSharedData(PeerId clientId) const;
+		const SharedData* doTryGetClientSharedData(PeerId clientId) const;
 
 		virtual std::unique_ptr<SharedData> makeSessionSharedData() = 0;
 		virtual std::unique_ptr<SharedData> makePeerSharedData() = 0;
@@ -48,41 +50,47 @@ namespace Halley {
 		virtual void onStartSession();
 		virtual void onPeerIdAssigned();
 		virtual void onHosting();
-		virtual void onConnected(int peerId);
-		virtual void onDisconnected(int peerId);
+		virtual void onConnected(PeerId peerId);
+		virtual void onDisconnected(PeerId peerId);
 		
 	private:
+		struct Peer {
+			PeerId peerId = -1;
+			std::shared_ptr<IConnection> connection;
+		};
+		
 		NetworkService& service;
 		NetworkSessionType type = NetworkSessionType::Undefined;
 
 		uint16_t maxClients = 0;
-		int myPeerId = -1;
+		std::optional<PeerId> myPeerId;
 
 		std::unique_ptr<SharedData> sessionSharedData;
 		std::map<int, std::unique_ptr<SharedData>> sharedData;
 
-		std::vector<std::shared_ptr<IConnection>> connections;
+		std::vector<Peer> peers;
 		std::vector<InboundNetworkPacket> inbox;
 
 		OutboundNetworkPacket makeOutbound(gsl::span<const gsl::byte> data, NetworkSessionMessageHeader header);
 		void sendToAll(OutboundNetworkPacket packet, int except = -1);
-		void closeConnection(int peerId, const String& reason);
+		void closeConnection(PeerId peerId, const String& reason);
 		void processReceive();
 
-		void retransmitControlMessage(int peerId, gsl::span<const gsl::byte> bytes);
-		void receiveControlMessage(int peerId, InboundNetworkPacket& packet);
-		void onControlMessage(int peerId, const ControlMsgSetPeerId& msg);
-		void onControlMessage(int peerId, const ControlMsgSetPeerState& msg);
-		void onControlMessage(int peerId, const ControlMsgSetSessionState& msg);
+		void retransmitControlMessage(PeerId peerId, gsl::span<const gsl::byte> bytes);
+		void receiveControlMessage(PeerId peerId, InboundNetworkPacket& packet);
+		void onControlMessage(PeerId peerId, const ControlMsgSetPeerId& msg);
+		void onControlMessage(PeerId peerId, const ControlMsgSetPeerState& msg);
+		void onControlMessage(PeerId peerId, const ControlMsgSetSessionState& msg);
 
-		void setMyPeerId(int id);
+		void setMyPeerId(PeerId id);
 
-		void checkForOutboundStateChanges(int ownerId);
-		OutboundNetworkPacket makeUpdateSharedDataPacket(int ownerId);
+		void checkForOutboundStateChanges(std::optional<PeerId> ownerId);
+		OutboundNetworkPacket makeUpdateSharedDataPacket(std::optional<PeerId> ownerId);
 		
 		OutboundNetworkPacket doMakeControlPacket(NetworkSessionControlMessageType msgType, OutboundNetworkPacket packet);
 
 		void onConnection(NetworkService::Acceptor& acceptor);
+		std::optional<PeerId> allocatePeerId() const;
 	};
 
 	template <typename SessionSharedDataType, typename PeerSharedDataType>
