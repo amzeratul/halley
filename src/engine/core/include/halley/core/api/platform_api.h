@@ -12,6 +12,7 @@ namespace Halley
 	class ISaveData;
 	class String;
 	class InputKeyboard;
+	class NetworkService;
 
 	class HTTPResponse {
 	public:
