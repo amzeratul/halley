@@ -75,9 +75,11 @@ void PrefabEditor::open()
 		window = std::make_shared<SceneEditorWindow>(factory, project, projectWindow.getAPI(), projectWindow);
 		add(window, 1);
 	}
-	if (assetType == AssetType::Scene) {
-		window->loadScene(assetId);
-	} else if (assetType == AssetType::Prefab) {
-		window->loadPrefab(assetId);
+	if (assetType == AssetType::Scene || assetType == AssetType::Prefab) {
+		const bool ok = window->loadSceneFromFile(assetType, assetId);
+		if (!ok) {
+			window->destroy();
+			window = {};
+		}
 	}
 }

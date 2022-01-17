@@ -9,6 +9,8 @@ namespace Halley {
 		static std::unique_ptr<Prefab> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Prefab; }
 
+		virtual AssetType getPrefabType() const { return AssetType::Prefab; }
+
 		void reload(Resource&& resource) override;
 		void makeDefault();
 
@@ -66,6 +68,8 @@ namespace Halley {
 	public:
 		static std::unique_ptr<Scene> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Scene; }
+
+		AssetType getPrefabType() const override { return AssetType::Scene; }
 
 		bool isScene() const override;
 		

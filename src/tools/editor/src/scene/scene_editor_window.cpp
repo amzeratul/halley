@@ -131,37 +131,31 @@ void SceneEditorWindow::onAddedToRoot(UIRoot& root)
 	root.registerKeyPressListener(shared_from_this());
 }
 
-void SceneEditorWindow::loadScene(const String& name)
+bool SceneEditorWindow::loadSceneFromFile(AssetType assetType, const String& name)
 {
 	unloadScene();
-	assetPath = project.getImportAssetsDatabase().getPrimaryInputFile(AssetType::Scene, name);
+	assetPath = project.getImportAssetsDatabase().getPrimaryInputFile(assetType, name);
 
-	if (!name.isEmpty()) {
-		const auto assetData = Path::readFile(project.getAssetsSrcPath() / assetPath);
-		Scene scene;
-		scene.parseYAML(gsl::as_bytes(gsl::span<const Byte>(assetData)));
-		scene.setAssetId(name);
-		loadScene(AssetType::Scene, scene);
-		//loadScene(AssetType::Scene, *project.getGameResources().get<Scene>(name));
+	if (name.isEmpty()) {
+		return false;
 	}
+
+	auto prefab = assetType == AssetType::Prefab ? std::make_unique<Prefab>() : std::make_unique<Scene>();
+	
+	const auto assetData = Path::readFile(project.getAssetsSrcPath() / assetPath);
+	if (!assetData.empty()) {
+		prefab->parseYAML(gsl::as_bytes(gsl::span<const Byte>(assetData)));
+	} else {
+		prefab->makeDefault();
+		markModified();
+	}
+	prefab->setAssetId(name);
+	loadScene(*prefab);
+
+	return true;
 }
 
-void SceneEditorWindow::loadPrefab(const String& name)
-{
-	unloadScene();
-	assetPath = project.getImportAssetsDatabase().getPrimaryInputFile(AssetType::Prefab, name);
-
-	if (!name.isEmpty()) {
-		const auto assetData = Path::readFile(project.getAssetsSrcPath() / assetPath);
-		Prefab prefab;
-		prefab.parseYAML(gsl::as_bytes(gsl::span<const Byte>(assetData)));
-		prefab.setAssetId(name);
-		loadScene(AssetType::Prefab, prefab);
-		// loadScene(AssetType::Prefab, *project.getGameResources().get<Prefab>(name));
-	}
-}
-
-void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
+void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 {
 	if (sceneData) {
 		unloadScene();
@@ -178,7 +172,6 @@ void SceneEditorWindow::loadScene(AssetType assetType, const Prefab& origPrefab)
 
 		// Load prefab
 		prefab = origPrefab.clone();
-		origPrefabAssetType = assetType;
 
 		// Spawn scene
 		entityFactory = std::make_shared<EntityFactory>(world, project.getGameResources());
@@ -419,7 +412,7 @@ void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 {
 	if (status == ProjectDLL::Status::Loaded) {
 		if (prefab) {
-			loadScene(origPrefabAssetType, *prefab);
+			loadScene(*prefab);
 		}
 	} else {
 		unloadScene();
@@ -1400,12 +1393,12 @@ void SceneEditorWindow::openAsset(AssetType assetType, const String& assetId)
 
 void SceneEditorWindow::openAssetHere(AssetType assetType, const String& assetId)
 {
-	projectWindow.replaceAssetTab(origPrefabAssetType, prefab->getAssetId(), assetType, assetId);
+	projectWindow.replaceAssetTab(prefab->getPrefabType(), prefab->getAssetId(), assetType, assetId);
 }
 
 String SceneEditorWindow::getAssetKey() const
 {
-	return origPrefabAssetType + ":" + prefab->getAssetId();
+	return prefab->getPrefabType() + ":" + prefab->getAssetId();
 }
 
 Future<AssetPreviewData> SceneEditorWindow::getAssetPreviewData(AssetType assetType, const String& id, Vector2i size)
