@@ -6,7 +6,7 @@
 #include "network_session_messages.h"
 #include "shared_data.h"
 #include "network_session_control_messages.h"
-#include "connection/network_service.h"
+#include "../connection/network_service.h"
 
 namespace Halley {
 	class NetworkService;
