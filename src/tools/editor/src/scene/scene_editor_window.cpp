@@ -760,9 +760,7 @@ void SceneEditorWindow::onEntitiesModified(gsl::span<const String> ids, gsl::spa
 		for (size_t i = 0; i < ids.size(); ++i) {
 			const auto* prevData = prevDatas[i];
 			const auto* newData = newDatas[i];
-			if (!prevData || newData->getName() != prevData->getName() || newData->getIcon() != prevData->getIcon() || newData->getPrefab() != prevData->getPrefab()) {
-				entityList->onEntityModified(ids[i], *newDatas[i]);
-			}
+			entityList->onEntityModified(ids[i], prevData, *newData);
 		}
 		markModified();
 	}

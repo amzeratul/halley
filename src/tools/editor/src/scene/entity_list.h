@@ -22,7 +22,7 @@ namespace Halley {
 		void refreshList();
 		void refreshNames();
 
-		void onEntityModified(const String& id, const EntityData& node);
+		void onEntityModified(const String& id, const EntityData* prevData, const EntityData& newData);
 		void onEntitiesAdded(gsl::span<const EntityChangeOperation> changes);
 		void onEntitiesRemoved(gsl::span<const String> ids, const String& newSelectionId);
 

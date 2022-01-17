@@ -149,9 +149,10 @@ void EntityList::refreshNames()
 	refreshList();
 }
 
-void EntityList::onEntityModified(const String& id, const EntityData& node)
+void EntityList::onEntityModified(const String& id, const EntityData* prevData, const EntityData& newData)
 {
-	onEntityModified(id, node, false);
+	const bool hasListChange = !prevData || newData.getName() != prevData->getName() || newData.getIcon() != prevData->getIcon() || newData.getPrefab() != prevData->getPrefab();
+	onEntityModified(id, newData, !hasListChange);
 }
 
 void EntityList::onEntityModified(const String& id, const EntityData& node, bool onlyRefreshValidation)
