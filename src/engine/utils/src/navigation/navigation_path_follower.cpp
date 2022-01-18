@@ -63,6 +63,9 @@ void NavigationPathFollower::update(Vector2f curPos, int curSubWorld, const Navm
 	if (needsToReEvaluatePath) {
 		reEvaluatePath(navmeshSet);
 	}
+	if (!path) {
+		return;
+	}
 
 	if (nextPathIdx >= path->path.size()) {
 		goToNextRegion(navmeshSet);
