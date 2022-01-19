@@ -1,6 +1,6 @@
 project (halley-net)
 
-include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/net" "../utils/include" "../entity/include")
+include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/net" "../core/include" "../utils/include" "../entity/include")
 
 set(SOURCES
         "src/connection/http.cpp"

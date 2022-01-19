@@ -12,8 +12,8 @@ namespace Halley {
 		void markUnmodified();
 		bool isModified() const;
 
-		virtual void serialize(Serializer& s) const = 0;
-		virtual void deserialize(Deserializer& s) = 0;
+		virtual void serialize(Serializer& s) const;
+		virtual void deserialize(Deserializer& s);
 
 	private:
 		bool modified = false;

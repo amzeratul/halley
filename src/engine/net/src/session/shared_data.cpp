@@ -15,3 +15,11 @@ bool SharedData::isModified() const
 {
 	return modified;
 }
+
+void SharedData::serialize(Serializer& s) const
+{
+}
+
+void SharedData::deserialize(Deserializer& s)
+{
+}

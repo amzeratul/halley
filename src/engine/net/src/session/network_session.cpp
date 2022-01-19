@@ -50,8 +50,7 @@ void NetworkSession::join(const String& address)
 void NetworkSession::close()
 {
 	for (auto& peer: peers) {
-		peer.connection->close();
-		onDisconnected(peer.peerId);
+		disconnectPeer(peer);
 	}
 	peers.clear();
 
@@ -121,7 +120,7 @@ void NetworkSession::update()
 	service.update();
 	for (auto& peer: peers) {
 		if (peer.connection->getStatus() == ConnectionStatus::Closed) {
-			onDisconnected(peer.peerId);
+			disconnectPeer(peer);
 		}
 	}
 	std_ex::erase_if(peers, [] (const Peer& peer)
@@ -199,6 +198,16 @@ const SharedData* NetworkSession::doTryGetClientSharedData(PeerId clientId) cons
 		return nullptr;
 	}
 	return iter->second.get();
+}
+
+std::unique_ptr<SharedData> NetworkSession::makeSessionSharedData()
+{
+	return std::make_unique<SharedData>();
+}
+
+std::unique_ptr<SharedData> NetworkSession::makePeerSharedData()
+{
+	return std::make_unique<SharedData>();
 }
 
 void NetworkSession::onStartSession()
@@ -337,8 +346,7 @@ void NetworkSession::closeConnection(PeerId peerId, const String& reason)
 {
 	for (auto& p: peers) {
 		if (p.peerId == peerId) {
-			onDisconnected(p.peerId);
-			p.connection->close();
+			disconnectPeer(p);
 		}
 	}
 }
@@ -496,4 +504,12 @@ std::optional<NetworkSession::PeerId> NetworkSession::allocatePeerId() const
 		}
 	}
 	return {};
+}
+
+void NetworkSession::disconnectPeer(Peer& peer)
+{
+	if (peer.connection->getStatus() != ConnectionStatus::Closed) {
+		peer.connection->close();
+	}
+	onDisconnected(peer.peerId);
 }

@@ -44,8 +44,8 @@ namespace Halley {
 		const SharedData& doGetClientSharedData(PeerId clientId) const;
 		const SharedData* doTryGetClientSharedData(PeerId clientId) const;
 
-		virtual std::unique_ptr<SharedData> makeSessionSharedData() = 0;
-		virtual std::unique_ptr<SharedData> makePeerSharedData() = 0;
+		virtual std::unique_ptr<SharedData> makeSessionSharedData();
+		virtual std::unique_ptr<SharedData> makePeerSharedData();
 
 		virtual void onStartSession();
 		virtual void onPeerIdAssigned();
@@ -91,48 +91,7 @@ namespace Halley {
 
 		void onConnection(NetworkService::Acceptor& acceptor);
 		std::optional<PeerId> allocatePeerId() const;
-	};
 
-	template <typename SessionSharedDataType, typename PeerSharedDataType>
-	class NetworkSessionImpl : public NetworkSession {
-	public:
-		NetworkSessionImpl(NetworkService& s) : NetworkSession(s) {}
-		virtual ~NetworkSessionImpl() {}
-
-		SessionSharedDataType& getMutableSessionSharedData()
-		{
-			return static_cast<SessionSharedDataType&>(doGetMutableSessionSharedData());
-		}
-		
-		const SessionSharedDataType& getSessionSharedData() const
-		{
-			return static_cast<const SessionSharedDataType&>(doGetSessionSharedData());
-		}
-
-		PeerSharedDataType& getMySharedData()
-		{
-			return static_cast<PeerSharedDataType&>(doGetMySharedData());
-		}
-
-		const PeerSharedDataType& getClientSharedData(int clientId) const
-		{
-			return static_cast<const PeerSharedDataType&>(doGetClientSharedData(clientId));
-		}
-
-		const PeerSharedDataType* tryGetClientSharedData(int clientId) const
-		{
-			return static_cast<const PeerSharedDataType*>(doTryGetClientSharedData(clientId));
-		}
-
-	protected:
-		std::unique_ptr<SharedData> makeSessionSharedData() override final
-		{
-			return std::make_unique<SessionSharedDataType>();
-		}
-		
-		std::unique_ptr<SharedData> makePeerSharedData() override final
-		{
-			return std::make_unique<PeerSharedDataType>();
-		}
+		void disconnectPeer(Peer& peer);
 	};
 }
