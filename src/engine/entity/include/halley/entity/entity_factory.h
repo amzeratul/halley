@@ -43,7 +43,10 @@ namespace Halley {
 
 		void updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene = nullptr);
 
+		std::pair<EntityRef, std::optional<UUID>> loadEntityDelta(const EntityDataDelta& delta, const std::optional<UUID>& uuidSrc); // Returns entity and parent UUID
+
 		EntityData serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent = true);
+		EntityDataDelta serializeEntityAsDelta(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions, bool canStoreParent = true);
 
 		std::shared_ptr<EntityFactoryContext> makeStandaloneContext();
 
