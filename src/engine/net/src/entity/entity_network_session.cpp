@@ -7,7 +7,7 @@ EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> sessi
 {
 }
 
-void EntityNetworkSession::updateLocalEntities(World& world, gsl::span<const EntityId> entityIds)
+void EntityNetworkSession::updateLocalEntities(Time t, World& world, gsl::span<const std::pair<EntityId, uint8_t>> entityIds)
 {
 	// TODO
 }
