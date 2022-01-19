@@ -1,6 +1,6 @@
 project (halley-net)
 
-include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/net" "../utils/include")
+include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/net" "../utils/include" "../entity/include")
 
 set(SOURCES
         "src/connection/http.cpp"
@@ -11,6 +11,8 @@ set(SOURCES
         "src/connection/network_packet.cpp"
         "src/connection/network_service.cpp"
         "src/connection/reliable_connection.cpp"
+
+        "src/entity/entity_network_session.cpp"
 
         "src/session/network_session_control_messages.cpp"
         "src/session/network_session.cpp"
@@ -33,6 +35,8 @@ set(HEADERS
         "include/halley/net/connection/reliable_connection.h"
         "include/halley/net/connection/standard_message_stream.h"
 
+        "include/halley/net/entity/entity_network_session.h"
+
         "include/halley/net/session/network_session_control_messages.h"
         "include/halley/net/session/network_session_messages.h"
         "include/halley/net/session/network_session_peer.h"
@@ -44,4 +48,4 @@ assign_source_group(${SOURCES})
 assign_source_group(${HEADERS})
 
 add_library (halley-net ${SOURCES} ${HEADERS})
-target_link_libraries(halley-net halley-utils)
+target_link_libraries(halley-net halley-utils halley-entity)

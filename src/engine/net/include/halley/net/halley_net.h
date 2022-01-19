@@ -13,4 +13,6 @@ namespace Halley {}
 #include <halley/net/connection/reliable_connection.h>
 #include <halley/net/connection/standard_message_stream.h>
 
+#include <halley/net/entity/entity_network_session.h>
+
 #include <halley/net/session/network_session.h>
