@@ -6,7 +6,7 @@
 #include "halley/data_structures/hash_map.h"
 #include "halley/entity/entity.h"
 #include "halley/time/halleytime.h"
-#include "session/network_session.h"
+#include "../session/network_session.h"
 
 namespace Halley {
 	class Resources;
