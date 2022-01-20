@@ -27,11 +27,6 @@
 #include "halley/text/string_converter.h"
 #include "halley_gl.h"
 
-#ifdef __APPLE__
-#include <pthread.h>
-#endif
-
-
 using namespace Halley;
 
 void GLUtils::doGlCheckError(const char* file, long line)
@@ -102,54 +97,34 @@ namespace Halley {
 			}
 			numUnits = 0;
 			curTexUnit = 0;
-			scissoring = false;
+
 			curBlend = BlendType();
-			hasClearCol = false;
+			glDisable(GL_BLEND);
+
+			viewport = {0, 0, 0, 0};
+
+			clearCol = {0, 0, 0, 0};
+			glClearColor(clearCol.r, clearCol.g, clearCol.b, clearCol.a);
+
+			scissoring = false;
+			glDisable(GL_SCISSOR_TEST);
 		}
 
 		int curTexUnit;
 		int numUnits;
-		std::array<int, 8> curTex;
+		std::array<unsigned int, 8> curTex;
 		BlendType curBlend;
 		Rect4i viewport;
 		Colour clearCol;
 		bool scissoring;
-		bool hasClearCol;
 	};
 
 }
 
-#ifdef __APPLE__
-static pthread_once_t key_once = PTHREAD_ONCE_INIT;
-static pthread_key_t key;
-
-static void destroyState(void* value)
-{
-	GLInternals* state = reinterpret_cast<GLInternals*>(value);
-	delete state;
-}
-
-static void makeState()
-{
-	pthread_key_create(&key, destroyState);
-}
-#endif
-
 GLInternals& getState()
 {
-#ifdef __APPLE__
-	pthread_once(&key_once, makeState);
-	GLInternals* ptr = reinterpret_cast<GLInternals*>(pthread_getspecific(key));
-    if (!ptr) {
-        ptr = new GLInternals();
-        pthread_setspecific(key, ptr);
-    }
-
-	return *ptr;
-#else
 	thread_local GLInternals state;
 	return state;
-#endif
 }
 
 ////////////////////
@@ -247,21 +222,19 @@ void GLUtils::setDepthStencil(const MaterialDepthStencil& depthStencil)
 
 void GLUtils::setTextureUnit(int n)
 {
-	Expects(n >= 0);
-	Expects(n < 8);
+	Expects(n >= 0 && n < 8);
 
-	if (!checked || state.curTexUnit != n) {
+	if (!checked || (state.curTexUnit != n)) {
 		glActiveTexture(GL_TEXTURE0 + n);
 		glCheckError();
 		state.curTexUnit = n;
+		state.numUnits = std::max(state.numUnits, n + 1);
 	}
 }
 
-void GLUtils::bindTexture(int id)
+void GLUtils::bindTexture(unsigned int id)
 {
-	Expects(id >= 0);
-
-	if (true || !checked || id != state.curTex[state.curTexUnit]) {
+	if (!checked || (id != state.curTex[state.curTexUnit])) {
 		state.curTex[state.curTexUnit] = id;
 		glBindTexture(GL_TEXTURE_2D, id);
 		glCheckError();
@@ -275,37 +248,14 @@ void GLUtils::setNumberOfTextureUnits(int n)
 
 	int prevUnit = state.curTexUnit;
 
-	if (checked) {
-		// Enable units
-		if (n > state.numUnits) {
-			for (int i = state.numUnits; i<n; i++) {
-				setTextureUnit(i);
-				glCheckError();
-			}
-		}
-
-		// Disable units
-		else {
-			for (int i = n; i<state.numUnits; i++) {
-				setTextureUnit(i);
-				bindTexture(0);
-				glCheckError();
-			}
-		}
-	}
-
-	else {
-		for (int i = 0; i<std::max(n, state.numUnits); i++) {
-			setTextureUnit(i);
-		}
+	for (int i = n; i < state.numUnits; i++) {
+		setTextureUnit(i);
+		bindTexture(0);
 	}
 
 	setTextureUnit(prevUnit < n ? prevUnit : 0);
-	state.numUnits = n;
-}
 
-void GLUtils::resetState()
-{
+	state.numUnits = n + 1;
 }
 
 void GLUtils::setViewPort(Rect4i r)
@@ -338,11 +288,9 @@ Halley::Rect4i GLUtils::getViewPort() const
 
 void GLUtils::clear(Colour col)
 {
-	if (!state.hasClearCol || col != state.clearCol) {
+	if (col != state.clearCol) {
 		glClearColor(col.r, col.g, col.b, col.a);
 		state.clearCol = col;
-		state.hasClearCol = true;
 	}
 	glClear(GL_COLOR_BUFFER_BIT);
 }
-
