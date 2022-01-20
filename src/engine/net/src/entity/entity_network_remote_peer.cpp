@@ -1,5 +1,6 @@
 #include "entity/entity_network_remote_peer.h"
 
+#include "entity/entity_network_session.h"
 #include "halley/entity/entity_factory.h"
 #include "halley/entity/world.h"
 #include "halley/support/logger.h"
@@ -7,8 +8,9 @@
 
 using namespace Halley;
 
-EntityNetworkRemotePeer::EntityNetworkRemotePeer(NetworkSession::PeerId peerId)
-	: peerId(peerId)
+EntityNetworkRemotePeer::EntityNetworkRemotePeer(EntityNetworkSession& parent, NetworkSession::PeerId peerId)
+	: parent(&parent)
+	, peerId(peerId)
 {}
 
 NetworkSession::PeerId EntityNetworkRemotePeer::getPeerId() const
@@ -16,8 +18,12 @@ NetworkSession::PeerId EntityNetworkRemotePeer::getPeerId() const
 	return peerId;
 }
 
-void EntityNetworkRemotePeer::sendEntities(Time t, EntityFactory& entityFactory, gsl::span<const std::pair<EntityId, uint8_t>> entityIds)
+void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds)
 {
+	if (!isAlive()) {
+		return;
+	}
+	
 	// Mark all as not alive
 	for (auto& e: outboundEntities) {
 		e.second.alive = false;
@@ -29,27 +35,31 @@ void EntityNetworkRemotePeer::sendEntities(Time t, EntityFactory& entityFactory,
 			continue;
 		}
 
-		auto entity = entityFactory.getWorld().getEntity(entityId);
+		auto entity = parent->getWorld().getEntity(entityId);
 
 		const auto iter = outboundEntities.find(entityId);
 		if (iter == outboundEntities.end()) {
-			createEntity(entityFactory, entity);
+			createEntity(entity);
 		} else {
-			updateEntity(entityFactory, iter->second, entity);
+			updateEntity(iter->second, entity);
 		}
 	}
 
 	// Destroy dead entities
 	for (auto& e: outboundEntities) {
 		if (!e.second.alive) {
-			destroyEntity(entityFactory, e.second);
+			destroyEntity(e.second);
 		}
 	}
 	std_ex::erase_if_value(outboundEntities, [](const OutboundEntity& e) { return !e.alive; });
 }
 
-void EntityNetworkRemotePeer::receiveEntities(EntityFactory& entityFactory)
+void EntityNetworkRemotePeer::receiveEntities()
 {
+	if (!isAlive()) {
+		return;
+	}
+	
 	// TODO
 }
 
@@ -59,6 +69,7 @@ void EntityNetworkRemotePeer::destroy(World& world)
 		for (const auto& [k, v]: inboundEntities) {
 			world.destroyEntity(v.worldId);
 		}
+		inboundEntities.clear();
 		alive = false;
 	}
 }
@@ -68,26 +79,35 @@ bool EntityNetworkRemotePeer::isAlive() const
 	return alive;
 }
 
-void EntityNetworkRemotePeer::createEntity(EntityFactory& entityFactory, EntityRef entity)
+void EntityNetworkRemotePeer::createEntity(EntityRef entity)
 {
 	OutboundEntity result;
 
 	result.alive = true;
 	result.networkId = assignId();
-	result.data = {}; // TODO
+	result.data = parent->getFactory().serializeEntity(entity, parent->getSerializationOptions());
 
-	//OutboundNetworkPacket packet;
-	//session->sendToPeer(packet, peerId);
+	auto deltaData = parent->getFactory().entityDataToPrefabDelta(result.data, entity.getPrefab(), parent->getEntityDeltaOptions());
+	
+	EntityHeader header;
+	header.type = EntityHeaderType::Create;
+	header.entityId = result.networkId;
+	
+	const auto bytes = Serializer::toBytes(result.data);
+	auto packet = OutboundNetworkPacket(bytes);
+	packet.addHeader(header);
+	parent->getSession().sendToPeer(packet, peerId);
 	
 	outboundEntities[entity.getEntityId()] = std::move(result);
 }
 
-void EntityNetworkRemotePeer::destroyEntity(EntityFactory& entityFactory, OutboundEntity& remote)
+void EntityNetworkRemotePeer::updateEntity(OutboundEntity& remote, EntityRef entity)
 {
-	// TODO: send to remote
+	auto newData = parent->getFactory().serializeEntity(entity, parent->getSerializationOptions());
+	
 }
 
-void EntityNetworkRemotePeer::updateEntity(EntityFactory& entityFactory, OutboundEntity& remote, EntityRef entity)
+void EntityNetworkRemotePeer::destroyEntity(OutboundEntity& remote)
 {
 	// TODO: send to remote
 }

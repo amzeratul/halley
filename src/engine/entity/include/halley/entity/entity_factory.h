@@ -47,7 +47,8 @@ namespace Halley {
 
 		EntityData serializeEntity(EntityRef entity, const SerializationOptions& options, bool canStoreParent = true);
 		EntityDataDelta serializeEntityAsDelta(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions, bool canStoreParent = true);
-
+		EntityDataDelta entityDataToPrefabDelta(EntityData data, std::shared_ptr<const Prefab> prefab, const EntityDataDelta::Options& deltaOptions);
+		
 		std::shared_ptr<EntityFactoryContext> makeStandaloneContext();
 
 	private:

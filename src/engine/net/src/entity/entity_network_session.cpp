@@ -19,38 +19,78 @@ EntityNetworkSession::~EntityNetworkSession()
 	session->removeListener(this);
 }
 
-void EntityNetworkSession::init(World& world, Resources& resources)
+void EntityNetworkSession::init(World& world, Resources& resources, std::set<String> ignoreComponents)
 {
 	factory = std::make_shared<EntityFactory>(world, resources);
+	serializationOptions.type = EntitySerialization::Type::SaveData;
+
+	deltaOptions.preserveOrder = false;
+	deltaOptions.shallow = false;
+	deltaOptions.ignoreComponents = std::move(ignoreComponents);
 }
 
 void EntityNetworkSession::sendLocalEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds)
 {
 	for (auto& peer: peers) {
-		peer.sendEntities(t, *factory, entityIds);
+		peer.sendEntities(t, entityIds);
 	}
 }
 
 void EntityNetworkSession::receiveRemoteEntities()
 {
 	for (auto& peer: peers) {
-		peer.receiveEntities(*factory);
+		peer.receiveEntities();
 	}
+}
+
+World& EntityNetworkSession::getWorld() const
+{
+	Expects(factory);
+	return factory->getWorld();
+}
+
+EntityFactory& EntityNetworkSession::getFactory() const
+{
+	Expects(factory);
+	return *factory;
+}
+
+const EntityFactory::SerializationOptions& EntityNetworkSession::getSerializationOptions() const
+{
+	Expects(factory);
+	return serializationOptions;
+}
+
+const EntityDataDelta::Options& EntityNetworkSession::getEntityDeltaOptions() const
+{
+	return deltaOptions;
+}
+
+NetworkSession& EntityNetworkSession::getSession() const
+{
+	Expects(session);
+	return *session;
 }
 
 void EntityNetworkSession::onStartSession(NetworkSession::PeerId myPeerId)
 {
+	Expects(factory);
+
 	// TODO
 }
 
 void EntityNetworkSession::onPeerConnected(NetworkSession::PeerId peerId)
 {
-	peers.push_back(EntityNetworkRemotePeer(peerId));
+	Expects(factory);
+	
+	peers.push_back(EntityNetworkRemotePeer(*this, peerId));
 	Logger::logDev("Peer " + toString(static_cast<int>(peerId)) + " connected to EntityNetworkSession.");
 }
 
 void EntityNetworkSession::onPeerDisconnected(NetworkSession::PeerId peerId)
 {
+	Expects(factory);
+
 	Logger::logDev("Peer " + toString(static_cast<int>(peerId)) + " disconnected from EntityNetworkSession.");
 	for (auto& peer: peers) {
 		if (peer.getPeerId() == peerId) {

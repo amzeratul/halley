@@ -90,8 +90,11 @@ EntityData EntityFactory::serializeEntity(EntityRef entity, const SerializationO
 EntityDataDelta EntityFactory::serializeEntityAsDelta(EntityRef entity, const SerializationOptions& options, const EntityDataDelta::Options& deltaOptions, bool canStoreParent)
 {
 	auto entityData = serializeEntity(entity, options, canStoreParent);
+	return entityDataToPrefabDelta(std::move(entityData), entity.getPrefab(), deltaOptions);
+}
 
-	const auto& prefab = entity.getPrefab();
+EntityDataDelta EntityFactory::entityDataToPrefabDelta(EntityData entityData, std::shared_ptr<const Prefab> prefab, const EntityDataDelta::Options& deltaOptions)
+{
 	if (prefab) {
 		entityData.setPrefab(prefab->getAssetId());
 		const auto* prefabData = prefab->getEntityData().tryGetPrefabUUID(entityData.getPrefabUUID());
