@@ -66,6 +66,11 @@ const EntityDataDelta::Options& EntityNetworkSession::getEntityDeltaOptions() co
 	return deltaOptions;
 }
 
+Time EntityNetworkSession::getMinSendInterval() const
+{
+	return 0.05;
+}
+
 NetworkSession& EntityNetworkSession::getSession() const
 {
 	Expects(session);
@@ -74,9 +79,6 @@ NetworkSession& EntityNetworkSession::getSession() const
 
 void EntityNetworkSession::onStartSession(NetworkSession::PeerId myPeerId)
 {
-	Expects(factory);
-
-	// TODO
 }
 
 void EntityNetworkSession::onPeerConnected(NetworkSession::PeerId peerId)

@@ -30,6 +30,8 @@ namespace Halley {
 		const EntityFactory::SerializationOptions& getSerializationOptions() const;
 		const EntityDataDelta::Options& getEntityDeltaOptions() const;
 
+		Time getMinSendInterval() const;
+
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
 		void onPeerConnected(NetworkSession::PeerId peerId) override;

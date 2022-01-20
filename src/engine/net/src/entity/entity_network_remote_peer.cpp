@@ -41,7 +41,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<Ent
 		if (iter == outboundEntities.end()) {
 			createEntity(entity);
 		} else {
-			updateEntity(iter->second, entity);
+			updateEntity(t, iter->second, entity);
 		}
 	}
 
@@ -83,37 +83,58 @@ void EntityNetworkRemotePeer::createEntity(EntityRef entity)
 {
 	OutboundEntity result;
 
-	result.alive = true;
 	result.networkId = assignId();
 	result.data = parent->getFactory().serializeEntity(entity, parent->getSerializationOptions());
 
 	auto deltaData = parent->getFactory().entityDataToPrefabDelta(result.data, entity.getPrefab(), parent->getEntityDeltaOptions());
-	
-	EntityHeader header;
-	header.type = EntityHeaderType::Create;
-	header.entityId = result.networkId;
-	
 	const auto bytes = Serializer::toBytes(result.data);
+	
 	auto packet = OutboundNetworkPacket(bytes);
-	packet.addHeader(header);
+	packet.addHeader(EntityHeader(EntityHeaderType::Create, result.networkId));
 	parent->getSession().sendToPeer(packet, peerId);
 	
 	outboundEntities[entity.getEntityId()] = std::move(result);
 }
 
-void EntityNetworkRemotePeer::updateEntity(OutboundEntity& remote, EntityRef entity)
+void EntityNetworkRemotePeer::updateEntity(Time t, OutboundEntity& remote, EntityRef entity)
 {
-	auto newData = parent->getFactory().serializeEntity(entity, parent->getSerializationOptions());
+	remote.timeSinceSend += t;
+	if (remote.timeSinceSend < parent->getMinSendInterval()) {
+		return;
+	}
 	
+	auto newData = parent->getFactory().serializeEntity(entity, parent->getSerializationOptions());
+	const auto deltaData = EntityDataDelta(remote.data, newData, parent->getEntityDeltaOptions());
+
+	if (deltaData.hasChange()) {
+		remote.data = std::move(newData);
+		remote.timeSinceSend = t;
+
+		const auto bytes = Serializer::toBytes(deltaData);
+		
+		auto packet = OutboundNetworkPacket(bytes);
+		packet.addHeader(EntityHeader(EntityHeaderType::Update, remote.networkId));
+		parent->getSession().sendToPeer(packet, peerId);
+	}
 }
 
 void EntityNetworkRemotePeer::destroyEntity(OutboundEntity& remote)
 {
-	// TODO: send to remote
+	auto packet = OutboundNetworkPacket(Bytes());
+	packet.addHeader(EntityHeader(EntityHeaderType::Destroy, remote.networkId));
+	parent->getSession().sendToPeer(packet, peerId);
+	allocatedOutboundIds.erase(remote.networkId);
 }
 
 uint16_t EntityNetworkRemotePeer::assignId()
 {
-	// TODO
-	return 0;
+	for (uint16_t i = 0; i < std::numeric_limits<uint16_t>::max() - 1; ++i) {
+		const uint16_t id = i + nextId;
+		if (!allocatedOutboundIds.contains(id)) {
+			allocatedOutboundIds.insert(id);
+			nextId = id + 1;
+			return id;
+		}
+	}
+	throw Exception("Unable to allocate network id for entity.", HalleyExceptions::Network);
 }

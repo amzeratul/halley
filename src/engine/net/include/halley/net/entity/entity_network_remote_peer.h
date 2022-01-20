@@ -34,11 +34,15 @@ namespace Halley {
     	struct EntityHeader { // Inefficiency: this occupies 4 bytes, but only needs 3
             NetworkEntityId entityId;
             EntityHeaderType type;
+
+            EntityHeader() = default;
+    		EntityHeader(EntityHeaderType type, NetworkEntityId entityId) : entityId(entityId), type(type) {}
     	};
         
         class OutboundEntity {
         public:
             bool alive = true;
+            Time timeSinceSend = 0;
             NetworkEntityId networkId = 0;
             EntityData data;
         };
@@ -51,13 +55,16 @@ namespace Halley {
 
         EntityNetworkSession* parent = nullptr;
         NetworkSession::PeerId peerId;
+    	bool alive = true;
     	
         HashMap<EntityId, OutboundEntity> outboundEntities;
         HashMap<NetworkEntityId, InboundEntity> inboundEntities;
-        bool alive = true;
+
+    	HashSet<NetworkEntityId> allocatedOutboundIds;
+        uint16_t nextId = 0;
 
         void createEntity(EntityRef entity);
-        void updateEntity(OutboundEntity& remote, EntityRef entity);
+        void updateEntity(Time t, OutboundEntity& remote, EntityRef entity);
         void destroyEntity(OutboundEntity& remote);
         uint16_t assignId();
     };
