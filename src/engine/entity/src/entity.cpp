@@ -1,7 +1,10 @@
 #include <halley/data_structures/memory_pool.h>
 #include "entity.h"
+
+
 #include "world.h"
 #include "components/transform_2d_component.h"
+#include "components/network_component.h"
 
 
 using namespace Halley;
@@ -284,6 +287,18 @@ void Entity::sortChildrenByInstanceUUIDs(const std::vector<UUID>& uuids)
 bool Entity::isEmpty() const
 {
 	return liveComponents == 0 && children.empty();
+}
+
+void Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
+{
+	auto* networkComponent = tryGetComponent<NetworkComponent>();
+	if (networkComponent) {
+		networkComponent->ownerId = peerId;
+	} else {
+		NetworkComponent component;
+		component.ownerId = peerId;
+		ref.addComponent(std::move(component));
+	}
 }
 
 void Entity::doDestroy(bool updateParenting)

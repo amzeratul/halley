@@ -19,10 +19,11 @@ EntityNetworkSession::~EntityNetworkSession()
 	session->removeListener(this);
 }
 
-void EntityNetworkSession::init(World& world, Resources& resources, std::set<String> ignoreComponents)
+void EntityNetworkSession::init(World& world, Resources& resources, std::set<String> ignoreComponents, IEntityNetworkSessionListener* listener)
 {
 	factory = std::make_shared<EntityFactory>(world, resources);
 	serializationOptions.type = EntitySerialization::Type::SaveData;
+	this->listener = listener;
 
 	deltaOptions.preserveOrder = false;
 	deltaOptions.shallow = false;
@@ -93,6 +94,13 @@ const EntityDataDelta::Options& EntityNetworkSession::getEntityDeltaOptions() co
 Time EntityNetworkSession::getMinSendInterval() const
 {
 	return 0.05;
+}
+
+void EntityNetworkSession::onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId)
+{
+	if (listener) {
+		listener->onRemoteEntityCreated(entity, peerId);
+	}
 }
 
 NetworkSession& EntityNetworkSession::getSession() const

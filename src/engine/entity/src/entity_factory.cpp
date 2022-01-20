@@ -513,24 +513,7 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 		updateEntity(entity, delta, static_cast<int>(EntitySerialization::Type::SaveData));
 	} else {
 		// Generate full EntityData from prefab first
-		EntityData entityData;
-		std::shared_ptr<const Prefab> prefab;
-		UUID prefabUUID;
-		
-		if (delta.getPrefab()) {
-			prefab = resources.get<Prefab>(delta.getPrefab().value());
-			const auto& prefabDataRoot = prefab->getEntityData();
-			prefabUUID = delta.getPrefabUUID().value_or(prefabDataRoot.getPrefabUUID());
-			const auto* prefabData = prefabDataRoot.tryGetPrefabUUID(prefabUUID);
-			if (!prefabData) {
-				throw Exception("Prefab data not found: " + delta.getPrefab().value() + " with UUID " + prefabUUID.toString(), 0);
-			}
-
-			entityData = EntityData::applyDelta(*prefabData, delta);
-			entityData.setPrefab("");
-		} else {
-			entityData.applyDelta(delta);
-		}
+		auto [entityData, prefab, prefabUUID] = prefabDeltaToEntityData(delta);
 		
 		entityData.setInstanceUUID(uuid);
 
@@ -547,10 +530,30 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 			}
 		}
 
-		if (delta.getPrefab()) {
+		if (prefab) {
 			entity.setPrefab(prefab, prefabUUID);
 		}
 	}
 
 	return std::make_pair(entity, parentUUID);
+}
+
+std::tuple<EntityData, std::shared_ptr<const Prefab>, UUID> EntityFactory::prefabDeltaToEntityData(const EntityDataDelta& delta)
+{
+	if (delta.getPrefab()) {
+		auto prefab = resources.get<Prefab>(delta.getPrefab().value());
+		const auto& prefabDataRoot = prefab->getEntityData();
+		auto prefabUUID = delta.getPrefabUUID().value_or(prefabDataRoot.getPrefabUUID());
+		const auto* prefabData = prefabDataRoot.tryGetPrefabUUID(prefabUUID);
+		if (!prefabData) {
+			throw Exception("Prefab data not found: " + delta.getPrefab().value() + " with UUID " + prefabUUID.toString(), 0);
+		}
+
+		auto entityData = EntityData::applyDelta(*prefabData, delta);
+		entityData.setPrefab("");
+
+		return { std::move(entityData), std::move(prefab), prefabUUID };
+	} else {
+		return { EntityData(delta), {}, {} };
+	}
 }

@@ -6,6 +6,7 @@
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 
+class NetworkComponent;
 using namespace Halley;
 
 EntityNetworkRemotePeer::EntityNetworkRemotePeer(EntityNetworkSession& parent, NetworkSession::PeerId peerId)
@@ -143,7 +144,14 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 		packet.addHeader(EntityNetworkHeader(EntityNetworkHeaderType::Update));
 		parent->getSession().sendToPeer(packet, peerId);
 
-		Logger::logDev("Sending update " + entity.getName() + ": " + toString(bytes.size()) + " bytes to " + toString(static_cast<int>(peerId)));
+		auto str = std::string(bytes.size(), '.');
+		for (size_t i = 0; i < bytes.size(); ++i) {
+			if (bytes[i] >= 0x20) {
+				str[i] = bytes[i];
+			}
+		}
+
+		Logger::logDev("Sending update " + entity.getName() + ": " + toString(bytes.size()) + " bytes to " + toString(static_cast<int>(peerId)) + ": " + String(str));
 	}
 }
 
@@ -160,15 +168,61 @@ void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote)
 
 void EntityNetworkRemotePeer::receiveCreateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data)
 {
-	// TODO
+	const auto iter = inboundEntities.find(id);
+	if (iter != inboundEntities.end()) {
+		Logger::logWarning("Entity with network id " + toString(static_cast<int>(id)) + " already exists from peer " + toString(static_cast<int>(peerId)));
+		return;
+	}
+
+	auto delta = Deserializer::fromBytes<EntityDataDelta>(data);
+	auto [entityData, prefab, prefabUUID] = parent->getFactory().prefabDeltaToEntityData(delta);
+
+	auto entity = parent->getFactory().createEntity(entityData);
+	if (prefab) {
+		entity.setPrefab(prefab, prefabUUID);
+	}
+
+	entity.setupNetwork(peerId);
+	
+	InboundEntity remote;
+	remote.data = std::move(entityData);
+	remote.worldId = entity.getEntityId();
+
+	inboundEntities[id] = std::move(remote);
+
+	parent->onRemoteEntityCreated(entity, peerId);
 }
 
 void EntityNetworkRemotePeer::receiveUpdateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data)
 {
-	// TODO
+	const auto iter = inboundEntities.find(id);
+	if (iter == inboundEntities.end()) {
+		Logger::logWarning("Entity with network id " + toString(static_cast<int>(id)) + " not found from peer " + toString(static_cast<int>(peerId)));
+		return;
+	}
+	auto& remote = iter->second;
+
+	auto entity = parent->getWorld().getEntity(remote.worldId);
+	if (!entity.isValid()) {
+		Logger::logWarning("Entity with network id " + toString(static_cast<int>(id)) + " not alive in the world from peer " + toString(static_cast<int>(peerId)));
+		return;
+	}
+	
+	auto delta = Deserializer::fromBytes<EntityDataDelta>(data);
+	parent->getFactory().updateEntity(entity, delta, static_cast<int>(EntitySerialization::Type::SaveData));
+	remote.data.applyDelta(delta);
 }
 
 void EntityNetworkRemotePeer::receiveDestroyEntity(EntityNetworkId id)
 {
-	// TODO
+	const auto iter = inboundEntities.find(id);
+	if (iter == inboundEntities.end()) {
+		Logger::logWarning("Entity with network id " + toString(static_cast<int>(id)) + " not found from peer " + toString(static_cast<int>(peerId)));
+		return;
+	}
+	auto& remote = iter->second;
+
+	parent->getWorld().destroyEntity(remote.worldId);
+
+	inboundEntities.erase(id);
 }

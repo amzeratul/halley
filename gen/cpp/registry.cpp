@@ -11,6 +11,7 @@ using namespace Halley;
 #include "components/audio_source_component.h"
 #include "components/script_component.h"
 #include "components/script_target_component.h"
+#include "components/network_component.h"
 
 // System factory functions
 
@@ -39,6 +40,7 @@ static ComponentFactoryMap makeComponentFactories() {
 	result["AudioSource"] = [] (const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return context.createComponent<AudioSourceComponent>(e, node); };
 	result["Script"] = [] (const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return context.createComponent<ScriptComponent>(e, node); };
 	result["ScriptTarget"] = [] (const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return context.createComponent<ScriptTargetComponent>(e, node); };
+	result["Network"] = [] (const EntityFactoryContext& context, EntityRef& e, const ConfigNode& node) -> CreateComponentFunctionResult { return context.createComponent<NetworkComponent>(e, node); };
 	return result;
 }
 
@@ -47,7 +49,7 @@ using ComponentReflectorList = std::vector<std::unique_ptr<ComponentReflector>>;
 
 static ComponentReflectorList makeComponentReflectors() {
 	ComponentReflectorList result;
-	result.reserve(10);
+	result.reserve(11);
 	result.push_back(std::make_unique<ComponentReflectorImpl<Transform2DComponent>>());
 	result.push_back(std::make_unique<ComponentReflectorImpl<SpriteComponent>>());
 	result.push_back(std::make_unique<ComponentReflectorImpl<TextLabelComponent>>());
@@ -58,6 +60,7 @@ static ComponentReflectorList makeComponentReflectors() {
 	result.push_back(std::make_unique<ComponentReflectorImpl<AudioSourceComponent>>());
 	result.push_back(std::make_unique<ComponentReflectorImpl<ScriptComponent>>());
 	result.push_back(std::make_unique<ComponentReflectorImpl<ScriptTargetComponent>>());
+	result.push_back(std::make_unique<ComponentReflectorImpl<NetworkComponent>>());
 	return result;
 }
 

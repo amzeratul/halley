@@ -208,6 +208,8 @@ namespace Halley {
 		void propagateChildrenChange();
 		void propagateChildWorldPartition(uint8_t newWorldPartition);
 
+		void setupNetwork(EntityRef& ref, uint8_t peerId);
+
 		void doDestroy(bool updateParenting);
 
 		bool hasBit(const World& world, int index) const;
@@ -620,6 +622,13 @@ namespace Halley {
 		{
 			return entity && entity->prefab ? entity->prefab->getAssetId() : std::optional<String>{};
 		}
+
+		void setupNetwork(uint8_t peerId)
+		{
+			Expects(entity);
+			entity->setupNetwork(*this, peerId);
+		}
+
 
 		bool isEmpty() const
 		{

@@ -1,0 +1,11 @@
+---
+
+component:
+  name: Network
+  members:
+  - ownerId: 
+      type: 'std::optional<uint8_t>'
+      canSave: false
+      canEdit: false
+
+...

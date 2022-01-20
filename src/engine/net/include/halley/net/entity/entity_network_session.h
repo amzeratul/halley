@@ -15,10 +15,16 @@ namespace Halley {
 
 	class EntityNetworkSession : NetworkSession::Listener {
     public:
+		class IEntityNetworkSessionListener {
+		public:
+			virtual ~IEntityNetworkSessionListener() = default;
+			virtual void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) {} 
+		};
+		
 		explicit EntityNetworkSession(std::shared_ptr<NetworkSession> session);
 		~EntityNetworkSession();
 
-		void init(World& world, Resources& resources, std::set<String> ignoreComponents);
+		void init(World& world, Resources& resources, std::set<String> ignoreComponents, IEntityNetworkSessionListener* listener);
 
 		void sendLocalEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds); // Takes pairs of entity id and owner peer id
 		void receiveRemoteEntities();
@@ -33,6 +39,8 @@ namespace Halley {
 
 		Time getMinSendInterval() const;
 
+		void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId);
+
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
 		void onPeerConnected(NetworkSession::PeerId peerId) override;
@@ -43,6 +51,7 @@ namespace Halley {
 		World* world = nullptr;
 		Resources* resources = nullptr;
 		std::shared_ptr<EntityFactory> factory;
+		IEntityNetworkSessionListener* listener = nullptr;
 		
 		EntityFactory::SerializationOptions serializationOptions;
 		EntityDataDelta::Options deltaOptions;
