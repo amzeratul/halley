@@ -113,10 +113,13 @@ void EntityNetworkRemotePeer::sendCreateEntity(EntityRef entity)
 	parent->getSession().sendToPeer(packet, peerId);
 	
 	outboundEntities[entity.getEntityId()] = std::move(result);
+
+	Logger::logDev("Sending create " + entity.getName() + ": " + toString(bytes.size()) + " bytes to " + toString(static_cast<int>(peerId)));
 }
 
 void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, EntityRef entity)
 {
+	remote.alive = true; // Important: mark it back alive
 	remote.timeSinceSend += t;
 	if (remote.timeSinceSend < parent->getMinSendInterval()) {
 		return;
@@ -135,6 +138,8 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 		packet.addHeader(EntityNetworkEntityHeader(remote.networkId));
 		packet.addHeader(EntityNetworkHeader(EntityNetworkHeaderType::Update));
 		parent->getSession().sendToPeer(packet, peerId);
+
+		Logger::logDev("Sending update " + entity.getName() + ": " + toString(bytes.size()) + " bytes to " + toString(static_cast<int>(peerId)));
 	}
 }
 
@@ -145,6 +150,8 @@ void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote)
 	packet.addHeader(EntityNetworkHeader(EntityNetworkHeaderType::Destroy));
 	parent->getSession().sendToPeer(packet, peerId);
 	allocatedOutboundIds.erase(remote.networkId);
+
+	Logger::logDev("Sending destroy entity to " + toString(static_cast<int>(peerId)));
 }
 
 void EntityNetworkRemotePeer::receiveCreateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data)

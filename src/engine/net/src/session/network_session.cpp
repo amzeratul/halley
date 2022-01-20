@@ -38,7 +38,7 @@ void NetworkSession::join(const String& address)
 {
 	Expects(type == NetworkSessionType::Undefined);
 
-	peers.emplace_back(Peer{ 0, service.connect(address) });
+	peers.emplace_back(Peer{ 0, true, service.connect(address) });
 	
 	type = NetworkSessionType::Client;
 }
@@ -94,7 +94,7 @@ void NetworkSession::acceptConnection(std::shared_ptr<IConnection> incoming)
 		throw Exception("Unable to allocate peer id for incoming connection.", HalleyExceptions::Network);
 	}
 	
-	auto& peer = peers.emplace_back(Peer{ id.value(), std::move(incoming) });
+	auto& peer = peers.emplace_back(Peer{ id.value(), true, std::move(incoming) });
 
 	ControlMsgSetPeerId msg;
 	msg.peerId = peer.peerId;
@@ -520,7 +520,10 @@ void NetworkSession::disconnectPeer(Peer& peer)
 	if (peer.connection->getStatus() != ConnectionStatus::Closed) {
 		peer.connection->close();
 	}
-	for (auto* listener: listeners) {
-		listener->onPeerDisconnected(peer.peerId);
+	if (peer.alive) {
+		for (auto* listener : listeners) {
+			listener->onPeerDisconnected(peer.peerId);
+		}
+		peer.alive = false;
 	}
 }

@@ -61,6 +61,7 @@ namespace Halley {
 	private:
 		struct Peer {
 			PeerId peerId = -1;
+			bool alive = true;
 			std::shared_ptr<IConnection> connection;
 		};
 		

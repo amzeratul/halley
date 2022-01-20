@@ -57,6 +57,8 @@ void EntityNetworkSession::receiveRemoteEntities()
 
 void EntityNetworkSession::onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet)
 {
+	Logger::logDev("Received entity update from " + toString(static_cast<int>(fromPeerId)) + " of type " + toString(static_cast<int>(type)));
+	
 	for (auto& peer: peers) {
 		if (peer.getPeerId() == fromPeerId) {
 			peer.receiveEntityPacket(fromPeerId, type, std::move(packet));
@@ -101,6 +103,7 @@ NetworkSession& EntityNetworkSession::getSession() const
 
 void EntityNetworkSession::onStartSession(NetworkSession::PeerId myPeerId)
 {
+	Logger::logDev("Starting session, I'm peer id " + toString(static_cast<int>(myPeerId)));
 }
 
 void EntityNetworkSession::onPeerConnected(NetworkSession::PeerId peerId)
