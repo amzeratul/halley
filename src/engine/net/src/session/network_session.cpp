@@ -31,9 +31,7 @@ void NetworkSession::host(uint16_t maxClients)
 	sessionSharedData = makeSessionSharedData();
 	service.startListening([=](NetworkService::Acceptor& a) { onConnection(a); });
 
-	onStartSession();
 	setMyPeerId(0);
-	onHosting();
 }
 
 void NetworkSession::join(const String& address)
@@ -43,8 +41,6 @@ void NetworkSession::join(const String& address)
 	peers.emplace_back(Peer{ 0, service.connect(address) });
 	
 	type = NetworkSessionType::Client;
-
-	onStartSession();
 }
 
 void NetworkSession::close()
@@ -111,7 +107,9 @@ void NetworkSession::acceptConnection(std::shared_ptr<IConnection> incoming)
 	for (auto& i: sharedData) {
 		conn.send(IConnection::TransmissionType::Reliable, makeUpdateSharedDataPacket(i.first));
 	}
-	onConnected(peer.peerId);
+	for (auto* listener : listeners) {
+		listener->onPeerConnected(peer.peerId);
+	}
 }
 
 void NetworkSession::update()
@@ -210,28 +208,6 @@ std::unique_ptr<SharedData> NetworkSession::makePeerSharedData()
 	return std::make_unique<SharedData>();
 }
 
-void NetworkSession::onStartSession()
-{
-}
-
-void NetworkSession::onPeerIdAssigned()
-{
-}
-
-void NetworkSession::onHosting()
-{
-}
-
-void NetworkSession::onConnected(PeerId peerId)
-{
-	Logger::logDev("Peer connected to network: " + toString(static_cast<int>(peerId)));
-}
-
-void NetworkSession::onDisconnected(PeerId peerId)
-{
-	Logger::logDev("Peer disconnected from network: " + toString(static_cast<int>(peerId)));
-}
-
 ConnectionStatus NetworkSession::getStatus() const
 {
 	if (type == NetworkSessionType::Undefined) {
@@ -260,7 +236,7 @@ OutboundNetworkPacket NetworkSession::makeOutbound(gsl::span<const gsl::byte> da
 	return packet;
 }
 
-void NetworkSession::sendToAll(OutboundNetworkPacket packet, int except)
+void NetworkSession::doSendToAll(OutboundNetworkPacket packet, std::optional<PeerId> except)
 {
 	for (size_t i = 0; i < peers.size(); ++i) {
 		if (peers[i].peerId != except) {
@@ -269,15 +245,34 @@ void NetworkSession::sendToAll(OutboundNetworkPacket packet, int except)
 	}
 }
 
-void NetworkSession::send(OutboundNetworkPacket packet)
+void NetworkSession::sendToPeers(OutboundNetworkPacket packet, std::optional<PeerId> except)
 {
 	NetworkSessionMessageHeader header;
-	header.type = NetworkSessionMessageType::ToPeers;
+	header.type = NetworkSessionMessageType::ToAllPeers;
 	header.srcPeerId = myPeerId.value();
 
-	auto out = makeOutbound(packet.getBytes(), header);
-	for (auto& peer: peers) {
-		peer.connection->send(IConnection::TransmissionType::Reliable, OutboundNetworkPacket(out));
+	doSendToAll(makeOutbound(packet.getBytes(), header), except);
+}
+
+void NetworkSession::sendToPeer(OutboundNetworkPacket packet, PeerId peerId)
+{
+	NetworkSessionMessageHeader header;
+	header.type = NetworkSessionMessageType::ToPeer;
+	header.srcPeerId = myPeerId.value();
+
+	bool sent = false;
+	for (size_t i = 0; i < peers.size(); ++i) {
+		if (peers[i].peerId == peerId) {
+			peers[i].connection->send(IConnection::TransmissionType::Reliable, makeOutbound(packet.getBytes(), header));
+			sent = true;
+			break;
+		}
+	}
+
+	// TODO: support redirecting via host
+	
+	if (!sent) {
+		Logger::logError("Unable to send message to peer " + toString(static_cast<int>(peerId)) + ": id not found.");
 	}
 }
 
@@ -289,6 +284,18 @@ bool NetworkSession::receive(InboundNetworkPacket& packet)
 		return true;
 	}
 	return false;
+}
+
+void NetworkSession::addListener(Listener* listener)
+{
+	if (!std_ex::contains(listeners, listener)) {
+		listeners.push_back(listener);
+	}
+}
+
+void NetworkSession::removeListener(Listener* listener)
+{
+	std_ex::erase(listeners, listener);
 }
 
 void NetworkSession::processReceive()
@@ -304,18 +311,18 @@ void NetworkSession::processReceive()
 
 			if (type == NetworkSessionType::Host) {
 				// Broadcast to other connections
-				if (header.type == NetworkSessionMessageType::ToPeers) {
+				if (header.type == NetworkSessionMessageType::ToAllPeers) {
 					// Verify client id
 					if (header.srcPeerId != peerId) {
 						closeConnection(peerId, "Player sent an invalid srcPlayer");
 					} else {
-						sendToAll(makeOutbound(packet.getBytes(), header), int(i));
+						doSendToAll(makeOutbound(packet.getBytes(), header), int(i));
 						inbox.emplace_back(std::move(packet));
 					}
 				} else if (header.type == NetworkSessionMessageType::Control) {
 					// Receive control
 					receiveControlMessage(peerId, packet);
-				} else if (header.type == NetworkSessionMessageType::ToMaster) {
+				} else if (header.type == NetworkSessionMessageType::ToPeer) {
 					// For me only
 					// Consume!
 					inbox.emplace_back(std::move(packet));
@@ -325,7 +332,7 @@ void NetworkSession::processReceive()
 			}
 
 			else if (type == NetworkSessionType::Client) {
-				if (header.type == NetworkSessionMessageType::ToPeers) {
+				if (header.type == NetworkSessionMessageType::ToAllPeers) {
 					// Consume!
 					inbox.emplace_back(std::move(packet));
 				} else if (header.type == NetworkSessionMessageType::Control) {
@@ -356,7 +363,7 @@ void NetworkSession::retransmitControlMessage(PeerId peerId, gsl::span<const gsl
 	NetworkSessionMessageHeader header;
 	header.type = NetworkSessionMessageType::Control;
 	header.srcPeerId = peerId;
-	sendToAll(makeOutbound(bytes, header), peerId);
+	doSendToAll(makeOutbound(bytes, header), peerId);
 }
 
 void NetworkSession::receiveControlMessage(PeerId peerId, InboundNetworkPacket& packet)
@@ -434,14 +441,16 @@ void NetworkSession::setMyPeerId(PeerId id)
 	myPeerId = id;
 	sharedData[id] = makePeerSharedData();
 
-	onPeerIdAssigned();
+	for (auto* listener: listeners) {
+		listener->onStartSession(id);
+	}
 }
 
 void NetworkSession::checkForOutboundStateChanges(std::optional<PeerId> ownerId)
 {
 	SharedData& data = !ownerId ? *sessionSharedData : *sharedData.at(ownerId.value());
 	if (data.isModified()) {
-		sendToAll(makeUpdateSharedDataPacket(ownerId));
+		doSendToAll(makeUpdateSharedDataPacket(ownerId), {});
 		data.markUnmodified();
 	}
 }
@@ -511,5 +520,7 @@ void NetworkSession::disconnectPeer(Peer& peer)
 	if (peer.connection->getStatus() != ConnectionStatus::Closed) {
 		peer.connection->close();
 	}
-	onDisconnected(peer.peerId);
+	for (auto* listener: listeners) {
+		listener->onPeerDisconnected(peer.peerId);
+	}
 }

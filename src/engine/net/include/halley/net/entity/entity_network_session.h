@@ -9,29 +9,41 @@
 #include "../session/network_session.h"
 
 namespace Halley {
+	class EntityFactory;
 	class Resources;
 	struct EntityId;
 	class World;
 	class NetworkSession;
 
-	class EntityNetworkSession {
+	class EntityNetworkSession : NetworkSession::Listener {
     public:
 		explicit EntityNetworkSession(std::shared_ptr<NetworkSession> session);
+		~EntityNetworkSession();
 
-		void sendLocalEntities(Time t, World& world, gsl::span<const std::pair<EntityId, uint8_t>> entityIds); // Takes pairs of entity id and owner peer id
-		void receiveRemoteEntities(World& world, Resources& resources);
+		void init(World& world, Resources& resources);
+
+		void sendLocalEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds); // Takes pairs of entity id and owner peer id
+		void receiveRemoteEntities();
+
+	protected:
+		void onStartSession(NetworkSession::PeerId myPeerId) override;
+		void onPeerConnected(NetworkSession::PeerId peerId) override;
+		void onPeerDisconnected(NetworkSession::PeerId peerId) override;
 
 	private:
+		using NetworkEntityId = uint16_t;
+		
 		class OutboundEntity {
 		public:
 			bool alive = true;
-			uint16_t networkId = 0;
-			Bytes data;
+			NetworkEntityId networkId = 0;
+			EntityData data;
 		};
 
 		class InboundEntity {
+		public:
 			EntityId worldId;
-			Bytes data;
+			EntityData data;
 		};
 
 		class RemotePeer {
@@ -39,20 +51,29 @@ namespace Halley {
 			RemotePeer(NetworkSession::PeerId peerId);
 
 			NetworkSession::PeerId getPeerId() const;
-			void updateEntities(Time t, World& world, gsl::span<const std::pair<EntityId, uint8_t>> entityIds);
+			void sendEntities(Time t, EntityFactory& entityFactory, gsl::span<const std::pair<EntityId, uint8_t>> entityIds);
+			void receiveEntities(EntityFactory& entityFactory);
+
+			void destroy(World& world);
+			bool isAlive() const;
 
 		private:
 			NetworkSession::PeerId peerId;
 			HashMap<EntityId, OutboundEntity> outboundEntities;
-			HashMap<EntityId, InboundEntity> inboundEntities;
+			HashMap<NetworkEntityId, InboundEntity> inboundEntities;
+			bool alive = true;
 
-			void createEntity(EntityRef entity);
-			void destroyEntity(OutboundEntity& remote);
-			void updateEntity(OutboundEntity& remote, EntityRef entity);
+			void createEntity(EntityFactory& entityFactory, EntityRef entity);
+			void destroyEntity(EntityFactory& entityFactory, OutboundEntity& remote);
+			void updateEntity(EntityFactory& entityFactory, OutboundEntity& remote, EntityRef entity);
 			uint16_t assignId();
 		};
 
+		World* world = nullptr;
+		Resources* resources = nullptr;
+		std::shared_ptr<EntityFactory> factory;
+
 		std::shared_ptr<NetworkSession> session;
 		std::vector<RemotePeer> peers;
-    };
+	};
 }

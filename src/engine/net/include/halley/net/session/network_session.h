@@ -15,27 +15,38 @@ namespace Halley {
 	public:
 		using PeerId = uint8_t;
 
+		class Listener {
+		public:
+			virtual ~Listener() = default;
+			virtual void onStartSession(PeerId myPeerId) {}
+			virtual void onPeerConnected(PeerId peerId) {}
+			virtual void onPeerDisconnected(PeerId peerId) {}
+		};
+
 		NetworkSession(NetworkService& service);
 		virtual ~NetworkSession();
 
+		void update();
+
 		void host(uint16_t maxClients);
 		void join(const String& address);
+		void close();
 
 		void setMaxClients(uint16_t clients);
 		uint16_t getMaxClients() const;
 
 		std::optional<PeerId> getMyPeerId() const;
-
 		uint16_t getClientCount() const;
-		void acceptConnection(std::shared_ptr<IConnection> move);
-		void update();
 
+		ConnectionStatus getStatus() const;
 		NetworkSessionType getType() const;
 
-		void close(); // Called from destructor, hence final
-		ConnectionStatus getStatus() const;
-		void send(OutboundNetworkPacket packet);
+		void sendToPeers(OutboundNetworkPacket packet, std::optional<PeerId> except = {});
+		void sendToPeer(OutboundNetworkPacket packet, PeerId peerId);
 		bool receive(InboundNetworkPacket& packet);
+
+		void addListener(Listener* listener);
+		void removeListener(Listener* listener);
 
 	protected:
 		SharedData& doGetMySharedData();
@@ -47,12 +58,6 @@ namespace Halley {
 		virtual std::unique_ptr<SharedData> makeSessionSharedData();
 		virtual std::unique_ptr<SharedData> makePeerSharedData();
 
-		virtual void onStartSession();
-		virtual void onPeerIdAssigned();
-		virtual void onHosting();
-		virtual void onConnected(PeerId peerId);
-		virtual void onDisconnected(PeerId peerId);
-		
 	private:
 		struct Peer {
 			PeerId peerId = -1;
@@ -71,8 +76,11 @@ namespace Halley {
 		std::vector<Peer> peers;
 		std::vector<InboundNetworkPacket> inbox;
 
+		std::vector<Listener*> listeners;
+
 		OutboundNetworkPacket makeOutbound(gsl::span<const gsl::byte> data, NetworkSessionMessageHeader header);
-		void sendToAll(OutboundNetworkPacket packet, int except = -1);
+		void doSendToAll(OutboundNetworkPacket packet, std::optional<PeerId> except);
+		
 		void closeConnection(PeerId peerId, const String& reason);
 		void processReceive();
 
@@ -90,6 +98,7 @@ namespace Halley {
 		OutboundNetworkPacket doMakeControlPacket(NetworkSessionControlMessageType msgType, OutboundNetworkPacket packet);
 
 		void onConnection(NetworkService::Acceptor& acceptor);
+		void acceptConnection(std::shared_ptr<IConnection> move);
 		std::optional<PeerId> allocatePeerId() const;
 
 		void disconnectPeer(Peer& peer);

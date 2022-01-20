@@ -3,7 +3,7 @@
 #include "halley/bytes/byte_serializer.h"
 
 namespace Halley {
-	enum class NetworkSessionType {
+	enum class NetworkSessionType : uint8_t {
 		Undefined,
 		Host,
 		Client
@@ -20,10 +20,10 @@ namespace Halley {
 		}
 	};
 
-	enum class NetworkSessionMessageType : char {
+	enum class NetworkSessionMessageType : uint8_t {
 		Control,
-		ToPeers,
-		ToMaster
+		ToAllPeers,
+		ToPeer
 	};
 
 	template <>
@@ -31,8 +31,8 @@ namespace Halley {
 		constexpr std::array<const char*, 3> operator()() const {
 			return{{
 				"control",
-				"toPeers",
-				"toMaster"
+				"toAllPeers",
+				"toPeer"
 			}};
 		}
 	};

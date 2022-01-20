@@ -242,6 +242,12 @@ namespace std_ex {
 		}		
 	}
 
+	template <typename C, typename V>
+	void erase(C& container, const V& value)
+	{
+		container.erase(std::remove(container.begin(), container.end(), value), container.end());
+	}
+
 	template <typename C, typename F>
 	void erase_if(C& container, F predicate)
 	{
