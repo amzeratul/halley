@@ -20,9 +20,7 @@ NetworkSession::PeerId EntityNetworkRemotePeer::getPeerId() const
 
 void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds)
 {
-	if (!isAlive()) {
-		return;
-	}
+	Expects(isAlive());
 	
 	// Mark all as not alive
 	for (auto& e: outboundEntities) {
@@ -35,10 +33,9 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<Ent
 			continue;
 		}
 
-		auto entity = parent->getWorld().getEntity(entityId);
+		const auto entity = parent->getWorld().getEntity(entityId);
 
-		const auto iter = outboundEntities.find(entityId);
-		if (iter == outboundEntities.end()) {
+		if (const auto iter = outboundEntities.find(entityId); iter == outboundEntities.end()) {
 			createEntity(entity);
 		} else {
 			updateEntity(t, iter->second, entity);
@@ -54,13 +51,21 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<Ent
 	std_ex::erase_if_value(outboundEntities, [](const OutboundEntity& e) { return !e.alive; });
 }
 
-void EntityNetworkRemotePeer::receiveEntities()
+void EntityNetworkRemotePeer::receiveEntityPacket(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet)
 {
-	if (!isAlive()) {
-		return;
+	Expects(isAlive());
+
+	EntityNetworkEntityHeader header;
+	packet.extractHeader(header);
+	const auto networkEntityId = header.entityId;
+
+	if (type == EntityNetworkHeaderType::Create) {
+		
+	} else if (type == EntityNetworkHeaderType::Update) {
+		
+	} else if (type == EntityNetworkHeaderType::Destroy) {
+		
 	}
-	
-	// TODO
 }
 
 void EntityNetworkRemotePeer::destroy(World& world)
@@ -90,7 +95,8 @@ void EntityNetworkRemotePeer::createEntity(EntityRef entity)
 	const auto bytes = Serializer::toBytes(result.data);
 	
 	auto packet = OutboundNetworkPacket(bytes);
-	packet.addHeader(EntityHeader(EntityHeaderType::Create, result.networkId));
+	packet.addHeader(EntityNetworkEntityHeader(result.networkId));
+	packet.addHeader(EntityNetworkHeader(EntityNetworkHeaderType::Create));
 	parent->getSession().sendToPeer(packet, peerId);
 	
 	outboundEntities[entity.getEntityId()] = std::move(result);
@@ -113,7 +119,8 @@ void EntityNetworkRemotePeer::updateEntity(Time t, OutboundEntity& remote, Entit
 		const auto bytes = Serializer::toBytes(deltaData);
 		
 		auto packet = OutboundNetworkPacket(bytes);
-		packet.addHeader(EntityHeader(EntityHeaderType::Update, remote.networkId));
+		packet.addHeader(EntityNetworkEntityHeader(remote.networkId));
+		packet.addHeader(EntityNetworkHeader(EntityNetworkHeaderType::Update));
 		parent->getSession().sendToPeer(packet, peerId);
 	}
 }
@@ -121,7 +128,8 @@ void EntityNetworkRemotePeer::updateEntity(Time t, OutboundEntity& remote, Entit
 void EntityNetworkRemotePeer::destroyEntity(OutboundEntity& remote)
 {
 	auto packet = OutboundNetworkPacket(Bytes());
-	packet.addHeader(EntityHeader(EntityHeaderType::Destroy, remote.networkId));
+	packet.addHeader(EntityNetworkEntityHeader(remote.networkId));
+	packet.addHeader(EntityNetworkHeader(EntityNetworkHeaderType::Destroy));
 	parent->getSession().sendToPeer(packet, peerId);
 	allocatedOutboundIds.erase(remote.networkId);
 }

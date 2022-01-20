@@ -276,14 +276,14 @@ void NetworkSession::sendToPeer(OutboundNetworkPacket packet, PeerId peerId)
 	}
 }
 
-bool NetworkSession::receive(InboundNetworkPacket& packet)
+std::optional<std::pair<NetworkSession::PeerId, InboundNetworkPacket>> NetworkSession::receive()
 {
 	if (!inbox.empty()) {
-		packet = InboundNetworkPacket(std::move(inbox[0]));
+		auto result = std::move(inbox[0]);
 		inbox.erase(inbox.begin());
-		return true;
+		return result;
 	}
-	return false;
+	return {};
 }
 
 void NetworkSession::addListener(Listener* listener)
@@ -317,7 +317,7 @@ void NetworkSession::processReceive()
 						closeConnection(peerId, "Player sent an invalid srcPlayer");
 					} else {
 						doSendToAll(makeOutbound(packet.getBytes(), header), int(i));
-						inbox.emplace_back(std::move(packet));
+						inbox.emplace_back(header.srcPeerId, std::move(packet));
 					}
 				} else if (header.type == NetworkSessionMessageType::Control) {
 					// Receive control
@@ -325,7 +325,7 @@ void NetworkSession::processReceive()
 				} else if (header.type == NetworkSessionMessageType::ToPeer) {
 					// For me only
 					// Consume!
-					inbox.emplace_back(std::move(packet));
+					inbox.emplace_back(header.srcPeerId, std::move(packet));
 				} else {
 					closeConnection(peerId, "Unknown session message type: " + toString(type));
 				}
@@ -334,7 +334,7 @@ void NetworkSession::processReceive()
 			else if (type == NetworkSessionType::Client) {
 				if (header.type == NetworkSessionMessageType::ToAllPeers) {
 					// Consume!
-					inbox.emplace_back(std::move(packet));
+					inbox.emplace_back(header.srcPeerId, std::move(packet));
 				} else if (header.type == NetworkSessionMessageType::Control) {
 					receiveControlMessage(peerId, packet);
 				} else {

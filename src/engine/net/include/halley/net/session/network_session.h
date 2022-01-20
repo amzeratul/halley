@@ -43,7 +43,7 @@ namespace Halley {
 
 		void sendToPeers(OutboundNetworkPacket packet, std::optional<PeerId> except = {});
 		void sendToPeer(OutboundNetworkPacket packet, PeerId peerId);
-		bool receive(InboundNetworkPacket& packet);
+		std::optional<std::pair<PeerId, InboundNetworkPacket>> receive();
 
 		void addListener(Listener* listener);
 		void removeListener(Listener* listener);
@@ -74,7 +74,7 @@ namespace Halley {
 		std::map<int, std::unique_ptr<SharedData>> sharedData;
 
 		std::vector<Peer> peers;
-		std::vector<InboundNetworkPacket> inbox;
+		std::vector<std::pair<PeerId, InboundNetworkPacket>> inbox;
 
 		std::vector<Listener*> listeners;
 

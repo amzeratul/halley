@@ -48,5 +48,7 @@ namespace Halley {
 
 		std::shared_ptr<NetworkSession> session;
 		std::vector<EntityNetworkRemotePeer> peers;
+
+		void onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet);
 	};
 }

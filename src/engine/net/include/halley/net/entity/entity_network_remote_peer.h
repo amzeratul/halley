@@ -1,5 +1,6 @@
 #pragma once
 
+#include "entity_network_header.h"
 #include "halley/data_structures/hash_map.h"
 #include "halley/entity/entity.h"
 #include "../session/network_session.h"
@@ -17,33 +18,17 @@ namespace Halley {
 
         NetworkSession::PeerId getPeerId() const;
         void sendEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds);
-        void receiveEntities();
+        void receiveEntityPacket(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet);
 
         void destroy(World& world);
         bool isAlive() const;
 
     private:
-        using NetworkEntityId = uint16_t;
-
-        enum class EntityHeaderType : uint8_t {
-	        Create,
-        	Update,
-        	Destroy
-        };
-    	
-    	struct EntityHeader { // Inefficiency: this occupies 4 bytes, but only needs 3
-            NetworkEntityId entityId;
-            EntityHeaderType type;
-
-            EntityHeader() = default;
-    		EntityHeader(EntityHeaderType type, NetworkEntityId entityId) : entityId(entityId), type(type) {}
-    	};
-        
         class OutboundEntity {
         public:
             bool alive = true;
             Time timeSinceSend = 0;
-            NetworkEntityId networkId = 0;
+            EntityNetworkId networkId = 0;
             EntityData data;
         };
 
@@ -58,9 +43,9 @@ namespace Halley {
     	bool alive = true;
     	
         HashMap<EntityId, OutboundEntity> outboundEntities;
-        HashMap<NetworkEntityId, InboundEntity> inboundEntities;
+        HashMap<EntityNetworkId, InboundEntity> inboundEntities;
 
-    	HashSet<NetworkEntityId> allocatedOutboundIds;
+    	HashSet<EntityNetworkId> allocatedOutboundIds;
         uint16_t nextId = 0;
 
         void createEntity(EntityRef entity);

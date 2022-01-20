@@ -38,8 +38,30 @@ void EntityNetworkSession::sendLocalEntities(Time t, gsl::span<const std::pair<E
 
 void EntityNetworkSession::receiveRemoteEntities()
 {
+	while (auto result = session->receive()) {
+		const auto fromPeerId = result->first;
+		auto& packet = result->second;
+		
+		EntityNetworkHeader header;
+		packet.extractHeader(header);
+
+		switch (header.type) {
+		case EntityNetworkHeaderType::Create:
+		case EntityNetworkHeaderType::Destroy:
+		case EntityNetworkHeaderType::Update:
+			onReceiveEntityUpdate(fromPeerId, header.type, std::move(packet));
+			break;
+		}
+	}
+}
+
+void EntityNetworkSession::onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet)
+{
 	for (auto& peer: peers) {
-		peer.receiveEntities();
+		if (peer.getPeerId() == fromPeerId) {
+			peer.receiveEntityPacket(fromPeerId, type, std::move(packet));
+			return;
+		}
 	}
 }
 
