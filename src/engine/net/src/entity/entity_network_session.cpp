@@ -101,6 +101,11 @@ NetworkSession& EntityNetworkSession::getSession() const
 	return *session;
 }
 
+bool EntityNetworkSession::hasWorld() const
+{
+	return !!factory;
+}
+
 void EntityNetworkSession::onStartSession(NetworkSession::PeerId myPeerId)
 {
 	Logger::logDev("Starting session, I'm peer id " + toString(static_cast<int>(myPeerId)));
@@ -108,22 +113,20 @@ void EntityNetworkSession::onStartSession(NetworkSession::PeerId myPeerId)
 
 void EntityNetworkSession::onPeerConnected(NetworkSession::PeerId peerId)
 {
-	Expects(factory);
-	
 	peers.push_back(EntityNetworkRemotePeer(*this, peerId));
+
 	Logger::logDev("Peer " + toString(static_cast<int>(peerId)) + " connected to EntityNetworkSession.");
 }
 
 void EntityNetworkSession::onPeerDisconnected(NetworkSession::PeerId peerId)
 {
-	Expects(factory);
-
-	Logger::logDev("Peer " + toString(static_cast<int>(peerId)) + " disconnected from EntityNetworkSession.");
 	for (auto& peer: peers) {
 		if (peer.getPeerId() == peerId) {
-			peer.destroy(factory->getWorld());
+			peer.destroy();
 		}
 	}
 	std_ex::erase_if(peers, [](const EntityNetworkRemotePeer& p) { return !p.isAlive(); });
+
+	Logger::logDev("Peer " + toString(static_cast<int>(peerId)) + " disconnected from EntityNetworkSession.");
 }
 

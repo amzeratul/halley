@@ -38,9 +38,11 @@ void NetworkSession::join(const String& address)
 {
 	Expects(type == NetworkSessionType::Undefined);
 
-	peers.emplace_back(Peer{ 0, true, service.connect(address) });
-	
 	type = NetworkSessionType::Client;
+	peers.emplace_back(Peer{ 0, true, service.connect(address) });
+	for (auto* listener : listeners) {
+		listener->onPeerConnected(0);
+	}
 }
 
 void NetworkSession::close()
@@ -332,7 +334,7 @@ void NetworkSession::processReceive()
 			}
 
 			else if (type == NetworkSessionType::Client) {
-				if (header.type == NetworkSessionMessageType::ToAllPeers) {
+				if (header.type == NetworkSessionMessageType::ToAllPeers || header.type == NetworkSessionMessageType::ToPeer) {
 					// Consume!
 					inbox.emplace_back(header.srcPeerId, std::move(packet));
 				} else if (header.type == NetworkSessionMessageType::Control) {

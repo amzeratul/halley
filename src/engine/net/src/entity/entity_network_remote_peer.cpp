@@ -68,12 +68,16 @@ void EntityNetworkRemotePeer::receiveEntityPacket(NetworkSession::PeerId fromPee
 	}
 }
 
-void EntityNetworkRemotePeer::destroy(World& world)
+void EntityNetworkRemotePeer::destroy()
 {
 	if (alive) {
-		for (const auto& [k, v]: inboundEntities) {
-			world.destroyEntity(v.worldId);
+		if (parent->hasWorld()) {
+			auto& world = parent->getWorld();
+			for (const auto& [k, v] : inboundEntities) {
+				world.destroyEntity(v.worldId);
+			}
 		}
+		
 		inboundEntities.clear();
 		alive = false;
 	}
@@ -130,7 +134,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 
 	if (deltaData.hasChange()) {
 		remote.data = std::move(newData);
-		remote.timeSinceSend = t;
+		remote.timeSinceSend = 0;
 
 		const auto bytes = Serializer::toBytes(deltaData);
 		
