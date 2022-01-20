@@ -48,9 +48,13 @@ namespace Halley {
     	HashSet<EntityNetworkId> allocatedOutboundIds;
         uint16_t nextId = 0;
 
-        void createEntity(EntityRef entity);
-        void updateEntity(Time t, OutboundEntity& remote, EntityRef entity);
-        void destroyEntity(OutboundEntity& remote);
         uint16_t assignId();
+        void sendCreateEntity(EntityRef entity);
+        void sendUpdateEntity(Time t, OutboundEntity& remote, EntityRef entity);
+        void sendDestroyEntity(OutboundEntity& remote);
+
+        void receiveCreateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data);
+        void receiveUpdateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data);
+        void receiveDestroyEntity(EntityNetworkId id);
     };
 }
