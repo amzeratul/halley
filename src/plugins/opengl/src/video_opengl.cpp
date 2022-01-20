@@ -140,6 +140,7 @@ void VideoOpenGL::initGLBindings()
 	}
 	glCheckError();
 #endif
+    GLUtils::resetDefaultGLState();
 }
 
 void VideoOpenGL::startLoaderThread()

@@ -53,7 +53,9 @@ namespace Halley {
 
 		void clear(Colour col);
 		static void doGlCheckError(const char* file = "", long line = 0);
-		
+
+        static void resetDefaultGLState();
+
 	private:
 		GLInternals& state;
 	};

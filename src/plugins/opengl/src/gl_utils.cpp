@@ -97,17 +97,10 @@ namespace Halley {
 			}
 			numUnits = 0;
 			curTexUnit = 0;
-
 			curBlend = BlendType();
-			glDisable(GL_BLEND);
-
 			viewport = {0, 0, 0, 0};
-
 			clearCol = {0, 0, 0, 0};
-			glClearColor(clearCol.r, clearCol.g, clearCol.b, clearCol.a);
-
 			scissoring = false;
-			glDisable(GL_SCISSOR_TEST);
 		}
 
 		int curTexUnit;
@@ -293,4 +286,11 @@ void GLUtils::clear(Colour col)
 		state.clearCol = col;
 	}
 	glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void GLUtils::resetDefaultGLState()
+{
+    glDisable(GL_BLEND);
+    glClearColor(0, 0, 0, 0);
+    glDisable(GL_SCISSOR_TEST);
 }
