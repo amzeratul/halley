@@ -119,7 +119,7 @@ void EntityNetworkRemotePeer::sendCreateEntity(EntityRef entity)
 	
 	outboundEntities[entity.getEntityId()] = std::move(result);
 
-	Logger::logDev("Sending create " + entity.getName() + ": " + toString(bytes.size()) + " bytes to " + toString(static_cast<int>(peerId)));
+	//Logger::logDev("Sending create " + entity.getName() + ": " + toString(bytes.size()) + " bytes to peer " + toString(static_cast<int>(peerId)));
 }
 
 void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, EntityRef entity)
@@ -131,7 +131,11 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 	}
 	
 	auto newData = parent->getFactory().serializeEntity(entity, parent->getSerializationOptions());
-	const auto deltaData = EntityDataDelta(remote.data, newData, parent->getEntityDeltaOptions());
+	auto deltaData = EntityDataDelta(remote.data, newData, parent->getEntityDeltaOptions());
+
+	if (deltaData.hasChange()) {
+		parent->onPreSendDelta(deltaData);
+	}
 
 	if (deltaData.hasChange()) {
 		remote.data = std::move(newData);
@@ -151,7 +155,8 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 			}
 		}
 
-		Logger::logDev("Sending update " + entity.getName() + ": " + toString(bytes.size()) + " bytes to " + toString(static_cast<int>(peerId)) + ": " + String(str));
+		Logger::logDev("Update:\n" + EntityData(deltaData).toYAML() + "\n");
+		//Logger::logDev("Sending update " + entity.getName() + ": " + toString(bytes.size()) + " bytes to peer " + toString(static_cast<int>(peerId)));
 	}
 }
 
@@ -163,7 +168,7 @@ void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote)
 	parent->getSession().sendToPeer(packet, peerId);
 	allocatedOutboundIds.erase(remote.networkId);
 
-	Logger::logDev("Sending destroy entity to " + toString(static_cast<int>(peerId)));
+	//Logger::logDev("Sending destroy entity to peer " + toString(static_cast<int>(peerId)));
 }
 
 void EntityNetworkRemotePeer::receiveCreateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data)
@@ -209,6 +214,7 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(EntityNetworkId id, gsl::span<
 	}
 	
 	auto delta = Deserializer::fromBytes<EntityDataDelta>(data);
+
 	parent->getFactory().updateEntity(entity, delta, static_cast<int>(EntitySerialization::Type::SaveData));
 	remote.data.applyDelta(delta);
 }

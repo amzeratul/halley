@@ -58,7 +58,7 @@ void EntityNetworkSession::receiveRemoteEntities()
 
 void EntityNetworkSession::onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet)
 {
-	Logger::logDev("Received entity update from " + toString(static_cast<int>(fromPeerId)) + " of type " + toString(static_cast<int>(type)));
+	//Logger::logDev("Received entity update from " + toString(static_cast<int>(fromPeerId)) + " of type " + toString(static_cast<int>(type)));
 	
 	for (auto& peer: peers) {
 		if (peer.getPeerId() == fromPeerId) {
@@ -100,6 +100,13 @@ void EntityNetworkSession::onRemoteEntityCreated(EntityRef entity, NetworkSessio
 {
 	if (listener) {
 		listener->onRemoteEntityCreated(entity, peerId);
+	}
+}
+
+void EntityNetworkSession::onPreSendDelta(EntityDataDelta& delta)
+{
+	if (listener) {
+		listener->onPreSendDelta(delta);
 	}
 }
 

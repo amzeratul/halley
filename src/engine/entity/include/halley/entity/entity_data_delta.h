@@ -33,7 +33,8 @@ namespace Halley {
 		const std::optional<uint8_t>& getFlags() const { return flags; }
 		const std::optional<UUID>& getPrefabUUID() const { return prefabUUID; }
 		void setPrefabUUID(const UUID& uuid);
-		
+
+		std::vector<std::pair<String, ConfigNode>>& getComponentsChanged() { return componentsChanged; }
 		const std::vector<std::pair<String, ConfigNode>>& getComponentsChanged() const { return componentsChanged; }
 		const std::vector<String>& getComponentsRemoved() const { return componentsRemoved; }
 		

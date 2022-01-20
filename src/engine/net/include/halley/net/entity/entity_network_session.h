@@ -18,7 +18,8 @@ namespace Halley {
 		class IEntityNetworkSessionListener {
 		public:
 			virtual ~IEntityNetworkSessionListener() = default;
-			virtual void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) {} 
+			virtual void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) {}
+			virtual void onPreSendDelta(EntityDataDelta& delta) {}
 		};
 		
 		explicit EntityNetworkSession(std::shared_ptr<NetworkSession> session);
@@ -40,6 +41,7 @@ namespace Halley {
 		Time getMinSendInterval() const;
 
 		void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId);
+		void onPreSendDelta(EntityDataDelta& delta);
 
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
