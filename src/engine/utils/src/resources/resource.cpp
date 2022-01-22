@@ -91,6 +91,36 @@ AsyncResource::~AsyncResource()
 	waitForLoad();
 }
 
+AsyncResource::AsyncResource(const AsyncResource& other)
+{
+	other.waitForLoad();
+	*this = other;
+}
+
+AsyncResource::AsyncResource(AsyncResource&& other) noexcept
+{
+	other.waitForLoad();
+	*this = std::move(other);
+}
+
+AsyncResource& AsyncResource::operator=(const AsyncResource& other)
+{
+	other.waitForLoad();
+	failed.store(other.failed);
+	loading.store(other.loading);
+	Resource::operator=(other);
+	return *this;
+}
+
+AsyncResource& AsyncResource::operator=(AsyncResource&& other) noexcept
+{
+	other.waitForLoad();
+	failed.store(other.failed);
+	loading.store(other.loading);
+	Resource::operator=(std::move(other));
+	return *this;
+}
+
 void AsyncResource::startLoading()
 {
 	loading = true;

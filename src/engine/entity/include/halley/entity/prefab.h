@@ -4,9 +4,9 @@
 #include "entity_data_delta.h"
 
 namespace Halley {	
-	class Prefab : public Resource {
-	public:
-		static std::unique_ptr<Prefab> loadResource(ResourceLoader& loader);
+	class Prefab : public AsyncResource {
+	public:		
+		static std::shared_ptr<Prefab> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Prefab; }
 
 		virtual AssetType getPrefabType() const { return AssetType::Prefab; }
@@ -47,6 +47,8 @@ namespace Halley {
 
 		virtual std::shared_ptr<Prefab> clone() const;
 
+		void preloadDependencies(Resources& resources) const;
+
 	protected:
 		struct Deltas {
 			std::map<UUID, EntityDataDelta> entitiesModified;
@@ -62,11 +64,13 @@ namespace Halley {
 		ConfigFile gameData;
 
 		Deltas deltas;
+
+		void doPreloadDependencies(const EntityData& entityData, Resources& resources) const;
 	};
 
 	class Scene final : public Prefab {
 	public:
-		static std::unique_ptr<Scene> loadResource(ResourceLoader& loader);
+		static std::shared_ptr<Scene> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::Scene; }
 
 		AssetType getPrefabType() const override { return AssetType::Scene; }
