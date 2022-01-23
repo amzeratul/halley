@@ -57,8 +57,11 @@ namespace Halley {
 
 		void load(gsl::span<const gsl::byte> bytes, Format format = Format::Undefined);
 		Bytes savePNGToBytes(bool allowDepthReduce = true) const;
+		Bytes saveQOIToBytes() const;
 		static Vector2i getImageSize(gsl::span<const gsl::byte> bytes);
 		static Format getImageFormat(gsl::span<const gsl::byte> bytes);
+
+		static bool isQOI(gsl::span<const gsl::byte> bytes);
 		static bool isPNG(gsl::span<const gsl::byte> bytes);
 
 		gsl::span<unsigned char> getPixelBytes();

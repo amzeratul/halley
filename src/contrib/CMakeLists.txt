@@ -6,6 +6,8 @@ include_directories("libogg/include" "libvorbis/include" "libvorbis/lib" "yaml-c
 set(SOURCES
         "json/jsoncpp.cpp"
 
+        "qoi/qoi.c"
+
         "lodepng/lodepng.cpp"
 
         "speex/resample.c"
@@ -68,6 +70,8 @@ set(SOURCES
 set(HEADERS
         "json/json-forwards.h"
         "json/json.h"
+
+        "qoi/qoi.h"
         
         "lodepng/lodepng.h"
         

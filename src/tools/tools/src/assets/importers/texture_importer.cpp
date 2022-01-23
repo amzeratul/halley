@@ -7,15 +7,18 @@ using namespace Halley;
 
 void TextureImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
-	// Update metadata
-	auto meta = asset.inputFiles.at(0).metadata;
-	meta.set("compression", "png");
-
 	// Get image
 	Image image;
 	Deserializer s(asset.inputFiles.at(0).data);
 	s >> image;
+	auto meta = asset.inputFiles.at(0).metadata;
 
-	// Encode to PNG and save
-	collector.output(asset.assetId, AssetType::Texture, image.savePNGToBytes(), meta);
+	const bool allowQOI = false;
+	if (allowQOI && (image.getFormat() == Image::Format::RGB || image.getFormat() == Image::Format::RGBA || image.getFormat() == Image::Format::RGBAPremultiplied)) {
+		meta.set("compression", "qoi");
+		collector.output(asset.assetId, AssetType::Texture, image.saveQOIToBytes(), meta);
+	} else {
+		meta.set("compression", "png");
+		collector.output(asset.assetId, AssetType::Texture, image.savePNGToBytes(), meta);
+	}
 }

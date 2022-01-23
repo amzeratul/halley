@@ -28,6 +28,7 @@
 #include "halley/text/string_converter.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/support/logger.h"
+#include "qoi/qoi.h"
 
 using namespace Halley;
 
@@ -489,47 +490,38 @@ void Image::deserialize(Deserializer& s)
 
 void Image::load(gsl::span<const gsl::byte> bytes, Format targetFormat)
 {
-	if (false && isPNG(bytes)) {
-		unsigned char* pixels;
-		unsigned int x, y;
-		lodepng::State state;
-		LodePNGColorType colorFormat;
-		switch (targetFormat) {
-		case Format::Indexed:
-		case Format::SingleChannel:
-			colorFormat = LCT_GREY;
-			break;
-		case Format::RGB:
-			colorFormat = LCT_RGB;
-			break;
-		default:
-			colorFormat = LCT_RGBA;
-		}
-		lodepng_decode_memory(&pixels, &x, &y, reinterpret_cast<const unsigned char*>(bytes.data()), bytes.size(), colorFormat, 8);
+	int targetChannels;
+	switch (targetFormat) {
+	case Format::Indexed:
+	case Format::SingleChannel:
+		targetChannels = 1;
+		break;
+	case Format::RGB:
+		targetChannels = 3;
+		break;
+	default:
+		targetChannels = 4;
+	}
 
-		px = std::unique_ptr<unsigned char, void(*)(unsigned char*)>(reinterpret_cast<unsigned char*>(pixels), [](unsigned char* data) { free(data); });
-		w = x;
-		h = y;
+	if (isQOI(bytes)) {
+		qoi_desc desc;
+		auto* result = qoi_decode(bytes.data(), static_cast<int>(bytes.size()), &desc, targetChannels);
+		if (!result) {
+			throw Exception("Unable to load QOI data.", HalleyExceptions::Utils);
+		}
+
 		format = targetFormat != Format::Undefined ? targetFormat : Format::RGBA;
+		
+		px = std::unique_ptr<unsigned char, void(*)(unsigned char*)>(reinterpret_cast<unsigned char*>(result), [](unsigned char* data) { free(data); });
+		w = desc.width;
+		h = desc.height;
 		dataLen = w * h * getBytesPerPixel();
 	} else {
 		int x, y, nComp;
 
-		int channels = 0;
-		switch (targetFormat) {
-		case Format::Indexed:
-		case Format::SingleChannel:
-			channels = 1;
-			break;
-		case Format::RGB:
-			channels = 3;
-			break;
-		default:
-			channels = 4;
-		}
 		format = targetFormat != Format::Undefined ? targetFormat : Format::RGBA;
 
-		uint8_t *pixels = stbi_load_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &x, &y, &nComp, channels);
+		uint8_t *pixels = stbi_load_from_memory(reinterpret_cast<stbi_uc const*>(bytes.data()), static_cast<int>(bytes.size()), &x, &y, &nComp, targetChannels);
 		if (!pixels) {
 			throw Exception("Unable to load image data: " + String(stbi_failure_reason()), HalleyExceptions::Utils);
 		}
@@ -655,6 +647,42 @@ Bytes Image::savePNGToBytes(bool allowDepthReduce) const
 	return result;
 }
 
+Bytes Image::saveQOIToBytes() const
+{
+	int channels = 0;
+	switch (getFormat()) {
+	case Format::RGB:
+		channels = 3;
+		break;
+	case Format::RGBA:
+	case Format::RGBAPremultiplied:
+		channels = 4;
+		break;
+	case Format::Indexed:
+	case Format::SingleChannel:
+	case Format::Undefined:
+		throw Exception("Image format not supported by QOI", HalleyExceptions::Utils);
+	}
+	
+	qoi_desc desc;
+	desc.width = w;
+	desc.height = h;
+	desc.channels = channels;
+	desc.colorspace = 0;
+	
+	int outLen;
+	auto out = qoi_encode(px.get(), &desc, &outLen);
+	if (!out) {
+		throw Exception("Unable to encode QOI", HalleyExceptions::Utils);
+	}
+	
+	Bytes result;
+	result.resize(outLen);
+	memcpy(result.data(), out, outLen);
+	free(out);
+	return result;
+}
+
 Vector2i Image::getImageSize(gsl::span<const gsl::byte> bytes)
 {
 	if (isPNG(bytes))	{
@@ -685,6 +713,12 @@ Image::Format Image::getImageFormat(gsl::span<const gsl::byte> bytes)
 	default:
 		return Format::RGBA;
 	}
+}
+
+bool Image::isQOI(gsl::span<const gsl::byte> bytes)
+{
+	unsigned char header[] = { 'q', 'o', 'i', 'f' };
+	return bytes.size() >= 4 && memcmp(bytes.data(), header, 4) == 0;
 }
 
 bool Image::isPNG(gsl::span<const gsl::byte> bytes)

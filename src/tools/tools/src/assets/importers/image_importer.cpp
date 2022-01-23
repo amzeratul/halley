@@ -19,7 +19,7 @@ void ImageImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	Path mainFile = asset.inputFiles.at(0).name;
 	auto span = gsl::as_bytes(gsl::span<const Byte>(input.data));
 	std::unique_ptr<Image> image;
-	if (meta.getString("compression", "png") == "png") {
+	if (const auto& compression = meta.getString("compression", "png"); compression == "png" || compression == "qoi") {
 		image = std::make_unique<Image>(span, fromString<Image::Format>(meta.getString("format", "undefined")));
 	} else {
 		image = std::make_unique<Image>();

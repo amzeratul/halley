@@ -128,7 +128,7 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 	.then([texture](std::unique_ptr<ResourceDataStatic> data) -> TextureDescriptorImageData
 	{
 		auto& meta = texture->getMeta();
-		if (meta.getString("compression") == "png") {
+		if (const auto& compression = meta.getString("compression"); compression == "png" || compression == "qoi") {
 			return TextureDescriptorImageData(std::make_unique<Image>(*data, meta));
 		} else {
 			return TextureDescriptorImageData(data->getSpan());
@@ -158,14 +158,16 @@ std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)
 			format = TextureFormat::RGBA; // Hmm
 		}
 
+		const auto& compression = meta.getString("compression");
 		Vector2i size(meta.getInt("width"), meta.getInt("height"));
+		
 		TextureDescriptor descriptor(size);
 		descriptor.useFiltering = meta.getBool("filtering", false);
 		descriptor.useMipMap = meta.getBool("mipmap", false);
 		descriptor.addressMode = fromString<TextureAddressMode>(meta.getString("addressMode", "clamp"));
 		descriptor.format = format;
 		descriptor.pixelData = std::move(img);
-		descriptor.pixelFormat = meta.getString("compression") == "png" ? PixelDataFormat::Image : PixelDataFormat::Precompiled;
+		descriptor.pixelFormat = compression == "png" || compression == "qoi" ? PixelDataFormat::Image : PixelDataFormat::Precompiled;
 		descriptor.retainPixelData = retain;
 		texture->load(std::move(descriptor));
 	});
