@@ -22,12 +22,16 @@ EntityNetworkSession::~EntityNetworkSession()
 void EntityNetworkSession::init(World& world, Resources& resources, std::set<String> ignoreComponents, IEntityNetworkSessionListener* listener)
 {
 	factory = std::make_shared<EntityFactory>(world, resources);
-	serializationOptions.type = EntitySerialization::Type::SaveData;
+	entitySerializationOptions.type = EntitySerialization::Type::SaveData;
 	this->listener = listener;
 
 	deltaOptions.preserveOrder = false;
 	deltaOptions.shallow = false;
 	deltaOptions.ignoreComponents = std::move(ignoreComponents);
+
+	setupDictionary();
+	byteSerializationOptions.version = SerializerOptions::maxVersion;
+	byteSerializationOptions.dictionary = &serializationDictionary;
 }
 
 void EntityNetworkSession::sendLocalEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds)
@@ -68,6 +72,21 @@ void EntityNetworkSession::onReceiveEntityUpdate(NetworkSession::PeerId fromPeer
 	}
 }
 
+void EntityNetworkSession::setupDictionary()
+{
+	serializationDictionary.addEntry("components");
+	serializationDictionary.addEntry("children");
+	serializationDictionary.addEntry("Transform2D");
+	serializationDictionary.addEntry("position");
+
+	// HACK
+	serializationDictionary.addEntry("Velocity");
+	serializationDictionary.addEntry("Character");
+	serializationDictionary.addEntry("velocity");
+	serializationDictionary.addEntry("facing");
+	serializationDictionary.addEntry("moveInput");
+}
+
 World& EntityNetworkSession::getWorld() const
 {
 	Expects(factory);
@@ -80,15 +99,20 @@ EntityFactory& EntityNetworkSession::getFactory() const
 	return *factory;
 }
 
-const EntityFactory::SerializationOptions& EntityNetworkSession::getSerializationOptions() const
+const EntityFactory::SerializationOptions& EntityNetworkSession::getEntitySerializationOptions() const
 {
 	Expects(factory);
-	return serializationOptions;
+	return entitySerializationOptions;
 }
 
 const EntityDataDelta::Options& EntityNetworkSession::getEntityDeltaOptions() const
 {
 	return deltaOptions;
+}
+
+const SerializerOptions& EntityNetworkSession::getByteSerializationOptions() const
+{
+	return byteSerializationOptions;
 }
 
 Time EntityNetworkSession::getMinSendInterval() const

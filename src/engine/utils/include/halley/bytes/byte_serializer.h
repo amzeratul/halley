@@ -16,6 +16,7 @@
 #include "halley/data_structures/maybe.h"
 #include "halley/maths/colour.h"
 #include "halley/maths/vector4.h"
+#include "iserialization_dictionary.h"
 
 namespace Halley {
 	class String;
@@ -26,8 +27,7 @@ namespace Halley {
 		
 		int version = 0;
 		bool exhaustiveDictionary = false;
-		std::function<std::optional<size_t>(const String& string)> stringToIndex;
-		std::function<const String&(size_t index)> indexToString;
+		ISerializationDictionary* dictionary = nullptr;
 
 		SerializerOptions() = default;
 		SerializerOptions(int version)

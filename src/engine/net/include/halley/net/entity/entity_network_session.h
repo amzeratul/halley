@@ -6,6 +6,7 @@
 #include "halley/time/halleytime.h"
 #include "../session/network_session.h"
 #include "entity_network_remote_peer.h"
+#include "halley/bytes/serialization_dictionary.h"
 
 namespace Halley {
 	class EntityFactory;
@@ -35,8 +36,9 @@ namespace Halley {
 		NetworkSession& getSession() const;
 		bool hasWorld() const;
 
-		const EntityFactory::SerializationOptions& getSerializationOptions() const;
+		const EntityFactory::SerializationOptions& getEntitySerializationOptions() const;
 		const EntityDataDelta::Options& getEntityDeltaOptions() const;
+		const SerializerOptions& getByteSerializationOptions() const;
 
 		Time getMinSendInterval() const;
 
@@ -55,12 +57,16 @@ namespace Halley {
 		std::shared_ptr<EntityFactory> factory;
 		IEntityNetworkSessionListener* listener = nullptr;
 		
-		EntityFactory::SerializationOptions serializationOptions;
+		EntityFactory::SerializationOptions entitySerializationOptions;
 		EntityDataDelta::Options deltaOptions;
+		SerializerOptions byteSerializationOptions;
+		SerializationDictionary serializationDictionary;
 
 		std::shared_ptr<NetworkSession> session;
 		std::vector<EntityNetworkRemotePeer> peers;
 
 		void onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet);
+
+		void setupDictionary();
 	};
 }

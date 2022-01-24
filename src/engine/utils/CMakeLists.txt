@@ -8,6 +8,7 @@ set(SOURCES
         "src/bytes/byte_serializer.cpp"
         "src/bytes/compression.cpp"
         "src/bytes/fuzzer.cpp"
+        "src/bytes/serialization_dictionary.cpp"
         
         "src/concurrency/concurrent.cpp"
         "src/concurrency/executor.cpp"
@@ -99,6 +100,8 @@ set(HEADERS
         "include/halley/bytes/config_node_serializer_base.h"
         "include/halley/bytes/compression.h"
         "include/halley/bytes/fuzzer.h"
+        "include/halley/bytes/iserialization_dictionary.h"
+        "include/halley/bytes/serialization_dictionary.h"
 
         "include/halley/concurrency/concurrent.h"
         "include/halley/concurrency/executor.h"

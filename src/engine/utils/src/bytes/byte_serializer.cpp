@@ -36,8 +36,8 @@ Serializer& Serializer::operator<<(const String& str)
 		*this << sz;
 		*this << gsl::as_bytes(gsl::span<const char>(str.c_str(), sz));
 	} else {
-		if (options.stringToIndex) {
-			auto idx = options.stringToIndex(str);
+		if (options.dictionary) {
+			auto idx = options.dictionary->stringToIndex(str);
 			if (idx) {
 				// Found, store index with bit 0 set to 1
 				const uint64_t value = uint64_t(options.exhaustiveDictionary ? idx.value() : (size_t(1) | (idx.value() << 1)));
@@ -179,11 +179,11 @@ Deserializer& Deserializer::operator>>(String& str)
 		uint64_t value;
 		*this >> value;
 		
-		if (options.indexToString) {
+		if (options.dictionary) {
 			if (options.exhaustiveDictionary || (value & 0x1) != 0) {
 				// Indexed string
 				int shift = options.exhaustiveDictionary ? 0 : 1;
-				str = options.indexToString(value >> shift);
+				str = options.dictionary->indexToString(value >> shift);
 			} else {
 				// Not indexed
 				readRawString(value >> 1);
