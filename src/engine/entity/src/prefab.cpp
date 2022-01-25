@@ -10,20 +10,28 @@
 
 using namespace Halley;
 
+namespace {
+	constexpr static bool threadedLoad = false;
+}
+
 std::shared_ptr<Prefab> Prefab::loadResource(ResourceLoader& loader)
 {
 	auto prefab = std::make_shared<Prefab>();
-	prefab->startLoading();
 	auto& res = loader.getResources();
 
-	loader.getAsync().then([prefab, &res] (std::unique_ptr<ResourceDataStatic> dataStatic)
-	{
-		Deserializer::fromBytes(*prefab, dataStatic->getSpan());
-		prefab->doneLoading();
-		Concurrent::execute([prefab, &res]() {
-			prefab->preloadDependencies(res);
+	if (threadedLoad) {
+		prefab->startLoading();
+		loader.getAsync().then([prefab, &res] (std::unique_ptr<ResourceDataStatic> dataStatic)
+		{
+			Deserializer::fromBytes(*prefab, dataStatic->getSpan());
+			prefab->doneLoading();
+			Concurrent::execute([prefab, &res]() {
+				prefab->preloadDependencies(res);
+			});
 		});
-	});
+	} else {
+		Deserializer::fromBytes(*prefab, loader.getStatic()->getSpan());
+	}
 	
 	return prefab;
 }
@@ -277,15 +285,21 @@ Prefab::Deltas Prefab::generatePrefabDeltas(const Prefab& newPrefab) const
 std::shared_ptr<Scene> Scene::loadResource(ResourceLoader& loader)
 {
 	auto scene = std::make_shared<Scene>();
-	scene->startLoading();
 	auto& resources = loader.getResources();
 	
-	loader.getAsync().then([scene, &resources] (std::unique_ptr<ResourceDataStatic> dataStatic)
-	{
-		Deserializer::fromBytes(*scene, dataStatic->getSpan());
-		scene->doneLoading();
-		scene->preloadDependencies(resources);
-	});
+	if (threadedLoad) {
+		scene->startLoading();
+		loader.getAsync().then([scene, &resources] (std::unique_ptr<ResourceDataStatic> dataStatic)
+		{
+			Deserializer::fromBytes(*scene, dataStatic->getSpan());
+			scene->doneLoading();
+			Concurrent::execute([scene, &resources] () {
+				scene->preloadDependencies(resources);
+			});
+		});
+	} else {
+		Deserializer::fromBytes(*scene, loader.getStatic()->getSpan());
+	}
 	
 	return scene;
 }
