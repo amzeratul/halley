@@ -33,6 +33,8 @@ void Prefab::reload(Resource&& resource)
 	waitForLoad();
 	
 	auto& prefab = dynamic_cast<Prefab&>(resource);
+	prefab.waitForLoad();
+	
 	auto newDeltas = generatePrefabDeltas(prefab);
 	*this = std::move(prefab);
 	deltas = std::move(newDeltas);
@@ -297,6 +299,8 @@ void Scene::reload(Resource&& resource)
 {
 	waitForLoad();
 	auto& scene = dynamic_cast<Scene&>(resource);
+	scene.waitForLoad();
+	
 	auto newDeltas = generateSceneDeltas(scene);
 	*this = std::move(scene);
 	deltas = std::move(newDeltas);
