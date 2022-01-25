@@ -50,6 +50,11 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<Ent
 		}
 	}
 	std_ex::erase_if_value(outboundEntities, [](const OutboundEntity& e) { return !e.alive; });
+
+	if (!hasSentData) {
+		hasSentData = true;
+		onFirstDataBatchSent();
+	}
 }
 
 void EntityNetworkRemotePeer::receiveEntityPacket(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet)
@@ -232,4 +237,13 @@ void EntityNetworkRemotePeer::receiveDestroyEntity(EntityNetworkId id)
 	parent->getWorld().destroyEntity(remote.worldId);
 
 	inboundEntities.erase(id);
+}
+
+void EntityNetworkRemotePeer::onFirstDataBatchSent()
+{
+	if (parent->getSession().getType() == NetworkSessionType::Host) {
+		auto packet = OutboundNetworkPacket(Bytes());
+		packet.addHeader(EntityNetworkHeader(EntityNetworkHeaderType::ReadyToStart));
+		parent->getSession().sendToPeer(packet, peerId);
+	}
 }

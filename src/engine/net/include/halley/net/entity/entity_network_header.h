@@ -8,7 +8,8 @@ namespace Halley {
     enum class EntityNetworkHeaderType : uint8_t {
         Create,
         Update,
-        Destroy
+        Destroy,
+    	ReadyToStart
     };
     
     struct EntityNetworkHeader {

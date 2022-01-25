@@ -23,13 +23,13 @@ namespace Halley {
 			virtual void onPreSendDelta(EntityDataDelta& delta) {}
 		};
 		
-		explicit EntityNetworkSession(std::shared_ptr<NetworkSession> session);
-		~EntityNetworkSession();
+		EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, std::set<String> ignoreComponents, IEntityNetworkSessionListener* listener);
+		~EntityNetworkSession() override;
 
-		void init(World& world, Resources& resources, std::set<String> ignoreComponents, IEntityNetworkSessionListener* listener);
+		void setWorld(World& world);
 
 		void sendLocalEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds); // Takes pairs of entity id and owner peer id
-		void receiveRemoteEntities();
+		void receiveUpdates();
 
 		World& getWorld() const;
 		EntityFactory& getFactory() const;
@@ -45,15 +45,21 @@ namespace Halley {
 		void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId);
 		void onPreSendDelta(EntityDataDelta& delta);
 
+		bool isReadyToStart() const;
+
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
 		void onPeerConnected(NetworkSession::PeerId peerId) override;
 		void onPeerDisconnected(NetworkSession::PeerId peerId) override;
 
 	private:
-
-		World* world = nullptr;
-		Resources* resources = nullptr;
+		struct QueuedPacket {
+			NetworkSession::PeerId fromPeerId;
+			EntityNetworkHeaderType type;
+			InboundNetworkPacket packet;
+		};
+		
+		Resources& resources;
 		std::shared_ptr<EntityFactory> factory;
 		IEntityNetworkSessionListener* listener = nullptr;
 		
@@ -65,7 +71,12 @@ namespace Halley {
 		std::shared_ptr<NetworkSession> session;
 		std::vector<EntityNetworkRemotePeer> peers;
 
+		std::vector<QueuedPacket> queuedPackets;
+
+		bool readyToStart = false;
+
 		void onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet);
+		void onReceiveReady(NetworkSession::PeerId fromPeerId);
 
 		void setupDictionary();
 	};

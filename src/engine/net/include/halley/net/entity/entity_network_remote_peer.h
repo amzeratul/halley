@@ -41,6 +41,7 @@ namespace Halley {
         EntityNetworkSession* parent = nullptr;
         NetworkSession::PeerId peerId;
     	bool alive = true;
+        bool hasSentData = false;
     	
         HashMap<EntityId, OutboundEntity> outboundEntities;
         HashMap<EntityNetworkId, InboundEntity> inboundEntities;
@@ -56,5 +57,7 @@ namespace Halley {
         void receiveCreateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data);
         void receiveUpdateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data);
         void receiveDestroyEntity(EntityNetworkId id);
-    };
+
+        void onFirstDataBatchSent();
+	};
 }
