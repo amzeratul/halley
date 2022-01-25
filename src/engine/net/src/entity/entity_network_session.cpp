@@ -34,6 +34,14 @@ EntityNetworkSession::~EntityNetworkSession()
 void EntityNetworkSession::setWorld(World& world)
 {
 	factory = std::make_shared<EntityFactory>(world, resources);
+
+	// Clear queue
+	if (!queuedPackets.empty()) {
+		for (auto& qp: queuedPackets) {
+			onReceiveEntityUpdate(qp.fromPeerId, qp.type, std::move(qp.packet));
+		}
+		queuedPackets.clear();
+	}
 }
 
 void EntityNetworkSession::sendLocalEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds)
@@ -49,15 +57,6 @@ void EntityNetworkSession::receiveUpdates()
 {
 	session->update();
 
-	// Clear queue first
-	if (factory && !queuedPackets.empty()) {
-		for (auto& qp: queuedPackets) {
-			onReceiveEntityUpdate(qp.fromPeerId, qp.type, std::move(qp.packet));
-		}
-		queuedPackets.clear();
-	}
-
-	// Check for incoming packets
 	while (auto result = session->receive()) {
 		const auto fromPeerId = result->first;
 		auto& packet = result->second;
@@ -114,6 +113,9 @@ void EntityNetworkSession::setupDictionary()
 	serializationDictionary.addEntry("velocity");
 	serializationDictionary.addEntry("facing");
 	serializationDictionary.addEntry("moveInput");
+	serializationDictionary.addEntry("Calendar");
+	serializationDictionary.addEntry("time");
+	serializationDictionary.addEntry("fract");
 }
 
 World& EntityNetworkSession::getWorld() const

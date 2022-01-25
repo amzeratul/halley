@@ -162,7 +162,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 		}
 
 		Logger::logDev("Sending update " + entity.getName() + ": " + toString(bytes.size()) + " bytes to peer " + toString(static_cast<int>(peerId)));
-		Logger::logDev("Update:\n" + EntityData(deltaData).toYAML() + "\n");
+		//Logger::logDev("Update:\n" + EntityData(deltaData).toYAML() + "\n");
 	}
 }
 
