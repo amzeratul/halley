@@ -6,6 +6,7 @@
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/resources/resource_data.h"
 #include "halley/support/logger.h"
+#include "halley/concurrency/concurrent.h"
 
 using namespace Halley;
 
@@ -14,12 +15,14 @@ std::shared_ptr<Prefab> Prefab::loadResource(ResourceLoader& loader)
 	auto prefab = std::make_shared<Prefab>();
 	prefab->startLoading();
 	auto& res = loader.getResources();
-	
+
 	loader.getAsync().then([prefab, &res] (std::unique_ptr<ResourceDataStatic> dataStatic)
 	{
 		Deserializer::fromBytes(*prefab, dataStatic->getSpan());
 		prefab->doneLoading();
-		prefab->preloadDependencies(res);
+		Concurrent::execute([prefab, &res]() {
+			prefab->preloadDependencies(res);
+		});
 	});
 	
 	return prefab;
@@ -27,6 +30,8 @@ std::shared_ptr<Prefab> Prefab::loadResource(ResourceLoader& loader)
 
 void Prefab::reload(Resource&& resource)
 {
+	waitForLoad();
+	
 	auto& prefab = dynamic_cast<Prefab&>(resource);
 	auto newDeltas = generatePrefabDeltas(prefab);
 	*this = std::move(prefab);
@@ -35,11 +40,13 @@ void Prefab::reload(Resource&& resource)
 
 void Prefab::makeDefault()
 {
+	waitForLoad();
 	entityData.setInstanceUUID(UUID::generate());
 }
 
 void Prefab::serialize(Serializer& s) const
 {
+	waitForLoad();
 	s << entityData;
 	s << gameData;
 }
@@ -53,6 +60,7 @@ void Prefab::deserialize(Deserializer& s)
 
 void Prefab::parseYAML(gsl::span<const gsl::byte> yaml)
 {
+	waitForLoad();
 	ConfigFile config;
 	YAMLConvert::parseConfig(config, yaml);
 	parseConfigNode(std::move(config.getRoot()));
@@ -60,6 +68,7 @@ void Prefab::parseYAML(gsl::span<const gsl::byte> yaml)
 
 String Prefab::toYAML() const
 {
+	waitForLoad();
 	YAMLConvert::EmitOptions options;
 	options.mapKeyOrder = {{ "name", "icon", "uuid", "prefab", "components", "children" }};
 	return YAMLConvert::generateYAML(toConfigNode(), options);
@@ -67,6 +76,8 @@ String Prefab::toYAML() const
 
 void Prefab::parseConfigNode(ConfigNode node)
 {
+	waitForLoad();
+	
 	if (node.getType() == ConfigNodeType::Map && node.hasKey("entity")) {
 		entityData = makeEntityData(node["entity"]);
 		gameData.getRoot() = std::move(node["game"]);
@@ -81,6 +92,8 @@ void Prefab::parseConfigNode(ConfigNode node)
 
 ConfigNode Prefab::toConfigNode() const
 {
+	waitForLoad();
+	
 	ConfigNode::MapType result;
 	result["entity"] = entityToConfigNode();
 	result["game"] = ConfigNode(gameData.getRoot());
@@ -154,12 +167,14 @@ const std::set<UUID>& Prefab::getEntitiesRemoved() const
 
 void Prefab::setGameData(const String& key, ConfigNode data)
 {
+	waitForLoad();
 	gameData.getRoot().ensureType(ConfigNodeType::Map);
 	gameData.getRoot()[key] = std::move(data);
 }
 
 void Prefab::removeGameData(const String& key)
 {
+	waitForLoad();
 	if (gameData.getRoot().getType() == ConfigNodeType::Map) {
 		gameData.getRoot().asMap().erase(key);
 	}
@@ -280,6 +295,7 @@ bool Scene::isScene() const
 
 void Scene::reload(Resource&& resource)
 {
+	waitForLoad();
 	auto& scene = dynamic_cast<Scene&>(resource);
 	auto newDeltas = generateSceneDeltas(scene);
 	*this = std::move(scene);

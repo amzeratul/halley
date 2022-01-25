@@ -107,8 +107,7 @@ AsyncResource& AsyncResource::operator=(const AsyncResource& other)
 {
 	other.waitForLoad();
 	failed.store(other.failed);
-	loading.store(other.loading);
-	Resource::operator=(other);
+	Resource::operator=(static_cast<const Resource&>(other));
 	return *this;
 }
 
@@ -116,8 +115,7 @@ AsyncResource& AsyncResource::operator=(AsyncResource&& other) noexcept
 {
 	other.waitForLoad();
 	failed.store(other.failed);
-	loading.store(other.loading);
-	Resource::operator=(std::move(other));
+	Resource::operator=(static_cast<Resource&&>(other));
 	return *this;
 }
 
