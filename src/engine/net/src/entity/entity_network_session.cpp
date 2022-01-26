@@ -13,7 +13,10 @@ EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> sessi
 	, session(std::move(session))
 {
 	Expects(this->session);
+	Expects(this->listener);
+	
 	this->session->addListener(this);
+	this->session->setSharedDataHandler(this);
 
 	entitySerializationOptions.type = EntitySerialization::Type::SaveData;
 
@@ -44,18 +47,27 @@ void EntityNetworkSession::setWorld(World& world)
 	}
 }
 
-void EntityNetworkSession::sendLocalEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds)
+void EntityNetworkSession::sendUpdates(Time t, Rect4i viewRect, gsl::span<const std::pair<EntityId, uint8_t>> entityIds)
 {
-	for (auto& peer: peers) {
-		peer.sendEntities(t, entityIds);
+	// Update viewport
+	auto& data = session->getMySharedData<EntityClientSharedData>();
+	const bool first = !data.viewRect;
+	data.viewRect = viewRect;
+	if (first || data.getTimeSinceLastSend() > 0.05) {
+		data.markModified();
 	}
 
-	session->update();
+	// Update entities
+	for (auto& peer: peers) {
+		peer.sendEntities(t, entityIds, session->getClientSharedData<EntityClientSharedData>(peer.getPeerId()));
+	}
+
+	session->update(t);
 }
 
 void EntityNetworkSession::receiveUpdates()
 {
-	session->update();
+	session->update(0.0);
 
 	while (auto result = session->receive()) {
 		const auto fromPeerId = result->first;
@@ -170,6 +182,12 @@ bool EntityNetworkSession::isReadyToStart() const
 	return readyToStart;
 }
 
+bool EntityNetworkSession::isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) const
+{
+	Expects(listener);
+	return listener->isEntityInView(entity, clientData);
+}
+
 NetworkSession& EntityNetworkSession::getSession() const
 {
 	Expects(session);
@@ -208,3 +226,22 @@ void EntityNetworkSession::onPeerDisconnected(NetworkSession::PeerId peerId)
 	Logger::logDev("Peer " + toString(static_cast<int>(peerId)) + " disconnected from EntityNetworkSession.");
 }
 
+std::unique_ptr<SharedData> EntityNetworkSession::makeSessionSharedData()
+{
+	return std::make_unique<EntitySessionSharedData>();
+}
+
+std::unique_ptr<SharedData> EntityNetworkSession::makePeerSharedData()
+{
+	return std::make_unique<EntityClientSharedData>();
+}
+
+void EntityClientSharedData::serialize(Serializer& s) const
+{
+	s << viewRect;
+}
+
+void EntityClientSharedData::deserialize(Deserializer& s)
+{
+	s >> viewRect;
+}

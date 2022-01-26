@@ -19,7 +19,7 @@ NetworkSession::PeerId EntityNetworkRemotePeer::getPeerId() const
 	return peerId;
 }
 
-void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds)
+void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds, const EntityClientSharedData& clientData)
 {
 	Expects(isAlive());
 	
@@ -35,11 +35,12 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<Ent
 		}
 
 		const auto entity = parent->getWorld().getEntity(entityId);
-
-		if (const auto iter = outboundEntities.find(entityId); iter == outboundEntities.end()) {
-			sendCreateEntity(entity);
-		} else {
-			sendUpdateEntity(t, iter->second, entity);
+		if (peerId == 0 || parent->isEntityInView(entity, clientData)) { // Always send to host
+			if (const auto iter = outboundEntities.find(entityId); iter == outboundEntities.end()) {
+				sendCreateEntity(entity);
+			} else {
+				sendUpdateEntity(t, iter->second, entity);
+			}
 		}
 	}
 
@@ -115,17 +116,13 @@ void EntityNetworkRemotePeer::sendCreateEntity(EntityRef entity)
 	result.data = parent->getFactory().serializeEntity(entity, parent->getEntitySerializationOptions());
 
 	auto deltaData = parent->getFactory().entityDataToPrefabDelta(result.data, entity.getPrefab(), parent->getEntityDeltaOptions());
-	const auto bytes = Serializer::toBytes(result.data, parent->getByteSerializationOptions());
-	
-	auto packet = OutboundNetworkPacket(bytes);
-	packet.addHeader(EntityNetworkEntityHeader(result.networkId));
-	packet.addHeader(EntityNetworkHeader(EntityNetworkHeaderType::Create));
-	parent->getSession().sendToPeer(packet, peerId);
+	auto bytes = Serializer::toBytes(result.data, parent->getByteSerializationOptions());
+	send(EntityNetworkHeaderType::Create, result.networkId, std::move(bytes));
 	
 	outboundEntities[entity.getEntityId()] = std::move(result);
 
 	Logger::logDev("Sending create " + entity.getName() + ": " + toString(bytes.size()) + " bytes to peer " + toString(static_cast<int>(peerId)));
-	Logger::logDev("Create:\n" + EntityData(deltaData).toYAML() + "\n");
+	//Logger::logDev("Create:\n" + EntityData(deltaData).toYAML() + "\n");
 }
 
 void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, EntityRef entity)
@@ -147,34 +144,31 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 		remote.data = std::move(newData);
 		remote.timeSinceSend = 0;
 
-		const auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
-		
-		auto packet = OutboundNetworkPacket(bytes);
-		packet.addHeader(EntityNetworkEntityHeader(remote.networkId));
-		packet.addHeader(EntityNetworkHeader(EntityNetworkHeaderType::Update));
-		parent->getSession().sendToPeer(packet, peerId);
+		auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
+		send(EntityNetworkHeaderType::Update, remote.networkId, std::move(bytes));
 
-		auto str = std::string(bytes.size(), '.');
-		for (size_t i = 0; i < bytes.size(); ++i) {
-			if (bytes[i] >= 0x20) {
-				str[i] = bytes[i];
-			}
-		}
-
-		Logger::logDev("Sending update " + entity.getName() + ": " + toString(bytes.size()) + " bytes to peer " + toString(static_cast<int>(peerId)));
+		//Logger::logDev("Sending update " + entity.getName() + ": " + toString(bytes.size()) + " bytes to peer " + toString(static_cast<int>(peerId)));
 		//Logger::logDev("Update:\n" + EntityData(deltaData).toYAML() + "\n");
 	}
 }
 
 void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote)
 {
-	auto packet = OutboundNetworkPacket(Bytes());
-	packet.addHeader(EntityNetworkEntityHeader(remote.networkId));
-	packet.addHeader(EntityNetworkHeader(EntityNetworkHeaderType::Destroy));
-	parent->getSession().sendToPeer(packet, peerId);
 	allocatedOutboundIds.erase(remote.networkId);
 
-	//Logger::logDev("Sending destroy entity to peer " + toString(static_cast<int>(peerId)));
+	send(EntityNetworkHeaderType::Destroy, remote.networkId, Bytes());
+
+	Logger::logDev("Sending destroy entity to peer " + toString(static_cast<int>(peerId)));
+}
+
+void EntityNetworkRemotePeer::send(EntityNetworkHeaderType type, EntityNetworkId networkId, Bytes data)
+{
+	// TODO: compress them into one update?
+	
+	auto packet = OutboundNetworkPacket(std::move(data));
+	packet.addHeader(EntityNetworkEntityHeader(networkId));
+	packet.addHeader(EntityNetworkHeader(type));
+	parent->getSession().sendToPeer(packet, peerId);
 }
 
 void EntityNetworkRemotePeer::receiveCreateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data)

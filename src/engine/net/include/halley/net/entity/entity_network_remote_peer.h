@@ -8,6 +8,7 @@
 #include "halley/time/halleytime.h"
 
 namespace Halley {
+	class EntityClientSharedData;
 	class EntityNetworkSession;
 	struct EntityId;
     class EntityData;
@@ -17,7 +18,7 @@ namespace Halley {
         EntityNetworkRemotePeer(EntityNetworkSession& parent, NetworkSession::PeerId peerId);
 
         NetworkSession::PeerId getPeerId() const;
-        void sendEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds);
+        void sendEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds, const EntityClientSharedData& clientData);
         void receiveEntityPacket(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet);
 
         void destroy();
@@ -53,6 +54,7 @@ namespace Halley {
         void sendCreateEntity(EntityRef entity);
         void sendUpdateEntity(Time t, OutboundEntity& remote, EntityRef entity);
         void sendDestroyEntity(OutboundEntity& remote);
+        void send(EntityNetworkHeaderType type, EntityNetworkId networkId, Bytes data);
 
         void receiveCreateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data);
         void receiveUpdateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data);

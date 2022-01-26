@@ -9,8 +9,9 @@
 #include "halley/utils/algorithm.h"
 using namespace Halley;
 
-NetworkSession::NetworkSession(NetworkService& service)
+NetworkSession::NetworkSession(NetworkService& service, ISharedDataHandler* sharedDataHandler)
 	: service(service)
+	, sharedDataHandler(sharedDataHandler)
 {
 }
 
@@ -114,10 +115,11 @@ void NetworkSession::acceptConnection(std::shared_ptr<IConnection> incoming)
 	}
 }
 
-void NetworkSession::update()
+void NetworkSession::update(Time t)
 {
-	// Remove dead connections
 	service.update();
+
+	// Remove dead connections
 	for (auto& peer: peers) {
 		if (peer.connection->getStatus() == ConnectionStatus::Closed) {
 			disconnectPeer(peer);
@@ -127,23 +129,24 @@ void NetworkSession::update()
 	{
 		return peer.connection->getStatus() == ConnectionStatus::Closed;
 	});
-
+	
+	// Check for data that needs to be sent
 	if (type == NetworkSessionType::Host) {
-		checkForOutboundStateChanges({});
+		checkForOutboundStateChanges(t, {});
 	}
-
-	if (type == NetworkSessionType::Client) {
-		if (peers.empty()) {
-			close();
-		}
-	}
-
 	if (type == NetworkSessionType::Host || type == NetworkSessionType::Client) {
 		if (myPeerId) {
 			auto iter = sharedData.find(myPeerId.value());
 			if (iter != sharedData.end()) {
-				checkForOutboundStateChanges(myPeerId.value());
+				checkForOutboundStateChanges(t, myPeerId.value());
 			}
+		}
+	}
+
+	// Close if connection is lost
+	if (type == NetworkSessionType::Client) {
+		if (peers.empty()) {
+			close();
 		}
 	}
 
@@ -202,11 +205,17 @@ const SharedData* NetworkSession::doTryGetClientSharedData(PeerId clientId) cons
 
 std::unique_ptr<SharedData> NetworkSession::makeSessionSharedData()
 {
+	if (sharedDataHandler) {
+		return sharedDataHandler->makeSessionSharedData();
+	}
 	return std::make_unique<SharedData>();
 }
 
 std::unique_ptr<SharedData> NetworkSession::makePeerSharedData()
 {
+	if (sharedDataHandler) {
+		return sharedDataHandler->makePeerSharedData();
+	}
 	return std::make_unique<SharedData>();
 }
 
@@ -288,16 +297,21 @@ std::optional<std::pair<NetworkSession::PeerId, InboundNetworkPacket>> NetworkSe
 	return {};
 }
 
-void NetworkSession::addListener(Listener* listener)
+void NetworkSession::addListener(IListener* listener)
 {
 	if (!std_ex::contains(listeners, listener)) {
 		listeners.push_back(listener);
 	}
 }
 
-void NetworkSession::removeListener(Listener* listener)
+void NetworkSession::removeListener(IListener* listener)
 {
 	std_ex::erase(listeners, listener);
+}
+
+void NetworkSession::setSharedDataHandler(ISharedDataHandler* handler)
+{
+	sharedDataHandler = handler;
 }
 
 const String& NetworkSession::getHostAddress() const
@@ -453,12 +467,14 @@ void NetworkSession::setMyPeerId(PeerId id)
 	}
 }
 
-void NetworkSession::checkForOutboundStateChanges(std::optional<PeerId> ownerId)
+void NetworkSession::checkForOutboundStateChanges(Time t, std::optional<PeerId> ownerId)
 {
 	SharedData& data = !ownerId ? *sessionSharedData : *sharedData.at(ownerId.value());
+	data.update(t);
 	if (data.isModified()) {
 		doSendToAll(makeUpdateSharedDataPacket(ownerId), {});
 		data.markUnmodified();
+		data.markSent();
 	}
 }
 
