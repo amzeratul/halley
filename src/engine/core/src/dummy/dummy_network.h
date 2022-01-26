@@ -16,7 +16,7 @@ namespace Halley {
 	{
 	public:
 		void update() override;
-		void startListening(AcceptCallback callback) override;
+		String startListening(AcceptCallback callback) override;
 		void stopListening() override;
 		std::shared_ptr<IConnection> connect(const String& address) override;
 	};

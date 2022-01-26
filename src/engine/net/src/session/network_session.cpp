@@ -300,6 +300,11 @@ void NetworkSession::removeListener(Listener* listener)
 	std_ex::erase(listeners, listener);
 }
 
+const String& NetworkSession::getHostAddress() const
+{
+	return hostAddress;
+}
+
 void NetworkSession::processReceive()
 {
 	InboundNetworkPacket packet;

@@ -48,6 +48,8 @@ namespace Halley {
 		void addListener(Listener* listener);
 		void removeListener(Listener* listener);
 
+		const String& getHostAddress() const;
+
 	protected:
 		SharedData& doGetMySharedData();
 		SharedData& doGetMutableSessionSharedData();
@@ -67,6 +69,7 @@ namespace Halley {
 		
 		NetworkService& service;
 		NetworkSessionType type = NetworkSessionType::Undefined;
+		String hostAddress;
 
 		uint16_t maxClients = 0;
 		std::optional<PeerId> myPeerId;

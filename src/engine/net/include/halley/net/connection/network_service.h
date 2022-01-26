@@ -35,7 +35,7 @@ namespace Halley
 
 		virtual void update() = 0;
 
-		virtual void startListening(AcceptCallback callback) = 0;
+		virtual String startListening(AcceptCallback callback) = 0; // Returns the address that clients will use to connect to
         virtual void stopListening() = 0;
 		virtual std::shared_ptr<IConnection> connect(const String& address) = 0;
 	};

@@ -13,8 +13,10 @@ std::unique_ptr<NetworkService> DummyNetworkAPI::createService(NetworkProtocol p
 void DummyNetworkService::update()
 {}
 
-void DummyNetworkService::startListening(AcceptCallback callback)
-{}
+String DummyNetworkService::startListening(AcceptCallback callback)
+{
+	return "";
+}
 
 void DummyNetworkService::stopListening()
 {}

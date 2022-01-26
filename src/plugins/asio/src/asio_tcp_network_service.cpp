@@ -27,11 +27,13 @@ void AsioTCPNetworkService::update()
 	activeConnections.erase(std::remove_if(activeConnections.begin(), activeConnections.end(), [] (const std::shared_ptr<IConnection>& conn) { return conn->getStatus() == ConnectionStatus::Closed; }), activeConnections.end());
 }
 
-void AsioTCPNetworkService::startListening(AcceptCallback callback)
+String AsioTCPNetworkService::startListening(AcceptCallback callback)
 {
 	acceptCallback = std::move(callback);
 	
 	doStartListening();
+
+	return "";
 }
 
 void AsioTCPNetworkService::doStartListening()

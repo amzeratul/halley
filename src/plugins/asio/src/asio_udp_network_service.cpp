@@ -91,13 +91,14 @@ std::shared_ptr<IConnection> AsioUDPNetworkService::connect(const String& addres
 	return conn;
 }
 
-void AsioUDPNetworkService::startListening(AcceptCallback callback)
+String AsioUDPNetworkService::startListening(AcceptCallback callback)
 {
 	acceptCallback = std::move(callback);
 	if (!startedListening) {
 		startedListening = true;
 		receiveNext();
 	}
+	return "";
 }
 
 void AsioUDPNetworkService::stopListening()
