@@ -376,8 +376,8 @@ namespace Halley {
 				if (node.getType() == ConfigNodeType::Map) {
 					result.clear();
 				}
-				auto map = node.asMap();
-				for (auto& s: map) {
+				const auto& map = node.asMap();
+				for (const auto& s: map) {
 					if (s.second.getType() == ConfigNodeType::Del) {
 						result.erase(s.first);
 					} else {
@@ -415,8 +415,8 @@ namespace Halley {
 				if (node.getType() == ConfigNodeType::Map) {
 					result.clear();
 				}
-				auto map = node.asMap();
-				for (auto& s: map) {
+				const auto& map = node.asMap();
+				for (const auto& s: map) {
 					if (s.second.getType() == ConfigNodeType::Del) {
 						result.erase(fromString<K>(s.first));
 					} else {
