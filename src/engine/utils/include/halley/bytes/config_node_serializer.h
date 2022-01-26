@@ -11,6 +11,31 @@
 #include "halley/core/resources/resource_reference.h"
 
 namespace Halley {
+	template <class, class = void_t<>> struct HasInPlaceDeserializer : std::false_type {};
+	template <class T> struct HasInPlaceDeserializer<T, decltype(std::declval<ConfigNodeSerializer<T>>().deserialize(std::declval<const ConfigNodeSerializationContext&>(), std::declval<const ConfigNode&>(), std::declval<T&>()))> : std::true_type { };
+
+	template <typename T>
+	class ConfigNodeHelper {
+	public:
+		static ConfigNode serialize(const T& value, const ConfigNodeSerializationContext& context)
+		{
+			return ConfigNodeSerializer<T>().serialize(value, context);
+		}
+		
+		static void deserialize(T& dst, const T& defaultValue, const ConfigNodeSerializationContext& context, const ConfigNode& node)
+		{
+			if (node.getType() == ConfigNodeType::Undefined || node.getType() == ConfigNodeType::Del) {
+				dst = defaultValue;
+			} else {
+				if constexpr (HasInPlaceDeserializer<T>::value) {
+					ConfigNodeSerializer<T>().deserialize(context, node, dst);
+				} else {
+					dst = ConfigNodeSerializer<T>().deserialize(context, node);
+				}
+			}
+		}
+	};
+
 	template <>
 	class ConfigNodeSerializer<bool> {
 	public:
@@ -337,17 +362,29 @@ namespace Halley {
         	}
         	return result;
 		}
-		
+
 		std::map<String, T> deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
 		{
 			std::map<String, T> result;
-			if (node.getType() == ConfigNodeType::Map) {
+			deserialize(context, node, result);
+			return result;
+		}
+		
+		void deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node, std::map<String, T>& result)
+		{
+			if (node.getType() == ConfigNodeType::Map || node.getType() == ConfigNodeType::DeltaMap) {
+				if (node.getType() == ConfigNodeType::Map) {
+					result.clear();
+				}
 				auto map = node.asMap();
-				for (auto& s : map) {
-					result[s.first] = ConfigNodeSerializer<T>().deserialize(context, s.second);
+				for (auto& s: map) {
+					if (s.second.getType() == ConfigNodeType::Del) {
+						result.erase(s.first);
+					} else {
+						ConfigNodeHelper<T>().deserialize(result[s.first], T(), context, s.second);
+					}
 				}
 			}
-			return result;
 		}
 	};
 
@@ -364,17 +401,29 @@ namespace Halley {
         	}
         	return result;
 		}
-		
+
 		std::map<K, V> deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
 		{
 			std::map<K, V> result;
-			if (node.getType() == ConfigNodeType::Map) {
+			deserialize(context, node, result);
+			return result;
+		}
+		
+		void deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node, std::map<K, V>& result)
+		{
+			if (node.getType() == ConfigNodeType::Map || node.getType() == ConfigNodeType::DeltaMap) {
+				if (node.getType() == ConfigNodeType::Map) {
+					result.clear();
+				}
 				auto map = node.asMap();
-				for (auto& s : map) {
-					result[fromString<K>(s.first)] = ConfigNodeSerializer<V>().deserialize(context, s.second);
+				for (auto& s: map) {
+					if (s.second.getType() == ConfigNodeType::Del) {
+						result.erase(fromString<K>(s.first));
+					} else {
+						ConfigNodeHelper<V>().deserialize(result[fromString<K>(s.first)], V(), context, s.second);
+					}
 				}
 			}
-			return result;
 		}
 	};
 
@@ -396,31 +445,6 @@ namespace Halley {
 				return OptionalLite<T>();
 			} else {
 				return OptionalLite<T>(ConfigNodeSerializer<T>().deserialize(context, node));
-			}
-		}
-	};
-
-	template <class, class = void_t<>> struct HasInPlaceDeserializer : std::false_type {};
-	template <class T> struct HasInPlaceDeserializer<T, decltype(std::declval<ConfigNodeSerializer<T>>().deserialize(std::declval<const ConfigNodeSerializationContext&>(), std::declval<const ConfigNode&>(), std::declval<T&>()))> : std::true_type { };
-
-	template <typename T>
-	class ConfigNodeHelper {
-	public:
-		static ConfigNode serialize(const T& value, const ConfigNodeSerializationContext& context)
-		{
-			return ConfigNodeSerializer<T>().serialize(value, context);
-		}
-		
-		static void deserialize(T& dst, const T& defaultValue, const ConfigNodeSerializationContext& context, const ConfigNode& node)
-		{
-			if (node.getType() == ConfigNodeType::Undefined || node.getType() == ConfigNodeType::Del) {
-				dst = defaultValue;
-			} else {
-				if constexpr (HasInPlaceDeserializer<T>::value) {
-					ConfigNodeSerializer<T>().deserialize(context, node, dst);
-				} else {
-					dst = ConfigNodeSerializer<T>().deserialize(context, node);
-				}
 			}
 		}
 	};
