@@ -54,7 +54,7 @@ namespace Halley {
         void sendCreateEntity(EntityRef entity);
         void sendUpdateEntity(Time t, OutboundEntity& remote, EntityRef entity);
         void sendDestroyEntity(OutboundEntity& remote);
-        void send(EntityNetworkHeaderType type, EntityNetworkId networkId, Bytes data);
+        size_t send(EntityNetworkHeaderType type, EntityNetworkId networkId, Bytes data);
 
         void receiveCreateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data);
         void receiveUpdateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data);
