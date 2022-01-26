@@ -189,6 +189,18 @@ bool EntityNetworkSession::isEntityInView(EntityRef entity, const EntityClientSh
 	return listener->isEntityInView(entity, clientData);
 }
 
+std::vector<Rect4i> EntityNetworkSession::getRemoteViewPorts() const
+{
+	std::vector<Rect4i> result;
+	for (auto& peer: peers) {
+		const auto* data = session->tryGetClientSharedData<EntityClientSharedData>(peer.getPeerId());
+		if (data && data->viewRect) {
+			result.push_back(data->viewRect.value());
+		}
+	}
+	return result;
+}
+
 NetworkSession& EntityNetworkSession::getSession() const
 {
 	Expects(session);

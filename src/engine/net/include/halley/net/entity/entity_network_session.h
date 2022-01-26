@@ -62,6 +62,8 @@ namespace Halley {
 		bool isReadyToStart() const;
 		bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) const;
 
+		std::vector<Rect4i> getRemoteViewPorts() const;
+
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
 		void onPeerConnected(NetworkSession::PeerId peerId) override;
