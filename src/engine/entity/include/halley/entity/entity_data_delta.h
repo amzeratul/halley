@@ -15,6 +15,7 @@ namespace Halley {
         	
 	        bool preserveOrder = false;
 			bool shallow = false;
+            bool deltaComponents = true;
         	std::set<String> ignoreComponents;
         };
 		
