@@ -244,6 +244,7 @@ void SceneEditorWindow::unloadScene()
 	entityEditor->setEntityEditorFactory({});
 	entityEditor->unloadIcons();
 	entityEditorFactory.reset();
+	entityValidator.reset();
 	entityList->setSceneData({});
 }
 
