@@ -121,7 +121,7 @@ void EntityNetworkRemotePeer::sendCreateEntity(EntityRef entity)
 	
 	outboundEntities[entity.getEntityId()] = std::move(result);
 
-	Logger::logDev("Sending create " + entity.getName() + ": " + toString(size) + " bytes to peer " + toString(static_cast<int>(peerId)));
+	//Logger::logDev("Sending create " + entity.getName() + ": " + toString(size) + " bytes to peer " + toString(static_cast<int>(peerId)));
 	//Logger::logDev("Create:\n" + EntityData(deltaData).toYAML() + "\n");
 }
 
@@ -158,7 +158,7 @@ void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote)
 
 	send(EntityNetworkHeaderType::Destroy, remote.networkId, Bytes());
 
-	Logger::logDev("Sending destroy entity to peer " + toString(static_cast<int>(peerId)));
+	//Logger::logDev("Sending destroy entity to peer " + toString(static_cast<int>(peerId)));
 }
 
 size_t EntityNetworkRemotePeer::send(EntityNetworkHeaderType type, EntityNetworkId networkId, Bytes data)
