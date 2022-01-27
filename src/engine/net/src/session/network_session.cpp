@@ -30,7 +30,7 @@ void NetworkSession::host(uint16_t maxClients)
 	this->maxClients = maxClients;
 	type = NetworkSessionType::Host;
 	sessionSharedData = makeSessionSharedData();
-	service.startListening([=](NetworkService::Acceptor& a) { onConnection(a); });
+	hostAddress = service.startListening([=](NetworkService::Acceptor& a) { onConnection(a); });
 
 	setMyPeerId(0);
 }
@@ -44,6 +44,7 @@ void NetworkSession::join(const String& address)
 	for (auto* listener : listeners) {
 		listener->onPeerConnected(0);
 	}
+	hostAddress = address;
 }
 
 void NetworkSession::close()
