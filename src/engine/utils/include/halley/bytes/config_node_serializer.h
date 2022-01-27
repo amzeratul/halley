@@ -188,7 +188,7 @@ namespace Halley {
 		
         std::optional<T> deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
         {
-        	if (node.getType() == ConfigNodeType::Undefined) {
+        	if (node.getType() == ConfigNodeType::Undefined || node.getType() == ConfigNodeType::Del) {
 				return std::optional<T>();
         	} else {
 				return std::optional<T>(ConfigNodeSerializer<T>().deserialize(context, node));
