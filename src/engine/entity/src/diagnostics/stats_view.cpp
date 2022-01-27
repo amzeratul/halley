@@ -9,11 +9,15 @@
 
 using namespace Halley;
 
+ScreenOverlay::ScreenOverlay()
+{
+	screenSize = Vector2f(1280, 720);
+}
+
 void ScreenOverlay::draw(RenderContext& context)
 {
 	const auto viewPort = Rect4f(context.getDefaultRenderTarget().getViewPort());
-	const auto targetSize = Vector2f(1280, 720);
-	const auto zoom2d = viewPort.getSize() / targetSize;
+	const auto zoom2d = viewPort.getSize() / screenSize;
 	const float zoom = std::min(zoom2d.x, zoom2d.y);
 
 	const auto camera = Camera(viewPort.getSize() / zoom * 0.5f)
@@ -23,6 +27,11 @@ void ScreenOverlay::draw(RenderContext& context)
 	context.with(camera).bind([&](Painter& painter) {
 		paint(painter);
 	});
+}
+
+Vector2f ScreenOverlay::getScreenSize() const
+{
+	return screenSize;
 }
 
 StatsView::StatsView(Resources& resources, const HalleyAPI& api)

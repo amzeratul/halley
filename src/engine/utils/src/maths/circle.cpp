@@ -17,6 +17,11 @@ Circle Circle::expand(float r) const
 	return Circle(centre, radius + r);
 }
 
+Rect4f Circle::getAABB() const
+{
+	return Rect4f(centre - Vector2f(radius, radius), centre + Vector2f(radius, radius));
+}
+
 Circle Circle::getSpanningCircle(const std::vector<Vector2f>& points)
 {
 	// TODO: should use Matousek, Sharir, Welzl's algorithm (https://en.wikipedia.org/wiki/Smallest-circle_problem#Matou%C5%A1ek,_Sharir,_Welzl's_algorithm)

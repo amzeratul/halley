@@ -14,6 +14,7 @@ namespace Halley {
 
 	class ScreenOverlay {
 	public:
+		ScreenOverlay();
 		virtual ~ScreenOverlay() = default;
 		
         virtual void draw(RenderContext& context);
@@ -22,6 +23,10 @@ namespace Halley {
 
 	protected:
         virtual void paint(Painter& painter) = 0;
+		Vector2f getScreenSize() const;
+
+	private:
+		Vector2f screenSize;
 	};
 
 	class StatsView : public ScreenOverlay {

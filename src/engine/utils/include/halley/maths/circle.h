@@ -2,6 +2,7 @@
 
 #include "vector2.h"
 #include <vector>
+#include "rect.h"
 
 namespace Halley {
     class Circle {
@@ -19,6 +20,7 @@ namespace Halley {
         bool overlaps(const Circle& circle) const;
 
     	[[nodiscard]] Circle expand(float radius) const;
+        Rect4f getAABB() const;
 
         static Circle getSpanningCircle(const std::vector<Vector2f>& points);
 
