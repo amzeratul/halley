@@ -109,7 +109,7 @@ EntityList::EntityInfo EntityList::getEntityInfo(const EntityData& data) const
 		result.icon = icons->getIcon(data.getIcon());
 		result.severity = getEntitySeverity(data, false);
 	} else {
-		if (const auto prefab = sceneEditorWindow->getGamePrefab(data.getPrefab())) {
+		if (const auto prefab = sceneEditorWindow->getGamePrefab(data.getPrefab()); prefab && !prefab->hasFailed()) {
 			result.name = prefab->getPrefabName();
 			result.icon = icons->getIcon(prefab->getPrefabIcon());
 			result.severity = getEntitySeverity(prefab->getEntityData().instantiateWithAsCopy(data), true);

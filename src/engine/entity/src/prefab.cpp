@@ -11,7 +11,7 @@
 using namespace Halley;
 
 namespace {
-	constexpr static bool threadedLoad = false;
+	constexpr static bool threadedLoad = true;
 }
 
 std::shared_ptr<Prefab> Prefab::loadResource(ResourceLoader& loader)
@@ -21,13 +21,18 @@ std::shared_ptr<Prefab> Prefab::loadResource(ResourceLoader& loader)
 
 	if (threadedLoad) {
 		prefab->startLoading();
-		loader.getAsync().then([prefab, &res] (std::unique_ptr<ResourceDataStatic> dataStatic)
+		loader.getAsync(false).then([prefab, &res] (std::unique_ptr<ResourceDataStatic> dataStatic)
 		{
-			Deserializer::fromBytes(*prefab, dataStatic->getSpan());
-			prefab->doneLoading();
-			Concurrent::execute([prefab, &res]() {
-				prefab->preloadDependencies(res);
-			});
+			if (dataStatic) {
+				Deserializer::fromBytes(*prefab, dataStatic->getSpan());
+				prefab->doneLoading();
+				Concurrent::execute([prefab, &res]() {
+					prefab->preloadDependencies(res);
+				});
+			} else {
+				prefab->makeDefault();
+				prefab->loadingFailed();
+			}
 		});
 	} else {
 		Deserializer::fromBytes(*prefab, loader.getStatic()->getSpan());
@@ -38,10 +43,10 @@ std::shared_ptr<Prefab> Prefab::loadResource(ResourceLoader& loader)
 
 void Prefab::reload(Resource&& resource)
 {
-	waitForLoad();
+	waitForLoad(true);
 	
 	auto& prefab = dynamic_cast<Prefab&>(resource);
-	prefab.waitForLoad();
+	prefab.waitForLoad(true);
 	
 	auto newDeltas = generatePrefabDeltas(prefab);
 	*this = std::move(prefab);
@@ -50,13 +55,12 @@ void Prefab::reload(Resource&& resource)
 
 void Prefab::makeDefault()
 {
-	waitForLoad();
 	entityData.setInstanceUUID(UUID::generate());
 }
 
 void Prefab::serialize(Serializer& s) const
 {
-	waitForLoad();
+	waitForLoad(true);
 	s << entityData;
 	s << gameData;
 }
@@ -70,7 +74,6 @@ void Prefab::deserialize(Deserializer& s)
 
 void Prefab::parseYAML(gsl::span<const gsl::byte> yaml)
 {
-	waitForLoad();
 	ConfigFile config;
 	YAMLConvert::parseConfig(config, yaml);
 	parseConfigNode(std::move(config.getRoot()));
@@ -78,7 +81,7 @@ void Prefab::parseYAML(gsl::span<const gsl::byte> yaml)
 
 String Prefab::toYAML() const
 {
-	waitForLoad();
+	waitForLoad(true);
 	YAMLConvert::EmitOptions options;
 	options.mapKeyOrder = {{ "name", "icon", "uuid", "prefab", "components", "children" }};
 	return YAMLConvert::generateYAML(toConfigNode(), options);
@@ -86,8 +89,6 @@ String Prefab::toYAML() const
 
 void Prefab::parseConfigNode(ConfigNode node)
 {
-	waitForLoad();
-	
 	if (node.getType() == ConfigNodeType::Map && node.hasKey("entity")) {
 		entityData = makeEntityData(node["entity"]);
 		gameData.getRoot() = std::move(node["game"]);
@@ -102,7 +103,7 @@ void Prefab::parseConfigNode(ConfigNode node)
 
 ConfigNode Prefab::toConfigNode() const
 {
-	waitForLoad();
+	waitForLoad(true);
 	
 	ConfigNode::MapType result;
 	result["entity"] = entityToConfigNode();
@@ -122,31 +123,31 @@ bool Prefab::isScene() const
 
 EntityData& Prefab::getEntityData()
 {
-	waitForLoad();
+	waitForLoad(true);
 	return entityData;
 }
 
 const EntityData& Prefab::getEntityData() const
 {
-	waitForLoad();
+	waitForLoad(true);
 	return entityData;
 }
 
 gsl::span<const EntityData> Prefab::getEntityDatas() const
 {
-	waitForLoad();
+	waitForLoad(true);
 	return gsl::span<const EntityData>(&entityData, 1);
 }
 
 gsl::span<EntityData> Prefab::getEntityDatas()
 {
-	waitForLoad();
+	waitForLoad(true);
 	return gsl::span<EntityData>(&entityData, 1);
 }
 
 std::map<UUID, const EntityData*> Prefab::getEntityDataMap() const
 {
-	waitForLoad();
+	waitForLoad(true);
 	std::map<UUID, const EntityData*> dataMap;
 
 	if (isScene()) {
@@ -177,14 +178,14 @@ const std::set<UUID>& Prefab::getEntitiesRemoved() const
 
 void Prefab::setGameData(const String& key, ConfigNode data)
 {
-	waitForLoad();
+	waitForLoad(true);
 	gameData.getRoot().ensureType(ConfigNodeType::Map);
 	gameData.getRoot()[key] = std::move(data);
 }
 
 void Prefab::removeGameData(const String& key)
 {
-	waitForLoad();
+	waitForLoad(true);
 	if (gameData.getRoot().getType() == ConfigNodeType::Map) {
 		gameData.getRoot().asMap().erase(key);
 	}
@@ -192,7 +193,7 @@ void Prefab::removeGameData(const String& key)
 
 ConfigNode& Prefab::getGameData(const String& key)
 {
-	waitForLoad();
+	waitForLoad(true);
 
 	gameData.getRoot().ensureType(ConfigNodeType::Map);
 	auto& map = gameData.getRoot().asMap();
@@ -207,7 +208,7 @@ ConfigNode& Prefab::getGameData(const String& key)
 
 const ConfigNode* Prefab::tryGetGameData(const String& key) const
 {
-	waitForLoad();
+	waitForLoad(true);
 
 	if (gameData.getRoot().getType() != ConfigNodeType::Map) {
 		return nullptr;
@@ -224,19 +225,19 @@ const ConfigNode* Prefab::tryGetGameData(const String& key) const
 
 String Prefab::getPrefabName() const
 {
-	waitForLoad();
+	waitForLoad(true);
 	return entityData.getName();
 }
 
 String Prefab::getPrefabIcon() const
 {
-	waitForLoad();
+	waitForLoad(true);
 	return entityData.getIcon();
 }
 
 EntityData* Prefab::findEntityData(const UUID& uuid)
 {
-	waitForLoad();
+	waitForLoad(true);
 	if (!uuid.isValid()) {
 		if (isScene()) {
 			return &entityData;
@@ -249,7 +250,7 @@ EntityData* Prefab::findEntityData(const UUID& uuid)
 
 std::shared_ptr<Prefab> Prefab::clone() const
 {
-	waitForLoad();
+	waitForLoad(true);
 	return std::make_shared<Prefab>(*this);
 }
 
@@ -289,13 +290,18 @@ std::shared_ptr<Scene> Scene::loadResource(ResourceLoader& loader)
 	
 	if (threadedLoad) {
 		scene->startLoading();
-		loader.getAsync().then([scene, &resources] (std::unique_ptr<ResourceDataStatic> dataStatic)
+		loader.getAsync(false).then([scene, &resources] (std::unique_ptr<ResourceDataStatic> dataStatic)
 		{
-			Deserializer::fromBytes(*scene, dataStatic->getSpan());
-			scene->doneLoading();
-			Concurrent::execute([scene, &resources] () {
-				scene->preloadDependencies(resources);
-			});
+			if (dataStatic) {
+				Deserializer::fromBytes(*scene, dataStatic->getSpan());
+				scene->doneLoading();
+				Concurrent::execute([scene, &resources] () {
+					scene->preloadDependencies(resources);
+				});
+			} else {
+				scene->makeDefault();
+				scene->loadingFailed();
+			}
 		});
 	} else {
 		Deserializer::fromBytes(*scene, loader.getStatic()->getSpan());
@@ -311,9 +317,9 @@ bool Scene::isScene() const
 
 void Scene::reload(Resource&& resource)
 {
-	waitForLoad();
+	waitForLoad(true);
 	auto& scene = dynamic_cast<Scene&>(resource);
-	scene.waitForLoad();
+	scene.waitForLoad(true);
 	
 	auto newDeltas = generateSceneDeltas(scene);
 	*this = std::move(scene);
@@ -327,13 +333,13 @@ void Scene::makeDefault()
 
 gsl::span<const EntityData> Scene::getEntityDatas() const
 {
-	waitForLoad();
+	waitForLoad(true);
 	return entityData.getChildren();
 }
 
 gsl::span<EntityData> Scene::getEntityDatas()
 {
-	waitForLoad();
+	waitForLoad(true);
 	return entityData.getChildren();
 }
 
@@ -344,13 +350,13 @@ String Scene::getPrefabName() const
 
 std::shared_ptr<Prefab> Scene::clone() const
 {
-	waitForLoad();
+	waitForLoad(true);
 	return std::make_shared<Scene>(*this);
 }
 
 ConfigNode Scene::entityToConfigNode() const
 {
-	waitForLoad();
+	waitForLoad(true);
 	ConfigNode::SequenceType result;
 	for (auto& c: entityData.getChildren()) {
 		result.emplace_back(c.toConfigNode(false));
@@ -360,7 +366,7 @@ ConfigNode Scene::entityToConfigNode() const
 
 EntityData Scene::makeEntityData(const ConfigNode& node) const
 {
-	waitForLoad();
+	waitForLoad(true);
 	EntityData result;
 	const auto& seq = node.asSequence();
 	result.getChildren().reserve(seq.size());
