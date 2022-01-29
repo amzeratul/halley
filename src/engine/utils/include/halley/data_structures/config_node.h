@@ -346,10 +346,10 @@ namespace Halley {
 		bool hasKey(const String& key) const;
 		void removeKey(const String& key);
 
-		ConfigNode& operator[](const std::string_view& key);
+		ConfigNode& operator[](std::string_view key);
 		ConfigNode& operator[](size_t idx);
 
-		const ConfigNode& operator[](const std::string_view& key) const;
+		const ConfigNode& operator[](std::string_view key) const;
 		const ConfigNode& operator[](size_t idx) const;
 
 		SequenceType::iterator begin();

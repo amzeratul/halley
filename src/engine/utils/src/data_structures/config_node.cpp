@@ -823,7 +823,7 @@ bool ConfigNode::hasKey(const String& key) const
 	}
 }
 
-ConfigNode& ConfigNode::operator[](const std::string_view& key)
+ConfigNode& ConfigNode::operator[](std::string_view key)
 {
 	return asMap()[key];
 }
@@ -833,7 +833,7 @@ ConfigNode& ConfigNode::operator[](size_t idx)
 	return asSequence().at(idx);
 }
 
-const ConfigNode& ConfigNode::operator[](const std::string_view& key) const
+const ConfigNode& ConfigNode::operator[](std::string_view key) const
 {
 	const auto& map = asMap();
 	const auto iter = map.find(key);
