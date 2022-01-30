@@ -73,6 +73,14 @@ namespace Halley {
 		}
 
 		template <typename T>
+		void preloadAll() const
+		{
+			for (const auto& e: enumerate<T>()) {
+				preload<T>(e);
+			}
+		}
+
+		template <typename T>
 		void unload(const String& name) const
 		{
 			of<T>().unload(name);
