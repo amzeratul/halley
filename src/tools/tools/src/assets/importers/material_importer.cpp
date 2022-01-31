@@ -46,7 +46,7 @@ void MaterialImporter::loadPass(MaterialDefinition& material, const ConfigNode& 
 	const String passName = material.getName() + "_pass_" + toString(passN);
 	const String shaderName = passName;
 
-	const auto shaderTypes = { ShaderType::Vertex, ShaderType::Geometry, ShaderType::Pixel, ShaderType::Combined };
+	const auto shaderTypes = { ShaderType::Pixel, ShaderType::Vertex, ShaderType::Geometry, ShaderType::Combined };
 	const String languages[] = { "hlsl", "glsl", "metal", "spirv" };
 
 	// Map languages to nodes
