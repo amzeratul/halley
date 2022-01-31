@@ -5,7 +5,7 @@
 
 namespace Halley
 {
-	class AsioTCPNetworkService : public NetworkService
+	class AsioTCPNetworkService : public NetworkServiceWithStats
 	{
 	public:
 		AsioTCPNetworkService(int port, IPVersion version = IPVersion::IPv4);

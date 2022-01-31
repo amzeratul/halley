@@ -25,11 +25,18 @@ void NetworkService::Acceptor::ensureChoiceMade()
 	reject();
 }
 
-void NetworkService::update(Time t)
+void NetworkServiceWithStats::onUpdateStats()
+{
+}
+
+void NetworkServiceWithStats::update(Time t)
 {
 	statsTime += t;
 	if (statsTime > 1.0) {
 		statsTime -= 1.0;
+
+		onUpdateStats();
+		
 		lastSentSize = sentSize;
 		lastReceivedSize = receivedSize;
 		lastSentPackets = sentPackets;
@@ -41,34 +48,34 @@ void NetworkService::update(Time t)
 	}
 }
 
-void NetworkService::onSendData(size_t size, size_t nPackets)
+void NetworkServiceWithStats::onSendData(size_t size, size_t nPackets)
 {
 	sentSize += size;
 	sentPackets += nPackets;
 }
 
-void NetworkService::onReceiveData(size_t size, size_t nPackets)
+void NetworkServiceWithStats::onReceiveData(size_t size, size_t nPackets)
 {
 	receivedSize += size;
 	receivedPackets += nPackets;
 }
 
-size_t NetworkService::getSentDataPerSecond() const
+size_t NetworkServiceWithStats::getSentDataPerSecond() const
 {
 	return lastSentSize;
 }
 
-size_t NetworkService::getReceivedDataPerSecond() const
+size_t NetworkServiceWithStats::getReceivedDataPerSecond() const
 {
 	return lastReceivedSize;
 }
 
-size_t NetworkService::getSentPacketsPerSecond() const
+size_t NetworkServiceWithStats::getSentPacketsPerSecond() const
 {
 	return lastSentPackets;
 }
 
-size_t NetworkService::getReceivedPacketsPerSecond() const
+size_t NetworkServiceWithStats::getReceivedPacketsPerSecond() const
 {
 	return lastReceivedPackets;
 }

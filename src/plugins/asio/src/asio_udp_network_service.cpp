@@ -51,7 +51,7 @@ AsioUDPNetworkService::~AsioUDPNetworkService()
 
 void AsioUDPNetworkService::update(Time t)
 {
-	NetworkService::update(t);
+	NetworkServiceWithStats::update(t);
 	
 	// Remove closed connections
 	std::vector<short> toErase;

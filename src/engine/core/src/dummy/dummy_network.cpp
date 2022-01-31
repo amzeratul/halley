@@ -11,7 +11,9 @@ std::unique_ptr<NetworkService> DummyNetworkAPI::createService(NetworkProtocol p
 }
 
 void DummyNetworkService::update(Time t)
-{}
+{
+	NetworkServiceWithStats::update(t);
+}
 
 String DummyNetworkService::startListening(AcceptCallback callback)
 {

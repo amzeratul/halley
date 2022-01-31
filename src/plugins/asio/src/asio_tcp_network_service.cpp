@@ -14,7 +14,7 @@ AsioTCPNetworkService::AsioTCPNetworkService(int port, IPVersion version)
 
 void AsioTCPNetworkService::update(Time t)
 {
-	NetworkService::update(t);
+	NetworkServiceWithStats::update(t);
 	
 	bool needsPoll;
 	do {
