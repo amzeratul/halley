@@ -217,6 +217,9 @@ if (USE_DX11)
 endif()
 
 # Metal
+if (USE_METAL AND HALLEY_NO_METAL)
+	set(USE_METAL 0)
+endif ()
 if (USE_METAL)
 	add_definitions(-DWITH_METAL)
 endif()
