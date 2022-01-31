@@ -57,7 +57,7 @@ void EditorRootStage::onVariableUpdate(Time time)
 	updateUI(time);
 
 	if (devConServer) {
-		devConServer->update();
+		devConServer->update(time);
 	}
 
 	auto& prefs = editor.getPreferences();

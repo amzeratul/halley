@@ -319,7 +319,7 @@ void Core::runPreVariableUpdate(Time time)
 {
 	if (devConClient) {
 		ProfilerEvent event(ProfilerEventType::CoreDevConClient);
-		devConClient->update();
+		devConClient->update(time);
 	}
 }
 

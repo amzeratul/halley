@@ -12,8 +12,10 @@ AsioTCPNetworkService::AsioTCPNetworkService(int port, IPVersion version)
 	Expects(port < 65536);
 }
 
-void AsioTCPNetworkService::update()
+void AsioTCPNetworkService::update(Time t)
 {
+	NetworkService::update(t);
+	
 	bool needsPoll;
 	do {
 		needsPoll = false;

@@ -27,9 +27,9 @@ DevConClient::~DevConClient()
 	service.reset();
 }
 
-void DevConClient::update()
+void DevConClient::update(Time t)
 {
-	service->update();
+	service->update(t);
 
 	for (auto& m: queue->receiveAll()) {
 		auto& msg = dynamic_cast<DevCon::DevConMessage&>(*m);

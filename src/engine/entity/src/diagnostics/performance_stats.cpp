@@ -1,7 +1,8 @@
-#include "diagnostics/performance_stats.h"
+﻿#include "diagnostics/performance_stats.h"
 
 #include "system.h"
 #include "world.h"
+#include "../../../net/include/halley/net/connection/iconnection.h"
 #include "halley/core/api/core_api.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/core/graphics/painter.h"
@@ -100,6 +101,11 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	}
 }
 
+void PerformanceStatsView::setNetworkStats(IConnectionStatsListener* stats)
+{
+	networkStats = stats;
+}
+
 int PerformanceStatsView::getPage() const
 {
 	return page;
@@ -171,22 +177,34 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 
 	ColourStringBuilder strBuilder;
 	strBuilder.append(toString(curFPS, 10, 3, ' '));
-	strBuilder.append(" FPS / ");
+	strBuilder.append(" FPS | ");
 	strBuilder.append(toString(maxFPS, 10, 4, ' '));
-	strBuilder.append(" FPS / ");
+	strBuilder.append(" FPS | ");
 	strBuilder.append(formatTime(frameAvgTime));
-	strBuilder.append(" ms / ");
+	strBuilder.append(" ms | ");
 	strBuilder.append(toString(painter.getPrevDrawCalls()));
-	strBuilder.append(" calls / ");
+	strBuilder.append(" calls | ");
 	strBuilder.append(toString(painter.getPrevTriangles()));
 	strBuilder.append(" tris");
+
+	if (networkStats) {
+		strBuilder.append(" | up: ");
+		strBuilder.append(toString(networkStats->getSentDataPerSecond() / 1000.0, 3) + " kBps");
+		strBuilder.append(" (");
+		strBuilder.append(toString(networkStats->getSentPacketsPerSecond()));
+		strBuilder.append(") | down: ");
+		strBuilder.append(toString(networkStats->getReceivedDataPerSecond() / 1000.0, 3) + " kBps");
+		strBuilder.append(" (");
+		strBuilder.append(toString(networkStats->getReceivedPacketsPerSecond()));
+		strBuilder.append(")");
+	}
 
 	if (!simple) {
 		const auto audioSpec = api.audio->getAudioSpec();
 		if (audioSpec) {
 			const int64_t totalTimePerBuffer = int64_t(audioSpec->bufferSize) * 1'000'000'000 / int64_t(audioSpec->sampleRate);
 			const auto percent = (audioAvgTime * 100.0f) / static_cast<float>(totalTimePerBuffer);
-			strBuilder.append(" / ");
+			strBuilder.append(" | ");
 			strBuilder.append(formatTime(audioAvgTime));
 			strBuilder.append(" ms audio (");
 			strBuilder.append(toString(percent, 1));

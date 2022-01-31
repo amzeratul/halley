@@ -21,7 +21,7 @@ namespace Halley
 		AsioUDPNetworkService(int port, IPVersion version = IPVersion::IPv4);
 		~AsioUDPNetworkService();
 
-		void update() override;
+		void update(Time t) override;
 
 		String startListening(AcceptCallback callback) override;
 		void stopListening() override;

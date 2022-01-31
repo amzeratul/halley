@@ -6,6 +6,8 @@
 #include <set>
 #include <gsl/span>
 
+#include "halley/time/halleytime.h"
+
 namespace Halley
 {
 	class NetworkService;
@@ -23,7 +25,7 @@ namespace Halley
 	public:
 		DevConServerConnection(std::shared_ptr<IConnection> connection);
 		
-		void update();
+		void update(Time t);
 		
 		void reloadAssets(gsl::span<const String> assetIds);
 
@@ -39,7 +41,7 @@ namespace Halley
 	public:
 		DevConServer(std::unique_ptr<NetworkService> service, int port = DevCon::devConPort);
 
-		void update();
+		void update(Time t);
 
 		void reloadAssets(gsl::span<const String> assetIds);
 

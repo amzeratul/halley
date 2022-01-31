@@ -15,7 +15,7 @@ namespace Halley {
 	class DummyNetworkService : public NetworkService
 	{
 	public:
-		void update() override;
+		void update(Time t) override;
 		String startListening(AcceptCallback callback) override;
 		void stopListening() override;
 		std::shared_ptr<IConnection> connect(const String& address) override;

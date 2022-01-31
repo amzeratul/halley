@@ -18,7 +18,7 @@ namespace Halley
 		DevConClient(const HalleyAPI& api, Resources& resources, std::unique_ptr<NetworkService> service, String address, int port = DevCon::devConPort);
 		~DevConClient();
 
-		void update();
+		void update(Time t);
 
 		void onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg);
 
