@@ -130,6 +130,9 @@ void EntityNetworkSession::onReceiveReady(NetworkSession::PeerId fromPeerId)
 
 void EntityNetworkSession::onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, InboundNetworkPacket packet)
 {
+	Expects(factory);
+	Expects(messageBridge.isValid());
+	
 	EntityNetworkMessageToEntityHeader header;
 	packet.extractHeader(header);
 
