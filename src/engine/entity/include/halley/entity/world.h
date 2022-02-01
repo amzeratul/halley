@@ -27,6 +27,14 @@ namespace Halley {
 	class Painter;
 	class HalleyAPI;
 
+	class IWorldNetworkInterface {
+	public:
+		virtual ~IWorldNetworkInterface() = default;
+
+		virtual bool isRemote(EntityRef entity) const = 0;
+		virtual void sendEntityMessage(EntityRef entity, int messageId, Bytes messageData) = 0;
+	};
+
 	class World
 	{
 	public:
@@ -122,6 +130,11 @@ namespace Halley {
 
 		size_t sendSystemMessage(SystemMessageContext context, const String& targetSystem);
 
+		void setNetworkInterface(IWorldNetworkInterface* interface);
+		bool isEntityNetworkRemote(EntityId entityId);
+		void sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr<Message> msg);
+		void receiveNetworkMessage(EntityId entityId, int messageId, Bytes messageData);
+
 		bool isDevMode() const;
 
 		void setEditor(bool isEditor);
@@ -152,6 +165,8 @@ namespace Halley {
 		std::shared_ptr<PoolAllocator<Entity>> entityPool;
 
 		std::list<SystemMessageContext> pendingSystemMessages;
+		
+		IWorldNetworkInterface* networkInterface = nullptr;
 
 		void allocateEntity(Entity* entity);
 		void updateEntities();

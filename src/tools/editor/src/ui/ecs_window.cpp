@@ -85,6 +85,7 @@ void ECSWindow::populateSystem(const String& name)
 	addLabel("[World]", false, (int(system.access) & int(SystemAccess::World)) != 0);
 	addLabel("[Resources]", (int(system.access) & int(SystemAccess::Resources)) != 0, false);
 	addLabel("[API]", false, (int(system.access) & int(SystemAccess::API)) != 0);
+	addLabel("[MessageBridge]", false, (int(system.access) & int(SystemAccess::MessageBridge)) != 0);
 	
 	for (const auto& component: ecsData.getComponents()) {
 		const bool hasWrite = writeComponents.find(component.first) != writeComponents.end();

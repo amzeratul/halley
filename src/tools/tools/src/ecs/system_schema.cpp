@@ -99,6 +99,8 @@ SystemSchema::SystemSchema(YAML::Node node, bool generate)
 				accessValue |= int(SystemAccess::World);
 			} else if (nodeName == "resources") {
 				accessValue |= int(SystemAccess::Resources);
+			} else if (nodeName == "messageBridge") {
+				accessValue |= int(SystemAccess::MessageBridge);
 			} else {
 				throw Exception("Unknown access type: " + nodeName, HalleyExceptions::Resources);
 			}

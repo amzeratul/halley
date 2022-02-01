@@ -413,6 +413,9 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	if ((int(system.access) & int(SystemAccess::Resources)) != 0) {
 		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("Halley::Resources&"), {}, "getResources", true), "return doGetResources();");
 	}
+	if ((int(system.access) & int(SystemAccess::MessageBridge)) != 0) {
+		sysClassGen.addMethodDefinition(MethodSchema(TypeSchema("Halley::SystemMessageBridge"), {}, "getMessageBridge"), "return doGetMessageBridge();");
+	}
 
 	// Entity messages
 	bool hasReceiveEntityMessage = false;

@@ -33,9 +33,23 @@ namespace Halley {
 	// True if T::onEntityModified() exists
 	template <class, class, class = Halley::void_t<>> struct HasOnEntitiesReloaded : std::false_type {};
 	template <class T, class F> struct HasOnEntitiesReloaded<T, F, decltype(std::declval<T>().onEntitiesReloaded(std::declval<Span<F*>>()))> : std::true_type {};
+
+	class SystemMessageBridge {
+	public:
+		SystemMessageBridge() = default;
+		SystemMessageBridge(System& system);
+
+		bool isValid() const;
+		void sendMessageToEntity(EntityId target, int msgId, gsl::span<const gsl::byte> data);
+
+	private:
+		System* system = nullptr;
+	};
 	
 	class System
 	{
+		friend class SystemMessageBridge;
+		
 	public:
 		System(Vector<FamilyBindingBase*> families, Vector<int> messageTypesReceived);
 		virtual ~System() {}
@@ -55,6 +69,7 @@ namespace Halley {
 		const HalleyAPI& doGetAPI() const { return *api; }
 		World& doGetWorld() const { return *world; }
 		Resources& doGetResources() const { return *resources; }
+		SystemMessageBridge doGetMessageBridge() { return SystemMessageBridge(*this); }
 
 		virtual void initBase() {}
 		virtual void deInit() {}

@@ -21,7 +21,7 @@ namespace Halley {
         void sendEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds, const EntityClientSharedData& clientData);
         void receiveEntityPacket(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet);
 
-        void destroy();
+    	void destroy();
         bool isAlive() const;
 
     private:

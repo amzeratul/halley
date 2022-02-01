@@ -24,7 +24,8 @@ namespace Halley
 		Pure = 0,
 		API = 1,
 		World = 2,
-		Resources = 4
+		Resources = 4,
+		MessageBridge = 8
 	};
 
 	enum class SystemMethod

@@ -1,10 +1,12 @@
 #include "entity/entity_network_session.h"
 
 #include "halley/entity/entity_factory.h"
+#include "halley/entity/system.h"
 #include "halley/entity/world.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 
+class NetworkComponent;
 using namespace Halley;
 
 EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, std::set<String> ignoreComponents, IEntityNetworkSessionListener* listener)
@@ -35,9 +37,10 @@ EntityNetworkSession::~EntityNetworkSession()
 	session->removeListener(this);
 }
 
-void EntityNetworkSession::setWorld(World& world)
+void EntityNetworkSession::setWorld(World& world, SystemMessageBridge bridge)
 {
 	factory = std::make_shared<EntityFactory>(world, resources);
+	messageBridge = bridge;
 
 	// Clear queue
 	if (!queuedPackets.empty()) {
@@ -86,6 +89,9 @@ void EntityNetworkSession::receiveUpdates()
 		case EntityNetworkHeaderType::ReadyToStart:
 			onReceiveReady(fromPeerId);
 			break;
+		case EntityNetworkHeaderType::MessageToEntity:
+			onReceiveMessageToEntity(fromPeerId, std::move(packet));
+			break;
 		}
 	}
 }
@@ -110,6 +116,31 @@ void EntityNetworkSession::onReceiveReady(NetworkSession::PeerId fromPeerId)
 	Logger::logDev("onReceiveReady from " + toString(int(fromPeerId)));
 	if (fromPeerId == 0) {
 		readyToStart = true;
+	}
+}
+
+void EntityNetworkSession::sendEntityMessage(EntityRef entity, int messageId, Bytes messageData)
+{
+	const NetworkSession::PeerId toPeerId = entity.getOwnerPeerId().value();
+
+	auto packet = OutboundNetworkPacket(std::move(messageData));
+	packet.addHeader(EntityNetworkMessageToEntityHeader(entity.getInstanceUUID(), messageId));
+	packet.addHeader(EntityNetworkHeader(EntityNetworkHeaderType::MessageToEntity));
+	session->sendToPeer(packet, toPeerId);
+}
+
+void EntityNetworkSession::onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, InboundNetworkPacket packet)
+{
+	EntityNetworkMessageToEntityHeader header;
+	packet.extractHeader(header);
+
+	auto& world = factory->getWorld();
+
+	const auto entity = world.findEntity(header.entityUUID);
+	if (entity) {
+		messageBridge.sendMessageToEntity(entity->getEntityId(), header.messageType, packet.getBytes());
+	} else {
+		Logger::logError("Received message for entity " + toString(header.entityUUID) + ", but entity was not found.");
 	}
 }
 
@@ -199,6 +230,12 @@ std::vector<Rect4i> EntityNetworkSession::getRemoteViewPorts() const
 		}
 	}
 	return result;
+}
+
+bool EntityNetworkSession::isRemote(EntityRef entity) const
+{
+	const auto myId = session->getMyPeerId().value();
+	return entity.getOwnerPeerId().value_or(myId) != myId;
 }
 
 NetworkSession& EntityNetworkSession::getSession() const

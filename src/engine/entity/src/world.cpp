@@ -5,6 +5,7 @@
 #include "world.h"
 #include "system.h"
 #include "family.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/text/string_converter.h"
 #include "halley/support/debug.h"
 #include "halley/file_formats/config_file.h"
@@ -691,4 +692,30 @@ void World::processSystemMessages(TimeLine timeline)
 		}
 	}
 	pendingSystemMessages.clear();
+}
+
+bool World::isEntityNetworkRemote(EntityId entityId)
+{
+	if (networkInterface) {
+		return networkInterface->isRemote(getEntity(entityId));
+	}
+	return false;
+}
+
+void World::sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr<Message> msg)
+{
+	if (networkInterface) {
+		networkInterface->sendEntityMessage(getEntity(entityId), messageId, Serializer::toBytes(*msg));
+	}
+}
+
+void World::receiveNetworkMessage(EntityId entityId, int messageId, Bytes messageData)
+{
+	// TODO: deserialize message
+	
+}
+
+void World::setNetworkInterface(IWorldNetworkInterface* interface)
+{
+	networkInterface = interface;
 }

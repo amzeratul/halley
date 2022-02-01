@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "halley/maths/uuid.h"
+
 namespace Halley {
     using EntityNetworkId = uint16_t;
 
@@ -9,7 +11,10 @@ namespace Halley {
         Create,
         Update,
         Destroy,
-    	ReadyToStart
+    	ReadyToStart,
+    	MessageToEntity,
+    	MessageToSystem, // Not implemented
+    	RPC, // Not implemented
     };
     
     struct EntityNetworkHeader {
@@ -24,5 +29,13 @@ namespace Halley {
 
         EntityNetworkEntityHeader() = default;
         EntityNetworkEntityHeader(EntityNetworkId entityId) : entityId(entityId) {}
+	};
+
+	struct EntityNetworkMessageToEntityHeader {
+        UUID entityUUID;
+        int messageType = 0;
+
+        EntityNetworkMessageToEntityHeader() = default;
+        EntityNetworkMessageToEntityHeader(UUID uuid, int messageType) : entityUUID(uuid), messageType(messageType) {}
 	};
 }

@@ -1,10 +1,31 @@
 #include "system.h"
 #include <halley/data_structures/flat_map.h>
 #include "halley/support/debug.h"
+#include "halley/support/logger.h"
 #include "halley/support/profiler.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
+
+SystemMessageBridge::SystemMessageBridge(System& system)
+	: system(&system)
+{
+}
+
+bool SystemMessageBridge::isValid() const
+{
+	return system != nullptr;
+}
+
+void SystemMessageBridge::sendMessageToEntity(EntityId target, int msgId, gsl::span<const gsl::byte> data)
+{
+	std::unique_ptr<Message> msg;
+
+	// TODO: deserialize message
+	Logger::logError("Message deserialization not implemented");
+	
+	system->doSendMessage(target, std::move(msg), msgId);
+}
 
 System::System(Vector<FamilyBindingBase*> uninitializedFamilies, Vector<int> messageTypesReceived)
 	: families(std::move(uninitializedFamilies))
@@ -90,7 +111,11 @@ void System::processMessages()
 
 void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, int id)
 {
-	outbox.emplace_back(std::make_pair(entityId, MessageEntry(std::move(msg), id, systemId)));
+	if (world->isEntityNetworkRemote(entityId)) {
+		world->sendNetworkMessage(entityId, id, std::move(msg));
+	} else {
+		outbox.emplace_back(std::make_pair(entityId, MessageEntry(std::move(msg), id, systemId)));
+	}
 }
 
 void System::dispatchMessages()
