@@ -100,6 +100,8 @@ namespace Halley {
 
 		bool readyToStart = false;
 
+		bool canProcessMessage(EntityNetworkHeaderType type);
+		void processMessage(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet);
 		void onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet);
 		void onReceiveReady(NetworkSession::PeerId fromPeerId);
 		void onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, InboundNetworkPacket packet);
