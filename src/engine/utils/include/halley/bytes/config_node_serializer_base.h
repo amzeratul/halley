@@ -27,13 +27,6 @@ namespace Halley {
 			return static_cast<int>(v) | makeMask(vs...);
 		}
 	}
-
-	template <typename T>
-    class ConfigNodeSerializerEnumUtils {
-	public:
-	    static T parseEnum(const ConfigNode& node);
-		static ConfigNode fromEnum(T value);
-    };
 	
 	class EntitySerializationContext {
 	public:
@@ -46,6 +39,13 @@ namespace Halley {
 			return (entitySerializationTypeMask & typeMask) != 0;
 		}
 	};
+
+	template <typename T>
+    class ConfigNodeSerializerEnumUtils {
+	public:
+	    static T parseEnum(const ConfigNode& node);
+		static ConfigNode fromEnum(T value);
+    };
 
     template <typename T>
     class ConfigNodeSerializer {

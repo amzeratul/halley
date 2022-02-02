@@ -133,7 +133,7 @@ namespace Halley {
 		void setNetworkInterface(IWorldNetworkInterface* interface);
 		bool isEntityNetworkRemote(EntityId entityId);
 		void sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr<Message> msg);
-		std::unique_ptr<Message> deserializeMessage(int msgId, gsl::span<const std::byte> data) const;
+		std::unique_ptr<Message> deserializeMessage(int msgId, gsl::span<const std::byte> data);
 
 		bool isDevMode() const;
 

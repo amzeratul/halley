@@ -22,6 +22,9 @@ namespace Halley {
 		String toString() const;
 		static String toUUID(const EntityId& id, const EntitySerializationContext& context);
 		static EntityId fromUUID(const String& uuidStr, const EntitySerializationContext& context);
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 	};
 	
 	template <>

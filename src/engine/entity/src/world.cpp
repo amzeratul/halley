@@ -710,14 +710,20 @@ bool World::isEntityNetworkRemote(EntityId entityId)
 void World::sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr<Message> msg)
 {
 	if (networkInterface) {
-		networkInterface->sendEntityMessage(getEntity(entityId), messageId, Serializer::toBytes(*msg));
+		auto options = SerializerOptions(SerializerOptions::maxVersion);
+		options.world = this;
+		networkInterface->sendEntityMessage(getEntity(entityId), messageId, Serializer::toBytes(*msg, options));
 	}
 }
 
-std::unique_ptr<Message> World::deserializeMessage(int msgId, gsl::span<const std::byte> data) const
+std::unique_ptr<Message> World::deserializeMessage(int msgId, gsl::span<const std::byte> data)
 {
 	auto msg = createMessage(msgId);
+
+	auto options = SerializerOptions(SerializerOptions::maxVersion);
+	options.world = this;
 	Deserializer::fromBytes(*msg, data);
+
 	return msg;
 }
 
