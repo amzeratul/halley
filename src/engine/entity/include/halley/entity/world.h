@@ -38,7 +38,7 @@ namespace Halley {
 	class World
 	{
 	public:
-		World(const HalleyAPI& api, Resources& resources, CreateComponentFunction createComponent);
+		World(const HalleyAPI& api, Resources& resources, CreateComponentFunction createComponent, CreateMessageFunction createMessage);
 		~World();
 
 		static std::unique_ptr<World> make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode);
@@ -133,7 +133,7 @@ namespace Halley {
 		void setNetworkInterface(IWorldNetworkInterface* interface);
 		bool isEntityNetworkRemote(EntityId entityId);
 		void sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr<Message> msg);
-		void receiveNetworkMessage(EntityId entityId, int messageId, Bytes messageData);
+		std::unique_ptr<Message> deserializeMessage(int msgId, gsl::span<const std::byte> data) const;
 
 		bool isDevMode() const;
 
@@ -145,6 +145,7 @@ namespace Halley {
 		Resources& resources;
 		std::array<Vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;
 		CreateComponentFunction createComponent;
+		CreateMessageFunction createMessage;
 		bool entityDirty = false;
 		bool entityReloaded = false;
 		bool editor = false;

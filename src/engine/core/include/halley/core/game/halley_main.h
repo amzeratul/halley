@@ -37,6 +37,7 @@ namespace Halley
 	{
 		CreateEntityFunctions::getCreateComponent() = createComponent;
 		CreateEntityFunctions::getCreateSystem() = createSystem;
+		CreateEntityFunctions::getCreateMessage() = createMessage;
 	}
 }
 

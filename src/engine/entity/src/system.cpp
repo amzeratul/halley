@@ -19,12 +19,7 @@ bool SystemMessageBridge::isValid() const
 
 void SystemMessageBridge::sendMessageToEntity(EntityId target, int msgId, gsl::span<const gsl::byte> data)
 {
-	std::unique_ptr<Message> msg;
-
-	// TODO: deserialize message
-	Logger::logError("Message deserialization not implemented");
-	
-	system->doSendMessage(target, std::move(msg), msgId);
+	system->sendRawMessage(target, msgId, data);
 }
 
 System::System(Vector<FamilyBindingBase*> uninitializedFamilies, Vector<int> messageTypesReceived)
@@ -159,6 +154,11 @@ void System::processSystemMessages()
 size_t System::getSystemMessagesInInbox() const
 {
 	return systemMessageInbox.size();
+}
+
+void System::sendRawMessage(EntityId target, int msgId, gsl::span<const std::byte> data)
+{
+	doSendMessage(target, world->deserializeMessage(msgId, data), msgId);
 }
 
 void System::doUpdate(Time time) {

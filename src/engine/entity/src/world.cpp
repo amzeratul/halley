@@ -17,10 +17,11 @@
 
 using namespace Halley;
 
-World::World(const HalleyAPI& api, Resources& resources, CreateComponentFunction createComponent)
+World::World(const HalleyAPI& api, Resources& resources, CreateComponentFunction createComponent, CreateMessageFunction createMessage)
 	: api(api)
 	, resources(resources)
 	, createComponent(std::move(createComponent))
+	, createMessage(std::move(createMessage))
 	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
 	, componentDeleterTable(std::make_shared<ComponentDeleterTable>())
 	, entityPool(std::make_shared<PoolAllocator<Entity>>())
@@ -54,7 +55,7 @@ World::~World()
 
 std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode)
 {
-	auto world = std::make_unique<World>(api, resources, CreateEntityFunctions::getCreateComponent());
+	auto world = std::make_unique<World>(api, resources, CreateEntityFunctions::getCreateComponent(), CreateEntityFunctions::getCreateMessage());
 	const auto& sceneConfig = resources.get<ConfigFile>(sceneName)->getRoot();
 	world->loadSystems(sceneConfig, CreateEntityFunctions::getCreateSystem());
 	return world;
@@ -709,10 +710,11 @@ void World::sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr
 	}
 }
 
-void World::receiveNetworkMessage(EntityId entityId, int messageId, Bytes messageData)
+std::unique_ptr<Message> World::deserializeMessage(int msgId, gsl::span<const std::byte> data) const
 {
-	// TODO: deserialize message
-	
+	auto msg = createMessage(msgId);
+	Deserializer::fromBytes(*msg, data);
+	return msg;
 }
 
 void World::setNetworkInterface(IWorldNetworkInterface* interface)

@@ -65,6 +65,8 @@ namespace Halley {
 		void processSystemMessages();
 		size_t getSystemMessagesInInbox() const;
 
+		void sendRawMessage(EntityId target, int msgId, gsl::span<const std::byte> data);
+
 	protected:
 		const HalleyAPI& doGetAPI() const { return *api; }
 		World& doGetWorld() const { return *world; }

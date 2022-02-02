@@ -64,6 +64,16 @@ static ComponentReflectorList makeComponentReflectors() {
 	return result;
 }
 
+
+using MessageFactory = std::function<std::unique_ptr<Halley::Message>()>;
+using MessageFactoryList = std::vector<MessageFactory>;
+
+static MessageFactoryList makeMessageFactories() {
+	MessageFactoryList result;
+	result.reserve(0);
+	return result;
+}
+
 namespace Halley {
 	std::unique_ptr<System> createSystem(String name) {
 		static SystemFactoryMap factories = makeSystemFactories();
@@ -81,6 +91,11 @@ namespace Halley {
 			throw Exception("Component not found: " + name, HalleyExceptions::Entity);
 		}
 		return result->second(context, entity, componentData);
+	}
+
+	std::unique_ptr<Halley::Message> createMessage(int msgId) {
+		static MessageFactoryList factories = makeMessageFactories();
+		return factories.at(msgId)();
 	}
 
 	ComponentReflector& getComponentReflector(int componentId) {

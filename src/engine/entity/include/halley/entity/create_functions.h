@@ -4,7 +4,8 @@
 #include <functional>
 
 namespace Halley {
-    class EntityFactoryContext;
+	class Message;
+	class EntityFactoryContext;
 	class EntityRef;
 	class String;
 	class ConfigNode;
@@ -18,10 +19,12 @@ namespace Halley {
 	
     using CreateComponentFunction = std::function<CreateComponentFunctionResult(const EntityFactoryContext& context, const String& componentName, EntityRef& entity, const ConfigNode& componentData)>;
     using CreateSystemFunction = std::function<std::unique_ptr<System>(String)>;
+	using CreateMessageFunction = std::function<std::unique_ptr<Message>(int)>;
 
 	class CreateEntityFunctions {
 	public:
 		static CreateComponentFunction& getCreateComponent();
 		static CreateSystemFunction& getCreateSystem();
+		static CreateMessageFunction& getCreateMessage();
 	};
 }

@@ -15,7 +15,7 @@ namespace Halley
 		CodeGenResult generateMessage(MessageSchema message) override;
 		CodeGenResult generateSystemMessage(SystemMessageSchema message) override;
 
-		CodeGenResult generateRegistry(const Vector<ComponentSchema>& components, const Vector<SystemSchema>& systems) override;
+		CodeGenResult generateRegistry(const Vector<ComponentSchema>& components, const Vector<SystemSchema>& systems, const Vector<MessageSchema>& messagesRaw) override;
 
 	private:
 		Vector<String> generateComponentHeader(ComponentSchema component);
@@ -26,5 +26,6 @@ namespace Halley
 		Path makePath(Path dir, String className, String extension) const;
 		String toFileName(String className) const;
 		String getComponentFileName(const ComponentSchema& component) const;
+		String getMessageFileName(const MessageSchema& message) const;
 	};
 }

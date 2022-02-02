@@ -16,10 +16,13 @@ namespace Halley
 		MessageSchema();
 		explicit MessageSchema(YAML::Node node, bool generate);
 
+		bool operator<(const MessageSchema& other) const;
+
 		int id = -1;
 		String name;
 		Vector<MemberSchema> members;
 		HashSet<String> includeFiles;
+		bool serializable = false;
 		bool generate = false;
 	};
 }
