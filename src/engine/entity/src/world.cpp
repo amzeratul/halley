@@ -3,6 +3,9 @@
 #include <halley/support/exception.h>
 #include <halley/utils/utils.h>
 #include "world.h"
+
+#include <cassert>
+
 #include "system.h"
 #include "family.h"
 #include "halley/bytes/byte_serializer.h"
@@ -203,6 +206,7 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 		e.setParent(parent.value());
 	}
 
+	assert(uuidMap.find(uuid) == uuidMap.end()); // No duplicate UUIDs allowed
 	uuidMap[uuid] = entity;
 	
 	return e;

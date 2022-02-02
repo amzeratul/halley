@@ -294,11 +294,11 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	// Serialize & deserialize methods
 	gen.addBlankLine()
 		.addMethodDefinition(MethodSchema(TypeSchema("Halley::ConfigNode"), {
-			VariableSchema(TypeSchema("Halley::ConfigNodeSerializationContext&", true), "context")
+			VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "context")
 		}, "serialize", true), serializeBody)
 		.addBlankLine()
 		.addMethodDefinition(MethodSchema(TypeSchema("void"), {
-			VariableSchema(TypeSchema("Halley::ConfigNodeSerializationContext&", true), "context"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "node")
+			VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "context"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "node")
 		}, "deserialize"), deserializeBody)
 		.addBlankLine();
 

@@ -36,7 +36,7 @@ namespace Halley {
 	template<>
 	class ConfigNodeSerializer<NavigationPathFollower> {
 	public:
-		ConfigNode serialize(const NavigationPathFollower& follower, const ConfigNodeSerializationContext& context);
-		NavigationPathFollower deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node);
+		ConfigNode serialize(const NavigationPathFollower& follower, const EntitySerializationContext& context);
+		NavigationPathFollower deserialize(const EntitySerializationContext& context, const ConfigNode& node);
 	};
 }

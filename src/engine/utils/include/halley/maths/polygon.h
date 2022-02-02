@@ -158,7 +158,7 @@ namespace Halley {
 	template<>
 	class ConfigNodeSerializer<Polygon> {
 	public:
-		ConfigNode serialize(const Polygon& polygon, const ConfigNodeSerializationContext&);
-		Polygon deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node);
+		ConfigNode serialize(const Polygon& polygon, const EntitySerializationContext&);
+		Polygon deserialize(const EntitySerializationContext&, const ConfigNode& node);
 	};
 }

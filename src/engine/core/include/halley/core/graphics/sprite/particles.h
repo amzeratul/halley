@@ -100,7 +100,7 @@ namespace Halley {
 	template<>
 	class ConfigNodeSerializer<Particles> {
 	public:
-		ConfigNode serialize(const Particles& particles, const ConfigNodeSerializationContext& context);
-		Particles deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node);
+		ConfigNode serialize(const Particles& particles, const EntitySerializationContext& context);
+		Particles deserialize(const EntitySerializationContext& context, const ConfigNode& node);
 	};
 }

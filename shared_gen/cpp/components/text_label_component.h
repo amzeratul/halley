@@ -23,7 +23,7 @@ public:
 	{
 	}
 
-	Halley::ConfigNode serialize(const Halley::ConfigNodeSerializationContext& context) const {
+	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& context) const {
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode node = Halley::ConfigNode::MapType();
 		Halley::EntityConfigNodeSerializer<decltype(text)>::serialize(text, Halley::TextRenderer{}, context, node, "text", makeMask(Type::Prefab, Type::SaveData));
@@ -32,7 +32,7 @@ public:
 		return node;
 	}
 
-	void deserialize(const Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node) {
+	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node) {
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(text)>::deserialize(text, Halley::TextRenderer{}, context, node, "text", makeMask(Type::Prefab, Type::SaveData));
 		Halley::EntityConfigNodeSerializer<decltype(layer)>::deserialize(layer, int{ 0 }, context, node, "layer", makeMask(Type::Prefab, Type::SaveData));

@@ -35,7 +35,7 @@ namespace Halley {
 		static ConfigNode fromEnum(T value);
     };
 	
-	class ConfigNodeSerializationContext {
+	class EntitySerializationContext {
 	public:
 		Resources* resources = nullptr;
 		const EntityFactoryContext* entityContext = nullptr;
@@ -50,7 +50,7 @@ namespace Halley {
     template <typename T>
     class ConfigNodeSerializer {
     public:
-        ConfigNode serialize(const T& src, const ConfigNodeSerializationContext& context)
+        ConfigNode serialize(const T& src, const EntitySerializationContext& context)
         {
         	if constexpr (std::is_enum_v<T>) {
         		return ConfigNodeSerializerEnumUtils<T>::fromEnum(src);
@@ -59,7 +59,7 @@ namespace Halley {
             }
         }
     	
-        T deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node)
+        T deserialize(const EntitySerializationContext&, const ConfigNode& node)
         {
         	if constexpr (std::is_enum_v<T>) {
         		return ConfigNodeSerializerEnumUtils<T>::parseEnum(node);

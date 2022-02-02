@@ -9,13 +9,13 @@ namespace Halley {
 	public:
 		virtual ~IScriptStateData() = default;
 
-		virtual ConfigNode toConfigNode(const ConfigNodeSerializationContext& context) = 0;
+		virtual ConfigNode toConfigNode(const EntitySerializationContext& context) = 0;
 	};
 
 	class ScriptStateThread {
 	public:
 		ScriptStateThread();
-		ScriptStateThread(const ConfigNode& node, const ConfigNodeSerializationContext& context);
+		ScriptStateThread(const ConfigNode& node, const EntitySerializationContext& context);
 		explicit ScriptStateThread(uint32_t startNode);
 
 		ScriptStateThread(const ScriptStateThread& other);
@@ -33,7 +33,7 @@ namespace Halley {
 
 		float& getTimeSlice() { return timeSlice; }
 
-		ConfigNode toConfigNode(const ConfigNodeSerializationContext& context) const;
+		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
 		bool hasPendingNodeData() const;
 		ConfigNode getPendingNodeData();
@@ -61,7 +61,7 @@ namespace Halley {
     	};
 
     	ScriptState();
-		ScriptState(const ConfigNode& node, const ConfigNodeSerializationContext& context);
+		ScriptState(const ConfigNode& node, const EntitySerializationContext& context);
 
     	bool hasStarted() const { return started; }
     	void start(OptionalLite<uint32_t> startNode, uint64_t graphHash);
@@ -69,7 +69,7 @@ namespace Halley {
     	
     	std::vector<ScriptStateThread>& getThreads() { return threads; }
 
-		ConfigNode toConfigNode(const ConfigNodeSerializationContext& context) const;
+		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
         uint64_t getGraphHash() const { return graphHash; }
 
     	bool hasThreadAt(uint32_t node) const;
@@ -112,15 +112,15 @@ namespace Halley {
 	template<>
 	class ConfigNodeSerializer<ScriptState> {
 	public:
-		ConfigNode serialize(const ScriptState& state, const ConfigNodeSerializationContext& context);
-		ScriptState deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node);
+		ConfigNode serialize(const ScriptState& state, const EntitySerializationContext& context);
+		ScriptState deserialize(const EntitySerializationContext& context, const ConfigNode& node);
 	};
 	
 	template<>
 	class ConfigNodeSerializer<ScriptStateThread> {
 	public:
-		ConfigNode serialize(const ScriptStateThread& thread, const ConfigNodeSerializationContext& context);
-		ScriptStateThread deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node);
+		ConfigNode serialize(const ScriptStateThread& thread, const EntitySerializationContext& context);
+		ScriptStateThread deserialize(const EntitySerializationContext& context, const ConfigNode& node);
 	};
 
 }

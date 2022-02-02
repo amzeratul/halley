@@ -18,7 +18,7 @@ String EntityId::toString() const
 	return Halley::toString(value);
 }
 
-String EntityId::toUUID(const EntityId& id, const ConfigNodeSerializationContext& context)
+String EntityId::toUUID(const EntityId& id, const EntitySerializationContext& context)
 {
 	if (!context.entityContext) {
 		return "";
@@ -27,7 +27,7 @@ String EntityId::toUUID(const EntityId& id, const ConfigNodeSerializationContext
 	return world.getEntity(id).getInstanceUUID().toString();
 }
 
-EntityId EntityId::fromUUID(const String& uuidStr, const ConfigNodeSerializationContext& context)
+EntityId EntityId::fromUUID(const String& uuidStr, const EntitySerializationContext& context)
 {
 	if (!context.entityContext) {
 		return EntityId();

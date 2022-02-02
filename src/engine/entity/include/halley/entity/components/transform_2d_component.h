@@ -54,7 +54,7 @@ public:
 	uint16_t getRevision() const { return revision; }
 	uint8_t getWorldPartition() const { return worldPartition; }
 
-	void deserialize(const Halley::ConfigNodeSerializationContext& context, const Halley::ConfigNode& node);
+	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node);
 
 private:
 	friend class Halley::EntityRef;

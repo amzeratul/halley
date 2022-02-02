@@ -640,7 +640,7 @@ Sprite& Sprite::setOuterBorder(Vector4s border)
 	return *this;
 }
 
-ConfigNode ConfigNodeSerializer<Sprite>::serialize(const Sprite& sprite, const ConfigNodeSerializationContext& context)
+ConfigNode ConfigNodeSerializer<Sprite>::serialize(const Sprite& sprite, const EntitySerializationContext& context)
 {
 	// TODO
 	// How do I even do this, though...
@@ -648,14 +648,14 @@ ConfigNode ConfigNodeSerializer<Sprite>::serialize(const Sprite& sprite, const C
 	return node;
 }
 
-Sprite ConfigNodeSerializer<Sprite>::deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+Sprite ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 {
 	Sprite sprite;
 	deserialize(context, node, sprite);
 	return sprite;
 }
 
-void ConfigNodeSerializer<Sprite>::deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node, Sprite& sprite)
+void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, Sprite& sprite)
 {
 	if (node.getType() == ConfigNodeType::Undefined) {
 		return;

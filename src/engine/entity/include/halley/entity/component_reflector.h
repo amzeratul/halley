@@ -6,7 +6,7 @@ namespace Halley {
     	virtual ~ComponentReflector() = default;
 
     	virtual const char* getName() const = 0;
-    	virtual ConfigNode serialize(const ConfigNodeSerializationContext& context, const Component& component) const = 0;
+    	virtual ConfigNode serialize(const EntitySerializationContext& context, const Component& component) const = 0;
     };
 
 	template <typename T>
@@ -17,7 +17,7 @@ namespace Halley {
 			return T::componentName;
 		}
 		
-		ConfigNode serialize(const ConfigNodeSerializationContext& context, const Component& component) const override
+		ConfigNode serialize(const EntitySerializationContext& context, const Component& component) const override
 		{
 			return static_cast<const T&>(component).serialize(context);
 		}
