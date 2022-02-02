@@ -303,11 +303,12 @@ void Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
 
 std::optional<uint8_t> Entity::getOwnerPeerId() const
 {
-	auto* networkComponent = tryGetComponent<NetworkComponent>();
+	const auto* networkComponent = tryGetComponent<NetworkComponent>();
 	if (networkComponent) {
-		networkComponent->ownerId;
+		return networkComponent->ownerId;
+	} else {
+		return {};
 	}
-	return {};
 }
 
 void Entity::doDestroy(bool updateParenting)
