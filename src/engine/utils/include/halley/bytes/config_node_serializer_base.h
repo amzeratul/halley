@@ -40,6 +40,8 @@ namespace Halley {
 		}
 	};
 
+	using ConfigNodeSerializationContext [[deprecated]] = EntitySerializationContext;
+
 	template <typename T>
     class ConfigNodeSerializerEnumUtils {
 	public:
