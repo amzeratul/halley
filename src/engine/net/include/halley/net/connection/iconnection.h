@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 namespace Halley
 {
 	class InboundNetworkPacket;
