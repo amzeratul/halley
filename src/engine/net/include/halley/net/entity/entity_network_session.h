@@ -66,7 +66,7 @@ namespace Halley {
 
 		std::vector<Rect4i> getRemoteViewPorts() const;
 
-		bool isRemote(EntityRef entity) const override;
+		bool isRemote(ConstEntityRef entity) const override;
 		void sendEntityMessage(EntityRef entity, int messageId, Bytes messageData) override;
 	
 	protected:

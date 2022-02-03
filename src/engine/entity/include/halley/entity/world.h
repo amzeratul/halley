@@ -31,7 +31,7 @@ namespace Halley {
 	public:
 		virtual ~IWorldNetworkInterface() = default;
 
-		virtual bool isRemote(EntityRef entity) const = 0;
+		virtual bool isRemote(ConstEntityRef entity) const = 0;
 		virtual void sendEntityMessage(EntityRef entity, int messageId, Bytes messageData) = 0;
 	};
 
@@ -131,7 +131,9 @@ namespace Halley {
 		size_t sendSystemMessage(SystemMessageContext context, const String& targetSystem);
 
 		void setNetworkInterface(IWorldNetworkInterface* interface);
-		bool isEntityNetworkRemote(EntityId entityId);
+		bool isEntityNetworkRemote(EntityId entityId) const;
+		bool isEntityNetworkRemote(EntityRef entity) const;
+		bool isEntityNetworkRemote(ConstEntityRef entity) const;
 		void sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr<Message> msg);
 		std::unique_ptr<Message> deserializeMessage(int msgId, gsl::span<const std::byte> data);
 

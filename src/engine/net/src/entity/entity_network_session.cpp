@@ -244,7 +244,7 @@ std::vector<Rect4i> EntityNetworkSession::getRemoteViewPorts() const
 	return result;
 }
 
-bool EntityNetworkSession::isRemote(EntityRef entity) const
+bool EntityNetworkSession::isRemote(ConstEntityRef entity) const
 {
 	const auto myId = session->getMyPeerId().value();
 	return entity.getOwnerPeerId().value_or(myId) != myId;

@@ -289,6 +289,11 @@ bool Entity::isEmpty() const
 	return liveComponents == 0 && children.empty();
 }
 
+bool Entity::isRemote(const World& world) const
+{
+	return world.isEntityNetworkRemote(ConstEntityRef(*this, world));
+}
+
 void Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
 {
 	auto* networkComponent = tryGetComponent<NetworkComponent>();

@@ -699,10 +699,23 @@ void World::processSystemMessages(TimeLine timeline)
 	pendingSystemMessages.clear();
 }
 
-bool World::isEntityNetworkRemote(EntityId entityId)
+bool World::isEntityNetworkRemote(EntityId entityId) const
+{
+	return isEntityNetworkRemote(getEntity(entityId));
+}
+
+bool World::isEntityNetworkRemote(EntityRef entity) const
 {
 	if (networkInterface) {
-		return networkInterface->isRemote(getEntity(entityId));
+		return networkInterface->isRemote(entity);
+	}
+	return false;
+}
+
+bool World::isEntityNetworkRemote(ConstEntityRef entity) const
+{
+	if (networkInterface) {
+		return networkInterface->isRemote(entity);
 	}
 	return false;
 }
