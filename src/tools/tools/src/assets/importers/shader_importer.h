@@ -15,6 +15,6 @@ namespace Halley
 		static Bytes compileHLSL(const String& name, ShaderType type, const Bytes& data);
 
 	private:
-		static void patchGLSL(const String& name, ShaderType type, Bytes& data);
+		static void patchGLSL330(const String& name, ShaderType type, Bytes& data);
 	};
 }

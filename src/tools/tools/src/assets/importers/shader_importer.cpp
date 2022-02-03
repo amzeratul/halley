@@ -15,8 +15,8 @@
 
 using namespace Halley;
 
-thread_local String glslShaderName;
-thread_local FlatMap<String, int> glslVariantMap;
+thread_local String glsl330ShaderName;
+thread_local FlatMap<String, int> glsl330VariantMap;
 
 void ShaderImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
@@ -82,6 +82,9 @@ Bytes ShaderImporter::convertHLSL(const String& name, ShaderType type, const Byt
 	Compiler::TargetDesc target = {};
 	if (dstLanguage == "glsl") {
 		target.language = ShadingLanguage::Glsl;
+		target.version = "430";
+	} else if (dstLanguage == "glsl330") {
+		target.language = ShadingLanguage::Glsl;
 		target.version = "330";
 	} else if (dstLanguage == "metal") {
 		target.language = ShadingLanguage::Msl_iOS;
@@ -101,8 +104,8 @@ Bytes ShaderImporter::convertHLSL(const String& name, ShaderType type, const Byt
 	Bytes bytes(result.target.Size());
 	memcpy(bytes.data(), result.target.Data(), bytes.size());
 
-	if (dstLanguage == "glsl") {
-		patchGLSL(name, type, bytes);
+	if (dstLanguage == "glsl330") {
+		patchGLSL330(name, type, bytes);
 	}
 
 	return bytes;
@@ -174,7 +177,7 @@ Bytes ShaderImporter::compileHLSL(const String& name, ShaderType type, const Byt
 
 	4) Sampler names get mangled too. We try to revert them to the original names.
 */
-void ShaderImporter::patchGLSL(const String& name, ShaderType type, Bytes& data)
+void ShaderImporter::patchGLSL330(const String& name, ShaderType type, Bytes& data)
 {
 	if (type != ShaderType::Vertex && type != ShaderType::Pixel) {
 		return;
@@ -182,14 +185,14 @@ void ShaderImporter::patchGLSL(const String& name, ShaderType type, Bytes& data)
 
 	String code(reinterpret_cast<const char*>(data.data()), data.size());
 
-	if (name != glslShaderName) {
+	if (name != glsl330ShaderName) {
 		if (type == ShaderType::Vertex) {
 			Logger::logWarning("Patching GLSL only works if pixel shader is compiled before vertex shader!");
 			return;
 		}
 
-		glslShaderName = name;
-		glslVariantMap.clear();
+		glsl330ShaderName = name;
+		glsl330VariantMap.clear();
 
 		// Build a map of all vertex shader inputs, counting how often they are used.
 
@@ -204,10 +207,10 @@ void ShaderImporter::patchGLSL(const String& name, ShaderType type, Bytes& data)
 				// Store in map, counting # of occurrences.
 				String ident = code.substr(n, ne - n);
 				int count = 0;
-				if (glslVariantMap.contains(ident)) {
-					count = glslVariantMap[ident] + 1;
+				if (glsl330VariantMap.contains(ident)) {
+					count = glsl330VariantMap[ident] + 1;
 				}
-				glslVariantMap[ident] = count;
+				glsl330VariantMap[ident] = count;
 				// forward marker
 				n = ne;
 			}
@@ -219,7 +222,7 @@ void ShaderImporter::patchGLSL(const String& name, ShaderType type, Bytes& data)
 
 		int slot = 0;
 
-		for (auto& pair : glslVariantMap)
+		for (auto& pair : glsl330VariantMap)
 		{
 			size_t n = code.find(pair.first);
 			Ensures(n != String::npos);
@@ -284,7 +287,7 @@ void ShaderImporter::patchGLSL(const String& name, ShaderType type, Bytes& data)
 
 		int slot = 0;
 
-		for (auto& pair : glslVariantMap)
+		for (auto& pair : glsl330VariantMap)
 		{
 			String ident = pair.first.replaceOne("in_var_", "out_var_");
 			size_t pos = 0;

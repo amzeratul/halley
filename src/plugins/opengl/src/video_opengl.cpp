@@ -10,6 +10,7 @@
 #include <halley/core/graphics/window.h>
 #include "halley/text/string_converter.h"
 #include "constant_buffer_opengl.h"
+#include "halley/core/game/game_platform.h"
 #include "halley/core/graphics/material/uniform_type.h"
 using namespace Halley;
 
@@ -262,7 +263,7 @@ std::unique_ptr<MaterialConstantBuffer> VideoOpenGL::createConstantBuffer()
 
 String VideoOpenGL::getShaderLanguage()
 {
-	return "glsl";
+	return getPlatform() != GamePlatform::MacOS ? "glsl" : "glsl330";
 }
 
 bool VideoOpenGL::isColumnMajor() const
