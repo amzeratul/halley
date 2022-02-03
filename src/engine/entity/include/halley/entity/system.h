@@ -77,7 +77,10 @@ namespace Halley {
 		virtual void deInit() {}
 		virtual void updateBase(Time) {}
 		virtual void renderBase(RenderContext&) {}
-		virtual void onMessagesReceived(int, Message**, size_t*, size_t) {}
+
+		virtual void processMessages();
+		void doProcessMessages(FamilyBindingBase& family, gsl::span<const int> typesAccepted);
+		virtual void onMessagesReceived(int, Message**, size_t*, size_t, FamilyBindingBase&) {}
 		virtual void onSystemMessageReceived(int messageId, SystemMessage& msg, const std::function<void(std::byte*)>& callback) {}
 
 		template <typename F, typename V>
@@ -207,7 +210,6 @@ namespace Halley {
 		void onAddedToWorld(World& world, int id);
 
 		void purgeMessages();
-		void processMessages();
 		void doSendMessage(EntityId target, std::unique_ptr<Message> msg, int msgId);
 		size_t doSendSystemMessage(SystemMessageContext context, const String& targetSystem);
 		void dispatchMessages();

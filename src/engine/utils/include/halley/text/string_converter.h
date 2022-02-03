@@ -22,6 +22,8 @@ namespace Halley
 		{
 			if constexpr (std::is_enum<T>::value) {
 				return EnumNames<T>()()[int(v)];
+			} else if constexpr (std::is_same_v<T, String>) {
+				return v;
 			} else {
 				return v.toString();
 			}
@@ -159,6 +161,21 @@ namespace Halley
 		}
 	};
 
+	template<typename T>
+	struct ToStringConverter<std::vector<T>>
+	{
+		String operator()(const std::vector<T>& v) const
+		{
+			String result;
+			for (size_t i = 0; i < v.size(); i++) {
+				if (i != 0) {
+					result += ", ";
+				}
+				result += toString(v[i]);
+			}
+			return result;
+		}
+	};
 	
 	template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
 	String toString(T src, int precisionDigits = -1, char decimalSeparator = '.')

@@ -556,36 +556,53 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	if (hasReceiveEntityMessage) {
 		sysClassGen.setAccessLevel(MemberAccess::Public);
 		
-		Vector<String> body = { "switch (msgIndex) {" };
+		Vector<String> onMessagesReceivedBody = { "switch (msgIndex) {" };
+		Vector<String> processMessagesBody;
+		HashMap<String, std::vector<String>> familiesReceived;
+		
 		for (auto& msg : system.messages) {
 			if (msg.receive) {
-				body.emplace_back("case " + msg.name + "Message::messageIndex: onMessagesReceived(reinterpret_cast<" + msg.name + "Message**>(msgs), idx, n); break;");
+				onMessagesReceivedBody.emplace_back("case " + msg.name + "Message::messageIndex: onMessagesReceived(reinterpret_cast<" + msg.name + "Message**>(msgs), idx, n, reinterpret_cast<Halley::FamilyBinding<" + upperFirst(msg.family) + "Family>&>(family)); break;");
 
 				sysClassGen
 					.addMethodDeclaration(MethodSchema(TypeSchema("void"), {
 						VariableSchema(TypeSchema(msg.name + "Message&", true), "msg"),
-						VariableSchema(TypeSchema("MainFamily&"), "e")
+						VariableSchema(TypeSchema(upperFirst(msg.family) + "Family&"), "e")
 					}, "onMessageReceived", false, true, false, false, false, true))
 					.addBlankLine();
+
+				familiesReceived[msg.family].push_back(msg.name + "Message::messageIndex");
 			}
 		}
-		body.emplace_back("}");
+		onMessagesReceivedBody.emplace_back("}");
+
+		for (const auto& [familyName, msgIds]: familiesReceived) {
+			processMessagesBody.push_back("doProcessMessages(" + familyName + "Family, std::array<int, " + toString(msgIds.size()) + ">{ " + toString(msgIds) + " });");
+		}
 
 		sysClassGen
 			.setAccessLevel(MemberAccess::Private)
+			.addMethodDefinition(MethodSchema(TypeSchema("void"), {}, "processMessages", false, false, true, true), processMessagesBody)
+			.addBlankLine();
+
+		sysClassGen
 			.addMethodDefinition(MethodSchema(TypeSchema("void"), {
 				VariableSchema(TypeSchema("int"), "msgIndex"),
 				VariableSchema(TypeSchema("Halley::Message**"), "msgs"),
 				VariableSchema(TypeSchema("size_t*"), "idx"),
-				VariableSchema(TypeSchema("size_t"), "n")
-			}, "onMessagesReceived", false, false, true, true), body)
-			.addBlankLine()
-			.addLine("template <typename M>")
+				VariableSchema(TypeSchema("size_t"), "n"),
+				VariableSchema(TypeSchema("Halley::FamilyBindingBase&"), "family")
+				}, "onMessagesReceived", false, false, true, true), onMessagesReceivedBody)
+			.addBlankLine();
+
+		sysClassGen
+			.addLine("template <typename M, typename F>")
 			.addMethodDefinition(MethodSchema(TypeSchema("void"), {
 				VariableSchema(TypeSchema("M**"), "msgs"),
 				VariableSchema(TypeSchema("size_t*"), "idx"),
-				VariableSchema(TypeSchema("size_t"), "n")
-			}, "onMessagesReceived"), "for (size_t i = 0; i < n; i++) static_cast<T*>(this)->onMessageReceived(*msgs[i], mainFamily[idx[i]]);")
+				VariableSchema(TypeSchema("size_t"), "n"),
+				VariableSchema(TypeSchema("F&"), "family")
+			}, "onMessagesReceived"), "for (size_t i = 0; i < n; i++) static_cast<T*>(this)->onMessageReceived(*msgs[i], family[idx[i]]);")
 			.addBlankLine();
 	}
 
@@ -675,7 +692,7 @@ Vector<String> CodegenCPP::generateSystemStub(SystemSchema& system) const
 		if (msg.receive) {
 			actualSys
 				.addBlankLine()
-				.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(msg.name + "Message&", true), "msg"), VariableSchema(TypeSchema("MainFamily&"), "entity") }, "onMessageReceived"), "// TODO");
+				.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema(msg.name + "Message&", true), "msg"), VariableSchema(TypeSchema(upperFirst(msg.family) + "Family&"), "entity") }, "onMessageReceived"), "// TODO");
 		}
 	}
 

@@ -722,7 +722,7 @@ std::unique_ptr<Message> World::deserializeMessage(int msgId, gsl::span<const st
 
 	auto options = SerializerOptions(SerializerOptions::maxVersion);
 	options.world = this;
-	Deserializer::fromBytes(*msg, data);
+	Deserializer::fromBytes(*msg, data, options);
 
 	return msg;
 }

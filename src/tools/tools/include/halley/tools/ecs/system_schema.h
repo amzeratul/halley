@@ -46,11 +46,12 @@ namespace Halley
 	{
 	public:
 		String name;
+		String family;
 		bool send = false;
 		bool receive = false;
 
 		MessageReferenceSchema() = default;
-		MessageReferenceSchema(String name, String parameter);
+		MessageReferenceSchema(String name, const String& parameters);
 	};
 
 	class FamilySchema
