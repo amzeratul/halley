@@ -5,6 +5,7 @@
 #include <iterator>
 #include <cstdint>
 #include <limits>
+#include <algorithm>
 
 namespace Halley {
 	template <typename T, class Allocator = std::allocator<T>>
@@ -25,6 +26,15 @@ namespace Halley {
 			friend class const_iterator;
 		
 		public:
+		#ifdef __cpp_lib_concepts
+		    using iterator_concept = std::contiguous_iterator_tag;
+		#endif // __cpp_lib_concepts
+		    using iterator_category = std::random_access_iterator_tag;
+		    using value_type        = typename VectorSize32::value_type;
+		    using difference_type   = typename VectorSize32::difference_type;
+		    using pointer           = typename VectorSize32::pointer;
+		    using reference         = value_type&;
+
 			iterator() : v(nullptr) {}
 			iterator(pointer v) : v(v) {}
 			
@@ -35,13 +45,34 @@ namespace Halley {
 			iterator operator--(int) const { return iterator(v - 1); }
 			iterator operator+(size_t o) const { return iterator(v + o); }
 			iterator operator-(size_t o) const { return iterator(v - o); }
+			ptrdiff_t operator-(const iterator& other) const { return v - other.v; }
+
+			bool operator==(const iterator& other) { return v == other.v; }
+			bool operator!=(const iterator& other) { return v != other.v; }
+			bool operator<(const iterator& other) { return v < other.v; }
+			bool operator>(const iterator& other) { return v > other.v; }
+			bool operator<=(const iterator& other) { return v <= other.v; }
+			bool operator>=(const iterator& other) { return v >= other.v; }
+
+			friend void swap(iterator& a, iterator& b) noexcept { std::swap(a.v, b.v); }
 
 		private:
 			pointer v;
 		};
 
 		class const_iterator {
+			friend class VectorSize32;
+		
 		public:
+		#ifdef __cpp_lib_concepts
+		    using iterator_concept = std::contiguous_iterator_tag;
+		#endif // __cpp_lib_concepts
+		    using iterator_category = std::random_access_iterator_tag;
+		    using value_type        = typename VectorSize32::value_type;
+		    using difference_type   = typename VectorSize32::difference_type;
+		    using pointer           = typename VectorSize32::const_pointer;
+		    using reference         = const value_type&;
+
 			const_iterator() : v(nullptr) {}
 			const_iterator(const_pointer v) : v(v) {}
 			const_iterator(iterator v) : v(v.v) {}
@@ -53,7 +84,17 @@ namespace Halley {
 			const_iterator operator--(int) const { return const_iterator(v - 1); }
 			const_iterator operator+(size_t o) const { return const_iterator(v + o); }
 			const_iterator operator-(size_t o) const { return const_iterator(v - o); }
-		
+			ptrdiff_t operator-(const const_iterator& o) const { return v - o.v; }
+
+			bool operator==(const const_iterator& other) { return v == other.v; }
+			bool operator!=(const const_iterator& other) { return v != other.v; }
+			bool operator<(const const_iterator& other) { return v < other.v; }
+			bool operator>(const const_iterator& other) { return v > other.v; }
+			bool operator<=(const const_iterator& other) { return v <= other.v; }
+			bool operator>=(const const_iterator& other) { return v >= other.v; }
+
+			friend void swap(const_iterator& a, const_iterator& b) noexcept { std::swap(a.v, b.v); }
+
 		private:
 			const_pointer v;			
 		};
@@ -235,31 +276,35 @@ namespace Halley {
 
 		iterator insert(const_iterator pos, const T& value)
 		{
+			const auto idx = pos - begin();
 			push_back(value);
 			std::rotate(pos, end() - 1, end());
-			return pos;
+			return begin() + idx;
 		}
 
 		iterator insert(const_iterator pos, T&& value)
 		{
+			const auto idx = pos - begin();
 			push_back(std::move(value));
-			std::rotate(pos, end() - 1, end());
-			return pos;
+			std::rotate(de_const_iter(pos), end() - 1, end());
+			return begin() + idx;
 		}
 
 		template <class... Args>
 		iterator emplace(const_iterator pos, Args&&... args)
 		{
+			const auto idx = pos - begin();
 			emplace_back(std::forward(args));
-			std::rotate(pos, end() - 1, end());
-			return pos;
+			std::rotate(de_const_iter(pos), end() - 1, end());
+			return begin() + idx;
 		}
 
 		iterator erase(const_iterator first, const_iterator last)
 		{
-			std::rotate(first, last, end());
-			do_resize(m_size - (last - first), m_capacity);
-			return first; // ?
+			const auto idx = first - begin();
+			std::rotate(de_const_iter(first), de_const_iter(last), end());
+			resize(m_size - (last - first));
+			return begin() + idx;
 		}
 
 		iterator erase(const_iterator pos)
@@ -408,6 +453,11 @@ namespace Halley {
 		{
 			return data()[pos];
 		}
+
+		[[nodiscard]] iterator de_const_iter(const_iterator iter)
+		{
+			return iterator(const_cast<pointer>(iter.v));
+		}
 	};
 
 	template <typename T, class Allocator>
@@ -436,5 +486,11 @@ namespace Halley {
 			}
 		}
 		return false;
+	}
+
+	template<typename T, class Allocator>
+	void swap(VectorSize32<T, Allocator>& a, VectorSize32<T, Allocator>& b) noexcept
+	{
+		a.swap(b);
 	}
 }
