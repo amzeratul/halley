@@ -16,6 +16,16 @@ namespace {
 		for (int i = 0; i < 100; ++i) {
 			EXPECT_EQ(i, a[i]);
 		}
+
+		const auto b = T(5, 10);
+		EXPECT_EQ(b.size(), 5);
+		EXPECT_EQ(b.back(), 10);
+
+		const auto c = T({ 1, 2, 3 });
+		EXPECT_EQ(c.size(), 3);
+		EXPECT_EQ(c[0], 1);
+		EXPECT_EQ(c[1], 2);
+		EXPECT_EQ(c[2], 3);
 	}
 	
 	template <typename T>

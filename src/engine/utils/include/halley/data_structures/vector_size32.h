@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <limits>
 #include <algorithm>
+#include <stdexcept>
 
 namespace Halley {
 	template <typename T, class Allocator = std::allocator<T>>
@@ -127,6 +128,33 @@ namespace Halley {
 			other.m_size = 0;
 			other.m_capacity = 0;
 		}
+
+		VectorSize32(size_t n)
+			: m_data(nullptr)
+			, m_size(0)
+			, m_capacity(0)
+		{
+			resize(n);
+		}
+
+		VectorSize32(size_t n, T defaultValue)
+			: m_data(nullptr)
+			, m_size(0)
+			, m_capacity(0)
+		{
+			resize(n, std::move(defaultValue));
+		}
+
+		VectorSize32(std::initializer_list<T> list)
+			: m_data(nullptr)
+			, m_size(0)
+			, m_capacity(0)
+		{
+			reserve(list.size());
+			for (auto e: list) {
+				push_back(std::move(e));
+			}
+		}
 		
 		~VectorSize32()
 		{
@@ -203,7 +231,7 @@ namespace Halley {
 		[[nodiscard]] reference at(size_t index)
 		{
 			if (index >= m_size) {
-				[[unlikely]] throw std::out_of_range("Index out of vector range");
+				throw std::out_of_range("Index out of vector range");
 			}
 			return data()[index];
 		}
@@ -211,7 +239,7 @@ namespace Halley {
 		[[nodiscard]] const_reference at(size_t index) const
 		{
 			if (index >= m_size) {
-				[[unlikely]] throw std::out_of_range("Index out of vector range");
+				throw std::out_of_range("Index out of vector range");
 			}
 			return data()[index];			
 		}
@@ -268,7 +296,7 @@ namespace Halley {
 
 		void clear()
 		{
-			resize(0);
+			do_resize(0, [] (std::byte*) {});
 		}
 
 		iterator insert(const_iterator pos, const T& value)
@@ -315,7 +343,7 @@ namespace Halley {
 			const auto idx = m_size;
 			construct_with_ensure_capacity(m_size + 1, [&] (std::byte* data)
 			{
-				new(pointer_at(idx, data)) T(args);			
+				new(pointer_at(idx, data)) T(std::forward<Args&&...>(args)...);			
 			});
 			++m_size;
 			return elem(idx);

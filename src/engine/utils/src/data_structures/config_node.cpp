@@ -854,22 +854,22 @@ const ConfigNode& ConfigNode::operator[](size_t idx) const
 	return asSequence().at(idx);
 }
 
-std::vector<ConfigNode>::iterator ConfigNode::begin()
+Vector<ConfigNode>::iterator ConfigNode::begin()
 {
 	return asSequence().begin();
 }
 
-std::vector<ConfigNode>::iterator ConfigNode::end()
+Vector<ConfigNode>::iterator ConfigNode::end()
 {
 	return asSequence().end();
 }
 
-std::vector<ConfigNode>::const_iterator ConfigNode::begin() const
+Vector<ConfigNode>::const_iterator ConfigNode::begin() const
 {
 	return asSequence().begin();
 }
 
-std::vector<ConfigNode>::const_iterator ConfigNode::end() const
+Vector<ConfigNode>::const_iterator ConfigNode::end() const
 {
 	return asSequence().end();
 }
