@@ -96,7 +96,7 @@ namespace Halley {
 
 	public:
 		using MapType = HashMap<String, ConfigNode>;
-		using SequenceType = std::vector<ConfigNode>;
+		using SequenceType = Vector<ConfigNode>;
 
 		struct NoopType {};
 		struct DelType {};

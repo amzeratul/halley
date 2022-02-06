@@ -127,6 +127,7 @@ set(HEADERS
         "include/halley/data_structures/ring_buffer.h"
         "include/halley/data_structures/tree_map.h"
         "include/halley/data_structures/vector.h"
+        "include/halley/data_structures/vector_size32.h"
         
         "include/halley/file/directory_monitor.h"
         "include/halley/file/path.h"
