@@ -17,7 +17,7 @@ namespace Halley {
 		using const_reference = const T&;
 		using pointer = typename std::allocator_traits<Allocator>::pointer;
 		using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
-		constexpr float growth_factor = 2.0f;
+		constexpr static float growth_factor = 2.0f;
 
 		class const_iterator;
 		
@@ -356,6 +356,11 @@ namespace Halley {
 		size_type m_size;
 		size_type m_capacity;
 
+		void change_capacity(size_type newCapacity)
+		{
+			change_capacity(newCapacity, [](std::byte*) {});
+		}
+
 		template <typename F>
 		void change_capacity(size_type newCapacity, const F& construct)
 		{
@@ -396,12 +401,12 @@ namespace Halley {
 
 		[[nodiscard]] reference elem(size_type pos)
 		{
-			return (*data)[pos];
+			return data()[pos];
 		}
 
 		[[nodiscard]] const_reference elem(size_type pos) const
 		{
-			return (*data)[pos];
+			return data()[pos];
 		}
 	};
 

@@ -19,6 +19,7 @@ set(SOURCES
         "src/path_test.cpp"
         "src/polygon_test.cpp"
         "src/serializer_test.cpp"
+        "src/vector_test.cpp"
         )
 
 set(HEADERS
