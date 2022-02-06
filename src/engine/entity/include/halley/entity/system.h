@@ -33,9 +33,23 @@ namespace Halley {
 	// True if T::onEntityModified() exists
 	template <class, class, class = Halley::void_t<>> struct HasOnEntitiesReloaded : std::false_type {};
 	template <class T, class F> struct HasOnEntitiesReloaded<T, F, decltype(std::declval<T>().onEntitiesReloaded(std::declval<Span<F*>>()))> : std::true_type {};
+
+	class SystemMessageBridge {
+	public:
+		SystemMessageBridge() = default;
+		SystemMessageBridge(System& system);
+
+		bool isValid() const;
+		void sendMessageToEntity(EntityId target, int msgId, gsl::span<const gsl::byte> data);
+
+	private:
+		System* system = nullptr;
+	};
 	
 	class System
 	{
+		friend class SystemMessageBridge;
+		
 	public:
 		System(Vector<FamilyBindingBase*> families, Vector<int> messageTypesReceived);
 		virtual ~System() {}
@@ -51,16 +65,22 @@ namespace Halley {
 		void processSystemMessages();
 		size_t getSystemMessagesInInbox() const;
 
+		void sendRawMessage(EntityId target, int msgId, gsl::span<const std::byte> data);
+
 	protected:
 		const HalleyAPI& doGetAPI() const { return *api; }
 		World& doGetWorld() const { return *world; }
 		Resources& doGetResources() const { return *resources; }
+		SystemMessageBridge doGetMessageBridge() { return SystemMessageBridge(*this); }
 
 		virtual void initBase() {}
 		virtual void deInit() {}
 		virtual void updateBase(Time) {}
 		virtual void renderBase(RenderContext&) {}
-		virtual void onMessagesReceived(int, Message**, size_t*, size_t) {}
+
+		virtual void processMessages();
+		void doProcessMessages(FamilyBindingBase& family, gsl::span<const int> typesAccepted);
+		virtual void onMessagesReceived(int, Message**, size_t*, size_t, FamilyBindingBase&) {}
 		virtual void onSystemMessageReceived(int messageId, SystemMessage& msg, const std::function<void(std::byte*)>& callback) {}
 
 		template <typename F, typename V>
@@ -190,7 +210,6 @@ namespace Halley {
 		void onAddedToWorld(World& world, int id);
 
 		void purgeMessages();
-		void processMessages();
 		void doSendMessage(EntityId target, std::unique_ptr<Message> msg, int msgId);
 		size_t doSendSystemMessage(SystemMessageContext context, const String& targetSystem);
 		void dispatchMessages();

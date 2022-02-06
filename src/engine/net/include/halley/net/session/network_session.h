@@ -57,6 +57,7 @@ namespace Halley {
 		void setSharedDataHandler(ISharedDataHandler* sharedDataHandler);
 
 		const String& getHostAddress() const;
+		NetworkService& getService() const;
 
 		template <typename T>
 		T& getMySharedData()

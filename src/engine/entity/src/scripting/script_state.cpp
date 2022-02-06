@@ -7,7 +7,7 @@ ScriptStateThread::ScriptStateThread()
 {
 }
 
-ScriptStateThread::ScriptStateThread(const ConfigNode& node, const ConfigNodeSerializationContext& context)
+ScriptStateThread::ScriptStateThread(const ConfigNode& node, const EntitySerializationContext& context)
 {
 	timeSlice = node["timeSlice"].asFloat(0);
 	if (node.hasKey("curNode")) {
@@ -18,7 +18,7 @@ ScriptStateThread::ScriptStateThread(const ConfigNode& node, const ConfigNodeSer
 	}
 }
 
-ConfigNode ScriptStateThread::toConfigNode(const ConfigNodeSerializationContext& context) const
+ConfigNode ScriptStateThread::toConfigNode(const EntitySerializationContext& context) const
 {
 	ConfigNode::MapType node;
 	if (timeSlice != 0) {
@@ -85,7 +85,7 @@ void ScriptStateThread::advanceToNode(OptionalLite<uint32_t> node)
 ScriptState::ScriptState()
 {}
 
-ScriptState::ScriptState(const ConfigNode& node, const ConfigNodeSerializationContext& context)
+ScriptState::ScriptState(const ConfigNode& node, const EntitySerializationContext& context)
 {
 	started = node["started"].asBool(false);
 	threads = ConfigNodeSerializer<decltype(threads)>().deserialize(context, node["threads"]);
@@ -93,7 +93,7 @@ ScriptState::ScriptState(const ConfigNode& node, const ConfigNodeSerializationCo
 	variables = ConfigNodeSerializer<decltype(variables)>().deserialize(context, node["variables"]);
 }
 
-ConfigNode ScriptState::toConfigNode(const ConfigNodeSerializationContext& context) const
+ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) const
 {
 	ConfigNode::MapType node;
 	if (started) {
@@ -200,22 +200,22 @@ void ScriptState::onNodeEndedIntrospection(uint32_t nodeId)
 	node.time = 0;
 }
 
-ConfigNode ConfigNodeSerializer<ScriptState>::serialize(const ScriptState& state, const ConfigNodeSerializationContext& context)
+ConfigNode ConfigNodeSerializer<ScriptState>::serialize(const ScriptState& state, const EntitySerializationContext& context)
 {
 	return state.toConfigNode(context);
 }
 
-ScriptState ConfigNodeSerializer<ScriptState>::deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+ScriptState ConfigNodeSerializer<ScriptState>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 {
 	return ScriptState(node, context);
 }
 
-ConfigNode ConfigNodeSerializer<ScriptStateThread>::serialize(const ScriptStateThread& thread, const ConfigNodeSerializationContext& context)
+ConfigNode ConfigNodeSerializer<ScriptStateThread>::serialize(const ScriptStateThread& thread, const EntitySerializationContext& context)
 {
 	return thread.toConfigNode(context);
 }
 
-ScriptStateThread ConfigNodeSerializer<ScriptStateThread>::deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+ScriptStateThread ConfigNodeSerializer<ScriptStateThread>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 {
 	return ScriptStateThread(node, context);
 }

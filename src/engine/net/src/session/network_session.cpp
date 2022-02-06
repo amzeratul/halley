@@ -118,7 +118,7 @@ void NetworkSession::acceptConnection(std::shared_ptr<IConnection> incoming)
 
 void NetworkSession::update(Time t)
 {
-	service.update();
+	service.update(t);
 
 	// Remove dead connections
 	for (auto& peer: peers) {
@@ -153,7 +153,7 @@ void NetworkSession::update(Time t)
 
 	// Update again to dispatch anything
 	processReceive();
-	service.update();
+	service.update(0.0);
 }
 
 NetworkSessionType NetworkSession::getType() const
@@ -318,6 +318,11 @@ void NetworkSession::setSharedDataHandler(ISharedDataHandler* handler)
 const String& NetworkSession::getHostAddress() const
 {
 	return hostAddress;
+}
+
+NetworkService& NetworkSession::getService() const
+{
+	return service;
 }
 
 void NetworkSession::processReceive()

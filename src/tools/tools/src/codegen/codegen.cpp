@@ -128,6 +128,7 @@ std::vector<Path> Codegen::generateCode(const ECSData& data, Path directory)
 		Path genDir = directory / gen->getDirectory();
 		Vector<ComponentSchema> comps;
 		Vector<SystemSchema> syss;
+		Vector<MessageSchema> msgs;
 
 		for (auto& comp: components) {
 			if (comp.second.generate) {
@@ -145,6 +146,7 @@ std::vector<Path> Codegen::generateCode(const ECSData& data, Path directory)
 			if (msg.second.generate) {
 				writeFiles(genDir, gen->generateMessage(msg.second), stats);
 			}
+			msgs.push_back(msg.second);
 		}
 		for (auto& sysMsg: systemMessages) {
 			if (sysMsg.second.generate) {
@@ -153,7 +155,7 @@ std::vector<Path> Codegen::generateCode(const ECSData& data, Path directory)
 		}
 
 		// Registry
-		writeFiles(genDir, gen->generateRegistry(comps, syss), stats);
+		writeFiles(genDir, gen->generateRegistry(comps, syss, msgs), stats);
 	}
 
 	// Has changes

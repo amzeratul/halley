@@ -16,7 +16,7 @@ DevConServerConnection::DevConServerConnection(std::shared_ptr<IConnection> conn
 	DevCon::setupMessageQueue(*queue);
 }
 
-void DevConServerConnection::update()
+void DevConServerConnection::update(Time t)
 {
 	for (auto& m: queue->receiveAll()) {
 		auto& msg = dynamic_cast<DevCon::DevConMessage&>(*m);
@@ -55,12 +55,12 @@ DevConServer::DevConServer(std::unique_ptr<NetworkService> s, int port)
 	});
 }
 
-void DevConServer::update()
+void DevConServer::update(Time t)
 {
-	service->update();
+	service->update(t);
 
 	for (auto& c: connections) {
-		c->update();
+		c->update(t);
 	}
 }
 

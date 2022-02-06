@@ -34,12 +34,12 @@ bool NavigationPath::operator!=(const NavigationPath& other) const
 	return !(*this == other);
 }
 
-ConfigNode ConfigNodeSerializer<NavigationPath>::serialize(const NavigationPath& path, const ConfigNodeSerializationContext& context)
+ConfigNode ConfigNodeSerializer<NavigationPath>::serialize(const NavigationPath& path, const EntitySerializationContext& context)
 {
 	return path.toConfigNode();
 }
 
-NavigationPath ConfigNodeSerializer<NavigationPath>::deserialize(const ConfigNodeSerializationContext& context,	const ConfigNode& node)
+NavigationPath ConfigNodeSerializer<NavigationPath>::deserialize(const EntitySerializationContext& context,	const ConfigNode& node)
 {
 	return NavigationPath(node);
 }

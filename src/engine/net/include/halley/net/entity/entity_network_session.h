@@ -7,6 +7,8 @@
 #include "../session/network_session.h"
 #include "entity_network_remote_peer.h"
 #include "halley/bytes/serialization_dictionary.h"
+#include "halley/entity/system.h"
+#include "halley/entity/world.h"
 
 namespace Halley {
 	class EntityFactory;
@@ -27,7 +29,7 @@ namespace Halley {
 		void deserialize(Deserializer& s) override;
 	};
 
-	class EntityNetworkSession : NetworkSession::IListener, NetworkSession::ISharedDataHandler {
+	class EntityNetworkSession : NetworkSession::IListener, NetworkSession::ISharedDataHandler, public IWorldNetworkInterface {
     public:
 		class IEntityNetworkSessionListener {
 		public:
@@ -40,7 +42,7 @@ namespace Halley {
 		EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, std::set<String> ignoreComponents, IEntityNetworkSessionListener* listener);
 		~EntityNetworkSession() override;
 
-		void setWorld(World& world);
+		void setWorld(World& world, SystemMessageBridge bridge);
 		
 		void sendUpdates(Time t, Rect4i viewRect, gsl::span<const std::pair<EntityId, uint8_t>> entityIds); // Takes pairs of entity id and owner peer id
 		void receiveUpdates();
@@ -64,6 +66,9 @@ namespace Halley {
 
 		std::vector<Rect4i> getRemoteViewPorts() const;
 
+		bool isRemote(ConstEntityRef entity) const override;
+		void sendEntityMessage(EntityRef entity, int messageId, Bytes messageData) override;
+	
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
 		void onPeerConnected(NetworkSession::PeerId peerId) override;
@@ -81,6 +86,7 @@ namespace Halley {
 		Resources& resources;
 		std::shared_ptr<EntityFactory> factory;
 		IEntityNetworkSessionListener* listener = nullptr;
+		SystemMessageBridge messageBridge;
 		
 		EntityFactory::SerializationOptions entitySerializationOptions;
 		EntityDataDelta::Options deltaOptions;
@@ -94,8 +100,11 @@ namespace Halley {
 
 		bool readyToStart = false;
 
+		bool canProcessMessage(EntityNetworkHeaderType type);
+		void processMessage(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet);
 		void onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet);
 		void onReceiveReady(NetworkSession::PeerId fromPeerId);
+		void onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, InboundNetworkPacket packet);
 
 		void setupDictionary();
 	};

@@ -1,10 +1,12 @@
 #include "entity/entity_network_session.h"
 
 #include "halley/entity/entity_factory.h"
+#include "halley/entity/system.h"
 #include "halley/entity/world.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 
+class NetworkComponent;
 using namespace Halley;
 
 EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> session, Resources& resources, std::set<String> ignoreComponents, IEntityNetworkSessionListener* listener)
@@ -35,14 +37,15 @@ EntityNetworkSession::~EntityNetworkSession()
 	session->removeListener(this);
 }
 
-void EntityNetworkSession::setWorld(World& world)
+void EntityNetworkSession::setWorld(World& world, SystemMessageBridge bridge)
 {
 	factory = std::make_shared<EntityFactory>(world, resources);
+	messageBridge = bridge;
 
 	// Clear queue
 	if (!queuedPackets.empty()) {
 		for (auto& qp: queuedPackets) {
-			onReceiveEntityUpdate(qp.fromPeerId, qp.type, std::move(qp.packet));
+			processMessage(qp.fromPeerId, qp.type, std::move(qp.packet));
 		}
 		queuedPackets.clear();
 	}
@@ -77,31 +80,43 @@ void EntityNetworkSession::receiveUpdates()
 		EntityNetworkHeader header;
 		packet.extractHeader(header);
 
-		switch (header.type) {
-		case EntityNetworkHeaderType::Create:
-		case EntityNetworkHeaderType::Destroy:
-		case EntityNetworkHeaderType::Update:
-			onReceiveEntityUpdate(fromPeerId, header.type, std::move(packet));
-			break;
-		case EntityNetworkHeaderType::ReadyToStart:
-			onReceiveReady(fromPeerId);
-			break;
+		if (canProcessMessage(header.type)) {
+			processMessage(fromPeerId, header.type, std::move(packet));
+		} else {
+			queuedPackets.emplace_back(QueuedPacket{ fromPeerId, header.type, std::move(packet) });
 		}
 	}
 }
 
+bool EntityNetworkSession::canProcessMessage(EntityNetworkHeaderType type)
+{
+	return factory || type == EntityNetworkHeaderType::ReadyToStart;
+}
+
+void EntityNetworkSession::processMessage(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet)
+{
+	switch (type) {
+	case EntityNetworkHeaderType::Create:
+	case EntityNetworkHeaderType::Destroy:
+	case EntityNetworkHeaderType::Update:
+		onReceiveEntityUpdate(fromPeerId, type, std::move(packet));
+		break;
+	case EntityNetworkHeaderType::ReadyToStart:
+		onReceiveReady(fromPeerId);
+		break;
+	case EntityNetworkHeaderType::MessageToEntity:
+		onReceiveMessageToEntity(fromPeerId, std::move(packet));
+		break;
+	}		
+}
+
 void EntityNetworkSession::onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet)
 {
-	if (factory) {
-		for (auto& peer: peers) {
-			if (peer.getPeerId() == fromPeerId) {
-				peer.receiveEntityPacket(fromPeerId, type, std::move(packet));
-				return;
-			}
+	for (auto& peer: peers) {
+		if (peer.getPeerId() == fromPeerId) {
+			peer.receiveEntityPacket(fromPeerId, type, std::move(packet));
+			return;
 		}
-	} else {
-		// Factory not ready, queue them up for later
-		queuedPackets.emplace_back(QueuedPacket{ fromPeerId, type, std::move(packet) });
 	}
 }
 
@@ -111,6 +126,34 @@ void EntityNetworkSession::onReceiveReady(NetworkSession::PeerId fromPeerId)
 	if (fromPeerId == 0) {
 		readyToStart = true;
 	}
+}
+
+void EntityNetworkSession::onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, InboundNetworkPacket packet)
+{
+	Expects(factory);
+	Expects(messageBridge.isValid());
+	
+	EntityNetworkMessageToEntityHeader header;
+	packet.extractHeader(header);
+
+	auto& world = factory->getWorld();
+
+	const auto entity = world.findEntity(header.entityUUID);
+	if (entity) {
+		messageBridge.sendMessageToEntity(entity->getEntityId(), header.messageType, packet.getBytes());
+	} else {
+		Logger::logError("Received message for entity " + toString(header.entityUUID) + ", but entity was not found.");
+	}
+}
+
+void EntityNetworkSession::sendEntityMessage(EntityRef entity, int messageId, Bytes messageData)
+{
+	const NetworkSession::PeerId toPeerId = entity.getOwnerPeerId().value();
+
+	auto packet = OutboundNetworkPacket(std::move(messageData));
+	packet.addHeader(EntityNetworkMessageToEntityHeader(entity.getInstanceUUID(), messageId));
+	packet.addHeader(EntityNetworkHeader(EntityNetworkHeaderType::MessageToEntity));
+	session->sendToPeer(packet, toPeerId);
 }
 
 void EntityNetworkSession::setupDictionary()
@@ -199,6 +242,12 @@ std::vector<Rect4i> EntityNetworkSession::getRemoteViewPorts() const
 		}
 	}
 	return result;
+}
+
+bool EntityNetworkSession::isRemote(ConstEntityRef entity) const
+{
+	const auto myId = session->getMyPeerId().value();
+	return entity.getOwnerPeerId().value_or(myId) != myId;
 }
 
 NetworkSession& EntityNetworkSession::getSession() const

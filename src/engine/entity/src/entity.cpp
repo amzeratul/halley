@@ -289,6 +289,11 @@ bool Entity::isEmpty() const
 	return liveComponents == 0 && children.empty();
 }
 
+bool Entity::isRemote(const World& world) const
+{
+	return world.isEntityNetworkRemote(ConstEntityRef(*this, world));
+}
+
 void Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
 {
 	auto* networkComponent = tryGetComponent<NetworkComponent>();
@@ -298,6 +303,16 @@ void Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
 		NetworkComponent component;
 		component.ownerId = peerId;
 		ref.addComponent(std::move(component));
+	}
+}
+
+std::optional<uint8_t> Entity::getOwnerPeerId() const
+{
+	const auto* networkComponent = tryGetComponent<NetworkComponent>();
+	if (networkComponent) {
+		return networkComponent->ownerId;
+	} else {
+		return {};
 	}
 }
 

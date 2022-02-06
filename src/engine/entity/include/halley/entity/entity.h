@@ -133,6 +133,8 @@ namespace Halley {
 
 		bool isEmpty() const;
 
+		bool isRemote(const World& world) const;
+
 	private:
 		// !!! WARNING !!!
 		// The order of elements in this class was carefully chosen to maximise cache performance!
@@ -209,6 +211,7 @@ namespace Halley {
 		void propagateChildWorldPartition(uint8_t newWorldPartition);
 
 		void setupNetwork(EntityRef& ref, uint8_t peerId);
+		std::optional<uint8_t> getOwnerPeerId() const;
 
 		void doDestroy(bool updateParenting);
 
@@ -629,6 +632,23 @@ namespace Halley {
 			entity->setupNetwork(*this, peerId);
 		}
 
+		std::optional<uint8_t> getOwnerPeerId() const
+		{
+			Expects(entity);
+			return entity->getOwnerPeerId();
+		}
+
+		bool isRemote() const
+		{
+			Expects(entity);
+			return entity->isRemote(*world);
+		}
+
+		bool isLocal() const
+		{
+			Expects(entity);
+			return !entity->isRemote(*world);
+		}
 
 		bool isEmpty() const
 		{
@@ -777,6 +797,24 @@ namespace Halley {
 		bool isValid() const
 		{
 			return entity != nullptr;
+		}
+
+		std::optional<uint8_t> getOwnerPeerId() const
+		{
+			Expects(entity);
+			return entity->getOwnerPeerId();
+		}
+
+		bool isRemote() const
+		{
+			Expects(entity);
+			return entity->isRemote(*world);
+		}
+
+		bool isLocal() const
+		{
+			Expects(entity);
+			return !entity->isRemote(*world);
 		}
 
 	private:

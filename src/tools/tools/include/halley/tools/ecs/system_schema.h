@@ -24,7 +24,8 @@ namespace Halley
 		Pure = 0,
 		API = 1,
 		World = 2,
-		Resources = 4
+		Resources = 4,
+		MessageBridge = 8
 	};
 
 	enum class SystemMethod
@@ -45,11 +46,12 @@ namespace Halley
 	{
 	public:
 		String name;
+		String family;
 		bool send = false;
 		bool receive = false;
 
 		MessageReferenceSchema() = default;
-		MessageReferenceSchema(String name, String parameter);
+		MessageReferenceSchema(String name, const String& parameters);
 	};
 
 	class FamilySchema

@@ -460,7 +460,7 @@ void AnimationPlayerLite::update(Time time, Sprite& sprite)
 	}
 }
 
-ConfigNode ConfigNodeSerializer<AnimationPlayer>::serialize(const AnimationPlayer& player, const ConfigNodeSerializationContext& context)
+ConfigNode ConfigNodeSerializer<AnimationPlayer>::serialize(const AnimationPlayer& player, const EntitySerializationContext& context)
 {
 	ConfigNode result = ConfigNode::MapType();
 	result["animation"] = player.hasAnimation() ? player.getAnimation().getAssetId() : "";
@@ -478,7 +478,7 @@ ConfigNode ConfigNodeSerializer<AnimationPlayer>::serialize(const AnimationPlaye
 	return result;
 }
 
-AnimationPlayer ConfigNodeSerializer<AnimationPlayer>::deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+AnimationPlayer ConfigNodeSerializer<AnimationPlayer>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Undefined) {
 		return AnimationPlayer();

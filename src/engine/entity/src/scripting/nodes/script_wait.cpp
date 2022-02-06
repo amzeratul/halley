@@ -10,7 +10,7 @@ void ScriptWait::doInitData(ScriptWaitData& data, const ScriptGraphNode& node, c
 	}
 }
 
-ConfigNode ScriptWaitData::toConfigNode(const ConfigNodeSerializationContext& context)
+ConfigNode ScriptWaitData::toConfigNode(const EntitySerializationContext& context)
 {
 	ConfigNode::MapType node;
 	node["time"] = timeLeft;

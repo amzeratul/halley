@@ -102,7 +102,7 @@ namespace Halley {
 		}
 
 		const std::shared_ptr<const Prefab>& getPrefab() const { return prefab; }
-		const ConfigNodeSerializationContext& getConfigNodeContext() const { return configNodeContext; }
+		const EntitySerializationContext& getConfigNodeContext() const { return configNodeContext; }
 		World& getWorld() const { return *world; }
 		EntityId getEntityIdFromUUID(const UUID& uuid) const;
 
@@ -119,7 +119,7 @@ namespace Halley {
 		void setWorldPartition(uint8_t partition);
 
 	private:
-		ConfigNodeSerializationContext configNodeContext;
+		EntitySerializationContext configNodeContext;
 		std::shared_ptr<const Prefab> prefab;
 		World* world;
 		EntityScene* scene;

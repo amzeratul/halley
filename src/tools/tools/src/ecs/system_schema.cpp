@@ -2,13 +2,27 @@
 #include <halley/support/exception.h>
 #include <halley/tools/ecs/system_schema.h>
 
+#include "halley/utils/algorithm.h"
+
 using namespace Halley;
 
-MessageReferenceSchema::MessageReferenceSchema(String name, String parameter)
-	: name(name)
+MessageReferenceSchema::MessageReferenceSchema(String name, const String& parameters)
+	: name(std::move(name))
 {
-	receive = parameter == "receive";
-	send = parameter == "send";
+	family = "main";
+
+	auto pars = parameters.split(' ');
+	for (size_t i = 0; i < pars.size(); ++i) {
+		if (pars[i] == "send" && !send) {
+			send = true;
+		} else if (pars[i] == "receive" && !receive) {
+			receive = true;
+		} else if (receive && i == pars.size() - 1) {
+			family = pars[i];
+		} else {
+			throw Exception("Invalid message declaration syntax", HalleyExceptions::Tools);
+		}
+	}
 }
 
 SystemSchema::SystemSchema() {}
@@ -99,6 +113,8 @@ SystemSchema::SystemSchema(YAML::Node node, bool generate)
 				accessValue |= int(SystemAccess::World);
 			} else if (nodeName == "resources") {
 				accessValue |= int(SystemAccess::Resources);
+			} else if (nodeName == "messageBridge") {
+				accessValue |= int(SystemAccess::MessageBridge);
 			} else {
 				throw Exception("Unknown access type: " + nodeName, HalleyExceptions::Resources);
 			}

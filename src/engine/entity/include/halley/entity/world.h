@@ -27,10 +27,18 @@ namespace Halley {
 	class Painter;
 	class HalleyAPI;
 
+	class IWorldNetworkInterface {
+	public:
+		virtual ~IWorldNetworkInterface() = default;
+
+		virtual bool isRemote(ConstEntityRef entity) const = 0;
+		virtual void sendEntityMessage(EntityRef entity, int messageId, Bytes messageData) = 0;
+	};
+
 	class World
 	{
 	public:
-		World(const HalleyAPI& api, Resources& resources, CreateComponentFunction createComponent);
+		World(const HalleyAPI& api, Resources& resources, CreateComponentFunction createComponent, CreateMessageFunction createMessage);
 		~World();
 
 		static std::unique_ptr<World> make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode);
@@ -122,6 +130,13 @@ namespace Halley {
 
 		size_t sendSystemMessage(SystemMessageContext context, const String& targetSystem);
 
+		void setNetworkInterface(IWorldNetworkInterface* interface);
+		bool isEntityNetworkRemote(EntityId entityId) const;
+		bool isEntityNetworkRemote(EntityRef entity) const;
+		bool isEntityNetworkRemote(ConstEntityRef entity) const;
+		void sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr<Message> msg);
+		std::unique_ptr<Message> deserializeMessage(int msgId, gsl::span<const std::byte> data);
+
 		bool isDevMode() const;
 
 		void setEditor(bool isEditor);
@@ -132,6 +147,7 @@ namespace Halley {
 		Resources& resources;
 		std::array<Vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;
 		CreateComponentFunction createComponent;
+		CreateMessageFunction createMessage;
 		bool entityDirty = false;
 		bool entityReloaded = false;
 		bool editor = false;
@@ -152,6 +168,8 @@ namespace Halley {
 		std::shared_ptr<PoolAllocator<Entity>> entityPool;
 
 		std::list<SystemMessageContext> pendingSystemMessages;
+		
+		IWorldNetworkInterface* networkInterface = nullptr;
 
 		void allocateEntity(Entity* entity);
 		void updateEntities();

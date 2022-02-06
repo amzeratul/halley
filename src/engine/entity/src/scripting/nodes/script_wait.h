@@ -6,7 +6,7 @@ namespace Halley {
 	public:
 		float timeLeft = 0;
 
-		ConfigNode toConfigNode(const ConfigNodeSerializationContext& context) override;
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
 	};
 	
 	class ScriptWait final : public ScriptNodeTypeBase<ScriptWaitData> {

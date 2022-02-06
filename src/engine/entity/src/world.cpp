@@ -3,8 +3,12 @@
 #include <halley/support/exception.h>
 #include <halley/utils/utils.h>
 #include "world.h"
+
+#include <cassert>
+
 #include "system.h"
 #include "family.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/text/string_converter.h"
 #include "halley/support/debug.h"
 #include "halley/file_formats/config_file.h"
@@ -16,10 +20,11 @@
 
 using namespace Halley;
 
-World::World(const HalleyAPI& api, Resources& resources, CreateComponentFunction createComponent)
+World::World(const HalleyAPI& api, Resources& resources, CreateComponentFunction createComponent, CreateMessageFunction createMessage)
 	: api(api)
 	, resources(resources)
 	, createComponent(std::move(createComponent))
+	, createMessage(std::move(createMessage))
 	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
 	, componentDeleterTable(std::make_shared<ComponentDeleterTable>())
 	, entityPool(std::make_shared<PoolAllocator<Entity>>())
@@ -53,7 +58,7 @@ World::~World()
 
 std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode)
 {
-	auto world = std::make_unique<World>(api, resources, CreateEntityFunctions::getCreateComponent());
+	auto world = std::make_unique<World>(api, resources, CreateEntityFunctions::getCreateComponent(), CreateEntityFunctions::getCreateMessage());
 	const auto& sceneConfig = resources.get<ConfigFile>(sceneName)->getRoot();
 	world->loadSystems(sceneConfig, CreateEntityFunctions::getCreateSystem());
 	return world;
@@ -201,6 +206,7 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 		e.setParent(parent.value());
 	}
 
+	assert(uuidMap.find(uuid) == uuidMap.end()); // No duplicate UUIDs allowed
 	uuidMap[uuid] = entity;
 	
 	return e;
@@ -691,4 +697,50 @@ void World::processSystemMessages(TimeLine timeline)
 		}
 	}
 	pendingSystemMessages.clear();
+}
+
+bool World::isEntityNetworkRemote(EntityId entityId) const
+{
+	return isEntityNetworkRemote(getEntity(entityId));
+}
+
+bool World::isEntityNetworkRemote(EntityRef entity) const
+{
+	if (networkInterface) {
+		return networkInterface->isRemote(entity);
+	}
+	return false;
+}
+
+bool World::isEntityNetworkRemote(ConstEntityRef entity) const
+{
+	if (networkInterface) {
+		return networkInterface->isRemote(entity);
+	}
+	return false;
+}
+
+void World::sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr<Message> msg)
+{
+	if (networkInterface) {
+		auto options = SerializerOptions(SerializerOptions::maxVersion);
+		options.world = this;
+		networkInterface->sendEntityMessage(getEntity(entityId), messageId, Serializer::toBytes(*msg, options));
+	}
+}
+
+std::unique_ptr<Message> World::deserializeMessage(int msgId, gsl::span<const std::byte> data)
+{
+	auto msg = createMessage(msgId);
+
+	auto options = SerializerOptions(SerializerOptions::maxVersion);
+	options.world = this;
+	Deserializer::fromBytes(*msg, data, options);
+
+	return msg;
+}
+
+void World::setNetworkInterface(IWorldNetworkInterface* interface)
+{
+	networkInterface = interface;
 }

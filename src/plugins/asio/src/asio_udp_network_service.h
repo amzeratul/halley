@@ -15,13 +15,13 @@ namespace asio = boost::asio;
 
 namespace Halley
 {
-	class AsioUDPNetworkService : public NetworkService
+	class AsioUDPNetworkService : public NetworkServiceWithStats
 	{
 	public:
 		AsioUDPNetworkService(int port, IPVersion version = IPVersion::IPv4);
 		~AsioUDPNetworkService();
 
-		void update() override;
+		void update(Time t) override;
 
 		String startListening(AcceptCallback callback) override;
 		void stopListening() override;

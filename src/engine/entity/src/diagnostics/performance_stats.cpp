@@ -1,7 +1,8 @@
-#include "diagnostics/performance_stats.h"
+﻿#include "diagnostics/performance_stats.h"
 
 #include "system.h"
 #include "world.h"
+#include "../../../net/include/halley/net/connection/iconnection.h"
 #include "halley/core/api/core_api.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/core/graphics/painter.h"
@@ -87,7 +88,7 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	auto& curFrameData = frameData[lastFrameData];
 	curFrameData.fixedTime = getTime(TimeLine::FixedUpdate);
 	curFrameData.variableTime = getTime(TimeLine::VariableUpdate);
-	curFrameData.renderTime = getTime(TimeLine::Render);
+	curFrameData.renderTime = getTime(TimeLine::Render) - static_cast<int>((vsyncTime.getLatest() + 500) / 1000);
 
 	for (const auto& e: data->getEvents()) {
 		if (e.type == ProfilerEventType::WorldSystemUpdate || e.type == ProfilerEventType::WorldSystemRender) {
@@ -98,6 +99,11 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	if (capturing) {
 		lastProfileData = std::move(data);
 	}
+}
+
+void PerformanceStatsView::setNetworkStats(IConnectionStatsListener* stats)
+{
+	networkStats = stats;
 }
 
 int PerformanceStatsView::getPage() const
@@ -171,22 +177,34 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 
 	ColourStringBuilder strBuilder;
 	strBuilder.append(toString(curFPS, 10, 3, ' '));
-	strBuilder.append(" FPS / ");
+	strBuilder.append(" FPS | ");
 	strBuilder.append(toString(maxFPS, 10, 4, ' '));
-	strBuilder.append(" FPS / ");
+	strBuilder.append(" FPS | ");
 	strBuilder.append(formatTime(frameAvgTime));
-	strBuilder.append(" ms / ");
+	strBuilder.append(" ms | ");
 	strBuilder.append(toString(painter.getPrevDrawCalls()));
-	strBuilder.append(" calls / ");
+	strBuilder.append(" calls | ");
 	strBuilder.append(toString(painter.getPrevTriangles()));
 	strBuilder.append(" tris");
+
+	if (networkStats) {
+		strBuilder.append(" | up: ");
+		strBuilder.append(toString(networkStats->getSentDataPerSecond() / 1000.0, 3) + " kBps");
+		strBuilder.append(" (");
+		strBuilder.append(toString(networkStats->getSentPacketsPerSecond()));
+		strBuilder.append(") | down: ");
+		strBuilder.append(toString(networkStats->getReceivedDataPerSecond() / 1000.0, 3) + " kBps");
+		strBuilder.append(" (");
+		strBuilder.append(toString(networkStats->getReceivedPacketsPerSecond()));
+		strBuilder.append(")");
+	}
 
 	if (!simple) {
 		const auto audioSpec = api.audio->getAudioSpec();
 		if (audioSpec) {
 			const int64_t totalTimePerBuffer = int64_t(audioSpec->bufferSize) * 1'000'000'000 / int64_t(audioSpec->sampleRate);
 			const auto percent = (audioAvgTime * 100.0f) / static_cast<float>(totalTimePerBuffer);
-			strBuilder.append(" / ");
+			strBuilder.append(" | ");
 			strBuilder.append(formatTime(audioAvgTime));
 			strBuilder.append(" ms audio (");
 			strBuilder.append(toString(percent, 1));
@@ -261,16 +279,19 @@ void PerformanceStatsView::drawTimeline(Painter& painter, Rect4f rect)
 		const float x = xPos(i);
 		const float w = xPos(i + 1) - x;
 		const Vector2f p = boxPos + Vector2f(x, displaySize.y);
-		const Vector2f s1 = Vector2f(w, std::min(frameData[index].variableTime * scale, displaySize.y));
-		const Vector2f s2 = Vector2f(w, std::min(frameData[index].renderTime * scale, displaySize.y - s1.y));
-		variableSprite
-			.setPosition(p)
-			.setSize(s1)
-			.draw(painter);
-		renderSprite
-			.setPosition(p - Vector2f(0, s1.y))
-			.setSize(s2)
-			.draw(painter);
+		Vector2f s1 = Vector2f(w, std::min(frameData[index].variableTime * scale, displaySize.y));
+		Vector2f s2 = Vector2f(w, std::min(frameData[index].renderTime * scale, displaySize.y));
+		if (s1.y > s2.y) {
+			if (s1.y < 1) {
+				s1.y = 1;
+			}
+			variableSprite.setPosition(p).setSize(s1).draw(painter);
+		} else {
+			if (s2.y < 1) {
+				s2.y = 1;
+			}
+			renderSprite.setPosition(p).setSize(s2).draw(painter);
+		}
 	}
 
 	fpsLabel.setPosition(pos + Vector2f(5.0f, 10.0f)).draw(painter);

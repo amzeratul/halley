@@ -5,12 +5,12 @@
 
 namespace Halley
 {
-	class AsioTCPNetworkService : public NetworkService
+	class AsioTCPNetworkService : public NetworkServiceWithStats
 	{
 	public:
 		AsioTCPNetworkService(int port, IPVersion version = IPVersion::IPv4);
 
-		void update() override;
+		void update(Time t) override;
 		String startListening(AcceptCallback callback) override;
 		void stopListening() override;
 		std::shared_ptr<IConnection> connect(const String& address) override;

@@ -10,8 +10,10 @@ std::unique_ptr<NetworkService> DummyNetworkAPI::createService(NetworkProtocol p
 	return std::make_unique<DummyNetworkService>();
 }
 
-void DummyNetworkService::update()
-{}
+void DummyNetworkService::update(Time t)
+{
+	NetworkServiceWithStats::update(t);
+}
 
 String DummyNetworkService::startListening(AcceptCallback callback)
 {

@@ -1,10 +1,26 @@
 #include "system.h"
 #include <halley/data_structures/flat_map.h>
 #include "halley/support/debug.h"
+#include "halley/support/logger.h"
 #include "halley/support/profiler.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
+
+SystemMessageBridge::SystemMessageBridge(System& system)
+	: system(&system)
+{
+}
+
+bool SystemMessageBridge::isValid() const
+{
+	return system != nullptr;
+}
+
+void SystemMessageBridge::sendMessageToEntity(EntityId target, int msgId, gsl::span<const gsl::byte> data)
+{
+	system->sendRawMessage(target, msgId, data);
+}
 
 System::System(Vector<FamilyBindingBase*> uninitializedFamilies, Vector<int> messageTypesReceived)
 	: families(std::move(uninitializedFamilies))
@@ -56,41 +72,46 @@ void System::purgeMessages()
 
 void System::processMessages()
 {
+}
+
+void System::doProcessMessages(FamilyBindingBase& family, gsl::span<const int> typesAccepted)
+{
 	// This whole method is probably very inefficient.
 	struct MessageBox
 	{
 		Vector<Message*> msg;
 		Vector<size_t> elemIdx;
 	};
-	FlatMap<int, MessageBox> inboxes;
+	HashMap<int, MessageBox> inboxes;
 
-	if (!families.empty()) {
-		auto& fam = *families[0];
-		size_t sz = fam.count();
-		for (size_t i = 0; i < sz; i++) {
-			FamilyBase* elem = reinterpret_cast<FamilyBase*>(fam.getElement(i));
-			Entity* entity = world->tryGetRawEntity(elem->entityId);
-			if (entity) {
-				for (const auto& msg: entity->inbox) {
-					if (std::find(messageTypesReceived.begin(), messageTypesReceived.end(), msg.type) != messageTypesReceived.end()) {
-						auto& inbox = inboxes[msg.type];
-						inbox.msg.emplace_back(msg.msg.get());
-						inbox.elemIdx.emplace_back(i);
-					}
+	const size_t sz = family.count();
+	for (size_t i = 0; i < sz; i++) {
+		const FamilyBase* elem = static_cast<FamilyBase*>(family.getElement(i));
+		const Entity* entity = world->tryGetRawEntity(elem->entityId);
+		if (entity) {
+			for (const auto& msg: entity->inbox) {
+				if (std::find(typesAccepted.begin(), typesAccepted.end(), msg.type) != typesAccepted.end()) {
+					auto& inbox = inboxes[msg.type];
+					inbox.msg.emplace_back(msg.msg.get());
+					inbox.elemIdx.emplace_back(i);
 				}
 			}
 		}
-		for (auto& iter : inboxes) {
-			int id = iter.first;
-			auto& inbox = iter.second;
-			onMessagesReceived(id, inbox.msg.data(), inbox.elemIdx.data(), inbox.msg.size());
-		}
+	}
+	for (auto& iter: inboxes) {
+		const int msgId = iter.first;
+		auto& inbox = iter.second;
+		onMessagesReceived(msgId, inbox.msg.data(), inbox.elemIdx.data(), inbox.msg.size(), family);
 	}
 }
 
 void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, int id)
 {
-	outbox.emplace_back(std::make_pair(entityId, MessageEntry(std::move(msg), id, systemId)));
+	if (world->isEntityNetworkRemote(entityId)) {
+		world->sendNetworkMessage(entityId, id, std::move(msg));
+	} else {
+		outbox.emplace_back(std::make_pair(entityId, MessageEntry(std::move(msg), id, systemId)));
+	}
 }
 
 void System::dispatchMessages()
@@ -134,6 +155,11 @@ void System::processSystemMessages()
 size_t System::getSystemMessagesInInbox() const
 {
 	return systemMessageInbox.size();
+}
+
+void System::sendRawMessage(EntityId target, int msgId, gsl::span<const std::byte> data)
+{
+	doSendMessage(target, world->deserializeMessage(msgId, data), msgId);
 }
 
 void System::doUpdate(Time time) {

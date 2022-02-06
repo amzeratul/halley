@@ -12,17 +12,17 @@
 
 namespace Halley {
 	template <class, class = void_t<>> struct HasInPlaceDeserializer : std::false_type {};
-	template <class T> struct HasInPlaceDeserializer<T, decltype(std::declval<ConfigNodeSerializer<T>>().deserialize(std::declval<const ConfigNodeSerializationContext&>(), std::declval<const ConfigNode&>(), std::declval<T&>()))> : std::true_type { };
+	template <class T> struct HasInPlaceDeserializer<T, decltype(std::declval<ConfigNodeSerializer<T>>().deserialize(std::declval<const EntitySerializationContext&>(), std::declval<const ConfigNode&>(), std::declval<T&>()))> : std::true_type { };
 
 	template <typename T>
 	class ConfigNodeHelper {
 	public:
-		static ConfigNode serialize(const T& value, const ConfigNodeSerializationContext& context)
+		static ConfigNode serialize(const T& value, const EntitySerializationContext& context)
 		{
 			return ConfigNodeSerializer<T>().serialize(value, context);
 		}
 		
-		static void deserialize(T& dst, const T& defaultValue, const ConfigNodeSerializationContext& context, const ConfigNode& node)
+		static void deserialize(T& dst, const T& defaultValue, const EntitySerializationContext& context, const ConfigNode& node)
 		{
 			if (node.getType() == ConfigNodeType::Undefined || node.getType() == ConfigNodeType::Del) {
 				dst = defaultValue;
@@ -39,12 +39,12 @@ namespace Halley {
 	template <>
 	class ConfigNodeSerializer<bool> {
 	public:
-		ConfigNode serialize(bool value, const ConfigNodeSerializationContext& context)
+		ConfigNode serialize(bool value, const EntitySerializationContext& context)
 		{
 			return ConfigNode(value);
 		}
 		
-		int deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node)
+		int deserialize(const EntitySerializationContext&, const ConfigNode& node)
 		{
 			return node.asBool(false);
 		}
@@ -53,12 +53,12 @@ namespace Halley {
 	template <>
     class ConfigNodeSerializer<int> {
     public:
-        ConfigNode serialize(int value, const ConfigNodeSerializationContext& context)
+        ConfigNode serialize(int value, const EntitySerializationContext& context)
 		{
 			return ConfigNode(value);
 		}
 		
-		int deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node)
+		int deserialize(const EntitySerializationContext&, const ConfigNode& node)
         {
 			return node.asInt(0);
         }
@@ -67,12 +67,12 @@ namespace Halley {
 	template <>
     class ConfigNodeSerializer<float> {
     public:
-        ConfigNode serialize(float value, const ConfigNodeSerializationContext& context)
+        ConfigNode serialize(float value, const EntitySerializationContext& context)
 		{
 			return ConfigNode(value);
 		}
 		
-		float deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node)
+		float deserialize(const EntitySerializationContext&, const ConfigNode& node)
         {
 			return node.asFloat(0);
         }
@@ -81,12 +81,12 @@ namespace Halley {
 	template <>
     class ConfigNodeSerializer<Vector2i> {
     public:
-        ConfigNode serialize(Vector2i value, const ConfigNodeSerializationContext& context)
+        ConfigNode serialize(Vector2i value, const EntitySerializationContext& context)
 		{
 			return ConfigNode(value);
 		}
 		
-		Vector2i deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node)
+		Vector2i deserialize(const EntitySerializationContext&, const ConfigNode& node)
         {
 			return node.asVector2i(Vector2i());
         }
@@ -95,12 +95,12 @@ namespace Halley {
 	template <>
     class ConfigNodeSerializer<Vector2f> {
     public:
-        ConfigNode serialize(Vector2f value, const ConfigNodeSerializationContext& context)
+        ConfigNode serialize(Vector2f value, const EntitySerializationContext& context)
 		{
 			return ConfigNode(value);
 		}
 		
-		Vector2f deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node)
+		Vector2f deserialize(const EntitySerializationContext&, const ConfigNode& node)
         {
 			return node.asVector2f(Vector2f());
         }
@@ -109,12 +109,12 @@ namespace Halley {
 	template <>
     class ConfigNodeSerializer<Angle1f> {
     public:
-        ConfigNode serialize(Angle1f value, const ConfigNodeSerializationContext& context)
+        ConfigNode serialize(Angle1f value, const EntitySerializationContext& context)
 		{
 			return ConfigNode(value.toDegrees());
 		}
 		
-		Angle1f deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node)
+		Angle1f deserialize(const EntitySerializationContext&, const ConfigNode& node)
         {
 			return Angle1f::fromDegrees(node.asFloat(0.0f));
         }
@@ -123,12 +123,12 @@ namespace Halley {
 	template <>
     class ConfigNodeSerializer<Colour4f> {
     public:
-        ConfigNode serialize(Colour4f value, const ConfigNodeSerializationContext& context)
+        ConfigNode serialize(Colour4f value, const EntitySerializationContext& context)
 		{
 			return ConfigNode(value.toString());
 		}
 		
-		Colour4f deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node)
+		Colour4f deserialize(const EntitySerializationContext&, const ConfigNode& node)
         {
 			return Colour4f::fromString(node.asString("#000000"));
         }
@@ -137,13 +137,13 @@ namespace Halley {
 	template <>
     class ConfigNodeSerializer<Rect4i> {
     public:
-        ConfigNode serialize(Rect4i value, const ConfigNodeSerializationContext& context)
+        ConfigNode serialize(Rect4i value, const EntitySerializationContext& context)
 		{
         	std::vector<int> seq = { value.getX(), value.getY(), value.getWidth(), value.getHeight() };
         	return ConfigNode(seq);
 		}
 		
-		Rect4i deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node)
+		Rect4i deserialize(const EntitySerializationContext&, const ConfigNode& node)
         {
         	if (node.getType() == ConfigNodeType::Sequence) {
 				auto seq = node.asSequence();
@@ -157,13 +157,13 @@ namespace Halley {
 	template <>
     class ConfigNodeSerializer<Rect4f> {
     public:
-        ConfigNode serialize(Rect4f value, const ConfigNodeSerializationContext& context)
+        ConfigNode serialize(Rect4f value, const EntitySerializationContext& context)
 		{
         	std::vector<float> seq = { value.getX(), value.getY(), value.getWidth(), value.getHeight() };
         	return ConfigNode(seq);
 		}
 		
-		Rect4f deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node)
+		Rect4f deserialize(const EntitySerializationContext&, const ConfigNode& node)
         {
 			if (node.getType() == ConfigNodeType::Sequence) {
 				auto seq = node.asSequence();
@@ -177,7 +177,7 @@ namespace Halley {
 	template <typename T>
     class ConfigNodeSerializer<std::optional<T>> {
     public:
-        ConfigNode serialize(const std::optional<T>& value, const ConfigNodeSerializationContext& context)
+        ConfigNode serialize(const std::optional<T>& value, const EntitySerializationContext& context)
 		{
         	if (value) {
 				return ConfigNodeSerializer<T>::serialize(value.value(), context);
@@ -186,7 +186,7 @@ namespace Halley {
 			}
 		}
 		
-        std::optional<T> deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+        std::optional<T> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
         {
         	if (node.getType() == ConfigNodeType::Undefined || node.getType() == ConfigNodeType::Del) {
 				return std::optional<T>();
@@ -199,7 +199,7 @@ namespace Halley {
 	template <typename T>
     class ConfigNodeSerializer<std::vector<T>> {
     public:
-        ConfigNode serialize(const std::vector<T>& values, const ConfigNodeSerializationContext& context)
+        ConfigNode serialize(const std::vector<T>& values, const EntitySerializationContext& context)
 		{
         	auto serializer = ConfigNodeSerializer<T>();
         	ConfigNode result = ConfigNode::SequenceType();
@@ -211,7 +211,7 @@ namespace Halley {
         	return result;
 		}
 		
-        std::vector<T> deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+        std::vector<T> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
         {
 			std::vector<T> result;
         	if (node.getType() == ConfigNodeType::Sequence) {
@@ -229,7 +229,7 @@ namespace Halley {
 	class ConfigNodeSerializer<std::pair<A, B>>
 	{
 	public:
-		ConfigNode serialize(const std::pair<A, B>& values, const ConfigNodeSerializationContext& context)
+		ConfigNode serialize(const std::pair<A, B>& values, const EntitySerializationContext& context)
 		{
 			auto serializerA = ConfigNodeSerializer<A>();
 			auto serializerB = ConfigNodeSerializer<B>();
@@ -241,7 +241,7 @@ namespace Halley {
 			return result;
 		}
 
-		std::pair<A, B> deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+		std::pair<A, B> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 		{
 			auto serializerA = ConfigNodeSerializer<A>();
 			auto serializerB = ConfigNodeSerializer<B>();
@@ -267,7 +267,7 @@ namespace Halley {
 	template <typename T>
 	class ConfigNodeSerializer<std::set<T>> {
 	public:
-		ConfigNode serialize(const std::set<T>& values, const ConfigNodeSerializationContext& context)
+		ConfigNode serialize(const std::set<T>& values, const EntitySerializationContext& context)
 		{
         	auto serializer = ConfigNodeSerializer<T>();
         	ConfigNode result = ConfigNode::SequenceType();
@@ -279,7 +279,7 @@ namespace Halley {
         	return result;
 		}
 		
-        std::set<T> deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+        std::set<T> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 		{
 			std::set<T> result;
 			if (node.getType() == ConfigNodeType::Sequence) {
@@ -295,7 +295,7 @@ namespace Halley {
 	template <typename T>
 	class ConfigNodeSerializer<HashSet<T>> {
 	public:
-		ConfigNode serialize(const HashSet<T>& values, const ConfigNodeSerializationContext& context)
+		ConfigNode serialize(const HashSet<T>& values, const EntitySerializationContext& context)
 		{
 			auto serializer = ConfigNodeSerializer<T>();
 			ConfigNode result = ConfigNode::SequenceType();
@@ -307,7 +307,7 @@ namespace Halley {
 			return result;
 		}
 
-		HashSet<T> deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+		HashSet<T> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 		{
 			HashSet<T> result;
 			if (node.getType() == ConfigNodeType::Sequence) {
@@ -323,12 +323,12 @@ namespace Halley {
 	template <typename T>
 	class ConfigNodeSerializer<ResourceReference<T>> {
 	public:
-		ConfigNode serialize(const ResourceReference<T>& value, const ConfigNodeSerializationContext& context)
+		ConfigNode serialize(const ResourceReference<T>& value, const EntitySerializationContext& context)
 		{
 			return ConfigNode(value.getId());
 		}
 		
-        ResourceReference<T> deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+        ResourceReference<T> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 		{
 			const auto assetId = node.hasKey("asset") ? node["asset"].asString("") : (node.getType() == ConfigNodeType::String ? node.asString("") : "");
 			return ResourceReference<T>(assetId.isEmpty() ? std::shared_ptr<const T>() : context.resources->get<T>(assetId));
@@ -338,12 +338,12 @@ namespace Halley {
 	template<>
 	class ConfigNodeSerializer<String> {
 	public:
-		ConfigNode serialize(const String& value, const ConfigNodeSerializationContext& context)
+		ConfigNode serialize(const String& value, const EntitySerializationContext& context)
 		{
 			return ConfigNode(value);
 		}
 
-		String deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node)
+		String deserialize(const EntitySerializationContext&, const ConfigNode& node)
 		{
 			return node.asString("");
 		}
@@ -353,7 +353,7 @@ namespace Halley {
 	class ConfigNodeSerializer<std::map<String, T>>
 	{
 	public:
-		ConfigNode serialize(const std::map<String, T>& values, const ConfigNodeSerializationContext& context)
+		ConfigNode serialize(const std::map<String, T>& values, const EntitySerializationContext& context)
 		{
         	auto serializer = ConfigNodeSerializer<T>();
         	ConfigNode result = ConfigNode::MapType();
@@ -363,14 +363,14 @@ namespace Halley {
         	return result;
 		}
 
-		std::map<String, T> deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+		std::map<String, T> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 		{
 			std::map<String, T> result;
 			deserialize(context, node, result);
 			return result;
 		}
 		
-		void deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node, std::map<String, T>& result)
+		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, std::map<String, T>& result)
 		{
 			if (node.getType() == ConfigNodeType::Map || node.getType() == ConfigNodeType::DeltaMap) {
 				if (node.getType() == ConfigNodeType::Map) {
@@ -392,7 +392,7 @@ namespace Halley {
 	class ConfigNodeSerializer<std::map<K, V>>
 	{
 	public:
-		ConfigNode serialize(const std::map<K, V>& values, const ConfigNodeSerializationContext& context)
+		ConfigNode serialize(const std::map<K, V>& values, const EntitySerializationContext& context)
 		{
         	auto serializer = ConfigNodeSerializer<V>();
         	ConfigNode result = ConfigNode::MapType();
@@ -402,14 +402,14 @@ namespace Halley {
         	return result;
 		}
 
-		std::map<K, V> deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+		std::map<K, V> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 		{
 			std::map<K, V> result;
 			deserialize(context, node, result);
 			return result;
 		}
 		
-		void deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node, std::map<K, V>& result)
+		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, std::map<K, V>& result)
 		{
 			if (node.getType() == ConfigNodeType::Map || node.getType() == ConfigNodeType::DeltaMap) {
 				if (node.getType() == ConfigNodeType::Map) {
@@ -430,7 +430,7 @@ namespace Halley {
 	template <typename T>
 	class ConfigNodeSerializer<OptionalLite<T>> {
 	public:
-        ConfigNode serialize(const OptionalLite<T>& value, const ConfigNodeSerializationContext& context)
+        ConfigNode serialize(const OptionalLite<T>& value, const EntitySerializationContext& context)
 		{
         	if (value) {
 				return ConfigNodeSerializer<T>::serialize(value.value(), context);
@@ -439,7 +439,7 @@ namespace Halley {
 			}
 		}
 
-		OptionalLite<T> deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+		OptionalLite<T> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 		{
 			if (node.getType() == ConfigNodeType::Undefined) {
 				return OptionalLite<T>();
@@ -452,7 +452,7 @@ namespace Halley {
 	template <typename T>
 	class ConfigNodeHelper<std::optional<T>> {
 	public:
-		static ConfigNode serialize(const std::optional<T>& src, const ConfigNodeSerializationContext& context)
+		static ConfigNode serialize(const std::optional<T>& src, const EntitySerializationContext& context)
 		{
 			if (src) {
 				return ConfigNodeHelper<T>::serialize(src.value(), context);
@@ -461,7 +461,7 @@ namespace Halley {
 			}
 		}
 
-		static void deserialize(std::optional<T>& dst, const std::optional<T>& defaultValue, const ConfigNodeSerializationContext& context, const ConfigNode& node)
+		static void deserialize(std::optional<T>& dst, const std::optional<T>& defaultValue, const EntitySerializationContext& context, const ConfigNode& node)
 		{
 			dst = ConfigNodeSerializer<std::optional<T>>().deserialize(context, node);
 		}
@@ -470,7 +470,7 @@ namespace Halley {
 	template <typename T>
 	class ConfigNodeHelper<OptionalLite<T>> {
 	public:
-		static ConfigNode serialize(const OptionalLite<T>& src, const ConfigNodeSerializationContext& context)
+		static ConfigNode serialize(const OptionalLite<T>& src, const EntitySerializationContext& context)
 		{
 			if (src) {
 				return ConfigNodeHelper<T>::serialize(src.value(), context);
@@ -479,7 +479,7 @@ namespace Halley {
 			}
 		}
 		
-		static void deserialize(OptionalLite<T>& dst, const OptionalLite<T>& defaultValue, const ConfigNodeSerializationContext& context, const ConfigNode& node)
+		static void deserialize(OptionalLite<T>& dst, const OptionalLite<T>& defaultValue, const EntitySerializationContext& context, const ConfigNode& node)
 		{
 			dst = ConfigNodeSerializer<OptionalLite<T>>().deserialize(context, node);
 		}
@@ -515,7 +515,7 @@ namespace Halley {
 	template <typename T>
 	class EntityConfigNodeSerializer {
 	public:
-		static void serialize(const T& value, const T& defaultValue, const ConfigNodeSerializationContext& context, ConfigNode& node, const String& name, int serializationMask)
+		static void serialize(const T& value, const T& defaultValue, const EntitySerializationContext& context, ConfigNode& node, const String& name, int serializationMask)
 		{
 			if (context.matchType(serializationMask)) {
 				bool canWrite;
@@ -536,7 +536,7 @@ namespace Halley {
 			}
 		}
 
-		static void deserialize(T& value, const T& defaultValue, const ConfigNodeSerializationContext& context, const ConfigNode& node, const String& name, int serializationMask)
+		static void deserialize(T& value, const T& defaultValue, const EntitySerializationContext& context, const ConfigNode& node, const String& name, int serializationMask)
 		{
 			if (context.matchType(serializationMask) && node.getType() != ConfigNodeType::Noop) {
 				const bool delta = node.getType() == ConfigNodeType::DeltaMap;
@@ -552,12 +552,12 @@ namespace Halley {
 	class ConfigNodeSerializer<ConfigNode>
 	{
 	public:
-		ConfigNode serialize(const ConfigNode& item, const ConfigNodeSerializationContext& context)
+		ConfigNode serialize(const ConfigNode& item, const EntitySerializationContext& context)
 		{
 			return ConfigNode(item);
 		}
 		
-		ConfigNode deserialize(const ConfigNodeSerializationContext& context, const ConfigNode& node)
+		ConfigNode deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 		{
 			return ConfigNode(node);
 		}

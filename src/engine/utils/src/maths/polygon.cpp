@@ -1386,12 +1386,12 @@ ConfigNode Polygon::toConfigNode() const
 	return ConfigNode(getVertices());
 }
 
-ConfigNode ConfigNodeSerializer<Polygon>::serialize(const Polygon& polygon, const ConfigNodeSerializationContext&)
+ConfigNode ConfigNodeSerializer<Polygon>::serialize(const Polygon& polygon, const EntitySerializationContext&)
 {
 	return polygon.toConfigNode();
 }
 
-Polygon ConfigNodeSerializer<Polygon>::deserialize(const ConfigNodeSerializationContext&, const ConfigNode& node) 
+Polygon ConfigNodeSerializer<Polygon>::deserialize(const EntitySerializationContext&, const ConfigNode& node) 
 {
 	return Polygon(node);
 }

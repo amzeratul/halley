@@ -12,10 +12,10 @@ namespace Halley {
 		std::unique_ptr<NetworkService> createService(NetworkProtocol protocol, int port) override;
 	};
 
-	class DummyNetworkService : public NetworkService
+	class DummyNetworkService : public NetworkServiceWithStats
 	{
 	public:
-		void update() override;
+		void update(Time t) override;
 		String startListening(AcceptCallback callback) override;
 		void stopListening() override;
 		std::shared_ptr<IConnection> connect(const String& address) override;
