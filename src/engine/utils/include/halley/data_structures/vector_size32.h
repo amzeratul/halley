@@ -240,23 +240,20 @@ namespace Halley {
 			return (*this)[m_size - 1];			
 		}
 
-		void resize(size_t size, T defaultValue = T())
+		void resize(size_t size)
 		{
-			const auto newSize = static_cast<uint32_t>(size);
-			if (newSize > m_size) {
-				if (newSize > m_capacity) {
-					change_capacity(newSize);
-				}
-				for (size_type i = m_size; i < newSize; ++i) {
-					new (pointer_at(i)) T(defaultValue);
-				}
-				m_size = newSize;
-			} else if (newSize < m_size) {
-				for (size_type i = newSize; i < m_size; ++i) {
-					elem(i).~T();
-				}
-				m_size = newSize;
-			}
+			do_resize(size, [] (std::byte* bytes)
+			{
+				new (bytes) T();
+			});
+		}
+
+		void resize(size_t size, T defaultValue)
+		{
+			do_resize(size, [&] (std::byte* bytes)
+			{
+				new (bytes) T(defaultValue);
+			});
 		}
 
 		void reserve(size_t size)
@@ -421,6 +418,26 @@ namespace Halley {
 				}
 				delete[] m_data;
 				m_data = newData;
+			}
+		}
+
+		template<typename F>
+		void do_resize(size_t size, const F& construct)
+		{
+			const auto newSize = static_cast<uint32_t>(size);
+			if (newSize > m_size) {
+				if (newSize > m_capacity) {
+					change_capacity(newSize);
+				}
+				for (size_type i = m_size; i < newSize; ++i) {
+					construct(pointer_at(i));
+				}
+				m_size = newSize;
+			} else if (newSize < m_size) {
+				for (size_type i = newSize; i < m_size; ++i) {
+					elem(i).~T();
+				}
+				m_size = newSize;
 			}
 		}
 
