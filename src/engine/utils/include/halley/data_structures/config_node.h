@@ -95,7 +95,7 @@ namespace Halley {
 		friend class ConfigFile;
 
 	public:
-		using MapType = std::map<String, ConfigNode, std::less<>>;
+		using MapType = HashMap<String, ConfigNode>;
 		using SequenceType = std::vector<ConfigNode>;
 
 		struct NoopType {};
