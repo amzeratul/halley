@@ -117,7 +117,7 @@ void EntityNetworkRemotePeer::sendCreateEntity(EntityRef entity)
 
 	auto deltaData = parent->getFactory().entityDataToPrefabDelta(result.data, entity.getPrefab(), parent->getEntityDeltaOptions());
 	auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
-	const auto size = send(EntityNetworkHeaderType::Create, result.networkId, std::move(bytes));
+	send(EntityNetworkMessageCreate(result.networkId, std::move(bytes)));
 	
 	outboundEntities[entity.getEntityId()] = std::move(result);
 
@@ -145,7 +145,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 		remote.timeSinceSend = 0;
 
 		auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
-		const auto size = send(EntityNetworkHeaderType::Update, remote.networkId, std::move(bytes));
+		send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes)));
 
 		//Logger::logDev("Sending update " + entity.getName() + ": " + toString(size) + " bytes to peer " + toString(static_cast<int>(peerId)));
 		//Logger::logDev("Update:\n" + EntityData(deltaData).toYAML() + "\n");
@@ -156,23 +156,14 @@ void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote)
 {
 	allocatedOutboundIds.erase(remote.networkId);
 
-	send(EntityNetworkHeaderType::Destroy, remote.networkId, Bytes());
+	send(EntityNetworkMessageDestroy(remote.networkId));
 
 	//Logger::logDev("Sending destroy entity to peer " + toString(static_cast<int>(peerId)));
 }
 
-size_t EntityNetworkRemotePeer::send(EntityNetworkHeaderType type, EntityNetworkId networkId, Bytes data)
+void EntityNetworkRemotePeer::send(EntityNetworkMessage message)
 {
-	// TODO: compress them into one update?
-
-	const size_t size = data.size() + 3;
-	
-	auto packet = OutboundNetworkPacket(std::move(data));
-	packet.addHeader(EntityNetworkEntityHeader(networkId));
-	packet.addHeader(EntityNetworkHeader(type));
-	parent->getSession().sendToPeer(packet, peerId);
-
-	return size;
+	parent->sendMessage(std::move(message), peerId);
 }
 
 void EntityNetworkRemotePeer::receiveCreateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data)
@@ -244,8 +235,6 @@ void EntityNetworkRemotePeer::receiveDestroyEntity(EntityNetworkId id)
 void EntityNetworkRemotePeer::onFirstDataBatchSent()
 {
 	if (parent->getSession().getType() == NetworkSessionType::Host) {
-		auto packet = OutboundNetworkPacket(Bytes());
-		packet.addHeader(EntityNetworkHeader(EntityNetworkHeaderType::ReadyToStart));
-		parent->getSession().sendToPeer(packet, peerId);
+		send(EntityNetworkMessage(EntityNetworkMessageReadyToStart()));
 	}
 }

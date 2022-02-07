@@ -1,6 +1,6 @@
 #pragma once
 
-#include "entity_network_header.h"
+#include "entity_network_message.h"
 #include "halley/data_structures/hash_map.h"
 #include "halley/entity/entity.h"
 #include "../session/network_session.h"
@@ -54,7 +54,7 @@ namespace Halley {
         void sendCreateEntity(EntityRef entity);
         void sendUpdateEntity(Time t, OutboundEntity& remote, EntityRef entity);
         void sendDestroyEntity(OutboundEntity& remote);
-        size_t send(EntityNetworkHeaderType type, EntityNetworkId networkId, Bytes data);
+        void send(EntityNetworkMessage message);
 
         void receiveCreateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data);
         void receiveUpdateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data);

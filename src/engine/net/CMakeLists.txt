@@ -12,6 +12,7 @@ set(SOURCES
         "src/connection/network_service.cpp"
         "src/connection/reliable_connection.cpp"
 
+        "src/entity/entity_network_message.cpp"
         "src/entity/entity_network_remote_peer.cpp"
         "src/entity/entity_network_session.cpp"
 
@@ -36,7 +37,7 @@ set(HEADERS
         "include/halley/net/connection/reliable_connection.h"
         "include/halley/net/connection/standard_message_stream.h"
 
-        "include/halley/net/entity/entity_network_header.h"
+        "include/halley/net/entity/entity_network_message.h"
         "include/halley/net/entity/entity_network_remote_peer.h"
         "include/halley/net/entity/entity_network_session.h"
 

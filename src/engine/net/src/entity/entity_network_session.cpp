@@ -45,7 +45,7 @@ void EntityNetworkSession::setWorld(World& world, SystemMessageBridge bridge)
 	// Clear queue
 	if (!queuedPackets.empty()) {
 		for (auto& qp: queuedPackets) {
-			processMessage(qp.fromPeerId, qp.type, std::move(qp.packet));
+			processMessage(qp.fromPeerId, std::move(qp.message));
 		}
 		queuedPackets.clear();
 	}
@@ -66,7 +66,23 @@ void EntityNetworkSession::sendUpdates(Time t, Rect4i viewRect, gsl::span<const 
 		peer.sendEntities(t, entityIds, session->getClientSharedData<EntityClientSharedData>(peer.getPeerId()));
 	}
 
+	sendMessages();
 	session->update(t);
+}
+
+void EntityNetworkSession::sendMessage(EntityNetworkMessage msg, NetworkSession::PeerId peerId)
+{
+	outbox[peerId].push_back(std::move(msg));
+}
+
+void EntityNetworkSession::sendMessages()
+{
+	for (const auto& [peerId, msgs] : outbox) {
+		auto data = Serializer::toBytes(msgs, byteSerializationOptions);
+		auto packet = OutboundNetworkPacket(std::move(data));
+		session->sendToPeer(std::move(packet), peerId);
+	}
+	outbox.clear();
 }
 
 void EntityNetworkSession::receiveUpdates()
@@ -76,24 +92,25 @@ void EntityNetworkSession::receiveUpdates()
 	while (auto result = session->receive()) {
 		const auto fromPeerId = result->first;
 		auto& packet = result->second;
-		
-		EntityNetworkHeader header;
-		packet.extractHeader(header);
 
-		if (canProcessMessage(header.type)) {
-			processMessage(fromPeerId, header.type, std::move(packet));
-		} else {
-			queuedPackets.emplace_back(QueuedPacket{ fromPeerId, header.type, std::move(packet) });
+		auto msgs = Deserializer::fromBytes<Vector<EntityNetworkMessage>>(packet.getBytes(), byteSerializationOptions);
+
+		for (auto& msg: msgs) {
+			if (canProcessMessage(msg)) {
+				processMessage(fromPeerId, std::move(msg));
+			} else {
+				queuedPackets.emplace_back(QueuedMessage{ fromPeerId, std::move(msg) });
+			}
 		}
 	}
 }
 
-bool EntityNetworkSession::canProcessMessage(EntityNetworkHeaderType type)
+bool EntityNetworkSession::canProcessMessage(const EntityNetworkMessage& msg) const
 {
-	return factory || type == EntityNetworkHeaderType::ReadyToStart;
+	return factory || !msg.needsInitialization();
 }
 
-void EntityNetworkSession::processMessage(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet)
+void EntityNetworkSession::processMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg)
 {
 	switch (type) {
 	case EntityNetworkHeaderType::Create:
@@ -149,11 +166,7 @@ void EntityNetworkSession::onReceiveMessageToEntity(NetworkSession::PeerId fromP
 void EntityNetworkSession::sendEntityMessage(EntityRef entity, int messageId, Bytes messageData)
 {
 	const NetworkSession::PeerId toPeerId = entity.getOwnerPeerId().value();
-
-	auto packet = OutboundNetworkPacket(std::move(messageData));
-	packet.addHeader(EntityNetworkMessageToEntityHeader(entity.getInstanceUUID(), messageId));
-	packet.addHeader(EntityNetworkHeader(EntityNetworkHeaderType::MessageToEntity));
-	session->sendToPeer(packet, toPeerId);
+	sendMessage(EntityNetworkMessageMessageToEntity(entity.getInstanceUUID(), messageId, std::move(messageData)), toPeerId);
 }
 
 void EntityNetworkSession::setupDictionary()

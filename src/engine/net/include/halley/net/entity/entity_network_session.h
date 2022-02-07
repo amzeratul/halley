@@ -68,7 +68,9 @@ namespace Halley {
 
 		bool isRemote(ConstEntityRef entity) const override;
 		void sendEntityMessage(EntityRef entity, int messageId, Bytes messageData) override;
-	
+
+		void sendMessage(EntityNetworkMessage msg, NetworkSession::PeerId peerId);
+
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
 		void onPeerConnected(NetworkSession::PeerId peerId) override;
@@ -77,10 +79,9 @@ namespace Halley {
 		std::unique_ptr<SharedData> makePeerSharedData() override;
 	
 	private:
-		struct QueuedPacket {
+		struct QueuedMessage {
 			NetworkSession::PeerId fromPeerId;
-			EntityNetworkHeaderType type;
-			InboundNetworkPacket packet;
+			EntityNetworkMessage message;
 		};
 		
 		Resources& resources;
@@ -96,16 +97,20 @@ namespace Halley {
 		std::shared_ptr<NetworkSession> session;
 		std::vector<EntityNetworkRemotePeer> peers;
 
-		std::vector<QueuedPacket> queuedPackets;
+		std::vector<QueuedMessage> queuedPackets;
+
+		HashMap<NetworkSession::PeerId, std::vector<EntityNetworkMessage>> pendingMessages;
 
 		bool readyToStart = false;
 
-		bool canProcessMessage(EntityNetworkHeaderType type);
-		void processMessage(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet);
+		bool canProcessMessage(const EntityNetworkMessage& msg) const;
+		void processMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
 		void onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet);
 		void onReceiveReady(NetworkSession::PeerId fromPeerId);
 		void onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, InboundNetworkPacket packet);
 
+		void sendMessages();
+		
 		void setupDictionary();
 	};
 }
