@@ -116,7 +116,7 @@ void EntityNetworkRemotePeer::sendCreateEntity(EntityRef entity)
 	result.data = parent->getFactory().serializeEntity(entity, parent->getEntitySerializationOptions());
 
 	auto deltaData = parent->getFactory().entityDataToPrefabDelta(result.data, entity.getPrefab(), parent->getEntityDeltaOptions());
-	auto bytes = Serializer::toBytes(result.data, parent->getByteSerializationOptions());
+	auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
 	const auto size = send(EntityNetworkHeaderType::Create, result.networkId, std::move(bytes));
 	
 	outboundEntities[entity.getEntityId()] = std::move(result);
@@ -183,7 +183,9 @@ void EntityNetworkRemotePeer::receiveCreateEntity(EntityNetworkId id, gsl::span<
 		return;
 	}
 
-	auto delta = Deserializer::fromBytes<EntityDataDelta>(data, parent->getByteSerializationOptions());
+	const auto delta = Deserializer::fromBytes<EntityDataDelta>(data, parent->getByteSerializationOptions());
+	//Logger::logDev("Instantiating from network (" + toString(data.size()) + " bytes):\n\n" + EntityData(delta).toYAML());
+
 	auto [entityData, prefab, prefabUUID] = parent->getFactory().prefabDeltaToEntityData(delta);
 	auto [entity, parentUUID] = parent->getFactory().loadEntityDelta(delta, {});
 
@@ -192,8 +194,6 @@ void EntityNetworkRemotePeer::receiveCreateEntity(EntityNetworkId id, gsl::span<
 			entity.setParent(parentEntity.value());
 		}
 	}
-
-	//Logger::logDev("Instantiating from network:\n" + entityData.toYAML());
 
 	entity.setupNetwork(peerId);
 	
