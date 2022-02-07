@@ -252,6 +252,14 @@ void EntityData::setFlag(Flag f, bool value)
 	flags = (flags & ~flag) | (value ? flag : 0);
 }
 
+void EntityData::randomiseInstanceUUIDs()
+{
+	instanceUUID = UUID::generate();
+	for (auto& c: children) {
+		c.randomiseInstanceUUIDs();
+	}
+}
+
 void EntityData::setInstanceUUID(UUID instanceUUID)
 {
 	this->instanceUUID = std::move(instanceUUID);

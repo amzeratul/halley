@@ -189,9 +189,25 @@ void EntityDataDelta::deserialize(Deserializer& s)
 	decodeOptField(flags, FieldId::Flags);
 }
 
+void EntityDataDelta::setInstanceUUID(const UUID& uuid)
+{
+	instanceUUID = uuid;
+}
+
 void EntityDataDelta::setPrefabUUID(const UUID& uuid)
 {
 	prefabUUID = uuid;
+}
+
+void EntityDataDelta::randomiseInstanceUUIDs()
+{
+	instanceUUID = UUID::generate();
+	for (auto& c: childrenAdded) {
+		c.randomiseInstanceUUIDs();
+	}
+	for (auto& c: childrenChanged) {
+		c.second.randomiseInstanceUUIDs();
+	}
 }
 
 bool EntityDataDelta::isSimpleDelta() const
