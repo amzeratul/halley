@@ -3,6 +3,7 @@
 #include "iserialization_dictionary.h"
 #include <optional>
 #include <vector>
+#include <gsl/span>
 #include "halley/text/halleystring.h"
 #include "halley/data_structures/hash_map.h"
 

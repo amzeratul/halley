@@ -368,6 +368,64 @@ namespace Halley {
 			return entity->tryGetComponent<T>();
 		}
 
+		template <typename T>
+		T* tryGetComponentInAncestors()
+		{
+			auto* c = tryGetComponent<T>();
+			if (c) {
+				return c;
+			}
+			if (auto parent = getParent(); parent.isValid()) {
+				return parent.tryGetComponentInAncestors<T>();
+			}
+			return nullptr;
+		}
+
+		template <typename T>
+		const T* tryGetComponentInAncestors() const
+		{
+			auto* c = tryGetComponent<T>();
+			if (c) {
+				return c;
+			}
+			if (const auto parent = getParent(); parent.isValid()) {
+				return parent.tryGetComponentInAncestors<T>();
+			}
+			return nullptr;
+		}
+
+		template <typename T>
+		T* tryGetComponentInTree()
+		{
+			auto* comp = tryGetComponent<T>();
+			if (comp) {
+				return comp;
+			}
+			for (auto& child: getRawChildren()) {
+				auto* childComp = EntityRef(*child, getWorld()).tryGetComponentInTree<T>();
+				if (childComp) {
+					return childComp;
+				}
+			}
+			return nullptr;
+		}
+
+		template <typename T>
+		const T* tryGetComponentInTree() const
+		{
+			auto* comp = tryGetComponent<T>();
+			if (comp) {
+				return comp;
+			}
+			for (auto& child: getRawChildren()) {
+				auto* childComp = ConstEntityRef(*child, getWorld()).tryGetComponentInTree<T>();
+				if (childComp) {
+					return childComp;
+				}
+			}
+			return nullptr;
+		}
+
 		EntityId getEntityId() const
 		{
 			validate();
@@ -815,6 +873,35 @@ namespace Halley {
 		{
 			Expects(entity);
 			return !entity->isRemote(*world);
+		}
+
+		template <typename T>
+		const T* tryGetComponentInAncestors() const
+		{
+			auto* c = tryGetComponent<T>();
+			if (c) {
+				return c;
+			}
+			if (const auto parent = getParent(); parent.isValid()) {
+				return parent.tryGetComponentInAncestors<T>();
+			}
+			return nullptr;
+		}
+
+		template <typename T>
+		const T* tryGetComponentInTree() const
+		{
+			auto* comp = tryGetComponent<T>();
+			if (comp) {
+				return comp;
+			}
+			for (auto& child: getRawChildren()) {
+				auto* childComp = ConstEntityRef(*child, *world).tryGetComponentInTree<T>();
+				if (childComp) {
+					return childComp;
+				}
+			}
+			return nullptr;
 		}
 
 	private:
