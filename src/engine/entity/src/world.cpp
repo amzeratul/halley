@@ -298,24 +298,6 @@ const Entity* World::tryGetRawEntity(EntityId id) const
 
 std::optional<EntityRef> World::findEntity(const UUID& id, bool includePending)
 {
-	/*
-	for (auto& e: entities) {
-		if (e->getInstanceUUID() == id && e->isAlive()) {
-			return EntityRef(*e, *this);
-		}
-	}
-
-	if (includePending) {
-		for (auto& e : entitiesPendingCreation) {
-			if (e->getInstanceUUID() == id && e->isAlive()) {
-				return EntityRef(*e, *this);
-			}
-		}
-	}
-	
-	return std::optional<EntityRef>();
-	*/
-
 	const auto result = uuidMap.find(id);
 	if (result != uuidMap.end()) {
 		Ensures(result->second->getInstanceUUID() == id);
