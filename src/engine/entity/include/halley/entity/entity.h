@@ -418,7 +418,7 @@ namespace Halley {
 				return comp;
 			}
 			for (auto& child: getRawChildren()) {
-				auto* childComp = ConstEntityRef(*child, getWorld()).tryGetComponentInTree<T>();
+				auto* childComp = EntityRef(*child, getWorld()).tryGetComponentInTree<T>();
 				if (childComp) {
 					return childComp;
 				}
