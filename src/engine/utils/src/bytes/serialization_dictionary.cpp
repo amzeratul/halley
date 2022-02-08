@@ -1,5 +1,6 @@
 #include "halley/bytes/serialization_dictionary.h"
 #include "halley/data_structures/config_node.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -55,5 +56,31 @@ void SerializationDictionary::addEntry(size_t idx, String str)
 	} else {
 		strings.resize(idx + 1);
 		strings.back() = std::move(str);
+	}
+}
+
+void SerializationDictionary::addEntries(gsl::span<const String> strings)
+{
+	for (const auto& str: strings) {
+		addEntry(str);
+	}
+}
+
+void SerializationDictionary::setLogMissingStrings(bool enabled, int min, int freq)
+{
+	logMissingStrings = enabled;
+	missingMin = min;
+	missingFreq = freq;
+}
+
+void SerializationDictionary::notifyMissingString(const String& string)
+{
+	if (!logMissingStrings) {
+		return;
+	}
+
+	const int cur = ++missing[string];
+	if (cur >= missingMin && (cur == missingMin || cur % missingFreq == 0)) {
+		Logger::logWarning("Serialization dictionary missing string: " + string + " (" + toString(cur) + "x)");
 	}
 }

@@ -47,6 +47,8 @@ Serializer& Serializer::operator<<(const String& str)
 					throw Exception("String \"" + str + "\" not found in serialization dictionary, but it's marked as exhaustive.", HalleyExceptions::Utils);
 				}
 
+				options.dictionary->notifyMissingString(str);
+
 				// Not found, store it with bit 0 set to 0
 				const uint64_t sz = uint64_t(str.size());
 				*this << (sz << 1);
