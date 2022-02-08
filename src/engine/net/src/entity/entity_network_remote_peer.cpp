@@ -58,20 +58,16 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<Ent
 	}
 }
 
-void EntityNetworkRemotePeer::receiveEntityPacket(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet)
+void EntityNetworkRemotePeer::receiveNetworkMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg)
 {
 	Expects(isAlive());
 
-	EntityNetworkEntityHeader header;
-	packet.extractHeader(header);
-	const auto networkEntityId = header.entityId;
-
-	if (type == EntityNetworkHeaderType::Create) {
-		receiveCreateEntity(networkEntityId, packet.getBytes());
-	} else if (type == EntityNetworkHeaderType::Update) {
-		receiveUpdateEntity(networkEntityId, packet.getBytes());
-	} else if (type == EntityNetworkHeaderType::Destroy) {
-		receiveDestroyEntity(networkEntityId);
+	if (msg.getType() == EntityNetworkHeaderType::Create) {
+		receiveCreateEntity(msg.getMessage<EntityNetworkMessageCreate>());
+	} else if (msg.getType() == EntityNetworkHeaderType::Update) {
+		receiveUpdateEntity(msg.getMessage<EntityNetworkMessageUpdate>());
+	} else if (msg.getType() == EntityNetworkHeaderType::Destroy) {
+		receiveDestroyEntity(msg.getMessage<EntityNetworkMessageDestroy>());
 	}
 }
 
@@ -166,15 +162,15 @@ void EntityNetworkRemotePeer::send(EntityNetworkMessage message)
 	parent->sendMessage(std::move(message), peerId);
 }
 
-void EntityNetworkRemotePeer::receiveCreateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data)
+void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCreate& msg)
 {
-	const auto iter = inboundEntities.find(id);
+	const auto iter = inboundEntities.find(msg.entityId);
 	if (iter != inboundEntities.end()) {
-		Logger::logWarning("Entity with network id " + toString(static_cast<int>(id)) + " already exists from peer " + toString(static_cast<int>(peerId)));
+		Logger::logWarning("Entity with network id " + toString(static_cast<int>(msg.entityId)) + " already exists from peer " + toString(static_cast<int>(peerId)));
 		return;
 	}
 
-	const auto delta = Deserializer::fromBytes<EntityDataDelta>(data, parent->getByteSerializationOptions());
+	const auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
 	//Logger::logDev("Instantiating from network (" + toString(data.size()) + " bytes):\n\n" + EntityData(delta).toYAML());
 
 	auto [entityData, prefab, prefabUUID] = parent->getFactory().prefabDeltaToEntityData(delta);
@@ -192,44 +188,44 @@ void EntityNetworkRemotePeer::receiveCreateEntity(EntityNetworkId id, gsl::span<
 	remote.data = std::move(entityData);
 	remote.worldId = entity.getEntityId();
 
-	inboundEntities[id] = std::move(remote);
+	inboundEntities[msg.entityId] = std::move(remote);
 
 	parent->onRemoteEntityCreated(entity, peerId);
 }
 
-void EntityNetworkRemotePeer::receiveUpdateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data)
+void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpdate& msg)
 {
-	const auto iter = inboundEntities.find(id);
+	const auto iter = inboundEntities.find(msg.entityId);
 	if (iter == inboundEntities.end()) {
-		Logger::logWarning("Entity with network id " + toString(static_cast<int>(id)) + " not found from peer " + toString(static_cast<int>(peerId)));
+		Logger::logWarning("Entity with network id " + toString(static_cast<int>(msg.entityId)) + " not found from peer " + toString(static_cast<int>(peerId)));
 		return;
 	}
 	auto& remote = iter->second;
 
 	auto entity = parent->getWorld().getEntity(remote.worldId);
 	if (!entity.isValid()) {
-		Logger::logWarning("Entity with network id " + toString(static_cast<int>(id)) + " not alive in the world from peer " + toString(static_cast<int>(peerId)));
+		Logger::logWarning("Entity with network id " + toString(static_cast<int>(msg.entityId)) + " not alive in the world from peer " + toString(static_cast<int>(peerId)));
 		return;
 	}
 	
-	auto delta = Deserializer::fromBytes<EntityDataDelta>(data, parent->getByteSerializationOptions());
+	auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
 
 	parent->getFactory().updateEntity(entity, delta, static_cast<int>(EntitySerialization::Type::SaveData));
 	remote.data.applyDelta(delta);
 }
 
-void EntityNetworkRemotePeer::receiveDestroyEntity(EntityNetworkId id)
+void EntityNetworkRemotePeer::receiveDestroyEntity(const EntityNetworkMessageDestroy& msg)
 {
-	const auto iter = inboundEntities.find(id);
+	const auto iter = inboundEntities.find(msg.entityId);
 	if (iter == inboundEntities.end()) {
-		Logger::logWarning("Entity with network id " + toString(static_cast<int>(id)) + " not found from peer " + toString(static_cast<int>(peerId)));
+		Logger::logWarning("Entity with network id " + toString(static_cast<int>(msg.entityId)) + " not found from peer " + toString(static_cast<int>(peerId)));
 		return;
 	}
 	auto& remote = iter->second;
 
 	parent->getWorld().destroyEntity(remote.worldId);
 
-	inboundEntities.erase(id);
+	inboundEntities.erase(msg.entityId);
 }
 
 void EntityNetworkRemotePeer::onFirstDataBatchSent()

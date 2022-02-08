@@ -55,6 +55,7 @@ namespace Halley {
 		const EntityFactory::SerializationOptions& getEntitySerializationOptions() const;
 		const EntityDataDelta::Options& getEntityDeltaOptions() const;
 		const SerializerOptions& getByteSerializationOptions() const;
+		SerializationDictionary& getSerializationDictionary();
 
 		Time getMinSendInterval() const;
 
@@ -99,15 +100,15 @@ namespace Halley {
 
 		std::vector<QueuedMessage> queuedPackets;
 
-		HashMap<NetworkSession::PeerId, std::vector<EntityNetworkMessage>> pendingMessages;
+		HashMap<NetworkSession::PeerId, Vector<EntityNetworkMessage>> outbox;
 
 		bool readyToStart = false;
 
 		bool canProcessMessage(const EntityNetworkMessage& msg) const;
 		void processMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
-		void onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet);
-		void onReceiveReady(NetworkSession::PeerId fromPeerId);
-		void onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, InboundNetworkPacket packet);
+		void onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
+		void onReceiveReady(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageReadyToStart& msg);
+		void onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageMessageToEntity& msg);
 
 		void sendMessages();
 		

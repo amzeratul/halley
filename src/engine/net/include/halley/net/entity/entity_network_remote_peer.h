@@ -19,7 +19,7 @@ namespace Halley {
 
         NetworkSession::PeerId getPeerId() const;
         void sendEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds, const EntityClientSharedData& clientData);
-        void receiveEntityPacket(NetworkSession::PeerId fromPeerId, EntityNetworkHeaderType type, InboundNetworkPacket packet);
+        void receiveNetworkMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
 
     	void destroy();
         bool isAlive() const;
@@ -56,9 +56,9 @@ namespace Halley {
         void sendDestroyEntity(OutboundEntity& remote);
         void send(EntityNetworkMessage message);
 
-        void receiveCreateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data);
-        void receiveUpdateEntity(EntityNetworkId id, gsl::span<const gsl::byte> data);
-        void receiveDestroyEntity(EntityNetworkId id);
+        void receiveCreateEntity(const EntityNetworkMessageCreate& msg);
+        void receiveUpdateEntity(const EntityNetworkMessageUpdate& msg);
+        void receiveDestroyEntity(const EntityNetworkMessageDestroy& msg);
 
         void onFirstDataBatchSent();
 	};

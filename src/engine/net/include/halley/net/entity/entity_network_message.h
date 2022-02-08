@@ -59,7 +59,7 @@ namespace Halley {
         EntityNetworkMessageDestroy() = default;
 		EntityNetworkMessageDestroy(EntityNetworkId id) : entityId(id) {}
 
-		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::Update; }
+		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::Destroy; }
 		void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
 	};
@@ -99,7 +99,7 @@ namespace Halley {
     	}
 
         void setMessage(std::unique_ptr<IEntityNetworkMessage> msg);
-        EntityNetworkHeaderType getType() const { return type; }
+        EntityNetworkHeaderType getType() const { return message->getType(); }
 
     	template <typename T>
         T& getMessage() const
@@ -113,7 +113,6 @@ namespace Halley {
         void deserialize(Deserializer& s);
 
     private:
-        EntityNetworkHeaderType type;
         std::unique_ptr<IEntityNetworkMessage> message;
     };
 }

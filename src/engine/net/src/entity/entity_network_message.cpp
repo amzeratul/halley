@@ -1,4 +1,7 @@
 #include "entity/entity_network_message.h"
+
+#include <cassert>
+
 #include "halley/bytes/byte_serializer.h"
 
 using namespace Halley;
@@ -72,7 +75,7 @@ bool EntityNetworkMessage::needsInitialization() const
 
 void EntityNetworkMessage::serialize(Serializer& s) const
 {
-	s << static_cast<int>(type);
+	s << static_cast<int>(getType());
 	message->serialize(s);
 }
 
@@ -80,7 +83,7 @@ void EntityNetworkMessage::deserialize(Deserializer& s)
 {
 	int t;
 	s >> t;
-	type = static_cast<EntityNetworkHeaderType>(t);
+	const auto type = static_cast<EntityNetworkHeaderType>(t);
 
 	switch (type) {
 	case EntityNetworkHeaderType::Create:
@@ -99,6 +102,8 @@ void EntityNetworkMessage::deserialize(Deserializer& s)
 		message = std::make_unique<EntityNetworkMessageMessageToEntity>();
 		break;
 	}
+
+	assert(message && message->getType() == type);
 
 	message->deserialize(s);
 }
