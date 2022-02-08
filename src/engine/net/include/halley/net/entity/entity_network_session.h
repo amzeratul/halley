@@ -34,6 +34,7 @@ namespace Halley {
 		class IEntityNetworkSessionListener {
 		public:
 			virtual ~IEntityNetworkSessionListener() = default;
+			virtual void onStartSession(NetworkSession::PeerId myPeerId) = 0;
 			virtual void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) {}
 			virtual void onPreSendDelta(EntityDataDelta& delta) {}
 			virtual bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) = 0;

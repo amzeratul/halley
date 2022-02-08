@@ -22,6 +22,10 @@ NetworkSession::PeerId EntityNetworkRemotePeer::getPeerId() const
 void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds, const EntityClientSharedData& clientData)
 {
 	Expects(isAlive());
+
+	if (!isRemoteReady()) {
+		return;
+	}
 	
 	// Mark all as not alive
 	for (auto& e: outboundEntities) {
@@ -226,6 +230,12 @@ void EntityNetworkRemotePeer::receiveDestroyEntity(const EntityNetworkMessageDes
 	parent->getWorld().destroyEntity(remote.worldId);
 
 	inboundEntities.erase(msg.entityId);
+}
+
+bool EntityNetworkRemotePeer::isRemoteReady() const
+{
+	auto& sharedData = parent->getSession().getClientSharedData<EntityClientSharedData>(peerId);
+	return !!sharedData.viewRect;
 }
 
 void EntityNetworkRemotePeer::onFirstDataBatchSent()

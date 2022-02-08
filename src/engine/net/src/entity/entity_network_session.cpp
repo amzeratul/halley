@@ -279,6 +279,7 @@ void EntityNetworkSession::onStartSession(NetworkSession::PeerId myPeerId)
 	if (myPeerId == 0) {
 		readyToStart = true;
 	}
+	listener->onStartSession(myPeerId);
 }
 
 void EntityNetworkSession::onPeerConnected(NetworkSession::PeerId peerId)
