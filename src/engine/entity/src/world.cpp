@@ -421,9 +421,8 @@ size_t World::sendSystemMessage(SystemMessageContext origContext, const String& 
 		}
 	}
 
-	if (networkInterface && sendRemote) {
-		const auto networkId = networkInterface->sendSystemMessage(targetSystem, context.msgId, Serializer::toBytes(*context.msg, SerializerOptions(SerializerOptions::maxVersion)), destination);
-		// TODO: track networkId to handle callback
+	if (sendRemote) {
+		sendNetworkSystemMessage(targetSystem, context, destination);
 	}
 		
 	return count;
@@ -739,6 +738,15 @@ void World::sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr
 		auto options = SerializerOptions(SerializerOptions::maxVersion);
 		options.world = this;
 		networkInterface->sendEntityMessage(getEntity(entityId), messageId, Serializer::toBytes(*msg, options));
+	}
+}
+
+void World::sendNetworkSystemMessage(const String& targetSystem, const SystemMessageContext& context, SystemMessageDestination destination)
+{
+	if (networkInterface) {
+		auto options = SerializerOptions(SerializerOptions::maxVersion);
+		options.world = this;
+		networkInterface->sendSystemMessage(targetSystem, context.msgId, Serializer::toBytes(*context.msg, options), destination, context.callback);
 	}
 }
 

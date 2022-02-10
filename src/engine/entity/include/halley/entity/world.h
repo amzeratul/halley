@@ -35,7 +35,7 @@ namespace Halley {
 
 		virtual bool isRemote(ConstEntityRef entity) const = 0;
 		virtual void sendEntityMessage(EntityRef entity, int messageId, Bytes messageData) = 0;
-		virtual uint32_t sendSystemMessage(String targetSystem, int messageId, Bytes messageData, SystemMessageDestination destination) = 0;
+		virtual void sendSystemMessage(String targetSystem, int messageId, Bytes messageData, SystemMessageDestination destination, std::function<void(gsl::byte*)>) = 0;
 		virtual bool isHost() = 0;
 	};
 
@@ -139,6 +139,7 @@ namespace Halley {
 		bool isEntityNetworkRemote(EntityRef entity) const;
 		bool isEntityNetworkRemote(ConstEntityRef entity) const;
 		void sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr<Message> msg);
+		void sendNetworkSystemMessage(const String& targetSystem, const SystemMessageContext& context, SystemMessageDestination destination);
 		std::unique_ptr<Message> deserializeMessage(int msgId, gsl::span<const std::byte> data);
 		std::unique_ptr<SystemMessage> deserializeSystemMessage(int msgId, gsl::span<const std::byte> data);
 

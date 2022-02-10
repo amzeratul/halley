@@ -70,8 +70,8 @@ namespace Halley {
 
 		bool isHost() override;
 		bool isRemote(ConstEntityRef entity) const override;
-		void sendEntityMessage(EntityRef entity, int messageId, Bytes messageData) override;
-		uint32_t sendSystemMessage(String targetSystem, int messageId, Bytes messageData, SystemMessageDestination destination) override;
+		void sendEntityMessage(EntityRef entity, int messageType, Bytes messageData) override;
+		void sendSystemMessage(String targetSystem, int messageType, Bytes messageData, SystemMessageDestination destination, std::function<void(gsl::byte*)>) override;
 		
 		void sendMessage(EntityNetworkMessage msg, NetworkSession::PeerId peerId);
 
@@ -87,12 +87,17 @@ namespace Halley {
 			NetworkSession::PeerId fromPeerId;
 			EntityNetworkMessage message;
 		};
+
+		struct PendingSysMsgResponse {
+			std::function<void(gsl::byte*)> callback;
+		};
 		
 		Resources& resources;
 		std::shared_ptr<EntityFactory> factory;
 		IEntityNetworkSessionListener* listener = nullptr;
 		SystemMessageBridge messageBridge;
 		uint32_t systemMessageId = 0;
+		HashMap<uint32_t, PendingSysMsgResponse>  pendingSysMsgResponses;
 		
 		EntityFactory::SerializationOptions entitySerializationOptions;
 		EntityDataDelta::Options deltaOptions;

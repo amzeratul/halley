@@ -1,5 +1,7 @@
 #include "entity/entity_network_session.h"
 
+#include <cassert>
+
 #include "halley/bytes/compression.h"
 #include "halley/entity/entity_factory.h"
 #include "halley/entity/system.h"
@@ -179,23 +181,35 @@ void EntityNetworkSession::onReceiveSystemMessage(NetworkSession::PeerId fromPee
 
 void EntityNetworkSession::onReceiveSystemMessageResponse(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsgResponse& msg)
 {
-	// TODO
+	auto iter = pendingSysMsgResponses.find(msg.msgId);
+	if (iter == pendingSysMsgResponses.end()) {
+		Logger::logError("Unexpected system message response received.");
+		return;
+	}
+
+	iter->second.callback(const_cast<gsl::byte*>(reinterpret_cast<const gsl::byte*>(msg.responseData.data()))); // bad bad bad
+	pendingSysMsgResponses.erase(iter);
 }
 
-void EntityNetworkSession::sendEntityMessage(EntityRef entity, int messageId, Bytes messageData)
+void EntityNetworkSession::sendEntityMessage(EntityRef entity, int messageType, Bytes messageData)
 {
 	const NetworkSession::PeerId toPeerId = entity.getOwnerPeerId().value();
-	sendMessage(EntityNetworkMessageEntityMsg(entity.getInstanceUUID(), messageId, std::move(messageData)), toPeerId);
+	sendMessage(EntityNetworkMessageEntityMsg(entity.getInstanceUUID(), messageType, std::move(messageData)), toPeerId);
 }
 
-uint32_t EntityNetworkSession::sendSystemMessage(String targetSystem, int messageId, Bytes messageData, SystemMessageDestination destination)
+void EntityNetworkSession::sendSystemMessage(String targetSystem, int messageType, Bytes messageData, SystemMessageDestination destination, std::function<void(gsl::byte*)> callback)
 {
 	// TODO: handle destination
 	NetworkSession::PeerId destinationPeer = 0;
 	
 	const auto id = systemMessageId++;
-	sendMessage(EntityNetworkMessageSystemMsg(messageId, id, std::move(targetSystem), std::move(messageData)), destinationPeer);
-	return id;
+	sendMessage(EntityNetworkMessageSystemMsg(messageType, id, std::move(targetSystem), std::move(messageData)), destinationPeer);
+
+	// Only wait for responses from host?
+	if (destination == SystemMessageDestination::Host) {
+		pendingSysMsgResponses[id] = PendingSysMsgResponse{ std::move(callback) };
+		assert(pendingSysMsgResponses.size() < 1000); // Make sure we're not leaking
+	}
 }
 
 void EntityNetworkSession::setupDictionary()
