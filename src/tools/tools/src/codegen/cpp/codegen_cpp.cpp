@@ -194,7 +194,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"	SystemMessageFactoryList result;"
 	});
 
-	registryCpp.push_back("	result.reserve(" + toString(messages.size()) + ");");
+	registryCpp.push_back("	result.reserve(" + toString(systemMessages.size()) + ");");
 
 	for (auto& sysMsg : systemMessages) {
 		registryCpp.push_back("	result.push_back([] () { return std::make_unique<" + sysMsg.name + "SystemMessage>(); });");
