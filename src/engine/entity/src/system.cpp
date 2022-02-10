@@ -128,9 +128,9 @@ void System::dispatchMessages()
 	}
 }
 
-size_t System::doSendSystemMessage(SystemMessageContext context, const String& targetSystem)
+size_t System::doSendSystemMessage(SystemMessageContext context, const String& targetSystem, SystemMessageDestination destination)
 {
-	return world->sendSystemMessage(std::move(context), targetSystem);
+	return world->sendSystemMessage(std::move(context), targetSystem, destination);
 }
 
 void System::receiveSystemMessage(const SystemMessageContext& context)

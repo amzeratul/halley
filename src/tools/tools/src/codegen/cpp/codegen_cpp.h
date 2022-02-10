@@ -21,7 +21,7 @@ namespace Halley
 		Vector<String> generateComponentHeader(ComponentSchema component);
 		Vector<String> generateSystemHeader(SystemSchema& system, const HashMap<String, ComponentSchema>& components, const HashMap<String, SystemMessageSchema>& systemMessages) const;
 		Vector<String> generateSystemStub(SystemSchema& system) const;
-		Vector<String> generateMessageHeader(const MessageSchema& message, const String& suffix);
+		Vector<String> generateMessageHeader(const MessageSchema& message, const SystemMessageSchema* sysMessage, const String& suffix);
 
 		Path makePath(Path dir, String className, String extension) const;
 		String toFileName(String className) const;

@@ -18,6 +18,7 @@
 #include <halley/data_structures/memory_pool.h>
 
 namespace Halley {
+	enum class SystemMessageDestination;
 	struct SystemMessageContext;
 	class UUID;
 	class ConfigNode;
@@ -128,7 +129,7 @@ namespace Halley {
 		MaskStorage& getMaskStorage() const noexcept;
 		ComponentDeleterTable& getComponentDeleterTable();
 
-		size_t sendSystemMessage(SystemMessageContext context, const String& targetSystem);
+		size_t sendSystemMessage(SystemMessageContext context, const String& targetSystem, SystemMessageDestination destination);
 
 		void setNetworkInterface(IWorldNetworkInterface* interface);
 		bool isEntityNetworkRemote(EntityId entityId) const;

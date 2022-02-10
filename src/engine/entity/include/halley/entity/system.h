@@ -107,7 +107,7 @@ namespace Halley {
 			doSendMessage(entityId, std::move(toSend), T::messageIndex);
 		}
 
-		template <typename T, typename R, typename F>
+		template <typename T, typename F>
 		size_t sendSystemMessageGeneric(T msg, F returnLambda, const String& targetSystem)
 		{
 			SystemMessageContext context;
@@ -116,27 +116,17 @@ namespace Halley {
 			context.msg = std::make_unique<T>(std::move(msg));
 			context.callback = [=, returnLambda = std::move(returnLambda)] (std::byte* data)
 			{
-				returnLambda(std::move(*reinterpret_cast<R*>(data)));
-			};
-			
-			return doSendSystemMessage(std::move(context), targetSystem);
-		}
-
-		template <typename T, typename F>
-		size_t sendSystemMessageGenericVoid(T msg, F returnLambda, const String& targetSystem)
-		{
-			SystemMessageContext context;
-
-			context.msgId = T::messageIndex;
-			context.msg = std::make_unique<T>(std::move(msg));
-			context.callback = [=, returnLambda = std::move(returnLambda)] (std::byte*)
-			{
 				if (returnLambda) {
-					returnLambda();
+					if constexpr (std::is_same_v<typename T::ReturnType, void>) {
+						static_cast<void>(data);
+						returnLambda();
+					} else {
+						returnLambda(std::move(*reinterpret_cast<typename T::ReturnType*>(data)));
+					}
 				}
 			};
 			
-			return doSendSystemMessage(std::move(context), targetSystem);
+			return doSendSystemMessage(std::move(context), targetSystem, T::messageDestination);
 		}
 
 		template <typename T>
@@ -211,7 +201,7 @@ namespace Halley {
 
 		void purgeMessages();
 		void doSendMessage(EntityId target, std::unique_ptr<Message> msg, int msgId);
-		size_t doSendSystemMessage(SystemMessageContext context, const String& targetSystem);
+		size_t doSendSystemMessage(SystemMessageContext context, const String& targetSystem, SystemMessageDestination destination);
 		void dispatchMessages();
 	};
 

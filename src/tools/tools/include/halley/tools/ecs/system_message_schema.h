@@ -1,6 +1,7 @@
 #pragma once
 
 #include "message_schema.h"
+#include "halley/entity/system_message.h"
 
 namespace Halley
 {
@@ -11,6 +12,7 @@ namespace Halley
 		explicit SystemMessageSchema(YAML::Node node, bool generate);
 
 		String returnType;
+		SystemMessageDestination destination = SystemMessageDestination::Local;
 		bool multicast = false;
 	};
 }

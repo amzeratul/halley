@@ -51,7 +51,7 @@ CodeGenResult CodegenCPP::generateMessage(MessageSchema message)
 	const String className = message.name + "Message";
 
 	CodeGenResult result;
-	result.emplace_back(CodeGenFile(makePath("messages", className, "h"), generateMessageHeader(message, "Message")));
+	result.emplace_back(CodeGenFile(makePath("messages", className, "h"), generateMessageHeader(message, nullptr, "Message")));
 	return result;
 }
 
@@ -60,7 +60,7 @@ CodeGenResult CodegenCPP::generateSystemMessage(SystemMessageSchema message)
 	const String className = message.name + "SystemMessage";
 
 	CodeGenResult result;
-	result.emplace_back(CodeGenFile(makePath("system_messages", className, "h"), generateMessageHeader(message, "SystemMessage")));
+	result.emplace_back(CodeGenFile(makePath("system_messages", className, "h"), generateMessageHeader(message, &message, "SystemMessage")));
 	return result;
 }
 
@@ -471,16 +471,11 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 			if (iter != systemMessages.end()) {
 				const auto& sysMsg = iter->second;
 
-				String functionName;
-				Vector<VariableSchema> parameters = { VariableSchema(TypeSchema(msg.name + "SystemMessage"), "msg") };
-
-				if (sysMsg.returnType == "void") {
-					functionName = "sendSystemMessageGenericVoid<decltype(msg), decltype(callback)>";
-					parameters.push_back(VariableSchema(TypeSchema("std::function<void()>"), "callback", "{}"));
-				} else {
-					functionName = "sendSystemMessageGeneric<decltype(msg), " + sysMsg.returnType + ", decltype(callback)>";
-					parameters.push_back(VariableSchema(TypeSchema("std::function<void(" + sysMsg.returnType + ")>"), "callback"));
-				}
+				const String functionName = "sendSystemMessageGeneric<decltype(msg), decltype(callback)>";
+				Vector<VariableSchema> parameters = {
+					VariableSchema(TypeSchema(msg.name + "SystemMessage"), "msg"),
+					VariableSchema(TypeSchema("std::function<void(" + (sysMsg.returnType == "void" ? "" : sysMsg.returnType) + ")>"), "callback", "{}")
+				};
 
 				Vector<String> body;
 				body.emplace_back("String targetSystem = \"\";");
@@ -709,7 +704,7 @@ Vector<String> CodegenCPP::generateSystemStub(SystemSchema& system) const
 	return contents;
 }
 
-Vector<String> CodegenCPP::generateMessageHeader(const MessageSchema& message, const String& suffix)
+Vector<String> CodegenCPP::generateMessageHeader(const MessageSchema& message, const SystemMessageSchema* sysMessage, const String& suffix)
 {
 	Vector<String> contents = {
 		"#pragma once",
@@ -724,8 +719,16 @@ Vector<String> CodegenCPP::generateMessageHeader(const MessageSchema& message, c
 	contents.push_back("");
 
 	auto gen = CPPClassGenerator(message.name + suffix, "Halley::" + suffix, MemberAccess::Public, true)
-		.setAccessLevel(MemberAccess::Public)
-		.addMember(MemberSchema(TypeSchema("int", false, true, true), "messageIndex", toString(message.id)))
+		.setAccessLevel(MemberAccess::Public);
+
+	gen.addMember(MemberSchema(TypeSchema("int", false, true, true), "messageIndex", toString(message.id)));
+
+	if (sysMessage) {
+		gen.addMember(MemberSchema(TypeSchema("Halley::SystemMessageDestination", false, true, true), "messageDestination", "Halley::SystemMessageDestination::" + upperFirst(toString(sysMessage->destination))))
+			.addLine("using ReturnType = " + sysMessage->returnType + ";");
+	}
+
+	gen
 		.addBlankLine()
 		.addMembers(message.members)
 		.addBlankLine()

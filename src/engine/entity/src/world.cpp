@@ -381,8 +381,10 @@ ComponentDeleterTable& World::getComponentDeleterTable()
 	return *componentDeleterTable;
 }
 
-size_t World::sendSystemMessage(SystemMessageContext origContext, const String& targetSystem)
+size_t World::sendSystemMessage(SystemMessageContext origContext, const String& targetSystem, SystemMessageDestination destination)
 {
+	// TODO: handle destination
+	
 	auto& context = pendingSystemMessages.emplace_back(std::move(origContext));
 	
 	size_t count = 0;

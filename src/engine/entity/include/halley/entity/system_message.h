@@ -4,14 +4,31 @@
 #include <cstddef>
 #include <memory>
 #include <functional>
+#include "message.h"
 
 namespace Halley
 {
-	class SystemMessage
+	enum class SystemMessageDestination {
+		Local,
+		Host,
+		AllClients,
+		RemoteClients
+	};
+
+	template <>
+	struct EnumNames<SystemMessageDestination> {
+		constexpr std::array<const char*, 4> operator()() const {
+			return {{
+				"local",
+				"host",
+				"allClients",
+				"remoteClients"
+			}};
+		}
+	};
+	
+	class SystemMessage : public Message
 	{
-	public:
-		virtual ~SystemMessage() {}
-		virtual size_t getSize() const = 0;
 	};
 
 	struct SystemMessageContext {
