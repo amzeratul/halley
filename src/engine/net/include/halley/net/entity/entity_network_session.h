@@ -68,9 +68,11 @@ namespace Halley {
 
 		std::vector<Rect4i> getRemoteViewPorts() const;
 
+		bool isHost() override;
 		bool isRemote(ConstEntityRef entity) const override;
 		void sendEntityMessage(EntityRef entity, int messageId, Bytes messageData) override;
-
+		uint32_t sendSystemMessage(String targetSystem, int messageId, Bytes messageData, SystemMessageDestination destination) override;
+		
 		void sendMessage(EntityNetworkMessage msg, NetworkSession::PeerId peerId);
 
 	protected:
@@ -90,6 +92,7 @@ namespace Halley {
 		std::shared_ptr<EntityFactory> factory;
 		IEntityNetworkSessionListener* listener = nullptr;
 		SystemMessageBridge messageBridge;
+		uint32_t systemMessageId = 0;
 		
 		EntityFactory::SerializationOptions entitySerializationOptions;
 		EntityDataDelta::Options deltaOptions;
@@ -109,7 +112,9 @@ namespace Halley {
 		void processMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
 		void onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
 		void onReceiveReady(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageReadyToStart& msg);
-		void onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageMessageToEntity& msg);
+		void onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageEntityMsg& msg);
+		void onReceiveSystemMessage(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsg& msg);
+		void onReceiveSystemMessageResponse(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsgResponse& msg);
 
 		void sendMessages();
 		

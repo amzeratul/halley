@@ -46,16 +46,46 @@ void EntityNetworkMessageReadyToStart::serialize(Serializer& s) const
 void EntityNetworkMessageReadyToStart::deserialize(Deserializer& s)
 {}
 
-void EntityNetworkMessageMessageToEntity::serialize(Serializer& s) const
+void EntityNetworkMessageEntityMsg::serialize(Serializer& s) const
 {
 	s << messageType;
 	s << messageData;
 }
 
-void EntityNetworkMessageMessageToEntity::deserialize(Deserializer& s)
+void EntityNetworkMessageEntityMsg::deserialize(Deserializer& s)
 {
 	s >> messageType;
 	s >> messageData;
+}
+
+void EntityNetworkMessageSystemMsg::serialize(Serializer& s) const
+{
+	s << messageType;
+	s << msgId;
+	s << targetSystem;
+	s << messageData;
+}
+
+void EntityNetworkMessageSystemMsg::deserialize(Deserializer& s)
+{
+	s >> messageType;
+	s >> msgId;
+	s >> targetSystem;
+	s >> messageData;
+}
+
+void EntityNetworkMessageSystemMsgResponse::serialize(Serializer& s) const
+{
+	s << messageType;
+	s << msgId;
+	s << responseData;
+}
+
+void EntityNetworkMessageSystemMsgResponse::deserialize(Deserializer& s)
+{
+	s >> messageType;
+	s >> msgId;
+	s >> responseData;
 }
 
 EntityNetworkMessage::EntityNetworkMessage(std::unique_ptr<IEntityNetworkMessage> msg)
@@ -98,8 +128,14 @@ void EntityNetworkMessage::deserialize(Deserializer& s)
 	case EntityNetworkHeaderType::ReadyToStart:
 		message = std::make_unique<EntityNetworkMessageReadyToStart>();
 		break;
-	case EntityNetworkHeaderType::MessageToEntity:
-		message = std::make_unique<EntityNetworkMessageMessageToEntity>();
+	case EntityNetworkHeaderType::EntityMsg:
+		message = std::make_unique<EntityNetworkMessageEntityMsg>();
+		break;
+	case EntityNetworkHeaderType::SystemMsg:
+		message = std::make_unique<EntityNetworkMessageSystemMsg>();
+		break;
+	case EntityNetworkHeaderType::SystemMsgResponse:
+		message = std::make_unique<EntityNetworkMessageSystemMsgResponse>();
 		break;
 	}
 

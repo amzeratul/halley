@@ -18,6 +18,7 @@
 #include <halley/data_structures/memory_pool.h>
 
 namespace Halley {
+	class SystemMessage;
 	enum class SystemMessageDestination;
 	struct SystemMessageContext;
 	class UUID;
@@ -34,12 +35,14 @@ namespace Halley {
 
 		virtual bool isRemote(ConstEntityRef entity) const = 0;
 		virtual void sendEntityMessage(EntityRef entity, int messageId, Bytes messageData) = 0;
+		virtual uint32_t sendSystemMessage(String targetSystem, int messageId, Bytes messageData, SystemMessageDestination destination) = 0;
+		virtual bool isHost() = 0;
 	};
 
 	class World
 	{
 	public:
-		World(const HalleyAPI& api, Resources& resources, CreateComponentFunction createComponent, CreateMessageFunction createMessage);
+		World(const HalleyAPI& api, Resources& resources, CreateComponentFunction createComponent, CreateMessageFunction createMessage, CreateSystemMessageFunction createSystemMessage);
 		~World();
 
 		static std::unique_ptr<World> make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode);
@@ -137,6 +140,7 @@ namespace Halley {
 		bool isEntityNetworkRemote(ConstEntityRef entity) const;
 		void sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr<Message> msg);
 		std::unique_ptr<Message> deserializeMessage(int msgId, gsl::span<const std::byte> data);
+		std::unique_ptr<SystemMessage> deserializeSystemMessage(int msgId, gsl::span<const std::byte> data);
 
 		bool isDevMode() const;
 
@@ -149,6 +153,7 @@ namespace Halley {
 		std::array<Vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;
 		CreateComponentFunction createComponent;
 		CreateMessageFunction createMessage;
+		CreateSystemMessageFunction createSystemMessage;
 		bool entityDirty = false;
 		bool entityReloaded = false;
 		bool editor = false;

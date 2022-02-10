@@ -19,7 +19,12 @@ bool SystemMessageBridge::isValid() const
 
 void SystemMessageBridge::sendMessageToEntity(EntityId target, int msgId, gsl::span<const gsl::byte> data)
 {
-	system->sendRawMessage(target, msgId, data);
+	system->sendEntityMessageFromNetwork(target, msgId, data);
+}
+
+void SystemMessageBridge::sendMessageToSystem(const String& targetSystem, int messageType, gsl::span<const std::byte> data)
+{
+	system->sendSystemMessageFromNetwork(targetSystem, messageType, data);
 }
 
 System::System(Vector<FamilyBindingBase*> uninitializedFamilies, Vector<int> messageTypesReceived)
@@ -157,9 +162,23 @@ size_t System::getSystemMessagesInInbox() const
 	return systemMessageInbox.size();
 }
 
-void System::sendRawMessage(EntityId target, int msgId, gsl::span<const std::byte> data)
+void System::sendEntityMessageFromNetwork(EntityId target, int msgId, gsl::span<const std::byte> data)
 {
 	doSendMessage(target, world->deserializeMessage(msgId, data), msgId);
+}
+
+void System::sendSystemMessageFromNetwork(const String& targetSystem, int msgId, gsl::span<const std::byte> data)
+{
+	SystemMessageContext context;
+
+	context.msgId = msgId;
+	context.msg = world->deserializeSystemMessage(msgId, data);
+	context.callback = [=] (std::byte*)
+	{
+		// TODO
+	};
+	
+	doSendSystemMessage(std::move(context), targetSystem, SystemMessageDestination::Local);
 }
 
 void System::doUpdate(Time time) {

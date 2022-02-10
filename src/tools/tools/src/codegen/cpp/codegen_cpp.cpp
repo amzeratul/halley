@@ -64,13 +64,15 @@ CodeGenResult CodegenCPP::generateSystemMessage(SystemMessageSchema message)
 	return result;
 }
 
-CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& componentsRaw, const Vector<SystemSchema>& systemsRaw, const Vector<MessageSchema>& messagesRaw)
+CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& componentsRaw, const Vector<SystemSchema>& systemsRaw, const Vector<MessageSchema>& messagesRaw, const Vector<SystemMessageSchema>& systemMessagesRaw)
 {
 	auto components = componentsRaw;
 	std::sort(components.begin(), components.end());
 	auto systems = systemsRaw;
 	std::sort(systems.begin(), systems.end());
 	auto messages = messagesRaw;
+	std::sort(messages.begin(), messages.end());
+	auto systemMessages = systemMessagesRaw;
 	std::sort(messages.begin(), messages.end());
 
 	Vector<String> registryCpp {
@@ -84,6 +86,9 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 	}
 	for (auto& msg: messages) {
 		registryCpp.emplace_back("#include \"" + getMessageFileName(msg) + "\"");
+	}
+	for (auto& msg: systemMessages) {
+		registryCpp.emplace_back("#include \"" + getSystemMessageFileName(msg) + "\"");
 	}
 	
 	registryCpp.insert(registryCpp.end(), {
@@ -177,6 +182,28 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"	return result;",
 		"}"
 	});
+
+	// System Message factories
+	registryCpp.insert(registryCpp.end(), {
+		"",
+		"",
+		"using SystemMessageFactory = std::function<std::unique_ptr<Halley::SystemMessage>()>;",
+		"using SystemMessageFactoryList = std::vector<SystemMessageFactory>;",
+		"",
+		"static SystemMessageFactoryList makeSystemMessageFactories() {",
+		"	SystemMessageFactoryList result;"
+	});
+
+	registryCpp.push_back("	result.reserve(" + toString(messages.size()) + ");");
+
+	for (auto& sysMsg : systemMessages) {
+		registryCpp.push_back("	result.push_back([] () { return std::make_unique<" + sysMsg.name + "SystemMessage>(); });");
+	}
+
+	registryCpp.insert(registryCpp.end(), {
+		"	return result;",
+		"}"
+	});
 	
 	// Create system and component methods
 	registryCpp.insert(registryCpp.end(), {
@@ -202,6 +229,11 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"",
 		"	std::unique_ptr<Halley::Message> createMessage(int msgId) {",
 		"		static MessageFactoryList factories = makeMessageFactories();",
+		"		return factories.at(msgId)();",
+		"	}",
+		"",
+		"	std::unique_ptr<Halley::SystemMessage> createSystemMessage(int msgId) {",
+		"		static SystemMessageFactoryList factories = makeSystemMessageFactories();",
 		"		return factories.at(msgId)();",
 		"	}",
 		"",
@@ -820,4 +852,9 @@ String CodegenCPP::getComponentFileName(const ComponentSchema& component) const
 String CodegenCPP::getMessageFileName(const MessageSchema& message) const
 {
 	return "messages/" + toFileName(message.name + "Message") + ".h";
+}
+
+String CodegenCPP::getSystemMessageFileName(const SystemMessageSchema& message) const
+{
+	return "system_messages/" + toFileName(message.name + "SystemMessage") + ".h";
 }

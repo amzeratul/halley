@@ -41,6 +41,7 @@ namespace Halley {
 
 		bool isValid() const;
 		void sendMessageToEntity(EntityId target, int msgId, gsl::span<const gsl::byte> data);
+		void sendMessageToSystem(const String& targetSystem, int messageType, gsl::span<const std::byte> data);
 
 	private:
 		System* system = nullptr;
@@ -65,7 +66,8 @@ namespace Halley {
 		void processSystemMessages();
 		size_t getSystemMessagesInInbox() const;
 
-		void sendRawMessage(EntityId target, int msgId, gsl::span<const std::byte> data);
+		void sendEntityMessageFromNetwork(EntityId target, int msgId, gsl::span<const std::byte> data);
+		void sendSystemMessageFromNetwork(const String& targetSystem, int msgId, gsl::span<const std::byte> data);
 
 	protected:
 		const HalleyAPI& doGetAPI() const { return *api; }

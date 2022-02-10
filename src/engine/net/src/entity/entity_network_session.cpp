@@ -124,14 +124,16 @@ void EntityNetworkSession::processMessage(NetworkSession::PeerId fromPeerId, Ent
 	case EntityNetworkHeaderType::ReadyToStart:
 		onReceiveReady(fromPeerId, msg.getMessage<EntityNetworkMessageReadyToStart>());
 		break;
-	case EntityNetworkHeaderType::MessageToEntity:
-		onReceiveMessageToEntity(fromPeerId, msg.getMessage<EntityNetworkMessageMessageToEntity>());
+	case EntityNetworkHeaderType::EntityMsg:
+		onReceiveMessageToEntity(fromPeerId, msg.getMessage<EntityNetworkMessageEntityMsg>());
 		break;
-	case EntityNetworkHeaderType::MessageToSystem:
+	case EntityNetworkHeaderType::SystemMsg:
+		onReceiveSystemMessage(fromPeerId, msg.getMessage<EntityNetworkMessageSystemMsg>());
 		break;
-	case EntityNetworkHeaderType::RPC:
+	case EntityNetworkHeaderType::SystemMsgResponse:
+		onReceiveSystemMessageResponse(fromPeerId, msg.getMessage<EntityNetworkMessageSystemMsgResponse>());
 		break;
-	}		
+	}
 }
 
 void EntityNetworkSession::onReceiveEntityUpdate(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg)
@@ -152,7 +154,7 @@ void EntityNetworkSession::onReceiveReady(NetworkSession::PeerId fromPeerId, con
 	}
 }
 
-void EntityNetworkSession::onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageMessageToEntity& msg)
+void EntityNetworkSession::onReceiveMessageToEntity(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageEntityMsg& msg)
 {
 	Expects(factory);
 	Expects(messageBridge.isValid());
@@ -167,10 +169,33 @@ void EntityNetworkSession::onReceiveMessageToEntity(NetworkSession::PeerId fromP
 	}
 }
 
+void EntityNetworkSession::onReceiveSystemMessage(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsg& msg)
+{
+	Expects(factory);
+	Expects(messageBridge.isValid());
+	
+	messageBridge.sendMessageToSystem(msg.targetSystem, msg.messageType, gsl::as_bytes(gsl::span<const Byte>(msg.messageData)));
+}
+
+void EntityNetworkSession::onReceiveSystemMessageResponse(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsgResponse& msg)
+{
+	// TODO
+}
+
 void EntityNetworkSession::sendEntityMessage(EntityRef entity, int messageId, Bytes messageData)
 {
 	const NetworkSession::PeerId toPeerId = entity.getOwnerPeerId().value();
-	sendMessage(EntityNetworkMessageMessageToEntity(entity.getInstanceUUID(), messageId, std::move(messageData)), toPeerId);
+	sendMessage(EntityNetworkMessageEntityMsg(entity.getInstanceUUID(), messageId, std::move(messageData)), toPeerId);
+}
+
+uint32_t EntityNetworkSession::sendSystemMessage(String targetSystem, int messageId, Bytes messageData, SystemMessageDestination destination)
+{
+	// TODO: handle destination
+	NetworkSession::PeerId destinationPeer = 0;
+	
+	const auto id = systemMessageId++;
+	sendMessage(EntityNetworkMessageSystemMsg(messageId, id, std::move(targetSystem), std::move(messageData)), destinationPeer);
+	return id;
 }
 
 void EntityNetworkSession::setupDictionary()
@@ -254,6 +279,11 @@ std::vector<Rect4i> EntityNetworkSession::getRemoteViewPorts() const
 		}
 	}
 	return result;
+}
+
+bool EntityNetworkSession::isHost()
+{
+	return session->getType() == NetworkSessionType::Host;
 }
 
 bool EntityNetworkSession::isRemote(ConstEntityRef entity) const

@@ -12,9 +12,9 @@ namespace Halley {
         Update,
         Destroy,
     	ReadyToStart,
-    	MessageToEntity,
-    	MessageToSystem, // Not implemented
-    	RPC, // Not implemented
+    	EntityMsg,
+    	SystemMsg,
+    	SystemMsgResponse
     };
 
     class IEntityNetworkMessage {
@@ -72,16 +72,45 @@ namespace Halley {
         bool needsInitialization() const override { return false; }
 	};
 
-	class EntityNetworkMessageMessageToEntity final : public IEntityNetworkMessage {
+	class EntityNetworkMessageEntityMsg final : public IEntityNetworkMessage {
 	public:
         UUID entityUUID;
         int messageType = 0;
         Bytes messageData;
 
-		EntityNetworkMessageMessageToEntity() = default;
-		EntityNetworkMessageMessageToEntity(UUID entityUUID, int messageType, Bytes messageData) : entityUUID(entityUUID), messageType(messageType), messageData(std::move(messageData)) {}
+		EntityNetworkMessageEntityMsg() = default;
+		EntityNetworkMessageEntityMsg(UUID entityUUID, int messageType, Bytes messageData) : entityUUID(entityUUID), messageType(messageType), messageData(std::move(messageData)) {}
 		
-		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::MessageToEntity; }
+		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::EntityMsg; }
+		void serialize(Serializer& s) const override;
+        void deserialize(Deserializer& s) override;
+	};
+
+	class EntityNetworkMessageSystemMsg final : public IEntityNetworkMessage {
+	public:
+        int messageType = 0;
+        uint32_t msgId = 0;
+        String targetSystem;
+        Bytes messageData;
+
+		EntityNetworkMessageSystemMsg() = default;
+		EntityNetworkMessageSystemMsg(int messageType, uint32_t msgId, String targetSystem, Bytes messageData) : messageType(messageType), msgId(msgId), targetSystem(targetSystem), messageData(std::move(messageData)) {}
+		
+		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::SystemMsg; }
+		void serialize(Serializer& s) const override;
+        void deserialize(Deserializer& s) override;
+	};
+
+	class EntityNetworkMessageSystemMsgResponse final : public IEntityNetworkMessage {
+	public:
+        int messageType = 0;
+        uint32_t msgId = 0;
+        Bytes responseData;
+
+		EntityNetworkMessageSystemMsgResponse() = default;
+		EntityNetworkMessageSystemMsgResponse(int messageType, uint32_t msgId, Bytes responseData) : messageType(messageType), msgId(msgId), responseData(std::move(responseData)) {}
+		
+		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::SystemMsgResponse; }
 		void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
 	};

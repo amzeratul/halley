@@ -41,6 +41,6 @@ namespace Halley
 		virtual CodeGenResult generateMessage(MessageSchema message) = 0;
 		virtual CodeGenResult generateSystemMessage(SystemMessageSchema message) = 0;
 
-		virtual CodeGenResult generateRegistry(const Vector<ComponentSchema>& components, const Vector<SystemSchema>& systems, const Vector<MessageSchema>& messagesRaw) = 0;
+		virtual CodeGenResult generateRegistry(const Vector<ComponentSchema>& components, const Vector<SystemSchema>& systems, const Vector<MessageSchema>& messagesRaw, const Vector<SystemMessageSchema>& systemMessagesRaw) = 0;
 	};
 }

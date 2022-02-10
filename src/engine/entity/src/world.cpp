@@ -20,11 +20,12 @@
 
 using namespace Halley;
 
-World::World(const HalleyAPI& api, Resources& resources, CreateComponentFunction createComponent, CreateMessageFunction createMessage)
+World::World(const HalleyAPI& api, Resources& resources, CreateComponentFunction createComponent, CreateMessageFunction createMessage, CreateSystemMessageFunction createSystemMessage)
 	: api(api)
 	, resources(resources)
 	, createComponent(std::move(createComponent))
 	, createMessage(std::move(createMessage))
+	, createSystemMessage(std::move(createSystemMessage))
 	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
 	, componentDeleterTable(std::make_shared<ComponentDeleterTable>())
 	, entityPool(std::make_shared<PoolAllocator<Entity>>())
@@ -58,7 +59,7 @@ World::~World()
 
 std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode)
 {
-	auto world = std::make_unique<World>(api, resources, CreateEntityFunctions::getCreateComponent(), CreateEntityFunctions::getCreateMessage());
+	auto world = std::make_unique<World>(api, resources, CreateEntityFunctions::getCreateComponent(), CreateEntityFunctions::getCreateMessage(), CreateEntityFunctions::getCreateSystemMessage());
 	const auto& sceneConfig = resources.get<ConfigFile>(sceneName)->getRoot();
 	world->loadSystems(sceneConfig, CreateEntityFunctions::getCreateSystem());
 	return world;
@@ -383,20 +384,48 @@ ComponentDeleterTable& World::getComponentDeleterTable()
 
 size_t World::sendSystemMessage(SystemMessageContext origContext, const String& targetSystem, SystemMessageDestination destination)
 {
-	// TODO: handle destination
+	size_t count = 0;
+
+	// Choose where to send
+	const bool amITheHost = !networkInterface || networkInterface->isHost();
+	bool sendLocal = false;
+	bool sendRemote = false;
+	switch (destination) {
+	case SystemMessageDestination::Local:
+		sendLocal = true;
+		break;
+	case SystemMessageDestination::AllClients:
+		sendLocal = true;
+		sendRemote = true;
+		break;
+	case SystemMessageDestination::Host:
+		sendLocal = amITheHost;
+		sendRemote = !amITheHost;
+		break;
+	case SystemMessageDestination::RemoteClients:
+		sendLocal = false;
+		sendRemote = true;
+		break;
+	}
 	
 	auto& context = pendingSystemMessages.emplace_back(std::move(origContext));
-	
-	size_t count = 0;
-	for (auto& timeline: systems) {
-		for (auto& system: timeline) {
-			if (system->canHandleSystemMessage(context.msgId, targetSystem)) {
-				system->receiveSystemMessage(context);
-				++count;
+
+	if (sendLocal) {
+		for (auto& timeline : systems) {
+			for (auto& system : timeline) {
+				if (system->canHandleSystemMessage(context.msgId, targetSystem)) {
+					system->receiveSystemMessage(context);
+					++count;
+				}
 			}
 		}
 	}
-	
+
+	if (networkInterface && sendRemote) {
+		const auto networkId = networkInterface->sendSystemMessage(targetSystem, context.msgId, Serializer::toBytes(*context.msg, SerializerOptions(SerializerOptions::maxVersion)), destination);
+		// TODO: track networkId to handle callback
+	}
+		
 	return count;
 }
 
@@ -716,6 +745,17 @@ void World::sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr
 std::unique_ptr<Message> World::deserializeMessage(int msgId, gsl::span<const std::byte> data)
 {
 	auto msg = createMessage(msgId);
+
+	auto options = SerializerOptions(SerializerOptions::maxVersion);
+	options.world = this;
+	Deserializer::fromBytes(*msg, data, options);
+
+	return msg;
+}
+
+std::unique_ptr<SystemMessage> World::deserializeSystemMessage(int msgId, gsl::span<const std::byte> data)
+{
+	auto msg = createSystemMessage(msgId);
 
 	auto options = SerializerOptions(SerializerOptions::maxVersion);
 	options.world = this;
