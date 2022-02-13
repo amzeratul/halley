@@ -52,7 +52,7 @@ namespace Halley {
 	constexpr bool is_iterator_v = false;
 
 	template <class T>
-	constexpr bool is_iterator_v<T, void_t<typename std::iterator_traits<T>::iterator_category>> = true;
+	constexpr bool is_iterator_v<T, std::void_t<typename std::iterator_traits<T>::iterator_category>> = true;
 	
 	template <typename T, class Allocator = std::allocator<T>>
 	class VectorSize32 : Allocator {
@@ -142,15 +142,15 @@ namespace Halley {
 			: Allocator(alloc)
 		{
 			reserve(list.size());
-			for (auto e: list) {
-				push_back(std::move(e));
+			for (const auto& e: list) {
+				push_back(T(e));
 			}
 		}
 		
 		~VectorSize32() noexcept
 		{
 			clear();
-			change_capacity(0);
+			std::allocator_traits<Allocator>::deallocate(*this, m_data, m_capacity);
 		}
 
 		VectorSize32& operator=(const VectorSize32& other)
@@ -209,8 +209,8 @@ namespace Halley {
 		{
 			clear();
 			reserve(list.size());
-			for (auto e: list) {
-				push_back(std::move(e));
+			for (const auto& e: list) {
+				push_back(T(e));
 			}
 		}
 
@@ -327,7 +327,10 @@ namespace Halley {
 
 		void clear() noexcept
 		{
-			do_resize(0, [] (pointer) {});
+			for (size_type i = 0; i < m_size; ++i) {
+				std::allocator_traits<Allocator>::destroy(*this, m_data + i);
+			}
+			m_size = 0;
 		}
 
 		iterator insert(const_iterator pos, const T& value)
@@ -351,7 +354,7 @@ namespace Halley {
 				for (size_t i = 0; i < count; ++i) {
 					std::allocator_traits<Allocator>::construct(*this, data() + (i + prevSize), value);
 				}
-				m_size = prevSize + count;
+				m_size = static_cast<uint32_t>(prevSize + count);
 			});
 		}
 
@@ -366,7 +369,7 @@ namespace Halley {
 					std::allocator_traits<Allocator>::construct(*this, data() + (i + prevSize), *iter);
 					++i;
 				}
-				m_size = prevSize + count;
+				m_size = static_cast<uint32_t>(prevSize + count);
 			});
 		}
 		
@@ -378,7 +381,7 @@ namespace Halley {
 				for (size_t i = 0; i < count; ++i) {
 					std::allocator_traits<Allocator>::construct(*this, data() + (i + prevSize), initializerList[i]);
 				}
-				m_size = prevSize + count;
+				m_size = static_cast<uint32_t>(prevSize + count);
 			});
 		}
 
@@ -558,7 +561,7 @@ namespace Halley {
 
 			f(prevSize);
 
-			std::rotate(pos, begin() + prevSize, end());
+			std::rotate(de_const_iter(pos), begin() + prevSize, end());
 			return begin() + idx;
 		}
 
