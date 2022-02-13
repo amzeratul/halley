@@ -371,7 +371,7 @@ namespace Halley {
 		{
 			const auto idx = first - begin();
 			std::rotate(de_const_iter(first), de_const_iter(last), end());
-			resize(m_size - (last - first));
+			resize(size() - (last - first));
 			return begin() + idx;
 		}
 
@@ -386,7 +386,7 @@ namespace Halley {
 			const auto idx = m_size;
 			construct_with_ensure_capacity(m_size + 1, [&] (pointer data)
 			{
-				new(pointer_at(idx, data)) T(std::forward<Args&&...>(args)...);			
+				std::allocator_traits<Allocator>::construct(*this, data + idx, std::forward<Args&&...>(args)...);
 			});
 			++m_size;
 			return elem(idx);
