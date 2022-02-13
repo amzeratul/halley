@@ -9,7 +9,7 @@
 #include <stdexcept>
 
 namespace Halley {
-	template <typename T, typename Pointer>
+	template <typename T, typename Pointer, typename Reference>
 	class VectorIterator {
 	public:
 	#ifdef __cpp_lib_concepts
@@ -19,13 +19,13 @@ namespace Halley {
 	    using value_type        = T;
 	    using difference_type   = std::ptrdiff_t;
 	    using pointer           = Pointer;
-	    using reference         = T&;
+	    using reference         = Reference;
 
 		VectorIterator() : v(nullptr) {}
 		VectorIterator(pointer v) : v(v) {}
 
-		template<typename OtherPointer>
-		VectorIterator(const VectorIterator<T, OtherPointer>& o) : v(o.v) {}
+		template<typename OtherPointer, typename OtherRef>
+		VectorIterator(const VectorIterator<T, OtherPointer, OtherRef>& o) : v(o.v) {}
 		
 		reference operator*() const { return *v; }
 		VectorIterator& operator++() { ++v; return *this; }
@@ -66,8 +66,8 @@ namespace Halley {
 		using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
 		constexpr static float growth_factor = 2.0f;
 
-		using iterator = VectorIterator<T, T*>;
-		using const_iterator = VectorIterator<T, const T*>;
+		using iterator = VectorIterator<T, T*, T&>;
+		using const_iterator = VectorIterator<T, const T*, const T&>;
 		using reverse_iterator = std::reverse_iterator<iterator>;
 		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -198,7 +198,11 @@ namespace Halley {
 		template <class InputIt, std::enable_if_t<is_iterator_v<InputIt>, int> Test = 0>
 		void assign(InputIt begin, InputIt end)
 		{
-			// TODO
+			clear();
+			reserve(end - begin);
+			for (auto iter = begin; iter != end; ++iter) {
+				push_back(*iter);
+			}
 		}
 
 		void assign(std::initializer_list<T> list)
@@ -328,34 +332,54 @@ namespace Halley {
 
 		iterator insert(const_iterator pos, const T& value)
 		{
-			const auto idx = pos - begin();
-			push_back(value);
-			std::rotate(pos, end() - 1, end());
-			return begin() + idx;
+			return do_insert(pos, [&] (size_t prevSize) {
+				push_back(value);
+			});
 		}
 
 		iterator insert(const_iterator pos, T&& value)
 		{
-			const auto idx = pos - begin();
-			push_back(std::move(value));
-			std::rotate(de_const_iter(pos), end() - 1, end());
-			return begin() + idx;
+			return do_insert(pos, [&] (size_t prevSize) {
+				push_back(std::move(value));
+			});
 		}
 
 		iterator insert(const_iterator pos, size_t count, const T& value)
 		{
-			// TODO
+			return do_insert(pos, [&](size_t prevSize) {
+				reserve(size() + count);
+				for (size_t i = 0; i < count; ++i) {
+					std::allocator_traits<Allocator>::construct(*this, data() + (i + prevSize), value);
+				}
+				m_size = prevSize + count;
+			});
 		}
 
 		template <class InputIt, std::enable_if_t<is_iterator_v<InputIt>, int> Test = 0>
 		iterator insert(const_iterator pos, InputIt first, InputIt last)
 		{
-			// TODO
+			return do_insert(pos, [&](size_t prevSize) {
+				const auto count = last - first;
+				reserve(size() + count);
+				size_t i = 0;
+				for (auto iter = first; iter != last; ++iter) {
+					std::allocator_traits<Allocator>::construct(*this, data() + (i + prevSize), *iter);
+					++i;
+				}
+				m_size = prevSize + count;
+			});
 		}
 		
 		iterator insert(const_iterator pos, std::initializer_list<T> initializerList)
 		{
-			// TODO
+			return do_insert(pos, [&](size_t prevSize) {
+				const auto count = initializerList.size();
+				reserve(size() + count);
+				for (size_t i = 0; i < count; ++i) {
+					std::allocator_traits<Allocator>::construct(*this, data() + (i + prevSize), initializerList[i]);
+				}
+				m_size = prevSize + count;
+			});
 		}
 
 		template <class... Args>
@@ -524,6 +548,18 @@ namespace Halley {
 			} else {
 				change_capacity(std::max(minCapacity, static_cast<size_type>(m_capacity * growth_factor)), construct);
 			}
+		}
+
+		template <typename F>
+		iterator do_insert(const_iterator pos, F f)
+		{
+			const auto idx = pos - begin();
+			const auto prevSize = size();
+
+			f(prevSize);
+
+			std::rotate(pos, begin() + prevSize, end());
+			return begin() + idx;
 		}
 
 		[[nodiscard]] reference elem(size_t pos)
