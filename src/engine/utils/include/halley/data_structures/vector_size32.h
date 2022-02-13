@@ -237,7 +237,7 @@ namespace Halley {
 
 		[[nodiscard]] bool empty() const
 		{
-			return m_size == 0;
+			return size() == 0;
 		}
 
 		[[nodiscard]] size_t capacity() const
@@ -273,26 +273,26 @@ namespace Halley {
 
 		[[nodiscard]] reference front()
 		{
-			assert(m_size > 0);
-			return (*this)[0];
+			assert(!empty());
+			return data()[0];
 		}
 
 		[[nodiscard]] reference back()
 		{
-			assert(m_size > 0);
-			return (*this)[m_size - 1];
+			assert(!empty());
+			return data()[size() - 1];
 		}
 
 		[[nodiscard]] const_reference front() const
 		{
-			assert(m_size > 0);
-			return (*this)[0];			
+			assert(!empty());
+			return data()[0];			
 		}
 
 		[[nodiscard]] const_reference back() const
 		{
-			assert(m_size > 0);
-			return (*this)[m_size - 1];			
+			assert(!empty());
+			return data()[size() - 1];			
 		}
 
 		void resize(size_t size)
@@ -313,12 +313,12 @@ namespace Halley {
 
 		void reserve(size_t size)
 		{
-			change_capacity(std::max(static_cast<size_type>(size), m_capacity));
+			change_capacity(static_cast<size_type>(std::max(size, capacity())));
 		}
 
 		void shrink_to_fit()
 		{
-			change_capacity(m_size);
+			change_capacity(size());
 		}
 
 		void clear() noexcept
@@ -412,8 +412,8 @@ namespace Halley {
 
 		void pop_back()
 		{
-			assert(m_size > 0);
-			std::allocator_traits<Allocator>::destroy(*this, m_data + (m_size - 1));
+			assert(!empty());
+			std::allocator_traits<Allocator>::destroy(*this, &back());
 			--m_size;
 		}
 
@@ -431,7 +431,7 @@ namespace Halley {
 
 		[[nodiscard]] iterator end()
 		{
-			return iterator(&elem(m_size));
+			return iterator(&elem(size()));
 		}
 
 		[[nodiscard]] const_iterator begin() const
@@ -441,7 +441,7 @@ namespace Halley {
 
 		[[nodiscard]] const_iterator end() const
 		{
-			return const_iterator(&elem(m_size));
+			return const_iterator(&elem(size()));
 		}
 
 		[[nodiscard]] reverse_iterator rbegin()
@@ -526,12 +526,12 @@ namespace Halley {
 			}
 		}
 
-		[[nodiscard]] reference elem(size_type pos)
+		[[nodiscard]] reference elem(size_t pos)
 		{
 			return data()[pos];
 		}
 
-		[[nodiscard]] const_reference elem(size_type pos) const
+		[[nodiscard]] const_reference elem(size_t pos) const
 		{
 			return data()[pos];
 		}
