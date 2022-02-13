@@ -10,7 +10,7 @@
 
 namespace Halley {
 	template <typename T, class Allocator = std::allocator<T>>
-	class VectorSize32 {
+	class VectorSize32 : Allocator {
 	public:
 		using value_type = T;
 		using size_type = uint32_t;
@@ -75,10 +75,10 @@ namespace Halley {
 		    using reference         = const value_type&;
 
 			const_iterator() : v(nullptr) {}
-			const_iterator(const_pointer v) : v(v) {}
+			const_iterator(pointer v) : v(v) {}
 			const_iterator(iterator v) : v(v.v) {}
 			
-			const_reference operator*() const { return *v; }
+			reference operator*() const { return *v; }
 			const_iterator& operator++() { ++v; return *this; }
 			const_iterator& operator--() { --v; return *this; }
 			const_iterator operator++(int) const { return const_iterator(v + 1); }
@@ -103,14 +103,57 @@ namespace Halley {
 		using reverse_iterator = std::reverse_iterator<iterator>;
 		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-		VectorSize32()
+		VectorSize32() noexcept
 			: m_data(nullptr)
 			, m_size(0)
 			, m_capacity(0)
 		{
 		}
+
+		explicit VectorSize32(const Allocator& allocator) noexcept
+			: Allocator(allocator)
+			, m_data(nullptr)
+			, m_size(0)
+			, m_capacity(0)
+		{
+			// TODO
+		}
+
+		VectorSize32(size_t count, T defaultValue, const Allocator& alloc = Allocator())
+			: Allocator(alloc)
+			, m_data(nullptr)
+			, m_size(0)
+			, m_capacity(0)
+		{
+			resize(count, std::move(defaultValue));
+		}
+
+		explicit VectorSize32(size_t count, const Allocator& alloc = Allocator())
+			: Allocator(alloc)
+			, m_data(nullptr)
+			, m_size(0)
+			, m_capacity(0)
+		{
+			resize(count);
+		}
+
+		template <class InputIt>
+		VectorSize32(InputIt first, InputIt last, const Allocator& alloc = Allocator())
+		{
+			// TODO
+		}
 		
 		VectorSize32(const VectorSize32& other)
+		{
+			change_capacity(other.m_capacity);
+			m_size = other.m_size;
+			for (uint32_t i = 0; i < m_size; ++i) {
+				new (pointer_at(i)) T(other[i]);
+			}
+		}
+		
+		VectorSize32(const VectorSize32& other, const Allocator& alloc)
+			: Allocator(alloc)
 		{
 			change_capacity(other.m_capacity);
 			m_size = other.m_size;
@@ -129,27 +172,25 @@ namespace Halley {
 			other.m_capacity = 0;
 		}
 
-		VectorSize32(size_t n)
-			: m_data(nullptr)
-			, m_size(0)
-			, m_capacity(0)
+		VectorSize32(VectorSize32&& other, const Allocator& alloc)
+			: Allocator(alloc)
+			, m_data(other.m_data)
+			, m_size(other.m_size)
+			, m_capacity(other.m_capacity)
 		{
-			resize(n);
+			other.m_data = nullptr;
+			other.m_size = 0;
+			other.m_capacity = 0;
 		}
 
-		VectorSize32(size_t n, T defaultValue)
-			: m_data(nullptr)
+		VectorSize32(std::initializer_list<T> list, const Allocator& alloc = Allocator())
+			: Allocator(alloc)
+			, m_data(nullptr)
 			, m_size(0)
 			, m_capacity(0)
 		{
-			resize(n, std::move(defaultValue));
-		}
-
-		VectorSize32(std::initializer_list<T> list)
-			: m_data(nullptr)
-			, m_size(0)
-			, m_capacity(0)
-		{
+			// TODO: handle allocator
+			
 			reserve(list.size());
 			for (auto e: list) {
 				push_back(std::move(e));
@@ -185,6 +226,32 @@ namespace Halley {
 			other.m_data = nullptr;
 			other.m_size = 0;
 			other.m_capacity = 0;
+			return *this;
+		}
+
+		VectorSize32& operator=(std::initializer_list<T> initializerList)
+		{
+			// TODO
+		}
+
+		void assign(size_t count, const T& value)
+		{
+			// TODO
+		}
+
+		template <class InputIt>
+		void assign(InputIt begin, InputIt end)
+		{
+			// TODO
+		}
+
+		void assign(std::initializer_list<T> initializerList)
+		{
+			// TODO
+		}
+
+		Allocator get_allocator() const noexcept
+		{
 			return *this;
 		}
 
@@ -270,7 +337,7 @@ namespace Halley {
 
 		void resize(size_t size)
 		{
-			do_resize(size, [] (std::byte* bytes)
+			do_resize(size, [] (pointer bytes)
 			{
 				new (bytes) T();
 			});
@@ -278,7 +345,7 @@ namespace Halley {
 
 		void resize(size_t size, T defaultValue)
 		{
-			do_resize(size, [&] (std::byte* bytes)
+			do_resize(size, [&] (pointer bytes)
 			{
 				new (bytes) T(defaultValue);
 			});
@@ -294,9 +361,9 @@ namespace Halley {
 			change_capacity(m_size);
 		}
 
-		void clear()
+		void clear() noexcept
 		{
-			do_resize(0, [] (std::byte*) {});
+			do_resize(0, [] (pointer) {});
 		}
 
 		iterator insert(const_iterator pos, const T& value)
@@ -313,6 +380,22 @@ namespace Halley {
 			push_back(std::move(value));
 			std::rotate(de_const_iter(pos), end() - 1, end());
 			return begin() + idx;
+		}
+
+		iterator insert(const_iterator pos, size_t count, const T& value)
+		{
+			// TODO
+		}
+
+		template <typename InputIt>
+		iterator insert(const_iterator pos, InputIt first, InputIt last)
+		{
+			// TODO
+		}
+		
+		iterator insert(const_iterator pos, std::initializer_list<T> initializerList)
+		{
+			// TODO
 		}
 
 		template <class... Args>
@@ -341,7 +424,7 @@ namespace Halley {
 		reference emplace_back(Args&&... args)
 		{
 			const auto idx = m_size;
-			construct_with_ensure_capacity(m_size + 1, [&] (std::byte* data)
+			construct_with_ensure_capacity(m_size + 1, [&] (pointer data)
 			{
 				new(pointer_at(idx, data)) T(std::forward<Args&&...>(args)...);			
 			});
@@ -351,7 +434,7 @@ namespace Halley {
 
 		void push_back(const T& value)
 		{
-			construct_with_ensure_capacity(m_size + 1, [&](std::byte* data)
+			construct_with_ensure_capacity(m_size + 1, [&](pointer data)
 			{
 				new(pointer_at(m_size, data)) T(value);
 			});
@@ -360,7 +443,7 @@ namespace Halley {
 
 		void push_back(T&& value)
 		{
-			construct_with_ensure_capacity(m_size + 1, [&](std::byte* data)
+			construct_with_ensure_capacity(m_size + 1, [&](pointer data)
 			{
 				new(pointer_at(m_size, data)) T(std::move(value));
 			});
@@ -422,13 +505,13 @@ namespace Halley {
 		} 
 
 	private:
-		std::byte* m_data;
+		pointer m_data;
 		size_type m_size;
 		size_type m_capacity;
 
 		void change_capacity(size_type newCapacity)
 		{
-			change_capacity(newCapacity, [](std::byte*) {});
+			change_capacity(newCapacity, [](pointer) {});
 		}
 
 		template <typename F>
@@ -436,7 +519,7 @@ namespace Halley {
 		{
 			assert(newCapacity >= m_size);
 			if (newCapacity != m_capacity) {
-				std::byte* newData = newCapacity > 0 ? new std::byte[newCapacity * sizeof(T)] : nullptr;
+				pointer newData = newCapacity > 0 ? std::allocator_traits<Allocator>::allocate(*this, newCapacity) : nullptr;
 
 				construct(newData);
 				
@@ -444,8 +527,9 @@ namespace Halley {
 					new (pointer_at(i, newData)) T(std::move(elem(i)));
 					elem(i).~T();
 				}
-				delete[] m_data;
+				std::allocator_traits<Allocator>::deallocate(*this, m_data, m_capacity);
 				m_data = newData;
+				m_capacity = newCapacity;
 			}
 		}
 
@@ -479,12 +563,12 @@ namespace Halley {
 			}
 		}
 
-		[[nodiscard]] std::byte* pointer_at(size_type pos, std::byte* bytes)
+		[[nodiscard]] pointer pointer_at(size_type pos, pointer bytes)
 		{
 			return bytes + pos * sizeof(T);
 		}
 
-		[[nodiscard]] std::byte* pointer_at(size_type pos)
+		[[nodiscard]] pointer pointer_at(size_type pos)
 		{
 			return m_data + pos * sizeof(T);
 		}
