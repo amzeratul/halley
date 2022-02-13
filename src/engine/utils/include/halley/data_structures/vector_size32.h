@@ -9,6 +9,51 @@
 #include <stdexcept>
 
 namespace Halley {
+	template <typename T, typename Pointer>
+	class VectorIterator {
+	public:
+	#ifdef __cpp_lib_concepts
+	    using iterator_concept = std::contiguous_iterator_tag;
+	#endif // __cpp_lib_concepts
+	    using iterator_category = std::random_access_iterator_tag;
+	    using value_type        = T;
+	    using difference_type   = std::ptrdiff_t;
+	    using pointer           = Pointer;
+	    using reference         = T&;
+
+		VectorIterator() : v(nullptr) {}
+		VectorIterator(pointer v) : v(v) {}
+
+		template<typename OtherPointer>
+		VectorIterator(const VectorIterator<T, OtherPointer>& o) : v(o.v) {}
+		
+		reference operator*() const { return *v; }
+		VectorIterator& operator++() { ++v; return *this; }
+		VectorIterator& operator--() { --v; return *this; }
+		VectorIterator operator++(int) const { return VectorIterator(v + 1); }
+		VectorIterator operator--(int) const { return VectorIterator(v - 1); }
+		VectorIterator operator+(size_t o) const { return VectorIterator(v + o); }
+		VectorIterator operator-(size_t o) const { return VectorIterator(v - o); }
+		ptrdiff_t operator-(const VectorIterator& other) const { return v - other.v; }
+
+		bool operator==(const VectorIterator& other) { return v == other.v; }
+		bool operator!=(const VectorIterator& other) { return v != other.v; }
+		bool operator<(const VectorIterator& other) { return v < other.v; }
+		bool operator>(const VectorIterator& other) { return v > other.v; }
+		bool operator<=(const VectorIterator& other) { return v <= other.v; }
+		bool operator>=(const VectorIterator& other) { return v >= other.v; }
+
+		friend void swap(VectorIterator& a, VectorIterator& b) noexcept { std::swap(a.v, b.v); }
+
+		pointer v;
+	};
+
+	template <class T, class = void>
+	constexpr bool is_iterator_v = false;
+
+	template <class T>
+	constexpr bool is_iterator_v<T, void_t<typename std::iterator_traits<T>::iterator_category>> = true;
+	
 	template <typename T, class Allocator = std::allocator<T>>
 	class VectorSize32 : Allocator {
 	public:
@@ -21,126 +66,35 @@ namespace Halley {
 		using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
 		constexpr static float growth_factor = 2.0f;
 
-		class const_iterator;
-		
-		class iterator {
-			friend class const_iterator;
-		
-		public:
-		#ifdef __cpp_lib_concepts
-		    using iterator_concept = std::contiguous_iterator_tag;
-		#endif // __cpp_lib_concepts
-		    using iterator_category = std::random_access_iterator_tag;
-		    using value_type        = typename VectorSize32::value_type;
-		    using difference_type   = typename VectorSize32::difference_type;
-		    using pointer           = typename VectorSize32::pointer;
-		    using reference         = value_type&;
-
-			iterator() : v(nullptr) {}
-			iterator(pointer v) : v(v) {}
-			
-			reference operator*() const { return *v; }
-			iterator& operator++() { ++v; return *this; }
-			iterator& operator--() { --v; return *this; }
-			iterator operator++(int) const { return iterator(v + 1); }
-			iterator operator--(int) const { return iterator(v - 1); }
-			iterator operator+(size_t o) const { return iterator(v + o); }
-			iterator operator-(size_t o) const { return iterator(v - o); }
-			ptrdiff_t operator-(const iterator& other) const { return v - other.v; }
-
-			bool operator==(const iterator& other) { return v == other.v; }
-			bool operator!=(const iterator& other) { return v != other.v; }
-			bool operator<(const iterator& other) { return v < other.v; }
-			bool operator>(const iterator& other) { return v > other.v; }
-			bool operator<=(const iterator& other) { return v <= other.v; }
-			bool operator>=(const iterator& other) { return v >= other.v; }
-
-			friend void swap(iterator& a, iterator& b) noexcept { std::swap(a.v, b.v); }
-
-		private:
-			pointer v;
-		};
-
-		class const_iterator {
-			friend class VectorSize32;
-		
-		public:
-		#ifdef __cpp_lib_concepts
-		    using iterator_concept = std::contiguous_iterator_tag;
-		#endif // __cpp_lib_concepts
-		    using iterator_category = std::random_access_iterator_tag;
-		    using value_type        = typename VectorSize32::value_type;
-		    using difference_type   = typename VectorSize32::difference_type;
-		    using pointer           = typename VectorSize32::const_pointer;
-		    using reference         = const value_type&;
-
-			const_iterator() : v(nullptr) {}
-			const_iterator(pointer v) : v(v) {}
-			const_iterator(iterator v) : v(v.v) {}
-			
-			reference operator*() const { return *v; }
-			const_iterator& operator++() { ++v; return *this; }
-			const_iterator& operator--() { --v; return *this; }
-			const_iterator operator++(int) const { return const_iterator(v + 1); }
-			const_iterator operator--(int) const { return const_iterator(v - 1); }
-			const_iterator operator+(size_t o) const { return const_iterator(v + o); }
-			const_iterator operator-(size_t o) const { return const_iterator(v - o); }
-			ptrdiff_t operator-(const const_iterator& o) const { return v - o.v; }
-
-			bool operator==(const const_iterator& other) { return v == other.v; }
-			bool operator!=(const const_iterator& other) { return v != other.v; }
-			bool operator<(const const_iterator& other) { return v < other.v; }
-			bool operator>(const const_iterator& other) { return v > other.v; }
-			bool operator<=(const const_iterator& other) { return v <= other.v; }
-			bool operator>=(const const_iterator& other) { return v >= other.v; }
-
-			friend void swap(const_iterator& a, const_iterator& b) noexcept { std::swap(a.v, b.v); }
-
-		private:
-			const_pointer v;			
-		};
-
+		using iterator = VectorIterator<T, T*>;
+		using const_iterator = VectorIterator<T, const T*>;
 		using reverse_iterator = std::reverse_iterator<iterator>;
 		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-		VectorSize32() noexcept
-			: m_data(nullptr)
-			, m_size(0)
-			, m_capacity(0)
-		{
-		}
+		VectorSize32() noexcept = default;
 
 		explicit VectorSize32(const Allocator& allocator) noexcept
 			: Allocator(allocator)
-			, m_data(nullptr)
-			, m_size(0)
-			, m_capacity(0)
 		{
-			// TODO
 		}
 
 		VectorSize32(size_t count, T defaultValue, const Allocator& alloc = Allocator())
 			: Allocator(alloc)
-			, m_data(nullptr)
-			, m_size(0)
-			, m_capacity(0)
 		{
 			resize(count, std::move(defaultValue));
 		}
 
 		explicit VectorSize32(size_t count, const Allocator& alloc = Allocator())
 			: Allocator(alloc)
-			, m_data(nullptr)
-			, m_size(0)
-			, m_capacity(0)
 		{
 			resize(count);
 		}
 
-		template <class InputIt>
+		template <class InputIt, std::enable_if_t<is_iterator_v<InputIt>, int> Test = 0>
 		VectorSize32(InputIt first, InputIt last, const Allocator& alloc = Allocator())
+			: Allocator(alloc)
 		{
-			// TODO
+			assign(std::move(first), std::move(last));
 		}
 		
 		VectorSize32(const VectorSize32& other)
@@ -148,7 +102,7 @@ namespace Halley {
 			change_capacity(other.m_capacity);
 			m_size = other.m_size;
 			for (uint32_t i = 0; i < m_size; ++i) {
-				new (pointer_at(i)) T(other[i]);
+				std::allocator_traits<Allocator>::construct(*this, m_data + i, other[i]);
 			}
 		}
 		
@@ -158,12 +112,13 @@ namespace Halley {
 			change_capacity(other.m_capacity);
 			m_size = other.m_size;
 			for (uint32_t i = 0; i < m_size; ++i) {
-				new (pointer_at(i)) T(other[i]);
+				std::allocator_traits<Allocator>::construct(*this, m_data + i, other[i]);
 			}
 		}
 		
 		VectorSize32(VectorSize32&& other) noexcept
-			: m_data(other.m_data)
+			: Allocator(std::move(other))
+			, m_data(other.m_data)
 			, m_size(other.m_size)
 			, m_capacity(other.m_capacity)
 		{
@@ -185,19 +140,14 @@ namespace Halley {
 
 		VectorSize32(std::initializer_list<T> list, const Allocator& alloc = Allocator())
 			: Allocator(alloc)
-			, m_data(nullptr)
-			, m_size(0)
-			, m_capacity(0)
 		{
-			// TODO: handle allocator
-			
 			reserve(list.size());
 			for (auto e: list) {
 				push_back(std::move(e));
 			}
 		}
 		
-		~VectorSize32()
+		~VectorSize32() noexcept
 		{
 			clear();
 			change_capacity(0);
@@ -220,6 +170,7 @@ namespace Halley {
 
 		VectorSize32& operator=(VectorSize32&& other) noexcept
 		{
+			Allocator::operator=(std::move(other));
 			m_data = other.m_data;
 			m_size = other.m_size;
 			m_capacity = other.m_capacity;
@@ -229,14 +180,19 @@ namespace Halley {
 			return *this;
 		}
 
-		VectorSize32& operator=(std::initializer_list<T> initializerList)
+		VectorSize32& operator=(std::initializer_list<T> list)
 		{
-			// TODO
+			reserve(list.size());
+			for (auto e: list) {
+				push_back(std::move(e));
+			}
+			return *this;
 		}
 
 		void assign(size_t count, const T& value)
 		{
-			// TODO
+			clear();
+			resize(count, value);
 		}
 
 		template <class InputIt>
@@ -245,12 +201,16 @@ namespace Halley {
 			// TODO
 		}
 
-		void assign(std::initializer_list<T> initializerList)
+		void assign(std::initializer_list<T> list)
 		{
-			// TODO
+			clear();
+			reserve(list.size());
+			for (auto e: list) {
+				push_back(std::move(e));
+			}
 		}
 
-		Allocator get_allocator() const noexcept
+		[[nodiscard]] Allocator get_allocator() const noexcept
 		{
 			return *this;
 		}
@@ -337,9 +297,9 @@ namespace Halley {
 
 		void resize(size_t size)
 		{
-			do_resize(size, [] (pointer bytes)
+			do_resize(size, [this] (pointer bytes)
 			{
-				new (bytes) T();
+				std::allocator_traits<Allocator>::construct(*this, bytes, T());
 			});
 		}
 
@@ -347,7 +307,7 @@ namespace Halley {
 		{
 			do_resize(size, [&] (pointer bytes)
 			{
-				new (bytes) T(defaultValue);
+				std::allocator_traits<Allocator>::construct(*this, bytes, defaultValue);
 			});
 		}
 
@@ -436,7 +396,7 @@ namespace Halley {
 		{
 			construct_with_ensure_capacity(m_size + 1, [&](pointer data)
 			{
-				new(pointer_at(m_size, data)) T(value);
+				std::allocator_traits<Allocator>::construct(*this, data + m_size, value);
 			});
 			++m_size;
 		}
@@ -445,7 +405,7 @@ namespace Halley {
 		{
 			construct_with_ensure_capacity(m_size + 1, [&](pointer data)
 			{
-				new(pointer_at(m_size, data)) T(std::move(value));
+				std::allocator_traits<Allocator>::construct(*this, data + m_size, std::move(value));
 			});
 			++m_size;
 		}
@@ -453,7 +413,7 @@ namespace Halley {
 		void pop_back()
 		{
 			assert(m_size > 0);
-			elem(m_size - 1).~T();
+			std::allocator_traits<Allocator>::destroy(*this, m_data + (m_size - 1));
 			--m_size;
 		}
 
@@ -505,9 +465,9 @@ namespace Halley {
 		} 
 
 	private:
-		pointer m_data;
-		size_type m_size;
-		size_type m_capacity;
+		pointer m_data = nullptr;
+		size_type m_size = 0;
+		size_type m_capacity = 0;
 
 		void change_capacity(size_type newCapacity)
 		{
@@ -523,11 +483,14 @@ namespace Halley {
 
 				construct(newData);
 				
-				for (size_type i = 0; i < m_size; ++i) {
-					new (pointer_at(i, newData)) T(std::move(elem(i)));
-					elem(i).~T();
+				if (m_data) {
+					for (size_type i = 0; i < m_size; ++i) {
+						std::allocator_traits<Allocator>::construct(*this, newData + i, std::move(m_data[i]));
+						std::allocator_traits<Allocator>::destroy(*this, m_data + i);
+					}
+					std::allocator_traits<Allocator>::deallocate(*this, m_data, m_capacity);
 				}
-				std::allocator_traits<Allocator>::deallocate(*this, m_data, m_capacity);
+				
 				m_data = newData;
 				m_capacity = newCapacity;
 			}
@@ -542,12 +505,12 @@ namespace Halley {
 					change_capacity(newSize);
 				}
 				for (size_type i = m_size; i < newSize; ++i) {
-					construct(pointer_at(i));
+					construct(m_data + i);
 				}
 				m_size = newSize;
 			} else if (newSize < m_size) {
 				for (size_type i = newSize; i < m_size; ++i) {
-					elem(i).~T();
+					std::allocator_traits<Allocator>::destroy(*this, m_data + i);
 				}
 				m_size = newSize;
 			}
@@ -561,16 +524,6 @@ namespace Halley {
 			} else {
 				change_capacity(std::max(minCapacity, static_cast<size_type>(m_capacity * growth_factor)), construct);
 			}
-		}
-
-		[[nodiscard]] pointer pointer_at(size_type pos, pointer bytes)
-		{
-			return bytes + pos * sizeof(T);
-		}
-
-		[[nodiscard]] pointer pointer_at(size_type pos)
-		{
-			return m_data + pos * sizeof(T);
 		}
 
 		[[nodiscard]] reference elem(size_type pos)
