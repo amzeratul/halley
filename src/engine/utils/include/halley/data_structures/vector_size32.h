@@ -195,7 +195,7 @@ namespace Halley {
 			resize(count, value);
 		}
 
-		template <class InputIt>
+		template <class InputIt, std::enable_if_t<is_iterator_v<InputIt>, int> Test = 0>
 		void assign(InputIt begin, InputIt end)
 		{
 			// TODO
@@ -347,7 +347,7 @@ namespace Halley {
 			// TODO
 		}
 
-		template <typename InputIt>
+		template <class InputIt, std::enable_if_t<is_iterator_v<InputIt>, int> Test = 0>
 		iterator insert(const_iterator pos, InputIt first, InputIt last)
 		{
 			// TODO
