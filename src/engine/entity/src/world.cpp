@@ -384,8 +384,6 @@ ComponentDeleterTable& World::getComponentDeleterTable()
 
 size_t World::sendSystemMessage(SystemMessageContext origContext, const String& targetSystem, SystemMessageDestination destination)
 {
-	size_t count = 0;
-
 	// Choose where to send
 	const bool amITheHost = !networkInterface || networkInterface->isHost();
 	bool sendLocal = false;
@@ -410,22 +408,29 @@ size_t World::sendSystemMessage(SystemMessageContext origContext, const String& 
 	
 	auto& context = pendingSystemMessages.emplace_back(std::move(origContext));
 
-	if (sendLocal) {
-		for (auto& timeline : systems) {
-			for (auto& system : timeline) {
-				if (system->canHandleSystemMessage(context.msgId, targetSystem)) {
+	size_t systemCount = 0;
+	for (auto& timeline : systems) {
+		for (auto& system : timeline) {
+			if (system->canHandleSystemMessage(context.msgId, targetSystem)) {
+				if (sendLocal) {
 					system->receiveSystemMessage(context);
-					++count;
 				}
+				++systemCount;
 			}
 		}
 	}
 
+	size_t totalCount = 0;
+	if (sendLocal) {
+		totalCount += systemCount;
+	}
+
 	if (sendRemote) {
 		sendNetworkSystemMessage(targetSystem, context, destination);
+		totalCount += (destination == SystemMessageDestination::Host ? 1 : 2) * systemCount; // Assume at least two clients for non-host sends
 	}
 		
-	return count;
+	return totalCount;
 }
 
 bool World::isDevMode() const

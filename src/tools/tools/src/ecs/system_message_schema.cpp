@@ -15,4 +15,10 @@ SystemMessageSchema::SystemMessageSchema(YAML::Node node, bool generate)
 	returnType = node["returnType"].as<std::string>("void");
 	multicast = node["multicast"].as<bool>(false);
 	destination = fromString<SystemMessageDestination>(node["destination"].as<std::string>("local"));
+
+	if (destination == SystemMessageDestination::AllClients || destination == SystemMessageDestination::RemoteClients) {
+		if (!multicast) {
+			throw Exception("Non-multicast system message \"" + name + "\" cannot be sent to all clients or remote clients.", HalleyExceptions::Tools);
+		}
+	}
 }
