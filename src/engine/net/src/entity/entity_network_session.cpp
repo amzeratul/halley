@@ -73,7 +73,12 @@ void EntityNetworkSession::sendUpdates(Time t, Rect4i viewRect, gsl::span<const 
 	session->update(t);
 }
 
-void EntityNetworkSession::sendMessage(EntityNetworkMessage msg, NetworkSession::PeerId peerId)
+void EntityNetworkSession::sendToAll(EntityNetworkMessage msg)
+{
+	outbox[-1].push_back(std::move(msg));
+}
+
+void EntityNetworkSession::sendToPeer(EntityNetworkMessage msg, NetworkSession::PeerId peerId)
 {
 	outbox[peerId].push_back(std::move(msg));
 }
@@ -84,7 +89,12 @@ void EntityNetworkSession::sendMessages()
 		auto data = Serializer::toBytes(msgs, byteSerializationOptions);
 		auto compressed = Compression::compressRaw(gsl::as_bytes(gsl::span<const Byte>(data)), false);
 		auto packet = OutboundNetworkPacket(std::move(compressed));
-		session->sendToPeer(std::move(packet), peerId);
+
+		if (peerId == -1) {
+			session->sendToPeers(std::move(packet));
+		} else {
+			session->sendToPeer(std::move(packet), static_cast<NetworkSession::PeerId>(peerId));
+		}
 	}
 	outbox.clear();
 }
@@ -174,21 +184,27 @@ void EntityNetworkSession::onReceiveMessageToEntity(NetworkSession::PeerId fromP
 void EntityNetworkSession::sendEntityMessage(EntityRef entity, int messageType, Bytes messageData)
 {
 	const NetworkSession::PeerId toPeerId = entity.getOwnerPeerId().value();
-	sendMessage(EntityNetworkMessageEntityMsg(entity.getInstanceUUID(), messageType, std::move(messageData)), toPeerId);
+	sendToPeer(EntityNetworkMessageEntityMsg(entity.getInstanceUUID(), messageType, std::move(messageData)), toPeerId);
 }
 
 void EntityNetworkSession::sendSystemMessage(String targetSystem, int messageType, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback)
 {
-	// TODO: handle destination
-	NetworkSession::PeerId destinationPeer = 0;
-	
-	const auto id = systemMessageId++;
-	sendMessage(EntityNetworkMessageSystemMsg(messageType, id, std::move(targetSystem), std::move(messageData)), destinationPeer);
+	Expects(destination != SystemMessageDestination::Local);
 
-	// Only wait for responses from host?
+	const auto id = systemMessageId++;
+	auto msg = EntityNetworkMessageSystemMsg(messageType, id, std::move(targetSystem), destination, std::move(messageData));
+
 	if (destination == SystemMessageDestination::Host) {
-		pendingSysMsgResponses[id] = PendingSysMsgResponse{ std::move(callback) };
-		assert(pendingSysMsgResponses.size() < 1000); // Make sure we're not leaking
+		assert(!isHost());
+		sendToPeer(std::move(msg), 0);
+
+		// Only wait for responses from host?
+		if (callback) {
+			pendingSysMsgResponses[id] = PendingSysMsgResponse{ std::move(callback) };
+			assert(pendingSysMsgResponses.size() < 1000); // Make sure we're not leaking
+		}
+	} else {
+		sendToAll(std::move(msg));
 	}
 }
 
@@ -202,7 +218,7 @@ void EntityNetworkSession::onReceiveSystemMessage(NetworkSession::PeerId fromPee
 	
 	messageBridge.sendMessageToSystem(msg.targetSystem, msg.messageType, gsl::as_bytes(gsl::span<const Byte>(msg.messageData)), [=] (gsl::byte*, Bytes serializedData)
 	{
-		sendMessage(EntityNetworkMessageSystemMsgResponse(msgType, msgId, serializedData), fromPeerId);
+		sendToPeer(EntityNetworkMessageSystemMsgResponse(msgType, msgId, serializedData), fromPeerId);
 	});
 }
 

@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+#include "halley/entity/system_message.h"
 #include "halley/maths/uuid.h"
 
 namespace Halley {
@@ -91,10 +92,17 @@ namespace Halley {
         int messageType = 0;
         uint32_t msgId = 0;
         String targetSystem;
+        SystemMessageDestination destination;
         Bytes messageData;
 
 		EntityNetworkMessageSystemMsg() = default;
-		EntityNetworkMessageSystemMsg(int messageType, uint32_t msgId, String targetSystem, Bytes messageData) : messageType(messageType), msgId(msgId), targetSystem(targetSystem), messageData(std::move(messageData)) {}
+		EntityNetworkMessageSystemMsg(int messageType, uint32_t msgId, String targetSystem, SystemMessageDestination destination, Bytes messageData)
+			: messageType(messageType)
+			, msgId(msgId)
+			, targetSystem(std::move(targetSystem))
+			, destination(destination)
+			, messageData(std::move(messageData))
+		{}
 		
 		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::SystemMsg; }
 		void serialize(Serializer& s) const override;

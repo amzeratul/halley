@@ -503,7 +503,6 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 			if (iter != systemMessages.end()) {
 				const auto& sysMsg = iter->second;
 
-				const String functionName = "sendSystemMessageGeneric<decltype(msg), decltype(callback)>";
 				Vector<VariableSchema> parameters = {
 					VariableSchema(TypeSchema(msg.name + "SystemMessage"), "msg"),
 					VariableSchema(TypeSchema("std::function<void(" + (sysMsg.returnType == "void" ? "" : sysMsg.returnType) + ")>"), "callback", "{}")
@@ -511,7 +510,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 
 				Vector<String> body;
 				body.emplace_back("String targetSystem = \"\";");
-				body.emplace_back(String(sysMsg.multicast ? "return " : "size_t n = ") + functionName + "(std::move(msg), std::move(callback), targetSystem);");
+				body.emplace_back(String(sysMsg.multicast ? "return " : "const size_t n = ") + "sendSystemMessageGeneric<decltype(msg), decltype(callback)>(std::move(msg), std::move(callback), targetSystem);");
 				if (!sysMsg.multicast) {
 					body.emplace_back("if (n != 1) {");
 					body.emplace_back("    throw Halley::Exception(\"Sending non-multicast " + sysMsg.name + "SystemMessage, but there are \" + toString(n) + \" systems receiving it (expecting exactly one).\", HalleyExceptions::Entity);");
@@ -653,15 +652,17 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 				} else {
 					onReceivedBody.emplace_back("    " + resultVar + "static_cast<T*>(this)->onMessageReceived(std::move(realMsg));");
 				}
+				onReceivedBody.emplace_back("    if (context.callback) {");
 				if (sysMsg.returnType == "void") {
-					onReceivedBody.emplace_back("    context.callback(nullptr, {});");
+					onReceivedBody.emplace_back("        context.callback(nullptr, {});");
 				} else {
-					onReceivedBody.emplace_back("	 if (context.remote) {");
-					onReceivedBody.emplace_back("	     context.callback(nullptr, Serializer::toBytes(result, SerializerOptions(SerializerOptions::maxVersion)));");
-					onReceivedBody.emplace_back("	 } else {");
-					onReceivedBody.emplace_back("	     context.callback(reinterpret_cast<std::byte*>(&result), {});");
-					onReceivedBody.emplace_back("	 }");
+					onReceivedBody.emplace_back("        if (context.remote) {");
+					onReceivedBody.emplace_back("            context.callback(nullptr, Serializer::toBytes(result, SerializerOptions(SerializerOptions::maxVersion)));");
+					onReceivedBody.emplace_back("        } else {");
+					onReceivedBody.emplace_back("            context.callback(reinterpret_cast<std::byte*>(&result), {});");
+					onReceivedBody.emplace_back("        }");
 				}
+				onReceivedBody.emplace_back("    }");
 				onReceivedBody.emplace_back("    break;");
 				onReceivedBody.emplace_back("}");
 

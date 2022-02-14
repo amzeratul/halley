@@ -63,6 +63,7 @@ void EntityNetworkMessageSystemMsg::serialize(Serializer& s) const
 	s << messageType;
 	s << msgId;
 	s << targetSystem;
+	s << static_cast<int>(destination);
 	s << messageData;
 }
 
@@ -71,6 +72,9 @@ void EntityNetworkMessageSystemMsg::deserialize(Deserializer& s)
 	s >> messageType;
 	s >> msgId;
 	s >> targetSystem;
+	int d;
+	s >> d;
+	destination = static_cast<SystemMessageDestination>(d);
 	s >> messageData;
 }
 

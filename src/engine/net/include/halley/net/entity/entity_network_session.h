@@ -72,8 +72,9 @@ namespace Halley {
 		bool isRemote(ConstEntityRef entity) const override;
 		void sendEntityMessage(EntityRef entity, int messageType, Bytes messageData) override;
 		void sendSystemMessage(String targetSystem, int messageType, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback) override;
-		
-		void sendMessage(EntityNetworkMessage msg, NetworkSession::PeerId peerId);
+
+		void sendToAll(EntityNetworkMessage msg);
+		void sendToPeer(EntityNetworkMessage msg, NetworkSession::PeerId peerId);
 
 	protected:
 		void onStartSession(NetworkSession::PeerId myPeerId) override;
@@ -109,7 +110,7 @@ namespace Halley {
 
 		std::vector<QueuedMessage> queuedPackets;
 
-		HashMap<NetworkSession::PeerId, Vector<EntityNetworkMessage>> outbox;
+		HashMap<int, Vector<EntityNetworkMessage>> outbox;
 
 		bool readyToStart = false;
 

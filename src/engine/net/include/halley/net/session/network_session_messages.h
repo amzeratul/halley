@@ -1,4 +1,5 @@
 #pragma once
+#include "halley/text/enum_names.h"
 #include "halley/utils/utils.h"
 #include "halley/bytes/byte_serializer.h"
 
@@ -40,5 +41,6 @@ namespace Halley {
 	struct NetworkSessionMessageHeader {
 		NetworkSessionMessageType type;
 		uint8_t srcPeerId;
+		uint8_t dstPeerId;
 	};
 }

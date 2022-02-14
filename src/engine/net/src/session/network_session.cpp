@@ -262,6 +262,7 @@ void NetworkSession::sendToPeers(OutboundNetworkPacket packet, std::optional<Pee
 	NetworkSessionMessageHeader header;
 	header.type = NetworkSessionMessageType::ToAllPeers;
 	header.srcPeerId = myPeerId.value();
+	header.dstPeerId = 0;
 
 	doSendToAll(makeOutbound(packet.getBytes(), header), except);
 }
@@ -271,6 +272,7 @@ void NetworkSession::sendToPeer(OutboundNetworkPacket packet, PeerId peerId)
 	NetworkSessionMessageHeader header;
 	header.type = NetworkSessionMessageType::ToPeer;
 	header.srcPeerId = myPeerId.value();
+	header.dstPeerId = peerId;
 
 	bool sent = false;
 	for (size_t i = 0; i < peers.size(); ++i) {
@@ -281,7 +283,16 @@ void NetworkSession::sendToPeer(OutboundNetworkPacket packet, PeerId peerId)
 		}
 	}
 
-	// TODO: support redirecting via host
+	// Redirect via host
+	if (!sent) {
+		for (size_t i = 0; i < peers.size(); ++i) {
+			if (peers[i].peerId == 0) {
+				peers[i].connection->send(IConnection::TransmissionType::Reliable, makeOutbound(packet.getBytes(), header));
+				sent = true;
+				break;
+			}
+		}
+	}
 	
 	if (!sent) {
 		Logger::logError("Unable to send message to peer " + toString(static_cast<int>(peerId)) + ": id not found.");
@@ -343,16 +354,19 @@ void NetworkSession::processReceive()
 					if (header.srcPeerId != peerId) {
 						closeConnection(peerId, "Player sent an invalid srcPlayer");
 					} else {
-						doSendToAll(makeOutbound(packet.getBytes(), header), int(i));
+						doSendToAll(makeOutbound(packet.getBytes(), header), peerId);
 						inbox.emplace_back(header.srcPeerId, std::move(packet));
 					}
 				} else if (header.type == NetworkSessionMessageType::Control) {
 					// Receive control
 					receiveControlMessage(peerId, packet);
 				} else if (header.type == NetworkSessionMessageType::ToPeer) {
-					// For me only
-					// Consume!
-					inbox.emplace_back(header.srcPeerId, std::move(packet));
+					if (header.dstPeerId == myPeerId) {
+						inbox.emplace_back(header.srcPeerId, std::move(packet));
+					} else {
+						// Redirect!
+						sendToPeer(makeOutbound(packet.getBytes(), header), header.dstPeerId);
+					}
 				} else {
 					closeConnection(peerId, "Unknown session message type: " + toString(type));
 				}
@@ -360,8 +374,11 @@ void NetworkSession::processReceive()
 
 			else if (type == NetworkSessionType::Client) {
 				if (header.type == NetworkSessionMessageType::ToAllPeers || header.type == NetworkSessionMessageType::ToPeer) {
-					// Consume!
-					inbox.emplace_back(header.srcPeerId, std::move(packet));
+					if (header.dstPeerId == myPeerId) {
+						inbox.emplace_back(header.srcPeerId, std::move(packet));
+					} else {
+						closeConnection(peerId, "Received message bound for a different client, aborting connection.");
+					}
 				} else if (header.type == NetworkSessionMessageType::Control) {
 					receiveControlMessage(peerId, packet);
 				} else {
@@ -389,7 +406,8 @@ void NetworkSession::retransmitControlMessage(PeerId peerId, gsl::span<const gsl
 {
 	NetworkSessionMessageHeader header;
 	header.type = NetworkSessionMessageType::Control;
-	header.srcPeerId = peerId;
+	header.srcPeerId = peerId; // ?
+	header.dstPeerId = 0;
 	doSendToAll(makeOutbound(bytes, header), peerId);
 }
 
@@ -510,6 +528,7 @@ OutboundNetworkPacket NetworkSession::doMakeControlPacket(NetworkSessionControlM
 	NetworkSessionMessageHeader header;
 	header.type = NetworkSessionMessageType::Control;
 	header.srcPeerId = myPeerId.value();
+	header.dstPeerId = 0;
 	packet.addHeader(header);
 
 	return packet;

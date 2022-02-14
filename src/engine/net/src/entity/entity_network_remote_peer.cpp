@@ -163,7 +163,7 @@ void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote)
 
 void EntityNetworkRemotePeer::send(EntityNetworkMessage message)
 {
-	parent->sendMessage(std::move(message), peerId);
+	parent->sendToPeer(std::move(message), peerId);
 }
 
 void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCreate& msg)

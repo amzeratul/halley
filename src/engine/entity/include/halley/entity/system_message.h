@@ -6,6 +6,7 @@
 #include <functional>
 #include "message.h"
 #include "halley/utils/utils.h"
+#include "halley/text/enum_names.h"
 
 namespace Halley
 {

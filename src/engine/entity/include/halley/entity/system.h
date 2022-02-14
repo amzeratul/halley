@@ -118,11 +118,11 @@ namespace Halley {
 			context.msgId = T::messageIndex;
 			context.remote = false;
 			context.msg = std::make_unique<T>(std::move(msg));
-			context.callback = [=, returnLambda = std::move(returnLambda)] (std::byte* data, Bytes serializedData)
-			{
-				Expects((data != nullptr) ^ (!serializedData.empty())); // Exactly one must contain data
-				
-				if (returnLambda) {
+
+			if (returnLambda) {
+				context.callback = [=, returnLambda = std::move(returnLambda)] (std::byte* data, Bytes serializedData) {
+					Expects((data != nullptr) ^ (!serializedData.empty())); // Exactly one must contain data
+					
 					if constexpr (std::is_same_v<typename T::ReturnType, void>) {
 						static_cast<void>(data);
 						static_cast<void>(serializedData);
@@ -135,8 +135,8 @@ namespace Halley {
 							returnLambda(Deserializer::fromBytes<typename T::ReturnType>(serializedData, std::move(options)));
 						}
 					}
-				}
-			};
+				};
+			}
 			
 			return doSendSystemMessage(std::move(context), targetSystem, T::messageDestination);
 		}
