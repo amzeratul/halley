@@ -654,9 +654,9 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 					onReceivedBody.emplace_back("    " + resultVar + "static_cast<T*>(this)->onMessageReceived(std::move(realMsg));");
 				}
 				if (sysMsg.returnType == "void") {
-					onReceivedBody.emplace_back("    callback(nullptr);");
+					onReceivedBody.emplace_back("    callback(nullptr, {});");
 				} else {
-					onReceivedBody.emplace_back("    callback(reinterpret_cast<std::byte*>(&result));");
+					onReceivedBody.emplace_back("    callback(reinterpret_cast<std::byte*>(&result), {});");
 				}
 				onReceivedBody.emplace_back("    break;");
 				onReceivedBody.emplace_back("}");
@@ -680,7 +680,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 			.addMethodDefinition(MethodSchema(TypeSchema("void"), {
 				VariableSchema(TypeSchema("int"), "msgIndex"),
 				VariableSchema(TypeSchema("Halley::SystemMessage&"), "msg"),
-				VariableSchema(TypeSchema("std::function<void(std::byte*)>&", true), "callback")
+				VariableSchema(TypeSchema("SystemMessageCallback&", true), "callback")
 			}, "onSystemMessageReceived", false, false, true, true), onReceivedBody)
 			.addMethodDefinition(MethodSchema(TypeSchema("bool"), {
 				VariableSchema(TypeSchema("int"), "msgIndex"),

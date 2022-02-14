@@ -22,9 +22,9 @@ void SystemMessageBridge::sendMessageToEntity(EntityId target, int msgId, gsl::s
 	system->sendEntityMessageFromNetwork(target, msgId, data);
 }
 
-void SystemMessageBridge::sendMessageToSystem(const String& targetSystem, int messageType, gsl::span<const std::byte> data)
+void SystemMessageBridge::sendMessageToSystem(const String& targetSystem, int messageType, gsl::span<const std::byte> data, SystemMessageCallback callback)
 {
-	system->sendSystemMessageFromNetwork(targetSystem, messageType, data);
+	system->sendSystemMessageFromNetwork(targetSystem, messageType, data, std::move(callback));
 }
 
 System::System(Vector<FamilyBindingBase*> uninitializedFamilies, Vector<int> messageTypesReceived)
@@ -167,15 +167,17 @@ void System::sendEntityMessageFromNetwork(EntityId target, int msgId, gsl::span<
 	doSendMessage(target, world->deserializeMessage(msgId, data), msgId);
 }
 
-void System::sendSystemMessageFromNetwork(const String& targetSystem, int msgId, gsl::span<const std::byte> data)
+void System::sendSystemMessageFromNetwork(const String& targetSystem, int msgId, gsl::span<const std::byte> data, SystemMessageCallback callback)
 {
 	SystemMessageContext context;
 
 	context.msgId = msgId;
 	context.msg = world->deserializeSystemMessage(msgId, data);
-	context.callback = [=] (std::byte*)
+	context.callback = [=, callback = std::move(callback)] (gsl::byte* data, Bytes)
 	{
+		const auto options = SerializerOptions(SerializerOptions::maxVersion);
 		// TODO
+		callback(nullptr, {});
 	};
 	
 	doSendSystemMessage(std::move(context), targetSystem, SystemMessageDestination::Local);

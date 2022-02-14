@@ -71,7 +71,7 @@ namespace Halley {
 		bool isHost() override;
 		bool isRemote(ConstEntityRef entity) const override;
 		void sendEntityMessage(EntityRef entity, int messageType, Bytes messageData) override;
-		void sendSystemMessage(String targetSystem, int messageType, Bytes messageData, SystemMessageDestination destination, std::function<void(gsl::byte*)>) override;
+		void sendSystemMessage(String targetSystem, int messageType, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback) override;
 		
 		void sendMessage(EntityNetworkMessage msg, NetworkSession::PeerId peerId);
 
@@ -89,7 +89,7 @@ namespace Halley {
 		};
 
 		struct PendingSysMsgResponse {
-			std::function<void(gsl::byte*)> callback;
+			SystemMessageCallback callback;
 		};
 		
 		Resources& resources;

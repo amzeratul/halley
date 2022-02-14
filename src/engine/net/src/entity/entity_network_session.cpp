@@ -171,33 +171,13 @@ void EntityNetworkSession::onReceiveMessageToEntity(NetworkSession::PeerId fromP
 	}
 }
 
-void EntityNetworkSession::onReceiveSystemMessage(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsg& msg)
-{
-	Expects(factory);
-	Expects(messageBridge.isValid());
-	
-	messageBridge.sendMessageToSystem(msg.targetSystem, msg.messageType, gsl::as_bytes(gsl::span<const Byte>(msg.messageData)));
-}
-
-void EntityNetworkSession::onReceiveSystemMessageResponse(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsgResponse& msg)
-{
-	auto iter = pendingSysMsgResponses.find(msg.msgId);
-	if (iter == pendingSysMsgResponses.end()) {
-		Logger::logError("Unexpected system message response received.");
-		return;
-	}
-
-	iter->second.callback(const_cast<gsl::byte*>(reinterpret_cast<const gsl::byte*>(msg.responseData.data()))); // bad bad bad
-	pendingSysMsgResponses.erase(iter);
-}
-
 void EntityNetworkSession::sendEntityMessage(EntityRef entity, int messageType, Bytes messageData)
 {
 	const NetworkSession::PeerId toPeerId = entity.getOwnerPeerId().value();
 	sendMessage(EntityNetworkMessageEntityMsg(entity.getInstanceUUID(), messageType, std::move(messageData)), toPeerId);
 }
 
-void EntityNetworkSession::sendSystemMessage(String targetSystem, int messageType, Bytes messageData, SystemMessageDestination destination, std::function<void(gsl::byte*)> callback)
+void EntityNetworkSession::sendSystemMessage(String targetSystem, int messageType, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback)
 {
 	// TODO: handle destination
 	NetworkSession::PeerId destinationPeer = 0;
@@ -211,6 +191,33 @@ void EntityNetworkSession::sendSystemMessage(String targetSystem, int messageTyp
 		assert(pendingSysMsgResponses.size() < 1000); // Make sure we're not leaking
 	}
 }
+
+void EntityNetworkSession::onReceiveSystemMessage(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsg& msg)
+{
+	Expects(factory);
+	Expects(messageBridge.isValid());
+
+	const auto msgType = msg.messageType;
+	const auto msgId = msg.msgId;
+	
+	messageBridge.sendMessageToSystem(msg.targetSystem, msg.messageType, gsl::as_bytes(gsl::span<const Byte>(msg.messageData)), [=] (gsl::byte*, Bytes serializedData)
+	{
+		sendMessage(EntityNetworkMessageSystemMsgResponse(msgType, msgId, serializedData), fromPeerId);
+	});
+}
+
+void EntityNetworkSession::onReceiveSystemMessageResponse(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsgResponse& msg)
+{
+	auto iter = pendingSysMsgResponses.find(msg.msgId);
+	if (iter == pendingSysMsgResponses.end()) {
+		Logger::logError("Unexpected system message response received.");
+		return;
+	}
+
+	iter->second.callback(nullptr, msg.responseData);
+	pendingSysMsgResponses.erase(iter);
+}
+
 
 void EntityNetworkSession::setupDictionary()
 {

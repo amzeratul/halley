@@ -17,6 +17,8 @@
 #include "halley/utils/attributes.h"
 #include <halley/data_structures/memory_pool.h>
 
+#include "system_message.h"
+
 namespace Halley {
 	class SystemMessage;
 	enum class SystemMessageDestination;
@@ -35,7 +37,7 @@ namespace Halley {
 
 		virtual bool isRemote(ConstEntityRef entity) const = 0;
 		virtual void sendEntityMessage(EntityRef entity, int messageId, Bytes messageData) = 0;
-		virtual void sendSystemMessage(String targetSystem, int messageId, Bytes messageData, SystemMessageDestination destination, std::function<void(gsl::byte*)>) = 0;
+		virtual void sendSystemMessage(String targetSystem, int messageId, Bytes messageData, SystemMessageDestination destination, SystemMessageCallback callback) = 0;
 		virtual bool isHost() = 0;
 	};
 

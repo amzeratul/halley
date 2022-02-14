@@ -10,6 +10,7 @@
 #include "entity.h"
 #include "halley/utils/type_traits.h"
 #include "system_message.h"
+#include "halley/bytes/byte_serializer.h"
 
 namespace Halley {
 	class Message;
@@ -41,7 +42,7 @@ namespace Halley {
 
 		bool isValid() const;
 		void sendMessageToEntity(EntityId target, int msgId, gsl::span<const gsl::byte> data);
-		void sendMessageToSystem(const String& targetSystem, int messageType, gsl::span<const std::byte> data);
+		void sendMessageToSystem(const String& targetSystem, int messageType, gsl::span<const std::byte> data, SystemMessageCallback callback);
 
 	private:
 		System* system = nullptr;
@@ -67,7 +68,7 @@ namespace Halley {
 		size_t getSystemMessagesInInbox() const;
 
 		void sendEntityMessageFromNetwork(EntityId target, int msgId, gsl::span<const std::byte> data);
-		void sendSystemMessageFromNetwork(const String& targetSystem, int msgId, gsl::span<const std::byte> data);
+		void sendSystemMessageFromNetwork(const String& targetSystem, int msgId, gsl::span<const std::byte> data, SystemMessageCallback callback);
 
 	protected:
 		const HalleyAPI& doGetAPI() const { return *api; }
@@ -83,7 +84,7 @@ namespace Halley {
 		virtual void processMessages();
 		void doProcessMessages(FamilyBindingBase& family, gsl::span<const int> typesAccepted);
 		virtual void onMessagesReceived(int, Message**, size_t*, size_t, FamilyBindingBase&) {}
-		virtual void onSystemMessageReceived(int messageId, SystemMessage& msg, const std::function<void(std::byte*)>& callback) {}
+		virtual void onSystemMessageReceived(int messageId, SystemMessage& msg, const SystemMessageCallback& callback) {}
 
 		template <typename F, typename V>
 		static void invokeIndividual(F&& f, V& fam)
@@ -116,14 +117,22 @@ namespace Halley {
 
 			context.msgId = T::messageIndex;
 			context.msg = std::make_unique<T>(std::move(msg));
-			context.callback = [=, returnLambda = std::move(returnLambda)] (std::byte* data)
+			context.callback = [=, returnLambda = std::move(returnLambda)] (std::byte* data, Bytes serializedData)
 			{
+				Expects((data != nullptr) ^ (!serializedData.empty())); // Exactly one must contain data
+				
 				if (returnLambda) {
 					if constexpr (std::is_same_v<typename T::ReturnType, void>) {
 						static_cast<void>(data);
+						static_cast<void>(serializedData);
 						returnLambda();
 					} else {
-						returnLambda(std::move(*reinterpret_cast<typename T::ReturnType*>(data)));
+						if (data) {
+							returnLambda(std::move(*reinterpret_cast<typename T::ReturnType*>(data)));
+						} else {
+							auto options = SerializerOptions(SerializerOptions::maxVersion);
+							returnLambda(Deserializer::fromBytes<typename T::ReturnType>(serializedData, std::move(options)));
+						}
 					}
 				}
 			};

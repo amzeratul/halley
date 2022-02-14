@@ -5,6 +5,7 @@
 #include <memory>
 #include <functional>
 #include "message.h"
+#include "halley/utils/utils.h"
 
 namespace Halley
 {
@@ -31,9 +32,11 @@ namespace Halley
 	{
 	};
 
+	using SystemMessageCallback = std::function<void(std::byte*, Bytes)>;
+
 	struct SystemMessageContext {
 		int msgId;
 		std::unique_ptr<SystemMessage> msg;
-		std::function<void(std::byte*)> callback;
+		SystemMessageCallback callback;
 	};
 }
