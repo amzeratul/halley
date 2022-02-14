@@ -226,7 +226,7 @@ void EntityNetworkSession::onReceiveSystemMessageResponse(NetworkSession::PeerId
 {
 	auto iter = pendingSysMsgResponses.find(msg.msgId);
 	if (iter == pendingSysMsgResponses.end()) {
-		Logger::logError("Unexpected system message response received.");
+		Logger::logWarning("Unexpected system message response received.");
 		return;
 	}
 

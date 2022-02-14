@@ -273,30 +273,24 @@ void NetworkSession::sendToPeer(OutboundNetworkPacket packet, PeerId peerId)
 	header.type = NetworkSessionMessageType::ToPeer;
 	header.srcPeerId = myPeerId.value();
 	header.dstPeerId = peerId;
+	packet.addHeader(header);
 
-	bool sent = false;
 	for (size_t i = 0; i < peers.size(); ++i) {
 		if (peers[i].peerId == peerId) {
-			peers[i].connection->send(IConnection::TransmissionType::Reliable, makeOutbound(packet.getBytes(), header));
-			sent = true;
-			break;
+			peers[i].connection->send(IConnection::TransmissionType::Reliable, std::move(packet));
+			return;
 		}
 	}
 
 	// Redirect via host
-	if (!sent) {
-		for (size_t i = 0; i < peers.size(); ++i) {
-			if (peers[i].peerId == 0) {
-				peers[i].connection->send(IConnection::TransmissionType::Reliable, makeOutbound(packet.getBytes(), header));
-				sent = true;
-				break;
-			}
+	for (size_t i = 0; i < peers.size(); ++i) {
+		if (peers[i].peerId == 0) {
+			peers[i].connection->send(IConnection::TransmissionType::Reliable, std::move(packet));
+			return;
 		}
 	}
 	
-	if (!sent) {
-		Logger::logError("Unable to send message to peer " + toString(static_cast<int>(peerId)) + ": id not found.");
-	}
+	Logger::logError("Unable to send message to peer " + toString(static_cast<int>(peerId)) + ": id not found.");
 }
 
 std::optional<std::pair<NetworkSession::PeerId, InboundNetworkPacket>> NetworkSession::receive()
@@ -373,7 +367,9 @@ void NetworkSession::processReceive()
 			}
 
 			else if (type == NetworkSessionType::Client) {
-				if (header.type == NetworkSessionMessageType::ToAllPeers || header.type == NetworkSessionMessageType::ToPeer) {
+				if (header.type == NetworkSessionMessageType::ToAllPeers) {
+					inbox.emplace_back(header.srcPeerId, std::move(packet));
+				} else if (header.type == NetworkSessionMessageType::ToPeer) {
 					if (header.dstPeerId == myPeerId) {
 						inbox.emplace_back(header.srcPeerId, std::move(packet));
 					} else {
@@ -395,6 +391,7 @@ void NetworkSession::processReceive()
 
 void NetworkSession::closeConnection(PeerId peerId, const String& reason)
 {
+	Logger::logError("Closing connection: " + reason);
 	for (auto& p: peers) {
 		if (p.peerId == peerId) {
 			disconnectPeer(p);
