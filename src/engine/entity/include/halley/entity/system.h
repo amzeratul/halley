@@ -84,7 +84,7 @@ namespace Halley {
 		virtual void processMessages();
 		void doProcessMessages(FamilyBindingBase& family, gsl::span<const int> typesAccepted);
 		virtual void onMessagesReceived(int, Message**, size_t*, size_t, FamilyBindingBase&) {}
-		virtual void onSystemMessageReceived(int messageId, SystemMessage& msg, const SystemMessageCallback& callback) {}
+		virtual void onSystemMessageReceived(const SystemMessageContext& context) {}
 
 		template <typename F, typename V>
 		static void invokeIndividual(F&& f, V& fam)
@@ -116,6 +116,7 @@ namespace Halley {
 			SystemMessageContext context;
 
 			context.msgId = T::messageIndex;
+			context.remote = false;
 			context.msg = std::make_unique<T>(std::move(msg));
 			context.callback = [=, returnLambda = std::move(returnLambda)] (std::byte* data, Bytes serializedData)
 			{

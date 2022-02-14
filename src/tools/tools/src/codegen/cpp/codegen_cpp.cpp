@@ -638,7 +638,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		canReceiveBody.emplace_back("if (!targetSystem.isEmpty() && targetSystem != getName()) return false;");
 		canReceiveBody.emplace_back("switch (msgIndex) {");
 
-		Vector<String> onReceivedBody = { "switch (msgIndex) {" };
+		Vector<String> onReceivedBody = { "switch (context.msgId) {" };
 
 		sysClassGen.setAccessLevel(MemberAccess::Public);
 		for (auto& msg : system.systemMessages) {
@@ -647,16 +647,20 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 				String resultVar = sysMsg.returnType == "void" ? "" : "auto result = ";
 				
 				onReceivedBody.emplace_back("case " + msg.name + "SystemMessage::messageIndex: {");
-				onReceivedBody.emplace_back("    auto& realMsg = reinterpret_cast<" + msg.name + "SystemMessage&>(msg);");
+				onReceivedBody.emplace_back("    auto& realMsg = reinterpret_cast<" + msg.name + "SystemMessage&>(*context.msg);");
 				if (sysMsg.multicast) {
 					onReceivedBody.emplace_back("    " + resultVar + "static_cast<T*>(this)->onMessageReceived(realMsg);");
 				} else {
 					onReceivedBody.emplace_back("    " + resultVar + "static_cast<T*>(this)->onMessageReceived(std::move(realMsg));");
 				}
 				if (sysMsg.returnType == "void") {
-					onReceivedBody.emplace_back("    callback(nullptr, {});");
+					onReceivedBody.emplace_back("    context.callback(nullptr, {});");
 				} else {
-					onReceivedBody.emplace_back("    callback(reinterpret_cast<std::byte*>(&result), {});");
+					onReceivedBody.emplace_back("	 if (context.remote) {");
+					onReceivedBody.emplace_back("	     context.callback(nullptr, Serializer::toBytes(result, SerializerOptions(SerializerOptions::maxVersion)));");
+					onReceivedBody.emplace_back("	 } else {");
+					onReceivedBody.emplace_back("	     context.callback(reinterpret_cast<std::byte*>(&result), {});");
+					onReceivedBody.emplace_back("	 }");
 				}
 				onReceivedBody.emplace_back("    break;");
 				onReceivedBody.emplace_back("}");
@@ -678,9 +682,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		sysClassGen
 			.setAccessLevel(MemberAccess::Private)
 			.addMethodDefinition(MethodSchema(TypeSchema("void"), {
-				VariableSchema(TypeSchema("int"), "msgIndex"),
-				VariableSchema(TypeSchema("Halley::SystemMessage&"), "msg"),
-				VariableSchema(TypeSchema("SystemMessageCallback&", true), "callback")
+				VariableSchema(TypeSchema("Halley::SystemMessageContext&", true), "context"),
 			}, "onSystemMessageReceived", false, false, true, true), onReceivedBody)
 			.addMethodDefinition(MethodSchema(TypeSchema("bool"), {
 				VariableSchema(TypeSchema("int"), "msgIndex"),

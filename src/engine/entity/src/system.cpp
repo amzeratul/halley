@@ -152,7 +152,7 @@ void System::prepareSystemMessages()
 void System::processSystemMessages()
 {
 	for (auto& message: systemMessages) {
-		onSystemMessageReceived(message->msgId, *message->msg, message->callback);
+		onSystemMessageReceived(*message);
 	}
 	systemMessages.clear();
 }
@@ -172,13 +172,9 @@ void System::sendSystemMessageFromNetwork(const String& targetSystem, int msgId,
 	SystemMessageContext context;
 
 	context.msgId = msgId;
+	context.remote = true;
 	context.msg = world->deserializeSystemMessage(msgId, data);
-	context.callback = [=, callback = std::move(callback)] (gsl::byte* data, Bytes)
-	{
-		const auto options = SerializerOptions(SerializerOptions::maxVersion);
-		// TODO
-		callback(nullptr, {});
-	};
+	context.callback = callback;
 	
 	doSendSystemMessage(std::move(context), targetSystem, SystemMessageDestination::Local);
 }

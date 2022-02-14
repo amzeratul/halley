@@ -36,6 +36,7 @@ namespace Halley
 
 	struct SystemMessageContext {
 		int msgId;
+		bool remote;
 		std::unique_ptr<SystemMessage> msg;
 		SystemMessageCallback callback;
 	};
