@@ -7,6 +7,7 @@ component:
   - sprite:
       type: 'Halley::Sprite'
       collapse: true
+      canSave: false
   - layer:
       type: int
       defaultValue: 0
@@ -24,6 +25,7 @@ component:
   - text:
       type: 'Halley::TextRenderer'
       collapse: true
+      canSave: false
   - layer:
       type: int
       defaultValue: 0
