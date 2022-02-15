@@ -21,7 +21,9 @@ component:
   name: TextLabel
   componentDependencies: [Transform2D]
   members:
-  - text: 'Halley::TextRenderer'
+  - text:
+      type: 'Halley::TextRenderer'
+      collapse: true
   - layer:
       type: int
       defaultValue: 0

@@ -456,6 +456,65 @@ public:
 	}
 };
 
+class ComponentEditorTextRendererFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::TextRenderer";
+	}
+
+	bool isNested() const override
+	{
+		return true;
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(ConfigNode::MapType());
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		const auto& data = pars.data;
+
+		auto& fieldData = data.getWriteableFieldData(); // HACK
+		fieldData.ensureType(ConfigNodeType::Map);
+
+		auto fontWidget = std::make_shared<SelectAssetWidget>("font", context.getUIFactory(), AssetType::Font, context.getGameResources(), context.getProjectWindow());
+		fontWidget->setDefaultAssetId("Ubuntu Bold");
+		
+		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
+		container->getSizer().setColumnProportions({{0, 1}});
+		container->add(context.makeLabel("Text"));
+		container->add(context.makeField("Halley::String", pars.withSubKey("text", ""), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Font"));
+		container->add(fontWidget);
+		container->add(context.makeLabel("Size"));
+		container->add(context.makeField("float", pars.withSubKey("size", "20"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Outline"));
+		container->add(context.makeField("float", pars.withSubKey("outline", "0"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Colour"));
+		container->add(context.makeField("Halley::Colour4f", pars.withSubKey("colour", "#000000"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Outline Colour"));
+		container->add(context.makeField("Halley::Colour4f", pars.withSubKey("outlineColour", "#000000"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Alignment"));
+		container->add(context.makeField("float", pars.withSubKey("alignment", "0"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Offset"));
+		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("offset"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Smoothness"));
+		container->add(context.makeField("float", pars.withSubKey("smoothness"), ComponentEditorLabelCreation::Never));
+		// TODO: clip, pixel offset, colour override, line spacing
+
+		container->bindData("font", fieldData["font"].asString(""), [&context, data](String newVal)
+		{
+			data.getWriteableFieldData()["font"] = ConfigNode(std::move(newVal));
+			context.onEntityUpdated();
+		});
+		
+		return container;
+	}
+};
+
 class ComponentEditorAnimationPlayerFieldFactory : public IComponentEditorFieldFactory {
 public:
 	String getFieldType() override
@@ -1258,6 +1317,7 @@ std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories
 	factories.emplace_back(std::make_unique<ComponentEditorVectorFieldFactory<Vector4i, 4>>("Halley::Vector4i"));
 	factories.emplace_back(std::make_unique<ComponentEditorVertexFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorSpriteFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorTextRendererFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorAnimationPlayerFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorPolygonFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorVertexListFieldFactory>());

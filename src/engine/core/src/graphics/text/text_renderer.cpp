@@ -184,7 +184,9 @@ TextRenderer TextRenderer::clone() const
 
 void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
 {
-	Expects(font != nullptr);
+	if (!font) {
+		return;
+	}
 
 	bool floorEnabled = false;
 	auto floorAlign = [floorEnabled] (Vector2f a) -> Vector2f
@@ -614,4 +616,41 @@ std::pair<String, std::vector<ColourOverride>> ColourStringBuilder::moveResults(
 	strings.clear();
 	len = 0;
 	return { std::move(result), std::move(colours) };
+}
+
+ConfigNode ConfigNodeSerializer<TextRenderer>::serialize(const TextRenderer& text, const EntitySerializationContext& context)
+{
+	// TODO
+	ConfigNode node;
+	return node;
+}
+
+void ConfigNodeSerializer<TextRenderer>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, TextRenderer& target)
+{
+	target.setFont(context.resources->get<Font>(node["font"].asString("Ubuntu Bold")));
+
+	if (node.hasKey("text")) {
+		target.setText(node["text"].asString());
+	}
+	if (node.hasKey("size")) {
+		target.setSize(node["size"].asFloat());
+	}
+	if (node.hasKey("outline")) {
+		target.setOutline(node["outline"].asFloat());
+	}
+	if (node.hasKey("colour")) {
+		target.setColour(Colour4f::fromString(node["colour"].asString()));
+	}
+	if (node.hasKey("outlineColour")) {
+		target.setOutlineColour(Colour4f::fromString(node["outlineColour"].asString()));
+	}
+	if (node.hasKey("alignment")) {
+		target.setAlignment(node["alignment"].asFloat());
+	}
+	if (node.hasKey("offset")) {
+		target.setOffset(node["offset"].asVector2f());
+	}
+	if (node.hasKey("smoothness")) {
+		target.setSmoothness(node["smoothness"].asFloat());
+	}
 }

@@ -121,4 +121,12 @@ namespace Halley
 		std::vector<ColourOverride> colours;
 		size_t len = 0;
 	};
+
+	class Resources;
+	template<>
+	class ConfigNodeSerializer<TextRenderer> {
+	public:
+		ConfigNode serialize(const TextRenderer& text, const EntitySerializationContext& context);
+		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, TextRenderer& target);
+	};
 }
