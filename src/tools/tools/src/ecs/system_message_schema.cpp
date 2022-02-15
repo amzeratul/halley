@@ -21,4 +21,9 @@ SystemMessageSchema::SystemMessageSchema(YAML::Node node, bool generate)
 			throw Exception("Non-multicast system message \"" + name + "\" cannot be sent to all clients or remote clients.", HalleyExceptions::Tools);
 		}
 	}
+	if (destination != SystemMessageDestination::Local) {
+		if (!serializable) {
+			throw Exception("System message \"" + name + "\" must be serializable since it's sent over the network.", HalleyExceptions::Tools);
+		}
+	}
 }
