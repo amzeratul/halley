@@ -505,7 +505,7 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 {
 	std::optional<UUID> parentUUID;
 	
-	const UUID& uuid = uuidSrc.value_or(UUID::generate());
+	const UUID& uuid = uuidSrc.value_or(delta.getInstanceUUID().value_or(UUID::generate()));
 	EntityRef entity = uuidSrc ? getWorld().findEntity(uuid, true).value_or(EntityRef()) : EntityRef();
 	
 	if (entity.isValid() && entity.getPrefabAssetId() == delta.getPrefab()) {
