@@ -191,18 +191,25 @@ void EntityNetworkSession::sendSystemMessage(String targetSystem, int messageTyp
 {
 	Expects(destination != SystemMessageDestination::Local);
 
-	const auto id = systemMessageId++;
-	auto msg = EntityNetworkMessageSystemMsg(messageType, id, std::move(targetSystem), destination, std::move(messageData));
+	// Only wait for responses from host
+	// In order to support responses from all players, this class needs to track which clients are in the session and probably include timeouts
+	const bool wantsResponse = destination == SystemMessageDestination::Host && callback;
+	if (!wantsResponse && callback) {
+		Logger::logError("Sending System Message " + toString(messageType) + " with a callback, but not sending it to host only, so it won't ever receive a remote response.");
+	}
 
+	// Create message
+	const auto id = systemMessageId++;
+	auto msg = EntityNetworkMessageSystemMsg(messageType, id, wantsResponse, std::move(targetSystem), destination, std::move(messageData));
+	if (wantsResponse) {
+		pendingSysMsgResponses[id] = PendingSysMsgResponse{ std::move(callback) };
+		assert(pendingSysMsgResponses.size() < 1000); // Make sure we're not leaking
+	}
+
+	// Send
 	if (destination == SystemMessageDestination::Host) {
 		assert(!isHost());
 		sendToPeer(std::move(msg), 0);
-
-		// Only wait for responses from host?
-		if (callback) {
-			pendingSysMsgResponses[id] = PendingSysMsgResponse{ std::move(callback) };
-			assert(pendingSysMsgResponses.size() < 1000); // Make sure we're not leaking
-		}
 	} else {
 		sendToAll(std::move(msg));
 	}
@@ -215,11 +222,16 @@ void EntityNetworkSession::onReceiveSystemMessage(NetworkSession::PeerId fromPee
 
 	const auto msgType = msg.messageType;
 	const auto msgId = msg.msgId;
+
+	SystemMessageCallback callback;
+	if (msg.wantsResponse) {
+		callback = [=](gsl::byte*, Bytes serializedData)
+		{
+			sendToPeer(EntityNetworkMessageSystemMsgResponse(msgType, msgId, serializedData), fromPeerId);
+		};
+	}
 	
-	messageBridge.sendMessageToSystem(msg.targetSystem, msg.messageType, gsl::as_bytes(gsl::span<const Byte>(msg.messageData)), [=] (gsl::byte*, Bytes serializedData)
-	{
-		sendToPeer(EntityNetworkMessageSystemMsgResponse(msgType, msgId, serializedData), fromPeerId);
-	});
+	messageBridge.sendMessageToSystem(msg.targetSystem, msg.messageType, gsl::as_bytes(gsl::span<const Byte>(msg.messageData)), std::move(callback));
 }
 
 void EntityNetworkSession::onReceiveSystemMessageResponse(NetworkSession::PeerId fromPeerId, const EntityNetworkMessageSystemMsgResponse& msg)

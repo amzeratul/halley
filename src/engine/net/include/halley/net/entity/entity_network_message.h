@@ -91,14 +91,16 @@ namespace Halley {
 	public:
         int messageType = 0;
         uint32_t msgId = 0;
+        bool wantsResponse = false;
         String targetSystem;
         SystemMessageDestination destination;
         Bytes messageData;
 
 		EntityNetworkMessageSystemMsg() = default;
-		EntityNetworkMessageSystemMsg(int messageType, uint32_t msgId, String targetSystem, SystemMessageDestination destination, Bytes messageData)
+		EntityNetworkMessageSystemMsg(int messageType, uint32_t msgId, bool wantsResponse, String targetSystem, SystemMessageDestination destination, Bytes messageData)
 			: messageType(messageType)
 			, msgId(msgId)
+			, wantsResponse(wantsResponse)
 			, targetSystem(std::move(targetSystem))
 			, destination(destination)
 			, messageData(std::move(messageData))
