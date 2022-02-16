@@ -337,8 +337,12 @@ bool EntityNetworkSession::isHost()
 
 bool EntityNetworkSession::isRemote(ConstEntityRef entity) const
 {
-	const auto myId = session->getMyPeerId().value();
-	return entity.getOwnerPeerId().value_or(myId) != myId;
+	const auto entityOwner = entity.getOwnerPeerId();
+	if (!entityOwner) {
+		return false;
+	}
+	
+	return entityOwner != session->getMyPeerId();
 }
 
 NetworkSession& EntityNetworkSession::getSession() const

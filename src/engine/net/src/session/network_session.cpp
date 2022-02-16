@@ -74,7 +74,6 @@ void NetworkSession::close()
 	}
 	peers.clear();
 
-	type = NetworkSessionType::Undefined;
 	myPeerId = {};
 }
 
@@ -121,10 +120,7 @@ void NetworkSession::update(Time t)
 			disconnectPeer(peer);
 		}
 	}
-	std_ex::erase_if(peers, [] (const Peer& peer)
-	{
-		return peer.connection->getStatus() == ConnectionStatus::Closed;
-	});
+	std_ex::erase_if(peers, [] (const Peer& peer) { return !peer.alive; });
 	
 	// Check for data that needs to be sent
 	if (type == NetworkSessionType::Host) {

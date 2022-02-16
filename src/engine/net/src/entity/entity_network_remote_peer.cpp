@@ -78,7 +78,8 @@ void EntityNetworkRemotePeer::receiveNetworkMessage(NetworkSession::PeerId fromP
 void EntityNetworkRemotePeer::destroy()
 {
 	if (alive) {
-		if (parent->hasWorld()) {
+		// Don't destroy host entities. Host disconnecting means that the session is terminating, and destroying host entities could lead to bugs.
+		if (parent->hasWorld() && peerId != 0) {
 			auto& world = parent->getWorld();
 			for (const auto& [k, v] : inboundEntities) {
 				world.destroyEntity(v.worldId);
