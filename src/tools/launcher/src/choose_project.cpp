@@ -16,7 +16,7 @@ void ChooseProject::onMakeUI()
 	{
 		FileChooserParameters parameters;
 		parameters.folderOnly = true;
-		OS::get().openFileChooser(parameters).then(Executors::getMainThread(), [=] (std::optional<Path> path)
+		OS::get().openFileChooser(parameters).then(Executors::getMainUpdateThread(), [=] (std::optional<Path> path)
 		{
 			if (path) {
 				addNewPath(path.value());

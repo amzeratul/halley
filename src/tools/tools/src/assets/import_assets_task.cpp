@@ -70,13 +70,13 @@ void ImportAssetsTask::run()
 
 		if (!hasError()) {
 			if (!outputAssets.empty()) {
-				Concurrent::execute(Executors::getMainThread(), [project = &project, assets = outputAssets] () {
+				Concurrent::execute(Executors::getMainUpdateThread(), [project = &project, assets = outputAssets] () {
 					project->reloadAssets(assets, false);
 				});
 			}
 
 			if (files.size() == 1 && files[0].assetId == ":codegen") {
-				Concurrent::execute(Executors::getMainThread(), [project = &project]() {
+				Concurrent::execute(Executors::getMainUpdateThread(), [project = &project]() {
 					project->reloadCodegen();
 				});
 			}

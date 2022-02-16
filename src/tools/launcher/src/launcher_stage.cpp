@@ -5,7 +5,7 @@
 using namespace Halley;
 
 LauncherStage::LauncherStage()
-	: mainThreadExecutor(Executors::getMainThread())
+	: mainThreadExecutor(Executors::getMainUpdateThread())
 {
 }
 

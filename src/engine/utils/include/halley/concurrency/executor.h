@@ -47,8 +47,11 @@ namespace Halley
 		static ExecutionQueue& getCPU() { return instance->cpu; }
 		static ExecutionQueue& getCPUAux() { return instance->cpuAux; }
 		static ExecutionQueue& getVideoAux() { return instance->videoAux; }
-		static ExecutionQueue& getMainThread() { return instance->mainThread; }
+		static ExecutionQueue& getMainUpdateThread() { return instance->mainUpdateThread; }
+		static ExecutionQueue& getMainRenderThread() { return instance->mainRenderThread; }
 		static ExecutionQueue& getDiskIO() { return instance->diskIO; }
+
+		[[deprecated]] static ExecutionQueue& getMainThread() { return instance->mainUpdateThread; }
 
 	private:
 		static Executors* instance;
@@ -56,7 +59,8 @@ namespace Halley
 		ExecutionQueue cpu;
 		ExecutionQueue cpuAux;
 		ExecutionQueue videoAux;
-		ExecutionQueue mainThread;
+		ExecutionQueue mainUpdateThread;
+		ExecutionQueue mainRenderThread;
 		ExecutionQueue diskIO;
 	};
 

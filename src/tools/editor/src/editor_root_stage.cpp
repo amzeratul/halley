@@ -15,7 +15,7 @@ using namespace Halley;
 
 EditorRootStage::EditorRootStage(HalleyEditor& editor, std::unique_ptr<Project> project)
 	: editor(editor)
-	, mainThreadExecutor(Executors::getMainThread())
+	, mainThreadExecutor(Executors::getMainUpdateThread())
 	, project(std::move(project))
 {
 }
@@ -172,7 +172,7 @@ void EditorRootStage::createLoadProjectUI()
 {
 	setTopLevelUI(std::make_shared<LoadProjectWindow>(*uiFactory, editor, [this] (String str)
 	{
-		Concurrent::execute(Executors::getMainThread(), [=] () {
+		Concurrent::execute(Executors::getMainUpdateThread(), [=] () {
 			project = editor.loadProject(str);
 			if (project) {
 				loadProject();

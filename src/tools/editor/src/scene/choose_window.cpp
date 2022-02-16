@@ -126,7 +126,7 @@ std::shared_ptr<UIImage> ChooseAssetTypeWindow::makePreviewIcon(const String& id
 	image->addBehaviour(std::make_shared<UIImageVisibleBehaviour>([imageWeak, this, id, thumbSize] (UIImage& img)
 	{
 		if (auto future = projectWindow.getAssetPreviewData(type, id, Vector2i(thumbSize)); future.isValid()) {
-			future.then(Executors::getMainThread(), [imageWeak, thumbSize] (AssetPreviewData data)
+			future.then(Executors::getMainUpdateThread(), [imageWeak, thumbSize] (AssetPreviewData data)
 			{
 				if (auto image = imageWeak.lock(); image) {
 					auto sprite = std::move(data.sprite);

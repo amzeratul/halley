@@ -71,7 +71,7 @@ void Project::update(Time time)
 
 void Project::onBuildDone()
 {
-	Concurrent::execute(Executors::getMainThread(), [=] () {
+	Concurrent::execute(Executors::getMainUpdateThread(), [=] () {
 		if (gameDll && !gameDll->isLoaded()) {
 			gameDll->load();
 		}

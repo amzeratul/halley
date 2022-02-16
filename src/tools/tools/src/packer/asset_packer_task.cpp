@@ -23,7 +23,7 @@ void AssetPackerTask::run()
 		setProgress(1.0f, "");
 
 		if (assetsToPack) {
-			Concurrent::execute(Executors::getMainThread(), [project = &project, assets = std::move(assetsToPack)] () {
+			Concurrent::execute(Executors::getMainUpdateThread(), [project = &project, assets = std::move(assetsToPack)] () {
 				project->reloadAssets(assets.value(), true);
 			});
 		}

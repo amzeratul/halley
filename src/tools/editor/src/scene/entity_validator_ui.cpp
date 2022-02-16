@@ -78,7 +78,7 @@ void EntityValidatorUI::refresh()
 					auto button = std::make_shared<UIButton>("action", factory.getStyle("buttonThin"), action.label);
 					button->setHandle(UIEventType::ButtonClicked, [this, actionData = ConfigNode(action.actionData)] (const UIEvent& event)
 					{
-						Concurrent::execute(Executors::getMainThread(), [=] () {
+						Concurrent::execute(Executors::getMainUpdateThread(), [=] () {
 							validator->applyAction(*entityEditor, *curEntity, actionData);
 							entityEditor->reloadEntity();
 						});

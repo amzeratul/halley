@@ -377,7 +377,7 @@ public:
 							const auto materialName = context.getGameResources().get<SpriteResource>(newVal)->getDefaultMaterialName();
 
 							// Important: run this on main thread. Otherwise, this call will result in addTextures being called again, invalidating this method halfway through its execution.
-							Concurrent::execute(Executors::getMainThread(), [materialName, material]() {
+							Concurrent::execute(Executors::getMainUpdateThread(), [materialName, material]() {
 								material->setValue(materialName);
 							});
 						}

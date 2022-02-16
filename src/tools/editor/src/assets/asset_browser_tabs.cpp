@@ -365,7 +365,7 @@ void AssetBrowserTabs::openContextMenu(const String& tabId)
 	menu->spawnOnRoot(*getRoot());
 
 	menu->setHandle(UIEventType::PopupAccept, [this, tabId] (const UIEvent& e) {\
-		Concurrent::execute(Executors::getMainThread(), [=] () {
+		Concurrent::execute(Executors::getMainUpdateThread(), [=] () {
 			onContextMenuAction(e.getStringData(), tabId);
 		});
 	});

@@ -290,7 +290,7 @@ void EntityList::openContextMenu(std::vector<String> entityIds)
 	menu->spawnOnRoot(*getRoot());
 
 	menu->setHandle(UIEventType::PopupAccept, [this, entityIds] (const UIEvent& e) {
-		Concurrent::execute(Executors::getMainThread(), [=] () {
+		Concurrent::execute(Executors::getMainUpdateThread(), [=] () {
 			onContextMenuAction(e.getStringData(), entityIds);
 		});
 	});

@@ -91,7 +91,7 @@ void CheckAssetsTask::run()
 		}
 
 		if (importing || first) {
-			Concurrent::execute(Executors::getMainThread(), [project = &project] () {
+			Concurrent::execute(Executors::getMainUpdateThread(), [project = &project] () {
 				Logger::logDev("Notifying assets imported");
 				project->onAllAssetsImported();
 			});

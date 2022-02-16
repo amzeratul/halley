@@ -359,7 +359,7 @@ void UIDebugConsole::runCommand(const String& rawCommand)
 	String command = std::move(args[0]);
 	args.erase(args.begin());
 	
-	controller->runCommand(std::move(command), std::move(args)).then(Executors::getMainThread(), [=] (UIDebugConsoleResponse result) {
+	controller->runCommand(std::move(command), std::move(args)).then(Executors::getMainUpdateThread(), [=] (UIDebugConsoleResponse result) {
 		if (!result.getResponse().isEmpty()) {
 			addLine(result.getResponse(), Colour::fromString("#E2D5EA"));
 		}
