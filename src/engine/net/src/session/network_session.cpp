@@ -439,6 +439,8 @@ void NetworkSession::receiveControlMessage(PeerId peerId, InboundNetworkPacket& 
 
 void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgJoin& msg)
 {
+	Logger::logDev("Join request from peer " + toString(int(peerId)));
+	
 	if (myPeerId != 0) {
 		closeConnection(peerId, "Only host can accept join requests.");
 		return;
@@ -518,7 +520,7 @@ void NetworkSession::setMyPeerId(PeerId id)
 
 NetworkSession::Peer& NetworkSession::getPeer(PeerId id)
 {
-	return *std::find_if(peers.begin(), peers.end(), [&](const Peer& peer) { return peer.peerId; });
+	return *std::find_if(peers.begin(), peers.end(), [&](const Peer& peer) { return peer.peerId == id; });
 }
 
 void NetworkSession::checkForOutboundStateChanges(Time t, std::optional<PeerId> ownerId)
