@@ -30,7 +30,7 @@ namespace Halley {
 			virtual std::unique_ptr<SharedData> makePeerSharedData() { return {}; }
 		};
 
-		NetworkSession(NetworkService& service, ISharedDataHandler* sharedDataHandler = nullptr);
+		NetworkSession(NetworkService& service, uint32_t networkVersion, String userName, ISharedDataHandler* sharedDataHandler = nullptr);
 		virtual ~NetworkSession();
 
 		void update(Time t);
@@ -111,6 +111,9 @@ namespace Halley {
 		String hostAddress;
 		ISharedDataHandler* sharedDataHandler = nullptr;
 
+		uint32_t networkVersion;
+		String userName;
+
 		uint16_t maxClients = 0;
 		std::optional<PeerId> myPeerId;
 
@@ -130,11 +133,13 @@ namespace Halley {
 
 		void retransmitControlMessage(PeerId peerId, gsl::span<const gsl::byte> bytes);
 		void receiveControlMessage(PeerId peerId, InboundNetworkPacket& packet);
+		void onControlMessage(PeerId peerId, const ControlMsgJoin& msg);
 		void onControlMessage(PeerId peerId, const ControlMsgSetPeerId& msg);
 		void onControlMessage(PeerId peerId, const ControlMsgSetPeerState& msg);
 		void onControlMessage(PeerId peerId, const ControlMsgSetSessionState& msg);
 
 		void setMyPeerId(PeerId id);
+		Peer& getPeer(PeerId id);
 
 		void checkForOutboundStateChanges(Time t, std::optional<PeerId> ownerId);
 		OutboundNetworkPacket makeUpdateSharedDataPacket(std::optional<PeerId> ownerId);
