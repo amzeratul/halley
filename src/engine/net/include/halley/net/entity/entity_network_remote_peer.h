@@ -18,11 +18,11 @@ namespace Halley {
         EntityNetworkRemotePeer(EntityNetworkSession& parent, NetworkSession::PeerId peerId);
 
         NetworkSession::PeerId getPeerId() const;
-        void sendEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds, const EntityClientSharedData& clientData);
-        void receiveNetworkMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
-
-    	void destroy();
         bool isAlive() const;
+    	void destroy();
+
+    	void sendEntities(Time t, gsl::span<const std::pair<EntityId, uint8_t>> entityIds, const EntityClientSharedData& clientData);
+        void receiveNetworkMessage(NetworkSession::PeerId fromPeerId, EntityNetworkMessage msg);
 
     private:
         class OutboundEntity {

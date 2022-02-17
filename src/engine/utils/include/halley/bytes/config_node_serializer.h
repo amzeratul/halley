@@ -544,7 +544,7 @@ namespace Halley {
 				if (fieldNode.getType() != ConfigNodeType::Noop && (fieldNode.getType() != ConfigNodeType::Undefined || !delta)) {
 					auto* interpolator = context.interpolators ? context.interpolators->tryGetInterpolator(context, componentName, fieldName) : nullptr;
 					if (interpolator) {
-						interpolator->deserialize(context, node[fieldName]);
+						interpolator->deserialize(&value, &defaultValue, context, node[fieldName]);
 					} else {
 						ConfigNodeHelper<T>::deserialize(value, defaultValue, context, node[fieldName]);
 					}

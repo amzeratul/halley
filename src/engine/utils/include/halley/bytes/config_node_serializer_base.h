@@ -35,15 +35,12 @@ namespace Halley {
 	public:
 		virtual ~IDataInterpolator() = default;
 
-		virtual void setEnabled(bool enabled) { this->enabled = enabled; }
-		virtual bool isEnabled() const { return enabled; }
+		virtual void setEnabled(bool enabled) {}
+		virtual bool isEnabled() const { return true; }
 
 		virtual void update(Time t) {}
 		
-		virtual void deserialize(const EntitySerializationContext& context, const ConfigNode& node) = 0;
-
-	private:
-		bool enabled = true;
+		virtual void deserialize(void* value, const void* defaultValue, const EntitySerializationContext& context, const ConfigNode& node) = 0;
 	};
 
 	class IDataInterpolatorSet {

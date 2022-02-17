@@ -9,6 +9,8 @@ namespace Halley {
 		void setInterpolator(std::unique_ptr<IDataInterpolator> interpolator, EntityId entity, std::string_view componentName, std::string_view fieldName);
 		IDataInterpolator* tryGetInterpolator(EntityId entity, std::string_view componentName, std::string_view fieldName);
 
+		void update(Time time) const;
+
 	private:
 		using Key = std::tuple<EntityId, std::string_view, std::string_view>;
 
@@ -27,8 +29,26 @@ namespace Halley {
 		DataInterpolatorSet* dataInterpolatorSet = nullptr;
 	};
 
-	class NullDataInterpolator : public IDataInterpolator {
+	template <typename T>
+	class DataInterpolator : public IDataInterpolator {
 	public:
-		void deserialize(const EntitySerializationContext& context, const ConfigNode& node) override {}
+		void deserialize(void* value, const void* defaultValue, const EntitySerializationContext& context, const ConfigNode& node) override
+		{
+			if (enabled) {
+				doDeserialize(*static_cast<T*>(value), *static_cast<const T*>(defaultValue), context, node);
+			}
+		}
+		
+		void setEnabled(bool enabled) override { this->enabled = enabled; }
+		bool isEnabled() const override { return enabled; }
+
+	protected:
+		void doDeserialize(T& value, const T& defaultValue, const EntitySerializationContext& context, const ConfigNode& node)
+		{
+			ConfigNodeSerializer<T>::deserialize(value, defaultValue, context, node);
+		}
+
+	private:
+		bool enabled = true;
 	};
 }

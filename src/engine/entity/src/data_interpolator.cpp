@@ -37,6 +37,13 @@ IDataInterpolator* DataInterpolatorSet::tryGetInterpolator(EntityId entity, std:
 	return nullptr;
 }
 
+void DataInterpolatorSet::update(Time time) const
+{
+	for (auto& e: interpolators) {
+		e.second->update(time);
+	}
+}
+
 DataInterpolatorSet::Key DataInterpolatorSet::makeKey(EntityId entity, std::string_view componentName, std::string_view fieldName) const
 {
 	return Key(entity, componentName, fieldName);
