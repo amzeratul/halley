@@ -299,8 +299,8 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 			deserializeBody += lineBreak;
 		}
 
-		serializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::serialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", context, node, \"" + member.name + "\", " + mask + ");";
-		deserializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::deserialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", context, node, \"" + member.name + "\", " + mask + ");";
+		serializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::serialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", context, node, componentName, \"" + member.name + "\", " + mask + ");";
+		deserializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + member.name + ")>::deserialize(" + member.name + ", " + CPPClassGenerator::getAnonString(member) + ", context, node, componentName, \"" + member.name + "\", " + mask + ");";
 	}
 	serializeBody += lineBreak + "return node;";
 

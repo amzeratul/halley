@@ -10,6 +10,7 @@ public:
 	static const constexpr char* componentName{ "Network" };
 
 	std::optional<uint8_t> ownerId{};
+	Halley::DataInterpolatorSet dataInterpolatorSet{};
 
 	NetworkComponent() {
 	}

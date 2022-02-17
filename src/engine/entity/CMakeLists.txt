@@ -5,6 +5,7 @@ include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/entity" "../c
 set(SOURCES
         "src/component.cpp"
         "src/create_functions.cpp"
+        "src/data_interpolator.cpp"
         "src/entity.cpp"
         "src/entity_data.cpp"
         "src/entity_data_delta.cpp"
@@ -50,6 +51,7 @@ set(HEADERS
         "include/halley/entity/component.h"
         "include/halley/entity/component_reflector.h"
         "include/halley/entity/create_functions.h"
+        "include/halley/entity/data_interpolator.h"
         "include/halley/entity/entity.h"
         "include/halley/entity/entity_data.h"
         "include/halley/entity/entity_data_delta.h"

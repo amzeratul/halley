@@ -60,7 +60,7 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 						defaultValue.emplace_back(defNode.as<std::string>());
 					}
 				}
-				
+
 				auto& field = members.emplace_back(TypeSchema(type), std::move(name), std::move(defaultValue), fromString<MemberAccess>(access));
 				field.collapse = collapse;
 				field.canEdit = canEdit;

@@ -4,6 +4,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 
 #include "entity/component.h"
 #include "entity/component_reflector.h"
+#include "entity/data_interpolator.h"
 #include "entity/message.h"
 #include "entity/prefab.h"
 #include "entity/prefab_scene_data.h"

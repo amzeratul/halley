@@ -22,13 +22,13 @@ public:
 	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& context) const {
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode node = Halley::ConfigNode::MapType();
-		Halley::EntityConfigNodeSerializer<decltype(referenceDistance)>::serialize(referenceDistance, float{ 500 }, context, node, "referenceDistance", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(referenceDistance)>::serialize(referenceDistance, float{ 500 }, context, node, componentName, "referenceDistance", makeMask(Type::Prefab, Type::SaveData));
 		return node;
 	}
 
 	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node) {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(referenceDistance)>::deserialize(referenceDistance, float{ 500 }, context, node, "referenceDistance", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(referenceDistance)>::deserialize(referenceDistance, float{ 500 }, context, node, componentName, "referenceDistance", makeMask(Type::Prefab, Type::SaveData));
 	}
 
 };

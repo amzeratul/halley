@@ -27,11 +27,27 @@ namespace Halley {
 			return static_cast<int>(v) | makeMask(vs...);
 		}
 	}
+
+	class EntitySerializationContext;
+	
+	class IDataInterpolator {
+	public:
+		virtual ~IDataInterpolator() = default;
+
+		virtual void deserialize(const EntitySerializationContext& context, const ConfigNode& node) = 0;
+	};
+
+	class IDataInterpolatorSet {
+	public:
+		virtual ~IDataInterpolatorSet() = default;
+		virtual IDataInterpolator* tryGetInterpolator(const EntitySerializationContext& context, std::string_view componentName, std::string_view fieldName) const = 0;
+	};
 	
 	class EntitySerializationContext {
 	public:
 		Resources* resources = nullptr;
 		const EntityFactoryContext* entityContext = nullptr;
+		const IDataInterpolatorSet* interpolators = nullptr;
 		int entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData);
 
 		[[nodiscard]] bool matchType(int typeMask) const

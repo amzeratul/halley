@@ -7,5 +7,9 @@ component:
       type: 'std::optional<uint8_t>'
       canSave: false
       canEdit: false
+  - dataInterpolatorSet:
+      type: 'Halley::DataInterpolatorSet'
+      canSave: false
+      canEdit: false
 
 ...

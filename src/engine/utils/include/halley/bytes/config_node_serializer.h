@@ -512,10 +512,10 @@ namespace Halley {
 	template<typename L, typename R = L>
 	struct HasOperatorDifferent : Detail::HasOperatorDifferent<L, R>::type {};
 
-	template <typename T>
+	template <typename T, typename Interpolator = void>
 	class EntityConfigNodeSerializer {
 	public:
-		static void serialize(const T& value, const T& defaultValue, const EntitySerializationContext& context, ConfigNode& node, const String& name, int serializationMask)
+		static void serialize(const T& value, const T& defaultValue, const EntitySerializationContext& context, ConfigNode& node, std::string_view componentName, std::string_view name, int serializationMask)
 		{
 			if (context.matchType(serializationMask)) {
 				bool canWrite;
@@ -536,13 +536,18 @@ namespace Halley {
 			}
 		}
 
-		static void deserialize(T& value, const T& defaultValue, const EntitySerializationContext& context, const ConfigNode& node, const String& name, int serializationMask)
+		static void deserialize(T& value, const T& defaultValue, const EntitySerializationContext& context, const ConfigNode& node, std::string_view componentName, std::string_view fieldName, int serializationMask)
 		{
 			if (context.matchType(serializationMask) && node.getType() != ConfigNodeType::Noop) {
 				const bool delta = node.getType() == ConfigNodeType::DeltaMap;
-				const auto& fieldNode = node[name];
+				const auto& fieldNode = node[fieldName];
 				if (fieldNode.getType() != ConfigNodeType::Noop && (fieldNode.getType() != ConfigNodeType::Undefined || !delta)) {
-					ConfigNodeHelper<T>::deserialize(value, defaultValue, context, node[name]);
+					auto* interpolator = context.interpolators ? context.interpolators->tryGetInterpolator(context, componentName, fieldName) : nullptr;
+					if (interpolator) {
+						interpolator->deserialize(context, node[fieldName]);
+					} else {
+						ConfigNodeHelper<T>::deserialize(value, defaultValue, context, node[fieldName]);
+					}
 				}
 			}
 		}

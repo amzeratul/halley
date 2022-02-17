@@ -3,6 +3,7 @@
 
 
 #include "world.h"
+#include "data_interpolator.h"
 #include "components/transform_2d_component.h"
 #include "components/network_component.h"
 

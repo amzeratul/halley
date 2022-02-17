@@ -5,6 +5,7 @@
 #include "halley/entity/world.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
+#include "halley/entity/data_interpolator.h"
 
 class NetworkComponent;
 using namespace Halley;
@@ -217,7 +218,9 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 	
 	auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
 
-	parent->getFactory().updateEntity(entity, delta, static_cast<int>(EntitySerialization::Type::SaveData));
+	auto retriever = DataInterpolatorSetRetriever(entity);
+
+	parent->getFactory().updateEntity(entity, delta, static_cast<int>(EntitySerialization::Type::SaveData), nullptr, &retriever);
 	remote.data.applyDelta(delta);
 }
 
