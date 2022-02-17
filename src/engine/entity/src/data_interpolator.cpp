@@ -37,6 +37,16 @@ IDataInterpolator* DataInterpolatorSet::tryGetInterpolator(EntityId entity, std:
 	return nullptr;
 }
 
+bool DataInterpolatorSet::setInterpolatorEnabled(EntityId entityId, std::string_view componentName, std::string_view fieldName, bool enabled)
+{
+	auto* interpolator = tryGetInterpolator(entityId, componentName, fieldName);
+	if (interpolator) {
+		interpolator->setEnabled(enabled);
+		return true;
+	}
+	return false;
+}
+
 void DataInterpolatorSet::update(Time time) const
 {
 	for (auto& e: interpolators) {

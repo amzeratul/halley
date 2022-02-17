@@ -8,6 +8,7 @@ namespace Halley {
 	public:
 		void setInterpolator(std::unique_ptr<IDataInterpolator> interpolator, EntityId entity, std::string_view componentName, std::string_view fieldName);
 		IDataInterpolator* tryGetInterpolator(EntityId entity, std::string_view componentName, std::string_view fieldName);
+		bool setInterpolatorEnabled(EntityId entity, std::string_view componentName, std::string_view fieldName, bool enabled);
 
 		void update(Time time) const;
 
@@ -45,7 +46,7 @@ namespace Halley {
 	protected:
 		void doDeserialize(T& value, const T& defaultValue, const EntitySerializationContext& context, const ConfigNode& node)
 		{
-			ConfigNodeSerializer<T>::deserialize(value, defaultValue, context, node);
+			ConfigNodeHelper<T>::deserialize(value, defaultValue, context, node);
 		}
 
 	private:
