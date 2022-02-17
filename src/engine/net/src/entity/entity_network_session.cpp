@@ -307,6 +307,17 @@ void EntityNetworkSession::onPreSendDelta(EntityDataDelta& delta)
 	}
 }
 
+void EntityNetworkSession::requestSetupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote)
+{
+	if (listener) {
+		listener->setupInterpolators(interpolatorSet, entity, remote);
+
+		for (const auto c: entity.getChildren()) {
+			requestSetupInterpolators(interpolatorSet, c, remote);
+		}
+	}
+}
+
 bool EntityNetworkSession::isReadyToStart() const
 {
 	return readyToStart;

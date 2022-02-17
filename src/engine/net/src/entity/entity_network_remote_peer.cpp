@@ -190,15 +190,14 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 		}
 	}
 
-	entity.setupNetwork(peerId);
-	
 	InboundEntity remote;
 	remote.data = std::move(entityData);
 	remote.worldId = entity.getEntityId();
-
 	inboundEntities[msg.entityId] = std::move(remote);
 
+	auto& interpolatorSet = entity.setupNetwork(peerId);
 	parent->onRemoteEntityCreated(entity, peerId);
+	parent->requestSetupInterpolators(interpolatorSet, entity, true);
 }
 
 void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpdate& msg)

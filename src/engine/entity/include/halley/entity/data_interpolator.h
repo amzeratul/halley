@@ -1,6 +1,7 @@
 #pragma once
 #include "entity.h"
 #include "halley/bytes/config_node_serializer_base.h"
+#include "halley/time/halleytime.h"
 
 namespace Halley {
 	class DataInterpolatorSet {
@@ -24,5 +25,10 @@ namespace Halley {
 
 	private:
 		DataInterpolatorSet* dataInterpolatorSet = nullptr;
+	};
+
+	class NullDataInterpolator : public IDataInterpolator {
+	public:
+		void deserialize(const EntitySerializationContext& context, const ConfigNode& node) override {}
 	};
 }

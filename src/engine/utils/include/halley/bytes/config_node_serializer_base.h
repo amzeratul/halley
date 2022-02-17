@@ -3,6 +3,7 @@
 #include <memory>
 #include "halley/file_formats/config_file.h"
 #include "halley/support/exception.h"
+#include "halley/time/halleytime.h"
 
 namespace Halley {
 	class EntityFactoryContext;
@@ -34,7 +35,15 @@ namespace Halley {
 	public:
 		virtual ~IDataInterpolator() = default;
 
+		virtual void setEnabled(bool enabled) { this->enabled = enabled; }
+		virtual bool isEnabled() const { return enabled; }
+
+		virtual void update(Time t) {}
+		
 		virtual void deserialize(const EntitySerializationContext& context, const ConfigNode& node) = 0;
+
+	private:
+		bool enabled = true;
 	};
 
 	class IDataInterpolatorSet {

@@ -295,15 +295,17 @@ bool Entity::isRemote(const World& world) const
 	return world.isEntityNetworkRemote(ConstEntityRef(*this, world));
 }
 
-void Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
+DataInterpolatorSet& Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
 {
 	auto* networkComponent = tryGetComponent<NetworkComponent>();
 	if (networkComponent) {
 		networkComponent->ownerId = peerId;
+		return networkComponent->dataInterpolatorSet;
 	} else {
 		NetworkComponent component;
 		component.ownerId = peerId;
 		ref.addComponent(std::move(component));
+		return ref.getComponent<NetworkComponent>().dataInterpolatorSet;
 	}
 }
 

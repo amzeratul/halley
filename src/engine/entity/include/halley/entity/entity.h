@@ -14,6 +14,7 @@
 #include "halley/maths/uuid.h"
 
 namespace Halley {
+	class DataInterpolatorSet;
 	class World;
 	class System;
 	class EntityRef;
@@ -210,7 +211,7 @@ namespace Halley {
 		void propagateChildrenChange();
 		void propagateChildWorldPartition(uint8_t newWorldPartition);
 
-		void setupNetwork(EntityRef& ref, uint8_t peerId);
+		DataInterpolatorSet& setupNetwork(EntityRef& ref, uint8_t peerId);
 		std::optional<uint8_t> getOwnerPeerId() const;
 
 		void doDestroy(bool updateParenting);
@@ -684,10 +685,10 @@ namespace Halley {
 			return entity && entity->prefab ? entity->prefab->getAssetId() : std::optional<String>{};
 		}
 
-		void setupNetwork(uint8_t peerId)
+		DataInterpolatorSet& setupNetwork(uint8_t peerId)
 		{
 			Expects(entity);
-			entity->setupNetwork(*this, peerId);
+			return entity->setupNetwork(*this, peerId);
 		}
 
 		std::optional<uint8_t> getOwnerPeerId() const

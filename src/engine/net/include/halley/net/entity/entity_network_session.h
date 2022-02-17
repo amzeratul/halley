@@ -36,6 +36,7 @@ namespace Halley {
 			virtual ~IEntityNetworkSessionListener() = default;
 			virtual void onStartSession(NetworkSession::PeerId myPeerId) = 0;
 			virtual void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId) {}
+			virtual void setupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote) = 0;
 			virtual void onPreSendDelta(EntityDataDelta& delta) {}
 			virtual bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) = 0;
 		};
@@ -62,6 +63,7 @@ namespace Halley {
 
 		void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId);
 		void onPreSendDelta(EntityDataDelta& delta);
+		void requestSetupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote);
 
 		bool isReadyToStart() const;
 		bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) const;
