@@ -1,12 +1,12 @@
 #pragma once
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include "halley/core/api/audio_api.h"
 
 namespace Halley
 {
 	struct AudioBuffer
 	{
-		std::vector<AudioSamplePack> packs;
+		Vector<AudioSamplePack> packs;
 	};
 
 	class AudioBufferPool;
@@ -75,7 +75,7 @@ namespace Halley
 			explicit Entry(std::unique_ptr<AudioBuffer>&& buffer);
 		};
 
-		std::array<std::vector<Entry>, 16> buffersTable;
+		std::array<Vector<Entry>, 16> buffersTable;
 
 		AudioBuffer& allocBuffer(size_t numSamples);
 	};

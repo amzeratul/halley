@@ -28,8 +28,8 @@ namespace Halley {
 
 			Entry(int assetType, uint64_t hash, String key, AssetDatabase::Entry entry);
 		};
-		std::vector<Entry> entries;
-		std::vector<int> sortedEntries;
+		Vector<Entry> entries;
+		Vector<int> sortedEntries;
 
 		void parseTable(Deserializer s, const Bytes& packBytes);
 	    void parseTypedDB(Deserializer& s, const Bytes& packBytes);

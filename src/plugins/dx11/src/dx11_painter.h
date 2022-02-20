@@ -39,8 +39,8 @@ namespace Halley
 	private:
 		DX11Video& dx11Video;
 
-		std::vector<DX11Buffer> vertexBuffers;
-		std::vector<DX11Buffer> indexBuffers;
+		Vector<DX11Buffer> vertexBuffers;
+		Vector<DX11Buffer> indexBuffers;
 		ID3D11InputLayout* layout = nullptr;
 		std::map<BlendType, DX11Blend> blendModes;
 
@@ -52,7 +52,7 @@ namespace Halley
 
 		size_t curBuffer = 0;
 		std::optional<Rect4i> clipping;
-		std::vector<int> renderTargetTextureUnits;
+		Vector<int> renderTargetTextureUnits;
 
 		DX11Blend& getBlendMode(BlendType type);
 		void rotateBuffers();

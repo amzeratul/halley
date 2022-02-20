@@ -9,7 +9,7 @@
 
 using namespace Halley;
 
-UIDropdown::UIDropdown(String id, UIStyle style, std::vector<LocalisedString> os, int defaultOption)
+UIDropdown::UIDropdown(String id, UIStyle style, Vector<LocalisedString> os, int defaultOption)
 	: UIClickable(std::move(id), Vector2f(style.getFloat("minSize"), style.getFloat("minSize")))
 	, curOption(defaultOption)
 {
@@ -99,24 +99,24 @@ void UIDropdown::updateOptionLabels() {
 	setMinSize(Vector2f::max(getMinimumSize(), minSize));
 }
 
-void UIDropdown::setOptions(std::vector<LocalisedString> os, int defaultOption)
+void UIDropdown::setOptions(Vector<LocalisedString> os, int defaultOption)
 {
 	setOptions({}, std::move(os), defaultOption);
 }
 
-void UIDropdown::setOptions(std::vector<String> optionIds, int defaultOption)
+void UIDropdown::setOptions(Vector<String> optionIds, int defaultOption)
 {
 	setOptions(std::move(optionIds), {}, defaultOption);
 }
 
-void UIDropdown::setOptions(const I18N& i18n, const String& i18nPrefix, std::vector<String> optionIds, int defaultOption)
+void UIDropdown::setOptions(const I18N& i18n, const String& i18nPrefix, Vector<String> optionIds, int defaultOption)
 {
 	setOptions(optionIds, i18n.getVector(i18nPrefix, optionIds), defaultOption);
 }
 
-void UIDropdown::setOptions(std::vector<String> oIds, std::vector<LocalisedString> os, int defaultOption)
+void UIDropdown::setOptions(Vector<String> oIds, Vector<LocalisedString> os, int defaultOption)
 {
-	std::vector<Entry> entries;
+	Vector<Entry> entries;
 	entries.resize(std::max(os.size(), oIds.size()));
 	for (size_t i = 0; i < entries.size(); ++i) {
 		// Be careful, do label first as id will get moved out
@@ -127,7 +127,7 @@ void UIDropdown::setOptions(std::vector<String> oIds, std::vector<LocalisedStrin
 	setOptions(std::move(entries), defaultOption);
 }
 
-void UIDropdown::setOptions(std::vector<Entry> os, int defaultOption)
+void UIDropdown::setOptions(Vector<Entry> os, int defaultOption)
 {
 	close();
 	options = std::move(os);

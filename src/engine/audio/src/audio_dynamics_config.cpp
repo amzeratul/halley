@@ -28,7 +28,7 @@ void AudioDynamicsConfig::deserialize(Deserializer& s)
 	s >> volume;
 }
 
-const std::vector<AudioDynamicsConfig::Variable>& AudioDynamicsConfig::getVolume() const
+const Vector<AudioDynamicsConfig::Variable>& AudioDynamicsConfig::getVolume() const
 {
 	return volume;
 }

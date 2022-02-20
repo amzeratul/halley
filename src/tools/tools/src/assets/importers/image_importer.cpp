@@ -59,8 +59,8 @@ std::unique_ptr<Image> ImageImporter::convertToIndexed(const String& fileName, c
 	auto src = image.getPixels4BPP();
 	size_t n = image.getWidth() * image.getHeight();
 
-	std::vector<int> coloursMissing;
-	std::vector<Vector2i> colourMissingPos;
+	Vector<int> coloursMissing;
+	Vector<Vector2i> colourMissingPos;
 
 	for (size_t i = 0; i < n; ++i) {
 		auto res = lookup.find(src[i]);

@@ -3,7 +3,7 @@
 #include <functional>
 #include <gsl/gsl>
 #include <memory>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include "halley/text/halleystring.h"
 #include "halley/maths/vector2.h"
 #include "halley/maths/vector3.h"
@@ -179,7 +179,7 @@ namespace Halley
 
 		virtual void setMasterVolume(float gain = 1.0f) = 0;
 		virtual void setGroupVolume(const String& groupName, float gain = 1.0f) = 0;
-		virtual void setOutputChannels(std::vector<AudioChannelData> audioChannelData) = 0;
+		virtual void setOutputChannels(Vector<AudioChannelData> audioChannelData) = 0;
 
 		virtual void setGlobalVariable(const String& variable, float value) = 0;
 

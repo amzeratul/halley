@@ -12,7 +12,7 @@ namespace Halley {
     public:
         explicit EntityValidator(World& world);
 
-        std::vector<IEntityValidator::Result> validateEntity(const EntityData& entity, bool recursive);
+        Vector<IEntityValidator::Result> validateEntity(const EntityData& entity, bool recursive);
         void applyAction(IEntityEditor& entityEditor, EntityData& data, const ConfigNode& actionData);
 		bool canApplyAction(const IEntityEditor& entityEditor, const EntityData& data, const ConfigNode& actionData);
 
@@ -25,9 +25,9 @@ namespace Halley {
     private:
         World& world;
 
-        std::vector<std::unique_ptr<IEntityValidator>> validators;
-        std::vector<std::unique_ptr<IEntityValidatorActionHandler>> handlers;
+        Vector<std::unique_ptr<IEntityValidator>> validators;
+        Vector<std::unique_ptr<IEntityValidatorActionHandler>> handlers;
 
-    	void validateEntity(const EntityData& entity, bool recursive, std::vector<IEntityValidator::Result>& result);
+    	void validateEntity(const EntityData& entity, bool recursive, Vector<IEntityValidator::Result>& result);
     };
 }

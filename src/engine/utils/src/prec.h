@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 #include <string>
 #include <algorithm>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <map>
 #include <set>
 #include <array>

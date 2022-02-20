@@ -120,8 +120,8 @@ namespace Halley {
 
 		virtual void setInputType(UIInputType uiInput);
 		virtual void setJoystickType(JoystickType joystickType);
-		void setOnlyEnabledWithInputs(const std::vector<UIInputType>& inputs);
-		const std::vector<UIInputType>& getOnlyEnabledWithInput() const;
+		void setOnlyEnabledWithInputs(const Vector<UIInputType>& inputs);
+		const Vector<UIInputType>& getOnlyEnabledWithInput() const;
 		virtual void setInputButtons(const UIInputButtons& buttons);
 		UIInputType getLastInputType() const;
 
@@ -158,7 +158,7 @@ namespace Halley {
 
 		void addBehaviour(std::shared_ptr<UIBehaviour> behaviour);
 		void clearBehaviours();
-		const std::vector<std::shared_ptr<UIBehaviour>>& getBehaviours() const;
+		const Vector<std::shared_ptr<UIBehaviour>>& getBehaviours() const;
 
 		std::optional<AudioHandle> playSound(const String& eventName);
 
@@ -178,7 +178,7 @@ namespace Halley {
 		void setToolTip(LocalisedString toolTip);
 
 		bool hasStyle() const;
-		const std::vector<UIStyle>& getStyles() const;
+		const Vector<UIStyle>& getStyles() const;
 
 	protected:
 		virtual void draw(UIPainter& painter) const;
@@ -216,7 +216,7 @@ namespace Halley {
 
 		virtual void checkActive();
 
-		std::vector<UIStyle> styles = {};
+		Vector<UIStyle> styles = {};
 
 	private:
 		void setParent(UIParent* parent);
@@ -232,7 +232,7 @@ namespace Halley {
 		UIRoot* root = nullptr;
 		String id;
 
-		std::vector<UIInputType> onlyEnabledWithInputs;
+		Vector<UIInputType> onlyEnabledWithInputs;
 		
 		std::unique_ptr<UIInputButtons> gamepadInputButtons;
 		UIInputResults gamepadInputResults;
@@ -255,7 +255,7 @@ namespace Halley {
 		std::shared_ptr<UIValidator> validator;
 		std::shared_ptr<UIDataBind> dataBind;
 		std::unique_ptr<UIAnchor> anchor;
-		std::vector<std::shared_ptr<UIBehaviour>> behaviours;
+		Vector<std::shared_ptr<UIBehaviour>> behaviours;
 
 		std::unique_ptr<LocalisedString> toolTip;
 

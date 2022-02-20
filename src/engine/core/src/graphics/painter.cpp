@@ -260,7 +260,7 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 
 	const size_t nPoints = points.size();
 	const size_t nSegments = (loop ? nPoints : (nPoints - 1));
-	std::vector<LineVertex> vertices(nSegments * 4);
+	Vector<LineVertex> vertices(nSegments * 4);
 
 	auto segmentNormal = [&] (size_t i) -> std::optional<Vector2f>
 	{
@@ -332,7 +332,7 @@ static size_t getSegmentsForArc(float radius, float arcLen)
 void Painter::drawCircle(Vector2f centre, float radius, float width, Colour4f colour, std::shared_ptr<Material> material)
 {
 	const size_t n = getSegmentsForArc(radius, 2 * float(pi()));
-	std::vector<Vector2f> points;
+	Vector<Vector2f> points;
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(radius, 0).rotate(Angle1f::fromRadians(i * 2.0f * float(pi()) / n)));
 	}
@@ -348,7 +348,7 @@ void Painter::drawCircleArc(Vector2f centre, float radius, float width, Angle1f 
 {
 	const float arcLen = (to - from).getRadians() + (from.turnSide(to) > 0 ? 0.0f : 0 * float(pi()));
 	const size_t n = getSegmentsForArc(radius, arcLen);
-	std::vector<Vector2f> points;
+	Vector<Vector2f> points;
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(radius, 0).rotate(from + Angle1f::fromRadians(i * arcLen / (n - 1))));
 	}
@@ -363,7 +363,7 @@ void Painter::drawCircleArc(Circle circle, float width, Angle1f from, Angle1f to
 void Painter::drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4f colour, std::shared_ptr<Material> material)
 {
 	const size_t n = getSegmentsForArc(std::max(radius.x, radius.y), 2 * float(pi()));
-	std::vector<Vector2f> points;
+	Vector<Vector2f> points;
 	for (size_t i = 0; i < n; ++i) {
 		points.push_back(centre + Vector2f(1.0f, 0).rotate(Angle1f::fromRadians(i * 2.0f * float(pi()) / n)) * radius);
 	}
@@ -372,7 +372,7 @@ void Painter::drawEllipse(Vector2f centre, Vector2f radius, float width, Colour4
 
 void Painter::drawRect(Rect4f rect, float width, Colour4f colour, std::shared_ptr<Material> material)
 {
-	std::vector<Vector2f> points;
+	Vector<Vector2f> points;
 	points.push_back(rect.getTopLeft());
 	points.push_back(rect.getTopRight());
 	points.push_back(rect.getBottomRight());
@@ -401,14 +401,14 @@ void Painter::drawPolygon(const Polygon& polygon, Colour4f colour, std::shared_p
 	
 	const auto& vs = polygon.getVertices();
 	const auto n = vs.size();
-	std::vector<LineVertex> vertices(n);
+	Vector<LineVertex> vertices(n);
 	for (size_t i = 0; i < n; ++i) {
 		vertices[i].position = vs[i];
 		vertices[i].colour = col;
 		vertices[i].normal = Vector2f();
 		vertices[i].width = Vector2f();
 	}
-	std::vector<IndexType> indices((n - 2) * 3);
+	Vector<IndexType> indices((n - 2) * 3);
 	for (size_t i = 0; i < n - 2; ++i) {
 		indices.push_back(0);
 		indices.push_back(static_cast<IndexType>(i) + 1);

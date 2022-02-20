@@ -51,9 +51,9 @@ void AssetBrowserTabs::openTab(std::optional<AssetType> assetType, const String&
 	}
 }
 
-static std::vector<UIConfirmationPopup::ButtonType> makeButtons(bool canSave)
+static Vector<UIConfirmationPopup::ButtonType> makeButtons(bool canSave)
 {
-	std::vector<UIConfirmationPopup::ButtonType> buttons;
+	Vector<UIConfirmationPopup::ButtonType> buttons;
 	if (canSave) {
 		buttons.push_back(UIConfirmationPopup::ButtonType::Yes);
 	}
@@ -239,7 +239,7 @@ void AssetBrowserTabs::saveCurrentTab()
 		if (windows[curPage]->canSave(true)) {
 			windows[curPage]->save();
 		} else {
-			auto buttons = std::vector<UIConfirmationPopup::ButtonType>{ UIConfirmationPopup::ButtonType::Ok };
+			auto buttons = Vector<UIConfirmationPopup::ButtonType>{ UIConfirmationPopup::ButtonType::Ok };
 			getRoot()->addChild(std::make_shared<UIConfirmationPopup>(factory, "Can't save", "Unable to save " + windows[curPage]->getName() + " due to entity validation errors.", buttons, [] (UIConfirmationPopup::ButtonType)
 			{
 			}));
@@ -348,7 +348,7 @@ void AssetBrowserTabs::loadTabs()
 
 void AssetBrowserTabs::openContextMenu(const String& tabId)
 {
-	auto menuOptions = std::vector<UIPopupMenuItem>();
+	auto menuOptions = Vector<UIPopupMenuItem>();
 	auto makeEntry = [&] (const String& id, const String& text, const String& toolTip, const String& icon, bool enabled = true)
 	{
 		auto iconSprite = Sprite().setImage(factory.getResources(), "entity_icons/" + (icon.isEmpty() ? "empty.png" : icon));

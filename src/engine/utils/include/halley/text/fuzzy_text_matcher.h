@@ -1,7 +1,7 @@
 #pragma once
 
 #include "halleystring.h"
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <optional>
 #include <gsl/span>
 
@@ -15,12 +15,12 @@ namespace Halley {
 			int sections = 0;
 			int sectionLens = 0;
 			int sectionPos = 0xFFFF;
-			std::vector<std::pair<uint16_t, uint16_t>> matchPositions;
+			Vector<std::pair<uint16_t, uint16_t>> matchPositions;
 
 			bool operator<(const Score& other) const;
 
 			Score advance(int jumpLen, int sectionPos, int newSectionLen) const;
-			void makeMatchPositions(const std::vector<int>& breadcrumbs);
+			void makeMatchPositions(const Vector<int>& breadcrumbs);
 		};
     	
         class Result {
@@ -37,17 +37,17 @@ namespace Halley {
         private:
         	String str;
         	String id;
-        	std::vector<std::pair<uint16_t, uint16_t>> matchPositions;
+        	Vector<std::pair<uint16_t, uint16_t>> matchPositions;
         	Score score;
         };
 
         FuzzyTextMatcher(bool caseSensitive, std::optional<size_t> resultsLimit);
     	
-    	void addStrings(std::vector<String> strings);
+    	void addStrings(Vector<String> strings);
     	void addString(String string, String id = "");
     	void clear();
 
-    	std::vector<Result> match(const String& query) const;
+    	Vector<Result> match(const String& query) const;
 
     private:
         struct Entry {
@@ -55,7 +55,7 @@ namespace Halley {
             String id;
         };
     	
-    	std::vector<Entry> strings;
+    	Vector<Entry> strings;
     	bool caseSensitive;
     	std::optional<size_t> resultsLimit;
 

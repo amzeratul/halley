@@ -340,7 +340,7 @@ UITreeListControls::UITreeListControls(String id, UIStyle style)
 	setupUI();
 }
 
-float UITreeListControls::updateGuides(const std::vector<int>& itemsLeftPerDepth, bool hasChildren, bool expanded)
+float UITreeListControls::updateGuides(const Vector<int>& itemsLeftPerDepth, bool hasChildren, bool expanded)
 {
 	const auto& style = styles.at(0);
 	auto getSprite = [&](size_t depth) -> Sprite
@@ -634,7 +634,7 @@ std::shared_ptr<UIListItem> UITreeListItem::getListItem() const
 	return listItem;
 }
 
-const std::vector<std::unique_ptr<UITreeListItem>>& UITreeListItem::getChildren() const
+const Vector<std::unique_ptr<UITreeListItem>>& UITreeListItem::getChildren() const
 {
 	return children;
 }
@@ -689,11 +689,11 @@ std::optional<String> UITreeListItem::doGetLastExpandedItem(bool expandedTree, c
 
 void UITreeListItem::updateTree(UITreeList& treeList)
 {
-	std::vector<int> itemsLeftPerDepth;
+	Vector<int> itemsLeftPerDepth;
 	doUpdateTree(treeList, itemsLeftPerDepth, expanded);
 }
 
-void UITreeListItem::collectItems(std::vector<std::shared_ptr<UIListItem>>& items)
+void UITreeListItem::collectItems(Vector<std::shared_ptr<UIListItem>>& items)
 {
 	if (listItem) {
 		items.push_back(listItem);
@@ -704,7 +704,7 @@ void UITreeListItem::collectItems(std::vector<std::shared_ptr<UIListItem>>& item
 	}
 }
 
-void UITreeListItem::doUpdateTree(UITreeList& treeList, std::vector<int>& itemsLeftPerDepth, bool treeExpanded)
+void UITreeListItem::doUpdateTree(UITreeList& treeList, Vector<int>& itemsLeftPerDepth, bool treeExpanded)
 {
 	treeList.doSetItemActive(id, treeExpanded);
 

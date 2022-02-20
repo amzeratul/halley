@@ -7,7 +7,7 @@ namespace Halley {
 	public:
 		using ProgressReporter = std::function<bool(float, const String&)>;
 
-		AssetCollector(const ImportingAsset& asset, const Path& dstDir, const std::vector<Path>& assetsSrc, ProgressReporter reporter);
+		AssetCollector(const ImportingAsset& asset, const Path& dstDir, const Vector<Path>& assetsSrc, ProgressReporter reporter);
 
 		void output(const String& name, AssetType type, const Bytes& data, std::optional<Metadata> metadata, const String& platform, const Path& primaryInputFile) override;
 
@@ -16,20 +16,20 @@ namespace Halley {
 		const Path& getDestinationDirectory() override;
 		Bytes readAdditionalFile(const Path& filePath) override;
 
-		std::vector<ImportingAsset> collectAdditionalAssets();
-		std::vector<std::pair<Path, Bytes>> collectOutFiles();
-		const std::vector<AssetResource>& getAssets() const;
-		const std::vector<TimestampedPath>& getAdditionalInputs() const;
+		Vector<ImportingAsset> collectAdditionalAssets();
+		Vector<std::pair<Path, Bytes>> collectOutFiles();
+		const Vector<AssetResource>& getAssets() const;
+		const Vector<TimestampedPath>& getAdditionalInputs() const;
 		
 	private:
 		const ImportingAsset& asset;
 		Path dstDir;
-		std::vector<Path> assetsSrc;
+		Vector<Path> assetsSrc;
 		ProgressReporter reporter;
 
-		std::vector<AssetResource> assets;
-		std::vector<ImportingAsset> additionalAssets;
-		std::vector<TimestampedPath> additionalInputs;
-		std::vector<std::pair<Path, Bytes>> outFiles;
+		Vector<AssetResource> assets;
+		Vector<ImportingAsset> additionalAssets;
+		Vector<TimestampedPath> additionalInputs;
+		Vector<std::pair<Path, Bytes>> outFiles;
 	};
 }

@@ -24,12 +24,12 @@ String IScriptNodeType::getLabel(const ScriptGraphNode& node) const
 	return "";
 }
 
-std::vector<IScriptNodeType::SettingType> IScriptNodeType::getSettingTypes() const
+Vector<IScriptNodeType::SettingType> IScriptNodeType::getSettingTypes() const
 {
 	return {};
 }
 
-std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node,	const World& world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node,	const World& world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const
 {
 	switch (elementType.type) {
 	case ScriptNodeElementType::ReadDataPin:
@@ -44,12 +44,12 @@ std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getDescription(c
 	return { "?", {} };
 }
 
-std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getNodeDescription(const ScriptGraphNode& node,	const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> IScriptNodeType::getNodeDescription(const ScriptGraphNode& node,	const World& world, const ScriptGraph& graph) const
 {
 	return { getName(), {} };
 }
 
-std::pair<String, std::vector<ColourOverride>> IScriptNodeType::getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const
+std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const
 {
 	auto getName = [](ScriptNodeElementType type) -> const char*
 	{
@@ -240,9 +240,9 @@ const IScriptNodeType* ScriptNodeTypeCollection::tryGetNodeType(const String& ty
 	return nullptr;
 }
 
-std::vector<String> ScriptNodeTypeCollection::getTypes(bool includeNonAddable) const
+Vector<String> ScriptNodeTypeCollection::getTypes(bool includeNonAddable) const
 {
-	std::vector<String> result;
+	Vector<String> result;
 	result.reserve(nodeTypes.size());
 	for (const auto& [id, v]: nodeTypes) {
 		if (v->canAdd() || includeNonAddable) {
@@ -252,9 +252,9 @@ std::vector<String> ScriptNodeTypeCollection::getTypes(bool includeNonAddable) c
 	return result;
 }
 
-std::vector<String> ScriptNodeTypeCollection::getNames(bool includeNonAddable) const
+Vector<String> ScriptNodeTypeCollection::getNames(bool includeNonAddable) const
 {
-	std::vector<String> result;
+	Vector<String> result;
 	result.reserve(nodeTypes.size());
 	for (const auto& [id, v]: nodeTypes) {
 		if (v->canAdd() || includeNonAddable) {

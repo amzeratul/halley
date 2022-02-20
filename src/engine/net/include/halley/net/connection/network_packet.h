@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <gsl/gsl>
 #include "halley/utils/utils.h"
 
@@ -20,7 +20,7 @@ namespace Halley
 		NetworkPacketBase(gsl::span<const gsl::byte> data, size_t prePadding);
 
 		size_t dataStart;
-		std::vector<gsl::byte> data;
+		Vector<gsl::byte> data;
 	};
 
 	class OutboundNetworkPacket : public NetworkPacketBase

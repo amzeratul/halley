@@ -127,7 +127,7 @@ namespace Halley {
 		World* world;
 		EntityScene* scene;
 		EntityFactoryContext* parent;
-		std::vector<EntityRef> entities;
+		Vector<EntityRef> entities;
 		bool update = false;
 		uint8_t worldPartition = 0;
 		EntityRef curEntity;

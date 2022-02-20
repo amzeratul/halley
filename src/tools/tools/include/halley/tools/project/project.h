@@ -43,12 +43,12 @@ namespace Halley
 		~Project() override;
 
 		void loadDLL(const HalleyStatics& statics);
-		void setPlugins(std::vector<HalleyPluginPtr> plugins);
+		void setPlugins(Vector<HalleyPluginPtr> plugins);
 		
 		void update(Time time);
 		void onBuildDone();
 
-		const std::vector<String>& getPlatforms() const;
+		const Vector<String>& getPlatforms() const;
 
 		const Path& getHalleyRootPath() const;
 		
@@ -72,7 +72,7 @@ namespace Halley
 		ECSData& getECSData();
 
 		const std::shared_ptr<AssetImporter>& getAssetImporter() const;
-		std::vector<std::unique_ptr<IAssetImporter>> getAssetImportersFromPlugins(ImportAssetType type) const;
+		Vector<std::unique_ptr<IAssetImporter>> getAssetImportersFromPlugins(ImportAssetType type) const;
 
 		void setDevConServer(DevConServer* server);
 		size_t addAssetReloadCallback(AssetReloadCallback callback);
@@ -92,8 +92,8 @@ namespace Halley
 		bool writeAssetToDisk(const Path& filePath, gsl::span<const gsl::byte> data) override;
 		bool writeAssetToDisk(const Path& filePath, std::string_view str) override;
 
-		std::vector<String> getAssetSrcList() const;
-		std::vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& path) const;
+		Vector<String> getAssetSrcList() const;
+		Vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& path) const;
 
 		void onAllAssetsImported();
 		void reloadAssets(const std::set<String>& assets, bool packed);
@@ -132,15 +132,15 @@ namespace Halley
 		void clearCachedAssetPreviews();
 
 	private:
-		std::vector<String> platforms;
+		Vector<String> platforms;
 		Path rootPath;
 		Path halleyRootPath;
 		Path assetPackManifest;
 		size_t callbackIdx = 0;
 
-		std::vector<std::pair<size_t, AssetReloadCallback>> assetReloadCallbacks;
-		std::vector<std::pair<size_t, AssetReloadCallback>> assetPackedReloadCallbacks;
-		std::vector<IAssetLoadListener*> assetLoadedListeners;
+		Vector<std::pair<size_t, AssetReloadCallback>> assetReloadCallbacks;
+		Vector<std::pair<size_t, AssetReloadCallback>> assetPackedReloadCallbacks;
+		Vector<IAssetLoadListener*> assetLoadedListeners;
 		CheckAssetsTask* checkAssetsTask = nullptr;
 
 		std::unique_ptr<ImportAssetsDatabase> importAssetsDatabase;
@@ -150,12 +150,12 @@ namespace Halley
 		std::unique_ptr<ProjectProperties> properties;
 		std::unique_ptr<ECSData> ecsData;
 
-		std::vector<HalleyPluginPtr> plugins;
+		Vector<HalleyPluginPtr> plugins;
 		std::shared_ptr<ProjectDLL> gameDll;
 		std::unique_ptr<Resources> gameResources;
 
 		bool assetNotifyImportEnabled = true;
-		std::vector<Path> assetsToNotifyImport;
+		Vector<Path> assetsToNotifyImport;
 
 		struct AssetPreviewCache {
 			int64_t timestamp;

@@ -37,13 +37,13 @@ namespace Halley {
 
 	private:
 		lua_State* lua;
-		std::vector<lua_State*> pushedStates;
+		Vector<lua_State*> pushedStates;
 		Resources* resources;
 
 		HashMap<String, LuaReference> modules;
-		std::vector<std::unique_ptr<LuaCallback>> closures;
+		Vector<std::unique_ptr<LuaCallback>> closures;
 		std::unique_ptr<LuaReference> errorHandlerRef;
-		std::vector<int> errorHandlerStackPos;
+		Vector<int> errorHandlerStackPos;
 
 		LuaReference loadScript(const String& chunkName, gsl::span<const gsl::byte> data);
 

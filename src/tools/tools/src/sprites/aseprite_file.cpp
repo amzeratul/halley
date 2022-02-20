@@ -131,7 +131,7 @@ struct AsepriteFileTagsEntryData
 };
 
 
-void AsepriteCel::loadImage(AsepriteDepth depth, const std::vector<uint32_t>& palette)
+void AsepriteCel::loadImage(AsepriteDepth depth, const Vector<uint32_t>& palette)
 {
 	imgData = std::make_unique<Image>(Image::Format::RGBA, size);
 	imgData->clear(Image::convertRGBAToInt(0, 0, 0, 0));
@@ -472,7 +472,7 @@ size_t AsepriteFile::getBPP() const
 	}
 }
 
-const std::vector<AsepriteTag>& AsepriteFile::getTags() const
+const Vector<AsepriteTag>& AsepriteFile::getTags() const
 {
 	return tags;
 }

@@ -35,7 +35,7 @@ namespace Halley {
 		std::optional<EntityData> makeInstance(const String& prefab) const;
 		void addNewPrefab(const String& referenceEntityId, bool childOfReference, const String& prefabName);
 		void addEntity(const String& referenceEntityId, bool childOfReference, EntityData data);
-		void addEntities(const String& referenceEntityId, bool childOfReference, std::vector<EntityData> data);
+		void addEntities(const String& referenceEntityId, bool childOfReference, Vector<EntityData> data);
 		void removeSelectedEntities();
 		void removeEntities(gsl::span<const String> entityIds) override;
 		void replaceEntity(const String& entityId, EntityData newData);
@@ -81,7 +81,7 @@ namespace Halley {
 		void refreshAssets();
 
 		void addComponentToCurrentEntity(const String& componentName) override;
-		void setHighlightedComponents(std::vector<String> componentNames) override;
+		void setHighlightedComponents(Vector<String> componentNames) override;
 		const IEntityEditorFactory& getEntityEditorFactory() const override;
 
 		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() override;
@@ -104,7 +104,7 @@ namespace Halley {
 		void openAssetHere(AssetType assetType, const String& assetId);
 		String getAssetKey() const;
 
-		std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const;
+		Vector<AssetCategoryFilter> getPrefabCategoryFilters() const;
 		
 		Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size);
 
@@ -152,7 +152,7 @@ namespace Halley {
 
 		std::shared_ptr<EntityValidator> entityValidator;
 
-		std::vector<String> currentEntityIds;
+		Vector<String> currentEntityIds;
 
 		std::shared_ptr<UIWidget> curCustomUI;
 		std::shared_ptr<UIWidget> curToolUI;
@@ -165,15 +165,15 @@ namespace Halley {
 		bool modified = false;
 		
 		size_t assetReloadCallbackIdx = 0;
-		std::vector<std::function<bool(gsl::span<const String>)>> assetReloadCallbacks;
+		Vector<std::function<bool(gsl::span<const String>)>> assetReloadCallbacks;
 
 		void makeUI();
-		void onEntitiesSelected(std::vector<String> selectedEntities);
+		void onEntitiesSelected(Vector<String> selectedEntities);
 		void panCameraToEntity(const String& id);
 
 		std::optional<String> findParent(const String& entityId, std::set<String>* invalidParents = nullptr) const;
 		const String* findParent(const String& targetEntityId, const EntityTree& tree, const String& parentEntityId, std::set<String>* invalidParents) const;
-		std::vector<std::pair<String, std::optional<String>>> findUniqueParents(gsl::span<const String> entityIds) const;
+		Vector<std::pair<String, std::optional<String>>> findUniqueParents(gsl::span<const String> entityIds) const;
 
 		String getNextSibling(const String& parentId, int childIndex) const;
 		std::pair<String, int> getParentInsertPos(const String& referenceId, bool childOfReference) const;
@@ -184,7 +184,7 @@ namespace Halley {
 		void setModified(bool enabled);
 
 		String serializeEntities(gsl::span<const EntityData> node) const;
-		std::vector<EntityData> deserializeEntities(const String& data) const;
+		Vector<EntityData> deserializeEntities(const String& data) const;
 
 		void assignUUIDs(EntityData& node);
 		void positionEntity(EntityData& entityData, Vector2f pos) const;

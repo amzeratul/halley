@@ -57,7 +57,7 @@ namespace Halley {
 		WinRTLocalSave(String prefix);
 		bool isReady() const override;
 		Bytes getData(const String& path) override;
-		std::vector<String> enumerate(const String& root) override;
+		Vector<String> enumerate(const String& root) override;
 		void setData(const String& path, const Bytes& data, bool commit) override;
 		void removeData(const String& path) override;
 		void commit() override;

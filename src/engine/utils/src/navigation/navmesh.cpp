@@ -10,7 +10,7 @@ using namespace Halley;
 Navmesh::Navmesh()
 {}
 
-Navmesh::Navmesh(std::vector<PolygonData> polys, const NavmeshBounds& bounds, int subWorld)
+Navmesh::Navmesh(Vector<PolygonData> polys, const NavmeshBounds& bounds, int subWorld)
 	: subWorld(subWorld)
 	, origin(bounds.origin)
 	, normalisedCoordinatesBase(bounds.base)
@@ -236,7 +236,7 @@ ConfigNode Navmesh::Node::toConfigNode() const
 	return result;
 }
 
-std::optional<std::vector<Navmesh::NodeAndConn>> Navmesh::pathfindNodes(const NavigationQuery& query) const
+std::optional<Vector<Navmesh::NodeAndConn>> Navmesh::pathfindNodes(const NavigationQuery& query) const
 {
 	if (query.fromSubWorld != subWorld || query.toSubWorld != subWorld) {
 		return {};
@@ -262,9 +262,9 @@ std::optional<NavigationPath> Navmesh::pathfind(const NavigationQuery& query) co
 	return makePath(query, nodePath.value());
 }
 
-std::vector<Navmesh::NodeAndConn> Navmesh::makeResult(const std::vector<State>& state, int startId, int endId) const
+Vector<Navmesh::NodeAndConn> Navmesh::makeResult(const Vector<State>& state, int startId, int endId) const
 {
-	std::vector<NodeAndConn> result;
+	Vector<NodeAndConn> result;
 	for (NodeAndConn curNode(endId); true; curNode = state[curNode.node].cameFrom) {
 		result.push_back(curNode);
 		if (curNode.node == startId) {
@@ -275,7 +275,7 @@ std::vector<Navmesh::NodeAndConn> Navmesh::makeResult(const std::vector<State>& 
 	return result;
 }
 
-std::optional<std::vector<Navmesh::NodeAndConn>> Navmesh::pathfind(int fromId, int toId) const
+std::optional<Vector<Navmesh::NodeAndConn>> Navmesh::pathfind(int fromId, int toId) const
 {
 	// Ensure the query is valid
 	if (fromId < 0 || fromId >= static_cast<int>(nodes.size()) || toId < 0 || toId >= static_cast<int>(nodes.size())) {
@@ -285,7 +285,7 @@ std::optional<std::vector<Navmesh::NodeAndConn>> Navmesh::pathfind(int fromId, i
 
 	// State map. Using vector for perf, trading space for CPU.
 	// TODO: measure this vs unordered_map or some other hashtable, it's not impossible that it'd perform better (compact memory)
-	std::vector<State> state(nodes.size(), State{});
+	Vector<State> state(nodes.size(), State{});
 
 	// Open set
 	auto openSet = PriorityQueue<NodeId, NodeComparator>(NodeComparator(state));
@@ -349,9 +349,9 @@ std::optional<std::vector<Navmesh::NodeAndConn>> Navmesh::pathfind(int fromId, i
 	return {};
 }
 
-std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, const std::vector<NodeAndConn>& nodePath) const
+std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, const Vector<NodeAndConn>& nodePath) const
 {
-	std::vector<Vector2f> points;
+	Vector<Vector2f> points;
 	points.reserve(nodePath.size() + 1);
 	
 	points.push_back(query.from);
@@ -372,7 +372,7 @@ std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, co
 	return NavigationPath(query, points);
 }
 
-void Navmesh::postProcessPath(std::vector<Vector2f>& points, NavigationQuery::PostProcessingType type) const
+void Navmesh::postProcessPath(Vector<Vector2f>& points, NavigationQuery::PostProcessingType type) const
 {
 	if (type == NavigationQuery::PostProcessingType::None) {
 		return;
@@ -381,14 +381,14 @@ void Navmesh::postProcessPath(std::vector<Vector2f>& points, NavigationQuery::Po
 		return;
 	}
 
-	std::vector<NodeId> nodeIds;
+	Vector<NodeId> nodeIds;
 	nodeIds.resize(points.size());
 	for (size_t i = 0; i < points.size(); ++i) {
 		nodeIds[i] = getNodeAt(points[i]).value_or(-1);
 		assert(nodeIds[i] != -1);
 	}
 
-	std::vector<float> pathCosts;
+	Vector<float> pathCosts;
 	pathCosts.resize(points.size());
 	pathCosts[0] = 0.0f;
 	for(size_t i = 1; i < points.size(); i++) {
@@ -711,10 +711,10 @@ ConfigNode Navmesh::Portal::toConfigNode() const
 	return result;
 }
 
-void Navmesh::Portal::postProcess(gsl::span<const Polygon> polygons, std::vector<Portal>& dst)
+void Navmesh::Portal::postProcess(gsl::span<const Polygon> polygons, Vector<Portal>& dst)
 {
 	const float epsilon = 0.01f;
-	std::vector<std::deque<Vector2f>> chains;
+	Vector<std::deque<Vector2f>> chains;
 	
 	for (auto& conn: connections) {
 		const auto edge = polygons[conn.node].getEdge(conn.connectionIdx);

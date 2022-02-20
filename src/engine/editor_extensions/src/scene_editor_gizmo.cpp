@@ -158,7 +158,7 @@ std::shared_ptr<UIWidget> SceneEditorGizmo::makeUI()
 	return {};
 }
 
-void SceneEditorGizmo::setSelectedEntities(std::vector<EntityRef> entities, std::vector<EntityData*> datas)
+void SceneEditorGizmo::setSelectedEntities(Vector<EntityRef> entities, Vector<EntityData*> datas)
 {
 	entityDatas = std::move(datas);
 	needsToCopy = true;
@@ -205,7 +205,7 @@ void SceneEditorGizmo::deselect()
 {
 }
 
-std::vector<String> SceneEditorGizmo::getHighlightedComponents() const
+Vector<String> SceneEditorGizmo::getHighlightedComponents() const
 {
 	return {};
 }
@@ -279,7 +279,7 @@ std::optional<ConstEntityRef> SceneEditorGizmo::getEntity(size_t entityIdx) cons
 	return entityIdx >= curEntities.size() ? std::optional<ConstEntityRef>() : ConstEntityRef(curEntities.at(entityIdx));
 }
 
-const std::vector<EntityRef>& SceneEditorGizmo::getEntities() const
+const Vector<EntityRef>& SceneEditorGizmo::getEntities() const
 {
 	return curEntities;
 }

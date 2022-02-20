@@ -86,9 +86,9 @@ String UIList::getSelectedOptionId() const
 	return getItem(curOption)->getId();
 }
 
-std::vector<int> UIList::getSelectedOptions() const
+Vector<int> UIList::getSelectedOptions() const
 {
-	std::vector<int> result;
+	Vector<int> result;
 	for (const auto& item: items) {
 		if (item->isSelected()) {
 			result.push_back(item->getIndex());
@@ -97,9 +97,9 @@ std::vector<int> UIList::getSelectedOptions() const
 	return result;
 }
 
-std::vector<String> UIList::getSelectedOptionIds() const
+Vector<String> UIList::getSelectedOptionIds() const
 {
-	std::vector<String> result;
+	Vector<String> result;
 	for (const auto& item: items) {
 		if (item->isSelected()) {
 			result.push_back(item->getId());
@@ -1245,7 +1245,7 @@ bool UIList::setSelectedOptionIds(gsl::span<const String> ids, SelectionMode mod
 		*/
 		forceAddChildren(UIInputType::Undefined, false);
 
-		auto sortedIds = std::vector<String>(ids.begin(), ids.end());
+		auto sortedIds = Vector<String>(ids.begin(), ids.end());
 		std::sort(sortedIds.begin(), sortedIds.end());
 		for (auto& item: items) {
 			const bool inSet = std::binary_search(sortedIds.begin(), sortedIds.end(), item->getId());

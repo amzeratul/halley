@@ -242,7 +242,7 @@ void AudioFacade::setGroupVolume(const String& groupName, float volume)
 	});
 }
 
-void AudioFacade::setOutputChannels(std::vector<AudioChannelData> audioChannelData)
+void AudioFacade::setOutputChannels(Vector<AudioChannelData> audioChannelData)
 {
 	enqueue([=, audioChannelData = std::move(audioChannelData)] () mutable
 	{

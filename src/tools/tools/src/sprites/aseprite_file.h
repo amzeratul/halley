@@ -32,7 +32,7 @@ namespace Halley {
 		Bytes rawData;
 		std::unique_ptr<Image> imgData;
 
-		void loadImage(AsepriteDepth depth, const std::vector<uint32_t>& palette);
+		void loadImage(AsepriteDepth depth, const Vector<uint32_t>& palette);
 		void drawAt(Image& image, uint8_t opacity, AsepriteBlendMode blendMode) const;
 	};
 
@@ -42,7 +42,7 @@ namespace Halley {
 		AsepriteFrame(uint16_t duration);
 
 		uint16_t duration;
-		std::vector<AsepriteCel> cels;
+		Vector<AsepriteCel> cels;
 	};
 
 	enum class AsepriteLayerType
@@ -115,7 +115,7 @@ namespace Halley {
 
 		void load(gsl::span<const gsl::byte> data);
 
-		const std::vector<AsepriteTag>& getTags() const;
+		const Vector<AsepriteTag>& getTags() const;
 		std::map<String, std::unique_ptr<Image>> makeGroupFrameImages(int frameNumber, bool groupSeparated);
 	    const AsepriteFrame& getFrame(int n) const;
 	    size_t getNumberOfFrames() const;
@@ -166,10 +166,10 @@ namespace Halley {
 		uint8_t transparentEntry;
 		uint16_t numOfColours;
 
-		std::vector<AsepriteFrame> frames;
-		std::vector<AsepriteLayer> layers;
-		std::vector<AsepriteTag> tags;
-		std::vector<uint32_t> paletteBg;
-		std::vector<uint32_t> paletteTransparent;
+		Vector<AsepriteFrame> frames;
+		Vector<AsepriteLayer> layers;
+		Vector<AsepriteTag> tags;
+		Vector<uint32_t> paletteBg;
+		Vector<uint32_t> paletteTransparent;
     };
 }

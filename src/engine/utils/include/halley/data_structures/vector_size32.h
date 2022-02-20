@@ -8,6 +8,13 @@
 #include <algorithm>
 #include <stdexcept>
 
+#ifdef max
+#undef max
+#endif
+#ifdef min
+#undef min
+#endif
+
 namespace Halley {
 	template <typename T, typename Pointer, typename Reference>
 	class VectorIterator {

@@ -47,7 +47,7 @@ ConfigNode ScriptGraphNode::PinConnection::toConfigNode(const EntitySerializatio
 ScriptGraphNode::Pin::Pin(const ConfigNode& node, const EntitySerializationContext& context)
 {
 	if (node.getType() == ConfigNodeType::Sequence) {
-		connections = ConfigNodeSerializer<std::vector<PinConnection>>().deserialize(context, node);
+		connections = ConfigNodeSerializer<Vector<PinConnection>>().deserialize(context, node);
 	} else if (node.getType() == ConfigNodeType::Map) {
 		connections.clear();
 		connections.push_back(ConfigNodeSerializer<PinConnection>().deserialize(context, node));
@@ -56,7 +56,7 @@ ScriptGraphNode::Pin::Pin(const ConfigNode& node, const EntitySerializationConte
 
 ConfigNode ScriptGraphNode::Pin::toConfigNode(const EntitySerializationContext& context) const
 {
-	return ConfigNodeSerializer<std::vector<PinConnection>>().serialize(connections, context);
+	return ConfigNodeSerializer<Vector<PinConnection>>().serialize(connections, context);
 }
 
 ScriptGraphNode::ScriptGraphNode()
@@ -74,7 +74,7 @@ ScriptGraphNode::ScriptGraphNode(const ConfigNode& node, const EntitySerializati
 	position = node["position"].asVector2f();
 	type = node["type"].asString();
 	settings = ConfigNode(node["settings"]);
-	pins = ConfigNodeSerializer<std::vector<Pin>>().deserialize(context, node["pins"]);
+	pins = ConfigNodeSerializer<Vector<Pin>>().deserialize(context, node["pins"]);
 }
 
 ConfigNode ScriptGraphNode::toConfigNode(const EntitySerializationContext& context) const
@@ -83,7 +83,7 @@ ConfigNode ScriptGraphNode::toConfigNode(const EntitySerializationContext& conte
 	result["position"] = position;
 	result["type"] = type;
 	result["settings"] = ConfigNode(settings);
-	result["pins"] = ConfigNodeSerializer<std::vector<Pin>>().serialize(pins, context);
+	result["pins"] = ConfigNodeSerializer<Vector<Pin>>().serialize(pins, context);
 	return result;
 }
 
@@ -136,7 +136,7 @@ ScriptGraph::ScriptGraph()
 
 ScriptGraph::ScriptGraph(const ConfigNode& node, const EntitySerializationContext& context)
 {
-	nodes = ConfigNodeSerializer<std::vector<ScriptGraphNode>>().deserialize(context, node["nodes"]);
+	nodes = ConfigNodeSerializer<Vector<ScriptGraphNode>>().deserialize(context, node["nodes"]);
 	if (nodes.empty()) {
 		makeBaseGraph();
 	}
@@ -146,7 +146,7 @@ ScriptGraph::ScriptGraph(const ConfigNode& node, const EntitySerializationContex
 ConfigNode ScriptGraph::toConfigNode(const EntitySerializationContext& context) const
 {
 	ConfigNode::MapType result;
-	result["nodes"] = ConfigNodeSerializer<std::vector<ScriptGraphNode>>().serialize(nodes, context);
+	result["nodes"] = ConfigNodeSerializer<Vector<ScriptGraphNode>>().serialize(nodes, context);
 	return result;
 }
 

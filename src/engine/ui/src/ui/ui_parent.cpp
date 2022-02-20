@@ -101,7 +101,7 @@ bool UIParent::isWaitingToSpawnChildren() const
 
 void UIParent::markAsNeedingLayout() {}
 
-std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren()
+Vector<std::shared_ptr<UIWidget>>& UIParent::getChildren()
 {
 	/*
 	if (!childrenWaiting.empty()) {
@@ -112,17 +112,17 @@ std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren()
 	return children;
 }
 
-const std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildren() const
+const Vector<std::shared_ptr<UIWidget>>& UIParent::getChildren() const
 {
 	return children;
 }
 
-std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildrenWaiting()
+Vector<std::shared_ptr<UIWidget>>& UIParent::getChildrenWaiting()
 {
 	return childrenWaiting;
 }
 
-const std::vector<std::shared_ptr<UIWidget>>& UIParent::getChildrenWaiting() const
+const Vector<std::shared_ptr<UIWidget>>& UIParent::getChildrenWaiting() const
 {
 	return childrenWaiting;
 }

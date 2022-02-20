@@ -62,10 +62,10 @@ namespace Halley
 	public:
 		TypeSchema type;
 		String name;
-		std::vector<String> defaultValue;
+		Vector<String> defaultValue;
 		std::optional<MemberAccess> access;
 
-		MemberSchema(TypeSchema type, String name, std::vector<String> defaultValue, std::optional<MemberAccess> access = {})
+		MemberSchema(TypeSchema type, String name, Vector<String> defaultValue, std::optional<MemberAccess> access = {})
 			: type(std::move(type))
 			, name(std::move(name))
 			, defaultValue(std::move(defaultValue))
@@ -73,12 +73,12 @@ namespace Halley
 		{}
 
 		MemberSchema(TypeSchema type, String name, String defaultValue = "", std::optional<MemberAccess> access = {})
-			: MemberSchema(std::move(type), std::move(name), defaultValue.isEmpty() ? std::vector<String>() : std::vector<String>{std::move(defaultValue)}, access)
+			: MemberSchema(std::move(type), std::move(name), defaultValue.isEmpty() ? Vector<String>() : Vector<String>{std::move(defaultValue)}, access)
 		{}
 
-		static std::vector<VariableSchema> toVariableSchema(const std::vector<MemberSchema>& schema)
+		static Vector<VariableSchema> toVariableSchema(const Vector<MemberSchema>& schema)
 		{
-			std::vector<VariableSchema> result;
+			Vector<VariableSchema> result;
 			result.reserve(schema.size());
 			for (const auto& s: schema) {
 				result.emplace_back(s.type, s.name);
@@ -98,7 +98,7 @@ namespace Halley
 		bool collapse = false;
 		std::optional<Range<float>> range;
 
-		ComponentFieldSchema(TypeSchema type, String name, std::vector<String> defaultValue, std::optional<MemberAccess> access = {})
+		ComponentFieldSchema(TypeSchema type, String name, Vector<String> defaultValue, std::optional<MemberAccess> access = {})
 			: MemberSchema(std::move(type), std::move(name), std::move(defaultValue), access)
 		{}
 
@@ -106,9 +106,9 @@ namespace Halley
 			: MemberSchema(std::move(type), std::move(name), std::move(defaultValue), access)
 		{}
 
-		static std::vector<VariableSchema> toVariableSchema(const std::vector<ComponentFieldSchema>& schema)
+		static Vector<VariableSchema> toVariableSchema(const Vector<ComponentFieldSchema>& schema)
 		{
-			std::vector<VariableSchema> result;
+			Vector<VariableSchema> result;
 			result.reserve(schema.size());
 			for (const auto& s: schema) {
 				result.emplace_back(s.type, s.name);

@@ -10,6 +10,6 @@ namespace Halley
 		int run(Vector<std::string> args) override;
 
 	private:
-		int copyFiles(const std::vector<std::string>& args);
+		int copyFiles(const Vector<std::string>& args);
 	};
 }

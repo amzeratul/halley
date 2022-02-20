@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <cstdint>
 #include "halley/core/game/main_loop.h"
 
@@ -25,7 +25,7 @@ namespace Halley
 		virtual ~IHalleyEntryPoint() = default;
 
 		virtual uint32_t getApiVersion() { return getHalleyDLLAPIVersion(); }
-		virtual std::unique_ptr<Core> createCore(const std::vector<std::string>& args) = 0;
+		virtual std::unique_ptr<Core> createCore(const Vector<std::string>& args) = 0;
 		virtual std::unique_ptr<Game> createGame() = 0;
 		virtual void initSharedStatics(const HalleyStatics& parent);
 	};
@@ -39,7 +39,7 @@ namespace Halley
 			return std::make_unique<GameType>();
 		}
 
-		std::unique_ptr<Core> createCore(const std::vector<std::string>& args) override
+		std::unique_ptr<Core> createCore(const Vector<std::string>& args) override
 		{
 			Expects(args.size() >= 1);
 			Expects(args.size() < 1000);

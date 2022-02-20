@@ -16,7 +16,7 @@ namespace Halley {
 	public:
 		class EmitOptions {
 		public:
-			std::vector<String> mapKeyOrder;
+			Vector<String> mapKeyOrder;
 		};
 		
 		static void parseConfig(ConfigFile& config, gsl::span<const gsl::byte> data);

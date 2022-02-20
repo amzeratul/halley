@@ -92,7 +92,7 @@ void Preferences::addRecent(Path path)
 	dirty = true;
 }
 
-const std::vector<String>& Preferences::getRecents() const
+const Vector<String>& Preferences::getRecents() const
 {
 	return recents;
 }
@@ -121,7 +121,7 @@ void Preferences::updateWindowDefinition(const Window& window)
 	}
 }
 
-const std::vector<String>& Preferences::getDisabledPlatforms() const
+const Vector<String>& Preferences::getDisabledPlatforms() const
 {
 	return disabledPlatforms;
 }

@@ -164,7 +164,7 @@ void UILabel::setFutureText(Future<String> futureText)
 	});
 }
 
-void UILabel::setColourOverride(const std::vector<ColourOverride>& overrides)
+void UILabel::setColourOverride(const Vector<ColourOverride>& overrides)
 {
 	renderer.setColourOverride(overrides);
 }

@@ -2,7 +2,7 @@
 #include "halley/core/api/halley_api_internal.h"
 #include "input_sdl.h"
 #include <cstdint>
-#include <vector>
+#include "halley/data_structures/vector.h"
 
 #include "halley/data_structures/ring_buffer.h"
 

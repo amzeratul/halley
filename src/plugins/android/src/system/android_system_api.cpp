@@ -28,7 +28,7 @@ void AndroidSystemAPI::init()
     };
     EGLint numConfigs;
     eglChooseConfig(display, attribs, nullptr,0, &numConfigs);
-    auto validConfigs = std::vector<EGLConfig>(numConfigs);
+    auto validConfigs = Vector<EGLConfig>(numConfigs);
     eglChooseConfig(display, attribs, validConfigs.data(), numConfigs, &numConfigs);
     config = validConfigs[0];
     for (int i = 0; i < numConfigs; ++i) {

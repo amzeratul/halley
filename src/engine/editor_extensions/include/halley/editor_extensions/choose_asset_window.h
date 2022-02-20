@@ -19,11 +19,11 @@ namespace Halley {
 		virtual ~ChooseAssetWindow();
 
         void onAddedToRoot(UIRoot& root) override;
-		void setAssetIds(std::vector<String> ids, String defaultOption);
-		void setAssetIds(std::vector<String> _ids, std::vector<String> _names, String _defaultOption);
+		void setAssetIds(Vector<String> ids, String defaultOption);
+		void setAssetIds(Vector<String> _ids, Vector<String> _names, String _defaultOption);
 
 		void setTitle(LocalisedString title);
-		void setCategoryFilters(std::vector<AssetCategoryFilter> filters, const String& defaultOption);
+		void setCategoryFilters(Vector<AssetCategoryFilter> filters, const String& defaultOption);
 
     protected:
         bool onKeyPress(KeyboardKeyPress key) override;
@@ -40,9 +40,9 @@ namespace Halley {
 
         virtual void onCategorySet(const String& id);
 
-        virtual void sortItems(std::vector<std::pair<String, String>>& items);
-		void sortItemsByName(std::vector<std::pair<String, String>>& items);
-		void sortItemsById(std::vector<std::pair<String, String>>& items);
+        virtual void sortItems(Vector<std::pair<String, String>>& items);
+		void sortItemsByName(Vector<std::pair<String, String>>& items);
+		void sortItemsById(Vector<std::pair<String, String>>& items);
 
     private:
         UIFactory& factory;
@@ -50,11 +50,11 @@ namespace Halley {
 		UISizerType orientation;
 		int nColumns;
 
-		std::vector<String> origIds;
-		std::vector<String> origNames;
-		std::vector<String> ids;
-		std::vector<String> names;
-		std::vector<AssetCategoryFilter> categoryFilters;
+		Vector<String> origIds;
+		Vector<String> origNames;
+		Vector<String> ids;
+		Vector<String> names;
+		Vector<AssetCategoryFilter> categoryFilters;
 		
 		FuzzyTextMatcher fuzzyMatcher;
 		String filter;

@@ -54,8 +54,8 @@ namespace Halley {
         private:
             void generatePins();
         	
-        	std::vector<RenderGraphPinType> inputPins;
-        	std::vector<RenderGraphPinType> outputPins;
+        	Vector<RenderGraphPinType> inputPins;
+        	Vector<RenderGraphPinType> outputPins;
         };
 
     	class Connection {
@@ -86,8 +86,8 @@ namespace Halley {
 		void deserialize(Deserializer& s);
 
     private:
-    	std::vector<Node> nodes;
-    	std::vector<Connection> connections;
+    	Vector<Node> nodes;
+    	Vector<Connection> connections;
 
     	void loadMaterials(Resources& resources);
     };

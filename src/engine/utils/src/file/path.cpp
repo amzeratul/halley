@@ -34,7 +34,7 @@ void Path::setPath(const String& value)
 	normalise();
 }
 
-Path::Path(std::vector<String> parts)
+Path::Path(Vector<String> parts)
 	: pathParts(parts)
 {
 	normalise();
@@ -175,7 +175,7 @@ size_t Path::getNumberPaths() const
 
 Path Path::dropFront(int numberFolders) const
 {
-	return Path(std::vector<String>(pathParts.begin() + numberFolders, pathParts.end()));
+	return Path(Vector<String>(pathParts.begin() + numberFolders, pathParts.end()));
 }
 
 Path Path::parentPath() const
@@ -309,7 +309,7 @@ Path Path::makeRelativeTo(const Path& path) const
 	size_t sharedRoot = 0;
 	size_t maxLen = std::min(me.pathParts.size(), path.pathParts.size());
 
-	std::vector<String> result;
+	Vector<String> result;
 	for (size_t i = 0; i < maxLen; ++i) {
 		if (me.pathParts[i] == path.pathParts[i]) {
 			sharedRoot = i + 1;
@@ -372,5 +372,5 @@ Path Path::getFront(size_t n) const
 	if (n >= pathParts.size()) {
 		return *this;
 	}
-	return Path(std::vector<String>(pathParts.begin(), pathParts.begin() + n));
+	return Path(Vector<String>(pathParts.begin(), pathParts.begin() + n));
 }

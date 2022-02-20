@@ -48,7 +48,7 @@ void AudioEngine::setListener(AudioListenerData l)
 	listener = l;
 }
 
-void AudioEngine::setOutputChannels(std::vector<AudioChannelData> channelData)
+void AudioEngine::setOutputChannels(Vector<AudioChannelData> channelData)
 {
 	if (channels.size() == channelData.size()) {
 		channels = std::move(channelData);
@@ -81,7 +81,7 @@ void AudioEngine::addEmitter(uint32_t id, std::unique_ptr<AudioVoice> src)
 	idToSource[id].push_back(emitters.back().get());
 }
 
-const std::vector<AudioVoice*>& AudioEngine::getSources(uint32_t id)
+const Vector<AudioVoice*>& AudioEngine::getSources(uint32_t id)
 {
 	auto src = idToSource.find(id);
 	if (src != idToSource.end()) {
@@ -91,7 +91,7 @@ const std::vector<AudioVoice*>& AudioEngine::getSources(uint32_t id)
 	}
 }
 
-std::vector<uint32_t> AudioEngine::getFinishedSounds()
+Vector<uint32_t> AudioEngine::getFinishedSounds()
 {
 	return std::move(finishedSounds);
 }

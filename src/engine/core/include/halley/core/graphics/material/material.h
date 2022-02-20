@@ -88,7 +88,7 @@ namespace Halley
 		const std::shared_ptr<const Texture>& getTexture(int textureUnit) const;
 		std::shared_ptr<const Texture> getRawTexture(int textureUnit) const;
 		const Vector<MaterialTextureParameter>& getTextureUniforms() const;
-		const std::vector<std::shared_ptr<const Texture>>& getTextures() const;
+		const Vector<std::shared_ptr<const Texture>>& getTextures() const;
 		size_t getNumTextureUnits() const;
 
 		const Vector<MaterialParameter>& getUniforms() const;
@@ -123,7 +123,7 @@ namespace Halley
 		Vector<MaterialParameter> uniforms;
 		Vector<MaterialTextureParameter> textureUniforms;
 		Vector<MaterialDataBlock> dataBlocks;
-		std::vector<std::shared_ptr<const Texture>> textures;
+		Vector<std::shared_ptr<const Texture>> textures;
 
 		mutable uint64_t hashValue = 0;
 		mutable bool needToUpdateHash = true;

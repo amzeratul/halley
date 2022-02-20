@@ -29,7 +29,7 @@ void ECSWindow::onMakeUI()
 		populateComponent(event.getStringData());
 	});
 
-	std::vector<String> systemNames;
+	Vector<String> systemNames;
 	for (const auto& system: ecsData.getSystems()) {
 		systemNames.push_back(system.first);
 	}
@@ -38,7 +38,7 @@ void ECSWindow::onMakeUI()
 		systemList->addTextItem(system, LocalisedString::fromUserString(system));
 	}
 
-	std::vector<String> componentNames;
+	Vector<String> componentNames;
 	for (const auto& component: ecsData.getComponents()) {
 		componentNames.push_back(component.first);
 	}

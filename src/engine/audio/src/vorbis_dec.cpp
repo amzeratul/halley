@@ -105,7 +105,7 @@ void Halley::VorbisData::reset()
 	open();
 }
 
-size_t Halley::VorbisData::read(gsl::span<std::vector<float>> dst)
+size_t Halley::VorbisData::read(gsl::span<Vector<float>> dst)
 {
 	Expects(file);
 	Expects(dst.size() == getNumChannels());

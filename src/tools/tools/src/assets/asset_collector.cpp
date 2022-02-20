@@ -9,7 +9,7 @@
 using namespace Halley;
 
 
-AssetCollector::AssetCollector(const ImportingAsset& asset, const Path& dstDir, const std::vector<Path>& assetsSrc, ProgressReporter reporter)
+AssetCollector::AssetCollector(const ImportingAsset& asset, const Path& dstDir, const Vector<Path>& assetsSrc, ProgressReporter reporter)
 	: asset(asset)
 	, dstDir(dstDir)
 	, assetsSrc(assetsSrc)
@@ -82,22 +82,22 @@ Bytes AssetCollector::readAdditionalFile(const Path& filePath)
 	throw Exception("Unable to find asset dependency: \"" + filePath.getString() + "\"", HalleyExceptions::Tools);
 }
 
-const std::vector<AssetResource>& AssetCollector::getAssets() const
+const Vector<AssetResource>& AssetCollector::getAssets() const
 {
 	return assets;
 }
 
-std::vector<ImportingAsset> AssetCollector::collectAdditionalAssets()
+Vector<ImportingAsset> AssetCollector::collectAdditionalAssets()
 {
 	return std::move(additionalAssets);
 }
 
-std::vector<std::pair<Path, Bytes>> AssetCollector::collectOutFiles()
+Vector<std::pair<Path, Bytes>> AssetCollector::collectOutFiles()
 {
 	return std::move(outFiles);
 }
 
-const std::vector<TimestampedPath>& AssetCollector::getAdditionalInputs() const
+const Vector<TimestampedPath>& AssetCollector::getAdditionalInputs() const
 {
 	return additionalInputs;
 }

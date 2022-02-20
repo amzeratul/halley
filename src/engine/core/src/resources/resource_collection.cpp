@@ -71,7 +71,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::getUntyped(const String& name,
 	return doGet(name, priority, true);
 }
 
-std::vector<String> ResourceCollectionBase::enumerate() const
+Vector<String> ResourceCollectionBase::enumerate() const
 {
 	if (resourceEnumerator) {
 		return resourceEnumerator();

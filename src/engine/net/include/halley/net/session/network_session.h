@@ -120,10 +120,10 @@ namespace Halley {
 		std::unique_ptr<SharedData> sessionSharedData;
 		std::map<int, std::unique_ptr<SharedData>> sharedData;
 
-		std::vector<Peer> peers;
-		std::vector<std::pair<PeerId, InboundNetworkPacket>> inbox;
+		Vector<Peer> peers;
+		Vector<std::pair<PeerId, InboundNetworkPacket>> inbox;
 
-		std::vector<IListener*> listeners;
+		Vector<IListener*> listeners;
 
 		OutboundNetworkPacket makeOutbound(gsl::span<const gsl::byte> data, NetworkSessionMessageHeader header);
 		void doSendToAll(OutboundNetworkPacket packet, std::optional<PeerId> except);

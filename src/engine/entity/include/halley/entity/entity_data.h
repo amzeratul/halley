@@ -60,10 +60,10 @@ namespace Halley {
     	const UUID& getPrefabUUID() const { return prefabUUID; }
     	const UUID& getParentUUID() const { return parentUUID; }
     	
-    	const std::vector<EntityData>& getChildren() const { return children; }
-    	std::vector<EntityData>& getChildren() { return children; }
-    	const std::vector<std::pair<String, ConfigNode>>& getComponents() const { return components; }
-    	std::vector<std::pair<String, ConfigNode>>& getComponents() { return components; }
+    	const Vector<EntityData>& getChildren() const { return children; }
+    	Vector<EntityData>& getChildren() { return children; }
+    	const Vector<std::pair<String, ConfigNode>>& getComponents() const { return components; }
+    	Vector<std::pair<String, ConfigNode>>& getComponents() { return components; }
         bool hasComponent(const String& componentName) const;
 
   	    const EntityData* tryGetPrefabUUID(const UUID& uuid) const;
@@ -78,8 +78,8 @@ namespace Halley {
     	void setInstanceUUID(UUID instanceUUID);
     	void setPrefabUUID(UUID prefabUUID);
         void setParentUUID(UUID parentUUID);
-	   	void setChildren(std::vector<EntityData> children);
-    	void setComponents(std::vector<std::pair<String, ConfigNode>> components);
+	   	void setChildren(Vector<EntityData> children);
+    	void setComponents(Vector<std::pair<String, ConfigNode>> components);
 
     	void applyDelta(const EntityDataDelta& delta);
         static EntityData applyDelta(EntityData src, const EntityDataDelta& delta);
@@ -111,8 +111,8 @@ namespace Halley {
     	UUID instanceUUID;
     	UUID prefabUUID;
     	UUID parentUUID;
-    	std::vector<EntityData> children;
-    	std::vector<std::pair<String, ConfigNode>> components;
+    	Vector<EntityData> children;
+    	Vector<std::pair<String, ConfigNode>> components;
     	bool sceneRoot = false;
 
     	void addComponent(String key, ConfigNode data);

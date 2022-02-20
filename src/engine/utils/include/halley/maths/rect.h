@@ -342,7 +342,7 @@ namespace Halley {
 			}
 		}
 
-		static Rect2D getSpanningRect(const std::vector<Vector2D<T>>& points)
+		static Rect2D getSpanningRect(const Vector<Vector2D<T>>& points)
 		{
 			if (points.empty()) {
 				return Rect2D(Vector2f(), Vector2f());

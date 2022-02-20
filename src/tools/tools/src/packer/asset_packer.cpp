@@ -31,7 +31,7 @@ void AssetPackListing::addFile(AssetType type, const String& name, const AssetDa
 	entries.push_back(Entry{ type, name, entry.path, entry.meta });
 }
 
-const std::vector<AssetPackListing::Entry>& AssetPackListing::getEntries() const
+const Vector<AssetPackListing::Entry>& AssetPackListing::getEntries() const
 {
 	return entries;
 }
@@ -56,7 +56,7 @@ void AssetPackListing::sort()
 	std::sort(entries.begin(), entries.end());
 }
 
-void AssetPacker::pack(Project& project, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets, ProgressCallback progress)
+void AssetPacker::pack(Project& project, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets, ProgressCallback progress)
 {
 	const auto& platforms = project.getPlatforms();
 	const size_t n = platforms.size();
@@ -67,7 +67,7 @@ void AssetPacker::pack(Project& project, std::optional<std::set<String>> assetsT
 	}
 }
 
-void AssetPacker::packPlatform(Project& project, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets, const String& platform, ProgressCallback progress)
+void AssetPacker::packPlatform(Project& project, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets, const String& platform, ProgressCallback progress)
 {
 	const auto src = project.getUnpackedAssetsPath();
 	const auto dst = project.getPackedAssetsPath(platform);
@@ -83,7 +83,7 @@ void AssetPacker::packPlatform(Project& project, std::optional<std::set<String>>
 	generatePacks(packs, src, dst, std::move(progress));
 }
 
-std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, std::optional<std::set<String>> assetsToPack, const std::vector<String>& deletedAssets)
+std::map<String, AssetPackListing> AssetPacker::sortIntoPacks(const AssetPackManifest& manifest, const AssetDatabase& srcAssetDb, std::optional<std::set<String>> assetsToPack, const Vector<String>& deletedAssets)
 {
 	std::map<String, AssetPackListing> packs;
 	for (auto typeName: EnumNames<AssetType>()()) {
@@ -156,7 +156,7 @@ void AssetPacker::generatePacks(std::map<String, AssetPackListing> packs, const 
 		AssetPackListing* listing = nullptr;
 		Path dstPack;
 	};
-	std::vector<Entry> toPack;
+	Vector<Entry> toPack;
 	
 	for (auto& packListing: packs) {
 		if (packListing.first.isEmpty()) {

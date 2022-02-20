@@ -9,7 +9,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptWaitFor::getPinConfiguration(con
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptWaitFor::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptWaitFor::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Wait until ");

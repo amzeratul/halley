@@ -18,8 +18,8 @@ namespace Halley {
     	const String& getAssetPackManifest() const;
     	void setAssetPackManifest(String manifest);
 
-    	const std::vector<String>& getPlatforms() const;
-    	void setPlatforms(std::vector<String> platforms);
+    	const Vector<String>& getPlatforms() const;
+    	void setPlatforms(Vector<String> platforms);
 
         const String& getBinName() const;
         void setBinName(String binName);
@@ -38,7 +38,7 @@ namespace Halley {
         String binName;
     	bool importByExtension = false;
     	float defaultZoom = 1.0f;
-    	std::vector<String> platforms;
+    	Vector<String> platforms;
 
     	bool dirty = false;
 

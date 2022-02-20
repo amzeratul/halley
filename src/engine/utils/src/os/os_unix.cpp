@@ -69,7 +69,7 @@ int Halley::OSUnix::runCommand(String command, String cwd, ILoggerSink* sink)
 {
 	auto args = command.split(' ');
 	String cmd = args[0];
-	std::vector<char*> argsPtr(args.size());
+	Vector<char*> argsPtr(args.size());
 	for (size_t i = 1; i < args.size(); ++i) {
 		argsPtr[i - 1] = const_cast<char*>(args[i].c_str());
 	}
@@ -153,9 +153,9 @@ void Halley::OSUnix::createDirectories(const Path& path)
 	mkpath(path.string().c_str(), 0777);
 }
 
-std::vector<Path> Halley::OSUnix::enumerateDirectory(const Path& path)
+Vector<Path> Halley::OSUnix::enumerateDirectory(const Path& path)
 {
-	std::vector<Path> result;
+	Vector<Path> result;
 
 	DIR* d;
 	struct dirent* dir;

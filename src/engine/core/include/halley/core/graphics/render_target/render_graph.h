@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include <vector>
+#include "halley/data_structures/vector.h"
 
 #include "render_graph_pin_type.h"
 #include "halley/core/graphics/texture_descriptor.h"
@@ -75,7 +75,7 @@ namespace Halley {
 			std::function<void(Image&)> calllback;
 		};
 		
-		std::vector<std::unique_ptr<RenderGraphNode>> nodes;
+		Vector<std::unique_ptr<RenderGraphNode>> nodes;
 		std::map<String, RenderGraphNode*> nodeMap;
 		
 		std::map<String, Camera> cameras;

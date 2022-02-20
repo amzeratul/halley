@@ -152,7 +152,7 @@ namespace Halley {
 			if (!toReload.empty()) {
 				// Notify reloads
 				HALLEY_DEBUG_TRACE();
-				std::vector<StorageType*> reloadedEntities;
+				Vector<StorageType*> reloadedEntities;
 				for (auto& entity : entities) {
 					if (std::find(toReload.begin(), toReload.end(), entity.entityId) != toReload.end()) {
 						reloadedEntities.push_back(&entity);

@@ -55,7 +55,7 @@ namespace Halley
 	class BinPack
 	{
 	public:
-		static std::optional<Vector<BinPackResult>> pack(const std::vector<BinPackEntry>& entries, Vector2i binSize);
-		static std::optional<Vector<BinPackResult>> fastPack(const std::vector<BinPackEntry>& entries, Vector2i binSize);
+		static std::optional<Vector<BinPackResult>> pack(const Vector<BinPackEntry>& entries, Vector2i binSize);
+		static std::optional<Vector<BinPackResult>> fastPack(const Vector<BinPackEntry>& entries, Vector2i binSize);
 	};
 }

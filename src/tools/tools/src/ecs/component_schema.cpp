@@ -36,7 +36,7 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				
 				std::optional<Range<float>> range;
 				if (memberProperties["range"].IsDefined()) {
-					std::vector<float> vs;
+					Vector<float> vs;
 					for (auto& r: memberProperties["range"]) {
 						vs.push_back(r.as<float>());
 					}
@@ -49,7 +49,7 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 					throw Exception("serializable field is removed from ECS component definitions. Use canSave and canEdit instead.", HalleyExceptions::Entity);
 				}
 
-				std::vector<String> defaultValue;
+				Vector<String> defaultValue;
 				const auto& defNode = memberProperties["defaultValue"];
 				if (defNode.IsDefined()) {
 					if (defNode.IsSequence()) {

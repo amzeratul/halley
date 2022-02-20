@@ -2,7 +2,7 @@
 
 #include "network_message.h"
 #include <memory>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <map>
 #include "reliable_connection.h"
 #include <list>
@@ -17,7 +17,7 @@ namespace Halley
 	{
 		struct PendingPacket
 		{
-			std::vector<std::unique_ptr<NetworkMessage>> msgs;
+			Vector<std::unique_ptr<NetworkMessage>> msgs;
 			std::chrono::steady_clock::time_point timeSent;
 			size_t size;
 			unsigned short seq;
@@ -26,7 +26,7 @@ namespace Halley
 
 		struct Channel
 		{
-			std::vector<std::unique_ptr<NetworkMessage>> receiveQueue;
+			Vector<std::unique_ptr<NetworkMessage>> receiveQueue;
 			std::unique_ptr<NetworkMessage> lastAck;
 			unsigned short lastAckSeq = 0;
 			unsigned short lastSentSeq = 0;
@@ -34,7 +34,7 @@ namespace Halley
 			ChannelSettings settings;
 			bool initialized = false;
 
-			void getReadyMessages(std::vector<std::unique_ptr<NetworkMessage>>& out);
+			void getReadyMessages(Vector<std::unique_ptr<NetworkMessage>>& out);
 		};
 
 	public:
@@ -43,25 +43,25 @@ namespace Halley
 		
 		void setChannel(int channel, ChannelSettings settings) override;
 
-		std::vector<std::unique_ptr<NetworkMessage>> receiveAll() override;
+		Vector<std::unique_ptr<NetworkMessage>> receiveAll() override;
 
 		void enqueue(std::unique_ptr<NetworkMessage> msg, int channel) override;
 		void sendAll() override;
 
 	private:
 		std::shared_ptr<ReliableConnection> connection;
-		std::vector<Channel> channels;
+		Vector<Channel> channels;
 
 		std::list<std::unique_ptr<NetworkMessage>> pendingMsgs;
 		std::map<int, PendingPacket> pendingPackets;
 		int nextPacketId = 0;
 
 		void onPacketAcked(int tag) override;
-		void checkReSend(std::vector<ReliableSubPacket>& collect);
+		void checkReSend(Vector<ReliableSubPacket>& collect);
 
 		ReliableSubPacket createPacket();
-		ReliableSubPacket makeTaggedPacket(std::vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size, bool resends = false, unsigned short resendSeq = 0);
-		std::vector<gsl::byte> serializeMessages(const std::vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size) const;
+		ReliableSubPacket makeTaggedPacket(Vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size, bool resends = false, unsigned short resendSeq = 0);
+		Vector<gsl::byte> serializeMessages(const Vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size) const;
 
 		void receiveMessages();
 	};

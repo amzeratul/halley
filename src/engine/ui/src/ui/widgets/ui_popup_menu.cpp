@@ -6,7 +6,7 @@
 
 using namespace Halley;
 
-UIPopupMenu::UIPopupMenu(String id, UIStyle style, std::vector<UIPopupMenuItem> items)
+UIPopupMenu::UIPopupMenu(String id, UIStyle style, Vector<UIPopupMenuItem> items)
 	: UIWidget(std::move(id), {}, UISizer(UISizerType::Vertical, style.getFloat("gap")), style.getBorder("innerBorder"))
 	, style(style)
 	, items(std::move(items))

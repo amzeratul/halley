@@ -451,14 +451,14 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
 
 	const auto getTimeLabel = [&] (int64_t t) { return toString((t + 500) / 1000); };
 
-	std::vector<CurEventData> curEvents;
+	Vector<CurEventData> curEvents;
 	curEvents.reserve(eventHistory.size());
 	for (const auto& [k, v]: eventHistory) {
 		curEvents.emplace_back(CurEventData{ &k, v.getType(), v.getAverage(), v.getHighest(), v.getLowest(), v.getHighestEver(), v.getLowestEver() });
 	}
 	std::sort(curEvents.begin(), curEvents.end());
 
-	std::vector<ColourStringBuilder> columns;
+	Vector<ColourStringBuilder> columns;
 	columns.resize(systemLabels.size());
 
 	columns[0].append("Name:\n");

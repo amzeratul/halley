@@ -266,7 +266,7 @@ bool Material::isCompatibleWith(const Material& other) const
 	return true;
 }
 
-const std::vector<std::shared_ptr<const Texture>>& Material::getTextures() const
+const Vector<std::shared_ptr<const Texture>>& Material::getTextures() const
 {
 	return textures;
 }

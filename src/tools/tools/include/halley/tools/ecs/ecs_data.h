@@ -1,6 +1,6 @@
 #pragma once
 #include <gsl/span>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include "component_schema.h"
 #include "custom_type_schema.h"
 #include "halley/data_structures/hash_map.h"
@@ -25,7 +25,7 @@ namespace Halley {
 	
     class ECSData {
     public:
-		void loadSources(std::vector<CodegenSourceInfo> files);
+		void loadSources(Vector<CodegenSourceInfo> files);
 
 		const HashMap<String, ComponentSchema>& getComponents() const;
 		const HashMap<String, SystemSchema>& getSystems() const;

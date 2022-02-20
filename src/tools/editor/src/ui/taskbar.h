@@ -24,7 +24,7 @@ namespace Halley
 		Resources& resources;
 		TaskSet& taskSet;
 		const HalleyAPI& api;
-		std::vector<std::shared_ptr<TaskDisplay>> tasks;
+		Vector<std::shared_ptr<TaskDisplay>> tasks;
 
 		Sprite barSolid;
 		Sprite barFade;

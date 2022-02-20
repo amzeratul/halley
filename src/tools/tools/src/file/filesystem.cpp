@@ -150,9 +150,9 @@ Bytes FileSystem::readFile(const Path& path)
 	return result;
 }
 
-std::vector<Path> FileSystem::enumerateDirectory(const Path& dir)
+Vector<Path> FileSystem::enumerateDirectory(const Path& dir)
 {
-	std::vector<Path> result;
+	Vector<Path> result;
 	if (exists(dir)) {
 		using RDI = recursive_directory_iterator;
 		RDI end;

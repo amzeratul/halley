@@ -2,7 +2,7 @@
 
 #include <set>
 #include <functional>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <map>
 
 namespace Halley {
@@ -16,7 +16,7 @@ namespace Halley {
 	};
 
 	class GameConsole;
-	using GameConsoleCallback = std::function<String(std::vector<String>)>;
+	using GameConsoleCallback = std::function<String(Vector<String>)>;
 
     class GameConsole {
     public:
@@ -35,6 +35,6 @@ namespace Halley {
 		std::set<IGameConsoleListener*> listeners;
 		std::map<String, GameConsoleCallback> commands;
 
-		String onHelp(std::vector<String> args);
+		String onHelp(Vector<String> args);
     };
 }

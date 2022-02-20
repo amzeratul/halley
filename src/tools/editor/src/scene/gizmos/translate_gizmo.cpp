@@ -106,7 +106,7 @@ std::shared_ptr<UIWidget> TranslateGizmo::makeUI()
 	return ui;
 }
 
-std::vector<String> TranslateGizmo::getHighlightedComponents() const
+Vector<String> TranslateGizmo::getHighlightedComponents() const
 {
 	return { "Transform2D" };
 }
@@ -207,7 +207,7 @@ void TranslateGizmo::doMoveBy(Vector2f delta)
 	const auto& entities = getEntities();
 	const size_t n = entities.size();
 
-	std::vector<Vector2f> targetPos;
+	Vector<Vector2f> targetPos;
 	targetPos.resize(n);
 
 	for (size_t i = 0; i < n; ++i) {

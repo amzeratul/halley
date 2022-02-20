@@ -24,9 +24,9 @@
 using namespace Halley;
 
 
-std::vector<Vector2i> Line::generateLine(Vector2i p0, Vector2i p1)
+Vector<Vector2i> Line::generateLine(Vector2i p0, Vector2i p1)
 {
-	std::vector<Vector2i> result;
+	Vector<Vector2i> result;
 	result.reserve(std::max(std::abs(p0.x - p1.x), std::abs(p0.y - p1.y)) + 1);
 
 	doLine(p0, p1, [&] (Vector2i p)

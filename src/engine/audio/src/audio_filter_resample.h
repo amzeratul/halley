@@ -17,7 +17,7 @@ namespace Halley
 	private:
 		AudioBufferPool& pool;
 		std::shared_ptr<AudioSource> source;
-		std::vector<std::unique_ptr<AudioResampler>> resamplers;
+		Vector<std::unique_ptr<AudioResampler>> resamplers;
 		int fromHz;
 		int toHz;
 

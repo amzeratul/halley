@@ -68,7 +68,7 @@ namespace Halley {
 		bool isReadyToStart() const;
 		bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) const;
 
-		std::vector<Rect4i> getRemoteViewPorts() const;
+		Vector<Rect4i> getRemoteViewPorts() const;
 
 		bool isHost() override;
 		bool isRemote(ConstEntityRef entity) const override;
@@ -108,9 +108,9 @@ namespace Halley {
 		SerializationDictionary serializationDictionary;
 
 		std::shared_ptr<NetworkSession> session;
-		std::vector<EntityNetworkRemotePeer> peers;
+		Vector<EntityNetworkRemotePeer> peers;
 
-		std::vector<QueuedMessage> queuedPackets;
+		Vector<QueuedMessage> queuedPackets;
 
 		HashMap<int, Vector<EntityNetworkMessage>> outbox;
 

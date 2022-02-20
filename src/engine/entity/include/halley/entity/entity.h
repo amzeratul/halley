@@ -130,7 +130,7 @@ namespace Halley {
 		void refresh(MaskStorage& storage, ComponentDeleterTable& table);
 		void destroy();
 		
-		void sortChildrenByInstanceUUIDs(const std::vector<UUID>& uuids);
+		void sortChildrenByInstanceUUIDs(const Vector<UUID>& uuids);
 
 		bool isEmpty() const;
 
@@ -195,7 +195,7 @@ namespace Halley {
 		void removeComponentById(World& world, int id);
 		void removeAllComponents(World& world);
 		void deleteComponent(Component* component, int id, ComponentDeleterTable& table);
-		void keepOnlyComponentsWithIds(const std::vector<int>& ids, World& world);
+		void keepOnlyComponentsWithIds(const Vector<int>& ids, World& world);
 
 		void onReady();
 
@@ -204,7 +204,7 @@ namespace Halley {
 
 		Entity* getParent() const { return parent; }
 		void setParent(Entity* parent, bool propagate = true, size_t childIdx = -1);
-		const std::vector<Entity*>& getChildren() const { return children; }
+		const Vector<Entity*>& getChildren() const { return children; }
 		void addChild(Entity& child);
 		void detachChildren();
 		void markHierarchyDirty();
@@ -225,7 +225,7 @@ namespace Halley {
 	public:
 		class Iterator {
 		public:
-			Iterator(std::vector<Entity*>::const_iterator iter, World& world)
+			Iterator(Vector<Entity*>::const_iterator iter, World& world)
 				: iter(iter)
 				, world(world)
 			{}
@@ -249,11 +249,11 @@ namespace Halley {
 			EntityRef operator*() const;
 
 		private:
-			std::vector<Entity*>::const_iterator iter;
+			Vector<Entity*>::const_iterator iter;
 			World& world;
 		};
 		
-		EntityRefIterable(const std::vector<Entity*>& entities, World& world)
+		EntityRefIterable(const Vector<Entity*>& entities, World& world)
 			: entities(entities)
 			, world(world)
 		{}
@@ -269,7 +269,7 @@ namespace Halley {
 		}
 
 	private:
-		const std::vector<Entity*>& entities;
+		const Vector<Entity*>& entities;
 		World& world;
 	};
 
@@ -490,7 +490,7 @@ namespace Halley {
 			return entity->prefabUUID;
 		}
 		
-		void keepOnlyComponentsWithIds(const std::vector<int>& ids)
+		void keepOnlyComponentsWithIds(const Vector<int>& ids)
 		{
 			validate();
 			entity->keepOnlyComponentsWithIds(ids, *world);
@@ -528,7 +528,7 @@ namespace Halley {
 			entity->setParent(nullptr);
 		}
 
-		const std::vector<Entity*>& getRawChildren() const
+		const Vector<Entity*>& getRawChildren() const
 		{
 			validate();
 			return entity->getChildren();
@@ -627,13 +627,13 @@ namespace Halley {
 			return entity->components[idx];
 		}
 
-		std::vector<std::pair<int, Component*>>::iterator begin() const
+		Vector<std::pair<int, Component*>>::iterator begin() const
 		{
 			validate();
 			return entity->components.begin();
 		}
 
-		std::vector<std::pair<int, Component*>>::iterator end() const
+		Vector<std::pair<int, Component*>>::iterator end() const
 		{
 			validate();
 			return entity->components.begin() + entity->liveComponents;
@@ -660,7 +660,7 @@ namespace Halley {
 			return entity->reloaded;
 		}
 
-		void sortChildrenByInstanceUUIDs(const std::vector<UUID>& uuids)
+		void sortChildrenByInstanceUUIDs(const Vector<UUID>& uuids)
 		{
 			validate();
 			entity->sortChildrenByInstanceUUIDs(uuids);
@@ -808,7 +808,7 @@ namespace Halley {
 			return parent != nullptr ? ConstEntityRef(*parent, *world) : std::optional<ConstEntityRef>();
 		}
 
-		[[deprecated]] const std::vector<Entity*>& getRawChildren() const
+		[[deprecated]] const Vector<Entity*>& getRawChildren() const
 		{
 			return entity->getChildren();
 		}
@@ -835,13 +835,13 @@ namespace Halley {
 			return entity->components[idx];
 		}
 
-		std::vector<std::pair<int, Component*>>::const_iterator begin() const
+		Vector<std::pair<int, Component*>>::const_iterator begin() const
 		{
 			Expects(entity);
 			return entity->components.begin();
 		}
 
-		std::vector<std::pair<int, Component*>>::const_iterator end() const
+		Vector<std::pair<int, Component*>>::const_iterator end() const
 		{
 			Expects(entity);
 			return entity->components.begin() + entity->liveComponents;

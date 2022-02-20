@@ -49,22 +49,22 @@ void WavefrontReader::parseLine(const String& line)
 	}
 }
 
-void WavefrontReader::parseV(std::vector<String>& tokens)
+void WavefrontReader::parseV(Vector<String>& tokens)
 {
 	v.emplace_back(Vector3f(tokens.at(1).toFloat(), tokens.at(2).toFloat(), tokens.at(3).toFloat()));
 }
 
-void WavefrontReader::parseVN(std::vector<String>& tokens)
+void WavefrontReader::parseVN(Vector<String>& tokens)
 {
 	vn.emplace_back(Vector3f(tokens.at(1).toFloat(), tokens.at(2).toFloat(), tokens.at(3).toFloat()));
 }
 
-void WavefrontReader::parseVT(std::vector<String>& tokens)
+void WavefrontReader::parseVT(Vector<String>& tokens)
 {
 	vt.emplace_back(Vector3f(tokens.at(1).toFloat(), 1.0f - tokens.at(2).toFloat(), tokens.at(3).toFloat()));
 }
 
-void WavefrontReader::parseF(std::vector<String>& tokens)
+void WavefrontReader::parseF(Vector<String>& tokens)
 {
 	auto a = FaceVertex(tokens[1]);
 	auto b = FaceVertex(tokens[2]);

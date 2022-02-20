@@ -539,7 +539,7 @@ void UIWidget::clearBehaviours()
 	behaviours.clear();
 }
 
-const std::vector<std::shared_ptr<UIBehaviour>>& UIWidget::getBehaviours() const
+const Vector<std::shared_ptr<UIBehaviour>>& UIWidget::getBehaviours() const
 {
 	return behaviours;
 }
@@ -731,13 +731,13 @@ void UIWidget::setJoystickType(JoystickType joystickType)
 {
 }
 
-void UIWidget::setOnlyEnabledWithInputs(const std::vector<UIInputType>& uiInput)
+void UIWidget::setOnlyEnabledWithInputs(const Vector<UIInputType>& uiInput)
 {
 	onlyEnabledWithInputs = uiInput;
 	setInputType(UIInputType::Keyboard);
 }
 
-const std::vector<UIInputType>& UIWidget::getOnlyEnabledWithInput() const
+const Vector<UIInputType>& UIWidget::getOnlyEnabledWithInput() const
 {
 	return onlyEnabledWithInputs;
 }
@@ -771,7 +771,7 @@ bool UIWidget::hasStyle() const
 	return !styles.empty();
 }
 
-const std::vector<UIStyle>& UIWidget::getStyles() const
+const Vector<UIStyle>& UIWidget::getStyles() const
 {
 	return styles;
 }

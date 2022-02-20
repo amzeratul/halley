@@ -62,7 +62,7 @@ UIColourScheme::UIColourScheme(const ConfigNode& node, Resources& resources)
 	}
 	if (node.hasKey("backgroundParticles")) {
 		backgroundParticles = Particles(node["backgroundParticles"]["particles"], resources);
-		std::vector<Sprite> particleSprites;
+		Vector<Sprite> particleSprites;
 		for (const auto& spriteNode: node["backgroundParticles"]["sprites"].asSequence()) {
 			particleSprites.push_back(getSpriteFromConfigNode(spriteNode, resources));
 		}

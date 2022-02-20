@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <memory>
 #include "halley/text/halleystring.h"
 #include <set>
@@ -47,6 +47,6 @@ namespace Halley
 
 	private:
 		std::unique_ptr<NetworkService> service;
-		std::vector<std::shared_ptr<DevConServerConnection>> connections;
+		Vector<std::shared_ptr<DevConServerConnection>> connections;
 	};
 }

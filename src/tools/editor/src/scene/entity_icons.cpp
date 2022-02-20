@@ -57,7 +57,7 @@ const Sprite& EntityIcons::getInvalidEntityIcon(IEntityValidator::Severity sever
 	return severity == IEntityValidator::Severity::Error ? invalidEntityErrorIcon : invalidEntityWarningIcon;
 }
 
-const std::vector<EntityIcons::Entry>& EntityIcons::getEntries() const
+const Vector<EntityIcons::Entry>& EntityIcons::getEntries() const
 {
 	return entries;
 }

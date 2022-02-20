@@ -31,9 +31,9 @@ namespace Halley {
 
 		Sprite boundsSprite;
 		Sprite sizerSprite;
-		std::vector<Sprite> sizerSprites;
+		Vector<Sprite> sizerSprites;
 		Rect4f curRect;
-		std::map<UISizer*, std::vector<std::pair<Rect4f, bool>>> sizerRects;
+		std::map<UISizer*, Vector<std::pair<Rect4f, bool>>> sizerRects;
 		UISizer* curSizer = nullptr;
 
 		void updateCurWidget();

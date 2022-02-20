@@ -9,7 +9,7 @@
 
 using namespace Halley;
 
-UIOptionListMorpher::UIOptionListMorpher(String id, UIStyle dropdownStyle, UIStyle spinlistStyle, std::vector<LocalisedString> os, int defaultOption)
+UIOptionListMorpher::UIOptionListMorpher(String id, UIStyle dropdownStyle, UIStyle spinlistStyle, Vector<LocalisedString> os, int defaultOption)
 	: UIWidget(std::move(id), {})
 	, dropdownStyle(dropdownStyle)
 	, spinlistStyle(spinlistStyle)
@@ -82,12 +82,12 @@ void UIOptionListMorpher::setInputType(UIInputType uiInput) {
 	lastInputType = uiInput;
 }
 
-void UIOptionListMorpher::setOptions(const std::vector<LocalisedString> os, int defaultOption)
+void UIOptionListMorpher::setOptions(const Vector<LocalisedString> os, int defaultOption)
 {
 	setOptions({}, os, defaultOption);
 }
 
-void UIOptionListMorpher::setOptions(std::vector<String> oIds, const std::vector<LocalisedString>& os, int defaultOption)
+void UIOptionListMorpher::setOptions(Vector<String> oIds, const Vector<LocalisedString>& os, int defaultOption)
 {
 	makeChildren(os, defaultOption);
 
@@ -95,7 +95,7 @@ void UIOptionListMorpher::setOptions(std::vector<String> oIds, const std::vector
 	spinlist->setOptions(oIds, os, defaultOption);
 }
 
-void UIOptionListMorpher::setOptions(const I18N& i18n, const String& i18nPrefix, const std::vector<String>& optionIds, int defaultOption)
+void UIOptionListMorpher::setOptions(const I18N& i18n, const String& i18nPrefix, const Vector<String>& optionIds, int defaultOption)
 {
 	dropdown->setOptions(optionIds, i18n.getVector(i18nPrefix, optionIds), defaultOption);
 	spinlist->setOptions(optionIds, i18n.getVector(i18nPrefix, optionIds), defaultOption);
@@ -147,7 +147,7 @@ void UIOptionListMorpher::readFromDataBind()
 	}
 }
 
-void UIOptionListMorpher::makeChildren(const std::vector<LocalisedString>& os, int defaultOption) {
+void UIOptionListMorpher::makeChildren(const Vector<LocalisedString>& os, int defaultOption) {
 	if (dropdown) {
 		return;
 	}

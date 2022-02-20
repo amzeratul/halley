@@ -229,6 +229,6 @@ LocalisedString ChooseUIWidgetWindow::getItemLabel(const String& id, const Strin
 	return LocalisedString::fromUserString(label);
 }
 
-void ChooseUIWidgetWindow::sortItems(std::vector<std::pair<String, String>>& values)
+void ChooseUIWidgetWindow::sortItems(Vector<std::pair<String, String>>& values)
 {
 }

@@ -28,7 +28,7 @@ namespace Halley {
 		EntityData curEntityInstance;
 		bool isPrefab = false;
 
-		std::vector<IEntityValidator::Result> curResultSet;
+		Vector<IEntityValidator::Result> curResultSet;
 	};
 
 	class EntityValidatorListUI : public UIWidget {
@@ -39,12 +39,12 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 
 		void setList(std::weak_ptr<EntityList> entityList);
-		void setInvalidEntities(std::vector<std::pair<int, IEntityValidator::Severity>> entities);
+		void setInvalidEntities(Vector<std::pair<int, IEntityValidator::Severity>> entities);
 
 	private:
 		UIFactory& factory;
 		std::weak_ptr<EntityList> entityList;
-		std::vector<int> invalidEntities;
+		Vector<int> invalidEntities;
 		std::shared_ptr<UILabel> description;
 
 		void move(int delta);

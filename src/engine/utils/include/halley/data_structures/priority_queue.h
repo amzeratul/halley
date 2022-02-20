@@ -1,5 +1,5 @@
 #include <algorithm>
-#include <vector>
+#include "halley/data_structures/vector.h"
 
 namespace Halley {
     template <typename T, typename Comparator>
@@ -46,7 +46,7 @@ namespace Halley {
         }
 
     private:
-        std::vector<T> heap;
+        Vector<T> heap;
         Comparator comparator;
     };
 }

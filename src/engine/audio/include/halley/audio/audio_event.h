@@ -32,7 +32,7 @@ namespace Halley
 		constexpr static AssetType getAssetType() { return AssetType::AudioEvent; }
 
 	private:
-		std::vector<std::unique_ptr<IAudioEventAction>> actions;
+		Vector<std::unique_ptr<IAudioEventAction>> actions;
 		void loadDependencies(Resources& resources) const;
 	};
 
@@ -78,8 +78,8 @@ namespace Halley
 
 	private:
 		AudioEvent& event;
-		std::vector<String> clips;
-		std::vector<std::shared_ptr<const AudioClip>> clipData;
+		Vector<String> clips;
+		Vector<std::shared_ptr<const AudioClip>> clipData;
 		String group;
 		Range<float> pitch;
 		Range<float> volume;

@@ -44,7 +44,7 @@ namespace Halley {
 
 	class UIPopupMenu : public UIWidget {
 	public:
-		UIPopupMenu(String id, UIStyle style, std::vector<UIPopupMenuItem> items);
+		UIPopupMenu(String id, UIStyle style, Vector<UIPopupMenuItem> items);
 
 		void update(Time t, bool moved) override;
 		
@@ -58,7 +58,7 @@ namespace Halley {
 		UIStyle style;
 		UIInputButtons inputButtons;
 		
-		std::vector<UIPopupMenuItem> items;
+		Vector<UIPopupMenuItem> items;
 		std::shared_ptr<UIList> itemList;
 
 		bool destroyOnUpdate = false;

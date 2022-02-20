@@ -8,7 +8,7 @@ ChannelSettings::ChannelSettings(bool reliable, bool ordered, bool keepLastSent)
 	, keepLastSent(keepLastSent)
 {}
 
-void MessageQueueUDP::Channel::getReadyMessages(std::vector<std::unique_ptr<NetworkMessage>>& out)
+void MessageQueueUDP::Channel::getReadyMessages(Vector<std::unique_ptr<NetworkMessage>>& out)
 {
 	if (settings.ordered) {
 		if (settings.reliable) {
@@ -169,13 +169,13 @@ void MessageQueueUDP::receiveMessages()
 	}
 }
 
-std::vector<std::unique_ptr<NetworkMessage>> MessageQueueUDP::receiveAll()
+Vector<std::unique_ptr<NetworkMessage>> MessageQueueUDP::receiveAll()
 {
 	if (connection->getStatus() == ConnectionStatus::Connected) {
 		receiveMessages();
 	}
 
-	std::vector<std::unique_ptr<NetworkMessage>> result;
+	Vector<std::unique_ptr<NetworkMessage>> result;
 	for (auto& c: channels) {
 		c.getReadyMessages(result);
 	}
@@ -201,7 +201,7 @@ void MessageQueueUDP::enqueue(std::unique_ptr<NetworkMessage> msg, int channelNu
 void MessageQueueUDP::sendAll()
 {
 	//int firstTag = nextPacketId;
-	std::vector<ReliableSubPacket> toSend;
+	Vector<ReliableSubPacket> toSend;
 
 	// Add packets which need to be re-sent
 	checkReSend(toSend);
@@ -239,7 +239,7 @@ void MessageQueueUDP::onPacketAcked(int tag)
 	}
 }
 
-void MessageQueueUDP::checkReSend(std::vector<ReliableSubPacket>& collect)
+void MessageQueueUDP::checkReSend(Vector<ReliableSubPacket>& collect)
 {
 	auto next = pendingPackets.begin();
 	for (auto iter = pendingPackets.begin(); iter != pendingPackets.end(); iter = next) {
@@ -260,7 +260,7 @@ void MessageQueueUDP::checkReSend(std::vector<ReliableSubPacket>& collect)
 
 ReliableSubPacket MessageQueueUDP::createPacket()
 {
-	std::vector<std::unique_ptr<NetworkMessage>> sentMsgs;
+	Vector<std::unique_ptr<NetworkMessage>> sentMsgs;
 	size_t maxSize = 1200;
 	size_t size = 0;
 	bool first = true;
@@ -303,7 +303,7 @@ ReliableSubPacket MessageQueueUDP::createPacket()
 	return makeTaggedPacket(sentMsgs, size);
 }
 
-ReliableSubPacket MessageQueueUDP::makeTaggedPacket(std::vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size, bool resends, unsigned short resendSeq)
+ReliableSubPacket MessageQueueUDP::makeTaggedPacket(Vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size, bool resends, unsigned short resendSeq)
 {
 	bool reliable = !msgs.empty() && channels[msgs[0]->channel].settings.reliable;
 
@@ -323,9 +323,9 @@ ReliableSubPacket MessageQueueUDP::makeTaggedPacket(std::vector<std::unique_ptr<
 	return result;
 }
 
-std::vector<gsl::byte> MessageQueueUDP::serializeMessages(const std::vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size) const
+Vector<gsl::byte> MessageQueueUDP::serializeMessages(const Vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size) const
 {
-	std::vector<gsl::byte> result(size);
+	Vector<gsl::byte> result(size);
 	size_t pos = 0;
 	
 	for (auto& msg: msgs) {

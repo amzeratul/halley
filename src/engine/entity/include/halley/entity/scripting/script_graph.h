@@ -25,7 +25,7 @@ namespace Halley {
 		};
 		
 		struct Pin {
-			std::vector<PinConnection> connections;
+			Vector<PinConnection> connections;
 
 			Pin() = default;
 			Pin(const ConfigNode& node, const EntitySerializationContext& context);
@@ -43,8 +43,8 @@ namespace Halley {
 
 		const String& getType() const { return type; }
 
-		std::vector<Pin>& getPins() { return pins; }
-		const std::vector<Pin>& getPins() const { return pins; }
+		Vector<Pin>& getPins() { return pins; }
+		const Vector<Pin>& getPins() const { return pins; }
 		Pin& getPin(size_t idx)
 		{
 			if (idx >= pins.size()) {
@@ -80,7 +80,7 @@ namespace Halley {
 		Vector2f position;
 		String type;
 		ConfigNode settings;
-		std::vector<Pin> pins;
+		Vector<Pin> pins;
 		uint32_t id = 0;
 		mutable const IScriptNodeType* nodeType = nullptr;
 	};
@@ -94,8 +94,8 @@ namespace Halley {
 
 		void makeBaseGraph();
 
-		const std::vector<ScriptGraphNode>& getNodes() const { return nodes; }
-		std::vector<ScriptGraphNode>& getNodes() { return nodes; }
+		const Vector<ScriptGraphNode>& getNodes() const { return nodes; }
+		Vector<ScriptGraphNode>& getNodes() { return nodes; }
 
 		OptionalLite<uint32_t> getStartNode() const;
 		uint64_t getHash() const;
@@ -109,7 +109,7 @@ namespace Halley {
 		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 
 	private:
-		std::vector<ScriptGraphNode> nodes;
+		Vector<ScriptGraphNode> nodes;
 		uint64_t hash = 0;
 
 		mutable uint64_t lastAssignTypeHash = 1;

@@ -101,7 +101,7 @@ void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter) // static
 	size_t spriteSize = sizeof(SpriteVertexAttrib);
 	char buffer[4096];
 	char* vertexData;
-	std::vector<char> vertices;
+	Vector<char> vertices;
 	const size_t vertexDataSize = sprites.size() * spriteSize;
 	if (vertexDataSize <= 4096) {
 		vertexData = buffer;

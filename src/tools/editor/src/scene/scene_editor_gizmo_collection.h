@@ -14,7 +14,7 @@ namespace Halley {
 		
 		bool update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) override;
 		void draw(Painter& painter, const ISceneEditor& sceneEditor) override;
-		void setSelectedEntities(std::vector<EntityRef> entities, std::vector<EntityData*> entityDatas) override;
+		void setSelectedEntities(Vector<EntityRef> entities, Vector<EntityData*> entityDatas) override;
 		bool canBoxSelectEntities() override;
 		void refreshEntity() override;
 		void onEntityModified(const UUID& uuid, const EntityData& oldData, const EntityData& newData);
@@ -37,7 +37,7 @@ namespace Halley {
 		ISceneEditorWindow& sceneEditorWindow;
 		SnapRules snapRules;
 
-		std::vector<Tool> tools;
+		Vector<Tool> tools;
 		std::map<String, GizmoFactory> gizmoFactories;
 		
 		std::unique_ptr<SceneEditorGizmo> selectedBoundsGizmo;
@@ -47,7 +47,7 @@ namespace Halley {
 		String currentTool;
 		UIList* uiList = nullptr;
 		
-		std::vector<EntityRef> selectedEntities;
-		std::vector<EntityData*> entityDatas;
+		Vector<EntityRef> selectedEntities;
+		Vector<EntityData*> entityDatas;
 	};
 }

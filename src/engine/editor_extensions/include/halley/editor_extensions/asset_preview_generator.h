@@ -29,7 +29,7 @@ namespace Halley {
 		String id;
 		LocalisedString name;
 		Sprite icon;
-		std::vector<String> prefixes;
+		Vector<String> prefixes;
 		bool showName = false;
 
 		bool matches(const String& id) const
@@ -49,7 +49,7 @@ namespace Halley {
 		virtual ~AssetPreviewGenerator() = default;
 
 		Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size);
-		virtual std::vector<AssetCategoryFilter> getPrefabCategoryFilters() const;
+		virtual Vector<AssetCategoryFilter> getPrefabCategoryFilters() const;
 
 		Rect4f getSpriteTreeBounds(const EntityRef& e) const;
 		std::optional<Rect4f> getSpriteBounds(const EntityRef& e) const;

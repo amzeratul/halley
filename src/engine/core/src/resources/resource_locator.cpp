@@ -103,9 +103,9 @@ std::unique_ptr<ResourceDataStream> ResourceLocator::getStream(const String& ass
 	return std::unique_ptr<ResourceDataStream>(ptr);
 }
 
-std::vector<String> ResourceLocator::enumerate(const AssetType type)
+Vector<String> ResourceLocator::enumerate(const AssetType type)
 {
-	std::vector<String> result;
+	Vector<String> result;
 	for (auto& l: locators) {
 		for (auto& r: l->getAssetDatabase().enumerate(type)) {
 			result.push_back(std::move(r));
@@ -160,7 +160,7 @@ void ResourceLocator::removePack(const Path& path)
 	}
 }
 
-std::vector<String> ResourceLocator::getAssetsFromPack(const Path& path, const String& encryptionKey) const
+Vector<String> ResourceLocator::getAssetsFromPack(const Path& path, const String& encryptionKey) const
 {
 	auto dataReader = system.getDataReader(path.string());
 	if (dataReader) {

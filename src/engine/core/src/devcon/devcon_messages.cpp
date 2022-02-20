@@ -63,7 +63,7 @@ void ReloadAssetsMsg::serialize(Serializer& s) const
 	s << ids;
 }
 
-std::vector<String> ReloadAssetsMsg::getIds() const
+Vector<String> ReloadAssetsMsg::getIds() const
 {
 	return ids;
 }

@@ -24,7 +24,7 @@ UINumericValidator::UINumericValidator(bool allowNegative, bool allowFloat)
 
 StringUTF32 UINumericValidator::onTextChanged(StringUTF32 src)
 {
-	std::vector<utf32type> result(src.length());
+	Vector<utf32type> result(src.length());
 	size_t j = 0;
 	for (size_t i = 0; i < result.size(); ++i) {
 		if ((src[i] >= '0' && src[i] <= '9') || (i == 0 && src[i] == '-' && allowNegative) || (src[i] == '.' && allowFloat)) {

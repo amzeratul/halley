@@ -16,7 +16,7 @@
 
 using namespace Halley;
 
-static std::optional<Vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, float scale, float borderSuperSampled, const std::vector<int>& characters)
+static std::optional<Vector<BinPackResult>> tryPacking(FontFace& font, float fontSize, Vector2i packSize, float scale, float borderSuperSampled, const Vector<int>& characters)
 {
 	font.setSize(fontSize);
 
@@ -74,7 +74,7 @@ FontGenerator::FontGenerator(bool verbose, std::function<bool(float, String)> pr
 {
 }
 
-FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<const gsl::byte> fontFile, FontSizeInfo sizeInfo, float radius, int superSample, std::vector<int> characters) {
+FontGeneratorResult FontGenerator::generateFont(const Metadata& meta, gsl::span<const gsl::byte> fontFile, FontSizeInfo sizeInfo, float radius, int superSample, Vector<int> characters) {
 	std::sort(characters.begin(), characters.end());
 
 	const float scale = 1.0f / superSample;
@@ -224,7 +224,7 @@ std::unique_ptr<Font> FontGenerator::generateFontMapBinary(const Metadata& meta,
 	const float smoothRadius = radius;
 	const int padding = lround(radius);
 
-	std::vector<String> fallback;
+	Vector<String> fallback;
 	for (auto& name: meta.getString("fallback", "").split(",")) {
 		auto trimmedName = name.trimBoth();
 		if (!trimmedName.isEmpty()) {
@@ -264,7 +264,7 @@ FontGeneratorResult::FontGeneratorResult() = default;
 FontGeneratorResult::FontGeneratorResult(FontGeneratorResult&& other) noexcept = default;
 FontGeneratorResult::~FontGeneratorResult() = default;
 
-std::vector<Path> FontGeneratorResult::write(Path dir, bool verbose) const
+Vector<Path> FontGeneratorResult::write(Path dir, bool verbose) const
 {
 	Path fileName = font->getName();
 	Path imgName = fileName.replaceExtension(".png");

@@ -1,7 +1,7 @@
 #include "widgets/ui_multi_image.h"
 using namespace Halley;
 
-UIMultiImage::UIMultiImage(const String& id, Vector2f size, std::vector<Sprite> sprites, std::vector<Vector2f> offsets)
+UIMultiImage::UIMultiImage(const String& id, Vector2f size, Vector<Sprite> sprites, Vector<Vector2f> offsets)
 	: UIWidget(id, size)
 	, sprites(std::move(sprites))
 	, offsets(std::move(offsets))
@@ -21,7 +21,7 @@ const Sprite& UIMultiImage::getSprite(size_t index) const
 	return sprites.at(index);
 }
 
-const std::vector<Sprite>& UIMultiImage::getSprites() const
+const Vector<Sprite>& UIMultiImage::getSprites() const
 {
 	return sprites;
 }
@@ -32,7 +32,7 @@ void UIMultiImage::setSprite(size_t index, Sprite sprite)
 	dirty = true;
 }
 
-void UIMultiImage::setSprites(std::vector<Sprite> sprites)
+void UIMultiImage::setSprites(Vector<Sprite> sprites)
 {
 	this->sprites = std::move(sprites);
 	if (this->sprites.size() != offsets.size()) {
@@ -46,7 +46,7 @@ Vector2f UIMultiImage::getOffset(size_t index) const
 	return offsets.at(index);
 }
 
-const std::vector<Vector2f>& UIMultiImage::getOffsets() const
+const Vector<Vector2f>& UIMultiImage::getOffsets() const
 {
 	return offsets;
 }
@@ -57,7 +57,7 @@ void UIMultiImage::setOffset(size_t index, Vector2f offset)
 	dirty = true;
 }
 
-void UIMultiImage::setOffsets(std::vector<Vector2f> offsets)
+void UIMultiImage::setOffsets(Vector<Vector2f> offsets)
 {
 	this->offsets = std::move(offsets);
 	if (this->sprites.size() != offsets.size()) {

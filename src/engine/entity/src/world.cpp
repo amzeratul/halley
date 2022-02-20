@@ -312,9 +312,9 @@ size_t World::numEntities() const
 	return entities.size();
 }
 
-std::vector<EntityRef> World::getEntities()
+Vector<EntityRef> World::getEntities()
 {
-	std::vector<EntityRef> result;
+	Vector<EntityRef> result;
 	result.reserve(entities.size());
 	for (auto& e: entities) {
 		result.emplace_back(*e, *this);
@@ -322,9 +322,9 @@ std::vector<EntityRef> World::getEntities()
 	return result;
 }
 
-std::vector<ConstEntityRef> World::getEntities() const
+Vector<ConstEntityRef> World::getEntities() const
 {
-	std::vector<ConstEntityRef> result;
+	Vector<ConstEntityRef> result;
 	result.reserve(entities.size());
 	for (auto& e : entities) {
 		result.emplace_back(*e, *this);
@@ -332,9 +332,9 @@ std::vector<ConstEntityRef> World::getEntities() const
 	return result;
 }
 
-std::vector<EntityRef> World::getTopLevelEntities()
+Vector<EntityRef> World::getTopLevelEntities()
 {
-	std::vector<EntityRef> result;
+	Vector<EntityRef> result;
 	result.reserve(entities.size());
 	for (auto& e : entities) {
 		if (e->getParent() == nullptr) {
@@ -344,9 +344,9 @@ std::vector<EntityRef> World::getTopLevelEntities()
 	return result;
 }
 
-std::vector<ConstEntityRef> World::getTopLevelEntities() const
+Vector<ConstEntityRef> World::getTopLevelEntities() const
 {
-	std::vector<ConstEntityRef> result;
+	Vector<ConstEntityRef> result;
 	result.reserve(entities.size());
 	for (auto& e : entities) {
 		if (e->getParent() == nullptr) {
@@ -514,12 +514,12 @@ void World::updateEntities()
 	HALLEY_DEBUG_TRACE();
 	size_t nEntities = entities.size();
 
-	std::vector<size_t> entitiesRemoved;
+	Vector<size_t> entitiesRemoved;
 
 	struct FamilyTodo {
-		std::vector<std::pair<FamilyMaskType, Entity*>> toAdd;
-		std::vector<std::pair<FamilyMaskType, Entity*>> toRemove;
-		std::vector<std::pair<FamilyMaskType, Entity*>> toReload;
+		Vector<std::pair<FamilyMaskType, Entity*>> toAdd;
+		Vector<std::pair<FamilyMaskType, Entity*>> toRemove;
+		Vector<std::pair<FamilyMaskType, Entity*>> toReload;
 	};
 	std::map<FamilyMaskType, FamilyTodo> pending;
 
@@ -674,13 +674,13 @@ void World::onAddFamily(Family& family) noexcept
 	familyCache.clear();
 }
 
-const std::vector<Family*>& World::getFamiliesFor(const FamilyMaskType& mask)
+const Vector<Family*>& World::getFamiliesFor(const FamilyMaskType& mask)
 {
 	auto i = familyCache.find(mask);
 	if (i != familyCache.end()) {
 		return i->second;
 	} else {
-		std::vector<Family*> result;
+		Vector<Family*> result;
 		for (auto& iter : families) {
 			auto& family = *iter;
 			FamilyMaskType famMask = family.inclusionMask;

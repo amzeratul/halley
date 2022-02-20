@@ -3,7 +3,7 @@ using namespace Halley;
 
 NavigationPath::NavigationPath() = default;
 
-NavigationPath::NavigationPath(const NavigationQuery& query, std::vector<Vector2f> path, std::vector<RegionNode> regions)
+NavigationPath::NavigationPath(const NavigationQuery& query, Vector<Vector2f> path, Vector<RegionNode> regions)
 	: path(std::move(path))
 	, regions(std::move(regions))
 	, query(query)

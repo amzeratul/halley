@@ -9,24 +9,24 @@ namespace Halley
 	class ProjectLoader
 	{
 	public:
-		ProjectLoader(const HalleyStatics& statics, const Path& halleyPath, std::vector<String> disabledPlatforms = {});
+		ProjectLoader(const HalleyStatics& statics, const Path& halleyPath, Vector<String> disabledPlatforms = {});
 
-		void setDisabledPlatforms(std::vector<String> platforms);
+		void setDisabledPlatforms(Vector<String> platforms);
 		
 		std::unique_ptr<Project> loadProject(const Path& path) const;
 		void selectPlugins(Project& project) const;
-		const std::vector<String>& getKnownPlatforms() const;
+		const Vector<String>& getKnownPlatforms() const;
 
 	private:
 		const HalleyStatics& statics;
 		Path halleyPath;
-		std::vector<String> disabledPlatforms;
+		Vector<String> disabledPlatforms;
 
-		std::vector<String> knownPlatforms;
-		std::vector<HalleyPluginPtr> plugins;
+		Vector<String> knownPlatforms;
+		Vector<HalleyPluginPtr> plugins;
 
 		void loadPlugins();
 		HalleyPluginPtr loadPlugin(const Path& path) const;
-		std::vector<HalleyPluginPtr> getPlugins(std::vector<String> platforms) const;
+		Vector<HalleyPluginPtr> getPlugins(Vector<String> platforms) const;
 	};
 }

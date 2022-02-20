@@ -54,7 +54,7 @@ void EntityList::makeUI()
 	setHandle(UIEventType::TreeItemReparented, [=] (const UIEvent& event)
 	{
 		const auto& src = event.getConfigData().asSequence();
-		std::vector<EntityChangeOperation> changes;
+		Vector<EntityChangeOperation> changes;
 		changes.reserve(src.size());
 		for (const auto& e: src) {
 			changes.emplace_back(EntityChangeOperation{ {}, e["itemId"].asString(), e["parentId"].asString(), e["childIdx"].asInt() });
@@ -166,7 +166,7 @@ void EntityList::onEntityModified(const String& id, const EntityData& node, bool
 
 void EntityList::onEntitiesAdded(gsl::span<const EntityChangeOperation> changes)
 {
-	std::vector<String> ids;
+	Vector<String> ids;
 
 	for (const auto& change: changes) {
 		addEntityTree(change.parent, change.childIndex, change.data->asEntityData());
@@ -201,7 +201,7 @@ void EntityList::select(const String& id, UIList::SelectionMode mode)
 
 void EntityList::select(gsl::span<const String> ids, UIList::SelectionMode mode)
 {
-	auto incoming = std::vector<String>(ids.begin(), ids.end());
+	auto incoming = Vector<String>(ids.begin(), ids.end());
 	auto current = getCurrentSelections();
 	std::sort(incoming.begin(), incoming.end());
 	std::sort(current.begin(), current.end());
@@ -226,7 +226,7 @@ String EntityList::getCurrentSelection() const
 	return list->getSelectedOptionId();
 }
 
-std::vector<String> EntityList::getCurrentSelections() const
+Vector<String> EntityList::getCurrentSelections() const
 {
 	return list->getSelectedOptionIds();
 }
@@ -241,9 +241,9 @@ UITreeList& EntityList::getList()
 	return *list;
 }
 
-void EntityList::openContextMenu(std::vector<String> entityIds)
+void EntityList::openContextMenu(Vector<String> entityIds)
 {
-	auto menuOptions = std::vector<UIPopupMenuItem>();
+	auto menuOptions = Vector<UIPopupMenuItem>();
 	auto makeEntry = [&] (const String& id, const String& text, const String& toolTip, const String& icon, bool enabled = true)
 	{
 		auto iconSprite = Sprite().setImage(factory.getResources(), "entity_icons/" + (icon.isEmpty() ? "empty.png" : icon));
@@ -337,7 +337,7 @@ bool EntityList::markValid(const UUID& uuid, IEntityValidator::Severity severity
 
 void EntityList::notifyValidatorList()
 {
-	std::vector<std::pair<int, IEntityValidator::Severity>> result;
+	Vector<std::pair<int, IEntityValidator::Severity>> result;
 	result.reserve(invalidEntities.size());
 	validationSeverity = IEntityValidator::Severity::None;
 

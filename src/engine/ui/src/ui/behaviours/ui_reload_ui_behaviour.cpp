@@ -64,7 +64,7 @@ void UIReloadUIBehaviour::setupUIStyleObservers()
 	getStyleObservers(*widget, *stylesheet, uiStyleObservers);
 }
 
-void UIReloadUIBehaviour::getStyleObservers(const UIWidget& widget, const UIStyleSheet& stylesheet, std::vector<std::pair<String, int>>& styleObservers) const
+void UIReloadUIBehaviour::getStyleObservers(const UIWidget& widget, const UIStyleSheet& stylesheet, Vector<std::pair<String, int>>& styleObservers) const
 {
 	if(widget.hasStyle()) {
 		for(const auto& style : widget.getStyles()) {

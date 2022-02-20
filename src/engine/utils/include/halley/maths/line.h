@@ -69,7 +69,7 @@ namespace Halley {
 			return (getClosestPoint(point) - point).length() < epsilon;
 		}
 
-		static std::vector<Vector2i> generateLine(Vector2i p0, Vector2i p1);
+		static Vector<Vector2i> generateLine(Vector2i p0, Vector2i p1);
 		static void doLine(Vector2i p0, Vector2i p1, std::function<void(Vector2i)> callback);
 	};
 

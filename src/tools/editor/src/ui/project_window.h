@@ -98,7 +98,7 @@ namespace Halley {
 
 		std::unique_ptr<TaskSet> tasks;
 
-		std::vector<IEditorCustomTools::ToolData> customTools;
+		Vector<IEditorCustomTools::ToolData> customTools;
     	bool waitingToLoadCustomUI = true;
     	bool hasAssets = false;
     	bool hasDLL = false;

@@ -155,9 +155,9 @@ void UIWidgetEditor::populateFillBox(UIWidget& root, ConfigNode& node)
 
 	using Entry = UIFactoryWidgetProperties::Entry;
 	std::array<Entry, 3> entries = {
-		Entry{ "Fill", "fill", "Halley::UISizerAlignFlags::Type", std::vector<String>{"fill"} },
-		Entry{ "Proportion", "proportion", "int", std::vector<String>{"0"} },
-		Entry{ "Border", "border", "Halley::Vector4f", std::vector<String>{"0", "0", "0", "0"}}
+		Entry{ "Fill", "fill", "Halley::UISizerAlignFlags::Type", Vector<String>{"fill"} },
+		Entry{ "Proportion", "proportion", "int", Vector<String>{"0"} },
+		Entry{ "Border", "border", "Halley::Vector4f", Vector<String>{"0", "0", "0", "0"}}
 	};
 	populateBox(root, node, entries);
 }
@@ -168,10 +168,10 @@ void UIWidgetEditor::populateSpacerBox(UIWidget& root, ConfigNode& node, ConfigN
 
 	using Entry = UIFactoryWidgetProperties::Entry;
 	std::array<Entry, 1> sizeEntry = {
-		Entry{ "Size", "size", "float", std::vector<String>{"0"}},
+		Entry{ "Size", "size", "float", Vector<String>{"0"}},
 	};
 	std::array<Entry, 1> proportionEntry = {
-		Entry{ "Proportion", "proportion", "int", std::vector<String>{"0"} },
+		Entry{ "Proportion", "proportion", "int", Vector<String>{"0"} },
 	};
 	populateBox(root, node, sizeEntry);
 	populateBox(root, rootNode, proportionEntry);
@@ -184,10 +184,10 @@ void UIWidgetEditor::populateSizerBox(UIWidget& root, ConfigNode& node)
 
 	using Entry = UIFactoryWidgetProperties::Entry;
 	std::array<Entry, 4> entries = {
-		Entry{ "Type", "type", "Halley::UISizerType", std::vector<String>{"horizontal"} },
-		Entry{ "Gap", "gap", "float", std::vector<String>{"1"} },
-		Entry{ "Columns", "columns", "int", std::vector<String>{"1"}},
-		Entry{ "Column Proportions", "columnProportions", "std::vector<int>", std::vector<String>{}}
+		Entry{ "Type", "type", "Halley::UISizerType", Vector<String>{"horizontal"} },
+		Entry{ "Gap", "gap", "float", Vector<String>{"1"} },
+		Entry{ "Columns", "columns", "int", Vector<String>{"1"}},
+		Entry{ "Column Proportions", "columnProportions", "Vector<int>", Vector<String>{}}
 	};
 	populateBox(root, node, entries);
 }

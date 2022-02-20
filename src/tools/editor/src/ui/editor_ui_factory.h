@@ -10,7 +10,7 @@ namespace Halley {
     	Sprite makeImportAssetTypeIcon(ImportAssetType type) const;
     	Sprite makeDirectoryIcon(bool up = false) const;
 
-    	std::vector<String> getColourSchemeNames() const;
+    	Vector<String> getColourSchemeNames() const;
     	void setColourScheme(const String& name);
 
     private:
@@ -32,6 +32,6 @@ namespace Halley {
 
     	void setColourSchemeByAssetId(const String& assetId);
         
-    	std::vector<std::pair<String, String>> colourSchemes;
+    	Vector<std::pair<String, String>> colourSchemes;
     };
 }

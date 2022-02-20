@@ -1,7 +1,7 @@
 #pragma once
 #include <thread>
 #include <atomic>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include "halley/core/api/halley_api_internal.h"
 #include <map>
 
@@ -45,7 +45,7 @@ namespace Halley {
 		void setMasterVolume(float volume = 1.0f) override;
 		void setGroupVolume(const String& groupName, float volume = 1.0f) override;
 
-	    void setOutputChannels(std::vector<AudioChannelData> audioChannelData) override;
+	    void setOutputChannels(Vector<AudioChannelData> audioChannelData) override;
 	    void setListener(AudioListenerData listener) override;
 
 		void setGlobalVariable(const String& variable, float value) override;
@@ -71,11 +71,11 @@ namespace Halley {
 		int lastDeviceNumber = 0;
 
 		RingBuffer<std::function<void()>> commandQueue;
-		std::vector<std::function<void()>> inbox;
+		Vector<std::function<void()>> inbox;
     	
 		RingBuffer<String> exceptions;
-		std::vector<uint32_t> playingSounds;
-		RingBuffer<std::vector<uint32_t>> finishedSoundsQueue;
+		Vector<uint32_t> playingSounds;
+		RingBuffer<Vector<uint32_t>> finishedSoundsQueue;
 
 		std::map<int, AudioHandle> musicTracks;
 

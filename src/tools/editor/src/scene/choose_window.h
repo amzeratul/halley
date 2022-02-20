@@ -12,7 +12,7 @@ namespace Halley {
 
     class AddComponentWindow : public ChooseAssetWindow {
     public:
-        AddComponentWindow(UIFactory& factory, const std::vector<String>& componentList, Callback callback);
+        AddComponentWindow(UIFactory& factory, const Vector<String>& componentList, Callback callback);
     };
 
 	class ChooseAssetTypeWindow : public ChooseAssetWindow {
@@ -23,7 +23,7 @@ namespace Halley {
         std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
 		LocalisedString getItemLabel(const String& id, const String& name, bool hasSearch) override;
 		std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch) override;
-		void sortItems(std::vector<std::pair<String, String>>& items) override;
+		void sortItems(Vector<std::pair<String, String>>& items) override;
 
 		LocalisedString getPreviewItemLabel(const String& id, const String& name, bool hasSearch);
         std::shared_ptr<UIImage> makePreviewIcon(const String& id, bool hasSearch);

@@ -41,12 +41,12 @@ namespace Halley
 		TextRenderer& setClip();
 		TextRenderer& setSmoothness(float smoothness);
 		TextRenderer& setPixelOffset(Vector2f offset);
-		TextRenderer& setColourOverride(const std::vector<ColourOverride>& colOverride);
+		TextRenderer& setColourOverride(const Vector<ColourOverride>& colOverride);
 		TextRenderer& setLineSpacing(float spacing);
 
 		TextRenderer clone() const;
 
-		void generateSprites(std::vector<Sprite>& sprites) const;
+		void generateSprites(Vector<Sprite>& sprites) const;
 		void draw(Painter& painter, const std::optional<Rect4f>& extClip = {}) const;
 
 		void setSpriteFilter(SpriteFilter f);
@@ -94,7 +94,7 @@ namespace Halley
 		Colour outlineColour;
 		std::optional<Rect4f> clip;
 
-		std::vector<ColourOverride> colourOverrides;
+		Vector<ColourOverride> colourOverrides;
 
 		mutable Vector<Sprite> spritesCache;
 		mutable bool materialDirty = true;
@@ -113,12 +113,12 @@ namespace Halley
 		explicit ColourStringBuilder(bool replaceEmptyWithQuotes = false);
 		void append(std::string_view text, std::optional<Colour4f> col = {});
 
-		std::pair<String, std::vector<ColourOverride>> moveResults();
+		std::pair<String, Vector<ColourOverride>> moveResults();
 
 	private:
 		bool replaceEmptyWithQuotes;
-		std::vector<String> strings;
-		std::vector<ColourOverride> colours;
+		Vector<String> strings;
+		Vector<ColourOverride> colours;
 		size_t len = 0;
 	};
 

@@ -32,11 +32,11 @@ TaskBase ExecutionQueue::getNext()
 	return value;
 }
 
-std::vector<TaskBase> ExecutionQueue::getAll()
+Vector<TaskBase> ExecutionQueue::getAll()
 {
 	std::unique_lock<std::mutex> lock(mutex);
 	hasTasks.store(false);
-	std::vector<TaskBase> tasks(queue.begin(), queue.end());
+	Vector<TaskBase> tasks(queue.begin(), queue.end());
 	queue.clear();
 	return tasks;
 }

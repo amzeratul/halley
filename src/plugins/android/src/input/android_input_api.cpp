@@ -56,13 +56,13 @@ std::shared_ptr<InputDevice> AndroidInputAPI::getMouse(int id) const
     return mouse;
 }
 
-std::vector<std::shared_ptr<InputTouch>> AndroidInputAPI::getNewTouchEvents()
+Vector<std::shared_ptr<InputTouch>> AndroidInputAPI::getNewTouchEvents()
 {
     // TODO
     return {};
 }
 
-std::vector<std::shared_ptr<InputTouch>> AndroidInputAPI::getTouchEvents()
+Vector<std::shared_ptr<InputTouch>> AndroidInputAPI::getTouchEvents()
 {
     // TODO
     return {};

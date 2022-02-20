@@ -34,8 +34,8 @@ namespace Halley {
 
 		int getSelectedOption() const;
 		String getSelectedOptionId() const;
-		std::vector<int> getSelectedOptions() const;
-		std::vector<String> getSelectedOptionIds() const;
+		Vector<int> getSelectedOptions() const;
+		Vector<String> getSelectedOptionIds() const;
 
 		size_t getCount() const;
 
@@ -116,7 +116,7 @@ namespace Halley {
 		void reassignIds();
 		void resetSelectionIfInvalid();
 
-		std::vector<std::shared_ptr<UIListItem>> items;
+		Vector<std::shared_ptr<UIListItem>> items;
 		int curOption = -1;
 		int curHover = -1;
 

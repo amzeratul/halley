@@ -1,4 +1,4 @@
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <list>
 #include "halley/net/connection/network_packet.h"
 #include "asio_udp_network_service.h"
@@ -54,7 +54,7 @@ void AsioUDPNetworkService::update(Time t)
 	NetworkServiceWithStats::update(t);
 	
 	// Remove closed connections
-	std::vector<short> toErase;
+	Vector<short> toErase;
 	auto& active = activeConnections;
 	for (auto& conn: active) {
 		if (conn.second->getStatus() == ConnectionStatus::Closing) {

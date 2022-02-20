@@ -17,10 +17,10 @@ Bytes AndroidSaveData::getData(const String& path)
     return Halley::Bytes();
 }
 
-std::vector<String> AndroidSaveData::enumerate(const String &root)
+Vector<String> AndroidSaveData::enumerate(const String &root)
 {
     // TODO
-    return std::vector<String>();
+    return Vector<String>();
 }
 
 void AndroidSaveData::setData(const String &path, const Bytes &data, bool commit)

@@ -16,7 +16,7 @@ FuzzyTextMatcher::Score FuzzyTextMatcher::Score::advance(int jumpLen, int sectio
 	return result;
 }
 
-void FuzzyTextMatcher::Score::makeMatchPositions(const std::vector<int>& breadcrumbs)
+void FuzzyTextMatcher::Score::makeMatchPositions(const Vector<int>& breadcrumbs)
 {
 	int last = -2;
 	for (auto pos: breadcrumbs) {
@@ -80,7 +80,7 @@ FuzzyTextMatcher::FuzzyTextMatcher(bool caseSensitive, std::optional<size_t> res
 {
 }
 
-void FuzzyTextMatcher::addStrings(std::vector<String> strs)
+void FuzzyTextMatcher::addStrings(Vector<String> strs)
 {
 	strings.reserve(strings.size() + strs.size());
 	for (auto& str: strs) {
@@ -98,11 +98,11 @@ void FuzzyTextMatcher::clear()
 	strings.clear();
 }
 
-std::vector<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const String& rawQuery) const
+Vector<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const String& rawQuery) const
 {
 	const StringUTF32 query = caseSensitive ? rawQuery.getUTF32() : rawQuery.asciiLower().getUTF32();
 	
-	std::vector<Result> results;
+	Vector<Result> results;
 
 	for (const auto& str: strings) {
 		auto result = match(str.string, str.id, query);
@@ -122,12 +122,12 @@ std::vector<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const String& rawQ
 
 class FuzzyMatchState {
 public:
-	std::vector<int> sectionMap;
-	std::vector<int> sectionLengths;
-	std::vector<int> breadcrumb;
+	Vector<int> sectionMap;
+	Vector<int> sectionLengths;
+	Vector<int> breadcrumb;
 };
 
-static FuzzyTextMatcher::Score findBestScore(const std::vector<std::vector<int16_t>>& indices, int idx, std::optional<int16_t> lastPos, FuzzyTextMatcher::Score score, FuzzyMatchState& state)
+static FuzzyTextMatcher::Score findBestScore(const Vector<Vector<int16_t>>& indices, int idx, std::optional<int16_t> lastPos, FuzzyTextMatcher::Score score, FuzzyMatchState& state)
 {
 	if (idx == -1) {
 		// Terminate
@@ -161,7 +161,7 @@ static FuzzyTextMatcher::Score findBestScore(const std::vector<std::vector<int16
 	return bestScore.value();
 }
 
-static FuzzyTextMatcher::Score findBestScore(const std::vector<std::vector<int16_t>>& indices, FuzzyMatchState state)
+static FuzzyTextMatcher::Score findBestScore(const Vector<Vector<int16_t>>& indices, FuzzyMatchState state)
 {
 	return findBestScore(indices, static_cast<int>(indices.size()) - 1, {}, FuzzyTextMatcher::Score(), state);
 }
@@ -200,7 +200,7 @@ std::optional<FuzzyTextMatcher::Result> FuzzyTextMatcher::match(const String& or
 	}
 	StringUTF32 str = caseSensitive ? origStr.getUTF32() : origStr.asciiLower().getUTF32();
 	
-	std::vector<std::vector<int16_t>> indices;
+	Vector<Vector<int16_t>> indices;
 	
 	size_t maxDepth = 1; // maxDepth is 1 more than the number of characters found so far, and represents how far into the query we can look
 

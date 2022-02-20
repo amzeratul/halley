@@ -24,7 +24,7 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	Bytes encodedData;
 	const Bytes* fileData = &rawData;
 
-	std::vector<std::vector<float>> samples;
+	Vector<Vector<float>> samples;
 	int numChannels = 0;
 	int sampleRate = 0;
 	bool needsEncoding = false;
@@ -54,7 +54,7 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	if (needsResampling) {
 		// Resample
 		Logger::logWarning(asset.assetId + " requires resampling from " + toString(sampleRate) + " to 48000 Hz.");
-		Concurrent::foreach(std::begin(samples), std::end(samples), [&] (std::vector<float>& s) {
+		Concurrent::foreach(std::begin(samples), std::end(samples), [&] (Vector<float>& s) {
 			s = resampleChannel(sampleRate, 48000, s);
 		});
 		sampleRate = 48000;
@@ -121,7 +121,7 @@ static void outputPacket(Bytes& dst, ogg_packet& packet, ogg_stream_state& os, b
 	}
 }
 
-Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const std::vector<float>> src)
+Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const Vector<float>> src)
 {
 	Bytes result;
 	int ret = 0;
@@ -233,10 +233,10 @@ Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const
 	return result;
 }
 
-std::vector<float> AudioImporter::resampleChannel(int from, int to, gsl::span<const float> src)
+Vector<float> AudioImporter::resampleChannel(int from, int to, gsl::span<const float> src)
 {
 	AudioResampler resampler(from, to, 1, 1.0f);
-	std::vector<float> dst(resampler.numOutputSamples(src.size()) + 1024);
+	Vector<float> dst(resampler.numOutputSamples(src.size()) + 1024);
 	auto result = resampler.resampleInterleaved(src, dst);
 	if (result.nRead != src.size()) {
 		throw Exception("Only read " + toString(result.nRead) + " samples, expected " + toString(src.size()), HalleyExceptions::Tools);

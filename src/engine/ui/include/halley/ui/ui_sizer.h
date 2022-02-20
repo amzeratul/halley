@@ -127,8 +127,8 @@ namespace Halley {
 		void clear();
 		bool isActive() const override;
 
-		void setColumnProportions(const std::vector<float>& values);
-		void setRowProportions(const std::vector<float>& values);
+		void setColumnProportions(const Vector<float>& values);
+		void setRowProportions(const Vector<float>& values);
 		void setEvenColumns();
 
 		UISizerType getType() const;
@@ -149,12 +149,12 @@ namespace Halley {
 
 	private:
 		struct GridProportions {
-			std::vector<float> columnProportions;
-			std::vector<float> rowProportions;
+			Vector<float> columnProportions;
+			Vector<float> rowProportions;
 			int nColumns = 0;
 		};
 
-		std::vector<UISizerEntry> entries;
+		Vector<UISizerEntry> entries;
 		std::unique_ptr<GridProportions> gridProportions;
 
 		UISizerType type = UISizerType::Undefined;
@@ -173,7 +173,7 @@ namespace Halley {
 		Vector2f computeMinimumSizeBoxFree() const;
 		void setRectFree(Rect4f rect, IUIElementListener* listener);
 
-		void computeGridSizes(std::vector<float>& cols, std::vector<float>& rows) const;
+		void computeGridSizes(Vector<float>& cols, Vector<float>& rows) const;
 		Vector2f computeMinimumSizeGrid() const;
 		void setRectGrid(Rect4f rect, IUIElementListener* listener);
 		float getColumnProportion(int column) const;

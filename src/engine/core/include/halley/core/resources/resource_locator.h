@@ -49,7 +49,7 @@ namespace Halley {
 		explicit ResourceLocator(SystemAPI& system);
 		void addFileSystem(const Path& path);
 		void addPack(const Path& path, const String& encryptionKey = "", bool preLoad = false, bool allowFailure = false, std::optional<int> priority = {});
-		std::vector<String> getAssetsFromPack(const Path& path, const String& encryptionKey = "") const;
+		Vector<String> getAssetsFromPack(const Path& path, const String& encryptionKey = "") const;
 		void removePack(const Path& path);
 
 		const Metadata* getMetaData(const String& resource, AssetType type) const override;
@@ -60,7 +60,7 @@ namespace Halley {
 		void purge(const String& asset, AssetType type);
 		void purgeAll();
 
-		std::vector<String> enumerate(AssetType type);
+		Vector<String> enumerate(AssetType type);
 		bool exists(const String& asset, AssetType type);
 
 		size_t getLocatorCount() const;

@@ -92,7 +92,7 @@ void Entity::deleteComponent(Component* component, int id, ComponentDeleterTable
 	PoolPool::getPool(deleter->getSize())->free(component);
 }
 
-void Entity::keepOnlyComponentsWithIds(const std::vector<int>& ids, World& world)
+void Entity::keepOnlyComponentsWithIds(const Vector<int>& ids, World& world)
 {
 	for (uint8_t i = 0; i < liveComponents; ++i) {
 		if (std::find(ids.begin(), ids.end(), components[i].first) == ids.end()) {
@@ -246,7 +246,7 @@ void Entity::destroy()
 	doDestroy(true);
 }
 
-void Entity::sortChildrenByInstanceUUIDs(const std::vector<UUID>& uuids)
+void Entity::sortChildrenByInstanceUUIDs(const Vector<UUID>& uuids)
 {
 	const size_t nChildren = children.size();
 

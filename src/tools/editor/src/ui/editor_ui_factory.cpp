@@ -152,9 +152,9 @@ void EditorUIFactory::loadColourSchemes()
 	}
 }
 
-std::vector<String> EditorUIFactory::getColourSchemeNames() const
+Vector<String> EditorUIFactory::getColourSchemeNames() const
 {
-	std::vector<String> result;
+	Vector<String> result;
 	for (const auto& scheme: colourSchemes) {
 		result.push_back(scheme.second);
 	}

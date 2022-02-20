@@ -1,9 +1,9 @@
 #include "script_music.h"
 using namespace Halley;
 
-std::vector<IScriptNodeType::SettingType> ScriptPlayMusic::getSettingTypes() const
+Vector<IScriptNodeType::SettingType> ScriptPlayMusic::getSettingTypes() const
 {
-	return { SettingType{ "music", "Halley::String", std::vector<String>{""} } };
+	return { SettingType{ "music", "Halley::String", Vector<String>{""} } };
 }
 
 gsl::span<const IScriptNodeType::PinType> ScriptPlayMusic::getPinConfiguration(const ScriptGraphNode& node) const
@@ -14,7 +14,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptPlayMusic::getPinConfiguration(c
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptPlayMusic::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptPlayMusic::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Play music ");
@@ -38,7 +38,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptStopMusic::getPinConfiguration(c
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptStopMusic::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptStopMusic::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Stop playing music.");

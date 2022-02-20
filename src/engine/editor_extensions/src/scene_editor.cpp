@@ -162,7 +162,7 @@ void SceneEditor::spawnPending()
 	world->spawnPending();
 }
 
-std::vector<std::unique_ptr<IComponentEditorFieldFactory>> SceneEditor::getComponentEditorFieldFactories()
+Vector<std::unique_ptr<IComponentEditorFieldFactory>> SceneEditor::getComponentEditorFieldFactories()
 {
 	return {};
 }
@@ -217,7 +217,7 @@ void SceneEditor::drawOverlay(Painter& painter, Rect4f view)
 {
 	const Vector2f drawPos = view.getBottomLeft() + Vector2f(10, -10);
 	String drawStr = "Zoom: " + toString(camera.getZoom()) + "x";
-	std::vector<ColourOverride> colours;
+	Vector<ColourOverride> colours;
 
 	if (mousePos) {
 		const auto worldOffset = getWorldOffset();
@@ -252,9 +252,9 @@ void SceneEditor::drawOverlay(Painter& painter, Rect4f view)
 		.draw(painter);
 }
 
-std::vector<EntityId> SceneEditor::createCamera()
+Vector<EntityId> SceneEditor::createCamera()
 {
-	return std::vector<EntityId>({
+	return Vector<EntityId>({
 		getWorld().createEntity("editorCamera")
 			.addComponent(Transform2DComponent(Vector2f(0, 0)))
 			.addComponent(CameraComponent(1.0f, "main"))
@@ -262,11 +262,11 @@ std::vector<EntityId> SceneEditor::createCamera()
 	});
 }
 
-void SceneEditor::onEntitiesSelected(std::vector<EntityRef> entities)
+void SceneEditor::onEntitiesSelected(Vector<EntityRef> entities)
 {
 }
 
-void SceneEditor::setEntityFocus(std::vector<EntityId> entityIds)
+void SceneEditor::setEntityFocus(Vector<EntityId> entityIds)
 {
 }
 
@@ -303,7 +303,7 @@ void SceneEditor::updateEntityFocused()
 	if (targetFocusedEntity != focusedEntity) {
 		focusedEntity = targetFocusedEntity;
 		
-		std::vector<EntityId> selectedIds;
+		Vector<EntityId> selectedIds;
 		if (focusedEntity.isValid()) {
 			addEntityIdToList(selectedIds, focusedEntity);
 		}
@@ -311,7 +311,7 @@ void SceneEditor::updateEntityFocused()
 	}
 }
 
-void SceneEditor::addEntityIdToList(std::vector<EntityId>& dst, EntityRef entity)
+void SceneEditor::addEntityIdToList(Vector<EntityId>& dst, EntityRef entity)
 {
 	dst.push_back(entity.getEntityId());
 	if (entity.getPrefab()) {
@@ -341,7 +341,7 @@ std::optional<Vector2f> SceneEditor::getWorldOffset() const
 	return {};
 }
 
-const std::vector<EntityId>& SceneEditor::getCameraIds() const
+const Vector<EntityId>& SceneEditor::getCameraIds() const
 {
 	return cameraEntityIds;
 }
@@ -426,7 +426,7 @@ void SceneEditor::setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizm
 	gizmoCollection.generateList(toolList);
 }
 
-void SceneEditor::setSelectedEntities(std::vector<UUID> uuids, std::vector<EntityData*> entityDatas)
+void SceneEditor::setSelectedEntities(Vector<UUID> uuids, Vector<EntityData*> entityDatas)
 {
 	Expects(uuids.size() == entityDatas.size());
 	
@@ -476,9 +476,9 @@ std::shared_ptr<ScriptNodeTypeCollection> SceneEditor::getScriptNodeTypes()
 	return std::make_shared<ScriptNodeTypeCollection>();
 }
 
-std::vector<UIPopupMenuItem> SceneEditor::getSceneContextMenu(const Vector2f& mousePos) const
+Vector<UIPopupMenuItem> SceneEditor::getSceneContextMenu(const Vector2f& mousePos) const
 {
-	std::vector<UIPopupMenuItem> result;
+	Vector<UIPopupMenuItem> result;
 
 	const auto entities = getRootEntitiesAt(mousePos, true);
 	for (const auto& e: entities) {
@@ -557,9 +557,9 @@ float SceneEditor::getSpriteDepth(EntityRef& e, Rect4f rect) const
 	}
 }
 
-std::vector<EntityRef> SceneEditor::getEntitiesAt(Rect4f area, bool allowUnselectable) const
+Vector<EntityRef> SceneEditor::getEntitiesAt(Rect4f area, bool allowUnselectable) const
 {
-	std::vector<std::pair<EntityRef, float>> temp;
+	Vector<std::pair<EntityRef, float>> temp;
 	
 	for (auto& e: world->getEntities()) {
 		if ((allowUnselectable || e.isSelectable()) && doesAreaOverlapSprite(e, area)) {
@@ -570,7 +570,7 @@ std::vector<EntityRef> SceneEditor::getEntitiesAt(Rect4f area, bool allowUnselec
 
 	std::sort(temp.begin(), temp.end(), [] (const auto& a, const auto& b) { return a.second > b.second; });
 
-	std::vector<EntityRef> result;
+	Vector<EntityRef> result;
 	result.reserve(temp.size());
 	for (auto& e: temp) {
 		if (e.first.isValid()) {
@@ -580,16 +580,16 @@ std::vector<EntityRef> SceneEditor::getEntitiesAt(Rect4f area, bool allowUnselec
 	return result;
 }
 
-std::vector<EntityRef> SceneEditor::getRootEntitiesAt(Vector2f point, bool allowUnselectable) const
+Vector<EntityRef> SceneEditor::getRootEntitiesAt(Vector2f point, bool allowUnselectable) const
 {
 	return getRootEntitiesAt(Rect4f(point, point), allowUnselectable);
 }
 
-std::vector<EntityRef> SceneEditor::getRootEntitiesAt(Rect4f area, bool allowUnselectable) const
+Vector<EntityRef> SceneEditor::getRootEntitiesAt(Rect4f area, bool allowUnselectable) const
 {
 	const auto entities = getEntitiesAt(area, allowUnselectable);
 
-	std::vector<EntityRef> result;
+	Vector<EntityRef> result;
 	for (const auto& e: entities) {
 		EntityRef curResult = e;
 		for (EntityRef parent = curResult.getParent(); parent.isValid(); parent = parent.getParent()) {
@@ -628,7 +628,7 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 		return;
 	}
 
-	output.newSelection = std::vector<UUID>();
+	output.newSelection = Vector<UUID>();
 	output.selectionMode = input.ctrlHeld ? UIList::SelectionMode::CtrlSelect : UIList::SelectionMode::Normal;
 	if (const auto bestEntity = getRootEntityAt(input.mousePos.value(), false); bestEntity.isValid()) {
 		output.newSelection->push_back(bestEntity.getInstanceUUID());
@@ -650,7 +650,7 @@ void SceneEditor::onStartSelectionBox()
 void SceneEditor::onSelectionBox(const SceneEditorInputState& input, SceneEditorOutputState& output)
 {
 	const auto& entities = getRootEntitiesAt(*input.selectionBox, false);
-	std::vector<UUID> results;
+	Vector<UUID> results;
 
 	if (input.shiftHeld || input.altHeld) {
 		results = selBoxStartSelectedEntities;

@@ -3,7 +3,7 @@
 #include <mutex>
 #include <atomic>
 #include <list>
-#include <vector>
+#include "halley/data_structures/vector.h"
 
 #include "halley/data_structures/vector.h"
 #include "halley/text/halleystring.h"
@@ -42,8 +42,8 @@ namespace Halley
 		bool hasError() const;
 
 		size_t getNumMessages() const;
-		std::vector<std::pair<LoggerLevel, String>> copyMessagesHead(size_t max, std::optional<LoggerLevel> filter = {}) const;
-		std::vector<std::pair<LoggerLevel, String>> copyMessagesTail(size_t max, std::optional<LoggerLevel> filter = {}) const;
+		Vector<std::pair<LoggerLevel, String>> copyMessagesHead(size_t max, std::optional<LoggerLevel> filter = {}) const;
+		Vector<std::pair<LoggerLevel, String>> copyMessagesTail(size_t max, std::optional<LoggerLevel> filter = {}) const;
 
 		bool hasPendingTasks() const;
 		void addPendingTask(std::unique_ptr<Task> task);

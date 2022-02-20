@@ -33,12 +33,12 @@ namespace Halley {
 		class Action {
 		public:
 			Type type;
-			std::vector<EntityChangeOperation> patches;
+			Vector<EntityChangeOperation> patches;
 			bool clearModified = false;
 
 			Action() = default;
 			Action(Type type, EntityDataDelta delta, String entityId, String parent = "", int childIndex = -1);
-			Action(Type type, std::vector<EntityChangeOperation> patches);
+			Action(Type type, Vector<EntityChangeOperation> patches);
 		};
 
 		struct ActionPair {
@@ -53,13 +53,13 @@ namespace Halley {
 			bool arePatchesCompatible(const EntityChangeOperation& a, const EntityChangeOperation& b, Type type) const;
 		};
 
-		std::vector<std::unique_ptr<ActionPair>> stack;
+		Vector<std::unique_ptr<ActionPair>> stack;
 		size_t stackPos = 0;
 		const size_t maxSize;
 		bool accepting;
 
 		void addToStack(Action forward, Action back, bool wasModified);
 		void runAction(const Action& action, SceneEditorWindow& sceneEditorWindow);
-		void sortPatches(std::vector<EntityChangeOperation>& patches);
+		void sortPatches(Vector<EntityChangeOperation>& patches);
 	};
 }

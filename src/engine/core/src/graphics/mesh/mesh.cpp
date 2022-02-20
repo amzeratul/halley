@@ -61,7 +61,7 @@ void Mesh::setVertices(size_t num, Bytes vertexData)
 	this->vertexData = std::move(vertexData);
 }
 
-void Mesh::setIndices(std::vector<IndexType> indices)
+void Mesh::setIndices(Vector<IndexType> indices)
 {
 	this->indices = std::move(indices);
 }
@@ -71,7 +71,7 @@ void Mesh::setMaterialName(String name)
 	this->materialName = std::move(name);
 }
 
-void Mesh::setTextureNames(std::vector<String> textureNames)
+void Mesh::setTextureNames(Vector<String> textureNames)
 {
 	this->textureNames = std::move(textureNames);
 }

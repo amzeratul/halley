@@ -194,9 +194,9 @@ void SceneEditorCanvas::notifyOutputState()
 	auto& fields = outputState.fieldsChanged;
 	if (!fields.empty()) {
 		const auto n = fields.size();
-		std::vector<String> ids;
-		std::vector<const EntityData*> oldDatas;
-		std::vector<const EntityData*> newDatas;
+		Vector<String> ids;
+		Vector<const EntityData*> oldDatas;
+		Vector<const EntityData*> newDatas;
 		ids.reserve(n);
 		oldDatas.reserve(n);
 		newDatas.reserve(n);
@@ -214,7 +214,7 @@ void SceneEditorCanvas::notifyOutputState()
 	}
 
 	if (outputState.newSelection) {
-		std::vector<String> ids;
+		Vector<String> ids;
 		ids.reserve(outputState.newSelection->size());
 		for (auto& uuid: outputState.newSelection.value()) {
 			ids.push_back(uuid.toString());

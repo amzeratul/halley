@@ -101,7 +101,7 @@ void Codegen::writeFiles(Path dir, const CodeGenResult& files, Stats& stats)
 	}
 }
 
-std::vector<Path> Codegen::generateCode(const ECSData& data, Path directory)
+Vector<Path> Codegen::generateCode(const ECSData& data, Path directory)
 {
 	auto components = data.getComponents();
 	auto systems = data.getSystems();
@@ -166,7 +166,7 @@ std::vector<Path> Codegen::generateCode(const ECSData& data, Path directory)
 		utime(cmakeLists.string().c_str(), nullptr);
 	}
 
-	std::vector<Path> out;
+	Vector<Path> out;
 	for (auto& f : stats.files) {
 		out.push_back(FileSystem::getRelative(f, directory));
 	}

@@ -59,11 +59,11 @@ namespace Halley
 		void initVideo() const;
 		void deInitVideo();
 		
-		std::vector<std::shared_ptr<SDLWindow>> windows;
+		Vector<std::shared_ptr<SDLWindow>> windows;
 		mutable bool videoInit = false;
 		std::map<SaveDataType, Path> saveDir;
 		std::shared_ptr<IClipboard> clipboard;
 		std::optional<String> saveCryptKey;
-		std::vector<std::function<void()>> globalHotkeyCallbacks;
+		Vector<std::function<void()>> globalHotkeyCallbacks;
 	};
 }

@@ -24,9 +24,9 @@ int VSProjectTool::run(Vector<std::string> args)
 	}
 }
 
-int VSProjectTool::copyFiles(const std::vector<std::string>& args)
+int VSProjectTool::copyFiles(const Vector<std::string>& args)
 {
-	std::vector<String> input;
+	Vector<String> input;
 	String output;
 
 	enum class Mode {

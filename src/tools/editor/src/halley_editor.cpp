@@ -90,7 +90,7 @@ void HalleyEditor::init(const Environment& environment, const Vector<String>& ar
 	parseArguments(args);
 }
 
-void HalleyEditor::parseArguments(const std::vector<String>& args)
+void HalleyEditor::parseArguments(const Vector<String>& args)
 {
 	gotProjectPath = false;
 

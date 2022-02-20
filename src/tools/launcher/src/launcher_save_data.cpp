@@ -6,12 +6,12 @@ LauncherSaveData::LauncherSaveData(std::shared_ptr<ISaveData> saveData)
 {	
 }
 
-std::vector<Path> LauncherSaveData::getProjectPaths() const
+Vector<Path> LauncherSaveData::getProjectPaths() const
 {
 	return {};
 }
 
-void LauncherSaveData::setProjectPaths(std::vector<Path> paths)
+void LauncherSaveData::setProjectPaths(Vector<Path> paths)
 {}
 
 void LauncherSaveData::save()

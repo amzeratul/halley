@@ -17,14 +17,14 @@ namespace Halley
 
 		using Callback = std::function<void(ButtonType)>;
 
-		UIConfirmationPopup(UIFactory& factory, String title, String message, std::vector<ButtonType> buttons, Callback callback);
+		UIConfirmationPopup(UIFactory& factory, String title, String message, Vector<ButtonType> buttons, Callback callback);
 
 		void onMakeUI() override;
 
 	private:
 		String title;
 		String message;
-		std::vector<ButtonType> buttons;
+		Vector<ButtonType> buttons;
 		Callback callback;
 	};
 

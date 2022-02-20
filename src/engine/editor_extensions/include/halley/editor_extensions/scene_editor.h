@@ -29,7 +29,7 @@ namespace Halley {
 		Resources& getResources() const override;
 		void spawnPending() override;
 
-    	const std::vector<EntityId>& getCameraIds() const override;
+    	const Vector<EntityId>& getCameraIds() const override;
 		void dragCamera(Vector2f amount) override;
 		void moveCamera(Vector2f pos) override;
     	bool loadCameraPos() override;
@@ -37,13 +37,13 @@ namespace Halley {
 
     	void setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizmoCollection) override;
 
-    	void setSelectedEntities(std::vector<UUID> uuids, std::vector<EntityData*> datas) override;
+    	void setSelectedEntities(Vector<UUID> uuids, Vector<EntityData*> datas) override;
     	void setEntityHighlightedOnList(const UUID& id) override;
 
 		void showEntity(const UUID& id) override;
 		void onToolSet(String& tool, String& componentName, String& fieldName) override;
     	
-		std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() override;
+		Vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() override;
 		std::shared_ptr<UIWidget> makeCustomUI() override;
 
 		void onSceneLoaded(Prefab& scene) override;
@@ -59,7 +59,7 @@ namespace Halley {
 
 		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() override;
 
-		std::vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const override;
+		Vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const override;
     	void onSceneContextMenuSelection(const String& id) override;
     	void onSceneContextMenuHighlight(const String& id) override;
 
@@ -87,19 +87,19 @@ namespace Halley {
 
     	virtual void drawOverlay(Painter& painter, Rect4f view);
 
-    	virtual std::vector<EntityId> createCamera();
+    	virtual Vector<EntityId> createCamera();
 
-    	virtual void onEntitiesSelected(std::vector<EntityRef> entityIds);
-    	virtual void setEntityFocus(std::vector<EntityId> entityIds);
+    	virtual void onEntitiesSelected(Vector<EntityRef> entityIds);
+    	virtual void setEntityFocus(Vector<EntityId> entityIds);
 		void cycleHighlight(int delta) override;
 
 		virtual std::optional<Vector2f> getWorldOffset() const;
 		std::unique_ptr<World> doCreateWorld(const String& stageName) const;
 
-    	virtual std::vector<EntityRef> getEntitiesAt(Rect4f area, bool allowUnselectable) const;
+    	virtual Vector<EntityRef> getEntitiesAt(Rect4f area, bool allowUnselectable) const;
     	EntityRef getRootEntityAt(Vector2f point, bool allowUnselectable) const;
-		std::vector<EntityRef> getRootEntitiesAt(Vector2f point, bool allowUnselectable) const;
-    	std::vector<EntityRef> getRootEntitiesAt(Rect4f area, bool allowUnselectable) const;
+		Vector<EntityRef> getRootEntitiesAt(Vector2f point, bool allowUnselectable) const;
+    	Vector<EntityRef> getRootEntitiesAt(Rect4f area, bool allowUnselectable) const;
        	virtual float getSpriteDepth(EntityRef& e, Rect4f area) const;
 
 	private:
@@ -109,9 +109,9 @@ namespace Halley {
 
     	std::unique_ptr<World> world;
 
-		std::vector<EntityId> cameraEntityIds;
+		Vector<EntityId> cameraEntityIds;
     	
-		std::vector<EntityRef> selectedEntities;
+		Vector<EntityRef> selectedEntities;
     	std::optional<EntityRef> forceFocusEntity;
     	EntityRef focusedEntity;
 		EntityRef entityHighlightedOnList;
@@ -123,7 +123,7 @@ namespace Halley {
 		std::optional<Vector2f> mousePos;
     	std::optional<Vector2f> holdMouseStart;
     	std::optional<Rect4f> selBox;
-		std::vector<UUID> selBoxStartSelectedEntities;
+		Vector<UUID> selBoxStartSelectedEntities;
 
 		AssetPreviewGenerator* assetPreviewGenerator = nullptr;
 
@@ -139,7 +139,7 @@ namespace Halley {
 
     	EntityRef getEntityToFocus();
 		void updateEntityFocused();
-		void addEntityIdToList(std::vector<EntityId>& dst, EntityRef entity);
+		void addEntityIdToList(Vector<EntityId>& dst, EntityRef entity);
 
     	void saveCameraPos();
 	};

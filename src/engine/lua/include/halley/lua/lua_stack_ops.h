@@ -154,10 +154,10 @@ namespace Halley {
 	};
 
 	template <typename T>
-	struct FromLua<std::vector<T>> {
-		inline std::vector<T> operator()(LuaState& state) const {
+	struct FromLua<Vector<T>> {
+		inline Vector<T> operator()(LuaState& state) const {
 			auto ops = LuaStackOps(state);
-			std::vector<T> result(LuaStackOps(state).getLength());
+			Vector<T> result(LuaStackOps(state).getLength());
 			for (size_t i = 0; i < result.size(); ++i) {
 				ops.getField(int(i + 1));
 				result[i] = FromLua<T>()(state);
@@ -168,8 +168,8 @@ namespace Halley {
 	};
 
 	template <typename T>
-	struct ToLua<std::vector<T>> {
-		inline void operator()(LuaState& state, std::vector<T>& value) const {
+	struct ToLua<Vector<T>> {
+		inline void operator()(LuaState& state, Vector<T>& value) const {
 			auto ops = LuaStackOps(state);
 			ops.pushTable(0, int(value.size()));
 			for (size_t i = 0; i < value.size(); ++i) {

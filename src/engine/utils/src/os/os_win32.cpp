@@ -168,7 +168,7 @@ void OSWin32::onWindowCreated(void* window)
 }
 
 struct MonitorInfo {
-	std::vector<Rect4i> rects;
+	Vector<Rect4i> rects;
 };
 
 BOOL CALLBACK onMonitorInfo(HMONITOR /*hMonitor*/, HDC /*hdcMonitor*/, LPRECT lprcMonitor, LPARAM dwData)
@@ -403,12 +403,12 @@ void OSWin32::atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data,
 	}
 }
 
-std::vector<Path> OSWin32::enumerateDirectory(const Path& rootPath)
+Vector<Path> OSWin32::enumerateDirectory(const Path& rootPath)
 {
 	std::list<String> dirsToList;
 	dirsToList.push_back(".");
 
-	std::vector<Path> result;
+	Vector<Path> result;
 
 	WIN32_FIND_DATAW ffd;
 	while (!dirsToList.empty()) {
@@ -726,8 +726,8 @@ Future<std::optional<Path>> OSWin32::openFileChooser(FileChooserParameters param
 		fileDialog->SetOptions(flags);
 
 		if (!parameters.fileTypes.empty()) {
-			std::vector<StringUTF16> stringBuffer;
-			std::vector<COMDLG_FILTERSPEC> spec;
+			Vector<StringUTF16> stringBuffer;
+			Vector<COMDLG_FILTERSPEC> spec;
 			for (const auto& type: parameters.fileTypes) {
 				String pattern;
 				for (const auto& ext: type.extensions) {

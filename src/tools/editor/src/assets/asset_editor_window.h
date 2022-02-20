@@ -39,10 +39,10 @@ namespace Halley {
 
 		std::shared_ptr<UIList> contentList;
 		std::shared_ptr<UIPagedPane> content;
-		std::vector<std::shared_ptr<AssetEditor>> curEditors;
+		Vector<std::shared_ptr<AssetEditor>> curEditors;
 
 		bool modified = false;
-		std::vector<std::pair<AssetType, String>> lastAssets;
+		Vector<std::pair<AssetType, String>> lastAssets;
 
 		std::shared_ptr<AssetEditor> makeEditor(Path filePath, AssetType type, const String& name);
 		void createEditorTab(Path filePath, AssetType type, const String& name);

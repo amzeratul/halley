@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <limits>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/bytes/config_node_serializer.h"
 #include "navigation_query.h"
@@ -18,13 +18,13 @@ namespace Halley {
 		};
 		
 		// The path is defined by a sequence of points, followed by a sequence of regions that need further processing
-		std::vector<Vector2f> path;
-		std::vector<RegionNode> regions;
+		Vector<Vector2f> path;
+		Vector<RegionNode> regions;
 
 		NavigationQuery query;
 
 		NavigationPath();
-		NavigationPath(const NavigationQuery& query, std::vector<Vector2f> path = {}, std::vector<RegionNode> regions = {});
+		NavigationPath(const NavigationQuery& query, Vector<Vector2f> path = {}, Vector<RegionNode> regions = {});
 		explicit NavigationPath(const ConfigNode& node);
 
 		ConfigNode toConfigNode() const;

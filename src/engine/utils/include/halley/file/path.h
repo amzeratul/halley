@@ -67,11 +67,11 @@ namespace Halley
 		bool isEmpty() const;
 
 	private:
-		std::vector<String> pathParts;
+		Vector<String> pathParts;
 		void normalise();
 		void setPath(const String& value);
 
-		explicit Path(std::vector<String> parts);
+		explicit Path(Vector<String> parts);
 	};
 
 	using TimestampedPath = std::pair<Path, int64_t>;

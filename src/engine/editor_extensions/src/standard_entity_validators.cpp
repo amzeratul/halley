@@ -8,9 +8,9 @@
 
 using namespace Halley;
 
-std::vector<IEntityValidator::Result> TransformEntityValidator::validateEntity(EntityValidator& validator, const EntityData& entityData)
+Vector<IEntityValidator::Result> TransformEntityValidator::validateEntity(EntityValidator& validator, const EntityData& entityData)
 {
-	std::vector<Result> result;
+	Vector<Result> result;
 
 	const auto entity = validator.getWorld().findEntity(entityData.getInstanceUUID(), true);
 	if (entity && entity->isValid()) {

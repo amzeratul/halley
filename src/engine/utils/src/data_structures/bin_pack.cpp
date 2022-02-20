@@ -9,7 +9,7 @@
 
 using namespace Halley;
 
-std::optional<Vector<BinPackResult>> BinPack::pack(const std::vector<BinPackEntry>& entries, Vector2i binSize)
+std::optional<Vector<BinPackResult>> BinPack::pack(const Vector<BinPackEntry>& entries, Vector2i binSize)
 {
 	using T = void*;
 
@@ -35,7 +35,7 @@ std::optional<Vector<BinPackResult>> BinPack::pack(const std::vector<BinPackEntr
 	}
 }
 
-std::optional<Vector<BinPackResult>> BinPack::fastPack(const std::vector<BinPackEntry>& entries, Vector2i binSize)
+std::optional<Vector<BinPackResult>> BinPack::fastPack(const Vector<BinPackEntry>& entries, Vector2i binSize)
 {
 	Vector<BinPackResult> result;
 	std::priority_queue<BinPackEntry> queue;

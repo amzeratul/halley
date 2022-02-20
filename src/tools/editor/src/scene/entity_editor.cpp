@@ -61,7 +61,7 @@ void EntityEditor::setSceneEditorWindow(SceneEditorWindow& editor, const HalleyA
 	entityValidatorUI->setValidator(editor.getEntityValidator());
 
 	auto icons = entityIcons->getEntries();
-	std::vector<UIDropdown::Entry> entries;
+	Vector<UIDropdown::Entry> entries;
 	entries.reserve(icons.size());
 	for (const auto& icon: icons) {
 		entries.emplace_back(icon.id, LocalisedString::fromUserString(icon.name), icon.icon);
@@ -205,7 +205,7 @@ void EntityEditor::reloadEntity()
 void EntityEditor::unloadIcons()
 {
 	if (entityIcon) {
-		entityIcon->setOptions(std::vector<UIDropdown::Entry>{});
+		entityIcon->setOptions(Vector<UIDropdown::Entry>{});
 	}
 }
 
@@ -296,7 +296,7 @@ void EntityEditor::addComponent()
 	auto prefabComponents = getComponentsOnPrefab();
 
 	// Generate all available names
-	std::vector<String> componentNames;
+	Vector<String> componentNames;
 	for (const auto& c: ecsData->getComponents()) {
 		if (existingComponents.find(c.first) == existingComponents.end()) {
 			if (!isPrefab || prefabComponents.find(c.first) != prefabComponents.end()) {
@@ -607,7 +607,7 @@ const EntityData& EntityEditor::getEntityData() const
 	return *currentEntityData;
 }
 
-void EntityEditor::setHighlightedComponents(std::vector<String> componentNames)
+void EntityEditor::setHighlightedComponents(Vector<String> componentNames)
 {
 	if (componentNames != highlightedComponents) {
 		highlightedComponents = std::move(componentNames);
@@ -690,7 +690,7 @@ ConfigNode EntityEditorFactory::getDefaultNode(const String& fieldType) const
 	}
 }
 
-void EntityEditorFactory::addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories)
+void EntityEditorFactory::addFieldFactories(Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories)
 {
 	for (auto& factory: factories) {
 		fieldFactories[factory->getFieldType()] = std::move(factory);
@@ -715,7 +715,7 @@ void EntityEditorFactory::setGameResources(Resources& resources)
 	makeContext();
 }
 
-std::pair<String, std::vector<String>> EntityEditorFactory::parseType(const String& type) const
+std::pair<String, Vector<String>> EntityEditorFactory::parseType(const String& type) const
 {
 	// This will split the C++ type for templates, e.g.:
 	// std::optional<Halley::String> -> "std::optional<>", {"Halley::String"}

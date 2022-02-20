@@ -53,12 +53,12 @@ namespace Halley
 
 			void serialize(Serializer& s) const override;
 
-			std::vector<String> getIds() const;
+			Vector<String> getIds() const;
 
 			MessageType getMessageType() const override;
 
 		private:
-			std::vector<String> ids;
+			Vector<String> ids;
 		};
 	}
 }

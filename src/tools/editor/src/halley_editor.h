@@ -40,6 +40,6 @@ namespace Halley
 		String projectPath;
 		bool gotProjectPath = false;
 
-		void parseArguments(const std::vector<String>& args);
+		void parseArguments(const Vector<String>& args);
 	};
 }

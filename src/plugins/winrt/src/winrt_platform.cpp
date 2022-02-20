@@ -119,7 +119,7 @@ void WinRTPlatform::invitationArrived(const std::wstring& uri)
 	xbl->invitationArrived(uri);
 }
 
-void WinRTPlatform::setProfanityCheckForbiddenWordsList(std::vector<String> words)
+void WinRTPlatform::setProfanityCheckForbiddenWordsList(Vector<String> words)
 {
 	xbl->setProfanityCheckForbiddenWordsList(std::move(words));
 }

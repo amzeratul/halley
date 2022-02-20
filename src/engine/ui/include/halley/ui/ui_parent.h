@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include <vector>
+#include "halley/data_structures/vector.h"
 
 #include "halley/core/input/text_input_capture.h"
 #include "halley/text/halleystring.h"
@@ -40,10 +40,10 @@ namespace Halley {
 		virtual void onChildrenRemoved() {}
 		virtual void onChildAdded(UIWidget& child) {}
 
-		std::vector<std::shared_ptr<UIWidget>>& getChildren();
-		const std::vector<std::shared_ptr<UIWidget>>& getChildren() const;
-		std::vector<std::shared_ptr<UIWidget>>& getChildrenWaiting();
-		const std::vector<std::shared_ptr<UIWidget>>& getChildrenWaiting() const;
+		Vector<std::shared_ptr<UIWidget>>& getChildren();
+		const Vector<std::shared_ptr<UIWidget>>& getChildren() const;
+		Vector<std::shared_ptr<UIWidget>>& getChildrenWaiting();
+		const Vector<std::shared_ptr<UIWidget>>& getChildrenWaiting() const;
 
 		std::shared_ptr<UIWidget> getWidget(const String& id);
 		std::shared_ptr<UIWidget> tryGetWidget(const String& id);
@@ -76,8 +76,8 @@ namespace Halley {
 		void descend(F f, bool includeInactive = false, bool includePending = false);
 
 	private:
-		std::vector<std::shared_ptr<UIWidget>> children;
-		std::vector<std::shared_ptr<UIWidget>> childrenWaiting;
+		Vector<std::shared_ptr<UIWidget>> children;
+		Vector<std::shared_ptr<UIWidget>> childrenWaiting;
 
 		std::shared_ptr<UIWidget> doGetWidget(const String& id) const;
 	};

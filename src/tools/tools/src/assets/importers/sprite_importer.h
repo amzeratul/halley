@@ -21,7 +21,7 @@ namespace Halley
 		Vector4s slices;
 
 		std::unique_ptr<Image> img;
-		std::vector<String> filenames;
+		Vector<String> filenames;
 		String origFilename;
 
 		bool operator==(const ImageData& other) const;
@@ -31,7 +31,7 @@ namespace Halley
 		friend class SpriteImporter;
 		
 		bool isDuplicate = false;
-		std::vector<ImageData*> duplicatesOfThis;
+		Vector<ImageData*> duplicatesOfThis;
 	};
 
 	class SpriteImporter : public IAssetImporter
@@ -43,13 +43,13 @@ namespace Halley
 		String getAssetId(const Path& file, const std::optional<Metadata>& metadata) const override;
 
 	private:
-		Animation generateAnimation(const String& spriteName, const String& spriteSheetName, const String& materialName, const std::vector<ImageData>& frameData);
+		Animation generateAnimation(const String& spriteName, const String& spriteSheetName, const String& materialName, const Vector<ImageData>& frameData);
 
-		std::unique_ptr<Image> generateAtlas(const String& atlasName, std::vector<ImageData>& images, SpriteSheet& spriteSheet, ConfigNode& spriteInfo);
-		std::unique_ptr<Image> makeAtlas(const std::vector<BinPackResult>& result, SpriteSheet& spriteSheet, ConfigNode& spriteInfo);
-		Vector2i computeAtlasSize(const std::vector<BinPackResult>& results) const;
-		void markDuplicates(std::vector<ImageData>& images) const;
+		std::unique_ptr<Image> generateAtlas(const String& atlasName, Vector<ImageData>& images, SpriteSheet& spriteSheet, ConfigNode& spriteInfo);
+		std::unique_ptr<Image> makeAtlas(const Vector<BinPackResult>& result, SpriteSheet& spriteSheet, ConfigNode& spriteInfo);
+		Vector2i computeAtlasSize(const Vector<BinPackResult>& results) const;
+		void markDuplicates(Vector<ImageData>& images) const;
 
-		std::vector<ImageData> splitImagesInGrid(const std::vector<ImageData>& images, Vector2i grid);
+		Vector<ImageData> splitImagesInGrid(const Vector<ImageData>& images, Vector2i grid);
 	};
 }

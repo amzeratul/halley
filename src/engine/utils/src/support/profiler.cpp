@@ -10,7 +10,7 @@ bool ProfilerData::ThreadInfo::operator<(const ThreadInfo& other) const
 	return totalTime > other.totalTime;
 }
 
-ProfilerData::ProfilerData(TimePoint frameStartTime, TimePoint frameEndTime, std::vector<Event> events)
+ProfilerData::ProfilerData(TimePoint frameStartTime, TimePoint frameEndTime, Vector<Event> events)
 	: frameStartTime(frameStartTime)
 	, frameEndTime(frameEndTime)
 	, events(std::move(events))
@@ -28,7 +28,7 @@ ProfilerData::TimePoint ProfilerData::getEndTime() const
 	return frameEndTime;
 }
 
-const std::vector<ProfilerData::Event>& ProfilerData::getEvents() const
+const Vector<ProfilerData::Event>& ProfilerData::getEvents() const
 {
 	return events;
 }
@@ -66,7 +66,7 @@ void ProfilerData::processEvents()
 {
 	struct ThreadCurInfo {
 		size_t maxDepth = 0;
-		std::vector<TimePoint> stackEnds;
+		Vector<TimePoint> stackEnds;
 		TimePoint start;
 		TimePoint end;
 		Duration totalTime;
@@ -197,7 +197,7 @@ ProfilerData ProfilerCapture::getCapture()
 	const auto startIdx = startId % events.size();
 	const auto endIdx = curId % events.size();
 
-	std::vector<ProfilerData::Event> eventsCopy;
+	Vector<ProfilerData::Event> eventsCopy;
 	if (startIdx < endIdx) {
 		eventsCopy.insert(eventsCopy.end(), events.begin() + startIdx, events.begin() + endIdx);
 	} else {

@@ -48,11 +48,11 @@ namespace Halley
 		void addAsset(const String& name, AssetType type, Entry&& entry);
 		const TypedDB& getDatabase(AssetType type) const;
 		bool hasDatabase(AssetType type) const;
-		std::vector<String> getAssets() const;
+		Vector<String> getAssets() const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
-		std::vector<String> enumerate(AssetType type) const;
+		Vector<String> enumerate(AssetType type) const;
 
 	private:
 		mutable TreeMap<int, TypedDB> dbs;

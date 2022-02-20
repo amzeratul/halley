@@ -2,7 +2,7 @@
 
 #include "network_message.h"
 #include <memory>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <map>
 
 namespace Halley
@@ -30,7 +30,7 @@ namespace Halley
 		virtual bool isConnected() const = 0;
 		virtual void enqueue(std::unique_ptr<NetworkMessage> msg, int channel) = 0;
 		virtual void sendAll() = 0;
-		virtual std::vector<std::unique_ptr<NetworkMessage>> receiveAll() = 0;
+		virtual Vector<std::unique_ptr<NetworkMessage>> receiveAll() = 0;
 
 		virtual void setChannel(int channel, ChannelSettings settings);
 
@@ -41,6 +41,6 @@ namespace Halley
 
 	private:
 		std::map<std::type_index, int> typeToMsgIndex;
-		std::vector<std::unique_ptr<NetworkMessageFactoryBase>> factories;
+		Vector<std::unique_ptr<NetworkMessageFactoryBase>> factories;
 	};
 }

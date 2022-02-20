@@ -39,12 +39,12 @@ void ProjectProperties::setAssetPackManifest(String manifest)
 	dirty = true;
 }
 
-const std::vector<String>& ProjectProperties::getPlatforms() const
+const Vector<String>& ProjectProperties::getPlatforms() const
 {
 	return platforms;
 }
 
-void ProjectProperties::setPlatforms(std::vector<String> platforms)
+void ProjectProperties::setPlatforms(Vector<String> platforms)
 {
 	this->platforms = std::move(platforms);
 	dirty = true;

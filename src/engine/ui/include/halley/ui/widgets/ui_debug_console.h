@@ -20,11 +20,11 @@ namespace Halley {
 		bool closeConsole = false;
 	};
 
-	using UIDebugConsoleCallback = std::function<UIDebugConsoleResponse(std::vector<String>)>;
+	using UIDebugConsoleCallback = std::function<UIDebugConsoleResponse(Vector<String>)>;
 
 	class UIDebugConsoleSyntax {
 	public:
-		using Callback = std::function<std::vector<String>()>;
+		using Callback = std::function<Vector<String>()>;
 		
 		struct Arg {
 			String name;
@@ -39,7 +39,7 @@ namespace Halley {
 		};
 		
 		struct Variant {
-			std::vector<Arg> args;
+			Vector<Arg> args;
 
 			Variant() = default;
 			Variant(std::initializer_list<Arg> args) : args(std::move(args)) {}
@@ -53,10 +53,10 @@ namespace Halley {
 		
 		bool hasSyntax() const;
 		std::optional<String> checkSyntax(const String& command, gsl::span<const String> args) const;
-		std::vector<StringUTF32> getAutoComplete(const StringUTF32& line) const;
+		Vector<StringUTF32> getAutoComplete(const StringUTF32& line) const;
 
 	private:
-		std::vector<Variant> variants;
+		Vector<Variant> variants;
 
 		struct VariantMatch {
 			OptionalLite<size_t> variantN;
@@ -91,17 +91,17 @@ namespace Halley {
 	public:
 		UIDebugConsoleController();
 
-		Future<UIDebugConsoleResponse> runCommand(String command, std::vector<String> args);
+		Future<UIDebugConsoleResponse> runCommand(String command, Vector<String> args);
 		String runHelp();
 		
 		void addCommands(UIDebugConsoleCommands& commands);
 		void removeCommands(UIDebugConsoleCommands& commands);
 		void clearCommands();
 
-		std::vector<StringUTF32> getAutoComplete(const StringUTF32& line) const;
+		Vector<StringUTF32> getAutoComplete(const StringUTF32& line) const;
 
 	private:
-		std::vector<UIDebugConsoleCommands*> commands;
+		Vector<UIDebugConsoleCommands*> commands;
 		std::unique_ptr<UIDebugConsoleCommands> baseCommandSet;
 	};
 

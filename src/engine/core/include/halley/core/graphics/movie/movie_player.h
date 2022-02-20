@@ -99,7 +99,7 @@ namespace Halley
 
 		std::shared_ptr<MoviePlayerAliveFlag> getAliveFlag() const;
 
-		std::vector<MoviePlayerStream> streams;
+		Vector<MoviePlayerStream> streams;
 		std::list<std::shared_ptr<Texture>> recycleTexture;
 		std::list<PendingFrame> pendingFrames;
 		int maxVideoFrames;

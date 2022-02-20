@@ -139,7 +139,7 @@ namespace Halley {
     public:
         ConfigNode serialize(Rect4i value, const EntitySerializationContext& context)
 		{
-        	std::vector<int> seq = { value.getX(), value.getY(), value.getWidth(), value.getHeight() };
+        	Vector<int> seq = { value.getX(), value.getY(), value.getWidth(), value.getHeight() };
         	return ConfigNode(seq);
 		}
 		
@@ -159,7 +159,7 @@ namespace Halley {
     public:
         ConfigNode serialize(Rect4f value, const EntitySerializationContext& context)
 		{
-        	std::vector<float> seq = { value.getX(), value.getY(), value.getWidth(), value.getHeight() };
+        	Vector<float> seq = { value.getX(), value.getY(), value.getWidth(), value.getHeight() };
         	return ConfigNode(seq);
 		}
 		
@@ -197,9 +197,9 @@ namespace Halley {
     };
 
 	template <typename T>
-    class ConfigNodeSerializer<std::vector<T>> {
+    class ConfigNodeSerializer<Vector<T>> {
     public:
-        ConfigNode serialize(const std::vector<T>& values, const EntitySerializationContext& context)
+        ConfigNode serialize(const Vector<T>& values, const EntitySerializationContext& context)
 		{
         	auto serializer = ConfigNodeSerializer<T>();
         	ConfigNode result = ConfigNode::SequenceType();
@@ -211,9 +211,9 @@ namespace Halley {
         	return result;
 		}
 		
-        std::vector<T> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
+        Vector<T> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
         {
-			std::vector<T> result;
+			Vector<T> result;
         	if (node.getType() == ConfigNodeType::Sequence) {
 				auto seq = node.asSequence();
 				result.reserve(seq.size());

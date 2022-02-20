@@ -267,18 +267,18 @@ const AnimationDirection& Animation::getDirection(int id) const
 	}
 }
 
-std::vector<String> Animation::getSequenceNames() const
+Vector<String> Animation::getSequenceNames() const
 {
-	std::vector<String> result;
+	Vector<String> result;
 	for (auto& s: sequences) {
 		result.emplace_back(s.getName());
 	}
 	return result;
 }
 
-std::vector<String> Animation::getDirectionNames() const
+Vector<String> Animation::getDirectionNames() const
 {
-	std::vector<String> result;
+	Vector<String> result;
 	for (auto& d: directions) {
 		result.emplace_back(d.getName());
 	}

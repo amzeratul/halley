@@ -3,7 +3,7 @@
 #include "iconnection.h"
 #include "network_packet.h"
 #include <memory>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <chrono>
 #include <deque>
 #include <limits>
@@ -21,7 +21,7 @@ namespace Halley
 	class ReliableSubPacket
 	{
 	public:
-		std::vector<gsl::byte> data;
+		Vector<gsl::byte> data;
 		int tag = -1;
 		//bool reliable = false;
 		bool resends = false;
@@ -33,12 +33,12 @@ namespace Halley
 
 		ReliableSubPacket(ReliableSubPacket&& other) = default;
 
-		ReliableSubPacket(std::vector<gsl::byte>&& data)
+		ReliableSubPacket(Vector<gsl::byte>&& data)
 			: data(data)
 			, resends(false)
 		{}
 
-		ReliableSubPacket(std::vector<gsl::byte>&& data, unsigned short resendSeq)
+		ReliableSubPacket(Vector<gsl::byte>&& data, unsigned short resendSeq)
 			: data(data)
 			, resends(true)
 			, resendSeq(resendSeq)
@@ -79,11 +79,11 @@ namespace Halley
 		unsigned short nextSequenceToSend = 0;
 		unsigned short highestReceived = 0xFFFF;
 
-		std::vector<char> receivedSeqs; // 0 = not received, 1 = received, 2 = received re-send, 3 = both
-		std::vector<SentPacketData> sentPackets;
+		Vector<char> receivedSeqs; // 0 = not received, 1 = received, 2 = received re-send, 3 = both
+		Vector<SentPacketData> sentPackets;
 		std::deque<InboundNetworkPacket> pendingPackets;
 
-		std::vector<IReliableConnectionAckListener*> ackListeners;
+		Vector<IReliableConnectionAckListener*> ackListeners;
 
 		float lag = 1; // Start at 1 second
 		Clock::time_point lastReceive;

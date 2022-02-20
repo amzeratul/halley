@@ -291,7 +291,7 @@ void MaterialDefinition::loadUniforms(const ConfigNode& node)
 			const String& blockName = it.first;
 			auto& uniformNodes = it.second;
 
-			std::vector<MaterialUniform> uniforms;
+			Vector<MaterialUniform> uniforms;
 			for (auto& uniformEntry: uniformNodes.asSequence()) {
 				if (uniformEntry.hasKey("name")) {
 					const auto name = uniformEntry["name"].asString();

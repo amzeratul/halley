@@ -70,11 +70,11 @@ namespace Halley {
     	};
 
     	ProfilerData() = default;
-    	ProfilerData(TimePoint frameStartTime, TimePoint frameEndTime, std::vector<Event> events);
+    	ProfilerData(TimePoint frameStartTime, TimePoint frameEndTime, Vector<Event> events);
 
     	TimePoint getStartTime() const;
     	TimePoint getEndTime() const;
-    	const std::vector<Event>& getEvents() const;
+    	const Vector<Event>& getEvents() const;
     	Duration getTotalElapsedTime() const;
 		Duration getElapsedTime(ProfilerEventType eventType) const;
 
@@ -83,9 +83,9 @@ namespace Halley {
     private:
     	TimePoint frameStartTime;
     	TimePoint frameEndTime;
-    	std::vector<Event> events;
+    	Vector<Event> events;
 
-    	std::vector<ThreadInfo> threads;
+    	Vector<ThreadInfo> threads;
 
     	void processEvents();
     };
@@ -125,7 +125,7 @@ namespace Halley {
     	std::chrono::steady_clock::time_point frameStartTime;
     	std::chrono::steady_clock::time_point frameEndTime;
 
-    	std::vector<ProfilerData::Event> events;
+    	Vector<ProfilerData::Event> events;
     };
 
 	class ProfilerEvent {

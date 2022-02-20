@@ -24,7 +24,7 @@
 
 using namespace Halley;
 
-AssetImporter::AssetImporter(Project& project, std::vector<Path> assetsSrc)
+AssetImporter::AssetImporter(Project& project, Vector<Path> assetsSrc)
 	: assetsSrc(std::move(assetsSrc))
 {
 	std::unique_ptr<IAssetImporter> defaultImporters[] = {
@@ -64,7 +64,7 @@ AssetImporter::AssetImporter(Project& project, std::vector<Path> assetsSrc)
 	}
 }
 
-void AssetImporter::addImporter(std::vector<std::unique_ptr<IAssetImporter>>& dst, std::unique_ptr<IAssetImporter> importer)
+void AssetImporter::addImporter(Vector<std::unique_ptr<IAssetImporter>>& dst, std::unique_ptr<IAssetImporter> importer)
 {
 	importer->setImportByExtension(importByExtension);
 	dst.emplace_back(std::move(importer));
@@ -118,9 +118,9 @@ IAssetImporter& AssetImporter::getRootImporter(const Path& path) const
 	return getImporters(getImportAssetType(path, true)).at(0);
 }
 
-std::vector<std::reference_wrapper<IAssetImporter>> AssetImporter::getImporters(ImportAssetType type) const
+Vector<std::reference_wrapper<IAssetImporter>> AssetImporter::getImporters(ImportAssetType type) const
 {
-	std::vector<std::reference_wrapper<IAssetImporter>> result;
+	Vector<std::reference_wrapper<IAssetImporter>> result;
 
 	auto i = importers.find(type);
 	if (i != importers.end()) {
@@ -133,7 +133,7 @@ std::vector<std::reference_wrapper<IAssetImporter>> AssetImporter::getImporters(
 	throw Exception("Unknown asset type: " + toString(int(type)), HalleyExceptions::Tools);
 }
 
-const std::vector<Path>& AssetImporter::getAssetsSrc() const
+const Vector<Path>& AssetImporter::getAssetsSrc() const
 {
 	return assetsSrc;
 }

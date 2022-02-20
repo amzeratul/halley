@@ -1,7 +1,7 @@
 #pragma once
 
 #include "vector2.h"
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include "rect.h"
 
 namespace Halley {
@@ -22,7 +22,7 @@ namespace Halley {
     	[[nodiscard]] Circle expand(float radius) const;
         Rect4f getAABB() const;
 
-        static Circle getSpanningCircle(const std::vector<Vector2f>& points);
+        static Circle getSpanningCircle(const Vector<Vector2f>& points);
 
     private:
         Vector2f centre;

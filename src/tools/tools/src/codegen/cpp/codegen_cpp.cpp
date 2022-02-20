@@ -144,7 +144,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 	registryCpp.insert(registryCpp.end(), {
 		"",
 		"",
-		"using ComponentReflectorList = std::vector<std::unique_ptr<ComponentReflector>>;",
+		"using ComponentReflectorList = Vector<std::unique_ptr<ComponentReflector>>;",
 		"",
 		"static ComponentReflectorList makeComponentReflectors() {",
 		"	ComponentReflectorList result;"
@@ -166,7 +166,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"",
 		"",
 		"using MessageFactory = std::function<std::unique_ptr<Halley::Message>()>;",
-		"using MessageFactoryList = std::vector<MessageFactory>;",
+		"using MessageFactoryList = Vector<MessageFactory>;",
 		"",
 		"static MessageFactoryList makeMessageFactories() {",
 		"	MessageFactoryList result;"
@@ -188,7 +188,7 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"",
 		"",
 		"using SystemMessageFactory = std::function<std::unique_ptr<Halley::SystemMessage>()>;",
-		"using SystemMessageFactoryList = std::vector<SystemMessageFactory>;",
+		"using SystemMessageFactoryList = Vector<SystemMessageFactory>;",
 		"",
 		"static SystemMessageFactoryList makeSystemMessageFactories() {",
 		"	SystemMessageFactoryList result;"
@@ -280,7 +280,7 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	String deserializeBody = "using namespace Halley::EntitySerialization;" + lineBreak;
 	bool first = true;
 	for (auto& member: component.members) {
-		std::vector<String> serializationTypes;
+		Vector<String> serializationTypes;
 		if (member.canEdit) {
 			serializationTypes.push_back("Type::Prefab");
 		}
@@ -551,7 +551,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 	}
 
 	// Construct initBase();
-	std::vector<String> initBaseMethodBody;
+	Vector<String> initBaseMethodBody;
 	for (auto& service: system.services) {
 		initBaseMethodBody.push_back(lowerFirst(service.name) + " = &doGetWorld().template getService<" + service.name + ">(getName());");
 	}
@@ -566,8 +566,8 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 
 	auto fams = convert<FamilySchema, MemberSchema>(system.families, [](auto& fam) { return MemberSchema(TypeSchema("Halley::FamilyBinding<" + upperFirst(fam.name) + "Family>"), fam.name + "Family"); });
 	auto mid = fams.begin() + std::min(fams.size(), size_t(1));
-	std::vector<MemberSchema> mainFams(fams.begin(), mid);
-	std::vector<MemberSchema> otherFams(mid, fams.end());
+	Vector<MemberSchema> mainFams(fams.begin(), mid);
+	Vector<MemberSchema> otherFams(mid, fams.end());
 	sysClassGen
 		.addBlankLine()
 		.setAccessLevel(system.strategy == SystemStrategy::Global ? MemberAccess::Protected : MemberAccess::Private)
@@ -584,7 +584,7 @@ Vector<String> CodegenCPP::generateSystemHeader(SystemSchema& system, const Hash
 		
 		Vector<String> onMessagesReceivedBody = { "switch (msgIndex) {" };
 		Vector<String> processMessagesBody;
-		HashMap<String, std::vector<String>> familiesReceived;
+		HashMap<String, Vector<String>> familiesReceived;
 		
 		for (auto& msg : system.messages) {
 			if (msg.receive) {

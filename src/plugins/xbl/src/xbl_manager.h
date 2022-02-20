@@ -121,7 +121,7 @@ namespace Halley {
 		void setPreparingToJoinCallback(PlatformPreparingToJoinCallback callback);
 		void setJoinErrorCallback(PlatformJoinErrorCallback callback);
 
-		void setProfanityCheckForbiddenWordsList(std::vector<String> words);
+		void setProfanityCheckForbiddenWordsList(Vector<String> words);
 		String performProfanityCheck(String text);
 
 		void suspend();
@@ -143,7 +143,7 @@ namespace Halley {
 		int32_t signOutHandler;
 		bool playerLoggedOut;
 		
-		std::vector<String> forbiddenWords;
+		Vector<String> forbiddenWords;
 		XBLAchievementsStatus achievementsStatus;
 		XBLStatus status = XBLStatus::Disconnected;
 
@@ -209,7 +209,7 @@ namespace Halley {
 
 		bool isReady() const override;
 		Bytes getData(const String& path) override;
-		std::vector<String> enumerate(const String& root) override;
+		Vector<String> enumerate(const String& root) override;
 		void setData(const String& path, const Bytes& data, bool commit) override;
 		void removeData(const String& path) override;
 		void commit() override;

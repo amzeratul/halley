@@ -33,7 +33,7 @@
 
 using namespace Halley;
 
-UIFactoryWidgetProperties::Entry::Entry(String label, String name, String type, std::vector<String> defaultValue)
+UIFactoryWidgetProperties::Entry::Entry(String label, String name, String type, Vector<String> defaultValue)
 	: label(std::move(label))
 	, name(std::move(name))
 	, type(std::move(type))
@@ -105,7 +105,7 @@ void UIFactory::addFactory(const String& key, WidgetFactory factory, UIFactoryWi
 	properties[key] = std::move(props);
 }
 
-void UIFactory::pushConditions(std::vector<String> conds)
+void UIFactory::pushConditions(Vector<String> conds)
 {
 	conditionStack.push_back(conds.size());
 	for (auto& c: conds) {
@@ -129,7 +129,7 @@ std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName)
 	return makeUI(*resources.get<UIDefinition>(configName));
 }
 
-std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName, std::vector<String> conditions)
+std::shared_ptr<UIWidget> UIFactory::makeUI(const String& configName, Vector<String> conditions)
 {
 	pushConditions(std::move(conditions));
 	try {
@@ -173,9 +173,9 @@ const UIFactoryWidgetProperties& UIFactory::getPropertiesForWidget(const String&
 	return iter->second;
 }
 
-std::vector<String> UIFactory::getWidgetClassList() const
+Vector<String> UIFactory::getWidgetClassList() const
 {
-	std::vector<String> result;
+	Vector<String> result;
 	result.reserve(properties.size());
 	for (auto& p: properties) {
 		result.push_back(p.first);
@@ -503,9 +503,9 @@ LocalisedString UIFactory::parseLabel(const ConfigNode& node, const String& defa
 	return label;
 }
 
-std::vector<UIFactory::ParsedOption> UIFactory::parseOptions(const ConfigNode& node)
+Vector<UIFactory::ParsedOption> UIFactory::parseOptions(const ConfigNode& node)
 {
-	std::vector<ParsedOption> result;
+	Vector<ParsedOption> result;
 	if (node.getType() == ConfigNodeType::Sequence) {
 		for (const auto& n: node.asSequence()) {
 			auto id = n["id"].asString("");
@@ -543,7 +543,7 @@ std::shared_ptr<UIWidget> UIFactory::makeBaseWidget(const ConfigNode& entryNode)
 UIFactoryWidgetProperties UIFactory::getBaseWidgetProperties() const
 {
 	UIFactoryWidgetProperties result;
-	result.entries.emplace_back("Inner Border", "innerBorder", "Halley::Vector4f", std::vector<String>{"", "", "", ""});
+	result.entries.emplace_back("Inner Border", "innerBorder", "Halley::Vector4f", Vector<String>{"", "", "", ""});
 	result.name = "Widget";
 	result.iconName = "widget_icons/widget.png";
 	return result;
@@ -787,7 +787,7 @@ UIFactoryWidgetProperties UIFactory::getButtonProperties() const
 	result.entries.emplace_back("Text (Loc Key)", "textKey", "Halley::String", "");
 	result.entries.emplace_back("Style", "style", "Halley::String", "button");
 	result.entries.emplace_back("Icon", "icon", "Halley::ResourceReference<Halley::SpriteResource>", "");
-	result.entries.emplace_back("Mouse Border", "mouseBorder", "Halley::Vector4f", std::vector<String>{"0", "0", "0", "0"});
+	result.entries.emplace_back("Mouse Border", "mouseBorder", "Halley::Vector4f", Vector<String>{"0", "0", "0", "0"});
 	return result;
 }
 
@@ -875,7 +875,7 @@ std::shared_ptr<UIWidget> UIFactory::makeDropdown(const ConfigNode& entryNode)
 	auto label = parseLabel(node);
 	auto options = parseOptions(node["options"]);
 
-	std::vector<UIDropdown::Entry> entries;
+	Vector<UIDropdown::Entry> entries;
 	entries.reserve(options.size());
 	for (auto& o: options) {
 		Sprite icon;
@@ -963,8 +963,8 @@ std::shared_ptr<UIWidget> UIFactory::makeMultiImage(const ConfigNode& entryNode)
 	const auto size = node["size"].asVector2f(Vector2f());
 	const auto materialName = node["material"].asString("");
 
-	std::vector<Sprite> sprites = {};
-	std::vector<Vector2f> offsets = {};
+	Vector<Sprite> sprites = {};
+	Vector<Vector2f> offsets = {};
 	
 	if (node.hasKey("images")) {
 		const auto& images = node["images"].asSequence();
@@ -1091,7 +1091,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 	auto tabs = std::make_shared<UIList>(id, getStyle(style), UISizerType::Horizontal, 1);
 	applyInputButtons(*tabs, widgetNode["inputButtons"].asString("tabs"));
 
-	std::vector<const ConfigNode*> tabNodes;
+	Vector<const ConfigNode*> tabNodes;
 	auto loadChildren = [&] (const ConfigNode& root)
 	{
 		for (auto& tabNode: root.asSequence()) {
@@ -1142,7 +1142,7 @@ UIFactoryWidgetProperties UIFactory::getTabbedPaneProperties() const
 	result.childEntries.emplace_back("Id", "id", "Halley::String", "");
 	result.childEntries.emplace_back("Text", "text", "Halley::String", "");
 	result.childEntries.emplace_back("Text (Key)", "textKey", "Halley::String", "");
-	result.childEntries.emplace_back("If", "if", "std::vector<Halley::String>", std::vector<String>());
+	result.childEntries.emplace_back("If", "if", "Vector<Halley::String>", Vector<String>());
 
 	return result;
 }
@@ -1151,7 +1151,7 @@ std::shared_ptr<UIWidget> UIFactory::makePagedPane(const ConfigNode& entryNode)
 {
 	const auto& widgetNode = entryNode["widget"];
 
-	std::vector<const ConfigNode*> pageNodes;
+	Vector<const ConfigNode*> pageNodes;
 	auto loadChildren = [&] (const ConfigNode& root)
 	{
 		for (auto& pageNode: root.asSequence()) {
@@ -1188,7 +1188,7 @@ UIFactoryWidgetProperties UIFactory::getPagedPaneProperties() const
 	result.childEntries.emplace_back("Id", "id", "Halley::String", "");
 	result.childEntries.emplace_back("Text", "text", "Halley::String", "");
 	result.childEntries.emplace_back("Text (Key)", "textKey", "Halley::String", "");
-	result.childEntries.emplace_back("If", "if", "std::vector<Halley::String>", std::vector<String>());
+	result.childEntries.emplace_back("If", "if", "Vector<Halley::String>", Vector<String>());
 
 	return result;
 }
@@ -1240,8 +1240,8 @@ std::shared_ptr<UIWidget> UIFactory::makeSpinList(const ConfigNode& entryNode) {
 	auto label = parseLabel(node);
 	auto options = parseOptions(node["options"]);
 
-	std::vector<String> optionIds;
-	std::vector<LocalisedString> optionLabels;
+	Vector<String> optionIds;
+	Vector<LocalisedString> optionLabels;
 	for (auto& o : options) {
 		optionIds.push_back(o.id);
 		optionLabels.push_back(o.text);
@@ -1261,8 +1261,8 @@ std::shared_ptr<UIWidget> UIFactory::makeOptionListMorpher(const ConfigNode& ent
 	auto label = parseLabel(node);
 	auto options = parseOptions(node["options"]);
 
-	std::vector<String> optionIds;
-	std::vector<LocalisedString> optionLabels;
+	Vector<String> optionIds;
+	Vector<LocalisedString> optionLabels;
 	for (auto& o : options) {
 		optionIds.push_back(o.id);
 		optionLabels.push_back(o.text);

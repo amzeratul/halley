@@ -2,7 +2,7 @@
 
 #include <set>
 #include <map>
-#include <vector>
+#include "halley/data_structures/vector.h"
 
 #include "halley/data_structures/hash_map.h"
 
@@ -127,7 +127,7 @@ namespace Halley
 		const size_t n = static_cast<size_t>(end - begin);
 
 		WeightType totalWeight = 0;
-		std::vector<WeightType> weights;
+		Vector<WeightType> weights;
 		weights.resize(n);
 
 		for (Iter iter = begin; iter != end; ++iter) {

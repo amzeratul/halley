@@ -90,12 +90,12 @@ namespace Halley {
 		bool isClockwise() const { return clockwise; }
 		bool isValid() const { return valid; }
 
-		std::vector<Polygon> splitIntoConvex() const;
-		bool splitIntoConvex(std::vector<Polygon>& output) const;
-		std::optional<std::vector<Polygon>> subtract(const Polygon& other) const;
+		Vector<Polygon> splitIntoConvex() const;
+		bool splitIntoConvex(Vector<Polygon>& output) const;
+		std::optional<Vector<Polygon>> subtract(const Polygon& other) const;
 		void simplify(float epsilon = 0.0001f);
-		std::vector<Polygon> splitConvexIntoMaxSides(size_t maxSides) const;
-		std::vector<Polygon> splitConvexByLine(const Line& line) const;
+		Vector<Polygon> splitConvexIntoMaxSides(size_t maxSides) const;
+		Vector<Polygon> splitConvexByLine(const Line& line) const;
 
 		const Rect4f& getAABB() const { return aabb; }
 		const Circle& getBoundingCircle() const { return circle; }
@@ -141,7 +141,7 @@ namespace Halley {
 		// Split by inserting a new edge between v0 and v1
 		std::pair<Polygon, Polygon> doSplit(size_t v0, size_t v1, gsl::span<const Vector2f> insertVertices) const;
 
-		void doSplitConvexIntoMaxSides(size_t maxSides, std::vector<Polygon>& output) const;
+		void doSplitConvexIntoMaxSides(size_t maxSides, Vector<Polygon>& output) const;
 
 		// Angle is ABC (B in the middle). Checks against semi-planes defined by AB and BC
 		// Returns:
@@ -151,8 +151,8 @@ namespace Halley {
 		static int isInsideAngle(Vector2f a, Vector2f b, Vector2f c, Vector2f p, bool clockwise);
 		bool overlapsEdge(LineSegment segment) const;
 
-		std::optional<std::vector<Polygon>> subtractOverlapping(const Polygon& other, bool forceConvexOutput) const;
-		std::vector<Polygon> subtractContained(const Polygon& other) const;
+		std::optional<Vector<Polygon>> subtractOverlapping(const Polygon& other, bool forceConvexOutput) const;
+		Vector<Polygon> subtractContained(const Polygon& other) const;
 	};
 
 	template<>

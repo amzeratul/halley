@@ -162,9 +162,9 @@ namespace Halley
 	};
 
 	template<typename T>
-	struct ToStringConverter<std::vector<T>>
+	struct ToStringConverter<Vector<T>>
 	{
-		String operator()(const std::vector<T>& v) const
+		String operator()(const Vector<T>& v) const
 		{
 			String result;
 			for (size_t i = 0; i < v.size(); i++) {
@@ -274,13 +274,13 @@ namespace Halley
 	}
 	
 	template <typename T>
-	String toString(const std::vector<T> values, std::string_view separator)
+	String toString(const Vector<T> values, std::string_view separator)
 	{
 		return toString(gsl::span<const T>(values), separator);
 	}
 	
 	template <typename T, typename F>
-	String toString(const std::vector<T> values, std::string_view separator, F f)
+	String toString(const Vector<T> values, std::string_view separator, F f)
 	{
 		return toString(gsl::span<const T>(values), separator, std::move(f));
 	}

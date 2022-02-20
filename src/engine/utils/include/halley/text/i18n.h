@@ -75,7 +75,7 @@ namespace Halley {
 
 		I18NLanguageMatch getMatch(const I18NLanguage& other) const;
 
-		static std::optional<I18NLanguage> getBestMatch(const std::vector<I18NLanguage>& languages, const I18NLanguage& target, std::optional<I18NLanguage> fallback = {});
+		static std::optional<I18NLanguage> getBestMatch(const Vector<I18NLanguage>& languages, const I18NLanguage& target, std::optional<I18NLanguage> fallback = {});
 
 		bool operator==(const I18NLanguage& other) const;
 		bool operator!=(const I18NLanguage& other) const;
@@ -104,16 +104,16 @@ namespace Halley {
 
 		void setCurrentLanguage(const I18NLanguage& code);
 		void setFallbackLanguage(const I18NLanguage& code);
-		std::vector<I18NLanguage> getLanguagesAvailable() const;
+		Vector<I18NLanguage> getLanguagesAvailable() const;
 
 		LocalisedString get(const String& key) const override;
 		std::optional<LocalisedString> get(const String& key, const I18NLanguage& language) const;
 		LocalisedString getPreProcessedUserString(const String& string) const;
 
 		template <typename T>
-		std::vector<LocalisedString> getVector(const String& keyPrefix, const T& keys) const
+		Vector<LocalisedString> getVector(const String& keyPrefix, const T& keys) const
 		{
-			std::vector<LocalisedString> result;
+			Vector<LocalisedString> result;
 			for (auto& k: keys) {
 				result.push_back(get(keyPrefix + k));
 			}

@@ -489,10 +489,10 @@ Bytes WinRTLocalSave::getData(const String& path)
 	}).get();
 }
 
-std::vector<String> WinRTLocalSave::enumerate(const String& root)
+Vector<String> WinRTLocalSave::enumerate(const String& root)
 {
-	return Concurrent::execute([&] () -> std::vector<String> {
-		std::vector<String> result;
+	return Concurrent::execute([&] () -> Vector<String> {
+		Vector<String> result;
 		try {
 			auto files = folder.GetFilesAsync(winrt::Windows::Storage::Search::CommonFileQuery::OrderByName, 0, 256).get();
 			for (auto& f: files) {

@@ -7,8 +7,8 @@ namespace Halley {
     public:
     	LauncherSaveData(std::shared_ptr<ISaveData> saveData);
 
-    	std::vector<Path> getProjectPaths() const;
-    	void setProjectPaths(std::vector<Path> paths);
+    	Vector<Path> getProjectPaths() const;
+    	void setProjectPaths(Vector<Path> paths);
 
     	void save();
     	void load();

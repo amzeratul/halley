@@ -106,7 +106,7 @@ static DXGI_FORMAT getDX11Format(ShaderParameterType type)
 	}
 }
 
-void DX11Shader::setMaterialLayout(DX11Video& video, const std::vector<MaterialAttribute>& attributes)
+void DX11Shader::setMaterialLayout(DX11Video& video, const Vector<MaterialAttribute>& attributes)
 {
 	if (layout) {
 		return;
@@ -114,8 +114,8 @@ void DX11Shader::setMaterialLayout(DX11Video& video, const std::vector<MaterialA
 
 	Expects(!vertexBlob.empty());
 
-	std::vector<std::array<char, 64>> names(attributes.size());
-	std::vector<D3D11_INPUT_ELEMENT_DESC> desc(attributes.size());
+	Vector<std::array<char, 64>> names(attributes.size());
+	Vector<D3D11_INPUT_ELEMENT_DESC> desc(attributes.size());
 
 	for (size_t i = 0; i < desc.size(); ++i) {
 		const auto& a = attributes[i];

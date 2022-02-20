@@ -10,7 +10,7 @@ namespace Halley {
 	protected:
 		std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch) override;
 		std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
-		void sortItems(std::vector<std::pair<String, String>>& items) override;
+		void sortItems(Vector<std::pair<String, String>>& items) override;
 	
 	private:
 		Resources& resources;

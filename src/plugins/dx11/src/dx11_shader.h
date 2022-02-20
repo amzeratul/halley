@@ -19,7 +19,7 @@ namespace Halley
 		int getBlockLocation(const String& name, ShaderType stage) override;
 
 		void bind(DX11Video& video);
-		void setMaterialLayout(DX11Video& video, const std::vector<MaterialAttribute>& attributes);
+		void setMaterialLayout(DX11Video& video, const Vector<MaterialAttribute>& attributes);
 
 	private:
 		String name;

@@ -28,7 +28,7 @@ namespace Halley
 		Vector<std::shared_ptr<InputTouch>> getTouchEvents() override;
 
 	private:
-		std::vector<std::shared_ptr<InputJoystick>> gamepads;
+		Vector<std::shared_ptr<InputJoystick>> gamepads;
 		std::shared_ptr<WinRTKeyboard> keyboard;
 		std::shared_ptr<WinRTMouse> mouse;
 	};

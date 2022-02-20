@@ -64,11 +64,11 @@ const std::map<String, UIDebugConsoleCommandData>& UIDebugConsoleCommands::getCo
 UIDebugConsoleController::UIDebugConsoleController()
 {
 	baseCommandSet = std::make_unique<UIDebugConsoleCommands>();
-	baseCommandSet->addCommand("help", [=](std::vector<String>) { return runHelp(); });
+	baseCommandSet->addCommand("help", [=](Vector<String>) { return runHelp(); });
 	clearCommands();
 }
 
-Future<UIDebugConsoleResponse> UIDebugConsoleController::runCommand(String command, std::vector<String> args)
+Future<UIDebugConsoleResponse> UIDebugConsoleController::runCommand(String command, Vector<String> args)
 {
 	for (auto& commandSet: commands) {
 		const auto& cs = commandSet->getCommands();
@@ -130,9 +130,9 @@ void UIDebugConsoleController::clearCommands()
 	addCommands(*baseCommandSet);
 }
 
-std::vector<StringUTF32> UIDebugConsoleController::getAutoComplete(const StringUTF32& line) const
+Vector<StringUTF32> UIDebugConsoleController::getAutoComplete(const StringUTF32& line) const
 {
-	std::vector<StringUTF32> results;
+	Vector<StringUTF32> results;
 	
 	for (auto& commandSet: commands) {
 		for (auto& command: commandSet->getCommands()) {
@@ -213,7 +213,7 @@ std::optional<String> UIDebugConsoleSyntax::checkSyntax(const String& command, g
 	return {};
 }
 
-std::vector<StringUTF32> UIDebugConsoleSyntax::getAutoComplete(const StringUTF32& line32) const
+Vector<StringUTF32> UIDebugConsoleSyntax::getAutoComplete(const StringUTF32& line32) const
 {
 	const auto line = String(line32);
 	auto [curVariant, argN, argStart, invalidArg] = getVariantMatch(line, false);
@@ -224,14 +224,14 @@ std::vector<StringUTF32> UIDebugConsoleSyntax::getAutoComplete(const StringUTF32
 	const auto& curArgSyntax = variants[curVariant.value()].args[argN];
 
 	// Retrieve valid options
-	std::vector<String> validOptions;
+	Vector<String> validOptions;
 	if (curArgSyntax.validOptionsCallback) {
 		validOptions = curArgSyntax.validOptionsCallback();
 	}
 
 	// Filter matching ones
 	const StringUTF32 linePrefix = line.substr(0, argStart).getUTF32();
-	std::vector<StringUTF32> results;
+	Vector<StringUTF32> results;
 	for (const auto& o: validOptions) {
 		if (o.startsWith(curArg)) {
 			results.emplace_back(linePrefix + o.getUTF32());
@@ -332,7 +332,7 @@ void UIDebugConsole::setup()
 	add(factory.makeUI("halley/debug_console"), 1);
 
 	inputField = getWidgetAs<UITextInput>("input");
-	inputField->setAutoCompleteHandle([=] (const StringUTF32& str) -> std::vector<StringUTF32>
+	inputField->setAutoCompleteHandle([=] (const StringUTF32& str) -> Vector<StringUTF32>
 	{
 		return controller->getAutoComplete(str);
 	});

@@ -8,7 +8,7 @@
 
 using namespace Halley;
 
-UISpinList::UISpinList(String id, const UIStyle& style, std::vector<LocalisedString> os, int defaultOption)
+UISpinList::UISpinList(String id, const UIStyle& style, Vector<LocalisedString> os, int defaultOption)
 	: UIWidget(std::move(id), {})
 	, curOption(defaultOption)
 {
@@ -64,7 +64,7 @@ void UISpinList::setInputButtons(const UIInputButtons& buttons)
 	inputButtons = buttons;
 }
 
-void UISpinList::setOptions(const std::vector<LocalisedString> os, int defaultOption)
+void UISpinList::setOptions(const Vector<LocalisedString> os, int defaultOption)
 {
 	setOptions({}, os, defaultOption);
 }
@@ -118,7 +118,7 @@ void UISpinList::updateOptionLabels() {
 	addChild(spinner);
 }
 
-void UISpinList::setOptions(std::vector<String> oIds, const std::vector<LocalisedString>& os, int defaultOption)
+void UISpinList::setOptions(Vector<String> oIds, const Vector<LocalisedString>& os, int defaultOption)
 {
 	if (oIds.empty()) {
 		oIds.resize(os.size());
@@ -146,7 +146,7 @@ void UISpinList::setOptions(std::vector<String> oIds, const std::vector<Localise
 	}
 }
 
-void UISpinList::setOptions(const I18N& i18n, const String& i18nPrefix, const std::vector<String>& optionIds, int defaultOption)
+void UISpinList::setOptions(const I18N& i18n, const String& i18nPrefix, const Vector<String>& optionIds, int defaultOption)
 {
 	setOptions(optionIds, i18n.getVector(i18nPrefix, optionIds), defaultOption);
 }

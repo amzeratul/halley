@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include "halley/text/halleystring.h"
 #include "halley/file/path.h"
 #include "halley/utils/utils.h"
@@ -31,7 +31,7 @@ namespace Halley
 	{
 	public:
 		String assetId;
-		std::vector<ImportingAssetFile> inputFiles;
+		Vector<ImportingAssetFile> inputFiles;
 		ImportAssetType assetType = ImportAssetType::Undefined;
 		ConfigNode options;
 	};

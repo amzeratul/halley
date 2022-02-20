@@ -23,7 +23,7 @@ void GameConsole::removeConsoleCommand(const String& command)
 	commands.erase(command);
 }
 
-String GameConsole::onHelp(std::vector<String> args)
+String GameConsole::onHelp(Vector<String> args)
 {
 	String result = "Commands available:";
 	for (auto& c: commands) {
@@ -34,7 +34,7 @@ String GameConsole::onHelp(std::vector<String> args)
 
 GameConsole::GameConsole()
 {
-	registerConsoleCommand("help", [=](std::vector<String> args) -> String { return onHelp(std::move(args)); });
+	registerConsoleCommand("help", [=](Vector<String> args) -> String { return onHelp(std::move(args)); });
 }
 
 void GameConsole::sendMessage(const String& string)

@@ -432,10 +432,10 @@ void SceneEditorWindow::selectEntities(gsl::span<const String> ids, UIList::Sele
 
 void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfReference, EntityData data)
 {
-	addEntities(referenceEntity, childOfReference, std::vector<EntityData>({ std::move(data) }));
+	addEntities(referenceEntity, childOfReference, Vector<EntityData>({ std::move(data) }));
 }
 
-void SceneEditorWindow::addEntities(const String& referenceEntity, bool childOfReference, std::vector<EntityData> datas)
+void SceneEditorWindow::addEntities(const String& referenceEntity, bool childOfReference, Vector<EntityData> datas)
 {
 	if (datas.empty()) {
 		return;
@@ -457,7 +457,7 @@ void SceneEditorWindow::addEntities(const String& referenceEntity, bool childOfR
 		transform = &identity;
 	}
 
-	std::vector<EntityChangeOperation> ops;
+	Vector<EntityChangeOperation> ops;
 	for (auto& data: datas) {
 		positionEntity(data, transform->inverseTransformPoint(basePos + getEntityPosition(data)));
 
@@ -506,7 +506,7 @@ void SceneEditorWindow::onEntitiesAdded(gsl::span<const EntityChangeOperation> c
 
 void SceneEditorWindow::removeEntities(gsl::span<const EntityChangeOperation> patches)
 {
-	std::vector<String> ids;
+	Vector<String> ids;
 	ids.reserve(patches.size());
 	for (const auto& p: patches) {
 		ids.push_back(p.entityId);
@@ -516,10 +516,10 @@ void SceneEditorWindow::removeEntities(gsl::span<const EntityChangeOperation> pa
 
 void SceneEditorWindow::modifyEntities(gsl::span<const EntityChangeOperation> patches)
 {
-	std::vector<String> ids;
-	std::vector<EntityData> oldDatas;
-	std::vector<const EntityData*> oldDataPtrs;
-	std::vector<const EntityData*> newDataPtrs;
+	Vector<String> ids;
+	Vector<EntityData> oldDatas;
+	Vector<const EntityData*> oldDataPtrs;
+	Vector<const EntityData*> newDataPtrs;
 	ids.reserve(ids.size());
 	oldDatas.reserve(patches.size());
 	oldDataPtrs.reserve(patches.size());
@@ -540,9 +540,9 @@ void SceneEditorWindow::modifyEntities(gsl::span<const EntityChangeOperation> pa
 
 void SceneEditorWindow::moveEntities(gsl::span<const EntityChangeOperation> origChanges, bool refreshEntityList)
 {
-	std::vector<EntityChangeOperation> forward;
-	std::vector<EntityChangeOperation> back;
-	std::vector<String> ids;
+	Vector<EntityChangeOperation> forward;
+	Vector<EntityChangeOperation> back;
+	Vector<String> ids;
 	forward.reserve(origChanges.size());
 	back.reserve(origChanges.size());
 	ids.reserve(origChanges.size());
@@ -618,7 +618,7 @@ void SceneEditorWindow::extractPrefab(const String& id, const String& prefabName
 	auto entityData = entityNodeData.getData();
 
 	// Generate instance components and clear prefab
-	auto components = std::vector<std::pair<String, ConfigNode>>();
+	auto components = Vector<std::pair<String, ConfigNode>>();
 	for (auto& c: entityData.getComponents()) {
 		if (c.first == "Transform2D" || c.first == "Transform3D") {
 			components.emplace_back(c);
@@ -669,7 +669,7 @@ void SceneEditorWindow::collapsePrefab(const String& id)
 	replaceEntity(id, std::move(instanceData));
 }
 
-void SceneEditorWindow::onEntitiesSelected(std::vector<String> selectedEntities)
+void SceneEditorWindow::onEntitiesSelected(Vector<String> selectedEntities)
 {
 	try {
 		if (selectedEntities.size() == 1) {
@@ -685,12 +685,12 @@ void SceneEditorWindow::onEntitiesSelected(std::vector<String> selectedEntities)
 			entityEditor->unloadEntity(!selectedEntities.empty());
 		}
 
-		std::vector<UUID> uuids;
+		Vector<UUID> uuids;
 		uuids.reserve(selectedEntities.size());
 		for (const auto& id: selectedEntities) {
 			uuids.emplace_back(id);
 		}
-		std::vector<EntityData*> datas = sceneData->getWriteableEntityDatas(uuids);
+		Vector<EntityData*> datas = sceneData->getWriteableEntityDatas(uuids);
 		gameBridge->setSelectedEntities(std::move(uuids), std::move(datas));
 		
 		currentEntityIds = selectedEntities;
@@ -845,7 +845,7 @@ void SceneEditorWindow::pasteEntitiesFromClipboard(const String& referenceId, bo
 
 String SceneEditorWindow::copyEntities(gsl::span<const String> ids)
 {
-	std::vector<EntityData> datas;
+	Vector<EntityData> datas;
 
 	for (const auto& [id, parentId]: findUniqueParents(ids)) {
 		if (!parentId) {
@@ -922,7 +922,7 @@ std::optional<EntityData> SceneEditorWindow::makeInstance(const String& prefabNa
 	const auto prefab = getGamePrefab(prefabName);
 	if (prefab) {
 		const auto& entityData = prefab->getEntityData();
-		auto components = std::vector<std::pair<String, ConfigNode>>();
+		auto components = Vector<std::pair<String, ConfigNode>>();
 
 		// Clone transform components
 		for (const auto& kv: entityData.getComponents()) {
@@ -984,10 +984,10 @@ void SceneEditorWindow::removeEntities(gsl::span<const String> targetIds)
 		return;
 	}
 
-	std::vector<String> entityIds;
-	std::vector<std::pair<String, int>> parenting;
-	std::vector<EntityData> prevDatas;
-	std::vector<String> toClean;
+	Vector<String> entityIds;
+	Vector<std::pair<String, int>> parenting;
+	Vector<EntityData> prevDatas;
+	Vector<String> toClean;
 	
 	for (const auto& [targetId, parentId]: findUniqueParents(targetIds)) {
 		if (!parentId) {
@@ -1082,9 +1082,9 @@ const String* SceneEditorWindow::findParent(const String& targetEntityId, const 
 	return nullptr;
 }
 
-std::vector<std::pair<String, std::optional<String>>> SceneEditorWindow::findUniqueParents(gsl::span<const String> entityIds) const
+Vector<std::pair<String, std::optional<String>>> SceneEditorWindow::findUniqueParents(gsl::span<const String> entityIds) const
 {
-	std::vector<std::pair<String, std::optional<String>>> result;
+	Vector<std::pair<String, std::optional<String>>> result;
 	std::set<String> idSet;
 	for (const auto& entityId: entityIds) {
 		idSet.insert(entityId);
@@ -1172,7 +1172,7 @@ void SceneEditorWindow::addComponentToCurrentEntity(const String& componentName)
 	entityEditor->addComponent(componentName, ConfigNode::MapType());
 }
 
-void SceneEditorWindow::setHighlightedComponents(std::vector<String> componentNames)
+void SceneEditorWindow::setHighlightedComponents(Vector<String> componentNames)
 {
 	entityEditor->setHighlightedComponents(std::move(componentNames));
 }
@@ -1209,12 +1209,12 @@ String SceneEditorWindow::serializeEntities(gsl::span<const EntityData> nodes) c
 	return YAMLConvert::generateYAML(result, options);
 }
 
-std::vector<EntityData> SceneEditorWindow::deserializeEntities(const String& data) const
+Vector<EntityData> SceneEditorWindow::deserializeEntities(const String& data) const
 {
 	ConfigFile file;
 	try {
 		YAMLConvert::parseConfig(file, gsl::as_bytes(gsl::span<const char>(data.c_str(), data.length())));
-		std::vector<EntityData> result;
+		Vector<EntityData> result;
 		if (file.getRoot().getType() == ConfigNodeType::Sequence) {
 			for (auto& n: file.getRoot().asSequence()) {
 				if (!isValidEntityTree(n)) {

@@ -92,7 +92,7 @@ void RenderGraph::render(const RenderContext& rc, VideoAPI& video, std::optional
 		node->determineIfNeedsRenderTarget();
 	}
 	
-	std::vector<RenderGraphNode*> renderQueue;
+	Vector<RenderGraphNode*> renderQueue;
 	renderQueue.reserve(nodes.size());
 	for (auto& node: nodes) {
 		if (node->activeInCurrentPass && node->depsLeft == 0) {

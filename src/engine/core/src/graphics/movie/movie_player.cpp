@@ -404,7 +404,7 @@ void MoviePlayer::onVideoFrameAvailable(Time time, std::shared_ptr<Texture> text
 
 void MoviePlayer::onAudioFrameAvailable(Time time, gsl::span<const short> origSamples)
 {
-	std::vector<AudioConfig::SampleFormat> samples(origSamples.size());
+	Vector<AudioConfig::SampleFormat> samples(origSamples.size());
 	for (size_t i = 0; i < size_t(origSamples.size()); ++i) {
 		samples[i] = origSamples[i] / 32768.0f;
 	}

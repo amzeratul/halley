@@ -24,8 +24,8 @@ namespace Halley {
 		UIFactory& factory;
 		UIStyle style;
 
-		std::vector<std::shared_ptr<UIWidget>> inputPinWidgets;
-		std::vector<std::shared_ptr<UIWidget>> outputPinWidgets;
+		Vector<std::shared_ptr<UIWidget>> inputPinWidgets;
+		Vector<std::shared_ptr<UIWidget>> outputPinWidgets;
 	
 	private:
 		std::optional<Vector2f> drag;

@@ -28,7 +28,7 @@ namespace Halley {
 		struct SettingType {
 			String name;
 			String type;
-			std::vector<String> defaultValue;
+			Vector<String> defaultValue;
 		};
 
 		using PinType = ScriptNodePinType;
@@ -40,10 +40,10 @@ namespace Halley {
 		virtual String getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const;
 		virtual String getLabel(const ScriptGraphNode& node) const;
 
-		virtual std::vector<SettingType> getSettingTypes() const;
-		virtual std::pair<String, std::vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const;
-		virtual std::pair<String, std::vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const;
-		virtual std::pair<String, std::vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const;
+		virtual Vector<SettingType> getSettingTypes() const;
+		virtual std::pair<String, Vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const;
+		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const;
+		virtual std::pair<String, Vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const;
 		virtual String getIconName(const ScriptGraphNode& node) const = 0;
 		virtual ScriptNodeClassification getClassification() const = 0;
 		
@@ -114,8 +114,8 @@ namespace Halley {
     	void addScriptNode(std::unique_ptr<IScriptNodeType> nodeType);
 
 		const IScriptNodeType* tryGetNodeType(const String& typeId) const;
-		std::vector<String> getTypes(bool includeNonAddable) const;
-		std::vector<String> getNames(bool includeNonAddable) const;
+		Vector<String> getTypes(bool includeNonAddable) const;
+		Vector<String> getNames(bool includeNonAddable) const;
 
 	private:
     	std::map<String, std::unique_ptr<IScriptNodeType>> nodeTypes;

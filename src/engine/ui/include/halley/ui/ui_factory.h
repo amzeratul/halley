@@ -30,15 +30,15 @@ namespace Halley
             String label;
 	        String name;
             String type;
-            std::vector<String> defaultValue;
+            Vector<String> defaultValue;
 
 			Entry() = default;
-			Entry(String label, String name, String type, std::vector<String> defaultValue = {});
+			Entry(String label, String name, String type, Vector<String> defaultValue = {});
 			Entry(String label, String name, String type, String defaultValue);
         };
 
-		std::vector<Entry> entries;
-		std::vector<Entry> childEntries;
+		Vector<Entry> entries;
+		Vector<Entry> childEntries;
 		String name;
 		String iconName;
 		String childName;
@@ -61,11 +61,11 @@ namespace Halley
 
 		void addFactory(const String& key, WidgetFactory factory, UIFactoryWidgetProperties properties = {});
 		
-		void pushConditions(std::vector<String> conditions);
+		void pushConditions(Vector<String> conditions);
 		void popConditions();
 
 		std::shared_ptr<UIWidget> makeUI(const String& configName);
-		std::shared_ptr<UIWidget> makeUI(const String& configName, std::vector<String> conditions);
+		std::shared_ptr<UIWidget> makeUI(const String& configName, Vector<String> conditions);
 		std::shared_ptr<UIWidget> makeUI(const UIDefinition& definition);
 
 		void loadUI(UIWidget& target, const String& configName);
@@ -73,7 +73,7 @@ namespace Halley
 
 		const UIFactoryWidgetProperties& getPropertiesForWidget(const String& widgetClass) const;
 		UIFactoryWidgetProperties getGlobalWidgetProperties() const;
-		std::vector<String> getWidgetClassList() const;
+		Vector<String> getWidgetClassList() const;
 
 		void setInputButtons(const String& key, UIInputButtons buttons);
 		void applyInputButtons(UIWidget& widget, const String& key);
@@ -127,7 +127,7 @@ namespace Halley
 		void loadSizerChildren(UISizer& sizer, const ConfigNode& node);
 
 		LocalisedString parseLabel(const ConfigNode& node, const String& defaultOption = "", const String& key = "text");
-		std::vector<ParsedOption> parseOptions(const ConfigNode& node);
+		Vector<ParsedOption> parseOptions(const ConfigNode& node);
 
 		std::shared_ptr<UIWidget> makeBaseWidget(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeLabel(const ConfigNode& node);
@@ -192,8 +192,8 @@ namespace Halley
 
 	private:
 		std::shared_ptr<UIStyleSheet> styleSheet;
-		std::vector<String> conditions;
-		std::vector<size_t> conditionStack;
+		Vector<String> conditions;
+		Vector<size_t> conditionStack;
 
 		std::map<String, WidgetFactory> factories;
 		std::map<String, UIFactoryWidgetProperties> properties;

@@ -36,12 +36,12 @@ void ChooseAssetWindow::onAddedToRoot(UIRoot& root)
 	root.registerKeyPressListener(shared_from_this(), 1);
 }
 
-void ChooseAssetWindow::setAssetIds(std::vector<String> ids, String defaultOption)
+void ChooseAssetWindow::setAssetIds(Vector<String> ids, String defaultOption)
 {
 	setAssetIds(std::move(ids), {}, std::move(defaultOption));
 }
 
-void ChooseAssetWindow::setAssetIds(std::vector<String> _ids, std::vector<String> _names, String _defaultOption)
+void ChooseAssetWindow::setAssetIds(Vector<String> _ids, Vector<String> _names, String _defaultOption)
 {
 	origIds = std::move(_ids);
 	origNames = std::move(_names);
@@ -113,7 +113,7 @@ void ChooseAssetWindow::populateList()
 			options->addTextItem("", LocalisedString::fromHardcodedString("[Empty]"));
 		}
 
-		std::vector<std::pair<String, String>> items;
+		Vector<std::pair<String, String>> items;
 		for (size_t i = 0; i < ids.size(); ++i) {
 			items.emplace_back(ids[i], names[i]);
 		}
@@ -142,7 +142,7 @@ void ChooseAssetWindow::addItem(const String& id, const String& name, gsl::span<
 	auto label = options->makeLabel("", getItemLabel(id, name, hasSearch));
 	auto labelCol = label->getColour();
 	if (!matchPositions.empty()) {
-		std::vector<ColourOverride> overrides;
+		Vector<ColourOverride> overrides;
 		for (const auto& p: matchPositions) {
 			overrides.emplace_back(p.first, highlightCol);
 			overrides.emplace_back(p.first + p.second, labelCol);
@@ -177,22 +177,22 @@ void ChooseAssetWindow::onCategorySet(const String& id)
 {
 }
 
-void ChooseAssetWindow::sortItems(std::vector<std::pair<String, String>>& items)
+void ChooseAssetWindow::sortItems(Vector<std::pair<String, String>>& items)
 {
 	sortItemsByName(items);
 }
 
-void ChooseAssetWindow::sortItemsByName(std::vector<std::pair<String, String>>& items)
+void ChooseAssetWindow::sortItemsByName(Vector<std::pair<String, String>>& items)
 {
 	std::sort(items.begin(), items.end(), [=] (const auto& a, const auto& b) { return a.second < b.second; });
 }
 
-void ChooseAssetWindow::sortItemsById(std::vector<std::pair<String, String>>& items)
+void ChooseAssetWindow::sortItemsById(Vector<std::pair<String, String>>& items)
 {
 	std::sort(items.begin(), items.end(), [=] (const auto& a, const auto& b) { return a.first < b.first; });
 }
 
-void ChooseAssetWindow::setCategoryFilters(std::vector<AssetCategoryFilter> filters, const String& defaultOption)
+void ChooseAssetWindow::setCategoryFilters(Vector<AssetCategoryFilter> filters, const String& defaultOption)
 {
 	categoryFilters = std::move(filters);
 	

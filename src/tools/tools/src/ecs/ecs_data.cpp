@@ -8,7 +8,7 @@
 using namespace Halley;
 
 
-void ECSData::loadSources(std::vector<CodegenSourceInfo> files)
+void ECSData::loadSources(Vector<CodegenSourceInfo> files)
 {
 	++revision;
 	for (auto& f : files) {

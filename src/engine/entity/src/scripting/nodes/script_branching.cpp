@@ -9,7 +9,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptBranch::getPinConfiguration(cons
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptBranch::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptBranch::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Branch if ");
@@ -23,7 +23,7 @@ IScriptNodeType::Result ScriptBranch::doUpdate(ScriptEnvironment& environment, T
 	return Result(ScriptNodeExecutionState::Done, 0, value ? 1 : 2);
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptBranch::getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const
+std::pair<String, Vector<ColourOverride>> ScriptBranch::getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const
 {
 	if (elementIdx >= 1) {
 		ColourStringBuilder builder;
@@ -49,7 +49,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptFork::getPinConfiguration(const 
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptFork::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptFork::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Fork execution.");
@@ -71,7 +71,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptMergeAny::getPinConfiguration(co
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptMergeAny::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptMergeAny::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Allows ");
@@ -95,7 +95,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptMergeAll::getPinConfiguration(co
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptMergeAll::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptMergeAll::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Proceeds with execution only when ");

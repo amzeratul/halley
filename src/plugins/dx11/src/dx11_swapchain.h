@@ -29,8 +29,8 @@ namespace Halley
 	private:
 		IDXGISwapChain1* swapChain = nullptr;
 		ID3D11RenderTargetView* renderTarget = nullptr;
-		std::vector<ID3D11DepthStencilView*> depthStencilViews;
-		std::vector<std::unique_ptr<Texture>> depthStencilTextures;
+		Vector<ID3D11DepthStencilView*> depthStencilViews;
+		Vector<std::unique_ptr<Texture>> depthStencilTextures;
 
 		Vector2i size;
 		DX11Video& video;

@@ -50,7 +50,7 @@ void SceneEditorGizmoCollection::draw(Painter& painter, const ISceneEditor& scen
 	}
 }
 
-void SceneEditorGizmoCollection::setSelectedEntities(std::vector<EntityRef> entities, std::vector<EntityData*> datas)
+void SceneEditorGizmoCollection::setSelectedEntities(Vector<EntityRef> entities, Vector<EntityData*> datas)
 {
 	selectedEntities = std::move(entities);
 	entityDatas = std::move(datas);
@@ -105,7 +105,7 @@ std::shared_ptr<UIWidget> SceneEditorGizmoCollection::setTool(const String& tool
 
 	if (changedTool) {
 		sceneEditorWindow.setSetting(EditorSettingType::Temp, "tools.curTool", ConfigNode(tool));
-		sceneEditorWindow.setHighlightedComponents(activeGizmo ? activeGizmo->getHighlightedComponents() : std::vector<String>());
+		sceneEditorWindow.setHighlightedComponents(activeGizmo ? activeGizmo->getHighlightedComponents() : Vector<String>());
 	}
 
 	if (activeGizmo) {

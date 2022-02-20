@@ -322,7 +322,7 @@ public:
 		container->add(context.makeField("bool", pars.withSubKey("visible", "true"), ComponentEditorLabelCreation::Never));
 		auto containerWeak = std::weak_ptr<UIWidget>(container);
 
-		auto prevMaterialParameters = std::make_shared<std::vector<std::shared_ptr<IUIElement>>>();
+		auto prevMaterialParameters = std::make_shared<Vector<std::shared_ptr<IUIElement>>>();
 		auto addMaterialParameters = [&context, containerWeak, prevMaterialParameters, pars](const String& materialName)
 		{
 			const auto& data = pars.data;
@@ -564,8 +564,8 @@ public:
 
 		auto updateAnimation = [container, data, &resources] (const String& animName)
 		{
-			std::vector<String> sequences;
-			std::vector<String> directions;
+			Vector<String> sequences;
+			Vector<String> directions;
 
 			auto material = container->getWidgetAs<UITextInput>("material");
 			if (animName.isEmpty()) {
@@ -666,7 +666,7 @@ public:
 		container->add(button, 0);
 
        	container->setHandle(UIEventType::ReloadData, pars.componentName + ":" + data.getName(), [=](const UIEvent& event) {
-			std::vector<Vector2f> newVal;
+			Vector<Vector2f> newVal;
 			if (data.getFieldData().getType() != ConfigNodeType::Undefined) {
 				newVal = data.getFieldData().asVector<Vector2f>();
 			}
@@ -699,7 +699,7 @@ class ComponentEditorStdVectorFieldFactory : public IComponentEditorFieldFactory
 public:
 	String getFieldType() override
 	{
-		return "std::vector<>";
+		return "Vector<>";
 	}
 
 	bool isNested() const override
@@ -1194,7 +1194,7 @@ public:
 		fillSizer->add(std::move(fillVertical), 0, {}, UISizerAlignFlags::Centre);
 		fillSizer->add(std::make_shared<UIImage>(Sprite().setImage(res, "arrows/arrow_up_down.png")), 0, {}, UISizerAlignFlags::Centre);
 
-		std::vector<String> listIds;
+		Vector<String> listIds;
 		auto alignList = std::make_shared<UIList>("align", context.getUIFactory().getStyle("list"), UISizerType::Grid, 3);
 		auto addDir = [&] (int dir, std::string_view imageName)
 		{
@@ -1300,9 +1300,9 @@ public:
 	}
 };
 
-std::vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
+Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
-	std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
+	Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
 
 	factories.emplace_back(std::make_unique<ComponentEditorTextFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>());

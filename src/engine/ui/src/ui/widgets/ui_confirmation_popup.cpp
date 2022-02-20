@@ -5,7 +5,7 @@
 #include "widgets/ui_label.h"
 using namespace Halley;
 
-UIConfirmationPopup::UIConfirmationPopup(UIFactory& factory, String title, String message, std::vector<ButtonType> buttons, Callback callback)
+UIConfirmationPopup::UIConfirmationPopup(UIFactory& factory, String title, String message, Vector<ButtonType> buttons, Callback callback)
 	: UIWidget("confirmationPopup", Vector2f(), UISizer())
 	, title(std::move(title))
 	, message(std::move(message))

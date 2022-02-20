@@ -164,7 +164,7 @@ namespace Halley
 
 		void makeAvailable()
 		{
-			std::vector<std::function<void(T)>> toRun;
+			Vector<std::function<void(T)>> toRun;
 
 			{
 				std::unique_lock<std::mutex> lock(mutex);
@@ -183,7 +183,7 @@ namespace Halley
 		std::atomic<bool> cancelled;
 		std::optional<T> data;
 
-		std::vector<std::function<void(T)>> continuations;
+		Vector<std::function<void(T)>> continuations;
 		std::mutex mutex;
 		std::condition_variable condition;
 	};

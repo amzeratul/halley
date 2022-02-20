@@ -10,7 +10,7 @@ namespace Halley
 	class AssetPackerTask : public Task
 	{
 	public:
-		explicit AssetPackerTask(Project& project, std::optional<std::set<String>> assetsToPack, std::vector<String> deletedAssets);
+		explicit AssetPackerTask(Project& project, std::optional<std::set<String>> assetsToPack, Vector<String> deletedAssets);
 
 	protected:
 		void run() override;
@@ -18,6 +18,6 @@ namespace Halley
 	private:
 		Project& project;
 		std::optional<std::set<String>> assetsToPack;
-		std::vector<String> deletedAssets;
+		Vector<String> deletedAssets;
 	};
 }

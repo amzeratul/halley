@@ -14,7 +14,7 @@ namespace Halley {
 
 	class UIOptionListMorpher : public UIWidget {
 	public:
-		explicit UIOptionListMorpher(String id, UIStyle dropdownStyle, UIStyle spinlistStyle, std::vector<LocalisedString> options = {}, int defaultOption = 0);
+		explicit UIOptionListMorpher(String id, UIStyle dropdownStyle, UIStyle spinlistStyle, Vector<LocalisedString> options = {}, int defaultOption = 0);
 
 		void setSelectedOption(int option);
 		void setSelectedOption(const String& id);
@@ -25,9 +25,9 @@ namespace Halley {
 		void setInputButtons(const UIInputButtons& buttons) override;
 		void setInputType(UIInputType uiInput) override;
 
-		void setOptions(std::vector<LocalisedString> options, int defaultOption = -1);
-		void setOptions(std::vector<String> optionIds, const std::vector<LocalisedString>& options, int defaultOption = -1);
-		void setOptions(const I18N& i18n, const String& i18nPrefix, const std::vector<String>& optionIds, int defaultOption = -1);
+		void setOptions(Vector<LocalisedString> options, int defaultOption = -1);
+		void setOptions(Vector<String> optionIds, const Vector<LocalisedString>& options, int defaultOption = -1);
+		void setOptions(const I18N& i18n, const String& i18nPrefix, const Vector<String>& optionIds, int defaultOption = -1);
 
 		void onManualControlCycleValue(int delta) override;
 		void onManualControlActivate() override;
@@ -56,6 +56,6 @@ namespace Halley {
 		std::shared_ptr<UIDropdown> dropdown;
 		std::shared_ptr<UISpinList> spinlist;
 
-		void makeChildren(const std::vector<LocalisedString>& os, int defaultOption);
+		void makeChildren(const Vector<LocalisedString>& os, int defaultOption);
 	};
 }

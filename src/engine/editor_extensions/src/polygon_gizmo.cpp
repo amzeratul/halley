@@ -163,7 +163,7 @@ void PolygonGizmo::deselect()
 	}
 }
 
-std::vector<String> PolygonGizmo::getHighlightedComponents() const
+Vector<String> PolygonGizmo::getHighlightedComponents() const
 {
 	return { componentName };
 }

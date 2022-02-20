@@ -104,7 +104,7 @@ void UIRoot::update(Time t, UIInputType activeInputType, spInputDevice mouse, sp
 	} while (isWaitingToSpawnChildren());
 }
 
-void UIRoot::updateGamepadInputTree(const spInputDevice& input, UIWidget& widget, std::vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting)
+void UIRoot::updateGamepadInputTree(const spInputDevice& input, UIWidget& widget, Vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting)
 {
 	if (!widget.isActive()) {
 		return;
@@ -142,7 +142,7 @@ void UIRoot::updateGamepadInput(const spInputDevice& input)
 	}
 	
 	auto& cs = getChildren();
-	std::vector<UIWidget*> inputTargets;
+	Vector<UIWidget*> inputTargets;
 	UIGamepadInput::Priority bestPriority = UIGamepadInput::Priority::Lowest;
 
 	bool accepting = true;
@@ -550,7 +550,7 @@ void UIRoot::unfocusWidget(UIWidget& widget)
 
 void UIRoot::focusNext(bool reverse)
 {
-	std::vector<std::shared_ptr<UIWidget>> focusables;
+	Vector<std::shared_ptr<UIWidget>> focusables;
 	descend([&] (const std::shared_ptr<UIWidget>& e)
 	{
 		if (e->canReceiveFocus()) {
@@ -575,9 +575,9 @@ void UIRoot::onWidgetRemoved(const UIWidget& widget)
 	}
 }
 
-std::vector<std::shared_ptr<UIWidget>> UIRoot::collectWidgets()
+Vector<std::shared_ptr<UIWidget>> UIRoot::collectWidgets()
 {
-	std::vector<std::shared_ptr<UIWidget>> output;
+	Vector<std::shared_ptr<UIWidget>> output;
 	if (getChildren().empty()) {
 		return {};
 	}
@@ -590,7 +590,7 @@ void UIRoot::onChildAdded(UIWidget& child)
 	//child.notifyTreeAddedToRoot(*this);
 }
 
-void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<std::shared_ptr<UIWidget>>& output)
+void UIRoot::collectWidgets(const std::shared_ptr<UIWidget>& start, Vector<std::shared_ptr<UIWidget>>& output)
 {
 	for (auto& c: start->getChildren()) {
 		collectWidgets(c, output);

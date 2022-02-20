@@ -124,14 +124,14 @@ const SpriteSheetEntry& SpriteSheet::getDummySprite() const
 	return dummySprite;
 }
 
-const std::vector<SpriteSheetFrameTag>& SpriteSheet::getFrameTags() const
+const Vector<SpriteSheetFrameTag>& SpriteSheet::getFrameTags() const
 {
 	return frameTags;
 }
 
-std::vector<String> SpriteSheet::getSpriteNames() const
+Vector<String> SpriteSheet::getSpriteNames() const
 {
-	std::vector<String> result;
+	Vector<String> result;
 	for (auto& f: spriteIdx) {
 		result.push_back(f.first);
 	}

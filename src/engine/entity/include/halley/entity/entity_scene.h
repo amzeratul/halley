@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+#include "halley/data_structures/vector.h"
 
 #include "entity.h"
 #include "prefab.h"
@@ -23,8 +23,8 @@ namespace Halley {
 		
 		explicit EntityScene(bool allowReload = false, uint8_t worldPartition = 0);
 		
-		std::vector<EntityId>& getEntities();
-		const std::vector<EntityId>& getEntities() const;
+		Vector<EntityId>& getEntities();
+		const Vector<EntityId>& getEntities() const;
 
 		bool needsUpdate() const;
 		void update(EntityFactory& factory, IEntitySceneUpdateCallbacks* callbacks = nullptr);
@@ -53,15 +53,15 @@ namespace Halley {
 
 		private:
 			std::shared_ptr<const Prefab> prefab;
-			std::vector<EntityId> entityIds;
+			Vector<EntityId> entityIds;
 			int assetVersion = 0;
 
-			std::vector<EntityRef> getEntities(World& world) const;
+			Vector<EntityRef> getEntities(World& world) const;
 		};
 
-		std::vector<EntityId> entities;
-		std::vector<PrefabObserver> prefabObservers;
-		std::vector<PrefabObserver> sceneObservers;
+		Vector<EntityId> entities;
+		Vector<PrefabObserver> prefabObservers;
+		Vector<PrefabObserver> sceneObservers;
 		bool allowReload = false;
 		uint8_t worldPartition = 0;
 

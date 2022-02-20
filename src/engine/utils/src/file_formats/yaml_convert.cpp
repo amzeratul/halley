@@ -16,7 +16,7 @@ ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node)
 		result = std::move(map);
 	}
 	else if (node.IsSequence()) {
-		std::vector<ConfigNode> list;
+		Vector<ConfigNode> list;
 		for (auto& n : node) {
 			list.emplace_back(parseYAMLNode(n));
 		}
@@ -145,7 +145,7 @@ void YAMLConvert::emitMap(const ConfigNode& node, YAML::Emitter& emitter, const 
 	const auto& map = node.asMap();
 
 	// Sort entries by key, using options
-	std::vector<String> keys;
+	Vector<String> keys;
 	keys.reserve(map.size());
 	for (auto& kv: map) {
 		if (kv.second.getType() != ConfigNodeType::Undefined) {

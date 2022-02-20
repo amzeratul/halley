@@ -31,8 +31,8 @@ Project::Project(Path projectRootPath, Path halleyRootPath)
 	platforms = properties->getPlatforms();
 
 	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getUnpackedAssetsPath(), getUnpackedAssetsPath() / "import.db", getUnpackedAssetsPath() / "assets.db", platforms);
-	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", std::vector<String>{ "" });
-	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", std::vector<String>{ "" });
+	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", Vector<String>{ "" });
+	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", Vector<String>{ "" });
 }
 
 Project::~Project()
@@ -53,11 +53,11 @@ void Project::loadDLL(const HalleyStatics& statics)
 	}
 }
 
-void Project::setPlugins(std::vector<HalleyPluginPtr> plugins)
+void Project::setPlugins(Vector<HalleyPluginPtr> plugins)
 {
 	if (plugins != this->plugins || !assetImporter) {
 		this->plugins = std::move(plugins);
-		assetImporter = std::make_shared<AssetImporter>(*this, std::vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});
+		assetImporter = std::make_shared<AssetImporter>(*this, Vector<Path>{getSharedAssetsSrcPath(), getAssetsSrcPath()});
 	}
 }
 
@@ -78,7 +78,7 @@ void Project::onBuildDone()
 	});
 }
 
-const std::vector<String>& Project::getPlatforms() const
+const Vector<String>& Project::getPlatforms() const
 {
 	return platforms;
 }
@@ -167,9 +167,9 @@ const std::shared_ptr<AssetImporter>& Project::getAssetImporter() const
 	return assetImporter;
 }
 
-std::vector<std::unique_ptr<IAssetImporter>> Project::getAssetImportersFromPlugins(ImportAssetType type) const
+Vector<std::unique_ptr<IAssetImporter>> Project::getAssetImportersFromPlugins(ImportAssetType type) const
 {
-	std::vector<std::unique_ptr<IAssetImporter>> result;
+	Vector<std::unique_ptr<IAssetImporter>> result;
 	for (auto& plugin: plugins) {
 		auto importer = plugin->getAssetImporter(type);
 		if (importer) {
@@ -285,12 +285,12 @@ bool Project::writeAssetToDisk(const Path& filePath, std::string_view str)
 	return writeAssetToDisk(filePath, gsl::as_bytes(gsl::span<const char>(str)));
 }
 
-std::vector<String> Project::getAssetSrcList() const
+Vector<String> Project::getAssetSrcList() const
 {
 	return importAssetsDatabase->getInputFiles();
 }
 
-std::vector<std::pair<AssetType, String>> Project::getAssetsFromFile(const Path& path) const
+Vector<std::pair<AssetType, String>> Project::getAssetsFromFile(const Path& path) const
 {
 	return importAssetsDatabase->getAssetsFromFile(path);
 }
@@ -305,7 +305,7 @@ void Project::onAllAssetsImported()
 void Project::reloadAssets(const std::set<String>& assets, bool packed)
 {
 	// Build name list
-	std::vector<String> assetIds;
+	Vector<String> assetIds;
 	assetIds.reserve(assets.size());
 	for (auto& a: assets) {
 		assetIds.push_back(a);
@@ -455,8 +455,8 @@ void Project::loadECSData()
 
 	const auto& inputFiles = codegenDatabase->getInputFiles();
 	const auto n = inputFiles.size();
-	std::vector<CodegenSourceInfo> sources(n);
-	std::vector<Bytes> inputData(n);
+	Vector<CodegenSourceInfo> sources(n);
+	Vector<Bytes> inputData(n);
 	
 	for (size_t i = 0; i < n; ++i) {
 		inputData[i] = FileSystem::readFile(getGenSrcPath() / inputFiles[i]);

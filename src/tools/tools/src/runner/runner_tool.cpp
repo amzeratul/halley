@@ -12,7 +12,7 @@ int RunnerTool::runRaw(int argc, char* argv[])
 	}
 	
 	// Skip the first two arguments (halley-cmd path and "run")
-	std::vector<std::string> args;
+	Vector<std::string> args;
 	args.reserve(argc - 2);
 	for (int i = 2; i < argc; ++i) {
 		args.emplace_back(argv[i]);

@@ -157,7 +157,7 @@ void Particles::update(Time t)
 	}
 }
 
-void Particles::setSprites(std::vector<Sprite> sprites)
+void Particles::setSprites(Vector<Sprite> sprites)
 {
 	baseSprites = std::move(sprites);
 }

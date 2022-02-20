@@ -2,7 +2,7 @@
 
 using namespace Halley;
 
-std::pair<String, std::vector<ColourOverride>> ScriptStart::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptStart::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	return { "Start execution", {} };
 }
@@ -29,7 +29,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptRestart::getPinConfiguration(con
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptRestart::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptRestart::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	return { "Restart script from beginning.", {} };
 }
@@ -49,7 +49,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptStop::getPinConfiguration(const 
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptStop::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptStop::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	return { "Terminate script.", {} };
 }

@@ -347,7 +347,7 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const EntityData& d
 		}
 	} else {
 		// Store the existing ids
-		std::vector<int> existingComps;
+		Vector<int> existingComps;
 		for (auto& c: entity) {
 			existingComps.push_back(c.first);
 		}
@@ -389,7 +389,7 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& dat
 	if (!entity.getRawChildren().empty()) {
 		// Delete old children that are no longer present
 		const auto& newChildren = data.getChildren();
-		std::vector<EntityRef> toDelete;
+		Vector<EntityRef> toDelete;
 		for (auto c: entity.getChildren()) {
 			const auto& uuid = c.getInstanceUUID();
 			if (!std_ex::contains_if(newChildren, [&] (const EntityData& c) { return c.getInstanceUUID() == uuid; })) {
@@ -412,7 +412,7 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& dat
 	}
 
 	// Ensure children order
-	std::vector<UUID> childInstanceUUIDs;
+	Vector<UUID> childInstanceUUIDs;
 	childInstanceUUIDs.reserve(data.getChildren().size());
 	for (const auto& child: data.getChildren()) {
 		childInstanceUUIDs.push_back(child.getInstanceUUID());
@@ -422,7 +422,7 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& dat
 
 void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityDataDelta& delta, const std::shared_ptr<EntityFactoryContext>& context)
 {
-	std::vector<EntityRef> toDelete;
+	Vector<EntityRef> toDelete;
 	for (auto child: entity.getChildren()) {
 		if (std_ex::contains(delta.getChildrenRemoved(), child.getInstanceUUID())) {
 			toDelete.emplace_back(child);

@@ -32,7 +32,7 @@ namespace Halley {
 		void moveCamera(Vector2f pos);
 		bool loadCameraPos();
 		std::shared_ptr<UIWidget> makeCustomUI() const;
-		void setSelectedEntities(std::vector<UUID> uuids, std::vector<EntityData*> datas);
+		void setSelectedEntities(Vector<UUID> uuids, Vector<EntityData*> datas);
 		void setEntityHighlightedOnList(const UUID& uuid);
 		void showEntity(const UUID& uuid);
 		void onToolSet(String& tool, String& componentName, String& fieldName);
@@ -47,7 +47,7 @@ namespace Halley {
 
 		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes();
 
-		std::vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const;
+		Vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const;
 		void onSceneContextMenuSelection(const String& id);
 		void onSceneContextMenuHighlight(const String& id);
 		

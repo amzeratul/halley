@@ -21,7 +21,7 @@ namespace Halley {
 				t * t * p2;
     	}
 
-    	std::vector<Vector2f> toLineSegments() const;
+    	Vector<Vector2f> toLineSegments() const;
     };
 
     class BezierCubic {
@@ -45,7 +45,7 @@ namespace Halley {
 				t * t * t * p3;
     	}
 
-    	std::vector<Vector2f> toLineSegments() const;
+    	Vector<Vector2f> toLineSegments() const;
 
     	BezierCubic operator+(Vector2f v) const
     	{

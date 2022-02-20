@@ -12,7 +12,7 @@ String CodegenImporter::getAssetId(const Path& file, const std::optional<Metadat
 
 void CodegenImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
-	std::vector<CodegenSourceInfo> srcs;
+	Vector<CodegenSourceInfo> srcs;
 	int n = 0;
 	for (auto& f : asset.inputFiles) {
 		if (!collector.reportProgress(lerp(0.0f, 0.25f, float(n) / asset.inputFiles.size()), "Loading sources")) {

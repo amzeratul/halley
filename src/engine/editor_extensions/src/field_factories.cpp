@@ -7,7 +7,7 @@
 
 using namespace Halley;
 
-EnumFieldFactory::EnumFieldFactory(String name, std::vector<String> values)
+EnumFieldFactory::EnumFieldFactory(String name, Vector<String> values)
 	: fieldName(std::move(name))
 	, values(std::move(values))
 {

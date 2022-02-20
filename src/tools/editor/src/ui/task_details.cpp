@@ -103,7 +103,7 @@ void TaskDetails::updateMessages()
 		lastStatus = task->getStatus();
 
 		const bool endedInError = lastStatus == TaskStatus::Done && task->hasError();
-		std::vector<std::pair<LoggerLevel, String>> msgs;
+		Vector<std::pair<LoggerLevel, String>> msgs;
 		if (endedInError) {
 			msgs = task->copyMessagesHead(6, LoggerLevel::Error);
 			if (msgs.size() == 6) {
@@ -118,7 +118,7 @@ void TaskDetails::updateMessages()
 		const auto& textRenderer = msgLabel->getTextRenderer();
 		
 		StringUTF32 message;
-		std::vector<ColourOverride> colours;
+		Vector<ColourOverride> colours;
 		int i = 0;
 		for (const auto& msg: msgs) {
 			colours.emplace_back(message.length(), getColour(*colourScheme, msg.first));

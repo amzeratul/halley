@@ -19,13 +19,13 @@ namespace Halley {
     	const String& getName(const String& id) const;
         const Sprite& getInvalidEntityIcon(IEntityValidator::Severity severity) const;
 
-    	const std::vector<Entry>& getEntries() const;
+    	const Vector<Entry>& getEntries() const;
 
     private:
     	Resources& resources;
     	const UIColourScheme& colourScheme;
     	
-    	std::vector<Entry> entries;
+    	Vector<Entry> entries;
     	HashMap<String, size_t> entryMap;
     	Entry defaultEntry;
         Sprite invalidEntityWarningIcon;

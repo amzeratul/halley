@@ -239,7 +239,7 @@ void NavmeshSet::tryLinkNavMeshes(uint16_t idxA, uint16_t idxB)
 	}
 }
 
-std::vector<NavmeshSet::NodeAndConn> NavmeshSet::findRegionPath(Vector2f startPos, Vector2f endPos, NodeId fromRegionId, NodeId toRegionId) const
+Vector<NavmeshSet::NodeAndConn> NavmeshSet::findRegionPath(Vector2f startPos, Vector2f endPos, NodeId fromRegionId, NodeId toRegionId) const
 {
 	// Ensure the query is valid
 	if (fromRegionId >= static_cast<int>(regionNodes.size()) || toRegionId >= static_cast<int>(regionNodes.size())) {
@@ -249,7 +249,7 @@ std::vector<NavmeshSet::NodeAndConn> NavmeshSet::findRegionPath(Vector2f startPo
 
 	// State map. Using vector for perf, trading space for CPU.
 	// TODO: measure this vs unordered_map or some other hashtable, it's not impossible that it'd perform better (compact memory)
-	std::vector<State> state(portalNodes.size(), State{});
+	Vector<State> state(portalNodes.size(), State{});
 
 	// Open set
 	auto openSet = PriorityQueue<NodeId, NodeComparator>(NodeComparator(state));
@@ -281,7 +281,7 @@ std::vector<NavmeshSet::NodeAndConn> NavmeshSet::findRegionPath(Vector2f startPo
 		const auto& curNode = portalNodes[curId];
 		if (curNode.toRegion == toRegionId) {
 			// A* is done! Generate result and return it
-			std::vector<NodeAndConn> result;
+			Vector<NodeAndConn> result;
 			uint16_t portal = std::numeric_limits<uint16_t>::max();
 			for (uint16_t i = curId; true;) {
 				const auto& nodeData = portalNodes[i];
@@ -348,18 +348,18 @@ std::pair<uint16_t, uint16_t> NavmeshSet::getPortalDestination(uint16_t region, 
 	return { maxVal, maxVal };
 }
 
-std::vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
+Vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
 	const NavigationQuery& queryStart, const NavigationQuery& queryEnd,
 	uint16_t startRegionId, uint16_t endRegionId, const Navmesh::Portal& portal,
-	std::vector<Navmesh::NodeAndConn> startLeg, std::vector<Navmesh::NodeAndConn> endLeg,
+	Vector<Navmesh::NodeAndConn> startLeg, Vector<Navmesh::NodeAndConn> endLeg,
 	NavigationQuery::PostProcessingType type) const
 {
 	// Create initial path of points and nodeIds
 	const auto& startNavmesh = navmeshes.at(startRegionId);
 	const auto& endNavmesh = navmeshes.at(endRegionId);
 	
-	std::vector<Vector2f> points;
-	std::vector<NodeId> nodeIds;
+	Vector<Vector2f> points;
+	Vector<NodeId> nodeIds;
 	const size_t pointsCount = 3 + startLeg.size() + endLeg.size(); // Start + Midpoint + End + Both Legs
 	points.reserve(pointsCount); 
 	nodeIds.reserve(pointsCount);
@@ -394,7 +394,7 @@ std::vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
 	nodeIds.emplace_back(endNavmesh.getNodeAt(queryEnd.to).value());
 
 	// Calculate path costs
-	std::vector<float> pathCosts;
+	Vector<float> pathCosts;
 	pathCosts.resize(points.size());
 	pathCosts[0] = 0.0f;
 	for (size_t i = 1; i < points.size(); i++) {

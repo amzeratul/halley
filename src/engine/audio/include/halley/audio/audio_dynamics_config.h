@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include "halley/data_structures/vector.h"
 
 #include "halley/text/halleystring.h"
 
@@ -29,9 +29,9 @@ namespace Halley {
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
-		const std::vector<Variable>& getVolume() const;
+		const Vector<Variable>& getVolume() const;
 
 	private:
-		std::vector<Variable> volume;
+		Vector<Variable> volume;
 	};
 }

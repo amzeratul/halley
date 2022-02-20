@@ -20,7 +20,7 @@ namespace Halley {
 	private:
 		String name;
 		String encryptionKey;
-		std::vector<String> matches;
+		Vector<String> matches;
 	};
 
 	class AssetPackManifest {
@@ -33,7 +33,7 @@ namespace Halley {
 		std::optional<std::reference_wrapper<const AssetPackManifestEntry>> getPack(const String& asset) const;
 
 	private:
-		std::vector<String> exclude;
-		std::vector<AssetPackManifestEntry> packs;
+		Vector<String> exclude;
+		Vector<AssetPackManifestEntry> packs;
 	};
 }

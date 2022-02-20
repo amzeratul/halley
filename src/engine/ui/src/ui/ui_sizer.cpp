@@ -293,7 +293,7 @@ bool UISizer::isActive() const
 	return false;
 }
 
-void UISizer::setColumnProportions(const std::vector<float>& values)
+void UISizer::setColumnProportions(const Vector<float>& values)
 {
 	if (gridProportions) {
 		gridProportions->columnProportions = values;
@@ -311,7 +311,7 @@ void UISizer::setEvenColumns()
 }
 
 
-void UISizer::setRowProportions(const std::vector<float>& values)
+void UISizer::setRowProportions(const Vector<float>& values)
 {
 	if (gridProportions) {
 		gridProportions->rowProportions = values;
@@ -457,7 +457,7 @@ void UISizer::setRectFree(Rect4f rect, IUIElementListener* listener)
 	}
 }
 
-void UISizer::computeGridSizes(std::vector<float>& colSize, std::vector<float>& rowSize) const
+void UISizer::computeGridSizes(Vector<float>& colSize, Vector<float>& rowSize) const
 {
 	Expects(gridProportions);
 	auto& nColumns = gridProportions->nColumns;
@@ -521,8 +521,8 @@ void UISizer::computeGridSizes(std::vector<float>& colSize, std::vector<float>& 
 
 Vector2f UISizer::computeMinimumSizeGrid() const
 {
-	std::vector<float> colSize;
-	std::vector<float> rowSize;
+	Vector<float> colSize;
+	Vector<float> rowSize;
 	computeGridSizes(colSize, rowSize);
 
 	Vector2f result((colSize.size() - 1) * gap, (rowSize.size() - 1) * gap);
@@ -547,10 +547,10 @@ void UISizer::setRectGrid(Rect4f rect, IUIElementListener* listener)
 	
 	Vector2f startPos = rect.getTopLeft();
 
-	std::vector<float> cols(nColumns);
-	std::vector<float> rows(nRows);
-	std::vector<float> colSize;
-	std::vector<float> rowSize;
+	Vector<float> cols(nColumns);
+	Vector<float> rows(nRows);
+	Vector<float> colSize;
+	Vector<float> rowSize;
 	computeGridSizes(colSize, rowSize);
 
 	// Add up min width

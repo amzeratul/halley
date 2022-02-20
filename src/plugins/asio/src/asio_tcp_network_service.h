@@ -34,7 +34,7 @@ namespace Halley
 		AcceptCallback acceptCallback;
 		std::optional<TCPSocket> acceptingSocket;
 		
-		std::vector<std::shared_ptr<AsioTCPConnection>> activeConnections;
+		Vector<std::shared_ptr<AsioTCPConnection>> activeConnections;
 
 		std::shared_ptr<AsioTCPConnection> acceptConnection();
 		void rejectConnection();

@@ -18,13 +18,13 @@ namespace Halley {
 	private:
 		UIFactory& factory;
 		ResourceObserver observer;
-		std::vector<std::pair<String, int>> uiStyleObservers;
+		Vector<std::pair<String, int>> uiStyleObservers;
 
 		bool requireStyleUpdate() const;
 		bool styleObserverNeedsUpdate(const std::pair<String, int>& observer) const;
 
 		void setupUIStyleObservers();
 
-		void getStyleObservers(const UIWidget& widget, const UIStyleSheet& stylesheet, std::vector<std::pair<String, int>>& styleObservers) const;
+		void getStyleObservers(const UIWidget& widget, const UIStyleSheet& stylesheet, Vector<std::pair<String, int>>& styleObservers) const;
 	};
 }

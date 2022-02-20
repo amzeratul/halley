@@ -511,7 +511,7 @@ void XBLManager::retrieveUserAchievementsState()
 				}
 				else
 				{
-					std::vector<xbox::services::achievements::achievement> achievements = result.payload().items();
+					Vector<xbox::services::achievements::achievement> achievements = result.payload().items();
 					for (unsigned int i = 0; i < achievements.size(); ++i)
 					{
 						xbox::services::achievements::achievement achievement = achievements[i];
@@ -553,7 +553,7 @@ XBLSaveData::XBLSaveData(XBLManager& manager, String containerName)
 	updateContainer();
 }
 
-void XBLManager::setProfanityCheckForbiddenWordsList(std::vector<String> words)
+void XBLManager::setProfanityCheckForbiddenWordsList(Vector<String> words)
 {
 	forbiddenWords.clear();
 	forbiddenWords.resize(words.size());
@@ -636,7 +636,7 @@ Bytes XBLSaveData::getData(const String& path)
 		}
 
 		auto key = winrt::hstring(path.getUTF16());
-		std::vector<winrt::hstring> updates;
+		Vector<winrt::hstring> updates;
 		updates.push_back(key);
 		auto view = winrt::single_threaded_vector(std::move(updates)).GetView();
 
@@ -663,15 +663,15 @@ Bytes XBLSaveData::getData(const String& path)
 	}).get();
 }
 
-std::vector<String> XBLSaveData::enumerate(const String& root)
+Vector<String> XBLSaveData::enumerate(const String& root)
 {
 	if (!isReady()) {
 		throw Exception("Container is not ready yet!", HalleyExceptions::PlatformPlugin);
 	}
 
-	return Concurrent::execute([&] () -> std::vector<String>
+	return Concurrent::execute([&] () -> Vector<String>
 	{
-		std::vector<String> results;
+		Vector<String> results;
 
 		auto query = gameSaveContainer->CreateBlobInfoQuery(root.getUTF16().c_str());
 		auto info = query.GetBlobInfoAsync().get();
@@ -721,7 +721,7 @@ void XBLSaveData::removeData(const String& path)
 	Concurrent::execute([=]() -> void
 	{
 		auto key = winrt::hstring(path.getUTF16());
-		std::vector<winrt::hstring> updates;
+		Vector<winrt::hstring> updates;
 		updates.push_back(key);
 		auto view = winrt::single_threaded_vector(std::move(updates)).GetView();
 
@@ -1222,7 +1222,7 @@ void XBLManager::multiplayerDone()
 void XBLManager::xblMultiplayerPoolProcess()
 {
 	if (xblMultiplayerManager!=nullptr) {
-		std::vector<multiplayer_event> queue = xblMultiplayerManager->do_work();
+		Vector<multiplayer_event> queue = xblMultiplayerManager->do_work();
 		for (auto& e : queue) {
 			switch (e.event_type()) {
 

@@ -150,7 +150,7 @@ TextRenderer& TextRenderer::setPixelOffset(Vector2f offset)
 	return *this;
 }
 
-TextRenderer& TextRenderer::setColourOverride(const std::vector<ColourOverride>& colOverride)
+TextRenderer& TextRenderer::setColourOverride(const Vector<ColourOverride>& colOverride)
 {
 	if (colourOverrides != colOverride) {
 		colourOverrides = colOverride;
@@ -182,7 +182,7 @@ TextRenderer TextRenderer::clone() const
 	return *this;
 }
 
-void TextRenderer::generateSprites(std::vector<Sprite>& sprites) const
+void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 {
 	if (!font) {
 		return;
@@ -606,7 +606,7 @@ void ColourStringBuilder::append(std::string_view text, std::optional<Colour4f> 
 	}
 }
 
-std::pair<String, std::vector<ColourOverride>> ColourStringBuilder::moveResults()
+std::pair<String, Vector<ColourOverride>> ColourStringBuilder::moveResults()
 {
 	String result;
 	result.cppStr().reserve(len + 1);

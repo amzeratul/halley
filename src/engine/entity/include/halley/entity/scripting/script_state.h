@@ -67,7 +67,7 @@ namespace Halley {
     	void start(OptionalLite<uint32_t> startNode, uint64_t graphHash);
 		void reset();
     	
-    	std::vector<ScriptStateThread>& getThreads() { return threads; }
+    	Vector<ScriptStateThread>& getThreads() { return threads; }
 
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
         uint64_t getGraphHash() const { return graphHash; }
@@ -96,14 +96,14 @@ namespace Halley {
     	void setVariable(const String& name, ConfigNode value);
 
 	private:
-    	std::vector<ScriptStateThread> threads;
+    	Vector<ScriptStateThread> threads;
     	uint64_t graphHash = 0;
     	bool started = false;
     	bool introspection = false;
     	std::map<uint32_t, size_t> nodeCounters;
     	std::map<String, ConfigNode> variables;
 
-    	std::vector<NodeIntrospection> nodeIntrospection;
+    	Vector<NodeIntrospection> nodeIntrospection;
 
     	void onNodeStartedIntrospection(uint32_t nodeId);
     	void onNodeEndedIntrospection(uint32_t nodeId);

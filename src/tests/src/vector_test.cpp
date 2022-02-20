@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <halley.hpp>
+#include <vector>
 
 #include "halley/data_structures/vector_size32.h"
 using namespace Halley;

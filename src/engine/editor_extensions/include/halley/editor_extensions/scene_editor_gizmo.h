@@ -83,7 +83,7 @@ namespace Halley {
 		virtual void draw(Painter& painter, const ISceneEditor& sceneEditor) const;
 		virtual std::shared_ptr<UIWidget> makeUI();
 
-		void setSelectedEntities(std::vector<EntityRef> entities, std::vector<EntityData*> entityDatas);
+		void setSelectedEntities(Vector<EntityRef> entities, Vector<EntityData*> entityDatas);
 		virtual void refreshEntity();
 
 		void setCamera(const Camera& camera);
@@ -92,7 +92,7 @@ namespace Halley {
 		virtual bool isHighlighted() const;
 		virtual void deselect();
 		
-		virtual std::vector<String> getHighlightedComponents() const;
+		virtual Vector<String> getHighlightedComponents() const;
 
 		virtual bool onKeyPress(KeyboardKeyPress key);
 		virtual bool canBoxSelectEntities() const;
@@ -101,7 +101,7 @@ namespace Halley {
 		virtual void onEntityChanged();
 
 		std::optional<ConstEntityRef> getEntity(size_t entityIdx = 0) const;
-		const std::vector<EntityRef>& getEntities() const;
+		const Vector<EntityRef>& getEntities() const;
 
 		const EntityData& getEntityData(size_t entityIdx = 0) const;
 		gsl::span<const EntityData*> getEntityDatas() const;
@@ -128,9 +128,9 @@ namespace Halley {
 		}
 
 	private:
-		std::vector<EntityRef> curEntities;
-		std::vector<EntityData> oldEntityDatas;
-		std::vector<EntityData*> entityDatas;
+		Vector<EntityRef> curEntities;
+		Vector<EntityData> oldEntityDatas;
+		Vector<EntityData*> entityDatas;
 		
 		SceneEditorOutputState* outputState = nullptr;
 		float zoom = 1.0f;

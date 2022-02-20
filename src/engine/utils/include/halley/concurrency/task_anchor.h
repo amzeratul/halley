@@ -46,8 +46,8 @@ namespace Halley
 		bool hasError() const;
 		
 		size_t getNumMessages() const;
-		std::vector<std::pair<LoggerLevel, String>> copyMessagesHead(size_t max, std::optional<LoggerLevel> filter = {}) const;
-		std::vector<std::pair<LoggerLevel, String>> copyMessagesTail(size_t max, std::optional<LoggerLevel> filter = {}) const;
+		Vector<std::pair<LoggerLevel, String>> copyMessagesHead(size_t max, std::optional<LoggerLevel> filter = {}) const;
+		Vector<std::pair<LoggerLevel, String>> copyMessagesTail(size_t max, std::optional<LoggerLevel> filter = {}) const;
 
 		Vector<std::unique_ptr<Task>> getContinuations();
 		Vector<std::unique_ptr<Task>> getPendingTasks();

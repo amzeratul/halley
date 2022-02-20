@@ -392,7 +392,7 @@ void MFMoviePlayer::readAudioSample(Time time, gsl::span<const gsl::byte> data)
 {
 	auto src = gsl::span<const short>(reinterpret_cast<const short*>(data.data()), data.size() / sizeof(short));
 
-	std::vector<AudioConfig::SampleFormat> samples(src.size());
+	Vector<AudioConfig::SampleFormat> samples(src.size());
 	for (int i = 0; i < src.size(); ++i) {
 		samples[i] = src[i] / 32768.0f;
 	}

@@ -11,7 +11,7 @@
 using namespace Halley;
 
 
-AddComponentWindow::AddComponentWindow(UIFactory& factory, const std::vector<String>& componentList, Callback callback)
+AddComponentWindow::AddComponentWindow(UIFactory& factory, const Vector<String>& componentList, Callback callback)
 	: ChooseAssetWindow(factory, std::move(callback), false)
 {
 	setAssetIds(componentList, "");
@@ -91,7 +91,7 @@ std::shared_ptr<UISizer> ChooseAssetTypeWindow::makeItemSizer(std::shared_ptr<UI
 	}
 }
 
-void ChooseAssetTypeWindow::sortItems(std::vector<std::pair<String, String>>& values)
+void ChooseAssetTypeWindow::sortItems(Vector<std::pair<String, String>>& values)
 {
 	if (hasPreview) {
 		sortItemsById(values);

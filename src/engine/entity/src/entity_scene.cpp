@@ -14,12 +14,12 @@ EntityScene::EntityScene(bool allowReload, uint8_t worldPartition)
 {
 }
 
-std::vector<EntityId>& EntityScene::getEntities()
+Vector<EntityId>& EntityScene::getEntities()
 {
 	return entities;
 }
 
-const std::vector<EntityId>& EntityScene::getEntities() const
+const Vector<EntityId>& EntityScene::getEntities() const
 {
 	return entities;
 }
@@ -178,9 +178,9 @@ const std::shared_ptr<const Prefab>& EntityScene::PrefabObserver::getPrefab() co
 	return prefab;
 }
 
-std::vector<EntityRef> EntityScene::PrefabObserver::getEntities(World& world) const
+Vector<EntityRef> EntityScene::PrefabObserver::getEntities(World& world) const
 {
-	std::vector<EntityRef> entities;
+	Vector<EntityRef> entities;
 	for (const auto& id: entityIds) {
 		auto* entity = world.tryGetRawEntity(id);
 		if (entity) {

@@ -206,7 +206,7 @@ bool ScriptingGizmo::isHighlighted() const
 	return !!nodeUnderMouse || curEntityTarget.isValid() || nodeEditingConnection;
 }
 
-std::vector<String> ScriptingGizmo::getHighlightedComponents() const
+Vector<String> ScriptingGizmo::getHighlightedComponents() const
 {
 	return { "Script" };
 }

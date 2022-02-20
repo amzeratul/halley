@@ -55,7 +55,7 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 		}
 
 		const auto& texs = overlayMethod->getTextureUniforms();
-		std::vector<RenderGraphPinType> inputPinTypes;
+		Vector<RenderGraphPinType> inputPinTypes;
 		inputPinTypes.reserve(2 + texs.size());
 		inputPinTypes.push_back(RenderGraphPinType::ColourBuffer);
 		inputPinTypes.push_back(RenderGraphPinType::DepthStencilBuffer);
@@ -193,7 +193,7 @@ std::shared_ptr<Texture> RenderGraphNode::makeTexture(VideoAPI& video, RenderGra
 	return texture;
 }
 
-void RenderGraphNode::render(const RenderGraph& graph, VideoAPI& video, const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue)
+void RenderGraphNode::render(const RenderGraph& graph, VideoAPI& video, const RenderContext& rc, Vector<RenderGraphNode*>& renderQueue)
 {
 	prepareTextures(video, rc);
 	renderNode(graph, rc);
@@ -323,7 +323,7 @@ RenderContext RenderGraphNode::getTargetRenderContext(const RenderContext& rc) c
 	}
 }
 
-void RenderGraphNode::notifyOutputs(std::vector<RenderGraphNode*>& renderQueue)
+void RenderGraphNode::notifyOutputs(Vector<RenderGraphNode*>& renderQueue)
 {
 	std::shared_ptr<Texture> colour;
 	std::shared_ptr<Texture> depthStencil;

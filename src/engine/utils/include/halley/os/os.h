@@ -42,7 +42,7 @@ namespace Halley {
 	public:
 		struct FileType {
 			String name;
-			std::vector<String> extensions; // Should not contain a "."
+			Vector<String> extensions; // Should not contain a "."
 			bool makeDefault = false;
 		};
 
@@ -50,7 +50,7 @@ namespace Halley {
 		Path defaultPath;
 		bool save = false;
 		bool folderOnly = false;
-		std::vector<FileType> fileTypes;
+		Vector<FileType> fileTypes;
 	};
 
 	class OS {
@@ -74,7 +74,7 @@ namespace Halley {
 		virtual Path parseProgramPath(const String& commandLine);
 		virtual void createDirectories(const Path& path);
 		virtual void atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data, std::optional<Path> backupOldVersionPath = {});
-		virtual std::vector<Path> enumerateDirectory(const Path& path);
+		virtual Vector<Path> enumerateDirectory(const Path& path);
 
 		virtual void setConsoleColor(int foreground, int background);
 		virtual int runCommand(String command, String cwd = "", ILoggerSink* sink = nullptr);

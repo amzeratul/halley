@@ -30,6 +30,6 @@ namespace Halley {
         int currentPage = 0;
     	bool guardedUpdate = false;
 
-		std::vector<std::shared_ptr<UIWidget>> pages;
+		Vector<std::shared_ptr<UIWidget>> pages;
     };
 }

@@ -14,7 +14,7 @@ namespace Halley
 		bool isConnected() const override;
 		void enqueue(std::unique_ptr<NetworkMessage> msg, int channel) override;
 		void sendAll() override;
-		std::vector<std::unique_ptr<NetworkMessage>> receiveAll() override;
+		Vector<std::unique_ptr<NetworkMessage>> receiveAll() override;
 				
 	private:
 		std::shared_ptr<IConnection> connection;

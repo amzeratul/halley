@@ -60,7 +60,7 @@ namespace Halley {
 		void setUIMouseRemapping(std::function<Vector2f(Vector2f)> remapFunction);
 		void unsetUIMouseRemapping();
 
-		std::vector<std::shared_ptr<UIWidget>> collectWidgets();
+		Vector<std::shared_ptr<UIWidget>> collectWidgets();
 
 		void onChildAdded(UIWidget& child) override;
 		
@@ -89,13 +89,13 @@ namespace Halley {
 
 		std::function<Vector2f(Vector2f)> mouseRemap;
 		std::unique_ptr<TextInputCapture> textCapture;
-		std::vector<std::pair<std::weak_ptr<UIWidget>, int>> keyPressListeners;
+		Vector<std::pair<std::weak_ptr<UIWidget>, int>> keyPressListeners;
 		std::function<bool(KeyboardKeyPress)> unhandledKeyPressListener;
 
 		std::shared_ptr<UIToolTip> toolTip;
 
 		void updateMouse(const std::shared_ptr<InputDevice>& mouse, KeyMods keyMods);
-		void updateGamepadInputTree(const std::shared_ptr<InputDevice>& input, UIWidget& c, std::vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting);
+		void updateGamepadInputTree(const std::shared_ptr<InputDevice>& input, UIWidget& c, Vector<UIWidget*>& inputTargets, UIGamepadInput::Priority& bestPriority, bool accepting);
 		void updateGamepadInput(const std::shared_ptr<InputDevice>& input);
 
 		void updateKeyboardInput();
@@ -107,7 +107,7 @@ namespace Halley {
 		std::shared_ptr<UIWidget> getWidgetUnderMouse(Vector2f mousePos, bool includeDisabled = false) const;
 		std::pair<std::shared_ptr<UIWidget>, int> getWidgetUnderMouse(const std::shared_ptr<UIWidget>& curWidget, Vector2f mousePos, bool includeDisabled = false, int childLayerAdjustment = 0) const;
 		void updateMouseOver(const std::shared_ptr<UIWidget>& underMouse);
-		void collectWidgets(const std::shared_ptr<UIWidget>& start, std::vector<std::shared_ptr<UIWidget>>& output);
+		void collectWidgets(const std::shared_ptr<UIWidget>& start, Vector<std::shared_ptr<UIWidget>>& output);
 
 		void focusWidget(UIWidget& widget);
 		void unfocusWidget(UIWidget& widget);

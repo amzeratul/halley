@@ -98,10 +98,10 @@ bool AssetDatabase::hasDatabase(AssetType type) const
 	return dbs.find(static_cast<int>(type)) != dbs.end();
 }
 
-std::vector<String> AssetDatabase::getAssets() const
+Vector<String> AssetDatabase::getAssets() const
 {
 	std::set<String> contains;
-	std::vector<String> result;
+	Vector<String> result;
 	for (auto& db: dbs) {
 		String prefix = toString(AssetType(db.first)) + ":";
 		for (const auto& asset: db.second.getAssets()) {
@@ -126,9 +126,9 @@ void AssetDatabase::deserialize(Deserializer& s)
 	s >> dbs;
 }
 
-std::vector<String> AssetDatabase::enumerate(AssetType type) const
+Vector<String> AssetDatabase::enumerate(AssetType type) const
 {
-	std::vector<String> result;
+	Vector<String> result;
 	if (hasDatabase(type)) {
 		for (auto& asset: getDatabase(type).getAssets()) {
 			result.push_back(asset.first);

@@ -30,9 +30,9 @@ namespace Halley {
         std::shared_ptr<const Material> getMaterial() const;
 
 		void setVertices(size_t num, Bytes vertexData);
-		void setIndices(std::vector<IndexType> indices);
+		void setIndices(Vector<IndexType> indices);
 		void setMaterialName(String name);
-		void setTextureNames(std::vector<String> textureNames);
+		void setTextureNames(Vector<String> textureNames);
 
 		void serialize(Serializer& deserializer) const;
 		void deserialize(Deserializer& deserializer);
@@ -40,10 +40,10 @@ namespace Halley {
     private:
 		uint32_t numVertices = 0;
         Bytes vertexData;
-        std::vector<IndexType> indices;
+        Vector<IndexType> indices;
 
 		String materialName;
-		std::vector<String> textureNames;
+		Vector<String> textureNames;
 		std::shared_ptr<Material> material;
     };
 }

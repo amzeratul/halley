@@ -30,22 +30,22 @@ namespace Halley
 		DirectoryMonitor monitorSharedGen;
 		DirectoryMonitor monitorSharedGenSrc;
 		bool oneShot;
-		std::vector<Path> directoryMetas;
+		Vector<Path> directoryMetas;
 
 		std::mutex mutex;
 		std::condition_variable condition;
 
-		std::vector<Path> inbox;
-		std::vector<Path> pending;
+		Vector<Path> inbox;
+		Vector<Path> pending;
 
 		static bool hasAssetsToImport(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets);
-		static std::vector<ImportAssetsDatabaseEntry> getAssetsToImport(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets);
+		static Vector<ImportAssetsDatabaseEntry> getAssetsToImport(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets);
 		
-		std::map<String, ImportAssetsDatabaseEntry> checkSpecificAssets(ImportAssetsDatabase& db, const std::vector<Path>& path);
-		std::map<String, ImportAssetsDatabaseEntry> checkAllAssets(ImportAssetsDatabase& db, std::vector<Path> srcPaths, bool collectDirMeta);
+		std::map<String, ImportAssetsDatabaseEntry> checkSpecificAssets(ImportAssetsDatabase& db, const Vector<Path>& path);
+		std::map<String, ImportAssetsDatabaseEntry> checkAllAssets(ImportAssetsDatabase& db, Vector<Path> srcPaths, bool collectDirMeta);
 		bool requestImport(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry> assets, Path dstPath, String taskName, bool packAfter);
-		std::optional<Path> findDirectoryMeta(const std::vector<Path>& metas, const Path& path) const;
-		bool importFile(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry>& assets, bool isCodegen, bool skipGen, const std::vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath);
+		std::optional<Path> findDirectoryMeta(const Vector<Path>& metas, const Path& path) const;
+		bool importFile(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry>& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath);
 		void sleep(int ms);
 	};
 }

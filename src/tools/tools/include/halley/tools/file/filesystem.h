@@ -2,7 +2,7 @@
 
 #include <gsl/gsl>
 #include "halley/utils/utils.h"
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include "halley/file/path.h"
 #include "halley/data_structures/maybe.h"
 
@@ -29,7 +29,7 @@ namespace Halley {
 		static void writeFile(const Path& path, const String& data);
 		static Bytes readFile(const Path& path);
 
-		static std::vector<Path> enumerateDirectory(const Path& path);
+		static Vector<Path> enumerateDirectory(const Path& path);
 		
 		static Path getRelative(const Path& path, const Path& parentPath);
 		static Path getAbsolute(const Path& path);

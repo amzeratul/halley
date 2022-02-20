@@ -21,22 +21,22 @@ namespace Halley
 			IndexType vn = 0;
 		};
 		
-		std::vector<VertexData> vertices;
-		std::vector<IndexType> indices;
+		Vector<VertexData> vertices;
+		Vector<IndexType> indices;
 		
-		std::vector<Vector3f> v;
-		std::vector<Vector3f> vt;
-		std::vector<Vector3f> vn;
+		Vector<Vector3f> v;
+		Vector<Vector3f> vt;
+		Vector<Vector3f> vn;
 
 		std::map<FaceVertex, IndexType> vertexMap;
 
 		std::unique_ptr<Mesh> makeMesh();
 		void parseLine(const String& data);
 
-		void parseV(std::vector<String>& tokens);
-		void parseVN(std::vector<String>& tokens);
-		void parseVT(std::vector<String>& tokens);
-		void parseF(std::vector<String>& tokens);
+		void parseV(Vector<String>& tokens);
+		void parseVN(Vector<String>& tokens);
+		void parseVT(Vector<String>& tokens);
+		void parseF(Vector<String>& tokens);
 		void makeTriangle(const FaceVertex& a, const FaceVertex& b, const FaceVertex& c);
 		IndexType getIndex(const FaceVertex& vert);
 	};

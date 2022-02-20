@@ -35,7 +35,7 @@ namespace Halley {
 		bool isHighlighted() const override;
 		void deselect() override;
 
-		std::vector<String> getHighlightedComponents() const override;
+		Vector<String> getHighlightedComponents() const override;
 		
 	protected:
 		void onEntityChanged() override;
@@ -55,7 +55,7 @@ namespace Halley {
 	private:
 		std::optional<Vertex> preview;
 		size_t previewIndex = 0;
-		std::vector<SceneEditorGizmoHandle> handles;
+		Vector<SceneEditorGizmoHandle> handles;
 
 		PolygonGizmoMode mode = PolygonGizmoMode::Move;
 		std::optional<PolygonGizmoMode> pendingMode;

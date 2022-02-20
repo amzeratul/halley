@@ -22,7 +22,7 @@ namespace Halley
 		Vector<ComponentFieldSchema> members;
 		HashSet<String> includeFiles;
 		std::optional<String> customImplementation;
-		std::vector<String> componentDependencies;
+		Vector<String> componentDependencies;
 		bool generate = false;
 
 		bool operator<(const ComponentSchema& other) const;

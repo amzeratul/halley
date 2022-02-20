@@ -211,7 +211,7 @@ bool AssetPreviewGenerator::isSpriteVisibleOnCamera(const Sprite& sprite, int ma
 	return true;
 }
 
-std::vector<AssetCategoryFilter> AssetPreviewGenerator::getPrefabCategoryFilters() const
+Vector<AssetCategoryFilter> AssetPreviewGenerator::getPrefabCategoryFilters() const
 {
 	return {};
 }

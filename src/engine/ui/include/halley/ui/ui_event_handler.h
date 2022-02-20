@@ -26,7 +26,7 @@ namespace Halley {
 		std::map<UIEventType, UIEventCallback> handles;
 		std::map<std::pair<UIEventType, String>, UIEventCallback> specificHandles;
 
-		std::vector<UIEvent> eventQueue;
+		Vector<UIEvent> eventQueue;
 
 		void handle(UIEvent& event);
 	};

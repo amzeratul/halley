@@ -162,7 +162,7 @@ void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVe
 	if (standardQuadsOnly) {
 		if (stdQuadElementBuffer.getSize() < numIndices * sizeof(unsigned short)) {
 			size_t indicesToAllocate = nextPowerOf2(numIndices);
-			std::vector<unsigned short> tmp(indicesToAllocate);
+			Vector<unsigned short> tmp(indicesToAllocate);
 			generateQuadIndices(0, indicesToAllocate / 6, tmp.data());
 			stdQuadElementBuffer.setData(gsl::as_bytes(gsl::span<unsigned short>(tmp)));
 		} else {

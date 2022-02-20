@@ -38,13 +38,13 @@ namespace Halley {
 		void setPrefabUUID(const UUID& uuid);
 		void randomiseInstanceUUIDs();
 
-		std::vector<std::pair<String, ConfigNode>>& getComponentsChanged() { return componentsChanged; }
-		const std::vector<std::pair<String, ConfigNode>>& getComponentsChanged() const { return componentsChanged; }
-		const std::vector<String>& getComponentsRemoved() const { return componentsRemoved; }
+		Vector<std::pair<String, ConfigNode>>& getComponentsChanged() { return componentsChanged; }
+		const Vector<std::pair<String, ConfigNode>>& getComponentsChanged() const { return componentsChanged; }
+		const Vector<String>& getComponentsRemoved() const { return componentsRemoved; }
 		
-		const std::vector<EntityData>& getChildrenAdded() const { return childrenAdded; }
-		const std::vector<std::pair<UUID, EntityDataDelta>>& getChildrenChanged() const { return childrenChanged; }
-		const std::vector<UUID>& getChildrenRemoved() const { return childrenRemoved; }
+		const Vector<EntityData>& getChildrenAdded() const { return childrenAdded; }
+		const Vector<std::pair<UUID, EntityDataDelta>>& getChildrenChanged() const { return childrenChanged; }
+		const Vector<UUID>& getChildrenRemoved() const { return childrenRemoved; }
 
 		bool isSimpleDelta() const;
     	
@@ -63,14 +63,14 @@ namespace Halley {
     	std::optional<UUID> prefabUUID;
 		std::optional<UUID> parentUUID;
 
-		std::vector<std::pair<String, ConfigNode>> componentsChanged;// Also includes components added
-		std::vector<String> componentsRemoved;
-		std::vector<String> componentOrder;
+		Vector<std::pair<String, ConfigNode>> componentsChanged;// Also includes components added
+		Vector<String> componentsRemoved;
+		Vector<String> componentOrder;
 
-		std::vector<EntityData> childrenAdded;
-		std::vector<std::pair<UUID, EntityDataDelta>> childrenChanged;
-		std::vector<UUID> childrenRemoved;
-		std::vector<UUID> childrenOrder;
+		Vector<EntityData> childrenAdded;
+		Vector<std::pair<UUID, EntityDataDelta>> childrenChanged;
+		Vector<UUID> childrenRemoved;
+		Vector<UUID> childrenOrder;
 
         enum class FieldId {
         	RESERVED,
@@ -96,18 +96,18 @@ namespace Halley {
 
 		uint16_t getFieldsPresent() const;
 
-		std::vector<std::pair<String, ConfigNode>> getComponentEmptyStructure() const;
+		Vector<std::pair<String, ConfigNode>> getComponentEmptyStructure() const;
 	};
 
 	class SceneDataDelta {
 	public:
 		void addEntity(UUID entityId, EntityDataDelta delta);
-		const std::vector<std::pair<UUID, EntityDataDelta>>& getEntities() const;
+		const Vector<std::pair<UUID, EntityDataDelta>>& getEntities() const;
 
 		void serialize(Serializer& s) const;
     	void deserialize(Deserializer& s);
 
 	private:
-		std::vector<std::pair<UUID, EntityDataDelta>> entities;
+		Vector<std::pair<UUID, EntityDataDelta>> entities;
 	};
 }

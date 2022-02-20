@@ -3,7 +3,7 @@
 #include "halley/text/halleystring.h"
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/text/i18n.h"
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <memory>
 
 namespace Halley {

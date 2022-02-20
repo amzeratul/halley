@@ -14,7 +14,7 @@ namespace Halley {
 
 	class UITextInput : public UIWidget {
 	public:
-		using AutoCompleteHandle = std::function<std::vector<StringUTF32>(StringUTF32)>;
+		using AutoCompleteHandle = std::function<Vector<StringUTF32>(StringUTF32)>;
 		
 		UITextInput(String id, UIStyle style, String text = "", LocalisedString ghostText = {}, std::shared_ptr<UIValidator> validator = {});
 
@@ -108,11 +108,11 @@ namespace Halley {
 		
 		AutoCompleteHandle autoCompleteHandle;
 		StringUTF32 userInputForAutoComplete;
-		std::vector<StringUTF32> autoCompleteOptions;
+		Vector<StringUTF32> autoCompleteOptions;
 		std::optional<size_t> autoCompleteCurOption;
 		bool modifiedByAutoComplete = false;
 
-		std::vector<String> history;
+		Vector<String> history;
 		std::optional<size_t> historyCurOption;
 		bool historyEnabled = false;
 		bool modifiedByHistory = false;

@@ -55,7 +55,7 @@ Bytes DummySaveData::getData(const String& path)
 	return {};
 }
 
-std::vector<String> DummySaveData::enumerate(const String& root)
+Vector<String> DummySaveData::enumerate(const String& root)
 {
 	return {};
 }

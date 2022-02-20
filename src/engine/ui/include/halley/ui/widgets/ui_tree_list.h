@@ -8,11 +8,11 @@ namespace Halley {
     public:
         UITreeListControls(String id, UIStyle style);
 
-        float updateGuides(const std::vector<int>& itemsLeftPerDepth, bool hasChildren, bool expanded);
+        float updateGuides(const Vector<int>& itemsLeftPerDepth, bool hasChildren, bool expanded);
         void setExpanded(bool expanded);
 
     private:
-    	std::vector<std::shared_ptr<UIImage>> guides;
+    	Vector<std::shared_ptr<UIImage>> guides;
         std::shared_ptr<UIButton> expandButton;
         std::shared_ptr<UIButton> collapseButton;
     	bool waitingConstruction = true;
@@ -61,7 +61,7 @@ namespace Halley {
 
         std::unique_ptr<UITreeListItem> removeFromTree(const String& id);
         void updateTree(UITreeList& treeList);
-    	void collectItems(std::vector<std::shared_ptr<UIListItem>>& items);
+    	void collectItems(Vector<std::shared_ptr<UIListItem>>& items);
     	std::optional<FindPositionResult> findPosition(UITreeList& tree, Vector2f pos) const;
     	
         const String& getId() const;
@@ -70,7 +70,7 @@ namespace Halley {
         size_t getChildIndex(const String& id) const;
 
         std::shared_ptr<UIListItem> getListItem() const;
-        const std::vector<std::unique_ptr<UITreeListItem>>& getChildren() const;
+        const Vector<std::unique_ptr<UITreeListItem>>& getChildren() const;
 
     	bool canHaveChildren() const;
 
@@ -84,11 +84,11 @@ namespace Halley {
         std::shared_ptr<UILabel> label;
     	std::shared_ptr<UIImage> icon;
         std::shared_ptr<UITreeListControls> treeControls;
-    	std::vector<std::unique_ptr<UITreeListItem>> children;
+    	Vector<std::unique_ptr<UITreeListItem>> children;
     	bool expanded = true;
     	bool forceLeaf = false;
 
-    	void doUpdateTree(UITreeList& treeList, std::vector<int>& itemsLeftPerDepth, bool treeExpanded);
+    	void doUpdateTree(UITreeList& treeList, Vector<int>& itemsLeftPerDepth, bool treeExpanded);
         std::optional<FindPositionResult> doFindPosition(UITreeList& tree, Vector2f pos, int depth, bool lasBranch) const;
         std::optional<String> doGetLastExpandedItem(bool expandedTree, const String& lastId, const String& id);
     };

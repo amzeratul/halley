@@ -126,6 +126,6 @@ namespace Halley {
         size_t readPos = 0;
         size_t writePos = 0;
         std::atomic<size_t> numEntries;
-        std::vector<T> entries;
+        Vector<T> entries;
     };
 }

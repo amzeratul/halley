@@ -28,7 +28,7 @@ namespace Halley {
 		class NavmeshNode {
 		public:
 			Polygon polygon;
-			std::vector<int> connections;
+			Vector<int> connections;
 			int region = -1;
 			int regionGroup = 0;
 			int remap = 0;
@@ -41,7 +41,7 @@ namespace Halley {
 				: polygon(std::move(p))
 				, connections(polygon.getNumSides(), -1)
 			{}
-			NavmeshNode(Polygon polygon, std::vector<int> connections)
+			NavmeshNode(Polygon polygon, Vector<int> connections)
 				: polygon(std::move(polygon))
 				, connections(std::move(connections))
 			{}
@@ -49,26 +49,26 @@ namespace Halley {
 		
 		constexpr static size_t maxPolygonSides = 8;
 
-		static std::vector<Polygon> generateByPolygonSubtraction(gsl::span<const Polygon> inputPolygons, gsl::span<const Polygon> obstacles, Circle bounds);
-		static std::vector<Polygon> preProcessObstacles(gsl::span<const Polygon> obstacles, float agentSize);
+		static Vector<Polygon> generateByPolygonSubtraction(gsl::span<const Polygon> inputPolygons, gsl::span<const Polygon> obstacles, Circle bounds);
+		static Vector<Polygon> preProcessObstacles(gsl::span<const Polygon> obstacles, float agentSize);
 		static Polygon makeAgentMask(float agentSize);
 
-		static std::vector<NavmeshNode> toNavmeshNode(std::vector<Polygon> polygons);
+		static Vector<NavmeshNode> toNavmeshNode(Vector<Polygon> polygons);
 		static void generateConnectivity(gsl::span<NavmeshNode> polygons);
-		static void postProcessPolygons(std::vector<NavmeshNode>& polygons, float maxSize, bool allowSimplification);
-		static void removeDeadPolygons(std::vector<NavmeshNode>& polygons);
+		static void postProcessPolygons(Vector<NavmeshNode>& polygons, float maxSize, bool allowSimplification);
+		static void removeDeadPolygons(Vector<NavmeshNode>& polygons);
 		static void tagEdgeConnections(gsl::span<NavmeshNode> nodes, gsl::span<const Line> mapEdges);
 
 		static std::optional<NavmeshNode> merge(const NavmeshNode& a, const NavmeshNode& b, size_t aEdgeIdx, size_t bEdgeIdx, size_t aIdx, size_t bIdx, float maxSize, bool allowSimplification);
 		static void remapConnections(NavmeshNode& poly, int from, int to);
 
 		static void simplifyPolygon(NavmeshNode& node, float threshold);
-		static void simplifyPolygons(std::vector<NavmeshNode>& nodes);
+		static void simplifyPolygons(Vector<NavmeshNode>& nodes);
 
-		static void limitPolygonSides(std::vector<Polygon>& polygons, size_t maxSides);
+		static void limitPolygonSides(Vector<Polygon>& polygons, size_t maxSides);
 
-		static void splitByPortals(std::vector<NavmeshNode>& nodes, gsl::span<const NavmeshSubworldPortal> portals);
-		static void removeNodesBeyondPortals(std::vector<NavmeshNode>& nodes);
+		static void splitByPortals(Vector<NavmeshNode>& nodes, gsl::span<const NavmeshSubworldPortal> portals);
+		static void removeNodesBeyondPortals(Vector<NavmeshNode>& nodes);
 
 		static void applyRegions(gsl::span<NavmeshNode> nodes, gsl::span<const Polygon> regions);
 		static int assignRegions(gsl::span<NavmeshNode> nodes);

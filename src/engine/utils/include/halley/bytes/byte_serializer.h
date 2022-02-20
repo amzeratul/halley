@@ -1,7 +1,7 @@
 #pragma once
 
 #include <halley/utils/utils.h>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <gsl/gsl>
 #include "halley/data_structures/flat_map.h"
 #include "halley/maths/vector2.h"
@@ -109,7 +109,7 @@ namespace Halley {
 		Serializer& operator<<(const Bytes& bytes);
 
 		template <typename T>
-		Serializer& operator<<(const std::vector<T>& val)
+		Serializer& operator<<(const Vector<T>& val)
 		{
 			unsigned int sz = static_cast<unsigned int>(val.size());
 			*this << sz;
@@ -316,7 +316,7 @@ namespace Halley {
 		Deserializer& operator>>(Bytes& bytes);
 
 		template <typename T>
-		Deserializer& operator>>(std::vector<T>& val)
+		Deserializer& operator>>(Vector<T>& val)
 		{
 			unsigned int sz;
 			*this >> sz;

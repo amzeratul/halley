@@ -31,9 +31,9 @@ void MessageQueueTCP::sendAll()
 {
 }
 
-std::vector<std::unique_ptr<NetworkMessage>> MessageQueueTCP::receiveAll()
+Vector<std::unique_ptr<NetworkMessage>> MessageQueueTCP::receiveAll()
 {
-	std::vector<std::unique_ptr<NetworkMessage>> result;
+	Vector<std::unique_ptr<NetworkMessage>> result;
 
 	if (isConnected()) {
 		InboundNetworkPacket packet;

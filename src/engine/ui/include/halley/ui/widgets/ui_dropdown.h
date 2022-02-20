@@ -28,7 +28,7 @@ namespace Halley {
 			{}
 		};
 		
-		UIDropdown(String id, UIStyle style, std::vector<LocalisedString> options = {}, int defaultOption = 0);
+		UIDropdown(String id, UIStyle style, Vector<LocalisedString> options = {}, int defaultOption = 0);
 
 		virtual void setSelectedOption(int option);
 		virtual void setSelectedOption(const String& id);
@@ -38,11 +38,11 @@ namespace Halley {
 		int getNumberOptions() const;
 
 		void setInputButtons(const UIInputButtons& buttons) override;
-		void setOptions(std::vector<LocalisedString> options, int defaultOption = -1);
-		void setOptions(std::vector<String> optionsIds, int defaultOption = -1);
-		void setOptions(std::vector<String> optionIds, std::vector<LocalisedString> options, int defaultOption = -1);
-		void setOptions(std::vector<Entry> options, int defaultOption = -1);
-		void setOptions(const I18N& i18n, const String& i18nPrefix, std::vector<String> optionIds, int defaultOption = -1);
+		void setOptions(Vector<LocalisedString> options, int defaultOption = -1);
+		void setOptions(Vector<String> optionsIds, int defaultOption = -1);
+		void setOptions(Vector<String> optionIds, Vector<LocalisedString> options, int defaultOption = -1);
+		void setOptions(Vector<Entry> options, int defaultOption = -1);
+		void setOptions(const I18N& i18n, const String& i18nPrefix, Vector<String> optionIds, int defaultOption = -1);
 
 		void onManualControlCycleValue(int delta) override;
 		void onManualControlActivate() override;
@@ -50,7 +50,7 @@ namespace Halley {
 		bool canReceiveFocus() const override;
 
 	protected:		
-		std::vector<Entry> options;
+		Vector<Entry> options;
 		
 		TextRenderer label;
 		Sprite icon;

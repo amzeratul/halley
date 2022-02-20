@@ -24,7 +24,7 @@ namespace Halley {
 		void draw(Painter& painter, const ISceneEditor& sceneEditor) const override;
 		bool isHighlighted() const override;
 		std::shared_ptr<UIWidget> makeUI() override;
-		std::vector<String> getHighlightedComponents() const override;
+		Vector<String> getHighlightedComponents() const override;
 		bool onKeyPress(KeyboardKeyPress key) override;
 		bool canBoxSelectEntities() const override;
 

@@ -84,7 +84,7 @@ namespace Halley {
 
         struct Result {
             LocalisedString errorMessage;
-            std::vector<Action> suggestedActions;
+            Vector<Action> suggestedActions;
         	Severity severity = Severity::Error;
 
 			Result() = default;
@@ -101,7 +101,7 @@ namespace Halley {
 				suggestedActions.push_back(std::move(suggestedAction));
 			}
 
-			Result(Severity severity, String errorMessage, std::vector<Action> suggestedActions)
+			Result(Severity severity, String errorMessage, Vector<Action> suggestedActions)
 				: errorMessage(LocalisedString::fromUserString(errorMessage))
 				, suggestedActions(std::move(suggestedActions))
         		, severity(severity)
@@ -115,7 +115,7 @@ namespace Halley {
 				suggestedActions.push_back(std::move(suggestedAction));
 			}
 
-			Result(Severity severity, LocalisedString errorMessage, std::vector<Action> suggestedActions)
+			Result(Severity severity, LocalisedString errorMessage, Vector<Action> suggestedActions)
 				: errorMessage(std::move(errorMessage))
 				, suggestedActions(std::move(suggestedActions))
         		, severity(severity)
@@ -128,7 +128,7 @@ namespace Halley {
 
     	virtual ~IEntityValidator() = default;
 
-        virtual std::vector<Result> validateEntity(EntityValidator& validator, const EntityData& entityData) = 0;
+        virtual Vector<Result> validateEntity(EntityValidator& validator, const EntityData& entityData) = 0;
     };
 
     class IEntityValidatorActionHandler {
@@ -207,19 +207,19 @@ namespace Halley {
     	virtual Resources& getResources() const = 0;
         virtual void spawnPending() = 0;
 
-        virtual const std::vector<EntityId>& getCameraIds() const = 0;
+        virtual const Vector<EntityId>& getCameraIds() const = 0;
         virtual void dragCamera(Vector2f amount) = 0;
     	virtual void moveCamera(Vector2f pos) = 0;
     	virtual bool loadCameraPos() = 0;
         virtual void changeZoom(int amount, Vector2f cursorPosRelToCamera) = 0;
 
-    	virtual void setSelectedEntities(std::vector<UUID> uuids, std::vector<EntityData*> datas) = 0;
+    	virtual void setSelectedEntities(Vector<UUID> uuids, Vector<EntityData*> datas) = 0;
     	virtual void setEntityHighlightedOnList(const UUID& id) = 0;
 
     	virtual void showEntity(const UUID& id) = 0;
         virtual void onToolSet(String& tool, String& componentName, String& fieldName) = 0;
 
-    	virtual std::vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
+    	virtual Vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;
     	virtual void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) = 0;
         virtual void onSceneLoaded(Prefab& scene) = 0;
@@ -235,7 +235,7 @@ namespace Halley {
 
     	virtual std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() = 0;
     	
-        virtual std::vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const = 0;
+        virtual Vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const = 0;
         virtual void onSceneContextMenuSelection(const String& id) = 0;
     	virtual void onSceneContextMenuHighlight(const String& id) = 0;
     	
@@ -251,7 +251,7 @@ namespace Halley {
 	public:
 		String entityId;
 		const EntityData* data = nullptr;
-		std::vector<EntityTree> children;
+		Vector<EntityTree> children;
 
 		bool contains(const String& id) const
 		{
@@ -306,7 +306,7 @@ namespace Halley {
 		virtual ~ISceneData() = default;
 
 		virtual EntityNodeData getWriteableEntityNodeData(const String& id) = 0;
-		virtual std::vector<EntityData*> getWriteableEntityDatas(gsl::span<const UUID> ids) = 0;
+		virtual Vector<EntityData*> getWriteableEntityDatas(gsl::span<const UUID> ids) = 0;
 		virtual ConstEntityNodeData getEntityNodeData(const String& id) = 0;
 		void reloadEntity(const String& id, const EntityData* data = nullptr);
 		virtual void reloadEntities(gsl::span<const String> ids, gsl::span<const EntityData*> datas) = 0;
@@ -336,7 +336,7 @@ namespace Halley {
 
         virtual bool update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) = 0;
         virtual void draw(Painter& painter, const ISceneEditor& sceneEditor) = 0;
-        virtual void setSelectedEntities(std::vector<EntityRef> entities, std::vector<EntityData*> entityDatas) = 0;
+        virtual void setSelectedEntities(Vector<EntityRef> entities, Vector<EntityData*> entityDatas) = 0;
 		virtual void refreshEntity() = 0;
         virtual std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName) = 0;
 		virtual void deselect() = 0;
@@ -361,7 +361,7 @@ namespace Halley {
 		virtual const std::shared_ptr<ISceneData>& getSceneData() const = 0;
 
 		virtual void addComponentToCurrentEntity(const String& componentName) = 0;
-		virtual void setHighlightedComponents(std::vector<String> componentNames) = 0;
+		virtual void setHighlightedComponents(Vector<String> componentNames) = 0;
 		virtual const IEntityEditorFactory& getEntityEditorFactory() const = 0;
 
 		virtual std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() = 0;
@@ -431,6 +431,6 @@ namespace Halley {
 
         virtual ~IEditorCustomTools() = default;
 
-        virtual std::vector<ToolData> makeTools(const MakeToolArgs& args) = 0;
+        virtual Vector<ToolData> makeTools(const MakeToolArgs& args) = 0;
     };
 }

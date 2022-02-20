@@ -31,7 +31,7 @@ namespace Halley {
 
 		UUID getEntityUnderCursor() const;
 		String getCurrentSelection() const;
-		std::vector<String> getCurrentSelections() const;
+		Vector<String> getCurrentSelections() const;
 
 		void setEntityValidatorList(std::shared_ptr<EntityValidatorListUI> validatorList);
 		void validateAllEntities();
@@ -67,7 +67,7 @@ namespace Halley {
 		void addEntityTree(const String& parentId, int childIndex, const EntityData& data);
 		EntityInfo getEntityInfo(const EntityData& data) const;
 
-		void openContextMenu(std::vector<String> entityIds);
+		void openContextMenu(Vector<String> entityIds);
 		void onContextMenuAction(const String& actionId, gsl::span<const String> entityIds);
 
 		bool markAllValid();

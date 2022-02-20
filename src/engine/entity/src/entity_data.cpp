@@ -275,12 +275,12 @@ void EntityData::setParentUUID(UUID parentUUID)
 	this->parentUUID = std::move(parentUUID);
 }
 
-void EntityData::setChildren(std::vector<EntityData> children)
+void EntityData::setChildren(Vector<EntityData> children)
 {
 	this->children = std::move(children);
 }
 
-void EntityData::setComponents(std::vector<std::pair<String, ConfigNode>> components)
+void EntityData::setComponents(Vector<std::pair<String, ConfigNode>> components)
 {
 	this->components = std::move(components);
 }

@@ -57,7 +57,7 @@ namespace Halley {
 			String right;
 		};
 
-		std::vector<ButtonEntry> buttons;
+		Vector<ButtonEntry> buttons;
 		String curFocus;
 		String lastFocus;
 		String cancelId;

@@ -45,6 +45,6 @@ namespace Halley {
 	private:
 		std::set<ITextInputCapture*> captures;
 		std::shared_ptr<IClipboard> clipboard;
-		std::vector<KeyboardKeyPress> keyPresses;
+		Vector<KeyboardKeyPress> keyPresses;
 	};
 }

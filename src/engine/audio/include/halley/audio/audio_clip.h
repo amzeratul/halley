@@ -49,9 +49,9 @@ namespace Halley
 		bool streaming = false;
 
 		// TODO: sort this mess?
-		mutable std::vector<std::vector<AudioConfig::SampleFormat>> temp0;
-		mutable std::vector<std::vector<AudioConfig::SampleFormat>> temp1;
-		mutable std::vector<std::vector<AudioConfig::SampleFormat>> samples;
+		mutable Vector<Vector<AudioConfig::SampleFormat>> temp0;
+		mutable Vector<Vector<AudioConfig::SampleFormat>> temp1;
+		mutable Vector<Vector<AudioConfig::SampleFormat>> samples;
 		mutable std::unique_ptr<VorbisData> vorbisData;
 	};
 
@@ -69,7 +69,7 @@ namespace Halley
 
 	private:
 		size_t length = 0;
-		mutable std::vector<std::vector<AudioConfig::SampleFormat>> buffers;
+		mutable Vector<Vector<AudioConfig::SampleFormat>> buffers;
 		mutable std::mutex mutex;
 		uint8_t numChannels = 0;
 	};

@@ -53,7 +53,7 @@ namespace Halley
 		bool canShowReportedUserContent() const override { return false; }
 
 		bool needsStringFiltering() const override { return true; }
-		void setProfanityCheckForbiddenWordsList(std::vector<String> words) override;
+		void setProfanityCheckForbiddenWordsList(Vector<String> words) override;
 		Future<String> performProfanityCheck(String text) override;
 
 		I18NLanguage getSystemLanguage() const override;

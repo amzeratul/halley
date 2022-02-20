@@ -2,7 +2,7 @@
 
 #include "iserialization_dictionary.h"
 #include <optional>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <gsl/span>
 #include "halley/text/halleystring.h"
 #include "halley/data_structures/hash_map.h"
@@ -26,7 +26,7 @@ namespace Halley {
         void notifyMissingString(const String& string) override;
     
     private:
-        std::vector<String> strings;
+        Vector<String> strings;
         HashMap<String, int> indices;
     	
         HashMap<String, int> missing;

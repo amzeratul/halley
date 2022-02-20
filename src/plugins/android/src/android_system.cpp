@@ -50,7 +50,7 @@ AndroidSystem::~AndroidSystem()
 
 void AndroidSystem::run()
 {
-    std::vector<std::string> args = { "halleygame" };
+    Vector<std::string> args = { "halleygame" };
 
     auto entry = getHalleyEntry();
     std::unique_ptr<IMainLoopable> core = entry->createCore(args);

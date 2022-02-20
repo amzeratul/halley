@@ -59,7 +59,7 @@ namespace Halley {
 	protected:
 		std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
 		LocalisedString getItemLabel(const String& id, const String& name, bool hasSearch) override;
-		void sortItems(std::vector<std::pair<String, String>>& items) override;
+		void sortItems(Vector<std::pair<String, String>>& items) override;
 
 	private:
 		UIFactory& factory;

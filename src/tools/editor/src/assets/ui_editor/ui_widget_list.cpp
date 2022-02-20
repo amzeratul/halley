@@ -19,7 +19,7 @@ void UIWidgetList::onMakeUI()
 	setHandle(UIEventType::TreeItemReparented, "widgetsList", [=] (const UIEvent& event)
 	{
 		const auto& src = event.getConfigData().asSequence();
-		std::vector<MoveOperation> changes;
+		Vector<MoveOperation> changes;
 		changes.reserve(src.size());
 		for (const auto& e: src) {
 			changes.emplace_back(MoveOperation{ e["itemId"].asString(), e["parentId"].asString(), e["childIdx"].asInt() });

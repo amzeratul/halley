@@ -61,13 +61,13 @@ namespace Halley
 		TextRenderer headerText;
 		TextRenderer fpsLabel;
 		TextRenderer graphLabel;
-		std::vector<TextRenderer> systemLabels;
+		Vector<TextRenderer> systemLabels;
 
 		AveragingLatched<int64_t> totalFrameTime;
 		AveragingLatched<int64_t> vsyncTime;
 		AveragingLatched<int64_t> audioTime;
 		
-		std::vector<FrameData> frameData;
+		Vector<FrameData> frameData;
 		size_t lastFrameData = 0;
 		HashMap<String, EventHistoryData> eventHistory;
 		std::shared_ptr<ProfilerData> lastProfileData;

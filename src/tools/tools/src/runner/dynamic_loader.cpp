@@ -19,7 +19,7 @@ DynamicGameLoader::~DynamicGameLoader()
 	unload();
 }
 
-std::unique_ptr<Core> DynamicGameLoader::createCore(std::vector<std::string> args)
+std::unique_ptr<Core> DynamicGameLoader::createCore(Vector<std::string> args)
 {
 	Expects(entry != nullptr);
 	return entry->createCore(args);

@@ -37,7 +37,7 @@ namespace Halley {
 		AssetType curType = AssetType::Sprite;
 
 		bool assetSrcMode = true;
-		std::optional<std::vector<String>> assetNames;
+		std::optional<Vector<String>> assetNames;
 		std::optional<Path> pendingOpen;
 
 		FuzzyTextMatcher fuzzyMatcher;
@@ -60,7 +60,7 @@ namespace Halley {
 
 		void listAssetSources();
 		void listAssets(AssetType type);
-		void setListContents(std::vector<String> files, const Path& curPath, bool flat);
+		void setListContents(Vector<String> files, const Path& curPath, bool flat);
 		void refreshList();
 		void setFilter(const String& filter);
 

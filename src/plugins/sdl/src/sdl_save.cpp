@@ -136,10 +136,10 @@ void SDLSaveData::removeData(const String& path)
 	Path::removeFile(backupFile);
 }
 
-std::vector<String> SDLSaveData::enumerate(const String& root)
+Vector<String> SDLSaveData::enumerate(const String& root)
 {
 	auto paths = OS::get().enumerateDirectory(dir);
-	std::vector<String> result;
+	Vector<String> result;
 	for (auto& p: paths) {
 		auto path = p.toString();
 		if (path.startsWith(root) && !path.endsWith(".bak")) {

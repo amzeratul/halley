@@ -280,9 +280,9 @@ static ConfigNode getEmptyConfigNodeStructure(const ConfigNode& node)
 	return ConfigNode();
 }
 
-std::vector<std::pair<String, ConfigNode>> EntityDataDelta::getComponentEmptyStructure() const
+Vector<std::pair<String, ConfigNode>> EntityDataDelta::getComponentEmptyStructure() const
 {
-	std::vector<std::pair<String, ConfigNode>> result;
+	Vector<std::pair<String, ConfigNode>> result;
 
 	for (const auto& c: componentsChanged) {
 		result.emplace_back(c.first, getEmptyConfigNodeStructure(c.second));
@@ -351,7 +351,7 @@ void SceneDataDelta::addEntity(UUID entityId, EntityDataDelta delta)
 	entities.emplace_back(std::move(entityId), std::move(delta));
 }
 
-const std::vector<std::pair<UUID, EntityDataDelta>>& SceneDataDelta::getEntities() const
+const Vector<std::pair<UUID, EntityDataDelta>>& SceneDataDelta::getEntities() const
 {
 	return entities;
 }

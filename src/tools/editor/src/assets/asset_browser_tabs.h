@@ -33,8 +33,8 @@ namespace Halley {
 		
 		std::shared_ptr<UIList> tabs;
 		std::shared_ptr<UIPagedPane> pages;
-		std::vector<std::shared_ptr<AssetEditorWindow>> windows;
-		std::vector<String> toClose;
+		Vector<std::shared_ptr<AssetEditorWindow>> windows;
+		Vector<String> toClose;
 
 		bool srcMode = false;
 		bool waitingLoad = true;

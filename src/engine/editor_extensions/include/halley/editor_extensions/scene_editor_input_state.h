@@ -39,8 +39,8 @@ namespace Halley {
 			EntityData* newData = nullptr;
 		};
 		
-		std::vector<FieldChange> fieldsChanged;
-		std::optional<std::vector<UUID>> newSelection;
+		Vector<FieldChange> fieldsChanged;
+		std::optional<Vector<UUID>> newSelection;
 		UIList::SelectionMode selectionMode = UIList::SelectionMode::Normal;
 		std::optional<UUID> mouseOver;
 

@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include "halley/utils/utils.h"
 #include "halley/maths/random.h"
 
@@ -22,7 +22,7 @@ namespace Halley
 	{
 	public:
 		Fuzzer();
-		void setCorpus(std::vector<Bytes> corpus);
+		void setCorpus(Vector<Bytes> corpus);
 		void setEvaluator(std::function<bool(const Bytes&)> function);
 		void setOptions(FuzzerOptions options);
 
@@ -33,8 +33,8 @@ namespace Halley
 
 		using Mutator = std::function<void(Bytes&)>;
 
-		std::vector<Bytes> corpus;
-		std::vector<Mutator> mutators;
+		Vector<Bytes> corpus;
+		Vector<Mutator> mutators;
 		std::function<bool(const Bytes&)> evaluator;
 		FuzzerOptions options;
 

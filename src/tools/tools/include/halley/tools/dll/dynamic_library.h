@@ -54,7 +54,7 @@ namespace Halley
 		bool waitingReload = false;
 		bool includeDebugSymbols = false;
 
-		mutable std::vector<std::string> toDelete;
+		mutable Vector<std::string> toDelete;
 
 		std::set<IDynamicLibraryListener*> reloadListeners;
 

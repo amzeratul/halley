@@ -37,9 +37,9 @@ namespace Halley
 	public:
 		String assetId;
 		Path srcDir;
-		std::vector<AssetPath> inputFiles;
-		std::vector<TimestampedPath> additionalInputFiles; // These were requested by the importer, rather than enumerated directly
-		std::vector<AssetResource> outputFiles;
+		Vector<AssetPath> inputFiles;
+		Vector<TimestampedPath> additionalInputFiles; // These were requested by the importer, rather than enumerated directly
+		Vector<AssetResource> outputFiles;
 		ImportAssetType assetType = ImportAssetType::Undefined;
 
 		ImportAssetsDatabaseEntry() {}
@@ -55,7 +55,7 @@ namespace Halley
 			, srcDir(std::move(srcDir))
 		{}
 
-		ImportAssetsDatabaseEntry(String assetId, Path srcDir, std::vector<AssetPath>&& inputFiles)
+		ImportAssetsDatabaseEntry(String assetId, Path srcDir, Vector<AssetPath>&& inputFiles)
 			: assetId(std::move(assetId))
 			, srcDir(std::move(srcDir))
 			, inputFiles(std::move(inputFiles))
@@ -90,7 +90,7 @@ namespace Halley
 		};
 
 	public:
-		ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile, std::vector<String> platforms);
+		ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile, Vector<String> platforms);
 
 		void load();
 		void save() const;
@@ -113,17 +113,17 @@ namespace Halley
 		void markDeleted(const ImportAssetsDatabaseEntry& asset);
 		void markFailed(const ImportAssetsDatabaseEntry& asset);
 		void markAssetsAsStillPresent(const std::map<String, ImportAssetsDatabaseEntry>& assets);
-		std::vector<ImportAssetsDatabaseEntry> getAllMissing() const;
+		Vector<ImportAssetsDatabaseEntry> getAllMissing() const;
 
-		std::vector<AssetResource> getOutFiles(String assetId) const;
-		std::vector<String> getInputFiles() const;
-		std::vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& inputFile);
+		Vector<AssetResource> getOutFiles(String assetId) const;
+		Vector<String> getInputFiles() const;
+		Vector<std::pair<AssetType, String>> getAssetsFromFile(const Path& inputFile);
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
 	private:
-		std::vector<String> platforms;
+		Vector<String> platforms;
 		Path directory;
 		Path dbFile;
 		Path assetsDbFile;

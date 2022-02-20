@@ -6,7 +6,7 @@
 using namespace Halley;
 
 
-ProjectLoader::ProjectLoader(const HalleyStatics& statics, const Path& halleyPath, std::vector<String> disabledPlatforms)
+ProjectLoader::ProjectLoader(const HalleyStatics& statics, const Path& halleyPath, Vector<String> disabledPlatforms)
 	: statics(statics)
 	, halleyPath(halleyPath)
 	, disabledPlatforms(std::move(disabledPlatforms))
@@ -14,7 +14,7 @@ ProjectLoader::ProjectLoader(const HalleyStatics& statics, const Path& halleyPat
 	loadPlugins();
 }
 
-void ProjectLoader::setDisabledPlatforms(std::vector<String> platforms)
+void ProjectLoader::setDisabledPlatforms(Vector<String> platforms)
 {
 	disabledPlatforms = std::move(platforms);
 }
@@ -37,7 +37,7 @@ void ProjectLoader::selectPlugins(Project& project) const
 	project.setPlugins(getPlugins(platforms));
 }
 
-const std::vector<String>& ProjectLoader::getKnownPlatforms() const
+const Vector<String>& ProjectLoader::getKnownPlatforms() const
 {
 	return knownPlatforms;
 }
@@ -78,12 +78,12 @@ void ProjectLoader::loadPlugins()
 	}
 }
 
-std::vector<HalleyPluginPtr> ProjectLoader::getPlugins(std::vector<String> platforms) const
+Vector<HalleyPluginPtr> ProjectLoader::getPlugins(Vector<String> platforms) const
 {
-	std::vector<HalleyPluginPtr> result;
+	Vector<HalleyPluginPtr> result;
 
 	// Initialize known platforms
-	std::vector<bool> foundPlatforms(platforms.size());
+	Vector<bool> foundPlatforms(platforms.size());
 	for (size_t i = 0; i < platforms.size(); ++i) {
 		foundPlatforms[i] = platforms[i] == "pc";
 	}

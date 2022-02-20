@@ -23,7 +23,7 @@
 
 #include "halleytime.h"
 #include <chrono>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <cstdint>
 
 namespace Halley {
@@ -105,7 +105,7 @@ namespace Halley {
 		int64_t lastElapsedNanoSeconds() const;
 
 	private:
-		std::vector<int64_t> nsTaken;
+		Vector<int64_t> nsTaken;
 		size_t pos = 0;
 		size_t samplesTaken = 0;
 		bool paused = false;

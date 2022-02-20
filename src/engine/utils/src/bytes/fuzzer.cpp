@@ -5,14 +5,14 @@ using namespace Halley;
 
 Fuzzer::Fuzzer()
 {
-	std::vector<gsl::byte> initVec(128);
+	Vector<gsl::byte> initVec(128);
 	Random::getGlobal().getBytes(initVec);
 	rng.setSeed(gsl::span<gsl::byte>(initVec.data(), initVec.size()));
 
 	setupMutators();
 }
 
-void Fuzzer::setCorpus(std::vector<Bytes> corpus)
+void Fuzzer::setCorpus(Vector<Bytes> corpus)
 {
 	this->corpus = std::move(corpus);
 }

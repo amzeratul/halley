@@ -47,7 +47,7 @@ namespace Halley {
 		
 		struct PortalNode {
 			Vector2f pos;
-			std::vector<PortalConnection> connections;
+			Vector<PortalConnection> connections;
 			uint16_t fromRegion;
 			uint16_t fromPortal;
 			uint16_t toRegion;
@@ -60,7 +60,7 @@ namespace Halley {
 		};
 
 		struct RegionNode {
-			std::vector<uint16_t> portals;
+			Vector<uint16_t> portals;
 		};
 
 		using NodeId = uint16_t;
@@ -76,7 +76,7 @@ namespace Halley {
 
 		class NodeComparator {
 		public:
-			NodeComparator(const std::vector<State>& state) : state(state) {}
+			NodeComparator(const Vector<State>& state) : state(state) {}
 			
 			bool operator()(NodeId a, NodeId b) const
 			{
@@ -84,21 +84,21 @@ namespace Halley {
 			}
 
 		private:
-			const std::vector<State>& state;
+			const Vector<State>& state;
 		};
 
-		std::vector<Navmesh> navmeshes;
-		std::vector<PortalNode> portalNodes;
-		std::vector<RegionNode> regionNodes;
+		Vector<Navmesh> navmeshes;
+		Vector<PortalNode> portalNodes;
+		Vector<RegionNode> regionNodes;
 
 		void tryLinkNavMeshes(uint16_t idxA, uint16_t idxB);
 
-		std::vector<NavigationPath::RegionNode> findRegionPath(Vector2f startPos, Vector2f endPos, uint16_t fromRegionId, uint16_t toRegionId) const;
+		Vector<NavigationPath::RegionNode> findRegionPath(Vector2f startPos, Vector2f endPos, uint16_t fromRegionId, uint16_t toRegionId) const;
 
-		std::vector<Vector2f> postProcessPathBetweenRegions(
+		Vector<Vector2f> postProcessPathBetweenRegions(
 			const NavigationQuery& queryStart, const NavigationQuery& queryEnd, 
 			uint16_t startRegionId, uint16_t endRegionId, const Navmesh::Portal& portal,
-			std::vector<Navmesh::NodeAndConn> startLeg, std::vector<Navmesh::NodeAndConn> endLeg, 
+			Vector<Navmesh::NodeAndConn> startLeg, Vector<Navmesh::NodeAndConn> endLeg, 
 			NavigationQuery::PostProcessingType type) const;
 	};
 }

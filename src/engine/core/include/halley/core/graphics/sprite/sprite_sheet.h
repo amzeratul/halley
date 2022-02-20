@@ -86,8 +86,8 @@ namespace Halley
 		const SpriteSheetEntry* tryGetSprite(const String& name) const;
 		const SpriteSheetEntry& getDummySprite() const;
 
-		const std::vector<SpriteSheetFrameTag>& getFrameTags() const;
-		std::vector<String> getSpriteNames() const;
+		const Vector<SpriteSheetFrameTag>& getFrameTags() const;
+		Vector<String> getSpriteNames() const;
 		const HashMap<String, uint32_t>& getSpriteNameMap() const;
 
 		size_t getSpriteCount() const;
@@ -116,10 +116,10 @@ namespace Halley
 		
 		Resources* resources = nullptr;
 
-		std::vector<SpriteSheetEntry> sprites;
+		Vector<SpriteSheetEntry> sprites;
 		SpriteSheetEntry dummySprite;
 		HashMap<String, uint32_t> spriteIdx;
-		std::vector<SpriteSheetFrameTag> frameTags;
+		Vector<SpriteSheetFrameTag> frameTags;
 
 		String textureName;
 		mutable std::shared_ptr<const Texture> texture;

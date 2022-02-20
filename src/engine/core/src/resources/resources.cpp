@@ -12,7 +12,7 @@ Resources::Resources(std::unique_ptr<ResourceLocator> locator, const HalleyAPI& 
 {
 }
 
-void Resources::reloadAssets(const std::vector<String>& ids)
+void Resources::reloadAssets(const Vector<String>& ids)
 {
 	// Early out
 	if (ids.empty()) {
@@ -21,7 +21,7 @@ void Resources::reloadAssets(const std::vector<String>& ids)
 
 	// Build this map first, so it gets sorted by AssetType
 	// The order in which asset types are reloaded is important, since they have dependencies
-	std::map<AssetType, std::vector<String>> byType;
+	std::map<AssetType, Vector<String>> byType;
 
 	for (const auto& id: ids) {
 		const auto splitPos = id.find(':');
@@ -35,7 +35,7 @@ void Resources::reloadAssets(const std::vector<String>& ids)
 	locator->purgeAll();
 }
 
-void Resources::reloadAssets(const std::map<AssetType, std::vector<String>>& byType)
+void Resources::reloadAssets(const std::map<AssetType, Vector<String>>& byType)
 {
 	// Purge assets first, to force re-loading of any affected packs
 	for (auto& curType: byType) {

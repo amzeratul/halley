@@ -31,7 +31,7 @@ namespace Halley
 
 	public:
 		using ResourceLoaderFunc = std::function<std::shared_ptr<Resource>(const String&, ResourceLoadPriority)>;
-		using ResourceEnumeratorFunc = std::function<std::vector<String>()>;
+		using ResourceEnumeratorFunc = std::function<Vector<String>()>;
 
 		explicit ResourceCollectionBase(Resources& parent, AssetType type);
 		virtual ~ResourceCollectionBase() {}
@@ -51,7 +51,7 @@ namespace Halley
 
 		std::shared_ptr<Resource> getUntyped(const String& name, ResourceLoadPriority priority = ResourceLoadPriority::Normal);
 
-		std::vector<String> enumerate() const;
+		Vector<String> enumerate() const;
 
 	protected:
 		virtual std::shared_ptr<Resource> loadResource(ResourceLoader& loader) = 0;

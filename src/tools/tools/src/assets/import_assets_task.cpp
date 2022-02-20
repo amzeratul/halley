@@ -13,7 +13,7 @@
 
 using namespace Halley;
 
-ImportAssetsTask::ImportAssetsTask(String taskName, ImportAssetsDatabase& db, std::shared_ptr<AssetImporter> importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry> files, std::vector<String> deletedAssets, Project& project, bool packAfter)
+ImportAssetsTask::ImportAssetsTask(String taskName, ImportAssetsDatabase& db, std::shared_ptr<AssetImporter> importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry> files, Vector<String> deletedAssets, Project& project, bool packAfter)
 	: Task(taskName, true, true)
 	, db(db)
 	, importer(importer)
@@ -33,7 +33,7 @@ void ImportAssetsTask::run()
 
 	assetsImported = 0;
 	assetsToImport = files.size();
-	std::vector<Future<void>> tasks;
+	Vector<Future<void>> tasks;
 
 	constexpr bool parallelImport = !Debug::isDebug();
 

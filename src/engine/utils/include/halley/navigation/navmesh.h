@@ -39,7 +39,7 @@ namespace Halley {
 		class PolygonData {
 		public:
 			Polygon polygon;
-			std::vector<int> connections;
+			Vector<int> connections;
 			float weight;
 		};
 
@@ -66,8 +66,8 @@ namespace Halley {
 		struct Portal {
 			int id;
 			Vector2f pos;
-			std::vector<NodeAndConn> connections;
-			std::vector<Vector2f> vertices;
+			Vector<NodeAndConn> connections;
+			Vector<Vector2f> vertices;
 			bool connected = false;
 			bool regionLink = false;
 			bool subWorldLink = false;
@@ -76,7 +76,7 @@ namespace Halley {
 			explicit Portal(const ConfigNode& node);
 
 			ConfigNode toConfigNode() const;
-			void postProcess(gsl::span<const Polygon> polygons, std::vector<Portal>& dst);
+			void postProcess(gsl::span<const Polygon> polygons, Vector<Portal>& dst);
 			
 			bool canJoinWith(const Portal& other, float epsilon) const;
 			void updateLocal();
@@ -85,18 +85,18 @@ namespace Halley {
 		
 		Navmesh();
 		Navmesh(const ConfigNode& nodeData);
-		Navmesh(std::vector<PolygonData> polygons, const NavmeshBounds& bounds, int subWorld);
+		Navmesh(Vector<PolygonData> polygons, const NavmeshBounds& bounds, int subWorld);
 
-		[[nodiscard]] std::optional<std::vector<NodeAndConn>> pathfindNodes(const NavigationQuery& query) const;
+		[[nodiscard]] std::optional<Vector<NodeAndConn>> pathfindNodes(const NavigationQuery& query) const;
 		[[nodiscard]] std::optional<NavigationPath> pathfind(const NavigationQuery& query) const;
 
 		[[nodiscard]] ConfigNode toConfigNode() const;
 		
-		[[nodiscard]] const std::vector<Node>& getNodes() const { return nodes; }
-		[[nodiscard]] const std::vector<Polygon>& getPolygons() const { return polygons; }
-		[[nodiscard]] const std::vector<Portal>& getPortals() const { return portals; }
-		[[nodiscard]] const std::vector<float>& getWeights() const { return weights; }
-		[[nodiscard]] const std::vector<std::pair<uint16_t, LineSegment>>& getOpenEdges() const { return openEdges; }
+		[[nodiscard]] const Vector<Node>& getNodes() const { return nodes; }
+		[[nodiscard]] const Vector<Polygon>& getPolygons() const { return polygons; }
+		[[nodiscard]] const Vector<Portal>& getPortals() const { return portals; }
+		[[nodiscard]] const Vector<float>& getWeights() const { return weights; }
+		[[nodiscard]] const Vector<std::pair<uint16_t, LineSegment>>& getOpenEdges() const { return openEdges; }
 		[[nodiscard]] const Polygon& getPolygon(int id) const;
 		[[nodiscard]] size_t getNumNodes() const { return nodes.size(); }
 		[[nodiscard]] std::optional<NodeId> getNodeAt(Vector2f position) const;
@@ -131,7 +131,7 @@ namespace Halley {
 
 		class NodeComparator {
 		public:
-			NodeComparator(const std::vector<State>& state) : state(state) {}
+			NodeComparator(const Vector<State>& state) : state(state) {}
 			
 			bool operator()(Navmesh::NodeId a, Navmesh::NodeId b) const
 			{
@@ -139,18 +139,18 @@ namespace Halley {
 			}
 
 		private:
-			const std::vector<State>& state;
+			const Vector<State>& state;
 		};
 
-		std::vector<Node> nodes;
-		std::vector<Polygon> polygons;
-		std::vector<Portal> portals;
-		std::vector<float> weights;
-		std::vector<std::pair<uint16_t, LineSegment>> openEdges;
+		Vector<Node> nodes;
+		Vector<Polygon> polygons;
+		Vector<Portal> portals;
+		Vector<float> weights;
+		Vector<std::pair<uint16_t, LineSegment>> openEdges;
 		int subWorld = 0;
 
 		Vector2i gridSize = Vector2i(20, 20);
-		std::vector<std::vector<NodeId>> polyGrid; // Quick lookup of polygons
+		Vector<Vector<NodeId>> polyGrid; // Quick lookup of polygons
 
 		Vector2f origin;
 		Base2D normalisedCoordinatesBase;
@@ -161,10 +161,10 @@ namespace Halley {
 
 		float totalArea = 0;
 
-		std::optional<std::vector<NodeAndConn>> pathfind(int fromId, int toId) const;
-		std::vector<NodeAndConn> makeResult(const std::vector<State>& state, int startId, int endId) const;
-		std::optional<NavigationPath> makePath(const NavigationQuery& query, const std::vector<NodeAndConn>& nodePath) const;
-		void postProcessPath(std::vector<Vector2f>& points, NavigationQuery::PostProcessingType type) const;
+		std::optional<Vector<NodeAndConn>> pathfind(int fromId, int toId) const;
+		Vector<NodeAndConn> makeResult(const Vector<State>& state, int startId, int endId) const;
+		std::optional<NavigationPath> makePath(const NavigationQuery& query, const Vector<NodeAndConn>& nodePath) const;
+		void postProcessPath(Vector<Vector2f>& points, NavigationQuery::PostProcessingType type) const;
 
 		void processPolygons();
 		void addPolygonsToGrid();

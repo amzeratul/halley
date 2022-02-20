@@ -108,7 +108,7 @@ void CheckAssetsTask::run()
 	}
 }
 
-bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry>& assets, bool isCodegen, bool skipGen, const std::vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath) {
+bool CheckAssetsTask::importFile(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry>& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath) {
 	std::array<int64_t, 3> timestamps = {{ 0, 0, 0 }};
 	bool dbChanged = false;
 
@@ -193,7 +193,7 @@ void CheckAssetsTask::sleep(int timeMs)
 	inbox.clear();
 }
 
-std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkSpecificAssets(ImportAssetsDatabase& db, const std::vector<Path>& paths)
+std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkSpecificAssets(ImportAssetsDatabase& db, const Vector<Path>& paths)
 {
 	std::map<String, ImportAssetsDatabaseEntry> assets;
 	bool dbChanged = false;
@@ -206,7 +206,7 @@ std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkSpecificAssets
 	return assets;
 }
 
-std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, std::vector<Path> srcPaths, bool collectDirMeta)
+std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkAllAssets(ImportAssetsDatabase& db, Vector<Path> srcPaths, bool collectDirMeta)
 {
 	std::map<String, ImportAssetsDatabaseEntry> assets;
 
@@ -215,7 +215,7 @@ std::map<String, ImportAssetsDatabaseEntry> CheckAssetsTask::checkAllAssets(Impo
 	if (collectDirMeta) {
 		directoryMetas.clear();
 	}
-	std::vector<Path> dummyDirMetas;
+	Vector<Path> dummyDirMetas;
 
 	db.markAllInputFilesAsMissing();
 
@@ -267,7 +267,7 @@ bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, std::map<String, I
 {
 	// Check for missing input files
 	auto toDelete = db.getAllMissing();
-	std::vector<String> deletedAssets;
+	Vector<String> deletedAssets;
 	if (!toDelete.empty()) {
 		for (auto& a: toDelete) {
 			for (auto& out: a.outputFiles) {
@@ -281,7 +281,7 @@ bool CheckAssetsTask::requestImport(ImportAssetsDatabase& db, std::map<String, I
 	// Import assets
 	const bool hasImport = hasAssetsToImport(db, assets);
 	if (hasImport || !deletedAssets.empty()) {
-		auto toImport = hasImport ? getAssetsToImport(db, assets) : std::vector<ImportAssetsDatabaseEntry>();
+		auto toImport = hasImport ? getAssetsToImport(db, assets) : Vector<ImportAssetsDatabaseEntry>();
 		addPendingTask(std::make_unique<ImportAssetsTask>(taskName, db, projectAssetImporter, dstPath, std::move(toImport), std::move(deletedAssets), project, packAfter));
 		return true;
 	}
@@ -307,7 +307,7 @@ bool CheckAssetsTask::hasAssetsToImport(ImportAssetsDatabase& db, const std::map
 	return false;
 }
 
-std::vector<ImportAssetsDatabaseEntry> CheckAssetsTask::getAssetsToImport(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets)
+Vector<ImportAssetsDatabaseEntry> CheckAssetsTask::getAssetsToImport(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets)
 {
 	Vector<ImportAssetsDatabaseEntry> toImport;
 
@@ -320,7 +320,7 @@ std::vector<ImportAssetsDatabaseEntry> CheckAssetsTask::getAssetsToImport(Import
 	return toImport;
 }
 
-std::optional<Path> CheckAssetsTask::findDirectoryMeta(const std::vector<Path>& metas, const Path& path) const
+std::optional<Path> CheckAssetsTask::findDirectoryMeta(const Vector<Path>& metas, const Path& path) const
 {
 	auto parent = path.parentPath();
 	std::optional<Path> longestPath;

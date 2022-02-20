@@ -580,7 +580,7 @@ std::optional<NetworkSession::PeerId> NetworkSession::allocatePeerId() const
 {
 	Expects(type == NetworkSessionType::Host);
 
-	auto avail = std::vector<uint8_t>(maxClients, 1);
+	auto avail = Vector<uint8_t>(maxClients, 1);
 	avail[0] = 0;
 	for (const auto& p: peers) {
 		assert(avail.at(p.peerId) == 1);

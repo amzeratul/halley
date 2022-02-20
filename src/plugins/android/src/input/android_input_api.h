@@ -2,7 +2,7 @@
 
 #include "halley/core/api/halley_api_internal.h"
 #include "halley/core/input/input_touch.h"
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <memory>
 #include <android/input.h>
 #include "android_mouse.h"
@@ -28,8 +28,8 @@ namespace Halley {
         size_t getNumberOfMice() const override;
         std::shared_ptr<InputDevice> getMouse(int id) const override;
 
-        std::vector<std::shared_ptr<InputTouch>> getNewTouchEvents() override;
-        std::vector<std::shared_ptr<InputTouch>> getTouchEvents() override;
+        Vector<std::shared_ptr<InputTouch>> getNewTouchEvents() override;
+        Vector<std::shared_ptr<InputTouch>> getTouchEvents() override;
         void setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction) override;
 
         void onInputEvent(AInputEvent* event);

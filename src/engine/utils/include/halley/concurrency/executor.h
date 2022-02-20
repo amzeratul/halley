@@ -5,7 +5,7 @@
 #include <condition_variable>
 #include <functional>
 #include <atomic>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include "halley/text/halleystring.h"
 
 namespace Halley
@@ -19,7 +19,7 @@ namespace Halley
 		void addToQueue(TaskBase task);
 
 		TaskBase getNext();
-		std::vector<TaskBase> getAll();
+		Vector<TaskBase> getAll();
 
 		size_t threadCount() const;
 		void onAttached();
@@ -106,7 +106,7 @@ namespace Halley
 
 	private:
 		String name;
-		std::vector<std::unique_ptr<Executor>> executors;
-		std::vector<std::thread> threads;
+		Vector<std::unique_ptr<Executor>> executors;
+		Vector<std::thread> threads;
 	};
 }

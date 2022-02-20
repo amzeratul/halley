@@ -105,7 +105,7 @@ namespace Halley {
 		}
 
 		template <typename T>
-		[[nodiscard]] std::vector<String> enumerate() const
+		[[nodiscard]] Vector<String> enumerate() const
 		{
 			return of<T>().enumerate();
 		}
@@ -115,8 +115,8 @@ namespace Halley {
 			return *locator;
 		}
 
-		void reloadAssets(const std::vector<String>& ids); // ids are in "type:name" format
-		void reloadAssets(const std::map<AssetType, std::vector<String>>& byType);
+		void reloadAssets(const Vector<String>& ids); // ids are in "type:name" format
+		void reloadAssets(const std::map<AssetType, Vector<String>>& byType);
 
 		const ResourceOptions& getOptions() const { return options; }
 

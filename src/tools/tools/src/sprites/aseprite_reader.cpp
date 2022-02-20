@@ -8,7 +8,7 @@
 using namespace Halley;
 
 
-std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(const String& spriteName, const Path& filename, gsl::span<const gsl::byte> fileData, bool trim, int padding, bool groupSeparated, bool sequenceSeparated)
+std::map<String, Vector<ImageData>> AsepriteReader::importAseprite(const String& spriteName, const Path& filename, gsl::span<const gsl::byte> fileData, bool trim, int padding, bool groupSeparated, bool sequenceSeparated)
 {
 	const String baseName = Path(spriteName).getFilename().string();
 
@@ -16,12 +16,12 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(const St
 	aseFile.load(fileData);
 
 	const size_t nFrames = aseFile.getNumberOfFrames();
-	std::vector<char> frameTagged(nFrames, 0);
+	Vector<char> frameTagged(nFrames, 0);
 
 	// Load all tags
-	std::vector<std::pair<String, std::vector<int>>> tags;
+	Vector<std::pair<String, Vector<int>>> tags;
 	for (auto& tag: aseFile.getTags()) {
-		std::vector<int> frames;
+		Vector<int> frames;
 		for (int i = tag.fromFrame; i <= tag.toFrame; ++i) {
 			frameTagged[i] = 1;
 			frames.push_back(i);
@@ -31,7 +31,7 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(const St
 
 	// Create empty tag
 	{
-		std::vector<int> untagged;
+		Vector<int> untagged;
 		for (int i = 0; i < int(frameTagged.size()); ++i) {
 			if (frameTagged[i] == 0) {
 				untagged.push_back(i);
@@ -43,7 +43,7 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(const St
 	}
 
 	// Create frames
-	std::map<String, std::vector<ImageData>> frameData;	
+	std::map<String, Vector<ImageData>> frameData;	
 	for (auto& t: tags) {
 		int i = 0;
 		String sequence = t.first;
@@ -64,12 +64,12 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(const St
 			for (auto& groupFrameImage : groupFrameImages) {
 				auto name = sequenceSeparated ? sequence : groupFrameImage.first;
 				
-				std::vector<ImageData> groupFrameData;
+				Vector<ImageData> groupFrameData;
 				auto firstImage = frameData.find(name) == frameData.end();
 				addImageData(i, frameN, groupFrameData, std::move(groupFrameImage.second), aseFile, baseName, sequence, direction, duration, trim, padding, hasFrameNumber, name, firstImage, spriteName, filename);
 				
 				if (frameData.find(name) == frameData.end())	{
-					frameData[name] = std::vector<ImageData>();
+					frameData[name] = Vector<ImageData>();
 				}
 				std::move(groupFrameData.begin(), groupFrameData.end(), std::back_inserter(frameData[name]));
 			}
@@ -80,7 +80,7 @@ std::map<String, std::vector<ImageData>> AsepriteReader::importAseprite(const St
 	return frameData;
 }
 
-void AsepriteReader::addImageData(int tagFrameNumber, int origFrameNumber, std::vector<ImageData>& frameData, std::unique_ptr<Image> frameImage, const AsepriteFile& aseFile,
+void AsepriteReader::addImageData(int tagFrameNumber, int origFrameNumber, Vector<ImageData>& frameData, std::unique_ptr<Image> frameImage, const AsepriteFile& aseFile,
 	const String& baseName, const String& sequence, const String& direction, int duration, bool trim, int padding, bool hasFrameNumber, std::optional<String> group,
 	bool firstImage, const String& spriteName, const Path& filename)
 {

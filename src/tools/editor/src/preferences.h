@@ -21,12 +21,12 @@ namespace Halley
 		void loadFromFile(SystemAPI& system);
 
 		void addRecent(Path path);
-		const std::vector<String>& getRecents() const;
+		const Vector<String>& getRecents() const;
 
 		WindowDefinition getWindowDefinition() const;
 		void updateWindowDefinition(const Window& window);
 
-		const std::vector<String>& getDisabledPlatforms() const;
+		const Vector<String>& getDisabledPlatforms() const;
 		bool isPlatformDisabled(const String& name) const;
 		void setPlatformDisabled(const String& name, bool disabled);
 
@@ -38,14 +38,14 @@ namespace Halley
 	private:
 		mutable bool dirty = false;
 
-		std::vector<String> recents;
+		Vector<String> recents;
 		String editorVersion;
 
 		std::optional<Vector2i> windowPosition;
 		Vector2i windowSize;
 		WindowState windowState = WindowState::Normal;
 
-		std::vector<String> disabledPlatforms;
+		Vector<String> disabledPlatforms;
 
 		String colourScheme;
 	};

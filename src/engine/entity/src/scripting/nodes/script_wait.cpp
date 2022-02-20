@@ -30,12 +30,12 @@ gsl::span<const IScriptNodeType::PinType> ScriptWait::getPinConfiguration(const 
 	return data;
 }
 
-std::vector<IScriptNodeType::SettingType> ScriptWait::getSettingTypes() const
+Vector<IScriptNodeType::SettingType> ScriptWait::getSettingTypes() const
 {
-	return { SettingType{ "time", "float", std::vector<String>{"0"} } };
+	return { SettingType{ "time", "float", Vector<String>{"0"} } };
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptWait::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptWait::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	const float time = node.getSettings()["time"].asFloat(0.0f);
 	auto str = ColourStringBuilder(true);

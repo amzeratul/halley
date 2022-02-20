@@ -9,9 +9,9 @@
 
 using namespace Halley;
 
-std::vector<IScriptNodeType::SettingType> ScriptSpriteAnimation::getSettingTypes() const
+Vector<IScriptNodeType::SettingType> ScriptSpriteAnimation::getSettingTypes() const
 {
-	return { SettingType{ "sequence", "Halley::String", std::vector<String>{"default"} } };
+	return { SettingType{ "sequence", "Halley::String", Vector<String>{"default"} } };
 }
 
 gsl::span<const IScriptNodeType::PinType> ScriptSpriteAnimation::getPinConfiguration(const ScriptGraphNode& node) const
@@ -22,7 +22,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpriteAnimation::getPinConfigura
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptSpriteAnimation::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSpriteAnimation::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Play sequence ");
@@ -46,9 +46,9 @@ IScriptNodeType::Result ScriptSpriteAnimation::doUpdate(ScriptEnvironment& envir
 
 
 
-std::vector<IScriptNodeType::SettingType> ScriptSpriteDirection::getSettingTypes() const
+Vector<IScriptNodeType::SettingType> ScriptSpriteDirection::getSettingTypes() const
 {
-	return { SettingType{ "direction", "Halley::String", std::vector<String>{"right"} } };
+	return { SettingType{ "direction", "Halley::String", Vector<String>{"right"} } };
 }
 
 gsl::span<const IScriptNodeType::PinType> ScriptSpriteDirection::getPinConfiguration(const ScriptGraphNode& node) const
@@ -59,7 +59,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpriteDirection::getPinConfigura
 	return data;
 }
 
-std::pair<String, std::vector<ColourOverride>> ScriptSpriteDirection::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSpriteDirection::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Set direction ");

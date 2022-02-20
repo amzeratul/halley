@@ -46,12 +46,12 @@ AudioPosition AudioPosition::makePositional(Vector2f pos, float referenceDistanc
 
 AudioPosition AudioPosition::makePositional(Vector3f pos, float referenceDistance, float maxDistance)
 {
-	std::vector<SpatialSource> sources;
+	Vector<SpatialSource> sources;
 	sources.emplace_back(pos, referenceDistance, maxDistance);
 	return makePositional(std::move(sources));
 }
 
-AudioPosition AudioPosition::makePositional(std::vector<SpatialSource> sources)
+AudioPosition AudioPosition::makePositional(Vector<SpatialSource> sources)
 {
 	auto result = AudioPosition();
 

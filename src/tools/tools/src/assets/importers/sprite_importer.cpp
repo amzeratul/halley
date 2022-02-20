@@ -36,7 +36,7 @@ bool ImageData::operator!=(const ImageData& other) const
 void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	String baseSpriteSheetName = Path(asset.assetId).replaceExtension("").string();
-	std::map<String, std::vector<ImageData>> totalGroupedFrames;
+	std::map<String, Vector<ImageData>> totalGroupedFrames;
 
 	std::optional<Metadata> startMeta;
 
@@ -73,7 +73,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 		}
 
 		// Import image data
-		std::map<String, std::vector<ImageData>> groupedFrames;
+		std::map<String, Vector<ImageData>> groupedFrames;
 		
 		if (inputFile.name.getExtension() == ".ase" || inputFile.name.getExtension() == ".aseprite") {
 			// Import Aseprite file
@@ -89,7 +89,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 				clip = clip.grow(padding);
 			}
 			
-			groupedFrames[""] = std::vector<ImageData>();
+			groupedFrames[""] = Vector<ImageData>();
 			auto& frames = groupedFrames[""];
 			auto& imgData = frames.emplace_back();
 			imgData.clip = clip;
@@ -122,7 +122,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			Animation animation = generateAnimation(spriteName, spriteSheetName, meta.getString("material", "Halley/Sprite"), frames.second);
 			collector.output(spriteName, AssetType::Animation, Serializer::toBytes(animation), {}, "pc", inputFile.name);
 
-			std::vector<ImageData> totalFrames;
+			Vector<ImageData> totalFrames;
 			std::move(frames.second.begin(), frames.second.end(), std::back_inserter(totalFrames));
 			totalGroupedFrames[spriteSheetName + " " + spriteName] = std::move(totalFrames);
 		}
@@ -130,7 +130,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	}
 
 	// Generate atlas + spritesheet
-	std::vector<ImageData> totalFrames;
+	Vector<ImageData> totalFrames;
 	for (auto& frames : totalGroupedFrames)
 	{
 		std::move(frames.second.begin(), frames.second.end(), std::back_inserter(totalFrames));
@@ -201,7 +201,7 @@ String SpriteImporter::getAssetId(const Path& file, const std::optional<Metadata
 	return IAssetImporter::getAssetId(file, metadata);
 }
 
-Animation SpriteImporter::generateAnimation(const String& spriteName, const String& spriteSheetName, const String& materialName, const std::vector<ImageData>& frameData)
+Animation SpriteImporter::generateAnimation(const String& spriteName, const String& spriteSheetName, const String& materialName, const Vector<ImageData>& frameData)
 {
 	Animation animation;
 
@@ -280,7 +280,7 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 	return animation;
 }
 
-std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, std::vector<ImageData>& images, SpriteSheet& spriteSheet, ConfigNode& spriteInfo)
+std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, Vector<ImageData>& images, SpriteSheet& spriteSheet, ConfigNode& spriteInfo)
 {
 	if (images.size() > 1) {
 		Logger::logInfo("Generating atlas \"" + atlasName + "\" with " + toString(images.size()) + " sprites...");
@@ -290,7 +290,7 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, st
 
 	// Generate entries
 	int64_t totalImageArea = 0;
-	std::vector<BinPackEntry> entries;
+	Vector<BinPackEntry> entries;
 	entries.reserve(images.size());
 	for (auto& img: images) {
 		if (!img.isDuplicate) {
@@ -337,7 +337,7 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, st
 	}
 }
 
-std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult>& result, SpriteSheet& spriteSheet, ConfigNode& spriteInfo)
+std::unique_ptr<Image> SpriteImporter::makeAtlas(const Vector<BinPackResult>& result, SpriteSheet& spriteSheet, ConfigNode& spriteInfo)
 {
 	spriteInfo.ensureType(ConfigNodeType::Sequence);
 	auto& infoSeq = spriteInfo.asSequence();
@@ -402,7 +402,7 @@ std::unique_ptr<Image> SpriteImporter::makeAtlas(const std::vector<BinPackResult
 	return atlasImage;
 }
 
-Vector2i SpriteImporter::computeAtlasSize(const std::vector<BinPackResult>& results) const
+Vector2i SpriteImporter::computeAtlasSize(const Vector<BinPackResult>& results) const
 {
 	int w = 0;
 	int h = 0;
@@ -415,9 +415,9 @@ Vector2i SpriteImporter::computeAtlasSize(const std::vector<BinPackResult>& resu
 	return Vector2i(nextPowerOf2(w), nextPowerOf2(h));
 }
 
-std::vector<ImageData> SpriteImporter::splitImagesInGrid(const std::vector<ImageData>& images, Vector2i grid)
+Vector<ImageData> SpriteImporter::splitImagesInGrid(const Vector<ImageData>& images, Vector2i grid)
 {
-	std::vector<ImageData> result;
+	Vector<ImageData> result;
 
 	for (const auto& src: images) {
 		auto imgSize = src.img->getSize();
@@ -450,7 +450,7 @@ std::vector<ImageData> SpriteImporter::splitImagesInGrid(const std::vector<Image
 	return result;
 }
 
-void SpriteImporter::markDuplicates(std::vector<ImageData>& images) const
+void SpriteImporter::markDuplicates(Vector<ImageData>& images) const
 {
 	HashMap<uint64_t, ImageData*> hashes;
 	

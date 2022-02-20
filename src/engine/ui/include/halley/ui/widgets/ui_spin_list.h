@@ -14,7 +14,7 @@ namespace Halley {
 
 	class UISpinList : public UIWidget {
 	public:
-		explicit UISpinList(String id, const UIStyle& style, std::vector<LocalisedString> options = {}, int defaultOption = 0);
+		explicit UISpinList(String id, const UIStyle& style, Vector<LocalisedString> options = {}, int defaultOption = 0);
 
 		void setSelectedOption(int option);
 		void setSelectedOption(const String& id);
@@ -23,9 +23,9 @@ namespace Halley {
 		LocalisedString getSelectedOptionText() const;
 
 		void setInputButtons(const UIInputButtons& buttons) override;
-		void setOptions(std::vector<LocalisedString> options, int defaultOption = -1);
-		void setOptions(std::vector<String> optionIds, const std::vector<LocalisedString>& options, int defaultOption = -1);
-		void setOptions(const I18N& i18n, const String& i18nPrefix, const std::vector<String>& optionIds, int defaultOption = -1);
+		void setOptions(Vector<LocalisedString> options, int defaultOption = -1);
+		void setOptions(Vector<String> optionIds, const Vector<LocalisedString>& options, int defaultOption = -1);
+		void setOptions(const I18N& i18n, const String& i18nPrefix, const Vector<String>& optionIds, int defaultOption = -1);
 
 		void onManualControlCycleValue(int delta) override;
 		void onManualControlActivate() override;
@@ -45,8 +45,8 @@ namespace Halley {
 
 		std::shared_ptr<UIWidget> spinner;
 
-		std::vector<LocalisedString> options;
-		std::vector<String> optionIds;
+		Vector<LocalisedString> options;
+		Vector<String> optionIds;
 		int curOption = 0;
 
 		void updateLabelPositions();

@@ -22,7 +22,7 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+#include "halley/data_structures/vector.h"
 #include <gsl/gsl>
 
 struct OggVorbis_File;
@@ -42,7 +42,7 @@ namespace Halley {
 		VorbisData(std::shared_ptr<ResourceData> resource);
 		~VorbisData();
 
-		size_t read(gsl::span<std::vector<float>> dst);
+		size_t read(gsl::span<Vector<float>> dst);
 
 		size_t getNumSamples() const; // Per channel
 		int getSampleRate() const;

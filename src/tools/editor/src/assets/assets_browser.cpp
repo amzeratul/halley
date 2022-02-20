@@ -160,7 +160,7 @@ void AssetsBrowser::listAssetSources()
 	if (filter.isEmpty()) {
 		setListContents(assetNames.value(), curSrcPath, false);
 	} else {
-		std::vector<String> filteredList;
+		Vector<String> filteredList;
 		auto result = fuzzyMatcher.match(filter);
 		
 		filteredList.reserve(result.size());
@@ -185,7 +185,7 @@ void AssetsBrowser::listAssets(AssetType type)
 	setListContents(assets, curPath, false);
 }
 
-void AssetsBrowser::setListContents(std::vector<String> assets, const Path& curPath, bool flat)
+void AssetsBrowser::setListContents(Vector<String> assets, const Path& curPath, bool flat)
 {
 	{
 		Hash::Hasher hasher;
@@ -222,7 +222,7 @@ void AssetsBrowser::setListContents(std::vector<String> assets, const Path& curP
 		}
 	} else {
 		std::set<String> dirs;
-		std::vector<String> files;
+		Vector<String> files;
 
 		for (auto& a: assets) {
 			auto relPath = Path("./" + a).makeRelativeTo(curPath);

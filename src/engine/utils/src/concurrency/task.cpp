@@ -83,11 +83,11 @@ size_t Task::getNumMessages() const
 	return numMessages.load();
 }
 
-std::vector<std::pair<LoggerLevel, String>> Task::copyMessagesHead(size_t max, std::optional<LoggerLevel> filter) const
+Vector<std::pair<LoggerLevel, String>> Task::copyMessagesHead(size_t max, std::optional<LoggerLevel> filter) const
 {
 	std::lock_guard<std::mutex> lock(mutex);
 
-	std::vector<std::pair<LoggerLevel, String>> result;
+	Vector<std::pair<LoggerLevel, String>> result;
 	for (const auto& msg: messageLog) {
 		if (!filter || msg.first == filter.value()) {
 			result.push_back(msg);
@@ -100,9 +100,9 @@ std::vector<std::pair<LoggerLevel, String>> Task::copyMessagesHead(size_t max, s
 	return result;
 }
 
-std::vector<std::pair<LoggerLevel, String>> Task::copyMessagesTail(size_t max, std::optional<LoggerLevel> filter) const
+Vector<std::pair<LoggerLevel, String>> Task::copyMessagesTail(size_t max, std::optional<LoggerLevel> filter) const
 {
-	std::vector<std::pair<LoggerLevel, String>> result;
+	Vector<std::pair<LoggerLevel, String>> result;
 
 	{
 		std::lock_guard<std::mutex> lock(mutex);

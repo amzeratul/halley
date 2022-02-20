@@ -138,14 +138,14 @@ void Polygon::simplify(float epsilon)
 	}
 }
 
-std::vector<Polygon> Polygon::splitConvexIntoMaxSides(size_t maxSides) const
+Vector<Polygon> Polygon::splitConvexIntoMaxSides(size_t maxSides) const
 {
-	std::vector<Polygon> result;
+	Vector<Polygon> result;
 	doSplitConvexIntoMaxSides(maxSides, result);
 	return result;
 }
 
-std::vector<Polygon> Polygon::splitConvexByLine(const Line& line) const
+Vector<Polygon> Polygon::splitConvexByLine(const Line& line) const
 {
 	if (!isValid()) {
 		return {};
@@ -181,7 +181,7 @@ std::vector<Polygon> Polygon::splitConvexByLine(const Line& line) const
 		lastPoint = point;
 	}
 
-	std::vector<Polygon> result;
+	Vector<Polygon> result;
 	if (!vs[0].empty()) {
 		result.push_back(vs[0]);
 	}
@@ -191,7 +191,7 @@ std::vector<Polygon> Polygon::splitConvexByLine(const Line& line) const
 	return result;
 }
 
-void Polygon::doSplitConvexIntoMaxSides(size_t maxSides, std::vector<Polygon>& output) const
+void Polygon::doSplitConvexIntoMaxSides(size_t maxSides, Vector<Polygon>& output) const
 {
 	if (!isValid()) {
 		return;
@@ -743,9 +743,9 @@ Polygon Polygon::convolution(const Polygon& other) const
 	return Polygon(result);
 }
 
-std::vector<Polygon> Polygon::splitIntoConvex() const
+Vector<Polygon> Polygon::splitIntoConvex() const
 {
-	std::vector<Polygon> result;
+	Vector<Polygon> result;
 	const bool ok = splitIntoConvex(result);
 	if (!ok) {
 		result.clear();
@@ -753,7 +753,7 @@ std::vector<Polygon> Polygon::splitIntoConvex() const
 	return result;
 }
 
-bool Polygon::splitIntoConvex(std::vector<Polygon>& output) const
+bool Polygon::splitIntoConvex(Vector<Polygon>& output) const
 {
 	if (!isValid()) {
 		return false;
@@ -790,9 +790,9 @@ bool Polygon::splitIntoConvex(std::vector<Polygon>& output) const
 
 	// Collect all concave angles
 	const float angleSign = clockwise ? 1.0f : -1.0f;
-	std::vector<size_t> concaveVertices;
+	Vector<size_t> concaveVertices;
 	const size_t n = vertices.size();
-	std::vector<char> isConcave(n, false);
+	Vector<char> isConcave(n, false);
 	for (size_t i = 0; i < n; ++i) {
 		const auto a = vertices[(i + n - 1) % n];
 		const auto b = vertices[i];
@@ -879,7 +879,7 @@ bool Polygon::splitIntoConvex(std::vector<Polygon>& output) const
 std::pair<Polygon, Polygon> Polygon::doSplit(size_t v0, size_t v1, gsl::span<const Vector2f> insertVertices) const
 {
 	if (v0 > v1) {
-		std::vector<Vector2f> inserts(insertVertices.begin(), insertVertices.end());
+		Vector<Vector2f> inserts(insertVertices.begin(), insertVertices.end());
 		std::reverse(inserts.begin(), inserts.end());
 		return doSplit(v1, v0, inserts);
 	}
@@ -950,7 +950,7 @@ bool Polygon::overlapsEdge(LineSegment segment) const
 	return false;
 }
 
-std::optional<std::vector<Polygon>> Polygon::subtract(const Polygon& other) const
+std::optional<Vector<Polygon>> Polygon::subtract(const Polygon& other) const
 {
 	if (!convex) {
 		throw Exception("Error on polygon subtraction: subtrahend is not convex.", HalleyExceptions::Utils);
@@ -967,13 +967,13 @@ std::optional<std::vector<Polygon>> Polygon::subtract(const Polygon& other) cons
 	case SATClassification::Contains:
 		return subtractContained(other);
 	case SATClassification::IsContainedBy:
-		return std::vector<Polygon>();
+		return Vector<Polygon>();
 	}
 
 	throw Exception("Unknown polygon SAT classification", HalleyExceptions::Utils);
 }
 
-std::optional<std::vector<Polygon>> Polygon::subtractOverlapping(const Polygon& other, bool forceConvexOutput) const
+std::optional<Vector<Polygon>> Polygon::subtractOverlapping(const Polygon& other, bool forceConvexOutput) const
 {
 	// Based on the paper "Polygon Subtraction in Two or Three Dimensions" by JE Wilson, October 2013
 	
@@ -990,8 +990,8 @@ std::optional<std::vector<Polygon>> Polygon::subtractOverlapping(const Polygon& 
 		VertexInfo(Vector2f pos, int origId, int crossIdx = -1) : pos(pos), origId(origId), crossIdx(crossIdx) {}
 	};
 
-	std::vector<VertexInfo> polyA;
-	std::vector<VertexInfo> polyB;
+	Vector<VertexInfo> polyA;
+	Vector<VertexInfo> polyB;
 
 	// Start by filling the data for both polygons
 	{
@@ -1076,7 +1076,7 @@ std::optional<std::vector<Polygon>> Polygon::subtractOverlapping(const Polygon& 
 		v.outside = !isPointInside(v.pos) && !isPointOnEdge(v.pos, epsilon);
 	}
 
-	auto findFirstUnusedOutsidePoint = [&] (const std::vector<VertexInfo>& vs) -> std::optional<size_t>
+	auto findFirstUnusedOutsidePoint = [&] (const Vector<VertexInfo>& vs) -> std::optional<size_t>
 	{
 		const auto iter = std::find_if(vs.begin(), vs.end(), [&] (const VertexInfo& v) { return v.outside && !v.processed; });
 		if (iter == vs.end()) {
@@ -1087,7 +1087,7 @@ std::optional<std::vector<Polygon>> Polygon::subtractOverlapping(const Polygon& 
 
 	// Run the splitting algorithm
 	const int nextOffset = clockwise == other.clockwise ? -1 : 1;
-	std::vector<Polygon> result;
+	Vector<Polygon> result;
 
 	while (true) {
 		const auto startPoint = findFirstUnusedOutsidePoint(polyA);
@@ -1096,7 +1096,7 @@ std::optional<std::vector<Polygon>> Polygon::subtractOverlapping(const Polygon& 
 			break;
 		}
 
-		std::vector<Vector2f> curOutput;
+		Vector<Vector2f> curOutput;
 
 		for (size_t idxA = startPoint.value(); idxA != startPoint.value() || curOutput.empty(); idxA = (idxA + 1) % polyA.size()) {
 			auto& curVert = polyA[idxA];
@@ -1133,7 +1133,7 @@ std::optional<std::vector<Polygon>> Polygon::subtractOverlapping(const Polygon& 
 	return result;
 }
 
-std::vector<Polygon> Polygon::subtractContained(const Polygon& other) const
+Vector<Polygon> Polygon::subtractContained(const Polygon& other) const
 {
 	// The idea here is to find the chord that gets closest to the other polygon and this polygon in two, then subtract other from both
 	// If the chord goes right through the other polygon, there's nothing else to be done
@@ -1159,8 +1159,8 @@ std::vector<Polygon> Polygon::subtractContained(const Polygon& other) const
 	if (bestChordDistance < 0) {
 		// Found a chord that goes right through the polygon, split there
 		std::pair<Polygon, Polygon> polys = doSplit(bestChord.first, bestChord.second, {});
-		std::vector<Polygon> res0 = polys.first.subtract(other).value();
-		std::vector<Polygon> res1 = polys.second.subtract(other).value();
+		Vector<Polygon> res0 = polys.first.subtract(other).value();
+		Vector<Polygon> res1 = polys.second.subtract(other).value();
 		for (auto& r: res1) {
 			res0.emplace_back(std::move(r));
 		}
@@ -1169,11 +1169,11 @@ std::vector<Polygon> Polygon::subtractContained(const Polygon& other) const
 		// Split along the chord, but insert an extra vertex
 		Vector2f extraVertex = other.getCentre();
 		std::pair<Polygon, Polygon> polys = doSplit(bestChord.first, bestChord.second, gsl::span<const Vector2f>(&extraVertex, 1));
-		std::vector<Polygon> splitConvexPolys;
+		Vector<Polygon> splitConvexPolys;
 		polys.first.splitIntoConvex(splitConvexPolys);
 		polys.second.splitIntoConvex(splitConvexPolys);
 
-		std::vector<Polygon> result;
+		Vector<Polygon> result;
 		for (auto& poly: splitConvexPolys) {
 			auto subResult = poly.subtract(other);
 			if (subResult) {

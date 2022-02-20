@@ -63,9 +63,9 @@ void I18N::loadLocalisation(const ConfigNode& root)
 	++version;
 }
 
-std::vector<I18NLanguage> I18N::getLanguagesAvailable() const
+Vector<I18NLanguage> I18N::getLanguagesAvailable() const
 {
-	std::vector<I18NLanguage> result;
+	Vector<I18NLanguage> result;
 	for (auto& e: strings) {
 		result.push_back(e.first);
 	}
@@ -217,7 +217,7 @@ I18NLanguageMatch I18NLanguage::getMatch(const I18NLanguage& other) const
 	return I18NLanguageMatch::Exact;
 }
 
-std::optional<I18NLanguage> I18NLanguage::getBestMatch(const std::vector<I18NLanguage>& languages, const I18NLanguage& target, std::optional<I18NLanguage> fallback)
+std::optional<I18NLanguage> I18NLanguage::getBestMatch(const Vector<I18NLanguage>& languages, const I18NLanguage& target, std::optional<I18NLanguage> fallback)
 {
 	I18NLanguageMatch bestMatch = I18NLanguageMatch::None;
 	std::optional<I18NLanguage> result = fallback;

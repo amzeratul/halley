@@ -38,7 +38,7 @@ namespace Halley {
 		
 		void update(Time t);
 
-		void setSprites(std::vector<Sprite> sprites);
+		void setSprites(Vector<Sprite> sprites);
 		void setAnimation(std::shared_ptr<const Animation> animation);
 
 		bool isAnimated() const;
@@ -55,9 +55,9 @@ namespace Halley {
 		bool firstUpdate = true;
 		float spawnRateMultiplier = 1.0f;
 
-		std::vector<Sprite> sprites;
-		std::vector<Particle> particles;
-		std::vector<AnimationPlayerLite> animationPlayers;
+		Vector<Sprite> sprites;
+		Vector<Particle> particles;
+		Vector<AnimationPlayerLite> animationPlayers;
 		
 		size_t nParticlesAlive = 0;
 		size_t nParticlesVisible = 0;
@@ -84,7 +84,7 @@ namespace Halley {
 		std::optional<size_t> maxParticles;
 		std::optional<size_t> burst;
 
-		std::vector<Sprite> baseSprites;
+		Vector<Sprite> baseSprites;
 		std::shared_ptr<const Animation> baseAnimation;
 		Vector2f position;
 

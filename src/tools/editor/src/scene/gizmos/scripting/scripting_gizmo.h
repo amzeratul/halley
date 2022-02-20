@@ -10,7 +10,7 @@ namespace Halley {
 		void draw(Painter& painter, const ISceneEditor& sceneEditor) const override;
 		bool isHighlighted() const override;
 		std::shared_ptr<UIWidget> makeUI() override;
-		std::vector<String> getHighlightedComponents() const override;
+		Vector<String> getHighlightedComponents() const override;
 		void refreshEntity() override;
 		void onEntityChanged() override;
 
@@ -47,7 +47,7 @@ namespace Halley {
 		bool dragging = false;
 		Vector2f startDragPos;
 
-		std::vector<EntityTarget> entityTargets;
+		Vector<EntityTarget> entityTargets;
 		EntityId curEntityTarget;
 
 		mutable TextRenderer tooltipLabel;

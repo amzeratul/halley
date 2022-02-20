@@ -22,7 +22,7 @@ namespace Halley {
 		std::optional<winrt::Windows::UI::Core::CoreWindow> window;
 		winrt::event_token acceleratorKeyEvent;
 
-		std::vector<int> keyMapping;
+		Vector<int> keyMapping;
 		std::set<WinRTTextInputCapture*> captures;
 
 		void initMapping();

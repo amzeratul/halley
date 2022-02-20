@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include <vector>
+#include "halley/data_structures/vector.h"
 
 
 #include "render_graph_definition.h"
@@ -35,7 +35,7 @@ namespace Halley {
 
 		struct OutputPin {
 			RenderGraphPinType type = RenderGraphPinType::Unknown;
-			std::vector<OtherPin> others;
+			Vector<OtherPin> others;
 		};
 
 		struct Variable {
@@ -51,8 +51,8 @@ namespace Halley {
 		void prepareInputPin(InputPin& pin, VideoAPI& video, Vector2i targetSize);
 		void prepareTextures(VideoAPI& video, const RenderContext& rc);
 		
-		void render(const RenderGraph& graph, VideoAPI& video, const RenderContext& rc, std::vector<RenderGraphNode*>& renderQueue);
-		void notifyOutputs(std::vector<RenderGraphNode*>& renderQueue);
+		void render(const RenderGraph& graph, VideoAPI& video, const RenderContext& rc, Vector<RenderGraphNode*>& renderQueue);
+		void notifyOutputs(Vector<RenderGraphNode*>& renderQueue);
 
 		void resetTextures();
 		std::shared_ptr<Texture> makeTexture(VideoAPI& video, RenderGraphPinType type);
@@ -77,7 +77,7 @@ namespace Halley {
 		std::optional<uint8_t> stencilClear;
 
 		std::shared_ptr<Material> overlayMethod;
-		std::vector<Variable> variables;
+		Vector<Variable> variables;
 		
 		bool activeInCurrentPass = false;
 		bool ownRenderTarget = false;
@@ -85,8 +85,8 @@ namespace Halley {
 		int depsLeft = 0;
 		Vector2i currentSize;
 
-		std::vector<InputPin> inputPins;
-		std::vector<OutputPin> outputPins;
+		Vector<InputPin> inputPins;
+		Vector<OutputPin> outputPins;
 
 		std::shared_ptr<TextureRenderTarget> renderTarget;
 		RenderGraphNode* directOutput = nullptr;

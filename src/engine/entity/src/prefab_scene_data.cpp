@@ -35,12 +35,12 @@ ISceneData::EntityNodeData PrefabSceneData::getWriteableEntityNodeData(const Str
 	return EntityNodeData(*data.entity, parentId, static_cast<int>(data.childIdx));
 }
 
-std::vector<EntityData*> PrefabSceneData::getWriteableEntityDatas(gsl::span<const UUID> ids)
+Vector<EntityData*> PrefabSceneData::getWriteableEntityDatas(gsl::span<const UUID> ids)
 {
-	std::vector<EntityData*> result;
+	Vector<EntityData*> result;
 	result.reserve(ids.size());
 
-	std::vector<UUID> sortedIds(ids.begin(), ids.end());
+	Vector<UUID> sortedIds(ids.begin(), ids.end());
 	std::sort(sortedIds.begin(), sortedIds.end());
 
 	getWriteableEntityDatas(result, prefab.getEntityDatas(), sortedIds);
@@ -221,7 +221,7 @@ PrefabSceneData::EntityAndParent PrefabSceneData::findEntityAndParent(EntityData
 	return {};
 }
 
-void PrefabSceneData::getWriteableEntityDatas(std::vector<EntityData*>& result, gsl::span<EntityData> datas, gsl::span<const UUID> sortedIds)
+void PrefabSceneData::getWriteableEntityDatas(Vector<EntityData*>& result, gsl::span<EntityData> datas, gsl::span<const UUID> sortedIds)
 {
 	for (auto& d: datas) {
 		if (std::binary_search(sortedIds.begin(), sortedIds.end(), d.getInstanceUUID())) {

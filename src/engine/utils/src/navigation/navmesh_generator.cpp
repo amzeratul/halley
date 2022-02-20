@@ -16,7 +16,7 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 	const auto v = bounds.side1 / bounds.side1Divisions;
 	const float maxSize = (u - v).length() * 0.6f;
 
-	std::vector<NavmeshNode> polygons;
+	Vector<NavmeshNode> polygons;
 	
 	for (size_t i = 0; i < bounds.side0Divisions; ++i) {
 		for (size_t j = 0; j < bounds.side1Divisions; ++j) {
@@ -59,10 +59,10 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 	return result;
 }
 
-std::vector<Polygon> NavmeshGenerator::generateByPolygonSubtraction(gsl::span<const Polygon> inputPolygons, gsl::span<const Polygon> obstacles, Circle bounds)
+Vector<Polygon> NavmeshGenerator::generateByPolygonSubtraction(gsl::span<const Polygon> inputPolygons, gsl::span<const Polygon> obstacles, Circle bounds)
 {
 	// Start with the given input polygons
-	std::vector<Polygon> output;
+	Vector<Polygon> output;
 	for (const auto& b: inputPolygons) {
 		b.splitIntoConvex(output);
 	}
@@ -78,7 +78,7 @@ std::vector<Polygon> NavmeshGenerator::generateByPolygonSubtraction(gsl::span<co
 		}
 		
 		int nPolys = static_cast<int>(output.size());
-		std::vector<Polygon> toAdd;
+		Vector<Polygon> toAdd;
 		
 		for (int i = 0; i < nPolys; ++i) {
 			// Subtract this obstacle from this polygon, then update the list
@@ -114,9 +114,9 @@ std::vector<Polygon> NavmeshGenerator::generateByPolygonSubtraction(gsl::span<co
 	return output;
 }
 
-std::vector<Polygon> NavmeshGenerator::preProcessObstacles(gsl::span<const Polygon> obstacles, float agentSize)
+Vector<Polygon> NavmeshGenerator::preProcessObstacles(gsl::span<const Polygon> obstacles, float agentSize)
 {
-	std::vector<Polygon> result;
+	Vector<Polygon> result;
 
 	// Convert all to convex
 	for (const auto& o: obstacles) {
@@ -156,9 +156,9 @@ Polygon NavmeshGenerator::makeAgentMask(float agentSize)
 	return agentMask;
 }
 
-std::vector<NavmeshGenerator::NavmeshNode> NavmeshGenerator::toNavmeshNode(std::vector<Polygon> polygons)
+Vector<NavmeshGenerator::NavmeshNode> NavmeshGenerator::toNavmeshNode(Vector<Polygon> polygons)
 {
-	std::vector<NavmeshNode> result;
+	Vector<NavmeshNode> result;
 	result.reserve(polygons.size());
 	for (auto& p: polygons) {
 		result.push_back(NavmeshNode(std::move(p)));
@@ -192,7 +192,7 @@ void NavmeshGenerator::generateConnectivity(gsl::span<NavmeshNode> polygons)
 	}
 }
 
-void NavmeshGenerator::postProcessPolygons(std::vector<NavmeshNode>& polygons, float maxSize, bool allowSimplification)
+void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float maxSize, bool allowSimplification)
 {
 	// Go through each polygon and see if any of its neighbours can be merged with it.
 	// If it can be merged, repeat the loop on the same polygon, otherwise move on
@@ -237,7 +237,7 @@ void NavmeshGenerator::postProcessPolygons(std::vector<NavmeshNode>& polygons, f
 	removeDeadPolygons(polygons);
 }
 
-void NavmeshGenerator::removeDeadPolygons(std::vector<NavmeshNode>& polygons)
+void NavmeshGenerator::removeDeadPolygons(Vector<NavmeshNode>& polygons)
 {
 	int newIdx = 0;
 	for (int i = 0; i < static_cast<int>(polygons.size()); ++i) {
@@ -283,10 +283,10 @@ std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const Navme
 		return {};
 	}
 	
-	std::vector<Vector2f> vsA = a.polygon.getVertices();
-	std::vector<Vector2f> vsB = b.polygon.getVertices();
-	std::vector<int> connA = a.connections;
-	std::vector<int> connB = b.connections;
+	Vector<Vector2f> vsA = a.polygon.getVertices();
+	Vector<Vector2f> vsB = b.polygon.getVertices();
+	Vector<int> connA = a.connections;
+	Vector<int> connB = b.connections;
 	const size_t aSize = vsA.size();
 	const size_t bSize = vsB.size();
 
@@ -364,7 +364,7 @@ void NavmeshGenerator::simplifyPolygon(NavmeshNode& node, float threshold)
 	}
 }
 
-void NavmeshGenerator::simplifyPolygons(std::vector<NavmeshNode>& nodes)
+void NavmeshGenerator::simplifyPolygons(Vector<NavmeshNode>& nodes)
 {
 	for (auto& node: nodes) {
 		simplifyPolygon(node, 0.1f);
@@ -380,7 +380,7 @@ void NavmeshGenerator::remapConnections(NavmeshNode& poly, int from, int to)
 	}
 }
 
-void NavmeshGenerator::limitPolygonSides(std::vector<Polygon>& polygons, size_t maxSides)
+void NavmeshGenerator::limitPolygonSides(Vector<Polygon>& polygons, size_t maxSides)
 {
 	const size_t n = polygons.size();
 	for (size_t i = 0; i < n; ++i) {
@@ -394,7 +394,7 @@ void NavmeshGenerator::limitPolygonSides(std::vector<Polygon>& polygons, size_t 
 	}
 }
 
-void NavmeshGenerator::splitByPortals(std::vector<NavmeshNode>& nodes, gsl::span<const NavmeshSubworldPortal> portals)
+void NavmeshGenerator::splitByPortals(Vector<NavmeshNode>& nodes, gsl::span<const NavmeshSubworldPortal> portals)
 {
 	const auto nNodes = nodes.size();
 	for (size_t idx = 0; idx < nNodes; ++idx) {
@@ -433,7 +433,7 @@ void NavmeshGenerator::splitByPortals(std::vector<NavmeshNode>& nodes, gsl::span
 	}
 }
 
-void NavmeshGenerator::removeNodesBeyondPortals(std::vector<NavmeshNode>& nodes)
+void NavmeshGenerator::removeNodesBeyondPortals(Vector<NavmeshNode>& nodes)
 {
 	std::list<NavmeshNode*> toProcess;
 	for (auto& node: nodes) {
@@ -470,7 +470,7 @@ void NavmeshGenerator::applyRegions(gsl::span<NavmeshNode> nodes, gsl::span<cons
 {
 	int curRegionGroup = 1;
 	for (const auto& region: regions) {
-		std::vector<Polygon> convexRegions;
+		Vector<Polygon> convexRegions;
 		region.splitIntoConvex(convexRegions);
 		for (auto& node: nodes) {
 			for (const auto& convexRegion: convexRegions) {
@@ -546,7 +546,7 @@ std::optional<size_t> NavmeshGenerator::getNavmeshEdge(NavmeshNode& node, size_t
 
 Navmesh NavmeshGenerator::makeNavmesh(gsl::span<NavmeshNode> nodes, const NavmeshBounds& bounds, gsl::span<const NavmeshSubworldPortal> subworldPortals, int region, int subWorld, std::function<float(int, const Polygon&)> getPolygonWeightCallback)
 {
-	std::vector<Navmesh::PolygonData> output;
+	Vector<Navmesh::PolygonData> output;
 
 	// Special connection values:
 	// -1: no connection
@@ -572,7 +572,7 @@ Navmesh NavmeshGenerator::makeNavmesh(gsl::span<NavmeshNode> nodes, const Navmes
 	// Generate
 	for (auto& node: nodes) {
 		if (node.alive && node.region == region) {
-			std::vector<int> connections = node.connections;
+			Vector<int> connections = node.connections;
 
 			for (size_t i = 0; i < connections.size(); ++i) {
 				auto& c = connections[i];

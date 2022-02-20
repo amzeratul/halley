@@ -126,12 +126,12 @@ size_t TaskAnchor::getNumMessages() const
 	return task->getNumMessages();
 }
 
-std::vector<std::pair<LoggerLevel, String>> TaskAnchor::copyMessagesHead(size_t max, std::optional<LoggerLevel> filter) const
+Vector<std::pair<LoggerLevel, String>> TaskAnchor::copyMessagesHead(size_t max, std::optional<LoggerLevel> filter) const
 {
 	return task->copyMessagesHead(max, filter);
 }
 
-std::vector<std::pair<LoggerLevel, String>> TaskAnchor::copyMessagesTail(size_t max, std::optional<LoggerLevel> filter) const
+Vector<std::pair<LoggerLevel, String>> TaskAnchor::copyMessagesTail(size_t max, std::optional<LoggerLevel> filter) const
 {
 	return task->copyMessagesTail(max, filter);
 }

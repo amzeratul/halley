@@ -117,7 +117,7 @@ void OS::atomicWriteFile(const Path& path, gsl::span<const gsl::byte> data, std:
 	fp.close();
 }
 
-std::vector<Path> OS::enumerateDirectory(const Path& path)
+Vector<Path> OS::enumerateDirectory(const Path& path)
 {
 	return {};
 }

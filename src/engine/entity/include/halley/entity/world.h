@@ -103,10 +103,10 @@ namespace Halley {
 		std::optional<EntityRef> findEntity(const UUID& id, bool includePending = false);
 
 		size_t numEntities() const;
-		std::vector<EntityRef> getEntities();
-		std::vector<ConstEntityRef> getEntities() const;
-		std::vector<EntityRef> getTopLevelEntities();
-		std::vector<ConstEntityRef> getTopLevelEntities() const;
+		Vector<EntityRef> getEntities();
+		Vector<ConstEntityRef> getEntities() const;
+		Vector<EntityRef> getTopLevelEntities();
+		Vector<ConstEntityRef> getTopLevelEntities() const;
 
 		void spawnPending(); // Warning: use with care, will invalidate entities
 
@@ -170,7 +170,7 @@ namespace Halley {
 		Vector<std::unique_ptr<Family>> families;
 		TreeMap<String, std::shared_ptr<Service>> services;
 
-		TreeMap<FamilyMaskType, std::vector<Family*>> familyCache;
+		TreeMap<FamilyMaskType, Vector<Family*>> familyCache;
 
 		std::shared_ptr<MaskStorage> maskStorage;
 		std::shared_ptr<ComponentDeleterTable> componentDeleterTable;
@@ -196,7 +196,7 @@ namespace Halley {
 
 		Service* tryGetService(const String& name) const;
 
-		const std::vector<Family*>& getFamiliesFor(const FamilyMaskType& mask);
+		const Vector<Family*>& getFamiliesFor(const FamilyMaskType& mask);
 
 		void processSystemMessages(TimeLine timeline);
 	};

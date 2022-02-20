@@ -49,7 +49,7 @@ namespace Halley {
 		void pasteComponents(const ConfigNode& data);
 		void pasteComponent(const String& name, ConfigNode data);
 
-		void setHighlightedComponents(std::vector<String> componentNames);
+		void setHighlightedComponents(Vector<String> componentNames);
 
 		IProjectWindow& getProjectWindow() const override;
 
@@ -82,7 +82,7 @@ namespace Halley {
 		int ecsDataRevision = 0;
 
 		std::map<String, std::shared_ptr<UIWidget>> componentWidgets;
-		std::vector<String> highlightedComponents;
+		Vector<String> highlightedComponents;
 
 		std::shared_ptr<EntityValidatorUI> entityValidatorUI;
 
@@ -117,7 +117,7 @@ namespace Halley {
 		void setCallbacks(IEntityEditorCallbacks& callbacks);
 		void setGameResources(Resources& resources);
 
-		void addFieldFactories(std::vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
+		void addFieldFactories(Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
 		void resetFieldFactories();
 	
 		std::shared_ptr<IUIElement> makeLabel(const String& label) const override;
@@ -132,7 +132,7 @@ namespace Halley {
 
 		mutable std::unique_ptr<ComponentEditorContext> context;
 
-		std::pair<String, std::vector<String>> parseType(const String& type) const;
+		std::pair<String, Vector<String>> parseType(const String& type) const;
 		void makeContext();
 	};
 }

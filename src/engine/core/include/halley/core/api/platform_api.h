@@ -275,7 +275,7 @@ namespace Halley
 		virtual bool needsStringFiltering() const { return false; }
 		virtual void setProfanityCheckLanguage(const String& language) {}
 		
-		virtual void setProfanityCheckForbiddenWordsList(std::vector<String> words) {}
+		virtual void setProfanityCheckForbiddenWordsList(Vector<String> words) {}
 
 		// Some platforms have different methods to check for profanity on names. If not, default to standard.
 		virtual Future<String> performNameProfanityCheck(String name)

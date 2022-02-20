@@ -190,7 +190,7 @@ void Random::setSeed(uint64_t seed)
 
 void Random::setSeed(gsl::span<const gsl::byte> data)
 {
-	std::vector<uint32_t> initData(alignUp(size_t(data.size_bytes()), sizeof(uint32_t)) / sizeof(uint32_t), 0);
+	Vector<uint32_t> initData(alignUp(size_t(data.size_bytes()), sizeof(uint32_t)) / sizeof(uint32_t), 0);
 	memcpy(initData.data(), data.data(), data.size_bytes());
 	generator->init_by_array(initData.data(), initData.size());
 }

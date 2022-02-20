@@ -44,7 +44,7 @@ void FontImporter::import(const ImportingAsset& asset, IAssetCollector& collecto
 	for (int c: extraChars.getUTF32()) {
 		characterSet.insert(c);
 	}
-	std::vector<int> characters;
+	Vector<int> characters;
 	characters.reserve(characterSet.size());
 	for (auto& c: characterSet) {
 		characters.push_back(c);

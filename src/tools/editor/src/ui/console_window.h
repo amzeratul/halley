@@ -25,7 +25,7 @@ namespace Halley
 	private:
 		UIFactory& factory;
 		
-		std::vector<std::pair<LoggerLevel, String>> buffer;
+		Vector<std::pair<LoggerLevel, String>> buffer;
 		std::shared_ptr<UIDebugConsole> console;
 
 		std::shared_ptr<UIDebugConsoleController> controller;

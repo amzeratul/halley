@@ -152,7 +152,7 @@ void MetadataEditor::addAssetTypeField(const String& name, const String& key, As
 	makeAssetTypeField(fields->getSizer(), key, type, defaultValue);
 }
 
-void MetadataEditor::addDropdownField(const String& name, const String& key, std::vector<String> values, const String& defaultValue)
+void MetadataEditor::addDropdownField(const String& name, const String& key, Vector<String> values, const String& defaultValue)
 {
 	makeLabel(name);
 	makeDropdownField(fields->getSizer(), key, std::move(values), defaultValue);
@@ -250,7 +250,7 @@ void MetadataEditor::makeStringField(UISizer& sizer, const String& key, const St
 	});
 }
 
-void MetadataEditor::makeDropdownField(UISizer& sizer, const String& key, std::vector<String> values, const String& defaultValue)
+void MetadataEditor::makeDropdownField(UISizer& sizer, const String& key, Vector<String> values, const String& defaultValue)
 {
 	const auto result = std::make_shared<UIDropdown>(key, factory.getStyle("dropdown"));
 	result->setOptions(std::move(values));

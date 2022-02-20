@@ -53,7 +53,7 @@ Font::Font(String name, String imageName, float ascender, float height, float si
 {
 }
 
-Font::Font(String name, String imageName, float ascender, float height, float sizePt, float renderScale, Vector2i imageSize, float distanceFieldSmoothRadius, std::vector<String> fallback)
+Font::Font(String name, String imageName, float ascender, float height, float sizePt, float renderScale, Vector2i imageSize, float distanceFieldSmoothRadius, Vector<String> fallback)
 	: name(std::move(name))
 	, imageName(std::move(imageName))
 	, ascender(ascender)
@@ -224,7 +224,7 @@ void Font::deserialize(Deserializer& s)
 void Font::printGlyphs() const
 {
 	std::optional<Range<int>> curRange;
-	std::vector<Range<int>> ranges;
+	Vector<Range<int>> ranges;
 	for (auto& g: glyphs) {
 		int c = g.first;
 		if (curRange && curRange->end == c - 1) {

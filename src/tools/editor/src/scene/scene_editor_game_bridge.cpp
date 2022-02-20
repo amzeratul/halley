@@ -142,7 +142,7 @@ std::shared_ptr<UIWidget> SceneEditorGameBridge::makeCustomUI() const
 	return result;
 }
 
-void SceneEditorGameBridge::setSelectedEntities(std::vector<UUID> uuids, std::vector<EntityData*> datas)
+void SceneEditorGameBridge::setSelectedEntities(Vector<UUID> uuids, Vector<EntityData*> datas)
 {
 	if (interfaceReady) {
 		interface->setSelectedEntities(std::move(uuids), std::move(datas));
@@ -319,7 +319,7 @@ std::shared_ptr<ScriptNodeTypeCollection> SceneEditorGameBridge::getScriptNodeTy
 	return {};
 }
 
-std::vector<UIPopupMenuItem> SceneEditorGameBridge::getSceneContextMenu(const Vector2f& mousePos) const
+Vector<UIPopupMenuItem> SceneEditorGameBridge::getSceneContextMenu(const Vector2f& mousePos) const
 {
 	if (interfaceReady) {
 		return interface->getSceneContextMenu(mousePos);
