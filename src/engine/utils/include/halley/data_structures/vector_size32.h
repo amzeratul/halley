@@ -43,10 +43,12 @@ namespace Halley {
 		VectorIterator operator--(int) const { return VectorIterator(v - 1); }
 		VectorIterator operator+(ptrdiff_t o) const { return VectorIterator(v + o); }
 		VectorIterator operator-(ptrdiff_t o) const { return VectorIterator(v - o); }
-		ptrdiff_t operator-(const VectorIterator& other) const { return v - other.v; }
 		VectorIterator operator+=(ptrdiff_t o) { v += o; return *this; }
 		VectorIterator operator-=(ptrdiff_t o) { v -= o; return *this; }
 		
+		template<typename OtherPointer>
+		ptrdiff_t operator-(const VectorIterator<T, OtherPointer>& other) const { return v - other.v; }
+
 		template<typename OtherPointer>
 		bool operator==(const VectorIterator<T, OtherPointer>& other) const { return v == other.v; }
 
@@ -397,7 +399,7 @@ namespace Halley {
 		{
 			const auto idx = pos - begin();
 			emplace_back(std::forward<Args>(args)...);
-			std::rotate(de_const_iter(pos), end() - 1, end());
+			std::rotate(begin() + idx, end() - 1, end());
 			return begin() + idx;
 		}
 
