@@ -36,6 +36,7 @@ namespace Halley {
 		
 		reference operator*() const { return *v; }
 		pointer operator->() const { return v; }
+		reference operator[](size_t n) const { return v[n]; }
 		
 		VectorIterator& operator++() { ++v; return *this; }
 		VectorIterator& operator--() { --v; return *this; }
@@ -378,14 +379,20 @@ namespace Halley {
 		iterator insert(const_iterator pos, InputIt first, InputIt last)
 		{
 			return do_insert(pos, [&](size_t prevSize) {
-				const auto count = last - first;
-				reserve(size() + count);
-				size_t i = 0;
-				for (auto iter = first; iter != last; ++iter) {
-					std::allocator_traits<Allocator>::construct(*this, data() + (i + prevSize), *iter);
-					++i;
+				if constexpr (std::is_same_v<typename std::iterator_traits<InputIt>::iterator_category, std::random_access_iterator_tag>) {
+					const auto count = last - first;
+					reserve(size() + count);
+					size_t i = 0;
+					for (auto iter = first; iter != last; ++iter) {
+						std::allocator_traits<Allocator>::construct(*this, data() + (i + prevSize), *iter);
+						++i;
+					}
+					m_size = static_cast<uint32_t>(prevSize + count);
+				} else {
+					for (auto iter = first; iter != last; ++iter) {
+						push_back(*iter);
+					}
 				}
-				m_size = static_cast<uint32_t>(prevSize + count);
 			});
 		}
 		
