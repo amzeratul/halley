@@ -35,8 +35,11 @@ namespace Halley {
 		void deserialize(Deserializer& s);
 
     private:
-        std::array<uint64_t, 2> bytes;
-    };
+        union {
+            std::array<uint64_t, 2> qwords;
+            std::array<uint8_t, 16> bytes;
+        };
+	};
 }
 
 template<>

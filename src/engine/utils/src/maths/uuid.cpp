@@ -9,28 +9,28 @@ using namespace Halley;
 
 UUID::UUID()
 {
-	bytes.fill(0);
+	qwords.fill(0);
 }
 
 UUID::UUID(std::array<Byte, 16> b)
 {
-	memcpy(bytes.data(), b.data(), 16);
+	memcpy(qwords.data(), b.data(), 16);
 }
 
 UUID::UUID(gsl::span<const gsl::byte> b)
 {
 	if (b.size_bytes() < 16) {
-		bytes.fill(0);
+		qwords.fill(0);
 	}
-	memcpy(bytes.data(), b.data(), std::min(b.size_bytes(), size_t(16)));
+	memcpy(qwords.data(), b.data(), std::min(b.size_bytes(), size_t(16)));
 }
 
 UUID::UUID(const Bytes& b)
 {
 	if (b.size() < 16) {
-		bytes.fill(0);
+		qwords.fill(0);
 	}
-	memcpy(bytes.data(), b.data(), std::min(b.size(), size_t(16)));
+	memcpy(qwords.data(), b.data(), std::min(b.size(), size_t(16)));
 }
 
 UUID::UUID(const String& str)
@@ -49,17 +49,17 @@ UUID::UUID(const String& str)
 
 bool UUID::operator==(const UUID& other) const
 {
-	return bytes == other.bytes;
+	return qwords == other.qwords;
 }
 
 bool UUID::operator!=(const UUID& other) const
 {
-	return bytes != other.bytes;
+	return qwords != other.qwords;
 }
 
 bool UUID::operator<(const UUID& other) const
 {
-	return bytes < other.bytes;
+	return qwords < other.qwords;
 }
 
 String UUID::toString() const
@@ -104,8 +104,8 @@ UUID UUID::generateFromUUIDs(const UUID& one, const UUID& two)
 
 bool UUID::isValid() const
 {
-	for (size_t i = 0; i < bytes.size(); ++i) {
-		if (bytes[i] != 0) {
+	for (size_t i = 0; i < qwords.size(); ++i) {
+		if (qwords[i] != 0) {
 			return true;
 		}
 	}
@@ -114,17 +114,17 @@ bool UUID::isValid() const
 
 gsl::span<const gsl::byte> UUID::getBytes() const
 {
-	return gsl::as_bytes(gsl::span<const uint64_t>(bytes));
+	return gsl::as_bytes(gsl::span<const uint64_t>(qwords));
 }
 
 gsl::span<gsl::byte> UUID::getWriteableBytes()
 {
-	return gsl::as_writable_bytes(gsl::span<uint64_t>(bytes));
+	return gsl::as_writable_bytes(gsl::span<uint64_t>(qwords));
 }
 
 gsl::span<const uint64_t> UUID::getUint64Bytes() const
 {
-	return bytes;
+	return qwords;
 }
 
 void UUID::serialize(Serializer& s) const
