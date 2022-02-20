@@ -396,7 +396,7 @@ namespace Halley {
 		iterator emplace(const_iterator pos, Args&&... args)
 		{
 			const auto idx = pos - begin();
-			emplace_back(std::forward(args));
+			emplace_back(std::forward(args...));
 			std::rotate(de_const_iter(pos), end() - 1, end());
 			return begin() + idx;
 		}
