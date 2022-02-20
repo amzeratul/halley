@@ -180,11 +180,12 @@ namespace Halley {
 			if (this == &other) {
 				return *this;
 			}
-			
-			change_capacity(other.m_capacity);
-			resize(other.m_size);
-			for (uint32_t i = 0; i < m_size; ++i) {
-				(*this)[i] = other[i];
+
+			// TODO: could be faster
+			clear();
+			reserve(other.size());
+			for (const auto& e: other) {
+				push_back(std::move(e));
 			}
 			
 			return *this;
@@ -204,8 +205,10 @@ namespace Halley {
 
 		VectorSize32& operator=(std::initializer_list<T> list)
 		{
+			// TODO: could be faster
+			clear();
 			reserve(list.size());
-			for (auto e: list) {
+			for (const auto& e: list) {
 				push_back(std::move(e));
 			}
 			return *this;
@@ -213,6 +216,7 @@ namespace Halley {
 
 		void assign(size_t count, const T& value)
 		{
+			// TODO: could be faster
 			clear();
 			resize(count, value);
 		}
@@ -220,6 +224,7 @@ namespace Halley {
 		template <class InputIt, std::enable_if_t<is_iterator_v<InputIt>, int> Test = 0>
 		void assign(InputIt begin, InputIt end)
 		{
+			// TODO: could be faster
 			clear();
 			reserve(end - begin);
 			for (auto iter = begin; iter != end; ++iter) {
@@ -229,6 +234,7 @@ namespace Halley {
 
 		void assign(std::initializer_list<T> list)
 		{
+			// TODO: could be faster
 			clear();
 			reserve(list.size());
 			for (const auto& e: list) {
@@ -400,8 +406,9 @@ namespace Halley {
 			return do_insert(pos, [&](size_t prevSize) {
 				const auto count = initializerList.size();
 				reserve(size() + count);
-				for (size_t i = 0; i < count; ++i) {
-					std::allocator_traits<Allocator>::construct(*this, data() + (i + prevSize), initializerList[i]);
+				size_t i = 0;
+				for (auto& e: initializerList) {
+					std::allocator_traits<Allocator>::construct(*this, data() + (i + prevSize), e);
 				}
 				m_size = static_cast<uint32_t>(prevSize + count);
 			});
@@ -420,7 +427,7 @@ namespace Halley {
 		{
 			const auto idx = first - begin();
 			std::rotate(de_const_iter(first), de_const_iter(last), end());
-			resize(size() - (last - first));
+			resize_down(static_cast<uint32_t>(size() - (last - first)));
 			return begin() + idx;
 		}
 
@@ -558,11 +565,17 @@ namespace Halley {
 				}
 				m_size = newSize;
 			} else if (newSize < m_size) {
-				for (size_type i = newSize; i < m_size; ++i) {
-					std::allocator_traits<Allocator>::destroy(*this, m_data + i);
-				}
-				m_size = newSize;
+				resize_down(newSize);
 			}
+		}
+
+		void resize_down(uint32_t newSize)
+		{
+			assert(newSize <= m_size);
+			for (size_type i = newSize; i < m_size; ++i) {
+				std::allocator_traits<Allocator>::destroy(*this, m_data + i);
+			}
+			m_size = newSize;
 		}
 
 		template <typename F>
