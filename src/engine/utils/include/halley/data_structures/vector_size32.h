@@ -16,7 +16,7 @@
 #endif
 
 namespace Halley {
-	template <typename T, typename Pointer, typename Reference>
+	template <typename T, typename Pointer>
 	class VectorIterator {
 	public:
 	#ifdef __cpp_lib_concepts
@@ -26,29 +26,44 @@ namespace Halley {
 	    using value_type        = T;
 	    using difference_type   = std::ptrdiff_t;
 	    using pointer           = Pointer;
-	    using reference         = Reference;
+	    using reference         = decltype(*Pointer());
 
 		VectorIterator() : v(nullptr) {}
 		VectorIterator(pointer v) : v(v) {}
 
-		template<typename OtherPointer, typename OtherRef>
-		VectorIterator(const VectorIterator<T, OtherPointer, OtherRef>& o) : v(o.v) {}
+		template<typename OtherPointer>
+		VectorIterator(const VectorIterator<T, OtherPointer>& o) : v(o.v) {}
 		
 		reference operator*() const { return *v; }
+		pointer operator->() const { return v; }
+		
 		VectorIterator& operator++() { ++v; return *this; }
 		VectorIterator& operator--() { --v; return *this; }
 		VectorIterator operator++(int) const { return VectorIterator(v + 1); }
 		VectorIterator operator--(int) const { return VectorIterator(v - 1); }
-		VectorIterator operator+(size_t o) const { return VectorIterator(v + o); }
-		VectorIterator operator-(size_t o) const { return VectorIterator(v - o); }
+		VectorIterator operator+(ptrdiff_t o) const { return VectorIterator(v + o); }
+		VectorIterator operator-(ptrdiff_t o) const { return VectorIterator(v - o); }
 		ptrdiff_t operator-(const VectorIterator& other) const { return v - other.v; }
+		VectorIterator operator+=(ptrdiff_t o) { v += o; return *this; }
+		VectorIterator operator-=(ptrdiff_t o) { v -= o; return *this; }
+		
+		template<typename OtherPointer>
+		bool operator==(const VectorIterator<T, OtherPointer>& other) const { return v == other.v; }
 
-		bool operator==(const VectorIterator& other) { return v == other.v; }
-		bool operator!=(const VectorIterator& other) { return v != other.v; }
-		bool operator<(const VectorIterator& other) { return v < other.v; }
-		bool operator>(const VectorIterator& other) { return v > other.v; }
-		bool operator<=(const VectorIterator& other) { return v <= other.v; }
-		bool operator>=(const VectorIterator& other) { return v >= other.v; }
+		template<typename OtherPointer>
+		bool operator!=(const VectorIterator<T, OtherPointer>& other) const { return v != other.v; }
+
+		template<typename OtherPointer>
+		bool operator<(const VectorIterator<T, OtherPointer>& other) const { return v < other.v; }
+
+		template<typename OtherPointer>
+		bool operator>(const VectorIterator<T, OtherPointer>& other) const { return v > other.v; }
+
+		template<typename OtherPointer>
+		bool operator<=(const VectorIterator<T, OtherPointer>& other) const { return v <= other.v; }
+
+		template<typename OtherPointer>
+		bool operator>=(const VectorIterator<T, OtherPointer>& other) const { return v >= other.v; }
 
 		friend void swap(VectorIterator& a, VectorIterator& b) noexcept { std::swap(a.v, b.v); }
 
@@ -73,8 +88,8 @@ namespace Halley {
 		using const_pointer = typename std::allocator_traits<Allocator>::const_pointer;
 		constexpr static float growth_factor = 2.0f;
 
-		using iterator = VectorIterator<T, T*, T&>;
-		using const_iterator = VectorIterator<T, const T*, const T&>;
+		using iterator = VectorIterator<T, T*>;
+		using const_iterator = VectorIterator<T, const T*>;
 		using reverse_iterator = std::reverse_iterator<iterator>;
 		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -396,7 +411,7 @@ namespace Halley {
 		iterator emplace(const_iterator pos, Args&&... args)
 		{
 			const auto idx = pos - begin();
-			emplace_back(std::forward(args...));
+			emplace_back(std::forward<Args>(args)...);
 			std::rotate(de_const_iter(pos), end() - 1, end());
 			return begin() + idx;
 		}
@@ -420,7 +435,7 @@ namespace Halley {
 			const auto idx = m_size;
 			construct_with_ensure_capacity(m_size + 1, [&] (pointer data)
 			{
-				std::allocator_traits<Allocator>::construct(*this, data + idx, std::forward<Args&&...>(args)...);
+				std::allocator_traits<Allocator>::construct(*this, data + idx, std::forward<Args>(args)...);
 			});
 			++m_size;
 			return elem(idx);
@@ -591,29 +606,37 @@ namespace Halley {
 	template <typename T, class Allocator>
 	bool operator==(const VectorSize32<T, Allocator>& a, const VectorSize32<T, Allocator>& b)
 	{
-		if (a.size() != b.size()) {
-			return false;
-		}
-		for (size_t i = 0; i < a.size(); ++i) {
-			if (!(a[i] == b[i])) {
-				return false;
-			}
-		}
-		return true;
+		return std::equal(a.begin(), a.end(), b.begin(), b.end());
 	}
 
 	template <typename T, class Allocator>
 	bool operator!=(const VectorSize32<T, Allocator>& a, const VectorSize32<T, Allocator>& b)
 	{
-		if (a.size() != b.size()) {
-			return true;
-		}
-		for (size_t i = 0; i < a.size(); ++i) {
-			if (a[i] != b[i]) {
-				return true;
-			}
-		}
-		return false;
+		return !std::equal(a.begin(), a.end(), b.begin(), b.end());
+	}
+
+	template <typename T, class Allocator>
+	bool operator<(const VectorSize32<T, Allocator>& a, const VectorSize32<T, Allocator>& b)
+	{
+		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](const T& a, const T& b) { return a < b; });
+	}
+
+	template <typename T, class Allocator>
+	bool operator>(const VectorSize32<T, Allocator>& a, const VectorSize32<T, Allocator>& b)
+	{
+		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](const T& a, const T& b) { return a > b; });
+	}
+
+	template <typename T, class Allocator>
+	bool operator<=(const VectorSize32<T, Allocator>& a, const VectorSize32<T, Allocator>& b)
+	{
+		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](const T& a, const T& b) { return a <= b; });
+	}
+
+	template <typename T, class Allocator>
+	bool operator>=(const VectorSize32<T, Allocator>& a, const VectorSize32<T, Allocator>& b)
+	{
+		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](const T& a, const T& b) { return a >= b; });
 	}
 
 	template<typename T, class Allocator>

@@ -67,7 +67,7 @@ component:
   - particles:
       type: 'Halley::Particles'
   - sprites:
-      type: 'std::vector<Halley::Sprite>'
+      type: 'Halley::Vector<Halley::Sprite>'
       collapse: true
       displayName: Sprites
   - animation:

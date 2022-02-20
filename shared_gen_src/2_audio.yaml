@@ -27,7 +27,7 @@ component:
       defaultValue: 100
       displayName: Max Range
   - playing:
-      type: 'std::vector<Halley::AudioHandle>'
+      type: 'Halley::Vector<Halley::AudioHandle>'
       canEdit: false
       canSave: false
 
