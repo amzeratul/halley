@@ -45,7 +45,7 @@ static ComponentFactoryMap makeComponentFactories() {
 }
 
 
-using ComponentReflectorList = std::vector<std::unique_ptr<ComponentReflector>>;
+using ComponentReflectorList = Vector<std::unique_ptr<ComponentReflector>>;
 
 static ComponentReflectorList makeComponentReflectors() {
 	ComponentReflectorList result;
@@ -66,7 +66,7 @@ static ComponentReflectorList makeComponentReflectors() {
 
 
 using MessageFactory = std::function<std::unique_ptr<Halley::Message>()>;
-using MessageFactoryList = std::vector<MessageFactory>;
+using MessageFactoryList = Vector<MessageFactory>;
 
 static MessageFactoryList makeMessageFactories() {
 	MessageFactoryList result;
@@ -76,7 +76,7 @@ static MessageFactoryList makeMessageFactories() {
 
 
 using SystemMessageFactory = std::function<std::unique_ptr<Halley::SystemMessage>()>;
-using SystemMessageFactoryList = std::vector<SystemMessageFactory>;
+using SystemMessageFactoryList = Vector<SystemMessageFactory>;
 
 static SystemMessageFactoryList makeSystemMessageFactories() {
 	SystemMessageFactoryList result;

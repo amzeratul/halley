@@ -12,7 +12,7 @@ public:
 	Halley::ResourceReference<Halley::AudioEvent> event{};
 	float rangeMin{ 50 };
 	float rangeMax{ 100 };
-	std::vector<Halley::AudioHandle> playing{};
+	Halley::Vector<Halley::AudioHandle> playing{};
 
 	AudioSourceComponent() {
 	}

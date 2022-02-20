@@ -181,12 +181,7 @@ namespace Halley {
 				return *this;
 			}
 
-			// TODO: could be faster
-			clear();
-			reserve(other.size());
-			for (const auto& e: other) {
-				push_back(std::move(e));
-			}
+			assign(other.begin(), other.end());
 			
 			return *this;
 		}
@@ -206,11 +201,7 @@ namespace Halley {
 		VectorSize32& operator=(std::initializer_list<T> list)
 		{
 			// TODO: could be faster
-			clear();
-			reserve(list.size());
-			for (const auto& e: list) {
-				push_back(std::move(e));
-			}
+			assign(list.begin(), list.end());
 			return *this;
 		}
 
@@ -234,12 +225,7 @@ namespace Halley {
 
 		void assign(std::initializer_list<T> list)
 		{
-			// TODO: could be faster
-			clear();
-			reserve(list.size());
-			for (const auto& e: list) {
-				push_back(T(e));
-			}
+			assign(list.begin(), list.end());
 		}
 
 		[[nodiscard]] Allocator get_allocator() const noexcept
@@ -403,15 +389,7 @@ namespace Halley {
 		
 		iterator insert(const_iterator pos, std::initializer_list<T> initializerList)
 		{
-			return do_insert(pos, [&](size_t prevSize) {
-				const auto count = initializerList.size();
-				reserve(size() + count);
-				size_t i = 0;
-				for (auto& e: initializerList) {
-					std::allocator_traits<Allocator>::construct(*this, data() + (i + prevSize), e);
-				}
-				m_size = static_cast<uint32_t>(prevSize + count);
-			});
+			return insert(pos, initializerList.begin(), initializerList.end());
 		}
 
 		template <class... Args>
@@ -596,7 +574,7 @@ namespace Halley {
 
 			f(prevSize);
 
-			std::rotate(de_const_iter(pos), begin() + prevSize, end());
+			std::rotate(begin() + idx, begin() + prevSize, end());
 			return begin() + idx;
 		}
 
@@ -612,7 +590,7 @@ namespace Halley {
 
 		[[nodiscard]] iterator de_const_iter(const_iterator iter)
 		{
-			return iterator(const_cast<pointer>(iter.v));
+			return iterator(begin() + (iter - begin()));
 		}
 	};
 
