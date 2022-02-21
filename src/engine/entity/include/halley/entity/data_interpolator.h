@@ -21,14 +21,19 @@ namespace Halley {
 		Key makeKey(EntityId entity, std::string_view componentName, std::string_view fieldName) const;
 	};
 
-	class DataInterpolatorSetRetriever : public IDataInterpolatorSet {
+	class DataInterpolatorSetRetriever : public IDataInterpolatorSetRetriever {
 	public:
-		DataInterpolatorSetRetriever(EntityRef rootEntity);
+		DataInterpolatorSetRetriever(EntityRef rootEntity, bool collectUUIDs);
 		
 		IDataInterpolator* tryGetInterpolator(const EntitySerializationContext& context, std::string_view componentName, std::string_view fieldName) const override;
-
+		IDataInterpolator* tryGetInterpolator(EntityId entityId, std::string_view componentName, std::string_view fieldName) const;
+		ConfigNode createComponentDelta(const UUID& instanceUUID, const String& componentName, const ConfigNode& from, const ConfigNode& to) const override;
+	
 	private:
 		DataInterpolatorSet* dataInterpolatorSet = nullptr;
+		HashMap<UUID, EntityId> uuids;
+
+		void collectUUIDs(EntityRef entity);
 	};
 
 	template <typename T>

@@ -6,6 +6,7 @@
 #include "halley/time/halleytime.h"
 
 namespace Halley {
+	class UUID;
 	class EntityFactoryContext;
     class Resources;
 	class ConfigNode;
@@ -41,19 +42,21 @@ namespace Halley {
 		virtual void update(Time t) {}
 		
 		virtual void deserialize(void* value, const void* defaultValue, const EntitySerializationContext& context, const ConfigNode& node) = 0;
+		virtual std::optional<ConfigNode> prepareFieldForSerialization(const ConfigNode& fromValue, const ConfigNode& toValue) { return {}; } // Return nullopt if "toValue" is good to go
 	};
 
-	class IDataInterpolatorSet {
+	class IDataInterpolatorSetRetriever {
 	public:
-		virtual ~IDataInterpolatorSet() = default;
+		virtual ~IDataInterpolatorSetRetriever() = default;
 		virtual IDataInterpolator* tryGetInterpolator(const EntitySerializationContext& context, std::string_view componentName, std::string_view fieldName) const = 0;
+		virtual ConfigNode createComponentDelta(const UUID& instanceUUID, const String& componentName, const ConfigNode& from, const ConfigNode& to) const = 0;
 	};
 	
 	class EntitySerializationContext {
 	public:
 		Resources* resources = nullptr;
 		const EntityFactoryContext* entityContext = nullptr;
-		const IDataInterpolatorSet* interpolators = nullptr;
+		const IDataInterpolatorSetRetriever* interpolators = nullptr;
 		int entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData);
 
 		[[nodiscard]] bool matchType(int typeMask) const

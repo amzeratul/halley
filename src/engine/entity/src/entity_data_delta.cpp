@@ -2,6 +2,7 @@
 
 #include <cassert>
 
+#include "data_interpolator.h"
 #include "entity_data.h"
 
 #include "halley/bytes/byte_serializer.h"
@@ -80,8 +81,14 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 		if (options.ignoreComponents.find(compId) == options.ignoreComponents.end()) {
 			const auto fromIter = std::find_if(from.components.begin(), from.components.end(), [&] (const auto& e) { return e.first == toComponent.first; });
 			if (fromIter != from.components.end()) {
-				// Potentially modified
-				auto delta = ConfigNode::createDelta(fromIter->second, toComponent.second);
+				// Potentially modified, compute delta
+				ConfigNode delta;
+				if (options.interpolatorSet) {
+					delta = options.interpolatorSet->createComponentDelta(from.getInstanceUUID(), fromIter->first, fromIter->second, toComponent.second);
+				} else {
+					delta = ConfigNode::createDelta(fromIter->second, toComponent.second);
+				}
+				
 				if (delta.getType() == ConfigNodeType::DeltaMap && !delta.asMap().empty()) {
 					if (options.deltaComponents) {
 						componentsChanged.emplace_back(toComponent.first, std::move(delta));

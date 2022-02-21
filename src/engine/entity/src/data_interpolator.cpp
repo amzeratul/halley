@@ -59,11 +59,15 @@ DataInterpolatorSet::Key DataInterpolatorSet::makeKey(EntityId entity, std::stri
 	return Key(entity, componentName, fieldName);
 }
 
-DataInterpolatorSetRetriever::DataInterpolatorSetRetriever(EntityRef rootEntity)
+DataInterpolatorSetRetriever::DataInterpolatorSetRetriever(EntityRef rootEntity, bool shouldCollectUUIDs)
 {
 	auto* networkComponent = rootEntity.tryGetComponent<NetworkComponent>();
 	if (networkComponent) {
 		dataInterpolatorSet = &networkComponent->dataInterpolatorSet;
+
+		if (shouldCollectUUIDs) {
+			collectUUIDs(rootEntity);
+		}
 	}
 }
 
@@ -73,5 +77,41 @@ IDataInterpolator* DataInterpolatorSetRetriever::tryGetInterpolator(const Entity
 		return dataInterpolatorSet->tryGetInterpolator(context.entityContext->getCurrentEntity().getEntityId(), componentName, fieldName);
 	} else {
 		return nullptr;
+	}
+}
+
+IDataInterpolator* DataInterpolatorSetRetriever::tryGetInterpolator(EntityId entityId, std::string_view componentName, std::string_view fieldName) const
+{
+	if (dataInterpolatorSet) {
+		return dataInterpolatorSet->tryGetInterpolator(entityId, componentName, fieldName);
+	} else {
+		return nullptr;
+	}
+}
+
+ConfigNode DataInterpolatorSetRetriever::createComponentDelta(const UUID& instanceUUID, const String& componentName, const ConfigNode& from, const ConfigNode& origTo) const
+{
+	const auto iter = uuids.find(instanceUUID);
+	const EntityId entityId = iter != uuids.end() ? iter->second : EntityId();
+
+	ConfigNode to = ConfigNode(origTo);
+	for (const auto& [fieldName, fromValue]: from.asMap()) {
+		auto* interpolator = tryGetInterpolator(entityId, componentName, fieldName);
+		if (interpolator) {
+			auto newValue = interpolator->prepareFieldForSerialization(fromValue, origTo[fieldName]);
+			if (newValue) {
+				to[fieldName] = std::move(newValue.value());
+			}
+		}
+	}
+	
+	return ConfigNode::createDelta(from, to);
+}
+
+void DataInterpolatorSetRetriever::collectUUIDs(EntityRef entity)
+{
+	uuids[entity.getInstanceUUID()] = entity.getEntityId();
+	for (auto c: entity.getChildren()) {
+		collectUUIDs(c);
 	}
 }

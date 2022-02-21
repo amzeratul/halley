@@ -136,7 +136,7 @@ std::shared_ptr<const Prefab> EntityFactory::getPrefab(std::optional<EntityRef> 
 	}
 }
 
-EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, bool update, std::shared_ptr<const Prefab> _prefab, const IEntityData* origEntityData, EntityScene* scene, EntityFactoryContext* parent, IDataInterpolatorSet* interpolators)
+EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, bool update, std::shared_ptr<const Prefab> _prefab, const IEntityData* origEntityData, EntityScene* scene, EntityFactoryContext* parent, IDataInterpolatorSetRetriever* interpolators)
 	: world(&world)
 	, scene(scene)
 	, parent(parent)
@@ -267,14 +267,14 @@ EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent, 
 	return entity;
 }
 
-void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene, IDataInterpolatorSet* interpolators)
+void EntityFactory::updateEntity(EntityRef& entity, const IEntityData& data, int serializationMask, EntityScene* scene, IDataInterpolatorSetRetriever* interpolators)
 {
 	Expects(entity.isValid());
 	const auto context = makeContext(data, entity, scene, true, serializationMask, nullptr, interpolators);
 	updateEntityNode(context->getRootEntityData(), entity, {}, context);
 }
 
-std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent, IDataInterpolatorSet* interpolators)
+std::shared_ptr<EntityFactoryContext> EntityFactory::makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent, IDataInterpolatorSetRetriever* interpolators)
 {
 	auto context = std::make_shared<EntityFactoryContext>(world, resources, serializationMask, updateContext, getPrefab(existing, data), &data, scene, parent, interpolators);
 

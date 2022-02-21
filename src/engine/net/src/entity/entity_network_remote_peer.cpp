@@ -134,14 +134,19 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 	if (remote.timeSinceSend < parent->getMinSendInterval()) {
 		return;
 	}
-	
+
+	// Encode delta using interpolators
 	auto newData = parent->getFactory().serializeEntity(entity, parent->getEntitySerializationOptions());
-	auto deltaData = EntityDataDelta(remote.data, newData, parent->getEntityDeltaOptions());
+	auto retriever = DataInterpolatorSetRetriever(entity, true);
+	auto options = parent->getEntityDeltaOptions();
+	options.interpolatorSet = &retriever;
+	auto deltaData = EntityDataDelta(remote.data, newData, options);
 
 	if (deltaData.hasChange()) {
-		parent->onPreSendDelta(deltaData);
+		parent->onPreSendDelta(deltaData); // Can modify deltaData
 	}
 
+	// Check again, since the method above can modify the delta
 	if (deltaData.hasChange()) {
 		remote.data = std::move(newData);
 		remote.timeSinceSend = 0;
@@ -217,7 +222,7 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 	
 	auto delta = Deserializer::fromBytes<EntityDataDelta>(msg.bytes, parent->getByteSerializationOptions());
 
-	auto retriever = DataInterpolatorSetRetriever(entity);
+	auto retriever = DataInterpolatorSetRetriever(entity, false);
 
 	parent->getFactory().updateEntity(entity, delta, static_cast<int>(EntitySerialization::Type::SaveData), nullptr, &retriever);
 	remote.data.applyDelta(delta);

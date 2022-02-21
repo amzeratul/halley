@@ -4,7 +4,9 @@
 #include <set>
 #include "entity_data.h"
 
-namespace Halley {	
+namespace Halley {
+	class IDataInterpolatorSetRetriever;
+
 	class EntityDataDelta : public IEntityData {
 		friend class EntityData;
 		
@@ -17,6 +19,7 @@ namespace Halley {
 			bool shallow = false;
             bool deltaComponents = true;
         	std::set<String> ignoreComponents;
+			IDataInterpolatorSetRetriever* interpolatorSet = nullptr;
         };
 		
         EntityDataDelta();
