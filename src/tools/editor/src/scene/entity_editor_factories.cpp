@@ -699,7 +699,7 @@ class ComponentEditorStdVectorFieldFactory : public IComponentEditorFieldFactory
 public:
 	String getFieldType() override
 	{
-		return "Vector<>";
+		return "Halley::Vector<>";
 	}
 
 	bool isNested() const override
