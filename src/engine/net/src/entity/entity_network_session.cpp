@@ -24,7 +24,7 @@ EntityNetworkSession::EntityNetworkSession(std::shared_ptr<NetworkSession> sessi
 	this->session->addListener(this);
 	this->session->setSharedDataHandler(this);
 
-	entitySerializationOptions.type = EntitySerialization::Type::SaveData;
+	entitySerializationOptions.type = EntitySerialization::Type::Network;
 
 	deltaOptions.preserveOrder = false;
 	deltaOptions.shallow = false;
