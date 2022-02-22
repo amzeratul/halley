@@ -280,15 +280,13 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 	String deserializeBody = "using namespace Halley::EntitySerialization;" + lineBreak;
 	bool first = true;
 	for (auto& member: component.members) {
-		Vector<String> serializationTypes;
-		if (member.canEdit) {
-			serializationTypes.push_back("Type::Prefab");
-		}
-		if (member.canSave) {
-			serializationTypes.push_back("Type::SaveData");
-		}
-		if (serializationTypes.empty()) {
+		if (member.serializationTypes.empty()) {
 			continue;
+		}
+		
+		Vector<String> serializationTypes;
+		for (auto t: member.serializationTypes) {
+			serializationTypes.push_back("Type::" + toString(t));
 		}
 		String mask = "makeMask(" + String::concatList(serializationTypes, ", ") + ")";
 		
@@ -316,7 +314,7 @@ Vector<String> CodegenCPP::generateComponentHeader(ComponentSchema component)
 
 	// Additional constructors
 	if (!component.members.empty()) {
-		const auto serializableMembers = filter(component.members.begin(), component.members.end(), [] (const ComponentFieldSchema& m) { return m.canEdit; });
+		const auto serializableMembers = filter(component.members.begin(), component.members.end(), [] (const ComponentFieldSchema& m) { return std_ex::contains(m.serializationTypes, EntitySerialization::Type::Prefab); });
 		if (!serializableMembers.empty()) {
 			gen.addBlankLine()
 				.addConstructor(ComponentFieldSchema::toVariableSchema(serializableMembers), true);

@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "halley/maths/range.h"
+#include "halley/bytes/config_node_serializer_base.h"
 
 namespace Halley
 {
@@ -92,19 +93,20 @@ namespace Halley
 	class ComponentFieldSchema : public MemberSchema {
 	public:
 		String displayName;
-		bool canSave = true;
-		bool canEdit = true;
+		std::vector<EntitySerialization::Type> serializationTypes;
 		bool hideInEditor = false;
 		bool collapse = false;
 		std::optional<Range<float>> range;
 
 		ComponentFieldSchema(TypeSchema type, String name, Vector<String> defaultValue, std::optional<MemberAccess> access = {})
 			: MemberSchema(std::move(type), std::move(name), std::move(defaultValue), access)
-		{}
+		{
+		}
 
 		ComponentFieldSchema(TypeSchema type, String name, String defaultValue = "", std::optional<MemberAccess> access = {})
 			: MemberSchema(std::move(type), std::move(name), std::move(defaultValue), access)
-		{}
+		{
+		}
 
 		static Vector<VariableSchema> toVariableSchema(const Vector<ComponentFieldSchema>& schema)
 		{

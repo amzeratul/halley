@@ -18,7 +18,9 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 			String name = m->first.as<std::string>();
 			if (m->second.IsScalar()) {
 				// e.g. - value: int
-				members.emplace_back(TypeSchema(m->second.as<std::string>()), std::move(name));
+				auto& field = members.emplace_back(TypeSchema(m->second.as<std::string>()), std::move(name));
+				field.serializationTypes.push_back(EntitySerialization::Type::Prefab);
+				field.serializationTypes.push_back(EntitySerialization::Type::SaveData);
 			} else {
 				// e.g.
 				// value:
@@ -29,11 +31,20 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				const String type = memberProperties["type"].as<std::string>();
 				const String access = memberProperties["access"].as<std::string>("public");
 				const String displayName = memberProperties["displayName"].as<std::string>("");
-				const bool canEdit = memberProperties["canEdit"].as<bool>(true);
-				const bool canSave = memberProperties["canSave"].as<bool>(true);
 				const bool hideInEditor = memberProperties["hideInEditor"].as<bool>(false);
 				const bool collapse = memberProperties["collapse"].as<bool>(false);
-				
+
+				std::set<EntitySerialization::Type> serializeTypes;
+				if (memberProperties["canEdit"].as<bool>(true)) {
+					serializeTypes.insert(EntitySerialization::Type::Prefab);
+				}
+				if (memberProperties["canSave"].as<bool>(true)) {
+					serializeTypes.insert(EntitySerialization::Type::SaveData);
+				}
+				if (memberProperties["canNetwork"].as<bool>(false)) {
+					serializeTypes.insert(EntitySerialization::Type::Network);
+				}
+
 				std::optional<Range<float>> range;
 				if (memberProperties["range"].IsDefined()) {
 					Vector<float> vs;
@@ -63,8 +74,7 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 
 				auto& field = members.emplace_back(TypeSchema(type), std::move(name), std::move(defaultValue), fromString<MemberAccess>(access));
 				field.collapse = collapse;
-				field.canEdit = canEdit;
-				field.canSave = canSave;
+				field.serializationTypes = Vector<EntitySerialization::Type>(serializeTypes.begin(), serializeTypes.end());
 				field.hideInEditor = hideInEditor;
 				field.displayName = displayName;
 				field.range = range;

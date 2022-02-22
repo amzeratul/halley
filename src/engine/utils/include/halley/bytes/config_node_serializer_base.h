@@ -12,15 +12,19 @@ namespace Halley {
 	class ConfigNode;
 
 	namespace EntitySerialization {
-        enum class Type {
-        	Undefined = 0,
-        	Prefab = 1,
-	        SaveData = 2
+        enum class Type : uint8_t {
+        	Undefined,
+        	Prefab,
+	        SaveData,
+        	Network,
         };
 
 		inline int makeMask(Type t)
 		{
-			return static_cast<int>(t);
+			if (t == Type::Undefined) {
+				return 0;
+			}
+			return 1 << (static_cast<int>(t) - 1);
 		}
 		
 		template <typename T, typename ... Ts>
@@ -29,6 +33,18 @@ namespace Halley {
 			return static_cast<int>(v) | makeMask(vs...);
 		}
 	}
+
+	template <>
+	struct EnumNames<EntitySerialization::Type> {
+		constexpr std::array<const char*, 4> operator()() const {
+			return{{
+				"Undefined",
+				"Prefab",
+				"SaveData",
+				"Network"
+			}};
+		}
+	};
 
 	class EntitySerializationContext;
 	

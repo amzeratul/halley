@@ -34,10 +34,17 @@ void Codegen::run(Path inDir, Path outDir)
 	throw Exception("Not supported", HalleyExceptions::Tools);
 }
 
-int Codegen::getHeaderVersion(gsl::span<const char> data)
+int Codegen::getHeaderVersion(gsl::span<const char> data, size_t& endOfHeader)
 {
 	const String str(data.data(), std::min(data.size(), size_t(128)));
 	const auto endLine = str.find('\n');
+	if (endLine == std::string::npos) {
+		endOfHeader = 0;
+		return 0;
+	}
+
+	endOfHeader = endLine;
+	
 	const String firstLine = str.left(endLine).trimBoth();
 	if (firstLine.startsWith("// Halley codegen version ")) {
 		return firstLine.mid(26).toInteger();
@@ -59,14 +66,19 @@ bool Codegen::writeFile(const Path& filePath, gsl::span<const char> data, bool s
 		in.read(&buffer[0], data.size());
 		in.close();
 
-		// Check if contents are identical
-		if (std::equal(buffer.begin(), buffer.end(), data.begin(), data.end())) {
-			return false;
-		}
+		// End of headers
+		size_t oldHeaderEnd = 0;
+		size_t newHeaderEnd = 0;
 
 		// Check if existing file is more recent
-		if (getHeaderVersion(buffer) > currentCodegenVersion) {
+		if (getHeaderVersion(buffer, oldHeaderEnd) > currentCodegenVersion) {
 			throw Exception("Codegen is out of date, please build editor.", HalleyExceptions::Tools);
+		}
+
+		// Check if contents are identical
+		getHeaderVersion(data, newHeaderEnd);
+		if (std::equal(buffer.begin() + oldHeaderEnd, buffer.end(), data.begin() + newHeaderEnd, data.end())) {
+			return false;
 		}
 	} else {
 		FileSystem::createParentDir(filePath);

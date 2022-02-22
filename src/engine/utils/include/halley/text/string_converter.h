@@ -274,13 +274,13 @@ namespace Halley
 	}
 	
 	template <typename T>
-	String toString(const Vector<T> values, std::string_view separator)
+	String toString(const Vector<T>& values, std::string_view separator)
 	{
 		return toString(gsl::span<const T>(values), separator);
 	}
 	
 	template <typename T, typename F>
-	String toString(const Vector<T> values, std::string_view separator, F f)
+	String toString(const Vector<T>& values, std::string_view separator, F f)
 	{
 		return toString(gsl::span<const T>(values), separator, std::move(f));
 	}

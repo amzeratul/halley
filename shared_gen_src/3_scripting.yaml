@@ -13,6 +13,7 @@ component:
       type: 'Halley::ScriptState'
       canEdit: false
       canSave: true
+      canNetwork: true
 
 ---
 

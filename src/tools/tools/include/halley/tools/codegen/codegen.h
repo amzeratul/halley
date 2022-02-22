@@ -28,7 +28,7 @@ namespace Halley
 		};
 
 	public:
-		constexpr static int currentCodegenVersion = 101;
+		constexpr static int currentCodegenVersion = 102;
 		
 		using ProgressReporter = std::function<bool(float, String)>;
 
@@ -38,6 +38,6 @@ namespace Halley
 	private:
 		static bool writeFile(const Path& path, gsl::span<const char> data, bool stub);
 		static void writeFiles(const Path& directory, const CodeGenResult& files, Stats& stats);
-		static int getHeaderVersion(gsl::span<const char> data);
+		static int getHeaderVersion(gsl::span<const char> data, size_t& endOfHeader);
 	};
 }

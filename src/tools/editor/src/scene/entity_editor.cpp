@@ -246,7 +246,7 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 	if (iter != ecsData->getComponents().end()) {
 		const auto& componentData = iter->second;
 		for (auto& member: componentData.members) {
-			if (member.canEdit && !member.hideInEditor) {
+			if (std_ex::contains(member.serializationTypes, EntitySerialization::Type::Prefab) && !member.hideInEditor) {
 				auto type = member.type.name;
 				if (type == "float" && member.range) {
 					type = "Halley::Range<" + type + "," + toString(member.range->start) + "," + toString(member.range->end) + ">";
