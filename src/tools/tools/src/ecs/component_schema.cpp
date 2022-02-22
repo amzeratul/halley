@@ -21,6 +21,7 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				auto& field = members.emplace_back(TypeSchema(m->second.as<std::string>()), std::move(name));
 				field.serializationTypes.push_back(EntitySerialization::Type::Prefab);
 				field.serializationTypes.push_back(EntitySerialization::Type::SaveData);
+				field.serializationTypes.push_back(EntitySerialization::Type::Network);
 			} else {
 				// e.g.
 				// value:
@@ -38,10 +39,11 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				if (memberProperties["canEdit"].as<bool>(true)) {
 					serializeTypes.insert(EntitySerialization::Type::Prefab);
 				}
-				if (memberProperties["canSave"].as<bool>(true)) {
+				bool canSave = memberProperties["canSave"].as<bool>(true);
+				if (canSave) {
 					serializeTypes.insert(EntitySerialization::Type::SaveData);
 				}
-				if (memberProperties["canNetwork"].as<bool>(false)) {
+				if (memberProperties["canNetwork"].as<bool>(canSave)) {
 					serializeTypes.insert(EntitySerialization::Type::Network);
 				}
 

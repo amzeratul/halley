@@ -1,4 +1,4 @@
-// Halley codegen version 101
+// Halley codegen version 102
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -28,16 +28,16 @@ public:
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode node = Halley::ConfigNode::MapType();
 		Halley::EntityConfigNodeSerializer<decltype(text)>::serialize(text, Halley::TextRenderer{}, context, node, componentName, "text", makeMask(Type::Prefab));
-		Halley::EntityConfigNodeSerializer<decltype(layer)>::serialize(layer, int{ 0 }, context, node, componentName, "layer", makeMask(Type::Prefab, Type::SaveData));
-		Halley::EntityConfigNodeSerializer<decltype(mask)>::serialize(mask, Halley::OptionalLite<int>{}, context, node, componentName, "mask", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(layer)>::serialize(layer, int{ 0 }, context, node, componentName, "layer", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(mask)>::serialize(mask, Halley::OptionalLite<int>{}, context, node, componentName, "mask", makeMask(Type::Prefab, Type::SaveData, Type::Network));
 		return node;
 	}
 
 	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node) {
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(text)>::deserialize(text, Halley::TextRenderer{}, context, node, componentName, "text", makeMask(Type::Prefab));
-		Halley::EntityConfigNodeSerializer<decltype(layer)>::deserialize(layer, int{ 0 }, context, node, componentName, "layer", makeMask(Type::Prefab, Type::SaveData));
-		Halley::EntityConfigNodeSerializer<decltype(mask)>::deserialize(mask, Halley::OptionalLite<int>{}, context, node, componentName, "mask", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(layer)>::deserialize(layer, int{ 0 }, context, node, componentName, "layer", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(mask)>::deserialize(mask, Halley::OptionalLite<int>{}, context, node, componentName, "mask", makeMask(Type::Prefab, Type::SaveData, Type::Network));
 	}
 
 };

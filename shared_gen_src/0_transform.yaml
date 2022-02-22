@@ -8,22 +8,18 @@ component:
       type: 'Halley::Vector2f'
       access: protected
       displayName: Position
-      canNetwork: true
   - scale:
       type: 'Halley::Vector2f'
       access: protected
       defaultValue: [1.0f, 1.0f]
       displayName: Scale
-      canNetwork: true
   - rotation:
       type: 'Halley::Angle1f'
       access: protected
       displayName: Rotation
-      canNetwork: true
   - subWorld:
       type: 'Halley::OptionalLite<int>'
       access: protected
       displayName: Subworld
-      canNetwork: true
 
 ...

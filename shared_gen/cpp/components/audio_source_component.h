@@ -1,4 +1,4 @@
-// Halley codegen version 101
+// Halley codegen version 102
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -28,17 +28,17 @@ public:
 	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& context) const {
 		using namespace Halley::EntitySerialization;
 		Halley::ConfigNode node = Halley::ConfigNode::MapType();
-		Halley::EntityConfigNodeSerializer<decltype(event)>::serialize(event, Halley::ResourceReference<Halley::AudioEvent>{}, context, node, componentName, "event", makeMask(Type::Prefab, Type::SaveData));
-		Halley::EntityConfigNodeSerializer<decltype(rangeMin)>::serialize(rangeMin, float{ 50 }, context, node, componentName, "rangeMin", makeMask(Type::Prefab, Type::SaveData));
-		Halley::EntityConfigNodeSerializer<decltype(rangeMax)>::serialize(rangeMax, float{ 100 }, context, node, componentName, "rangeMax", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(event)>::serialize(event, Halley::ResourceReference<Halley::AudioEvent>{}, context, node, componentName, "event", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(rangeMin)>::serialize(rangeMin, float{ 50 }, context, node, componentName, "rangeMin", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(rangeMax)>::serialize(rangeMax, float{ 100 }, context, node, componentName, "rangeMax", makeMask(Type::Prefab, Type::SaveData, Type::Network));
 		return node;
 	}
 
 	void deserialize(const Halley::EntitySerializationContext& context, const Halley::ConfigNode& node) {
 		using namespace Halley::EntitySerialization;
-		Halley::EntityConfigNodeSerializer<decltype(event)>::deserialize(event, Halley::ResourceReference<Halley::AudioEvent>{}, context, node, componentName, "event", makeMask(Type::Prefab, Type::SaveData));
-		Halley::EntityConfigNodeSerializer<decltype(rangeMin)>::deserialize(rangeMin, float{ 50 }, context, node, componentName, "rangeMin", makeMask(Type::Prefab, Type::SaveData));
-		Halley::EntityConfigNodeSerializer<decltype(rangeMax)>::deserialize(rangeMax, float{ 100 }, context, node, componentName, "rangeMax", makeMask(Type::Prefab, Type::SaveData));
+		Halley::EntityConfigNodeSerializer<decltype(event)>::deserialize(event, Halley::ResourceReference<Halley::AudioEvent>{}, context, node, componentName, "event", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(rangeMin)>::deserialize(rangeMin, float{ 50 }, context, node, componentName, "rangeMin", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(rangeMax)>::deserialize(rangeMax, float{ 100 }, context, node, componentName, "rangeMax", makeMask(Type::Prefab, Type::SaveData, Type::Network));
 	}
 
 };
