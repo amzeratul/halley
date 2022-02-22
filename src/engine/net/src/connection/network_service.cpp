@@ -29,11 +29,16 @@ void NetworkServiceWithStats::onUpdateStats()
 {
 }
 
+Time NetworkServiceWithStats::getStatUpdateInterval() const
+{
+	return 1.0;
+}
+
 void NetworkServiceWithStats::update(Time t)
 {
 	statsTime += t;
-	if (statsTime > 1.0) {
-		statsTime -= 1.0;
+	if (statsTime > getStatUpdateInterval()) {
+		statsTime = 0;
 
 		onUpdateStats();
 		

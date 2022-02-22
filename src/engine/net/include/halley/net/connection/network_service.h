@@ -61,6 +61,7 @@ namespace Halley
 		size_t receivedPackets = 0;
 
 		virtual void onUpdateStats();
+		virtual Time getStatUpdateInterval() const;
 
 	private:
 		Time statsTime = 0.0;

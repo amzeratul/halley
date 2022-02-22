@@ -89,13 +89,27 @@ namespace Halley {
 			T newValue = value;
 			ConfigNodeHelper<T>::deserialize(newValue, defaultValue, context, node);
 
-			if constexpr (std::is_same_v<T, Intermediate>) {
-				delta = newValue - value;
+			if (shouldApplyInstantly(value, newValue)) {
+				value = newValue;
+				
+				delta = Intermediate();
+				timeLeft = 0;
+				targetValue = nullptr;
 			} else {
-				delta = Intermediate(newValue) - Intermediate(value);
+				if constexpr (std::is_same_v<T, Intermediate>) {
+					delta = newValue - value;
+				} else {
+					delta = Intermediate(newValue) - Intermediate(value);
+				}
+
+				timeLeft = length;
+				targetValue = &value;
 			}
-			timeLeft = length;
-			targetValue = &value;
+		}
+
+		virtual bool shouldApplyInstantly(const T& prevValue, const T& newValue)
+		{
+			return false;
 		}
 
 	private:

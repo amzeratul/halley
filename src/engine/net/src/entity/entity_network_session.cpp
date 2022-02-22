@@ -59,10 +59,12 @@ void EntityNetworkSession::sendUpdates(Time t, Rect4i viewRect, gsl::span<const 
 {
 	// Update viewport
 	auto& data = session->getMySharedData<EntityClientSharedData>();
-	const bool first = !data.viewRect;
-	data.viewRect = viewRect;
-	if (first || data.getTimeSinceLastSend() > 0.05) {
-		data.markModified();
+	if (data.viewRect != viewRect) {
+		const bool first = !data.viewRect;
+		data.viewRect = viewRect;
+		if (first || data.getTimeSinceLastSend() > 0.05) {
+			data.markModified();
+		}
 	}
 
 	// Update entities
