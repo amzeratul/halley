@@ -17,22 +17,26 @@
 #include "halley/tools/project/project_loader.h"
 #include "halley/core/game/game.h"
 #include "halley/file_formats/yaml_convert.h"
+#include "halley/tools/codegen/codegen.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
+constexpr static int currentAssetVersion = 99;
+constexpr static int currentCodegenVersion = Codegen::currentCodegenVersion;
+
 Project::Project(Path projectRootPath, Path halleyRootPath)
 	: rootPath(std::move(projectRootPath))
 	, halleyRootPath(std::move(halleyRootPath))
-{	
+{
 	properties = std::make_unique<ProjectProperties>(rootPath / "halley_project" / "properties.yaml");
 	assetPackManifest = rootPath / properties->getAssetPackManifest();
 
 	platforms = properties->getPlatforms();
 
-	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getUnpackedAssetsPath(), getUnpackedAssetsPath() / "import.db", getUnpackedAssetsPath() / "assets.db", platforms);
-	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", Vector<String>{ "" });
-	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", Vector<String>{ "" });
+	importAssetsDatabase = std::make_unique<ImportAssetsDatabase>(getUnpackedAssetsPath(), getUnpackedAssetsPath() / "import.db", getUnpackedAssetsPath() / "assets.db", platforms, currentAssetVersion);
+	codegenDatabase = std::make_unique<ImportAssetsDatabase>(getGenPath(), getGenPath() / "import.db", getGenPath() / "assets.db", Vector<String>{ "" }, currentCodegenVersion);
+	sharedCodegenDatabase = std::make_unique<ImportAssetsDatabase>(getSharedGenPath(), getSharedGenPath() / "import.db", getSharedGenPath() / "assets.db", Vector<String>{ "" }, currentCodegenVersion);
 }
 
 Project::~Project()

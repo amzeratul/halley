@@ -4,8 +4,6 @@
 #include "halley/resources/resource_data.h"
 #include "halley/tools/file/filesystem.h"
 
-constexpr static int currentAssetVersion = 98;
-
 using namespace Halley;
 
 AssetPath::AssetPath()
@@ -119,11 +117,12 @@ void ImportAssetsDatabase::InputFileEntry::deserialize(Deserializer& s)
 	s >> basePath;
 }
 
-ImportAssetsDatabase::ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile, Vector<String> platforms)
+ImportAssetsDatabase::ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile, Vector<String> platforms, int version)
 	: platforms(std::move(platforms))
 	, directory(std::move(directory))
 	, dbFile(std::move(dbFile))
 	, assetsDbFile(std::move(assetsDbFile))
+	, version(version)
 {
 	load();
 }
@@ -441,7 +440,6 @@ Vector<std::pair<AssetType, String>> ImportAssetsDatabase::getAssetsFromFile(con
 
 void ImportAssetsDatabase::serialize(Serializer& s) const
 {
-	int version = currentAssetVersion;
 	s << version;
 	s << platforms;
 	s << assetsImported;
@@ -450,9 +448,9 @@ void ImportAssetsDatabase::serialize(Serializer& s) const
 
 void ImportAssetsDatabase::deserialize(Deserializer& s)
 {
-	int version;
-	s >> version;
-	if (version == currentAssetVersion) {
+	int loadVersion;
+	s >> loadVersion;
+	if (version == loadVersion) {
 		Vector<String> platformsRead;
 		s >> platformsRead;
 		if (platformsRead == platforms) {

@@ -90,7 +90,7 @@ namespace Halley
 		};
 
 	public:
-		ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile, Vector<String> platforms);
+		ImportAssetsDatabase(Path directory, Path dbFile, Path assetsDbFile, Vector<String> platforms, int version);
 
 		void load();
 		void save() const;
@@ -127,6 +127,7 @@ namespace Halley
 		Path directory;
 		Path dbFile;
 		Path assetsDbFile;
+		const int version;
 
 		std::map<String, AssetEntry> assetsImported;
 		std::map<String, AssetEntry> assetsFailed; // Ephemeral
