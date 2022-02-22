@@ -69,5 +69,11 @@ _ReSharper*/
 
 # External folder
 /external/
+
+# Codegen
 /gen/
-/shared_gen/
+
+# Shared codegen (don't ignore the whole folder as /shared_gen/cpp/components/ contains files that go in git)
+/shared_gen/*.db
+/shared_gen/cpp/*.cpp
+/shared_gen/cpp/*.h
