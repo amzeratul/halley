@@ -47,6 +47,16 @@ bool DataInterpolatorSet::setInterpolatorEnabled(EntityId entityId, std::string_
 	return false;
 }
 
+bool DataInterpolatorSet::isReady() const
+{
+	return ready;
+}
+
+void DataInterpolatorSet::markReady()
+{
+	ready = true;
+}
+
 void DataInterpolatorSet::update(Time time) const
 {
 	for (auto& e: interpolators) {
@@ -82,7 +92,7 @@ IDataInterpolator* DataInterpolatorSetRetriever::tryGetInterpolator(const Entity
 
 IDataInterpolator* DataInterpolatorSetRetriever::tryGetInterpolator(EntityId entityId, std::string_view componentName, std::string_view fieldName) const
 {
-	if (dataInterpolatorSet) {
+	if (dataInterpolatorSet && entityId.isValid()) {
 		return dataInterpolatorSet->tryGetInterpolator(entityId, componentName, fieldName);
 	} else {
 		return nullptr;

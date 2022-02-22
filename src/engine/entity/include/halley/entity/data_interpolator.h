@@ -11,12 +11,16 @@ namespace Halley {
 		IDataInterpolator* tryGetInterpolator(EntityId entity, std::string_view componentName, std::string_view fieldName);
 		bool setInterpolatorEnabled(EntityId entity, std::string_view componentName, std::string_view fieldName, bool enabled);
 
+		bool isReady() const;
+		void markReady();
+		
 		void update(Time time) const;
 
 	private:
 		using Key = std::tuple<EntityId, std::string_view, std::string_view>;
 
 		Vector<std::pair<Key, std::unique_ptr<IDataInterpolator>>> interpolators; // Vector as hashing this is complex and we only expect a few interpolators per entity
+		bool ready = false;
 
 		Key makeKey(EntityId entity, std::string_view componentName, std::string_view fieldName) const;
 	};

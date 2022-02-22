@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "halley/bytes/compression.h"
+#include "halley/entity/data_interpolator.h"
 #include "halley/entity/entity_factory.h"
 #include "halley/entity/system.h"
 #include "halley/entity/world.h"
@@ -309,11 +310,22 @@ void EntityNetworkSession::onPreSendDelta(EntityDataDelta& delta)
 
 void EntityNetworkSession::requestSetupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote)
 {
+	interpolatorSet.markReady();
 	if (listener) {
 		listener->setupInterpolators(interpolatorSet, entity, remote);
 
-		for (const auto c: entity.getChildren()) {
+		for (const auto& c: entity.getChildren()) {
 			requestSetupInterpolators(interpolatorSet, c, remote);
+		}
+	}
+}
+
+void EntityNetworkSession::setupOutboundInterpolators(EntityRef entity)
+{
+	if (listener) {
+		auto& interpolatorSet = entity.setupNetwork(session->getMyPeerId().value());
+		if (!interpolatorSet.isReady()) {
+			requestSetupInterpolators(interpolatorSet, entity, false);
 		}
 	}
 }

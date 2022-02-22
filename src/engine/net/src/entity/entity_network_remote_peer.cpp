@@ -42,6 +42,7 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<Ent
 		const auto entity = parent->getWorld().getEntity(entityId);
 		if (peerId == 0 || parent->isEntityInView(entity, clientData)) { // Always send to host
 			if (const auto iter = outboundEntities.find(entityId); iter == outboundEntities.end()) {
+				parent->setupOutboundInterpolators(entity);
 				sendCreateEntity(entity);
 			} else {
 				sendUpdateEntity(t, iter->second, entity);
@@ -155,7 +156,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 		send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes)));
 
 		//Logger::logDev("Sending update " + entity.getName() + ": " + toString(size) + " bytes to peer " + toString(static_cast<int>(peerId)));
-		//Logger::logDev("Update:\n" + EntityData(deltaData).toYAML() + "\n");
+		Logger::logDev("Update:\n" + EntityData(deltaData).toYAML() + "\n");
 	}
 }
 
@@ -254,3 +255,4 @@ void EntityNetworkRemotePeer::onFirstDataBatchSent()
 		send(EntityNetworkMessage(EntityNetworkMessageReadyToStart()));
 	}
 }
+

@@ -64,6 +64,7 @@ namespace Halley {
 		void onRemoteEntityCreated(EntityRef entity, NetworkSession::PeerId peerId);
 		void onPreSendDelta(EntityDataDelta& delta);
 		void requestSetupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote);
+		void setupOutboundInterpolators(EntityRef entity);
 
 		bool isReadyToStart() const;
 		bool isEntityInView(EntityRef entity, const EntityClientSharedData& clientData) const;
