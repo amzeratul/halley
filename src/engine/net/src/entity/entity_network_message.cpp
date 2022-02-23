@@ -94,6 +94,12 @@ void EntityNetworkMessageSystemMsgResponse::deserialize(Deserializer& s)
 	s >> responseData;
 }
 
+void EntityNetworkMessageKeepAlive::serialize(Serializer& s) const
+{}
+
+void EntityNetworkMessageKeepAlive::deserialize(Deserializer& s)
+{}
+
 EntityNetworkMessage::EntityNetworkMessage(std::unique_ptr<IEntityNetworkMessage> msg)
 	: message(std::move(msg))
 {
@@ -142,6 +148,9 @@ void EntityNetworkMessage::deserialize(Deserializer& s)
 		break;
 	case EntityNetworkHeaderType::SystemMsgResponse:
 		message = std::make_unique<EntityNetworkMessageSystemMsgResponse>();
+		break;
+	case EntityNetworkHeaderType::KeepAlive:
+		message = std::make_unique<EntityNetworkMessageKeepAlive>();
 		break;
 	}
 

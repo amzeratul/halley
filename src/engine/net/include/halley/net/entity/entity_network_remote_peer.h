@@ -14,6 +14,8 @@ namespace Halley {
     class EntityData;
 
     class EntityNetworkRemotePeer {
+        constexpr static Time maxSendInterval = 1.0;
+    	
     public:
         EntityNetworkRemotePeer(EntityNetworkSession& parent, NetworkSession::PeerId peerId);
 
@@ -50,10 +52,13 @@ namespace Halley {
     	HashSet<EntityNetworkId> allocatedOutboundIds;
         uint16_t nextId = 0;
 
+        Time timeSinceSend = 0;
+
         uint16_t assignId();
         void sendCreateEntity(EntityRef entity);
         void sendUpdateEntity(Time t, OutboundEntity& remote, EntityRef entity);
         void sendDestroyEntity(OutboundEntity& remote);
+        void sendKeepAlive();
         void send(EntityNetworkMessage message);
 
         void receiveCreateEntity(const EntityNetworkMessageCreate& msg);

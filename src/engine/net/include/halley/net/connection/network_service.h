@@ -15,6 +15,13 @@ namespace Halley
 	class NetworkService : public IConnectionStatsListener
 	{
 	public:
+		enum class Quality {
+			Normal,
+			SimulateAverage,
+			SimulateBad,
+			SimulateTerrible
+		};
+		
 		class Acceptor {
 		public:
 			virtual ~Acceptor() = default;
@@ -39,6 +46,8 @@ namespace Halley
 		virtual String startListening(AcceptCallback callback) = 0; // Returns the address that clients will use to connect to
         virtual void stopListening() = 0;
 		virtual std::shared_ptr<IConnection> connect(const String& address) = 0;
+
+		virtual void setSimulateQualityLevel(Quality quality) {}
 	};
 
 	class NetworkServiceWithStats : public NetworkService {

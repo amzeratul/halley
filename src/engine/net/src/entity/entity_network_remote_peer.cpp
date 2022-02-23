@@ -27,6 +27,8 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<Ent
 	if (!isRemoteReady()) {
 		return;
 	}
+
+	timeSinceSend += t;
 	
 	// Mark all as not alive
 	for (auto& e: outboundEntities) {
@@ -58,6 +60,10 @@ void EntityNetworkRemotePeer::sendEntities(Time t, gsl::span<const std::pair<Ent
 	}
 	std_ex::erase_if_value(outboundEntities, [](const OutboundEntity& e) { return !e.alive; });
 
+	if (timeSinceSend > maxSendInterval) {
+		sendKeepAlive();
+	}
+	
 	if (!hasSentData) {
 		hasSentData = true;
 		onFirstDataBatchSent();
@@ -167,9 +173,15 @@ void EntityNetworkRemotePeer::sendDestroyEntity(OutboundEntity& remote)
 	//Logger::logDev("Send Destroy entity to peer " + toString(static_cast<int>(peerId)));
 }
 
+void EntityNetworkRemotePeer::sendKeepAlive()
+{
+	send(EntityNetworkMessageKeepAlive());
+}
+
 void EntityNetworkRemotePeer::send(EntityNetworkMessage message)
 {
 	parent->sendToPeer(std::move(message), peerId);
+	timeSinceSend = 0;
 }
 
 void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCreate& msg)

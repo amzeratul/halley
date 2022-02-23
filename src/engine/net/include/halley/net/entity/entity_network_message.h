@@ -15,7 +15,8 @@ namespace Halley {
     	ReadyToStart,
     	EntityMsg,
     	SystemMsg,
-    	SystemMsgResponse
+    	SystemMsgResponse,
+    	KeepAlive
     };
 
     class IEntityNetworkMessage {
@@ -121,6 +122,15 @@ namespace Halley {
 		EntityNetworkMessageSystemMsgResponse(int messageType, uint32_t msgId, Bytes responseData) : messageType(messageType), msgId(msgId), responseData(std::move(responseData)) {}
 		
 		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::SystemMsgResponse; }
+		void serialize(Serializer& s) const override;
+        void deserialize(Deserializer& s) override;
+	};
+
+	class EntityNetworkMessageKeepAlive final : public IEntityNetworkMessage {
+	public:
+        EntityNetworkMessageKeepAlive() = default;
+
+		EntityNetworkHeaderType getType() const override { return EntityNetworkHeaderType::KeepAlive; }
 		void serialize(Serializer& s) const override;
         void deserialize(Deserializer& s) override;
 	};
