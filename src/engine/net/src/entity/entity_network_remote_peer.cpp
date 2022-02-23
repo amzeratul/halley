@@ -160,7 +160,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 		auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
 		send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes)));
 		
-		//Logger::logDev("Send Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + ":\n" + EntityData(deltaData).toYAML() + "\n");
+		//Logger::logDev("Send Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + ":\n" + deltaData.toYAML() + "\n");
 	}
 }
 

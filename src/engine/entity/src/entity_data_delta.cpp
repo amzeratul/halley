@@ -6,6 +6,7 @@
 #include "entity_data.h"
 
 #include "halley/bytes/byte_serializer.h"
+#include "halley/file_formats/yaml_convert.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;
@@ -266,6 +267,86 @@ bool EntityDataDelta::modifiesTheSameAs(const EntityDataDelta& other) const
 	}
 
 	return getComponentEmptyStructure() == other.getComponentEmptyStructure();
+}
+
+ConfigNode EntityDataDelta::toConfigNode() const
+{
+	ConfigNode::MapType result;
+
+	if (name) {
+		result["name"] = name.value();
+	}
+	if (prefab) {
+		result["prefab"] = prefab.value();
+	}
+	if (icon) {
+		result["icon"] = icon.value();
+	}
+	if (instanceUUID) {
+		result["uuid"] = instanceUUID->toString();
+	}
+	if (prefabUUID) {
+		result["prefabUUID"] = prefabUUID->toString();
+	}
+	if (parentUUID) {
+		result["parent"] = parentUUID->toString();
+	}
+	if (flags) {
+		result["flags"] = static_cast<int>(flags.value());
+	}
+
+	if (!componentsChanged.empty()) {
+		ConfigNode::SequenceType compNodes;
+		for (const auto& comp: componentsChanged) {
+			ConfigNode::MapType entry;
+			entry[comp.first] = ConfigNode(comp.second);
+			compNodes.emplace_back(std::move(entry));
+		}
+		result["componentsChanged"] = std::move(compNodes);
+	}
+
+	if (!componentsRemoved.empty()) {
+		result["componentsRemoved"] = componentsRemoved;
+	}
+
+	if (!componentOrder.empty()) {
+		result["componentOrder"] = componentOrder;
+	}
+
+	if (!childrenAdded.empty()) {
+		ConfigNode::SequenceType childNodes;
+		for (const auto& child: childrenAdded) {
+			childNodes.emplace_back(child.toConfigNode(true));
+		}
+		result["childrenAdded"] = std::move(childNodes);
+	}
+
+	if (!childrenChanged.empty()) {
+		ConfigNode::SequenceType childNodes;
+		for (const auto& child: childrenChanged) {
+			ConfigNode::MapType entry;
+			entry[toString(child.first)] = ConfigNode(child.second.toConfigNode());
+			childNodes.emplace_back(std::move(entry));
+		}
+		result["childrenChanged"] = std::move(childNodes);
+	}
+
+	if (!childrenRemoved.empty()) {
+		result["childrenRemoved"] = childrenRemoved;
+	}
+
+	if (!childrenOrder.empty()) {
+		result["childrenOrder"] = childrenOrder;
+	}
+	
+	return ConfigNode(std::move(result));
+}
+
+String EntityDataDelta::toYAML() const
+{
+	YAMLConvert::EmitOptions options;
+	options.mapKeyOrder = {{ "name", "prefab", "icon", "flags", "uuid", "prefabUUID", "parent", "components", "children" }};
+	return YAMLConvert::generateYAML(toConfigNode(), options);
 }
 
 static ConfigNode getEmptyConfigNodeStructure(const ConfigNode& node)

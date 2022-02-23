@@ -5,6 +5,8 @@
 #include "halley/bytes/byte_serializer.h"
 #include <cstring> // needed for memset and memcmp
 
+#include "halley/data_structures/config_node.h"
+
 using namespace Halley;
 
 UUID::UUID()
@@ -47,6 +49,11 @@ UUID::UUID(const String& str)
 	Encode::decodeBase16(strView.substr(24, 12), span.subspan(10, 6));
 }
 
+UUID::UUID(const ConfigNode& node)
+	: UUID(node.asString())
+{
+}
+
 bool UUID::operator==(const UUID& other) const
 {
 	return qwords == other.qwords;
@@ -71,6 +78,11 @@ String UUID::toString() const
 		 + encodeBase16(span.subspan(6, 2)) + "-"
 		 + encodeBase16(span.subspan(8, 2)) + "-"
 		 + encodeBase16(span.subspan(10, 6));
+}
+
+ConfigNode UUID::toConfigNode() const
+{
+	return ConfigNode(toString());
 }
 
 UUID UUID::generate()

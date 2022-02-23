@@ -57,6 +57,9 @@ namespace Halley {
 
 		bool modifiesTheSameAs(const EntityDataDelta& other) const;
 
+		ConfigNode toConfigNode() const;
+		String toYAML() const;
+
 	private:
     	std::optional<String> name;
     	std::optional<String> prefab;
