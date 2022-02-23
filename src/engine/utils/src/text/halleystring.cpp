@@ -570,6 +570,8 @@ double String::toDouble() const
 			return std::numeric_limits<double>::infinity();
 		} else if (str == "-.inf") {
 			return -std::numeric_limits<double>::infinity();
+		} else if (str == ".nan") {
+			return std::numeric_limits<double>::quiet_NaN();
 		}
 		return std::stod(left(length() - 1).cppStr());
 	}
