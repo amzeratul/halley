@@ -231,6 +231,21 @@ EntityData* EntityData::tryGetInstanceUUID(const UUID& uuid)
 	return nullptr;
 }
 
+const ConfigNode& EntityData::getFieldData(const String& componentName, const String& fieldName) const
+{
+	static ConfigNode undefined;
+	
+	for (const auto& c: components) {
+		if (c.first == componentName) {
+			if (c.second.hasKey(fieldName)) {
+				return c.second[fieldName];
+			}
+		}
+	}
+
+	return undefined;
+}
+
 void EntityData::setName(String name)
 {
 	this->name = std::move(name);

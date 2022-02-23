@@ -69,7 +69,8 @@ namespace Halley {
   	    const EntityData* tryGetPrefabUUID(const UUID& uuid) const;
         const EntityData* tryGetInstanceUUID(const UUID& uuid) const;
     	EntityData* tryGetInstanceUUID(const UUID& uuid);
-
+        const ConfigNode& getFieldData(const String& componentName, const String& fieldName) const;
+        
     	void setName(String name);
     	void setPrefab(String prefab);
     	void setIcon(String icon);

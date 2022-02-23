@@ -376,12 +376,37 @@ void EntityFactory::updateEntityComponentsDelta(EntityRef entity, const EntityDa
 	const auto& func = world.getCreateComponentFunction();
 
 	for (const auto& [componentName, componentData]: delta.getComponentsChanged()) {
-		func(context, componentName, entity, componentData);
+		auto overriden = getComponentsWithPrefabDefaults(entity, context, componentData, componentName);		
+		func(context, componentName, entity, overriden ? *overriden : componentData);
 	}
 
 	for (const auto& componentName: delta.getComponentsRemoved()) {
 		func(context, componentName, entity, ConfigNode(ConfigNode::DelType()));
 	}
+}
+
+std::optional<ConfigNode> EntityFactory::getComponentsWithPrefabDefaults(EntityRef entity, const EntityFactoryContext& context, const ConfigNode& componentData, const String& componentName)
+{
+	std::optional<ConfigNode> result;
+		
+	for (const auto& entry: componentData.asMap()) {
+		if (entry.second.getType() == ConfigNodeType::Del) {
+			if (const auto & prefab = context.getPrefab(); prefab) {
+				if (const auto * prefabData = prefab->getEntityData().tryGetPrefabUUID(entity.getPrefabUUID()); prefabData) {
+					const auto& fieldName = entry.first;
+
+					if (auto& data = prefabData->getFieldData(componentName, fieldName); data.getType() != ConfigNodeType::Undefined) {
+						if (!result) {
+							result = componentData;
+						}
+						(*result)[fieldName] = data;
+					}
+				}
+			}
+		}
+	}
+
+	return result;
 }
 
 void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& data, const std::shared_ptr<EntityFactoryContext>& context)
