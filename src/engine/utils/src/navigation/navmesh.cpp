@@ -214,6 +214,9 @@ Navmesh::Node::Node(const ConfigNode& node)
 		const int conn = connNodes[i].asInt();
 		connections[i] = conn != -1 ? OptionalLite<NodeId>(gsl::narrow<NodeId>(conn)) : OptionalLite<NodeId>();
 		costs[i] = connCosts[i].asFloat();
+		if (std::isnan(costs[i])) {
+			costs[i] = std::numeric_limits<float>::infinity();
+		}
 	}
 }
 
