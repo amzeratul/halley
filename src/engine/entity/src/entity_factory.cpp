@@ -388,7 +388,7 @@ void EntityFactory::updateEntityComponentsDelta(EntityRef entity, const EntityDa
 std::optional<ConfigNode> EntityFactory::getComponentsWithPrefabDefaults(EntityRef entity, const EntityFactoryContext& context, const ConfigNode& componentData, const String& componentName)
 {
 	std::optional<ConfigNode> result;
-		
+
 	for (const auto& entry: componentData.asMap()) {
 		if (entry.second.getType() == ConfigNodeType::Del) {
 			if (const auto & prefab = context.getPrefab(); prefab) {

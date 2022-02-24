@@ -64,9 +64,38 @@ namespace Halley {
 	};
 
 	template <typename T, typename Intermediate = T>
-	class LerpDataInterpolator : public DataInterpolator<T> {
+	class QuantizingDataInterpolator : public DataInterpolator<T> {
 	public:
-		LerpDataInterpolator(Time length) : length(length) {}
+		QuantizingDataInterpolator(std::optional<float> granularity = {})
+			: granularity(granularity)
+		{}
+
+		std::optional<ConfigNode> prepareFieldForSerialization(const ConfigNode& fromValue, const ConfigNode& toValue) override
+		{
+			if (toValue.getType() != ConfigNodeType::Del && toValue.getType() != ConfigNodeType::Undefined && granularity) {
+				auto from = quantize<T>(fromValue.as<T>(), granularity.value());
+				auto to = quantize<T>(toValue.as<T>(), granularity.value());
+				if (from == to) {
+					return ConfigNode(fromValue);
+				}
+				return ConfigNode(to);
+			} else {
+				return {};
+			}
+		}
+	
+	private:
+		std::optional<float> granularity;
+	};
+
+	template <typename T, typename Intermediate = T, typename Base = DataInterpolator<T>>
+	class LerpDataInterpolator : public Base {
+	public:
+		template <typename ... Args>
+		LerpDataInterpolator(Time length, Args... args)
+			: Base(args...)
+			, length(length)
+		{}
 
 		void update(Time t) override
 		{
@@ -118,4 +147,7 @@ namespace Halley {
 		Intermediate delta;
 		T* targetValue = nullptr;
 	};
+
+	template <typename T, typename Intermediate = T>
+	using QuantizingLerpDataInterpolator = LerpDataInterpolator<T, Intermediate, QuantizingDataInterpolator<T, Intermediate>>;
 }
