@@ -237,16 +237,16 @@ void Core::deInit()
 		api->audio->stopPlayback();
 	}
 
+	
+	// Stop thread pool and other statics
+	statics.suspend();
+	
 	// Deinit resources
 	resources.reset();
 
 	// Deinit API (note that this has to happen after resources, otherwise resources which rely on an API to de-init, such as textures, will crash)
 	api->deInit();
 	api.reset();
-	
-	// Stop thread pool and other statics
-	statics.suspend();
-	
 	initialized = false;
 
 	// Deinit console redirector
@@ -511,9 +511,11 @@ void Core::setStage(std::unique_ptr<Stage> next)
 
 void Core::quit(int code)
 {
-	exitCode = code;
-	std::cout << "Game terminating via CoreAPI::quit(" << code << ")." << std::endl;
-	running = false;
+	if (running) {
+		exitCode = code;
+		std::cout << "Game terminating via CoreAPI::quit(" << code << ")." << std::endl;
+		running = false;
+	}
 }
 
 Resources& Core::getResources()

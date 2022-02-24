@@ -32,7 +32,7 @@ DX11Texture::~DX11Texture()
 
 DX11Texture& DX11Texture::operator=(DX11Texture&& other) noexcept
 {
-	other.waitForLoad();
+	other.waitForLoad(true);
 
 	texture = other.texture;
 	srv = other.srv;

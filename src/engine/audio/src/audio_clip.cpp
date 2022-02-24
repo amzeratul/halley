@@ -19,7 +19,7 @@ AudioClip::~AudioClip()
 
 AudioClip& AudioClip::operator=(AudioClip&& other) noexcept
 {
-	other.waitForLoad();
+	other.waitForLoad(true);
 
 	sampleLength = other.sampleLength;
 	numChannels = other.numChannels;

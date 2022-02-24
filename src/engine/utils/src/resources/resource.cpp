@@ -88,24 +88,24 @@ AsyncResource::AsyncResource()
 
 AsyncResource::~AsyncResource()
 {
-	waitForLoad();
+	waitForLoad(true);
 }
 
 AsyncResource::AsyncResource(const AsyncResource& other)
 {
-	other.waitForLoad();
+	other.waitForLoad(true);
 	*this = other;
 }
 
 AsyncResource::AsyncResource(AsyncResource&& other) noexcept
 {
-	other.waitForLoad();
+	other.waitForLoad(true);
 	*this = std::move(other);
 }
 
 AsyncResource& AsyncResource::operator=(const AsyncResource& other)
 {
-	other.waitForLoad();
+	other.waitForLoad(true);
 	failed.store(other.failed);
 	Resource::operator=(static_cast<const Resource&>(other));
 	return *this;
@@ -113,7 +113,7 @@ AsyncResource& AsyncResource::operator=(const AsyncResource& other)
 
 AsyncResource& AsyncResource::operator=(AsyncResource&& other) noexcept
 {
-	other.waitForLoad();
+	other.waitForLoad(true);
 	failed.store(other.failed);
 	Resource::operator=(static_cast<Resource&&>(other));
 	return *this;
