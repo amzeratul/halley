@@ -11,7 +11,7 @@
 #include "halley/core/resources/resource_reference.h"
 
 namespace Halley {
-	template <class, class = void_t<>> struct HasInPlaceDeserializer : std::false_type {};
+	template <class, class = std::void_t<>> struct HasInPlaceDeserializer : std::false_type {};
 	template <class T> struct HasInPlaceDeserializer<T, decltype(std::declval<ConfigNodeSerializer<T>>().deserialize(std::declval<const EntitySerializationContext&>(), std::declval<const ConfigNode&>(), std::declval<T&>()))> : std::true_type { };
 
 	template <typename T>

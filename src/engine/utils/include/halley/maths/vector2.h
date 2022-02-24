@@ -62,12 +62,13 @@ namespace Halley {
 		}
 
 		// Getter
-		constexpr T& operator[](size_t n)
+		[[nodiscard]] constexpr T& operator[](size_t n)
 		{
 			Expects(n <= 1);
 			return (&x)[n];
 		}
-		constexpr T operator[](size_t n) const
+
+		[[nodiscard]] constexpr T operator[](size_t n) const
 		{
 			Expects(n <= 1);
 			return (&x)[n];
@@ -77,27 +78,27 @@ namespace Halley {
 		constexpr Vector2D& operator = (const Vector2D& param) { x = param.x; y = param.y; return *this; }
 		constexpr Vector2D& operator = (Vector2D&& param) noexcept { x = param.x; y = param.y; return *this; }
 		constexpr Vector2D& operator = (T param) { x = param; y = param; return *this; }
-		constexpr bool operator == (Vector2D param) const { return x == param.x && y == param.y; }
-		constexpr bool operator != (Vector2D param) const { return x != param.x || y != param.y; }
-		constexpr bool operator < (Vector2D param) const { return y != param.y ? y < param.y : x < param.x; }
+		[[nodiscard]] constexpr bool operator == (Vector2D param) const { return x == param.x && y == param.y; }
+		[[nodiscard]] constexpr bool operator != (Vector2D param) const { return x != param.x || y != param.y; }
+		[[nodiscard]] constexpr bool operator < (Vector2D param) const { return y != param.y ? y < param.y : x < param.x; }
 
 		// Basic algebra
-		constexpr Vector2D operator + (Vector2D param) const { return Vector2D(x + param.x,y + param.y); }
-		constexpr Vector2D operator - (Vector2D param) const { return Vector2D(x - param.x,y - param.y); }
-		constexpr Vector2D operator * (Vector2D param) const { return Vector2D(x * param.x,y * param.y); }
-		constexpr Vector2D operator / (Vector2D param) const { return Vector2D(x / param.x,y / param.y); }
-		constexpr Vector2D operator % (Vector2D param) const { return Vector2D(mod(x, param.x), mod(y, param.y)); }
+		[[nodiscard]] constexpr Vector2D operator + (Vector2D param) const { return Vector2D(x + param.x,y + param.y); }
+		[[nodiscard]] constexpr Vector2D operator - (Vector2D param) const { return Vector2D(x - param.x,y - param.y); }
+		[[nodiscard]] constexpr Vector2D operator * (Vector2D param) const { return Vector2D(x * param.x,y * param.y); }
+		[[nodiscard]] constexpr Vector2D operator / (Vector2D param) const { return Vector2D(x / param.x,y / param.y); }
+		[[nodiscard]] constexpr Vector2D operator % (Vector2D param) const { return Vector2D(mod(x, param.x), mod(y, param.y)); }
 
-		constexpr Vector2D modulo(Vector2D param) const { return Vector2D(Halley::modulo<T>(x, param.x), Halley::modulo<T>(y, param.y)); }
-		constexpr Vector2D floorDiv(Vector2D param) const { return Vector2D(Halley::floorDiv(x, param.x), Halley::floorDiv(y, param.y)); }
+		[[nodiscard]] constexpr Vector2D modulo(Vector2D param) const { return Vector2D(Halley::modulo<T>(x, param.x), Halley::modulo<T>(y, param.y)); }
+		[[nodiscard]] constexpr Vector2D floorDiv(Vector2D param) const { return Vector2D(Halley::floorDiv(x, param.x), Halley::floorDiv(y, param.y)); }
 
-		constexpr Vector2D operator - () const { return Vector2D(-x,-y); }
-
-		template <typename V>
-		constexpr Vector2D operator * (V param) const { return Vector2D(T(x * param), T(y * param)); }
+		[[nodiscard]] constexpr Vector2D operator - () const { return Vector2D(-x,-y); }
 
 		template <typename V>
-		constexpr Vector2D operator / (V param) const { return Vector2D(T(x / param), T(y / param)); }
+		[[nodiscard]] constexpr Vector2D operator * (V param) const { return Vector2D(T(x * param), T(y * param)); }
+
+		template <typename V>
+		[[nodiscard]] constexpr Vector2D operator / (V param) const { return Vector2D(T(x / param), T(y / param)); }
 
 		// In-place operations
 		constexpr Vector2D& operator += (Vector2D param) { x += param.x; y += param.y; return *this; }
@@ -109,7 +110,7 @@ namespace Halley {
 		constexpr Vector2D& operator /= (const T param) { x /= param; y /= param; return *this; }
 
 		// Get the normalized vector (unit vector)
-		constexpr Vector2D unit () const
+		[[nodiscard]] constexpr Vector2D unit () const
 		{
 			float len = length();
 			if (len != 0) {
@@ -118,49 +119,52 @@ namespace Halley {
 				return Vector2D(0, 0);
 			}
 		}
-		constexpr Vector2D normalized() const
+
+		[[nodiscard]] constexpr Vector2D normalized() const
 		{
 			return unit();
 		}
+
 		constexpr void normalize()
 		{
 			*this = unit();
 		}
 
 		// Get the orthogonal vector
-		constexpr Vector2D orthoLeft () const { return Vector2D(-y, x); }
-		constexpr Vector2D orthoRight () const { return Vector2D(y, -x); }
+		[[nodiscard]] constexpr Vector2D orthoLeft () const { return Vector2D(-y, x); }
+		[[nodiscard]] constexpr Vector2D orthoRight () const { return Vector2D(y, -x); }
 
 		// Cross product (the Z component of it)
-		constexpr T cross (Vector2D param) const { return x * param.y - y * param.x; }
+		[[nodiscard]] constexpr T cross (Vector2D param) const { return x * param.y - y * param.x; }
 
 		// Dot product
-		constexpr T dot (Vector2D param) const { return (x * param.x) + (y * param.y); }
+		[[nodiscard]] constexpr T dot (Vector2D param) const { return (x * param.x) + (y * param.y); }
 
 		// Length
-		constexpr T length () const { return static_cast<T>(std::sqrt(squaredLength())); }
-		constexpr T len () const { return length(); }
-		constexpr T manhattanLength() const { return std::abs(x) + std::abs(y); }
+		[[nodiscard]] constexpr T length () const { return static_cast<T>(std::sqrt(squaredLength())); }
+		[[nodiscard]] constexpr T len () const { return length(); }
+		[[nodiscard]] constexpr T manhattanLength() const { return std::abs(x) + std::abs(y); }
 
 		// Squared length, often useful and much faster
-		constexpr T squaredLength () const { return x*x+y*y; }
+		[[nodiscard]] constexpr T squaredLength () const { return x*x+y*y; }
 
 		// Projection on another vector
-		constexpr Vector2D projection (Vector2D param) const
+		[[nodiscard]] constexpr Vector2D projection (Vector2D param) const
 		{
 			Vector2D unit = param.unit();
 			return this->dot(unit) * unit;
 		}
-		constexpr T projectionLength (Vector2D param) const
+		[[nodiscard]] constexpr T projectionLength (Vector2D param) const
 		{
 			return this->dot(param.unit());
 		}
 
 		// Rounding
-		constexpr Vector2D floor() const { return Vector2D(static_cast<T>(std::floor(x)), static_cast<T>(std::floor(y))); }
-		constexpr Vector2D ceil() const { return Vector2D(static_cast<T>(std::ceil(x)), static_cast<T>(std::ceil(y))); }
-		constexpr Vector2D round() const { return Vector2D(static_cast<T>(std::round(x)), static_cast<T>(std::round(y))); }
-
+		[[nodiscard]] constexpr Vector2D floor() const { return Vector2D(static_cast<T>(std::floor(x)), static_cast<T>(std::floor(y))); }
+		[[nodiscard]] constexpr Vector2D ceil() const { return Vector2D(static_cast<T>(std::ceil(x)), static_cast<T>(std::ceil(y))); }
+		[[nodiscard]] constexpr Vector2D round() const { return Vector2D(static_cast<T>(std::round(x)), static_cast<T>(std::round(y))); }
+		[[nodiscard]] constexpr Vector2D quantize(float amount) const { return Vector2D(static_cast<T>(Halley::quantize(x, amount)), static_cast<T>(Halley::quantize(y, amount))); }
+		
 		// Gets the angle that this vector is pointing to
 		[[nodiscard]] constexpr U angle () const
 		{
@@ -189,33 +193,33 @@ namespace Halley {
 			return *this - dot(param)*param;
 		}
 
-		String toString() const
+		[[nodiscard]] String toString() const
 		{
 			return String("(") + x + ", " + y + ")";
 		}
 
-		constexpr Vector2D abs() const
+		[[nodiscard]] constexpr Vector2D abs() const
 		{
 			return Vector2D(std::abs(x), std::abs(y));
 		}
 
-		constexpr bool isValid() const
+		[[nodiscard]] constexpr bool isValid() const
 		{
 			return !std::isnan(x) && !std::isnan(y) && !std::isinf(x) && !std::isinf(y);
 		}
 
-		bool epsilonEquals(Vector2D other, float epsilon) const
+		[[nodiscard]] bool epsilonEquals(Vector2D other, float epsilon) const
 		{
 			return std::abs(x - other.x) < epsilon
 				&& std::abs(y - other.y) < epsilon;
 		}
 
-		constexpr static Vector2D<T,U> min(Vector2D<T,U> a, Vector2D<T,U> b)
+		[[nodiscard]] constexpr static Vector2D<T,U> min(Vector2D<T,U> a, Vector2D<T,U> b)
 		{
 			return Vector2D<T,U>(std::min(a.x, b.x), std::min(a.y, b.y));
 		}
 
-		constexpr static Vector2D<T,U> max(Vector2D<T,U> a, Vector2D<T,U> b)
+		[[nodiscard]] constexpr static Vector2D<T,U> max(Vector2D<T,U> a, Vector2D<T,U> b)
 		{
 			return Vector2D<T,U>(std::max(a.x, b.x), std::max(a.y, b.y));
 		}

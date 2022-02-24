@@ -95,6 +95,9 @@ namespace Halley {
 		friend class ConfigFile;
 
 	public:
+		template <typename T>
+		class Tag {};
+
 		using MapType = HashMap<String, ConfigNode>;
 		using SequenceType = Vector<ConfigNode>;
 
@@ -341,6 +344,12 @@ namespace Halley {
 		SequenceType& asSequence();
 		MapType& asMap();
 
+		template <typename T>
+		auto as() const -> decltype(std::declval<ConfigNode>().convertTo(Tag<T>()))
+		{
+			return convertTo(Tag<T>());
+		}
+
 		void ensureType(ConfigNodeType type);
 
 		bool hasKey(const String& key) const;
@@ -401,9 +410,6 @@ namespace Halley {
 		void decayDeltaArtifacts();
 
 	private:
-		template <typename T>
-		class Tag {};
-
 		union {
 			String* strData;
 			MapType* mapData;

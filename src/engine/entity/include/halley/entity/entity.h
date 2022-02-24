@@ -21,7 +21,7 @@ namespace Halley {
 	class Prefab;
 
 	// True if T::onAddedToEntity(EntityRef&) exists
-	template <class, class = void_t<>> struct HasOnAddedToEntityMember : std::false_type {};
+	template <class, class = std::void_t<>> struct HasOnAddedToEntityMember : std::false_type {};
 	template <class T> struct HasOnAddedToEntityMember<T, decltype(std::declval<T&>().onAddedToEntity(std::declval<EntityRef&>()))> : std::true_type { };
 	
 	class MessageEntry
