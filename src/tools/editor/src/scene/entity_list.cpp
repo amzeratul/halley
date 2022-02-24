@@ -116,7 +116,7 @@ EntityList::EntityInfo EntityList::getEntityInfo(const EntityData& data) const
 		} else {
 			result.name = "Missing prefab! [" + data.getPrefab() + "]";
 			result.icon = icons->getIcon("");
-			result.severity = IEntityValidator::Severity::None;
+			result.severity = IEntityValidator::Severity::Error;
 		}
 	}
 
