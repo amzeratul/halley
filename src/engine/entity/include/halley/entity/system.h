@@ -19,22 +19,13 @@ namespace Halley {
 
 	template <typename T, std::size_t size = gsl::dynamic_extent> using Span = gsl::span<T, size>;
 
-	// True if T::init() exists
-	template <class, class = Halley::void_t<>> struct HasInitMember : std::false_type {};
-	template <class T> struct HasInitMember<T, decltype(std::declval<T&>().init())> : std::true_type { };
-
-	// True if T::onEntityAdded(F&) exists
-	template <class, class, class = Halley::void_t<>> struct HasOnEntitiesAdded : std::false_type {};
-	template <class T, class F> struct HasOnEntitiesAdded<T, F, decltype(std::declval<T>().onEntitiesAdded(std::declval<Span<F>>()))> : std::true_type { };
+	namespace Detail {
+		template<class T> using InitMember = decltype(std::declval<T&>().init());
+		template<class T, typename F> using OnEntitiesAddedMember = decltype(std::declval<T>().onEntitiesAdded(std::declval<Span<F>>()));
+		template<class T, typename F> using OnEntitiesRemovedMember = decltype(std::declval<T>().onEntitiesRemoved(std::declval<Span<F>>()));
+		template<class T, typename F> using OnEntitiesReloadedMember = decltype(std::declval<T>().onEntitiesReloaded(std::declval<Span<F*>>()));
+	}
 	
-	// True if T::onEntityRemoved(F&) exists
-	template <class, class, class = Halley::void_t<>> struct HasOnEntitiesRemoved : std::false_type {};
-	template <class T, class F> struct HasOnEntitiesRemoved<T, F, decltype(std::declval<T>().onEntitiesRemoved(std::declval<Span<F>>()))> : std::true_type { };
-
-	// True if T::onEntityModified() exists
-	template <class, class, class = Halley::void_t<>> struct HasOnEntitiesReloaded : std::false_type {};
-	template <class T, class F> struct HasOnEntitiesReloaded<T, F, decltype(std::declval<T>().onEntitiesReloaded(std::declval<Span<F*>>()))> : std::true_type {};
-
 	class SystemMessageBridge {
 	public:
 		SystemMessageBridge() = default;
@@ -144,7 +135,7 @@ namespace Halley {
 		template <typename T>
 		void invokeInit(T* system)
 		{
-			if constexpr (HasInitMember<T>::value) {
+			if constexpr (is_detected_v<Detail::InitMember, T>) {
 				system->init();
 			}
 		}
@@ -152,7 +143,7 @@ namespace Halley {
 		template <typename T, typename F>
 		void initialiseOnEntityAdded(FamilyBinding<F>& binding, T* system)
 		{
-			if constexpr (HasOnEntitiesAdded<T, F>::value) {
+			if constexpr (is_detected_v<Detail::OnEntitiesAddedMember, T, F>) {
 				binding.setOnEntitiesAdded([system] (void* es, size_t count)
 				{
 					system->onEntitiesAdded(Span<F>(static_cast<F*>(es), count));
@@ -163,7 +154,7 @@ namespace Halley {
 		template <typename T, typename F>
 		void initialiseOnEntityRemoved(FamilyBinding<F>& binding, T* system)
 		{
-			if constexpr (HasOnEntitiesRemoved<T, F>::value) {
+			if constexpr (is_detected_v<Detail::OnEntitiesRemovedMember, T, F>) {
 				binding.setOnEntitiesRemoved([system] (void* es, size_t count)
 				{
 					system->onEntitiesRemoved(Span<F>(static_cast<F*>(es), count));
@@ -174,7 +165,7 @@ namespace Halley {
 		template <typename T, typename F>
 		void initializeOnEntityReloaded(FamilyBinding<F>& binding, T* system)
 		{
-			if constexpr (HasOnEntitiesReloaded<T, F>::value) {
+			if constexpr (is_detected_v<Detail::OnEntitiesReloadedMember, T, F>) {
 				binding.setOnEntitiesReloaded([system](void* es, size_t count)
 				{
 					system->onEntitiesReloaded(Span<F*>(static_cast<F**>(es), count));

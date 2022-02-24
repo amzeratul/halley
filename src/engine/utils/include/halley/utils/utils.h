@@ -39,6 +39,8 @@
 #include <halley/data_structures/vector.h>
 #include <gsl/gsl_assert>
 
+#include "type_traits.h"
+
 #ifdef _MSC_VER
 #include <xmmintrin.h>
 #endif
@@ -134,18 +136,40 @@ namespace Halley {
 
 	// Interpolation
 	template <typename T>
-	[[nodiscard]] constexpr inline T interpolate(T a, T b, float factor) {
+	[[nodiscard]] constexpr inline T interpolate(T a, T b, float factor)
+	{
 		return static_cast<T>(a * (1 - factor) + b * factor);
 	}
 
 	template <typename T>
-	[[nodiscard]] constexpr inline T lerp(T a, T b, float factor) {
+	[[nodiscard]] constexpr inline T lerp(T a, T b, float factor)
+	{
 		return static_cast<T>(a * (1 - factor) + b * factor);
 	}
 
 	template <typename T>
-	[[nodiscard]] constexpr inline T damp(T a, T b, float lambda, float dt) {
+	[[nodiscard]] constexpr inline T damp(T a, T b, float lambda, float dt)
+	{
 		return lerp<T>(a, b, 1.0f - std::exp(-lambda * dt));
+	}
+
+	namespace Detail {
+		template<class T> using QuantizeMember = decltype(std::declval<T>().quantize(std::declval<float>()));
+	}
+	
+	template <typename T>
+	[[nodiscard]] constexpr inline T quantize(T a, float factor)
+	{
+		static_assert(is_detected_v<Detail::QuantizeMember, T> || std::is_scalar_v<T>, "Type does not support quantization.");
+		
+		if constexpr (is_detected_v<Detail::QuantizeMember, T>) {
+			return a.quantize(factor);
+		} else if constexpr (std::is_scalar_v<T>) {
+			return std::round(a / factor) * factor;
+		} else {
+			// Will never be reached due to static_assert above
+			return a;
+		}
 	}
 
 	template <typename T>
