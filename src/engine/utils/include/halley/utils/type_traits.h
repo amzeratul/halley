@@ -6,17 +6,29 @@ namespace Halley
 {
 	// is_detected_v is based on https://en.cppreference.com/w/cpp/experimental/is_detected
 
+	struct nonesuch {
+	    ~nonesuch() = delete;
+	    nonesuch(nonesuch const&) = delete;
+	    void operator=(nonesuch const&) = delete;
+	};
+
 	namespace detail {
-	    template<template<class...> class Expr, class... Args>
-	    std::false_type is_detected_impl(...);
-
-	    template<template<class...> class Expr, class... Args>
-	    std::true_type is_detected_impl(std::void_t<Expr<Args...>>*);
+		template <class Default, class AlwaysVoid, template<class...> class Op, class... Args>
+		struct detector {
+			using value_t = std::false_type;
+			using type = Default;
+		};
+		 
+		template <class Default, template<class...> class Op, class... Args>
+		struct detector<Default, std::void_t<Op<Args...>>, Op, Args...> {
+			using value_t = std::true_type;
+			using type = Op<Args...>;
+		};
 	}
-
-	template<template<class...> class Expr, class... Args>
-	using is_detected = decltype(detail::is_detected_impl<Expr, Args...>(nullptr));
-
+	 
+	template <template<class...> class Op, class... Args>
+	using is_detected = typename detail::detector<nonesuch, void, Op, Args...>::value_t;
+	
 	template<template<class...> class Expr, class... Args>
 	constexpr bool is_detected_v = is_detected<Expr, Args...>::value;
 }
