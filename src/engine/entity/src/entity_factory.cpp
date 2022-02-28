@@ -389,17 +389,19 @@ std::optional<ConfigNode> EntityFactory::getComponentsWithPrefabDefaults(EntityR
 {
 	std::optional<ConfigNode> result;
 
-	for (const auto& entry: componentData.asMap()) {
-		if (entry.second.getType() == ConfigNodeType::Del) {
-			if (const auto & prefab = context.getPrefab(); prefab) {
-				if (const auto * prefabData = prefab->getEntityData().tryGetPrefabUUID(entity.getPrefabUUID()); prefabData) {
-					const auto& fieldName = entry.first;
+	if (componentData.getType() == ConfigNodeType::Map || componentData.getType() == ConfigNodeType::DeltaMap) {
+		for (const auto& entry: componentData.asMap()) {
+			if (entry.second.getType() == ConfigNodeType::Del) {
+				if (const auto & prefab = context.getPrefab(); prefab) {
+					if (const auto * prefabData = prefab->getEntityData().tryGetPrefabUUID(entity.getPrefabUUID()); prefabData) {
+						const auto& fieldName = entry.first;
 
-					if (auto& data = prefabData->getFieldData(componentName, fieldName); data.getType() != ConfigNodeType::Undefined) {
-						if (!result) {
-							result = componentData;
+						if (auto& data = prefabData->getFieldData(componentName, fieldName); data.getType() != ConfigNodeType::Undefined) {
+							if (!result) {
+								result = componentData;
+							}
+							(*result)[fieldName] = data;
 						}
-						(*result)[fieldName] = data;
 					}
 				}
 			}
