@@ -178,6 +178,7 @@ int Core::getTargetFPS()
 void Core::init()
 {
 	Expects(!initialized);
+	initialized = true;
 	
 	// Initialize API
 	api->init();
@@ -207,14 +208,13 @@ void Core::init()
 	if (api->video) {
 		painter = api->videoInternal->makePainter(*resources);
 	}
-
-	initialized = true;
 }
 
 void Core::deInit()
 {
 	std::cout << "Game shutting down." << std::endl;
 	Expects(initialized);
+	initialized = false;
 
 	// Ensure stage is cleaned up
 	running = false;
@@ -247,7 +247,6 @@ void Core::deInit()
 	// Deinit API (note that this has to happen after resources, otherwise resources which rely on an API to de-init, such as textures, will crash)
 	api->deInit();
 	api.reset();
-	initialized = false;
 
 	// Deinit console redirector
 	std::cout << "Goodbye!" << std::endl;
