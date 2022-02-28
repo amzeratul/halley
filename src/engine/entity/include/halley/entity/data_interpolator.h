@@ -73,8 +73,8 @@ namespace Halley {
 		std::optional<ConfigNode> prepareFieldForSerialization(const ConfigNode& fromValue, const ConfigNode& toValue) override
 		{
 			if (toValue.getType() != ConfigNodeType::Del && toValue.getType() != ConfigNodeType::Undefined && granularity) {
-				auto from = quantize<T>(fromValue.as<T>(), granularity.value());
-				auto to = quantize<T>(toValue.as<T>(), granularity.value());
+				auto from = quantize<T>(fromValue.asType<T>(), granularity.value());
+				auto to = quantize<T>(toValue.asType<T>(), granularity.value());
 				if (from == to) {
 					return ConfigNode(fromValue);
 				}

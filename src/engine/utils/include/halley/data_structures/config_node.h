@@ -344,12 +344,6 @@ namespace Halley {
 		SequenceType& asSequence();
 		MapType& asMap();
 
-		template <typename T>
-		auto as() const -> decltype(std::declval<ConfigNode>().convertTo(Tag<T>()))
-		{
-			return convertTo(Tag<T>());
-		}
-
 		void ensureType(ConfigNodeType type);
 
 		bool hasKey(const String& key) const;
