@@ -9,8 +9,12 @@ namespace Halley
 {	
 	struct ChannelSettings
 	{
-	public:
-		ChannelSettings(bool reliable = false, bool ordered = false, bool keepLastSent = false);
+		constexpr ChannelSettings(bool reliable = false, bool ordered = false, bool keepLastSent = false)
+			: reliable(reliable)
+			, ordered(ordered)
+			, keepLastSent(keepLastSent)
+		{}
+
 		bool reliable;
 		bool ordered;
 		bool keepLastSent;
@@ -36,11 +40,11 @@ namespace Halley
 
 	protected:
 		void addFactory(std::unique_ptr<NetworkMessageFactoryBase> factory);
-		int getMessageType(NetworkMessage& msg) const;
-		std::unique_ptr<NetworkMessage> deserializeMessage(gsl::span<const gsl::byte> data, unsigned short msgType, unsigned short seq);
+		uint16_t getMessageType(NetworkMessage& msg) const;
+		std::unique_ptr<NetworkMessage> deserializeMessage(gsl::span<const gsl::byte> data, uint16_t msgType, uint16_t seq);
 
 	private:
-		std::map<std::type_index, int> typeToMsgIndex;
+		std::map<std::type_index, uint16_t> typeToMsgIndex;
 		Vector<std::unique_ptr<NetworkMessageFactoryBase>> factories;
 	};
 }

@@ -31,10 +31,11 @@ namespace Halley
 		class LogMsg final : public DevConMessage
 		{
 		public:
-			LogMsg(gsl::span<const gsl::byte> data);
+			LogMsg() = default;
 			LogMsg(LoggerLevel level, const String& msg);
 
 			void serialize(Serializer& s) const override;
+			void deserialize(Deserializer& s) override;
 
 			LoggerLevel getLevel() const;
 			const String& getMessage() const;
@@ -48,10 +49,11 @@ namespace Halley
 		class ReloadAssetsMsg final : public DevConMessage
 		{
 		public:
-			ReloadAssetsMsg(gsl::span<const gsl::byte> data);
+			ReloadAssetsMsg() = default;
 			ReloadAssetsMsg(gsl::span<const String> ids);
 
 			void serialize(Serializer& s) const override;
+			void deserialize(Deserializer& s) override;
 
 			Vector<String> getIds() const;
 

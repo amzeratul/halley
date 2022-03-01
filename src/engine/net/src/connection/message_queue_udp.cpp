@@ -3,12 +3,6 @@
 #include <utility>
 using namespace Halley;
 
-ChannelSettings::ChannelSettings(bool reliable, bool ordered, bool keepLastSent)
-	: reliable(reliable)
-	, ordered(ordered)
-	, keepLastSent(keepLastSent)
-{}
-
 void MessageQueueUDP::Channel::getReadyMessages(Vector<std::unique_ptr<NetworkMessage>>& out)
 {
 	if (settings.ordered) {
@@ -20,7 +14,7 @@ void MessageQueueUDP::Channel::getReadyMessages(Vector<std::unique_ptr<NetworkMe
 				for (size_t i = 0; i < receiveQueue.size(); ++i) {
 					auto& m = receiveQueue[i];
 					uint16_t expected = lastReceivedSeq + 1;
-					if (m->seq == expected) {
+					if (m->getSeq() == expected) {
 						trying = true;
 						out.push_back(std::move(m));
 						if (receiveQueue.size() > 1) {
@@ -39,7 +33,7 @@ void MessageQueueUDP::Channel::getReadyMessages(Vector<std::unique_ptr<NetworkMe
 			// Look for the highest seq message, as long as it's above lastReceived
 			for (size_t i = 0; i < receiveQueue.size(); ++i) {
 				auto& m = receiveQueue[i];
-				uint16_t dist = m->seq - lastReceivedSeq;
+				uint16_t dist = m->getSeq() - lastReceivedSeq;
 				if (dist < 0x7FFF) {
 					if (dist > bestDist) {
 						bestDist = dist;
@@ -48,7 +42,7 @@ void MessageQueueUDP::Channel::getReadyMessages(Vector<std::unique_ptr<NetworkMe
 				}
 			}
 			if (best != fail) {
-				lastReceivedSeq = receiveQueue[best]->seq;
+				lastReceivedSeq = receiveQueue[best]->getSeq();
 				out.push_back(std::move(receiveQueue[best]));
 			}
 			receiveQueue.clear();
@@ -193,8 +187,8 @@ void MessageQueueUDP::enqueue(std::unique_ptr<NetworkMessage> msg, int channelNu
 	}
 	auto& channel = channels[channelNumber];
 
-	msg->channel = channelNumber;
-	msg->seq = ++channel.lastSentSeq;
+	msg->setChannel(channelNumber);
+	msg->setSeq(++channel.lastSentSeq);
 
 	pendingMsgs.push_back(std::move(msg));
 }
@@ -226,9 +220,9 @@ void MessageQueueUDP::onPacketAcked(int tag)
 		auto& packet = i->second;
 
 		for (auto& m : packet.msgs) {
-			auto& channel = channels[m->channel];
-			if (m->seq - channel.lastAckSeq < 0x7FFFFFFF) {
-				channel.lastAckSeq = m->seq;
+			auto& channel = channels[m->getChannel()];
+			if (m->getSeq() - channel.lastAckSeq < 0x7FFFFFFF) {
+				channel.lastAckSeq = m->getSeq();
 				if (channel.settings.keepLastSent) {
 					channel.lastAck = std::move(m);
 				}
@@ -274,7 +268,7 @@ AckUnreliableSubPacket MessageQueueUDP::createPacket()
 		const auto& msg = *iter;
 
 		// Check if this message is compatible
-		const auto& channel = channels[msg->channel];
+		const auto& channel = channels[msg->getChannel()];
 		const bool isReliable = channel.settings.reliable;
 		const bool isOrdered = channel.settings.ordered;
 		if (first || isReliable == packetReliable) {
@@ -306,7 +300,7 @@ AckUnreliableSubPacket MessageQueueUDP::createPacket()
 
 AckUnreliableSubPacket MessageQueueUDP::makeTaggedPacket(Vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size, bool resends, uint16_t resendSeq)
 {
-	bool reliable = !msgs.empty() && channels[msgs[0]->channel].settings.reliable;
+	bool reliable = !msgs.empty() && channels[msgs[0]->getChannel()].settings.reliable;
 
 	auto data = serializeMessages(msgs, size);
 
@@ -332,7 +326,7 @@ Vector<gsl::byte> MessageQueueUDP::serializeMessages(const Vector<std::unique_pt
 	for (auto& msg: msgs) {
 		size_t msgSize = msg->getSerializedSize();
 		int msgType = getMessageType(*msg);
-		char channelN = msg->channel;
+		char channelN = msg->getChannel();
 
 		auto& channel = channels[channelN];
 		bool isOrdered = channel.settings.ordered;
@@ -341,7 +335,7 @@ Vector<gsl::byte> MessageQueueUDP::serializeMessages(const Vector<std::unique_pt
 		memcpy(&result[pos], &channelN, 1);
 		pos += 1;
 		if (isOrdered) {
-			uint16_t sequence = static_cast<uint16_t>(msg->seq);
+			uint16_t sequence = msg->getSeq();
 			memcpy(&result[pos], &sequence, 2);
 			pos += 2;
 		}

@@ -16,11 +16,11 @@ void MessageQueue::setChannel(int channel, ChannelSettings settings)
 
 void MessageQueue::addFactory(std::unique_ptr<NetworkMessageFactoryBase> factory)
 {
-	typeToMsgIndex[factory->getTypeIndex()] = int(factories.size());
+	typeToMsgIndex[factory->getTypeIndex()] = static_cast<uint16_t>(factories.size());
 	factories.emplace_back(std::move(factory));
 }
 
-int MessageQueue::getMessageType(NetworkMessage& msg) const
+uint16_t MessageQueue::getMessageType(NetworkMessage& msg) const
 {
 	auto idxIter = typeToMsgIndex.find(std::type_index(typeid(msg)));
 	if (idxIter == typeToMsgIndex.end()) {
@@ -29,10 +29,10 @@ int MessageQueue::getMessageType(NetworkMessage& msg) const
 	return idxIter->second;
 }
 
-std::unique_ptr<NetworkMessage> MessageQueue::deserializeMessage(gsl::span<const gsl::byte> data, unsigned short msgType, unsigned short seq)
+std::unique_ptr<NetworkMessage> MessageQueue::deserializeMessage(gsl::span<const gsl::byte> data, uint16_t msgType, uint16_t seq)
 {
 	auto msg = factories.at(msgType)->create(data);
-	msg->seq = seq;
+	msg->setSeq(seq);
 	return msg;
 }
 
