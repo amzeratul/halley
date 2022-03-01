@@ -54,7 +54,7 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
 
 void AckUnreliableConnection::sendTagged(gsl::span<AckUnreliableSubPacket> subPackets)
 {
-	unsigned short firstSeq = nextSequenceToSend;
+	uint16_t firstSeq = nextSequenceToSend;
 	std::array<gsl::byte, 2048> buffer;
 	gsl::span<gsl::byte, 2048> dst(buffer);
 	size_t pos = sizeof(AckUnreliableHeader);
@@ -62,7 +62,7 @@ void AckUnreliableConnection::sendTagged(gsl::span<AckUnreliableSubPacket> subPa
 	for (auto& subPacket : subPackets) {
 		// Add reliable sub-header
 		bool isResend = subPacket.resends;
-		unsigned short resending = subPacket.resendSeq;
+		uint16_t resending = subPacket.resendSeq;
 		size_t size = subPacket.data.size();
 		bool longSize = size >= 64;
 		if (longSize) {
@@ -90,7 +90,7 @@ void AckUnreliableConnection::sendTagged(gsl::span<AckUnreliableSubPacket> subPa
 		pos += subPacket.data.size();
 
 		// Get sequence
-		unsigned short seq = nextSequenceToSend++;
+		uint16_t seq = nextSequenceToSend++;
 		size_t idx = seq % BUFFER_SIZE;
 		auto& sent = sentPackets[idx];
 		sent.waiting = true;
@@ -104,7 +104,7 @@ void AckUnreliableConnection::sendTagged(gsl::span<AckUnreliableSubPacket> subPa
 		}
 	}
 
-	// Add reliable header
+	// Add header
 	AckUnreliableHeader header;
 	header.sequence = firstSeq;
 	header.ack = highestReceived;
@@ -159,7 +159,7 @@ void AckUnreliableConnection::processReceivedPacket(InboundNetworkPacket& packet
 	AckUnreliableHeader header;
 	packet.extractHeader(gsl::as_writable_bytes(gsl::span<AckUnreliableHeader>(&header, 1)));
 	processReceivedAcks(header.ack, header.ackBits);
-	unsigned short seq = header.sequence;
+	uint16_t seq = header.sequence;
 
 	while (packet.getSize() > 0) {
 		if (packet.getSize() < 1) {
@@ -177,16 +177,16 @@ void AckUnreliableConnection::processReceivedPacket(InboundNetworkPacket& packet
 				throw Exception("Sub-packet header incomplete.", HalleyExceptions::Network);
 			}
 			packet.extractHeader(data.subspan(1, 1));
-			size = static_cast<unsigned short>(sizeBytes[0] & 0x3F) << 8 | sizeBytes[1];
+			size = static_cast<uint16_t>(sizeBytes[0] & 0x3F) << 8 | sizeBytes[1];
 		} else {
 			size = sizeBytes[0] & 0x3F;
 		}
-		unsigned short resendOf = 0;
+		uint16_t resendOf = 0;
 		if (resend) {
 			if (packet.getSize() < 2) {
 				throw Exception("Sub-packet header missing resend data", HalleyExceptions::Network);
 			}
-			packet.extractHeader(gsl::as_writable_bytes(gsl::span<unsigned short>(&resendOf, 1)));
+			packet.extractHeader(gsl::as_writable_bytes(gsl::span<uint16_t>(&resendOf, 1)));
 		}
 
 		// Extract data
@@ -205,28 +205,28 @@ void AckUnreliableConnection::processReceivedPacket(InboundNetworkPacket& packet
 	}
 }
 
-void AckUnreliableConnection::processReceivedAcks(unsigned short ack, unsigned int ackBits)
+void AckUnreliableConnection::processReceivedAcks(uint16_t ack, unsigned int ackBits)
 {
 	// If acking something too far back in the past, ignore it
-	unsigned short diff = nextSequenceToSend - ack;
+	uint16_t diff = nextSequenceToSend - ack;
 	if (diff > 512) {
 		return;
 	}
 
 	for (int i = 32; --i >= 0; ) {
 		if (ackBits & (1 << i)) {
-			unsigned short seq = static_cast<unsigned short>(ack - (i + 1));
+			uint16_t seq = static_cast<uint16_t>(ack - (i + 1));
 			onAckReceived(seq);
 		}
 	}
 	onAckReceived(ack);
 }
 
-bool AckUnreliableConnection::onSeqReceived(unsigned short seq, bool isResend, unsigned short resendOf)
+bool AckUnreliableConnection::onSeqReceived(uint16_t seq, bool isResend, uint16_t resendOf)
 {
 	size_t bufferPos = size_t(seq) % BUFFER_SIZE;
 	size_t resendPos = size_t(resendOf) % BUFFER_SIZE;
-	unsigned short diff = seq - highestReceived;
+	uint16_t diff = seq - highestReceived;
 
 	if (diff != 0 && diff < 0x8000) { // seq higher than highestReceived, with unsigned wrap-around
 		if (diff > BUFFER_SIZE - 32) {
@@ -258,17 +258,17 @@ bool AckUnreliableConnection::onSeqReceived(unsigned short seq, bool isResend, u
 	return true;
 }
 
-void AckUnreliableConnection::onAckReceived(unsigned short sequence)
+void AckUnreliableConnection::onAckReceived(uint16_t sequence)
 {
 	auto& data = sentPackets[sequence % BUFFER_SIZE];
 	if (data.waiting) {
 		data.waiting = false;
 		if (data.tag != -1) {
-			for (auto& listener : ackListeners) {
+			for (const auto& listener: ackListeners) {
 				listener->onPacketAcked(data.tag);
 			}
 		}
-		float msgLag = std::chrono::duration<float>(Clock::now() - data.timestamp).count();
+		const float msgLag = std::chrono::duration<float>(Clock::now() - data.timestamp).count();
 		reportLatency(msgLag);
 	}
 }

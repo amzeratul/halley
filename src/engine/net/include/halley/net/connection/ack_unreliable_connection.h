@@ -7,6 +7,7 @@
 #include <chrono>
 #include <deque>
 #include <limits>
+#include <cstdint>
 
 namespace Halley
 {
@@ -25,8 +26,8 @@ namespace Halley
 		int tag = -1;
 		//bool reliable = false;
 		bool resends = false;
-		unsigned short seq = std::numeric_limits<unsigned short>::max();
-		unsigned short resendSeq = 0;
+		uint16_t seq = std::numeric_limits<uint16_t>::max();
+		uint16_t resendSeq = 0;
 
 		AckUnreliableSubPacket()
 		{}
@@ -38,7 +39,7 @@ namespace Halley
 			, resends(false)
 		{}
 
-		AckUnreliableSubPacket(Vector<gsl::byte>&& data, unsigned short resendSeq)
+		AckUnreliableSubPacket(Vector<gsl::byte>&& data, uint16_t resendSeq)
 			: data(data)
 			, resends(true)
 			, resendSeq(resendSeq)
@@ -76,8 +77,8 @@ namespace Halley
 	private:
 		std::shared_ptr<IConnection> parent;
 
-		unsigned short nextSequenceToSend = 0;
-		unsigned short highestReceived = 0xFFFF;
+		uint16_t nextSequenceToSend = 0;
+		uint16_t highestReceived = 0xFFFF;
 
 		Vector<char> receivedSeqs; // 0 = not received, 1 = received, 2 = received re-send, 3 = both
 		Vector<SentPacketData> sentPackets;
@@ -92,9 +93,9 @@ namespace Halley
 		void processReceivedPacket(InboundNetworkPacket& packet);
 		unsigned int generateAckBits();
 
-		void processReceivedAcks(unsigned short ack, unsigned int ackBits);
-		bool onSeqReceived(unsigned short sequence, bool isResend, unsigned short resendOf);
-		void onAckReceived(unsigned short sequence);
+		void processReceivedAcks(uint16_t ack, unsigned int ackBits);
+		bool onSeqReceived(uint16_t sequence, bool isResend, uint16_t resendOf);
+		void onAckReceived(uint16_t sequence);
 		void reportLatency(float lag);
 	};
 }

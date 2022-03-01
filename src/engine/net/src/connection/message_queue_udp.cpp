@@ -1,5 +1,6 @@
 #include "halley/net/connection/message_queue_udp.h"
 #include <iostream>
+#include <utility>
 using namespace Halley;
 
 ChannelSettings::ChannelSettings(bool reliable, bool ordered, bool keepLastSent)
@@ -18,7 +19,7 @@ void MessageQueueUDP::Channel::getReadyMessages(Vector<std::unique_ptr<NetworkMe
 				trying = false;
 				for (size_t i = 0; i < receiveQueue.size(); ++i) {
 					auto& m = receiveQueue[i];
-					unsigned short expected = lastReceivedSeq + 1;
+					uint16_t expected = lastReceivedSeq + 1;
 					if (m->seq == expected) {
 						trying = true;
 						out.push_back(std::move(m));
@@ -32,13 +33,13 @@ void MessageQueueUDP::Channel::getReadyMessages(Vector<std::unique_ptr<NetworkMe
 				}
 			}
 		} else {
-			unsigned short bestDist = 0;
+			uint16_t bestDist = 0;
 			size_t fail = size_t(-1);
 			size_t best = fail;
 			// Look for the highest seq message, as long as it's above lastReceived
 			for (size_t i = 0; i < receiveQueue.size(); ++i) {
 				auto& m = receiveQueue[i];
-				unsigned short dist = m->seq - lastReceivedSeq;
+				uint16_t dist = m->seq - lastReceivedSeq;
 				if (dist < 0x7FFF) {
 					if (dist > bestDist) {
 						bestDist = dist;
@@ -61,7 +62,7 @@ void MessageQueueUDP::Channel::getReadyMessages(Vector<std::unique_ptr<NetworkMe
 }
 
 MessageQueueUDP::MessageQueueUDP(std::shared_ptr<AckUnreliableConnection> conn)
-	: connection(conn)
+	: connection(std::move(conn))
 	, channels(32)
 {
 	Expects(connection != nullptr);
@@ -94,7 +95,7 @@ void MessageQueueUDP::receiveMessages()
 		while (connection->receive(packet)) {
 			auto data = packet.getBytes();
 
-			while (data.size() > 0) {
+			while (!data.empty()) {
 				// Read channel
 				char channelN;
 				memcpy(&channelN, data.data(), 1);
@@ -105,7 +106,7 @@ void MessageQueueUDP::receiveMessages()
 				auto& channel = channels[channelN];
 
 				// Read sequence
-				unsigned short sequence = 0;
+				uint16_t sequence = 0;
 				if (channel.settings.ordered) {
 					if (data.size() < 2) {
 						throw Exception("Missing sequence data", HalleyExceptions::Network);
@@ -117,38 +118,38 @@ void MessageQueueUDP::receiveMessages()
 				// Read size
 				size_t size;
 				unsigned char b0;
-				if (data.size() < 1) {
+				if (data.empty()) {
 					throw Exception("Missing size data", HalleyExceptions::Network);
 				}
 				memcpy(&b0, data.data(), 1);
 				data = data.subspan(1);
 				if (b0 & 0x80) {
-					if (data.size() < 1) {
+					if (data.empty()) {
 						throw Exception("Missing size data", HalleyExceptions::Network);
 					}
 					unsigned char b1;
 					memcpy(&b1, data.data(), 1);
 					data = data.subspan(1);
-					size = (static_cast<unsigned short>(b0 & 0x7F) << 8) | static_cast<unsigned short>(b1);
+					size = (static_cast<uint16_t>(b0 & 0x7F) << 8) | static_cast<uint16_t>(b1);
 				} else {
 					size = b0;
 				}
 
 				// Read message type
-				unsigned short msgType;
-				if (data.size() < 1) {
+				uint16_t msgType;
+				if (data.empty()) {
 					throw Exception("Missing msgType data", HalleyExceptions::Network);
 				}
 				memcpy(&b0, data.data(), 1);
 				data = data.subspan(1);
 				if (b0 & 0x80) {
-					if (data.size() < 1) {
+					if (data.empty()) {
 						throw Exception("Missing msgType data", HalleyExceptions::Network);
 					}
 					unsigned char b1;
 					memcpy(&b1, data.data(), 1);
 					data = data.subspan(1);
-					msgType = (static_cast<unsigned short>(b0 & 0x7F) << 8) | static_cast<unsigned short>(b1);
+					msgType = (static_cast<uint16_t>(b0 & 0x7F) << 8) | static_cast<uint16_t>(b1);
 				} else {
 					msgType = b0;
 				}
@@ -247,7 +248,7 @@ void MessageQueueUDP::checkReSend(Vector<AckUnreliableSubPacket>& collect)
 		auto& pending = iter->second;
 
 		// Check how long it's been waiting
-		float elapsed = std::chrono::duration<float>(std::chrono::steady_clock::now() - pending.timeSent).count();
+		const float elapsed = std::chrono::duration<float>(std::chrono::steady_clock::now() - pending.timeSent).count();
 		if (elapsed > 0.1f && elapsed > connection->getLatency() * 3.0f) {
 			// Re-send if it's reliable
 			if (pending.reliable) {
@@ -261,7 +262,7 @@ void MessageQueueUDP::checkReSend(Vector<AckUnreliableSubPacket>& collect)
 AckUnreliableSubPacket MessageQueueUDP::createPacket()
 {
 	Vector<std::unique_ptr<NetworkMessage>> sentMsgs;
-	size_t maxSize = 1200;
+	const size_t maxSize = 1300;
 	size_t size = 0;
 	bool first = true;
 	bool packetReliable = false;
@@ -270,18 +271,18 @@ AckUnreliableSubPacket MessageQueueUDP::createPacket()
 	auto next = pendingMsgs.begin();
 	for (auto iter = pendingMsgs.begin(); iter != pendingMsgs.end(); iter = next) {
 		++next;
-		auto& msg = *iter;
+		const auto& msg = *iter;
 
 		// Check if this message is compatible
-		auto& channel = channels[msg->channel];
-		bool isReliable = channel.settings.reliable;
-		bool isOrdered = channel.settings.ordered;
+		const auto& channel = channels[msg->channel];
+		const bool isReliable = channel.settings.reliable;
+		const bool isOrdered = channel.settings.ordered;
 		if (first || isReliable == packetReliable) {
 			// Check if the message fits
-			size_t msgSize = (*iter)->getSerializedSize();
-			int msgType = getMessageType(**iter);
-			size_t headerSize = 1 + (isOrdered ? 2 : 0) + (msgSize >= 128 ? 2 : 1) + (msgType >= 128 ? 2 : 1);
-			size_t totalSize = headerSize + msgSize;
+			const size_t msgSize = (*iter)->getSerializedSize();
+			const int msgType = getMessageType(**iter);
+			const size_t headerSize = 1 + (isOrdered ? 2 : 0) + (msgSize >= 128 ? 2 : 1) + (msgType >= 128 ? 2 : 1);
+			const size_t totalSize = headerSize + msgSize;
 
 			if (size + totalSize <= maxSize) {
 				// It fits, so add it
@@ -303,7 +304,7 @@ AckUnreliableSubPacket MessageQueueUDP::createPacket()
 	return makeTaggedPacket(sentMsgs, size);
 }
 
-AckUnreliableSubPacket MessageQueueUDP::makeTaggedPacket(Vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size, bool resends, unsigned short resendSeq)
+AckUnreliableSubPacket MessageQueueUDP::makeTaggedPacket(Vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size, bool resends, uint16_t resendSeq)
 {
 	bool reliable = !msgs.empty() && channels[msgs[0]->channel].settings.reliable;
 
@@ -340,7 +341,7 @@ Vector<gsl::byte> MessageQueueUDP::serializeMessages(const Vector<std::unique_pt
 		memcpy(&result[pos], &channelN, 1);
 		pos += 1;
 		if (isOrdered) {
-			unsigned short sequence = static_cast<unsigned short>(msg->seq);
+			uint16_t sequence = static_cast<uint16_t>(msg->seq);
 			memcpy(&result[pos], &sequence, 2);
 			pos += 2;
 		}

@@ -8,6 +8,7 @@
 #include <list>
 #include <chrono>
 #include "message_queue.h"
+#include <cstdint>
 
 namespace Halley
 {
@@ -20,7 +21,7 @@ namespace Halley
 			Vector<std::unique_ptr<NetworkMessage>> msgs;
 			std::chrono::steady_clock::time_point timeSent;
 			size_t size;
-			unsigned short seq;
+			uint16_t seq;
 			bool reliable;
 		};
 
@@ -28,9 +29,9 @@ namespace Halley
 		{
 			Vector<std::unique_ptr<NetworkMessage>> receiveQueue;
 			std::unique_ptr<NetworkMessage> lastAck;
-			unsigned short lastAckSeq = 0;
-			unsigned short lastSentSeq = 0;
-			unsigned short lastReceivedSeq = 0;
+			uint16_t lastAckSeq = 0;
+			uint16_t lastSentSeq = 0;
+			uint16_t lastReceivedSeq = 0;
 			ChannelSettings settings;
 			bool initialized = false;
 
@@ -60,7 +61,7 @@ namespace Halley
 		void checkReSend(Vector<AckUnreliableSubPacket>& collect);
 
 		AckUnreliableSubPacket createPacket();
-		AckUnreliableSubPacket makeTaggedPacket(Vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size, bool resends = false, unsigned short resendSeq = 0);
+		AckUnreliableSubPacket makeTaggedPacket(Vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size, bool resends = false, uint16_t resendSeq = 0);
 		Vector<gsl::byte> serializeMessages(const Vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size) const;
 
 		void receiveMessages();
