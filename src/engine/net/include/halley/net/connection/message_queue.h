@@ -5,6 +5,8 @@
 #include "halley/data_structures/vector.h"
 #include <map>
 
+#include "network_packet.h"
+
 namespace Halley
 {	
 	struct ChannelSettings
@@ -26,9 +28,12 @@ namespace Halley
 		virtual ~MessageQueue();
 		
 		virtual bool isConnected() const = 0;
-		virtual void enqueue(std::unique_ptr<NetworkMessage> msg, int channel) = 0;
+		virtual void enqueue(OutboundNetworkPacket packet, uint16_t channel) = 0;
 		virtual void sendAll() = 0;
-		virtual Vector<std::unique_ptr<NetworkMessage>> receiveAll() = 0;
+		virtual Vector<InboundNetworkPacket> receiveRaw() = 0;
+
+		void enqueue(std::unique_ptr<NetworkMessage> msg, uint16_t channel);
+		Vector<std::unique_ptr<NetworkMessage>> receiveMessages();
 
 		virtual void setChannel(int channel, ChannelSettings settings);
 	};

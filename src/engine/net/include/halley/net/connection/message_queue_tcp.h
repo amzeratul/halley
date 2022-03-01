@@ -12,9 +12,9 @@ namespace Halley
 		~MessageQueueTCP() override;
 
 		bool isConnected() const override;
-		void enqueue(std::unique_ptr<NetworkMessage> msg, int channel) override;
+		void enqueue(OutboundNetworkPacket bytes, uint16_t channel) override;
 		void sendAll() override;
-		Vector<std::unique_ptr<NetworkMessage>> receiveAll() override;
+		Vector<InboundNetworkPacket> receiveRaw() override;
 				
 	private:
 		std::shared_ptr<IConnection> connection;

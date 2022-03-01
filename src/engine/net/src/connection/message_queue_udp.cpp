@@ -164,20 +164,20 @@ void MessageQueueUDP::receiveMessages()
 	}
 }
 
-Vector<std::unique_ptr<NetworkMessage>> MessageQueueUDP::receiveAll()
+Vector<InboundNetworkPacket> MessageQueueUDP::receiveRaw()
 {
 	if (connection->getStatus() == ConnectionStatus::Connected) {
 		receiveMessages();
 	}
 
-	Vector<std::unique_ptr<NetworkMessage>> result;
+	Vector<InboundNetworkPacket> result;
 	for (auto& c: channels) {
 		c.getReadyMessages(result);
 	}
 	return result;
 }
 
-void MessageQueueUDP::enqueue(std::unique_ptr<NetworkMessage> msg, int channelNumber)
+void MessageQueueUDP::enqueue(OutboundNetworkPacket msg, uint16_t channelNumber)
 {
 	Expects(channelNumber >= 0);
 	Expects(channelNumber < 32);

@@ -34,6 +34,14 @@ namespace Halley
 			memcpy(dst.data(), serialized->data(), serialized->size());
 		}
 
+		Bytes getBytes() const
+		{
+			if (!serialized) {
+				serialized = Serializer::toBytes(*this, getSerializerOptions());
+			}
+			return *serialized;
+		}
+
 		virtual void serialize(Serializer& s) const = 0;
 		virtual void deserialize(Deserializer& s) = 0;
 

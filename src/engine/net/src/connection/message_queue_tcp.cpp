@@ -1,9 +1,11 @@
+#include <utility>
+
 #include "halley/net/connection/message_queue_tcp.h"
 #include "connection/network_packet.h"
 using namespace Halley;
 
 MessageQueueTCP::MessageQueueTCP(std::shared_ptr<IConnection> connection)
-	: connection(connection)
+	: connection(std::move(connection))
 {
 }
 
@@ -18,11 +20,9 @@ bool MessageQueueTCP::isConnected() const
 	return connection->getStatus() == ConnectionStatus::Connected || connection->getStatus() == ConnectionStatus::Connecting;
 }
 
-void MessageQueueTCP::enqueue(std::unique_ptr<NetworkMessage> msg, int channel)
+void MessageQueueTCP::enqueue(OutboundNetworkPacket packet, uint16_t channel)
 {
 	if (isConnected()) {
-		auto packet = OutboundNetworkPacket(Serializer::toBytes(*msg));
-		packet.addHeader(getMessageType(*msg));
 		connection->send(IConnection::TransmissionType::Reliable, std::move(packet));
 	}
 }
@@ -31,16 +31,14 @@ void MessageQueueTCP::sendAll()
 {
 }
 
-Vector<std::unique_ptr<NetworkMessage>> MessageQueueTCP::receiveAll()
+Vector<InboundNetworkPacket> MessageQueueTCP::receiveRaw()
 {
-	Vector<std::unique_ptr<NetworkMessage>> result;
+	Vector<InboundNetworkPacket> result;
 
 	if (isConnected()) {
 		InboundNetworkPacket packet;
 		while (connection->receive(packet)) {
-			int messageType = -1;
-			packet.extractHeader(messageType);
-			result.push_back(deserializeMessage(packet.getBytes(), messageType, 0));
+			result.push_back(std::move(packet));
 		}
 	}
 

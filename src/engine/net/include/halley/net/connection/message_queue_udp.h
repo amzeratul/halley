@@ -44,9 +44,9 @@ namespace Halley
 		
 		void setChannel(int channel, ChannelSettings settings) override;
 
-		Vector<std::unique_ptr<NetworkMessage>> receiveAll() override;
+		Vector<InboundNetworkPacket> receiveRaw() override;
 
-		void enqueue(std::unique_ptr<NetworkMessage> msg, int channel) override;
+		void enqueue(OutboundNetworkPacket msg, uint16_t channel) override;
 		void sendAll() override;
 
 	private:
