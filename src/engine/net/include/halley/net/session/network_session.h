@@ -127,7 +127,7 @@ namespace Halley {
 
 		OutboundNetworkPacket makeOutbound(gsl::span<const gsl::byte> data, NetworkSessionMessageHeader header);
 		void doSendToAll(OutboundNetworkPacket packet, std::optional<PeerId> except);
-		void sendToPeer(const Peer& peer, OutboundNetworkPacket packet);
+		void doSendToPeer(const Peer& peer, OutboundNetworkPacket packet);
 		
 		void closeConnection(PeerId peerId, const String& reason);
 		void processReceive();

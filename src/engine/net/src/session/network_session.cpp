@@ -49,7 +49,7 @@ void NetworkSession::join(const String& address)
 	msg.networkVersion = networkVersion;
 	msg.userName = userName;
 	Bytes bytes = Serializer::toBytes(msg);
-	sendToPeer(peers.back(), doMakeControlPacket(NetworkSessionControlMessageType::Join, OutboundNetworkPacket(bytes)));
+	doSendToPeer(peers.back(), doMakeControlPacket(NetworkSessionControlMessageType::Join, OutboundNetworkPacket(bytes)));
 	
 	for (auto* listener : listeners) {
 		listener->onPeerConnected(0);
@@ -249,20 +249,6 @@ void NetworkSession::sendToPeers(OutboundNetworkPacket packet, std::optional<Pee
 	doSendToAll(makeOutbound(packet.getBytes(), header), except);
 }
 
-void NetworkSession::doSendToAll(OutboundNetworkPacket packet, std::optional<PeerId> except)
-{
-	for (size_t i = 0; i < peers.size(); ++i) {
-		if (peers[i].peerId != except) {
-			sendToPeer(peers[i], OutboundNetworkPacket(packet));
-		}
-	}
-}
-
-void NetworkSession::sendToPeer(const Peer& peer, OutboundNetworkPacket packet)
-{
-	peer.connection->send(IConnection::TransmissionType::Reliable, std::move(packet));
-}
-
 void NetworkSession::sendToPeer(OutboundNetworkPacket packet, PeerId peerId)
 {
 	NetworkSessionMessageHeader header;
@@ -273,7 +259,7 @@ void NetworkSession::sendToPeer(OutboundNetworkPacket packet, PeerId peerId)
 
 	for (size_t i = 0; i < peers.size(); ++i) {
 		if (peers[i].peerId == peerId) {
-			sendToPeer(peers[i], OutboundNetworkPacket(packet));
+			doSendToPeer(peers[i], OutboundNetworkPacket(packet));
 			return;
 		}
 	}
@@ -281,12 +267,26 @@ void NetworkSession::sendToPeer(OutboundNetworkPacket packet, PeerId peerId)
 	// Redirect via host
 	for (size_t i = 0; i < peers.size(); ++i) {
 		if (peers[i].peerId == 0) {
-			sendToPeer(peers[i], OutboundNetworkPacket(packet));
+			doSendToPeer(peers[i], OutboundNetworkPacket(packet));
 			return;
 		}
 	}
 	
 	Logger::logError("Unable to send message to peer " + toString(static_cast<int>(peerId)) + ": id not found.");
+}
+
+void NetworkSession::doSendToAll(OutboundNetworkPacket packet, std::optional<PeerId> except)
+{
+	for (size_t i = 0; i < peers.size(); ++i) {
+		if (peers[i].peerId != except) {
+			doSendToPeer(peers[i], OutboundNetworkPacket(packet));
+		}
+	}
+}
+
+void NetworkSession::doSendToPeer(const Peer& peer, OutboundNetworkPacket packet)
+{
+	peer.connection->send(IConnection::TransmissionType::Reliable, std::move(packet));
 }
 
 std::optional<std::pair<NetworkSession::PeerId, InboundNetworkPacket>> NetworkSession::receive()
@@ -462,10 +462,10 @@ void NetworkSession::onControlMessage(PeerId peerId, const ControlMsgJoin& msg)
 	sharedData[outMsg.peerId] = makePeerSharedData();
 
 	const auto& peer = getPeer(peerId);
-	sendToPeer(peer, doMakeControlPacket(NetworkSessionControlMessageType::SetPeerId, OutboundNetworkPacket(bytes)));
-	sendToPeer(peer, makeUpdateSharedDataPacket({}));
+	doSendToPeer(peer, doMakeControlPacket(NetworkSessionControlMessageType::SetPeerId, OutboundNetworkPacket(bytes)));
+	doSendToPeer(peer, makeUpdateSharedDataPacket({}));
 	for (auto& i : sharedData) {
-		sendToPeer(peer, makeUpdateSharedDataPacket(i.first));
+		doSendToPeer(peer, makeUpdateSharedDataPacket(i.first));
 	}
 	for (auto* listener : listeners) {
 		listener->onPeerConnected(peerId);

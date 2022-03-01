@@ -12,7 +12,7 @@ namespace Halley
 	class MessageQueue;
 	class MessageQueueUDP;
 	class MessageQueueTCP;
-
+	
 	class NetworkMessage
 	{
 	public:
@@ -79,5 +79,24 @@ namespace Halley
 		{
 			return std::type_index(typeid(T));
 		}
+	};
+
+	class NetworkMessageFactories
+	{
+	public:
+		template <typename T>
+		void addFactory()
+		{
+			addFactory(std::make_unique<NetworkMessageFactory<T>>());
+		}
+
+		uint16_t getMessageType(NetworkMessage& msg) const;
+		std::unique_ptr<NetworkMessage> deserializeMessage(gsl::span<const gsl::byte> data, uint16_t msgType, uint16_t seq);
+
+	private:
+		std::map<std::type_index, uint16_t> typeToMsgIndex;
+		Vector<std::unique_ptr<NetworkMessageFactoryBase>> factories;
+
+		void addFactory(std::unique_ptr<NetworkMessageFactoryBase> factory);
 	};
 }

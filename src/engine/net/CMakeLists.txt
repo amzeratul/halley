@@ -9,6 +9,7 @@ set(SOURCES
         "src/connection/message_queue.cpp"
         "src/connection/message_queue_tcp.cpp"
         "src/connection/message_queue_udp.cpp"
+        "src/connection/network_message.cpp"
         "src/connection/network_packet.cpp"
         "src/connection/network_service.cpp"
 
