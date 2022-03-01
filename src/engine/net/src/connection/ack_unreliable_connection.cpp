@@ -1,69 +1,63 @@
-#include "connection/reliable_connection.h"
+#include "connection/ack_unreliable_connection.h"
 #include "connection/network_packet.h"
 #include <iostream>
 #include <chrono>
+#include <utility>
 #include <halley/utils/utils.h>
 #include <halley/support/exception.h>
 #include "halley/text/string_converter.h"
 
 using namespace Halley;
 
-struct ReliableHeader
+struct AckUnreliableHeader
 {
 	uint16_t sequence = 0xFFFF;
 	uint16_t ack = 0xFFFF;
 	uint32_t ackBits = 0xFFFFFFFF;
 };
 
-struct ReliableSubHeader
-{
-	uint8_t sizeA;
-	uint8_t sizeB;
-	uint16_t resend;
-};
-
 constexpr size_t BUFFER_SIZE = 1024;
 
-ReliableConnection::ReliableConnection(std::shared_ptr<IConnection> parent)
-	: parent(parent)
+AckUnreliableConnection::AckUnreliableConnection(std::shared_ptr<IConnection> parent)
+	: parent(std::move(parent))
 	, receivedSeqs(BUFFER_SIZE)
 	, sentPackets(BUFFER_SIZE)
 {
 	lastSend = lastReceive = Clock::now();
 }
 
-void ReliableConnection::close()
+void AckUnreliableConnection::close()
 {
 	parent->close();
 }
 
-ConnectionStatus ReliableConnection::getStatus() const
+ConnectionStatus AckUnreliableConnection::getStatus() const
 {
 	return parent->getStatus();
 }
 
-bool ReliableConnection::isSupported(TransmissionType type) const
+bool AckUnreliableConnection::isSupported(TransmissionType type) const
 {
-	return true;
+	return type == TransmissionType::Unreliable;
 }
 
-void ReliableConnection::send(TransmissionType type, OutboundNetworkPacket packet)
+void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket packet)
 {
-	ReliableSubPacket subPacket;
+	AckUnreliableSubPacket subPacket;
 	subPacket.data.resize(packet.getSize());
 	packet.copyTo(subPacket.data);
 	subPacket.resends = false;
 	subPacket.tag = -1;
 
-	sendTagged(gsl::span<ReliableSubPacket>(&subPacket, 1));
+	sendTagged(gsl::span<AckUnreliableSubPacket>(&subPacket, 1));
 }
 
-void ReliableConnection::sendTagged(gsl::span<ReliableSubPacket> subPackets)
+void AckUnreliableConnection::sendTagged(gsl::span<AckUnreliableSubPacket> subPackets)
 {
 	unsigned short firstSeq = nextSequenceToSend;
 	std::array<gsl::byte, 2048> buffer;
 	gsl::span<gsl::byte, 2048> dst(buffer);
-	size_t pos = sizeof(ReliableHeader);
+	size_t pos = sizeof(AckUnreliableHeader);
 
 	for (auto& subPacket : subPackets) {
 		// Add reliable sub-header
@@ -111,11 +105,11 @@ void ReliableConnection::sendTagged(gsl::span<ReliableSubPacket> subPackets)
 	}
 
 	// Add reliable header
-	ReliableHeader header;
+	AckUnreliableHeader header;
 	header.sequence = firstSeq;
 	header.ack = highestReceived;
 	header.ackBits = generateAckBits();
-	auto headerData = gsl::as_bytes(gsl::span<ReliableHeader>(&header, 1));
+	auto headerData = gsl::as_bytes(gsl::span<AckUnreliableHeader>(&header, 1));
 #ifdef _MSC_VER
 	memcpy_s(dst.data(), dst.size_bytes(), headerData.data(), headerData.size());
 #else
@@ -126,7 +120,7 @@ void ReliableConnection::sendTagged(gsl::span<ReliableSubPacket> subPackets)
 	parent->send(TransmissionType::Unreliable, OutboundNetworkPacket(dst.subspan(0, pos)));
 }
 
-bool ReliableConnection::receive(InboundNetworkPacket& packet)
+bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
 {
 	// Process all incoming
 	try {
@@ -150,20 +144,20 @@ bool ReliableConnection::receive(InboundNetworkPacket& packet)
 	return false;
 }
 
-void ReliableConnection::addAckListener(IReliableConnectionAckListener& listener)
+void AckUnreliableConnection::addAckListener(IAckUnreliableConnectionListener& listener)
 {
 	ackListeners.push_back(&listener);
 }
 
-void ReliableConnection::removeAckListener(IReliableConnectionAckListener& listener)
+void AckUnreliableConnection::removeAckListener(IAckUnreliableConnectionListener& listener)
 {
 	ackListeners.erase(std::find(ackListeners.begin(), ackListeners.end(), &listener));
 }
 
-void ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
+void AckUnreliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 {
-	ReliableHeader header;
-	packet.extractHeader(gsl::as_writable_bytes(gsl::span<ReliableHeader>(&header, 1)));
+	AckUnreliableHeader header;
+	packet.extractHeader(gsl::as_writable_bytes(gsl::span<AckUnreliableHeader>(&header, 1)));
 	processReceivedAcks(header.ack, header.ackBits);
 	unsigned short seq = header.sequence;
 
@@ -211,7 +205,7 @@ void ReliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
 	}
 }
 
-void ReliableConnection::processReceivedAcks(unsigned short ack, unsigned int ackBits)
+void AckUnreliableConnection::processReceivedAcks(unsigned short ack, unsigned int ackBits)
 {
 	// If acking something too far back in the past, ignore it
 	unsigned short diff = nextSequenceToSend - ack;
@@ -228,7 +222,7 @@ void ReliableConnection::processReceivedAcks(unsigned short ack, unsigned int ac
 	onAckReceived(ack);
 }
 
-bool ReliableConnection::onSeqReceived(unsigned short seq, bool isResend, unsigned short resendOf)
+bool AckUnreliableConnection::onSeqReceived(unsigned short seq, bool isResend, unsigned short resendOf)
 {
 	size_t bufferPos = size_t(seq) % BUFFER_SIZE;
 	size_t resendPos = size_t(resendOf) % BUFFER_SIZE;
@@ -264,7 +258,7 @@ bool ReliableConnection::onSeqReceived(unsigned short seq, bool isResend, unsign
 	return true;
 }
 
-void ReliableConnection::onAckReceived(unsigned short sequence)
+void AckUnreliableConnection::onAckReceived(unsigned short sequence)
 {
 	auto& data = sentPackets[sequence % BUFFER_SIZE];
 	if (data.waiting) {
@@ -279,7 +273,7 @@ void ReliableConnection::onAckReceived(unsigned short sequence)
 	}
 }
 
-unsigned int ReliableConnection::generateAckBits()
+unsigned int AckUnreliableConnection::generateAckBits()
 {
 	unsigned int result = 0;
 	
@@ -291,7 +285,7 @@ unsigned int ReliableConnection::generateAckBits()
 	return result;
 }
 
-void ReliableConnection::reportLatency(float lastMeasuredLag)
+void AckUnreliableConnection::reportLatency(float lastMeasuredLag)
 {
 	if (fabs(lag) < 0.00001f) {
 		lag = lastMeasuredLag;
@@ -300,12 +294,12 @@ void ReliableConnection::reportLatency(float lastMeasuredLag)
 	}
 }
 
-float ReliableConnection::getTimeSinceLastSend() const
+float AckUnreliableConnection::getTimeSinceLastSend() const
 {
 	return std::chrono::duration<float>(Clock::now() - lastSend).count();
 }
 
-float ReliableConnection::getTimeSinceLastReceive() const
+float AckUnreliableConnection::getTimeSinceLastReceive() const
 {
 	return std::chrono::duration<float>(Clock::now() - lastReceive).count();
 }

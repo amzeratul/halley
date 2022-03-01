@@ -10,15 +10,15 @@
 
 namespace Halley
 {
-	class IReliableConnectionAckListener
+	class IAckUnreliableConnectionListener
 	{
 	public:
-		virtual ~IReliableConnectionAckListener() {}
+		virtual ~IAckUnreliableConnectionListener() {}
 
 		virtual void onPacketAcked(int tag) = 0;
 	};
 
-	class ReliableSubPacket
+	class AckUnreliableSubPacket
 	{
 	public:
 		Vector<gsl::byte> data;
@@ -28,24 +28,24 @@ namespace Halley
 		unsigned short seq = std::numeric_limits<unsigned short>::max();
 		unsigned short resendSeq = 0;
 
-		ReliableSubPacket()
+		AckUnreliableSubPacket()
 		{}
 
-		ReliableSubPacket(ReliableSubPacket&& other) = default;
+		AckUnreliableSubPacket(AckUnreliableSubPacket&& other) = default;
 
-		ReliableSubPacket(Vector<gsl::byte>&& data)
+		AckUnreliableSubPacket(Vector<gsl::byte>&& data)
 			: data(data)
 			, resends(false)
 		{}
 
-		ReliableSubPacket(Vector<gsl::byte>&& data, unsigned short resendSeq)
+		AckUnreliableSubPacket(Vector<gsl::byte>&& data, unsigned short resendSeq)
 			: data(data)
 			, resends(true)
 			, resendSeq(resendSeq)
 		{}
 	};
 
-	class ReliableConnection : public IConnection
+	class AckUnreliableConnection : public IConnection
 	{
 		using Clock = std::chrono::steady_clock;
 
@@ -57,7 +57,7 @@ namespace Halley
 		};
 
 	public:
-		ReliableConnection(std::shared_ptr<IConnection> parent);
+		AckUnreliableConnection(std::shared_ptr<IConnection> parent);
 
 		void close() override;
 		ConnectionStatus getStatus() const override;
@@ -65,9 +65,9 @@ namespace Halley
 		void send(TransmissionType type, OutboundNetworkPacket packet) override;
 		bool receive(InboundNetworkPacket& packet) override;
 
-		void sendTagged(gsl::span<ReliableSubPacket> subPackets);
-		void addAckListener(IReliableConnectionAckListener& listener);
-		void removeAckListener(IReliableConnectionAckListener& listener);
+		void sendTagged(gsl::span<AckUnreliableSubPacket> subPackets);
+		void addAckListener(IAckUnreliableConnectionListener& listener);
+		void removeAckListener(IAckUnreliableConnectionListener& listener);
 
 		float getLatency() const { return lag; }
 		float getTimeSinceLastSend() const;
@@ -83,7 +83,7 @@ namespace Halley
 		Vector<SentPacketData> sentPackets;
 		std::deque<InboundNetworkPacket> pendingPackets;
 
-		Vector<IReliableConnectionAckListener*> ackListeners;
+		Vector<IAckUnreliableConnectionListener*> ackListeners;
 
 		float lag = 1; // Start at 1 second
 		Clock::time_point lastReceive;

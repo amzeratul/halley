@@ -60,7 +60,7 @@ void MessageQueueUDP::Channel::getReadyMessages(Vector<std::unique_ptr<NetworkMe
 	}
 }
 
-MessageQueueUDP::MessageQueueUDP(std::shared_ptr<ReliableConnection> conn)
+MessageQueueUDP::MessageQueueUDP(std::shared_ptr<AckUnreliableConnection> conn)
 	: connection(conn)
 	, channels(32)
 {
@@ -201,7 +201,7 @@ void MessageQueueUDP::enqueue(std::unique_ptr<NetworkMessage> msg, int channelNu
 void MessageQueueUDP::sendAll()
 {
 	//int firstTag = nextPacketId;
-	Vector<ReliableSubPacket> toSend;
+	Vector<AckUnreliableSubPacket> toSend;
 
 	// Add packets which need to be re-sent
 	checkReSend(toSend);
@@ -239,7 +239,7 @@ void MessageQueueUDP::onPacketAcked(int tag)
 	}
 }
 
-void MessageQueueUDP::checkReSend(Vector<ReliableSubPacket>& collect)
+void MessageQueueUDP::checkReSend(Vector<AckUnreliableSubPacket>& collect)
 {
 	auto next = pendingPackets.begin();
 	for (auto iter = pendingPackets.begin(); iter != pendingPackets.end(); iter = next) {
@@ -258,7 +258,7 @@ void MessageQueueUDP::checkReSend(Vector<ReliableSubPacket>& collect)
 	}
 }
 
-ReliableSubPacket MessageQueueUDP::createPacket()
+AckUnreliableSubPacket MessageQueueUDP::createPacket()
 {
 	Vector<std::unique_ptr<NetworkMessage>> sentMsgs;
 	size_t maxSize = 1200;
@@ -303,7 +303,7 @@ ReliableSubPacket MessageQueueUDP::createPacket()
 	return makeTaggedPacket(sentMsgs, size);
 }
 
-ReliableSubPacket MessageQueueUDP::makeTaggedPacket(Vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size, bool resends, unsigned short resendSeq)
+AckUnreliableSubPacket MessageQueueUDP::makeTaggedPacket(Vector<std::unique_ptr<NetworkMessage>>& msgs, size_t size, bool resends, unsigned short resendSeq)
 {
 	bool reliable = !msgs.empty() && channels[msgs[0]->channel].settings.reliable;
 
@@ -316,7 +316,7 @@ ReliableSubPacket MessageQueueUDP::makeTaggedPacket(Vector<std::unique_ptr<Netwo
 	pendingData.reliable = reliable;
 	pendingData.timeSent = std::chrono::steady_clock::now();
 
-	auto result = ReliableSubPacket(std::move(data));
+	auto result = AckUnreliableSubPacket(std::move(data));
 	result.tag = tag;
 	result.resends = resends;
 	result.resendSeq = resendSeq;
