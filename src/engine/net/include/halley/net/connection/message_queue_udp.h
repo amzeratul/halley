@@ -55,7 +55,7 @@ namespace Halley
 		
 		void setChannel(uint8_t channel, ChannelSettings settings) override;
 
-		Vector<InboundNetworkPacket> receiveRaw() override;
+		Vector<InboundNetworkPacket> receivePackets() override;
 
 		void enqueue(OutboundNetworkPacket packet, uint8_t channel) override;
 		void sendAll() override;

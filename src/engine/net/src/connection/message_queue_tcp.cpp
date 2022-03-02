@@ -31,7 +31,7 @@ void MessageQueueTCP::sendAll()
 {
 }
 
-Vector<InboundNetworkPacket> MessageQueueTCP::receiveRaw()
+Vector<InboundNetworkPacket> MessageQueueTCP::receivePackets()
 {
 	Vector<InboundNetworkPacket> result;
 

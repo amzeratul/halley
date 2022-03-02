@@ -135,7 +135,7 @@ void MessageQueueUDP::receiveMessages()
 	}
 }
 
-Vector<InboundNetworkPacket> MessageQueueUDP::receiveRaw()
+Vector<InboundNetworkPacket> MessageQueueUDP::receivePackets()
 {
 	if (connection->getStatus() == ConnectionStatus::Connected) {
 		receiveMessages();

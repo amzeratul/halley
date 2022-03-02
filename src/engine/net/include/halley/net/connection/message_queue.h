@@ -30,7 +30,7 @@ namespace Halley
 		virtual bool isConnected() const = 0;
 		virtual void enqueue(OutboundNetworkPacket packet, uint8_t channel) = 0;
 		virtual void sendAll() = 0;
-		virtual Vector<InboundNetworkPacket> receiveRaw() = 0;
+		virtual Vector<InboundNetworkPacket> receivePackets() = 0;
 
 		void enqueue(std::unique_ptr<NetworkMessage> msg, uint8_t channel);
 		Vector<std::unique_ptr<NetworkMessage>> receiveMessages();

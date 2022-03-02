@@ -104,6 +104,8 @@ namespace Halley {
 			PeerId peerId = -1;
 			bool alive = true;
 			std::shared_ptr<IConnection> connection;
+
+			ConnectionStatus getStatus() const;
 		};
 		
 		NetworkService& service;

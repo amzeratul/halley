@@ -20,7 +20,7 @@ void MessageQueue::enqueue(std::unique_ptr<NetworkMessage> msg, uint8_t channel)
 Vector<std::unique_ptr<NetworkMessage>> MessageQueue::receiveMessages()
 {
 	Vector<std::unique_ptr<NetworkMessage>> result;
-	auto msgs = receiveRaw();
+	auto msgs = receivePackets();
 	result.reserve(msgs.size());
 
 	for (auto& msg: msgs) {

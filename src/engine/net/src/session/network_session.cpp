@@ -44,7 +44,6 @@ void NetworkSession::join(const String& address)
 	type = NetworkSessionType::Client;
 	peers.emplace_back(Peer{ 0, true, service.connect(address) });
 
-	auto& conn = *peers.back().connection;
 	ControlMsgJoin msg;
 	msg.networkVersion = networkVersion;
 	msg.userName = userName;
@@ -100,7 +99,7 @@ uint16_t NetworkSession::getClientCount() const
 	} else if (type == NetworkSessionType::Host) {
 		uint16_t i = 1;
 		for (auto& peer: peers) {
-			if (peer.connection->getStatus() == ConnectionStatus::Connected) {
+			if (peer.getStatus() == ConnectionStatus::Connected) {
 				++i;
 			}
 		}
@@ -116,7 +115,7 @@ void NetworkSession::update(Time t)
 
 	// Remove dead connections
 	for (auto& peer: peers) {
-		if (peer.connection->getStatus() == ConnectionStatus::Closed) {
+		if (peer.getStatus() == ConnectionStatus::Closed) {
 			disconnectPeer(peer);
 		}
 	}
@@ -211,6 +210,11 @@ std::unique_ptr<SharedData> NetworkSession::makePeerSharedData()
 	return std::make_unique<SharedData>();
 }
 
+ConnectionStatus NetworkSession::Peer::getStatus() const
+{
+	return connection->getStatus();
+}
+
 ConnectionStatus NetworkSession::getStatus() const
 {
 	if (type == NetworkSessionType::Undefined) {
@@ -219,10 +223,10 @@ ConnectionStatus NetworkSession::getStatus() const
 		if (peers.empty()) {
 			return ConnectionStatus::Closed;
 		} else {
-			if (peers[0].connection->getStatus() == ConnectionStatus::Connected) {
+			if (peers[0].getStatus() == ConnectionStatus::Connected) {
 				return myPeerId && sessionSharedData ? ConnectionStatus::Connected : ConnectionStatus::Connecting;
 			} else {
-				return peers[0].connection->getStatus();
+				return peers[0].getStatus();
 			}
 		}
 	} else if (type == NetworkSessionType::Host) {
@@ -297,33 +301,6 @@ std::optional<std::pair<NetworkSession::PeerId, InboundNetworkPacket>> NetworkSe
 		return result;
 	}
 	return {};
-}
-
-void NetworkSession::addListener(IListener* listener)
-{
-	if (!std_ex::contains(listeners, listener)) {
-		listeners.push_back(listener);
-	}
-}
-
-void NetworkSession::removeListener(IListener* listener)
-{
-	std_ex::erase(listeners, listener);
-}
-
-void NetworkSession::setSharedDataHandler(ISharedDataHandler* handler)
-{
-	sharedDataHandler = handler;
-}
-
-const String& NetworkSession::getHostAddress() const
-{
-	return hostAddress;
-}
-
-NetworkService& NetworkSession::getService() const
-{
-	return service;
 }
 
 void NetworkSession::processReceive()
@@ -523,6 +500,33 @@ void NetworkSession::setMyPeerId(PeerId id)
 	}
 }
 
+void NetworkSession::addListener(IListener* listener)
+{
+	if (!std_ex::contains(listeners, listener)) {
+		listeners.push_back(listener);
+	}
+}
+
+void NetworkSession::removeListener(IListener* listener)
+{
+	std_ex::erase(listeners, listener);
+}
+
+void NetworkSession::setSharedDataHandler(ISharedDataHandler* handler)
+{
+	sharedDataHandler = handler;
+}
+
+const String& NetworkSession::getHostAddress() const
+{
+	return hostAddress;
+}
+
+NetworkService& NetworkSession::getService() const
+{
+	return service;
+}
+
 NetworkSession::Peer& NetworkSession::getPeer(PeerId id)
 {
 	return *std::find_if(peers.begin(), peers.end(), [&](const Peer& peer) { return peer.peerId == id; });
@@ -602,7 +606,7 @@ std::optional<NetworkSession::PeerId> NetworkSession::allocatePeerId() const
 
 void NetworkSession::disconnectPeer(Peer& peer)
 {
-	if (peer.connection->getStatus() != ConnectionStatus::Closed) {
+	if (peer.getStatus() != ConnectionStatus::Closed) {
 		peer.connection->close();
 	}
 	if (peer.alive) {
