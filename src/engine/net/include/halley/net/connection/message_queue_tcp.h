@@ -12,7 +12,7 @@ namespace Halley
 		~MessageQueueTCP() override;
 
 		bool isConnected() const override;
-		void enqueue(OutboundNetworkPacket bytes, uint16_t channel) override;
+		void enqueue(OutboundNetworkPacket bytes, uint8_t channel) override;
 		void sendAll() override;
 		Vector<InboundNetworkPacket> receiveRaw() override;
 				

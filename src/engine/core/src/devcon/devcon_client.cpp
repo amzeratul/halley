@@ -31,7 +31,7 @@ void DevConClient::update(Time t)
 {
 	service->update(t);
 
-	for (auto& m: queue->receiveAll()) {
+	for (auto& m: queue->receiveMessages()) {
 		auto& msg = dynamic_cast<DevCon::DevConMessage&>(*m);
 		switch (msg.getMessageType()) {
 		case DevCon::MessageType::Log:

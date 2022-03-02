@@ -20,7 +20,7 @@ bool MessageQueueTCP::isConnected() const
 	return connection->getStatus() == ConnectionStatus::Connected || connection->getStatus() == ConnectionStatus::Connecting;
 }
 
-void MessageQueueTCP::enqueue(OutboundNetworkPacket packet, uint16_t channel)
+void MessageQueueTCP::enqueue(OutboundNetworkPacket packet, uint8_t channel)
 {
 	if (isConnected()) {
 		connection->send(IConnection::TransmissionType::Reliable, std::move(packet));

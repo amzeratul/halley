@@ -10,7 +10,7 @@ MessageQueue::~MessageQueue()
 {
 }
 
-void MessageQueue::enqueue(std::unique_ptr<NetworkMessage> msg, uint16_t channel)
+void MessageQueue::enqueue(std::unique_ptr<NetworkMessage> msg, uint8_t channel)
 {
 	auto packet = OutboundNetworkPacket(msg->getBytes());
 	packet.addHeader(getMessageType(*msg));
@@ -32,7 +32,7 @@ Vector<std::unique_ptr<NetworkMessage>> MessageQueue::receiveMessages()
 	return result;
 }
 
-void MessageQueue::setChannel(int channel, ChannelSettings settings)
+void MessageQueue::setChannel(uint8_t channel, ChannelSettings settings)
 {
 }
 

@@ -28,13 +28,13 @@ namespace Halley
 		virtual ~MessageQueue();
 		
 		virtual bool isConnected() const = 0;
-		virtual void enqueue(OutboundNetworkPacket packet, uint16_t channel) = 0;
+		virtual void enqueue(OutboundNetworkPacket packet, uint8_t channel) = 0;
 		virtual void sendAll() = 0;
 		virtual Vector<InboundNetworkPacket> receiveRaw() = 0;
 
-		void enqueue(std::unique_ptr<NetworkMessage> msg, uint16_t channel);
+		void enqueue(std::unique_ptr<NetworkMessage> msg, uint8_t channel);
 		Vector<std::unique_ptr<NetworkMessage>> receiveMessages();
 
-		virtual void setChannel(int channel, ChannelSettings settings);
+		virtual void setChannel(uint8_t channel, ChannelSettings settings);
 	};
 }

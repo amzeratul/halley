@@ -487,6 +487,7 @@ namespace Halley {
 		}
 
 		size_t getPosition() const { return pos; }
+		size_t getBytesLeft() const { return src.size() - pos; }
 
 	private:
 		size_t pos = 0;
