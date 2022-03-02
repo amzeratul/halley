@@ -60,6 +60,10 @@ namespace Halley
 		void enqueue(OutboundNetworkPacket packet, uint8_t channel) override;
 		void sendAll() override;
 
+		bool isConnected() const override;
+		ConnectionStatus getStatus() const;
+		void close();
+
 	private:
 		std::shared_ptr<AckUnreliableConnection> connection;
 		Vector<Channel> channels;

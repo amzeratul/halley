@@ -181,6 +181,21 @@ void MessageQueueUDP::sendAll()
 	}
 }
 
+bool MessageQueueUDP::isConnected() const
+{
+	return connection->getStatus() == ConnectionStatus::Connected;
+}
+
+ConnectionStatus MessageQueueUDP::getStatus() const
+{
+	return connection->getStatus();
+}
+
+void MessageQueueUDP::close()
+{
+	connection->close();
+}
+
 void MessageQueueUDP::onPacketAcked(int tag)
 {
 	auto i = pendingPackets.find(tag);
