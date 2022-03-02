@@ -9,6 +9,7 @@
 #include "../connection/network_service.h"
 
 namespace Halley {
+	class MessageQueueUDP;
 	class NetworkService;
 
 	class NetworkSession {
@@ -103,7 +104,7 @@ namespace Halley {
 		struct Peer {
 			PeerId peerId = -1;
 			bool alive = true;
-			std::shared_ptr<IConnection> connection;
+			std::shared_ptr<MessageQueueUDP> connection;
 
 			ConnectionStatus getStatus() const;
 		};
@@ -154,5 +155,7 @@ namespace Halley {
 		std::optional<PeerId> allocatePeerId() const;
 
 		void disconnectPeer(Peer& peer);
+
+		std::shared_ptr<MessageQueueUDP> makeConnection(std::shared_ptr<IConnection> connection);
 	};
 }

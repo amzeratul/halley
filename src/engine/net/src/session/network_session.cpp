@@ -2,6 +2,7 @@
 
 #include <cassert>
 
+#include "connection/message_queue_udp.h"
 #include "session/network_session_control_messages.h"
 #include "connection/network_service.h"
 #include "connection/network_packet.h"
@@ -42,7 +43,7 @@ void NetworkSession::join(const String& address)
 	Expects(type == NetworkSessionType::Undefined);
 
 	type = NetworkSessionType::Client;
-	peers.emplace_back(Peer{ 0, true, service.connect(address) });
+	peers.emplace_back(Peer{ 0, true, makeConnection(service.connect(address)) });
 
 	ControlMsgJoin msg;
 	msg.networkVersion = networkVersion;
@@ -63,7 +64,7 @@ void NetworkSession::acceptConnection(std::shared_ptr<IConnection> incoming)
 		throw Exception("Unable to allocate peer id for incoming connection.", HalleyExceptions::Network);
 	}
 	
-	peers.emplace_back(Peer{ id.value(), true, std::move(incoming) });
+	peers.emplace_back(Peer{ id.value(), true, makeConnection(std::move(incoming)) });
 }
 
 void NetworkSession::close()
@@ -290,7 +291,9 @@ void NetworkSession::doSendToAll(OutboundNetworkPacket packet, std::optional<Pee
 
 void NetworkSession::doSendToPeer(const Peer& peer, OutboundNetworkPacket packet)
 {
-	peer.connection->send(IConnection::TransmissionType::Reliable, std::move(packet));
+	//peer.connection->send(IConnection::TransmissionType::Reliable, std::move(packet));
+	peer.connection->enqueue(std::move(packet), 0);
+	peer.connection->sendAll();
 }
 
 std::optional<std::pair<NetworkSession::PeerId, InboundNetworkPacket>> NetworkSession::receive()
@@ -306,11 +309,11 @@ std::optional<std::pair<NetworkSession::PeerId, InboundNetworkPacket>> NetworkSe
 void NetworkSession::processReceive()
 {
 	InboundNetworkPacket packet;
-	for (size_t i = 0; i < peers.size(); ++i) {
-		const bool gotMessage = peers[i].connection->receive(packet);
-		if (gotMessage) {
+	for (auto& peer: peers) {
+		const PeerId peerId = peer.peerId;
+
+		for (auto& packet: peer.connection->receivePackets()) {
 			// Get header
-			const PeerId peerId = peers[i].peerId;
 			NetworkSessionMessageHeader header;
 			packet.extractHeader(header);
 
@@ -615,4 +618,14 @@ void NetworkSession::disconnectPeer(Peer& peer)
 		}
 		peer.alive = false;
 	}
+}
+
+std::shared_ptr<MessageQueueUDP> NetworkSession::makeConnection(std::shared_ptr<IConnection> connection)
+{
+	auto ackConn = std::make_shared<AckUnreliableConnection>(connection);
+	auto queue = std::make_shared<MessageQueueUDP>(ackConn);
+
+	queue->setChannel(0, ChannelSettings(true, true));
+
+	return queue;
 }

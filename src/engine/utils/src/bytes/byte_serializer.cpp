@@ -314,7 +314,7 @@ void Deserializer::deserializeVariableInteger(uint64_t& val, bool& sign, bool is
 void Deserializer::ensureSufficientBytesRemaining(size_t bytes)
 {
 	if (bytes > getBytesRemaining()) {
-		throw Exception("Attempt to deserialize out of bounds", HalleyExceptions::File);
+		throw Exception("Attempt to deserialize out of bounds, requested " + toString(bytes) + " bytes, but only have " + toString(getBytesRemaining()) + " bytes left.", HalleyExceptions::File);
 	}
 }
 

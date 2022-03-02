@@ -90,14 +90,17 @@ Vector<gsl::byte> MessageQueueUDP::serializeMessages(const Vector<Outbound>& msg
 	for (auto& msg: msgs) {
 		const uint8_t channelN = msg.channel;
 		const auto& channel = channels[channelN];
-		const bool isOrdered = channel.settings.ordered;
 
 		auto s = Serializer(result, SerializerOptions(SerializerOptions::maxVersion));
 		s << channelN;
-		if (isOrdered) {
+		if (channel.settings.ordered) {
 			s << msg.seq;
 		}
+
+		// Serialize as a vector
+		s << static_cast<uint32_t>(msg.packet.getSize());
 		s << msg.packet.getBytes();
+
 	}
 
 	return result;
