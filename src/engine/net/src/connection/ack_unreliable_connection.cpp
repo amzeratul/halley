@@ -5,6 +5,10 @@
 #include <utility>
 #include <halley/utils/utils.h>
 #include <halley/support/exception.h>
+
+#include "halley/bytes/byte_serializer.h"
+#include "halley/support/logger.h"
+#include "halley/text/encode.h"
 #include "halley/text/string_converter.h"
 
 using namespace Halley;
@@ -14,7 +18,21 @@ struct AckUnreliableHeader
 	uint16_t sequence = 0xFFFF;
 	uint16_t ack = 0xFFFF;
 	uint32_t ackBits = 0xFFFFFFFF;
+
+	void serialize(Serializer& s) const;
+	void deserialize(Deserializer& s);
 };
+
+void AckUnreliableHeader::serialize(Serializer& s) const
+{
+	s << gsl::as_bytes(gsl::span<const AckUnreliableHeader>(this, 1));
+}
+
+void AckUnreliableHeader::deserialize(Deserializer& s)
+{
+	// Technically UB
+	s >> gsl::as_writable_bytes(gsl::span<AckUnreliableHeader>(this, 1));
+}
 
 constexpr size_t BUFFER_SIZE = 1024;
 
@@ -52,74 +70,6 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
 	sendTagged(gsl::span<AckUnreliableSubPacket>(&subPacket, 1));
 }
 
-void AckUnreliableConnection::sendTagged(gsl::span<AckUnreliableSubPacket> subPackets)
-{
-	uint16_t firstSeq = nextSequenceToSend;
-	std::array<gsl::byte, 2048> buffer;
-	gsl::span<gsl::byte, 2048> dst(buffer);
-	size_t pos = sizeof(AckUnreliableHeader);
-
-	for (auto& subPacket : subPackets) {
-		// Add reliable sub-header
-		bool isResend = subPacket.resends;
-		uint16_t resending = subPacket.resendSeq;
-		size_t size = subPacket.data.size();
-		bool longSize = size >= 64;
-		if (longSize) {
-			std::array<unsigned char, 2> b;
-			b[0] = static_cast<unsigned char>((size >> 8) & 0x3F) | 0x40 | (isResend ? 0x80 : 0);
-			b[1] = static_cast<unsigned char>(size & 0xFF);
-			memcpy(dst.subspan(pos, 2).data(), b.data(), 2);
-			pos += 2;
-		} else {
-			unsigned char b = static_cast<unsigned char>(size) | (isResend ? 0x80 : 0);
-			memcpy(dst.subspan(pos, 1).data(), &b, 1);
-			pos += 1;
-		}
-		if (resending) {
-			memcpy(dst.subspan(pos, 2).data(), &resending, 2);
-			pos += 2;
-		}
-
-		// Add data
-#ifdef _MSC_VER
-		memcpy_s(dst.subspan(pos).data(), dst.subspan(pos).size_bytes(), subPacket.data.data(), subPacket.data.size());
-#else
-		memcpy(dst.subspan(pos).data(), subPacket.data.data(), subPacket.data.size());
-#endif
-		pos += subPacket.data.size();
-
-		// Get sequence
-		uint16_t seq = nextSequenceToSend++;
-		size_t idx = seq % BUFFER_SIZE;
-		auto& sent = sentPackets[idx];
-		sent.waiting = true;
-		sent.tag = subPacket.tag;
-		lastSend = sent.timestamp = Clock::now();
-
-		// Update caller on the sequence number of this
-		subPacket.seq = seq;
-		if (subPacket.resends) {
-			//std::cout << "Re-sending " << subPacket.resendSeq << " as " << seq << std::endl;
-		}
-	}
-
-	// Add header
-	AckUnreliableHeader header;
-	header.sequence = firstSeq;
-	header.ack = highestReceived;
-	header.ackBits = generateAckBits();
-	auto headerData = gsl::as_bytes(gsl::span<AckUnreliableHeader>(&header, 1));
-#ifdef _MSC_VER
-	memcpy_s(dst.data(), dst.size_bytes(), headerData.data(), headerData.size());
-#else
-	memcpy(dst.data(), headerData.data(), headerData.size());
-#endif
-
-	// Send
-	parent->send(TransmissionType::Unreliable, OutboundNetworkPacket(dst.subspan(0, pos)));
-}
-
 bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
 {
 	// Process all incoming
@@ -144,6 +94,86 @@ bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
 	return false;
 }
 
+void AckUnreliableConnection::sendTagged(gsl::span<AckUnreliableSubPacket> subPackets)
+{
+	std::array<gsl::byte, 2048> buffer;
+	const auto dst = gsl::span<gsl::byte>(buffer);
+
+	auto s = Serializer(dst, SerializerOptions(SerializerOptions::maxVersion));
+
+	// Add header
+	AckUnreliableHeader header;
+	header.sequence = nextSequenceToSend;
+	header.ack = highestReceived;
+	header.ackBits = generateAckBits();
+	s << header;
+
+	// Add subpackets
+	for (auto& subPacket : subPackets) {
+		const uint16_t sizeAndResend = static_cast<uint16_t>(subPacket.data.size() << 1) | static_cast<uint16_t>(subPacket.resends ? 1 : 0);
+		s << sizeAndResend;
+		if (subPacket.resends) {
+			s << subPacket.resendSeq;
+		}
+		s << gsl::span<const gsl::byte>(subPacket.data);
+
+		// Get sequence
+		const uint16_t seq = nextSequenceToSend++;
+		const size_t idx = seq % BUFFER_SIZE;
+		auto& sent = sentPackets[idx];
+		sent.waiting = true;
+		sent.tag = subPacket.tag;
+		lastSend = sent.timestamp = Clock::now();
+
+		// Update caller on the sequence number of this
+		subPacket.seq = seq;
+		if (subPacket.resends) {
+			//std::cout << "Re-sending " << subPacket.resendSeq << " as " << seq << std::endl;
+		}
+	}
+
+	// Send
+	parent->send(TransmissionType::Unreliable, OutboundNetworkPacket(dst.subspan(0, s.getSize())));
+}
+
+void AckUnreliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
+{
+	//Logger::logDev("Received packet with " + toString(packet.getSize()) + " bytes: " + Encode::encodeBase16(packet.getBytes()));
+	auto s = Deserializer(packet.getBytes(), SerializerOptions(SerializerOptions::maxVersion));
+
+	AckUnreliableHeader header;
+	s >> header;
+
+	processReceivedAcks(header.ack, header.ackBits);
+	uint16_t seq = header.sequence;
+
+	while (s.getBytesLeft() > 0) {
+		// Header
+		uint16_t sizeAndResend = 0;
+		s >> sizeAndResend;
+		const uint16_t size = sizeAndResend >> 1;
+		const bool resend = (sizeAndResend & 1) != 0;
+		uint16_t resendOf = 0;
+		if (resend) {
+			s >> resendOf;
+		}
+
+		// Extract data
+		std::array<char, 2048> buffer;
+		if (size > buffer.size() || size > s.getBytesLeft()) {
+			throw Exception("Unexpected sub-packet size: " + toString(size) + " bytes, " + toString(s.getBytesLeft()) + " bytes remaining.", HalleyExceptions::Network);
+		}
+		auto subPacketData = gsl::as_writable_bytes(gsl::span<char>(buffer).subspan(0, size));
+		s >> subPacketData;
+
+		// Process sub-packet
+		if (onSeqReceived(seq, resend, resendOf)) {
+			pendingPackets.emplace_back(subPacketData);
+		}
+		++seq;
+	}
+}
+
 void AckUnreliableConnection::addAckListener(IAckUnreliableConnectionListener& listener)
 {
 	ackListeners.push_back(&listener);
@@ -152,57 +182,6 @@ void AckUnreliableConnection::addAckListener(IAckUnreliableConnectionListener& l
 void AckUnreliableConnection::removeAckListener(IAckUnreliableConnectionListener& listener)
 {
 	ackListeners.erase(std::find(ackListeners.begin(), ackListeners.end(), &listener));
-}
-
-void AckUnreliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
-{
-	AckUnreliableHeader header;
-	packet.extractHeader(gsl::as_writable_bytes(gsl::span<AckUnreliableHeader>(&header, 1)));
-	processReceivedAcks(header.ack, header.ackBits);
-	uint16_t seq = header.sequence;
-
-	while (packet.getSize() > 0) {
-		if (packet.getSize() < 1) {
-			throw Exception("Sub-packet header not found.", HalleyExceptions::Network);
-		}
-
-		// Sub-packets header
-		std::array<unsigned char, 2> sizeBytes;
-		auto data = gsl::as_writable_bytes(gsl::span<unsigned char>(sizeBytes));
-		packet.extractHeader(data.subspan(0, 1));
-		size_t size = 0;
-		bool resend = (sizeBytes[0] & 0x80) != 0;
-		if (sizeBytes[0] & 0x40) {
-			if (packet.getSize() < 1) {
-				throw Exception("Sub-packet header incomplete.", HalleyExceptions::Network);
-			}
-			packet.extractHeader(data.subspan(1, 1));
-			size = static_cast<uint16_t>(sizeBytes[0] & 0x3F) << 8 | sizeBytes[1];
-		} else {
-			size = sizeBytes[0] & 0x3F;
-		}
-		uint16_t resendOf = 0;
-		if (resend) {
-			if (packet.getSize() < 2) {
-				throw Exception("Sub-packet header missing resend data", HalleyExceptions::Network);
-			}
-			packet.extractHeader(gsl::as_writable_bytes(gsl::span<uint16_t>(&resendOf, 1)));
-		}
-
-		// Extract data
-		std::array<char, 2048> buffer;
-		if (size > buffer.size() || size > packet.getSize()) {
-			throw Exception("Unexpected sub-packet size: " + toString(size) + " bytes, packet is " + toString(packet.getSize()) + " bytes.", HalleyExceptions::Network);
-		}
-		auto subPacketData = gsl::span<char, 2048>(buffer).subspan(0, size);
-		packet.extractHeader(gsl::as_writable_bytes(subPacketData));
-
-		// Process sub-packet
-		if (onSeqReceived(seq, resend, resendOf)) {
-			pendingPackets.push_back(InboundNetworkPacket(gsl::as_bytes(subPacketData)));
-		}
-		++seq;
-	}
 }
 
 void AckUnreliableConnection::processReceivedAcks(uint16_t ack, unsigned int ackBits)

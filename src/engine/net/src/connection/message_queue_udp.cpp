@@ -30,7 +30,7 @@ void MessageQueueUDP::Channel::getReadyMessages(Vector<InboundNetworkPacket>& ou
 			}
 		} else {
 			uint16_t bestDist = 0;
-			const size_t fail = std::numeric_limits<size_t>::max();
+			constexpr size_t fail = std::numeric_limits<size_t>::max();
 			size_t best = fail;
 			// Look for the highest seq message, as long as it's above lastReceived
 			for (size_t i = 0; i < receiveQueue.size(); ++i) {
@@ -234,6 +234,7 @@ void MessageQueueUDP::checkReSend(Vector<AckUnreliableSubPacket>& collect)
 		if (elapsed > 0.1f && elapsed > connection->getLatency() * 3.0f) {
 			// Re-send if it's reliable
 			if (pending.reliable) {
+				Logger::logDev("Resending " + toString(pending.seq));
 				collect.push_back(makeTaggedPacket(pending.msgs, pending.size, true, pending.seq));
 			}
 			pendingPackets.erase(iter);
@@ -248,6 +249,7 @@ AckUnreliableSubPacket MessageQueueUDP::createPacket()
 	size_t size = 0;
 	bool first = true;
 	bool packetReliable = false;
+	bool allowMaxSizeViolation = true; // Hmm
 
 	// Figure out what messages are going in this packet
 	auto next = outboundQueued.begin();
@@ -262,10 +264,10 @@ AckUnreliableSubPacket MessageQueueUDP::createPacket()
 		if (first || isReliable == packetReliable) {
 			// Check if the message fits
 			const size_t msgSize = (*iter).packet.getSize();
-			const size_t headerSize = 7; // Max header size
+			const size_t headerSize = 8; // Max header size
 			const size_t totalSize = msgSize + headerSize;
 
-			if (size + totalSize <= maxSize) {
+			if (size + totalSize <= maxSize || (first && allowMaxSizeViolation)) {
 				// It fits, so add it
 				size += totalSize;
 

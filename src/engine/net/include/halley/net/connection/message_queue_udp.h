@@ -16,25 +16,25 @@ namespace Halley
 
 	class MessageQueueUDP : public MessageQueue, private IAckUnreliableConnectionListener
 	{
-		struct Inbound {
-			InboundNetworkPacket packet;
-			uint16_t seq;
-			uint8_t channel;
-		};
-
 		struct Outbound {
 			OutboundNetworkPacket packet;
-			uint16_t seq;
-			uint8_t channel;
+			uint16_t seq = 0;
+			uint8_t channel = 0;
+		};
+
+		struct Inbound {
+			InboundNetworkPacket packet;
+			uint16_t seq = 0;
+			uint8_t channel = 0;
 		};
 
 		struct PendingPacket
 		{
 			Vector<Outbound> msgs;
 			std::chrono::steady_clock::time_point timeSent;
-			size_t size;
-			uint16_t seq;
-			bool reliable;
+			size_t size = 0;
+			uint16_t seq = 0;
+			bool reliable = false;
 		};
 
 		struct Channel

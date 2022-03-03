@@ -107,6 +107,7 @@ namespace Halley {
 		Serializer& operator<<(const StringUTF32& str);
 		Serializer& operator<<(const Path& path);
 		Serializer& operator<<(gsl::span<const gsl::byte> span);
+		Serializer& operator<<(gsl::span<gsl::byte> span);
 		Serializer& operator<<(const Bytes& bytes);
 
 		template <typename T>

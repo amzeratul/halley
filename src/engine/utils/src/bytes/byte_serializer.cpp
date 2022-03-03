@@ -80,6 +80,12 @@ Serializer& Serializer::operator<<(gsl::span<const gsl::byte> span)
 	return *this;
 }
 
+Serializer& Serializer::operator<<(gsl::span<gsl::byte> span)
+{
+	copyBytes(span.data(), span.size_bytes());
+	return *this;
+}
+
 Serializer& Serializer::operator<<(const Bytes& bytes)
 {
 	*this << static_cast<uint32_t>(bytes.size());
