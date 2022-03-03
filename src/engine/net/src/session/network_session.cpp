@@ -99,7 +99,7 @@ uint16_t NetworkSession::getClientCount() const
 		//return getStatus() != ConnectionStatus::Open ? 0 : 2; // TODO
 	} else if (type == NetworkSessionType::Host) {
 		uint16_t i = 1;
-		for (auto& peer: peers) {
+		for (const auto& peer: peers) {
 			if (peer.getStatus() == ConnectionStatus::Connected) {
 				++i;
 			}
@@ -267,17 +267,17 @@ void NetworkSession::sendToPeer(OutboundNetworkPacket packet, PeerId peerId)
 	header.dstPeerId = peerId;
 	packet.addHeader(header);
 
-	for (size_t i = 0; i < peers.size(); ++i) {
-		if (peers[i].peerId == peerId) {
-			doSendToPeer(peers[i], OutboundNetworkPacket(packet));
+	for (const auto& peer: peers) {
+		if (peer.peerId == peerId) {
+			doSendToPeer(peer, OutboundNetworkPacket(packet));
 			return;
 		}
 	}
 
 	// Redirect via host
-	for (size_t i = 0; i < peers.size(); ++i) {
-		if (peers[i].peerId == 0) {
-			doSendToPeer(peers[i], OutboundNetworkPacket(packet));
+	for (const auto& peer: peers) {
+		if (peer.peerId == 0) {
+			doSendToPeer(peer, OutboundNetworkPacket(packet));
 			return;
 		}
 	}
@@ -287,9 +287,9 @@ void NetworkSession::sendToPeer(OutboundNetworkPacket packet, PeerId peerId)
 
 void NetworkSession::doSendToAll(OutboundNetworkPacket packet, std::optional<PeerId> except)
 {
-	for (size_t i = 0; i < peers.size(); ++i) {
-		if (peers[i].peerId != except) {
-			doSendToPeer(peers[i], OutboundNetworkPacket(packet));
+	for (const auto& peer : peers) {
+		if (peer.peerId != except) {
+			doSendToPeer(peer, OutboundNetworkPacket(packet));
 		}
 	}
 }
