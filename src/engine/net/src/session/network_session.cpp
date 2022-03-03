@@ -142,8 +142,13 @@ void NetworkSession::update(Time t)
 		}
 	}
 
-	// Update again to dispatch anything
+	// Deal with incoming messages
 	processReceive();
+
+	// Actually send
+	for (auto& peer: peers) {
+		peer.connection->sendAll();
+	}
 	service.update(0.0);
 }
 
@@ -293,7 +298,6 @@ void NetworkSession::doSendToPeer(const Peer& peer, OutboundNetworkPacket packet
 {
 	//peer.connection->send(IConnection::TransmissionType::Reliable, std::move(packet));
 	peer.connection->enqueue(std::move(packet), 0);
-	peer.connection->sendAll();
 }
 
 std::optional<std::pair<NetworkSession::PeerId, InboundNetworkPacket>> NetworkSession::receive()

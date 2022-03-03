@@ -155,9 +155,6 @@ Vector<InboundNetworkPacket> MessageQueueUDP::receivePackets()
 
 void MessageQueueUDP::enqueue(OutboundNetworkPacket packet, uint8_t channelNumber)
 {
-	Expects(channelNumber >= 0);
-	Expects(channelNumber < 32);
-
 	if (!channels[channelNumber].initialized) {
 		throw Exception("Channel " + toString(channelNumber) + " has not been set up", HalleyExceptions::Network);
 	}
@@ -180,9 +177,11 @@ void MessageQueueUDP::sendAll()
 	}
 
 	// Send and update sequences
-	connection->sendTagged(toSend);
-	for (auto& packet: toSend) {
-		pendingPackets[packet.tag].seq = packet.seq;
+	if (!toSend.empty()) {
+		connection->sendTagged(toSend);
+		for (auto& packet: toSend) {
+			pendingPackets[packet.tag].seq = packet.seq;
+		}
 	}
 }
 
@@ -245,7 +244,7 @@ void MessageQueueUDP::checkReSend(Vector<AckUnreliableSubPacket>& collect)
 AckUnreliableSubPacket MessageQueueUDP::createPacket()
 {
 	Vector<Outbound> sentMsgs;
-	const size_t maxSize = 1300;
+	const size_t maxSize = 1350;
 	size_t size = 0;
 	bool first = true;
 	bool packetReliable = false;
@@ -263,7 +262,7 @@ AckUnreliableSubPacket MessageQueueUDP::createPacket()
 		if (first || isReliable == packetReliable) {
 			// Check if the message fits
 			const size_t msgSize = (*iter).packet.getSize();
-			const size_t headerSize = 6; // Max header size
+			const size_t headerSize = 7; // Max header size
 			const size_t totalSize = msgSize + headerSize;
 
 			if (size + totalSize <= maxSize) {
