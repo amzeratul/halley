@@ -88,6 +88,7 @@ namespace Halley {
 		}
 
 		size_t getSize() const { return size; }
+		size_t getPosition() const { return size; }
 
 		Serializer& operator<<(bool val) { return serializePod(val); }
 		Serializer& operator<<(int8_t val) { return serializeInteger(val); }
@@ -222,8 +223,6 @@ namespace Halley {
 			return *this;
 		}
 
-		size_t getPosition() const { return size; }
-
 	private:
 		size_t size = 0;
 		gsl::span<gsl::byte> dst;
@@ -232,10 +231,7 @@ namespace Halley {
 		template <typename T>
 		Serializer& serializePod(T val)
 		{
-			if (!dryRun) {
-				memcpy(dst.data() + size, &val, sizeof(T));
-			}
-			size += sizeof(T);
+			copyBytes(&val, sizeof(T));
 			return *this;
 		}
 
@@ -257,6 +253,7 @@ namespace Halley {
 		}
 
 		void serializeVariableInteger(uint64_t val, std::optional<bool> sign);
+		void copyBytes(const void* src, size_t size);
 	};
 
 	class Deserializer : public ByteSerializationBase {

@@ -1,6 +1,8 @@
 #include "halley/net/connection/message_queue_udp.h"
 #include <iostream>
 #include <utility>
+
+#include "halley/support/logger.h"
 using namespace Halley;
 
 void MessageQueueUDP::Channel::getReadyMessages(Vector<InboundNetworkPacket>& out)
@@ -86,12 +88,12 @@ void MessageQueueUDP::setChannel(uint8_t channel, ChannelSettings settings)
 Vector<gsl::byte> MessageQueueUDP::serializeMessages(const Vector<Outbound>& msgs, size_t size) const
 {
 	Vector<gsl::byte> result(size);
+	auto s = Serializer(result, SerializerOptions(SerializerOptions::maxVersion));
 	
 	for (auto& msg: msgs) {
 		const uint8_t channelN = msg.channel;
 		const auto& channel = channels[channelN];
 
-		auto s = Serializer(result, SerializerOptions(SerializerOptions::maxVersion));
 		s << channelN;
 		if (channel.settings.ordered) {
 			s << msg.seq;
@@ -100,9 +102,9 @@ Vector<gsl::byte> MessageQueueUDP::serializeMessages(const Vector<Outbound>& msg
 		// Serialize as a vector
 		s << static_cast<uint32_t>(msg.packet.getSize());
 		s << msg.packet.getBytes();
-
 	}
 
+	result.resize(s.getSize());
 	return result;
 }
 
@@ -261,10 +263,12 @@ AckUnreliableSubPacket MessageQueueUDP::createPacket()
 		if (first || isReliable == packetReliable) {
 			// Check if the message fits
 			const size_t msgSize = (*iter).packet.getSize();
+			const size_t headerSize = 6; // Max header size
+			const size_t totalSize = msgSize + headerSize;
 
-			if (size + msgSize <= maxSize) {
+			if (size + totalSize <= maxSize) {
 				// It fits, so add it
-				size += msgSize;
+				size += totalSize;
 
 				sentMsgs.push_back(std::move(*iter));
 				outboundQueued.erase(iter);

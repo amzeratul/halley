@@ -76,22 +76,15 @@ Serializer& Serializer::operator<<(const Path& path)
 
 Serializer& Serializer::operator<<(gsl::span<const gsl::byte> span)
 {
-	if (!dryRun) {
-		memcpy(dst.data() + size, span.data(), span.size_bytes());
-	}
-	size += span.size_bytes();
+	copyBytes(span.data(), span.size_bytes());
 	return *this;
 }
 
 Serializer& Serializer::operator<<(const Bytes& bytes)
 {
-	const uint32_t byteSize = static_cast<uint32_t>(bytes.size());
-	*this << byteSize;
+	*this << static_cast<uint32_t>(bytes.size());
 
-	if (!dryRun) {
-		memcpy(dst.data() + size, bytes.data(), bytes.size());
-	}
-	size += bytes.size();
+	copyBytes(bytes.data(), bytes.size());
 	return *this;
 }
 
@@ -142,6 +135,17 @@ void Serializer::serializeVariableInteger(uint64_t val, std::optional<bool> sign
 	}
 
 	*this << gsl::as_bytes(gsl::span<const uint8_t>(buffer.data(), curPos));
+}
+
+void Serializer::copyBytes(const void* src, size_t srcSize)
+{
+	if (!dryRun) {
+		if (dst.size() - size < srcSize) {
+			throw Exception("Insufficient bytes to serialize data.", HalleyExceptions::Utils);
+		}
+		memcpy(dst.data() + size, src, srcSize);
+	}
+	size += srcSize;
 }
 
 Deserializer::Deserializer(gsl::span<const gsl::byte> src, SerializerOptions options)
