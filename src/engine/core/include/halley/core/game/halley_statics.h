@@ -15,7 +15,7 @@ namespace Halley
 		~HalleyStatics();
 		
 		void setupGlobals() const;
-		void resume(SystemAPI* system);
+		void resume(SystemAPI* system, size_t maxThreads);
 		void suspend();
 
 	private:

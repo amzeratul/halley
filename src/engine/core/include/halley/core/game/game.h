@@ -60,6 +60,8 @@ namespace Halley
 		const HalleyAPI& getAPI() const;
 		Resources& getResources() const;
 
+		virtual size_t getMaxThreads() const;
+
 	private:
 		friend class Core;
 		

@@ -96,3 +96,8 @@ Resources& Game::getResources() const
 	}
 	return *resources;
 }
+
+size_t Game::getMaxThreads() const
+{
+	return std::thread::hardware_concurrency();
+}

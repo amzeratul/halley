@@ -59,7 +59,7 @@ int CommandLineTool::runRaw(int argc, char** argv)
 	}
 
 	statics = std::make_unique<HalleyStatics>();
-	statics->resume(nullptr);
+	statics->resume(nullptr, std::thread::hardware_concurrency());
 	StdOutSink logSink(true);
 	Logger::addSink(logSink);
 	env.parseProgramPath(argv[0]);
