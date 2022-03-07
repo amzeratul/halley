@@ -64,6 +64,7 @@ namespace Halley
 		void removeProfilerCallback(IProfileCallback* callback) override;
 
 		int getExitCode() const { return exitCode; }
+		
 
 	private:
 		void deInit();

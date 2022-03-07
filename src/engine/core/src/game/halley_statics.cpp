@@ -57,7 +57,7 @@ HalleyStatics::~HalleyStatics()
 	sharedData.reset();
 }
 
-void HalleyStatics::resume(SystemAPI* system)
+void HalleyStatics::resume(SystemAPI* system, size_t maxThreads)
 {
 	setupGlobals();
 
@@ -73,8 +73,8 @@ void HalleyStatics::resume(SystemAPI* system)
 		}
 	};
 
-	sharedData->cpuThreadPool = std::make_unique<ThreadPool>("CPU", sharedData->executors->getCPU(), std::thread::hardware_concurrency(), makeThread);
-	sharedData->cpuAuxThreadPool = std::make_unique<ThreadPool>("CPUAux", sharedData->executors->getCPUAux(), std::thread::hardware_concurrency(), makeThread);
+	sharedData->cpuThreadPool = std::make_unique<ThreadPool>("CPU", sharedData->executors->getCPU(), maxThreads, makeThread);
+	sharedData->cpuAuxThreadPool = std::make_unique<ThreadPool>("CPUAux", sharedData->executors->getCPUAux(), maxThreads, makeThread);
 	sharedData->diskIOThreadPool = std::make_unique<ThreadPool>("IO", sharedData->executors->getDiskIO(), 1, makeThread);
 #endif
 }
