@@ -231,6 +231,7 @@ bool AckUnreliableConnection::onSeqReceived(uint16_t seq, bool isResend, uint16_
 	if (diff != 0 && diff < 0x8000) { // seq higher than highestReceived, with unsigned wrap-around
 		if (diff > BUFFER_SIZE - 32) {
 			// Ops, skipped too many packets!
+			Logger::logError("Connection error: too many packets dropped.");
 			close();
 			return false;
 		}
