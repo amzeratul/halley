@@ -28,7 +28,7 @@ namespace Halley
 		};
 
 	public:
-		constexpr static int currentCodegenVersion = 103;
+		constexpr static int currentCodegenVersion = 104;
 		
 		using ProgressReporter = std::function<bool(float, String)>;
 
