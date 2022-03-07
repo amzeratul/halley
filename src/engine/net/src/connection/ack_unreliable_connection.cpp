@@ -128,9 +128,11 @@ void AckUnreliableConnection::sendTagged(gsl::span<AckUnreliableSubPacket> subPa
 		// Update caller on the sequence number of this
 		subPacket.seq = seq;
 		if (subPacket.resends) {
-			//std::cout << "Re-sending " << subPacket.resendSeq << " as " << seq << std::endl;
+			notifyResend(subPacket.resendSeq);
 		}
 	}
+
+	notifySend(header.sequence);
 
 	// Send
 	parent->send(TransmissionType::Unreliable, OutboundNetworkPacket(dst.subspan(0, s.getSize())));
@@ -250,6 +252,8 @@ void AckUnreliableConnection::onAckReceived(uint16_t sequence)
 		}
 		const float msgLag = std::chrono::duration<float>(Clock::now() - data.timestamp).count();
 		reportLatency(msgLag);
+
+		notifyAck(sequence);
 	}
 }
 
@@ -265,15 +269,6 @@ unsigned int AckUnreliableConnection::generateAckBits()
 	return result;
 }
 
-void AckUnreliableConnection::reportLatency(float lastMeasuredLag)
-{
-	if (fabs(lag) < 0.00001f) {
-		lag = lastMeasuredLag;
-	} else {
-		lag = lerp(lag, lastMeasuredLag, 0.2f);
-	}
-}
-
 float AckUnreliableConnection::getTimeSinceLastSend() const
 {
 	return std::chrono::duration<float>(Clock::now() - lastSend).count();
@@ -284,3 +279,26 @@ float AckUnreliableConnection::getTimeSinceLastReceive() const
 	return std::chrono::duration<float>(Clock::now() - lastReceive).count();
 }
 
+void AckUnreliableConnection::reportLatency(float lastMeasuredLag)
+{
+	if (fabs(lag) < 0.00001f) {
+		lag = lastMeasuredLag;
+	} else {
+		lag = lerp(lag, lastMeasuredLag, 0.2f);
+	}
+}
+
+void AckUnreliableConnection::notifySend(uint16_t sequence)
+{
+
+}
+
+void AckUnreliableConnection::notifyResend(uint16_t sequence)
+{
+
+}
+
+void AckUnreliableConnection::notifyAck(uint16_t sequence)
+{
+
+}

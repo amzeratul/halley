@@ -8,7 +8,8 @@
 
 namespace Halley
 {
-	class IConnectionStatsListener;
+	class NetworkSession;
+	class INetworkServiceStatsListener;
 	class System;
 
 	class PerformanceStatsView : public StatsView, public CoreAPI::IProfileCallback
@@ -21,7 +22,7 @@ namespace Halley
 		void paint(Painter& painter) override;
 
 		void onProfileData(std::shared_ptr<ProfilerData> data) override;
-		void setNetworkStats(IConnectionStatsListener* networkStats);
+		void setNetworkStats(NetworkSession& networkSession);
 
 		int getPage() const;
 		void setPage(int page);
@@ -75,7 +76,7 @@ namespace Halley
 		bool capturing = true;
 		int page = 0;
 
-		IConnectionStatsListener* networkStats = nullptr;
+		INetworkServiceStatsListener* networkStats = nullptr;
 
 		const Sprite boxBg;
 		const Sprite whitebox;

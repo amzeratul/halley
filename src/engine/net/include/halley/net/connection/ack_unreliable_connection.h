@@ -97,5 +97,9 @@ namespace Halley
 		bool onSeqReceived(uint16_t sequence, bool isResend, uint16_t resendOf);
 		void onAckReceived(uint16_t sequence);
 		void reportLatency(float lag);
+
+		void notifySend(uint16_t sequence);
+		void notifyResend(uint16_t sequence);
+		void notifyAck(uint16_t sequence);
 	};
 }

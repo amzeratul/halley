@@ -2,7 +2,7 @@
 
 #include "system.h"
 #include "world.h"
-#include "../../../net/include/halley/net/connection/iconnection.h"
+#include "halley/net/session/network_session.h"
 #include "halley/core/api/core_api.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/core/graphics/painter.h"
@@ -101,9 +101,9 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	}
 }
 
-void PerformanceStatsView::setNetworkStats(IConnectionStatsListener* stats)
+void PerformanceStatsView::setNetworkStats(NetworkSession& session)
 {
-	networkStats = stats;
+	networkStats = &session.getService();
 }
 
 int PerformanceStatsView::getPage() const
