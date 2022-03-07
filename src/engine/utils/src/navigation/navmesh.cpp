@@ -5,6 +5,7 @@
 #include "halley/data_structures/priority_queue.h"
 #include "halley/maths/random.h"
 #include "halley/maths/ray.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 Navmesh::Navmesh()
@@ -469,12 +470,26 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 	float distanceLeft = maxDistance;
 	float weightedDistance = 0.0f;
 	NodeId curPoly = initialPolygon;
+	std::optional<NodeId> prevPoly;
 	while (distanceLeft > 0) {
 		const auto& poly = polygons.at(curPoly);
 		std::optional<size_t> edgeIdx = poly.getExitEdge(ray);
 		if (!edgeIdx) {
 			// Something went wrong
 			return { ray.p, weightedDistance };
+		}
+
+		const auto nextPoly = nodes[curPoly].connections[edgeIdx.value()];
+		if (nextPoly && (nextPoly == prevPoly)) {
+			//Logger::logError("Navmesh::findRayCollision error: ping-ponging on navmesh. Prev = " + toString(prevPoly) + ", cur = " + toString(curPoly) + ", next = " + toString(nextPoly));
+
+			// Try again, from the next edge
+			//edgeIdx = poly.getExitEdge(ray, edgeIdx.value() + 1);
+			edgeIdx = poly.getExitEdge(ray, edgeIdx.value() + 1);
+			if (!edgeIdx) {
+				Logger::logError("Could not recover from ping-pong, aborting.");
+				return { ray.p, weightedDistance };
+			}
 		}
 
 		// Find intersection with that edge
@@ -504,7 +519,12 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 
 		// Check how much more we have left to go and stop if we reach the destination
 		constexpr float epsilon = 0.1f;
-		const float distMoved = std::max((ray.p - intersection.value()).length(), epsilon); // If distMoved is zero, this can infinite loop (seen it in practice)
+		float distMoved = (ray.p - intersection.value()).length();
+
+		if (distMoved < std::min(epsilon, distanceLeft)) {
+			// If distMoved is zero, this can infinite loop (seen it in practice)
+			distMoved = epsilon;
+		}
 		weightedDistance += std::min(distMoved, distanceLeft) * (weights.empty() ? 1.0f : weights.at(curPoly));
 		distanceLeft -= distMoved;
 		if (distanceLeft < epsilon) {
@@ -512,9 +532,9 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 		}
 
 		// Move to the next polygon on navmesh
-		const auto next = nodes[curPoly].connections[edgeIdx.value()];
-		if (next) {
-			curPoly = next.value();
+		if (nextPoly) {
+			prevPoly = curPoly;
+			curPoly = nextPoly.value();
 			ray = Ray(intersection.value(), ray.dir);
 		} else {
 			// Hit the edge of the navmesh

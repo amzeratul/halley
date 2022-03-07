@@ -115,7 +115,7 @@ namespace Halley {
 
 		ConfigNode toConfigNode() const;
 
-		std::optional<size_t> getExitEdge(const Ray& ray) const;
+		std::optional<size_t> getExitEdge(const Ray& ray, size_t startFromEdge = 0) const;
 
 		float getArea() const { return area; }
 

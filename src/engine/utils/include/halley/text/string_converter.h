@@ -9,12 +9,53 @@
 #include <array>
 #include <optional>
 #include <iomanip>
+#include "halley/data_structures/maybe.h"
 #include "enum_names.h"
 
 namespace Halley
 {
 
-	
+	template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
+	String toString(T src, int precisionDigits = -1, char decimalSeparator = '.')
+	{
+		Expects(precisionDigits >= -1 && precisionDigits <= 20);
+		std::stringstream str;
+		if (precisionDigits != -1) {
+			str << std::fixed << std::setprecision(precisionDigits);
+		}
+		str << src;
+
+		String result;
+		if (precisionDigits == -1) {
+			result = String::prettyFloat(str.str());
+		} else {
+			result = str.str();
+		}
+
+		if (decimalSeparator != '.') {
+			result = result.replaceAll(String("."), String(decimalSeparator));
+		}
+
+		return result;
+	}
+
+	template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+	String toString(T value, int base = 10, int width = 1, char fill = '0')
+	{
+		Expects(base == 10 || base == 16 || base == 8);
+		std::stringstream ss;
+		if (base == 16) {
+			ss.setf(std::ios::hex, std::ios::basefield);
+		} else if (base == 8) {
+			ss.setf(std::ios::oct, std::ios::basefield);
+		}
+		if (width > 1) {
+			ss << std::setfill(fill) << std::setw(width);
+		}
+		ss << value;
+		return ss.str();
+	}
+
 	struct UserConverter
 	{
 		template<typename T>
@@ -24,6 +65,8 @@ namespace Halley
 				return EnumNames<T>()()[int(v)];
 			} else if constexpr (std::is_same_v<T, String>) {
 				return v;
+			} else if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
+				return Halley::toString(v);
 			} else {
 				return v.toString();
 			}
@@ -148,76 +191,6 @@ namespace Halley
 		}
 	};
 
-	template<typename T>
-	struct ToStringConverter<std::optional<T>>
-	{
-		String operator()(const std::optional<T>& v) const
-		{
-			if (v) {
-				return toString(v.value());
-			} else {
-				return "{}";
-			}
-		}
-	};
-
-	template<typename T>
-	struct ToStringConverter<Vector<T>>
-	{
-		String operator()(const Vector<T>& v) const
-		{
-			String result;
-			for (size_t i = 0; i < v.size(); i++) {
-				if (i != 0) {
-					result += ", ";
-				}
-				result += toString(v[i]);
-			}
-			return result;
-		}
-	};
-	
-	template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
-	String toString(T src, int precisionDigits = -1, char decimalSeparator = '.')
-	{
-		Expects(precisionDigits >= -1 && precisionDigits <= 20);
-		std::stringstream str;
-		if (precisionDigits != -1) {
-			str << std::fixed << std::setprecision(precisionDigits);
-		}
-		str << src;
-
-		String result;
-		if (precisionDigits == -1) {
-			result = String::prettyFloat(str.str());
-		} else {
-			result = str.str();
-		}
-
-		if (decimalSeparator != '.') {
-			result = result.replaceAll(String("."), String(decimalSeparator));
-		}
-
-		return result;
-	}
-
-	template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-	String toString(T value, int base = 10, int width = 1, char fill = '0')
-	{
-		Expects(base == 10 || base == 16 || base == 8);
-		std::stringstream ss;
-		if (base == 16) {
-			ss.setf(std::ios::hex, std::ios::basefield);
-		} else if (base == 8) {
-			ss.setf(std::ios::oct, std::ios::basefield);
-		}
-		if (width > 1) {
-			ss << std::setfill(fill) << std::setw(width);
-		}
-		ss << value;
-		return ss.str();
-	}
-
 	template <typename T, typename std::enable_if<!std::is_integral<T>::value && !std::is_floating_point<T>::value, int>::type = 0>
 	String toString(const T& value)
 	{
@@ -284,5 +257,47 @@ namespace Halley
 	{
 		return toString(gsl::span<const T>(values), separator, std::move(f));
 	}
+
+	template<typename T>
+	struct ToStringConverter<std::optional<T>>
+	{
+		String operator()(const std::optional<T>& v) const
+		{
+			if (v) {
+				return toString(v.value());
+			} else {
+				return "{}";
+			}
+		}
+	};
+
+	template<typename T>
+	struct ToStringConverter<OptionalLite<T>>
+	{
+		String operator()(const OptionalLite<T>& v) const
+		{
+			if (v) {
+				return toString(v.value());
+			} else {
+				return "{}";
+			}
+		}
+	};
+
+	template<typename T>
+	struct ToStringConverter<Vector<T>>
+	{
+		String operator()(const Vector<T>& v) const
+		{
+			String result;
+			for (size_t i = 0; i < v.size(); i++) {
+				if (i != 0) {
+					result += ", ";
+				}
+				result += toString(v[i]);
+			}
+			return result;
+		}
+	};
 
 }
