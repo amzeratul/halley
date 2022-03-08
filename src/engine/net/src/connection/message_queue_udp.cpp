@@ -178,9 +178,11 @@ void MessageQueueUDP::sendAll()
 
 	// Send and update sequences
 	if (!toSend.empty()) {
-		connection->sendTagged(toSend);
+		const auto seq = connection->sendTagged(toSend);
 		for (auto& packet: toSend) {
-			pendingPackets[packet.tag].seq = packet.seq;
+			if (packet.tag != -1) {
+				pendingPackets[packet.tag].seq = seq;
+			}
 		}
 	}
 }
@@ -234,7 +236,7 @@ void MessageQueueUDP::checkReSend(Vector<AckUnreliableSubPacket>& collect)
 		if (elapsed > 0.1f && elapsed > connection->getLatency() * 3.0f) {
 			// Re-send if it's reliable
 			if (pending.reliable) {
-				Logger::logDev("Resending " + toString(pending.seq));
+				//Logger::logDev("Resending " + toString(pending.seq));
 				collect.push_back(makeTaggedPacket(pending.msgs, pending.size, true, pending.seq));
 			}
 			pendingPackets.erase(iter);

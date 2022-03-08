@@ -16,13 +16,13 @@ void AckUnreliableConnectionStats::update(Time time)
 void AckUnreliableConnectionStats::onPacketSent(uint16_t sequence, size_t size)
 {
 	packetStats[pos] = PacketStats{ sequence, State::Sent, size };
-	pos = (pos + 1) % packetStats.size();
+	pos = (pos + 1) % capacity;
 
 	// Upon reaching a new line, clear it
 	if (pos % lineSize == 0) {
-		lineStart = pos;
+		lineStart = (pos + lineSize) % capacity;
 		for (size_t i = 0; i < lineSize; ++i) {
-			packetStats[(pos + i) % packetStats.size()] = PacketStats();
+			packetStats[(pos + i) % capacity] = PacketStats();
 		}
 	}
 }

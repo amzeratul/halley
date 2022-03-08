@@ -67,7 +67,8 @@ void AckUnreliableConnection::send(TransmissionType type, OutboundNetworkPacket 
 	subPacket.resends = false;
 	subPacket.tag = -1;
 
-	sendTagged(gsl::span<AckUnreliableSubPacket>(&subPacket, 1));
+	const auto seq = sendTagged(gsl::span<AckUnreliableSubPacket>(&subPacket, 1));
+	static_cast<void>(seq);
 }
 
 bool AckUnreliableConnection::receive(InboundNetworkPacket& packet)
@@ -284,6 +285,7 @@ void AckUnreliableConnection::reportLatency(float lastMeasuredLag)
 		lag = lastMeasuredLag;
 	} else {
 		lag = lerp(lag, lastMeasuredLag, 0.2f);
+		//Logger::logDev("Lag: " + toString(lag));
 	}
 }
 

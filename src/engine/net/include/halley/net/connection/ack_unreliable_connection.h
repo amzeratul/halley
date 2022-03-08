@@ -71,18 +71,18 @@ namespace Halley
 		AckUnreliableConnection(std::shared_ptr<IConnection> parent);
 
 		void close() override;
-		ConnectionStatus getStatus() const override;
-		bool isSupported(TransmissionType type) const override;
+		[[nodiscard]] ConnectionStatus getStatus() const override;
+		[[nodiscard]] bool isSupported(TransmissionType type) const override;
 		void send(TransmissionType type, OutboundNetworkPacket packet) override;
-		bool receive(InboundNetworkPacket& packet) override;
+		[[nodiscard]] bool receive(InboundNetworkPacket& packet) override;
 
-		uint16_t sendTagged(gsl::span<const AckUnreliableSubPacket> subPackets);
+		[[nodiscard]] uint16_t sendTagged(gsl::span<const AckUnreliableSubPacket> subPackets);
 		void addAckListener(IAckUnreliableConnectionListener& listener);
 		void removeAckListener(IAckUnreliableConnectionListener& listener);
 
-		float getLatency() const { return lag; }
-		float getTimeSinceLastSend() const;
-		float getTimeSinceLastReceive() const;
+		[[nodiscard]] float getLatency() const { return lag; }
+		[[nodiscard]] float getTimeSinceLastSend() const;
+		[[nodiscard]] float getTimeSinceLastReceive() const;
 
 		void setStatsListener(IAckUnreliableConnectionStatsListener* listener);
 
