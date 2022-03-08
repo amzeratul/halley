@@ -105,12 +105,13 @@ uint16_t AckUnreliableConnection::sendTagged(gsl::span<const AckUnreliableSubPac
 	// Add header
 	const auto seq = nextSequenceToSend++;
 	AckUnreliableHeader header;
-	header.sequence = nextSequenceToSend;
+	header.sequence = seq;
 	header.ack = highestReceived;
 	header.ackBits = generateAckBits();
 	s << header;
 
 	auto& sent = sentPackets[seq % BUFFER_SIZE];
+	sent = SentPacketData{};
 
 	// Add subpackets
 	for (auto& subPacket : subPackets) {
@@ -135,8 +136,22 @@ uint16_t AckUnreliableConnection::sendTagged(gsl::span<const AckUnreliableSubPac
 	// Send
 	parent->send(TransmissionType::Unreliable, OutboundNetworkPacket(dst.subspan(0, s.getSize())));
 	notifySend(header.sequence, s.getSize());
+	earliestUnackedMsg = {};
 
 	return seq;
+}
+
+void AckUnreliableConnection::sendAckPacketsIfNeeded()
+{
+	if (earliestUnackedMsg) {
+		constexpr float maxAckTime = 0.05f;
+		const float deltaTime = std::chrono::duration<float>(Clock::now() - earliestUnackedMsg.value()).count();
+		if (deltaTime > maxAckTime) {
+			// Send empty
+			const auto seq = sendTagged(gsl::span<AckUnreliableSubPacket>());
+			static_cast<void>(seq);
+		}
+	}
 }
 
 void AckUnreliableConnection::processReceivedPacket(InboundNetworkPacket& packet)
@@ -150,28 +165,29 @@ void AckUnreliableConnection::processReceivedPacket(InboundNetworkPacket& packet
 	processReceivedAcks(header.ack, header.ackBits);
 	const uint16_t seq = header.sequence;
 
-	while (s.getBytesLeft() > 0) {
-		// Header
-		uint16_t sizeAndResend = 0;
-		s >> sizeAndResend;
-		const uint16_t size = sizeAndResend >> 1;
-		const bool resend = (sizeAndResend & 1) != 0;
-		uint16_t resendOf = 0;
-		if (resend) {
-			s >> resendOf;
-		}
+	if (onSeqReceived(seq, s.getBytesLeft() > 0)) {
+		while (s.getBytesLeft() > 0) {
+			// Header
+			uint16_t sizeAndResend = 0;
+			s >> sizeAndResend;
+			const uint16_t size = sizeAndResend >> 1;
+			const bool resend = (sizeAndResend & 1) != 0;
+			uint16_t resendOf = 0;
+			if (resend) {
+				s >> resendOf;
+			}
 
-		// Extract data
-		std::array<char, 2048> buffer;
-		if (size > buffer.size() || size > s.getBytesLeft()) {
-			throw Exception("Unexpected sub-packet size: " + toString(size) + " bytes, " + toString(s.getBytesLeft()) + " bytes remaining.", HalleyExceptions::Network);
-		}
-		auto subPacketData = gsl::as_writable_bytes(gsl::span<char>(buffer).subspan(0, size));
-		s >> subPacketData;
-
-		auto curSeq = resend ? resendOf : seq;
-		if (onSeqReceived(curSeq)) {
-			pendingPackets.emplace_back(subPacketData);
+			// Extract data
+			std::array<char, 2048> buffer;
+			if (size > buffer.size() || size > s.getBytesLeft()) {
+				throw Exception("Unexpected sub-packet size: " + toString(size) + " bytes, " + toString(s.getBytesLeft()) + " bytes remaining.", HalleyExceptions::Network);
+			}
+			auto subPacketData = gsl::as_writable_bytes(gsl::span<char>(buffer).subspan(0, size));
+			s >> subPacketData;
+			
+			if (!resend || onSeqReceived(resendOf, true)) {
+				pendingPackets.emplace_back(subPacketData);
+			}
 		}
 	}
 }
@@ -203,7 +219,7 @@ void AckUnreliableConnection::processReceivedAcks(uint16_t ack, unsigned int ack
 	onAckReceived(ack);
 }
 
-bool AckUnreliableConnection::onSeqReceived(uint16_t seq)
+bool AckUnreliableConnection::onSeqReceived(uint16_t seq, bool hasSubPacket)
 {
 	const size_t bufferPos = size_t(seq) % BUFFER_SIZE;
 	const uint16_t diff = seq - highestReceived;
@@ -231,6 +247,9 @@ bool AckUnreliableConnection::onSeqReceived(uint16_t seq)
 	} else {
 		// Mark this packet as received
 		receivedSeqs[bufferPos] = 1;
+		if (hasSubPacket && !earliestUnackedMsg) {
+			earliestUnackedMsg = Clock::now();
+		}
 		return true;
 	}
 }

@@ -63,7 +63,7 @@ namespace Halley
 		struct SentPacketData
 		{
 			std::vector<int> tags;
-			Clock::time_point timestamp;
+			Clock::time_point timestamp = {};
 			bool waiting = false;
 		};
 
@@ -73,10 +73,12 @@ namespace Halley
 		void close() override;
 		[[nodiscard]] ConnectionStatus getStatus() const override;
 		[[nodiscard]] bool isSupported(TransmissionType type) const override;
-		void send(TransmissionType type, OutboundNetworkPacket packet) override;
 		[[nodiscard]] bool receive(InboundNetworkPacket& packet) override;
 
+		void send(TransmissionType type, OutboundNetworkPacket packet) override;
 		[[nodiscard]] uint16_t sendTagged(gsl::span<const AckUnreliableSubPacket> subPackets);
+		void sendAckPacketsIfNeeded();
+
 		void addAckListener(IAckUnreliableConnectionListener& listener);
 		void removeAckListener(IAckUnreliableConnectionListener& listener);
 
@@ -102,12 +104,13 @@ namespace Halley
 		float lag = 1; // Start at 1 second
 		Clock::time_point lastReceive;
 		Clock::time_point lastSend;
+		std::optional<Clock::time_point> earliestUnackedMsg;
 
 		void processReceivedPacket(InboundNetworkPacket& packet);
 		unsigned int generateAckBits();
 
 		void processReceivedAcks(uint16_t ack, unsigned int ackBits);
-		bool onSeqReceived(uint16_t sequence);
+		bool onSeqReceived(uint16_t sequence, bool hasSubPacket);
 		void onAckReceived(uint16_t sequence);
 		void reportLatency(float lag);
 

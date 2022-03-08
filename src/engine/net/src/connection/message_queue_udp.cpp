@@ -185,6 +185,8 @@ void MessageQueueUDP::sendAll()
 			}
 		}
 	}
+
+	connection->sendAckPacketsIfNeeded();
 }
 
 bool MessageQueueUDP::isConnected() const

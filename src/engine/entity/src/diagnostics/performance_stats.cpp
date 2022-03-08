@@ -553,7 +553,7 @@ void PerformanceStatsView::drawNetworkStats(Painter& painter, Rect4f rect)
 			const size_t y = j / lineLen;
 
 			const auto& stat = stats[(j + start) % stats.size()];
-			const auto eventRect = Rect4f(rect.getTopLeft() + Vector2f(x * width, y * height), width, height);
+			const auto eventRect = Rect4f(area.getTopLeft() + Vector2f(x * width, y * height), width, height);
 			const auto border = Vector2f(4, 4);
 			
 			box
