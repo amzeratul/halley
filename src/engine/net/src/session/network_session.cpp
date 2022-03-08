@@ -2,6 +2,7 @@
 
 #include <cassert>
 
+#include "connection/ack_unreliable_connection_stats.h"
 #include "connection/message_queue_udp.h"
 #include "session/network_session_control_messages.h"
 #include "connection/network_service.h"
@@ -43,7 +44,7 @@ void NetworkSession::join(const String& address)
 	Expects(type == NetworkSessionType::Undefined);
 
 	type = NetworkSessionType::Client;
-	peers.emplace_back(Peer{ 0, true, makeConnection(service.connect(address)) });
+	peers.emplace_back(makePeer(0, service.connect(address)));
 
 	ControlMsgJoin msg;
 	msg.networkVersion = networkVersion;
@@ -64,7 +65,7 @@ void NetworkSession::acceptConnection(std::shared_ptr<IConnection> incoming)
 		throw Exception("Unable to allocate peer id for incoming connection.", HalleyExceptions::Network);
 	}
 	
-	peers.emplace_back(Peer{ id.value(), true, makeConnection(std::move(incoming)) });
+	peers.emplace_back(makePeer(id.value(), std::move(incoming)));
 }
 
 void NetworkSession::close()
@@ -150,6 +151,11 @@ void NetworkSession::update(Time t)
 		peer.connection->sendAll();
 	}
 	service.update(0.0);
+
+	// Update stats
+	for (auto& peer: peers) {
+		peer.stats->update(t);
+	}
 }
 
 NetworkSessionType NetworkSession::getType() const
@@ -534,6 +540,16 @@ NetworkService& NetworkSession::getService() const
 	return service;
 }
 
+size_t NetworkSession::getNumConnections() const
+{
+	return peers.size();
+}
+
+const AckUnreliableConnectionStats& NetworkSession::getConnectionStats(size_t idx)
+{
+	return *peers.at(idx).stats;
+}
+
 NetworkSession::Peer& NetworkSession::getPeer(PeerId id)
 {
 	return *std::find_if(peers.begin(), peers.end(), [&](const Peer& peer) { return peer.peerId == id; });
@@ -624,12 +640,14 @@ void NetworkSession::disconnectPeer(Peer& peer)
 	}
 }
 
-std::shared_ptr<MessageQueueUDP> NetworkSession::makeConnection(std::shared_ptr<IConnection> connection)
+NetworkSession::Peer NetworkSession::makePeer(PeerId peerId, std::shared_ptr<IConnection> connection)
 {
-	auto ackConn = std::make_shared<AckUnreliableConnection>(connection);
-	auto queue = std::make_shared<MessageQueueUDP>(ackConn);
+	auto stats = std::make_shared<AckUnreliableConnectionStats>();
+	auto ackConn = std::make_shared<AckUnreliableConnection>(std::move(connection));
+	ackConn->setStatsListener(stats.get());
 
-	queue->setChannel(0, ChannelSettings(true, true));
+	auto messageQueue = std::make_shared<MessageQueueUDP>(ackConn);
+	messageQueue->setChannel(0, ChannelSettings(true, true));
 
-	return queue;
+	return Peer{ peerId, true, std::move(messageQueue), std::move(stats) };
 }

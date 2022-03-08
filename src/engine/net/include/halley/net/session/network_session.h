@@ -9,6 +9,7 @@
 #include "../connection/network_service.h"
 
 namespace Halley {
+	class AckUnreliableConnectionStats;
 	class MessageQueueUDP;
 	class NetworkService;
 
@@ -60,6 +61,9 @@ namespace Halley {
 		const String& getHostAddress() const;
 		NetworkService& getService() const;
 
+		size_t getNumConnections() const;
+		const AckUnreliableConnectionStats& getConnectionStats(size_t idx);
+
 		template <typename T>
 		T& getMySharedData()
 		{
@@ -105,6 +109,7 @@ namespace Halley {
 			PeerId peerId = -1;
 			bool alive = true;
 			std::shared_ptr<MessageQueueUDP> connection;
+			std::shared_ptr<AckUnreliableConnectionStats> stats;
 
 			ConnectionStatus getStatus() const;
 		};
@@ -156,6 +161,6 @@ namespace Halley {
 
 		void disconnectPeer(Peer& peer);
 
-		std::shared_ptr<MessageQueueUDP> makeConnection(std::shared_ptr<IConnection> connection);
+		Peer makePeer(PeerId peerId, std::shared_ptr<IConnection> connection);
 	};
 }

@@ -19,6 +19,16 @@ namespace Halley
 		virtual void onPacketAcked(int tag) = 0;
 	};
 
+	class IAckUnreliableConnectionStatsListener
+	{
+	public:
+		virtual ~IAckUnreliableConnectionStatsListener() {}
+
+		virtual void onPacketSent(uint16_t sequence) = 0;
+		virtual void onPacketResent(uint16_t sequence) = 0;
+		virtual void onPacketAcked(uint16_t sequence) = 0;
+	};
+
 	class AckUnreliableSubPacket
 	{
 	public:
@@ -52,9 +62,9 @@ namespace Halley
 
 		struct SentPacketData
 		{
-			bool waiting = false;
-			int tag = -1;
+			std::vector<int> tags;
 			Clock::time_point timestamp;
+			bool waiting = false;
 		};
 
 	public:
@@ -66,7 +76,7 @@ namespace Halley
 		void send(TransmissionType type, OutboundNetworkPacket packet) override;
 		bool receive(InboundNetworkPacket& packet) override;
 
-		void sendTagged(gsl::span<AckUnreliableSubPacket> subPackets);
+		uint16_t sendTagged(gsl::span<const AckUnreliableSubPacket> subPackets);
 		void addAckListener(IAckUnreliableConnectionListener& listener);
 		void removeAckListener(IAckUnreliableConnectionListener& listener);
 
@@ -74,17 +84,20 @@ namespace Halley
 		float getTimeSinceLastSend() const;
 		float getTimeSinceLastReceive() const;
 
+		void setStatsListener(IAckUnreliableConnectionStatsListener* listener);
+
 	private:
 		std::shared_ptr<IConnection> parent;
 
 		uint16_t nextSequenceToSend = 0;
 		uint16_t highestReceived = 0xFFFF;
 
-		Vector<char> receivedSeqs; // 0 = not received, 1 = received, 2 = received re-send, 3 = both
+		Vector<char> receivedSeqs; // 0 = not received, 1 = received
 		Vector<SentPacketData> sentPackets;
 		std::deque<InboundNetworkPacket> pendingPackets;
 
 		Vector<IAckUnreliableConnectionListener*> ackListeners;
+		IAckUnreliableConnectionStatsListener* statsListener = nullptr;
 
 		float lag = 1; // Start at 1 second
 		Clock::time_point lastReceive;
@@ -94,7 +107,7 @@ namespace Halley
 		unsigned int generateAckBits();
 
 		void processReceivedAcks(uint16_t ack, unsigned int ackBits);
-		bool onSeqReceived(uint16_t sequence, bool isResend, uint16_t resendOf);
+		bool onSeqReceived(uint16_t sequence);
 		void onAckReceived(uint16_t sequence);
 		void reportLatency(float lag);
 

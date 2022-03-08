@@ -4,6 +4,7 @@ include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/net" "../core
 
 set(SOURCES
         "src/connection/ack_unreliable_connection.cpp"
+        "src/connection/ack_unreliable_connection_stats.cpp"
         "src/connection/http.cpp"
         "src/connection/instability_simulator.cpp"
         "src/connection/message_queue.cpp"
@@ -26,6 +27,7 @@ set(HEADERS
         "include/halley/net/halley_net.h"
 
         "include/halley/net/connection/ack_unreliable_connection.h"
+        "include/halley/net/connection/ack_unreliable_connection_stats.h"
         "include/halley/net/connection/http.h"
         "include/halley/net/connection/iconnection.h"
         "include/halley/net/connection/imessage_stream.h"
