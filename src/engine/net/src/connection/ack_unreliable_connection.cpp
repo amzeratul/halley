@@ -133,7 +133,7 @@ uint16_t AckUnreliableConnection::sendTagged(gsl::span<const AckUnreliableSubPac
 
 	// Send
 	parent->send(TransmissionType::Unreliable, OutboundNetworkPacket(dst.subspan(0, s.getSize())));
-	notifySend(header.sequence);
+	notifySend(header.sequence, s.getSize());
 
 	return seq;
 }
@@ -287,10 +287,10 @@ void AckUnreliableConnection::reportLatency(float lastMeasuredLag)
 	}
 }
 
-void AckUnreliableConnection::notifySend(uint16_t sequence)
+void AckUnreliableConnection::notifySend(uint16_t sequence, size_t size)
 {
 	if (statsListener) {
-		statsListener->onPacketSent(sequence);
+		statsListener->onPacketSent(sequence, size);
 	}
 }
 

@@ -24,7 +24,7 @@ namespace Halley
 	public:
 		virtual ~IAckUnreliableConnectionStatsListener() {}
 
-		virtual void onPacketSent(uint16_t sequence) = 0;
+		virtual void onPacketSent(uint16_t sequence, size_t size) = 0;
 		virtual void onPacketResent(uint16_t sequence) = 0;
 		virtual void onPacketAcked(uint16_t sequence) = 0;
 	};
@@ -111,7 +111,7 @@ namespace Halley
 		void onAckReceived(uint16_t sequence);
 		void reportLatency(float lag);
 
-		void notifySend(uint16_t sequence);
+		void notifySend(uint16_t sequence, size_t size);
 		void notifyResend(uint16_t sequence);
 		void notifyAck(uint16_t sequence);
 	};

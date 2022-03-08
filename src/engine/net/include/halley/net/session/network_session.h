@@ -62,7 +62,7 @@ namespace Halley {
 		NetworkService& getService() const;
 
 		size_t getNumConnections() const;
-		const AckUnreliableConnectionStats& getConnectionStats(size_t idx);
+		const AckUnreliableConnectionStats& getConnectionStats(size_t idx) const;
 
 		template <typename T>
 		T& getMySharedData()

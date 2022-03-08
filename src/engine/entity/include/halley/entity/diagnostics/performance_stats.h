@@ -4,6 +4,7 @@
 
 #include "stats_view.h"
 #include "halley/core/api/core_api.h"
+#include "halley/net/connection/ack_unreliable_connection_stats.h"
 #include "halley/support/profiler.h"
 
 namespace Halley
@@ -77,10 +78,11 @@ namespace Halley
 		int page = 0;
 
 		INetworkServiceStatsListener* networkStats = nullptr;
+		const NetworkSession* networkSession;
 
 		const Sprite boxBg;
 		const Sprite whitebox;
-		
+
 
 		void drawHeader(Painter& painter, bool simple);
 		void drawTimeline(Painter& painter, Rect4f rect);
@@ -88,8 +90,10 @@ namespace Halley
 		void drawTimeGraphThreads(Painter& painter, Rect4f rect, Range<ProfilerData::TimePoint> timeRange);
 		void drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo, Range<ProfilerData::TimePoint> timeRange);
 		void drawTopSystems(Painter& painter, Rect4f rect);
+		void drawNetworkStats(Painter& painter, Rect4f rect);
 		
 		Colour4f getEventColour(ProfilerEventType event) const;
+		Colour4f getNetworkStatsCol(AckUnreliableConnectionStats::State state) const;
 
 		int64_t getTimeNs(TimeLine timeline, const ProfilerData& data);
 	};

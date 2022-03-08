@@ -545,7 +545,7 @@ size_t NetworkSession::getNumConnections() const
 	return peers.size();
 }
 
-const AckUnreliableConnectionStats& NetworkSession::getConnectionStats(size_t idx)
+const AckUnreliableConnectionStats& NetworkSession::getConnectionStats(size_t idx) const
 {
 	return *peers.at(idx).stats;
 }
@@ -642,7 +642,10 @@ void NetworkSession::disconnectPeer(Peer& peer)
 
 NetworkSession::Peer NetworkSession::makePeer(PeerId peerId, std::shared_ptr<IConnection> connection)
 {
-	auto stats = std::make_shared<AckUnreliableConnectionStats>();
+	const size_t statsCapacity = 256; // TODO
+	const size_t lineSize = 64; // TODO
+
+	auto stats = std::make_shared<AckUnreliableConnectionStats>(statsCapacity, lineSize);
 	auto ackConn = std::make_shared<AckUnreliableConnection>(std::move(connection));
 	ackConn->setStatsListener(stats.get());
 
