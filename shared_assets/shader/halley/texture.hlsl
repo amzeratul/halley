@@ -10,7 +10,7 @@ float4 sampleHorizontalAA(Texture2D tex, float2 coord) {
     float2 pixelCoord = coord * texSize;
     float pixelSize = abs(ddx(pixelCoord));
     
-    float2 p0 = pixelCoord;
+    float2 p0 = pixelCoord - float2(0.5, 0) * pixelSize;
     float2 p1 = p0 + float2(pixelSize, 0);
     float p0t = 1.0 - frac(p0.x);
     float p1t = frac(p1.x);
