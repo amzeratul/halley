@@ -356,7 +356,7 @@ void ScriptingGizmo::addNode()
 {
 	const Vector2f pos = lastMousePos ? lastMousePos.value() - basePos : Vector2f();
 	
-	auto chooseAssetWindow = std::make_shared<ScriptingChooseNode>(factory, *resources, scriptNodeTypes, [=] (std::optional<String> result)
+	auto chooseAssetWindow = std::make_shared<ScriptingChooseNode>(Vector2f(), factory, *resources, scriptNodeTypes, [=] (std::optional<String> result)
 	{
 		if (result) {
 			Concurrent::execute(pendingUITasks, [this, type = std::move(result.value()), pos] ()

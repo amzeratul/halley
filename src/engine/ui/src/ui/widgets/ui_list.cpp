@@ -334,13 +334,18 @@ std::shared_ptr<UIListItem> UIList::addItem(const String& id, std::shared_ptr<IU
 
 void UIList::clear()
 {
+	const bool hadItems = !items.empty();
+
 	items.clear();
 	curOption = -1;
 	UIWidget::clear();
-	layout();
 
-	if (scrollToSelection) {
-		sendEvent(UIEvent(UIEventType::MakeAreaVisibleCentered, getId(), Rect4f(0, 0, 1, 1)));
+	if (hadItems) {
+		layout();
+
+		if (scrollToSelection) {
+			sendEvent(UIEvent(UIEventType::MakeAreaVisibleCentered, getId(), Rect4f(0, 0, 1, 1)));
+		}
 	}
 }
 

@@ -25,7 +25,7 @@ namespace Halley {
 		UIFactory& getGameFactory();
 
 		bool onKeyPress(KeyboardKeyPress key) override;
-
+		
 	private:
 		std::shared_ptr<const Resource> loadResource(const String& assetId) override;
 		
@@ -60,6 +60,8 @@ namespace Halley {
 		std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
 		LocalisedString getItemLabel(const String& id, const String& name, bool hasSearch) override;
 		void sortItems(Vector<std::pair<String, String>>& items) override;
+
+		int getNumColumns(Vector2f scrollPaneSize) const override;
 
 	private:
 		UIFactory& factory;

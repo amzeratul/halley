@@ -18,6 +18,7 @@ children:
   border: [1, 4, 1, 1]
 - widget: { class: scrollBarPane, size: [625, 400], scrollHorizontal: true, scrollVertical: true, autoHide: true }
   border: [1, 4, 1, 1]
+  proportion: 1
   children:
   - widget: { id: options, class: list, size: [400, 400] }
     proportion: 1

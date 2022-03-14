@@ -489,6 +489,11 @@ void ProjectWindow::render(RenderContext& rc) const
 	}
 }
 
+Vector2f ProjectWindow::getChoosePrefabWindowSize() const
+{
+	return getSize() - Vector2f(900.0f, 350.0f);
+}
+
 
 ProjectWindow::SettingsStorage::SettingsStorage(std::shared_ptr<ISaveData> saveData, String path)
 	: saveData(std::move(saveData))
