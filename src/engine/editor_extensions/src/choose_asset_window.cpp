@@ -6,6 +6,7 @@
 #include "halley/utils/algorithm.h"
 #include "halley/ui/widgets/ui_image.h"
 #include "halley/ui/ui_factory.h"
+#include "halley/ui/widgets/ui_scrollbar_pane.h"
 
 using namespace Halley;
 
@@ -130,6 +131,12 @@ void ChooseAssetWindow::populateList()
 		options->setSelectedOption(0);
 	} else {
 		options->setSelectedOptionId(defaultOption);
+	}
+
+	if (options->getCount() > 0) {
+		const auto scroll = getWidgetAs<UIScrollBarPane>("optionsScroll");
+		const auto itemSize = options->getItem(0)->getSize().y;
+		scroll->getPane()->setScrollSpeed(itemSize);
 	}
 }
 
