@@ -162,8 +162,8 @@ int ChooseAssetTypeWindow::getNumColumns(Vector2f scrollPaneSize) const
 }
 
 
-ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, Callback callback)
-	: ChooseAssetTypeWindow(projectWindow.getChoosePrefabWindowSize(), factory, AssetType::Prefab, defaultOption, gameResources, projectWindow, true, std::move(callback))
+ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, std::optional<String> defaultOption, Resources& gameResources, ProjectWindow& projectWindow, Callback callback)
+	: ChooseAssetTypeWindow(projectWindow.getChoosePrefabWindowSize(), factory, AssetType::Prefab, defaultOption.value_or(projectWindow.getSetting(EditorSettingType::Project, lastOptionKey).asString("")), gameResources, projectWindow, true, std::move(callback))
 {
 	const auto lastCategory = projectWindow.getSetting(EditorSettingType::Project, lastCategoryKey).asString("");
 	setCategoryFilters(projectWindow.getAssetPreviewGenerator().getPrefabCategoryFilters(), lastCategory);
@@ -172,4 +172,14 @@ ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, String defaultOption,
 void ChoosePrefabWindow::onCategorySet(const String& id)
 {
 	projectWindow.setSetting(EditorSettingType::Project, lastCategoryKey, ConfigNode(id));
+}
+
+void ChoosePrefabWindow::onOptionSelected(const String& id)
+{
+	lastOption = id;
+}
+
+void ChoosePrefabWindow::onDestroyRequested()
+{
+	projectWindow.setSetting(EditorSettingType::Project, lastOptionKey, ConfigNode(lastOption));
 }

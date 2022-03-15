@@ -56,12 +56,16 @@ namespace Halley {
 
 	class ChoosePrefabWindow : public ChooseAssetTypeWindow {
 	public:
-		ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, Callback callback);
+		ChoosePrefabWindow(UIFactory& factory, std::optional<String> defaultOption, Resources& gameResources, ProjectWindow& projectWindow, Callback callback);
 	
     protected:
 		void onCategorySet(const String& id) override;
+		void onOptionSelected(const String& id) override;
+		void onDestroyRequested() override;
 	
 	private:
 		constexpr const static char* lastCategoryKey = "prefab_picker.last_category";
+		constexpr const static char* lastOptionKey = "prefab_picker.last_option";
+		String lastOption;
 	};
 }

@@ -901,7 +901,7 @@ void SceneEditorWindow::addNewEntity(std::optional<String> reference, bool child
 
 void SceneEditorWindow::addNewPrefab(std::optional<String> reference, bool childOfReference)
 {
-	getRoot()->addChild(std::make_shared<ChoosePrefabWindow>(uiFactory, "", project.getGameResources(), projectWindow, [=] (std::optional<String> result)
+	getRoot()->addChild(std::make_shared<ChoosePrefabWindow>(uiFactory, std::optional<String>(), project.getGameResources(), projectWindow, [=](std::optional<String> result)
 	{
 		if (result) {
 			addNewPrefab(reference.value_or(currentEntityIds.empty() ? "" : currentEntityIds.front()), childOfReference, result.value());

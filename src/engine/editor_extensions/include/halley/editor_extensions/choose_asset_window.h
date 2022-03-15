@@ -39,6 +39,7 @@ namespace Halley {
 		std::shared_ptr<UISizer> makeItemSizerBigIcon(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label);
 
         virtual void onCategorySet(const String& id);
+		virtual void onOptionSelected(const String& id);
 
         virtual void sortItems(Vector<std::pair<String, String>>& items);
 		void sortItemsByName(Vector<std::pair<String, String>>& items);

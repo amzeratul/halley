@@ -186,6 +186,10 @@ void ChooseAssetWindow::onCategorySet(const String& id)
 {
 }
 
+void ChooseAssetWindow::onOptionSelected(const String& id)
+{
+}
+
 void ChooseAssetWindow::sortItems(Vector<std::pair<String, String>>& items)
 {
 	sortItemsByName(items);
@@ -223,6 +227,12 @@ void ChooseAssetWindow::setCategoryFilters(Vector<AssetCategoryFilter> filters, 
 	{
 		setCategoryFilter(id);
 	});
+
+	bindData("options", "", [=](const String& id)
+	{
+		onOptionSelected(id);
+	});
+	
 	setCategoryFilter(defaultOption);
 }
 
