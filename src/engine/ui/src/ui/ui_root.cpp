@@ -321,7 +321,7 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 		// Click
 		if (!anyMouseButtonHeld && mouse->isButtonPressed(i)) {
 			
-			anyMouseButtonHeld = true;
+			anyMouseButtonHeld = i;
 			mouseExclusive = actuallyUnderMouse;
 
 			if (actuallyUnderMouse) {
@@ -349,8 +349,8 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 		}
 
 		// Release click
-		if (anyMouseButtonHeld && mouse->isButtonReleased(i)) {
-			anyMouseButtonHeld = false;
+		if (anyMouseButtonHeld == i && mouse->isButtonReleased(i)) {
+			anyMouseButtonHeld = {};
 			
 			if (exclusive) {
 				exclusive->releaseMouse(mousePos, i);
