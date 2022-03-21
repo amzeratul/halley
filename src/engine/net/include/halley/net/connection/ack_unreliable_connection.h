@@ -103,6 +103,8 @@ namespace Halley
 		IAckUnreliableConnectionStatsListener* statsListener = nullptr;
 
 		float lag = 1; // Start at 1 second
+		float curLag = 0;
+
 		Clock::time_point lastReceive;
 		Clock::time_point lastSend;
 		std::optional<Clock::time_point> earliestUnackedMsg;
@@ -113,7 +115,10 @@ namespace Halley
 		void processReceivedAcks(uint16_t ack, unsigned int ackBits);
 		bool onSeqReceived(uint16_t sequence, bool hasSubPacket);
 		void onAckReceived(uint16_t sequence);
+
+		void startLatencyReport();
 		void reportLatency(float lag);
+		void endLatencyReport();
 
 		void notifySend(uint16_t sequence, size_t size);
 		void notifyResend(uint16_t sequence);

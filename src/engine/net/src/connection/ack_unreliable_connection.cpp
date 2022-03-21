@@ -216,6 +216,7 @@ void AckUnreliableConnection::processReceivedAcks(uint16_t ack, unsigned int ack
 		return;
 	}
 
+	startLatencyReport();
 	for (int i = 32; --i >= 0; ) {
 		if (ackBits & (1 << i)) {
 			uint16_t seq = static_cast<uint16_t>(ack - (i + 1));
@@ -223,6 +224,7 @@ void AckUnreliableConnection::processReceivedAcks(uint16_t ack, unsigned int ack
 		}
 	}
 	onAckReceived(ack);
+	endLatencyReport();
 }
 
 bool AckUnreliableConnection::onSeqReceived(uint16_t seq, bool hasSubPacket)
@@ -306,13 +308,22 @@ void AckUnreliableConnection::setStatsListener(IAckUnreliableConnectionStatsList
 	statsListener = listener;
 }
 
+void AckUnreliableConnection::startLatencyReport()
+{
+	curLag = std::numeric_limits<float>::infinity();
+}
+
 void AckUnreliableConnection::reportLatency(float lastMeasuredLag)
 {
+	curLag = std::min(curLag, lastMeasuredLag);
+}
+
+void AckUnreliableConnection::endLatencyReport()
+{
 	if (fabs(lag) < 0.00001f) {
-		lag = lastMeasuredLag;
-	} else {
-		lag = lerp(lag, lastMeasuredLag, 0.2f);
-		//Logger::logDev("Lag: " + toString(lag));
+		lag = curLag;
+	} else if (curLag < 30) {
+		lag = lerp(lag, curLag, 0.2f);
 	}
 }
 
