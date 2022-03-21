@@ -5,6 +5,7 @@ using namespace Halley;
 AckUnreliableConnectionStats::AckUnreliableConnectionStats(size_t capacity, size_t lineSize)
 	: capacity(capacity)
 	, lineSize(lineSize)
+	, lineStart(lineSize)
 {
 	packetStats.resize(capacity);
 }

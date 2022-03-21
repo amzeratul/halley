@@ -144,7 +144,7 @@ uint16_t AckUnreliableConnection::sendTagged(gsl::span<const AckUnreliableSubPac
 void AckUnreliableConnection::sendAckPacketsIfNeeded()
 {
 	if (earliestUnackedMsg) {
-		constexpr float maxAckTime = 0.05f;
+		constexpr float maxAckTime = 0.02f;
 		const float deltaTime = std::chrono::duration<float>(Clock::now() - earliestUnackedMsg.value()).count();
 		if (deltaTime > maxAckTime) {
 			// Send empty
@@ -258,13 +258,14 @@ void AckUnreliableConnection::onAckReceived(uint16_t sequence)
 {
 	auto& data = sentPackets[sequence % BUFFER_SIZE];
 	if (data.waiting) {
+		const float msgLag = std::chrono::duration<float>(Clock::now() - data.timestamp).count();
+
 		data.waiting = false;
 		for (int tag: data.tags) {
 			for (const auto& listener: ackListeners) {
 				listener->onPacketAcked(tag);
 			}
 		}
-		const float msgLag = std::chrono::duration<float>(Clock::now() - data.timestamp).count();
 		reportLatency(msgLag);
 
 		notifyAck(sequence);

@@ -240,7 +240,7 @@ void MessageQueueUDP::checkReSend(Vector<AckUnreliableSubPacket>& collect)
 
 		// Check how long it's been waiting
 		const float elapsed = std::chrono::duration<float>(std::chrono::steady_clock::now() - pending.timeSent).count();
-		if (elapsed > 0.1f && elapsed > connection->getLatency() * 3.0f) {
+		if (elapsed > 0.01f && elapsed > connection->getLatency() * 1.8f) {
 			// Re-send if it's reliable
 			if (pending.reliable) {
 				//Logger::logDev("Resending " + toString(pending.seq));

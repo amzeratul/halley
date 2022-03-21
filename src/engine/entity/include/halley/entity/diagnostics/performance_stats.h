@@ -95,7 +95,7 @@ namespace Halley
 		void drawNetworkStats(Painter& painter, Rect4f rect);
 		
 		Colour4f getEventColour(ProfilerEventType event) const;
-		Colour4f getNetworkStatsCol(AckUnreliableConnectionStats::State state) const;
+		Colour4f getNetworkStatsCol(const AckUnreliableConnectionStats::PacketStats& stats) const;
 
 		int64_t getTimeNs(TimeLine timeline, const ProfilerData& data);
 	};

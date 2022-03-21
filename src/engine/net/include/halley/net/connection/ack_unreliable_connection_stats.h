@@ -31,9 +31,9 @@ namespace Halley {
         [[nodiscard]] size_t getLineSize() const;
 
     private:
-        size_t capacity;
-        size_t lineSize;
-        size_t lineStart;
+        size_t capacity = 0;
+        size_t lineSize = 0;
+        size_t lineStart = 0;
 
         std::vector<PacketStats> packetStats;
         size_t pos = 0; 

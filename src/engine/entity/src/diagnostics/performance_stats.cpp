@@ -442,9 +442,13 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 	}
 }
 
-Colour4f PerformanceStatsView::getNetworkStatsCol(AckUnreliableConnectionStats::State state) const
+Colour4f PerformanceStatsView::getNetworkStatsCol(const AckUnreliableConnectionStats::PacketStats& stats) const
 {
-	switch (state) {
+	if (stats.size == 8 && stats.state != AckUnreliableConnectionStats::State::Unsent) {
+		return Colour4f(0.5f, 0.5f, 0.5f);
+	}
+
+	switch (stats.state) {
 	case AckUnreliableConnectionStats::State::Sent:
 		return Colour4f(1, 1, 0, 1);
 	case AckUnreliableConnectionStats::State::Acked:
@@ -569,7 +573,7 @@ void PerformanceStatsView::drawNetworkStats(Painter& painter, Rect4f rect)
 			const auto border = Vector2f(4, 4);
 			
 			box
-				.setColour(getNetworkStatsCol(stat.state))
+				.setColour(getNetworkStatsCol(stat))
 				.setPosition(eventRect.getTopLeft() + border)
 				.scaleTo(eventRect.getSize() - 2 * border)
 				.draw(painter);
