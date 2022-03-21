@@ -85,7 +85,7 @@ namespace Halley {
 		std::shared_ptr<InputDevice> dummyInput;
 		Vector2f overscan;
 
-		bool anyMouseButtonHeld = false;
+		std::optional<int> anyMouseButtonHeld;
 
 		std::function<Vector2f(Vector2f)> mouseRemap;
 		std::unique_ptr<TextInputCapture> textCapture;

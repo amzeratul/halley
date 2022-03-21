@@ -17,7 +17,7 @@ namespace Halley {
 
 	class ChooseAssetTypeWindow : public ChooseAssetWindow {
 	public:
-        ChooseAssetTypeWindow(UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, bool hasPreview, Callback callback);
+        ChooseAssetTypeWindow(Vector2f minSize, UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, bool hasPreview, Callback callback);
 
     protected:
         std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
@@ -29,6 +29,8 @@ namespace Halley {
         std::shared_ptr<UIImage> makePreviewIcon(const String& id, bool hasSearch);
 		std::shared_ptr<UISizer> makePreviewItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch);
 
+        int getNumColumns(Vector2f scrollPaneSize) const override;
+		
 		ProjectWindow& projectWindow;
 		AssetType type;
 
@@ -54,12 +56,16 @@ namespace Halley {
 
 	class ChoosePrefabWindow : public ChooseAssetTypeWindow {
 	public:
-		ChoosePrefabWindow(UIFactory& factory, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, Callback callback);
+		ChoosePrefabWindow(UIFactory& factory, std::optional<String> defaultOption, Resources& gameResources, ProjectWindow& projectWindow, Callback callback);
 	
     protected:
 		void onCategorySet(const String& id) override;
+		void onOptionSelected(const String& id) override;
+		void onDestroyRequested() override;
 	
 	private:
 		constexpr const static char* lastCategoryKey = "prefab_picker.last_category";
+		constexpr const static char* lastOptionKey = "prefab_picker.last_option";
+		String lastOption;
 	};
 }

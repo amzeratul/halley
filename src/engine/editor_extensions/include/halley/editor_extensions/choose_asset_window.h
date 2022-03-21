@@ -15,7 +15,7 @@ namespace Halley {
     public:		
         using Callback = std::function<void(std::optional<String>)>;
 		
-        ChooseAssetWindow(UIFactory& factory, Callback callback, bool canShowBlank = true, UISizerType orientation = UISizerType::Vertical, int nColumns = 1);
+        ChooseAssetWindow(Vector2f minSize, UIFactory& factory, Callback callback, bool canShowBlank = true);
 		virtual ~ChooseAssetWindow();
 
         void onAddedToRoot(UIRoot& root) override;
@@ -39,16 +39,18 @@ namespace Halley {
 		std::shared_ptr<UISizer> makeItemSizerBigIcon(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label);
 
         virtual void onCategorySet(const String& id);
+		virtual void onOptionSelected(const String& id);
 
         virtual void sortItems(Vector<std::pair<String, String>>& items);
 		void sortItemsByName(Vector<std::pair<String, String>>& items);
 		void sortItemsById(Vector<std::pair<String, String>>& items);
 
+        virtual int getNumColumns(Vector2f scrollPaneSize) const;
+
     private:
         UIFactory& factory;
         Callback callback;
 		UISizerType orientation;
-		int nColumns;
 
 		Vector<String> origIds;
 		Vector<String> origNames;

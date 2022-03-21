@@ -54,6 +54,8 @@ namespace Halley {
 
         void render(RenderContext& rc) const override;
 
+    	Vector2f getChoosePrefabWindowSize() const;
+
     protected:
         void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 

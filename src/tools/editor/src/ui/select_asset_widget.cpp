@@ -101,7 +101,7 @@ void SelectAssetWidget::choose()
 			window = std::make_shared<ChoosePrefabWindow>(factory, getValue(), *gameResources, *projectWindow, callback);
 		} else {
 			const bool preview = type == AssetType::Sprite || type == AssetType::Animation;
-			window = std::make_shared<ChooseAssetTypeWindow>(factory, type, getValue(), *gameResources, *projectWindow, preview, callback);
+			window = std::make_shared<ChooseAssetTypeWindow>(Vector2f(), factory, type, getValue(), *gameResources, *projectWindow, preview, callback);
 		}
 		getRoot()->addChild(std::move(window));
 	}
