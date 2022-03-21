@@ -29,6 +29,7 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI
 	fpsLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f))
 		.setText("20\n\n30\n\n60").setAlignment(0.5f);
 	graphLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f)).setAlignment(0.5f);
+	connLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
 
 	for (size_t i = 0; i < 8; ++i) {
 		systemLabels.push_back(headerText.clone());
@@ -108,6 +109,11 @@ void PerformanceStatsView::setNetworkStats(NetworkSession& session)
 {
 	networkStats = &session.getService();
 	networkSession = &session;
+}
+
+int PerformanceStatsView::getNumPages() const
+{
+	return networkStats ? 3 : 2;
 }
 
 int PerformanceStatsView::getPage() const
@@ -532,7 +538,13 @@ void PerformanceStatsView::drawNetworkStats(Painter& painter, Rect4f rect)
 	auto box = whitebox.clone();
 
 	for (size_t i = 0; i < nConnections; ++i) {
-		const Rect4f area = Rect4f(rect.getTopLeft() + Vector2f(0, i * (boxHeight + spacing)), rect.getWidth(), boxHeight);
+		const Rect4f totalArea = Rect4f(rect.getTopLeft() + Vector2f(0, i * (boxHeight + spacing)), rect.getWidth(), boxHeight);
+		const Rect4f area = totalArea.grow(0, -20, 0, 0);
+
+		connLabel
+			.setPosition(totalArea.getTopLeft())
+			.setText("Connection #" + toString(i + 1) + ": latency = " + toString(lroundl(networkSession->getLatency(i) * 1000)) + " ms.")
+			.draw(painter);
 
 		boxBg
 			.clone()
@@ -546,7 +558,7 @@ void PerformanceStatsView::drawNetworkStats(Painter& painter, Rect4f rect)
 		const auto lineLen = connStats.getLineSize();
 		const size_t nLines = (stats.size() + lineLen - 1) / lineLen;
 		const float width = area.getWidth() / lineLen;
-		const float height = boxHeight / nLines;
+		const float height = area.getHeight() / nLines;
 
 		for (size_t j = 0; j < stats.size(); ++j) {
 			const size_t x = j % lineLen;

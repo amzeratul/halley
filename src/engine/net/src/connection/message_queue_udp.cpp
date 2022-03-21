@@ -204,6 +204,11 @@ void MessageQueueUDP::close()
 	connection->close();
 }
 
+float MessageQueueUDP::getLatency() const
+{
+	return connection->getLatency();
+}
+
 void MessageQueueUDP::onPacketAcked(int tag)
 {
 	auto i = pendingPackets.find(tag);

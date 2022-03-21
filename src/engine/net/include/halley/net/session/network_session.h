@@ -63,6 +63,7 @@ namespace Halley {
 
 		size_t getNumConnections() const;
 		const AckUnreliableConnectionStats& getConnectionStats(size_t idx) const;
+		float getLatency(size_t idx) const;
 
 		template <typename T>
 		T& getMySharedData()

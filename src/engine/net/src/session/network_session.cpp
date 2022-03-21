@@ -550,6 +550,11 @@ const AckUnreliableConnectionStats& NetworkSession::getConnectionStats(size_t id
 	return *peers.at(idx).stats;
 }
 
+float NetworkSession::getLatency(size_t idx) const
+{
+	return peers.at(idx).connection->getLatency();
+}
+
 NetworkSession::Peer& NetworkSession::getPeer(PeerId id)
 {
 	return *std::find_if(peers.begin(), peers.end(), [&](const Peer& peer) { return peer.peerId == id; });

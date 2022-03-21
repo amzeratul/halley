@@ -64,6 +64,8 @@ namespace Halley
 		ConnectionStatus getStatus() const;
 		void close();
 
+		float getLatency() const;
+
 	private:
 		std::shared_ptr<AckUnreliableConnection> connection;
 		Vector<Channel> channels;

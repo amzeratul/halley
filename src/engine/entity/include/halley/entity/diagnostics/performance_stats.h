@@ -25,6 +25,7 @@ namespace Halley
 		void onProfileData(std::shared_ptr<ProfilerData> data) override;
 		void setNetworkStats(NetworkSession& networkSession);
 
+		int getNumPages() const;
 		int getPage() const;
 		void setPage(int page);
 
@@ -63,6 +64,7 @@ namespace Halley
 		TextRenderer headerText;
 		TextRenderer fpsLabel;
 		TextRenderer graphLabel;
+		TextRenderer connLabel;
 		Vector<TextRenderer> systemLabels;
 
 		AveragingLatched<int64_t> totalFrameTime;
