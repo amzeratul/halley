@@ -16,22 +16,18 @@ void AckUnreliableConnectionStats::update(Time time)
 
 void AckUnreliableConnectionStats::onPacketSent(uint16_t sequence, size_t size)
 {
-	packetStats[pos] = PacketStats{ sequence, State::Sent, size };
-	pos = (pos + 1) % capacity;
+	addPacket(PacketStats{ sequence, State::Sent, true, size });
+}
 
-	// Upon reaching a new line, clear it
-	if (pos % lineSize == 0) {
-		lineStart = (pos + lineSize) % capacity;
-		for (size_t i = 0; i < lineSize; ++i) {
-			packetStats[(pos + i) % capacity] = PacketStats();
-		}
-	}
+void AckUnreliableConnectionStats::onPacketReceived(uint16_t sequence, size_t size, bool resend)
+{
+	addPacket(PacketStats{ sequence, State::Received, false, size });
 }
 
 void AckUnreliableConnectionStats::onPacketResent(uint16_t sequence)
 {
 	for (auto& packet: packetStats) {
-		if (packet.seq == sequence) {
+		if (packet.outbound && packet.seq == sequence) {
 			packet.state = State::Resent;
 			return;
 		}
@@ -41,7 +37,7 @@ void AckUnreliableConnectionStats::onPacketResent(uint16_t sequence)
 void AckUnreliableConnectionStats::onPacketAcked(uint16_t sequence)
 {
 	for (auto& packet: packetStats) {
-		if (packet.seq == sequence) {
+		if (packet.outbound && packet.seq == sequence) {
 			packet.state = State::Acked;
 			return;
 		}
@@ -61,4 +57,18 @@ size_t AckUnreliableConnectionStats::getLineStart() const
 size_t AckUnreliableConnectionStats::getLineSize() const
 {
 	return lineSize;
+}
+
+void AckUnreliableConnectionStats::addPacket(PacketStats stats)
+{
+	packetStats[pos] = stats;
+	pos = (pos + 1) % capacity;
+
+	// Upon reaching a new line, clear it
+	if (pos % lineSize == 0) {
+		lineStart = (pos + lineSize) % capacity;
+		for (size_t i = 0; i < lineSize; ++i) {
+			packetStats[(pos + i) % capacity] = PacketStats();
+		}
+	}
 }

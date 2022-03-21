@@ -27,6 +27,7 @@ namespace Halley
 		virtual void onPacketSent(uint16_t sequence, size_t size) = 0;
 		virtual void onPacketResent(uint16_t sequence) = 0;
 		virtual void onPacketAcked(uint16_t sequence) = 0;
+		virtual void onPacketReceived(uint16_t sequence, size_t size, bool resend) = 0;
 	};
 
 	class AckUnreliableSubPacket
@@ -117,5 +118,6 @@ namespace Halley
 		void notifySend(uint16_t sequence, size_t size);
 		void notifyResend(uint16_t sequence);
 		void notifyAck(uint16_t sequence);
+		void notifyReceive(uint16_t sequence, size_t size, bool resend);
 	};
 }

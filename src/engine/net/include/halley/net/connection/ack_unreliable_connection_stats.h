@@ -9,12 +9,14 @@ namespace Halley {
             Unsent,
         	Sent,
         	Resent,
-        	Acked
+        	Acked,
+            Received
         };
 
         struct PacketStats {
 	        uint16_t seq = 0;
             State state = State::Unsent;
+            bool outbound;
             size_t size;
         };
 
@@ -25,6 +27,7 @@ namespace Halley {
     	void onPacketSent(uint16_t sequence, size_t size) override;
 	    void onPacketResent(uint16_t sequence) override;
 	    void onPacketAcked(uint16_t sequence) override;
+        void onPacketReceived(uint16_t sequence, size_t size, bool resend) override;
 
         [[nodiscard]] gsl::span<const PacketStats> getPacketStats() const;
         [[nodiscard]] size_t getLineStart() const;
@@ -36,6 +39,8 @@ namespace Halley {
         size_t lineStart = 0;
 
         std::vector<PacketStats> packetStats;
-        size_t pos = 0; 
+        size_t pos = 0;
+
+        void addPacket(PacketStats stats);
     };
 }

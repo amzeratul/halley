@@ -166,6 +166,10 @@ void AckUnreliableConnection::processReceivedPacket(InboundNetworkPacket& packet
 	const uint16_t seq = header.sequence;
 
 	if (onSeqReceived(seq, s.getBytesLeft() > 0)) {
+		if (s.getBytesLeft() == 0) {
+			notifyReceive(seq, 0, false);
+		}
+
 		while (s.getBytesLeft() > 0) {
 			// Header
 			uint16_t sizeAndResend = 0;
@@ -188,6 +192,8 @@ void AckUnreliableConnection::processReceivedPacket(InboundNetworkPacket& packet
 			if (!resend || onSeqReceived(resendOf, true)) {
 				pendingPackets.emplace_back(subPacketData);
 			}
+
+			notifyReceive(seq, size, resend);
 		}
 	}
 }
@@ -250,6 +256,7 @@ bool AckUnreliableConnection::onSeqReceived(uint16_t seq, bool hasSubPacket)
 		if (hasSubPacket && !earliestUnackedMsg) {
 			earliestUnackedMsg = Clock::now();
 		}
+
 		return true;
 	}
 }
@@ -327,5 +334,12 @@ void AckUnreliableConnection::notifyAck(uint16_t sequence)
 {
 	if (statsListener) {
 		statsListener->onPacketAcked(sequence);
+	}
+}
+
+void AckUnreliableConnection::notifyReceive(uint16_t sequence, size_t size, bool resend)
+{
+	if (statsListener) {
+		statsListener->onPacketReceived(sequence, size, resend);
 	}
 }

@@ -455,6 +455,8 @@ Colour4f PerformanceStatsView::getNetworkStatsCol(const AckUnreliableConnectionS
 		return Colour4f(0, 1, 0, 1);
 	case AckUnreliableConnectionStats::State::Resent:
 		return Colour4f(1, 0, 0, 1);
+	case AckUnreliableConnectionStats::State::Received:
+		return Colour4f(0, 0.2f, 1, 1);
 	case AckUnreliableConnectionStats::State::Unsent:
 	default:
 		return Colour4f(0, 0, 0, 0);
