@@ -21,10 +21,10 @@ void AudioVoiceFadeBehaviour::onAttach(AudioVoice& audioSource)
 bool AudioVoiceFadeBehaviour::update(float elapsedTime, AudioVoice& audioSource)
 {
 	curTime += elapsedTime;
-	const float t = clamp(curTime / fadeTime, 0.0f, 1.0f);
+	const float t = fadeTime == 0.0f ? 1.0f : clamp(curTime / fadeTime, 0.0f, 1.0f);
 	const float volume = lerp(volume0, volume1, t);
 	
-	audioSource.getDynamicGainRef() *= gainToVolume(volume);
+	audioSource.setUserGain(audioSource.getDynamicGainRef() * gainToVolume(volume));
 	
 	if (curTime >= fadeTime) {
 		if (stopAtEnd) {
