@@ -25,6 +25,7 @@
 #include <sstream>
 #include <cstring>
 #include "halley/os/os.h"
+#include "halley/support/logger.h"
 #include "halley/text/string_converter.h"
 
 #if defined(_MSC_VER) && !defined(WINDOWS_STORE)
@@ -116,10 +117,6 @@ static void signalHandler(int signum)
     ::signal(SIGSEGV, SIG_DFL);
 	::signal(SIGABRT, SIG_DFL);
 
-#ifdef HAS_STACKTRACE
-	boost::stacktrace::safe_dump_to(dumpFile.c_str());
-#endif
-
 	std::stringstream ss;
 	ss << "Process aborting with signal #";
 	switch (signum) {
@@ -145,14 +142,7 @@ static void signalHandler(int signum)
 		ss << "UNKNOWN (" << signum << ")";
 	}
 
-#if defined(HAS_STACKWALKER)
-	ss << "\n";
-	OStreamStackWalker walker(ss, "RtlRaiseException", 2);
-	walker.ShowCallstack();
-#elif defined(HAS_STACKTRACE)
-	ss << "\n" << boost::stacktrace::stacktrace(3, 99);
-#endif
-	errorHandler(ss.str());
+	Logger::logException(Exception(ss.str(), HalleyExceptions::Core));
 
 	::raise(SIGABRT);
 }
