@@ -65,6 +65,12 @@ void ProjectWindow::onRemovedFromRoot(UIRoot& root)
 	debugConsole.reset();
 	debugConsoleController.reset();
 	debugConsoleCommands.reset();
+
+	consoleWindow.reset();
+
+	assetPreviewGenerator.reset();
+	assetEditorWindow.reset();
+	assetFinder.reset();
 }
 
 void ProjectWindow::makeUI()
