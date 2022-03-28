@@ -55,6 +55,9 @@ namespace Halley {
         const EntityData& asEntityData() const override;
         const EntityDataDelta& asEntityDataDelta() const override;
 
+		void instantiate(const UUID& uuid);
+		EntityDataDelta instantiateAsCopy(const UUID& uuid) const;
+
 		bool modifiesTheSameAs(const EntityDataDelta& other) const;
 
 		ConfigNode toConfigNode() const;

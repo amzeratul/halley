@@ -461,7 +461,14 @@ void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityData
 		}
 	}
 	for (const auto& childData: delta.getChildrenAdded()) {
-		updateEntityNode(childData, tryGetEntity(childData.getInstanceUUID(), *context, false), entity, context);
+		assert(childData.getInstanceUUID() != entity.getInstanceUUID());
+
+		if (context->needsNewContextFor(childData)) {
+			const auto newContext = makeContext(childData, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get());
+			updateEntityNode(newContext->getRootEntityData(), getEntity(childData.getInstanceUUID(), *newContext, false), entity, newContext);
+		} else {
+			updateEntityNode(childData, tryGetEntity(childData.getInstanceUUID(), *context, false), entity, context);
+		}
 	}
 	for (auto& c: toDelete) {
 		world.destroyEntity(c);

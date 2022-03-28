@@ -248,6 +248,30 @@ const EntityDataDelta& EntityDataDelta::asEntityDataDelta() const
 	return *this;
 }
 
+void EntityDataDelta::instantiate(const UUID& uuid)
+{
+	for (auto& c: childrenAdded) {
+		c.instantiate(uuid);
+	}
+	for (auto& c: childrenChanged) {
+		c.first = UUID::generateFromUUIDs(uuid, c.first);
+		c.second.instantiate(uuid);
+	}
+	for (auto& c: childrenRemoved) {
+		c = UUID::generateFromUUIDs(uuid, c);
+	}
+	for (auto& c: childrenOrder) {
+		c = UUID::generateFromUUIDs(uuid, c);
+	}
+}
+
+EntityDataDelta EntityDataDelta::instantiateAsCopy(const UUID& uuid) const
+{
+	EntityDataDelta result = *this;
+	result.instantiate(uuid);
+	return result;
+}
+
 bool EntityDataDelta::modifiesTheSameAs(const EntityDataDelta& other) const
 {
 	if (getFieldsPresent() != other.getFieldsPresent()) {

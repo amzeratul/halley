@@ -132,9 +132,12 @@ void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, EntityS
 		auto deltaIter = modified.find(uuid);
 		if (deltaIter != modified.end()) {
 			// A simple delta is available for this entity, apply that
-			factory.updateEntity(entity, deltaIter->second, static_cast<int>(EntitySerialization::Type::Prefab));
+
+			const auto& delta = prefab->isScene() ? deltaIter->second : deltaIter->second.instantiateAsCopy(entity.getInstanceUUID());
+
+			factory.updateEntity(entity, delta, static_cast<int>(EntitySerialization::Type::Prefab));
 			if (callbacks) {
-				callbacks->onEntityUpdated(entity, deltaIter->second, worldPartition);
+				callbacks->onEntityUpdated(entity, delta, worldPartition);
 			}
 		} else if (removed.find(uuid) != removed.end()) {
 			// Remove

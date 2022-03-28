@@ -396,6 +396,12 @@ bool EntityData::matchesUUID(const EntityData& other) const
 		|| (instanceUUID.isValid() && instanceUUID == other.getInstanceUUID());
 }
 
+void EntityData::instantiate(const UUID& uuid)
+{
+	instanceUUID = uuid;
+	generateChildUUID(uuid);
+}
+
 void EntityData::instantiateWith(const EntityData& instance)
 {
 	// This should only be called on the root of prefab
