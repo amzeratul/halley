@@ -7,7 +7,7 @@
 namespace Halley {
 	class DataInterpolatorSet {
 	public:
-		void setInterpolator(std::unique_ptr<IDataInterpolator> interpolator, EntityId entity, std::string_view componentName, std::string_view fieldName);
+		void setInterpolator(std::shared_ptr<IDataInterpolator> interpolator, EntityId entity, std::string_view componentName, std::string_view fieldName);
 		IDataInterpolator* tryGetInterpolator(EntityId entity, std::string_view componentName, std::string_view fieldName);
 		bool setInterpolatorEnabled(EntityId entity, std::string_view componentName, std::string_view fieldName, bool enabled);
 
@@ -19,7 +19,7 @@ namespace Halley {
 	private:
 		using Key = std::tuple<EntityId, std::string_view, std::string_view>;
 
-		Vector<std::pair<Key, std::unique_ptr<IDataInterpolator>>> interpolators; // Vector as hashing this is complex and we only expect a few interpolators per entity
+		Vector<std::pair<Key, std::shared_ptr<IDataInterpolator>>> interpolators; // Vector as hashing this is complex and we only expect a few interpolators per entity
 		bool ready = false;
 
 		Key makeKey(EntityId entity, std::string_view componentName, std::string_view fieldName) const;
@@ -150,4 +150,36 @@ namespace Halley {
 
 	template <typename T, typename Intermediate = T>
 	using QuantizingLerpDataInterpolator = LerpDataInterpolator<T, Intermediate, QuantizingDataInterpolator<T, Intermediate>>;
+
+
+
+	class DeadReckoningInterpolator : public DataInterpolator<Vector2f> {
+	public:
+		void update(Time t) override;
+		std::optional<ConfigNode> prepareFieldForSerialization(const ConfigNode& fromValue, const ConfigNode& toValue) override;
+
+		void setVelocity(Vector2f vel);
+		void setVelocityRef(Vector2f& value);
+
+	protected:
+		void doDeserialize(Vector2f& value, const Vector2f& defaultValue, const EntitySerializationContext& context, const ConfigNode& node) override;
+
+	private:
+		Vector2f outboundVel;
+		Vector2f* velRef = nullptr;
+	};
+
+	class DeadReckoningVelocityInterpolator : public DataInterpolator<Vector2f> {
+	public:
+		DeadReckoningVelocityInterpolator(std::shared_ptr<DeadReckoningInterpolator> parent);
+
+		void update(Time t) override;
+		std::optional<ConfigNode> prepareFieldForSerialization(const ConfigNode& fromValue, const ConfigNode& toValue) override;
+
+	protected:
+		void doDeserialize(Vector2f& value, const Vector2f& defaultValue, const EntitySerializationContext& context, const ConfigNode& node) override;
+
+	private:
+		std::shared_ptr<DeadReckoningInterpolator> parent;
+	};
 }

@@ -147,12 +147,7 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 	auto options = parent->getEntityDeltaOptions();
 	options.interpolatorSet = &retriever;
 	auto deltaData = EntityDataDelta(remote.data, newData, options);
-
-	if (deltaData.hasChange()) {
-		parent->onPreSendDelta(deltaData); // Can modify deltaData
-	}
-
-	// Check again, since the method above can modify the delta
+	
 	if (deltaData.hasChange()) {
 		remote.data = std::move(newData);
 		remote.timeSinceSend = 0;

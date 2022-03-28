@@ -9,7 +9,7 @@
 
 using namespace Halley;
 
-void DataInterpolatorSet::setInterpolator(std::unique_ptr<IDataInterpolator> interpolator, EntityId entity, std::string_view componentName, std::string_view fieldName)
+void DataInterpolatorSet::setInterpolator(std::shared_ptr<IDataInterpolator> interpolator, EntityId entity, std::string_view componentName, std::string_view fieldName)
 {
 	const auto key = makeKey(entity, componentName, fieldName);
 	for (auto& entry: interpolators) {
@@ -106,10 +106,8 @@ ConfigNode DataInterpolatorSetRetriever::createComponentDelta(const UUID& instan
 
 	ConfigNode to = ConfigNode(origTo);
 	for (const auto& [fieldName, fromValue]: from.asMap()) {
-		auto* interpolator = tryGetInterpolator(entityId, componentName, fieldName);
-		if (interpolator) {
-			auto newValue = interpolator->prepareFieldForSerialization(fromValue, origTo[fieldName]);
-			if (newValue) {
+		if (auto* interpolator = tryGetInterpolator(entityId, componentName, fieldName)) {
+			if (auto newValue = interpolator->prepareFieldForSerialization(fromValue, origTo[fieldName])) {
 				to[fieldName] = std::move(newValue.value());
 			}
 		}
@@ -124,4 +122,49 @@ void DataInterpolatorSetRetriever::collectUUIDs(EntityRef entity)
 	for (auto c: entity.getChildren()) {
 		collectUUIDs(c);
 	}
+}
+
+
+
+void DeadReckoningInterpolator::update(Time time)
+{
+}
+
+std::optional<ConfigNode> DeadReckoningInterpolator::prepareFieldForSerialization(const ConfigNode& fromValue, const ConfigNode& toValue)
+{
+	return {};
+}
+
+void DeadReckoningInterpolator::setVelocity(Vector2f vel)
+{
+	outboundVel = vel;
+}
+
+void DeadReckoningInterpolator::setVelocityRef(Vector2f& value)
+{
+	velRef = &value;
+}
+
+void DeadReckoningInterpolator::doDeserialize(Vector2f& value, const Vector2f& defaultValue, const EntitySerializationContext& context, const ConfigNode& node)
+{
+}
+
+DeadReckoningVelocityInterpolator::DeadReckoningVelocityInterpolator(std::shared_ptr<DeadReckoningInterpolator> parent)
+	: parent(std::move(parent))
+{
+}
+
+void DeadReckoningVelocityInterpolator::update(Time time)
+{
+}
+
+std::optional<ConfigNode> DeadReckoningVelocityInterpolator::prepareFieldForSerialization(const ConfigNode& fromValue, const ConfigNode& toValue)
+{
+	parent->setVelocity(toValue.asVector2f());
+	return ConfigNode(ConfigNode::NoopType());
+}
+
+void DeadReckoningVelocityInterpolator::doDeserialize(Vector2f& value, const Vector2f& defaultValue, const EntitySerializationContext& context, const ConfigNode& node)
+{
+	parent->setVelocityRef(value);
 }

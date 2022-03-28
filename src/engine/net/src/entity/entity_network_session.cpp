@@ -303,13 +303,6 @@ void EntityNetworkSession::onRemoteEntityCreated(EntityRef entity, NetworkSessio
 	}
 }
 
-void EntityNetworkSession::onPreSendDelta(EntityDataDelta& delta)
-{
-	if (listener) {
-		listener->onPreSendDelta(delta);
-	}
-}
-
 void EntityNetworkSession::requestSetupInterpolators(DataInterpolatorSet& interpolatorSet, EntityRef entity, bool remote)
 {
 	interpolatorSet.markReady();
