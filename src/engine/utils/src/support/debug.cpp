@@ -143,6 +143,7 @@ static void signalHandler(int signum)
 	}
 
 	Logger::logException(Exception(ss.str(), HalleyExceptions::Core));
+	errorHandler(ss.str());
 
 	::raise(SIGABRT);
 }
