@@ -44,7 +44,7 @@ namespace Halley {
 			
 			bool needsUpdate() const;
 			
-			void updateEntities(EntityFactory& factory, EntityScene& scene, IEntitySceneUpdateCallbacks* callbacks, uint8_t worldPartition) const;
+			void updateEntities(EntityFactory& factory, EntityScene& scene, IEntitySceneUpdateCallbacks* callbacks, uint8_t worldPartition);
 			void markUpdated();
 
 			void addEntity(EntityRef entity);

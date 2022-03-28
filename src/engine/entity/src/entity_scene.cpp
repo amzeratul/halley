@@ -115,7 +115,7 @@ bool EntityScene::PrefabObserver::needsUpdate() const
 	return assetVersion != prefab->getAssetVersion();
 }
 
-void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, EntityScene& scene, IEntitySceneUpdateCallbacks* callbacks, uint8_t worldPartition) const
+void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, EntityScene& scene, IEntitySceneUpdateCallbacks* callbacks, uint8_t worldPartition)
 {
 	const auto& modified = prefab->getEntitiesModified();
 	const auto& removed = prefab->getEntitiesRemoved();
@@ -151,6 +151,7 @@ void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, EntityS
 		if (dataIter != dataMap.end()) {
 			// Create
 			const auto entity = factory.createEntity(*dataIter->second, {}, &scene);
+			addEntity(entity);
 			if (callbacks) {
 				callbacks->onEntityAdded(entity, *dataIter->second, worldPartition);
 			}
