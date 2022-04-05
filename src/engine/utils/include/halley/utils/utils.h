@@ -42,9 +42,19 @@
 #include "type_traits.h"
 
 #ifdef _MSC_VER
-#include <xmmintrin.h>
-#endif
+	#include <xmmintrin.h>
 
+	#if defined(DEV_BUILD)
+		#define PRAGMA_DEOPTIMIZE __pragma(optimize( "", off ))
+		#define PRAGMA_REOPTIMIZE __pragma(optimize( "", on ))
+	#else
+		#define PRAGMA_DEOPTIMIZE
+		#define PRAGMA_REOPTIMIZE
+	#endif
+#else
+	#define PRAGMA_DEOPTIMIZE
+	#define PRAGMA_REOPTIMIZE
+#endif
 
 namespace Halley {
 	// General aliases
