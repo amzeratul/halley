@@ -8,6 +8,7 @@
 #include <deque>
 #include <limits>
 #include <cstdint>
+#include <optional>
 
 namespace Halley
 {
