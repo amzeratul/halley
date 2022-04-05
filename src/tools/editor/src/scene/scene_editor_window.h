@@ -35,7 +35,7 @@ namespace Halley {
 		std::optional<EntityData> makeInstance(const String& prefab) const;
 		void addNewPrefab(const String& referenceEntityId, bool childOfReference, const String& prefabName);
 		void addEntity(const String& referenceEntityId, bool childOfReference, EntityData data);
-		void addEntities(const String& referenceEntityId, bool childOfReference, Vector<EntityData> data);
+		void addEntities(const String& referenceEntityId, bool childOfReference, Vector<EntityData> data, bool moveToCursor);
 		void removeSelectedEntities();
 		void removeEntities(gsl::span<const String> entityIds) override;
 		void replaceEntity(const String& entityId, EntityData newData);
@@ -62,10 +62,10 @@ namespace Halley {
 
 		void copyEntitiesToClipboard(gsl::span<const String> ids);
 		void cutEntitiesToClipboard(gsl::span<const String> ids);
-		void pasteEntitiesFromClipboard(const String& referenceId, bool childOfReference);
+		void pasteEntitiesFromClipboard(const String& referenceId, bool childOfReference, bool moveToCursor);
 		String copyEntities(gsl::span<const String> ids);
-		void pasteEntities(const String& data, const String& referenceId, bool childOfReference);
-		void duplicateEntities(gsl::span<const String> ids);
+		void pasteEntities(const String& data, const String& referenceId, bool childOfReference, bool moveToCursor);
+		void duplicateEntities(gsl::span<const String> ids, bool moveToCursor);
 		void openEditPrefabWindow(const String& name);
 
 		const std::shared_ptr<ISceneData>& getSceneData() const override;

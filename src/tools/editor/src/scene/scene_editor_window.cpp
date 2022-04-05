@@ -296,12 +296,22 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 	}
 
 	if (key.is(KeyCode::V, KeyMods::Ctrl)) {
-		pasteEntitiesFromClipboard(entityList->getCurrentSelection(), false);
+		pasteEntitiesFromClipboard(entityList->getCurrentSelection(), false, true);
+		return true;
+	}
+
+	if (key.is(KeyCode::V, KeyMods::CtrlShift)) {
+		pasteEntitiesFromClipboard(entityList->getCurrentSelection(), false, false);
 		return true;
 	}
 
 	if (key.is(KeyCode::D, KeyMods::Ctrl)) {
-		duplicateEntities(entityList->getCurrentSelections());
+		duplicateEntities(entityList->getCurrentSelections(), true);
+		return true;
+	}
+
+	if (key.is(KeyCode::D, KeyMods::CtrlShift)) {
+		duplicateEntities(entityList->getCurrentSelections(), false);
 		return true;
 	}
 
@@ -342,13 +352,13 @@ void SceneEditorWindow::onEntityContextMenuAction(const String& actionId, gsl::s
 	} else if (actionId == "cut") {
 		cutEntitiesToClipboard(entityIds);
 	} else if (actionId == "paste_sibling") {
-		pasteEntitiesFromClipboard(entityIds.front(), false);
+		pasteEntitiesFromClipboard(entityIds.front(), false, true);
 	} else if (actionId == "paste_child") {
-		pasteEntitiesFromClipboard(entityIds.front(), true);
+		pasteEntitiesFromClipboard(entityIds.front(), true, true);
 	} else if (actionId == "delete") {
 		removeEntities(entityIds);
 	} else if (actionId == "duplicate") {
-		duplicateEntities(entityIds);
+		duplicateEntities(entityIds, true);
 	} else if (actionId == "add_entity_child") {
 		addNewEntity(entityIds.front(), true);
 	} else if (actionId == "add_entity_sibling") {
@@ -432,10 +442,10 @@ void SceneEditorWindow::selectEntities(gsl::span<const String> ids, UIList::Sele
 
 void SceneEditorWindow::addEntity(const String& referenceEntity, bool childOfReference, EntityData data)
 {
-	addEntities(referenceEntity, childOfReference, Vector<EntityData>({ std::move(data) }));
+	addEntities(referenceEntity, childOfReference, Vector<EntityData>({ std::move(data) }), true);
 }
 
-void SceneEditorWindow::addEntities(const String& referenceEntity, bool childOfReference, Vector<EntityData> datas)
+void SceneEditorWindow::addEntities(const String& referenceEntity, bool childOfReference, Vector<EntityData> datas, bool moveToCursor)
 {
 	if (datas.empty()) {
 		return;
@@ -448,7 +458,7 @@ void SceneEditorWindow::addEntities(const String& referenceEntity, bool childOfR
 	// Find the placement position
 	// This is based on the anchor closest to the average pos, and the cursor pos
 	const Vector2f targetPos = getPositionClosestToAverage(datas);
-	const Vector2f basePos = gameBridge->getMousePos().value_or(gameBridge->getCameraPos()).round() - targetPos;
+	const Vector2f basePos = moveToCursor ? gameBridge->getMousePos().value_or(gameBridge->getCameraPos()).round() - targetPos : Vector2f();
 
 	// Find the relevant transform
 	const Transform2DComponent identity;
@@ -832,13 +842,13 @@ void SceneEditorWindow::cutEntitiesToClipboard(gsl::span<const String> ids)
 	removeEntities(ids);
 }
 
-void SceneEditorWindow::pasteEntitiesFromClipboard(const String& referenceId, bool childOfReference)
+void SceneEditorWindow::pasteEntitiesFromClipboard(const String& referenceId, bool childOfReference, bool moveToCursor)
 {
 	const auto clipboard = api.system->getClipboard();
 	if (clipboard) {
 		auto clipboardData = clipboard->getStringData();
 		if (clipboardData) {
-			pasteEntities(clipboardData.value(), referenceId, childOfReference);
+			pasteEntities(clipboardData.value(), referenceId, childOfReference, moveToCursor);
 		}
 	}
 }
@@ -862,7 +872,7 @@ String SceneEditorWindow::copyEntities(gsl::span<const String> ids)
 	return serializeEntities(datas);
 }
 
-void SceneEditorWindow::pasteEntities(const String& stringData, const String& referenceId, bool childOfReference)
+void SceneEditorWindow::pasteEntities(const String& stringData, const String& referenceId, bool childOfReference, bool moveToCursor)
 {
 	Expects(gameBridge);
 	auto datas = deserializeEntities(stringData);
@@ -870,14 +880,14 @@ void SceneEditorWindow::pasteEntities(const String& stringData, const String& re
 		for (auto& data: datas) {
 			assignUUIDs(data);
 		}
-		addEntities(referenceId, childOfReference, std::move(datas));
+		addEntities(referenceId, childOfReference, std::move(datas), moveToCursor);
 	}
 }
 
-void SceneEditorWindow::duplicateEntities(gsl::span<const String> ids)
+void SceneEditorWindow::duplicateEntities(gsl::span<const String> ids, bool moveToCursor)
 {
 	if (!ids.empty()) {
-		pasteEntities(copyEntities(ids), ids.back(), false);
+		pasteEntities(copyEntities(ids), ids.back(), false, moveToCursor);
 	}
 }
 
@@ -1193,7 +1203,7 @@ std::shared_ptr<ScriptNodeTypeCollection> SceneEditorWindow::getScriptNodeTypes(
 String SceneEditorWindow::serializeEntities(gsl::span<const EntityData> nodes) const
 {
 	YAMLConvert::EmitOptions options;
-	options.mapKeyOrder = {{ "name", "icon", "prefab", "uuid", "components", "children" }};
+	options.mapKeyOrder = {{ "name", "icon", "prefab", "uuid", "flags", "components", "children" }};
 
 	ConfigNode result;
 	if (nodes.size() == 1) {
@@ -1287,7 +1297,7 @@ bool SceneEditorWindow::isValidEntityTree(const ConfigNode& node) const
 		return false;
 	}
 	for (const auto& [k, v]: node.asMap()) {
-		if (k != "name" && k != "uuid" && k != "components" && k != "children" && k != "prefab" && k != "icon") {
+		if (k != "name" && k != "uuid" && k != "components" && k != "children" && k != "prefab" && k != "icon" && k != "flags") {
 			return false;
 		}
 	}

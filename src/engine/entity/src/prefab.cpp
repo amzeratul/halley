@@ -83,7 +83,7 @@ String Prefab::toYAML() const
 {
 	waitForLoad(true);
 	YAMLConvert::EmitOptions options;
-	options.mapKeyOrder = {{ "name", "icon", "uuid", "prefab", "components", "children" }};
+	options.mapKeyOrder = {{ "name", "icon", "flags", "uuid", "prefab", "components", "children" }};
 	return YAMLConvert::generateYAML(toConfigNode(), options);
 }
 
