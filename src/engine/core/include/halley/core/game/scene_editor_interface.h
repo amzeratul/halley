@@ -330,11 +330,16 @@ namespace Halley {
 			{}
 		};
 
+		struct SelectResult {
+			bool hasHighlight = false;
+			bool allowEntitySpriteSelection = true;
+		};
+
 		using GizmoFactory = std::function<std::unique_ptr<SceneEditorGizmo>(SnapRules snapRules, const String& componentName, const String& fieldName)>;
 		
 		virtual ~ISceneEditorGizmoCollection() = default;
 
-        virtual bool update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) = 0;
+        virtual SelectResult update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState) = 0;
         virtual void draw(Painter& painter, const ISceneEditor& sceneEditor) = 0;
         virtual void setSelectedEntities(Vector<EntityRef> entities, Vector<EntityData*> entityDatas) = 0;
 		virtual void refreshEntity() = 0;

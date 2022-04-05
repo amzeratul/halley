@@ -205,6 +205,11 @@ void SceneEditorGizmo::deselect()
 {
 }
 
+bool SceneEditorGizmo::allowEntitySpriteSelection() const
+{
+	return true;
+}
+
 Vector<String> SceneEditorGizmo::getHighlightedComponents() const
 {
 	return {};

@@ -162,5 +162,5 @@ void HalleyAPI::replaceCoreAPI(CoreAPIInternal* coreAPI)
 
 uint32_t Halley::getHalleyDLLAPIVersion()
 {
-	return 148;
+	return 149;
 }

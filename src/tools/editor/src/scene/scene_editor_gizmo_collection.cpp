@@ -22,7 +22,7 @@ SceneEditorGizmoCollection::SceneEditorGizmoCollection(UIFactory& factory, Resou
 	resetTools();
 }
 
-bool SceneEditorGizmoCollection::update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState)
+ISceneEditorGizmoCollection::SelectResult SceneEditorGizmoCollection::update(Time time, const Camera& camera, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState, SceneEditorOutputState& outputState)
 {
 	selectedBoundsGizmo->setCamera(camera);
 	selectedBoundsGizmo->update(time, sceneEditor, inputState);
@@ -35,9 +35,9 @@ bool SceneEditorGizmoCollection::update(Time time, const Camera& camera, const I
 		activeGizmo->update(time, sceneEditor, inputState);
 		activeGizmo->setOutputState(nullptr);
 
-		return activeGizmo->isHighlighted();
+		return SelectResult{ activeGizmo->isHighlighted(), activeGizmo->allowEntitySpriteSelection() };
 	}
-	return false;
+	return SelectResult();
 }
 
 void SceneEditorGizmoCollection::draw(Painter& painter, const ISceneEditor& sceneEditor)

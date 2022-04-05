@@ -34,6 +34,7 @@ namespace Halley {
 
 		bool isHighlighted() const override;
 		void deselect() override;
+		bool allowEntitySpriteSelection() const override;
 
 		Vector<String> getHighlightedComponents() const override;
 		

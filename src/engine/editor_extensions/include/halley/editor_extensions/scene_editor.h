@@ -72,6 +72,12 @@ namespace Halley {
 		bool shouldDrawOutline(const Sprite& sprite) const override;
 
     protected:
+		enum class EntityAtPositionSelectMode {
+			All,
+			Sprite,
+			NonSprite
+		};
+
     	Camera camera;
 		IEditorInterface* editorInterface;
 
@@ -96,10 +102,10 @@ namespace Halley {
 		virtual std::optional<Vector2f> getWorldOffset() const;
 		std::unique_ptr<World> doCreateWorld(const String& stageName) const;
 
-    	virtual Vector<EntityRef> getEntitiesAt(Rect4f area, bool allowUnselectable) const;
-    	EntityRef getRootEntityAt(Vector2f point, bool allowUnselectable) const;
-		Vector<EntityRef> getRootEntitiesAt(Vector2f point, bool allowUnselectable) const;
-    	Vector<EntityRef> getRootEntitiesAt(Rect4f area, bool allowUnselectable) const;
+    	virtual Vector<EntityRef> getEntitiesAt(Rect4f area, bool allowUnselectable, EntityAtPositionSelectMode mode) const;
+    	EntityRef getRootEntityAt(Vector2f point, bool allowUnselectable, EntityAtPositionSelectMode mode) const;
+		Vector<EntityRef> getRootEntitiesAt(Vector2f point, bool allowUnselectable, EntityAtPositionSelectMode mode) const;
+    	Vector<EntityRef> getRootEntitiesAt(Rect4f area, bool allowUnselectable, EntityAtPositionSelectMode mode) const;
        	virtual float getSpriteDepth(EntityRef& e, Rect4f area) const;
 
 	private:
@@ -133,7 +139,7 @@ namespace Halley {
     	EntityRef getEntity(const UUID& uuid) const;
 
     	bool doesAreaOverlapSprite(EntityRef& e, Rect4f area) const;
-    	void onClick(const SceneEditorInputState& input, SceneEditorOutputState& output);
+    	void onClick(const SceneEditorInputState& input, SceneEditorOutputState& output, bool canSelectSprite);
 		void onStartSelectionBox();
 		void onSelectionBox(const SceneEditorInputState& input, SceneEditorOutputState& output);
 

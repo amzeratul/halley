@@ -94,14 +94,14 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	}
 
 	// Update gizmos
-	const bool hasHighlightedGizmo = gizmoCollection->update(t, camera, *this, inputState, outputState);
-	if (!hasHighlightedGizmo && inputState.leftClickPressed) {
+	const auto gizmoUpdateResult = gizmoCollection->update(t, camera, *this, inputState, outputState);
+	if (!gizmoUpdateResult.hasHighlight && inputState.leftClickPressed) {
 		gizmoCollection->deselect();
-		onClick(inputState, outputState);
+		onClick(inputState, outputState, gizmoUpdateResult.allowEntitySpriteSelection);
 	}
 
 	// Start dragging
-	if (!hasHighlightedGizmo && inputState.leftClickPressed) {
+	if (!gizmoUpdateResult.hasHighlight && inputState.leftClickPressed) {
 		holdMouseStart = mousePos;
 	}
 
@@ -290,7 +290,7 @@ EntityRef SceneEditor::getEntityToFocus()
 		return EntityRef();
 	}
 
-	EntityRef underMouse = mousePos ? getRootEntityAt(mousePos.value(), false) : EntityRef();
+	EntityRef underMouse = mousePos ? getRootEntityAt(mousePos.value(), false, EntityAtPositionSelectMode::All) : EntityRef();
 	if (!underMouse.isValid()) {
 		return entityHighlightedOnList;
 	}
@@ -480,7 +480,7 @@ Vector<UIPopupMenuItem> SceneEditor::getSceneContextMenu(const Vector2f& mousePo
 {
 	Vector<UIPopupMenuItem> result;
 
-	const auto entities = getRootEntitiesAt(mousePos, true);
+	const auto entities = getRootEntitiesAt(mousePos, true, EntityAtPositionSelectMode::All);
 	for (const auto& e: entities) {
 		const auto name = LocalisedString::fromHardcodedString("Select: " + e.getName());
 		const auto tooltip = LocalisedString::fromHardcodedString("Selects entity o" + e.getName());
@@ -557,7 +557,7 @@ float SceneEditor::getSpriteDepth(EntityRef& e, Rect4f rect) const
 	}
 }
 
-Vector<EntityRef> SceneEditor::getEntitiesAt(Rect4f area, bool allowUnselectable) const
+Vector<EntityRef> SceneEditor::getEntitiesAt(Rect4f area, bool allowUnselectable, EntityAtPositionSelectMode mode) const
 {
 	Vector<std::pair<EntityRef, float>> temp;
 	
@@ -580,14 +580,14 @@ Vector<EntityRef> SceneEditor::getEntitiesAt(Rect4f area, bool allowUnselectable
 	return result;
 }
 
-Vector<EntityRef> SceneEditor::getRootEntitiesAt(Vector2f point, bool allowUnselectable) const
+Vector<EntityRef> SceneEditor::getRootEntitiesAt(Vector2f point, bool allowUnselectable, EntityAtPositionSelectMode mode) const
 {
-	return getRootEntitiesAt(Rect4f(point, point), allowUnselectable);
+	return getRootEntitiesAt(Rect4f(point, point), allowUnselectable, mode);
 }
 
-Vector<EntityRef> SceneEditor::getRootEntitiesAt(Rect4f area, bool allowUnselectable) const
+Vector<EntityRef> SceneEditor::getRootEntitiesAt(Rect4f area, bool allowUnselectable, EntityAtPositionSelectMode mode) const
 {
-	const auto entities = getEntitiesAt(area, allowUnselectable);
+	const auto entities = getEntitiesAt(area, allowUnselectable, mode);
 
 	Vector<EntityRef> result;
 	for (const auto& e: entities) {
@@ -606,9 +606,9 @@ Vector<EntityRef> SceneEditor::getRootEntitiesAt(Rect4f area, bool allowUnselect
 	return result;
 }
 
-EntityRef SceneEditor::getRootEntityAt(Vector2f point, bool allowUnselectable) const
+EntityRef SceneEditor::getRootEntityAt(Vector2f point, bool allowUnselectable, EntityAtPositionSelectMode mode) const
 {
-	const auto entities = getRootEntitiesAt(point, allowUnselectable);
+	const auto entities = getRootEntitiesAt(point, allowUnselectable, mode);
 	if (entities.empty()) {
 		highlightDelta = 0;
 		return EntityRef();
@@ -619,7 +619,7 @@ EntityRef SceneEditor::getRootEntityAt(Vector2f point, bool allowUnselectable) c
 	return entities.at(highlightDelta);
 }
 
-void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputState& output)
+void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputState& output, bool canSelectSprite)
 {
 	if (!input.mousePos) {
 		return;
@@ -627,11 +627,14 @@ void SceneEditor::onClick(const SceneEditorInputState& input, SceneEditorOutputS
 	if (input.spaceHeld || input.shiftHeld || (input.altHeld && !input.ctrlHeld)) {
 		return;
 	}
-
-	output.newSelection = Vector<UUID>();
+	
 	output.selectionMode = input.ctrlHeld ? UIList::SelectionMode::CtrlSelect : UIList::SelectionMode::Normal;
-	if (const auto bestEntity = getRootEntityAt(input.mousePos.value(), false); bestEntity.isValid()) {
+	const auto bestEntity = getRootEntityAt(input.mousePos.value(), false, canSelectSprite ? EntityAtPositionSelectMode::All : EntityAtPositionSelectMode::NonSprite);
+	if (bestEntity.isValid()) {
+		output.newSelection = Vector<UUID>();
 		output.newSelection->push_back(bestEntity.getInstanceUUID());
+	} else if (canSelectSprite) {
+		output.newSelection = Vector<UUID>();
 	}
 }
 
@@ -649,7 +652,7 @@ void SceneEditor::onStartSelectionBox()
 
 void SceneEditor::onSelectionBox(const SceneEditorInputState& input, SceneEditorOutputState& output)
 {
-	const auto& entities = getRootEntitiesAt(*input.selectionBox, false);
+	const auto& entities = getRootEntitiesAt(*input.selectionBox, false, EntityAtPositionSelectMode::All);
 	Vector<UUID> results;
 
 	if (input.shiftHeld || input.altHeld) {

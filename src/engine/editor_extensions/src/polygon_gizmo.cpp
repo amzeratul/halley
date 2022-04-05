@@ -163,6 +163,11 @@ void PolygonGizmo::deselect()
 	}
 }
 
+bool PolygonGizmo::allowEntitySpriteSelection() const
+{
+	return false;
+}
+
 Vector<String> PolygonGizmo::getHighlightedComponents() const
 {
 	return { componentName };
