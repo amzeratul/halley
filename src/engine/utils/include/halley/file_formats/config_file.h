@@ -25,6 +25,7 @@ namespace Halley
 		void deserialize(Deserializer& s);
 
 		size_t getSizeBytes() const;
+		ResourceMemoryUsage getMemoryUsage() const override;
 
 		static std::unique_ptr<ConfigFile> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::ConfigFile; }
