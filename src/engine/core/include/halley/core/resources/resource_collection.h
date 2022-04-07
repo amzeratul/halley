@@ -14,6 +14,7 @@ namespace Halley
 	class Resource;
 	class Resources;
 	class ResourceLoader;
+	struct ResourceMemoryUsage;
 
 	class ResourceCollectionBase
 	{
@@ -53,6 +54,9 @@ namespace Halley
 
 		Vector<String> enumerate() const;
 
+		AssetType getAssetType() const;
+		ResourceMemoryUsage getMemoryUsage() const;
+
 	protected:
 		virtual std::shared_ptr<Resource> loadResource(ResourceLoader& loader) = 0;
 
@@ -66,7 +70,7 @@ namespace Halley
 		AssetType type;
 		ResourceLoaderFunc resourceLoader;
 		ResourceEnumeratorFunc resourceEnumerator;
-		std::shared_mutex mutex;
+		mutable std::shared_mutex mutex;
 	};
 
 	template <typename T>

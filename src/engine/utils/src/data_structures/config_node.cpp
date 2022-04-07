@@ -1446,3 +1446,34 @@ bool ConfigNode::isEquivalentStrictOrder(const ConfigNode& other) const
 	return false;
 }
 
+size_t ConfigNode::getSizeBytes() const
+{
+	size_t result = sizeof(ConfigNode);
+
+	switch (type) {
+	case ConfigNodeType::Bytes:
+		result += sizeof(Bytes) + bytesData->size();
+		break;
+	case ConfigNodeType::Map:
+	case ConfigNodeType::DeltaMap:
+		result += sizeof(MapType);
+		for (auto& e: *mapData) {
+			result += e.first.getSizeBytes();
+			result += e.second.getSizeBytes();
+		}
+		break;
+	case ConfigNodeType::DeltaSequence:
+	case ConfigNodeType::Sequence:
+		result += sizeof(SequenceType);
+		for (auto& e: *sequenceData) {
+			result += e.getSizeBytes();
+		}
+		break;
+	case ConfigNodeType::String:
+		result += sizeof(String);
+		result += strData->getSizeBytes();
+		break;
+	}
+
+	return result;
+}

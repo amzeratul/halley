@@ -36,6 +36,11 @@ void Resource::reloadResource(Resource&& resource)
 	reload(std::move(resource));
 }
 
+ResourceMemoryUsage Resource::getMemoryUsage() const
+{
+	return ResourceMemoryUsage{};
+}
+
 void Resource::reload(Resource&& resource)
 {
 }

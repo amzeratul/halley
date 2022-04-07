@@ -136,6 +136,21 @@ bool AudioClip::isLoaded() const
 	return AsyncResource::isLoaded();
 }
 
+ResourceMemoryUsage AudioClip::getMemoryUsage() const
+{
+	ResourceMemoryUsage result;
+
+	if (vorbisData) {
+		result.ramUsage += vorbisData->getSizeBytes() + sizeof(VorbisData);
+	}
+	result.ramUsage += temp0.size() * sizeof(AudioConfig::SampleFormat);
+	result.ramUsage += temp1.size() * sizeof(AudioConfig::SampleFormat);
+	result.ramUsage += samples.size() * sizeof(AudioConfig::SampleFormat);
+	result.ramUsage += sizeof(*this);
+
+	return result;
+}
+
 std::shared_ptr<AudioClip> AudioClip::loadResource(ResourceLoader& loader)
 {
 	auto meta = loader.getMeta();

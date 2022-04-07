@@ -96,6 +96,14 @@ std::unique_ptr<Image> Texture::makeImage(Painter& painter) const
 	return image;
 }
 
+ResourceMemoryUsage Texture::getMemoryUsage() const
+{
+	ResourceMemoryUsage result;
+	result.ramUsage = descriptor.getMemoryUsage() + sizeof(*this);
+	result.vramUsage = getVRamUsage();
+	return result;
+}
+
 void Texture::doLoad(TextureDescriptor& descriptor)
 {
 }
@@ -109,6 +117,11 @@ void Texture::doCopyToImage(Painter& painter, Image& image) const
 {
 	Logger::logWarning("Copying to image not implemented.");
 	image.clear(Image::convertRGBAToInt(255, 0, 255));
+}
+
+size_t Texture::getVRamUsage() const
+{
+	return 0;
 }
 
 std::shared_ptr<Texture> Texture::loadResource(ResourceLoader& loader)

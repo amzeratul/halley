@@ -372,6 +372,8 @@ namespace Halley {
 			Expects(intData != 0xDDDDDDDD);
 		}
 
+		size_t getSizeBytes() const;
+
 		struct BreadCrumb {
 			const BreadCrumb* prev = nullptr;
 			String key;

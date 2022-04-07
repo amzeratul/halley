@@ -556,6 +556,13 @@ void Image::preMultiply()
 	format = Format::RGBAPremultiplied;
 }
 
+ResourceMemoryUsage Image::getMemoryUsage() const
+{
+	ResourceMemoryUsage result;
+	result.vramUsage = sizeof(*this) + getByteSize();
+	return result;
+}
+
 
 gsl::span<unsigned char> Image::getPixelBytes()
 {

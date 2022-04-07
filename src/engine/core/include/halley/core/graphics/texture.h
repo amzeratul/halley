@@ -32,6 +32,8 @@ namespace Halley
 		void copyToImage(Painter& painter, Image& image) const;
 		std::unique_ptr<Image> makeImage(Painter& painter) const;
 
+		ResourceMemoryUsage getMemoryUsage() const final override;
+
 	protected:
 		Vector2i size;
 		TextureDescriptor descriptor;
@@ -39,5 +41,6 @@ namespace Halley
 		virtual void doLoad(TextureDescriptor& descriptor);
 		virtual void doCopyToTexture(Painter& painter, Texture& other) const;
 		virtual void doCopyToImage(Painter& painter, Image& image) const;
+		virtual size_t getVRamUsage() const;
 	};
 }

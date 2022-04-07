@@ -112,6 +112,8 @@ namespace Halley {
 
 		void preMultiply();
 
+		ResourceMemoryUsage getMemoryUsage() const override;
+
 	private:
 		std::unique_ptr<unsigned char, void(*)(unsigned char*)> px;
 		size_t dataLen = 0;

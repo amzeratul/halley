@@ -26,6 +26,7 @@ namespace Halley
 		ID3D11Texture2D* getTexture() const;
 
 	protected:
+		size_t getVRamUsage() const override;
 		void doCopyToTexture(Painter& painter, Texture& other) const override;
 		void doCopyToImage(Painter& painter, Image& image) const override;
 

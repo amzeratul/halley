@@ -167,6 +167,16 @@ void VorbisData::seek(size_t sample)
 	ov_pcm_seek(file, ogg_int64_t(sample));
 }
 
+size_t VorbisData::getSizeBytes() const
+{
+	if (streaming) {
+		return sizeof(ResourceDataStream);
+	} else {
+		auto res = std::dynamic_pointer_cast<ResourceDataStatic>(resource);
+		return res->getSize() + sizeof(ResourceDataStatic);
+	}
+}
+
 size_t VorbisData::vorbisRead(void* ptr, size_t size, size_t nmemb, void* datasource)
 {
 	VorbisData* data = static_cast<VorbisData*>(datasource);

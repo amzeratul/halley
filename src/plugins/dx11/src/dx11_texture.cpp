@@ -249,3 +249,8 @@ ID3D11Texture2D* DX11Texture::getTexture() const
 {
 	return texture;
 }
+
+size_t DX11Texture::getVRamUsage() const
+{
+	return 0; // ?
+}

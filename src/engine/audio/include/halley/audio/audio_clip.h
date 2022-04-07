@@ -37,6 +37,8 @@ namespace Halley
 		size_t getLoopPoint() const override; // in samples
 		bool isLoaded() const override;
 
+		ResourceMemoryUsage getMemoryUsage() const override;
+
 		static std::shared_ptr<AudioClip> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::AudioClip; }
 		void reload(Resource&& resource) override;

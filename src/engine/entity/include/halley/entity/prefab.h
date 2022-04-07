@@ -49,6 +49,8 @@ namespace Halley {
 
 		void preloadDependencies(Resources& resources) const;
 
+		ResourceMemoryUsage getMemoryUsage() const override;
+
 	protected:
 		struct Deltas {
 			std::map<UUID, EntityDataDelta> entitiesModified;

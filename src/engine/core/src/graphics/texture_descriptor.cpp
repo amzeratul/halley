@@ -109,6 +109,22 @@ const Image* TextureDescriptorImageData::getImage() const
 	return imgUnique ? imgUnique.get() : imgShared.get();
 }
 
+size_t TextureDescriptorImageData::getMemoryUsage() const
+{
+	size_t result = 0;
+
+	if (imgUnique) {
+		result += imgUnique->getByteSize() + sizeof(Image);
+	}
+
+	if (imgShared) {
+		result += imgShared->getByteSize() + sizeof(Image);
+	}
+
+	result += rawBytes.size();
+	return result;
+}
+
 TextureDescriptor::TextureDescriptor(Vector2i size, TextureFormat format)
 	: size(size)
 	, format(format)
@@ -147,4 +163,9 @@ int TextureDescriptor::getBitsPerPixel(TextureFormat format)
 		return 1;
 	}
 	throw Exception("Unknown image format: " + toString(format), HalleyExceptions::Graphics);
+}
+
+size_t TextureDescriptor::getMemoryUsage() const
+{
+	return pixelData.getMemoryUsage();
 }

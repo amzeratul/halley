@@ -127,6 +127,27 @@ namespace Halley
 	class ResourceObserver;
 	class Resources;
 
+	struct ResourceMemoryUsage {
+		size_t ramUsage = 0;
+		size_t vramUsage = 0;
+
+		ResourceMemoryUsage& operator+=(const ResourceMemoryUsage& other)
+		{
+			ramUsage += other.ramUsage;
+			vramUsage += other.vramUsage;
+			return *this;
+		}
+
+		String toString() const
+		{
+			String result = String::prettySize(ramUsage) + " RAM";
+			if (vramUsage > 0) {
+				result += " + " + String::prettySize(vramUsage) + " VRAM";
+			}
+			return result;
+		}
+	};
+
 	class Resource
 	{
 	public:
@@ -143,6 +164,8 @@ namespace Halley
 		int getAssetVersion() const { return assetVersion; }
 		void increaseAssetVersion();
 		void reloadResource(Resource&& resource);
+
+		virtual ResourceMemoryUsage getMemoryUsage() const;
 
 	protected:
 		virtual void reload(Resource&& resource);

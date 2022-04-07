@@ -502,3 +502,21 @@ std::optional<size_t> EntityData::getChildIndex(const UUID& uuid) const
 	}
 	return {};
 }
+
+size_t EntityData::getSizeBytes() const
+{
+	size_t result = sizeof(EntityData);
+	result += name.getSizeBytes();
+	result += prefab.getSizeBytes();
+	result += icon.getSizeBytes();
+
+	for (const auto& c: children) {
+		result += c.getSizeBytes();
+	}
+	for (const auto& c: components) {
+		result += c.first.getSizeBytes();
+		result += c.second.getSizeBytes();
+	}
+
+	return result;
+}

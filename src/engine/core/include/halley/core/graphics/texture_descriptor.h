@@ -77,6 +77,8 @@ namespace Halley
 		Image* getImage();
 		const Image* getImage() const;
 
+		size_t getMemoryUsage() const;
+
 	private:
 		std::unique_ptr<Image> imgUnique;
 		std::shared_ptr<Image> imgShared;
@@ -111,5 +113,7 @@ namespace Halley
 		TextureDescriptor& operator=(TextureDescriptor&& other) noexcept;
 
 		static int getBitsPerPixel(TextureFormat format);
+
+		size_t getMemoryUsage() const;
 	};
 }

@@ -53,6 +53,8 @@ namespace Halley {
 		void seek(double t);
 		void seek(size_t sample);
 
+		size_t getSizeBytes() const;
+
 	private:
 		void open();
 		static size_t vorbisRead(void* ptr, size_t size, size_t nmemb, void* datasource);

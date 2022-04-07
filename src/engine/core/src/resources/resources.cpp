@@ -63,4 +63,17 @@ void Resources::reloadAssets(const std::map<AssetType, Vector<String>>& byType)
 	}
 }
 
+void Resources::generateMemoryReport()
+{
+	Logger::logInfo("Memory usage:");
+	for (auto& res: resources) {
+		if (res) {
+			auto memoryUsage = res->getMemoryUsage();
+			if (memoryUsage.ramUsage > 0 || memoryUsage.vramUsage > 0) {
+				Logger::logInfo(String("\t") + toString(res->getAssetType()) + ": " + memoryUsage.toString());
+			}
+		}
+	}	
+}
+
 Resources::~Resources() = default;

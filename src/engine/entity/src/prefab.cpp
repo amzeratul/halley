@@ -261,6 +261,13 @@ void Prefab::preloadDependencies(Resources& resources) const
 	}
 }
 
+ResourceMemoryUsage Prefab::getMemoryUsage() const
+{
+	ResourceMemoryUsage result;
+	result.ramUsage = entityData.getSizeBytes() + gameData.getSizeBytes();
+	return result;
+}
+
 void Prefab::doPreloadDependencies(const EntityData& data, Resources& resources) const
 {
 	if (!data.getPrefab().isEmpty()) {

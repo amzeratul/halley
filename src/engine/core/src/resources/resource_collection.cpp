@@ -80,6 +80,23 @@ Vector<String> ResourceCollectionBase::enumerate() const
 	}
 }
 
+AssetType ResourceCollectionBase::getAssetType() const
+{
+	return type;
+}
+
+ResourceMemoryUsage ResourceCollectionBase::getMemoryUsage() const
+{
+	ResourceMemoryUsage usage;
+	std::shared_lock lock(mutex);
+
+	for (auto& r: resources) {
+		usage += r.second.res->getMemoryUsage();
+	}
+
+	return usage;
+}
+
 std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(const String& assetId, ResourceLoadPriority priority, bool allowFallback) {
 	std::shared_ptr<Resource> newRes;
 

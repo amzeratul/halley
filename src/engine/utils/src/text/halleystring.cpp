@@ -1035,6 +1035,11 @@ bool Halley::operator==(const std::basic_string_view<char32_t>& lhp, const Strin
 	return lhp == std::basic_string_view<char32_t>(rhp);
 }
 
+size_t String::getSizeBytes() const
+{
+	return length() + 1;
+}
+
 String Halley::operator+ (const String& lhp, const String& rhp)
 {
 	return String(lhp.cppStr() + rhp.cppStr());

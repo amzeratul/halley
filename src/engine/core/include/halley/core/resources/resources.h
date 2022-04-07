@@ -120,6 +120,8 @@ namespace Halley {
 
 		const ResourceOptions& getOptions() const { return options; }
 
+		void generateMemoryReport();
+
 	private:
 		const std::unique_ptr<ResourceLocator> locator;
 		Vector<std::unique_ptr<ResourceCollectionBase>> resources;

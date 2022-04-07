@@ -104,6 +104,8 @@ namespace Halley {
 
         std::optional<size_t> getChildIndex(const UUID& uuid) const;
 
+        size_t getSizeBytes() const;
+
     private:
 
     	String name;
