@@ -38,14 +38,24 @@ namespace Halley
 
 	enum class AudioEventActionType
 	{
-		Play
+		Play,
+		Stop,
+		Pause,
+		Resume,
+		SetSwitch,
+		SetVariable
 	};
 
 	template <>
 	struct EnumNames<AudioEventActionType> {
-		constexpr std::array<const char*, 1> operator()() const {
+		constexpr std::array<const char*, 6> operator()() const {
 			return{{
-				"play"
+				"play",
+				"stop",
+				"pause",
+				"resume",
+				"setSwitch",
+				"setVariable"
 			}};
 		}
 	};
