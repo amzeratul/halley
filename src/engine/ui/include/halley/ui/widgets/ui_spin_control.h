@@ -28,6 +28,8 @@ namespace Halley {
 		void readFromDataBind() override;
 
 	private:
+		void refreshTextInput();
+
 		std::shared_ptr<UITextInput> textInput;
 		float value = 0;
 		float increment = 1;

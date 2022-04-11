@@ -29,14 +29,25 @@ UISpinControl::UISpinControl(String id, UIStyle style, float value)
 
 	setHandle(UIEventType::FocusLost, id + "_textinput", [=] (const UIEvent& event)
 	{
-		setValue(textInput->getText().toFloat());
+		auto valueString = textInput->getText();
+		setValue(valueString.isEmpty() ? getValue() : valueString.toFloat());
+		refreshTextInput();
 	});
 	setHandle(UIEventType::TextSubmit, id + "_textinput", [=] (const UIEvent& event)
 	{
-		setValue(textInput->getText().toFloat());
+		auto valueString = textInput->getText();
+		setValue(valueString.isEmpty() ? getValue() : valueString.toFloat());
+		refreshTextInput();
 	});
 
 	setValue(value);
+}
+
+void UISpinControl::refreshTextInput()
+{
+	textInput->setCanSendEvents(false);
+	textInput->setText(toString(value));
+	textInput->setCanSendEvents(true);
 }
 
 void UISpinControl::setValue(float v)
@@ -56,9 +67,7 @@ void UISpinControl::setValue(float v)
 	}
 
 	if (changed || finalValue != v) {
-		textInput->setCanSendEvents(false);
-		textInput->setText(toString(finalValue));
-		textInput->setCanSendEvents(true);
+		refreshTextInput();
 	}
 
 	if (changed) {
