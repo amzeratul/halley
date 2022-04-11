@@ -9,6 +9,7 @@
 #include "importers/config_importer.h"
 #include "importers/audio_importer.h"
 #include "importers/audio_event_importer.h"
+#include "importers/audio_object_importer.h"
 #include "importers/sprite_importer.h"
 #include "importers/spritesheet_importer.h"
 #include "importers/bitmap_font_importer.h"
@@ -39,6 +40,7 @@ AssetImporter::AssetImporter(Project& project, Vector<Path> assetsSrc)
 		std::make_unique<SceneImporter>(),
 		std::make_unique<CodegenImporter>(),
 		std::make_unique<AudioImporter>(),
+		std::make_unique<AudioObjectImporter>(),
 		std::make_unique<AudioEventImporter>(),
 		std::make_unique<SpriteImporter>(),
 		std::make_unique<SpriteSheetImporter>(),
@@ -94,6 +96,8 @@ ImportAssetType AssetImporter::getImportAssetType(const Path& path, bool skipRed
 		return ImportAssetType::AudioClip;
 	} else if (root == "audio_event") {
 		return ImportAssetType::AudioEvent;
+	} else if (root == "audio_object") {
+		return ImportAssetType::AudioObject;
 	} else if (root == "spritesheet") {
 		return ImportAssetType::SpriteSheet;
 	} else if (root == "shader") {

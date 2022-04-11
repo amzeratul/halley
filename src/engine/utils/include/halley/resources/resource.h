@@ -27,6 +27,7 @@ namespace Halley
 		Animation,
 		ConfigFile,
 		AudioClip,
+		AudioObject,
 		AudioEvent,
 		Sprite,
 		SpriteSheet,
@@ -41,7 +42,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<ImportAssetType> {
-		constexpr std::array<const char*, 22> operator()() const {
+		constexpr std::array<const char*, 23> operator()() const {
 			return{{
 				"undefined",
 				"skip",
@@ -55,6 +56,7 @@ namespace Halley
 				"animation",
 				"configFile",
 				"audioClip",
+				"audioObject",
 				"audioEvent",
 				"sprite",
 				"spriteSheet",
@@ -86,7 +88,8 @@ namespace Halley
 		Animation, // Depends on SpriteSheet
 		Font, // Depends on SpriteSheet
 		AudioClip,
-		AudioEvent, // Depends on AudioClip
+		AudioObject, // Depends on AudioClip
+		AudioEvent, // Depends on AudioObject
 		Mesh,
 		MeshAnimation, // Depends on Mesh
 		VariableTable,
@@ -98,7 +101,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<AssetType> {
-		constexpr std::array<const char*, 20> operator()() const {
+		constexpr std::array<const char*, 21> operator()() const {
 			return{{
 				"binaryFile",
 				"textFile",
@@ -112,6 +115,7 @@ namespace Halley
 				"animation",
 				"font",
 				"audioClip",
+				"audioObject",
 				"audioEvent",
 				"mesh",
 				"meshAnimation",

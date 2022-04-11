@@ -19,6 +19,7 @@ colours:
   
   icon_audioClip: "#E39343"
   icon_audioEvent: "#A2630D"
+  icon_audioObject: "#E0AD12"
   
   icon_font: "#D538E9"
   icon_bitmapFont: "#D538E9"

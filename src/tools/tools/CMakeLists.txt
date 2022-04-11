@@ -29,6 +29,7 @@ set(SOURCES
 
     "src/assets/importers/animation_importer.cpp"
     "src/assets/importers/audio_event_importer.cpp"
+    "src/assets/importers/audio_object_importer.cpp"
     "src/assets/importers/audio_importer.cpp"
     "src/assets/importers/bitmap_font_importer.cpp"
     "src/assets/importers/codegen_importer.cpp"
