@@ -8,7 +8,7 @@ namespace Halley
 	class UIFactory;
 	class UIWidget;
 	class String;
-	class ConfigObserver;
+	class ResourceObserver;
 	class UIParent;
 
 	class UIFactoryTester
@@ -27,7 +27,7 @@ namespace Halley
 		Resources& resources;
 
 		std::shared_ptr<UIWidget> curUI;
-		std::unique_ptr<ConfigObserver> curObserver;
+		std::unique_ptr<ResourceObserver> curObserver;
 
 		void loadFromObserver();
 	};
