@@ -18,6 +18,7 @@ set(SOURCES
         "src/audio_object.cpp"
         "src/audio_position.cpp"
         "src/audio_source_clip.cpp"
+        "src/audio_source_object.cpp"
         "src/audio_variable_table.cpp"
         "src/audio_voice.cpp"
         "src/behaviours/audio_voice_behaviour.cpp"
@@ -48,6 +49,7 @@ set(HEADERS
         "src/audio_mixer_avx.h"
         "src/audio_mixer_sse.h"
         "src/audio_source_clip.h"
+        "src/audio_source_object.h"
         "src/audio_variable_table.h"
         "src/audio_voice.h"
         )

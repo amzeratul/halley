@@ -603,6 +603,9 @@ Range<float> ConfigNode::asFloatRange() const
 	} else if (type == ConfigNodeType::Sequence) {
 		const auto& seq = asSequence();
 		return Range<float>(seq.at(0).asFloat(), seq.at(1).asFloat());
+	} else if (type == ConfigNodeType::Int || type == ConfigNodeType::Float) {
+		const auto v = asFloat();
+		return Range<float>(v, v);
 	} else {
 		throw Exception(getNodeDebugId() + " is not a range type", HalleyExceptions::Resources);
 	}
@@ -668,6 +671,15 @@ Vector4f ConfigNode::asVector4f(Vector4f defaultValue) const
 		return defaultValue;
 	} else {
 		return asVector4f();
+	}
+}
+
+Range<float> ConfigNode::asFloatRange(Range<float> defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return defaultValue;
+	} else {
+		return asFloatRange();
 	}
 }
 

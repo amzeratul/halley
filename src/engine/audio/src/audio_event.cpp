@@ -21,7 +21,7 @@ AudioEvent::AudioEvent(const ConfigNode& config)
 		for (auto& actionNode: config["actions"]) {
 			const auto type = fromString<AudioEventActionType>(actionNode["type"].asString());
 			if (type == AudioEventActionType::Play) {
-				actions.push_back(std::make_unique<AudioEventActionPlay>(*this, actionNode));
+				actions.push_back(std::make_unique<AudioEventActionPlay>(actionNode));
 			}
 		}
 	}
@@ -56,7 +56,7 @@ void AudioEvent::deserialize(Deserializer& s)
 		s >> name;
 		auto type = fromString<AudioEventActionType>(name);
 		if (type == AudioEventActionType::Play) {
-			auto newAction = std::make_unique<AudioEventActionPlay>(*this);
+			auto newAction = std::make_unique<AudioEventActionPlay>();
 			s >> *newAction;
 			actions.push_back(std::move(newAction));
 		}
@@ -82,44 +82,18 @@ std::shared_ptr<AudioEvent> AudioEvent::loadResource(ResourceLoader& loader)
 	return event;
 }
 
-AudioEventActionPlay::AudioEventActionPlay(AudioEvent& event)
-	: event(event)
+AudioEventActionPlay::AudioEventActionPlay()
 {
 }
 
-AudioEventActionPlay::AudioEventActionPlay(AudioEvent& event, const ConfigNode& node)
-	: event(event)
+AudioEventActionPlay::AudioEventActionPlay(const ConfigNode& node)
 {
 	group = node["group"].asString("");
-	if (node.hasKey("clips")) {
-		for (auto& clipNode: node["clips"]) {
-			clips.push_back(clipNode.asString());
-		}
-	}
-	
-	if (node["pitch"].getType() == ConfigNodeType::Sequence) {
-		auto seq = node["pitch"].asSequence();
-		pitch = Range<float>(seq.at(0).asFloat(), seq.at(1).asFloat());
-	} else {
-		float val = node["pitch"].asFloat(1.0f);
-		pitch = Range<float>(val, val);
-	}
-
-	if (node["volume"].getType() == ConfigNodeType::Sequence) {
-		auto seq = node["volume"].asSequence();
-		volume = Range<float>(seq.at(0).asFloat(), seq.at(1).asFloat());
-	} else {
-		float val = node["volume"].asFloat(1.0f);
-		volume = Range<float>(val, val);
-	}
-
-	minimumSpace = node["minimumSpace"].asFloat(0.0f);
+	clips = node["clips"].asVector<String>({});
+	pitch = node["pitch"].asFloatRange(Range<float>(1, 1));
+	volume = node["volume"].asFloatRange(Range<float>(1, 1));
 	delay = node["delay"].asFloat(0.0f);
 	loop = node["loop"].asBool(false);
-
-	if (node.hasKey("dynamics")) {
-		dynamics = AudioDynamicsConfig(node["dynamics"]);
-	}
 }
 
 bool AudioEventActionPlay::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
@@ -150,10 +124,6 @@ bool AudioEventActionPlay::run(AudioEngine& engine, uint32_t id, const AudioPosi
 	}
 
 	auto voice = std::make_unique<AudioVoice>(source, position, curVolume, engine.getGroupId(group));
-	if (dynamics) {
-		voice->addBehaviour(std::make_unique<AudioVoiceDynamicsBehaviour>(dynamics.value(), engine));
-	}
-	
 	engine.addEmitter(id, std::move(voice));
 	return true;
 }
@@ -170,9 +140,7 @@ void AudioEventActionPlay::serialize(Serializer& s) const
 	s << pitch;
 	s << volume;
 	s << delay;
-	s << minimumSpace;
 	s << loop;
-	s << dynamics;
 }
 
 void AudioEventActionPlay::deserialize(Deserializer& s)
@@ -182,9 +150,7 @@ void AudioEventActionPlay::deserialize(Deserializer& s)
 	s >> pitch;
 	s >> volume;
 	s >> delay;
-	s >> minimumSpace;
 	s >> loop;
-	s >> dynamics;
 }
 
 void AudioEventActionPlay::loadDependencies(const Resources& resources)
@@ -197,7 +163,7 @@ void AudioEventActionPlay::loadDependencies(const Resources& resources)
 			if (resources.exists<AudioClip>(c)) {
 				clipData.push_back(resources.get<AudioClip>(c));
 			} else {
-				Logger::logError("AudioClip not found: \"" + c + "\", needed by \"" + event.getAssetId() + "\".");
+				Logger::logError("AudioClip not found: \"" + c + "\".");
 				clipData.push_back(std::shared_ptr<AudioClip>());
 			}
 		}

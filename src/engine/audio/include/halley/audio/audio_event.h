@@ -75,8 +75,8 @@ namespace Halley
 	class AudioEventActionPlay final : public IAudioEventAction
 	{
 	public:
-		explicit AudioEventActionPlay(AudioEvent& event);
-		AudioEventActionPlay(AudioEvent& event, const ConfigNode& config);
+		explicit AudioEventActionPlay();
+		AudioEventActionPlay(const ConfigNode& config);
 
 		bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
 		AudioEventActionType getType() const override;
@@ -87,15 +87,12 @@ namespace Halley
 		void loadDependencies(const Resources& resources) override;
 
 	private:
-		AudioEvent& event;
 		Vector<String> clips;
 		Vector<std::shared_ptr<const AudioClip>> clipData;
 		String group;
 		Range<float> pitch;
 		Range<float> volume;
 		float delay = 0.0f;
-		float minimumSpace = 0.0f;
 		bool loop = false;
-		std::optional<AudioDynamicsConfig> dynamics;
 	};
 }

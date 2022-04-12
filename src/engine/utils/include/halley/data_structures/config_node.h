@@ -248,6 +248,7 @@ namespace Halley {
 		Vector3f asVector3f(Vector3f defaultValue) const;
 		Vector4i asVector4i(Vector4i defaultValue) const;
 		Vector4f asVector4f(Vector4f defaultValue) const;
+		Range<float> asFloatRange(Range<float> defaultValue) const;
 
 		template <typename T>
 		Vector<T> asVector() const
