@@ -7,6 +7,7 @@
 
 namespace Halley
 {
+	class AudioObject;
 	class AudioPosition;
 	class AudioEngine;
 	class ConfigNode;
@@ -33,7 +34,7 @@ namespace Halley
 
 	private:
 		Vector<std::unique_ptr<IAudioEventAction>> actions;
-		void loadDependencies(Resources& resources) const;
+		void loadDependencies(Resources& resources);
 	};
 
 	enum class AudioEventActionType
@@ -69,7 +70,7 @@ namespace Halley
 
 		virtual void serialize(Serializer& s) const = 0;
 		virtual void deserialize(Deserializer& s) = 0;
-		virtual void loadDependencies(const Resources& resources) {}
+		virtual void loadDependencies(Resources& resources) {}
 	};
 
 	class AudioEventActionPlay final : public IAudioEventAction
@@ -84,15 +85,11 @@ namespace Halley
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
 
-		void loadDependencies(const Resources& resources) override;
+		void loadDependencies(Resources& resources) override;
 
 	private:
-		Vector<String> clips;
-		Vector<std::shared_ptr<const AudioClip>> clipData;
-		String group;
-		Range<float> pitch;
-		Range<float> volume;
-		float delay = 0.0f;
-		bool loop = false;
+		String objectName;
+		bool legacy = false;
+		std::shared_ptr<const AudioObject> object;
 	};
 }

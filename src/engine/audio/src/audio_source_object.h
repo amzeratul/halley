@@ -8,7 +8,7 @@ namespace Halley
 	class AudioSourceObject final : public AudioSource
 	{
 	public:
-		AudioSourceObject(std::shared_ptr<const AudioObject> object);
+		AudioSourceObject(AudioEngine& engine, std::shared_ptr<const AudioObject> object);
 
 		uint8_t getNumberOfChannels() const override;
 		bool getAudioData(size_t numSamples, AudioSourceData& dst) override;
@@ -16,5 +16,6 @@ namespace Halley
 
 	private:
 		const std::shared_ptr<const AudioObject> object;
+		std::shared_ptr<AudioSource> source;
 	};
 }

@@ -1,6 +1,11 @@
 #include "audio_object.h"
+#include "audio_clip.h"
 
 #include "halley/bytes/byte_serializer.h"
+#include "halley/core/resources/resources.h"
+#include "halley/data_structures/config_node.h"
+#include "halley/maths/random.h"
+#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -12,14 +17,68 @@ AudioObject::AudioObject(const ConfigNode& config)
 	// TODO
 }
 
+void AudioObject::loadLegacyEvent(const ConfigNode& node)
+{
+	group = node["group"].asString("");
+	clips = node["clips"].asVector<String>({});
+	pitch = node["pitch"].asFloatRange(Range<float>(1, 1));
+	volume = node["volume"].asFloatRange(Range<float>(1, 1));
+	delay = node["delay"].asFloat(0.0f);
+	loop = node["loop"].asBool(false);
+}
+
+const String& AudioObject::getGroup() const
+{
+	return group;
+}
+
+std::shared_ptr<const AudioClip> AudioObject::getRandomClip(Random& rng) const
+{
+	if (clipData.empty()) {
+		return {};
+	}
+
+	return rng.getRandomElement(clipData);
+}
+
+Range<float> AudioObject::getPitch() const
+{
+	return pitch;
+}
+
+Range<float> AudioObject::getVolume() const
+{
+	return volume;
+}
+
+float AudioObject::getDelay() const
+{
+	return delay;
+}
+
+bool AudioObject::getLoop() const
+{
+	return loop;
+}
+
 void AudioObject::serialize(Serializer& s) const
 {
-	// TODO
+	s << clips;
+	s << group;
+	s << pitch;
+	s << volume;
+	s << delay;
+	s << loop;
 }
 
 void AudioObject::deserialize(Deserializer& s)
 {
-	// TODO
+	s >> clips;
+	s >> group;
+	s >> pitch;
+	s >> volume;
+	s >> delay;
+	s >> loop;
 }
 
 void AudioObject::reload(Resource&& resource)
@@ -41,7 +100,19 @@ std::shared_ptr<AudioObject> AudioObject::loadResource(ResourceLoader& loader)
 	return object;
 }
 
-void AudioObject::loadDependencies(Resources& resources) const
+void AudioObject::loadDependencies(Resources& resources)
 {
-	
+	if (clipData.size() != clips.size()) {
+		clipData.clear();
+		clipData.reserve(clips.size());
+			
+		for (auto& c: clips) {
+			if (resources.exists<AudioClip>(c)) {
+				clipData.push_back(resources.get<AudioClip>(c));
+			} else {
+				Logger::logError("AudioClip not found: \"" + c + "\".");
+				clipData.push_back(std::shared_ptr<AudioClip>());
+			}
+		}
+	}
 }
