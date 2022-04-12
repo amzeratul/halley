@@ -1210,7 +1210,7 @@ std::shared_ptr<UIWidget> UIFactory::makeFramedImage(const ConfigNode& entryNode
 std::shared_ptr<UIWidget> UIFactory::makeHybridList(const ConfigNode& node)
 {
 	auto& widgetNode = node["widget"];
-	auto style = getStyle(node["style"].asString("hybridList"));
+	auto style = getStyle(widgetNode["style"].asString("hybridList"));
 	auto list = std::make_shared<UIHybridList>(widgetNode["id"].asString(), style);
 	if (widgetNode.hasKey("options")) {
 		for (auto& optionsNode: widgetNode["options"].asSequence()) {
