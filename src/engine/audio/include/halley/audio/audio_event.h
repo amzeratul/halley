@@ -43,18 +43,20 @@ namespace Halley
 		Stop,
 		Pause,
 		Resume,
+		SetVolume,
 		SetSwitch,
 		SetVariable
 	};
 
 	template <>
 	struct EnumNames<AudioEventActionType> {
-		constexpr std::array<const char*, 6> operator()() const {
+		constexpr std::array<const char*, 7> operator()() const {
 			return{{
 				"play",
 				"stop",
 				"pause",
 				"resume",
+				"setVolume",
 				"setSwitch",
 				"setVariable"
 			}};
@@ -76,11 +78,11 @@ namespace Halley
 	class AudioEventActionPlay final : public IAudioEventAction
 	{
 	public:
-		explicit AudioEventActionPlay();
+		explicit AudioEventActionPlay() = default;
 		AudioEventActionPlay(const ConfigNode& config);
 
 		bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
-		AudioEventActionType getType() const override;
+		AudioEventActionType getType() const override { return AudioEventActionType::Play; }
 
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
@@ -89,7 +91,105 @@ namespace Halley
 
 	private:
 		String objectName;
-		bool legacy = false;
 		std::shared_ptr<const AudioObject> object;
+		bool legacy = false;
+	};
+
+	class AudioEventActionObject : public IAudioEventAction
+	{
+	public:
+		AudioEventActionObject() = default;
+		AudioEventActionObject(const ConfigNode& config);
+		
+		void serialize(Serializer& s) const override;
+		void deserialize(Deserializer& s) override;
+
+		void loadDependencies(Resources& resources) override;
+
+	protected:
+		std::shared_ptr<const AudioObject> object;
+
+	private:
+		String objectName;
+	};
+
+	class AudioEventActionStop final : public AudioEventActionObject
+	{
+	public:
+		AudioEventActionStop() = default;
+		AudioEventActionStop(const ConfigNode& config);
+
+		bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
+		AudioEventActionType getType() const override { return AudioEventActionType::Stop; }
+	};
+
+	class AudioEventActionPause final : public AudioEventActionObject
+	{
+	public:
+		AudioEventActionPause() = default;
+		AudioEventActionPause(const ConfigNode& config);
+
+		bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
+		AudioEventActionType getType() const override { return AudioEventActionType::Pause; }
+	};
+
+	class AudioEventActionResume final : public AudioEventActionObject
+	{
+	public:
+		AudioEventActionResume() = default;
+		AudioEventActionResume(const ConfigNode& config);
+
+		bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
+		AudioEventActionType getType() const override { return AudioEventActionType::Resume; }
+	};
+
+	class AudioEventActionSetVolume final : public AudioEventActionObject
+	{
+	public:
+		AudioEventActionSetVolume() = default;
+		AudioEventActionSetVolume(const ConfigNode& config);
+
+		bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
+		AudioEventActionType getType() const override { return AudioEventActionType::SetVolume; }
+
+		void serialize(Serializer& s) const override;
+		void deserialize(Deserializer& s) override;
+
+	private:
+		float gain;
+	};
+
+	class AudioEventActionSetSwitch final : public IAudioEventAction
+	{
+	public:
+		AudioEventActionSetSwitch() = default;
+		AudioEventActionSetSwitch(const ConfigNode& config);
+
+		bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
+		AudioEventActionType getType() const override { return AudioEventActionType::SetSwitch; }
+
+		void serialize(Serializer& s) const override;
+		void deserialize(Deserializer& s) override;
+
+	private:
+		String switchId;
+		String value;
+	};
+
+	class AudioEventActionSetVariable final : public IAudioEventAction
+	{
+	public:
+		AudioEventActionSetVariable() = default;
+		AudioEventActionSetVariable(const ConfigNode& config);
+
+		bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
+		AudioEventActionType getType() const override { return AudioEventActionType::SetVariable; }
+
+		void serialize(Serializer& s) const override;
+		void deserialize(Deserializer& s) override;
+
+	private:
+		String variableId;
+		float value;
 	};
 }

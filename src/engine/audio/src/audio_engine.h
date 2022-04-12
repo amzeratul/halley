@@ -19,6 +19,8 @@ namespace Halley {
     class AudioEngine: private IAudioOutput
     {
     public:
+		using ModifyCallback = std::function<void(AudioVoice&)>;
+    	
 	    AudioEngine();
 		~AudioEngine();
 
@@ -27,7 +29,8 @@ namespace Halley {
 	    void setListener(AudioListenerData position);
 		void setOutputChannels(Vector<AudioChannelData> channelData);
 
-		void addEmitter(uint32_t id, std::unique_ptr<AudioVoice> src);
+		void addEmitter(std::unique_ptr<AudioVoice> src);
+		void modifyEmittersFor(uint32_t sourceId, uint32_t audioObjectId, ModifyCallback callback);
 
 		const Vector<AudioVoice*>& getSources(uint32_t id);
 		Vector<uint32_t> getFinishedSounds();

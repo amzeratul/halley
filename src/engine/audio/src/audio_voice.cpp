@@ -14,6 +14,7 @@ AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, Au
 	: engine(engine)
 	, group(group)
 	, playing(false)
+	, paused(false)
 	, done(false)
 	, isFirstUpdate(true)
 	, baseGain(gain)
@@ -26,14 +27,26 @@ AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, Au
 
 AudioVoice::~AudioVoice() = default;
 
-void AudioVoice::setId(uint32_t i)
+void AudioVoice::setIds(uint32_t uniqueId, uint32_t sourceId, uint32_t audioObjectId)
 {
-	id = i;
+	this->uniqueId = uniqueId;
+	this->sourceId = sourceId;
+	this->audioObjectId = audioObjectId;
 }
 
-uint32_t AudioVoice::getId() const
+uint32_t AudioVoice::getUniqueId() const
 {
-	return id;
+	return uniqueId;
+}
+
+uint32_t AudioVoice::getSourceId() const
+{
+	return sourceId;
+}
+
+uint32_t AudioVoice::getAudioObjectId() const
+{
+	return audioObjectId;
 }
 
 void AudioVoice::start()
@@ -49,6 +62,16 @@ void AudioVoice::stop()
 {
 	playing = false;
 	done = true;
+}
+
+void AudioVoice::pause()
+{
+	paused = true;
+}
+
+void AudioVoice::resume()
+{
+	paused = false;
 }
 
 bool AudioVoice::isPlaying() const
@@ -151,8 +174,10 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioL
 		elapsedTime = 0;
 	}
 
+	float pauseGain = paused ? 0.0f : 1.0f;
+	
 	prevChannelMix = channelMix;
-	sourcePos.setMix(nChannels, channels, channelMix, baseGain * userGain * dynamicGain * groupGain, listener);
+	sourcePos.setMix(nChannels, channels, channelMix, baseGain * userGain * dynamicGain * groupGain * pauseGain, listener);
 	
 	if (isFirstUpdate) {
 		prevChannelMix = channelMix;
@@ -162,6 +187,10 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioL
 
 void AudioVoice::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixer& mixer, AudioBufferPool& pool)
 {
+	if (paused) {
+		return;
+	}
+	
 	Expects(!dst.empty());
 	Expects(numSamples % 16 == 0);
 
@@ -216,5 +245,7 @@ void AudioVoice::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixe
 
 void AudioVoice::advancePlayback(size_t samples)
 {
-	elapsedTime += float(samples) / AudioConfig::sampleRate;
+	if (!paused) {
+		elapsedTime += float(samples) / AudioConfig::sampleRate;
+	}
 }

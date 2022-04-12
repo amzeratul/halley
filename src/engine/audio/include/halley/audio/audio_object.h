@@ -15,6 +15,8 @@ namespace Halley {
 
         void loadLegacyEvent(const ConfigNode& node);
 
+        uint32_t getAudioObjectId() const;
+
 		const String& getGroup() const;
         std::shared_ptr<const AudioClip> getRandomClip(Random& rng) const;
 
@@ -32,6 +34,8 @@ namespace Halley {
     	void loadDependencies(Resources& resources);
 
     private:
+		uint32_t audioObjectId;
+		
 		Vector<String> clips;
 		Vector<std::shared_ptr<const AudioClip>> clipData;
 		String group;
@@ -39,5 +43,7 @@ namespace Halley {
 		Range<float> volume;
 		float delay = 0.0f;
 		bool loop = false;
+
+		void generateId();
     };
 }

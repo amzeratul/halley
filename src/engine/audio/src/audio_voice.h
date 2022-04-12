@@ -18,6 +18,8 @@ namespace Halley {
 
 		void start();
 		void stop();
+		void pause();
+		void resume();
 
 		bool isPlaying() const;
 		bool isReady() const;
@@ -39,8 +41,10 @@ namespace Halley {
 		void update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener, float groupGain);
 		void mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixer& mixer, AudioBufferPool& pool);
 		
-		void setId(uint32_t id);
-		uint32_t getId() const;
+		void setIds(uint32_t uniqueId, uint32_t sourceId = 0, uint32_t audioObjectId = 0);
+		uint32_t getUniqueId() const;
+		uint32_t getSourceId() const;
+		uint32_t getAudioObjectId() const;
 
 		void addBehaviour(std::unique_ptr<AudioVoiceBehaviour> behaviour);
 		
@@ -49,10 +53,13 @@ namespace Halley {
 	private:
 		AudioEngine& engine;
 		
-		uint32_t id = std::numeric_limits<uint32_t>::max();
+		uint32_t uniqueId = std::numeric_limits<uint32_t>::max();
+		uint32_t sourceId = 0;
+		uint32_t audioObjectId = 0;
 		uint8_t group = 0;
 		uint8_t nChannels = 0;
 		bool playing : 1;
+		bool paused : 1;
 		bool done : 1;
 		bool isFirstUpdate : 1;
     	float baseGain = 1.0f;

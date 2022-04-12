@@ -57,8 +57,33 @@ void AudioEvent::deserialize(Deserializer& s)
 		String name;
 		s >> name;
 		auto type = fromString<AudioEventActionType>(name);
-		if (type == AudioEventActionType::Play) {
-			auto newAction = std::make_unique<AudioEventActionPlay>();
+		std::unique_ptr<IAudioEventAction> newAction;
+
+		switch (type) {
+		case AudioEventActionType::Play:
+			newAction = std::make_unique<AudioEventActionPlay>();
+			break;
+		case AudioEventActionType::Stop:
+			newAction = std::make_unique<AudioEventActionStop>();
+			break;
+		case AudioEventActionType::Pause:
+			newAction = std::make_unique<AudioEventActionPause>();
+			break;
+		case AudioEventActionType::Resume:
+			newAction = std::make_unique<AudioEventActionResume>();
+			break;
+		case AudioEventActionType::SetVolume:
+			newAction = std::make_unique<AudioEventActionSetVolume>();
+			break;
+		case AudioEventActionType::SetSwitch:
+			newAction = std::make_unique<AudioEventActionSetSwitch>();
+			break;
+		case AudioEventActionType::SetVariable:
+			newAction = std::make_unique<AudioEventActionSetVariable>();
+			break;
+		}
+
+		if (newAction) {
 			s >> *newAction;
 			actions.push_back(std::move(newAction));
 		}
@@ -93,8 +118,6 @@ void AudioEvent::loadDependencies(Resources& resources)
 
 
 
-AudioEventActionPlay::AudioEventActionPlay() = default;
-
 AudioEventActionPlay::AudioEventActionPlay(const ConfigNode& node)
 {
 	if (node.hasKey("object")) {
@@ -109,11 +132,14 @@ AudioEventActionPlay::AudioEventActionPlay(const ConfigNode& node)
 	}
 }
 
-bool AudioEventActionPlay::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+bool AudioEventActionPlay::run(AudioEngine& engine, uint32_t uniqueId, const AudioPosition& position) const
 {
 	if (!object) {
 		return false;
 	}
+
+	const uint32_t sourceId = 0; // TODO
+	const uint32_t audioObjectId = object->getAudioObjectId();
 
 	const auto gainRange = object->getVolume();
 	const float gain = engine.getRNG().getFloat(gainRange.start, gainRange.end);
@@ -122,13 +148,10 @@ bool AudioEventActionPlay::run(AudioEngine& engine, uint32_t id, const AudioPosi
 
 	auto source = std::make_shared<AudioSourceObject>(engine, object);
 	auto voice = std::make_unique<AudioVoice>(engine, source, position, gain, pitch, engine.getGroupId(object->getGroup()));
-	engine.addEmitter(id, std::move(voice));
+	voice->setIds(uniqueId, sourceId, audioObjectId);
+	
+	engine.addEmitter(std::move(voice));
 	return true;
-}
-
-AudioEventActionType AudioEventActionPlay::getType() const
-{
-	return AudioEventActionType::Play;
 }
 
 void AudioEventActionPlay::serialize(Serializer& s) const
@@ -137,7 +160,7 @@ void AudioEventActionPlay::serialize(Serializer& s) const
 	if (legacy) {
 		s << *object;
 	} else {
-		s << objectName;	
+		s << objectName;
 	}
 }
 
@@ -162,4 +185,179 @@ void AudioEventActionPlay::loadDependencies(Resources& resources)
 			object = resources.get<AudioObject>(objectName);
 		}
 	}
+}
+
+AudioEventActionObject::AudioEventActionObject(const ConfigNode& node)
+{
+	objectName = node["object"].asString();
+}
+
+void AudioEventActionObject::serialize(Serializer& s) const
+{
+	s << objectName;
+}
+
+void AudioEventActionObject::deserialize(Deserializer& s)
+{
+	s >> objectName;
+}
+
+void AudioEventActionObject::loadDependencies(Resources& resources)
+{
+	if (!objectName.isEmpty() && (!object || object->getAssetId() != objectName)) {
+		object = resources.get<AudioObject>(objectName);
+	}
+}
+
+AudioEventActionStop::AudioEventActionStop(const ConfigNode& config)
+	: AudioEventActionObject(config)
+{	
+}
+
+bool AudioEventActionStop::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+{
+	if (!object) {
+		return false;
+	}
+	
+	const uint32_t sourceId = 0; // TODO
+	const uint32_t audioObjectId = object->getAudioObjectId();
+
+	engine.modifyEmittersFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
+	{
+		voice.stop();
+	});
+
+	return true;
+}
+
+AudioEventActionPause::AudioEventActionPause(const ConfigNode& config)
+	: AudioEventActionObject(config)
+{}
+
+bool AudioEventActionPause::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+{
+	if (!object) {
+		return false;
+	}
+	
+	const uint32_t sourceId = 0; // TODO
+	const uint32_t audioObjectId = object->getAudioObjectId();
+
+	engine.modifyEmittersFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
+	{
+		voice.pause();
+	});
+
+	return true;
+}
+
+AudioEventActionResume::AudioEventActionResume(const ConfigNode& config)
+	: AudioEventActionObject(config)
+{}
+
+bool AudioEventActionResume::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+{
+	if (!object) {
+		return false;
+	}
+	
+	const uint32_t sourceId = 0; // TODO
+	const uint32_t audioObjectId = object->getAudioObjectId();
+
+	engine.modifyEmittersFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
+	{
+		voice.resume();
+	});
+
+	return true;
+}
+
+AudioEventActionSetVolume::AudioEventActionSetVolume(const ConfigNode& config)
+	: AudioEventActionObject(config)
+{
+	gain = config["gain"].asFloat(1.0f);
+}
+
+bool AudioEventActionSetVolume::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+{
+	if (!object) {
+		return false;
+	}
+	
+	const uint32_t sourceId = 0; // TODO
+	const uint32_t audioObjectId = object->getAudioObjectId();
+
+	engine.modifyEmittersFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
+	{
+		voice.setUserGain(gain);
+	});
+
+	return true;
+}
+
+void AudioEventActionSetVolume::serialize(Serializer& s) const
+{
+	AudioEventActionObject::serialize(s);
+	s << gain;
+}
+
+void AudioEventActionSetVolume::deserialize(Deserializer& s)
+{
+	AudioEventActionObject::deserialize(s);
+	s >> gain;
+}
+
+AudioEventActionSetSwitch::AudioEventActionSetSwitch(const ConfigNode& config)
+{
+	switchId = config["switchId"].asString();
+	value = config["value"].asString();
+}
+
+bool AudioEventActionSetSwitch::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+{
+	const uint32_t sourceId = 0; // TODO
+
+	// TODO
+
+	return true;
+}
+
+void AudioEventActionSetSwitch::serialize(Serializer& s) const
+{
+	s << switchId;
+	s << value;
+}
+
+void AudioEventActionSetSwitch::deserialize(Deserializer& s)
+{
+	s >> switchId;
+	s >> value;
+}
+
+AudioEventActionSetVariable::AudioEventActionSetVariable(const ConfigNode& config)
+{
+	variableId = config["variableId"].asString();
+	value = config["value"].asFloat();
+}
+
+bool AudioEventActionSetVariable::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+{
+	const uint32_t sourceId = 0; // TODO
+
+	// TODO
+
+	return true;
+}
+
+void AudioEventActionSetVariable::serialize(Serializer& s) const
+{
+	s << variableId;
+	s << value;
+}
+
+void AudioEventActionSetVariable::deserialize(Deserializer& s)
+{
+	s >> variableId;
+	s >> value;
 }

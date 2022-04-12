@@ -40,7 +40,9 @@ void AudioEngine::postEvent(uint32_t id, const AudioEvent& event, const AudioPos
 
 void AudioEngine::play(uint32_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop)
 {
-	addEmitter(id, std::make_unique<AudioVoice>(*this, std::make_shared<AudioSourceClip>(std::move(clip), loop, 0), std::move(position), volume, 1.0f, getGroupId("")));
+	auto voice = std::make_unique<AudioVoice>(*this, std::make_shared<AudioSourceClip>(std::move(clip), loop, 0), std::move(position), volume, 1.0f, getGroupId(""));
+	voice->setIds(id);
+	addEmitter(std::move(voice));
 }
 
 void AudioEngine::setListener(AudioListenerData l)
@@ -74,11 +76,19 @@ void AudioEngine::run()
 	// but first return so we the AudioFacade can update the incoming sound data
 }
 
-void AudioEngine::addEmitter(uint32_t id, std::unique_ptr<AudioVoice> src)
+void AudioEngine::addEmitter(std::unique_ptr<AudioVoice> src)
 {
 	emitters.emplace_back(std::move(src));
-	emitters.back()->setId(id);
-	idToSource[id].push_back(emitters.back().get());
+	idToSource[emitters.back()->getUniqueId()].push_back(emitters.back().get());
+}
+
+void AudioEngine::modifyEmittersFor(uint32_t sourceId, uint32_t audioObjectId, ModifyCallback callback)
+{
+	for (auto& e: emitters) {
+		if (e->getAudioObjectId() == audioObjectId && e->getSourceId() == sourceId) {
+			callback(*e);
+		}
+	}
 }
 
 const Vector<AudioVoice*>& AudioEngine::getSources(uint32_t id)
@@ -296,7 +306,7 @@ void AudioEngine::removeFinishedEmitters()
 {
 	for (auto& e: emitters) {
 		if (e->isDone()) {
-			auto iter = idToSource.find(e->getId());
+			auto iter = idToSource.find(e->getUniqueId());
 			if (iter != idToSource.end()) {
 				auto& ems = iter->second;
 				if (ems.size() > 1) {

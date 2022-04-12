@@ -10,10 +10,13 @@
 using namespace Halley;
 
 AudioObject::AudioObject()
-{}
+{
+	generateId();
+}
 
 AudioObject::AudioObject(const ConfigNode& config)
 {
+	generateId();
 	// TODO
 }
 
@@ -25,6 +28,11 @@ void AudioObject::loadLegacyEvent(const ConfigNode& node)
 	volume = node["volume"].asFloatRange(Range<float>(1, 1));
 	delay = node["delay"].asFloat(0.0f);
 	loop = node["loop"].asBool(false);
+}
+
+uint32_t AudioObject::getAudioObjectId() const
+{
+	return audioObjectId;
 }
 
 const String& AudioObject::getGroup() const
@@ -115,4 +123,11 @@ void AudioObject::loadDependencies(Resources& resources)
 			}
 		}
 	}
+}
+
+void AudioObject::generateId()
+{
+	static std::atomic<uint32_t> id = 1;
+	
+	audioObjectId = id++;
 }
