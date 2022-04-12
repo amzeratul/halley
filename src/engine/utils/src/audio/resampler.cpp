@@ -74,3 +74,9 @@ size_t AudioResampler::numOutputSamples(size_t numInputSamples) const
 {
 	return numInputSamples * to / from;
 }
+
+void AudioResampler::setFromHz(int from)
+{
+	this->from = from;
+	speex_resampler_set_rate(resampler.get(), from, to);
+}

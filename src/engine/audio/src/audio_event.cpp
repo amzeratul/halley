@@ -115,8 +115,13 @@ bool AudioEventActionPlay::run(AudioEngine& engine, uint32_t id, const AudioPosi
 		return false;
 	}
 
+	const auto gainRange = object->getVolume();
+	const float gain = engine.getRNG().getFloat(gainRange.start, gainRange.end);
+	const auto pitchRange = object->getPitch();
+	const float pitch = clamp(engine.getRNG().getFloat(pitchRange.start, pitchRange.end), 0.1f, 2.0f);
+
 	auto source = std::make_shared<AudioSourceObject>(engine, object);
-	auto voice = std::make_unique<AudioVoice>(source, position, 1.0f, engine.getGroupId(object->getGroup()));
+	auto voice = std::make_unique<AudioVoice>(engine, source, position, gain, pitch, engine.getGroupId(object->getGroup()));
 	engine.addEmitter(id, std::move(voice));
 	return true;
 }

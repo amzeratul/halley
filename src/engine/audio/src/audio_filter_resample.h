@@ -14,6 +14,8 @@ namespace Halley
 		bool isReady() const override;
 		bool getAudioData(size_t numSamples, AudioSourceData& dst) override;
 
+		void setFromHz(int fromHz);
+
 	private:
 		AudioBufferPool& pool;
 		std::shared_ptr<AudioSource> source;

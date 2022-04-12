@@ -26,6 +26,8 @@ namespace Halley
 		AudioResamplerResult resampleNoninterleaved(gsl::span<const float> src, gsl::span<float> dst, const size_t numChannels);
 		size_t numOutputSamples(size_t numInputSamples) const;
 
+		void setFromHz(int from);
+
 	private:
 		std::unique_ptr<SpeexResamplerState, void(*)(SpeexResamplerState*)> resampler;
 		size_t nChannels;

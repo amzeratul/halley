@@ -40,7 +40,7 @@ void AudioEngine::postEvent(uint32_t id, const AudioEvent& event, const AudioPos
 
 void AudioEngine::play(uint32_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop)
 {
-	addEmitter(id, std::make_unique<AudioVoice>(std::make_shared<AudioSourceClip>(std::move(clip), loop, 0), std::move(position), volume, getGroupId("")));
+	addEmitter(id, std::make_unique<AudioVoice>(*this, std::make_shared<AudioSourceClip>(std::move(clip), loop, 0), std::move(position), volume, 1.0f, getGroupId("")));
 }
 
 void AudioEngine::setListener(AudioListenerData l)

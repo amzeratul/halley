@@ -5,6 +5,7 @@
 #include <limits>
 
 namespace Halley {
+	class AudioFilterResample;
 	class AudioBufferPool;
 	class AudioMixer;
 	class AudioVoiceBehaviour;
@@ -12,7 +13,7 @@ namespace Halley {
 
 	class AudioVoice {
     public:
-		AudioVoice(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain, uint8_t group);
+		AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain, float pitch, uint8_t group);
 		~AudioVoice();
 
 		void start();
@@ -27,6 +28,8 @@ namespace Halley {
 		void setUserGain(float gain);
 		float getUserGain() const;
 		float& getDynamicGainRef();
+
+		void setPitch(float pitch);
 
 		void setAudioSourcePosition(Vector3f position);
 		void setAudioSourcePosition(AudioPosition sourcePos);
@@ -44,6 +47,8 @@ namespace Halley {
 		uint8_t getGroup() const;
 
 	private:
+		AudioEngine& engine;
+		
 		uint32_t id = std::numeric_limits<uint32_t>::max();
 		uint8_t group = 0;
 		uint8_t nChannels = 0;
@@ -56,6 +61,7 @@ namespace Halley {
 		float elapsedTime = 0.0f;
 
 		std::shared_ptr<AudioSource> source;
+		std::shared_ptr<AudioFilterResample> resample;
 		std::unique_ptr<AudioVoiceBehaviour> behaviour;
     	AudioPosition sourcePos;
 

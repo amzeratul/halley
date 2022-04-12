@@ -69,3 +69,10 @@ bool AudioFilterResample::getAudioData(size_t numSamples, AudioSourceData& dstBu
 
 	return playing;
 }
+
+void AudioFilterResample::setFromHz(int fromHz)
+{
+	for (auto& r: resamplers) {
+		r->setFromHz(fromHz);
+	}
+}

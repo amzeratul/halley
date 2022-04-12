@@ -1,5 +1,8 @@
 #include "audio_voice.h"
 #include <utility>
+
+#include "audio_engine.h"
+#include "audio_filter_resample.h"
 #include "audio_mixer.h"
 #include "behaviours/audio_voice_behaviour.h"
 #include "audio_source.h"
@@ -7,16 +10,19 @@
 
 using namespace Halley;
 
-AudioVoice::AudioVoice(std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain, uint8_t group) 
-	: group(group)
+AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, AudioPosition sourcePos, float gain, float pitch, uint8_t group) 
+	: engine(engine)
+	, group(group)
 	, playing(false)
 	, done(false)
 	, isFirstUpdate(true)
 	, baseGain(gain)
 	, userGain(1.0f)
-	, source(std::move(source))
+	, source(std::move(src))
 	, sourcePos(std::move(sourcePos))
-{}
+{
+	setPitch(pitch);
+}
 
 AudioVoice::~AudioVoice() = default;
 
@@ -101,6 +107,20 @@ float AudioVoice::getUserGain() const
 float& AudioVoice::getDynamicGainRef()
 {
 	return dynamicGain;
+}
+
+void AudioVoice::setPitch(float pitch)
+{
+	if (resample || std::abs(pitch - 1.0f) > 0.01f) {
+		const auto freq = static_cast<int>(lround(AudioConfig::sampleRate * pitch));
+		
+		if (resample) {
+			resample->setFromHz(freq);
+		} else {
+			resample = std::make_shared<AudioFilterResample>(source, freq, AudioConfig::sampleRate, engine.getPool());
+			source = resample;
+		}
+	}
 }
 
 void AudioVoice::setAudioSourcePosition(Vector3f position)
