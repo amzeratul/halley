@@ -10,7 +10,7 @@
 
 using namespace Halley;
 
-AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, AudioPosition sourcePos, float gain, float pitch, uint8_t group) 
+AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, float gain, float pitch, uint8_t group) 
 	: engine(engine)
 	, group(group)
 	, playing(false)
@@ -20,31 +20,24 @@ AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, Au
 	, baseGain(gain)
 	, userGain(1.0f)
 	, source(std::move(src))
-	, sourcePos(std::move(sourcePos))
 {
 	setPitch(pitch);
 }
 
 AudioVoice::~AudioVoice() = default;
 
-void AudioVoice::setIds(uint32_t uniqueId, uint32_t sourceId, uint32_t audioObjectId)
+void AudioVoice::setIds(AudioEventId eventId, AudioObjectId audioObjectId)
 {
-	this->uniqueId = uniqueId;
-	this->sourceId = sourceId;
+	this->eventId = eventId;
 	this->audioObjectId = audioObjectId;
 }
 
-uint32_t AudioVoice::getUniqueId() const
+AudioEventId AudioVoice::getEventId() const
 {
-	return uniqueId;
+	return eventId;
 }
 
-uint32_t AudioVoice::getSourceId() const
-{
-	return sourceId;
-}
-
-uint32_t AudioVoice::getAudioObjectId() const
+AudioObjectId AudioVoice::getAudioObjectId() const
 {
 	return audioObjectId;
 }
@@ -146,22 +139,12 @@ void AudioVoice::setPitch(float pitch)
 	}
 }
 
-void AudioVoice::setAudioSourcePosition(Vector3f position)
-{
-	sourcePos.setPosition(position);
-}
-
-void AudioVoice::setAudioSourcePosition(AudioPosition s)
-{
-	sourcePos = std::move(s);
-}
-
 size_t AudioVoice::getNumberOfChannels() const
 {
 	return nChannels;
 }
 
-void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener, float groupGain)
+void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioPosition& sourcePos, const AudioListenerData& listener, float groupGain)
 {
 	Expects(playing);
 

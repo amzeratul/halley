@@ -29,11 +29,11 @@ AudioEvent::AudioEvent(const ConfigNode& config)
 	}
 }
 
-size_t AudioEvent::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+size_t AudioEvent::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
 	size_t nEmitters = 0;
 	for (const auto& a: actions) {
-		if (a->run(engine, id, position)) {
+		if (a->run(engine, id, emitter)) {
 			++nEmitters;
 		}
 	}
@@ -132,7 +132,7 @@ AudioEventActionPlay::AudioEventActionPlay(const ConfigNode& node)
 	}
 }
 
-bool AudioEventActionPlay::run(AudioEngine& engine, uint32_t uniqueId, const AudioPosition& position) const
+bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, AudioEmitter& emitter) const
 {
 	if (!object) {
 		return false;
@@ -147,10 +147,10 @@ bool AudioEventActionPlay::run(AudioEngine& engine, uint32_t uniqueId, const Aud
 	const float pitch = clamp(engine.getRNG().getFloat(pitchRange.start, pitchRange.end), 0.1f, 2.0f);
 
 	auto source = std::make_shared<AudioSourceObject>(engine, object);
-	auto voice = std::make_unique<AudioVoice>(engine, source, position, gain, pitch, engine.getGroupId(object->getGroup()));
-	voice->setIds(uniqueId, sourceId, audioObjectId);
+	auto voice = std::make_unique<AudioVoice>(engine, source, gain, pitch, engine.getGroupId(object->getGroup()));
+	voice->setIds(uniqueId, audioObjectId);
 	
-	engine.addVoice(std::move(voice));
+	emitter.addVoice(std::move(voice));
 	return true;
 }
 
@@ -214,16 +214,15 @@ AudioEventActionStop::AudioEventActionStop(const ConfigNode& config)
 {	
 }
 
-bool AudioEventActionStop::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+bool AudioEventActionStop::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
 	if (!object) {
 		return false;
 	}
 	
-	const uint32_t sourceId = 0; // TODO
-	const uint32_t audioObjectId = object->getAudioObjectId();
+	const AudioObjectId audioObjectId = object->getAudioObjectId();
 
-	engine.modifyVoicesFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
+	emitter.forVoices(audioObjectId, [&] (AudioVoice& voice)
 	{
 		voice.stop();
 	});
@@ -235,16 +234,15 @@ AudioEventActionPause::AudioEventActionPause(const ConfigNode& config)
 	: AudioEventActionObject(config)
 {}
 
-bool AudioEventActionPause::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+bool AudioEventActionPause::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
 	if (!object) {
 		return false;
 	}
 	
-	const uint32_t sourceId = 0; // TODO
-	const uint32_t audioObjectId = object->getAudioObjectId();
+	const AudioObjectId audioObjectId = object->getAudioObjectId();
 
-	engine.modifyVoicesFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
+	emitter.forVoices(audioObjectId, [&] (AudioVoice& voice)
 	{
 		voice.pause();
 	});
@@ -256,16 +254,15 @@ AudioEventActionResume::AudioEventActionResume(const ConfigNode& config)
 	: AudioEventActionObject(config)
 {}
 
-bool AudioEventActionResume::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+bool AudioEventActionResume::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
 	if (!object) {
 		return false;
 	}
 	
-	const uint32_t sourceId = 0; // TODO
-	const uint32_t audioObjectId = object->getAudioObjectId();
+	const AudioObjectId audioObjectId = object->getAudioObjectId();
 
-	engine.modifyVoicesFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
+	emitter.forVoices(audioObjectId, [&] (AudioVoice& voice)
 	{
 		voice.resume();
 	});
@@ -279,16 +276,15 @@ AudioEventActionSetVolume::AudioEventActionSetVolume(const ConfigNode& config)
 	gain = config["gain"].asFloat(1.0f);
 }
 
-bool AudioEventActionSetVolume::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+bool AudioEventActionSetVolume::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
 	if (!object) {
 		return false;
 	}
 	
-	const uint32_t sourceId = 0; // TODO
-	const uint32_t audioObjectId = object->getAudioObjectId();
+	const AudioObjectId audioObjectId = object->getAudioObjectId();
 
-	engine.modifyVoicesFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
+	emitter.forVoices(audioObjectId, [&] (AudioVoice& voice)
 	{
 		voice.setUserGain(gain);
 	});
@@ -314,10 +310,8 @@ AudioEventActionSetSwitch::AudioEventActionSetSwitch(const ConfigNode& config)
 	value = config["value"].asString();
 }
 
-bool AudioEventActionSetSwitch::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+bool AudioEventActionSetSwitch::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
-	const uint32_t sourceId = 0; // TODO
-
 	// TODO
 
 	return true;
@@ -341,10 +335,8 @@ AudioEventActionSetVariable::AudioEventActionSetVariable(const ConfigNode& confi
 	value = config["value"].asFloat();
 }
 
-bool AudioEventActionSetVariable::run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const
+bool AudioEventActionSetVariable::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
-	const uint32_t sourceId = 0; // TODO
-
 	// TODO
 
 	return true;

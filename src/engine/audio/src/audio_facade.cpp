@@ -1,4 +1,6 @@
 #include "audio_facade.h"
+
+#include "audio_emitter_handle_impl.h"
 #include "audio_engine.h"
 #include "audio_handle_impl.h"
 #include "behaviours/audio_voice_behaviour.h"
@@ -19,6 +21,7 @@ AudioFacade::AudioFacade(AudioOutputAPI& o, SystemAPI& system)
 	, exceptions(16)
 	, finishedSoundsQueue(4)
 	, ownAudioThread(o.needsAudioThread())
+	, curEmitterId(1)
 {
 }
 
@@ -158,31 +161,80 @@ std::optional<AudioSpec> AudioFacade::getAudioSpec() const
 	return running ? audioSpec : std::optional<AudioSpec>();
 }
 
-AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
+
+AudioEmitterHandle AudioFacade::createEmitter(AudioPosition position)
 {
-	uint32_t id = uniqueId++;
+	const auto emitterId = curEmitterId++;
+
+	enqueue([=]() {
+		engine->createEmitter(emitterId, position, false);
+	});
+
+	return std::make_shared<AudioEmitterHandleImpl>(*this, emitterId);
+}
+
+AudioHandle AudioFacade::postEvent(const String& name, AudioEmitterHandle emitter)
+{
+	const auto id = curEventId++;
+	const auto emitterId = emitter->getId();
 
 	if (resources->exists<AudioEvent>(name)) {
 		const auto event = resources->get<AudioEvent>(name);
 		enqueue([=]() {
-			engine->postEvent(id, *event, position);
+			engine->postEvent(id, *event, emitterId);
 		});
 	} else {
 		Logger::logError("Unknown audio event: \"" + name + "\"");
 	}
 
 	playingSounds.push_back(id);
-	return std::make_shared<AudioHandleImpl>(*this, id);
+
+	return std::make_shared<AudioHandleImpl>(*this, id, emitterId);
+}
+
+AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume, bool loop)
+{
+	uint32_t id = curEventId++;
+	const auto emitterId = emitter->getId();
+
+	enqueue([=] () {
+		engine->play(id, clip, emitterId, volume, loop);
+	});
+	playingSounds.push_back(id);
+
+	return std::make_shared<AudioHandleImpl>(*this, id, emitterId);
+}
+
+AudioHandle AudioFacade::postEvent(const String& name, AudioPosition position)
+{
+	const auto id = curEventId++;
+	const auto emitterId = curEmitterId++;
+
+	if (resources->exists<AudioEvent>(name)) {
+		const auto event = resources->get<AudioEvent>(name);
+		enqueue([=]() {
+			engine->createEmitter(emitterId, position, true);
+			engine->postEvent(id, *event, emitterId);
+		});
+	} else {
+		Logger::logError("Unknown audio event: \"" + name + "\"");
+	}
+
+	playingSounds.push_back(id);
+	return std::make_shared<AudioHandleImpl>(*this, id, emitterId);
 }
 
 AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop)
 {
-	uint32_t id = uniqueId++;
+	uint32_t id = curEventId++;
+	const auto emitterId = curEmitterId++;
+
 	enqueue([=] () {
-		engine->play(id, clip, position, volume, loop);
+		engine->createEmitter(emitterId, position, true);
+		engine->play(id, clip, emitterId, volume, loop);
 	});
 	playingSounds.push_back(id);
-	return std::make_shared<AudioHandleImpl>(*this, id);
+	return std::make_shared<AudioHandleImpl>(*this, id, emitterId);
 }
 
 AudioHandle AudioFacade::playMusic(const String& eventName, int track, float fadeInTime)

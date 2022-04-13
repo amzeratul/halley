@@ -3,6 +3,7 @@
 #include <functional>
 #include <gsl/gsl>
 #include <memory>
+
 #include "halley/data_structures/vector.h"
 #include "halley/text/halleystring.h"
 #include "halley/maths/vector2.h"
@@ -18,6 +19,10 @@ namespace Halley
 	class IAudioClip;
 	class AudioVoiceBehaviour;
 	class AudioEngine;
+
+	using AudioEventId = uint32_t;
+    using AudioEmitterId = uint32_t;
+    using AudioObjectId = uint32_t;
 
     namespace AudioConfig {
         constexpr int sampleRate = 48000;
@@ -158,6 +163,18 @@ namespace Halley
 	};
 	using AudioHandle = std::shared_ptr<IAudioHandle>;
 
+	class IAudioEmitterHandle
+	{
+	public:
+		virtual ~IAudioEmitterHandle() {}
+
+		virtual AudioEmitterId getId() const = 0;
+
+		/// Allows emitter to remain alive after handle is destroyed, as long as it has sound playing
+		virtual void detach() = 0;
+	};
+	using AudioEmitterHandle = std::shared_ptr<IAudioEmitterHandle>;
+
 	class AudioAPI
 	{
 	public:
@@ -169,13 +186,18 @@ namespace Halley
 		virtual void pausePlayback() = 0;
 		virtual void resumePlayback() = 0;
 
-		virtual AudioHandle postEvent(const String& name, AudioPosition position) = 0;
+		virtual AudioEmitterHandle createEmitter(AudioPosition position) = 0;
+		virtual AudioHandle postEvent(const String& name, AudioEmitterHandle emitter) = 0;
+		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume = 1.0f, bool loop = false) = 0;
 
+		// Start old API, avoid in new code
 		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume = 1.0f, bool loop = false) = 0;
+		virtual AudioHandle postEvent(const String& name, AudioPosition position) = 0;
 		virtual AudioHandle playMusic(const String& eventName, int track = 0, float fadeInTime = 0.0f) = 0;
 		virtual AudioHandle getMusic(int track = 0) = 0;
 		virtual void stopMusic(int track = 0, float fadeOutTime = 0.0f) = 0;
 		virtual void stopAllMusic(float fadeOutTime = 0.0f) = 0;
+		// End old API
 
 		virtual void setMasterVolume(float gain = 1.0f) = 0;
 		virtual void setGroupVolume(const String& groupName, float gain = 1.0f) = 0;

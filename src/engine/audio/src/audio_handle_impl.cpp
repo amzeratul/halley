@@ -7,9 +7,10 @@
 
 using namespace Halley;
 
-AudioHandleImpl::AudioHandleImpl(AudioFacade& facade, uint32_t id)
+AudioHandleImpl::AudioHandleImpl(AudioFacade& facade, AudioEventId eventId, AudioEmitterId emitterId)
 	: facade(facade)
-	, handleId(id)
+	, eventId(eventId)
+	, emitterId(emitterId)
 {
 }
 
@@ -17,7 +18,7 @@ void AudioHandleImpl::setGain(float gain)
 {
 	if (std::abs(gain - this->gain) > 0.00001f) {
 		this->gain = gain;
-		enqueue([gain] (AudioVoice& src)
+		enqueueForVoices([gain] (AudioVoice& src)
 		{
 			src.setUserGain(gain);
 		});
@@ -31,23 +32,23 @@ void AudioHandleImpl::setVolume(float volume)
 
 void AudioHandleImpl::setPosition(Vector2f pos)
 {
-	enqueue([pos] (AudioVoice& src)
+	enqueue([pos] (AudioEmitter& src)
 	{
-		src.setAudioSourcePosition(Vector3f(pos));
+		src.setPosition(AudioPosition::makePositional(Vector3f(pos)));
 	});
 }
 
 void AudioHandleImpl::setPan(float pan)
 {
-	enqueue([pan] (AudioVoice& src)
+	enqueue([pan] (AudioEmitter& src)
 	{
-		src.setAudioSourcePosition(AudioPosition::makeUI(pan));
+		src.setPosition(AudioPosition::makeUI(pan));
 	});
 }
 
 void AudioHandleImpl::stop(float fadeTime)
 {
-	enqueue([fadeTime] (AudioVoice& src)
+	enqueueForVoices([fadeTime] (AudioVoice& src)
 	{
 		if (fadeTime >= 0.001f) {
 			src.addBehaviour(std::make_unique<AudioVoiceFadeBehaviour>(fadeTime, 1.0f, 0.0f, true));
@@ -81,7 +82,7 @@ void AudioHandleImpl::addBehaviour(std::unique_ptr<AudioVoiceBehaviour> b)
 {
 	// Gotta work around std::function requiring copyable
 	BadPointer<AudioVoiceBehaviour> behaviour = b.release();
-	enqueue([behaviour] (AudioVoice& src) mutable
+	enqueueForVoices([behaviour] (AudioVoice& src) mutable
 	{
 		auto b = std::unique_ptr<AudioVoiceBehaviour>(behaviour.release());
 		if (b) {
@@ -95,17 +96,35 @@ void AudioHandleImpl::addBehaviour(std::unique_ptr<AudioVoiceBehaviour> b)
 bool AudioHandleImpl::isPlaying() const
 {
 	auto& playing = facade.playingSounds;
-	return std::binary_search(playing.begin(), playing.end(), handleId);
+	return std::binary_search(playing.begin(), playing.end(), eventId);
 }
 
 
-void AudioHandleImpl::enqueue(std::function<void(AudioVoice& src)> f)
+void AudioHandleImpl::enqueue(std::function<void(AudioEmitter& src)> f)
 {
-	uint32_t id = handleId;
+	auto id = emitterId;
 	AudioEngine* engine = facade.engine.get();
 	facade.enqueue([id, engine, f = std::move(f)] () {
-		for (const auto& src: engine->getSources(id)) {
-			f(*src);
+		auto* emitter = engine->getEmitter(id);
+		if (emitter) {
+			f(*emitter);
+		}
+	});
+}
+
+void AudioHandleImpl::enqueueForVoices(std::function<void(AudioVoice& src)> f)
+{
+	auto id = emitterId;
+	auto evId = eventId;
+	AudioEngine* engine = facade.engine.get();
+	facade.enqueue([id, evId, engine, f = std::move(f)] () {
+		auto* emitter = engine->getEmitter(id);
+		if (emitter) {
+			for (auto& v: emitter->getVoices()) {
+				if (v->getEventId() == evId) {
+					f(*v);
+				}
+			}
 		}
 	});
 }

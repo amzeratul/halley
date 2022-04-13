@@ -15,7 +15,7 @@ namespace Halley {
 
         void loadLegacyEvent(const ConfigNode& node);
 
-        uint32_t getAudioObjectId() const;
+        AudioObjectId getAudioObjectId() const;
 
 		const String& getGroup() const;
         std::shared_ptr<const AudioClip> getRandomClip(Random& rng) const;
@@ -34,7 +34,7 @@ namespace Halley {
     	void loadDependencies(Resources& resources);
 
     private:
-		uint32_t audioObjectId;
+		AudioObjectId audioObjectId;
 		
 		Vector<String> clips;
 		Vector<std::shared_ptr<const AudioClip>> clipData;

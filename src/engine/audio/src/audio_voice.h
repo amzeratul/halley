@@ -13,7 +13,7 @@ namespace Halley {
 
 	class AudioVoice {
     public:
-		AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> source, AudioPosition sourcePos, float gain, float pitch, uint8_t group);
+		AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> source, float gain, float pitch, uint8_t group);
 		~AudioVoice();
 
 		void start();
@@ -33,18 +33,14 @@ namespace Halley {
 
 		void setPitch(float pitch);
 
-		void setAudioSourcePosition(Vector3f position);
-		void setAudioSourcePosition(AudioPosition sourcePos);
-
 		size_t getNumberOfChannels() const;
 
-		void update(gsl::span<const AudioChannelData> channels, const AudioListenerData& listener, float groupGain);
+		void update(gsl::span<const AudioChannelData> channels, const AudioPosition& sourcePos, const AudioListenerData& listener, float groupGain);
 		void mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixer& mixer, AudioBufferPool& pool);
 		
-		void setIds(uint32_t uniqueId, uint32_t sourceId = 0, uint32_t audioObjectId = 0);
-		uint32_t getUniqueId() const;
-		uint32_t getSourceId() const;
-		uint32_t getAudioObjectId() const;
+		void setIds(AudioEventId eventId, AudioObjectId audioObjectId = 0);
+		AudioEventId getEventId() const;
+		AudioObjectId getAudioObjectId() const;
 
 		void addBehaviour(std::unique_ptr<AudioVoiceBehaviour> behaviour);
 		
@@ -53,9 +49,8 @@ namespace Halley {
 	private:
 		AudioEngine& engine;
 		
-		uint32_t uniqueId = std::numeric_limits<uint32_t>::max();
-		uint32_t sourceId = 0;
-		uint32_t audioObjectId = 0;
+		AudioEventId eventId = std::numeric_limits<AudioEventId>::max();
+		AudioObjectId audioObjectId = 0;
 		uint8_t group = 0;
 		uint8_t nChannels = 0;
 		bool playing : 1;
@@ -70,7 +65,6 @@ namespace Halley {
 		std::shared_ptr<AudioSource> source;
 		std::shared_ptr<AudioFilterResample> resample;
 		std::unique_ptr<AudioVoiceBehaviour> behaviour;
-    	AudioPosition sourcePos;
 
 		std::array<float, 16> channelMix;
 		std::array<float, 16> prevChannelMix;

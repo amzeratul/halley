@@ -3,10 +3,13 @@
 #include <atomic>
 #include <condition_variable>
 #include <map>
+
+#include "audio_emitter.h"
 #include "halley/data_structures/vector.h"
 
 #include "audio_voice.h"
 #include "halley/audio/resampler.h"
+#include "halley/data_structures/hash_map.h"
 #include "halley/data_structures/ring_buffer.h"
 #include "halley/maths/random.h"
 
@@ -16,24 +19,28 @@ namespace Halley {
 	class Resources;
 	class AudioVariableTable;
 
-    class AudioEngine: private IAudioOutput
+    class AudioEngine final: private IAudioOutput
     {
     public:
-		using ModifyCallback = std::function<void(AudioVoice&)>;
+		using VoiceCallback = std::function<void(AudioVoice&)>;
     	
 	    AudioEngine();
 		~AudioEngine();
 
-	    void postEvent(uint32_t id, const AudioEvent& event, const AudioPosition& position);
-	    void play(uint32_t id, std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop);
+		void createEmitter(AudioEmitterId id, AudioPosition position, bool temporary);
+		void destroyEmitter(AudioEmitterId id);
+		void setEmitterPosition(AudioEmitterId id, AudioPosition position);
+
+	    void postEvent(AudioEventId id, const AudioEvent& event, AudioEmitterId emitterId);
+	    void play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, AudioEmitterId emitterId, float volume, bool loop);
+		
 	    void setListener(AudioListenerData position);
 		void setOutputChannels(Vector<AudioChannelData> channelData);
 
-		void addVoice(std::unique_ptr<AudioVoice> src);
-		void modifyVoicesFor(uint32_t sourceId, uint32_t audioObjectId, ModifyCallback callback);
+		void forVoices(AudioObjectId audioObjectId, VoiceCallback callback);
 
-		const Vector<AudioVoice*>& getSources(uint32_t id);
-		Vector<uint32_t> getFinishedSounds();
+		AudioEmitter* getEmitter(AudioEmitterId id);
+		Vector<AudioEventId> getFinishedSounds();
 
 		void run();
 		void start(AudioSpec spec, AudioOutputAPI& out);
@@ -68,12 +75,9 @@ namespace Halley {
 		std::atomic<bool> running;
 		std::atomic<bool> needsBuffer;
 
-		Vector<std::unique_ptr<AudioVoice>> voices;
+		HashMap<AudioEmitterId, std::unique_ptr<AudioEmitter>> emitters;
 		Vector<AudioChannelData> channels;
 		
-		std::map<uint32_t, Vector<AudioVoice*>> idToSource;
-		Vector<AudioVoice*> dummyIdSource;
-
 		float masterGain = 1.0f;
 		Vector<String> groupNames;
     	Vector<float> groupGains;

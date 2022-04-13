@@ -127,7 +127,7 @@ void AudioObject::loadDependencies(Resources& resources)
 
 void AudioObject::generateId()
 {
-	static std::atomic<uint32_t> id = 1;
+	static std::atomic<AudioObjectId> id = 1;
 	
 	audioObjectId = id++;
 }

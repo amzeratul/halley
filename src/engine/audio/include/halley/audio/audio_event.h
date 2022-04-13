@@ -4,9 +4,11 @@
 #include "halley/data_structures/maybe.h"
 #include "audio_clip.h"
 #include "audio_dynamics_config.h"
+#include "audio_position.h"
 
 namespace Halley
 {
+	class AudioEmitter;
 	class AudioObject;
 	class AudioPosition;
 	class AudioEngine;
@@ -23,7 +25,7 @@ namespace Halley
 		AudioEvent();
 		explicit AudioEvent(const ConfigNode& config);
 
-		size_t run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const;
+		size_t run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -67,7 +69,7 @@ namespace Halley
 	{
 	public:
 		virtual ~IAudioEventAction() {}
-		virtual bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const = 0;
+		virtual bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const = 0;
 		virtual AudioEventActionType getType() const = 0;
 
 		virtual void serialize(Serializer& s) const = 0;
@@ -81,7 +83,7 @@ namespace Halley
 		explicit AudioEventActionPlay() = default;
 		AudioEventActionPlay(const ConfigNode& config);
 
-		bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
+		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::Play; }
 
 		void serialize(Serializer& s) const override;
@@ -119,7 +121,7 @@ namespace Halley
 		AudioEventActionStop() = default;
 		AudioEventActionStop(const ConfigNode& config);
 
-		bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
+		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::Stop; }
 	};
 
@@ -129,7 +131,7 @@ namespace Halley
 		AudioEventActionPause() = default;
 		AudioEventActionPause(const ConfigNode& config);
 
-		bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
+		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::Pause; }
 	};
 
@@ -139,7 +141,7 @@ namespace Halley
 		AudioEventActionResume() = default;
 		AudioEventActionResume(const ConfigNode& config);
 
-		bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
+		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::Resume; }
 	};
 
@@ -149,7 +151,7 @@ namespace Halley
 		AudioEventActionSetVolume() = default;
 		AudioEventActionSetVolume(const ConfigNode& config);
 
-		bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
+		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::SetVolume; }
 
 		void serialize(Serializer& s) const override;
@@ -165,7 +167,7 @@ namespace Halley
 		AudioEventActionSetSwitch() = default;
 		AudioEventActionSetSwitch(const ConfigNode& config);
 
-		bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
+		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::SetSwitch; }
 
 		void serialize(Serializer& s) const override;
@@ -182,7 +184,7 @@ namespace Halley
 		AudioEventActionSetVariable() = default;
 		AudioEventActionSetVariable(const ConfigNode& config);
 
-		bool run(AudioEngine& engine, uint32_t id, const AudioPosition& position) const override;
+		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::SetVariable; }
 
 		void serialize(Serializer& s) const override;

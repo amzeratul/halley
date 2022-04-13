@@ -11,11 +11,13 @@ namespace Halley {
 	class AudioPosition;
 	class AudioEngine;
 	class AudioHandleImpl;
+	class AudioEmitterHandleImpl;
 	class IAudioClip;
 
     class AudioFacade final : public AudioAPIInternal
     {
 		friend class AudioHandleImpl;
+		friend class AudioEmitterHandleImpl;
 
     public:
 		explicit AudioFacade(AudioOutputAPI& output, SystemAPI& system);
@@ -34,8 +36,11 @@ namespace Halley {
 		void pausePlayback() override;
 		void resumePlayback() override;
 
-	    AudioHandle postEvent(const String& name, AudioPosition position) override;
+		AudioEmitterHandle createEmitter(AudioPosition position) override;
+	    AudioHandle postEvent(const String& name, AudioEmitterHandle emitter) override;
+		AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume, bool loop) override;
 
+    	AudioHandle postEvent(const String& name, AudioPosition position) override;
     	AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume, bool loop) override;
 		AudioHandle playMusic(const String& eventName, int track = 0, float fadeInTime = 0.0f) override;
 		AudioHandle getMusic(int track = 0) override;
@@ -79,8 +84,10 @@ namespace Halley {
 
 		std::map<int, AudioHandle> musicTracks;
 
-		uint32_t uniqueId = 0;
+		AudioEventId curEventId = 0;
 		bool ownAudioThread;
+
+		AudioEmitterId curEmitterId;
 
 		void doStartPlayback(int deviceNumber, bool createEngine);
 	    void run();
