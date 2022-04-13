@@ -14,11 +14,16 @@ AudioObject::AudioObject()
 	generateId();
 }
 
-AudioObject::AudioObject(const ConfigNode& config)
+AudioObject::AudioObject(const ConfigNode& node)
 {
 	generateId();
-	if (config.hasKey("root")) {
-		root = IAudioSubObject::makeSubObject(config["root"]);
+
+	group = node["group"].asString("");
+	pitch = node["pitch"].asFloatRange(Range<float>(1, 1));
+	volume = node["volume"].asFloatRange(Range<float>(1, 1));
+
+	if (node.hasKey("root")) {
+		root = IAudioSubObject::makeSubObject(node["root"]);
 	}
 }
 

@@ -7,15 +7,17 @@ namespace Halley {
 
 	enum class AudioSubObjectType {
 		None,
-		Clips
+		Clips,
+		Layers
 	};
 
 	template <>
 	struct EnumNames<AudioSubObjectType> {
-		constexpr std::array<const char*, 2> operator()() const {
+		constexpr std::array<const char*, 3> operator()() const {
 			return{{
 				"none",
-				"clips"
+				"clips",
+				"layers"
 			}};
 		}
 	};
@@ -55,7 +57,6 @@ namespace Halley {
 		void deserialize(Deserializer& s);
 
 		bool hasValue() const;
-
 
 	private:
 		std::unique_ptr<IAudioSubObject> obj;

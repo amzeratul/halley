@@ -12,6 +12,7 @@
 #include "halley/file_formats/config_file.h"
 #include "halley/audio/audio_clip.h"
 #include "halley/audio/audio_event.h"
+#include "halley/audio/audio_object.h"
 #include "halley/file_formats/binary_file.h"
 #include "halley/file_formats/image.h"
 #include "halley/core/graphics/mesh/mesh.h"
@@ -35,6 +36,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<Font>();
 	resources.init<ConfigFile>();
 	resources.init<AudioClip>();
+	resources.init<AudioObject>();
 	resources.init<AudioEvent>();
 	resources.init<Mesh>();
 	resources.init<VariableTable>();
