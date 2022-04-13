@@ -25,6 +25,8 @@ AudioEngine::AudioEngine()
 	, needsBuffer(true)
 {
 	rng.setSeed(Random::getGlobal().getRawInt());
+
+	createEmitter(0, AudioPosition::makeFixed(), false);
 }
 
 AudioEngine::~AudioEngine()

@@ -176,7 +176,7 @@ AudioEmitterHandle AudioFacade::createEmitter(AudioPosition position)
 AudioHandle AudioFacade::postEvent(const String& name, AudioEmitterHandle emitter)
 {
 	const auto id = curEventId++;
-	const auto emitterId = emitter->getId();
+	const auto emitterId = emitter ? emitter->getId() : 0;
 
 	if (resources->exists<AudioEvent>(name)) {
 		const auto event = resources->get<AudioEvent>(name);
@@ -195,7 +195,7 @@ AudioHandle AudioFacade::postEvent(const String& name, AudioEmitterHandle emitte
 AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume, bool loop)
 {
 	uint32_t id = curEventId++;
-	const auto emitterId = emitter->getId();
+	const auto emitterId = emitter ? emitter->getId() : 0;
 
 	enqueue([=] () {
 		engine->play(id, clip, emitterId, volume, loop);

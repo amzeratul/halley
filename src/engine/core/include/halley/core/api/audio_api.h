@@ -187,8 +187,8 @@ namespace Halley
 		virtual void resumePlayback() = 0;
 
 		virtual AudioEmitterHandle createEmitter(AudioPosition position) = 0;
-		virtual AudioHandle postEvent(const String& name, AudioEmitterHandle emitter) = 0;
-		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume = 1.0f, bool loop = false) = 0;
+		virtual AudioHandle postEvent(const String& name, AudioEmitterHandle emitter = {}) = 0;
+		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter = {}, float volume = 1.0f, bool loop = false) = 0;
 
 		// Start old API, avoid in new code
 		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioPosition position, float volume = 1.0f, bool loop = false) = 0;
