@@ -75,7 +75,8 @@ namespace Halley {
 	    AudioSpec audioSpec;
 		int lastDeviceNumber = 0;
 
-		RingBuffer<std::function<void()>> commandQueue;
+		RingBuffer<Vector<std::function<void()>>> commandQueue;
+		Vector<std::function<void()>> outbox;
 		Vector<std::function<void()>> inbox;
     	
 		RingBuffer<String> exceptions;

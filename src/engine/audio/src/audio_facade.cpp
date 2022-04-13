@@ -17,7 +17,7 @@ AudioFacade::AudioFacade(AudioOutputAPI& o, SystemAPI& system)
 	, system(system)
 	, running(false)
 	, started(false)
-	, commandQueue(1024)
+	, commandQueue(4)
 	, exceptions(16)
 	, finishedSoundsQueue(4)
 	, ownAudioThread(o.needsAudioThread())
@@ -363,11 +363,12 @@ void AudioFacade::stepAudio()
 			}
 		}
 
-		const size_t nToRead = commandQueue.availableToRead();
-		inbox.resize(nToRead);
-		commandQueue.read(gsl::span<std::function<void()>>(inbox.data(), nToRead));
-		for (auto& action : inbox) {
-			action();
+		while (commandQueue.canRead(1)) {
+			commandQueue.read(gsl::span<Vector<std::function<void()>>>(&inbox, 1));
+			for (auto& action: inbox) {
+				action();
+			}
+			inbox.clear();
 		}
 
 		if (ownAudioThread) {
@@ -383,11 +384,7 @@ void AudioFacade::stepAudio()
 void AudioFacade::enqueue(std::function<void()> action)
 {
 	if (running) {
-		if (commandQueue.canWrite(1)) {
-			commandQueue.writeOne(std::move(action));
-		} else {
-			Logger::logError("Out of space on audio command queue.");
-		}
+		outbox.push_back(std::move(action));
 	}
 }
 
@@ -404,6 +401,15 @@ void AudioFacade::pump()
 	}
 
 	if (running) {
+		if (!outbox.empty()) {
+			if (commandQueue.canWrite(1)) {
+				commandQueue.writeOne(std::move(outbox));
+			} else {
+				Logger::logError("Out of space on audio command queue.");
+			}
+			outbox.clear();
+		}
+
 		while (finishedSoundsQueue.canRead(1)) {
 			auto finishedSounds = finishedSoundsQueue.readOne();
 			playingSounds.erase(std::remove_if(playingSounds.begin(), playingSounds.end(), [&] (uint32_t id) -> bool
