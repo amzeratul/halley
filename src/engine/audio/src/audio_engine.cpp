@@ -12,6 +12,7 @@
 #include "audio_variable_table.h"
 #include "halley/support/profiler.h"
 #include "halley/time/stopwatch.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -42,7 +43,7 @@ void AudioEngine::play(uint32_t id, std::shared_ptr<const IAudioClip> clip, Audi
 {
 	auto voice = std::make_unique<AudioVoice>(*this, std::make_shared<AudioSourceClip>(std::move(clip), loop, 0), std::move(position), volume, 1.0f, getGroupId(""));
 	voice->setIds(id);
-	addEmitter(std::move(voice));
+	addVoice(std::move(voice));
 }
 
 void AudioEngine::setListener(AudioListenerData l)
@@ -76,17 +77,17 @@ void AudioEngine::run()
 	// but first return so we the AudioFacade can update the incoming sound data
 }
 
-void AudioEngine::addEmitter(std::unique_ptr<AudioVoice> src)
+void AudioEngine::addVoice(std::unique_ptr<AudioVoice> src)
 {
-	emitters.emplace_back(std::move(src));
-	idToSource[emitters.back()->getUniqueId()].push_back(emitters.back().get());
+	voices.emplace_back(std::move(src));
+	idToSource[voices.back()->getUniqueId()].push_back(voices.back().get());
 }
 
-void AudioEngine::modifyEmittersFor(uint32_t sourceId, uint32_t audioObjectId, ModifyCallback callback)
+void AudioEngine::modifyVoicesFor(uint32_t sourceId, uint32_t audioObjectId, ModifyCallback callback)
 {
-	for (auto& e: emitters) {
-		if (e->getAudioObjectId() == audioObjectId && e->getSourceId() == sourceId) {
-			callback(*e);
+	for (auto& v: voices) {
+		if (v->getAudioObjectId() == audioObjectId && v->getSourceId() == sourceId) {
+			callback(*v);
 		}
 	}
 }
@@ -147,8 +148,8 @@ void AudioEngine::generateBuffer()
 	
 	auto channelBuffersRef = pool->getBuffers(numChannels, samplesToRead);
 	auto channelBuffers = channelBuffersRef.getBuffers();
-	mixEmitters(samplesToRead, numChannels, channelBuffers);
-	removeFinishedEmitters();
+	mixVoices(samplesToRead, numChannels, channelBuffers);
+	removeFinishedVoices();
 
 	// Interleave
 	auto bufferRef = pool->getBuffer(samplesToRead * numChannels);
@@ -280,7 +281,7 @@ void AudioEngine::setGroupGain(const String& name, float gain)
 	groupGains[getGroupId(name)] = gain;
 }
 
-void AudioEngine::mixEmitters(size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers)
+void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers)
 {
 	// Clear buffers
 	for (size_t i = 0; i < nChannels; ++i) {
@@ -288,7 +289,7 @@ void AudioEngine::mixEmitters(size_t numSamples, size_t nChannels, gsl::span<Aud
 	}
 
 	// Mix every emitter
-	for (auto& e: emitters) {
+	for (auto& e: voices) {
 		// Start playing if necessary
 		if (!e->isPlaying() && !e->isDone() && e->isReady()) {
 			e->start();
@@ -302,11 +303,11 @@ void AudioEngine::mixEmitters(size_t numSamples, size_t nChannels, gsl::span<Aud
 	}
 }
 
-void AudioEngine::removeFinishedEmitters()
+void AudioEngine::removeFinishedVoices()
 {
-	for (auto& e: emitters) {
-		if (e->isDone()) {
-			auto iter = idToSource.find(e->getUniqueId());
+	for (auto& v: voices) {
+		if (v->isDone()) {
+			auto iter = idToSource.find(v->getUniqueId());
 			if (iter != idToSource.end()) {
 				auto& ems = iter->second;
 				if (ems.size() > 1) {
@@ -318,7 +319,7 @@ void AudioEngine::removeFinishedEmitters()
 			}
 		}
 	}
-	emitters.erase(std::remove_if(emitters.begin(), emitters.end(), [&] (const std::unique_ptr<AudioVoice>& src) { return src->isDone(); }), emitters.end());
+	std_ex::erase_if(voices, [&] (const std::unique_ptr<AudioVoice>& src) { return src->isDone(); });
 }
 
 void AudioEngine::clearBuffer(gsl::span<AudioSamplePack> dst)

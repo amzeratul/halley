@@ -150,7 +150,7 @@ bool AudioEventActionPlay::run(AudioEngine& engine, uint32_t uniqueId, const Aud
 	auto voice = std::make_unique<AudioVoice>(engine, source, position, gain, pitch, engine.getGroupId(object->getGroup()));
 	voice->setIds(uniqueId, sourceId, audioObjectId);
 	
-	engine.addEmitter(std::move(voice));
+	engine.addVoice(std::move(voice));
 	return true;
 }
 
@@ -223,7 +223,7 @@ bool AudioEventActionStop::run(AudioEngine& engine, uint32_t id, const AudioPosi
 	const uint32_t sourceId = 0; // TODO
 	const uint32_t audioObjectId = object->getAudioObjectId();
 
-	engine.modifyEmittersFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
+	engine.modifyVoicesFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
 	{
 		voice.stop();
 	});
@@ -244,7 +244,7 @@ bool AudioEventActionPause::run(AudioEngine& engine, uint32_t id, const AudioPos
 	const uint32_t sourceId = 0; // TODO
 	const uint32_t audioObjectId = object->getAudioObjectId();
 
-	engine.modifyEmittersFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
+	engine.modifyVoicesFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
 	{
 		voice.pause();
 	});
@@ -265,7 +265,7 @@ bool AudioEventActionResume::run(AudioEngine& engine, uint32_t id, const AudioPo
 	const uint32_t sourceId = 0; // TODO
 	const uint32_t audioObjectId = object->getAudioObjectId();
 
-	engine.modifyEmittersFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
+	engine.modifyVoicesFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
 	{
 		voice.resume();
 	});
@@ -288,7 +288,7 @@ bool AudioEventActionSetVolume::run(AudioEngine& engine, uint32_t id, const Audi
 	const uint32_t sourceId = 0; // TODO
 	const uint32_t audioObjectId = object->getAudioObjectId();
 
-	engine.modifyEmittersFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
+	engine.modifyVoicesFor(sourceId, audioObjectId, [&] (AudioVoice& voice)
 	{
 		voice.setUserGain(gain);
 	});

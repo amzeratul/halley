@@ -29,8 +29,8 @@ namespace Halley {
 	    void setListener(AudioListenerData position);
 		void setOutputChannels(Vector<AudioChannelData> channelData);
 
-		void addEmitter(std::unique_ptr<AudioVoice> src);
-		void modifyEmittersFor(uint32_t sourceId, uint32_t audioObjectId, ModifyCallback callback);
+		void addVoice(std::unique_ptr<AudioVoice> src);
+		void modifyVoicesFor(uint32_t sourceId, uint32_t audioObjectId, ModifyCallback callback);
 
 		const Vector<AudioVoice*>& getSources(uint32_t id);
 		Vector<uint32_t> getFinishedSounds();
@@ -68,7 +68,7 @@ namespace Halley {
 		std::atomic<bool> running;
 		std::atomic<bool> needsBuffer;
 
-		Vector<std::unique_ptr<AudioVoice>> emitters;
+		Vector<std::unique_ptr<AudioVoice>> voices;
 		Vector<AudioChannelData> channels;
 		
 		std::map<uint32_t, Vector<AudioVoice*>> idToSource;
@@ -85,8 +85,8 @@ namespace Halley {
 
     	Vector<uint32_t> finishedSounds;
 
-		void mixEmitters(size_t numSamples, size_t channels, gsl::span<AudioBuffer*> buffers);
-	    void removeFinishedEmitters();
+		void mixVoices(size_t numSamples, size_t channels, gsl::span<AudioBuffer*> buffers);
+	    void removeFinishedVoices();
 		void clearBuffer(gsl::span<AudioSamplePack> dst);
 		void queueAudioFloat(gsl::span<const float> data);
 		void queueAudioBytes(gsl::span<const gsl::byte> data);
