@@ -16,6 +16,6 @@ namespace Halley
 
 	private:
 		const std::shared_ptr<const AudioObject> object;
-		std::shared_ptr<AudioSource> source;
+		std::unique_ptr<AudioSource> source;
 	};
 }

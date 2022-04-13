@@ -138,7 +138,6 @@ bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, Audio
 		return false;
 	}
 
-	const uint32_t sourceId = 0; // TODO
 	const uint32_t audioObjectId = object->getAudioObjectId();
 
 	const auto gainRange = object->getVolume();
@@ -146,8 +145,8 @@ bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, Audio
 	const auto pitchRange = object->getPitch();
 	const float pitch = clamp(engine.getRNG().getFloat(pitchRange.start, pitchRange.end), 0.1f, 2.0f);
 
-	auto source = std::make_shared<AudioSourceObject>(engine, object);
-	auto voice = std::make_unique<AudioVoice>(engine, source, gain, pitch, engine.getGroupId(object->getGroup()));
+	auto source = object->makeSource(engine, emitter);
+	auto voice = std::make_unique<AudioVoice>(engine, std::move(source), gain, pitch, engine.getGroupId(object->getGroup()));
 	voice->setIds(uniqueId, audioObjectId);
 	
 	emitter.addVoice(std::move(voice));

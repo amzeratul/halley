@@ -1,11 +1,13 @@
 #pragma once
 
+#include "audio_sub_object.h"
 #include "halley/resources/resource.h"
 #include "halley/resources/resource_data.h"
 #include "halley/core/api/audio_api.h"
 #include "halley/maths/range.h"
 
 namespace Halley {
+	class AudioSource;
 	class Random;
 
 	class AudioObject final : public Resource {
@@ -16,14 +18,11 @@ namespace Halley {
         void loadLegacyEvent(const ConfigNode& node);
 
         AudioObjectId getAudioObjectId() const;
-
 		const String& getGroup() const;
-        std::shared_ptr<const AudioClip> getRandomClip(Random& rng) const;
-
 		Range<float> getPitch() const;
 		Range<float> getVolume() const;
-		float getDelay() const;
-		bool getLoop() const;
+
+		std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const;
     	
     	void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -35,14 +34,11 @@ namespace Halley {
 
     private:
 		AudioObjectId audioObjectId;
+		AudioSubObjectHandle root;
 		
-		Vector<String> clips;
-		Vector<std::shared_ptr<const AudioClip>> clipData;
 		String group;
 		Range<float> pitch;
 		Range<float> volume;
-		float delay = 0.0f;
-		bool loop = false;
 
 		void generateId();
     };

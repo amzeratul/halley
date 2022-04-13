@@ -11,34 +11,20 @@ using namespace Halley;
 AudioSourceObject::AudioSourceObject(AudioEngine& engine, std::shared_ptr<const AudioObject> obj)
 	: object(std::move(obj))
 {
-	auto& rng = engine.getRNG();
-
-	if (auto clip = object->getRandomClip(rng); clip) {
-		source = std::make_shared<AudioSourceClip>(std::move(clip), object->getLoop(), lround(object->getDelay() * AudioConfig::sampleRate));
-	}
 }
 
 uint8_t AudioSourceObject::getNumberOfChannels() const
 {
-	if (!source) {
-		return 0;
-	}
-	return source->getNumberOfChannels();
+	return 0;
 }
 
 bool AudioSourceObject::getAudioData(size_t numSamples, AudioSourceData& dst)
 {
-	if (!source) {
-		return false;
-	}
-	return source->getAudioData(numSamples, dst);
+	return false;
 }
 
 bool AudioSourceObject::isReady() const
 {
-	if (!source) {
-		return true;
-	}
-	return source->isReady();
+	return true;
 }
 
