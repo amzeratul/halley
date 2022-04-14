@@ -8,14 +8,16 @@ namespace Halley {
 	class ConfigNode;
 
 	enum class AudioFadeCurve : uint8_t {
+		None,
 		Linear,
 		Sinusoidal
 	};
 
 	template <>
 	struct EnumNames<AudioFadeCurve> {
-		constexpr std::array<const char*, 2> operator()() const {
+		constexpr std::array<const char*, 3> operator()() const {
 			return{{
+				"none",
 				"linear",
 				"sinusoidal"
 			}};
@@ -30,6 +32,7 @@ namespace Halley {
 
 		float evaluate(float time) const;
 		float getLength() const;
+		bool hasFade() const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

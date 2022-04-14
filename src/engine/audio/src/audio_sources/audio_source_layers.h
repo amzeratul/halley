@@ -23,13 +23,14 @@ namespace Halley
 			std::unique_ptr<AudioSource> source;
 			float prevGain = 0;
 			float gain = 0;
+			bool playing = false;
+			bool synchronised = false;
 			size_t idx = 0;
 			AudioFader fader;
 
 			Layer(std::unique_ptr<AudioSource> source, AudioEmitter& emitter, size_t idx);
 			void init(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter);
 			void update(float time, const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter, const AudioFade& fade);
-			bool isPlaying(const AudioSubObjectLayers& layerConfig) const;
 		};
 
 		AudioEngine& engine;

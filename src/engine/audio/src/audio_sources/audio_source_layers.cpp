@@ -21,7 +21,7 @@ AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter,
 		assert(layerSources[0]->getNumberOfChannels() == layerSources[i]->getNumberOfChannels());
 
 		layers.emplace_back(std::move(layerSources[i]), emitter, i);
-		layers.back().update(0, layerConfig, emitter, fadeConfig);
+		layers.back().init(layerConfig, emitter);
 	}
 }
 
@@ -34,28 +34,47 @@ bool AudioSourceLayers::getAudioData(size_t numSamples, AudioSourceData dst)
 {
 	const auto nChannels = getNumberOfChannels();
 
-	auto& mixer = engine.getMixer();
-	auto result = engine.getPool().getBuffers(nChannels, numSamples);
-	auto temp = engine.getPool().getBuffers(nChannels, numSamples);
-	bool ok = true;
-
 	const float deltaTime = static_cast<float>(numSamples) / static_cast<float>(AudioConfig::sampleRate);
 
-	mixer.zero(result.getSpans(), nChannels);
+	// Update layers and count how many are active
+	size_t nActive = 0;
 	for (auto& layer: layers) {
 		layer.update(deltaTime, layerConfig, emitter, fadeConfig);
+		nActive += layer.playing ? 1 : 0;
+	}
 
-		if (layer.isPlaying(layerConfig)) {
-			ok = layer.source->getAudioData(numSamples, temp.getSampleSpans()) && ok;
-
-			if (layer.prevGain > 0.0001f || layer.gain > 0.0001f) {
-				mixer.mixAudio(temp.getSpans(), result.getSpans(), layer.prevGain, layer.gain);
+	auto temp = engine.getPool().getBuffers(nChannels, numSamples);
+	if (nActive == 1) {
+		// If only one layer is playing, mix it directly
+		bool ok = false;
+		for (auto& layer: layers) {
+			if (layer.playing) {
+				ok = layer.source->getAudioData(numSamples, dst);
+			} else if (layer.synchronised) {
+				layer.source->getAudioData(numSamples, temp.getSampleSpans());
 			}
 		}
-	}
-	mixer.copy(result.getSpans(), dst, nChannels);
+		return ok;
+	} else {
+		// Multiple layers playing, mix them
+		auto& mixer = engine.getMixer();
+		auto result = engine.getPool().getBuffers(nChannels, numSamples);
+		bool ok = true;
 
-	return ok;
+		mixer.zero(result.getSpans(), nChannels);
+		for (auto& layer: layers) {
+			if (layer.playing || layer.synchronised) {
+				ok = layer.source->getAudioData(numSamples, temp.getSampleSpans()) && ok;
+
+				if (layer.playing) {
+					mixer.mixAudio(temp.getSpans(), result.getSpans(), layer.prevGain, layer.gain);
+				}
+			}
+		}
+		mixer.copy(result.getSpans(), dst, nChannels);
+
+		return ok;
+	}
 }
 
 bool AudioSourceLayers::isReady() const
@@ -74,6 +93,8 @@ void AudioSourceLayers::Layer::init(const AudioSubObjectLayers& layerConfig, Aud
 	const auto targetGain = layerConfig.getLayerExpression(idx).evaluate(emitter);
 	fader.stopAndSetValue(targetGain);
 	prevGain = gain = targetGain;
+	synchronised = layerConfig.isLayerSynchronised(idx);
+	playing = targetGain > 0.0001f;
 }
 
 void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter, const AudioFade& fade)
@@ -88,9 +109,6 @@ void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& la
 
 	prevGain = gain;
 	gain = fader.getCurrentValue();
-}
 
-bool AudioSourceLayers::Layer::isPlaying(const AudioSubObjectLayers& layerConfig) const
-{
-	return gain > 0.0001f || prevGain > 0.0001f || layerConfig.isLayerSynchronised(idx);
+	playing = gain > 0.0001f || prevGain > 0.0001f;
 }

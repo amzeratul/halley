@@ -18,6 +18,8 @@ AudioFade::AudioFade(const ConfigNode& node)
 float AudioFade::evaluate(float time) const
 {
 	switch (curve) {
+	case AudioFadeCurve::None:
+		return 1.0f;
 	case AudioFadeCurve::Linear:
 		return clamp(time / length, 0.0f, 1.0f);
 	case AudioFadeCurve::Sinusoidal:
@@ -29,6 +31,11 @@ float AudioFade::evaluate(float time) const
 float AudioFade::getLength() const
 {
 	return length;
+}
+
+bool AudioFade::hasFade() const
+{
+	return curve != AudioFadeCurve::None;
 }
 
 void AudioFade::serialize(Serializer& s) const

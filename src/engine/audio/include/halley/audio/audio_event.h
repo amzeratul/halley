@@ -4,6 +4,7 @@
 #include "halley/data_structures/maybe.h"
 #include "audio_clip.h"
 #include "audio_dynamics_config.h"
+#include "audio_fade.h"
 #include "audio_position.h"
 
 namespace Halley
@@ -77,7 +78,24 @@ namespace Halley
 		virtual void loadDependencies(Resources& resources) {}
 	};
 
-	class AudioEventActionPlay final : public IAudioEventAction
+	class AudioEventActionObject : public IAudioEventAction
+	{
+	public:
+		AudioEventActionObject() = default;
+		AudioEventActionObject(const ConfigNode& config, bool loadObject = true);
+		
+		void serialize(Serializer& s) const override;
+		void deserialize(Deserializer& s) override;
+
+		void loadDependencies(Resources& resources) override;
+
+	protected:
+		std::shared_ptr<const AudioObject> object;
+		String objectName;
+		AudioFade fade;
+	};
+
+	class AudioEventActionPlay final : public AudioEventActionObject
 	{
 	public:
 		explicit AudioEventActionPlay() = default;
@@ -92,27 +110,7 @@ namespace Halley
 		void loadDependencies(Resources& resources) override;
 
 	private:
-		String objectName;
-		std::shared_ptr<const AudioObject> object;
 		bool legacy = false;
-	};
-
-	class AudioEventActionObject : public IAudioEventAction
-	{
-	public:
-		AudioEventActionObject() = default;
-		AudioEventActionObject(const ConfigNode& config);
-		
-		void serialize(Serializer& s) const override;
-		void deserialize(Deserializer& s) override;
-
-		void loadDependencies(Resources& resources) override;
-
-	protected:
-		std::shared_ptr<const AudioObject> object;
-
-	private:
-		String objectName;
 	};
 
 	class AudioEventActionStop final : public AudioEventActionObject

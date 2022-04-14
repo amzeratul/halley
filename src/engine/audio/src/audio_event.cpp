@@ -116,7 +116,38 @@ void AudioEvent::loadDependencies(Resources& resources)
 
 
 
+AudioEventActionObject::AudioEventActionObject(const ConfigNode& node, bool loadObject)
+{
+	if (loadObject) {
+		objectName = node["object"].asString();
+	}
+	fade = AudioFade(node["fade"]);
+}
+
+void AudioEventActionObject::serialize(Serializer& s) const
+{
+	s << objectName;
+	s << fade;
+}
+
+void AudioEventActionObject::deserialize(Deserializer& s)
+{
+	s >> objectName;
+	s >> fade;
+}
+
+void AudioEventActionObject::loadDependencies(Resources& resources)
+{
+	if (!objectName.isEmpty() && (!object || object->getAssetId() != objectName)) {
+		object = resources.get<AudioObject>(objectName);
+	}
+}
+
+
+
+
 AudioEventActionPlay::AudioEventActionPlay(const ConfigNode& node)
+	: AudioEventActionObject(node, false)
 {
 	if (node.hasKey("object")) {
 		objectName = node["object"].asString();
@@ -157,7 +188,7 @@ void AudioEventActionPlay::serialize(Serializer& s) const
 	if (legacy) {
 		s << *object;
 	} else {
-		s << objectName;
+		AudioEventActionObject::serialize(s);
 	}
 }
 
@@ -169,7 +200,7 @@ void AudioEventActionPlay::deserialize(Deserializer& s)
 		s >> *obj;
 		object = obj;
 	} else {
-		s >> objectName;
+		AudioEventActionObject::deserialize(s);
 	}
 }
 
@@ -178,31 +209,7 @@ void AudioEventActionPlay::loadDependencies(Resources& resources)
 	if (legacy) {
 		const_cast<AudioObject&>(*object).loadDependencies(resources); // :|
 	} else {
-		if (!objectName.isEmpty() && (!object || object->getAssetId() != objectName)) {
-			object = resources.get<AudioObject>(objectName);
-		}
-	}
-}
-
-AudioEventActionObject::AudioEventActionObject(const ConfigNode& node)
-{
-	objectName = node["object"].asString();
-}
-
-void AudioEventActionObject::serialize(Serializer& s) const
-{
-	s << objectName;
-}
-
-void AudioEventActionObject::deserialize(Deserializer& s)
-{
-	s >> objectName;
-}
-
-void AudioEventActionObject::loadDependencies(Resources& resources)
-{
-	if (!objectName.isEmpty() && (!object || object->getAssetId() != objectName)) {
-		object = resources.get<AudioObject>(objectName);
+		AudioEventActionObject::loadDependencies(resources);
 	}
 }
 
