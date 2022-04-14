@@ -2,7 +2,7 @@
 #include "audio_mixer.h"
 #include <thread>
 #include <chrono>
-#include "audio_source_clip.h"
+#include "audio_sources/audio_source_clip.h"
 #include "audio_filter_resample.h"
 #include "halley/support/debug.h"
 #include "halley/core/resources/resources.h"

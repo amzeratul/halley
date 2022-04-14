@@ -4,7 +4,7 @@
 #include "halley/support/logger.h"
 #include "halley/bytes/byte_serializer.h"
 #include "../audio_engine.h"
-#include "../audio_source_clip.h"
+#include "../audio_sources/audio_source_clip.h"
 #include "audio_clip.h"
 
 namespace Halley {
