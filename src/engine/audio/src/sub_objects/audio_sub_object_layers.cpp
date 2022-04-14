@@ -11,6 +11,11 @@ void AudioSubObjectLayers::load(const ConfigNode& node)
 			layers.emplace_back(layerNode);
 		}
 	}
+	if (node.hasKey("fade")) {
+		fadeConfig = AudioFade(node["fade"]);
+	} else {
+		fadeConfig = AudioFade(1.0f, AudioFadeCurve::Linear);
+	}
 }
 
 std::unique_ptr<AudioSource> AudioSubObjectLayers::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
@@ -21,7 +26,7 @@ std::unique_ptr<AudioSource> AudioSubObjectLayers::makeSource(AudioEngine& engin
 		sources.push_back(l.object->makeSource(engine, emitter));
 	}
 
-	return std::make_unique<AudioSourceLayers>(engine, emitter, std::move(sources), *this);
+	return std::make_unique<AudioSourceLayers>(engine, emitter, std::move(sources), *this, fadeConfig);
 }
 
 void AudioSubObjectLayers::loadDependencies(Resources& resources)
@@ -34,11 +39,13 @@ void AudioSubObjectLayers::loadDependencies(Resources& resources)
 void AudioSubObjectLayers::serialize(Serializer& s) const
 {
 	s << layers;
+	s << fadeConfig;
 }
 
 void AudioSubObjectLayers::deserialize(Deserializer& s)
 {
 	s >> layers;
+	s >> fadeConfig;
 }
 
 const AudioExpression& AudioSubObjectLayers::getLayerExpression(size_t idx) const

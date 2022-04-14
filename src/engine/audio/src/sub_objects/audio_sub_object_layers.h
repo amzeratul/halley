@@ -1,5 +1,6 @@
 #pragma once
 #include "audio_expression.h"
+#include "audio_fade.h"
 #include "audio_sub_object.h"
 
 namespace Halley {
@@ -32,5 +33,6 @@ namespace Halley {
 		};
 
 		Vector<Layer> layers;
+		AudioFade fadeConfig;
 	};
 }

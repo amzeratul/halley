@@ -10,17 +10,18 @@
 
 using namespace Halley;
 
-AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter, Vector<std::unique_ptr<AudioSource>> layerSources, const AudioSubObjectLayers& layerConfig)
+AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter, Vector<std::unique_ptr<AudioSource>> layerSources, const AudioSubObjectLayers& layerConfig, AudioFade fadeConfig)
 	: engine(engine)
 	, emitter(emitter)
 	, layerConfig(layerConfig)
+	, fadeConfig(fadeConfig)
 {
 	layers.reserve(layerSources.size());
 	for (size_t i = 0; i < layerSources.size(); ++i) {
 		assert(layerSources[0]->getNumberOfChannels() == layerSources[i]->getNumberOfChannels());
 
 		layers.emplace_back(std::move(layerSources[i]), emitter, i);
-		layers.back().update(0, layerConfig, emitter);
+		layers.back().update(0, layerConfig, emitter, fadeConfig);
 	}
 }
 
@@ -42,7 +43,7 @@ bool AudioSourceLayers::getAudioData(size_t numSamples, AudioSourceData dst)
 
 	mixer.zero(result.getSpans(), nChannels);
 	for (auto& layer: layers) {
-		layer.update(deltaTime, layerConfig, emitter);
+		layer.update(deltaTime, layerConfig, emitter, fadeConfig);
 
 		if (layer.isPlaying(layerConfig)) {
 			ok = layer.source->getAudioData(numSamples, temp.getSampleSpans()) && ok;
@@ -75,12 +76,11 @@ void AudioSourceLayers::Layer::init(const AudioSubObjectLayers& layerConfig, Aud
 	prevGain = gain = targetGain;
 }
 
-void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter)
+void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter, const AudioFade& fade)
 {
 	const auto targetGain = layerConfig.getLayerExpression(idx).evaluate(emitter);
 
 	if (std::abs(targetGain - gain) > 0.001f) {
-		const auto fade = AudioFade(1.0f, AudioFadeCurve::Linear); // TODO: read dynamically
 		fader.startFade(gain, targetGain, fade);
 	}
 

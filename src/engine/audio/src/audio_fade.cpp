@@ -60,15 +60,18 @@ void AudioFader::stopAndSetValue(float value)
 	startVal = endVal = value;
 }
 
-void AudioFader::update(float t)
+bool AudioFader::update(float t)
 {
 	if (fading) {
 		time += t;
 		if (time >= fade.getLength()) {
 			time = fade.getLength();
 			fading = false;
+			return true;
 		}
 	}
+
+	return false;
 }
 
 bool AudioFader::isFading() const

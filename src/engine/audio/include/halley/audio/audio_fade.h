@@ -43,7 +43,9 @@ namespace Halley {
 	public:
 		void startFade(float from, float to, const AudioFade& fade);
 		void stopAndSetValue(float value);
-		void update(float time);
+
+		/// Returns true if the fade just ended
+		bool update(float time);
 
 		bool isFading() const;
 		float getCurrentValue() const;
