@@ -29,7 +29,6 @@ uint8_t AudioSourceLayers::getNumberOfChannels() const
 	return layers.empty() ? 0 : layers[0].source->getNumberOfChannels();
 }
 
-PRAGMA_DEOPTIMIZE
 bool AudioSourceLayers::getAudioData(size_t numSamples, AudioSourceData dst)
 {
 	const auto nChannels = getNumberOfChannels();
@@ -57,7 +56,6 @@ bool AudioSourceLayers::getAudioData(size_t numSamples, AudioSourceData dst)
 
 	return ok;
 }
-PRAGMA_REOPTIMIZE
 
 bool AudioSourceLayers::isReady() const
 {
