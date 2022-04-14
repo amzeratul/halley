@@ -17,15 +17,27 @@
 
 namespace Halley
 {
+	using AudioChannelSamples = gsl::span<AudioSamplePack>;
+	using AudioChannelSamplesConst = gsl::span<const AudioSamplePack>;
+	using AudioMultiChannelSamples = std::array<gsl::span<AudioSamplePack>, AudioConfig::maxChannels>;
+	using AudioMultiChannelSamplesConst = std::array<gsl::span<const AudioSamplePack>, AudioConfig::maxChannels>;
+
 	class AudioMixer
 	{
 	public:
 		virtual ~AudioMixer() {}
 
-		virtual void mixAudio(gsl::span<const AudioSamplePack> src, gsl::span<AudioSamplePack> dst, float gainStart, float gainEnd);
+		virtual void mixAudio(AudioChannelSamplesConst src, AudioChannelSamples dst, float gainStart, float gainEnd);
+		void mixAudio(AudioMultiChannelSamplesConst src, AudioMultiChannelSamples dst, float gainStart, float gainEnd);
+		void mixAudio(AudioMultiChannelSamples src, AudioMultiChannelSamples dst, float gainStart, float gainEnd);
+
 		virtual void interleaveChannels(gsl::span<AudioSamplePack> dst, gsl::span<AudioBuffer*> srcs);
 		virtual void concatenateChannels(gsl::span<AudioSamplePack> dst, gsl::span<AudioBuffer*> srcs);
 		virtual void compressRange(gsl::span<AudioSamplePack> buffer);
+
+		void zero(AudioMultiChannelSamples dst);
+		void copy(AudioMultiChannelSamples src, std::array<gsl::span<AudioConfig::SampleFormat>, AudioConfig::maxChannels> dst);
+
 		static std::unique_ptr<AudioMixer> makeMixer();
 	};
 }

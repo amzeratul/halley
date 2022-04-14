@@ -3,19 +3,31 @@
 
 namespace Halley
 {
+	class AudioEmitter;
 	class AudioObject;
 
 	class AudioSourceLayers final : public AudioSource
 	{
 	public:
-		AudioSourceLayers(AudioEngine& engine, std::shared_ptr<const AudioObject> object);
+		AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter, Vector<std::unique_ptr<AudioSource>> layerSources);
 
 		uint8_t getNumberOfChannels() const override;
-		bool getAudioData(size_t numSamples, AudioSourceData& dst) override;
+		bool getAudioData(size_t numSamples, AudioSourceData dst) override;
 		bool isReady() const override;
 
 	private:
-		const std::shared_ptr<const AudioObject> object;
-		std::unique_ptr<AudioSource> source;
+		class Layer {
+		public:
+			std::unique_ptr<AudioSource> source;
+			float prevGain = 0;
+			float gain = 0;
+
+			Layer(std::unique_ptr<AudioSource> source, AudioEmitter& emitter);
+			void evaluateGain(AudioEmitter& emitter);
+		};
+
+		AudioEngine& engine;
+		AudioEmitter& emitter;
+		Vector<Layer> layers;
 	};
 }

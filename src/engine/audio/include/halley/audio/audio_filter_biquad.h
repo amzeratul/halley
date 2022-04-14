@@ -10,7 +10,7 @@ namespace Halley {
     	
 	    uint8_t getNumberOfChannels() const override;
 	    bool isReady() const override;
-	    bool getAudioData(size_t numSamples, AudioSourceData& dst) override;
+	    bool getAudioData(size_t numSamples, AudioSourceData dst) override;
 
     private:
 		std::shared_ptr<AudioSource> src;

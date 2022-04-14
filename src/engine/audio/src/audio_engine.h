@@ -52,6 +52,7 @@ namespace Halley {
     	Random& getRNG();
 		AudioBufferPool& getPool() const;
 		AudioVariableTable& getVariableTable() const;
+		AudioMixer& getMixer() const;
 
 		void setMasterGain(float gain);
 		void setGroupGain(const String& name, float gain);

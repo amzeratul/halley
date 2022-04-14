@@ -17,7 +17,7 @@ bool AudioFilterBiquad::isReady() const
 	return src->isReady();
 }
 
-bool AudioFilterBiquad::getAudioData(size_t numSamples, AudioSourceData& dst)
+bool AudioFilterBiquad::getAudioData(size_t numSamples, AudioSourceData dst)
 {
 	// TODO
 	return src->getAudioData(numSamples, dst);

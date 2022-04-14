@@ -27,6 +27,22 @@ void AudioMixer::mixAudio(gsl::span<const AudioSamplePack> src, gsl::span<AudioS
 	}
 }
 
+void AudioMixer::mixAudio(AudioMultiChannelSamplesConst src, AudioMultiChannelSamples dst, float gainStart, float gainEnd)
+{
+	auto n = std::min(src.size(), dst.size());
+	for (decltype(n) i = 0; i < n; ++i) {
+		mixAudio(src[i], dst[i], gainStart, gainEnd);
+	}
+}
+
+void AudioMixer::mixAudio(AudioMultiChannelSamples src, AudioMultiChannelSamples dst, float gainStart, float gainEnd)
+{
+	auto n = std::min(src.size(), dst.size());
+	for (decltype(n) i = 0; i < n; ++i) {
+		mixAudio(src[i], dst[i], gainStart, gainEnd);
+	}
+}
+
 void AudioMixer::interleaveChannels(gsl::span<AudioSamplePack> dstBuffer, gsl::span<AudioBuffer*> srcs)
 {
 	Expects(srcs.size() == 2);
@@ -64,6 +80,16 @@ void AudioMixer::compressRange(gsl::span<AudioSamplePack> buffer)
 			sample = std::max(-0.99995f, std::min(sample, 0.99995f));
 		}
 	}
+}
+
+void AudioMixer::zero(AudioMultiChannelSamples dst)
+{
+
+}
+
+void AudioMixer::copy(AudioMultiChannelSamples src, std::array<gsl::span<AudioConfig::SampleFormat>, AudioConfig::maxChannels> dst)
+{
+
 }
 
 #ifdef HAS_SSE

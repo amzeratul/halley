@@ -300,6 +300,11 @@ AudioVariableTable& AudioEngine::getVariableTable() const
 	return *variableTable;
 }
 
+AudioMixer& AudioEngine::getMixer() const
+{
+	return *mixer;
+}
+
 void AudioEngine::setMasterGain(float gain)
 {
 	masterGain = gain;
