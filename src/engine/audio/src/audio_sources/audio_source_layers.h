@@ -1,4 +1,5 @@
 #pragma once
+#include "audio_fade.h"
 #include "audio_source.h"
 
 namespace Halley
@@ -23,9 +24,11 @@ namespace Halley
 			float prevGain = 0;
 			float gain = 0;
 			size_t idx = 0;
+			AudioFader fader;
 
 			Layer(std::unique_ptr<AudioSource> source, AudioEmitter& emitter, size_t idx);
-			void evaluateGain(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter);
+			void init(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter);
+			void update(float time, const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter);
 			bool isPlaying(const AudioSubObjectLayers& layerConfig) const;
 		};
 

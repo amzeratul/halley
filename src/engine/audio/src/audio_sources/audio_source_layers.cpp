@@ -20,7 +20,7 @@ AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter,
 		assert(layerSources[0]->getNumberOfChannels() == layerSources[i]->getNumberOfChannels());
 
 		layers.emplace_back(std::move(layerSources[i]), emitter, i);
-		layers.back().evaluateGain(layerConfig, emitter);
+		layers.back().update(0, layerConfig, emitter);
 	}
 }
 
@@ -39,12 +39,18 @@ bool AudioSourceLayers::getAudioData(size_t numSamples, AudioSourceData dst)
 	auto temp = engine.getPool().getBuffers(nChannels, numSamples);
 	bool ok = true;
 
+	const float deltaTime = static_cast<float>(numSamples) / static_cast<float>(AudioConfig::sampleRate);
+
 	mixer.zero(result.getSpans(), nChannels);
 	for (auto& layer: layers) {
-		layer.evaluateGain(layerConfig, emitter);
+		layer.update(deltaTime, layerConfig, emitter);
+
 		if (layer.isPlaying(layerConfig)) {
 			ok = layer.source->getAudioData(numSamples, temp.getSampleSpans()) && ok;
-			mixer.mixAudio(temp.getSpans(), result.getSpans(), layer.prevGain, layer.gain);
+
+			if (layer.prevGain > 0.0001f || layer.gain > 0.0001f) {
+				mixer.mixAudio(temp.getSpans(), result.getSpans(), layer.prevGain, layer.gain);
+			}
 		}
 	}
 	mixer.copy(result.getSpans(), dst, nChannels);
@@ -64,10 +70,26 @@ AudioSourceLayers::Layer::Layer(std::unique_ptr<AudioSource> source, AudioEmitte
 {
 }
 
-void AudioSourceLayers::Layer::evaluateGain(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter)
+void AudioSourceLayers::Layer::init(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter)
 {
+	const auto targetGain = layerConfig.getLayerExpression(idx).evaluate(emitter);
+	fader.stopAndSetValue(targetGain);
+	prevGain = gain = targetGain;
+}
+
+void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter)
+{
+	const auto targetGain = layerConfig.getLayerExpression(idx).evaluate(emitter);
+
+	if (std::abs(targetGain - gain) > 0.001f) {
+		const auto fade = AudioFade(1.0f, AudioFadeCurve::Linear); // TODO: read dynamically
+		fader.startFade(gain, targetGain, fade);
+	}
+
+	fader.update(time);
+
 	prevGain = gain;
-	gain = layerConfig.getLayerExpression(idx).evaluate(emitter);
+	gain = fader.getCurrentValue();
 }
 
 bool AudioSourceLayers::Layer::isPlaying(const AudioSubObjectLayers& layerConfig) const
