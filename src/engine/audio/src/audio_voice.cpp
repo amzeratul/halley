@@ -197,7 +197,7 @@ void AudioVoice::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixe
 	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
 		bufferRefs[srcChannel] = pool.getBuffer(numSamples);
 		audioData[srcChannel] = bufferRefs[srcChannel].getSpan().subspan(0, numPacks);
-		audioSampleData[srcChannel] = audioData[srcChannel].data()->samples;
+		audioSampleData[srcChannel] = gsl::span<AudioConfig::SampleFormat>(audioData[srcChannel].data()->samples.data(), numSamples);
 	}
 	bool isPlaying = source->getAudioData(numSamples, audioSampleData);
 

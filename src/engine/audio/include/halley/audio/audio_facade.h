@@ -37,6 +37,8 @@ namespace Halley {
 		void resumePlayback() override;
 
 		AudioEmitterHandle createEmitter(AudioPosition position) override;
+		AudioEmitterHandle getGlobalEmitter() override;
+
 	    AudioHandle postEvent(const String& name, AudioEmitterHandle emitter) override;
 		AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume, bool loop) override;
 

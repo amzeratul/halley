@@ -29,14 +29,17 @@ uint8_t AudioSourceLayers::getNumberOfChannels() const
 	return layers.empty() ? 0 : layers[0].source->getNumberOfChannels();
 }
 
+PRAGMA_DEOPTIMIZE
 bool AudioSourceLayers::getAudioData(size_t numSamples, AudioSourceData dst)
 {
+	const auto nChannels = getNumberOfChannels();
+
 	auto& mixer = engine.getMixer();
-	auto result = engine.getPool().getBuffers(getNumberOfChannels(), numSamples);
-	auto temp = engine.getPool().getBuffers(getNumberOfChannels(), numSamples);
+	auto result = engine.getPool().getBuffers(nChannels, numSamples);
+	auto temp = engine.getPool().getBuffers(nChannels, numSamples);
 	bool ok = true;
 
-	mixer.zero(result.getSpans());
+	mixer.zero(result.getSpans(), nChannels);
 	for (auto& layer: layers) {
 		layer.evaluateGain(layerConfig, emitter);
 		if (layer.isPlaying(layerConfig)) {
@@ -44,10 +47,11 @@ bool AudioSourceLayers::getAudioData(size_t numSamples, AudioSourceData dst)
 			mixer.mixAudio(temp.getSpans(), result.getSpans(), layer.prevGain, layer.gain);
 		}
 	}
-	mixer.copy(result.getSpans(), dst);
+	mixer.copy(result.getSpans(), dst, nChannels);
 
 	return ok;
 }
+PRAGMA_REOPTIMIZE
 
 bool AudioSourceLayers::isReady() const
 {

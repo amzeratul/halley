@@ -35,8 +35,9 @@ namespace Halley
 		virtual void concatenateChannels(gsl::span<AudioSamplePack> dst, gsl::span<AudioBuffer*> srcs);
 		virtual void compressRange(gsl::span<AudioSamplePack> buffer);
 
-		void zero(AudioMultiChannelSamples dst);
-		void copy(AudioMultiChannelSamples src, std::array<gsl::span<AudioConfig::SampleFormat>, AudioConfig::maxChannels> dst);
+		void zero(AudioMultiChannelSamples dst, size_t nChannels = 8);
+		void copy(AudioMultiChannelSamples src, std::array<gsl::span<AudioConfig::SampleFormat>, AudioConfig::maxChannels> dst, size_t nChannels = 8);
+		void copy(AudioChannelSamples src, gsl::span<AudioConfig::SampleFormat> dst);
 
 		static std::unique_ptr<AudioMixer> makeMixer();
 	};

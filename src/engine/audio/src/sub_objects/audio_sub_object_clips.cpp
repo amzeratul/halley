@@ -19,8 +19,8 @@ void AudioSubObjectClips::load(const ConfigNode& node)
 	clips = node["clips"].asVector<String>({});
 	delay = node["delay"].asFloat(0.0f);
 	loop = node["loop"].asBool(false);
-	loopStart = node["loopStart"].asInt();
-	loopEnd = node["loopEnd"].asInt();
+	loopStart = node["loopStart"].asInt(0);
+	loopEnd = node["loopEnd"].asInt(0);
 }
 
 std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine, AudioEmitter& emitter) const

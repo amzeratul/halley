@@ -82,14 +82,30 @@ void AudioMixer::compressRange(gsl::span<AudioSamplePack> buffer)
 	}
 }
 
-void AudioMixer::zero(AudioMultiChannelSamples dst)
+void AudioMixer::zero(AudioMultiChannelSamples dst, size_t nChannels)
 {
-
+	const size_t n = std::min(nChannels, dst.size());
+	for (size_t i = 0; i < n; ++i) {
+		memset(dst[i].data(), 0, dst[i].size_bytes());
+	}
 }
 
-void AudioMixer::copy(AudioMultiChannelSamples src, std::array<gsl::span<AudioConfig::SampleFormat>, AudioConfig::maxChannels> dst)
+void AudioMixer::copy(AudioMultiChannelSamples src, std::array<gsl::span<AudioConfig::SampleFormat>, AudioConfig::maxChannels> dst, size_t nChannels)
 {
+	const size_t n = std::min(nChannels, std::min(src.size(), dst.size()));
+	for (size_t c = 0; c < n; ++c) {
+		copy(src[c], dst[c]);
+	}
+}
 
+void AudioMixer::copy(AudioChannelSamples src, gsl::span<AudioConfig::SampleFormat> dst)
+{
+	const size_t len = std::min(src.size(), dst.size() / AudioSamplePack::NumSamples);
+	for (size_t i = 0; i < len; ++i) {
+		for (size_t j = 0; j < AudioSamplePack::NumSamples; ++j) {
+			dst[i * AudioSamplePack::NumSamples + j] = src[i].samples[j];
+		}
+	}
 }
 
 #ifdef HAS_SSE

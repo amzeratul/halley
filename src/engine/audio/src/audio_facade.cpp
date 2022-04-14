@@ -170,7 +170,12 @@ AudioEmitterHandle AudioFacade::createEmitter(AudioPosition position)
 		engine->createEmitter(emitterId, position, false);
 	});
 
-	return std::make_shared<AudioEmitterHandleImpl>(*this, emitterId);
+	return std::make_shared<AudioEmitterHandleImpl>(*this, emitterId, true);
+}
+
+AudioEmitterHandle AudioFacade::getGlobalEmitter()
+{
+	return std::make_shared<AudioEmitterHandleImpl>(*this, 0, false);
 }
 
 AudioHandle AudioFacade::postEvent(const String& name, AudioEmitterHandle emitter)

@@ -170,6 +170,9 @@ namespace Halley
 
 		virtual AudioEmitterId getId() const = 0;
 
+		virtual void setSwitch(String switchId, String value) = 0;
+		virtual void setVariable(String variableId, float value) = 0;
+
 		/// Allows emitter to remain alive after handle is destroyed, as long as it has sound playing
 		virtual void detach() = 0;
 	};
@@ -187,6 +190,8 @@ namespace Halley
 		virtual void resumePlayback() = 0;
 
 		virtual AudioEmitterHandle createEmitter(AudioPosition position) = 0;
+		virtual AudioEmitterHandle getGlobalEmitter() = 0;
+
 		virtual AudioHandle postEvent(const String& name, AudioEmitterHandle emitter = {}) = 0;
 		virtual AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter = {}, float volume = 1.0f, bool loop = false) = 0;
 
