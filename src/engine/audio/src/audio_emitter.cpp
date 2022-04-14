@@ -59,3 +59,32 @@ void AudioEmitter::makeTemporary()
 {
 	temporary = true;
 }
+
+void AudioEmitter::setSwitchValue(const String& id, String value)
+{
+	switchValues[id] = std::move(value);
+}
+
+void AudioEmitter::setVariableValue(const String& id, float value)
+{
+	variableValues[id] = value;
+}
+
+const String& AudioEmitter::getSwitchValue(const String& id) const
+{
+	const auto iter = switchValues.find(id);
+	if (iter == switchValues.end()) {
+		static String emptyString;
+		return emptyString;
+	}
+	return iter->second;
+}
+
+float AudioEmitter::getVariableValue(const String& id) const
+{
+	const auto iter = variableValues.find(id);
+	if (iter == variableValues.end()) {
+		return 0;
+	}
+	return iter->second;
+}

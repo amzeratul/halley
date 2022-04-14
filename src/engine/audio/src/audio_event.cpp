@@ -309,7 +309,7 @@ AudioEventActionSetSwitch::AudioEventActionSetSwitch(const ConfigNode& config)
 
 bool AudioEventActionSetSwitch::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
-	// TODO
+	emitter.setSwitchValue(switchId, value);
 
 	return true;
 }
@@ -334,7 +334,7 @@ AudioEventActionSetVariable::AudioEventActionSetVariable(const ConfigNode& confi
 
 bool AudioEventActionSetVariable::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
-	// TODO
+	emitter.setVariableValue(variableId, value);
 
 	return true;
 }
