@@ -1,4 +1,5 @@
 #pragma once
+#include "audio_expression.h"
 #include "audio_sub_object.h"
 
 namespace Halley {
@@ -14,7 +15,22 @@ namespace Halley {
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
 
+		const AudioExpression& getLayerExpression(size_t idx) const;
+		bool isLayerSynchronised(size_t idx) const;
+
 	private:
-		Vector<AudioSubObjectHandle> layerObjects;
+		struct Layer {
+			AudioSubObjectHandle object;
+			AudioExpression expression;
+			bool synchronised = false;
+
+			Layer() = default;
+			Layer(const ConfigNode& node);
+
+			void serialize(Serializer& s) const;
+			void deserialize(Deserializer& s);
+		};
+
+		Vector<Layer> layers;
 	};
 }

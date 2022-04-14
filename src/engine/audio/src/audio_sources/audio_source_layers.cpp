@@ -6,18 +6,21 @@
 #include "audio_object.h"
 #include "audio_source_clip.h"
 #include "../audio_mixer.h"
+#include "../sub_objects/audio_sub_object_layers.h"
 
 using namespace Halley;
 
-AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter, Vector<std::unique_ptr<AudioSource>> layerSources)
+AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter, Vector<std::unique_ptr<AudioSource>> layerSources, const AudioSubObjectLayers& layerConfig)
 	: engine(engine)
 	, emitter(emitter)
+	, layerConfig(layerConfig)
 {
 	layers.reserve(layerSources.size());
 	for (size_t i = 0; i < layerSources.size(); ++i) {
 		assert(layerSources[0]->getNumberOfChannels() == layerSources[i]->getNumberOfChannels());
 
-		layers.emplace_back(std::move(layerSources[i]), emitter);
+		layers.emplace_back(std::move(layerSources[i]), emitter, i);
+		layers.back().evaluateGain(layerConfig, emitter);
 	}
 }
 
@@ -35,8 +38,11 @@ bool AudioSourceLayers::getAudioData(size_t numSamples, AudioSourceData dst)
 
 	mixer.zero(result.getSpans());
 	for (auto& layer: layers) {
-		ok = layer.source->getAudioData(numSamples, temp.getSampleSpans()) && ok;
-		mixer.mixAudio(temp.getSpans(), result.getSpans(), layer.prevGain, layer.gain);
+		layer.evaluateGain(layerConfig, emitter);
+		if (layer.isPlaying(layerConfig)) {
+			ok = layer.source->getAudioData(numSamples, temp.getSampleSpans()) && ok;
+			mixer.mixAudio(temp.getSpans(), result.getSpans(), layer.prevGain, layer.gain);
+		}
 	}
 	mixer.copy(result.getSpans(), dst);
 
@@ -48,15 +54,19 @@ bool AudioSourceLayers::isReady() const
 	return std::all_of(layers.begin(), layers.end(), [=] (const auto& ls) { return ls.source->isReady(); });
 }
 
-AudioSourceLayers::Layer::Layer(std::unique_ptr<AudioSource> source, AudioEmitter& emitter)
+AudioSourceLayers::Layer::Layer(std::unique_ptr<AudioSource> source, AudioEmitter& emitter, size_t idx)
 	: source(std::move(source))
+	, idx(idx)
 {
-	evaluateGain(emitter);
 }
 
-void AudioSourceLayers::Layer::evaluateGain(AudioEmitter& emitter)
+void AudioSourceLayers::Layer::evaluateGain(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter)
 {
-	// TODO
 	prevGain = gain;
-	gain = 1;
+	gain = layerConfig.getLayerExpression(idx).evaluate(emitter);
+}
+
+bool AudioSourceLayers::Layer::isPlaying(const AudioSubObjectLayers& layerConfig) const
+{
+	return gain > 0.0001f || prevGain > 0.0001f || layerConfig.isLayerSynchronised(idx);
 }
