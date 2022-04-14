@@ -8,16 +8,18 @@ namespace Halley {
 	enum class AudioSubObjectType {
 		None,
 		Clips,
-		Layers
+		Layers,
+		Sequence
 	};
 
 	template <>
 	struct EnumNames<AudioSubObjectType> {
-		constexpr std::array<const char*, 3> operator()() const {
+		constexpr std::array<const char*, 4> operator()() const {
 			return{{
 				"none",
 				"clips",
-				"layers"
+				"layers",
+				"sequence"
 			}};
 		}
 	};
@@ -60,25 +62,6 @@ namespace Halley {
 
 	private:
 		std::unique_ptr<IAudioSubObject> obj;
-	};
-
-	class AudioSubObjectClips final : public IAudioSubObject {
-	public:
-		void load(const ConfigNode& node) override;
-
-		AudioSubObjectType getType() override { return AudioSubObjectType::Clips; }
-
-		std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const override;
-		void loadDependencies(Resources& resources) override;
-
-		void serialize(Serializer& s) const override;
-		void deserialize(Deserializer& s) override;
-
-	private:
-		Vector<String> clips;
-		Vector<std::shared_ptr<const AudioClip>> clipData;
-		float delay = 0.0f;
-		bool loop = false;
 	};
 
 }

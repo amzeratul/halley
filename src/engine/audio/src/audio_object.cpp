@@ -6,6 +6,7 @@
 #include "halley/data_structures/config_node.h"
 #include "halley/maths/random.h"
 #include "halley/support/logger.h"
+#include "sub_objects/audio_sub_object_clips.h"
 
 using namespace Halley;
 

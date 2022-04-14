@@ -1,11 +1,9 @@
 #include "audio_sub_object.h"
 
 #include "audio_engine.h"
-#include "audio_source_clip.h"
-#include "audio_clip.h"
-#include "halley/core/resources/resources.h"
-#include "halley/support/logger.h"
 #include "halley/bytes/byte_serializer.h"
+#include "sub_objects/audio_sub_object_clips.h"
+#include "sub_objects/audio_sub_object_layers.h"
 
 using namespace Halley;
 
@@ -14,6 +12,11 @@ std::unique_ptr<IAudioSubObject> IAudioSubObject::makeSubObject(AudioSubObjectTy
 	switch (type) {
 	case AudioSubObjectType::Clips:
 		return std::make_unique<AudioSubObjectClips>();
+	case AudioSubObjectType::Layers:
+		return std::make_unique<AudioSubObjectLayers>();
+	case AudioSubObjectType::Sequence:
+		// TODO
+		return {};
 	}
 	return {};
 }
@@ -88,50 +91,3 @@ void AudioSubObjectHandle::deserialize(Deserializer& s)
 	}
 }
 
-void AudioSubObjectClips::load(const ConfigNode& node)
-{
-	clips = node["clips"].asVector<String>({});
-	delay = node["delay"].asFloat(0.0f);
-	loop = node["loop"].asBool(false);
-}
-
-std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
-{
-	if (clipData.empty()) {
-		return {};
-	}
-
-	auto clip = engine.getRNG().getRandomElement(clipData);
-	return std::make_unique<AudioSourceClip>(clip, loop, lroundl(delay * AudioConfig::sampleRate));
-}
-
-void AudioSubObjectClips::loadDependencies(Resources& resources)
-{
-	if (clipData.size() != clips.size()) {
-		clipData.clear();
-		clipData.reserve(clips.size());
-
-		for (auto& c: clips) {
-			if (resources.exists<AudioClip>(c)) {
-				clipData.push_back(resources.get<AudioClip>(c));
-			} else {
-				Logger::logError("AudioClip not found: \"" + c + "\".");
-				clipData.push_back(std::shared_ptr<AudioClip>());
-			}
-		}
-	}
-}
-
-void AudioSubObjectClips::serialize(Serializer& s) const
-{
-	s << clips;
-	s << delay;
-	s << loop;
-}
-
-void AudioSubObjectClips::deserialize(Deserializer& s)
-{
-	s >> clips;
-	s >> delay;
-	s >> loop;
-}

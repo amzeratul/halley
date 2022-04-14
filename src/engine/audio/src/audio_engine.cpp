@@ -75,14 +75,14 @@ void AudioEngine::play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, 
 		return;
 	}
 
-	auto voice = std::make_unique<AudioVoice>(*this, std::make_shared<AudioSourceClip>(std::move(clip), loop, 0), volume, 1.0f, getGroupId(""));
+	auto voice = std::make_unique<AudioVoice>(*this, std::make_shared<AudioSourceClip>(std::move(clip), loop, 0, 0, 0), volume, 1.0f, getGroupId(""));
 	voice->setIds(id);
 	iter->second->addVoice(std::move(voice));
 }
 
 void AudioEngine::setListener(AudioListenerData l)
 {
-	listener = l;
+	listener = std::move(l);
 }
 
 void AudioEngine::setOutputChannels(Vector<AudioChannelData> channelData)

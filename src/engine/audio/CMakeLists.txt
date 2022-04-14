@@ -24,6 +24,8 @@ set(SOURCES
         "src/audio_sub_object.cpp"
         "src/audio_variable_table.cpp"
         "src/audio_voice.cpp"
+        "src/sub_objects/audio_sub_object_clips.cpp"
+        "src/sub_objects/audio_sub_object_layers.cpp"
         "src/behaviours/audio_voice_behaviour.cpp"
         "src/behaviours/audio_voice_dynamics_behaviour.cpp"
         "src/behaviours/audio_voice_fade_behaviour.cpp"
@@ -58,6 +60,8 @@ set(HEADERS
         "src/audio_source_object.h"
         "src/audio_variable_table.h"
         "src/audio_voice.h"
+        "src/sub_objects/audio_sub_object_clips.h"
+        "src/sub_objects/audio_sub_object_layers.h"
         )
 
 set(SOURCES ${SOURCES} ${OGG_FILES} ${VORBIS_FILES})
