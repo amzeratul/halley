@@ -20,8 +20,9 @@ AudioEvent::AudioEvent(const ConfigNode& config)
 	if (config.hasKey("actions")) {
 		for (auto& actionNode: config["actions"]) {
 			const auto type = fromString<AudioEventActionType>(actionNode["type"].asString());
-			if (type == AudioEventActionType::Play) {
-				actions.push_back(std::make_unique<AudioEventActionPlay>(actionNode));
+			if (auto action = makeAction(type); action) {
+				action->load(actionNode);
+				actions.push_back(std::move(action));
 			}
 		}
 	}
@@ -55,33 +56,8 @@ void AudioEvent::deserialize(Deserializer& s)
 		String name;
 		s >> name;
 		auto type = fromString<AudioEventActionType>(name);
-		std::unique_ptr<IAudioEventAction> newAction;
 
-		switch (type) {
-		case AudioEventActionType::Play:
-			newAction = std::make_unique<AudioEventActionPlay>();
-			break;
-		case AudioEventActionType::Stop:
-			newAction = std::make_unique<AudioEventActionStop>();
-			break;
-		case AudioEventActionType::Pause:
-			newAction = std::make_unique<AudioEventActionPause>();
-			break;
-		case AudioEventActionType::Resume:
-			newAction = std::make_unique<AudioEventActionResume>();
-			break;
-		case AudioEventActionType::SetVolume:
-			newAction = std::make_unique<AudioEventActionSetVolume>();
-			break;
-		case AudioEventActionType::SetSwitch:
-			newAction = std::make_unique<AudioEventActionSetSwitch>();
-			break;
-		case AudioEventActionType::SetVariable:
-			newAction = std::make_unique<AudioEventActionSetVariable>();
-			break;
-		}
-
-		if (newAction) {
+		if (std::unique_ptr<IAudioEventAction> newAction = makeAction(type); newAction) {
 			s >> *newAction;
 			actions.push_back(std::move(newAction));
 		}
@@ -114,9 +90,29 @@ void AudioEvent::loadDependencies(Resources& resources)
 	}
 }
 
+std::unique_ptr<IAudioEventAction> AudioEvent::makeAction(AudioEventActionType type) const
+{
+	switch (type) {
+	case AudioEventActionType::Play:
+		return std::make_unique<AudioEventActionPlay>();
+	case AudioEventActionType::Stop:
+		return std::make_unique<AudioEventActionStop>();
+	case AudioEventActionType::Pause:
+		return std::make_unique<AudioEventActionPause>();
+	case AudioEventActionType::Resume:
+		return std::make_unique<AudioEventActionResume>();
+	case AudioEventActionType::SetVolume:
+		return std::make_unique<AudioEventActionSetVolume>();
+	case AudioEventActionType::SetSwitch:
+		return std::make_unique<AudioEventActionSetSwitch>();
+	case AudioEventActionType::SetVariable:
+		return std::make_unique<AudioEventActionSetVariable>();
+	}
+	return {};
+}
 
 
-AudioEventActionObject::AudioEventActionObject(const ConfigNode& node, bool loadObject)
+void AudioEventActionObject::loadObject(const ConfigNode& node, bool loadObject)
 {
 	if (loadObject) {
 		objectName = node["object"].asString();
@@ -148,9 +144,9 @@ void AudioEventActionObject::loadDependencies(Resources& resources)
 
 
 
-AudioEventActionPlay::AudioEventActionPlay(const ConfigNode& node)
-	: AudioEventActionObject(node, false)
+void AudioEventActionPlay::load(const ConfigNode& node)
 {
+	loadObject(node, false);
 	legacy = !node.hasKey("object");
 	
 	if (legacy) {
@@ -184,6 +180,7 @@ bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, Audio
 	auto source = object->makeSource(engine, emitter);
 	auto voice = std::make_unique<AudioVoice>(engine, std::move(source), gain, pitch, delaySamples, engine.getGroupId(object->getGroup()));
 	voice->setIds(uniqueId, audioObjectId);
+	voice->play(fade);
 	
 	emitter.addVoice(std::move(voice));
 	return true;
@@ -224,9 +221,9 @@ void AudioEventActionPlay::loadDependencies(Resources& resources)
 	}
 }
 
-AudioEventActionStop::AudioEventActionStop(const ConfigNode& config)
-	: AudioEventActionObject(config)
-{	
+void AudioEventActionStop::load(const ConfigNode& config)
+{
+	loadObject(config);
 }
 
 bool AudioEventActionStop::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
@@ -239,15 +236,16 @@ bool AudioEventActionStop::run(AudioEngine& engine, AudioEventId id, AudioEmitte
 
 	emitter.forVoices(audioObjectId, [&] (AudioVoice& voice)
 	{
-		voice.stop();
+		voice.stop(fade);
 	});
 
 	return true;
 }
 
-AudioEventActionPause::AudioEventActionPause(const ConfigNode& config)
-	: AudioEventActionObject(config)
-{}
+void AudioEventActionPause::load(const ConfigNode& config)
+{
+	loadObject(config);
+}
 
 bool AudioEventActionPause::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
@@ -259,15 +257,16 @@ bool AudioEventActionPause::run(AudioEngine& engine, AudioEventId id, AudioEmitt
 
 	emitter.forVoices(audioObjectId, [&] (AudioVoice& voice)
 	{
-		voice.pause();
+		voice.pause(fade);
 	});
 
 	return true;
 }
 
-AudioEventActionResume::AudioEventActionResume(const ConfigNode& config)
-	: AudioEventActionObject(config)
-{}
+void AudioEventActionResume::load(const ConfigNode& config)
+{
+	loadObject(config);
+}
 
 bool AudioEventActionResume::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
@@ -279,15 +278,15 @@ bool AudioEventActionResume::run(AudioEngine& engine, AudioEventId id, AudioEmit
 
 	emitter.forVoices(audioObjectId, [&] (AudioVoice& voice)
 	{
-		voice.resume();
+		voice.resume(fade);
 	});
 
 	return true;
 }
 
-AudioEventActionSetVolume::AudioEventActionSetVolume(const ConfigNode& config)
-	: AudioEventActionObject(config)
+void AudioEventActionSetVolume::load(const ConfigNode& config)
 {
+	loadObject(config);
 	gain = config["gain"].asFloat(1.0f);
 }
 
@@ -319,7 +318,7 @@ void AudioEventActionSetVolume::deserialize(Deserializer& s)
 	s >> gain;
 }
 
-AudioEventActionSetSwitch::AudioEventActionSetSwitch(const ConfigNode& config)
+void AudioEventActionSetSwitch::load(const ConfigNode& config)
 {
 	switchId = config["switchId"].asString();
 	value = config["value"].asString();
@@ -344,7 +343,7 @@ void AudioEventActionSetSwitch::deserialize(Deserializer& s)
 	s >> value;
 }
 
-AudioEventActionSetVariable::AudioEventActionSetVariable(const ConfigNode& config)
+void AudioEventActionSetVariable::load(const ConfigNode& config)
 {
 	variableId = config["variableId"].asString();
 	value = config["value"].asFloat();

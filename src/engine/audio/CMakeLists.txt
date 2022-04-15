@@ -28,7 +28,6 @@ set(SOURCES
         "src/sub_objects/audio_sub_object_layers.cpp"
         "src/behaviours/audio_voice_behaviour.cpp"
         "src/behaviours/audio_voice_dynamics_behaviour.cpp"
-        "src/behaviours/audio_voice_fade_behaviour.cpp"
         "src/vorbis_dec.cpp"
         )
 
@@ -48,7 +47,6 @@ set(HEADERS
         "include/halley/audio/vorbis_dec.h"
         "include/halley/audio/behaviours/audio_voice_behaviour.h"
         "include/halley/audio/behaviours/audio_voice_dynamics_behaviour.h"
-        "include/halley/audio/behaviours/audio_voice_fade_behaviour.h"
         "src/audio_sources/audio_source_clip.h"
         "src/audio_sources/audio_source_layers.h"
         "src/audio_buffer.h"

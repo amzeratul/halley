@@ -10,4 +10,3 @@ namespace Halley {}
 
 #include "behaviours/audio_voice_behaviour.h"
 #include "behaviours/audio_voice_dynamics_behaviour.h"
-#include "behaviours/audio_voice_fade_behaviour.h"

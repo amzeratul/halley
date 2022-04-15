@@ -4,6 +4,8 @@
 #include "audio_buffer.h"
 #include <limits>
 
+#include "audio_fade.h"
+
 namespace Halley {
 	class AudioFilterResample;
 	class AudioBufferPool;
@@ -17,9 +19,11 @@ namespace Halley {
 		~AudioVoice();
 
 		void start();
-		void stop();
-		void pause();
-		void resume();
+
+		void play(AudioFade fade);
+		void stop(AudioFade fade);
+		void pause(AudioFade fade);
+		void resume(AudioFade fade);
 
 		bool isPlaying() const;
 		bool isReady() const;
@@ -47,6 +51,12 @@ namespace Halley {
 		uint8_t getGroup() const;
 
 	private:
+		enum class FadeEndBehaviour {
+			None,
+			Pause,
+			Stop
+		};
+		
 		AudioEngine& engine;
 		
 		AudioEventId eventId = std::numeric_limits<AudioEventId>::max();
@@ -63,6 +73,9 @@ namespace Halley {
 		float elapsedTime = 0.0f;
 		uint32_t delaySamples = 0;
 
+		AudioFader fader;
+		FadeEndBehaviour fadeEnd = FadeEndBehaviour::None;
+
 		std::shared_ptr<AudioSource> source;
 		std::shared_ptr<AudioFilterResample> resample;
 		std::unique_ptr<AudioVoiceBehaviour> behaviour;
@@ -71,5 +84,6 @@ namespace Halley {
 		std::array<float, 16> prevChannelMix;
 
 		void advancePlayback(size_t samples);
+		void onFadeEnd();
     };
 }

@@ -20,6 +20,17 @@ namespace Halley
 	class Resources;
 	class AudioDynamicsConfig;
 
+	enum class AudioEventActionType
+	{
+		Play,
+		Stop,
+		Pause,
+		Resume,
+		SetVolume,
+		SetSwitch,
+		SetVariable
+	};
+
 	class AudioEvent final : public Resource
 	{
 	public:
@@ -38,19 +49,9 @@ namespace Halley
 	private:
 		Vector<std::unique_ptr<IAudioEventAction>> actions;
 		void loadDependencies(Resources& resources);
+		std::unique_ptr<IAudioEventAction> makeAction(AudioEventActionType type) const;
 	};
-
-	enum class AudioEventActionType
-	{
-		Play,
-		Stop,
-		Pause,
-		Resume,
-		SetVolume,
-		SetSwitch,
-		SetVariable
-	};
-
+	
 	template <>
 	struct EnumNames<AudioEventActionType> {
 		constexpr std::array<const char*, 7> operator()() const {
@@ -70,6 +71,7 @@ namespace Halley
 	{
 	public:
 		virtual ~IAudioEventAction() {}
+		virtual void load(const ConfigNode& config) = 0;
 		virtual bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const = 0;
 		virtual AudioEventActionType getType() const = 0;
 
@@ -81,8 +83,7 @@ namespace Halley
 	class AudioEventActionObject : public IAudioEventAction
 	{
 	public:
-		AudioEventActionObject() = default;
-		AudioEventActionObject(const ConfigNode& config, bool loadObject = true);
+		void loadObject(const ConfigNode& config, bool loadObject = true);
 		
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
@@ -98,8 +99,7 @@ namespace Halley
 	class AudioEventActionPlay final : public AudioEventActionObject
 	{
 	public:
-		explicit AudioEventActionPlay() = default;
-		AudioEventActionPlay(const ConfigNode& config);
+		void load(const ConfigNode& config) override;
 
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::Play; }
@@ -118,8 +118,7 @@ namespace Halley
 	class AudioEventActionStop final : public AudioEventActionObject
 	{
 	public:
-		AudioEventActionStop() = default;
-		AudioEventActionStop(const ConfigNode& config);
+		void load(const ConfigNode& config) override;
 
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::Stop; }
@@ -128,8 +127,7 @@ namespace Halley
 	class AudioEventActionPause final : public AudioEventActionObject
 	{
 	public:
-		AudioEventActionPause() = default;
-		AudioEventActionPause(const ConfigNode& config);
+		void load(const ConfigNode& config) override;
 
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::Pause; }
@@ -138,8 +136,7 @@ namespace Halley
 	class AudioEventActionResume final : public AudioEventActionObject
 	{
 	public:
-		AudioEventActionResume() = default;
-		AudioEventActionResume(const ConfigNode& config);
+		void load(const ConfigNode& config) override;
 
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::Resume; }
@@ -148,8 +145,7 @@ namespace Halley
 	class AudioEventActionSetVolume final : public AudioEventActionObject
 	{
 	public:
-		AudioEventActionSetVolume() = default;
-		AudioEventActionSetVolume(const ConfigNode& config);
+		void load(const ConfigNode& config) override;
 
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::SetVolume; }
@@ -164,8 +160,7 @@ namespace Halley
 	class AudioEventActionSetSwitch final : public IAudioEventAction
 	{
 	public:
-		AudioEventActionSetSwitch() = default;
-		AudioEventActionSetSwitch(const ConfigNode& config);
+		void load(const ConfigNode& config) override;
 
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::SetSwitch; }
@@ -181,8 +176,7 @@ namespace Halley
 	class AudioEventActionSetVariable final : public IAudioEventAction
 	{
 	public:
-		AudioEventActionSetVariable() = default;
-		AudioEventActionSetVariable(const ConfigNode& config);
+		void load(const ConfigNode& config) override;
 
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::SetVariable; }

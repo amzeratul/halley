@@ -2,7 +2,6 @@
 #include "audio_facade.h"
 #include "audio_engine.h"
 #include <algorithm>
-#include "behaviours/audio_voice_fade_behaviour.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;
@@ -46,16 +45,41 @@ void AudioHandleImpl::setPan(float pan)
 	});
 }
 
+void AudioHandleImpl::play(const AudioFade& audioFade)
+{
+	enqueueForVoices([fade = audioFade](AudioVoice& src)
+	{
+		src.play(fade);
+	});	
+}
+
+void AudioHandleImpl::stop(const AudioFade& audioFade)
+{
+	enqueueForVoices([fade = audioFade](AudioVoice& src)
+	{
+		src.stop(fade);
+	});
+}
+
+void AudioHandleImpl::pause(const AudioFade& audioFade)
+{
+	enqueueForVoices([fade = audioFade](AudioVoice& src)
+	{
+		src.pause(fade);
+	});
+}
+
+void AudioHandleImpl::resume(const AudioFade& audioFade)
+{
+	enqueueForVoices([fade = audioFade](AudioVoice& src)
+	{
+		src.resume(fade);
+	});
+}
+
 void AudioHandleImpl::stop(float fadeTime)
 {
-	enqueueForVoices([fadeTime] (AudioVoice& src)
-	{
-		if (fadeTime >= 0.001f) {
-			src.addBehaviour(std::make_unique<AudioVoiceFadeBehaviour>(fadeTime, 1.0f, 0.0f, true));
-		} else {
-			src.stop();
-		}
-	});
+	stop(AudioFade(fadeTime, fadeTime > 0.0001f ? AudioFadeCurve::Linear : AudioFadeCurve::None));
 }
 
 // This is kind of like a unique_ptr, but copying it also moves it. >_>

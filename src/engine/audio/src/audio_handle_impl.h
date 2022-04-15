@@ -17,6 +17,12 @@ namespace Halley
 		void setVolume(float volume) override;
 		void setPosition(Vector2f pos) override;
 		void setPan(float pan) override;
+
+		void play(const AudioFade& audioFade) override;
+		void stop(const AudioFade& audioFade) override;
+		void pause(const AudioFade& audioFade) override;
+		void resume(const AudioFade& audioFade) override;
+		
 		void stop(float fadeTime) override;
 		bool isPlaying() const override;
 		void addBehaviour(std::unique_ptr<AudioVoiceBehaviour> behaviour) override;

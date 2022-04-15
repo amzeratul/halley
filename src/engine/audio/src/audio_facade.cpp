@@ -8,7 +8,6 @@
 #include "halley/support/logger.h"
 #include "halley/core/resources/resources.h"
 #include "audio_event.h"
-#include "behaviours/audio_voice_fade_behaviour.h"
 
 using namespace Halley;
 
@@ -244,16 +243,11 @@ AudioHandle AudioFacade::play(std::shared_ptr<const IAudioClip> clip, AudioPosit
 
 AudioHandle AudioFacade::playMusic(const String& eventName, int track, float fadeInTime)
 {
-	bool hasFade = fadeInTime > 0.0001f;
-	
 	stopMusic(track, 0.5f);
 	auto handle = postEvent(eventName, AudioPosition::makeFixed());
 	musicTracks[track] = handle;
 
-	if (hasFade) {
-		handle->setGain(0.0f);
-		handle->addBehaviour(std::make_unique<AudioVoiceFadeBehaviour>(fadeInTime, 0.0f, 1.0f, false));
-	}
+	handle->play(AudioFade(fadeInTime, fadeInTime > 0.0001f ? AudioFadeCurve::Linear : AudioFadeCurve::None));
 
 	return handle;
 }
@@ -309,11 +303,7 @@ void AudioFacade::setOutputChannels(Vector<AudioChannelData> audioChannelData)
 
 void AudioFacade::stopMusic(AudioHandle& handle, float fadeOutTime)
 {
-	if (fadeOutTime > 0.001f) {
-		handle->addBehaviour(std::make_unique<AudioVoiceFadeBehaviour>(fadeOutTime, 1.0f, 0.0f, true));
-	} else {
-		handle->stop();
-	}
+	handle->stop(AudioFade(fadeOutTime, fadeOutTime > 0.001f ? AudioFadeCurve::Linear : AudioFadeCurve::None));
 }
 
 void AudioFacade::onNeedBuffer()

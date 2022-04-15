@@ -13,6 +13,7 @@
 
 namespace Halley
 {
+	class AudioFade;
 	class AudioPosition;
 	class AudioClip;
 	class AudioEvent;
@@ -157,8 +158,14 @@ namespace Halley
 		virtual void setPosition(Vector2f pos) = 0;
 		virtual void setPan(float pan) = 0;
 
-		virtual void stop(float fadeTime = 0.0f) = 0;
+		virtual void play(const AudioFade& audioFade) = 0;
+		virtual void stop(const AudioFade& audioFade) = 0;
+		virtual void pause(const AudioFade& audioFade) = 0;
+		virtual void resume(const AudioFade& audioFade) = 0;
+		
 		virtual bool isPlaying() const = 0;
+
+		virtual void stop(float fadeTime = 0.0f) = 0;
 		virtual void addBehaviour(std::unique_ptr<AudioVoiceBehaviour> behaviour) = 0;
 	};
 	using AudioHandle = std::shared_ptr<IAudioHandle>;

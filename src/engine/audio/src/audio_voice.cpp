@@ -22,6 +22,7 @@ AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, fl
 	, delaySamples(delaySamples)
 	, source(std::move(src))
 {
+	fader.stopAndSetValue(1);
 	setPitch(pitch);
 }
 
@@ -52,20 +53,51 @@ void AudioVoice::start()
 	nChannels = source->getNumberOfChannels();
 }
 
-void AudioVoice::stop()
+void AudioVoice::play(AudioFade fade)
 {
-	playing = false;
-	done = true;
+	if (fade.hasFade()) {
+		fader.startFade(0, 1, fade);
+		fadeEnd = FadeEndBehaviour::None;
+	}
 }
 
-void AudioVoice::pause()
+void AudioVoice::stop(AudioFade fade)
 {
-	paused = true;
+	if (fade.hasFade()) {
+		if (fadeEnd == FadeEndBehaviour::None) {
+			// If we're fading to stop or pause, don't change the fade, just replace its behaviour
+			fader.startFade(fader.getCurrentValue(), 0, fade);
+		}
+		fadeEnd = FadeEndBehaviour::Stop;
+	} else {
+		playing = false;
+		done = true;
+	}
 }
 
-void AudioVoice::resume()
+void AudioVoice::pause(AudioFade fade)
+{
+	if (fade.hasFade()) {
+		if (fadeEnd == FadeEndBehaviour::None) {
+			// If we're fading to stop or pause, don't do anything
+			fader.startFade(fader.getCurrentValue(), 0, fade);
+			fadeEnd = FadeEndBehaviour::Pause;
+		}
+	} else {
+		paused = true;
+	}
+}
+
+void AudioVoice::resume(AudioFade fade)
 {
 	paused = false;
+	if (fade.hasFade()) {
+		if (!fader.isFading() || fadeEnd == FadeEndBehaviour::Pause) {
+			// If we're already fading, only override a pause
+			fader.startFade(fader.getCurrentValue(), 1, fade);
+			fadeEnd = FadeEndBehaviour::None;
+		}
+	}
 }
 
 bool AudioVoice::isPlaying() const
@@ -149,14 +181,22 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 {
 	Expects(playing);
 
-	dynamicGain = 1;
+	if (fader.isFading()) {
+		if (fader.update(elapsedTime)) {
+			onFadeEnd();
+		}
+	}
+
+	// Dynamic gain is a combination of the fader's current value, times the value from the current behaviour
+	dynamicGain = fader.getCurrentValue();
+	
 	if (behaviour) {
 		const bool keep = behaviour->updateChain(elapsedTime, *this);
 		if (!keep) {
 			behaviour = behaviour->releaseNext();
 		}
-		elapsedTime = 0;
 	}
+	elapsedTime = 0;
 
 	const float pauseGain = paused ? 0.0f : 1.0f;
 	
@@ -168,6 +208,19 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 		isFirstUpdate = false;
 	}
 }
+
+void AudioVoice::onFadeEnd()
+{
+	switch (fadeEnd) {
+	case FadeEndBehaviour::Pause:
+		pause(AudioFade());
+		break;
+	case FadeEndBehaviour::Stop:
+		stop(AudioFade());
+		break;
+	}
+}
+
 
 void AudioVoice::mixTo(size_t numSamplesRequested, gsl::span<AudioBuffer*> dst, AudioBufferPool& pool)
 {
@@ -232,7 +285,7 @@ void AudioVoice::mixTo(size_t numSamplesRequested, gsl::span<AudioBuffer*> dst, 
 		advancePlayback(numSamples);
 
 		if (!isPlaying) {
-			stop();
+			stop(AudioFade());
 		}
 	}
 }
