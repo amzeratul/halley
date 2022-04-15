@@ -1,6 +1,7 @@
 #include "audio_source_clip.h"
 #include <utility>
 #include "audio_clip.h"
+#include "../audio_mixer.h"
 
 using namespace Halley;
 
@@ -25,7 +26,7 @@ bool AudioSourceClip::isReady() const
 	return clip->isLoaded();
 }
 
-bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioSourceData dstChannels)
+bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSamples dstChannels)
 {
 	Expects(isReady());
 	if (!initialised) {
@@ -40,13 +41,7 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioSourceData dstC
 	// On delay, pad with zeroes
 	if (playbackPos < 0) {
 		const size_t delaySamples = std::min(static_cast<size_t>(-playbackPos), samplesRequested);
-
-		for (size_t srcChannel = 0; srcChannel < nChannels; ++srcChannel) {
-			auto dstBuf = dstChannels[srcChannel];
-			auto dst = dstBuf.data() + samplesWritten;
-			memset(dst, 0, delaySamples * sizeof(AudioSample));
-		}
-
+		AudioMixer::zeroRange(dstChannels, nChannels, samplesWritten, delaySamples);
 		samplesWritten += delaySamples;
 		playbackPos += static_cast<int64_t>(delaySamples);
 	}
@@ -73,9 +68,9 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioSourceData dstC
 
 		if (samplesToRead > 0) {
 			// We have some samples that we can read, so go ahead with reading them
-			for (size_t srcChannel = 0; srcChannel < nChannels; ++srcChannel) {
-				auto dst = AudioSamples(dstChannels[srcChannel].data() + samplesWritten, samplesToRead);
-				const size_t nCopied = clip->copyChannelData(srcChannel, static_cast<size_t>(playbackPos), samplesToRead, dst);
+			for (size_t ch = 0; ch < nChannels; ++ch) {
+				auto dst = dstChannels[ch].subspan(samplesWritten, samplesToRead);
+				const size_t nCopied = clip->copyChannelData(ch, static_cast<size_t>(playbackPos), samplesToRead, dst);
 				Expects(nCopied <= samplesRequested * sizeof(AudioSample));
 			}
 
@@ -83,12 +78,7 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioSourceData dstC
 			samplesWritten += samplesToRead;
 		} else {
 			// Reached end of playback, pad with zeroes
-			for (size_t srcChannel = 0; srcChannel < nChannels; ++srcChannel) {
-				auto dstBuf = dstChannels[srcChannel];
-				auto dst = dstBuf.data() + samplesWritten;
-				memset(dst, 0, samplesRemaining * sizeof(AudioSample));
-			}
-
+			AudioMixer::zeroRange(dstChannels, nChannels, samplesWritten, samplesRemaining);
 			samplesWritten += samplesRemaining;
 		}
 	}

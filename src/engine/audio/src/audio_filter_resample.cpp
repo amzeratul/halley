@@ -21,7 +21,7 @@ bool AudioFilterResample::isReady() const
 	return source->isReady();
 }
 
-bool AudioFilterResample::getAudioData(size_t numSamples, AudioSourceData dstBuffers)
+bool AudioFilterResample::getAudioData(size_t numSamples, AudioMultiChannelSamples dstBuffers)
 {
 	const size_t nChannels = source->getNumberOfChannels();
 	const size_t additionalPaddingSamples = 2;

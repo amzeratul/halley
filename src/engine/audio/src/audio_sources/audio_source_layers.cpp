@@ -30,7 +30,7 @@ uint8_t AudioSourceLayers::getNumberOfChannels() const
 	return layers.empty() ? 0 : layers[0].source->getNumberOfChannels();
 }
 
-bool AudioSourceLayers::getAudioData(size_t numSamples, AudioSourceData dst)
+bool AudioSourceLayers::getAudioData(size_t numSamples, AudioMultiChannelSamples dst)
 {
 	const auto nChannels = getNumberOfChannels();
 	const float deltaTime = static_cast<float>(numSamples) / static_cast<float>(AudioConfig::sampleRate);
@@ -50,7 +50,7 @@ bool AudioSourceLayers::getAudioData(size_t numSamples, AudioSourceData dst)
 			}
 		}
 	}
-	AudioMixer::copy(result.getSpans(), dst, nChannels);
+	AudioMixer::copy(dst, result.getSpans(), nChannels);
 
 	return ok;
 }

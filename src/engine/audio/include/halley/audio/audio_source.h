@@ -6,14 +6,12 @@
 
 namespace Halley
 {
-	using AudioSourceData = AudioMultiChannelSamples;
-
 	class AudioSource {
 	public:
 		virtual ~AudioSource() {}
 
 		virtual uint8_t getNumberOfChannels() const = 0;
 		virtual bool isReady() const { return true; }
-		virtual bool getAudioData(size_t numSamples, AudioSourceData dst) = 0;
+		virtual bool getAudioData(size_t numSamples, AudioMultiChannelSamples dst) = 0;
 	};
 }

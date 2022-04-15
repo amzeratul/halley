@@ -36,7 +36,7 @@ using namespace Halley;
 
 void AudioMixer::mixAudio(AudioSamplesConst src, AudioSamples dst, float gain0, float gain1)
 {
-	const size_t nSamples = size_t(src.size());
+	const auto nSamples = static_cast<size_t>(src.size());
 
 	if (std::abs(gain0 - gain1) < 0.0001f) {
 		// If the gain doesn't change, the code is faster
@@ -45,7 +45,7 @@ void AudioMixer::mixAudio(AudioSamplesConst src, AudioSamples dst, float gain0, 
 			for (size_t i = 0; i < nSamples; ++i) {
 				dst[i] += src[i];
 			}
-		} else {
+		} else if (std::abs(gain0) > 0.0001f) {
 			for (size_t i = 0; i < nSamples; ++i) {
 				dst[i] += src[i] * gain0;
 			}
@@ -112,15 +112,23 @@ void AudioMixer::zero(AudioMultiChannelSamples dst, size_t nChannels)
 	}
 }
 
-void AudioMixer::copy(AudioMultiChannelSamples src, AudioMultiChannelSamples dst, size_t nChannels)
+void AudioMixer::zeroRange(AudioMultiChannelSamples dst, size_t nChannels, size_t start, size_t len)
 {
-	const size_t n = std::min(nChannels, std::min(src.size(), dst.size()));
-	for (size_t c = 0; c < n; ++c) {
-		copy(src[c], dst[c]);
+	const size_t nCh = std::min(nChannels, dst.size());
+	for (size_t i = 0; i < nCh; ++i) {
+		memset(dst[i].data() + start, 0, std::min(dst[i].size() - start, len) * sizeof(AudioSample));
 	}
 }
 
-void AudioMixer::copy(AudioSamples src, AudioSamples dst)
+void AudioMixer::copy(AudioMultiChannelSamples dst, AudioMultiChannelSamples src, size_t nChannels)
+{
+	const size_t n = std::min(nChannels, std::min(src.size(), dst.size()));
+	for (size_t c = 0; c < n; ++c) {
+		copy(dst[c], src[c]);
+	}
+}
+
+void AudioMixer::copy(AudioSamples dst, AudioSamples src)
 {
 	memcpy(dst.data(), src.data(), std::min(src.size(), dst.size()) * sizeof(AudioSample));
 }

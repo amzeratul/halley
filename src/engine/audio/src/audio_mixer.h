@@ -17,7 +17,8 @@ namespace Halley
 		static void compressRange(AudioSamples buffer);
 
 		static void zero(AudioMultiChannelSamples dst, size_t nChannels = 8);
-		static void copy(AudioMultiChannelSamples src, AudioMultiChannelSamples dst, size_t nChannels = 8);
-		static void copy(AudioSamples src, AudioSamples dst);
+		static void zeroRange(AudioMultiChannelSamples dst, size_t nChannels, size_t start, size_t len = std::numeric_limits<size_t>::max());
+		static void copy(AudioMultiChannelSamples dst, AudioMultiChannelSamples src, size_t nChannels = 8);
+		static void copy(AudioSamples dst, AudioSamples src);
 	};
 }
