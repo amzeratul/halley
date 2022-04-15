@@ -121,7 +121,9 @@ AudioEventActionObject::AudioEventActionObject(const ConfigNode& node, bool load
 	if (loadObject) {
 		objectName = node["object"].asString();
 	}
-	fade = AudioFade(node["fade"]);
+	if (node.hasKey("fade")) {
+		fade = AudioFade(node["fade"]);
+	}
 }
 
 void AudioEventActionObject::serialize(Serializer& s) const

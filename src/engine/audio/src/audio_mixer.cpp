@@ -7,22 +7,25 @@ using namespace Halley;
 
 void AudioMixer::mixAudio(gsl::span<const AudioSamplePack> src, gsl::span<AudioSamplePack> dst, float gain0, float gain1)
 {
-	const size_t nPacks = size_t(src.size());
+	const size_t nSamples = size_t(src.size());
 
-	if (gain0 == gain1) {
+	if (std::abs(gain0 - gain1) < 0.0001f) {
 		// If the gain doesn't change, the code is faster
-		for (size_t i = 0; i < nPacks; ++i) {
-			for (size_t j = 0; j < AudioSamplePack::NumSamples; ++j) {
-				dst[i].samples[j] += src[i].samples[j] * gain0;
+		if (std::abs(gain0 - 1.0f) < 0.0001f) {
+			// No need to even multiply
+			for (size_t i = 0; i < nSamples; ++i) {
+				dst[i] += src[i];
+			}
+		} else {
+			for (size_t i = 0; i < nSamples; ++i) {
+				dst[i] += src[i] * gain0;
 			}
 		}
 	} else {
 		// Interpolate the gain
-		const float scale = 1.0f / (dst.size() * AudioSamplePack::NumSamples);
-		for (size_t i = 0; i < nPacks; ++i) {
-			for (size_t j = 0; j < AudioSamplePack::NumSamples; ++j) {
-				dst[i].samples[j] += src[i].samples[j] * lerp(gain0, gain1, (i * AudioSamplePack::NumSamples + j) * scale);
-			}
+		const float scale = 1.0f / nSamples;
+		for (size_t i = 0; i < nSamples; ++i) {
+			dst[i] += src[i] * lerp(gain0, gain1, i * scale);
 		}
 	}
 }
@@ -45,19 +48,11 @@ void AudioMixer::mixAudio(AudioMultiChannelSamples src, AudioMultiChannelSamples
 
 void AudioMixer::interleaveChannels(gsl::span<AudioSamplePack> dstBuffer, gsl::span<AudioBuffer*> srcs)
 {
-	Expects(srcs.size() == 2);
-	
-	size_t n = 0;
-	for (size_t i = 0; i < size_t(dstBuffer.size()); ++i) {
-		gsl::span<AudioConfig::SampleFormat> dst = dstBuffer[i].samples;
-		size_t srcIdx = i >> 1;
-		size_t srcOff = (i & 1) << 3;
-
-		for (size_t j = 0; j < AudioSamplePack::NumSamples / 2; ++j) {
-			size_t srcPos = j + srcOff;
-			dst[2 * j] = srcs[0]->packs[srcIdx].samples[srcPos];
-			dst[2 * j + 1] = srcs[1]->packs[srcIdx].samples[srcPos];
-			n += 2;
+	const size_t nChannels = srcs.size();	
+	const size_t nSamples = dstBuffer.size() / nChannels;
+	for (size_t i = 0; i < nSamples; ++i) {
+		for (size_t j = 0; j < nChannels; ++j) {
+			dstBuffer[i * nChannels + j] = srcs[j]->samples[i];
 		}
 	}
 }
@@ -66,8 +61,8 @@ void AudioMixer::concatenateChannels(gsl::span<AudioSamplePack> dst, gsl::span<A
 {
 	size_t pos = 0;
 	for (size_t i = 0; i < size_t(srcs.size()); ++i) {
-		const size_t nBytes = srcs[i]->packs.size() * sizeof(AudioSamplePack);
-		memcpy(dst.subspan(pos, nBytes).data(), srcs[i]->packs.data(), nBytes);
+		const size_t nBytes = srcs[i]->samples.size() * sizeof(AudioSamplePack);
+		memcpy(dst.subspan(pos, nBytes).data(), srcs[i]->samples.data(), nBytes);
 		pos += nBytes;
 	}
 }
@@ -75,10 +70,8 @@ void AudioMixer::concatenateChannels(gsl::span<AudioSamplePack> dst, gsl::span<A
 void AudioMixer::compressRange(gsl::span<AudioSamplePack> buffer)
 {
 	for (size_t i = 0; i < buffer.size(); ++i) {
-		for (size_t j = 0; j < AudioSamplePack::NumSamples; ++j) {
-			float& sample = buffer[i].samples[j];
-			sample = std::max(-0.99995f, std::min(sample, 0.99995f));
-		}
+		float& sample = buffer[i];
+		sample = std::max(-0.99995f, std::min(sample, 0.99995f));
 	}
 }
 
@@ -100,12 +93,7 @@ void AudioMixer::copy(AudioMultiChannelSamples src, std::array<gsl::span<AudioCo
 
 void AudioMixer::copy(AudioChannelSamples src, gsl::span<AudioConfig::SampleFormat> dst)
 {
-	const size_t len = std::min(src.size(), dst.size() / AudioSamplePack::NumSamples);
-	for (size_t i = 0; i < len; ++i) {
-		for (size_t j = 0; j < AudioSamplePack::NumSamples; ++j) {
-			dst[i * AudioSamplePack::NumSamples + j] = src[i].samples[j];
-		}
-	}
+	memcpy(dst.data(), src.data(), std::min(src.size(), dst.size()) * sizeof(AudioConfig::SampleFormat));
 }
 
 #ifdef HAS_SSE
@@ -166,6 +154,9 @@ static bool hasAVX()
 
 std::unique_ptr<AudioMixer> AudioMixer::makeMixer()
 {
+	return std::make_unique<AudioMixer>();
+
+	/*
 #ifdef HAS_AVX
 	if (hasAVX()) {
 		return std::make_unique<AudioMixerAVX>();
@@ -177,4 +168,5 @@ std::unique_ptr<AudioMixer> AudioMixer::makeMixer()
 #else
 	return std::make_unique<AudioMixer>();
 #endif
+	*/
 }

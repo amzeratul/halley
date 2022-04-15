@@ -172,7 +172,6 @@ void AudioEngine::generateBuffer()
 	timer.start();
 	
 	const size_t samplesToRead = alignUp(spec.bufferSize * 48000 / spec.sampleRate, 16);
-	const size_t packsToRead = samplesToRead / 16;
 	const size_t numChannels = spec.numChannels;
 	
 	auto channelBuffersRef = pool->getBuffers(numChannels, samplesToRead);
@@ -182,7 +181,7 @@ void AudioEngine::generateBuffer()
 
 	// Interleave
 	auto bufferRef = pool->getBuffer(samplesToRead * numChannels);
-	auto buffer = bufferRef.getSpan().subspan(0, packsToRead * numChannels);
+	auto buffer = bufferRef.getSpan().subspan(0, samplesToRead * numChannels);
 	const bool interleave = out->needsInterleavedSamples();
 	if (interleave) {
 		mixer->interleaveChannels(buffer, channelBuffers);
@@ -196,15 +195,15 @@ void AudioEngine::generateBuffer()
 	// Resample to output sample rate, if necessary
 	if (outResampler) {
 		const auto resampledBuffer = pool->getBuffer(samplesToRead * numChannels * spec.sampleRate / 48000 + 16);
-		const auto srcSpan = bufferRef.getSampleSpan().subspan(0, samplesToRead * numChannels);
-		const auto dstSpan = resampledBuffer.getSampleSpan();
+		const auto srcSpan = bufferRef.getSpan().subspan(0, samplesToRead * numChannels);
+		const auto dstSpan = resampledBuffer.getSpan();
 		auto result = interleave ? outResampler->resampleInterleaved(srcSpan, dstSpan) : outResampler->resampleNoninterleaved(srcSpan, dstSpan, numChannels);
 		if (result.nRead != samplesToRead) {
 			Logger::logError("Audio resampler failed to read all input sample data.");
 		}
-		queueAudioFloat(resampledBuffer.getSampleSpan().subspan(0, result.nWritten * numChannels));
+		queueAudioFloat(resampledBuffer.getSpan().subspan(0, result.nWritten * numChannels));
 	} else {
-		queueAudioFloat(bufferRef.getSampleSpan());
+		queueAudioFloat(bufferRef.getSpan());
 	}
 
 	timer.pause();
@@ -319,7 +318,7 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<Audio
 {
 	// Clear buffers
 	for (size_t i = 0; i < nChannels; ++i) {
-		clearBuffer(buffers[i]->packs);
+		clearBuffer(buffers[i]->samples);
 	}
 
 	// Mix every emitter
@@ -349,10 +348,8 @@ void AudioEngine::removeFinishedVoices()
 
 void AudioEngine::clearBuffer(gsl::span<AudioSamplePack> dst)
 {
-	for (auto& pack : dst) {
-		for (size_t i = 0; i < AudioSamplePack::NumSamples; ++i) {
-			pack.samples[i] = 0.0f;
-		}
+	for (auto& s : dst) {
+		s = 0.0f;
 	}
 }
 

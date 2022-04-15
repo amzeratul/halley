@@ -46,12 +46,7 @@ AudioBuffer& AudioBufferRef::getBuffer() const
 
 gsl::span<AudioSamplePack> AudioBufferRef::getSpan() const
 {
-	return gsl::span<AudioSamplePack>(buffer->packs);
-}
-
-gsl::span<AudioConfig::SampleFormat> AudioBufferRef::getSampleSpan() const
-{
-	return gsl::span<AudioConfig::SampleFormat>(buffer->packs.data()->samples.data(), buffer->packs.size() * AudioSamplePack::NumSamples);
+	return gsl::span<AudioSamplePack>(buffer->samples);
 }
 
 AudioBuffersRef::AudioBuffersRef()
@@ -66,8 +61,8 @@ AudioBuffersRef::AudioBuffersRef(size_t n, std::array<AudioBuffer*, AudioConfig:
 	, pool(&pool)
 {
 	for (size_t i = 0; i < n; ++i) {
-		spans[i] = buffers[i]->packs;
-		sampleSpans[i] = gsl::span<AudioConfig::SampleFormat>(spans[i].data()->samples.data(), spans[i].size() * AudioSamplePack::NumSamples);
+		spans[i] = buffers[i]->samples;
+		sampleSpans[i] = gsl::span<AudioConfig::SampleFormat>(spans[i].data(), spans[i].size());
 	}
 }
 
@@ -136,12 +131,9 @@ AudioBuffersRef AudioBufferPool::getBuffers(size_t n, size_t numSamples)
 
 AudioBuffer& AudioBufferPool::allocBuffer(size_t numSamples)
 {
-	Expects(AudioSamplePack::NumSamples == 16);
-	Expects(numSamples >= AudioSamplePack::NumSamples);
 	Expects(numSamples < 65536);
 
-	constexpr size_t log2NumSamples = 4;
-	const size_t idx = fastLog2Ceil(uint32_t(numSamples)) - log2NumSamples;
+	const size_t idx = fastLog2Ceil(uint32_t(numSamples));
 	auto& buffers = buffersTable[idx];
 
 	for (auto& b: buffers) {
@@ -153,13 +145,13 @@ AudioBuffer& AudioBufferPool::allocBuffer(size_t numSamples)
 
 	// Couldn't find a free one, create new
 	buffers.emplace_back(std::make_unique<AudioBuffer>());
-	buffers.back().buffer->packs.resize(1LL << idx);
+	buffers.back().buffer->samples.resize(1LL << idx);
 	return *buffers.back().buffer;
 }
 
 void AudioBufferPool::returnBuffer(AudioBuffer& buffer)
 {
-	const size_t idx = fastLog2Ceil(uint32_t(buffer.packs.size()));
+	const size_t idx = fastLog2Ceil(uint32_t(buffer.samples.size()));
 	auto& buffers = buffersTable[idx];
 
 	for (auto& b: buffers) {

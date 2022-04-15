@@ -30,18 +30,14 @@ namespace Halley
     	constexpr int maxVoices = 128;
         using SampleFormat = float;
     }
-
+	
+	using AudioSamplePack = AudioConfig::SampleFormat;
+	
 	class AudioDevice
 	{
 	public:
 		virtual ~AudioDevice() {}
 		virtual String getName() const = 0;
-	};
-
-	struct alignas(64) AudioSamplePack
-	{
-		constexpr static int NumSamples = 16;
-		std::array<AudioConfig::SampleFormat, NumSamples> samples; // AVX-512 friendly
 	};
 
 	enum class AudioSampleFormat

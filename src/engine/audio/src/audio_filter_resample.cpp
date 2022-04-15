@@ -41,8 +41,8 @@ bool AudioFilterResample::getAudioData(size_t numSamples, AudioSourceData dstBuf
 	bool playing = source->getAudioData(numSamplesSrc, srcs);
 
 	// Prepare temporary destination data
-	auto tmpBuffer = pool.getBuffer(numSamples + 2 * AudioSamplePack::NumSamples);
-	auto tmp = tmpBuffer.getSampleSpan();
+	auto tmpBuffer = pool.getBuffer(numSamples + 32); // Is this +32 needed?
+	auto tmp = tmpBuffer.getSpan();
 	
 	// Resample
 	for (size_t channel = 0; channel < nChannels; ++channel) {

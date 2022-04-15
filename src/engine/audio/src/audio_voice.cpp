@@ -175,10 +175,7 @@ void AudioVoice::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixe
 	}
 	
 	Expects(!dst.empty());
-	Expects(numSamples % 16 == 0);
 
-	const size_t numPacks = numSamples / 16;
-	Expects(dst[0]->packs.size() >= numPacks);
 	const size_t nSrcChannels = getNumberOfChannels();
 	const auto nDstChannels = size_t(dst.size());
 
@@ -196,8 +193,8 @@ void AudioVoice::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixe
 	std::array<AudioBufferRef, AudioConfig::maxChannels> bufferRefs;
 	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
 		bufferRefs[srcChannel] = pool.getBuffer(numSamples);
-		audioData[srcChannel] = bufferRefs[srcChannel].getSpan().subspan(0, numPacks);
-		audioSampleData[srcChannel] = gsl::span<AudioConfig::SampleFormat>(audioData[srcChannel].data()->samples.data(), numSamples);
+		audioData[srcChannel] = bufferRefs[srcChannel].getSpan().subspan(0, numSamples);
+		audioSampleData[srcChannel] = audioData[srcChannel];
 	}
 	bool isPlaying = source->getAudioData(numSamples, audioSampleData);
 
@@ -214,7 +211,7 @@ void AudioVoice::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixe
 
 				// Render to destination
 				if (gain0 + gain1 > 0.0001f) {
-					mixer.mixAudio(audioData[srcChannel], dst[dstChannel]->packs, gain0, gain1);
+					mixer.mixAudio(audioData[srcChannel], dst[dstChannel]->samples, gain0, gain1);
 				}
 			}
 		}

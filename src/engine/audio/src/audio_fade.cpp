@@ -11,7 +11,7 @@ AudioFade::AudioFade(float length, AudioFadeCurve curve)
 
 AudioFade::AudioFade(const ConfigNode& node)
 {
-	length = node["length"].asFloat();
+	length = node["length"].asFloat(0.0f);
 	curve = fromString<AudioFadeCurve>(node["curve"].asString("linear"));
 }
 
