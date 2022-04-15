@@ -36,7 +36,7 @@ namespace Halley {
 		size_t getNumberOfChannels() const;
 
 		void update(gsl::span<const AudioChannelData> channels, const AudioPosition& sourcePos, const AudioListenerData& listener, float groupGain);
-		void mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixer& mixer, AudioBufferPool& pool);
+		void mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioBufferPool& pool);
 		
 		void setIds(AudioEventId eventId, AudioObjectId audioObjectId = 0);
 		AudioEventId getEventId() const;

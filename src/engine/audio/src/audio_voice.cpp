@@ -168,7 +168,7 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 	}
 }
 
-void AudioVoice::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixer& mixer, AudioBufferPool& pool)
+void AudioVoice::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioBufferPool& pool)
 {
 	if (paused) {
 		return;
@@ -211,7 +211,7 @@ void AudioVoice::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixe
 
 				// Render to destination
 				if (gain0 + gain1 > 0.0001f) {
-					mixer.mixAudio(audioData[srcChannel], dst[dstChannel]->samples, gain0, gain1);
+					AudioMixer::mixAudio(audioData[srcChannel], dst[dstChannel]->samples, gain0, gain1);
 				}
 			}
 		}

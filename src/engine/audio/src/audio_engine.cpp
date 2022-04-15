@@ -17,8 +17,7 @@
 using namespace Halley;
 
 AudioEngine::AudioEngine()
-	: mixer(AudioMixer::makeMixer())
-	, pool(std::make_unique<AudioBufferPool>())
+	: pool(std::make_unique<AudioBufferPool>())
 	, variableTable(std::make_unique<AudioVariableTable>())
 	, audioOutputBuffer(4096 * 8)
 	, running(true)
@@ -184,13 +183,13 @@ void AudioEngine::generateBuffer()
 	auto buffer = bufferRef.getSpan().subspan(0, samplesToRead * numChannels);
 	const bool interleave = out->needsInterleavedSamples();
 	if (interleave) {
-		mixer->interleaveChannels(buffer, channelBuffers);
+		AudioMixer::interleaveChannels(buffer, channelBuffers);
 	} else {
-		mixer->concatenateChannels(buffer, channelBuffers);
+		AudioMixer::concatenateChannels(buffer, channelBuffers);
 	}
 
 	// Compress
-	mixer->compressRange(buffer);
+	AudioMixer::compressRange(buffer);
 
 	// Resample to output sample rate, if necessary
 	if (outResampler) {
@@ -299,11 +298,6 @@ AudioVariableTable& AudioEngine::getVariableTable() const
 	return *variableTable;
 }
 
-AudioMixer& AudioEngine::getMixer() const
-{
-	return *mixer;
-}
-
 void AudioEngine::setMasterGain(float gain)
 {
 	masterGain = gain;
@@ -332,7 +326,7 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<Audio
 			// Mix it in!
 			if (v->isPlaying()) {
 				v->update(channels, e.second->getPosition(), listener, masterGain * getGroupGain(v->getGroup()));
-				v->mixTo(numSamples, buffers, *mixer, *pool);
+				v->mixTo(numSamples, buffers, *pool);
 			}
 		}
 	}

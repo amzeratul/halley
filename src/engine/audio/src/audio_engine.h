@@ -52,7 +52,6 @@ namespace Halley {
     	Random& getRNG();
 		AudioBufferPool& getPool() const;
 		AudioVariableTable& getVariableTable() const;
-		AudioMixer& getMixer() const;
 
 		void setMasterGain(float gain);
 		void setGroupGain(const String& name, float gain);
@@ -65,7 +64,6 @@ namespace Halley {
     private:
 		AudioSpec spec;
 		AudioOutputAPI* out = nullptr;
-		std::unique_ptr<AudioMixer> mixer;
 		std::unique_ptr<AudioBufferPool> pool;
 		std::unique_ptr<AudioResampler> outResampler;
 		std::unique_ptr<AudioVariableTable> variableTable;

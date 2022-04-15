@@ -36,22 +36,21 @@ bool AudioSourceLayers::getAudioData(size_t numSamples, AudioSourceData dst)
 	const float deltaTime = static_cast<float>(numSamples) / static_cast<float>(AudioConfig::sampleRate);
 
 	auto temp = engine.getPool().getBuffers(nChannels, numSamples);
-	auto& mixer = engine.getMixer();
 	auto result = engine.getPool().getBuffers(nChannels, numSamples);
 	bool ok = true;
 
-	mixer.zero(result.getSpans(), nChannels);
+	AudioMixer::zero(result.getSpans(), nChannels);
 	for (auto& layer: layers) {
 		layer.update(deltaTime, layerConfig, emitter, fadeConfig);
 		if (layer.playing || layer.synchronised) {
 			ok = layer.source->getAudioData(numSamples, temp.getSampleSpans()) && ok;
 
 			if (layer.playing) {
-				mixer.mixAudio(temp.getSpans(), result.getSpans(), layer.prevGain, layer.gain);
+				AudioMixer::mixAudio(temp.getSpans(), result.getSpans(), layer.prevGain, layer.gain);
 			}
 		}
 	}
-	mixer.copy(result.getSpans(), dst, nChannels);
+	AudioMixer::copy(result.getSpans(), dst, nChannels);
 
 	return ok;
 }
