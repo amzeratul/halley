@@ -52,6 +52,7 @@ namespace Halley {
 
 		bool isFading() const;
 		float getCurrentValue() const;
+		float getTargetValue() const;
 
 	private:
 		AudioFade fade;

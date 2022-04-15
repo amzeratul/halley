@@ -79,7 +79,7 @@ void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& la
 {
 	const auto targetGain = layerConfig.getLayerExpression(idx).evaluate(emitter);
 
-	if (std::abs(targetGain - gain) > 0.001f) {
+	if (std::abs(targetGain - fader.getTargetValue()) > 0.001f) {
 		fader.startFade(gain, targetGain, fade);
 	}
 

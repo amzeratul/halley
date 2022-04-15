@@ -90,3 +90,8 @@ float AudioFader::getCurrentValue() const
 {
 	return fading ? lerp(startVal, endVal, fade.evaluate(time)) : endVal;
 }
+
+float AudioFader::getTargetValue() const
+{
+	return endVal;
+}
