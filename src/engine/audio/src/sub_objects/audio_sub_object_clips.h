@@ -17,7 +17,6 @@ namespace Halley {
 	private:
 		Vector<String> clips;
 		Vector<std::shared_ptr<const AudioClip>> clipData;
-		float delay = 0.0f;
 		bool loop = false;
 		int loopStart = 0;
 		int loopEnd = 0;

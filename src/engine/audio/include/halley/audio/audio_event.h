@@ -111,6 +111,8 @@ namespace Halley
 
 	private:
 		bool legacy = false;
+		Range<float> playGain;
+		float delay = 0;
 	};
 
 	class AudioEventActionStop final : public AudioEventActionObject

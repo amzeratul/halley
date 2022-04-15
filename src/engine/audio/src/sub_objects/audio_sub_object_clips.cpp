@@ -17,7 +17,6 @@ using namespace Halley;
 void AudioSubObjectClips::load(const ConfigNode& node)
 {
 	clips = node["clips"].asVector<String>({});
-	delay = node["delay"].asFloat(0.0f);
 	loop = node["loop"].asBool(false);
 	loopStart = node["loopStart"].asInt(0);
 	loopEnd = node["loopEnd"].asInt(0);
@@ -30,7 +29,7 @@ std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine
 	}
 
 	auto clip = engine.getRNG().getRandomElement(clipData);
-	return std::make_unique<AudioSourceClip>(clip, loop, lroundl(delay * AudioConfig::sampleRate), loopStart, loopEnd);
+	return std::make_unique<AudioSourceClip>(clip, loop, loopStart, loopEnd);
 }
 
 void AudioSubObjectClips::loadDependencies(Resources& resources)
@@ -53,13 +52,11 @@ void AudioSubObjectClips::loadDependencies(Resources& resources)
 void AudioSubObjectClips::serialize(Serializer& s) const
 {
 	s << clips;
-	s << delay;
 	s << loop;
 }
 
 void AudioSubObjectClips::deserialize(Deserializer& s)
 {
 	s >> clips;
-	s >> delay;
 	s >> loop;
 }

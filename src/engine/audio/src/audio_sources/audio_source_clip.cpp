@@ -6,9 +6,8 @@
 using namespace Halley;
 
 
-AudioSourceClip::AudioSourceClip(std::shared_ptr<const IAudioClip> c, bool looping, int64_t delaySamples, int64_t loopStart, int64_t loopEnd)
+AudioSourceClip::AudioSourceClip(std::shared_ptr<const IAudioClip> c, bool looping, int64_t loopStart, int64_t loopEnd)
 	: clip(std::move(c))
-	, playbackPos(-delaySamples)
 	, loopStart(loopStart)
 	, loopEnd(loopEnd)
 	, looping(looping)

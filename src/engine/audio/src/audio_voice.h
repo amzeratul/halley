@@ -13,7 +13,7 @@ namespace Halley {
 
 	class AudioVoice {
     public:
-		AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> source, float gain, float pitch, uint8_t group);
+		AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> source, float gain, float pitch, uint32_t delaySamples, uint8_t group);
 		~AudioVoice();
 
 		void start();
@@ -61,6 +61,7 @@ namespace Halley {
 		float dynamicGain = 1.0f;
 		float userGain = 1.0f;
 		float elapsedTime = 0.0f;
+		uint32_t delaySamples = 0;
 
 		std::shared_ptr<AudioSource> source;
 		std::shared_ptr<AudioFilterResample> resample;

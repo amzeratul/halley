@@ -151,16 +151,20 @@ void AudioEventActionObject::loadDependencies(Resources& resources)
 AudioEventActionPlay::AudioEventActionPlay(const ConfigNode& node)
 	: AudioEventActionObject(node, false)
 {
-	if (node.hasKey("object")) {
-		objectName = node["object"].asString();
-		legacy = false;
-	} else {
+	legacy = !node.hasKey("object");
+	
+	if (legacy) {
 		objectName = "";
 		auto obj = std::make_shared<AudioObject>();
 		obj->loadLegacyEvent(node);
 		object = obj;
-		legacy = true;
+		playGain = Range<float>(1, 1);
+	} else {
+		objectName = node["object"].asString();
+		playGain = node["gain"].asFloatRange(Range<float>(1, 1));
 	}
+
+	delay = node["delay"].asFloat(0);
 }
 
 bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, AudioEmitter& emitter) const
@@ -171,13 +175,14 @@ bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, Audio
 
 	const uint32_t audioObjectId = object->getAudioObjectId();
 
-	const auto gainRange = object->getVolume();
+	const auto gainRange = object->getVolume() * playGain;
 	const float gain = engine.getRNG().getFloat(gainRange.start, gainRange.end);
 	const auto pitchRange = object->getPitch();
 	const float pitch = clamp(engine.getRNG().getFloat(pitchRange.start, pitchRange.end), 0.1f, 2.0f);
-
+	const auto delaySamples = std::lroundf(delay * static_cast<float>(AudioConfig::sampleRate));
+	
 	auto source = object->makeSource(engine, emitter);
-	auto voice = std::make_unique<AudioVoice>(engine, std::move(source), gain, pitch, engine.getGroupId(object->getGroup()));
+	auto voice = std::make_unique<AudioVoice>(engine, std::move(source), gain, pitch, delaySamples, engine.getGroupId(object->getGroup()));
 	voice->setIds(uniqueId, audioObjectId);
 	
 	emitter.addVoice(std::move(voice));
@@ -192,6 +197,8 @@ void AudioEventActionPlay::serialize(Serializer& s) const
 	} else {
 		AudioEventActionObject::serialize(s);
 	}
+	s << playGain;
+	s << delay;
 }
 
 void AudioEventActionPlay::deserialize(Deserializer& s)
@@ -204,6 +211,8 @@ void AudioEventActionPlay::deserialize(Deserializer& s)
 	} else {
 		AudioEventActionObject::deserialize(s);
 	}
+	s >> playGain;
+	s >> delay;
 }
 
 void AudioEventActionPlay::loadDependencies(Resources& resources)

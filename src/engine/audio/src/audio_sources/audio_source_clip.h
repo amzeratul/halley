@@ -6,7 +6,7 @@ namespace Halley
 	class AudioSourceClip final : public AudioSource
 	{
 	public:
-		AudioSourceClip(std::shared_ptr<const IAudioClip> clip, bool looping, int64_t delaySamples, int64_t loopStart, int64_t loopEnd);
+		AudioSourceClip(std::shared_ptr<const IAudioClip> clip, bool looping, int64_t loopStart, int64_t loopEnd);
 
 		uint8_t getNumberOfChannels() const override;
 		bool getAudioData(size_t numSamples, AudioMultiChannelSamples dst) override;

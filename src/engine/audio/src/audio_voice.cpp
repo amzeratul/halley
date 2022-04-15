@@ -10,7 +10,7 @@
 
 using namespace Halley;
 
-AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, float gain, float pitch, uint8_t group) 
+AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, float gain, float pitch, uint32_t delaySamples, uint8_t group) 
 	: engine(engine)
 	, group(group)
 	, playing(false)
@@ -19,6 +19,7 @@ AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, fl
 	, isFirstUpdate(true)
 	, baseGain(gain)
 	, userGain(1.0f)
+	, delaySamples(delaySamples)
 	, source(std::move(src))
 {
 	setPitch(pitch);
@@ -157,7 +158,7 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 		elapsedTime = 0;
 	}
 
-	float pauseGain = paused ? 0.0f : 1.0f;
+	const float pauseGain = paused ? 0.0f : 1.0f;
 	
 	prevChannelMix = channelMix;
 	sourcePos.setMix(nChannels, channels, channelMix, baseGain * userGain * dynamicGain * groupGain * pauseGain, listener);
@@ -168,18 +169,17 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 	}
 }
 
-void AudioVoice::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioBufferPool& pool)
+void AudioVoice::mixTo(size_t numSamplesRequested, gsl::span<AudioBuffer*> dst, AudioBufferPool& pool)
 {
+	Expects(!dst.empty());
+
 	if (paused) {
 		return;
 	}
-	
-	Expects(!dst.empty());
-
-	const size_t nSrcChannels = getNumberOfChannels();
-	const auto nDstChannels = size_t(dst.size());
 
 	// Figure out the total mix in the previous update, and now. If it's zero, then there's nothing to listen here.
+	const size_t nSrcChannels = getNumberOfChannels();
+	const auto nDstChannels = size_t(dst.size());
 	float totalMix = 0.0f;
 	const size_t nMixes = nSrcChannels * nDstChannels;
 	Expects (nMixes < 16);
@@ -187,39 +187,53 @@ void AudioVoice::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioBuff
 		totalMix += prevChannelMix[i] + channelMix[i];
 	}
 
-	// Read data from source
-	AudioMultiChannelSamples audioData;
-	AudioMultiChannelSamples audioSampleData;
-	std::array<AudioBufferRef, AudioConfig::maxChannels> bufferRefs;
-	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
-		bufferRefs[srcChannel] = pool.getBuffer(numSamples);
-		audioData[srcChannel] = bufferRefs[srcChannel].getSpan().subspan(0, numSamples);
-		audioSampleData[srcChannel] = audioData[srcChannel];
+	// Check delay
+	size_t startDstSample = 0;
+	size_t numSamples = numSamplesRequested;
+	if (delaySamples > 0) {
+		const size_t delayNow = std::min(static_cast<size_t>(delaySamples), numSamples);
+		delaySamples -= static_cast<uint32_t>(delayNow);
+		startDstSample += delayNow;
+		numSamples -= delayNow;
 	}
-	bool isPlaying = source->getAudioData(numSamples, audioSampleData);
 
-	// If we're audible, render
-	if (totalMix >= 0.0001f) {
-		// Render each emitter channel
+	if (numSamples > 0) {
+		// Read data from source
+		AudioMultiChannelSamples audioData;
+		AudioMultiChannelSamples audioSampleData;
+		std::array<AudioBufferRef, AudioConfig::maxChannels> bufferRefs;
 		for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
-			// Read to buffer
-			for (size_t dstChannel = 0; dstChannel < nDstChannels; ++dstChannel) {
-				// Compute mix
-				const size_t mixIndex = (srcChannel * nChannels) + dstChannel;
-				const float gain0 = prevChannelMix[mixIndex];
-				const float gain1 = channelMix[mixIndex];
+			bufferRefs[srcChannel] = pool.getBuffer(numSamples);
+			audioData[srcChannel] = bufferRefs[srcChannel].getSpan().subspan(0, numSamples);
+			audioSampleData[srcChannel] = audioData[srcChannel];
+		}
+		const bool isPlaying = source->getAudioData(numSamples, audioSampleData);
 
-				// Render to destination
-				if (gain0 + gain1 > 0.0001f) {
-					AudioMixer::mixAudio(audioData[srcChannel], dst[dstChannel]->samples, gain0, gain1);
+		// If we're audible, render
+		if (totalMix >= 0.0001f) {
+			// Render each emitter channel
+			for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
+				// Read to buffer
+				for (size_t dstChannel = 0; dstChannel < nDstChannels; ++dstChannel) {
+					// Compute mix
+					const size_t mixIndex = (srcChannel * nChannels) + dstChannel;
+					const float gain0 = prevChannelMix[mixIndex];
+					const float gain1 = channelMix[mixIndex];
+
+					// Render to destination
+					if (gain0 + gain1 > 0.0001f) {
+						const auto dstBuffer = AudioSamples(dst[dstChannel]->samples).subspan(startDstSample);
+						AudioMixer::mixAudio(audioData[srcChannel], dstBuffer, gain0, gain1);
+					}
 				}
 			}
 		}
-	}
 
-	advancePlayback(numSamples);
-	if (!isPlaying) {
-		stop();
+		advancePlayback(numSamples);
+
+		if (!isPlaying) {
+			stop();
+		}
 	}
 }
 
