@@ -14,7 +14,7 @@ namespace Halley
 	class ConsoleWindow : public UIWidget, public ILoggerSink
 	{
 	public:
-		explicit ConsoleWindow(UIFactory& ui);
+		explicit ConsoleWindow(UIFactory& ui, const HalleyAPI& api);
 		~ConsoleWindow();
 
 		void log(LoggerLevel level, const String& msg) override;

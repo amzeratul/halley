@@ -89,7 +89,7 @@ namespace Halley {
 
 	class UIDebugConsoleController {
 	public:
-		UIDebugConsoleController();
+		UIDebugConsoleController(Resources& resources, const HalleyAPI& api);
 
 		Future<UIDebugConsoleResponse> runCommand(String command, Vector<String> args);
 		String runHelp();

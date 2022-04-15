@@ -27,7 +27,7 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	, resources(resources)
 	, api(api)
 {
-	debugConsoleController = std::make_shared<UIDebugConsoleController>();
+	debugConsoleController = std::make_shared<UIDebugConsoleController>(resources, api);
 
 	settings[EditorSettingType::Temp] = std::make_unique<SettingsStorage>(std::shared_ptr<ISaveData>(), "");
 	settings[EditorSettingType::Project] = std::make_unique<SettingsStorage>(api.system->getStorageContainer(SaveDataType::SaveLocal, "settings"), project.getProperties().getUUID().toString());
@@ -131,7 +131,7 @@ void ProjectWindow::makePagedPane()
 	}
 
 	assetEditorWindow = std::make_shared<AssetsBrowser>(factory, project, *this);
-	consoleWindow = std::make_shared<ConsoleWindow>(factory);
+	consoleWindow = std::make_shared<ConsoleWindow>(factory, api);
 	auto settings = std::make_shared<EditorSettingsWindow>(factory, editor.getPreferences(), project, editor.getProjectLoader(), *this);
 	auto properties = std::make_shared<GamePropertiesWindow>(factory, project);
 	auto ecs = std::make_shared<ECSWindow>(factory, project);

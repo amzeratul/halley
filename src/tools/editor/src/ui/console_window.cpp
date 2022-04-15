@@ -2,11 +2,11 @@
 
 using namespace Halley;
 
-ConsoleWindow::ConsoleWindow(UIFactory& ui)
+ConsoleWindow::ConsoleWindow(UIFactory& ui, const HalleyAPI& api)
 	: UIWidget("console", {}, UISizer())
 	, factory(ui)
 {
-	controller = std::make_shared<UIDebugConsoleController>();
+	controller = std::make_shared<UIDebugConsoleController>(ui.getResources(), api);
 	console = std::make_shared<UIDebugConsole>("debugConsole", ui, controller);
 
 	Logger::addSink(*this);

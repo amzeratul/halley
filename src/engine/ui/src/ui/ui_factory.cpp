@@ -1346,8 +1346,8 @@ std::shared_ptr<UIWidget> UIFactory::makeDebugConsole(const ConfigNode& entryNod
 {
 	const auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
-
-	auto widget = std::make_shared<UIDebugConsole>(id, *this, std::make_shared<UIDebugConsoleController>());
+	
+	auto widget = std::make_shared<UIDebugConsole>(id, *this, std::make_shared<UIDebugConsoleController>(getResources(), api));
 
 	return widget;
 }

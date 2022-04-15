@@ -4,7 +4,9 @@
 #include "widgets/ui_scrollbar_pane.h"
 #include "ui_factory.h"
 #include "halley/concurrency/concurrent.h"
+#include "halley/core/api/halley_api.h"
 #include "halley/utils/algorithm.h"
+#include "halley/audio/audio_event.h"
 
 using namespace Halley;
 
@@ -61,10 +63,39 @@ const std::map<String, UIDebugConsoleCommandData>& UIDebugConsoleCommands::getCo
 	return commands;
 }
 
-UIDebugConsoleController::UIDebugConsoleController()
+UIDebugConsoleController::UIDebugConsoleController(Resources& resources, const HalleyAPI& api)
 {
 	baseCommandSet = std::make_unique<UIDebugConsoleCommands>();
-	baseCommandSet->addCommand("help", [=](Vector<String>) { return runHelp(); });
+	
+	baseCommandSet->addCommand("help", [=](Vector<String>)
+	{
+		return runHelp();
+	});
+	
+	baseCommandSet->addCommand("audioGlobalSwitch", [&api] (Vector<String> args) -> String
+	{
+		if (args.size() != 2) {
+			return "Usage: audioGlobalSwitch <switchId> <value>";
+		} else {
+			api.audio->getGlobalEmitter()->setSwitch(args[0], args[1]);
+			return "Switch set.";
+		}
+	});
+
+	baseCommandSet->addCommand("audioGlobalEvent", [&api, &resources] (Vector<String> args) -> String
+	{
+		if (args.size() != 1) {
+			return "Usage: audioGlobalEvent <eventId>";
+		} else {
+			if (resources.exists<AudioEvent>(args[0])) {
+				api.audio->postEvent(args[0]);
+				return "Posted event.";
+			} else {
+				return "Event not found.";
+			}
+		}		
+	});
+
 	clearCommands();
 }
 
