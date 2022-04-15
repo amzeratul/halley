@@ -75,7 +75,7 @@ void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadat
 	doneLoading();
 }
 
-size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, gsl::span<AudioConfig::SampleFormat> dst) const
+size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, AudioSamples dst) const
 {
 	Expects(pos + len <= sampleLength);
 
@@ -106,10 +106,10 @@ size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, gsl::
 			buf.resize(len);
 		}
 
-		memcpy(dst.data(), temp[channelN].data(), len * sizeof(AudioConfig::SampleFormat));
+		memcpy(dst.data(), temp[channelN].data(), len * sizeof(AudioSample));
 		return len;
 	} else {
-		memcpy(dst.data(), samples.at(channelN).data() + pos, len * sizeof(AudioConfig::SampleFormat));
+		memcpy(dst.data(), samples.at(channelN).data() + pos, len * sizeof(AudioSample));
 		return len;
 	}
 }
@@ -143,9 +143,9 @@ ResourceMemoryUsage AudioClip::getMemoryUsage() const
 	if (vorbisData) {
 		result.ramUsage += vorbisData->getSizeBytes() + sizeof(VorbisData);
 	}
-	result.ramUsage += temp0.size() * sizeof(AudioConfig::SampleFormat);
-	result.ramUsage += temp1.size() * sizeof(AudioConfig::SampleFormat);
-	result.ramUsage += samples.size() * sizeof(AudioConfig::SampleFormat);
+	result.ramUsage += temp0.size() * sizeof(AudioSample);
+	result.ramUsage += temp1.size() * sizeof(AudioSample);
+	result.ramUsage += samples.size() * sizeof(AudioSample);
 	result.ramUsage += sizeof(*this);
 
 	return result;
@@ -185,7 +185,7 @@ StreamingAudioClip::StreamingAudioClip(uint8_t numChannels)
 	buffers.resize(numChannels);
 }
 
-void StreamingAudioClip::addInterleavedSamples(gsl::span<const AudioConfig::SampleFormat> src)
+void StreamingAudioClip::addInterleavedSamples(AudioSamplesConst src)
 {
 	std::unique_lock<std::mutex> lock(mutex);
 
@@ -202,18 +202,18 @@ void StreamingAudioClip::addInterleavedSamples(gsl::span<const AudioConfig::Samp
 	length += nSamples;
 }
 
-size_t StreamingAudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, gsl::span<AudioConfig::SampleFormat> dst) const
+size_t StreamingAudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, AudioSamples dst) const
 {
 	std::unique_lock<std::mutex> lock(mutex);
 
 	auto& buffer = buffers[channelN];
 	const size_t toWrite = std::min(len, buffer.size());
 
-	memcpy(dst.data(), buffer.data(), toWrite * sizeof(AudioConfig::SampleFormat));
+	memcpy(dst.data(), buffer.data(), toWrite * sizeof(AudioSample));
 	buffer.erase(buffer.begin(), buffer.begin() + toWrite);
 
 	if (toWrite < len) {
-		memcpy(dst.data() + toWrite, buffer.data() + toWrite, (len - toWrite) * sizeof(AudioConfig::SampleFormat));
+		memcpy(dst.data() + toWrite, buffer.data() + toWrite, (len - toWrite) * sizeof(AudioSample));
 	}
 
 	return len;

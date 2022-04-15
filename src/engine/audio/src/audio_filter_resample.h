@@ -25,7 +25,7 @@ namespace Halley
 
 		struct LeftOverData
 		{
-			std::array<AudioConfig::SampleFormat, 8> samples;
+			std::array<AudioSample, 8> samples;
 			size_t n = 0;
 		};
 		std::array<LeftOverData, AudioConfig::maxChannels> leftoverSamples;

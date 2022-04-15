@@ -94,7 +94,7 @@ void AudioEngine::setOutputChannels(Vector<AudioChannelData> channelData)
 
 void AudioEngine::run()
 {
-	//const size_t bufSize = spec.numChannels * sizeof(AudioConfig::SampleFormat) * spec.bufferSize;
+	//const size_t bufSize = spec.numChannels * sizeof(AudioSample) * spec.bufferSize;
 
 	// Generate one buffer
 	if (running && needsMoreAudio()) {
@@ -346,7 +346,7 @@ void AudioEngine::removeFinishedVoices()
 	std_ex::erase_if_value(emitters, [&] (const std::unique_ptr<AudioEmitter>& src) { return src->shouldBeRemoved(); });
 }
 
-void AudioEngine::clearBuffer(gsl::span<AudioSamplePack> dst)
+void AudioEngine::clearBuffer(AudioSamples dst)
 {
 	for (auto& s : dst) {
 		s = 0.0f;

@@ -64,7 +64,7 @@ bool AudioFilterResample::getAudioData(size_t numSamples, AudioSourceData dstBuf
 		leftoverSamples[channel].n = leftOver;
 
 		// Copy to destination
-		memcpy(dstBuffers[channel].data(), tmp.data(), numSamples * sizeof(AudioConfig::SampleFormat));
+		memcpy(dstBuffers[channel].data(), tmp.data(), numSamples * sizeof(AudioSample));
 	}
 
 	return playing;

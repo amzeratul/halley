@@ -9,7 +9,7 @@
 
 using namespace Halley;
 
-void AudioMixerSSE::mixAudio(gsl::span<const AudioSamplePack> srcRaw, gsl::span<AudioSamplePack> dstRaw, float gain0, float gain1)
+void AudioMixerSSE::mixAudio(AudioSamplesConst srcRaw, AudioSamples dstRaw, float gain0, float gain1)
 {
 	gsl::span<const __m128> src(reinterpret_cast<const __m128*>(srcRaw.data()), srcRaw.size() * 4);
 	gsl::span<__m128> dst(reinterpret_cast<__m128*>(dstRaw.data()), dstRaw.size() * 4);
@@ -41,7 +41,7 @@ void AudioMixerSSE::mixAudio(gsl::span<const AudioSamplePack> srcRaw, gsl::span<
 	}
 }
 
-void AudioMixerSSE::compressRange(gsl::span<AudioSamplePack> buffer)
+void AudioMixerSSE::compressRange(AudioSamples buffer)
 {
 	gsl::span<__m128> dst(reinterpret_cast<__m128*>(buffer.data()), buffer.size() * 4);
 	const size_t nSamples = size_t(dst.size());

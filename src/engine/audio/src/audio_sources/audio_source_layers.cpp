@@ -7,7 +7,6 @@
 #include "audio_source_clip.h"
 #include "../audio_mixer.h"
 #include "../sub_objects/audio_sub_object_layers.h"
-#include "halley/support/logger.h"
 
 using namespace Halley;
 
@@ -89,8 +88,6 @@ void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& la
 
 	prevGain = gain;
 	gain = fader.getCurrentValue();
-
-	Logger::logDev("Gain: " + toString(idx) + " = " + toString(gain));
 
 	playing = gain > 0.0001f || prevGain > 0.0001f;
 }

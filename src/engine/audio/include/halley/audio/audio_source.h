@@ -6,7 +6,7 @@
 
 namespace Halley
 {
-	using AudioSourceData = std::array<gsl::span<AudioConfig::SampleFormat>, AudioConfig::maxChannels>;
+	using AudioSourceData = AudioMultiChannelSamples;
 
 	class AudioSource {
 	public:

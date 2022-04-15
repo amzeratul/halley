@@ -6,7 +6,7 @@ namespace Halley
 {
 	struct AudioBuffer
 	{
-		Vector<AudioSamplePack> samples;
+		Vector<AudioSample> samples;
 	};
 
 	class AudioBufferPool;
@@ -25,7 +25,7 @@ namespace Halley
 		~AudioBufferRef();
 
 		AudioBuffer& getBuffer() const;
-		gsl::span<AudioSamplePack> getSpan() const;
+		AudioSamples getSpan() const;
 
 	private:
 		AudioBuffer* buffer;
@@ -46,13 +46,13 @@ namespace Halley
 		~AudioBuffersRef();
 
 		gsl::span<AudioBuffer*> getBuffers();
-		std::array<gsl::span<AudioSamplePack>, AudioConfig::maxChannels> getSpans() const;
-		std::array<gsl::span<AudioConfig::SampleFormat>, AudioConfig::maxChannels> getSampleSpans() const;
+		AudioMultiChannelSamples getSpans() const;
+		AudioMultiChannelSamples getSampleSpans() const;
 
 	private:
 		std::array<AudioBuffer*, AudioConfig::maxChannels> buffers;
-		std::array<gsl::span<AudioSamplePack>, AudioConfig::maxChannels> spans;
-		std::array<gsl::span<AudioConfig::SampleFormat>, AudioConfig::maxChannels> sampleSpans;
+		AudioMultiChannelSamples spans;
+		AudioMultiChannelSamples sampleSpans;
 		size_t nBuffers;
 		AudioBufferPool* pool;
 	};

@@ -31,7 +31,11 @@ namespace Halley
         using SampleFormat = float;
     }
 	
-	using AudioSamplePack = AudioConfig::SampleFormat;
+	using AudioSample = AudioConfig::SampleFormat;
+	using AudioSamples = gsl::span<AudioSample>;
+	using AudioSamplesConst = gsl::span<const AudioSample>;
+	using AudioMultiChannelSamples = std::array<AudioSamples, AudioConfig::maxChannels>;
+	using AudioMultiChannelSamplesConst = std::array<AudioSamplesConst, AudioConfig::maxChannels>;
 	
 	class AudioDevice
 	{

@@ -44,9 +44,9 @@ AudioBuffer& AudioBufferRef::getBuffer() const
 	return *buffer;
 }
 
-gsl::span<AudioSamplePack> AudioBufferRef::getSpan() const
+AudioSamples AudioBufferRef::getSpan() const
 {
-	return gsl::span<AudioSamplePack>(buffer->samples);
+	return AudioSamples(buffer->samples);
 }
 
 AudioBuffersRef::AudioBuffersRef()
@@ -62,7 +62,7 @@ AudioBuffersRef::AudioBuffersRef(size_t n, std::array<AudioBuffer*, AudioConfig:
 {
 	for (size_t i = 0; i < n; ++i) {
 		spans[i] = buffers[i]->samples;
-		sampleSpans[i] = gsl::span<AudioConfig::SampleFormat>(spans[i].data(), spans[i].size());
+		sampleSpans[i] = AudioSamples(spans[i].data(), spans[i].size());
 	}
 }
 
@@ -104,12 +104,12 @@ gsl::span<AudioBuffer*> AudioBuffersRef::getBuffers()
 	return gsl::span<AudioBuffer*>(buffers.data(), nBuffers);
 }
 
-std::array<gsl::span<AudioSamplePack>, AudioConfig::maxChannels> AudioBuffersRef::getSpans() const
+AudioMultiChannelSamples AudioBuffersRef::getSpans() const
 {
 	return spans;
 }
 
-std::array<gsl::span<AudioConfig::SampleFormat>, AudioConfig::maxChannels> AudioBuffersRef::getSampleSpans() const
+AudioMultiChannelSamples AudioBuffersRef::getSampleSpans() const
 {
 	return sampleSpans;
 }

@@ -44,7 +44,7 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioSourceData dstC
 		for (size_t srcChannel = 0; srcChannel < nChannels; ++srcChannel) {
 			auto dstBuf = dstChannels[srcChannel];
 			auto dst = dstBuf.data() + samplesWritten;
-			memset(dst, 0, delaySamples * sizeof(AudioConfig::SampleFormat));
+			memset(dst, 0, delaySamples * sizeof(AudioSample));
 		}
 
 		samplesWritten += delaySamples;
@@ -74,9 +74,9 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioSourceData dstC
 		if (samplesToRead > 0) {
 			// We have some samples that we can read, so go ahead with reading them
 			for (size_t srcChannel = 0; srcChannel < nChannels; ++srcChannel) {
-				auto dst = gsl::span<AudioConfig::SampleFormat>(dstChannels[srcChannel].data() + samplesWritten, samplesToRead);
+				auto dst = AudioSamples(dstChannels[srcChannel].data() + samplesWritten, samplesToRead);
 				const size_t nCopied = clip->copyChannelData(srcChannel, static_cast<size_t>(playbackPos), samplesToRead, dst);
-				Expects(nCopied <= samplesRequested * sizeof(AudioConfig::SampleFormat));
+				Expects(nCopied <= samplesRequested * sizeof(AudioSample));
 			}
 
 			playbackPos += static_cast<int64_t>(samplesToRead);
@@ -86,7 +86,7 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioSourceData dstC
 			for (size_t srcChannel = 0; srcChannel < nChannels; ++srcChannel) {
 				auto dstBuf = dstChannels[srcChannel];
 				auto dst = dstBuf.data() + samplesWritten;
-				memset(dst, 0, samplesRemaining * sizeof(AudioConfig::SampleFormat));
+				memset(dst, 0, samplesRemaining * sizeof(AudioSample));
 			}
 
 			samplesWritten += samplesRemaining;

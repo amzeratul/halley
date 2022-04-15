@@ -13,7 +13,7 @@ namespace Halley
 	public:
 		virtual ~IAudioClip() = default;
 
-		virtual size_t copyChannelData(size_t channelN, size_t pos, size_t len, gsl::span<AudioConfig::SampleFormat> dst) const = 0;
+		virtual size_t copyChannelData(size_t channelN, size_t pos, size_t len, AudioSamples dst) const = 0;
 		virtual uint8_t getNumberOfChannels() const = 0;
 		virtual size_t getLength() const = 0; // in samples
 		virtual size_t getLoopPoint() const { return 0; } // in samples
@@ -31,7 +31,7 @@ namespace Halley
 		void loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadata meta);
 		void loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadata meta);
 
-		size_t copyChannelData(size_t channelN, size_t pos, size_t len, gsl::span<AudioConfig::SampleFormat> dst) const override;
+		size_t copyChannelData(size_t channelN, size_t pos, size_t len, AudioSamples dst) const override;
 		uint8_t getNumberOfChannels() const override;
 		size_t getLength() const override; // in samples
 		size_t getLoopPoint() const override; // in samples
@@ -51,9 +51,9 @@ namespace Halley
 		bool streaming = false;
 
 		// TODO: sort this mess?
-		mutable Vector<Vector<AudioConfig::SampleFormat>> temp0;
-		mutable Vector<Vector<AudioConfig::SampleFormat>> temp1;
-		mutable Vector<Vector<AudioConfig::SampleFormat>> samples;
+		mutable Vector<Vector<AudioSample>> temp0;
+		mutable Vector<Vector<AudioSample>> temp1;
+		mutable Vector<Vector<AudioSample>> samples;
 		mutable std::unique_ptr<VorbisData> vorbisData;
 	};
 
@@ -62,16 +62,16 @@ namespace Halley
 	public:
 		StreamingAudioClip(uint8_t numChannels);
 
-		void addInterleavedSamples(gsl::span<const AudioConfig::SampleFormat> src);
+		void addInterleavedSamples(AudioSamplesConst src);
 
-		size_t copyChannelData(size_t channelN, size_t pos, size_t len, gsl::span<AudioConfig::SampleFormat> dst) const override;
+		size_t copyChannelData(size_t channelN, size_t pos, size_t len, AudioSamples dst) const override;
 		uint8_t getNumberOfChannels() const override;
 		size_t getLength() const override;
 		size_t getSamplesLeft() const;
 
 	private:
 		size_t length = 0;
-		mutable Vector<Vector<AudioConfig::SampleFormat>> buffers;
+		mutable Vector<Vector<AudioSample>> buffers;
 		mutable std::mutex mutex;
 		uint8_t numChannels = 0;
 	};

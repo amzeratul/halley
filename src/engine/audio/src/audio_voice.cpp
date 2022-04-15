@@ -188,8 +188,8 @@ void AudioVoice::mixTo(size_t numSamples, gsl::span<AudioBuffer*> dst, AudioMixe
 	}
 
 	// Read data from source
-	std::array<gsl::span<AudioSamplePack>, AudioConfig::maxChannels> audioData;
-	std::array<gsl::span<AudioConfig::SampleFormat>, AudioConfig::maxChannels> audioSampleData;
+	AudioMultiChannelSamples audioData;
+	AudioMultiChannelSamples audioSampleData;
 	std::array<AudioBufferRef, AudioConfig::maxChannels> bufferRefs;
 	for (size_t srcChannel = 0; srcChannel < nSrcChannels; ++srcChannel) {
 		bufferRefs[srcChannel] = pool.getBuffer(numSamples);

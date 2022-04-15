@@ -5,7 +5,7 @@
 
 using namespace Halley;
 
-void AudioMixer::mixAudio(gsl::span<const AudioSamplePack> src, gsl::span<AudioSamplePack> dst, float gain0, float gain1)
+void AudioMixer::mixAudio(AudioSamplesConst src, AudioSamples dst, float gain0, float gain1)
 {
 	const size_t nSamples = size_t(src.size());
 
@@ -46,7 +46,7 @@ void AudioMixer::mixAudio(AudioMultiChannelSamples src, AudioMultiChannelSamples
 	}
 }
 
-void AudioMixer::interleaveChannels(gsl::span<AudioSamplePack> dstBuffer, gsl::span<AudioBuffer*> srcs)
+void AudioMixer::interleaveChannels(AudioSamples dstBuffer, gsl::span<AudioBuffer*> srcs)
 {
 	const size_t nChannels = srcs.size();	
 	const size_t nSamples = dstBuffer.size() / nChannels;
@@ -57,17 +57,17 @@ void AudioMixer::interleaveChannels(gsl::span<AudioSamplePack> dstBuffer, gsl::s
 	}
 }
 
-void AudioMixer::concatenateChannels(gsl::span<AudioSamplePack> dst, gsl::span<AudioBuffer*> srcs)
+void AudioMixer::concatenateChannels(AudioSamples dst, gsl::span<AudioBuffer*> srcs)
 {
 	size_t pos = 0;
 	for (size_t i = 0; i < size_t(srcs.size()); ++i) {
-		const size_t nBytes = srcs[i]->samples.size() * sizeof(AudioSamplePack);
+		const size_t nBytes = srcs[i]->samples.size() * sizeof(AudioSample);
 		memcpy(dst.subspan(pos, nBytes).data(), srcs[i]->samples.data(), nBytes);
 		pos += nBytes;
 	}
 }
 
-void AudioMixer::compressRange(gsl::span<AudioSamplePack> buffer)
+void AudioMixer::compressRange(AudioSamples buffer)
 {
 	for (size_t i = 0; i < buffer.size(); ++i) {
 		float& sample = buffer[i];
@@ -83,7 +83,7 @@ void AudioMixer::zero(AudioMultiChannelSamples dst, size_t nChannels)
 	}
 }
 
-void AudioMixer::copy(AudioMultiChannelSamples src, std::array<gsl::span<AudioConfig::SampleFormat>, AudioConfig::maxChannels> dst, size_t nChannels)
+void AudioMixer::copy(AudioMultiChannelSamples src, AudioMultiChannelSamples dst, size_t nChannels)
 {
 	const size_t n = std::min(nChannels, std::min(src.size(), dst.size()));
 	for (size_t c = 0; c < n; ++c) {
@@ -91,9 +91,9 @@ void AudioMixer::copy(AudioMultiChannelSamples src, std::array<gsl::span<AudioCo
 	}
 }
 
-void AudioMixer::copy(AudioChannelSamples src, gsl::span<AudioConfig::SampleFormat> dst)
+void AudioMixer::copy(AudioSamples src, AudioSamples dst)
 {
-	memcpy(dst.data(), src.data(), std::min(src.size(), dst.size()) * sizeof(AudioConfig::SampleFormat));
+	memcpy(dst.data(), src.data(), std::min(src.size(), dst.size()) * sizeof(AudioSample));
 }
 
 #ifdef HAS_SSE

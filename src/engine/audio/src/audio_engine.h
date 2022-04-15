@@ -92,7 +92,7 @@ namespace Halley {
 
 		void mixVoices(size_t numSamples, size_t channels, gsl::span<AudioBuffer*> buffers);
 	    void removeFinishedVoices();
-		void clearBuffer(gsl::span<AudioSamplePack> dst);
+		void clearBuffer(AudioSamples dst);
 		void queueAudioFloat(gsl::span<const float> data);
 		void queueAudioBytes(gsl::span<const gsl::byte> data);
 		bool needsMoreAudio();

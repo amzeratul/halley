@@ -13,7 +13,7 @@
 
 using namespace Halley;
 
-void AudioMixerAVX::mixAudio(gsl::span<const AudioSamplePack> srcRaw, gsl::span<AudioSamplePack> dstRaw, float gain0, float gain1)
+void AudioMixerAVX::mixAudio(AudioSamplesConst srcRaw, AudioSamples dstRaw, float gain0, float gain1)
 {
 	gsl::span<const __m256> src(reinterpret_cast<const __m256*>(srcRaw.data()), srcRaw.size() * 2);
 	gsl::span<__m256> dst(reinterpret_cast<__m256*>(dstRaw.data()), dstRaw.size() * 2);
@@ -44,7 +44,7 @@ void AudioMixerAVX::mixAudio(gsl::span<const AudioSamplePack> srcRaw, gsl::span<
 	}
 }
 
-void AudioMixerAVX::compressRange(gsl::span<AudioSamplePack> buffer)
+void AudioMixerAVX::compressRange(AudioSamples buffer)
 {
 	gsl::span<__m256> dst(reinterpret_cast<__m256*>(buffer.data()), buffer.size() * 2);
 	const size_t nSamples = size_t(dst.size());
