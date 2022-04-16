@@ -24,8 +24,12 @@ set(SOURCES
         "src/audio_voice.cpp"
         "src/audio_sources/audio_source_clip.cpp"
         "src/audio_sources/audio_source_layers.cpp"
+        "src/audio_sources/audio_source_sequence.cpp"
+        "src/audio_sources/audio_source_switch.cpp"
         "src/sub_objects/audio_sub_object_clips.cpp"
         "src/sub_objects/audio_sub_object_layers.cpp"
+        "src/sub_objects/audio_sub_object_sequence.cpp"
+        "src/sub_objects/audio_sub_object_switch.cpp"
         "src/behaviours/audio_voice_behaviour.cpp"
         "src/behaviours/audio_voice_dynamics_behaviour.cpp"
         "src/vorbis_dec.cpp"
@@ -49,6 +53,8 @@ set(HEADERS
         "include/halley/audio/behaviours/audio_voice_dynamics_behaviour.h"
         "src/audio_sources/audio_source_clip.h"
         "src/audio_sources/audio_source_layers.h"
+        "src/audio_sources/audio_source_sequence.h"
+        "src/audio_sources/audio_source_switch.h"
         "src/audio_buffer.h"
         "src/audio_emitter.h"
         "src/audio_emitter_handle_impl.h"
@@ -60,6 +66,8 @@ set(HEADERS
         "src/audio_voice.h"
         "src/sub_objects/audio_sub_object_clips.h"
         "src/sub_objects/audio_sub_object_layers.h"
+        "src/sub_objects/audio_sub_object_sequence.h"
+        "src/sub_objects/audio_sub_object_switch.h"
         )
 
 set(SOURCES ${SOURCES} ${OGG_FILES} ${VORBIS_FILES})

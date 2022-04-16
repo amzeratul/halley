@@ -4,6 +4,8 @@
 #include "halley/bytes/byte_serializer.h"
 #include "sub_objects/audio_sub_object_clips.h"
 #include "sub_objects/audio_sub_object_layers.h"
+#include "sub_objects/audio_sub_object_sequence.h"
+#include "sub_objects/audio_sub_object_switch.h"
 
 using namespace Halley;
 
@@ -14,9 +16,10 @@ std::unique_ptr<IAudioSubObject> IAudioSubObject::makeSubObject(AudioSubObjectTy
 		return std::make_unique<AudioSubObjectClips>();
 	case AudioSubObjectType::Layers:
 		return std::make_unique<AudioSubObjectLayers>();
+	case AudioSubObjectType::Switch:
+		return std::make_unique<AudioSubObjectSwitch>();
 	case AudioSubObjectType::Sequence:
-		// TODO
-		return {};
+		return std::make_unique<AudioSubObjectSequence>();
 	}
 	return {};
 }

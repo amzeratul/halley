@@ -9,16 +9,18 @@ namespace Halley {
 		None,
 		Clips,
 		Layers,
+		Switch,
 		Sequence
 	};
 
 	template <>
 	struct EnumNames<AudioSubObjectType> {
-		constexpr std::array<const char*, 4> operator()() const {
+		constexpr std::array<const char*, 5> operator()() const {
 			return{{
 				"none",
 				"clips",
 				"layers",
+				"switch",
 				"sequence"
 			}};
 		}
