@@ -49,6 +49,13 @@ void AudioEventEditor::doLoadUI()
 
 AudioEventEditorAction::AudioEventEditorAction(UIFactory& factory, IAudioEventAction& action, int id)
 	: UIWidget(toString(id), {}, UISizer())
+	, factory(factory)
+	, action(action)
 {
 	factory.loadUI(*this, "halley/audio_event_editor_action");
+}
+
+void AudioEventEditorAction::onMakeUI()
+{
+	action.makeUI(factory, getWidgetAs<UILabel>("label"), getWidget("contents"));
 }

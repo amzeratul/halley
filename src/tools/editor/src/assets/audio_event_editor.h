@@ -25,5 +25,10 @@ namespace Halley {
 	class AudioEventEditorAction : public UIWidget {
 	public:
         AudioEventEditorAction(UIFactory& factory, IAudioEventAction& action, int id);
+        void onMakeUI() override;
+	
+	private:
+        UIFactory& factory;
+        IAudioEventAction& action;
 	};
 }

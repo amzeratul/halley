@@ -1,7 +1,7 @@
 widget: { id: background, class: image, image: "$ui_window", innerBorder: [ 8, 8, 8, 8 ], colour: $ui_staticBox, size: [20, 20] }
 sizer: { type: horizontal }
 children:
-- widget: { id: action, class: label, text: Action, colour: "$ui_unselectedTextAlt" }
+- widget: { id: label, class: label, text: Action, colour: "$ui_unselectedTextAlt" }
   fill: centre
   border: [4, 2, 4, 4]
 - widget: { class: widget, id: contents }

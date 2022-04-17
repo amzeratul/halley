@@ -8,6 +8,7 @@
 #include "halley/core/resources/resources.h"
 #include "audio_filter_resample.h"
 #include "audio_object.h"
+#include "../../ui/include/halley/ui/widgets/ui_label.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/support/logger.h"
 
@@ -285,6 +286,11 @@ ConfigNode AudioEventActionPlay::toConfigNode() const
 	result["delay"] = delay;
 	
 	return result;
+}
+
+void AudioEventActionPlay::makeUI(UIFactory& factory, std::shared_ptr<UILabel> label, std::shared_ptr<UIWidget> contents)
+{
+	label->setText(LocalisedString::fromHardcodedString("Play"));
 }
 
 void AudioEventActionStop::load(const ConfigNode& config)
