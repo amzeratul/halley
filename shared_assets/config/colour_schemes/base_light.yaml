@@ -17,9 +17,9 @@ colours:
   icon_variableTable: "#50E9BB"
   icon_uiDefinition: "#21B4E4"
   
-  icon_audioClip: "#E39343"
-  icon_audioEvent: "#A2630D"
-  icon_audioObject: "#E0AD12"
+  icon_audioClip: "#F479AD"
+  icon_audioEvent: "#EF83F8"
+  icon_audioObject: "#CE26CE"
   
   icon_font: "#D538E9"
   icon_bitmapFont: "#D538E9"

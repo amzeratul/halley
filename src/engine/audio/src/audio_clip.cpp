@@ -101,11 +101,6 @@ size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, Audio
 			streamPos += len;
 		}
 
-		auto& buf = samples.at(channelN);
-		if (buf.size() < len) {
-			buf.resize(len);
-		}
-
 		memcpy(dst.data(), temp[channelN].data(), len * sizeof(AudioSample));
 		return len;
 	} else {

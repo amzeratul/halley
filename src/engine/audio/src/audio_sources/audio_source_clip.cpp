@@ -37,15 +37,6 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 	const uint8_t nChannels = getNumberOfChannels();
 	size_t samplesWritten = 0;
 
-	// On delay, pad with zeroes
-	if (playbackPos < 0) {
-		const size_t delaySamples = std::min(static_cast<size_t>(-playbackPos), samplesRequested);
-		AudioMixer::zeroRange(dstChannels, nChannels, samplesWritten, delaySamples);
-		samplesWritten += delaySamples;
-		playbackPos += static_cast<int64_t>(delaySamples);
-	}
-
-	// Playback pos is positive
 	while (samplesWritten < samplesRequested) {
 		if (playbackPos >= playbackLength) {
 			// If we're at the end of playback, either loop, or flag as done

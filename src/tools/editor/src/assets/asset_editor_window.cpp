@@ -1,6 +1,8 @@
 #include "asset_editor_window.h"
 #include "animation_editor.h"
 #include "asset_editor.h"
+#include "audio_event_editor.h"
+#include "audio_object_editor.h"
 #include "metadata_editor.h"
 #include "prefab_editor.h"
 #include "graph/render_graph_editor.h"
@@ -193,6 +195,10 @@ std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(Path filePath, AssetT
 		return std::make_shared<RenderGraphEditor>(factory, project.getGameResources(), project, type);
 	case AssetType::UIDefinition:
 		return std::make_shared<UIEditor>(factory, project.getGameResources(), project, projectWindow, projectWindow.getAPI());
+	case AssetType::AudioEvent:
+		return std::make_shared<AudioEventEditor>(factory, project.getGameResources(), project, projectWindow);
+	case AssetType::AudioObject:
+		return std::make_shared<AudioObjectEditor>(factory, project.getGameResources(), project, projectWindow);
 	}
 	return {};
 }
