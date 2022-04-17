@@ -39,6 +39,11 @@ AudioSubObjectHandle::AudioSubObjectHandle(std::unique_ptr<IAudioSubObject> obj)
 {
 }
 
+AudioSubObjectHandle::AudioSubObjectHandle(const ConfigNode& node)
+{
+	obj = IAudioSubObject::makeSubObject(node);
+}
+
 IAudioSubObject& AudioSubObjectHandle::getObject()
 {
 	return *obj;
