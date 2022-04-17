@@ -6,6 +6,13 @@ void AudioSubObjectSequence::load(const ConfigNode& node)
 	// TODO
 }
 
+ConfigNode AudioSubObjectSequence::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	// TODO
+	return result;
+}
+
 std::unique_ptr<AudioSource> AudioSubObjectSequence::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
 {
 	// TODO

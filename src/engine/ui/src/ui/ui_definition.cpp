@@ -108,3 +108,8 @@ String UIDefinition::toYAML() const
 	options.mapKeyOrder = {{ "uuid", "proportion", "border", "sizer", "widget", "children" }};
 	return YAMLConvert::generateYAML(data.getRoot(), options);
 }
+
+void UIDefinition::makeDefault()
+{
+	// TODO?
+}

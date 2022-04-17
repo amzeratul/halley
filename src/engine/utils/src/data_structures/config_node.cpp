@@ -243,6 +243,14 @@ ConfigNode& ConfigNode::operator=(Vector4f value)
 	return *this = std::move(seq);
 }
 
+ConfigNode& ConfigNode::operator=(Range<float> value)
+{
+	reset();
+	type = ConfigNodeType::Float2;
+	vec2fData = Vector2f(value.start, value.end);
+	return *this;
+}
+
 ConfigNode& ConfigNode::operator=(const std::string_view& value)
 {
 	*this = String(value);

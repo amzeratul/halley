@@ -8,6 +8,7 @@
 #include "halley/core/resources/resources.h"
 #include "audio_filter_resample.h"
 #include "audio_object.h"
+#include "halley/file_formats/yaml_convert.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;
@@ -41,6 +42,20 @@ AudioEvent::AudioEvent(const ConfigNode& config)
 	}
 }
 
+String AudioEvent::toYAML() const
+{
+	auto actionsNode = ConfigNode::SequenceType();
+	for (const auto& action: actions) {
+		actionsNode.push_back(action->toConfigNode());
+	}
+	
+	ConfigNode result = ConfigNode::MapType();
+	result["actions"] = std::move(actionsNode);
+
+	YAMLConvert::EmitOptions options;
+	return YAMLConvert::generateYAML(result, options);
+}
+
 size_t AudioEvent::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
 	size_t nEmitters = 0;
@@ -50,6 +65,16 @@ size_t AudioEvent::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitt
 		}
 	}
 	return nEmitters;
+}
+
+const Vector<std::unique_ptr<IAudioEventAction>>& AudioEvent::getActions() const
+{
+	return actions;
+}
+
+Vector<std::unique_ptr<IAudioEventAction>>& AudioEvent::getActions()
+{
+	return actions;
 }
 
 void AudioEvent::serialize(Serializer& s) const
@@ -94,6 +119,10 @@ std::shared_ptr<AudioEvent> AudioEvent::loadResource(ResourceLoader& loader)
 	s >> *event;
 	event->loadDependencies(loader.getResources());
 	return event;
+}
+
+void AudioEvent::makeDefault()
+{
 }
 
 void AudioEvent::loadDependencies(Resources& resources)
@@ -154,7 +183,19 @@ void AudioEventActionObject::loadDependencies(Resources& resources)
 	}
 }
 
+ConfigNode AudioEventActionObject::toConfigNode() const
+{
+	auto result = ConfigNode::MapType();
 
+	if (!objectName.isEmpty()) {
+		result["object"] = objectName;
+	}
+	if (fade.hasFade()) {
+		result["fade"] = fade.toConfigNode();
+	}
+
+	return result;
+}
 
 
 void AudioEventActionPlay::load(const ConfigNode& node)
@@ -234,6 +275,18 @@ void AudioEventActionPlay::loadDependencies(Resources& resources)
 	}
 }
 
+ConfigNode AudioEventActionPlay::toConfigNode() const
+{
+	auto result = AudioEventActionObject::toConfigNode();
+
+	if (std::abs(playGain.start - 1.0f) > 0.0001f && std::abs(playGain.end - 1.0f) > 0.0001f) {
+		result["playGain"] = playGain;
+	}
+	result["delay"] = delay;
+	
+	return result;
+}
+
 void AudioEventActionStop::load(const ConfigNode& config)
 {
 	loadObject(config);
@@ -303,6 +356,13 @@ void AudioEventActionSetVolume::load(const ConfigNode& config)
 	gain = config["gain"].asFloat(1.0f);
 }
 
+ConfigNode AudioEventActionSetVolume::toConfigNode() const
+{
+	auto result = AudioEventActionObject::toConfigNode();
+	result["gain"] = gain;
+	return result;
+}
+
 bool AudioEventActionSetVolume::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
 	if (!object) {
@@ -337,6 +397,14 @@ void AudioEventActionSetSwitch::load(const ConfigNode& config)
 	value = config["value"].asString();
 }
 
+ConfigNode AudioEventActionSetSwitch::toConfigNode() const
+{
+	auto result = ConfigNode::MapType();
+	result["switchId"] = switchId;
+	result["value"] = value;
+	return result;
+}
+
 bool AudioEventActionSetSwitch::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
 {
 	emitter.setSwitchValue(switchId, value);
@@ -360,6 +428,14 @@ void AudioEventActionSetVariable::load(const ConfigNode& config)
 {
 	variableId = config["variableId"].asString();
 	value = config["value"].asFloat();
+}
+
+ConfigNode AudioEventActionSetVariable::toConfigNode() const
+{
+	auto result = ConfigNode::MapType();
+	result["variableId"] = variableId;
+	result["value"] = value;
+	return result;
 }
 
 bool AudioEventActionSetVariable::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const

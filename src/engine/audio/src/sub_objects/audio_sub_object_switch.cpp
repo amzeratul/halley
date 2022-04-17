@@ -15,6 +15,14 @@ void AudioSubObjectSwitch::load(const ConfigNode& node)
 	cases = node["cases"].asHashMap<String, AudioSubObjectHandle>();
 }
 
+ConfigNode AudioSubObjectSwitch::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	result["switchId"] = switchId;
+	result["cases"] = cases;
+	return result;
+}
+
 std::unique_ptr<AudioSource> AudioSubObjectSwitch::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
 {
 	const auto& curValue = emitter.getSwitchValue(switchId);

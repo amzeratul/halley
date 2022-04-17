@@ -18,6 +18,20 @@ void AudioSubObjectLayers::load(const ConfigNode& node)
 	}
 }
 
+ConfigNode AudioSubObjectLayers::toConfigNode() const
+{
+	ConfigNode::MapType result;
+
+	if (!layers.empty()) {
+		result["layers"] = layers;
+	}
+	if (fadeConfig.hasFade()) {
+		result["fade"] = fadeConfig.toConfigNode();
+	}
+		
+	return result;
+}
+
 std::unique_ptr<AudioSource> AudioSubObjectLayers::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
 {
 	Vector<std::unique_ptr<AudioSource>> sources;
@@ -63,6 +77,15 @@ AudioSubObjectLayers::Layer::Layer(const ConfigNode& node)
 	object = IAudioSubObject::makeSubObject(node["object"]);
 	expression.load(node["expression"]);
 	synchronised = node["synchronised"].asBool(false);
+}
+
+ConfigNode AudioSubObjectLayers::Layer::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	result["object"] = object.toConfigNode();
+	result["expression"] = expression.toConfigNode();
+	result["synchronised"] = synchronised;
+	return result;
 }
 
 void AudioSubObjectLayers::Layer::serialize(Serializer& s) const

@@ -32,6 +32,10 @@ namespace Halley {
 		constexpr static AssetType getAssetType() { return AssetType::AudioObject; }
     	void loadDependencies(Resources& resources);
 
+		void makeDefault();
+		ConfigNode toConfigNode() const;
+        String toYAML() const;
+
     private:
 		AudioObjectId audioObjectId;
 		AudioSubObjectHandle root;

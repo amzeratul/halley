@@ -4,6 +4,7 @@
 #include "halley/bytes/byte_serializer.h"
 #include "halley/core/resources/resources.h"
 #include "halley/data_structures/config_node.h"
+#include "halley/file_formats/yaml_convert.h"
 #include "halley/maths/random.h"
 #include "halley/support/logger.h"
 #include "sub_objects/audio_sub_object_clips.h"
@@ -26,6 +27,26 @@ AudioObject::AudioObject(const ConfigNode& node)
 	if (node.hasKey("root")) {
 		root = IAudioSubObject::makeSubObject(node["root"]);
 	}
+}
+
+ConfigNode AudioObject::toConfigNode() const
+{
+	ConfigNode::MapType result;
+
+	if (!group.isEmpty()) {
+		result["group"] = group;
+	}
+	if (pitch != Range<float>(1, 1)) {
+		result["pitch"] = pitch;
+	}
+	if (volume != Range<float>(1, 1)) {
+		result["volume"] = volume;
+	}
+	if (root.hasValue()) {
+		result["root"] = root->toConfigNode();
+	}
+	
+	return result;
 }
 
 void AudioObject::loadLegacyEvent(const ConfigNode& node)
@@ -108,6 +129,17 @@ void AudioObject::loadDependencies(Resources& resources)
 	if (root.hasValue()) {
 		root->loadDependencies(resources);
 	}
+}
+
+void AudioObject::makeDefault()
+{
+	// TODO?
+}
+
+String AudioObject::toYAML() const
+{
+	YAMLConvert::EmitOptions options;
+	return YAMLConvert::generateYAML(toConfigNode(), options);
 }
 
 void AudioObject::generateId()

@@ -8,6 +8,7 @@ namespace Halley {
 
         void reload() override;
         void refreshAssets() override;
+		void onMakeUI() override;
 	
     protected:
         void update(Time t, bool moved) override;
@@ -15,5 +16,14 @@ namespace Halley {
 
 	private:
         std::shared_ptr<AudioEvent> audioEvent;
+        std::shared_ptr<UIList> actionList;
+        int actionId = 0;
+
+        void doLoadUI();
+	};
+
+	class AudioEventEditorAction : public UIWidget {
+	public:
+        AudioEventEditorAction(UIFactory& factory, IAudioEventAction& action, int id);
 	};
 }

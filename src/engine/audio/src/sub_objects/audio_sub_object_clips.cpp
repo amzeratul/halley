@@ -22,6 +22,26 @@ void AudioSubObjectClips::load(const ConfigNode& node)
 	loopEnd = node["loopEnd"].asInt(0);
 }
 
+ConfigNode AudioSubObjectClips::toConfigNode() const
+{
+	ConfigNode::MapType result;
+
+	if (!clips.empty()) {
+		result["clips"] = clips;
+	}
+	if (loop) {
+		result["loop"] = loop;
+	}
+	if (loopStart != 0) {
+		result["loopStart"] = loopStart;
+	}
+	if (loopEnd != 0) {
+		result["loopEnd"] = loopEnd;
+	}
+		
+	return result;
+}
+
 std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
 {
 	if (clipData.empty()) {

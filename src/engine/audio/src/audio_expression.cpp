@@ -21,6 +21,17 @@ AudioExpressionTerm::AudioExpressionTerm(const ConfigNode& node)
 	}
 }
 
+ConfigNode AudioExpressionTerm::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	result["type"] = toString(type);
+	result["id"] = id;
+	if (type == AudioExpressionTermType::Switch) {
+		result["value"] = value;
+	}
+	return result;
+}
+
 float AudioExpressionTerm::evaluate(const AudioEmitter& emitter) const
 {
 	switch (type) {
@@ -52,6 +63,13 @@ void AudioExpressionTerm::deserialize(Deserializer& s)
 void AudioExpression::load(const ConfigNode& node)
 {
 	terms = node["terms"].asVector<AudioExpressionTerm>();
+}
+
+ConfigNode AudioExpression::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	result["terms"] = terms;
+	return result;
 }
 
 float AudioExpression::evaluate(const AudioEmitter& emitter) const

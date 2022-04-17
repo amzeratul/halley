@@ -31,6 +31,7 @@ namespace Halley {
 
         AudioExpressionTerm() = default;
         AudioExpressionTerm(const ConfigNode& node);
+        ConfigNode toConfigNode() const;
 
         float evaluate(const AudioEmitter& emitter) const;
 
@@ -41,6 +42,7 @@ namespace Halley {
 	class AudioExpression {
     public:
         void load(const ConfigNode& node);
+        ConfigNode toConfigNode() const;
 
         float evaluate(const AudioEmitter& emitter) const;
 

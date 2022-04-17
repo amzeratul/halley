@@ -41,6 +41,8 @@ namespace Halley {
 
 		virtual void serialize(Serializer& s) const = 0;
 		virtual void deserialize(Deserializer& s) = 0;
+
+		virtual ConfigNode toConfigNode() const = 0;
 	};
 
 	class AudioSubObjectHandle {
@@ -48,6 +50,7 @@ namespace Halley {
 		AudioSubObjectHandle() = default;
 		AudioSubObjectHandle(std::unique_ptr<IAudioSubObject> obj);
 		AudioSubObjectHandle(const ConfigNode& node);
+		ConfigNode toConfigNode() const;
 
 		IAudioSubObject& getObject();
 		const IAudioSubObject& getObject() const;

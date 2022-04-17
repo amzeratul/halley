@@ -37,6 +37,8 @@ namespace Halley {
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
+		ConfigNode toConfigNode() const;
+
 	private:
 		float length = 0;
 		AudioFadeCurve curve = AudioFadeCurve::Linear;

@@ -32,6 +32,7 @@ namespace Halley {
         
         void parseYAML(gsl::span<const gsl::byte> yaml);
 		String toYAML() const;
+        void makeDefault();
 
     private:
         ConfigFile data;

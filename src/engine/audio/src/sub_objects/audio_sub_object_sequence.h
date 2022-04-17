@@ -5,6 +5,7 @@ namespace Halley {
     class AudioSubObjectSequence final : public IAudioSubObject {
     public:
    	    void load(const ConfigNode& node) override;
+    	ConfigNode toConfigNode() const override;
 
         AudioSubObjectType getType() override { return AudioSubObjectType::Sequence; }
 	    std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const override;

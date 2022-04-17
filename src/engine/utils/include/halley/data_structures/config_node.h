@@ -156,6 +156,7 @@ namespace Halley {
 		ConfigNode& operator=(Vector3f value);
 		ConfigNode& operator=(Vector4i value);
 		ConfigNode& operator=(Vector4f value);
+		ConfigNode& operator=(Range<float> value);
 
 		ConfigNode& operator=(MapType entryMap);
 		ConfigNode& operator=(SequenceType entryList);

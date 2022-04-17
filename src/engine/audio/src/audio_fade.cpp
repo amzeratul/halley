@@ -15,6 +15,18 @@ AudioFade::AudioFade(const ConfigNode& node)
 	curve = fromString<AudioFadeCurve>(node["curve"].asString("linear"));
 }
 
+ConfigNode AudioFade::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	if (length > 0.0f) {
+		result["length"] = length;
+	}
+	if (curve != AudioFadeCurve::Linear) {
+		result["curve"] = toString(curve);
+	}
+	return result;
+}
+
 float AudioFade::evaluate(float time) const
 {
 	switch (curve) {

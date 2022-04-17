@@ -44,6 +44,11 @@ AudioSubObjectHandle::AudioSubObjectHandle(const ConfigNode& node)
 	obj = IAudioSubObject::makeSubObject(node);
 }
 
+ConfigNode AudioSubObjectHandle::toConfigNode() const
+{
+	return obj->toConfigNode();
+}
+
 IAudioSubObject& AudioSubObjectHandle::getObject()
 {
 	return *obj;

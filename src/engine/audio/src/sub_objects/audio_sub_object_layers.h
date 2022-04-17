@@ -7,6 +7,7 @@ namespace Halley {
 	class AudioSubObjectLayers final : public IAudioSubObject {
 	public:
 		void load(const ConfigNode& node) override;
+		ConfigNode toConfigNode() const override;
 
 		AudioSubObjectType getType() override { return AudioSubObjectType::Layers; }
 
@@ -27,6 +28,7 @@ namespace Halley {
 
 			Layer() = default;
 			Layer(const ConfigNode& node);
+			ConfigNode toConfigNode() const;
 
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);

@@ -10,6 +10,7 @@
 #include "metadata_editor.h"
 #include "new_asset_window.h"
 #include "prefab_editor.h"
+#include "halley/audio/audio_object.h"
 #include "halley/tools/file/filesystem.h"
 #include "src/ui/editor_ui_factory.h"
 #include "src/ui/project_window.h"
@@ -340,7 +341,7 @@ void AssetsBrowser::updateAddRemoveButtons()
 	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
 	
 	const auto stem = curSrcPath.getFront(1).string();
-	const bool canAdd = stem == "prefab" || stem == "scene";
+	const bool canAdd = stem == "prefab" || stem == "scene" || stem == "audio_object" || stem == "audio_event" || stem == "ui";
 	const bool canRemove = !lastClickedAsset.isEmpty() && !lastClickedAsset.endsWith("/.");
 
 	getWidget("addAsset")->setEnabled(canAdd);
@@ -364,6 +365,18 @@ void AssetsBrowser::addAsset()
 				Scene scene;
 				scene.makeDefault();
 				addAsset(newName.value() + ".scene", scene.toYAML());
+			} else if (assetType == "audio_object") {
+				AudioObject object;
+				object.makeDefault();
+				addAsset(newName.value() + ".yaml", object.toYAML());
+			} else if (assetType == "audio_event") {
+				AudioEvent audioEvent;
+				audioEvent.makeDefault();
+				addAsset(newName.value() + ".yaml", audioEvent.toYAML());
+			} else if (assetType == "ui") {
+				UIDefinition ui;
+				ui.makeDefault();
+				addAsset(newName.value() + ".yaml", ui.toYAML());
 			}
 		}
 	}));

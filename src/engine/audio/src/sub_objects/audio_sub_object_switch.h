@@ -7,6 +7,7 @@ namespace Halley {
     public:
         AudioSubObjectSwitch() = default;
         AudioSubObjectSwitch(const ConfigNode& node);
+    	ConfigNode toConfigNode() const override;
     	
 	    void load(const ConfigNode& node) override;
 

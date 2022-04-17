@@ -1,0 +1,12 @@
+widget: { id: background, class: image, image: "$ui_window", innerBorder: [ 8, 8, 8, 8 ], colour: $ui_staticBox, size: [20, 20] }
+sizer: { type: horizontal }
+children:
+- widget: { id: action, class: label, text: Action, colour: "$ui_unselectedTextAlt" }
+  fill: centre
+  border: [4, 2, 4, 4]
+- widget: { class: widget, id: contents }
+  sizer: { type: vertical, gap: 0 }
+  proportion: 1
+  children: []
+- widget: { id: delete, class: button, style: buttonThin, size: [15, 15], text: "x" }
+  fill: centre

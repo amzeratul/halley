@@ -5,6 +5,7 @@ namespace Halley {
 	class AudioSubObjectClips final : public IAudioSubObject {
 	public:
 		void load(const ConfigNode& node) override;
+		ConfigNode toConfigNode() const override;
 
 		AudioSubObjectType getType() override { return AudioSubObjectType::Clips; }
 

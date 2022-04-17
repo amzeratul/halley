@@ -42,12 +42,18 @@ namespace Halley
 
 		size_t run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const;
 
+		const Vector<std::unique_ptr<IAudioEventAction>>& getActions() const;
+		Vector<std::unique_ptr<IAudioEventAction>>& getActions();
+
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
 		void reload(Resource&& resource) override;
 		static std::shared_ptr<AudioEvent> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::AudioEvent; }
+
+		void makeDefault();
+        String toYAML() const;
 
 	private:
 		Vector<std::unique_ptr<IAudioEventAction>> actions;
@@ -82,6 +88,8 @@ namespace Halley
 		virtual void serialize(Serializer& s) const = 0;
 		virtual void deserialize(Deserializer& s) = 0;
 		virtual void loadDependencies(Resources& resources) {}
+
+		virtual ConfigNode toConfigNode() const = 0;
 	};
 
 	class AudioEventActionObject : public IAudioEventAction
@@ -93,6 +101,8 @@ namespace Halley
 		void deserialize(Deserializer& s) override;
 
 		void loadDependencies(Resources& resources) override;
+
+		ConfigNode toConfigNode() const override;
 
 	protected:
 		std::shared_ptr<const AudioObject> object;
@@ -112,6 +122,8 @@ namespace Halley
 		void deserialize(Deserializer& s) override;
 
 		void loadDependencies(Resources& resources) override;
+
+		ConfigNode toConfigNode() const override;
 
 	private:
 		bool legacy = false;
@@ -157,6 +169,8 @@ namespace Halley
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
 
+		ConfigNode toConfigNode() const override;
+
 	private:
 		float gain;
 	};
@@ -171,6 +185,8 @@ namespace Halley
 
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
+
+		ConfigNode toConfigNode() const override;
 
 	private:
 		String switchId;
@@ -187,6 +203,8 @@ namespace Halley
 
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
+
+		ConfigNode toConfigNode() const override;
 
 	private:
 		String variableId;
