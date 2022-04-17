@@ -6,12 +6,14 @@ namespace Halley {
     public:
         AudioEventEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow);
 
-        void refresh();
         void reload() override;
         void refreshAssets() override;
 	
     protected:
         void update(Time t, bool moved) override;
         std::shared_ptr<const Resource> loadResource(const String& assetId) override;
+
+	private:
+        std::shared_ptr<AudioEvent> audioEvent;
 	};
 }

@@ -14,6 +14,20 @@ using namespace Halley;
 
 AudioEvent::AudioEvent() = default;
 
+AudioEvent::AudioEvent(const AudioEvent& other)
+{
+	*this = other;
+}
+
+AudioEvent& AudioEvent::operator=(const AudioEvent& other)
+{
+	// eh, will do
+	auto bytes = Serializer::toBytes(other);
+	auto s = Deserializer(bytes);
+	deserialize(s);
+	return *this;
+}
+
 AudioEvent::AudioEvent(const ConfigNode& config)
 {
 	if (config.hasKey("actions")) {

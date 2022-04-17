@@ -1,0 +1,21 @@
+widget: { class: widget }
+sizer: { type: vertical }
+children:
+- widget: { id: background, class: image, image: "$ui_title_capsule", colour: "$ui_popupWindow", innerBorder: [ 4, 1, 4, 4 ], size: [20, 20] }
+  sizer: { type: vertical }
+  children:
+  - widget: { id: title, class: label, text: "Audio Event" }
+    fill: centre
+  - widget: { id: content, class: widget }
+    border: [1, 4, 1, 1]
+    proportion: 1
+    sizer: { type: vertical, gap: 3 }
+    children:
+    - widget: { class: widget }
+      sizer: { type: vertical, gap: 1 }
+      children:
+      - widget: { id: actions, class: list, canDrag: true, style: dragList }
+        fill: left
+      - widget: { id: addAction, class: button, text: "+", size: [50, 20], style: buttonThin, active: true }
+        fill: left
+        border: [0, 0, 0, 1]

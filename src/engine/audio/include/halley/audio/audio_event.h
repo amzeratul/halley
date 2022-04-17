@@ -35,7 +35,10 @@ namespace Halley
 	{
 	public:
 		AudioEvent();
+		AudioEvent(const AudioEvent& other);
 		explicit AudioEvent(const ConfigNode& config);
+
+		AudioEvent& operator=(const AudioEvent& other);
 
 		size_t run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const;
 
@@ -48,6 +51,7 @@ namespace Halley
 
 	private:
 		Vector<std::unique_ptr<IAudioEventAction>> actions;
+		
 		void loadDependencies(Resources& resources);
 		std::unique_ptr<IAudioEventAction> makeAction(AudioEventActionType type) const;
 	};

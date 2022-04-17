@@ -8,11 +8,6 @@ AudioObjectEditor::AudioObjectEditor(UIFactory& factory, Resources& gameResource
 	
 }
 
-void AudioObjectEditor::refresh()
-{
-	// TODO
-}
-
 void AudioObjectEditor::reload()
 {
 	// TODO
