@@ -7,6 +7,3 @@ namespace Halley {}
 #include "audio_filter_biquad.h"
 #include "audio_position.h"
 #include "audio_source.h"
-
-#include "behaviours/audio_voice_behaviour.h"
-#include "behaviours/audio_voice_dynamics_behaviour.h"

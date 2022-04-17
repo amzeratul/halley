@@ -1,6 +1,5 @@
 #pragma once
 #include "audio_position.h"
-#include "behaviours/audio_voice_behaviour.h"
 #include "audio_buffer.h"
 #include <limits>
 
@@ -33,7 +32,6 @@ namespace Halley {
 		float getBaseGain() const;
 		void setUserGain(float gain);
 		float getUserGain() const;
-		float& getDynamicGainRef();
 
 		void setPitch(float pitch);
 
@@ -45,13 +43,11 @@ namespace Halley {
 		void setIds(AudioEventId eventId, AudioObjectId audioObjectId = 0);
 		AudioEventId getEventId() const;
 		AudioObjectId getAudioObjectId() const;
-
-		void addBehaviour(std::unique_ptr<AudioVoiceBehaviour> behaviour);
 		
 		uint8_t getGroup() const;
 
 	private:
-		enum class FadeEndBehaviour {
+		enum class FadeEndBehaviour : uint8_t {
 			None,
 			Pause,
 			Stop
@@ -68,7 +64,6 @@ namespace Halley {
 		bool done : 1;
 		bool isFirstUpdate : 1;
     	float baseGain = 1.0f;
-		float dynamicGain = 1.0f;
 		float userGain = 1.0f;
 		float elapsedTime = 0.0f;
 		uint32_t delaySamples = 0;
@@ -78,7 +73,6 @@ namespace Halley {
 
 		std::shared_ptr<AudioSource> source;
 		std::shared_ptr<AudioFilterResample> resample;
-		std::unique_ptr<AudioVoiceBehaviour> behaviour;
 
 		std::array<float, 16> channelMix;
 		std::array<float, 16> prevChannelMix;

@@ -8,7 +8,6 @@
 #include "halley/core/resources/resources.h"
 #include "audio_filter_resample.h"
 #include "audio_object.h"
-#include "behaviours/audio_voice_dynamics_behaviour.h"
 #include "halley/support/logger.h"
 
 using namespace Halley;

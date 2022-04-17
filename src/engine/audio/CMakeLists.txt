@@ -20,7 +20,6 @@ set(SOURCES
         "src/audio_object.cpp"
         "src/audio_position.cpp"
         "src/audio_sub_object.cpp"
-        "src/audio_variable_table.cpp"
         "src/audio_voice.cpp"
         "src/audio_sources/audio_source_clip.cpp"
         "src/audio_sources/audio_source_layers.cpp"
@@ -29,8 +28,6 @@ set(SOURCES
         "src/sub_objects/audio_sub_object_layers.cpp"
         "src/sub_objects/audio_sub_object_sequence.cpp"
         "src/sub_objects/audio_sub_object_switch.cpp"
-        "src/behaviours/audio_voice_behaviour.cpp"
-        "src/behaviours/audio_voice_dynamics_behaviour.cpp"
         "src/vorbis_dec.cpp"
         )
 
@@ -48,8 +45,6 @@ set(HEADERS
         "include/halley/audio/audio_sub_object.h"
         "include/halley/audio/halley_audio.h"
         "include/halley/audio/vorbis_dec.h"
-        "include/halley/audio/behaviours/audio_voice_behaviour.h"
-        "include/halley/audio/behaviours/audio_voice_dynamics_behaviour.h"
         "src/audio_sources/audio_source_clip.h"
         "src/audio_sources/audio_source_layers.h"
         "src/audio_sources/audio_source_sequence.h"
@@ -60,7 +55,6 @@ set(HEADERS
         "src/audio_filter_resample.h"
         "src/audio_handle_impl.h"
         "src/audio_mixer.h"
-        "src/audio_variable_table.h"
         "src/audio_voice.h"
         "src/sub_objects/audio_sub_object_clips.h"
         "src/sub_objects/audio_sub_object_layers.h"

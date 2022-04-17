@@ -4,7 +4,6 @@
 #include "audio_engine.h"
 #include "audio_filter_resample.h"
 #include "audio_mixer.h"
-#include "behaviours/audio_voice_behaviour.h"
 #include "audio_source.h"
 #include "halley/support/logger.h"
 
@@ -116,18 +115,6 @@ bool AudioVoice::isDone() const
 }
 
 
-void AudioVoice::addBehaviour(std::unique_ptr<AudioVoiceBehaviour> value)
-{
-	Expects(value);
-	if (behaviour) {
-		behaviour->addToChain(std::move(value));
-	} else {
-		behaviour = std::move(value);
-	}
-	elapsedTime = 0;
-	behaviour->onAttach(*this);
-}
-
 uint8_t AudioVoice::getGroup() const
 {
 	return group;
@@ -151,11 +138,6 @@ void AudioVoice::setUserGain(float gain)
 float AudioVoice::getUserGain() const
 {
 	return userGain;
-}
-
-float& AudioVoice::getDynamicGainRef()
-{
-	return dynamicGain;
 }
 
 void AudioVoice::setPitch(float pitch)
@@ -187,17 +169,8 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 		}
 	}
 
-	// Dynamic gain is a combination of the fader's current value, times the value from the current behaviour
-	dynamicGain = fader.getCurrentValue();
+	const auto dynamicGain = fader.getCurrentValue();
 	
-	if (behaviour) {
-		const bool keep = behaviour->updateChain(elapsedTime, *this);
-		if (!keep) {
-			behaviour = behaviour->releaseNext();
-		}
-	}
-	elapsedTime = 0;
-
 	const float pauseGain = paused ? 0.0f : 1.0f;
 	
 	prevChannelMix = channelMix;
@@ -207,6 +180,8 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 		prevChannelMix = channelMix;
 		isFirstUpdate = false;
 	}
+
+	elapsedTime = 0;
 }
 
 void AudioVoice::onFadeEnd()

@@ -9,7 +9,6 @@
 #include "audio_event.h"
 #include "halley/support/logger.h"
 #include "halley/core/api/audio_api.h"
-#include "audio_variable_table.h"
 #include "halley/support/profiler.h"
 #include "halley/time/stopwatch.h"
 #include "halley/utils/algorithm.h"
@@ -18,7 +17,6 @@ using namespace Halley;
 
 AudioEngine::AudioEngine()
 	: pool(std::make_unique<AudioBufferPool>())
-	, variableTable(std::make_unique<AudioVariableTable>())
 	, audioOutputBuffer(4096 * 8)
 	, running(true)
 	, needsBuffer(true)
@@ -293,11 +291,6 @@ AudioBufferPool& AudioEngine::getPool() const
 	return *pool;
 }
 
-AudioVariableTable& AudioEngine::getVariableTable() const
-{
-	return *variableTable;
-}
-
 void AudioEngine::setMasterGain(float gain)
 {
 	masterGain = gain;
@@ -357,11 +350,6 @@ int AudioEngine::getGroupId(const String& group)
 		groupGains.push_back(1.0f);
 		return int(groupNames.size()) - 1;
 	}
-}
-
-void AudioEngine::setVariable(const String& name, float value)
-{
-	variableTable->set(name, value);
 }
 
 int64_t AudioEngine::getLastTimeElapsed()

@@ -102,20 +102,6 @@ private:
 	mutable T* v = nullptr;
 };
 
-void AudioHandleImpl::addBehaviour(std::unique_ptr<AudioVoiceBehaviour> b)
-{
-	// Gotta work around std::function requiring copyable
-	BadPointer<AudioVoiceBehaviour> behaviour = b.release();
-	enqueueForVoices([behaviour] (AudioVoice& src) mutable
-	{
-		auto b = std::unique_ptr<AudioVoiceBehaviour>(behaviour.release());
-		if (b) {
-			src.addBehaviour(std::move(b));
-		} else {
-			Logger::logWarning("AudioVoiceBehaviour lost since event has more than one voice.");
-		}
-	});
-}
 
 bool AudioHandleImpl::isPlaying() const
 {

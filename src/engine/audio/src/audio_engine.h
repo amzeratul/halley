@@ -51,13 +51,10 @@ namespace Halley {
 	    
     	Random& getRNG();
 		AudioBufferPool& getPool() const;
-		AudioVariableTable& getVariableTable() const;
 
 		void setMasterGain(float gain);
 		void setGroupGain(const String& name, float gain);
 		int getGroupId(const String& group);
-
-    	void setVariable(const String& name, float value);
 
 		int64_t getLastTimeElapsed();
 
@@ -66,7 +63,6 @@ namespace Halley {
 		AudioOutputAPI* out = nullptr;
 		std::unique_ptr<AudioBufferPool> pool;
 		std::unique_ptr<AudioResampler> outResampler;
-		std::unique_ptr<AudioVariableTable> variableTable;
 		Vector<short> tmpShort;
 		Vector<int> tmpInt;
 		RingBuffer<gsl::byte> audioOutputBuffer;

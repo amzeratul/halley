@@ -3,7 +3,6 @@
 #include "audio_emitter_handle_impl.h"
 #include "audio_engine.h"
 #include "audio_handle_impl.h"
-#include "behaviours/audio_voice_behaviour.h"
 #include "halley/support/console.h"
 #include "halley/support/logger.h"
 #include "halley/core/resources/resources.h"
@@ -317,15 +316,6 @@ void AudioFacade::setListener(AudioListenerData listener)
 {
 	enqueue([=] () {
 		engine->setListener(listener);
-	});
-}
-
-void AudioFacade::setGlobalVariable(const String& variable, float value)
-{
-	String nameCopy = variable;
-	enqueue([this, nameCopy = std::move(nameCopy), value]()
-	{
-		engine->setVariable(nameCopy, value);
 	});
 }
 
