@@ -133,7 +133,6 @@ void AudioObject::loadDependencies(Resources& resources)
 
 void AudioObject::makeDefault()
 {
-	// TODO?
 }
 
 String AudioObject::toYAML() const

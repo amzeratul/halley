@@ -36,9 +36,11 @@ namespace Halley
 	public:
 		AudioEvent();
 		AudioEvent(const AudioEvent& other);
+		AudioEvent(AudioEvent&& other) = default;
 		explicit AudioEvent(const ConfigNode& config);
 
 		AudioEvent& operator=(const AudioEvent& other);
+		AudioEvent& operator=(AudioEvent&& other) = default;
 
 		size_t run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const;
 

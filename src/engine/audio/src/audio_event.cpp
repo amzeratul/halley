@@ -89,6 +89,8 @@ void AudioEvent::serialize(Serializer& s) const
 
 void AudioEvent::deserialize(Deserializer& s)
 {
+	actions.clear();
+	
 	uint32_t size;
 	s >> size;
 	for (uint32_t i = 0; i < size; ++i) {

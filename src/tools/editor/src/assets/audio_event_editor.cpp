@@ -16,13 +16,21 @@ void AudioEventEditor::reload()
 
 void AudioEventEditor::refreshAssets()
 {
-	// TODO
+	if (audioEvent) {
+		audioEvent = std::make_shared<AudioEvent>(*gameResources.get<AudioEvent>(audioEvent->getAssetId()));
+		doLoadUI();
+	}
 }
 
 void AudioEventEditor::onMakeUI()
 {
 	actionList = getWidgetAs<UIList>("actions");
 	doLoadUI();
+}
+
+void AudioEventEditor::save()
+{
+	// TODO
 }
 
 Resources& AudioEventEditor::getGameResources() const

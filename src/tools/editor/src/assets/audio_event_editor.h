@@ -9,6 +9,7 @@ namespace Halley {
         void reload() override;
         void refreshAssets() override;
 		void onMakeUI() override;
+		void save() override;
         Resources& getGameResources() const;
 
     protected:
