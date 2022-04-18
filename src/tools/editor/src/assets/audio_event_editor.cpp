@@ -258,12 +258,40 @@ void AudioEventEditorAction::makeSetVolumeAction(AudioEventActionSetVolume& acti
 
 void AudioEventEditorAction::makeSetSwitchAction(AudioEventActionSetSwitch& action)
 {
+	factory.loadUI(*getWidget("contents"), "halley/audio_editor/audio_action_set_variable");
+
+	getWidget("switchValue")->setActive(true);
+
+	bindData("variableId", action.getSwitchId(), [=, &action](String value)
+	{
+		action.setSwitchId(std::move(value));
+		editor.markModified();
+	});
 	
+	bindData("switchValue", action.getValue(), [=, &action](String value)
+	{
+		action.setValue(std::move(value));
+		editor.markModified();
+	});
 }
 
 void AudioEventEditorAction::makeSetVariableAction(AudioEventActionSetVariable& action)
 {
+	factory.loadUI(*getWidget("contents"), "halley/audio_editor/audio_action_set_variable");
+
+	getWidget("variableValue")->setActive(true);
+
+	bindData("variableId", action.getVariableId(), [=, &action](String value)
+	{
+		action.setVariableId(std::move(value));
+		editor.markModified();
+	});
 	
+	bindData("variableValue", action.getValue(), [=, &action](float value)
+	{
+		action.setValue(value);
+		editor.markModified();
+	});	
 }
 
 ChooseAudioEventAction::ChooseAudioEventAction(UIFactory& factory, Callback callback)
