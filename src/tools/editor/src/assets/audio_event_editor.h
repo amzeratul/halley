@@ -30,5 +30,7 @@ namespace Halley {
 	private:
         UIFactory& factory;
         IAudioEventAction& action;
+
+        void makePlayAction(AudioEventActionPlay& action);
 	};
 }

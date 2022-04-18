@@ -1,4 +1,4 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
-- widget: { id: object, class: label, text: Action, colour: "$ui_unselectedTextAlt" }
+- widget: { id: object, class: selectAsset, assetType: audioObject, size: [400, 20] }

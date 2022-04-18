@@ -9,9 +9,6 @@
 
 namespace Halley
 {
-	class UIWidget;
-	class UILabel;
-	class UIFactory;
 	class AudioEmitter;
 	class AudioObject;
 	class AudioPosition;
@@ -93,8 +90,6 @@ namespace Halley
 		virtual void loadDependencies(Resources& resources) {}
 
 		virtual ConfigNode toConfigNode() const = 0;
-		
-		virtual void makeUI(UIFactory& factory, std::shared_ptr<UILabel> label, std::shared_ptr<UIWidget> contents) {}
 	};
 
 	class AudioEventActionObject : public IAudioEventAction
@@ -108,6 +103,9 @@ namespace Halley
 		void loadDependencies(Resources& resources) override;
 
 		ConfigNode toConfigNode() const override;
+
+		const String& getObjectName() const;
+		void setObjectName(const String& name, Resources& resources);
 
 	protected:
 		std::shared_ptr<const AudioObject> object;
@@ -129,8 +127,6 @@ namespace Halley
 		void loadDependencies(Resources& resources) override;
 
 		ConfigNode toConfigNode() const override;
-
-		void makeUI(UIFactory& factory, std::shared_ptr<UILabel> label, std::shared_ptr<UIWidget> contents) override;
 
 	private:
 		bool legacy = false;

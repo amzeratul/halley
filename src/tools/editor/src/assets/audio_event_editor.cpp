@@ -1,4 +1,6 @@
 #include "audio_event_editor.h"
+
+#include "src/ui/select_asset_widget.h"
 using namespace Halley;
 
 AudioEventEditor::AudioEventEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow)
@@ -57,5 +59,18 @@ AudioEventEditorAction::AudioEventEditorAction(UIFactory& factory, IAudioEventAc
 
 void AudioEventEditorAction::onMakeUI()
 {
-	action.makeUI(factory, getWidgetAs<UILabel>("label"), getWidget("contents"));
+	switch (action.getType()) {
+	case AudioEventActionType::Play:
+		makePlayAction(dynamic_cast<AudioEventActionPlay&>(action));
+		break;
+	}
+}
+
+void AudioEventEditorAction::makePlayAction(AudioEventActionPlay& action)
+{
+	getWidgetAs<UILabel>("label")->setText(LocalisedString::fromHardcodedString("Play"));
+
+	factory.loadUI(*getWidget("contents"), "halley/audio_editor/audio_action_play");
+
+	getWidgetAs<SelectAssetWidget>("object")->setValue(action.getObjectName());
 }
