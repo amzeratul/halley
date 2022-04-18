@@ -26,6 +26,7 @@ AudioEvent& AudioEvent::operator=(const AudioEvent& other)
 	auto bytes = Serializer::toBytes(other);
 	auto s = Deserializer(bytes);
 	deserialize(s);
+	setAssetId(other.getAssetId());
 	return *this;
 }
 

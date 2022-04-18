@@ -9,7 +9,8 @@ namespace Halley {
         void reload() override;
         void refreshAssets() override;
 		void onMakeUI() override;
-	
+        Resources& getGameResources() const;
+
     protected:
         void update(Time t, bool moved) override;
         std::shared_ptr<const Resource> loadResource(const String& assetId) override;
@@ -24,13 +25,14 @@ namespace Halley {
 
 	class AudioEventEditorAction : public UIWidget {
 	public:
-        AudioEventEditorAction(UIFactory& factory, IAudioEventAction& action, int id);
+        AudioEventEditorAction(UIFactory& factory, AudioEventEditor& editor, IAudioEventAction& action, int id);
         void onMakeUI() override;
 	
 	private:
         UIFactory& factory;
+        AudioEventEditor& editor;
         IAudioEventAction& action;
-
+		
         void makePlayAction(AudioEventActionPlay& action);
 	};
 }

@@ -25,6 +25,11 @@ void AudioEventEditor::onMakeUI()
 	doLoadUI();
 }
 
+Resources& AudioEventEditor::getGameResources() const
+{
+	return gameResources;
+}
+
 void AudioEventEditor::update(Time t, bool moved)
 {
 	// TODO
@@ -39,19 +44,21 @@ std::shared_ptr<const Resource> AudioEventEditor::loadResource(const String& id)
 void AudioEventEditor::doLoadUI()
 {
 	if (audioEvent) {
+		getWidgetAs<UILabel>("title")->setText(LocalisedString::fromHardcodedString("Audio Event: \"" + audioEvent->getAssetId() + "\""));
 		actionList->clear();
 
 		for (auto& action : audioEvent->getActions()) {
-			auto a = std::make_shared<AudioEventEditorAction>(factory, *action, actionId++);
+			auto a = std::make_shared<AudioEventEditorAction>(factory, *this, *action, actionId++);
 			auto id = a->getId();
 			actionList->addItem(id, std::move(a));
 		}
 	}
 }
 
-AudioEventEditorAction::AudioEventEditorAction(UIFactory& factory, IAudioEventAction& action, int id)
+AudioEventEditorAction::AudioEventEditorAction(UIFactory& factory, AudioEventEditor& editor, IAudioEventAction& action, int id)
 	: UIWidget(toString(id), {}, UISizer())
 	, factory(factory)
+	, editor(editor)
 	, action(action)
 {
 	factory.loadUI(*this, "halley/audio_editor/audio_action");
@@ -71,6 +78,9 @@ void AudioEventEditorAction::makePlayAction(AudioEventActionPlay& action)
 	getWidgetAs<UILabel>("label")->setText(LocalisedString::fromHardcodedString("Play"));
 
 	factory.loadUI(*getWidget("contents"), "halley/audio_editor/audio_action_play");
-
-	getWidgetAs<SelectAssetWidget>("object")->setValue(action.getObjectName());
+	
+	bindData("object", action.getObjectName(), [=, &action] (String value)
+	{
+		action.setObjectName(value, editor.getGameResources());
+	});
 }
