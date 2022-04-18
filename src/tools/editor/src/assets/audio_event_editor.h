@@ -15,6 +15,8 @@ namespace Halley {
 
 		Resources& getGameResources() const;
         void markModified();
+		
+        void deleteAction(const IAudioEventAction& action, const String& uiId);
 
     protected:
         void update(Time t, bool moved) override;

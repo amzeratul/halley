@@ -61,6 +61,16 @@ void AudioEventEditor::markModified()
 	modified = true;
 }
 
+void AudioEventEditor::deleteAction(const IAudioEventAction& action, const String& uiId)
+{
+	Concurrent::execute(Executors::getMainUpdateThread(), [this, &action, uiId=uiId]() {
+		actionList->removeItem(uiId);
+		auto& actions = audioEvent->getActions();
+		std_ex::erase_if(actions, [&](const auto& a) { return a.get() == &action; });
+		markModified();
+	});
+}
+
 Resources& AudioEventEditor::getGameResources() const
 {
 	return gameResources;
@@ -115,6 +125,11 @@ void AudioEventEditorAction::onMakeUI()
 		makeResumeAction(dynamic_cast<AudioEventActionResume&>(action));
 		break;
 	}
+
+	setHandle(UIEventType::ButtonClicked, "delete", [=] (const UIEvent& event)
+	{
+		editor.deleteAction(action, getId());
+	});
 }
 
 void AudioEventEditorAction::makeObjectAction(AudioEventActionObject& action)
