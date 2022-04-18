@@ -107,6 +107,9 @@ namespace Halley
 		const String& getObjectName() const;
 		void setObjectName(const String& name, Resources& resources);
 
+		const AudioFade& getFade() const;
+		AudioFade& getFade();
+
 	protected:
 		std::shared_ptr<const AudioObject> object;
 		String objectName;
@@ -120,6 +123,12 @@ namespace Halley
 
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::Play; }
+
+		float getDelay() const;
+		void setDelay(float delay);
+		Range<float> getGain() const;
+		Range<float>& getGain();
+		void setGain(Range<float> gain);
 
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;

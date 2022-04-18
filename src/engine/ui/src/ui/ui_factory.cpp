@@ -799,7 +799,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 	auto label = parseLabel(node);
 	auto ghostText = parseLabel(node, "", "ghost");
 
-	auto result = std::make_shared<UITextInput>(id, style, "", label);;
+	auto result = std::make_shared<UITextInput>(id, style, "", label);
 	if (!ghostText.getString().isEmpty()) {
 		result->setGhostText(ghostText);
 	}
@@ -807,9 +807,13 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 	auto validatorName = node["validator"].asString("");
 	if (!validatorName.isEmpty()) {
 		if (validatorName == "numeric") {
-			result->setValidator(std::make_shared<UINumericValidator>(true));
+			result->setValidator(std::make_shared<UINumericValidator>(true, true));
 		} else if (validatorName == "numericPositive") {
-		result->setValidator(std::make_shared<UINumericValidator>(false));
+			result->setValidator(std::make_shared<UINumericValidator>(false, true));
+		} else if (validatorName == "integer") {
+			result->setValidator(std::make_shared<UINumericValidator>(true, false));
+		} else if (validatorName == "integerPositive") {
+			result->setValidator(std::make_shared<UINumericValidator>(false, false));
 		} else {
 			throw Exception("Unknown text input validator: " + validatorName, HalleyExceptions::UI);
 		}

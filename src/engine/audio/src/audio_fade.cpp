@@ -12,7 +12,7 @@ AudioFade::AudioFade(float length, AudioFadeCurve curve)
 AudioFade::AudioFade(const ConfigNode& node)
 {
 	length = node["length"].asFloat(0.0f);
-	curve = fromString<AudioFadeCurve>(node["curve"].asString("linear"));
+	curve = fromString<AudioFadeCurve>(node["curve"].asString("none"));
 }
 
 ConfigNode AudioFade::toConfigNode() const
@@ -21,7 +21,7 @@ ConfigNode AudioFade::toConfigNode() const
 	if (length > 0.0f) {
 		result["length"] = length;
 	}
-	if (curve != AudioFadeCurve::Linear) {
+	if (curve != AudioFadeCurve::None) {
 		result["curve"] = toString(curve);
 	}
 	return result;
@@ -45,9 +45,24 @@ float AudioFade::getLength() const
 	return length;
 }
 
+void AudioFade::setLength(float len)
+{
+	length = len;
+}
+
+AudioFadeCurve AudioFade::getCurve() const
+{
+	return curve;
+}
+
+void AudioFade::setCurve(AudioFadeCurve c)
+{
+	curve = c;
+}
+
 bool AudioFade::hasFade() const
 {
-	return curve != AudioFadeCurve::None;
+	return curve != AudioFadeCurve::None && length > 0.0f;
 }
 
 void AudioFade::serialize(Serializer& s) const

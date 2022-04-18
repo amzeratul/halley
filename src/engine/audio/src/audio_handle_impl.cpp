@@ -79,7 +79,7 @@ void AudioHandleImpl::resume(const AudioFade& audioFade)
 
 void AudioHandleImpl::stop(float fadeTime)
 {
-	stop(AudioFade(fadeTime, fadeTime > 0.0001f ? AudioFadeCurve::Linear : AudioFadeCurve::None));
+	stop(AudioFade(fadeTime, AudioFadeCurve::Linear));
 }
 
 // This is kind of like a unique_ptr, but copying it also moves it. >_>

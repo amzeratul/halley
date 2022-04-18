@@ -246,7 +246,7 @@ AudioHandle AudioFacade::playMusic(const String& eventName, int track, float fad
 	auto handle = postEvent(eventName, AudioPosition::makeFixed());
 	musicTracks[track] = handle;
 
-	handle->play(AudioFade(fadeInTime, fadeInTime > 0.0001f ? AudioFadeCurve::Linear : AudioFadeCurve::None));
+	handle->play(AudioFade(fadeInTime, AudioFadeCurve::Linear));
 
 	return handle;
 }
@@ -302,7 +302,7 @@ void AudioFacade::setOutputChannels(Vector<AudioChannelData> audioChannelData)
 
 void AudioFacade::stopMusic(AudioHandle& handle, float fadeOutTime)
 {
-	handle->stop(AudioFade(fadeOutTime, fadeOutTime > 0.001f ? AudioFadeCurve::Linear : AudioFadeCurve::None));
+	handle->stop(AudioFade(fadeOutTime, AudioFadeCurve::Linear));
 }
 
 void AudioFacade::onNeedBuffer()

@@ -209,6 +209,16 @@ void AudioEventActionObject::setObjectName(const String& name, Resources& resour
 	loadDependencies(resources);
 }
 
+const AudioFade& AudioEventActionObject::getFade() const
+{
+	return fade;
+}
+
+AudioFade& AudioEventActionObject::getFade()
+{
+	return fade;
+}
+
 
 void AudioEventActionPlay::load(const ConfigNode& node)
 {
@@ -250,6 +260,31 @@ bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, Audio
 	
 	emitter.addVoice(std::move(voice));
 	return true;
+}
+
+float AudioEventActionPlay::getDelay() const
+{
+	return delay;
+}
+
+void AudioEventActionPlay::setDelay(float delay)
+{
+	this->delay = delay;
+}
+
+Range<float> AudioEventActionPlay::getGain() const
+{
+	return playGain;
+}
+
+Range<float>& AudioEventActionPlay::getGain()
+{
+	return playGain;
+}
+
+void AudioEventActionPlay::setGain(Range<float> gain)
+{
+	playGain = gain;
 }
 
 void AudioEventActionPlay::serialize(Serializer& s) const

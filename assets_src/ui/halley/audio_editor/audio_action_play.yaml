@@ -1,4 +1,39 @@
 widget: { class: widget }
-sizer: { type: vertical }
+sizer: { type: vertical, gap: 4 }
 children:
 - widget: { id: object, class: selectAsset, assetType: audioObject, size: [400, 20] }
+  fill: left
+- sizer: { type: horizontal }
+  children:
+  - widget: { class: label, text: "Fade: " }
+    fill: centre
+  - widget: 
+      id: fadeType
+      class: dropdown
+      options:
+      - id: none
+        text: None
+      - id: linear
+        text: Linear
+      - id: sinusoidal
+        text: Sinusoidal
+  - widget: { class: widget, id: fadeLenOptions }
+    sizer: { type: horizontal }
+    children:
+    - widget: { class: label, text: ", length: " }
+      fill: centre
+    - widget: { id: fadeLength, class: textInput, size: [50, 20], validator: numericPositive }
+    - widget: { class: label, text: " s" }
+      fill: centre
+- widget: { class: widget, id: playOptions, active: false }
+  sizer: { type: horizontal }
+  children:
+  - widget: { class: label, text: "Delay: " }
+    fill: centre
+  - widget: { id: delay, class: textInput, size: [50, 20], validator: numericPositive }
+  - widget: { class: label, text: " s, gain: " }
+    fill: centre
+  - widget: { id: gainMin, class: textInput, size: [40, 20], validator: numericPositive }
+  - widget: { class: label, text: " ~ " }
+    fill: centre
+  - widget: { id: gainMax, class: textInput, size: [40, 20], validator: numericPositive }

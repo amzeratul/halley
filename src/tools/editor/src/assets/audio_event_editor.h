@@ -33,6 +33,10 @@ namespace Halley {
         AudioEventEditor& editor;
         IAudioEventAction& action;
 		
+        void makeObjectAction(AudioEventActionObject& action);
         void makePlayAction(AudioEventActionPlay& action);
+        void makeStopAction(AudioEventActionStop& action);
+        void makePauseAction(AudioEventActionPause& action);
+        void makeResumeAction(AudioEventActionResume& action);
 	};
 }
