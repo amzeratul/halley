@@ -81,6 +81,7 @@ void AudioEventEditor::addAction(AudioEventActionType type)
 	auto& actions = audioEvent->getActions();
 	actions.emplace_back(AudioEvent::makeAction(type));
 	addActionUI(*actions.back());
+	markModified();
 }
 
 void AudioEventEditor::deleteAction(const IAudioEventAction& action, const String& uiId)
@@ -112,7 +113,7 @@ void AudioEventEditor::addActionUI(IAudioEventAction& action)
 {
 	auto a = std::make_shared<AudioEventEditorAction>(factory, *this, action, actionId++);
 	auto id = a->getId();
-	actionList->addItem(id, std::move(a));
+	actionList->addItem(id, std::move(a), 1);
 }
 
 void AudioEventEditor::doLoadUI()
@@ -138,6 +139,8 @@ AudioEventEditorAction::AudioEventEditorAction(UIFactory& factory, AudioEventEdi
 
 void AudioEventEditorAction::onMakeUI()
 {
+	getWidgetAs<UILabel>("label")->setText(LocalisedString::fromUserString(AudioEvent::getActionName(action.getType())));
+
 	switch (action.getType()) {
 	case AudioEventActionType::Play:
 		makePlayAction(dynamic_cast<AudioEventActionPlay&>(action));
@@ -192,8 +195,6 @@ void AudioEventEditorAction::makeObjectAction(AudioEventActionObject& action)
 
 void AudioEventEditorAction::makePlayAction(AudioEventActionPlay& action)
 {
-	getWidgetAs<UILabel>("label")->setText(LocalisedString::fromHardcodedString("Play"));
-
 	makeObjectAction(action);
 
 	getWidget("playOptions")->setActive(true);
@@ -219,22 +220,16 @@ void AudioEventEditorAction::makePlayAction(AudioEventActionPlay& action)
 
 void AudioEventEditorAction::makeStopAction(AudioEventActionStop& action)
 {
-	getWidgetAs<UILabel>("label")->setText(LocalisedString::fromHardcodedString("Stop"));
-
 	makeObjectAction(action);
 }
 
 void AudioEventEditorAction::makePauseAction(AudioEventActionPause& action)
 {
-	getWidgetAs<UILabel>("label")->setText(LocalisedString::fromHardcodedString("Pause"));
-
 	makeObjectAction(action);
 }
 
 void AudioEventEditorAction::makeResumeAction(AudioEventActionResume& action)
 {
-	getWidgetAs<UILabel>("label")->setText(LocalisedString::fromHardcodedString("Resume"));
-
 	makeObjectAction(action);	
 }
 
@@ -245,7 +240,7 @@ ChooseAudioEventAction::ChooseAudioEventAction(UIFactory& factory, Callback call
 	Vector<String> names;
 	for (auto id: EnumNames<AudioEventActionType>()()) {
 		ids.push_back(id);
-		names.push_back(id);
+		names.push_back(AudioEvent::getActionName(fromString<AudioEventActionType>(id)));
 	}
 	setTitle(LocalisedString::fromHardcodedString("Add Audio Event Action"));
 	setAssetIds(ids, names, "play");

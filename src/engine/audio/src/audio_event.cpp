@@ -156,6 +156,27 @@ std::unique_ptr<IAudioEventAction> AudioEvent::makeAction(AudioEventActionType t
 	return {};
 }
 
+String AudioEvent::getActionName(AudioEventActionType type)
+{
+	switch (type) {
+	case AudioEventActionType::Play:
+		return "Play";
+	case AudioEventActionType::Stop:
+		return "Stop";
+	case AudioEventActionType::Pause:
+		return "Pause";
+	case AudioEventActionType::Resume:
+		return "Resume";
+	case AudioEventActionType::SetSwitch:
+		return "Set Switch";
+	case AudioEventActionType::SetVariable:
+		return "Set Variable";
+	case AudioEventActionType::SetVolume:
+		return "Set Volume";
+	}
+	return "Unknown";
+}
+
 
 ConfigNode IAudioEventAction::toConfigNode() const
 {

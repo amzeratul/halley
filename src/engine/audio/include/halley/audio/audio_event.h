@@ -73,6 +73,7 @@ namespace Halley
         String toYAML() const;
 
 		static std::unique_ptr<IAudioEventAction> makeAction(AudioEventActionType type);
+		static String getActionName(AudioEventActionType type);
 
 	private:
 		Vector<std::unique_ptr<IAudioEventAction>> actions;

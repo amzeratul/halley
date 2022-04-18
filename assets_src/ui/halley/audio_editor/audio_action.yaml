@@ -1,9 +1,11 @@
 widget: { id: background, class: image, image: "$ui_window", innerBorder: [ 8, 8, 8, 8 ], colour: $ui_staticBox, size: [20, 20] }
 sizer: { type: horizontal }
 children:
-- widget: { id: label, class: label, text: Action, colour: "$ui_unselectedTextAlt" }
+- widget: { class: widget, size: [100, 20] }
   fill: [top, left]
   border: [4, 2, 10, 4]
+  children:
+  - widget: { id: label, class: label, text: Action, colour: "$ui_unselectedTextAlt", size: [100, 20] }
 - widget: { class: widget, id: contents }
   sizer: { type: vertical, gap: 0 }
   proportion: 1
