@@ -9,8 +9,12 @@ namespace Halley {
         void reload() override;
         void refreshAssets() override;
 		void onMakeUI() override;
+		
 		void save() override;
-        Resources& getGameResources() const;
+		bool isModified() override;
+
+		Resources& getGameResources() const;
+        void markModified();
 
     protected:
         void update(Time t, bool moved) override;
@@ -20,6 +24,7 @@ namespace Halley {
         std::shared_ptr<AudioEvent> audioEvent;
         std::shared_ptr<UIList> actionList;
         int actionId = 0;
+        bool modified = false;
 
         void doLoadUI();
 	};

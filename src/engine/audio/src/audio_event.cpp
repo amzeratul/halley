@@ -157,6 +157,13 @@ std::unique_ptr<IAudioEventAction> AudioEvent::makeAction(AudioEventActionType t
 }
 
 
+ConfigNode IAudioEventAction::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	result["type"] = toString(getType());
+	return result;
+}
+
 void AudioEventActionObject::loadObject(const ConfigNode& node, bool loadObject)
 {
 	if (loadObject) {
@@ -188,7 +195,7 @@ void AudioEventActionObject::loadDependencies(Resources& resources)
 
 ConfigNode AudioEventActionObject::toConfigNode() const
 {
-	auto result = ConfigNode::MapType();
+	auto result = IAudioEventAction::toConfigNode();
 
 	if (!objectName.isEmpty()) {
 		result["object"] = objectName;
@@ -448,7 +455,7 @@ void AudioEventActionSetSwitch::load(const ConfigNode& config)
 
 ConfigNode AudioEventActionSetSwitch::toConfigNode() const
 {
-	auto result = ConfigNode::MapType();
+	auto result = IAudioEventAction::toConfigNode();
 	result["switchId"] = switchId;
 	result["value"] = value;
 	return result;
@@ -481,7 +488,7 @@ void AudioEventActionSetVariable::load(const ConfigNode& config)
 
 ConfigNode AudioEventActionSetVariable::toConfigNode() const
 {
-	auto result = ConfigNode::MapType();
+	auto result = IAudioEventAction::toConfigNode();
 	result["variableId"] = variableId;
 	result["value"] = value;
 	return result;

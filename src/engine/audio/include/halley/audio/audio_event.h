@@ -91,7 +91,7 @@ namespace Halley
 		virtual void deserialize(Deserializer& s) = 0;
 		virtual void loadDependencies(Resources& resources) {}
 
-		virtual ConfigNode toConfigNode() const = 0;
+		virtual ConfigNode toConfigNode() const;
 	};
 
 	class AudioEventActionObject : public IAudioEventAction

@@ -74,6 +74,7 @@ void UIEditor::save()
 
 		project.setAssetSaveNotification(false);
 		project.writeAssetToDisk(assetPath, gsl::as_bytes(gsl::span<const char>(strData.c_str(), strData.length())));
+		project.setAssetSaveNotification(true);
 	}
 }
 

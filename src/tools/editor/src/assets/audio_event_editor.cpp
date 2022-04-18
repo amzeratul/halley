@@ -1,5 +1,6 @@
 #include "audio_event_editor.h"
 
+#include "halley/tools/project/project.h"
 #include "src/ui/select_asset_widget.h"
 using namespace Halley;
 
@@ -25,12 +26,39 @@ void AudioEventEditor::refreshAssets()
 void AudioEventEditor::onMakeUI()
 {
 	actionList = getWidgetAs<UIList>("actions");
+
+	setHandle(UIEventType::ListItemsSwapped, "actions", [=](const UIEvent& event)
+	{
+		auto& actions = audioEvent->getActions();
+		std::swap(actions[event.getIntData()], actions[event.getIntData2()]);
+		markModified();
+	});
+
 	doLoadUI();
 }
 
 void AudioEventEditor::save()
 {
-	// TODO
+	if (modified) {
+		modified = false;
+
+		const auto assetPath = Path("audio_event/" + audioEvent->getAssetId() + ".yaml");
+		const auto strData = audioEvent->toYAML();
+
+		project.setAssetSaveNotification(false);
+		project.writeAssetToDisk(assetPath, gsl::as_bytes(gsl::span<const char>(strData.c_str(), strData.length())));
+		project.setAssetSaveNotification(true);
+	}
+}
+
+bool AudioEventEditor::isModified()
+{
+	return modified;
+}
+
+void AudioEventEditor::markModified()
+{
+	modified = true;
 }
 
 Resources& AudioEventEditor::getGameResources() const
@@ -40,7 +68,6 @@ Resources& AudioEventEditor::getGameResources() const
 
 void AudioEventEditor::update(Time t, bool moved)
 {
-	// TODO
 }
 
 std::shared_ptr<const Resource> AudioEventEditor::loadResource(const String& id)
@@ -102,12 +129,14 @@ void AudioEventEditorAction::makeObjectAction(AudioEventActionObject& action)
 	bindData("object", action.getObjectName(), [=, &action] (String value)
 	{
 		action.setObjectName(value, editor.getGameResources());
+		editor.markModified();
 	});
 	
 	bindData("fadeType", toString(action.getFade().getCurve()), [=, &action] (String value)
 	{
 		auto curve = fromString<AudioFadeCurve>(value);
 		action.getFade().setCurve(curve);
+		editor.markModified();
 		updateFadeType(curve);
 	});
 	updateFadeType(action.getFade().getCurve());
@@ -115,6 +144,7 @@ void AudioEventEditorAction::makeObjectAction(AudioEventActionObject& action)
 	bindData("fadeLength", action.getFade().getLength(), [=, &action] (float value)
 	{
 		action.getFade().setLength(value);
+		editor.markModified();
 	});	
 }
 
@@ -129,16 +159,19 @@ void AudioEventEditorAction::makePlayAction(AudioEventActionPlay& action)
 	bindData("delay", action.getDelay(), [=, &action] (float value)
 	{
 		action.setDelay(value);
+		editor.markModified();
 	});
 	
 	bindData("gainMin", action.getGain().start, [=, &action] (float value)
 	{
 		action.getGain().start = value;
+		editor.markModified();
 	});	
 	
 	bindData("gainMax", action.getGain().end, [=, &action] (float value)
 	{
 		action.getGain().end = value;
+		editor.markModified();
 	});	
 }
 
