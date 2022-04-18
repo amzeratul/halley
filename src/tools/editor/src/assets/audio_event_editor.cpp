@@ -246,6 +246,14 @@ void AudioEventEditorAction::makeResumeAction(AudioEventActionResume& action)
 void AudioEventEditorAction::makeSetVolumeAction(AudioEventActionSetVolume& action)
 {
 	makeObjectAction(action);
+
+	getWidget("volumeOptions")->setActive(true);
+	
+	bindData("gain", action.getGain(), [=, &action] (float value)
+	{
+		action.setGain(value);
+		editor.markModified();
+	});	
 }
 
 void AudioEventEditorAction::makeSetSwitchAction(AudioEventActionSetSwitch& action)

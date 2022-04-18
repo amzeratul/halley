@@ -191,7 +191,7 @@ namespace Halley
 		ConfigNode toConfigNode() const override;
 
 	private:
-		float gain;
+		float gain = 1;
 	};
 
 	class AudioEventActionSetSwitch final : public IAudioEventAction
@@ -237,6 +237,6 @@ namespace Halley
 
 	private:
 		String variableId;
-		float value;
+		float value = 0;
 	};
 }

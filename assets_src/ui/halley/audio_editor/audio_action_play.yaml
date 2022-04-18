@@ -37,3 +37,9 @@ children:
   - widget: { class: label, text: " ~ " }
     fill: centre
   - widget: { id: gainMax, class: textInput, size: [40, 20], validator: numericPositive }
+- widget: { class: widget, id: volumeOptions, active: false }
+  sizer: { type: horizontal }
+  children:
+  - widget: { class: label, text: "Gain: " }
+    fill: centre
+  - widget: { id: gain, class: textInput, size: [40, 20], validator: numericPositive }
