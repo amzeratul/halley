@@ -44,8 +44,6 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	project.addAssetLoadedListener(this);
 
 	tasks->addTask(std::make_unique<CheckAssetsTask>(project, false));
-
-	makeUI();
 }
 
 ProjectWindow::~ProjectWindow()

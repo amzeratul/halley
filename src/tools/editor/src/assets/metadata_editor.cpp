@@ -6,11 +6,13 @@
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/ui/widgets/ui_textinput.h"
 #include "src/ui/select_asset_widget.h"
+#include "src/ui/project_window.h"
 using namespace Halley;
 
-MetadataEditor::MetadataEditor(UIFactory& factory)
+MetadataEditor::MetadataEditor(UIFactory& factory, ProjectWindow& projectWindow)
 	: UIWidget("metadataEditor", {}, UISizer(UISizerType::Grid, 1, 2))
 	, factory(factory)
+	, projectWindow(projectWindow)
 {
 }
 
@@ -267,8 +269,7 @@ void MetadataEditor::makeDropdownField(UISizer& sizer, const String& key, Vector
 
 void MetadataEditor::makeAssetTypeField(UISizer& sizer, const String& key, AssetType type, const String& defaultValue)
 {
-	const auto result = std::make_shared<SelectAssetWidget>(key, factory, type);
-	result->setGameResources(project->getGameResources());
+	const auto result = std::make_shared<SelectAssetWidget>(key, factory, type, project->getGameResources(), projectWindow);
 	result->setMinSize(Vector2f(40, 22));
 	sizer.add(result, 1);
 

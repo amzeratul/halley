@@ -74,7 +74,8 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeAnimationEditorDisplay(const Conf
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeMetadataEditor(const ConfigNode& entryNode)
 {
-	return std::make_shared<MetadataEditor>(*this);
+	Expects(projectWindow != nullptr);
+	return std::make_shared<MetadataEditor>(*this, *projectWindow);
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeSceneEditorCanvas(const ConfigNode& entryNode)
@@ -114,9 +115,14 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeEntityEditor(const ConfigNode& en
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeSelectAsset(const ConfigNode& entryNode)
 {
+	Expects(gameResources != nullptr);
+	Expects(projectWindow != nullptr);
+	
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
-	return std::make_shared<SelectAssetWidget>(id, *this, fromString<AssetType>(node["assetType"].asString()));
+	const auto assetType = fromString<AssetType>(node["assetType"].asString());
+
+	return std::make_shared<SelectAssetWidget>(id, *this, assetType, *gameResources, *projectWindow);
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeUIWidgetEditor(const ConfigNode& entryNode)
@@ -182,6 +188,12 @@ void EditorUIFactory::setColourScheme(const String& name)
 	if (found) {
 		reloadStyleSheet();
 	}
+}
+
+void EditorUIFactory::setProject(ProjectWindow* projectWindow, Resources* gameResources)
+{
+	this->projectWindow = projectWindow;
+	this->gameResources = gameResources;
 }
 
 void EditorUIFactory::setColourSchemeByAssetId(const String& assetId)

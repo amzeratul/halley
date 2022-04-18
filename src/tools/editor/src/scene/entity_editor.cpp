@@ -56,7 +56,6 @@ void EntityEditor::setSceneEditorWindow(SceneEditorWindow& editor, const HalleyA
 	sceneEditor = &editor;
 	entityIcons = &editor.getEntityIcons();
 	this->api = &api;
-	prefabName->setProjectWindow(editor.getProjectWindow());
 
 	entityValidatorUI->setValidator(editor.getEntityValidator());
 
@@ -83,9 +82,6 @@ void EntityEditor::makeUI()
 
 	entityName = getWidgetAs<UITextInput>("entityName");
 	prefabName = getWidgetAs<SelectAssetWidget>("prefabName");
-	if (sceneEditor) {
-		prefabName->setProjectWindow(sceneEditor->getProjectWindow());
-	}
 	entityIcon = getWidgetAs<UIDropdown>("entityIcon");
 
 	entityValidatorUI = getWidgetAs<EntityValidatorUI>("entityValidatorUI");
@@ -136,7 +132,6 @@ bool EntityEditor::loadEntity(const String& id, EntityData& data, const Prefab* 
 	Expects(ecsData);
 
 	gameResources = &resources;
-	prefabName->setGameResources(*gameResources);
 
 	if (currentId == id && currentEntityData == &data && !force) {
 		return false;

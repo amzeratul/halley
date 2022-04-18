@@ -8,20 +8,17 @@ namespace Halley {
 
 	class SelectAssetWidget : public UIWidget {
 	public:
-		SelectAssetWidget(const String& id, UIFactory& factory, AssetType type);
 		SelectAssetWidget(const String& id, UIFactory& factory, AssetType type, Resources& gameResources, IProjectWindow& projectWindow);
 
 		void setValue(const String& newValue);
 		String getValue() const;
 
-		void setGameResources(Resources& gameResources);
 		void setDefaultAssetId(String assetId);
-		void setProjectWindow(ProjectWindow& projectWindow);
 
 	private:
 		UIFactory& factory;
-		Resources* gameResources = nullptr;
-		ProjectWindow* projectWindow = nullptr;
+		Resources& gameResources;
+		ProjectWindow& projectWindow;
 		AssetType type;
 		String value;
 		String defaultAssetId;

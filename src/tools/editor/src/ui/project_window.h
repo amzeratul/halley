@@ -21,7 +21,9 @@ namespace Halley {
         ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Project& project, Resources& resources, const HalleyAPI& api);
     	~ProjectWindow() override;
 
-        void onRemovedFromRoot(UIRoot& root) override;
+        void makeUI();
+
+    	void onRemovedFromRoot(UIRoot& root) override;
     	
         void setPage(EditorTabs tab);
         LocalisedString setCustomPage(const String& pageId);
@@ -119,7 +121,6 @@ namespace Halley {
     	std::map<EditorSettingType, std::unique_ptr<SettingsStorage>> settings;
     	Time timeSinceSettingsSaved = 0;
 
-        void makeUI();
     	void makeToolbar();
     	void makePagedPane();
 

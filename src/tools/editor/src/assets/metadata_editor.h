@@ -4,6 +4,7 @@
 
 namespace Halley
 {
+	class ProjectWindow;
 	class Project;
 	enum class AssetType;
 	class UIFactory;
@@ -11,7 +12,7 @@ namespace Halley
 	class MetadataEditor : public UIWidget
 	{
 	public:
-		MetadataEditor(UIFactory& factory);
+		MetadataEditor(UIFactory& factory, ProjectWindow& projectWindow);
 
 		void setResource(Project& project, AssetType type, const Path& filePath, Metadata effectiveMetadata);
 		void onMetadataChanged();
@@ -24,6 +25,7 @@ namespace Halley
 
 	private:
 		UIFactory& factory;
+		ProjectWindow& projectWindow;
 		Metadata metadata;
 		Metadata origMetadata;
 		Metadata effectiveMetadata;

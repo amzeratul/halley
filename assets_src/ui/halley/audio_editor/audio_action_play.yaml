@@ -1,0 +1,4 @@
+widget: { class: widget }
+sizer: { type: vertical }
+children:
+- widget: { id: object, class: label, text: Action, colour: "$ui_unselectedTextAlt" }

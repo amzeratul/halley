@@ -1,4 +1,5 @@
 #pragma once
+#include "project_window.h"
 #include "halley/ui/ui_factory.h"
 
 namespace Halley {
@@ -13,7 +14,9 @@ namespace Halley {
     	Vector<String> getColourSchemeNames() const;
     	void setColourScheme(const String& name);
 
-    private:
+        void setProject(ProjectWindow* projectWindow, Resources* gameResources);
+
+	private:
 		std::shared_ptr<UIWidget> makeScrollBackground(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeAnimationEditorDisplay(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makeMetadataEditor(const ConfigNode& entryNode);
@@ -33,5 +36,7 @@ namespace Halley {
     	void setColourSchemeByAssetId(const String& assetId);
         
     	Vector<std::pair<String, String>> colourSchemes;
+        ProjectWindow* projectWindow = nullptr;
+        Resources* gameResources = nullptr;
     };
 }

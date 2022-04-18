@@ -4,7 +4,7 @@ using namespace Halley;
 AudioEventEditor::AudioEventEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow)
 	: AssetEditor(factory, gameResources, project, AssetType::AudioEvent)
 {
-	factory.loadUI(*this, "halley/audio_event_editor");
+	factory.loadUI(*this, "halley/audio_editor/audio_event_editor");
 }
 
 void AudioEventEditor::reload()
@@ -52,7 +52,7 @@ AudioEventEditorAction::AudioEventEditorAction(UIFactory& factory, IAudioEventAc
 	, factory(factory)
 	, action(action)
 {
-	factory.loadUI(*this, "halley/audio_event_editor_action");
+	factory.loadUI(*this, "halley/audio_editor/audio_action");
 }
 
 void AudioEventEditorAction::onMakeUI()

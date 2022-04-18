@@ -6,19 +6,14 @@
 #include "src/ui/project_window.h"
 using namespace Halley;
 
-SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, AssetType type)
+SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, AssetType type, Resources& gameResources, IProjectWindow& projectWindow)
 	: UIWidget(id, Vector2f(), UISizer(UISizerType::Horizontal))
 	, factory(factory)
+	, gameResources(gameResources)
+	, projectWindow(dynamic_cast<ProjectWindow&>(projectWindow))
 	, type(type)
 {
 	makeUI();
-}
-
-SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, AssetType type, Resources& gameResources, IProjectWindow& projectWindow)
-	: SelectAssetWidget(id, factory, type)
-{
-	this->gameResources = &gameResources;
-	this->projectWindow = &dynamic_cast<ProjectWindow&>(projectWindow);
 }
 
 void SelectAssetWidget::setValue(const String& newValue)
@@ -27,7 +22,7 @@ void SelectAssetWidget::setValue(const String& newValue)
 		value = newValue;
 		input->setText(getDisplayName());
 
-		if (gameResources->ofType(type).exists(newValue)) {
+		if (gameResources.ofType(type).exists(newValue)) {
 			input->getTextLabel().setColourOverride({});
 		} else {
 			input->getTextLabel().setColourOverride({ColourOverride(0, input->getStyles()[0].getColour("errorColour"))});
@@ -44,11 +39,6 @@ String SelectAssetWidget::getValue() const
 	return value;
 }
 
-void SelectAssetWidget::setGameResources(Resources& resources)
-{
-	gameResources = &resources;
-}
-
 void SelectAssetWidget::setDefaultAssetId(String assetId)
 {
 	defaultAssetId = std::move(assetId);
@@ -56,11 +46,6 @@ void SelectAssetWidget::setDefaultAssetId(String assetId)
 		input->setGhostText(LocalisedString::fromUserString(getDisplayName(defaultAssetId)));
 		updateToolTip();
 	}
-}
-
-void SelectAssetWidget::setProjectWindow(ProjectWindow& window)
-{
-	projectWindow = &window;
 }
 
 void SelectAssetWidget::makeUI()
@@ -87,24 +72,22 @@ void SelectAssetWidget::makeUI()
 
 void SelectAssetWidget::choose()
 {
-	if (gameResources) {
-		auto callback = [=] (std::optional<String> result)
-		{
-			if (result) {
-				setValue(result.value());
-			}
-		};
-
-		std::shared_ptr<UIWidget> window;
-		if (type == AssetType::Prefab) {
-			assert(projectWindow != nullptr);
-			window = std::make_shared<ChoosePrefabWindow>(factory, getValue(), *gameResources, *projectWindow, callback);
-		} else {
-			const bool preview = type == AssetType::Sprite || type == AssetType::Animation;
-			window = std::make_shared<ChooseAssetTypeWindow>(Vector2f(), factory, type, getValue(), *gameResources, *projectWindow, preview, callback);
+	auto callback = [=] (std::optional<String> result)
+	{
+		if (result) {
+			setValue(result.value());
 		}
-		getRoot()->addChild(std::move(window));
+	};
+
+	std::shared_ptr<UIWidget> window;
+	if (type == AssetType::Prefab) {
+		assert(projectWindow != nullptr);
+		window = std::make_shared<ChoosePrefabWindow>(factory, getValue(), gameResources, projectWindow, callback);
+	} else {
+		const bool preview = type == AssetType::Sprite || type == AssetType::Animation;
+		window = std::make_shared<ChooseAssetTypeWindow>(Vector2f(), factory, type, getValue(), gameResources, projectWindow, preview, callback);
 	}
+	getRoot()->addChild(std::move(window));
 }
 
 void SelectAssetWidget::updateToolTip()

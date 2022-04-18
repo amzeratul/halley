@@ -202,6 +202,8 @@ void EditorRootStage::loadProject()
 	project->setDevConServer(devConServer.get());
 
 	projectWindow = std::make_shared<ProjectWindow>(*uiFactory, editor, *project, getResources(), getAPI());
+	uiFactory->setProject(projectWindow.get(), &project->getGameResources());
+	projectWindow->makeUI();
 	setTopLevelUI(projectWindow);
 }
 
@@ -209,6 +211,7 @@ void EditorRootStage::unloadProject()
 {
 	initSprites();
 	setTopLevelUI({});
+	uiFactory->setProject(nullptr, nullptr);
 	projectWindow.reset();
 	project.reset();
 }
