@@ -30,6 +30,21 @@ namespace Halley
 		SetSwitch,
 		SetVariable
 	};
+	
+	template <>
+	struct EnumNames<AudioEventActionType> {
+		constexpr std::array<const char*, 7> operator()() const {
+			return{{
+				"play",
+				"stop",
+				"pause",
+				"resume",
+				"setVolume",
+				"setSwitch",
+				"setVariable"
+			}};
+		}
+	};
 
 	class AudioEvent final : public Resource
 	{
@@ -57,26 +72,12 @@ namespace Halley
 		void makeDefault();
         String toYAML() const;
 
+		static std::unique_ptr<IAudioEventAction> makeAction(AudioEventActionType type);
+
 	private:
 		Vector<std::unique_ptr<IAudioEventAction>> actions;
 		
 		void loadDependencies(Resources& resources);
-		std::unique_ptr<IAudioEventAction> makeAction(AudioEventActionType type) const;
-	};
-	
-	template <>
-	struct EnumNames<AudioEventActionType> {
-		constexpr std::array<const char*, 7> operator()() const {
-			return{{
-				"play",
-				"stop",
-				"pause",
-				"resume",
-				"setVolume",
-				"setSwitch",
-				"setVariable"
-			}};
-		}
 	};
 
 	class IAudioEventAction

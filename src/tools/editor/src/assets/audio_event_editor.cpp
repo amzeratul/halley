@@ -34,6 +34,11 @@ void AudioEventEditor::onMakeUI()
 		markModified();
 	});
 
+	setHandle(UIEventType::ButtonClicked, "addAction", [=] (const UIEvent& event)
+	{
+		addAction();
+	});
+
 	doLoadUI();
 }
 
@@ -61,6 +66,23 @@ void AudioEventEditor::markModified()
 	modified = true;
 }
 
+void AudioEventEditor::addAction()
+{
+	getRoot()->addChild(std::make_shared<ChooseAudioEventAction>(factory, [=] (std::optional<String> result)
+	{
+		if (result) {
+			addAction(fromString<AudioEventActionType>(*result));
+		}
+	}));
+}
+
+void AudioEventEditor::addAction(AudioEventActionType type)
+{
+	auto& actions = audioEvent->getActions();
+	actions.emplace_back(AudioEvent::makeAction(type));
+	addActionUI(*actions.back());
+}
+
 void AudioEventEditor::deleteAction(const IAudioEventAction& action, const String& uiId)
 {
 	Concurrent::execute(Executors::getMainUpdateThread(), [this, &action, uiId=uiId]() {
@@ -86,6 +108,13 @@ std::shared_ptr<const Resource> AudioEventEditor::loadResource(const String& id)
 	return audioEvent;
 }
 
+void AudioEventEditor::addActionUI(IAudioEventAction& action)
+{
+	auto a = std::make_shared<AudioEventEditorAction>(factory, *this, action, actionId++);
+	auto id = a->getId();
+	actionList->addItem(id, std::move(a));
+}
+
 void AudioEventEditor::doLoadUI()
 {
 	if (audioEvent) {
@@ -93,9 +122,7 @@ void AudioEventEditor::doLoadUI()
 		actionList->clear();
 
 		for (auto& action : audioEvent->getActions()) {
-			auto a = std::make_shared<AudioEventEditorAction>(factory, *this, *action, actionId++);
-			auto id = a->getId();
-			actionList->addItem(id, std::move(a));
+			addActionUI(*action);
 		}
 	}
 }
@@ -209,4 +236,21 @@ void AudioEventEditorAction::makeResumeAction(AudioEventActionResume& action)
 	getWidgetAs<UILabel>("label")->setText(LocalisedString::fromHardcodedString("Resume"));
 
 	makeObjectAction(action);	
+}
+
+ChooseAudioEventAction::ChooseAudioEventAction(UIFactory& factory, Callback callback)
+	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), false)
+{
+	Vector<String> ids;
+	Vector<String> names;
+	for (auto id: EnumNames<AudioEventActionType>()()) {
+		ids.push_back(id);
+		names.push_back(id);
+	}
+	setTitle(LocalisedString::fromHardcodedString("Add Audio Event Action"));
+	setAssetIds(ids, names, "play");
+}
+
+void ChooseAudioEventAction::sortItems(Vector<std::pair<String, String>>& items)
+{
 }

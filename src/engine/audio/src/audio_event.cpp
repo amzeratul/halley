@@ -135,7 +135,7 @@ void AudioEvent::loadDependencies(Resources& resources)
 	}
 }
 
-std::unique_ptr<IAudioEventAction> AudioEvent::makeAction(AudioEventActionType type) const
+std::unique_ptr<IAudioEventAction> AudioEvent::makeAction(AudioEventActionType type)
 {
 	switch (type) {
 	case AudioEventActionType::Play:

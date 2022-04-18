@@ -15,7 +15,9 @@ namespace Halley {
 
 		Resources& getGameResources() const;
         void markModified();
-		
+
+        void addAction();
+        void addAction(AudioEventActionType type);
         void deleteAction(const IAudioEventAction& action, const String& uiId);
 
     protected:
@@ -28,6 +30,7 @@ namespace Halley {
         int actionId = 0;
         bool modified = false;
 
+        void addActionUI(IAudioEventAction& action);
         void doLoadUI();
 	};
 
@@ -46,5 +49,13 @@ namespace Halley {
         void makeStopAction(AudioEventActionStop& action);
         void makePauseAction(AudioEventActionPause& action);
         void makeResumeAction(AudioEventActionResume& action);
+	};
+
+	class ChooseAudioEventAction : public ChooseAssetWindow {
+	public:
+        ChooseAudioEventAction(UIFactory& factory, Callback callback);
+
+	private:
+		void sortItems(Vector<std::pair<String, String>>& items) override;
 	};
 }
