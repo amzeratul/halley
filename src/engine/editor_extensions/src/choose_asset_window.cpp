@@ -303,6 +303,11 @@ void ChooseAssetWindow::onMakeUI()
 		accept();
 	});
 
+	setHandle(UIEventType::ListAccept, "options", [=](const UIEvent& event)
+	{
+		accept();
+	});
+
 	setChildLayerAdjustment(10);
 
 	layout();

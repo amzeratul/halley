@@ -20,7 +20,7 @@ children:
   border: [1, 4, 1, 1]
   proportion: 1
   children:
-  - widget: { id: options, class: list, size: [400, 400] }
+  - widget: { id: options, class: list, size: [400, 400], singleClickAccept: false }
     proportion: 1
 - sizer: { type: horizontal }
   children:
