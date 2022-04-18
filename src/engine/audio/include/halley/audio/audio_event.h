@@ -22,6 +22,7 @@ namespace Halley
 
 	enum class AudioEventActionType
 	{
+		PlayLegacy,
 		Play,
 		Stop,
 		Pause,
@@ -33,8 +34,9 @@ namespace Halley
 	
 	template <>
 	struct EnumNames<AudioEventActionType> {
-		constexpr std::array<const char*, 7> operator()() const {
+		constexpr std::array<const char*, 8> operator()() const {
 			return{{
+				"playLegacy",
 				"play",
 				"stop",
 				"pause",
@@ -123,10 +125,11 @@ namespace Halley
 	class AudioEventActionPlay final : public AudioEventActionObject
 	{
 	public:
+		AudioEventActionPlay(bool legacy);
 		void load(const ConfigNode& config) override;
 
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
-		AudioEventActionType getType() const override { return AudioEventActionType::Play; }
+		AudioEventActionType getType() const override;
 
 		float getDelay() const;
 		void setDelay(float delay);

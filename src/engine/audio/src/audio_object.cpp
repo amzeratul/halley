@@ -60,6 +60,20 @@ void AudioObject::loadLegacyEvent(const ConfigNode& node)
 	root = AudioSubObjectHandle(std::move(clips));
 }
 
+void AudioObject::legacyToConfigNode(ConfigNode& result) const
+{
+	if (!group.isEmpty()) {
+		result["group"] = group;
+	}
+	if (pitch != Range<float>(1, 1)) {
+		result["pitch"] = pitch;
+	}
+	if (volume != Range<float>(1, 1)) {
+		result["volume"] = volume;
+	}
+	dynamic_cast<const AudioSubObjectClips&>(root.getObject()).toLegacyConfigNode(result);
+}
+
 uint32_t AudioObject::getAudioObjectId() const
 {
 	return audioObjectId;

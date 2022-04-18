@@ -42,6 +42,14 @@ ConfigNode AudioSubObjectClips::toConfigNode() const
 	return result;
 }
 
+void AudioSubObjectClips::toLegacyConfigNode(ConfigNode& dst) const
+{
+	dst["clips"] = clips;
+	if (loop) {
+		dst["loop"] = loop;
+	}
+}
+
 std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
 {
 	if (clipData.empty()) {

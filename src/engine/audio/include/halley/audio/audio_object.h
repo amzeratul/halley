@@ -16,6 +16,7 @@ namespace Halley {
 		explicit AudioObject(const ConfigNode& config);
 
         void loadLegacyEvent(const ConfigNode& node);
+        void legacyToConfigNode(ConfigNode& result) const;
 
         AudioObjectId getAudioObjectId() const;
 		const String& getGroup() const;

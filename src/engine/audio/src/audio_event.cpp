@@ -138,8 +138,10 @@ void AudioEvent::loadDependencies(Resources& resources)
 std::unique_ptr<IAudioEventAction> AudioEvent::makeAction(AudioEventActionType type)
 {
 	switch (type) {
+	case AudioEventActionType::PlayLegacy:
+		return std::make_unique<AudioEventActionPlay>(true);
 	case AudioEventActionType::Play:
-		return std::make_unique<AudioEventActionPlay>();
+		return std::make_unique<AudioEventActionPlay>(false);
 	case AudioEventActionType::Stop:
 		return std::make_unique<AudioEventActionStop>();
 	case AudioEventActionType::Pause:
@@ -159,6 +161,8 @@ std::unique_ptr<IAudioEventAction> AudioEvent::makeAction(AudioEventActionType t
 String AudioEvent::getActionName(AudioEventActionType type)
 {
 	switch (type) {
+	case AudioEventActionType::PlayLegacy:
+		return "Play (Legacy)";
 	case AudioEventActionType::Play:
 		return "Play";
 	case AudioEventActionType::Stop:
@@ -250,6 +254,11 @@ AudioFade& AudioEventActionObject::getFade()
 }
 
 
+AudioEventActionPlay::AudioEventActionPlay(bool legacy)
+	: legacy(legacy)
+{
+}
+
 void AudioEventActionPlay::load(const ConfigNode& node)
 {
 	loadObject(node, false);
@@ -290,6 +299,11 @@ bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, Audio
 	
 	emitter.addVoice(std::move(voice));
 	return true;
+}
+
+AudioEventActionType AudioEventActionPlay::getType() const
+{
+	return legacy ? AudioEventActionType::PlayLegacy : AudioEventActionType::Play;
 }
 
 float AudioEventActionPlay::getDelay() const
@@ -356,11 +370,16 @@ ConfigNode AudioEventActionPlay::toConfigNode() const
 {
 	auto result = AudioEventActionObject::toConfigNode();
 
-	if (std::abs(playGain.start - 1.0f) > 0.0001f && std::abs(playGain.end - 1.0f) > 0.0001f) {
-		result["playGain"] = playGain;
-	}
 	if (delay > 0.0001f) {
 		result["delay"] = delay;
+	}
+
+	if (legacy) {
+		object->legacyToConfigNode(result);
+	} else {
+		if (std::abs(playGain.start - 1.0f) > 0.0001f && std::abs(playGain.end - 1.0f) > 0.0001f) {
+			result["gain"] = playGain;
+		}		
 	}
 	
 	return result;

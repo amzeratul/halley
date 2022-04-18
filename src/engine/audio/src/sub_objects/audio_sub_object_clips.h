@@ -6,6 +6,7 @@ namespace Halley {
 	public:
 		void load(const ConfigNode& node) override;
 		ConfigNode toConfigNode() const override;
+		void toLegacyConfigNode(ConfigNode& dst) const;
 
 		AudioSubObjectType getType() override { return AudioSubObjectType::Clips; }
 
