@@ -338,7 +338,9 @@ ConfigNode AudioEventActionPlay::toConfigNode() const
 	if (std::abs(playGain.start - 1.0f) > 0.0001f && std::abs(playGain.end - 1.0f) > 0.0001f) {
 		result["playGain"] = playGain;
 	}
-	result["delay"] = delay;
+	if (delay > 0.0001f) {
+		result["delay"] = delay;
+	}
 	
 	return result;
 }

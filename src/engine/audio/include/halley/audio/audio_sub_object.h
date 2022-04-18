@@ -50,6 +50,12 @@ namespace Halley {
 		AudioSubObjectHandle() = default;
 		AudioSubObjectHandle(std::unique_ptr<IAudioSubObject> obj);
 		AudioSubObjectHandle(const ConfigNode& node);
+
+		AudioSubObjectHandle(const AudioSubObjectHandle& other);
+		AudioSubObjectHandle(AudioSubObjectHandle&& other) = default;
+		AudioSubObjectHandle& operator=(const AudioSubObjectHandle& other);
+		AudioSubObjectHandle& operator=(AudioSubObjectHandle&& other) = default;
+		
 		ConfigNode toConfigNode() const;
 
 		IAudioSubObject& getObject();

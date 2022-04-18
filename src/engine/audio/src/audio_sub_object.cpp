@@ -44,6 +44,19 @@ AudioSubObjectHandle::AudioSubObjectHandle(const ConfigNode& node)
 	obj = IAudioSubObject::makeSubObject(node);
 }
 
+AudioSubObjectHandle::AudioSubObjectHandle(const AudioSubObjectHandle& other)
+{
+	*this = other;
+}
+
+AudioSubObjectHandle& AudioSubObjectHandle::operator=(const AudioSubObjectHandle& other)
+{
+	// HACK
+	auto s = Deserializer(Serializer::toBytes(*this));
+	deserialize(s);
+	return *this;
+}
+
 ConfigNode AudioSubObjectHandle::toConfigNode() const
 {
 	return obj->toConfigNode();
