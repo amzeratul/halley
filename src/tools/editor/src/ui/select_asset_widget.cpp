@@ -12,17 +12,19 @@ SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, Asset
 	, gameResources(gameResources)
 	, projectWindow(dynamic_cast<ProjectWindow&>(projectWindow))
 	, type(type)
+	, allowEmpty("[None]")
 {
 	makeUI();
 }
 
 void SelectAssetWidget::setValue(const String& newValue)
 {
-	if (newValue != value) {
+	if (newValue != value || firstValue) {
+		firstValue = false;
 		value = newValue;
 		input->setText(getDisplayName());
 
-		if (gameResources.ofType(type).exists(newValue)) {
+		if (!displayErrorForEmpty || gameResources.ofType(type).exists(newValue)) {
 			input->getTextLabel().setColourOverride({});
 		} else {
 			input->getTextLabel().setColourOverride({ColourOverride(0, input->getStyles()[0].getColour("errorColour"))});
@@ -46,6 +48,16 @@ void SelectAssetWidget::setDefaultAssetId(String assetId)
 		input->setGhostText(LocalisedString::fromUserString(getDisplayName(defaultAssetId)));
 		updateToolTip();
 	}
+}
+
+void SelectAssetWidget::setAllowEmpty(std::optional<String> allow)
+{
+	allowEmpty = std::move(allow);
+}
+
+void SelectAssetWidget::setDisplayErrorForEmpty(bool enabled)
+{
+	displayErrorForEmpty = enabled;
 }
 
 void SelectAssetWidget::makeUI()
@@ -85,7 +97,7 @@ void SelectAssetWidget::choose()
 		window = std::make_shared<ChoosePrefabWindow>(factory, getValue(), gameResources, projectWindow, callback);
 	} else {
 		const bool preview = type == AssetType::Sprite || type == AssetType::Animation;
-		window = std::make_shared<ChooseAssetTypeWindow>(Vector2f(), factory, type, getValue(), gameResources, projectWindow, preview, callback);
+		window = std::make_shared<ChooseAssetTypeWindow>(Vector2f(), factory, type, getValue(), gameResources, projectWindow, preview, allowEmpty, callback);
 	}
 	getRoot()->addChild(std::move(window));
 }
@@ -107,6 +119,9 @@ String SelectAssetWidget::getDisplayName() const
 
 String SelectAssetWidget::getDisplayName(const String& name) const
 {
+	if (name.isEmpty() && allowEmpty) {
+		return *allowEmpty;
+	}
 	if (type == AssetType::Sprite || type == AssetType::Animation || type == AssetType::MaterialDefinition) {
 		return Path(name).getFilename().toString();
 	} else {

@@ -15,7 +15,7 @@ namespace Halley {
     public:		
         using Callback = std::function<void(std::optional<String>)>;
 		
-        ChooseAssetWindow(Vector2f minSize, UIFactory& factory, Callback callback, bool canShowBlank = true);
+        ChooseAssetWindow(Vector2f minSize, UIFactory& factory, Callback callback, std::optional<String> canShowBlank = "[None]");
 		virtual ~ChooseAssetWindow();
 
         void onAddedToRoot(UIRoot& root) override;
@@ -62,7 +62,7 @@ namespace Halley {
 		String filter;
         String defaultOption;
         Colour4f highlightCol;
-		bool canShowBlank = true;
+		std::optional<String> canShowBlank;
 		
         void accept();
         void cancel();

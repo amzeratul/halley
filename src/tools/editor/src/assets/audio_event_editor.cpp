@@ -154,6 +154,15 @@ void AudioEventEditorAction::onMakeUI()
 	case AudioEventActionType::Resume:
 		makeResumeAction(dynamic_cast<AudioEventActionResume&>(action));
 		break;
+	case AudioEventActionType::SetVolume:
+		makeSetVolumeAction(dynamic_cast<AudioEventActionSetVolume&>(action));
+		break;
+	case AudioEventActionType::SetSwitch:
+		makeSetSwitchAction(dynamic_cast<AudioEventActionSetSwitch&>(action));
+		break;
+	case AudioEventActionType::SetVariable:
+		makeSetVariableAction(dynamic_cast<AudioEventActionSetVariable&>(action));
+		break;
 	}
 
 	setHandle(UIEventType::ButtonClicked, "delete", [=] (const UIEvent& event)
@@ -198,6 +207,7 @@ void AudioEventEditorAction::makePlayAction(AudioEventActionPlay& action)
 	makeObjectAction(action);
 
 	getWidget("playOptions")->setActive(true);
+	getWidgetAs<SelectAssetWidget>("object")->setAllowEmpty({});
 
 	bindData("delay", action.getDelay(), [=, &action] (float value)
 	{
@@ -233,8 +243,23 @@ void AudioEventEditorAction::makeResumeAction(AudioEventActionResume& action)
 	makeObjectAction(action);	
 }
 
+void AudioEventEditorAction::makeSetVolumeAction(AudioEventActionSetVolume& action)
+{
+	makeObjectAction(action);
+}
+
+void AudioEventEditorAction::makeSetSwitchAction(AudioEventActionSetSwitch& action)
+{
+	
+}
+
+void AudioEventEditorAction::makeSetVariableAction(AudioEventActionSetVariable& action)
+{
+	
+}
+
 ChooseAudioEventAction::ChooseAudioEventAction(UIFactory& factory, Callback callback)
-	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), false)
+	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), {})
 {
 	Vector<String> ids;
 	Vector<String> names;

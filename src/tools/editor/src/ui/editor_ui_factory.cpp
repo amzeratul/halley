@@ -122,7 +122,12 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeSelectAsset(const ConfigNode& ent
 	auto id = node["id"].asString();
 	const auto assetType = fromString<AssetType>(node["assetType"].asString());
 
-	return std::make_shared<SelectAssetWidget>(id, *this, assetType, *gameResources, *projectWindow);
+	auto widget = std::make_shared<SelectAssetWidget>(id, *this, assetType, *gameResources, *projectWindow);
+	if (node.hasKey("allowEmpty")) {
+		widget->setAllowEmpty(node["allowEmpty"].asString(""));
+	}
+	widget->setDisplayErrorForEmpty(node["displayErrorForEmpty"].asBool(true));
+	return widget;
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeUIWidgetEditor(const ConfigNode& entryNode)

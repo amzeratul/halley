@@ -17,7 +17,7 @@ namespace Halley {
 
 	class ChooseAssetTypeWindow : public ChooseAssetWindow {
 	public:
-        ChooseAssetTypeWindow(Vector2f minSize, UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, bool hasPreview, Callback callback);
+        ChooseAssetTypeWindow(Vector2f minSize, UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, bool hasPreview, std::optional<String> allowEmpty, Callback callback);
 
     protected:
         std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;

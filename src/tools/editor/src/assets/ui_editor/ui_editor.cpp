@@ -190,7 +190,7 @@ void UIEditor::removeWidget(const String& id)
 }
 
 ChooseUIWidgetWindow::ChooseUIWidgetWindow(UIFactory& factory, UIFactory& gameFactory, Callback callback)
-	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), false)
+	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), {})
 	, factory(factory)
 	, gameFactory(gameFactory)
 {

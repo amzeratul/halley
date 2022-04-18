@@ -14,6 +14,8 @@ namespace Halley {
 		String getValue() const;
 
 		void setDefaultAssetId(String assetId);
+		void setAllowEmpty(std::optional<String> allowEmpty);
+		void setDisplayErrorForEmpty(bool enabled);
 
 	private:
 		UIFactory& factory;
@@ -23,6 +25,9 @@ namespace Halley {
 		String value;
 		String defaultAssetId;
 		std::shared_ptr<UITextInput> input;
+		std::optional<String> allowEmpty;
+		bool displayErrorForEmpty = true;
+		bool firstValue = true;
 
 		void makeUI();
 		void choose();

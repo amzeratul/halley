@@ -12,7 +12,7 @@ using namespace Halley;
 
 
 AddComponentWindow::AddComponentWindow(UIFactory& factory, const Vector<String>& componentList, Callback callback)
-	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), false)
+	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), {})
 {
 	setAssetIds(componentList, "");
 	setTitle(LocalisedString::fromHardcodedString("Add Component"));
@@ -21,7 +21,7 @@ AddComponentWindow::AddComponentWindow(UIFactory& factory, const Vector<String>&
 
 
 ChooseImportAssetWindow::ChooseImportAssetWindow(UIFactory& factory, Project& project, Callback callback)
-	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), false)
+	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), {})
 	, project(project)
 {
 	auto assetNames = project.getAssetSrcList();
@@ -51,8 +51,8 @@ bool ChooseImportAssetWindow::canShowAll() const
 
 
 
-ChooseAssetTypeWindow::ChooseAssetTypeWindow(Vector2f minSize, UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, bool hasPreview, Callback callback)
-	: ChooseAssetWindow(minSize, factory, std::move(callback), false)
+ChooseAssetTypeWindow::ChooseAssetTypeWindow(Vector2f minSize, UIFactory& factory, AssetType type, String defaultOption, Resources& gameResources, ProjectWindow& projectWindow, bool hasPreview, std::optional<String> allowEmpty, Callback callback)
+	: ChooseAssetWindow(minSize, factory, std::move(callback), allowEmpty)
 	, projectWindow(projectWindow)
 	, type(type)
 	, hasPreview(hasPreview)
@@ -163,7 +163,7 @@ int ChooseAssetTypeWindow::getNumColumns(Vector2f scrollPaneSize) const
 
 
 ChoosePrefabWindow::ChoosePrefabWindow(UIFactory& factory, std::optional<String> defaultOption, Resources& gameResources, ProjectWindow& projectWindow, Callback callback)
-	: ChooseAssetTypeWindow(projectWindow.getChoosePrefabWindowSize(), factory, AssetType::Prefab, defaultOption.value_or(projectWindow.getSetting(EditorSettingType::Project, lastOptionKey).asString("")), gameResources, projectWindow, true, std::move(callback))
+	: ChooseAssetTypeWindow(projectWindow.getChoosePrefabWindowSize(), factory, AssetType::Prefab, defaultOption.value_or(projectWindow.getSetting(EditorSettingType::Project, lastOptionKey).asString("")), gameResources, projectWindow, true, {}, std::move(callback))
 {
 	const auto lastCategory = projectWindow.getSetting(EditorSettingType::Project, lastCategoryKey).asString("");
 	setCategoryFilters(projectWindow.getAssetPreviewGenerator().getPrefabCategoryFilters(), lastCategory);

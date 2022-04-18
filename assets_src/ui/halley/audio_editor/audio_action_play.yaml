@@ -1,7 +1,7 @@
 widget: { class: widget }
 sizer: { type: vertical, gap: 4 }
 children:
-- widget: { id: object, class: selectAsset, assetType: audioObject, size: [400, 20] }
+- widget: { id: object, class: selectAsset, assetType: audioObject, size: [400, 20], allowEmpty: "[All]", displayErrorForEmpty: false }
   fill: left
 - sizer: { type: horizontal }
   children:

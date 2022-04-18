@@ -11,12 +11,12 @@
 using namespace Halley;
 
 
-ChooseAssetWindow::ChooseAssetWindow(Vector2f minSize, UIFactory& factory, Callback callback, bool canShowBlank)
+ChooseAssetWindow::ChooseAssetWindow(Vector2f minSize, UIFactory& factory, Callback callback, std::optional<String> canShowBlank)
 	: UIWidget("choose_asset_window", minSize, UISizer())
 	, factory(factory)
 	, callback(std::move(callback))
 	, fuzzyMatcher(false, 100)
-	, canShowBlank(canShowBlank)
+	, canShowBlank(std::move(canShowBlank))
 {
 	highlightCol = factory.getColourScheme()->getColour("ui_stringMatchText");
 
@@ -113,7 +113,7 @@ void ChooseAssetWindow::populateList()
 		}			
 	} else if (canShowAll()) {
 		if (canShowBlank) {
-			options->addTextItem("", LocalisedString::fromHardcodedString("[Empty]"));
+			options->addTextItem("", LocalisedString::fromUserString(canShowBlank.value()));
 		}
 
 		Vector<std::pair<String, String>> items;

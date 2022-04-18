@@ -3,7 +3,7 @@
 using namespace Halley;
 
 ScriptingChooseNode::ScriptingChooseNode(Vector2f minSize, UIFactory& factory, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, const Callback& callback)
-	: ChooseAssetWindow(minSize, factory, callback, false)
+	: ChooseAssetWindow(minSize, factory, callback, {})
 	, resources(resources)
 	, scriptNodeTypes(scriptNodeTypes)
 {

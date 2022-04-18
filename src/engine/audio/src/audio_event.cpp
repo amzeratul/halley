@@ -458,6 +458,16 @@ bool AudioEventActionSetVolume::run(AudioEngine& engine, AudioEventId id, AudioE
 	return true;
 }
 
+float AudioEventActionSetVolume::getGain() const
+{
+	return gain;
+}
+
+void AudioEventActionSetVolume::setGain(float value)
+{
+	gain = value;
+}
+
 void AudioEventActionSetVolume::serialize(Serializer& s) const
 {
 	AudioEventActionObject::serialize(s);
@@ -491,6 +501,26 @@ bool AudioEventActionSetSwitch::run(AudioEngine& engine, AudioEventId id, AudioE
 	return true;
 }
 
+const String& AudioEventActionSetSwitch::getSwitchId() const
+{
+	return switchId;
+}
+
+const String& AudioEventActionSetSwitch::getValue() const
+{
+	return value;
+}
+
+void AudioEventActionSetSwitch::setSwitchId(String id)
+{
+	switchId = std::move(id);
+}
+
+void AudioEventActionSetSwitch::setValue(String val)
+{
+	value = std::move(val);
+}
+
 void AudioEventActionSetSwitch::serialize(Serializer& s) const
 {
 	s << switchId;
@@ -522,6 +552,26 @@ bool AudioEventActionSetVariable::run(AudioEngine& engine, AudioEventId id, Audi
 	emitter.setVariableValue(variableId, value);
 
 	return true;
+}
+
+const String& AudioEventActionSetVariable::getVariableId() const
+{
+	return variableId;
+}
+
+float AudioEventActionSetVariable::getValue() const
+{
+	return value;
+}
+
+void AudioEventActionSetVariable::setVariableId(String id)
+{
+	variableId = std::move(id);
+}
+
+void AudioEventActionSetVariable::setValue(float val)
+{
+	value = val;
 }
 
 void AudioEventActionSetVariable::serialize(Serializer& s) const

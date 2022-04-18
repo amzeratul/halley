@@ -182,6 +182,9 @@ namespace Halley
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::SetVolume; }
 
+		float getGain() const;
+		void setGain(float value);
+
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
 
@@ -198,6 +201,11 @@ namespace Halley
 
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::SetSwitch; }
+
+		const String& getSwitchId() const;
+		const String& getValue() const;
+		void setSwitchId(String id);
+		void setValue(String val);
 
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
@@ -216,6 +224,11 @@ namespace Halley
 
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::SetVariable; }
+
+		const String& getVariableId() const;
+		float getValue() const;
+		void setVariableId(String id);
+		void setValue(float val);
 
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
