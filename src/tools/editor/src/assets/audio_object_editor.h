@@ -12,6 +12,8 @@ namespace Halley {
 		bool isModified() override;
 		void save() override;
         void markModified();
+
+        void onMakeUI() override;
 	
     protected:
         void update(Time t, bool moved) override;
@@ -20,5 +22,8 @@ namespace Halley {
 	private:
         bool modified = false;
         std::shared_ptr<AudioObject> audioObject;
+        std::shared_ptr<UITreeList> hierarchy;
+
+        void doLoadUI();
 	};
 }

@@ -1,0 +1,8 @@
+widget: { class: widget }
+sizer: { type: horizontal }
+children:
+- widget: { id: hierarchy, class: treeList, size: [300, 300] }
+- widget: { id: contents, class: widget }
+  proportion: 1
+  sizer: { type: vertical }
+  children: []
