@@ -84,7 +84,7 @@ void AudioObjectEditor::populateObject(const String& parentId, size_t idx, const
 
 	// Add this item
 	const auto id = parentId + ":" + toString(idx);
-	hierarchy->addTreeItem(id, parentId, idx, LocalisedString::fromUserString(subObject->getName()), "label", Sprite());
+	hierarchy->addTreeItem(id, parentId, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(subObject->getName()), "label", Sprite());
 
 	// Add sub-categories
 	for (auto& cat: subObject->getSubCategories()) {
@@ -96,11 +96,11 @@ void AudioObjectEditor::populateObject(const String& parentId, size_t idx, const
 	for (size_t i = 0; i < n; ++i) {
 		auto subObjectCat = subObject->getSubObjectCategory(i);
 		auto parent = subObjectCat.isEmpty() ? id : (id  + ":" + subObjectCat);
-		populateObject(parent, std::numeric_limits<size_t>::max(), subObject->getSubObject(i));
+		populateObject(parent, i, subObject->getSubObject(i));
 	}
 
 	// Add clips
 	for (auto& clip: subObject->getClips()) {
-		hierarchy->addTreeItem(id + ":" + clip, id, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(clip));
+		hierarchy->addTreeItem(id + ":" + clip, id, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(clip), "labelSpecial", Sprite());
 	}
 }
