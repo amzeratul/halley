@@ -3,7 +3,7 @@
 using namespace Halley;
 
 LoadDLLTask::LoadDLLTask(ProjectDLL::Status status)
-	: Task("Load Game DLL", false, true)
+	: Task("Loading Game DLL", false, true)
 	, status(status)
 {
 }
