@@ -27,5 +27,7 @@ namespace Halley {
 
         void doLoadUI();
         void populateObject(const String& parentId, size_t idx, const AudioSubObjectHandle& subObject);
+
+		Sprite makeIcon(AudioSubObjectType type) const;
 	};
 }

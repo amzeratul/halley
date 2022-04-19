@@ -67,7 +67,7 @@ void AudioObjectEditor::doLoadUI()
 {
 	hierarchy->clear();
 	if (audioObject) {
-		hierarchy->addTreeItem("root", "", 0, LocalisedString::fromHardcodedString("Root"));
+		hierarchy->addTreeItem("root", "", 0, LocalisedString::fromUserString(audioObject->getAssetId()), "labelSpecial", factory.makeAssetTypeIcon(AssetType::AudioObject));
 		size_t idx = 0;
 		for (const auto& subObject: audioObject->getSubObjects()) {
 			populateObject("root", idx++, subObject);
@@ -84,11 +84,11 @@ void AudioObjectEditor::populateObject(const String& parentId, size_t idx, const
 
 	// Add this item
 	const auto id = parentId + ":" + toString(idx);
-	hierarchy->addTreeItem(id, parentId, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(subObject->getName()), "label", Sprite());
+	hierarchy->addTreeItem(id, parentId, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(subObject->getName()), "label", makeIcon(subObject->getType()));
 
 	// Add sub-categories
 	for (auto& cat: subObject->getSubCategories()) {
-		hierarchy->addTreeItem(id + ":" + cat, id, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(cat));
+		hierarchy->addTreeItem(id + ":" + cat, id, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(cat), "label", makeIcon(AudioSubObjectType::None));
 	}
 
 	// Populate sub-objects
@@ -101,6 +101,23 @@ void AudioObjectEditor::populateObject(const String& parentId, size_t idx, const
 
 	// Add clips
 	for (auto& clip: subObject->getClips()) {
-		hierarchy->addTreeItem(id + ":" + clip, id, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(clip), "labelSpecial", Sprite());
+		hierarchy->addTreeItem(id + ":" + clip, id, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(clip), "labelSpecial", factory.makeAssetTypeIcon(AssetType::AudioClip));
 	}
+}
+
+Sprite AudioObjectEditor::makeIcon(AudioSubObjectType type) const
+{
+	switch (type) {
+	case AudioSubObjectType::Layers:
+		return Sprite().setImage(factory.getResources(), "ui/audio_object_layers.png");
+	case AudioSubObjectType::Sequence:
+		return Sprite().setImage(factory.getResources(), "ui/audio_object_sequence.png");
+	case AudioSubObjectType::Clips:
+		return Sprite().setImage(factory.getResources(), "ui/audio_object_clips.png");
+	case AudioSubObjectType::Switch:
+		return Sprite().setImage(factory.getResources(), "ui/audio_object_switch.png");
+	case AudioSubObjectType::None:
+		return Sprite().setImage(factory.getResources(), "ui/audio_object_none.png");
+	}
+	return Sprite();
 }
