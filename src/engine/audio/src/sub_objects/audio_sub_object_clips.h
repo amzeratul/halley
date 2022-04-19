@@ -12,6 +12,7 @@ namespace Halley {
 
 		String getName() const override;
 		gsl::span<const String> getClips() const override;
+		bool canCollapseToClip() const override;
 
 		std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const override;
 		void loadDependencies(Resources& resources) override;

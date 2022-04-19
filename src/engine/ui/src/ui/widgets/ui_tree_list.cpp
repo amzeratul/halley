@@ -170,7 +170,6 @@ void UITreeList::onItemDoneDragging(UIListItem& item, int index, Vector2f pos)
 	if (res) {
 		const auto& resData = res.value();
 
-		const String& itemId = item.getId();
 		String newParentId;
 		size_t newChildIndex;
 		
@@ -190,6 +189,11 @@ void UITreeList::onItemDoneDragging(UIListItem& item, int index, Vector2f pos)
 		reparentItems(getSelectedOptionIds(), newParentId, static_cast<int>(newChildIndex));
 	}
 	insertCursor = Sprite();
+}
+
+bool UITreeList::canParentItemTo(const String& itemId, const String& parentId) const
+{
+	return true;
 }
 
 UITreeListItem& UITreeList::getItemOrRoot(const String& id)
@@ -229,7 +233,7 @@ void UITreeList::reparentItems(gsl::span<const String> itemIds, const String& ne
 	int curOffset = 0;
 
 	for (const auto& itemId: itemIds) {
-		if (itemId == newParentId) {
+		if (itemId == newParentId || !canParentItemTo(itemId, newParentId)) {
 			continue;
 		}
 

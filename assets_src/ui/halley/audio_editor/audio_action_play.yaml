@@ -26,17 +26,22 @@ children:
     - widget: { class: label, text: " s" }
       fill: centre
 - widget: { class: widget, id: playOptions, active: false }
-  sizer: { type: horizontal }
+  sizer: { type: vertical, gap: 4 }
   children:
-  - widget: { class: label, text: "Delay: " }
-    fill: centre
-  - widget: { id: delay, class: textInput, size: [50, 20], validator: numericPositive }
-  - widget: { class: label, text: " s, gain: " }
-    fill: centre
-  - widget: { id: gainMin, class: textInput, size: [40, 20], validator: numericPositive }
-  - widget: { class: label, text: " ~ " }
-    fill: centre
-  - widget: { id: gainMax, class: textInput, size: [40, 20], validator: numericPositive }
+  - sizer: { horizontal }
+    children:
+    - widget: { class: label, text: "Delay: " }
+      fill: centre
+    - widget: { id: delay, class: textInput, size: [50, 20], validator: numericPositive }
+    - widget: { class: label, text: " s" }
+  - sizer: { horizontal: }
+    children:
+    - widget: { class: label, text: "Gain: " }
+      fill: centre
+    - widget: { id: gainMin, class: textInput, size: [40, 20], validator: numericPositive }
+    - widget: { class: label, text: " ~ " }
+      fill: centre
+    - widget: { id: gainMax, class: textInput, size: [40, 20], validator: numericPositive }
 - widget: { class: widget, id: volumeOptions, active: false }
   sizer: { type: horizontal }
   children:

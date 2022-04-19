@@ -60,6 +60,11 @@ gsl::span<const String> AudioSubObjectClips::getClips() const
 	return clips;
 }
 
+bool AudioSubObjectClips::canCollapseToClip() const
+{
+	return true;
+}
+
 std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
 {
 	if (clipData.empty()) {

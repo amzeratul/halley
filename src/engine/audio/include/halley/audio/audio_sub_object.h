@@ -51,6 +51,7 @@ namespace Halley {
 		virtual Vector<String> getSubCategories() const;
 		virtual String getSubObjectCategory(size_t n) const;
 		virtual gsl::span<const String> getClips() const;
+		virtual bool canCollapseToClip() const;
 	};
 
 	class AudioSubObjectHandle {

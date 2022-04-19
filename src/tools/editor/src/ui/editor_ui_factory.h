@@ -29,6 +29,7 @@ namespace Halley {
         std::shared_ptr<UIWidget> makeUIWidgetEditor(const ConfigNode& entryNode);
         std::shared_ptr<UIWidget> makeUIWidgetList(const ConfigNode& entryNode);
         std::shared_ptr<UIWidget> makeUIEditorDisplay(const ConfigNode& entryNode);
+        std::shared_ptr<UIWidget> makeAudioObjectTreeList(const ConfigNode& entryNode);
 
     	void loadColourSchemes();
     	void reloadStyleSheet();

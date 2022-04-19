@@ -120,6 +120,8 @@ namespace Halley {
         void draw(UIPainter& painter) const override;
         void onItemDragging(UIListItem& item, int index, Vector2f pos) override;
         void onItemDoneDragging(UIListItem& item, int index, Vector2f pos) override;
+
+    	virtual bool canParentItemTo(const String& itemId, const String& parentId) const;
     	
     private:
         friend class UITreeListItem;

@@ -5,6 +5,7 @@
 #include "select_asset_widget.h"
 #include "src/assets/animation_editor.h"
 #include "src/assets/asset_editor_window.h"
+#include "src/assets/audio_object_editor.h"
 #include "src/assets/metadata_editor.h"
 #include "src/assets/ui_editor/ui_editor_display.h"
 #include "src/assets/ui_editor/ui_widget_editor.h"
@@ -36,6 +37,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("uiWidgetList", [=](const ConfigNode& node) { return makeUIWidgetList(node); });
 	addFactory("uiWidgetEditor", [=](const ConfigNode& node) { return makeUIWidgetEditor(node); });
 	addFactory("uiEditorDisplay", [=](const ConfigNode& node) { return makeUIEditorDisplay(node); });
+	addFactory("audioObjectTreeList", [=](const ConfigNode& node) { return makeAudioObjectTreeList(node); });
 }
 
 Sprite EditorUIFactory::makeAssetTypeIcon(AssetType type) const
@@ -149,6 +151,19 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeUIEditorDisplay(const ConfigNode&
 	auto& node = entryNode["widget"];
 	auto id = node["id"].asString();
 	return std::make_shared<UIEditorDisplay>(id, Vector2f{}, makeSizer(entryNode).value_or(UISizer()));
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeAudioObjectTreeList(const ConfigNode& entryNode)
+{
+	const auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	auto style = UIStyle(node["style"].asString("treeList"), getStyleSheet());
+	auto label = parseLabel(node);
+
+	auto widget = std::make_shared<AudioObjectEditorTreeList>(id, style);
+	applyListProperties(*widget, node, "treeList");
+
+	return widget;
 }
 
 void EditorUIFactory::loadColourSchemes()

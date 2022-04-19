@@ -3,7 +3,7 @@ sizer: { type: horizontal }
 children:
 - widget: { class: scrollBarPane, size: [350, 250], scrollHorizontal: true, scrollVertical: true }
   children:
-  - widget: { id: hierarchy, class: treeList, canDrag: true }
+  - widget: { id: hierarchy, class: audioObjectTreeList, canDrag: true }
     proportion: 1
 - widget: { id: contents, class: widget }
   proportion: 1

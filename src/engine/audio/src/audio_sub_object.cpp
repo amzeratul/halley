@@ -59,6 +59,11 @@ gsl::span<const String> IAudioSubObject::getClips() const
 	return {};
 }
 
+bool IAudioSubObject::canCollapseToClip() const
+{
+	return false;
+}
+
 AudioSubObjectHandle::AudioSubObjectHandle(std::unique_ptr<IAudioSubObject> obj)
 	: obj(std::move(obj))
 {
