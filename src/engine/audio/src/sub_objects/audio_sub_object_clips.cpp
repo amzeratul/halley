@@ -50,6 +50,16 @@ void AudioSubObjectClips::toLegacyConfigNode(ConfigNode& dst) const
 	}
 }
 
+String AudioSubObjectClips::getName() const
+{
+	return "Clips";
+}
+
+gsl::span<const String> AudioSubObjectClips::getClips() const
+{
+	return clips;
+}
+
 std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
 {
 	if (clipData.empty()) {

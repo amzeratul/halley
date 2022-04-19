@@ -148,7 +148,7 @@ namespace Halley {
 				for (auto& kv: val) {
 					keys.insert(kv.first);
 				}
-				*this << static_cast<unsigned int>(val.size());
+				*this << static_cast<unsigned int>(keys.size());
 				for (const auto& k: keys) {
 					*this << k << val.at(k);
 				}

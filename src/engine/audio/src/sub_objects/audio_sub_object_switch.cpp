@@ -33,6 +33,52 @@ std::unique_ptr<AudioSource> AudioSubObjectSwitch::makeSource(AudioEngine& engin
 	return {};
 }
 
+String AudioSubObjectSwitch::getName() const
+{
+	return "Switch [" + switchId + "]";
+}
+
+size_t AudioSubObjectSwitch::getNumSubObjects() const
+{
+	return cases.size();
+}
+
+const AudioSubObjectHandle& AudioSubObjectSwitch::getSubObject(size_t n) const
+{
+	// HACK
+	size_t idx = 0;
+	for (const auto& c: cases) {
+		if (idx == n) {
+			return c.second;
+		}
+		++idx;
+	}
+	return IAudioSubObject::getSubObject(n);
+}
+
+Vector<String> AudioSubObjectSwitch::getSubCategories() const
+{
+	// TODO: read from switch
+	Vector<String> result;
+	for (auto& c: cases) {
+		result.push_back(c.first);
+	}
+	return result;
+}
+
+String AudioSubObjectSwitch::getSubObjectCategory(size_t n) const
+{
+	// HACK
+	size_t idx = 0;
+	for (const auto& c: cases) {
+		if (idx == n) {
+			return c.first;
+		}
+		++idx;
+	}
+	return "";
+}
+
 void AudioSubObjectSwitch::loadDependencies(Resources& resources)
 {
 	for (const auto& c: cases) {

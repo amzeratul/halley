@@ -11,6 +11,10 @@ namespace Halley {
 
 		AudioSubObjectType getType() override { return AudioSubObjectType::Layers; }
 
+		String getName() const override;
+		size_t getNumSubObjects() const override;
+		const AudioSubObjectHandle& getSubObject(size_t n) const override;
+
 		std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const override;
 		void loadDependencies(Resources& resources) override;
 

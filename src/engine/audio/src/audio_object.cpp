@@ -23,10 +23,7 @@ AudioObject::AudioObject(const ConfigNode& node)
 	group = node["group"].asString("");
 	pitch = node["pitch"].asFloatRange(Range<float>(1, 1));
 	volume = node["volume"].asFloatRange(Range<float>(1, 1));
-
-	if (node.hasKey("root")) {
-		root = IAudioSubObject::makeSubObject(node["root"]);
-	}
+	objects = node["objects"].asVector<AudioSubObjectHandle>({});
 }
 
 ConfigNode AudioObject::toConfigNode() const
@@ -42,9 +39,7 @@ ConfigNode AudioObject::toConfigNode() const
 	if (volume != Range<float>(1, 1)) {
 		result["volume"] = volume;
 	}
-	if (root.hasValue()) {
-		result["root"] = root->toConfigNode();
-	}
+	result["objects"] = objects;
 	
 	return result;
 }
@@ -57,7 +52,9 @@ void AudioObject::loadLegacyEvent(const ConfigNode& node)
 
 	auto clips = std::make_unique<AudioSubObjectClips>();
 	clips->load(node);
-	root = AudioSubObjectHandle(std::move(clips));
+
+	objects.clear();
+	objects.emplace_back(AudioSubObjectHandle(std::move(clips)));
 }
 
 void AudioObject::legacyToConfigNode(ConfigNode& result) const
@@ -71,7 +68,7 @@ void AudioObject::legacyToConfigNode(ConfigNode& result) const
 	if (volume != Range<float>(1, 1)) {
 		result["volume"] = volume;
 	}
-	dynamic_cast<const AudioSubObjectClips&>(root.getObject()).toLegacyConfigNode(result);
+	dynamic_cast<const AudioSubObjectClips&>(objects[0].getObject()).toLegacyConfigNode(result);
 }
 
 uint32_t AudioObject::getAudioObjectId() const
@@ -94,10 +91,15 @@ Range<float> AudioObject::getVolume() const
 	return volume;
 }
 
+gsl::span<const AudioSubObjectHandle> AudioObject::getSubObjects() const
+{
+	return objects;
+}
+
 std::unique_ptr<AudioSource> AudioObject::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
 {
-	if (root.hasValue()) {
-		return root->makeSource(engine, emitter);
+	if (!objects.empty()) {
+		return objects[0]->makeSource(engine, emitter);
 	} else {
 		return {};
 	}
@@ -108,7 +110,7 @@ void AudioObject::serialize(Serializer& s) const
 	s << group;
 	s << pitch;
 	s << volume;
-	s << root;
+	s << objects;
 }
 
 void AudioObject::deserialize(Deserializer& s)
@@ -116,7 +118,7 @@ void AudioObject::deserialize(Deserializer& s)
 	s >> group;
 	s >> pitch;
 	s >> volume;
-	s >> root;
+	s >> objects;
 }
 
 void AudioObject::reload(Resource&& resource)
@@ -140,8 +142,8 @@ std::shared_ptr<AudioObject> AudioObject::loadResource(ResourceLoader& loader)
 
 void AudioObject::loadDependencies(Resources& resources)
 {
-	if (root.hasValue()) {
-		root->loadDependencies(resources);
+	if (!objects.empty()) {
+		objects[0]->loadDependencies(resources);
 	}
 }
 

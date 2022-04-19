@@ -32,6 +32,21 @@ ConfigNode AudioSubObjectLayers::toConfigNode() const
 	return result;
 }
 
+String AudioSubObjectLayers::getName() const
+{
+	return "Layers";
+}
+
+size_t AudioSubObjectLayers::getNumSubObjects() const
+{
+	return layers.size();
+}
+
+const AudioSubObjectHandle& AudioSubObjectLayers::getSubObject(size_t n) const
+{
+	return layers[n].object;
+}
+
 std::unique_ptr<AudioSource> AudioSubObjectLayers::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
 {
 	Vector<std::unique_ptr<AudioSource>> sources;

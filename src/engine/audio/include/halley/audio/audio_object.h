@@ -23,6 +23,8 @@ namespace Halley {
 		Range<float> getPitch() const;
 		Range<float> getVolume() const;
 
+		gsl::span<const AudioSubObjectHandle> getSubObjects() const;
+
 		std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const;
     	
     	void serialize(Serializer& s) const;
@@ -39,7 +41,7 @@ namespace Halley {
 
     private:
 		AudioObjectId audioObjectId;
-		AudioSubObjectHandle root;
+		std::vector<AudioSubObjectHandle> objects;
 		
 		String group;
 		Range<float> pitch;

@@ -19,6 +19,11 @@ std::unique_ptr<AudioSource> AudioSubObjectSequence::makeSource(AudioEngine& eng
 	return {};
 }
 
+String AudioSubObjectSequence::getName() const
+{
+	return "Sequence";
+}
+
 void AudioSubObjectSequence::loadDependencies(Resources& resources)
 {
 	// TODO

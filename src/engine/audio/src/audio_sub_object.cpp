@@ -34,6 +34,31 @@ std::unique_ptr<IAudioSubObject> IAudioSubObject::makeSubObject(const ConfigNode
 	return obj;
 }
 
+size_t IAudioSubObject::getNumSubObjects() const
+{
+	return 0;
+}
+
+const AudioSubObjectHandle& IAudioSubObject::getSubObject(size_t n) const
+{
+	throw Exception("Sub-object index out of range", HalleyExceptions::AudioEngine);
+}
+
+Vector<String> IAudioSubObject::getSubCategories() const
+{
+	return {};
+}
+
+String IAudioSubObject::getSubObjectCategory(size_t n) const
+{
+	return "";
+}
+
+gsl::span<const String> IAudioSubObject::getClips() const
+{
+	return {};
+}
+
 AudioSubObjectHandle::AudioSubObjectHandle(std::unique_ptr<IAudioSubObject> obj)
 	: obj(std::move(obj))
 {
@@ -52,7 +77,7 @@ AudioSubObjectHandle::AudioSubObjectHandle(const AudioSubObjectHandle& other)
 AudioSubObjectHandle& AudioSubObjectHandle::operator=(const AudioSubObjectHandle& other)
 {
 	// HACK
-	auto s = Deserializer(Serializer::toBytes(*this));
+	auto s = Deserializer(Serializer::toBytes(other));
 	deserialize(s);
 	return *this;
 }

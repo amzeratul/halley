@@ -3,6 +3,7 @@
 #include "halley/data_structures/config_node.h"
 
 namespace Halley {
+	class AudioSubObjectHandle;
 	class AudioEmitter;
 
 	enum class AudioSubObjectType {
@@ -43,6 +44,13 @@ namespace Halley {
 		virtual void deserialize(Deserializer& s) = 0;
 
 		virtual ConfigNode toConfigNode() const = 0;
+
+		virtual String getName() const = 0;
+		virtual size_t getNumSubObjects() const;
+		virtual const AudioSubObjectHandle& getSubObject(size_t n) const;
+		virtual Vector<String> getSubCategories() const;
+		virtual String getSubObjectCategory(size_t n) const;
+		virtual gsl::span<const String> getClips() const;
 	};
 
 	class AudioSubObjectHandle {
