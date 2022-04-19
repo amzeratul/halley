@@ -135,25 +135,15 @@ namespace Halley {
 		template <typename T, typename U>
 		Serializer& operator<<(const HashMap<T, U>& val)
 		{
-			// Convert to map first to make order deterministic
-			if constexpr (std::is_copy_assignable_v<U>) {
-				std::map<T, U> m;
-				for (auto& kv : val) {
-					m[kv.first] = kv.second;
-				}
-				return (*this << m);
-			} else {
-				// Non-copyable, use a set instead
-				std::set<T> keys;
-				for (auto& kv: val) {
-					keys.insert(kv.first);
-				}
-				*this << static_cast<unsigned int>(keys.size());
-				for (const auto& k: keys) {
-					*this << k << val.at(k);
-				}
-				return *this;
+			std::set<T> keys;
+			for (auto& kv: val) {
+				keys.insert(kv.first);
 			}
+			*this << static_cast<unsigned int>(keys.size());
+			for (const auto& k: keys) {
+				*this << k << val.at(k);
+			}
+			return *this;
 		}
 
 		template <typename K, typename V, typename Cmp, typename Allocator>
