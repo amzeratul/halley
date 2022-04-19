@@ -24,7 +24,7 @@ void SelectAssetWidget::setValue(const String& newValue)
 		value = newValue;
 		input->setText(getDisplayName());
 
-		if (!displayErrorForEmpty || gameResources.ofType(type).exists(newValue)) {
+		if (!displayErrorForEmpty || !defaultAssetId.isEmpty() || gameResources.ofType(type).exists(newValue)) {
 			input->getTextLabel().setColourOverride({});
 		} else {
 			input->getTextLabel().setColourOverride({ColourOverride(0, input->getStyles()[0].getColour("errorColour"))});
@@ -119,7 +119,7 @@ String SelectAssetWidget::getDisplayName() const
 
 String SelectAssetWidget::getDisplayName(const String& name) const
 {
-	if (name.isEmpty() && allowEmpty) {
+	if (name.isEmpty() && allowEmpty && defaultAssetId.isEmpty()) {
 		return *allowEmpty;
 	}
 	if (type == AssetType::Sprite || type == AssetType::Animation || type == AssetType::MaterialDefinition) {
