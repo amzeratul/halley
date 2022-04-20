@@ -64,6 +64,19 @@ bool IAudioSubObject::canCollapseToClip() const
 	return false;
 }
 
+bool IAudioSubObject::canAddObject(const std::optional<String>& caseName) const
+{
+	return false;
+}
+
+void IAudioSubObject::addObject(AudioSubObjectHandle handle, const std::optional<String>& caseName, size_t idx)
+{
+}
+
+void IAudioSubObject::addClip(std::shared_ptr<const AudioClip> clip, size_t idx)
+{
+}
+
 AudioSubObjectHandle::AudioSubObjectHandle(std::unique_ptr<IAudioSubObject> obj)
 	: obj(std::move(obj))
 {

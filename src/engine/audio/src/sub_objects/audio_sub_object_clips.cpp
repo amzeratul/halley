@@ -103,3 +103,10 @@ void AudioSubObjectClips::deserialize(Deserializer& s)
 	s >> clips;
 	s >> loop;
 }
+
+void AudioSubObjectClips::addClip(std::shared_ptr<const AudioClip> audioClip, size_t idx)
+{
+	const auto pos = std::min(clips.size(), idx);
+	clips.insert(clips.begin() + pos, audioClip->getAssetId());
+	clipData.insert(clipData.begin() + pos, std::move(audioClip));
+}

@@ -243,7 +243,7 @@ void UITreeList::reparentItems(gsl::span<const String> itemIds, const String& ne
 		}
 
 		const auto& curItem = *root.tryFindId(itemId);
-		const String& oldParentId = curItem.getParentId();
+		const String oldParentId = curItem.getParentId(); // Don't store a reference
 		auto& oldParent = *root.tryFindId(oldParentId);
 		const size_t oldChildIndex = static_cast<int>(oldParent.getChildIndex(itemId));
 
@@ -265,7 +265,9 @@ void UITreeList::reparentItems(gsl::span<const String> itemIds, const String& ne
 			auto& entry = reparentNode.emplace_back(ConfigNode::MapType());
 			entry["itemId"] = itemId;
 			entry["parentId"] = newParentId;
+			entry["oldParentId"] = oldParentId;
 			entry["childIdx"] = newChildIndex;
+			entry["oldChildIdx"] = static_cast<int>(oldChildIndex);
 
 			++newChildIndex;
 		}

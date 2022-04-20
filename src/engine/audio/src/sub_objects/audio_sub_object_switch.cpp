@@ -79,6 +79,11 @@ String AudioSubObjectSwitch::getSubObjectCategory(size_t n) const
 	return "";
 }
 
+bool AudioSubObjectSwitch::canAddObject(const std::optional<String>& caseName) const
+{
+	return caseName.has_value() && cases.find(caseName.value()) == cases.end();
+}
+
 void AudioSubObjectSwitch::loadDependencies(Resources& resources)
 {
 	for (const auto& c: cases) {

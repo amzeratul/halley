@@ -20,6 +20,8 @@ namespace Halley {
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
 
+		void addClip(std::shared_ptr<const AudioClip> clip, size_t idx) override;
+
 	private:
 		Vector<String> clips;
 		Vector<std::shared_ptr<const AudioClip>> clipData;

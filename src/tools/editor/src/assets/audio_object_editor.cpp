@@ -1,10 +1,12 @@
 #include "audio_object_editor.h"
 #include "halley/audio/audio_object.h"
 #include "halley/tools/project/project.h"
+#include "src/scene/choose_window.h"
 using namespace Halley;
 
 AudioObjectEditor::AudioObjectEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow)
 	: AssetEditor(factory, gameResources, project, AssetType::AudioObject)
+	, projectWindow(projectWindow)
 {
 	factory.loadUI(*this, "halley/audio_editor/audio_object_editor");
 }
@@ -16,8 +18,28 @@ void AudioObjectEditor::onMakeUI()
 	setHandle(UIEventType::TreeItemReparented, "hierarchy", [=] (const UIEvent& event)
 	{
 		for (const auto& e: event.getConfigData().asSequence()) {
-			reparent(e["itemId"].asString(), e["parentId"].asString(), e["childIdx"].asInt());
+			moveObject(e["itemId"].asString(), e["parentId"].asString(), e["oldParentId"].asString(), e["childIdx"].asInt(), e["oldChildIdx"].asInt());
 		}
+	});
+
+	setHandle(UIEventType::ButtonClicked, "add", [=] (const UIEvent& event)
+	{
+		addObject();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "addClip", [=] (const UIEvent& event)
+	{
+		addClip();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "remove", [=] (const UIEvent& event)
+	{
+		removeCurrentSelection();
+	});
+
+	setHandle(UIEventType::ListSelectionChanged, "hierarchy", [=] (const UIEvent& event)
+	{
+		onSelectionChange(event.getStringData());
 	});
 
 	doLoadUI();
@@ -40,6 +62,9 @@ bool AudioObjectEditor::canParentItemTo(const String& itemId, const String& pare
 	}
 	if (parentId == "root") {
 		return true;
+	}
+	if (parentId == "") {
+		return false;
 	}
 
 	const auto& item = treeData.at(itemId);
@@ -97,15 +122,16 @@ void AudioObjectEditor::markModified()
 
 void AudioObjectEditor::update(Time t, bool moved)
 {
-	if (needRefresh) {
+	if (needFullRefresh) {
 		doLoadUI();
-		needRefresh = false;
+		needFullRefresh = false;
 	}
 }
 
 std::shared_ptr<const Resource> AudioObjectEditor::loadResource(const String& assetId)
 {
 	audioObject = std::make_shared<AudioObject>(*gameResources.get<AudioObject>(assetId));
+	audioObject->loadDependencies(gameResources);
 	return audioObject;
 }
 
@@ -171,11 +197,115 @@ void AudioObjectEditor::populateObject(const String& parentId, size_t idx, Audio
 	}
 }
 
-void AudioObjectEditor::reparent(const String& itemId, const String& parentId, int childIdx)
+void AudioObjectEditor::onSelectionChange(const String& id)
+{
+	bool canAdd = id == "root";
+	bool canAddClip = false;
+	const bool canRemove = id != "root";
+
+	const auto iter = treeData.find(id);
+	if (iter != treeData.end()) {
+		auto& data = iter->second;
+		canAdd = data.subObject && data.subObject->canAddObject(data.subCase);
+		canAddClip = data.subObject && data.subObject->getType() == AudioSubObjectType::Clips;
+	}
+
+	getWidget("add")->setEnabled(canAdd);
+	getWidget("addClip")->setEnabled(canAddClip);
+	getWidget("remove")->setEnabled(canRemove);
+}
+
+void AudioObjectEditor::addObject()
+{
+	getRoot()->addChild(std::make_shared<ChooseAudioSubObject>(factory, [=] (std::optional<String> result)
+	{
+		if (result) {
+			addObject(fromString<AudioSubObjectType>(*result));
+		}
+	}));
+}
+
+void AudioObjectEditor::addClip()
+{
+	getRoot()->addChild(std::make_shared<ChooseAssetTypeWindow>(Vector2f(), factory, AssetType::AudioClip, "", gameResources, projectWindow, false, std::optional<String>(), [=](std::optional<String> result)
+	{
+		if (result) {
+			addClip(*result);
+		}
+	}));
+}
+
+void AudioObjectEditor::addObject(AudioSubObjectType type)
+{
+	auto subObject = AudioSubObjectHandle(IAudioSubObject::makeSubObject(type));
+	auto& parent = treeData.at(hierarchy->getSelectedOptionId());
+	parent.subObject->addObject(std::move(subObject), parent.subCase, std::numeric_limits<size_t>::max());
+	markModified();
+
+	needFullRefresh = true;
+}
+
+void AudioObjectEditor::addClip(const String& assetId)
+{
+	auto clip = gameResources.get<AudioClip>(assetId);
+	auto& parent = treeData.at(hierarchy->getSelectedOptionId());
+	parent.subObject->addClip(std::move(clip), std::numeric_limits<size_t>::max());
+	markModified();
+
+	needFullRefresh = true;
+}
+
+void AudioObjectEditor::removeCurrentSelection()
 {
 	// TODO
-	needRefresh = true;
+
 	markModified();
+	needFullRefresh = true;
+}
+
+void AudioObjectEditor::moveItem(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx)
+{
+	const auto& item = treeData.at(itemId);
+	if (item.clip) {
+		moveClip(itemId, parentId, oldParentId, childIdx, oldChildIdx);
+	} else {
+		moveObject(itemId, parentId, oldParentId, childIdx, oldChildIdx);
+	}
+	markModified();
+}
+
+void AudioObjectEditor::moveObject(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx)
+{
+	if (parentId == oldParentId) {
+		if (parentId == "root") {
+			auto objs = audioObject->getSubObjects();
+			std::swap(objs[childIdx], objs[oldChildIdx]);
+		} else {
+			// This shouldn't happen!
+			Logger::logError("Moving audio sub object within same parent, outside of root");
+			needFullRefresh = true;
+		}
+	} else {
+		if (parentId == "root") {
+			// Move to root
+			// TODO
+		} else if (oldParentId == "root") {
+			// Move from root
+			// TODO
+		} else {
+			// Move between objects
+			const auto& parent = treeData.at(parentId);
+			const auto& oldParent = treeData.at(oldParentId);
+			// TODO
+		}
+
+		needFullRefresh = true;
+	}
+}
+
+void AudioObjectEditor::moveClip(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx)
+{
+	// TODO
 }
 
 Sprite AudioObjectEditor::makeIcon(AudioSubObjectType type) const
@@ -213,4 +343,24 @@ bool AudioObjectEditorTreeList::canParentItemTo(const String& itemId, const Stri
 bool AudioObjectEditorTreeList::canDragItemId(const String& itemId) const
 {
 	return parent->canDragItem(itemId);
+}
+
+ChooseAudioSubObject::ChooseAudioSubObject(UIFactory& factory, Callback callback)
+	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), {})
+{
+	Vector<String> ids;
+	Vector<String> names;
+	for (auto id: EnumNames<AudioSubObjectType>()()) {
+		const auto type = fromString<AudioSubObjectType>(id);
+		if (type != AudioSubObjectType::None && type != AudioSubObjectType::Clips) {
+			ids.push_back(id);
+			names.push_back(id);
+		}
+	}
+	setTitle(LocalisedString::fromHardcodedString("Add Audio Sub-object"));
+	setAssetIds(ids, names, "switch");
+}
+
+void ChooseAudioSubObject::sortItems(Vector<std::pair<String, String>>& values)
+{
 }

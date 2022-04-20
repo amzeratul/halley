@@ -19,6 +19,7 @@ namespace Halley {
         AudioSubObjectHandle& getSubObject(size_t n) override;
         Vector<String> getSubCategories() const override;
         String getSubObjectCategory(size_t n) const override;
+        bool canAddObject(const std::optional<String>& caseName) const override;
 
         void loadDependencies(Resources& resources) override;
 	    void serialize(Serializer& s) const override;

@@ -32,15 +32,26 @@ namespace Halley {
             std::optional<String> clip;
         };
 
+        ProjectWindow& projectWindow;
 		bool modified = false;
-        bool needRefresh = false;
+        bool needFullRefresh = false;
         std::shared_ptr<AudioObject> audioObject;
         std::shared_ptr<AudioObjectEditorTreeList> hierarchy;
         HashMap<String, TreeData> treeData;
 
         void doLoadUI();
         void populateObject(const String& parentId, size_t idx, AudioSubObjectHandle& subObject);
-        void reparent(const String& itemId, const String& parentId, int childIdx);
+
+        void onSelectionChange(const String& id);
+        void addObject();
+        void addObject(AudioSubObjectType type);
+        void addClip();
+        void addClip(const String& assetId);
+        void removeCurrentSelection();
+
+		void moveItem(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx);
+        void moveObject(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx);
+        void moveClip(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx);
 
 		Sprite makeIcon(AudioSubObjectType type) const;
 	};
@@ -58,4 +69,12 @@ namespace Halley {
     private:
         AudioObjectEditor* parent = nullptr;
     };
+
+	class ChooseAudioSubObject : public ChooseAssetWindow {
+	public:
+        ChooseAudioSubObject(UIFactory& factory, Callback callback);
+
+	private:
+		void sortItems(Vector<std::pair<String, String>>& items) override;
+	};
 }

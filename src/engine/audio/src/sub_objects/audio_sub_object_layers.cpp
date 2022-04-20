@@ -87,6 +87,11 @@ bool AudioSubObjectLayers::isLayerSynchronised(size_t idx) const
 	return layers.at(idx).synchronised;
 }
 
+bool AudioSubObjectLayers::canAddObject(const std::optional<String>& case_name) const
+{
+	return true;
+}
+
 AudioSubObjectLayers::Layer::Layer(const ConfigNode& node)
 {
 	object = IAudioSubObject::makeSubObject(node["object"]);

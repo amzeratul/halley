@@ -52,6 +52,9 @@ namespace Halley {
 		virtual String getSubObjectCategory(size_t n) const;
 		virtual gsl::span<const String> getClips() const;
 		virtual bool canCollapseToClip() const;
+		virtual bool canAddObject(const std::optional<String>& caseName) const;
+		virtual void addObject(AudioSubObjectHandle handle, const std::optional<String>& caseName, size_t idx);
+		virtual void addClip(std::shared_ptr<const AudioClip> clip, size_t idx);
 	};
 
 	class AudioSubObjectHandle {

@@ -24,6 +24,8 @@ namespace Halley {
 		const AudioExpression& getLayerExpression(size_t idx) const;
 		bool isLayerSynchronised(size_t idx) const;
 
+		bool canAddObject(const std::optional<String>& caseName) const override;
+
 	private:
 		struct Layer {
 			AudioSubObjectHandle object;

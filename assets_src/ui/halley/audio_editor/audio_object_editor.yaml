@@ -1,10 +1,21 @@
 widget: { class: widget }
 sizer: { type: horizontal }
 children:
-- widget: { class: scrollBarPane, size: [350, 250], scrollHorizontal: true, scrollVertical: true }
+- sizer: { type: vertical }
   children:
-  - widget: { id: hierarchy, class: audioObjectTreeList, canDrag: true }
+  - widget: { class: scrollBarPane, size: [350, 250], scrollHorizontal: true, scrollVertical: true, autoHide: true }
     proportion: 1
+    children:
+    - widget: { id: hierarchy, class: audioObjectTreeList, canDrag: true }
+      proportion: 1
+  - sizer: { type: horizontal }
+    children:
+    - widget: { class: button, id: add, text: Add }
+      proportion: 1
+    - widget: { class: button, id: addClip, text: Add Clip }
+      proportion: 1
+    - widget: { class: button, id: remove, text: Remove }
+      proportion: 1
 - widget: { id: contents, class: widget }
   proportion: 1
   sizer: { type: vertical }
