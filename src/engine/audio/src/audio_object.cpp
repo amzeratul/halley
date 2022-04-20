@@ -183,9 +183,15 @@ void AudioObject::addObject(AudioSubObjectHandle object, const std::optional<Str
 	objects.insert(objects.begin() + std::min(objects.size(), idx), std::move(object));
 }
 
-void AudioObject::removeObject(const IAudioObject* object)
+AudioSubObjectHandle AudioObject::removeObject(const IAudioObject* object)
 {
-	std_ex::erase_if(objects, [&] (const auto& o) { return &o.getObject() == object; });
+	const auto iter = std_ex::find_if(objects, [&] (const auto& o) { return &o.getObject() == object; });
+	if (iter != objects.end()) {
+		auto handle = std::move(*iter);
+		objects.erase(iter);
+		return handle;
+	}
+	return AudioSubObjectHandle();
 }
 
 void AudioObject::generateId()

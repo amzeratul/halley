@@ -100,9 +100,15 @@ void AudioSubObjectLayers::addObject(AudioSubObjectHandle audioSubObject, const 
 	layers.insert(layers.begin() + std::min(layers.size(), idx), std::move(layer));
 }
 
-void AudioSubObjectLayers::removeObject(const IAudioObject* object)
+AudioSubObjectHandle AudioSubObjectLayers::removeObject(const IAudioObject* object)
 {
-	std_ex::erase_if(layers, [&] (const Layer& layer) { return &layer.object.getObject() == object; });
+	const auto iter = std_ex::find_if(layers, [&] (const Layer& layer) { return &layer.object.getObject() == object; });
+	if (iter != layers.end()) {
+		auto handle = std::move(iter->object);
+		layers.erase(iter);
+		return handle;
+	}
+	return AudioSubObjectHandle();
 }
 
 AudioSubObjectLayers::Layer::Layer(const ConfigNode& node)

@@ -110,3 +110,13 @@ void AudioSubObjectClips::addClip(std::shared_ptr<const AudioClip> audioClip, si
 	clips.insert(clips.begin() + pos, audioClip->getAssetId());
 	clipData.insert(clipData.begin() + pos, std::move(audioClip));
 }
+
+void AudioSubObjectClips::removeClip(const String& clipId)
+{
+	const auto iter = std::find(clips.begin(), clips.end(), clipId);
+	if (iter != clips.end()) {
+		const auto pos = iter - clips.begin();
+		clips.erase(iter);
+		clipData.erase(clipData.begin() + pos);
+	}
+}

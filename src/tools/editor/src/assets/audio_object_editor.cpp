@@ -285,9 +285,12 @@ void AudioObjectEditor::moveObject(const String& itemId, const String& parentId,
 		auto& b = parent.object->getSubObject(oldChildIdx);
 		std::swap(a, b);
 	} else {
+		const auto& item = treeData.at(itemId);
 		const auto& parent = treeData.at(parentId);
 		const auto& oldParent = treeData.at(oldParentId);
-		// TODO
+
+		auto obj = oldParent.object->removeObject(item.object);
+		parent.object->addObject(std::move(obj), parent.subCase, childIdx);
 
 		needFullRefresh = true;
 	}

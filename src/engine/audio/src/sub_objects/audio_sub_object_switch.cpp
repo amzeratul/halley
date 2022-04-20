@@ -90,14 +90,14 @@ void AudioSubObjectSwitch::addObject(AudioSubObjectHandle audioSubObject, const 
 	cases[caseName.value()] = std::move(audioSubObject);
 }
 
-void AudioSubObjectSwitch::removeObject(const IAudioObject* object)
+AudioSubObjectHandle AudioSubObjectSwitch::removeObject(const IAudioObject* object)
 {
 	for (auto& c: cases) {
 		if (&c.second.getObject() == object) {
-			c.second = AudioSubObjectHandle();
-			return;
+			return std::move(c.second);
 		}
 	}
+	return AudioSubObjectHandle();
 }
 
 void AudioSubObjectSwitch::loadDependencies(Resources& resources)

@@ -73,8 +73,9 @@ void IAudioObject::addObject(AudioSubObjectHandle handle, const std::optional<St
 {
 }
 
-void IAudioObject::removeObject(const IAudioObject* object)
+AudioSubObjectHandle IAudioObject::removeObject(const IAudioObject* object)
 {
+	return AudioSubObjectHandle();
 }
 
 void IAudioObject::addClip(std::shared_ptr<const AudioClip> clip, size_t idx)
