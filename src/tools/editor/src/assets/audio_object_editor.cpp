@@ -74,7 +74,7 @@ bool AudioObjectEditor::canParentItemTo(const String& itemId, const String& pare
 		return false;
 	}
 	if (item.clip) {
-		return (parent.subObject && parent.subObject->getType() == AudioSubObjectType::Clips);
+		return (parent.object && parent.object->getType() == AudioSubObjectType::Clips);
 	}
 	if (item.subCase) {
 		return false;
@@ -143,6 +143,8 @@ void AudioObjectEditor::doLoadUI()
 
 	if (audioObject) {
 		hierarchy->addTreeItem("root", "", 0, LocalisedString::fromUserString(audioObject->getAssetId()), "labelSpecial", factory.makeAssetTypeIcon(AssetType::AudioObject));
+		treeData["root"] = TreeData{ audioObject.get() };
+
 		size_t idx = 0;
 		for (auto& subObject: audioObject->getSubObjects()) {
 			populateObject("root", idx++, subObject);
@@ -199,16 +201,11 @@ void AudioObjectEditor::populateObject(const String& parentId, size_t idx, Audio
 
 void AudioObjectEditor::onSelectionChange(const String& id)
 {
-	bool canAdd = id == "root";
-	bool canAddClip = false;
-	const bool canRemove = id != "root";
+	auto& data = treeData.at(id);
 
-	const auto iter = treeData.find(id);
-	if (iter != treeData.end()) {
-		auto& data = iter->second;
-		canAdd = data.subObject && data.subObject->canAddObject(data.subCase);
-		canAddClip = data.subObject && data.subObject->getType() == AudioSubObjectType::Clips;
-	}
+	const bool canAdd = data.object && data.object->canAddObject(data.subCase);
+	const bool canAddClip = data.object && data.object->getType() == AudioSubObjectType::Clips;
+	const bool canRemove = id != "root";
 
 	getWidget("add")->setEnabled(canAdd);
 	getWidget("addClip")->setEnabled(canAddClip);
@@ -239,7 +236,7 @@ void AudioObjectEditor::addObject(AudioSubObjectType type)
 {
 	auto subObject = AudioSubObjectHandle(IAudioSubObject::makeSubObject(type));
 	auto& parent = treeData.at(hierarchy->getSelectedOptionId());
-	parent.subObject->addObject(std::move(subObject), parent.subCase, std::numeric_limits<size_t>::max());
+	parent.object->addObject(std::move(subObject), parent.subCase, std::numeric_limits<size_t>::max());
 	markModified();
 
 	needFullRefresh = true;
@@ -249,7 +246,7 @@ void AudioObjectEditor::addClip(const String& assetId)
 {
 	auto clip = gameResources.get<AudioClip>(assetId);
 	auto& parent = treeData.at(hierarchy->getSelectedOptionId());
-	parent.subObject->addClip(std::move(clip), std::numeric_limits<size_t>::max());
+	parent.object->addClip(std::move(clip), std::numeric_limits<size_t>::max());
 	markModified();
 
 	needFullRefresh = true;
@@ -277,27 +274,14 @@ void AudioObjectEditor::moveItem(const String& itemId, const String& parentId, c
 void AudioObjectEditor::moveObject(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx)
 {
 	if (parentId == oldParentId) {
-		if (parentId == "root") {
-			auto objs = audioObject->getSubObjects();
-			std::swap(objs[childIdx], objs[oldChildIdx]);
-		} else {
-			// This shouldn't happen!
-			Logger::logError("Moving audio sub object within same parent, outside of root");
-			needFullRefresh = true;
-		}
+		const auto& parent = treeData.at(parentId);
+		auto& a = parent.object->getSubObject(childIdx);
+		auto& b = parent.object->getSubObject(oldChildIdx);
+		std::swap(a, b);
 	} else {
-		if (parentId == "root") {
-			// Move to root
-			// TODO
-		} else if (oldParentId == "root") {
-			// Move from root
-			// TODO
-		} else {
-			// Move between objects
-			const auto& parent = treeData.at(parentId);
-			const auto& oldParent = treeData.at(oldParentId);
-			// TODO
-		}
+		const auto& parent = treeData.at(parentId);
+		const auto& oldParent = treeData.at(oldParentId);
+		// TODO
 
 		needFullRefresh = true;
 	}

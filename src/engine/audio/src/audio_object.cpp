@@ -157,6 +157,31 @@ String AudioObject::toYAML() const
 	return YAMLConvert::generateYAML(toConfigNode(), options);
 }
 
+AudioSubObjectType AudioObject::getType()
+{
+	return AudioSubObjectType::None;
+}
+
+size_t AudioObject::getNumSubObjects() const
+{
+	return objects.size();
+}
+
+AudioSubObjectHandle& AudioObject::getSubObject(size_t n)
+{
+	return objects.at(n);
+}
+
+bool AudioObject::canAddObject(const std::optional<String>& caseName) const
+{
+	return !caseName.has_value();
+}
+
+void AudioObject::addObject(AudioSubObjectHandle object, const std::optional<String>& caseName, size_t idx)
+{
+	objects.insert(objects.begin() + std::min(objects.size(), idx), std::move(object));
+}
+
 void AudioObject::generateId()
 {
 	static std::atomic<AudioObjectId> id = 1;

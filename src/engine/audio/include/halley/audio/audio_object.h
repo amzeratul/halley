@@ -10,7 +10,7 @@ namespace Halley {
 	class AudioSource;
 	class Random;
 
-	class AudioObject final : public Resource {
+	class AudioObject final : public Resource, public IAudioObject {
     public:
     	AudioObject();
 		explicit AudioObject(const ConfigNode& config);
@@ -38,6 +38,12 @@ namespace Halley {
 		void makeDefault();
 		ConfigNode toConfigNode() const;
         String toYAML() const;
+
+        AudioSubObjectType getType() override;
+        size_t getNumSubObjects() const override;
+        AudioSubObjectHandle& getSubObject(size_t n) override;
+        bool canAddObject(const std::optional<String>& caseName) const override;
+        void addObject(AudioSubObjectHandle handle, const std::optional<String>& caseName, size_t idx) override;
 
     private:
 		AudioObjectId audioObjectId;

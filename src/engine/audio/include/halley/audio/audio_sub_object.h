@@ -27,7 +27,23 @@ namespace Halley {
 		}
 	};
 
-	class IAudioSubObject {
+	class IAudioObject {
+	public:
+		virtual ~IAudioObject() = default;
+
+		virtual AudioSubObjectType getType() = 0;
+		virtual size_t getNumSubObjects() const;
+		virtual AudioSubObjectHandle& getSubObject(size_t n);
+		virtual Vector<String> getSubCategories() const;
+		virtual String getSubObjectCategory(size_t n) const;
+		virtual gsl::span<const String> getClips() const;
+		virtual bool canCollapseToClip() const;
+		virtual bool canAddObject(const std::optional<String>& caseName) const;
+		virtual void addObject(AudioSubObjectHandle handle, const std::optional<String>& caseName, size_t idx);
+		virtual void addClip(std::shared_ptr<const AudioClip> clip, size_t idx);
+	};
+
+	class IAudioSubObject : public IAudioObject {
 	public:
 		static std::unique_ptr<IAudioSubObject> makeSubObject(AudioSubObjectType type);
 		static std::unique_ptr<IAudioSubObject> makeSubObject(const ConfigNode& node);
@@ -35,7 +51,6 @@ namespace Halley {
 		virtual ~IAudioSubObject() = default;
 
 		virtual void load(const ConfigNode& node) = 0;
-		virtual AudioSubObjectType getType() = 0;
 
 		virtual std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const = 0;
 		virtual void loadDependencies(Resources& resources) = 0;
@@ -46,15 +61,6 @@ namespace Halley {
 		virtual ConfigNode toConfigNode() const = 0;
 
 		virtual String getName() const = 0;
-		virtual size_t getNumSubObjects() const;
-		virtual AudioSubObjectHandle& getSubObject(size_t n);
-		virtual Vector<String> getSubCategories() const;
-		virtual String getSubObjectCategory(size_t n) const;
-		virtual gsl::span<const String> getClips() const;
-		virtual bool canCollapseToClip() const;
-		virtual bool canAddObject(const std::optional<String>& caseName) const;
-		virtual void addObject(AudioSubObjectHandle handle, const std::optional<String>& caseName, size_t idx);
-		virtual void addClip(std::shared_ptr<const AudioClip> clip, size_t idx);
 	};
 
 	class AudioSubObjectHandle {

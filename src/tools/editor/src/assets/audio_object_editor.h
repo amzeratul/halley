@@ -27,7 +27,7 @@ namespace Halley {
 
 	private:
         struct TreeData {
-	        IAudioSubObject* subObject = nullptr;
+	        IAudioObject* object = nullptr;
             std::optional<String> subCase = {};
             std::optional<String> clip;
         };

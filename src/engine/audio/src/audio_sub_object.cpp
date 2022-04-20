@@ -34,46 +34,46 @@ std::unique_ptr<IAudioSubObject> IAudioSubObject::makeSubObject(const ConfigNode
 	return obj;
 }
 
-size_t IAudioSubObject::getNumSubObjects() const
+size_t IAudioObject::getNumSubObjects() const
 {
 	return 0;
 }
 
-AudioSubObjectHandle& IAudioSubObject::getSubObject(size_t n)
+AudioSubObjectHandle& IAudioObject::getSubObject(size_t n)
 {
 	throw Exception("Sub-object index out of range", HalleyExceptions::AudioEngine);
 }
 
-Vector<String> IAudioSubObject::getSubCategories() const
+Vector<String> IAudioObject::getSubCategories() const
 {
 	return {};
 }
 
-String IAudioSubObject::getSubObjectCategory(size_t n) const
+String IAudioObject::getSubObjectCategory(size_t n) const
 {
 	return "";
 }
 
-gsl::span<const String> IAudioSubObject::getClips() const
+gsl::span<const String> IAudioObject::getClips() const
 {
 	return {};
 }
 
-bool IAudioSubObject::canCollapseToClip() const
+bool IAudioObject::canCollapseToClip() const
 {
 	return false;
 }
 
-bool IAudioSubObject::canAddObject(const std::optional<String>& caseName) const
+bool IAudioObject::canAddObject(const std::optional<String>& caseName) const
 {
 	return false;
 }
 
-void IAudioSubObject::addObject(AudioSubObjectHandle handle, const std::optional<String>& caseName, size_t idx)
+void IAudioObject::addObject(AudioSubObjectHandle handle, const std::optional<String>& caseName, size_t idx)
 {
 }
 
-void IAudioSubObject::addClip(std::shared_ptr<const AudioClip> clip, size_t idx)
+void IAudioObject::addClip(std::shared_ptr<const AudioClip> clip, size_t idx)
 {
 }
 
