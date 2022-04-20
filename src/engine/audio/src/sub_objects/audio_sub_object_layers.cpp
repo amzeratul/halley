@@ -42,7 +42,7 @@ size_t AudioSubObjectLayers::getNumSubObjects() const
 	return layers.size();
 }
 
-const AudioSubObjectHandle& AudioSubObjectLayers::getSubObject(size_t n) const
+AudioSubObjectHandle& AudioSubObjectLayers::getSubObject(size_t n)
 {
 	return layers[n].object;
 }

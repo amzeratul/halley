@@ -47,7 +47,7 @@ namespace Halley {
 
 		virtual String getName() const = 0;
 		virtual size_t getNumSubObjects() const;
-		virtual const AudioSubObjectHandle& getSubObject(size_t n) const;
+		virtual AudioSubObjectHandle& getSubObject(size_t n);
 		virtual Vector<String> getSubCategories() const;
 		virtual String getSubObjectCategory(size_t n) const;
 		virtual gsl::span<const String> getClips() const;

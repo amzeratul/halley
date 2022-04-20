@@ -39,7 +39,7 @@ size_t IAudioSubObject::getNumSubObjects() const
 	return 0;
 }
 
-const AudioSubObjectHandle& IAudioSubObject::getSubObject(size_t n) const
+AudioSubObjectHandle& IAudioSubObject::getSubObject(size_t n)
 {
 	throw Exception("Sub-object index out of range", HalleyExceptions::AudioEngine);
 }

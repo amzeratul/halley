@@ -43,11 +43,11 @@ size_t AudioSubObjectSwitch::getNumSubObjects() const
 	return cases.size();
 }
 
-const AudioSubObjectHandle& AudioSubObjectSwitch::getSubObject(size_t n) const
+AudioSubObjectHandle& AudioSubObjectSwitch::getSubObject(size_t n)
 {
 	// HACK
 	size_t idx = 0;
-	for (const auto& c: cases) {
+	for (auto& c: cases) {
 		if (idx == n) {
 			return c.second;
 		}

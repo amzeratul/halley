@@ -91,7 +91,7 @@ Range<float> AudioObject::getVolume() const
 	return volume;
 }
 
-gsl::span<const AudioSubObjectHandle> AudioObject::getSubObjects() const
+gsl::span<AudioSubObjectHandle> AudioObject::getSubObjects()
 {
 	return objects;
 }

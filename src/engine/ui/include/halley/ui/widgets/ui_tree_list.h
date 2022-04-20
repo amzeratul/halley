@@ -122,6 +122,7 @@ namespace Halley {
         void onItemDoneDragging(UIListItem& item, int index, Vector2f pos) override;
 
     	virtual bool canParentItemTo(const String& itemId, const String& parentId) const;
+        virtual bool canDragItemId(const String& itemId) const;
     	
     private:
         friend class UITreeListItem;

@@ -23,7 +23,7 @@ namespace Halley {
 		Range<float> getPitch() const;
 		Range<float> getVolume() const;
 
-		gsl::span<const AudioSubObjectHandle> getSubObjects() const;
+		gsl::span<AudioSubObjectHandle> getSubObjects();
 
 		std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const;
     	

@@ -16,7 +16,7 @@ namespace Halley {
 
         String getName() const override;
         size_t getNumSubObjects() const override;
-        const AudioSubObjectHandle& getSubObject(size_t n) const override;
+        AudioSubObjectHandle& getSubObject(size_t n) override;
         Vector<String> getSubCategories() const override;
         String getSubObjectCategory(size_t n) const override;
 

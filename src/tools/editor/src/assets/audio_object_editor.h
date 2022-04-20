@@ -18,6 +18,7 @@ namespace Halley {
 
         void onMakeUI() override;
 
+        bool canDragItem(const String& itemId) const;
         bool canParentItemTo(const String& itemId, const String& parentId) const;
 	
     protected:
@@ -26,18 +27,20 @@ namespace Halley {
 
 	private:
         struct TreeData {
-	        AudioSubObjectType type;
-            bool subObject = false;
-            bool clip = false;
+	        IAudioSubObject* subObject = nullptr;
+            std::optional<String> subCase = {};
+            std::optional<String> clip;
         };
 
 		bool modified = false;
+        bool needRefresh = false;
         std::shared_ptr<AudioObject> audioObject;
         std::shared_ptr<AudioObjectEditorTreeList> hierarchy;
         HashMap<String, TreeData> treeData;
 
         void doLoadUI();
-        void populateObject(const String& parentId, size_t idx, const AudioSubObjectHandle& subObject);
+        void populateObject(const String& parentId, size_t idx, AudioSubObjectHandle& subObject);
+        void reparent(const String& itemId, const String& parentId, int childIdx);
 
 		Sprite makeIcon(AudioSubObjectType type) const;
 	};
@@ -50,6 +53,7 @@ namespace Halley {
 
     protected:
         bool canParentItemTo(const String& itemId, const String& parentId) const override;
+        bool canDragItemId(const String& itemId) const override;
 
     private:
         AudioObjectEditor* parent = nullptr;

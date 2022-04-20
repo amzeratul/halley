@@ -196,6 +196,11 @@ bool UITreeList::canParentItemTo(const String& itemId, const String& parentId) c
 	return true;
 }
 
+bool UITreeList::canDragItemId(const String& itemId) const
+{
+	return true;
+}
+
 UITreeListItem& UITreeList::getItemOrRoot(const String& id)
 {
 	const auto res = root.tryFindId(id);
@@ -315,7 +320,7 @@ bool UITreeList::isSingleRoot() const
 
 bool UITreeList::canDragListItem(const UIListItem& listItem)
 {
-	return isDragEnabled() && (!singleRoot || listItem.getAbsoluteIndex() != 0);
+	return isDragEnabled() && (!singleRoot || listItem.getAbsoluteIndex() != 0) && canDragItemId(listItem.getId());
 }
 
 void UITreeList::makeParentsOfItemExpanded(const String& id)
