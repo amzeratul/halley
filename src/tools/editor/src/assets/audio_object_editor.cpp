@@ -143,7 +143,7 @@ void AudioObjectEditor::doLoadUI()
 
 	if (audioObject) {
 		hierarchy->addTreeItem("root", "", 0, LocalisedString::fromUserString(audioObject->getAssetId()), "labelSpecial", factory.makeAssetTypeIcon(AssetType::AudioObject));
-		treeData["root"] = TreeData{ audioObject.get() };
+		treeData["root"] = TreeData{ "", audioObject.get()};
 
 		size_t idx = 0;
 		for (auto& subObject: audioObject->getSubObjects()) {
@@ -167,19 +167,19 @@ void AudioObjectEditor::populateObject(const String& parentId, size_t idx, Audio
 	if (collapse) {
 		for (auto& clip: subObject->getClips()) {
 			hierarchy->addTreeItem(id, parentId, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(clip), "labelSpecial", factory.makeAssetTypeIcon(AssetType::AudioClip));
-			treeData[id] = TreeData{ &subObject.getObject() };
+			treeData[id] = TreeData{ parentId, &subObject.getObject() };
 			break;
 		}
 	} else {
 		// Add this item
 		hierarchy->addTreeItem(id, parentId, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(subObject->getName()), "label", makeIcon(subObject->getType()));
-		treeData[id] = TreeData{ &subObject.getObject() };
+		treeData[id] = TreeData{ parentId, &subObject.getObject() };
 
 		// Add sub-categories
 		for (auto& cat: subObject->getSubCategories()) {
 			const auto catId = id + ":" + cat;
 			hierarchy->addTreeItem(catId, id, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(cat), "label", makeIcon(AudioSubObjectType::None));
-			treeData[catId] = TreeData{ &subObject.getObject(), cat };
+			treeData[catId] = TreeData{ id, &subObject.getObject(), cat };
 		}
 
 		// Populate sub-objects
@@ -194,7 +194,7 @@ void AudioObjectEditor::populateObject(const String& parentId, size_t idx, Audio
 		for (auto& clip: subObject->getClips()) {
 			const auto clipId = id + ":" + clip;
 			hierarchy->addTreeItem(clipId, id, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(clip), "labelSpecial", factory.makeAssetTypeIcon(AssetType::AudioClip));
-			treeData[clipId] = TreeData{ nullptr, {}, clip };
+			treeData[clipId] = TreeData{ id, nullptr, {}, clip };
 		}
 	}
 }
@@ -205,7 +205,7 @@ void AudioObjectEditor::onSelectionChange(const String& id)
 
 	const bool canAdd = data.object && data.object->canAddObject(data.subCase);
 	const bool canAddClip = data.object && data.object->getType() == AudioSubObjectType::Clips;
-	const bool canRemove = id != "root";
+	const bool canRemove = id != "root" && !data.subCase;
 
 	getWidget("add")->setEnabled(canAdd);
 	getWidget("addClip")->setEnabled(canAddClip);
@@ -254,7 +254,13 @@ void AudioObjectEditor::addClip(const String& assetId)
 
 void AudioObjectEditor::removeCurrentSelection()
 {
-	// TODO
+	auto& target = treeData.at(hierarchy->getSelectedOptionId());
+	auto& parent = treeData.at(target.parent);
+	if (target.clip) {
+		parent.object->removeClip(*target.clip);
+	} else {
+		parent.object->removeObject(target.object);
+	}
 
 	markModified();
 	needFullRefresh = true;

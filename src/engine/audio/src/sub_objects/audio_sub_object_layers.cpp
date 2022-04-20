@@ -1,6 +1,7 @@
 #include "audio_sub_object_layers.h"
 #include "halley/bytes/byte_serializer.h"
 #include "../audio_sources/audio_source_layers.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -87,9 +88,21 @@ bool AudioSubObjectLayers::isLayerSynchronised(size_t idx) const
 	return layers.at(idx).synchronised;
 }
 
-bool AudioSubObjectLayers::canAddObject(const std::optional<String>& case_name) const
+bool AudioSubObjectLayers::canAddObject(const std::optional<String>& caseName) const
 {
-	return true;
+	return !caseName;
+}
+
+void AudioSubObjectLayers::addObject(AudioSubObjectHandle audioSubObject, const std::optional<String>& caseName, size_t idx)
+{
+	Layer layer;
+	layer.object = std::move(audioSubObject);
+	layers.insert(layers.begin() + std::min(layers.size(), idx), std::move(layer));
+}
+
+void AudioSubObjectLayers::removeObject(const IAudioObject* object)
+{
+	std_ex::erase_if(layers, [&] (const Layer& layer) { return &layer.object.getObject() == object; });
 }
 
 AudioSubObjectLayers::Layer::Layer(const ConfigNode& node)

@@ -7,6 +7,7 @@
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/maths/random.h"
 #include "halley/support/logger.h"
+#include "halley/utils/algorithm.h"
 #include "sub_objects/audio_sub_object_clips.h"
 
 using namespace Halley;
@@ -180,6 +181,11 @@ bool AudioObject::canAddObject(const std::optional<String>& caseName) const
 void AudioObject::addObject(AudioSubObjectHandle object, const std::optional<String>& caseName, size_t idx)
 {
 	objects.insert(objects.begin() + std::min(objects.size(), idx), std::move(object));
+}
+
+void AudioObject::removeObject(const IAudioObject* object)
+{
+	std_ex::erase_if(objects, [&] (const auto& o) { return &o.getObject() == object; });
 }
 
 void AudioObject::generateId()

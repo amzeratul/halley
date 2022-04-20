@@ -3,6 +3,7 @@
 #include "halley/data_structures/config_node.h"
 
 namespace Halley {
+	class IAudioSubObject;
 	class AudioSubObjectHandle;
 	class AudioEmitter;
 
@@ -40,7 +41,9 @@ namespace Halley {
 		virtual bool canCollapseToClip() const;
 		virtual bool canAddObject(const std::optional<String>& caseName) const;
 		virtual void addObject(AudioSubObjectHandle handle, const std::optional<String>& caseName, size_t idx);
+		virtual void removeObject(const IAudioObject* object);
 		virtual void addClip(std::shared_ptr<const AudioClip> clip, size_t idx);
+		virtual void removeClip(const String& clipId);
 	};
 
 	class IAudioSubObject : public IAudioObject {

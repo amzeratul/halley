@@ -2,6 +2,7 @@
 
 #include "../audio_emitter.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/utils/algorithm.h"
 using namespace Halley;
 
 AudioSubObjectSwitch::AudioSubObjectSwitch(const ConfigNode& node)
@@ -82,6 +83,21 @@ String AudioSubObjectSwitch::getSubObjectCategory(size_t n) const
 bool AudioSubObjectSwitch::canAddObject(const std::optional<String>& caseName) const
 {
 	return caseName.has_value() && cases.find(caseName.value()) == cases.end();
+}
+
+void AudioSubObjectSwitch::addObject(AudioSubObjectHandle audioSubObject, const std::optional<String>& caseName, size_t idx)
+{
+	cases[caseName.value()] = std::move(audioSubObject);
+}
+
+void AudioSubObjectSwitch::removeObject(const IAudioObject* object)
+{
+	for (auto& c: cases) {
+		if (&c.second.getObject() == object) {
+			c.second = AudioSubObjectHandle();
+			return;
+		}
+	}
 }
 
 void AudioSubObjectSwitch::loadDependencies(Resources& resources)
