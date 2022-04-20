@@ -18,7 +18,7 @@ void AudioObjectEditor::onMakeUI()
 	setHandle(UIEventType::TreeItemReparented, "hierarchy", [=] (const UIEvent& event)
 	{
 		for (const auto& e: event.getConfigData().asSequence()) {
-			moveObject(e["itemId"].asString(), e["parentId"].asString(), e["oldParentId"].asString(), e["childIdx"].asInt(), e["oldChildIdx"].asInt());
+			moveItem(e["itemId"].asString(), e["parentId"].asString(), e["oldParentId"].asString(), e["childIdx"].asInt(), e["oldChildIdx"].asInt());
 		}
 	});
 
@@ -71,16 +71,16 @@ bool AudioObjectEditor::canParentItemTo(const String& itemId, const String& pare
 	const auto& parent = treeData.at(parentId);
 
 	if (parent.clip) {
-		return false;
+		return (item.clip || (item.object && item.object->getType() == AudioSubObjectType::Clips));
 	}
 	if (item.clip) {
-		return (parent.object && parent.object->getType() == AudioSubObjectType::Clips);
+		return (parent.object && parent.object->canAddObject(AudioSubObjectType::Clips, parent.subCase));
 	}
 	if (item.subCase) {
 		return false;
 	}
 
-	return true;
+	return parent.object->canAddObject(item.object->getType(), parent.subCase);
 }
 
 void AudioObjectEditor::reload()
@@ -161,7 +161,7 @@ void AudioObjectEditor::populateObject(const String& parentId, size_t idx, Audio
 		return;
 	}
 
-	const bool collapse = subObject->canCollapseToClip() && subObject->getClips().size() == 1;
+	const bool collapse = parentId != "root" && subObject->canCollapseToClip() && subObject->getClips().size() == 1;
 	const auto id = parentId + ":" + toString(idx);
 
 	if (collapse) {
@@ -203,7 +203,7 @@ void AudioObjectEditor::onSelectionChange(const String& id)
 {
 	auto& data = treeData.at(id);
 
-	const bool canAdd = data.object && data.object->canAddObject(data.subCase);
+	const bool canAdd = data.object && data.object->canAddObject(AudioSubObjectType::Switch, data.subCase);
 	const bool canAddClip = data.object && data.object->getType() == AudioSubObjectType::Clips;
 	const bool canRemove = id != "root" && !data.subCase;
 
@@ -246,7 +246,7 @@ void AudioObjectEditor::addClip(const String& assetId)
 {
 	auto clip = gameResources.get<AudioClip>(assetId);
 	auto& parent = treeData.at(hierarchy->getSelectedOptionId());
-	parent.object->addClip(std::move(clip), std::numeric_limits<size_t>::max());
+	parent.object->addClip(std::move(clip), {}, std::numeric_limits<size_t>::max());
 	markModified();
 
 	needFullRefresh = true;
@@ -266,6 +266,7 @@ void AudioObjectEditor::removeCurrentSelection()
 	needFullRefresh = true;
 }
 
+PRAGMA_DEOPTIMIZE
 void AudioObjectEditor::moveItem(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx)
 {
 	const auto& item = treeData.at(itemId);
@@ -298,7 +299,19 @@ void AudioObjectEditor::moveObject(const String& itemId, const String& parentId,
 
 void AudioObjectEditor::moveClip(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx)
 {
-	// TODO
+	if (parentId == oldParentId) {
+		const auto& parent = treeData.at(parentId);
+		parent.object->swapClips(childIdx, oldChildIdx);
+	} else {
+		const auto& item = treeData.at(itemId);
+		const auto& parent = treeData.at(parentId);
+		const auto& oldParent = treeData.at(oldParentId);
+
+		oldParent.object->removeClip(item.clip.value());
+		parent.object->addClip(gameResources.get<AudioClip>(item.clip.value()), parent.subCase, childIdx);
+
+		needFullRefresh = true;
+	}
 }
 
 Sprite AudioObjectEditor::makeIcon(AudioSubObjectType type) const

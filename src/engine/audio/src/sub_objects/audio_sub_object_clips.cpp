@@ -14,6 +14,12 @@ namespace Halley {
 using namespace Halley;
 
 
+AudioSubObjectClips::AudioSubObjectClips(std::shared_ptr<const AudioClip> clip)
+{
+	clipData.push_back(std::move(clip));
+	clips.push_back(clipData.back()->getAssetId());
+}
+
 void AudioSubObjectClips::load(const ConfigNode& node)
 {
 	clips = node["clips"].asVector<String>({});
@@ -104,7 +110,20 @@ void AudioSubObjectClips::deserialize(Deserializer& s)
 	s >> loop;
 }
 
-void AudioSubObjectClips::addClip(std::shared_ptr<const AudioClip> audioClip, size_t idx)
+bool AudioSubObjectClips::canAddObject(AudioSubObjectType type, const std::optional<String>& caseName) const
+{
+	return type == AudioSubObjectType::Clips;
+}
+
+void AudioSubObjectClips::addObject(AudioSubObjectHandle object, const std::optional<String>& caseName, size_t idx)
+{
+	auto& other = dynamic_cast<AudioSubObjectClips&>(object.getObject());
+	const auto pos = std::min(clips.size(), idx);
+	clips.insert(clips.begin() + pos, other.clips.begin(), other.clips.end());
+	clipData.insert(clipData.begin() + pos, other.clipData.begin(), other.clipData.end());
+}
+
+void AudioSubObjectClips::addClip(std::shared_ptr<const AudioClip> audioClip, const std::optional<String>& caseName, size_t idx)
 {
 	const auto pos = std::min(clips.size(), idx);
 	clips.insert(clips.begin() + pos, audioClip->getAssetId());
@@ -119,4 +138,10 @@ void AudioSubObjectClips::removeClip(const String& clipId)
 		clips.erase(iter);
 		clipData.erase(clipData.begin() + pos);
 	}
+}
+
+void AudioSubObjectClips::swapClips(size_t idxA, size_t idxB)
+{
+	std::swap(clips[idxA], clips[idxB]);
+	std::swap(clipData[idxA], clipData[idxB]);
 }

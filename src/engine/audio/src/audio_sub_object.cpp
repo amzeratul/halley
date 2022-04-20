@@ -64,7 +64,7 @@ bool IAudioObject::canCollapseToClip() const
 	return false;
 }
 
-bool IAudioObject::canAddObject(const std::optional<String>& caseName) const
+bool IAudioObject::canAddObject(AudioSubObjectType type, const std::optional<String>& caseName) const
 {
 	return false;
 }
@@ -78,11 +78,16 @@ AudioSubObjectHandle IAudioObject::removeObject(const IAudioObject* object)
 	return AudioSubObjectHandle();
 }
 
-void IAudioObject::addClip(std::shared_ptr<const AudioClip> clip, size_t idx)
+void IAudioObject::addClip(std::shared_ptr<const AudioClip> clip, const std::optional<String>& caseName, size_t idx)
 {
+	addObject(AudioSubObjectHandle(std::make_unique<AudioSubObjectClips>(std::move(clip))), caseName, idx);
 }
 
 void IAudioObject::removeClip(const String& clipId)
+{
+}
+
+void IAudioObject::swapClips(size_t idxA, size_t idxB)
 {
 }
 
@@ -104,7 +109,8 @@ AudioSubObjectHandle::AudioSubObjectHandle(const AudioSubObjectHandle& other)
 AudioSubObjectHandle& AudioSubObjectHandle::operator=(const AudioSubObjectHandle& other)
 {
 	// HACK
-	auto s = Deserializer(Serializer::toBytes(other));
+	auto bytes = Serializer::toBytes(other);
+	auto s = Deserializer(bytes);
 	deserialize(s);
 	return *this;
 }

@@ -88,7 +88,7 @@ bool AudioSubObjectLayers::isLayerSynchronised(size_t idx) const
 	return layers.at(idx).synchronised;
 }
 
-bool AudioSubObjectLayers::canAddObject(const std::optional<String>& caseName) const
+bool AudioSubObjectLayers::canAddObject(AudioSubObjectType type, const std::optional<String>& caseName) const
 {
 	return !caseName;
 }

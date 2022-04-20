@@ -173,7 +173,7 @@ AudioSubObjectHandle& AudioObject::getSubObject(size_t n)
 	return objects.at(n);
 }
 
-bool AudioObject::canAddObject(const std::optional<String>& caseName) const
+bool AudioObject::canAddObject(AudioSubObjectType type, const std::optional<String>& caseName) const
 {
 	return !caseName.has_value();
 }

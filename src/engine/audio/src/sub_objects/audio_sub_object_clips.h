@@ -4,6 +4,9 @@
 namespace Halley {
 	class AudioSubObjectClips final : public IAudioSubObject {
 	public:
+		AudioSubObjectClips() = default;
+		explicit AudioSubObjectClips(std::shared_ptr<const AudioClip> clip);
+
 		void load(const ConfigNode& node) override;
 		ConfigNode toConfigNode() const override;
 		void toLegacyConfigNode(ConfigNode& dst) const;
@@ -20,8 +23,11 @@ namespace Halley {
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
 
-		void addClip(std::shared_ptr<const AudioClip> clip, size_t idx) override;
+		bool canAddObject(AudioSubObjectType type, const std::optional<String>& caseName) const override;
+		void addObject(AudioSubObjectHandle handle, const std::optional<String>& caseName, size_t idx) override;
+		void addClip(std::shared_ptr<const AudioClip> clip, const std::optional<String>& caseName, size_t idx) override;
 		void removeClip(const String& clipId) override;
+		void swapClips(size_t idxA, size_t idxB) override;
 
 	private:
 		Vector<String> clips;

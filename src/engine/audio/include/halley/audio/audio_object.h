@@ -42,7 +42,7 @@ namespace Halley {
         AudioSubObjectType getType() override;
         size_t getNumSubObjects() const override;
         AudioSubObjectHandle& getSubObject(size_t n) override;
-        bool canAddObject(const std::optional<String>& caseName) const override;
+        bool canAddObject(AudioSubObjectType type, const std::optional<String>& caseName) const override;
         void addObject(AudioSubObjectHandle handle, const std::optional<String>& caseName, size_t idx) override;
 		AudioSubObjectHandle removeObject(const IAudioObject* object) override;
 

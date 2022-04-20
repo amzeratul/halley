@@ -80,9 +80,18 @@ String AudioSubObjectSwitch::getSubObjectCategory(size_t n) const
 	return "";
 }
 
-bool AudioSubObjectSwitch::canAddObject(const std::optional<String>& caseName) const
+bool AudioSubObjectSwitch::canAddObject(AudioSubObjectType type, const std::optional<String>& caseName) const
 {
-	return caseName.has_value() && cases.find(caseName.value()) == cases.end();
+	if (!caseName.has_value()) {
+		return false;
+	}
+
+	const auto iter = cases.find(caseName.value());
+	if (iter == cases.end()) {
+		return true;
+	}
+
+	return !iter->second.hasValue();
 }
 
 void AudioSubObjectSwitch::addObject(AudioSubObjectHandle audioSubObject, const std::optional<String>& caseName, size_t idx)
