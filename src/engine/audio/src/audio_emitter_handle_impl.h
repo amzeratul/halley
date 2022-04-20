@@ -14,6 +14,8 @@ namespace Halley {
 
         void setSwitch(String switchId, String value) override;
 		void setVariable(String variableId, float value) override;
+        void setPosition(AudioPosition position) override;
+        void setGain(float gain) override;
 
     private:
         AudioFacade& facade;

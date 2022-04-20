@@ -256,6 +256,7 @@ AudioFade& AudioEventActionObject::getFade()
 
 AudioEventActionPlay::AudioEventActionPlay(bool legacy)
 	: legacy(legacy)
+	, playGain(1, 1)
 {
 }
 

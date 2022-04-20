@@ -15,6 +15,10 @@ component:
   name: AudioSource
   componentDependencies: [Transform2D]
   members:
+  - emitter:
+      type: 'Halley::AudioEmitterHandle'
+      canEdit: false
+      canSave: false
   - event:
       type: 'Halley::ResourceReference<Halley::AudioEvent>'
       displayName: Event
@@ -26,9 +30,5 @@ component:
       type: float
       defaultValue: 100
       displayName: Max Range
-  - playing:
-      type: 'Halley::Vector<Halley::AudioHandle>'
-      canEdit: false
-      canSave: false
 
 ...

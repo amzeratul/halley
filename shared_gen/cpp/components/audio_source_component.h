@@ -1,4 +1,4 @@
-// Halley codegen version 102
+// Halley codegen version 105
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -10,10 +10,10 @@ public:
 	static constexpr int componentIndex{ 7 };
 	static const constexpr char* componentName{ "AudioSource" };
 
+	Halley::AudioEmitterHandle emitter{};
 	Halley::ResourceReference<Halley::AudioEvent> event{};
 	float rangeMin{ 50 };
 	float rangeMax{ 100 };
-	Halley::Vector<Halley::AudioHandle> playing{};
 
 	AudioSourceComponent() {
 	}

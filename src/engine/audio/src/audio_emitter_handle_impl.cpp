@@ -70,3 +70,34 @@ void AudioEmitterHandleImpl::setVariable(String variableId, float value)
 		}
 	});
 }
+
+void AudioEmitterHandleImpl::setPosition(AudioPosition position)
+{
+	AudioEngine* engine = facade.engine.get();
+	const auto emId = id;
+
+	facade.enqueue([=] ()
+	{
+		auto* em = engine->getEmitter(emId);
+		if (em) {
+			em->setPosition(position);
+		}
+	});
+}
+
+void AudioEmitterHandleImpl::setGain(float gain)
+{
+	AudioEngine* engine = facade.engine.get();
+	const auto emId = id;
+
+	facade.enqueue([=] ()
+	{
+		auto* em = engine->getEmitter(emId);
+		if (em) {
+			em->forVoices(0, [&] (AudioVoice& voice)
+			{
+				voice.setUserGain(gain);
+			});
+		}
+	});
+}

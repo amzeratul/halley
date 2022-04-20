@@ -13,6 +13,8 @@
 using namespace Halley;
 
 AudioObject::AudioObject()
+	: pitch(1, 1)
+	, volume(1, 1)
 {
 	generateId();
 }

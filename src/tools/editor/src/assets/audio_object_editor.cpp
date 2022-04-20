@@ -131,7 +131,7 @@ void AudioObjectEditor::update(Time t, bool moved)
 std::shared_ptr<const Resource> AudioObjectEditor::loadResource(const String& assetId)
 {
 	audioObject = std::make_shared<AudioObject>(*gameResources.get<AudioObject>(assetId));
-	audioObject->loadDependencies(gameResources);
+	//audioObject->loadDependencies(gameResources);
 	return audioObject;
 }
 

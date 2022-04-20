@@ -96,6 +96,7 @@ void AudioSubObjectClips::loadDependencies(Resources& resources)
 			}
 		}
 	}
+	depsLoaded = true;
 }
 
 void AudioSubObjectClips::serialize(Serializer& s) const
@@ -120,14 +121,18 @@ void AudioSubObjectClips::addObject(AudioSubObjectHandle object, const std::opti
 	auto& other = dynamic_cast<AudioSubObjectClips&>(object.getObject());
 	const auto pos = std::min(clips.size(), idx);
 	clips.insert(clips.begin() + pos, other.clips.begin(), other.clips.end());
-	clipData.insert(clipData.begin() + pos, other.clipData.begin(), other.clipData.end());
+	if (depsLoaded) {
+		clipData.insert(clipData.begin() + pos, other.clipData.begin(), other.clipData.end());
+	}
 }
 
 void AudioSubObjectClips::addClip(std::shared_ptr<const AudioClip> audioClip, const std::optional<String>& caseName, size_t idx)
 {
 	const auto pos = std::min(clips.size(), idx);
 	clips.insert(clips.begin() + pos, audioClip->getAssetId());
-	clipData.insert(clipData.begin() + pos, std::move(audioClip));
+	if (depsLoaded) {
+		clipData.insert(clipData.begin() + pos, std::move(audioClip));
+	}
 }
 
 void AudioSubObjectClips::removeClip(const String& clipId)
@@ -136,12 +141,16 @@ void AudioSubObjectClips::removeClip(const String& clipId)
 	if (iter != clips.end()) {
 		const auto pos = iter - clips.begin();
 		clips.erase(iter);
-		clipData.erase(clipData.begin() + pos);
+		if (depsLoaded) {
+			clipData.erase(clipData.begin() + pos);
+		}
 	}
 }
 
 void AudioSubObjectClips::swapClips(size_t idxA, size_t idxB)
 {
 	std::swap(clips[idxA], clips[idxB]);
-	std::swap(clipData[idxA], clipData[idxB]);
+	if (depsLoaded) {
+		std::swap(clipData[idxA], clipData[idxB]);
+	}
 }

@@ -35,5 +35,6 @@ namespace Halley {
 		bool loop = false;
 		int loopStart = 0;
 		int loopEnd = 0;
+		bool depsLoaded = false;
 	};
 }

@@ -177,6 +177,8 @@ namespace Halley
 
 		virtual void setSwitch(String switchId, String value) = 0;
 		virtual void setVariable(String variableId, float value) = 0;
+		virtual void setPosition(AudioPosition position) = 0;
+		virtual void setGain(float gain) = 0;
 
 		/// Allows emitter to remain alive after handle is destroyed, as long as it has sound playing
 		virtual void detach() = 0;
