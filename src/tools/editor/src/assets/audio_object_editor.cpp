@@ -115,6 +115,23 @@ void AudioObjectEditor::save()
 	}
 }
 
+std::shared_ptr<const Resource> AudioObjectEditor::loadResource(const String& assetId)
+{
+	const auto assetPath = project.getImportAssetsDatabase().getPrimaryInputFile(assetType, assetId);
+	const auto assetData = Path::readFile(project.getAssetsSrcPath() / assetPath);
+
+	if (!assetData.empty()) {
+		auto config = YAMLConvert::parseConfig(assetData);
+		audioObject = std::make_shared<AudioObject>(config.getRoot());
+	} else {
+		audioObject = std::make_shared<AudioObject>();
+		markModified();
+	}
+	audioObject->setAssetId(assetId);
+	
+	return audioObject;
+}
+
 void AudioObjectEditor::markModified()
 {
 	modified = true;
@@ -126,13 +143,6 @@ void AudioObjectEditor::update(Time t, bool moved)
 		doLoadUI();
 		needFullRefresh = false;
 	}
-}
-
-std::shared_ptr<const Resource> AudioObjectEditor::loadResource(const String& assetId)
-{
-	audioObject = std::make_shared<AudioObject>(*gameResources.get<AudioObject>(assetId));
-	//audioObject->loadDependencies(gameResources);
-	return audioObject;
 }
 
 void AudioObjectEditor::doLoadUI()

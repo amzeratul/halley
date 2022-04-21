@@ -105,7 +105,18 @@ void AudioEventEditor::update(Time t, bool moved)
 
 std::shared_ptr<const Resource> AudioEventEditor::loadResource(const String& id)
 {
-	audioEvent = std::make_shared<AudioEvent>(*gameResources.get<AudioEvent>(id));
+	const auto assetPath = project.getImportAssetsDatabase().getPrimaryInputFile(assetType, assetId);
+	const auto assetData = Path::readFile(project.getAssetsSrcPath() / assetPath);
+
+	if (!assetData.empty()) {
+		auto config = YAMLConvert::parseConfig(assetData);
+		audioEvent = std::make_shared<AudioEvent>(config.getRoot());
+	} else {
+		audioEvent = std::make_shared<AudioEvent>();
+		markModified();
+	}
+	audioEvent->setAssetId(assetId);
+	
 	return audioEvent;
 }
 
