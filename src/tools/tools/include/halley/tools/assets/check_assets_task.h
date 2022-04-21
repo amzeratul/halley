@@ -19,6 +19,8 @@ namespace Halley
 		void run() override;
 
 	private:
+		using AssetMap = ImportAssetsDatabase::AssetMap;
+
 		Project& project;
 		std::shared_ptr<AssetImporter> projectAssetImporter;
 
@@ -38,14 +40,14 @@ namespace Halley
 		Vector<Path> inbox;
 		Vector<Path> pending;
 
-		static bool hasAssetsToImport(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets);
-		static Vector<ImportAssetsDatabaseEntry> getAssetsToImport(ImportAssetsDatabase& db, const std::map<String, ImportAssetsDatabaseEntry>& assets);
+		static bool hasAssetsToImport(ImportAssetsDatabase& db, const AssetMap& assets);
+		static Vector<ImportAssetsDatabaseEntry> getAssetsToImport(ImportAssetsDatabase& db, const AssetMap& assets);
 		
-		std::map<String, ImportAssetsDatabaseEntry> checkSpecificAssets(ImportAssetsDatabase& db, const Vector<Path>& path);
-		std::map<String, ImportAssetsDatabaseEntry> checkAllAssets(ImportAssetsDatabase& db, Vector<Path> srcPaths, bool collectDirMeta);
-		bool requestImport(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry> assets, Path dstPath, String taskName, bool packAfter);
+		AssetMap checkSpecificAssets(ImportAssetsDatabase& db, const Vector<Path>& path);
+		AssetMap checkAllAssets(ImportAssetsDatabase& db, Vector<Path> srcPaths, bool collectDirMeta);
+		bool requestImport(ImportAssetsDatabase& db, AssetMap assets, Path dstPath, String taskName, bool packAfter);
 		std::optional<Path> findDirectoryMeta(const Vector<Path>& metas, const Path& path) const;
-		bool importFile(ImportAssetsDatabase& db, std::map<String, ImportAssetsDatabaseEntry>& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath);
+		bool importFile(ImportAssetsDatabase& db, AssetMap& assets, bool isCodegen, bool skipGen, const Vector<Path>& directoryMetas, const Path& srcPath, const Path& filePath);
 		void sleep(int ms);
 	};
 }
