@@ -9,5 +9,22 @@ children:
   - widget: { id: content, class: widget }
     border: [1, 4, 1, 1]
     proportion: 1
-    sizer: { type: vertical, gap: 3 }
-    children: []
+    sizer: { type: grid, columns: 2, columnProportions: [0, 1] }
+    children:
+    - widget: { class: widget, size: [150, 20] }
+      children:
+      - widget: { class: label, text: "Group:" }
+    - widget: { id: group, class: textInput, size: [200, 20] }
+      fill: left
+    - widget: { class: label, text: "Gain:" }
+    - sizer: { type: horizontal }
+      children:
+      - widget: { id: gainMin, class: textInput, size: [50, 20], validator: numericPositive }
+      - widget: { class: label, text: " ~ " }
+      - widget: { id: gainMax, class: textInput, size: [50, 20], validator: numericPositive }
+    - widget: { class: label, text: "Pitch:" }
+    - sizer: { type: horizontal }
+      children:
+      - widget: { id: pitchMin, class: textInput, size: [50, 20], validator: numericPositive }
+      - widget: { class: label, text: " ~ " }
+      - widget: { id: pitchMax, class: textInput, size: [50, 20], validator: numericPositive }

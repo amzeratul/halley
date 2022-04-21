@@ -6,7 +6,7 @@
 #include "audio_object.h"
 #include "audio_source_clip.h"
 #include "../audio_mixer.h"
-#include "../sub_objects/audio_sub_object_layers.h"
+#include "sub_objects/audio_sub_object_layers.h"
 
 using namespace Halley;
 

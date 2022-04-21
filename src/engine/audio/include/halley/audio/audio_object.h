@@ -22,6 +22,9 @@ namespace Halley {
 		const String& getGroup() const;
 		Range<float> getPitch() const;
 		Range<float> getGain() const;
+		Range<float>& getPitch();
+		Range<float>& getGain();
+        void setGroup(String group);
 
 		gsl::span<AudioSubObjectHandle> getSubObjects();
 

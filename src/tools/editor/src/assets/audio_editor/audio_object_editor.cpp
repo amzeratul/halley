@@ -340,13 +340,13 @@ void AudioObjectEditor::setCurrentObject(IAudioObject* object)
 		switch (currentObject->getType()) {
 		case AudioSubObjectType::None:
 			// Root
-			setCurrentObjectEditor(std::make_shared<AudioRootEditor>(factory, dynamic_cast<AudioObject&>(*object)));
+			setCurrentObjectEditor(std::make_shared<AudioRootEditor>(factory, *this, dynamic_cast<AudioObject&>(*object)));
 			break;
 		case AudioSubObjectType::Clips:
 			setCurrentObjectEditor({});
 			break;
 		case AudioSubObjectType::Layers:
-			setCurrentObjectEditor(std::make_shared<AudioLayersEditor>(factory, dynamic_cast<AudioSubObjectLayers&>(*object)));
+			setCurrentObjectEditor(std::make_shared<AudioLayersEditor>(factory, *this, dynamic_cast<AudioSubObjectLayers&>(*object)));
 			break;
 		case AudioSubObjectType::Sequence:
 			setCurrentObjectEditor({});

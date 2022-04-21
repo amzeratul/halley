@@ -94,6 +94,21 @@ Range<float> AudioObject::getGain() const
 	return gain;
 }
 
+Range<float>& AudioObject::getPitch()
+{
+	return pitch;
+}
+
+Range<float>& AudioObject::getGain()
+{
+	return gain;
+}
+
+void AudioObject::setGroup(String group)
+{
+	this->group = std::move(group);
+}
+
 gsl::span<AudioSubObjectHandle> AudioObject::getSubObjects()
 {
 	return objects;
