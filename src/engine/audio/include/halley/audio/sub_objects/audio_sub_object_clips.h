@@ -1,5 +1,5 @@
 #pragma once
-#include "audio_sub_object.h"
+#include "../audio_sub_object.h"
 
 namespace Halley {
 	class AudioSubObjectClips final : public IAudioSubObject {

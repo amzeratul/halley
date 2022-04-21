@@ -43,6 +43,10 @@ set(HEADERS
         "include/halley/audio/audio_sub_object.h"
         "include/halley/audio/halley_audio.h"
         "include/halley/audio/vorbis_dec.h"
+        "include/halley/audio/sub_objects/audio_sub_object_clips.h"
+        "include/halley/audio/sub_objects/audio_sub_object_layers.h"
+        "include/halley/audio/sub_objects/audio_sub_object_sequence.h"
+        "include/halley/audio/sub_objects/audio_sub_object_switch.h"
         "src/audio_sources/audio_source_clip.h"
         "src/audio_sources/audio_source_layers.h"
         "src/audio_sources/audio_source_sequence.h"
@@ -54,10 +58,6 @@ set(HEADERS
         "src/audio_handle_impl.h"
         "src/audio_mixer.h"
         "src/audio_voice.h"
-        "src/sub_objects/audio_sub_object_clips.h"
-        "src/sub_objects/audio_sub_object_layers.h"
-        "src/sub_objects/audio_sub_object_sequence.h"
-        "src/sub_objects/audio_sub_object_switch.h"
         )
 
 set(SOURCES ${SOURCES} ${OGG_FILES} ${VORBIS_FILES})

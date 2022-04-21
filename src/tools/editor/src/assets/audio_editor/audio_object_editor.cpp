@@ -1,7 +1,11 @@
 #include "audio_object_editor.h"
+
+#include "audio_layers_editor.h"
+#include "audio_root_editor.h"
 #include "halley/audio/audio_object.h"
 #include "halley/tools/project/project.h"
 #include "src/scene/choose_window.h"
+#include "halley/audio/sub_objects/audio_sub_object_layers.h"
 using namespace Halley;
 
 AudioObjectEditor::AudioObjectEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow)
@@ -336,19 +340,19 @@ void AudioObjectEditor::setCurrentObject(IAudioObject* object)
 		switch (currentObject->getType()) {
 		case AudioSubObjectType::None:
 			// Root
-			// TODO
+			setCurrentObjectEditor(std::make_shared<AudioRootEditor>(factory, dynamic_cast<AudioObject&>(*object)));
 			break;
 		case AudioSubObjectType::Clips:
-			// TODO
+			setCurrentObjectEditor({});
 			break;
 		case AudioSubObjectType::Layers:
-			// TODO
+			setCurrentObjectEditor(std::make_shared<AudioLayersEditor>(factory, dynamic_cast<AudioSubObjectLayers&>(*object)));
 			break;
 		case AudioSubObjectType::Sequence:
-			// TODO
+			setCurrentObjectEditor({});
 			break;
 		case AudioSubObjectType::Switch:
-			// TODO
+			setCurrentObjectEditor({});
 			break;
 		}
 	}
@@ -360,7 +364,9 @@ void AudioObjectEditor::setCurrentObjectEditor(std::shared_ptr<UIWidget> widget)
 		currentObjectEditor->destroy();
 	}
 	currentObjectEditor = std::move(widget);
-	getWidget("contents")->add(currentObjectEditor, 1);
+	if (currentObjectEditor) {
+		getWidget("contents")->add(currentObjectEditor, 1);
+	}
 }
 
 Sprite AudioObjectEditor::makeIcon(AudioSubObjectType type) const

@@ -1,7 +1,7 @@
 #pragma once
-#include "audio_expression.h"
-#include "audio_fade.h"
-#include "audio_sub_object.h"
+#include "../audio_expression.h"
+#include "../audio_fade.h"
+#include "../audio_sub_object.h"
 
 namespace Halley {
 	class AudioSubObjectLayers final : public IAudioSubObject {
