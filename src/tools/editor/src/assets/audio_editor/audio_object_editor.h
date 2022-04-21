@@ -1,5 +1,5 @@
 #pragma once
-#include "asset_editor.h"
+#include "../asset_editor.h"
 #include "halley/audio/audio_sub_object.h"
 
 namespace Halley {

@@ -5,7 +5,7 @@
 #include "select_asset_widget.h"
 #include "src/assets/animation_editor.h"
 #include "src/assets/asset_editor_window.h"
-#include "src/assets/audio_object_editor.h"
+#include "src/assets/audio_editor/audio_object_editor.h"
 #include "src/assets/metadata_editor.h"
 #include "src/assets/ui_editor/ui_editor_display.h"
 #include "src/assets/ui_editor/ui_widget_editor.h"

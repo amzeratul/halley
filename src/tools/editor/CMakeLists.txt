@@ -16,11 +16,12 @@ set (editor_sources
 	"src/assets/asset_editor.cpp"
 	"src/assets/assets_browser.cpp"
 	"src/assets/asset_browser_tabs.cpp"
-	"src/assets/audio_event_editor.cpp"
-	"src/assets/audio_object_editor.cpp"
 	"src/assets/metadata_editor.cpp"
 	"src/assets/new_asset_window.cpp"
 	"src/assets/prefab_editor.cpp"
+
+	"src/assets/audio_editor/audio_event_editor.cpp"
+	"src/assets/audio_editor/audio_object_editor.cpp"
 
 	"src/assets/ui_editor/ui_editor.cpp"
 	"src/assets/ui_editor/ui_editor_display.cpp"
@@ -82,11 +83,12 @@ set (editor_headers
 	"src/assets/asset_editor.h"
 	"src/assets/assets_browser.h"
 	"src/assets/asset_browser_tabs.h"
-	"src/assets/audio_event_editor.h"
-	"src/assets/audio_object_editor.h"
 	"src/assets/metadata_editor.h"
 	"src/assets/new_asset_window.h"
 	"src/assets/prefab_editor.h"
+
+	"src/assets/audio_editor/audio_event_editor.h"
+	"src/assets/audio_editor/audio_object_editor.h"
 
 	"src/assets/ui_editor/ui_editor.h"
 	"src/assets/ui_editor/ui_editor_display.h"

@@ -1,5 +1,5 @@
 #pragma once
-#include "asset_editor.h"
+#include "../asset_editor.h"
 
 namespace Halley {
 	class AudioEventEditor : public AssetEditor {
