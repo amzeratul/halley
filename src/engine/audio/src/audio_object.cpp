@@ -14,7 +14,7 @@ using namespace Halley;
 
 AudioObject::AudioObject()
 	: pitch(1, 1)
-	, volume(1, 1)
+	, gain(1, 1)
 {
 	generateId();
 }
@@ -25,7 +25,7 @@ AudioObject::AudioObject(const ConfigNode& node)
 
 	group = node["group"].asString("");
 	pitch = node["pitch"].asFloatRange(Range<float>(1, 1));
-	volume = node["volume"].asFloatRange(Range<float>(1, 1));
+	gain = node["gain"].asFloatRange(Range<float>(1, 1));
 	objects = node["objects"].asVector<AudioSubObjectHandle>({});
 }
 
@@ -39,8 +39,8 @@ ConfigNode AudioObject::toConfigNode() const
 	if (pitch != Range<float>(1, 1)) {
 		result["pitch"] = pitch;
 	}
-	if (volume != Range<float>(1, 1)) {
-		result["volume"] = volume;
+	if (gain != Range<float>(1, 1)) {
+		result["gain"] = gain;
 	}
 	result["objects"] = objects;
 	
@@ -51,7 +51,7 @@ void AudioObject::loadLegacyEvent(const ConfigNode& node)
 {
 	group = node["group"].asString("");
 	pitch = node["pitch"].asFloatRange(Range<float>(1, 1));
-	volume = node["volume"].asFloatRange(Range<float>(1, 1));
+	gain = node["gain"].asFloatRange(Range<float>(1, 1));
 
 	auto clips = std::make_unique<AudioSubObjectClips>();
 	clips->load(node);
@@ -68,8 +68,8 @@ void AudioObject::legacyToConfigNode(ConfigNode& result) const
 	if (pitch != Range<float>(1, 1)) {
 		result["pitch"] = pitch;
 	}
-	if (volume != Range<float>(1, 1)) {
-		result["volume"] = volume;
+	if (gain != Range<float>(1, 1)) {
+		result["gain"] = gain;
 	}
 	dynamic_cast<const AudioSubObjectClips&>(objects[0].getObject()).toLegacyConfigNode(result);
 }
@@ -89,9 +89,9 @@ Range<float> AudioObject::getPitch() const
 	return pitch;
 }
 
-Range<float> AudioObject::getVolume() const
+Range<float> AudioObject::getGain() const
 {
-	return volume;
+	return gain;
 }
 
 gsl::span<AudioSubObjectHandle> AudioObject::getSubObjects()
@@ -112,7 +112,7 @@ void AudioObject::serialize(Serializer& s) const
 {
 	s << group;
 	s << pitch;
-	s << volume;
+	s << gain;
 	s << objects;
 }
 
@@ -120,7 +120,7 @@ void AudioObject::deserialize(Deserializer& s)
 {
 	s >> group;
 	s >> pitch;
-	s >> volume;
+	s >> gain;
 	s >> objects;
 }
 

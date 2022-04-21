@@ -21,7 +21,7 @@ namespace Halley {
         AudioObjectId getAudioObjectId() const;
 		const String& getGroup() const;
 		Range<float> getPitch() const;
-		Range<float> getVolume() const;
+		Range<float> getGain() const;
 
 		gsl::span<AudioSubObjectHandle> getSubObjects();
 
@@ -52,7 +52,7 @@ namespace Halley {
 		
 		String group;
 		Range<float> pitch;
-		Range<float> volume;
+		Range<float> gain;
 
 		void generateId();
     };
