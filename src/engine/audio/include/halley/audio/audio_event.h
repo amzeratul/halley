@@ -1,11 +1,8 @@
 #pragma once
 #include "halley/resources/resource.h"
 #include "halley/maths/range.h"
-#include "halley/data_structures/maybe.h"
 #include "audio_clip.h"
-#include "audio_dynamics_config.h"
 #include "audio_fade.h"
-#include "audio_position.h"
 
 namespace Halley
 {
@@ -18,7 +15,6 @@ namespace Halley
 	class ResourceLoader;
 	class IAudioEventAction;
 	class Resources;
-	class AudioDynamicsConfig;
 
 	enum class AudioEventActionType
 	{

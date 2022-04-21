@@ -5,7 +5,6 @@ include_directories(${Boost_INCLUDE_DIR} "include/halley/audio" "../utils/includ
 set(SOURCES
         "src/audio_buffer.cpp"
         "src/audio_clip.cpp"
-        "src/audio_dynamics_config.cpp"
         "src/audio_emitter.cpp"
         "src/audio_emitter_handle_impl.cpp"
         "src/audio_engine.cpp"
@@ -33,7 +32,6 @@ set(SOURCES
 
 set(HEADERS
         "include/halley/audio/audio_clip.h"
-        "include/halley/audio/audio_dynamics_config.h"
         "include/halley/audio/audio_event.h"
         "include/halley/audio/audio_expression.h"
         "include/halley/audio/audio_facade.h"
