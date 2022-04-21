@@ -32,7 +32,7 @@ namespace Halley {
 	public:
 		virtual ~IAudioObject() = default;
 
-		virtual AudioSubObjectType getType() = 0;
+		virtual AudioSubObjectType getType() const = 0;
 		virtual size_t getNumSubObjects() const;
 		virtual AudioSubObjectHandle& getSubObject(size_t n);
 		virtual Vector<String> getSubCategories() const;

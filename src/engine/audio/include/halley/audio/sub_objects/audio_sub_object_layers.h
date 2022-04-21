@@ -9,7 +9,7 @@ namespace Halley {
 		void load(const ConfigNode& node) override;
 		ConfigNode toConfigNode() const override;
 
-		AudioSubObjectType getType() override { return AudioSubObjectType::Layers; }
+		AudioSubObjectType getType() const override { return AudioSubObjectType::Layers; }
 
 		String getName() const override;
 		size_t getNumSubObjects() const override;

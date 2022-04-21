@@ -11,7 +11,7 @@ namespace Halley {
     	
 	    void load(const ConfigNode& node) override;
 
-        AudioSubObjectType getType() override { return AudioSubObjectType::Switch; }
+        AudioSubObjectType getType() const override { return AudioSubObjectType::Switch; }
 	    std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const override;
 
         String getName() const override;

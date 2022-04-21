@@ -1,4 +1,4 @@
-#include "audio_sub_object_sequence.h"
+#include "sub_objects/audio_sub_object_sequence.h"
 using namespace Halley;
 
 void AudioSubObjectSequence::load(const ConfigNode& node)
@@ -9,7 +9,7 @@ void AudioSubObjectSequence::load(const ConfigNode& node)
 ConfigNode AudioSubObjectSequence::toConfigNode() const
 {
 	ConfigNode::MapType result;
-	// TODO
+	result["type"] = toString(getType());
 	return result;
 }
 

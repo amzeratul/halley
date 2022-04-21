@@ -11,7 +11,7 @@ namespace Halley {
 		ConfigNode toConfigNode() const override;
 		void toLegacyConfigNode(ConfigNode& dst) const;
 
-		AudioSubObjectType getType() override { return AudioSubObjectType::Clips; }
+		AudioSubObjectType getType() const override { return AudioSubObjectType::Clips; }
 
 		String getName() const override;
 		gsl::span<const String> getClips() const override;

@@ -42,7 +42,7 @@ namespace Halley {
 		ConfigNode toConfigNode() const;
         String toYAML() const;
 
-        AudioSubObjectType getType() override;
+        AudioSubObjectType getType() const override;
         size_t getNumSubObjects() const override;
         AudioSubObjectHandle& getSubObject(size_t n) override;
         bool canAddObject(AudioSubObjectType type, const std::optional<String>& caseName) const override;

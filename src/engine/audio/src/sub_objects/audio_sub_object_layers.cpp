@@ -1,6 +1,7 @@
-#include "audio_sub_object_layers.h"
-#include "halley/bytes/byte_serializer.h"
+#include "sub_objects/audio_sub_object_layers.h"
 #include "../audio_sources/audio_source_layers.h"
+#include "audio_sub_object.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
@@ -23,6 +24,7 @@ ConfigNode AudioSubObjectLayers::toConfigNode() const
 {
 	ConfigNode::MapType result;
 
+	result["type"] = toString(getType());
 	if (!layers.empty()) {
 		result["layers"] = layers;
 	}

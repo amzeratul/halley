@@ -175,7 +175,7 @@ String AudioObject::toYAML() const
 	return YAMLConvert::generateYAML(toConfigNode(), options);
 }
 
-AudioSubObjectType AudioObject::getType()
+AudioSubObjectType AudioObject::getType() const
 {
 	return AudioSubObjectType::None;
 }

@@ -1,4 +1,4 @@
-#include "audio_sub_object_clips.h"
+#include "sub_objects/audio_sub_object_clips.h"
 
 #include "halley/core/resources/resources.h"
 #include "halley/support/logger.h"
@@ -33,6 +33,7 @@ ConfigNode AudioSubObjectClips::toConfigNode() const
 {
 	ConfigNode::MapType result;
 
+	result["type"] = toString(getType());
 	if (!clips.empty()) {
 		result["clips"] = clips;
 	}

@@ -1,4 +1,4 @@
-#include "audio_sub_object_switch.h"
+#include "sub_objects/audio_sub_object_switch.h"
 
 #include "../audio_emitter.h"
 #include "halley/bytes/byte_serializer.h"
@@ -19,6 +19,7 @@ void AudioSubObjectSwitch::load(const ConfigNode& node)
 ConfigNode AudioSubObjectSwitch::toConfigNode() const
 {
 	ConfigNode::MapType result;
+	result["type"] = toString(getType());
 	result["switchId"] = switchId;
 	result["cases"] = cases;
 	return result;
