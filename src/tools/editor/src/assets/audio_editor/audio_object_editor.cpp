@@ -227,7 +227,9 @@ void AudioObjectEditor::onSelectionChange(const String& id)
 	getWidget("addClip")->setEnabled(canAddClip);
 	getWidget("remove")->setEnabled(canRemove);
 
-	setCurrentObject(data.object);
+	if (data.object) {
+		setCurrentObject(data.object);
+	}
 }
 
 void AudioObjectEditor::addObject()
