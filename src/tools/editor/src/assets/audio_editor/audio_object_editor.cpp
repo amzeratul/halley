@@ -128,6 +128,8 @@ std::shared_ptr<const Resource> AudioObjectEditor::loadResource(const String& as
 		markModified();
 	}
 	audioObject->setAssetId(assetId);
+
+	setCurrentObject(audioObject.get());
 	
 	return audioObject;
 }
@@ -220,6 +222,8 @@ void AudioObjectEditor::onSelectionChange(const String& id)
 	getWidget("add")->setEnabled(canAdd);
 	getWidget("addClip")->setEnabled(canAddClip);
 	getWidget("remove")->setEnabled(canRemove);
+
+	setCurrentObject(data.object);
 }
 
 void AudioObjectEditor::addObject()
@@ -322,6 +326,41 @@ void AudioObjectEditor::moveClip(const String& itemId, const String& parentId, c
 
 		needFullRefresh = true;
 	}
+}
+
+void AudioObjectEditor::setCurrentObject(IAudioObject* object)
+{
+	if (currentObject != object) {
+		currentObject = object;
+
+		switch (currentObject->getType()) {
+		case AudioSubObjectType::None:
+			// Root
+			// TODO
+			break;
+		case AudioSubObjectType::Clips:
+			// TODO
+			break;
+		case AudioSubObjectType::Layers:
+			// TODO
+			break;
+		case AudioSubObjectType::Sequence:
+			// TODO
+			break;
+		case AudioSubObjectType::Switch:
+			// TODO
+			break;
+		}
+	}
+}
+
+void AudioObjectEditor::setCurrentObjectEditor(std::shared_ptr<UIWidget> widget)
+{
+	if (currentObjectEditor) {
+		currentObjectEditor->destroy();
+	}
+	currentObjectEditor = std::move(widget);
+	getWidget("contents")->add(currentObjectEditor, 1);
 }
 
 Sprite AudioObjectEditor::makeIcon(AudioSubObjectType type) const

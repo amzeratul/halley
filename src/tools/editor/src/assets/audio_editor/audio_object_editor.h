@@ -40,6 +40,9 @@ namespace Halley {
         std::shared_ptr<AudioObjectEditorTreeList> hierarchy;
         HashMap<String, TreeData> treeData;
 
+        IAudioObject* currentObject = nullptr;
+        std::shared_ptr<UIWidget> currentObjectEditor;
+
         void doLoadUI();
         void populateObject(const String& parentId, size_t idx, AudioSubObjectHandle& subObject);
 
@@ -53,6 +56,9 @@ namespace Halley {
 		void moveItem(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx);
         void moveObject(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx);
         void moveClip(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx);
+
+        void setCurrentObject(IAudioObject* object);
+        void setCurrentObjectEditor(std::shared_ptr<UIWidget> widget);
 
 		Sprite makeIcon(AudioSubObjectType type) const;
 	};
