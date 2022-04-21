@@ -35,6 +35,8 @@ namespace Halley {
 		bool loop = false;
 		int loopStart = 0;
 		int loopEnd = 0;
+		Range<float> gain = Range<float>(1, 1);
+
 		bool depsLoaded = false;
 	};
 }

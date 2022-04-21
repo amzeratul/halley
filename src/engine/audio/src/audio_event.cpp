@@ -288,7 +288,7 @@ bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, Audio
 	const uint32_t audioObjectId = object->getAudioObjectId();
 
 	const auto gainRange = object->getVolume() * playGain;
-	const float gain = engine.getRNG().getFloat(gainRange.start, gainRange.end);
+	const float gain = engine.getRNG().getFloat(gainRange);
 	const auto pitchRange = object->getPitch();
 	const float pitch = clamp(engine.getRNG().getFloat(pitchRange.start, pitchRange.end), 0.1f, 2.0f);
 	const auto delaySamples = std::lroundf(delay * static_cast<float>(AudioConfig::sampleRate));

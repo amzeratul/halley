@@ -26,6 +26,8 @@
 #include <gsl/span>
 #include <cstdint>
 
+#include "range.h"
+
 namespace Halley {
 	class MT199937AR;
 
@@ -51,6 +53,7 @@ namespace Halley {
 		uint64_t getInt(uint64_t min, uint64_t max); // [min, max]
 		size_t getSizeT(size_t min, size_t max); // [min, max]
 		float getFloat(float min, float max); // [min, max)
+		float getFloat(Range<float> range); // [range.start, range.end)
 		double getDouble(double min, double max); // [min, max)
 
 		// NOTE THAT THIS IS ALWAYS EXCLUSIVE ON MAX

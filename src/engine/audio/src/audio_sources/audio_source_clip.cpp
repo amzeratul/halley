@@ -6,10 +6,12 @@
 using namespace Halley;
 
 
-AudioSourceClip::AudioSourceClip(std::shared_ptr<const IAudioClip> c, bool looping, int64_t loopStart, int64_t loopEnd)
+AudioSourceClip::AudioSourceClip(std::shared_ptr<const IAudioClip> c, bool looping, float gain, int64_t loopStart, int64_t loopEnd)
 	: clip(std::move(c))
 	, loopStart(loopStart)
 	, loopEnd(loopEnd)
+	, gain(gain)
+	, prevGain(gain)
 	, looping(looping)
 {
 	Expects(clip != nullptr);
@@ -60,7 +62,7 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 			// We have some samples that we can read, so go ahead with reading them
 			for (size_t ch = 0; ch < nChannels; ++ch) {
 				auto dst = dstChannels[ch].subspan(samplesWritten, samplesToRead);
-				const size_t nCopied = clip->copyChannelData(ch, static_cast<size_t>(playbackPos), samplesToRead, dst);
+				const size_t nCopied = clip->copyChannelData(ch, static_cast<size_t>(playbackPos), samplesToRead, prevGain, gain, dst);
 				Expects(nCopied <= samplesRequested * sizeof(AudioSample));
 			}
 
@@ -72,6 +74,8 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 			samplesWritten += samplesRemaining;
 		}
 	}
+
+	prevGain = gain;
 
 	return isPlaying;
 }

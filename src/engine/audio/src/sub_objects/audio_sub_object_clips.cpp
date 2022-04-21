@@ -24,6 +24,7 @@ void AudioSubObjectClips::load(const ConfigNode& node)
 {
 	clips = node["clips"].asVector<String>({});
 	loop = node["loop"].asBool(false);
+	gain = node["gain"].asFloatRange(Range<float>(1, 1));
 	loopStart = node["loopStart"].asInt(0);
 	loopEnd = node["loopEnd"].asInt(0);
 }
@@ -37,6 +38,9 @@ ConfigNode AudioSubObjectClips::toConfigNode() const
 	}
 	if (loop) {
 		result["loop"] = loop;
+	}
+	if (gain != Range<float>(1, 1)) {
+		result["gain"] = gain;
 	}
 	if (loopStart != 0) {
 		result["loopStart"] = loopStart;
@@ -78,7 +82,7 @@ std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine
 	}
 
 	auto clip = engine.getRNG().getRandomElement(clipData);
-	return std::make_unique<AudioSourceClip>(clip, loop, loopStart, loopEnd);
+	return std::make_unique<AudioSourceClip>(clip, loop, engine.getRNG().getFloat(gain), loopStart, loopEnd);
 }
 
 void AudioSubObjectClips::loadDependencies(Resources& resources)
@@ -103,12 +107,18 @@ void AudioSubObjectClips::serialize(Serializer& s) const
 {
 	s << clips;
 	s << loop;
+	s << gain;
+	s << loopStart;
+	s << loopEnd;
 }
 
 void AudioSubObjectClips::deserialize(Deserializer& s)
 {
 	s >> clips;
 	s >> loop;
+	s >> gain;
+	s >> loopStart;
+	s >> loopEnd;
 }
 
 bool AudioSubObjectClips::canAddObject(AudioSubObjectType type, const std::optional<String>& caseName) const

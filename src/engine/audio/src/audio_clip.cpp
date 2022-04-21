@@ -1,4 +1,6 @@
 #include "audio_clip.h"
+
+#include "audio_mixer.h"
 #include "halley/resources/resource_data.h"
 #include "vorbis_dec.h"
 #include "halley/resources/metadata.h"
@@ -75,7 +77,7 @@ void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadat
 	doneLoading();
 }
 
-size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, AudioSamples dst) const
+size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
 {
 	Expects(pos + len <= sampleLength);
 
@@ -101,10 +103,12 @@ size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, Audio
 			streamPos += len;
 		}
 
-		memcpy(dst.data(), temp[channelN].data(), len * sizeof(AudioSample));
+		AudioMixer::copy(dst, AudioSamples(temp[channelN]).subspan(0, len), gain0, gain1);
+		//memcpy(dst.data(), temp[channelN].data(), len * sizeof(AudioSample));
 		return len;
 	} else {
-		memcpy(dst.data(), samples.at(channelN).data() + pos, len * sizeof(AudioSample));
+		AudioMixer::copy(dst, AudioSamples(samples.at(channelN)).subspan(pos, len), gain0, gain1);
+		//memcpy(dst.data(), samples.at(channelN).data() + pos, len * sizeof(AudioSample));
 		return len;
 	}
 }
@@ -197,18 +201,20 @@ void StreamingAudioClip::addInterleavedSamples(AudioSamplesConst src)
 	length += nSamples;
 }
 
-size_t StreamingAudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, AudioSamples dst) const
+size_t StreamingAudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
 {
 	std::unique_lock<std::mutex> lock(mutex);
 
 	auto& buffer = buffers[channelN];
 	const size_t toWrite = std::min(len, buffer.size());
 
-	memcpy(dst.data(), buffer.data(), toWrite * sizeof(AudioSample));
+	AudioMixer::copy(dst, buffer, gain0, gain1);
+	//memcpy(dst.data(), buffer.data(), toWrite * sizeof(AudioSample));
 	buffer.erase(buffer.begin(), buffer.begin() + toWrite);
 
 	if (toWrite < len) {
-		memcpy(dst.data() + toWrite, buffer.data() + toWrite, (len - toWrite) * sizeof(AudioSample));
+		AudioMixer::copy(dst.subspan(toWrite, len - toWrite), AudioSamples(buffer).subspan(toWrite, len - toWrite), gain1, gain1);
+		//memcpy(dst.data() + toWrite, buffer.data() + toWrite, (len - toWrite) * sizeof(AudioSample));
 	}
 
 	return len;

@@ -118,6 +118,11 @@ float Random::getFloat(float min, float max)
 	return getRawFloat() * (max - min) + min;
 }
 
+float Random::getFloat(Range<float> range)
+{
+	return getFloat(range.start, range.end);
+}
+
 double Random::getDouble(double min, double max)
 {
 	return getRawDouble() * (max - min) + min;

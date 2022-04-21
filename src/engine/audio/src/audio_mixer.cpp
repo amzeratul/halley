@@ -36,7 +36,7 @@ using namespace Halley;
 
 void AudioMixer::mixAudio(AudioSamplesConst src, AudioSamples dst, float gain0, float gain1)
 {
-	const auto nSamples = static_cast<size_t>(src.size());
+	const auto nSamples = std::min(src.size(), dst.size());
 
 	if (std::abs(gain0 - gain1) < 0.0001f) {
 		// If the gain doesn't change, the code is faster
@@ -131,6 +131,27 @@ void AudioMixer::copy(AudioMultiChannelSamples dst, AudioMultiChannelSamples src
 void AudioMixer::copy(AudioSamples dst, AudioSamples src)
 {
 	memcpy(dst.data(), src.data(), std::min(src.size(), dst.size()) * sizeof(AudioSample));
+}
+
+void AudioMixer::copy(AudioSamples dst, AudioSamples src, float gainStart, float gainEnd)
+{
+	const auto nSamples = std::min(src.size(), dst.size());
+
+	if (std::abs(gainStart - gainEnd) < 0.0001f) {
+		if (std::abs(gainStart - 1.0f) < 0.0001f) {
+			copy(dst, src);
+		} else {
+			for (size_t i = 0; i < nSamples; ++i) {
+				dst[i] = src[i] * gainStart;
+			}
+		}
+	} else {
+		// Interpolate the gain
+		const float scale = 1.0f / nSamples;
+		for (size_t i = 0; i < nSamples; ++i) {
+			dst[i] = src[i] * lerp(gainStart, gainEnd, i * scale);
+		}
+	}
 }
 
 #ifdef HAS_SSE
