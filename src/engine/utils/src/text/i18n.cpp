@@ -92,7 +92,11 @@ LocalisedString I18N::get(const String& key) const
 		}
 	}
 
+#ifdef DEV_BUILD
+	return LocalisedString(*this, key, "#MISSING:" + key + "#");
+#else
 	return LocalisedString(*this, key, "#MISSING#");
+#endif
 }
 
 std::optional<LocalisedString> I18N::get(const String& key, const I18NLanguage& language) const
