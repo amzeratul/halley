@@ -2,6 +2,7 @@
 #include "halley/maths/range.h"
 #include "halley/resources/resource.h"
 #include "halley/resources/resource_data.h"
+#include "halley/ui/widgets/ui_dropdown.h"
 
 namespace Halley {
 	class AudioSwitchProperties {
@@ -59,6 +60,8 @@ namespace Halley {
 		gsl::span<const AudioBusProperties> getChildren() const;
 		gsl::span<AudioBusProperties> getChildren();
 
+		void collectBusIds(Vector<String>& output) const;
+
 	private:
 		String id;
 		Vector<AudioBusProperties> children;
@@ -81,9 +84,17 @@ namespace Halley {
 		gsl::span<const AudioBusProperties> getBuses() const;
 		gsl::span<AudioBusProperties> getBuses();
 
+		Vector<String> getSwitchIds() const;
+		Vector<String> getVariableIds() const;
+		Vector<String> getBusIds() const;
+
+		const AudioSwitchProperties* tryGetSwitch(const String& id) const;
+
 	private:
 		Vector<AudioSwitchProperties> switches;
 		Vector<AudioVariableProperties> variables;
 		Vector<AudioBusProperties> buses;
+
+		void getBusIds(Vector<String>& result) const;
 	};
 }

@@ -2,6 +2,8 @@
 #include "../asset_editor.h"
 
 namespace Halley {
+	class AudioProperties;
+
 	class AudioEventEditor : public AssetEditor {
     public:
         AudioEventEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow);
@@ -19,6 +21,8 @@ namespace Halley {
         void addAction();
         void addAction(AudioEventActionType type);
         void deleteAction(const IAudioEventAction& action, const String& uiId);
+
+		const AudioProperties& getAudioProperties() const;
 
     protected:
         void update(Time t, bool moved) override;

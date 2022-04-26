@@ -6,8 +6,12 @@ namespace Halley {
     public:
         GameProperties() = default;
 		GameProperties(const ConfigNode& node);
+        explicit GameProperties(Path path);
 
 		ConfigNode toConfigNode() const;
+		void save() const;
+		void load();
+		void load(const ConfigNode& node);
 		
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -21,5 +25,6 @@ namespace Halley {
 
     private:
 		AudioProperties audioProperties;
+		Path path;
     };
 }

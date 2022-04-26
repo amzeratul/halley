@@ -109,6 +109,11 @@ void UIDropdown::setOptions(Vector<String> optionIds, int defaultOption)
 	setOptions(std::move(optionIds), {}, defaultOption);
 }
 
+void UIDropdown::setOptions(gsl::span<const String> optionsIds, int defaultOption)
+{
+	setOptions(Vector<String>(optionsIds.begin(), optionsIds.end()), {}, defaultOption);
+}
+
 void UIDropdown::setOptions(const I18N& i18n, const String& i18nPrefix, Vector<String> optionIds, int defaultOption)
 {
 	setOptions(optionIds, i18n.getVector(i18nPrefix, optionIds), defaultOption);
@@ -237,7 +242,11 @@ void UIDropdown::readFromDataBind()
 {
 	auto data = getDataBind();
 	if (data->getFormat() == UIDataBind::Format::String) {
-		setSelectedOption(data->getStringData());
+		const auto target = data->getStringData();
+		setSelectedOption(target);
+		if (getSelectedOptionId() != target) {
+			notifyDataBind(getSelectedOptionId(), true);
+		}
 	} else {
 		setSelectedOption(data->getIntData());
 	}

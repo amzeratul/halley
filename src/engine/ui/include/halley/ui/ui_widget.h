@@ -199,10 +199,10 @@ namespace Halley {
 		virtual void onParentChanged();
 		virtual void onActiveChanged(bool active);
 
-		void notifyDataBind(bool data) const;
-		void notifyDataBind(int data) const;
-		void notifyDataBind(float data) const;
-		void notifyDataBind(const String& data) const;
+		void notifyDataBind(bool data, bool force = false) const;
+		void notifyDataBind(int data, bool force = false) const;
+		void notifyDataBind(float data, bool force = false) const;
+		void notifyDataBind(const String& data, bool force = false) const;
 
 		void shrink();
 		void forceLayout();

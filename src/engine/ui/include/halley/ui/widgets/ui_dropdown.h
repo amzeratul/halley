@@ -40,6 +40,7 @@ namespace Halley {
 		void setInputButtons(const UIInputButtons& buttons) override;
 		void setOptions(Vector<LocalisedString> options, int defaultOption = -1);
 		void setOptions(Vector<String> optionsIds, int defaultOption = -1);
+		void setOptions(gsl::span<const String> optionsIds, int defaultOption = -1);
 		void setOptions(Vector<String> optionIds, Vector<LocalisedString> options, int defaultOption = -1);
 		void setOptions(Vector<Entry> options, int defaultOption = -1);
 		void setOptions(const I18N& i18n, const String& i18nPrefix, Vector<String> optionIds, int defaultOption = -1);

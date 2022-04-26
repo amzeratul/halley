@@ -1,5 +1,6 @@
 #include "audio_event_editor.h"
 
+#include "halley/core/properties/game_properties.h"
 #include "halley/tools/project/project.h"
 #include "src/ui/select_asset_widget.h"
 using namespace Halley;
@@ -92,6 +93,11 @@ void AudioEventEditor::deleteAction(const IAudioEventAction& action, const Strin
 		std_ex::erase_if(actions, [&](const auto& a) { return a.get() == &action; });
 		markModified();
 	});
+}
+
+const AudioProperties& AudioEventEditor::getAudioProperties() const
+{
+	return project.getGameProperties().getAudioProperties();
 }
 
 Resources& AudioEventEditor::getGameResources() const
@@ -271,13 +277,28 @@ void AudioEventEditorAction::makeSetSwitchAction(AudioEventActionSetSwitch& acti
 {
 	factory.loadUI(*getWidget("contents"), "halley/audio_editor/audio_action_set_variable");
 
+	getWidgetAs<UIDropdown>("variableId")->setOptions(editor.getAudioProperties().getSwitchIds());
+
 	getWidget("switchValue")->setActive(true);
+
+	auto populateSwitchValues = [=] (const String& id)
+	{
+		const auto* switchProps = editor.getAudioProperties().tryGetSwitch(id);
+		auto dropdown = getWidgetAs<UIDropdown>("switchValue");
+		if (switchProps) {
+			dropdown->setOptions(switchProps->getValues());
+		}  else {
+			dropdown->clear();
+		}
+	};
 
 	bindData("variableId", action.getSwitchId(), [=, &action](String value)
 	{
+		populateSwitchValues(value);
 		action.setSwitchId(std::move(value));
 		editor.markModified();
 	});
+	populateSwitchValues(action.getSwitchId());
 	
 	bindData("switchValue", action.getValue(), [=, &action](String value)
 	{
@@ -289,6 +310,8 @@ void AudioEventEditorAction::makeSetSwitchAction(AudioEventActionSetSwitch& acti
 void AudioEventEditorAction::makeSetVariableAction(AudioEventActionSetVariable& action)
 {
 	factory.loadUI(*getWidget("contents"), "halley/audio_editor/audio_action_set_variable");
+
+	getWidgetAs<UIDropdown>("variableId")->setOptions(editor.getAudioProperties().getVariableIds());
 
 	getWidget("variableValue")->setActive(true);
 

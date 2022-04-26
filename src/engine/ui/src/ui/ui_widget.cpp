@@ -469,30 +469,42 @@ const UIRoot* UIWidget::getRoot() const
 	return root;
 }
 
-void UIWidget::notifyDataBind(bool data) const
+void UIWidget::notifyDataBind(bool data, bool force) const
 {
 	if (dataBind) {
+		if (force) {
+			dataBind->setAcceptingDataFromWidget(true);
+		}
 		dataBind->onDataFromWidget(data);
 	}
 }
 
-void UIWidget::notifyDataBind(int data) const
+void UIWidget::notifyDataBind(int data, bool force) const
 {
 	if (dataBind) {
+		if (force) {
+			dataBind->setAcceptingDataFromWidget(true);
+		}
 		dataBind->onDataFromWidget(data);
 	}
 }
 
-void UIWidget::notifyDataBind(float data) const
+void UIWidget::notifyDataBind(float data, bool force) const
 {
 	if (dataBind) {
+		if (force) {
+			dataBind->setAcceptingDataFromWidget(true);
+		}
 		dataBind->onDataFromWidget(data);
 	}
 }
 
-void UIWidget::notifyDataBind(const String& data) const
+void UIWidget::notifyDataBind(const String& data, bool force) const
 {
 	if (dataBind) {
+		if (force) {
+			dataBind->setAcceptingDataFromWidget(true);
+		}
 		dataBind->onDataFromWidget(data);
 	}
 }

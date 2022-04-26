@@ -5,8 +5,8 @@ children:
   children:
   - widget: { class: label, text: "Set " }
     fill: centre
-  - widget: { id: variableId, class: textInput, size: [100, 20] }
+  - widget: { id: variableId, class: dropdown, size: [100, 20] }
   - widget: { class: label, text: " to " }
     fill: centre
   - widget: { id: variableValue, class: textInput, size: [40, 20], validator: numericPositive, active: false }
-  - widget: { id: switchValue, class: textInput, size: [100, 20], active: false }
+  - widget: { id: switchValue, class: dropdown, size: [100, 20], active: false }

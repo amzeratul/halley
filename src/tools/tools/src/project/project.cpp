@@ -16,6 +16,7 @@
 #include "halley/tools/ecs/ecs_data.h"
 #include "halley/tools/project/project_loader.h"
 #include "halley/core/game/game.h"
+#include "halley/core/properties/game_properties.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/tools/codegen/codegen.h"
 #include "halley/utils/algorithm.h"
@@ -30,6 +31,7 @@ Project::Project(Path projectRootPath, Path halleyRootPath)
 	, halleyRootPath(std::move(halleyRootPath))
 {
 	properties = std::make_unique<ProjectProperties>(rootPath / "halley_project" / "properties.yaml");
+	gameProperties = std::make_unique<GameProperties>(rootPath / "assets_src" / "game_properties" / "game_properties.yaml");
 	assetPackManifest = rootPath / properties->getAssetPackManifest();
 
 	platforms = properties->getPlatforms();
@@ -230,6 +232,11 @@ void Project::removeAssetLoadedListener(IAssetLoadListener* listener)
 ProjectProperties& Project::getProperties() const
 {
 	return *properties;
+}
+
+GameProperties& Project::getGameProperties() const
+{
+	return *gameProperties;
 }
 
 Metadata Project::getImportMetadata(AssetType type, const String& assetId) const

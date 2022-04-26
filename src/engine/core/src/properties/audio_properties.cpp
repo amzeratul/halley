@@ -142,11 +142,21 @@ gsl::span<AudioBusProperties> AudioBusProperties::getChildren()
 	return children;
 }
 
+void AudioBusProperties::collectBusIds(Vector<String>& output) const
+{
+	output.push_back(id);
+	for (const auto& c: children) {
+		c.collectBusIds(output);
+	}
+}
+
 AudioProperties::AudioProperties(const ConfigNode& node)
 {
-	variables = node["variables"].asVector<AudioVariableProperties>({});
-	switches = node["switches"].asVector<AudioSwitchProperties>({});
-	buses = node["buses"].asVector<AudioBusProperties>({});
+	if (node.getType() != ConfigNodeType::Undefined) {
+		variables = node["variables"].asVector<AudioVariableProperties>({});
+		switches = node["switches"].asVector<AudioSwitchProperties>({});
+		buses = node["buses"].asVector<AudioBusProperties>({});
+	}
 }
 
 ConfigNode AudioProperties::toConfigNode() const
@@ -200,4 +210,46 @@ gsl::span<const AudioBusProperties> AudioProperties::getBuses() const
 gsl::span<AudioBusProperties> AudioProperties::getBuses()
 {
 	return buses;
+}
+
+Vector<String> AudioProperties::getSwitchIds() const
+{
+	Vector<String> result;
+	for (const auto& s: switches) {
+		result.push_back(s.getId());
+	}
+	return result;
+}
+
+Vector<String> AudioProperties::getVariableIds() const
+{
+	Vector<String> result;
+	for (const auto& v: variables) {
+		result.push_back(v.getId());
+	}
+	return result;
+}
+
+Vector<String> AudioProperties::getBusIds() const
+{
+	Vector<String> result;
+	getBusIds(result);
+	return result;
+}
+
+const AudioSwitchProperties* AudioProperties::tryGetSwitch(const String& id) const
+{
+	for (const auto& s: switches) {
+		if (s.getId() == id) {
+			return &s;
+		}
+	}
+	return nullptr;
+}
+
+void AudioProperties::getBusIds(Vector<String>& result) const
+{
+	for (auto& b: buses) {
+		b.collectBusIds(result);
+	}
 }

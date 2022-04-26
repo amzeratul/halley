@@ -15,6 +15,7 @@
 
 namespace Halley
 {
+	class GameProperties;
 	class IHalleyEntryPoint;
 	class ProjectLoader;
 	class ImportAssetsDatabase;
@@ -83,6 +84,7 @@ namespace Halley
 		void removeAssetLoadedListener(IAssetLoadListener* listener);
 		
 		ProjectProperties& getProperties() const;
+		GameProperties& getGameProperties() const;
 
 		Metadata getImportMetadata(AssetType type, const String& assetId) const;
 		Metadata readMetadataFromDisk(const Path& filePath) const;
@@ -148,6 +150,7 @@ namespace Halley
 		std::unique_ptr<ImportAssetsDatabase> sharedCodegenDatabase;
 		std::shared_ptr<AssetImporter> assetImporter;
 		std::unique_ptr<ProjectProperties> properties;
+		std::unique_ptr<GameProperties> gameProperties;
 		std::unique_ptr<ECSData> ecsData;
 
 		Vector<HalleyPluginPtr> plugins;
