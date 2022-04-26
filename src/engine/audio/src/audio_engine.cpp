@@ -305,7 +305,7 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<Audio
 {
 	// Clear buffers
 	for (size_t i = 0; i < nChannels; ++i) {
-		clearBuffer(buffers[i]->samples);
+		AudioMixer::zero(buffers[i]->samples);
 	}
 
 	// Mix every emitter
@@ -331,13 +331,6 @@ void AudioEngine::removeFinishedVoices()
 		e.second->removeFinishedVoices();
 	}
 	std_ex::erase_if_value(emitters, [&] (const std::unique_ptr<AudioEmitter>& src) { return src->shouldBeRemoved(); });
-}
-
-void AudioEngine::clearBuffer(AudioSamples dst)
-{
-	for (auto& s : dst) {
-		s = 0.0f;
-	}
 }
 
 int AudioEngine::getBusId(const String& bus)

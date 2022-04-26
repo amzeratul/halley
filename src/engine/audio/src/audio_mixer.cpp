@@ -104,6 +104,11 @@ void AudioMixer::compressRange(AudioSamples buffer)
 	}
 }
 
+void AudioMixer::zero(AudioSamples dst)
+{
+	memset(dst.data(), 0, dst.size_bytes());
+}
+
 void AudioMixer::zero(AudioMultiChannelSamples dst, size_t nChannels)
 {
 	const size_t n = std::min(nChannels, dst.size());
