@@ -24,6 +24,7 @@ set (editor_sources
 	"src/assets/audio_editor/audio_layers_editor.cpp"
 	"src/assets/audio_editor/audio_object_editor.cpp"
 	"src/assets/audio_editor/audio_root_editor.cpp"
+	"src/assets/audio_editor/audio_switch_editor.cpp"
 
 	"src/assets/ui_editor/ui_editor.cpp"
 	"src/assets/ui_editor/ui_editor_display.cpp"
@@ -93,6 +94,7 @@ set (editor_headers
 	"src/assets/audio_editor/audio_layers_editor.h"
 	"src/assets/audio_editor/audio_object_editor.h"
 	"src/assets/audio_editor/audio_root_editor.h"
+	"src/assets/audio_editor/audio_switch_editor.h"
 
 	"src/assets/ui_editor/ui_editor.h"
 	"src/assets/ui_editor/ui_editor_display.h"

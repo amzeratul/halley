@@ -99,7 +99,7 @@ const Vector<String>& Preferences::getRecents() const
 
 WindowDefinition Preferences::getWindowDefinition() const
 {
-	return WindowDefinition(WindowType::ResizableWindow, windowPosition, windowSize, "Halley Editor - " + editorVersion).withState(windowState);
+	return WindowDefinition(WindowType::ResizableWindow, windowPosition, windowSize, "Halley Editor - " + editorVersion, true).withState(windowState);
 }
 
 void Preferences::updateWindowDefinition(const Window& window)

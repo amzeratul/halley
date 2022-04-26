@@ -113,6 +113,16 @@ AudioSubObjectHandle AudioSubObjectLayers::removeObject(const IAudioObject* obje
 	return AudioSubObjectHandle();
 }
 
+gsl::span<AudioSubObjectLayers::Layer> AudioSubObjectLayers::getLayers()
+{
+	return layers;
+}
+
+AudioFade& AudioSubObjectLayers::getFade()
+{
+	return fadeConfig;
+}
+
 AudioSubObjectLayers::Layer::Layer(const ConfigNode& node)
 {
 	object = IAudioSubObject::makeSubObject(node["object"]);

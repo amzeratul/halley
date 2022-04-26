@@ -6,6 +6,19 @@
 namespace Halley {
 	class AudioSubObjectLayers final : public IAudioSubObject {
 	public:
+		struct Layer {
+			AudioSubObjectHandle object;
+			AudioExpression expression;
+			bool synchronised = false;
+
+			Layer() = default;
+			Layer(const ConfigNode& node);
+			ConfigNode toConfigNode() const;
+
+			void serialize(Serializer& s) const;
+			void deserialize(Deserializer& s);
+		};
+
 		void load(const ConfigNode& node) override;
 		ConfigNode toConfigNode() const override;
 
@@ -28,20 +41,10 @@ namespace Halley {
 		void addObject(AudioSubObjectHandle handle, const std::optional<String>& caseName, size_t idx) override;
 		AudioSubObjectHandle removeObject(const IAudioObject* object) override;
 
+		gsl::span<Layer> getLayers();
+		AudioFade& getFade();
+
 	private:
-		struct Layer {
-			AudioSubObjectHandle object;
-			AudioExpression expression;
-			bool synchronised = false;
-
-			Layer() = default;
-			Layer(const ConfigNode& node);
-			ConfigNode toConfigNode() const;
-
-			void serialize(Serializer& s) const;
-			void deserialize(Deserializer& s);
-		};
-
 		Vector<Layer> layers;
 		AudioFade fadeConfig;
 	};

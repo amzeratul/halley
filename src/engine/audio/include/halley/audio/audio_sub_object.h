@@ -3,6 +3,7 @@
 #include "halley/data_structures/config_node.h"
 
 namespace Halley {
+	class AudioProperties;
 	class IAudioSubObject;
 	class AudioSubObjectHandle;
 	class AudioEmitter;
@@ -35,7 +36,7 @@ namespace Halley {
 		virtual AudioSubObjectType getType() const = 0;
 		virtual size_t getNumSubObjects() const;
 		virtual AudioSubObjectHandle& getSubObject(size_t n);
-		virtual Vector<String> getSubCategories() const;
+		virtual Vector<String> getSubCategories(const AudioProperties& audioProperties) const;
 		virtual String getSubObjectCategory(size_t n) const;
 		virtual gsl::span<const String> getClips() const;
 		virtual bool canCollapseToClip() const;

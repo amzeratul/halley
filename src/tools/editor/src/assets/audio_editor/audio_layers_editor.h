@@ -1,5 +1,6 @@
 #pragma once
 
+#include "halley/audio/sub_objects/audio_sub_object_layers.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/ui_widget.h"
 
@@ -11,9 +12,25 @@ namespace Halley {
     public:
         AudioLayersEditor(UIFactory& factory, AudioObjectEditor& editor, AudioSubObjectLayers& layers);
 
-	private:
+		void onMakeUI() override;
+
+		AudioSubObjectLayers::Layer& getLayer(size_t idx);
+
+    private:
 		UIFactory& factory;
         AudioObjectEditor& editor;
 		AudioSubObjectLayers& layers;
+    };
+
+	class AudioLayersEditorLayer : public UIWidget {
+    public:
+        AudioLayersEditorLayer(UIFactory& factory, AudioLayersEditor& layersEditor, size_t idx);
+
+		void onMakeUI() override;
+
+	private:
+		UIFactory& factory;
+        AudioLayersEditor& layersEditor;
+		size_t idx;
     };
 }

@@ -1,0 +1,13 @@
+widget: { class: widget }
+sizer: { type: vertical }
+children:
+- widget: { id: background, class: image, image: "$ui_title_capsule", colour: "$ui_popupWindow", innerBorder: [ 4, 1, 4, 4 ], size: [20, 20] }
+  sizer: { type: vertical }
+  children:
+  - widget: { id: layerName, class: label, text: "Layer Name" }
+    fill: centre
+  - widget: { id: layerContents, class: widget }
+    border: [1, 4, 1, 1]
+    proportion: 1
+    sizer: { type: vertical, gap: 3 }
+    children: []

@@ -2,10 +2,12 @@
 
 #include "audio_layers_editor.h"
 #include "audio_root_editor.h"
+#include "audio_switch_editor.h"
 #include "halley/audio/audio_object.h"
 #include "halley/tools/project/project.h"
 #include "src/scene/choose_window.h"
 #include "halley/audio/sub_objects/audio_sub_object_layers.h"
+#include "halley/audio/sub_objects/audio_sub_object_switch.h"
 #include "halley/core/properties/game_properties.h"
 using namespace Halley;
 
@@ -198,7 +200,7 @@ void AudioObjectEditor::populateObject(const String& parentId, size_t idx, Audio
 		treeData[id] = TreeData{ parentId, &subObject.getObject() };
 
 		// Add sub-categories
-		for (auto& cat: subObject->getSubCategories()) {
+		for (auto& cat: subObject->getSubCategories(getAudioProperties())) {
 			const auto catId = id + ":" + cat;
 			hierarchy->addTreeItem(catId, id, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(cat), "label", makeIcon(AudioSubObjectType::None));
 			treeData[catId] = TreeData{ id, &subObject.getObject(), cat };
@@ -360,7 +362,7 @@ void AudioObjectEditor::setCurrentObject(IAudioObject* object)
 			setCurrentObjectEditor({});
 			break;
 		case AudioSubObjectType::Switch:
-			setCurrentObjectEditor({});
+			setCurrentObjectEditor(std::make_shared<AudioSwitchEditor>(factory, *this, dynamic_cast<AudioSubObjectSwitch&>(*object)));
 			break;
 		}
 	}

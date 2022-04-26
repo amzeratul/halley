@@ -63,6 +63,9 @@ void AudioSubObjectClips::toLegacyConfigNode(ConfigNode& dst) const
 
 String AudioSubObjectClips::getName() const
 {
+	if (clips.size() == 1) {
+		return clips[0];
+	}
 	return "Clips";
 }
 

@@ -9,7 +9,7 @@ children:
   - widget: { id: content, class: widget }
     border: [1, 4, 1, 1]
     proportion: 1
-    sizer: { type: grid, columns: 2, columnProportions: [0, 1] }
+    sizer: { type: grid, columns: 2, columnProportions: [0, 1], gap: 4 }
     children:
     - widget: { class: widget, size: [150, 20] }
       children:

@@ -44,7 +44,7 @@ AudioSubObjectHandle& IAudioObject::getSubObject(size_t n)
 	throw Exception("Sub-object index out of range", HalleyExceptions::AudioEngine);
 }
 
-Vector<String> IAudioObject::getSubCategories() const
+Vector<String> IAudioObject::getSubCategories(const AudioProperties& audioProperties) const
 {
 	return {};
 }

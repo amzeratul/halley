@@ -2,7 +2,6 @@
 #include "halley/maths/range.h"
 #include "halley/resources/resource.h"
 #include "halley/resources/resource_data.h"
-#include "halley/ui/widgets/ui_dropdown.h"
 
 namespace Halley {
 	class AudioSwitchProperties {

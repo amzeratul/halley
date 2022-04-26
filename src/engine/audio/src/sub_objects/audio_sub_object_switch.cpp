@@ -2,6 +2,7 @@
 
 #include "../audio_emitter.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/core/properties/audio_properties.h"
 #include "halley/utils/algorithm.h"
 using namespace Halley;
 
@@ -58,12 +59,19 @@ AudioSubObjectHandle& AudioSubObjectSwitch::getSubObject(size_t n)
 	return IAudioSubObject::getSubObject(n);
 }
 
-Vector<String> AudioSubObjectSwitch::getSubCategories() const
+Vector<String> AudioSubObjectSwitch::getSubCategories(const AudioProperties& audioProperties) const
 {
-	// TODO: read from switch
+	const auto* switchProperties = audioProperties.tryGetSwitch(switchId);
+
 	Vector<String> result;
-	for (auto& c: cases) {
-		result.push_back(c.first);
+	if (switchProperties) {
+		result.assign(switchProperties->getValues().begin(), switchProperties->getValues().end());
+	}
+	
+	for (const auto& c: cases) {
+		if (!std_ex::contains(result, c.first)) {
+			result.push_back(c.first);
+		}
 	}
 	return result;
 }
