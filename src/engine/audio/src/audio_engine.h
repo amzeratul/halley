@@ -53,8 +53,8 @@ namespace Halley {
 		AudioBufferPool& getPool() const;
 
 		void setMasterGain(float gain);
-		void setGroupGain(const String& name, float gain);
-		int getGroupId(const String& group);
+		void setBusGain(const String& name, float gain);
+		int getBusId(const String& bus);
 
 		int64_t getLastTimeElapsed();
 
@@ -74,8 +74,8 @@ namespace Halley {
 		Vector<AudioChannelData> channels;
 		
 		float masterGain = 1.0f;
-		Vector<String> groupNames;
-    	Vector<float> groupGains;
+		Vector<String> busNames;
+    	Vector<float> busGains;
 
 		AudioListenerData listener;
 
@@ -94,6 +94,6 @@ namespace Halley {
 		size_t getAvailable() override;
 		size_t output(gsl::span<std::byte> dst, bool fill) override;
 
-    	float getGroupGain(uint8_t group) const;
+    	float getBusGain(uint8_t bus) const;
     };
 }

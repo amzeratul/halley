@@ -2,6 +2,7 @@
 
 #include "audio_object_editor.h"
 #include "halley/audio/audio_object.h"
+#include "halley/core/properties/audio_properties.h"
 using namespace Halley;
 
 AudioRootEditor::AudioRootEditor(UIFactory& factory, AudioObjectEditor& editor, AudioObject& object)
@@ -15,9 +16,11 @@ AudioRootEditor::AudioRootEditor(UIFactory& factory, AudioObjectEditor& editor, 
 
 void AudioRootEditor::onMakeUI()
 {
-	bindData("group", object.getGroup(), [=] (String value)
+	getWidgetAs<UIDropdown>("bus")->setOptions(editor.getAudioProperties().getBusIds());
+
+	bindData("bus", object.getBus(), [=] (String value)
 	{
-		object.setGroup(std::move(value));
+		object.setBus(std::move(value));
 		editor.markModified();
 	});
 

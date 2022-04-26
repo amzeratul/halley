@@ -294,7 +294,7 @@ bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, Audio
 	const auto delaySamples = std::lroundf(delay * static_cast<float>(AudioConfig::sampleRate));
 	
 	auto source = object->makeSource(engine, emitter);
-	auto voice = std::make_unique<AudioVoice>(engine, std::move(source), gain, pitch, delaySamples, engine.getGroupId(object->getGroup()));
+	auto voice = std::make_unique<AudioVoice>(engine, std::move(source), gain, pitch, delaySamples, engine.getBusId(object->getBus()));
 	voice->setIds(uniqueId, audioObjectId);
 	voice->play(fade);
 	

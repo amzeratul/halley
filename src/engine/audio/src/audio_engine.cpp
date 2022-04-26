@@ -72,7 +72,7 @@ void AudioEngine::play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, 
 		return;
 	}
 
-	auto voice = std::make_unique<AudioVoice>(*this, std::make_shared<AudioSourceClip>(std::move(clip), loop, 1.0f, 0, 0), volume, 1.0f, 0, getGroupId(""));
+	auto voice = std::make_unique<AudioVoice>(*this, std::make_shared<AudioSourceClip>(std::move(clip), loop, 1.0f, 0, 0), volume, 1.0f, 0, getBusId(""));
 	voice->setIds(id);
 	iter->second->addVoice(std::move(voice));
 }
@@ -296,9 +296,9 @@ void AudioEngine::setMasterGain(float gain)
 	masterGain = gain;
 }
 
-void AudioEngine::setGroupGain(const String& name, float gain)
+void AudioEngine::setBusGain(const String& name, float gain)
 {
-	groupGains[getGroupId(name)] = gain;
+	busGains[getBusId(name)] = gain;
 }
 
 void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers)
@@ -318,7 +318,7 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<Audio
 
 			// Mix it in!
 			if (v->isPlaying()) {
-				v->update(channels, e.second->getPosition(), listener, masterGain * getGroupGain(v->getGroup()));
+				v->update(channels, e.second->getPosition(), listener, masterGain * getBusGain(v->getGroup()));
 				v->mixTo(numSamples, buffers, *pool);
 			}
 		}
@@ -340,15 +340,15 @@ void AudioEngine::clearBuffer(AudioSamples dst)
 	}
 }
 
-int AudioEngine::getGroupId(const String& group)
+int AudioEngine::getBusId(const String& bus)
 {
-	const auto iter = std::find(groupNames.begin(), groupNames.end(), group);
-	if (iter != groupNames.end()) {
-		return int(iter - groupNames.begin());
+	const auto iter = std::find(busNames.begin(), busNames.end(), bus);
+	if (iter != busNames.end()) {
+		return int(iter - busNames.begin());
 	} else {
-		groupNames.push_back(group);
-		groupGains.push_back(1.0f);
-		return int(groupNames.size()) - 1;
+		busNames.push_back(bus);
+		busGains.push_back(1.0f);
+		return int(busNames.size()) - 1;
 	}
 }
 
@@ -357,7 +357,7 @@ int64_t AudioEngine::getLastTimeElapsed()
 	return lastTimeElapsed.exchange(0);
 }
 
-float AudioEngine::getGroupGain(uint8_t id) const
+float AudioEngine::getBusGain(uint8_t id) const
 {
-	return groupGains[id];
+	return busGains[id];
 }

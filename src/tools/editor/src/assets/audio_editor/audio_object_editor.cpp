@@ -6,6 +6,7 @@
 #include "halley/tools/project/project.h"
 #include "src/scene/choose_window.h"
 #include "halley/audio/sub_objects/audio_sub_object_layers.h"
+#include "halley/core/properties/game_properties.h"
 using namespace Halley;
 
 AudioObjectEditor::AudioObjectEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow)
@@ -85,6 +86,11 @@ bool AudioObjectEditor::canParentItemTo(const String& itemId, const String& pare
 	}
 
 	return parent.object->canAddObject(item.object->getType(), parent.subCase);
+}
+
+const AudioProperties& AudioObjectEditor::getAudioProperties() const
+{
+	return project.getGameProperties().getAudioProperties();
 }
 
 void AudioObjectEditor::reload()

@@ -23,7 +23,7 @@ AudioObject::AudioObject(const ConfigNode& node)
 {
 	generateId();
 
-	group = node["group"].asString("");
+	bus = node[node.hasKey("bus") ? "bus" : "group"].asString("");
 	pitch = node["pitch"].asFloatRange(Range<float>(1, 1));
 	gain = node["gain"].asFloatRange(Range<float>(1, 1));
 	objects = node["objects"].asVector<AudioSubObjectHandle>({});
@@ -33,8 +33,8 @@ ConfigNode AudioObject::toConfigNode() const
 {
 	ConfigNode::MapType result;
 
-	if (!group.isEmpty()) {
-		result["group"] = group;
+	if (!bus.isEmpty()) {
+		result["bus"] = bus;
 	}
 	if (pitch != Range<float>(1, 1)) {
 		result["pitch"] = pitch;
@@ -49,7 +49,7 @@ ConfigNode AudioObject::toConfigNode() const
 
 void AudioObject::loadLegacyEvent(const ConfigNode& node)
 {
-	group = node["group"].asString("");
+	bus = node["group"].asString("");
 	pitch = node["pitch"].asFloatRange(Range<float>(1, 1));
 	gain = node["gain"].asFloatRange(Range<float>(1, 1));
 
@@ -62,8 +62,8 @@ void AudioObject::loadLegacyEvent(const ConfigNode& node)
 
 void AudioObject::legacyToConfigNode(ConfigNode& result) const
 {
-	if (!group.isEmpty()) {
-		result["group"] = group;
+	if (!bus.isEmpty()) {
+		result["bus"] = bus;
 	}
 	if (pitch != Range<float>(1, 1)) {
 		result["pitch"] = pitch;
@@ -79,9 +79,9 @@ uint32_t AudioObject::getAudioObjectId() const
 	return audioObjectId;
 }
 
-const String& AudioObject::getGroup() const
+const String& AudioObject::getBus() const
 {
-	return group;
+	return bus;
 }
 
 Range<float> AudioObject::getPitch() const
@@ -104,9 +104,9 @@ Range<float>& AudioObject::getGain()
 	return gain;
 }
 
-void AudioObject::setGroup(String group)
+void AudioObject::setBus(String bus)
 {
-	this->group = std::move(group);
+	this->bus = std::move(bus);
 }
 
 gsl::span<AudioSubObjectHandle> AudioObject::getSubObjects()
@@ -125,7 +125,7 @@ std::unique_ptr<AudioSource> AudioObject::makeSource(AudioEngine& engine, AudioE
 
 void AudioObject::serialize(Serializer& s) const
 {
-	s << group;
+	s << bus;
 	s << pitch;
 	s << gain;
 	s << objects;
@@ -133,7 +133,7 @@ void AudioObject::serialize(Serializer& s) const
 
 void AudioObject::deserialize(Deserializer& s)
 {
-	s >> group;
+	s >> bus;
 	s >> pitch;
 	s >> gain;
 	s >> objects;

@@ -9,9 +9,9 @@
 
 using namespace Halley;
 
-AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, float gain, float pitch, uint32_t delaySamples, uint8_t group) 
+AudioVoice::AudioVoice(AudioEngine& engine, std::shared_ptr<AudioSource> src, float gain, float pitch, uint32_t delaySamples, uint8_t bus) 
 	: engine(engine)
-	, group(group)
+	, bus(bus)
 	, playing(false)
 	, paused(false)
 	, done(false)
@@ -115,9 +115,9 @@ bool AudioVoice::isDone() const
 }
 
 
-uint8_t AudioVoice::getGroup() const
+uint8_t AudioVoice::getBus() const
 {
-	return group;
+	return bus;
 }
 
 void AudioVoice::setBaseGain(float gain)
@@ -159,7 +159,7 @@ size_t AudioVoice::getNumberOfChannels() const
 	return nChannels;
 }
 
-void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioPosition& sourcePos, const AudioListenerData& listener, float groupGain)
+void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioPosition& sourcePos, const AudioListenerData& listener, float busGain)
 {
 	Expects(playing);
 
@@ -174,7 +174,7 @@ void AudioVoice::update(gsl::span<const AudioChannelData> channels, const AudioP
 	const float pauseGain = paused ? 0.0f : 1.0f;
 	
 	prevChannelMix = channelMix;
-	sourcePos.setMix(nChannels, channels, channelMix, baseGain * userGain * dynamicGain * groupGain * pauseGain, listener);
+	sourcePos.setMix(nChannels, channels, channelMix, baseGain * userGain * dynamicGain * busGain * pauseGain, listener);
 	
 	if (isFirstUpdate) {
 		prevChannelMix = channelMix;

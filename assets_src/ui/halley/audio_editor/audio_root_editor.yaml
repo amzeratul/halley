@@ -13,8 +13,8 @@ children:
     children:
     - widget: { class: widget, size: [150, 20] }
       children:
-      - widget: { class: label, text: "Group:" }
-    - widget: { id: group, class: textInput, size: [200, 20] }
+      - widget: { class: label, text: "Bus:" }
+    - widget: { id: bus, class: dropdown, size: [200, 20] }
       fill: left
     - widget: { class: label, text: "Gain:" }
     - sizer: { type: horizontal }

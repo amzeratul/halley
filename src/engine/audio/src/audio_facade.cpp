@@ -285,10 +285,10 @@ void AudioFacade::setMasterVolume(float volume)
 	});
 }
 
-void AudioFacade::setGroupVolume(const String& groupName, float volume)
+void AudioFacade::setBusVolume(const String& busName, float volume)
 {
 	enqueue([=] () {
-		engine->setGroupGain(groupName, volumeToGain(volume));
+		engine->setBusGain(busName, volumeToGain(volume));
 	});
 }
 

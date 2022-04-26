@@ -19,12 +19,12 @@ namespace Halley {
         void legacyToConfigNode(ConfigNode& result) const;
 
         AudioObjectId getAudioObjectId() const;
-		const String& getGroup() const;
+		const String& getBus() const;
 		Range<float> getPitch() const;
 		Range<float> getGain() const;
 		Range<float>& getPitch();
 		Range<float>& getGain();
-        void setGroup(String group);
+        void setBus(String bus);
 
 		gsl::span<AudioSubObjectHandle> getSubObjects();
 
@@ -53,7 +53,7 @@ namespace Halley {
 		AudioObjectId audioObjectId;
 		std::vector<AudioSubObjectHandle> objects;
 		
-		String group;
+		String bus;
 		Range<float> pitch;
 		Range<float> gain;
 

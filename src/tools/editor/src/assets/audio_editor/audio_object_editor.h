@@ -3,7 +3,8 @@
 #include "halley/audio/audio_sub_object.h"
 
 namespace Halley {
-    class AudioObjectEditorTreeList;
+	class AudioProperties;
+	class AudioObjectEditorTreeList;
 
 	class AudioObjectEditor : public AssetEditor {
     public:
@@ -20,7 +21,9 @@ namespace Halley {
 
         bool canDragItem(const String& itemId) const;
         bool canParentItemTo(const String& itemId, const String& parentId) const;
-	
+
+		const AudioProperties& getAudioProperties() const;
+
     protected:
         void update(Time t, bool moved) override;
         std::shared_ptr<const Resource> loadResource(const String& assetId) override;

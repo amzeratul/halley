@@ -50,7 +50,7 @@ namespace Halley {
 		void stopAllMusic(float fadeOutTime = 0.0f) override;
 
 		void setMasterVolume(float volume = 1.0f) override;
-		void setGroupVolume(const String& groupName, float volume = 1.0f) override;
+		void setBusVolume(const String& busName, float volume = 1.0f) override;
 
 	    void setOutputChannels(Vector<AudioChannelData> audioChannelData) override;
 	    void setListener(AudioListenerData listener) override;
