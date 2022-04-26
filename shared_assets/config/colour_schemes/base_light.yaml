@@ -12,6 +12,7 @@ colours:
   icon_scene: "#57BE0C"
   
   icon_colours: "#00DDE1"
+  icon_gameProperties: "#2E5C3C"
   icon_configFile: "#23E232"
   icon_localisation: "#43FA52"
   icon_variableTable: "#50E9BB"
