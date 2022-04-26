@@ -14,6 +14,11 @@ namespace Halley {
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
+		const String& getId() const;
+		void setId(String value);
+		gsl::span<const String> getValues() const;
+		gsl::span<String> getValues();
+
 	private:
 		String id;
 		Vector<String> values;
@@ -29,6 +34,11 @@ namespace Halley {
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
+		const String& getId() const;
+		void setId(String value);
+		Range<float> getRange() const;
+		Range<float>& getRange();
+
 	private:
 		String id;
 		Range<float> range;
@@ -43,6 +53,11 @@ namespace Halley {
 		
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
+
+		const String& getId() const;
+		void setId(String value);
+		gsl::span<const AudioBusProperties> getChildren() const;
+		gsl::span<AudioBusProperties> getChildren();
 
 	private:
 		String id;

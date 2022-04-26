@@ -30,6 +30,26 @@ void AudioSwitchProperties::deserialize(Deserializer& s)
 	s >> values;
 }
 
+const String& AudioSwitchProperties::getId() const
+{
+	return id;
+}
+
+void AudioSwitchProperties::setId(String value)
+{
+	id = std::move(value);
+}
+
+gsl::span<const String> AudioSwitchProperties::getValues() const
+{
+	return values;
+}
+
+gsl::span<String> AudioSwitchProperties::getValues()
+{
+	return values;
+}
+
 AudioVariableProperties::AudioVariableProperties(const ConfigNode& node)
 {
 	id = node["id"].asString();
@@ -56,6 +76,26 @@ void AudioVariableProperties::deserialize(Deserializer& s)
 	s >> range;
 }
 
+const String& AudioVariableProperties::getId() const
+{
+	return id;
+}
+
+void AudioVariableProperties::setId(String value)
+{
+	id = std::move(value);
+}
+
+Range<float> AudioVariableProperties::getRange() const
+{
+	return range;
+}
+
+Range<float>& AudioVariableProperties::getRange()
+{
+	return range;
+}
+
 AudioBusProperties::AudioBusProperties(const ConfigNode& node)
 {
 	id = node["id"].asString();
@@ -80,6 +120,26 @@ void AudioBusProperties::deserialize(Deserializer& s)
 {
 	s >> id;
 	s >> children;
+}
+
+const String& AudioBusProperties::getId() const
+{
+	return id;
+}
+
+void AudioBusProperties::setId(String value)
+{
+	id = std::move(value);
+}
+
+gsl::span<const AudioBusProperties> AudioBusProperties::getChildren() const
+{
+	return children;
+}
+
+gsl::span<AudioBusProperties> AudioBusProperties::getChildren()
+{
+	return children;
 }
 
 AudioProperties::AudioProperties(const ConfigNode& node)
