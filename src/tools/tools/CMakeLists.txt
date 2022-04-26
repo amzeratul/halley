@@ -36,6 +36,7 @@ set(SOURCES
     "src/assets/importers/config_importer.cpp"
     "src/assets/importers/copy_file_importer.cpp"
     "src/assets/importers/font_importer.cpp"
+    "src/assets/importers/game_properties_importer.cpp"
     "src/assets/importers/image_importer.cpp"
     "src/assets/importers/material_importer.cpp"
     "src/assets/importers/mesh_importer.cpp"

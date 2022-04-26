@@ -17,6 +17,7 @@
 #include "halley/text/string_converter.h"
 #include "halley/tools/project/project.h"
 #include "halley/tools/project/project_properties.h"
+#include "importers/game_properties_importer.h"
 #include "importers/texture_importer.h"
 #include "importers/variable_importer.h"
 #include "importers/mesh_importer.h"
@@ -49,6 +50,7 @@ AssetImporter::AssetImporter(Project& project, Vector<Path> assetsSrc)
 		std::make_unique<MeshImporter>(),
 		std::make_unique<SkipAssetImporter>(),
 		std::make_unique<VariableImporter>(),
+		std::make_unique<GamePropertiesImporter>(),
 		std::make_unique<RenderGraphImporter>(),
 		std::make_unique<UIImporter>()
 	};
@@ -108,6 +110,8 @@ ImportAssetType AssetImporter::getImportAssetType(const Path& path, bool skipRed
 		return ImportAssetType::Mesh;
 	} else if (root == "variable") {
 		return ImportAssetType::VariableTable;
+	} else if (root == "game_properties") {
+		return ImportAssetType::GameProperties;
 	} else if (root == "render_graph") {
 		return ImportAssetType::RenderGraphDefinition;
 	} else if (root == "ui") {

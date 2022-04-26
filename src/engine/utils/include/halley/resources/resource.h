@@ -34,6 +34,7 @@ namespace Halley
 		Shader,
 		Mesh,
 		VariableTable,
+		GameProperties,
 		RenderGraphDefinition,
 		Prefab,
 		Scene,
@@ -42,7 +43,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<ImportAssetType> {
-		constexpr std::array<const char*, 23> operator()() const {
+		constexpr std::array<const char*, 24> operator()() const {
 			return{{
 				"undefined",
 				"skip",
@@ -63,6 +64,7 @@ namespace Halley
 				"shader",
 				"mesh",
 				"variableTable",
+				"gameProperties",
 				"renderGraphDefinition",
 				"prefab",
 				"scene",
@@ -79,6 +81,7 @@ namespace Halley
 		BinaryFile,
 		TextFile,
 		ConfigFile,
+		GameProperties,
 		Texture,
 		Shader,
 		MaterialDefinition, // Depends on Texture and Shader
@@ -101,11 +104,12 @@ namespace Halley
 
 	template <>
 	struct EnumNames<AssetType> {
-		constexpr std::array<const char*, 21> operator()() const {
+		constexpr std::array<const char*, 22> operator()() const {
 			return{{
 				"binaryFile",
 				"textFile",
 				"configFile",
+				"gameProperties",
 				"texture",
 				"shader",
 				"materialDefinition",

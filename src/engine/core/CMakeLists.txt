@@ -62,6 +62,9 @@ set(SOURCES
         "src/input/text_input_capture.cpp"
         "src/input/text_input_data.cpp"
 
+        "src/properties/audio_properties.cpp"
+        "src/properties/game_properties.cpp"
+
         "src/resources/asset_database.cpp"
         "src/resources/asset_pack.cpp"
         "src/resources/resource_collection.cpp"
@@ -166,6 +169,9 @@ set(HEADERS
         "include/halley/core/input/text_input_capture.h"
         "include/halley/core/input/text_input_data.h"
         
+        "include/halley/core/properties/audio_properties.h"
+        "include/halley/core/properties/game_properties.h"
+
         "include/halley/core/resources/asset_database.h"
         "include/halley/core/resources/asset_pack.h"
         "include/halley/core/resources/resource_collection.h"

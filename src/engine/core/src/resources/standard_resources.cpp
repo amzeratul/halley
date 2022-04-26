@@ -1,6 +1,7 @@
 #include <halley/file_formats/text_file.h>
 #include "resources/standard_resources.h"
 
+#include "properties/game_properties.h"
 #include "graphics/render_target/render_graph_definition.h"
 #include "resources/resources.h"
 #include "graphics/sprite/animation.h"
@@ -44,6 +45,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<Scene>();
 	resources.init<RenderGraphDefinition>();
 	resources.init<UIDefinition>();
+	resources.init<GameProperties>();
 
 	resources.setFallback<Animation>("missing_image");
 	resources.setFallback<SpriteSheet>("missing_image");
@@ -60,4 +62,6 @@ void StandardResources::initialize(Resources& resources)
 
 	resources.setFallback<Prefab>("missing_prefab");
 	resources.setFallback<Scene>("missing_scene");
+
+	resources.setFallback<GameProperties>("default_properties");
 }
