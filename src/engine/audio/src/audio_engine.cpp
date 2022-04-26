@@ -318,7 +318,7 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<Audio
 
 			// Mix it in!
 			if (v->isPlaying()) {
-				v->update(channels, e.second->getPosition(), listener, masterGain * getBusGain(v->getGroup()));
+				v->update(channels, e.second->getPosition(), listener, masterGain * getBusGain(v->getBus()));
 				v->mixTo(numSamples, buffers, *pool);
 			}
 		}
