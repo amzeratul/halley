@@ -427,7 +427,7 @@ Vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
 
 			if (i <= crossoverPoint && dst > crossoverPoint) {
 				// Raycast from start
-				const auto [startCol, startDist] = startNavmesh.findRayCollision(startRay, startLen, startNode);
+				const auto [startCol, startDist] = startNavmesh.findRayCollision(startRay, startLen + 0.5f, startNode);
 
 				if (!startCol) {
 					// Something went wrong, should have hit the edge of the navmesh or another obstacle
