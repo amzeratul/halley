@@ -136,3 +136,13 @@ void AudioSubObjectSwitch::deserialize(Deserializer& s)
 	s >> switchId;
 	s >> cases;
 }
+
+const String& AudioSubObjectSwitch::getSwitchId() const
+{
+	return switchId;
+}
+
+void AudioSubObjectSwitch::setSwitchId(String value)
+{
+	switchId = std::move(value);
+}

@@ -27,6 +27,9 @@ namespace Halley {
 	    void serialize(Serializer& s) const override;
 	    void deserialize(Deserializer& s) override;
 
+    	const String& getSwitchId() const;
+        void setSwitchId(String value);
+
     private:
 		String switchId;
 		HashMap<String, AudioSubObjectHandle> cases;

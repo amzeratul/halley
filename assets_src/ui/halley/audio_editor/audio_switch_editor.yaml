@@ -9,5 +9,11 @@ children:
   - widget: { id: content, class: widget }
     border: [1, 4, 1, 1]
     proportion: 1
-    sizer: { type: vertical, gap: 3 }
-    children: []
+    sizer: { type: grid, columns: 2, columnProportions: [0, 1], gap: 4 }
+    children:
+    - widget: { class: widget, size: [100, 10] }
+      children:
+      - widget: { class: label, text: "Switch: " }
+        fill: centre
+    - widget: { id: switchId, class: dropdown, size: [200, 20] }
+      fill: [left, centreVertical]

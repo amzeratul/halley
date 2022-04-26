@@ -11,6 +11,8 @@ namespace Halley {
     public:
         AudioSwitchEditor(UIFactory& factory, AudioObjectEditor& editor, AudioSubObjectSwitch& switchConfig);
 
+		void onMakeUI() override;
+
 	private:
 		UIFactory& factory;
         AudioObjectEditor& editor;
