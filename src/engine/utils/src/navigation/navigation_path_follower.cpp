@@ -112,7 +112,7 @@ void NavigationPathFollower::goToNextRegion(const NavmeshSet& navmeshSet)
 			const auto& portal = regionNavMesh.getPortals().at(region.exitEdgeId);
 			
 			const auto queryStart = NavigationQuery(startPos, subWorld, endPos, subWorld, NavigationQuery::PostProcessingType::None);
-			const auto queryEnd = NavigationQuery(endPos, subWorld, secondEndPos, secondRegionNavMesh.getSubWorld(), NavigationQuery::PostProcessingType::None);
+			const auto queryEnd = NavigationQuery(endPos, secondRegionNavMesh.getSubWorld(), secondEndPos, secondRegionNavMesh.getSubWorld(), NavigationQuery::PostProcessingType::None);
 			newPath = navmeshSet.pathfindBetweenRegions(queryStart, queryEnd, region.regionNodeId, secondRegion.regionNodeId, portal, path->query.postProcessingType);
 		}
 
