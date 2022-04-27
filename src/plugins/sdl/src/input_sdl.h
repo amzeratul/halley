@@ -30,6 +30,7 @@ namespace Halley {
 
 	class InputKeyboardSDL;
 	class InputMouseSDL;
+	class SystemSDL;
 
 	class InputSDL final : public InputAPIInternal {
 		friend class HalleyAPI;
@@ -50,6 +51,9 @@ namespace Halley {
 		Vector<std::shared_ptr<InputTouch>> getNewTouchEvents() override;
 		Vector<std::shared_ptr<InputTouch>> getTouchEvents() override;
 
+		void setMouseTrap(bool shouldBeTrapped) override;
+		void setMouseCursorPos(Vector2i pos) override;
+
 		void processEvent(SDL_Event& event);
 
 		void setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction) override;
@@ -62,7 +66,7 @@ namespace Halley {
 		void processJoyEvent(int n, SDL_Event& event);
 		void processTouch(int type, long long touchId, long long fingerId, float x, float y);
 
-		SystemAPI& system;
+		SystemSDL& system;
 		
 		Vector<std::shared_ptr<InputKeyboardSDL>> keyboards;
 		Vector<std::shared_ptr<InputJoystick>> joysticks;
@@ -72,6 +76,8 @@ namespace Halley {
 		std::map<int, std::shared_ptr<InputTouch>> touchEvents;
 
 		std::function<Vector2f(Vector2i)> mouseRemap;
+
+		bool isMouseTrapped = false; // HACK can be removed once we update SDL
 	};
 
 };

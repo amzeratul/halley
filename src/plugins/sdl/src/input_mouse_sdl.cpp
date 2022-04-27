@@ -83,7 +83,9 @@ void InputMouseSDL::update()
 {
 	clearPresses();
 	wheelMove = 0;
-	prevPos = pos;
+	if (!isMouseTrapped) {
+		prevPos = pos;
+	}
 }
 
 float InputMouseSDL::getAxis(int n)
@@ -95,4 +97,14 @@ float InputMouseSDL::getAxis(int n)
 	} else {
 		return 0.0f;
 	}
+}
+
+void InputMouseSDL::setDeltaPos(Vector2i deltaPos)
+{
+	this->prevPos = Vector2f((float)deltaPos.x, (float)deltaPos.y);
+}
+
+void InputMouseSDL::setMouseTrapped(bool isTrapped)
+{
+	isMouseTrapped = isTrapped;
 }

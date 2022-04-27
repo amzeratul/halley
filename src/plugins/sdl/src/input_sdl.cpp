@@ -23,6 +23,8 @@
 #include "input_joystick_sdl.h"
 #include "input_mouse_sdl.h"
 #include "input_keyboard_sdl.h"
+#include "system_sdl.h"
+#include "sdl_window.h"
 #include "halley/core/input/input_touch.h"
 #include <SDL.h>
 #include "halley/support/console.h"
@@ -35,7 +37,7 @@
 using namespace Halley;
 
 InputSDL::InputSDL(SystemAPI& system)
-	: system(system)
+	: system(dynamic_cast<SystemSDL&>(system))
 {
 }
 
@@ -132,6 +134,13 @@ void InputSDL::beginEvents(Time t)
 	// Mice
 	for (auto& mouse: mice) {
 		mouse->update();
+
+		mouse->setMouseTrapped(isMouseTrapped); // HACK can be removed once we update SDL
+		if (isMouseTrapped) {
+			const auto pos = Vector2i(system.getWindow(0)->getWindowRect().getWidth() / 2, system.getWindow(0)->getWindowRect().getHeight() / 2);
+			setMouseCursorPos(pos);
+			mouse->setDeltaPos(pos);
+		}
 	}
 
 	// Touch events
@@ -253,4 +262,15 @@ Vector<spInputTouch> Halley::InputSDL::getTouchEvents()
 		result.push_back(i.second);
 	}
 	return result;
+}
+
+void InputSDL::setMouseCursorPos(Vector2i pos)
+{
+	SDL_WarpMouseInWindow(system.getWindow(0)->getSDLWindow(), pos.x, pos.y);
+}
+
+void InputSDL::setMouseTrap(bool shouldBeTrapped)
+{
+	isMouseTrapped = shouldBeTrapped;
+	SDL_SetWindowGrab(system.getWindow(0)->getSDLWindow(), shouldBeTrapped ? SDL_TRUE : SDL_FALSE);
 }

@@ -372,6 +372,14 @@ std::unique_ptr<GLContext> SystemSDL::createGLContext()
 	return std::make_unique<SDLGLContext>(windows[0]->getSDLWindow());
 }
 
+std::shared_ptr<Halley::SDLWindow> SystemSDL::getWindow(int index)
+{
+	if (index >= windows.size())
+		return nullptr;
+
+	return windows[index];
+}
+
 void SystemSDL::showCursor(bool show)
 {
 	SDL_ShowCursor(show ? 1 : 0);
