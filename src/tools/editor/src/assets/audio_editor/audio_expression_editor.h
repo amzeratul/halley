@@ -15,11 +15,14 @@ namespace Halley {
 		AudioExpressionTerm& getExpressionTerm(size_t idx);
 		void markModified(size_t idx);
 		AudioObjectEditor& getEditor();
+		void deleteTerm(size_t idx);
 
 	private:
 		UIFactory& factory;
 		AudioExpression& expression;
 		AudioObjectEditor& editor;
+
+		void loadUI();
 	};
 
 	class AudioExpressionEditorExpression : public UIWidget {

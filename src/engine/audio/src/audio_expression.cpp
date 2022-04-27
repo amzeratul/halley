@@ -103,7 +103,7 @@ void AudioExpression::deserialize(Deserializer& s)
 	s >> terms;
 }
 
-gsl::span<AudioExpressionTerm> AudioExpression::getTerms()
+Vector<AudioExpressionTerm>& AudioExpression::getTerms()
 {
 	return terms;
 }

@@ -65,7 +65,7 @@ namespace Halley {
         void serialize(Serializer& s) const;
         void deserialize(Deserializer& s);
 
-        gsl::span<AudioExpressionTerm> getTerms();
+        Vector<AudioExpressionTerm>& getTerms();
 
 	private:
         Vector<AudioExpressionTerm> terms;

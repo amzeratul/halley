@@ -18,12 +18,7 @@ AudioExpressionEditor::AudioExpressionEditor(UIFactory& factory, AudioExpression
 
 void AudioExpressionEditor::onMakeUI()
 {
-	auto exprList = getWidgetAs<UIList>("expressions");
-	size_t idx = 0;
-	for (auto& e: expression.getTerms()) {
-		exprList->addItem(toString(idx), std::make_shared<AudioExpressionEditorExpression>(factory, *this, idx));
-		++idx;
-	}
+	loadUI();
 }
 
 AudioExpressionTerm& AudioExpressionEditor::getExpressionTerm(size_t idx)
@@ -39,6 +34,23 @@ void AudioExpressionEditor::markModified(size_t idx)
 AudioObjectEditor& AudioExpressionEditor::getEditor()
 {
 	return editor;
+}
+
+void AudioExpressionEditor::deleteTerm(size_t idx)
+{
+	expression.getTerms().erase(expression.getTerms().begin() + idx);
+	loadUI();
+}
+
+void AudioExpressionEditor::loadUI()
+{
+	auto exprList = getWidgetAs<UIList>("expressions");
+	exprList->clear();
+	size_t idx = 0;
+	for (auto& e: expression.getTerms()) {
+		exprList->addItem(toString(idx), std::make_shared<AudioExpressionEditorExpression>(factory, *this, idx));
+		++idx;
+	}
 }
 
 AudioExpressionEditorExpression::AudioExpressionEditorExpression(UIFactory& factory, AudioExpressionEditor& parent, size_t idx)
@@ -93,6 +105,18 @@ void AudioExpressionEditorExpression::onMakeUI()
 			parent.markModified(idx);
 		});
 	} else if (expression.type == AudioExpressionTermType::Variable) {
-		// TODO
+		getWidget("variableExpression")->setActive(true);
+
+		bindData("variableId", expression.id, [=] (String value)
+		{
+			auto& expression = parent.getExpressionTerm(idx);
+			expression.id = std::move(value);
+			parent.markModified(idx);
+		});
 	}
+
+	setHandle(UIEventType::ButtonClicked, "delete", [=] (const UIEvent& event)
+	{
+		parent.deleteTerm(idx);
+	});
 }
