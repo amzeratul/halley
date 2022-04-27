@@ -52,43 +52,47 @@ AudioExpressionEditorExpression::AudioExpressionEditorExpression(UIFactory& fact
 
 void AudioExpressionEditorExpression::onMakeUI()
 {
-	auto& expression = parent.getExpressionTerm(idx);
+	const auto& expression = parent.getExpressionTerm(idx);
 
-	getWidget("switchExpression")->setActive(true);
+	if (expression.type == AudioExpressionTermType::Switch) {
+		getWidget("switchExpression")->setActive(true);
 
-	getWidgetAs<UIDropdown>("switchId")->setOptions(parent.getEditor().getAudioProperties().getSwitchIds());
+		getWidgetAs<UIDropdown>("switchId")->setOptions(parent.getEditor().getAudioProperties().getSwitchIds());
 
-	auto updateSwitchValues = [=] (const String& value) {
-		const auto& audioProperties = parent.getEditor().getAudioProperties();
-		const auto* switchConf = audioProperties.tryGetSwitch(value);
-		if (switchConf) {
-			getWidgetAs<UIDropdown>("switchValue")->setOptions(switchConf->getValues());
-		} else {
-			getWidgetAs<UIDropdown>("switchValue")->clear();
-		}
-	};
+		auto updateSwitchValues = [=] (const String& value) {
+			const auto& audioProperties = parent.getEditor().getAudioProperties();
+			const auto* switchConf = audioProperties.tryGetSwitch(value);
+			if (switchConf) {
+				getWidgetAs<UIDropdown>("switchValue")->setOptions(switchConf->getValues());
+			} else {
+				getWidgetAs<UIDropdown>("switchValue")->clear();
+			}
+		};
 
-	updateSwitchValues(expression.id);
+		updateSwitchValues(expression.id);
 
-	bindData("switchId", expression.id, [=] (String value)
-	{
-		updateSwitchValues(value);
-		auto& expression = parent.getExpressionTerm(idx);
-		expression.id = std::move(value);
-		parent.markModified(idx);
-	});
+		bindData("switchId", expression.id, [=] (String value)
+		{
+			updateSwitchValues(value);
+			auto& expression = parent.getExpressionTerm(idx);
+			expression.id = std::move(value);
+			parent.markModified(idx);
+		});
 
-	bindData("switchOp", toString(expression.op), [this] (String value)
-	{
-		auto& expression = parent.getExpressionTerm(idx);
-		expression.op = fromString<AudioExpressionTermOp>(value);
-		parent.markModified(idx);
-	});
+		bindData("switchOp", toString(expression.op), [this] (String value)
+		{
+			auto& expression = parent.getExpressionTerm(idx);
+			expression.op = fromString<AudioExpressionTermOp>(value);
+			parent.markModified(idx);
+		});
 
-	bindData("switchValue", expression.value, [this] (String value)
-	{
-		auto& expression = parent.getExpressionTerm(idx);
-		expression.value = std::move(value);
-		parent.markModified(idx);
-	});
+		bindData("switchValue", expression.value, [this] (String value)
+		{
+			auto& expression = parent.getExpressionTerm(idx);
+			expression.value = std::move(value);
+			parent.markModified(idx);
+		});
+	} else if (expression.type == AudioExpressionTermType::Variable) {
+		// TODO
+	}
 }
