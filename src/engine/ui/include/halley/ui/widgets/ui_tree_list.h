@@ -114,6 +114,7 @@ namespace Halley {
         bool setSelectedOptionId(const String& id, SelectionMode mode = SelectionMode::Normal) override;
 
         Vector2f getDragPositionAdjustment(Vector2f pos, Vector2f startPos) const override;
+    	void refresh();
 
     protected:
         void update(Time t, bool moved) override;
@@ -136,6 +137,5 @@ namespace Halley {
         void setupEvents();
     	void reparentItems(gsl::span<const String> ids, const String& newParentId, int childIndex);
     	void removeTree(const UITreeListItem& tree);
-    	void refresh();
     };
 }

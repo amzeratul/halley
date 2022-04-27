@@ -15,7 +15,7 @@ namespace Halley {
 
 		bool isModified() override;
 		void save() override;
-        void markModified();
+        void markModified(bool refreshList);
 
         void onMakeUI() override;
 

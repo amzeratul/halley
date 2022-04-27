@@ -137,7 +137,7 @@ std::shared_ptr<const Resource> AudioObjectEditor::loadResource(const String& as
 		audioObject = std::make_shared<AudioObject>(config.getRoot());
 	} else {
 		audioObject = std::make_shared<AudioObject>();
-		markModified();
+		markModified(false);
 	}
 	audioObject->setAssetId(assetId);
 
@@ -146,9 +146,12 @@ std::shared_ptr<const Resource> AudioObjectEditor::loadResource(const String& as
 	return audioObject;
 }
 
-void AudioObjectEditor::markModified()
+void AudioObjectEditor::markModified(bool refreshList)
 {
 	modified = true;
+	if (refreshList) {
+		needFullRefresh = true;
+	}
 }
 
 void AudioObjectEditor::update(Time t, bool moved)
@@ -161,6 +164,8 @@ void AudioObjectEditor::update(Time t, bool moved)
 
 void AudioObjectEditor::doLoadUI()
 {
+	hierarchy->setCanSendEvents(false);
+	auto prevId = hierarchy->getSelectedOptionId();
 	hierarchy->clear();
 	hierarchy->setParent(*this);
 	treeData.clear();
@@ -175,8 +180,12 @@ void AudioObjectEditor::doLoadUI()
 		}
 	}
 	hierarchy->sortItems();
+	hierarchy->refresh();
+	hierarchy->layout();
+	hierarchy->setSelectedOptionId(prevId);
+	hierarchy->setCanSendEvents(true);
 
-	layout();
+	//layout();
 }
 
 void AudioObjectEditor::populateObject(const String& parentId, size_t idx, AudioSubObjectHandle& subObject)
@@ -265,9 +274,7 @@ void AudioObjectEditor::addObject(AudioSubObjectType type)
 	auto subObject = AudioSubObjectHandle(IAudioSubObject::makeSubObject(type));
 	auto& parent = treeData.at(hierarchy->getSelectedOptionId());
 	parent.object->addObject(std::move(subObject), parent.subCase, std::numeric_limits<size_t>::max());
-	markModified();
-
-	needFullRefresh = true;
+	markModified(true);
 }
 
 void AudioObjectEditor::addClip(const String& assetId)
@@ -275,9 +282,7 @@ void AudioObjectEditor::addClip(const String& assetId)
 	auto clip = gameResources.get<AudioClip>(assetId);
 	auto& parent = treeData.at(hierarchy->getSelectedOptionId());
 	parent.object->addClip(std::move(clip), {}, std::numeric_limits<size_t>::max());
-	markModified();
-
-	needFullRefresh = true;
+	markModified(true);
 }
 
 void AudioObjectEditor::removeCurrentSelection()
@@ -290,8 +295,7 @@ void AudioObjectEditor::removeCurrentSelection()
 		parent.object->removeObject(target.object);
 	}
 
-	markModified();
-	needFullRefresh = true;
+	markModified(true);
 }
 
 PRAGMA_DEOPTIMIZE
@@ -303,7 +307,7 @@ void AudioObjectEditor::moveItem(const String& itemId, const String& parentId, c
 	} else {
 		moveObject(itemId, parentId, oldParentId, childIdx, oldChildIdx);
 	}
-	markModified();
+	markModified(false);
 }
 
 void AudioObjectEditor::moveObject(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx)

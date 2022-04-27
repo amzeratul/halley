@@ -6,8 +6,7 @@ children:
   children:
   - widget: { id: title, class: label, text: "Layers" }
     fill: centre
-  - widget: { id: content, class: widget }
+  - widget: { id: layers, class: list, canDrag: true, style: dragList }
+    fill: left
     border: [1, 4, 1, 1]
     proportion: 1
-    sizer: { type: vertical, gap: 3 }
-    children: []

@@ -1,5 +1,6 @@
 #include "audio_layers_editor.h"
 
+#include "audio_object_editor.h"
 #include "halley/audio/sub_objects/audio_sub_object_layers.h"
 
 using namespace Halley;
@@ -15,11 +16,17 @@ AudioLayersEditor::AudioLayersEditor(UIFactory& factory, AudioObjectEditor& edit
 
 void AudioLayersEditor::onMakeUI()
 {
-	const auto content = getWidget("content");
+	const auto layerList = getWidgetAs<UIList>("layers");
 
 	for (size_t i = 0; i < layers.getLayers().size(); ++i) {
-		content->add(std::make_shared<AudioLayersEditorLayer>(factory, *this, i));
+		layerList->addItem(toString(i), std::make_shared<AudioLayersEditorLayer>(factory, *this, i), 1);
 	}
+
+	setHandle(UIEventType::ListItemsSwapped, [=] (const UIEvent& event)
+	{
+		std::swap(layers.getLayers()[event.getIntData()], layers.getLayers()[event.getIntData2()]);
+		editor.markModified(true);
+	});
 }
 
 AudioSubObjectLayers::Layer& AudioLayersEditor::getLayer(size_t idx)

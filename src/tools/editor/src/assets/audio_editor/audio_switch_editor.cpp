@@ -23,6 +23,6 @@ void AudioSwitchEditor::onMakeUI()
 	bindData("switchId", switchConfig.getSwitchId(), [=] (String value)
 	{
 		switchConfig.setSwitchId(std::move(value));
-		editor.markModified();
+		editor.markModified(true);
 	});
 }

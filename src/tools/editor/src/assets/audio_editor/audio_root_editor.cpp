@@ -21,30 +21,30 @@ void AudioRootEditor::onMakeUI()
 	bindData("bus", object.getBus(), [=] (String value)
 	{
 		object.setBus(std::move(value));
-		editor.markModified();
+		editor.markModified(false);
 	});
 
 	bindData("gainMin", object.getGain().start, [=] (float value)
 	{
 		object.getGain().start = value;
-		editor.markModified();
+		editor.markModified(false);
 	});
 
 	bindData("gainMax", object.getGain().end, [=] (float value)
 	{
 		object.getGain().end = value;
-		editor.markModified();
+		editor.markModified(false);
 	});
 
 	bindData("pitchMin", object.getPitch().start, [=] (float value)
 	{
 		object.getPitch().start = value;
-		editor.markModified();
+		editor.markModified(false);
 	});
 
 	bindData("pitchMax", object.getPitch().end, [=] (float value)
 	{
 		object.getPitch().end = value;
-		editor.markModified();
+		editor.markModified(false);
 	});
 }

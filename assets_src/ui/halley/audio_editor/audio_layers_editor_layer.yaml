@@ -1,13 +1,20 @@
-widget: { class: widget }
+widget: { id: background, class: image, image: "$ui_window", innerBorder: [ 8, 8, 8, 8 ], colour: $ui_staticBox, size: [20, 20] }
 sizer: { type: vertical }
 children:
-- widget: { id: background, class: image, image: "$ui_title_capsule", colour: "$ui_popupWindow", innerBorder: [ 4, 1, 4, 4 ], size: [20, 20] }
-  sizer: { type: vertical }
+- widget: { id: layerName, class: label, text: "Layer Name", colour: "$ui_unselectedTextAlt" }
+  fill: [left, centreVertical]
+  border: [0, 0, 0, 10]
+- widget: { id: layerContents, class: widget }
+  proportion: 1
+  sizer: { type: grid, columns: 2, columnProportions: [0, 1], gap: 3 }
   children:
-  - widget: { id: layerName, class: label, text: "Layer Name" }
-    fill: centre
-  - widget: { id: layerContents, class: widget }
-    border: [1, 4, 1, 1]
-    proportion: 1
-    sizer: { type: vertical, gap: 3 }
-    children: []
+  - widget: { class: widget, size: [100, 10] }
+    fill: [left, centreVertical]
+    children:
+    - widget: { class: label, text: "Expression: " }
+  - widget: { class: widget }
+    fill: [left, centreVertical]
+  - widget: { class: label, text: "Synchronised: " }
+    fill: [left, centreVertical]
+  - widget: { class: checkbox, id: synchronised }
+    fill: [left, centreVertical]
