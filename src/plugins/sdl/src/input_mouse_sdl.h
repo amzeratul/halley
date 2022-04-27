@@ -34,6 +34,7 @@ namespace Halley {
 	public:
 		Vector2f getPosition() const override;
 		int getWheelMove() const override;
+		float getAxis(int n) override;
 
 		void update();
 
@@ -43,6 +44,7 @@ namespace Halley {
 		void updateRemap(const std::function<Vector2f(Vector2i)>& remap);
 
 		Vector2f pos;
+		Vector2f prevPos;
 		int wheelMove;
 	};
 
