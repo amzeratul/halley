@@ -15,6 +15,7 @@ namespace Halley {
 		void onMakeUI() override;
 
 		AudioSubObjectLayers::Layer& getLayer(size_t idx);
+		void markModified(size_t idx);
 
     private:
 		UIFactory& factory;

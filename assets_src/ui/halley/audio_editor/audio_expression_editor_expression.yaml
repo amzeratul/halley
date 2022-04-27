@@ -1,0 +1,13 @@
+widget: { class: widget }
+sizer: { type: horizontal }
+children:
+- widget: { id: switchExpression, class: widget }
+  sizer: { type: horizontal }
+  children:
+  - widget: { class: label, text: "If switch " }
+  - widget: { id: switchId, class: dropdown, size: [150, 20] }
+  - widget: { id: switchOp, class: dropdown, size: [50, 20], options: [{ id: "equal", text: "==" }, { id: "different", text: "!=" }] }
+  - widget: { id: switchValue, class: dropdown, size: [150, 20] }
+- stretchSpacer: {}
+  proportion: 1
+- widget: { id: delete, class: button, style: buttonThin, text: "x", size: [20, 16] }

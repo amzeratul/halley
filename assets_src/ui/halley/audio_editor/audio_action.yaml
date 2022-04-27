@@ -1,4 +1,4 @@
-widget: { id: background, class: image, image: "$ui_window", innerBorder: [ 8, 8, 8, 8 ], colour: $ui_staticBox, size: [20, 20] }
+widget: { id: background, class: image, image: "$ui_window", innerBorder: [ 8, 8, 8, 8 ], colour: $ui_staticBox, size: [20, 20], interactWithMouse: true }
 sizer: { type: horizontal }
 children:
 - widget: { class: widget, size: [100, 20] }

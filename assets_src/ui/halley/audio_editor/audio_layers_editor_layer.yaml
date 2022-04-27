@@ -1,4 +1,4 @@
-widget: { id: background, class: image, image: "$ui_window", innerBorder: [ 8, 8, 8, 8 ], colour: $ui_staticBox, size: [20, 20] }
+widget: { id: background, class: image, image: "$ui_window", innerBorder: [ 8, 8, 8, 8 ], colour: $ui_staticBox, size: [20, 20], interactWithMouse: true }
 sizer: { type: vertical }
 children:
 - widget: { id: layerName, class: label, text: "Layer Name", colour: "$ui_unselectedTextAlt" }
@@ -12,8 +12,9 @@ children:
     fill: [left, centreVertical]
     children:
     - widget: { class: label, text: "Expression: " }
-  - widget: { class: widget }
+  - widget: { class: widget, id: expressionContainer }
     fill: [left, centreVertical]
+    children: []
   - widget: { class: label, text: "Synchronised: " }
     fill: [left, centreVertical]
   - widget: { class: checkbox, id: synchronised }

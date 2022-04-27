@@ -941,6 +941,11 @@ std::shared_ptr<UIWidget> UIFactory::makeImage(const ConfigNode& entryNode)
 	if (node.hasKey("layerAdjustment")) {
 		image->setLayerAdjustment(node["layerAdjustment"].asInt());
 	}
+
+	if (node.hasKey("interactWithMouse")) {
+		image->setInteractWithMouse(node["interactWithMouse"].asBool(false));
+	}
+
 	return image;
 }
 

@@ -1,0 +1,4 @@
+widget: { class: widget }
+children:
+- widget: { id: expressions, class: list, canDrag: true, style: dragList }
+- widget: { id: add, class: button, style: buttonThin, text: "+", size: [30, 16] }

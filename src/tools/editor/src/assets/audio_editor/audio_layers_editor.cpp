@@ -1,5 +1,6 @@
 #include "audio_layers_editor.h"
 
+#include "audio_expression_editor.h"
 #include "audio_object_editor.h"
 #include "halley/audio/sub_objects/audio_sub_object_layers.h"
 
@@ -34,6 +35,11 @@ AudioSubObjectLayers::Layer& AudioLayersEditor::getLayer(size_t idx)
 	return layers.getLayers()[idx];
 }
 
+void AudioLayersEditor::markModified(size_t idx)
+{
+	editor.markModified(false);
+}
+
 AudioLayersEditorLayer::AudioLayersEditorLayer(UIFactory& factory, AudioLayersEditor& layersEditor, size_t idx)
 	: UIWidget("audio_layers_editor_layer", Vector2f(), UISizer())
 	, factory(factory)
@@ -48,4 +54,12 @@ void AudioLayersEditorLayer::onMakeUI()
 	auto& layer = layersEditor.getLayer(idx);
 	const auto& name = layer.object->getName();
 	getWidgetAs<UILabel>("layerName")->setText(LocalisedString::fromUserString(name));
+
+	getWidget("expressionContainer")->add(std::make_shared<AudioExpressionEditor>(factory, layer.expression), 1);
+
+	bindData("synchronised", layer.synchronised, [this, &layer] (bool value)
+	{
+		layer.synchronised = value;
+		layersEditor.markModified(idx);
+	});
 }

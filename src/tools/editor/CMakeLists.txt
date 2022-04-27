@@ -21,6 +21,7 @@ set (editor_sources
 	"src/assets/prefab_editor.cpp"
 
 	"src/assets/audio_editor/audio_event_editor.cpp"
+	"src/assets/audio_editor/audio_expression_editor.cpp"
 	"src/assets/audio_editor/audio_layers_editor.cpp"
 	"src/assets/audio_editor/audio_object_editor.cpp"
 	"src/assets/audio_editor/audio_root_editor.cpp"
@@ -91,6 +92,7 @@ set (editor_headers
 	"src/assets/prefab_editor.h"
 
 	"src/assets/audio_editor/audio_event_editor.h"
+	"src/assets/audio_editor/audio_expression_editor.h"
 	"src/assets/audio_editor/audio_layers_editor.h"
 	"src/assets/audio_editor/audio_object_editor.h"
 	"src/assets/audio_editor/audio_root_editor.h"

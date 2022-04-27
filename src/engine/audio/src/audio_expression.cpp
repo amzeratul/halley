@@ -90,3 +90,8 @@ void AudioExpression::deserialize(Deserializer& s)
 {
 	s >> terms;
 }
+
+gsl::span<AudioExpressionTerm> AudioExpression::getTerms()
+{
+	return terms;
+}
