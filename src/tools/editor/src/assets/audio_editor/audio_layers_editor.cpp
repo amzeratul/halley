@@ -40,6 +40,11 @@ void AudioLayersEditor::markModified(size_t idx)
 	editor.markModified(false);
 }
 
+AudioObjectEditor& AudioLayersEditor::getEditor()
+{
+	return editor;
+}
+
 AudioLayersEditorLayer::AudioLayersEditorLayer(UIFactory& factory, AudioLayersEditor& layersEditor, size_t idx)
 	: UIWidget("audio_layers_editor_layer", Vector2f(), UISizer())
 	, factory(factory)
@@ -55,7 +60,7 @@ void AudioLayersEditorLayer::onMakeUI()
 	const auto& name = layer.object->getName();
 	getWidgetAs<UILabel>("layerName")->setText(LocalisedString::fromUserString(name));
 
-	getWidget("expressionContainer")->add(std::make_shared<AudioExpressionEditor>(factory, layer.expression), 1);
+	getWidget("expressionContainer")->add(std::make_shared<AudioExpressionEditor>(factory, layer.expression, layersEditor.getEditor()), 1);
 
 	bindData("synchronised", layer.synchronised, [this, &layer] (bool value)
 	{

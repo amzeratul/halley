@@ -13,6 +13,7 @@ AudioExpressionTerm::AudioExpressionTerm(const ConfigNode& node)
 	case AudioExpressionTermType::Switch:
 		id = node["id"].asString();
 		value = node["value"].asString();
+		op = fromString<AudioExpressionTermOp>(node["op"].asString("equals"));
 		break;
 
 	case AudioExpressionTermType::Variable:
@@ -28,6 +29,7 @@ ConfigNode AudioExpressionTerm::toConfigNode() const
 	result["id"] = id;
 	if (type == AudioExpressionTermType::Switch) {
 		result["value"] = value;
+		result["op"] = toString(op);
 	}
 	return result;
 }
@@ -36,7 +38,14 @@ float AudioExpressionTerm::evaluate(const AudioEmitter& emitter) const
 {
 	switch (type) {
 	case AudioExpressionTermType::Switch:
-		return emitter.getSwitchValue(id) == value ? 1.0f : 0.0f;
+		{
+			const bool isEqual = emitter.getSwitchValue(id) == value;
+			if (op == AudioExpressionTermOp::Equals) {
+				return isEqual ? 1.0f : 0.0f;
+			} else if (op == AudioExpressionTermOp::NotEquals) {
+				return isEqual ? 0.0f : 1.0f;
+			}
+		}
 	case AudioExpressionTermType::Variable:
 		return emitter.getVariableValue(id);
 	}
@@ -47,6 +56,7 @@ float AudioExpressionTerm::evaluate(const AudioEmitter& emitter) const
 void AudioExpressionTerm::serialize(Serializer& s) const
 {
 	s << static_cast<int>(type);
+	s << static_cast<int>(op);
 	s << id;
 	s << value;
 }
@@ -56,6 +66,8 @@ void AudioExpressionTerm::deserialize(Deserializer& s)
 	int t;
 	s >> t;
 	type = static_cast<AudioExpressionTermType>(t);
+	s >> t;
+	op = static_cast<AudioExpressionTermOp>(t);
 	s >> id;
 	s >> value;
 }

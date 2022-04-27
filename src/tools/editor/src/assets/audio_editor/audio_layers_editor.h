@@ -16,6 +16,7 @@ namespace Halley {
 
 		AudioSubObjectLayers::Layer& getLayer(size_t idx);
 		void markModified(size_t idx);
+        AudioObjectEditor& getEditor();
 
     private:
 		UIFactory& factory;

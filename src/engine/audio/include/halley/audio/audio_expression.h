@@ -8,7 +8,7 @@ namespace Halley {
     class Serializer;
     class Deserializer;
 
-    enum class AudioExpressionTermType {
+    enum class AudioExpressionTermType: uint8_t {
 	    Switch,
         Variable
     };
@@ -23,9 +23,25 @@ namespace Halley {
 		}
 	};
 
+    enum class AudioExpressionTermOp: uint8_t {
+	    Equals,
+        NotEquals
+    };
+
+	template <>
+	struct EnumNames<AudioExpressionTermOp> {
+		constexpr std::array<const char*, 2> operator()() const {
+			return{{
+				"equals",
+                "notEquals"
+			}};
+		}
+	};
+
     class AudioExpressionTerm {
     public:
         AudioExpressionTermType type;
+        AudioExpressionTermOp op;
         String id;
         String value;
 
