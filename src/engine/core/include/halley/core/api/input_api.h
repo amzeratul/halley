@@ -35,6 +35,9 @@ namespace Halley
 		virtual Vector<std::shared_ptr<InputTouch>> getNewTouchEvents() = 0;
 		virtual Vector<std::shared_ptr<InputTouch>> getTouchEvents() = 0;
 
+		virtual void setMouseTrap(bool shouldBeTrapped) {};
+		virtual void setMouseCursorPos(Vector2i pos) {};
+
 		virtual void setMouseRemapping(std::function<Vector2f(Vector2i)> remapFunction) = 0;
 
 		virtual Future<bool> requestControllerSetup(int minControllers, int maxControllers, std::optional<Vector<InputControllerData>> controllerData = {})

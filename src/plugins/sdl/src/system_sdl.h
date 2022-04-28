@@ -14,6 +14,9 @@ namespace Halley
 	public:
 		explicit SystemSDL(std::optional<String> saveCryptKey);
 
+		std::shared_ptr<SDLWindow> getWindow(int index);
+		std::shared_ptr<IClipboard> getClipboard() const override;
+
 	protected:
 		void init() override;
 		void deInit() override;
@@ -43,8 +46,6 @@ namespace Halley
 		void setEnvironment(Environment* env) override;
 
 		bool canExit() override;
-
-		std::shared_ptr<IClipboard> getClipboard() const override;
 
 		void setThreadName(const String& name) override;
 
