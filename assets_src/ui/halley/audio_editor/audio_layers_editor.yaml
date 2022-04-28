@@ -2,11 +2,16 @@ widget: { class: widget }
 sizer: { type: vertical }
 children:
 - widget: { id: background, class: image, image: "$ui_title_capsule", colour: "$ui_popupWindow", innerBorder: [ 4, 1, 4, 4 ], size: [20, 20] }
-  sizer: { type: vertical }
+  sizer: { type: vertical, gap: 4 }
   children:
   - widget: { id: title, class: label, text: "Layers" }
+    border: [0, 0, 0, 4]
     fill: centre
+  - sizer: { type: horizontal }
+    children:
+    - widget: { class: label, text: "Crossfade: " }
+    - widget: { class: widget, id: fadeContainer }
+      children: []
   - widget: { id: layers, class: list, canDrag: true, style: dragList }
-    fill: left
     border: [1, 4, 1, 1]
     proportion: 1

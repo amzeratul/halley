@@ -1,5 +1,6 @@
 #include "audio_event_editor.h"
 
+#include "audio_fade_editor.h"
 #include "halley/core/properties/game_properties.h"
 #include "halley/tools/project/project.h"
 #include "src/ui/select_asset_widget.h"
@@ -192,31 +193,16 @@ void AudioEventEditorAction::makeObjectAction(AudioEventActionObject& action)
 {
 	factory.loadUI(*getWidget("contents"), "halley/audio_editor/audio_action_play");
 
-	auto updateFadeType = [this](AudioFadeCurve curve)
+	getWidget("fadeContainer")->add(std::make_shared<AudioFadeEditor>(factory, action.getFade(), [=] ()
 	{
-		getWidget("fadeLenOptions")->setActive(curve != AudioFadeCurve::None);
-	};
-	
+		editor.markModified();
+	}));
+
 	bindData("object", action.getObjectName(), [=, &action] (String value)
 	{
 		action.setObjectName(value, editor.getGameResources());
 		editor.markModified();
 	});
-	
-	bindData("fadeType", toString(action.getFade().getCurve()), [=, &action] (String value)
-	{
-		auto curve = fromString<AudioFadeCurve>(value);
-		action.getFade().setCurve(curve);
-		editor.markModified();
-		updateFadeType(curve);
-	});
-	updateFadeType(action.getFade().getCurve());
-
-	bindData("fadeLength", action.getFade().getLength(), [=, &action] (float value)
-	{
-		action.getFade().setLength(value);
-		editor.markModified();
-	});	
 }
 
 void AudioEventEditorAction::makePlayAction(AudioEventActionPlay& action)

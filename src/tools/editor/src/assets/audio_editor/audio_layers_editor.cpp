@@ -1,6 +1,7 @@
 #include "audio_layers_editor.h"
 
 #include "audio_expression_editor.h"
+#include "audio_fade_editor.h"
 #include "audio_object_editor.h"
 #include "halley/audio/sub_objects/audio_sub_object_layers.h"
 
@@ -17,8 +18,12 @@ AudioLayersEditor::AudioLayersEditor(UIFactory& factory, AudioObjectEditor& edit
 
 void AudioLayersEditor::onMakeUI()
 {
-	const auto layerList = getWidgetAs<UIList>("layers");
+	getWidget("fadeContainer")->add(std::make_shared<AudioFadeEditor>(factory, layers.getFade(), [=] ()
+	{
+		editor.markModified(false);
+	}));
 
+	const auto layerList = getWidgetAs<UIList>("layers");
 	for (size_t i = 0; i < layers.getLayers().size(); ++i) {
 		layerList->addItem(toString(i), std::make_shared<AudioLayersEditorLayer>(factory, *this, i), 1);
 	}

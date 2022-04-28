@@ -7,24 +7,8 @@ children:
   children:
   - widget: { class: label, text: "Fade: " }
     fill: centre
-  - widget: 
-      id: fadeType
-      class: dropdown
-      options:
-      - id: none
-        text: None
-      - id: linear
-        text: Linear
-      - id: sinusoidal
-        text: Sinusoidal
-  - widget: { class: widget, id: fadeLenOptions }
-    sizer: { type: horizontal }
-    children:
-    - widget: { class: label, text: ", length: " }
-      fill: centre
-    - widget: { id: fadeLength, class: textInput, size: [50, 20], validator: numericPositive }
-    - widget: { class: label, text: " s" }
-      fill: centre
+  - widget: { class: widget, id: fadeContainer }
+    children: []
 - widget: { class: widget, id: playOptions, active: false }
   sizer: { type: vertical, gap: 4 }
   children:
