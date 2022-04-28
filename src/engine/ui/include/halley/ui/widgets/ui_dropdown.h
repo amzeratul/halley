@@ -32,6 +32,7 @@ namespace Halley {
 
 		virtual void setSelectedOption(int option);
 		virtual void setSelectedOption(const String& id);
+		void setSelectedOptionPartialMatch(const String& match);
 		int getSelectedOption() const;
 		String getSelectedOptionId() const;
 		LocalisedString getSelectedOptionText() const;
@@ -58,9 +59,13 @@ namespace Halley {
 		
 		int curOption = 0;
 
+		String keypressMatch;
+		Time timeSinceLastKeypress;
+
 		void draw(UIPainter& painter) const override;
 		void update(Time t, bool moved) override;
 
+		bool onKeyPress(KeyboardKeyPress key) override;
 		void onClicked(Vector2f mousePos, KeyMods keyMods) override;
 		void doSetState(State state) override;
 

@@ -6,6 +6,7 @@
 #include "widgets/ui_list.h"
 #include "halley/text/i18n.h"
 #include "halley/ui/ui_data_bind.h"
+#include "halley/core/input/input_keyboard.h"
 
 using namespace Halley;
 
@@ -34,6 +35,10 @@ void UIDropdown::setSelectedOption(int option)
 		} else {
 			notifyDataBind(curOption);
 		}
+
+		if (dropdownList) {
+			dropdownList->setSelectedOption(option);
+		}
 	}
 }
 
@@ -42,6 +47,15 @@ void UIDropdown::setSelectedOption(const String& id)
 	const auto iter = std::find_if(options.begin(), options.end(), [&] (const auto& o) { return o.id == id; });
 	if (iter != options.end()) {
 		setSelectedOption(static_cast<int>(iter - options.begin()));
+	}
+}
+
+void UIDropdown::setSelectedOptionPartialMatch(const String& match)
+{
+	const auto iter = std::find_if(options.begin(), options.end(), [&] (const auto& o) { return o.label.getString().startsWith(match, false); });
+	if (iter != options.end()) {
+		int option = static_cast<int>(iter - options.begin());
+		setSelectedOption(option);
 	}
 }
 
@@ -213,6 +227,30 @@ void UIDropdown::update(Time t, bool moved)
 	if (dropdownWindow) {
 		dropdownWindow->setPosition(getPosition() + Vector2f(0.0f, openState == OpenState::OpenDown ? getSize().y : (-dropdownWindow->getSize().y)));
 	}
+
+	timeSinceLastKeypress += t;
+}
+
+bool UIDropdown::onKeyPress(KeyboardKeyPress key)
+{
+	if (!dropdownList) {
+		// FIXME: The widget isn't in focus if just hovered and not yet clicked.
+		// This check blocks updates in that case.
+		return false;
+	}
+
+	if (timeSinceLastKeypress > 1.5) {
+		keypressMatch = "";
+	}
+	timeSinceLastKeypress = 0.0;
+
+	if (key.key >= KeyCode::A && key.key <= KeyCode::Z) {
+		int ch = 'a' + (int(key.key) - int(KeyCode::A));
+		keypressMatch += char(ch);
+		setSelectedOptionPartialMatch(keypressMatch);
+	}
+
+	return false;
 }
 
 void UIDropdown::onClicked(Vector2f mousePos, KeyMods keyMods)
