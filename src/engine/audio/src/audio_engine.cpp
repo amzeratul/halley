@@ -9,6 +9,7 @@
 #include "audio_event.h"
 #include "halley/support/logger.h"
 #include "halley/core/api/audio_api.h"
+#include "halley/core/properties/audio_properties.h"
 #include "halley/support/profiler.h"
 #include "halley/time/stopwatch.h"
 #include "halley/utils/algorithm.h"
@@ -133,10 +134,11 @@ Vector<AudioEventId> AudioEngine::getFinishedSounds()
 	return std::move(finishedSounds);
 }
 
-void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
+void AudioEngine::start(AudioSpec s, AudioOutputAPI& o, const AudioProperties& audioProperties)
 {
 	spec = s;
 	out = &o;
+	this->audioProperties = &audioProperties;
 	running = true;
 
 	out->setAudioOutputInterface(*this);
@@ -148,6 +150,8 @@ void AudioEngine::start(AudioSpec s, AudioOutputAPI& o)
 	if (spec.sampleRate != 48000) {
 		outResampler = std::make_unique<AudioResampler>(48000, spec.sampleRate, spec.numChannels, Debug::isDebug() ? 0.0f : 0.5f);
 	}
+
+	loadBuses();
 }
 
 void AudioEngine::resume()
@@ -296,13 +300,11 @@ void AudioEngine::setMasterGain(float gain)
 	masterGain = gain;
 }
 
-void AudioEngine::setBusGain(const String& name, float gain)
-{
-	busGains[getBusId(name)] = gain;
-}
-
 void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<AudioBuffer*> buffers)
 {
+	// Ensure propagation of bus gains
+	updateBusGains();
+
 	// Clear buffers
 	for (size_t i = 0; i < nChannels; ++i) {
 		AudioMixer::zero(buffers[i]->samples);
@@ -318,7 +320,7 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<Audio
 
 			// Mix it in!
 			if (v->isPlaying()) {
-				v->update(channels, e.second->getPosition(), listener, masterGain * getBusGain(v->getBus()));
+				v->update(channels, e.second->getPosition(), listener, masterGain * getCompositeBusGain(v->getBus()));
 				v->mixTo(numSamples, buffers, *pool);
 			}
 		}
@@ -333,15 +335,39 @@ void AudioEngine::removeFinishedVoices()
 	std_ex::erase_if_value(emitters, [&] (const std::unique_ptr<AudioEmitter>& src) { return src->shouldBeRemoved(); });
 }
 
-int AudioEngine::getBusId(const String& bus)
+int AudioEngine::getBusId(const String& busName)
 {
-	const auto iter = std::find(busNames.begin(), busNames.end(), bus);
-	if (iter != busNames.end()) {
-		return int(iter - busNames.begin());
+	const auto iter = std::find_if(buses.begin(), buses.end(), [&] (const BusData& b) { return b.name == busName; });
+	if (iter != buses.end()) {
+		return int(iter - buses.begin());
 	} else {
-		busNames.push_back(bus);
-		busGains.push_back(1.0f);
-		return int(busNames.size()) - 1;
+		Logger::logError("Unknown audio bus: " + busName);
+		return 0;
+	}
+}
+
+void AudioEngine::loadBuses()
+{
+	buses.clear();
+	for (const auto& bus: audioProperties->getBuses()) {
+		loadBus(bus, OptionalLite<uint8_t>{});
+	}
+}
+
+void AudioEngine::loadBus(const AudioBusProperties& bus, OptionalLite<uint8_t> parent)
+{
+	const auto id = static_cast<uint8_t>(buses.size());
+	buses.emplace_back(BusData{ bus.getId(), 1.0f, 1.0f, parent });
+	for (const auto& b: bus.getChildren()) {
+		loadBus(b, id);
+	}
+}
+
+void AudioEngine::updateBusGains()
+{
+	for (auto& bus: buses) {
+		const float base = bus.parent ? buses.at(bus.parent.value()).compositeGain : 1.0f;
+		bus.compositeGain = bus.gain * base;
 	}
 }
 
@@ -350,7 +376,12 @@ int64_t AudioEngine::getLastTimeElapsed()
 	return lastTimeElapsed.exchange(0);
 }
 
-float AudioEngine::getBusGain(uint8_t id) const
+void AudioEngine::setBusGain(const String& name, float gain)
 {
-	return busGains[id];
+	buses[getBusId(name)].gain = gain;
+}
+
+float AudioEngine::getCompositeBusGain(uint8_t id) const
+{
+	return buses.at(id).compositeGain;
 }

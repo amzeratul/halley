@@ -14,6 +14,8 @@
 #include "halley/maths/random.h"
 
 namespace Halley {
+	class AudioBusProperties;
+	class AudioProperties;
 	class AudioMixer;
 	class IAudioClip;
 	class Resources;
@@ -43,7 +45,7 @@ namespace Halley {
 		Vector<AudioEventId> getFinishedSounds();
 
 		void run();
-		void start(AudioSpec spec, AudioOutputAPI& out);
+		void start(AudioSpec spec, AudioOutputAPI& out, const AudioProperties& audioProperties);
 		void resume();
 		void pause();
 
@@ -54,13 +56,22 @@ namespace Halley {
 
 		void setMasterGain(float gain);
 		void setBusGain(const String& name, float gain);
-		int getBusId(const String& bus);
+    	float getCompositeBusGain(uint8_t bus) const;
+		int getBusId(const String& busName);
 
 		int64_t getLastTimeElapsed();
 
     private:
+		struct BusData {
+			String name;
+			float gain = 1;
+			float compositeGain = 1;
+			OptionalLite<uint8_t> parent;
+		};
+
 		AudioSpec spec;
 		AudioOutputAPI* out = nullptr;
+		const AudioProperties* audioProperties = nullptr;
 		std::unique_ptr<AudioBufferPool> pool;
 		std::unique_ptr<AudioResampler> outResampler;
 		Vector<short> tmpShort;
@@ -74,8 +85,7 @@ namespace Halley {
 		Vector<AudioChannelData> channels;
 		
 		float masterGain = 1.0f;
-		Vector<String> busNames;
-    	Vector<float> busGains;
+		Vector<BusData> buses;
 
 		AudioListenerData listener;
 
@@ -93,6 +103,8 @@ namespace Halley {
 		size_t getAvailable() override;
 		size_t output(gsl::span<std::byte> dst, bool fill) override;
 
-    	float getBusGain(uint8_t bus) const;
+    	void loadBuses();
+		void loadBus(const AudioBusProperties& bus, OptionalLite<uint8_t> parent);
+		void updateBusGains();
     };
 }

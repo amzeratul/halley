@@ -8,6 +8,7 @@
 #include "halley/data_structures/ring_buffer.h"
 
 namespace Halley {
+	class AudioProperties;
 	class AudioPosition;
 	class AudioEngine;
 	class AudioHandleImpl;
@@ -98,6 +99,8 @@ namespace Halley {
 		void stopMusic(AudioHandle& handle, float fade);
 
 		void onNeedBuffer();
+
+		const AudioProperties& getAudioProperties() const;
     };
 
 	inline float volumeToGain(float volume)

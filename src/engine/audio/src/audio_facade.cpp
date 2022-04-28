@@ -7,6 +7,7 @@
 #include "halley/support/logger.h"
 #include "halley/core/resources/resources.h"
 #include "audio_event.h"
+#include "halley/core/properties/game_properties.h"
 
 using namespace Halley;
 
@@ -113,7 +114,7 @@ void AudioFacade::resumePlayback()
 			pausePlayback();
 		}
 
-		engine->start(audioSpec, output);
+		engine->start(audioSpec, output, getAudioProperties());
 		running = true;
 
 		if (ownAudioThread) {
@@ -310,6 +311,12 @@ void AudioFacade::onNeedBuffer()
 	if (!ownAudioThread) {
 		stepAudio();
 	}
+}
+
+const AudioProperties& AudioFacade::getAudioProperties() const
+{
+	const auto properties = resources->get<GameProperties>("game_properties");
+	return properties->getAudioProperties();
 }
 
 void AudioFacade::setListener(AudioListenerData listener)
