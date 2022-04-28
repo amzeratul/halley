@@ -19,6 +19,16 @@ AudioExpressionEditor::AudioExpressionEditor(UIFactory& factory, AudioExpression
 void AudioExpressionEditor::onMakeUI()
 {
 	loadUI();
+
+	setHandle(UIEventType::ButtonClicked, "add", [=] (const UIEvent& event)
+	{
+		addTerm();
+	});
+
+	setHandle(UIEventType::ListItemsSwapped, "expressions", [=] (const UIEvent& event)
+	{
+		refreshIds();
+	});
 }
 
 AudioExpressionTerm& AudioExpressionEditor::getExpressionTerm(size_t idx)
@@ -38,27 +48,62 @@ AudioObjectEditor& AudioExpressionEditor::getEditor()
 
 void AudioExpressionEditor::deleteTerm(size_t idx)
 {
-	expression.getTerms().erase(expression.getTerms().begin() + idx);
-	loadUI();
+	Concurrent::execute(Executors::getMainUpdateThread(), [=] () {
+		getWidgetAs<UIList>("expressions")->removeItem(expressionEditors[idx]->getId());
+		expression.getTerms().erase(expression.getTerms().begin() + idx);
+		expressionEditors.erase(expressionEditors.begin() + idx);
+		refreshIds();
+	});
 }
 
 void AudioExpressionEditor::loadUI()
 {
 	auto exprList = getWidgetAs<UIList>("expressions");
 	exprList->clear();
+	expressionEditors.clear();
 	size_t idx = 0;
 	for (auto& e: expression.getTerms()) {
-		exprList->addItem(toString(idx), std::make_shared<AudioExpressionEditorExpression>(factory, *this, idx));
+		expressionEditors.push_back(std::make_shared<AudioExpressionEditorExpression>(factory, *this, idx));
+		exprList->addItem(expressionEditors.back()->getId(), expressionEditors.back(), 1);
 		++idx;
 	}
 }
 
+void AudioExpressionEditor::refreshIds()
+{
+	for (size_t i = 0; i < expressionEditors.size(); ++i) {
+		expressionEditors[i]->updateIdx(i);
+	}
+}
+
+void AudioExpressionEditor::addTerm()
+{
+	getRoot()->addChild(std::make_shared<ChooseAudioExpressionAction>(factory, [=] (std::optional<String> result)
+	{
+		if (result) {
+			addTerm(fromString<AudioExpressionTermType>(*result));
+		}
+	}));
+}
+
+void AudioExpressionEditor::addTerm(AudioExpressionTermType type)
+{
+	const auto idx = expression.getTerms().size();
+	expression.getTerms().push_back(AudioExpressionTerm(type));
+
+	expressionEditors.push_back(std::make_shared<AudioExpressionEditorExpression>(factory, *this, idx));
+	getWidgetAs<UIList>("expressions")->addItem(expressionEditors.back()->getId(), expressionEditors.back(), 1);
+}
+
 AudioExpressionEditorExpression::AudioExpressionEditorExpression(UIFactory& factory, AudioExpressionEditor& parent, size_t idx)
-	: UIWidget("audio_expression_editor_expression", Vector2f(), UISizer())
+	: UIWidget("", Vector2f(), UISizer())
 	, factory(factory)
 	, parent(parent)
 	, idx(idx)
 {
+	static size_t uniqueIdx = 0;
+	setId("audio_expression_editor_expression_" + toString(uniqueIdx++));
+
 	factory.loadUI(*this, "halley/audio_editor/audio_expression_editor_expression");
 }
 
@@ -119,4 +164,26 @@ void AudioExpressionEditorExpression::onMakeUI()
 	{
 		parent.deleteTerm(idx);
 	});
+}
+
+void AudioExpressionEditorExpression::updateIdx(size_t idx)
+{
+	this->idx = idx;
+}
+
+ChooseAudioExpressionAction::ChooseAudioExpressionAction(UIFactory& factory, Callback callback)
+	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), {})
+{
+	Vector<String> ids;
+	Vector<String> names;
+	for (auto id: EnumNames<AudioExpressionTermType>()()) {
+		ids.push_back(id);
+		names.push_back(id);
+	}
+	setTitle(LocalisedString::fromHardcodedString("Add Expression"));
+	setAssetIds(ids, names, "variable");
+}
+
+void ChooseAudioExpressionAction::sortItems(Vector<std::pair<String, String>>& values)
+{
 }

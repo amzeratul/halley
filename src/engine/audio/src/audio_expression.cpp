@@ -6,6 +6,11 @@
 
 using namespace Halley;
 
+AudioExpressionTerm::AudioExpressionTerm(AudioExpressionTermType type)
+	: type(type)
+{
+}
+
 AudioExpressionTerm::AudioExpressionTerm(const ConfigNode& node)
 {
 	type = fromString<AudioExpressionTermType>(node["type"].asString());

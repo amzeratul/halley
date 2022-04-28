@@ -40,12 +40,13 @@ namespace Halley {
 
     class AudioExpressionTerm {
     public:
-        AudioExpressionTermType type;
-        AudioExpressionTermOp op;
+        AudioExpressionTermType type = AudioExpressionTermType::Switch;
+        AudioExpressionTermOp op = AudioExpressionTermOp::Equals;
         String id;
         String value;
 
         AudioExpressionTerm() = default;
+        AudioExpressionTerm(AudioExpressionTermType type);
         AudioExpressionTerm(const ConfigNode& node);
         ConfigNode toConfigNode() const;
 
