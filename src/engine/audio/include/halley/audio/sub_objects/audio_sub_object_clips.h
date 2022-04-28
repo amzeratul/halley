@@ -29,6 +29,10 @@ namespace Halley {
 		void removeClip(const String& clipId) override;
 		void swapClips(size_t idxA, size_t idxB) override;
 
+		bool getLoop() const;
+		void setLoop(bool loop);
+		Range<float>& getGain();
+
 	private:
 		Vector<String> clips;
 		Vector<std::shared_ptr<const AudioClip>> clipData;

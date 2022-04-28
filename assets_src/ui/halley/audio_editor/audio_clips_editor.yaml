@@ -1,0 +1,24 @@
+widget: { class: widget }
+sizer: { type: vertical }
+children:
+- widget: { id: background, class: image, image: "$ui_title_capsule", colour: "$ui_popupWindow", innerBorder: [ 4, 1, 4, 4 ], size: [20, 20] }
+  sizer: { type: vertical }
+  children:
+  - widget: { id: title, class: label, text: "Clips" }
+    fill: centre
+  - widget: { id: content, class: widget }
+    border: [1, 4, 1, 1]
+    proportion: 1
+    sizer: { type: grid, columns: 2, columnProportions: [0, 1], gap: 4 }
+    children:
+    - widget: { class: widget, size: [150, 20] }
+      children:
+      - widget: { class: label, text: "Loop:" }
+    - widget: { id: loop, class: checkbox }
+      fill: left
+    - widget: { class: label, text: "Gain:" }
+    - sizer: { type: horizontal }
+      children:
+      - widget: { id: gainMin, class: textInput, size: [50, 20], validator: numericPositive }
+      - widget: { class: label, text: " ~ " }
+      - widget: { id: gainMax, class: textInput, size: [50, 20], validator: numericPositive }

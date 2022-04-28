@@ -1,9 +1,11 @@
 #include "audio_object_editor.h"
 
+#include "audio_clips_editor.h"
 #include "audio_layers_editor.h"
 #include "audio_root_editor.h"
 #include "audio_switch_editor.h"
 #include "halley/audio/audio_object.h"
+#include "halley/audio/sub_objects/audio_sub_object_clips.h"
 #include "halley/tools/project/project.h"
 #include "src/scene/choose_window.h"
 #include "halley/audio/sub_objects/audio_sub_object_layers.h"
@@ -357,7 +359,7 @@ void AudioObjectEditor::setCurrentObject(IAudioObject* object)
 			setCurrentObjectEditor(std::make_shared<AudioRootEditor>(factory, *this, dynamic_cast<AudioObject&>(*object)));
 			break;
 		case AudioSubObjectType::Clips:
-			setCurrentObjectEditor({});
+			setCurrentObjectEditor(std::make_shared<AudioClipsEditor>(factory, *this, dynamic_cast<AudioSubObjectClips&>(*object)));
 			break;
 		case AudioSubObjectType::Layers:
 			setCurrentObjectEditor(std::make_shared<AudioLayersEditor>(factory, *this, dynamic_cast<AudioSubObjectLayers&>(*object)));

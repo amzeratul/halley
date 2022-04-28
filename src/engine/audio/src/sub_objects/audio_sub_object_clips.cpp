@@ -168,3 +168,18 @@ void AudioSubObjectClips::swapClips(size_t idxA, size_t idxB)
 		std::swap(clipData[idxA], clipData[idxB]);
 	}
 }
+
+bool AudioSubObjectClips::getLoop() const
+{
+	return loop;
+}
+
+void AudioSubObjectClips::setLoop(bool value)
+{
+	loop = value;
+}
+
+Range<float>& AudioSubObjectClips::getGain()
+{
+	return gain;
+}

@@ -20,6 +20,7 @@ set (editor_sources
 	"src/assets/new_asset_window.cpp"
 	"src/assets/prefab_editor.cpp"
 
+	"src/assets/audio_editor/audio_clips_editor.cpp"
 	"src/assets/audio_editor/audio_event_editor.cpp"
 	"src/assets/audio_editor/audio_expression_editor.cpp"
 	"src/assets/audio_editor/audio_fade_editor.cpp"
@@ -92,6 +93,7 @@ set (editor_headers
 	"src/assets/new_asset_window.h"
 	"src/assets/prefab_editor.h"
 
+	"src/assets/audio_editor/audio_clips_editor.h"
 	"src/assets/audio_editor/audio_event_editor.h"
 	"src/assets/audio_editor/audio_expression_editor.h"
 	"src/assets/audio_editor/audio_fade_editor.h"
