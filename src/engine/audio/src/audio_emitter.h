@@ -17,7 +17,7 @@ namespace Halley {
         void setPosition(const AudioPosition& pos);
 
         void addVoice(std::unique_ptr<AudioVoice> voice);
-        void removeFinishedVoices();
+        void removeFinishedVoices(Vector<AudioEventId>& removedIds);
         [[nodiscard]] gsl::span<const std::unique_ptr<AudioVoice>> getVoices() const;
     	void forVoices(AudioObjectId audioObjectId, VoiceCallback callback);
 

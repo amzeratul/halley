@@ -31,9 +31,16 @@ void AudioEmitter::addVoice(std::unique_ptr<AudioVoice> voice)
 	voices.push_back(std::move(voice));
 }
 
-void AudioEmitter::removeFinishedVoices()
+void AudioEmitter::removeFinishedVoices(Vector<AudioEventId>& removedIds)
 {
-	std_ex::erase_if(voices, [&] (const auto& v) { return v->isDone(); });
+	std_ex::erase_if(voices, [&] (const auto& v)
+	{
+		const bool done = v->isDone();
+		if (done) {
+			removedIds.push_back(v->getEventId());
+		}
+		return done;
+	});
 }
 
 gsl::span<const std::unique_ptr<AudioVoice>> AudioEmitter::getVoices() const

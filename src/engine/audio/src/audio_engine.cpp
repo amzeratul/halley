@@ -330,7 +330,7 @@ void AudioEngine::mixVoices(size_t numSamples, size_t nChannels, gsl::span<Audio
 void AudioEngine::removeFinishedVoices()
 {
 	for (auto& e: emitters) {
-		e.second->removeFinishedVoices();
+		e.second->removeFinishedVoices(finishedSounds);
 	}
 	std_ex::erase_if_value(emitters, [&] (const std::unique_ptr<AudioEmitter>& src) { return src->shouldBeRemoved(); });
 }
