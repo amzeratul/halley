@@ -96,6 +96,15 @@ void CurveEditor::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 		if (anchor) {
 			dragging = true;
 			updateDragging(mousePos);
+		} else {
+			// TODO: Insert new point
+		}
+	}
+
+	if (button == 2) {
+		const auto anchor = getAnchorAt(mousePos);
+		if (anchor) {
+			// TODO: delete point
 		}
 	}
 }
@@ -198,7 +207,19 @@ std::optional<size_t> CurveEditor::getAnchorAt(Vector2f mousePos) const
 void CurveEditor::updateDragging(Vector2f mousePos)
 {
 	if (dragging && curAnchor) {
-		points[*curAnchor] = mouseToCurveSpace(mousePos);
+		const auto idx = curAnchor.value();
+
+		points[idx] = mouseToCurveSpace(mousePos);
 		normalizePoints();
+
+		if (idx > 0 && points[idx].x < points[idx - 1].x) {
+			std::swap(points[idx], points[idx - 1]);
+			curAnchor = idx - 1;
+		}
+
+		if (idx < points.size() - 1 && points[idx].x > points[idx + 1].x) {
+			std::swap(points[idx], points[idx + 1]);
+			curAnchor = idx + 1;
+		}
 	}
 }
