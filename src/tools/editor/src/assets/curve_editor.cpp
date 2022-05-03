@@ -2,8 +2,8 @@
 
 using namespace Halley;
 
-CurveEditor::CurveEditor(const String& id, UIStyle style)
-	: UIWidget(id)
+CurveEditor::CurveEditor(String id, UIStyle style)
+	: UIWidget(std::move(id))
 {
 	styles.push_back(std::move(style));
 	setInteractWithMouse(true);
@@ -21,16 +21,20 @@ void CurveEditor::update(Time time, bool moved)
 void CurveEditor::draw(UIPainter& painter) const
 {
 	painter.draw(background);
+	painter.draw([this] (Painter& painter)
+	{
+		auto basePos = getPosition();
+	});
 }
 
-void CurveEditor::setRange(Range<float> range)
+void CurveEditor::setHorizontalRange(Range<float> range)
 {
-	this->range = range;
+	horizontalRange = range;
 }
 
-Range<float> CurveEditor::getRange() const
+Range<float> CurveEditor::getHorizontalRange() const
 {
-	return range;
+	return horizontalRange;
 }
 
 void CurveEditor::setPoints(Vector<Vector2f> points)
@@ -46,6 +50,11 @@ const Vector<Vector2f>& CurveEditor::getPoints() const
 Vector<Vector2f>& CurveEditor::getPoints()
 {
 	return points;
+}
+
+void CurveEditor::setChangeCallback(Callback callback)
+{
+	this->callback = std::move(callback);
 }
 
 void CurveEditor::onMouseOver(Vector2f mousePos)

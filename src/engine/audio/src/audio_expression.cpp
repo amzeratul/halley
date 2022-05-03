@@ -68,8 +68,34 @@ float AudioExpressionTerm::evaluateSwitch(const AudioEmitter& emitter) const
 
 float AudioExpressionTerm::evaluateVariable(const AudioEmitter& emitter) const
 {
-	// TODO
-	return emitter.getVariableValue(id);
+	const auto val = emitter.getVariableValue(id);
+
+	// No points!
+	if (points.empty()) {
+		return val;
+	}
+
+	// Before first point
+	if (val < points.front().x) {
+		return points.front().y;
+	}
+
+	// Between two points
+	for (size_t i = 1; i < points.size(); ++i) {
+		const float prevX = points[i - 1].x;
+		const float nextX = points[i].x;
+
+		if (val < nextX) {
+			assert(val > prevX);
+			const float t = (val - prevX) / (nextX - prevX);
+			assert(t >= 0.0f);
+			assert(t <= 1.0f);
+			return lerp(points[i - 1].y, points[i].y, t);
+		}
+	}
+
+	// After last point
+	return points.back().y;
 }
 
 void AudioExpressionTerm::serialize(Serializer& s) const

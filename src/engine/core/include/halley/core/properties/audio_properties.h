@@ -88,6 +88,7 @@ namespace Halley {
 		Vector<String> getBusIds() const;
 
 		const AudioSwitchProperties* tryGetSwitch(const String& id) const;
+		const AudioVariableProperties* tryGetVariable(const String& id) const;
 
 	private:
 		Vector<AudioSwitchProperties> switches;

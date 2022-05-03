@@ -5,6 +5,7 @@
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/widgets/ui_dropdown.h"
 #include "halley/ui/widgets/ui_list.h"
+#include "src/assets/curve_editor.h"
 using namespace Halley;
 
 AudioExpressionEditor::AudioExpressionEditor(UIFactory& factory, AudioExpression& expression, AudioObjectEditor& editor)
@@ -115,14 +116,14 @@ AudioExpressionEditorExpression::AudioExpressionEditorExpression(UIFactory& fact
 void AudioExpressionEditorExpression::onMakeUI()
 {
 	const auto& expression = parent.getExpressionTerm(idx);
+	const auto& audioProperties = parent.getEditor().getAudioProperties();
 
 	if (expression.type == AudioExpressionTermType::Switch) {
 		getWidget("switchExpression")->setActive(true);
 
-		getWidgetAs<UIDropdown>("switchId")->setOptions(parent.getEditor().getAudioProperties().getSwitchIds());
+		getWidgetAs<UIDropdown>("switchId")->setOptions(audioProperties.getSwitchIds());
 
 		auto updateSwitchValues = [=] (const String& value) {
-			const auto& audioProperties = parent.getEditor().getAudioProperties();
 			const auto* switchConf = audioProperties.tryGetSwitch(value);
 			if (switchConf) {
 				getWidgetAs<UIDropdown>("switchValue")->setOptions(switchConf->getValues());
@@ -157,12 +158,27 @@ void AudioExpressionEditorExpression::onMakeUI()
 	} else if (expression.type == AudioExpressionTermType::Variable) {
 		getWidget("variableExpression")->setActive(true);
 
-		getWidgetAs<UIDropdown>("variableId")->setOptions(parent.getEditor().getAudioProperties().getVariableIds());
+		getWidgetAs<UIDropdown>("variableId")->setOptions(audioProperties.getVariableIds());
 
 		bindData("variableId", expression.id, [=] (String value)
 		{
 			auto& expr = parent.getExpressionTerm(idx);
 			expr.id = std::move(value);
+			parent.markModified(idx);
+		});
+
+		auto curveEditor = getWidgetAs<CurveEditor>("variableCurve");
+		auto variableConfig = audioProperties.tryGetVariable(expression.id);
+		if (variableConfig) {
+			curveEditor->setHorizontalRange(variableConfig->getRange());
+		} else {
+			curveEditor->setHorizontalRange(Range<float>(0, 1));
+		}
+		curveEditor->setPoints(expression.points);
+		curveEditor->setChangeCallback([=] (const Vector<Vector2f>& points)
+		{
+			auto& expr = parent.getExpressionTerm(idx);
+			expr.points = points;
 			parent.markModified(idx);
 		});
 	}

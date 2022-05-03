@@ -247,6 +247,16 @@ const AudioSwitchProperties* AudioProperties::tryGetSwitch(const String& id) con
 	return nullptr;
 }
 
+const AudioVariableProperties* AudioProperties::tryGetVariable(const String& id) const
+{
+	for (const auto& v: variables) {
+		if (v.getId() == id) {
+			return &v;
+		}
+	}
+	return nullptr;
+}
+
 void AudioProperties::getBusIds(Vector<String>& result) const
 {
 	for (auto& b: buses) {

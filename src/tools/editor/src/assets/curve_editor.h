@@ -5,17 +5,21 @@
 namespace Halley {
     class CurveEditor : public UIWidget {
     public:
-        CurveEditor(const String& id, UIStyle style);
+        using Callback = std::function<void(const Vector<Vector2f>&)>;
+
+        CurveEditor(String id, UIStyle style);
 
         void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;
 
-        void setRange(Range<float> range);
-        Range<float> getRange() const;
+        void setHorizontalRange(Range<float> range);
+        Range<float> getHorizontalRange() const;
 
         void setPoints(Vector<Vector2f> points);
         const Vector<Vector2f>& getPoints() const;
         Vector<Vector2f>& getPoints();
+
+        void setChangeCallback(Callback callback);
 
     protected:
         void onMouseOver(Vector2f mousePos) override;
@@ -24,7 +28,8 @@ namespace Halley {
 
     private:
     	Sprite background;
-        Range<float> range;
+        Range<float> horizontalRange;
         Vector<Vector2f> points;
+        Callback callback;
     };
 }
