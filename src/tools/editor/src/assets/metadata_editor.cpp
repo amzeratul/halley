@@ -16,6 +16,19 @@ MetadataEditor::MetadataEditor(UIFactory& factory, ProjectWindow& projectWindow)
 {
 }
 
+bool MetadataEditor::hasEditorForType(AssetType type)
+{
+	switch (type) {
+	case AssetType::Sprite:
+	case AssetType::Animation:
+	case AssetType::AudioClip:
+	case AssetType::Font:
+		return true;
+	default:
+		return false;
+	}
+}
+
 void MetadataEditor::setResource(Project& p, AssetType type, const Path& path, Metadata effectiveMeta)
 {
 	assetType = type;

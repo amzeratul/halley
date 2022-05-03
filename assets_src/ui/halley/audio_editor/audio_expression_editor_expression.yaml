@@ -2,6 +2,7 @@ widget: { id: background, class: image, image: "$ui_window", innerBorder: [ 8, 8
 sizer: { type: horizontal }
 children:
 - widget: { id: switchExpression, class: widget, active: false }
+  proportion: 1
   sizer: { type: horizontal }
   children:
   - widget: { class: label, text: "If switch " }
@@ -9,10 +10,14 @@ children:
   - widget: { id: switchOp, class: dropdown, size: [50, 20], options: [{ id: "equals", text: "==" }, { id: "notEquals", text: "!=" }] }
   - widget: { id: switchValue, class: dropdown, size: [150, 20] }
 - widget: { id: variableExpression, class: widget, active: false }
-  sizer: { type: horizontal }
-  children:
-  - widget: { class: label, text: "Variable " }
-  - widget: { id: variableId, class: dropdown, size: [150, 20] }
-- stretchSpacer: {}
+  sizer: { type: vertical, gap: 4 }
   proportion: 1
+  children:
+  - sizer: { type: horizontal }
+    children:
+    - widget: { class: label, text: "Variable " }
+    - widget: { id: variableId, class: dropdown, size: [150, 20] }
+  - widget: { id: variableCurve, class: curveEditor, size: [400, 50] }
 - widget: { id: delete, class: button, style: buttonThin, text: "x", size: [20, 16] }
+  fill: centre
+  border: [4, 0, 0, 0]

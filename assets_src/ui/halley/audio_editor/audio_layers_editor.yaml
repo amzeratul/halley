@@ -10,6 +10,8 @@ children:
   - sizer: { type: horizontal }
     children:
     - widget: { class: label, text: "Crossfade: " }
+      fill: [centreVertical, left]
+      border: [3, 0, 0, 0]
     - widget: { class: widget, id: fadeContainer }
       children: []
   - widget: { id: layers, class: list, canDrag: true, style: dragList }

@@ -14,6 +14,8 @@ namespace Halley
 	public:
 		MetadataEditor(UIFactory& factory, ProjectWindow& projectWindow);
 
+		static bool hasEditorForType(AssetType type);
+
 		void setResource(Project& project, AssetType type, const Path& filePath, Metadata effectiveMetadata);
 		void onMetadataChanged();
 		void saveMetadata();

@@ -344,4 +344,7 @@ uiStyle:
     disabledLabel: { font: Ubuntu Regular, size: 15, colour: $ui_disabledText }
     gap: 1
 
+  curveEditor:
+    background: { img: whitebox.png, colour: $ui_popupWindow }
+
 ...

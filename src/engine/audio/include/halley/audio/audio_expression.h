@@ -1,5 +1,6 @@
 #pragma once
 #include "halley/data_structures/vector.h"
+#include "halley/maths/vector2.h"
 #include "halley/text/string_converter.h"
 
 namespace Halley {
@@ -44,6 +45,7 @@ namespace Halley {
         AudioExpressionTermOp op = AudioExpressionTermOp::Equals;
         String id;
         String value;
+        Vector<Vector2f> points;
 
         AudioExpressionTerm() = default;
         AudioExpressionTerm(AudioExpressionTermType type);
@@ -51,6 +53,8 @@ namespace Halley {
         ConfigNode toConfigNode() const;
 
         float evaluate(const AudioEmitter& emitter) const;
+        float evaluateSwitch(const AudioEmitter& emitter) const;
+        float evaluateVariable(const AudioEmitter& emitter) const;
 
         void serialize(Serializer& s) const;
         void deserialize(Deserializer& s);

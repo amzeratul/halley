@@ -23,6 +23,7 @@ AudioExpressionTerm::AudioExpressionTerm(const ConfigNode& node)
 
 	case AudioExpressionTermType::Variable:
 		id = node["id"].asString();
+		points = node["points"].asVector<Vector2f>();
 		break;
 	}
 }
@@ -31,10 +32,13 @@ ConfigNode AudioExpressionTerm::toConfigNode() const
 {
 	ConfigNode::MapType result;
 	result["type"] = toString(type);
-	result["id"] = id;
 	if (type == AudioExpressionTermType::Switch) {
+		result["id"] = id;
 		result["value"] = value;
 		result["op"] = toString(op);
+	} else if (type == AudioExpressionTermType::Variable) {
+		result["id"] = id;
+		result["points"] = points;
 	}
 	return result;
 }
@@ -43,19 +47,29 @@ float AudioExpressionTerm::evaluate(const AudioEmitter& emitter) const
 {
 	switch (type) {
 	case AudioExpressionTermType::Switch:
-		{
-			const bool isEqual = emitter.getSwitchValue(id) == value;
-			if (op == AudioExpressionTermOp::Equals) {
-				return isEqual ? 1.0f : 0.0f;
-			} else if (op == AudioExpressionTermOp::NotEquals) {
-				return isEqual ? 0.0f : 1.0f;
-			}
-		}
+		return evaluateSwitch(emitter);
 	case AudioExpressionTermType::Variable:
-		return emitter.getVariableValue(id);
+		return evaluateVariable(emitter);
 	}
 
 	return 1.0f;
+}
+
+float AudioExpressionTerm::evaluateSwitch(const AudioEmitter& emitter) const
+{
+	const bool isEqual = emitter.getSwitchValue(id) == value;
+	if (op == AudioExpressionTermOp::Equals) {
+		return isEqual ? 1.0f : 0.0f;
+	} else if (op == AudioExpressionTermOp::NotEquals) {
+		return isEqual ? 0.0f : 1.0f;
+	}
+	return 0.0f; // ??
+}
+
+float AudioExpressionTerm::evaluateVariable(const AudioEmitter& emitter) const
+{
+	// TODO
+	return emitter.getVariableValue(id);
 }
 
 void AudioExpressionTerm::serialize(Serializer& s) const
@@ -64,6 +78,7 @@ void AudioExpressionTerm::serialize(Serializer& s) const
 	s << static_cast<int>(op);
 	s << id;
 	s << value;
+	s << points;
 }
 
 void AudioExpressionTerm::deserialize(Deserializer& s)
@@ -75,6 +90,7 @@ void AudioExpressionTerm::deserialize(Deserializer& s)
 	op = static_cast<AudioExpressionTermOp>(t);
 	s >> id;
 	s >> value;
+	s >> points;
 }
 
 void AudioExpression::load(const ConfigNode& node)

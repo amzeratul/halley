@@ -28,6 +28,7 @@ void AudioExpressionEditor::onMakeUI()
 	setHandle(UIEventType::ListItemsSwapped, "expressions", [=] (const UIEvent& event)
 	{
 		refreshIds();
+		editor.markModified(false);
 	});
 }
 
@@ -53,6 +54,8 @@ void AudioExpressionEditor::deleteTerm(size_t idx)
 		expression.getTerms().erase(expression.getTerms().begin() + idx);
 		expressionEditors.erase(expressionEditors.begin() + idx);
 		refreshIds();
+
+		editor.markModified(false);
 	});
 }
 
@@ -93,6 +96,8 @@ void AudioExpressionEditor::addTerm(AudioExpressionTermType type)
 
 	expressionEditors.push_back(std::make_shared<AudioExpressionEditorExpression>(factory, *this, idx));
 	getWidgetAs<UIList>("expressions")->addItem(expressionEditors.back()->getId(), expressionEditors.back(), 1);
+
+	editor.markModified(false);
 }
 
 AudioExpressionEditorExpression::AudioExpressionEditorExpression(UIFactory& factory, AudioExpressionEditor& parent, size_t idx)
@@ -152,10 +157,12 @@ void AudioExpressionEditorExpression::onMakeUI()
 	} else if (expression.type == AudioExpressionTermType::Variable) {
 		getWidget("variableExpression")->setActive(true);
 
+		getWidgetAs<UIDropdown>("variableId")->setOptions(parent.getEditor().getAudioProperties().getVariableIds());
+
 		bindData("variableId", expression.id, [=] (String value)
 		{
-			auto& expression = parent.getExpressionTerm(idx);
-			expression.id = std::move(value);
+			auto& expr = parent.getExpressionTerm(idx);
+			expr.id = std::move(value);
 			parent.markModified(idx);
 		});
 	}

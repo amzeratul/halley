@@ -69,9 +69,10 @@ void AssetEditorWindow::loadAsset(const String& name, std::optional<AssetType> t
 				return b.first < a.first;
 			});
 
+			showMetadataEditor = false;
 			for (const auto& asset: assets) {
-				if (asset.first == AssetType::Prefab || asset.first == AssetType::Scene || asset.first == AssetType::UIDefinition) {
-					showMetadataEditor = false;
+				if (MetadataEditor::hasEditorForType(asset.first)) {
+					showMetadataEditor = true;
 				}
 			}
 
