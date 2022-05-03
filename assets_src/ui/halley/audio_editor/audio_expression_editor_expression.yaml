@@ -17,7 +17,7 @@ children:
     children:
     - widget: { class: label, text: "Variable " }
     - widget: { id: variableId, class: dropdown, size: [150, 20] }
-  - widget: { id: variableCurve, class: curveEditor, size: [400, 50] }
+  - widget: { id: variableCurve, class: curveEditor, size: [400, 60] }
 - widget: { id: delete, class: button, style: buttonThin, text: "x", size: [20, 16] }
   fill: centre
   border: [4, 0, 0, 0]

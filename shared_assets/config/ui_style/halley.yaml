@@ -345,6 +345,8 @@ uiStyle:
     gap: 1
 
   curveEditor:
-    background: { img: whitebox.png, colour: $ui_popupWindow }
+    background: { img: $ui_window, colour: $ui_popupWindow }
+    display: { img: whitebox.png, colour: $ui_listBackground }
+    lineColour: "#0E79E4"
 
 ...
