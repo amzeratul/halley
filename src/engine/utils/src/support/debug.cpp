@@ -172,8 +172,8 @@ void Debug::setErrorHandling(const String& dumpFilePath, std::function<void(cons
 	dumpFile = dumpFilePath;
 
 #ifdef HAS_SIGNAL
-	//::signal(SIGSEGV, &signalHandler);
-	//::signal(SIGABRT, &signalHandler);
+	::signal(SIGSEGV, &signalHandler);
+	::signal(SIGABRT, &signalHandler);
 #endif
 
 	std::set_terminate(&terminateHandler);
