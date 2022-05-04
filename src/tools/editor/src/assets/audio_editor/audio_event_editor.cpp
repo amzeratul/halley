@@ -203,6 +203,12 @@ void AudioEventEditorAction::makeObjectAction(AudioEventActionObject& action)
 		action.setObjectName(value, editor.getGameResources());
 		editor.markModified();
 	});
+
+	bindData("scope", toString(action.getScope()), [=, &action](String value)
+	{
+		action.setScope(fromString<AudioEventScope>(value));
+		editor.markModified();
+	});
 }
 
 void AudioEventEditorAction::makePlayAction(AudioEventActionPlay& action)

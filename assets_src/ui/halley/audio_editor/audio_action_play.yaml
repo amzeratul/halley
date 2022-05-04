@@ -32,3 +32,8 @@ children:
   - widget: { class: label, text: "Gain: " }
     fill: centre
   - widget: { id: gain, class: textInput, size: [40, 20], validator: numericPositive }
+- sizer: { type: horizontal }
+  children:
+  - widget: { class: label, text: "Scope: " }
+    fill: centre
+  - widget: { id: scope, class: dropdown, size: [100, 20], options: [{ id: object, text: Object }, { id: global, text: Global }] }
