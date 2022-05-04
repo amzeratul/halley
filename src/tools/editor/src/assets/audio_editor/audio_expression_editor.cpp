@@ -160,20 +160,29 @@ void AudioExpressionEditorExpression::onMakeUI()
 
 		getWidgetAs<UIDropdown>("variableId")->setOptions(audioProperties.getVariableIds());
 
+		auto updateVariableProps = [this, &audioProperties] (const String& variableName)
+		{
+			auto curveEditor = getWidgetAs<CurveEditor>("variableCurve");
+			auto variableConfig = audioProperties.tryGetVariable(variableName);
+			if (variableConfig) {
+				curveEditor->setHorizontalRange(variableConfig->getRange());
+				curveEditor->setHorizontalDividers(variableConfig->getNumberOfHorizontalDividers());
+			} else {
+				curveEditor->setHorizontalRange(Range<float>(0, 1));
+				curveEditor->setHorizontalDividers(10);
+			}
+		};
+
 		bindData("variableId", expression.id, [=] (String value)
 		{
+			updateVariableProps(value);
 			auto& expr = parent.getExpressionTerm(idx);
 			expr.id = std::move(value);
 			parent.markModified(idx);
 		});
 
+		updateVariableProps(expression.id);
 		auto curveEditor = getWidgetAs<CurveEditor>("variableCurve");
-		auto variableConfig = audioProperties.tryGetVariable(expression.id);
-		if (variableConfig) {
-			curveEditor->setHorizontalRange(variableConfig->getRange());
-		} else {
-			curveEditor->setHorizontalRange(Range<float>(0, 1));
-		}
 		curveEditor->setPoints(expression.points);
 		curveEditor->setChangeCallback([=] (const Vector<Vector2f>& points)
 		{

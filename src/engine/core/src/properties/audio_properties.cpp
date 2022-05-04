@@ -54,6 +54,7 @@ AudioVariableProperties::AudioVariableProperties(const ConfigNode& node)
 {
 	id = node["id"].asString();
 	range = node["range"].asFloatRange();
+	nHorizontalDividers = node["nHorizontalDividers"].asInt(10);
 }
 
 ConfigNode AudioVariableProperties::toConfigNode() const
@@ -61,6 +62,7 @@ ConfigNode AudioVariableProperties::toConfigNode() const
 	ConfigNode::MapType result;
 	result["id"] = id;
 	result["range"] = range;
+	result["nHorizontalDividers"] = nHorizontalDividers;
 	return result;
 }
 
@@ -68,12 +70,14 @@ void AudioVariableProperties::serialize(Serializer& s) const
 {
 	s << id;
 	s << range;
+	s << nHorizontalDividers;
 }
 
 void AudioVariableProperties::deserialize(Deserializer& s)
 {
 	s >> id;
 	s >> range;
+	s >> nHorizontalDividers;
 }
 
 const String& AudioVariableProperties::getId() const
@@ -94,6 +98,16 @@ Range<float> AudioVariableProperties::getRange() const
 Range<float>& AudioVariableProperties::getRange()
 {
 	return range;
+}
+
+int AudioVariableProperties::getNumberOfHorizontalDividers() const
+{
+	return nHorizontalDividers;
+}
+
+void AudioVariableProperties::setNumberOfHorizontalDividers(int n)
+{
+	nHorizontalDividers = n;
 }
 
 AudioBusProperties::AudioBusProperties(const ConfigNode& node)

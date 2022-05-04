@@ -348,7 +348,7 @@ uiStyle:
     background: { img: $ui_window, colour: $ui_popupWindow }
     display: { img: whitebox.png, colour: $ui_listBackground }
     lineColour: "#0E79E4"
-    gridLine: { img: whitebox.png, colour: "0E79E440" }
+    gridLine: { img: whitebox.png, colour: "#0E79E440" }
     tooltipLabel: { font: Ubuntu Light, size: 12, colour: $ui_text }
 
 ...

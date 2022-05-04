@@ -22,6 +22,7 @@ void CurveEditor::update(Time time, bool moved)
 {
 	if (!dragging && !isMouseOver()) {
 		curAnchor = {};
+		mouseAnchor = {};
 		tooltipLabel.setText("");
 	}
 
@@ -36,6 +37,22 @@ void CurveEditor::draw(UIPainter& painter) const
 {
 	painter.draw(background);
 	painter.draw(display);
+
+	// Horizontal grid
+	const auto drawArea = getDrawArea();
+	const auto vLine = gridLine.clone().scaleTo(Vector2f(1, drawArea.getHeight()));
+	for (size_t i = 0; i <= nHorizontalDividers; ++i) {
+		float t = static_cast<float>(i) / static_cast<float>(nHorizontalDividers);
+		painter.draw(vLine.clone().setPosition(lerp(drawArea.getTopLeft(), drawArea.getTopRight(), t)), true);
+	}
+
+	// Vertical grid
+	const auto hLine = gridLine.clone().scaleTo(Vector2f(drawArea.getWidth(), 1));
+	for (size_t i = 0; i <= nVerticalDividers; ++i) {
+		float t = static_cast<float>(i) / static_cast<float>(nVerticalDividers);
+		painter.draw(hLine.clone().setPosition(lerp(drawArea.getTopLeft(), drawArea.getBottomLeft(), t)), true);
+	}
+
 	painter.draw([this] (Painter& painter)
 	{
 		Vector<Vector2f> ps;
@@ -50,6 +67,10 @@ void CurveEditor::draw(UIPainter& painter) const
 		for (size_t i = 0; i < points.size(); ++i) {
 			drawAnchor(painter, ps[i], curAnchor == i);
 		}
+
+		if (mouseAnchor) {
+			painter.drawCircle(curveToMouseSpace(*mouseAnchor), 1.5f, 3.0f, lineColour);
+		}
 	});
 	painter.draw(tooltipLabel);
 }
@@ -57,11 +78,22 @@ void CurveEditor::draw(UIPainter& painter) const
 void CurveEditor::setHorizontalRange(Range<float> range)
 {
 	horizontalRange = range;
+	normalizePoints();
 }
 
 Range<float> CurveEditor::getHorizontalRange() const
 {
 	return horizontalRange;
+}
+
+void CurveEditor::setHorizontalDividers(size_t n)
+{
+	nHorizontalDividers = n;
+}
+
+void CurveEditor::setVerticalDividers(size_t n)
+{
+	nVerticalDividers = n;
 }
 
 void CurveEditor::setPoints(Vector<Vector2f> pts)
@@ -92,9 +124,15 @@ void CurveEditor::onMouseOver(Vector2f mousePos)
 	}
 	updateDragging(mousePos);
 
+	if (curAnchor) {
+		mouseAnchor = {};
+	} else {
+		mouseAnchor = clampPoint(mouseToCurveSpace(mousePos));
+	}
+
 	const auto drawArea = getDrawArea();
 	const bool left = mousePos.x > drawArea.getCenter().x;
-	const auto curPos = curAnchor ? points[*curAnchor] : clampPoint(mouseToCurveSpace(mousePos));
+	const auto curPos = curAnchor ? points[*curAnchor] : *mouseAnchor;
 	tooltipLabel
 		.setOffset(Vector2f(left ? 0.0f : 1.0f, 0.0f))
 		.setPosition(left ? drawArea.getTopLeft() : drawArea.getTopRight())

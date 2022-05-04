@@ -38,10 +38,13 @@ namespace Halley {
 		void setId(String value);
 		Range<float> getRange() const;
 		Range<float>& getRange();
+		int getNumberOfHorizontalDividers() const;
+		void setNumberOfHorizontalDividers(int n);
 
 	private:
 		String id;
 		Range<float> range;
+		int nHorizontalDividers = 10;
 	};
 
 	class AudioBusProperties {

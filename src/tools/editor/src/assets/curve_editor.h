@@ -14,6 +14,8 @@ namespace Halley {
 
         void setHorizontalRange(Range<float> range);
         Range<float> getHorizontalRange() const;
+        void setHorizontalDividers(size_t n);
+        void setVerticalDividers(size_t n);
 
         void setPoints(Vector<Vector2f> pts);
         const Vector<Vector2f>& getPoints() const;
@@ -36,10 +38,13 @@ namespace Halley {
         TextRenderer tooltipLabel;
 
     	Range<float> horizontalRange;
+        size_t nHorizontalDividers = 10;
+        size_t nVerticalDividers = 5;
         Vector<Vector2f> points;
         Callback callback;
 
         std::optional<size_t> curAnchor;
+        std::optional<Vector2f> mouseAnchor;
         bool dragging = false;
 
         void normalizePoints();
