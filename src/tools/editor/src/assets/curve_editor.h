@@ -48,6 +48,10 @@ namespace Halley {
         Vector2f curveToMouseSpace(Vector2f curvePos) const;
         Vector2f mouseToCurveSpace(Vector2f mousePos) const;
         std::optional<size_t> getAnchorAt(Vector2f mousePos) const;
+        Vector2f clampPoint(Vector2f point) const;
+
+        void insertPoint(Vector2f curvePos);
+        void deletePoint(size_t idx);
         void updateDragging(Vector2f mousePos);
     };
 }

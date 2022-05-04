@@ -97,14 +97,14 @@ void CurveEditor::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 			dragging = true;
 			updateDragging(mousePos);
 		} else {
-			// TODO: Insert new point
+			insertPoint(mouseToCurveSpace(mousePos));
 		}
 	}
 
 	if (button == 2) {
 		const auto anchor = getAnchorAt(mousePos);
 		if (anchor) {
-			// TODO: delete point
+			deletePoint(anchor.value());
 		}
 	}
 }
@@ -143,8 +143,7 @@ void CurveEditor::normalizePoints()
 	points.back().x = horizontalRange.end;
 
 	for (auto& p: points) {
-		p.x = clamp(p.x, horizontalRange.start, horizontalRange.end);
-		p.y = clamp(p.y, 0.0f, 1.0f);
+		p = clampPoint(p);
 	}
 
 	if (points != startPoints) {
@@ -202,6 +201,39 @@ std::optional<size_t> CurveEditor::getAnchorAt(Vector2f mousePos) const
 	}
 
 	return bestIdx;
+}
+
+Vector2f CurveEditor::clampPoint(Vector2f p) const
+{
+	p.x = clamp(p.x, horizontalRange.start, horizontalRange.end);
+	p.y = clamp(p.y, 0.0f, 1.0f);
+	return p;
+}
+
+void CurveEditor::insertPoint(Vector2f curvePos)
+{
+	const auto pos = clampPoint(curvePos);
+
+	for (size_t i = 0; i < points.size() - 1; ++i) {
+		if (points[i].x > pos.x) {
+			points.insert(points.begin() + i, pos);
+			curAnchor = i;
+			dragging = true;
+			return;
+		}
+	}
+
+	const auto idx = points.size() - 1;
+	points.insert(points.begin() + idx, pos);
+	curAnchor = idx;
+	dragging = true;
+}
+
+void CurveEditor::deletePoint(size_t idx)
+{
+	if (idx > 0 && idx < points.size() - 1) {
+		points.erase(points.begin() + idx);
+	}
 }
 
 void CurveEditor::updateDragging(Vector2f mousePos)
