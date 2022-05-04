@@ -239,7 +239,7 @@ void AudioObjectEditor::onSelectionChange(const String& id)
 	auto& data = treeData.at(id);
 
 	const bool canAdd = data.object && data.object->canAddObject(AudioSubObjectType::Switch, data.subCase);
-	const bool canAddClip = data.object && data.object->getType() == AudioSubObjectType::Clips;
+	const bool canAddClip = data.object && data.object->canAddObject(AudioSubObjectType::Clips, data.subCase);
 	const bool canRemove = id != "root" && !data.subCase;
 
 	getWidget("add")->setEnabled(canAdd);

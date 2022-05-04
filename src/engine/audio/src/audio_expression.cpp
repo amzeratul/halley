@@ -85,8 +85,7 @@ float AudioExpressionTerm::evaluateVariable(const AudioEmitter& emitter) const
 		const float prevX = points[i - 1].x;
 		const float nextX = points[i].x;
 
-		if (val < nextX) {
-			assert(val > prevX);
+		if (val >= prevX && val < nextX) {
 			const float t = (val - prevX) / (nextX - prevX);
 			assert(t >= 0.0f);
 			assert(t <= 1.0f);

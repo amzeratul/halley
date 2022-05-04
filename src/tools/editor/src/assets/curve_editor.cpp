@@ -219,6 +219,7 @@ void CurveEditor::insertPoint(Vector2f curvePos)
 			points.insert(points.begin() + i, pos);
 			curAnchor = i;
 			dragging = true;
+			notifyChange();
 			return;
 		}
 	}
@@ -227,12 +228,14 @@ void CurveEditor::insertPoint(Vector2f curvePos)
 	points.insert(points.begin() + idx, pos);
 	curAnchor = idx;
 	dragging = true;
+	notifyChange();
 }
 
 void CurveEditor::deletePoint(size_t idx)
 {
 	if (idx > 0 && idx < points.size() - 1) {
 		points.erase(points.begin() + idx);
+		notifyChange();
 	}
 }
 
@@ -253,5 +256,7 @@ void CurveEditor::updateDragging(Vector2f mousePos)
 			std::swap(points[idx], points[idx + 1]);
 			curAnchor = idx + 1;
 		}
+
+		notifyChange();
 	}
 }
