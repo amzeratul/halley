@@ -37,9 +37,18 @@ EntityValidator::EntityValidator(World& world)
 
 Vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityData& entity, bool recursive)
 {
-	Vector<IEntityValidator::Result> result;
-	validateEntity(entity, recursive, result);
-	return result;
+	try {
+		Vector<IEntityValidator::Result> result;
+		validateEntity(entity, recursive, result);
+		return result;
+	} catch (const std::exception& e) {
+		Logger::logError("Exception when attempting to validate entity:");
+		Logger::logException(e);
+		return {};
+	} catch (...) {
+		Logger::logError("Unknown exception when attempting to validate entity.");
+		return {};
+	}
 }
 
 void EntityValidator::validateEntity(const EntityData& entity, bool recursive, Vector<IEntityValidator::Result>& result)
