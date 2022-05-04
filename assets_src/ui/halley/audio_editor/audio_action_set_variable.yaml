@@ -10,3 +10,8 @@ children:
     fill: centre
   - widget: { id: variableValue, class: textInput, size: [40, 20], validator: numericPositive, active: false }
   - widget: { id: switchValue, class: dropdown, size: [100, 20], active: false }
+- sizer: { type: horizontal }
+  children:
+  - widget: { class: label, text: "Scope: " }
+    fill: centre
+  - widget: { id: scope, class: dropdown, size: [100, 20], options: [{ id: object, text: Object }, { id: global, text: Global }] }

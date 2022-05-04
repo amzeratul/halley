@@ -20,7 +20,7 @@ namespace Halley {
 
         void addAction();
         void addAction(AudioEventActionType type);
-        void deleteAction(const IAudioEventAction& action, const String& uiId);
+        void deleteAction(const AudioEventAction& action, const String& uiId);
 
 		const AudioProperties& getAudioProperties() const;
 
@@ -34,19 +34,19 @@ namespace Halley {
         int actionId = 0;
         bool modified = false;
 
-        void addActionUI(IAudioEventAction& action);
+        void addActionUI(AudioEventAction& action);
         void doLoadUI();
 	};
 
 	class AudioEventEditorAction : public UIWidget {
 	public:
-        AudioEventEditorAction(UIFactory& factory, AudioEventEditor& editor, IAudioEventAction& action, int id);
+        AudioEventEditorAction(UIFactory& factory, AudioEventEditor& editor, AudioEventAction& action, int id);
         void onMakeUI() override;
 	
 	private:
         UIFactory& factory;
         AudioEventEditor& editor;
-        IAudioEventAction& action;
+        AudioEventAction& action;
 		
         void makeObjectAction(AudioEventActionObject& action);
         void makePlayAction(AudioEventActionPlay& action);

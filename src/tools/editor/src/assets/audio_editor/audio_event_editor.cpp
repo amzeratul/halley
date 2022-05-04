@@ -86,7 +86,7 @@ void AudioEventEditor::addAction(AudioEventActionType type)
 	markModified();
 }
 
-void AudioEventEditor::deleteAction(const IAudioEventAction& action, const String& uiId)
+void AudioEventEditor::deleteAction(const AudioEventAction& action, const String& uiId)
 {
 	Concurrent::execute(Executors::getMainUpdateThread(), [this, &action, uiId=uiId]() {
 		actionList->removeItem(uiId);
@@ -127,7 +127,7 @@ std::shared_ptr<const Resource> AudioEventEditor::loadResource(const String& id)
 	return audioEvent;
 }
 
-void AudioEventEditor::addActionUI(IAudioEventAction& action)
+void AudioEventEditor::addActionUI(AudioEventAction& action)
 {
 	auto a = std::make_shared<AudioEventEditorAction>(factory, *this, action, actionId++);
 	auto id = a->getId();
@@ -146,7 +146,7 @@ void AudioEventEditor::doLoadUI()
 	}
 }
 
-AudioEventEditorAction::AudioEventEditorAction(UIFactory& factory, AudioEventEditor& editor, IAudioEventAction& action, int id)
+AudioEventEditorAction::AudioEventEditorAction(UIFactory& factory, AudioEventEditor& editor, AudioEventAction& action, int id)
 	: UIWidget(toString(id), {}, UISizer())
 	, factory(factory)
 	, editor(editor)
@@ -291,6 +291,12 @@ void AudioEventEditorAction::makeSetSwitchAction(AudioEventActionSetSwitch& acti
 		action.setValue(std::move(value));
 		editor.markModified();
 	});
+
+	bindData("scope", toString(action.getScope()), [=, &action](String value)
+	{
+		action.setScope(fromString<AudioEventScope>(value));
+		editor.markModified();
+	});
 }
 
 void AudioEventEditorAction::makeSetVariableAction(AudioEventActionSetVariable& action)
@@ -312,6 +318,12 @@ void AudioEventEditorAction::makeSetVariableAction(AudioEventActionSetVariable& 
 		action.setValue(value);
 		editor.markModified();
 	});	
+
+	bindData("scope", toString(action.getScope()), [=, &action](String value)
+	{
+		action.setScope(fromString<AudioEventScope>(value));
+		editor.markModified();
+	});
 }
 
 ChooseAudioEventAction::ChooseAudioEventAction(UIFactory& factory, Callback callback)

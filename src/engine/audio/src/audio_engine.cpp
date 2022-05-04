@@ -59,7 +59,7 @@ void AudioEngine::postEvent(AudioEventId id, const AudioEvent& event, AudioEmitt
 		return;
 	}
 
-	const size_t nVoices = event.run(*this, id, *iter->second);
+	const size_t nVoices = event.run(*this, id, *emitters.at(0), *iter->second);
 	if (nVoices == 0) {
 		finishedSounds.push_back(id);
 	}

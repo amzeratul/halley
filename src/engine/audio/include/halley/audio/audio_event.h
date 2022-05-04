@@ -13,7 +13,7 @@ namespace Halley
 	class ConfigNode;
 	class ConfigFile;
 	class ResourceLoader;
-	class IAudioEventAction;
+	class AudioEventAction;
 	class Resources;
 
 	enum class AudioEventActionType
@@ -44,6 +44,21 @@ namespace Halley
 		}
 	};
 
+	enum class AudioEventScope {
+		Global,
+		Object
+	};
+	
+	template <>
+	struct EnumNames<AudioEventScope> {
+		constexpr std::array<const char*, 2> operator()() const {
+			return{{
+				"global",
+				"object"
+			}};
+		}
+	};
+
 	class AudioEvent final : public Resource
 	{
 	public:
@@ -55,10 +70,10 @@ namespace Halley
 		AudioEvent& operator=(const AudioEvent& other);
 		AudioEvent& operator=(AudioEvent&& other) = default;
 
-		size_t run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const;
+		size_t run(AudioEngine& engine, AudioEventId id, AudioEmitter& globalEmitter, AudioEmitter& objectEmitter) const;
 
-		const Vector<std::unique_ptr<IAudioEventAction>>& getActions() const;
-		Vector<std::unique_ptr<IAudioEventAction>>& getActions();
+		const Vector<std::unique_ptr<AudioEventAction>>& getActions() const;
+		Vector<std::unique_ptr<AudioEventAction>>& getActions();
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -70,31 +85,37 @@ namespace Halley
 		void makeDefault();
         String toYAML() const;
 
-		static std::unique_ptr<IAudioEventAction> makeAction(AudioEventActionType type);
+		static std::unique_ptr<AudioEventAction> makeAction(AudioEventActionType type);
 		static String getActionName(AudioEventActionType type);
 
 	private:
-		Vector<std::unique_ptr<IAudioEventAction>> actions;
+		Vector<std::unique_ptr<AudioEventAction>> actions;
 		
 		void loadDependencies(Resources& resources);
 	};
 
-	class IAudioEventAction
+	class AudioEventAction
 	{
 	public:
-		virtual ~IAudioEventAction() {}
-		virtual void load(const ConfigNode& config) = 0;
+		virtual ~AudioEventAction() {}
+		virtual void load(const ConfigNode& config);
 		virtual bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const = 0;
 		virtual AudioEventActionType getType() const = 0;
 
-		virtual void serialize(Serializer& s) const = 0;
-		virtual void deserialize(Deserializer& s) = 0;
+		virtual AudioEventScope getScope() const { return scope; }
+		void setScope(AudioEventScope scope) { this->scope = scope; }
+
+		virtual void serialize(Serializer& s) const;
+		virtual void deserialize(Deserializer& s);
 		virtual void loadDependencies(Resources& resources) {}
 
 		virtual ConfigNode toConfigNode() const;
+
+	protected:
+		AudioEventScope scope = AudioEventScope::Object;
 	};
 
-	class AudioEventActionObject : public IAudioEventAction
+	class AudioEventActionObject : public AudioEventAction
 	{
 	public:
 		void loadObject(const ConfigNode& config, bool loadObject = true);
@@ -193,7 +214,7 @@ namespace Halley
 		float gain = 1;
 	};
 
-	class AudioEventActionSetSwitch final : public IAudioEventAction
+	class AudioEventActionSetSwitch final : public AudioEventAction
 	{
 	public:
 		void load(const ConfigNode& config) override;
@@ -216,7 +237,7 @@ namespace Halley
 		String value;
 	};
 
-	class AudioEventActionSetVariable final : public IAudioEventAction
+	class AudioEventActionSetVariable final : public AudioEventAction
 	{
 	public:
 		void load(const ConfigNode& config) override;

@@ -57,23 +57,23 @@ String AudioEvent::toYAML() const
 	return YAMLConvert::generateYAML(result, options);
 }
 
-size_t AudioEvent::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
+size_t AudioEvent::run(AudioEngine& engine, AudioEventId id, AudioEmitter& globalEmitter, AudioEmitter& objectEmitter) const
 {
 	size_t nEmitters = 0;
 	for (const auto& a: actions) {
-		if (a->run(engine, id, emitter)) {
+		if (a->run(engine, id, a->getScope() == AudioEventScope::Object ? objectEmitter : globalEmitter)) {
 			++nEmitters;
 		}
 	}
 	return nEmitters;
 }
 
-const Vector<std::unique_ptr<IAudioEventAction>>& AudioEvent::getActions() const
+const Vector<std::unique_ptr<AudioEventAction>>& AudioEvent::getActions() const
 {
 	return actions;
 }
 
-Vector<std::unique_ptr<IAudioEventAction>>& AudioEvent::getActions()
+Vector<std::unique_ptr<AudioEventAction>>& AudioEvent::getActions()
 {
 	return actions;
 }
@@ -98,7 +98,7 @@ void AudioEvent::deserialize(Deserializer& s)
 		s >> name;
 		auto type = fromString<AudioEventActionType>(name);
 
-		if (std::unique_ptr<IAudioEventAction> newAction = makeAction(type); newAction) {
+		if (std::unique_ptr<AudioEventAction> newAction = makeAction(type); newAction) {
 			s >> *newAction;
 			actions.push_back(std::move(newAction));
 		}
@@ -135,7 +135,7 @@ void AudioEvent::loadDependencies(Resources& resources)
 	}
 }
 
-std::unique_ptr<IAudioEventAction> AudioEvent::makeAction(AudioEventActionType type)
+std::unique_ptr<AudioEventAction> AudioEvent::makeAction(AudioEventActionType type)
 {
 	switch (type) {
 	case AudioEventActionType::PlayLegacy:
@@ -182,15 +182,32 @@ String AudioEvent::getActionName(AudioEventActionType type)
 }
 
 
-ConfigNode IAudioEventAction::toConfigNode() const
+void AudioEventAction::serialize(Serializer& s) const
+{
+	s << scope;
+}
+
+void AudioEventAction::deserialize(Deserializer& s)
+{
+	s >> scope;
+}
+
+void AudioEventAction::load(const ConfigNode& config)
+{
+	scope = fromString<AudioEventScope>(config["scope"].asString("object"));
+}
+
+ConfigNode AudioEventAction::toConfigNode() const
 {
 	ConfigNode::MapType result;
 	result["type"] = toString(getType());
+	result["scope"] = toString(scope);
 	return result;
 }
 
 void AudioEventActionObject::loadObject(const ConfigNode& node, bool loadObject)
 {
+	AudioEventAction::load(node);
 	if (loadObject) {
 		objectName = node["object"].asString();
 	}
@@ -201,12 +218,14 @@ void AudioEventActionObject::loadObject(const ConfigNode& node, bool loadObject)
 
 void AudioEventActionObject::serialize(Serializer& s) const
 {
+	AudioEventAction::serialize(s);
 	s << objectName;
 	s << fade;
 }
 
 void AudioEventActionObject::deserialize(Deserializer& s)
 {
+	AudioEventAction::deserialize(s);
 	s >> objectName;
 	s >> fade;
 }
@@ -220,7 +239,7 @@ void AudioEventActionObject::loadDependencies(Resources& resources)
 
 ConfigNode AudioEventActionObject::toConfigNode() const
 {
-	auto result = IAudioEventAction::toConfigNode();
+	auto result = AudioEventAction::toConfigNode();
 
 	if (!objectName.isEmpty()) {
 		result["object"] = objectName;
@@ -502,13 +521,15 @@ void AudioEventActionSetVolume::deserialize(Deserializer& s)
 
 void AudioEventActionSetSwitch::load(const ConfigNode& config)
 {
+	AudioEventAction::load(config);
 	switchId = config["switchId"].asString();
 	value = config["value"].asString();
+	scope = fromString<AudioEventScope>(config["scope"].asString("object"));
 }
 
 ConfigNode AudioEventActionSetSwitch::toConfigNode() const
 {
-	auto result = IAudioEventAction::toConfigNode();
+	auto result = AudioEventAction::toConfigNode();
 	result["switchId"] = switchId;
 	result["value"] = value;
 	return result;
@@ -543,25 +564,28 @@ void AudioEventActionSetSwitch::setValue(String val)
 
 void AudioEventActionSetSwitch::serialize(Serializer& s) const
 {
+	AudioEventAction::serialize(s);
 	s << switchId;
 	s << value;
 }
 
 void AudioEventActionSetSwitch::deserialize(Deserializer& s)
 {
+	AudioEventAction::deserialize(s);
 	s >> switchId;
 	s >> value;
 }
 
 void AudioEventActionSetVariable::load(const ConfigNode& config)
 {
+	AudioEventAction::load(config);
 	variableId = config["variableId"].asString();
 	value = config["value"].asFloat();
 }
 
 ConfigNode AudioEventActionSetVariable::toConfigNode() const
 {
-	auto result = IAudioEventAction::toConfigNode();
+	auto result = AudioEventAction::toConfigNode();
 	result["variableId"] = variableId;
 	result["value"] = value;
 	return result;
@@ -596,12 +620,14 @@ void AudioEventActionSetVariable::setValue(float val)
 
 void AudioEventActionSetVariable::serialize(Serializer& s) const
 {
+	AudioEventAction::serialize(s);
 	s << variableId;
 	s << value;
 }
 
 void AudioEventActionSetVariable::deserialize(Deserializer& s)
 {
+	AudioEventAction::deserialize(s);
 	s >> variableId;
 	s >> value;
 }
