@@ -43,10 +43,9 @@ namespace Halley {
 		void setBlendType(BlendType type);
 		void setDepthStencil(const MaterialDepthStencil& depthStencil);
 
-		void bindTexture(int id);
+		void bindTexture(unsigned int id);
 		void setTextureUnit(int n);
 		void setNumberOfTextureUnits(int n);
-		void resetState();
 
 		void setViewPort(Rect4i rect);
 		void setScissor(Rect4i rect, bool enable);
@@ -54,7 +53,9 @@ namespace Halley {
 
 		void clear(Colour col);
 		static void doGlCheckError(const char* file = "", long line = 0);
-		
+
+        static void resetDefaultGLState();
+
 	private:
 		GLInternals& state;
 	};

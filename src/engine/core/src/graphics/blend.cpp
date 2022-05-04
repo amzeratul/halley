@@ -16,7 +16,7 @@ bool BlendType::operator==(const BlendType& other) const
 
 bool BlendType::operator!=(const BlendType& other) const
 {
-	return mode != other.mode && premultiplied != other.premultiplied;
+	return mode != other.mode || premultiplied != other.premultiplied;
 }
 
 bool BlendType::operator<(const BlendType& other) const
