@@ -31,7 +31,9 @@ namespace Halley {
     private:
     	Sprite background;
         Sprite display;
+        Sprite gridLine;
         Colour4f lineColour;
+        TextRenderer tooltipLabel;
 
     	Range<float> horizontalRange;
         Vector<Vector2f> points;

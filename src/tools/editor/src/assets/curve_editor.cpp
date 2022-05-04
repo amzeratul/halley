@@ -4,21 +4,25 @@
 
 using namespace Halley;
 
-CurveEditor::CurveEditor(String id, UIStyle style)
+CurveEditor::CurveEditor(String id, UIStyle _style)
 	: UIWidget(std::move(id))
 {
-	styles.push_back(std::move(style));
+	styles.push_back(std::move(_style));
 	setInteractWithMouse(true);
 
-	background = styles.back().getSprite("background");
-	display = styles.back().getSprite("display");
-	lineColour = styles.back().getColour("lineColour");
+	const auto& style = styles.back();
+	background = style.getSprite("background");
+	display = style.getSprite("display");
+	lineColour = style.getColour("lineColour");
+	gridLine = style.getSprite("gridLine");
+	tooltipLabel = style.getTextRenderer("tooltipLabel");
 }
 
 void CurveEditor::update(Time time, bool moved)
 {
 	if (!dragging && !isMouseOver()) {
 		curAnchor = {};
+		tooltipLabel.setText("");
 	}
 
 	if (moved) {
@@ -47,6 +51,7 @@ void CurveEditor::draw(UIPainter& painter) const
 			drawAnchor(painter, ps[i], curAnchor == i);
 		}
 	});
+	painter.draw(tooltipLabel);
 }
 
 void CurveEditor::setHorizontalRange(Range<float> range)
@@ -86,6 +91,14 @@ void CurveEditor::onMouseOver(Vector2f mousePos)
 		curAnchor = getAnchorAt(mousePos);
 	}
 	updateDragging(mousePos);
+
+	const auto drawArea = getDrawArea();
+	const bool left = mousePos.x > drawArea.getCenter().x;
+	const auto curPos = curAnchor ? points[*curAnchor] : clampPoint(mouseToCurveSpace(mousePos));
+	tooltipLabel
+		.setOffset(Vector2f(left ? 0.0f : 1.0f, 0.0f))
+		.setPosition(left ? drawArea.getTopLeft() : drawArea.getTopRight())
+		.setText(toString(curPos.x, 2) + ", " + toString(curPos.y, 2));
 }
 
 void CurveEditor::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
