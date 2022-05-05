@@ -181,6 +181,11 @@ void AudioEventEditorAction::onMakeUI()
 	case AudioEventActionType::SetVariable:
 		makeSetVariableAction(dynamic_cast<AudioEventActionSetVariable&>(action));
 		break;
+	case AudioEventActionType::PauseBus:
+	case AudioEventActionType::ResumeBus:
+	case AudioEventActionType::StopBus:
+		makeBusAction(dynamic_cast<AudioEventActionBus&>(action));
+		break;
 	}
 
 	setHandle(UIEventType::ButtonClicked, "delete", [=] (const UIEvent& event)
@@ -328,6 +333,24 @@ void AudioEventEditorAction::makeSetVariableAction(AudioEventActionSetVariable& 
 	bindData("scope", toString(action.getScope()), [=, &action](String value)
 	{
 		action.setScope(fromString<AudioEventScope>(value));
+		editor.markModified();
+	});
+}
+
+void AudioEventEditorAction::makeBusAction(AudioEventActionBus& action)
+{
+	factory.loadUI(*getWidget("contents"), "halley/audio_editor/audio_action_bus");
+
+	getWidgetAs<UIDropdown>("busName")->setOptions(editor.getAudioProperties().getBusIds());
+
+	getWidget("fadeContainer")->add(std::make_shared<AudioFadeEditor>(factory, action.getFade(), [=] ()
+	{
+		editor.markModified();
+	}));
+
+	bindData("busName", action.getBusName(), [=, &action](String value)
+	{
+		action.setBusName(std::move(value));
 		editor.markModified();
 	});
 }

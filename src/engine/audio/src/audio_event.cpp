@@ -148,6 +148,12 @@ std::unique_ptr<AudioEventAction> AudioEvent::makeAction(AudioEventActionType ty
 		return std::make_unique<AudioEventActionPause>();
 	case AudioEventActionType::Resume:
 		return std::make_unique<AudioEventActionResume>();
+	case AudioEventActionType::StopBus:
+		return std::make_unique<AudioEventActionStopBus>();
+	case AudioEventActionType::PauseBus:
+		return std::make_unique<AudioEventActionPauseBus>();
+	case AudioEventActionType::ResumeBus:
+		return std::make_unique<AudioEventActionResumeBus>();
 	case AudioEventActionType::SetVolume:
 		return std::make_unique<AudioEventActionSetVolume>();
 	case AudioEventActionType::SetSwitch:
@@ -171,6 +177,12 @@ String AudioEvent::getActionName(AudioEventActionType type)
 		return "Pause";
 	case AudioEventActionType::Resume:
 		return "Resume";
+	case AudioEventActionType::StopBus:
+		return "Stop Bus";
+	case AudioEventActionType::PauseBus:
+		return "Pause Bus";
+	case AudioEventActionType::ResumeBus:
+		return "Resume Bus";
 	case AudioEventActionType::SetSwitch:
 		return "Set Switch";
 	case AudioEventActionType::SetVariable:
@@ -268,6 +280,56 @@ const AudioFade& AudioEventActionObject::getFade() const
 }
 
 AudioFade& AudioEventActionObject::getFade()
+{
+	return fade;
+}
+
+
+
+void AudioEventActionBus::load(const ConfigNode& config)
+{
+	AudioEventAction::load(config);
+	busName = config["busName"].asString("");
+	if (config.hasKey("fade")) {
+		fade = AudioFade(config["fade"]);
+	}
+}
+
+ConfigNode AudioEventActionBus::toConfigNode() const
+{
+	auto result = AudioEventAction::toConfigNode();
+	result["busName"] = busName;
+	if (fade.hasFade()) {
+		result["fade"] = fade.toConfigNode();
+	}
+	return result;
+}
+
+void AudioEventActionBus::serialize(Serializer& s) const
+{
+	AudioEventAction::serialize(s);
+	s << busName;
+	s << fade;
+}
+
+void AudioEventActionBus::deserialize(Deserializer& s)
+{
+	AudioEventAction::deserialize(s);
+	s >> busName;
+	s >> fade;
+}
+
+const String& AudioEventActionBus::getBusName() const
+{
+	return busName;
+}
+
+void AudioEventActionBus::setBusName(String name)
+{
+	busName = std::move(name);
+}
+
+AudioFade& AudioEventActionBus::getFade()
 {
 	return fade;
 }
@@ -461,6 +523,63 @@ bool AudioEventActionResume::run(AudioEngine& engine, AudioEventId id, AudioEmit
 	const AudioObjectId audioObjectId = object->getAudioObjectId();
 
 	emitter.forVoices(audioObjectId, [&] (AudioVoice& voice)
+	{
+		voice.resume(fade);
+	});
+
+	return true;
+}
+
+void AudioEventActionStopBus::load(const ConfigNode& config)
+{
+	AudioEventActionBus::load(config);
+}
+
+bool AudioEventActionStopBus::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
+{
+	if (busName.isEmpty()) {
+		return false;
+	}
+
+	engine.forVoicesOnBus(engine.getBusId(busName), [&] (AudioVoice& voice)
+	{
+		voice.stop(fade);
+	});
+
+	return true;
+}
+
+void AudioEventActionPauseBus::load(const ConfigNode& config)
+{
+	AudioEventActionBus::load(config);
+}
+
+bool AudioEventActionPauseBus::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
+{
+	if (busName.isEmpty()) {
+		return false;
+	}
+
+	engine.forVoicesOnBus(engine.getBusId(busName), [&] (AudioVoice& voice)
+	{
+		voice.pause(fade);
+	});
+
+	return true;
+}
+
+void AudioEventActionResumeBus::load(const ConfigNode& config)
+{
+	AudioEventActionBus::load(config);
+}
+
+bool AudioEventActionResumeBus::run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const
+{
+	if (busName.isEmpty()) {
+		return false;
+	}
+
+	engine.forVoicesOnBus(engine.getBusId(busName), [&] (AudioVoice& voice)
 	{
 		voice.resume(fade);
 	});

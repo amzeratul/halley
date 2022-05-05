@@ -40,6 +40,7 @@ namespace Halley {
 		void setOutputChannels(Vector<AudioChannelData> channelData);
 
 		void forVoices(AudioObjectId audioObjectId, VoiceCallback callback);
+		void forVoicesOnBus(int busId, VoiceCallback callback);
 
 		AudioEmitter* getEmitter(AudioEmitterId id);
 		Vector<AudioEventId> getFinishedSounds();

@@ -23,6 +23,9 @@ namespace Halley
 		Stop,
 		Pause,
 		Resume,
+		StopBus,
+		PauseBus,
+		ResumeBus,
 		SetVolume,
 		SetSwitch,
 		SetVariable
@@ -30,13 +33,16 @@ namespace Halley
 	
 	template <>
 	struct EnumNames<AudioEventActionType> {
-		constexpr std::array<const char*, 8> operator()() const {
+		constexpr std::array<const char*, 11> operator()() const {
 			return{{
 				"playLegacy",
 				"play",
 				"stop",
 				"pause",
 				"resume",
+				"stopBus",
+				"pauseBus",
+				"resumeBus",
 				"setVolume",
 				"setSwitch",
 				"setVariable"
@@ -139,6 +145,24 @@ namespace Halley
 		AudioFade fade;
 	};
 
+	class AudioEventActionBus : public AudioEventAction {
+	public:
+		void load(const ConfigNode& config) override;
+		ConfigNode toConfigNode() const override;
+
+		void serialize(Serializer& s) const override;
+		void deserialize(Deserializer& s) override;
+
+		const String& getBusName() const;
+		void setBusName(String name);
+
+		AudioFade& getFade();
+
+	protected:
+		String busName;
+		AudioFade fade;
+	};
+
 	class AudioEventActionPlay final : public AudioEventActionObject
 	{
 	public:
@@ -192,6 +216,33 @@ namespace Halley
 
 		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
 		AudioEventActionType getType() const override { return AudioEventActionType::Resume; }
+	};
+
+	class AudioEventActionStopBus final : public AudioEventActionBus
+	{
+	public:
+		void load(const ConfigNode& config) override;
+
+		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
+		AudioEventActionType getType() const override { return AudioEventActionType::StopBus; }
+	};
+
+	class AudioEventActionPauseBus final : public AudioEventActionBus
+	{
+	public:
+		void load(const ConfigNode& config) override;
+
+		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
+		AudioEventActionType getType() const override { return AudioEventActionType::PauseBus; }
+	};
+
+	class AudioEventActionResumeBus final : public AudioEventActionBus
+	{
+	public:
+		void load(const ConfigNode& config) override;
+
+		bool run(AudioEngine& engine, AudioEventId id, AudioEmitter& emitter) const override;
+		AudioEventActionType getType() const override { return AudioEventActionType::ResumeBus; }
 	};
 
 	class AudioEventActionSetVolume final : public AudioEventActionObject

@@ -1,0 +1,17 @@
+widget: { class: widget }
+sizer: { type: vertical, gap: 4 }
+children:
+- sizer: { type: horizontal }
+  children:
+  - widget: { class: label, text: "Fade: " }
+    fill: centre
+  - widget: { class: widget, id: fadeContainer }
+    children: []
+- widget: { class: widget, id: busOptions }
+  sizer: { type: vertical, gap: 4 }
+  children:
+  - sizer: { horizontal }
+    children:
+    - widget: { class: label, text: "Bus: " }
+      fill: centre
+    - widget: { id: busName, class: dropdown, size: [200, 20] }

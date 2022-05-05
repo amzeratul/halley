@@ -56,6 +56,7 @@ namespace Halley {
         void makeSetVolumeAction(AudioEventActionSetVolume& action);
         void makeSetSwitchAction(AudioEventActionSetSwitch& action);
         void makeSetVariableAction(AudioEventActionSetVariable& action);
+        void makeBusAction(AudioEventActionBus& action);
 	};
 
 	class ChooseAudioEventAction : public ChooseAssetWindow {

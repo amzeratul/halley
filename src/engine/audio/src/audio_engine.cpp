@@ -120,6 +120,17 @@ void AudioEngine::forVoices(AudioObjectId audioObjectId, VoiceCallback callback)
 	}
 }
 
+void AudioEngine::forVoicesOnBus(int busId, VoiceCallback callback)
+{
+	for (auto& e: emitters) {
+		for (auto& v: e.second->getVoices()) {
+			if (v->getBus() == busId) {
+				callback(*v);
+			}
+		}
+	}
+}
+
 AudioEmitter* AudioEngine::getEmitter(AudioEmitterId id)
 {
 	const auto iter = emitters.find(id);
