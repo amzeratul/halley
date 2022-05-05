@@ -31,6 +31,12 @@ void AudioExpressionEditor::onMakeUI()
 		refreshIds();
 		editor.markModified(false);
 	});
+
+	bindData("operation", toString(expression.getOperation()), [=] (String value)
+	{
+		expression.setOperation(fromString<AudioExpressionOperation>(value));
+		editor.markModified(false);
+	});
 }
 
 AudioExpressionTerm& AudioExpressionEditor::getExpressionTerm(size_t idx)
@@ -55,6 +61,7 @@ void AudioExpressionEditor::deleteTerm(size_t idx)
 		expression.getTerms().erase(expression.getTerms().begin() + idx);
 		expressionEditors.erase(expressionEditors.begin() + idx);
 		refreshIds();
+		updateOperation();
 
 		editor.markModified(false);
 	});
@@ -71,6 +78,7 @@ void AudioExpressionEditor::loadUI()
 		exprList->addItem(expressionEditors.back()->getId(), expressionEditors.back(), 1);
 		++idx;
 	}
+	updateOperation();
 }
 
 void AudioExpressionEditor::refreshIds()
@@ -98,7 +106,14 @@ void AudioExpressionEditor::addTerm(AudioExpressionTermType type)
 	expressionEditors.push_back(std::make_shared<AudioExpressionEditorExpression>(factory, *this, idx));
 	getWidgetAs<UIList>("expressions")->addItem(expressionEditors.back()->getId(), expressionEditors.back(), 1);
 
+	updateOperation();
+
 	editor.markModified(false);
+}
+
+void AudioExpressionEditor::updateOperation()
+{
+	getWidget("operationContainer")->setActive(expression.getTerms().size() >= 2);
 }
 
 AudioExpressionEditorExpression::AudioExpressionEditorExpression(UIFactory& factory, AudioExpressionEditor& parent, size_t idx)
@@ -145,7 +160,7 @@ void AudioExpressionEditorExpression::onMakeUI()
 		bindData("switchOp", toString(expression.op), [this] (String value)
 		{
 			auto& expression = parent.getExpressionTerm(idx);
-			expression.op = fromString<AudioExpressionTermOp>(value);
+			expression.op = fromString<AudioExpressionTermComp>(value);
 			parent.markModified(idx);
 		});
 
@@ -153,6 +168,13 @@ void AudioExpressionEditorExpression::onMakeUI()
 		{
 			auto& expression = parent.getExpressionTerm(idx);
 			expression.value = std::move(value);
+			parent.markModified(idx);
+		});
+
+		bindData("gain", expression.gain, [this] (float value)
+		{
+			auto& expression = parent.getExpressionTerm(idx);
+			expression.gain = value;
 			parent.markModified(idx);
 		});
 	} else if (expression.type == AudioExpressionTermType::Variable) {

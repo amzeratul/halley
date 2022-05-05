@@ -2,5 +2,11 @@ widget: { class: widget }
 sizer: { type: vertical }
 children:
 - widget: { id: expressions, class: list, canDrag: true, style: dragList }
+- widget: { id: operationContainer, class: widget, active: false }
+  sizer: { type: horizontal }
+  children:
+  - widget: { class: label, text: "Operation: " }
+    fill: [left, centreVertical]
+  - widget: { id: operation, class: dropdown, size: [150, 20], options: [{ id: "multiply", text: "Multiply" }, { id: "add", text: "Add" }, { id: "min", text: "Minimum value" }, { id: "max", text: "Maximum value" }] }
 - widget: { id: add, class: button, style: buttonThin, text: "+", size: [30, 16] }
   fill: left

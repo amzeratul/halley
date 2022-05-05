@@ -30,6 +30,7 @@ namespace Halley {
 		void refreshIds();
 		void addTerm();
 		void addTerm(AudioExpressionTermType type);
+		void updateOperation();
 	};
 
 	class AudioExpressionEditorExpression : public UIWidget {

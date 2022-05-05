@@ -10,6 +10,9 @@ children:
   - widget: { id: switchId, class: dropdown, size: [150, 20] }
   - widget: { id: switchOp, class: dropdown, size: [50, 20], options: [{ id: "equals", text: "==" }, { id: "notEquals", text: "!=" }] }
   - widget: { id: switchValue, class: dropdown, size: [150, 20] }
+  - widget: { class: label, text: ", gain = " }
+    fill: centre
+  - widget: { id: gain, class: textInput, size: [50, 20], validator: numericPositive }
 - widget: { id: variableExpression, class: widget, active: false }
   sizer: { type: vertical, gap: 4 }
   proportion: 1

@@ -24,13 +24,13 @@ namespace Halley {
 		}
 	};
 
-    enum class AudioExpressionTermOp: uint8_t {
+    enum class AudioExpressionTermComp: uint8_t {
 	    Equals,
         NotEquals
     };
 
 	template <>
-	struct EnumNames<AudioExpressionTermOp> {
+	struct EnumNames<AudioExpressionTermComp> {
 		constexpr std::array<const char*, 2> operator()() const {
 			return{{
 				"equals",
@@ -42,10 +42,11 @@ namespace Halley {
     class AudioExpressionTerm {
     public:
         AudioExpressionTermType type = AudioExpressionTermType::Switch;
-        AudioExpressionTermOp op = AudioExpressionTermOp::Equals;
+        AudioExpressionTermComp op = AudioExpressionTermComp::Equals;
         String id;
         String value;
         Vector<Vector2f> points;
+        float gain = 1;
 
         AudioExpressionTerm() = default;
         AudioExpressionTerm(AudioExpressionTermType type);
@@ -60,6 +61,25 @@ namespace Halley {
         void deserialize(Deserializer& s);
     };
 
+    enum class AudioExpressionOperation: uint8_t {
+	    Multiply,
+        Add,
+        Min,
+        Max
+    };
+
+	template <>
+	struct EnumNames<AudioExpressionOperation> {
+		constexpr std::array<const char*, 4> operator()() const {
+			return{{
+				"multiply",
+                "add",
+                "min",
+                "max"
+			}};
+		}
+	};
+
 	class AudioExpression {
     public:
         void load(const ConfigNode& node);
@@ -71,8 +91,11 @@ namespace Halley {
         void deserialize(Deserializer& s);
 
         Vector<AudioExpressionTerm>& getTerms();
+        AudioExpressionOperation getOperation() const;
+        void setOperation(AudioExpressionOperation op);
 
 	private:
         Vector<AudioExpressionTerm> terms;
+        AudioExpressionOperation operation;
     };
 }

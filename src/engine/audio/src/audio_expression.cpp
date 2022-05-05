@@ -18,7 +18,8 @@ AudioExpressionTerm::AudioExpressionTerm(const ConfigNode& node)
 	case AudioExpressionTermType::Switch:
 		id = node["id"].asString();
 		value = node["value"].asString();
-		op = fromString<AudioExpressionTermOp>(node["op"].asString("equals"));
+		op = fromString<AudioExpressionTermComp>(node["op"].asString("equals"));
+		gain = node["gain"].asFloat(1.0f);
 		break;
 
 	case AudioExpressionTermType::Variable:
@@ -36,6 +37,7 @@ ConfigNode AudioExpressionTerm::toConfigNode() const
 		result["id"] = id;
 		result["value"] = value;
 		result["op"] = toString(op);
+		result["gain"] = gain;
 	} else if (type == AudioExpressionTermType::Variable) {
 		result["id"] = id;
 		result["points"] = points;
@@ -58,10 +60,10 @@ float AudioExpressionTerm::evaluate(const AudioEmitter& emitter) const
 float AudioExpressionTerm::evaluateSwitch(const AudioEmitter& emitter) const
 {
 	const bool isEqual = emitter.getSwitchValue(id) == value;
-	if (op == AudioExpressionTermOp::Equals) {
-		return isEqual ? 1.0f : 0.0f;
-	} else if (op == AudioExpressionTermOp::NotEquals) {
-		return isEqual ? 0.0f : 1.0f;
+	if (op == AudioExpressionTermComp::Equals) {
+		return isEqual ? gain : 0.0f;
+	} else if (op == AudioExpressionTermComp::NotEquals) {
+		return isEqual ? 0.0f : gain;
 	}
 	return 0.0f; // ??
 }
@@ -104,6 +106,7 @@ void AudioExpressionTerm::serialize(Serializer& s) const
 	s << id;
 	s << value;
 	s << points;
+	s << gain;
 }
 
 void AudioExpressionTerm::deserialize(Deserializer& s)
@@ -112,44 +115,86 @@ void AudioExpressionTerm::deserialize(Deserializer& s)
 	s >> t;
 	type = static_cast<AudioExpressionTermType>(t);
 	s >> t;
-	op = static_cast<AudioExpressionTermOp>(t);
+	op = static_cast<AudioExpressionTermComp>(t);
 	s >> id;
 	s >> value;
 	s >> points;
+	s >> gain;
 }
 
 void AudioExpression::load(const ConfigNode& node)
 {
 	terms = node["terms"].asVector<AudioExpressionTerm>();
+	operation = fromString<AudioExpressionOperation>(node["operation"].asString("multiply"));
 }
 
 ConfigNode AudioExpression::toConfigNode() const
 {
 	ConfigNode::MapType result;
 	result["terms"] = terms;
+	result["operation"] = toString(operation);
 	return result;
 }
 
 float AudioExpression::evaluate(const AudioEmitter& emitter) const
 {
-	float value = 1.0f;
-	for (auto& t: terms) {
-		value *= t.evaluate(emitter);
+	float value;
+
+	switch (operation) {
+	case AudioExpressionOperation::Multiply:
+	case AudioExpressionOperation::Min:
+		value = 1.0f;
+		break;
+	default:
+		value = 0.0f;
+		break;
 	}
-	return value;
+
+	for (auto& t: terms) {
+		const auto v = t.evaluate(emitter);
+
+		switch (operation) {
+		case AudioExpressionOperation::Multiply:
+			value *= v;
+			break;
+		case AudioExpressionOperation::Add:
+			value += v;
+			break;
+		case AudioExpressionOperation::Max:
+			value = std::max(value, v);
+			break;
+		case AudioExpressionOperation::Min:
+			value = std::min(value, v);
+			break;
+		}
+
+	}
+	return clamp(value, 0.0f, 1.0f);
 }
 
 void AudioExpression::serialize(Serializer& s) const
 {
 	s << terms;
+	s << operation;
 }
 
 void AudioExpression::deserialize(Deserializer& s)
 {
 	s >> terms;
+	s >> operation;
 }
 
 Vector<AudioExpressionTerm>& AudioExpression::getTerms()
 {
 	return terms;
+}
+
+AudioExpressionOperation AudioExpression::getOperation() const
+{
+	return operation;
+}
+
+void AudioExpression::setOperation(AudioExpressionOperation op)
+{
+	operation = op;
 }
