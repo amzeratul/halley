@@ -30,6 +30,10 @@ children:
           fill: [left, centreVertical]
         - widget: { id: loopEnd, class: textInput, size: [100, 20], validator: integerPositive }
           fill: left
+        - widget: { class: label, text: "Randomise start: " }
+          fill: [left, centreVertical]
+        - widget: { id: randomiseStart, class: checkbox }
+          fill: left
     - widget: { class: label, text: "Gain:" }
     - sizer: { type: horizontal }
       children:

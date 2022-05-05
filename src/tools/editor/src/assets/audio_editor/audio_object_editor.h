@@ -61,6 +61,7 @@ namespace Halley {
         void moveClip(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx);
 
         void setCurrentObject(IAudioObject* object);
+        void doSetCurrentObject();
         void setCurrentObjectEditor(std::shared_ptr<UIWidget> widget);
 
 		Sprite makeIcon(AudioSubObjectType type) const;

@@ -7,7 +7,7 @@
 using namespace Halley;
 
 
-AudioSourceClip::AudioSourceClip(AudioEngine& engine, std::shared_ptr<const IAudioClip> c, bool looping, float gain, int64_t loopStart, int64_t loopEnd)
+AudioSourceClip::AudioSourceClip(AudioEngine& engine, std::shared_ptr<const IAudioClip> c, bool looping, float gain, int64_t loopStart, int64_t loopEnd, bool randomiseStart)
 	: engine(engine)
 	, clip(std::move(c))
 	, loopStart(loopStart)
@@ -15,6 +15,7 @@ AudioSourceClip::AudioSourceClip(AudioEngine& engine, std::shared_ptr<const IAud
 	, gain(gain)
 	, prevGain(gain)
 	, looping(looping)
+	, randomiseStart(randomiseStart)
 {
 	Expects(clip != nullptr);
 }
@@ -32,12 +33,6 @@ bool AudioSourceClip::isReady() const
 bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSamples dstChannels)
 {
 	Expects(isReady());
-	if (!initialised) {
-		initialised = true;
-
-		streams[0].active = true;
-		streams[0].loop = looping;
-	}
 
 	// Set stream end positions
 	const auto clipLength = clip->getLength();
@@ -45,6 +40,14 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 	streams[0].endPos = hasEarlyEnd ? static_cast<size_t>(loopEnd) : clipLength;
 	streams[0].kickOffSecondStream = hasEarlyEnd;
 	streams[1].endPos = clipLength;
+
+	if (!initialised) {
+		initialised = true;
+
+		streams[0].active = true;
+		streams[0].loop = looping;
+		streams[0].playbackPos = looping && randomiseStart ? engine.getRNG().getSizeT(0, streams[0].endPos) : 0;
+	}
 
 	const uint8_t nChannels = getNumberOfChannels();
 	size_t samplesWritten = 0;

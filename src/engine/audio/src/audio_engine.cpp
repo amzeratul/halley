@@ -73,7 +73,7 @@ void AudioEngine::play(AudioEventId id, std::shared_ptr<const IAudioClip> clip, 
 		return;
 	}
 
-	auto voice = std::make_unique<AudioVoice>(*this, std::make_shared<AudioSourceClip>(*this, std::move(clip), loop, 1.0f, 0, 0), volume, 1.0f, 0, getBusId(""));
+	auto voice = std::make_unique<AudioVoice>(*this, std::make_shared<AudioSourceClip>(*this, std::move(clip), loop, 1.0f, 0, 0, false), volume, 1.0f, 0, getBusId(""));
 	voice->setIds(id);
 	iter->second->addVoice(std::move(voice));
 }

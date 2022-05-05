@@ -7,7 +7,7 @@ namespace Halley
 	class AudioSourceClip final : public AudioSource
 	{
 	public:
-		AudioSourceClip(AudioEngine& engine, std::shared_ptr<const IAudioClip> clip, bool looping, float gain, int64_t loopStart, int64_t loopEnd);
+		AudioSourceClip(AudioEngine& engine, std::shared_ptr<const IAudioClip> clip, bool looping, float gain, int64_t loopStart, int64_t loopEnd, bool randomiseStart);
 
 		uint8_t getNumberOfChannels() const override;
 		bool getAudioData(size_t numSamples, AudioMultiChannelSamples dst) override;
@@ -33,5 +33,6 @@ namespace Halley
 
 		bool initialised = false;
 		bool looping = false;
+		bool randomiseStart = false;
 	};
 }

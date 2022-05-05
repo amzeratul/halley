@@ -187,7 +187,7 @@ void AudioObjectEditor::doLoadUI()
 	hierarchy->setSelectedOptionId(prevId);
 	hierarchy->setCanSendEvents(true);
 
-	//layout();
+	doSetCurrentObject();
 }
 
 void AudioObjectEditor::populateObject(const String& parentId, size_t idx, AudioSubObjectHandle& subObject)
@@ -353,24 +353,34 @@ void AudioObjectEditor::setCurrentObject(IAudioObject* object)
 	if (currentObject != object) {
 		currentObject = object;
 
-		switch (currentObject->getType()) {
-		case AudioSubObjectType::None:
-			// Root
-			setCurrentObjectEditor(std::make_shared<AudioRootEditor>(factory, *this, dynamic_cast<AudioObject&>(*object)));
-			break;
-		case AudioSubObjectType::Clips:
-			setCurrentObjectEditor(std::make_shared<AudioClipsEditor>(factory, *this, dynamic_cast<AudioSubObjectClips&>(*object)));
-			break;
-		case AudioSubObjectType::Layers:
-			setCurrentObjectEditor(std::make_shared<AudioLayersEditor>(factory, *this, dynamic_cast<AudioSubObjectLayers&>(*object)));
-			break;
-		case AudioSubObjectType::Sequence:
-			setCurrentObjectEditor({});
-			break;
-		case AudioSubObjectType::Switch:
-			setCurrentObjectEditor(std::make_shared<AudioSwitchEditor>(factory, *this, dynamic_cast<AudioSubObjectSwitch&>(*object)));
-			break;
-		}
+		doSetCurrentObject();
+	}
+}
+
+void AudioObjectEditor::doSetCurrentObject()
+{
+	if (!currentObject) {
+		setCurrentObjectEditor({});
+		return;
+	}
+
+	switch (currentObject->getType()) {
+	case AudioSubObjectType::None:
+		// Root
+		setCurrentObjectEditor(std::make_shared<AudioRootEditor>(factory, *this, dynamic_cast<AudioObject&>(*currentObject)));
+		break;
+	case AudioSubObjectType::Clips:
+		setCurrentObjectEditor(std::make_shared<AudioClipsEditor>(factory, *this, dynamic_cast<AudioSubObjectClips&>(*currentObject)));
+		break;
+	case AudioSubObjectType::Layers:
+		setCurrentObjectEditor(std::make_shared<AudioLayersEditor>(factory, *this, dynamic_cast<AudioSubObjectLayers&>(*currentObject)));
+		break;
+	case AudioSubObjectType::Sequence:
+		setCurrentObjectEditor({});
+		break;
+	case AudioSubObjectType::Switch:
+		setCurrentObjectEditor(std::make_shared<AudioSwitchEditor>(factory, *this, dynamic_cast<AudioSubObjectSwitch&>(*currentObject)));
+		break;
 	}
 }
 

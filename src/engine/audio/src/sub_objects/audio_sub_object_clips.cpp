@@ -24,6 +24,7 @@ void AudioSubObjectClips::load(const ConfigNode& node)
 {
 	clips = node["clips"].asVector<String>({});
 	loop = node["loop"].asBool(false);
+	randomiseStart = node["randomiseStart"].asBool(false);
 	gain = node["gain"].asFloatRange(Range<float>(1, 1));
 	loopStart = node["loopStart"].asInt(0);
 	loopEnd = node["loopEnd"].asInt(0);
@@ -39,6 +40,9 @@ ConfigNode AudioSubObjectClips::toConfigNode() const
 	}
 	if (loop) {
 		result["loop"] = loop;
+	}
+	if (randomiseStart) {
+		result["randomiseStart"] = randomiseStart;
 	}
 	if (gain != Range<float>(1, 1)) {
 		result["gain"] = gain;
@@ -86,7 +90,7 @@ std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine
 	}
 
 	auto clip = engine.getRNG().getRandomElement(clipData);
-	return std::make_unique<AudioSourceClip>(engine, clip, loop, engine.getRNG().getFloat(gain), loopStart, loopEnd);
+	return std::make_unique<AudioSourceClip>(engine, clip, loop, engine.getRNG().getFloat(gain), loopStart, loopEnd, randomiseStart);
 }
 
 void AudioSubObjectClips::loadDependencies(Resources& resources)
@@ -111,6 +115,7 @@ void AudioSubObjectClips::serialize(Serializer& s) const
 {
 	s << clips;
 	s << loop;
+	s << randomiseStart;
 	s << gain;
 	s << loopStart;
 	s << loopEnd;
@@ -120,6 +125,7 @@ void AudioSubObjectClips::deserialize(Deserializer& s)
 {
 	s >> clips;
 	s >> loop;
+	s >> randomiseStart;
 	s >> gain;
 	s >> loopStart;
 	s >> loopEnd;

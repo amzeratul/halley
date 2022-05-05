@@ -41,6 +41,7 @@ namespace Halley {
 		Vector<String> clips;
 		Vector<std::shared_ptr<const AudioClip>> clipData;
 		bool loop = false;
+		bool randomiseStart = false;
 		int loopStart = 0;
 		int loopEnd = 0;
 		Range<float> gain = Range<float>(1, 1);
