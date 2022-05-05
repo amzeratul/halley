@@ -104,10 +104,10 @@ void AudioObjectEditor::reload()
 
 void AudioObjectEditor::refreshAssets()
 {
-	if (audioObject) {
-		audioObject = std::make_shared<AudioObject>(*gameResources.get<AudioObject>(audioObject->getAssetId()));
-		doLoadUI();
-	}
+	// if (audioObject) {
+	// 	audioObject = std::make_shared<AudioObject>(*gameResources.get<AudioObject>(audioObject->getAssetId()));
+	// 	doLoadUI();
+	// }
 }
 
 bool AudioObjectEditor::isModified()
