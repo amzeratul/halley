@@ -111,6 +111,7 @@ namespace Halley {
 
 		virtual void onItemDragging(UIListItem& item, int index, Vector2f pos);
 		virtual void onItemDoneDragging(UIListItem& item, int index, Vector2f pos);
+		virtual void onItemDoubleClicked(UIListItem& item, KeyMods mods);
 
 		void doSetItemActive(const String& id, bool active);
 		void reassignIds();
@@ -142,7 +143,6 @@ namespace Halley {
 		void onItemClicked(UIListItem& item, int button, KeyMods keyMods);
 		void onItemClickReleased(UIListItem& item, int button, KeyMods keyMods);
 		SelectionMode getMode(KeyMods mods, int button) const;
-		void onItemDoubleClicked(UIListItem& item, KeyMods mods);
 		void onAccept();
 		void onCancel();
 
