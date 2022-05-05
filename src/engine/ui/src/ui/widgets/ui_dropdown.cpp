@@ -234,6 +234,8 @@ void UIDropdown::update(Time t, bool moved)
 	}
 
 	timeSinceLastKeypress += t;
+
+	UIClickable::update(t, moved);
 }
 
 bool UIDropdown::onKeyPress(KeyboardKeyPress key)

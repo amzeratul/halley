@@ -41,6 +41,8 @@ void UIMenuButton::setOnGroupStateCallback(OnGroupStateCallback callback)
 void UIMenuButton::update(Time t, bool moved)
 {
 	updateButton();
+
+	UIClickable::update(t, moved);
 }
 
 void UIMenuButton::doSetState(State state)

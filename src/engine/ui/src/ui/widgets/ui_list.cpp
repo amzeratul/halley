@@ -1007,6 +1007,8 @@ void UIListItem::update(Time t, bool moved)
 	if (dirty) {
 		updateSpritePosition();
 	}
+
+	UIClickable::update(t, moved);
 }
 
 void UIListItem::onMouseOver(Vector2f mousePos)

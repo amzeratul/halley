@@ -48,6 +48,8 @@ void UIButton::update(Time t, bool moved)
 			.setPos(basePos)
 			.setScale(getSize() / imgBaseSize);
 	}
+
+	UIClickable::update(t, moved);
 }
 
 void UIButton::onClicked(Vector2f, KeyMods keyMods)

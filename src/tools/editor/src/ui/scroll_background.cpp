@@ -45,6 +45,8 @@ void ScrollBackground::update(Time t, bool moved)
 			.setTexRect(Rect4f(Vector2f(), getSize() / Vector2f(16, 16) / getZoomLevel()));
 	}
 	dirty = false;
+
+	UIClickable::update(t, moved);
 }
 
 void ScrollBackground::draw(UIPainter& painter) const

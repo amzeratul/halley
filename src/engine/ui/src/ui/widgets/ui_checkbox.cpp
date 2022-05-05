@@ -24,6 +24,8 @@ void UICheckbox::update(Time t, bool moved)
 	if (dirty) {
 		sprite.scaleTo(getSize()).setPos(getPosition());
 	}
+
+	UIClickable::update(t, moved);
 }
 
 bool UICheckbox::isChecked() const
