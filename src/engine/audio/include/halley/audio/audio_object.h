@@ -50,7 +50,7 @@ namespace Halley {
 		AudioSubObjectHandle removeObject(const IAudioObject* object) override;
 
     private:
-		AudioObjectId audioObjectId;
+		AudioObjectId audioObjectId = 0;
 		std::vector<AudioSubObjectHandle> objects;
 		
 		String bus;
