@@ -6,6 +6,7 @@ children:
   sizer: { type: horizontal }
   children:
   - widget: { class: label, text: "If switch " }
+    fill: [left, centreVertical]
   - widget: { id: switchId, class: dropdown, size: [150, 20] }
   - widget: { id: switchOp, class: dropdown, size: [50, 20], options: [{ id: "equals", text: "==" }, { id: "notEquals", text: "!=" }] }
   - widget: { id: switchValue, class: dropdown, size: [150, 20] }
@@ -16,8 +17,9 @@ children:
   - sizer: { type: horizontal }
     children:
     - widget: { class: label, text: "Variable " }
+      fill: [left, centreVertical]
     - widget: { id: variableId, class: dropdown, size: [150, 20] }
   - widget: { id: variableCurve, class: curveEditor, size: [400, 60] }
 - widget: { id: delete, class: button, style: buttonThin, text: "x", size: [20, 16] }
-  fill: centre
+  fill: [top, centreHorizontal]
   border: [4, 0, 0, 0]

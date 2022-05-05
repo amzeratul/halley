@@ -36,4 +36,4 @@ children:
   children:
   - widget: { class: label, text: "Scope: " }
     fill: centre
-  - widget: { id: scope, class: dropdown, size: [100, 20], options: [{ id: object, text: Object }, { id: global, text: Global }] }
+  - widget: { id: scope, class: dropdown, size: [150, 20], options: [{ id: object, text: Target Object }, { id: global, text: Global Singleton }] }

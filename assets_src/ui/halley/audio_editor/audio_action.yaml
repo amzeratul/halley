@@ -11,5 +11,5 @@ children:
   proportion: 1
   children: []
 - widget: { id: delete, class: button, style: buttonThin, size: [15, 15], text: "x" }
-  fill: [top, centre]
+  fill: [top, centreHorizontal]
   border: [10, 0, 0, 0]
