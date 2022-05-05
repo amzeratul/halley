@@ -51,7 +51,11 @@ void AudioObject::loadLegacyEvent(const ConfigNode& node)
 {
 	bus = node["group"].asString("");
 	pitch = node["pitch"].asFloatRange(Range<float>(1, 1));
-	gain = node["gain"].asFloatRange(Range<float>(1, 1));
+	if (node.hasKey("volume")) {
+		gain = node["volume"].asFloatRange(Range<float>(1, 1));
+	} else {
+		gain = node["gain"].asFloatRange(Range<float>(1, 1));
+	}
 
 	auto clips = std::make_unique<AudioSubObjectClips>();
 	clips->load(node);
