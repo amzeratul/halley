@@ -1,6 +1,14 @@
 #include "audio_source_sequence.h"
 using namespace Halley;
 
+AudioSourceSequence::AudioSourceSequence(AudioEngine& engine, AudioEmitter& emitter, const AudioSubObjectSequence& sequenceConfig, AudioFade fadeConfig)
+	: engine(engine)
+	, emitter(emitter)
+	, sequenceConfig(sequenceConfig)
+	, fadeConfig(fadeConfig)
+{
+}
+
 uint8_t AudioSourceSequence::getNumberOfChannels() const
 {
 	// TODO

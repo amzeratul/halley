@@ -1,4 +1,5 @@
 #pragma once
+#include "../audio_fade.h"
 #include "../audio_sub_object.h"
 
 namespace Halley {
@@ -21,7 +22,11 @@ namespace Halley {
 	    void serialize(Serializer& s) const override;
 	    void deserialize(Deserializer& s) override;
 
+        AudioFade& getCrossFade();
+
     private:
         Vector<AudioSubObjectHandle> segments;
+
+        AudioFade crossFade;
     };
 }

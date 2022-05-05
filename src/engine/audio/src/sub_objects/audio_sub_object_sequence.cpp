@@ -22,7 +22,7 @@ ConfigNode AudioSubObjectSequence::toConfigNode() const
 
 std::unique_ptr<AudioSource> AudioSubObjectSequence::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
 {
-	return std::make_unique<AudioSourceSequence>();
+	return std::make_unique<AudioSourceSequence>(engine, emitter, *this, crossFade);
 }
 
 String AudioSubObjectSequence::getName() const
@@ -76,4 +76,9 @@ void AudioSubObjectSequence::serialize(Serializer& s) const
 void AudioSubObjectSequence::deserialize(Deserializer& s)
 {
 	s >> segments;
+}
+
+AudioFade& AudioSubObjectSequence::getCrossFade()
+{
+	return crossFade;
 }
