@@ -77,6 +77,10 @@ void CurveEditor::draw(UIPainter& painter) const
 
 void CurveEditor::setHorizontalRange(Range<float> range)
 {
+	for (auto& p: points) {
+		p.x = lerp(range.start, range.end, invLerp(p.x, horizontalRange.start, horizontalRange.end));
+	}
+
 	horizontalRange = range;
 	normalizePoints();
 }
