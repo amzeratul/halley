@@ -298,6 +298,7 @@ void AudioObjectEditor::removeCurrentSelection()
 	} else {
 		parent.object->removeObject(target.object);
 	}
+	setCurrentObject(nullptr);
 
 	markModified(true);
 }

@@ -9,7 +9,7 @@ namespace Halley {
 
 	class AudioSequenceEditor : public UIWidget {
     public:
-        AudioSequenceEditor(UIFactory& factory, AudioObjectEditor& editor, AudioSubObjectSequence& layers);
+        AudioSequenceEditor(UIFactory& factory, AudioObjectEditor& editor, AudioSubObjectSequence& sequence);
 
 		void onMakeUI() override;
 

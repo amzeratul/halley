@@ -3,7 +3,7 @@
 #include "audio_object_editor.h"
 using namespace Halley;
 
-AudioSequenceEditor::AudioSequenceEditor(UIFactory& factory, AudioObjectEditor& editor, AudioSubObjectSequence& layers)
+AudioSequenceEditor::AudioSequenceEditor(UIFactory& factory, AudioObjectEditor& editor, AudioSubObjectSequence& sequence)
 	: UIWidget("audio_sequence_editor", Vector2f(), UISizer())
 	, factory(factory)
 	, editor(editor)
