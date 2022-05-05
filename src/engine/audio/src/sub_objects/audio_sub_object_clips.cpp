@@ -86,7 +86,7 @@ std::unique_ptr<AudioSource> AudioSubObjectClips::makeSource(AudioEngine& engine
 	}
 
 	auto clip = engine.getRNG().getRandomElement(clipData);
-	return std::make_unique<AudioSourceClip>(clip, loop, engine.getRNG().getFloat(gain), loopStart, loopEnd);
+	return std::make_unique<AudioSourceClip>(engine, clip, loop, engine.getRNG().getFloat(gain), loopStart, loopEnd);
 }
 
 void AudioSubObjectClips::loadDependencies(Resources& resources)

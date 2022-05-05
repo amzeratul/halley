@@ -24,11 +24,11 @@ children:
         children:
         - widget: { class: label, text: "Loop start (samples): " }
           fill: [left, centreVertical]
-        - widget: { id: loopStart, class: textInput, size: [70, 20], validator: integerPositive }
+        - widget: { id: loopStart, class: textInput, size: [100, 20], validator: integerPositive }
           fill: left
         - widget: { class: label, text: "Loop end (samples): " }
           fill: [left, centreVertical]
-        - widget: { id: loopEnd, class: textInput, size: [70, 20], validator: integerPositive }
+        - widget: { id: loopEnd, class: textInput, size: [100, 20], validator: integerPositive }
           fill: left
     - widget: { class: label, text: "Gain:" }
     - sizer: { type: horizontal }

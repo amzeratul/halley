@@ -2,12 +2,14 @@
 #include <utility>
 #include "audio_clip.h"
 #include "../audio_mixer.h"
+#include "../audio_engine.h"
 
 using namespace Halley;
 
 
-AudioSourceClip::AudioSourceClip(std::shared_ptr<const IAudioClip> c, bool looping, float gain, int64_t loopStart, int64_t loopEnd)
-	: clip(std::move(c))
+AudioSourceClip::AudioSourceClip(AudioEngine& engine, std::shared_ptr<const IAudioClip> c, bool looping, float gain, int64_t loopStart, int64_t loopEnd)
+	: engine(engine)
+	, clip(std::move(c))
 	, loopStart(loopStart)
 	, loopEnd(loopEnd)
 	, gain(gain)
@@ -32,41 +34,90 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 	Expects(isReady());
 	if (!initialised) {
 		initialised = true;
-	}
-	const auto playbackLength = static_cast<int64_t>(clip->getLength());
 
-	bool isPlaying = true;
+		streams[0].active = true;
+		streams[0].loop = looping;
+	}
+
+	// Set stream end positions
+	const auto clipLength = clip->getLength();
+	const bool hasEarlyEnd = loopEnd > 0 && static_cast<size_t>(loopEnd) < clipLength;
+	streams[0].endPos = hasEarlyEnd ? static_cast<size_t>(loopEnd) : clipLength;
+	streams[0].kickOffSecondStream = hasEarlyEnd;
+	streams[1].endPos = clipLength;
+
 	const uint8_t nChannels = getNumberOfChannels();
 	size_t samplesWritten = 0;
 
 	while (samplesWritten < samplesRequested) {
-		if (playbackPos >= playbackLength) {
-			// If we're at the end of playback, either loop, or flag as done
-			if (looping) {
-				playbackPos = std::max(loopStart, static_cast<int64_t>(clip->getLoopPoint()));
-				if (playbackPos >= playbackLength) {
-					looping = false;
-					playbackPos = playbackLength;
-					isPlaying = false;
+		for (auto& stream: streams) {
+			if (stream.active) {
+				if (stream.playbackPos >= stream.endPos) {
+					// If we're at the end of playback, either loop, or flag as done
+					if (stream.loop) {
+						const auto prevPos = stream.playbackPos;
+						stream.playbackPos = std::max(static_cast<size_t>(loopStart), clip->getLoopPoint());
+						if (stream.playbackPos >= clipLength) {
+							// Loop failed
+							looping = false;
+							stream.playbackPos = clipLength;
+							stream.active = false;
+						} else {
+							// Loop ok
+							if (stream.kickOffSecondStream) {
+								streams[1].active = true;
+								streams[1].playbackPos = prevPos;
+							}
+						}
+					} else {
+						stream.active = false;
+					}
 				}
-			} else {
-				isPlaying = false;
 			}
 		}
 
-		const size_t samplesAvailable = static_cast<size_t>(playbackLength - playbackPos);
+		size_t streamsActive = 0;
+		size_t samplesAvailable = std::numeric_limits<size_t>::max();
+		for (const auto& stream: streams) {
+			if (stream.active) {
+				samplesAvailable = std::min(samplesAvailable, stream.endPos - stream.playbackPos);
+				++streamsActive;
+			}
+		}
+		if (streamsActive == 0) {
+			samplesAvailable = 0;
+		}
+
 		const size_t samplesRemaining = samplesRequested - samplesWritten;
 		const size_t samplesToRead = std::min(samplesRemaining, samplesAvailable);
 
 		if (samplesToRead > 0) {
 			// We have some samples that we can read, so go ahead with reading them
-			for (size_t ch = 0; ch < nChannels; ++ch) {
-				auto dst = dstChannels[ch].subspan(samplesWritten, samplesToRead);
-				const size_t nCopied = clip->copyChannelData(ch, static_cast<size_t>(playbackPos), samplesToRead, prevGain, gain, dst);
-				Expects(nCopied <= samplesRequested * sizeof(AudioSample));
+			bool first = true;
+
+			for (auto& stream: streams) {
+				if (stream.active) {
+					if (first) {
+						for (size_t ch = 0; ch < nChannels; ++ch) {
+							auto dst = dstChannels[ch].subspan(samplesWritten, samplesToRead);
+							const size_t nCopied = clip->copyChannelData(ch, stream.playbackPos, samplesToRead, prevGain, gain, dst);
+							assert(nCopied <= samplesRequested * sizeof(AudioSample));
+						}
+						first = false;
+					} else {
+						auto buffer = engine.getPool().getBuffer(samplesToRead);
+						for (size_t ch = 0; ch < nChannels; ++ch) {
+							auto dst = dstChannels[ch].subspan(samplesWritten, samplesToRead);
+							const size_t nCopied = clip->copyChannelData(ch, stream.playbackPos, samplesToRead, prevGain, gain, buffer.getSpan());
+							AudioMixer::mixAudio(buffer.getSpan(), dst, 1, 1);
+							assert(nCopied <= samplesRequested * sizeof(AudioSample));
+						}
+					}
+
+					stream.playbackPos += static_cast<int64_t>(samplesToRead);
+				}
 			}
 
-			playbackPos += static_cast<int64_t>(samplesToRead);
 			samplesWritten += samplesToRead;
 		} else {
 			// Reached end of playback, pad with zeroes
@@ -77,5 +128,5 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 
 	prevGain = gain;
 
-	return isPlaying;
+	return std::any_of(streams.begin(), streams.end(), [] (const auto& s) { return s.active; });
 }
