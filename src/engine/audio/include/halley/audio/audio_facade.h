@@ -40,6 +40,7 @@ namespace Halley {
 		AudioEmitterHandle createEmitter(AudioPosition position) override;
 		AudioEmitterHandle getGlobalEmitter() override;
 
+		AudioHandle postEvent(const String& name) override;
 	    AudioHandle postEvent(const String& name, AudioEmitterHandle emitter) override;
 		AudioHandle play(std::shared_ptr<const IAudioClip> clip, AudioEmitterHandle emitter, float volume, bool loop) override;
 
@@ -91,7 +92,9 @@ namespace Halley {
 
 		AudioEmitterId curEmitterId;
 
-		void doStartPlayback(int deviceNumber, bool createEngine);
+		AudioHandle doPostEvent(const String& name, AudioEmitterId emitterId);
+
+    	void doStartPlayback(int deviceNumber, bool createEngine);
 	    void run();
 	    void stepAudio();
 	    void enqueue(std::function<void()> action);

@@ -177,10 +177,23 @@ AudioEmitterHandle AudioFacade::getGlobalEmitter()
 	return std::make_shared<AudioEmitterHandleImpl>(*this, 0, false);
 }
 
+AudioHandle AudioFacade::postEvent(const String& name)
+{
+	return doPostEvent(name, 0);
+}
+
 AudioHandle AudioFacade::postEvent(const String& name, AudioEmitterHandle emitter)
 {
+	if (!emitter) {
+		Logger::logError("Cannot post event \"" + name + "\" to invalid emitter.");
+		return std::make_shared<AudioHandleImpl>(*this, curEventId++, 0);
+	}
+	return doPostEvent(name, emitter->getId());
+}
+
+AudioHandle AudioFacade::doPostEvent(const String& name, AudioEmitterId emitterId)
+{
 	const auto id = curEventId++;
-	const auto emitterId = emitter ? emitter->getId() : 0;
 
 	if (resources->exists<AudioEvent>(name)) {
 		const auto event = resources->get<AudioEvent>(name);
