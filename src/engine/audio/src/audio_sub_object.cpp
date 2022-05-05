@@ -24,6 +24,34 @@ std::unique_ptr<IAudioSubObject> IAudioSubObject::makeSubObject(AudioSubObjectTy
 	return {};
 }
 
+template <typename T>
+static void castSubObjectCopy(IAudioSubObject& dst, const IAudioSubObject& src)
+{
+	dynamic_cast<T&>(dst) = dynamic_cast<const T&>(src);
+}
+
+void IAudioSubObject::copySubObject(IAudioSubObject& dst, const IAudioSubObject& src)
+{
+	if (dst.getType() == src.getType()) {
+		switch (dst.getType()) {
+		case AudioSubObjectType::Clips:
+			castSubObjectCopy<AudioSubObjectClips>(dst, src);
+			break;
+		case AudioSubObjectType::Layers:
+			castSubObjectCopy<AudioSubObjectLayers>(dst, src);
+			break;
+		case AudioSubObjectType::Switch:
+			castSubObjectCopy<AudioSubObjectSwitch>(dst, src);
+			break;
+		case AudioSubObjectType::Sequence:
+			castSubObjectCopy<AudioSubObjectSequence>(dst, src);
+			break;
+		}
+	} else {
+		throw Exception("Cannot copy heterogeneous audio objects.", HalleyExceptions::AudioEngine);
+	}
+}
+
 std::unique_ptr<IAudioSubObject> IAudioSubObject::makeSubObject(const ConfigNode& node)
 {
 	const auto type = fromString<AudioSubObjectType>(node["type"].asString());
@@ -108,10 +136,14 @@ AudioSubObjectHandle::AudioSubObjectHandle(const AudioSubObjectHandle& other)
 
 AudioSubObjectHandle& AudioSubObjectHandle::operator=(const AudioSubObjectHandle& other)
 {
-	// HACK
-	auto bytes = Serializer::toBytes(other);
-	auto s = Deserializer(bytes);
-	deserialize(s);
+	if (hasValue() && other.hasValue() && obj->getType() == other->getType()) {
+		IAudioSubObject::copySubObject(*obj, other.getObject());
+	} else {
+		// HACK
+		auto bytes = Serializer::toBytes(other);
+		auto s = Deserializer(bytes);
+		deserialize(s);
+	}
 	return *this;
 }
 

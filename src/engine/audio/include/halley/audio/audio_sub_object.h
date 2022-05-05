@@ -51,6 +51,7 @@ namespace Halley {
 	class IAudioSubObject : public IAudioObject {
 	public:
 		static std::unique_ptr<IAudioSubObject> makeSubObject(AudioSubObjectType type);
+		static void copySubObject(IAudioSubObject& dst, const IAudioSubObject& src);
 		static std::unique_ptr<IAudioSubObject> makeSubObject(const ConfigNode& node);
 
 		virtual ~IAudioSubObject() = default;
