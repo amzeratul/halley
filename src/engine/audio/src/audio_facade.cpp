@@ -187,11 +187,10 @@ AudioHandle AudioFacade::postEvent(const String& name, AudioEmitterHandle emitte
 		enqueue([=]() {
 			engine->postEvent(id, *event, emitterId);
 		});
+		playingSounds.push_back(id);
 	} else {
 		Logger::logError("Unknown audio event: \"" + name + "\"");
 	}
-
-	playingSounds.push_back(id);
 
 	return std::make_shared<AudioHandleImpl>(*this, id, emitterId);
 }

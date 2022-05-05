@@ -183,3 +183,23 @@ Range<float>& AudioSubObjectClips::getGain()
 {
 	return gain;
 }
+
+int AudioSubObjectClips::getLoopStart() const
+{
+	return loopStart;
+}
+
+int AudioSubObjectClips::getLoopEnd() const
+{
+	return loopEnd;
+}
+
+void AudioSubObjectClips::setLoopStart(int samples)
+{
+	loopStart = samples;
+}
+
+void AudioSubObjectClips::setLoopEnd(int samples)
+{
+	loopEnd = samples;
+}

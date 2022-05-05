@@ -14,10 +14,13 @@ AudioClipsEditor::AudioClipsEditor(UIFactory& factory, AudioObjectEditor& editor
 
 void AudioClipsEditor::onMakeUI()
 {
+	getWidget("loopDetails")->setActive(clips.getLoop());
+
 	bindData("loop", clips.getLoop(), [=] (bool value)
 	{
 		clips.setLoop(value);
 		editor.markModified(false);
+		getWidget("loopDetails")->setActive(value);
 	});
 
 	bindData("gainMin", clips.getGain().start, [=] (float value)
@@ -29,6 +32,18 @@ void AudioClipsEditor::onMakeUI()
 	bindData("gainMax", clips.getGain().end, [=] (float value)
 	{
 		clips.getGain().end = value;
+		editor.markModified(false);
+	});
+
+	bindData("loopStart", clips.getLoopStart(), [=] (int value)
+	{
+		clips.setLoopStart(value);
+		editor.markModified(false);
+	});
+
+	bindData("loopEnd", clips.getLoopEnd(), [=] (int value)
+	{
+		clips.setLoopEnd(value);
 		editor.markModified(false);
 	});
 }

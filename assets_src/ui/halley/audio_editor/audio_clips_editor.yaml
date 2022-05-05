@@ -14,8 +14,22 @@ children:
     - widget: { class: widget, size: [150, 20] }
       children:
       - widget: { class: label, text: "Loop:" }
-    - widget: { id: loop, class: checkbox }
-      fill: left
+    - widget: { class: widget }
+      sizer: { type: vertical }
+      children:
+      - widget: { id: loop, class: checkbox }
+        fill: left
+      - widget: { id: loopDetails, class: widget, active: false }
+        sizer: { type: grid, columns: 2, columnProportions: [0, 1], gap: 4 }
+        children:
+        - widget: { class: label, text: "Loop start (samples): " }
+          fill: [left, centreVertical]
+        - widget: { id: loopStart, class: textInput, size: [70, 20], validator: integerPositive }
+          fill: left
+        - widget: { class: label, text: "Loop end (samples): " }
+          fill: [left, centreVertical]
+        - widget: { id: loopEnd, class: textInput, size: [70, 20], validator: integerPositive }
+          fill: left
     - widget: { class: label, text: "Gain:" }
     - sizer: { type: horizontal }
       children:

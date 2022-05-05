@@ -32,6 +32,10 @@ namespace Halley {
 		bool getLoop() const;
 		void setLoop(bool loop);
 		Range<float>& getGain();
+		int getLoopStart() const;
+		int getLoopEnd() const;
+		void setLoopStart(int samples);
+		void setLoopEnd(int samples);
 
 	private:
 		Vector<String> clips;
