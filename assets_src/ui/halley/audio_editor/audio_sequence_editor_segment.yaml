@@ -1,0 +1,10 @@
+widget: { id: background, class: image, image: "$ui_window", innerBorder: [ 8, 8, 8, 8 ], colour: $ui_staticBox, size: [20, 20], interactWithMouse: true }
+sizer: { type: vertical }
+children:
+- widget: { id: segmentName, class: label, text: "Segment Name", colour: "$ui_unselectedTextAlt" }
+  fill: [left, centreVertical]
+  border: [0, 0, 0, 10]
+- widget: { id: segmentContents, class: widget }
+  proportion: 1
+  sizer: { type: grid, columns: 2, columnProportions: [0, 1], gap: 3 }
+  children: []

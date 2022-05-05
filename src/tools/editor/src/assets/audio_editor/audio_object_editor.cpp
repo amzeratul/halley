@@ -3,12 +3,14 @@
 #include "audio_clips_editor.h"
 #include "audio_layers_editor.h"
 #include "audio_root_editor.h"
+#include "audio_sequence_editor.h"
 #include "audio_switch_editor.h"
 #include "halley/audio/audio_object.h"
 #include "halley/audio/sub_objects/audio_sub_object_clips.h"
 #include "halley/tools/project/project.h"
 #include "src/scene/choose_window.h"
 #include "halley/audio/sub_objects/audio_sub_object_layers.h"
+#include "halley/audio/sub_objects/audio_sub_object_sequence.h"
 #include "halley/audio/sub_objects/audio_sub_object_switch.h"
 #include "halley/core/properties/game_properties.h"
 using namespace Halley;
@@ -376,7 +378,7 @@ void AudioObjectEditor::doSetCurrentObject()
 		setCurrentObjectEditor(std::make_shared<AudioLayersEditor>(factory, *this, dynamic_cast<AudioSubObjectLayers&>(*currentObject)));
 		break;
 	case AudioSubObjectType::Sequence:
-		setCurrentObjectEditor({});
+		setCurrentObjectEditor(std::make_shared<AudioSequenceEditor>(factory, *this, dynamic_cast<AudioSubObjectSequence&>(*currentObject)));
 		break;
 	case AudioSubObjectType::Switch:
 		setCurrentObjectEditor(std::make_shared<AudioSwitchEditor>(factory, *this, dynamic_cast<AudioSubObjectSwitch&>(*currentObject)));
