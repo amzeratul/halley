@@ -81,11 +81,19 @@ void AudioFade::deserialize(Deserializer& s)
 
 void AudioFader::startFade(float from, float to, const AudioFade& fade)
 {
-	fading = true;
+	this->fade = fade;
 	startVal = from;
 	endVal = to;
 	time = 0;
-	this->fade = fade;
+
+	const float delta = std::abs(from - to);
+	if (delta < 0.001f) {
+		fading = false;
+		timeScale = 1;
+	} else {
+		fading = true;
+		timeScale = 1.0f / delta;
+	}
 }
 
 void AudioFader::stopAndSetValue(float value)
@@ -97,7 +105,7 @@ void AudioFader::stopAndSetValue(float value)
 bool AudioFader::update(float t)
 {
 	if (fading) {
-		time += t;
+		time += t * timeScale;
 		if (time >= fade.getLength()) {
 			time = fade.getLength();
 			fading = false;

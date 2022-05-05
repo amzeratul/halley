@@ -64,6 +64,7 @@ namespace Halley {
 		AudioFade fade;
 		bool fading = false;
 		float time = 0;
+		float timeScale = 1;
 		float startVal = 0;
 		float endVal = 0;
 	};
