@@ -103,7 +103,7 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 					if (first) {
 						for (size_t ch = 0; ch < nChannels; ++ch) {
 							auto dst = dstChannels[ch].subspan(samplesWritten, samplesToRead);
-							const size_t nCopied = clip->copyChannelData(ch, stream.playbackPos, samplesToRead, prevGain, gain, dst);
+							const size_t nCopied = clip->copyChannelData(engine.getPool(), ch, stream.playbackPos, samplesToRead, prevGain, gain, dst);
 							assert(nCopied <= samplesRequested * sizeof(AudioSample));
 						}
 						first = false;
@@ -111,7 +111,7 @@ bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSam
 						auto buffer = engine.getPool().getBuffer(samplesToRead);
 						for (size_t ch = 0; ch < nChannels; ++ch) {
 							auto dst = dstChannels[ch].subspan(samplesWritten, samplesToRead);
-							const size_t nCopied = clip->copyChannelData(ch, stream.playbackPos, samplesToRead, prevGain, gain, buffer.getSpan());
+							const size_t nCopied = clip->copyChannelData(engine.getPool(), ch, stream.playbackPos, samplesToRead, prevGain, gain, buffer.getSpan());
 							AudioMixer::mixAudio(buffer.getSpan(), dst, 1, 1);
 							assert(nCopied <= samplesRequested * sizeof(AudioSample));
 						}

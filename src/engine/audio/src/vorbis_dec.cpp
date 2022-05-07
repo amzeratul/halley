@@ -55,21 +55,23 @@ static void onVorbisError(int error)
 	throw Exception("Error opening Ogg Vorbis: "+str, HalleyExceptions::Resources);
 }
 
-Halley::VorbisData::VorbisData(std::shared_ptr<ResourceData> resource)
+VorbisData::VorbisData(std::shared_ptr<ResourceData> resource, bool doOpen)
 	: resource(resource)
 	, file(nullptr)
 	, streaming(std::dynamic_pointer_cast<ResourceDataStream>(resource))
 	, pos(0)
 {
-	open();
+	if (doOpen) {
+		open();
+	}
 }
 
-Halley::VorbisData::~VorbisData()
+VorbisData::~VorbisData()
 {
 	close();
 }
 
-void Halley::VorbisData::open()
+void VorbisData::open()
 {
 	close();
 
@@ -90,7 +92,7 @@ void Halley::VorbisData::open()
 	}
 }
 
-void Halley::VorbisData::close()
+void VorbisData::close()
 {
 	if (file) {
 		ov_clear(file);
@@ -99,19 +101,30 @@ void Halley::VorbisData::close()
 	}
 }
 
-void Halley::VorbisData::reset()
+void VorbisData::reset()
 {
 	close();
 	open();
 }
 
-size_t Halley::VorbisData::read(gsl::span<Vector<float>> dst)
+size_t VorbisData::read(gsl::span<Vector<float>> dst)
 {
-	Expects(file);
-	Expects(dst.size() == getNumChannels());
+	AudioMultiChannelSamples samplesSpan;
+	for (size_t i = 0; i < dst.size(); ++i) {
+		samplesSpan[i] = dst[i];
+	}
+	return read(samplesSpan, dst.size());
+}
+
+size_t VorbisData::read(AudioMultiChannelSamples dst, size_t nChannels)
+{
+	if (!file) {
+		open();
+	}
+
+	Expects(nChannels == getNumChannels());
 
 	int bitstream;
-	size_t nChannels = getNumChannels();
 	size_t totalRead = 0;
 	size_t toReadLeft = dst[0].size();
 
@@ -141,30 +154,43 @@ size_t VorbisData::getNumSamples() const
 	return size_t(ov_pcm_total(file, -1));
 }
 
-int Halley::VorbisData::getSampleRate() const
+int VorbisData::getSampleRate() const
 {
 	Expects(file);
 	vorbis_info *info = ov_info(file, -1);
 	return info->rate;
 }
 
-int Halley::VorbisData::getNumChannels() const
+int VorbisData::getNumChannels() const
 {
 	Expects(file);
 	vorbis_info *info = ov_info(file, -1);
 	return info->channels;
 }
 
-void Halley::VorbisData::seek(double t)
+void VorbisData::seek(double t)
 {
-	Expects(file);
+	if (!file) {
+		open();
+	}
 	ov_time_seek(file, t);
 }
 
 void VorbisData::seek(size_t sample)
 {
-	Expects(file);
+	if (!file) {
+		open();
+	}
 	ov_pcm_seek(file, ogg_int64_t(sample));
+}
+
+size_t VorbisData::tell() const
+{
+	if (file) {
+		return ov_pcm_tell(file);
+	} else {
+		return 0;
+	}
 }
 
 size_t VorbisData::getSizeBytes() const
@@ -184,7 +210,7 @@ size_t VorbisData::vorbisRead(void* ptr, size_t size, size_t nmemb, void* dataso
 	if (data->streaming) {
 		auto res = data->stream;
 		size_t requested = size*nmemb;
-		size_t r = res->read(gsl::as_writable_bytes(gsl::span<char>(reinterpret_cast<char*>(ptr), requested)));
+		size_t r = res->read(as_writable_bytes(gsl::span<char>(reinterpret_cast<char*>(ptr), requested)));
 		return r;
 	} else {
 		auto res = std::dynamic_pointer_cast<ResourceDataStatic>(data->resource);

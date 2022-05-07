@@ -68,12 +68,7 @@ AudioBuffersRef::AudioBuffersRef(size_t n, std::array<AudioBuffer*, AudioConfig:
 
 AudioBuffersRef::AudioBuffersRef(AudioBuffersRef&& other) noexcept
 {
-	buffers = other.buffers;
-	nBuffers = other.nBuffers;
-	pool = other.pool;
-
-	other.nBuffers = 0;
-	other.pool = nullptr;
+	*this = std::move(other);
 }
 
 AudioBuffersRef& AudioBuffersRef::operator=(AudioBuffersRef&& other) noexcept
@@ -85,18 +80,17 @@ AudioBuffersRef& AudioBuffersRef::operator=(AudioBuffersRef&& other) noexcept
 	other.nBuffers = 0;
 	other.pool = nullptr;
 
+	for (size_t i = 0; i < nBuffers; ++i) {
+		spans[i] = buffers[i]->samples;
+		sampleSpans[i] = AudioSamples(spans[i].data(), spans[i].size());
+	}
+
 	return *this;
 }
 
 AudioBuffersRef::~AudioBuffersRef()
 {
-	if (pool) {
-		for (size_t i = 0; i < nBuffers; ++i) {
-			pool->returnBuffer(*buffers[i]);
-		}
-	}
-	pool = nullptr;
-	nBuffers = 0;
+	clear();
 }
 
 gsl::span<AudioBuffer*> AudioBuffersRef::getBuffers()
@@ -112,6 +106,22 @@ AudioMultiChannelSamples AudioBuffersRef::getSpans() const
 AudioMultiChannelSamples AudioBuffersRef::getSampleSpans() const
 {
 	return sampleSpans;
+}
+
+bool AudioBuffersRef::matches(size_t n, size_t len) const
+{
+	return nBuffers == n && (nBuffers == 0 || buffers[0]->samples.size() == len);
+}
+
+void AudioBuffersRef::clear()
+{
+	if (pool) {
+		for (size_t i = 0; i < nBuffers; ++i) {
+			pool->returnBuffer(*buffers[i]);
+		}
+	}
+	pool = nullptr;
+	nBuffers = 0;
 }
 
 AudioBufferRef AudioBufferPool::getBuffer(size_t numSamples)

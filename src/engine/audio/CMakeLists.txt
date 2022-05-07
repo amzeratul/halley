@@ -31,6 +31,7 @@ set(SOURCES
         )
 
 set(HEADERS
+        "include/halley/audio/audio_buffer.h"
         "include/halley/audio/audio_clip.h"
         "include/halley/audio/audio_event.h"
         "include/halley/audio/audio_expression.h"
@@ -50,7 +51,6 @@ set(HEADERS
         "src/audio_sources/audio_source_clip.h"
         "src/audio_sources/audio_source_layers.h"
         "src/audio_sources/audio_source_sequence.h"
-        "src/audio_buffer.h"
         "src/audio_emitter.h"
         "src/audio_emitter_handle_impl.h"
         "src/audio_engine.h"

@@ -32,7 +32,7 @@ void AudioImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 
 	if (mainFile.getExtension() == ".ogg") { // assuming Ogg Vorbis
 		// Load vorbis data
-		VorbisData vorbis(resData);
+		VorbisData vorbis(resData, true);
 		numChannels = vorbis.getNumChannels();
 		size_t numSamples = vorbis.getNumSamples();
 		sampleRate = vorbis.getSampleRate();

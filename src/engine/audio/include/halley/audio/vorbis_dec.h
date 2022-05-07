@@ -25,6 +25,8 @@
 #include "halley/data_structures/vector.h"
 #include <gsl/gsl>
 
+#include "halley/core/api/audio_api.h"
+
 struct OggVorbis_File;
 
 #if defined(_MSC_VER) || defined(__clang__)
@@ -39,10 +41,11 @@ namespace Halley {
 
 	class VorbisData {
 	public:
-		VorbisData(std::shared_ptr<ResourceData> resource);
+		VorbisData(std::shared_ptr<ResourceData> resource, bool open);
 		~VorbisData();
 
 		size_t read(gsl::span<Vector<float>> dst);
+		size_t read(AudioMultiChannelSamples dst, size_t nChannels);
 
 		size_t getNumSamples() const; // Per channel
 		int getSampleRate() const;
@@ -52,6 +55,7 @@ namespace Halley {
 		void reset();
 		void seek(double t);
 		void seek(size_t sample);
+		size_t tell() const;
 
 		size_t getSizeBytes() const;
 

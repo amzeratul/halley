@@ -2,9 +2,12 @@
 #include "halley/resources/resource.h"
 #include "halley/resources/resource_data.h"
 #include "halley/core/api/audio_api.h"
+#include "audio_buffer.h"
 
 namespace Halley
 {
+	class AudioBuffersRef;
+	class AudioBufferPool;
 	class ResourceLoader;
 	class VorbisData;
 
@@ -13,7 +16,7 @@ namespace Halley
 	public:
 		virtual ~IAudioClip() = default;
 
-		virtual size_t copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const = 0;
+		virtual size_t copyChannelData(AudioBufferPool& pool, size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const = 0;
 		virtual uint8_t getNumberOfChannels() const = 0;
 		virtual size_t getLength() const = 0; // in samples
 		virtual size_t getLoopPoint() const { return 0; } // in samples
@@ -31,7 +34,7 @@ namespace Halley
 		void loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadata meta);
 		void loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadata meta);
 
-		size_t copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const override;
+		size_t copyChannelData(AudioBufferPool& pool, size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const override;
 		uint8_t getNumberOfChannels() const override;
 		size_t getLength() const override; // in samples
 		size_t getLoopPoint() const override; // in samples
@@ -50,11 +53,12 @@ namespace Halley
 		uint8_t numChannels = 0;
 		bool streaming = false;
 
-		// TODO: sort this mess?
-		mutable Vector<Vector<AudioSample>> temp0;
-		mutable Vector<Vector<AudioSample>> temp1;
+		std::array<std::unique_ptr<VorbisData>, 2> vorbisData;
+
 		mutable Vector<Vector<AudioSample>> samples;
-		mutable std::unique_ptr<VorbisData> vorbisData;
+		mutable AudioBuffersRef buffer;
+
+		VorbisData& getVorbisData(size_t targetPos) const;
 	};
 
 	class StreamingAudioClip final : public IAudioClip
@@ -64,7 +68,7 @@ namespace Halley
 
 		void addInterleavedSamples(AudioSamplesConst src);
 
-		size_t copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const override;
+		size_t copyChannelData(AudioBufferPool& pool, size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const override;
 		uint8_t getNumberOfChannels() const override;
 		size_t getLength() const override;
 		size_t getSamplesLeft() const;

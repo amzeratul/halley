@@ -28,9 +28,7 @@ AudioClip& AudioClip::operator=(AudioClip&& other) noexcept
 	loopPoint = other.loopPoint;
 	streamPos = other.streamPos;
 	streaming = other.streaming;
-
-	temp0 = std::move(other.temp0);
-	temp1 = std::move(other.temp1);
+	
 	samples = std::move(other.samples);
 	vorbisData = std::move(other.vorbisData);
 
@@ -41,7 +39,7 @@ AudioClip& AudioClip::operator=(AudioClip&& other) noexcept
 
 void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadata metadata)
 {
-	VorbisData vorbis(data);
+	VorbisData vorbis(data, true);
 	if (vorbis.getSampleRate() != AudioConfig::sampleRate) {
 		throw Exception("Sound clip should be " + toString(AudioConfig::sampleRate) + " Hz.", HalleyExceptions::AudioEngine);
 	}	
@@ -54,6 +52,7 @@ void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadat
 	for (size_t i = 0; i < numChannels; ++i) {
 		samples[i].resize(sampleLength);
 	}
+	
 	vorbis.read(samples);
 	vorbis.close();
 
@@ -62,55 +61,70 @@ void AudioClip::loadFromStatic(std::shared_ptr<ResourceDataStatic> data, Metadat
 
 void AudioClip::loadFromStream(std::shared_ptr<ResourceDataStream> data, Metadata metadata)
 {
-	vorbisData = std::make_unique<VorbisData>(data);
-	uint8_t nChannels = vorbisData->getNumChannels();
-	if (vorbisData->getSampleRate() != AudioConfig::sampleRate) {
+	for (size_t i = 0; i < vorbisData.size(); ++i) {
+		vorbisData[i] = std::make_unique<VorbisData>(data, i == 0);
+	}
+
+	uint8_t nChannels = vorbisData[0]->getNumChannels();
+	if (vorbisData[0]->getSampleRate() != AudioConfig::sampleRate) {
 		throw Exception("Sound clip should be " + toString(AudioConfig::sampleRate) + " Hz.", HalleyExceptions::AudioEngine);
 	}
 	
 	samples.resize(nChannels);
 	numChannels = nChannels;
-	sampleLength = vorbisData->getNumSamples();
+	sampleLength = vorbisData[0]->getNumSamples();
 	loopPoint = metadata.getInt("loopPoint", 0);
 	streamPos = 0;
 	streaming = true;
 	doneLoading();
 }
 
-size_t AudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
+size_t AudioClip::copyChannelData(AudioBufferPool& pool, size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
 {
 	Expects(pos + len <= sampleLength);
 
 	if (streaming) {
-		auto& temp = pos == 0 ? temp0 : temp1; // pos == 0 has a different buffer because if it loops around, it will be used together with another buffer
-		if (temp.size() != numChannels) {
-			temp.resize(numChannels);
-		}
-
-		if (channelN == 0) { // TODO: this assumes the channels will be read in order. This will break threading.
-			if (pos != streamPos) {
-				vorbisData->seek(pos);
-				streamPos = pos;
+		// NB: this assumes the channels will be read in order.
+		if (channelN == 0) {
+			if (!buffer.matches(numChannels, len)) {
+				buffer = pool.getBuffers(numChannels, len);
 			}
 
-			size_t toRead = len;
-			for (size_t i = 0; i < numChannels; ++i) {
-				if (temp[i].size() < toRead) {
-					temp[i].resize(toRead);
-				}
-			}
-			vorbisData->read(temp);
-			streamPos += len;
+			auto& vorbis = getVorbisData(pos);
+			vorbis.read(buffer.getSampleSpans(), numChannels);
+			streamPos = pos + len;
 		}
 
-		AudioMixer::copy(dst, AudioSamples(temp[channelN]).subspan(0, len), gain0, gain1);
-		//memcpy(dst.data(), temp[channelN].data(), len * sizeof(AudioSample));
-		return len;
+		AudioMixer::copy(dst, AudioSamples(buffer.getSampleSpans()[channelN]).subspan(0, len), gain0, gain1);
 	} else {
 		AudioMixer::copy(dst, AudioSamples(samples.at(channelN)).subspan(pos, len), gain0, gain1);
-		//memcpy(dst.data(), samples.at(channelN).data() + pos, len * sizeof(AudioSample));
-		return len;
 	}
+	return len;
+}
+
+VorbisData& AudioClip::getVorbisData(size_t targetPos) const
+{
+	// This chooses which of the two vorbis data readers to use. This allows two simultaneous reads of the stream without insane seeking, needed for self-overlapping music loops.
+	// It'll basically pick whichever of the two readers is closer to the target position, and seek if needed.
+
+	const size_t nSamples = vorbisData[0]->getNumSamples();
+	size_t bestDist = std::numeric_limits<size_t>::max();
+	size_t bestIdx = 0;
+
+	for (size_t i = 0; i < vorbisData.size(); ++i) {
+		const auto curPos = vorbisData[i]->tell();
+		const auto dist = (targetPos - curPos) % nSamples; // Unsigned subtraction is desirable here, seeking forward is faster than seeking backwards
+		if (dist < bestDist) {
+			bestDist = dist;
+			bestIdx = i;
+		}
+	}
+
+	if (bestDist != 0) {
+		vorbisData[bestIdx]->seek(targetPos);
+	}
+	
+	return *vorbisData[bestIdx];
 }
 
 size_t AudioClip::getLength() const
@@ -139,11 +153,11 @@ ResourceMemoryUsage AudioClip::getMemoryUsage() const
 {
 	ResourceMemoryUsage result;
 
-	if (vorbisData) {
-		result.ramUsage += vorbisData->getSizeBytes() + sizeof(VorbisData);
+	for (auto& v: vorbisData) {
+		if (v) {
+			result.ramUsage += v->getSizeBytes() + sizeof(VorbisData);
+		}
 	}
-	result.ramUsage += temp0.size() * sizeof(AudioSample);
-	result.ramUsage += temp1.size() * sizeof(AudioSample);
 	result.ramUsage += samples.size() * sizeof(AudioSample);
 	result.ramUsage += sizeof(*this);
 
@@ -201,7 +215,7 @@ void StreamingAudioClip::addInterleavedSamples(AudioSamplesConst src)
 	length += nSamples;
 }
 
-size_t StreamingAudioClip::copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
+size_t StreamingAudioClip::copyChannelData(AudioBufferPool& pool, size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
 {
 	std::unique_lock<std::mutex> lock(mutex);
 

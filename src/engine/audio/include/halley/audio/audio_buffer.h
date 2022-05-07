@@ -49,6 +49,9 @@ namespace Halley
 		AudioMultiChannelSamples getSpans() const;
 		AudioMultiChannelSamples getSampleSpans() const;
 
+		bool matches(size_t n, size_t len) const;
+		void clear();
+
 	private:
 		std::array<AudioBuffer*, AudioConfig::maxChannels> buffers;
 		AudioMultiChannelSamples spans;
