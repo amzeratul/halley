@@ -196,6 +196,7 @@ namespace Halley {
 		void releaseMouse(Vector2f mousePos, int button) override;
 		void setDragPos(Vector2f pos);
 		void onEnabledChanged() override;
+		bool ignoreClip() const override;
 
 	private:
 		UIList& parent;

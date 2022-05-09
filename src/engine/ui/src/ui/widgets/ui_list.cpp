@@ -895,6 +895,8 @@ void UIList::onItemDragging(UIListItem& item, int index, Vector2f pos)
 			swapItems(index, index + 1);
 		}
 	}
+
+	sendEvent(UIEvent(UIEventType::MakeAreaVisibleSmooth, getId(), Rect4f(pos, pos + item.getSize()) - getPosition()));
 }
 
 void UIList::onItemDoneDragging(UIListItem& item, int index, Vector2f pos)
@@ -947,6 +949,11 @@ void UIListItem::onEnabledChanged()
 	addNewChildren(getLastInputType());
 	doSetState(getCurState());
 	sendEventDown(UIEvent(UIEventType::SetEnabled, getId(), isEnabled()));
+}
+
+bool UIListItem::ignoreClip() const
+{
+	return dragged;
 }
 
 void UIListItem::draw(UIPainter& painter) const

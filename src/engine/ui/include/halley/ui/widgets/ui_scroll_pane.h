@@ -29,7 +29,7 @@ namespace Halley {
 
 		void scrollTo(Vector2f position);
 		void scrollBy(Vector2f delta);
-		void scrollToShow(Rect4f rect, bool center);
+		void scrollToShow(Rect4f rect, bool center, bool smooth = false);
 		void setRelativeScroll(float position, UIScrollDirection direction);
 
 		float getScrollSpeed() const;
@@ -65,6 +65,7 @@ namespace Halley {
 		bool scrollHorizontal = false;
 		bool scrollVertical = false;
 		bool scrollWheelEnabled = true;
+		Time lastDeltaT = 0;
 
 		void onMouseWheel(const UIEvent& event);
 		Vector2f getBasePosition(const String& widgetId);
