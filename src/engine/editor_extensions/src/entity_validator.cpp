@@ -53,6 +53,10 @@ Vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityDat
 
 void EntityValidator::validateEntity(const EntityData& entity, bool recursive, Vector<IEntityValidator::Result>& result)
 {
+	if (entity.getFlag(EntityData::Flag::Disabled)) {
+		return;
+	}
+
 	for (const auto& validator: validators) {
 		auto r = validator->validateEntity(*this, entity);
 		for (auto& v: r) {

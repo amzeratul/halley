@@ -45,6 +45,8 @@ void EntityValidatorUI::refresh()
 	
 	Vector<IEntityValidator::Result> result;
 	if (isPrefab) {
+		const auto prefab = gameResources->get<Prefab>(curEntity->getPrefab());
+		curEntityInstance = prefab->getEntityData().instantiateWithAsCopy(*curEntity);
 		result = validator->validateEntity(curEntityInstance, true);
 	} else {
 		result = validator->validateEntity(*curEntity, false);

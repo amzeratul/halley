@@ -22,8 +22,12 @@ children:
         children:
         - widget: { class: widget, size: [100, 20] }
           children:
-          - widget: { id: "", class: label, text: "Selectable", style: "labelLight" }
+          - widget: { id: "", class: label, text: "Enabled", style: "labelLight" }
             fill: centreVertical
+        - widget: { id: enabled, class: checkbox }
+          proportion: 1
+        - widget: { id: "", class: label, text: "Selectable", style: "labelLight" }
+          fill: centreVertical
         - widget: { id: selectable, class: checkbox }
           proportion: 1
       - widget: { id: entityFields, class: widget }

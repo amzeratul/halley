@@ -15,7 +15,8 @@ Entity::Entity()
 	, alive(true)
 	, serializable(true)
 	, reloaded(false)
-	, active(true)
+	, enabled(true)
+	, parentEnabled(true)
 	, selectable(true)
 {
 
@@ -144,12 +145,15 @@ void Entity::setParent(Entity* newParent, bool propagate, size_t childIdx)
 			if (worldPartition != newParent->worldPartition) {
 				propagateChildWorldPartition(newParent->worldPartition);
 			}
+			propagateEnabled(enabled, newParent->enabled && newParent->parentEnabled);
 			if (childIdx >= parent->children.size()) {
 				parent->children.push_back(this);
 			} else {
 				parent->children.insert(parent->children.begin() + childIdx, this);
 			}
 			parent->propagateChildrenChange();
+		} else {
+			propagateEnabled(enabled, true);
 		}
 
 		if (propagate) {
@@ -203,6 +207,26 @@ void Entity::propagateChildWorldPartition(uint8_t newWorldPartition)
 	}
 }
 
+void Entity::propagateEnabled(bool enabledStatus, bool parentStatus)
+{
+	const bool oldStatus = enabled && parentEnabled;
+	enabled = enabledStatus;
+	parentEnabled = parentStatus;
+	const bool newStatus = enabled && parentEnabled;
+
+	if (oldStatus != newStatus) {
+		for (auto& child: children) {
+			child->propagateEnabled(child->enabled, newStatus);
+		}
+		dirty = true;
+	}
+}
+
+void Entity::setEnabled(bool enabled)
+{
+	propagateEnabled(enabled, parentEnabled);
+}
+
 FamilyMaskType Entity::getMask() const
 {
 	return mask;
@@ -221,8 +245,10 @@ void Entity::refresh(MaskStorage& storage, ComponentDeleterTable& table)
 
 		// Re-generate mask
 		auto m = FamilyMask::RealType();
-		for (auto i : components) {
-			FamilyMask::setBit(m, i.first);
+		if (enabled && parentEnabled) {
+			for (auto i : components) {
+				FamilyMask::setBit(m, i.first);
+			}
 		}
 		mask = FamilyMaskType(m, storage);
 

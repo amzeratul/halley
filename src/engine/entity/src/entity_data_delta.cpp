@@ -36,7 +36,7 @@ EntityDataDelta::EntityDataDelta(const EntityData& from, const EntityData& to, c
 		icon = to.icon;
 	}
 	if (from.flags != to.flags) {
-		flags = to.flags;
+		flags = from.flags ^ to.flags;
 	}
 	if (from.instanceUUID != to.instanceUUID) {
 		instanceUUID = to.instanceUUID;

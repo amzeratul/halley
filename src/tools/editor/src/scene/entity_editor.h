@@ -93,6 +93,7 @@ namespace Halley {
 		String getName() const;
 		void setPrefabName(const String& prefab);
 		void setSelectable(bool selectable);
+		void setEntityEnabled(bool selectable);
 		void editPrefab();
 		void setIcon(const String& icon);
 
