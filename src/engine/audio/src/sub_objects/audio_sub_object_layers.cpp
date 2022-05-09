@@ -80,14 +80,9 @@ void AudioSubObjectLayers::deserialize(Deserializer& s)
 	s >> fadeConfig;
 }
 
-const AudioExpression& AudioSubObjectLayers::getLayerExpression(size_t idx) const
+const AudioSubObjectLayers::Layer& AudioSubObjectLayers::getLayer(size_t idx) const
 {
-	return layers.at(idx).expression;
-}
-
-bool AudioSubObjectLayers::isLayerSynchronised(size_t idx) const
-{
-	return layers.at(idx).synchronised;
+	return layers.at(idx);
 }
 
 bool AudioSubObjectLayers::canAddObject(AudioSubObjectType type, const std::optional<String>& caseName) const
@@ -128,6 +123,12 @@ AudioSubObjectLayers::Layer::Layer(const ConfigNode& node)
 	object = IAudioSubObject::makeSubObject(node["object"]);
 	expression.load(node["expression"]);
 	synchronised = node["synchronised"].asBool(false);
+	if (node.hasKey("fadeIn")) {
+		fadeIn = AudioFade(node["fadeIn"]);
+	}
+	if (node.hasKey("fadeOut")) {
+		fadeOut = AudioFade(node["fadeOut"]);
+	}
 }
 
 ConfigNode AudioSubObjectLayers::Layer::toConfigNode() const
@@ -136,6 +137,12 @@ ConfigNode AudioSubObjectLayers::Layer::toConfigNode() const
 	result["object"] = object.toConfigNode();
 	result["expression"] = expression.toConfigNode();
 	result["synchronised"] = synchronised;
+	if (fadeIn) {
+		result["fadeIn"] = fadeIn->toConfigNode();
+	}
+	if (fadeOut) {
+		result["fadeOut"] = fadeOut->toConfigNode();
+	}
 	return result;
 }
 
@@ -144,6 +151,8 @@ void AudioSubObjectLayers::Layer::serialize(Serializer& s) const
 	s << object;
 	s << expression;
 	s << synchronised;
+	s << fadeIn;
+	s << fadeOut;
 }
 
 void AudioSubObjectLayers::Layer::deserialize(Deserializer& s)
@@ -151,4 +160,6 @@ void AudioSubObjectLayers::Layer::deserialize(Deserializer& s)
 	s >> object;
 	s >> expression;
 	s >> synchronised;
+	s >> fadeIn;
+	s >> fadeOut;
 }

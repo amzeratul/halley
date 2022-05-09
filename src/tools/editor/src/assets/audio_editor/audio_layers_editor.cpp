@@ -72,4 +72,37 @@ void AudioLayersEditorLayer::onMakeUI()
 		layer.synchronised = value;
 		layersEditor.markModified(idx);
 	});
+
+	auto updateFadeOverride = [=](bool value, std::optional<AudioFade>& fade, const char* containerId)
+	{
+		if (!!fade != value) {
+			fade = value ? AudioFade() : std::optional<AudioFade>();
+		}
+
+		auto container = getWidget(containerId);
+		container->setActive(value);
+		if (value) {
+			container->add(std::make_shared<AudioFadeEditor>(factory, *fade, [this] ()
+			{
+				layersEditor.markModified(idx);
+			}));
+		} else {
+			container->clear();
+		}
+	};
+
+	bindData("overrideFadeIn", !!layer.fadeIn, [=, &layer] (bool value)
+	{
+		updateFadeOverride(value, layer.fadeIn, "fadeInContainer");		
+		layersEditor.markModified(idx);
+	});
+
+	bindData("overrideFadeOut", !!layer.fadeOut, [=, &layer] (bool value)
+	{
+		updateFadeOverride(value, layer.fadeOut, "fadeOutContainer");		
+		layersEditor.markModified(idx);
+	});
+
+	updateFadeOverride(!!layer.fadeIn, layer.fadeIn, "fadeInContainer");
+	updateFadeOverride(!!layer.fadeOut, layer.fadeOut, "fadeOutContainer");
 }

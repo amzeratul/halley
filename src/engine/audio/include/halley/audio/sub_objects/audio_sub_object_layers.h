@@ -9,6 +9,8 @@ namespace Halley {
 		struct Layer {
 			AudioSubObjectHandle object;
 			AudioExpression expression;
+			std::optional<AudioFade> fadeIn;
+			std::optional<AudioFade> fadeOut;
 			bool synchronised = false;
 
 			Layer() = default;
@@ -37,8 +39,7 @@ namespace Halley {
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
 
-		const AudioExpression& getLayerExpression(size_t idx) const;
-		bool isLayerSynchronised(size_t idx) const;
+		const Layer& getLayer(size_t idx) const;
 
 		gsl::span<Layer> getLayers();
 		AudioFade& getFade();
