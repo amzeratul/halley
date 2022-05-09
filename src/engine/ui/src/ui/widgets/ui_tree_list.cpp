@@ -324,6 +324,12 @@ bool UITreeList::isSingleRoot() const
 	return singleRoot;
 }
 
+void UITreeList::setAllExpanded(bool expanded)
+{
+	root.setAllExpanded(expanded);
+	needsRefresh = true;
+}
+
 bool UITreeList::canDragListItem(const UIListItem& listItem)
 {
 	return isDragEnabled() && (!singleRoot || listItem.getAbsoluteIndex() != 0) && canDragItemId(listItem.getId());
@@ -532,6 +538,14 @@ void UITreeListItem::setExpanded(bool e)
 	if (!children.empty() && treeControls) {
 		expanded = e;
 		treeControls->setExpanded(e);
+	}
+}
+
+void UITreeListItem::setAllExpanded(bool expanded)
+{
+	setExpanded(expanded);
+	for (auto& c: children) {
+		c->setAllExpanded(expanded);
 	}
 }
 

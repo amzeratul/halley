@@ -124,6 +124,16 @@ void SceneEditorWindow::makeUI()
 	{
 		removeSelectedEntities();
 	});
+
+	setHandle(UIEventType::ButtonClicked, "expandAll", [=] (const UIEvent& event)
+	{
+		entityList->getList().setAllExpanded(true);
+	});
+
+	setHandle(UIEventType::ButtonClicked, "collapseAll", [=] (const UIEvent& event)
+	{
+		entityList->getList().setAllExpanded(false);
+	});
 }
 
 void SceneEditorWindow::onAddedToRoot(UIRoot& root)
