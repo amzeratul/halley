@@ -433,7 +433,14 @@ void SceneEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
 {
 	Vector<String> ids;
 	Vector<String> names;
-	entityList->collectEntities(ids, names);
+	Vector<Sprite> icons;
+	entityList->collectEntities(ids, names, icons);
+
+	HashMap<String, Sprite> iconMap;
+	for (size_t i = 0; i < ids.size(); ++i) {
+		iconMap[ids[i]] = std::move(icons[i]);
+	}
+
 	const auto cameraStartPos = gameBridge->getCameraPos();
 	const auto initialSelection = entityList->getCurrentSelection();
 
@@ -452,6 +459,18 @@ void SceneEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
 		selectEntity(toHighlight);
 		panCameraToEntity(toHighlight);
 	});
+
+	assetFinder.setIconRetriever([=, iconMap = std::move(iconMap)] (const String& prefix, const String& id) -> Sprite
+	{
+		if (prefix == "@") {
+			const auto iter = iconMap.find(id);
+			if (iter != iconMap.end()) {
+				return iter->second;
+			}
+		}
+		return Sprite();
+	});
+
 	assetFinder.setInputGhostText(LocalisedString::fromHardcodedString("Search files by name (Prefix with @ to find an entity)"));
 }
 

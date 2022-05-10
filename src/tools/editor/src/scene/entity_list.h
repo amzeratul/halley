@@ -40,7 +40,7 @@ namespace Halley {
 		void forceValidationIfWaiting();
 
 		UITreeList& getList();
-		void collectEntities(Vector<String>& ids, Vector<String>& names);
+		void collectEntities(Vector<String>& ids, Vector<String>& names, Vector<Sprite>& icons);
 
 	private:
 		struct EntityInfo {

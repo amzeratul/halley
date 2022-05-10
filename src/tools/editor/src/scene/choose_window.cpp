@@ -32,8 +32,22 @@ PaletteWindow::PaletteWindow(UIFactory& factory, Project& project, Callback call
 	setAnchor(UIAnchor(Vector2f(0.5f, 0.0f), Vector2f(0.5f, 0.0f)));
 }
 
+void PaletteWindow::setIconRetriever(IconRetriever retriever)
+{
+	iconRetriever = std::move(retriever);
+}
+
 std::shared_ptr<UIImage> PaletteWindow::makeIcon(const String& id, bool hasSearch)
 {
+	const auto prefix = getCurrentDataSetPrefix();
+	if (prefix != "") {
+		Sprite sprite;
+		if (iconRetriever) {
+			sprite = iconRetriever(prefix, id);
+		}
+		return std::make_shared<UIImage>(sprite);
+	}
+
 	const auto type = project.getAssetImporter()->getImportAssetType(id, false);
 	const auto iter = icons.find(type);
 	if (iter != icons.end()) {

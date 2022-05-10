@@ -307,6 +307,11 @@ bool ChooseAssetWindow::isShowingDefaultDataSet() const
 	return curEntry == 0;
 }
 
+const String& ChooseAssetWindow::getCurrentDataSetPrefix() const
+{
+	return entries[curEntry].prefix;
+}
+
 void ChooseAssetWindow::setCategoryFilters(Vector<AssetCategoryFilter> filters, const String& defaultOption)
 {
 	categoryFilters = std::move(filters);

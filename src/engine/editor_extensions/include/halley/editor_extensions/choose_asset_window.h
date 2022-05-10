@@ -52,6 +52,7 @@ namespace Halley {
         virtual int getNumColumns(Vector2f scrollPaneSize) const;
 
 		bool isShowingDefaultDataSet() const;
+		const String& getCurrentDataSetPrefix() const;
 
     private:
 		struct DataSet {

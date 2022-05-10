@@ -257,9 +257,9 @@ UITreeList& EntityList::getList()
 	return *list;
 }
 
-void EntityList::collectEntities(Vector<String>& ids, Vector<String>& names)
+void EntityList::collectEntities(Vector<String>& ids, Vector<String>& names, Vector<Sprite>& icons)
 {
-	list->enumerateIdsAndLabels(ids, names);
+	list->enumerateIdsAndLabels(ids, names, icons);
 }
 
 void EntityList::openContextMenu(Vector<String> entityIds)

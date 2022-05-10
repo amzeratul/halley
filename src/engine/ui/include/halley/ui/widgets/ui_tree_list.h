@@ -65,7 +65,7 @@ namespace Halley {
     	std::optional<FindPositionResult> findPosition(UITreeList& tree, Vector2f pos) const;
 
     	void collectItems(Vector<std::shared_ptr<UIListItem>>& items);
-        void enumerateIdsAndLabels(Vector<String>& ids, Vector<String>& names) const;
+        void enumerateIdsAndLabels(Vector<String>& ids, Vector<String>& names, Vector<Sprite>& icons) const;
 
         const String& getId() const;
     	const String& getParentId() const;
@@ -118,7 +118,7 @@ namespace Halley {
         void makeParentsOfItemExpanded(const String& id);
         bool setSelectedOptionId(const String& id, SelectionMode mode = SelectionMode::Normal) override;
 
-        void enumerateIdsAndLabels(Vector<String>& ids, Vector<String>& names) const;
+        void enumerateIdsAndLabels(Vector<String>& ids, Vector<String>& names, Vector<Sprite>& icons) const;
 
         Vector2f getDragPositionAdjustment(Vector2f pos, Vector2f startPos) const override;
     	void refresh();

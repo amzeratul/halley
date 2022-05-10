@@ -353,9 +353,9 @@ bool UITreeList::setSelectedOptionId(const String& id, SelectionMode mode)
 	return UIList::setSelectedOptionId(id, mode);
 }
 
-void UITreeList::enumerateIdsAndLabels(Vector<String>& ids, Vector<String>& names) const
+void UITreeList::enumerateIdsAndLabels(Vector<String>& ids, Vector<String>& names, Vector<Sprite>& icons) const
 {
-	root.enumerateIdsAndLabels(ids, names);
+	root.enumerateIdsAndLabels(ids, names, icons);
 }
 
 Vector2f UITreeList::getDragPositionAdjustment(Vector2f pos, Vector2f startPos) const
@@ -756,15 +756,16 @@ void UITreeListItem::collectItems(Vector<std::shared_ptr<UIListItem>>& items)
 	}
 }
 
-void UITreeListItem::enumerateIdsAndLabels(Vector<String>& ids, Vector<String>& names) const
+void UITreeListItem::enumerateIdsAndLabels(Vector<String>& ids, Vector<String>& names, Vector<Sprite>& icons) const
 {
 	if (!id.isEmpty()) {
 		ids.push_back(id);
 		names.push_back(label->getTextRenderer().getText());
+		icons.push_back(icon->getSprite());
 	}
 
 	for (const auto& c: children) {
-		c->enumerateIdsAndLabels(ids, names);
+		c->enumerateIdsAndLabels(ids, names, icons);
 	}
 }
 

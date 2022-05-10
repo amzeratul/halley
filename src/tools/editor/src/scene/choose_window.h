@@ -43,7 +43,10 @@ namespace Halley {
 
 	class PaletteWindow final : public ChooseAssetWindow {
 	public:
+		using IconRetriever = std::function<Sprite(const String& prefix, const String& id)>;
+
 		PaletteWindow(UIFactory& factory, Project& project, Callback callback);
+		void setIconRetriever(IconRetriever retriever);
 
 	protected:
 		std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
@@ -52,6 +55,7 @@ namespace Halley {
 	private:
 		Project& project;
 		std::map<ImportAssetType, Sprite> icons;
+		IconRetriever iconRetriever;
 	};
 
 	class ChoosePrefabWindow : public ChooseAssetTypeWindow {
