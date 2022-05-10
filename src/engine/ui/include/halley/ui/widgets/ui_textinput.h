@@ -31,6 +31,7 @@ namespace Halley {
 		String getText() const;
 		UITextInput& setGhostText(LocalisedString text);
 		LocalisedString getGhostText() const;
+		void setShowGhostWhenFocused(bool show);
 		
 		TextRenderer& getTextLabel();
 
@@ -127,5 +128,6 @@ namespace Halley {
 
 		bool isMultiLine = false;
 		bool clearOnSubmit = false;
+		bool showGhostWhenFocused = false;
 	};
 }

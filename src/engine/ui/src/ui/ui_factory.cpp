@@ -826,6 +826,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 	result->setReadOnly(node["readOnly"].asBool(false));
 	result->setHistoryEnabled(node["history"].asBool(false));
 	result->setClearOnSubmit(node["clearOnSubmit"].asBool(false));
+	result->setShowGhostWhenFocused(node["showGhostWhenFocused"].asBool(false));
 
 	return result;
 }

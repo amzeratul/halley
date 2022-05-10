@@ -431,10 +431,17 @@ ProjectWindow& SceneEditorWindow::getProjectWindow() const
 
 void SceneEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
 {
-	// assetFinder.setAssetIds({"a", "b"}, {"a", "b"}, "@", [=] (std::optional<String> result)
-	// {
-	// 	
-	// });
+	Vector<String> ids;
+	Vector<String> names;
+	entityList->collectEntities(ids, names);
+
+	assetFinder.setAssetIds(std::move(ids), std::move(names), "@", [=](std::optional<String> result)
+	{
+		if (result) {
+			selectEntity(*result);
+		}
+	});
+	assetFinder.setInputGhostText(LocalisedString::fromHardcodedString("Search files by name (Prefix with @ to find an entity)"));
 }
 
 void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)

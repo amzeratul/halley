@@ -60,6 +60,11 @@ LocalisedString UITextInput::getGhostText() const
 	return ghostText;
 }
 
+void UITextInput::setShowGhostWhenFocused(bool show)
+{
+	showGhostWhenFocused = show;
+}
+
 TextRenderer& UITextInput::getTextLabel()
 {
 	return label;
@@ -271,7 +276,7 @@ void UITextInput::update(Time t, bool moved)
 	}
 
 	// Update text labels
-	const bool showGhost = text.getText().empty() && (!isFocused() || isReadOnly());
+	const bool showGhost = text.getText().empty() && (!isFocused() || showGhostWhenFocused || isReadOnly());
 	const bool showAutoComplete = autoCompleteCurOption.has_value();
 	ghostText.checkForUpdates();
 	ghostLabel.setText(showAutoComplete ? getAutoCompleteCaption() : (showGhost ? ghostText.getString().getUTF32() : StringUTF32()));

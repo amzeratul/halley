@@ -24,6 +24,7 @@ namespace Halley {
 		void setAssetIds(Vector<String> ids, Vector<String> names, String prefix, Callback callback);
 
 		void setTitle(LocalisedString title);
+		void setInputGhostText(LocalisedString text);
 		void setCategoryFilters(Vector<AssetCategoryFilter> filters, const String& defaultOption);
 
     protected:

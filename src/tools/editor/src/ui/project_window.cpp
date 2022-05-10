@@ -355,6 +355,7 @@ void ProjectWindow::openAssetFinder()
 			assetFinder.reset();
 		});
 
+		assetFinder->setInputGhostText(LocalisedString::fromHardcodedString("Search files by name"));
 		if (const auto curAssetEditor = assetEditorWindow->getActiveWindow()) {
 			curAssetEditor->onOpenAssetFinder(*assetFinder);
 		}

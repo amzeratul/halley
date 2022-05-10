@@ -257,6 +257,11 @@ UITreeList& EntityList::getList()
 	return *list;
 }
 
+void EntityList::collectEntities(Vector<String>& ids, Vector<String>& names)
+{
+	list->enumerateIdsAndLabels(ids, names);
+}
+
 void EntityList::openContextMenu(Vector<String> entityIds)
 {
 	auto menuOptions = Vector<UIPopupMenuItem>();

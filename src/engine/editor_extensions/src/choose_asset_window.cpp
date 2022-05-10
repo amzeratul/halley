@@ -7,6 +7,7 @@
 #include "halley/ui/widgets/ui_image.h"
 #include "halley/ui/ui_factory.h"
 #include "halley/ui/widgets/ui_scrollbar_pane.h"
+#include "halley/ui/widgets/ui_textinput.h"
 
 using namespace Halley;
 
@@ -304,6 +305,14 @@ void ChooseAssetWindow::setUserFilter(const String& str)
 void ChooseAssetWindow::setTitle(LocalisedString title)
 {
 	getWidgetAs<UILabel>("title")->setText(std::move(title));
+}
+
+void ChooseAssetWindow::setInputGhostText(LocalisedString text)
+{
+	auto search = getWidgetAs<UITextInput>("search");
+	if (search) {
+		search->setGhostText(text);
+	}
 }
 
 bool ChooseAssetWindow::onKeyPress(KeyboardKeyPress key)
