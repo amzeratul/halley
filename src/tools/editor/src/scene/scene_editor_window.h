@@ -119,6 +119,8 @@ namespace Halley {
 
 		ProjectWindow& getProjectWindow() const;
 
+		void onOpenAssetFinder(PaletteWindow& assetFinder);
+
 	protected:
 		void update(Time t, bool moved) override;
 

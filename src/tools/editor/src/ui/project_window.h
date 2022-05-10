@@ -110,7 +110,7 @@ namespace Halley {
 
     	std::shared_ptr<AssetsBrowser> assetEditorWindow;
         std::shared_ptr<ConsoleWindow> consoleWindow;
-        std::shared_ptr<ChooseImportAssetWindow> assetFinder;
+        std::shared_ptr<PaletteWindow> assetFinder;
 
         std::unique_ptr<AssetPreviewGenerator> assetPreviewGenerator;
 

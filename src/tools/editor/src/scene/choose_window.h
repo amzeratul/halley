@@ -41,9 +41,9 @@ namespace Halley {
 		bool hasPreview;
 	};
 
-	class ChooseImportAssetWindow : public ChooseAssetWindow {
+	class PaletteWindow final : public ChooseAssetWindow {
 	public:
-		ChooseImportAssetWindow(UIFactory& factory, Project& project, Callback callback);
+		PaletteWindow(UIFactory& factory, Project& project, Callback callback);
 
 	protected:
 		std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;

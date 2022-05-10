@@ -13,6 +13,7 @@
 #include "src/editor_root_stage.h"
 #include "src/halley_editor.h"
 #include "src/assets/assets_browser.h"
+#include "src/assets/asset_editor_window.h"
 #include "src/scene/choose_window.h"
 #include "src/scene/scene_editor_window.h"
 #include "src/ui/editor_ui_factory.h"
@@ -346,13 +347,18 @@ TaskSet& ProjectWindow::getTasks() const
 void ProjectWindow::openAssetFinder()
 {
 	if (!assetFinder) {
-		assetFinder = std::make_shared<ChooseImportAssetWindow>(factory, project, [=] (std::optional<String> result)
+		assetFinder = std::make_shared<PaletteWindow>(factory, project, [=] (std::optional<String> result)
 		{
 			if (result) {
 				openFile(result.value());
 			}
 			assetFinder.reset();
 		});
+
+		if (const auto curAssetEditor = assetEditorWindow->getActiveWindow()) {
+			curAssetEditor->onOpenAssetFinder(*assetFinder);
+		}
+
 		getRoot()->addChild(assetFinder);
 	}
 }

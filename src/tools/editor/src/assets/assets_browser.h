@@ -26,6 +26,7 @@ namespace Halley {
 		void saveAllTabs();
 		void closeTab();
         void moveTabFocus(int delta);
+		std::shared_ptr<AssetEditorWindow> getActiveWindow() const;
 
     private:
 		EditorUIFactory& factory;

@@ -270,6 +270,17 @@ void AssetBrowserTabs::moveTabFocus(int delta)
 	}
 }
 
+std::shared_ptr<AssetEditorWindow> AssetBrowserTabs::getActiveWindow() const
+{
+	if (isActiveInHierarchy()) {
+		const int curPage = pages->getCurrentPage();
+		if (curPage >= 0 && curPage < static_cast<int>(windows.size())) {
+			return windows[curPage];
+		}
+	}
+	return {};
+}
+
 void AssetBrowserTabs::update(Time t, bool moved)
 {
 	auto closing = toClose;

@@ -79,6 +79,11 @@ void AssetsBrowser::moveTabFocus(int delta)
 	assetTabs->moveTabFocus(delta);
 }
 
+std::shared_ptr<AssetEditorWindow> AssetsBrowser::getActiveWindow() const
+{
+	return assetTabs->getActiveWindow();
+}
+
 void AssetsBrowser::loadResources()
 {
 	project.addAssetReloadCallback([=] (gsl::span<const String> assets)

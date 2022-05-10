@@ -22,6 +22,7 @@ namespace Halley {
 		void saveAllTabs();
 		void closeCurrentTab();
 		void moveTabFocus(int delta);
+		std::shared_ptr<AssetEditorWindow> getActiveWindow() const;
 
 	protected:
 		void update(Time t, bool moved) override;

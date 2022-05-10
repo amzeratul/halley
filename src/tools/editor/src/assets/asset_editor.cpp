@@ -67,6 +67,10 @@ bool AssetEditor::canSave(bool forceInstantCheck) const
 	return true;
 }
 
+void AssetEditor::onOpenAssetFinder(PaletteWindow& assetFinder)
+{
+}
+
 void AssetEditor::onTabbedIn()
 {
 }

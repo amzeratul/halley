@@ -1,6 +1,7 @@
 #include "halley/ui/ui_widget.h"
 #include "halley/ui/widgets/ui_list.h"
 #include "halley/ui/widgets/ui_paged_pane.h"
+#include "src/scene/choose_window.h"
 
 namespace Halley {
 	class EditorUIFactory;
@@ -26,6 +27,8 @@ namespace Halley {
 		bool canSave(bool forceInstantCheck) const;
 		void save();
 		String getName() const;
+
+		void onOpenAssetFinder(PaletteWindow& assetFinder);
 
 	private:
 		EditorUIFactory& factory;

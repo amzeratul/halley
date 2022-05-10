@@ -8,6 +8,7 @@ namespace Halley {
 	class ProjectWindow;
 	class Project;
 	class MetadataEditor;
+	class PaletteWindow;
 	
 	class AssetEditor : public UIWidget	{
 	public:
@@ -24,6 +25,7 @@ namespace Halley {
         virtual bool isModified();
         virtual void save();
 		virtual bool canSave(bool forceInstantCheck) const;
+        virtual void onOpenAssetFinder(PaletteWindow& assetFinder);
 
     protected:
 		virtual std::shared_ptr<const Resource> loadResource(const String& assetId) = 0;

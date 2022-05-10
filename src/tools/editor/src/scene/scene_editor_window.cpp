@@ -429,6 +429,14 @@ ProjectWindow& SceneEditorWindow::getProjectWindow() const
 	return projectWindow;
 }
 
+void SceneEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
+{
+	// assetFinder.setAssetIds({"a", "b"}, {"a", "b"}, "@", [=] (std::optional<String> result)
+	// {
+	// 	
+	// });
+}
+
 void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 {
 	if (status == ProjectDLL::Status::Loaded) {

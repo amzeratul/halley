@@ -14,10 +14,12 @@ using namespace Halley;
 ChooseAssetWindow::ChooseAssetWindow(Vector2f minSize, UIFactory& factory, Callback callback, std::optional<String> canShowBlank)
 	: UIWidget("choose_asset_window", minSize, UISizer())
 	, factory(factory)
-	, callback(std::move(callback))
 	, fuzzyMatcher(false, 100)
 	, canShowBlank(std::move(canShowBlank))
 {
+	entries.emplace_back(DataSet{});
+	entries.back().callback = std::move(callback);
+
 	highlightCol = factory.getColourScheme()->getColour("ui_stringMatchText");
 
 	factory.loadUI(*this, "halley/choose_asset_window");
@@ -40,27 +42,40 @@ void ChooseAssetWindow::setAssetIds(Vector<String> ids, String defaultOption)
 	setAssetIds(std::move(ids), {}, std::move(defaultOption));
 }
 
-void ChooseAssetWindow::setAssetIds(Vector<String> _ids, Vector<String> _names, String _defaultOption)
+void ChooseAssetWindow::setAssetIds(Vector<String> ids, Vector<String> names, String defaultOption)
 {
-	origIds = std::move(_ids);
-	origNames = std::move(_names);
-	defaultOption = std::move(_defaultOption);
-	if (origNames.empty()) {
-		origNames = origIds;
+	this->defaultOption = std::move(defaultOption);
+	setAssetIds(std::move(ids), std::move(names), "", {});
+}
+
+void ChooseAssetWindow::setAssetIds(Vector<String> ids, Vector<String> names, String prefix, Callback callback)
+{
+	auto& e = getEntry(prefix);
+
+	e.origIds = std::move(ids);
+	e.origNames = std::move(names);
+	if (e.origNames.empty()) {
+		e.origNames = e.origIds;
 	}
 	
-	if (origNames.size() != origIds.size()) {
+	if (e.origNames.size() != e.origIds.size()) {
 		throw Exception("Names and ids must have same length", HalleyExceptions::UI);
 	}
 
-	setCategoryFilter("");
+	if (prefix.isEmpty()) {
+		setCategoryFilter("");
+	} else {
+		e.callback = std::move(callback);
+	}
 }
 
 void ChooseAssetWindow::setCategoryFilter(const String& filterId)
 {
+	auto& e = entries[curEntry];
+
 	if (filterId.isEmpty()) {
-		ids = origIds;
-		names = origNames;
+		ids = e.origIds;
+		names = e.origNames;
 	} else {
 		const auto filterIter = std_ex::find_if(categoryFilters, [&] (const auto& f) { return f.id == filterId; });
 		if (filterIter != categoryFilters.end()) {
@@ -69,15 +84,15 @@ void ChooseAssetWindow::setCategoryFilter(const String& filterId)
 			ids.clear();
 			names.clear();
 
-			for (size_t i = 0; i < origIds.size(); ++i) {
-				if (curFilter.matches(origIds[i])) {
-					ids.push_back(origIds[i]);
-					names.push_back(origNames[i]);
+			for (size_t i = 0; i < e.origIds.size(); ++i) {
+				if (curFilter.matches(e.origIds[i])) {
+					ids.push_back(e.origIds[i]);
+					names.push_back(e.origNames[i]);
 				}
 			}
 		} else {
-			ids = origIds;
-			names = origNames;
+			ids = e.origIds;
+			names = e.origNames;
 		}
 	}
 	
@@ -162,6 +177,36 @@ void ChooseAssetWindow::addItem(const String& id, const String& name, gsl::span<
 	options->addItem(id, makeItemSizer(std::move(icon), std::move(label), hasSearch), 1);
 }
 
+ChooseAssetWindow::DataSet& ChooseAssetWindow::getEntry(const String& prefix)
+{
+	for (auto& e: entries) {
+		if (e.prefix == prefix) {
+			return e;
+		}
+	}
+	entries.emplace_back(DataSet{});
+	entries.back().prefix = prefix;
+	return entries.back();
+}
+
+void ChooseAssetWindow::updateCurrentDataSet(const String& str)
+{
+	size_t longestMatch = 0;
+	size_t bestIdx = 0;
+	for (size_t i = 0; i < entries.size(); ++i) {
+		const size_t len = entries[i].prefix.length();
+		if (len > longestMatch && str.startsWith(entries[i].prefix)) {
+			longestMatch = len;
+			bestIdx = i;
+		}
+	}
+
+	if (curEntry != bestIdx) {
+		curEntry = bestIdx;
+		setCategoryFilter("");
+	}
+}
+
 std::shared_ptr<UISizer> ChooseAssetWindow::makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch)
 {
 	auto sizer = std::make_shared<UISizer>();
@@ -210,6 +255,11 @@ int ChooseAssetWindow::getNumColumns(Vector2f scrollPaneSize) const
 	return 1;
 }
 
+bool ChooseAssetWindow::isShowingDefaultDataSet() const
+{
+	return curEntry == 0;
+}
+
 void ChooseAssetWindow::setCategoryFilters(Vector<AssetCategoryFilter> filters, const String& defaultOption)
 {
 	categoryFilters = std::move(filters);
@@ -238,9 +288,16 @@ void ChooseAssetWindow::setCategoryFilters(Vector<AssetCategoryFilter> filters, 
 
 void ChooseAssetWindow::setUserFilter(const String& str)
 {
-	if (filter != str) {
-		filter = str;
-		populateList();
+	if (rawFilter != str) {
+		rawFilter = str;
+
+		const auto prevEntry = curEntry;
+		updateCurrentDataSet(rawFilter);
+		filter = rawFilter.mid(entries[curEntry].prefix.size());
+
+		if (prevEntry == curEntry) {
+			populateList();
+		}
 	}
 }
 
@@ -322,16 +379,28 @@ void ChooseAssetWindow::accept()
 {
 	const auto id = getWidgetAs<UIList>("options")->getSelectedOptionId();
 	if (canShowBlank || !id.isEmpty()) {
-		if (callback) {
-			callback(id);
-			destroy();
+		if (entries[curEntry].callback) {
+			entries[curEntry].callback(id);
+			entries[curEntry].callback = {};
 		}
-		callback = {};
+
+		cancelAllExcept(curEntry);
+		destroy();
 	}
 }
 
 void ChooseAssetWindow::cancel()
 {
-	callback({});
+	cancelAllExcept(std::optional<size_t>{});
 	destroy();
+}
+
+void ChooseAssetWindow::cancelAllExcept(std::optional<size_t> idx)
+{
+	for (size_t i = 0; i < entries.size(); ++i) {
+		if (i != idx && entries[i].callback) {
+			entries[i].callback({});
+			entries[i].callback = {};
+		}
+	}
 }

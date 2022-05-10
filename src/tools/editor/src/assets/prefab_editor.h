@@ -12,6 +12,7 @@ namespace Halley {
 		bool isModified() override;
 		void save() override;
 		bool canSave(bool forceInstantCheck) const override;
+		void onOpenAssetFinder(PaletteWindow& assetFinder) override;
 
 	protected:
 		void update(Time t, bool moved) override;

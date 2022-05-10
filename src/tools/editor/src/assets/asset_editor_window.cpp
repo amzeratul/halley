@@ -141,6 +141,14 @@ String AssetEditorWindow::getName() const
 	return Path(loadedAsset).getFilename().getString();
 }
 
+void AssetEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
+{
+	auto curPage = content->getCurrentPage();
+	if (curPage >= 0 && curPage < static_cast<int>(curEditors.size())) {
+		curEditors[curPage]->onOpenAssetFinder(assetFinder);
+	}
+}
+
 void AssetEditorWindow::onDoubleClickAsset()
 {
 	if (!curEditors.empty()) {

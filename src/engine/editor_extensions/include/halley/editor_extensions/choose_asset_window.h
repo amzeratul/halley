@@ -20,16 +20,18 @@ namespace Halley {
 
         void onAddedToRoot(UIRoot& root) override;
 		void setAssetIds(Vector<String> ids, String defaultOption);
-		void setAssetIds(Vector<String> _ids, Vector<String> _names, String _defaultOption);
+		void setAssetIds(Vector<String> ids, Vector<String> names, String defaultOption);
+		void setAssetIds(Vector<String> ids, Vector<String> names, String prefix, Callback callback);
 
 		void setTitle(LocalisedString title);
 		void setCategoryFilters(Vector<AssetCategoryFilter> filters, const String& defaultOption);
 
     protected:
-        bool onKeyPress(KeyboardKeyPress key) override;
+        std::shared_ptr<UIList> options;
+
+    	bool onKeyPress(KeyboardKeyPress key) override;
 		virtual bool canShowAll() const;
 		UIFactory& getFactory() const;
-        std::shared_ptr<UIList> options;
         void onMakeUI() override;
 
 		virtual std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch);
@@ -47,28 +49,43 @@ namespace Halley {
 
         virtual int getNumColumns(Vector2f scrollPaneSize) const;
 
-    private:
-        UIFactory& factory;
-        Callback callback;
-		UISizerType orientation;
+		bool isShowingDefaultDataSet() const;
 
-		Vector<String> origIds;
-		Vector<String> origNames;
+    private:
+		struct DataSet {
+			Vector<String> origIds;
+			Vector<String> origNames;
+			String prefix;
+			Callback callback;
+		};
+
 		Vector<String> ids;
 		Vector<String> names;
+        String defaultOption;
+
+    	UIFactory& factory;
+		UISizerType orientation;
+
+		Vector<DataSet> entries;
+		size_t curEntry = 0;
+
 		Vector<AssetCategoryFilter> categoryFilters;
 		
 		FuzzyTextMatcher fuzzyMatcher;
+		String rawFilter;
 		String filter;
-        String defaultOption;
         Colour4f highlightCol;
 		std::optional<String> canShowBlank;
 		
         void accept();
         void cancel();
+		void cancelAllExcept(std::optional<size_t> idx);
         void setUserFilter(const String& str);
 		void setCategoryFilter(const String& filterId);
 		void populateList();
 		void addItem(const String& id, const String& name, gsl::span<const std::pair<uint16_t, uint16_t>> matchPositions = {});
+
+		DataSet& getEntry(const String& prefix);
+		void updateCurrentDataSet(const String& str);
     };
 }

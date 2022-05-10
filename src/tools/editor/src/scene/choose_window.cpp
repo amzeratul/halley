@@ -20,7 +20,7 @@ AddComponentWindow::AddComponentWindow(UIFactory& factory, const Vector<String>&
 
 
 
-ChooseImportAssetWindow::ChooseImportAssetWindow(UIFactory& factory, Project& project, Callback callback)
+PaletteWindow::PaletteWindow(UIFactory& factory, Project& project, Callback callback)
 	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), {})
 	, project(project)
 {
@@ -31,7 +31,7 @@ ChooseImportAssetWindow::ChooseImportAssetWindow(UIFactory& factory, Project& pr
 	setTitle(LocalisedString::fromHardcodedString("Open asset"));
 }
 
-std::shared_ptr<UIImage> ChooseImportAssetWindow::makeIcon(const String& id, bool hasSearch)
+std::shared_ptr<UIImage> PaletteWindow::makeIcon(const String& id, bool hasSearch)
 {
 	const auto type = project.getAssetImporter()->getImportAssetType(id, false);
 	const auto iter = icons.find(type);
@@ -44,9 +44,9 @@ std::shared_ptr<UIImage> ChooseImportAssetWindow::makeIcon(const String& id, boo
 	return std::make_shared<UIImage>(icon);
 }
 
-bool ChooseImportAssetWindow::canShowAll() const
+bool PaletteWindow::canShowAll() const
 {
-	return false;
+	return !isShowingDefaultDataSet();
 }
 
 
