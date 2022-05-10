@@ -326,7 +326,7 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 		icon = delta.icon.value();
 	}
 	if (delta.flags) {
-		flags = delta.flags.value();
+		flags ^= delta.flags.value();
 	}
 	if (delta.instanceUUID) {
 		instanceUUID = delta.instanceUUID.value();
@@ -416,6 +416,8 @@ void EntityData::instantiateWith(const EntityData& instance)
 
 	// Update components and children
 	instantiateData(instance);
+
+	flags |= instance.flags;
 }
 
 void EntityData::generateChildUUID(const UUID& root)

@@ -57,6 +57,7 @@ namespace Halley {
         void setLabel(const LocalisedString& label);
     	void setIcon(Sprite icon);
         void setExpanded(bool expanded);
+        void setAllExpanded(bool expanded);
         void setForceLeaf(bool leaf);
 
         std::unique_ptr<UITreeListItem> removeFromTree(const String& id);
@@ -107,6 +108,8 @@ namespace Halley {
 
     	void setSingleRoot(bool enabled);
     	bool isSingleRoot() const;
+
+        void setAllExpanded(bool expanded);
 
         bool canDragListItem(const UIListItem& listItem) override;
 

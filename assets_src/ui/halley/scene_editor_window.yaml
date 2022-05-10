@@ -5,6 +5,12 @@ proportion: 1
 children:
 - sizer: { type: vertical }
   children:
+    - sizer: { type: horizontal }
+      children:
+      - widget: { id: expandAll, class: button, text: Expand All, size: [60, 20] }
+        proportion: 1
+      - widget: { id: collapseAll, class: button, text: Collapse All, size: [60, 20] }
+        proportion: 1
     - widget: { id: scrollBarPane, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, size: [350, 22] }
       sizer: { type: vertical }
       proportion: 1

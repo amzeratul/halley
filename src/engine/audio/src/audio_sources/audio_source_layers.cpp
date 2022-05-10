@@ -68,18 +68,21 @@ AudioSourceLayers::Layer::Layer(std::unique_ptr<AudioSource> source, AudioEmitte
 
 void AudioSourceLayers::Layer::init(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter)
 {
-	const auto targetGain = layerConfig.getLayerExpression(idx).evaluate(emitter);
+	const auto targetGain = layerConfig.getLayer(idx).expression.evaluate(emitter);
 	fader.stopAndSetValue(targetGain);
 	prevGain = gain = targetGain;
-	synchronised = layerConfig.isLayerSynchronised(idx);
+	synchronised = layerConfig.getLayer(idx).synchronised;
 	playing = targetGain > 0.0001f;
 }
 
-void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter, const AudioFade& fade)
+void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& layersConfig, AudioEmitter& emitter, const AudioFade& generalFade)
 {
-	const auto targetGain = layerConfig.getLayerExpression(idx).evaluate(emitter);
+	const auto& layer = layersConfig.getLayer(idx);
+	const auto targetGain = layer.expression.evaluate(emitter);
 
-	if (std::abs(targetGain - fader.getTargetValue()) > 0.001f) {
+	const auto delta = targetGain - fader.getTargetValue();
+	if (std::abs(delta) > 0.001f) {
+		const auto& fade = delta > 0 ? layer.fadeIn.value_or(generalFade) : layer.fadeOut.value_or(generalFade);
 		fader.startFade(gain, targetGain, fade);
 	}
 

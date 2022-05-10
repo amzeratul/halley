@@ -106,6 +106,11 @@ void EntityEditor::makeUI()
 		setSelectable(event.getBoolData());
 	});
 
+	setHandle(UIEventType::CheckboxUpdated, "enabled", [=] (const UIEvent& event)
+	{
+		setEntityEnabled(event.getBoolData());
+	});
+
 	setHandle(UIEventType::TextSubmit, "entityName", [=] (const UIEvent& event)
 	{
 		setName(event.getStringData());
@@ -191,6 +196,7 @@ void EntityEditor::reloadEntity()
 			entityIcon->setSelectedOption(getEntityData().getIcon());
 		}
 		getWidgetAs<UICheckbox>("selectable")->setChecked(!getEntityData().getFlag(EntityData::Flag::NotSelectable));
+		getWidgetAs<UICheckbox>("enabled")->setChecked(!getEntityData().getFlag(EntityData::Flag::Disabled));
 		setCanSendEvents(true);
 
 		entityValidatorUI->setEntity(*currentEntityData, *this, *gameResources);
@@ -559,6 +565,14 @@ void EntityEditor::setSelectable(bool selectable)
 {
 	if (getEntityData().getFlag(EntityData::Flag::NotSelectable) == selectable) {
 		getEntityData().setFlag(EntityData::Flag::NotSelectable, !selectable);
+		onEntityUpdated();
+	}
+}
+
+void EntityEditor::setEntityEnabled(bool enabled)
+{
+	if (getEntityData().getFlag(EntityData::Flag::Disabled) == enabled) {
+		getEntityData().setFlag(EntityData::Flag::Disabled, !enabled);
 		onEntityUpdated();
 	}
 }

@@ -111,6 +111,7 @@ namespace Halley
 			String inactiveImage;
 			String spriteSheet;
 			String sprite;
+			String imageColour;
 			LocalisedString tooltip;
 			Vector4f border;
 			bool active;

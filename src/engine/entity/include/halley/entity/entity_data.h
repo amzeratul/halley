@@ -32,7 +32,9 @@ namespace Halley {
     	
     public:
         enum class Flag : uint8_t {
-	        NotSelectable = 1
+	        NotSelectable = 1,
+            Disabled = 2,
+            TreeViewCollapsed = 4
         };
 
     	EntityData();

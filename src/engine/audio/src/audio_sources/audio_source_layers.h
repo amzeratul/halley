@@ -30,7 +30,7 @@ namespace Halley
 
 			Layer(std::unique_ptr<AudioSource> source, AudioEmitter& emitter, size_t idx);
 			void init(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter);
-			void update(float time, const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter, const AudioFade& fade);
+			void update(float time, const AudioSubObjectLayers& layersConfig, AudioEmitter& emitter, const AudioFade& fade);
 		};
 
 		AudioEngine& engine;

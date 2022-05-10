@@ -162,6 +162,8 @@ void UITreeList::onItemDragging(UIListItem& item, int index, Vector2f pos)
 		insertCursor = styles.at(0).getSubStyle("cursor").getSprite(resData.type == UITreeListItem::PositionType::OnTop ? "over" : "beforeAfter");
 		insertCursor.setPos(rect.getTopLeft()).scaleTo(rect.getSize());
 	}
+
+	sendEvent(UIEvent(UIEventType::MakeAreaVisibleSmooth, getId(), Rect4f(pos, pos + item.getSize()) - getPosition()));
 }
 
 void UITreeList::onItemDoneDragging(UIListItem& item, int index, Vector2f pos)
@@ -185,7 +187,7 @@ void UITreeList::onItemDoneDragging(UIListItem& item, int index, Vector2f pos)
 			const auto siblingIndex = parent->getChildIndex(resData.item->getId());
 			newChildIndex = siblingIndex + (resData.type == UITreeListItem::PositionType::Before ? 0 : 1);
 		}
-
+		
 		reparentItems(getSelectedOptionIds(), newParentId, static_cast<int>(newChildIndex));
 	}
 	insertCursor = Sprite();
@@ -290,6 +292,7 @@ void UITreeList::reparentItems(gsl::span<const String> itemIds, const String& ne
 void UITreeList::sortItems()
 {
 	// Store previous curOption
+	setCanSendEvents(false);
 	const auto oldOption = getSelectedOptionId();
 	
 	// Update list representation
@@ -299,6 +302,7 @@ void UITreeList::sortItems()
 
 	// Restore curOption
 	setSelectedOptionId(oldOption);
+	setCanSendEvents(true);
 
 	// Update sizer
 	getSizer().sortItems([&] (const UISizerEntry& a, const UISizerEntry& b)
@@ -318,6 +322,12 @@ void UITreeList::setSingleRoot(bool enabled)
 bool UITreeList::isSingleRoot() const
 {
 	return singleRoot;
+}
+
+void UITreeList::setAllExpanded(bool expanded)
+{
+	root.setAllExpanded(expanded);
+	needsRefresh = true;
 }
 
 bool UITreeList::canDragListItem(const UIListItem& listItem)
@@ -528,6 +538,14 @@ void UITreeListItem::setExpanded(bool e)
 	if (!children.empty() && treeControls) {
 		expanded = e;
 		treeControls->setExpanded(e);
+	}
+}
+
+void UITreeListItem::setAllExpanded(bool expanded)
+{
+	setExpanded(expanded);
+	for (auto& c: children) {
+		c->setAllExpanded(expanded);
 	}
 }
 

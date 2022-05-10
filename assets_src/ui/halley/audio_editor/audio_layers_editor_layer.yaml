@@ -19,3 +19,21 @@ children:
     fill: [left, centreVertical]
   - widget: { class: checkbox, id: synchronised }
     fill: [left, centreVertical]
+  - widget: { class: label, text: "Override Fade In: " }
+    fill: [left, centreVertical]
+  - sizer: { type: horizontal }
+    children:
+    - widget: { class: checkbox, id: overrideFadeIn }
+      fill: [left, centreVertical]
+    - widget: { class: widget, id: fadeInContainer }
+      sizer: { type: horizontal }
+      children: []
+  - widget: { class: label, text: "Override Fade Out: " }
+    fill: [left, centreVertical]
+  - sizer: { type: horizontal }
+    children:
+    - widget: { class: checkbox, id: overrideFadeOut }
+      fill: [left, centreVertical]
+    - widget: { class: widget, id: fadeOutContainer }
+      sizer: { type: horizontal }
+      children: []

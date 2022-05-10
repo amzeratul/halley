@@ -27,11 +27,17 @@ UIScrollPane::UIScrollPane(String id, Vector2f clipSize, UISizer&& sizer, bool s
 		refresh();
 		scrollToShow(event.getRectData() + getBasePosition(event.getSourceId()), true);
 	});
+
+	setHandle(UIEventType::MakeAreaVisibleSmooth, [this] (const UIEvent& event)
+	{
+		refresh();
+		scrollToShow(event.getRectData() + getBasePosition(event.getSourceId()), false, true);
+	});
 }
 
 UIScrollPane::UIScrollPane(Vector2f clipSize, UISizer&& sizer, bool scrollHorizontal, bool scrollVertical)
-: UIScrollPane("", clipSize, std::move(sizer), scrollHorizontal, scrollVertical) {
-
+: UIScrollPane("", clipSize, std::move(sizer), scrollHorizontal, scrollVertical)
+{
 }
 
 Vector2f UIScrollPane::getScrollPosition() const
@@ -73,6 +79,9 @@ void UIScrollPane::setScrollSpeed(float speed)
 void UIScrollPane::update(Time t, bool moved)
 {
 	refresh();
+	if (t > 0.0001) {
+		lastDeltaT = t;
+	}
 }
 
 bool UIScrollPane::canScroll(UIScrollDirection direction) const
@@ -176,7 +185,7 @@ Vector2f UIScrollPane::getLayoutOriginPosition() const
 	return getPosition() - scrollPos.floor();
 }
 
-void UIScrollPane::scrollToShow(Rect4f rect, bool center)
+void UIScrollPane::scrollToShow(Rect4f rect, bool center, bool smooth)
 {
 	auto size = getSize();
 
@@ -184,8 +193,17 @@ void UIScrollPane::scrollToShow(Rect4f rect, bool center)
 	float minX = rect.getRight() - size.x;
 	float maxY = rect.getTop();
 	float minY = rect.getBottom() - size.y;
-	auto target = center ? (rect.getCenter() - 0.5f * size) : scrollPos;
-	scrollTo(Vector2f(clamp(target.x, minX, maxX), clamp(target.y, minY, maxY)));
+	const auto target = center ? (rect.getCenter() - 0.5f * size) : scrollPos;
+	auto dst = Vector2f(clamp(target.x, minX, maxX), clamp(target.y, minY, maxY));
+
+	if (smooth) {
+		const auto maxPixelsPerSecond = 600.0f;
+		const auto maxDelta = static_cast<float>(lastDeltaT) * maxPixelsPerSecond;
+		dst.x = clamp(dst.x, scrollPos.x - maxDelta, scrollPos.x + maxDelta);
+		dst.y = clamp(dst.y, scrollPos.y - maxDelta, scrollPos.y + maxDelta);
+	}
+
+	scrollTo(dst);
 }
 
 float UIScrollPane::getScrollSpeed() const

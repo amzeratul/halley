@@ -113,6 +113,13 @@ namespace Halley {
 		{
 			return alive;
 		}
+
+		bool isEnabled() const
+		{
+			return enabled;
+		}
+
+		void setEnabled(bool enabled);
 		
 		const UUID& getPrefabUUID() const
 		{
@@ -148,7 +155,8 @@ namespace Halley {
 		bool alive : 1;
 		bool serializable : 1;
 		bool reloaded : 1;
-		bool active : 1; // Reserved for future use
+		bool enabled : 1;
+		bool parentEnabled : 1;
 		bool selectable : 1;
 		
 		uint8_t childrenRevision = 0;
@@ -210,6 +218,7 @@ namespace Halley {
 		void markHierarchyDirty();
 		void propagateChildrenChange();
 		void propagateChildWorldPartition(uint8_t newWorldPartition);
+		void propagateEnabled(bool enabled, bool parentEnabled);
 
 		DataInterpolatorSet& setupNetwork(EntityRef& ref, uint8_t peerId);
 		std::optional<uint8_t> getOwnerPeerId() const;
@@ -597,6 +606,18 @@ namespace Halley {
 		{
 			validate();
 			entity->selectable = selectable;
+		}
+
+		bool isEnabled() const
+		{
+			validate();
+			return entity->isEnabled();
+		}
+
+		void setEnabled(bool enabled)
+		{
+			validate();
+			entity->setEnabled(enabled);
 		}
 
 		bool operator==(const EntityRef& other) const

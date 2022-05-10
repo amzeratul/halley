@@ -518,6 +518,7 @@ Vector<UIFactory::ParsedOption> UIFactory::parseOptions(const ConfigNode& node)
 			option.id = id;
 			option.text = label;
 			option.image = n["image"].asString("");
+			option.imageColour = n["imageColour"].asString("");
 			option.inactiveImage = n["inactiveImage"].asString("");
 			option.spriteSheet = n["spriteSheet"].asString("");
 			option.sprite = n["sprite"].asString("");
@@ -1324,7 +1325,10 @@ void UIFactory::applyListProperties(UIList& list, const ConfigNode& node, const 
 			} else {
 				normalSprite.setSprite(resources, o.spriteSheet, o.sprite);
 			}
-			
+
+			if (!o.imageColour.isEmpty()) {
+				normalSprite.setColour(o.imageColour);
+			}
 			auto image = std::make_shared<UIImage>(normalSprite);
 
 			if (!o.inactiveImage.isEmpty()) {
