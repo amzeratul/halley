@@ -320,6 +320,11 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 		return true;
 	}
 
+	if (key.is(KeyCode::E, KeyMods::Ctrl)) {
+		toggleEntitiesEnabled(entityList->getCurrentSelections());
+		return true;
+	}
+
 	if (key.is(KeyCode::D, KeyMods::CtrlShift)) {
 		duplicateEntities(entityList->getCurrentSelections(), false);
 		return true;
@@ -381,6 +386,8 @@ void SceneEditorWindow::onEntityContextMenuAction(const String& actionId, gsl::s
 		extractPrefab(entityIds.front());
 	} else if (actionId == "collapse_prefab") {
 		collapsePrefab(entityIds.front());
+	} else if (actionId == "toggle_enable") {
+		toggleEntitiesEnabled(entityIds);
 	}
 }
 
@@ -944,6 +951,62 @@ void SceneEditorWindow::duplicateEntities(gsl::span<const String> ids, bool move
 	if (!ids.empty()) {
 		pasteEntities(copyEntities(ids), ids.back(), false, moveToCursor);
 	}
+}
+
+bool SceneEditorWindow::hasAnyDisabledEntities(gsl::span<const String> ids) const
+{
+	for (const auto& id: ids) {
+		auto data = sceneData->getEntityNodeData(id).getData();
+		if (data.getFlag(EntityData::Flag::Disabled)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void SceneEditorWindow::toggleEntitiesEnabled(gsl::span<const String> ids)
+{
+	const bool anyDisabled = hasAnyDisabledEntities(ids);
+
+	Vector<String> modifiedIds;
+	Vector<EntityData> oldDatas;
+	Vector<const EntityData*> newDataPtrs;
+
+	if (anyDisabled) {
+		// Enable everything
+		for (const auto& id: ids) {
+			auto& data = sceneData->getWriteableEntityNodeData(id).getData();
+			if (data.getFlag(EntityData::Flag::Disabled)) {
+				modifiedIds.push_back(id);
+				oldDatas.push_back(data);
+				data.setFlag(EntityData::Flag::Disabled, false);
+				newDataPtrs.push_back(&data);
+			}
+		}
+	} else {
+		// Disable roots
+		for (const auto& [id, parentId]: findUniqueParents(ids)) {
+			if (!parentId) {
+				continue;
+			}
+			auto& data = sceneData->getWriteableEntityNodeData(id).getData();
+			if (!data.getFlag(EntityData::Flag::Disabled)) {
+				modifiedIds.push_back(id);
+				oldDatas.push_back(data);
+				data.setFlag(EntityData::Flag::Disabled, true);
+				newDataPtrs.push_back(&data);
+			}
+		}
+	}
+
+	Vector<const EntityData*> oldDataPtrs;
+	oldDataPtrs.reserve(oldDatas.size());
+	for (auto& d: oldDatas) {
+		oldDataPtrs.push_back(&d);
+	}
+	
+	onEntitiesModified(modifiedIds, oldDataPtrs, newDataPtrs);
+	entityEditor->reloadEntity();
 }
 
 void SceneEditorWindow::openEditPrefabWindow(const String& name)

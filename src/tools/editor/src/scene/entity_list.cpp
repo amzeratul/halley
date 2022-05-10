@@ -312,6 +312,7 @@ void EntityList::openContextMenu(Vector<String> entityIds)
 	const bool canExtractPrefab = canAddAsSibling;
 	const bool canAddAsChild = !isPrefab;
 	const bool canRemove = canAddAsSibling;
+	const bool canEnable = sceneEditorWindow->hasAnyDisabledEntities(entityIds);
 	const bool isSingle = entityIds.size() == 1;
 
 	if (isSingle) {
@@ -331,12 +332,14 @@ void EntityList::openContextMenu(Vector<String> entityIds)
 		makeEntry("paste_sibling", "Paste", "Paste entities as a sibling of the current one. [Ctrl+V]", "paste.png", canPaste && canAddAsSibling);
 		makeEntry("paste_child", "Paste (Child)", "Paste entity as a child of the current one.", "", canPaste && canAddAsChild);
 		menuOptions.emplace_back();
+		makeEntry("toggle_enable", canEnable ? "Enable" : "Disable", canEnable ? "Enable entity [Ctrl+E]" : "Disable entity [Ctrl+E]", "");
 		makeEntry("duplicate", "Duplicate", "Duplicate entity [Ctrl+D]", "", canAddAsSibling);
 		makeEntry("delete", "Delete", "Delete entity [Del]", "delete.png", canRemove);
 	} else {
 		makeEntry("cut", "Cut", "Cut entities to clipboard [Ctrl+X]", "cut.png", canRemove);
 		makeEntry("copy", "Copy", "Copy entities to clipboard [Ctrl+C]", "copy.png");
 		menuOptions.emplace_back();
+		makeEntry("toggle_enable", canEnable ? "Enable" : "Disable", canEnable ? "Enable entities [Ctrl+E]" : "Disable entities [Ctrl+E]", "");
 		makeEntry("duplicate", "Duplicate", "Duplicate entities [Ctrl+D]", "", canAddAsSibling);
 		makeEntry("delete", "Delete", "Delete entities [Del]", "delete.png", canRemove);
 	}

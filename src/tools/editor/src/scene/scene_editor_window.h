@@ -66,6 +66,7 @@ namespace Halley {
 		String copyEntities(gsl::span<const String> ids);
 		void pasteEntities(const String& data, const String& referenceId, bool childOfReference, bool moveToCursor);
 		void duplicateEntities(gsl::span<const String> ids, bool moveToCursor);
+		void toggleEntitiesEnabled(gsl::span<const String> ids);
 		void openEditPrefabWindow(const String& name);
 
 		const std::shared_ptr<ISceneData>& getSceneData() const override;
@@ -112,6 +113,7 @@ namespace Halley {
 		bool canPasteEntity() const;
 		bool canAddSibling(const String& entityId) const;
 		bool isPrefabInstance(const String& entityId) const;
+		bool hasAnyDisabledEntities(gsl::span<const String> ids) const;
 
 		EntityValidator& getEntityValidator();
 		void refreshGizmos();
