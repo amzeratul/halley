@@ -250,21 +250,57 @@ void UILabel::setColour(Colour4f colour)
 	renderer.setColour(colour);
 }
 
-void UILabel::setSelectable(TextRenderer normalRenderer, TextRenderer selectedRenderer)
+void UILabel::setSelectable(TextRenderer normalRenderer, TextRenderer selectedRenderer, bool preserveAlpha)
 {
 	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event)
 	{
 		if (event.getBoolData()) {
-			setColour(selectedRenderer.getColour());
+			auto col = selectedRenderer.getColour();
+			if (preserveAlpha) {
+				col.a = getColour().a;
+			}
+
+			setColour(col);
 			renderer.setOutline(selectedRenderer.getOutline());
 			renderer.setOutlineColour(selectedRenderer.getOutlineColour());
 		} else {
-			setColour(normalRenderer.getColour());
+			auto col = normalRenderer.getColour();
+			if (preserveAlpha) {
+				col.a = getColour().a;
+			}
+
+			setColour(col);
 			renderer.setOutline(normalRenderer.getOutline());
 			renderer.setOutlineColour(normalRenderer.getOutlineColour());
 		}
 	});
 }
+
+/*
+void UILabel::setSelectable(TextRenderer selectedRenderer)
+{
+	Colour4f origCol = getColour();
+	Colour4f origOutlineCol = renderer.getOutlineColour();
+	float origOutline = renderer.getOutline();
+
+	setHandle(UIEventType::SetSelected, [=] (const UIEvent& event) mutable
+	{
+		if (event.getBoolData()) {
+			origCol = getColour();
+			origOutlineCol = renderer.getOutlineColour();
+			origOutline = renderer.getOutline();
+
+			setColour(selectedRenderer.getColour());
+			renderer.setOutline(selectedRenderer.getOutline());
+			renderer.setOutlineColour(selectedRenderer.getOutlineColour());
+		} else {
+			setColour(origCol);
+			renderer.setOutline(origOutline);
+			renderer.setOutlineColour(origOutlineCol);
+		}
+	});
+}
+*/
 
 void UILabel::setDisablable(TextRenderer normalRenderer, TextRenderer disabledRenderer)
 {

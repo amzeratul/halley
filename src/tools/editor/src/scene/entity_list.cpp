@@ -58,7 +58,12 @@ void EntityList::makeUI()
 			Vector<EntityChangeOperation> changes;
 			changes.reserve(src.size());
 			for (const auto& e: src) {
-				changes.emplace_back(EntityChangeOperation{ {}, e["itemId"].asString(), e["parentId"].asString(), e["childIdx"].asInt() });
+				const auto& itemId = e["itemId"].asString();
+				changes.emplace_back(EntityChangeOperation{ {}, itemId, e["parentId"].asString(), e["childIdx"].asInt() });
+
+				if (auto listItem = list->tryGetTreeItem(itemId)) {
+					updateItemEnabledStatus(*listItem);
+				}
 			}
 
 			sceneEditorWindow->moveEntities(changes, false);
@@ -95,7 +100,11 @@ void EntityList::addEntity(const EntityData& data, const String& parentId, int c
 	const auto info = getEntityInfo(data);
 	const size_t idx = childIndex >= 0 ? static_cast<size_t>(childIndex) : std::numeric_limits<size_t>::max();
 	const bool expanded = !data.getFlag(EntityData::Flag::TreeViewCollapsed);
-	list->addTreeItem(data.getInstanceUUID().toString(), parentId, idx, LocalisedString::fromUserString(info.name), isPrefab ? "labelSpecial" : "label", info.icon, isPrefab, expanded);
+	const bool enabled = !data.getFlag(EntityData::Flag::Disabled);
+
+	auto& item = list->addTreeItem(data.getInstanceUUID().toString(), parentId, idx, LocalisedString::fromUserString(info.name), isPrefab ? "labelSpecial" : "label", info.icon, isPrefab, expanded);
+	updateItemEnabledStatus(item, enabled);
+
 	markValid(data.getInstanceUUID(), info.severity);
 }
 
@@ -111,6 +120,7 @@ void EntityList::addEntityTree(const String& parentId, int childIndex, const Ent
 EntityList::EntityInfo EntityList::getEntityInfo(const EntityData& data) const
 {
 	EntityInfo result;
+	result.enabled = !data.getFlag(EntityData::Flag::Disabled);
 
 	if (data.getPrefab().isEmpty()) {
 		result.name = data.getName().isEmpty() ? String("Unnamed Entity") : data.getName();
@@ -169,6 +179,10 @@ void EntityList::onEntityModified(const String& id, const EntityData& node, bool
 	const bool validationChanged = markValid(node.getInstanceUUID(), info.severity);
 	if (validationChanged || !onlyRefreshValidation) {
 		list->setLabel(id, LocalisedString::fromUserString(info.name), std::move(info.icon));
+	}
+
+	if (auto item = list->tryGetTreeItem(id)) {
+		updateItemEnabledStatus(*item, info.enabled);
 	}
 }
 
@@ -260,6 +274,26 @@ UITreeList& EntityList::getList()
 void EntityList::collectEntities(Vector<String>& ids, Vector<String>& names, Vector<Sprite>& icons)
 {
 	list->enumerateIdsAndLabels(ids, names, icons);
+}
+
+void EntityList::updateItemEnabledStatus(UITreeListItem& item, bool enabled)
+{
+	const bool modified = enabled ? item.removeTag("disabled") : item.addTag("disabled");
+	if (modified) {
+		updateItemEnabledStatus(item);
+	}
+}
+
+void EntityList::updateItemEnabledStatus(UITreeListItem& item)
+{
+	const bool enabledInHierarchy = !item.hasTagInAncestors("disabled");
+	auto col = item.getLabelColour();
+	col.a = enabledInHierarchy ? 1.0f : 0.5f;
+	item.setLabelColour(col);
+
+	for (const auto& c: item.getChildren()) {
+		updateItemEnabledStatus(*c);
+	}
 }
 
 void EntityList::openContextMenu(Vector<String> entityIds)

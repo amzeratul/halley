@@ -180,6 +180,11 @@ namespace Halley {
 			return Colour4(r, g, b, a * t);
 		}
 
+		Colour4 withAlpha(float newA) const
+		{
+			return Colour4(r, g, b, newA);
+		}
+
 		[[nodiscard]] constexpr Colour4 operator+(const Colour4& c) const
 		{
 			return Colour4(r+c.r, g+c.g, b+c.b, a+c.a);

@@ -50,11 +50,13 @@ namespace Halley {
     	UITreeListItem(String id, std::shared_ptr<UIListItem> listItem, std::shared_ptr<UITreeListControls> treeControls, std::shared_ptr<UILabel> label, std::shared_ptr<UIImage> iconWidget, bool forceLeaf, bool expanded);
 
     	UITreeListItem* tryFindId(const String& id);
-        void addChild(std::unique_ptr<UITreeListItem> item, size_t pos);
+        UITreeListItem& addChild(std::unique_ptr<UITreeListItem> item, size_t pos);
     	std::unique_ptr<UITreeListItem> removeChild(const String& id);
         void moveChild(size_t oldChildIndex, size_t newChildIndex);
 
         void setLabel(const LocalisedString& label);
+        void setLabelColour(Colour4f colour);
+        Colour4f getLabelColour() const;
     	void setIcon(Sprite icon);
         bool setExpanded(bool expanded);
         bool setAllExpanded(UITreeList& tree, bool expanded);
@@ -80,14 +82,21 @@ namespace Halley {
         std::pair<bool, bool> expandParentsOfId(const String& targetId); // returns {containsId, modified}
         std::optional<String> getLastExpandedItem(const String& targetId);
 
+        bool addTag(String tag);
+        bool removeTag(const String& tag);
+        bool hasTag(const String& tag) const;
+        bool hasTagInAncestors(const String& tag) const;
+
     private:
     	String id;
     	String parentId;
+        UITreeListItem* parent = nullptr;
         std::shared_ptr<UIListItem> listItem;
         std::shared_ptr<UILabel> label;
     	std::shared_ptr<UIImage> icon;
         std::shared_ptr<UITreeListControls> treeControls;
     	Vector<std::unique_ptr<UITreeListItem>> children;
+        Vector<String> tags;
     	bool expanded = true;
     	bool forceLeaf = false;
 
@@ -100,10 +109,12 @@ namespace Halley {
     public:
     	UITreeList(String id, UIStyle style);
 
-        void addTreeItem(const String& id, const String& parentId, size_t childIndex, const LocalisedString& label, const String& labelStyle = "label", Sprite icon = Sprite(), bool forceLeaf = false, bool expanded = true);
+        UITreeListItem& addTreeItem(const String& id, const String& parentId, size_t childIndex, const LocalisedString& label, const String& labelStyle = "label", Sprite icon = Sprite(), bool forceLeaf = false, bool expanded = true);
         void removeItem(const String& id, bool immediate = true);
         void setLabel(const String& id, const LocalisedString& label, Sprite icon);
         void setForceLeaf(const String& id, bool forceLeaf);
+
+        UITreeListItem* tryGetTreeItem(const String& id);
 
         void clear() override;
         void sortItems();

@@ -47,6 +47,7 @@ namespace Halley {
 			String name;
 			Sprite icon;
 			IEntityValidator::Severity severity;
+			bool enabled = true;
 		};
 
 		UIFactory& factory;
@@ -79,6 +80,8 @@ namespace Halley {
 		void onEntityModified(const String& id, const EntityData& node, bool onlyRefreshValidation);
 
 		void setEntityExpanded(const String& id, bool expanded);
+		void updateItemEnabledStatus(UITreeListItem& item, bool enabled);
+		void updateItemEnabledStatus(UITreeListItem& item);
 
 		IEntityValidator::Severity getEntitySeverity(const EntityData& entityData, bool recursive) const;
 	};

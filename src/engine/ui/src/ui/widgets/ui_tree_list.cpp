@@ -6,6 +6,7 @@
 #include <cassert>
 
 
+#include "halley/utils/algorithm.h"
 #include "widgets/ui_image.h"
 #include "widgets/ui_label.h"
 using namespace Halley;
@@ -17,7 +18,7 @@ UITreeList::UITreeList(String id, UIStyle style)
 	setupEvents();
 }
 
-void UITreeList::addTreeItem(const String& id, const String& parentId, size_t childIndex, const LocalisedString& label, const String& labelStyleName, Sprite icon, bool forceLeaf, bool expanded)
+UITreeListItem& UITreeList::addTreeItem(const String& id, const String& parentId, size_t childIndex, const LocalisedString& label, const String& labelStyleName, Sprite icon, bool forceLeaf, bool expanded)
 {
 	const auto& style = styles.at(0);
 	auto listItem = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
@@ -38,7 +39,7 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, size_t ch
 	const auto& labelStyle = style.getSubStyle(labelStyleName);
 	auto labelWidget = std::make_shared<UILabel>(id + "_label", labelStyle, labelStyle.getTextRenderer("normal"), label);
 	if (labelStyle.hasTextRenderer("selected")) {
-		labelWidget->setSelectable(labelStyle.getTextRenderer("normal"), labelStyle.getTextRenderer("selected"));
+		labelWidget->setSelectable(labelStyle.getTextRenderer("normal"), labelStyle.getTextRenderer("selected"), true);
 	}
 	if (labelStyle.hasTextRenderer("disabled")) {
 		labelWidget->setDisablable(labelStyle.getTextRenderer("normal"), labelStyle.getTextRenderer("disabled"));
@@ -51,10 +52,12 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, size_t ch
 	// Logical item
 	auto treeItem = std::make_unique<UITreeListItem>(id, listItem, treeControls, labelWidget, iconWidget, forceLeaf, expanded);
 	auto& parentItem = getItemOrRoot(parentId);
-	parentItem.addChild(std::move(treeItem), childIndex);
+	auto& result = parentItem.addChild(std::move(treeItem), childIndex);
 
 	addItem(listItem, Vector4f(), UISizerAlignFlags::Left | UISizerFillFlags::FillVertical);
 	needsRefresh = true;
+
+	return result;
 }
 
 void UITreeList::removeItem(const String& id, bool immediate)
@@ -101,6 +104,11 @@ void UITreeList::setForceLeaf(const String& id, bool forceLeaf)
 	if (item) {
 		item->setForceLeaf(forceLeaf);
 	}
+}
+
+UITreeListItem* UITreeList::tryGetTreeItem(const String& id)
+{
+	return root.tryFindId(id);
 }
 
 void UITreeList::clear()
@@ -491,28 +499,29 @@ UITreeListItem* UITreeListItem::tryFindId(const String& id)
 	return nullptr;
 }
 
-void UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item, size_t pos)
+UITreeListItem& UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item, size_t pos)
 {
 	Expects(!forceLeaf);
 	
-	if (children.empty()) {
-		//expanded = true;
-	}
 	item->parentId = id;
-	
-	children.insert(children.begin() + std::min(children.size(), pos), std::move(item));
+	item->parent = this;
+
+	const size_t idx = std::min(children.size(), pos);
+	children.insert(children.begin() + idx, std::move(item));
+	return *children[idx];
 }
 
 std::unique_ptr<UITreeListItem> UITreeListItem::removeChild(const String& id)
 {
 	Expects(!forceLeaf);
-	
+
 	const size_t n = children.size();
 	for (size_t i = 0; i < n; ++i) {
 		if (children[i]->id == id) {
 			auto item = std::move(children[i]);
 			children.erase(children.begin() + i);
 			item->parentId = "";
+			item->parent = nullptr;
 			return item;
 		}
 	}
@@ -538,6 +547,21 @@ void UITreeListItem::setLabel(const LocalisedString& text)
 	if (label) {
 		label->setText(text);
 	}
+}
+
+void UITreeListItem::setLabelColour(Colour4f colour)
+{
+	if (label) {
+		label->setColour(colour);
+	}
+}
+
+Colour4f UITreeListItem::getLabelColour() const
+{
+	if (label) {
+		return label->getColour();
+	}
+	return Colour4f();
 }
 
 void UITreeListItem::setIcon(Sprite sprite)
@@ -719,6 +743,34 @@ std::pair<bool, bool> UITreeListItem::expandParentsOfId(const String& id)
 std::optional<String> UITreeListItem::getLastExpandedItem(const String& targetId)
 {
 	return doGetLastExpandedItem(expanded, id, targetId);
+}
+
+bool UITreeListItem::addTag(String tag)
+{
+	if (!hasTag(tag)) {
+		tags.push_back(std::move(tag));
+		return true;
+	}
+	return false;
+}
+
+bool UITreeListItem::removeTag(const String& tag)
+{
+	if (hasTag(tag)) {
+		std_ex::erase(tags, tag);
+		return true;
+	}
+	return false;
+}
+
+bool UITreeListItem::hasTag(const String& tag) const
+{
+	return std_ex::contains(tags, tag);
+}
+
+bool UITreeListItem::hasTagInAncestors(const String& tag) const
+{
+	return hasTag(tag) || (parent && parent->hasTagInAncestors(tag));
 }
 
 std::optional<String> UITreeListItem::doGetLastExpandedItem(bool expandedTree, const String& lastId, const String& targetId)
