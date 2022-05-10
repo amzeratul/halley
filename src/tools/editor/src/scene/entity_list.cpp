@@ -64,6 +64,11 @@ void EntityList::makeUI()
 		notifyValidatorList();
 	});
 
+	setHandle(UIEventType::TreeItemExpanded, [=] (const UIEvent& event)
+	{
+		setEntityExpanded(event.getStringData(), event.getBoolData());
+	});
+
 	setHandle(UIEventType::ListItemRightClicked, [=] (const UIEvent& event)
 	{
 		openContextMenu(list->getSelectedOptionIds());
@@ -87,7 +92,8 @@ void EntityList::addEntity(const EntityData& data, const String& parentId, int c
 	const bool isPrefab = !data.getPrefab().isEmpty();
 	const auto info = getEntityInfo(data);
 	const size_t idx = childIndex >= 0 ? static_cast<size_t>(childIndex) : std::numeric_limits<size_t>::max();
-	list->addTreeItem(data.getInstanceUUID().toString(), parentId, idx, LocalisedString::fromUserString(info.name), isPrefab ? "labelSpecial" : "label", info.icon, isPrefab);
+	const bool expanded = !data.getFlag(EntityData::Flag::TreeViewCollapsed);
+	list->addTreeItem(data.getInstanceUUID().toString(), parentId, idx, LocalisedString::fromUserString(info.name), isPrefab ? "labelSpecial" : "label", info.icon, isPrefab, expanded);
 	markValid(data.getInstanceUUID(), info.severity);
 }
 
@@ -161,6 +167,14 @@ void EntityList::onEntityModified(const String& id, const EntityData& node, bool
 	const bool validationChanged = markValid(node.getInstanceUUID(), info.severity);
 	if (validationChanged || !onlyRefreshValidation) {
 		list->setLabel(id, LocalisedString::fromUserString(info.name), std::move(info.icon));
+	}
+}
+
+void EntityList::setEntityExpanded(const String& id, bool expanded)
+{
+	const bool modified = sceneData->getWriteableEntityNodeData(id).getData().setFlag(EntityData::Flag::TreeViewCollapsed, !expanded);
+	if (modified) {
+		sceneEditorWindow->markModified();
 	}
 }
 

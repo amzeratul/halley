@@ -66,6 +66,15 @@ UIEvent::UIEvent(UIEventType type, String sourceId, String data, int intData)
 	configData["str"] = std::move(data);
 }
 
+UIEvent::UIEvent(UIEventType type, String sourceId, String data, bool boolData)
+	: type(type)
+	, sourceId(std::move(sourceId))
+	, configData(ConfigNode::MapType())
+{
+	configData["bool"] = boolData;
+	configData["str"] = std::move(data);
+}
+
 UIEvent::UIEvent(UIEventType type, String sourceId, String data, String data2, int intData)
 	: type(type)
 	, sourceId(std::move(sourceId))

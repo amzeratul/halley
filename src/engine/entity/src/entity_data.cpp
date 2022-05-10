@@ -261,10 +261,12 @@ void EntityData::setIcon(String icon)
 	this->icon = std::move(icon);
 }
 
-void EntityData::setFlag(Flag f, bool value)
+bool EntityData::setFlag(Flag f, bool value)
 {
 	const auto flag = static_cast<uint8_t>(f);
+	const auto oldValue = flags;
 	flags = (flags & ~flag) | (value ? flag : 0);
+	return flags != oldValue;
 }
 
 void EntityData::randomiseInstanceUUIDs()

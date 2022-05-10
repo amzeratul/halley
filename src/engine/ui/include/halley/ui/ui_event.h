@@ -57,8 +57,9 @@ namespace Halley {
 		TabChanged,
 		TabbedIn,
 		TabbedOut,
-		TreeCollapse,
-		TreeExpand,
+		TreeCollapseHandle,
+		TreeExpandHandle,
+		TreeItemExpanded,
 		TreeItemReparented,
 		UnhandledMousePressLeft,
 		UnhandledMousePressRight,
@@ -79,6 +80,7 @@ namespace Halley {
 		UIEvent(UIEventType type, String sourceId, KeyCode keyCode, KeyMods keyMods);
 		UIEvent(UIEventType type, String sourceId, float data);
 		UIEvent(UIEventType type, String sourceId, String data, int intData);
+		UIEvent(UIEventType type, String sourceId, String data, bool boolData);
 		UIEvent(UIEventType type, String sourceId, String data, String data2, int intData);
 		UIEvent(UIEventType type, String sourceId, Vector2f data);
 		UIEvent(UIEventType type, String sourceId, Rect4f data);

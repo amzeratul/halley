@@ -77,6 +77,8 @@ namespace Halley {
 		void validateEntityTree(const EntityTree& entityTree);
 		void onEntityModified(const String& id, const EntityData& node, bool onlyRefreshValidation);
 
+		void setEntityExpanded(const String& id, bool expanded);
+
 		IEntityValidator::Severity getEntitySeverity(const EntityData& entityData, bool recursive) const;
 	};
 }

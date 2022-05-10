@@ -17,7 +17,7 @@ UITreeList::UITreeList(String id, UIStyle style)
 	setupEvents();
 }
 
-void UITreeList::addTreeItem(const String& id, const String& parentId, size_t childIndex, const LocalisedString& label, const String& labelStyleName, Sprite icon, bool forceLeaf)
+void UITreeList::addTreeItem(const String& id, const String& parentId, size_t childIndex, const LocalisedString& label, const String& labelStyleName, Sprite icon, bool forceLeaf, bool expanded)
 {
 	const auto& style = styles.at(0);
 	auto listItem = std::make_shared<UIListItem>(id, *this, style.getSubStyle("item"), int(getNumberOfItems()), style.getBorder("extraMouseBorder"));
@@ -49,7 +49,7 @@ void UITreeList::addTreeItem(const String& id, const String& parentId, size_t ch
 	listItem->setDraggableSubWidget(root.get());
 
 	// Logical item
-	auto treeItem = std::make_unique<UITreeListItem>(id, listItem, treeControls, labelWidget, iconWidget, forceLeaf);
+	auto treeItem = std::make_unique<UITreeListItem>(id, listItem, treeControls, labelWidget, iconWidget, forceLeaf, expanded);
 	auto& parentItem = getItemOrRoot(parentId);
 	parentItem.addChild(std::move(treeItem), childIndex);
 
@@ -214,22 +214,24 @@ UITreeListItem& UITreeList::getItemOrRoot(const String& id)
 
 void UITreeList::setupEvents()
 {
-	setHandle(UIEventType::TreeCollapse, [=] (const UIEvent& event)
+	setHandle(UIEventType::TreeCollapseHandle, [=] (const UIEvent& event)
 	{
 		auto elem = root.tryFindId(event.getStringData());
 		if (elem) {
 			elem->setExpanded(false);
 		}
 		needsRefresh = true;
+		sendEvent(UIEvent(UIEventType::TreeItemExpanded, getId(), event.getStringData(), false));
 	});
 
-	setHandle(UIEventType::TreeExpand, [=](const UIEvent& event)
+	setHandle(UIEventType::TreeExpandHandle, [=](const UIEvent& event)
 	{
 		auto elem = root.tryFindId(event.getStringData());
 		if (elem) {
 			elem->setExpanded(true);
 		}
 		needsRefresh = true;
+		sendEvent(UIEvent(UIEventType::TreeItemExpanded, getId(), event.getStringData(), true));
 	});
 }
 
@@ -326,8 +328,10 @@ bool UITreeList::isSingleRoot() const
 
 void UITreeList::setAllExpanded(bool expanded)
 {
-	root.setAllExpanded(expanded);
-	needsRefresh = true;
+	const bool changed = root.setAllExpanded(*this, expanded);
+	if (changed) {
+		needsRefresh = true;
+	}
 }
 
 bool UITreeList::canDragListItem(const UIListItem& listItem)
@@ -442,24 +446,29 @@ void UITreeListControls::setupUI()
 {
 	setHandle(UIEventType::ButtonClicked, "expand", [=] (const UIEvent& event)
 	{
-		sendEvent(UIEvent(UIEventType::TreeExpand, getId(), getId()));
+		sendEvent(UIEvent(UIEventType::TreeExpandHandle, getId(), getId()));
 	});
 	setHandle(UIEventType::ButtonClicked, "collapse", [=](const UIEvent& event)
 	{
-		sendEvent(UIEvent(UIEventType::TreeCollapse, getId(), getId()));
+		sendEvent(UIEvent(UIEventType::TreeCollapseHandle, getId(), getId()));
 	});
 }
 
 UITreeListItem::UITreeListItem() = default;
 
-UITreeListItem::UITreeListItem(String id, std::shared_ptr<UIListItem> listItem, std::shared_ptr<UITreeListControls> treeControls, std::shared_ptr<UILabel> label, std::shared_ptr<UIImage> icon, bool forceLeaf)
+UITreeListItem::UITreeListItem(String id, std::shared_ptr<UIListItem> listItem, std::shared_ptr<UITreeListControls> treeCtrl, std::shared_ptr<UILabel> label, std::shared_ptr<UIImage> icon, bool forceLeaf, bool expanded)
 	: id(std::move(id))
 	, listItem(std::move(listItem))
 	, label(std::move(label))
 	, icon(std::move(icon))
-	, treeControls(std::move(treeControls))
+	, treeControls(std::move(treeCtrl))
+	, expanded(expanded)
 	, forceLeaf(forceLeaf)
-{}
+{
+	if (treeControls) {
+		treeControls->setExpanded(expanded);
+	}
+}
 
 UITreeListItem* UITreeListItem::tryFindId(const String& id)
 {
@@ -482,7 +491,7 @@ void UITreeListItem::addChild(std::unique_ptr<UITreeListItem> item, size_t pos)
 	Expects(!forceLeaf);
 	
 	if (children.empty()) {
-		expanded = true;
+		//expanded = true;
 	}
 	item->parentId = id;
 	
@@ -533,20 +542,29 @@ void UITreeListItem::setIcon(Sprite sprite)
 	}
 }
 
-void UITreeListItem::setExpanded(bool e)
+bool UITreeListItem::setExpanded(bool e)
 {
 	if (!children.empty() && treeControls) {
+		const bool changed = e != expanded;
 		expanded = e;
 		treeControls->setExpanded(e);
+		return changed;
 	}
+	return false;
 }
 
-void UITreeListItem::setAllExpanded(bool expanded)
+bool UITreeListItem::setAllExpanded(UITreeList& tree, bool expanded)
 {
-	setExpanded(expanded);
-	for (auto& c: children) {
-		c->setAllExpanded(expanded);
+	bool changed = setExpanded(expanded);
+	if (changed) {
+		tree.sendEvent(UIEvent(UIEventType::TreeItemExpanded, tree.getId(), id, expanded));
 	}
+
+	for (auto& c: children) {
+		changed = c->setAllExpanded(tree, expanded) || changed;
+	}
+
+	return changed;
 }
 
 void UITreeListItem::setForceLeaf(bool leaf)

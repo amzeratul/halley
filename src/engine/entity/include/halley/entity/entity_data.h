@@ -76,7 +76,7 @@ namespace Halley {
     	void setName(String name);
     	void setPrefab(String prefab);
     	void setIcon(String icon);
-        void setFlag(Flag flag, bool value);
+        bool setFlag(Flag flag, bool value);
         void randomiseInstanceUUIDs();
     	void setInstanceUUID(UUID instanceUUID);
     	void setPrefabUUID(UUID prefabUUID);
