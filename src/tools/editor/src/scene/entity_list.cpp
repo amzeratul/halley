@@ -53,15 +53,17 @@ void EntityList::makeUI()
 
 	setHandle(UIEventType::TreeItemReparented, [=] (const UIEvent& event)
 	{
-		const auto& src = event.getConfigData().asSequence();
-		Vector<EntityChangeOperation> changes;
-		changes.reserve(src.size());
-		for (const auto& e: src) {
-			changes.emplace_back(EntityChangeOperation{ {}, e["itemId"].asString(), e["parentId"].asString(), e["childIdx"].asInt() });
-		}
+		Concurrent::execute(Executors::getMainUpdateThread(), [this, event] () {
+			const auto& src = event.getConfigData().asSequence();
+			Vector<EntityChangeOperation> changes;
+			changes.reserve(src.size());
+			for (const auto& e: src) {
+				changes.emplace_back(EntityChangeOperation{ {}, e["itemId"].asString(), e["parentId"].asString(), e["childIdx"].asInt() });
+			}
 
-		sceneEditorWindow->moveEntities(changes, false);
-		notifyValidatorList();
+			sceneEditorWindow->moveEntities(changes, false);
+			notifyValidatorList();
+		});
 	});
 
 	setHandle(UIEventType::TreeItemExpanded, [=] (const UIEvent& event)
