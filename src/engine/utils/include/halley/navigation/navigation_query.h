@@ -23,6 +23,7 @@ namespace Halley {
 		explicit NavigationQuery(const ConfigNode& node);
 
 		ConfigNode toConfigNode() const;
+		String toString() const;
 
 		bool operator==(const NavigationQuery& other) const;
 		bool operator!=(const NavigationQuery& other) const;

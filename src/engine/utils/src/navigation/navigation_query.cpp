@@ -32,9 +32,15 @@ ConfigNode NavigationQuery::toConfigNode() const
 	result["fromSubWorld"] = fromSubWorld;
 	result["to"] = to;
 	result["toSubWorld"] = toSubWorld;
-	result["postProcessingType"] = toString(postProcessingType);
+	result["postProcessingType"] = Halley::toString(postProcessingType);
 	
 	return result;
+}
+
+String NavigationQuery::toString() const
+{
+	using Halley::toString;
+	return "navQuery(" + toString(from) + ":" + toString(fromSubWorld) + " -> " + toString(to) + ":" + toString(toSubWorld) + ", " + toString(postProcessingType) + ")";
 }
 
 bool NavigationQuery::operator==(const NavigationQuery& other) const

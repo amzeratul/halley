@@ -368,9 +368,17 @@ std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, co
 		points.push_back(0.5f * (edge.a + edge.b));
 	}
 	points.push_back(query.to);
-
+	
 	if (query.postProcessingType != NavigationQuery::PostProcessingType::None) {
 		postProcessPath(points, query.postProcessingType);
+	}
+
+	// Check for NaN/inf
+	for (auto& p: points) {
+		if (!p.isValid()) {
+			Logger::logError("Navmesh query " + toString(query) + " generated NaNs and/or infs. Aborting.");
+			return NavigationPath(query, {});
+		}
 	}
 
 	return NavigationPath(query, points);
