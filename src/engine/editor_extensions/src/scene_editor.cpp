@@ -279,7 +279,7 @@ void SceneEditor::setEntityHighlightedOnList(const UUID& id, bool forceShow)
 {
 	auto entity = world->findEntity(id).value_or(EntityRef());
 	if (forceShow) {
-		forceFocusEntity = entity;
+		forceFocusEntity = entity.isValid() ? entity : std::optional<EntityRef>();
 	}
 	entityHighlightedOnList = entity;
 }
