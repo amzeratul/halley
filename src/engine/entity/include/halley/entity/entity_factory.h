@@ -88,7 +88,7 @@ namespace Halley {
 			if (componentData.getType() == ConfigNodeType::Del) {
 				e.removeComponent<T>();
 			} else {
-				auto* comp = e.tryGetComponent<T>();
+				auto* comp = e.tryGetComponent<T>(true);
 				if (comp) {
 					comp->deserialize(entitySerializationContext, componentData);
 				} else {

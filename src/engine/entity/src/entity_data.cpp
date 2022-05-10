@@ -328,7 +328,7 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 		icon = delta.icon.value();
 	}
 	if (delta.flags) {
-		flags ^= delta.flags.value();
+		flags = delta.flags.value();
 	}
 	if (delta.instanceUUID) {
 		instanceUUID = delta.instanceUUID.value();

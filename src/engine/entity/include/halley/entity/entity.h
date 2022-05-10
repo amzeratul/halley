@@ -49,24 +49,28 @@ namespace Halley {
 		~Entity();
 
 		template <typename T>
-		T* tryGetComponent()
+		T* tryGetComponent(bool evenIfDisabled = false)
 		{
-			constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
-			for (uint8_t i = 0; i < liveComponents; i++) {
-				if (components[i].first == id) {
-					return static_cast<T*>(components[i].second);
+			if (evenIfDisabled || (enabled && parentEnabled)) {
+				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
+				for (uint8_t i = 0; i < liveComponents; i++) {
+					if (components[i].first == id) {
+						return static_cast<T*>(components[i].second);
+					}
 				}
 			}
 			return nullptr;
 		}
 
 		template <typename T>
-		const T* tryGetComponent() const
+		const T* tryGetComponent(bool evenIfDisabled = false) const
 		{
-			constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
-			for (uint8_t i = 0; i < liveComponents; i++) {
-				if (components[i].first == id) {
-					return static_cast<const T*>(components[i].second);
+			if (evenIfDisabled || (enabled && parentEnabled)) {
+				constexpr int id = FamilyMask::RetrieveComponentIndex<T>::componentIndex;
+				for (uint8_t i = 0; i < liveComponents; i++) {
+					if (components[i].first == id) {
+						return static_cast<const T*>(components[i].second);
+					}
 				}
 			}
 			return nullptr;
@@ -365,17 +369,17 @@ namespace Halley {
 		}
 
 		template <typename T>
-		T* tryGetComponent()
+		T* tryGetComponent(bool evenIfDisabled = false)
 		{
 			validate();
-			return entity->tryGetComponent<T>();
+			return entity->tryGetComponent<T>(evenIfDisabled);
 		}
 
 		template <typename T>
-		const T* tryGetComponent() const
+		const T* tryGetComponent(bool evenIfDisabled = false) const
 		{
 			validate();
-			return entity->tryGetComponent<T>();
+			return entity->tryGetComponent<T>(evenIfDisabled);
 		}
 
 		template <typename T>

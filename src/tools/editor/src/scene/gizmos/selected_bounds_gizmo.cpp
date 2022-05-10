@@ -70,7 +70,7 @@ void SelectedBoundsGizmo::drawMerged(Painter& painter, const ISceneEditor& scene
 
 void SelectedBoundsGizmo::drawStencilTree(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor) const
 {
-	if (const auto* sprite = entity.tryGetComponent<SpriteComponent>()) {
+	if (const auto* sprite = entity.tryGetComponent<SpriteComponent>(true)) {
 		if (shouldInclude(sprite->sprite, sceneEditor)) {
 			drawStencilSprite(painter, sprite->sprite);
 		}
@@ -82,7 +82,7 @@ void SelectedBoundsGizmo::drawStencilTree(Painter& painter, EntityRef entity, co
 
 void SelectedBoundsGizmo::drawOutlineTree(Painter& painter, EntityRef entity, const ISceneEditor& sceneEditor, float width, Colour4f colour) const
 {
-	if (const auto* sprite = entity.tryGetComponent<SpriteComponent>()) {
+	if (const auto* sprite = entity.tryGetComponent<SpriteComponent>(true)) {
 		if (shouldInclude(sprite->sprite, sceneEditor)) {
 			drawOutlineSprite(painter, sprite->sprite, width, colour);
 		}
