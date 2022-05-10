@@ -275,9 +275,13 @@ void SceneEditor::cycleHighlight(int delta)
 	highlightDelta += delta;
 }
 
-void SceneEditor::setEntityHighlightedOnList(const UUID& id)
+void SceneEditor::setEntityHighlightedOnList(const UUID& id, bool forceShow)
 {
-	entityHighlightedOnList = world->findEntity(id).value_or(EntityRef());
+	auto entity = world->findEntity(id).value_or(EntityRef());
+	if (forceShow) {
+		forceFocusEntity = entity;
+	}
+	entityHighlightedOnList = entity;
 }
 
 EntityRef SceneEditor::getEntityToFocus()

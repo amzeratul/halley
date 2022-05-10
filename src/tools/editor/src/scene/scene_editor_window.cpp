@@ -274,7 +274,7 @@ void SceneEditorWindow::update(Time t, bool moved)
 	updateButtons();
 
 	if (entityList && gameBridge) {
-		gameBridge->setEntityHighlightedOnList(entityList->getEntityUnderCursor());
+		gameBridge->setEntityHighlightedOnList(entityList->getEntityUnderCursor(), false);
 	}
 }
 
@@ -434,12 +434,23 @@ void SceneEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
 	Vector<String> ids;
 	Vector<String> names;
 	entityList->collectEntities(ids, names);
+	const auto cameraStartPos = gameBridge->getCameraPos();
+	const auto initialSelection = entityList->getCurrentSelection();
 
 	assetFinder.setAssetIds(std::move(ids), std::move(names), "@", [=](std::optional<String> result)
 	{
 		if (result) {
 			selectEntity(*result);
+		} else {
+			selectEntity(initialSelection);
+			gameBridge->moveCamera(cameraStartPos);
 		}
+		gameBridge->setEntityHighlightedOnList(UUID(), true);
+	}, [=] (const String& toHighlight)
+	{
+		gameBridge->setEntityHighlightedOnList(UUID(toHighlight), true);
+		selectEntity(toHighlight);
+		panCameraToEntity(toHighlight);
 	});
 	assetFinder.setInputGhostText(LocalisedString::fromHardcodedString("Search files by name (Prefix with @ to find an entity)"));
 }

@@ -214,7 +214,7 @@ namespace Halley {
         virtual void changeZoom(int amount, Vector2f cursorPosRelToCamera) = 0;
 
     	virtual void setSelectedEntities(Vector<UUID> uuids, Vector<EntityData*> datas) = 0;
-    	virtual void setEntityHighlightedOnList(const UUID& id) = 0;
+    	virtual void setEntityHighlightedOnList(const UUID& id, bool forceShow) = 0;
 
     	virtual void showEntity(const UUID& id) = 0;
         virtual void onToolSet(String& tool, String& componentName, String& fieldName) = 0;

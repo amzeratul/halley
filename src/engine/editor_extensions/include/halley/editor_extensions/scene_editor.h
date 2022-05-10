@@ -38,7 +38,7 @@ namespace Halley {
     	void setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizmoCollection) override;
 
     	void setSelectedEntities(Vector<UUID> uuids, Vector<EntityData*> datas) override;
-    	void setEntityHighlightedOnList(const UUID& id) override;
+    	void setEntityHighlightedOnList(const UUID& id, bool forceShow) override;
 
 		void showEntity(const UUID& id) override;
 		void onToolSet(String& tool, String& componentName, String& fieldName) override;

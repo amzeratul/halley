@@ -33,9 +33,54 @@ ChooseAssetWindow::~ChooseAssetWindow() = default;
 
 void ChooseAssetWindow::onAddedToRoot(UIRoot& root)
 {
+	auto size = getMinimumSize();
+	size.y = std::max(size.y, root.getRect().getHeight() / 2 - 50.0f);
+	setMinSize(size);
+
 	root.setFocus(getWidget("search"));
 	root.registerKeyPressListener(getWidget("options"), 2);
 	root.registerKeyPressListener(shared_from_this(), 1);
+}
+
+void ChooseAssetWindow::onMakeUI()
+{
+	options = getWidgetAs<UIList>("options");
+
+	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
+	{
+		accept();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "cancel", [=](const UIEvent& event)
+	{
+		cancel();
+	});
+
+	setHandle(UIEventType::TextChanged, "search", [=](const UIEvent& event)
+	{
+		setUserFilter(event.getStringData());
+	});
+
+	setHandle(UIEventType::TextSubmit, "search", [=](const UIEvent& event)
+	{
+		accept();
+	});
+
+	setHandle(UIEventType::ListAccept, "options", [=](const UIEvent& event)
+	{
+		accept();
+	});
+
+	setHandle(UIEventType::ListSelectionChanged, "options", [=] (const UIEvent& event)
+	{
+		if (entries[curEntry].highlightCallback) {
+			entries[curEntry].highlightCallback(event.getStringData());
+		}
+	});
+
+	setChildLayerAdjustment(10);
+
+	layout();
 }
 
 void ChooseAssetWindow::setAssetIds(Vector<String> ids, String defaultOption)
@@ -46,10 +91,10 @@ void ChooseAssetWindow::setAssetIds(Vector<String> ids, String defaultOption)
 void ChooseAssetWindow::setAssetIds(Vector<String> ids, Vector<String> names, String defaultOption)
 {
 	this->defaultOption = std::move(defaultOption);
-	setAssetIds(std::move(ids), std::move(names), "", {});
+	setAssetIds(std::move(ids), std::move(names), "", {}, {});
 }
 
-void ChooseAssetWindow::setAssetIds(Vector<String> ids, Vector<String> names, String prefix, Callback callback)
+void ChooseAssetWindow::setAssetIds(Vector<String> ids, Vector<String> names, String prefix, Callback callback, HighlightCallback highlightCallback)
 {
 	auto& e = getEntry(prefix);
 
@@ -67,6 +112,7 @@ void ChooseAssetWindow::setAssetIds(Vector<String> ids, Vector<String> names, St
 		setCategoryFilter("");
 	} else {
 		e.callback = std::move(callback);
+		e.highlightCallback = std::move(highlightCallback);
 	}
 }
 
@@ -343,40 +389,6 @@ std::shared_ptr<UIImage> ChooseAssetWindow::makeIcon(const String& id, bool hasS
 UIFactory& ChooseAssetWindow::getFactory() const
 {
 	return factory;
-}
-
-void ChooseAssetWindow::onMakeUI()
-{
-	options = getWidgetAs<UIList>("options");
-
-	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
-	{
-		accept();
-	});
-
-	setHandle(UIEventType::ButtonClicked, "cancel", [=](const UIEvent& event)
-	{
-		cancel();
-	});
-
-	setHandle(UIEventType::TextChanged, "search", [=](const UIEvent& event)
-	{
-		setUserFilter(event.getStringData());
-	});
-
-	setHandle(UIEventType::TextSubmit, "search", [=](const UIEvent& event)
-	{
-		accept();
-	});
-
-	setHandle(UIEventType::ListAccept, "options", [=](const UIEvent& event)
-	{
-		accept();
-	});
-
-	setChildLayerAdjustment(10);
-
-	layout();
 }
 
 LocalisedString ChooseAssetWindow::getItemLabel(const String& id, const String& name, bool hasSearch)

@@ -149,10 +149,10 @@ void SceneEditorGameBridge::setSelectedEntities(Vector<UUID> uuids, Vector<Entit
 	}
 }
 
-void SceneEditorGameBridge::setEntityHighlightedOnList(const UUID& uuid)
+void SceneEditorGameBridge::setEntityHighlightedOnList(const UUID& uuid, bool forceShow)
 {
 	if (interfaceReady) {
-		interface->setEntityHighlightedOnList(uuid);
+		interface->setEntityHighlightedOnList(uuid, forceShow);
 	}
 }
 

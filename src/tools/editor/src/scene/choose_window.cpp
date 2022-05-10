@@ -29,6 +29,7 @@ PaletteWindow::PaletteWindow(UIFactory& factory, Project& project, Callback call
 	
 	setAssetIds(std::move(assetNames), "");
 	setTitle(LocalisedString::fromHardcodedString("Open asset"));
+	setAnchor(UIAnchor(Vector2f(0.5f, 0.0f), Vector2f(0.5f, 0.0f)));
 }
 
 std::shared_ptr<UIImage> PaletteWindow::makeIcon(const String& id, bool hasSearch)

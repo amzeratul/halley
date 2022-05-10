@@ -14,6 +14,7 @@ namespace Halley {
     class ChooseAssetWindow : public UIWidget {
     public:		
         using Callback = std::function<void(std::optional<String>)>;
+		using HighlightCallback = std::function<void(const String&)>;
 		
         ChooseAssetWindow(Vector2f minSize, UIFactory& factory, Callback callback, std::optional<String> canShowBlank = "[None]");
 		virtual ~ChooseAssetWindow();
@@ -21,7 +22,7 @@ namespace Halley {
         void onAddedToRoot(UIRoot& root) override;
 		void setAssetIds(Vector<String> ids, String defaultOption);
 		void setAssetIds(Vector<String> ids, Vector<String> names, String defaultOption);
-		void setAssetIds(Vector<String> ids, Vector<String> names, String prefix, Callback callback);
+		void setAssetIds(Vector<String> ids, Vector<String> names, String prefix, Callback callback, HighlightCallback highlightCallback);
 
 		void setTitle(LocalisedString title);
 		void setInputGhostText(LocalisedString text);
@@ -58,6 +59,7 @@ namespace Halley {
 			Vector<String> origNames;
 			String prefix;
 			Callback callback;
+			HighlightCallback highlightCallback;
 		};
 
 		Vector<String> ids;

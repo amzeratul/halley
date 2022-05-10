@@ -16,11 +16,11 @@ children:
     proportion: 1
 - widget: { id: search, class: textInput, size: [50, 22], ghostText: Search, tooltip: "Type the name (or part of the name) of the asset you want to search for.", showGhostWhenFocused: true }
   border: [1, 4, 1, 1]
-- widget: { id: optionsScroll, class: scrollBarPane, size: [625, 400], scrollHorizontal: true, scrollVertical: true, autoHide: true }
+- widget: { id: optionsScroll, class: scrollBarPane, size: [625, 200], scrollHorizontal: true, scrollVertical: true, autoHide: true }
   border: [1, 4, 1, 1]
   proportion: 1
   children:
-  - widget: { id: options, class: list, size: [400, 400], singleClickAccept: false }
+  - widget: { id: options, class: list, size: [400, 200], singleClickAccept: false }
     proportion: 1
 - sizer: { type: horizontal }
   children:
