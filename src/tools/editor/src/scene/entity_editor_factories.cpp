@@ -402,7 +402,7 @@ public:
 					if (uniform.type == ShaderParameterType::Float || uniform.type == ShaderParameterType::Int) {
 						String typeName = uniform.type == ShaderParameterType::Float ? "float" : "int";
 						if (uniform.range) {
-							type = "Halley::Range<" + typeName + "," + toString(uniform.range->start) + "," + toString(uniform.range->end) + ">";
+							type = "Halley::Range<" + typeName + "," + toString(uniform.range->start) + "," + toString(uniform.range->end) + "," + toString(uniform.granularity) + ">";
 						} else {
 							type = typeName;
 						}
@@ -1133,22 +1133,31 @@ public:
 		auto style = context.getUIFactory().getStyle("slider");
 
 		Range<float> range(0, 1);
-		if (pars.typeParameters.size() == 3) {
+		float granularity = 0;
+		if (pars.typeParameters.size() >= 3 && pars.typeParameters.size() <= 4) {
 			range = Range<float>(pars.typeParameters[1].toFloat(), pars.typeParameters[2].toFloat());
+			if (pars.typeParameters.size() == 4) {
+				granularity = pars.typeParameters[3].toFloat();
+			}
 		}
 		auto field = std::make_shared<UISlider>("range", style, range.start, range.end);
 		if (intType) {
 			field->setGranularity(1.0f);
 		} else {
-			const float totalRange = range.getLength();
-			float granularity = 0.01f;
 			int decimalPlaces = 2;
+			float baseGranularity = 0.01f;
+
+			const float totalRange = range.getLength();
 			if (totalRange >= 100) {
-				granularity = 1.0f;
+				baseGranularity = 1.0f;
 				decimalPlaces = 0;
 			} else if (totalRange >= 10) {
-				granularity = 0.1f;
+				baseGranularity = 0.1f;
 				decimalPlaces = 1;
+			}
+
+			if (granularity < 0.00001f) {
+				granularity = baseGranularity;
 			}
 			field->setGranularity(granularity);
 			field->setLabelConversion([decimalPlaces](float v) { return LocalisedString::fromUserString(toString(v, decimalPlaces)); });
