@@ -256,8 +256,12 @@ void UIWidget::remove(IUIElement& element)
 		removeChild(*widget);
 		widget->destroy();
 	} else {
-		throw Exception("Unimplemented: UIWidget::remove with sizer", HalleyExceptions::UI);
-	}	
+		const auto sizer = dynamic_cast<UISizer*>(&element);
+		if (sizer) {
+			sizer->clear();
+		}
+		//throw Exception("Unimplemented: UIWidget::remove with sizer", HalleyExceptions::UI);
+	}
 	if (sizer) {
 		sizer->remove(element);
 	}
