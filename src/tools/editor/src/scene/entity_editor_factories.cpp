@@ -415,9 +415,18 @@ public:
 					if (type.isEmpty()) {
 						continue;
 					}
-					
+
+					Vector<String> defaultValue;
+					if (uniform.defaultValue.getType() != ConfigNodeType::Undefined) {
+						if (uniform.defaultValue.getType() == ConfigNodeType::Sequence) {
+							defaultValue = uniform.defaultValue.asVector<String>({});
+						} else {
+							defaultValue.push_back(uniform.defaultValue.asString());
+						}
+					}
+
 					const auto label = context.makeLabel("- " + uniform.name);
-					const auto widget = context.makeField(type, pars.withSubKey(key), ComponentEditorLabelCreation::Never);
+					const auto widget = context.makeField(type, pars.withSubKey(key, defaultValue), ComponentEditorLabelCreation::Never);
 					
 					container->add(label, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
 					container->add(widget, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);

@@ -655,6 +655,37 @@ Sprite ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContex
 	return sprite;
 }
 
+namespace {
+	float clampToRange(std::optional<Range<float>> range, float v)
+	{
+		return range ? clamp(v, range->start, range->end) : v;
+	}
+
+	Vector2f clampToRange(std::optional<Range<float>> range, Vector2f v)
+	{
+		if (range) {
+			return Vector2f(clamp(v.x, range->start, range->end), clamp(v.y, range->start, range->end));
+		}
+		return v;
+	}
+
+	Vector3f clampToRange(std::optional<Range<float>> range, Vector3f v)
+	{
+		if (range) {
+			return Vector3f(clamp(v.x, range->start, range->end), clamp(v.y, range->start, range->end), clamp(v.z, range->start, range->end));
+		}
+		return v;
+	}
+
+	Vector4f clampToRange(std::optional<Range<float>> range, Vector4f v)
+	{
+		if (range) {
+			return Vector4f(clamp(v.x, range->start, range->end), clamp(v.y, range->start, range->end), clamp(v.z, range->start, range->end), clamp(v.w, range->start, range->end));
+		}
+		return v;
+	}
+}
+
 void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, Sprite& sprite)
 {
 	if (node.getType() == ConfigNodeType::Undefined) {
@@ -718,13 +749,25 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		// Load material parameters
 		for (const auto& block: material->getUniformBlocks()) {
 			for (const auto& uniform: block.uniforms) {
+				auto applyValue = [&] (const ConfigNode& node)
+				{
+					if (uniform.type == ShaderParameterType::Float) {
+						sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asFloat(0)));
+					} else if (uniform.type == ShaderParameterType::Float2) {
+						sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector2f(Vector2f())));
+					} else if (uniform.type == ShaderParameterType::Float3) {
+						sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector3f(Vector3f())));
+					} else if (uniform.type == ShaderParameterType::Float4) {
+						sprite.getMutableMaterial().set(uniform.name, clampToRange(uniform.range, node.asVector4f(Vector4f())));
+					}
+				};
+
 				if (uniform.editable) {
 					const auto key = "par_" + uniform.name;
 					if (node.hasKey(key)) {
-						const auto& parNode = node[key];
-						if (uniform.type == ShaderParameterType::Float) {
-							sprite.getMutableMaterial().set(uniform.name, parNode.asFloat());
-						}
+						applyValue(node[key]);
+					} else {
+						applyValue(uniform.defaultValue);
 					}
 				}
 			}

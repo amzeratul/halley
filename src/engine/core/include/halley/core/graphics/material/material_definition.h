@@ -1,5 +1,6 @@
 #pragma once
 #include "halley/core/graphics/blend.h"
+#include "halley/data_structures/config_node.h"
 #include "halley/resources/resource.h"
 #include "halley/maths/range.h"
 
@@ -124,9 +125,10 @@ namespace Halley
 		std::optional<Range<float>> range;
 		bool editable = true;
 		ShaderParameterType type;
+		ConfigNode defaultValue;
 
 		MaterialUniform();
-		MaterialUniform(String name, ShaderParameterType type, std::optional<Range<float>> range = {}, bool editable = true, String autoVariable = "");
+		MaterialUniform(String name, ShaderParameterType type, std::optional<Range<float>> range = {}, bool editable = true, String autoVariable = "", ConfigNode defaultValue = {});
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
