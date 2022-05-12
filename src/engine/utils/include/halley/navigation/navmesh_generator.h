@@ -55,15 +55,15 @@ namespace Halley {
 
 		static Vector<NavmeshNode> toNavmeshNode(Vector<Polygon> polygons);
 		static void generateConnectivity(gsl::span<NavmeshNode> polygons);
-		static void postProcessPolygons(Vector<NavmeshNode>& polygons, float maxSize, bool allowSimplification);
+		static void postProcessPolygons(Vector<NavmeshNode>& polygons, float maxSize, bool allowSimplification, const NavmeshBounds& bounds);
 		static void removeDeadPolygons(Vector<NavmeshNode>& polygons);
 		static void tagEdgeConnections(gsl::span<NavmeshNode> nodes, gsl::span<const Line> mapEdges);
 
-		static std::optional<NavmeshNode> merge(const NavmeshNode& a, const NavmeshNode& b, size_t aEdgeIdx, size_t bEdgeIdx, size_t aIdx, size_t bIdx, float maxSize, bool allowSimplification);
+		static std::optional<NavmeshNode> merge(const NavmeshNode& a, const NavmeshNode& b, size_t aEdgeIdx, size_t bEdgeIdx, size_t aIdx, size_t bIdx, float maxSize, bool allowSimplification, const NavmeshBounds& bounds);
 		static void remapConnections(NavmeshNode& poly, int from, int to);
 
-		static void simplifyPolygon(NavmeshNode& node, float threshold);
-		static void simplifyPolygons(Vector<NavmeshNode>& nodes);
+		static void simplifyPolygon(NavmeshNode& node, float threshold, const NavmeshBounds& bounds);
+		static void simplifyPolygons(Vector<NavmeshNode>& nodes, const NavmeshBounds& bounds);
 
 		static void limitPolygonSides(Vector<Polygon>& polygons, size_t maxSides);
 

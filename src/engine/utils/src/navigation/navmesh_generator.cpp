@@ -29,7 +29,7 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 
 			auto cellPolygons = toNavmeshNode(generateByPolygonSubtraction(gsl::span<const Polygon>(&cell, 1), obstacles, cell.getBoundingCircle()));
 			generateConnectivity(cellPolygons);
-			postProcessPolygons(cellPolygons, maxSize, false);
+			postProcessPolygons(cellPolygons, maxSize, false, params.bounds);
 
 			const int startIdx = static_cast<int>(polygons.size());
 			for (auto& p: cellPolygons) {
@@ -45,10 +45,10 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 
 	splitByPortals(polygons, params.subworldPortals);
 	generateConnectivity(polygons);
-	tagEdgeConnections(polygons, params.bounds.makeEdges());
+	tagEdgeConnections(polygons, params.bounds.edges);
 	removeNodesBeyondPortals(polygons);
-	postProcessPolygons(polygons, maxSize, true);
-	simplifyPolygons(polygons);
+	postProcessPolygons(polygons, maxSize, true, params.bounds);
+	simplifyPolygons(polygons, params.bounds);
 	applyRegions(polygons, params.regions);
 	const int nRegions = assignRegions(polygons);
 
@@ -192,7 +192,7 @@ void NavmeshGenerator::generateConnectivity(gsl::span<NavmeshNode> polygons)
 	}
 }
 
-void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float maxSize, bool allowSimplification)
+void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float maxSize, bool allowSimplification, const NavmeshBounds& bounds)
 {
 	// Go through each polygon and see if any of its neighbours can be merged with it.
 	// If it can be merged, repeat the loop on the same polygon, otherwise move on
@@ -212,7 +212,7 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 				auto bEdgeIter = std::find_if(polyB.connections.begin(), polyB.connections.end(), [&] (int c) { return c == aIdx; });
 				assert(bEdgeIter != polyB.connections.end());
 				
-				auto mergedPolygon = merge(polyA, polyB, j, bEdgeIter - polyB.connections.begin(), aIdx, bIdx, maxSize, allowSimplification);
+				auto mergedPolygon = merge(polyA, polyB, j, bEdgeIter - polyB.connections.begin(), aIdx, bIdx, maxSize, allowSimplification, bounds);
 				if (mergedPolygon) {
 					for (auto& c: polyB.connections) {
 						if (c >= 0 && c != aIdx) {
@@ -257,7 +257,7 @@ void NavmeshGenerator::removeDeadPolygons(Vector<NavmeshNode>& polygons)
 
 void NavmeshGenerator::tagEdgeConnections(gsl::span<NavmeshNode> nodes, gsl::span<const Line> mapEdges)
 {
-	constexpr float epsilon = 0.1f;
+	constexpr float epsilon = 0.01f;
 	for (auto& node: nodes) {
 		for (size_t i = 0; i < node.connections.size(); ++i) {
 			auto& c = node.connections[i];
@@ -273,7 +273,7 @@ void NavmeshGenerator::tagEdgeConnections(gsl::span<NavmeshNode> nodes, gsl::spa
 	}
 }
 
-std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const NavmeshNode& a, const NavmeshNode& b, size_t aEdgeIdx, size_t bEdgeIdx, size_t aIdx, size_t bIdx, float maxSize, bool allowSimplification)
+std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const NavmeshNode& a, const NavmeshNode& b, size_t aEdgeIdx, size_t bEdgeIdx, size_t aIdx, size_t bIdx, float maxSize, bool allowSimplification, const NavmeshBounds& bounds)
 {
 	Expects(a.polygon.isValid());
 	Expects(b.polygon.isValid());
@@ -323,7 +323,7 @@ std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const Navme
 	
 	auto result = NavmeshNode(std::move(prePoly), std::move(connA));
 	if (allowSimplification) {
-		simplifyPolygon(result, 0.1f);
+		simplifyPolygon(result, 0.1f, bounds);
 	}
 
 	if (result.polygon.getNumSides() <= maxPolygonSides && result.polygon.isValid() && result.polygon.isConvex()) {
@@ -333,8 +333,10 @@ std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const Navme
 	}
 }
 
-void NavmeshGenerator::simplifyPolygon(NavmeshNode& node, float threshold)
+void NavmeshGenerator::simplifyPolygon(NavmeshNode& node, float threshold, const NavmeshBounds& bounds)
 {
+	// Goes through every vertex in a polygon, see if it can be simplified
+
 	auto vs = node.polygon.getVertices();
 	auto& conn = node.connections;
 	
@@ -345,16 +347,20 @@ void NavmeshGenerator::simplifyPolygon(NavmeshNode& node, float threshold)
 		const size_t prevI = (i + n - 1) % n;
 		const size_t nextI = (i + 1) % n;
 		if (conn[prevI] == -1 && conn[i] == -1) {
+			// Check if "cur" is close enough in line with "prev" and "next". If so, eliminate it.
 			Vector2f cur = vs[i];
 			Vector2f prev = vs[prevI];
 			Vector2f next = vs[nextI];
 			const float maxDist = (prev - next).length() * threshold;
 			if (LineSegment(prev, next).contains(cur, maxDist)) {
-				vs.erase(vs.begin() + i);
-				conn.erase(conn.begin() + i);
-				--n;
-				--i;
-				simplified = true;
+				// Vertex eligible for removal, but first check if it's not in the navmesh bounds, as we don't want to affect navmesh connectivity
+				if (!bounds.isPointOnEdge(cur, threshold * 2)) {
+					vs.erase(vs.begin() + i);
+					conn.erase(conn.begin() + i);
+					--n;
+					--i;
+					simplified = true;
+				}
 			}
 		}
 	}
@@ -364,10 +370,10 @@ void NavmeshGenerator::simplifyPolygon(NavmeshNode& node, float threshold)
 	}
 }
 
-void NavmeshGenerator::simplifyPolygons(Vector<NavmeshNode>& nodes)
+void NavmeshGenerator::simplifyPolygons(Vector<NavmeshNode>& nodes, const NavmeshBounds& bounds)
 {
 	for (auto& node: nodes) {
-		simplifyPolygon(node, 0.1f);
+		simplifyPolygon(node, 0.1f, bounds);
 	}
 }
 
@@ -567,7 +573,7 @@ Navmesh NavmeshGenerator::makeNavmesh(gsl::span<NavmeshNode> nodes, const Navmes
 	}
 	output.reserve(i);
 
-	const auto edges = bounds.makeEdges();
+	const auto& edges = bounds.edges;
 
 	// Generate
 	for (auto& node: nodes) {

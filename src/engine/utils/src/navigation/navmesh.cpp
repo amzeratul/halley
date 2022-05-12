@@ -168,20 +168,27 @@ NavmeshBounds::NavmeshBounds(Vector2f origin, Vector2f side0, Vector2f side1, si
 	, side1Divisions(side1Divisions)
 	, scaleFactor(scaleFactor)
 	, base(side0, side1)
-{}
-
-std::array<Line, 4> NavmeshBounds::makeEdges() const
 {
 	const auto u = side0.normalized();
 	const auto v = side1.normalized();
 	const auto p0 = origin;
 	const auto p1 = origin + side0 + side1;
-	return {
+	edges = {
 		Line(p0, u),
 		Line(p0, v),
 		Line(p1, u),
 		Line(p1, v)
 	};
+}
+
+bool NavmeshBounds::isPointOnEdge(Vector2f point, float threshold) const
+{
+	for (auto& e: edges) {
+		if (e.getDistance(point) < threshold) {
+			return true;
+		}
+	}
+	return false;
 }
 
 bool NavmeshSubworldPortal::operator==(const NavmeshSubworldPortal& other) const

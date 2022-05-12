@@ -16,9 +16,10 @@ namespace Halley {
 		size_t side1Divisions;
 		Vector2f scaleFactor;
 		Base2D base;
+		std::array<Line, 4> edges;
 
 		NavmeshBounds(Vector2f origin, Vector2f side0, Vector2f side1, size_t side0Divisions, size_t side1Divisions, Vector2f scaleFactor);
-		std::array<Line, 4> makeEdges() const;
+		bool isPointOnEdge(Vector2f point, float threshold) const;
 	};
 
 	struct NavmeshSubworldPortal {
