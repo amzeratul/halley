@@ -53,6 +53,9 @@ namespace Halley {
 		static Vector<Polygon> preProcessObstacles(gsl::span<const Polygon> obstacles, float agentSize);
 		static Polygon makeAgentMask(float agentSize);
 
+		static Polygon makeCell(Vector2i coord, Vector2f origin, Vector2f u, Vector2f v);
+		static void insertPolygons(Vector<NavmeshNode>& src, Vector<NavmeshNode>& dst);
+
 		static Vector<NavmeshNode> toNavmeshNode(Vector<Polygon> polygons);
 		static void generateConnectivity(gsl::span<NavmeshNode> polygons);
 		static void postProcessPolygons(Vector<NavmeshNode>& polygons, float maxSize, bool allowSimplification, const NavmeshBounds& bounds);

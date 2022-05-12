@@ -20,26 +20,11 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 	
 	for (size_t i = 0; i < bounds.side0Divisions; ++i) {
 		for (size_t j = 0; j < bounds.side1Divisions; ++j) {
-			const auto cell = Polygon(VertexList{{
-				bounds.origin + (i + 1) * u + j * v,
-				bounds.origin + (i + 1) * u + (j + 1) * v,
-				bounds.origin + i * u + (j + 1) * v,
-				bounds.origin + i * u + j * v
-			}});
-
+			const auto cell = makeCell(Vector2i(static_cast<int>(i), static_cast<int>(j)), bounds.origin, u, v);
 			auto cellPolygons = toNavmeshNode(generateByPolygonSubtraction(gsl::span<const Polygon>(&cell, 1), obstacles, cell.getBoundingCircle()));
 			generateConnectivity(cellPolygons);
 			postProcessPolygons(cellPolygons, maxSize, false, params.bounds);
-
-			const int startIdx = static_cast<int>(polygons.size());
-			for (auto& p: cellPolygons) {
-				polygons.emplace_back(std::move(p));
-				for (auto& c: polygons.back().connections) {
-					if (c >= 0) {
-						c += startIdx;
-					}
-				}
-			}
+			insertPolygons(cellPolygons, polygons);
 		}
 	}
 
@@ -154,6 +139,29 @@ Polygon NavmeshGenerator::makeAgentMask(float agentSize)
 	Ensures(agentMask.isClockwise());
 	Ensures(agentMask.isValid());
 	return agentMask;
+}
+
+Polygon NavmeshGenerator::makeCell(Vector2i coord, Vector2f origin, Vector2f u, Vector2f v)
+{
+	return Polygon(VertexList{{
+		origin + (coord.x + 1) * u + coord.y * v,
+		origin + (coord.x + 1) * u + (coord.y + 1) * v,
+		origin + coord.x * u + (coord.y + 1) * v,
+		origin + coord.x * u + coord.y * v
+	}});
+}
+
+void NavmeshGenerator::insertPolygons(Vector<NavmeshNode>& src, Vector<NavmeshNode>& dst)
+{
+	const int startIdx = static_cast<int>(dst.size());
+	for (auto& p: src) {
+		dst.emplace_back(std::move(p));
+		for (auto& c: dst.back().connections) {
+			if (c >= 0) {
+				c += startIdx;
+			}
+		}
+	}
 }
 
 Vector<NavmeshGenerator::NavmeshNode> NavmeshGenerator::toNavmeshNode(Vector<Polygon> polygons)
