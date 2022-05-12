@@ -3,6 +3,25 @@
 #include "../audio_sub_object.h"
 
 namespace Halley {
+    enum class AudioSequenceType {
+	    Sequential,
+        Shuffle,
+		ShuffleOnce,
+		Random
+    };
+	
+	template <>
+	struct EnumNames<AudioSequenceType> {
+		constexpr std::array<const char*, 4> operator()() const {
+			return{{
+				"sequential",
+				"shuffle",
+				"shuffleOnce",
+				"random"
+			}};
+		}
+	};
+
     class AudioSubObjectSequence final : public IAudioSubObject {
     public:
    	    void load(const ConfigNode& node) override;
@@ -13,6 +32,7 @@ namespace Halley {
 
         String getName() const override;
 		size_t getNumSubObjects() const override;
+		const AudioSubObjectHandle& getSubObject(size_t n) const;
 		AudioSubObjectHandle& getSubObject(size_t n) override;
 		bool canAddObject(AudioSubObjectType type, const std::optional<String>& caseName) const override;
 		void addObject(AudioSubObjectHandle handle, const std::optional<String>& caseName, size_t idx) override;
@@ -23,10 +43,14 @@ namespace Halley {
 	    void deserialize(Deserializer& s) override;
 
         AudioFade& getCrossFade();
+		AudioSequenceType& getSequenceType();
+		const AudioFade& getCrossFade() const;
+		AudioSequenceType getSequenceType() const;
 
     private:
         Vector<AudioSubObjectHandle> segments;
 
         AudioFade crossFade;
+        AudioSequenceType sequenceType;
     };
 }

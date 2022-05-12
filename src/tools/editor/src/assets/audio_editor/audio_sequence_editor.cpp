@@ -1,5 +1,6 @@
 #include "audio_sequence_editor.h"
 
+#include "audio_fade_editor.h"
 #include "audio_object_editor.h"
 using namespace Halley;
 
@@ -14,7 +15,16 @@ AudioSequenceEditor::AudioSequenceEditor(UIFactory& factory, AudioObjectEditor& 
 
 void AudioSequenceEditor::onMakeUI()
 {
-	// TODO
+	getWidget("fadeContainer")->add(std::make_shared<AudioFadeEditor>(factory, sequence.getCrossFade(), [=] ()
+	{
+		editor.markModified(false);
+	}));
+
+	bindData("sequenceType", toString(sequence.getSequenceType()), [=] (String value)
+	{
+		sequence.getSequenceType() = fromString<AudioSequenceType>(value);
+		editor.markModified(false);
+	});
 }
 
 void AudioSequenceEditor::markModified(size_t idx)

@@ -10,6 +10,8 @@ using namespace Halley;
 void AudioSubObjectSequence::load(const ConfigNode& node)
 {
 	segments = node["segments"].asVector<AudioSubObjectHandle>({});
+	crossFade = AudioFade(node["crossFade"]);
+	sequenceType = fromString<AudioSequenceType>(node["sequenceType"].asString("sequential"));
 }
 
 ConfigNode AudioSubObjectSequence::toConfigNode() const
@@ -17,12 +19,14 @@ ConfigNode AudioSubObjectSequence::toConfigNode() const
 	ConfigNode::MapType result;
 	result["type"] = toString(getType());
 	result["segments"] = segments;
+	result["crossFade"] = crossFade.toConfigNode();
+	result["sequenceType"] = toString(sequenceType);
 	return result;
 }
 
 std::unique_ptr<AudioSource> AudioSubObjectSequence::makeSource(AudioEngine& engine, AudioEmitter& emitter) const
 {
-	return std::make_unique<AudioSourceSequence>(engine, emitter, *this, crossFade);
+	return std::make_unique<AudioSourceSequence>(engine, emitter, *this);
 }
 
 String AudioSubObjectSequence::getName() const
@@ -33,6 +37,11 @@ String AudioSubObjectSequence::getName() const
 size_t AudioSubObjectSequence::getNumSubObjects() const
 {
 	return segments.size();
+}
+
+const AudioSubObjectHandle& AudioSubObjectSequence::getSubObject(size_t n) const
+{
+	return segments.at(n);
 }
 
 AudioSubObjectHandle& AudioSubObjectSequence::getSubObject(size_t n)
@@ -81,4 +90,19 @@ void AudioSubObjectSequence::deserialize(Deserializer& s)
 AudioFade& AudioSubObjectSequence::getCrossFade()
 {
 	return crossFade;
+}
+
+AudioSequenceType& AudioSubObjectSequence::getSequenceType()
+{
+	return sequenceType;
+}
+
+const AudioFade& AudioSubObjectSequence::getCrossFade() const
+{
+	return crossFade;
+}
+
+AudioSequenceType AudioSubObjectSequence::getSequenceType() const
+{
+	return sequenceType;
 }

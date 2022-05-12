@@ -8,7 +8,7 @@ namespace Halley
 	class AudioSourceSequence final : public AudioSource
 	{
 	public:
-		AudioSourceSequence(AudioEngine& engine, AudioEmitter& emitter, const AudioSubObjectSequence& sequenceConfig, AudioFade fadeConfig);
+		AudioSourceSequence(AudioEngine& engine, AudioEmitter& emitter, const AudioSubObjectSequence& sequenceConfig);
 
 		uint8_t getNumberOfChannels() const override;
 		bool getAudioData(size_t numSamples, AudioMultiChannelSamples dst) override;
@@ -18,6 +18,13 @@ namespace Halley
 		AudioEngine& engine;
 		AudioEmitter& emitter;
 		const AudioSubObjectSequence& sequenceConfig;
-		AudioFade fadeConfig;
+
+		Vector<size_t> playList;
+		size_t curTrack = 0;
+
+		bool initialized = false;
+
+		void initialize();
+		void nextTrack();
 	};
 }

@@ -7,11 +7,17 @@ children:
   - widget: { id: title, class: label, text: "Sequence" }
     border: [0, 0, 0, 4]
     fill: centre
-  - sizer: { type: horizontal }
+  - sizer: { type: grid, columns: 2, columnProportions: [0, 1], gap: 4 }
+    border: [3, 0, 0, 0]
     children:
+    - widget: { class: widget, minSize: [100, 20] }
+      children:
+      - widget: { class: label, text: "Type: " }
+      fill: [centreVertical, left]
+    - widget: { class: dropdown, id: sequenceType, options: [{ id: sequential, text: Sequential }, { id: shuffle, text: Shuffle }, { id: shuffleOnce, text: Shuffle Once }, { id: random, text: Random }] }
+      fill: left
     - widget: { class: label, text: "Crossfade: " }
       fill: [centreVertical, left]
-      border: [3, 0, 0, 0]
     - widget: { class: widget, id: fadeContainer }
       children: []
   - widget: { id: segments, class: list, canDrag: true, style: dragList }
