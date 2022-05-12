@@ -9,7 +9,7 @@
 
 using namespace Halley;
 
-Task::Task(String name, bool isCancellable, bool isVisible) 
+Task::Task(String name, bool isCancellable, bool isVisible, Vector<String> exclusivityTags) 
 	: progress(0)
 	, name(name)
 	, cancelled(false)
@@ -17,6 +17,7 @@ Task::Task(String name, bool isCancellable, bool isVisible)
 	, pendingTaskCount(0)
 	, isCancellable(isCancellable)
 	, isVisible(isVisible)
+	, exclusivityTags(std::move(exclusivityTags))
 {}
 
 void Task::updateOnMain(float time)

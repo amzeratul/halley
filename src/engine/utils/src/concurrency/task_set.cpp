@@ -37,7 +37,7 @@ void TaskSet::update(Time time)
 		++next;
 
 		auto& task = *iter;
-		task->update(static_cast<float>(time));
+		task->update(*this, static_cast<float>(time));
 
 		auto subTasks = task->getPendingTasks();
 		for (auto& t : subTasks) {
@@ -87,4 +87,41 @@ void TaskSet::setListener(TaskSetListener& l)
 const std::list<std::shared_ptr<TaskAnchor>>& TaskSet::getTasks() const
 {
 	return tasks;
+}
+
+std::pair<std::unique_ptr<TaskExclusivityHandle>, String> TaskSet::getExclusiveHandle(const String& taskName, const Vector<String>& tags)
+{
+	// Check if tags are all free
+	for (auto& tag: tags) {
+		const auto iter = exclusiveClaims.find(tag);
+		if (iter != exclusiveClaims.end()) {
+			return { std::unique_ptr<TaskExclusivityHandle>(), iter->second };
+		}
+	}
+
+	// Claim tags
+	for (auto& tag: tags) {
+		exclusiveClaims[tag] = taskName;
+	}
+	
+	return { std::make_unique<TaskExclusivityHandle>(*this, tags), "" };
+}
+
+void TaskSet::returnHandle(TaskExclusivityHandle& handle)
+{
+	for (auto& tag: handle.tags) {
+		exclusiveClaims.erase(tag);
+	}
+	handle.tags.clear();
+}
+
+TaskExclusivityHandle::TaskExclusivityHandle(TaskSet& parent, Vector<String> tags)
+	: parent(parent)
+	, tags(std::move(tags))
+{
+}
+
+TaskExclusivityHandle::~TaskExclusivityHandle()
+{
+	parent.returnHandle(*this);
 }

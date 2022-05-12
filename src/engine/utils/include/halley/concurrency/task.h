@@ -23,7 +23,7 @@ namespace Halley
 		virtual ~Task() {}
 
 	protected:
-		Task(String name, bool isCancellable, bool isVisible);
+		Task(String name, bool isCancellable, bool isVisible, Vector<String> exclusivityTags = {});
 
 		virtual void run() = 0;
 		virtual void updateOnMain(float time);
@@ -72,5 +72,7 @@ namespace Halley
 		bool error = false;
 		std::list<std::pair<LoggerLevel, String>> messageLog;
 		std::atomic<size_t> numMessages;
+
+		Vector<String> exclusivityTags;
 	};
 }

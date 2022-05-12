@@ -14,7 +14,7 @@
 using namespace Halley;
 
 ImportAssetsTask::ImportAssetsTask(String taskName, ImportAssetsDatabase& db, std::shared_ptr<AssetImporter> importer, Path assetsPath, Vector<ImportAssetsDatabaseEntry> files, Vector<String> deletedAssets, Project& project, bool packAfter)
-	: Task(taskName, true, true)
+	: Task(taskName, true, true, { files.size() == 1 && files[0].assetId == ":codegen" ? "code" : "assets" })
 	, db(db)
 	, importer(importer)
 	, assetsPath(assetsPath)

@@ -44,7 +44,7 @@ void TaskBar::update(Time time, bool moved)
 
 	// Ensure that all tasks have a display associated
 	for (auto& t : taskData) {
-		if (t->isVisible() && t->getStatus() == TaskStatus::Started) {
+		if (t->isVisible() && t->getStatus() == TaskStatus::Started || t->getStatus() == TaskStatus::ReadyToStart) {
 			getDisplayFor(t);
 		}
 	}

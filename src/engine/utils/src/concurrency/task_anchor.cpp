@@ -7,6 +7,8 @@
 #include "halley/support/logger.h"
 #include <chrono>
 
+#include "halley/concurrency/task_set.h"
+
 using namespace Halley;
 
 TaskAnchor::TaskAnchor(std::unique_ptr<Task> t, float delay)
@@ -52,16 +54,25 @@ void TaskAnchor::terminate()
 	}
 }
 
-void TaskAnchor::update(float time)
+void TaskAnchor::update(TaskSet& taskSet, float time)
 {
 	if (status == TaskStatus::WaitingToStart) {
 		timeToStart -= time;
 		if (timeToStart <= 0) {
+			status = TaskStatus::ReadyToStart;
+		}
+	}
+
+	if (status == TaskStatus::ReadyToStart) {
+		std::tie(exclusivityHandle, waitingFor) = taskSet.getExclusiveHandle(task->name, task->exclusivityTags);
+		if (exclusivityHandle) {
 			status = TaskStatus::Started;
 			taskFuture = Concurrent::execute([this]() { task->run(); });
 		}
-	} else if (status == TaskStatus::Started) {
-		bool done = taskFuture.hasValue();
+	}
+
+	if (status == TaskStatus::Started) {
+		const bool done = taskFuture.hasValue();
 		if (done) {
 			status = TaskStatus::Done;
 			error = task->hasError();
@@ -88,7 +99,11 @@ String TaskAnchor::getName() const
 
 String TaskAnchor::getProgressLabel() const
 {
-	return progressLabel;
+	if (!waitingFor.isEmpty()) {
+		return "Waiting for \"" + waitingFor + "\"...";
+	} else {
+		return progressLabel;
+	}
 }
 
 bool TaskAnchor::canCancel() const

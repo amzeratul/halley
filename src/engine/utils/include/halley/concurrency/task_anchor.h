@@ -11,11 +11,14 @@ namespace Halley
 	enum class TaskStatus
 	{
 		WaitingToStart,
+		ReadyToStart,
 		Started,
 		Done
 	};
 
 	class Task;
+	class TaskSet;
+	class TaskExclusivityHandle;
 
 	class TaskAnchor
 	{
@@ -29,7 +32,7 @@ namespace Halley
 		TaskAnchor& operator=(const TaskAnchor& other) = delete;
 
 		void terminate();
-		void update(float time);
+		void update(TaskSet& taskSet, float time);
 
 		TaskStatus getStatus() const;
 		String getName() const;
@@ -64,5 +67,8 @@ namespace Halley
 		String progressLabel;
 
 		int id = 0;
+
+		std::unique_ptr<TaskExclusivityHandle> exclusivityHandle;
+		String waitingFor;
 	};
 }
