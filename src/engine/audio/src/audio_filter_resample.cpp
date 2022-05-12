@@ -70,6 +70,11 @@ bool AudioFilterResample::getAudioData(size_t numSamples, AudioMultiChannelSampl
 	return playing;
 }
 
+size_t AudioFilterResample::getSamplesLeft() const
+{
+	return source->getSamplesLeft() * toHz / fromHz;
+}
+
 void AudioFilterResample::setFromHz(int fromHz)
 {
 	for (auto& r: resamplers) {

@@ -60,6 +60,15 @@ bool AudioSourceLayers::isReady() const
 	return std::all_of(layers.begin(), layers.end(), [=] (const auto& ls) { return ls.source->isReady(); });
 }
 
+size_t AudioSourceLayers::getSamplesLeft() const
+{
+	size_t result = 0;
+	for (auto& l: layers) {
+		result = std::max(result, l.source->getSamplesLeft());
+	}
+	return result;
+}
+
 AudioSourceLayers::Layer::Layer(std::unique_ptr<AudioSource> source, AudioEmitter& emitter, size_t idx)
 	: source(std::move(source))
 	, idx(idx)

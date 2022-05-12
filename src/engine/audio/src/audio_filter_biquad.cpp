@@ -22,3 +22,8 @@ bool AudioFilterBiquad::getAudioData(size_t numSamples, AudioMultiChannelSamples
 	// TODO
 	return src->getAudioData(numSamples, dst);
 }
+
+size_t AudioFilterBiquad::getSamplesLeft() const
+{
+	return src->getSamplesLeft();
+}

@@ -33,6 +33,11 @@ bool AudioSourceSequence::isReady() const
 	return false;
 }
 
+size_t AudioSourceSequence::getSamplesLeft() const
+{
+	return std::numeric_limits<size_t>::max();
+}
+
 void AudioSourceSequence::initialize()
 {
 	initialized = true;
@@ -41,11 +46,12 @@ void AudioSourceSequence::initialize()
 		playList.push_back(i);
 	}
 
-	if (sequenceConfig.getSequenceType() == AudioSequenceType::Shuffle) {
+	const auto type = sequenceConfig.getSequenceType();
+	if (type == AudioSequenceType::Shuffle || type == AudioSequenceType::ShuffleOnce) {
 		shuffle(playList.begin(), playList.end(), engine.getRNG());
 	}
 
-	if (sequenceConfig.getSequenceType() == AudioSequenceType::Random) {
+	if (type == AudioSequenceType::Random) {
 		curTrack = engine.getRNG().getSizeT(0, playList.size());
 	} else {
 		curTrack = 0;

@@ -30,6 +30,11 @@ bool AudioSourceClip::isReady() const
 	return clip->isLoaded();
 }
 
+size_t AudioSourceClip::getSamplesLeft() const
+{
+	return looping ? std::numeric_limits<size_t>::max() : (clip->getLength() - streams[0].playbackPos);
+}
+
 bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSamples dstChannels)
 {
 	Expects(isReady());

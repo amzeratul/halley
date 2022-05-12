@@ -12,6 +12,7 @@ namespace Halley
 		uint8_t getNumberOfChannels() const override;
 		bool getAudioData(size_t numSamples, AudioMultiChannelSamples dst) override;
 		bool isReady() const override;
+		size_t getSamplesLeft() const override;
 
 	private:
 		AudioEngine& engine;

@@ -13,6 +13,7 @@ namespace Halley
 		uint8_t getNumberOfChannels() const override;
 		bool isReady() const override;
 		bool getAudioData(size_t numSamples, AudioMultiChannelSamples dst) override;
+		size_t getSamplesLeft() const override;
 
 		void setFromHz(int fromHz);
 
