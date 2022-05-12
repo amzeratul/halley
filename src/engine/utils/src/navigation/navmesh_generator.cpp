@@ -54,6 +54,7 @@ Vector<Polygon> NavmeshGenerator::generateByPolygonSubtraction(gsl::span<const P
 
 	for (const auto& p: output) {
 		assert(p.isClockwise());
+		assert(p.isConvex());
 	}
 
 	// Subtract all obstacles
@@ -186,7 +187,7 @@ void NavmeshGenerator::generateConnectivity(gsl::span<NavmeshNode> polygons)
 				for (size_t polyBIdx = polyAIdx + 1; polyBIdx < polygons.size(); ++polyBIdx) {
 					NavmeshNode& b = polygons[polyBIdx];
 
-					const auto edgeBIdx = b.polygon.findEdge(edgeA, 0.0001f);
+					const auto edgeBIdx = b.polygon.findEdge(edgeA, 0.01f);
 					if (edgeBIdx) {
 						if (b.connections[edgeBIdx.value()] < 0) {
 							// Establish connection
