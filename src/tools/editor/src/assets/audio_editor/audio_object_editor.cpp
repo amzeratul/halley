@@ -303,7 +303,6 @@ void AudioObjectEditor::removeCurrentSelection()
 	markModified(true);
 }
 
-PRAGMA_DEOPTIMIZE
 void AudioObjectEditor::moveItem(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx)
 {
 	const auto& item = treeData.at(itemId);
