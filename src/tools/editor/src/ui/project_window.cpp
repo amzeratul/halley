@@ -221,6 +221,7 @@ void ProjectWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 			project.getGameResources().get<SpriteSheet>(ss)->clearMaterialCache();
 		}
 		project.clearCachedAssetPreviews();
+		assetPreviewGenerator = {};
 	}
 
 	updateDLLStatus(status);
