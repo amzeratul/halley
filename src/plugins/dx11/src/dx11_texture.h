@@ -37,6 +37,7 @@ namespace Halley
 		ID3D11ShaderResourceView* srvAlt = nullptr;
 		ID3D11SamplerState* samplerState = nullptr;
 		DXGI_FORMAT format;
+		size_t vramUsage = 0;
 
 		void copyToImageDirectly(Image& image) const;
 	};

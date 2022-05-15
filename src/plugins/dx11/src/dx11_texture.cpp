@@ -95,6 +95,8 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 		throw Exception("Unknown texture format", HalleyExceptions::VideoPlugin);
 	}
 
+	vramUsage = bpp * size.x * size.y;
+
 	desc.BindFlags = 0;
 	if (descriptor.isDepthStencil) {
 		desc.BindFlags |= D3D11_BIND_DEPTH_STENCIL;
@@ -252,5 +254,5 @@ ID3D11Texture2D* DX11Texture::getTexture() const
 
 size_t DX11Texture::getVRamUsage() const
 {
-	return 0; // ?
+	return vramUsage;
 }
