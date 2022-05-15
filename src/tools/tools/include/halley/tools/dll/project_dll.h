@@ -25,7 +25,8 @@ namespace Halley {
 		void load();
 		void unload();
 		bool isLoaded() const;
-		
+
+		void reload();
 		void reloadIfChanged();
 		void addReloadListener(IProjectDLLListener& listener);
 		void removeReloadListener(IProjectDLLListener& listener);

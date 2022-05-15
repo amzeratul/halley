@@ -186,6 +186,11 @@ bool ProjectWindow::loadCustomUI()
 	}
 
 	debugConsoleCommands = std::make_shared<UIDebugConsoleCommands>();
+	debugConsoleCommands->addCommand("dllReload", [=](Vector<String> args) -> String
+	{
+		reloadDLL();
+		return "Reloading DLL";
+	});
 	try {
 		game->attachToEditorDebugConsole(*debugConsoleCommands, project.getGameResources(), project);
 		debugConsoleController->addCommands(*debugConsoleCommands);
@@ -204,6 +209,10 @@ void ProjectWindow::destroyCustomUI()
 	}
 	pagedPane->resizePages(numOfStandardTools);
 	debugConsoleCommands.reset();
+	if (debugConsole) {
+		debugConsole->destroy();
+	}
+	debugConsole.reset();
 }
 
 void ProjectWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
@@ -390,6 +399,19 @@ void ProjectWindow::updateDLLStatus(ProjectDLL::Status status)
 	}
 
 	firstDLLLoad = false;
+}
+
+void ProjectWindow::reloadDLL()
+{
+	Concurrent::execute(Executors::getMainUpdateThread(), [=]() {
+		project.withDLL([&](ProjectDLL& dll)
+		{
+			dll.reload();
+		});
+	});
+	if (debugConsole) {
+		debugConsole->hide();
+	}
 }
 
 void ProjectWindow::reloadProject()

@@ -86,6 +86,11 @@ bool ProjectDLL::isLoaded() const
 	return status == Status::Loaded;
 }
 
+void ProjectDLL::reload()
+{
+	dll.reloadIfChanged(true);
+}
+
 void ProjectDLL::reloadIfChanged()
 {
 	dll.reloadIfChanged();

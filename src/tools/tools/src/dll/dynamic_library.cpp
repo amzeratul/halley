@@ -215,9 +215,9 @@ bool DynamicLibrary::hasChanged() const
 	return true;
 }
 
-void DynamicLibrary::reloadIfChanged()
+void DynamicLibrary::reloadIfChanged(bool forceReload)
 {
-	if (hasChanged()) {
+	if (forceReload || hasChanged()) {
 		notifyUnload();
 		unload();
 		waitingReload = true;
