@@ -180,9 +180,24 @@ namespace Halley {
 			return Colour4(r, g, b, a * t);
 		}
 
-		Colour4 withAlpha(float newA) const
+		[[nodiscard]] constexpr Colour4 withAlpha(float newA) const
 		{
 			return Colour4(r, g, b, newA);
+		}
+
+		[[nodiscard]] constexpr Colour4 toMaxBrightness() const
+		{
+			float m = std::max(r, std::max(g, b));
+			if (m > 0.001f) {
+				return Colour4(r / m, g / m, b / m, a);
+			} else {
+				return Colour4(1, 1, 1, a);
+			}
+		}
+
+		[[nodiscard]] constexpr float getLuma() const
+		{
+			return 0.212f * r + 0.701f * g + 0.087f * b;
 		}
 
 		[[nodiscard]] constexpr Colour4 operator+(const Colour4& c) const
