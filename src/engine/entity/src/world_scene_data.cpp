@@ -11,7 +11,7 @@ ISceneData::EntityNodeData WorldSceneData::getWriteableEntityNodeData(const Stri
 	throw Exception("Not implemented", HalleyExceptions::Entity);
 }
 
-Vector<EntityData*> WorldSceneData::getWriteableEntityDatas(gsl::span<const UUID> ids)
+std::pair<Vector<UUID>, Vector<EntityData*>> WorldSceneData::getWriteableEntityDatas(gsl::span<const UUID> ids)
 {
 	throw Exception("Not implemented", HalleyExceptions::Entity);
 }

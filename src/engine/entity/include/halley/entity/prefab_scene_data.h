@@ -8,7 +8,7 @@ namespace Halley {
     	PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> factory, World& world, Resources& gameResources);
 
         EntityNodeData getWriteableEntityNodeData(const String& id) override;
-        Vector<EntityData*> getWriteableEntityDatas(gsl::span<const UUID> ids) override;
+        std::pair<Vector<UUID>, Vector<EntityData*>> getWriteableEntityDatas(gsl::span<const UUID> ids) override;
         ConstEntityNodeData getEntityNodeData(const String& id) override;
      	void reloadEntities(gsl::span<const String> ids, gsl::span<const EntityData*> datas) override;
         EntityTree getEntityTree() const override;

@@ -762,7 +762,8 @@ void SceneEditorWindow::onEntitiesSelected(Vector<String> selectedEntities)
 		for (const auto& id: selectedEntities) {
 			uuids.emplace_back(id);
 		}
-		Vector<EntityData*> datas = sceneData->getWriteableEntityDatas(uuids);
+		Vector<EntityData*> datas;
+		std::tie(uuids, datas) = sceneData->getWriteableEntityDatas(uuids);
 		gameBridge->setSelectedEntities(std::move(uuids), std::move(datas));
 		
 		currentEntityIds = selectedEntities;
