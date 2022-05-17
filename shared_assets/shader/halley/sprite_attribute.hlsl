@@ -32,4 +32,5 @@ struct VOut {
     float2 pixelPos : POSITION2;
     float2 pivot : POSITION3;
     float2 size : SIZE0;
+    float2 scale : SCALE;
 };

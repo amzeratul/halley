@@ -32,6 +32,7 @@ void basicVertex(VIn input, out VOut output) {
     output.vertPos = input.vertPos.xy;
     output.pixelPos = input.size * input.scale * input.vertPos.xy;
     output.pivot = input.pivot;
+    output.scale = input.scale;
     getColours(input.colour, output.colour, output.colourAdd);
     output.colourNoPremultiply = input.colour;
     output.position = getVertexPosition(input.position, input.pivot, input.size * input.scale, input.vertPos.xy, input.rotation);
