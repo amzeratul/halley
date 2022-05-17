@@ -26,15 +26,16 @@ namespace Halley
 			std::unique_ptr<AudioSource> source;
 			size_t endSamplesOverlap = 0;
 			TrackState state = TrackState::Playing;
-			float gain = 1.0f;
 			float prevGain = 1.0f;
+			AudioFader fader;
 
 			PlayingTrack() = default;
 			PlayingTrack(std::unique_ptr<AudioSource> source)
 				: source(std::move(source))
 			{}
 
-			size_t getSamplesBeforeTransition() const;
+			size_t getSamplesBeforeNextEvent(size_t fadeLen) const;
+			size_t getSamplesBeforeTransition(size_t fadeLen) const;
 			size_t getSamplesBeforeEnd() const;
 		};
 

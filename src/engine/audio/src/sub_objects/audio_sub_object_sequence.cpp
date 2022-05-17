@@ -80,12 +80,14 @@ void AudioSubObjectSequence::loadDependencies(Resources& resources)
 void AudioSubObjectSequence::serialize(Serializer& s) const
 {
 	s << segments;
+	s << crossFade;
 	s << sequenceType;
 }
 
 void AudioSubObjectSequence::deserialize(Deserializer& s)
 {
 	s >> segments;
+	s >> crossFade;
 	s >> sequenceType;
 }
 

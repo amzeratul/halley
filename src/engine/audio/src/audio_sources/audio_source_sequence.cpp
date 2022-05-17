@@ -25,13 +25,9 @@ bool AudioSourceSequence::getAudioData(size_t samplesRequested, AudioMultiChanne
 		return false;
 	}
 
-	// Update gains
-	for (auto& p: playingTracks) {
-		p.prevGain = p.gain;
-	}
-
 	const auto nChannels = getNumberOfChannels();
 	size_t samplePos = 0;
+	const auto fadeLen = static_cast<size_t>(sequenceConfig.getCrossFade().getLength() * AudioConfig::sampleRate);
 
 	while (samplePos < samplesRequested) {
 		if (playingTracks.empty()) {
@@ -42,7 +38,7 @@ bool AudioSourceSequence::getAudioData(size_t samplesRequested, AudioMultiChanne
 		// Figure out how many samples we'll read
 		size_t samplesToRead = samplesRequested - samplePos;
 		for (const auto& p: playingTracks) {
-			samplesToRead = std::min(samplesToRead, p.getSamplesBeforeTransition());
+			samplesToRead = std::min(samplesToRead, p.getSamplesBeforeNextEvent(fadeLen));
 		}
 
 		// Transition out anyone who needs it
@@ -55,18 +51,22 @@ bool AudioSourceSequence::getAudioData(size_t samplesRequested, AudioMultiChanne
 						++startNewTrack;
 					}
 					p.state = TrackState::Done;
-				} else if (p.getSamplesBeforeTransition() == samplesToRead) {
+				} else if (p.getSamplesBeforeTransition(fadeLen) == samplesToRead) {
 					if (p.state == TrackState::Playing) {
 						++startNewTrack;
 					}
 					p.state = TrackState::TransitioningOut;
+				}
+				if (p.getSamplesBeforeEnd() == fadeLen) {
+					p.prevGain = p.fader.getCurrentValue();
+					p.fader.startFade(p.fader.getCurrentValue(), 0, sequenceConfig.getCrossFade());
 				}
 				++nPlaying;
 			}
 		}
 
 		// Read samples
-		if (nPlaying == 1 && samplePos == 0 && samplesToRead == samplesRequested && playingTracks.front().gain == 1 && playingTracks.front().prevGain == 1) {
+		if (nPlaying == 1 && samplePos == 0 && samplesToRead == samplesRequested && playingTracks.front().fader.getCurrentValue() == 1 && playingTracks.front().prevGain == 1) {
 			// Passthrough!
 			playingTracks.front().source->getAudioData(samplesRequested, dst);
 		} else {
@@ -75,7 +75,7 @@ bool AudioSourceSequence::getAudioData(size_t samplesRequested, AudioMultiChanne
 			bool first = true;
 			for (auto& p: playingTracks) {
 				p.source->getAudioData(samplesToRead, buffer.getSampleSpans());
-				const float gain = lerp(p.prevGain, p.gain, static_cast<float>(samplePos) / static_cast<float>(samplesRequested));
+				const float gain = lerp(p.prevGain, p.fader.getCurrentValue(), static_cast<float>(samplePos) / static_cast<float>(samplesRequested));
 
 				if (first) {
 					for (size_t i = 0; i < nChannels; ++i) {
@@ -94,6 +94,13 @@ bool AudioSourceSequence::getAudioData(size_t samplesRequested, AudioMultiChanne
 		// Remove finished tracks
 		std_ex::erase_if(playingTracks, [&] (const auto& p) { return p.state == TrackState::Done; });
 
+		// Update fades
+		const float time = static_cast<float>(samplesToRead) / static_cast<float>(AudioConfig::sampleRate);
+		for (auto& p: playingTracks) {
+			p.prevGain = p.fader.getCurrentValue();
+			p.fader.update(time);
+		}
+		
 		// Start new track(s)
 		for (size_t i = 0; i < startNewTrack; ++i) {
 			nextTrack();
@@ -118,10 +125,19 @@ size_t AudioSourceSequence::getSamplesLeft() const
 	return std::numeric_limits<size_t>::max();
 }
 
-size_t AudioSourceSequence::PlayingTrack::getSamplesBeforeTransition() const
+size_t AudioSourceSequence::PlayingTrack::getSamplesBeforeNextEvent(size_t fadeLen) const
 {
 	const auto left = source->getSamplesLeft();
-	return left > endSamplesOverlap ? left - endSamplesOverlap : 0;
+	const auto e0 = endSamplesOverlap + fadeLen;
+	const auto e1 = endSamplesOverlap;
+	return left > e0 ? left - e0 : (left > e1 ? left - e1 : left);
+}
+
+size_t AudioSourceSequence::PlayingTrack::getSamplesBeforeTransition(size_t fadeLen) const
+{
+	const auto left = source->getSamplesLeft();
+	size_t overlap = endSamplesOverlap + fadeLen;
+	return left > overlap ? left - overlap : 0;
 }
 
 size_t AudioSourceSequence::PlayingTrack::getSamplesBeforeEnd() const
@@ -178,4 +194,7 @@ void AudioSourceSequence::nextTrack()
 void AudioSourceSequence::loadCurrentTrack()
 {
 	playingTracks.push_back({ sequenceConfig.getSubObject(playList[curTrack])->makeSource(engine, emitter) });
+	auto& track = playingTracks.back();
+	track.fader.startFade(0.0f, 1.0f, sequenceConfig.getCrossFade());
+	track.prevGain = track.fader.getCurrentValue();
 }
