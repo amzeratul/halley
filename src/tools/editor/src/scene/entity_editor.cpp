@@ -249,11 +249,15 @@ void EntityEditor::loadComponentData(const String& componentType, ConfigNode& da
 		for (auto& member: componentData.members) {
 			if (std_ex::contains(member.serializationTypes, EntitySerialization::Type::Prefab) && !member.hideInEditor) {
 				auto type = member.type.name;
+				ConfigNode options;
 				if (type == "float" && member.range) {
-					type = "Halley::Range<" + type + "," + toString(member.range->start) + "," + toString(member.range->end) + ">";
+					type = "Halley::Range<" + type + ">";
+					options = ConfigNode::MapType();
+					options["start"] = member.range->start;
+					options["end"] = member.range->end;
 				}
 				
-				ComponentFieldParameters parameters(componentType, ComponentDataRetriever(data, member.name, member.displayName.isEmpty() ? member.name : member.displayName), member.defaultValue);
+				ComponentFieldParameters parameters(componentType, ComponentDataRetriever(data, member.name, member.displayName.isEmpty() ? member.name : member.displayName), member.defaultValue, {}, std::move(options));
 				auto field = entityEditorFactory->makeField(type, parameters, member.collapse ? ComponentEditorLabelCreation::Never : ComponentEditorLabelCreation::Always);
 				if (field) {
 					componentFields->add(field);

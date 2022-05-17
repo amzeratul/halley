@@ -196,6 +196,11 @@ public:
 			value = data.getFieldData().asType<VecType>(value);
 		}
 
+		float granularity = 1;
+		if (pars.options.getType() == ConfigNodeType::Map) {
+			granularity = pars.options["granularity"].asFloat(1.0f);
+		}
+
 		const auto& style = context.getUIFactory().getStyle("spinControl");
 		const auto& buttonStyle = context.getUIFactory().getStyle("buttonThin");
 
@@ -205,6 +210,7 @@ public:
 		std::array<std::shared_ptr<UISpinControl2>, nDimensions> values;
 		for (int i = 0; i < nDimensions; ++i) {
 			values[i] = std::make_shared<UISpinControl2>("value" + toString(i), style, static_cast<float>(value[i]), true);
+			values[i]->setIncrement(granularity);
 			container->add(values[i], 1);
 			container->bindData("value" + toString(i), value[i], [&context, data, dataOutput, defaultValue, i] (ScalarType newVal)
 			{
@@ -398,11 +404,14 @@ public:
 					
 					String key = "par_" + uniform.name;
 					String type;
+					ConfigNode options = ConfigNode::MapType();
 
 					if (uniform.type == ShaderParameterType::Float || uniform.type == ShaderParameterType::Int) {
 						String typeName = uniform.type == ShaderParameterType::Float ? "float" : "int";
 						if (uniform.range) {
-							type = "Halley::Range<" + typeName + "," + toString(uniform.range->start) + "," + toString(uniform.range->end) + "," + toString(uniform.granularity) + ">";
+							type = "Halley::Range<" + typeName + ">";
+							options["start"] = uniform.range->start;
+							options["end"] = uniform.range->end;
 						} else {
 							type = typeName;
 						}
@@ -411,6 +420,7 @@ public:
 					} else if (uniform.type == ShaderParameterType::Int2) {
 						type = "Halley::Vector2i";
 					}
+					options["granularity"] = uniform.granularity;
 
 					if (type.isEmpty()) {
 						continue;
@@ -426,7 +436,7 @@ public:
 					}
 
 					const auto label = context.makeLabel("- " + uniform.name);
-					const auto widget = context.makeField(type, pars.withSubKey(key, defaultValue), ComponentEditorLabelCreation::Never);
+					const auto widget = context.makeField(type, pars.withSubKey(key, defaultValue).withOptions(std::move(options)), ComponentEditorLabelCreation::Never);
 					
 					container->add(label, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
 					container->add(widget, 0, Vector4f(), UISizerFillFlags::Fill, Vector2f(), insertPos++);
@@ -1139,7 +1149,12 @@ public:
 			if (pars.typeParameters.size() == 4) {
 				granularity = pars.typeParameters[3].toFloat();
 			}
+		} else if (pars.options.getType() == ConfigNodeType::Map) {
+			range.start = pars.options["start"].asFloat(0.0f);
+			range.end = pars.options["end"].asFloat(1.0f);
+			granularity = pars.options["granularity"].asFloat(0.0f);
 		}
+
 		auto field = std::make_shared<UISlider>("range", style, range.start, range.end);
 		if (intType) {
 			field->setGranularity(1.0f);
