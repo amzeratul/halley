@@ -693,12 +693,15 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 	}
 
 	// Get the material definition
+	bool hasNewMaterial = false;
 	std::shared_ptr<const MaterialDefinition> material;
 	const auto& materialNode = node["material"];
 	if (materialNode.getType() == ConfigNodeType::String) {
 		material = context.resources->get<MaterialDefinition>(materialNode.asString());
+		hasNewMaterial = true;
 	} else if (materialNode.getType() == ConfigNodeType::Del || !sprite.hasMaterial()) {
 		material = context.resources->get<MaterialDefinition>("Halley/Sprite");
+		hasNewMaterial = true;
 	} else {
 		material = sprite.getMaterial().getDefinitionPtr();
 	}
@@ -727,7 +730,9 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 
 	if (material) {
 		if (material->getTextures().empty()) {
-			sprite.setMaterial(std::make_shared<Material>(material));
+			if (hasNewMaterial) {
+				sprite.setMaterial(std::make_shared<Material>(material));
+			}
 		} else {
 			// Load each texture
 			size_t i = 0;
@@ -736,7 +741,9 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 				if (!loaded) {
 					if (i == 0) {
 						if (!loadTexture("image", i)) {
-							sprite.setMaterial(std::make_shared<Material>(material));
+							if (hasNewMaterial) {
+								sprite.setMaterial(std::make_shared<Material>(material));
+							}
 						}
 					} else if (i == 1) {
 						loadTexture("image1", i);
