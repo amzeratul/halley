@@ -85,6 +85,11 @@ std::optional<float> UISlider::getGranularity() const
 	return granularity;
 }
 
+void UISlider::setShowLabel(bool show)
+{
+	box->setActive(show);
+}
+
 void UISlider::setLabelConversion(std::function<LocalisedString(float)> f)
 {
 	labelConversion = f;

@@ -20,6 +20,7 @@ namespace Halley {
 		void setGranularity(std::optional<float> granularity);
 		std::optional<float> getGranularity() const;
 
+		void setShowLabel(bool show);
 		void setLabelConversion(std::function<LocalisedString(float)> f);
 		void setTransformation(std::function<float(float)> f);
 
