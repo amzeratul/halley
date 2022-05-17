@@ -51,10 +51,15 @@ bool AudioSourceSequence::getAudioData(size_t samplesRequested, AudioMultiChanne
 		for (auto& p: playingTracks) {
 			if (p.state != TrackState::Done) {
 				if (p.getSamplesBeforeEnd() == samplesToRead) {
-					p.state = TrackState::TransitioningOut;
-					++startNewTrack;
-				} else if (p.getSamplesBeforeTransition() == samplesToRead) {
+					if (p.state == TrackState::Playing) {
+						++startNewTrack;
+					}
 					p.state = TrackState::Done;
+				} else if (p.getSamplesBeforeTransition() == samplesToRead) {
+					if (p.state == TrackState::Playing) {
+						++startNewTrack;
+					}
+					p.state = TrackState::TransitioningOut;
 				}
 				++nPlaying;
 			}
@@ -138,16 +143,18 @@ void AudioSourceSequence::initialize()
 	}
 
 	if (type == AudioSequenceType::Random) {
-		curTrack = engine.getRNG().getSizeT(0, playList.size());
+		curTrack = engine.getRNG().getSizeT(0, playList.size() - 1);
 	} else {
 		curTrack = 0;
 	}
+
+	loadCurrentTrack();
 }
 
 void AudioSourceSequence::nextTrack()
 {
 	if (sequenceConfig.getSequenceType() == AudioSequenceType::Random) {
-		curTrack = engine.getRNG().getSizeT(0, playList.size());
+		curTrack = engine.getRNG().getSizeT(0, playList.size() - 1);
 	} else {
 		++curTrack;
 
@@ -158,11 +165,17 @@ void AudioSourceSequence::nextTrack()
 				shuffle(playList.begin(), playList.end(), engine.getRNG());
 				if (playList.front() == lastTrack && playList.size() >= 2) {
 					// If we got the last track as the start, swap it with another random track
-					std::swap(playList.front(), playList[engine.getRNG().getSizeT(1, playList.size())]);
+					const auto idx = engine.getRNG().getSizeT(1, playList.size() - 1);
+					std::swap(playList.front(), playList[idx]);
 				}
 			}
 		}
 	}
 
+	loadCurrentTrack();
+}
+
+void AudioSourceSequence::loadCurrentTrack()
+{
 	playingTracks.push_back({ sequenceConfig.getSubObject(playList[curTrack])->makeSource(engine, emitter) });
 }

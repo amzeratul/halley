@@ -51,5 +51,6 @@ namespace Halley
 
 		void initialize();
 		void nextTrack();
+		void loadCurrentTrack();
 	};
 }
