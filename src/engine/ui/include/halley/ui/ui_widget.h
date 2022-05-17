@@ -174,7 +174,7 @@ namespace Halley {
 		
 		virtual void onMakeUI();
 
-		LocalisedString getToolTip() const;
+		virtual LocalisedString getToolTip() const;
 		void setToolTip(LocalisedString toolTip);
 
 		bool hasStyle() const;

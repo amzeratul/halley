@@ -49,7 +49,7 @@ void UIToolTip::update(Time t, bool moved)
 		if (timeOnWidget > delay && !visible) {
 			visible = true;
 
-			auto pos = lastMousePos + Vector2f(0, 20);
+			auto pos = lastMousePos + Vector2f(12, 20);
 			const auto screenRect = getRoot()->getRect();
 			pos = Vector2f::max(pos, screenRect.getTopLeft());
 			pos = Vector2f::min(pos, screenRect.getBottomRight() - getSize());

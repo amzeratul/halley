@@ -124,6 +124,11 @@ std::shared_ptr<UIWidget> UISlider::getLabelBox() const
 	return box;
 }
 
+bool UISlider::canInteractWithMouse() const
+{
+	return true;
+}
+
 void UISlider::update(Time t, bool moved)
 {
 	timeSinceMove += t;
@@ -191,6 +196,11 @@ void UISliderBar::onMouseOver(Vector2f mousePos)
 Rect4f UISliderBar::getMouseRect() const
 {
 	return Rect4f(getPosition() - Vector2f(extra.x, extra.y), getPosition() + getSize() + Vector2f(extra.z, extra.w));
+}
+
+LocalisedString UISliderBar::getToolTip() const
+{
+	return parent.getToolTip();
 }
 
 void UISliderBar::draw(UIPainter& painter) const

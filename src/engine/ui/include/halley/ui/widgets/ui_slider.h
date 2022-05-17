@@ -28,6 +28,7 @@ namespace Halley {
 		std::shared_ptr<UIWidget> getLabelBox() const;
 
 	protected:
+		bool canInteractWithMouse() const override;
 		void update(Time t, bool moved) override;
 
 	private:
@@ -58,6 +59,7 @@ namespace Halley {
 	    void releaseMouse(Vector2f mousePos, int button) override;
 		void onMouseOver(Vector2f mousePos) override;
 		Rect4f getMouseRect() const override;
+		LocalisedString getToolTip() const override;
 
 	protected:
 		void draw(UIPainter& painter) const override;
