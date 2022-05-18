@@ -200,6 +200,8 @@ void EntityEditor::reloadEntity()
 		setCanSendEvents(true);
 
 		entityValidatorUI->setEntity(*currentEntityData, *this, *gameResources);
+	} else {
+		entityValidatorUI->setActive(false);
 	}
 }
 
