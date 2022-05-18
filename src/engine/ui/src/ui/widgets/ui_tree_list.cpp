@@ -106,6 +106,15 @@ void UITreeList::setForceLeaf(const String& id, bool forceLeaf)
 	}
 }
 
+bool UITreeList::setSelectedOptionIds(gsl::span<const String> ids, SelectionMode mode)
+{
+	for (const auto& id: ids) {
+		makeParentsOfItemExpanded(id);
+	}
+
+	return UIList::setSelectedOptionIds(ids, mode);
+}
+
 UITreeListItem* UITreeList::tryGetTreeItem(const String& id)
 {
 	return root.tryFindId(id);

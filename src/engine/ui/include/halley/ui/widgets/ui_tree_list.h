@@ -114,6 +114,8 @@ namespace Halley {
         void setLabel(const String& id, const LocalisedString& label, Sprite icon);
         void setForceLeaf(const String& id, bool forceLeaf);
 
+        bool setSelectedOptionIds(gsl::span<const String> ids, SelectionMode mode = SelectionMode::Normal) override;
+
         UITreeListItem* tryGetTreeItem(const String& id);
 
         void clear() override;
