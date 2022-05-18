@@ -389,6 +389,10 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 	const std::shared_ptr<UIWidget> mousePosTarget = exclusive ? exclusive : actuallyUnderMouse;
 	if (mousePosTarget) {
 		mousePosTarget->onMouseOver(mousePos);
+	}
+
+	// Show tooltip
+	if (mousePosTarget && !exclusive) {
 		if (toolTip) {
 			toolTip->showToolTipForWidget(*mousePosTarget, mousePos);
 		}
