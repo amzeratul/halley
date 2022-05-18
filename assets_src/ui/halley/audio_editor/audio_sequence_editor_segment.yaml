@@ -12,5 +12,5 @@ children:
     fill: [left, centreVertical]
     children:
     - widget: { class: label, text: "End at sample: " }
-  - widget: { id: endSample, class: textInput, size: [100, 20], validator: integerPositive }
+  - widget: { id: endSample, class: textInput, size: [100, 20], validator: integerPositive, tooltip: "After this sample, continue playing, but also start the next segment as if this segment ended. Set to 0 to disable it." }
     fill: left
