@@ -193,8 +193,14 @@ void AudioSourceSequence::nextTrack()
 
 void AudioSourceSequence::loadCurrentTrack()
 {
-	playingTracks.push_back({ sequenceConfig.getSubObject(playList[curTrack])->makeSource(engine, emitter) });
+	const auto& segment = sequenceConfig.getSegments()[playList[curTrack]];
+	playingTracks.push_back({ segment.object->makeSource(engine, emitter) });
 	auto& track = playingTracks.back();
 	track.fader.startFade(0.0f, 1.0f, sequenceConfig.getCrossFade());
 	track.prevGain = track.fader.getCurrentValue();
+
+	const auto nSamples = track.source->getSamplesLeft();
+	if (segment.endSample > 0 && static_cast<size_t>(segment.endSample) < nSamples) {
+		track.endSamplesOverlap = nSamples - static_cast<size_t>(segment.endSample);
+	}
 }
