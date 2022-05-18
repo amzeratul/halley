@@ -7,4 +7,10 @@ children:
 - widget: { id: segmentContents, class: widget }
   proportion: 1
   sizer: { type: grid, columns: 2, columnProportions: [0, 1], gap: 3 }
-  children: []
+  children:
+  - widget: { class: widget, size: [100, 10] }
+    fill: [left, centreVertical]
+    children:
+    - widget: { class: label, text: "End at sample: " }
+  - widget: { id: endSample, class: textInput, size: [100, 20], validator: integerPositive }
+    fill: left

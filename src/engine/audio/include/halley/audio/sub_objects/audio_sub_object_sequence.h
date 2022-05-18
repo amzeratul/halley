@@ -24,7 +24,20 @@ namespace Halley {
 
     class AudioSubObjectSequence final : public IAudioSubObject {
     public:
-   	    void load(const ConfigNode& node) override;
+		struct Segment {
+			AudioSubObjectHandle object;
+			int endSample = 0;
+
+			Segment() = default;
+			Segment(const ConfigNode& node);
+			Segment(AudioSubObjectHandle subObject);
+			ConfigNode toConfigNode() const;
+
+			void serialize(Serializer& s) const;
+			void deserialize(Deserializer& s);
+		};
+
+    	void load(const ConfigNode& node) override;
     	ConfigNode toConfigNode() const override;
 
         AudioSubObjectType getType() const override { return AudioSubObjectType::Sequence; }
@@ -47,8 +60,12 @@ namespace Halley {
 		const AudioFade& getCrossFade() const;
 		AudioSequenceType getSequenceType() const;
 
+		gsl::span<const Segment> getSegments() const;
+		gsl::span<Segment> getSegments();
+		Segment& getSegment(size_t idx);
+
     private:
-        Vector<AudioSubObjectHandle> segments;
+        Vector<Segment> segments;
 
         AudioFade crossFade;
         AudioSequenceType sequenceType;

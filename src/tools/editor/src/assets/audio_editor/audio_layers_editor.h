@@ -22,6 +22,8 @@ namespace Halley {
 		UIFactory& factory;
         AudioObjectEditor& editor;
 		AudioSubObjectLayers& layers;
+
+		void refreshIds();
     };
 
 	class AudioLayersEditorLayer : public UIWidget {
@@ -29,6 +31,7 @@ namespace Halley {
         AudioLayersEditorLayer(UIFactory& factory, AudioLayersEditor& layersEditor, size_t idx);
 
 		void onMakeUI() override;
+		void setIdx(size_t idx);
 
 	private:
 		UIFactory& factory;

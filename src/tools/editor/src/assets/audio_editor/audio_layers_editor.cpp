@@ -32,6 +32,7 @@ void AudioLayersEditor::onMakeUI()
 	{
 		std::swap(layers.getLayers()[event.getIntData()], layers.getLayers()[event.getIntData2()]);
 		editor.markModified(true);
+		refreshIds();
 	});
 }
 
@@ -48,6 +49,16 @@ void AudioLayersEditor::markModified(size_t idx)
 AudioObjectEditor& AudioLayersEditor::getEditor()
 {
 	return editor;
+}
+
+void AudioLayersEditor::refreshIds()
+{
+	const auto layerList = getWidgetAs<UIList>("layers");
+	const auto n = layerList->getCount();
+	for (size_t i = 0; i < n; ++i) {
+		const auto layerEditor = layerList->getItem(static_cast<int>(i))->getWidgetAs<AudioLayersEditorLayer>("audio_layers_editor_layer");
+		layerEditor->setIdx(i);
+	}
 }
 
 AudioLayersEditorLayer::AudioLayersEditorLayer(UIFactory& factory, AudioLayersEditor& layersEditor, size_t idx)
@@ -105,4 +116,9 @@ void AudioLayersEditorLayer::onMakeUI()
 
 	updateFadeOverride(!!layer.fadeIn, layer.fadeIn, "fadeInContainer");
 	updateFadeOverride(!!layer.fadeOut, layer.fadeOut, "fadeOutContainer");
+}
+
+void AudioLayersEditorLayer::setIdx(size_t idx)
+{
+	this->idx = idx;
 }

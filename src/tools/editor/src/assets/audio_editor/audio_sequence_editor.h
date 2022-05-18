@@ -15,10 +15,26 @@ namespace Halley {
 
 		void markModified(size_t idx);
         AudioObjectEditor& getEditor();
+        AudioSubObjectSequence::Segment& getSegment(size_t idx);
 
     private:
 		UIFactory& factory;
         AudioObjectEditor& editor;
 		AudioSubObjectSequence& sequence;
+
+		void refreshIds();
+    };
+
+	class AudioSequenceEditorSegment : public UIWidget {
+    public:
+        AudioSequenceEditorSegment(UIFactory& factory, AudioSequenceEditor& sequenceEditor, size_t idx);
+
+		void onMakeUI() override;
+		void setIdx(size_t idx);
+
+	private:
+		UIFactory& factory;
+        AudioSequenceEditor& sequenceEditor;
+		size_t idx;
     };
 }
