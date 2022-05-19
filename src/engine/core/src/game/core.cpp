@@ -308,10 +308,10 @@ void Core::processEvents(Time time)
 	}
 }
 
-void Core::runStartFrame()
+void Core::runStartFrame(Time time)
 {
 	if (currentStage) {
-		currentStage->onStartFrame();
+		currentStage->onStartFrame(time);
 	}
 }
 
@@ -386,7 +386,7 @@ void Core::tickFrame(Time time)
 
 	const bool multithreaded = currentStage && currentStage->hasMultithreadedRendering();
 
-	runStartFrame();
+	runStartFrame(time);
 	
 	if (multithreaded) {
 		auto updateTask = Concurrent::execute([&] () {

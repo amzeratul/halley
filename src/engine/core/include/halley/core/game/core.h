@@ -80,7 +80,7 @@ namespace Halley
 		void showComputerInfo() const;
 
 		void processEvents(Time time);
-		void runStartFrame();
+		void runStartFrame(Time time);
 		void runPreVariableUpdate(Time time);
 		void runVariableUpdate(Time time);
 		void runPostVariableUpdate(Time time);

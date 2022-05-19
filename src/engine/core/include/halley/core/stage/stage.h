@@ -21,7 +21,7 @@ namespace Halley
 
 		virtual void init() {}
 
-		virtual void onStartFrame() {}
+		virtual void onStartFrame(Time) {}
 		virtual void onFixedUpdate(Time) {}
 		virtual void onVariableUpdate(Time) {}
 		virtual void onRender(RenderContext&) const {}

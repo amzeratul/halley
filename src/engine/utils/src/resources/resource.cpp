@@ -41,6 +41,21 @@ ResourceMemoryUsage Resource::getMemoryUsage() const
 	return ResourceMemoryUsage{};
 }
 
+void Resource::increaseAge(float time)
+{
+	age += time;
+}
+
+void Resource::resetAge()
+{
+	age = 0;
+}
+
+float Resource::getAge() const
+{
+	return age;
+}
+
 void Resource::reload(Resource&& resource)
 {
 }

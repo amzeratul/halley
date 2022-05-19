@@ -55,7 +55,13 @@ namespace Halley
 		Vector<String> enumerate() const;
 
 		AssetType getAssetType() const;
+
 		ResourceMemoryUsage getMemoryUsage() const;
+		ResourceMemoryUsage getMemoryUsageAndAge(float time);
+		void age(float time);
+
+		/// <returns>How much memory was freed</returns>
+		ResourceMemoryUsage clearOldResources(float maxAge);
 
 	protected:
 		virtual std::shared_ptr<Resource> loadResource(ResourceLoader& loader) = 0;

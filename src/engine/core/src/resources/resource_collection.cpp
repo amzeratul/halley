@@ -97,6 +97,70 @@ ResourceMemoryUsage ResourceCollectionBase::getMemoryUsage() const
 	return usage;
 }
 
+void ResourceCollectionBase::age(float time)
+{
+	std::shared_lock lock(mutex);
+
+	for (auto& r: resources) {
+		const auto& resourcePtr = r.second.res;
+		if (resourcePtr.use_count() <= 2) {
+			resourcePtr->increaseAge(time);
+		} else {
+			resourcePtr->resetAge();
+		}
+	}
+}
+
+ResourceMemoryUsage ResourceCollectionBase::clearOldResources(float maxAge)
+{
+	Vector<decltype(resources)::iterator> toDelete;
+	ResourceMemoryUsage usage;
+
+	{
+		std::shared_lock lock(mutex);
+
+		for (auto iter = resources.begin(); iter != resources.end(); ) {
+			auto next = iter;
+			++next;
+
+			auto& resourcePtr = iter->second.res;
+			if (resourcePtr.use_count() <= 2 && resourcePtr->getAge() > maxAge) {
+				usage += resourcePtr->getMemoryUsage();
+				toDelete.push_back(iter);
+			}
+
+			iter = next;
+		}
+
+		for (auto& a: toDelete) {
+			resources.erase(a);
+		}
+	}
+
+	// Delete out of the lock to avoid stalling resources for too long
+	toDelete.clear();
+
+	return usage;
+}
+
+ResourceMemoryUsage ResourceCollectionBase::getMemoryUsageAndAge(float time)
+{
+	ResourceMemoryUsage usage;
+	std::shared_lock lock(mutex);
+
+	for (auto& r: resources) {
+		auto& resourcePtr = r.second.res;
+		if (resourcePtr.use_count() <= 2) {
+			resourcePtr->increaseAge(time);
+		} else {
+			resourcePtr->resetAge();
+		}
+		usage += resourcePtr->getMemoryUsage();
+	}
+
+	return usage;
+}
+
 std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(const String& assetId, ResourceLoadPriority priority, bool allowFallback) {
 	std::shared_ptr<Resource> newRes;
 

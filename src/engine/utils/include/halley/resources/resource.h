@@ -175,6 +175,10 @@ namespace Halley
 
 		virtual ResourceMemoryUsage getMemoryUsage() const;
 
+		void increaseAge(float time);
+		void resetAge();
+		float getAge() const;
+
 	protected:
 		virtual void reload(Resource&& resource);
 
@@ -182,6 +186,7 @@ namespace Halley
 		Metadata meta;
 		String assetId;
 		int assetVersion = 0;
+		float age = 0;
 		bool metaSet = false;
 	};
 
