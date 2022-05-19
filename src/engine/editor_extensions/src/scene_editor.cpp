@@ -232,8 +232,9 @@ void SceneEditor::drawOverlay(Painter& painter, Rect4f view)
 			drawStr += "\nWorld: " + Vector2i(worldPos);
 		}
 
-		if (!selectedEntities.empty()) {
-			const auto* t2d = selectedEntities.front().tryGetComponent<Transform2DComponent>();
+		if (!selectedEntityIds.empty()) {
+			auto e = getWorld().getEntity(selectedEntityIds.front());
+			const auto* t2d = e.tryGetComponent<Transform2DComponent>();
 			colours.emplace_back(drawStr.size(), Colour4f(0.8f, 0.8f, 1.0f));
 			if (t2d) {
 				const auto objectPos = Vector2i(t2d->inverseTransformPoint(Vector2f(scenePos)));
@@ -433,10 +434,13 @@ void SceneEditor::setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizm
 void SceneEditor::setSelectedEntities(Vector<UUID> uuids, Vector<EntityData*> entityDatas)
 {
 	Expects(uuids.size() == entityDatas.size());
-	
+
+	Vector<EntityRef> selectedEntities;
 	selectedEntities.resize(uuids.size());
+	selectedEntityIds.resize(uuids.size());
 	for (size_t i = 0; i < uuids.size(); ++i) {
-		auto& selectedEntity = selectedEntities[i];
+		auto selectedEntity = getWorld().getEntity(selectedEntityIds[i]);
+		selectedEntities[i] = selectedEntity;
 		const auto& id = uuids[i];
 		const auto& curId = selectedEntity.isValid() ? selectedEntity.getInstanceUUID() : UUID();
 		if (id != curId) {
@@ -532,7 +536,8 @@ void SceneEditor::onInit(std::shared_ptr<const UIColourScheme> colourScheme)
 EntityRef SceneEditor::getEntity(const UUID& id) const
 {
 	// Optimization: this will most likely be a selected entity
-	for (const auto& e: selectedEntities) {
+	for (const auto& eId: selectedEntityIds) {
+		const auto& e = getWorld().getEntity(eId);
 		if (e.getInstanceUUID() == id) {
 			return e;
 		}
@@ -646,9 +651,9 @@ void SceneEditor::onStartSelectionBox()
 {
 	if (!selBox) {
 		selBoxStartSelectedEntities.clear();
-		selBoxStartSelectedEntities.reserve(selectedEntities.size());
-		for (const auto& e: selectedEntities) {
-			selBoxStartSelectedEntities.push_back(e.getInstanceUUID());
+		selBoxStartSelectedEntities.reserve(selectedEntityIds.size());
+		for (const auto& e: selectedEntityIds) {
+			selBoxStartSelectedEntities.push_back(getWorld().getEntity(e).getInstanceUUID());
 		}
 	}
 	selBox = Rect4f(holdMouseStart.value(), mousePos.value());
