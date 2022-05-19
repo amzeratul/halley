@@ -286,7 +286,9 @@ EntityData Prefab::makeEntityData(const ConfigNode& node) const
 Prefab::Deltas Prefab::generatePrefabDeltas(const Prefab& newPrefab) const
 {
 	Deltas result;
-	result.entitiesModified[entityData.getPrefabUUID()] = EntityDataDelta(entityData, newPrefab.entityData);
+	EntityDataDelta::Options options;
+	options.deltaComponents = false;
+	result.entitiesModified[entityData.getPrefabUUID()] = EntityDataDelta(entityData, newPrefab.entityData, options);
 	return result;
 }
 
