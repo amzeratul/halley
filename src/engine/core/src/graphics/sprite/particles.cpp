@@ -13,6 +13,11 @@ Particles::Particles()
 Particles::Particles(const ConfigNode& node, Resources& resources)
 	: rng(&Random::getGlobal())
 {
+	load(node, resources);
+}
+
+void Particles::load(const ConfigNode& node, Resources& resources)
+{
 	spawnRate = node["spawnRate"].asFloat(100);
 	spawnArea = node["spawnArea"].asVector2f(Vector2f(0, 0));
 	ttl = node["ttl"].asFloat(1.0f);
@@ -294,5 +299,10 @@ ConfigNode ConfigNodeSerializer<Particles>::serialize(const Particles& particles
 Particles ConfigNodeSerializer<Particles>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 {
 	return Particles(node, *context.resources);
+}
+
+void ConfigNodeSerializer<Particles>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, Particles& target)
+{
+	target.load(node, *context.resources);
 }
 

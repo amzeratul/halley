@@ -23,6 +23,7 @@ namespace Halley {
 	public:
 		Particles();
 		Particles(const ConfigNode& node, Resources& resources);
+		void load(const ConfigNode& node, Resources& resources);
 
 		ConfigNode toConfigNode() const;
 
@@ -102,5 +103,6 @@ namespace Halley {
 	public:
 		ConfigNode serialize(const Particles& particles, const EntitySerializationContext& context);
 		Particles deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, Particles& target);
 	};
 }
