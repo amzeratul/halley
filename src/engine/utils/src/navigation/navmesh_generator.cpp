@@ -32,7 +32,7 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 	generateConnectivity(polygons);
 	tagEdgeConnections(polygons, params.bounds.edges);
 	removeNodesBeyondPortals(polygons);
-	postProcessPolygons(polygons, maxSize, true, params.bounds);
+	//postProcessPolygons(polygons, maxSize, true, params.bounds);
 	simplifyPolygons(polygons, params.bounds);
 	applyRegions(polygons, params.regions);
 	const int nRegions = assignRegions(polygons);
