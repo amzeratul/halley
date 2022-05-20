@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
   <Type Name="Halley::ConfigNode">
-    <DisplayString Condition="type == ConfigNodeType::Int">Int:{intData}</DisplayString>
-    <DisplayString Condition="type == ConfigNodeType::Float">Float:{floatData}</DisplayString>
-    <DisplayString Condition="type == ConfigNodeType::Int2">Int2:({vec2iData.x}, {vec2iData.y})</DisplayString>
-    <DisplayString Condition="type == ConfigNodeType::Float2">Float2:({vec2fData.x}, {vec2fData.y})</DisplayString>
-    <DisplayString Condition="type == ConfigNodeType::String">String:{*strData}</DisplayString>
-    <DisplayString Condition="type == ConfigNodeType::Bytes">Bytes:{*bytesData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Int">{intData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Float">{floatData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Int2">({vec2iData.x}, {vec2iData.y})</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Float2">({vec2fData.x}, {vec2fData.y})</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::String">{*strData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Bytes">{*bytesData}</DisplayString>
     <DisplayString Condition="type == ConfigNodeType::Noop">Noop</DisplayString>
-    <DisplayString Condition="type == ConfigNodeType::Idx">Idx</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Idx">Idx(start={vec2iData.x}, len={vec2iData.y})</DisplayString>
     <DisplayString Condition="type == ConfigNodeType::Del">Del</DisplayString>
-    <DisplayString Condition="type == ConfigNodeType::Map">Map:{*mapData}</DisplayString>
-    <DisplayString Condition="type == ConfigNodeType::DeltaMap">DeltaMap:{*mapData}</DisplayString>
-    <DisplayString Condition="type == ConfigNodeType::Sequence">Sequence:{*sequenceData}</DisplayString>
-    <DisplayString Condition="type == ConfigNodeType::DeltaSequence">DeltaSequence:{*sequenceData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Map">(Map){*mapData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::DeltaMap">(Map){*mapData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::Sequence">(Sequence){*sequenceData}</DisplayString>
+    <DisplayString Condition="type == ConfigNodeType::DeltaSequence">(Sequence){*sequenceData}</DisplayString>
     <DisplayString>Undefined</DisplayString>
     <Expand>
-		<Item Name="Int Data" Condition="type == ConfigNodeType::Int">intData</Item>
-	    <Item Name="Float Data" Condition="type == ConfigNodeType::Float">floatData</Item>
-	    <Item Name="Int2 Data" Condition="type == ConfigNodeType::Int2">vec2iData</Item>
-	    <Item Name="Float2 Data" Condition="type == ConfigNodeType::Float2">vec2fData</Item>
-	    <Item Name="String Data" Condition="type == ConfigNodeType::String">*strData</Item>
-	    <Item Name="Bytes Data" Condition="type == ConfigNodeType::Bytes">*bytesData</Item>
-	    <Item Name="Map Data" Condition="type == ConfigNodeType::Map">*mapData</Item>
-	    <Item Name="Delta Map Data" Condition="type == ConfigNodeType::DeltaMap">*mapData</Item>
-	    <Item Name="Sequence Data" Condition="type == ConfigNodeType::Sequence">*sequenceData</Item>
-	    <Item Name="Delta Sequence Data" Condition="type == ConfigNodeType::DeltaSequence">*sequenceData</Item>
-		<Item Name="Type">type</Item>
+	    <Item Name="[Int]" Condition="type == ConfigNodeType::Int">intData</Item>
+	    <Item Name="[Float]" Condition="type == ConfigNodeType::Float">floatData</Item>
+	    <Item Name="[Int2]" Condition="type == ConfigNodeType::Int2">vec2iData</Item>
+	    <Item Name="[Float2]" Condition="type == ConfigNodeType::Float2">vec2fData</Item>
+	    <Item Name="[String]" Condition="type == ConfigNodeType::String">*strData</Item>
+	    <Item Name="[Bytes]" Condition="type == ConfigNodeType::Bytes">*bytesData</Item>
+	    <Item Name="[Map]" Condition="type == ConfigNodeType::Map">*mapData</Item>
+	    <Item Name="[Delta Map]" Condition="type == ConfigNodeType::DeltaMap">*mapData</Item>
+	    <Item Name="[Sequence]" Condition="type == ConfigNodeType::Sequence">*sequenceData</Item>
+	    <Item Name="[Delta Sequence]" Condition="type == ConfigNodeType::DeltaSequence">*sequenceData</Item>
+	    <Item Name="[Idx]" Condition="type == ConfigNodeType::Idx">vec2iData</Item>
     </Expand>
   </Type>
 </AutoVisualizer>
