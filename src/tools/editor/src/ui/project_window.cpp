@@ -28,8 +28,6 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	, resources(resources)
 	, api(api)
 {
-	debugConsoleController = std::make_shared<UIDebugConsoleController>(resources, api);
-
 	settings[EditorSettingType::Temp] = std::make_unique<SettingsStorage>(std::shared_ptr<ISaveData>(), "");
 	settings[EditorSettingType::Project] = std::make_unique<SettingsStorage>(api.system->getStorageContainer(SaveDataType::SaveLocal, "settings"), project.getProperties().getUUID().toString());
 	settings[EditorSettingType::Editor] = std::make_unique<SettingsStorage>(api.system->getStorageContainer(SaveDataType::SaveLocal, "settings"), "halleyEditor");
@@ -58,13 +56,7 @@ ProjectWindow::~ProjectWindow()
 
 void ProjectWindow::onRemovedFromRoot(UIRoot& root)
 {
-	if (debugConsole) {
-		debugConsole->destroy();
-	}
-	debugConsole.reset();
-	debugConsoleController.reset();
-	debugConsoleCommands.reset();
-
+	destroyConsole();
 	consoleWindow.reset();
 
 	assetPreviewGenerator.reset();
@@ -185,18 +177,7 @@ bool ProjectWindow::loadCustomUI()
 		}
 	}
 
-	debugConsoleCommands = std::make_shared<UIDebugConsoleCommands>();
-	debugConsoleCommands->addCommand("dllReload", [=](Vector<String> args) -> String
-	{
-		reloadDLL();
-		return "Reloading DLL";
-	});
-	try {
-		game->attachToEditorDebugConsole(*debugConsoleCommands, project.getGameResources(), project);
-		debugConsoleController->addCommands(*debugConsoleCommands);
-	} catch (const std::exception& e) {
-		Logger::logException(e);
-	} catch (...) {}
+	setupConsole(*game);
 
 	return true;
 }
@@ -208,11 +189,8 @@ void ProjectWindow::destroyCustomUI()
 		customTools.clear();
 	}
 	pagedPane->resizePages(numOfStandardTools);
-	debugConsoleCommands.reset();
-	if (debugConsole) {
-		debugConsole->destroy();
-	}
-	debugConsole.reset();
+
+	destroyConsole();
 }
 
 void ProjectWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
@@ -412,6 +390,36 @@ void ProjectWindow::reloadDLL()
 	if (debugConsole) {
 		debugConsole->hide();
 	}
+}
+
+void ProjectWindow::setupConsole(Game& game)
+{
+	debugConsoleController = std::make_shared<UIDebugConsoleController>(resources, api);
+	debugConsoleCommands = std::make_shared<UIDebugConsoleCommands>();
+	debugConsoleCommands->addCommand("dllReload", [=](Vector<String> args) -> String
+	{
+		reloadDLL();
+		return "Reloading DLL";
+	});
+	try {
+		game.attachToEditorDebugConsole(*debugConsoleCommands, project.getGameResources(), project);
+		debugConsoleController->addCommands(*debugConsoleCommands);
+	} catch (const std::exception& e) {
+		Logger::logException(e);
+	} catch (...) {}
+}
+
+void ProjectWindow::destroyConsole()
+{
+	if (debugConsole) {
+		debugConsole->destroy();
+		debugConsole.reset();
+	}
+	if (debugConsoleController) {
+		debugConsoleController->removeCommands(*debugConsoleCommands);
+		debugConsoleController.reset();
+	}
+	debugConsoleCommands.reset();
 }
 
 void ProjectWindow::reloadProject()

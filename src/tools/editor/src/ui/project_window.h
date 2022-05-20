@@ -133,5 +133,8 @@ namespace Halley {
         void toggleDebugConsole();
     	void updateDLLStatus(ProjectDLL::Status status);
         void reloadDLL();
+
+        void setupConsole(Game& game);
+        void destroyConsole();
 	};
 }
