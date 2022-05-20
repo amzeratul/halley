@@ -116,6 +116,7 @@ set(HEADERS
         "include/halley/data_structures/dynamic_grid.h"
         "include/halley/data_structures/flat_map.h"
         "include/halley/data_structures/hash_map.h"
+        "include/halley/data_structures/hash_map.natvis"
         "include/halley/data_structures/highscore.h"
         "include/halley/data_structures/mapped_pool.h"
         "include/halley/data_structures/maybe.h"
