@@ -15,5 +15,18 @@
     <DisplayString Condition="type == ConfigNodeType::Sequence">Sequence:{*sequenceData}</DisplayString>
     <DisplayString Condition="type == ConfigNodeType::DeltaSequence">DeltaSequence:{*sequenceData}</DisplayString>
     <DisplayString>Undefined</DisplayString>
+    <Expand>
+		<Item Name="Int Data" Condition="type == ConfigNodeType::Int">intData</Item>
+	    <Item Name="Float Data" Condition="type == ConfigNodeType::Float">floatData</Item>
+	    <Item Name="Int2 Data" Condition="type == ConfigNodeType::Int2">vec2iData</Item>
+	    <Item Name="Float2 Data" Condition="type == ConfigNodeType::Float2">vec2fData</Item>
+	    <Item Name="String Data" Condition="type == ConfigNodeType::String">*strData</Item>
+	    <Item Name="Bytes Data" Condition="type == ConfigNodeType::Bytes">*bytesData</Item>
+	    <Item Name="Map Data" Condition="type == ConfigNodeType::Map">*mapData</Item>
+	    <Item Name="Delta Map Data" Condition="type == ConfigNodeType::DeltaMap">*mapData</Item>
+	    <Item Name="Sequence Data" Condition="type == ConfigNodeType::Sequence">*sequenceData</Item>
+	    <Item Name="Delta Sequence Data" Condition="type == ConfigNodeType::DeltaSequence">*sequenceData</Item>
+		<Item Name="Type">type</Item>
+    </Expand>
   </Type>
 </AutoVisualizer>
