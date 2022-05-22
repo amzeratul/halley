@@ -8,10 +8,7 @@ Base2D::Base2D()
 Base2D::Base2D(Vector2f u, Vector2f v)
 	: u(u), v(v)
 {
-	// Compute inverse
-	const float det = 1.0f / u.cross(v);
-	invU = det * Vector2f(v.y, -u.y);
-	invV = det * Vector2f(-v.x, u.x);
+	computeInverse();
 }
 
 Base2D::Base2D(const ConfigNode& node)
@@ -22,6 +19,13 @@ Base2D::Base2D(const ConfigNode& node)
 Base2D::Base2D(Vector2f u, Vector2f v, Vector2f invU, Vector2f invV)
 	: u(u), v(v), invU(invU), invV(invV)
 {
+}
+
+void Base2D::computeInverse()
+{
+	const float det = 1.0f / u.cross(v);
+	invU = det * Vector2f(v.y, -u.y);
+	invV = det * Vector2f(-v.x, u.x);
 }
 
 Vector2f Base2D::transform(Vector2f point) const
@@ -80,5 +84,6 @@ void Base2D::deserialize(Deserializer& s)
 {
 	s >> u;
 	s >> v;
+	computeInverse();
 }
 

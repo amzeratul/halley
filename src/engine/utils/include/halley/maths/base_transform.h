@@ -51,5 +51,6 @@ namespace Halley {
 		Vector2f invU, invV;
 
 		Base2D(Vector2f u, Vector2f v, Vector2f invU, Vector2f invV);
+		void computeInverse();
 	};
 }

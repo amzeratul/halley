@@ -29,4 +29,12 @@ namespace Halley
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
 	};
+
+	class NavmeshSetImporter : public IAssetImporter
+	{
+	public:
+		ImportAssetType getType() const override { return ImportAssetType::NavmeshSet; }
+
+		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
+	};
 }

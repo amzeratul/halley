@@ -39,6 +39,7 @@ AssetImporter::AssetImporter(Project& project, Vector<Path> assetsSrc)
 		std::make_unique<ConfigImporter>(),
 		std::make_unique<PrefabImporter>(),
 		std::make_unique<SceneImporter>(),
+		std::make_unique<NavmeshSetImporter>(),
 		std::make_unique<CodegenImporter>(),
 		std::make_unique<AudioImporter>(),
 		std::make_unique<AudioObjectImporter>(),
@@ -94,6 +95,8 @@ ImportAssetType AssetImporter::getImportAssetType(const Path& path, bool skipRed
 		return ImportAssetType::Prefab;
 	} else if (root == "scene") {
 		return ImportAssetType::Scene;
+	} else if (root == "navmesh_set") {
+		return ImportAssetType::NavmeshSet;
 	} else if (root == "audio") {
 		return ImportAssetType::AudioClip;
 	} else if (root == "audio_event") {
