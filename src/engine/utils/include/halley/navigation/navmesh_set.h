@@ -5,12 +5,21 @@
 #include "navigation_path.h"
 
 namespace Halley {
-	class NavmeshSet {
+	class NavmeshSet : public Resource {
 	public:
 		NavmeshSet();
 		NavmeshSet(const ConfigNode& nodeData);
 
 		ConfigNode toConfigNode() const;
+
+		static std::shared_ptr<NavmeshSet> loadResource(ResourceLoader& loader);
+		constexpr static AssetType getAssetType() { return AssetType::NavmeshSet; }
+
+		void reload(Resource&& resource) override;
+		void makeDefault();
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 
 		void add(Navmesh navmesh);
 		void addChunk(NavmeshSet navmeshSet, Vector2f origin, Vector2i gridPosition);

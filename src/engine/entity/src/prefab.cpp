@@ -24,7 +24,7 @@ std::shared_ptr<Prefab> Prefab::loadResource(ResourceLoader& loader)
 		loader.getAsync(false).then([prefab, &res] (std::unique_ptr<ResourceDataStatic> dataStatic)
 		{
 			if (dataStatic) {
-				Deserializer::fromBytes(*prefab, dataStatic->getSpan());
+				Deserializer::fromBytes(*prefab, dataStatic->getSpan(), SerializerOptions(SerializerOptions::maxVersion));
 				prefab->doneLoading();
 				Concurrent::execute([prefab, &res]() {
 					prefab->preloadDependencies(res);
@@ -35,7 +35,7 @@ std::shared_ptr<Prefab> Prefab::loadResource(ResourceLoader& loader)
 			}
 		});
 	} else {
-		Deserializer::fromBytes(*prefab, loader.getStatic()->getSpan());
+		Deserializer::fromBytes(*prefab, loader.getStatic()->getSpan(), SerializerOptions(SerializerOptions::maxVersion));
 	}
 	
 	return prefab;
@@ -302,7 +302,7 @@ std::shared_ptr<Scene> Scene::loadResource(ResourceLoader& loader)
 		loader.getAsync(false).then([scene, &resources] (std::unique_ptr<ResourceDataStatic> dataStatic)
 		{
 			if (dataStatic) {
-				Deserializer::fromBytes(*scene, dataStatic->getSpan());
+				Deserializer::fromBytes(*scene, dataStatic->getSpan(), SerializerOptions(SerializerOptions::maxVersion));
 				scene->doneLoading();
 				Concurrent::execute([scene, &resources] () {
 					scene->preloadDependencies(resources);
@@ -313,7 +313,7 @@ std::shared_ptr<Scene> Scene::loadResource(ResourceLoader& loader)
 			}
 		});
 	} else {
-		Deserializer::fromBytes(*scene, loader.getStatic()->getSpan());
+		Deserializer::fromBytes(*scene, loader.getStatic()->getSpan(), SerializerOptions(SerializerOptions::maxVersion));
 	}
 	
 	return scene;

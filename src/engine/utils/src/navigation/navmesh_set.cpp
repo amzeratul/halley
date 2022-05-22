@@ -1,5 +1,6 @@
 #include "halley/navigation/navmesh_set.h"
 
+#include "halley/bytes/byte_serializer.h"
 #include "halley/data_structures/priority_queue.h"
 #include "halley/maths/ray.h"
 #include "halley/support/logger.h"
@@ -21,6 +22,32 @@ ConfigNode NavmeshSet::toConfigNode() const
 	ConfigNode::MapType result;
 	result["navmeshes"] = navmeshes;
 	return result;
+}
+
+std::shared_ptr<NavmeshSet> NavmeshSet::loadResource(ResourceLoader& loader)
+{
+	auto result = std::make_shared<NavmeshSet>();
+	Deserializer::fromBytes(*result, loader.getStatic()->getSpan(), SerializerOptions(SerializerOptions::maxVersion));
+	return result;
+}
+
+void NavmeshSet::reload(Resource&& resource)
+{
+	*this = dynamic_cast<NavmeshSet&&>(resource);
+}
+
+void NavmeshSet::makeDefault()
+{
+}
+
+void NavmeshSet::serialize(Serializer& s) const
+{
+	s << navmeshes;
+}
+
+void NavmeshSet::deserialize(Deserializer& s)
+{
+	s >> navmeshes;
 }
 
 void NavmeshSet::add(Navmesh navmesh)

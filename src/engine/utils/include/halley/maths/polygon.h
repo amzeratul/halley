@@ -108,12 +108,16 @@ namespace Halley {
 		CollisionResult getCollisionWithSweepingCircle(Vector2f circlePos, float radius, Vector2f moveDir, float moveLen) const;
 		CollisionResult getCollisionWithSweepingEllipse(Vector2f circlePos, Vector2f radius, Vector2f moveDir, float moveLen) const;
 
+		float getDistanceTo(Vector2f point, float anisotropy = 1.0f) const;
 		float getDistanceTo(const Line& line) const;
 
 		bool operator==(const Polygon& other) const;
 		bool operator!=(const Polygon& other) const;
 
 		ConfigNode toConfigNode() const;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 
 		std::optional<size_t> getExitEdge(const Ray& ray, size_t startFromEdge = 0) const;
 

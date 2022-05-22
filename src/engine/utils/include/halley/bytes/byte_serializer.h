@@ -206,6 +206,16 @@ namespace Halley {
 				return *this << false;
 			}
 		}
+		
+		template <typename T>
+		Serializer& operator<<(const OptionalLite<T>& p)
+		{
+			if (p) {
+				return *this << true << p.value();
+			} else {
+				return *this << false;
+			}
+		}
 
 		template <typename T>
 		Serializer& operator<<(const Range<T>& p)
@@ -459,6 +469,21 @@ namespace Halley {
 				p = tmp;
 			} else {
 				p = std::optional<T>();
+			}
+			return *this;
+		}
+
+		template <typename T>
+		Deserializer& operator>>(OptionalLite<T>& p)
+		{
+			bool present;
+			*this >> present;
+			if (present) {
+				T tmp;
+				*this >> tmp;
+				p = tmp;
+			} else {
+				p = OptionalLite<T>();
 			}
 			return *this;
 		}

@@ -7,7 +7,7 @@
 #include "metadata.h"
 #include "halley/text/enum_names.h"
 
-#if defined(DEV_BUILD) && !defined(__NX_TOOLCHAIN_MAJOR__)
+#if false && defined(DEV_BUILD) && !defined(__NX_TOOLCHAIN_MAJOR__)
 #define ENABLE_HOT_RELOAD
 #endif
 
@@ -36,6 +36,7 @@ namespace Halley
 		VariableTable,
 		GameProperties,
 		RenderGraphDefinition,
+		NavmeshSet,
 		Prefab,
 		Scene,
 		UIDefinition
@@ -43,7 +44,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<ImportAssetType> {
-		constexpr std::array<const char*, 24> operator()() const {
+		constexpr std::array<const char*, 25> operator()() const {
 			return{{
 				"undefined",
 				"skip",
@@ -66,6 +67,7 @@ namespace Halley
 				"variableTable",
 				"gameProperties",
 				"renderGraphDefinition",
+				"navmeshSet",
 				"prefab",
 				"scene",
 				"uiDefinition"
@@ -97,6 +99,7 @@ namespace Halley
 		MeshAnimation, // Depends on Mesh
 		VariableTable,
 		RenderGraphDefinition,
+		NavmeshSet,
 		Prefab,
 		Scene,
 		UIDefinition
@@ -104,7 +107,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<AssetType> {
-		constexpr std::array<const char*, 22> operator()() const {
+		constexpr std::array<const char*, 23> operator()() const {
 			return{{
 				"binaryFile",
 				"textFile",
@@ -125,6 +128,7 @@ namespace Halley
 				"meshAnimation",
 				"variableTable",
 				"renderGraphDefinition",
+				"navmeshSet",
 				"prefab",
 				"scene",
 				"uiDefinition"

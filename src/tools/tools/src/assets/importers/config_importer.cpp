@@ -24,7 +24,7 @@ void PrefabImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	Metadata meta = asset.inputFiles.at(0).metadata;
 	meta.set("asset_compression", "deflate");
 
-	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::Prefab, Serializer::toBytes(prefab), meta);
+	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::Prefab, Serializer::toBytes(prefab, SerializerOptions(SerializerOptions::maxVersion)), meta);
 }
 
 void SceneImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
@@ -35,6 +35,6 @@ void SceneImporter::import(const ImportingAsset& asset, IAssetCollector& collect
 	Metadata meta = asset.inputFiles.at(0).metadata;
 	meta.set("asset_compression", "deflate");
 
-	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::Scene, Serializer::toBytes(scene), meta);
+	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::Scene, Serializer::toBytes(scene, SerializerOptions(SerializerOptions::maxVersion)), meta);
 }
 

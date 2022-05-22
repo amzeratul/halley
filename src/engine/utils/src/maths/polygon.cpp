@@ -31,6 +31,7 @@
 #include "halley/maths/line.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
+#include "halley/bytes/byte_serializer.h"
 using namespace Halley;
 
 
@@ -1342,6 +1343,14 @@ Polygon::CollisionResult Polygon::getCollisionWithSweepingEllipse(Vector2f p0, V
 	return result;
 }
 
+float Polygon::getDistanceTo(Vector2f point, float anisotropy) const
+{
+	if (isPointInside(point)) {
+		return 0;
+	}
+	return (getClosestPoint(point, anisotropy) - point).length();
+}
+
 float Polygon::getDistanceTo(const Line& line) const
 {
 	const auto n = line.dir.orthoRight();
@@ -1387,6 +1396,17 @@ bool Polygon::operator!=(const Polygon& other) const
 ConfigNode Polygon::toConfigNode() const
 {
 	return ConfigNode(getVertices());
+}
+
+void Polygon::serialize(Serializer& s) const
+{
+	s << vertices;
+}
+
+void Polygon::deserialize(Deserializer& s)
+{
+	s >> vertices;
+	realize();
 }
 
 ConfigNode ConfigNodeSerializer<Polygon>::serialize(const Polygon& polygon, const EntitySerializationContext&)

@@ -55,6 +55,9 @@ namespace Halley {
 			Node(const ConfigNode& node);
 
 			ConfigNode toConfigNode() const;
+
+			void serialize(Serializer& s) const;
+			void deserialize(Deserializer& s);
 		};
 		
 		struct NodeAndConn {
@@ -62,6 +65,12 @@ namespace Halley {
 			uint16_t connectionIdx;
 			
 			NodeAndConn(NodeId node = -1, uint16_t connection = std::numeric_limits<uint16_t>::max()) : node(node), connectionIdx(connection) {}
+			NodeAndConn(const ConfigNode& node);
+
+			ConfigNode toConfigNode() const;
+
+			void serialize(Serializer& s) const;
+			void deserialize(Deserializer& s);
 		};
 
 		struct Portal {
@@ -73,10 +82,14 @@ namespace Halley {
 			bool regionLink = false;
 			bool subWorldLink = false;
 
-			Portal(int id);
+			Portal(int id = 0);
 			explicit Portal(const ConfigNode& node);
 
 			ConfigNode toConfigNode() const;
+
+			void serialize(Serializer& s) const;
+			void deserialize(Deserializer& s);
+
 			void postProcess(gsl::span<const Polygon> polygons, Vector<Portal>& dst);
 			
 			bool canJoinWith(const Portal& other, float epsilon) const;
@@ -88,11 +101,14 @@ namespace Halley {
 		Navmesh(const ConfigNode& nodeData);
 		Navmesh(Vector<PolygonData> polygons, const NavmeshBounds& bounds, int subWorld);
 
+		[[nodiscard]] ConfigNode toConfigNode() const;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+
 		[[nodiscard]] std::optional<Vector<NodeAndConn>> pathfindNodes(const NavigationQuery& query) const;
 		[[nodiscard]] std::optional<NavigationPath> pathfind(const NavigationQuery& query) const;
 
-		[[nodiscard]] ConfigNode toConfigNode() const;
-		
 		[[nodiscard]] const Vector<Node>& getNodes() const { return nodes; }
 		[[nodiscard]] const Vector<Polygon>& getPolygons() const { return polygons; }
 		[[nodiscard]] const Vector<Portal>& getPortals() const { return portals; }

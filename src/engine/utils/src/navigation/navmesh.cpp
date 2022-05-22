@@ -6,6 +6,7 @@
 #include "halley/maths/random.h"
 #include "halley/maths/ray.h"
 #include "halley/support/logger.h"
+#include "halley/bytes/byte_serializer.h"
 using namespace Halley;
 
 Navmesh::Navmesh()
@@ -91,6 +92,33 @@ ConfigNode Navmesh::toConfigNode() const
 	result["weights"] = weights;
 	
 	return result;
+}
+
+void Navmesh::serialize(Serializer& s) const
+{
+	s << scaleFactor;
+	s << origin;
+	s << normalisedCoordinatesBase;
+	s << nodes;
+	s << polygons;
+	s << portals;
+	s << subWorld;
+	s << weights;
+}
+
+void Navmesh::deserialize(Deserializer& s)
+{
+	s >> scaleFactor;
+	s >> origin;
+	s >> normalisedCoordinatesBase;
+	s >> nodes;
+	s >> polygons;
+	s >> portals;
+	s >> subWorld;
+	s >> weights;
+
+	processPolygons();
+	generateOpenEdges();
 }
 
 const Polygon& Navmesh::getPolygon(int id) const
@@ -245,6 +273,49 @@ ConfigNode Navmesh::Node::toConfigNode() const
 	result["connCosts"] = std::move(connCosts);
 	
 	return result;
+}
+
+void Navmesh::Node::serialize(Serializer& s) const
+{
+	s << pos;
+	s << nConnections;
+	for (size_t i = 0; i < nConnections; ++i) {
+		s << connections[i];
+		s << costs[i];
+	}
+}
+
+void Navmesh::Node::deserialize(Deserializer& s)
+{
+	s >> pos;
+	s >> nConnections;
+	for (size_t i = 0; i < nConnections; ++i) {
+		s >> connections[i];
+		s >> costs[i];
+	}
+}
+
+Navmesh::NodeAndConn::NodeAndConn(const ConfigNode& configNode)
+	: node(static_cast<uint16_t>(configNode.asVector2i().x))
+	, connectionIdx(static_cast<uint16_t>(configNode.asVector2i().y))
+{
+}
+
+ConfigNode Navmesh::NodeAndConn::toConfigNode() const
+{
+	return ConfigNode(Vector2i(node, connectionIdx));
+}
+
+void Navmesh::NodeAndConn::serialize(Serializer& s) const
+{
+	s << node;
+	s << connectionIdx;
+}
+
+void Navmesh::NodeAndConn::deserialize(Deserializer& s)
+{
+	s >> node;
+	s >> connectionIdx;
 }
 
 std::optional<Vector<Navmesh::NodeAndConn>> Navmesh::pathfindNodes(const NavigationQuery& query) const
@@ -725,10 +796,7 @@ Navmesh::Portal::Portal(const ConfigNode& node)
 	id = node["id"].asInt();
 	pos = node["pos"].asVector2f();
 	vertices = node["vertices"].asVector<Vector2f>();
-	for (const auto& conn: node["connections"].asSequence()) {
-		auto value = conn.asVector2i();
-		connections.emplace_back(value.x, value.y);
-	}
+	connections = node["connections"].asVector<NodeAndConn>();
 	updateLocal();
 }
 
@@ -739,14 +807,26 @@ ConfigNode Navmesh::Portal::toConfigNode() const
 	result["id"] = id;
 	result["pos"] = pos;
 	result["vertices"] = vertices;
-
-	ConfigNode::SequenceType conns;
-	for (const auto& c: connections) {
-		conns.emplace_back(ConfigNode(Vector2i(c.node, c.connectionIdx)));
-	}
-	result["connections"] = std::move(conns);
+	result["connections"] = connections;
 	
 	return result;
+}
+
+void Navmesh::Portal::serialize(Serializer& s) const
+{
+	s << id;
+	s << pos;
+	s << vertices;
+	s << connections;
+}
+
+void Navmesh::Portal::deserialize(Deserializer& s)
+{
+	s >> id;
+	s >> pos;
+	s >> vertices;
+	s >> connections;
+	updateLocal();
 }
 
 void Navmesh::Portal::postProcess(gsl::span<const Polygon> polygons, Vector<Portal>& dst)

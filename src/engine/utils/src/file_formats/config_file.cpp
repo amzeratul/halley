@@ -111,7 +111,7 @@ std::unique_ptr<ConfigFile> ConfigFile::loadResource(ResourceLoader& loader)
 	}
 	
 	auto config = std::make_unique<ConfigFile>();
-	Deserializer s(data->getSpan());
+	Deserializer s(data->getSpan(), SerializerOptions());
 	s >> *config;
 
 	return config;

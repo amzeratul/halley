@@ -43,6 +43,9 @@ namespace Halley {
 
 		ConfigNode toConfigNode() const;
 
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+
 	private:
 		Vector2f u, v;
 		Vector2f invU, invV;

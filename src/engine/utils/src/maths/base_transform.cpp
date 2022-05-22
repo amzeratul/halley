@@ -1,4 +1,5 @@
 #include "halley/maths/base_transform.h"
+#include "halley/bytes/byte_serializer.h"
 using namespace Halley;
 
 Base2D::Base2D()
@@ -67,5 +68,17 @@ ConfigNode Base2D::toConfigNode() const
 	result["u"] = u;
 	result["v"] = v;
 	return ConfigNode(result);
+}
+
+void Base2D::serialize(Serializer& s) const
+{
+	s << u;
+	s << v;
+}
+
+void Base2D::deserialize(Deserializer& s)
+{
+	s >> u;
+	s >> v;
 }
 
