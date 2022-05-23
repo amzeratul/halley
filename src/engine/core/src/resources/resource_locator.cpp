@@ -61,14 +61,14 @@ std::unique_ptr<ResourceData> ResourceLocator::getResource(const String& asset, 
 		if (data) {
 			return data;
 		} else if (throwOnFail) {
-			throw Exception("Unable to load resource: " + asset, HalleyExceptions::Resources);
+			throw Exception("Unable to load resource: " + toString(type) + ":" + asset, HalleyExceptions::Resources);
 		} else {
 			return {};
 		}
 	} else if (throwOnFail) {
-		throw Exception("Unable to locate resource: " + asset, HalleyExceptions::Resources);
+		throw Exception("Unable to locate resource: " + toString(type) + ":" + asset, HalleyExceptions::Resources);
 	} else {
-		Logger::logError("Unable to locate resource: " + asset);
+		Logger::logError("Unable to locate resource: " + toString(type) + ":" + asset);
 		return {};
 	}
 }
