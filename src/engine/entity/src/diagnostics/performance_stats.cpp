@@ -191,14 +191,17 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	const int curFPS = static_cast<int>(lround(1'000'000'000.0 / (frameAvgTime + vsyncAvgTime)));
 	const int maxFPS = static_cast<int>(lround(1'000'000'000.0 / frameAvgTime));
 
+	const auto updateCol = Colour4f(0.69f, 0.75f, 0.98f);
+	const auto renderCol = Colour4f(0.98f, 0.69f, 0.69f);
+
 	ColourStringBuilder strBuilder;
-	strBuilder.append(toString(curFPS, 10, 3, ' '));
+	strBuilder.append(toString(curFPS, 10, 3, ' '), curFPS < maxFPS ? std::optional<Colour4f>() : Colour4f(1, 0, 0));
 	strBuilder.append(" FPS | ");
-	strBuilder.append(toString(maxFPS, 10, 4, ' '));
+	strBuilder.append(toString(maxFPS, 10, 4, ' '), updateAvgTime > renderAvgTime ? updateCol : renderCol);
 	strBuilder.append(" FPS | ");
-	strBuilder.append(formatTime(updateAvgTime));
+	strBuilder.append(formatTime(updateAvgTime), updateCol);
 	strBuilder.append(" ms / ");
-	strBuilder.append(formatTime(renderAvgTime));
+	strBuilder.append(formatTime(renderAvgTime), renderCol);
 	strBuilder.append(" ms | ");
 	strBuilder.append(toString(painter.getPrevDrawCalls()));
 	strBuilder.append(" calls | ");
