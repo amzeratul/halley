@@ -12,13 +12,14 @@ namespace Halley {
 
 		void setValue(float value);
 		void setRelativeValue(float value);
-		float getValue() const;
+		float getValue(bool applyGranularity = true) const;
 		float getMinValue() const;
 		float getMaxValue() const;
-		float getRelativeValue() const; // 0..1 range
+		float getRelativeValue(bool applyGranularity = true) const; // 0..1 range
 		void readFromDataBind() override;
 		void setGranularity(std::optional<float> granularity);
 		std::optional<float> getGranularity() const;
+		void setMouseWheelSpeed(float speed);
 
 		void setShowLabel(bool show);
 		void setLabelConversion(std::function<LocalisedString(float)> f);
@@ -40,6 +41,7 @@ namespace Halley {
 		const float minValue;
 		const float maxValue;
 		std::optional<float> granularity;
+		float mouseWheelSpeed = 1;
 		float value;
 		float maxSpeed = 0;
 		Time timeSinceMove = 0;
@@ -48,6 +50,7 @@ namespace Halley {
 		std::function<float(float)> transformation;
 
 		LocalisedString makeLabel() const;
+		float getValueWithGranularity() const;
 	};
 	
 	class UISliderBar : public UIWidget {

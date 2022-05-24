@@ -1074,6 +1074,7 @@ std::shared_ptr<UIWidget> UIFactory::makeSlider(const ConfigNode& entryNode)
 	if (node.hasKey("granularity")) {
 		slider->setGranularity(node["granularity"].asFloat());
 	}
+	slider->setMouseWheelSpeed(node["mouseWheelSpeed"].asFloat(1.0f));
 	slider->setShowLabel(node["showLabel"].asBool(true));
 
 	return slider;

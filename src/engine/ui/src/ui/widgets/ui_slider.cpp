@@ -20,6 +20,11 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 	box->setMinSize(box->getSize());
 	UIWidget::add(box, 0, {}, UISizerAlignFlags::Centre);
 
+	setHandle(UIEventType::MouseWheel, [=] (const UIEvent& event)
+	{
+		setValue(getValue() + float(event.getIntData()) * granularity.value_or(1.0f) * mouseWheelSpeed);
+	});
+
 	setValue(value);
 }
 
@@ -37,14 +42,9 @@ void UISlider::setRelativeValue(float v)
 	setValue(lerp(minValue, maxValue, v));
 }
 
-float UISlider::getValue() const
+float UISlider::getValue(bool withGranularity) const
 {
-	float val;
-	if (granularity) {
-		val = clamp(lround((value - minValue) / granularity.value()) * granularity.value() + minValue, minValue, maxValue);
-	} else {
-		val = value;
-	}
+	float val = withGranularity ? getValueWithGranularity() : value;
 
 	if (transformation) {
 		val = transformation(val);
@@ -62,9 +62,10 @@ float UISlider::getMaxValue() const
 	return maxValue;
 }
 
-float UISlider::getRelativeValue() const
+float UISlider::getRelativeValue(bool applyGranularity) const
 {
-	return (value - minValue) / (maxValue - minValue);
+	const float val = applyGranularity ? getValueWithGranularity() : value;
+	return (val - minValue) / (maxValue - minValue);
 }
 
 void UISlider::readFromDataBind()
@@ -83,6 +84,11 @@ void UISlider::setGranularity(std::optional<float> g)
 std::optional<float> UISlider::getGranularity() const
 {
 	return granularity;
+}
+
+void UISlider::setMouseWheelSpeed(float speed)
+{
+	mouseWheelSpeed = speed;
 }
 
 void UISlider::setShowLabel(bool show)
@@ -151,6 +157,15 @@ LocalisedString UISlider::makeLabel() const
 	}
 }
 
+float UISlider::getValueWithGranularity() const
+{
+	if (granularity) {
+		return clamp(lround((value - minValue) / granularity.value()) * granularity.value() + minValue, minValue, maxValue);
+	} else {
+		return value;
+	}
+}
+
 UISliderBar::UISliderBar(UISlider& parent, UIStyle style)
 	: UIWidget("")
 	, parent(parent)
@@ -213,7 +228,7 @@ void UISliderBar::draw(UIPainter& painter) const
 	painter.draw(left);
 	painter.draw(right);
 	fill(painter, Rect4f(getPosition(), getPosition() + getSize()), bar);
-	fill(painter, Rect4f(getPosition(), getPosition() + getSize() * Vector2f(parent.getRelativeValue(), 1.0f)), barFull);
+	fill(painter, Rect4f(getPosition(), getPosition() + getSize() * Vector2f(parent.getRelativeValue(!held), 1.0f)), barFull);
 	painter.draw(thumb);
 }
 
