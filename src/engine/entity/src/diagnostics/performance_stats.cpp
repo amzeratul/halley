@@ -22,6 +22,8 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI
 	, audioTime(60)
 	, vsyncTime(60)
 	, totalFrameTime(60)
+	, updateTime(60)
+	, renderTime(60)
 {
 	api.core->addProfilerCallback(this);
 	
@@ -79,6 +81,8 @@ void PerformanceStatsView::paint(Painter& painter)
 void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 {
 	vsyncTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVSync).count());
+	updateTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVariableUpdate).count() + data->getElapsedTime(ProfilerEventType::CoreFixedUpdate).count());
+	renderTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreRender).count());
 	totalFrameTime.pushValue(data->getTotalElapsedTime().count() - vsyncTime.getLatest());
 	audioTime.pushValue(api.audio->getLastTimeElapsed());
 
@@ -180,6 +184,8 @@ ProfilerEventType PerformanceStatsView::EventHistoryData::getType() const
 void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 {
 	const auto frameAvgTime = totalFrameTime.getAverage();
+	const auto updateAvgTime = updateTime.getAverage();
+	const auto renderAvgTime = renderTime.getAverage();
 	const auto vsyncAvgTime = vsyncTime.getAverage();
 	const auto audioAvgTime = audioTime.getAverage();
 	const int curFPS = static_cast<int>(lround(1'000'000'000.0 / (frameAvgTime + vsyncAvgTime)));
@@ -190,7 +196,9 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	strBuilder.append(" FPS | ");
 	strBuilder.append(toString(maxFPS, 10, 4, ' '));
 	strBuilder.append(" FPS | ");
-	strBuilder.append(formatTime(frameAvgTime));
+	strBuilder.append(formatTime(updateAvgTime));
+	strBuilder.append(" ms / ");
+	strBuilder.append(formatTime(renderAvgTime));
 	strBuilder.append(" ms | ");
 	strBuilder.append(toString(painter.getPrevDrawCalls()));
 	strBuilder.append(" calls | ");

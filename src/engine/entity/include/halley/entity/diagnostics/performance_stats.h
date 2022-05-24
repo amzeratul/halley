@@ -68,6 +68,8 @@ namespace Halley
 		Vector<TextRenderer> systemLabels;
 
 		AveragingLatched<int64_t> totalFrameTime;
+		AveragingLatched<int64_t> updateTime;
+		AveragingLatched<int64_t> renderTime;
 		AveragingLatched<int64_t> vsyncTime;
 		AveragingLatched<int64_t> audioTime;
 		
