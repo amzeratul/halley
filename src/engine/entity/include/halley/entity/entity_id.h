@@ -20,26 +20,10 @@ namespace Halley {
 		bool operator>=(const EntityId& other) const { return value >= other.value; }
 
 		String toString() const;
-		static String toUUID(const EntityId& id, const EntitySerializationContext& context);
-		static EntityId fromUUID(const String& uuidStr, const EntitySerializationContext& context);
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 	};
-	
-	template <>
-    class ConfigNodeSerializer<EntityId> {
-    public:
-		ConfigNode serialize(EntityId id, const EntitySerializationContext& context)
-		{
-			return ConfigNode(EntityId::toUUID(id, context));
-		}
-		
-        EntityId deserialize(const EntitySerializationContext& context, const ConfigNode& node)
-        {
-			return EntityId::fromUUID(node.asString(""), context);
-        }
-    };
 }
 
 
