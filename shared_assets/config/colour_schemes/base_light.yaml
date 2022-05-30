@@ -10,6 +10,7 @@ colours:
 
   icon_prefab: "#EA8C00"
   icon_scene: "#57BE0C"
+  icon_navmeshSet: "#ACD2FD"
   
   icon_colours: "#00DDE1"
   icon_gameProperties: "#2E5C3C"
@@ -17,7 +18,9 @@ colours:
   icon_localisation: "#43FA52"
   icon_variableTable: "#50E9BB"
   icon_uiDefinition: "#21B4E4"
-  
+
+  icon_scriptGraph: "#CE75EC"
+
   icon_audioClip: "#F479AD"
   icon_audioEvent: "#EF83F8"
   icon_audioObject: "#CE26CE"

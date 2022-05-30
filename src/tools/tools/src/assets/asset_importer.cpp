@@ -22,6 +22,7 @@
 #include "importers/variable_importer.h"
 #include "importers/mesh_importer.h"
 #include "importers/render_graph_importer.h"
+#include "importers/script_graph_importer.h"
 #include "importers/ui_importer.h"
 
 using namespace Halley;
@@ -53,6 +54,7 @@ AssetImporter::AssetImporter(Project& project, Vector<Path> assetsSrc)
 		std::make_unique<VariableImporter>(),
 		std::make_unique<GamePropertiesImporter>(),
 		std::make_unique<RenderGraphImporter>(),
+		std::make_unique<ScriptGraphImporter>(),
 		std::make_unique<UIImporter>()
 	};
 
@@ -117,6 +119,8 @@ ImportAssetType AssetImporter::getImportAssetType(const Path& path, bool skipRed
 		return ImportAssetType::GameProperties;
 	} else if (root == "render_graph") {
 		return ImportAssetType::RenderGraphDefinition;
+	} else if (root == "script_graph") {
+		return ImportAssetType::ScriptGraph;
 	} else if (root == "ui") {
 		return ImportAssetType::UIDefinition;
 	}

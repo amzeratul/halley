@@ -18,6 +18,7 @@
 #include "halley/file_formats/image.h"
 #include "halley/core/graphics/mesh/mesh.h"
 #include "halley/entity/prefab.h"
+#include "halley/entity/scripting/script_graph.h"
 #include "halley/navigation/navmesh_set.h"
 #include "halley/ui/ui_definition.h"
 #include "halley/utils/variable.h"
@@ -46,6 +47,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<Scene>();
 	resources.init<NavmeshSet>();
 	resources.init<RenderGraphDefinition>();
+	//resources.init<ScriptGraph>();
 	resources.init<UIDefinition>();
 	resources.init<GameProperties>();
 

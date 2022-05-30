@@ -18,25 +18,41 @@ namespace Halley {
 			EntityId entity;
 
 			PinConnection() = default;
+			PinConnection(const ConfigNode& node);
 			PinConnection(const ConfigNode& node, const EntitySerializationContext& context);
 			PinConnection(uint32_t dstNode, uint8_t dstPin);
 			explicit PinConnection(EntityId entity);
+
+			ConfigNode toConfigNode() const;
 			ConfigNode toConfigNode(const EntitySerializationContext& context) const;
+
+			void serialize(Serializer& s) const;
+			void deserialize(Deserializer& s);
 		};
 		
 		struct Pin {
 			Vector<PinConnection> connections;
 
 			Pin() = default;
+			Pin(const ConfigNode& node);
 			Pin(const ConfigNode& node, const EntitySerializationContext& context);
+			ConfigNode toConfigNode() const;
 			ConfigNode toConfigNode(const EntitySerializationContext& context) const;
+
+			void serialize(Serializer& s) const;
+			void deserialize(Deserializer& s);
 		};
 		
 		ScriptGraphNode();
 		ScriptGraphNode(String type, Vector2f position);
+		ScriptGraphNode(const ConfigNode& node);
 		ScriptGraphNode(const ConfigNode& node, const EntitySerializationContext& context);
 
+		ConfigNode toConfigNode() const;
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 
 		Vector2f getPosition() const { return position; }
 		void setPosition(Vector2f p) { position = p; }
@@ -85,12 +101,23 @@ namespace Halley {
 		mutable const IScriptNodeType* nodeType = nullptr;
 	};
 	
-	class ScriptGraph {
+	class ScriptGraph : public Resource {
 	public:
 		ScriptGraph();
+		ScriptGraph(const ConfigNode& node);
 		ScriptGraph(const ConfigNode& node, const EntitySerializationContext& context);
 
+		ConfigNode toConfigNode() const;
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
+
+		static std::shared_ptr<ScriptGraph> loadResource(ResourceLoader& loader);
+		constexpr static AssetType getAssetType() { return AssetType::ScriptGraph; }
+
+		void reload(Resource&& resource) override;
+		void makeDefault();
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
 
 		void makeBaseGraph();
 

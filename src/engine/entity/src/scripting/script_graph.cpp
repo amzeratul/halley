@@ -2,10 +2,19 @@
 
 #include "entity.h"
 #include "world.h"
+#include "halley/bytes/byte_serializer.h"
 #include "halley/utils/algorithm.h"
 #include "halley/utils/hash.h"
 #include "scripting/script_node_type.h"
 using namespace Halley;
+
+ScriptGraphNode::PinConnection::PinConnection(const ConfigNode& node)
+{
+	if (node.hasKey("dstNode")) {
+		dstNode = static_cast<uint32_t>(node["dstNode"].asInt());
+	}
+	dstPin = static_cast<uint8_t>(node["dstPin"].asInt(0));
+}
 
 ScriptGraphNode::PinConnection::PinConnection(const ConfigNode& node, const EntitySerializationContext& context)
 {
@@ -29,6 +38,18 @@ ScriptGraphNode::PinConnection::PinConnection(EntityId entity)
 {
 }
 
+ConfigNode ScriptGraphNode::PinConnection::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	if (dstNode) {
+		result["dstNode"] = ConfigNode(static_cast<int>(dstNode.value()));
+	}
+	if (dstPin != 0) {
+		result["dstPin"] = static_cast<int>(dstPin);
+	}
+	return result;
+}
+
 ConfigNode ScriptGraphNode::PinConnection::toConfigNode(const EntitySerializationContext& context) const
 {
 	ConfigNode::MapType result;
@@ -44,6 +65,24 @@ ConfigNode ScriptGraphNode::PinConnection::toConfigNode(const EntitySerializatio
 	return result;
 }
 
+void ScriptGraphNode::PinConnection::serialize(Serializer& s) const
+{
+	s << dstNode;
+	s << dstPin;
+	//s << entity;
+}
+
+void ScriptGraphNode::PinConnection::deserialize(Deserializer& s)
+{
+	s >> dstNode;
+	s >> dstPin;
+}
+
+ScriptGraphNode::Pin::Pin(const ConfigNode& node)
+{
+	connections = node.asVector<PinConnection>();
+}
+
 ScriptGraphNode::Pin::Pin(const ConfigNode& node, const EntitySerializationContext& context)
 {
 	if (node.getType() == ConfigNodeType::Sequence) {
@@ -54,9 +93,26 @@ ScriptGraphNode::Pin::Pin(const ConfigNode& node, const EntitySerializationConte
 	}
 }
 
+ConfigNode ScriptGraphNode::Pin::toConfigNode() const
+{
+	ConfigNode result;
+	result = connections;
+	return result;
+}
+
 ConfigNode ScriptGraphNode::Pin::toConfigNode(const EntitySerializationContext& context) const
 {
 	return ConfigNodeSerializer<Vector<PinConnection>>().serialize(connections, context);
+}
+
+void ScriptGraphNode::Pin::serialize(Serializer& s) const
+{
+	s << connections;
+}
+
+void ScriptGraphNode::Pin::deserialize(Deserializer& s)
+{
+	s >> connections;
 }
 
 ScriptGraphNode::ScriptGraphNode()
@@ -69,12 +125,30 @@ ScriptGraphNode::ScriptGraphNode(String type, Vector2f position)
 {
 }
 
+ScriptGraphNode::ScriptGraphNode(const ConfigNode& node)
+{
+	position = node["position"].asVector2f();
+	type = node["type"].asString();
+	settings = ConfigNode(node["settings"]);
+	pins = node["pins"].asVector<Pin>();
+}
+
 ScriptGraphNode::ScriptGraphNode(const ConfigNode& node, const EntitySerializationContext& context)
 {
 	position = node["position"].asVector2f();
 	type = node["type"].asString();
 	settings = ConfigNode(node["settings"]);
 	pins = ConfigNodeSerializer<Vector<Pin>>().deserialize(context, node["pins"]);
+}
+
+ConfigNode ScriptGraphNode::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	result["position"] = position;
+	result["type"] = type;
+	result["settings"] = ConfigNode(settings);
+	result["pins"] = pins;
+	return result;
 }
 
 ConfigNode ScriptGraphNode::toConfigNode(const EntitySerializationContext& context) const
@@ -85,6 +159,22 @@ ConfigNode ScriptGraphNode::toConfigNode(const EntitySerializationContext& conte
 	result["settings"] = ConfigNode(settings);
 	result["pins"] = ConfigNodeSerializer<Vector<Pin>>().serialize(pins, context);
 	return result;
+}
+
+void ScriptGraphNode::serialize(Serializer& s) const
+{
+	s << position;
+	s << type;
+	s << settings;
+	s << pins;
+}
+
+void ScriptGraphNode::deserialize(Deserializer& s)
+{
+	s >> position;
+	s >> type;
+	s >> settings;
+	s >> pins;
 }
 
 void ScriptGraphNode::feedToHash(Hash::Hasher& hasher)
@@ -130,17 +220,26 @@ ScriptNodePinType ScriptGraphNode::getPinType(uint8_t idx) const
 
 ScriptGraph::ScriptGraph()
 {
-	makeBaseGraph();
+	finishGraph();
+}
+
+ScriptGraph::ScriptGraph(const ConfigNode& node)
+{
+	nodes = node["nodes"].asVector<ScriptGraphNode>();
 	finishGraph();
 }
 
 ScriptGraph::ScriptGraph(const ConfigNode& node, const EntitySerializationContext& context)
 {
 	nodes = ConfigNodeSerializer<Vector<ScriptGraphNode>>().deserialize(context, node["nodes"]);
-	if (nodes.empty()) {
-		makeBaseGraph();
-	}
 	finishGraph();
+}
+
+ConfigNode ScriptGraph::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	result["nodes"] = nodes;
+	return result;
 }
 
 ConfigNode ScriptGraph::toConfigNode(const EntitySerializationContext& context) const
@@ -148,6 +247,32 @@ ConfigNode ScriptGraph::toConfigNode(const EntitySerializationContext& context) 
 	ConfigNode::MapType result;
 	result["nodes"] = ConfigNodeSerializer<Vector<ScriptGraphNode>>().serialize(nodes, context);
 	return result;
+}
+
+std::shared_ptr<ScriptGraph> ScriptGraph::loadResource(ResourceLoader& loader)
+{
+	auto script = std::make_shared<ScriptGraph>();
+	Deserializer::fromBytes(*script, loader.getStatic()->getSpan(), SerializerOptions(SerializerOptions::maxVersion));
+	return script;
+}
+
+void ScriptGraph::reload(Resource&& resource)
+{
+	*this = dynamic_cast<ScriptGraph&&>(resource);
+}
+
+void ScriptGraph::makeDefault()
+{
+}
+
+void ScriptGraph::serialize(Serializer& s) const
+{
+	s << nodes;
+}
+
+void ScriptGraph::deserialize(Deserializer& s)
+{
+	s >> nodes;
 }
 
 void ScriptGraph::makeBaseGraph()
@@ -266,6 +391,10 @@ void ScriptGraph::assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection
 
 void ScriptGraph::finishGraph()
 {
+	if (nodes.empty()) {
+		makeBaseGraph();
+	}
+
 	Hash::Hasher hasher;
 	uint32_t i = 0;
 	for (auto& node: nodes) {

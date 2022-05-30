@@ -36,6 +36,7 @@ namespace Halley
 		VariableTable,
 		GameProperties,
 		RenderGraphDefinition,
+		ScriptGraph,
 		NavmeshSet,
 		Prefab,
 		Scene,
@@ -44,7 +45,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<ImportAssetType> {
-		constexpr std::array<const char*, 25> operator()() const {
+		constexpr std::array<const char*, 26> operator()() const {
 			return{{
 				"undefined",
 				"skip",
@@ -67,6 +68,7 @@ namespace Halley
 				"variableTable",
 				"gameProperties",
 				"renderGraphDefinition",
+				"scriptGraph",
 				"navmeshSet",
 				"prefab",
 				"scene",
@@ -99,6 +101,7 @@ namespace Halley
 		MeshAnimation, // Depends on Mesh
 		VariableTable,
 		RenderGraphDefinition,
+		ScriptGraph,
 		NavmeshSet,
 		Prefab,
 		Scene,
@@ -107,7 +110,7 @@ namespace Halley
 
 	template <>
 	struct EnumNames<AssetType> {
-		constexpr std::array<const char*, 23> operator()() const {
+		constexpr std::array<const char*, 24> operator()() const {
 			return{{
 				"binaryFile",
 				"textFile",
@@ -128,6 +131,7 @@ namespace Halley
 				"meshAnimation",
 				"variableTable",
 				"renderGraphDefinition",
+				"scriptGraph",
 				"navmeshSet",
 				"prefab",
 				"scene",
