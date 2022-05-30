@@ -1,3 +1,5 @@
+#pragma once
+
 #include "entity_id.h"
 
 namespace Halley {

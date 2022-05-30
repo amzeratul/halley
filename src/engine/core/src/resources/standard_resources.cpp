@@ -47,7 +47,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.init<Scene>();
 	resources.init<NavmeshSet>();
 	resources.init<RenderGraphDefinition>();
-	//resources.init<ScriptGraph>();
+	resources.init<ScriptGraph>();
 	resources.init<UIDefinition>();
 	resources.init<GameProperties>();
 

@@ -14,7 +14,7 @@ void ScriptGraphImporter::import(const ImportingAsset& asset, IAssetCollector& c
 	Metadata meta = asset.inputFiles.at(0).metadata;
 	meta.set("asset_compression", "deflate");
 
-	//const auto scriptGraph = ScriptGraph(config.getRoot());
+	const auto scriptGraph = ScriptGraph(config.getRoot());
 
-	//collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::ScriptGraph, Serializer::toBytes(scriptGraph, SerializerOptions(SerializerOptions::maxVersion)), meta);
+	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::ScriptGraph, Serializer::toBytes(scriptGraph, SerializerOptions(SerializerOptions::maxVersion)), meta);
 }
