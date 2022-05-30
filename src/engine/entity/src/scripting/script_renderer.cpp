@@ -118,10 +118,10 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t 
 				if (highlightNode && highlightNode->nodeId == pinConnection.dstNode.value()) {
 					highlighted = true;
 				}
-			} else if (pinConnection.entity.isValid()) {
-				auto entity = world.tryGetEntity(pinConnection.entity);
+			} else if (const auto entityId = graph.getEntityId(pinConnection.entityIdx); entityId.isValid()) {
+				auto entity = world.tryGetEntity(entityId);
 				if (entity.isValid()) {
-					auto* transform = entity.tryGetComponent<Transform2DComponent>();
+					const auto* transform = entity.tryGetComponent<Transform2DComponent>();
 					if (transform) {
 						dstPos = transform->getGlobalPosition();
 						dstPinType = ScriptNodePinType{ ScriptNodeElementType::TargetPin, ScriptNodePinDirection::Output };

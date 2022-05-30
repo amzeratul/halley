@@ -4,6 +4,8 @@
 #include "halley/bytes/config_node_serializer.h"
 
 namespace Halley {
+	class World;
+
 	struct alignas(8) EntityId {
 		int64_t value;
 

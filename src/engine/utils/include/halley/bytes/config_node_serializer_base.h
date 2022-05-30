@@ -6,6 +6,7 @@
 #include "halley/time/halleytime.h"
 
 namespace Halley {
+	class IEntityFactoryContext;
 	class UUID;
 	class EntityFactoryContext;
     class Resources;
@@ -71,7 +72,7 @@ namespace Halley {
 	class EntitySerializationContext {
 	public:
 		Resources* resources = nullptr;
-		const EntityFactoryContext* entityContext = nullptr;
+		const IEntityFactoryContext* entityContext = nullptr;
 		const IDataInterpolatorSetRetriever* interpolators = nullptr;
 		int entitySerializationTypeMask = EntitySerialization::makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData);
 

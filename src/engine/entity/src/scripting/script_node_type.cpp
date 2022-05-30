@@ -156,8 +156,8 @@ String IScriptNodeType::getConnectedNodeName(const World& world, const ScriptGra
 	if (pin.connections[0].dstNode) {
 		const auto& otherNode = graph.getNodes().at(pin.connections[0].dstNode.value());
 		return otherNode.getNodeType().getShortDescription(world, otherNode, graph);
-	} else if (pin.connections[0].entity.isValid()) {
-		const auto target = world.tryGetEntity(pin.connections[0].entity);
+	} else if (pin.connections[0].entityIdx) {
+		const auto target = world.tryGetEntity(graph.getEntityId(pin.connections[0].entityIdx));
 		if (target.isValid()) {
 			return target.getName();
 		}
@@ -172,8 +172,8 @@ EntityId IScriptNodeType::readEntityId(ScriptEnvironment& environment, const Scr
 		const auto& pin = node.getPins()[idx];
 		if (!pin.connections.empty()) {
 			const auto& conn = pin.connections[0];
-			if (conn.entity.isValid()) {
-				return conn.entity;
+			if (conn.entityIdx) {
+				return environment.getCurrentGraph()->getEntityId(conn.entityIdx);
 			} else if (conn.dstNode) {
 				const auto& nodes = environment.getCurrentGraph()->getNodes();
 				const auto& dstNode = nodes.at(conn.dstNode.value());

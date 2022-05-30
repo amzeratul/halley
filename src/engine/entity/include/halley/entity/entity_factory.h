@@ -75,7 +75,16 @@ namespace Halley {
 		[[nodiscard]] std::shared_ptr<const Prefab> getPrefab(std::optional<EntityRef> entity, const IEntityData& data) const;
 	};
 
-	class EntityFactoryContext {
+	class IEntityFactoryContext {
+	public:
+		virtual ~IEntityFactoryContext() = default;
+
+		virtual EntityId getEntityIdFromUUID(const UUID& uuid) const = 0;
+		virtual EntityRef getCurrentEntity() const = 0;
+		virtual World& getWorld() const = 0;
+	};
+
+	class EntityFactoryContext : public IEntityFactoryContext {
 	public:
 		EntityFactoryContext(World& world, Resources& resources, int entitySerializationMask, bool update, std::shared_ptr<const Prefab> prefab = {}, const IEntityData* origEntityData = nullptr, EntityScene* scene = nullptr, EntityFactoryContext* parent = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr);
 		
@@ -104,8 +113,8 @@ namespace Halley {
 
 		const std::shared_ptr<const Prefab>& getPrefab() const { return prefab; }
 		const EntitySerializationContext& getEntitySerializationContext() const { return entitySerializationContext; }
-		World& getWorld() const { return *world; }
-		EntityId getEntityIdFromUUID(const UUID& uuid) const;
+		World& getWorld() const override { return *world; }
+		EntityId getEntityIdFromUUID(const UUID& uuid) const override;
 
 		void addEntity(EntityRef entity);
 		void notifyEntity(const EntityRef& entity) const;
@@ -120,7 +129,7 @@ namespace Halley {
 		void setWorldPartition(uint8_t partition);
 
 		void setCurrentEntity(EntityRef entity);
-		EntityRef getCurrentEntity() const;
+		EntityRef getCurrentEntity() const override;
 
 	private:
 		EntitySerializationContext entitySerializationContext;

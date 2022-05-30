@@ -1,5 +1,6 @@
 #include "entity_id.h"
 
+#include "entity_factory.h"
 #include "world.h"
 #include "halley/bytes/byte_serializer.h"
 #include "halley/text/string_converter.h"

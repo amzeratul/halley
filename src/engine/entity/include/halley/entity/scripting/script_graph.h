@@ -15,16 +15,14 @@ namespace Halley {
 		struct PinConnection {
 			OptionalLite<uint32_t> dstNode = {};
 			uint8_t dstPin = 0;
-			EntityId entity;
+			OptionalLite<uint8_t> entityIdx;
 
 			PinConnection() = default;
 			PinConnection(const ConfigNode& node);
-			PinConnection(const ConfigNode& node, const EntitySerializationContext& context);
 			PinConnection(uint32_t dstNode, uint8_t dstPin);
-			explicit PinConnection(EntityId entity);
+			explicit PinConnection(OptionalLite<uint8_t> entityIdx);
 
 			ConfigNode toConfigNode() const;
-			ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);
@@ -35,9 +33,7 @@ namespace Halley {
 
 			Pin() = default;
 			Pin(const ConfigNode& node);
-			Pin(const ConfigNode& node, const EntitySerializationContext& context);
 			ConfigNode toConfigNode() const;
-			ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);
@@ -46,10 +42,8 @@ namespace Halley {
 		ScriptGraphNode();
 		ScriptGraphNode(String type, Vector2f position);
 		ScriptGraphNode(const ConfigNode& node);
-		ScriptGraphNode(const ConfigNode& node, const EntitySerializationContext& context);
 
 		ConfigNode toConfigNode() const;
-		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -135,8 +129,13 @@ namespace Halley {
 
 		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 
+		EntityId getEntityId(OptionalLite<uint8_t> idx) const;
+		uint8_t addEntityId(EntityId id);
+		void removeEntityId(EntityId id);
+
 	private:
 		Vector<ScriptGraphNode> nodes;
+		Vector<EntityId> entityIds;
 		uint64_t hash = 0;
 
 		mutable uint64_t lastAssignTypeHash = 1;
@@ -144,31 +143,10 @@ namespace Halley {
 		void finishGraph();
 	};
 
-	template<>
-	class ConfigNodeSerializer<ScriptGraphNode::PinConnection> {
-	public:
-		ConfigNode serialize(const ScriptGraphNode::PinConnection& connection, const EntitySerializationContext& context);
-		ScriptGraphNode::PinConnection deserialize(const EntitySerializationContext& context, const ConfigNode& node);
-	};
-
-	template<>
-	class ConfigNodeSerializer<ScriptGraphNode::Pin> {
-	public:
-		ConfigNode serialize(const ScriptGraphNode::Pin& pin, const EntitySerializationContext& context);
-		ScriptGraphNode::Pin deserialize(const EntitySerializationContext& context, const ConfigNode& node);
-	};
-
-	template<>
-	class ConfigNodeSerializer<ScriptGraphNode> {
-	public:
-		ConfigNode serialize(const ScriptGraphNode& node, const EntitySerializationContext& context);
-		ScriptGraphNode deserialize(const EntitySerializationContext& context, const ConfigNode& node);
-	};
-
-	template<>
-	class ConfigNodeSerializer<ScriptGraph> {
-	public:
-		ConfigNode serialize(const ScriptGraph& graph, const EntitySerializationContext& context);
+	template <>
+    class ConfigNodeSerializer<ScriptGraph> {
+    public:
+		ConfigNode serialize(ScriptGraph script, const EntitySerializationContext& context);
 		ScriptGraph deserialize(const EntitySerializationContext& context, const ConfigNode& node);
-	};
+    };
 }
