@@ -237,7 +237,7 @@ void ScriptingGizmo::saveEntityData()
 	ConfigNode scriptGraphData;
 	if (scriptGraph) {
 		const auto context = sceneEditorWindow.getEntityFactory()->makeStandaloneContext();
-		scriptGraphData = scriptGraph->toConfigNode();
+		scriptGraphData = scriptGraph->toConfigNode(context->getEntitySerializationContext());
 	}
 	
 	auto* data = getComponentData("Script");

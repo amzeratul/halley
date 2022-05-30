@@ -118,7 +118,8 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t 
 				if (highlightNode && highlightNode->nodeId == pinConnection.dstNode.value()) {
 					highlighted = true;
 				}
-			} else if (const auto entityId = graph.getEntityId(pinConnection.entityIdx); entityId.isValid()) {
+			} else if (pinConnection.entityIdx) {
+				const auto entityId = graph.getEntityId(pinConnection.entityIdx);
 				auto entity = world.tryGetEntity(entityId);
 				if (entity.isValid()) {
 					const auto* transform = entity.tryGetComponent<Transform2DComponent>();

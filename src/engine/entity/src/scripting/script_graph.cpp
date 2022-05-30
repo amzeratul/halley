@@ -11,6 +11,9 @@ ScriptGraphNode::PinConnection::PinConnection(const ConfigNode& node)
 	if (node.hasKey("dstNode")) {
 		dstNode = static_cast<uint32_t>(node["dstNode"].asInt());
 	}
+	if (node.hasKey("entityIdx")) {
+		entityIdx = node["entityIdx"].asInt();
+	}
 	dstPin = static_cast<uint8_t>(node["dstPin"].asInt(0));
 }
 
@@ -33,6 +36,9 @@ ConfigNode ScriptGraphNode::PinConnection::toConfigNode() const
 	}
 	if (dstPin != 0) {
 		result["dstPin"] = static_cast<int>(dstPin);
+	}
+	if (entityIdx) {
+		result["entityIdx"] = entityIdx.value();
 	}
 	return result;
 }
