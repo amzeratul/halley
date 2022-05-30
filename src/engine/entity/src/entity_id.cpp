@@ -50,3 +50,20 @@ void EntityId::deserialize(Deserializer& s)
 		throw Exception("Deserializing EntityID requires World to be set in SerializationOptions.", HalleyExceptions::Entity);
 	}
 }
+
+ConfigNode ConfigNodeSerializer<EntityId>::serialize(EntityId id, const EntitySerializationContext& context)
+{
+	if (!context.entityContext) {
+		return ConfigNode(String());
+	}
+	auto& world = context.entityContext->getWorld();
+	return ConfigNode(world.getEntity(id).getInstanceUUID().toString());
+}
+
+EntityId ConfigNodeSerializer<EntityId>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
+{
+	if (!context.entityContext) {
+		return EntityId();
+	}
+	return context.entityContext->getEntityIdFromUUID(UUID(node.asString("")));
+}

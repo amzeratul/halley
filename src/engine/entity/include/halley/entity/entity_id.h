@@ -26,6 +26,13 @@ namespace Halley {
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 	};
+
+	template <>
+    class ConfigNodeSerializer<EntityId> {
+    public:
+		ConfigNode serialize(EntityId id, const EntitySerializationContext& context);
+		EntityId deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+    };
 }
 
 

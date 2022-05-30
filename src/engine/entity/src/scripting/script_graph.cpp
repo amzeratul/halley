@@ -4,7 +4,6 @@
 #include "halley/utils/algorithm.h"
 #include "halley/utils/hash.h"
 #include "scripting/script_node_type.h"
-#include "entity_id_serializer.h"
 using namespace Halley;
 
 ScriptGraphNode::PinConnection::PinConnection(const ConfigNode& node)
