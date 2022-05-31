@@ -28,6 +28,7 @@ void ScriptGizmoUI::update(Time time, bool moved)
 {
 	gizmo.setBasePosition(getPosition());
 	if (time > 0.00001) {
+		inputState.rawMousePos = inputState.mousePos;
 		gizmo.update(time, resources, inputState);
 		inputState.clear();
 	}
