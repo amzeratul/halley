@@ -12,6 +12,7 @@ namespace Halley {
 		Vector2f getScrollPosition() const override;
 		Vector2f getBasePosition() const override;
 		Vector2f getLayoutOriginPosition() const override;
+		Vector2f getLayoutMinimumSize(bool force) const override;
 		void drawChildren(UIPainter& painter) const override;
 
     private:

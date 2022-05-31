@@ -52,13 +52,13 @@ void BaseCanvas::doSetState(State state)
 
 void BaseCanvas::update(Time t, bool moved)
 {
-	if (moved || dirty) {
-		bg
-			.setPos(getPosition())
-			.setSize(getSize())
-			.setTexRect(Rect4f(Vector2f(), getSize() / Vector2f(16, 16) / getZoomLevel()));
-	}
-	dirty = false;
+	const Vector2f startPos = getScrollPosition();
+	const auto scale = Vector2f(1, 1) / (Vector2f(16, 16) * getZoomLevel());
+
+	bg
+		.setPos(getPosition())
+		.setSize(getSize())
+		.setTexRect(Rect4f(startPos * scale, (startPos + getSize()) * scale));
 
 	UIClickable::update(t, moved);
 }
@@ -148,7 +148,6 @@ void BaseCanvas::onMouseWheel(const UIEvent& event)
 	const float oldZoom = getZoomLevel();
 	zoomExp = clamp(zoomExp + signOf(event.getIntData()), -5, 5);
 	const float zoom = getZoomLevel();
-	dirty = true;
 
 	if (zoom != oldZoom) {
 		const Vector2f childPos = getChildren().at(0)->getPosition() - getPosition();

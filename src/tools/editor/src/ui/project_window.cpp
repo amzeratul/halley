@@ -184,7 +184,9 @@ bool ProjectWindow::loadCustomUI()
 
 void ProjectWindow::destroyCustomUI()
 {
-	entityEditorFactory->clear();
+	if (entityEditorFactory) {
+		entityEditorFactory->clear();
+	}
 
 	if (!customTools.empty()) {
 		makeToolbar();

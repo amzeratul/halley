@@ -26,6 +26,11 @@ Vector2f InfiniCanvas::getLayoutOriginPosition() const
 	return -scrollPos;
 }
 
+Vector2f InfiniCanvas::getLayoutMinimumSize(bool force) const
+{
+	return getMinimumSize();
+}
+
 void InfiniCanvas::drawChildren(UIPainter& painter) const
 {
 	auto p = painter.withClip(getRect());
