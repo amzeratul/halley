@@ -14,7 +14,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptPlayMusic::getPinConfiguration(c
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptPlayMusic::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptPlayMusic::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Play music ");
@@ -38,7 +38,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptStopMusic::getPinConfiguration(c
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptStopMusic::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptStopMusic::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Stop playing music.");

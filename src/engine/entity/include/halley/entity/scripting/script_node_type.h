@@ -37,12 +37,12 @@ namespace Halley {
 
 		virtual String getId() const = 0;
 		virtual String getName() const = 0;
-		virtual String getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const;
+		virtual String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const;
 		virtual String getLabel(const ScriptGraphNode& node) const;
 
 		virtual Vector<SettingType> getSettingTypes() const;
-		virtual std::pair<String, Vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World& world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const;
-		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const;
+		virtual std::pair<String, Vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World* world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const;
+		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const;
 		virtual std::pair<String, Vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const;
 		virtual String getIconName(const ScriptGraphNode& node) const = 0;
 		virtual ScriptNodeClassification getClassification() const = 0;
@@ -64,7 +64,7 @@ namespace Halley {
 		ConfigNode readDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const;
 		void writeDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const;
 		EntityId readEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const;
-		String getConnectedNodeName(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const;
+		String getConnectedNodeName(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const;
 
 		std::array<OptionalLite<uint32_t>, 8> getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const;
 

@@ -22,7 +22,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpriteAnimation::getPinConfigura
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSpriteAnimation::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSpriteAnimation::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Play sequence ");
@@ -59,7 +59,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpriteDirection::getPinConfigura
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSpriteDirection::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSpriteDirection::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Set direction ");

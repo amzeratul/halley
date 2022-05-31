@@ -14,7 +14,7 @@
 #include "nodes/script_wait_for.h"
 using namespace Halley;
 
-String IScriptNodeType::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String IScriptNodeType::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const
 {
 	return getName();
 }
@@ -29,7 +29,7 @@ Vector<IScriptNodeType::SettingType> IScriptNodeType::getSettingTypes() const
 	return {};
 }
 
-std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node,	const World& world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node, const World* world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const
 {
 	switch (elementType.type) {
 	case ScriptNodeElementType::ReadDataPin:
@@ -44,7 +44,7 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const 
 	return { "?", {} };
 }
 
-std::pair<String, Vector<ColourOverride>> IScriptNodeType::getNodeDescription(const ScriptGraphNode& node,	const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> IScriptNodeType::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	return { getName(), {} };
 }
@@ -145,7 +145,7 @@ void IScriptNodeType::writeDataPin(ScriptEnvironment& environment, const ScriptG
 	dstNode.getNodeType().setData(environment, dstNode, dst.dstPin, std::move(data));
 }
 
-String IScriptNodeType::getConnectedNodeName(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const
+String IScriptNodeType::getConnectedNodeName(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const
 {
 	const auto& pin = node.getPin(pinN);
 	if (pin.connections.empty()) {
@@ -156,8 +156,8 @@ String IScriptNodeType::getConnectedNodeName(const World& world, const ScriptGra
 	if (pin.connections[0].dstNode) {
 		const auto& otherNode = graph.getNodes().at(pin.connections[0].dstNode.value());
 		return otherNode.getNodeType().getShortDescription(world, otherNode, graph);
-	} else if (pin.connections[0].entityIdx) {
-		const auto target = world.tryGetEntity(graph.getEntityId(pin.connections[0].entityIdx));
+	} else if (pin.connections[0].entityIdx && world) {
+		const auto target = world->tryGetEntity(graph.getEntityId(pin.connections[0].entityIdx));
 		if (target.isValid()) {
 			return target.getName();
 		}

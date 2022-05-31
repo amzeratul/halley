@@ -6,7 +6,7 @@ String ScriptVariable::getLabel(const ScriptGraphNode& node) const
 	return node.getSettings()["variable"].asString("");
 }
 
-String ScriptVariable::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String ScriptVariable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const
 {
 	return getLabel(node);
 }
@@ -24,7 +24,7 @@ Vector<IScriptNodeType::SettingType> ScriptVariable::getSettingTypes() const
 	return { SettingType{ "variable", "Halley::String", Vector<String>{""} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptVariable::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptVariable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Variable ");
@@ -48,7 +48,7 @@ String ScriptLiteral::getLabel(const ScriptGraphNode& node) const
 	return node.getSettings()["value"].asString("0");
 }
 
-String ScriptLiteral::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String ScriptLiteral::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const
 {
 	return getLabel(node);
 }
@@ -66,7 +66,7 @@ Vector<IScriptNodeType::SettingType> ScriptLiteral::getSettingTypes() const
 	return { SettingType{ "value", "Halley::String", Vector<String>{"0"} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptLiteral::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptLiteral::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Literal with value ");
@@ -99,7 +99,7 @@ String ScriptComparison::getLabel(const ScriptGraphNode& node) const
 	return node.getSettings()["operator"].asString("equals");
 }
 
-String ScriptComparison::getShortDescription(const World& world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String ScriptComparison::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
@@ -120,7 +120,7 @@ Vector<IScriptNodeType::SettingType> ScriptComparison::getSettingTypes() const
 	return { SettingType{ "operator", "Halley::String", Vector<String>{"equals"} } };
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptComparison::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptComparison::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("True if ");
@@ -148,7 +148,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSetVariable::getPinConfiguration
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSetVariable::getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> ScriptSetVariable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Copies value into variable.");

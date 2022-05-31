@@ -17,7 +17,7 @@ namespace Halley {
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/wait.png"; }
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		Vector<SettingType> getSettingTypes() const override;
-		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World& world, const ScriptGraph& graph) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptWaitData& curData) const override;
 		void doInitData(ScriptWaitData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const override;

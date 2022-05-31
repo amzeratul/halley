@@ -289,7 +289,7 @@ void ScriptingBaseGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& no
 		return;
 	}
 	
-	const auto [text, colours] = nodeType->getDescription(node, sceneEditorWindow.getEntityFactory()->getWorld(), nodeInfo.element, nodeInfo.elementId, *scriptGraph);
+	const auto [text, colours] = nodeType->getDescription(node, world, nodeInfo.element, nodeInfo.elementId, *scriptGraph);
 	const float curZoom = getZoom();
 
 	const float align = 0.5f;
