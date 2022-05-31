@@ -87,6 +87,10 @@ void BaseCanvas::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 	}
 
 	UIClickable::pressMouse(mousePos, button, keyMods);
+
+	if (mouseMirror) {
+		mouseMirror->pressMouse(mousePos, button, keyMods);
+	}
 }
 
 void BaseCanvas::releaseMouse(Vector2f mousePos, int button)
@@ -102,6 +106,10 @@ void BaseCanvas::releaseMouse(Vector2f mousePos, int button)
 	}
 
 	UIClickable::releaseMouse(mousePos, button);
+
+	if (mouseMirror) {
+		mouseMirror->releaseMouse(mousePos, button);
+	}
 }
 
 void BaseCanvas::onMouseOver(Vector2f mousePos)

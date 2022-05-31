@@ -225,12 +225,17 @@ void SceneEditorCanvas::notifyOutputState()
 
 void SceneEditorCanvas::clearInputState()
 {
-	inputState.leftClickPressed = false;
-	inputState.leftClickReleased = false;
-	inputState.middleClickPressed = false;
-	inputState.middleClickReleased = false;
-	inputState.rightClickPressed = false;
-	inputState.rightClickReleased = false;
+	inputState.clear();
+}
+
+void SceneEditorInputState::clear()
+{
+	leftClickPressed = false;
+	leftClickReleased = false;
+	middleClickPressed = false;
+	middleClickReleased = false;
+	rightClickPressed = false;
+	rightClickReleased = false;
 }
 
 void SceneEditorCanvas::openRightClickMenu()

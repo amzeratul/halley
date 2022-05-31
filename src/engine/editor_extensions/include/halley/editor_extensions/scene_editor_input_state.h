@@ -28,6 +28,8 @@ namespace Halley {
         std::optional<Vector2f> mousePos;
 		std::optional<Rect4f> selectionBox;
 		bool deselect = false;
+
+   		void clear();
     };
 
 	struct SceneEditorOutputState {
