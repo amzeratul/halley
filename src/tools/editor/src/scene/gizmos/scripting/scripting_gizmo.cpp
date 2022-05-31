@@ -56,6 +56,11 @@ void ScriptingGizmo::onEntityChanged()
 	loadEntityData();
 }
 
+bool ScriptingGizmo::allowEntitySpriteSelection() const
+{
+	return false;
+}
+
 void ScriptingGizmo::loadEntityData()
 {
 	const auto* transform = getComponent<Transform2DComponent>();

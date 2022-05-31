@@ -14,6 +14,7 @@ namespace Halley {
 		Vector<String> getHighlightedComponents() const override;
 		void refreshEntity() override;
 		void onEntityChanged() override;
+		bool allowEntitySpriteSelection() const override;
 
 	private:
 		ScriptingBaseGizmo gizmo;
