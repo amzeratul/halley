@@ -14,7 +14,9 @@ namespace Halley {
     	void setMousePosListener(MousePosListener listener);
 
     	void setZoomEnabled(bool enabled);
-
+		void setScrollEnabled(bool enabled);
+		void setMouseMirror(std::shared_ptr<UIWidget> mouseMirror);
+		
 	protected:
 		void doSetState(State state) override;
 		void update(Time t, bool moved) override;
@@ -39,12 +41,14 @@ namespace Halley {
 		int zoomExp = 0;
 		bool dirty = false;
     	bool zoomEnabled = true;
+		bool scrollEnabled = true;
 
 		bool dragging = false;
 		std::array<bool, 2> draggingButton;
 
 		ZoomListener zoomListener;
     	MousePosListener mousePosListener;
+		std::shared_ptr<UIWidget> mouseMirror;
 
 		void onMouseWheel(const UIEvent& event);
     };

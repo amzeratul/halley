@@ -15,10 +15,18 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
 
+		bool isHighlighted() const;
+
+	protected:
+        void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
+		void releaseMouse(Vector2f mousePos, int button) override;
+        void onMouseOver(Vector2f mousePos) override;
+
 	private:
 		UIFactory& factory;
 		Resources& resources;
 		ScriptingBaseGizmo gizmo;
+		SceneEditorInputState inputState;
 
 		void onModified();
 	};

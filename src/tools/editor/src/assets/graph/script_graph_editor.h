@@ -2,6 +2,7 @@
 
 #include "script_gizmo_ui.h"
 #include "../asset_editor.h"
+#include "src/ui/infini_canvas.h"
 #include "src/ui/scroll_background.h"
 
 namespace Halley {
@@ -26,7 +27,7 @@ namespace Halley {
     	std::shared_ptr<ScriptGraph> scriptGraph;
 
 		std::shared_ptr<ScriptGizmoUI> gizmoEditor;
-    	std::shared_ptr<ScrollBackground> scrollBg;
+		std::shared_ptr<InfiniCanvas> infiniCanvas;
 		bool modified = false;
     };
 }

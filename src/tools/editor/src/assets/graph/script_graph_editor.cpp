@@ -21,9 +21,10 @@ void ScriptGraphEditor::onMakeUI()
 		gizmoEditor->load(*scriptGraph);
 	}
 
-	const auto infiniCanvas = getWidgetAs<InfiniCanvas>("infiniCanvas");
+	infiniCanvas = getWidgetAs<InfiniCanvas>("infiniCanvas");
 	infiniCanvas->clear();
-	infiniCanvas->add(gizmoEditor);
+	infiniCanvas->add(gizmoEditor, 0, {}, UISizerAlignFlags::Centre, Vector2f());
+	infiniCanvas->setMouseMirror(gizmoEditor);
 }
 
 void ScriptGraphEditor::reload()
@@ -83,4 +84,6 @@ std::shared_ptr<const Resource> ScriptGraphEditor::loadResource(const String& as
 void ScriptGraphEditor::update(Time time, bool moved)
 {
 	AssetEditor::update(time, moved);
+
+	infiniCanvas->setScrollEnabled(!gizmoEditor->isHighlighted());
 }

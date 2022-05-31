@@ -36,6 +36,16 @@ void BaseCanvas::setZoomEnabled(bool enabled)
 	zoomEnabled = enabled;
 }
 
+void BaseCanvas::setScrollEnabled(bool enabled)
+{
+	scrollEnabled = enabled;
+}
+
+void BaseCanvas::setMouseMirror(std::shared_ptr<UIWidget> widget)
+{
+	mouseMirror = widget;
+}
+
 void BaseCanvas::doSetState(State state)
 {
 }
@@ -68,7 +78,7 @@ void BaseCanvas::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 	if (button == 1) {
 		draggingButton[1] = true;
 	}
-	const bool shouldDrag = draggingButton[0] || draggingButton[1];
+	const bool shouldDrag = scrollEnabled && (draggingButton[0] || draggingButton[1]);
 
 	if (shouldDrag && !dragging) {
 		dragging = true;
@@ -84,7 +94,7 @@ void BaseCanvas::releaseMouse(Vector2f mousePos, int button)
 	if (button == 0 || button == 1) {
 		draggingButton[button] = false;
 	}
-	const bool shouldDrag = draggingButton[0] || draggingButton[1];
+	const bool shouldDrag = scrollEnabled && (draggingButton[0] || draggingButton[1]);
 
 	if (dragging && !shouldDrag) {
 		onMouseOver(mousePos);
@@ -106,6 +116,10 @@ void BaseCanvas::onMouseOver(Vector2f mousePos)
 	}
 
 	UIClickable::onMouseOver(mousePos);
+
+	if (mouseMirror) {
+		mouseMirror->onMouseOver(mousePos);
+	}
 }
 
 void BaseCanvas::onDoubleClicked(Vector2f mousePos, KeyMods keyMods)
