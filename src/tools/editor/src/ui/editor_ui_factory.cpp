@@ -29,6 +29,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	setInputButtons("list", listButtons);
 
 	addFactory("scrollBackground", [=] (const ConfigNode& node) { return makeScrollBackground(node); });
+	addFactory("infiniCanvas", [=] (const ConfigNode& node) { return makeInfiniCanvas(node); });
 	addFactory("animationEditorDisplay", [=] (const ConfigNode& node) { return makeAnimationEditorDisplay(node); });
 	addFactory("metadataEditor", [=] (const ConfigNode& node) { return makeMetadataEditor(node); });
 	addFactory("sceneEditorCanvas", [=](const ConfigNode& node) { return makeSceneEditorCanvas(node); });

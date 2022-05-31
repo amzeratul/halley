@@ -49,7 +49,7 @@ Colour4f GraphEditor::getColourForPinType(RenderGraphPinType pinType) const
 
 void GraphEditor::addNode(std::shared_ptr<UIGraphNode> node)
 {
-	scrollBg->add(std::move(node), 0, {}, {}, node->getPosition());
+	infiniCanvas->add(node, 0, {}, {}, node->getPosition());
 }
 
 GraphConnections::GraphConnections(GraphEditor& editor)
