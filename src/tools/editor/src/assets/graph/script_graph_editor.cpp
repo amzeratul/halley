@@ -15,7 +15,7 @@ ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResource
 
 void ScriptGraphEditor::onMakeUI()
 {
-	auto gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, projectWindow.getEntityEditorFactory(), projectWindow.getScriptNodeTypes());
+	auto gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *projectWindow.getEntityEditorFactory(), projectWindow.getScriptNodeTypes());
 
 	const auto infiniCanvas = getWidgetAs<InfiniCanvas>("infiniCanvas");
 	infiniCanvas->clear();

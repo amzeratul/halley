@@ -184,6 +184,8 @@ bool ProjectWindow::loadCustomUI()
 
 void ProjectWindow::destroyCustomUI()
 {
+	entityEditorFactory.reset();
+
 	if (!customTools.empty()) {
 		makeToolbar();
 		customTools.clear();
@@ -536,16 +538,18 @@ Vector2f ProjectWindow::getChoosePrefabWindowSize() const
 	return getSize() - Vector2f(900.0f, 350.0f);
 }
 
-const IEntityEditorFactory& ProjectWindow::getEntityEditorFactory() const
+std::shared_ptr<EntityEditorFactory> ProjectWindow::getEntityEditorFactory()
 {
-	// TODO
-	return *static_cast<IEntityEditorFactory*>(nullptr);
+	if (!entityEditorFactory) {
+		entityEditorFactory = std::make_shared<EntityEditorFactory>(factory);
+		entityEditorFactory->addFieldFactories(project.getGameInstance()->createCustomEditorFieldFactories());
+	}
+	return entityEditorFactory;
 }
 
 std::shared_ptr<ScriptNodeTypeCollection> ProjectWindow::getScriptNodeTypes()
 {
-	// TODO
-	return {};
+	return project.getGameInstance()->createScriptNodeTypeCollection();
 }
 
 

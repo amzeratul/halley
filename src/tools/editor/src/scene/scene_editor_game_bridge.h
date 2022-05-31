@@ -45,8 +45,6 @@ namespace Halley {
 
 		void refreshAssets();
 
-		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes();
-
 		Vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const;
 		void onSceneContextMenuSelection(const String& id);
 		void onSceneContextMenuHighlight(const String& id);

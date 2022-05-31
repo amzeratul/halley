@@ -43,11 +43,13 @@ namespace Halley
 		virtual std::unique_ptr<Stage> makeStage(StageID id);
 
 		virtual int getTargetFPS() const;
+		virtual size_t getMaxThreads() const;
 
 		virtual String getDevConAddress() const;
 		virtual int getDevConPort() const;
 
 		virtual std::shared_ptr<GameConsole> getGameConsole() const;
+		virtual void attachToEditorDebugConsole(UIDebugConsoleCommands& commands, Resources& gameResources, IProject& project);
 
 		virtual void onUncaughtException(const Exception& exception, TimeLine timeLine);
 
@@ -55,12 +57,11 @@ namespace Halley
 		virtual std::unique_ptr<IEditorCustomTools> createEditorCustomToolsInterface();
 		virtual std::unique_ptr<AssetPreviewGenerator> createAssetPreviewGenerator(const HalleyAPI& api, Resources& resources);
 		virtual std::unique_ptr<UIFactory> createUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n);
-		virtual void attachToEditorDebugConsole(UIDebugConsoleCommands& commands, Resources& gameResources, IProject& project);
+		virtual std::unique_ptr<ScriptNodeTypeCollection> createScriptNodeTypeCollection();
+		virtual Vector<std::unique_ptr<IComponentEditorFieldFactory>> createCustomEditorFieldFactories();
 
 		const HalleyAPI& getAPI() const;
 		Resources& getResources() const;
-
-		virtual size_t getMaxThreads() const;
 
 	private:
 		friend class Core;

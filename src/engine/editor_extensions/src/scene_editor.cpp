@@ -162,11 +162,6 @@ void SceneEditor::spawnPending()
 	world->spawnPending();
 }
 
-Vector<std::unique_ptr<IComponentEditorFieldFactory>> SceneEditor::getComponentEditorFieldFactories()
-{
-	return {};
-}
-
 std::shared_ptr<UIWidget> SceneEditor::makeCustomUI()
 {
 	return {};
@@ -473,11 +468,6 @@ void SceneEditor::setupConsoleCommands(UIDebugConsoleController& controller, ISc
 
 void SceneEditor::refreshAssets()
 {
-}
-
-std::shared_ptr<ScriptNodeTypeCollection> SceneEditor::getScriptNodeTypes()
-{
-	return std::make_shared<ScriptNodeTypeCollection>();
 }
 
 Vector<UIPopupMenuItem> SceneEditor::getSceneContextMenu(const Vector2f& mousePos) const

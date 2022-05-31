@@ -311,14 +311,6 @@ void SceneEditorGameBridge::refreshAssets()
 	}
 }
 
-std::shared_ptr<ScriptNodeTypeCollection> SceneEditorGameBridge::getScriptNodeTypes()
-{
-	if (interfaceReady) {
-		return interface->getScriptNodeTypes();
-	}
-	return {};
-}
-
 Vector<UIPopupMenuItem> SceneEditorGameBridge::getSceneContextMenu(const Vector2f& mousePos) const
 {
 	if (interfaceReady) {

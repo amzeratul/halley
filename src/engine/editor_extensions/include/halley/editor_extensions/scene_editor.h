@@ -43,7 +43,6 @@ namespace Halley {
 		void showEntity(const UUID& id) override;
 		void onToolSet(String& tool, String& componentName, String& fieldName) override;
     	
-		Vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() override;
 		std::shared_ptr<UIWidget> makeCustomUI() override;
 
 		void onSceneLoaded(Prefab& scene) override;
@@ -56,8 +55,6 @@ namespace Halley {
     	void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) override;
 
 		void refreshAssets() override;
-
-		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() override;
 
 		Vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const override;
     	void onSceneContextMenuSelection(const String& id) override;

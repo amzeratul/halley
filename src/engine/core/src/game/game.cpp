@@ -1,6 +1,7 @@
 #include "halley/core/game/game.h"
 
 #include "halley/editor_extensions/asset_preview_generator.h"
+#include "halley/entity/scripting/script_node_type.h"
 #include "halley/ui/ui_factory.h"
 using namespace Halley;
 
@@ -75,6 +76,16 @@ std::unique_ptr<AssetPreviewGenerator> Game::createAssetPreviewGenerator(const H
 std::unique_ptr<UIFactory> Game::createUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n)
 {
 	return std::make_unique<UIFactory>(api, resources, i18n);
+}
+
+std::unique_ptr<ScriptNodeTypeCollection> Game::createScriptNodeTypeCollection()
+{
+	return std::make_unique<ScriptNodeTypeCollection>();
+}
+
+Vector<std::unique_ptr<IComponentEditorFieldFactory>> Game::createCustomEditorFieldFactories()
+{
+	return {};
 }
 
 void Game::attachToEditorDebugConsole(UIDebugConsoleCommands& commands, Resources& gameResources, IProject& project)

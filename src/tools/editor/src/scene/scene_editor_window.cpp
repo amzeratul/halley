@@ -190,11 +190,9 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 
 		// Setup editors
 		sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, world, project.getGameResources());
-		entityEditorFactory = std::make_shared<EntityEditorFactory>(uiFactory);
-		entityEditorFactory->addFieldFactories(interface.getComponentEditorFieldFactories());
 		entityEditor->setSceneEditorWindow(*this, api);
 		entityEditor->setECSData(project.getECSData());
-		entityEditor->setEntityEditorFactory(entityEditorFactory);
+		entityEditor->setEntityEditorFactory(projectWindow.getEntityEditorFactory());
 		entityList->setSceneData(sceneData);
 
 		// Select entity
@@ -253,7 +251,6 @@ void SceneEditorWindow::unloadScene()
 	entityEditor->unloadEntity(false);
 	entityEditor->setEntityEditorFactory({});
 	entityEditor->unloadIcons();
-	entityEditorFactory.reset();
 	entityValidator.reset();
 	entityList->setSceneData({});
 }
@@ -1308,15 +1305,12 @@ void SceneEditorWindow::setHighlightedComponents(Vector<String> componentNames)
 
 const IEntityEditorFactory& SceneEditorWindow::getEntityEditorFactory() const
 {
-	return *entityEditorFactory;
+	return *projectWindow.getEntityEditorFactory();
 }
 
 std::shared_ptr<ScriptNodeTypeCollection> SceneEditorWindow::getScriptNodeTypes()
 {
-	if (gameBridge) {
-		return gameBridge->getScriptNodeTypes();
-	}
-	return {};
+	return projectWindow.getScriptNodeTypes();
 }
 
 String SceneEditorWindow::serializeEntities(gsl::span<const EntityData> nodes) const

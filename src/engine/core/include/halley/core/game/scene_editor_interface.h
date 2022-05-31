@@ -220,7 +220,6 @@ namespace Halley {
     	virtual void showEntity(const UUID& id) = 0;
         virtual void onToolSet(String& tool, String& componentName, String& fieldName) = 0;
 
-    	virtual Vector<std::unique_ptr<IComponentEditorFieldFactory>> getComponentEditorFieldFactories() = 0;
     	virtual std::shared_ptr<UIWidget> makeCustomUI() = 0;
     	virtual void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) = 0;
         virtual void onSceneLoaded(Prefab& scene) = 0;
@@ -234,8 +233,6 @@ namespace Halley {
     	virtual std::optional<Vector2f> getMousePos() const = 0;
     	virtual Vector2f getCameraPos() const = 0;
 
-    	virtual std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes() = 0;
-    	
         virtual Vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const = 0;
         virtual void onSceneContextMenuSelection(const String& id) = 0;
     	virtual void onSceneContextMenuHighlight(const String& id) = 0;
