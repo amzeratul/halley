@@ -13,6 +13,7 @@
 class Transform2DComponent;
 
 namespace Halley {
+	class UIRoot;
 	struct AssetPreviewData;
 	class IEntityEditor;
 	class Image;
@@ -377,7 +378,7 @@ namespace Halley {
 		virtual float getProjectDefaultZoom() const = 0;
 
 		virtual std::shared_ptr<EntityFactory> getEntityFactory() const = 0;
-		virtual void spawnUI(std::shared_ptr<UIWidget> ui) = 0;
+		virtual UIRoot& getUIRoot() = 0;
 
 		virtual Path getPrimaryInputFile(AssetType type, const String& assetId, bool absolute) const = 0;
 

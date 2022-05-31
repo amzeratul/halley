@@ -12,7 +12,7 @@ using namespace Halley;
 #endif
 #include "components/transform_2d_component.h"
 
-ScriptRenderer::ScriptRenderer(Resources& resources, World& world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom)
+ScriptRenderer::ScriptRenderer(Resources& resources, World* world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom)
 	: resources(resources)
 	, world(world)
 	, nodeTypeCollection(nodeTypeCollection)
@@ -118,9 +118,9 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t 
 				if (highlightNode && highlightNode->nodeId == pinConnection.dstNode.value()) {
 					highlighted = true;
 				}
-			} else if (pinConnection.entityIdx) {
+			} else if (pinConnection.entityIdx && world) {
 				const auto entityId = graph.getEntityId(pinConnection.entityIdx);
-				auto entity = world.tryGetEntity(entityId);
+				auto entity = world->tryGetEntity(entityId);
 				if (entity.isValid()) {
 					const auto* transform = entity.tryGetComponent<Transform2DComponent>();
 					if (transform) {

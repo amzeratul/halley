@@ -7,10 +7,12 @@
 
 using namespace Halley;
 
-ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, ISceneEditorWindow& sceneEditorWindow, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes)
+ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, ISceneEditorWindow& sceneEditorWindow, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom)
 	: factory(factory)
 	, sceneEditorWindow(sceneEditorWindow)
 	, scriptNodeTypes(std::move(scriptNodeTypes))
+	, world(&sceneEditorWindow.getEntityFactory()->getWorld())
+	, baseZoom(baseZoom)
 {
 	tooltipLabel
 		.setFont(factory.getResources().get<Font>("Ubuntu Bold"))
@@ -20,15 +22,19 @@ ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, ISceneEditorWindow& s
 		.setOutline(1);
 }
 
-void ScriptingBaseGizmo::update(Time time, Resources& res, World* world, const SceneEditorInputState& inputState)
+void ScriptingBaseGizmo::setUIRoot(UIRoot& root)
+{
+	uiRoot = &root;
+}
+
+void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInputState& inputState)
 {
 	Executor(pendingUITasks).runPending();
 
 	resources = &res;
 	
 	if (!renderer) {
-		assert(!!world);
-		renderer = std::make_shared<ScriptRenderer>(res, *world, *scriptNodeTypes, sceneEditorWindow.getProjectDefaultZoom());
+		renderer = std::make_shared<ScriptRenderer>(res, world, *scriptNodeTypes, baseZoom);
 	}
 	renderer->setGraph(scriptGraph);
 
@@ -331,7 +337,7 @@ void ScriptingBaseGizmo::openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos
 	ScriptGraphNode& node = getNode(nodeId);
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
 	if (nodeType && (force || !nodeType->getSettingTypes().empty())) {
-		sceneEditorWindow.spawnUI(std::make_shared<ScriptingNodeEditor>(*this, factory, sceneEditorWindow.getEntityEditorFactory(), nodeId, *nodeType, pos));
+		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, sceneEditorWindow.getEntityEditorFactory(), nodeId, *nodeType, pos));
 	}
 }
 
@@ -348,7 +354,7 @@ void ScriptingBaseGizmo::addNode()
 			});
 		}
 	});
-	sceneEditorWindow.spawnUI(std::move(chooseAssetWindow));
+	uiRoot->addChild(std::move(chooseAssetWindow));
 }
 
 void ScriptingBaseGizmo::addNode(const String& type, Vector2f pos)

@@ -11,7 +11,8 @@ namespace Halley {
 
 		using ModifiedCallback = std::function<void()>;
 
-		ScriptingBaseGizmo(UIFactory& factory, ISceneEditorWindow& sceneEditorWindow, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes);
+		ScriptingBaseGizmo(UIFactory& factory, ISceneEditorWindow& sceneEditorWindow, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom = 1.0f);
+		void setUIRoot(UIRoot& root);
 
 		void addNode();
 		bool destroyNode(uint32_t id);
@@ -25,7 +26,7 @@ namespace Halley {
 
 		ExecutionQueue& getExecutionQueue();
 
-		void update(Time time, Resources& resources, World* world, const SceneEditorInputState& inputState);
+		void update(Time time, Resources& resources, const SceneEditorInputState& inputState);
 		void draw(Painter& painter) const;
 		bool isHighlighted() const;
 		std::shared_ptr<UIWidget> makeUI();
@@ -43,6 +44,8 @@ namespace Halley {
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
 		std::shared_ptr<ScriptRenderer> renderer;
 
+		UIRoot* uiRoot = nullptr;
+		World* world = nullptr;
 		Resources* resources = nullptr;
 
 		Vector2f basePos;
@@ -55,6 +58,7 @@ namespace Halley {
 		bool dragging = false;
 		Vector2f startDragPos;
 		float zoom = 1.0f;
+		float baseZoom = 1.0f;
 
 		Vector<EntityTarget> entityTargets;
 		EntityId curEntityTarget;

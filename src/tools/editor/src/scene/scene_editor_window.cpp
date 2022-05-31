@@ -1511,9 +1511,9 @@ std::shared_ptr<EntityFactory> SceneEditorWindow::getEntityFactory() const
 	return entityFactory;
 }
 
-void SceneEditorWindow::spawnUI(std::shared_ptr<UIWidget> ui)
+UIRoot& SceneEditorWindow::getUIRoot()
 {
-	getRoot()->addChild(std::move(ui));
+	return *getRoot();
 }
 
 void SceneEditorWindow::openAsset(AssetType assetType, const String& assetId)

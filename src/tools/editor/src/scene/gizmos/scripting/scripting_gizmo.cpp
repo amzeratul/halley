@@ -9,20 +9,21 @@ using namespace Halley;
 
 ScriptingGizmo::ScriptingGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes)
 	: SceneEditorGizmo(snapRules)
-	, gizmo(factory, sceneEditorWindow, scriptNodeTypes)
+	, gizmo(factory, sceneEditorWindow, scriptNodeTypes, sceneEditorWindow.getProjectDefaultZoom())
 	, sceneEditorWindow(sceneEditorWindow)
 {
 	gizmo.setModifiedCallback([=] ()
 	{
 		saveEntityData();
 	});
+	gizmo.setUIRoot(sceneEditorWindow.getUIRoot());
 	compileEntityTargetList(sceneEditorWindow.getEntityFactory()->getWorld());
 }
 
 void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {
 	gizmo.setZoom(getZoom());
-	gizmo.update(time, sceneEditor.getResources(), &sceneEditor.getWorld(), inputState);
+	gizmo.update(time, sceneEditor.getResources(), inputState);
 }
 
 void ScriptingGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) const

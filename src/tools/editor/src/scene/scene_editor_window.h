@@ -99,8 +99,8 @@ namespace Halley {
 		float getProjectDefaultZoom() const override;
 
 		std::shared_ptr<EntityFactory> getEntityFactory() const override;
-		void spawnUI(std::shared_ptr<UIWidget> ui) override;
-		
+		UIRoot& getUIRoot() override;
+
 		void openAsset(AssetType assetType, const String& assetId);
 		void openAssetHere(AssetType assetType, const String& assetId);
 		String getAssetKey() const;
