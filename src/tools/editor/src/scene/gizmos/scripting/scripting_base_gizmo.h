@@ -17,22 +17,23 @@ namespace Halley {
 		void addNode();
 		bool destroyNode(uint32_t id);
 		bool destroyHighlightedNode();
+		ScriptGraphNode& getNode(uint32_t id);
 
 		ScriptGraph& getGraph();
 		ScriptGraph* getGraphPtr();
 		void setGraph(ScriptGraph* graph);
-		ScriptGraphNode& getNode(uint32_t id);
-		void setBasePosition(Vector2f pos);
-
+		
 		ExecutionQueue& getExecutionQueue();
 
 		void update(Time time, Resources& resources, const SceneEditorInputState& inputState);
 		void draw(Painter& painter) const;
 		bool isHighlighted() const;
+
 		std::shared_ptr<UIWidget> makeUI();
 
 		void setZoom(float zoom);
 		float getZoom() const;
+		void setBasePosition(Vector2f pos);
 
 		void onModified();
 		void setModifiedCallback(ModifiedCallback callback);
