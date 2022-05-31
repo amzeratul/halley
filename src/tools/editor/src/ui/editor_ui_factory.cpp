@@ -1,6 +1,8 @@
 #include "editor_ui_factory.h"
 #include "halley/core/resources/resources.h"
 #include <halley/file_formats/config_file.h>
+
+#include "infini_canvas.h"
 #include "scroll_background.h"
 #include "select_asset_widget.h"
 #include "src/assets/animation_editor.h"
@@ -67,6 +69,12 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeScrollBackground(const ConfigNode
 {
 	auto& node = entryNode["widget"];
 	return std::make_shared<ScrollBackground>("scrollBackground", getStyle(node["style"].asString("scrollBackground")), makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), api.input->getKeyboard());
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeInfiniCanvas(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	return std::make_shared<InfiniCanvas>("infiniCanvas", getStyle(node["style"].asString("infiniCanvas")), makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), api.input->getKeyboard());
 }
 
 std::shared_ptr<UIWidget> EditorUIFactory::makeAnimationEditorDisplay(const ConfigNode& entryNode)
