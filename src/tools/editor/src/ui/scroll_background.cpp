@@ -1,10 +1,14 @@
 #include "scroll_background.h"
+
+#include <utility>
 using namespace Halley;
 
-ScrollBackground::ScrollBackground(String id, UIStyle style, UISizer sizer)
+ScrollBackground::ScrollBackground(String id, UIStyle style, UISizer sizer, std::shared_ptr<InputKeyboard> keyboard)
 	: UIClickable(std::move(id), {}, std::move(sizer))
+	, keyboard(std::move(keyboard))
 {
 	bg = style.getSprite("background");
+	draggingButton.fill(false);
 	
 	setHandle(UIEventType::MouseWheel, [this] (const UIEvent& event)
 	{
@@ -61,7 +65,15 @@ UIScrollPane* ScrollBackground::getScrollPane() const
 
 void ScrollBackground::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
-	if (button == 0) {
+	if (button == 0 && keyboard && keyboard->isButtonDown(KeyCode::Space)) {
+		draggingButton[0] = true;
+	}
+	if (button == 1) {
+		draggingButton[1] = true;
+	}
+	const bool shouldDrag = draggingButton[0] || draggingButton[1];
+
+	if (shouldDrag && !dragging) {
 		pane = getScrollPane();
 		if (pane) {
 			dragging = true;
@@ -75,11 +87,14 @@ void ScrollBackground::pressMouse(Vector2f mousePos, int button, KeyMods keyMods
 
 void ScrollBackground::releaseMouse(Vector2f mousePos, int button)
 {
-	if (button == 0) {
-		if (dragging) {
-			onMouseOver(mousePos);
-			dragging = false;
-		}
+	if (button == 0 || button == 1) {
+		draggingButton[button] = false;
+	}
+	const bool shouldDrag = draggingButton[0] || draggingButton[1];
+
+	if (dragging && !shouldDrag) {
+		onMouseOver(mousePos);
+		dragging = false;
 	}
 
 	UIClickable::releaseMouse(mousePos, button);

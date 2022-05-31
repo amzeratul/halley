@@ -9,7 +9,7 @@ namespace Halley {
 		using ZoomListener = std::function<void(float)>;
     	using MousePosListener = std::function<void(Vector2f)>;
 
-        ScrollBackground(String id, UIStyle style, UISizer sizer);
+        ScrollBackground(String id, UIStyle style, UISizer sizer, std::shared_ptr<InputKeyboard> keyboard);
 		float getZoomLevel() const;
 		void setZoomListener(ZoomListener listener);
     	void setMousePosListener(MousePosListener listener);
@@ -29,6 +29,7 @@ namespace Halley {
 		void onDoubleClicked(Vector2f mousePos, KeyMods keyMods) override;
     	
     private:
+		std::shared_ptr<InputKeyboard> keyboard;
 		Sprite bg;
 		Vector2f mouseStartPos;
 		Vector2f startScrollPos;
@@ -36,8 +37,10 @@ namespace Halley {
 		UIScrollPane* pane = nullptr;
 		int zoomExp = 0;
 		bool dirty = false;
-		bool dragging = false;
     	bool zoomEnabled = true;
+
+		bool dragging = false;
+		std::array<bool, 2> draggingButton;
 
 		ZoomListener zoomListener;
     	MousePosListener mousePosListener;
