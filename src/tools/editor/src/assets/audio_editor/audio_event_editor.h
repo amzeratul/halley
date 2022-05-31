@@ -14,9 +14,9 @@ namespace Halley {
 		
 		void save() override;
 		bool isModified() override;
+        void markModified();
 
 		Resources& getGameResources() const;
-        void markModified();
 
         void addAction();
         void addAction(AudioEventActionType type);

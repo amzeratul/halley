@@ -6,6 +6,7 @@
 #include "metadata_editor.h"
 #include "prefab_editor.h"
 #include "graph/render_graph_editor.h"
+#include "graph/script_graph_editor.h"
 #include "halley/tools/project/project.h"
 #include "src/ui/editor_ui_factory.h"
 #include "src/ui/project_window.h"
@@ -208,6 +209,8 @@ std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(Path filePath, AssetT
 		return std::make_shared<AudioEventEditor>(factory, project.getGameResources(), project, projectWindow);
 	case AssetType::AudioObject:
 		return std::make_shared<AudioObjectEditor>(factory, project.getGameResources(), project, projectWindow);
+	case AssetType::ScriptGraph:
+		return std::make_shared<ScriptGraphEditor>(factory, project.getGameResources(), project, projectWindow);
 	}
 	return {};
 }

@@ -103,6 +103,7 @@ namespace Halley {
 
 		ConfigNode toConfigNode() const;
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
+		String toYAML() const;
 
 		static std::shared_ptr<ScriptGraph> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::ScriptGraph; }

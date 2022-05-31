@@ -1,6 +1,7 @@
 #include "scripting/script_graph.h"
 
 #include "halley/bytes/byte_serializer.h"
+#include "halley/file_formats/yaml_convert.h"
 #include "halley/utils/algorithm.h"
 #include "halley/utils/hash.h"
 #include "scripting/script_node_type.h"
@@ -199,6 +200,12 @@ ConfigNode ScriptGraph::toConfigNode(const EntitySerializationContext& context) 
 	return result;
 }
 
+String ScriptGraph::toYAML() const
+{
+	YAMLConvert::EmitOptions options;
+	return YAMLConvert::generateYAML(toConfigNode(), options);
+}
+
 std::shared_ptr<ScriptGraph> ScriptGraph::loadResource(ResourceLoader& loader)
 {
 	auto script = std::make_shared<ScriptGraph>();
@@ -213,6 +220,9 @@ void ScriptGraph::reload(Resource&& resource)
 
 void ScriptGraph::makeDefault()
 {
+	nodes.clear();
+	entityIds.clear();
+	finishGraph();
 }
 
 void ScriptGraph::serialize(Serializer& s) const

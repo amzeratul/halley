@@ -38,6 +38,7 @@ set (editor_sources
 
 	"src/assets/graph/graph_editor.cpp"
 	"src/assets/graph/render_graph_editor.cpp"
+	"src/assets/graph/script_graph_editor.cpp"
 	"src/assets/graph/ui_graph_node.cpp"
 	
 	"src/project/core_api_wrapper.cpp"
@@ -113,6 +114,7 @@ set (editor_headers
 
 	"src/assets/graph/graph_editor.h"
 	"src/assets/graph/render_graph_editor.h"
+	"src/assets/graph/script_graph_editor.h"
 	"src/assets/graph/ui_graph_node.h"
 
 	"src/project/core_api_wrapper.h"
