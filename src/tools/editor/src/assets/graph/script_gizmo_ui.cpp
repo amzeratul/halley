@@ -31,9 +31,9 @@ void ScriptGizmoUI::update(Time time, bool moved)
 
 void ScriptGizmoUI::draw(UIPainter& painter) const
 {
-	painter.draw([=] (Painter& painter)
+	painter.draw([=] (Painter& p)
 	{
-		gizmo.draw(painter);
+		gizmo.draw(p);
 	});
 }
 

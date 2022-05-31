@@ -15,11 +15,15 @@ ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResource
 
 void ScriptGraphEditor::onMakeUI()
 {
-	auto gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *projectWindow.getEntityEditorFactory(), projectWindow.getScriptNodeTypes());
+	gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *projectWindow.getEntityEditorFactory(), projectWindow.getScriptNodeTypes());
+	
+	if (scriptGraph) {
+		gizmoEditor->load(*scriptGraph);
+	}
 
 	const auto infiniCanvas = getWidgetAs<InfiniCanvas>("infiniCanvas");
 	infiniCanvas->clear();
-	infiniCanvas->add(std::move(gizmoEditor));
+	infiniCanvas->add(gizmoEditor);
 }
 
 void ScriptGraphEditor::reload()
@@ -68,6 +72,10 @@ std::shared_ptr<const Resource> ScriptGraphEditor::loadResource(const String& as
 		markModified();
 	}
 	scriptGraph->setAssetId(assetId);
+
+	if (gizmoEditor) {
+		gizmoEditor->load(*scriptGraph);
+	}
 	
 	return scriptGraph;
 }
