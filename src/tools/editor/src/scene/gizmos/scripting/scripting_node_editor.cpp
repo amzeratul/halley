@@ -2,7 +2,7 @@
 #include "scripting_gizmo.h"
 using namespace Halley;
 
-ScriptingNodeEditor::ScriptingNodeEditor(ScriptingGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, uint32_t nodeId, const IScriptNodeType& nodeType, std::optional<Vector2f> pos)
+ScriptingNodeEditor::ScriptingNodeEditor(ScriptingBaseGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, uint32_t nodeId, const IScriptNodeType& nodeType, std::optional<Vector2f> pos)
 	: UIWidget("scripting_node_editor", {}, UISizer())
 	, gizmo(gizmo)
 	, factory(factory)
@@ -87,7 +87,7 @@ void ScriptingNodeEditor::applyChanges()
 	Concurrent::execute(gizmo->getExecutionQueue(), [gizmo, nodeId, curSettings = std::move(curSettings)] () mutable {
 		gizmo->getNode(nodeId).getSettings() = std::move(curSettings);
 		gizmo->getGraph().validateNodePins(nodeId);
-		gizmo->saveEntityData();
+		gizmo->onModified();
 	});
 }
 

@@ -2,12 +2,12 @@
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
-	class ScriptingGizmo;
+	class ScriptingBaseGizmo;
 	class UIFactory;
 
 	class ScriptingGizmoToolbar : public UIWidget {
 	public:
-		ScriptingGizmoToolbar(UIFactory& factory, ScriptingGizmo& gizmo);
+		ScriptingGizmoToolbar(UIFactory& factory, ScriptingBaseGizmo& gizmo);
 
 		void onMakeUI() override;
 		void onAddedToRoot(UIRoot& root) override;
@@ -17,7 +17,7 @@ namespace Halley {
 		bool onKeyPress(KeyboardKeyPress key) override;
 	
 	private:
-		ScriptingGizmo& gizmo;
+		ScriptingBaseGizmo& gizmo;
 		UIFactory& factory;
 	};
 }

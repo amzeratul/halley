@@ -2,7 +2,7 @@
 #include "scripting_gizmo.h"
 using namespace Halley;
 
-ScriptingGizmoToolbar::ScriptingGizmoToolbar(UIFactory& factory, ScriptingGizmo& gizmo)
+ScriptingGizmoToolbar::ScriptingGizmoToolbar(UIFactory& factory, ScriptingBaseGizmo& gizmo)
 	: UIWidget("scripting_gizmo_toolbar", {}, UISizer())
 	, gizmo(gizmo)
 	, factory(factory)
