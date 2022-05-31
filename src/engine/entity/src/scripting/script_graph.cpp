@@ -126,7 +126,10 @@ void ScriptGraphNode::deserialize(Deserializer& s)
 
 void ScriptGraphNode::feedToHash(Hash::Hasher& hasher)
 {
-	// TODO
+	hasher.feed(position.x);
+	hasher.feed(position.y);
+	hasher.feed(type);
+	// TODO: settings, pins
 }
 
 void ScriptGraphNode::onNodeRemoved(uint32_t nodeId)
@@ -148,6 +151,7 @@ void ScriptGraphNode::onNodeRemoved(uint32_t nodeId)
 void ScriptGraphNode::assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const
 {
 	nodeType = nodeTypeCollection.tryGetNodeType(type);
+	Ensures(nodeType != nullptr);
 }
 
 const IScriptNodeType& ScriptGraphNode::getNodeType() const

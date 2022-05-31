@@ -10,7 +10,6 @@ ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResource
 	: AssetEditor(factory, gameResources, project, AssetType::ScriptGraph)
 	, projectWindow(projectWindow)
 {
-	factory.loadUI(*this, "halley/script_graph_editor");
 }
 
 void ScriptGraphEditor::onMakeUI()
@@ -28,6 +27,8 @@ void ScriptGraphEditor::onMakeUI()
 	infiniCanvas->clear();
 	infiniCanvas->add(gizmoEditor, 0, {}, UISizerAlignFlags::Centre, Vector2f());
 	infiniCanvas->setMouseMirror(gizmoEditor);
+
+	getWidget("toolbar")->add(gizmoEditor->makeUI());
 }
 
 void ScriptGraphEditor::reload()
@@ -64,6 +65,24 @@ void ScriptGraphEditor::markModified()
 
 std::shared_ptr<const Resource> ScriptGraphEditor::loadResource(const String& assetId)
 {
+	if (project.isDLLLoaded()) {
+		open();
+	} else {
+		pendingLoad = true;
+	}
+	
+	return {};
+}
+
+void ScriptGraphEditor::open()
+{
+	Expects (project.isDLLLoaded());
+
+	if (!hasUI) {
+		factory.loadUI(*this, "halley/script_graph_editor");
+		hasUI = true;
+	}
+	
 	const auto assetPath = project.getImportAssetsDatabase().getPrimaryInputFile(assetType, assetId);
 	const auto assetData = Path::readFile(project.getAssetsSrcPath() / assetPath);
 
@@ -80,12 +99,15 @@ std::shared_ptr<const Resource> ScriptGraphEditor::loadResource(const String& as
 	if (gizmoEditor) {
 		gizmoEditor->load(*scriptGraph);
 	}
-	
-	return scriptGraph;
 }
 
 void ScriptGraphEditor::update(Time time, bool moved)
 {
+	if (pendingLoad && project.isDLLLoaded()) {
+		pendingLoad = false;
+		open();
+	}
+
 	AssetEditor::update(time, moved);
 
 	infiniCanvas->setScrollEnabled(!gizmoEditor->isHighlighted());

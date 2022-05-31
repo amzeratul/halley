@@ -24,6 +24,7 @@ void UIWidgetEditor::setSelectedWidget(const String& id, ConfigNode* node, const
 void UIWidgetEditor::setGameResources(Resources& resources)
 {
 	entityFieldFactory = std::make_shared<EntityEditorFactory>(factory);
+	entityFieldFactory->addStandardFieldFactories();
 	entityFieldFactory->setGameResources(resources);
 	entityFieldFactory->setCallbacks(*this);
 	refresh();

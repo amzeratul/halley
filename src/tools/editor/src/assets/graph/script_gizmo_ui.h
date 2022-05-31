@@ -18,6 +18,8 @@ namespace Halley {
 		void draw(UIPainter& painter) const override;
 
 		bool isHighlighted() const;
+		
+		std::shared_ptr<UIWidget> makeUI();
 
 	protected:
         void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;

@@ -129,6 +129,7 @@ namespace Halley {
 		void validateNodePins(uint32_t nodeIdx);
 
 		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const;
+		void finishGraph();
 
 		EntityId getEntityId(OptionalLite<uint8_t> idx) const;
 		uint8_t addEntityId(EntityId id);
@@ -140,8 +141,6 @@ namespace Halley {
 		uint64_t hash = 0;
 
 		mutable uint64_t lastAssignTypeHash = 1;
-
-		void finishGraph();
 	};
 
 	template <>

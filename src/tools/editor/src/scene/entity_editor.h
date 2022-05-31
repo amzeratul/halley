@@ -119,7 +119,9 @@ namespace Halley {
 		void setGameResources(Resources& resources);
 
 		void addFieldFactories(Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
-		void resetFieldFactories();
+		void addStandardFieldFactories();
+		void clear();
+		bool isEmpty() const;
 	
 		std::shared_ptr<IUIElement> makeLabel(const String& label) const override;
 		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const override;

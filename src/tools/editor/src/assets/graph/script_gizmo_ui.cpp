@@ -47,6 +47,11 @@ bool ScriptGizmoUI::isHighlighted() const
 	return gizmo.isHighlighted();
 }
 
+std::shared_ptr<UIWidget> ScriptGizmoUI::makeUI()
+{
+	return gizmo.makeUI();
+}
+
 void ScriptGizmoUI::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	inputState.mousePos = mousePos;

@@ -650,7 +650,6 @@ void EntityEditor::setComponentColour(const String& name, UIWidget& component)
 EntityEditorFactory::EntityEditorFactory(UIFactory& factory)
 	: factory(factory)
 {
-	resetFieldFactories();
 	makeContext();
 }
 
@@ -712,10 +711,19 @@ void EntityEditorFactory::addFieldFactories(Vector<std::unique_ptr<IComponentEdi
 	}
 }
 
-void EntityEditorFactory::resetFieldFactories()
+void EntityEditorFactory::addStandardFieldFactories()
+{
+	addFieldFactories(EntityEditorFactories::getDefaultFactories());
+}
+
+void EntityEditorFactory::clear()
 {
 	fieldFactories.clear();
-	addFieldFactories(EntityEditorFactories::getDefaultFactories());
+}
+
+bool EntityEditorFactory::isEmpty() const
+{
+	return fieldFactories.empty();
 }
 
 void EntityEditorFactory::setCallbacks(IEntityEditorCallbacks& editor)

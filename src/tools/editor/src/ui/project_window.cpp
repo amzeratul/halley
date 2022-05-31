@@ -184,7 +184,7 @@ bool ProjectWindow::loadCustomUI()
 
 void ProjectWindow::destroyCustomUI()
 {
-	entityEditorFactory.reset();
+	entityEditorFactory->clear();
 
 	if (!customTools.empty()) {
 		makeToolbar();
@@ -542,6 +542,9 @@ std::shared_ptr<EntityEditorFactory> ProjectWindow::getEntityEditorFactory()
 {
 	if (!entityEditorFactory) {
 		entityEditorFactory = std::make_shared<EntityEditorFactory>(factory);
+	}
+	if (entityEditorFactory->isEmpty()) {
+		entityEditorFactory->addStandardFieldFactories();
 		entityEditorFactory->addFieldFactories(project.getGameInstance()->createCustomEditorFieldFactories());
 	}
 	return entityEditorFactory;

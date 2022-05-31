@@ -29,5 +29,9 @@ namespace Halley {
 		std::shared_ptr<ScriptGizmoUI> gizmoEditor;
 		std::shared_ptr<InfiniCanvas> infiniCanvas;
 		bool modified = false;
+		bool pendingLoad = false;
+		bool hasUI = false;
+
+		void open();
     };
 }

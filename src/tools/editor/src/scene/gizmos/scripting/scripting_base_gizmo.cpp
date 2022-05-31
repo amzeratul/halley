@@ -235,6 +235,7 @@ bool ScriptingBaseGizmo::destroyNode(uint32_t id)
 		
 		nodes.erase(nodes.begin() + id);
 		onModified();
+		scriptGraph->finishGraph();
 		return true;
 	}
 
@@ -362,6 +363,8 @@ void ScriptingBaseGizmo::addNode(const String& type, Vector2f pos)
 	auto& nodes = scriptGraph->getNodes();
 	const uint32_t id = static_cast<uint32_t>(nodes.size());
 	nodes.emplace_back(type, pos);
+	scriptGraph->finishGraph();
+	scriptGraph->assignTypes(*scriptNodeTypes);
 	onModified();
 	
 	openNodeUI(id, {}, false);
