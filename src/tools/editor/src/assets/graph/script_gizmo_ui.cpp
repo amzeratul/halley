@@ -1,11 +1,12 @@
 #include "script_gizmo_ui.h"
 using namespace Halley;
 
-ScriptGizmoUI::ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes)
+ScriptGizmoUI::ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, ModifiedCallback modifiedCallback)
 	: UIWidget("scriptGizmoUI", {}, {})
 	, factory(factory)
 	, resources(resources)
 	, gizmo(factory, entityEditorFactory, nullptr, scriptNodeTypes)
+	, modifiedCallback(std::move(modifiedCallback))
 {
 	gizmo.setModifiedCallback([=] ()
 	{
@@ -47,6 +48,7 @@ bool ScriptGizmoUI::isHighlighted() const
 
 void ScriptGizmoUI::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
+	inputState.mousePos = mousePos;
 	if (button == 0) {
 		inputState.leftClickPressed = true;
 		inputState.leftClickHeld = true;
@@ -61,6 +63,7 @@ void ScriptGizmoUI::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 
 void ScriptGizmoUI::releaseMouse(Vector2f mousePos, int button)
 {
+	inputState.mousePos = mousePos;
 	if (button == 0) {
 		inputState.leftClickReleased = true;
 		inputState.leftClickHeld = false;
@@ -80,4 +83,7 @@ void ScriptGizmoUI::onMouseOver(Vector2f mousePos)
 
 void ScriptGizmoUI::onModified()
 {
+	if (modifiedCallback) {
+		modifiedCallback();
+	}
 }

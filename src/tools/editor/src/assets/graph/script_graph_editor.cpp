@@ -15,7 +15,10 @@ ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResource
 
 void ScriptGraphEditor::onMakeUI()
 {
-	gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *projectWindow.getEntityEditorFactory(), projectWindow.getScriptNodeTypes());
+	gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *projectWindow.getEntityEditorFactory(), projectWindow.getScriptNodeTypes(), [=] ()
+	{
+		markModified();
+	});
 	
 	if (scriptGraph) {
 		gizmoEditor->load(*scriptGraph);

@@ -6,7 +6,9 @@
 namespace Halley {
 	class ScriptGizmoUI : public UIWidget {
 	public:
-		ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes);
+		using ModifiedCallback = ScriptingBaseGizmo::ModifiedCallback;
+
+		ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, ModifiedCallback modifiedCallback);
 
 		void onAddedToRoot(UIRoot& root) override;
 
@@ -27,6 +29,7 @@ namespace Halley {
 		Resources& resources;
 		ScriptingBaseGizmo gizmo;
 		SceneEditorInputState inputState;
+		ModifiedCallback modifiedCallback;
 
 		void onModified();
 	};

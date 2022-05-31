@@ -42,10 +42,6 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 		scriptGraph->assignTypes(*scriptNodeTypes);
 	}
 
-	if (!dragging) {
-		nodeUnderMouse = renderer->getNodeUnderMouse(basePos, getZoom(), inputState.mousePos, !!nodeEditingConnection);
-	}
-
 	// Find entity target under mouse
 	curEntityTarget = EntityId();
 	const auto curZoom = getZoom();
@@ -64,6 +60,10 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 		onNodeDragging(inputState);
 	} else if (nodeEditingConnection) {
 		onEditingConnection(inputState);
+	}
+
+	if (!dragging) {
+		nodeUnderMouse = renderer->getNodeUnderMouse(basePos, getZoom(), inputState.mousePos, !!nodeEditingConnection);
 	}
 
 	if (startedIdle && nodeUnderMouse && inputState.mousePos) {
