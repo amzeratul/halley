@@ -43,7 +43,7 @@ colours:
   ui_scrollBarDown: "#5C686D"
   ui_scrollBarHover: "#97a1a5"
   ui_scrollBarDisabled: "#D7AAB6"
-  ui_scrollBackground: "#2f424b"
+  ui_scrollBackground: "#26363E"
   
   ui_backgroundBox: "#22333b"
   ui_popupWindow: "#1A262D"

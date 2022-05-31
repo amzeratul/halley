@@ -298,7 +298,10 @@ uiStyle:
     gap: 2
 
   scrollBackground:
-    background: { img: $ui_scroll_background, colour: $scrollBackground }
+    background: { img: $ui_scroll_background, colour: $ui_scrollBackground }
+
+  infiniCanvas:
+    background: { img: $ui_scroll_background, colour: $ui_scrollBackground }
 
   graphNode:
     paintBackground: { img: $ui_title_capsule, colour: $taskComplete }

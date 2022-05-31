@@ -1,0 +1,9 @@
+---
+widget: { class: widget }
+sizer: { type: vertical }
+children:
+- widget: { class: infiniCanvas, id: infiniCanvas }
+  proportion: 1
+  sizer: { type: free }
+  children: []
+...

@@ -31,7 +31,6 @@ colours:
   ui_listHover: "#FFC6E7"
   ui_listDrag: "#FFC6E780"
 
-  ui_scrollBackground: "#F8E0EF"
   ui_backgroundBox: "#F8E0EF"
   ui_popupWindow: "#FFC6E7"
   ui_staticBox: "#FFC6E7"
@@ -47,7 +46,7 @@ colours:
 
   ui_logWarningText: "#FFA626"
 
-  scrollBackground: "#FFDDE6"
+  ui_scrollBackground: "#F8E0EF"
 
   taskbarLogoBackground: "#FFD7EE"
 
