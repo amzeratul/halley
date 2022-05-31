@@ -12,7 +12,7 @@ using namespace Halley;
 #endif
 #include "components/transform_2d_component.h"
 
-ScriptRenderer::ScriptRenderer(Resources& resources, World* world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom)
+ScriptRenderer::ScriptRenderer(Resources& resources, const World* world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom)
 	: resources(resources)
 	, world(world)
 	, nodeTypeCollection(nodeTypeCollection)

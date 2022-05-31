@@ -31,7 +31,7 @@ namespace Halley {
 			ScriptNodePinType toType;
 		};
 		
-		ScriptRenderer(Resources& resources, World* world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom);
+		ScriptRenderer(Resources& resources, const World* world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom);
 		
 		void setGraph(const ScriptGraph* graph);
 		void setState(ScriptState* scriptState);
@@ -58,7 +58,7 @@ namespace Halley {
 		};
 		
 		Resources& resources;
-		World* world = nullptr;
+		const World* world = nullptr;
 		const ScriptNodeTypeCollection& nodeTypeCollection;
 		float nativeZoom = 1.0f;
 		

@@ -11,7 +11,7 @@ namespace Halley {
 
 		using ModifiedCallback = std::function<void()>;
 
-		ScriptingBaseGizmo(UIFactory& factory, ISceneEditorWindow& sceneEditorWindow, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom = 1.0f);
+		ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom = 1.0f);
 		void setUIRoot(UIRoot& root);
 
 		void addNode();
@@ -40,12 +40,12 @@ namespace Halley {
 
 	private:
 		UIFactory& factory;
-		ISceneEditorWindow& sceneEditorWindow;
+		const IEntityEditorFactory& entityEditorFactory;
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
 		std::shared_ptr<ScriptRenderer> renderer;
 
 		UIRoot* uiRoot = nullptr;
-		World* world = nullptr;
+		const World* world = nullptr;
 		Resources* resources = nullptr;
 
 		Vector2f basePos;

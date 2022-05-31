@@ -7,11 +7,11 @@
 
 using namespace Halley;
 
-ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, ISceneEditorWindow& sceneEditorWindow, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom)
+ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom)
 	: factory(factory)
-	, sceneEditorWindow(sceneEditorWindow)
+	, entityEditorFactory(entityEditorFactory)
 	, scriptNodeTypes(std::move(scriptNodeTypes))
-	, world(&sceneEditorWindow.getEntityFactory()->getWorld())
+	, world(world)
 	, baseZoom(baseZoom)
 {
 	tooltipLabel
@@ -337,7 +337,7 @@ void ScriptingBaseGizmo::openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos
 	ScriptGraphNode& node = getNode(nodeId);
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
 	if (nodeType && (force || !nodeType->getSettingTypes().empty())) {
-		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, sceneEditorWindow.getEntityEditorFactory(), nodeId, *nodeType, pos));
+		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, entityEditorFactory, nodeId, *nodeType, pos));
 	}
 }
 

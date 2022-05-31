@@ -9,7 +9,7 @@ using namespace Halley;
 
 ScriptingGizmo::ScriptingGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes)
 	: SceneEditorGizmo(snapRules)
-	, gizmo(factory, sceneEditorWindow, scriptNodeTypes, sceneEditorWindow.getProjectDefaultZoom())
+	, gizmo(factory, sceneEditorWindow.getEntityEditorFactory(), &sceneEditorWindow.getEntityFactory()->getWorld(), scriptNodeTypes, sceneEditorWindow.getProjectDefaultZoom())
 	, sceneEditorWindow(sceneEditorWindow)
 {
 	gizmo.setModifiedCallback([=] ()
