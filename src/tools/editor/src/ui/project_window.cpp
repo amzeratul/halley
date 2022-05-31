@@ -536,6 +536,18 @@ Vector2f ProjectWindow::getChoosePrefabWindowSize() const
 	return getSize() - Vector2f(900.0f, 350.0f);
 }
 
+const IEntityEditorFactory& ProjectWindow::getEntityEditorFactory() const
+{
+	// TODO
+	return *static_cast<IEntityEditorFactory*>(nullptr);
+}
+
+std::shared_ptr<ScriptNodeTypeCollection> ProjectWindow::getScriptNodeTypes()
+{
+	// TODO
+	return {};
+}
+
 
 ProjectWindow::SettingsStorage::SettingsStorage(std::shared_ptr<ISaveData> saveData, String path)
 	: saveData(std::move(saveData))

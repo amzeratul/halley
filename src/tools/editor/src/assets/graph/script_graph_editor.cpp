@@ -1,14 +1,25 @@
 #include "script_graph_editor.h"
+
+#include "script_gizmo_ui.h"
 #include "halley/tools/project/project.h"
+#include "src/ui/infini_canvas.h"
+#include "src/ui/project_window.h"
 using namespace Halley;
 
 ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow)
 	: AssetEditor(factory, gameResources, project, AssetType::ScriptGraph)
+	, projectWindow(projectWindow)
 {
+	factory.loadUI(*this, "halley/script_graph_editor");
 }
 
 void ScriptGraphEditor::onMakeUI()
 {
+	auto gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, projectWindow.getEntityEditorFactory(), projectWindow.getScriptNodeTypes());
+
+	const auto infiniCanvas = getWidgetAs<InfiniCanvas>("infiniCanvas");
+	infiniCanvas->clear();
+	infiniCanvas->add(std::move(gizmoEditor));
 }
 
 void ScriptGraphEditor::reload()

@@ -21,6 +21,7 @@ namespace Halley {
         std::shared_ptr<const Resource> loadResource(const String& assetId) override;
 
     private:
+		ProjectWindow& projectWindow;
     	std::shared_ptr<ScriptGraph> scriptGraph;
 
     	std::shared_ptr<ScrollBackground> scrollBg;

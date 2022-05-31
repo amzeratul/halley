@@ -58,6 +58,9 @@ namespace Halley {
 
     	Vector2f getChoosePrefabWindowSize() const;
 
+    	const IEntityEditorFactory& getEntityEditorFactory() const;
+		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes();
+
     protected:
         void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 
