@@ -24,7 +24,7 @@ void ScriptGraphEditor::save()
 	if (modified) {
 		modified = false;
 
-		const auto assetPath = Path("script_graph/" + scriptGraph->getAssetId() + ".yaml");
+		const auto assetPath = Path("script_graph/" + scriptGraph->getAssetId() + ".hsg");
 		const auto strData = scriptGraph->toYAML();
 
 		project.setAssetSaveNotification(false);

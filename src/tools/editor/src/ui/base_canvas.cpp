@@ -6,9 +6,9 @@ using namespace Halley;
 BaseCanvas::BaseCanvas(String id, UIStyle style, UISizer sizer, std::shared_ptr<InputKeyboard> keyboard)
 	: UIClickable(std::move(id), {}, std::move(sizer))
 	, keyboard(std::move(keyboard))
+	, draggingButton({false, false})
 {
 	bg = style.getSprite("background");
-	draggingButton.fill(false);
 	
 	setHandle(UIEventType::MouseWheel, [this] (const UIEvent& event)
 	{
