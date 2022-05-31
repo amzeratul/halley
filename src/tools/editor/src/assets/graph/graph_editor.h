@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../asset_editor.h"
-#include "src/ui/scroll_background.h"
+#include "src/ui/infini_canvas.h"
 
 namespace Halley {
 	class UIGraphNode;
@@ -18,7 +18,7 @@ namespace Halley {
 		Colour4f getColourForPinType(RenderGraphPinType pinType) const;
 
 	protected:
-		std::shared_ptr<ScrollBackground> scrollBg;
+		std::shared_ptr<InfiniCanvas> infiniCanvas;
 		UIStyle connectionsStyle;
 
 		void addNode(std::shared_ptr<UIGraphNode> node);

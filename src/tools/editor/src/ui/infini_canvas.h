@@ -11,6 +11,8 @@ namespace Halley {
     	void setScrollPosition(Vector2f pos) override;
 		Vector2f getScrollPosition() const override;
 		Vector2f getBasePosition() const override;
+		Vector2f getLayoutOriginPosition() const override;
+		void drawChildren(UIPainter& painter) const override;
 
 	private:
 		Vector2f scrollPos;

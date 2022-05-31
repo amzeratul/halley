@@ -2,13 +2,8 @@
 widget: { class: widget }
 sizer: { type: vertical }
 children:
-- widget: { id: contents, class: scrollBarPane, scrollHorizontal: true, scrollVertical: true, mouseWheelEnabled: false }
+- widget: { class: infiniCanvas, id: infiniCanvas }
   proportion: 1
-  fill: fill
-  sizer: { type: vertical }
-  children:
-  - widget: { class: scrollBackground, id: scrollBackground }
-    proportion: 1
-    sizer: { type: free }
-    children: []
+  sizer: { type: free }
+  children: []
 ...

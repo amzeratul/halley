@@ -20,3 +20,14 @@ Vector2f InfiniCanvas::getBasePosition() const
 {
 	return getPosition();
 }
+
+Vector2f InfiniCanvas::getLayoutOriginPosition() const
+{
+	return -scrollPos;
+}
+
+void InfiniCanvas::drawChildren(UIPainter& painter) const
+{
+	auto p = painter.withClip(getRect());
+	UIWidget::drawChildren(p);
+}

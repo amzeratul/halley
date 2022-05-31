@@ -60,7 +60,9 @@ void BaseCanvas::draw(UIPainter& painter) const
 
 void BaseCanvas::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
-	if (button == 0 && keyboard && keyboard->isButtonDown(KeyCode::Space)) {
+	const bool needSpaceForLeftClick = false;
+	const bool canLeftClickScroll = !needSpaceForLeftClick || keyboard && keyboard->isButtonDown(KeyCode::Space);
+	if (button == 0 && canLeftClickScroll) {
 		draggingButton[0] = true;
 	}
 	if (button == 1) {

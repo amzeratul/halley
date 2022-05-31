@@ -14,14 +14,14 @@ GraphEditor::GraphEditor(UIFactory& factory, Resources& gameResources, Project& 
 
 void GraphEditor::reload()
 {
-	scrollBg->clear();
-	scrollBg->add(std::make_shared<GraphConnections>(*this));
+	infiniCanvas->clear();
+	infiniCanvas->add(std::make_shared<GraphConnections>(*this));
 }
 
 void GraphEditor::onMakeUI()
 {
-	scrollBg = getWidgetAs<ScrollBackground>("scrollBackground");
-	scrollBg->setZoomEnabled(false);
+	infiniCanvas = getWidgetAs<InfiniCanvas>("infiniCanvas");
+	infiniCanvas->setZoomEnabled(false);
 }
 
 std::shared_ptr<UIGraphNode> GraphEditor::getNode(std::string_view id)
