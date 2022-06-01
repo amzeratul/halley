@@ -27,6 +27,12 @@ void ScriptGraphEditor::onMakeUI()
 	infiniCanvas->clear();
 	infiniCanvas->add(gizmoEditor, 0, {}, UISizerAlignFlags::Centre, Vector2f());
 	infiniCanvas->setMouseMirror(gizmoEditor);
+	infiniCanvas->setZoomEnabled(false);
+
+	infiniCanvas->setZoomListener([=] (float zoom)
+	{
+		gizmoEditor->setZoom(zoom);
+	});
 
 	getWidget("toolbar")->add(gizmoEditor->makeUI());
 }

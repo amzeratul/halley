@@ -42,6 +42,11 @@ void ScriptGizmoUI::draw(UIPainter& painter) const
 	});
 }
 
+void ScriptGizmoUI::setZoom(float zoom)
+{
+	gizmo.setZoom(zoom);
+}
+
 bool ScriptGizmoUI::isHighlighted() const
 {
 	return gizmo.isHighlighted();

@@ -17,6 +17,7 @@ namespace Halley {
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;
 
+		void setZoom(float zoom);
 		bool isHighlighted() const;
 		
 		std::shared_ptr<UIWidget> makeUI();
