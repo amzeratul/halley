@@ -9,6 +9,7 @@ BaseCanvas::BaseCanvas(String id, UIStyle style, UISizer sizer, std::shared_ptr<
 	, draggingButton({false, false})
 {
 	bg = style.getSprite("background");
+	bgSize = bg.getSize();
 	
 	setHandle(UIEventType::MouseWheel, [this] (const UIEvent& event)
 	{
@@ -53,7 +54,7 @@ void BaseCanvas::doSetState(State state)
 void BaseCanvas::update(Time t, bool moved)
 {
 	const Vector2f startPos = getScrollPosition();
-	const auto scale = Vector2f(1, 1) / (Vector2f(32, 32) * getZoomLevel());
+	const auto scale = Vector2f(1, 1) / (bgSize * getZoomLevel());
 
 	bg
 		.setPos(getPosition())

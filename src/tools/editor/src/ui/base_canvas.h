@@ -35,6 +35,7 @@ namespace Halley {
     private:
 		std::shared_ptr<InputKeyboard> keyboard;
 		Sprite bg;
+		Vector2f bgSize;
 		Vector2f mouseStartPos;
 		Vector2f startScrollPos;
 		Vector2f lastMousePos;
