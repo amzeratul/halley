@@ -34,10 +34,14 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 
 	tasks = std::make_unique<TaskSet>();
 
+	entityEditorFactory = std::make_shared<EntityEditorFactory>(factory);
+	entityEditorFactory->addStandardFieldFactories();
+
 	project.withDLL([&] (ProjectDLL& dll)
 	{
 		dll.addReloadListener(*this);
 		updateDLLStatus(dll.getStatus());
+		entityEditorFactory->addFieldFactories(dll.getGame().createCustomEditorFieldFactories());
 		hasDLL = dll.isLoaded();
 	});
 	project.addAssetLoadedListener(this);
@@ -179,14 +183,16 @@ bool ProjectWindow::loadCustomUI()
 
 	setupConsole(*game);
 
+	entityEditorFactory->clear();
+	entityEditorFactory->addStandardFieldFactories();
+	entityEditorFactory->addFieldFactories(project.getGameInstance()->createCustomEditorFieldFactories());
+	
 	return true;
 }
 
 void ProjectWindow::destroyCustomUI()
 {
-	if (entityEditorFactory) {
-		entityEditorFactory->clear();
-	}
+	entityEditorFactory->clear();
 
 	if (!customTools.empty()) {
 		makeToolbar();
@@ -542,13 +548,6 @@ Vector2f ProjectWindow::getChoosePrefabWindowSize() const
 
 std::shared_ptr<EntityEditorFactory> ProjectWindow::getEntityEditorFactory()
 {
-	if (!entityEditorFactory) {
-		entityEditorFactory = std::make_shared<EntityEditorFactory>(factory);
-	}
-	if (entityEditorFactory->isEmpty()) {
-		entityEditorFactory->addStandardFieldFactories();
-		entityEditorFactory->addFieldFactories(project.getGameInstance()->createCustomEditorFieldFactories());
-	}
 	return entityEditorFactory;
 }
 
