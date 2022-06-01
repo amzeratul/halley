@@ -41,8 +41,10 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 	{
 		dll.addReloadListener(*this);
 		updateDLLStatus(dll.getStatus());
-		entityEditorFactory->addFieldFactories(dll.getGame().createCustomEditorFieldFactories());
 		hasDLL = dll.isLoaded();
+		if (hasDLL) {
+			entityEditorFactory->addFieldFactories(dll.getGame().createCustomEditorFieldFactories());
+		}
 	});
 	project.addAssetLoadedListener(this);
 
