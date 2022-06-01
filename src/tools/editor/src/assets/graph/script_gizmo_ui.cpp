@@ -92,6 +92,11 @@ void ScriptGizmoUI::onMouseOver(Vector2f mousePos)
 	inputState.mousePos = mousePos;
 }
 
+bool ScriptGizmoUI::ignoreClip() const
+{
+	return true;
+}
+
 void ScriptGizmoUI::onModified()
 {
 	if (modifiedCallback) {

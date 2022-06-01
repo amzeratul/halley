@@ -21,6 +21,7 @@ namespace Halley {
 		void doSetState(State state) override;
 		void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;
+		void drawAfterChildren(UIPainter& painter) const override;
 
         void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 		void releaseMouse(Vector2f mousePos, int button) override;
@@ -34,9 +35,12 @@ namespace Halley {
     	
     private:
 		std::shared_ptr<InputKeyboard> keyboard;
-		Sprite bg;
+
+    	Sprite bg;
+		Sprite border;
 		Vector2f bgSize;
-		Vector2f mouseStartPos;
+
+    	Vector2f mouseStartPos;
 		Vector2f startScrollPos;
 		Vector2f lastMousePos;
 		int zoomExp = 0;

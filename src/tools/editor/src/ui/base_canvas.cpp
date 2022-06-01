@@ -10,6 +10,7 @@ BaseCanvas::BaseCanvas(String id, UIStyle style, UISizer sizer, std::shared_ptr<
 {
 	bg = style.getSprite("background");
 	bgSize = bg.getSize();
+	border = style.getSprite("border");
 	
 	setHandle(UIEventType::MouseWheel, [this] (const UIEvent& event)
 	{
@@ -61,12 +62,21 @@ void BaseCanvas::update(Time t, bool moved)
 		.setSize(getSize())
 		.setTexRect(Rect4f(startPos * scale, (startPos + getSize()) * scale));
 
+	border
+		.setPos(getPosition())
+		.scaleTo(getSize());
+
 	UIClickable::update(t, moved);
 }
 
 void BaseCanvas::draw(UIPainter& painter) const
 {
 	painter.draw(bg);
+}
+
+void BaseCanvas::drawAfterChildren(UIPainter& painter) const
+{
+	painter.draw(border);
 }
 
 void BaseCanvas::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
