@@ -41,6 +41,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	std::optional<Metadata> startMeta;
 
 	std::optional<String> palette;
+	bool powerOfTwo = true;
 
 	for (auto& inputFile: asset.inputFiles) {
 		auto fileInputId = Path(inputFile.name).dropFront(1);
@@ -70,6 +71,11 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			}
 		} else {
 			palette = thisPalette;
+		}
+
+		// Power of two
+		if (asset.inputFiles.size() == 1) {
+			powerOfTwo = meta.getBool("powerOfTwo", true);
 		}
 
 		// Import image data
@@ -131,8 +137,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 
 	// Generate atlas + spritesheet
 	Vector<ImageData> totalFrames;
-	for (auto& frames : totalGroupedFrames)
-	{
+	for (auto& frames : totalGroupedFrames) {
 		std::move(frames.second.begin(), frames.second.end(), std::back_inserter(totalFrames));
 	}
 
@@ -146,7 +151,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	auto groupAtlasName = asset.assetId;
 	auto spriteSheet = std::make_shared<SpriteSheet>();
 	ConfigNode spriteInfo;
-	auto atlasImage = generateAtlas(groupAtlasName, totalFrames, *spriteSheet, spriteInfo);
+	auto atlasImage = generateAtlas(groupAtlasName, totalFrames, *spriteSheet, spriteInfo, powerOfTwo);
 	spriteSheet->setTextureName(groupAtlasName);
 	spriteSheet->setDefaultMaterialName(meta.getString("material", meta.getString("defaultMaterial", "Halley/Sprite")));
 
@@ -154,6 +159,9 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	auto size = atlasImage->getSize();
 	if (palette) {
 		meta.set("palette", palette.value());
+	}
+	if (!powerOfTwo) {
+		meta.set("powerOfTwo", false);
 	}
 	meta.set("width", size.x);
 	meta.set("height", size.y);
@@ -280,7 +288,7 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 	return animation;
 }
 
-std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, Vector<ImageData>& images, SpriteSheet& spriteSheet, ConfigNode& spriteInfo)
+std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, Vector<ImageData>& images, SpriteSheet& spriteSheet, ConfigNode& spriteInfo, bool powerOfTwo)
 {
 	if (images.size() > 1) {
 		Logger::logInfo("Generating atlas \"" + atlasName + "\" with " + toString(images.size()) + " sprites...");
@@ -323,26 +331,28 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, Ve
 			if (images.size() > 1) {
 				Logger::logInfo("Atlas \"" + atlasName + "\" generated at " + toString(size.x) + "x" + toString(size.y) + " px with " + toString(images.size()) + " sprites. Total image area is " + toString(totalImageArea) + " px^2, sqrt = " + toString(lround(sqrt(totalImageArea))) + " px.");
 			}
-			
-			return makeAtlas(res.value(), spriteSheet, spriteInfo);
-		} else {
+
+			return makeAtlas(res.value(), spriteSheet, spriteInfo, powerOfTwo);
+		}
+		else {
 			// Try 64x64, then 128x64, 128x128, 256x128, etc
 			if (wide) {
 				wide = false;
 				curSize *= 2;
-			} else {
+			}
+			else {
 				wide = true;
 			}
 		}
 	}
 }
 
-std::unique_ptr<Image> SpriteImporter::makeAtlas(const Vector<BinPackResult>& result, SpriteSheet& spriteSheet, ConfigNode& spriteInfo)
+std::unique_ptr<Image> SpriteImporter::makeAtlas(const Vector<BinPackResult>& result, SpriteSheet& spriteSheet, ConfigNode& spriteInfo, bool powerOfTwo)
 {
 	spriteInfo.ensureType(ConfigNodeType::Sequence);
 	auto& infoSeq = spriteInfo.asSequence();
 	
-	Vector2i size = computeAtlasSize(result);
+	Vector2i size = computeAtlasSize(result, powerOfTwo);
 
 	std::unique_ptr<Image> atlasImage;
 
@@ -402,7 +412,7 @@ std::unique_ptr<Image> SpriteImporter::makeAtlas(const Vector<BinPackResult>& re
 	return atlasImage;
 }
 
-Vector2i SpriteImporter::computeAtlasSize(const Vector<BinPackResult>& results) const
+Vector2i SpriteImporter::computeAtlasSize(const Vector<BinPackResult>& results, bool powerOfTwo) const
 {
 	int w = 0;
 	int h = 0;
@@ -412,7 +422,11 @@ Vector2i SpriteImporter::computeAtlasSize(const Vector<BinPackResult>& results) 
 		h = std::max(h, r.rect.getBottom());
 	}
 
-	return Vector2i(nextPowerOf2(w), nextPowerOf2(h));
+	if (powerOfTwo) {
+		return Vector2i(nextPowerOf2(w), nextPowerOf2(h));
+	} else {
+		return Vector2i(w, h);
+	}
 }
 
 Vector<ImageData> SpriteImporter::splitImagesInGrid(const Vector<ImageData>& images, Vector2i grid)

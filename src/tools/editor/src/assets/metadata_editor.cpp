@@ -89,6 +89,7 @@ void MetadataEditor::makeUI()
 		addBoolField("Palette Top\nLine Only", "paletteTopLineOnly", false);
 		addBoolField("Filtering", "filtering", false);
 		addBoolField("Minimap", "minimap", false);
+		addBoolField("Power of Two", "powerOfTwo", true);
 		addEnumField<TextureFormat>("Format", "format", "rgba");
 		addEnumField<TextureAddressMode>("Address", "addressMode", "clamp");
 		addInt2Field("Tile Split", "tileWidth", "tileHeight", Vector2i());
