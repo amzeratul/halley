@@ -53,7 +53,7 @@ void BaseCanvas::doSetState(State state)
 void BaseCanvas::update(Time t, bool moved)
 {
 	const Vector2f startPos = getScrollPosition();
-	const auto scale = Vector2f(1, 1) / (Vector2f(16, 16) * getZoomLevel());
+	const auto scale = Vector2f(1, 1) / (Vector2f(32, 32) * getZoomLevel());
 
 	bg
 		.setPos(getPosition())

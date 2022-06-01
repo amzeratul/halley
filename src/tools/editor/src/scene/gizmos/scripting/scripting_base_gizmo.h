@@ -62,7 +62,7 @@ namespace Halley {
 		float baseZoom = 1.0f;
 
 		Vector<EntityTarget> entityTargets;
-		EntityId curEntityTarget;
+		std::optional<size_t> curEntityTarget;
 
 		mutable TextRenderer tooltipLabel;
 
@@ -70,7 +70,9 @@ namespace Halley {
 
 		ModifiedCallback modifiedCallback;
 
+		void drawToolTip(Painter& painter, const EntityTarget& entityTarget) const;
 		void drawToolTip(Painter& painter, const ScriptGraphNode& node, const ScriptRenderer::NodeUnderMouseInfo& nodeInfo) const;
+		void drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f pos) const;
 		void drawEntityTargets(Painter& painter) const;
 
 		void openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos, bool force);

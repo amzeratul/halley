@@ -43,12 +43,13 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 	}
 
 	// Find entity target under mouse
-	curEntityTarget = EntityId();
+	curEntityTarget.reset();
 	const auto curZoom = getZoom();
 	if (inputState.mousePos) {
-		for (const auto& entity: entityTargets) {
+		for (size_t i = 0; i < entityTargets.size(); ++i) {
+			const auto& entity = entityTargets[i];
 			if (Circle(entity.pos, 6.0f / curZoom).contains(inputState.mousePos.value())) {
-				curEntityTarget = entity.entityId;
+				curEntityTarget = i;
 			}
 		}
 	}
@@ -176,7 +177,7 @@ void ScriptingBaseGizmo::onEditingConnection(const SceneEditorInputState& inputS
 			}
 		} else {
 			if (srcType.type == ET::TargetPin && srcType.direction == ScriptNodePinDirection::Input) {
-				if (scriptGraph->connectPin(srcNodeId, srcPinId, curEntityTarget)) {
+				if (scriptGraph->connectPin(srcNodeId, srcPinId, curEntityTarget ? entityTargets[*curEntityTarget].entityId : EntityId())) {
 					onModified();
 				}
 			}
@@ -210,14 +211,18 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 	renderer->setCurrentPath(path);
 	renderer->draw(painter, basePos, getZoom());
 
-	if (nodeUnderMouse && !dragging) {
-		drawToolTip(painter, scriptGraph->getNodes().at(nodeUnderMouse->nodeId), nodeUnderMouse.value());
+	if (!dragging) {
+		if (nodeUnderMouse) {
+			drawToolTip(painter, scriptGraph->getNodes().at(nodeUnderMouse->nodeId), nodeUnderMouse.value());
+		} else if (curEntityTarget) {
+			drawToolTip(painter, entityTargets[curEntityTarget.value()]);
+		}
 	}
 }
 
 bool ScriptingBaseGizmo::isHighlighted() const
 {
-	return !!nodeUnderMouse || curEntityTarget.isValid() || nodeEditingConnection;
+	return !!nodeUnderMouse || curEntityTarget || nodeEditingConnection;
 }
 
 bool ScriptingBaseGizmo::destroyNode(uint32_t id)
@@ -283,6 +288,15 @@ ExecutionQueue& ScriptingBaseGizmo::getExecutionQueue()
 	return pendingUITasks;
 }
 
+void ScriptingBaseGizmo::drawToolTip(Painter& painter, const EntityTarget& entityTarget) const
+{
+	ColourStringBuilder builder;
+	builder.append("Entity ");
+	builder.append("\"" + world->getEntity(entityTarget.entityId).getName() + "\"", Colour4f(0.97f, 0.35f, 0.35f));
+	const auto [text, colours] = builder.moveResults();
+	drawToolTip(painter, text, colours, entityTarget.pos + Vector2f(0, 10));
+}
+
 void ScriptingBaseGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, const ScriptRenderer::NodeUnderMouseInfo& nodeInfo) const
 {
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
@@ -291,10 +305,14 @@ void ScriptingBaseGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& no
 	}
 	
 	const auto [text, colours] = nodeType->getDescription(node, world, nodeInfo.element, nodeInfo.elementId, *scriptGraph);
-	const float curZoom = getZoom();
-
-	const float align = 0.5f;
 	const auto elemPos = nodeInfo.element.type == ScriptNodeElementType::Node ? 0.5f * (nodeInfo.nodeArea.getBottomLeft() + nodeInfo.nodeArea.getBottomRight()) : nodeInfo.pinPos;
+	drawToolTip(painter, text, colours, elemPos);
+}
+
+void ScriptingBaseGizmo::drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f elemPos) const
+{
+	const float align = 0.5f;
+	const float curZoom = getZoom();
 	const auto pos = elemPos + Vector2f(0, 10) / curZoom;
 	
 	tooltipLabel
@@ -323,7 +341,7 @@ void ScriptingBaseGizmo::drawEntityTargets(Painter& painter) const
 	for (const auto& e: entityTargets) {
 		const float radius = 6.0f / curZoom;
 		const float width = 1.5f / curZoom;
-		const auto col = e.entityId == curEntityTarget ? Colour4f(1, 1, 1) : Colour4f(0.35f, 1.0f, 0.35f);
+		const auto col = curEntityTarget && entityTargets[*curEntityTarget].entityId == e.entityId ? Colour4f(1, 1, 1) : Colour4f(0.35f, 1.0f, 0.35f);
 		painter.drawCircle(e.pos, radius, width, col);
 	}
 }
