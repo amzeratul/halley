@@ -5,14 +5,14 @@
 #include <halley.hpp>
 #endif
 
-class ScriptComponent final : public Halley::Component {
+class ScriptableComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 8 };
-	static const constexpr char* componentName{ "Script" };
+	static const constexpr char* componentName{ "Scriptable" };
 
 	Halley::ScriptState scriptState{};
 
-	ScriptComponent() {
+	ScriptableComponent() {
 	}
 
 	Halley::ConfigNode serialize(const Halley::EntitySerializationContext& context) const {

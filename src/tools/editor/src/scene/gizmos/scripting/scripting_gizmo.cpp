@@ -1,6 +1,7 @@
 #include "scripting_gizmo.h"
 
 #include <components/script_component.h>
+#include <components/script_graph_component.h>
 #include <components/script_target_component.h>
 
 #include "halley/entity/components/transform_2d_component.h"
@@ -43,7 +44,7 @@ std::shared_ptr<UIWidget> ScriptingGizmo::makeUI()
 
 Vector<String> ScriptingGizmo::getHighlightedComponents() const
 {
-	return { "Script" };
+	return { "CometScript" };
 }
 
 void ScriptingGizmo::refreshEntity()
@@ -66,8 +67,8 @@ void ScriptingGizmo::loadEntityData()
 	const auto* transform = getComponent<Transform2DComponent>();
 	gizmo.setBasePosition(transform ? transform->getGlobalPosition() : Vector2f());
 
-	auto* script = getComponent<ScriptComponent>();
-	gizmo.setGraph(script ? &script->scriptGraph : nullptr);
+	auto* scriptGraph = getComponent<ScriptGraphComponent>();
+	gizmo.setGraph(scriptGraph ? &scriptGraph->scriptGraph : nullptr);
 }
 
 void ScriptingGizmo::saveEntityData()
@@ -78,11 +79,11 @@ void ScriptingGizmo::saveEntityData()
 		scriptGraphData = gizmo.getGraph().toConfigNode(context->getEntitySerializationContext());
 	}
 	
-	auto* data = getComponentData("Script");
+	auto* data = getComponentData("CometScript");
 	if (data) {
-		(*data)["scriptGraph"] = scriptGraphData;
+		(*data)["script"] = scriptGraphData;
 	}
-	markModified("Script", "scriptGraph");
+	markModified("CometScript", "script");
 }
 
 void ScriptingGizmo::compileEntityTargetList(World& world)

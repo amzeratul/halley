@@ -1,18 +1,24 @@
 ---
 
 component:
-  name: Script
-  componentDependencies: [Transform2D]
+  name: Scriptable
   members:
-  - scriptGraph:
-      type: 'Halley::ScriptGraph'
-      canEdit: true
-      canSave: false
-      displayName: Graph
   - scriptState:
       type: 'Halley::ScriptState'
       canEdit: false
       canSave: true
+
+---
+
+component:
+  name: CometScript
+  componentDependencies: [Scriptable, Transform2D]
+  members:
+  - script:
+      type: 'Halley::ScriptGraph'
+      canEdit: true
+      canSave: false
+      displayName: Graph
 
 ---
 

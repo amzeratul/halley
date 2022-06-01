@@ -50,7 +50,7 @@ void ScriptGraphEditor::save()
 	if (modified) {
 		modified = false;
 
-		const auto assetPath = Path("script_graph/" + scriptGraph->getAssetId() + ".hsg");
+		const auto assetPath = Path("comet/" + scriptGraph->getAssetId() + ".comet");
 		const auto strData = scriptGraph->toYAML();
 
 		project.setAssetSaveNotification(false);

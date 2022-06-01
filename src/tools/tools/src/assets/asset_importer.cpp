@@ -119,7 +119,7 @@ ImportAssetType AssetImporter::getImportAssetType(const Path& path, bool skipRed
 		return ImportAssetType::GameProperties;
 	} else if (root == "render_graph") {
 		return ImportAssetType::RenderGraphDefinition;
-	} else if (root == "script_graph") {
+	} else if (root == "comet") {
 		return ImportAssetType::ScriptGraph;
 	} else if (root == "ui") {
 		return ImportAssetType::UIDefinition;
