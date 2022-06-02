@@ -52,6 +52,7 @@ namespace Halley {
 		Vector2f basePos;
 		ScriptGraph* scriptGraph = nullptr;
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeUnderMouse;
+		Vector<ScriptRenderer::NodeUnderMouseInfo> highlightedNodes;
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeEditingConnection;
 		std::optional<Vector2f> nodeConnectionDst;
 		std::optional<Vector2f> lastMousePos;

@@ -36,9 +36,10 @@ namespace Halley {
 		void setGraph(const ScriptGraph* graph);
 		void setState(ScriptState* scriptState);
 		void draw(Painter& painter, Vector2f basePos, float curZoom);
-		
-		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos, bool pinPriority) const;
-		void setHighlight(std::optional<NodeUnderMouseInfo> highlightNode);
+
+		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const;
+		Vector<NodeUnderMouseInfo> getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const;
+		void setHighlight(Vector<NodeUnderMouseInfo> highlightNode);
 		void setCurrentPath(std::optional<ConnectionPath> path);
 
 		static Colour4f getNodeColour(const IScriptNodeType& nodeType);
@@ -71,7 +72,7 @@ namespace Halley {
 		TextRenderer labelText;
 		std::map<String, Sprite> icons;
 
-		std::optional<NodeUnderMouseInfo> highlightNode;
+		Vector<NodeUnderMouseInfo> highlightNodes;
 		std::optional<ConnectionPath> currentPath;
 
 		void drawNodeOutputs(Painter& painter, Vector2f basePos, size_t nodeIdx, const ScriptGraph& graph, float curZoom);

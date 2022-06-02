@@ -3,6 +3,7 @@
 #include "halley/core/graphics/painter.h"
 #include "halley/maths/bezier.h"
 #include "halley/support/logger.h"
+#include "halley/utils/algorithm.h"
 #include "scripting/script_graph.h"
 #include "scripting/script_node_type.h"
 using namespace Halley;
@@ -59,7 +60,8 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 	for (uint32_t i = 0; i < static_cast<uint32_t>(graph->getNodes().size()); ++i) {
 		const auto& node = graph->getNodes()[i];
 
-		const bool highlightThis = highlightNode && highlightNode->nodeId == i;
+		const auto highlightNode = std_ex::find_if(highlightNodes, [&](const auto n) { return n.nodeId == i; });
+		const bool highlightThis = highlightNode != highlightNodes.end();
 		const auto pinType = highlightThis ? highlightNode->element : std::optional<ScriptNodePinType>();
 		const auto pinId = highlightThis ? highlightNode->elementId : 0;
 		
@@ -93,8 +95,8 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t 
 	if (!nodeType) {
 		return;
 	}
-
-	const bool nodeHighlighted = highlightNode && highlightNode->nodeId == nodeIdx;
+	const auto highlightNode = std_ex::find_if(highlightNodes, [&](const auto n) { return n.nodeId == nodeIdx; });
+	const bool nodeHighlighted = highlightNode != highlightNodes.end();
 
 	for (size_t i = 0; i < node.getPins().size(); ++i) {
 		const auto& srcPinType = nodeType->getPin(node, i);
@@ -115,7 +117,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t 
 				}
 				dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom).getCentre();
 				dstPinType = dstNodeType->getPin(node, dstIdx);
-				if (highlightNode && highlightNode->nodeId == pinConnection.dstNode.value()) {
+				if (nodeHighlighted && highlightNode->nodeId == pinConnection.dstNode.value()) {
 					highlighted = true;
 				}
 			} else if (pinConnection.entityIdx && world) {
@@ -365,9 +367,9 @@ const Sprite& ScriptRenderer::getIcon(const IScriptNodeType& nodeType, const Scr
 	return icons[iconName];
 }
 
-std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMouse(Vector2f basePos, float curZoom, std::optional<Vector2f> mousePos, bool pinPriority) const
+std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const
 {
-	if (!graph || !mousePos) {
+	if (!graph) {
 		return {};
 	}
 
@@ -383,7 +385,7 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 		const auto pos = basePos + node.getPosition();
 
 		const auto nodeBounds = Circle(pos, area.getSize().length() / 2);
-		if (!nodeBounds.contains(mousePos.value())) {
+		if (!nodeBounds.contains(mousePos)) {
 			continue;
 		}
 		
@@ -399,9 +401,9 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 		for	(size_t j = 0; j < pins.size(); ++j) {
 			const auto& pinType = pins[j];
 			const auto circle = getNodeElementArea(*nodeType, basePos, node, j, curZoom).expand((pinPriority ? 12.0f : 4.0f) / curZoom);
-			if (circle.contains(mousePos.value())) {
+			if (circle.contains(mousePos)) {
 				foundPin = true;
-				const float distance = (mousePos.value() - circle.getCentre()).length();
+				const float distance = (mousePos - circle.getCentre()).length();
 				if (distance < bestDistance) {
 					bestDistance = distance;
 					bestResult = NodeUnderMouseInfo{ static_cast<uint32_t>(i), pinType, static_cast<uint8_t>(j), curRect, circle.getCentre() };
@@ -410,8 +412,8 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 		}
 		
 		// Check main body
-		if (!foundPin && curRect.contains(mousePos.value())) {
-			const float distance = (mousePos.value() - curRect.getCenter()).length();
+		if (!foundPin && curRect.contains(mousePos)) {
+			const float distance = (mousePos - curRect.getCenter()).length();
 			if (distance < bestDistance) {
 				bestDistance = distance;
 				bestResult = NodeUnderMouseInfo{ static_cast<uint32_t>(i), ScriptNodePinType{ScriptNodeElementType::Node}, 0, curRect, Vector2f() };
@@ -422,9 +424,34 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 	return bestResult;
 }
 
-void ScriptRenderer::setHighlight(std::optional<NodeUnderMouseInfo> node)
+Vector<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const
 {
-	highlightNode = node;
+	if (!graph) {
+		return {};
+	}
+
+	const float effectiveZoom = std::max(nativeZoom, curZoom);
+	const auto nodeSize = getNodeSize(effectiveZoom);
+	const Rect4f area = Rect4f(-nodeSize / 2, nodeSize / 2) / effectiveZoom;
+
+	Vector<NodeUnderMouseInfo> result;
+
+	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
+		const auto& node = graph->getNodes()[i];
+		const auto pos = basePos + node.getPosition();
+		const auto curRect = area + pos;
+
+		if (curRect.overlaps(selBox)) {
+			result.push_back(NodeUnderMouseInfo{ static_cast<uint32_t>(i), ScriptNodePinType{ScriptNodeElementType::Node}, 0, curRect, Vector2f() });
+		}
+	}
+
+	return result;
+}
+
+void ScriptRenderer::setHighlight(Vector<NodeUnderMouseInfo> node)
+{
+	highlightNodes = std::move(node);
 }
 
 void ScriptRenderer::setCurrentPath(std::optional<ConnectionPath> path)

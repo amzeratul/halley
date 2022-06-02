@@ -43,11 +43,12 @@ ISceneEditorGizmoCollection::SelectResult SceneEditorGizmoCollection::update(Tim
 void SceneEditorGizmoCollection::draw(Painter& painter, const ISceneEditor& sceneEditor)
 {
 	selectedBoundsGizmo->draw(painter, sceneEditor);
-	selectionBoxGizmo->draw(painter, sceneEditor);
 	
 	if (activeGizmo) {
 		activeGizmo->draw(painter, sceneEditor);
 	}
+
+	selectionBoxGizmo->draw(painter, sceneEditor);
 }
 
 void SceneEditorGizmoCollection::setSelectedEntities(Vector<EntityRef> entities, Vector<EntityData*> datas)

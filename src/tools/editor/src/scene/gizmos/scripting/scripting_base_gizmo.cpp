@@ -45,7 +45,7 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 	// Find entity target under mouse
 	curEntityTarget.reset();
 	const auto curZoom = getZoom();
-	if (inputState.mousePos) {
+	if (inputState.mousePos && !inputState.selectionBox) {
 		for (size_t i = 0; i < entityTargets.size(); ++i) {
 			const auto& entity = entityTargets[i];
 			if (Circle(entity.pos, 6.0f / curZoom).contains(inputState.mousePos.value())) {
@@ -64,7 +64,19 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 	}
 
 	if (!dragging) {
-		nodeUnderMouse = renderer->getNodeUnderMouse(basePos, getZoom(), inputState.mousePos, !!nodeEditingConnection);
+		if (inputState.mousePos) {
+			nodeUnderMouse = renderer->getNodeUnderMouse(basePos, getZoom(), *inputState.mousePos, !!nodeEditingConnection);
+		} else {
+			nodeUnderMouse.reset();
+		}
+		if (inputState.selectionBox) {
+			highlightedNodes = renderer->getNodesInRect(basePos, getZoom(), *inputState.selectionBox);
+		} else {
+			highlightedNodes.clear();
+			if (nodeUnderMouse) {
+				highlightedNodes.push_back(nodeUnderMouse.value());
+			}
+		}
 	}
 
 	if (startedIdle && nodeUnderMouse && inputState.mousePos) {
@@ -207,7 +219,7 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 
 	drawEntityTargets(painter);
 	
-	renderer->setHighlight(nodeUnderMouse);
+	renderer->setHighlight(highlightedNodes);
 	renderer->setCurrentPath(path);
 	renderer->draw(painter, basePos, getZoom());
 
