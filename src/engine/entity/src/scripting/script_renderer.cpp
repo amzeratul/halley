@@ -22,6 +22,7 @@ ScriptRenderer::ScriptRenderer(Resources& resources, const World* world, const S
 	nodeBg = Sprite().setImage(resources, "halley_ui/ui_float_solid_window.png").setPivot(Vector2f(0.5f, 0.5f));
 	nodeBgOutline = Sprite().setImage(resources, "halley_ui/ui_float_solid_window_outline.png").setPivot(Vector2f(0.5f, 0.5f));
 	variableBg = Sprite().setImage(resources, "halley_ui/script_variable.png").setPivot(Vector2f(0.5f, 0.5f));
+	variableBgOutline = Sprite().setImage(resources, "halley_ui/script_variable_outline.png").setPivot(Vector2f(0.5f, 0.5f));
 	pinSprite = Sprite().setImage(resources, "halley_ui/ui_render_graph_node_pin.png").setPivot(Vector2f(0.5f, 0.5f));
 	labelText
 		.setFont(resources.get<Font>("Ubuntu Bold"))
@@ -220,6 +221,13 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 				.setPosition(pos)
 				.setScale(1.0f / curZoom)
 				.draw(painter);
+
+			if (drawMode.selected) {
+				variableBgOutline.clone()
+					.setPosition(pos)
+					.setScale(1.0f / curZoom)
+					.draw(painter);
+			}
 		} else {
 			nodeBg.clone()
 				.setColour(col)

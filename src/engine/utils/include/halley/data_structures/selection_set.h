@@ -93,6 +93,13 @@ namespace Halley {
             }
         }
 
+        void clickNone(SelectionSetModifier modifier)
+        {
+	        if (modifier == SelectionSetModifier::None) {
+                selected.clear();
+	        }
+        }
+
         void clear()
         {
             selected.clear();

@@ -74,18 +74,24 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 		}
 	}
 
-	if (startedIdle && nodeUnderMouse && inputState.mousePos) {
-		if (nodeUnderMouse->element.type == ScriptNodeElementType::Node) {
-			if (inputState.leftClickPressed) {
-				onNodeClicked(inputState.mousePos.value(), getSelectionModifier(inputState));
-			} else if (inputState.rightClickReleased) {
-				openNodeUI(nodeUnderMouse->nodeId, inputState.rawMousePos.value(), true);
+	if (startedIdle && inputState.mousePos) {
+		if (nodeUnderMouse) {
+			if (nodeUnderMouse->element.type == ScriptNodeElementType::Node) {
+				if (inputState.leftClickPressed) {
+					onNodeClicked(inputState.mousePos.value(), getSelectionModifier(inputState));
+				} else if (inputState.rightClickReleased) {
+					openNodeUI(nodeUnderMouse->nodeId, inputState.rawMousePos.value(), true);
+				}
+			} else {
+				if (inputState.leftClickPressed) {
+					onPinClicked(false, inputState.shiftHeld);
+				} else if (inputState.rightClickPressed) {
+					onPinClicked(true, inputState.shiftHeld);
+				}
 			}
 		} else {
 			if (inputState.leftClickPressed) {
-				onPinClicked(false, inputState.shiftHeld);
-			} else if (inputState.rightClickPressed) {
-				onPinClicked(true, inputState.shiftHeld);
+				selectedNodes.clickNone(getSelectionModifier(inputState));
 			}
 		}
 	}

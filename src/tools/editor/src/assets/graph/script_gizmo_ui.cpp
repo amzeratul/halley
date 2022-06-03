@@ -1,10 +1,11 @@
 #include "script_gizmo_ui.h"
 using namespace Halley;
 
-ScriptGizmoUI::ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, ModifiedCallback modifiedCallback)
+ScriptGizmoUI::ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, std::shared_ptr<InputKeyboard> keyboard, ModifiedCallback modifiedCallback)
 	: UIWidget("scriptGizmoUI", {}, {})
 	, factory(factory)
 	, resources(resources)
+	, keyboard(keyboard)
 	, gizmo(factory, entityEditorFactory, nullptr, scriptNodeTypes)
 	, modifiedCallback(std::move(modifiedCallback))
 {
@@ -26,6 +27,11 @@ void ScriptGizmoUI::load(ScriptGraph& graph)
 
 void ScriptGizmoUI::update(Time time, bool moved)
 {
+	inputState.altHeld = keyboard->isButtonDown(KeyCode::LAlt) || keyboard->isButtonDown(KeyCode::RAlt);
+	inputState.ctrlHeld = keyboard->isButtonDown(KeyCode::LCtrl) || keyboard->isButtonDown(KeyCode::RCtrl);
+	inputState.shiftHeld = keyboard->isButtonDown(KeyCode::LShift) || keyboard->isButtonDown(KeyCode::RShift);
+	inputState.spaceHeld = keyboard->isButtonDown(KeyCode::Space);
+
 	gizmo.setBasePosition(getPosition());
 	if (time > 0.00001) {
 		inputState.rawMousePos = inputState.mousePos;
