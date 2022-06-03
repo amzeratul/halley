@@ -15,6 +15,8 @@ namespace Halley {
 
     	void setZoomEnabled(bool enabled);
 		void setScrollEnabled(bool enabled);
+		void setLeftClickScrollEnabled(bool enabled);
+		void setLeftClickScrollKey(std::optional<KeyCode> key);
 		void setMouseMirror(std::shared_ptr<UIWidget> mouseMirror);
 		
 	protected:
@@ -46,6 +48,8 @@ namespace Halley {
 		int zoomExp = 0;
     	bool zoomEnabled = true;
 		bool scrollEnabled = true;
+		bool leftClickScrollEnabled = true;
+		std::optional<KeyCode> leftClickScrollKey;
 
 		bool dragging = false;
 		std::array<bool, 2> draggingButton;

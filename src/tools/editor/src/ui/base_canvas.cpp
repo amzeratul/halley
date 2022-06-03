@@ -43,6 +43,16 @@ void BaseCanvas::setScrollEnabled(bool enabled)
 	scrollEnabled = enabled;
 }
 
+void BaseCanvas::setLeftClickScrollEnabled(bool enabled)
+{
+	leftClickScrollEnabled = enabled;
+}
+
+void BaseCanvas::setLeftClickScrollKey(std::optional<KeyCode> key)
+{
+	leftClickScrollKey = key;
+}
+
 void BaseCanvas::setMouseMirror(std::shared_ptr<UIWidget> widget)
 {
 	mouseMirror = widget;
@@ -81,8 +91,7 @@ void BaseCanvas::drawAfterChildren(UIPainter& painter) const
 
 void BaseCanvas::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
-	const bool needSpaceForLeftClick = false;
-	const bool canLeftClickScroll = !needSpaceForLeftClick || keyboard && keyboard->isButtonDown(KeyCode::Space);
+	const bool canLeftClickScroll = leftClickScrollEnabled && (!leftClickScrollKey || keyboard && keyboard->isButtonDown(*leftClickScrollKey));
 	if (button == 0 && canLeftClickScroll) {
 		draggingButton[0] = true;
 	}
