@@ -68,12 +68,9 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 			nodeUnderMouse.reset();
 		}
 		if (inputState.selectionBox) {
-			highlightedNodes = renderer->getNodesInRect(basePos, getZoom(), *inputState.selectionBox);
+			selectedNodes.updateOrStartDrag(renderer->getNodesInRect(basePos, getZoom(), *inputState.selectionBox), getSelectionModifier(inputState));
 		} else {
-			highlightedNodes.clear();
-			if (nodeUnderMouse) {
-				highlightedNodes.push_back(nodeUnderMouse.value());
-			}
+			selectedNodes.endDrag();
 		}
 	}
 
@@ -219,7 +216,7 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 
 	drawEntityTargets(painter);
 	
-	renderer->setHighlight(highlightedNodes);
+	renderer->setHighlight(nodeUnderMouse);
 	renderer->setCurrentPath(path);
 	renderer->draw(painter, basePos, getZoom());
 
@@ -236,6 +233,19 @@ void ScriptingBaseGizmo::assignNodeTypes() const
 {
 	if (scriptGraph && scriptNodeTypes) {
 		scriptGraph->assignTypes(*scriptNodeTypes);
+	}
+}
+
+SelectionSetModifier ScriptingBaseGizmo::getSelectionModifier(const SceneEditorInputState& inputState) const
+{
+	if (inputState.ctrlHeld) {
+		return SelectionSetModifier::Toggle;
+	} else if (inputState.shiftHeld) {
+		return SelectionSetModifier::Add;
+	} else if (inputState.altHeld) {
+		return SelectionSetModifier::Remove;
+	} else {
+		return SelectionSetModifier::None;
 	}
 }
 

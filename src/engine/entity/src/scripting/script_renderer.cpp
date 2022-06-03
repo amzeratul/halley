@@ -60,8 +60,7 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 	for (uint32_t i = 0; i < static_cast<uint32_t>(graph->getNodes().size()); ++i) {
 		const auto& node = graph->getNodes()[i];
 
-		const auto highlightNode = std_ex::find_if(highlightNodes, [&](const auto n) { return n.nodeId == i; });
-		const bool highlightThis = highlightNode != highlightNodes.end();
+		const bool highlightThis = highlightNode && highlightNode->nodeId == i;
 		const auto pinType = highlightThis ? highlightNode->element : std::optional<ScriptNodePinType>();
 		const auto pinId = highlightThis ? highlightNode->elementId : 0;
 		
@@ -95,8 +94,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t 
 	if (!nodeType) {
 		return;
 	}
-	const auto highlightNode = std_ex::find_if(highlightNodes, [&](const auto n) { return n.nodeId == nodeIdx; });
-	const bool nodeHighlighted = highlightNode != highlightNodes.end();
+	const bool nodeHighlighted = highlightNode && highlightNode->nodeId == nodeIdx;;
 
 	for (size_t i = 0; i < node.getPins().size(); ++i) {
 		const auto& srcPinType = nodeType->getPin(node, i);
@@ -424,7 +422,7 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 	return bestResult;
 }
 
-Vector<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const
+Vector<uint32_t> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const
 {
 	if (!graph) {
 		return {};
@@ -434,7 +432,7 @@ Vector<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodesInRect(Vector
 	const auto nodeSize = getNodeSize(effectiveZoom);
 	const Rect4f area = Rect4f(-nodeSize / 2, nodeSize / 2) / effectiveZoom;
 
-	Vector<NodeUnderMouseInfo> result;
+	Vector<uint32_t> result;
 
 	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
 		const auto& node = graph->getNodes()[i];
@@ -442,16 +440,16 @@ Vector<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodesInRect(Vector
 		const auto curRect = area + pos;
 
 		if (curRect.overlaps(selBox)) {
-			result.push_back(NodeUnderMouseInfo{ static_cast<uint32_t>(i), ScriptNodePinType{ScriptNodeElementType::Node}, 0, curRect, Vector2f() });
+			result.push_back(static_cast<uint32_t>(i));
 		}
 	}
 
 	return result;
 }
 
-void ScriptRenderer::setHighlight(Vector<NodeUnderMouseInfo> node)
+void ScriptRenderer::setHighlight(std::optional<NodeUnderMouseInfo> node)
 {
-	highlightNodes = std::move(node);
+	highlightNode = std::move(node);
 }
 
 void ScriptRenderer::setCurrentPath(std::optional<ConnectionPath> path)

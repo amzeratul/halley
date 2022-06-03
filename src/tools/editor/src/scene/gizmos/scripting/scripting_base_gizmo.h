@@ -1,4 +1,5 @@
 #pragma once
+#include "halley/data_structures/selection_set.h"
 #include "halley/editor_extensions/scene_editor_gizmo.h"
 
 namespace Halley {
@@ -52,8 +53,9 @@ namespace Halley {
 
 		Vector2f basePos;
 		ScriptGraph* scriptGraph = nullptr;
+
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeUnderMouse;
-		Vector<ScriptRenderer::NodeUnderMouseInfo> highlightedNodes;
+		SelectionSet<uint32_t> selectedNodes;
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeEditingConnection;
 		std::optional<Vector2f> nodeConnectionDst;
 		std::optional<Vector2f> lastMousePos;
@@ -86,5 +88,6 @@ namespace Halley {
 		void onEditingConnection(const SceneEditorInputState& inputState);
 
 		void assignNodeTypes() const;
+		SelectionSetModifier getSelectionModifier(const SceneEditorInputState& inputState) const;
 	};
 }

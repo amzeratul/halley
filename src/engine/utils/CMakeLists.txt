@@ -126,6 +126,7 @@ set(HEADERS
         "include/halley/data_structures/priority_queue.h"
         "include/halley/data_structures/rect_spatial_checker.h"
         "include/halley/data_structures/ring_buffer.h"
+        "include/halley/data_structures/selection_set.h"
         "include/halley/data_structures/tree_map.h"
         "include/halley/data_structures/vector.h"
         "include/halley/data_structures/vector_size32.h"

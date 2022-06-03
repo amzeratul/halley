@@ -108,7 +108,7 @@ void BaseCanvas::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 
 	UIClickable::pressMouse(mousePos, button, keyMods);
 
-	if (mouseMirror) {
+	if (mouseMirror && !dragging) {
 		mouseMirror->pressMouse(mousePos, button, keyMods);
 	}
 }
@@ -120,15 +120,15 @@ void BaseCanvas::releaseMouse(Vector2f mousePos, int button)
 	}
 	const bool shouldDrag = scrollEnabled && (draggingButton[0] || draggingButton[1]);
 
+	UIClickable::releaseMouse(mousePos, button);
+
+	if (mouseMirror && !dragging) {
+		mouseMirror->releaseMouse(mousePos, button);
+	}
+	
 	if (dragging && !shouldDrag) {
 		onMouseOver(mousePos);
 		dragging = false;
-	}
-
-	UIClickable::releaseMouse(mousePos, button);
-
-	if (mouseMirror) {
-		mouseMirror->releaseMouse(mousePos, button);
 	}
 }
 
@@ -145,7 +145,7 @@ void BaseCanvas::onMouseOver(Vector2f mousePos)
 
 	UIClickable::onMouseOver(mousePos);
 
-	if (mouseMirror) {
+	if (mouseMirror && !dragging) {
 		mouseMirror->onMouseOver(mousePos);
 	}
 }

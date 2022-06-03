@@ -23,6 +23,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "data_structures/priority_queue.h"
 #include "data_structures/rect_spatial_checker.h"
 #include "data_structures/ring_buffer.h"
+#include "data_structures/selection_set.h"
 #include "data_structures/tree_map.h"
 #include "data_structures/vector.h"
 

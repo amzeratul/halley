@@ -71,7 +71,9 @@ void ScriptGizmoUI::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 	if (button == 0) {
 		inputState.leftClickPressed = true;
 		inputState.leftClickHeld = true;
-		dragStart = mousePos;
+		if (!isHighlighted()) {
+			dragStart = mousePos;
+		}
 	} else if (button == 1) {
 		inputState.middleClickPressed = true;
 		inputState.middleClickHeld = true;
