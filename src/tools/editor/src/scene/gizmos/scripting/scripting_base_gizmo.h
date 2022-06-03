@@ -82,7 +82,7 @@ namespace Halley {
 		void openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos, bool force);
 		void addNode(const String& type, Vector2f pos);
 
-		void onNodeClicked(Vector2f mousePos);
+		void onNodeClicked(Vector2f mousePos, SelectionSetModifier modifier);
 		void onNodeDragging(const SceneEditorInputState& inputState);
 		void onPinClicked(bool rightClick, bool shiftHeld);
 		void onEditingConnection(const SceneEditorInputState& inputState);

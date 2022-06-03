@@ -77,7 +77,7 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 	if (startedIdle && nodeUnderMouse && inputState.mousePos) {
 		if (nodeUnderMouse->element.type == ScriptNodeElementType::Node) {
 			if (inputState.leftClickPressed) {
-				onNodeClicked(inputState.mousePos.value());
+				onNodeClicked(inputState.mousePos.value(), getSelectionModifier(inputState));
 			} else if (inputState.rightClickReleased) {
 				openNodeUI(nodeUnderMouse->nodeId, inputState.rawMousePos.value(), true);
 			}
@@ -120,11 +120,15 @@ void ScriptingBaseGizmo::onModified()
 	}
 }
 
-void ScriptingBaseGizmo::onNodeClicked(Vector2f mousePos)
+void ScriptingBaseGizmo::onNodeClicked(Vector2f mousePos, SelectionSetModifier modifier)
 {
-	dragging = true;
-	const auto nodePos = scriptGraph->getNodes()[nodeUnderMouse->nodeId].getPosition();
-	startDragPos = nodePos - mousePos;
+	selectedNodes.clickOne(nodeUnderMouse->nodeId, modifier);
+
+	if (modifier == SelectionSetModifier::None) {
+		dragging = true;
+		const auto nodePos = scriptGraph->getNodes()[nodeUnderMouse->nodeId].getPosition();
+		startDragPos = nodePos - mousePos;
+	}
 }
 
 void ScriptingBaseGizmo::onNodeDragging(const SceneEditorInputState& inputState)
@@ -217,6 +221,7 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 	drawEntityTargets(painter);
 	
 	renderer->setHighlight(nodeUnderMouse);
+	renderer->setSelection(selectedNodes.getSelected());
 	renderer->setCurrentPath(path);
 	renderer->draw(painter, basePos, getZoom());
 

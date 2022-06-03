@@ -40,6 +40,7 @@ namespace Halley {
 		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const;
 		Vector<uint32_t> getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const;
 		void setHighlight(std::optional<NodeUnderMouseInfo> highlightNode);
+		void setSelection(Vector<uint32_t> selectedNodes);
 		void setCurrentPath(std::optional<ConnectionPath> path);
 
 		static Colour4f getNodeColour(const IScriptNodeType& nodeType);
@@ -54,6 +55,7 @@ namespace Halley {
 
 		struct NodeDrawMode {
 			NodeDrawModeType type = NodeDrawModeType::Normal;
+			bool selected = false;
 			float time = 0;
 			float activationTime = 0;
 		};
@@ -67,12 +69,14 @@ namespace Halley {
 		ScriptState* state = nullptr;
 
 		Sprite nodeBg;
+		Sprite nodeBgOutline;
 		Sprite variableBg;
 		Sprite pinSprite;
 		TextRenderer labelText;
 		std::map<String, Sprite> icons;
 
 		std::optional<NodeUnderMouseInfo> highlightNode;
+		Vector<uint32_t> selectedNodes;
 		std::optional<ConnectionPath> currentPath;
 
 		void drawNodeOutputs(Painter& painter, Vector2f basePos, size_t nodeIdx, const ScriptGraph& graph, float curZoom);

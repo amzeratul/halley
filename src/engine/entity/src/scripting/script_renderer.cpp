@@ -20,6 +20,7 @@ ScriptRenderer::ScriptRenderer(Resources& resources, const World* world, const S
 	, nativeZoom(nativeZoom)
 {
 	nodeBg = Sprite().setImage(resources, "halley_ui/ui_float_solid_window.png").setPivot(Vector2f(0.5f, 0.5f));
+	nodeBgOutline = Sprite().setImage(resources, "halley_ui/ui_float_solid_window_outline.png").setPivot(Vector2f(0.5f, 0.5f));
 	variableBg = Sprite().setImage(resources, "halley_ui/script_variable.png").setPivot(Vector2f(0.5f, 0.5f));
 	pinSprite = Sprite().setImage(resources, "halley_ui/ui_render_graph_node_pin.png").setPivot(Vector2f(0.5f, 0.5f));
 	labelText
@@ -82,6 +83,7 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 				drawMode.type = NodeDrawModeType::Highlight;
 			}
 		}
+		drawMode.selected = std_ex::contains(selectedNodes, i);
 		
 		drawNode(painter, basePos, node, effectiveZoom, drawMode, pinType, pinId);
 	}
@@ -226,6 +228,15 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 				.setSize(nodeBg.getSize() / curZoom)
 				.setSliceScale(1.0f / curZoom)
 				.draw(painter);
+
+			if (drawMode.selected) {
+				nodeBgOutline.clone()
+					.setPosition(pos)
+					.scaleTo(nodeSize + border)
+					.setSize(nodeBg.getSize() / curZoom)
+					.setSliceScale(1.0f / curZoom)
+					.draw(painter);
+			}
 		}
 
 		const auto label = nodeType->getLabel(node);
@@ -450,6 +461,11 @@ Vector<uint32_t> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZoom,
 void ScriptRenderer::setHighlight(std::optional<NodeUnderMouseInfo> node)
 {
 	highlightNode = std::move(node);
+}
+
+void ScriptRenderer::setSelection(Vector<uint32_t> nodes)
+{
+	selectedNodes = std::move(nodes);
 }
 
 void ScriptRenderer::setCurrentPath(std::optional<ConnectionPath> path)
