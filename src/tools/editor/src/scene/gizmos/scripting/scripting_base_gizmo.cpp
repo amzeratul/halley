@@ -38,9 +38,7 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 	}
 	renderer->setGraph(scriptGraph);
 
-	if (scriptGraph) {
-		scriptGraph->assignTypes(*scriptNodeTypes);
-	}
+	assignNodeTypes();
 
 	// Find entity target under mouse
 	curEntityTarget.reset();
@@ -208,6 +206,8 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 		return;
 	}
 
+	assignNodeTypes();
+
 	std::optional<ScriptRenderer::ConnectionPath> path;
 	if (nodeEditingConnection && nodeConnectionDst) {
 		const auto srcType = nodeEditingConnection->element;
@@ -229,6 +229,13 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 		} else if (curEntityTarget) {
 			drawToolTip(painter, entityTargets[curEntityTarget.value()]);
 		}
+	}
+}
+
+void ScriptingBaseGizmo::assignNodeTypes() const
+{
+	if (scriptGraph && scriptNodeTypes) {
+		scriptGraph->assignTypes(*scriptNodeTypes);
 	}
 }
 
@@ -394,7 +401,7 @@ void ScriptingBaseGizmo::addNode(const String& type, Vector2f pos)
 	const uint32_t id = static_cast<uint32_t>(nodes.size());
 	nodes.emplace_back(type, pos);
 	scriptGraph->finishGraph();
-	scriptGraph->assignTypes(*scriptNodeTypes);
+	assignNodeTypes();
 	onModified();
 	
 	openNodeUI(id, {}, false);

@@ -101,6 +101,8 @@ namespace Halley {
 		ScriptGraph(const ConfigNode& node);
 		ScriptGraph(const ConfigNode& node, const EntitySerializationContext& context);
 
+		void load(const ConfigNode& node, const EntitySerializationContext& context);
+
 		ConfigNode toConfigNode() const;
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 		String toYAML() const;
@@ -148,5 +150,6 @@ namespace Halley {
     public:
 		ConfigNode serialize(ScriptGraph script, const EntitySerializationContext& context);
 		ScriptGraph deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, ScriptGraph& target);
     };
 }

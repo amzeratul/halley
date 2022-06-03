@@ -27,6 +27,7 @@ namespace Halley {
 
 		void update(Time time, Resources& resources, const SceneEditorInputState& inputState);
 		void draw(Painter& painter) const;
+
 		bool isHighlighted() const;
 
 		std::shared_ptr<UIWidget> makeUI();
@@ -83,5 +84,7 @@ namespace Halley {
 		void onNodeDragging(const SceneEditorInputState& inputState);
 		void onPinClicked(bool rightClick, bool shiftHeld);
 		void onEditingConnection(const SceneEditorInputState& inputState);
+
+		void assignNodeTypes() const;
 	};
 }

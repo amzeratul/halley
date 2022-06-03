@@ -182,8 +182,14 @@ ScriptGraph::ScriptGraph(const ConfigNode& node)
 
 ScriptGraph::ScriptGraph(const ConfigNode& node, const EntitySerializationContext& context)
 {
+	load(node, context);
+}
+
+void ScriptGraph::load(const ConfigNode& node, const EntitySerializationContext& context)
+{
 	nodes = node["nodes"].asVector<ScriptGraphNode>();
 	entityIds = ConfigNodeSerializer<Vector<EntityId>>().deserialize(context, node["entityIds"]);
+	lastAssignTypeHash = 0;
 	finishGraph();
 }
 
@@ -420,4 +426,9 @@ ConfigNode ConfigNodeSerializer<ScriptGraph>::serialize(ScriptGraph script, cons
 ScriptGraph ConfigNodeSerializer<ScriptGraph>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 {
 	return ScriptGraph(node, context);
+}
+
+void ConfigNodeSerializer<ScriptGraph>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, ScriptGraph& target)
+{
+	target.load(node, context);
 }
