@@ -32,9 +32,12 @@ namespace Halley {
 		UIFactory& factory;
 		Resources& resources;
 		ScriptingBaseGizmo gizmo;
-		SceneEditorInputState inputState;
 		ModifiedCallback modifiedCallback;
 
+		SceneEditorInputState inputState;
+		std::optional<Vector2f> dragStart;
+
 		void onModified();
+		void updateSelectionBox();
 	};
 }
