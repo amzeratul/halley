@@ -114,6 +114,12 @@ namespace Halley {
 			float t = 0;
 		};
 
+		struct CameraPanAnimation {
+			Vector2f lastVel;
+			bool updatedLastFrame = false;
+			Time panTime = 0;
+		};
+
 		const HalleyAPI* api = nullptr;
 		Resources* resources = nullptr;
 		Resources* editorResources = nullptr;
@@ -122,6 +128,8 @@ namespace Halley {
 
 		Vector<EntityId> cameraEntityIds;
 		std::optional<CameraAnimation> cameraAnimation;
+		CameraPanAnimation cameraPanAnimation;
+		Time lastStepTime = 0;
     	
 		Vector<EntityRef> selectedEntities;
     	std::optional<EntityRef> forceFocusEntity;
@@ -153,6 +161,7 @@ namespace Halley {
 		void updateEntityFocused();
 		void addEntityIdToList(Vector<EntityId>& dst, EntityRef entity);
 
+		void doDragCamera(Vector2f amount);
 		void updateCameraPos(Time t);
     	void saveCameraPos();
 	};

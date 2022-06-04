@@ -58,12 +58,12 @@ void SceneEditor::init(SceneEditorContext& context)
 
 void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState)
 {
+	// Update camera
+	updateCameraPos(t);
+
 	// Update world
 	world->step(TimeLine::FixedUpdate, t);
 	world->step(TimeLine::VariableUpdate, t);
-
-	// Update camera
-	updateCameraPos(t);
 
 	// Update input state
 	inputState.mousePos = inputState.rawMousePos ? camera.screenToWorld(inputState.rawMousePos.value(), inputState.viewRect) : std::optional<Vector2f>();
@@ -107,6 +107,8 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 		highlightDelta = 0;
 	}
 	updateEntityFocused();
+
+	lastStepTime = t;
 }
 
 void SceneEditor::render(RenderContext& rc)
@@ -344,6 +346,14 @@ const Vector<EntityId>& SceneEditor::getCameraIds() const
 
 void SceneEditor::dragCamera(Vector2f amount)
 {
+	doDragCamera(amount);
+	cameraPanAnimation.lastVel = amount / lastStepTime;
+	cameraPanAnimation.panTime = 0;
+	cameraPanAnimation.updatedLastFrame = true;
+}
+
+void SceneEditor::doDragCamera(Vector2f amount)
+{
 	auto camera = getWorld().getEntity(cameraEntityIds.at(0));
 	const float zoom = camera.getComponent<CameraComponent>().zoom;
 	auto& transform = camera.getComponent<Transform2DComponent>();
@@ -392,8 +402,11 @@ void SceneEditor::updateCameraPos(Time t)
 	auto cameraEntity = getWorld().getEntity(cameraEntityIds.at(0));
 	auto& camera = cameraEntity.getComponent<CameraComponent>();
 	auto& transform = cameraEntity.getComponent<Transform2DComponent>();
+	bool changed = false;
 
 	if (cameraAnimation) {
+		cameraPanAnimation.lastVel = Vector2f();
+
 		auto& ca = *cameraAnimation;
 		ca.t = advance(ca.t, 1.0f, static_cast<float>(t) * 4.0f);
 		const float t = std::sin(ca.t * pif() * 0.5f);
@@ -404,11 +417,22 @@ void SceneEditor::updateCameraPos(Time t)
 			camera.zoom = ca.z1;
 			transform.setGlobalPosition(ca.p1);
 			cameraAnimation.reset();
-			saveCameraPos();
+			changed = true;
 		}
 	}
 
-	this->camera.setPosition(transform.getGlobalPosition()).setZoom(camera.zoom);
+	if (!cameraPanAnimation.updatedLastFrame && cameraPanAnimation.lastVel.length() > 10.0f) {
+		auto& vel = cameraPanAnimation.lastVel;
+		transform.setGlobalPosition(transform.getGlobalPosition() + vel * static_cast<float>(t));
+		vel = damp(vel, Vector2f(), 10.0f, static_cast<float>(t));
+	}
+	cameraPanAnimation.updatedLastFrame = false;
+
+	if (changed) {
+		saveCameraPos();
+	}
+
+	this->camera.setPosition(roundPosition(transform.getGlobalPosition())).setZoom(camera.zoom);
 }
 
 void SceneEditor::saveCameraPos()
