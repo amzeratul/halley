@@ -21,6 +21,11 @@ namespace Halley {
 				t * t * p2;
     	}
 
+    	Vector2f getStartPoint() const { return p0; }
+        Vector2f getEndPoint() const { return p2; }
+
+        std::pair<BezierQuadratic, BezierQuadratic> splitAt(float t) const;
+        bool isFlat(float tolerance) const;
     	Vector<Vector2f> toLineSegments() const;
     };
 
@@ -45,7 +50,12 @@ namespace Halley {
 				t * t * t * p3;
     	}
 
+        std::pair<BezierCubic, BezierCubic> splitAt(float t) const;
+        bool isFlat(float tolerance) const;
     	Vector<Vector2f> toLineSegments() const;
+
+        Vector2f getStartPoint() const { return p0; }
+        Vector2f getEndPoint() const { return p3; }
 
     	BezierCubic operator+(Vector2f v) const
     	{
