@@ -479,6 +479,9 @@ void ScriptingBaseGizmo::openNodeUI(std::optional<uint32_t> nodeId, std::optiona
 
 void ScriptingBaseGizmo::addNode()
 {
+	if (uiRoot->hasModalUI()) {
+		return;
+	}
 	auto chooseAssetWindow = std::make_shared<ScriptingChooseNode>(Vector2f(), factory, *resources, scriptNodeTypes, [=] (std::optional<String> result)
 	{
 		if (result) {
