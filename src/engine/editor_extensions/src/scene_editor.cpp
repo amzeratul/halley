@@ -208,7 +208,7 @@ Resources& SceneEditor::getEditorResources() const
 void SceneEditor::drawOverlay(Painter& painter, Rect4f view)
 {
 	const Vector2f drawPos = view.getBottomLeft() + Vector2f(10, -10);
-	String drawStr = "Zoom: " + toString(camera.getZoom()) + "x";
+	String drawStr = "Zoom: " + toString(camera.getZoom(), 3, '.', false) + "x";
 	Vector<ColourOverride> colours;
 
 	if (mousePos) {

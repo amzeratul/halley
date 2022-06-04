@@ -16,12 +16,15 @@ namespace Halley
 {
 
 	template <typename T, typename std::enable_if<std::is_floating_point<T>::value, int>::type = 0>
-	String toString(T src, int precisionDigits = -1, char decimalSeparator = '.')
+	String toString(T src, int precisionDigits = -1, char decimalSeparator = '.', bool fixed = true)
 	{
 		Expects(precisionDigits >= -1 && precisionDigits <= 20);
 		std::stringstream str;
 		if (precisionDigits != -1) {
-			str << std::fixed << std::setprecision(precisionDigits);
+			if (fixed) {
+				str << std::fixed;
+			}
+			str << std::setprecision(precisionDigits);
 		}
 		str << src;
 
