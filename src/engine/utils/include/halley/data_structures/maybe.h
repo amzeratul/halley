@@ -155,6 +155,11 @@ namespace Halley
 			}
 		}
 
+		void reset()
+		{
+			val = getDefaultValue();
+		}
+
 	private:
 		T val;
 

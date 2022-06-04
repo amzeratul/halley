@@ -240,7 +240,7 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 
 	drawEntityTargets(painter);
 	
-	renderer->setHighlight(nodeUnderMouse);
+	renderer->setHighlight(nodeUnderMouse, curEntityTarget ? scriptGraph->getEntityIdx(entityTargets[*curEntityTarget].entityId) : OptionalLite<uint8_t>());
 	renderer->setSelection(selectedNodes.getSelected());
 	renderer->setCurrentPath(path);
 	renderer->draw(painter, basePos, getZoom());

@@ -367,6 +367,16 @@ EntityId ScriptGraph::getEntityId(OptionalLite<uint8_t> idx) const
 	return entityIds.at(idx.value());
 }
 
+OptionalLite<uint8_t> ScriptGraph::getEntityIdx(EntityId id) const
+{
+	const auto iter = std_ex::find(entityIds, id);
+	if (iter == entityIds.end()) {
+		return {};
+	} else {
+		return static_cast<uint8_t>(iter - entityIds.begin());
+	}
+}
+
 uint8_t ScriptGraph::addEntityId(EntityId id)
 {
 	// Look for existing

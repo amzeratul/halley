@@ -134,6 +134,7 @@ namespace Halley {
 		void finishGraph();
 
 		EntityId getEntityId(OptionalLite<uint8_t> idx) const;
+		OptionalLite<uint8_t> getEntityIdx(EntityId id) const;
 		uint8_t addEntityId(EntityId id);
 		void removeEntityId(EntityId id);
 

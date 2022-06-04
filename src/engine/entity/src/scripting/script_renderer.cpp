@@ -97,7 +97,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t 
 	if (!nodeType) {
 		return;
 	}
-	const bool nodeHighlighted = highlightNode && highlightNode->nodeId == nodeIdx;;
+	const bool nodeHighlighted = highlightNode && highlightNode->nodeId == nodeIdx;
 
 	for (size_t i = 0; i < node.getPins().size(); ++i) {
 		const auto& srcPinType = nodeType->getPin(node, i);
@@ -118,7 +118,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t 
 				}
 				dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom).getCentre();
 				dstPinType = dstNodeType->getPin(node, dstIdx);
-				if (nodeHighlighted && highlightNode->nodeId == pinConnection.dstNode.value()) {
+				if (highlightNode && highlightNode->nodeId == pinConnection.dstNode.value()) {
 					highlighted = true;
 				}
 			} else if (pinConnection.entityIdx && world) {
@@ -130,6 +130,10 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t 
 						dstPos = transform->getGlobalPosition();
 						dstPinType = ScriptNodePinType{ ScriptNodeElementType::TargetPin, ScriptNodePinDirection::Output };
 					}
+				}
+
+				if (highlightEntity == pinConnection.entityIdx) {
+					highlighted = true;
 				}
 			}
 			
@@ -466,9 +470,10 @@ Vector<uint32_t> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZoom,
 	return result;
 }
 
-void ScriptRenderer::setHighlight(std::optional<NodeUnderMouseInfo> node)
+void ScriptRenderer::setHighlight(std::optional<NodeUnderMouseInfo> node,OptionalLite<uint8_t> entity)
 {
 	highlightNode = std::move(node);
+	highlightEntity = entity;
 }
 
 void ScriptRenderer::setSelection(Vector<uint32_t> nodes)

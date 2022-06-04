@@ -39,7 +39,7 @@ namespace Halley {
 
 		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const;
 		Vector<uint32_t> getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const;
-		void setHighlight(std::optional<NodeUnderMouseInfo> highlightNode);
+		void setHighlight(std::optional<NodeUnderMouseInfo> highlightNode, OptionalLite<uint8_t> highlightEntity);
 		void setSelection(Vector<uint32_t> selectedNodes);
 		void setCurrentPath(std::optional<ConnectionPath> path);
 
@@ -77,6 +77,7 @@ namespace Halley {
 		std::map<String, Sprite> icons;
 
 		std::optional<NodeUnderMouseInfo> highlightNode;
+		OptionalLite<uint8_t> highlightEntity;
 		Vector<uint32_t> selectedNodes;
 		std::optional<ConnectionPath> currentPath;
 
