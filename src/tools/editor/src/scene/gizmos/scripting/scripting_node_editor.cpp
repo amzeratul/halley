@@ -2,13 +2,14 @@
 #include "scripting_gizmo.h"
 using namespace Halley;
 
-ScriptingNodeEditor::ScriptingNodeEditor(ScriptingBaseGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, uint32_t nodeId, const IScriptNodeType& nodeType, std::optional<Vector2f> pos)
+ScriptingNodeEditor::ScriptingNodeEditor(ScriptingBaseGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, uint32_t nodeId, const IScriptNodeType& nodeType, std::optional<Vector2f> pos, bool isCreatingNode)
 	: UIWidget("scripting_node_editor", {}, UISizer())
 	, gizmo(gizmo)
 	, factory(factory)
 	, entityEditorFactory(entityEditorFactory)
 	, nodeId(nodeId)
 	, nodeType(nodeType)
+	, isCreatingNode(isCreatingNode)
 	, curSettings(gizmo.getNode(nodeId).getSettings())
 {
 	if (pos) {
@@ -30,6 +31,7 @@ void ScriptingNodeEditor::onMakeUI()
 
 	setHandle(UIEventType::ButtonClicked, "cancel", [=] (const UIEvent& event)
 	{
+		cancelChanges();
 		destroy();
 	});
 
@@ -45,7 +47,9 @@ void ScriptingNodeEditor::onMakeUI()
 		destroy();
 	});
 
-	getWidget("delete")->setEnabled(nodeType.canDelete());
+	const auto deleteButton = getWidget("delete");
+	deleteButton->setActive(!isCreatingNode);
+	deleteButton->setEnabled(nodeType.canDelete());
 
 	makeFields(getWidget("nodeFields"));
 }
@@ -65,6 +69,7 @@ void ScriptingNodeEditor::onRemovedFromRoot(UIRoot& root)
 bool ScriptingNodeEditor::onKeyPress(KeyboardKeyPress key)
 {
 	if (key.is(KeyCode::Esc)) {
+		cancelChanges();
 		destroy();
 		return true;
 	}
@@ -88,7 +93,15 @@ void ScriptingNodeEditor::applyChanges()
 		gizmo->getNode(nodeId).getSettings() = std::move(curSettings);
 		gizmo->getGraph().validateNodePins(nodeId);
 		gizmo->onModified();
+		gizmo->onNodeAdded(nodeId);
 	});
+}
+
+void ScriptingNodeEditor::cancelChanges()
+{
+	if (isCreatingNode) {
+		deleteNode();
+	}
 }
 
 void ScriptingNodeEditor::deleteNode()

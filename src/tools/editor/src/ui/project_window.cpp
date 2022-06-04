@@ -36,6 +36,7 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 
 	entityEditorFactory = std::make_shared<EntityEditorFactory>(factory);
 	entityEditorFactory->addStandardFieldFactories();
+	entityEditorFactory->setGameResources(project.getGameResources());
 
 	project.withDLL([&] (ProjectDLL& dll)
 	{

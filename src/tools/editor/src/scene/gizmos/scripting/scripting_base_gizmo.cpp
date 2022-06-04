@@ -92,7 +92,7 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 				if (inputState.leftClickPressed) {
 					onNodeClicked(inputState.mousePos.value(), getSelectionModifier(inputState));
 				} else if (inputState.rightClickReleased) {
-					openNodeUI(nodeUnderMouse->nodeId, inputState.rawMousePos.value(), true);
+					openNodeUI(nodeUnderMouse->nodeId, inputState.rawMousePos.value(), false);
 				}
 			} else {
 				if (inputState.leftClickPressed) {
@@ -125,6 +125,11 @@ void ScriptingBaseGizmo::setModifiedCallback(ModifiedCallback callback)
 void ScriptingBaseGizmo::setEntityTargets(Vector<EntityTarget> targets)
 {
 	entityTargets = std::move(targets);
+}
+
+void ScriptingBaseGizmo::onNodeAdded(uint32_t id)
+{
+	selectedNodes.directSelect(id, SelectionSetModifier::None);
 }
 
 void ScriptingBaseGizmo::onModified()
@@ -441,12 +446,12 @@ std::shared_ptr<UIWidget> ScriptingBaseGizmo::makeUI()
 	return std::make_shared<ScriptingGizmoToolbar>(factory, *this);
 }
 
-void ScriptingBaseGizmo::openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos, bool force)
+void ScriptingBaseGizmo::openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos, bool isCreatingNode)
 {
-	ScriptGraphNode& node = getNode(nodeId);
+	const ScriptGraphNode& node = getNode(nodeId);
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
-	if (nodeType && (force || !nodeType->getSettingTypes().empty())) {
-		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, entityEditorFactory, nodeId, *nodeType, pos));
+	if (nodeType && (!isCreatingNode || !nodeType->getSettingTypes().empty())) {
+		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, entityEditorFactory, nodeId, *nodeType, pos, isCreatingNode));
 	}
 }
 
@@ -475,5 +480,5 @@ void ScriptingBaseGizmo::addNode(const String& type, Vector2f pos)
 	assignNodeTypes();
 	onModified();
 	
-	openNodeUI(id, {}, false);
+	openNodeUI(id, {}, true);
 }

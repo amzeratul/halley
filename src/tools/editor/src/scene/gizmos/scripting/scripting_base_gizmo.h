@@ -46,6 +46,8 @@ namespace Halley {
 		void setModifiedCallback(ModifiedCallback callback);
 		void setEntityTargets(Vector<EntityTarget> entityTargets);
 
+		void onNodeAdded(uint32_t id);
+
 	private:
 		struct Dragging {
 			Vector<uint32_t> nodeIds;
@@ -90,7 +92,7 @@ namespace Halley {
 		void drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f pos) const;
 		void drawEntityTargets(Painter& painter) const;
 
-		void openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos, bool force);
+		void openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos, bool isCreatingNode);
 		void addNode(const String& type, Vector2f pos);
 
 		void onNodeClicked(Vector2f mousePos, SelectionSetModifier modifier);
