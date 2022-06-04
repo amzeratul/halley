@@ -106,6 +106,14 @@ namespace Halley {
        	virtual float getSpriteDepth(EntityRef& e, Rect4f area) const;
 
 	private:
+		struct CameraAnimation {
+			Vector2f p0;
+			Vector2f p1;
+			float z0;
+			float z1;
+			float t = 0;
+		};
+
 		const HalleyAPI* api = nullptr;
 		Resources* resources = nullptr;
 		Resources* editorResources = nullptr;
@@ -113,6 +121,7 @@ namespace Halley {
     	std::unique_ptr<World> world;
 
 		Vector<EntityId> cameraEntityIds;
+		std::optional<CameraAnimation> cameraAnimation;
     	
 		Vector<EntityRef> selectedEntities;
     	std::optional<EntityRef> forceFocusEntity;
@@ -144,6 +153,7 @@ namespace Halley {
 		void updateEntityFocused();
 		void addEntityIdToList(Vector<EntityId>& dst, EntityRef entity);
 
+		void updateCameraPos(Time t);
     	void saveCameraPos();
 	};
 }

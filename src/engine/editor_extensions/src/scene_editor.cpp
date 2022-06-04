@@ -63,10 +63,7 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	world->step(TimeLine::VariableUpdate, t);
 
 	// Update camera
-	auto cameraEntity = world->getEntity(cameraEntityIds.at(0));
-	auto& cameraComponent = cameraEntity.getComponent<CameraComponent>();
-	auto& transformComponent = cameraEntity.getComponent<Transform2DComponent>();
-	camera.setPosition(transformComponent.getGlobalPosition()).setZoom(cameraComponent.zoom);
+	updateCameraPos(t);
 
 	// Update input state
 	inputState.mousePos = inputState.rawMousePos ? camera.screenToWorld(inputState.rawMousePos.value(), inputState.viewRect) : std::optional<Vector2f>();
@@ -380,12 +377,38 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 
 	// Zoom
 	const int curLevel = lroundf(std::log2f(clamp(camera.zoom, 1.0f / 32.0f, 32.0f)));
-	camera.zoom = std::pow(2.0f, float(clamp(curLevel + amount, -5, 5)));
+	const float targetZoom = std::pow(2.0f, float(clamp(curLevel + amount, -5, 5)));
 
 	// Translate to keep fixed point
-	const Vector2f translate = cursorPosRelToCamera * (1.0f / prevZoom - 1.0f / camera.zoom);
-	transform.setGlobalPosition(roundPosition(transform.getGlobalPosition() + translate, camera.zoom));
-	saveCameraPos();
+	const Vector2f prevPos = transform.getGlobalPosition();
+	const Vector2f translate = cursorPosRelToCamera * (1.0f / prevZoom - 1.0f / targetZoom);
+	const Vector2f targetPos = roundPosition(prevPos + translate, targetZoom);
+
+	cameraAnimation = CameraAnimation{ prevPos, targetPos, prevZoom, targetZoom, 0 };
+}
+
+void SceneEditor::updateCameraPos(Time t)
+{
+	auto cameraEntity = getWorld().getEntity(cameraEntityIds.at(0));
+	auto& camera = cameraEntity.getComponent<CameraComponent>();
+	auto& transform = cameraEntity.getComponent<Transform2DComponent>();
+
+	if (cameraAnimation) {
+		auto& ca = *cameraAnimation;
+		ca.t = advance(ca.t, 1.0f, static_cast<float>(t) * 4.0f);
+		const float t = std::sin(ca.t * pif() * 0.5f);
+		camera.zoom = 1.0f / lerp(1.0f / ca.z0, 1.0f / ca.z1, t);
+		transform.setGlobalPosition(lerp(ca.p0, ca.p1, t));
+
+		if (ca.t >= 0.999f) {
+			camera.zoom = ca.z1;
+			transform.setGlobalPosition(ca.p1);
+			cameraAnimation.reset();
+			saveCameraPos();
+		}
+	}
+
+	this->camera.setPosition(transform.getGlobalPosition()).setZoom(camera.zoom);
 }
 
 void SceneEditor::saveCameraPos()
