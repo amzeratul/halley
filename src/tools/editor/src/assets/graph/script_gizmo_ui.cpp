@@ -18,6 +18,12 @@ ScriptGizmoUI::ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEn
 void ScriptGizmoUI::onAddedToRoot(UIRoot& root)
 {
 	gizmo.setUIRoot(root);
+	root.registerKeyPressListener(shared_from_this());
+}
+
+void ScriptGizmoUI::onRemovedFromRoot(UIRoot& root)
+{
+	root.removeKeyPressListener(*this);
 }
 
 void ScriptGizmoUI::load(ScriptGraph& graph)
@@ -121,6 +127,11 @@ bool ScriptGizmoUI::ignoreClip() const
 
 bool ScriptGizmoUI::onKeyPress(KeyboardKeyPress key)
 {
+	if (key.is(KeyCode::A, KeyMods::Ctrl)) {
+		gizmo.addNode();
+		return true;
+	}
+
 	if (key.is(KeyCode::Delete)) {
 		gizmo.deleteSelection();
 		return true;

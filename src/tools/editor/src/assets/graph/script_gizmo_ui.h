@@ -11,6 +11,7 @@ namespace Halley {
 		ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, std::shared_ptr<InputKeyboard> keyboard, ModifiedCallback modifiedCallback);
 
 		void onAddedToRoot(UIRoot& root) override;
+		void onRemovedFromRoot(UIRoot& root) override;
 
 		void load(ScriptGraph& graph);
 
