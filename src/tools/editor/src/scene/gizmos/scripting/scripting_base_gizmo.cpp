@@ -74,6 +74,18 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 		}
 	}
 
+	if (inputState.leftClickPressed && inputState.mousePos) {
+		const auto modifier = getSelectionModifier(inputState);
+		if (nodeUnderMouse && nodeUnderMouse->element.type == ScriptNodeElementType::Node) {
+			selectedNodes.mouseButtonPressed(nodeUnderMouse->nodeId, modifier, *inputState.mousePos);
+		} else {
+			selectedNodes.mouseButtonPressed({}, modifier, *inputState.mousePos);
+		}
+	}
+	if (inputState.leftClickReleased && inputState.mousePos) {
+		selectedNodes.mouseButtonReleased(*inputState.mousePos);
+	}
+
 	if (startedIdle && inputState.mousePos) {
 		if (nodeUnderMouse) {
 			if (nodeUnderMouse->element.type == ScriptNodeElementType::Node) {
@@ -90,18 +102,6 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 				}
 			}
 		}
-	}
-
-	if (inputState.leftClickPressed && inputState.mousePos) {
-		const auto modifier = getSelectionModifier(inputState);
-		if (nodeUnderMouse && nodeUnderMouse->element.type == ScriptNodeElementType::Node) {
-			selectedNodes.mouseButtonPressed(nodeUnderMouse->nodeId, modifier, *inputState.mousePos);
-		} else {
-			selectedNodes.mouseButtonPressed({}, modifier, *inputState.mousePos);
-		}
-	}
-	if (inputState.leftClickReleased && inputState.mousePos) {
-		selectedNodes.mouseButtonReleased(*inputState.mousePos);
 	}
 	
 	lastMousePos = inputState.mousePos;
@@ -137,20 +137,28 @@ void ScriptingBaseGizmo::onModified()
 void ScriptingBaseGizmo::onNodeClicked(Vector2f mousePos, SelectionSetModifier modifier)
 {
 	if (modifier == SelectionSetModifier::None) {
-		dragging = true;
-		const auto nodePos = scriptGraph->getNodes()[nodeUnderMouse->nodeId].getPosition();
-		startDragPos = nodePos - mousePos;
+		const auto& nodes = scriptGraph->getNodes();
+		Vector<uint32_t> nodeIds = selectedNodes.getSelected();
+		Vector<Vector2f> startPos;
+		startPos.reserve(nodeIds.size());
+		for (auto& node: nodeIds) {
+			startPos.push_back(nodes[node].getPosition());
+		}
+		dragging = Dragging { nodeIds, startPos, mousePos };
 	}
 }
 
 void ScriptingBaseGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 {
 	if (inputState.mousePos) {
-		const auto newPos = startDragPos + inputState.mousePos.value();
-		scriptGraph->getNodes()[nodeUnderMouse->nodeId].setPosition(newPos);
+		const Vector2f delta = inputState.mousePos.value() - dragging->startMousePos;
+		for (size_t i = 0; i < dragging->nodeIds.size(); ++i) {
+			auto& node = scriptGraph->getNodes()[dragging->nodeIds[i]];
+			node.setPosition(dragging->startPos[i] + delta);
+		}
 	}
 	if (!inputState.leftClickHeld) {
-		dragging = false;
+		dragging.reset();
 		onModified();
 	}
 }
@@ -316,7 +324,7 @@ ScriptGraph* ScriptingBaseGizmo::getGraphPtr()
 void ScriptingBaseGizmo::setGraph(ScriptGraph* graph)
 {
 	scriptGraph = graph;
-	dragging = false;
+	dragging.reset();
 }
 
 ScriptGraphNode& ScriptingBaseGizmo::getNode(uint32_t id)

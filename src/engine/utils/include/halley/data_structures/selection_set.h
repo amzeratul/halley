@@ -99,7 +99,11 @@ namespace Halley {
 
         void mouseButtonPressed(std::optional<T> element, SelectionSetModifier modifier, Vector2f mousePos)
         {
-            pendingPress = PendingPress{ element, modifier, mousePos };
+            if (modifier == SelectionSetModifier::None && (!element || isSelected(*element))) {
+                pendingPress = PendingPress{ element, modifier, mousePos };
+            } else {
+                directSelect(element, modifier);
+            }
         }
 
         void mouseButtonReleased(Vector2f mousePos)

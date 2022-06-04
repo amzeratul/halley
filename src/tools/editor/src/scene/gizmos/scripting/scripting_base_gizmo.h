@@ -42,6 +42,12 @@ namespace Halley {
 		void setEntityTargets(Vector<EntityTarget> entityTargets);
 
 	private:
+		struct Dragging {
+			Vector<uint32_t> nodeIds;
+			Vector<Vector2f> startPos;
+			Vector2f startMousePos;
+		};
+
 		UIFactory& factory;
 		const IEntityEditorFactory& entityEditorFactory;
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
@@ -60,8 +66,8 @@ namespace Halley {
 		std::optional<Vector2f> nodeConnectionDst;
 		std::optional<Vector2f> lastMousePos;
 
-		bool dragging = false;
-		Vector2f startDragPos;
+		std::optional<Dragging> dragging;
+
 		float zoom = 1.0f;
 		float baseZoom = 1.0f;
 
