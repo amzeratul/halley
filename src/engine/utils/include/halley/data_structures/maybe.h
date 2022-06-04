@@ -28,6 +28,10 @@ namespace Halley
 			: val(getDefaultValue())
 		{}
 
+		constexpr OptionalLite(std::nullopt_t)
+			: val(getDefaultValue())
+		{}
+
 		[[maybe_unused]] constexpr OptionalLite& operator=(T v)
 		{
 			val = v;

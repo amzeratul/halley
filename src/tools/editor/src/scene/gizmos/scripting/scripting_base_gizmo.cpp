@@ -130,6 +130,7 @@ void ScriptingBaseGizmo::setEntityTargets(Vector<EntityTarget> targets)
 void ScriptingBaseGizmo::onNodeAdded(uint32_t id)
 {
 	selectedNodes.directSelect(id, SelectionSetModifier::None);
+	dragging = Dragging{ { id }, { scriptGraph->getNodes()[id].getPosition() }, {}, true };
 }
 
 void ScriptingBaseGizmo::onModified()
@@ -149,20 +150,27 @@ void ScriptingBaseGizmo::onNodeClicked(Vector2f mousePos, SelectionSetModifier m
 		for (auto& node: nodeIds) {
 			startPos.push_back(nodes[node].getPosition());
 		}
-		dragging = Dragging { nodeIds, startPos, mousePos };
+		dragging = Dragging { nodeIds, startPos, mousePos, false };
 	}
 }
 
 void ScriptingBaseGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 {
 	if (inputState.mousePos) {
-		const Vector2f delta = inputState.mousePos.value() - dragging->startMousePos;
-		for (size_t i = 0; i < dragging->nodeIds.size(); ++i) {
-			auto& node = scriptGraph->getNodes()[dragging->nodeIds[i]];
-			node.setPosition(dragging->startPos[i] + delta);
+		if (dragging->startMousePos) {
+			const Vector2f delta = inputState.mousePos.value() - *dragging->startMousePos;
+			for (size_t i = 0; i < dragging->nodeIds.size(); ++i) {
+				auto& node = scriptGraph->getNodes()[dragging->nodeIds[i]];
+				node.setPosition(dragging->startPos[i] + delta);
+			}
+		} else {
+			for (size_t i = 0; i < dragging->nodeIds.size(); ++i) {
+				auto& node = scriptGraph->getNodes()[dragging->nodeIds[i]];
+				node.setPosition(*inputState.mousePos - basePos);
+			}
 		}
 	}
-	if (!inputState.leftClickHeld) {
+	if ((dragging->sticky && inputState.leftClickPressed) || (!dragging->sticky && !inputState.leftClickHeld)) {
 		dragging.reset();
 		onModified();
 	}
@@ -245,7 +253,7 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 
 	drawEntityTargets(painter);
 	
-	renderer->setHighlight(nodeUnderMouse, curEntityTarget ? scriptGraph->getEntityIdx(entityTargets[*curEntityTarget].entityId) : OptionalLite<uint8_t>());
+	renderer->setHighlight(nodeUnderMouse, curEntityTarget ? scriptGraph->getEntityIdx(entityTargets[*curEntityTarget].entityId) : std::nullopt);
 	renderer->setSelection(selectedNodes.getSelected());
 	renderer->setCurrentPath(path);
 	renderer->draw(painter, basePos, getZoom());
@@ -452,6 +460,8 @@ void ScriptingBaseGizmo::openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
 	if (nodeType && (!isCreatingNode || !nodeType->getSettingTypes().empty())) {
 		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, entityEditorFactory, nodeId, *nodeType, pos, isCreatingNode));
+	} else if (isCreatingNode) {
+		onNodeAdded(nodeId);
 	}
 }
 

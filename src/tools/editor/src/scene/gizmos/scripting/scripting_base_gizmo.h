@@ -52,7 +52,8 @@ namespace Halley {
 		struct Dragging {
 			Vector<uint32_t> nodeIds;
 			Vector<Vector2f> startPos;
-			Vector2f startMousePos;
+			std::optional<Vector2f> startMousePos;
+			bool sticky;
 		};
 
 		UIFactory& factory;
