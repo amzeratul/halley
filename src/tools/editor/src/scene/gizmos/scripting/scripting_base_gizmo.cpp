@@ -7,8 +7,6 @@
 
 using namespace Halley;
 
-PRAGMA_DEOPTIMIZE
-
 ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom)
 	: factory(factory)
 	, entityEditorFactory(entityEditorFactory)
@@ -391,12 +389,8 @@ void ScriptingBaseGizmo::paste(const ConfigNode& node)
 
 bool ScriptingBaseGizmo::deleteSelection()
 {
-	bool changed = false;
-	for (auto& e: selectedNodes.getSelected()) {
-		changed = destroyNode(e) || changed;
-	}
+	const bool changed = destroyNodes(selectedNodes.getSelected());
 	selectedNodes.clear();
-
 	return changed;
 }
 
