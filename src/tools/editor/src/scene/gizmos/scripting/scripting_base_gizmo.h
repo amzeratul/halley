@@ -16,6 +16,7 @@ namespace Halley {
 		void setUIRoot(UIRoot& root);
 
 		void addNode();
+		uint32_t addNode(const String& type, Vector2f pos, ConfigNode settings);
 		bool destroyNode(uint32_t id);
 		bool destroyNodes(Vector<uint32_t> ids);
 		ScriptGraphNode& getNode(uint32_t id);
@@ -45,8 +46,6 @@ namespace Halley {
 		void onModified();
 		void setModifiedCallback(ModifiedCallback callback);
 		void setEntityTargets(Vector<EntityTarget> entityTargets);
-
-		void onNodeAdded(uint32_t id);
 
 	private:
 		struct Dragging {
@@ -93,8 +92,7 @@ namespace Halley {
 		void drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f pos) const;
 		void drawEntityTargets(Painter& painter) const;
 
-		void openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos, bool isCreatingNode);
-		void addNode(const String& type, Vector2f pos);
+		void openNodeUI(std::optional<uint32_t> nodeId, std::optional<Vector2f> pos, const String& nodeType);
 
 		void onNodeClicked(Vector2f mousePos, SelectionSetModifier modifier);
 		void onNodeDragging(const SceneEditorInputState& inputState);

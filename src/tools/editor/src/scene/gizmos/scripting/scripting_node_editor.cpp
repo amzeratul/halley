@@ -2,15 +2,14 @@
 #include "scripting_gizmo.h"
 using namespace Halley;
 
-ScriptingNodeEditor::ScriptingNodeEditor(ScriptingBaseGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, uint32_t nodeId, const IScriptNodeType& nodeType, std::optional<Vector2f> pos, bool isCreatingNode)
+ScriptingNodeEditor::ScriptingNodeEditor(ScriptingBaseGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, std::optional<uint32_t> nodeId, const IScriptNodeType& nodeType, std::optional<Vector2f> pos)
 	: UIWidget("scripting_node_editor", {}, UISizer())
 	, gizmo(gizmo)
 	, factory(factory)
 	, entityEditorFactory(entityEditorFactory)
 	, nodeId(nodeId)
 	, nodeType(nodeType)
-	, isCreatingNode(isCreatingNode)
-	, curSettings(gizmo.getNode(nodeId).getSettings())
+	, curSettings(nodeId ? ConfigNode(gizmo.getNode(*nodeId).getSettings()) : ConfigNode::MapType())
 {
 	if (pos) {
 		setAnchor(UIAnchor(Vector2f(), Vector2f(0.0f, 0.5f), pos.value()));
@@ -48,7 +47,7 @@ void ScriptingNodeEditor::onMakeUI()
 	});
 
 	const auto deleteButton = getWidget("delete");
-	deleteButton->setActive(!isCreatingNode);
+	deleteButton->setActive(!!nodeId);
 	deleteButton->setEnabled(nodeType.canDelete());
 
 	makeFields(getWidget("nodeFields"));
@@ -86,28 +85,27 @@ bool ScriptingNodeEditor::onKeyPress(KeyboardKeyPress key)
 void ScriptingNodeEditor::applyChanges()
 {
 	auto* gizmo = &this->gizmo;
-	const auto nodeId = this->nodeId;
-	auto curSettings = ConfigNode(this->curSettings);
+	const auto type = nodeType.getId();
 	
-	Concurrent::execute(gizmo->getExecutionQueue(), [gizmo, nodeId, curSettings = std::move(curSettings)] () mutable {
-		gizmo->getNode(nodeId).getSettings() = std::move(curSettings);
-		gizmo->getGraph().validateNodePins(nodeId);
+	Concurrent::execute(gizmo->getExecutionQueue(), [type, gizmo, nodeId = this->nodeId, curSettings = ConfigNode(curSettings)] () mutable {
+		if (!nodeId) {
+			nodeId = gizmo->addNode(type, Vector2f(), std::move(curSettings));
+		} else {
+			gizmo->getNode(*nodeId).getSettings() = std::move(curSettings);
+		}
+		gizmo->getGraph().validateNodePins(*nodeId);
 		gizmo->onModified();
-		gizmo->onNodeAdded(nodeId);
 	});
 }
 
 void ScriptingNodeEditor::cancelChanges()
 {
-	if (isCreatingNode) {
-		deleteNode();
-	}
 }
 
 void ScriptingNodeEditor::deleteNode()
 {
 	auto* gizmo = &this->gizmo;
-	const auto nodeId = this->nodeId;
+	const auto nodeId = *this->nodeId;
 
 	Concurrent::execute(gizmo->getExecutionQueue(), [gizmo, nodeId] () {
 		gizmo->destroyNode(nodeId);

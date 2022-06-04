@@ -7,6 +7,8 @@
 
 using namespace Halley;
 
+PRAGMA_DEOPTIMIZE
+
 ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom)
 	: factory(factory)
 	, entityEditorFactory(entityEditorFactory)
@@ -92,7 +94,7 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 				if (inputState.leftClickPressed) {
 					onNodeClicked(inputState.mousePos.value(), getSelectionModifier(inputState));
 				} else if (inputState.rightClickReleased) {
-					openNodeUI(nodeUnderMouse->nodeId, inputState.rawMousePos.value(), false);
+					openNodeUI(nodeUnderMouse->nodeId, inputState.rawMousePos.value(), getNode(nodeUnderMouse->nodeId).getType());
 				}
 			} else {
 				if (inputState.leftClickPressed) {
@@ -125,12 +127,6 @@ void ScriptingBaseGizmo::setModifiedCallback(ModifiedCallback callback)
 void ScriptingBaseGizmo::setEntityTargets(Vector<EntityTarget> targets)
 {
 	entityTargets = std::move(targets);
-}
-
-void ScriptingBaseGizmo::onNodeAdded(uint32_t id)
-{
-	selectedNodes.directSelect(id, SelectionSetModifier::None);
-	dragging = Dragging{ { id }, { scriptGraph->getNodes()[id].getPosition() }, {}, true };
 }
 
 void ScriptingBaseGizmo::onModified()
@@ -454,41 +450,42 @@ std::shared_ptr<UIWidget> ScriptingBaseGizmo::makeUI()
 	return std::make_shared<ScriptingGizmoToolbar>(factory, *this);
 }
 
-void ScriptingBaseGizmo::openNodeUI(uint32_t nodeId, std::optional<Vector2f> pos, bool isCreatingNode)
+void ScriptingBaseGizmo::openNodeUI(std::optional<uint32_t> nodeId, std::optional<Vector2f> pos, const String& type)
 {
-	const ScriptGraphNode& node = getNode(nodeId);
-	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
-	if (nodeType && (!isCreatingNode || !nodeType->getSettingTypes().empty())) {
-		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, entityEditorFactory, nodeId, *nodeType, pos, isCreatingNode));
-	} else if (isCreatingNode) {
-		onNodeAdded(nodeId);
+	const auto* nodeType = scriptNodeTypes->tryGetNodeType(type);
+	if (nodeType && (nodeId || !nodeType->getSettingTypes().empty())) {
+		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, entityEditorFactory, nodeId, *nodeType, pos));
+	} else if (!nodeId) {
+		addNode(type, pos.value_or(Vector2f()), ConfigNode());
 	}
 }
 
 void ScriptingBaseGizmo::addNode()
 {
-	const Vector2f pos = lastMousePos ? lastMousePos.value() - basePos : Vector2f();
-	
 	auto chooseAssetWindow = std::make_shared<ScriptingChooseNode>(Vector2f(), factory, *resources, scriptNodeTypes, [=] (std::optional<String> result)
 	{
 		if (result) {
-			Concurrent::execute(pendingUITasks, [this, type = std::move(result.value()), pos] ()
+			Concurrent::execute(pendingUITasks, [this, type = std::move(result.value())] ()
 			{
-				addNode(type, pos);
+				openNodeUI({}, {}, type);
 			});
 		}
 	});
 	uiRoot->addChild(std::move(chooseAssetWindow));
 }
 
-void ScriptingBaseGizmo::addNode(const String& type, Vector2f pos)
+uint32_t ScriptingBaseGizmo::addNode(const String& type, Vector2f pos, ConfigNode settings)
 {
 	auto& nodes = scriptGraph->getNodes();
 	const uint32_t id = static_cast<uint32_t>(nodes.size());
 	nodes.emplace_back(type, pos);
+	nodes.back().getSettings() = std::move(settings);
 	scriptGraph->finishGraph();
 	assignNodeTypes();
 	onModified();
-	
-	openNodeUI(id, {}, true);
+
+	selectedNodes.directSelect(id, SelectionSetModifier::None);
+	dragging = Dragging{ { id }, { scriptGraph->getNodes()[id].getPosition() }, {}, true };
+
+	return id;
 }
