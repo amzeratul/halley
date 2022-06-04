@@ -118,7 +118,7 @@ bool TaskAnchor::isVisible() const
 
 void TaskAnchor::cancel()
 {
-	if (status == TaskStatus::WaitingToStart) {
+	if (status == TaskStatus::WaitingToStart || status == TaskStatus::ReadyToStart) {
 		status = TaskStatus::Done;
 	}
 	if (task->isCancellable) {
