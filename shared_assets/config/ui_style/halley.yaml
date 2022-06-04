@@ -301,7 +301,7 @@ uiStyle:
     background: { img: $ui_scroll_background, colour: $ui_scrollBackground }
 
   infiniCanvas:
-    background: { img: $ui_hex_background, colour: $ui_scrollBackground }
+    background: { img: $ui_scroll_background, colour: $ui_scrollBackground }
     border: { img: $ui_canvas_border, colour: $background0 }
 
   graphNode:

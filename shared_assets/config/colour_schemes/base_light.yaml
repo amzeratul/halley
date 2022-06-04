@@ -113,6 +113,6 @@ sprites:
   ui_task_fill: { img: halley_ui/ui_list_item.png, material: Halley/SpriteInverseTint }
   ui_scroll_background: { img: halley_ui/checkered.png, material: Halley/SpriteInverseTint }
   ui_canvas_border: { img: halley_ui/rounded_corners_border.png, material: Halley/SpriteInverseTint }
-  ui_hex_background: { img: halley_ui/hex_bg.png, material: Halley/Sprite }
+  ui_hex_background: { img: halley_ui/hex_bg_small.png, material: Halley/Sprite }
   ui_popup: { img: halley_ui/ui_popup.png, material: Halley/SpriteInverseTint }
   ui_separator: { img: halley_ui/ui_separator.png, material: Halley/SpriteInverseTint }
