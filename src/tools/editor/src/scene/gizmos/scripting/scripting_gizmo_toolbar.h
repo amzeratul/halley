@@ -12,9 +12,6 @@ namespace Halley {
 		void onMakeUI() override;
 		void onAddedToRoot(UIRoot& root) override;
 		void onRemovedFromRoot(UIRoot& root) override;
-
-	protected:
-		bool onKeyPress(KeyboardKeyPress key) override;
 	
 	private:
 		ScriptingBaseGizmo& gizmo;

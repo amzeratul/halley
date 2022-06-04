@@ -30,17 +30,3 @@ void ScriptingGizmoToolbar::onRemovedFromRoot(UIRoot& root)
 	root.removeKeyPressListener(*this);
 }
 
-bool ScriptingGizmoToolbar::onKeyPress(KeyboardKeyPress key)
-{
-	if (key.is(KeyCode::A, KeyMods::Ctrl)) {
-		gizmo.addNode();
-		return true;
-	}
-
-	if (key.is(KeyCode::Delete)) {
-		gizmo.deleteSelection();
-		return true;
-	}
-	
-	return false;
-}

@@ -15,6 +15,7 @@ namespace Halley {
 		void refreshEntity() override;
 		void onEntityChanged() override;
 		bool allowEntitySpriteSelection() const override;
+		bool onKeyPress(KeyboardKeyPress key) override;
 
 	private:
 		ScriptingBaseGizmo gizmo;

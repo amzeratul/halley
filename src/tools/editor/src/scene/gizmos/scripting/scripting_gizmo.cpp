@@ -102,3 +102,18 @@ void ScriptingGizmo::compileEntityTargetList(World& world)
 	}
 	gizmo.setEntityTargets(std::move(entityTargets));
 }
+
+bool ScriptingGizmo::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::A, KeyMods::Ctrl)) {
+		gizmo.addNode();
+		return true;
+	}
+
+	if (key.is(KeyCode::Delete)) {
+		gizmo.deleteSelection();
+		return true;
+	}
+	
+	return false;
+}

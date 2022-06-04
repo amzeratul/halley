@@ -277,6 +277,13 @@ void SceneEditorWindow::update(Time t, bool moved)
 
 bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 {
+	if (gameBridge && toolMode) {
+		auto& gizmos = gameBridge->getGizmos();
+		if (gizmos.onKeyPress(key, *toolMode)) {
+			return true;
+		}
+	}
+
 	if (key.is(KeyCode::Z, KeyMods::Ctrl)) {
 		undo();
 		return true;
@@ -345,13 +352,6 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 	if (key.is(KeyCode::F2)) {
 		entityEditor->focusRenameEntity();
 		return true;
-	}
-
-	if (gameBridge && toolMode) {
-		auto& gizmos = gameBridge->getGizmos();
-		if (gizmos.onKeyPress(key, *toolMode)) {
-			return true;
-		}
 	}
 
 	return false;
