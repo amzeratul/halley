@@ -281,11 +281,24 @@ bool ScriptingBaseGizmo::isHighlighted() const
 
 bool ScriptingBaseGizmo::destroyNode(uint32_t id)
 {
+	return destroyNodes({ id });
+}
+
+bool ScriptingBaseGizmo::destroyNodes(Vector<uint32_t> ids)
+{
+	std::sort(ids.begin(), ids.end(), std::greater<uint32_t>());
+
+	bool modified = false;
+
 	auto& nodes = scriptGraph->getNodes();
-	if (id < nodes.size()) {
+	for (auto& id: ids) {
+		if (nodeUnderMouse && nodeUnderMouse->nodeId == id) {
+			nodeUnderMouse.reset();
+		}
+
 		const auto* nodeType = scriptNodeTypes->tryGetNodeType(nodes[id].getType());
 		if (nodeType && !nodeType->canDelete()) {
-			return false;
+			continue;
 		}
 		
 		for (auto& n: nodes) {
@@ -293,22 +306,15 @@ bool ScriptingBaseGizmo::destroyNode(uint32_t id)
 		}
 		
 		nodes.erase(nodes.begin() + id);
+		modified = true;
+	}
+
+	if (modified) {
 		onModified();
-		scriptGraph->finishGraph();
-		return true;
+		scriptGraph->finishGraph();		
 	}
 
-	return false;
-}
-
-bool ScriptingBaseGizmo::destroyHighlightedNode()
-{
-	if (nodeUnderMouse && nodeUnderMouse->element.type == ScriptNodeElementType::Node) {
-		destroyNode(nodeUnderMouse->nodeId);
-		nodeUnderMouse.reset();
-		return true;
-	}
-	return false;
+	return modified;
 }
 
 ScriptGraph& ScriptingBaseGizmo::getGraph()
@@ -330,6 +336,36 @@ void ScriptingBaseGizmo::setGraph(ScriptGraph* graph)
 ScriptGraphNode& ScriptingBaseGizmo::getNode(uint32_t id)
 {
 	return scriptGraph->getNodes().at(id);
+}
+
+ConfigNode ScriptingBaseGizmo::copySelection() const
+{
+	ConfigNode result;
+	// TODO
+	return result;
+}
+
+ConfigNode ScriptingBaseGizmo::cutSelection()
+{
+	auto result = copySelection();
+	deleteSelection();
+	return result;
+}
+
+void ScriptingBaseGizmo::paste(const ConfigNode& node)
+{
+	// TODO
+}
+
+bool ScriptingBaseGizmo::deleteSelection()
+{
+	bool changed = false;
+	for (auto& e: selectedNodes.getSelected()) {
+		changed = destroyNode(e) || changed;
+	}
+	selectedNodes.clear();
+
+	return changed;
 }
 
 void ScriptingBaseGizmo::setBasePosition(Vector2f pos)

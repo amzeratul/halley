@@ -38,7 +38,8 @@ bool ScriptingGizmoToolbar::onKeyPress(KeyboardKeyPress key)
 	}
 
 	if (key.is(KeyCode::Delete)) {
-		return gizmo.destroyHighlightedNode();
+		gizmo.deleteSelection();
+		return true;
 	}
 	
 	return false;

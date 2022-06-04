@@ -17,8 +17,13 @@ namespace Halley {
 
 		void addNode();
 		bool destroyNode(uint32_t id);
-		bool destroyHighlightedNode();
+		bool destroyNodes(Vector<uint32_t> ids);
 		ScriptGraphNode& getNode(uint32_t id);
+
+		ConfigNode copySelection() const;
+		ConfigNode cutSelection();
+		void paste(const ConfigNode& node);
+		bool deleteSelection();
 
 		ScriptGraph& getGraph();
 		ScriptGraph* getGraphPtr();

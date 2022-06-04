@@ -15,7 +15,7 @@ ScriptingGizmo::ScriptingGizmo(SnapRules snapRules, UIFactory& factory, ISceneEd
 {
 	gizmo.setModifiedCallback([=] ()
 	{
-		saveEntityData();
+		modified = true;
 	});
 	gizmo.setUIRoot(sceneEditorWindow.getUIRoot());
 	compileEntityTargetList(sceneEditorWindow.getEntityFactory()->getWorld());
@@ -25,6 +25,11 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 {
 	gizmo.setZoom(getZoom());
 	gizmo.update(time, sceneEditor.getResources(), inputState);
+
+	if (modified) {
+		modified = false;
+		saveEntityData();
+	}
 }
 
 void ScriptingGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) const

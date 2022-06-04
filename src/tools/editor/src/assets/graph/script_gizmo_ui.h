@@ -27,6 +27,8 @@ namespace Halley {
 		void releaseMouse(Vector2f mousePos, int button) override;
         void onMouseOver(Vector2f mousePos) override;
 		bool ignoreClip() const override;
+		bool onKeyPress(KeyboardKeyPress key) override;
+		bool canReceiveFocus() const override;
 
 	private:
 		UIFactory& factory;

@@ -72,6 +72,8 @@ std::shared_ptr<UIWidget> ScriptGizmoUI::makeUI()
 
 void ScriptGizmoUI::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
+	focus();
+
 	inputState.mousePos = mousePos;
 	updateSelectionBox();
 	if (button == 0) {
@@ -113,6 +115,41 @@ void ScriptGizmoUI::onMouseOver(Vector2f mousePos)
 }
 
 bool ScriptGizmoUI::ignoreClip() const
+{
+	return true;
+}
+
+bool ScriptGizmoUI::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::Delete)) {
+		gizmo.deleteSelection();
+		return true;
+	}
+
+	if (key.is(KeyCode::C, KeyMods::Ctrl)) {
+		gizmo.copySelection();
+		return true;
+	}
+
+	if (key.is(KeyCode::X, KeyMods::Ctrl)) {
+		gizmo.cutSelection();
+		return true;
+	}
+
+	if (key.is(KeyCode::V, KeyMods::Ctrl)) {
+		gizmo.paste(ConfigNode());
+		return true;
+	}
+
+	if (key.is(KeyCode::D, KeyMods::Ctrl)) {
+		gizmo.paste(gizmo.copySelection());
+		return true;
+	}
+
+	return false;
+}
+
+bool ScriptGizmoUI::canReceiveFocus() const
 {
 	return true;
 }

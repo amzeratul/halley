@@ -19,6 +19,7 @@ namespace Halley {
 	private:
 		ScriptingBaseGizmo gizmo;
 		ISceneEditorWindow& sceneEditorWindow;
+		bool modified = false;
 
 		void loadEntityData();
 		void saveEntityData();
