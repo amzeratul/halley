@@ -29,6 +29,7 @@ namespace Halley {
 			Vector2f to;
 			ScriptNodePinType fromType;
 			ScriptNodePinType toType;
+			bool fade = false;
 		};
 		
 		ScriptRenderer(Resources& resources, const World* world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom);
@@ -38,10 +39,11 @@ namespace Halley {
 		void draw(Painter& painter, Vector2f basePos, float curZoom);
 
 		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const;
+		Vector2f getPinPosition(Vector2f basePos, const ScriptGraphNode& node, uint8_t idx) const;
 		Vector<uint32_t> getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const;
 		void setHighlight(std::optional<NodeUnderMouseInfo> highlightNode, OptionalLite<uint8_t> highlightEntity);
 		void setSelection(Vector<uint32_t> selectedNodes);
-		void setCurrentPath(std::optional<ConnectionPath> path);
+		void setCurrentPaths(Vector<ConnectionPath> path);
 
 		static Colour4f getNodeColour(const IScriptNodeType& nodeType);
 
@@ -79,7 +81,7 @@ namespace Halley {
 		std::optional<NodeUnderMouseInfo> highlightNode;
 		OptionalLite<uint8_t> highlightEntity;
 		Vector<uint32_t> selectedNodes;
-		std::optional<ConnectionPath> currentPath;
+		Vector<ConnectionPath> currentPaths;
 
 		void drawNodeOutputs(Painter& painter, Vector2f basePos, size_t nodeIdx, const ScriptGraph& graph, float curZoom);
 		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, uint8_t highlightElementId);
@@ -90,6 +92,6 @@ namespace Halley {
 		const Sprite& getIcon(const IScriptNodeType& nodeType, const ScriptGraphNode& node);
 
 		BezierCubic makeBezier(const ConnectionPath& path) const;
-		void drawConnection(Painter& painter, const ConnectionPath& path, float curZoom, bool highlight) const;
+		void drawConnection(Painter& painter, const ConnectionPath& path, float curZoom, bool highlight, bool fade) const;
 	};
 }

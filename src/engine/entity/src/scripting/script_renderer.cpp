@@ -55,8 +55,8 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 		drawNodeOutputs(painter, basePos, i, *graph, effectiveZoom);
 	}
 
-	if (currentPath) {
-		drawConnection(painter, currentPath.value(), curZoom, false);
+	for (const auto& currentPath: currentPaths) {
+		drawConnection(painter, currentPath, curZoom, false, currentPath.fade);
 	}
 	
 	for (uint32_t i = 0; i < static_cast<uint32_t>(graph->getNodes().size()); ++i) {
@@ -139,7 +139,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t 
 			
 			if (dstPos) {
 				const Vector2f srcPos = getNodeElementArea(*nodeType, basePos, node, i, curZoom).getCentre();
-				drawConnection(painter, ConnectionPath{ srcPos, dstPos.value(), srcPinType, dstPinType }, curZoom, highlighted);
+				drawConnection(painter, ConnectionPath{ srcPos, dstPos.value(), srcPinType, dstPinType }, curZoom, highlighted, false);
 			}
 		}
 	}
@@ -171,11 +171,11 @@ BezierCubic ScriptRenderer::makeBezier(const ConnectionPath& path) const
 	return BezierCubic(path.from, path.from + dist * fromDir, path.to + dist * toDir, path.to);
 }
 
-void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path, float curZoom, bool highlight) const
+void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path, float curZoom, bool highlight, bool fade) const
 {
 	const auto bezier = makeBezier(path);
 	const auto baseCol = getPinColour(path.fromType);
-	const auto col = highlight ? baseCol.inverseMultiplyLuma(0.25f) : baseCol;
+	const auto col = (highlight ? baseCol.inverseMultiplyLuma(0.25f) : baseCol).multiplyAlpha(fade ? 0.5f : 1.0f);
 	painter.drawLine(bezier + Vector2f(1.0f, 2.0f) / curZoom, 3.0f / curZoom, Colour4f(0, 0, 0, 0.3f));
 	painter.drawLine(bezier, 3.0f / curZoom, col);
 }
@@ -445,6 +445,11 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 	return bestResult;
 }
 
+Vector2f ScriptRenderer::getPinPosition(Vector2f basePos, const ScriptGraphNode& node, uint8_t idx) const
+{
+	return getNodeElementArea(node.getNodeType(), basePos, node, idx, 1.0f).getCentre();
+}
+
 Vector<uint32_t> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const
 {
 	if (!graph) {
@@ -481,7 +486,7 @@ void ScriptRenderer::setSelection(Vector<uint32_t> nodes)
 	selectedNodes = std::move(nodes);
 }
 
-void ScriptRenderer::setCurrentPath(std::optional<ConnectionPath> path)
+void ScriptRenderer::setCurrentPaths(Vector<ConnectionPath> path)
 {
-	currentPath = path;
+	currentPaths = std::move(path);
 }

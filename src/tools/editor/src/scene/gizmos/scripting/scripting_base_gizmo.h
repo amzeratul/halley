@@ -20,6 +20,7 @@ namespace Halley {
 		bool destroyNode(uint32_t id);
 		bool destroyNodes(Vector<uint32_t> ids);
 		ScriptGraphNode& getNode(uint32_t id);
+		const ScriptGraphNode& getNode(uint32_t id) const;
 
 		ConfigNode copySelection() const;
 		ConfigNode cutSelection();
@@ -55,6 +56,21 @@ namespace Halley {
 			bool sticky;
 		};
 
+		struct Connection {
+			uint32_t srcNode;
+			uint32_t dstNode;
+			uint8_t srcPin;
+			uint8_t dstPin;
+			ScriptNodePinType srcType;
+			ScriptNodePinType dstType;
+			Vector2f srcPos;
+			Vector2f dstPos;
+			float distance;
+
+			bool operator<(const Connection& other) const;
+			bool conflictsWith(const Connection& connection) const;
+		};
+
 		UIFactory& factory;
 		const IEntityEditorFactory& entityEditorFactory;
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
@@ -74,6 +90,7 @@ namespace Halley {
 		std::optional<Vector2f> lastMousePos;
 
 		std::optional<Dragging> dragging;
+		Vector<Connection> pendingAutoConnections;
 
 		float zoom = 1.0f;
 		float baseZoom = 1.0f;
@@ -98,6 +115,11 @@ namespace Halley {
 		void onNodeDragging(const SceneEditorInputState& inputState);
 		void onPinClicked(bool rightClick, bool shiftHeld);
 		void onEditingConnection(const SceneEditorInputState& inputState);
+
+		void updateNodeAutoConnection(gsl::span<const uint32_t> nodes);
+		void pruneConflictingAutoConnections();
+		void finishAutoConnection();
+		std::optional<Connection> findAutoConnectionForPin(uint32_t srcNodeId, uint8_t srcPinIdx, Vector2f nodePos, ScriptNodePinType srcPinType, gsl::span<const uint32_t> excludeIds) const;
 
 		void assignNodeTypes() const;
 		SelectionSetModifier getSelectionModifier(const SceneEditorInputState& inputState) const;
