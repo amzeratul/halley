@@ -74,29 +74,41 @@ namespace Halley {
             }
         }
 
-        void clickOne(const T& element, SelectionSetModifier modifier)
+        void directSelect(std::optional<T> element, SelectionSetModifier modifier)
         {
             if (modifier == SelectionSetModifier::None) {
                 selected.clear();
-                selected.push_back(element);
+                if (element) {
+                    selected.push_back(*element);
+                }
                 return;
             }
 
-            if (isSelected(element)) {
-                if (modifier == SelectionSetModifier::Remove || modifier == SelectionSetModifier::Toggle) {
-                    std_ex::erase(selected, element);
-                }
-            } else {
-                if (modifier == SelectionSetModifier::Add || modifier == SelectionSetModifier::Toggle) {
-                    selected.push_back(element);
-                }
+            if (element) {
+	            if (isSelected(*element)) {
+	                if (modifier == SelectionSetModifier::Remove || modifier == SelectionSetModifier::Toggle) {
+	                    std_ex::erase(selected, *element);
+	                }
+	            } else {
+	                if (modifier == SelectionSetModifier::Add || modifier == SelectionSetModifier::Toggle) {
+	                    selected.push_back(*element);
+	                }
+	            }
             }
         }
 
-        void clickNone(SelectionSetModifier modifier)
+        void mouseButtonPressed(std::optional<T> element, SelectionSetModifier modifier, Vector2f mousePos)
         {
-	        if (modifier == SelectionSetModifier::None) {
-                selected.clear();
+            pendingPress = PendingPress{ element, modifier, mousePos };
+        }
+
+        void mouseButtonReleased(Vector2f mousePos)
+        {
+	        if (pendingPress) {
+                if ((pendingPress->mousePos - mousePos).manhattanLength() < 4) {
+                    directSelect(pendingPress->element, pendingPress->modifier);
+                }
+                pendingPress.reset();
 	        }
         }
 
@@ -116,8 +128,14 @@ namespace Halley {
         }
 
     private:
+        struct PendingPress {
+            std::optional<T> element;
+            SelectionSetModifier modifier;
+            Vector2f mousePos;
+        };
         Vector<T> selected;
         Vector<T> startSelected;
         std::optional<SelectionSetModifier> curDrag;
+        std::optional<PendingPress> pendingPress;
     };
 }

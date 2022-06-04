@@ -89,11 +89,19 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 					onPinClicked(true, inputState.shiftHeld);
 				}
 			}
-		} else {
-			if (inputState.leftClickPressed) {
-				selectedNodes.clickNone(getSelectionModifier(inputState));
-			}
 		}
+	}
+
+	if (inputState.leftClickPressed && inputState.mousePos) {
+		const auto modifier = getSelectionModifier(inputState);
+		if (nodeUnderMouse && nodeUnderMouse->element.type == ScriptNodeElementType::Node) {
+			selectedNodes.mouseButtonPressed(nodeUnderMouse->nodeId, modifier, *inputState.mousePos);
+		} else {
+			selectedNodes.mouseButtonPressed({}, modifier, *inputState.mousePos);
+		}
+	}
+	if (inputState.leftClickReleased && inputState.mousePos) {
+		selectedNodes.mouseButtonReleased(*inputState.mousePos);
 	}
 	
 	lastMousePos = inputState.mousePos;
@@ -128,8 +136,6 @@ void ScriptingBaseGizmo::onModified()
 
 void ScriptingBaseGizmo::onNodeClicked(Vector2f mousePos, SelectionSetModifier modifier)
 {
-	selectedNodes.clickOne(nodeUnderMouse->nodeId, modifier);
-
 	if (modifier == SelectionSetModifier::None) {
 		dragging = true;
 		const auto nodePos = scriptGraph->getNodes()[nodeUnderMouse->nodeId].getPosition();
