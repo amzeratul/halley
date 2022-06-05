@@ -4,7 +4,7 @@ float3 hsvToRgb(float h, float s, float v)
     float g = 0;
     float b = 0;
     if (s == 0) {
-        r = clamp(v * 255, 0, 255);
+        r = clamp(v, 0, 1);
         g = b = r;
     } else {
         h = h % 1.0;

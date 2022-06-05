@@ -28,6 +28,7 @@
 #include <gsl/gsl_assert>
 #include <cstdint>
 #include "halley/utils/utils.h"
+#include "halley/maths/vector3.h"
 
 namespace Halley {
 	// This whole class is TERRIBLE
@@ -134,6 +135,11 @@ namespace Halley {
 			return col;
 		}
 
+		[[nodiscard]] static Colour4 fromHSV(Vector3f hsv)
+		{
+			return fromHSV(hsv.x, hsv.y, hsv.z);
+		}
+
 		[[nodiscard]] static Colour4 fromHSV(float h, float s, float v)
 		{
 			float r = 0;
@@ -157,11 +163,31 @@ namespace Halley {
 				case 3:	r = p; g = q; b = v; break;
 				case 4:	r = t; g = p; b = v; break;
 				case 5:	r = v; g = p; b = q; break;
-				//default: throw Exception("Invalid value!");
 				}
 			}
 
 			return Colour4<T>(Colour4<float>(r, g, b));
+		}
+
+		[[nodiscard]] Vector3f toHSV() const
+		{
+			const float ma = std::max(r, std::max(g, b));
+			const float mi = std::min(r, std::min(g, b));
+			const float c = ma - mi;
+			float hp = 0;
+			if (c > 0.000001f) {
+				if (std::abs(ma - r) < 0.00001f) {
+					hp = floatModulo((g - b) / c, 6.0f);
+				} else if (std::abs(ma - g) < 0.00001f) {
+					hp = (b - r) / c + 2;
+				} else {
+					hp = (r - g) / c + 4;
+				}
+			}
+			const float h = hp / 6.0f;
+			const float v = ma;
+			const float s = v > 0.00001f ? c / v : 0;
+			return Vector3f(h, s, v);
 		}
 
 		[[nodiscard]] constexpr Colour4 multiplyLuma(float t) const

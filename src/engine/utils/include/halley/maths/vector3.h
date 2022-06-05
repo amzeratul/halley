@@ -135,6 +135,16 @@ namespace Halley {
 		{
 			return Vector2D<T>(x, y);
 		}
+
+		constexpr Vector2D<T> xz() const
+		{
+			return Vector2D<T>(x, z);
+		}
+
+		constexpr Vector2D<T> yz() const
+		{
+			return Vector2D<T>(y, z);
+		}
 	};
 
 

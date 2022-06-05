@@ -11,6 +11,9 @@ namespace Halley {
 
     	ColourPickerButton(UIFactory& factory, Colour4f colour, Callback callback);
 
+        void update(Time t, bool moved) override;
+		void draw(UIPainter& painter) const override;
+        
     	void setColour(Colour4f colour, bool final);
 
     protected:
@@ -19,6 +22,8 @@ namespace Halley {
     private:
         UIFactory& factory;
         Callback callback;
+        TextRenderer label;
+        Colour4f colour;
     };
 
     class ColourPicker : public UIWidget {

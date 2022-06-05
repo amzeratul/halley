@@ -5,13 +5,40 @@ ColourPickerButton::ColourPickerButton(UIFactory& factory, Colour4f colour, Call
 	: UIImage(Sprite().setImage(factory.getResources(), "halley_ui/ui_list_item.png").setColour(colour))
 	, factory(factory)
 	, callback(std::move(callback))
+	, colour(colour)
 {
 	setMinSize(Vector2f(40, 22));
 	setInteractWithMouse(true);
+
+	label = TextRenderer()
+		.setFont(factory.getResources().get<Font>("Ubuntu Regular"))
+		.setSize(12)
+		.setColour(Colour4f(1, 1, 1, 1))
+		.setOffset(Vector2f(0.5f, 0.5f));
+}
+
+void ColourPickerButton::update(Time t, bool moved)
+{
+	UIImage::update(t, moved);
+
+	const auto hsv = colour.toHSV();
+	const bool isBrightCol = (Vector2f(0, 1) - hsv.yz()).length() < 0.5f;
+
+	label
+		.setText(colour.toString())
+		.setPosition(getRect().getCenter())
+		.setColour(isBrightCol ? Colour4f(0, 0, 0, 1) : Colour4f(1, 1, 1, 1));
+}
+
+void ColourPickerButton::draw(UIPainter& painter) const
+{
+	UIImage::draw(painter);
+	painter.draw(label);
 }
 
 void ColourPickerButton::setColour(Colour4f colour, bool final)
 {
+	this->colour = colour;
 	getSprite().setColour(colour);
 	if (callback) {
 		callback(colour, final);

@@ -942,21 +942,13 @@ public:
 		String value = data.getFieldData().asString(defaultValue);
 
 		auto container = std::make_shared<UISizer>();
-		
-		auto field = std::make_shared<UITextInput>("colourHex", context.getUIFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
-		container->add(field, 1);
 
 		auto colourPreview = std::make_shared<ColourPickerButton>(context.getUIFactory(), Colour4f::fromString(value), [&context, data](Colour4f col, bool final)
 		{
 			data.getWriteableFieldData() = ConfigNode(toString(col));
 			context.onEntityUpdated();
 		});
-		container->add(colourPreview);
-		
-		field->bindData("colourHex", value, [colourPreview](String newVal)
-		{
-			colourPreview->setColour(Colour4f::fromString(newVal), true);
-		});
+		container->add(colourPreview, 1);
 
 		return container;
 	}
