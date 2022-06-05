@@ -53,6 +53,7 @@ void ColourPicker::onMakeUI()
 
 	mainDisplay = getWidgetAs<ColourPickerDisplay>("mainDisplay");
 	ribbonDisplay = getWidgetAs<ColourPickerDisplay>("ribbonDisplay");
+	ribbonDisplay->setCursorType(ColourPickerDisplay::CursorType::HorizontalLine);
 }
 
 Colour4f ColourPicker::getColour() const
@@ -101,8 +102,31 @@ void ColourPicker::onColourChanged()
 
 ColourPickerDisplay::ColourPickerDisplay(String id, Vector2f size, Resources& resources, const String& material)
 	: UIImage(std::move(id), makeSprite(resources, size, material))
+	, resources(resources)
 {
 	setInteractWithMouse(true);
+}
+
+void ColourPickerDisplay::update(Time t, bool moved)
+{
+	UIImage::update(t, moved);
+
+	cursor.setPosition(getPosition() + getSize() * Vector2f(0.5f, value.y));
+}
+
+void ColourPickerDisplay::draw(UIPainter& painter) const
+{
+	UIImage::draw(painter);
+
+	if (cursorType == CursorType::Circle) {
+		painter.withClip(getRect()).draw([=](Painter& p)
+		{
+			const auto col = value.length() < 0.5f ? Colour4f(0, 0, 0, 1) : Colour4f(1, 1, 1, 1);
+			p.drawCircle(value * getSize() + getPosition(), 5, 1, col);
+		});
+	} else if (cursorType == CursorType::HorizontalLine) {
+		painter.draw(cursor);
+	}
 }
 
 void ColourPickerDisplay::setValue(Vector2f value)
@@ -143,6 +167,14 @@ void ColourPickerDisplay::onMouseOver(Vector2f mousePos)
 bool ColourPickerDisplay::isFocusLocked() const
 {
 	return held;
+}
+
+void ColourPickerDisplay::setCursorType(CursorType type)
+{
+	cursorType = type;
+	if (cursorType == CursorType::HorizontalLine) {
+		cursor = Sprite().setImage(resources, "halley_ui/colour_pick_ribbon_cursor.png");
+	}
 }
 
 Sprite ColourPickerDisplay::makeSprite(Resources& resources, Vector2f size, const String& material)

@@ -48,7 +48,15 @@ namespace Halley {
 
     class ColourPickerDisplay : public UIImage {
     public:
+        enum class CursorType {
+	        Circle,
+            HorizontalLine
+        };
+
         ColourPickerDisplay(String id, Vector2f size, Resources& resources, const String& material);
+
+        void update(Time t, bool moved) override;
+        void draw(UIPainter& painter) const override;
 
         void setValue(Vector2f value);
         Vector2f getValue() const;
@@ -58,9 +66,14 @@ namespace Halley {
         void onMouseOver(Vector2f mousePos) override;
         bool isFocusLocked() const override;
 
+        void setCursorType(CursorType type);
+
     private:
+        Resources& resources;
         Vector2f value;
         bool held = false;
+        CursorType cursorType = CursorType::Circle;
+        Sprite cursor;
 
         static Sprite makeSprite(Resources& resources, Vector2f size, const String& material);
     };
