@@ -53,6 +53,8 @@ namespace Halley {
         std::shared_ptr<UITextInput> floatCode;
 
     	bool updatingUI = false;
+        bool updatingHex = false;
+        bool updatingDisplay = false;
 
         void onMakeUI() override;
 
@@ -70,10 +72,14 @@ namespace Halley {
             HorizontalLine
         };
 
+        using Callback = std::function<void(Vector2f)>;
+
         ColourPickerDisplay(String id, Vector2f size, Resources& resources, const String& material);
 
         void update(Time t, bool moved) override;
         void draw(UIPainter& painter) const override;
+
+        void setCallback(Callback callback);
 
         void setValue(Vector2f value);
         Vector2f getValue() const;
@@ -91,6 +97,7 @@ namespace Halley {
         bool held = false;
         CursorType cursorType = CursorType::Circle;
         Sprite cursor;
+        Callback callback;
 
         static Sprite makeSprite(Resources& resources, Vector2f size, const String& material);
     };

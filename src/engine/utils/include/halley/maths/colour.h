@@ -56,7 +56,11 @@ namespace Halley {
 	template <typename T, typename U>
 	constexpr U convertColour(T x)
 	{
-		return U(float(x) * colMaxValue<U>() / colMaxValue<T>());
+		if constexpr (std::is_integral_v<U>) {
+			return U(std::round(static_cast<float>(x) * colMaxValue<U>()) / colMaxValue<T>());
+		} else {
+			return U(static_cast<float>(x) * colMaxValue<U>() / colMaxValue<T>());
+		}
 	}
 
 	template <>
@@ -169,12 +173,12 @@ namespace Halley {
 			return Colour4<T>(Colour4<float>(r, g, b));
 		}
 
-		[[nodiscard]] Vector3f toHSV() const
+		[[nodiscard]] Vector3f toHSV(float defaultHue = 0, float defaultSaturation = 0) const
 		{
 			const float ma = std::max(r, std::max(g, b));
 			const float mi = std::min(r, std::min(g, b));
 			const float c = ma - mi;
-			float hp = 0;
+			float hp = defaultHue * 6;
 			if (c > 0.000001f) {
 				if (std::abs(ma - r) < 0.00001f) {
 					hp = floatModulo((g - b) / c, 6.0f);
@@ -186,7 +190,7 @@ namespace Halley {
 			}
 			const float h = hp / 6.0f;
 			const float v = ma;
-			const float s = v > 0.00001f ? c / v : 0;
+			const float s = v > 0.00001f ? c / v : defaultSaturation;
 			return Vector3f(h, s, v);
 		}
 

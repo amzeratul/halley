@@ -83,6 +83,22 @@ void ColourPicker::onMakeUI()
 	mainDisplay = getWidgetAs<ColourPickerDisplay>("mainDisplay");
 	ribbonDisplay = getWidgetAs<ColourPickerDisplay>("ribbonDisplay");
 	ribbonDisplay->setCursorType(ColourPickerDisplay::CursorType::HorizontalLine);
+	mainDisplay->setCallback([=](Vector2f sv)
+	{
+		updatingDisplay = true;
+		const float h = 1 - ribbonDisplay->getValue().y;
+		setColour(Colour4f::fromHSV(h, sv.x, 1 - sv.y));
+		updatingDisplay = false;
+	});
+	ribbonDisplay->setCallback([=](Vector2f val)
+	{
+		updatingDisplay = true;
+		const float h = 1 - val.y;
+		const Vector2f sv = mainDisplay->getValue();
+		setColour(Colour4f::fromHSV(h, sv.x, 1 - sv.y));
+		mainDisplay->getSprite().setCustom0(Vector4f(h, 0, 0, 0));
+		updatingDisplay = false;
+	});
 
 	colourView = getWidgetAs<UIImage>("colour");
 	prevColourView = getWidgetAs<UIImage>("prevColour");
@@ -101,7 +117,9 @@ void ColourPicker::onMakeUI()
 	bindData("hexCode", colour.toString(), [=](String val)
 	{
 		if (!updatingUI) {
+			updatingHex = true;
 			setColour(Colour4f::fromString(val));
+			updatingHex = false;
 		}
 	});
 
@@ -179,16 +197,14 @@ void ColourPicker::setColour(Colour4f col)
 	if (col != colour) {
 		colour = col;
 		onColourChanged();
-		updateUI();
+		if (!updatingUI) {
+			updateUI();
+		}
 	}
 }
 
 void ColourPicker::update(Time t, bool moved)
 {
-	const float h = 1 - ribbonDisplay->getValue().y;
-	mainDisplay->getSprite().setCustom0(Vector4f(h, 0, 0, 0));
-	const Vector2f sv = mainDisplay->getValue();
-	setColour(Colour4f::fromHSV(h, sv.x, 1 - sv.y));
 }
 
 void ColourPicker::accept()
@@ -218,10 +234,15 @@ void ColourPicker::updateUI()
 {
 	updatingUI = true;
 
-	const auto hsv = colour.toHSV();
+	const auto startHue = 1 - ribbonDisplay->getValue().y;
+	const auto startSaturation = mainDisplay->getValue().x;
+	const auto hsv = colour.toHSV(startHue, startSaturation);
 
-	mainDisplay->setValue(Vector2f(hsv.y, 1 - hsv.z));
-	ribbonDisplay->setValue(Vector2f(0, 1 - hsv.x));
+	if (!updatingDisplay) {
+		mainDisplay->getSprite().setCustom0(Vector4f(hsv.x, 0, 0, 0));
+		mainDisplay->setValue(Vector2f(hsv.y, 1 - hsv.z));
+		ribbonDisplay->setValue(Vector2f(0, 1 - hsv.x));
+	}
 
 	rgbhsvSliders[0]->setValue(colour.r * 255);
 	rgbhsvSliders[1]->setValue(colour.g * 255);
@@ -234,7 +255,9 @@ void ColourPicker::updateUI()
 	colourView->getSprite().setColour(colour);
 	prevColourView->getSprite().setColour(initialColour);
 
-	hexCode->setText(colour.toString());
+	if (!updatingHex) {
+		hexCode->setText(colour.toString());
+	}
 	floatCode->setText(Vector4f(colour.r, colour.g, colour.b, colour.a).toString(3));
 
 	updatingUI = false;
@@ -269,9 +292,17 @@ void ColourPickerDisplay::draw(UIPainter& painter) const
 	}
 }
 
+void ColourPickerDisplay::setCallback(Callback callback)
+{
+	this->callback = std::move(callback);
+}
+
 void ColourPickerDisplay::setValue(Vector2f value)
 {
 	this->value = value;
+	if (callback) {
+		callback(value);
+	}
 }
 
 Vector2f ColourPickerDisplay::getValue() const
@@ -298,9 +329,10 @@ void ColourPickerDisplay::releaseMouse(Vector2f mousePos, int button)
 void ColourPickerDisplay::onMouseOver(Vector2f mousePos)
 {
 	if (held) {
-		value = (mousePos - getPosition()) / getSize();
-		value.x = clamp(value.x, 0.0f, 1.0f);
-		value.y = clamp(value.y, 0.0f, 1.0f);
+		auto val = (mousePos - getPosition()) / getSize();
+		val.x = clamp(val.x, 0.0f, 1.0f);
+		val.y = clamp(val.y, 0.0f, 1.0f);
+		setValue(val);
 	}
 }
 
