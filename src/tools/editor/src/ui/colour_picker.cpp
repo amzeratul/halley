@@ -81,10 +81,8 @@ void ColourPicker::onMakeUI()
 	const auto hsv = colour.toHSV();
 
 	mainDisplay = getWidgetAs<ColourPickerDisplay>("mainDisplay");
-	mainDisplay->setValue(Vector2f(hsv.y, 1 - hsv.z));
 	ribbonDisplay = getWidgetAs<ColourPickerDisplay>("ribbonDisplay");
 	ribbonDisplay->setCursorType(ColourPickerDisplay::CursorType::HorizontalLine);
-	ribbonDisplay->setValue(Vector2f(0, 1 - hsv.x));
 
 	colourView = getWidgetAs<UIImage>("colour");
 	prevColourView = getWidgetAs<UIImage>("prevColour");
@@ -99,6 +97,49 @@ void ColourPicker::onMakeUI()
 	rgbhsvSliders[4] = getWidgetAs<UISlider>("sSlider");
 	rgbhsvSliders[5] = getWidgetAs<UISlider>("vSlider");
 	alphaSlider = getWidgetAs<UISlider>("aSlider");
+
+	bindData("hexCode", colour.toString(), [=](String val)
+	{
+		if (!updatingUI) {
+			setColour(Colour4f::fromString(val));
+		}
+	});
+
+	bindData("rSlider", colour.r, [=](float val)
+	{
+		if (!updatingUI) {
+			auto c = colour;
+			c.r = val / 255.0f;
+			setColour(c);
+		}
+	});
+
+	bindData("gSlider", colour.g, [=](float val)
+	{
+		if (!updatingUI) {
+			auto c = colour;
+			c.g = val / 255.0f;
+			setColour(c);
+		}
+	});
+
+	bindData("bSlider", colour.b, [=](float val)
+	{
+		if (!updatingUI) {
+			auto c = colour;
+			c.b = val / 255.0f;
+			setColour(c);
+		}
+	});
+
+	bindData("alphaSlider", colour.a, [=](float val)
+	{
+		if (!updatingUI) {
+			auto c = colour;
+			c.a = val / 255.0f;
+			setColour(c);
+		}
+	});
 
 	updateUI();
 }
@@ -153,6 +194,9 @@ void ColourPicker::updateUI()
 	updatingUI = true;
 
 	const auto hsv = colour.toHSV();
+
+	mainDisplay->setValue(Vector2f(hsv.y, 1 - hsv.z));
+	ribbonDisplay->setValue(Vector2f(0, 1 - hsv.x));
 
 	rgbhsvSliders[0]->setValue(colour.r * 255);
 	rgbhsvSliders[1]->setValue(colour.g * 255);
