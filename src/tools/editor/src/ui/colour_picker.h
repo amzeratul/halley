@@ -41,14 +41,26 @@ namespace Halley {
         Colour4f initialColour;
         Colour4f colour;
         Callback callback;
+
         std::shared_ptr<ColourPickerDisplay> mainDisplay;
         std::shared_ptr<ColourPickerDisplay> ribbonDisplay;
+        
+        std::array<std::shared_ptr<UISlider>, 6> rgbhsvSliders;
+        std::shared_ptr<UISlider> alphaSlider;
+        std::shared_ptr<UIImage> colourView;
+        std::shared_ptr<UIImage> prevColourView;
+        std::shared_ptr<UITextInput> hexCode;
+        std::shared_ptr<UITextInput> floatCode;
+
+    	bool updatingUI = false;
 
         void onMakeUI() override;
 
         void accept();
         void cancel();
         void onColourChanged();
+
+        void updateUI();
     };
 
     class ColourPickerDisplay : public UIImage {

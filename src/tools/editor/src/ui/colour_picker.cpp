@@ -85,6 +85,22 @@ void ColourPicker::onMakeUI()
 	ribbonDisplay = getWidgetAs<ColourPickerDisplay>("ribbonDisplay");
 	ribbonDisplay->setCursorType(ColourPickerDisplay::CursorType::HorizontalLine);
 	ribbonDisplay->setValue(Vector2f(0, 1 - hsv.x));
+
+	colourView = getWidgetAs<UIImage>("colour");
+	prevColourView = getWidgetAs<UIImage>("prevColour");
+
+	hexCode = getWidgetAs<UITextInput>("hexCode");
+	floatCode = getWidgetAs<UITextInput>("floatCode");
+
+	rgbhsvSliders[0] = getWidgetAs<UISlider>("rSlider");
+	rgbhsvSliders[1] = getWidgetAs<UISlider>("gSlider");
+	rgbhsvSliders[2] = getWidgetAs<UISlider>("bSlider");
+	rgbhsvSliders[3] = getWidgetAs<UISlider>("hSlider");
+	rgbhsvSliders[4] = getWidgetAs<UISlider>("sSlider");
+	rgbhsvSliders[5] = getWidgetAs<UISlider>("vSlider");
+	alphaSlider = getWidgetAs<UISlider>("aSlider");
+
+	updateUI();
 }
 
 Colour4f ColourPicker::getColour() const
@@ -97,6 +113,7 @@ void ColourPicker::setColour(Colour4f col)
 	if (col != colour) {
 		colour = col;
 		onColourChanged();
+		updateUI();
 	}
 }
 
@@ -129,6 +146,29 @@ void ColourPicker::onColourChanged()
 	if (callback) {
 		callback(colour, false);
 	}
+}
+
+void ColourPicker::updateUI()
+{
+	updatingUI = true;
+
+	const auto hsv = colour.toHSV();
+
+	rgbhsvSliders[0]->setValue(colour.r * 255);
+	rgbhsvSliders[1]->setValue(colour.g * 255);
+	rgbhsvSliders[2]->setValue(colour.b * 255);
+	alphaSlider->setValue(colour.a * 255);
+	rgbhsvSliders[3]->setValue(hsv.x * 360);
+	rgbhsvSliders[4]->setValue(hsv.y * 255);
+	rgbhsvSliders[5]->setValue(hsv.z * 255);
+
+	colourView->getSprite().setColour(colour);
+	prevColourView->getSprite().setColour(initialColour);
+
+	hexCode->setText(colour.toString());
+	floatCode->setText(Vector4f(colour.r, colour.g, colour.b, colour.a).toString(3));
+
+	updatingUI = false;
 }
 
 ColourPickerDisplay::ColourPickerDisplay(String id, Vector2f size, Resources& resources, const String& material)

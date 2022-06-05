@@ -20,8 +20,10 @@ children:
       - widget: { id: ribbonDisplay, class: colourPickerDisplay, material: "Halley/ColourDisplayH", size: [16, 256] }
         border: [0, 10, 10, 10]
     - sizer: { type: horizontal }
+      border: [10, 0, 20, 0]
       children:
       - widget: { class: label, text: Alpha }
+        border: [0, 0, 10, 0]
       - widget: { id: aSlider, class: slider, maxValue: 255, granularity: 1 }
         proportion: 1
   - sizer: { type: vertical }
@@ -30,7 +32,7 @@ children:
       border: [10, 10, 10, 10]
       children:
       - widget: { id: colour, class: image, image: halley_ui/ui_list_item.png, size: [64, 32] }
-        proportion: 1
+        proportion: 2
       - widget: { id: prevColour, class: image, image: halley_ui/ui_list_item.png, size: [64, 32] }
         proportion: 1
     - widget: { class: widget, size: [300, 10] }
@@ -50,12 +52,14 @@ children:
       - widget: { id: sSlider, class: slider, maxValue: 255, granularity: 1 }
       - widget: { class: label, text: Value }
       - widget: { id: vSlider, class: slider, maxValue: 255, granularity: 1 }
-    - sizer: { type: horizontal }
-      children:
+      - widget: { class: widget, size: [10, 10] }
+      - widget: { class: widget, size: [10, 10] }
+      - widget: { class: label, text: Hex }
+        fill: [left, centreVertical]
       - widget: { id: hexCode, class: textInput }
-        proportion: 1
+      - widget: { class: label, text: Float }
+        fill: [left, centreVertical]
       - widget: { id: floatCode, class: textInput }
-        proportion: 1
 - sizer: { type: horizontal }
   children:
   - stretchSpacer: {}
