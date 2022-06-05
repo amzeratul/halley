@@ -135,6 +135,7 @@ void ColourPicker::onMakeUI()
 
 	hexCode = getWidgetAs<UITextInput>("hexCode");
 	floatCode = getWidgetAs<UITextInput>("floatCode");
+	floatCode->setReadOnly(true);
 
 	rgbhsvSliders[0] = getWidgetAs<UISlider>("rSlider");
 	rgbhsvSliders[1] = getWidgetAs<UISlider>("gSlider");
