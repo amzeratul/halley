@@ -279,14 +279,31 @@ uiStyle:
     labelInnerBorder: [2, 0, 2, 0]
     extraMouseBorder: [1, 3, 1, 3]
     label: { font: Ubuntu Bold, size: 14, colour: $ui_text }
-    textInput:
+    spinControl:
       box: { img: $ui_input_thin, colour: $ui_inputNormal }
       caret: { img: halley_ui/ui_caret.png, colour: $ui_inputCaret }
-      innerBorder: [ 6, 2, 6, 1 ]
-      label: { font: Ubuntu Regular, size: 15, colour: $ui_text }
-      labelGhost: { font: Ubuntu Regular, size: 15, colour: $ui_textGhost }
+      innerBorder: [ 6, 2, 6, 3 ]
+      label: { font: Ubuntu Light, size: 14, colour: $ui_text }
+      labelGhost: { font: Ubuntu Light, size: 14, colour: $ui_textGhost }
       errorColour: "#FC2847"
-      minSize: [40, 22]
+      minSize: [60, 22]
+      upButton: { img: halley_ui/icon_up.png, colour: $ui_text }
+      downButton: { img: halley_ui/icon_down.png, colour: $ui_text }
+      spinButton:
+        normal: { img: "halley_ui/ui_window.png", colour: $ui_inputNormalActual }
+        down: { img: "halley_ui/ui_window.png", colour: $ui_buttonDown }
+        hover: { img: "halley_ui/ui_window.png", colour: $ui_buttonHover }
+        disabled: { img: "halley_ui/ui_window.png", colour: $ui_buttonDisabled }
+        innerBorder: [ -5, -4, -5, -4 ]
+        upSound: ""
+        downSound: ""
+        hoverSound: ""
+        label: { font: Ubuntu Bold, size: 14, colour: $ui_text }
+        disabledLabel: { font: Ubuntu Bold, size: 14, colour: $ui_disabledText }
+        labelBorder: [0, 0, 0, 0]
+        iconBorder: [0, 0, 0, 0]
+        iconColour: $ui_text
+        disabledIconColour: $ui_disabledText
 
   tabs:
     background: { img: $ui_tabs_bg, colour: $ui_controlNormal }

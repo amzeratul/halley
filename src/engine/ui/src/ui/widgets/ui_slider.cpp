@@ -3,9 +3,10 @@
 #include "ui_validator.h"
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/ui/widgets/ui_image.h"
+#include "widgets/ui_spin_control2.h"
 using namespace Halley;
 
-UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxValue, float value, bool hasTextInput)
+UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxValue, float value, bool hasSpinControl)
 	: UIWidget(id, {}, UISizer(UISizerType::Horizontal, 0), style.getBorder("innerBorder"))
 	, minValue(minValue)
 	, maxValue(maxValue)
@@ -15,9 +16,18 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 	sliderBar = std::make_shared<UISliderBar>(*this, style);
 	UIWidget::add(sliderBar, 1, style.getBorder("barBorder"), UISizerAlignFlags::CentreVertical | UISizerFillFlags::FillHorizontal);
 
-	if (hasTextInput) {
-		textInput = std::make_shared<UITextInput>(id + "_input", style.getSubStyle("textInput"), "", LocalisedString(), std::make_shared<UINumericValidator>(minValue < 0));
-		UIWidget::add(textInput, 0, {}, UISizerAlignFlags::Centre);
+	if (hasSpinControl) {
+		spinControl = std::make_shared<UISpinControl2>(id + "_input", style.getSubStyle("spinControl"), value, false);
+		spinControl->setMinimumValue(minValue);
+		spinControl->setMaximumValue(maxValue);
+		UIWidget::add(spinControl, 0, {}, UISizerAlignFlags::Centre);
+
+		bindData(id + "_input", value, [=](float value)
+		{
+			fromInput = true;
+			setValue(value);
+			fromInput = false;
+		});
 	} else {
 		box = std::make_shared<UIImage>(style.getSprite("labelBorder"), UISizer(UISizerType::Vertical), style.getBorder("labelInnerBorder"));
 		label = std::make_shared<UILabel>(id + "_label", style, makeLabel());
@@ -42,7 +52,9 @@ void UISlider::setValue(float v)
 		box->layout();
 		box->setMinSize(Vector2f::max(box->getMinimumSize(), box->getSize()));
 	}
-	updateLabel();
+	if (!fromInput) {
+		updateLabel();
+	}
 	notifyDataBind(getValue());
 }
 
@@ -175,8 +187,8 @@ void UISlider::updateLabel()
 		box->layout();
 		box->setMinSize(Vector2f::max(box->getMinimumSize(), box->getSize()));
 	}
-	if (textInput) {
-		textInput->setText(makeLabel().getString());
+	if (spinControl) {
+		spinControl->setValue(getValue());
 	}
 }
 
