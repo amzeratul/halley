@@ -1,0 +1,20 @@
+---
+widget: { class: image, image: "$ui_title_capsule", innerBorder: [ 6, 3, 6, 6 ], colour: $ui_popupWindow, size: [500, 400] }
+sizer: { type: vertical }
+fill: centre
+proportion: 1
+children:
+- sizer: { type: horizontal }
+  children:
+  - widget: { class: label, id: title, text: "Pick Colour" }
+    fill: centre
+    proportion: 1
+- widget: { class: label, id: message, text: "TODO" }
+  border: [0, 10, 0, 10]
+- sizer: { type: horizontal }
+  children:
+  - stretchSpacer: {}
+    proportion: 1
+  - widget: { id: ok, class: button, text: OK, size: [100, 22] }
+  - widget: { id: cancel, class: button, text: Cancel, size: [100, 22] }
+...

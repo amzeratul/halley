@@ -8,6 +8,7 @@
 #include "src/ui/select_asset_widget.h"
 #include "halley/editor_extensions/component_field_parameters.h"
 #include "halley/editor_extensions/component_editor_context.h"
+#include "src/ui/colour_picker.h"
 
 using namespace Halley;
 
@@ -932,7 +933,6 @@ public:
 
 	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
 	{
-		// TODO: make this a proper colour picker
 		auto data = pars.data;
 		auto defaultValue = pars.getStringDefaultParameter();
 		if (defaultValue.isEmpty()) {
@@ -946,15 +946,16 @@ public:
 		auto field = std::make_shared<UITextInput>("colourHex", context.getUIFactory().getStyle("inputThin"), value, LocalisedString::fromUserString(defaultValue));
 		container->add(field, 1);
 
-		auto colourPreview = std::make_shared<UIImage>(Sprite().setImage(context.getUIFactory().getResources(), "halley_ui/ui_list_item.png").setColour(Colour4f::fromString(value)));
-		colourPreview->setMinSize(Vector2f(40, 22));
+		auto colourPreview = std::make_shared<ColourPickerButton>(context.getUIFactory(), Colour4f::fromString(value), [&context, data](Colour4f col, bool final)
+		{
+			data.getWriteableFieldData() = ConfigNode(toString(col));
+			context.onEntityUpdated();
+		});
 		container->add(colourPreview);
 		
-		field->bindData("colourHex", value, [&context, data, colourPreview](String newVal)
+		field->bindData("colourHex", value, [colourPreview](String newVal)
 		{
-			colourPreview->getSprite().setColour(Colour4f::fromString(newVal));
-			data.getWriteableFieldData() = ConfigNode(std::move(newVal));
-			context.onEntityUpdated();
+			colourPreview->setColour(Colour4f::fromString(newVal), true);
 		});
 
 		return container;

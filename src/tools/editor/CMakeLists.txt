@@ -67,6 +67,7 @@ set (editor_sources
 	"src/scene/gizmos/scripting/scripting_node_editor.cpp"
 
 	"src/ui/base_canvas.cpp"
+	"src/ui/colour_picker.cpp"
 	"src/ui/console_window.cpp"
 	"src/ui/ecs_window.cpp"
 	"src/ui/editor_settings_window.cpp"
@@ -147,6 +148,7 @@ set (editor_headers
 	"src/scene/gizmos/scripting/scripting_node_editor.h"
 	
 	"src/ui/base_canvas.h"
+	"src/ui/colour_picker.h"
 	"src/ui/console_window.h"
 	"src/ui/ecs_window.h"
 	"src/ui/editor_settings_window.h"
