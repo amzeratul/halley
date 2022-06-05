@@ -3,7 +3,9 @@
 #include <halley/ui/halley_ui.h>
 
 namespace Halley {
-    class ColourPickerButton : public UIImage {
+	class ColourPickerDisplay;
+
+	class ColourPickerButton : public UIImage {
     public:
         using Callback = std::function<void(Colour4f, bool)>;
 
@@ -26,16 +28,40 @@ namespace Halley {
     	ColourPicker(UIFactory& factory, Colour4f initialColour, Callback callback);
 
         Colour4f getColour() const;
+        void setColour(Colour4f col);
+
+        void update(Time t, bool moved) override;
 
     private:
         Colour4f initialColour;
         Colour4f colour;
         Callback callback;
+        std::shared_ptr<ColourPickerDisplay> mainDisplay;
+        std::shared_ptr<ColourPickerDisplay> ribbonDisplay;
 
-    	void onMakeUI() override;
+        void onMakeUI() override;
 
         void accept();
         void cancel();
         void onColourChanged();
+    };
+
+    class ColourPickerDisplay : public UIImage {
+    public:
+        ColourPickerDisplay(String id, Vector2f size, Resources& resources, const String& material);
+
+        void setValue(Vector2f value);
+        Vector2f getValue() const;
+
+        void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
+        void releaseMouse(Vector2f mousePos, int button) override;
+        void onMouseOver(Vector2f mousePos) override;
+        bool isFocusLocked() const override;
+
+    private:
+        Vector2f value;
+        bool held = false;
+
+        static Sprite makeSprite(Resources& resources, Vector2f size, const String& material);
     };
 }

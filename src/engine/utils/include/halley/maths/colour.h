@@ -27,6 +27,7 @@
 #include "halley/text/halleystring.h"
 #include <gsl/gsl_assert>
 #include <cstdint>
+#include "halley/utils/utils.h"
 
 namespace Halley {
 	// This whole class is TERRIBLE
@@ -139,9 +140,7 @@ namespace Halley {
 			float g = 0;
 			float b = 0;
 			if (s == 0) {
-				r = v * 255;
-				if (r < 0) r = 0;
-				if (r > 255) r = 255;
+				r = clamp(v * 255.0f, 0.0f, 255.0f);
 				g = b = r;
 			} else {
 				h = float(std::fmod(h, 1.0f));

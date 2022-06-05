@@ -2,6 +2,7 @@
 #include "halley/core/resources/resources.h"
 #include <halley/file_formats/config_file.h>
 
+#include "colour_picker.h"
 #include "infini_canvas.h"
 #include "scroll_background.h"
 #include "select_asset_widget.h"
@@ -43,6 +44,7 @@ EditorUIFactory::EditorUIFactory(const HalleyAPI& api, Resources& resources, I18
 	addFactory("uiEditorDisplay", [=](const ConfigNode& node) { return makeUIEditorDisplay(node); });
 	addFactory("audioObjectTreeList", [=](const ConfigNode& node) { return makeAudioObjectTreeList(node); });
 	addFactory("curveEditor", [=](const ConfigNode& node) { return makeCurveEditor(node); });
+	addFactory("colourPickerDisplay", [=](const ConfigNode& node) { return makeColourPickerDisplay(node); });
 }
 
 Sprite EditorUIFactory::makeAssetTypeIcon(AssetType type) const
@@ -186,6 +188,17 @@ std::shared_ptr<UIWidget> EditorUIFactory::makeCurveEditor(const ConfigNode& ent
 	auto widget = std::make_shared<CurveEditor>(id, style);
 
 	return widget;
+}
+
+std::shared_ptr<UIWidget> EditorUIFactory::makeColourPickerDisplay(const ConfigNode& entryNode)
+{
+	const auto& node = entryNode["widget"];
+	auto id = node["id"].asString();
+	auto size = node["size"].asVector2f(Vector2f(16, 16));
+	auto material = node["material"].asString();
+	auto widget = std::make_shared<ColourPickerDisplay>(std::move(id), size, getResources(), material);
+
+	return widget;	
 }
 
 void EditorUIFactory::loadColourSchemes()

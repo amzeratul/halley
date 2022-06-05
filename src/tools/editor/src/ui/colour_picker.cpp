@@ -36,11 +36,6 @@ ColourPicker::ColourPicker(UIFactory& factory, Colour4f initialColour, Callback 
 	setAnchor(UIAnchor());
 }
 
-Colour4f ColourPicker::getColour() const
-{
-	return colour;
-}
-
 void ColourPicker::onMakeUI()
 {
 	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
@@ -52,6 +47,30 @@ void ColourPicker::onMakeUI()
 	{
 		cancel();
 	});
+
+	mainDisplay = getWidgetAs<ColourPickerDisplay>("mainDisplay");
+	ribbonDisplay = getWidgetAs<ColourPickerDisplay>("ribbonDisplay");
+}
+
+Colour4f ColourPicker::getColour() const
+{
+	return colour;
+}
+
+void ColourPicker::setColour(Colour4f col)
+{
+	if (col != colour) {
+		colour = col;
+		onColourChanged();
+	}
+}
+
+void ColourPicker::update(Time t, bool moved)
+{
+	const float h = 1 - ribbonDisplay->getValue().y;
+	mainDisplay->getSprite().setCustom0(Vector4f(h, 0, 0, 0));
+	const Vector2f sv = mainDisplay->getValue();
+	setColour(Colour4f::fromHSV(h, sv.x, 1 - sv.y));
 }
 
 void ColourPicker::accept()
@@ -75,4 +94,58 @@ void ColourPicker::onColourChanged()
 	if (callback) {
 		callback(colour, false);
 	}
+}
+
+ColourPickerDisplay::ColourPickerDisplay(String id, Vector2f size, Resources& resources, const String& material)
+	: UIImage(std::move(id), makeSprite(resources, size, material))
+{
+	setInteractWithMouse(true);
+}
+
+void ColourPickerDisplay::setValue(Vector2f value)
+{
+	this->value = value;
+}
+
+Vector2f ColourPickerDisplay::getValue() const
+{
+	return value;
+}
+
+void ColourPickerDisplay::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
+{
+	if (button == 0) {
+		focus();
+		held = true;
+		onMouseOver(mousePos);
+	}
+}
+
+void ColourPickerDisplay::releaseMouse(Vector2f mousePos, int button)
+{
+	if (button == 0) {
+		held = false;
+	}
+}
+
+void ColourPickerDisplay::onMouseOver(Vector2f mousePos)
+{
+	if (held) {
+		value = (mousePos - getPosition()) / getSize();
+		value.x = clamp(value.x, 0.0f, 1.0f);
+		value.y = clamp(value.y, 0.0f, 1.0f);
+	}
+}
+
+bool ColourPickerDisplay::isFocusLocked() const
+{
+	return held;
+}
+
+Sprite ColourPickerDisplay::makeSprite(Resources& resources, Vector2f size, const String& material)
+{
+	return Sprite()
+		.setSize(size)
+		.setMaterial(resources, material)
+		.setTexRect(Rect4f(Vector2f(0, 0), Vector2f(1, 1)));
 }
