@@ -139,12 +139,12 @@ namespace Halley {
 			return col;
 		}
 
-		[[nodiscard]] static Colour4 fromHSV(Vector3f hsv)
+		[[nodiscard]] static Colour4 fromHSV(Vector3f hsv, float a)
 		{
-			return fromHSV(hsv.x, hsv.y, hsv.z);
+			return fromHSV(hsv.x, hsv.y, hsv.z, a);
 		}
 
-		[[nodiscard]] static Colour4 fromHSV(float h, float s, float v)
+		[[nodiscard]] static Colour4 fromHSV(float h, float s, float v, float a)
 		{
 			float r = 0;
 			float g = 0;
@@ -170,7 +170,7 @@ namespace Halley {
 				}
 			}
 
-			return Colour4<T>(Colour4<float>(r, g, b));
+			return Colour4<T>(Colour4<float>(r, g, b, a));
 		}
 
 		[[nodiscard]] Vector3f toHSV(float defaultHue = 0, float defaultSaturation = 0) const

@@ -87,7 +87,7 @@ void ColourPicker::onMakeUI()
 	{
 		updatingDisplay = true;
 		const float h = 1 - ribbonDisplay->getValue().y;
-		setColour(Colour4f::fromHSV(h, sv.x, 1 - sv.y));
+		setColour(Colour4f::fromHSV(h, sv.x, 1 - sv.y, colour.a));
 		updatingDisplay = false;
 	});
 	ribbonDisplay->setCallback([=](Vector2f val)
@@ -95,7 +95,7 @@ void ColourPicker::onMakeUI()
 		updatingDisplay = true;
 		const float h = 1 - val.y;
 		const Vector2f sv = mainDisplay->getValue();
-		setColour(Colour4f::fromHSV(h, sv.x, 1 - sv.y));
+		setColour(Colour4f::fromHSV(h, sv.x, 1 - sv.y, colour.a));
 		mainDisplay->getSprite().setCustom0(Vector4f(h, 0, 0, 0));
 		updatingDisplay = false;
 	});
@@ -123,7 +123,7 @@ void ColourPicker::onMakeUI()
 		}
 	});
 
-	bindData("rSlider", colour.r, [=](float val)
+	bindData("rSlider", colour.r * 255, [=](float val)
 	{
 		if (!updatingUI) {
 			auto c = colour;
@@ -132,7 +132,7 @@ void ColourPicker::onMakeUI()
 		}
 	});
 
-	bindData("gSlider", colour.g, [=](float val)
+	bindData("gSlider", colour.g * 255, [=](float val)
 	{
 		if (!updatingUI) {
 			auto c = colour;
@@ -141,7 +141,7 @@ void ColourPicker::onMakeUI()
 		}
 	});
 
-	bindData("bSlider", colour.b, [=](float val)
+	bindData("bSlider", colour.b * 255, [=](float val)
 	{
 		if (!updatingUI) {
 			auto c = colour;
@@ -150,23 +150,23 @@ void ColourPicker::onMakeUI()
 		}
 	});
 
-	bindData("alphaSlider", colour.a, [=](float val)
+	bindData("aSlider", colour.a * 100, [=](float val)
 	{
 		if (!updatingUI) {
 			auto c = colour;
-			c.a = val / 255.0f;
+			c.a = val / 100.0f;
 			setColour(c);
 		}
 	});
 
-	bindData("hSlider", hsv.x, [=](float val)
+	bindData("hSlider", hsv.x * 360.0f, [=](float val)
 	{
 		if (!updatingUI) {
 			ribbonDisplay->setValue(Vector2f(0, 1 - val / 360.0f));
 		}
 	});
 
-	bindData("sSlider", hsv.y, [=](float val)
+	bindData("sSlider", hsv.y * 255.0f, [=](float val)
 	{
 		if (!updatingUI) {
 			auto v = mainDisplay->getValue();
@@ -175,7 +175,7 @@ void ColourPicker::onMakeUI()
 		}
 	});
 
-	bindData("vSlider", hsv.z, [=](float val)
+	bindData("vSlider", hsv.z * 255.0f, [=](float val)
 	{
 		if (!updatingUI) {
 			auto v = mainDisplay->getValue();
@@ -247,7 +247,7 @@ void ColourPicker::updateUI()
 	rgbhsvSliders[0]->setValue(colour.r * 255);
 	rgbhsvSliders[1]->setValue(colour.g * 255);
 	rgbhsvSliders[2]->setValue(colour.b * 255);
-	alphaSlider->setValue(colour.a * 255);
+	alphaSlider->setValue(colour.a * 100);
 	rgbhsvSliders[3]->setValue(hsv.x * 360);
 	rgbhsvSliders[4]->setValue(hsv.y * 255);
 	rgbhsvSliders[5]->setValue(hsv.z * 255);

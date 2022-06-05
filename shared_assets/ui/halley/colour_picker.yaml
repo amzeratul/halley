@@ -24,8 +24,9 @@ children:
       children:
       - widget: { class: label, text: Alpha }
         border: [0, 0, 10, 0]
-      - widget: { id: aSlider, class: slider, maxValue: 255, granularity: 1 }
+      - widget: { id: aSlider, class: slider, maxValue: 100, granularity: 1 }
         proportion: 1
+      - widget: { class: label, text: "%" }
   - sizer: { type: vertical }
     children:
     - sizer: { type: horizontal }
