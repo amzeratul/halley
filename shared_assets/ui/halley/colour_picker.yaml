@@ -11,10 +11,51 @@ children:
     proportion: 1
 - sizer: { type: horizontal }
   children:
-  - widget: { id: mainDisplay, class: colourPickerDisplay, material: "Halley/ColourDisplaySV", size: [256, 256] }
-    border: [10, 10, 10, 10]
-  - widget: { id: ribbonDisplay, class: colourPickerDisplay, material: "Halley/ColourDisplayH", size: [16, 256] }
-    border: [0, 10, 10, 10]
+  - sizer: { type: vertical }
+    children:
+    - sizer: { type: horizontal }
+      children:
+      - widget: { id: mainDisplay, class: colourPickerDisplay, material: "Halley/ColourDisplaySV", size: [256, 256] }
+        border: [10, 10, 10, 10]
+      - widget: { id: ribbonDisplay, class: colourPickerDisplay, material: "Halley/ColourDisplayH", size: [16, 256] }
+        border: [0, 10, 10, 10]
+    - sizer: { type: horizontal }
+      children:
+      - widget: { class: label, text: Alpha }
+      - widget: { id: aSlider, class: slider, maxValue: 255, granularity: 1 }
+        proportion: 1
+  - sizer: { type: vertical }
+    children:
+    - sizer: { type: horizontal }
+      border: [10, 10, 10, 10]
+      children:
+      - widget: { id: colour, class: image, image: halley_ui/ui_list_item.png, size: [64, 32] }
+        proportion: 1
+      - widget: { id: prevColour, class: image, image: halley_ui/ui_list_item.png, size: [64, 32] }
+        proportion: 1
+    - widget: { class: widget, size: [300, 10] }
+      sizer: { type: grid, columns: 2, columnProportions: [0, 1], gap: 4 }
+      border: [10, 10, 10, 10]
+      children:
+      - widget: { class: label, text: Red }
+      - widget: { id: rSlider, class: slider, maxValue: 255, granularity: 1 }
+      - widget: { class: label, text: Green }
+      - widget: { id: gSlider, class: slider, maxValue: 255, granularity: 1 }
+      - widget: { class: label, text: Blue }
+      - widget: { id: bSlider, class: slider, maxValue: 255, granularity: 1 }
+      - widget: { class: label, text: Hue }
+      - widget: { id: hSlider, class: slider, maxValue: 359, granularity: 1 }
+      - widget: { class: label, text: Saturation }
+        border: [0, 0, 10, 0]
+      - widget: { id: sSlider, class: slider, maxValue: 255, granularity: 1 }
+      - widget: { class: label, text: Value }
+      - widget: { id: vSlider, class: slider, maxValue: 255, granularity: 1 }
+    - sizer: { type: horizontal }
+      children:
+      - widget: { id: hexCode, class: textInput }
+        proportion: 1
+      - widget: { id: floatCode, class: textInput }
+        proportion: 1
 - sizer: { type: horizontal }
   children:
   - stretchSpacer: {}
