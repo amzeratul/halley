@@ -111,5 +111,6 @@ namespace Halley {
 
 		void focusWidget(UIWidget& widget);
 		void unfocusWidget(UIWidget& widget);
+		Vector<std::shared_ptr<UIWidget>> getFocusables();
 	};
 }

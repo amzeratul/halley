@@ -283,7 +283,7 @@ namespace Halley {
 		for (auto& c: children) {
 			if (c->isActive() || includeInactive) {
 				f(c);
-				c->descend(f, includeInactive);
+				c->descend(f, includeInactive, includePending);
 			}
 		}
 
@@ -291,7 +291,7 @@ namespace Halley {
 			for (auto& c: childrenWaiting) {
 				if (c->isActive() || includeInactive) {
 					f(c);
-					c->descend(f, includeInactive);
+					c->descend(f, includeInactive, includePending);
 				}
 			}
 		}

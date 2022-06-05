@@ -16,6 +16,8 @@ ScriptingNodeEditor::ScriptingNodeEditor(ScriptingBaseGizmo& gizmo, UIFactory& f
 	} else {
 		setAnchor(UIAnchor());
 	}
+	setModal(true);
+	factory.loadUI(*this, "halley/scripting_node_editor");
 }
 
 void ScriptingNodeEditor::onMakeUI()
@@ -55,9 +57,8 @@ void ScriptingNodeEditor::onMakeUI()
 
 void ScriptingNodeEditor::onAddedToRoot(UIRoot& root)
 {
-	factory.loadUI(*this, "halley/scripting_node_editor");
-
 	root.registerKeyPressListener(shared_from_this());
+	root.focusNext(false);
 }
 
 void ScriptingNodeEditor::onRemovedFromRoot(UIRoot& root)
@@ -122,18 +123,5 @@ void ScriptingNodeEditor::makeFields(const std::shared_ptr<UIWidget>& fieldsRoot
 		const auto params = ComponentFieldParameters(type.name, ComponentDataRetriever(curSettings, type.name, type.name), type.defaultValue);
 		auto field = entityEditorFactory.makeField(type.type, params, ComponentEditorLabelCreation::Always);
 		fieldsRoot->add(field);
-	}
-
-	bool foundFocus = false;
-	fieldsRoot->descend([&] (const std::shared_ptr<UIWidget>& e)
-	{
-		if (!foundFocus && e->canReceiveFocus()) {
-			foundFocus = true;
-			getRoot()->setFocus(e);
-		}
-	}, false, true);
-
-	if (!foundFocus) {
-		getRoot()->setFocus(shared_from_this());
 	}
 }

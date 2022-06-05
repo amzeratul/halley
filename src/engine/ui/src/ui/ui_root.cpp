@@ -552,15 +552,31 @@ void UIRoot::unfocusWidget(UIWidget& widget)
 	}
 }
 
-void UIRoot::focusNext(bool reverse)
+Vector<std::shared_ptr<UIWidget>> UIRoot::getFocusables()
 {
 	Vector<std::shared_ptr<UIWidget>> focusables;
-	descend([&] (const std::shared_ptr<UIWidget>& e)
-	{
-		if (e->canReceiveFocus()) {
-			focusables.push_back(e);
+
+	const bool hasModal = hasModalUI();
+
+	for (const auto& cs: { getChildrenWaiting(), getChildren() }) {
+		for (const auto& c: cs) {
+			if (!hasModal || c->isModal()) {
+				c->descend([&] (const std::shared_ptr<UIWidget>& e)
+				{
+					if (e->canReceiveFocus()) {
+						focusables.push_back(e);
+					}
+				}, false, true);
+			}
 		}
-	});
+	}
+
+	return focusables;
+}
+
+void UIRoot::focusNext(bool reverse)
+{
+	const auto focusables = getFocusables();
 
 	if (focusables.empty()) {
 		return;
@@ -642,12 +658,22 @@ bool UIRoot::hasModalUI() const
 			return true;
 		}
 	}
+	for (const auto& c: getChildrenWaiting()) {
+		if (c->isActive() && c->isModal()) {
+			return true;
+		}
+	}
 	return false;
 }
 
 String UIRoot::getModalUIName() const
 {
 	for (const auto& c: getChildren()) {
+		if (c->isActive() && c->isModal()) {
+			return c->getId();
+		}
+	}
+	for (const auto& c: getChildrenWaiting()) {
 		if (c->isActive() && c->isModal()) {
 			return c->getId();
 		}
