@@ -141,6 +141,31 @@ void ColourPicker::onMakeUI()
 		}
 	});
 
+	bindData("hSlider", hsv.x, [=](float val)
+	{
+		if (!updatingUI) {
+			ribbonDisplay->setValue(Vector2f(0, 1 - val / 360.0f));
+		}
+	});
+
+	bindData("sSlider", hsv.y, [=](float val)
+	{
+		if (!updatingUI) {
+			auto v = mainDisplay->getValue();
+			v.x = val / 255.0f;
+			mainDisplay->setValue(v);
+		}
+	});
+
+	bindData("vSlider", hsv.z, [=](float val)
+	{
+		if (!updatingUI) {
+			auto v = mainDisplay->getValue();
+			v.y = 1.0f - (val / 255.0f);
+			mainDisplay->setValue(v);
+		}
+	});
+
 	updateUI();
 }
 
