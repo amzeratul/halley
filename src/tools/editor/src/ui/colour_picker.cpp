@@ -21,7 +21,10 @@ void ColourPickerButton::setColour(Colour4f colour, bool final)
 void ColourPickerButton::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	if (button == 0 && keyMods == KeyMods::None) {
-		getRoot()->addChild(std::make_shared<ColourPicker>(factory, getSprite().getColour(), callback));
+		getRoot()->addChild(std::make_shared<ColourPicker>(factory, getSprite().getColour(), [=] (Colour4f col, bool final)
+		{
+			setColour(col, final);
+		}));
 	}
 }
 
