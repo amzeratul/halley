@@ -29,7 +29,9 @@ void PopupWindow::releaseMouse(Vector2f mousePos, int button)
 void PopupWindow::onMouseOver(Vector2f mousePos)
 {
 	if (dragging) {
-		setAnchor(UIAnchor(Vector2f(), Vector2f(), mousePos - startDragPos));
+		const Rect4f rootBounds = getRoot()->getRect();
+		const Rect4f bounds = Rect4f(rootBounds.getTopLeft(), rootBounds.getBottomRight() - getSize());
+		setAnchor(UIAnchor(Vector2f(), Vector2f(), bounds.getClosestPoint(mousePos - startDragPos)));
 	}
 }
 
