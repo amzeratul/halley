@@ -1,6 +1,7 @@
 #pragma once
 #include "halley/ui/ui_widget.h"
 #include "ui_image.h"
+#include "ui_textinput.h"
 
 namespace Halley {
 	class UISliderBar;
@@ -8,7 +9,7 @@ namespace Halley {
 
 	class UISlider : public UIWidget {
 	public:
-		UISlider(const String& id, UIStyle style, float minValue, float maxValue, float value = 0);
+		UISlider(const String& id, UIStyle style, float minValue, float maxValue, float value = 0, bool hasTextInput = false);
 
 		void setValue(float value);
 		void setRelativeValue(float value);
@@ -36,6 +37,7 @@ namespace Halley {
 	private:
 		std::shared_ptr<UISliderBar> sliderBar;
 		std::shared_ptr<UILabel> label;
+		std::shared_ptr<UITextInput> textInput;
 		std::shared_ptr<UIImage> box;
 
 		const float minValue;
@@ -50,6 +52,7 @@ namespace Halley {
 		std::function<float(float)> transformation;
 
 		LocalisedString makeLabel() const;
+		void updateLabel();
 		float getValueWithGranularity() const;
 	};
 	

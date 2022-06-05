@@ -35,6 +35,8 @@ namespace Halley {
 		bool hasColour(const String& name) const;
 		bool hasSubStyle(const String& name) const;
 		bool hasSprite(const String& name) const;
+		bool hasVector2f(const String& name) const;
+		bool hasFloat(const String& name) const;
 
 		void reload(const ConfigNode& node);
 

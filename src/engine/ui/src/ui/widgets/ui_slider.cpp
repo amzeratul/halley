@@ -1,9 +1,11 @@
 #include "halley/ui/widgets/ui_slider.h"
+
+#include "ui_validator.h"
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/ui/widgets/ui_image.h"
 using namespace Halley;
 
-UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxValue, float value)
+UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxValue, float value, bool hasTextInput)
 	: UIWidget(id, {}, UISizer(UISizerType::Horizontal, 0), style.getBorder("innerBorder"))
 	, minValue(minValue)
 	, maxValue(maxValue)
@@ -12,13 +14,18 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 	styles.emplace_back(style);
 	sliderBar = std::make_shared<UISliderBar>(*this, style);
 	UIWidget::add(sliderBar, 1, style.getBorder("barBorder"), UISizerAlignFlags::CentreVertical | UISizerFillFlags::FillHorizontal);
-	
-	box = std::make_shared<UIImage>(style.getSprite("labelBorder"), UISizer(UISizerType::Vertical), style.getBorder("labelInnerBorder"));
-	label = std::make_shared<UILabel>(id + "_label", style, makeLabel());
-	box->add(label, 0, {}, UISizerAlignFlags::Centre);
-	box->layout();
-	box->setMinSize(box->getSize());
-	UIWidget::add(box, 0, {}, UISizerAlignFlags::Centre);
+
+	if (hasTextInput) {
+		textInput = std::make_shared<UITextInput>(id + "_input", style.getSubStyle("textInput"), "", LocalisedString(), std::make_shared<UINumericValidator>(minValue < 0));
+		UIWidget::add(textInput, 0, {}, UISizerAlignFlags::Centre);
+	} else {
+		box = std::make_shared<UIImage>(style.getSprite("labelBorder"), UISizer(UISizerType::Vertical), style.getBorder("labelInnerBorder"));
+		label = std::make_shared<UILabel>(id + "_label", style, makeLabel());
+		box->add(label, 0, {}, UISizerAlignFlags::Centre);
+		box->layout();
+		box->setMinSize(box->getSize());
+		UIWidget::add(box, 0, {}, UISizerAlignFlags::Centre);
+	}
 
 	setHandle(UIEventType::MouseWheel, [=] (const UIEvent& event)
 	{
@@ -31,9 +38,11 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 void UISlider::setValue(float v)
 {
 	value = clamp(v, minValue, maxValue);
-	label->setText(makeLabel());
-	box->layout();
-	box->setMinSize(Vector2f::max(box->getMinimumSize(), box->getSize()));
+	if (box) {
+		box->layout();
+		box->setMinSize(Vector2f::max(box->getMinimumSize(), box->getSize()));
+	}
+	updateLabel();
 	notifyDataBind(getValue());
 }
 
@@ -93,13 +102,15 @@ void UISlider::setMouseWheelSpeed(float speed)
 
 void UISlider::setShowLabel(bool show)
 {
-	box->setActive(show);
+	if (box) {
+		box->setActive(show);
+	}
 }
 
 void UISlider::setLabelConversion(std::function<LocalisedString(float)> f)
 {
 	labelConversion = f;
-	label->setText(makeLabel());
+	updateLabel();
 }
 
 void UISlider::setTransformation(std::function<float(float)> f)
@@ -154,6 +165,18 @@ LocalisedString UISlider::makeLabel() const
 		return labelConversion(getValue());
 	} else {
 		return LocalisedString::fromNumber(int(lround(getValue())));
+	}
+}
+
+void UISlider::updateLabel()
+{
+	if (box && label) {
+		label->setText(makeLabel());
+		box->layout();
+		box->setMinSize(Vector2f::max(box->getMinimumSize(), box->getSize()));
+	}
+	if (textInput) {
+		textInput->setText(makeLabel().getString());
 	}
 }
 

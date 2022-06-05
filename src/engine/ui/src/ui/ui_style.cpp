@@ -90,3 +90,13 @@ bool UIStyle::hasColour(const String& name) const
 {
 	return style->hasColour(name);
 }
+
+bool UIStyle::hasFloat(const String& name) const
+{
+	return style->hasFloat(name);
+}
+
+bool UIStyle::hasVector2f(const String& name) const
+{
+	return style->hasVector2f(name);
+}

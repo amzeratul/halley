@@ -24,7 +24,7 @@ children:
       children:
       - widget: { class: label, text: Alpha }
         border: [0, 0, 10, 0]
-      - widget: { id: aSlider, class: slider, maxValue: 100, granularity: 1 }
+      - widget: { id: aSlider, class: slider, maxValue: 100, granularity: 1, hasTextInput: true }
         proportion: 1
       - widget: { class: label, text: "%" }
   - sizer: { type: vertical }
@@ -41,20 +41,20 @@ children:
       border: [10, 10, 10, 10]
       children:
       - widget: { class: label, text: Red }
-      - widget: { id: rSlider, class: slider, maxValue: 255, granularity: 1 }
+      - widget: { id: rSlider, class: slider, maxValue: 255, granularity: 1, hasTextInput: true }
       - widget: { class: label, text: Green }
-      - widget: { id: gSlider, class: slider, maxValue: 255, granularity: 1 }
+      - widget: { id: gSlider, class: slider, maxValue: 255, granularity: 1, hasTextInput: true }
       - widget: { class: label, text: Blue }
-      - widget: { id: bSlider, class: slider, maxValue: 255, granularity: 1 }
+      - widget: { id: bSlider, class: slider, maxValue: 255, granularity: 1, hasTextInput: true }
       - widget: { class: widget, size: [10, 10] }
       - widget: { class: widget, size: [10, 10] }
       - widget: { class: label, text: Hue }
-      - widget: { id: hSlider, class: slider, maxValue: 359, granularity: 1 }
+      - widget: { id: hSlider, class: slider, maxValue: 359, granularity: 1, hasTextInput: true }
       - widget: { class: label, text: Saturation }
         border: [0, 0, 10, 0]
-      - widget: { id: sSlider, class: slider, maxValue: 255, granularity: 1 }
+      - widget: { id: sSlider, class: slider, maxValue: 255, granularity: 1, hasTextInput: true }
       - widget: { class: label, text: Value }
-      - widget: { id: vSlider, class: slider, maxValue: 255, granularity: 1 }
+      - widget: { id: vSlider, class: slider, maxValue: 255, granularity: 1, hasTextInput: true }
       - widget: { class: widget, size: [10, 10] }
       - widget: { class: widget, size: [10, 10] }
       - widget: { class: label, text: Hex }

@@ -1069,8 +1069,9 @@ std::shared_ptr<UIWidget> UIFactory::makeSlider(const ConfigNode& entryNode)
 	auto minValue = node["minValue"].asFloat(0);
 	auto maxValue = node["maxValue"].asFloat(1);
 	auto value = node["value"].asFloat(0.5f);
+	bool hasTextInput = node["hasTextInput"].asBool(false);
 
-	auto slider = std::make_shared<UISlider>(id, style, minValue, maxValue, value);
+	auto slider = std::make_shared<UISlider>(id, style, minValue, maxValue, value, hasTextInput);
 	if (node.hasKey("granularity")) {
 		slider->setGranularity(node["granularity"].asFloat());
 	}

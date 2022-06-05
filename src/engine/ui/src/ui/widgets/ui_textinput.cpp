@@ -10,8 +10,22 @@
 
 using namespace Halley;
 
+namespace {
+	Vector2f getInputSize(const UIStyle& style)
+	{
+		if (style.hasVector2f("minSize")) {
+			return style.getVector2f("minSize");
+		} else if (style.hasFloat("minSize")) {
+			const auto s = style.getFloat("minSize");
+			return Vector2f(s, s);
+		} else {
+			return Vector2f();
+		}
+	}
+}
+
 UITextInput::UITextInput(String id, UIStyle style, String text, LocalisedString ghostText, std::shared_ptr<UIValidator> validator)
-	: UIWidget(std::move(id), Vector2f(style.getFloat("minSize"), style.getFloat("minSize")), UISizer(UISizerType::Vertical), style.getBorder("innerBorder"))
+	: UIWidget(std::move(id), getInputSize(style), UISizer(UISizerType::Vertical), style.getBorder("innerBorder"))
 	, sprite(style.getSprite("box"))
 	, caret(style.getSprite("caret"))
 	, label(style.getTextRenderer("label"))

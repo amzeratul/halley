@@ -7,6 +7,7 @@
 #include "halley/core/resources/resources.h"
 #include "halley/support/logger.h"
 #include "halley/maths/vector4.h"
+#include "halley/utils/algorithm.h"
 using namespace Halley;
 
 Colour4f getColour(const ConfigNode& node, const std::shared_ptr<const UIColourScheme>& colourScheme)
@@ -137,7 +138,7 @@ const T& getValue(const ConfigNode* node, UIStyleSheet& styleSheet, const String
 }
 
 template <typename T>
-bool hasValue(const ConfigNode* node, const String& key, HashMap<String, T>& cache)
+bool hasValue(const ConfigNode* node, const String& key, HashMap<String, T>& cache, std::initializer_list<const ConfigNodeType> typeRequired)
 {
 	// Is it already in cache?
 	const auto iter = cache.find(key);
@@ -145,7 +146,7 @@ bool hasValue(const ConfigNode* node, const String& key, HashMap<String, T>& cac
 		return true;
 	}
 
-	return node->hasKey(key);
+	return node->hasKey(key) && typeRequired.size() == 0 || std_ex::contains(typeRequired, (*node)[key].getType());
 }
 
 class UIStyleDefinition::Pimpl {
@@ -193,22 +194,32 @@ const TextRenderer& UIStyleDefinition::getTextRenderer(const String& name) const
 
 bool UIStyleDefinition::hasTextRenderer(const String& name) const
 {
-	return hasValue(node, name, pimpl->textRenderers);
+	return hasValue(node, name, pimpl->textRenderers, { ConfigNodeType::Map });
 }
 
 bool UIStyleDefinition::hasColour(const String& name) const
 {
-	return hasValue(node, name, pimpl->colours);
+	return hasValue(node, name, pimpl->colours, { ConfigNodeType::String });
 }
 
 bool UIStyleDefinition::hasSubStyle(const String& name) const
 {
-	return hasValue(node, name, pimpl->subStyles);
+	return hasValue(node, name, pimpl->subStyles, { ConfigNodeType::Map });
 }
 
 bool UIStyleDefinition::hasSprite(const String& name) const
 {
-	return hasValue(node, name, pimpl->sprites);
+	return hasValue(node, name, pimpl->sprites, { ConfigNodeType::String, ConfigNodeType::Map });
+}
+
+bool UIStyleDefinition::hasVector2f(const String& name) const
+{
+	return hasValue(node, name, pimpl->vector2fs, { ConfigNodeType::Sequence });
+}
+
+bool UIStyleDefinition::hasFloat(const String& name) const
+{
+	return hasValue(node, name, pimpl->floats, { ConfigNodeType::Float, ConfigNodeType::Int });
 }
 
 Vector4f UIStyleDefinition::getBorder(const String& name) const
@@ -228,7 +239,7 @@ float UIStyleDefinition::getFloat(const String& name) const
 
 float UIStyleDefinition::getFloat(const String& name, float defaultValue) const
 {
-	if (hasValue(node, name, pimpl->floats)) {
+	if (hasValue(node, name, pimpl->floats, { ConfigNodeType::Int, ConfigNodeType::Float })) {
 		return getFloat(name);
 	}
 
@@ -242,7 +253,7 @@ Vector2f UIStyleDefinition::getVector2f(const String& name) const
 
 Vector2f UIStyleDefinition::getVector2f(const String& name, Vector2f defaultValue) const
 {
-	if (hasValue(node, name, pimpl->vector2fs)) {
+	if (hasValue(node, name, pimpl->vector2fs, { ConfigNodeType::Sequence })) {
 		return getVector2f(name);
 	}
 

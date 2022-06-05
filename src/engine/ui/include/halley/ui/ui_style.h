@@ -25,6 +25,8 @@ namespace Halley {
 		Vector2f getVector2f(const String& name, Vector2f defaultValue) const;
 		Colour4f getColour(const String& name) const;
 		bool hasColour(const String& name) const;
+		bool hasFloat(const String& name) const;
+		bool hasVector2f(const String& name) const;
 
 	private:
 		std::shared_ptr<const UIStyleDefinition> style;
