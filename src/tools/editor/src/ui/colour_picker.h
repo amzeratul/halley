@@ -2,6 +2,8 @@
 
 #include <halley/ui/halley_ui.h>
 
+#include "popup_window.h"
+
 namespace Halley {
 	class ColourPickerDisplay;
 
@@ -26,11 +28,15 @@ namespace Halley {
         Colour4f colour;
     };
 
-    class ColourPicker : public UIWidget {
+    class ColourPicker : public PopupWindow {
     public:
         using Callback = std::function<void(Colour4f, bool)>;
 
     	ColourPicker(UIFactory& factory, Colour4f initialColour, Callback callback);
+
+        void onAddedToRoot(UIRoot& root) override;
+        void onRemovedFromRoot(UIRoot& root) override;
+        bool onKeyPress(KeyboardKeyPress key) override;
 
         Colour4f getColour() const;
         void setColour(Colour4f col);

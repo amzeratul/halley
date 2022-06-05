@@ -61,7 +61,7 @@ void ColourPickerButton::pressMouse(Vector2f mousePos, int button, KeyMods keyMo
 }
 
 ColourPicker::ColourPicker(UIFactory& factory, Colour4f initialColour, Callback callback)
-	: UIWidget("colourPicker", {}, UISizer())
+	: PopupWindow("colourPicker")
 	, initialColour(initialColour)
 	, colour(initialColour)
 	, callback(std::move(callback))
@@ -69,6 +69,31 @@ ColourPicker::ColourPicker(UIFactory& factory, Colour4f initialColour, Callback 
 	factory.loadUI(*this, "halley/colour_picker");
 	setModal(true);
 	setAnchor(UIAnchor());
+}
+
+void ColourPicker::onAddedToRoot(UIRoot& root)
+{
+	root.registerKeyPressListener(shared_from_this());
+}
+
+void ColourPicker::onRemovedFromRoot(UIRoot& root)
+{
+	root.removeKeyPressListener(*this);
+}
+
+bool ColourPicker::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::Enter)) {
+		accept();
+		return true;
+	}
+
+	if (key.is(KeyCode::Esc)) {
+		cancel();
+		return true;
+	}
+
+	return false;
 }
 
 void ColourPicker::onMakeUI()
