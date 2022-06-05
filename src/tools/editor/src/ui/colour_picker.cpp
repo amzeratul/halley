@@ -78,9 +78,13 @@ void ColourPicker::onMakeUI()
 		cancel();
 	});
 
+	const auto hsv = colour.toHSV();
+
 	mainDisplay = getWidgetAs<ColourPickerDisplay>("mainDisplay");
+	mainDisplay->setValue(Vector2f(hsv.y, 1 - hsv.z));
 	ribbonDisplay = getWidgetAs<ColourPickerDisplay>("ribbonDisplay");
 	ribbonDisplay->setCursorType(ColourPickerDisplay::CursorType::HorizontalLine);
+	ribbonDisplay->setValue(Vector2f(0, 1 - hsv.x));
 }
 
 Colour4f ColourPicker::getColour() const
