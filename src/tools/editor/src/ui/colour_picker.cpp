@@ -24,8 +24,13 @@ void ColourPickerButton::update(Time t, bool moved)
 	const auto hsv = colour.toHSV();
 	const bool isBrightCol = (Vector2f(0, 1) - hsv.yz()).length() < 0.5f;
 
+	String labelStr = colour.withAlpha(1).toString();
+	if (colour.a < 0.9999f) {
+		labelStr += " [" + toString(lroundl(colour.a * 100)) + "%]";
+	}
+
 	label
-		.setText(colour.toString())
+		.setText(labelStr)
 		.setPosition(getRect().getCenter())
 		.setColour(isBrightCol ? Colour4f(0, 0, 0, 1) : Colour4f(1, 1, 1, 1));
 }

@@ -46,6 +46,8 @@ children:
       - widget: { id: gSlider, class: slider, maxValue: 255, granularity: 1 }
       - widget: { class: label, text: Blue }
       - widget: { id: bSlider, class: slider, maxValue: 255, granularity: 1 }
+      - widget: { class: widget, size: [10, 10] }
+      - widget: { class: widget, size: [10, 10] }
       - widget: { class: label, text: Hue }
       - widget: { id: hSlider, class: slider, maxValue: 359, granularity: 1 }
       - widget: { class: label, text: Saturation }
