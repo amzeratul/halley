@@ -161,7 +161,6 @@ namespace Halley {
 		void updateEntityFocused();
 		void addEntityIdToList(Vector<EntityId>& dst, EntityRef entity);
 
-		void doDragCamera(Vector2f amount);
 		void updateCameraPos(Time t);
     	void saveCameraPos();
 	};

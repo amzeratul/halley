@@ -346,21 +346,18 @@ const Vector<EntityId>& SceneEditor::getCameraIds() const
 
 void SceneEditor::dragCamera(Vector2f amount)
 {
-	doDragCamera(amount);
-	cameraPanAnimation.deltas.emplace_back(amount, lastStepTime);
+	auto camera = getWorld().getEntity(cameraEntityIds.at(0));
+	const float zoom = camera.getComponent<CameraComponent>().zoom;
+	auto& transform = camera.getComponent<Transform2DComponent>();
+	transform.setGlobalPosition(roundPosition(transform.getGlobalPosition() + amount / zoom));
+
+	cameraPanAnimation.deltas.emplace_back(amount / zoom, lastStepTime);
 	if (cameraPanAnimation.deltas.size() > 3) {
 		cameraPanAnimation.deltas.erase(cameraPanAnimation.deltas.begin());
 	}
 	cameraPanAnimation.inertiaVel.reset();
 	cameraPanAnimation.updatedLastFrame = true;
-}
 
-void SceneEditor::doDragCamera(Vector2f amount)
-{
-	auto camera = getWorld().getEntity(cameraEntityIds.at(0));
-	const float zoom = camera.getComponent<CameraComponent>().zoom;
-	auto& transform = camera.getComponent<Transform2DComponent>();
-	transform.setGlobalPosition(roundPosition(transform.getGlobalPosition() + amount / zoom));
 	saveCameraPos();
 }
 
@@ -438,12 +435,12 @@ void SceneEditor::updateCameraPos(Time t)
 			}
 			vel = ds / static_cast<float>(dt);
 			cameraPanAnimation.deltas.clear();
-			if (vel->length() < 500.0f) {
+			if (vel->length() < 400.0f / getZoom()) {
 				vel.reset();
 			}
 		}
 
-		if (vel && vel->length() > 60.0f) {
+		if (vel && vel->length() > 60.0f / getZoom()) {
 			transform.setGlobalPosition(transform.getGlobalPosition() + *vel * static_cast<float>(t));
 			vel = damp(*vel, Vector2f(), 5.0f, static_cast<float>(t));
 		}
