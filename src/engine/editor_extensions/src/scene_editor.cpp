@@ -347,8 +347,11 @@ const Vector<EntityId>& SceneEditor::getCameraIds() const
 void SceneEditor::dragCamera(Vector2f amount)
 {
 	doDragCamera(amount);
-	cameraPanAnimation.lastVel = amount / lastStepTime;
-	cameraPanAnimation.panTime = 0;
+	cameraPanAnimation.deltas.emplace_back(amount, lastStepTime);
+	if (cameraPanAnimation.deltas.size() > 3) {
+		cameraPanAnimation.deltas.erase(cameraPanAnimation.deltas.begin());
+	}
+	cameraPanAnimation.inertiaVel.reset();
 	cameraPanAnimation.updatedLastFrame = true;
 }
 
@@ -397,6 +400,8 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 	cameraAnimation = CameraAnimation{ prevPos, targetPos, prevZoom, targetZoom, 0 };
 }
 
+PRAGMA_DEOPTIMIZE
+
 void SceneEditor::updateCameraPos(Time t)
 {
 	auto cameraEntity = getWorld().getEntity(cameraEntityIds.at(0));
@@ -405,7 +410,8 @@ void SceneEditor::updateCameraPos(Time t)
 	bool changed = false;
 
 	if (cameraAnimation) {
-		cameraPanAnimation.lastVel = Vector2f();
+		cameraPanAnimation.inertiaVel = Vector2f();
+		cameraPanAnimation.deltas.clear();
 
 		auto& ca = *cameraAnimation;
 		ca.t = advance(ca.t, 1.0f, static_cast<float>(t) * 4.0f);
@@ -421,10 +427,26 @@ void SceneEditor::updateCameraPos(Time t)
 		}
 	}
 
-	if (!cameraPanAnimation.updatedLastFrame && cameraPanAnimation.lastVel.length() > 10.0f) {
-		auto& vel = cameraPanAnimation.lastVel;
-		transform.setGlobalPosition(transform.getGlobalPosition() + vel * static_cast<float>(t));
-		vel = damp(vel, Vector2f(), 10.0f, static_cast<float>(t));
+	if (!cameraPanAnimation.updatedLastFrame) {
+		auto& vel = cameraPanAnimation.inertiaVel;
+		if (!vel && cameraPanAnimation.deltas.size() >= 3) {
+			Vector2f ds;
+			Time dt = 0;
+			for (const auto& d: cameraPanAnimation.deltas) {
+				ds += d.first;
+				dt += d.second;
+			}
+			vel = ds / static_cast<float>(dt);
+			cameraPanAnimation.deltas.clear();
+			if (vel->length() < 500.0f) {
+				vel.reset();
+			}
+		}
+
+		if (vel && vel->length() > 60.0f) {
+			transform.setGlobalPosition(transform.getGlobalPosition() + *vel * static_cast<float>(t));
+			vel = damp(*vel, Vector2f(), 5.0f, static_cast<float>(t));
+		}
 	}
 	cameraPanAnimation.updatedLastFrame = false;
 

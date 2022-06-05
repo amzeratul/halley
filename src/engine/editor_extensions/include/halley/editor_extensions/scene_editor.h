@@ -115,9 +115,9 @@ namespace Halley {
 		};
 
 		struct CameraPanAnimation {
-			Vector2f lastVel;
+			Vector<std::pair<Vector2f, Time>> deltas;
+			std::optional<Vector2f> inertiaVel;
 			bool updatedLastFrame = false;
-			Time panTime = 0;
 		};
 
 		const HalleyAPI* api = nullptr;
