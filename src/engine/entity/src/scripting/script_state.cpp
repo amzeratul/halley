@@ -1,6 +1,7 @@
 #include "scripting/script_state.h"
 
 #include "halley/bytes/byte_serializer.h"
+#include "scripting/script_graph.h"
 using namespace Halley;
 
 ScriptStateThread::ScriptStateThread()
@@ -91,6 +92,26 @@ ScriptState::ScriptState(const ConfigNode& node, const EntitySerializationContex
 	threads = ConfigNodeSerializer<decltype(threads)>().deserialize(context, node["threads"]);
 	graphHash = Deserializer::fromBytes<decltype(graphHash)>(node["graphHash"].asBytes());
 	variables = ConfigNodeSerializer<decltype(variables)>().deserialize(context, node["variables"]);
+
+	const auto scriptGraphName = node["script"].asString();
+	if (!scriptGraphName.isEmpty()) {
+		scriptGraph = context.resources->get<ScriptGraph>(scriptGraphName).get();
+	}
+}
+
+ScriptState::ScriptState(const ScriptGraph* script)
+	: scriptGraph(script)
+{
+}
+
+const ScriptGraph* ScriptState::getScriptGraphPtr() const
+{
+	return scriptGraph;
+}
+
+void ScriptState::setScriptGraphPtr(const ScriptGraph* script)
+{
+	scriptGraph = script;
 }
 
 ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) const
@@ -102,6 +123,7 @@ ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) 
 	node["threads"] = ConfigNodeSerializer<decltype(threads)>().serialize(threads, context);
 	node["graphHash"] = Serializer::toBytes(graphHash);
 	node["variables"] = ConfigNodeSerializer<decltype(variables)>().serialize(variables, context);
+	node["script"] = scriptGraph ? scriptGraph->getAssetId() : "";
 	return node;
 }
 
@@ -177,6 +199,16 @@ ConfigNode ScriptState::getVariable(const String& name) const
 void ScriptState::setVariable(const String& name, ConfigNode value)
 {
 	variables[name] = std::move(value);
+}
+
+bool ScriptState::operator==(const ScriptState& other) const
+{
+	return false;
+}
+
+bool ScriptState::operator!=(const ScriptState& other) const
+{
+	return true;
 }
 
 void ScriptState::onNodeStartedIntrospection(uint32_t nodeId)

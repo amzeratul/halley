@@ -19,14 +19,18 @@ ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resourc
 {
 }
 
-void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState& graphState)
+void ScriptEnvironment::update(Time time, ScriptState& graphState)
 {
-	currentGraph = &graph;
+	currentGraph = graphState.getScriptGraphPtr();
+	if (!currentGraph) {
+		throw Exception("Unable to update script state, script not set.", HalleyExceptions::Entity);
+	}
+
 	currentState = &graphState;
-	graph.assignTypes(nodeTypeCollection);
+	currentGraph->assignTypes(nodeTypeCollection);
 	
-	if (!graphState.hasStarted() || graphState.getGraphHash() != graph.getHash()) {
-		graphState.start(graph.getStartNode(), graph.getHash());
+	if (!graphState.hasStarted() || graphState.getGraphHash() != currentGraph->getHash()) {
+		graphState.start(currentGraph->getStartNode(), currentGraph->getHash());
 	}
 
 	// Allocate time for each thread
@@ -43,7 +47,7 @@ void ScriptEnvironment::update(Time time, const ScriptGraph& graph, ScriptState&
 		while (!suspended && timeLeft > 0 && thread.getCurNode()) {
 			// Get node type
 			const auto nodeId = thread.getCurNode().value();
-			const auto& node = graph.getNodes().at(nodeId);
+			const auto& node = currentGraph->getNodes().at(nodeId);
 			const auto& nodeType = node.getNodeType();
 			
 			// Start node if not done yet

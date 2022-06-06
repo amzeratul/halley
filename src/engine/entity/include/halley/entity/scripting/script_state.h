@@ -62,8 +62,12 @@ namespace Halley {
 
     	ScriptState();
 		ScriptState(const ConfigNode& node, const EntitySerializationContext& context);
+		ScriptState(const ScriptGraph* script);
 
-    	bool hasStarted() const { return started; }
+		const ScriptGraph* getScriptGraphPtr() const;
+		void setScriptGraphPtr(const ScriptGraph* script);
+
+		bool hasStarted() const { return started; }
     	void start(OptionalLite<uint32_t> startNode, uint64_t graphHash);
 		void reset();
     	
@@ -95,7 +99,11 @@ namespace Halley {
     	ConfigNode getVariable(const String& name) const;
     	void setVariable(const String& name, ConfigNode value);
 
+		bool operator==(const ScriptState& other) const;
+		bool operator!=(const ScriptState& other) const;
+
 	private:
+		const ScriptGraph* scriptGraph = nullptr;
     	Vector<ScriptStateThread> threads;
     	uint64_t graphHash = 0;
     	bool started = false;

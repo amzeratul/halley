@@ -3,8 +3,8 @@
 component:
   name: Scriptable
   members:
-  - scriptState:
-      type: 'Halley::ScriptState'
+  - activeStates:
+      type: 'Halley::Vector<Halley::ScriptState>'
       canEdit: false
       canSave: true
 

@@ -503,7 +503,7 @@ namespace Halley {
 	    struct HasOperatorDifferent
 	    {
 	        template<typename T = L, typename U = R>
-	        static auto test(T &&t, U &&u) -> decltype(t == u, void(), std::true_type{});
+	        static auto test(T &&t, U &&u) -> decltype(t != u, void(), std::true_type{});
 	        static auto test(...) -> std::false_type;
 	        using type = decltype(test(std::declval<L>(), std::declval<R>()));
 	    };
