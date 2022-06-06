@@ -155,6 +155,7 @@ void ScriptGraphNode::onNodeRemoved(uint32_t nodeId)
 				}
 			}
 		}
+		std_ex::erase_if(pin.connections, [] (const PinConnection& c) { return !c.hasConnection(); });
 	}
 }
 
