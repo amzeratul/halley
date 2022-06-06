@@ -92,26 +92,44 @@ ScriptState::ScriptState(const ConfigNode& node, const EntitySerializationContex
 	threads = ConfigNodeSerializer<decltype(threads)>().deserialize(context, node["threads"]);
 	graphHash = Deserializer::fromBytes<decltype(graphHash)>(node["graphHash"].asBytes());
 	variables = ConfigNodeSerializer<decltype(variables)>().deserialize(context, node["variables"]);
+	persistAfterDone = node["persistAfterDone"].asBool(false);
 
 	const auto scriptGraphName = node["script"].asString();
 	if (!scriptGraphName.isEmpty()) {
-		scriptGraph = context.resources->get<ScriptGraph>(scriptGraphName).get();
+		scriptGraph = context.resources->get<ScriptGraph>(scriptGraphName);
 	}
 }
 
-ScriptState::ScriptState(const ScriptGraph* script)
+ScriptState::ScriptState(const ScriptGraph* script, bool persistAfterDone)
+	: scriptGraphRef(script)
+	, persistAfterDone(persistAfterDone)
+{
+}
+
+ScriptState::ScriptState(std::shared_ptr<const ScriptGraph> script)
 	: scriptGraph(script)
 {
 }
 
 const ScriptGraph* ScriptState::getScriptGraphPtr() const
 {
-	return scriptGraph;
+	return scriptGraph ? scriptGraph.get() : scriptGraphRef;
 }
 
 void ScriptState::setScriptGraphPtr(const ScriptGraph* script)
 {
-	scriptGraph = script;
+	scriptGraph.reset();
+	scriptGraphRef = script;
+}
+
+bool ScriptState::isDone() const
+{
+	return started && threads.empty();
+}
+
+bool ScriptState::isDead() const
+{
+	return isDone() && !persistAfterDone;
 }
 
 ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) const
@@ -124,6 +142,7 @@ ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) 
 	node["graphHash"] = Serializer::toBytes(graphHash);
 	node["variables"] = ConfigNodeSerializer<decltype(variables)>().serialize(variables, context);
 	node["script"] = scriptGraph ? scriptGraph->getAssetId() : "";
+	node["persistAfterDone"] = persistAfterDone;
 	return node;
 }
 

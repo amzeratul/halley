@@ -62,12 +62,16 @@ namespace Halley {
 
     	ScriptState();
 		ScriptState(const ConfigNode& node, const EntitySerializationContext& context);
-		ScriptState(const ScriptGraph* script);
+		ScriptState(const ScriptGraph* script, bool persistAfterDone);
+		ScriptState(std::shared_ptr<const ScriptGraph> script);
 
 		const ScriptGraph* getScriptGraphPtr() const;
 		void setScriptGraphPtr(const ScriptGraph* script);
 
 		bool hasStarted() const { return started; }
+		bool isDone() const;
+		bool isDead() const;
+
     	void start(OptionalLite<uint32_t> startNode, uint64_t graphHash);
 		void reset();
     	
@@ -103,11 +107,13 @@ namespace Halley {
 		bool operator!=(const ScriptState& other) const;
 
 	private:
-		const ScriptGraph* scriptGraph = nullptr;
+		std::shared_ptr<const ScriptGraph> scriptGraph;
+		const ScriptGraph* scriptGraphRef = nullptr;
     	Vector<ScriptStateThread> threads;
     	uint64_t graphHash = 0;
     	bool started = false;
     	bool introspection = false;
+		bool persistAfterDone = false;
     	std::map<uint32_t, size_t> nodeCounters;
     	std::map<String, ConfigNode> variables;
 

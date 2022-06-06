@@ -7,6 +7,10 @@ component:
       type: 'Halley::Vector<Halley::ScriptState>'
       canEdit: false
       canSave: true
+  - tags:
+      type: 'Halley::Vector<Halley::String>'
+      canEdit: true
+      canSave: true
 
 ---
 
