@@ -149,7 +149,11 @@ String IScriptNodeType::getConnectedNodeName(const World* world, const ScriptGra
 {
 	const auto& pin = node.getPin(pinN);
 	if (pin.connections.empty()) {
-		return "<empty>";
+		if (node.getNodeType().getPin(node, pinN).type == ScriptNodeElementType::TargetPin) {
+			return "<current entity>";
+		} else {
+			return "<empty>";
+		}
 	}
 	assert(pin.connections.size() == 1);
 

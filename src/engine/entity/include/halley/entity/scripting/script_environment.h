@@ -9,7 +9,7 @@ namespace Halley {
     	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection);
     	virtual ~ScriptEnvironment() = default;
 
-    	virtual void update(Time time, ScriptState& graphState);
+    	virtual void update(Time time, ScriptState& graphState, EntityId curEntity);
 
     	EntityRef tryGetEntity(EntityId entityId);
     	const ScriptGraph* getCurrentGraph() const;
@@ -28,8 +28,10 @@ namespace Halley {
     	World& world;
     	Resources& resources;
     	const ScriptNodeTypeCollection& nodeTypeCollection;
+
     	const ScriptGraph* currentGraph = nullptr;
     	ScriptState* currentState = nullptr;
+        EntityId currentEntity;
 
     private:
         std::unique_ptr<IScriptStateData> makeNodeData(const IScriptNodeType& nodeType, const ScriptGraphNode& node, const ConfigNode& nodeData);

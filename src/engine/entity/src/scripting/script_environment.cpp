@@ -19,7 +19,7 @@ ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resourc
 {
 }
 
-void ScriptEnvironment::update(Time time, ScriptState& graphState)
+void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curEntity)
 {
 	currentGraph = graphState.getScriptGraphPtr();
 	if (!currentGraph) {
@@ -28,6 +28,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState)
 
 	currentState = &graphState;
 	currentGraph->assignTypes(nodeTypeCollection);
+	currentEntity = curEntity;
 	
 	if (!graphState.hasStarted() || graphState.getGraphHash() != currentGraph->getHash()) {
 		graphState.start(currentGraph->getStartNode(), currentGraph->getHash());
@@ -99,11 +100,12 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState)
 
 	currentGraph = nullptr;
 	currentState = nullptr;
+	currentEntity = EntityId();
 }
 
 EntityRef ScriptEnvironment::tryGetEntity(EntityId entityId)
 {
-	return world.tryGetEntity(entityId);
+	return world.tryGetEntity(entityId.isValid() ? entityId : currentEntity);
 }
 
 const ScriptGraph* ScriptEnvironment::getCurrentGraph() const
