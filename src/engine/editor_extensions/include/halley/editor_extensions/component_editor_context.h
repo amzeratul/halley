@@ -49,11 +49,13 @@ namespace Halley {
 		virtual std::shared_ptr<IUIElement> makeLabel(const String& label) const = 0;
 		virtual std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const = 0;
 		virtual ConfigNode getDefaultNode(const String& fieldType) const = 0;
+		virtual Resources& getGameResources() = 0;
+		virtual IEntityEditorCallbacks* getCallbacks() = 0;
 	};
 	
     class ComponentEditorContext {
     public:
-	    ComponentEditorContext(IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources& gameResources);
+	    ComponentEditorContext(IEntityEditorFactory& entityEditorFactory, UIFactory& factory);
 
         UIFactory& getUIFactory() const;
 	    Resources& getGameResources() const;
@@ -68,8 +70,6 @@ namespace Halley {
 
     private:
     	IEntityEditorFactory& entityEditorFactory;
-        IEntityEditorCallbacks* entityEditor = nullptr;
-        UIFactory& factory;
-        Resources& gameResources;
+		UIFactory& factory;
     };
 }

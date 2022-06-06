@@ -4,21 +4,19 @@
 
 using namespace Halley;
 
-ComponentEditorContext::ComponentEditorContext(IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources& gameResources)
+ComponentEditorContext::ComponentEditorContext(IEntityEditorFactory& entityEditorFactory, UIFactory& factory)
 	: entityEditorFactory(entityEditorFactory)
-	, entityEditor(entityEditor)
 	, factory(factory)
-	, gameResources(gameResources)
 {}
 
 Resources& ComponentEditorContext::getGameResources() const
 {
-	return gameResources;
+	return entityEditorFactory.getGameResources();
 }
 
 IProjectWindow& ComponentEditorContext::getProjectWindow() const
 {
-	return entityEditor->getProjectWindow();
+	return entityEditorFactory.getCallbacks()->getProjectWindow();
 }
 
 UIFactory& ComponentEditorContext::getUIFactory() const
@@ -43,6 +41,7 @@ ConfigNode ComponentEditorContext::getDefaultNode(const String& fieldType) const
 
 void ComponentEditorContext::setTool(const String& tool, const String& componentName, const String& fieldName) const
 {
+	auto entityEditor = entityEditorFactory.getCallbacks();
 	if (entityEditor) {
 		entityEditor->setTool(tool, componentName, fieldName);
 	}
@@ -50,6 +49,7 @@ void ComponentEditorContext::setTool(const String& tool, const String& component
 
 void ComponentEditorContext::setDefaultName(const String& name, const String& prevName) const
 {
+	auto entityEditor = entityEditorFactory.getCallbacks();
 	if (entityEditor) {
 		entityEditor->setDefaultName(name, prevName);
 	}
@@ -57,6 +57,7 @@ void ComponentEditorContext::setDefaultName(const String& name, const String& pr
 
 void ComponentEditorContext::onEntityUpdated() const
 {
+	auto entityEditor = entityEditorFactory.getCallbacks();
 	if (entityEditor) {
 		entityEditor->onEntityUpdated();
 	}

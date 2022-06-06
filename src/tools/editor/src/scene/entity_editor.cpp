@@ -650,7 +650,7 @@ void EntityEditor::setComponentColour(const String& name, UIWidget& component)
 EntityEditorFactory::EntityEditorFactory(UIFactory& factory)
 	: factory(factory)
 {
-	makeContext();
+	context = std::make_unique<ComponentEditorContext>(*this, factory);
 }
 
 std::shared_ptr<IUIElement> EntityEditorFactory::makeLabel(const String& text) const
@@ -729,13 +729,21 @@ bool EntityEditorFactory::isEmpty() const
 void EntityEditorFactory::setCallbacks(IEntityEditorCallbacks& editor)
 {
 	callbacks = &editor;
-	makeContext();
 }
 
 void EntityEditorFactory::setGameResources(Resources& resources)
 {
 	gameResources = &resources;
-	makeContext();
+}
+
+Resources& EntityEditorFactory::getGameResources()
+{
+	return *gameResources;
+}
+
+IEntityEditorCallbacks* EntityEditorFactory::getCallbacks()
+{
+	return callbacks;
 }
 
 std::pair<String, Vector<String>> EntityEditorFactory::parseType(const String& type) const
@@ -759,9 +767,4 @@ std::pair<String, Vector<String>> EntityEditorFactory::parseType(const String& t
 		return {base, remain};
 	}
 	return {type, {}};
-}
-
-void EntityEditorFactory::makeContext()
-{
-	context = std::make_unique<ComponentEditorContext>(*this, callbacks, factory, *gameResources);
 }

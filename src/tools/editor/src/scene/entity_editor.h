@@ -117,6 +117,8 @@ namespace Halley {
 		
 		void setCallbacks(IEntityEditorCallbacks& callbacks);
 		void setGameResources(Resources& resources);
+		Resources& getGameResources() override;
+		IEntityEditorCallbacks* getCallbacks() override;
 
 		void addFieldFactories(Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
 		void addStandardFieldFactories();
@@ -136,6 +138,5 @@ namespace Halley {
 		mutable std::unique_ptr<ComponentEditorContext> context;
 
 		std::pair<String, Vector<String>> parseType(const String& type) const;
-		void makeContext();
 	};
 }
