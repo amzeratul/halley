@@ -519,7 +519,7 @@ void ScriptingBaseGizmo::updateNodeAutoConnection(gsl::span<const uint32_t> node
 		const auto& node = nodes[id];
 		const size_t nPins = node.getNodeType().getPinConfiguration(node).size();
 		for (size_t pinIdx = 0; pinIdx < nPins; ++pinIdx) {
-			const bool empty = node.getPin(pinIdx).connections.empty();
+			const bool empty = !node.getPin(pinIdx).hasConnection();
 			const auto srcPinType = node.getPinType(static_cast<uint8_t>(pinIdx));
 
 			if (empty) {
@@ -572,7 +572,7 @@ std::optional<ScriptingBaseGizmo::Connection> ScriptingBaseGizmo::findAutoConnec
 
 		const size_t nPins = node.getNodeType().getPinConfiguration(node).size();
 		for (size_t pinIdx = 0; pinIdx < nPins; ++pinIdx) {
-			const bool empty = node.getPin(pinIdx).connections.empty();
+			const bool empty = !node.getPin(pinIdx).hasConnection();
 			const auto dstPinType = node.getPinType(static_cast<uint8_t>(pinIdx));
 			if (empty && dstPinType.type == srcPinType.type && dstPinType.direction != srcPinType.direction) {
 				const auto srcPos = renderer->getPinPosition(basePos, getNode(srcNodeId), srcPinIdx);

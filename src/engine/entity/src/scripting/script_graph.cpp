@@ -58,6 +58,11 @@ void ScriptGraphNode::PinConnection::deserialize(Deserializer& s)
 	s >> entityIdx;
 }
 
+bool ScriptGraphNode::PinConnection::hasConnection() const
+{
+	return dstNode || entityIdx;
+}
+
 ScriptGraphNode::Pin::Pin(const ConfigNode& node)
 {
 	connections = node.asVector<PinConnection>();
@@ -78,6 +83,11 @@ void ScriptGraphNode::Pin::serialize(Serializer& s) const
 void ScriptGraphNode::Pin::deserialize(Deserializer& s)
 {
 	s >> connections;
+}
+
+bool ScriptGraphNode::Pin::hasConnection() const
+{
+	return !connections.empty() && std::any_of(connections.begin(), connections.end(), [] (const PinConnection& p) { return p.hasConnection(); });
 }
 
 ScriptGraphNode::ScriptGraphNode()

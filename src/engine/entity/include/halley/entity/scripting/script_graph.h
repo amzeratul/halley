@@ -26,6 +26,8 @@ namespace Halley {
 
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);
+
+			bool hasConnection() const;
 		};
 		
 		struct Pin {
@@ -37,6 +39,8 @@ namespace Halley {
 
 			void serialize(Serializer& s) const;
 			void deserialize(Deserializer& s);
+
+			bool hasConnection() const;
 		};
 		
 		ScriptGraphNode();
