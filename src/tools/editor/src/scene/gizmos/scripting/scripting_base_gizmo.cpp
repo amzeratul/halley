@@ -105,6 +105,8 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 	}
 	
 	lastMousePos = inputState.mousePos;
+	lastCtrlHeld = inputState.ctrlHeld;
+	lastShiftHeld = inputState.shiftHeld;
 }
 
 void ScriptingBaseGizmo::setZoom(float zoom)
@@ -244,6 +246,8 @@ void ScriptingBaseGizmo::onEditingConnection(const SceneEditorInputState& inputS
 
 void ScriptingBaseGizmo::draw(Painter& painter) const
 {
+	drawWheelGuides(painter);
+
 	if (!renderer) {
 		return;
 	}
@@ -587,4 +591,42 @@ std::optional<ScriptingBaseGizmo::Connection> ScriptingBaseGizmo::findAutoConnec
 	}
 
 	return bestPath;
+}
+
+void ScriptingBaseGizmo::onMouseWheel(Vector2f mousePos, int amount, KeyMods keyMods)
+{
+	int axis;
+	if (keyMods == KeyMods::Ctrl) {
+		axis = 0;
+	} else if (keyMods == KeyMods::Shift) {
+		axis = 1;
+	} else {
+		return;
+	}
+
+	const float delta = static_cast<float>(amount) * -16.0f;
+	const float midPos = (mousePos - basePos)[axis];
+	const float mid0 = midPos - 32;
+	const float mid1 = midPos + 32;
+
+	for (auto& node: scriptGraph->getNodes()) {
+		auto pos = node.getPosition();
+		if (std::abs(pos[axis] - midPos) > 32) {
+			pos[axis] = advance(pos[axis], pos[axis] < midPos ? mid0 : mid1, delta);
+			node.setPosition(pos);
+		}
+	}
+}
+
+void ScriptingBaseGizmo::drawWheelGuides(Painter& painter) const
+{
+	const auto viewPort = Rect4f(painter.getViewPort());
+
+	if (lastMousePos) {
+		if (lastCtrlHeld) {
+			painter.drawLine(Vector<Vector2f>{ Vector2f(lastMousePos->x, viewPort.getTop()), Vector2f(lastMousePos->x, viewPort.getBottom()) }, 1, Colour4f(1, 1, 1, 1));
+		} else if (lastShiftHeld) {
+			painter.drawLine(Vector<Vector2f>{ Vector2f(viewPort.getLeft(), lastMousePos->y), Vector2f(viewPort.getRight(), lastMousePos->y) }, 1, Colour4f(1, 1, 1, 1));
+		}
+	}
 }

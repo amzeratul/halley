@@ -161,6 +161,10 @@ void BaseCanvas::refresh()
 
 void BaseCanvas::onMouseWheel(const UIEvent& event)
 {
+	if (mouseMirror) {
+		mouseMirror->sendEventDown(event);
+	}
+
 	if (!zoomEnabled) {
 		return;
 	}

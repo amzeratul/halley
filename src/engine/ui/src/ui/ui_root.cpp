@@ -382,7 +382,7 @@ void UIRoot::updateMouse(const spInputDevice& mouse, KeyMods keyMods)
 	const int wheelDelta = mouse->getWheelMove();
 	const std::shared_ptr<UIWidget> exclusiveUnderMouse = exclusive ? exclusive : actuallyUnderMouse;
 	if (wheelDelta != 0 && exclusiveUnderMouse) {
-		exclusiveUnderMouse->sendEvent(UIEvent(UIEventType::MouseWheel, "mouse", wheelDelta));
+		exclusiveUnderMouse->sendEvent(UIEvent(UIEventType::MouseWheel, "mouse", wheelDelta, keyMods));
 	}
 
 	// Mouse position

@@ -13,6 +13,13 @@ ScriptGizmoUI::ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEn
 	{
 		onModified();
 	});
+
+	setHandle(UIEventType::MouseWheel, [=] (const UIEvent& event)
+	{
+		if (inputState.mousePos) {
+			gizmo.onMouseWheel(*inputState.mousePos, event.getIntData(), event.getKeyMods());
+		}
+	});
 }
 
 void ScriptGizmoUI::onAddedToRoot(UIRoot& root)

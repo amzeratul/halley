@@ -40,6 +40,15 @@ UIEvent::UIEvent(UIEventType type, String sourceId, int data1, int data2)
 	configData["int2"] = data2;
 }
 
+UIEvent::UIEvent(UIEventType type, String sourceId, int data, KeyMods keyMods)
+	: type(type)
+	, sourceId(std::move(sourceId))
+	, configData(ConfigNode::MapType())
+{
+	configData["int"] = data;
+	configData["keyMods"] = static_cast<int>(keyMods);
+}
+
 UIEvent::UIEvent(UIEventType type, String sourceId, KeyCode keyCode, KeyMods keyMods)
 	: type(type)
 	, sourceId(std::move(sourceId))

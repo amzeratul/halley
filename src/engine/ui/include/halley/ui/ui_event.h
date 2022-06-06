@@ -77,6 +77,7 @@ namespace Halley {
 		UIEvent(UIEventType type, String sourceId, bool data);
 		UIEvent(UIEventType type, String sourceId, int data);
 		UIEvent(UIEventType type, String sourceId, int data1, int data2);
+		UIEvent(UIEventType type, String sourceId, int data, KeyMods keyMods);
 		UIEvent(UIEventType type, String sourceId, KeyCode keyCode, KeyMods keyMods);
 		UIEvent(UIEventType type, String sourceId, float data);
 		UIEvent(UIEventType type, String sourceId, String data, int intData);

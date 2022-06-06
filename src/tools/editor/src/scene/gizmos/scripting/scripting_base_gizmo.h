@@ -48,6 +48,8 @@ namespace Halley {
 		void setModifiedCallback(ModifiedCallback callback);
 		void setEntityTargets(Vector<EntityTarget> entityTargets);
 
+		void onMouseWheel(Vector2f mousePos, int amount, KeyMods keyMods);
+
 	private:
 		struct Dragging {
 			Vector<uint32_t> nodeIds;
@@ -88,6 +90,8 @@ namespace Halley {
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeEditingConnection;
 		std::optional<Vector2f> nodeConnectionDst;
 		std::optional<Vector2f> lastMousePos;
+		bool lastCtrlHeld = false;
+		bool lastShiftHeld = false;
 
 		std::optional<Dragging> dragging;
 		Vector<Connection> pendingAutoConnections;
@@ -123,5 +127,7 @@ namespace Halley {
 
 		void assignNodeTypes() const;
 		SelectionSetModifier getSelectionModifier(const SceneEditorInputState& inputState) const;
+
+		void drawWheelGuides(Painter& painter) const;
 	};
 }
