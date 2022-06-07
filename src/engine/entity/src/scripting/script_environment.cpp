@@ -85,11 +85,11 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 					}
 				} else if (result.state == ScriptNodeExecutionState::Terminate) {
 					// Terminate script
-					for (auto& t: threads) {
-						terminateThread(t);
-					}
+					doTerminateState();
+					break;
 				} else if (result.state == ScriptNodeExecutionState::Restart) {
 					// Restart script
+					doTerminateState();
 					graphState.reset();
 					break;
 				} else if (result.state == ScriptNodeExecutionState::Merged) {
@@ -110,9 +110,59 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	currentEntity = EntityId();
 }
 
+void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEntity)
+{
+	currentGraph = graphState.getScriptGraphPtr();
+	if (!currentGraph) {
+		throw Exception("Unable to terminate script state, script not set.", HalleyExceptions::Entity);
+	}
+
+	currentState = &graphState;
+	currentGraph->assignTypes(nodeTypeCollection);
+	currentEntity = curEntity;
+
+	doTerminateState();
+
+	currentGraph = nullptr;
+	currentState = nullptr;
+	currentEntity = EntityId();
+}
+
+void ScriptEnvironment::doTerminateState()
+{
+	for (auto& thread: currentState->getThreads()) {
+		terminateThread(thread);
+	}
+	currentState->getThreads().clear();
+}
+
 void ScriptEnvironment::terminateThread(ScriptStateThread& thread)
 {
 	thread.advanceToNode({});
+	
+	auto& currentStack = thread.getStack();
+	const auto n = static_cast<int>(currentStack.size());
+	for (int i = n; --i >= 0;) {
+		const auto nodeId = currentStack[i];
+
+		// Check if this node is still alive on any other stacks
+		bool aliveElsewhere = false;
+		for (auto& otherThread: currentState->getThreads()) {
+			if (&otherThread != &thread) {
+				if (std_ex::contains(otherThread.getStack(), nodeId)) {
+					aliveElsewhere = true;
+					break;
+				}
+			}
+		}
+
+		if (!aliveElsewhere) {
+			auto& node = currentGraph->getNodes()[nodeId];
+			node.getNodeType().destructor(*this, node);
+		}
+	}
+
+	currentStack.clear();
 }
 
 EntityRef ScriptEnvironment::tryGetEntity(EntityId entityId)

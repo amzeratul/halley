@@ -107,6 +107,10 @@ IScriptNodeType::PinType IScriptNodeType::getPin(const ScriptGraphNode& node, si
 	return PinType{ ScriptNodeElementType::Undefined, ScriptNodePinDirection::Input };
 }
 
+void IScriptNodeType::destructor(ScriptEnvironment& environment, const ScriptGraphNode& node) const
+{
+}
+
 ConfigNode IScriptNodeType::readDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
 	const auto& pins = node.getPins();

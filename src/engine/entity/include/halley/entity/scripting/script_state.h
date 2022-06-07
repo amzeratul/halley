@@ -17,10 +17,12 @@ namespace Halley {
 	public:
 		ScriptStateThread();
 		ScriptStateThread(const ConfigNode& node, const EntitySerializationContext& context);
-		explicit ScriptStateThread(ScriptNodeId startNode);
-
+		ScriptStateThread(ScriptNodeId startNode);
 		ScriptStateThread(const ScriptStateThread& other);
 		ScriptStateThread(ScriptStateThread&& other) = default;
+
+		~ScriptStateThread();
+
 		ScriptStateThread& operator=(const ScriptStateThread& other);
 		ScriptStateThread& operator=(ScriptStateThread&& other) = default;
 		
@@ -38,6 +40,9 @@ namespace Halley {
 
 		bool hasPendingNodeData() const;
 		ConfigNode getPendingNodeData();
+
+		const Vector<ScriptNodeId>& getStack() const;
+		Vector<ScriptNodeId>& getStack();
 
 	private:
 		OptionalLite<ScriptNodeId> curNode;

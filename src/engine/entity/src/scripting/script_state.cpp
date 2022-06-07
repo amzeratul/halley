@@ -1,6 +1,7 @@
 #include "scripting/script_state.h"
 
 #include "halley/bytes/byte_serializer.h"
+#include "halley/support/logger.h"
 #include "scripting/script_graph.h"
 using namespace Halley;
 
@@ -29,6 +30,13 @@ ScriptStateThread::ScriptStateThread(const ConfigNode& node, const EntitySeriali
 	}
 	if (node.hasKey("curData")) {
 		pendingData = node["curData"];
+	}
+}
+
+ScriptStateThread::~ScriptStateThread()
+{
+	if (!stack.empty()) {
+		Logger::logError("ScriptStateThread terminated with a non-empty stack");
 	}
 }
 
@@ -67,6 +75,16 @@ ConfigNode ScriptStateThread::getPendingNodeData()
 	return std::move(pendingData);
 }
 
+const Vector<ScriptNodeId>& ScriptStateThread::getStack() const
+{
+	return stack;
+}
+
+Vector<ScriptNodeId>& ScriptStateThread::getStack()
+{
+	return stack;
+}
+
 void ScriptStateThread::startNode(std::unique_ptr<IScriptStateData> data)
 {
 	Expects(!nodeStarted);
@@ -90,7 +108,9 @@ void ScriptStateThread::advanceToNode(OptionalLite<ScriptNodeId> node)
 }
 
 ScriptState::ScriptState()
-{}
+{
+	
+}
 
 ScriptState::ScriptState(const ConfigNode& node, const EntitySerializationContext& context)
 {
