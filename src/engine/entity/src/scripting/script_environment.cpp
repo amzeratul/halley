@@ -55,7 +55,6 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 			if (!thread.isNodeStarted()) {
 				thread.startNode(makeNodeData(nodeType, node, thread.getPendingNodeData()));
 				graphState.onNodeStarted(nodeId);
-				//Logger::logDev("Start node " + nodeType.getId());
 			}
 
 			// Update

@@ -38,7 +38,6 @@ namespace Halley {
 
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
-		bool hasPendingNodeData() const;
 		ConfigNode getPendingNodeData();
 
 		const Vector<ScriptNodeId>& getStack() const;

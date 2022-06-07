@@ -65,11 +65,6 @@ ConfigNode ScriptStateThread::toConfigNode(const EntitySerializationContext& con
 	return node;
 }
 
-bool ScriptStateThread::hasPendingNodeData() const
-{
-	return pendingData.getType() != ConfigNodeType::Undefined;
-}
-
 ConfigNode ScriptStateThread::getPendingNodeData()
 {
 	return std::move(pendingData);
