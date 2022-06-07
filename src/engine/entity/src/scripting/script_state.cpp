@@ -81,6 +81,7 @@ ScriptState::NodeState::NodeState()
 }
 
 ScriptState::NodeState::NodeState(const ConfigNode& node, const EntitySerializationContext& context)
+	: data(nullptr)
 {
 	threadCount = static_cast<uint8_t>(node["threadCount"].asInt(0));
 	pendingData = new ConfigNode(node["pendingData"]);
@@ -88,11 +89,13 @@ ScriptState::NodeState::NodeState(const ConfigNode& node, const EntitySerializat
 }
 
 ScriptState::NodeState::NodeState(const NodeState& other)
+	: data(nullptr)
 {
 	*this = other;
 }
 
 ScriptState::NodeState::NodeState(NodeState&& other)
+	: data(nullptr)
 {
 	*this = std::move(other);
 }
@@ -129,7 +132,11 @@ ConfigNode ScriptState::NodeState::toConfigNode(const EntitySerializationContext
 {
 	ConfigNode::MapType result;
 	result["threadCount"] = threadCount;
-	if (data) {
+	if (hasPendingData) {
+		if (pendingData) {
+			result["pendingData"] = ConfigNode(*pendingData);
+		}
+	} else if (data) {
 		result["pendingData"] = data->toConfigNode(context);
 	}
 	return result;
@@ -304,7 +311,7 @@ bool ScriptState::operator!=(const ScriptState& other) const
 
 ScriptState::NodeState& ScriptState::getNodeState(ScriptNodeId nodeId)
 {
-	return nodeState[nodeId];
+	return nodeState.at(nodeId);
 }
 
 void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state)
