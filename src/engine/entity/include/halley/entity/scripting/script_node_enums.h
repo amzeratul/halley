@@ -3,7 +3,7 @@
 #include <cstdint>
 
 namespace Halley {
- 	using ScriptNodeId = uint32_t;
+ 	using ScriptNodeId = uint16_t;
 	using ScriptPinId = uint8_t;
 
 	enum class ScriptNodeExecutionState : uint8_t {

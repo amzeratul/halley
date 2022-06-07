@@ -188,9 +188,9 @@ EntityId IScriptNodeType::readEntityId(ScriptEnvironment& environment, const Scr
 	return EntityId();
 }
 
-std::array<OptionalLite<uint32_t>, 8> IScriptNodeType::getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const
+std::array<OptionalLite<ScriptNodeId>, 8> IScriptNodeType::getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const
 {
-	std::array<OptionalLite<uint32_t>, 8> result;
+	std::array<OptionalLite<ScriptNodeId>, 8> result;
 	result.fill({});
 	
 	const auto& pinConfig = getPinConfiguration(node);
