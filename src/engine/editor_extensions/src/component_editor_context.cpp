@@ -4,41 +4,55 @@
 
 using namespace Halley;
 
-ComponentEditorContext::ComponentEditorContext(IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources& gameResources)
-	: entityEditorFactory(entityEditorFactory)
+ComponentEditorContext::ComponentEditorContext(IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources)
+	: entityEditorFactory(&entityEditorFactory)
 	, entityEditor(entityEditor)
-	, factory(factory)
+	, factory(&factory)
 	, gameResources(gameResources)
 {}
 
+void ComponentEditorContext::set(IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources)
+{
+	this->entityEditorFactory = &entityEditorFactory;
+	this->entityEditor = entityEditor;
+	this->factory = &factory;
+	this->gameResources = gameResources;
+}
+
 Resources& ComponentEditorContext::getGameResources() const
 {
-	return gameResources;
+	Expects(gameResources != nullptr);
+	return *gameResources;
 }
 
 IProjectWindow& ComponentEditorContext::getProjectWindow() const
 {
+	Expects(entityEditor != nullptr);
 	return entityEditor->getProjectWindow();
 }
 
 UIFactory& ComponentEditorContext::getUIFactory() const
 {
-	return factory;
+	Expects(factory != nullptr);
+	return *factory;
 }
 
 std::shared_ptr<IUIElement> ComponentEditorContext::makeLabel(const String& label) const
 {
-	return entityEditorFactory.makeLabel(label);
+	Expects(entityEditorFactory != nullptr);
+	return entityEditorFactory->makeLabel(label);
 }
 
 std::shared_ptr<IUIElement> ComponentEditorContext::makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const
 {
-	return entityEditorFactory.makeField(fieldType, std::move(parameters), createLabel);
+	Expects(entityEditorFactory != nullptr);
+	return entityEditorFactory->makeField(fieldType, std::move(parameters), createLabel);
 }
 
 ConfigNode ComponentEditorContext::getDefaultNode(const String& fieldType) const
 {
-	return entityEditorFactory.getDefaultNode(fieldType);
+	Expects(entityEditorFactory != nullptr);
+	return entityEditorFactory->getDefaultNode(fieldType);
 }
 
 void ComponentEditorContext::setTool(const String& tool, const String& componentName, const String& fieldName) const

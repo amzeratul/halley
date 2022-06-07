@@ -765,5 +765,9 @@ std::pair<String, Vector<String>> EntityEditorFactory::parseType(const String& t
 
 void EntityEditorFactory::makeContext()
 {
-	context = std::make_unique<ComponentEditorContext>(*this, callbacks, factory, *gameResources);
+	if (!context) {
+		context = std::make_unique<ComponentEditorContext>(*this, callbacks, factory, gameResources);
+	} else {
+		context->set(*this, callbacks, factory, gameResources);
+	}
 }

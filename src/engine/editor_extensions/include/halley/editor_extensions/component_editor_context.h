@@ -53,7 +53,9 @@ namespace Halley {
 	
     class ComponentEditorContext {
     public:
-	    ComponentEditorContext(IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources& gameResources);
+	    ComponentEditorContext(IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources);
+
+		void set(IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources);
 
         UIFactory& getUIFactory() const;
 	    Resources& getGameResources() const;
@@ -67,9 +69,9 @@ namespace Halley {
 	    void setDefaultName(const String& name, const String& prevName) const;
 
     private:
-    	IEntityEditorFactory& entityEditorFactory;
+    	IEntityEditorFactory* entityEditorFactory = nullptr;
         IEntityEditorCallbacks* entityEditor = nullptr;
-        UIFactory& factory;
-        Resources& gameResources;
+        UIFactory* factory = nullptr;
+        Resources* gameResources = nullptr;
     };
 }
