@@ -1057,6 +1057,26 @@ bool ConfigNode::convertTo(Tag<bool> tag) const
 	return asBool();
 }
 
+uint8_t ConfigNode::convertTo(Tag<uint8_t> tag) const
+{
+	return asInt();
+}
+
+uint16_t ConfigNode::convertTo(Tag<uint16_t> tag) const
+{
+	return asInt();
+}
+
+uint32_t ConfigNode::convertTo(Tag<uint32_t> tag) const
+{
+	return asInt();
+}
+
+uint64_t ConfigNode::convertTo(Tag<uint64_t> tag) const
+{
+	return asInt();
+}
+
 Vector2i ConfigNode::convertTo(Tag<Vector2i> tag) const
 {
 	return asVector2i();

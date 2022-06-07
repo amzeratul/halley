@@ -6,10 +6,23 @@ using namespace Halley;
 
 ScriptStateThread::ScriptStateThread()
 {
+	stack.reserve(16);
+}
+
+ScriptStateThread::ScriptStateThread(ScriptNodeId startNode)
+	: curNode(startNode)
+	, nodeStarted(false)
+{
+}
+
+ScriptStateThread::ScriptStateThread(const ScriptStateThread& other)
+{
+	*this = other;
 }
 
 ScriptStateThread::ScriptStateThread(const ConfigNode& node, const EntitySerializationContext& context)
 {
+	stack = node["stack"].asVector<ScriptNodeId>();
 	timeSlice = node["timeSlice"].asFloat(0);
 	if (node.hasKey("curNode")) {
 		curNode = node["curNode"].asInt();
@@ -19,9 +32,19 @@ ScriptStateThread::ScriptStateThread(const ConfigNode& node, const EntitySeriali
 	}
 }
 
+ScriptStateThread& ScriptStateThread::operator=(const ScriptStateThread& other)
+{
+	Expects(!curData);
+	curNode = other.curNode;
+	nodeStarted = other.nodeStarted;
+	timeSlice = other.timeSlice;
+	return *this;
+}
+
 ConfigNode ScriptStateThread::toConfigNode(const EntitySerializationContext& context) const
 {
 	ConfigNode::MapType node;
+	node["stack"] = stack;
 	if (timeSlice != 0) {
 		node["timeSlice"] = timeSlice;
 	}
@@ -44,26 +67,6 @@ ConfigNode ScriptStateThread::getPendingNodeData()
 	return std::move(pendingData);
 }
 
-ScriptStateThread::ScriptStateThread(ScriptNodeId startNode)
-	: curNode(startNode)
-	, nodeStarted(false)
-{
-}
-
-ScriptStateThread::ScriptStateThread(const ScriptStateThread& other)
-{
-	*this = other;
-}
-
-ScriptStateThread& ScriptStateThread::operator=(const ScriptStateThread& other)
-{
-	Expects(!curData);
-	curNode = other.curNode;
-	nodeStarted = other.nodeStarted;
-	timeSlice = other.timeSlice;
-	return *this;
-}
-
 void ScriptStateThread::startNode(std::unique_ptr<IScriptStateData> data)
 {
 	Expects(!nodeStarted);
@@ -80,6 +83,9 @@ void ScriptStateThread::finishNode()
 
 void ScriptStateThread::advanceToNode(OptionalLite<ScriptNodeId> node)
 {
+	if (curNode) {
+		stack.push_back(*curNode);
+	}
 	curNode = node;
 }
 

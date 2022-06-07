@@ -449,6 +449,10 @@ namespace Halley {
 		int convertTo(Tag<int> tag) const;
 		float convertTo(Tag<float> tag) const;
 		bool convertTo(Tag<bool> tag) const;
+		uint8_t convertTo(Tag<uint8_t> tag) const;
+		uint16_t convertTo(Tag<uint16_t> tag) const;
+		uint32_t convertTo(Tag<uint32_t> tag) const;
+		uint64_t convertTo(Tag<uint64_t> tag) const;
 		Vector2i convertTo(Tag<Vector2i> tag) const;
 		Vector2f convertTo(Tag<Vector2f> tag) const;
 		Vector3i convertTo(Tag<Vector3i> tag) const;

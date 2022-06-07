@@ -42,9 +42,10 @@ namespace Halley {
 	private:
 		OptionalLite<ScriptNodeId> curNode;
 		bool nodeStarted = false;
+		float timeSlice = 0;
 		std::unique_ptr<IScriptStateData> curData;
-		float timeSlice;
 		ConfigNode pendingData;
+		Vector<ScriptNodeId> stack;
 	};
 
     class ScriptState {
