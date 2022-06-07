@@ -35,5 +35,6 @@ namespace Halley {
 
     private:
         std::unique_ptr<IScriptStateData> makeNodeData(const IScriptNodeType& nodeType, const ScriptGraphNode& node, const ConfigNode& nodeData);
+        void terminateThread(ScriptStateThread& thread);
     };
 }

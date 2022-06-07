@@ -1,4 +1,5 @@
 #pragma once
+#include "script_node_enums.h"
 #include "halley/bytes/config_node_serializer.h"
 #include "halley/time/halleytime.h"
 
@@ -16,20 +17,20 @@ namespace Halley {
 	public:
 		ScriptStateThread();
 		ScriptStateThread(const ConfigNode& node, const EntitySerializationContext& context);
-		explicit ScriptStateThread(uint32_t startNode);
+		explicit ScriptStateThread(ScriptNodeId startNode);
 
 		ScriptStateThread(const ScriptStateThread& other);
 		ScriptStateThread(ScriptStateThread&& other) = default;
 		ScriptStateThread& operator=(const ScriptStateThread& other);
 		ScriptStateThread& operator=(ScriptStateThread&& other) = default;
 		
-		OptionalLite<uint32_t> getCurNode() const { return curNode; }
+		OptionalLite<ScriptNodeId> getCurNode() const { return curNode; }
 		IScriptStateData* getCurData() { return curData.get(); }
 		bool isNodeStarted() const { return nodeStarted; }
 
 		void startNode(std::unique_ptr<IScriptStateData> data);
 		void finishNode();
-		void advanceToNode(OptionalLite<uint32_t> node);
+		void advanceToNode(OptionalLite<ScriptNodeId> node);
 
 		float& getTimeSlice() { return timeSlice; }
 
@@ -39,7 +40,7 @@ namespace Halley {
 		ConfigNode getPendingNodeData();
 
 	private:
-		OptionalLite<uint32_t> curNode;
+		OptionalLite<ScriptNodeId> curNode;
 		bool nodeStarted = false;
 		std::unique_ptr<IScriptStateData> curData;
 		float timeSlice;
@@ -72,7 +73,7 @@ namespace Halley {
 		bool isDone() const;
 		bool isDead() const;
 
-    	void start(OptionalLite<uint32_t> startNode, uint64_t graphHash);
+    	void start(OptionalLite<ScriptNodeId> startNode, uint64_t graphHash);
 		void reset();
     	
     	Vector<ScriptStateThread>& getThreads() { return threads; }
@@ -80,25 +81,25 @@ namespace Halley {
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
         uint64_t getGraphHash() const { return graphHash; }
 
-    	bool hasThreadAt(uint32_t node) const;
+    	bool hasThreadAt(ScriptNodeId node) const;
 
     	void setIntrospection(bool enabled);
     	void updateIntrospection(Time t);
-        void onNodeStarted(uint32_t nodeId)
+        void onNodeStarted(ScriptNodeId nodeId)
         {
 	        if (introspection) {
 		        onNodeStartedIntrospection(nodeId);
 	        }
         }
-    	void onNodeEnded(uint32_t nodeId)
+    	void onNodeEnded(ScriptNodeId nodeId)
     	{
 	        if (introspection) {
 		        onNodeEndedIntrospection(nodeId);
 	        }
         }
-    	NodeIntrospection getNodeIntrospection(uint32_t nodeId) const;
+    	NodeIntrospection getNodeIntrospection(ScriptNodeId nodeId) const;
 
-    	size_t& getNodeCounter(uint32_t node);
+    	size_t& getNodeCounter(ScriptNodeId node);
 
     	ConfigNode getVariable(const String& name) const;
     	void setVariable(const String& name, ConfigNode value);
@@ -114,13 +115,13 @@ namespace Halley {
     	bool started = false;
     	bool introspection = false;
 		bool persistAfterDone = false;
-    	std::map<uint32_t, size_t> nodeCounters;
+    	std::map<ScriptNodeId, size_t> nodeCounters;
     	std::map<String, ConfigNode> variables;
 
     	Vector<NodeIntrospection> nodeIntrospection;
 
-    	void onNodeStartedIntrospection(uint32_t nodeId);
-    	void onNodeEndedIntrospection(uint32_t nodeId);
+    	void onNodeStartedIntrospection(ScriptNodeId nodeId);
+    	void onNodeEndedIntrospection(ScriptNodeId nodeId);
     };
 	
 	template<>

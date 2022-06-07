@@ -9,17 +9,17 @@ namespace Halley {
 	class ScriptNodeTypeCollection;
 	class ScriptGraph;
 	class World;
-	
+
 	class ScriptGraphNode {
 	public:
 		struct PinConnection {
-			OptionalLite<uint32_t> dstNode = {};
-			uint8_t dstPin = 0;
+			OptionalLite<ScriptNodeId> dstNode = {};
+			ScriptPinId dstPin = 0;
 			OptionalLite<uint8_t> entityIdx;
 
 			PinConnection() = default;
 			PinConnection(const ConfigNode& node);
-			PinConnection(uint32_t dstNode, uint8_t dstPin);
+			PinConnection(ScriptNodeId dstNode, ScriptPinId dstPin);
 			explicit PinConnection(OptionalLite<uint8_t> entityIdx);
 
 			ConfigNode toConfigNode() const;
@@ -80,22 +80,22 @@ namespace Halley {
 
 		void feedToHash(Hash::Hasher& hasher);
 
-		void onNodeRemoved(uint32_t nodeId);
+		void onNodeRemoved(ScriptNodeId nodeId);
 
 		void assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		const IScriptNodeType& getNodeType() const;
 
-		uint32_t getId() const { return id; }
-		void setId(uint32_t i) { id = i; }
+		ScriptNodeId getId() const { return id; }
+		void setId(ScriptNodeId i) { id = i; }
 
-		ScriptNodePinType getPinType(uint8_t idx) const;
+		ScriptNodePinType getPinType(ScriptPinId idx) const;
 
 	private:
 		Vector2f position;
 		String type;
 		ConfigNode settings;
 		Vector<Pin> pins;
-		uint32_t id = 0;
+		ScriptNodeId id = 0;
 		mutable const IScriptNodeType* nodeType = nullptr;
 	};
 	
@@ -125,14 +125,14 @@ namespace Halley {
 		const Vector<ScriptGraphNode>& getNodes() const { return nodes; }
 		Vector<ScriptGraphNode>& getNodes() { return nodes; }
 
-		OptionalLite<uint32_t> getStartNode() const;
+		OptionalLite<ScriptNodeId> getStartNode() const;
 		uint64_t getHash() const;
 
-		bool connectPins(uint32_t srcNode, uint8_t srcPinN, uint32_t dstNode, uint8_t dstPin);
-		bool connectPin(uint32_t srcNode, uint8_t srcPinN, EntityId target);
-		bool disconnectPin(uint32_t nodeIdx, uint8_t pinN);
-		bool disconnectPinIfSingleConnection(uint32_t nodeIdx, uint8_t pinN);
-		void validateNodePins(uint32_t nodeIdx);
+		bool connectPins(ScriptNodeId srcNode, ScriptPinId srcPinN, ScriptNodeId dstNode, ScriptPinId dstPin);
+		bool connectPin(ScriptNodeId srcNode, ScriptPinId srcPinN, EntityId target);
+		bool disconnectPin(ScriptNodeId nodeIdx, ScriptPinId pinN);
+		bool disconnectPinIfSingleConnection(ScriptNodeId nodeIdx, ScriptPinId pinN);
+		void validateNodePins(ScriptNodeId nodeIdx);
 
 		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		void finishGraph();

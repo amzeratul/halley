@@ -44,7 +44,7 @@ ConfigNode ScriptStateThread::getPendingNodeData()
 	return std::move(pendingData);
 }
 
-ScriptStateThread::ScriptStateThread(uint32_t startNode)
+ScriptStateThread::ScriptStateThread(ScriptNodeId startNode)
 	: curNode(startNode)
 	, nodeStarted(false)
 {
@@ -78,7 +78,7 @@ void ScriptStateThread::finishNode()
 	curData.reset();
 }
 
-void ScriptStateThread::advanceToNode(OptionalLite<uint32_t> node)
+void ScriptStateThread::advanceToNode(OptionalLite<ScriptNodeId> node)
 {
 	curNode = node;
 }
@@ -146,7 +146,7 @@ ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) 
 	return node;
 }
 
-bool ScriptState::hasThreadAt(uint32_t node) const
+bool ScriptState::hasThreadAt(ScriptNodeId node) const
 {
 	for (const auto& thread: threads) {
 		if (thread.getCurNode() == node) {
@@ -156,7 +156,7 @@ bool ScriptState::hasThreadAt(uint32_t node) const
 	return false;
 }
 
-void ScriptState::start(OptionalLite<uint32_t> startNode, uint64_t hash)
+void ScriptState::start(OptionalLite<ScriptNodeId> startNode, uint64_t hash)
 {
 	threads.clear();
 	nodeCounters.clear();
@@ -196,12 +196,12 @@ void ScriptState::updateIntrospection(Time t)
 	}
 }
 
-ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(uint32_t nodeId) const
+ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(ScriptNodeId nodeId) const
 {
 	return nodeId < nodeIntrospection.size() ? nodeIntrospection[nodeId] : NodeIntrospection();
 }
 
-size_t& ScriptState::getNodeCounter(uint32_t node)
+size_t& ScriptState::getNodeCounter(ScriptNodeId node)
 {
 	return nodeCounters[node];
 }
@@ -230,7 +230,7 @@ bool ScriptState::operator!=(const ScriptState& other) const
 	return true;
 }
 
-void ScriptState::onNodeStartedIntrospection(uint32_t nodeId)
+void ScriptState::onNodeStartedIntrospection(ScriptNodeId nodeId)
 {
 	if (nodeId >= nodeIntrospection.size()) {
 		nodeIntrospection.resize(nodeId + 1);
@@ -241,7 +241,7 @@ void ScriptState::onNodeStartedIntrospection(uint32_t nodeId)
 	node.activationTime = 1.0f;
 }
 
-void ScriptState::onNodeEndedIntrospection(uint32_t nodeId)
+void ScriptState::onNodeEndedIntrospection(ScriptNodeId nodeId)
 {
 	if (nodeId >= nodeIntrospection.size()) {
 		nodeIntrospection.resize(nodeId + 1);

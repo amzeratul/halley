@@ -397,8 +397,6 @@ void SceneEditor::changeZoom(int amount, Vector2f cursorPosRelToCamera)
 	cameraAnimation = CameraAnimation{ prevPos, targetPos, prevZoom, targetZoom, 0 };
 }
 
-PRAGMA_DEOPTIMIZE
-
 void SceneEditor::updateCameraPos(Time t)
 {
 	auto cameraEntity = getWorld().getEntity(cameraEntityIds.at(0));

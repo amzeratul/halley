@@ -61,34 +61,41 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 			// Update
 			const auto result = nodeType.update(*this, time, node, thread.getCurData());
 
-			if (result.state == ScriptNodeExecutionState::Done) {
-				// Proceed to next node(s)
-				thread.finishNode();
-				graphState.onNodeEnded(nodeId);
-
-				auto outputNodes = nodeType.getOutputNodes(node, result.outputsActive);
-				thread.advanceToNode(outputNodes[0]);
-				for (size_t j = 1; j < outputNodes.size(); ++j) {
-					if (outputNodes[j]) {
-						auto& newThread = threads.emplace_back(outputNodes[j].value());
-						newThread.getTimeSlice() = timeLeft;
-					}
-				}
-			} else if (result.state == ScriptNodeExecutionState::Executing) {
+			if (result.state == ScriptNodeExecutionState::Executing) {
 				// Still running this node, suspend
 				suspended = true;
-			} else if (result.state == ScriptNodeExecutionState::Terminate) {
-				// Terminate script
-				threads.clear();
-				break;
-			} else if (result.state == ScriptNodeExecutionState::Restart) {
-				// Restart script
-				graphState.reset();
-				break;
-			} else if (result.state == ScriptNodeExecutionState::Merged) {
-				// Merged thread
-				thread.advanceToNode({});
-				break;
+			} else {
+				// Node ended
+				graphState.onNodeEnded(nodeId);
+				thread.finishNode();
+
+				if (result.state == ScriptNodeExecutionState::Done) {
+					// Proceed to next node(s)
+					auto outputNodes = nodeType.getOutputNodes(node, result.outputsActive);
+					if (!outputNodes[0]) {
+						terminateThread(thread);
+					} else {
+						thread.advanceToNode(outputNodes[0]);
+						for (size_t j = 1; j < outputNodes.size(); ++j) {
+							if (outputNodes[j]) {
+								auto& newThread = threads.emplace_back(outputNodes[j].value());
+								newThread.getTimeSlice() = timeLeft;
+							}
+						}
+					}
+				} else if (result.state == ScriptNodeExecutionState::Terminate) {
+					// Terminate script
+					for (auto& t: threads) {
+						terminateThread(t);
+					}
+				} else if (result.state == ScriptNodeExecutionState::Restart) {
+					// Restart script
+					graphState.reset();
+					break;
+				} else if (result.state == ScriptNodeExecutionState::Merged) {
+					// Merged thread
+					terminateThread(thread);
+				}
 			}
 		}
 	}
@@ -101,6 +108,11 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	currentGraph = nullptr;
 	currentState = nullptr;
 	currentEntity = EntityId();
+}
+
+void ScriptEnvironment::terminateThread(ScriptStateThread& thread)
+{
+	thread.advanceToNode({});
 }
 
 EntityRef ScriptEnvironment::tryGetEntity(EntityId entityId)

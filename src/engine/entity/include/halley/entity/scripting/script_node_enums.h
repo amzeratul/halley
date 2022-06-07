@@ -3,7 +3,10 @@
 #include <cstdint>
 
 namespace Halley {
-    enum class ScriptNodeExecutionState {
+ 	using ScriptNodeId = uint32_t;
+	using ScriptPinId = uint8_t;
+
+	enum class ScriptNodeExecutionState : uint8_t {
 		Done,
 		Executing,
 		Restart,
@@ -11,7 +14,7 @@ namespace Halley {
     	Merged
 	};
 
-	enum class ScriptNodeClassification {
+	enum class ScriptNodeClassification : uint8_t {
 		FlowControl,
 		Action,
 		Variable,

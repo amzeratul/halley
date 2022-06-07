@@ -10,21 +10,21 @@ using namespace Halley;
 ScriptGraphNode::PinConnection::PinConnection(const ConfigNode& node)
 {
 	if (node.hasKey("dstNode")) {
-		dstNode = static_cast<uint32_t>(node["dstNode"].asInt());
+		dstNode = static_cast<ScriptNodeId>(node["dstNode"].asInt());
 	}
 	if (node.hasKey("entityIdx")) {
 		entityIdx = node["entityIdx"].asInt();
 	}
-	dstPin = static_cast<uint8_t>(node["dstPin"].asInt(0));
+	dstPin = static_cast<ScriptPinId>(node["dstPin"].asInt(0));
 }
 
-ScriptGraphNode::PinConnection::PinConnection(uint32_t dstNode, uint8_t dstPin)
+ScriptGraphNode::PinConnection::PinConnection(ScriptNodeId dstNode, ScriptPinId dstPin)
 	: dstNode(dstNode)
 	, dstPin(dstPin)
 {
 }
 
-ScriptGraphNode::PinConnection::PinConnection(OptionalLite<uint8_t> entityIdx)
+ScriptGraphNode::PinConnection::PinConnection(OptionalLite<ScriptPinId> entityIdx)
 	: entityIdx(entityIdx)
 {
 }
@@ -142,13 +142,13 @@ void ScriptGraphNode::feedToHash(Hash::Hasher& hasher)
 	// TODO: settings, pins
 }
 
-void ScriptGraphNode::onNodeRemoved(uint32_t nodeId)
+void ScriptGraphNode::onNodeRemoved(ScriptNodeId nodeId)
 {
 	for (auto& pin: pins) {
 		for (auto& o: pin.connections) {
 			if (o.dstNode) {
 				if (o.dstNode.value() == nodeId) {
-					o.dstNode = OptionalLite<uint32_t>();
+					o.dstNode = OptionalLite<ScriptNodeId>();
 					o.dstPin = 0;
 				} else if (o.dstNode.value() >= nodeId) {
 					--o.dstNode.value();
@@ -171,7 +171,7 @@ const IScriptNodeType& ScriptGraphNode::getNodeType() const
 	return *nodeType;
 }
 
-ScriptNodePinType ScriptGraphNode::getPinType(uint8_t idx) const
+ScriptNodePinType ScriptGraphNode::getPinType(ScriptPinId idx) const
 {
 	const auto& config = getNodeType().getPinConfiguration(*this);
 	if (idx >= config.size()) {
@@ -261,11 +261,11 @@ void ScriptGraph::makeBaseGraph()
 	nodes.emplace_back("start", Vector2f(0, -30));
 }
 
-OptionalLite<uint32_t> ScriptGraph::getStartNode() const
+OptionalLite<ScriptNodeId> ScriptGraph::getStartNode() const
 {
 	const auto iter = std::find_if(nodes.begin(), nodes.end(), [&] (const ScriptGraphNode& node) { return node.getType() == "start"; });
 	if (iter != nodes.end()) {
-		return static_cast<uint32_t>(iter - nodes.begin());
+		return static_cast<ScriptNodeId>(iter - nodes.begin());
 	}
 	return {};
 }
@@ -275,7 +275,7 @@ uint64_t ScriptGraph::getHash() const
 	return hash;
 }
 
-bool ScriptGraph::connectPins(uint32_t srcNodeIdx, uint8_t srcPinN, uint32_t dstNodeIdx, uint8_t dstPinN)
+bool ScriptGraph::connectPins(ScriptNodeId srcNodeIdx, ScriptPinId srcPinN, ScriptNodeId dstNodeIdx, ScriptPinId dstPinN)
 {
 	auto& srcNode = nodes.at(srcNodeIdx);
 	auto& srcPin = srcNode.getPin(srcPinN);
@@ -297,7 +297,7 @@ bool ScriptGraph::connectPins(uint32_t srcNodeIdx, uint8_t srcPinN, uint32_t dst
 	return true;
 }
 
-bool ScriptGraph::connectPin(uint32_t srcNodeIdx, uint8_t srcPinN, EntityId target)
+bool ScriptGraph::connectPin(ScriptNodeId srcNodeIdx, ScriptPinId srcPinN, EntityId target)
 {
 	auto& srcNode = nodes.at(srcNodeIdx);
 	auto& srcPin = srcNode.getPin(srcPinN);
@@ -315,7 +315,7 @@ bool ScriptGraph::connectPin(uint32_t srcNodeIdx, uint8_t srcPinN, EntityId targ
 	return true;
 }
 
-bool ScriptGraph::disconnectPin(uint32_t nodeIdx, uint8_t pinN)
+bool ScriptGraph::disconnectPin(ScriptNodeId nodeIdx, ScriptPinId pinN)
 {
 	auto& node = nodes.at(nodeIdx);
 	auto& pin = node.getPin(pinN);
@@ -336,7 +336,7 @@ bool ScriptGraph::disconnectPin(uint32_t nodeIdx, uint8_t pinN)
 	return true;
 }
 
-bool ScriptGraph::disconnectPinIfSingleConnection(uint32_t nodeIdx, uint8_t pinN)
+bool ScriptGraph::disconnectPinIfSingleConnection(ScriptNodeId nodeIdx, ScriptPinId pinN)
 {
 	auto& node = nodes.at(nodeIdx);
 	if (node.getPinType(pinN).isMultiConnection()) {
@@ -346,7 +346,7 @@ bool ScriptGraph::disconnectPinIfSingleConnection(uint32_t nodeIdx, uint8_t pinN
 	return disconnectPin(nodeIdx, pinN);
 }
 
-void ScriptGraph::validateNodePins(uint32_t nodeIdx)
+void ScriptGraph::validateNodePins(ScriptNodeId nodeIdx)
 {
 	auto& node = nodes.at(nodeIdx);
 
@@ -354,7 +354,7 @@ void ScriptGraph::validateNodePins(uint32_t nodeIdx)
 	const size_t nPinsTarget = node.getNodeType().getPinConfiguration(node).size();
 	if (nPinsCur > nPinsTarget) {
 		for (size_t i = nPinsTarget; i < nPinsCur; ++i) {
-			disconnectPin(nodeIdx, static_cast<uint8_t>(i));
+			disconnectPin(nodeIdx, static_cast<ScriptPinId>(i));
 		}
 		node.getPins().resize(nPinsTarget);
 	}
@@ -431,7 +431,7 @@ void ScriptGraph::finishGraph()
 	}
 
 	Hash::Hasher hasher;
-	uint32_t i = 0;
+	ScriptNodeId i = 0;
 	for (auto& node: nodes) {
 		node.setId(i++);
 		node.feedToHash(hasher);

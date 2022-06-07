@@ -16,11 +16,11 @@ namespace Halley {
 		void setUIRoot(UIRoot& root);
 
 		void addNode();
-		uint32_t addNode(const String& type, Vector2f pos, ConfigNode settings);
-		bool destroyNode(uint32_t id);
-		bool destroyNodes(Vector<uint32_t> ids);
-		ScriptGraphNode& getNode(uint32_t id);
-		const ScriptGraphNode& getNode(uint32_t id) const;
+		ScriptNodeId addNode(const String& type, Vector2f pos, ConfigNode settings);
+		bool destroyNode(ScriptNodeId id);
+		bool destroyNodes(Vector<ScriptNodeId> ids);
+		ScriptGraphNode& getNode(ScriptNodeId id);
+		const ScriptGraphNode& getNode(ScriptNodeId id) const;
 
 		ConfigNode copySelection() const;
 		ConfigNode cutSelection();
@@ -52,17 +52,17 @@ namespace Halley {
 
 	private:
 		struct Dragging {
-			Vector<uint32_t> nodeIds;
+			Vector<ScriptNodeId> nodeIds;
 			Vector<Vector2f> startPos;
 			std::optional<Vector2f> startMousePos;
 			bool sticky;
 		};
 
 		struct Connection {
-			uint32_t srcNode;
-			uint32_t dstNode;
-			uint8_t srcPin;
-			uint8_t dstPin;
+			ScriptNodeId srcNode;
+			ScriptNodeId dstNode;
+			ScriptPinId srcPin;
+			ScriptPinId dstPin;
 			ScriptNodePinType srcType;
 			ScriptNodePinType dstType;
 			Vector2f srcPos;
@@ -86,7 +86,7 @@ namespace Halley {
 		ScriptGraph* scriptGraph = nullptr;
 
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeUnderMouse;
-		SelectionSet<uint32_t> selectedNodes;
+		SelectionSet<ScriptNodeId> selectedNodes;
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeEditingConnection;
 		std::optional<Vector2f> nodeConnectionDst;
 		std::optional<Vector2f> lastMousePos;
@@ -113,17 +113,17 @@ namespace Halley {
 		void drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f pos) const;
 		void drawEntityTargets(Painter& painter) const;
 
-		void openNodeUI(std::optional<uint32_t> nodeId, std::optional<Vector2f> pos, const String& nodeType);
+		void openNodeUI(std::optional<ScriptNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
 
 		void onNodeClicked(Vector2f mousePos, SelectionSetModifier modifier);
 		void onNodeDragging(const SceneEditorInputState& inputState);
 		void onPinClicked(bool rightClick, bool shiftHeld);
 		void onEditingConnection(const SceneEditorInputState& inputState);
 
-		void updateNodeAutoConnection(gsl::span<const uint32_t> nodes);
+		void updateNodeAutoConnection(gsl::span<const ScriptNodeId> nodes);
 		void pruneConflictingAutoConnections();
 		void finishAutoConnection();
-		std::optional<Connection> findAutoConnectionForPin(uint32_t srcNodeId, uint8_t srcPinIdx, Vector2f nodePos, ScriptNodePinType srcPinType, gsl::span<const uint32_t> excludeIds) const;
+		std::optional<Connection> findAutoConnectionForPin(ScriptNodeId srcNodeId, ScriptPinId srcPinIdx, Vector2f nodePos, ScriptNodePinType srcPinType, gsl::span<const ScriptNodeId> excludeIds) const;
 
 		void assignNodeTypes() const;
 		SelectionSetModifier getSelectionModifier(const SceneEditorInputState& inputState) const;
