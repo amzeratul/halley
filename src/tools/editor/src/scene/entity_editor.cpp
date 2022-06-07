@@ -509,11 +509,13 @@ void EntityEditor::pasteComponent(const String& name, ConfigNode data)
 	}
 }
 
-void EntityEditor::setName(const String& name)
+void EntityEditor::setName(const String& name, bool markModified)
 {
 	if (!isPrefab && getName() != name) {
 		getEntityData().setName(name);
-		onEntityUpdated();
+		if (markModified) {
+			onEntityUpdated();
+		}
 	}
 }
 
@@ -530,7 +532,7 @@ void EntityEditor::setDefaultName(const String& name, const String& prevName)
 	const auto oldName = getName();
 	if (oldName.isEmpty() || oldName == prevName) {
 		entityName->setText(name);
-		setName(name);
+		setName(name, false);
 	}
 }
 

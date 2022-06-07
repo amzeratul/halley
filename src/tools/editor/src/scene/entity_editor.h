@@ -89,7 +89,7 @@ namespace Halley {
 		void makeUI();
 		void loadComponentData(const String& componentType, ConfigNode& data);
 
-		void setName(const String& name);
+		void setName(const String& name, bool markModified = true);
 		String getName() const;
 		void setPrefabName(const String& prefab);
 		void setSelectable(bool selectable);
