@@ -75,6 +75,7 @@ void TaskAnchor::update(TaskSet& taskSet, float time)
 		const bool done = taskFuture.hasValue();
 		if (done) {
 			status = TaskStatus::Done;
+			exclusivityHandle.reset();
 			error = task->hasError();
 			progress = 1;
 			progressLabel = "";

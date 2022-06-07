@@ -11,7 +11,7 @@ using namespace Halley;
 
 Task::Task(String name, bool isCancellable, bool isVisible, Vector<String> exclusivityTags) 
 	: progress(0)
-	, name(name)
+	, name(std::move(name))
 	, cancelled(false)
 	, hasPendingTasksOnQueue(false)
 	, pendingTaskCount(0)
