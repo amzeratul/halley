@@ -50,15 +50,17 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 			const auto nodeId = thread.getCurNode().value();
 			const auto& node = currentGraph->getNodes().at(nodeId);
 			const auto& nodeType = node.getNodeType();
+			auto& nodeState = graphState.getNodeState(nodeId);
 			
 			// Start node if not done yet
-			if (!thread.isNodeStarted()) {
-				thread.startNode(makeNodeData(nodeType, node, thread.getPendingNodeData()));
-				graphState.onNodeStarted(nodeId);
+			if (nodeState.threadCount == 0) {
+				graphState.startNode(node, nodeState);
 			}
+			graphState.onNodeStarted(nodeId);
+			nodeState.threadCount++;
 
 			// Update
-			const auto result = nodeType.update(*this, time, node, thread.getCurData());
+			const auto result = nodeType.update(*this, time, node, nodeState.data);
 
 			if (result.state == ScriptNodeExecutionState::Executing) {
 				// Still running this node, suspend
@@ -66,7 +68,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 			} else {
 				// Node ended
 				graphState.onNodeEnded(nodeId);
-				thread.finishNode();
+				graphState.finishNode(node, nodeState);
 
 				if (result.state == ScriptNodeExecutionState::Done) {
 					// Proceed to next node(s)
@@ -138,26 +140,20 @@ void ScriptEnvironment::doTerminateState()
 void ScriptEnvironment::terminateThread(ScriptStateThread& thread)
 {
 	thread.advanceToNode({});
+
+	auto& state = *currentState;
 	
 	auto& currentStack = thread.getStack();
 	const auto n = static_cast<int>(currentStack.size());
 	for (int i = n; --i >= 0;) {
 		const auto nodeId = currentStack[i];
+		const auto& node = currentGraph->getNodes()[nodeId];
 
-		// Check if this node is still alive on any other stacks
-		bool aliveElsewhere = false;
-		for (auto& otherThread: currentState->getThreads()) {
-			if (&otherThread != &thread) {
-				if (std_ex::contains(otherThread.getStack(), nodeId)) {
-					aliveElsewhere = true;
-					break;
-				}
-			}
-		}
-
-		if (!aliveElsewhere) {
-			auto& node = currentGraph->getNodes()[nodeId];
+		auto& nodeState = state.getNodeState(nodeId);
+		nodeState.threadCount--;
+		if (nodeState.threadCount == 0) {
 			node.getNodeType().destructor(*this, node);
+			state.finishNode(node, nodeState);
 		}
 	}
 
@@ -208,13 +204,4 @@ void ScriptEnvironment::setDirection(EntityId entityId, const String& direction)
 			spriteAnimation->player.setDirection(direction);
 		}
 	}
-}
-
-std::unique_ptr<IScriptStateData> ScriptEnvironment::makeNodeData(const IScriptNodeType& nodeType, const ScriptGraphNode& node, const ConfigNode& nodeData)
-{
-	auto result = nodeType.makeData();
-	if (result) {
-		nodeType.initData(*result, node, nodeData);
-	}
-	return result;
 }

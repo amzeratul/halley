@@ -52,7 +52,8 @@ namespace Halley {
 
 		virtual bool canAdd() const { return true; }
         virtual bool canDelete() const { return true; }
-		
+        virtual bool canKeepData() const { return false; }
+
 		virtual std::unique_ptr<IScriptStateData> makeData() const { return {}; }
         virtual void initData(IScriptStateData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const {}
 
@@ -70,7 +71,7 @@ namespace Halley {
 
 		std::array<OptionalLite<ScriptNodeId>, 8> getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const;
 
-		static String addParentheses(String str);
+        static String addParentheses(String str);
 	};
 
 	template <typename DataType, typename EnvironmentType = ScriptEnvironment>

@@ -3,6 +3,7 @@
 #include "halley/bytes/byte_serializer.h"
 #include "halley/support/logger.h"
 #include "scripting/script_graph.h"
+#include "scripting/script_node_type.h"
 using namespace Halley;
 
 ScriptStateThread::ScriptStateThread()
@@ -12,7 +13,6 @@ ScriptStateThread::ScriptStateThread()
 
 ScriptStateThread::ScriptStateThread(ScriptNodeId startNode)
 	: curNode(startNode)
-	, nodeStarted(false)
 {
 }
 
@@ -28,9 +28,6 @@ ScriptStateThread::ScriptStateThread(const ConfigNode& node, const EntitySeriali
 	if (node.hasKey("curNode")) {
 		curNode = node["curNode"].asInt();
 	}
-	if (node.hasKey("curData")) {
-		pendingData = node["curData"];
-	}
 }
 
 ScriptStateThread::~ScriptStateThread()
@@ -42,9 +39,7 @@ ScriptStateThread::~ScriptStateThread()
 
 ScriptStateThread& ScriptStateThread::operator=(const ScriptStateThread& other)
 {
-	Expects(!curData);
 	curNode = other.curNode;
-	nodeStarted = other.nodeStarted;
 	timeSlice = other.timeSlice;
 	return *this;
 }
@@ -59,15 +54,7 @@ ConfigNode ScriptStateThread::toConfigNode(const EntitySerializationContext& con
 	if (curNode) {
 		node["curNode"] = static_cast<int>(curNode.value());
 	}
-	if (curData) {
-		node["curData"] = curData->toConfigNode(context);
-	}
 	return node;
-}
-
-ConfigNode ScriptStateThread::getPendingNodeData()
-{
-	return std::move(pendingData);
 }
 
 const Vector<ScriptNodeId>& ScriptStateThread::getStack() const
@@ -80,26 +67,87 @@ Vector<ScriptNodeId>& ScriptStateThread::getStack()
 	return stack;
 }
 
-void ScriptStateThread::startNode(std::unique_ptr<IScriptStateData> data)
-{
-	Expects(!nodeStarted);
-	nodeStarted = true;
-	curData = std::move(data);
-}
-
-void ScriptStateThread::finishNode()
-{
-	Expects(nodeStarted);
-	nodeStarted = false;
-	curData.reset();
-}
-
 void ScriptStateThread::advanceToNode(OptionalLite<ScriptNodeId> node)
 {
 	if (curNode) {
 		stack.push_back(*curNode);
 	}
 	curNode = node;
+}
+
+ScriptState::NodeState::NodeState()
+	: data(nullptr)
+{
+}
+
+ScriptState::NodeState::NodeState(const ConfigNode& node, const EntitySerializationContext& context)
+{
+	threadCount = static_cast<uint8_t>(node["threadCount"].asInt(0));
+	pendingData = new ConfigNode(node["pendingData"]);
+	hasPendingData = true;
+}
+
+ScriptState::NodeState::NodeState(const NodeState& other)
+{
+	*this = other;
+}
+
+ScriptState::NodeState::NodeState(NodeState&& other)
+{
+	*this = std::move(other);
+}
+
+ScriptState::NodeState& ScriptState::NodeState::operator=(const NodeState& other)
+{
+	releaseData();
+
+	if (other.data != nullptr) {
+		throw Exception("Invalid copy operation", HalleyExceptions::Entity);
+	}
+
+	threadCount = other.threadCount;
+
+	return *this;
+}
+
+ScriptState::NodeState& ScriptState::NodeState::operator=(NodeState&& other)
+{
+	releaseData();
+
+	threadCount = other.threadCount;
+
+	data = other.data;
+	hasPendingData = other.hasPendingData;
+
+	other.data = nullptr;
+	other.hasPendingData = false;
+
+	return *this;
+}
+
+ConfigNode ScriptState::NodeState::toConfigNode(const EntitySerializationContext& context) const
+{
+	ConfigNode::MapType result;
+	result["threadCount"] = threadCount;
+	if (data) {
+		result["pendingData"] = data->toConfigNode(context);
+	}
+	return result;
+}
+
+void ScriptState::NodeState::releaseData()
+{
+	if (hasPendingData) {
+		delete pendingData;
+	} else {
+		delete data;
+	}
+	data = nullptr;
+}
+
+ScriptState::NodeState::~NodeState()
+{
+	releaseData();
 }
 
 ScriptState::ScriptState()
@@ -111,6 +159,7 @@ ScriptState::ScriptState(const ConfigNode& node, const EntitySerializationContex
 {
 	started = node["started"].asBool(false);
 	threads = ConfigNodeSerializer<decltype(threads)>().deserialize(context, node["threads"]);
+	nodeState = ConfigNodeSerializer<decltype(nodeState)>().deserialize(context, node["nodeState"]);
 	graphHash = Deserializer::fromBytes<decltype(graphHash)>(node["graphHash"].asBytes());
 	variables = ConfigNodeSerializer<decltype(variables)>().deserialize(context, node["variables"]);
 	persistAfterDone = node["persistAfterDone"].asBool(false);
@@ -160,6 +209,7 @@ ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) 
 		node["started"] = started;
 	}
 	node["threads"] = ConfigNodeSerializer<decltype(threads)>().serialize(threads, context);
+	node["nodeState"] = ConfigNodeSerializer<decltype(nodeState)>().serialize(nodeState, context);
 	node["graphHash"] = Serializer::toBytes(graphHash);
 	node["variables"] = ConfigNodeSerializer<decltype(variables)>().serialize(variables, context);
 	node["script"] = scriptGraph ? scriptGraph->getAssetId() : "";
@@ -186,6 +236,7 @@ void ScriptState::start(OptionalLite<ScriptNodeId> startNode, uint64_t hash)
 	}
 	graphHash = hash;
 	started = true;
+	nodeState.resize(getScriptGraphPtr()->getNodes().size());
 }
 
 void ScriptState::reset()
@@ -251,6 +302,29 @@ bool ScriptState::operator!=(const ScriptState& other) const
 	return true;
 }
 
+ScriptState::NodeState& ScriptState::getNodeState(ScriptNodeId nodeId)
+{
+	return nodeState[nodeId];
+}
+
+void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state)
+{
+	auto& nodeType = node.getNodeType();
+	auto data = nodeType.makeData();
+	if (data) {
+		nodeType.initData(*data, node, state.hasPendingData ? std::move(*state.pendingData) : ConfigNode());
+		state.data = data.release();
+		state.hasPendingData = false;
+	}
+}
+
+void ScriptState::finishNode(const ScriptGraphNode& node, NodeState& state)
+{
+	if (!node.getNodeType().canKeepData()) {
+		state.releaseData();
+	}
+}
+
 void ScriptState::onNodeStartedIntrospection(ScriptNodeId nodeId)
 {
 	if (nodeId >= nodeIntrospection.size()) {
@@ -290,4 +364,14 @@ ConfigNode ConfigNodeSerializer<ScriptStateThread>::serialize(const ScriptStateT
 ScriptStateThread ConfigNodeSerializer<ScriptStateThread>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 {
 	return ScriptStateThread(node, context);
+}
+
+ConfigNode ConfigNodeSerializer<ScriptState::NodeState>::serialize(const ScriptState::NodeState& state, const EntitySerializationContext& context)
+{
+	return state.toConfigNode(context);
+}
+
+ScriptState::NodeState ConfigNodeSerializer<ScriptState::NodeState>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
+{
+	return ScriptState::NodeState(node, context);
 }

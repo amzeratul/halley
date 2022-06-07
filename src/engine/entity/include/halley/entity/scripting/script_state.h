@@ -4,6 +4,7 @@
 #include "halley/time/halleytime.h"
 
 namespace Halley {
+	class ScriptGraphNode;
 	class ScriptGraph;
 
 	class IScriptStateData {
@@ -27,11 +28,7 @@ namespace Halley {
 		ScriptStateThread& operator=(ScriptStateThread&& other) = default;
 		
 		OptionalLite<ScriptNodeId> getCurNode() const { return curNode; }
-		IScriptStateData* getCurData() { return curData.get(); }
-		bool isNodeStarted() const { return nodeStarted; }
 
-		void startNode(std::unique_ptr<IScriptStateData> data);
-		void finishNode();
 		void advanceToNode(OptionalLite<ScriptNodeId> node);
 
 		float& getTimeSlice() { return timeSlice; }
@@ -45,10 +42,7 @@ namespace Halley {
 
 	private:
 		OptionalLite<ScriptNodeId> curNode;
-		bool nodeStarted = false;
 		float timeSlice = 0;
-		std::unique_ptr<IScriptStateData> curData;
-		ConfigNode pendingData;
 		Vector<ScriptNodeId> stack;
 	};
 
@@ -66,6 +60,28 @@ namespace Halley {
     		NodeIntrospectionState state;
     	};
 
+		struct NodeState {
+			uint8_t threadCount = 0;
+			bool hasPendingData = false;
+			union {
+				gsl::owner<IScriptStateData*> data;
+				gsl::owner<ConfigNode*> pendingData;
+			};
+
+			NodeState();
+			NodeState(const ConfigNode& node, const EntitySerializationContext& context);
+			NodeState(const NodeState& other);
+			NodeState(NodeState&& other);
+			~NodeState();
+
+			NodeState& operator=(const NodeState& other);
+			NodeState& operator=(NodeState&& other);
+
+			ConfigNode toConfigNode(const EntitySerializationContext& context) const;
+
+			void releaseData();
+		};
+
     	ScriptState();
 		ScriptState(const ConfigNode& node, const EntitySerializationContext& context);
 		ScriptState(const ScriptGraph* script, bool persistAfterDone);
@@ -80,6 +96,10 @@ namespace Halley {
 
     	void start(OptionalLite<ScriptNodeId> startNode, uint64_t graphHash);
 		void reset();
+
+    	NodeState& getNodeState(ScriptNodeId nodeId);
+		void startNode(const ScriptGraphNode& node, NodeState& state);
+		void finishNode(const ScriptGraphNode& node, NodeState& state);
     	
     	Vector<ScriptStateThread>& getThreads() { return threads; }
 
@@ -90,6 +110,16 @@ namespace Halley {
 
     	void setIntrospection(bool enabled);
     	void updateIntrospection(Time t);
+    	NodeIntrospection getNodeIntrospection(ScriptNodeId nodeId) const;
+
+    	size_t& getNodeCounter(ScriptNodeId node);
+
+    	ConfigNode getVariable(const String& name) const;
+    	void setVariable(const String& name, ConfigNode value);
+
+		bool operator==(const ScriptState& other) const;
+		bool operator!=(const ScriptState& other) const;
+
         void onNodeStarted(ScriptNodeId nodeId)
         {
 	        if (introspection) {
@@ -102,20 +132,14 @@ namespace Halley {
 		        onNodeEndedIntrospection(nodeId);
 	        }
         }
-    	NodeIntrospection getNodeIntrospection(ScriptNodeId nodeId) const;
-
-    	size_t& getNodeCounter(ScriptNodeId node);
-
-    	ConfigNode getVariable(const String& name) const;
-    	void setVariable(const String& name, ConfigNode value);
-
-		bool operator==(const ScriptState& other) const;
-		bool operator!=(const ScriptState& other) const;
 
 	private:
 		std::shared_ptr<const ScriptGraph> scriptGraph;
 		const ScriptGraph* scriptGraphRef = nullptr;
     	Vector<ScriptStateThread> threads;
+
+		Vector<NodeState> nodeState;
+
     	uint64_t graphHash = 0;
     	bool started = false;
     	bool introspection = false;
@@ -141,6 +165,13 @@ namespace Halley {
 	public:
 		ConfigNode serialize(const ScriptStateThread& thread, const EntitySerializationContext& context);
 		ScriptStateThread deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+	};
+	
+	template<>
+	class ConfigNodeSerializer<ScriptState::NodeState> {
+	public:
+		ConfigNode serialize(const ScriptState::NodeState& state, const EntitySerializationContext& context);
+		ScriptState::NodeState deserialize(const EntitySerializationContext& context, const ConfigNode& node);
 	};
 
 }
