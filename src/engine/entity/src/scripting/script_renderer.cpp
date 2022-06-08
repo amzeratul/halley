@@ -43,7 +43,7 @@ void ScriptRenderer::setState(const ScriptState* scriptState)
 	state = scriptState;
 }
 
-void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
+void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom, float posScale)
 {
 	if (!graph) {
 		return;
@@ -52,7 +52,7 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 	const float effectiveZoom = std::max(nativeZoom, curZoom);
 
 	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
-		drawNodeOutputs(painter, basePos, static_cast<ScriptNodeId>(i), *graph, effectiveZoom);
+		drawNodeOutputs(painter, basePos, static_cast<ScriptNodeId>(i), *graph, effectiveZoom, posScale);
 	}
 
 	for (const auto& currentPath: currentPaths) {
@@ -64,11 +64,11 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 		const auto pinType = highlightThis ? highlightNode->element : std::optional<ScriptNodePinType>();
 		const auto pinId = highlightThis ? highlightNode->elementId : 0;
 		
-		drawNode(painter, basePos, graph->getNodes()[i], effectiveZoom, getNodeDrawMode(i), pinType, pinId);
+		drawNode(painter, basePos, graph->getNodes()[i], effectiveZoom, posScale, getNodeDrawMode(i), pinType, pinId);
 	}
 }
 
-void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptNodeId nodeIdx, const ScriptGraph& graph, float curZoom)
+void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptNodeId nodeIdx, const ScriptGraph& graph, float curZoom, float posScale)
 {
 	auto drawMode = getNodeDrawMode(nodeIdx);
 	NodeDrawMode dstDrawMode;
@@ -97,7 +97,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptN
 				if (!dstNodeType) {
 					continue;
 				}
-				dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom).getCentre();
+				dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom, posScale).getCentre();
 				dstPinType = dstNodeType->getPin(node, dstIdx);
 				if (highlightNode && highlightNode->nodeId == pinConnection.dstNode.value()) {
 					highlighted = true;
@@ -121,7 +121,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptN
 			}
 			
 			if (dstPos) {
-				const Vector2f srcPos = getNodeElementArea(*nodeType, basePos, node, i, curZoom).getCentre();
+				const Vector2f srcPos = getNodeElementArea(*nodeType, basePos, node, i, curZoom, posScale).getCentre();
 				const bool connActive = drawMode.type != NodeDrawModeType::Unvisited && dstDrawMode.type != NodeDrawModeType::Unvisited;
 				drawConnection(painter, ConnectionPath{ srcPos, dstPos.value(), srcPinType, dstPinType }, curZoom, highlighted, !connActive);
 			}
@@ -188,11 +188,11 @@ ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(ScriptNodeId nodeId
 	return drawMode;
 }
 
-void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, ScriptPinId highlightElementId)
+void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, ScriptPinId highlightElementId)
 {
 	const Vector2f border = Vector2f(18, 18);
 	const Vector2f nodeSize = getNodeSize(curZoom);
-	const auto pos = ((basePos + node.getPosition()) * curZoom).round() / curZoom;
+	const auto pos = ((basePos + node.getPosition() * posScale) * curZoom).round() / curZoom;
 
 	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
 	if (!nodeType) {
@@ -290,7 +290,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 	const auto& pins = nodeType->getPinConfiguration(node);
 	for (size_t i = 0; i < pins.size(); ++i) {
 		const auto& pinType = pins[i];
-		const auto circle = getNodeElementArea(*nodeType, basePos, node, i, curZoom);
+		const auto circle = getNodeElementArea(*nodeType, basePos, node, i, curZoom, posScale);
 		const auto baseCol = getPinColour(pinType);
 		const auto col = highlightElement == pinType && highlightElementId == i ? baseCol.inverseMultiplyLuma(0.3f) : baseCol;
 		pinSprite.clone()
@@ -306,7 +306,7 @@ Vector2f ScriptRenderer::getNodeSize(float curZoom) const
 	return Vector2f(60, 60);
 }
 
-Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom) const
+Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom, float posScale) const
 {
 	const Vector2f nodeSize = getNodeSize(curZoom);
 	const auto getOffset = [&] (size_t idx, size_t n)
@@ -349,8 +349,8 @@ Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vecto
 	default:
 		break;
 	}
-	
-	const Vector2f pos = basePos + node.getPosition();
+
+	const Vector2f pos = basePos + node.getPosition() * posScale;
 	const Vector2f centre = pos + offset / curZoom;
 	const float radius = 4.0f / curZoom;
 	
@@ -435,7 +435,7 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 		const auto& pins = nodeType->getPinConfiguration(node);
 		for	(size_t j = 0; j < pins.size(); ++j) {
 			const auto& pinType = pins[j];
-			const auto circle = getNodeElementArea(*nodeType, basePos, node, j, curZoom).expand((pinPriority ? 12.0f : 4.0f) / curZoom);
+			const auto circle = getNodeElementArea(*nodeType, basePos, node, j, curZoom, curZoom).expand((pinPriority ? 12.0f : 4.0f) / curZoom);
 			if (circle.contains(mousePos)) {
 				foundPin = true;
 				const float distance = (mousePos - circle.getCentre()).length();
@@ -461,7 +461,7 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 
 Vector2f ScriptRenderer::getPinPosition(Vector2f basePos, const ScriptGraphNode& node, ScriptPinId idx) const
 {
-	return getNodeElementArea(node.getNodeType(), basePos, node, idx, 1.0f).getCentre();
+	return getNodeElementArea(node.getNodeType(), basePos, node, idx, 1.0f, 1.0f).getCentre();
 }
 
 Vector<ScriptNodeId> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const

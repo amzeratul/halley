@@ -36,7 +36,7 @@ namespace Halley {
 		
 		void setGraph(const ScriptGraph* graph);
 		void setState(const ScriptState* scriptState);
-		void draw(Painter& painter, Vector2f basePos, float curZoom);
+		void draw(Painter& painter, Vector2f basePos, float curZoom, float posScale = 1.0f);
 
 		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const;
 		Vector2f getPinPosition(Vector2f basePos, const ScriptGraphNode& node, ScriptPinId idx) const;
@@ -83,11 +83,11 @@ namespace Halley {
 		Vector<ScriptNodeId> selectedNodes;
 		Vector<ConnectionPath> currentPaths;
 
-		void drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptNodeId nodeIdx, const ScriptGraph& graph, float curZoom);
-		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, ScriptPinId highlightElementId);
+		void drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptNodeId nodeIdx, const ScriptGraph& graph, float curZoom, float posScale);
+		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, ScriptPinId highlightElementId);
 
 		Vector2f getNodeSize(float curZoom) const;
-		Circle getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom) const;
+		Circle getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom, float posScale) const;
 		Colour4f getPinColour(ScriptNodePinType pinType) const;
 		const Sprite& getIcon(const IScriptNodeType& nodeType, const ScriptGraphNode& node);
 
