@@ -51,7 +51,7 @@ namespace Halley {
 		enum class NodeDrawModeType : uint8_t {
 			Normal,
 			Highlight,
-			Visited,
+			Unvisited,
 			Active
 		};
 
@@ -83,7 +83,7 @@ namespace Halley {
 		Vector<ScriptNodeId> selectedNodes;
 		Vector<ConnectionPath> currentPaths;
 
-		void drawNodeOutputs(Painter& painter, Vector2f basePos, size_t nodeIdx, const ScriptGraph& graph, float curZoom);
+		void drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptNodeId nodeIdx, const ScriptGraph& graph, float curZoom);
 		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, ScriptPinId highlightElementId);
 
 		Vector2f getNodeSize(float curZoom) const;
@@ -93,5 +93,7 @@ namespace Halley {
 
 		BezierCubic makeBezier(const ConnectionPath& path) const;
 		void drawConnection(Painter& painter, const ConnectionPath& path, float curZoom, bool highlight, bool fade) const;
+
+		NodeDrawMode getNodeDrawMode(ScriptNodeId nodeId) const;
 	};
 }

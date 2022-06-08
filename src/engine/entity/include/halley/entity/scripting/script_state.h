@@ -43,10 +43,10 @@ namespace Halley {
 		ScriptStateThread fork(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin) const;
 		
 		float& getTimeSlice() { return timeSlice; }
+		float& getCurNodeTime() { return curNodeTime; }
+		float getCurNodeTime() const { return curNodeTime; }
 
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
-
-		ConfigNode getPendingNodeData();
 
 		const Vector<StackFrame>& getStack() const;
 		Vector<StackFrame>& getStack();
@@ -55,6 +55,7 @@ namespace Halley {
 	private:
 		OptionalLite<ScriptNodeId> curNode;
 		float timeSlice = 0;
+		float curNodeTime = 0;
 		Vector<StackFrame> stack;
 	};
 
@@ -120,10 +121,7 @@ namespace Halley {
 
     	bool hasThreadAt(ScriptNodeId node) const;
 
-    	void setIntrospection(bool enabled);
-    	void updateIntrospection(Time t);
     	NodeIntrospection getNodeIntrospection(ScriptNodeId nodeId) const;
-
     	size_t& getNodeCounter(ScriptNodeId node);
 
     	ConfigNode getVariable(const String& name) const;
@@ -131,20 +129,7 @@ namespace Halley {
 
 		bool operator==(const ScriptState& other) const;
 		bool operator!=(const ScriptState& other) const;
-
-        void onNodeStarted(ScriptNodeId nodeId)
-        {
-	        if (introspection) {
-		        onNodeStartedIntrospection(nodeId);
-	        }
-        }
-    	void onNodeEnded(ScriptNodeId nodeId)
-    	{
-	        if (introspection) {
-		        onNodeEndedIntrospection(nodeId);
-	        }
-        }
-
+		
 	private:
 		std::shared_ptr<const ScriptGraph> scriptGraph;
 		const ScriptGraph* scriptGraphRef = nullptr;
@@ -158,8 +143,6 @@ namespace Halley {
 		bool persistAfterDone = false;
     	std::map<ScriptNodeId, size_t> nodeCounters;
     	std::map<String, ConfigNode> variables;
-
-    	Vector<NodeIntrospection> nodeIntrospection;
 
     	void onNodeStartedIntrospection(ScriptNodeId nodeId);
     	void onNodeEndedIntrospection(ScriptNodeId nodeId);

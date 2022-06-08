@@ -52,7 +52,7 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 	const float effectiveZoom = std::max(nativeZoom, curZoom);
 
 	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
-		drawNodeOutputs(painter, basePos, i, *graph, effectiveZoom);
+		drawNodeOutputs(painter, basePos, static_cast<ScriptNodeId>(i), *graph, effectiveZoom);
 	}
 
 	for (const auto& currentPath: currentPaths) {
@@ -60,38 +60,19 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom)
 	}
 	
 	for (ScriptNodeId i = 0; i < static_cast<ScriptNodeId>(graph->getNodes().size()); ++i) {
-		const auto& node = graph->getNodes()[i];
-
 		const bool highlightThis = highlightNode && highlightNode->nodeId == i;
 		const auto pinType = highlightThis ? highlightNode->element : std::optional<ScriptNodePinType>();
 		const auto pinId = highlightThis ? highlightNode->elementId : 0;
 		
-		NodeDrawMode drawMode;
-		if (state) {
-			// Rendering in-game, with execution state
-			const auto nodeIntrospection = state->getNodeIntrospection(i);
-			if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Active) {
-				drawMode.type = NodeDrawModeType::Active;
-				drawMode.time = nodeIntrospection.time;
-			} else if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Visited) {
-				drawMode.type = NodeDrawModeType::Visited;
-				drawMode.time = nodeIntrospection.time;
-			}
-			drawMode.activationTime = nodeIntrospection.activationTime;
-		} else {
-			// Rendering in editor
-			if (highlightThis && highlightNode->element.type == ScriptNodeElementType::Node) {
-				drawMode.type = NodeDrawModeType::Highlight;
-			}
-		}
-		drawMode.selected = std_ex::contains(selectedNodes, i);
-		
-		drawNode(painter, basePos, node, effectiveZoom, drawMode, pinType, pinId);
+		drawNode(painter, basePos, graph->getNodes()[i], effectiveZoom, getNodeDrawMode(i), pinType, pinId);
 	}
 }
 
-void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t nodeIdx, const ScriptGraph& graph, float curZoom)
+void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptNodeId nodeIdx, const ScriptGraph& graph, float curZoom)
 {
+	auto drawMode = getNodeDrawMode(nodeIdx);
+	NodeDrawMode dstDrawMode;
+
 	const ScriptGraphNode& node = graph.getNodes().at(nodeIdx);
 	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
 	if (!nodeType) {
@@ -121,6 +102,8 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t 
 				if (highlightNode && highlightNode->nodeId == pinConnection.dstNode.value()) {
 					highlighted = true;
 				}
+
+				dstDrawMode = getNodeDrawMode(*pinConnection.dstNode);
 			} else if (pinConnection.entityIdx && world) {
 				const auto entityId = graph.getEntityId(pinConnection.entityIdx);
 				auto entity = world->tryGetEntity(entityId);
@@ -139,7 +122,8 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, size_t 
 			
 			if (dstPos) {
 				const Vector2f srcPos = getNodeElementArea(*nodeType, basePos, node, i, curZoom).getCentre();
-				drawConnection(painter, ConnectionPath{ srcPos, dstPos.value(), srcPinType, dstPinType }, curZoom, highlighted, false);
+				const bool connActive = drawMode.type != NodeDrawModeType::Unvisited && dstDrawMode.type != NodeDrawModeType::Unvisited;
+				drawConnection(painter, ConnectionPath{ srcPos, dstPos.value(), srcPinType, dstPinType }, curZoom, highlighted, !connActive);
 			}
 		}
 	}
@@ -180,6 +164,30 @@ void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path
 	painter.drawLine(bezier, 3.0f / curZoom, col);
 }
 
+ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(ScriptNodeId nodeId) const
+{
+	NodeDrawMode drawMode;
+	if (state) {
+		// Rendering in-game, with execution state
+		const auto nodeIntrospection = state->getNodeIntrospection(nodeId);
+		if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Active) {
+			drawMode.type = NodeDrawModeType::Active;
+			drawMode.time = nodeIntrospection.time;
+		} else if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Unvisited) {
+			drawMode.type = NodeDrawModeType::Unvisited;
+		}
+		drawMode.activationTime = nodeIntrospection.activationTime;
+	} else {
+		// Rendering in editor
+		const bool highlightThis = highlightNode && highlightNode->nodeId == nodeId;
+		if (highlightThis && highlightNode->element.type == ScriptNodeElementType::Node) {
+			drawMode.type = NodeDrawModeType::Highlight;
+		}
+	}
+	drawMode.selected = std_ex::contains(selectedNodes, nodeId);
+	return drawMode;
+}
+
 void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, ScriptPinId highlightElementId)
 {
 	const Vector2f border = Vector2f(18, 18);
@@ -208,7 +216,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 				borderAlpha = 1;
 				break;
 			}
-		case NodeDrawModeType::Visited:
+		case NodeDrawModeType::Unvisited:
 			col = col.multiplyLuma(0.3f);
 			iconCol = Colour4f(0.5f, 0.5f, 0.5f);
 			break;

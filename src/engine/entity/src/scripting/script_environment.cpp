@@ -54,7 +54,6 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 			// Start node if not done yet
 			if (nodeState.threadCount == 0) {
 				graphState.startNode(node, nodeState);
-				graphState.onNodeStarted(nodeId);
 				nodeState.threadCount++;
 			}
 
@@ -63,6 +62,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 
 			if (result.state == ScriptNodeExecutionState::Executing) {
 				// Still running this node, suspend
+				thread.getCurNodeTime() += timeLeft;
 				timeLeft = 0;
 			} else if (result.state == ScriptNodeExecutionState::Fork) {
 				for (auto& outputNode : nodeType.getOutputNodes(node, result.outputsActive)) {
@@ -72,7 +72,6 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 				}
 			} else {
 				// Node ended
-				graphState.onNodeEnded(nodeId);
 				graphState.finishNode(node, nodeState);
 				timeLeft -= static_cast<float>(result.timeElapsed);
 
@@ -110,8 +109,6 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	}
 	
 	removeStoppedThreads();
-
-	graphState.updateIntrospection(time);
 
 	currentGraph = nullptr;
 	currentState = nullptr;
