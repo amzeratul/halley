@@ -225,6 +225,20 @@ namespace Halley {
         }
 	};
 
+	template <typename T>
+    class ConfigNodeSerializer<std::shared_ptr<T>> {
+    public:
+        ConfigNode serialize(const std::shared_ptr<T>& value, const EntitySerializationContext& context)
+		{
+			return ConfigNodeSerializer<T>().serialize(*value, context);
+		}
+		
+        std::shared_ptr<T> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
+        {
+			return std::make_shared<T>(ConfigNodeSerializer<T>().deserialize(context, node));
+        }
+	};
+
 	template <typename A, typename B>
 	class ConfigNodeSerializer<std::pair<A, B>>
 	{
