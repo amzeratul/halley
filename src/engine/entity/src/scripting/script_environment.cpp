@@ -43,9 +43,8 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	for (size_t i = 0; i < threads.size(); ++i) {
 		auto& thread = threads[i];
 		float& timeLeft = thread.getTimeSlice();
-		bool suspended = false;
 
-		while (!suspended && timeLeft > 0 && thread.getCurNode()) {
+		while (timeLeft > 0 && thread.getCurNode()) {
 			// Get node type
 			const auto nodeId = thread.getCurNode().value();
 			const auto& node = currentGraph->getNodes().at(nodeId);
@@ -64,25 +63,34 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 
 			if (result.state == ScriptNodeExecutionState::Executing) {
 				// Still running this node, suspend
-				suspended = true;
+				timeLeft = 0;
+			} else if (result.state == ScriptNodeExecutionState::Fork) {
+				for (auto& outputNode : nodeType.getOutputNodes(node, result.outputsActive)) {
+					if (outputNode.dstNode) {
+						addThread(thread.fork(outputNode.dstNode.value(), outputNode.outputPin));
+					}
+				}
 			} else {
 				// Node ended
 				graphState.onNodeEnded(nodeId);
 				graphState.finishNode(node, nodeState);
+				timeLeft -= static_cast<float>(result.timeElapsed);
 
 				if (result.state == ScriptNodeExecutionState::Done) {
 					// Proceed to next node(s)
 					auto outputNodes = nodeType.getOutputNodes(node, result.outputsActive);
-					if (!outputNodes[0]) {
-						terminateThread(thread);
-					} else {
-						thread.advanceToNode(outputNodes[0]);
+					if (outputNodes[0].dstNode) {
+						// Generate forked threads
 						for (size_t j = 1; j < outputNodes.size(); ++j) {
-							if (outputNodes[j]) {
-								auto& newThread = threads.emplace_back(outputNodes[j].value());
-								newThread.getTimeSlice() = timeLeft;
+							if (outputNodes[j].dstNode) {
+								addThread(thread.fork(outputNodes[j].dstNode.value(), outputNodes[j].outputPin));
 							}
 						}
+
+						// Update current thread only after forks were spawned
+						thread.advanceToNode(outputNodes[0].dstNode, outputNodes[0].outputPin);
+					} else {
+						terminateThread(thread);
 					}
 				} else if (result.state == ScriptNodeExecutionState::Terminate) {
 					// Terminate script
@@ -100,9 +108,8 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 			}
 		}
 	}
-
-	// Remove stopped threads
-	std_ex::erase_if(threads, [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); });
+	
+	removeStoppedThreads();
 
 	graphState.updateIntrospection(time);
 
@@ -129,6 +136,18 @@ void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEnti
 	currentEntity = EntityId();
 }
 
+void ScriptEnvironment::abortCodePath(ScriptNodeId node, std::optional<ScriptPinId> outputPin)
+{
+	Expects(currentState != nullptr);
+
+	for (auto& thread: currentState->getThreads()) {
+		if (thread.stackGoesThrough(node, outputPin)) {
+			terminateThread(thread);
+		}
+	}
+	removeStoppedThreads();
+}
+
 void ScriptEnvironment::doTerminateState()
 {
 	for (auto& thread: currentState->getThreads()) {
@@ -137,16 +156,27 @@ void ScriptEnvironment::doTerminateState()
 	currentState->getThreads().clear();
 }
 
+void ScriptEnvironment::addThread(ScriptStateThread thread)
+{
+	for (const auto s: thread.getStack()) {
+		auto& nThreads = currentState->getNodeState(s.node).threadCount;
+		assert(n >= 1);
+		++nThreads;
+	}
+
+	currentState->getThreads().push_back(std::move(thread));
+}
+
 void ScriptEnvironment::terminateThread(ScriptStateThread& thread)
 {
-	thread.advanceToNode({});
+	thread.advanceToNode({}, 0);
 
 	auto& state = *currentState;
 	
-	auto& currentStack = thread.getStack();
-	const auto n = static_cast<int>(currentStack.size());
+	auto& threadStack = thread.getStack();
+	const auto n = static_cast<int>(threadStack.size());
 	for (int i = n; --i >= 0;) {
-		const auto nodeId = currentStack[i];
+		const auto nodeId = threadStack[i].node;
 		const auto& node = currentGraph->getNodes()[nodeId];
 
 		auto& nodeState = state.getNodeState(nodeId);
@@ -156,8 +186,12 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread)
 			state.finishNode(node, nodeState);
 		}
 	}
+	threadStack.clear();
+}
 
-	currentStack.clear();
+void ScriptEnvironment::removeStoppedThreads()
+{
+	std_ex::erase_if(currentState->getThreads(), [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); });
 }
 
 EntityRef ScriptEnvironment::tryGetEntity(EntityId entityId)

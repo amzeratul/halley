@@ -38,7 +38,7 @@ void ScriptRenderer::setGraph(const ScriptGraph* graph)
 	this->graph = graph;
 }
 
-void ScriptRenderer::setState(ScriptState* scriptState)
+void ScriptRenderer::setState(const ScriptState* scriptState)
 {
 	state = scriptState;
 }
@@ -355,7 +355,9 @@ Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType)
 	case ScriptNodeClassification::Variable:
 		return Colour4f(0.91f, 0.71f, 0.0f);
 	case ScriptNodeClassification::FlowControl:
-		return Colour4f(0.35f, 0.35f, 0.97f);
+		return Colour4f(0.35f, 0.55f, 0.97f);
+	case ScriptNodeClassification::State:
+		return Colour4f(0.75f, 0.35f, 0.97f);
 	}
 	return Colour4f(0.2f, 0.2f, 0.2f);
 }

@@ -69,7 +69,11 @@ namespace Halley {
 		EntityId readEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const;
 		String getConnectedNodeName(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const;
 
-		std::array<OptionalLite<ScriptNodeId>, 8> getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const;
+		struct OutputNode {
+			OptionalLite<ScriptNodeId> dstNode;
+			ScriptPinId outputPin;
+		};
+		std::array<OutputNode, 8> getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const;
 
         static String addParentheses(String str);
 	};

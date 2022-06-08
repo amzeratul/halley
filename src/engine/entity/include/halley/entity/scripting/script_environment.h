@@ -11,6 +11,7 @@ namespace Halley {
 
     	virtual void update(Time time, ScriptState& graphState, EntityId curEntity);
     	void terminateState(ScriptState& graphState, EntityId curEntity);
+        void abortCodePath(ScriptNodeId node, std::optional<ScriptPinId> outputPin);
 
     	EntityRef tryGetEntity(EntityId entityId);
     	const ScriptGraph* getCurrentGraph() const;
@@ -36,6 +37,8 @@ namespace Halley {
 
     private:
         void doTerminateState();
+        void addThread(ScriptStateThread thread);
         void terminateThread(ScriptStateThread& thread);
+        void removeStoppedThreads();
     };
 }

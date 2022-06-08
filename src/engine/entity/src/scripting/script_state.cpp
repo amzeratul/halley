@@ -6,6 +6,24 @@
 #include "scripting/script_node_type.h"
 using namespace Halley;
 
+ScriptStateThread::StackFrame::StackFrame(const ConfigNode& n)
+{
+	auto v = n.asVector2i();
+	node = v.x;
+	pin = v.y;
+}
+
+ScriptStateThread::StackFrame::StackFrame(ScriptNodeId node, ScriptPinId pin)
+	: node(node)
+	, pin(pin)
+{
+}
+
+ConfigNode ScriptStateThread::StackFrame::toConfigNode() const
+{
+	return ConfigNode(Vector2i(node, pin));
+}
+
 ScriptStateThread::ScriptStateThread()
 {
 	stack.reserve(16);
@@ -23,7 +41,7 @@ ScriptStateThread::ScriptStateThread(const ScriptStateThread& other)
 
 ScriptStateThread::ScriptStateThread(const ConfigNode& node, const EntitySerializationContext& context)
 {
-	stack = node["stack"].asVector<ScriptNodeId>();
+	stack = node["stack"].asVector<StackFrame>();
 	timeSlice = node["timeSlice"].asFloat(0);
 	if (node.hasKey("curNode")) {
 		curNode = node["curNode"].asInt();
@@ -57,22 +75,37 @@ ConfigNode ScriptStateThread::toConfigNode(const EntitySerializationContext& con
 	return node;
 }
 
-const Vector<ScriptNodeId>& ScriptStateThread::getStack() const
+const Vector<ScriptStateThread::StackFrame>& ScriptStateThread::getStack() const
 {
 	return stack;
 }
 
-Vector<ScriptNodeId>& ScriptStateThread::getStack()
+Vector<ScriptStateThread::StackFrame>& ScriptStateThread::getStack()
 {
 	return stack;
 }
 
-void ScriptStateThread::advanceToNode(OptionalLite<ScriptNodeId> node)
+bool ScriptStateThread::stackGoesThrough(ScriptNodeId node, std::optional<ScriptPinId> pin) const
+{
+	return !stack.empty() && std::any_of(stack.begin(), stack.end(), [&] (const StackFrame& frame)
+	{
+		return frame.node == node && (!pin || frame.pin == pin);
+	});
+}
+
+void ScriptStateThread::advanceToNode(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin)
 {
 	if (curNode) {
-		stack.push_back(*curNode);
+		stack.push_back(StackFrame(*curNode, outputPin));
 	}
 	curNode = node;
+}
+
+ScriptStateThread ScriptStateThread::fork(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin) const
+{
+	ScriptStateThread newThread = *this;
+	newThread.advanceToNode(node, outputPin);
+	return newThread;
 }
 
 ScriptState::NodeState::NodeState()

@@ -8,6 +8,7 @@ namespace Halley {
 
 	enum class ScriptNodeExecutionState : uint8_t {
 		Done,
+		Fork,
 		Executing,
 		Restart,
 		Terminate,
@@ -19,6 +20,7 @@ namespace Halley {
 		Action,
 		Variable,
 		Terminator, // As in start/end, not as in Arnie
+		State,
 		Unknown
 	};
 

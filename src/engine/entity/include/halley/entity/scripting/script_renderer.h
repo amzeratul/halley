@@ -35,7 +35,7 @@ namespace Halley {
 		ScriptRenderer(Resources& resources, const World* world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom);
 		
 		void setGraph(const ScriptGraph* graph);
-		void setState(ScriptState* scriptState);
+		void setState(const ScriptState* scriptState);
 		void draw(Painter& painter, Vector2f basePos, float curZoom);
 
 		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const;
@@ -68,7 +68,7 @@ namespace Halley {
 		float nativeZoom = 1.0f;
 		
 		const ScriptGraph* graph = nullptr;
-		ScriptState* state = nullptr;
+		const ScriptState* state = nullptr;
 
 		Sprite nodeBg;
 		Sprite nodeBgOutline;

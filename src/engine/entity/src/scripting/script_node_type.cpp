@@ -192,9 +192,9 @@ EntityId IScriptNodeType::readEntityId(ScriptEnvironment& environment, const Scr
 	return EntityId();
 }
 
-std::array<OptionalLite<ScriptNodeId>, 8> IScriptNodeType::getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const
+std::array<IScriptNodeType::OutputNode, 8> IScriptNodeType::getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const
 {
-	std::array<OptionalLite<ScriptNodeId>, 8> result;
+	std::array<OutputNode, 8> result;
 	result.fill({});
 	
 	const auto& pinConfig = getPinConfiguration(node);
@@ -208,7 +208,7 @@ std::array<OptionalLite<ScriptNodeId>, 8> IScriptNodeType::getOutputNodes(const 
 				const auto& output = node.getPin(i);
 				for (auto& conn: output.connections) {
 					if (conn.dstNode) {
-						result[nOutputsFound++] = conn.dstNode;
+						result[nOutputsFound++] = OutputNode{ conn.dstNode, static_cast<ScriptPinId>(i) };
 					}
 				}
 			}

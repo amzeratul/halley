@@ -16,6 +16,16 @@ namespace Halley {
 
 	class ScriptStateThread {
 	public:
+		struct StackFrame {
+			ScriptNodeId node;
+			ScriptPinId pin;
+
+			StackFrame() = default;
+			StackFrame(const ConfigNode& node);
+			StackFrame(ScriptNodeId node, ScriptPinId pin);
+			ConfigNode toConfigNode() const;
+		};
+
 		ScriptStateThread();
 		ScriptStateThread(const ConfigNode& node, const EntitySerializationContext& context);
 		ScriptStateThread(ScriptNodeId startNode);
@@ -29,21 +39,23 @@ namespace Halley {
 		
 		OptionalLite<ScriptNodeId> getCurNode() const { return curNode; }
 
-		void advanceToNode(OptionalLite<ScriptNodeId> node);
-
+		void advanceToNode(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin);
+		ScriptStateThread fork(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin) const;
+		
 		float& getTimeSlice() { return timeSlice; }
 
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
 		ConfigNode getPendingNodeData();
 
-		const Vector<ScriptNodeId>& getStack() const;
-		Vector<ScriptNodeId>& getStack();
+		const Vector<StackFrame>& getStack() const;
+		Vector<StackFrame>& getStack();
+		bool stackGoesThrough(ScriptNodeId node, std::optional<ScriptPinId> pin) const;
 
 	private:
 		OptionalLite<ScriptNodeId> curNode;
 		float timeSlice = 0;
-		Vector<ScriptNodeId> stack;
+		Vector<StackFrame> stack;
 	};
 
     class ScriptState {
