@@ -351,12 +351,18 @@ ScriptState::NodeState& ScriptState::getNodeState(ScriptNodeId nodeId)
 
 void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state)
 {
-	auto& nodeType = node.getNodeType();
-	auto data = nodeType.makeData();
-	if (data) {
-		nodeType.initData(*data, node, state.hasPendingData ? std::move(*state.pendingData) : ConfigNode());
-		state.data = data.release();
-		state.hasPendingData = false;
+	if (state.hasPendingData || !state.data) {
+		auto& nodeType = node.getNodeType();
+		auto data = nodeType.makeData();
+		if (data) {
+			nodeType.initData(*data, node, state.hasPendingData ? std::move(*state.pendingData) : ConfigNode());
+			state.data = data.release();
+			state.hasPendingData = false;
+		}
+	}
+
+	if (state.threadCount == 0) {
+		state.threadCount = 1;
 	}
 }
 

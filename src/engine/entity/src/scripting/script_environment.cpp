@@ -67,12 +67,7 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		const auto& node = currentGraph->getNodes().at(nodeId);
 		const auto& nodeType = node.getNodeType();
 		auto& nodeState = graphState.getNodeState(nodeId);
-		
-		// Start node if not done yet
-		if (nodeState.threadCount == 0) {
-			graphState.startNode(node, nodeState);
-			nodeState.threadCount++;
-		}
+		graphState.startNode(node, nodeState);
 
 		// Update
 		const auto result = nodeType.update(*this, timeLeft, node, nodeState.data);
