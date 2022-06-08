@@ -54,9 +54,9 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 			// Start node if not done yet
 			if (nodeState.threadCount == 0) {
 				graphState.startNode(node, nodeState);
+				graphState.onNodeStarted(nodeId);
+				nodeState.threadCount++;
 			}
-			graphState.onNodeStarted(nodeId);
-			nodeState.threadCount++;
 
 			// Update
 			const auto result = nodeType.update(*this, time, node, nodeState.data);

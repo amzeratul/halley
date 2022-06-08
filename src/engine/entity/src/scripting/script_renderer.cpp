@@ -195,6 +195,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 		const auto baseCol = getNodeColour(*nodeType);
 		Colour4f col = baseCol;
 		Colour4f iconCol = Colour4f(1, 1, 1);
+		float borderAlpha = drawMode.selected ? 1.0f : 0.0f;
 		
 		switch (drawMode.type) {
 		case NodeDrawModeType::Highlight:
@@ -204,6 +205,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 			{
 				const float phase = drawMode.time * 2.0f * pif();
 				col = col.inverseMultiplyLuma(sinRange(phase, 0.3f, 1.0f));
+				borderAlpha = 1;
 				break;
 			}
 		case NodeDrawModeType::Visited:
@@ -226,10 +228,11 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 				.setScale(1.0f / curZoom)
 				.draw(painter);
 
-			if (drawMode.selected) {
+			if (borderAlpha > 0.0001f) {
 				variableBgOutline.clone()
 					.setPosition(pos)
 					.setScale(1.0f / curZoom)
+					.setColour(Colour4f(1, 1, 1, borderAlpha))
 					.draw(painter);
 			}
 		} else {
@@ -241,12 +244,13 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 				.setSliceScale(1.0f / curZoom)
 				.draw(painter);
 
-			if (drawMode.selected) {
+			if (borderAlpha > 0.0001f) {
 				nodeBgOutline.clone()
 					.setPosition(pos)
 					.scaleTo(nodeSize + border)
 					.setSize(nodeBg.getSize() / curZoom)
 					.setSliceScale(1.0f / curZoom)
+					.setColour(Colour4f(1, 1, 1, borderAlpha))
 					.draw(painter);
 			}
 		}
