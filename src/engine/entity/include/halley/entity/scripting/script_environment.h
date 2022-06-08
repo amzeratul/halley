@@ -36,8 +36,9 @@ namespace Halley {
         EntityId currentEntity;
 
     private:
+        void updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);
         void doTerminateState();
-        void addThread(ScriptStateThread thread);
+        void addThread(ScriptStateThread thread, Vector<ScriptStateThread>& pending);
         void terminateThread(ScriptStateThread& thread);
         void removeStoppedThreads();
     };
