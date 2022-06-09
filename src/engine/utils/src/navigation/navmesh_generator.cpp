@@ -416,6 +416,11 @@ void NavmeshGenerator::splitByPortals(Vector<NavmeshNode>& nodes, gsl::span<cons
 		auto& node = nodes[idx];
 		
 		for (auto& portal: portals) {
+			if (!node.polygon.isConvex()) {
+				Logger::logError("Non-convex polygon found at splitByPortals stage, skipping");
+				continue;
+			}
+
 			auto result = node.polygon.classify(portal.segment);
 			if (result != Polygon::SATClassification::Separate) {
 				
