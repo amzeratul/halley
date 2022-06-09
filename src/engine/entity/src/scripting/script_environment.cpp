@@ -70,50 +70,31 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		graphState.startNode(node, nodeState);
 
 		// Update
-		const auto result = nodeType.update(*this, timeLeft, node, nodeState.data);
+		const auto result = nodeType.update(*this, static_cast<Time>(timeLeft), node, nodeState.data);
 
 		if (result.state == ScriptNodeExecutionState::Executing) {
 			// Still running this node, suspend
 			thread.getCurNodeTime() += timeLeft;
 			timeLeft = 0;
 		} else if (result.state == ScriptNodeExecutionState::Fork) {
-			for (auto& outputNode : nodeType.getOutputNodes(node, result.outputsActive)) {
-				if (outputNode.dstNode) {
-					addThread(thread.fork(outputNode.dstNode.value(), outputNode.outputPin), pendingThreads);
-				}
-			}
+			forkThread(thread, nodeType.getOutputNodes(node, result.outputsActive), pendingThreads);
 		} else {
 			// Node ended
 			graphState.finishNode(node, nodeState);
 			timeLeft -= static_cast<float>(result.timeElapsed);
 
 			if (result.state == ScriptNodeExecutionState::Done) {
-				// Proceed to next node(s)
 				auto outputNodes = nodeType.getOutputNodes(node, result.outputsActive);
-				if (outputNodes[0].dstNode) {
-					// Generate forked threads
-					for (size_t j = 1; j < outputNodes.size(); ++j) {
-						if (outputNodes[j].dstNode) {
-							addThread(thread.fork(outputNodes[j].dstNode.value(), outputNodes[j].outputPin), pendingThreads);
-						}
-					}
-
-					// Update current thread only after forks were spawned
-					thread.advanceToNode(outputNodes[0].dstNode, outputNodes[0].outputPin);
-				} else {
-					terminateThread(thread);
-				}
+				forkThread(thread, outputNodes, pendingThreads, 1);
+				advanceThread(thread, outputNodes[0].dstNode, outputNodes[0].outputPin);
 			} else if (result.state == ScriptNodeExecutionState::Terminate) {
-				// Terminate script
 				doTerminateState();
 				break;
 			} else if (result.state == ScriptNodeExecutionState::Restart) {
-				// Restart script
 				doTerminateState();
 				graphState.reset();
 				break;
-			} else if (result.state == ScriptNodeExecutionState::Merged) {
-				// Merged thread
+			} else if (result.state == ScriptNodeExecutionState::MergeAndWait) {
 				terminateThread(thread);
 			}
 		}
@@ -168,6 +149,24 @@ void ScriptEnvironment::addThread(ScriptStateThread thread, Vector<ScriptStateTh
 	}
 
 	pending.push_back(std::move(thread));
+}
+
+void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<ScriptNodeId> node, ScriptPinId outputPin)
+{
+	if (node) {
+		thread.advanceToNode(node, outputPin);
+	} else {
+		terminateThread(thread);
+	}
+}
+
+void ScriptEnvironment::forkThread(ScriptStateThread& thread, std::array<IScriptNodeType::OutputNode, 8> outputNodes, Vector<ScriptStateThread>& pendingThreads, size_t firstIdx)
+{
+	for (size_t j = 1; j < outputNodes.size(); ++j) {
+		if (outputNodes[j].dstNode) {
+			addThread(thread.fork(outputNodes[j].dstNode.value(), outputNodes[j].outputPin), pendingThreads);
+		}
+	}
 }
 
 void ScriptEnvironment::terminateThread(ScriptStateThread& thread)

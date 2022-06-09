@@ -39,6 +39,8 @@ namespace Halley {
         void updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);
         void doTerminateState();
         void addThread(ScriptStateThread thread, Vector<ScriptStateThread>& pending);
+        void advanceThread(ScriptStateThread& thread, OptionalLite<ScriptNodeId> node, ScriptPinId outputPin);
+        void forkThread(ScriptStateThread& thread, std::array<IScriptNodeType::OutputNode, 8> outputNodes, Vector<ScriptStateThread>& pendingThreads, size_t firstIdx = 0);
         void terminateThread(ScriptStateThread& thread);
         void removeStoppedThreads();
     };

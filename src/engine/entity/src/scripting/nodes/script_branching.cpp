@@ -123,8 +123,8 @@ IScriptNodeType::Result ScriptMergeAll::doUpdate(ScriptEnvironment& environment,
 
 	if (++counter == expected) {
 		counter = 0;
-		return Result(ScriptNodeExecutionState::Done);
+		return Result(ScriptNodeExecutionState::MergeAndContinue);
 	} else {
-		return Result(ScriptNodeExecutionState::Merged);
+		return Result(ScriptNodeExecutionState::MergeAndWait);
 	}
 }
