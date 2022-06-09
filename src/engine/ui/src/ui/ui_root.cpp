@@ -582,8 +582,9 @@ void UIRoot::focusNext(bool reverse)
 		return;
 	}
 
-	const int index = gsl::narrow<int>(std::find(focusables.begin(), focusables.end(), currentFocus.lock()) - focusables.begin());
-	const int newIndex = modulo(index + (reverse ? -1 : 1), gsl::narrow<int>(focusables.size()));
+	const auto iter = std::find(focusables.begin(), focusables.end(), currentFocus.lock());
+	const int index = gsl::narrow<int>(iter - focusables.begin());
+	const int newIndex = iter != focusables.end() ? modulo(index + (reverse ? -1 : 1), gsl::narrow<int>(focusables.size())) : 0;
 	setFocus(focusables[newIndex]);
 }
 
