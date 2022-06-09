@@ -2,7 +2,7 @@
 #include "scripting/script_environment.h"
 
 namespace Halley {
-	class ScriptWaitData : public IScriptStateData {
+	class ScriptWaitData : public ScriptStateData<ScriptWaitData> {
 	public:
 		float timeLeft = 0;
 

@@ -45,11 +45,6 @@ ScriptStateThread::ScriptStateThread(ScriptNodeId startNode)
 {
 }
 
-ScriptStateThread::ScriptStateThread(const ScriptStateThread& other)
-{
-	*this = other;
-}
-
 ScriptStateThread::ScriptStateThread(const ConfigNode& node, const EntitySerializationContext& context)
 {
 	stack = node["stack"].asVector<StackFrame>();
@@ -57,20 +52,6 @@ ScriptStateThread::ScriptStateThread(const ConfigNode& node, const EntitySeriali
 	if (node.hasKey("curNode")) {
 		curNode = node["curNode"].asInt();
 	}
-}
-
-ScriptStateThread::~ScriptStateThread()
-{
-	if (!stack.empty()) {
-		Logger::logError("ScriptStateThread terminated with a non-empty stack");
-	}
-}
-
-ScriptStateThread& ScriptStateThread::operator=(const ScriptStateThread& other)
-{
-	curNode = other.curNode;
-	timeSlice = other.timeSlice;
-	return *this;
 }
 
 bool ScriptStateThread::isRunning() const
@@ -166,11 +147,18 @@ ScriptState::NodeState& ScriptState::NodeState::operator=(const NodeState& other
 {
 	releaseData();
 
-	if (other.data != nullptr) {
-		throw Exception("Invalid copy operation", HalleyExceptions::Entity);
-	}
-
+	hasPendingData = other.hasPendingData;
 	threadCount = other.threadCount;
+
+	if (other.hasPendingData) {
+		if (other.pendingData) {
+			pendingData = new ConfigNode(*other.pendingData);
+		}
+	} else {
+		if (other.data) {
+			data = other.data->clone().release();
+		}
+	}
 
 	return *this;
 }

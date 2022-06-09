@@ -12,6 +12,16 @@ namespace Halley {
 		virtual ~IScriptStateData() = default;
 
 		virtual ConfigNode toConfigNode(const EntitySerializationContext& context) = 0;
+		[[nodiscard]] virtual std::unique_ptr<IScriptStateData> clone() const = 0;
+	};
+
+	template <typename T>
+	class ScriptStateData: public IScriptStateData {
+	public:
+		[[nodiscard]] std::unique_ptr<IScriptStateData> clone() const override
+		{
+			return std::make_unique<T>(dynamic_cast<const T&>(*this));
+		}
 	};
 
 	class ScriptStateThread {
@@ -32,14 +42,12 @@ namespace Halley {
 		ScriptStateThread();
 		ScriptStateThread(const ConfigNode& node, const EntitySerializationContext& context);
 		ScriptStateThread(ScriptNodeId startNode);
-		ScriptStateThread(const ScriptStateThread& other);
+		ScriptStateThread(const ScriptStateThread& other) = default;
 		ScriptStateThread(ScriptStateThread&& other) = default;
-
-		~ScriptStateThread();
-
+		
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
-		ScriptStateThread& operator=(const ScriptStateThread& other);
+		ScriptStateThread& operator=(const ScriptStateThread& other) = default;
 		ScriptStateThread& operator=(ScriptStateThread&& other) = default;
 		
 		OptionalLite<ScriptNodeId> getCurNode() const { return curNode; }
@@ -143,16 +151,15 @@ namespace Halley {
 	private:
 		std::shared_ptr<const ScriptGraph> scriptGraph;
 		const ScriptGraph* scriptGraphRef = nullptr;
-    	Vector<ScriptStateThread> threads;
 
+    	Vector<ScriptStateThread> threads;
 		Vector<NodeState> nodeState;
+    	std::map<ScriptNodeId, size_t> nodeCounters;
+    	std::map<String, ConfigNode> variables;
 
     	uint64_t graphHash = 0;
     	bool started = false;
-    	bool introspection = false;
 		bool persistAfterDone = false;
-    	std::map<ScriptNodeId, size_t> nodeCounters;
-    	std::map<String, ConfigNode> variables;
 
     	void onNodeStartedIntrospection(ScriptNodeId nodeId);
     	void onNodeEndedIntrospection(ScriptNodeId nodeId);
