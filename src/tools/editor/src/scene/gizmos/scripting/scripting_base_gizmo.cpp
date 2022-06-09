@@ -579,8 +579,8 @@ std::optional<ScriptingBaseGizmo::Connection> ScriptingBaseGizmo::findAutoConnec
 			const bool empty = !node.getPin(pinIdx).hasConnection();
 			const auto dstPinType = node.getPinType(static_cast<ScriptPinId>(pinIdx));
 			if (empty && dstPinType.type == srcPinType.type && dstPinType.direction != srcPinType.direction) {
-				const auto srcPos = renderer->getPinPosition(basePos, getNode(srcNodeId), srcPinIdx);
-				const auto dstPos = renderer->getPinPosition(basePos, getNode(node.getId()), static_cast<ScriptPinId>(pinIdx));
+				const auto srcPos = renderer->getPinPosition(basePos, getNode(srcNodeId), srcPinIdx, getZoom());
+				const auto dstPos = renderer->getPinPosition(basePos, getNode(node.getId()), static_cast<ScriptPinId>(pinIdx), getZoom());
 				const float distance = (srcPos - dstPos).length();
 				if (distance < bestDistance) {
 					bestDistance = distance;

@@ -435,7 +435,7 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 		const auto& pins = nodeType->getPinConfiguration(node);
 		for	(size_t j = 0; j < pins.size(); ++j) {
 			const auto& pinType = pins[j];
-			const auto circle = getNodeElementArea(*nodeType, basePos, node, j, curZoom, curZoom).expand((pinPriority ? 12.0f : 4.0f) / curZoom);
+			const auto circle = getNodeElementArea(*nodeType, basePos, node, j, curZoom, 1.0f).expand((pinPriority ? 12.0f : 4.0f) / curZoom);
 			if (circle.contains(mousePos)) {
 				foundPin = true;
 				const float distance = (mousePos - circle.getCentre()).length();
@@ -459,9 +459,9 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 	return bestResult;
 }
 
-Vector2f ScriptRenderer::getPinPosition(Vector2f basePos, const ScriptGraphNode& node, ScriptPinId idx) const
+Vector2f ScriptRenderer::getPinPosition(Vector2f basePos, const ScriptGraphNode& node, ScriptPinId idx, float zoom) const
 {
-	return getNodeElementArea(node.getNodeType(), basePos, node, idx, 1.0f, 1.0f).getCentre();
+	return getNodeElementArea(node.getNodeType(), basePos, node, idx, zoom, 1.0f).getCentre();
 }
 
 Vector<ScriptNodeId> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const

@@ -39,7 +39,7 @@ namespace Halley {
 		void draw(Painter& painter, Vector2f basePos, float curZoom, float posScale = 1.0f);
 
 		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const;
-		Vector2f getPinPosition(Vector2f basePos, const ScriptGraphNode& node, ScriptPinId idx) const;
+		Vector2f getPinPosition(Vector2f basePos, const ScriptGraphNode& node, ScriptPinId idx, float zoom) const;
 		Vector<ScriptNodeId> getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const;
 		void setHighlight(std::optional<NodeUnderMouseInfo> highlightNode, OptionalLite<uint8_t> highlightEntity);
 		void setSelection(Vector<ScriptNodeId> selectedNodes);
