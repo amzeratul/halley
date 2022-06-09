@@ -58,6 +58,11 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	}
 	removeStoppedThreads();
 
+	// Clean up if done
+	if (graphState.isDone()) {
+		doTerminateState();
+	}
+
 	currentGraph = nullptr;
 	currentState = nullptr;
 	currentEntity = EntityId();
@@ -78,18 +83,26 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		// Update
 		const auto result = nodeType.update(*this, static_cast<Time>(timeLeft), node, nodeState.data);
 
+		if (result.outputsCancelled != 0) {
+			cancelOutputs(nodeId, result.outputsCancelled);
+		}
+
 		if (result.state == ScriptNodeExecutionState::Executing) {
 			// Still running this node, suspend
 			thread.getCurNodeTime() += timeLeft;
 			timeLeft = 0;
-		} else if (result.state == ScriptNodeExecutionState::Fork) {
+		} else if (result.state == ScriptNodeExecutionState::Fork || result.state == ScriptNodeExecutionState::ForkAndConvertToWatcher) {
 			forkThread(thread, nodeType.getOutputNodes(node, result.outputsActive), pendingThreads);
+			if (result.state == ScriptNodeExecutionState::ForkAndConvertToWatcher) {
+				thread.setWatcher(true);
+			}
 		} else if (result.state == ScriptNodeExecutionState::MergeAndWait) {
 			mergeThread(thread, true);
 		} else {
 			// Node ended
 			graphState.finishNode(node, nodeState);
 			timeLeft -= static_cast<float>(result.timeElapsed);
+			thread.setWatcher(false);
 
 			if (result.state == ScriptNodeExecutionState::Done || result.state == ScriptNodeExecutionState::MergeAndContinue) {
 				if (result.state == ScriptNodeExecutionState::MergeAndContinue) {
@@ -130,18 +143,6 @@ void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEnti
 	currentEntity = EntityId();
 }
 
-void ScriptEnvironment::abortCodePath(ScriptNodeId node, std::optional<ScriptPinId> outputPin)
-{
-	Expects(currentState != nullptr);
-
-	for (auto& thread: currentState->getThreads()) {
-		if (thread.stackGoesThrough(node, outputPin)) {
-			terminateThread(thread);
-		}
-	}
-	removeStoppedThreads();
-}
-
 void ScriptEnvironment::doTerminateState()
 {
 	for (auto& thread: currentState->getThreads()) {
@@ -172,7 +173,7 @@ void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<Sc
 
 void ScriptEnvironment::forkThread(ScriptStateThread& thread, std::array<IScriptNodeType::OutputNode, 8> outputNodes, Vector<ScriptStateThread>& pendingThreads, size_t firstIdx)
 {
-	for (size_t j = 1; j < outputNodes.size(); ++j) {
+	for (size_t j = firstIdx; j < outputNodes.size(); ++j) {
 		if (outputNodes[j].dstNode) {
 			addThread(thread.fork(outputNodes[j].dstNode.value(), outputNodes[j].outputPin), pendingThreads);
 		}
@@ -184,6 +185,8 @@ void ScriptEnvironment::mergeThread(ScriptStateThread& thread, bool wait)
 	for (auto& other: currentState->getThreads()) {
 		if (&thread != &other && other.isMerging() && other.getCurNode() == thread.getCurNode()) {
 			thread.merge(other);
+			other.setMerging(false);
+			terminateThread(other);
 			break;
 		}
 	}
@@ -208,7 +211,7 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread)
 		auto& nodeState = state.getNodeState(nodeId);
 		nodeState.threadCount--;
 		if (nodeState.threadCount == 0) {
-			node.getNodeType().destructor(*this, node);
+			node.getNodeType().destructor(*this, node, nodeState.data);
 			state.finishNode(node, nodeState);
 		}
 	}
@@ -218,6 +221,31 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread)
 void ScriptEnvironment::removeStoppedThreads()
 {
 	std_ex::erase_if(currentState->getThreads(), [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); });
+}
+
+void ScriptEnvironment::cancelOutputs(ScriptNodeId node, uint8_t cancelMask)
+{
+	if (cancelMask == 0xFF) {
+		abortCodePath(node, {});
+	} else {
+		for (uint8_t i = 0; i < 8; ++i) {
+			if ((cancelMask & (1 << i)) != 0) {
+				abortCodePath(node, i);
+			}
+		}
+	}
+}
+
+void ScriptEnvironment::abortCodePath(ScriptNodeId node, std::optional<ScriptPinId> outputPin)
+{
+	Expects(currentState != nullptr);
+
+	for (auto& thread: currentState->getThreads()) {
+		if (thread.stackGoesThrough(node, outputPin)) {
+			terminateThread(thread);
+		}
+	}
+	removeStoppedThreads();
 }
 
 EntityRef ScriptEnvironment::tryGetEntity(EntityId entityId)

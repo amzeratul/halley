@@ -72,16 +72,13 @@ ConfigNode ScriptStateThread::toConfigNode(const EntitySerializationContext& con
 	return node;
 }
 
-void ScriptStateThread::merge(ScriptStateThread& other)
+void ScriptStateThread::merge(const ScriptStateThread& other)
 {
 	for (auto& f: other.stack) {
 		if (!std_ex::contains(stack, f)) {
 			stack.push_back(f);
 		}
 	}
-	other.stack.clear();
-	other.curNode.reset();
-	other.merging = false;
 }
 
 const Vector<ScriptStateThread::StackFrame>& ScriptStateThread::getStack() const
@@ -96,7 +93,7 @@ Vector<ScriptStateThread::StackFrame>& ScriptStateThread::getStack()
 
 bool ScriptStateThread::stackGoesThrough(ScriptNodeId node, std::optional<ScriptPinId> pin) const
 {
-	return !stack.empty() && std::any_of(stack.begin(), stack.end(), [&] (const StackFrame& frame)
+	return std::any_of(stack.begin(), stack.end(), [&] (const StackFrame& frame)
 	{
 		return frame.node == node && (!pin || frame.pin == pin);
 	});
@@ -251,7 +248,7 @@ void ScriptState::setScriptGraphPtr(const ScriptGraph* script)
 
 bool ScriptState::isDone() const
 {
-	return started && threads.empty();
+	return started && std::all_of(threads.begin(), threads.end(), [] (const ScriptStateThread& thread) { return thread.isWatcher(); });
 }
 
 bool ScriptState::isDead() const
@@ -298,7 +295,7 @@ ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(ScriptNodeId no
 			if (thread.getCurNode() == nodeId) {
 				result.state = NodeIntrospectionState::Active;
 				result.time = thread.getCurNodeTime();
-			} else {
+			} else if (result.state == NodeIntrospectionState::Unvisited) {
 				for (auto& f: thread.getStack()) {
 					if (f.node == nodeId) {
 						result.state = NodeIntrospectionState::Visited;

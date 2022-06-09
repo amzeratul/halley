@@ -62,8 +62,10 @@ namespace Halley {
 		bool isRunning() const;
 		bool isMerging() const { return merging; }
 		void setMerging(bool merging) { this->merging = merging; }
+		bool isWatcher() const { return watcher; }
+		void setWatcher(bool watcher) { this->watcher = watcher; }
 
-		void merge(ScriptStateThread& other);
+		void merge(const ScriptStateThread& other);
 
 		const Vector<StackFrame>& getStack() const;
 		Vector<StackFrame>& getStack();
@@ -72,6 +74,7 @@ namespace Halley {
 	private:
 		OptionalLite<ScriptNodeId> curNode;
 		bool merging = false;
+		bool watcher = false;
 		float timeSlice = 0;
 		float curNodeTime = 0;
 		Vector<StackFrame> stack;

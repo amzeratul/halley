@@ -107,10 +107,6 @@ IScriptNodeType::PinType IScriptNodeType::getPin(const ScriptGraphNode& node, si
 	return PinType{ ScriptNodeElementType::Undefined, ScriptNodePinDirection::Input };
 }
 
-void IScriptNodeType::destructor(ScriptEnvironment& environment, const ScriptGraphNode& node) const
-{
-}
-
 ConfigNode IScriptNodeType::readDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
 	const auto& pins = node.getPins();
@@ -192,7 +188,7 @@ EntityId IScriptNodeType::readEntityId(ScriptEnvironment& environment, const Scr
 	return EntityId();
 }
 
-std::array<IScriptNodeType::OutputNode, 8> IScriptNodeType::getOutputNodes(const ScriptGraphNode& node, uint32_t outputActiveMask) const
+std::array<IScriptNodeType::OutputNode, 8> IScriptNodeType::getOutputNodes(const ScriptGraphNode& node, uint8_t outputActiveMask) const
 {
 	std::array<OutputNode, 8> result;
 	result.fill({});

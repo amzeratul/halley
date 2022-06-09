@@ -87,7 +87,7 @@ void ScriptGraphNode::Pin::deserialize(Deserializer& s)
 
 bool ScriptGraphNode::Pin::hasConnection() const
 {
-	return !connections.empty() && std::any_of(connections.begin(), connections.end(), [] (const PinConnection& p) { return p.hasConnection(); });
+	return std::any_of(connections.begin(), connections.end(), [] (const PinConnection& p) { return p.hasConnection(); });
 }
 
 ScriptGraphNode::ScriptGraphNode()
