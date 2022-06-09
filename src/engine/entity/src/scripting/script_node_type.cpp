@@ -216,6 +216,21 @@ std::array<IScriptNodeType::OutputNode, 8> IScriptNodeType::getOutputNodes(const
 	return result;
 }
 
+ScriptPinId IScriptNodeType::getNthOutputPinIdx(const ScriptGraphNode& node, size_t n) const
+{
+	const auto& pinConfig = getPinConfiguration(node);
+	size_t curOutputPin = 0;
+	for (size_t i = 0; i < pinConfig.size(); ++i) {
+		if (pinConfig[i].type == ScriptNodeElementType::FlowPin && pinConfig[i].direction == ScriptNodePinDirection::Output) {
+			if (curOutputPin == n) {
+				return static_cast<ScriptPinId>(i);
+			}
+			++curOutputPin;
+		}
+	}
+	return 0xFF;
+}
+
 String IScriptNodeType::addParentheses(String str)
 {
 	if (str.contains(' ')) {

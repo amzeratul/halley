@@ -209,6 +209,7 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread)
 		const auto& node = currentGraph->getNodes()[nodeId];
 
 		auto& nodeState = state.getNodeState(nodeId);
+		state.ensureNodeLoaded(node, nodeState);
 		nodeState.threadCount--;
 		if (nodeState.threadCount == 0) {
 			node.getNodeType().destructor(*this, node, nodeState.data);
@@ -223,14 +224,16 @@ void ScriptEnvironment::removeStoppedThreads()
 	std_ex::erase_if(currentState->getThreads(), [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); });
 }
 
-void ScriptEnvironment::cancelOutputs(ScriptNodeId node, uint8_t cancelMask)
+void ScriptEnvironment::cancelOutputs(ScriptNodeId nodeId, uint8_t cancelMask)
 {
 	if (cancelMask == 0xFF) {
-		abortCodePath(node, {});
+		abortCodePath(nodeId, {});
 	} else {
 		for (uint8_t i = 0; i < 8; ++i) {
 			if ((cancelMask & (1 << i)) != 0) {
-				abortCodePath(node, i);
+				auto& node = currentGraph->getNodes()[nodeId];
+				const auto pinIdx = node.getNodeType().getNthOutputPinIdx(node, i);
+				abortCodePath(nodeId, pinIdx);
 			}
 		}
 	}
@@ -245,7 +248,6 @@ void ScriptEnvironment::abortCodePath(ScriptNodeId node, std::optional<ScriptPin
 			terminateThread(thread);
 		}
 	}
-	removeStoppedThreads();
 }
 
 EntityRef ScriptEnvironment::tryGetEntity(EntityId entityId)

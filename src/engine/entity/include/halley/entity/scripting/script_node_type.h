@@ -75,6 +75,7 @@ namespace Halley {
 			ScriptPinId outputPin;
 		};
 		std::array<OutputNode, 8> getOutputNodes(const ScriptGraphNode& node, uint8_t outputActiveMask) const;
+		ScriptPinId getNthOutputPinIdx(const ScriptGraphNode& node, size_t n) const;
 
         static String addParentheses(String str);
 	};

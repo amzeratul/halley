@@ -50,7 +50,7 @@ namespace Halley {
         void terminateThread(ScriptStateThread& thread);
         void removeStoppedThreads();
 
-        void cancelOutputs(ScriptNodeId node, uint8_t cancelMask);
+        void cancelOutputs(ScriptNodeId nodeId, uint8_t cancelMask);
         void abortCodePath(ScriptNodeId node, std::optional<ScriptPinId> outputPin);
     };
 }

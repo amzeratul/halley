@@ -364,6 +364,15 @@ ScriptState::NodeState& ScriptState::getNodeState(ScriptNodeId nodeId)
 
 void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state)
 {
+	ensureNodeLoaded(node, state);
+
+	if (state.threadCount == 0) {
+		state.threadCount = 1;
+	}
+}
+
+void ScriptState::ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state)
+{
 	if (state.hasPendingData || !state.data) {
 		auto& nodeType = node.getNodeType();
 		auto data = nodeType.makeData();
@@ -372,10 +381,6 @@ void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state)
 			state.data = data.release();
 			state.hasPendingData = false;
 		}
-	}
-
-	if (state.threadCount == 0) {
-		state.threadCount = 1;
 	}
 }
 
