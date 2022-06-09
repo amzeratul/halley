@@ -1,12 +1,18 @@
 #include "scripting/script_environment.h"
+
+
 #include "world.h"
 #include "halley/core/api/halley_api.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
 #include "scripting/script_graph.h"
 #include "scripting/script_state.h"
+#include "halley/core/api/audio_api.h"
+#include "halley/audio/audio_event.h"
 
 #include "halley/core/graphics/sprite/animation_player.h"
+
+#include <components/audio_source_component.h>
 #include <components/sprite_animation_component.h>
 
 using namespace Halley;
@@ -229,16 +235,6 @@ size_t& ScriptEnvironment::getNodeCounter(uint32_t nodeId)
 	return currentState->getNodeCounter(nodeId);
 }
 
-void ScriptEnvironment::playMusic(const String& music, float fadeTime)
-{
-	api.audio->playMusic(music, 0, fadeTime);
-}
-
-void ScriptEnvironment::stopMusic(float fadeTime)
-{
-	api.audio->stopMusic(0, fadeTime);
-}
-
 ConfigNode ScriptEnvironment::getVariable(const String& variable)
 {
 	return currentState->getVariable(variable);
@@ -251,11 +247,16 @@ void ScriptEnvironment::setVariable(const String& variable, ConfigNode data)
 
 void ScriptEnvironment::setDirection(EntityId entityId, const String& direction)
 {
-	auto entity = tryGetEntity(entityId);
-	if (entity.isValid()) {
-		auto* spriteAnimation = entity.tryGetComponent<SpriteAnimationComponent>();
-		if (spriteAnimation) {
-			spriteAnimation->player.setDirection(direction);
-		}
+	if (auto* spriteAnimation = tryGetComponent<SpriteAnimationComponent>(entityId)) {
+		spriteAnimation->player.setDirection(direction);
+	}
+}
+
+void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)
+{
+	if (const auto* audioSource = tryGetComponent<AudioSourceComponent>(entityId)) {
+		api.audio->postEvent(id, audioSource->emitter);
+	} else {
+		api.audio->postEvent(id);
 	}
 }

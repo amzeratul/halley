@@ -1,6 +1,6 @@
 project (halley-entity)
 
-include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/entity" "../core/include" "../utils/include" "../net/include" "../editor_extensions/include" "../../../shared_gen/cpp")
+include_directories(${Boost_INCLUDE_DIR} "include" "include/halley/entity" "../core/include" "../utils/include" "../net/include" "../audio/include" "../editor_extensions/include" "../../../shared_gen/cpp")
 
 set(SOURCES
         "src/component.cpp"
@@ -38,7 +38,7 @@ set(SOURCES
         "src/scripting/nodes/script_branching.cpp"
         "src/scripting/nodes/script_flow_control.cpp"
         "src/scripting/nodes/script_logic_gates.cpp"
-        "src/scripting/nodes/script_music.cpp"
+        "src/scripting/nodes/script_audio.cpp"
         "src/scripting/nodes/script_sprite.cpp"
         "src/scripting/nodes/script_variables.cpp"
         "src/scripting/nodes/script_wait.cpp"
@@ -91,7 +91,7 @@ set(HEADERS
         "src/scripting/nodes/script_branching.h"
         "src/scripting/nodes/script_flow_control.h"
         "src/scripting/nodes/script_logic_gates.h"
-        "src/scripting/nodes/script_music.h"
+        "src/scripting/nodes/script_audio.h"
         "src/scripting/nodes/script_sprite.h"
         "src/scripting/nodes/script_variables.h"
         "src/scripting/nodes/script_wait.h"

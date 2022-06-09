@@ -14,18 +14,10 @@ namespace Halley {
 
 		bool hasValue() const { return !!resource; }
 		operator bool() const { return !!resource; }
+		const T* operator->() const { return resource.get(); }
 
 		std::shared_ptr<const T>& get() { return resource; }
 		const std::shared_ptr<const T>& get() const { return resource; }
-
-		const String& getId() const
-		{
-			if (!resource) {
-				const static String dummyId;
-				return dummyId;
-			}
-			return resource->getAssetId();
-		}
 
 	private:
 		std::shared_ptr<const T> resource;

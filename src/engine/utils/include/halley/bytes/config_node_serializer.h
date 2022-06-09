@@ -339,7 +339,7 @@ namespace Halley {
 	public:
 		ConfigNode serialize(const ResourceReference<T>& value, const EntitySerializationContext& context)
 		{
-			return ConfigNode(value.getId());
+			return ConfigNode(value ? value->getAssetId() : "");
 		}
 		
         ResourceReference<T> deserialize(const EntitySerializationContext& context, const ConfigNode& node)

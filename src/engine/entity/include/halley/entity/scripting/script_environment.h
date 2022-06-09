@@ -17,13 +17,19 @@ namespace Halley {
     	const ScriptGraph* getCurrentGraph() const;
         size_t& getNodeCounter(uint32_t nodeId);
 
-    	void playMusic(const String& music, float fadeTime);
-    	void stopMusic(float fadeTime);
+    	void postAudioEvent(const String& id, EntityId entityId);
 
     	virtual ConfigNode getVariable(const String& variable);
     	virtual void setVariable(const String& variable, ConfigNode data);
 
     	virtual void setDirection(EntityId entityId, const String& direction);
+
+        template <typename T>
+        T* tryGetComponent(EntityId id)
+        {
+	        auto entity = tryGetEntity(id);
+            return entity.isValid() ? entity.tryGetComponent<T>() : nullptr;
+        }
 
     protected:
 		const HalleyAPI& api;
