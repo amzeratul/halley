@@ -2,6 +2,7 @@
 
 #include "halley/bytes/byte_serializer.h"
 #include "halley/support/logger.h"
+#include "halley/utils/algorithm.h"
 #include "scripting/script_graph.h"
 #include "scripting/script_node_type.h"
 using namespace Halley;
@@ -22,6 +23,16 @@ ScriptStateThread::StackFrame::StackFrame(ScriptNodeId node, ScriptPinId pin)
 ConfigNode ScriptStateThread::StackFrame::toConfigNode() const
 {
 	return ConfigNode(Vector2i(node, pin));
+}
+
+bool ScriptStateThread::StackFrame::operator==(const StackFrame& other) const
+{
+	return node == other.node && pin == other.pin;
+}
+
+bool ScriptStateThread::StackFrame::operator!=(const StackFrame& other) const
+{
+	return node != other.node || pin != other.pin;
 }
 
 ScriptStateThread::ScriptStateThread()
@@ -62,6 +73,11 @@ ScriptStateThread& ScriptStateThread::operator=(const ScriptStateThread& other)
 	return *this;
 }
 
+bool ScriptStateThread::isRunning() const
+{
+	return curNode && !merging;
+}
+
 ConfigNode ScriptStateThread::toConfigNode(const EntitySerializationContext& context) const
 {
 	ConfigNode::MapType node;
@@ -73,6 +89,18 @@ ConfigNode ScriptStateThread::toConfigNode(const EntitySerializationContext& con
 		node["curNode"] = static_cast<int>(curNode.value());
 	}
 	return node;
+}
+
+void ScriptStateThread::merge(ScriptStateThread& other)
+{
+	for (auto& f: other.stack) {
+		if (!std_ex::contains(stack, f)) {
+			stack.push_back(f);
+		}
+	}
+	other.stack.clear();
+	other.curNode.reset();
+	other.merging = false;
 }
 
 const Vector<ScriptStateThread::StackFrame>& ScriptStateThread::getStack() const

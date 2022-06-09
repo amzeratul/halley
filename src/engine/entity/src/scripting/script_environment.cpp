@@ -61,7 +61,7 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 {
 	float& timeLeft = thread.getTimeSlice();
 
-	while (timeLeft > 0 && thread.getCurNode()) {
+	while (timeLeft > 0 && thread.isRunning()) {
 		// Get node type
 		const auto nodeId = thread.getCurNode().value();
 		const auto& node = currentGraph->getNodes().at(nodeId);
@@ -78,12 +78,18 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 			timeLeft = 0;
 		} else if (result.state == ScriptNodeExecutionState::Fork) {
 			forkThread(thread, nodeType.getOutputNodes(node, result.outputsActive), pendingThreads);
+		} else if (result.state == ScriptNodeExecutionState::MergeAndWait) {
+			mergeThread(thread, true);
 		} else {
 			// Node ended
 			graphState.finishNode(node, nodeState);
 			timeLeft -= static_cast<float>(result.timeElapsed);
 
-			if (result.state == ScriptNodeExecutionState::Done) {
+			if (result.state == ScriptNodeExecutionState::Done || result.state == ScriptNodeExecutionState::MergeAndContinue) {
+				if (result.state == ScriptNodeExecutionState::MergeAndContinue) {
+					mergeThread(thread, false);
+				}
+
 				auto outputNodes = nodeType.getOutputNodes(node, result.outputsActive);
 				forkThread(thread, outputNodes, pendingThreads, 1);
 				advanceThread(thread, outputNodes[0].dstNode, outputNodes[0].outputPin);
@@ -94,8 +100,6 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 				doTerminateState();
 				graphState.reset();
 				break;
-			} else if (result.state == ScriptNodeExecutionState::MergeAndWait) {
-				terminateThread(thread);
 			}
 		}
 	}
@@ -166,6 +170,20 @@ void ScriptEnvironment::forkThread(ScriptStateThread& thread, std::array<IScript
 		if (outputNodes[j].dstNode) {
 			addThread(thread.fork(outputNodes[j].dstNode.value(), outputNodes[j].outputPin), pendingThreads);
 		}
+	}
+}
+
+void ScriptEnvironment::mergeThread(ScriptStateThread& thread, bool wait)
+{
+	for (auto& other: currentState->getThreads()) {
+		if (&thread != &other && other.isMerging() && other.getCurNode() == thread.getCurNode()) {
+			thread.merge(other);
+			break;
+		}
+	}
+
+	if (wait) {
+		thread.setMerging(true);
 	}
 }
 

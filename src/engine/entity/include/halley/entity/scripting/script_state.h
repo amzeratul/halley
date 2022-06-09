@@ -24,6 +24,9 @@ namespace Halley {
 			StackFrame(const ConfigNode& node);
 			StackFrame(ScriptNodeId node, ScriptPinId pin);
 			ConfigNode toConfigNode() const;
+
+			bool operator==(const StackFrame& other) const;
+			bool operator!=(const StackFrame& other) const;
 		};
 
 		ScriptStateThread();
@@ -33,6 +36,8 @@ namespace Halley {
 		ScriptStateThread(ScriptStateThread&& other) = default;
 
 		~ScriptStateThread();
+
+		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
 		ScriptStateThread& operator=(const ScriptStateThread& other);
 		ScriptStateThread& operator=(ScriptStateThread&& other) = default;
@@ -46,7 +51,11 @@ namespace Halley {
 		float& getCurNodeTime() { return curNodeTime; }
 		float getCurNodeTime() const { return curNodeTime; }
 
-		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
+		bool isRunning() const;
+		bool isMerging() const { return merging; }
+		void setMerging(bool merging) { this->merging = merging; }
+
+		void merge(ScriptStateThread& other);
 
 		const Vector<StackFrame>& getStack() const;
 		Vector<StackFrame>& getStack();
@@ -54,6 +63,7 @@ namespace Halley {
 
 	private:
 		OptionalLite<ScriptNodeId> curNode;
+		bool merging = false;
 		float timeSlice = 0;
 		float curNodeTime = 0;
 		Vector<StackFrame> stack;
