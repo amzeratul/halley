@@ -17,6 +17,7 @@ namespace Halley {
 		class EmitOptions {
 		public:
 			Vector<String> mapKeyOrder;
+			bool compactMaps = false;
 		};
 		
 		static void parseConfig(ConfigFile& config, gsl::span<const gsl::byte> data);
@@ -32,7 +33,7 @@ namespace Halley {
 		static void emitNode(const ConfigNode& node, YAML::Emitter& emitter, const EmitOptions& options);
 		static void emitSequence(const ConfigNode& node, YAML::Emitter& emitter, const EmitOptions& options);
 		static void emitMap(const ConfigNode& node, YAML::Emitter& emitter, const EmitOptions& options);
-		static bool isCompactSequence(const ConfigNode& node, int depth);
+		static bool isCompactSequence(const ConfigNode& node, int depth, const EmitOptions& options);
 	};
 
 }

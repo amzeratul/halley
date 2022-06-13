@@ -104,7 +104,9 @@ ScriptGraphNode::ScriptGraphNode(const ConfigNode& node)
 {
 	position = node["position"].asVector2f();
 	type = node["type"].asString();
-	settings = ConfigNode(node["settings"]);
+	if (node.hasKey("settings")) {
+		settings = ConfigNode(node["settings"]);
+	}
 	pins = node["pins"].asVector<Pin>();
 }
 
@@ -113,7 +115,9 @@ ConfigNode ScriptGraphNode::toConfigNode() const
 	ConfigNode::MapType result;
 	result["position"] = position;
 	result["type"] = type;
-	result["settings"] = ConfigNode(settings);
+	if (settings.getType() == ConfigNodeType::Map && !settings.asMap().empty()) {
+		result["settings"] = ConfigNode(settings);
+	}
 	result["pins"] = pins;
 	return result;
 }
@@ -187,7 +191,7 @@ ScriptGraph::ScriptGraph()
 
 ScriptGraph::ScriptGraph(const ConfigNode& node)
 {
-	nodes = node["nodes"].asVector<ScriptGraphNode>();
+	nodes = node["nodes"].asVector<ScriptGraphNode>({});
 	finishGraph();
 }
 
@@ -198,7 +202,7 @@ ScriptGraph::ScriptGraph(const ConfigNode& node, const EntitySerializationContex
 
 void ScriptGraph::load(const ConfigNode& node, const EntitySerializationContext& context)
 {
-	nodes = node["nodes"].asVector<ScriptGraphNode>();
+	nodes = node["nodes"].asVector<ScriptGraphNode>({});
 	entityIds = ConfigNodeSerializer<Vector<EntityId>>().deserialize(context, node["entityIds"]);
 	lastAssignTypeHash = 0;
 	finishGraph();
@@ -224,6 +228,8 @@ ConfigNode ScriptGraph::toConfigNode(const EntitySerializationContext& context) 
 String ScriptGraph::toYAML() const
 {
 	YAMLConvert::EmitOptions options;
+	options.mapKeyOrder = { "type", "settings", "position", "pins" };
+	options.compactMaps = true;
 	return YAMLConvert::generateYAML(toConfigNode(), options);
 }
 

@@ -129,7 +129,7 @@ void YAMLConvert::emitNode(const ConfigNode& node, YAML::Emitter& emitter, const
 
 void YAMLConvert::emitSequence(const ConfigNode& node, YAML::Emitter& emitter, const EmitOptions& options)
 {
-	if (isCompactSequence(node, 0)) {
+	if (isCompactSequence(node, 0, options)) {
 		emitter << YAML::Flow;
 	}
 
@@ -164,7 +164,7 @@ void YAMLConvert::emitMap(const ConfigNode& node, YAML::Emitter& emitter, const 
 		return a < b;
 	});
 
-	if (keys.empty()) {
+	if (isCompactSequence(node, 0, options)) {
 		emitter << YAML::Flow;
 	}
 	emitter << YAML::BeginMap;
@@ -180,11 +180,25 @@ void YAMLConvert::emitMap(const ConfigNode& node, YAML::Emitter& emitter, const 
 	emitter << YAML::EndMap;
 }
 
-bool YAMLConvert::isCompactSequence(const ConfigNode& node, int depth)
-{	
+bool YAMLConvert::isCompactSequence(const ConfigNode& node, int depth, const EmitOptions& options)
+{
+	bool ok = true;
+
 	switch (node.getType()) {
 	case ConfigNodeType::Map:
-		return false;
+		if (node.asMap().empty()) {
+			return true;
+		}
+		if (!options.compactMaps) {
+			return false;
+		}
+		if (depth >= 2) {
+			return false;
+		}
+		for (auto& [k, v]: node.asMap()) {
+			ok = ok && isCompactSequence(v, depth + 1, options);
+		}
+		return ok;
 
 	case ConfigNodeType::Int:
 	case ConfigNodeType::Float:
@@ -199,9 +213,8 @@ bool YAMLConvert::isCompactSequence(const ConfigNode& node, int depth)
 		if (depth >= 2) {
 			return false;
 		}
-		bool ok = true;
 		for (auto& n: node.asSequence()) {
-			ok = ok && isCompactSequence(n, depth + 1);
+			ok = ok && isCompactSequence(n, depth + 1, options);
 		}
 		return ok;
 	}
