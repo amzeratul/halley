@@ -83,6 +83,7 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 
 		// Update
 		const auto result = nodeType.update(*this, static_cast<Time>(timeLeft), node, nodeState.data);
+		thread.getCurNodeTime() += timeLeft;
 		timeLeft -= static_cast<float>(result.timeElapsed);
 
 		if (result.outputsCancelled != 0) {
@@ -91,7 +92,6 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 
 		if (result.state == ScriptNodeExecutionState::Executing) {
 			// Still running this node, suspend
-			thread.getCurNodeTime() += timeLeft;
 			timeLeft = 0;
 		} else if (result.state == ScriptNodeExecutionState::Fork || result.state == ScriptNodeExecutionState::ForkAndConvertToWatcher) {
 			forkThread(thread, nodeType.getOutputNodes(node, result.outputsActive), pendingThreads);
