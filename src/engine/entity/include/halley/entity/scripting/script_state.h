@@ -121,9 +121,13 @@ namespace Halley {
 		ScriptState(const ScriptGraph* script, bool persistAfterDone);
 		ScriptState(std::shared_ptr<const ScriptGraph> script);
 
+		const String& getScriptId() const;
 		const ScriptGraph* getScriptGraphPtr() const;
 		void setScriptGraphPtr(const ScriptGraph* script);
 
+		void setTags(Vector<String> tags);
+		bool hasTag(const String& tag) const;
+		
 		bool hasStarted() const { return started; }
 		bool isDone() const;
 		bool isDead() const;
@@ -151,7 +155,7 @@ namespace Halley {
 
 		bool operator==(const ScriptState& other) const;
 		bool operator!=(const ScriptState& other) const;
-		
+
 	private:
 		std::shared_ptr<const ScriptGraph> scriptGraph;
 		const ScriptGraph* scriptGraphRef = nullptr;
@@ -164,6 +168,8 @@ namespace Halley {
     	uint64_t graphHash = 0;
     	bool started = false;
 		bool persistAfterDone = false;
+
+		Vector<String> tags;
 
     	void onNodeStartedIntrospection(ScriptNodeId nodeId);
     	void onNodeEndedIntrospection(ScriptNodeId nodeId);

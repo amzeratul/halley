@@ -217,6 +217,7 @@ ScriptState::ScriptState(const ConfigNode& node, const EntitySerializationContex
 	graphHash = Deserializer::fromBytes<decltype(graphHash)>(node["graphHash"].asBytes());
 	variables = ConfigNodeSerializer<decltype(variables)>().deserialize(context, node["variables"]);
 	persistAfterDone = node["persistAfterDone"].asBool(false);
+	tags = node["tags"].asVector<String>({});
 
 	const auto scriptGraphName = node["script"].asString();
 	if (!scriptGraphName.isEmpty()) {
@@ -235,6 +236,13 @@ ScriptState::ScriptState(std::shared_ptr<const ScriptGraph> script)
 {
 }
 
+const String& ScriptState::getScriptId() const
+{
+	const auto* script = getScriptGraphPtr();
+	assert(script != nullptr);
+	return script->getAssetId();
+}
+
 const ScriptGraph* ScriptState::getScriptGraphPtr() const
 {
 	return scriptGraph ? scriptGraph.get() : scriptGraphRef;
@@ -244,6 +252,16 @@ void ScriptState::setScriptGraphPtr(const ScriptGraph* script)
 {
 	scriptGraph.reset();
 	scriptGraphRef = script;
+}
+
+void ScriptState::setTags(Vector<String> tags)
+{
+	this->tags = std::move(tags);
+}
+
+bool ScriptState::hasTag(const String& tag) const
+{
+	return std_ex::contains(tags, tag);
 }
 
 bool ScriptState::isDone() const
@@ -268,6 +286,7 @@ ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) 
 	node["variables"] = ConfigNodeSerializer<decltype(variables)>().serialize(variables, context);
 	node["script"] = scriptGraph ? scriptGraph->getAssetId() : "";
 	node["persistAfterDone"] = persistAfterDone;
+	node["tags"] = tags;
 	return node;
 }
 
