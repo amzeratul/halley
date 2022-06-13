@@ -2,7 +2,8 @@
 #include "script_node_type.h"
 
 namespace Halley {
-    class ScriptState;
+	class InputDevice;
+	class ScriptState;
 	
     class ScriptEnvironment {
     public:
@@ -23,6 +24,9 @@ namespace Halley {
 
     	virtual void setDirection(EntityId entityId, const String& direction);
 
+        void setInputDevice(int idx, std::shared_ptr<InputDevice> input);
+        std::shared_ptr<InputDevice> getInputDevice(int idx) const;
+
         template <typename T>
         T* tryGetComponent(EntityId id)
         {
@@ -34,6 +38,7 @@ namespace Halley {
 		const HalleyAPI& api;
     	World& world;
     	Resources& resources;
+        HashMap<int, std::shared_ptr<InputDevice>> inputDevices;
     	const ScriptNodeTypeCollection& nodeTypeCollection;
 
     	const ScriptGraph* currentGraph = nullptr;

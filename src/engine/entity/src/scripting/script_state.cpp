@@ -336,7 +336,6 @@ void ScriptState::start(OptionalLite<ScriptNodeId> startNode, uint64_t hash)
 	}
 	graphHash = hash;
 	started = true;
-	nodeState.resize(getScriptGraphPtr()->getNodes().size());
 }
 
 void ScriptState::reset()
@@ -345,6 +344,11 @@ void ScriptState::reset()
 	nodeCounters.clear();
 	started = false;
 	graphHash = 0;
+}
+
+void ScriptState::ensureReady()
+{
+	nodeState.resize(getScriptGraphPtr()->getNodes().size());
 }
 
 size_t& ScriptState::getNodeCounter(ScriptNodeId node)

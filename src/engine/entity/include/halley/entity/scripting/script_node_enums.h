@@ -51,17 +51,25 @@ namespace Halley {
 	struct ScriptNodePinType {
 		ScriptNodeElementType type = ScriptNodeElementType::Undefined;
 		ScriptNodePinDirection direction = ScriptNodePinDirection::Input;
+		bool isCancellable : 1;
+		
+		ScriptNodePinType(ScriptNodeElementType type = ScriptNodeElementType::Undefined, ScriptNodePinDirection direction = ScriptNodePinDirection::Input, bool cancellable = false)
+			: type(type)
+			, direction(direction)
+			, isCancellable(cancellable)
+		{}
 
-		bool operator==(const ScriptNodePinType& other) const
+		[[nodiscard]] bool operator==(const ScriptNodePinType& other) const
 		{
 			return type == other.type && direction == other.direction;
 		}
-		bool operator!=(const ScriptNodePinType& other) const
+
+		[[nodiscard]] bool operator!=(const ScriptNodePinType& other) const
 		{
 			return type != other.type || direction != other.direction;
 		}
 
-		ScriptPinSide getSide() const
+		[[nodiscard]] ScriptPinSide getSide() const
 		{
 			switch (type) {
 			case ScriptNodeElementType::ReadDataPin:
@@ -75,12 +83,22 @@ namespace Halley {
 			}
 		}
 
-		bool isMultiConnection() const
+		[[nodiscard]] bool isMultiConnection() const
 		{
 			return (type == ScriptNodeElementType::ReadDataPin && direction == ScriptNodePinDirection::Output)
 				|| (type == ScriptNodeElementType::WriteDataPin && direction == ScriptNodePinDirection::Input)
 				|| (type == ScriptNodeElementType::FlowPin)
 				|| (type == ScriptNodeElementType::TargetPin && direction == ScriptNodePinDirection::Output);
+		}
+
+		[[nodiscard]] bool canConnectTo(const ScriptNodePinType& other) const
+		{
+			return type == other.type && direction != other.direction;
+		}
+
+		[[nodiscard]] ScriptNodePinType getReverseDirection() const
+		{
+			return ScriptNodePinType(type, direction == ScriptNodePinDirection::Input ? ScriptNodePinDirection::Output : ScriptNodePinDirection::Input);
 		}
 	};
 }

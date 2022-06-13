@@ -134,6 +134,7 @@ namespace Halley {
 
     	void start(OptionalLite<ScriptNodeId> startNode, uint64_t graphHash);
 		void reset();
+		void ensureReady();
 
     	NodeState& getNodeState(ScriptNodeId nodeId);
 		void startNode(const ScriptGraphNode& node, NodeState& state);

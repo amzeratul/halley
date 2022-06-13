@@ -35,10 +35,11 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	currentState = &graphState;
 	currentGraph->assignTypes(nodeTypeCollection);
 	currentEntity = curEntity;
-	
+
 	if (!graphState.hasStarted() || graphState.getGraphHash() != currentGraph->getHash()) {
 		graphState.start(currentGraph->getStartNode(), currentGraph->getHash());
 	}
+	graphState.ensureReady();
 
 	// Allocate time for each thread
 	auto& threads = graphState.getThreads();
@@ -82,6 +83,7 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 
 		// Update
 		const auto result = nodeType.update(*this, static_cast<Time>(timeLeft), node, nodeState.data);
+		timeLeft -= static_cast<float>(result.timeElapsed);
 
 		if (result.outputsCancelled != 0) {
 			cancelOutputs(nodeId, result.outputsCancelled);
@@ -101,7 +103,6 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		} else {
 			// Node ended
 			graphState.finishNode(node, nodeState);
-			timeLeft -= static_cast<float>(result.timeElapsed);
 			thread.setWatcher(false);
 
 			if (result.state == ScriptNodeExecutionState::Done || result.state == ScriptNodeExecutionState::MergeAndContinue) {
@@ -233,6 +234,7 @@ void ScriptEnvironment::cancelOutputs(ScriptNodeId nodeId, uint8_t cancelMask)
 			if ((cancelMask & (1 << i)) != 0) {
 				auto& node = currentGraph->getNodes()[nodeId];
 				const auto pinIdx = node.getNodeType().getNthOutputPinIdx(node, i);
+				assert(node.getPinType(pinIdx).isCancellable);
 				abortCodePath(nodeId, pinIdx);
 			}
 		}
@@ -279,6 +281,21 @@ void ScriptEnvironment::setDirection(EntityId entityId, const String& direction)
 {
 	if (auto* spriteAnimation = tryGetComponent<SpriteAnimationComponent>(entityId)) {
 		spriteAnimation->player.setDirection(direction);
+	}
+}
+
+void ScriptEnvironment::setInputDevice(int idx, std::shared_ptr<InputDevice> input)
+{
+	inputDevices[idx] = std::move(input);
+}
+
+std::shared_ptr<InputDevice> ScriptEnvironment::getInputDevice(int idx) const
+{
+	const auto iter = inputDevices.find(idx);
+	if (iter != inputDevices.end()) {
+		return iter->second;
+	} else {
+		return {};
 	}
 }
 

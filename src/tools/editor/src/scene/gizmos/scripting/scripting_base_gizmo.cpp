@@ -216,7 +216,7 @@ void ScriptingBaseGizmo::onEditingConnection(const SceneEditorInputState& inputS
 		const auto dstNodeId = nodeUnderMouse->nodeId;
 		const auto dstType = nodeUnderMouse->element;
 
-		if (srcType.type != dstType.type || srcType.direction == dstType.direction || srcNodeId == dstNodeId) {
+		if (!srcType.canConnectTo(dstType) || srcNodeId == dstNodeId) {
 			nodeUnderMouse.reset();
 		}
 	}
@@ -257,9 +257,7 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 	Vector<ScriptRenderer::ConnectionPath> paths;
 	if (nodeEditingConnection && nodeConnectionDst) {
 		const auto srcType = nodeEditingConnection->element;
-		ScriptNodePinType dstType;
-		dstType.type = srcType.type;
-		dstType.direction = srcType.direction == ScriptNodePinDirection::Input ? ScriptNodePinDirection::Output : ScriptNodePinDirection::Input;
+		ScriptNodePinType dstType = srcType.getReverseDirection();
 		paths.push_back(ScriptRenderer::ConnectionPath{ nodeEditingConnection->pinPos, nodeConnectionDst.value(), srcType, dstType, false });
 	}
 
@@ -578,7 +576,7 @@ std::optional<ScriptingBaseGizmo::Connection> ScriptingBaseGizmo::findAutoConnec
 		for (size_t pinIdx = 0; pinIdx < nPins; ++pinIdx) {
 			const bool empty = !node.getPin(pinIdx).hasConnection();
 			const auto dstPinType = node.getPinType(static_cast<ScriptPinId>(pinIdx));
-			if (empty && dstPinType.type == srcPinType.type && dstPinType.direction != srcPinType.direction) {
+			if (empty && srcPinType.canConnectTo(dstPinType)) {
 				const auto srcPos = renderer->getPinPosition(basePos, getNode(srcNodeId), srcPinIdx, getZoom());
 				const auto dstPos = renderer->getPinPosition(basePos, getNode(node.getId()), static_cast<ScriptPinId>(pinIdx), getZoom());
 				const float distance = (srcPos - dstPos).length();
