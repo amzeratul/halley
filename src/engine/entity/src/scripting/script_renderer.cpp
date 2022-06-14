@@ -276,12 +276,22 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 
 		// Label
 		if (!label.isEmpty()) {
-			labelText.clone()
-				.setPosition(pos + Vector2f(0, (8.0f + iconExtraOffset) / curZoom).round())
+			const float size = 14 / curZoom;
+			auto labelCopy = labelText.clone()
+				.setPosition(pos + Vector2f(0, (18.0f + iconExtraOffset) / curZoom).round())
 				.setText(label)
-				.setSize(14 / curZoom)
+				.setSize(size)
 				.setOutline(8.0f / curZoom)
 				.setOutlineColour(col.multiplyLuma(0.75f))
+				.setOffset(Vector2f(0, 0.5f));
+
+			const float maxWidth = 56.0f;
+			const auto extents = labelCopy.getExtents();
+			if (extents.x > maxWidth) {
+				labelCopy.setSize(size * maxWidth / extents.x);
+			}
+
+			labelCopy
 				.draw(painter);
 		}
 	}

@@ -3,6 +3,11 @@
 #include "halley/core/input/input_device.h"
 using namespace Halley;
 
+String ScriptInputButton::getLabel(const ScriptGraphNode& node) const
+{
+	return node.getSettings()["button"].asString("");
+}
+
 Vector<IScriptNodeType::SettingType> ScriptInputButton::getSettingTypes() const
 {
 	return {
@@ -23,7 +28,7 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Monitor input button ");
-	str.append(toString(node.getSettings()["button"].asString("")), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(node.getSettings()["button"].asString(""), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append(" on device ");
 	str.append(toString(node.getSettings()["device"].asInt(0)), Colour4f(0.97f, 0.35f, 0.35f));
 	return str.moveResults();
