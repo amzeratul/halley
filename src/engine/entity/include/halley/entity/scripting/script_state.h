@@ -154,6 +154,9 @@ namespace Halley {
     	ConfigNode getVariable(const String& name) const;
     	void setVariable(const String& name, ConfigNode value);
 
+		void updateDisplayOffset(Time t);
+		Vector2f getDisplayOffset() const;
+
 		bool operator==(const ScriptState& other) const;
 		bool operator!=(const ScriptState& other) const;
 
@@ -169,6 +172,8 @@ namespace Halley {
     	uint64_t graphHash = 0;
     	bool started = false;
 		bool persistAfterDone = false;
+
+		Vector2f displayOffset;
 
 		Vector<String> tags;
 

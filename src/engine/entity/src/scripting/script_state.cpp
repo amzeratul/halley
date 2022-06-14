@@ -370,6 +370,29 @@ void ScriptState::setVariable(const String& name, ConfigNode value)
 	variables[name] = std::move(value);
 }
 
+void ScriptState::updateDisplayOffset(Time t)
+{
+	Vector2f targetPos;
+	size_t n = 0;
+	for (const auto& t: threads) {
+		const auto nodeId = t.getCurNode();
+		if (nodeId) {
+			const auto pos = getScriptGraphPtr()->getNodes().at(nodeId.value()).getPosition();
+			targetPos += pos;
+			++n;
+		}
+	}
+
+	targetPos /= static_cast<float>(n);
+
+	displayOffset = damp(displayOffset, targetPos, 2.0f, static_cast<float>(t));
+}
+
+Vector2f ScriptState::getDisplayOffset() const
+{
+	return displayOffset;
+}
+
 bool ScriptState::operator==(const ScriptState& other) const
 {
 	return false;

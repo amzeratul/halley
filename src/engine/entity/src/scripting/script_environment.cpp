@@ -64,6 +64,8 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 		doTerminateState();
 	}
 
+	graphState.updateDisplayOffset(time);
+
 	currentGraph = nullptr;
 	currentState = nullptr;
 	currentEntity = EntityId();
