@@ -61,8 +61,18 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom, flo
 	
 	for (ScriptNodeId i = 0; i < static_cast<ScriptNodeId>(graph->getNodes().size()); ++i) {
 		const bool highlightThis = highlightNode && highlightNode->nodeId == i;
-		const auto pinType = highlightThis ? highlightNode->element : std::optional<ScriptNodePinType>();
-		const auto pinId = highlightThis ? highlightNode->elementId : 0;
+		auto pinType = highlightThis ? highlightNode->element : std::optional<ScriptNodePinType>();
+		auto pinId = highlightThis ? highlightNode->elementId : 0;
+
+		if (highlightNode && !highlightThis) {
+			const auto& pin = graph->getNodes()[highlightNode->nodeId].getPin(highlightNode->elementId);
+			for (const auto& conn: pin.connections) {
+				if (conn.dstNode == i) {
+					pinId = conn.dstPin;
+					pinType = graph->getNodes()[i].getPinType(pinId);
+				}
+			}
+		}
 		
 		drawNode(painter, basePos, graph->getNodes()[i], effectiveZoom, posScale, getNodeDrawMode(i), pinType, pinId);
 	}
@@ -78,17 +88,19 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptN
 	if (!nodeType) {
 		return;
 	}
-	const bool nodeHighlighted = highlightNode && highlightNode->nodeId == nodeIdx;
+	const bool nodeHighlighted = highlightNode && highlightNode->nodeId == nodeIdx && highlightNode->element.type == ScriptNodeElementType::Node;
 
 	for (size_t i = 0; i < node.getPins().size(); ++i) {
 		const auto& srcPinType = nodeType->getPin(node, i);
 		const auto& pin = node.getPins()[i];
+
+		const bool pinHighlighted = nodeHighlighted || (highlightNode && highlightNode->nodeId == nodeIdx && highlightNode->elementId == i);
 		
 		for (const auto& pinConnection: pin.connections) {
 			std::optional<Vector2f> dstPos;
 			ScriptNodePinType dstPinType;
 
-			bool highlighted = nodeHighlighted;
+			bool highlighted = pinHighlighted;
 
 			if (pinConnection.dstNode && srcPinType.direction == ScriptNodePinDirection::Output) {
 				const size_t dstIdx = pinConnection.dstPin;
@@ -100,7 +112,9 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptN
 				dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom, posScale).getCentre();
 				dstPinType = dstNodeType->getPin(node, dstIdx);
 				if (highlightNode && highlightNode->nodeId == pinConnection.dstNode.value()) {
-					highlighted = true;
+					if (highlightNode->element.type == ScriptNodeElementType::Node || highlightNode->elementId == pinConnection.dstPin) {
+						highlighted = true;
+					}
 				}
 
 				dstDrawMode = getNodeDrawMode(*pinConnection.dstNode);
