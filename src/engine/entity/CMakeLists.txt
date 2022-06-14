@@ -36,9 +36,10 @@ set(SOURCES
         "src/scripting/script_state.cpp"
 
         "src/scripting/nodes/script_branching.cpp"
-        "src/scripting/nodes/script_flow_control.cpp"
+        "src/scripting/nodes/script_execution_control.cpp"
         "src/scripting/nodes/script_logic_gates.cpp"
         "src/scripting/nodes/script_audio.cpp"
+        "src/scripting/nodes/script_flow_gate.cpp"
         "src/scripting/nodes/script_input.cpp"
         "src/scripting/nodes/script_loop.cpp"
         "src/scripting/nodes/script_sprite.cpp"
@@ -91,9 +92,10 @@ set(HEADERS
         "include/halley/entity/scripting/script_state.h"
 
         "src/scripting/nodes/script_branching.h"
-        "src/scripting/nodes/script_flow_control.h"
+        "src/scripting/nodes/script_execution_control.h"
         "src/scripting/nodes/script_logic_gates.h"
         "src/scripting/nodes/script_audio.h"
+        "src/scripting/nodes/script_flow_gate.h"
         "src/scripting/nodes/script_input.h"
         "src/scripting/nodes/script_loop.h"
         "src/scripting/nodes/script_sprite.h"

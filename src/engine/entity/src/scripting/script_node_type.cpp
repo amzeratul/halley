@@ -5,9 +5,10 @@
 
 #include "world.h"
 #include "nodes/script_branching.h"
-#include "nodes/script_flow_control.h"
+#include "nodes/script_execution_control.h"
 #include "nodes/script_logic_gates.h"
 #include "nodes/script_audio.h"
+#include "nodes/script_flow_gate.h"
 #include "nodes/script_input.h"
 #include "nodes/script_loop.h"
 #include "nodes/script_sprite.h"
@@ -310,4 +311,5 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptInputButton>());
 	addScriptNode(std::make_unique<ScriptForLoop>());
 	addScriptNode(std::make_unique<ScriptWhileLoop>());
+	addScriptNode(std::make_unique<ScriptFlowGate>());
 }
