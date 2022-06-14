@@ -106,6 +106,8 @@ ScriptGraphNode::ScriptGraphNode(const ConfigNode& node)
 	type = node["type"].asString();
 	if (node.hasKey("settings")) {
 		settings = ConfigNode(node["settings"]);
+	} else {
+		settings = ConfigNode::MapType();
 	}
 	pins = node["pins"].asVector<Pin>();
 }

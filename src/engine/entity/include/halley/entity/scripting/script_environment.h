@@ -35,12 +35,17 @@ namespace Halley {
             return entity.isValid() ? entity.tryGetComponent<T>() : nullptr;
         }
 
+        void setHostNetworkAuthority(bool isHost);
+        bool hasNetworkAuthorityOver(EntityId id);
+        bool hasHostNetworkAuthority() const;
+
     protected:
 		const HalleyAPI& api;
     	World& world;
     	Resources& resources;
         HashMap<int, std::shared_ptr<InputDevice>> inputDevices;
     	const ScriptNodeTypeCollection& nodeTypeCollection;
+        bool isHost = false;
 
     	const ScriptGraph* currentGraph = nullptr;
     	ScriptState* currentState = nullptr;

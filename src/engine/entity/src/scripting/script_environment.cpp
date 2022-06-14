@@ -313,6 +313,21 @@ int ScriptEnvironment::getInputButtonByName(const String& name) const
 	return static_cast<int>(fromString<DefaultInputButtons>(name));
 }
 
+void ScriptEnvironment::setHostNetworkAuthority(bool host)
+{
+	isHost = host;
+}
+
+bool ScriptEnvironment::hasNetworkAuthorityOver(EntityId id)
+{
+	return !world.isEntityNetworkRemote(tryGetEntity(id));
+}
+
+bool ScriptEnvironment::hasHostNetworkAuthority() const
+{
+	return isHost;
+}
+
 void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)
 {
 	if (const auto* audioSource = tryGetComponent<AudioSourceComponent>(entityId)) {

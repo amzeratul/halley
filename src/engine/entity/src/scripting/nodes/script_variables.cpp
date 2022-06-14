@@ -134,11 +134,20 @@ std::pair<String, Vector<ColourOverride>> ScriptComparison::getNodeDescription(c
 
 ConfigNode ScriptComparison::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
+	const auto a = readDataPin(environment, node, 0);
+	const auto b = readDataPin(environment, node, 1);
 	// TODO
 	return ConfigNode(false);
 }
 
 
+String ScriptSetVariable::getLabel(const ScriptGraphNode& node) const
+{
+	if (!node.getPin(2).hasConnection()) {
+		return toString(node.getSettings()["defaultValue"].asInt(0));
+	}
+	return "";
+}
 
 gsl::span<const IScriptNodeType::PinType> ScriptSetVariable::getPinConfiguration(const ScriptGraphNode& node) const
 {
@@ -148,18 +157,26 @@ gsl::span<const IScriptNodeType::PinType> ScriptSetVariable::getPinConfiguration
 	return data;
 }
 
+Vector<IScriptNodeType::SettingType> ScriptSetVariable::getSettingTypes() const
+{
+	return { SettingType{ "defaultValue", "int", Vector<String>{"0"} } };
+}
+
 std::pair<String, Vector<ColourOverride>> ScriptSetVariable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
+	auto label = getLabel(node);
+
 	auto str = ColourStringBuilder(true);
 	str.append(getConnectedNodeName(world, node, graph, 3), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append(" := ");
-	str.append(getConnectedNodeName(world, node, graph, 2), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(label.isEmpty() ? getConnectedNodeName(world, node, graph, 2) : label, Colour4f(0.97f, 0.35f, 0.35f));
 	return str.moveResults();
 }
 
 IScriptNodeType::Result ScriptSetVariable::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	writeDataPin(environment, node, 3, readDataPin(environment, node, 2));
+	auto data = node.getPin(2).hasConnection() ? readDataPin(environment, node, 2) : ConfigNode(node.getSettings()["defaultValue"].asInt(0));
+	writeDataPin(environment, node, 3, std::move(data));
 	return Result(ScriptNodeExecutionState::Done);
 }
 

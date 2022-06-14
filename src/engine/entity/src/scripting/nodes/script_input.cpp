@@ -27,9 +27,9 @@ gsl::span<const IScriptNodeType::PinType> ScriptInputButton::getPinConfiguration
 std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
-	str.append("Monitor input button ");
+	str.append("Input ");
 	str.append(node.getSettings()["button"].asString(""), Colour4f(0.97f, 0.35f, 0.35f));
-	str.append(" on device ");
+	str.append(" on ");
 	str.append(toString(node.getSettings()["device"].asInt(0)), Colour4f(0.97f, 0.35f, 0.35f));
 	return str.moveResults();
 }
