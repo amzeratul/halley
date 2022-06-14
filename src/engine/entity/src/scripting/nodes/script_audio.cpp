@@ -18,9 +18,9 @@ std::pair<String, Vector<ColourOverride>> ScriptAudioEvent::getNodeDescription(c
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Post audio event ");
-	str.append(node.getSettings()["event"].asString(""), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(node.getSettings()["event"].asString(""), parameterColour);
 	str.append(" on entity ");
-	str.append(getConnectedNodeName(world, node, graph, 2), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	return str.moveResults();
 }
 

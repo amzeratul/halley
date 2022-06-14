@@ -13,7 +13,7 @@ std::pair<String, Vector<ColourOverride>> ScriptBranch::getNodeDescription(const
 {
 	auto str = ColourStringBuilder(true);
 	str.append("If ");
-	str.append(getConnectedNodeName(world, node, graph, 1), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
 	return str.moveResults();
 }
 

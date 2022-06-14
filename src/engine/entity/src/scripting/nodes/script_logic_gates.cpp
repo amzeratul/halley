@@ -23,9 +23,9 @@ std::pair<String, Vector<ColourOverride>> ScriptLogicGateAnd::getNodeDescription
 	auto b = getConnectedNodeName(world, node, graph, 1);
 	ColourStringBuilder result;
 	result.append("True if ");
-	result.append(addParentheses(std::move(a)), Colour4f(0.97f, 0.35f, 0.35f));
+	result.append(addParentheses(std::move(a)), parameterColour);
 	result.append(" AND ");
-	result.append(addParentheses(std::move(b)), Colour4f(0.97f, 0.35f, 0.35f));
+	result.append(addParentheses(std::move(b)), parameterColour);
 	return result.moveResults();
 }
 
@@ -57,9 +57,9 @@ std::pair<String, Vector<ColourOverride>> ScriptLogicGateOr::getNodeDescription(
 	auto b = getConnectedNodeName(world, node, graph, 1);
 	ColourStringBuilder result;
 	result.append("True if ");
-	result.append(addParentheses(std::move(a)), Colour4f(0.97f, 0.35f, 0.35f));
+	result.append(addParentheses(std::move(a)), parameterColour);
 	result.append(" OR ");
-	result.append(addParentheses(std::move(b)), Colour4f(0.97f, 0.35f, 0.35f));
+	result.append(addParentheses(std::move(b)), parameterColour);
 	return result.moveResults();
 }
 
@@ -91,9 +91,9 @@ std::pair<String, Vector<ColourOverride>> ScriptLogicGateXor::getNodeDescription
 	auto b = getConnectedNodeName(world, node, graph, 1);
 	ColourStringBuilder result;
 	result.append("True if ");
-	result.append(addParentheses(std::move(a)), Colour4f(0.97f, 0.35f, 0.35f));
+	result.append(addParentheses(std::move(a)), parameterColour);
 	result.append(" XOR ");
-	result.append(addParentheses(std::move(b)), Colour4f(0.97f, 0.35f, 0.35f));
+	result.append(addParentheses(std::move(b)), parameterColour);
 	return result.moveResults();
 }
 
@@ -123,7 +123,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLogicGateNot::getNodeDescription
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	ColourStringBuilder result;
 	result.append("True if NOT ");
-	result.append(addParentheses(std::move(a)), Colour4f(0.97f, 0.35f, 0.35f));
+	result.append(addParentheses(std::move(a)), parameterColour);
 	return result.moveResults();
 }
 

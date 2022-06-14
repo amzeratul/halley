@@ -28,7 +28,7 @@ std::pair<String, Vector<ColourOverride>> ScriptVariable::getNodeDescription(con
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Variable ");
-	str.append(node.getSettings()["variable"].asString(""), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(node.getSettings()["variable"].asString(""), parameterColour);
 	return str.moveResults();
 }
 
@@ -70,7 +70,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLiteral::getNodeDescription(cons
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Literal ");
-	str.append(node.getSettings()["value"].asString("0"), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(node.getSettings()["value"].asString("0"), parameterColour);
 	str.append(".");
 	return str.moveResults();
 }
@@ -124,11 +124,11 @@ std::pair<String, Vector<ColourOverride>> ScriptComparison::getNodeDescription(c
 {
 	auto str = ColourStringBuilder(true);
 	str.append("True if ");
-	str.append(addParentheses(getConnectedNodeName(world, node, graph, 0)), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(addParentheses(getConnectedNodeName(world, node, graph, 0)), parameterColour);
 	str.append(" ");
-	str.append(node.getSettings()["operator"].asString("equals"), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(node.getSettings()["operator"].asString("equals"), parameterColour);
 	str.append(" ");
-	str.append(addParentheses(getConnectedNodeName(world, node, graph, 1)), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(addParentheses(getConnectedNodeName(world, node, graph, 1)), parameterColour);
 	return str.moveResults();
 }
 
@@ -167,9 +167,9 @@ std::pair<String, Vector<ColourOverride>> ScriptSetVariable::getNodeDescription(
 	auto label = getLabel(node);
 
 	auto str = ColourStringBuilder(true);
-	str.append(getConnectedNodeName(world, node, graph, 3), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
 	str.append(" := ");
-	str.append(label.isEmpty() ? getConnectedNodeName(world, node, graph, 2) : label, Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(label.isEmpty() ? getConnectedNodeName(world, node, graph, 2) : label, parameterColour);
 	return str.moveResults();
 }
 
@@ -229,13 +229,13 @@ std::pair<String, Vector<ColourOverride>> ScriptHoldVariable::getNodeDescription
 	const auto label2 = !node.getPin(3).hasConnection() ? toString(node.getSettings()["defaultPrevValue"].asInt(0)) : "";
 
 	auto str = ColourStringBuilder(true);
-	str.append(getConnectedNodeName(world, node, graph, 3), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
 	str.append(" := ");
-	str.append(label1.isEmpty() ? getConnectedNodeName(world, node, graph, 2) : label1, Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(label1.isEmpty() ? getConnectedNodeName(world, node, graph, 2) : label1, parameterColour);
 	str.append(", then ");
-	str.append(getConnectedNodeName(world, node, graph, 3), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
 	str.append(" := ");
-	str.append(label2.isEmpty() ? getConnectedNodeName(world, node, graph, 3) : label2, Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(label2.isEmpty() ? getConnectedNodeName(world, node, graph, 3) : label2, parameterColour);
 	return str.moveResults();
 }
 

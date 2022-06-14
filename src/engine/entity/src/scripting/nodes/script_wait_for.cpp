@@ -13,7 +13,7 @@ std::pair<String, Vector<ColourOverride>> ScriptWaitFor::getNodeDescription(cons
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Wait until ");
-	str.append(addParentheses(getConnectedNodeName(world, node, graph, 1)), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(addParentheses(getConnectedNodeName(world, node, graph, 1)), parameterColour);
 	str.append(" is true");
 	return str.moveResults();
 }

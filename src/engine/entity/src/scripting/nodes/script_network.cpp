@@ -18,7 +18,7 @@ std::pair<String, Vector<ColourOverride>> ScriptEntityAuthority::getNodeDescript
 {
 	ColourStringBuilder str;
 	str.append("Has authority over ");
-	str.append(getConnectedNodeName(world, node, graph, 0), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
 	return str.moveResults();
 }
 
@@ -68,7 +68,7 @@ std::pair<String, Vector<ColourOverride>> ScriptIfEntityAuthority::getNodeDescri
 {
 	ColourStringBuilder str;
 	str.append("If has authority over ");
-	str.append(getConnectedNodeName(world, node, graph, 1), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
 	return str.moveResults();
 }
 

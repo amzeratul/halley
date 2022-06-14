@@ -38,7 +38,7 @@ std::pair<String, Vector<ColourOverride>> ScriptForLoop::getNodeDescription(cons
 	const int count = node.getSettings()["loopCount"].asInt(0);
 	auto str = ColourStringBuilder(true);
 	str.append("Loop ");
-	str.append(toString(count), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(toString(count), parameterColour);
 	str.append(count == 1 ? " time" : " times");
 	return str.moveResults();
 }
@@ -94,11 +94,11 @@ std::pair<String, Vector<ColourOverride>> ScriptWhileLoop::getNodeDescription(co
 	if (node.getPin(1).hasConnection()) {
 		const auto desc = getConnectedNodeName(world, node, graph, 1);
 		str.append("Loop as long as ");
-		str.append(desc, Colour4f(0.97f, 0.35f, 0.35f));
+		str.append(desc, parameterColour);
 		str.append(" is true");
 	} else {
 		str.append("Loop ");
-		str.append("forever", Colour4f(0.97f, 0.35f, 0.35f));
+		str.append("forever", parameterColour);
 	}
 	return str.moveResults();
 }

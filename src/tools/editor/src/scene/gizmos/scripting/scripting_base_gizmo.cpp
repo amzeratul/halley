@@ -410,7 +410,7 @@ void ScriptingBaseGizmo::drawToolTip(Painter& painter, const EntityTarget& entit
 {
 	ColourStringBuilder builder;
 	builder.append("Entity ");
-	builder.append("\"" + world->getEntity(entityTarget.entityId).getName() + "\"", Colour4f(0.97f, 0.35f, 0.35f));
+	builder.append("\"" + world->getEntity(entityTarget.entityId).getName() + "\"", IScriptNodeType::parameterColour);
 	const auto [text, colours] = builder.moveResults();
 	drawToolTip(painter, text, colours, entityTarget.pos + Vector2f(0, 10));
 }

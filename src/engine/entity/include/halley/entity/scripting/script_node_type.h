@@ -32,6 +32,7 @@ namespace Halley {
 			Vector<String> defaultValue;
 		};
 
+		constexpr static Colour4f parameterColour = Colour4f(0.97f, 0.35f, 0.35f);
 		using PinType = ScriptNodePinType;
 
 		virtual ~IScriptNodeType() = default;

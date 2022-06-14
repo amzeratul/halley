@@ -28,9 +28,9 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Input ");
-	str.append(node.getSettings()["button"].asString(""), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(node.getSettings()["button"].asString(""), parameterColour);
 	str.append(" on ");
-	str.append(toString(node.getSettings()["device"].asInt(0)), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(toString(node.getSettings()["device"].asInt(0)), parameterColour);
 	return str.moveResults();
 }
 
