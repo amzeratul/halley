@@ -285,7 +285,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 				.setOutlineColour(col.multiplyLuma(0.75f))
 				.setOffset(Vector2f(0, 0.5f));
 
-			const float maxWidth = 56.0f;
+			const float maxWidth = variable ? 40.0f : 56.0f;
 			const auto extents = labelCopy.getExtents();
 			if (extents.x > maxWidth) {
 				labelCopy.setSize(size * maxWidth / extents.x);

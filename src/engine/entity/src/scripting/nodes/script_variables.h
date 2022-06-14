@@ -61,5 +61,30 @@ namespace Halley {
 
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
 	};
+
+	class ScriptHoldVariableData : public ScriptStateData<ScriptHoldVariableData> {
+	public:
+		ConfigNode prevValue;
+
+		ScriptHoldVariableData() = default;
+		ScriptHoldVariableData(const ConfigNode& node);
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+	};
+
+	class ScriptHoldVariable final : public ScriptNodeTypeBase<ScriptHoldVariableData> {
+	public:
+		String getId() const override { return "holdVariable"; }
+		String getName() const override { return "Variable Hold"; }
+		String getLabel(const ScriptGraphNode& node) const override;
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/set_variable.png"; }
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
+		Vector<SettingType> getSettingTypes() const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+
+		void doInitData(ScriptHoldVariableData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptHoldVariableData& curData) const override;
+		void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptHoldVariableData& curData) const override;
+	};
 	
 }
