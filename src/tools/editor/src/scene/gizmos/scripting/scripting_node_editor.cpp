@@ -36,22 +36,12 @@ void ScriptingNodeEditor::onMakeUI()
 		destroy();
 	});
 
-	setHandle(UIEventType::ButtonClicked, "delete", [=] (const UIEvent& event)
-	{
-		deleteNode();
-		destroy();
-	});
-
 	setHandle(UIEventType::TextSubmit, [=] (const UIEvent& event)
 	{
 		applyChanges();
 		destroy();
 	});
-
-	const auto deleteButton = getWidget("delete");
-	deleteButton->setActive(!!nodeId);
-	deleteButton->setEnabled(nodeType.canDelete());
-
+	
 	makeFields(getWidget("nodeFields"));
 }
 

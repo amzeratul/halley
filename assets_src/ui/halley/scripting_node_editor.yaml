@@ -8,7 +8,6 @@ children:
 - widget: { id: nodeFields, class: widget }
   border: [1, 10, 1, 7]
   sizer: { type: vertical, gap: 2 }
-- widget: { id: delete, class: button, text: Delete, tooltip: "Remove node" }
 - sizer: { type: horizontal }
   children:
   - widget: { id: ok, class: button, text: OK, tooltip: "Accept changes" }
