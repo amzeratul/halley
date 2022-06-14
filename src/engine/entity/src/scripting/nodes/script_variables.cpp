@@ -69,7 +69,7 @@ Vector<IScriptNodeType::SettingType> ScriptLiteral::getSettingTypes() const
 std::pair<String, Vector<ColourOverride>> ScriptLiteral::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
-	str.append("Literal with value ");
+	str.append("Literal ");
 	str.append(node.getSettings()["value"].asString("0"), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append(".");
 	return str.moveResults();
@@ -151,7 +151,9 @@ gsl::span<const IScriptNodeType::PinType> ScriptSetVariable::getPinConfiguration
 std::pair<String, Vector<ColourOverride>> ScriptSetVariable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
-	str.append("Copies value into variable.");
+	str.append(getConnectedNodeName(world, node, graph, 3), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append(" := ");
+	str.append(getConnectedNodeName(world, node, graph, 2), Colour4f(0.97f, 0.35f, 0.35f));
 	return str.moveResults();
 }
 

@@ -3,13 +3,13 @@ using namespace Halley;
 
 ScriptFlowGateData::ScriptFlowGateData(const ConfigNode& node)
 {
-	started = node["started"].asBool(false);
+	flowing = node["flowing"].asBool(false);
 }
 
 ConfigNode ScriptFlowGateData::toConfigNode(const EntitySerializationContext& context)
 {
 	ConfigNode::MapType result;
-	result["started"] = started;
+	result["flowing"] = flowing;
 	return result;
 }
 
@@ -42,21 +42,21 @@ std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getPinDescription(cons
 
 void ScriptFlowGate::doInitData(ScriptFlowGateData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const
 {
-	data.started = false;
+	data.flowing = false;
 }
 
 IScriptNodeType::Result ScriptFlowGate::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptFlowGateData& data) const
 {
-	const bool condition = readDataPin(environment, node, 1).asBool(false);
+	const bool shouldFlow = readDataPin(environment, node, 1).asBool(false);
 
-	if (!data.started) {
-		data.started = true;
-		return Result(condition ? ScriptNodeExecutionState::ForkAndConvertToWatcher : ScriptNodeExecutionState::Done, 0, 1);
-	} else {
-		if (condition) {
-			return Result(ScriptNodeExecutionState::Executing, time);
+	if (shouldFlow != data.flowing) {
+		data.flowing = shouldFlow;
+		if (shouldFlow) {
+			return Result(ScriptNodeExecutionState::ForkAndConvertToWatcher, 0, 1);
 		} else {
-			return Result(ScriptNodeExecutionState::Done, 0, 0, 1);
+			return Result(ScriptNodeExecutionState::Executing, time, 0, 1);
 		}
+	} else {
+		return Result(ScriptNodeExecutionState::Executing, time);
 	}	
 }

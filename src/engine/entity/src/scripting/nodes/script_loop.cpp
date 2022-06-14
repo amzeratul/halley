@@ -90,17 +90,22 @@ gsl::span<const IScriptNodeType::PinType> ScriptWhileLoop::getPinConfiguration(c
 
 std::pair<String, Vector<ColourOverride>> ScriptWhileLoop::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
-	const auto desc = getConnectedNodeName(world, node, graph, 1);
 	auto str = ColourStringBuilder(true);
-	str.append("Loop as long as ");
-	str.append(desc, Colour4f(0.97f, 0.35f, 0.35f));
-	str.append(" is true");
+	if (node.getPin(1).hasConnection()) {
+		const auto desc = getConnectedNodeName(world, node, graph, 1);
+		str.append("Loop as long as ");
+		str.append(desc, Colour4f(0.97f, 0.35f, 0.35f));
+		str.append(" is true");
+	} else {
+		str.append("Loop ");
+		str.append("forever", Colour4f(0.97f, 0.35f, 0.35f));
+	}
 	return str.moveResults();
 }
 
 IScriptNodeType::Result ScriptWhileLoop::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	const bool condition = readDataPin(environment, node, 1).asBool(false);
+	const bool condition = readDataPin(environment, node, 1).asBool(true);
 	return Result(ScriptNodeExecutionState::Done, 0, condition ? 2 : 1);
 }
 

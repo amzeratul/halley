@@ -9,7 +9,7 @@ namespace Halley {
 		ScriptFlowGateData(const ConfigNode& node);
 		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
 
-		bool started = false;
+		bool flowing = false;
 	};
 
 	class ScriptFlowGate : public ScriptNodeTypeBase<ScriptFlowGateData> {
