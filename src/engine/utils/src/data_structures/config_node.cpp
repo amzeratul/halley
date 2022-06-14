@@ -527,6 +527,8 @@ bool ConfigNode::asBool() const
 {
 	if (type == ConfigNodeType::Int) {
 		return intData != 0;
+	} if (type == ConfigNodeType::Float) {
+		return floatData != 0;
 	} else {
 		return asString() == "true";
 	}

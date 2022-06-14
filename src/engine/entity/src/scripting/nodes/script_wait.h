@@ -6,6 +6,8 @@ namespace Halley {
 	public:
 		float timeLeft = 0;
 
+		ScriptWaitData() = default;
+		ScriptWaitData(const ConfigNode& node);
 		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
 	};
 	

@@ -407,9 +407,9 @@ void ScriptState::ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state
 	}
 }
 
-void ScriptState::finishNode(const ScriptGraphNode& node, NodeState& state)
+void ScriptState::finishNode(const ScriptGraphNode& node, NodeState& state, bool allThreadsDone)
 {
-	if (!node.getNodeType().canKeepData()) {
+	if (allThreadsDone || !node.getNodeType().canKeepData()) {
 		state.releaseData();
 	}
 }

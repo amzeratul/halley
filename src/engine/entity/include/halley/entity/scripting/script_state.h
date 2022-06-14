@@ -139,7 +139,7 @@ namespace Halley {
     	NodeState& getNodeState(ScriptNodeId nodeId);
 		void startNode(const ScriptGraphNode& node, NodeState& state);
 		void ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state);
-		void finishNode(const ScriptGraphNode& node, NodeState& state);
+		void finishNode(const ScriptGraphNode& node, NodeState& state, bool allThreadsDone);
     	
     	Vector<ScriptStateThread>& getThreads() { return threads; }
 

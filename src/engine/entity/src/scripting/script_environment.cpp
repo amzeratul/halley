@@ -102,7 +102,7 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 			mergeThread(thread, true);
 		} else {
 			// Node ended
-			graphState.finishNode(node, nodeState);
+			graphState.finishNode(node, nodeState, false);
 			thread.setWatcher(false);
 
 			if (result.state == ScriptNodeExecutionState::Done || result.state == ScriptNodeExecutionState::MergeAndContinue) {
@@ -147,7 +147,7 @@ void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEnti
 void ScriptEnvironment::doTerminateState()
 {
 	for (auto& thread: currentState->getThreads()) {
-		terminateThread(thread);
+		terminateThread(thread, false);
 	}
 	currentState->getThreads().clear();
 }
@@ -168,7 +168,7 @@ void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<Sc
 	if (node) {
 		thread.advanceToNode(node, outputPin);
 	} else {
-		terminateThread(thread);
+		terminateThread(thread, true);
 	}
 }
 
@@ -187,7 +187,7 @@ void ScriptEnvironment::mergeThread(ScriptStateThread& thread, bool wait)
 		if (&thread != &other && other.isMerging() && other.getCurNode() == thread.getCurNode()) {
 			thread.merge(other);
 			other.setMerging(false);
-			terminateThread(other);
+			terminateThread(other, false);
 			break;
 		}
 	}
@@ -197,7 +197,7 @@ void ScriptEnvironment::mergeThread(ScriptStateThread& thread, bool wait)
 	}
 }
 
-void ScriptEnvironment::terminateThread(ScriptStateThread& thread)
+void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRollback)
 {
 	thread.advanceToNode({}, 0);
 
@@ -211,10 +211,17 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread)
 
 		auto& nodeState = state.getNodeState(nodeId);
 		state.ensureNodeLoaded(node, nodeState);
+
+		if (allowRollback && i >= 1 && node.getNodeType().isStackRollbackPoint(*this, node, threadStack[i].pin, nodeState.data)) {
+			threadStack.resize(i);
+			thread.advanceToNode(nodeId, threadStack[i - 1].pin);
+			return;
+		}
+
 		nodeState.threadCount--;
 		if (nodeState.threadCount == 0) {
 			node.getNodeType().destructor(*this, node, nodeState.data);
-			state.finishNode(node, nodeState);
+			state.finishNode(node, nodeState, true);
 		}
 	}
 	threadStack.clear();
@@ -247,7 +254,7 @@ void ScriptEnvironment::abortCodePath(ScriptNodeId node, std::optional<ScriptPin
 
 	for (auto& thread: currentState->getThreads()) {
 		if (thread.stackGoesThrough(node, outputPin)) {
-			terminateThread(thread);
+			terminateThread(thread, false);
 		}
 	}
 }

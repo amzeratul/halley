@@ -9,6 +9,7 @@
 #include "nodes/script_logic_gates.h"
 #include "nodes/script_audio.h"
 #include "nodes/script_input.h"
+#include "nodes/script_loop.h"
 #include "nodes/script_sprite.h"
 #include "nodes/script_variables.h"
 #include "nodes/script_wait.h"
@@ -307,4 +308,6 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptComparison>());
 	addScriptNode(std::make_unique<ScriptSetVariable>());
 	addScriptNode(std::make_unique<ScriptInputButton>());
+	addScriptNode(std::make_unique<ScriptForLoop>());
+	addScriptNode(std::make_unique<ScriptWhileLoop>());
 }
