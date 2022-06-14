@@ -308,6 +308,11 @@ std::shared_ptr<InputDevice> ScriptEnvironment::getInputDevice(int idx) const
 	}
 }
 
+int ScriptEnvironment::getInputButtonByName(const String& name) const
+{
+	return static_cast<int>(fromString<DefaultInputButtons>(name));
+}
+
 void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)
 {
 	if (const auto* audioSource = tryGetComponent<AudioSourceComponent>(entityId)) {

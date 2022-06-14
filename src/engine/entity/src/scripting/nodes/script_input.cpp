@@ -6,7 +6,7 @@ using namespace Halley;
 Vector<IScriptNodeType::SettingType> ScriptInputButton::getSettingTypes() const
 {
 	return {
-		SettingType{ "button", "int", Vector<String>{"0"} },
+		SettingType{ "button", "Halley::InputButton", Vector<String>{"primary"} },
 		SettingType{ "device", "int", Vector<String>{"0"} },
 	};
 }
@@ -22,8 +22,8 @@ gsl::span<const IScriptNodeType::PinType> ScriptInputButton::getPinConfiguration
 std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
-	str.append("Monitors input button ");
-	str.append(toString(node.getSettings()["button"].asInt(0)), Colour4f(0.97f, 0.35f, 0.35f));
+	str.append("Monitor input button ");
+	str.append(toString(node.getSettings()["button"].asString("")), Colour4f(0.97f, 0.35f, 0.35f));
 	str.append(" on device ");
 	str.append(toString(node.getSettings()["device"].asInt(0)), Colour4f(0.97f, 0.35f, 0.35f));
 	return str.moveResults();
@@ -48,7 +48,7 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getPinDescription(c
 IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	const int device = node.getSettings()["device"].asInt(0);
-	const int button = node.getSettings()["button"].asInt(0);
+	const int button = environment.getInputButtonByName(node.getSettings()["button"].asString("primary"));
 	const auto input = environment.getInputDevice(device);
 	if (input) {
 		const bool pressed = input->isButtonPressed(button);

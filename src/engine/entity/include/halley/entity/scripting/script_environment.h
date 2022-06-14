@@ -26,6 +26,7 @@ namespace Halley {
 
         void setInputDevice(int idx, std::shared_ptr<InputDevice> input);
         std::shared_ptr<InputDevice> getInputDevice(int idx) const;
+        virtual int getInputButtonByName(const String& name) const;
 
         template <typename T>
         T* tryGetComponent(EntityId id)

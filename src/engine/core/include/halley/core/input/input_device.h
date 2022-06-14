@@ -37,6 +37,27 @@ namespace Halley {
 		SwitchLeftJoycon,
 		SwitchRightJoycon
 	};
+
+	enum class DefaultInputButtons {
+		Primary,
+		Secondary,
+		Accept,
+		Cancel
+	};
+
+	template <>
+	struct EnumNames<DefaultInputButtons> {
+		constexpr std::array<const char*, 4> operator()() const {
+			return{{
+				"primary",
+				"secondary",
+				"accept",
+				"cancel"
+			}};
+		}
+	};
+
+	using InputButton = int;
 	
 	class InputDevice {
 	public:
@@ -54,14 +75,14 @@ namespace Halley {
 		virtual bool isAnyButtonReleased();
 		virtual bool isAnyButtonDown();
 
-		virtual bool isButtonPressed(int code);
-		virtual bool isButtonPressedRepeat(int code);
-		virtual bool isButtonReleased(int code);
-		virtual bool isButtonDown(int code);
+		virtual bool isButtonPressed(InputButton code);
+		virtual bool isButtonPressedRepeat(InputButton code);
+		virtual bool isButtonReleased(InputButton code);
+		virtual bool isButtonDown(InputButton code);
 
-		virtual void clearButton(int code);
-		virtual void clearButtonPress(int code);
-		virtual void clearButtonRelease(int code);
+		virtual void clearButton(InputButton code);
+		virtual void clearButtonPress(InputButton code);
+		virtual void clearButtonRelease(InputButton code);
 
 		virtual float getAxis(int /*n*/);
 		virtual int getAxisRepeat(int /*n*/);

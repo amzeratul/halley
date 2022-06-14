@@ -45,14 +45,14 @@ namespace Halley {
 		bool isAnyButtonReleased() override;
 		bool isAnyButtonDown() override;
 
-		bool isButtonPressed(int code) override;
-		bool isButtonPressedRepeat(int code) override;
-		bool isButtonReleased(int code) override;
-		bool isButtonDown(int code) override;
+		bool isButtonPressed(InputButton code) override;
+		bool isButtonPressedRepeat(InputButton code) override;
+		bool isButtonReleased(InputButton code) override;
+		bool isButtonDown(InputButton code) override;
 
-		void clearButton(int code) override;
-		void clearButtonPress(int code) override;
-		void clearButtonRelease(int code) override;
+		void clearButton(InputButton code) override;
+		void clearButtonPress(InputButton code) override;
+		void clearButtonRelease(InputButton code) override;
 
 		String getButtonName(int code) override;
 

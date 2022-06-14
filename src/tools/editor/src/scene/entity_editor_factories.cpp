@@ -84,6 +84,21 @@ public:
 	}
 };
 
+class ComponentEditorCustomIntFieldFactory : public ComponentEditorIntFieldFactory {
+public:
+	ComponentEditorCustomIntFieldFactory(String fieldType)
+		: fieldType(std::move(fieldType))
+	{}
+
+	String getFieldType() override
+	{
+		return fieldType;
+	}
+
+private:
+	String fieldType;
+};
+
 class ComponentEditorFloatFieldFactory : public IComponentEditorFieldFactory {
 public:
 	String getFieldType() override
@@ -1359,6 +1374,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorRangeFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorUIAlignFactory>());
 
+	factories.emplace_back(EnumFieldFactory::makeEnumFactory<DefaultInputButtons>("Halley::InputButton"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<UISizerType>("Halley::UISizerType"));
 
 	return factories;

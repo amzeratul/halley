@@ -113,25 +113,25 @@ bool InputButtonBase::isAnyButtonDown()
 	return std::any_of(buttonDown.begin(), buttonDown.end(), [] (const auto& v) { return v != 0; });
 }
 
-bool InputButtonBase::isButtonPressed(int code)
+bool InputButtonBase::isButtonPressed(InputButton code)
 {
 	if (code < 0 || code >= int(buttonPressed.size())) return false;
 	return buttonPressed[code] != 0;
 }
 
-bool InputButtonBase::isButtonPressedRepeat(int code)
+bool InputButtonBase::isButtonPressedRepeat(InputButton code)
 {
 	if (code < 0 || code >= int(buttonPressedRepeat.size())) return false;
 	return buttonPressedRepeat[code] != 0;
 }
 
-bool InputButtonBase::isButtonReleased(int code)
+bool InputButtonBase::isButtonReleased(InputButton code)
 {
 	if (code < 0 || code >= int(buttonReleased.size())) return false;
 	return buttonReleased[code] != 0;
 }
 
-bool InputButtonBase::isButtonDown(int code)
+bool InputButtonBase::isButtonDown(InputButton code)
 {
 	if (code < 0 || code >= int(buttonDown.size())) return false;
 	return buttonDown[code] != 0;
@@ -162,7 +162,7 @@ String InputButtonBase::getButtonName(int code)
 	return "Button" + toString(code);
 }
 
-void InputButtonBase::clearButton(int code)
+void InputButtonBase::clearButton(InputButton code)
 {
 	if (code >= 0 && code < int(buttonPressedRepeat.size())) {
 		buttonPressed[code] = 0;
@@ -172,7 +172,7 @@ void InputButtonBase::clearButton(int code)
 	}
 }
 
-void InputButtonBase::clearButtonPress(int code)
+void InputButtonBase::clearButtonPress(InputButton code)
 {
 	if (code >= 0 && code < int(buttonPressedRepeat.size())) {
 		buttonPressed[code] = 0;
@@ -180,7 +180,7 @@ void InputButtonBase::clearButtonPress(int code)
 	}
 }
 
-void InputButtonBase::clearButtonRelease(int code)
+void InputButtonBase::clearButtonRelease(InputButton code)
 {
 	if (code >= 0 && code < int(buttonPressedRepeat.size())) {
 		buttonReleased[code] = 0;

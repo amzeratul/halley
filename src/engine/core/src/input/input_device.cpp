@@ -47,37 +47,37 @@ bool InputDevice::isAnyButtonDown()
 	return false;
 }
 
-bool InputDevice::isButtonPressed(int code)
+bool InputDevice::isButtonPressed(InputButton code)
 {
 	return false;
 }
 
-bool InputDevice::isButtonPressedRepeat(int code)
+bool InputDevice::isButtonPressedRepeat(InputButton code)
 {
 	return false;
 }
 
-bool InputDevice::isButtonReleased(int code)
+bool InputDevice::isButtonReleased(InputButton code)
 {
 	return false;
 }
 
-bool InputDevice::isButtonDown(int code)
+bool InputDevice::isButtonDown(InputButton code)
 {
 	return false;
 }
 
-void InputDevice::clearButton(int code)
+void InputDevice::clearButton(InputButton code)
 {
 	
 }
 
-void InputDevice::clearButtonPress(int code)
+void InputDevice::clearButtonPress(InputButton code)
 {
 	
 }
 
-void InputDevice::clearButtonRelease(int code)
+void InputDevice::clearButtonRelease(InputButton code)
 {
 	
 }

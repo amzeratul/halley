@@ -22,4 +22,24 @@ namespace Halley {
 		const String fieldName;
 		Vector<String> values;
 	};
+
+	class EnumIntFieldFactory : public IComponentEditorFieldFactory
+	{
+	public:
+		EnumIntFieldFactory(String name, Vector<String> names);
+		
+		std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override;
+		String getFieldType() override;
+
+		template <typename T>
+		static std::unique_ptr<EnumIntFieldFactory> makeEnumFactory(String name)
+		{
+			const auto& vals = EnumNames<T>()();
+			return std::make_unique<EnumIntFieldFactory>(std::move(name), Vector<String>(vals.begin(), vals.end()));
+		}
+
+	private:
+		const String fieldName;
+		Vector<String> names;
+	};
 }

@@ -102,7 +102,7 @@ bool InputVirtual::isAnyButtonDown()
 	return false;
 }
 
-bool InputVirtual::isButtonPressed(int code)
+bool InputVirtual::isButtonPressed(InputButton code)
 {
 	auto& binds = buttons.at(code);
 	for (auto& bind : binds) {
@@ -113,7 +113,7 @@ bool InputVirtual::isButtonPressed(int code)
 	return false;
 }
 
-bool InputVirtual::isButtonPressedRepeat(int code)
+bool InputVirtual::isButtonPressedRepeat(InputButton code)
 {
 	auto& binds = buttons.at(code);
 	for (auto& bind : binds) {
@@ -124,7 +124,7 @@ bool InputVirtual::isButtonPressedRepeat(int code)
 	return false;
 }
 
-bool InputVirtual::isButtonReleased(int code)
+bool InputVirtual::isButtonReleased(InputButton code)
 {
 	auto& binds = buttons.at(code);
 	for (auto& bind : binds) {
@@ -135,7 +135,7 @@ bool InputVirtual::isButtonReleased(int code)
 	return false;
 }
 
-bool InputVirtual::isButtonDown(int code)
+bool InputVirtual::isButtonDown(InputButton code)
 {
 	auto& binds = buttons.at(code);
 	for (auto& bind : binds) {
@@ -146,7 +146,7 @@ bool InputVirtual::isButtonDown(int code)
 	return false;
 }
 
-void InputVirtual::clearButton(int code)
+void InputVirtual::clearButton(InputButton code)
 {
 	auto& binds = buttons.at(code);
 	for (auto& bind : binds) {
@@ -154,7 +154,7 @@ void InputVirtual::clearButton(int code)
 	}
 }
 
-void InputVirtual::clearButtonPress(int code)
+void InputVirtual::clearButtonPress(InputButton code)
 {
 	auto& binds = buttons.at(code);
 	for (auto& bind : binds) {
@@ -162,7 +162,7 @@ void InputVirtual::clearButtonPress(int code)
 	}
 }
 
-void InputVirtual::clearButtonRelease(int code)
+void InputVirtual::clearButtonRelease(InputButton code)
 {
 	auto& binds = buttons.at(code);
 	for (auto& bind : binds) {

@@ -42,3 +42,39 @@ String EnumFieldFactory::getFieldType()
 {
 	return fieldName;
 }
+
+
+EnumIntFieldFactory::EnumIntFieldFactory(String name, Vector<String> names)
+	: fieldName(std::move(name))
+	, names(std::move(names))
+{
+}
+
+std::shared_ptr<IUIElement> EnumIntFieldFactory::createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars)
+{
+	const auto data = pars.data;
+
+	auto& fieldData = data.getFieldData();
+	const auto& defaultValue = pars.getIntDefaultParameter();
+	const auto& value = fieldData.asInt(defaultValue);
+
+	const auto& dropStyle = context.getUIFactory().getStyle("dropdown");
+
+	auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
+	auto dropdown = std::make_shared<UIDropdown>("enum", dropStyle);
+	dropdown->setOptions(names);
+	container->add(dropdown);
+
+	container->bindData("enum", value, [&context, data](int newVal) {
+		auto& node = data.getWriteableFieldData();
+		node = ConfigNode(newVal);
+		context.onEntityUpdated();
+	});
+	
+	return container;
+}
+
+String EnumIntFieldFactory::getFieldType()
+{
+	return fieldName;
+}
