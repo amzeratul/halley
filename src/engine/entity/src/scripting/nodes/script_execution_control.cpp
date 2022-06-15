@@ -4,7 +4,7 @@ using namespace Halley;
 
 std::pair<String, Vector<ColourOverride>> ScriptStart::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
-	return { "Start execution", {} };
+	return { "Start script", {} };
 }
 
 gsl::span<const IScriptNodeType::PinType> ScriptStart::getPinConfiguration(const ScriptGraphNode& node) const
@@ -31,7 +31,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptRestart::getPinConfiguration(con
 
 std::pair<String, Vector<ColourOverride>> ScriptRestart::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
-	return { "Restart script from beginning.", {} };
+	return { "Restart script", {} };
 }
 
 IScriptNodeType::Result ScriptRestart::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
@@ -51,10 +51,30 @@ gsl::span<const IScriptNodeType::PinType> ScriptStop::getPinConfiguration(const 
 
 std::pair<String, Vector<ColourOverride>> ScriptStop::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
-	return { "Terminate script.", {} };
+	return { "Terminate script", {} };
 }
 
 IScriptNodeType::Result ScriptStop::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	return Result(ScriptNodeExecutionState::Terminate);
+}
+
+
+
+gsl::span<const IScriptNodeType::PinType> ScriptSpinwait::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 1>{ PinType{ ET::FlowPin, PD::Input } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptSpinwait::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	return { "Spinwait thread", {} };
+}
+
+IScriptNodeType::Result ScriptSpinwait::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	return Result(ScriptNodeExecutionState::Executing, time);
 }
