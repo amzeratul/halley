@@ -4,8 +4,9 @@
 
 using namespace Halley;
 
-ComponentEditorContext::ComponentEditorContext(IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources)
-	: entityEditorFactory(&entityEditorFactory)
+ComponentEditorContext::ComponentEditorContext(IProjectWindow& projectWindow, IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources)
+	: projectWindow(projectWindow)
+	, entityEditorFactory(&entityEditorFactory)
 	, entityEditor(entityEditor)
 	, factory(&factory)
 	, gameResources(gameResources)
@@ -27,8 +28,7 @@ Resources& ComponentEditorContext::getGameResources() const
 
 IProjectWindow& ComponentEditorContext::getProjectWindow() const
 {
-	Expects(entityEditor != nullptr);
-	return entityEditor->getProjectWindow();
+	return projectWindow;
 }
 
 UIFactory& ComponentEditorContext::getUIFactory() const

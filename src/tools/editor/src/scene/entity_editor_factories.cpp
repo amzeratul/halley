@@ -1072,6 +1072,8 @@ public:
 			return AssetType::Animation;
 		} else if (strippedTypeName == "MaterialDefinition") {
 			return AssetType::MaterialDefinition;
+		} else if (strippedTypeName == "Prefab") {
+			return AssetType::Prefab;
 		} else {
 			Logger::logWarning("Unimplemented resource type on ComponentEditorResourceReferenceFieldFactory: " + strippedTypeName);
 		}

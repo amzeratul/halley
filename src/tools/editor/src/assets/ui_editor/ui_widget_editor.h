@@ -20,7 +20,6 @@ namespace Halley {
         void reloadEntity() override;
         void setTool(const String& tool, const String& componentName, const String& fieldName) override;
         void setDefaultName(const String& name, const String& prevName) override;
-        IProjectWindow& getProjectWindow() const override;
 
     private:
         UIFactory& factory;

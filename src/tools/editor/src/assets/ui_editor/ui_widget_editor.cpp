@@ -23,7 +23,8 @@ void UIWidgetEditor::setSelectedWidget(const String& id, ConfigNode* node, const
 
 void UIWidgetEditor::setGameResources(Resources& resources)
 {
-	entityFieldFactory = std::make_shared<EntityEditorFactory>(factory);
+	Expects(projectWindow);
+	entityFieldFactory = std::make_shared<EntityEditorFactory>(*projectWindow, factory);
 	entityFieldFactory->addStandardFieldFactories();
 	entityFieldFactory->setGameResources(resources);
 	entityFieldFactory->setCallbacks(*this);
@@ -51,11 +52,6 @@ void UIWidgetEditor::setTool(const String& tool, const String& componentName, co
 
 void UIWidgetEditor::setDefaultName(const String& name, const String& prevName)
 {
-}
-
-IProjectWindow& UIWidgetEditor::getProjectWindow() const
-{
-	return *projectWindow;
 }
 
 void UIWidgetEditor::refresh()

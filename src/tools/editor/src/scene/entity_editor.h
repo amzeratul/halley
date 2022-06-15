@@ -51,7 +51,7 @@ namespace Halley {
 
 		void setHighlightedComponents(Vector<String> componentNames);
 
-		IProjectWindow& getProjectWindow() const override;
+		IProjectWindow& getProjectWindow() const;
 
 	protected:
 		bool onKeyPress(KeyboardKeyPress key) override;
@@ -113,7 +113,7 @@ namespace Halley {
 
 	class EntityEditorFactory : public IEntityEditorFactory {
 	public:
-		EntityEditorFactory(UIFactory& factory);
+		EntityEditorFactory(ProjectWindow& projectWindow, UIFactory& factory);
 		
 		void setCallbacks(IEntityEditorCallbacks& callbacks);
 		void setGameResources(Resources& resources);
@@ -128,6 +128,7 @@ namespace Halley {
 		ConfigNode getDefaultNode(const String& fieldType) const override;
 
 	private:
+		ProjectWindow& projectWindow;
 		UIFactory& factory;
 		IEntityEditorCallbacks* callbacks = nullptr;
 		Resources* gameResources = nullptr;

@@ -649,8 +649,9 @@ void EntityEditor::setComponentColour(const String& name, UIWidget& component)
 	capsule->getSprite().setColour(colour);
 }
 
-EntityEditorFactory::EntityEditorFactory(UIFactory& factory)
-	: factory(factory)
+EntityEditorFactory::EntityEditorFactory(ProjectWindow& projectWindow, UIFactory& factory)
+	: projectWindow(projectWindow)
+	, factory(factory)
 {
 	makeContext();
 }
@@ -766,7 +767,7 @@ std::pair<String, Vector<String>> EntityEditorFactory::parseType(const String& t
 void EntityEditorFactory::makeContext()
 {
 	if (!context) {
-		context = std::make_unique<ComponentEditorContext>(*this, callbacks, factory, gameResources);
+		context = std::make_unique<ComponentEditorContext>(projectWindow, *this, callbacks, factory, gameResources);
 	} else {
 		context->set(*this, callbacks, factory, gameResources);
 	}

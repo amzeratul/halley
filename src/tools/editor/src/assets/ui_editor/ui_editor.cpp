@@ -23,8 +23,8 @@ void UIEditor::onMakeUI()
 	widgetList = getWidgetAs<UIWidgetList>("widgetList");
 	widgetList->setUIEditor(*this);
 	widgetEditor = getWidgetAs<UIWidgetEditor>("widgetEditor");
-	widgetEditor->setGameResources(gameResources);
 	widgetEditor->setUIEditor(*this, projectWindow);
+	widgetEditor->setGameResources(gameResources);
 
 	setHandle(UIEventType::ListSelectionChanged, "widgetsList", [=] (const UIEvent& event)
 	{

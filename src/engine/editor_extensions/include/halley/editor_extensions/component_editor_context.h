@@ -29,7 +29,6 @@ namespace Halley {
 		virtual void reloadEntity() = 0;
 		virtual void setTool(const String& tool, const String& componentName, const String& fieldName) = 0;
 		virtual void setDefaultName(const String& name, const String& prevName) = 0;
-		virtual IProjectWindow& getProjectWindow() const = 0;
 	};
 
 	class IEntityEditor : public IEntityEditorCallbacks {
@@ -53,7 +52,7 @@ namespace Halley {
 	
     class ComponentEditorContext {
     public:
-	    ComponentEditorContext(IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources);
+	    ComponentEditorContext(IProjectWindow& projectWindow, IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources);
 
 		void set(IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources);
 
@@ -69,6 +68,7 @@ namespace Halley {
 	    void setDefaultName(const String& name, const String& prevName) const;
 
     private:
+		IProjectWindow& projectWindow;
     	IEntityEditorFactory* entityEditorFactory = nullptr;
         IEntityEditorCallbacks* entityEditor = nullptr;
         UIFactory* factory = nullptr;
