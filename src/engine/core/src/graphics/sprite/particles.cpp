@@ -78,6 +78,11 @@ ConfigNode Particles::toConfigNode() const
 	return result;
 }
 
+void Particles::burstParticles(size_t n)
+{
+	pendingSpawn += static_cast<float>(n);
+}
+
 void Particles::setEnabled(bool e)
 {
 	enabled = e;

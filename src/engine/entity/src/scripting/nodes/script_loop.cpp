@@ -235,7 +235,7 @@ IScriptNodeType::Result ScriptEveryTime::doUpdate(ScriptEnvironment& environment
 
 void ScriptEveryTime::doInitData(ScriptEveryTimeData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const
 {
-	data.time = 0;
+	data.time = node.getSettings()["time"].asFloat(1.0f);
 }
 
 bool ScriptEveryTime::canKeepData() const

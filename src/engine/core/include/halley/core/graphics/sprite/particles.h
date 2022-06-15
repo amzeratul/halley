@@ -27,7 +27,7 @@ namespace Halley {
 
 		ConfigNode toConfigNode() const;
 
-		void spawn(size_t n);
+		void burstParticles(size_t n);
 
 		void setEnabled(bool enabled);
 		bool isEnabled() const;
@@ -94,6 +94,7 @@ namespace Halley {
 		void start();
 		void initializeParticle(size_t index);
 		void updateParticles(float t);
+		void spawn(size_t n);
 
 		Vector2f getSpawnPosition() const;
 	};
