@@ -850,7 +850,7 @@ namespace Halley {
 			return parent != nullptr ? ConstEntityRef(*parent, *world) : std::optional<ConstEntityRef>();
 		}
 
-		[[deprecated]] const Vector<Entity*>& getRawChildren() const
+		const Vector<Entity*>& getRawChildren() const
 		{
 			return entity->getChildren();
 		}
