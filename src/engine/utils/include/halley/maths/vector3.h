@@ -48,7 +48,6 @@ namespace Halley {
 		template <typename V>
 		constexpr explicit Vector3D (const Vector3D<V> &vec) { x = T(vec.x); y = T(vec.y); z = T(vec.z); }
 
-		// From 2D vector
 		constexpr explicit Vector3D (Vector2D<T> vec, T z = 0) { x = vec.x; y = vec.y; this->z = z; }
 
 		template <typename U>
@@ -58,6 +57,14 @@ namespace Halley {
 			x = vec.x * angle.cos();
 			y = vec.y * angle.cos();
 			z = len * angle.sin();
+		}
+
+		template <typename U>
+		constexpr explicit Vector3D (T len, Angle<U> azimuth, Angle<U> elevation)
+		{
+			x = len * azimuth.cos() * elevation.cos();
+			y = len * azimuth.sin() * elevation.cos();
+			z = len * elevation.sin();
 		}
 
 		// Getter

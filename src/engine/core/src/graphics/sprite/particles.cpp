@@ -241,9 +241,8 @@ void Particles::initializeParticle(size_t index)
 	particle.pos = getSpawnPosition();
 	particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f();
 	particle.scale = startScale;
-
-	const Vector2f horizVel = Vector2f(rng->getFloat(speed - speedScatter, speed + speedScatter), startAzimuth);
-	particle.vel = Vector3f(horizVel, startElevation);
+	
+	particle.vel = Vector3f(rng->getFloat(speed - speedScatter, speed + speedScatter), startAzimuth, startElevation);
 
 	auto& sprite = sprites[index];
 	if (isAnimated()) {
