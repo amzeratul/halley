@@ -339,6 +339,11 @@ World& ScriptEnvironment::getWorld()
 	return world;
 }
 
+Resources& ScriptEnvironment::getResources()
+{
+	return resources;
+}
+
 void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)
 {
 	if (const auto* audioSource = tryGetComponent<AudioSourceComponent>(entityId)) {

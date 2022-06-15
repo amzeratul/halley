@@ -42,6 +42,7 @@ namespace Halley {
     	int getCurrentFrameNumber() const;
 
         World& getWorld();
+        Resources& getResources();
 
     protected:
 		const HalleyAPI& api;

@@ -37,7 +37,7 @@ namespace Halley {
 
 		World& getWorld();
 		
-		EntityRef createEntity(const String& prefabName);
+		EntityRef createEntity(const String& prefabName, EntityRef parent = EntityRef(), EntityScene* scene = nullptr);
 		EntityRef createEntity(const EntityData& data, EntityRef parent = EntityRef(), EntityScene* scene = nullptr);
 		EntityScene createScene(const std::shared_ptr<const Prefab>& scene, bool allowReload, uint8_t worldPartition = 0);
 

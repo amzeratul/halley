@@ -27,6 +27,8 @@ namespace Halley {
 
 		ConfigNode toConfigNode() const;
 
+		void spawn(size_t n);
+
 		void setEnabled(bool enabled);
 		bool isEnabled() const;
 		void setSpawnRateMultiplier(float value);
@@ -90,7 +92,6 @@ namespace Halley {
 		Vector2f position;
 
 		void start();
-		void spawn(size_t n);
 		void initializeParticle(size_t index);
 		void updateParticles(float t);
 

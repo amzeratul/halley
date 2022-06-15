@@ -314,14 +314,9 @@ namespace Halley {
 		template <typename T>
 		EntityRef& addComponent(T&& component)
 		{
+			validateComponentType<T>();
 			validate();
 			
-			static_assert(!std::is_pointer<T>::value, "Cannot pass pointer to component");
-			static_assert(!std::is_same<T, Component>::value, "Cannot add base class Component to entity, make sure type isn't being erased");
-			static_assert(std::is_base_of<Component, T>::value, "Components must extend the Component class");
-			static_assert(!std::is_polymorphic<T>::value, "Components cannot be polymorphic (i.e. they can't have virtual methods)");
-			static_assert(std::is_default_constructible<T>::value, "Components must have a default constructor");
-
 			auto c = new T(std::move(component));
 			entity->addComponent(*world, c);
 
@@ -335,6 +330,7 @@ namespace Halley {
 		template <typename T>
 		EntityRef& removeComponent()
 		{
+			validateComponentType<T>();
 			validate();
 			entity->removeComponent<T>(*world);
 			return *this;
@@ -357,6 +353,7 @@ namespace Halley {
 		template <typename T>
 		T& getComponent()
 		{
+			validateComponentType<T>();
 			validate();
 			return entity->getComponent<T>();
 		}
@@ -364,6 +361,7 @@ namespace Halley {
 		template <typename T>
 		const T& getComponent() const
 		{
+			validateComponentType<T>();
 			validate();
 			return entity->getComponent<T>();
 		}
@@ -371,6 +369,7 @@ namespace Halley {
 		template <typename T>
 		T* tryGetComponent(bool evenIfDisabled = false)
 		{
+			validateComponentType<T>();
 			validate();
 			return entity->tryGetComponent<T>(evenIfDisabled);
 		}
@@ -378,6 +377,7 @@ namespace Halley {
 		template <typename T>
 		const T* tryGetComponent(bool evenIfDisabled = false) const
 		{
+			validateComponentType<T>();
 			validate();
 			return entity->tryGetComponent<T>(evenIfDisabled);
 		}
@@ -385,6 +385,7 @@ namespace Halley {
 		template <typename T>
 		T* tryGetComponentInAncestors()
 		{
+			validateComponentType<T>();
 			auto* c = tryGetComponent<T>();
 			if (c) {
 				return c;
@@ -398,6 +399,7 @@ namespace Halley {
 		template <typename T>
 		const T* tryGetComponentInAncestors() const
 		{
+			validateComponentType<T>();
 			auto* c = tryGetComponent<T>();
 			if (c) {
 				return c;
@@ -411,6 +413,7 @@ namespace Halley {
 		template <typename T>
 		T* tryGetComponentInTree()
 		{
+			validateComponentType<T>();
 			auto* comp = tryGetComponent<T>();
 			if (comp) {
 				return comp;
@@ -427,6 +430,7 @@ namespace Halley {
 		template <typename T>
 		const T* tryGetComponentInTree() const
 		{
+			validateComponentType<T>();
 			auto* comp = tryGetComponent<T>();
 			if (comp) {
 				return comp;
@@ -449,6 +453,7 @@ namespace Halley {
 		template <typename T>
 		bool hasComponent() const
 		{
+			validateComponentType<T>();
 			validate();
 			return entity->hasComponent<T>(*world);
 		}
@@ -456,6 +461,7 @@ namespace Halley {
 		template <typename T>
 		bool hasComponentInTree() const
 		{
+			validateComponentType<T>();
 			if (hasComponent<T>()) {
 				return true;
 			}
@@ -470,6 +476,7 @@ namespace Halley {
 		template <typename T>
 		bool hasComponentInAncestors() const
 		{
+			validateComponentType<T>();
 			if (hasComponent<T>()) {
 				return true;
 			}
@@ -756,6 +763,16 @@ namespace Halley {
 #ifdef _DEBUG
 		EntityId entityId;
 #endif
+
+		template <typename T>
+		constexpr static void validateComponentType()
+		{
+			static_assert(!std::is_pointer<T>::value, "Cannot pass pointer to component");
+			static_assert(!std::is_same<T, Component>::value, "Cannot add base class Component to entity, make sure type isn't being erased");
+			static_assert(std::is_base_of<Component, T>::value, "Components must extend the Component class");
+			static_assert(!std::is_polymorphic<T>::value, "Components cannot be polymorphic (i.e. they can't have virtual methods)");
+			static_assert(std::is_default_constructible<T>::value, "Components must have a default constructor");
+		}
 	};
 	
 	class ConstEntityRef
