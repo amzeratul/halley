@@ -35,7 +35,11 @@ std::shared_ptr<Material> MaterialRecycler::cloneMaterial(const Material& materi
 
 Sprite MaterialRecycler::clone(const Sprite& sprite)
 {
-	return sprite.clone().setMaterial(cloneMaterial(sprite.getMaterial()));
+	auto s2 = sprite.clone();
+	if (sprite.hasMaterial()) {
+		s2.setMaterial(cloneMaterial(sprite.getMaterial()));
+	}
+	return s2;
 }
 
 TextRenderer MaterialRecycler::clone(const TextRenderer& text)
