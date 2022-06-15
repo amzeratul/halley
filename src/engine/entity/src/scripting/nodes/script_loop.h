@@ -61,7 +61,6 @@ namespace Halley {
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptEveryFrameData& curData) const override;
 		void doInitData(ScriptEveryFrameData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const override;
-		bool doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId outPin, ScriptEveryFrameData& curData) const override;
 		bool canKeepData() const override;
 	};
 
@@ -87,7 +86,6 @@ namespace Halley {
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptEveryTimeData& curData) const override;
 		void doInitData(ScriptEveryTimeData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const override;
-		bool doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId outPin, ScriptEveryTimeData& curData) const override;
 		bool canKeepData() const override;
 	};
 }

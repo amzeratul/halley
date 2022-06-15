@@ -174,11 +174,6 @@ void ScriptEveryFrame::doInitData(ScriptEveryFrameData& data, const ScriptGraphN
 	data.lastFrameN = -1;
 }
 
-bool ScriptEveryFrame::doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId outPin, ScriptEveryFrameData& curData) const
-{
-	return true;
-}
-
 bool ScriptEveryFrame::canKeepData() const
 {
 	return true;
@@ -241,11 +236,6 @@ IScriptNodeType::Result ScriptEveryTime::doUpdate(ScriptEnvironment& environment
 void ScriptEveryTime::doInitData(ScriptEveryTimeData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const
 {
 	data.time = 0;
-}
-
-bool ScriptEveryTime::doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId outPin, ScriptEveryTimeData& curData) const
-{
-	return true;
 }
 
 bool ScriptEveryTime::canKeepData() const
