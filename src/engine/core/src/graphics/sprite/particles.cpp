@@ -26,8 +26,8 @@ void Particles::load(const ConfigNode& node, Resources& resources)
 	speedScatter = node["speedScatter"].asFloat(0.0f);
 	speedDamp = node["speedDamp"].asFloat(0.0f);
 	acceleration = node["acceleration"].asVector3f(Vector3f());
-	angle = node["angle"].asFloat(0.0f);
-	angleScatter = node["angleScatter"].asFloat(0.0f);
+	angle = node["angle"].asVector2f(Vector2f());
+	angleScatter = node["angleScatter"].asVector2f(Vector2f());
 	startScale = node["startScale"].asFloat(1.0f);
 	endScale = node["endScale"].asFloat(1.0f);
 	fadeInTime = node["fadeInTime"].asFloat(0.0f);
@@ -119,6 +119,11 @@ void Particles::setSpawnArea(Vector2f area)
 }
 
 void Particles::setAngle(float newAngle)
+{
+	angle = Vector2f(newAngle, 0);
+}
+
+void Particles::setAngle(Vector2f newAngle)
 {
 	angle = newAngle;
 }
@@ -226,16 +231,19 @@ void Particles::spawn(size_t n)
 
 void Particles::initializeParticle(size_t index)
 {
-	const auto startDirection = Angle1f::fromDegrees(rng->getFloat(angle - angleScatter, angle + angleScatter));
+	const auto startAzimuth = Angle1f::fromDegrees(rng->getFloat(angle.x - angleScatter.x, angle.x + angleScatter.x));
+	const auto startElevation = Angle1f::fromDegrees(rng->getFloat(angle.y - angleScatter.y, angle.y + angleScatter.y));
 	
 	auto& particle = particles[index];
 	particle.alive = true;
 	particle.time = 0;
 	particle.ttl = rng->getFloat(ttl - ttlScatter, ttl + ttlScatter);
 	particle.pos = getSpawnPosition();
-	particle.angle = rotateTowardsMovement ? startDirection : Angle1f();
+	particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f();
 	particle.scale = startScale;
-	particle.vel = Vector3f(Vector2f(rng->getFloat(speed - speedScatter, speed + speedScatter), startDirection));
+
+	const Vector2f horizVel = Vector2f(rng->getFloat(speed - speedScatter, speed + speedScatter), startAzimuth);
+	particle.vel = Vector3f(horizVel, startElevation);
 
 	auto& sprite = sprites[index];
 	if (isAnimated()) {

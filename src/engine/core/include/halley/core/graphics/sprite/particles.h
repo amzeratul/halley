@@ -39,6 +39,7 @@ namespace Halley {
 		void setSpawnArea(Vector2f area);
 
 		void setAngle(float newAngle);
+		void setAngle(Vector2f newAngle);
 		
 		void update(Time t);
 
@@ -75,8 +76,8 @@ namespace Halley {
 		float speedScatter = 0;
 		float speedDamp = 0;
 		Vector3f acceleration;
-		float angle = 0;
-		float angleScatter = 0;
+		Vector2f angle;
+		Vector2f angleScatter;
 		float startScale = 1;
 		float endScale = 1;
 		float fadeInTime = 0;

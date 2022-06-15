@@ -44,10 +44,21 @@ namespace Halley {
 		// Constructors
 		constexpr Vector3D () { x = y = z = 0; }
 		constexpr Vector3D (T x, T y, T z) { this->x = x; this->y = y; this->z = z; }
-		constexpr explicit Vector3D (Vector2D<T> vec, T z = 0) { x = vec.x; y = vec.y; this->z = z; }
 		constexpr Vector3D (const Vector3D<T> &vec) { x = vec.x; y = vec.y; z = vec.z; }
 		template <typename V>
 		constexpr explicit Vector3D (const Vector3D<V> &vec) { x = T(vec.x); y = T(vec.y); z = T(vec.z); }
+
+		// From 2D vector
+		constexpr explicit Vector3D (Vector2D<T> vec, T z = 0) { x = vec.x; y = vec.y; this->z = z; }
+
+		template <typename U>
+		constexpr explicit Vector3D (Vector2D<T> vec, Angle<U> angle)
+		{
+			const auto len = vec.length();
+			x = vec.x * angle.cos();
+			y = vec.y * angle.cos();
+			z = len * angle.sin();
+		}
 
 		// Getter
 		constexpr inline T& operator[](size_t n)

@@ -1016,9 +1016,9 @@ public:
 		container->add(context.makeLabel("Acceleration"));
 		container->add(context.makeField("Halley::Vector3f", pars.withSubKey("acceleration", ""), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Angle"));
-		container->add(context.makeField("float", pars.withSubKey("angle", "0"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("angle", ""), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Angle Scatter"));
-		container->add(context.makeField("float", pars.withSubKey("angleScatter", "10"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("angleScatter", "10"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Start Scale"));
 		container->add(context.makeField("float", pars.withSubKey("startScale", "1"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("End Scale"));
