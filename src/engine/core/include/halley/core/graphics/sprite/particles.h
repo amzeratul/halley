@@ -11,8 +11,8 @@ namespace Halley {
 	
 	class Particles {
 		struct Particle {
-			Vector2f pos;
-			Vector2f vel;
+			Vector3f pos;
+			Vector3f vel;
 			Angle1f angle;
 			float scale = 1;
 			float time = 0;
@@ -35,6 +35,7 @@ namespace Halley {
 		float getSpawnRateMultiplier() const;
 
 		void setPosition(Vector2f pos);
+		void setPosition(Vector3f pos);
 		void setSpawnArea(Vector2f area);
 
 		void setAngle(float newAngle);
@@ -73,7 +74,7 @@ namespace Halley {
 		float speed = 100;
 		float speedScatter = 0;
 		float speedDamp = 0;
-		Vector2f acceleration;
+		Vector3f acceleration;
 		float angle = 0;
 		float angleScatter = 0;
 		float startScale = 1;
@@ -89,14 +90,14 @@ namespace Halley {
 
 		Vector<Sprite> baseSprites;
 		std::shared_ptr<const Animation> baseAnimation;
-		Vector2f position;
+		Vector3f position;
 
 		void start();
 		void initializeParticle(size_t index);
 		void updateParticles(float t);
 		void spawn(size_t n);
 
-		Vector2f getSpawnPosition() const;
+		Vector3f getSpawnPosition() const;
 	};
 
 	class Resources;

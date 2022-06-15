@@ -1014,7 +1014,7 @@ public:
 		container->add(context.makeLabel("Speed Damp"));
 		container->add(context.makeField("float", pars.withSubKey("speedDamp", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Acceleration"));
-		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("acceleration", ""), ComponentEditorLabelCreation::Never));
+		container->add(context.makeField("Halley::Vector3f", pars.withSubKey("acceleration", ""), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Angle"));
 		container->add(context.makeField("float", pars.withSubKey("angle", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Angle Scatter"));

@@ -25,7 +25,7 @@ void Particles::load(const ConfigNode& node, Resources& resources)
 	speed = node["speed"].asFloat(100.0f);
 	speedScatter = node["speedScatter"].asFloat(0.0f);
 	speedDamp = node["speedDamp"].asFloat(0.0f);
-	acceleration = node["acceleration"].asVector2f(Vector2f());
+	acceleration = node["acceleration"].asVector3f(Vector3f());
 	angle = node["angle"].asFloat(0.0f);
 	angleScatter = node["angleScatter"].asFloat(0.0f);
 	startScale = node["startScale"].asFloat(1.0f);
@@ -104,6 +104,11 @@ float Particles::getSpawnRateMultiplier() const
 }
 
 void Particles::setPosition(Vector2f pos)
+{
+	position = Vector3f(pos);
+}
+
+void Particles::setPosition(Vector3f pos)
 {
 	position = pos;
 }
@@ -230,7 +235,7 @@ void Particles::initializeParticle(size_t index)
 	particle.pos = getSpawnPosition();
 	particle.angle = rotateTowardsMovement ? startDirection : Angle1f();
 	particle.scale = startScale;
-	particle.vel = Vector2f(rng->getFloat(speed - speedScatter, speed + speedScatter), startDirection);
+	particle.vel = Vector3f(Vector2f(rng->getFloat(speed - speedScatter, speed + speedScatter), startDirection));
 
 	auto& sprite = sprites[index];
 	if (isAnimated()) {
@@ -259,21 +264,21 @@ void Particles::updateParticles(float time)
 			particle.vel += acceleration * time;
 			
 			if (stopTime > 0.00001f && particle.time + stopTime >= particle.ttl) {
-				particle.vel = damp(particle.vel, Vector2f(), 10.0f, time);
+				particle.vel = damp(particle.vel, Vector3f(), 10.0f, time);
 			}
 			
 			if (speedDamp > 0.0001f) {
-				particle.vel = damp(particle.vel, Vector2f(), speedDamp, time);
+				particle.vel = damp(particle.vel, Vector3f(), speedDamp, time);
 			}
 
 			if (directionScatter > 0.00001f) {
-				particle.vel = particle.vel.rotate(Angle1f::fromDegrees(rng->getFloat(-directionScatter * time, directionScatter * time)));
+				particle.vel = Vector3f(particle.vel.xy().rotate(Angle1f::fromDegrees(rng->getFloat(-directionScatter * time, directionScatter * time))), particle.vel.z);
 			}
 			
 			particle.pos += particle.vel * time;
 
 			if (rotateTowardsMovement && particle.vel.squaredLength() > 0.001f) {
-				particle.angle = particle.vel.angle();
+				particle.angle = particle.vel.xy().angle();
 			}
 
 			particle.scale = lerp(startScale, endScale, particle.time / particle.ttl);
@@ -284,16 +289,16 @@ void Particles::updateParticles(float time)
 			}
 
 			sprites[i]
-				.setPosition(particle.pos)
+				.setPosition(particle.pos.xy() + Vector2f(0, -particle.pos.z))
 				.setRotation(particle.angle)
 				.setScale(particle.scale);
 		}
 	}
 }
 
-Vector2f Particles::getSpawnPosition() const
+Vector3f Particles::getSpawnPosition() const
 {
-	return position + Vector2f(rng->getFloat(-spawnArea.x * 0.5f, spawnArea.x * 0.5f), rng->getFloat(-spawnArea.y * 0.5f, spawnArea.y * 0.5f));
+	return position + Vector3f(rng->getFloat(-spawnArea.x * 0.5f, spawnArea.x * 0.5f), rng->getFloat(-spawnArea.y * 0.5f, spawnArea.y * 0.5f), 0);
 }
 
 ConfigNode ConfigNodeSerializer<Particles>::serialize(const Particles& particles, const EntitySerializationContext& context)
