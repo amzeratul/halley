@@ -334,6 +334,11 @@ int ScriptEnvironment::getCurrentFrameNumber() const
 	return currentState->getCurrentFrameNumber();
 }
 
+World& ScriptEnvironment::getWorld()
+{
+	return world;
+}
+
 void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)
 {
 	if (const auto* audioSource = tryGetComponent<AudioSourceComponent>(entityId)) {
