@@ -40,4 +40,54 @@ namespace Halley {
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
 		bool doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId outPin) const override;
 	};
+
+
+	class ScriptEveryFrameData : public ScriptStateData<ScriptEveryFrameData> {
+	public:
+		int lastFrameN = -1;
+
+		ScriptEveryFrameData() = default;
+		ScriptEveryFrameData(const ConfigNode& node);
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+	};
+	
+	class ScriptEveryFrame final : public ScriptNodeTypeBase<ScriptEveryFrameData> {
+	public:
+		String getId() const override { return "everyFrame"; }
+		String getName() const override { return "Every Frame"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/every_frame.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptEveryFrameData& curData) const override;
+		void doInitData(ScriptEveryFrameData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const override;
+		bool doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId outPin, ScriptEveryFrameData& curData) const override;
+		bool canKeepData() const override;
+	};
+
+
+	class ScriptEveryTimeData : public ScriptStateData<ScriptEveryTimeData> {
+	public:
+		float time = 0;
+
+		ScriptEveryTimeData() = default;
+		ScriptEveryTimeData(const ConfigNode& node);
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+	};
+	
+	class ScriptEveryTime final : public ScriptNodeTypeBase<ScriptEveryTimeData> {
+	public:
+		String getId() const override { return "everyTime"; }
+		String getName() const override { return "Every Time"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/every_time.png"; }
+		String getLabel(const ScriptGraphNode& node) const override;
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
+		Vector<SettingType> getSettingTypes() const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptEveryTimeData& curData) const override;
+		void doInitData(ScriptEveryTimeData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const override;
+		bool doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId outPin, ScriptEveryTimeData& curData) const override;
+		bool canKeepData() const override;
+	};
 }

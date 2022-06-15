@@ -160,6 +160,9 @@ namespace Halley {
 		bool operator==(const ScriptState& other) const;
 		bool operator!=(const ScriptState& other) const;
 
+    	int getCurrentFrameNumber() const;
+		void incrementFrameNumber();
+
 	private:
 		std::shared_ptr<const ScriptGraph> scriptGraph;
 		const ScriptGraph* scriptGraphRef = nullptr;
@@ -170,6 +173,7 @@ namespace Halley {
     	std::map<String, ConfigNode> variables;
 
     	uint64_t graphHash = 0;
+		int frameNumber = 0;
     	bool started = false;
 		bool persistAfterDone = false;
 

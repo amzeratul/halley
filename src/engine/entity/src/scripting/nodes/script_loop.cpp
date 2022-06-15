@@ -126,3 +126,129 @@ std::pair<String, Vector<ColourOverride>> ScriptWhileLoop::getPinDescription(con
 		return ScriptNodeTypeBase<void>::getPinDescription(node, element, elementIdx);
 	}
 }
+
+
+
+
+ScriptEveryFrameData::ScriptEveryFrameData(const ConfigNode& node)
+{
+	lastFrameN = node["lastFrameN"].asInt();
+}
+
+ConfigNode ScriptEveryFrameData::toConfigNode(const EntitySerializationContext& context)
+{
+	ConfigNode::MapType result;
+	result["lastFrameN"] = lastFrameN;
+	return result;
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptEveryFrame::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptEveryFrame::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Pulse every ");
+	str.append("frame", parameterColour);
+	return str.moveResults();
+}
+
+IScriptNodeType::Result ScriptEveryFrame::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptEveryFrameData& curData) const
+{
+	const auto curFrame = environment.getCurrentFrameNumber();
+	if (curFrame != curData.lastFrameN) {
+		curData.lastFrameN = curFrame;
+		return Result(ScriptNodeExecutionState::Fork, 0, 1);
+	} else {
+		return Result(ScriptNodeExecutionState::Executing, time);
+	}
+}
+
+void ScriptEveryFrame::doInitData(ScriptEveryFrameData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const
+{
+	data.lastFrameN = -1;
+}
+
+bool ScriptEveryFrame::doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId outPin, ScriptEveryFrameData& curData) const
+{
+	return true;
+}
+
+bool ScriptEveryFrame::canKeepData() const
+{
+	return true;
+}
+
+
+
+ScriptEveryTimeData::ScriptEveryTimeData(const ConfigNode& node)
+{
+	time = node["time"].asFloat(0);
+}
+
+ConfigNode ScriptEveryTimeData::toConfigNode(const EntitySerializationContext& context)
+{
+	ConfigNode::MapType result;
+	result["time"] = time;
+	return result;
+}
+
+String ScriptEveryTime::getLabel(const ScriptGraphNode& node) const
+{
+	return toString(node.getSettings()["time"].asFloat(1.0f)) + " s";
+}
+
+Vector<IScriptNodeType::SettingType> ScriptEveryTime::getSettingTypes() const
+{
+	return { SettingType{ "time", "float", Vector<String>{"1"} } };
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptEveryTime::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptEveryTime::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Pulse every ");
+	str.append(toString(node.getSettings()["time"].asFloat(1.0f)), parameterColour);
+	str.append(" s");
+	return str.moveResults();
+}
+
+IScriptNodeType::Result ScriptEveryTime::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptEveryTimeData& curData) const
+{
+	const float period = node.getSettings()["time"].asFloat(1.0f);
+	const float timeToNextPulse = period - curData.time;
+	if (timeToNextPulse < static_cast<float>(time)) {
+		curData.time = 0;
+		return Result(ScriptNodeExecutionState::Fork, static_cast<Time>(timeToNextPulse), 1);
+	} else {
+		curData.time += static_cast<float>(time);
+		return Result(ScriptNodeExecutionState::Executing, time);
+	}
+}
+
+void ScriptEveryTime::doInitData(ScriptEveryTimeData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const
+{
+	data.time = 0;
+}
+
+bool ScriptEveryTime::doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId outPin, ScriptEveryTimeData& curData) const
+{
+	return true;
+}
+
+bool ScriptEveryTime::canKeepData() const
+{
+	return true;
+}

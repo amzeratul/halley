@@ -218,6 +218,7 @@ ScriptState::ScriptState(const ConfigNode& node, const EntitySerializationContex
 	variables = ConfigNodeSerializer<decltype(variables)>().deserialize(context, node["variables"]);
 	persistAfterDone = node["persistAfterDone"].asBool(false);
 	tags = node["tags"].asVector<String>({});
+	frameNumber = node["frameNumber"].asInt(0);
 
 	const auto scriptGraphName = node["script"].asString();
 	if (!scriptGraphName.isEmpty()) {
@@ -287,6 +288,7 @@ ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) 
 	node["script"] = scriptGraph ? scriptGraph->getAssetId() : "";
 	node["persistAfterDone"] = persistAfterDone;
 	node["tags"] = tags;
+	node["frameNumber"] = frameNumber;
 	return node;
 }
 
@@ -401,6 +403,16 @@ bool ScriptState::operator==(const ScriptState& other) const
 bool ScriptState::operator!=(const ScriptState& other) const
 {
 	return true;
+}
+
+int ScriptState::getCurrentFrameNumber() const
+{
+	return frameNumber;
+}
+
+void ScriptState::incrementFrameNumber()
+{
+	++frameNumber;
 }
 
 ScriptState::NodeState& ScriptState::getNodeState(ScriptNodeId nodeId)

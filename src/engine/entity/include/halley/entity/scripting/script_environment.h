@@ -39,6 +39,8 @@ namespace Halley {
         bool hasNetworkAuthorityOver(EntityId id);
         bool hasHostNetworkAuthority() const;
 
+    	int getCurrentFrameNumber() const;
+
     protected:
 		const HalleyAPI& api;
     	World& world;

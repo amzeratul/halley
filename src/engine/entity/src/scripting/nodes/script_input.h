@@ -4,7 +4,7 @@
 namespace Halley {
 	class ScriptInputButton final : public ScriptNodeTypeBase<void> {
 	public:
-		String getId() const override { return "scriptInputButton"; }
+		String getId() const override { return "inputButton"; }
 		String getName() const override { return "Input Button"; }
 		String getLabel(const ScriptGraphNode& node) const override;
 		Vector<SettingType> getSettingTypes() const override;

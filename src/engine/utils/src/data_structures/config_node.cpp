@@ -725,6 +725,8 @@ String ConfigNode::asString() const
 		return "(" + toString(v.x) + ", " + toString(v.y) + ")";
 	} else if (type == ConfigNodeType::Map) {
 		return "{...}";
+	} else if (type == ConfigNodeType::Undefined) {
+		return "null";
 	} else {
 		throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to String.", HalleyExceptions::Resources);
 	}

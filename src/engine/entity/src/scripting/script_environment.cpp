@@ -65,6 +65,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	}
 
 	graphState.updateDisplayOffset(time);
+	graphState.incrementFrameNumber();
 
 	currentGraph = nullptr;
 	currentState = nullptr;
@@ -326,6 +327,11 @@ bool ScriptEnvironment::hasNetworkAuthorityOver(EntityId id)
 bool ScriptEnvironment::hasHostNetworkAuthority() const
 {
 	return isHost;
+}
+
+int ScriptEnvironment::getCurrentFrameNumber() const
+{
+	return currentState->getCurrentFrameNumber();
 }
 
 void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)
