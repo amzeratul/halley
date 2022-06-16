@@ -297,7 +297,7 @@ void Particles::initializeParticle(size_t index)
 	particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f();
 	particle.scale = startScale;
 	
-	particle.vel = Vector3f(rng->getFloat(speed - speedScatter, speed + speedScatter), startAzimuth, startElevation) * velScale;
+	particle.vel = Vector3f(rng->getFloat(speed - speedScatter, speed + speedScatter), startAzimuth, startElevation);
 
 	auto& sprite = sprites[index];
 	if (isAnimated()) {
@@ -323,7 +323,7 @@ void Particles::updateParticles(float time)
 		if (particle.time >= particle.ttl) {
 			particle.alive = false;
 		} else {
-			particle.pos += particle.vel * time + 0.5f * acceleration * time * time;
+			particle.pos += (particle.vel * time + acceleration * (0.5f * time * time)) * velScale;
 			particle.vel += acceleration * time;
 
 			if (minHeight && particle.pos.z < minHeight) {
