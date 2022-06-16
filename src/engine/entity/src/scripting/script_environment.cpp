@@ -27,6 +27,8 @@ ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resourc
 
 void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curEntity)
 {
+	deltaTime = time;
+
 	currentGraph = graphState.getScriptGraphPtr();
 	if (!currentGraph) {
 		throw Exception("Unable to update script state, script not set.", HalleyExceptions::Entity);
@@ -332,6 +334,11 @@ bool ScriptEnvironment::hasHostNetworkAuthority() const
 int ScriptEnvironment::getCurrentFrameNumber() const
 {
 	return currentState->getCurrentFrameNumber();
+}
+
+Time ScriptEnvironment::getDeltaTime() const
+{
+	return deltaTime;
 }
 
 World& ScriptEnvironment::getWorld()

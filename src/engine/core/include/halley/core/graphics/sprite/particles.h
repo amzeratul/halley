@@ -27,10 +27,13 @@ namespace Halley {
 
 		ConfigNode toConfigNode() const;
 
-		void burstParticles(size_t n);
+		void burstParticles(float n);
 
 		void setEnabled(bool enabled);
 		bool isEnabled() const;
+
+		void setSpawnRate(float value);
+		float getSpawnRate() const;
 		void setSpawnRateMultiplier(float value);
 		float getSpawnRateMultiplier() const;
 
@@ -108,9 +111,9 @@ namespace Halley {
 		Vector3f position;
 
 		void start();
-		void initializeParticle(size_t index);
+		void initializeParticle(size_t index, float time);
 		void updateParticles(float t);
-		void spawn(size_t n);
+		void spawn(size_t n, float time);
 
 		Vector3f getSpawnPosition() const;
 	};

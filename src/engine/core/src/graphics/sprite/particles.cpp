@@ -88,9 +88,9 @@ ConfigNode Particles::toConfigNode() const
 	return result;
 }
 
-void Particles::burstParticles(size_t n)
+void Particles::burstParticles(float n)
 {
-	pendingSpawn += static_cast<float>(n);
+	pendingSpawn += n;
 }
 
 void Particles::setEnabled(bool e)
@@ -101,6 +101,16 @@ void Particles::setEnabled(bool e)
 bool Particles::isEnabled() const
 {
 	return enabled;
+}
+
+void Particles::setSpawnRate(float value)
+{
+	spawnRate = value;
+}
+
+float Particles::getSpawnRate() const
+{
+	return spawnRate;
 }
 
 void Particles::setSpawnRateMultiplier(float value)
@@ -186,7 +196,7 @@ float Particles::getSpawnHeight() const
 void Particles::start()
 {
 	if (burst) {
-		spawn(burst.value());
+		spawn(burst.value(), 0);
 	}
 }
 
@@ -202,7 +212,7 @@ void Particles::update(Time t)
 	pendingSpawn = pendingSpawn - static_cast<float>(toSpawn);
 
 	// Spawn new particles
-	spawn(static_cast<size_t>(toSpawn));
+	spawn(static_cast<size_t>(toSpawn), static_cast<float>(t));
 
 	// Update particles
 	updateParticles(static_cast<float>(t));
@@ -262,7 +272,7 @@ gsl::span<const Sprite> Particles::getSprites() const
 	return gsl::span<const Sprite>(sprites).subspan(0, nParticlesVisible);
 }
 
-void Particles::spawn(size_t n)
+void Particles::spawn(size_t n, float time)
 {
 	if (maxParticles) {
 		n = std::min(n, maxParticles.value() - nParticlesAlive);
@@ -278,20 +288,21 @@ void Particles::spawn(size_t n)
 			animationPlayers.resize(size, AnimationPlayerLite(baseAnimation));
 		}
 	}
-	
-	for (size_t i = start; i < nParticlesAlive; ++i) {
-		initializeParticle(i);
+
+	const float timeSlice = time / n;
+	for (size_t i = 0; i < n; ++i) {
+		initializeParticle(start + i, i * timeSlice);
 	}
 }
 
-void Particles::initializeParticle(size_t index)
+void Particles::initializeParticle(size_t index, float time)
 {
 	const auto startAzimuth = Angle1f::fromDegrees(rng->getFloat(angle.x - angleScatter.x, angle.x + angleScatter.x));
 	const auto startElevation = Angle1f::fromDegrees(rng->getFloat(angle.y - angleScatter.y, angle.y + angleScatter.y));
 	
 	auto& particle = particles[index];
 	particle.alive = true;
-	particle.time = 0;
+	particle.time = time;
 	particle.ttl = rng->getFloat(ttl - ttlScatter, ttl + ttlScatter);
 	particle.pos = getSpawnPosition();
 	particle.angle = rotateTowardsMovement ? startAzimuth : Angle1f();

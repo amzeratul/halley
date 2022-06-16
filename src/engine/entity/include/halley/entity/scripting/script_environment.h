@@ -40,6 +40,7 @@ namespace Halley {
         bool hasHostNetworkAuthority() const;
 
     	int getCurrentFrameNumber() const;
+        Time getDeltaTime() const;
 
         World& getWorld();
         Resources& getResources();
@@ -55,6 +56,7 @@ namespace Halley {
     	const ScriptGraph* currentGraph = nullptr;
     	ScriptState* currentState = nullptr;
         EntityId currentEntity;
+        Time deltaTime = 0;
 
     private:
         void updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);
