@@ -367,7 +367,8 @@ void Particles::updateParticles(float time)
 			sprites[i]
 				.setPosition(particle.pos.xy() + Vector2f(0, -particle.pos.z))
 				.setRotation(particle.angle)
-				.setScale(particle.scale);
+				.setScale(particle.scale)
+				.setCustom1(Vector4f(particle.pos.xy(), 0, 0));
 		}
 	}
 }
