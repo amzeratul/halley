@@ -40,6 +40,17 @@ namespace Halley {
 
 		void setAngle(float newAngle);
 		void setAngle(Vector2f newAngle);
+		Vector2f getAngle() const;
+
+		void setSpeed(float speed);
+		float getSpeed() const;
+		void setAcceleration(Vector3f acceleration);
+		Vector3f getAcceleration() const;
+
+		void setMinHeight(std::optional<float> minZ);
+		std::optional<float> getMinHeight() const;
+		void setSpawnHeight(float height);
+		float getSpawnHeight() const;
 		
 		void update(Time t);
 
@@ -70,12 +81,14 @@ namespace Halley {
 
 		float spawnRate = 100;
 		Vector2f spawnArea;
+		float startHeight = 0;
 		float ttl = 1;
 		float ttlScatter = 0;
 		float speed = 100;
 		float speedScatter = 0;
 		float speedDamp = 0;
 		Vector3f acceleration;
+		Vector3f velScale;
 		Vector2f angle;
 		Vector2f angleScatter;
 		float startScale = 1;
@@ -88,6 +101,7 @@ namespace Halley {
 		bool destroyWhenDone = false;
 		std::optional<size_t> maxParticles;
 		std::optional<size_t> burst;
+		std::optional<float> minHeight;
 
 		Vector<Sprite> baseSprites;
 		std::shared_ptr<const Animation> baseAnimation;

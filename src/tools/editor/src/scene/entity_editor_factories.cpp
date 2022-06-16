@@ -999,6 +999,8 @@ public:
 		container->add(context.makeField("float", pars.withSubKey("spawnRate", "100"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Spawn Area"));
 		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("spawnArea"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Start Height"));
+		container->add(context.makeField("float", pars.withSubKey("startHeight", "0"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Max Particles"));
 		container->add(context.makeField("std::optional<int>", pars.withSubKey("maxParticles", ""), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Burst"));
@@ -1009,6 +1011,8 @@ public:
 		container->add(context.makeField("float", pars.withSubKey("ttlScatter", "0.2"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Speed"));
 		container->add(context.makeField("float", pars.withSubKey("speed", "100"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Velocity Scale"));
+		container->add(context.makeField("Halley::Vector3f", pars.withSubKey("velScale", {"1", "1", "1"}), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Speed Scatter"));
 		container->add(context.makeField("float", pars.withSubKey("speedScatter", "10"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Speed Damp"));
@@ -1018,7 +1022,7 @@ public:
 		container->add(context.makeLabel("Angle"));
 		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("angle", ""), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Angle Scatter"));
-		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("angleScatter", "10"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeField("Halley::Vector2f", pars.withSubKey("angleScatter", {"10", "0"}), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Start Scale"));
 		container->add(context.makeField("float", pars.withSubKey("startScale", "1"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("End Scale"));
@@ -1035,6 +1039,8 @@ public:
 		container->add(context.makeField("bool", pars.withSubKey("rotateTowardsMovement", "false"), ComponentEditorLabelCreation::Never));
 		container->add(context.makeLabel("Destroy When Done"));
 		container->add(context.makeField("bool", pars.withSubKey("destroyWhenDone", "false"), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Minimum Height"));
+		container->add(context.makeField("std::optional<float>", pars.withSubKey("minHeight", ""), ComponentEditorLabelCreation::Never));
 		
 		auto containerWeak = std::weak_ptr<UIWidget>(container);
 
