@@ -1080,6 +1080,8 @@ public:
 			return AssetType::MaterialDefinition;
 		} else if (strippedTypeName == "Prefab") {
 			return AssetType::Prefab;
+		} else if (strippedTypeName == "ScriptGraph") {
+			return AssetType::ScriptGraph;
 		} else {
 			Logger::logWarning("Unimplemented resource type on ComponentEditorResourceReferenceFieldFactory: " + strippedTypeName);
 		}
