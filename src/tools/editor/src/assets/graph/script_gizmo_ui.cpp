@@ -1,11 +1,12 @@
 #include "script_gizmo_ui.h"
 using namespace Halley;
 
-ScriptGizmoUI::ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, std::shared_ptr<InputKeyboard> keyboard, ModifiedCallback modifiedCallback)
+ScriptGizmoUI::ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, std::shared_ptr<InputKeyboard> keyboard, std::shared_ptr<IClipboard> clipboard, ModifiedCallback modifiedCallback)
 	: UIWidget("scriptGizmoUI", {}, {})
 	, factory(factory)
 	, resources(resources)
-	, keyboard(keyboard)
+	, keyboard(std::move(keyboard))
+	, clipboard(std::move(clipboard))
 	, gizmo(factory, entityEditorFactory, nullptr, scriptNodeTypes)
 	, modifiedCallback(std::move(modifiedCallback))
 {
@@ -145,7 +146,7 @@ bool ScriptGizmoUI::onKeyPress(KeyboardKeyPress key)
 	}
 
 	if (key.is(KeyCode::C, KeyMods::Ctrl)) {
-		gizmo.copySelection();
+		gizmo.copySelectionToClipboard(clipboard);
 		return true;
 	}
 
@@ -155,7 +156,7 @@ bool ScriptGizmoUI::onKeyPress(KeyboardKeyPress key)
 	}
 
 	if (key.is(KeyCode::V, KeyMods::Ctrl)) {
-		gizmo.paste(ConfigNode());
+		gizmo.pasteFromClipboard(clipboard);
 		return true;
 	}
 

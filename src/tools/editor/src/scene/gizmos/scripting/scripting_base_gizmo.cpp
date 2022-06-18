@@ -338,7 +338,7 @@ bool ScriptingBaseGizmo::destroyNodes(Vector<ScriptNodeId> ids)
 
 	if (modified) {
 		onModified();
-		scriptGraph->finishGraph();		
+		scriptGraph->finishGraph();
 	}
 
 	return modified;
@@ -372,9 +372,86 @@ const ScriptGraphNode& ScriptingBaseGizmo::getNode(ScriptNodeId id) const
 
 ConfigNode ScriptingBaseGizmo::copySelection() const
 {
-	ConfigNode result;
-	// TODO
-	return result;
+	const auto& nodes = scriptGraph->getNodes();
+	Vector<ScriptGraphNode> result;
+	HashMap<ScriptNodeId, ScriptNodeId> remap;
+
+	ScriptNodeId newIdx = 0;
+	for (const auto id: selectedNodes.getSelected()) {
+		remap[id] = newIdx++;
+	}
+
+	for (const auto id: selectedNodes.getSelected()) {
+		auto& node = result.emplace_back(nodes[id]);
+		node.remapNodes(remap);
+	}
+
+	return ConfigNode(result);
+}
+
+void ScriptingBaseGizmo::paste(const ConfigNode& node)
+{
+	Vector<ScriptGraphNode> nodes = node.asVector<ScriptGraphNode>();
+	if (nodes.empty()) {
+		return;
+	}
+
+	// Find centre position
+	Vector2f avgPos;
+	for (auto& n: nodes) {
+		avgPos += n.getPosition();
+	}
+	avgPos /= static_cast<float>(nodes.size());
+	Vector2f offset;
+	if (lastMousePos) {
+		offset = lastMousePos.value() - basePos - avgPos;
+	}
+
+	// Reassign ids and paste
+	Vector<ScriptNodeId> sel;
+	const auto startNewIdx = static_cast<ScriptNodeId>(scriptGraph->getNodes().size());
+	auto newIdx = startNewIdx;
+	HashMap<ScriptNodeId, ScriptNodeId> remap;
+	for (size_t i = 0; i < nodes.size(); ++i) {
+		sel.push_back(newIdx);
+		remap[static_cast<ScriptNodeId>(i)] = newIdx++;
+	}
+	for (size_t i = 0; i < nodes.size(); ++i) {
+		auto& node = scriptGraph->getNodes().emplace_back(nodes[i]);
+		node.remapNodes(remap);
+		node.setPosition(node.getPosition() + offset);
+	}
+
+	// Update selection
+	selectedNodes.setSelection(sel);
+
+	onModified();
+	scriptGraph->finishGraph();
+}
+
+void ScriptingBaseGizmo::copySelectionToClipboard(const std::shared_ptr<IClipboard>& clipboard) const
+{
+	const auto sel = copySelection();
+
+	YAMLConvert::EmitOptions options;
+	options.mapKeyOrder = { "type", "settings", "position", "pins" };
+	options.compactMaps = true;
+	clipboard->setData(YAMLConvert::generateYAML(sel, options));
+}
+
+void ScriptingBaseGizmo::pasteFromClipboard(const std::shared_ptr<IClipboard>& clipboard)
+{
+	auto strData = clipboard->getStringData();
+	if (strData) {
+		const ConfigNode node = YAMLConvert::parseConfig(strData.value());
+		paste(node);
+	}
+}
+
+void ScriptingBaseGizmo::cutSelectionToClipboard(const std::shared_ptr<IClipboard>& clipboard)
+{
+	copySelectionToClipboard(clipboard);
+	deleteSelection();
 }
 
 ConfigNode ScriptingBaseGizmo::cutSelection()
@@ -382,11 +459,6 @@ ConfigNode ScriptingBaseGizmo::cutSelection()
 	auto result = copySelection();
 	deleteSelection();
 	return result;
-}
-
-void ScriptingBaseGizmo::paste(const ConfigNode& node)
-{
-	// TODO
 }
 
 bool ScriptingBaseGizmo::deleteSelection()

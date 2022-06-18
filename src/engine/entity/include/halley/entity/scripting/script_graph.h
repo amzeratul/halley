@@ -81,6 +81,7 @@ namespace Halley {
 		void feedToHash(Hash::Hasher& hasher);
 
 		void onNodeRemoved(ScriptNodeId nodeId);
+		void remapNodes(const HashMap<ScriptNodeId, ScriptNodeId>& remap);
 
 		void assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		const IScriptNodeType& getNodeType() const;

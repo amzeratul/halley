@@ -8,7 +8,7 @@ namespace Halley {
 	public:
 		using ModifiedCallback = ScriptingBaseGizmo::ModifiedCallback;
 
-		ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, std::shared_ptr<InputKeyboard> keyboard, ModifiedCallback modifiedCallback);
+		ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEntityEditorFactory& entityEditorFactory, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, std::shared_ptr<InputKeyboard> keyboard, std::shared_ptr<IClipboard> clipboard, ModifiedCallback modifiedCallback);
 
 		void onAddedToRoot(UIRoot& root) override;
 		void onRemovedFromRoot(UIRoot& root) override;
@@ -35,6 +35,7 @@ namespace Halley {
 		UIFactory& factory;
 		Resources& resources;
 		std::shared_ptr<InputKeyboard> keyboard;
+		std::shared_ptr<IClipboard> clipboard;
 		ScriptingBaseGizmo gizmo;
 		ModifiedCallback modifiedCallback;
 

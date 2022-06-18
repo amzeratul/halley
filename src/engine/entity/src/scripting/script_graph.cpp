@@ -165,6 +165,26 @@ void ScriptGraphNode::onNodeRemoved(ScriptNodeId nodeId)
 	}
 }
 
+void ScriptGraphNode::remapNodes(const HashMap<ScriptNodeId, ScriptNodeId>& remap)
+{
+	for (auto& pin: pins) {
+		for (auto& o: pin.connections) {
+			if (o.dstNode) {
+				const auto iter = remap.find(o.dstNode.value());
+				if (iter != remap.end()) {
+					o.dstNode = iter->second;
+				} else {
+					o.dstNode.reset();
+					o.dstPin = 0;
+				}
+			} else if (o.entityIdx) {
+				o.entityIdx.reset();
+			}
+		}
+		std_ex::erase_if(pin.connections, [] (const PinConnection& c) { return !c.hasConnection(); });
+	}
+}
+
 void ScriptGraphNode::assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const
 {
 	nodeType = nodeTypeCollection.tryGetNodeType(type);

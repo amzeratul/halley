@@ -116,6 +116,12 @@ namespace Halley {
 	        }
         }
 
+        void setSelection(gsl::span<const T> ids)
+        {
+            clear();
+            selected.insert(selected.begin(), ids.begin(), ids.end());
+        }
+
         void clear()
         {
             selected.clear();
