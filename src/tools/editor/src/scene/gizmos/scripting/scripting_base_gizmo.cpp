@@ -74,7 +74,7 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 		}
 	}
 
-	if (inputState.leftClickPressed && inputState.mousePos) {
+	if (startedIdle && inputState.leftClickPressed && inputState.mousePos) {
 		const auto modifier = getSelectionModifier(inputState);
 		if (nodeUnderMouse && nodeUnderMouse->element.type == ScriptNodeElementType::Node) {
 			selectedNodes.mouseButtonPressed(nodeUnderMouse->nodeId, modifier, *inputState.mousePos);
@@ -162,6 +162,7 @@ void ScriptingBaseGizmo::onNodeClicked(Vector2f mousePos, SelectionSetModifier m
 
 void ScriptingBaseGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 {
+	Expects(dragging->nodeIds.size() == dragging->startPos.size());
 	if (inputState.mousePos) {
 		if (dragging->startMousePos) {
 			const Vector2f delta = inputState.mousePos.value() - *dragging->startMousePos;
@@ -409,6 +410,7 @@ void ScriptingBaseGizmo::paste(const ConfigNode& node)
 
 	// Reassign ids and paste
 	Vector<ScriptNodeId> sel;
+	Vector<Vector2f> startPos;
 	const auto startNewIdx = static_cast<ScriptNodeId>(scriptGraph->getNodes().size());
 	auto newIdx = startNewIdx;
 	HashMap<ScriptNodeId, ScriptNodeId> remap;
@@ -419,11 +421,15 @@ void ScriptingBaseGizmo::paste(const ConfigNode& node)
 	for (size_t i = 0; i < nodes.size(); ++i) {
 		auto& node = scriptGraph->getNodes().emplace_back(nodes[i]);
 		node.remapNodes(remap);
-		node.setPosition(node.getPosition() + offset);
+
+		const auto pos = node.getPosition() + offset;
+		node.setPosition(pos);
+		startPos.push_back(pos);
 	}
 
 	// Update selection
 	selectedNodes.setSelection(sel);
+	dragging = Dragging{ std::move(sel), std::move(startPos), lastMousePos, true };
 
 	onModified();
 	scriptGraph->finishGraph();
