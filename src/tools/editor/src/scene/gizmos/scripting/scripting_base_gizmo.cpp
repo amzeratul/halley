@@ -392,6 +392,9 @@ ConfigNode ScriptingBaseGizmo::copySelection() const
 
 void ScriptingBaseGizmo::paste(const ConfigNode& node)
 {
+	if (!isValidPaste(node)) {
+		return;
+	}
 	Vector<ScriptGraphNode> nodes = node.asVector<ScriptGraphNode>();
 	if (nodes.empty()) {
 		return;
@@ -435,6 +438,22 @@ void ScriptingBaseGizmo::paste(const ConfigNode& node)
 	scriptGraph->finishGraph();
 }
 
+bool ScriptingBaseGizmo::isValidPaste(const ConfigNode& node) const
+{
+	if (node.getType() != ConfigNodeType::Sequence) {
+		return false;
+	}
+	for (const auto& n: node.asSequence()) {
+		if (n.getType() != ConfigNodeType::Map) {
+			return false;
+		}
+		if (!n.hasKey("position") || !n.hasKey("pins") || !n.hasKey("type")) {
+			return false;
+		}
+	}
+	return true;
+}
+
 void ScriptingBaseGizmo::copySelectionToClipboard(const std::shared_ptr<IClipboard>& clipboard) const
 {
 	const auto sel = copySelection();
@@ -449,8 +468,10 @@ void ScriptingBaseGizmo::pasteFromClipboard(const std::shared_ptr<IClipboard>& c
 {
 	auto strData = clipboard->getStringData();
 	if (strData) {
-		const ConfigNode node = YAMLConvert::parseConfig(strData.value());
-		paste(node);
+		try {
+			const ConfigNode node = YAMLConvert::parseConfig(strData.value());
+			paste(node);
+		} catch (...) {}
 	}
 }
 
@@ -471,6 +492,7 @@ bool ScriptingBaseGizmo::deleteSelection()
 {
 	const bool changed = destroyNodes(selectedNodes.getSelected());
 	selectedNodes.clear();
+	dragging.reset();
 	return changed;
 }
 

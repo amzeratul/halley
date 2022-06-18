@@ -25,6 +25,7 @@ namespace Halley {
 		ConfigNode copySelection() const;
 		ConfigNode cutSelection();
 		void paste(const ConfigNode& node);
+		bool isValidPaste(const ConfigNode& node) const;
 		bool deleteSelection();
 		void copySelectionToClipboard(const std::shared_ptr<IClipboard>& clipboard) const;
 		void cutSelectionToClipboard(const std::shared_ptr<IClipboard>& clipboard);
