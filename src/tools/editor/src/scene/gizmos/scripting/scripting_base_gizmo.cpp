@@ -584,7 +584,10 @@ void ScriptingBaseGizmo::addNode()
 	if (uiRoot->hasModalUI()) {
 		return;
 	}
-	auto chooseAssetWindow = std::make_shared<ScriptingChooseNode>(Vector2f(), factory, *resources, scriptNodeTypes, [=] (std::optional<String> result)
+
+	const auto windowSize = uiRoot->getRect().getSize() - Vector2f(900, 350);
+
+	auto chooseAssetWindow = std::make_shared<ScriptingChooseNode>(windowSize, factory, *resources, scriptNodeTypes, [=] (std::optional<String> result)
 	{
 		if (result) {
 			Concurrent::execute(pendingUITasks, [this, type = std::move(result.value())] ()

@@ -52,5 +52,5 @@ void ScriptingChooseNode::sortItems(Vector<std::pair<String, String>>& items)
 
 int ScriptingChooseNode::getNumColumns(Vector2f scrollPaneSize) const
 {
-	return 4;
+	return static_cast<int>(std::ceil(scrollPaneSize.x / 180.0f));
 }

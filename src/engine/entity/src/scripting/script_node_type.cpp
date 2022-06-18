@@ -11,6 +11,7 @@
 #include "nodes/script_flow_gate.h"
 #include "nodes/script_input.h"
 #include "nodes/script_loop.h"
+#include "nodes/script_messaging.h"
 #include "nodes/script_network.h"
 #include "nodes/script_sprite.h"
 #include "nodes/script_variables.h"
@@ -321,4 +322,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptHostAuthority>());
 	addScriptNode(std::make_unique<ScriptIfEntityAuthority>());
 	addScriptNode(std::make_unique<ScriptIfHostAuthority>());
+	addScriptNode(std::make_unique<ScriptSendMessage>());
+	addScriptNode(std::make_unique<ScriptReceiveMessage>());
+	addScriptNode(std::make_unique<ScriptSendSystemMessage>());
 }
