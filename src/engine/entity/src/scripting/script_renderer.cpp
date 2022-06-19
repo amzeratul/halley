@@ -112,7 +112,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptN
 					continue;
 				}
 				dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom, posScale).getCentre();
-				dstPinType = dstNodeType->getPin(node, dstIdx);
+				dstPinType = dstNodeType->getPin(dstNode, dstIdx);
 				if (highlightNode && highlightNode->nodeId == pinConnection.dstNode.value()) {
 					if (highlightNode->element.type == ScriptNodeElementType::Node || highlightNode->elementId == pinConnection.dstPin) {
 						highlighted = true;

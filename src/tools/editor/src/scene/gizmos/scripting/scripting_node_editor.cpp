@@ -11,11 +11,13 @@ ScriptingNodeEditor::ScriptingNodeEditor(ScriptingBaseGizmo& gizmo, UIFactory& f
 	, nodeType(nodeType)
 	, curSettings(nodeId ? ConfigNode(gizmo.getNode(*nodeId).getSettings()) : ConfigNode::MapType())
 {
+	UIAnchor anchor;
 	if (pos) {
-		setAnchor(UIAnchor(Vector2f(), Vector2f(0.0f, 0.5f), pos.value()));
-	} else {
-		setAnchor(UIAnchor());
+		anchor = UIAnchor(Vector2f(), Vector2f(0.0f, 0.5f), pos.value());
 	}
+	anchor.setAutoBounds(true);
+	setAnchor(anchor);
+
 	setModal(true);
 	factory.loadUI(*this, "halley/scripting_node_editor");
 }
