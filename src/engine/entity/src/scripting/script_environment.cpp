@@ -42,7 +42,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	if (!graphState.hasStarted() || graphState.getGraphHash() != currentGraph->getHash()) {
 		graphState.start(currentGraph->getStartNode(), currentGraph->getHash());
 	}
-	graphState.ensureReady();
+	graphState.ensureReady(serializationContext);
 
 	// Allocate time for each thread
 	auto& threads = graphState.getThreads();
@@ -85,7 +85,7 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		const auto& node = currentGraph->getNodes().at(nodeId);
 		const auto& nodeType = node.getNodeType();
 		auto& nodeState = graphState.getNodeState(nodeId);
-		graphState.startNode(node, nodeState, serializationContext);
+		graphState.startNode(node, nodeState);
 
 		// Update
 		const auto result = nodeType.update(*this, static_cast<Time>(timeLeft), node, nodeState.data);
@@ -216,7 +216,6 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRol
 		const auto& node = currentGraph->getNodes()[nodeId];
 
 		auto& nodeState = state.getNodeState(nodeId);
-		state.ensureNodeLoaded(node, nodeState, serializationContext);
 
 		if (allowRollback && i >= 1 && node.getNodeType().isStackRollbackPoint(*this, node, threadStack[i].pin, nodeState.data)) {
 			threadStack.resize(i);
@@ -293,7 +292,7 @@ const ScriptGraph* ScriptEnvironment::getCurrentGraph() const
 	return currentGraph;
 }
 
-size_t& ScriptEnvironment::getNodeCounter(uint32_t nodeId)
+size_t& ScriptEnvironment::getNodeCounter(ScriptNodeId nodeId)
 {
 	return currentState->getNodeCounter(nodeId);
 }
@@ -368,6 +367,11 @@ World& ScriptEnvironment::getWorld()
 Resources& ScriptEnvironment::getResources()
 {
 	return resources;
+}
+
+IScriptStateData* ScriptEnvironment::getNodeData(ScriptNodeId nodeId)
+{
+	return currentState->getNodeState(nodeId).data;
 }
 
 void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)

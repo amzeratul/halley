@@ -16,7 +16,8 @@ namespace Halley {
 
     	EntityRef tryGetEntity(EntityId entityId);
     	const ScriptGraph* getCurrentGraph() const;
-        size_t& getNodeCounter(uint32_t nodeId);
+        size_t& getNodeCounter(ScriptNodeId nodeId);
+        IScriptStateData* getNodeData(ScriptNodeId nodeId);
 
     	void postAudioEvent(const String& id, EntityId entityId);
 

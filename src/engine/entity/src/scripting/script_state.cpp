@@ -348,9 +348,15 @@ void ScriptState::reset()
 	graphHash = 0;
 }
 
-void ScriptState::ensureReady()
+void ScriptState::ensureReady(const EntitySerializationContext& context)
 {
-	nodeState.resize(getScriptGraphPtr()->getNodes().size());
+	const auto& nodes = getScriptGraphPtr()->getNodes();
+	if (nodeState.size() != nodes.size()) {
+		nodeState.resize(nodes.size());
+		for (size_t i = 0; i < nodes.size(); ++i) {
+			ensureNodeLoaded(nodes[i], nodeState[i], context);
+		}
+	}
 }
 
 size_t& ScriptState::getNodeCounter(ScriptNodeId node)
@@ -420,12 +426,16 @@ ScriptState::NodeState& ScriptState::getNodeState(ScriptNodeId nodeId)
 	return nodeState.at(nodeId);
 }
 
-void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state, const EntitySerializationContext& context)
+void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state)
 {
-	ensureNodeLoaded(node, state, context);
-
 	if (state.threadCount == 0) {
 		state.threadCount = 1;
+
+		if (state.data) {
+			auto& nodeType = node.getNodeType();
+			auto newData = nodeType.makeData();
+			state.data->copyFrom(std::move(*newData));
+		}
 	}
 }
 
@@ -444,8 +454,8 @@ void ScriptState::ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state
 
 void ScriptState::finishNode(const ScriptGraphNode& node, NodeState& state, bool allThreadsDone)
 {
-	if (allThreadsDone || !node.getNodeType().canKeepData()) {
-		state.releaseData();
+	if (state.data && (allThreadsDone || !node.getNodeType().canKeepData())) {
+		//state.data;
 	}
 }
 

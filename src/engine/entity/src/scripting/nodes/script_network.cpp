@@ -24,7 +24,7 @@ std::pair<String, Vector<ColourOverride>> ScriptEntityAuthority::getNodeDescript
 
 ConfigNode ScriptEntityAuthority::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	return ConfigNode(environment.hasNetworkAuthorityOver(getEntityId(environment, node, 0)));
+	return ConfigNode(environment.hasNetworkAuthorityOver(readEntityId(environment, node, 0)));
 }
 
 
@@ -74,7 +74,7 @@ std::pair<String, Vector<ColourOverride>> ScriptIfEntityAuthority::getNodeDescri
 
 IScriptNodeType::Result ScriptIfEntityAuthority::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	const bool hasAuthority = environment.hasNetworkAuthorityOver(getEntityId(environment, node, 1));
+	const bool hasAuthority = environment.hasNetworkAuthorityOver(readEntityId(environment, node, 1));
 	return Result(ScriptNodeExecutionState::Done, 0, hasAuthority ? 1 : 0);
 }
 

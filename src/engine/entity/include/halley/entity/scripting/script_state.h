@@ -13,6 +13,7 @@ namespace Halley {
 
 		virtual ConfigNode toConfigNode(const EntitySerializationContext& context) = 0;
 		[[nodiscard]] virtual std::unique_ptr<IScriptStateData> clone() const = 0;
+		virtual void copyFrom(IScriptStateData&& src) = 0;
 	};
 
 	template <typename T>
@@ -21,6 +22,11 @@ namespace Halley {
 		[[nodiscard]] std::unique_ptr<IScriptStateData> clone() const override
 		{
 			return std::make_unique<T>(dynamic_cast<const T&>(*this));
+		}
+
+		void copyFrom(IScriptStateData&& src) override
+		{
+			dynamic_cast<T&>(*this) = dynamic_cast<T&&>(src);
 		}
 	};
 
@@ -134,11 +140,10 @@ namespace Halley {
 
     	void start(OptionalLite<ScriptNodeId> startNode, uint64_t graphHash);
 		void reset();
-		void ensureReady();
+		void ensureReady(const EntitySerializationContext& context);
 
     	NodeState& getNodeState(ScriptNodeId nodeId);
-		void startNode(const ScriptGraphNode& node, NodeState& state, const EntitySerializationContext& context);
-		void ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state, const EntitySerializationContext& context);
+		void startNode(const ScriptGraphNode& node, NodeState& state);
 		void finishNode(const ScriptGraphNode& node, NodeState& state, bool allThreadsDone);
     	
     	Vector<ScriptStateThread>& getThreads() { return threads; }
@@ -183,6 +188,7 @@ namespace Halley {
 
     	void onNodeStartedIntrospection(ScriptNodeId nodeId);
     	void onNodeEndedIntrospection(ScriptNodeId nodeId);
+		void ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state, const EntitySerializationContext& context);
     };
 	
 	template<>

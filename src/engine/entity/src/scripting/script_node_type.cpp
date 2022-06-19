@@ -128,7 +128,7 @@ ConfigNode IScriptNodeType::readDataPin(ScriptEnvironment& environment, const Sc
 	const auto& dst = pin.connections[0];
 	const auto& nodes = environment.getCurrentGraph()->getNodes();
 	const auto& dstNode = nodes[dst.dstNode.value()];
-	return dstNode.getNodeType().getData(environment, dstNode, dst.dstPin);
+	return dstNode.getNodeType().getData(environment, dstNode, dst.dstPin, environment.getNodeData(dst.dstNode.value()));
 }
 
 void IScriptNodeType::writeDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const
@@ -147,7 +147,7 @@ void IScriptNodeType::writeDataPin(ScriptEnvironment& environment, const ScriptG
 	const auto& dst = pin.connections[0];
 	const auto& nodes = environment.getCurrentGraph()->getNodes();
 	const auto& dstNode = nodes[dst.dstNode.value()];
-	dstNode.getNodeType().setData(environment, dstNode, dst.dstPin, std::move(data));
+	dstNode.getNodeType().setData(environment, dstNode, dst.dstPin, std::move(data), environment.getNodeData(dst.dstNode.value()));
 }
 
 String IScriptNodeType::getConnectedNodeName(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const
@@ -186,7 +186,7 @@ EntityId IScriptNodeType::readEntityId(ScriptEnvironment& environment, const Scr
 			} else if (conn.dstNode) {
 				const auto& nodes = environment.getCurrentGraph()->getNodes();
 				const auto& dstNode = nodes.at(conn.dstNode.value());
-				return dstNode.getNodeType().getEntityId(environment, dstNode, conn.dstPin);
+				return dstNode.getNodeType().getEntityId(environment, dstNode, conn.dstPin, environment.getNodeData(conn.dstNode.value()));
 			}
 		}
 	}
