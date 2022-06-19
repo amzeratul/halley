@@ -52,32 +52,38 @@ namespace Halley {
 		ScriptNodeElementType type = ScriptNodeElementType::Undefined;
 		ScriptNodePinDirection direction = ScriptNodePinDirection::Input;
 		bool isCancellable : 1;
+		bool forceHorizontal : 1;
 		
-		ScriptNodePinType(ScriptNodeElementType type = ScriptNodeElementType::Undefined, ScriptNodePinDirection direction = ScriptNodePinDirection::Input, bool cancellable = false)
+		ScriptNodePinType(ScriptNodeElementType type = ScriptNodeElementType::Undefined, ScriptNodePinDirection direction = ScriptNodePinDirection::Input, bool cancellable = false, bool forceHorizontal = false)
 			: type(type)
 			, direction(direction)
 			, isCancellable(cancellable)
+			, forceHorizontal(forceHorizontal)
 		{}
 
 		[[nodiscard]] bool operator==(const ScriptNodePinType& other) const
 		{
-			return type == other.type && direction == other.direction;
+			return type == other.type && direction == other.direction && isCancellable == other.isCancellable && forceHorizontal == other.forceHorizontal;
 		}
 
 		[[nodiscard]] bool operator!=(const ScriptNodePinType& other) const
 		{
-			return type != other.type || direction != other.direction;
+			return !(*this == other);
 		}
 
 		[[nodiscard]] ScriptPinSide getSide() const
 		{
 			switch (type) {
+			case ScriptNodeElementType::TargetPin:
+				if (!forceHorizontal) {
+					return direction == ScriptNodePinDirection::Input ? ScriptPinSide::Top : ScriptPinSide::Bottom;
+				} else {
+					[[fallthrough]];
+				}
 			case ScriptNodeElementType::ReadDataPin:
 			case ScriptNodeElementType::WriteDataPin:
 			case ScriptNodeElementType::FlowPin:
 				return direction == ScriptNodePinDirection::Input ? ScriptPinSide::Left : ScriptPinSide::Right;
-			case ScriptNodeElementType::TargetPin:
-				return direction == ScriptNodePinDirection::Input ? ScriptPinSide::Top : ScriptPinSide::Bottom;
 			default:
 				return ScriptPinSide::Undefined;
 			}

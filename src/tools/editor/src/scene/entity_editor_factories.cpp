@@ -1173,7 +1173,7 @@ public:
 			granularity = pars.options["granularity"].asFloat(0.0f);
 		}
 
-		auto field = std::make_shared<UISlider>("range", style, range.start, range.end);
+		auto field = std::make_shared<UISlider>("range", style, range.start, range.end, 0.0f, true);
 		if (intType) {
 			field->setGranularity(1.0f);
 		} else {

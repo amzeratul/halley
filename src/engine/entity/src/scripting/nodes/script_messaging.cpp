@@ -1,4 +1,6 @@
 #include "script_messaging.h"
+
+#include "halley/support/logger.h"
 using namespace Halley;
 
 Vector<IScriptNodeType::SettingType> ScriptSendMessage::getSettingTypes() const
@@ -6,6 +8,7 @@ Vector<IScriptNodeType::SettingType> ScriptSendMessage::getSettingTypes() const
 	return {
 		SettingType{ "script", "Halley::ResourceReference<Halley::ScriptGraph>", Vector<String>{""} },
 		SettingType{ "message", "Halley::String", Vector<String>{""} },
+		SettingType{ "parameters", "Halley::Range<int, 0, 4>", Vector<String>{"0"} },
 	};
 }
 
@@ -13,8 +16,12 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendMessage::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
-	return data;
+	const static auto data = std::array<PinType, 7>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
+
+	const int nArgs = clamp(node.getSettings()["parameters"].asInt(0), 0, 4);
+
+	return gsl::span<const IScriptNodeType::PinType>(data).subspan(0, 3 + nArgs);
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
@@ -22,16 +29,40 @@ std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getNodeDescription(
 	auto str = ColourStringBuilder(true);
 	str.append("Send message ");
 	str.append(node.getSettings()["message"].asString(""), parameterColour);
-	str.append(" to script ");
+	str.append("(");
+
+	const int nArgs = clamp(node.getSettings()["parameters"].asInt(0), 0, 4);
+	for (int i = 0; i < nArgs; ++i) {
+		if (i != 0) {
+			str.append(", ");
+		}
+		str.append(getConnectedNodeName(world, node, graph, 3 + i), parameterColour);
+	}
+
+	str.append(") to script ");
 	str.append(node.getSettings()["script"].asString(""), parameterColour);
 	str.append(" on entity ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	return str.moveResults();
 }
 
+std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getPinDescription(const ScriptGraphNode& node, PinType elementType, ScriptPinId elementIdx) const
+{
+	if (elementIdx >= 3) {
+		return { "Message parameter #" + toString(elementIdx - 2), {}};
+	} else {
+		return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+	}
+}
+
 IScriptNodeType::Result ScriptSendMessage::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	// TODO
+	const auto& msg = node.getSettings()["message"].asString("");
+	const auto& script = node.getSettings()["script"].asString("");
+	const auto entityId = readEntityId(environment, node, 2);
+	const auto& entityName = environment.tryGetEntity(entityId).getName();
+
+	Logger::logDev("Sending message " + script + ":" + msg + " to " + entityName);
 	return Result(ScriptNodeExecutionState::Done);
 }
 
