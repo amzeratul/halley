@@ -23,6 +23,8 @@ ScriptRenderer::ScriptRenderer(Resources& resources, const World* world, const S
 	nodeBgOutline = Sprite().setImage(resources, "halley_ui/ui_float_solid_window_outline.png").setPivot(Vector2f(0.5f, 0.5f));
 	variableBg = Sprite().setImage(resources, "halley_ui/script_variable.png").setPivot(Vector2f(0.5f, 0.5f));
 	variableBgOutline = Sprite().setImage(resources, "halley_ui/script_variable_outline.png").setPivot(Vector2f(0.5f, 0.5f));
+	destructorBg = Sprite().setImage(resources, "halley_ui/script_destructor_bg.png").setPivot(Vector2f(0.5f, 0.0f));
+	destructorIcon = Sprite().setImage(resources, "halley_ui/script_destructor_icon.png").setPivot(Vector2f(0.5f, 0.5f));
 	pinSprite = Sprite().setImage(resources, "halley_ui/ui_render_graph_node_pin.png").setPivot(Vector2f(0.5f, 0.5f));
 	labelText
 		.setFont(resources.get<Font>("Ubuntu Bold"))
@@ -239,6 +241,20 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 		if (drawMode.activationTime > 0.0f) {
 			const float t = drawMode.activationTime;
 			col = lerp(col, Colour4f(1, 1, 1), t * t);
+		}
+
+		// Destructor
+		if (nodeType->hasDestructor()) {
+			destructorBg.clone()
+				.setColour(col.multiplyLuma(0.6f))
+				.setPosition(pos + Vector2f(0, 29) / curZoom)
+				.setScale(1.0f / curZoom)
+				.draw(painter);
+
+			destructorIcon.clone()
+				.setPosition(pos + Vector2f(0, 36) / curZoom)
+				.setScale(1.0f / curZoom)
+				.draw(painter);
 		}
 		
 		// Node body

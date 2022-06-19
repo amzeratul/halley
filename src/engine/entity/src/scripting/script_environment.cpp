@@ -225,7 +225,9 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRol
 
 		nodeState.threadCount--;
 		if (nodeState.threadCount == 0) {
-			node.getNodeType().destructor(*this, node, nodeState.data);
+			if (node.getNodeType().hasDestructor()) {
+				node.getNodeType().destructor(*this, node, nodeState.data);
+			}
 			state.finishNode(node, nodeState, true);
 		}
 	}

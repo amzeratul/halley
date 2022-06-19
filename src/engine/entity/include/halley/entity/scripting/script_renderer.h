@@ -75,6 +75,8 @@ namespace Halley {
 		Sprite variableBg;
 		Sprite variableBgOutline;
 		Sprite pinSprite;
+		Sprite destructorBg;
+		Sprite destructorIcon;
 		TextRenderer labelText;
 		std::map<String, Sprite> icons;
 
