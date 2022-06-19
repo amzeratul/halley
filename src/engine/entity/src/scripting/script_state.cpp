@@ -124,8 +124,10 @@ ScriptState::NodeState::NodeState(const ConfigNode& node, const EntitySerializat
 	: data(nullptr)
 {
 	threadCount = static_cast<uint8_t>(node["threadCount"].asInt(0));
-	pendingData = new ConfigNode(node["pendingData"]);
-	hasPendingData = true;
+	if (node.hasKey("pendingData")) {
+		pendingData = new ConfigNode(node["pendingData"]);
+		hasPendingData = true;
+	}
 }
 
 ScriptState::NodeState::NodeState(const NodeState& other)
@@ -224,6 +226,8 @@ ScriptState::ScriptState(const ConfigNode& node, const EntitySerializationContex
 	if (!scriptGraphName.isEmpty()) {
 		scriptGraph = context.resources->get<ScriptGraph>(scriptGraphName);
 	}
+
+	needsStateLoading = true;
 }
 
 ScriptState::ScriptState(const ScriptGraph* script, bool persistAfterDone)
@@ -351,11 +355,12 @@ void ScriptState::reset()
 void ScriptState::ensureReady(const EntitySerializationContext& context)
 {
 	const auto& nodes = getScriptGraphPtr()->getNodes();
-	if (nodeState.size() != nodes.size()) {
+	if (needsStateLoading || nodeState.size() != nodes.size()) {
 		nodeState.resize(nodes.size());
 		for (size_t i = 0; i < nodes.size(); ++i) {
 			ensureNodeLoaded(nodes[i], nodeState[i], context);
 		}
+		needsStateLoading = false;
 	}
 }
 
@@ -428,6 +433,7 @@ ScriptState::NodeState& ScriptState::getNodeState(ScriptNodeId nodeId)
 
 void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state)
 {
+	assert(!state.hasPendingData);
 	if (state.threadCount == 0) {
 		state.threadCount = 1;
 

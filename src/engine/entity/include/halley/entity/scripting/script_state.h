@@ -181,6 +181,7 @@ namespace Halley {
 		int frameNumber = 0;
     	bool started = false;
 		bool persistAfterDone = false;
+		bool needsStateLoading = false;
 
 		Vector2f displayOffset;
 
