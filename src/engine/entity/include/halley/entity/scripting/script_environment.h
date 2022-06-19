@@ -1,11 +1,12 @@
 #pragma once
+#include "../entity_factory.h"
 #include "script_node_type.h"
 
 namespace Halley {
 	class InputDevice;
 	class ScriptState;
 	
-    class ScriptEnvironment {
+    class ScriptEnvironment: private IEntityFactoryContext {
     public:
     	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection);
     	virtual ~ScriptEnvironment() = default;
@@ -57,6 +58,7 @@ namespace Halley {
     	ScriptState* currentState = nullptr;
         EntityId currentEntity;
         Time deltaTime = 0;
+        EntitySerializationContext serializationContext;
 
     private:
         void updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);
@@ -70,5 +72,8 @@ namespace Halley {
 
         void cancelOutputs(ScriptNodeId nodeId, uint8_t cancelMask);
         void abortCodePath(ScriptNodeId node, std::optional<ScriptPinId> outputPin);
+
+        EntityId getEntityIdFromUUID(const UUID& uuid) const override;
+        UUID getUUIDFromEntityId(EntityId id) const override;
     };
 }

@@ -158,6 +158,11 @@ EntityId EntityFactoryContext::getEntityIdFromUUID(const UUID& uuid) const
 	return EntityId();
 }
 
+UUID EntityFactoryContext::getUUIDFromEntityId(EntityId id) const
+{
+	return world->getEntity(id).getInstanceUUID();
+}
+
 void EntityFactoryContext::addEntity(EntityRef entity)
 {
 	if (entity.getWorldPartition() != getWorldPartition()) {
@@ -217,14 +222,14 @@ void EntityFactoryContext::setWorldPartition(uint8_t partition)
 	worldPartition = partition;
 }
 
-void EntityFactoryContext::setCurrentEntity(EntityRef entity)
-{
-	curEntity = entity;
-}
-
-EntityRef EntityFactoryContext::getCurrentEntity() const
+EntityId EntityFactoryContext::getCurrentEntityId() const
 {
 	return curEntity;
+}
+
+void EntityFactoryContext::setCurrentEntity(EntityId entity)
+{
+	curEntity = entity;
 }
 
 void EntityFactoryContext::setEntityData(const IEntityData& iData)
@@ -305,7 +310,7 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 		entity.setParent(parent.value());
 	}
 
-	context->setCurrentEntity(entity);
+	context->setCurrentEntity(entity.getEntityId());
 
 	if (iData.isDelta()) {
 		const auto& delta = iData.asEntityDataDelta();
@@ -332,7 +337,7 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 	}
 
 	// Don't keep a lingering reference
-	context->setCurrentEntity(EntityRef());
+	context->setCurrentEntity(EntityId());
 }
 
 void EntityFactory::updateEntityComponents(EntityRef entity, const EntityData& data, const EntityFactoryContext& context)

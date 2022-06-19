@@ -239,7 +239,7 @@ std::pair<String, Vector<ColourOverride>> ScriptHoldVariable::getNodeDescription
 	return str.moveResults();
 }
 
-void ScriptHoldVariable::doInitData(ScriptHoldVariableData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const
+void ScriptHoldVariable::doInitData(ScriptHoldVariableData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
 }
 

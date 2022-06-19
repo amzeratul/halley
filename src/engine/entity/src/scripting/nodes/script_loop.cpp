@@ -64,7 +64,7 @@ IScriptNodeType::Result ScriptForLoop::doUpdate(ScriptEnvironment& environment, 
 	return Result(ScriptNodeExecutionState::Done, 0, done ? 1 : 2);
 }
 
-void ScriptForLoop::doInitData(ScriptForLoopData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const
+void ScriptForLoop::doInitData(ScriptForLoopData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
 	data.iterations = 0;
 }
@@ -169,7 +169,7 @@ IScriptNodeType::Result ScriptEveryFrame::doUpdate(ScriptEnvironment& environmen
 	}
 }
 
-void ScriptEveryFrame::doInitData(ScriptEveryFrameData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const
+void ScriptEveryFrame::doInitData(ScriptEveryFrameData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
 	data.lastFrameN = -1;
 }
@@ -233,7 +233,7 @@ IScriptNodeType::Result ScriptEveryTime::doUpdate(ScriptEnvironment& environment
 	}
 }
 
-void ScriptEveryTime::doInitData(ScriptEveryTimeData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const
+void ScriptEveryTime::doInitData(ScriptEveryTimeData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
 	data.time = node.getSettings()["time"].asFloat(1.0f);
 }

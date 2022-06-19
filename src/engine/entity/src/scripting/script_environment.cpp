@@ -23,6 +23,7 @@ ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resourc
 	, resources(resources)
 	, nodeTypeCollection(nodeTypeCollection)
 {
+	serializationContext.entityContext = this;
 }
 
 void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curEntity)
@@ -84,7 +85,7 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		const auto& node = currentGraph->getNodes().at(nodeId);
 		const auto& nodeType = node.getNodeType();
 		auto& nodeState = graphState.getNodeState(nodeId);
-		graphState.startNode(node, nodeState);
+		graphState.startNode(node, nodeState, serializationContext);
 
 		// Update
 		const auto result = nodeType.update(*this, static_cast<Time>(timeLeft), node, nodeState.data);
@@ -215,7 +216,7 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRol
 		const auto& node = currentGraph->getNodes()[nodeId];
 
 		auto& nodeState = state.getNodeState(nodeId);
-		state.ensureNodeLoaded(node, nodeState);
+		state.ensureNodeLoaded(node, nodeState, serializationContext);
 
 		if (allowRollback && i >= 1 && node.getNodeType().isStackRollbackPoint(*this, node, threadStack[i].pin, nodeState.data)) {
 			threadStack.resize(i);
@@ -262,6 +263,24 @@ void ScriptEnvironment::abortCodePath(ScriptNodeId node, std::optional<ScriptPin
 			terminateThread(thread, false);
 		}
 	}
+}
+
+EntityId ScriptEnvironment::getEntityIdFromUUID(const UUID& uuid) const
+{
+	auto e = world.findEntity(uuid, true);
+	if (e) {
+		return e->getEntityId();
+	}
+	return EntityId();
+}
+
+UUID ScriptEnvironment::getUUIDFromEntityId(EntityId id) const
+{
+	auto e = world.tryGetEntity(id);
+	if (e.isValid()) {
+		return e.getInstanceUUID();
+	}
+	return UUID();
 }
 
 EntityRef ScriptEnvironment::tryGetEntity(EntityId entityId)

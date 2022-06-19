@@ -80,8 +80,8 @@ namespace Halley {
 		virtual ~IEntityFactoryContext() = default;
 
 		virtual EntityId getEntityIdFromUUID(const UUID& uuid) const = 0;
-		virtual EntityRef getCurrentEntity() const = 0;
-		virtual World& getWorld() const = 0;
+		virtual UUID getUUIDFromEntityId(EntityId id) const = 0;
+		virtual EntityId getCurrentEntityId() const { return EntityId(); }
 	};
 
 	class EntityFactoryContext : public IEntityFactoryContext {
@@ -113,8 +113,9 @@ namespace Halley {
 
 		const std::shared_ptr<const Prefab>& getPrefab() const { return prefab; }
 		const EntitySerializationContext& getEntitySerializationContext() const { return entitySerializationContext; }
-		World& getWorld() const override { return *world; }
+
 		EntityId getEntityIdFromUUID(const UUID& uuid) const override;
+		UUID getUUIDFromEntityId(EntityId id) const override;
 
 		void addEntity(EntityRef entity);
 		void notifyEntity(const EntityRef& entity) const;
@@ -128,8 +129,8 @@ namespace Halley {
 		uint8_t getWorldPartition() const;
 		void setWorldPartition(uint8_t partition);
 
-		void setCurrentEntity(EntityRef entity);
-		EntityRef getCurrentEntity() const override;
+		void setCurrentEntity(EntityId entity);
+		EntityId getCurrentEntityId() const override;
 
 	private:
 		EntitySerializationContext entitySerializationContext;
@@ -140,7 +141,7 @@ namespace Halley {
 		Vector<EntityRef> entities;
 		bool update = false;
 		uint8_t worldPartition = 0;
-		EntityRef curEntity;
+		EntityId curEntity;
 
 		const IEntityData* entityData = nullptr;
 		EntityData instancedEntityData;

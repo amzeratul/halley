@@ -1,7 +1,7 @@
 #include "script_wait.h"
 using namespace Halley;
 
-void ScriptWait::doInitData(ScriptWaitData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const
+void ScriptWait::doInitData(ScriptWaitData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
 	if (nodeData.getType() == ConfigNodeType::Undefined) {
 		data.timeLeft = node.getSettings()["time"].asFloat(0.0f);

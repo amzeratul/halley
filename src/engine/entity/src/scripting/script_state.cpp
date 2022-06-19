@@ -420,22 +420,22 @@ ScriptState::NodeState& ScriptState::getNodeState(ScriptNodeId nodeId)
 	return nodeState.at(nodeId);
 }
 
-void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state)
+void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state, const EntitySerializationContext& context)
 {
-	ensureNodeLoaded(node, state);
+	ensureNodeLoaded(node, state, context);
 
 	if (state.threadCount == 0) {
 		state.threadCount = 1;
 	}
 }
 
-void ScriptState::ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state)
+void ScriptState::ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state, const EntitySerializationContext& context)
 {
 	if (state.hasPendingData || !state.data) {
 		auto& nodeType = node.getNodeType();
 		auto data = nodeType.makeData();
 		if (data) {
-			nodeType.initData(*data, node, state.hasPendingData ? std::move(*state.pendingData) : ConfigNode());
+			nodeType.initData(*data, node, context, state.hasPendingData ? std::move(*state.pendingData) : ConfigNode());
 			state.data = data.release();
 			state.hasPendingData = false;
 		}

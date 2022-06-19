@@ -84,7 +84,7 @@ DataInterpolatorSetRetriever::DataInterpolatorSetRetriever(EntityRef rootEntity,
 IDataInterpolator* DataInterpolatorSetRetriever::tryGetInterpolator(const EntitySerializationContext& context, std::string_view componentName, std::string_view fieldName) const
 {
 	if (dataInterpolatorSet) {
-		return dataInterpolatorSet->tryGetInterpolator(context.entityContext->getCurrentEntity().getEntityId(), componentName, fieldName);
+		return dataInterpolatorSet->tryGetInterpolator(context.entityContext->getCurrentEntityId(), componentName, fieldName);
 	} else {
 		return nullptr;
 	}

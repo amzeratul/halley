@@ -40,7 +40,7 @@ std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getPinDescription(cons
 	}
 }
 
-void ScriptFlowGate::doInitData(ScriptFlowGateData& data, const ScriptGraphNode& node, const ConfigNode& nodeData) const
+void ScriptFlowGate::doInitData(ScriptFlowGateData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
 	data.flowing = false;
 }

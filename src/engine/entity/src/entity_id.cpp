@@ -56,8 +56,7 @@ ConfigNode ConfigNodeSerializer<EntityId>::serialize(EntityId id, const EntitySe
 	if (!id.isValid() || !context.entityContext) {
 		return ConfigNode(String());
 	}
-	auto& world = context.entityContext->getWorld();
-	return ConfigNode(world.getEntity(id).getInstanceUUID().toString());
+	return ConfigNode(context.entityContext->getUUIDFromEntityId(id).toString());
 }
 
 EntityId ConfigNodeSerializer<EntityId>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)

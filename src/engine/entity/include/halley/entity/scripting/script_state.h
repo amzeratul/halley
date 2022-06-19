@@ -137,8 +137,8 @@ namespace Halley {
 		void ensureReady();
 
     	NodeState& getNodeState(ScriptNodeId nodeId);
-		void startNode(const ScriptGraphNode& node, NodeState& state);
-		void ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state);
+		void startNode(const ScriptGraphNode& node, NodeState& state, const EntitySerializationContext& context);
+		void ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state, const EntitySerializationContext& context);
 		void finishNode(const ScriptGraphNode& node, NodeState& state, bool allThreadsDone);
     	
     	Vector<ScriptStateThread>& getThreads() { return threads; }
