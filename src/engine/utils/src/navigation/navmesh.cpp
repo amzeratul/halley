@@ -287,8 +287,12 @@ void Navmesh::Node::serialize(Serializer& s) const
 
 void Navmesh::Node::deserialize(Deserializer& s)
 {
+	uint64_t n;
+
 	s >> pos;
-	s >> static_cast<uint64_t&>(nConnections);
+	s >> n;
+	nConnections = static_cast<size_t>(n);
+
 	for (size_t i = 0; i < nConnections; ++i) {
 		s >> connections[i];
 		s >> costs[i];
