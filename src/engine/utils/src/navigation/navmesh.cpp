@@ -278,7 +278,7 @@ ConfigNode Navmesh::Node::toConfigNode() const
 void Navmesh::Node::serialize(Serializer& s) const
 {
 	s << pos;
-	s << nConnections;
+	s << static_cast<uint64_t>(nConnections);
 	for (size_t i = 0; i < nConnections; ++i) {
 		s << connections[i];
 		s << costs[i];
@@ -288,7 +288,7 @@ void Navmesh::Node::serialize(Serializer& s) const
 void Navmesh::Node::deserialize(Deserializer& s)
 {
 	s >> pos;
-	s >> nConnections;
+	s >> static_cast<uint64_t&>(nConnections);
 	for (size_t i = 0; i < nConnections; ++i) {
 		s >> connections[i];
 		s >> costs[i];
