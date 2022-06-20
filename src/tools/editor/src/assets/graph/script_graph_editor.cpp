@@ -118,5 +118,7 @@ void ScriptGraphEditor::update(Time time, bool moved)
 
 	AssetEditor::update(time, moved);
 
-	infiniCanvas->setScrollEnabled(!gizmoEditor->isHighlighted());
+	if (gizmoEditor) {
+		infiniCanvas->setScrollEnabled(!gizmoEditor->isHighlighted());
+	}
 }
