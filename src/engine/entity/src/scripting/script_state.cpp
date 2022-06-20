@@ -3,6 +3,7 @@
 #include "halley/bytes/byte_serializer.h"
 #include "halley/support/logger.h"
 #include "halley/utils/algorithm.h"
+#include "nodes/script_messaging.h"
 #include "scripting/script_graph.h"
 #include "scripting/script_node_type.h"
 using namespace Halley;
@@ -426,6 +427,43 @@ void ScriptState::incrementFrameNumber()
 	++frameNumber;
 }
 
+void ScriptState::receiveMessage(ScriptMessage msg)
+{
+	const auto* script = getScriptGraphPtr();
+	if (script && script->getMessageInboxId(msg.type.message, false)) {
+		inbox.push_back(std::move(msg));
+	}
+}
+
+void ScriptState::processMessages()
+{
+	std_ex::erase_if(inbox, [=] (ScriptMessage& msg)
+	{
+		return processMessage(msg);
+	});
+}
+
+bool ScriptState::processMessage(ScriptMessage& msg)
+{
+	if (const auto* scriptGraph = getScriptGraphPtr()) {
+		if (const auto inboxId = scriptGraph->getMessageInboxId(msg.type.message)) {
+			const auto& node = scriptGraph->getNodes().at(*inboxId);
+			auto& state = getNodeState(*inboxId);
+			assert(state.data);
+
+			const auto& receiveMsgNode = dynamic_cast<const ScriptReceiveMessage&>(node.getNodeType());
+			const bool accepted = receiveMsgNode.tryReceiveMessage(node, *dynamic_cast<ScriptReceiveMessageData*>(state.data), msg);
+			if (accepted) {
+				threads.push_back(ScriptStateThread(*inboxId));
+			}
+			return accepted;
+		}
+	}
+
+	// If we get here, then we can never accept this, consume it
+	return true;
+}
+
 ScriptState::NodeState& ScriptState::getNodeState(ScriptNodeId nodeId)
 {
 	return nodeState.at(nodeId);
@@ -439,8 +477,9 @@ void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state)
 
 		if (state.data) {
 			auto& nodeType = node.getNodeType();
-			auto newData = nodeType.makeData();
-			state.data->copyFrom(std::move(*newData));
+			//auto newData = nodeType.makeData();
+			//state.data->copyFrom(std::move(*newData));
+			nodeType.initData(*state.data, node, EntitySerializationContext(), ConfigNode());
 		}
 	}
 }

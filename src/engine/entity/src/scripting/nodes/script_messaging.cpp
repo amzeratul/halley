@@ -1,6 +1,7 @@
 #include "script_messaging.h"
 
 #include "halley/support/logger.h"
+#include "scripting/script_message.h"
 using namespace Halley;
 
 Vector<IScriptNodeType::SettingType> ScriptSendMessage::getSettingTypes() const
@@ -49,7 +50,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getNodeDescription(
 std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getPinDescription(const ScriptGraphNode& node, PinType elementType, ScriptPinId elementIdx) const
 {
 	if (elementIdx >= 3) {
-		return { "Message parameter #" + toString(elementIdx - 2), {}};
+		return { "Parameter #" + toString(elementIdx - 2), {}};
 	} else {
 		return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 	}
@@ -57,21 +58,40 @@ std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getPinDescription(c
 
 IScriptNodeType::Result ScriptSendMessage::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	const auto& msg = node.getSettings()["message"].asString("");
-	const auto& script = node.getSettings()["script"].asString("");
-	const auto entityId = readEntityId(environment, node, 2);
-	const auto& entityName = environment.tryGetEntity(entityId).getName();
+	ScriptMessage msg;
+	ScriptMessageType& msgType = msg.type;
+	msgType.message = node.getSettings()["message"].asString("");
+	msgType.script = node.getSettings()["script"].asString("");
+	msgType.nParams = clamp(node.getSettings()["parameters"].asInt(0), 0, 4);
 
-	Logger::logDev("Sending message " + script + ":" + msg + " to " + entityName);
+	if (msgType.nParams > 0) {
+		msg.params = ConfigNode::SequenceType();
+		for (int i = 0; i < msgType.nParams; ++i) {
+			msg.params.asSequence().push_back(readDataPin(environment, node, 3 + i));
+		}
+	}
+
+	const auto entityId = readEntityId(environment, node, 2);
+	environment.sendMessage(entityId, std::move(msg));
+	
 	return Result(ScriptNodeExecutionState::Done);
 }
 
+ConfigNode ScriptReceiveMessageData::toConfigNode(const EntitySerializationContext& context)
+{
+	ConfigNode::MapType result;
+	result["curArgs"] = curArgs;
+	result["hasMessageActive"] = hasMessageActive;
+	return result;
+}
 
 
 Vector<IScriptNodeType::SettingType> ScriptReceiveMessage::getSettingTypes() const
 {
 	return {
 		SettingType{ "message", "Halley::String", Vector<String>{""} },
+		SettingType{ "nParams", "Halley::Range<int, 0, 4>", Vector<String>{"0"} },
+		SettingType{ "allowSpawning", "bool", Vector<String>{"false"} },
 	};
 }
 
@@ -79,8 +99,10 @@ gsl::span<const IScriptNodeType::PinType> ScriptReceiveMessage::getPinConfigurat
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 1>{ PinType{ ET::FlowPin, PD::Output } };
-	return data;
+	const static auto data = std::array<PinType, 5>{ PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
+	const int nParams = node.getSettings()["nParams"].asInt(0);
+
+	return gsl::span<const PinType>(data).subspan(0, 1 + nParams);
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
@@ -91,11 +113,78 @@ std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getNodeDescripti
 	return str.moveResults();
 }
 
-IScriptNodeType::Result ScriptReceiveMessage::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getPinDescription(const ScriptGraphNode& node, PinType element, ScriptPinId elementIdx) const
+{
+	if (elementIdx >= 1) {
+		return { "Parameter #" + toString(elementIdx), {} };
+	} else {
+		return ScriptNodeTypeBase<ScriptReceiveMessageData>::getPinDescription(node, element, elementIdx);
+	}
+}
+
+bool ScriptReceiveMessage::hasDestructor() const
+{
+	return true;
+}
+
+bool ScriptReceiveMessage::showDestructor() const
+{
+	return false;
+}
+
+void ScriptReceiveMessage::doInitData(ScriptReceiveMessageData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
+{
+	if (nodeData.getType() != ConfigNodeType::Undefined) {
+		data.curArgs = nodeData["curArgs"];
+		data.hasMessageActive = nodeData["hasMessageActive"].asBool(false);
+	}
+}
+
+IScriptNodeType::Result ScriptReceiveMessage::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptReceiveMessageData& data) const
 {
 	return Result(ScriptNodeExecutionState::Done);
 }
 
+ConfigNode ScriptReceiveMessage::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptReceiveMessageData& data) const
+{
+	const size_t argN = pinN - 1;
+	if (!data.hasMessageActive || data.curArgs.getType() == ConfigNodeType::Undefined || argN >= data.curArgs.asSequence().size()) {
+		return ConfigNode();
+	}
+	return ConfigNode(data.curArgs.asSequence()[argN]);
+}
+
+void ScriptReceiveMessage::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptReceiveMessageData& data) const
+{
+	data.hasMessageActive = false;
+	data.curArgs = ConfigNode();
+}
+
+bool ScriptReceiveMessage::canReceiveMessage(const ScriptGraphNode& node, const String& messageId, bool requiresSpawningScript) const
+{
+	if (messageId != node.getSettings()["message"].asString("")) {
+		return false;
+	}
+
+	if (requiresSpawningScript && !node.getSettings()["allowSpawning"].asBool(false)) {
+		return false;
+	}
+
+	return true;
+}
+
+bool ScriptReceiveMessage::tryReceiveMessage(const ScriptGraphNode& node, ScriptReceiveMessageData& data, ScriptMessage& msg) const
+{
+	Expects(msg.type.message == node.getSettings()["message"].asString(""));
+
+	if (data.hasMessageActive) {
+		return false;
+	}
+
+	data.hasMessageActive = true;
+	data.curArgs = std::move(msg.params);
+	return true;
+}
 
 
 Vector<IScriptNodeType::SettingType> ScriptSendSystemMessage::getSettingTypes() const

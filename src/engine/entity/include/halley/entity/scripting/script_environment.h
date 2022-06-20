@@ -1,4 +1,5 @@
 #pragma once
+#include "script_message.h"
 #include "../entity_factory.h"
 #include "script_node_type.h"
 
@@ -18,6 +19,7 @@ namespace Halley {
     	const ScriptGraph* getCurrentGraph() const;
         size_t& getNodeCounter(ScriptNodeId nodeId);
         IScriptStateData* getNodeData(ScriptNodeId nodeId);
+        void assignTypes(const ScriptGraph& graph);
 
     	void postAudioEvent(const String& id, EntityId entityId);
 
@@ -47,6 +49,9 @@ namespace Halley {
         World& getWorld();
         Resources& getResources();
 
+    	void sendMessage(EntityId dstEntity, ScriptMessage message);
+        Vector<std::pair<EntityId, ScriptMessage>> getOutboundMessages();
+
     protected:
 		const HalleyAPI& api;
     	World& world;
@@ -61,6 +66,8 @@ namespace Halley {
         Time deltaTime = 0;
         EntitySerializationContext serializationContext;
 
+        Vector<std::pair<EntityId, ScriptMessage>> outBox;
+
     private:
         void updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);
         void doTerminateState();
@@ -73,7 +80,7 @@ namespace Halley {
 
         void cancelOutputs(ScriptNodeId nodeId, uint8_t cancelMask);
         void abortCodePath(ScriptNodeId node, std::optional<ScriptPinId> outputPin);
-
+        
         EntityId getEntityIdFromUUID(const UUID& uuid) const override;
         UUID getUUIDFromEntityId(EntityId id) const override;
     };

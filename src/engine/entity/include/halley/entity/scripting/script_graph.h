@@ -129,6 +129,8 @@ namespace Halley {
 		OptionalLite<ScriptNodeId> getStartNode() const;
 		uint64_t getHash() const;
 
+		std::optional<ScriptNodeId> getMessageInboxId(const String& messageId, bool requiresSpawningScript = false) const;
+
 		bool connectPins(ScriptNodeId srcNode, ScriptPinId srcPinN, ScriptNodeId dstNode, ScriptPinId dstPin);
 		bool connectPin(ScriptNodeId srcNode, ScriptPinId srcPinN, EntityId target);
 		bool disconnectPin(ScriptNodeId nodeIdx, ScriptPinId pinN);

@@ -44,6 +44,8 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	}
 	graphState.ensureReady(serializationContext);
 
+	currentState->processMessages();
+
 	// Allocate time for each thread
 	auto& threads = graphState.getThreads();
 	for (auto& thread: threads) {
@@ -371,9 +373,24 @@ Resources& ScriptEnvironment::getResources()
 	return resources;
 }
 
+void ScriptEnvironment::sendMessage(EntityId dstEntity, ScriptMessage message)
+{
+	outBox.emplace_back(dstEntity, std::move(message));
+}
+
+Vector<std::pair<EntityId, ScriptMessage>> ScriptEnvironment::getOutboundMessages()
+{
+	return std::move(outBox);
+}
+
 IScriptStateData* ScriptEnvironment::getNodeData(ScriptNodeId nodeId)
 {
 	return currentState->getNodeState(nodeId).data;
+}
+
+void ScriptEnvironment::assignTypes(const ScriptGraph& graph)
+{
+	graph.assignTypes(nodeTypeCollection);
 }
 
 void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)

@@ -1,4 +1,5 @@
 #pragma once
+#include "script_message.h"
 #include "script_node_enums.h"
 #include "halley/bytes/config_node_serializer.h"
 #include "halley/time/halleytime.h"
@@ -168,6 +169,9 @@ namespace Halley {
     	int getCurrentFrameNumber() const;
 		void incrementFrameNumber();
 
+    	void receiveMessage(ScriptMessage msg);
+        void processMessages();
+
 	private:
 		std::shared_ptr<const ScriptGraph> scriptGraph;
 		const ScriptGraph* scriptGraphRef = nullptr;
@@ -186,10 +190,12 @@ namespace Halley {
 		Vector2f displayOffset;
 
 		Vector<String> tags;
+		Vector<ScriptMessage> inbox;
 
     	void onNodeStartedIntrospection(ScriptNodeId nodeId);
     	void onNodeEndedIntrospection(ScriptNodeId nodeId);
 		void ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state, const EntitySerializationContext& context);
+        bool processMessage(ScriptMessage& msg);
     };
 	
 	template<>

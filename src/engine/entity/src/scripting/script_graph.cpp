@@ -4,6 +4,7 @@
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/utils/algorithm.h"
 #include "halley/utils/hash.h"
+#include "nodes/script_messaging.h"
 #include "scripting/script_node_type.h"
 using namespace Halley;
 
@@ -213,7 +214,9 @@ ScriptGraph::ScriptGraph()
 
 ScriptGraph::ScriptGraph(const ConfigNode& node)
 {
-	nodes = node["nodes"].asVector<ScriptGraphNode>({});
+	if (node.getType() == ConfigNodeType::Map) {
+		nodes = node["nodes"].asVector<ScriptGraphNode>({});
+	}
 	finishGraph();
 }
 
@@ -301,6 +304,20 @@ OptionalLite<ScriptNodeId> ScriptGraph::getStartNode() const
 uint64_t ScriptGraph::getHash() const
 {
 	return hash;
+}
+
+std::optional<ScriptNodeId> ScriptGraph::getMessageInboxId(const String& messageId, bool requiresSpawningScript) const
+{
+	for (size_t i = 0; i < nodes.size(); ++i) {
+		const auto& node = nodes[i];
+		if (node.getType() == "receiveMessage") {
+			const bool ok = dynamic_cast<const ScriptReceiveMessage&>(node.getNodeType()).canReceiveMessage(node, messageId, requiresSpawningScript);
+			if (ok) {
+				return static_cast<ScriptNodeId>(i);
+			}
+		}
+	}
+	return {};
 }
 
 bool ScriptGraph::connectPins(ScriptNodeId srcNodeIdx, ScriptPinId srcPinN, ScriptNodeId dstNodeIdx, ScriptPinId dstPinN)
