@@ -7,9 +7,7 @@ using namespace Halley;
 Vector<IScriptNodeType::SettingType> ScriptSendMessage::getSettingTypes() const
 {
 	return {
-		SettingType{ "script", "Halley::ResourceReference<Halley::ScriptGraph>", Vector<String>{""} },
-		SettingType{ "message", "Halley::String", Vector<String>{""} },
-		SettingType{ "parameters", "Halley::Range<int, 0, 4>", Vector<String>{"0"} },
+		SettingType{ "message", "Halley::ScriptMessageType", Vector<String>{""} },
 	};
 }
 
@@ -20,20 +18,21 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendMessage::getPinConfiguration
 	const static auto data = std::array<PinType, 7>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
 
-	const int nArgs = clamp(node.getSettings()["parameters"].asInt(0), 0, 4);
+	const auto msgType = ScriptMessageType(node.getSettings()["message"]);
 
-	return gsl::span<const IScriptNodeType::PinType>(data).subspan(0, 3 + nArgs);
+	return gsl::span<const IScriptNodeType::PinType>(data).subspan(0, 3 + msgType.nParams);
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
+	const auto msgType = ScriptMessageType(node.getSettings()["message"]);
+
 	auto str = ColourStringBuilder(true);
 	str.append("Send message ");
-	str.append(node.getSettings()["message"].asString(""), parameterColour);
+	str.append(msgType.message, parameterColour);
 	str.append("(");
 
-	const int nArgs = clamp(node.getSettings()["parameters"].asInt(0), 0, 4);
-	for (int i = 0; i < nArgs; ++i) {
+	for (int i = 0; i < msgType.nParams; ++i) {
 		if (i != 0) {
 			str.append(", ");
 		}
@@ -41,7 +40,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getNodeDescription(
 	}
 
 	str.append(") to script ");
-	str.append(node.getSettings()["script"].asString(""), parameterColour);
+	str.append(msgType.script, parameterColour);
 	str.append(" on entity ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	return str.moveResults();
@@ -60,9 +59,7 @@ IScriptNodeType::Result ScriptSendMessage::doUpdate(ScriptEnvironment& environme
 {
 	ScriptMessage msg;
 	ScriptMessageType& msgType = msg.type;
-	msgType.message = node.getSettings()["message"].asString("");
-	msgType.script = node.getSettings()["script"].asString("");
-	msgType.nParams = clamp(node.getSettings()["parameters"].asInt(0), 0, 4);
+	msgType = ScriptMessageType(node.getSettings()["message"]);
 
 	if (msgType.nParams > 0) {
 		msg.params = ConfigNode::SequenceType();
@@ -116,7 +113,7 @@ std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getNodeDescripti
 std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getPinDescription(const ScriptGraphNode& node, PinType element, ScriptPinId elementIdx) const
 {
 	if (elementIdx >= 1) {
-		return { "Parameter #" + toString(elementIdx), {} };
+		return { "Parameter #" + toString(static_cast<int>(elementIdx)), {} };
 	} else {
 		return ScriptNodeTypeBase<ScriptReceiveMessageData>::getPinDescription(node, element, elementIdx);
 	}
@@ -184,6 +181,11 @@ bool ScriptReceiveMessage::tryReceiveMessage(const ScriptGraphNode& node, Script
 	data.hasMessageActive = true;
 	data.curArgs = std::move(msg.params);
 	return true;
+}
+
+std::pair<String, int> ScriptReceiveMessage::getMessageIdAndParams(const ScriptGraphNode& node) const
+{
+	return { node.getSettings()["message"].asString(""), node.getSettings()["nParams"].asInt(0) };
 }
 
 

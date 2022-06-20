@@ -3,9 +3,11 @@ using namespace Halley;
 
 ScriptMessageType::ScriptMessageType(const ConfigNode& node)
 {
-	script = node["script"].asString("");
-	message = node["message"].asString("");
-	nParams = node["nParams"].asInt(0);
+	if (node.getType() == ConfigNodeType::Map) {
+		script = node["script"].asString("");
+		message = node["message"].asString("");
+		nParams = node["nParams"].asInt(0);
+	}
 }
 
 ConfigNode ScriptMessageType::toConfig() const

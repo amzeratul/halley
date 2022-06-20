@@ -1351,6 +1351,75 @@ public:
 	}
 };
 
+
+
+class ComponentEditorScriptMessageTypeFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::ScriptMessageType";
+	}
+
+	bool isNested() const override
+	{
+		return true;
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(ConfigNode::MapType());
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		auto data = pars.data;
+
+		auto& fieldData = data.getWriteableFieldData(); // HACK
+		fieldData.ensureType(ConfigNodeType::Map);
+
+		auto& resources = context.getGameResources();
+		const auto& dropStyle = context.getUIFactory().getStyle("dropdownLight");
+
+		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
+		container->getSizer().setColumnProportions({{0, 1}});
+		container->add(context.makeLabel("Script"));
+		container->add(std::make_shared<SelectAssetWidget>("script", context.getUIFactory(), AssetType::ScriptGraph, context.getGameResources(), context.getProjectWindow()));
+		container->add(context.makeLabel("Message"));
+		container->add(std::make_shared<UIDropdown>("message", dropStyle));
+
+		auto updateScript = [container, data, &resources] (const String& scriptName)
+		{
+			Vector<String> messages;
+
+			if (!scriptName.isEmpty()) {
+				const auto script = resources.get<ScriptGraph>(scriptName);
+				messages = script->getMessageNames();
+			}
+
+			auto message = container->getWidgetAs<UIDropdown>("message");
+			message->setOptions(messages);
+			message->setSelectedOption(data.getFieldData()["message"].asString(""));
+		};
+		updateScript(fieldData["script"].asString(""));
+
+		container->bindData("script", fieldData["script"].asString(""), [&context, data, updateScript](String newVal)
+		{
+			updateScript(newVal);
+			data.getWriteableFieldData()["script"] = ConfigNode(std::move(newVal));
+			context.onEntityUpdated();
+		});
+
+		container->bindData("message", fieldData["message"].asString(""), [&context, data](String newVal)
+		{
+			data.getWriteableFieldData()["message"] = ConfigNode(std::move(newVal));
+			context.onEntityUpdated();
+		});
+
+		return container;
+	}
+};
+
+
 Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
 	Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
@@ -1383,6 +1452,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorScriptGraphFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorRangeFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorUIAlignFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorScriptMessageTypeFieldFactory>());
 
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<DefaultInputButtons>("Halley::InputButton"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<UISizerType>("Halley::UISizerType"));

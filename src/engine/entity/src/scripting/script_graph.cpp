@@ -320,6 +320,19 @@ std::optional<ScriptNodeId> ScriptGraph::getMessageInboxId(const String& message
 	return {};
 }
 
+Vector<String> ScriptGraph::getMessageNames() const
+{
+	Vector<String> result;
+	for (size_t i = 0; i < nodes.size(); ++i) {
+		const auto& node = nodes[i];
+		if (node.getType() == "receiveMessage") {
+			auto [msg, params] = dynamic_cast<const ScriptReceiveMessage&>(node.getNodeType()).getMessageIdAndParams(node);
+			result.push_back(std::move(msg));
+		}
+	}
+	return result;
+}
+
 bool ScriptGraph::connectPins(ScriptNodeId srcNodeIdx, ScriptPinId srcPinN, ScriptNodeId dstNodeIdx, ScriptPinId dstPinN)
 {
 	auto& srcNode = nodes.at(srcNodeIdx);

@@ -46,6 +46,7 @@ namespace Halley {
 
 		bool canReceiveMessage(const ScriptGraphNode& node, const String& messageId, bool requiresSpawningScript) const;
 		bool tryReceiveMessage(const ScriptGraphNode& node, ScriptReceiveMessageData& data, ScriptMessage& msg) const;
+		std::pair<String, int> getMessageIdAndParams(const ScriptGraphNode& node) const;
 	};
 
 	class ScriptSendSystemMessage final : public ScriptNodeTypeBase<void> {
