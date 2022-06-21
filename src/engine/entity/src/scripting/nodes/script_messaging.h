@@ -5,7 +5,7 @@ namespace Halley {
 	class ScriptSendMessage final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "sendMessage"; }
-		String getName() const override { return "Message Send"; }
+		String getName() const override { return "Send Message"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/send_message.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
 
@@ -28,7 +28,7 @@ namespace Halley {
 	class ScriptReceiveMessage final : public ScriptNodeTypeBase<ScriptReceiveMessageData> {
 	public:
 		String getId() const override { return "receiveMessage"; }
-		String getName() const override { return "Message Receive"; }
+		String getName() const override { return "Receive Message"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/receive_message.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Terminator; }
 
@@ -52,8 +52,22 @@ namespace Halley {
 	class ScriptSendSystemMessage final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "sendSystemMessage"; }
-		String getName() const override { return "System Msg. Send"; }
+		String getName() const override { return "Send System Msg."; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/send_system_message.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
+
+		Vector<SettingType> getSettingTypes() const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+	};
+
+	class ScriptSendEntityMessage final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "sendEntityMessage"; }
+		String getName() const override { return "Send Entity Msg"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/send_entity_message.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
 
 		Vector<SettingType> getSettingTypes() const override;

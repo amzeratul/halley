@@ -24,4 +24,14 @@ namespace Halley {
         ConfigNode toConfig() const;
         String toString() const;
     };
+
+	class ScriptEntityMessageType {
+	public:
+        String message;
+        Vector<String> members;
+
+        ScriptEntityMessageType() = default;
+        ScriptEntityMessageType(const ConfigNode& node);
+        ConfigNode toConfig() const;
+	};
 }

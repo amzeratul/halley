@@ -340,6 +340,11 @@ const HalleyAPI& ProjectWindow::getAPI() const
 	return api;
 }
 
+Project& ProjectWindow::getProject()
+{
+	return project;
+}
+
 TaskSet& ProjectWindow::getTasks() const
 {
 	return *tasks;

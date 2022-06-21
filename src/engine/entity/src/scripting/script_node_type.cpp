@@ -325,4 +325,5 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptSendMessage>());
 	addScriptNode(std::make_unique<ScriptReceiveMessage>());
 	addScriptNode(std::make_unique<ScriptSendSystemMessage>());
+	addScriptNode(std::make_unique<ScriptSendEntityMessage>());
 }

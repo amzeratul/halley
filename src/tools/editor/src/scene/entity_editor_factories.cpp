@@ -1432,6 +1432,76 @@ public:
 };
 
 
+
+class ComponentEditorEntityMessageTypeFieldFactory : public IComponentEditorFieldFactory {
+public:
+	ComponentEditorEntityMessageTypeFieldFactory(const ECSData& ecsData)
+		: ecsData(ecsData)
+	{}
+	
+	String getFieldType() override
+	{
+		return "Halley::EntityMessageType";
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(ConfigNode::MapType());
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		auto data = pars.data;
+
+		auto& fieldData = data.getWriteableFieldData(); // HACK
+		fieldData.ensureType(ConfigNodeType::Map);
+
+		Vector<String> messageIds;
+		for (auto& [k, v]: ecsData.getMessages()) {
+			if (v.serializable) {
+				messageIds.push_back(k);
+			}
+		}
+
+		const auto& dropStyle = context.getUIFactory().getStyle("dropdownLight");
+		auto dropdown = std::make_shared<UIDropdown>("messageType", dropStyle);
+		dropdown->setOptions(std::move(messageIds));
+		dropdown->setSelectedOption(data.getFieldData()["message"].asString(""));
+
+		dropdown->bindData("messageType", fieldData["message"].asString(""), [&context, data, this](String newVal)
+		{
+			data.getWriteableFieldData() = getMessageConfig(newVal);
+			context.onEntityUpdated();
+		});
+
+		return dropdown;
+	}
+
+private:
+	const ECSData& ecsData;
+
+	ConfigNode getMessageConfig(const String& messageId) const
+	{
+		ConfigNode::MapType result;
+		result["message"] = messageId;
+
+		const auto& msgs = ecsData.getMessages();
+		const auto iter = msgs.find(messageId);
+		if (iter != msgs.end()) {
+			const auto& msgConfig = iter->second;
+			ConfigNode::SequenceType members;
+			members.reserve(msgConfig.members.size());
+			for (const auto& m: msgConfig.members) {
+				members.push_back(ConfigNode(m.name));
+			}
+			result["members"] = std::move(members);
+		}
+		
+		return result;
+	}
+};
+
+
 Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
 	Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
@@ -1469,5 +1539,14 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<DefaultInputButtons>("Halley::InputButton"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<UISizerType>("Halley::UISizerType"));
 
+	return factories;
+}
+
+Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getECSFactories(const ECSData& ecsData)
+{
+	Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
+
+	factories.emplace_back(std::make_unique<ComponentEditorEntityMessageTypeFieldFactory>(ecsData));
+	
 	return factories;
 }

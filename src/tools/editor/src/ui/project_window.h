@@ -32,6 +32,7 @@ namespace Halley {
         void replaceAssetTab(AssetType oldType, const String& oldId, AssetType newType, const String& newId);
 
     	const HalleyAPI& getAPI() const;
+        Project& getProject();
 
     	TaskSet& getTasks() const;
 

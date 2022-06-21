@@ -717,6 +717,7 @@ void EntityEditorFactory::addFieldFactories(Vector<std::unique_ptr<IComponentEdi
 void EntityEditorFactory::addStandardFieldFactories()
 {
 	addFieldFactories(EntityEditorFactories::getDefaultFactories());
+	addFieldFactories(EntityEditorFactories::getECSFactories(projectWindow.getProject().getECSData()));
 }
 
 void EntityEditorFactory::clear()

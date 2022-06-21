@@ -219,3 +219,40 @@ IScriptNodeType::Result ScriptSendSystemMessage::doUpdate(ScriptEnvironment& env
 	// TODO
 	return Result(ScriptNodeExecutionState::Done);
 }
+
+
+
+Vector<IScriptNodeType::SettingType> ScriptSendEntityMessage::getSettingTypes() const
+{
+	return {
+		SettingType{ "message", "Halley::EntityMessageType", Vector<String>{""} },
+	};
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptSendEntityMessage::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptSendEntityMessage::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	const auto msgType = ScriptEntityMessageType(node.getSettings()["message"]);
+	
+	auto str = ColourStringBuilder(true);
+	str.append("Send message ");
+	str.append(msgType.message, parameterColour);
+	str.append(" to entity ");
+	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	return str.moveResults();
+}
+
+IScriptNodeType::Result ScriptSendEntityMessage::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	const auto msgType = ScriptEntityMessageType(node.getSettings()["message"]);
+	
+	// TODO
+	return Result(ScriptNodeExecutionState::Done);
+}

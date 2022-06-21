@@ -37,3 +37,21 @@ String ScriptMessage::toString() const
 {
 	return type.message + "(" + params.asString() + ")";
 }
+
+
+
+ScriptEntityMessageType::ScriptEntityMessageType(const ConfigNode& node)
+{
+	if (node.getType() == ConfigNodeType::Map) {
+		message = node["message"].asString("");
+		members = node["members"].asVector<String>({});
+	}
+}
+
+ConfigNode ScriptEntityMessageType::toConfig() const
+{
+	ConfigNode::MapType result;
+	result["message"] = message;
+	result["members"] = members;
+	return result;
+}

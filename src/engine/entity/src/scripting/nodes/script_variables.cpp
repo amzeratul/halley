@@ -229,11 +229,11 @@ std::pair<String, Vector<ColourOverride>> ScriptHoldVariable::getNodeDescription
 	const auto label2 = !node.getPin(3).hasConnection() ? toString(node.getSettings()["defaultPrevValue"].asInt(0)) : "";
 
 	auto str = ColourStringBuilder(true);
-	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	str.append(getConnectedNodeName(world, node, graph, 4), parameterColour);
 	str.append(" := ");
 	str.append(label1.isEmpty() ? getConnectedNodeName(world, node, graph, 2) : label1, parameterColour);
 	str.append(", then ");
-	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	str.append(getConnectedNodeName(world, node, graph, 4), parameterColour);
 	str.append(" := ");
 	str.append(label2.isEmpty() ? getConnectedNodeName(world, node, graph, 3) : label2, parameterColour);
 	return str.moveResults();
