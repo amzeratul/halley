@@ -311,7 +311,8 @@ std::optional<ScriptNodeId> ScriptGraph::getMessageInboxId(const String& message
 	for (size_t i = 0; i < nodes.size(); ++i) {
 		const auto& node = nodes[i];
 		if (node.getType() == "receiveMessage") {
-			const bool ok = dynamic_cast<const ScriptReceiveMessage&>(node.getNodeType()).canReceiveMessage(node, messageId, requiresSpawningScript);
+			ScriptReceiveMessage nodeType;
+			const bool ok = nodeType.canReceiveMessage(node, messageId, requiresSpawningScript);
 			if (ok) {
 				return static_cast<ScriptNodeId>(i);
 			}
@@ -326,11 +327,27 @@ Vector<String> ScriptGraph::getMessageNames() const
 	for (size_t i = 0; i < nodes.size(); ++i) {
 		const auto& node = nodes[i];
 		if (node.getType() == "receiveMessage") {
-			auto [msg, params] = dynamic_cast<const ScriptReceiveMessage&>(node.getNodeType()).getMessageIdAndParams(node);
+			ScriptReceiveMessage nodeType;
+			auto [msg, params] = nodeType.getMessageIdAndParams(node);
 			result.push_back(std::move(msg));
 		}
 	}
 	return result;
+}
+
+int ScriptGraph::getMessageNumParams(const String& messageId) const
+{
+	for (size_t i = 0; i < nodes.size(); ++i) {
+		const auto& node = nodes[i];
+		if (node.getType() == "receiveMessage") {
+			ScriptReceiveMessage nodeType;
+			const auto [msg, params] = nodeType.getMessageIdAndParams(node);
+			if (msg == messageId) {
+				return params;
+			}
+		}
+	}
+	return 0;
 }
 
 bool ScriptGraph::connectPins(ScriptNodeId srcNodeIdx, ScriptPinId srcPinN, ScriptNodeId dstNodeIdx, ScriptPinId dstPinN)

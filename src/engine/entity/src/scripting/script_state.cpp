@@ -451,7 +451,7 @@ bool ScriptState::processMessage(ScriptMessage& msg)
 			auto& state = getNodeState(*inboxId);
 			assert(state.data);
 
-			const auto& receiveMsgNode = dynamic_cast<const ScriptReceiveMessage&>(node.getNodeType());
+			ScriptReceiveMessage receiveMsgNode;
 			const bool accepted = receiveMsgNode.tryReceiveMessage(node, *dynamic_cast<ScriptReceiveMessageData*>(state.data), msg);
 			if (accepted) {
 				threads.push_back(ScriptStateThread(*inboxId));

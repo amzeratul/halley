@@ -113,6 +113,7 @@ namespace Halley {
 		String toYAML() const;
 
 		Vector<String> getMessageNames() const;
+		int getMessageNumParams(const String& messageId) const;
 
 		static std::shared_ptr<ScriptGraph> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::ScriptGraph; }

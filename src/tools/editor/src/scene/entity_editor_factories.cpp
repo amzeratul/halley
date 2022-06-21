@@ -1385,9 +1385,23 @@ public:
 		container->add(context.makeLabel("Script"));
 		container->add(std::make_shared<SelectAssetWidget>("script", context.getUIFactory(), AssetType::ScriptGraph, context.getGameResources(), context.getProjectWindow()));
 		container->add(context.makeLabel("Message"));
-		container->add(std::make_shared<UIDropdown>("message", dropStyle));
+		container->add(std::make_shared<UIDropdown>("messageId", dropStyle));
 
-		auto updateScript = [container, data, &resources] (const String& scriptName)
+		auto updateMessage = [&context, &resources, data](String newVal)
+		{
+			int nParams = 0;
+			const auto scriptName = data.getFieldData()["script"].asString("");
+			if (!scriptName.isEmpty()) {
+				const auto script = resources.get<ScriptGraph>(scriptName);
+				nParams = script->getMessageNumParams(newVal);
+			}
+
+			data.getWriteableFieldData()["message"] = ConfigNode(std::move(newVal));
+			data.getWriteableFieldData()["nParams"] = ConfigNode(nParams);
+			context.onEntityUpdated();
+		};
+
+		auto updateScript = [container, data, &resources, updateMessage] (const String& scriptName)
 		{
 			Vector<String> messages;
 
@@ -1396,22 +1410,20 @@ public:
 				messages = script->getMessageNames();
 			}
 
-			auto message = container->getWidgetAs<UIDropdown>("message");
+			auto message = container->getWidgetAs<UIDropdown>("messageId");
 			message->setOptions(messages);
 			message->setSelectedOption(data.getFieldData()["message"].asString(""));
+			updateMessage(message->getSelectedOptionId());
 		};
+
+		container->bindData("messageId", fieldData["message"].asString(""), updateMessage);
+		
 		updateScript(fieldData["script"].asString(""));
 
 		container->bindData("script", fieldData["script"].asString(""), [&context, data, updateScript](String newVal)
 		{
+			data.getWriteableFieldData()["script"] = ConfigNode(newVal);
 			updateScript(newVal);
-			data.getWriteableFieldData()["script"] = ConfigNode(std::move(newVal));
-			context.onEntityUpdated();
-		});
-
-		container->bindData("message", fieldData["message"].asString(""), [&context, data](String newVal)
-		{
-			data.getWriteableFieldData()["message"] = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 
