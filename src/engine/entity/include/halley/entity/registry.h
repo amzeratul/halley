@@ -15,5 +15,7 @@ namespace Halley {
 	CreateComponentFunctionResult createComponent(const EntityFactoryContext& context, const String& name, EntityRef& entity, const ConfigNode& componentData);
 	ComponentReflector& getComponentReflector(int componentId);
 	std::unique_ptr<Message> createMessage(int msgId);
+	std::unique_ptr<Message> createMessageByName(const String& msgName);
 	std::unique_ptr<SystemMessage> createSystemMessage(int msgId);
+	std::unique_ptr<SystemMessage> createSystemMessageByName(const String& msgName);
 }
