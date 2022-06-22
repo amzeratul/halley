@@ -1,4 +1,4 @@
-// Halley codegen version 105
+// Halley codegen version 110
 #include <halley.hpp>
 using namespace Halley;
 
@@ -88,6 +88,19 @@ static SystemMessageFactoryList makeSystemMessageFactories() {
 	return result;
 }
 
+
+using MessageNames = Halley::HashMap<Halley::String, size_t>;
+
+static MessageNames makeMessageNames() {
+	MessageNames result;
+	return result;
+}
+
+static MessageNames makeSystemMessageNames() {
+	MessageNames result;
+	return result;
+}
+
 namespace Halley {
 	std::unique_ptr<System> createSystem(String name) {
 		static SystemFactoryMap factories = makeSystemFactories();
@@ -112,9 +125,19 @@ namespace Halley {
 		return factories.at(msgId)();
 	}
 
+	std::unique_ptr<Halley::Message> createMessageByName(const Halley::String msgName) {
+		static MessageNames names = makeMessageNames();
+		return createMessage(static_cast<int>(names.at(msgName)));
+	}
+
 	std::unique_ptr<Halley::SystemMessage> createSystemMessage(int msgId) {
 		static SystemMessageFactoryList factories = makeSystemMessageFactories();
 		return factories.at(msgId)();
+	}
+
+	std::unique_ptr<Halley::Message> createSystemMessageByName(const Halley::String msgName) {
+		static MessageNames names = makeSystemMessageNames();
+		return createMessage(static_cast<int>(names.at(msgName)));
 	}
 
 	ComponentReflector& getComponentReflector(int componentId) {

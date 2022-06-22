@@ -204,6 +204,41 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"	return result;",
 		"}"
 	});
+
+	// Message names
+	registryCpp.insert(registryCpp.end(), {
+		"",
+		"",
+		"using MessageNames = Halley::HashMap<Halley::String, size_t>;",
+		"",
+		"static MessageNames makeMessageNames() {",
+		"	MessageNames result;"
+	});
+
+	for (size_t i = 0; i < messages.size(); ++i) {
+		registryCpp.push_back("	result[\"" + messages[i].name + "\"] = " + toString(i) + ";");
+	}
+
+	registryCpp.insert(registryCpp.end(), {
+		"	return result;",
+		"}"
+	});
+
+	// System message names
+	registryCpp.insert(registryCpp.end(), {
+		"",
+		"static MessageNames makeSystemMessageNames() {",
+		"	MessageNames result;"
+	});
+
+	for (size_t i = 0; i < systemMessages.size(); ++i) {
+		registryCpp.push_back("	result[\"" + systemMessages[i].name + "\"] = " + toString(i) + ";");
+	}
+
+	registryCpp.insert(registryCpp.end(), {
+		"	return result;",
+		"}"
+	});
 	
 	// Create system and component methods
 	registryCpp.insert(registryCpp.end(), {
@@ -232,9 +267,19 @@ CodeGenResult CodegenCPP::generateRegistry(const Vector<ComponentSchema>& compon
 		"		return factories.at(msgId)();",
 		"	}",
 		"",
+		"	std::unique_ptr<Halley::Message> createMessageByName(const Halley::String msgName) {",
+		"		static MessageNames names = makeMessageNames();",
+		"		return createMessage(static_cast<int>(names.at(msgName)));",
+		"	}",
+		"",
 		"	std::unique_ptr<Halley::SystemMessage> createSystemMessage(int msgId) {",
 		"		static SystemMessageFactoryList factories = makeSystemMessageFactories();",
 		"		return factories.at(msgId)();",
+		"	}",
+		"",
+		"	std::unique_ptr<Halley::Message> createSystemMessageByName(const Halley::String msgName) {",
+		"		static MessageNames names = makeSystemMessageNames();",
+		"		return createMessage(static_cast<int>(names.at(msgName)));",
 		"	}",
 		"",
 		"	ComponentReflector& getComponentReflector(int componentId) {",
