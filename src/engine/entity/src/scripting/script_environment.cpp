@@ -378,6 +378,11 @@ void ScriptEnvironment::sendMessage(EntityId dstEntity, ScriptMessage message)
 	outBox.emplace_back(dstEntity, std::move(message));
 }
 
+void ScriptEnvironment::sendEntityMessage(EntityId dstEntity, const String& messageId, ConfigNode args)
+{
+	// TODO
+}
+
 Vector<std::pair<EntityId, ScriptMessage>> ScriptEnvironment::getOutboundMessages()
 {
 	return std::move(outBox);

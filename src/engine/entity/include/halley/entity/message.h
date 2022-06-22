@@ -9,6 +9,8 @@ namespace Halley
 {
 	class Deserializer;
 	class Serializer;
+	class EntitySerializationContext;
+	class ConfigNode;
 
 	class Message
 	{
@@ -22,6 +24,11 @@ namespace Halley
 		}
 		
 		virtual void deserialize(Deserializer& s)
+		{
+			throw Exception("Message " + String(typeid(*this).name()) + " is not serializable.", HalleyExceptions::Entity);
+		}
+
+		virtual void deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 		{
 			throw Exception("Message " + String(typeid(*this).name()) + " is not serializable.", HalleyExceptions::Entity);
 		}

@@ -778,24 +778,37 @@ Vector<String> CodegenCPP::generateMessageHeader(const MessageSchema& message, c
 	if (message.serializable) {
 		String serializeBody;
 		String deserializeBody;
+		String configDeserializeBody;
+
+		configDeserializeBody += "using namespace Halley::EntitySerialization;";
 
 		bool first = true;
 		for (auto& m: message.members) {
+			const String lineBreak = getPlatform() == GamePlatform::Windows ? "\r\n\t\t" : "\n\t\t";
 			if (first) {
 				first = false;
 			} else {
-				const String lineBreak = getPlatform() == GamePlatform::Windows ? "\r\n\t\t" : "\n\t\t";
 				serializeBody += lineBreak;
 				deserializeBody += lineBreak;
 			}
 			serializeBody += "s << " + m.name + ";";
 			deserializeBody += "s >> " + m.name + ";";
+			configDeserializeBody += lineBreak;
+
+			Vector<String> serializationTypes;
+			for (auto t: { EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData, EntitySerialization::Type::Network }) {
+				serializationTypes.push_back("Type::" + toString(t));
+			}
+			String mask = "makeMask(" + String::concatList(serializationTypes, ", ") + ")";
+			configDeserializeBody += "Halley::EntityConfigNodeSerializer<decltype(" + m.name + ")>::deserialize(" + m.name + ", " + CPPClassGenerator::getAnonString(m) + ", context, node, \"\", \"" + m.name + "\", " + mask + ");";
 		}
 
 		gen.addBlankLine();
-		gen.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Serializer&"), "s") }, "serialize", true, false, true, true), serializeBody);
+		gen.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::Serializer&"), "s") }, "serialize", true, false, true, true), serializeBody);
 		gen.addBlankLine();
-		gen.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Deserializer&"), "s") }, "deserialize", false, false, true, true), deserializeBody);
+		gen.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::Deserializer&"), "s") }, "deserialize", false, false, true, true), deserializeBody);
+		gen.addBlankLine();
+		gen.addMethodDefinition(MethodSchema(TypeSchema("void"), { VariableSchema(TypeSchema("Halley::EntitySerializationContext&", true), "context"), VariableSchema(TypeSchema("Halley::ConfigNode&", true), "node") }, "deserialize", false, false, true, true), configDeserializeBody);
 	}
 
 	gen.finish().writeTo(contents);

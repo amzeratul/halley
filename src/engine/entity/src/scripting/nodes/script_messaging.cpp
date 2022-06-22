@@ -231,10 +231,13 @@ Vector<IScriptNodeType::SettingType> ScriptSendEntityMessage::getSettingTypes() 
 
 gsl::span<const IScriptNodeType::PinType> ScriptSendEntityMessage::getPinConfiguration(const ScriptGraphNode& node) const
 {
+	const auto msgType = ScriptEntityMessageType(node.getSettings()["message"]);
+
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
-	return data;
+	const static auto data = std::array<PinType, 7>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
+	return gsl::span<const PinType>(data).subspan(0, 3 + msgType.members.size());
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptSendEntityMessage::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
@@ -244,15 +247,32 @@ std::pair<String, Vector<ColourOverride>> ScriptSendEntityMessage::getNodeDescri
 	auto str = ColourStringBuilder(true);
 	str.append("Send message ");
 	str.append(msgType.message, parameterColour);
-	str.append(" to entity ");
+	str.append("(");
+
+	size_t i = 0;
+	for (const auto& m: msgType.members) {
+		str.append(m + " = ");
+		str.append(getConnectedNodeName(world, node, graph, 3 + i), parameterColour);
+		++i;
+	}
+
+	str.append(") to entity ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	return str.moveResults();
 }
 
 IScriptNodeType::Result ScriptSendEntityMessage::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
+	const auto target = readEntityId(environment, node, 2);
 	const auto msgType = ScriptEntityMessageType(node.getSettings()["message"]);
 	
-	// TODO
+	auto args = ConfigNode::MapType();
+	size_t i = 0;
+	for (const auto& m: msgType.members) {
+		args[m] = readDataPin(environment, node, 3 + i);
+		++i;
+	}
+	environment.sendEntityMessage(target, msgType.message, std::move(args));
+
 	return Result(ScriptNodeExecutionState::Done);
 }

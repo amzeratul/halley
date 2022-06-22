@@ -50,7 +50,9 @@ namespace Halley {
         Resources& getResources();
 
     	void sendMessage(EntityId dstEntity, ScriptMessage message);
-        Vector<std::pair<EntityId, ScriptMessage>> getOutboundMessages();
+        void sendEntityMessage(EntityId dstEntity, const String& messageId, ConfigNode args);
+
+    	Vector<std::pair<EntityId, ScriptMessage>> getOutboundMessages();
 
     protected:
 		const HalleyAPI& api;
