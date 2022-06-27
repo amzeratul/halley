@@ -446,6 +446,9 @@ namespace Halley {
 
 		EntityId getEntityId() const
 		{
+			if (!entity) {
+				return EntityId();
+			}
 			validate();
 			return entity->getEntityId();
 		}

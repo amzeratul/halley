@@ -287,4 +287,16 @@ namespace std_ex {
 		}
 		source.clear();
 	};
+
+	template <typename C, typename F>
+	Halley::Vector<std::invoke_result_t<F, typename C::value_type>> transform(const C& container, const F& predicate)
+	{
+		using T = Halley::Vector<std::invoke_result_t<F, typename C::value_type>>;
+		T result;
+		result.reserve(container.size());
+		for (const auto& v: container) {
+			result.emplace_back(predicate(v));
+		}
+		return result;
+	}
 }
