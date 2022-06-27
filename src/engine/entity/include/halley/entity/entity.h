@@ -636,7 +636,11 @@ namespace Halley {
 
 		bool operator==(const EntityRef& other) const
 		{
-			return entity == other.entity && world == other.world;
+			return entity == other.entity && world == other.world
+#ifdef _DEBUG
+			&& entityId == other.entityId
+#endif
+			;
 		}
 
 		bool operator!=(const EntityRef& other) const

@@ -226,8 +226,8 @@ void SceneEditor::drawOverlay(Painter& painter, Rect4f view)
 			drawStr += "\nWorld: " + Vector2i(worldPos);
 		}
 
-		if (!selectedEntities.empty()) {
-			const auto* t2d = selectedEntities.front().tryGetComponent<Transform2DComponent>();
+		if (!selectedEntityIds.empty()) {
+			const auto* t2d = world->getEntity(selectedEntityIds.front()).tryGetComponent<Transform2DComponent>();
 			colours.emplace_back(drawStr.size(), Colour4f(0.8f, 0.8f, 1.0f));
 			if (t2d) {
 				const auto objectPos = Vector2i(t2d->inverseTransformPoint(Vector2f(scenePos)));
@@ -256,7 +256,7 @@ Vector<EntityId> SceneEditor::createCamera()
 	});
 }
 
-void SceneEditor::onEntitiesSelected(Vector<EntityRef> entities)
+void SceneEditor::onEntitiesSelected(Vector<EntityId> entities)
 {
 }
 
@@ -493,22 +493,15 @@ void SceneEditor::setSelectedEntities(Vector<UUID> uuids, Vector<EntityData*> en
 {
 	Expects(uuids.size() == entityDatas.size());
 	
-	selectedEntities.resize(uuids.size());
+	selectedEntityIds.resize(uuids.size());
 	for (size_t i = 0; i < uuids.size(); ++i) {
-		auto& selectedEntity = selectedEntities[i];
-		const auto& id = uuids[i];
-		const auto& curId = selectedEntity.isValid() ? selectedEntity.getInstanceUUID() : UUID();
-		if (id != curId) {
-			selectedEntity = EntityRef();
-			if (id.isValid()) {
-				selectedEntity = getWorld().findEntity(id).value_or(EntityRef());
-			}
-		}
+		selectedEntityIds[i] = getWorld().findEntity(uuids[i]).value_or(EntityRef()).getEntityId();
 	}
 
-	gizmoCollection->setSelectedEntities(selectedEntities, std::move(entityDatas));
+	auto selectedEntities = std_ex::transform(selectedEntityIds, [=] (EntityId id) { return getWorld().getEntity(id); });
+	gizmoCollection->setSelectedEntities(std::move(selectedEntities), std::move(entityDatas));
 
-	onEntitiesSelected(selectedEntities);
+	onEntitiesSelected(selectedEntityIds);
 	updateEntityFocused();
 }
 
@@ -585,12 +578,6 @@ void SceneEditor::onInit(std::shared_ptr<const UIColourScheme> colourScheme)
 
 EntityRef SceneEditor::getEntity(const UUID& id) const
 {
-	// Optimization: this will most likely be a selected entity
-	for (const auto& e: selectedEntities) {
-		if (e.getInstanceUUID() == id) {
-			return e;
-		}
-	}
 	return getWorld().findEntity(id).value();
 }
 
@@ -700,9 +687,9 @@ void SceneEditor::onStartSelectionBox()
 {
 	if (!selBox) {
 		selBoxStartSelectedEntities.clear();
-		selBoxStartSelectedEntities.reserve(selectedEntities.size());
-		for (const auto& e: selectedEntities) {
-			selBoxStartSelectedEntities.push_back(e.getInstanceUUID());
+		selBoxStartSelectedEntities.reserve(selectedEntityIds.size());
+		for (const auto& e: selectedEntityIds) {
+			selBoxStartSelectedEntities.push_back(world->getEntity(e).getInstanceUUID());
 		}
 	}
 	selBox = Rect4f(holdMouseStart.value(), mousePos.value());

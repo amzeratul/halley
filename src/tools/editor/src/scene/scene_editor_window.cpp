@@ -641,13 +641,7 @@ void SceneEditorWindow::moveEntities(gsl::span<const EntityChangeOperation> orig
 		entityList->refreshList();
 	}
 
-	// Not sure why this is all needed
-	auto curSorted = currentEntityIds;
-	std::sort(curSorted.begin(), curSorted.end());
-	std::sort(ids.begin(), ids.end());
-	if (!curSorted.empty() && curSorted == ids) {
-		onEntitiesSelected(entityList->getCurrentSelections());
-	}
+	onEntitiesSelected(entityList->getCurrentSelections());
 
 	undoStack.pushMoved(modified, forward, back);
 	
