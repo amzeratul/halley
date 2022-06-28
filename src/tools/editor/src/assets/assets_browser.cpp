@@ -346,7 +346,7 @@ void AssetsBrowser::updateAddRemoveButtons()
 	// TODO: refactor updateAddRemoveButtons/addAsset/removeAsset?
 	
 	const auto stem = curSrcPath.getFront(1).string();
-	const bool canAdd = stem == "prefab" || stem == "scene" || stem == "audio_object" || stem == "audio_event" || stem == "ui";
+	const bool canAdd = stem == "prefab" || stem == "scene" || stem == "audio_object" || stem == "audio_event" || stem == "ui" || stem == "comet";
 	const bool canRemove = !lastClickedAsset.isEmpty() && !lastClickedAsset.endsWith("/.");
 
 	getWidget("addAsset")->setEnabled(canAdd);
@@ -382,6 +382,10 @@ void AssetsBrowser::addAsset()
 				UIDefinition ui;
 				ui.makeDefault();
 				addAsset(newName.value() + ".yaml", ui.toYAML());
+			} else if (assetType == "comet") {
+				ScriptGraph graph;
+				graph.makeDefault();
+				addAsset(newName.value() + ".comet", graph.toYAML());
 			}
 		}
 	}));
