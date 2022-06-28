@@ -63,12 +63,13 @@ namespace Halley {
 		DeltaMap, // For delta coding
 		Noop, // For delta coding
 		Idx, // For delta coding
-		Del // For delta coding
+		Del, // For delta coding
+		Int64
 	};
 
 	template <>
 	struct EnumNames<ConfigNodeType> {
-		constexpr std::array<const char*, 13> operator()() const {
+		constexpr std::array<const char*, 15> operator()() const {
 			return{{
 				"undefined",
 				"string",
@@ -82,8 +83,9 @@ namespace Halley {
 				"deltaSequence",
 				"deltaMap",
 				"noop",
-				"idx"
-				"del"
+				"idx",
+				"del",
+				"int64"
 			}};
 		}
 	};
@@ -119,6 +121,7 @@ namespace Halley {
 		explicit ConfigNode(const std::string_view& value);
 		explicit ConfigNode(bool value);
 		explicit ConfigNode(int value);
+		explicit ConfigNode(int64_t value);
 		explicit ConfigNode(float value);
 		explicit ConfigNode(Vector2i value);
 		explicit ConfigNode(Vector2f value);
@@ -149,6 +152,7 @@ namespace Halley {
 		ConfigNode& operator=(ConfigNode&& other) noexcept;
 		ConfigNode& operator=(bool value);
 		ConfigNode& operator=(int value);
+		ConfigNode& operator=(int64_t value);
 		ConfigNode& operator=(float value);
 		ConfigNode& operator=(Vector2i value);
 		ConfigNode& operator=(Vector2f value);
@@ -227,6 +231,7 @@ namespace Halley {
 		void deserialize(Deserializer& s);
 
 		int asInt() const;
+		int64_t asInt64() const;
 		float asFloat() const;
 		bool asBool() const;
 		Vector2i asVector2i() const;
@@ -240,6 +245,7 @@ namespace Halley {
 		const Bytes& asBytes() const;
 
 		int asInt(int defaultValue) const;
+		int64_t asInt64(int64_t defaultValue) const;
 		float asFloat(float defaultValue) const;
 		bool asBool(bool defaultValue) const;
 		String asString(const std::string_view& defaultValue) const;
@@ -418,6 +424,7 @@ namespace Halley {
 			float floatData;
 			Vector2i vec2iData;
 			Vector2f vec2fData;
+			int64_t int64Data;
 		};
 		ConfigNodeType type = ConfigNodeType::Undefined;
 		int auxData = 0; // Used by delta coding
@@ -447,6 +454,7 @@ namespace Halley {
 		String backTrackFullNodeName() const;
 
 		int convertTo(Tag<int> tag) const;
+		int64_t convertTo(Tag<int64_t> tag) const;
 		float convertTo(Tag<float> tag) const;
 		bool convertTo(Tag<bool> tag) const;
 		uint8_t convertTo(Tag<uint8_t> tag) const;

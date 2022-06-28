@@ -49,6 +49,11 @@ ConfigNode::ConfigNode(int value)
 	operator=(value);
 }
 
+ConfigNode::ConfigNode(int64_t value)
+{
+	operator=(value);
+}
+
 ConfigNode::ConfigNode(float value)
 {
 	operator=(value);
@@ -192,6 +197,14 @@ ConfigNode& ConfigNode::operator=(int value)
 	reset();
 	type = ConfigNodeType::Int;
 	intData = value;
+	return *this;
+}
+
+ConfigNode& ConfigNode::operator=(int64_t value)
+{
+	reset();
+	type = ConfigNodeType::Int64;
+	int64Data = value;
 	return *this;
 }
 
@@ -505,6 +518,23 @@ int ConfigNode::asInt() const
 		return int(floatData);
 	} else if (type == ConfigNodeType::String) {
 		return asString().toInteger();
+	} else if (type == ConfigNodeType::Int64) {
+		return int(int64Data);
+	} else {
+		throw Exception(getNodeDebugId() + " cannot be converted to int.", HalleyExceptions::Resources);
+	}
+}
+
+int64_t ConfigNode::asInt64() const
+{
+	if (type == ConfigNodeType::Int64) {
+		return int64Data;
+	} else if (type == ConfigNodeType::Int) {
+		return intData;
+	} else if (type == ConfigNodeType::Float) {
+		return int(floatData);
+	} else if (type == ConfigNodeType::String) {
+		return asString().toInteger();
 	} else {
 		throw Exception(getNodeDebugId() + " cannot be converted to int.", HalleyExceptions::Resources);
 	}
@@ -516,6 +546,8 @@ float ConfigNode::asFloat() const
 		return float(intData);
 	} else if (type == ConfigNodeType::Float) {
 		return floatData;
+	} else if (type == ConfigNodeType::Int64) {
+		return float(int64Data);
 	} else if (type == ConfigNodeType::String) {
 		return asString().toFloat();
 	} else {
@@ -527,8 +559,10 @@ bool ConfigNode::asBool() const
 {
 	if (type == ConfigNodeType::Int) {
 		return intData != 0;
-	} if (type == ConfigNodeType::Float) {
+	} else if (type == ConfigNodeType::Float) {
 		return floatData != 0;
+	} else if (type == ConfigNodeType::Int64) {
+		return int64Data != 0;
 	} else {
 		return asString() == "true";
 	}
@@ -702,6 +736,8 @@ String ConfigNode::asString() const
 		return *strData;
 	} else if (type == ConfigNodeType::Int) {
 		return toString(asInt());
+	} else if (type == ConfigNodeType::Int64) {
+		return toString(asInt64());
 	} else if (type == ConfigNodeType::Float) {
 		return toString(asFloat());
 	} else if (type == ConfigNodeType::Sequence) {
@@ -737,6 +773,15 @@ int ConfigNode::asInt(int defaultValue) const
 		return defaultValue;
 	} else {
 		return asInt();
+	}
+}
+
+int64_t ConfigNode::asInt64(int64_t defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return defaultValue;
+	} else {
+		return asInt64();
 	}
 }
 
@@ -812,6 +857,9 @@ void ConfigNode::ensureType(ConfigNodeType t)
 			break;
 		case ConfigNodeType::Int2:
 			*this = Vector2i();
+			break;
+		case ConfigNodeType::Int64:
+			*this = int64_t(0);
 			break;
 		case ConfigNodeType::Float:
 			*this = 0.0f;
@@ -1050,6 +1098,11 @@ int ConfigNode::convertTo(Tag<int> tag) const
 	return asInt();
 }
 
+int64_t ConfigNode::convertTo(Tag<int64_t> tag) const
+{
+	return asInt64();
+}
+
 float ConfigNode::convertTo(Tag<float> tag) const
 {
 	return asFloat();
@@ -1077,7 +1130,7 @@ uint32_t ConfigNode::convertTo(Tag<uint32_t> tag) const
 
 uint64_t ConfigNode::convertTo(Tag<uint64_t> tag) const
 {
-	return asInt();
+	return asInt64();
 }
 
 Vector2i ConfigNode::convertTo(Tag<Vector2i> tag) const
