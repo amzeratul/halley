@@ -41,10 +41,19 @@ namespace Halley {
 		virtual bool isHost() = 0;
 	};
 
+	struct WorldReflection {
+		CreateComponentFunction createComponent;
+		CreateMessageFunction createMessage;
+		CreateMessageByNameFunction createMessageByName;
+		CreateSystemMessageFunction createSystemMessage;
+		CreateSystemMessageByNameFunction createSystemMessageByName;
+		CreateSystemFunction createSystem;
+	};
+
 	class World
 	{
 	public:
-		World(const HalleyAPI& api, Resources& resources, CreateComponentFunction createComponent, CreateMessageFunction createMessage, CreateSystemMessageFunction createSystemMessage);
+		World(const HalleyAPI& api, Resources& resources, WorldReflection reflection);
 		~World();
 
 		static std::unique_ptr<World> make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode);
@@ -61,7 +70,7 @@ namespace Halley {
 		const Vector<std::unique_ptr<System>>& getSystems(TimeLine timeline) const;
 
 		Service& addService(std::shared_ptr<Service> service);
-		void loadSystems(const ConfigNode& config, std::function<std::unique_ptr<System>(String)> createFunction);
+		void loadSystems(const ConfigNode& config);
 
 		template <typename T>
 		T& getService()
@@ -143,7 +152,9 @@ namespace Halley {
 		void sendNetworkMessage(EntityId entityId, int messageId, std::unique_ptr<Message> msg);
 		void sendNetworkSystemMessage(const String& targetSystem, const SystemMessageContext& context, SystemMessageDestination destination);
 		std::unique_ptr<Message> deserializeMessage(int msgId, gsl::span<const std::byte> data);
+		std::unique_ptr<Message> deserializeMessage(const String& messageName, const ConfigNode& data);
 		std::unique_ptr<SystemMessage> deserializeSystemMessage(int msgId, gsl::span<const std::byte> data);
+		std::unique_ptr<SystemMessage> deserializeSystemMessage(const String& messageName, const ConfigNode& data);
 
 		bool isDevMode() const;
 
@@ -154,9 +165,7 @@ namespace Halley {
 		const HalleyAPI& api;
 		Resources& resources;
 		std::array<Vector<std::unique_ptr<System>>, static_cast<int>(TimeLine::NUMBER_OF_TIMELINES)> systems;
-		CreateComponentFunction createComponent;
-		CreateMessageFunction createMessage;
-		CreateSystemMessageFunction createSystemMessage;
+		WorldReflection reflection;
 		bool entityDirty = false;
 		bool entityReloaded = false;
 		bool editor = false;

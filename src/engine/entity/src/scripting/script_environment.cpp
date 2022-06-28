@@ -373,19 +373,48 @@ Resources& ScriptEnvironment::getResources()
 	return resources;
 }
 
-void ScriptEnvironment::sendMessage(EntityId dstEntity, ScriptMessage message)
+void ScriptEnvironment::sendScriptMessage(EntityId dstEntity, ScriptMessage message)
 {
-	outBox.emplace_back(dstEntity, std::move(message));
+	if (!dstEntity.isValid()) {
+		dstEntity = currentEntity;
+	}
+
+	scriptOutbox.emplace_back(dstEntity, std::move(message));
 }
 
-void ScriptEnvironment::sendEntityMessage(EntityId dstEntity, const String& messageId, ConfigNode args)
+void ScriptEnvironment::sendEntityMessage(EntityMessageData message)
 {
-	// TODO
+	Expects(!message.messageName.isEmpty());
+
+	if (!message.targetEntity.isValid()) {
+		message.targetEntity = currentEntity;
+	}
+
+	entityOutbox.emplace_back(std::move(message));
 }
 
-Vector<std::pair<EntityId, ScriptMessage>> ScriptEnvironment::getOutboundMessages()
+void ScriptEnvironment::sendSystemMessage(SystemMessageData message)
 {
-	return std::move(outBox);
+	auto msg = world.deserializeSystemMessage(message.messageName, message.messageData);
+	const auto dst = msg->getMessageDestination();
+	const auto id = msg->getId();
+
+	SystemMessageContext context;
+	context.msg = std::move(msg);
+	context.msgId = id;
+	context.remote = false;
+
+	world.sendSystemMessage(std::move(context), message.targetSystem, dst);
+}
+
+Vector<std::pair<EntityId, ScriptMessage>> ScriptEnvironment::getOutboundScriptMessages()
+{
+	return std::move(scriptOutbox);
+}
+
+Vector<ScriptEnvironment::EntityMessageData> ScriptEnvironment::getOutboundEntityMessages()
+{
+	return std::move(entityOutbox);
 }
 
 IScriptStateData* ScriptEnvironment::getNodeData(ScriptNodeId nodeId)

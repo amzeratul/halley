@@ -20,12 +20,10 @@
 
 using namespace Halley;
 
-World::World(const HalleyAPI& api, Resources& resources, CreateComponentFunction createComponent, CreateMessageFunction createMessage, CreateSystemMessageFunction createSystemMessage)
+World::World(const HalleyAPI& api, Resources& resources, WorldReflection reflection)
 	: api(api)
 	, resources(resources)
-	, createComponent(std::move(createComponent))
-	, createMessage(std::move(createMessage))
-	, createSystemMessage(std::move(createSystemMessage))
+	, reflection(std::move(reflection))
 	, maskStorage(FamilyMask::MaskStorageInterface::createStorage())
 	, componentDeleterTable(std::make_shared<ComponentDeleterTable>())
 	, entityPool(std::make_shared<PoolAllocator<Entity>>())
@@ -59,9 +57,18 @@ World::~World()
 
 std::unique_ptr<World> World::make(const HalleyAPI& api, Resources& resources, const String& sceneName, bool devMode)
 {
-	auto world = std::make_unique<World>(api, resources, CreateEntityFunctions::getCreateComponent(), CreateEntityFunctions::getCreateMessage(), CreateEntityFunctions::getCreateSystemMessage());
+	auto reflection = WorldReflection {
+		CreateEntityFunctions::getCreateComponent(),
+		CreateEntityFunctions::getCreateMessage(),
+		CreateEntityFunctions::getCreateMessageByName(),
+		CreateEntityFunctions::getCreateSystemMessage(),
+		CreateEntityFunctions::getCreateSystemMessageByName(),
+		CreateEntityFunctions::getCreateSystem()
+	};
+
+	auto world = std::make_unique<World>(api, resources, std::move(reflection));
 	const auto& sceneConfig = resources.get<ConfigFile>(sceneName)->getRoot();
-	world->loadSystems(sceneConfig, CreateEntityFunctions::getCreateSystem());
+	world->loadSystems(sceneConfig);
 	return world;
 }
 
@@ -137,7 +144,7 @@ Service& World::addService(std::shared_ptr<Service> service)
 	return ref;
 }
 
-void World::loadSystems(const ConfigNode& root, std::function<std::unique_ptr<System>(String)> createFunction)
+void World::loadSystems(const ConfigNode& root)
 {
 	auto timelines = root["timelines"].asMap();
 	for (auto iter = timelines.begin(); iter != timelines.end(); ++iter) {
@@ -155,7 +162,7 @@ void World::loadSystems(const ConfigNode& root, std::function<std::unique_ptr<Sy
 
 		for (auto& sysName: iter->second) {
 			String name = sysName.asString();
-			addSystem(createFunction(name + "System"), timeline).setName(name);
+			addSystem(reflection.createSystem(name + "System"), timeline).setName(name);
 		}
 	}
 }
@@ -369,7 +376,7 @@ void World::setEntityReloaded()
 
 const CreateComponentFunction& World::getCreateComponentFunction() const
 {
-	return createComponent;
+	return reflection.createComponent;
 }
 
 MaskStorage& World::getMaskStorage() const noexcept
@@ -757,7 +764,7 @@ void World::sendNetworkSystemMessage(const String& targetSystem, const SystemMes
 
 std::unique_ptr<Message> World::deserializeMessage(int msgId, gsl::span<const std::byte> data)
 {
-	auto msg = createMessage(msgId);
+	auto msg = reflection.createMessage(msgId);
 
 	auto options = SerializerOptions(SerializerOptions::maxVersion);
 	options.world = this;
@@ -766,13 +773,35 @@ std::unique_ptr<Message> World::deserializeMessage(int msgId, gsl::span<const st
 	return msg;
 }
 
+std::unique_ptr<Message> World::deserializeMessage(const String& messageName, const ConfigNode& data)
+{
+	auto msg = reflection.createMessageByName(messageName);
+
+	EntitySerializationContext context;
+	context.resources = &resources;
+	msg->deserialize(context, data);
+
+	return msg;
+}
+
 std::unique_ptr<SystemMessage> World::deserializeSystemMessage(int msgId, gsl::span<const std::byte> data)
 {
-	auto msg = createSystemMessage(msgId);
+	auto msg = reflection.createSystemMessage(msgId);
 
 	auto options = SerializerOptions(SerializerOptions::maxVersion);
 	options.world = this;
 	Deserializer::fromBytes(*msg, data, options);
+
+	return msg;
+}
+
+std::unique_ptr<SystemMessage> World::deserializeSystemMessage(const String& messageName, const ConfigNode& data)
+{
+	auto msg = reflection.createSystemMessageByName(messageName);
+
+	EntitySerializationContext context;
+	context.resources = &resources;
+	msg->deserialize(context, data);
 
 	return msg;
 }

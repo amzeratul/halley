@@ -17,6 +17,7 @@ namespace Halley
 	public:
 		virtual ~Message() {}
 		virtual size_t getSize() const = 0;
+		virtual int getId() const = 0;
 
 		virtual void serialize(Serializer& s) const
 		{

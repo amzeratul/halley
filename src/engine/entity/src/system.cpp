@@ -19,12 +19,17 @@ bool SystemMessageBridge::isValid() const
 
 void SystemMessageBridge::sendMessageToEntity(EntityId target, int msgId, gsl::span<const gsl::byte> data)
 {
-	system->sendEntityMessageFromNetwork(target, msgId, data);
+	system->sendEntityMessage(target, msgId, data);
+}
+
+void SystemMessageBridge::sendMessageToEntity(EntityId target, const String& messageName, const ConfigNode& messageData)
+{
+	system->sendEntityMessageConfig(target, messageName, messageData);
 }
 
 void SystemMessageBridge::sendMessageToSystem(const String& targetSystem, int messageType, gsl::span<const std::byte> data, SystemMessageCallback callback)
 {
-	system->sendSystemMessageFromNetwork(targetSystem, messageType, data, std::move(callback));
+	system->sendSystemMessage(targetSystem, messageType, data, std::move(callback));
 }
 
 System::System(Vector<FamilyBindingBase*> uninitializedFamilies, Vector<int> messageTypesReceived)
@@ -162,12 +167,12 @@ size_t System::getSystemMessagesInInbox() const
 	return systemMessageInbox.size();
 }
 
-void System::sendEntityMessageFromNetwork(EntityId target, int msgId, gsl::span<const std::byte> data)
+void System::sendEntityMessage(EntityId target, int msgId, gsl::span<const std::byte> data)
 {
 	doSendMessage(target, world->deserializeMessage(msgId, data), msgId);
 }
 
-void System::sendSystemMessageFromNetwork(const String& targetSystem, int msgId, gsl::span<const std::byte> data, SystemMessageCallback callback)
+void System::sendSystemMessage(const String& targetSystem, int msgId, gsl::span<const std::byte> data, SystemMessageCallback callback)
 {
 	SystemMessageContext context;
 
@@ -177,6 +182,29 @@ void System::sendSystemMessageFromNetwork(const String& targetSystem, int msgId,
 	context.callback = callback;
 	
 	doSendSystemMessage(std::move(context), targetSystem, SystemMessageDestination::Local);
+}
+
+void System::sendEntityMessageConfig(EntityId target, const String& messageType, const ConfigNode& data)
+{
+	auto msg = world->deserializeMessage(messageType, data);
+	const auto id = msg->getId();
+	doSendMessage(target, std::move(msg), id);
+}
+
+void System::sendSystemMessageConfig(const String& targetSystem, const String& messageType, const ConfigNode& data)
+{
+	auto msg = world->deserializeSystemMessage(messageType, data);
+	auto destination = msg->getMessageDestination();
+
+	SystemMessageContext context;
+
+	context.msgId = msg->getId();
+	context.remote = false;
+	context.msg = std::move(msg);
+	//context.callback = [] () {};
+	
+	doSendSystemMessage(std::move(context), targetSystem, SystemMessageDestination::Local);
+
 }
 
 void System::doUpdate(Time time) {

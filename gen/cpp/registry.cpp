@@ -1,4 +1,4 @@
-// Halley codegen version 110
+// Halley codegen version 115
 #include <halley.hpp>
 using namespace Halley;
 
@@ -125,7 +125,7 @@ namespace Halley {
 		return factories.at(msgId)();
 	}
 
-	std::unique_ptr<Halley::Message> createMessageByName(const Halley::String msgName) {
+	std::unique_ptr<Halley::Message> createMessageByName(const Halley::String& msgName) {
 		static MessageNames names = makeMessageNames();
 		return createMessage(static_cast<int>(names.at(msgName)));
 	}
@@ -135,9 +135,9 @@ namespace Halley {
 		return factories.at(msgId)();
 	}
 
-	std::unique_ptr<Halley::Message> createSystemMessageByName(const Halley::String msgName) {
+	std::unique_ptr<Halley::SystemMessage> createSystemMessageByName(const Halley::String& msgName) {
 		static MessageNames names = makeSystemMessageNames();
-		return createMessage(static_cast<int>(names.at(msgName)));
+		return createSystemMessage(static_cast<int>(names.at(msgName)));
 	}
 
 	ComponentReflector& getComponentReflector(int componentId) {

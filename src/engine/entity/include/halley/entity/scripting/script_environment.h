@@ -9,6 +9,18 @@ namespace Halley {
 	
     class ScriptEnvironment: private IEntityFactoryContext {
     public:
+        struct EntityMessageData {
+	        EntityId targetEntity;
+            String messageName;
+            ConfigNode messageData;
+        };
+
+        struct SystemMessageData {
+	        String targetSystem;
+            String messageName;
+            ConfigNode messageData;
+        };
+
     	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection);
     	virtual ~ScriptEnvironment() = default;
 
@@ -49,10 +61,12 @@ namespace Halley {
         World& getWorld();
         Resources& getResources();
 
-    	void sendMessage(EntityId dstEntity, ScriptMessage message);
-        void sendEntityMessage(EntityId dstEntity, const String& messageId, ConfigNode args);
+    	void sendScriptMessage(EntityId dstEntity, ScriptMessage message);
+        void sendEntityMessage(EntityMessageData message);
+        void sendSystemMessage(SystemMessageData message);
 
-    	Vector<std::pair<EntityId, ScriptMessage>> getOutboundMessages();
+    	Vector<std::pair<EntityId, ScriptMessage>> getOutboundScriptMessages();
+        Vector<EntityMessageData> getOutboundEntityMessages();
 
     protected:
 		const HalleyAPI& api;
@@ -68,7 +82,8 @@ namespace Halley {
         Time deltaTime = 0;
         EntitySerializationContext serializationContext;
 
-        Vector<std::pair<EntityId, ScriptMessage>> outBox;
+        Vector<std::pair<EntityId, ScriptMessage>> scriptOutbox;
+        Vector<EntityMessageData> entityOutbox;
 
     private:
         void updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);

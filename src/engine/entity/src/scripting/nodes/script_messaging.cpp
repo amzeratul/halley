@@ -69,7 +69,7 @@ IScriptNodeType::Result ScriptSendMessage::doUpdate(ScriptEnvironment& environme
 	}
 
 	const auto entityId = readEntityId(environment, node, 2);
-	environment.sendMessage(entityId, std::move(msg));
+	environment.sendScriptMessage(entityId, std::move(msg));
 	
 	return Result(ScriptNodeExecutionState::Done);
 }
@@ -272,7 +272,7 @@ IScriptNodeType::Result ScriptSendEntityMessage::doUpdate(ScriptEnvironment& env
 		args[m] = readDataPin(environment, node, 3 + i);
 		++i;
 	}
-	environment.sendEntityMessage(target, msgType.message, std::move(args));
+	environment.sendEntityMessage(ScriptEnvironment::EntityMessageData{ target, msgType.message, std::move(args) });
 
 	return Result(ScriptNodeExecutionState::Done);
 }

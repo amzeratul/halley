@@ -19,8 +19,20 @@ CreateMessageFunction& CreateEntityFunctions::getCreateMessage()
 	return f;
 }
 
+CreateMessageByNameFunction& CreateEntityFunctions::getCreateMessageByName()
+{
+	static CreateMessageByNameFunction f;
+	return f;
+}
+
 CreateSystemMessageFunction& CreateEntityFunctions::getCreateSystemMessage()
 {
 	static CreateSystemMessageFunction f;
+	return f;
+}
+
+CreateSystemMessageByNameFunction& CreateEntityFunctions::getCreateSystemMessageByName()
+{
+	static CreateSystemMessageByNameFunction f;
 	return f;
 }

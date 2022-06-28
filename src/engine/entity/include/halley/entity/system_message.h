@@ -31,6 +31,8 @@ namespace Halley
 	
 	class SystemMessage : public Message
 	{
+	public:
+		virtual SystemMessageDestination getMessageDestination() const = 0;
 	};
 
 	using SystemMessageCallback = std::function<void(std::byte*, Bytes)>;
