@@ -1,7 +1,7 @@
 #include "script_network.h"
 using namespace Halley;
 
-String ScriptEntityAuthority::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String ScriptEntityAuthority::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
 {
 	return "has authority over " + getConnectedNodeName(world, node, graph, 0);
 }
@@ -30,7 +30,7 @@ ConfigNode ScriptEntityAuthority::doGetData(ScriptEnvironment& environment, cons
 
 
 
-String ScriptHostAuthority::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String ScriptHostAuthority::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
 {
 	return "has host authority";
 }

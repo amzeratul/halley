@@ -2,7 +2,7 @@
 
 using namespace Halley;
 
-String ScriptLogicGateAnd::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String ScriptLogicGateAnd::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
@@ -36,7 +36,7 @@ ConfigNode ScriptLogicGateAnd::doGetData(ScriptEnvironment& environment, const S
 }
 
 
-String ScriptLogicGateOr::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String ScriptLogicGateOr::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
@@ -70,7 +70,7 @@ ConfigNode ScriptLogicGateOr::doGetData(ScriptEnvironment& environment, const Sc
 }
 
 
-String ScriptLogicGateXor::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String ScriptLogicGateXor::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
@@ -104,7 +104,7 @@ ConfigNode ScriptLogicGateXor::doGetData(ScriptEnvironment& environment, const S
 }
 
 
-String ScriptLogicGateNot::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String ScriptLogicGateNot::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	return "NOT " + addParentheses(std::move(a));

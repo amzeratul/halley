@@ -6,7 +6,7 @@ String ScriptVariable::getLabel(const ScriptGraphNode& node) const
 	return node.getSettings()["variable"].asString("");
 }
 
-String ScriptVariable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String ScriptVariable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
 {
 	return getLabel(node);
 }
@@ -48,7 +48,7 @@ String ScriptLiteral::getLabel(const ScriptGraphNode& node) const
 	return node.getSettings()["value"].asString("0");
 }
 
-String ScriptLiteral::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String ScriptLiteral::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
 {
 	return getLabel(node);
 }
@@ -99,7 +99,7 @@ String ScriptComparison::getLabel(const ScriptGraphNode& node) const
 	return node.getSettings()["operator"].asString("equals");
 }
 
-String ScriptComparison::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String ScriptComparison::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);

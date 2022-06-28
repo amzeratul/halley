@@ -119,6 +119,15 @@ std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getPinDescriptio
 	}
 }
 
+String ScriptReceiveMessage::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+{
+	if (elementIdx >= 1) {
+		return "Msg param #" + toString(static_cast<int>(elementIdx));
+	} else {
+		return ScriptNodeTypeBase<ScriptReceiveMessageData>::getShortDescription(world, node, graph, elementIdx);
+	}
+}
+
 bool ScriptReceiveMessage::hasDestructor() const
 {
 	return true;

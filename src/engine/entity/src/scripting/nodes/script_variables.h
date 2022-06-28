@@ -7,7 +7,7 @@ namespace Halley {
 		String getId() const override { return "variable"; }
 		String getName() const override { return "Variable"; }
 		String getLabel(const ScriptGraphNode& node) const override;
-		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const override;
+		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const override;
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/variable.png"; }
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		Vector<SettingType> getSettingTypes() const override;
@@ -23,7 +23,7 @@ namespace Halley {
 		String getId() const override { return "literal"; }
 		String getName() const override { return "Literal"; }
 		String getLabel(const ScriptGraphNode& node) const override;
-		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const override;
+		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const override;
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/literal.png"; }
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		Vector<SettingType> getSettingTypes() const override;
@@ -38,7 +38,7 @@ namespace Halley {
 		String getId() const override { return "comparison"; }
 		String getName() const override { return "Comparison"; }
 		String getLabel(const ScriptGraphNode& node) const override;
-		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const override;
+		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const override;
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/comparison.png"; }
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		Vector<SettingType> getSettingTypes() const override;

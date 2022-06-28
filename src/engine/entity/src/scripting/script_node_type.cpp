@@ -19,7 +19,7 @@
 #include "nodes/script_wait_for.h"
 using namespace Halley;
 
-String IScriptNodeType::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph) const
+String IScriptNodeType::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
 {
 	return getName();
 }
@@ -164,7 +164,7 @@ String IScriptNodeType::getConnectedNodeName(const World* world, const ScriptGra
 
 	if (pin.connections[0].dstNode) {
 		const auto& otherNode = graph.getNodes().at(pin.connections[0].dstNode.value());
-		return otherNode.getNodeType().getShortDescription(world, otherNode, graph);
+		return otherNode.getNodeType().getShortDescription(world, otherNode, graph, pin.connections[0].dstPin);
 	} else if (pin.connections[0].entityIdx && world) {
 		const auto target = world->tryGetEntity(graph.getEntityId(pin.connections[0].entityIdx));
 		if (target.isValid()) {
