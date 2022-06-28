@@ -34,4 +34,6 @@ namespace Halley {
         ScriptEntityMessageType(const ConfigNode& node);
         ConfigNode toConfig() const;
 	};
+
+    using ScriptSystemMessageType = ScriptEntityMessageType;
 }

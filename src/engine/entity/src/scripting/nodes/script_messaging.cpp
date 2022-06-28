@@ -192,8 +192,8 @@ std::pair<String, int> ScriptReceiveMessage::getMessageIdAndParams(const ScriptG
 Vector<IScriptNodeType::SettingType> ScriptSendSystemMessage::getSettingTypes() const
 {
 	return {
-		SettingType{ "system", "Halley::String", Vector<String>{""} },
-		SettingType{ "message", "Halley::String", Vector<String>{""} },
+		SettingType{ "system", "Halley::System", Vector<String>{""} },
+		SettingType{ "message", "Halley::SystemMessageType", Vector<String>{""} },
 	};
 }
 
@@ -207,16 +207,41 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendSystemMessage::getPinConfigu
 
 std::pair<String, Vector<ColourOverride>> ScriptSendSystemMessage::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
+	const auto msgType = ScriptSystemMessageType(node.getSettings()["message"]);
+
 	auto str = ColourStringBuilder(true);
 	str.append("Send message ");
-	str.append(node.getSettings()["message"].asString(""), parameterColour);
-	str.append(" to system ");
+	str.append(msgType.message, parameterColour);
+	str.append("(");
+
+	size_t i = 0;
+	for (const auto& m: msgType.members) {
+		if (i != 0) {
+			str.append(", ");
+		}
+		str.append(m + " = ");
+		str.append(getConnectedNodeName(world, node, graph, 3 + i), parameterColour);
+		++i;
+	}
+
+	str.append(") to system ");
 	str.append(node.getSettings()["system"].asString(""), parameterColour);
-	return str.moveResults();}
+	return str.moveResults();
+}
 
 IScriptNodeType::Result ScriptSendSystemMessage::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	// TODO
+	const auto msgType = ScriptSystemMessageType(node.getSettings()["message"]);
+	const auto targetSystem = node.getSettings()["system"].asString("");
+
+	auto args = ConfigNode::MapType();
+	size_t i = 0;
+	for (const auto& m: msgType.members) {
+		args[m] = readDataPin(environment, node, 3 + i);
+		++i;
+	}
+	environment.sendSystemMessage(ScriptEnvironment::SystemMessageData{ targetSystem, msgType.message, std::move(args) });
+
 	return Result(ScriptNodeExecutionState::Done);
 }
 
@@ -251,6 +276,9 @@ std::pair<String, Vector<ColourOverride>> ScriptSendEntityMessage::getNodeDescri
 
 	size_t i = 0;
 	for (const auto& m: msgType.members) {
+		if (i != 0) {
+			str.append(", ");
+		}
 		str.append(m + " = ");
 		str.append(getConnectedNodeName(world, node, graph, 3 + i), parameterColour);
 		++i;

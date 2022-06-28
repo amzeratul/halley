@@ -1435,13 +1435,15 @@ public:
 
 class ComponentEditorEntityMessageTypeFieldFactory : public IComponentEditorFieldFactory {
 public:
-	ComponentEditorEntityMessageTypeFieldFactory(const ECSData& ecsData)
+	ComponentEditorEntityMessageTypeFieldFactory(const ECSData& ecsData, String fieldType, bool systemMessage)
 		: ecsData(ecsData)
+		, fieldType(fieldType)
+		, systemMessage(systemMessage)
 	{}
 	
 	String getFieldType() override
 	{
-		return "Halley::EntityMessageType";
+		return fieldType;
 	}
 
 	ConfigNode getDefaultNode() const override
@@ -1457,9 +1459,17 @@ public:
 		fieldData.ensureType(ConfigNodeType::Map);
 
 		Vector<String> messageIds;
-		for (auto& [k, v]: ecsData.getMessages()) {
-			if (v.serializable) {
-				messageIds.push_back(k);
+		if (systemMessage) {
+			for (auto& [k, v]: ecsData.getSystemMessages()) {
+				if (v.serializable) {
+					messageIds.push_back(k);
+				}
+			}
+		} else {
+			for (auto& [k, v]: ecsData.getMessages()) {
+				if (v.serializable) {
+					messageIds.push_back(k);
+				}
 			}
 		}
 
@@ -1479,6 +1489,8 @@ public:
 
 private:
 	const ECSData& ecsData;
+	String fieldType;
+	bool systemMessage;
 
 	ConfigNode getMessageConfig(const String& messageId) const
 	{
@@ -1499,6 +1511,53 @@ private:
 		
 		return result;
 	}
+};
+
+
+class ComponentEditorSystemFieldFactory : public IComponentEditorFieldFactory {
+public:
+	ComponentEditorSystemFieldFactory(const ECSData& ecsData)
+		: ecsData(ecsData)
+	{}
+	
+	String getFieldType() override
+	{
+		return "Halley::System";
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(ConfigNode::MapType());
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		auto data = pars.data;
+
+		auto& fieldData = data.getWriteableFieldData(); // HACK
+		fieldData.ensureType(ConfigNodeType::Map);
+
+		Vector<String> systemIds;
+		for (auto& [k, v]: ecsData.getSystems()) {
+			systemIds.push_back(k);
+		}
+
+		const auto& dropStyle = context.getUIFactory().getStyle("dropdownLight");
+		auto dropdown = std::make_shared<UIDropdown>("systemType", dropStyle);
+		dropdown->setOptions(std::move(systemIds));
+		dropdown->setSelectedOption(data.getFieldData()["system"].asString(""));
+
+		dropdown->bindData("systemType", fieldData["system"].asString(""), [&context, data, this](String newVal)
+		{
+			data.getWriteableFieldData() = newVal;
+			context.onEntityUpdated();
+		});
+
+		return dropdown;
+	}
+
+private:
+	const ECSData& ecsData;
 };
 
 
@@ -1546,7 +1605,9 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 {
 	Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
 
-	factories.emplace_back(std::make_unique<ComponentEditorEntityMessageTypeFieldFactory>(ecsData));
+	factories.emplace_back(std::make_unique<ComponentEditorEntityMessageTypeFieldFactory>(ecsData, "Halley::EntityMessageType", false));
+	factories.emplace_back(std::make_unique<ComponentEditorEntityMessageTypeFieldFactory>(ecsData, "Halley::SystemMessageType", true));
+	factories.emplace_back(std::make_unique<ComponentEditorSystemFieldFactory>(ecsData));
 	
 	return factories;
 }
