@@ -31,6 +31,9 @@ namespace Halley {
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
 
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
+
+	private:
+		ConfigNode getConfigNode(const ScriptGraphNode& node) const;
 	};
 	
 	class ScriptComparison final : public ScriptNodeTypeBase<void> {

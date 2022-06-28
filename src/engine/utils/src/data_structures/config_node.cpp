@@ -563,6 +563,8 @@ bool ConfigNode::asBool() const
 		return floatData != 0;
 	} else if (type == ConfigNodeType::Int64) {
 		return int64Data != 0;
+	} else if (type == ConfigNodeType::Undefined) {
+		return false;
 	} else {
 		return asString() == "true";
 	}

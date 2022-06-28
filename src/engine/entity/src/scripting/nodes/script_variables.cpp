@@ -68,14 +68,33 @@ Vector<IScriptNodeType::SettingType> ScriptLiteral::getSettingTypes() const
 
 std::pair<String, Vector<ColourOverride>> ScriptLiteral::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
+	auto data = getConfigNode(node);
+
 	auto str = ColourStringBuilder(true);
-	str.append("Literal ");
-	str.append(node.getSettings()["value"].asString("0"), parameterColour);
-	str.append(".");
+	bool quoting = false;
+	if (data.getType() == ConfigNodeType::Int) {
+		str.append("Int ");
+	} else if (data.getType() == ConfigNodeType::Float) {
+		str.append("Float ");
+	} else {
+		str.append("String ");
+		str.append("\"", parameterColour);
+		quoting = true;
+	}
+	
+	str.append(data.asString(), parameterColour);
+	if (quoting) {
+		str.append("\"", parameterColour);
+	}
 	return str.moveResults();
 }
 
 ConfigNode ScriptLiteral::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	return getConfigNode(node);
+}
+
+ConfigNode ScriptLiteral::getConfigNode(const ScriptGraphNode& node) const
 {
 	const auto& value = node.getSettings()["value"].asString("0");
 	if (value.isNumber()) {
@@ -84,13 +103,8 @@ ConfigNode ScriptLiteral::doGetData(ScriptEnvironment& environment, const Script
 		} else {
 			return ConfigNode(value.toFloat());
 		}
-	} else {
-		if (value.asciiLower() == "true") {
-			return ConfigNode(true);
-		}
 	}
-	// All other cases
-	return ConfigNode(false);
+	return ConfigNode(value);
 }
 
 
