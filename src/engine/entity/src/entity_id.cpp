@@ -53,14 +53,25 @@ void EntityId::deserialize(Deserializer& s)
 
 ConfigNode ConfigNodeSerializer<EntityId>::serialize(EntityId id, const EntitySerializationContext& context)
 {
-	if (!id.isValid() || !context.entityContext) {
+	if (!context.entityContext) {
+		return ConfigNode(id.value);
+	}
+
+	if (!id.isValid()) {
 		return ConfigNode(String());
 	}
+
 	return ConfigNode(context.entityContext->getUUIDFromEntityId(id).toString());
 }
 
 EntityId ConfigNodeSerializer<EntityId>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 {
+	if (node.getType() == ConfigNodeType::Int64) {
+		EntityId result;
+		result.value = node.asInt64();
+		return result;
+	}
+
 	const auto& value = node.asString("");
 	const auto uuid = value.isEmpty() ? UUID() : UUID(value);
 	if (!context.entityContext || !uuid.isValid()) {

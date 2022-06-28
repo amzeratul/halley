@@ -259,3 +259,56 @@ void ScriptHoldVariable::doDestructor(ScriptEnvironment& environment, const Scri
 }
 
 
+
+gsl::span<const IScriptNodeType::PinType> ScriptEntityIdToData::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+String ScriptEntityIdToData::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+{
+	return getConnectedNodeName(world, node, graph, 0);
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptEntityIdToData::getNodeDescription(const ScriptGraphNode& node, const World* world,	const ScriptGraph& graph) const
+{
+	return { "Convert EntityId to data.", {} };
+}
+
+ConfigNode ScriptEntityIdToData::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	return ConfigNode(readEntityId(environment, node, 0).value);
+}
+
+
+
+gsl::span<const IScriptNodeType::PinType> ScriptDataToEntityId::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::TargetPin, PD::Output } };
+	return data;
+}
+
+String ScriptDataToEntityId::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+{
+	return getConnectedNodeName(world, node, graph, 0);
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptDataToEntityId::getNodeDescription(const ScriptGraphNode& node, const World* world,	const ScriptGraph& graph) const
+{
+	return { "Convert data to EntityId.", {} };
+}
+
+EntityId ScriptDataToEntityId::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId pinN) const
+{
+	const auto data = readDataPin(environment, node, 0);
+	EntityId result;
+	result.value = data.asInt64(-1);
+	return result;
+}
+
+

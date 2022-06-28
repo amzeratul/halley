@@ -207,15 +207,19 @@ Vector<IScriptNodeType::SettingType> ScriptSendSystemMessage::getSettingTypes() 
 	};
 }
 
+namespace {
+	constexpr static size_t maxMsgParams = 4;
+}
+
 gsl::span<const IScriptNodeType::PinType> ScriptSendSystemMessage::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	const auto msgType = ScriptSystemMessageType(node.getSettings()["message"]);
 
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 7>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input },
+	const static auto data = std::array<PinType, 3 + maxMsgParams>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
-	return gsl::span<const PinType>(data).subspan(0, 3 + msgType.members.size());
+	return gsl::span<const PinType>(data).subspan(0, 3 + std::min(msgType.members.size(), maxMsgParams));
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptSendSystemMessage::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
@@ -235,6 +239,10 @@ std::pair<String, Vector<ColourOverride>> ScriptSendSystemMessage::getNodeDescri
 		str.append(m + " = ");
 		str.append(getConnectedNodeName(world, node, graph, 3 + i), parameterColour);
 		++i;
+
+		if (i == maxMsgParams) {
+			break;
+		}
 	}
 
 	str.append(") to system ");
@@ -252,6 +260,10 @@ IScriptNodeType::Result ScriptSendSystemMessage::doUpdate(ScriptEnvironment& env
 	for (const auto& m: msgType.members) {
 		args[m] = readDataPin(environment, node, 3 + i);
 		++i;
+
+		if (i == maxMsgParams) {
+			break;
+		}
 	}
 	environment.sendSystemMessage(ScriptEnvironment::SystemMessageData{ targetSystem, msgType.message, std::move(args) });
 
@@ -273,9 +285,9 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendEntityMessage::getPinConfigu
 
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 7>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input },
+	const static auto data = std::array<PinType, 3 + maxMsgParams>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
-	return gsl::span<const PinType>(data).subspan(0, 3 + msgType.members.size());
+	return gsl::span<const PinType>(data).subspan(0, 3 + std::min(msgType.members.size(), maxMsgParams));
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptSendEntityMessage::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
@@ -295,6 +307,10 @@ std::pair<String, Vector<ColourOverride>> ScriptSendEntityMessage::getNodeDescri
 		str.append(m + " = ");
 		str.append(getConnectedNodeName(world, node, graph, 3 + i), parameterColour);
 		++i;
+
+		if (i == maxMsgParams) {
+			break;
+		}
 	}
 
 	str.append(") to entity ");
@@ -312,6 +328,10 @@ IScriptNodeType::Result ScriptSendEntityMessage::doUpdate(ScriptEnvironment& env
 	for (const auto& m: msgType.members) {
 		args[m] = readDataPin(environment, node, 3 + i);
 		++i;
+		
+		if (i == maxMsgParams) {
+			break;
+		}
 	}
 	environment.sendEntityMessage(ScriptEnvironment::EntityMessageData{ target, msgType.message, std::move(args) });
 
