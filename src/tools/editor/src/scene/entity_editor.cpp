@@ -529,6 +529,8 @@ void EntityEditor::setIcon(const String& icon)
 
 void EntityEditor::setDefaultName(const String& name, const String& prevName)
 {
+	Expects(currentEntityData);
+
 	const auto oldName = getName();
 	if (oldName.isEmpty() || oldName == prevName) {
 		entityName->setText(name);
@@ -555,7 +557,7 @@ bool EntityEditor::onKeyPress(KeyboardKeyPress key)
 
 String EntityEditor::getName() const
 {
-	return isPrefab ? "" : getEntityData().getName();
+	return isPrefab || !currentEntityData ? "" : currentEntityData->getName();
 }
 
 void EntityEditor::setPrefabName(const String& prefab)
@@ -616,6 +618,7 @@ void EntityEditor::setTool(const String& tool, const String& componentName, cons
 
 EntityData& EntityEditor::getEntityData()
 {
+	Expects(currentEntityData);
 	return *currentEntityData;
 }
 
