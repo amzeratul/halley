@@ -1437,7 +1437,7 @@ class ComponentEditorEntityMessageTypeFieldFactory : public IComponentEditorFiel
 public:
 	ComponentEditorEntityMessageTypeFieldFactory(const ECSData& ecsData, String fieldType, bool systemMessage)
 		: ecsData(ecsData)
-		, fieldType(fieldType)
+		, fieldType(std::move(fieldType))
 		, systemMessage(systemMessage)
 	{}
 	
@@ -1497,19 +1497,34 @@ private:
 		ConfigNode::MapType result;
 		result["message"] = messageId;
 
-		const auto& msgs = ecsData.getMessages();
-		const auto iter = msgs.find(messageId);
-		if (iter != msgs.end()) {
-			const auto& msgConfig = iter->second;
+		if (const auto* msg = getMessage(messageId)) {
 			ConfigNode::SequenceType members;
-			members.reserve(msgConfig.members.size());
-			for (const auto& m: msgConfig.members) {
+			members.reserve(msg->members.size());
+			for (const auto& m: msg->members) {
 				members.push_back(ConfigNode(m.name));
 			}
 			result["members"] = std::move(members);
 		}
 		
 		return result;
+	}
+
+	const MessageSchema* getMessage(const String& messageId) const
+	{
+		if (systemMessage) {
+			const auto& msgs = ecsData.getSystemMessages();
+			const auto iter = msgs.find(messageId);
+			if (iter != msgs.end()) {
+				return &(iter->second);
+			}
+		} else {
+			const auto& msgs = ecsData.getMessages();
+			const auto iter = msgs.find(messageId);
+			if (iter != msgs.end()) {
+				return &(iter->second);
+			}
+		}
+		return nullptr;
 	}
 };
 
@@ -1534,8 +1549,7 @@ public:
 	{
 		auto data = pars.data;
 
-		auto& fieldData = data.getWriteableFieldData(); // HACK
-		fieldData.ensureType(ConfigNodeType::Map);
+		const String value = data.getFieldData().asString("");
 
 		Vector<String> systemIds;
 		for (auto& [k, v]: ecsData.getSystems()) {
@@ -1545,11 +1559,10 @@ public:
 		const auto& dropStyle = context.getUIFactory().getStyle("dropdownLight");
 		auto dropdown = std::make_shared<UIDropdown>("systemType", dropStyle);
 		dropdown->setOptions(std::move(systemIds));
-		dropdown->setSelectedOption(data.getFieldData()["system"].asString(""));
 
-		dropdown->bindData("systemType", fieldData["system"].asString(""), [&context, data, this](String newVal)
+		dropdown->bindData("systemType", value, [&context, data, this](String newVal)
 		{
-			data.getWriteableFieldData() = newVal;
+			data.getWriteableFieldData() = ConfigNode(std::move(newVal));
 			context.onEntityUpdated();
 		});
 

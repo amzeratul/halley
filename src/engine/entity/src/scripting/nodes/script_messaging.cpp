@@ -122,7 +122,7 @@ std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getPinDescriptio
 String ScriptReceiveMessage::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
 {
 	if (elementIdx >= 1) {
-		return "Msg param #" + toString(static_cast<int>(elementIdx));
+		return "msg.param" + toString(static_cast<int>(elementIdx));
 	} else {
 		return ScriptNodeTypeBase<ScriptReceiveMessageData>::getShortDescription(world, node, graph, elementIdx);
 	}
@@ -198,6 +198,7 @@ std::pair<String, int> ScriptReceiveMessage::getMessageIdAndParams(const ScriptG
 }
 
 
+
 Vector<IScriptNodeType::SettingType> ScriptSendSystemMessage::getSettingTypes() const
 {
 	return {
@@ -208,10 +209,13 @@ Vector<IScriptNodeType::SettingType> ScriptSendSystemMessage::getSettingTypes() 
 
 gsl::span<const IScriptNodeType::PinType> ScriptSendSystemMessage::getPinConfiguration(const ScriptGraphNode& node) const
 {
+	const auto msgType = ScriptSystemMessageType(node.getSettings()["message"]);
+
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 2>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
-	return data;
+	const static auto data = std::array<PinType, 7>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
+	return gsl::span<const PinType>(data).subspan(0, 3 + msgType.members.size());
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptSendSystemMessage::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
