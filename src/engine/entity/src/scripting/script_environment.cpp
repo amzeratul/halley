@@ -26,7 +26,7 @@ ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resourc
 	serializationContext.entityContext = this;
 }
 
-void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curEntity)
+void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables)
 {
 	deltaTime = time;
 
@@ -36,6 +36,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	}
 
 	currentState = &graphState;
+	currentEntityVariables = &entityVariables;
 	currentGraph->assignTypes(nodeTypeCollection);
 	currentEntity = curEntity;
 
@@ -74,6 +75,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 
 	currentGraph = nullptr;
 	currentState = nullptr;
+	currentEntityVariables = nullptr;
 	currentEntity = EntityId();
 }
 
@@ -134,7 +136,7 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 }
 
 
-void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEntity)
+void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables)
 {
 	currentGraph = graphState.getScriptGraphPtr();
 	if (!currentGraph) {
@@ -142,6 +144,7 @@ void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEnti
 	}
 
 	currentState = &graphState;
+	currentEntityVariables = &entityVariables;
 	currentGraph->assignTypes(nodeTypeCollection);
 	currentEntity = curEntity;
 
@@ -149,6 +152,7 @@ void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEnti
 
 	currentGraph = nullptr;
 	currentState = nullptr;
+	currentEntityVariables = nullptr;
 	currentEntity = EntityId();
 }
 
@@ -301,16 +305,6 @@ size_t& ScriptEnvironment::getNodeCounter(ScriptNodeId nodeId)
 	return currentState->getNodeCounter(nodeId);
 }
 
-ConfigNode ScriptEnvironment::getVariable(const String& variable)
-{
-	return currentState->getVariable(variable);
-}
-
-void ScriptEnvironment::setVariable(const String& variable, ConfigNode data)
-{
-	currentState->setVariable(variable, std::move(data));
-}
-
 void ScriptEnvironment::setDirection(EntityId entityId, const String& direction)
 {
 	if (auto* spriteAnimation = tryGetComponent<SpriteAnimationComponent>(entityId)) {
@@ -433,5 +427,31 @@ void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)
 		api.audio->postEvent(id, audioSource->emitter);
 	} else {
 		api.audio->postEvent(id);
+	}
+}
+
+ScriptVariables& ScriptEnvironment::getVariables(ScriptVariableScope scope)
+{
+	switch (scope) {
+	case ScriptVariableScope::Script:
+		return currentState->getVariables();
+	case ScriptVariableScope::Entity:
+		return *currentEntityVariables;
+	case ScriptVariableScope::Global:
+	default:
+		throw Exception("Variable type " + toString(scope) + " not implemented", HalleyExceptions::Entity);
+	}
+}
+
+const ScriptVariables& ScriptEnvironment::getVariables(ScriptVariableScope scope) const
+{
+	switch (scope) {
+	case ScriptVariableScope::Script:
+		return currentState->getVariables();
+	case ScriptVariableScope::Entity:
+		return *currentEntityVariables;
+	case ScriptVariableScope::Global:
+	default:
+		throw Exception("Variable type " + toString(scope) + " not implemented", HalleyExceptions::Entity);
 	}
 }

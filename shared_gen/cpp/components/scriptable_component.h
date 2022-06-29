@@ -1,4 +1,4 @@
-// Halley codegen version 105
+// Halley codegen version 115
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -12,6 +12,7 @@ public:
 
 	Halley::Vector<std::shared_ptr<Halley::ScriptState>> activeStates{};
 	Halley::Vector<Halley::String> tags{};
+	Halley::ScriptVariables variables{};
 
 	ScriptableComponent() {
 	}
@@ -26,6 +27,7 @@ public:
 		Halley::ConfigNode node = Halley::ConfigNode::MapType();
 		Halley::EntityConfigNodeSerializer<decltype(activeStates)>::serialize(activeStates, Halley::Vector<std::shared_ptr<Halley::ScriptState>>{}, context, node, componentName, "activeStates", makeMask(Type::SaveData, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(tags)>::serialize(tags, Halley::Vector<Halley::String>{}, context, node, componentName, "tags", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(variables)>::serialize(variables, Halley::ScriptVariables{}, context, node, componentName, "variables", makeMask(Type::SaveData, Type::Network));
 		return node;
 	}
 
@@ -33,6 +35,7 @@ public:
 		using namespace Halley::EntitySerialization;
 		Halley::EntityConfigNodeSerializer<decltype(activeStates)>::deserialize(activeStates, Halley::Vector<std::shared_ptr<Halley::ScriptState>>{}, context, node, componentName, "activeStates", makeMask(Type::SaveData, Type::Network));
 		Halley::EntityConfigNodeSerializer<decltype(tags)>::deserialize(tags, Halley::Vector<Halley::String>{}, context, node, componentName, "tags", makeMask(Type::Prefab, Type::SaveData, Type::Network));
+		Halley::EntityConfigNodeSerializer<decltype(variables)>::deserialize(variables, Halley::ScriptVariables{}, context, node, componentName, "variables", makeMask(Type::SaveData, Type::Network));
 	}
 
 };

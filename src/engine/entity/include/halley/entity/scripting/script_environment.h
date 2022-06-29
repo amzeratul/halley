@@ -6,7 +6,24 @@
 namespace Halley {
 	class InputDevice;
 	class ScriptState;
-	
+
+    enum class ScriptVariableScope {
+        Script,
+        Entity,
+        Global
+    };
+
+	template <>
+	struct EnumNames<ScriptVariableScope> {
+		constexpr std::array<const char*, 3> operator()() const {
+			return{{
+				"script",
+				"entity",
+				"global"
+			}};
+		}
+	};
+
     class ScriptEnvironment: private IEntityFactoryContext {
     public:
         struct EntityMessageData {
@@ -24,8 +41,8 @@ namespace Halley {
     	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection);
     	virtual ~ScriptEnvironment() = default;
 
-    	virtual void update(Time time, ScriptState& graphState, EntityId curEntity);
-    	void terminateState(ScriptState& graphState, EntityId curEntity);
+    	virtual void update(Time time, ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables);
+    	void terminateState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables);
 
     	EntityRef tryGetEntity(EntityId entityId);
     	const ScriptGraph* getCurrentGraph() const;
@@ -35,8 +52,8 @@ namespace Halley {
 
     	void postAudioEvent(const String& id, EntityId entityId);
 
-    	virtual ConfigNode getVariable(const String& variable);
-    	virtual void setVariable(const String& variable, ConfigNode data);
+        ScriptVariables& getVariables(ScriptVariableScope scope);
+        const ScriptVariables& getVariables(ScriptVariableScope scope) const;
 
     	virtual void setDirection(EntityId entityId, const String& direction);
 
@@ -78,6 +95,7 @@ namespace Halley {
 
     	const ScriptGraph* currentGraph = nullptr;
     	ScriptState* currentState = nullptr;
+        ScriptVariables* currentEntityVariables = nullptr;
         EntityId currentEntity;
         Time deltaTime = 0;
         EntitySerializationContext serializationContext;

@@ -35,6 +35,7 @@ set(SOURCES
         "src/scripting/script_node_type.cpp"
         "src/scripting/script_renderer.cpp"
         "src/scripting/script_state.cpp"
+        "src/scripting/script_variables.cpp"
 
         "src/scripting/nodes/script_branching.cpp"
         "src/scripting/nodes/script_execution_control.cpp"
@@ -45,8 +46,8 @@ set(SOURCES
         "src/scripting/nodes/script_loop.cpp"
         "src/scripting/nodes/script_messaging.cpp"
         "src/scripting/nodes/script_network.cpp"
+        "src/scripting/nodes/script_node_variables.cpp"
         "src/scripting/nodes/script_sprite.cpp"
-        "src/scripting/nodes/script_variables.cpp"
         "src/scripting/nodes/script_wait.cpp"
         "src/scripting/nodes/script_wait_for.cpp"
         )
@@ -94,6 +95,7 @@ set(HEADERS
         "include/halley/entity/scripting/script_node_type.h"
         "include/halley/entity/scripting/script_renderer.h"
         "include/halley/entity/scripting/script_state.h"
+        "include/halley/entity/scripting/script_variables.h"
 
         "src/scripting/nodes/script_branching.h"
         "src/scripting/nodes/script_execution_control.h"
@@ -104,8 +106,8 @@ set(HEADERS
         "src/scripting/nodes/script_loop.h"
         "src/scripting/nodes/script_messaging.h"
         "src/scripting/nodes/script_network.h"
+        "src/scripting/nodes/script_node_variables.h"
         "src/scripting/nodes/script_sprite.h"
-        "src/scripting/nodes/script_variables.h"
         "src/scripting/nodes/script_wait.h"
         "src/scripting/nodes/script_wait_for.h"
         )

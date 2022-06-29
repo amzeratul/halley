@@ -1,6 +1,7 @@
 #pragma once
 #include "script_message.h"
 #include "script_node_enums.h"
+#include "script_variables.h"
 #include "halley/bytes/config_node_serializer.h"
 #include "halley/time/halleytime.h"
 
@@ -157,9 +158,6 @@ namespace Halley {
     	NodeIntrospection getNodeIntrospection(ScriptNodeId nodeId) const;
     	size_t& getNodeCounter(ScriptNodeId node);
 
-    	ConfigNode getVariable(const String& name) const;
-    	void setVariable(const String& name, ConfigNode value);
-
 		void updateDisplayOffset(Time t);
 		Vector2f getDisplayOffset() const;
 
@@ -172,6 +170,9 @@ namespace Halley {
     	void receiveMessage(ScriptMessage msg);
         void processMessages();
 
+		ScriptVariables& getVariables();
+		const ScriptVariables& getVariables() const;
+
 	private:
 		std::shared_ptr<const ScriptGraph> scriptGraph;
 		const ScriptGraph* scriptGraphRef = nullptr;
@@ -179,7 +180,7 @@ namespace Halley {
     	Vector<ScriptStateThread> threads;
 		Vector<NodeState> nodeState;
     	std::map<ScriptNodeId, size_t> nodeCounters;
-    	std::map<String, ConfigNode> variables;
+    	ScriptVariables variables;
 
     	uint64_t graphHash = 0;
 		int frameNumber = 0;

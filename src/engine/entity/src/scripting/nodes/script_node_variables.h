@@ -2,20 +2,36 @@
 #include "scripting/script_environment.h"
 
 namespace Halley {
-	class ScriptVariable final : public ScriptNodeTypeBase<void> {
+	class ScriptVariable : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "variable"; }
-		String getName() const override { return "Variable"; }
+		String getName() const override { return "Script Variable"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/variable.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Variable; }
+
 		String getLabel(const ScriptGraphNode& node) const override;
 		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const override;
-		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/variable.png"; }
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		Vector<SettingType> getSettingTypes() const override;
-		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Variable; }
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
 
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
 		void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const override;
+
+	protected:
+		virtual ScriptVariableScope getScope() const;
+	};
+
+	class ScriptEntityVariable : public ScriptVariable {
+	public:
+		String getId() const override { return "entityVariable"; }
+		String getName() const override { return "Entity Variable"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/entity_variable.png"; }
+
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+
+	protected:
+		ScriptVariableScope getScope() const override;
 	};
 	
 	class ScriptLiteral final : public ScriptNodeTypeBase<void> {

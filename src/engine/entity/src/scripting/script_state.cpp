@@ -370,20 +370,6 @@ size_t& ScriptState::getNodeCounter(ScriptNodeId node)
 	return nodeCounters[node];
 }
 
-ConfigNode ScriptState::getVariable(const String& name) const
-{
-	const auto iter = variables.find(name);
-	if (iter != variables.end()) {
-		return ConfigNode(iter->second);
-	}
-	return ConfigNode(0);
-}
-
-void ScriptState::setVariable(const String& name, ConfigNode value)
-{
-	variables[name] = std::move(value);
-}
-
 void ScriptState::updateDisplayOffset(Time t)
 {
 	Vector2f targetPos;
@@ -441,6 +427,16 @@ void ScriptState::processMessages()
 	{
 		return processMessage(msg);
 	});
+}
+
+ScriptVariables& ScriptState::getVariables()
+{
+	return variables;
+}
+
+const ScriptVariables& ScriptState::getVariables() const
+{
+	return variables;
 }
 
 bool ScriptState::processMessage(ScriptMessage& msg)

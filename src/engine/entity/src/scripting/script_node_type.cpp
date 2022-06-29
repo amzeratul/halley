@@ -14,7 +14,7 @@
 #include "nodes/script_messaging.h"
 #include "nodes/script_network.h"
 #include "nodes/script_sprite.h"
-#include "nodes/script_variables.h"
+#include "nodes/script_node_variables.h"
 #include "nodes/script_wait.h"
 #include "nodes/script_wait_for.h"
 using namespace Halley;
@@ -299,8 +299,6 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptSpriteAnimation>());
 	addScriptNode(std::make_unique<ScriptSpriteDirection>());
 	addScriptNode(std::make_unique<ScriptBranch>());
-	//addScriptNode(std::make_unique<ScriptFork>());
-	//addScriptNode(std::make_unique<ScriptMergeAny>());
 	addScriptNode(std::make_unique<ScriptMergeAll>());
 	addScriptNode(std::make_unique<ScriptLogicGateAnd>());
 	addScriptNode(std::make_unique<ScriptLogicGateOr>());
@@ -308,6 +306,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptLogicGateNot>());
 	addScriptNode(std::make_unique<ScriptAudioEvent>());
 	addScriptNode(std::make_unique<ScriptVariable>());
+	addScriptNode(std::make_unique<ScriptEntityVariable>());
 	addScriptNode(std::make_unique<ScriptLiteral>());
 	addScriptNode(std::make_unique<ScriptComparison>());
 	addScriptNode(std::make_unique<ScriptSetVariable>());
