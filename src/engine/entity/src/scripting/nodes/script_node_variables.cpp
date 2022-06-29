@@ -1,4 +1,7 @@
 #include "script_node_variables.h"
+
+#include "halley/maths/ops.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 String ScriptVariable::getLabel(const ScriptGraphNode& node) const
@@ -118,9 +121,10 @@ ConfigNode ScriptLiteral::getConfigNode(const ScriptGraphNode& node) const
 }
 
 
+
 String ScriptComparison::getLabel(const ScriptGraphNode& node) const
 {
-	return node.getSettings()["operator"].asString("equals");
+	return node.getSettings()["operator"].asString("==");
 }
 
 String ScriptComparison::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
@@ -128,7 +132,7 @@ String ScriptComparison::getShortDescription(const World* world, const ScriptGra
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
 	auto op = getLabel(node);
-	return addParentheses(std::move(a)) + " " + std::move(op) + " " + addParentheses(std::move(b));
+	return addParentheses(std::move(a)) + " " + op + " " + addParentheses(std::move(b));
 }
 
 gsl::span<const IScriptNodeType::PinType> ScriptComparison::getPinConfiguration(const ScriptGraphNode& node) const
@@ -141,7 +145,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptComparison::getPinConfiguration(
 
 Vector<IScriptNodeType::SettingType> ScriptComparison::getSettingTypes() const
 {
-	return { SettingType{ "operator", "Halley::String", Vector<String>{"equals"} } };
+	return { SettingType{ "operator", "Halley::MathRelOp", Vector<String>{"=="} } };
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptComparison::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
@@ -150,7 +154,7 @@ std::pair<String, Vector<ColourOverride>> ScriptComparison::getNodeDescription(c
 	str.append("True if ");
 	str.append(addParentheses(getConnectedNodeName(world, node, graph, 0)), parameterColour);
 	str.append(" ");
-	str.append(node.getSettings()["operator"].asString("equals"), parameterColour);
+	str.append(node.getSettings()["operator"].asString("=="), parameterColour);
 	str.append(" ");
 	str.append(addParentheses(getConnectedNodeName(world, node, graph, 1)), parameterColour);
 	return str.moveResults();
@@ -160,8 +164,24 @@ ConfigNode ScriptComparison::doGetData(ScriptEnvironment& environment, const Scr
 {
 	const auto a = readDataPin(environment, node, 0);
 	const auto b = readDataPin(environment, node, 1);
-	// TODO
-	return ConfigNode(false);
+	const auto typeA = a.getType();
+	const auto typeB = b.getType();
+	const auto op = fromString<MathRelOp>(node.getSettings()["operator"].asString("=="));
+
+	bool result = false;
+	if (typeA == ConfigNodeType::String || typeB == ConfigNodeType::String) {
+		result = MathOps::compare(op, a.asString(""), b.asString(""));
+	} else if (typeA == ConfigNodeType::Float || typeB == ConfigNodeType::Float) {
+		result = MathOps::compare(op, a.asFloat(0), b.asFloat(0));
+	} else if (typeA == ConfigNodeType::Int64 || typeB == ConfigNodeType::Int64) {
+		result = MathOps::compare(op, a.asInt64(0), b.asInt64(0));
+	} else if (typeA == ConfigNodeType::Int || typeB == ConfigNodeType::Int) {
+		result = MathOps::compare(op, a.asInt(0), b.asInt(0));
+	} else {
+		Logger::logError("ScriptComparison node can't compare types " + toString(typeA) + " and " + toString(typeB));
+	}
+
+	return ConfigNode(result);
 }
 
 
