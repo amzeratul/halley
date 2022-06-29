@@ -255,6 +255,74 @@ ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const Scr
 }
 
 
+gsl::span<const IScriptNodeType::PinType> ScriptAdvanceTo::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 6>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::WriteDataPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptAdvanceTo::getPinDescription(const ScriptGraphNode& node, PinType element, ScriptPinId elementIdx) const
+{
+	if (elementIdx == 1) {
+		return { "Flow output if target not reached.", {} };
+	} else if (elementIdx == 2) {
+		return { "Flow output if target reached.", {} };
+	} else if (elementIdx == 3) {
+		return { "Target value", {} };
+	} else if (elementIdx == 4) {
+		return { "Increment value", {} };
+	} else if (elementIdx == 5) {
+		return { "Variable being modified", {} };
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, element, elementIdx);
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptAdvanceTo::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Advance ");
+	str.append(getConnectedNodeName(world, node, graph, 5), parameterColour);
+	str.append(" towards ");
+	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	str.append(" by ");
+	str.append(getConnectedNodeName(world, node, graph, 4), parameterColour);
+	return str.moveResults();
+}
+
+IScriptNodeType::Result ScriptAdvanceTo::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	const auto target = readDataPin(environment, node, 3);
+	const auto amount = readDataPin(environment, node, 4);
+	const auto val = readDataPin(environment, node, 5);
+
+	auto type = val.getType();
+	if (type == ConfigNodeType::Undefined) {
+		type = amount.getType();
+	}
+
+	bool reached = false;
+
+	if (type == ConfigNodeType::Float) {
+		auto [v, done] = advanceWithFlag(val.asFloat(0), target.asFloat(0), amount.asFloat(0));
+		reached = done;
+		writeDataPin(environment, node, 5, ConfigNode(v));
+	} else if (type == ConfigNodeType::Int) {
+		auto [v, done] = advanceWithFlag(val.asInt(0), target.asInt(0), amount.asInt(0));
+		reached = done;
+		writeDataPin(environment, node, 5, ConfigNode(v));
+	} else if (type == ConfigNodeType::Int64) {
+		auto [v, done] = advanceWithFlag(val.asInt64(0), target.asInt64(0), amount.asInt64(0));
+		reached = done;
+		writeDataPin(environment, node, 5, ConfigNode(v));
+	} else {
+		Logger::logError("Cannot advance variable of type " + toString(type));
+	}
+
+	return Result(ScriptNodeExecutionState::Done, 0, reached ? 2 : 1);
+}
+
 
 String ScriptSetVariable::getLabel(const ScriptGraphNode& node) const
 {

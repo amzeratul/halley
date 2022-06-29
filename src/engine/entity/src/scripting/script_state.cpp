@@ -298,7 +298,7 @@ bool ScriptState::hasTag(const String& tag) const
 
 bool ScriptState::isDone() const
 {
-	return started && std::all_of(threads.begin(), threads.end(), [] (const ScriptStateThread& thread) { return thread.isWatcher(); });
+	return started && inbox.empty() && std::all_of(threads.begin(), threads.end(), [] (const ScriptStateThread& thread) { return thread.isWatcher(); });
 }
 
 bool ScriptState::isDead() const
@@ -392,7 +392,9 @@ void ScriptState::updateDisplayOffset(Time t)
 		}
 	}
 
-	targetPos /= static_cast<float>(n);
+	if (n > 0) {
+		targetPos /= static_cast<float>(n);
+	}
 
 	displayOffset = damp(displayOffset, targetPos, 2.0f, static_cast<float>(t));
 }

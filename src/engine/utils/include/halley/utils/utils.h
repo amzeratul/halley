@@ -288,8 +288,29 @@ namespace Halley {
 	template<typename T>
 	[[nodiscard]] constexpr static T advance(T a, T b, T inc)
 	{
-		if (a < b) return std::min(a+inc, b);
-		else return std::max(a-inc, b);
+		if (a < b) {
+			return std::min(a + inc, b);
+		} else {
+			return std::max(a - inc, b);
+		}
+	}
+
+	template<typename T>
+	[[nodiscard]] constexpr static std::pair<T, bool> advanceWithFlag(T a, T b, T inc)
+	{
+		if (a < b) {
+			if (a + inc > b) {
+				return { b, true };
+			} else {
+				return { a + inc, false };
+			}
+		} else {
+			if (a - inc < b) {
+				return { b, true };
+			} else {
+				return { a - inc, false };
+			}
+		}
 	}
 
 	// Align address

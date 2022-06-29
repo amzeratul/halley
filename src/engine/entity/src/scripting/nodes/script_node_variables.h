@@ -72,6 +72,20 @@ namespace Halley {
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
 	};
 	
+	class ScriptAdvanceTo final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "advanceTo"; }
+		String getName() const override { return "Advance Variable To"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/advanceTo.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
+
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, ScriptPinId elementIdx) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+	};
+	
 	class ScriptSetVariable final : public ScriptNodeTypeBase<void> {
 	public:
 		String getId() const override { return "setVariable"; }
