@@ -135,7 +135,7 @@ void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, EntityS
 
 			const auto& delta = prefab->isScene() ? deltaIter->second : deltaIter->second.instantiateAsCopy(entity.getInstanceUUID());
 
-			factory.updateEntity(entity, delta, static_cast<int>(EntitySerialization::Type::Prefab));
+			factory.updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Prefab));
 			if (callbacks) {
 				callbacks->onEntityUpdated(entity, delta, worldPartition);
 			}

@@ -1,4 +1,6 @@
 #include "script_network.h"
+
+#include "halley/support/logger.h"
 using namespace Halley;
 
 String ScriptEntityAuthority::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
@@ -74,7 +76,9 @@ std::pair<String, Vector<ColourOverride>> ScriptIfEntityAuthority::getNodeDescri
 
 IScriptNodeType::Result ScriptIfEntityAuthority::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	const bool hasAuthority = environment.hasNetworkAuthorityOver(readEntityId(environment, node, 1));
+	const auto entity = environment.tryGetEntity(readEntityId(environment, node, 1)).getEntityId();
+	const bool hasAuthority = environment.hasNetworkAuthorityOver(entity);
+	Logger::logDev("Has authority over " + toString(entity) + " = " + (hasAuthority ? "true" : "false"));
 	return Result(ScriptNodeExecutionState::Done, 0, hasAuthority ? 1 : 0);
 }
 

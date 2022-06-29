@@ -230,7 +230,7 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 
 	auto retriever = DataInterpolatorSetRetriever(entity, false);
 
-	parent->getFactory().updateEntity(entity, delta, static_cast<int>(EntitySerialization::Type::SaveData), nullptr, &retriever);
+	parent->getFactory().updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Network), nullptr, &retriever);
 	remote.data.applyDelta(delta);
 }
 

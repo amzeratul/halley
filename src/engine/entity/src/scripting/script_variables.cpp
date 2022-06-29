@@ -9,7 +9,13 @@ ScriptVariables::ScriptVariables(const ConfigNode& node)
 
 void ScriptVariables::load(const ConfigNode& node)
 {
-	variables = node.asHashMap<String, ConfigNode>();
+	if (node.getType() == ConfigNodeType::Map) {
+		variables = node.asHashMap<String, ConfigNode>();
+	} else {
+		for (const auto& [k, v]: node.asMap()) {
+			variables[k].applyDelta(v);
+		}
+	}
 }
 
 ConfigNode ScriptVariables::toConfigNode() const

@@ -566,7 +566,7 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 	
 	if (entity.isValid() && entity.getPrefabAssetId() == delta.getPrefab()) {
 		// Apply delta to existing entity
-		updateEntity(entity, delta, static_cast<int>(EntitySerialization::Type::SaveData));
+		updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::SaveData));
 	} else {
 		// Generate full EntityData from prefab first
 		auto [entityData, prefab, prefabUUID] = prefabDeltaToEntityData(delta);
@@ -575,7 +575,7 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 
 		if (entity.isValid()) {
 			// Update existing entity
-			updateEntity(entity, entityData, static_cast<int>(EntitySerialization::Type::SaveData) | static_cast<int>(EntitySerialization::Type::Prefab));
+			updateEntity(entity, entityData, EntitySerialization::makeMask(EntitySerialization::Type::SaveData, EntitySerialization::Type::Prefab));
 		}  else {
 			// Create new entity
 			entity = createEntity(entityData);

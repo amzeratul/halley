@@ -79,7 +79,7 @@ void PrefabSceneData::reloadEntities(gsl::span<const String> ids, gsl::span<cons
 		if (entity) {
 			if (data) {
 				// Update
-				factory->updateEntity(*entity, *data, static_cast<int>(EntitySerialization::Type::Prefab));
+				factory->updateEntity(*entity, *data, EntitySerialization::makeMask(EntitySerialization::Type::Prefab));
 			} else {
 				// Destroy
 				world.destroyEntity(entity.value());

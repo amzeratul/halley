@@ -212,25 +212,6 @@ ScriptState::ScriptState()
 	
 }
 
-ScriptState::ScriptState(const ConfigNode& node, const EntitySerializationContext& context)
-{
-	started = node["started"].asBool(false);
-	threads = ConfigNodeSerializer<decltype(threads)>().deserialize(context, node["threads"]);
-	nodeState = ConfigNodeSerializer<decltype(nodeState)>().deserialize(context, node["nodeState"]);
-	graphHash = Deserializer::fromBytes<decltype(graphHash)>(node["graphHash"].asBytes());
-	variables = ConfigNodeSerializer<decltype(variables)>().deserialize(context, node["variables"]);
-	persistAfterDone = node["persistAfterDone"].asBool(false);
-	tags = node["tags"].asVector<String>({});
-	frameNumber = node["frameNumber"].asInt(0);
-
-	const auto scriptGraphName = node["script"].asString();
-	if (!scriptGraphName.isEmpty()) {
-		scriptGraph = context.resources->get<ScriptGraph>(scriptGraphName);
-	}
-
-	needsStateLoading = true;
-}
-
 ScriptState::ScriptState(const ScriptGraph* script, bool persistAfterDone)
 	: scriptGraphRef(script)
 	, persistAfterDone(persistAfterDone)
@@ -240,6 +221,51 @@ ScriptState::ScriptState(const ScriptGraph* script, bool persistAfterDone)
 ScriptState::ScriptState(std::shared_ptr<const ScriptGraph> script)
 	: scriptGraph(script)
 {
+}
+
+ScriptState::ScriptState(const ConfigNode& node, const EntitySerializationContext& context)
+{
+	if (!context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::Network))) {
+		started = node["started"].asBool(false);
+		threads = ConfigNodeSerializer<decltype(threads)>().deserialize(context, node["threads"]);
+		nodeState = ConfigNodeSerializer<decltype(nodeState)>().deserialize(context, node["nodeState"]);
+		graphHash = Deserializer::fromBytes<decltype(graphHash)>(node["graphHash"].asBytes());
+		variables = ConfigNodeSerializer<decltype(variables)>().deserialize(context, node["variables"]);
+		frameNumber = node["frameNumber"].asInt(0);
+	}
+
+	persistAfterDone = node["persistAfterDone"].asBool(false);
+	tags = node["tags"].asVector<String>({});
+	const auto scriptGraphName = node["script"].asString();
+	if (!scriptGraphName.isEmpty()) {
+		scriptGraph = context.resources->get<ScriptGraph>(scriptGraphName);
+	}
+
+	needsStateLoading = true;
+
+	Logger::logDev("Deserialized script state");
+}
+
+ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) const
+{
+	ConfigNode::MapType node;
+
+	if (!context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::Network))) {
+		if (started) {
+			node["started"] = started;
+		}
+		node["threads"] = ConfigNodeSerializer<decltype(threads)>().serialize(threads, context);
+		node["nodeState"] = ConfigNodeSerializer<decltype(nodeState)>().serialize(nodeState, context);
+		node["graphHash"] = Serializer::toBytes(graphHash);
+		node["variables"] = ConfigNodeSerializer<decltype(variables)>().serialize(variables, context);
+		node["frameNumber"] = frameNumber;
+	}
+
+	node["script"] = scriptGraph ? scriptGraph->getAssetId() : "";
+	node["persistAfterDone"] = persistAfterDone;
+	node["tags"] = tags;
+
+	return node;
 }
 
 const String& ScriptState::getScriptId() const
@@ -278,23 +304,6 @@ bool ScriptState::isDone() const
 bool ScriptState::isDead() const
 {
 	return isDone() && !persistAfterDone;
-}
-
-ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) const
-{
-	ConfigNode::MapType node;
-	if (started) {
-		node["started"] = started;
-	}
-	node["threads"] = ConfigNodeSerializer<decltype(threads)>().serialize(threads, context);
-	node["nodeState"] = ConfigNodeSerializer<decltype(nodeState)>().serialize(nodeState, context);
-	node["graphHash"] = Serializer::toBytes(graphHash);
-	node["variables"] = ConfigNodeSerializer<decltype(variables)>().serialize(variables, context);
-	node["script"] = scriptGraph ? scriptGraph->getAssetId() : "";
-	node["persistAfterDone"] = persistAfterDone;
-	node["tags"] = tags;
-	node["frameNumber"] = frameNumber;
-	return node;
 }
 
 bool ScriptState::hasThreadAt(ScriptNodeId node) const
