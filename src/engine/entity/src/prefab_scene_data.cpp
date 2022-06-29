@@ -87,7 +87,7 @@ void PrefabSceneData::reloadEntities(gsl::span<const String> ids, gsl::span<cons
 		} else {
 			if (data) {
 				// Create
-				factory->createEntity(*data);
+				factory->createEntity(*data, EntitySerialization::makeMask(EntitySerialization::Type::Prefab));
 			}
 		}
 	}

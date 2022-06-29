@@ -153,7 +153,7 @@ void EntityScene::PrefabObserver::updateEntities(EntityFactory& factory, EntityS
 		auto dataIter = dataMap.find(uuid);
 		if (dataIter != dataMap.end()) {
 			// Create
-			const auto entity = factory.createEntity(*dataIter->second, {}, &scene);
+			const auto entity = factory.createEntity(*dataIter->second, EntitySerialization::makeMask(EntitySerialization::Type::Prefab), {}, &scene);
 			addEntity(entity);
 			if (callbacks) {
 				callbacks->onEntityAdded(entity, *dataIter->second, worldPartition);

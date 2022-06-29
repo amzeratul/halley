@@ -33,7 +33,7 @@ EntityScene EntityFactory::createScene(const std::shared_ptr<const Prefab>& pref
 {
 	EntityScene curScene(allowReload, worldPartition);
 	for (const auto& entityData: prefab->getEntityDatas()) {
-		auto entity = createEntity(entityData, EntityRef(), &curScene);
+		auto entity = createEntity(entityData, EntitySerialization::makeMask(EntitySerialization::Type::Prefab), EntityRef(), &curScene);
 		curScene.addPrefabReference(prefab, entity);
 		curScene.addRootEntity(entity);	
 	}
@@ -261,12 +261,12 @@ EntityRef EntityFactory::createEntity(const String& prefabName, EntityRef parent
 {
 	EntityData data(UUID::generate());
 	data.setPrefab(prefabName);
-	return createEntity(data, parent, scene);
+	const int mask = makeMask(EntitySerialization::Type::Prefab);
+	return createEntity(data, mask, parent, scene);
 }
 
-EntityRef EntityFactory::createEntity(const EntityData& data, EntityRef parent, EntityScene* scene)
+EntityRef EntityFactory::createEntity(const EntityData& data, int mask, EntityRef parent, EntityScene* scene)
 {
-	const auto mask = makeMask(EntitySerialization::Type::Prefab, EntitySerialization::Type::SaveData);
 	const auto context = makeContext(data, {}, scene, false, mask);
 	const auto entity = tryGetEntity(data.getInstanceUUID(), *context, false);
 	updateEntityNode(context->getRootEntityData(), entity, parent, context);
@@ -557,7 +557,7 @@ EntityRef EntityFactory::getEntity(const UUID& instanceUUID, EntityFactoryContex
 	return result;
 }
 
-std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const EntityDataDelta& delta, const std::optional<UUID>& uuidSrc)
+std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const EntityDataDelta& delta, const std::optional<UUID>& uuidSrc, int mask)
 {
 	std::optional<UUID> parentUUID;
 	
@@ -566,7 +566,7 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 	
 	if (entity.isValid() && entity.getPrefabAssetId() == delta.getPrefab()) {
 		// Apply delta to existing entity
-		updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::SaveData));
+		updateEntity(entity, delta, mask);
 	} else {
 		// Generate full EntityData from prefab first
 		auto [entityData, prefab, prefabUUID] = prefabDeltaToEntityData(delta);
@@ -575,10 +575,10 @@ std::pair<EntityRef, std::optional<UUID>> EntityFactory::loadEntityDelta(const E
 
 		if (entity.isValid()) {
 			// Update existing entity
-			updateEntity(entity, entityData, EntitySerialization::makeMask(EntitySerialization::Type::SaveData, EntitySerialization::Type::Prefab));
+			updateEntity(entity, entityData, mask);
 		}  else {
 			// Create new entity
-			entity = createEntity(entityData);
+			entity = createEntity(entityData, mask);
 
 			// Pending parenting
 			if (entityData.getParentUUID().isValid()) {
