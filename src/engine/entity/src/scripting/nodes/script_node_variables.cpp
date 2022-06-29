@@ -8,7 +8,7 @@ String ScriptVariable::getLabel(const ScriptGraphNode& node) const
 
 String ScriptVariable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
 {
-	return toString(getScope()) + ":" + node.getSettings()["variable"].asString("");
+	return node.getSettings()["scope"].asString("script") + ":" + node.getSettings()["variable"].asString("");
 }
 
 gsl::span<const IScriptNodeType::PinType> ScriptVariable::getPinConfiguration(const ScriptGraphNode& node) const
@@ -21,46 +21,35 @@ gsl::span<const IScriptNodeType::PinType> ScriptVariable::getPinConfiguration(co
 
 Vector<IScriptNodeType::SettingType> ScriptVariable::getSettingTypes() const
 {
-	return { SettingType{ "variable", "Halley::String", Vector<String>{""} } };
+	return {
+		SettingType{ "scope", "Halley::ScriptVariableScope", Vector<String>{"script"} },
+		SettingType{ "variable", "Halley::String", Vector<String>{""} }
+	};
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptVariable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
-	str.append("Script Variable ");
-	str.append(node.getSettings()["variable"].asString(""), parameterColour);
+	str.append("Variable ");
+	str.append(node.getSettings()["scope"].asString("script") + ":" + node.getSettings()["variable"].asString(""), parameterColour);
 	return str.moveResults();
 }
 
 ConfigNode ScriptVariable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	const auto& vars = environment.getVariables(getScope());
+	const auto& vars = environment.getVariables(getScope(node));
 	return ConfigNode(vars.getVariable(node.getSettings()["variable"].asString("")));
 }
 
 void ScriptVariable::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const
 {
-	auto& vars = environment.getVariables(getScope());
+	auto& vars = environment.getVariables(getScope(node));
 	vars.setVariable(node.getSettings()["variable"].asString(""), std::move(data));
 }
 
-ScriptVariableScope ScriptVariable::getScope() const
+ScriptVariableScope ScriptVariable::getScope(const ScriptGraphNode& node) const
 {
-	return ScriptVariableScope::Script;
-}
-
-
-std::pair<String, Vector<ColourOverride>> ScriptEntityVariable::getNodeDescription(const ScriptGraphNode& node, const World* world,	const ScriptGraph& graph) const
-{
-	auto str = ColourStringBuilder(true);
-	str.append("Entity Variable ");
-	str.append(node.getSettings()["variable"].asString(""), parameterColour);
-	return str.moveResults();	
-}
-
-ScriptVariableScope ScriptEntityVariable::getScope() const
-{
-	return ScriptVariableScope::Entity;
+	return fromString<ScriptVariableScope>(node.getSettings()["scope"].asString("script"));
 }
 
 
