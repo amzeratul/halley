@@ -185,6 +185,77 @@ ConfigNode ScriptComparison::doGetData(ScriptEnvironment& environment, const Scr
 }
 
 
+
+String ScriptArithmetic::getLabel(const ScriptGraphNode& node) const
+{
+	return node.getSettings()["operator"].asString("+");
+}
+
+String ScriptArithmetic::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+{
+	auto a = getConnectedNodeName(world, node, graph, 0);
+	auto b = getConnectedNodeName(world, node, graph, 1);
+	auto op = getLabel(node);
+
+	if (op[0] >= 'a' && op[0] <= 'z') {
+		// If starts with a lower case letter, assume it's in function form
+		return op + "(" + a + ", " + b + ")";
+	} else {
+		// Otherwise, assume infix form
+		return addParentheses(std::move(a)) + " " + op + " " + addParentheses(std::move(b));
+	}
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptArithmetic::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+Vector<IScriptNodeType::SettingType> ScriptArithmetic::getSettingTypes() const
+{
+	return { SettingType{ "operator", "Halley::MathOp", Vector<String>{"+"} } };
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptArithmetic::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Returns ");
+	str.append(getShortDescription(world, node, graph, 0), parameterColour);
+	return str.moveResults();
+}
+
+ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pin_n) const
+{
+	const auto a = readDataPin(environment, node, 0);
+	const auto b = readDataPin(environment, node, 1);
+	const auto typeA = a.getType();
+	const auto typeB = b.getType();
+	const auto op = fromString<MathOp>(node.getSettings()["operator"].asString("+"));
+
+	if (typeA == ConfigNodeType::String || typeB == ConfigNodeType::String) {
+		if (op == MathOp::Add) {
+			return ConfigNode(a.asString("") + b.asString(""));
+		} else {
+			Logger::logError("Attempting to perform illegal op " + toString(op) + " with string types.");
+			return ConfigNode();
+		}
+	} else if (typeA == ConfigNodeType::Float || typeB == ConfigNodeType::Float) {
+		return ConfigNode(MathOps::apply(op, a.asFloat(0), b.asFloat(0)));
+	} else if (typeA == ConfigNodeType::Int64 || typeB == ConfigNodeType::Int64) {
+		return ConfigNode(MathOps::apply(op, a.asInt64(0), b.asInt64(0)));
+	} else if (typeA == ConfigNodeType::Int || typeB == ConfigNodeType::Int) {
+		return ConfigNode(MathOps::apply(op, a.asInt(0), b.asInt(0)));
+	} else {
+		Logger::logError("ScriptComparison node can't perform arithmetic with types " + toString(typeA) + " and " + toString(typeB));
+		return ConfigNode();
+	}
+}
+
+
+
 String ScriptSetVariable::getLabel(const ScriptGraphNode& node) const
 {
 	if (!node.getPin(2).hasConnection()) {
