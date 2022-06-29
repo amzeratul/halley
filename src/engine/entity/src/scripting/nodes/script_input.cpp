@@ -3,6 +3,11 @@
 #include "halley/core/input/input_device.h"
 using namespace Halley;
 
+ConfigNode ScriptInputButtonData::toConfigNode(const EntitySerializationContext& context)
+{
+	return ConfigNode();
+}
+
 String ScriptInputButton::getLabel(const ScriptGraphNode& node) const
 {
 	return node.getSettings()["button"].asString("");
@@ -46,18 +51,26 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getPinDescription(c
 	case 4:
 		return { "Flow Output while button is not held", {}};
 	default:
-		return ScriptNodeTypeBase<void>::getPinDescription(node, element, elementIdx);
+		return ScriptNodeTypeBase<ScriptInputButtonData>::getPinDescription(node, element, elementIdx);
 	}
 }
 
-IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+void ScriptInputButton::doInitData(ScriptInputButtonData& data, const ScriptGraphNode& node, const EntitySerializationContext& context,	const ConfigNode& nodeData) const
+{
+	data.initialised = false;
+}
+
+IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptInputButtonData& data) const
 {
 	const int device = node.getSettings()["device"].asInt(0);
 	const int button = environment.getInputButtonByName(node.getSettings()["button"].asString("primary"));
 	const auto input = environment.getInputDevice(device);
 	if (input) {
-		const bool pressed = input->isButtonPressed(button);
-		const bool released = input->isButtonReleased(button);
+		const bool firstRun = !data.initialised;
+		data.initialised = true;
+
+		const bool pressed = input->isButtonPressed(button) || (firstRun && input->isButtonDown(button));
+		const bool released = input->isButtonReleased(button) || (firstRun && !input->isButtonDown(button));
 
 		if (pressed || released) {
 			constexpr uint8_t pressedPin = 1;

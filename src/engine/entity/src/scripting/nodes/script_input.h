@@ -2,7 +2,14 @@
 #include "scripting/script_environment.h"
 
 namespace Halley {
-	class ScriptInputButton final : public ScriptNodeTypeBase<void> {
+	class ScriptInputButtonData final : public ScriptStateData<ScriptInputButtonData> {
+	public:
+		bool initialised = false; // DON'T SERIALISE
+
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+	};
+
+	class ScriptInputButton final : public ScriptNodeTypeBase<ScriptInputButtonData> {
 	public:
 		String getId() const override { return "inputButton"; }
 		String getName() const override { return "Input Button"; }
@@ -14,6 +21,7 @@ namespace Halley {
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::State; }
 		std::pair<String, Vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, ScriptPinId elementIdx) const override;
 
-		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+		void doInitData(ScriptInputButtonData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptInputButtonData& data) const override;
 	};
 }
