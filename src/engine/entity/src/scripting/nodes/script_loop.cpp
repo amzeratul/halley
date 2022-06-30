@@ -146,7 +146,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptEveryFrame::getPinConfiguration(
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 2>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
 
@@ -158,6 +158,20 @@ std::pair<String, Vector<ColourOverride>> ScriptEveryFrame::getNodeDescription(c
 	return str.moveResults();
 }
 
+std::pair<String, Vector<ColourOverride>> ScriptEveryFrame::getPinDescription(const ScriptGraphNode& node, PinType element, ScriptPinId elementIdx) const
+{
+	if (elementIdx == 2) {
+		return { "Frame delta time", {} };
+	} else {
+		return ScriptNodeTypeBase<ScriptEveryFrameData>::getPinDescription(node, element, elementIdx);
+	}
+}
+
+String ScriptEveryFrame::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+{
+	return "Frame delta time";
+}
+
 IScriptNodeType::Result ScriptEveryFrame::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptEveryFrameData& curData) const
 {
 	const auto curFrame = environment.getCurrentFrameNumber();
@@ -167,6 +181,11 @@ IScriptNodeType::Result ScriptEveryFrame::doUpdate(ScriptEnvironment& environmen
 	} else {
 		return Result(ScriptNodeExecutionState::Executing, time);
 	}
+}
+
+ConfigNode ScriptEveryFrame::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptEveryFrameData& curData) const
+{
+	return ConfigNode(static_cast<float>(environment.getDeltaTime()));
 }
 
 void ScriptEveryFrame::doInitData(ScriptEveryFrameData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const

@@ -285,6 +285,7 @@ void ScriptGraph::serialize(Serializer& s) const
 void ScriptGraph::deserialize(Deserializer& s)
 {
 	s >> nodes;
+	finishGraph();
 }
 
 void ScriptGraph::makeBaseGraph()

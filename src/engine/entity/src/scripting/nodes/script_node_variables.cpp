@@ -231,25 +231,25 @@ ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const Scr
 {
 	const auto a = readDataPin(environment, node, 0);
 	const auto b = readDataPin(environment, node, 1);
-	const auto typeA = a.getType();
-	const auto typeB = b.getType();
 	const auto op = fromString<MathOp>(node.getSettings()["operator"].asString("+"));
 
-	if (typeA == ConfigNodeType::String || typeB == ConfigNodeType::String) {
+	const auto type = ConfigNode::getPromotedType(std::array<ConfigNodeType, 2>{ a.getType(), b.getType() }, true);
+
+	if (type == ConfigNodeType::String) {
 		if (op == MathOp::Add) {
 			return ConfigNode(a.asString("") + b.asString(""));
 		} else {
 			Logger::logError("Attempting to perform illegal op " + toString(op) + " with string types.");
 			return ConfigNode();
 		}
-	} else if (typeA == ConfigNodeType::Float || typeB == ConfigNodeType::Float) {
+	} else if (type == ConfigNodeType::Float) {
 		return ConfigNode(MathOps::apply(op, a.asFloat(0), b.asFloat(0)));
-	} else if (typeA == ConfigNodeType::Int64 || typeB == ConfigNodeType::Int64) {
+	} else if (type == ConfigNodeType::Int64) {
 		return ConfigNode(MathOps::apply(op, a.asInt64(0), b.asInt64(0)));
-	} else if (typeA == ConfigNodeType::Int || typeB == ConfigNodeType::Int) {
+	} else if (type == ConfigNodeType::Int) {
 		return ConfigNode(MathOps::apply(op, a.asInt(0), b.asInt(0)));
 	} else {
-		Logger::logError("ScriptComparison node can't perform arithmetic with types " + toString(typeA) + " and " + toString(typeB));
+		Logger::logError("ScriptComparison node can't perform arithmetic with types " + toString(a.getType()) + " and " + toString(b.getType()));
 		return ConfigNode();
 	}
 }
@@ -259,21 +259,37 @@ gsl::span<const IScriptNodeType::PinType> ScriptAdvanceTo::getPinConfiguration(c
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 6>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::WriteDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 9>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input },
+		PinType{ ET::WriteDataPin, PD::Output }
+	};
 	return data;
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptAdvanceTo::getPinDescription(const ScriptGraphNode& node, PinType element, ScriptPinId elementIdx) const
 {
 	if (elementIdx == 1) {
-		return { "Flow output if target not reached.", {} };
+		return { "Flow output.", {} };
 	} else if (elementIdx == 2) {
-		return { "Flow output if target reached.", {} };
+		return { "Flow output if target is reached.", {} };
 	} else if (elementIdx == 3) {
-		return { "Target value", {} };
+		return { "Flow output if target is not reached.", {} };
 	} else if (elementIdx == 4) {
-		return { "Increment value", {} };
+		return { "Flow output if variable was modified.", {} };
 	} else if (elementIdx == 5) {
+		return { "Flow output if variable was not modified.", {} };
+	} else if (elementIdx == 6) {
+		return { "Target value", {} };
+	} else if (elementIdx == 7) {
+		return { "Increment value", {} };
+	} else if (elementIdx == 8) {
 		return { "Variable being modified", {} };
 	}
 	return ScriptNodeTypeBase<void>::getPinDescription(node, element, elementIdx);
@@ -283,51 +299,66 @@ std::pair<String, Vector<ColourOverride>> ScriptAdvanceTo::getNodeDescription(co
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Advance ");
-	str.append(getConnectedNodeName(world, node, graph, 5), parameterColour);
+	str.append(getConnectedNodeName(world, node, graph, 8), parameterColour);
 	str.append(" towards ");
-	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	str.append(getConnectedNodeName(world, node, graph, 6), parameterColour);
 	str.append(" by ");
-	str.append(getConnectedNodeName(world, node, graph, 4), parameterColour);
+	str.append(getConnectedNodeName(world, node, graph, 7), parameterColour);
 	return str.moveResults();
+}
+
+namespace {
+	template <typename T>
+	std::tuple<T, bool, bool> advanceWithFlags(T a, T b, T inc)
+	{
+		const bool modified = !(a == b);
+		const T c = advance<T>(a, b, inc);
+		const bool reached = c == b;
+		return { c, modified, reached };
+	}
 }
 
 IScriptNodeType::Result ScriptAdvanceTo::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	const auto target = readDataPin(environment, node, 3);
-	const auto amount = readDataPin(environment, node, 4);
-	const auto val = readDataPin(environment, node, 5);
+	const auto target = readDataPin(environment, node, 6);
+	const auto amount = readDataPin(environment, node, 7);
+	const auto var = readDataPin(environment, node, 8);
 
-	auto type = val.getType();
-	if (type == ConfigNodeType::Undefined) {
-		type = amount.getType();
-	}
-
+	const auto type = ConfigNode::getPromotedType(std::array<ConfigNodeType, 3>{ var.getType(), target.getType(), amount.getType() }, true);
+	bool modified = false;
 	bool reached = false;
-
+	
 	if (type == ConfigNodeType::Float) {
-		auto [v, done] = advanceWithFlag(val.asFloat(0), target.asFloat(0), amount.asFloat(0));
-		reached = done;
-		writeDataPin(environment, node, 5, ConfigNode(v));
+		float v;
+		std::tie(v, modified, reached) = advanceWithFlags(var.asFloat(0), target.asFloat(0), amount.asFloat(0));
+		//Logger::logDev("AdvanceTo(" + toString(node.getId()) + "): " + toString(var.asFloat(0)) + " -> " + toString(v) + " | modified=" + toString(modified) + ", reached=" + toString(reached));
+		writeDataPin(environment, node, 8, ConfigNode(v));
 	} else if (type == ConfigNodeType::Int) {
-		auto [v, done] = advanceWithFlag(val.asInt(0), target.asInt(0), amount.asInt(0));
-		reached = done;
-		writeDataPin(environment, node, 5, ConfigNode(v));
+		int v;
+		std::tie(v, modified, reached) = advanceWithFlags(var.asInt(0), target.asInt(0), amount.asInt(0));
+		writeDataPin(environment, node, 8, ConfigNode(v));
 	} else if (type == ConfigNodeType::Int64) {
-		auto [v, done] = advanceWithFlag(val.asInt64(0), target.asInt64(0), amount.asInt64(0));
-		reached = done;
-		writeDataPin(environment, node, 5, ConfigNode(v));
+		int64_t v;
+		std::tie(v, modified, reached) = advanceWithFlags(var.asInt64(0), target.asInt64(0), amount.asInt64(0));
+		writeDataPin(environment, node, 8, ConfigNode(v));
 	} else {
 		Logger::logError("Cannot advance variable of type " + toString(type));
 	}
 
-	return Result(ScriptNodeExecutionState::Done, 0, reached ? 2 : 1);
+	constexpr uint8_t normalOutPinMask = 1 << 0;
+	constexpr uint8_t reachedOutPinMask = 1 << 1;
+	constexpr uint8_t notReachedOutPinMask = 1 << 2;
+	constexpr uint8_t modifiedOutPinMask = 1 << 3;
+	constexpr uint8_t notModifiedOutPinMask = 1 << 4;
+	return Result(ScriptNodeExecutionState::Done, 0, (normalOutPinMask) | (reached ? reachedOutPinMask : notReachedOutPinMask) | (modified ? modifiedOutPinMask : notModifiedOutPinMask));
 }
+
 
 
 String ScriptSetVariable::getLabel(const ScriptGraphNode& node) const
 {
 	if (!node.getPin(2).hasConnection()) {
-		return toString(node.getSettings()["defaultValue"].asInt(0));
+		return toString(node.getSettings()["defaultValue"].asFloat(0));
 	}
 	return "";
 }
@@ -342,7 +373,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSetVariable::getPinConfiguration
 
 Vector<IScriptNodeType::SettingType> ScriptSetVariable::getSettingTypes() const
 {
-	return { SettingType{ "defaultValue", "int", Vector<String>{"0"} } };
+	return { SettingType{ "defaultValue", "float", Vector<String>{"0"} } };
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptSetVariable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
@@ -358,7 +389,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSetVariable::getNodeDescription(
 
 IScriptNodeType::Result ScriptSetVariable::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	auto data = node.getPin(2).hasConnection() ? readDataPin(environment, node, 2) : ConfigNode(node.getSettings()["defaultValue"].asInt(0));
+	auto data = node.getPin(2).hasConnection() ? readDataPin(environment, node, 2) : ConfigNode(node.getSettings()["defaultValue"].asFloat(0));
 	writeDataPin(environment, node, 3, std::move(data));
 	return Result(ScriptNodeExecutionState::Done);
 }

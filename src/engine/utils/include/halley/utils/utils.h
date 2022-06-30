@@ -295,24 +295,6 @@ namespace Halley {
 		}
 	}
 
-	template<typename T>
-	[[nodiscard]] constexpr static std::pair<T, bool> advanceWithFlag(T a, T b, T inc)
-	{
-		if (a < b) {
-			if (a + inc > b) {
-				return { b, true };
-			} else {
-				return { a + inc, false };
-			}
-		} else {
-			if (a - inc < b) {
-				return { b, true };
-			} else {
-				return { a - inc, false };
-			}
-		}
-	}
-
 	// Align address
 	template <typename T>
 	[[nodiscard]] constexpr T alignUp(T val, T align)

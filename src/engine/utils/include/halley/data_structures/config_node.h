@@ -412,6 +412,10 @@ namespace Halley {
 		static ConfigNode applyDelta(const ConfigNode& from, const ConfigNode& delta);
 		void applyDelta(const ConfigNode& delta);
 		void decayDeltaArtifacts();
+		
+		static ConfigNodeType getPromotedType(gsl::span<const ConfigNodeType> types, bool promoteUndefined);
+		static bool isScalarType(ConfigNodeType type, bool acceptUndefined);
+		static bool isVector2Type(ConfigNodeType type, bool acceptUndefined);
 
 	private:
 		union {

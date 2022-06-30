@@ -1472,6 +1472,41 @@ void ConfigNode::decayDeltaArtifacts()
 	}
 }
 
+ConfigNodeType ConfigNode::getPromotedType(gsl::span<const ConfigNodeType> types, bool promoteUndefined)
+{
+	ConfigNodeType result = ConfigNodeType::Undefined;
+	
+	if (!types.empty()) {
+		result = types[0];
+		for (size_t i = 1; i < types.size(); ++i) {
+			const auto a = types[i - 1];
+			const auto b = types[i];
+
+			if (a != b) {
+				if (isScalarType(a, promoteUndefined) && isScalarType(b, promoteUndefined)) {
+					result = (a == ConfigNodeType::Float || b == ConfigNodeType::Float) ? ConfigNodeType::Float : ((a == ConfigNodeType::Int64 || b == ConfigNodeType::Int64) ? ConfigNodeType::Int64 : ConfigNodeType::Int);
+				} else if (isVector2Type(a, promoteUndefined) && isVector2Type(b, promoteUndefined)) {
+					result = (a == ConfigNodeType::Float2 || b == ConfigNodeType::Float2) ? ConfigNodeType::Float2 : ConfigNodeType::Int2;
+				} else {
+					return ConfigNodeType::Undefined;
+				}
+			}
+		}
+	}
+
+	return result;
+}
+
+bool ConfigNode::isScalarType(ConfigNodeType type, bool acceptUndefined)
+{
+	return type == ConfigNodeType::Int || type == ConfigNodeType::Float || type == ConfigNodeType::Int64 || (acceptUndefined && type == ConfigNodeType::Undefined);
+}
+
+bool ConfigNode::isVector2Type(ConfigNodeType type, bool acceptUndefined)
+{
+	return type == ConfigNodeType::Int2 || type == ConfigNodeType::Float2 || (acceptUndefined && type == ConfigNodeType::Undefined);
+}
+
 void ConfigNode::applyMapDelta(const ConfigNode& delta)
 {
 	auto& myMap = asMap();
