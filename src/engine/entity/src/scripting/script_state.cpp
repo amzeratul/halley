@@ -237,7 +237,6 @@ void ScriptState::load(const ConfigNode& node, const EntitySerializationContext&
 		graphHash = Deserializer::fromBytes<decltype(graphHash)>(node["graphHash"].asBytes());
 		ConfigNodeSerializer<decltype(localVars)>().deserialize(context, node["localVars"], localVars);
 		frameNumber = node["frameNumber"].asInt(0);
-		needsStateLoading = true;
 	}
 
 	ConfigNodeSerializer<decltype(sharedVars)>().deserialize(context, node["sharedVars"], sharedVars);
@@ -255,6 +254,7 @@ void ScriptState::load(const ConfigNode& node, const EntitySerializationContext&
 		if (!scriptGraphName.isEmpty()) {
 			scriptGraph = context.resources->get<ScriptGraph>(scriptGraphName);
 		}
+		needsStateLoading = true;
 	}
 }
 
@@ -290,11 +290,10 @@ ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) 
 	return node;
 }
 
-const String& ScriptState::getScriptId() const
+String ScriptState::getScriptId() const
 {
 	const auto* script = getScriptGraphPtr();
-	assert(script != nullptr);
-	return script->getAssetId();
+	return script ? script->getAssetId() : "";
 }
 
 const ScriptGraph* ScriptState::getScriptGraphPtr() const

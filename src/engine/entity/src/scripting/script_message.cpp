@@ -55,3 +55,13 @@ ConfigNode ScriptEntityMessageType::toConfig() const
 	result["members"] = members;
 	return result;
 }
+
+ConfigNode ConfigNodeSerializer<ScriptMessage>::serialize(const ScriptMessage& msg, const EntitySerializationContext& context)
+{
+	return msg.toConfig();
+}
+
+ScriptMessage ConfigNodeSerializer<ScriptMessage>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
+{
+	return ScriptMessage(node);
+}

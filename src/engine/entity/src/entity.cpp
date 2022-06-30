@@ -340,6 +340,8 @@ std::optional<uint8_t> Entity::getOwnerPeerId() const
 	const auto* networkComponent = tryGetComponent<NetworkComponent>();
 	if (networkComponent) {
 		return networkComponent->ownerId;
+	} else if (parent) {
+		return parent->getOwnerPeerId();
 	} else {
 		return {};
 	}

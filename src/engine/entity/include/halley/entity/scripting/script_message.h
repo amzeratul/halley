@@ -1,9 +1,10 @@
 #pragma once
 #include "halley/data_structures/config_node.h"
 #include "halley/text/halleystring.h"
+#include "halley/bytes/config_node_serializer_base.h"
 
 namespace Halley {
-    class ScriptMessageType {
+	class ScriptMessageType {
     public:
         String script;
         String message;
@@ -36,4 +37,11 @@ namespace Halley {
 	};
 
     using ScriptSystemMessageType = ScriptEntityMessageType;
+	
+	template<>
+	class ConfigNodeSerializer<ScriptMessage> {
+	public:
+		ConfigNode serialize(const ScriptMessage& msg, const EntitySerializationContext& context);
+		ScriptMessage deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+	};
 }

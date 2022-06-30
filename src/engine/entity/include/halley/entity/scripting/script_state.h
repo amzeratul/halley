@@ -131,7 +131,7 @@ namespace Halley {
 
 		void load(const ConfigNode& node, const EntitySerializationContext& context);
 
-		const String& getScriptId() const;
+		String getScriptId() const;
 		const ScriptGraph* getScriptGraphPtr() const;
 		void setScriptGraphPtr(const ScriptGraph* script);
 
