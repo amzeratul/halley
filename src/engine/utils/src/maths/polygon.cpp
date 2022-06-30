@@ -1345,6 +1345,9 @@ Polygon::CollisionResult Polygon::getCollisionWithSweepingEllipse(Vector2f p0, V
 
 float Polygon::getDistanceTo(Vector2f point, float anisotropy) const
 {
+	if (vertices.empty()) {
+		return std::numeric_limits<float>::infinity();
+	}
 	if (isPointInside(point)) {
 		return 0;
 	}
