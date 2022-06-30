@@ -433,11 +433,12 @@ void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)
 ScriptVariables& ScriptEnvironment::getVariables(ScriptVariableScope scope)
 {
 	switch (scope) {
-	case ScriptVariableScope::Script:
-		return currentState->getVariables();
+	case ScriptVariableScope::Local:
+		return currentState->getLocalVariables();
+	case ScriptVariableScope::Shared:
+		return currentState->getSharedVariables();
 	case ScriptVariableScope::Entity:
 		return *currentEntityVariables;
-	case ScriptVariableScope::Global:
 	default:
 		throw Exception("Variable type " + toString(scope) + " not implemented", HalleyExceptions::Entity);
 	}
@@ -446,11 +447,12 @@ ScriptVariables& ScriptEnvironment::getVariables(ScriptVariableScope scope)
 const ScriptVariables& ScriptEnvironment::getVariables(ScriptVariableScope scope) const
 {
 	switch (scope) {
-	case ScriptVariableScope::Script:
-		return currentState->getVariables();
+	case ScriptVariableScope::Local:
+		return currentState->getLocalVariables();
+	case ScriptVariableScope::Shared:
+		return currentState->getSharedVariables();
 	case ScriptVariableScope::Entity:
 		return *currentEntityVariables;
-	case ScriptVariableScope::Global:
 	default:
 		throw Exception("Variable type " + toString(scope) + " not implemented", HalleyExceptions::Entity);
 	}

@@ -230,20 +230,19 @@ ScriptState::ScriptState(const ConfigNode& node, const EntitySerializationContex
 		threads = ConfigNodeSerializer<decltype(threads)>().deserialize(context, node["threads"]);
 		nodeState = ConfigNodeSerializer<decltype(nodeState)>().deserialize(context, node["nodeState"]);
 		graphHash = Deserializer::fromBytes<decltype(graphHash)>(node["graphHash"].asBytes());
-		variables = ConfigNodeSerializer<decltype(variables)>().deserialize(context, node["variables"]);
+		localVars = ConfigNodeSerializer<decltype(localVars)>().deserialize(context, node["localVars"]);
 		frameNumber = node["frameNumber"].asInt(0);
 	}
 
+	sharedVars = ConfigNodeSerializer<decltype(sharedVars)>().deserialize(context, node["sharedVars"]);
 	persistAfterDone = node["persistAfterDone"].asBool(false);
 	tags = node["tags"].asVector<String>({});
-	const auto scriptGraphName = node["script"].asString();
+	const auto scriptGraphName = node["script"].asString("");
 	if (!scriptGraphName.isEmpty()) {
 		scriptGraph = context.resources->get<ScriptGraph>(scriptGraphName);
 	}
 
 	needsStateLoading = true;
-
-	Logger::logDev("Deserialized script state");
 }
 
 ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) const
@@ -257,13 +256,23 @@ ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) 
 		node["threads"] = ConfigNodeSerializer<decltype(threads)>().serialize(threads, context);
 		node["nodeState"] = ConfigNodeSerializer<decltype(nodeState)>().serialize(nodeState, context);
 		node["graphHash"] = Serializer::toBytes(graphHash);
-		node["variables"] = ConfigNodeSerializer<decltype(variables)>().serialize(variables, context);
+		node["localVars"] = ConfigNodeSerializer<decltype(localVars)>().serialize(localVars, context);
 		node["frameNumber"] = frameNumber;
 	}
 
-	node["script"] = scriptGraph ? scriptGraph->getAssetId() : "";
-	node["persistAfterDone"] = persistAfterDone;
-	node["tags"] = tags;
+	if (!sharedVars.empty()) {
+		node["sharedVars"] = ConfigNodeSerializer<decltype(sharedVars)>().serialize(sharedVars, context);
+	}
+	auto scriptName = scriptGraph ? scriptGraph->getAssetId() : "";
+	if (!scriptName.isEmpty()) {
+		node["script"] = std::move(scriptName);
+	}
+	if (persistAfterDone) {
+		node["persistAfterDone"] = persistAfterDone;
+	}
+	if (!tags.empty()) {
+		node["tags"] = tags;
+	}
 
 	return node;
 }
@@ -440,14 +449,24 @@ void ScriptState::processMessages()
 	});
 }
 
-ScriptVariables& ScriptState::getVariables()
+ScriptVariables& ScriptState::getLocalVariables()
 {
-	return variables;
+	return localVars;
 }
 
-const ScriptVariables& ScriptState::getVariables() const
+const ScriptVariables& ScriptState::getLocalVariables() const
 {
-	return variables;
+	return localVars;
+}
+
+ScriptVariables& ScriptState::getSharedVariables()
+{
+	return sharedVars;
+}
+
+const ScriptVariables& ScriptState::getSharedVariables() const
+{
+	return sharedVars;
 }
 
 bool ScriptState::processMessage(ScriptMessage& msg)

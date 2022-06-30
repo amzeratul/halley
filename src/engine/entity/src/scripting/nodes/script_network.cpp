@@ -78,7 +78,6 @@ IScriptNodeType::Result ScriptIfEntityAuthority::doUpdate(ScriptEnvironment& env
 {
 	const auto entity = environment.tryGetEntity(readEntityId(environment, node, 1)).getEntityId();
 	const bool hasAuthority = environment.hasNetworkAuthorityOver(entity);
-	Logger::logDev("Has authority over " + toString(entity) + " = " + (hasAuthority ? "true" : "false"));
 	return Result(ScriptNodeExecutionState::Done, 0, hasAuthority ? 1 : 0);
 }
 

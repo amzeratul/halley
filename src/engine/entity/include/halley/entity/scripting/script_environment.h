@@ -8,18 +8,18 @@ namespace Halley {
 	class ScriptState;
 
     enum class ScriptVariableScope {
-        Script,
-        Entity,
-        Global
+        Local,
+        Shared,
+        Entity
     };
 
 	template <>
 	struct EnumNames<ScriptVariableScope> {
 		constexpr std::array<const char*, 3> operator()() const {
 			return{{
-				"script",
-				"entity",
-				"global"
+				"local",
+                "shared",
+				"entity"
 			}};
 		}
 	};

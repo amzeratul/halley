@@ -11,7 +11,7 @@ void ScriptVariables::load(const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Map) {
 		variables = node.asHashMap<String, ConfigNode>();
-	} else {
+	} else if (node.getType() != ConfigNodeType::Undefined) {
 		for (const auto& [k, v]: node.asMap()) {
 			variables[k].applyDelta(v);
 		}
@@ -40,6 +40,11 @@ void ScriptVariables::setVariable(const String& name, ConfigNode value)
 bool ScriptVariables::hasVariable(const String& name) const
 {
 	return variables.find(name) != variables.end();
+}
+
+bool ScriptVariables::empty() const
+{
+	return variables.empty();
 }
 
 ConfigNode ConfigNodeSerializer<ScriptVariables>::serialize(const ScriptVariables& variables, const EntitySerializationContext& context)

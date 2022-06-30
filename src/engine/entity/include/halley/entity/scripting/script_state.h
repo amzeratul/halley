@@ -170,8 +170,10 @@ namespace Halley {
     	void receiveMessage(ScriptMessage msg);
         void processMessages();
 
-		ScriptVariables& getVariables();
-		const ScriptVariables& getVariables() const;
+		ScriptVariables& getLocalVariables();
+		const ScriptVariables& getLocalVariables() const;
+    	ScriptVariables& getSharedVariables();
+		const ScriptVariables& getSharedVariables() const;
 
 	private:
 		std::shared_ptr<const ScriptGraph> scriptGraph;
@@ -180,7 +182,8 @@ namespace Halley {
     	Vector<ScriptStateThread> threads;
 		Vector<NodeState> nodeState;
     	std::map<ScriptNodeId, size_t> nodeCounters;
-    	ScriptVariables variables;
+    	ScriptVariables localVars;
+		ScriptVariables sharedVars;
 
     	uint64_t graphHash = 0;
 		int frameNumber = 0;
