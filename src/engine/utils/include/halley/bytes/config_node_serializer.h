@@ -4,6 +4,7 @@
 #include "halley/data_structures/maybe.h"
 #include "halley/maths/colour.h"
 #include "halley/maths/rect.h"
+#include "halley/utils/type_traits.h"
 #include "config_node_serializer_base.h"
 #include <set>
 
@@ -11,8 +12,9 @@
 #include "halley/core/resources/resource_reference.h"
 
 namespace Halley {
-	template <class, class = std::void_t<>> struct HasInPlaceDeserializer : std::false_type {};
-	template <class T> struct HasInPlaceDeserializer<T, decltype(std::declval<ConfigNodeSerializer<T>>().deserialize(std::declval<const EntitySerializationContext&>(), std::declval<const ConfigNode&>(), std::declval<T&>()))> : std::true_type { };
+	namespace Detail {
+		template<class T> using VoidDeserializer = decltype(std::declval<ConfigNodeSerializer<T>>().deserialize(std::declval<const EntitySerializationContext&>(), std::declval<const ConfigNode&>(), std::declval<T&>()));
+	}
 
 	template <typename T>
 	class ConfigNodeHelper {
@@ -27,7 +29,20 @@ namespace Halley {
 			if (node.getType() == ConfigNodeType::Undefined || node.getType() == ConfigNodeType::Del) {
 				dst = defaultValue;
 			} else {
-				if constexpr (HasInPlaceDeserializer<T>::value) {
+				if constexpr (is_detected<Detail::VoidDeserializer, T>::value) {
+					ConfigNodeSerializer<T>().deserialize(context, node, dst);
+				} else {
+					dst = ConfigNodeSerializer<T>().deserialize(context, node);
+				}
+			}
+		}
+		
+		static void deserialize(T& dst, const EntitySerializationContext& context, const ConfigNode& node)
+		{
+			if (node.getType() == ConfigNodeType::Undefined || node.getType() == ConfigNodeType::Del) {
+				dst = T();
+			} else {
+				if constexpr (is_detected<Detail::VoidDeserializer, T>::value) {
 					ConfigNodeSerializer<T>().deserialize(context, node, dst);
 				} else {
 					dst = ConfigNodeSerializer<T>().deserialize(context, node);
@@ -223,6 +238,19 @@ namespace Halley {
 			}
 			return result;
         }
+
+		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, Vector<T>& target)
+        {
+			if (node.getType() == ConfigNodeType::Sequence) {
+				auto seq = node.asSequence();
+		        target.resize(seq.size());
+				for (size_t i = 0; i < target.size(); ++i) {
+					ConfigNodeHelper<T>::deserialize(target[i], context, seq[i]);
+				}
+			} else {
+				target.clear();
+			}
+        }
 	};
 
 	template <typename T>
@@ -236,6 +264,15 @@ namespace Halley {
         std::shared_ptr<T> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
         {
 			return std::make_shared<T>(ConfigNodeSerializer<T>().deserialize(context, node));
+        }
+		
+        void deserialize(const EntitySerializationContext& context, const ConfigNode& node, std::shared_ptr<T>& target)
+        {
+			if (target) {
+				ConfigNodeHelper<T>::deserialize(*target, context, node);
+			} else {
+				target = std::make_shared<T>(ConfigNodeSerializer<T>().deserialize(context, node));
+			}
         }
 	};
 

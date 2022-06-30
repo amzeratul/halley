@@ -225,24 +225,37 @@ ScriptState::ScriptState(std::shared_ptr<const ScriptGraph> script)
 
 ScriptState::ScriptState(const ConfigNode& node, const EntitySerializationContext& context)
 {
+	load(node, context);
+}
+
+void ScriptState::load(const ConfigNode& node, const EntitySerializationContext& context)
+{
 	if (!context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::Network))) {
 		started = node["started"].asBool(false);
 		threads = ConfigNodeSerializer<decltype(threads)>().deserialize(context, node["threads"]);
 		nodeState = ConfigNodeSerializer<decltype(nodeState)>().deserialize(context, node["nodeState"]);
 		graphHash = Deserializer::fromBytes<decltype(graphHash)>(node["graphHash"].asBytes());
-		localVars = ConfigNodeSerializer<decltype(localVars)>().deserialize(context, node["localVars"]);
+		ConfigNodeSerializer<decltype(localVars)>().deserialize(context, node["localVars"], localVars);
 		frameNumber = node["frameNumber"].asInt(0);
+		needsStateLoading = true;
 	}
 
-	sharedVars = ConfigNodeSerializer<decltype(sharedVars)>().deserialize(context, node["sharedVars"]);
-	persistAfterDone = node["persistAfterDone"].asBool(false);
-	tags = node["tags"].asVector<String>({});
-	const auto scriptGraphName = node["script"].asString("");
-	if (!scriptGraphName.isEmpty()) {
-		scriptGraph = context.resources->get<ScriptGraph>(scriptGraphName);
+	ConfigNodeSerializer<decltype(sharedVars)>().deserialize(context, node["sharedVars"], sharedVars);
+
+	if (node.hasKey("persistAfterDone")) {
+		persistAfterDone = node["persistAfterDone"].asBool();
 	}
 
-	needsStateLoading = true;
+	if (node.hasKey("tags")) {
+		tags = node["tags"].asVector<String>();
+	}
+
+	if (node.hasKey("script")) {
+		const auto scriptGraphName = node["script"].asString();
+		if (!scriptGraphName.isEmpty()) {
+			scriptGraph = context.resources->get<ScriptGraph>(scriptGraphName);
+		}
+	}
 }
 
 ConfigNode ScriptState::toConfigNode(const EntitySerializationContext& context) const
@@ -538,6 +551,11 @@ ConfigNode ConfigNodeSerializer<ScriptState>::serialize(const ScriptState& state
 ScriptState ConfigNodeSerializer<ScriptState>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 {
 	return ScriptState(node, context);
+}
+
+void ConfigNodeSerializer<ScriptState>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, ScriptState& target)
+{
+	target.load(node, context);
 }
 
 ConfigNode ConfigNodeSerializer<ScriptStateThread>::serialize(const ScriptStateThread& thread, const EntitySerializationContext& context)

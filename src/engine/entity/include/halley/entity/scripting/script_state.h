@@ -129,6 +129,8 @@ namespace Halley {
 		ScriptState(const ScriptGraph* script, bool persistAfterDone);
 		ScriptState(std::shared_ptr<const ScriptGraph> script);
 
+		void load(const ConfigNode& node, const EntitySerializationContext& context);
+
 		const String& getScriptId() const;
 		const ScriptGraph* getScriptGraphPtr() const;
 		void setScriptGraphPtr(const ScriptGraph* script);
@@ -207,6 +209,7 @@ namespace Halley {
 	public:
 		ConfigNode serialize(const ScriptState& state, const EntitySerializationContext& context);
 		ScriptState deserialize(const EntitySerializationContext& context, const ConfigNode& node);
+		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, ScriptState& target);
 	};
 	
 	template<>
