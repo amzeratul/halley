@@ -348,7 +348,7 @@ void EntityData::applyDelta(const EntityDataDelta& delta)
 		if (iter != children.end()) {
 			iter->applyDelta(child.second);
 		} else {
-			Logger::logWarning("Child not found: " + child.first.toString());
+			children.push_back(EntityData(child.second));
 		}
 	}
 	for (const auto& child: delta.childrenAdded) {
