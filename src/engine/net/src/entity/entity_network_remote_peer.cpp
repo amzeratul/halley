@@ -191,7 +191,7 @@ void EntityNetworkRemotePeer::receiveCreateEntity(const EntityNetworkMessageCrea
 	//Logger::logDev("Instantiating from network:\n\n" + EntityData(delta).toYAML());
 
 	auto [entityData, prefab, prefabUUID] = parent->getFactory().prefabDeltaToEntityData(delta);
-	auto [entity, parentUUID] = parent->getFactory().loadEntityDelta(delta, {}, EntitySerialization::makeMask(EntitySerialization::Type::Network));
+	auto [entity, parentUUID] = parent->getFactory().loadEntityDelta(delta, {}, EntitySerialization::makeMask(EntitySerialization::Type::SaveData, EntitySerialization::Type::Prefab, EntitySerialization::Type::Network));
 
 	if (parentUUID) {
 		if (auto parentEntity = parent->getWorld().findEntity(parentUUID.value()); parentEntity) {
