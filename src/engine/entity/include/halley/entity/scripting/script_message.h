@@ -13,6 +13,9 @@ namespace Halley {
         ScriptMessageType() = default;
         ScriptMessageType(const ConfigNode& node);
         ConfigNode toConfig() const;
+
+        void serialize(Serializer& s) const;
+        void deserialize(Deserializer& s);
     };
 
     class ScriptMessage {
@@ -24,6 +27,9 @@ namespace Halley {
         ScriptMessage(const ConfigNode& node);
         ConfigNode toConfig() const;
         String toString() const;
+
+        void serialize(Serializer& s) const;
+        void deserialize(Deserializer& s);
     };
 
 	class ScriptEntityMessageType {
