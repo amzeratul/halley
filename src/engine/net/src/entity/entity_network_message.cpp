@@ -48,12 +48,14 @@ void EntityNetworkMessageReadyToStart::deserialize(Deserializer& s)
 
 void EntityNetworkMessageEntityMsg::serialize(Serializer& s) const
 {
+	s << entityUUID;
 	s << messageType;
 	s << messageData;
 }
 
 void EntityNetworkMessageEntityMsg::deserialize(Deserializer& s)
 {
+	s >> entityUUID;
 	s >> messageType;
 	s >> messageData;
 }

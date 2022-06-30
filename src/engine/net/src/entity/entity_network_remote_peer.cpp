@@ -126,11 +126,11 @@ void EntityNetworkRemotePeer::sendCreateEntity(EntityRef entity)
 
 	auto deltaData = parent->getFactory().entityDataToPrefabDelta(result.data, entity.getPrefab(), parent->getEntityDeltaOptions());
 	auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
+	//Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + EntityData(deltaData).toYAML() + "\n");
+
 	send(EntityNetworkMessageCreate(result.networkId, std::move(bytes)));
 	
 	outboundEntities[entity.getEntityId()] = std::move(result);
-	
-	//Logger::logDev("Send Create: " + entity.getName() + " (" + entity.getInstanceUUID() + ") to peer " + toString(static_cast<int>(peerId)) + ":\n" + EntityData(deltaData).toYAML() + "\n");
 }
 
 void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, EntityRef entity)
@@ -153,9 +153,9 @@ void EntityNetworkRemotePeer::sendUpdateEntity(Time t, OutboundEntity& remote, E
 		remote.timeSinceSend = 0;
 
 		auto bytes = Serializer::toBytes(deltaData, parent->getByteSerializationOptions());
-		send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes)));
+		//Logger::logDev("Send Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + " (" + toString(bytes.size()) + " B):\n" + deltaData.toYAML() + "\n");
 		
-		//Logger::logDev("Send Update " + entity.getName() + " to peer " + toString(static_cast<int>(peerId)) + ":\n" + deltaData.toYAML() + "\n");
+		send(EntityNetworkMessageUpdate(remote.networkId, std::move(bytes)));
 	}
 }
 
@@ -230,6 +230,7 @@ void EntityNetworkRemotePeer::receiveUpdateEntity(const EntityNetworkMessageUpda
 
 	auto retriever = DataInterpolatorSetRetriever(entity, false);
 
+	//Logger::logDev("Updating entity:\n" + delta.toYAML());
 	parent->getFactory().updateEntity(entity, delta, EntitySerialization::makeMask(EntitySerialization::Type::Network), nullptr, &retriever);
 	remote.data.applyDelta(delta);
 }
