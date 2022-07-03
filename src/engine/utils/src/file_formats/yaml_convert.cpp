@@ -1,6 +1,7 @@
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/file_formats/halley-yamlcpp.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/text/encode.h"
 using namespace Halley;
 
 ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node)
@@ -124,7 +125,8 @@ void YAMLConvert::emitNode(const ConfigNode& node, YAML::Emitter& emitter, const
 		return;
 
 	case ConfigNodeType::Bytes:
-		throw Exception("Unsupported ConfigNode type: bytes", HalleyExceptions::Tools);
+		emitter << YAML::Binary(node.asBytes().data(), node.asBytes().size());
+		return;
 
 	default:
 		emitter << YAML::Null;
