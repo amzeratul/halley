@@ -6,11 +6,13 @@
 #include "halley/net/connection/iconnection.h"
 #include "halley/net/connection/message_queue.h"
 #include "devcon/devcon_messages.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
-DevConServerConnection::DevConServerConnection(DevConServer& parent, std::shared_ptr<IConnection> conn)
+DevConServerConnection::DevConServerConnection(DevConServer& parent, size_t id, std::shared_ptr<IConnection> conn)
 	: parent(parent)
+	, id(id)
 	, connection(conn)
 	, queue(std::make_shared<MessageQueueTCP>(connection))
 {
@@ -35,6 +37,16 @@ void DevConServerConnection::update(Time t)
 			break;
 		}
 	}
+}
+
+bool DevConServerConnection::isAlive() const
+{
+	return connection->getStatus() != ConnectionStatus::Closed && connection->getStatus() != ConnectionStatus::Closing;
+}
+
+size_t DevConServerConnection::getId() const
+{
+	return id;
 }
 
 void DevConServerConnection::reloadAssets(gsl::span<const String> ids)
@@ -70,7 +82,7 @@ DevConServer::DevConServer(std::unique_ptr<NetworkService> s, int port)
 	service->startListening([=] (NetworkService::Acceptor& a)
 	{
 		Logger::logInfo("New incoming DevCon connection.");
-		connections.push_back(std::make_shared<DevConServerConnection>(*this, a.accept()));
+		connections.push_back(std::make_shared<DevConServerConnection>(*this, connId++, a.accept()));
 		initConnection(*connections.back());
 	});
 }
@@ -81,7 +93,12 @@ void DevConServer::update(Time t)
 
 	for (const auto& c: connections) {
 		c->update(t);
+		if (!c->isAlive()) {
+			terminateConnection(*c);
+		}
 	}
+
+	std_ex::erase_if(connections, [=](const auto& c) { return !c->isAlive(); });
 }
 
 void DevConServer::reloadAssets(gsl::span<const String> ids)
@@ -116,7 +133,10 @@ void DevConServer::onReceiveNotifyInterestMsg(const DevConServerConnection& conn
 {
 	const auto iter = interest.find(msg.handle);
 	if (iter != interest.end()) {
-		iter->second.callback(std::move(msg.data));
+		if (!std_ex::contains(iter->second.hadResult, connection.getId())) {
+			iter->second.hadResult.push_back(connection.getId());
+		}
+		iter->second.callback(connection.getId(), std::move(msg.data));
 	}
 }
 
@@ -124,5 +144,15 @@ void DevConServer::initConnection(DevConServerConnection& conn)
 {
 	for (const auto& [handle, val]: interest) {
 		conn.registerInterest(val.id, val.config, handle);
+	}
+}
+
+void DevConServer::terminateConnection(DevConServerConnection& conn)
+{
+	for (auto& [k, v] : interest) {
+		if (std_ex::contains(v.hadResult, conn.getId())) {
+			std_ex::erase(v.hadResult, conn.getId());
+			v.callback(conn.getId(), ConfigNode());
+		}
 	}
 }

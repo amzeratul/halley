@@ -39,15 +39,15 @@ namespace Halley {
 
     	std::optional<uint32_t> scriptEnumHandle;
 		std::optional<uint32_t> scriptStateHandle;
-		int64_t curEntityId = -1;
+		std::optional<std::pair<size_t, int64_t>> curEntityId;
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
 
 		void open();
 		void setListeningToClient(bool listening);
-		void setListeningToState(int64_t entityId);
+		void setListeningToState(std::pair<size_t, int64_t> entityId);
 
-		void onScriptEnum(ConfigNode data);
-		void onScriptState(ConfigNode data);
-		void setCurrentInstance(int64_t entityId);
+		void onScriptEnum(size_t connId, ConfigNode data);
+		void onScriptState(size_t connId, ConfigNode data);
+		void setCurrentInstance(std::pair<size_t, int64_t> entityId);
     };
 }

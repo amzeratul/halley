@@ -27,9 +27,11 @@ namespace Halley
 	class DevConServerConnection
 	{
 	public:
-		DevConServerConnection(DevConServer& parent, std::shared_ptr<IConnection> connection);
+		DevConServerConnection(DevConServer& parent, size_t id, std::shared_ptr<IConnection> connection);
 		
 		void update(Time t);
+		bool isAlive() const;
+		size_t getId() const;
 		
 		void reloadAssets(gsl::span<const String> assetIds);
 
@@ -38,6 +40,7 @@ namespace Halley
 
 	private:
 		DevConServer& parent;
+		size_t id;
 		std::shared_ptr<IConnection> connection;
 		std::shared_ptr<MessageQueue> queue;
 
@@ -50,11 +53,11 @@ namespace Halley
 		friend class DevConServerConnection;
 
 	public:
-		using InterestCallback = std::function<void(ConfigNode)>;
+		using InterestCallback = std::function<void(size_t, ConfigNode)>;
 		using InterestHandle = uint32_t;
 
 		DevConServer(std::unique_ptr<NetworkService> service, int port = DevCon::devConPort);
-
+		
 		void update(Time t);
 
 		void reloadAssets(gsl::span<const String> assetIds);
@@ -70,14 +73,17 @@ namespace Halley
 			String id;
 			ConfigNode config;
 			InterestCallback callback;
+			Vector<size_t> hadResult;
 		};
 
 		std::unique_ptr<NetworkService> service;
 		Vector<std::shared_ptr<DevConServerConnection>> connections;
+		size_t connId = 0;
 
 		HashMap<InterestHandle, Interest> interest;
 		InterestHandle interestId = 0;
 
 		void initConnection(DevConServerConnection& conn);
+		void terminateConnection(DevConServerConnection& conn);
 	};
 }

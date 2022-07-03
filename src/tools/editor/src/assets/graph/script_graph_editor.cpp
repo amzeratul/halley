@@ -53,9 +53,16 @@ void ScriptGraphEditor::onMakeUI()
 	getWidget("toolbarGizmo")->clear();
 	getWidget("toolbarGizmo")->add(gizmoEditor->makeUI());
 
-	bindData("instances", "-1", [=](String id)
+	bindData("instances", "-1:-1", [=](String id)
 	{
-		setCurrentInstance(id.isInteger() ? id.toInteger64() : -1);
+		auto split = id.split(':');
+		if (split.size() == 2 && split[0].isInteger() && split[1].isInteger()) {
+			auto connId = split[0].toInteger();
+			auto entityId = split[1].toInteger64();
+			setCurrentInstance({ connId, entityId });
+		} else {
+			setCurrentInstance({ 0, -1 });
+		}
 	});
 }
 
@@ -146,7 +153,7 @@ void ScriptGraphEditor::update(Time time, bool moved)
 	}
 }
 
-void ScriptGraphEditor::setCurrentInstance(int64_t entityId)
+void ScriptGraphEditor::setCurrentInstance(std::pair<size_t, int64_t> entityId)
 {
 	if (curEntityId != entityId) {
 		curEntityId = entityId;
@@ -162,24 +169,24 @@ void ScriptGraphEditor::setListeningToClient(bool listening)
 
 	if (listening) {
 		if (!scriptEnumHandle) {
-			onScriptEnum(ConfigNode::SequenceType{});
-			scriptEnumHandle = devConServer.registerInterest("scriptEnum", ConfigNode(assetId), [=] (ConfigNode result)
+			onScriptEnum({}, ConfigNode::SequenceType{});
+			scriptEnumHandle = devConServer.registerInterest("scriptEnum", ConfigNode(assetId), [=] (size_t connId, ConfigNode result)
 			{
-				onScriptEnum(std::move(result));
+				onScriptEnum(connId, std::move(result));
 			});
 		}
-		setListeningToState(curEntityId);
+		setListeningToState(curEntityId.value_or(std::pair<size_t, int64_t>(0, -1)));
 	} else {
 		if (scriptEnumHandle) {
 			devConServer.unregisterInterest(scriptEnumHandle.value());
 			scriptEnumHandle.reset();
-			onScriptEnum(ConfigNode::SequenceType{});
+			onScriptEnum({}, ConfigNode::SequenceType{});
 		}
-		setListeningToState(-1);
+		setListeningToState({0, -1});
 	}
 }
 
-void ScriptGraphEditor::setListeningToState(int64_t entityId)
+void ScriptGraphEditor::setListeningToState(std::pair<size_t, int64_t> entityId)
 {
 	auto& devConServer = *project.getDevConServer();
 
@@ -188,37 +195,48 @@ void ScriptGraphEditor::setListeningToState(int64_t entityId)
 		scriptStateHandle.reset();
 	}
 
-	if (entityId != -1) {
+	if (entityId.second != -1) {
 		ConfigNode::MapType params;
-		params["entityId"] = curEntityId;
+		params["connId"] = static_cast<int>(entityId.first);
+		params["entityId"] = entityId.second;
 		params["scriptId"] = assetId;
-		scriptStateHandle = devConServer.registerInterest("scriptState", params, [=] (ConfigNode result)
+		scriptStateHandle = devConServer.registerInterest("scriptState", params, [=] (size_t connId, ConfigNode result)
 		{
-			onScriptState(std::move(result));
+			onScriptState(connId, std::move(result));
 		});
 	} else {
-		onScriptState(ConfigNode());
+		onScriptState(curEntityId ? curEntityId->first : 0, ConfigNode());
 	}
 }
 
-void ScriptGraphEditor::onScriptEnum(ConfigNode data)
+void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
 {
 	const auto instances = getWidgetAs<UIDropdown>("instances");
 	Vector<String> ids;
 	Vector<LocalisedString> names;
-	ids.push_back("-1");
+	ids.push_back("-1:-1");
 	names.push_back(LocalisedString::fromHardcodedString("[none]"));
 
-	for (const auto& entry: data.asSequence()) {
-		ids.push_back(toString(entry["entityId"].asInt64()));
-		names.push_back(LocalisedString::fromUserString(entry["name"].asString() + " (" + toString(entry["entityId"].asInt64()) + ")"));
+	if (data.getType() == ConfigNodeType::Sequence) {
+		for (const auto& entry : data.asSequence()) {
+			ids.push_back(toString(connId) + ":" + toString(entry["entityId"].asInt64()));
+			names.push_back(LocalisedString::fromUserString("[" + toString(connId) + "] " + entry["name"].asString() + " (" + toString(entry["entityId"].asInt64()) + ")"));
+		}
 	}
 
 	instances->setOptions(std::move(ids), std::move(names));
 }
 
-void ScriptGraphEditor::onScriptState(ConfigNode data)
+void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 {
+	if (!curEntityId) {
+		scriptState.reset();
+	}
+
+	if (curEntityId->first != connId) {
+		return;
+	}
+
 	if (data.getType() == ConfigNodeType::Undefined) {
 		scriptState.reset();
 	} else {
