@@ -12,6 +12,16 @@ ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResource
 {
 }
 
+ScriptGraphEditor::~ScriptGraphEditor()
+{
+	setListeningToClient(false);
+}
+
+void ScriptGraphEditor::onActiveChanged(bool active)
+{
+	setListeningToClient(active);
+}
+
 void ScriptGraphEditor::onMakeUI()
 {
 	gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *projectWindow.getEntityEditorFactory(), projectWindow.getScriptNodeTypes(), 
@@ -107,6 +117,8 @@ void ScriptGraphEditor::open()
 	if (gizmoEditor) {
 		gizmoEditor->load(*scriptGraph);
 	}
+
+	setListeningToClient(true);
 }
 
 void ScriptGraphEditor::update(Time time, bool moved)
@@ -121,4 +133,27 @@ void ScriptGraphEditor::update(Time time, bool moved)
 	if (gizmoEditor) {
 		infiniCanvas->setScrollEnabled(!gizmoEditor->isHighlighted());
 	}
+}
+
+void ScriptGraphEditor::setListeningToClient(bool listening)
+{
+	auto& devConServer = *project.getDevConServer();
+
+	if (scriptEnumHandle) {
+		devConServer.unregisterInterest(scriptEnumHandle.value());
+		scriptEnumHandle.reset();
+	}
+
+	if (listening) {
+		scriptEnumHandle = devConServer.registerInterest("scriptEnum", ConfigNode(assetId), [=] (ConfigNode result)
+		{
+			onScriptEnum(std::move(result));
+		});
+	}
+}
+
+void ScriptGraphEditor::onScriptEnum(ConfigNode data)
+{
+	YAMLConvert::EmitOptions options;
+	Logger::logDev("Script enum:\n" + YAMLConvert::generateYAML(data, options));
 }

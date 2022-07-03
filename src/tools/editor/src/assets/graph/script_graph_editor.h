@@ -9,6 +9,9 @@ namespace Halley {
     class ScriptGraphEditor : public AssetEditor {
 	public:
 		ScriptGraphEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow);
+		~ScriptGraphEditor() override;
+
+		void onActiveChanged(bool active) override;
 
         void reload() override;
         void refreshAssets() override;
@@ -32,6 +35,11 @@ namespace Halley {
 		bool pendingLoad = false;
 		bool hasUI = false;
 
+    	std::optional<uint32_t> scriptEnumHandle;
+
 		void open();
+		void setListeningToClient(bool listening);
+
+		void onScriptEnum(ConfigNode data);
     };
 }
