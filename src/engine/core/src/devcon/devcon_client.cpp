@@ -50,12 +50,12 @@ void DevConClient::update(Time t)
 
 void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
 {
-	if (msg.getIds().size() <= 5) {
-		Logger::logDev("Reloading " + toString(msg.getIds().size()) + " assets: " + toString(msg.getIds()));
+	if (msg.ids.size() <= 5) {
+		Logger::logDev("Reloading " + toString(msg.ids.size()) + " assets: " + toString(msg.ids));
 	} else {
-		Logger::logDev("Reloading " + toString(msg.getIds().size()) + " assets.");
+		Logger::logDev("Reloading " + toString(msg.ids.size()) + " assets.");
 	}
-	resources.reloadAssets(msg.getIds());
+	resources.reloadAssets(msg.ids);
 }
 
 void DevConClient::connect()

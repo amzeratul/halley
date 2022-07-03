@@ -9,8 +9,9 @@
 
 using namespace Halley;
 
-DevConServerConnection::DevConServerConnection(std::shared_ptr<IConnection> conn)
-	: connection(conn)
+DevConServerConnection::DevConServerConnection(DevConServer& parent, std::shared_ptr<IConnection> conn)
+	: parent(parent)
+	, connection(conn)
 	, queue(std::make_shared<MessageQueueTCP>(connection))
 {
 	DevCon::setupMessageQueue(*queue);
@@ -27,8 +28,8 @@ void DevConServerConnection::update(Time t)
 			onReceiveLogMsg(dynamic_cast<DevCon::LogMsg&>(msg));
 			break;
 
-		case DevCon::MessageType::ReloadAssets:
-			// TODO;
+		case DevCon::MessageType::NotifyInterest:
+			onReceiveNotifyInterestMsg(dynamic_cast<DevCon::NotifyInterestMsg&>(msg));
 
 		default:
 			break;
@@ -43,19 +44,24 @@ void DevConServerConnection::reloadAssets(gsl::span<const String> ids)
 
 void DevConServerConnection::registerInterest(const String& id, const ConfigNode& params, uint32_t handle)
 {
-	// TODO
+	queue->enqueue(std::make_unique<DevCon::RegisterInterestMsg>(id, ConfigNode(params), handle), 0);
 }
 
 void DevConServerConnection::unregisterInterest(uint32_t handle)
 {
-	// TODO
+	queue->enqueue(std::make_unique<DevCon::UnregisterInterestMsg>(handle), 0);
 }
 
 
 
-void DevConServerConnection::onReceiveLogMsg(const DevCon::LogMsg& msg)
+void DevConServerConnection::onReceiveLogMsg(DevCon::LogMsg& msg)
 {
-	Logger::log(msg.getLevel(), "[REMOTE] " + msg.getMessage());
+	Logger::log(msg.level, "[REMOTE] " + msg.msg);
+}
+
+void DevConServerConnection::onReceiveNotifyInterestMsg(DevCon::NotifyInterestMsg& msg)
+{
+	parent.onReceiveNotifyInterestMsg(*this, msg);
 }
 
 DevConServer::DevConServer(std::unique_ptr<NetworkService> s, int port)
@@ -64,7 +70,7 @@ DevConServer::DevConServer(std::unique_ptr<NetworkService> s, int port)
 	service->startListening([=] (NetworkService::Acceptor& a)
 	{
 		Logger::logInfo("New incoming DevCon connection.");
-		connections.push_back(std::make_shared<DevConServerConnection>(a.accept()));
+		connections.push_back(std::make_shared<DevConServerConnection>(*this, a.accept()));
 		initConnection(*connections.back());
 	});
 }
@@ -104,6 +110,14 @@ void DevConServer::unregisterInterest(InterestHandle handle)
 		c->unregisterInterest(handle);
 	}
 	interest.erase(handle);
+}
+
+void DevConServer::onReceiveNotifyInterestMsg(const DevConServerConnection& connection, DevCon::NotifyInterestMsg& msg)
+{
+	const auto iter = interest.find(msg.handle);
+	if (iter != interest.end()) {
+		iter->second.callback(std::move(msg.data));
+	}
 }
 
 void DevConServer::initConnection(DevConServerConnection& conn)

@@ -3,6 +3,8 @@
 #include "halley/net/connection/network_message.h"
 #include <gsl/gsl>
 
+#include "halley/data_structures/config_node.h"
+
 namespace Halley
 {
 	class Serializer;
@@ -59,11 +61,7 @@ namespace Halley
 
 			void serialize(Serializer& s) const override;
 			void deserialize(Deserializer& s) override;
-
-			LoggerLevel getLevel() const;
-			const String& getMessage() const;
-
-		private:
+			
 			LoggerLevel level;
 			String msg;
 		};
@@ -76,11 +74,47 @@ namespace Halley
 
 			void serialize(Serializer& s) const override;
 			void deserialize(Deserializer& s) override;
-
-			Vector<String> getIds() const;
-
-		private:
+			
 			Vector<String> ids;
+		};
+
+		class RegisterInterestMsg final : public DevConMessageBase<MessageType::RegisterInterest>
+		{
+		public:
+			RegisterInterestMsg() = default;
+			RegisterInterestMsg(String id, ConfigNode params, uint32_t handle);
+
+			void serialize(Serializer& s) const override;
+			void deserialize(Deserializer& s) override;
+			
+			String id;
+			ConfigNode params;
+			uint32_t handle;
+		};
+
+		class UnregisterInterestMsg final : public DevConMessageBase<MessageType::UnregisterInterest>
+		{
+		public:
+			UnregisterInterestMsg() = default;
+			UnregisterInterestMsg(uint32_t handle);
+
+			void serialize(Serializer& s) const override;
+			void deserialize(Deserializer& s) override;
+			
+			uint32_t handle;
+		};
+
+		class NotifyInterestMsg final : public DevConMessageBase<MessageType::NotifyInterest>
+		{
+		public:
+			NotifyInterestMsg() = default;
+			NotifyInterestMsg(uint32_t handle, ConfigNode data);
+
+			void serialize(Serializer& s) const override;
+			void deserialize(Deserializer& s) override;
+			
+			uint32_t handle;
+			ConfigNode data;
 		};
 	}
 }

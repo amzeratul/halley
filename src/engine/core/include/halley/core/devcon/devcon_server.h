@@ -19,12 +19,15 @@ namespace Halley
 		constexpr static int devConPort = 12500;
 		class LogMsg;
 		class ReloadAssetsMsg;
+		class NotifyInterestMsg;
 	}
+
+	class DevConServer;
 
 	class DevConServerConnection
 	{
 	public:
-		DevConServerConnection(std::shared_ptr<IConnection> connection);
+		DevConServerConnection(DevConServer& parent, std::shared_ptr<IConnection> connection);
 		
 		void update(Time t);
 		
@@ -34,10 +37,12 @@ namespace Halley
 		void unregisterInterest(uint32_t handle);
 
 	private:
+		DevConServer& parent;
 		std::shared_ptr<IConnection> connection;
 		std::shared_ptr<MessageQueue> queue;
 
-		void onReceiveLogMsg(const DevCon::LogMsg& msg);
+		void onReceiveLogMsg(DevCon::LogMsg& msg);
+		void onReceiveNotifyInterestMsg(DevCon::NotifyInterestMsg& msg);
 	};
 
 	class DevConServer
@@ -54,6 +59,8 @@ namespace Halley
 
 		InterestHandle registerInterest(String id, ConfigNode params, InterestCallback callback);
 		void unregisterInterest(InterestHandle handle);
+
+		void onReceiveNotifyInterestMsg(const DevConServerConnection& connection, DevCon::NotifyInterestMsg& msg);
 
 	private:
 		struct Interest {

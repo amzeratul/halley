@@ -12,6 +12,9 @@ void DevCon::setupMessageQueue(MessageQueue& queue)
 
 	queue.addFactory<LogMsg>();
 	queue.addFactory<ReloadAssetsMsg>();
+	queue.addFactory<RegisterInterestMsg>();
+	queue.addFactory<UnregisterInterestMsg>();
+	queue.addFactory<NotifyInterestMsg>();
 }
 
 
@@ -32,16 +35,6 @@ void LogMsg::deserialize(Deserializer& s)
 	s >> msg;
 }
 
-LoggerLevel LogMsg::getLevel() const
-{
-	return level;
-}
-
-const String& LogMsg::getMessage() const
-{
-	return msg;
-}
-
 
 ReloadAssetsMsg::ReloadAssetsMsg(gsl::span<const String> ids)
 	: ids(ids.begin(), ids.end())
@@ -57,7 +50,55 @@ void ReloadAssetsMsg::deserialize(Deserializer& s)
 	s >> ids;
 }
 
-Vector<String> ReloadAssetsMsg::getIds() const
+RegisterInterestMsg::RegisterInterestMsg(String id, ConfigNode params, uint32_t handle)
+	: id(std::move(id))
+	, params(std::move(params))
+	, handle(handle)
 {
-	return ids;
+}
+
+void RegisterInterestMsg::serialize(Serializer& s) const
+{
+	s << id;
+	s << params;
+	s << handle;
+}
+
+void RegisterInterestMsg::deserialize(Deserializer& s)
+{
+	s >> id;
+	s >> params;
+	s >> handle;
+}
+
+UnregisterInterestMsg::UnregisterInterestMsg(uint32_t handle)
+	: handle(handle)
+{}
+
+void UnregisterInterestMsg::serialize(Serializer& s) const
+{
+	s << handle;
+}
+
+void UnregisterInterestMsg::deserialize(Deserializer& s)
+{
+	s >> handle;
+}
+
+NotifyInterestMsg::NotifyInterestMsg(uint32_t handle, ConfigNode data)
+	: handle(handle)
+	, data(std::move(data))
+{
+}
+
+void NotifyInterestMsg::serialize(Serializer& s) const
+{
+	s << handle;
+	s << data;
+}
+
+void NotifyInterestMsg::deserialize(Deserializer& s)
+{
+	s >> handle;
+	s >> data;
 }
