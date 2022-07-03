@@ -87,6 +87,10 @@ void YAMLConvert::emitNode(const ConfigNode& node, YAML::Emitter& emitter, const
 		emitter << node.asInt();
 		return;
 
+	case ConfigNodeType::Int64:
+		emitter << node.asInt64();
+		return;
+
 	case ConfigNodeType::Int2:
 		{
 			const auto vec = node.asVector2i();

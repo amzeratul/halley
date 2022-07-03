@@ -136,6 +136,9 @@ ConfigNode& ConfigNode::operator=(const ConfigNode& other)
 		case ConfigNodeType::Int:
 			*this = other.asInt();
 			break;
+		case ConfigNodeType::Int64:
+			*this = other.asInt64();
+			break;
 		case ConfigNodeType::Float:
 			*this = other.asFloat();
 			break;
@@ -280,11 +283,15 @@ bool ConfigNode::operator==(const ConfigNode& other) const
 		case ConfigNodeType::String:
 			return asString() == other.asString();
 		case ConfigNodeType::Sequence:
+		case ConfigNodeType::DeltaSequence:
 			return asSequence() == other.asSequence();
 		case ConfigNodeType::Map:
+		case ConfigNodeType::DeltaMap:
 			return asMap() == other.asMap();
 		case ConfigNodeType::Int:
 			return asInt() == other.asInt();
+		case ConfigNodeType::Int64:
+			return asInt64() == other.asInt64();
 		case ConfigNodeType::Float:
 			return std::abs(asFloat() - other.asFloat()) < 0.00001f;
 		case ConfigNodeType::Int2:
@@ -398,6 +405,9 @@ void ConfigNode::serialize(Serializer& s) const
 		case ConfigNodeType::Int:
 			s << asInt();
 			break;
+		case ConfigNodeType::Int64:
+			s << asInt64();
+			break;
 		case ConfigNodeType::Float:
 			s << asFloat();
 			break;
@@ -461,6 +471,9 @@ void ConfigNode::deserialize(Deserializer& s)
 			break;
 		case ConfigNodeType::Int:
 			deserializeContents<int>(s);
+			break;
+		case ConfigNodeType::Int64:
+			deserializeContents<int64_t>(s);
 			break;
 		case ConfigNodeType::Float:
 			deserializeContents<float>(s);
