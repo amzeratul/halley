@@ -36,10 +36,15 @@ namespace Halley {
 		bool hasUI = false;
 
     	std::optional<uint32_t> scriptEnumHandle;
+		std::optional<uint32_t> scriptStateHandle;
+		int64_t curEntityId = -1;
 
 		void open();
 		void setListeningToClient(bool listening);
+		void setListeningToState(int64_t entityId);
 
 		void onScriptEnum(ConfigNode data);
+		void onScriptState(ConfigNode data);
+		void setCurrentInstance(int64_t entityId);
     };
 }

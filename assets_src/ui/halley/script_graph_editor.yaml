@@ -3,7 +3,13 @@ widget: { class: widget }
 sizer: { type: vertical }
 children:
 - widget: { class: widget, id: toolbar }
-  children: []
+  sizer: { type: horizontal }
+  children:
+  - widget: { class: dropdown, id: instances, size: [200, 16] }
+    fill: centre
+    border: [0, 0, 6, 0]
+  - widget: { class: widget, id: toolbarGizmo }
+    children: []
 - widget: { class: infiniCanvas, id: infiniCanvas }
   proportion: 1
   sizer: { type: free }

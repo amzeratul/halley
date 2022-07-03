@@ -15,6 +15,8 @@ ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResource
 ScriptGraphEditor::~ScriptGraphEditor()
 {
 	setListeningToClient(false);
+	assert(!scriptEnumHandle);
+	assert(!scriptStateHandle);
 }
 
 void ScriptGraphEditor::onActiveChanged(bool active)
@@ -46,7 +48,13 @@ void ScriptGraphEditor::onMakeUI()
 		gizmoEditor->setZoom(zoom);
 	});
 
-	getWidget("toolbar")->add(gizmoEditor->makeUI());
+	getWidget("toolbarGizmo")->clear();
+	getWidget("toolbarGizmo")->add(gizmoEditor->makeUI());
+
+	bindData("instances", "-1", [=](String id)
+	{
+		setCurrentInstance(id.toInteger64());
+	});
 }
 
 void ScriptGraphEditor::reload()
@@ -139,21 +147,73 @@ void ScriptGraphEditor::setListeningToClient(bool listening)
 {
 	auto& devConServer = *project.getDevConServer();
 
-	if (scriptEnumHandle) {
-		devConServer.unregisterInterest(scriptEnumHandle.value());
-		scriptEnumHandle.reset();
+	if (listening) {
+		if (!scriptEnumHandle) {
+			onScriptEnum(ConfigNode::SequenceType{});
+			scriptEnumHandle = devConServer.registerInterest("scriptEnum", ConfigNode(assetId), [=] (ConfigNode result)
+			{
+				onScriptEnum(std::move(result));
+			});
+		}
+		setListeningToState(curEntityId);
+	} else {
+		if (scriptEnumHandle) {
+			devConServer.unregisterInterest(scriptEnumHandle.value());
+			scriptEnumHandle.reset();
+			onScriptEnum(ConfigNode::SequenceType{});
+		}
+		setListeningToState(-1);
+	}
+}
+
+void ScriptGraphEditor::setListeningToState(int64_t entityId)
+{
+	auto& devConServer = *project.getDevConServer();
+
+	if (scriptStateHandle) {
+		devConServer.unregisterInterest(scriptStateHandle.value());
+		scriptStateHandle.reset();
 	}
 
-	if (listening) {
-		scriptEnumHandle = devConServer.registerInterest("scriptEnum", ConfigNode(assetId), [=] (ConfigNode result)
+	if (entityId != -1) {
+		ConfigNode::MapType params;
+		params["entityId"] = curEntityId;
+		params["scriptId"] = assetId;
+		scriptStateHandle = devConServer.registerInterest("scriptState", params, [=] (ConfigNode result)
 		{
-			onScriptEnum(std::move(result));
+			onScriptState(std::move(result));
 		});
 	}
 }
 
 void ScriptGraphEditor::onScriptEnum(ConfigNode data)
 {
+	const auto instances = getWidgetAs<UIDropdown>("instances");
+	Vector<String> ids;
+	Vector<LocalisedString> names;
+	ids.push_back("-1");
+	names.push_back(LocalisedString::fromHardcodedString("[none]"));
+
+	for (const auto& entry: data.asSequence()) {
+		ids.push_back(toString(entry["entityId"].asInt64()));
+		names.push_back(LocalisedString::fromUserString(entry["name"].asString() + " (" + toString(entry["entityId"].asInt64()) + ")"));
+	}
+
+	instances->setOptions(std::move(ids), std::move(names));
+}
+
+void ScriptGraphEditor::onScriptState(ConfigNode data)
+{
 	YAMLConvert::EmitOptions options;
-	Logger::logDev("Script enum:\n" + YAMLConvert::generateYAML(data, options));
+	Logger::logDev("Got script state:\n" + YAMLConvert::generateYAML(data, options));
+}
+
+void ScriptGraphEditor::setCurrentInstance(int64_t entityId)
+{
+	if (curEntityId != entityId) {
+		curEntityId = entityId;
+		if (scriptEnumHandle) {
+			setListeningToState(entityId);
+		}
+	}
 }
