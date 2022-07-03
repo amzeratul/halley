@@ -9,6 +9,7 @@ using namespace Halley;
 ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow)
 	: AssetEditor(factory, gameResources, project, AssetType::ScriptGraph)
 	, projectWindow(projectWindow)
+	, gameResources(gameResources)
 {
 }
 
@@ -26,7 +27,8 @@ void ScriptGraphEditor::onActiveChanged(bool active)
 
 void ScriptGraphEditor::onMakeUI()
 {
-	gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *projectWindow.getEntityEditorFactory(), projectWindow.getScriptNodeTypes(), 
+	scriptNodeTypes = projectWindow.getScriptNodeTypes();
+	gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *projectWindow.getEntityEditorFactory(), scriptNodeTypes, 
 		projectWindow.getAPI().input->getKeyboard(), projectWindow.getAPI().system->getClipboard(), [=] ()
 	{
 		markModified();
@@ -53,7 +55,7 @@ void ScriptGraphEditor::onMakeUI()
 
 	bindData("instances", "-1", [=](String id)
 	{
-		setCurrentInstance(id.toInteger64());
+		setCurrentInstance(id.isInteger() ? id.toInteger64() : -1);
 	});
 }
 
@@ -139,7 +141,18 @@ void ScriptGraphEditor::update(Time time, bool moved)
 	AssetEditor::update(time, moved);
 
 	if (gizmoEditor) {
+		gizmoEditor->setState(scriptState.get());
 		infiniCanvas->setScrollEnabled(!gizmoEditor->isHighlighted());
+	}
+}
+
+void ScriptGraphEditor::setCurrentInstance(int64_t entityId)
+{
+	if (curEntityId != entityId) {
+		curEntityId = entityId;
+		if (scriptEnumHandle) {
+			setListeningToState(entityId);
+		}
 	}
 }
 
@@ -183,6 +196,8 @@ void ScriptGraphEditor::setListeningToState(int64_t entityId)
 		{
 			onScriptState(std::move(result));
 		});
+	} else {
+		onScriptState(ConfigNode());
 	}
 }
 
@@ -204,16 +219,19 @@ void ScriptGraphEditor::onScriptEnum(ConfigNode data)
 
 void ScriptGraphEditor::onScriptState(ConfigNode data)
 {
-	YAMLConvert::EmitOptions options;
-	Logger::logDev("Got script state:\n" + YAMLConvert::generateYAML(data, options));
-}
-
-void ScriptGraphEditor::setCurrentInstance(int64_t entityId)
-{
-	if (curEntityId != entityId) {
-		curEntityId = entityId;
-		if (scriptEnumHandle) {
-			setListeningToState(entityId);
+	if (data.getType() == ConfigNodeType::Undefined) {
+		scriptState.reset();
+	} else {
+		if (!scriptState) {
+			scriptState = std::make_unique<ScriptState>();
 		}
+
+		scriptGraph->assignTypes(*scriptNodeTypes);
+
+		EntitySerializationContext context;
+		context.resources = &gameResources;
+		scriptState->load(data, context);
+		scriptState->setScriptGraphPtr(scriptGraph.get());
+		scriptState->ensureReady(context);
 	}
 }

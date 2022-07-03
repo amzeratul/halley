@@ -34,6 +34,7 @@ namespace Halley {
 		ScriptGraph& getGraph();
 		ScriptGraph* getGraphPtr();
 		void setGraph(ScriptGraph* graph);
+		void setState(ScriptState* state);
 		
 		ExecutionQueue& getExecutionQueue();
 
@@ -88,6 +89,7 @@ namespace Halley {
 
 		Vector2f basePos;
 		ScriptGraph* scriptGraph = nullptr;
+		ScriptState* scriptState = nullptr;
 
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeUnderMouse;
 		SelectionSet<ScriptNodeId> selectedNodes;

@@ -271,6 +271,7 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 	renderer->setHighlight(nodeUnderMouse, curEntityTarget ? scriptGraph->getEntityIdx(entityTargets[*curEntityTarget].entityId) : std::nullopt);
 	renderer->setSelection(selectedNodes.getSelected());
 	renderer->setCurrentPaths(paths);
+	renderer->setState(scriptState);
 	renderer->draw(painter, basePos, getZoom());
 
 	if (!dragging) {
@@ -359,6 +360,11 @@ void ScriptingBaseGizmo::setGraph(ScriptGraph* graph)
 {
 	scriptGraph = graph;
 	dragging.reset();
+}
+
+void ScriptingBaseGizmo::setState(ScriptState* state)
+{
+	scriptState = state;
 }
 
 ScriptGraphNode& ScriptingBaseGizmo::getNode(ScriptNodeId id)

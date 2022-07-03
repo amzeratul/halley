@@ -14,6 +14,7 @@ namespace Halley {
 		void onRemovedFromRoot(UIRoot& root) override;
 
 		void load(ScriptGraph& graph);
+		void setState(ScriptState* state);
 
 		void update(Time t, bool moved) override;
 		void draw(UIPainter& painter) const override;

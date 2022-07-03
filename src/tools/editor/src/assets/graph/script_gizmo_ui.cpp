@@ -39,6 +39,11 @@ void ScriptGizmoUI::load(ScriptGraph& graph)
 	gizmo.setGraph(&graph);
 }
 
+void ScriptGizmoUI::setState(ScriptState* state)
+{
+	gizmo.setState(state);
+}
+
 void ScriptGizmoUI::update(Time time, bool moved)
 {
 	inputState.altHeld = keyboard->isButtonDown(KeyCode::LAlt) || keyboard->isButtonDown(KeyCode::RAlt);

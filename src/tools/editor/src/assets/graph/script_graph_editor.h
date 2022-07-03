@@ -27,7 +27,9 @@ namespace Halley {
 
     private:
 		ProjectWindow& projectWindow;
+		Resources& gameResources;
     	std::shared_ptr<ScriptGraph> scriptGraph;
+		std::unique_ptr<ScriptState> scriptState;
 
 		std::shared_ptr<ScriptGizmoUI> gizmoEditor;
 		std::shared_ptr<InfiniCanvas> infiniCanvas;
@@ -38,6 +40,7 @@ namespace Halley {
     	std::optional<uint32_t> scriptEnumHandle;
 		std::optional<uint32_t> scriptStateHandle;
 		int64_t curEntityId = -1;
+		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
 
 		void open();
 		void setListeningToClient(bool listening);
