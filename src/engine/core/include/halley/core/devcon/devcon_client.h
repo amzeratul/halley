@@ -36,6 +36,7 @@ namespace Halley
 		struct InterestGroup {
 			Vector<ConfigNode> configs;
 			Vector<uint32_t> handles;
+			Vector<ConfigNode> lastResults;
 		};
 
 		HashMap<String, InterestGroup> interests;

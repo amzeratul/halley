@@ -18,6 +18,7 @@ void DevConInterest::registerInterest(String id, ConfigNode config, uint32_t han
 	auto& group = interests[id];
 	group.configs.push_back(config);
 	group.handles.push_back(handle);
+	group.lastResults.push_back(ConfigNode());
 }
 
 void DevConInterest::unregisterInterest(uint32_t handle)
@@ -28,6 +29,7 @@ void DevConInterest::unregisterInterest(uint32_t handle)
 			const auto idx = iter - v.handles.begin();
 			v.handles.erase(iter);
 			v.configs.erase(v.configs.begin() + idx);
+			v.lastResults.erase(v.lastResults.begin() + idx);
 
 			if (v.handles.empty()) {
 				interests.erase(k);
@@ -54,8 +56,12 @@ gsl::span<const ConfigNode> DevConInterest::getInterestConfigs(const String& id)
 
 void DevConInterest::notifyInterest(const String& id, size_t configIdx, ConfigNode data)
 {
-	const auto handle = interests.at(id).handles.at(configIdx);
-	parent.notifyInterest(handle, std::move(data));
+	auto& group = interests.at(id);
+	if (data != group.lastResults.at(configIdx)) {
+		const auto handle = group.handles.at(configIdx);
+		parent.notifyInterest(handle, ConfigNode(data));
+		group.lastResults[configIdx] = std::move(data);
+	}
 }
 
 
