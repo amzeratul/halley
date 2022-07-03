@@ -419,20 +419,17 @@ void UIWidget::updateActive(bool wasActiveBefore)
 		}
 
 		markAsNeedingLayout();
-
-		if (isActiveInHierarchy()) {
-			notifyActivationChange(isActive());
-		}
+		notifyActivationChange(isActive());
 	}
 }
 
 void UIWidget::notifyActivationChange(bool active)
 {
-	onActiveChanged(active);
+	if (isActive()) {
+		onActiveChanged(active);
+	}
 	for (auto& c: getChildren()) {
-		if (c->isActive()) {
-			c->notifyActivationChange(active);
-		}
+		c->notifyActivationChange(active);
 	}
 }
 
@@ -678,7 +675,9 @@ void UIWidget::destroy()
 void UIWidget::forceDestroy()
 {
 	destroying = true;
+	const bool wasActive = isActive();
 	alive = false;
+	updateActive(wasActive);
 }
 
 bool UIWidget::isDescendentOf(const UIWidget& ancestor) const
