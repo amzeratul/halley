@@ -68,3 +68,8 @@ void CoreAPIWrapper::removeProfilerCallback(IProfileCallback* callback)
 {
 	parent.removeProfilerCallback(callback);
 }
+
+DevConClient* CoreAPIWrapper::getDevConClient() const
+{
+	return nullptr;
+}

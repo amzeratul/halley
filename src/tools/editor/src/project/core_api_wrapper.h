@@ -18,7 +18,8 @@ namespace Halley {
 		bool isDevMode() override;
 		void addProfilerCallback(IProfileCallback* callback) override;
 		void removeProfilerCallback(IProfileCallback* callback) override;
-	
+		DevConClient* getDevConClient() const override;
+
 	private:
 		CoreAPI& parent;
 	};
