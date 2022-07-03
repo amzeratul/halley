@@ -64,6 +64,8 @@ namespace Halley
 		void removeProfilerCallback(IProfileCallback* callback) override;
 
 		int getExitCode() const { return exitCode; }
+
+		DevConClient* getDevConClient() const override;
 		
 
 	private:

@@ -47,6 +47,8 @@ namespace Halley
 
 	class DevConServer
 	{
+		friend class DevConServerConnection;
+
 	public:
 		using InterestCallback = std::function<void(ConfigNode)>;
 		using InterestHandle = uint32_t;
@@ -60,6 +62,7 @@ namespace Halley
 		InterestHandle registerInterest(String id, ConfigNode params, InterestCallback callback);
 		void unregisterInterest(InterestHandle handle);
 
+	protected:
 		void onReceiveNotifyInterestMsg(const DevConServerConnection& connection, DevCon::NotifyInterestMsg& msg);
 
 	private:
@@ -73,7 +76,7 @@ namespace Halley
 		Vector<std::shared_ptr<DevConServerConnection>> connections;
 
 		HashMap<InterestHandle, Interest> interest;
-		uint32_t interestId = 0;
+		InterestHandle interestId = 0;
 
 		void initConnection(DevConServerConnection& conn);
 	};

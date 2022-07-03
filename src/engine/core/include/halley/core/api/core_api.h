@@ -7,6 +7,7 @@
 
 namespace Halley
 {
+	class DevConClient;
 	class Resources;
 	class Stage;
 	class HalleyStatics;
@@ -43,5 +44,7 @@ namespace Halley
 		virtual void removeProfilerCallback(IProfileCallback* callback) = 0;
 
 		virtual bool isDevMode() = 0;
+
+		virtual DevConClient* getDevConClient() const = 0;
 	};
 }

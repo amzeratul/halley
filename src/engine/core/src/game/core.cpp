@@ -211,6 +211,11 @@ void Core::init()
 	}
 }
 
+DevConClient* Core::getDevConClient() const
+{
+	return devConClient.get();
+}
+
 void Core::deInit()
 {
 	std::cout << "Game shutting down." << std::endl;

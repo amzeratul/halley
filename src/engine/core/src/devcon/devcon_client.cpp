@@ -8,6 +8,58 @@
 
 using namespace Halley;
 
+
+DevConInterest::DevConInterest(DevConClient& parent)
+	: parent(parent)
+{}
+
+void DevConInterest::registerInterest(String id, ConfigNode config, uint32_t handle)
+{
+	auto& group = interests[id];
+	group.configs.push_back(config);
+	group.handles.push_back(handle);
+}
+
+void DevConInterest::unregisterInterest(uint32_t handle)
+{
+	for (auto& [k, v]: interests) {
+		const auto iter = std::find(v.handles.begin(), v.handles.end(), handle);
+		if (iter != v.handles.end()) {
+			const auto idx = iter - v.handles.begin();
+			v.handles.erase(iter);
+			v.configs.erase(v.configs.begin() + idx);
+
+			if (v.handles.empty()) {
+				interests.erase(k);
+			}
+
+			return;
+		}
+	}
+}
+
+bool DevConInterest::hasInterest(const String& id) const
+{
+	return interests.contains(id);
+}
+
+gsl::span<const ConfigNode> DevConInterest::getInterestConfigs(const String& id) const
+{
+	const auto iter = interests.find(id);
+	if (iter != interests.end()) {
+		return iter->second.configs;
+	}
+	return {};
+}
+
+void DevConInterest::notifyInterest(const String& id, size_t configIdx, ConfigNode data)
+{
+	const auto handle = interests.at(id).handles.at(configIdx);
+	parent.notifyInterest(handle, std::move(data));
+}
+
+
+
 DevConClient::DevConClient(const HalleyAPI& api, Resources& resources, std::unique_ptr<NetworkService> service, String address, int port)
 	: api(api)
 	, resources(resources)
@@ -15,6 +67,8 @@ DevConClient::DevConClient(const HalleyAPI& api, Resources& resources, std::uniq
 	, address(std::move(address))
 	, port(port)
 {
+	interest = std::make_unique<DevConInterest>(*this);
+
 	connect();
 
 	Logger::addSink(*this);
@@ -29,17 +83,22 @@ DevConClient::~DevConClient()
 
 void DevConClient::update(Time t)
 {
+	queue->sendAll();
 	service->update(t);
 
 	for (auto& m: queue->receiveMessages()) {
 		auto& msg = dynamic_cast<DevCon::DevConMessage&>(*m);
 		switch (msg.getMessageType()) {
-		case DevCon::MessageType::Log:
-			// TODO?
-			break;
-
 		case DevCon::MessageType::ReloadAssets:
 			onReceiveReloadAssets(dynamic_cast<DevCon::ReloadAssetsMsg&>(msg));
+			break;
+
+		case DevCon::MessageType::RegisterInterest:
+			onReceiveRegisterInterest(dynamic_cast<DevCon::RegisterInterestMsg&>(msg));
+			break;
+
+		case DevCon::MessageType::UnregisterInterest:
+			onReceiveUnregisterInterest(dynamic_cast<DevCon::UnregisterInterestMsg&>(msg));
 			break;
 
 		default:
@@ -56,6 +115,26 @@ void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
 		Logger::logDev("Reloading " + toString(msg.ids.size()) + " assets.");
 	}
 	resources.reloadAssets(msg.ids);
+}
+
+void DevConClient::onReceiveRegisterInterest(DevCon::RegisterInterestMsg& msg)
+{
+	interest->registerInterest(msg.id, std::move(msg.params), msg.handle);
+}
+
+void DevConClient::onReceiveUnregisterInterest(const DevCon::UnregisterInterestMsg& msg)
+{
+	interest->unregisterInterest(msg.handle);
+}
+
+DevConInterest& DevConClient::getInterest() const
+{
+	return *interest;
+}
+
+void DevConClient::notifyInterest(uint32_t handle, ConfigNode data)
+{
+	queue->enqueue(std::make_unique<DevCon::NotifyInterestMsg>(handle, std::move(data)), 0);
 }
 
 void DevConClient::connect()
