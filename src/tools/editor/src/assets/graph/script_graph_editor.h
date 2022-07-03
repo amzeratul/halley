@@ -26,6 +26,12 @@ namespace Halley {
         std::shared_ptr<const Resource> loadResource(const String& assetId) override;
 
     private:
+		struct EntityEnumData {
+			size_t connId;
+			int64_t entityId;
+			String name;
+		};
+		
 		ProjectWindow& projectWindow;
 		Resources& gameResources;
     	std::shared_ptr<ScriptGraph> scriptGraph;
@@ -40,13 +46,16 @@ namespace Halley {
     	std::optional<uint32_t> scriptEnumHandle;
 		std::optional<uint32_t> scriptStateHandle;
 		std::optional<std::pair<size_t, int64_t>> curEntityId;
-		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
+    	Vector<EntityEnumData> curEntities;
+
+    	std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
 
 		void open();
 		void setListeningToClient(bool listening);
 		void setListeningToState(std::pair<size_t, int64_t> entityId);
 
 		void onScriptEnum(size_t connId, ConfigNode data);
+		void refreshScriptEnum();
 		void onScriptState(size_t connId, ConfigNode data);
 		void setCurrentInstance(std::pair<size_t, int64_t> entityId);
     };

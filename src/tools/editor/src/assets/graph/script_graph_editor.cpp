@@ -169,7 +169,7 @@ void ScriptGraphEditor::setListeningToClient(bool listening)
 
 	if (listening) {
 		if (!scriptEnumHandle) {
-			onScriptEnum({}, ConfigNode::SequenceType{});
+			refreshScriptEnum();
 			scriptEnumHandle = devConServer.registerInterest("scriptEnum", ConfigNode(assetId), [=] (size_t connId, ConfigNode result)
 			{
 				onScriptEnum(connId, std::move(result));
@@ -180,7 +180,8 @@ void ScriptGraphEditor::setListeningToClient(bool listening)
 		if (scriptEnumHandle) {
 			devConServer.unregisterInterest(scriptEnumHandle.value());
 			scriptEnumHandle.reset();
-			onScriptEnum({}, ConfigNode::SequenceType{});
+			curEntities.clear();
+			refreshScriptEnum();
 		}
 		setListeningToState({0, -1});
 	}
@@ -211,17 +212,28 @@ void ScriptGraphEditor::setListeningToState(std::pair<size_t, int64_t> entityId)
 
 void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
 {
+	std_ex::erase_if(curEntities, [&](const auto& e) { return e.connId == connId; });
+
+	if (data.getType() == ConfigNodeType::Sequence) {
+		for (const auto& entry : data.asSequence()) {
+			curEntities.emplace_back(EntityEnumData{ connId, entry["entityId"].asInt64(), entry["name"].asString() });
+		}
+	}
+
+	refreshScriptEnum();
+}
+
+void ScriptGraphEditor::refreshScriptEnum()
+{
 	const auto instances = getWidgetAs<UIDropdown>("instances");
 	Vector<String> ids;
 	Vector<LocalisedString> names;
 	ids.push_back("-1:-1");
 	names.push_back(LocalisedString::fromHardcodedString("[none]"));
 
-	if (data.getType() == ConfigNodeType::Sequence) {
-		for (const auto& entry : data.asSequence()) {
-			ids.push_back(toString(connId) + ":" + toString(entry["entityId"].asInt64()));
-			names.push_back(LocalisedString::fromUserString("[" + toString(connId) + "] " + entry["name"].asString() + " (" + toString(entry["entityId"].asInt64()) + ")"));
-		}
+	for (const auto& e: curEntities) {
+		ids.push_back(toString(e.connId) + ":" + toString(e.entityId)); 
+		names.push_back(LocalisedString::fromUserString("[" + toString(e.connId) + "] " + e.name + " (" + toString(e.entityId) + ")"));
 	}
 
 	instances->setOptions(std::move(ids), std::move(names));
