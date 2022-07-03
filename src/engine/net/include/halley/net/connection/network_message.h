@@ -55,6 +55,8 @@ namespace Halley
 			return SerializerOptions(SerializerOptions::maxVersion);
 		}
 
+		virtual uint16_t getNetworkIndex() const = 0;
+
 	private:
 		uint16_t seq = 0;
 		uint8_t channel = -1;
@@ -68,7 +70,7 @@ namespace Halley
 		virtual ~NetworkMessageFactoryBase() {}
 
 		virtual std::unique_ptr<NetworkMessage> create(gsl::span<const gsl::byte> src) const = 0;
-		virtual std::type_index getTypeIndex() const = 0;
+		virtual uint16_t getTypeIndex() const = 0;
 	};
 
 	template <typename T>
@@ -83,9 +85,9 @@ namespace Halley
 			return result;
 		}
 
-		std::type_index getTypeIndex() const override
+		uint16_t getTypeIndex() const override
 		{
-			return std::type_index(typeid(T));
+			return T::getTypeIndex();
 		}
 	};
 
@@ -102,7 +104,7 @@ namespace Halley
 		std::unique_ptr<NetworkMessage> deserializeMessage(gsl::span<const gsl::byte> data, uint16_t msgType, uint16_t seq);
 
 	private:
-		std::map<std::type_index, uint16_t> typeToMsgIndex;
+		HashMap<uint16_t, uint16_t> typeToMsgIndex;
 		Vector<std::unique_ptr<NetworkMessageFactoryBase>> factories;
 
 		void addFactory(std::unique_ptr<NetworkMessageFactoryBase> factory);

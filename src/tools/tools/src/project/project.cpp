@@ -192,9 +192,15 @@ void Project::setAssetPackManifest(const Path& path)
 
 void Project::setDevConServer(DevConServer* server)
 {
-	addAssetPackReloadCallback([=] (gsl::span<const String> assetIds) {
-		server->reloadAssets(assetIds);
+	devConServer = server;
+	addAssetPackReloadCallback([this] (gsl::span<const String> assetIds) {
+		devConServer->reloadAssets(assetIds);
 	});
+}
+
+DevConServer* Project::getDevConServer() const
+{
+	return devConServer;
 }
 
 size_t Project::addAssetReloadCallback(AssetReloadCallback callback)

@@ -42,11 +42,6 @@ const String& LogMsg::getMessage() const
 	return msg;
 }
 
-MessageType LogMsg::getMessageType() const
-{
-	return MessageType::Log;
-}
-
 
 ReloadAssetsMsg::ReloadAssetsMsg(gsl::span<const String> ids)
 	: ids(ids.begin(), ids.end())
@@ -65,9 +60,4 @@ void ReloadAssetsMsg::deserialize(Deserializer& s)
 Vector<String> ReloadAssetsMsg::getIds() const
 {
 	return ids;
-}
-
-MessageType ReloadAssetsMsg::getMessageType() const
-{
-	return MessageType::ReloadAssets;
 }

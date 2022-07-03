@@ -17,18 +17,41 @@ namespace Halley
 		enum class MessageType
 		{
 			Log,
-			ReloadAssets
+			ReloadAssets,
+			RegisterInterest,
+			UnregisterInterest,
+			NotifyInterest
 		};
-
 
 		class DevConMessage : public NetworkMessage
 		{
 		public:
-			virtual ~DevConMessage() = default;
 			virtual MessageType getMessageType() const = 0;
 		};
 
-		class LogMsg final : public DevConMessage
+		template <MessageType _msgType>
+		class DevConMessageBase : public DevConMessage
+		{
+		public:
+			constexpr static MessageType msgType = _msgType;
+
+			uint16_t getNetworkIndex() const override
+			{
+				return getTypeIndex();
+			}
+
+			constexpr static uint16_t getTypeIndex()
+			{
+				return static_cast<uint16_t>(msgType);
+			}
+
+			MessageType getMessageType() const override
+			{
+				return msgType;
+			}
+		};
+
+		class LogMsg final : public DevConMessageBase<MessageType::Log>
 		{
 		public:
 			LogMsg() = default;
@@ -39,14 +62,13 @@ namespace Halley
 
 			LoggerLevel getLevel() const;
 			const String& getMessage() const;
-			MessageType getMessageType() const override;
 
 		private:
 			LoggerLevel level;
 			String msg;
 		};
 
-		class ReloadAssetsMsg final : public DevConMessage
+		class ReloadAssetsMsg final : public DevConMessageBase<MessageType::ReloadAssets>
 		{
 		public:
 			ReloadAssetsMsg() = default;
@@ -56,8 +78,6 @@ namespace Halley
 			void deserialize(Deserializer& s) override;
 
 			Vector<String> getIds() const;
-
-			MessageType getMessageType() const override;
 
 		private:
 			Vector<String> ids;

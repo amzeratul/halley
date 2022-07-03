@@ -11,7 +11,7 @@ void NetworkMessageFactories::addFactory(std::unique_ptr<NetworkMessageFactoryBa
 
 uint16_t NetworkMessageFactories::getMessageType(NetworkMessage& msg) const
 {
-	auto idxIter = typeToMsgIndex.find(std::type_index(typeid(msg)));
+	auto idxIter = typeToMsgIndex.find(msg.getNetworkIndex());
 	if (idxIter == typeToMsgIndex.end()) {
 		throw Exception("No appropriate factory for this type of message: " + String(typeid(msg).name()), HalleyExceptions::Network);
 	}

@@ -76,6 +76,8 @@ namespace Halley
 		Vector<std::unique_ptr<IAssetImporter>> getAssetImportersFromPlugins(ImportAssetType type) const;
 
 		void setDevConServer(DevConServer* server);
+		DevConServer* getDevConServer() const;
+
 		size_t addAssetReloadCallback(AssetReloadCallback callback);
 		void removeAssetReloadCallback(size_t idx);
 		size_t addAssetPackReloadCallback(AssetReloadCallback callback);
@@ -159,6 +161,8 @@ namespace Halley
 
 		bool assetNotifyImportEnabled = true;
 		Vector<Path> assetsToNotifyImport;
+
+		DevConServer* devConServer = nullptr;
 
 		struct AssetPreviewCache {
 			int64_t timestamp;

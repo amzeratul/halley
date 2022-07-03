@@ -18,6 +18,8 @@ DevConServerConnection::DevConServerConnection(std::shared_ptr<IConnection> conn
 
 void DevConServerConnection::update(Time t)
 {
+	queue->sendAll();
+
 	for (auto& m: queue->receiveMessages()) {
 		auto& msg = dynamic_cast<DevCon::DevConMessage&>(*m);
 		switch (msg.getMessageType()) {
@@ -37,8 +39,19 @@ void DevConServerConnection::update(Time t)
 void DevConServerConnection::reloadAssets(gsl::span<const String> ids)
 {
 	queue->enqueue(std::make_unique<DevCon::ReloadAssetsMsg>(ids), 0);
-	queue->sendAll();
 }
+
+void DevConServerConnection::registerInterest(const String& id, const ConfigNode& params, uint32_t handle)
+{
+	// TODO
+}
+
+void DevConServerConnection::unregisterInterest(uint32_t handle)
+{
+	// TODO
+}
+
+
 
 void DevConServerConnection::onReceiveLogMsg(const DevCon::LogMsg& msg)
 {
@@ -52,6 +65,7 @@ DevConServer::DevConServer(std::unique_ptr<NetworkService> s, int port)
 	{
 		Logger::logInfo("New incoming DevCon connection.");
 		connections.push_back(std::make_shared<DevConServerConnection>(a.accept()));
+		initConnection(*connections.back());
 	});
 }
 
@@ -59,14 +73,42 @@ void DevConServer::update(Time t)
 {
 	service->update(t);
 
-	for (auto& c: connections) {
+	for (const auto& c: connections) {
 		c->update(t);
 	}
 }
 
 void DevConServer::reloadAssets(gsl::span<const String> ids)
 {
-	for (auto& c: connections) {
+	for (const auto& c: connections) {
 		c->reloadAssets(ids);
+	}
+}
+
+DevConServer::InterestHandle DevConServer::registerInterest(String id, ConfigNode params, InterestCallback callback)
+{
+	const InterestHandle handle = interestId++;
+
+	for (const auto& c: connections) {
+		c->registerInterest(id, params, handle);
+	}
+
+	interest[handle] = Interest{ std::move(id), std::move(params), std::move(callback) };
+
+	return handle;
+}
+
+void DevConServer::unregisterInterest(InterestHandle handle)
+{
+	for (const auto& c: connections) {
+		c->unregisterInterest(handle);
+	}
+	interest.erase(handle);
+}
+
+void DevConServer::initConnection(DevConServerConnection& conn)
+{
+	for (const auto& [handle, val]: interest) {
+		conn.registerInterest(val.id, val.config, handle);
 	}
 }
