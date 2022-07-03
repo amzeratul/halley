@@ -9,7 +9,7 @@ namespace Halley {
 	struct alignas(8) EntityId {
 		int64_t value;
 
-		EntityId() : value(-1) {}
+		EntityId(int64_t value = -1) : value(value) {}
 
 		explicit EntityId(const String& str);
 
