@@ -86,7 +86,7 @@ namespace Halley {
     	Vector<std::pair<EntityId, ScriptMessage>> getOutboundScriptMessages();
         Vector<EntityMessageData> getOutboundEntityMessages();
 
-        virtual std::shared_ptr<UIWidget> createInWorldUI(const String& ui, EntityId entityId);
+        virtual std::shared_ptr<UIWidget> createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId);
         virtual std::shared_ptr<UIWidget> createModalUI(const String& ui);
 
     protected:

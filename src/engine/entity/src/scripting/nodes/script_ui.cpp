@@ -43,7 +43,9 @@ ConfigNode ScriptUIInWorldData::toConfigNode(const EntitySerializationContext& c
 Vector<IScriptNodeType::SettingType> ScriptUIInWorld::getSettingTypes() const
 {
 	return {
-		SettingType{ "ui", "Halley::ResourceReference<Halley::UIDefinition>", Vector<String>{""} }
+		SettingType{ "ui", "Halley::ResourceReference<Halley::UIDefinition>", Vector<String>{""} },
+		SettingType{ "alignment", "Halley::Vector2f", Vector<String>{"0.5", "0.5"}},
+		SettingType{ "offset", "Halley::Vector2f", Vector<String>{"0", "0"}}
 	};
 }
 
@@ -62,6 +64,10 @@ std::pair<String, Vector<ColourOverride>> ScriptUIInWorld::getNodeDescription(co
 	str.append(node.getSettings()["ui"].asString(""), parameterColour);
 	str.append(" on entity ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(" with alignment ");
+	str.append(toString(node.getSettings()["alignment"].asVector2f(Vector2f(0.5f, 0.5f))), parameterColour);
+	str.append(" and offset ");
+	str.append(toString(node.getSettings()["offset"].asVector2f(Vector2f())), parameterColour);
 	return str.moveResults();
 }
 
@@ -74,8 +80,10 @@ IScriptNodeType::Result ScriptUIInWorld::doUpdate(ScriptEnvironment& environment
 {
 	const String ui = node.getSettings()["ui"].asString("");
 	const EntityId entityId = readEntityId(environment, node, 2);
+	const auto alignment = node.getSettings()["alignment"].asVector2f(Vector2f(0.5f, 0.5f));
+	const auto offset = node.getSettings()["offset"].asVector2f(Vector2f());
 
-	data.ui = environment.createInWorldUI(ui, entityId);
+	data.ui = environment.createInWorldUI(ui, offset, alignment, entityId);
 
 	return Result(ScriptNodeExecutionState::Done);
 }

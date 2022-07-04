@@ -411,7 +411,7 @@ Vector<ScriptEnvironment::EntityMessageData> ScriptEnvironment::getOutboundEntit
 	return std::move(entityOutbox);
 }
 
-std::shared_ptr<UIWidget> ScriptEnvironment::createInWorldUI(const String& ui, EntityId entityId)
+std::shared_ptr<UIWidget> ScriptEnvironment::createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId)
 {
 	return {};
 }
