@@ -3,6 +3,12 @@
 #include "../../../../ui/include/halley/ui/ui_widget.h"
 using namespace Halley;
 
+ConfigNode ScriptUIModalData::toConfigNode(const EntitySerializationContext& context)
+{
+	// TODO?
+	return ConfigNode();
+}
+
 Vector<IScriptNodeType::SettingType> ScriptUIModal::getSettingTypes() const
 {
 	return {
@@ -14,7 +20,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptUIModal::getPinConfiguration(con
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 2>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType { ET::ReadDataPin, PD::Output } };
 	return data;
 }
 
@@ -23,20 +29,34 @@ std::pair<String, Vector<ColourOverride>> ScriptUIModal::getNodeDescription(cons
 	auto str = ColourStringBuilder(true);
 	str.append("Open modal UI ");
 	str.append(node.getSettings()["ui"].asString(""), parameterColour);
+	str.append(", wait for it, then output result value");
 	return str.moveResults();
 }
 
-IScriptNodeType::Result ScriptUIModal::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+void ScriptUIModal::doInitData(ScriptUIModalData& data, const ScriptGraphNode& node, const EntitySerializationContext& context,	const ConfigNode& nodeData) const
 {
-	// TODO
+	data.ui.reset();
+}
+
+IScriptNodeType::Result ScriptUIModal::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptUIModalData& data) const
+{
+	const String ui = node.getSettings()["ui"].asString("");
+	data.ui = environment.createModalUI(ui);
 	return Result(ScriptNodeExecutionState::Done);
 }
 
+void ScriptUIModal::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptUIModalData& data) const
+{
+	if (data.ui) {
+		data.ui->destroy();
+		data.ui.reset();
+	}
+}
 
 
 ConfigNode ScriptUIInWorldData::toConfigNode(const EntitySerializationContext& context)
 {
-	// TODO
+	// TODO?
 	return ConfigNode();
 }
 
