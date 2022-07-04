@@ -18,6 +18,7 @@ namespace Halley {
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/ui_modal.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
 		bool hasDestructor() const override { return true; }
+		bool canKeepData() const override { return true; }
 
 		Vector<SettingType> getSettingTypes() const override;
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
@@ -42,6 +43,7 @@ namespace Halley {
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/ui_in_world.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
 		bool hasDestructor() const override { return true; }
+		bool canKeepData() const override { return true; }
 
 		Vector<SettingType> getSettingTypes() const override;
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
