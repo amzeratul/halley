@@ -1082,6 +1082,8 @@ public:
 			return AssetType::Prefab;
 		} else if (strippedTypeName == "ScriptGraph") {
 			return AssetType::ScriptGraph;
+		} else if (strippedTypeName == "UIDefinition") {
+			return AssetType::UIDefinition;
 		} else {
 			Logger::logWarning("Unimplemented resource type on ComponentEditorResourceReferenceFieldFactory: " + strippedTypeName);
 		}

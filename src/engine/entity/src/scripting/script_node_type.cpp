@@ -15,6 +15,7 @@
 #include "nodes/script_network.h"
 #include "nodes/script_sprite.h"
 #include "nodes/script_node_variables.h"
+#include "nodes/script_ui.h"
 #include "nodes/script_wait.h"
 #include "nodes/script_wait_for.h"
 using namespace Halley;
@@ -328,4 +329,6 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptSendEntityMessage>());
 	addScriptNode(std::make_unique<ScriptEntityIdToData>());
 	addScriptNode(std::make_unique<ScriptDataToEntityId>());
+	addScriptNode(std::make_unique<ScriptUIModal>());
+	addScriptNode(std::make_unique<ScriptUIInWorld>());
 }

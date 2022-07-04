@@ -411,6 +411,16 @@ Vector<ScriptEnvironment::EntityMessageData> ScriptEnvironment::getOutboundEntit
 	return std::move(entityOutbox);
 }
 
+std::shared_ptr<UIWidget> ScriptEnvironment::createInWorldUI(const String& ui, EntityId entityId)
+{
+	return {};
+}
+
+std::shared_ptr<UIWidget> ScriptEnvironment::createModalUI(const String& ui)
+{
+	return {};
+}
+
 IScriptStateData* ScriptEnvironment::getNodeData(ScriptNodeId nodeId)
 {
 	return currentState->getNodeState(nodeId).data;

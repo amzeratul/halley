@@ -48,6 +48,7 @@ set(SOURCES
         "src/scripting/nodes/script_network.cpp"
         "src/scripting/nodes/script_node_variables.cpp"
         "src/scripting/nodes/script_sprite.cpp"
+        "src/scripting/nodes/script_ui.cpp"
         "src/scripting/nodes/script_wait.cpp"
         "src/scripting/nodes/script_wait_for.cpp"
         )
@@ -108,6 +109,7 @@ set(HEADERS
         "src/scripting/nodes/script_network.h"
         "src/scripting/nodes/script_node_variables.h"
         "src/scripting/nodes/script_sprite.h"
+        "src/scripting/nodes/script_ui.h"
         "src/scripting/nodes/script_wait.h"
         "src/scripting/nodes/script_wait_for.h"
         )

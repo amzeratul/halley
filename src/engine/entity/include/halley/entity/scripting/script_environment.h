@@ -4,6 +4,7 @@
 #include "script_node_type.h"
 
 namespace Halley {
+	class UIWidget;
 	class InputDevice;
 	class ScriptState;
 
@@ -84,6 +85,9 @@ namespace Halley {
 
     	Vector<std::pair<EntityId, ScriptMessage>> getOutboundScriptMessages();
         Vector<EntityMessageData> getOutboundEntityMessages();
+
+        virtual std::shared_ptr<UIWidget> createInWorldUI(const String& ui, EntityId entityId);
+        virtual std::shared_ptr<UIWidget> createModalUI(const String& ui);
 
     protected:
 		const HalleyAPI& api;
