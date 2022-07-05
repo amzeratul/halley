@@ -118,6 +118,7 @@ namespace Halley {
 			Vector<std::pair<Vector2f, Time>> deltas;
 			std::optional<Vector2f> inertiaVel;
 			bool updatedLastFrame = false;
+			void stop();
 		};
 
 		const HalleyAPI* api = nullptr;

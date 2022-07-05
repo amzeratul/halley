@@ -69,6 +69,9 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	}
 
 	// Box selection
+	if (inputState.leftClickPressed || inputState.rightClickPressed || inputState.middleClickPressed) {
+		cameraPanAnimation.stop();
+	}
 	if (mousePos) {
 		if (holdMouseStart && (holdMouseStart.value() - mousePos.value()).length() > 3 / getZoom()) {
 			onStartSelectionBox();
@@ -600,6 +603,12 @@ float SceneEditor::getSpriteDepth(EntityRef& e, Rect4f rect) const
 	} else {
 		return -std::numeric_limits<float>::infinity();
 	}
+}
+
+void SceneEditor::CameraPanAnimation::stop()
+{
+	deltas.clear();
+	inertiaVel = Vector2f();
 }
 
 Vector<EntityRef> SceneEditor::getEntitiesAt(Rect4f area, bool allowUnselectable, EntityAtPositionSelectMode mode) const
