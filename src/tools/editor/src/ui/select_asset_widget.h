@@ -9,6 +9,7 @@ namespace Halley {
 	class SelectAssetWidget : public UIWidget {
 	public:
 		SelectAssetWidget(const String& id, UIFactory& factory, AssetType type, Resources& gameResources, IProjectWindow& projectWindow);
+		~SelectAssetWidget() override;
 
 		void setValue(const String& newValue);
 		String getValue() const;
@@ -26,6 +27,7 @@ namespace Halley {
 		String defaultAssetId;
 		std::shared_ptr<UITextInput> input;
 		std::optional<String> allowEmpty;
+		std::shared_ptr<bool> aliveFlag;
 		bool displayErrorForEmpty = true;
 		bool firstValue = true;
 

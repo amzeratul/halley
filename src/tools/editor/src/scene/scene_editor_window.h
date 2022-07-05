@@ -170,6 +170,8 @@ namespace Halley {
 		size_t assetReloadCallbackIdx = 0;
 		Vector<std::function<bool(gsl::span<const String>)>> assetReloadCallbacks;
 
+		mutable std::shared_ptr<EntityEditorFactory> entityEditorFactory;
+
 		void makeUI();
 		void onEntitiesSelected(Vector<String> selectedEntities);
 		void panCameraToEntity(const String& id);

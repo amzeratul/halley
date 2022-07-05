@@ -28,7 +28,9 @@ void ScriptGraphEditor::onActiveChanged(bool active)
 void ScriptGraphEditor::onMakeUI()
 {
 	scriptNodeTypes = projectWindow.getScriptNodeTypes();
-	gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *projectWindow.getEntityEditorFactory(), scriptNodeTypes, 
+	entityEditorFactory = std::make_shared<EntityEditorFactory>(projectWindow.getEntityEditorFactoryRoot(), nullptr);
+
+	gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *entityEditorFactory, scriptNodeTypes, 
 		projectWindow.getAPI().input->getKeyboard(), projectWindow.getAPI().system->getClipboard(), [=] ()
 	{
 		markModified();

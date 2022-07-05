@@ -20,11 +20,12 @@ EntityEditor::EntityEditor(String id, UIFactory& factory)
 	reloadEntity();
 }
 
-void EntityEditor::setEntityEditorFactory(std::shared_ptr<EntityEditorFactory> factory)
+void EntityEditor::setEntityEditorFactory(EntityEditorFactoryRoot* rootFactory)
 {
-	entityEditorFactory = std::move(factory);
-	if (entityEditorFactory) {
-		entityEditorFactory->setCallbacks(*this);
+	if (rootFactory) {
+		entityEditorFactory = std::make_shared<EntityEditorFactory>(*rootFactory, static_cast<IEntityEditorCallbacks*>(this));
+	} else {
+		entityEditorFactory.reset();
 	}
 }
 
@@ -142,7 +143,6 @@ bool EntityEditor::loadEntity(const String& id, EntityData& data, const Prefab* 
 		return false;
 	}
 
-	entityEditorFactory->setGameResources(resources);
 	currentEntityData = &data;
 	prefabData = prefab;
 	currentId = id;
@@ -652,16 +652,53 @@ void EntityEditor::setComponentColour(const String& name, UIWidget& component)
 	capsule->getSprite().setColour(colour);
 }
 
-EntityEditorFactory::EntityEditorFactory(ProjectWindow& projectWindow, UIFactory& factory)
+
+
+EntityEditorFactoryRoot::EntityEditorFactoryRoot(ProjectWindow& projectWindow, UIFactory& factory)
 	: projectWindow(projectWindow)
 	, factory(factory)
 {
-	makeContext();
+}
+
+void EntityEditorFactoryRoot::addFieldFactories(Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories)
+{
+	for (auto& factory: factories) {
+		fieldFactories[factory->getFieldType()] = std::move(factory);
+	}
+}
+
+void EntityEditorFactoryRoot::addStandardFieldFactories()
+{
+	addFieldFactories(EntityEditorFactories::getDefaultFactories());
+	addFieldFactories(EntityEditorFactories::getECSFactories(projectWindow.getProject().getECSData()));
+}
+
+void EntityEditorFactoryRoot::clear()
+{
+	fieldFactories.clear();
+}
+
+bool EntityEditorFactoryRoot::isEmpty() const
+{
+	return fieldFactories.empty();
+}
+
+void EntityEditorFactoryRoot::setGameResources(Resources& resources)
+{
+	gameResources = &resources;
+}
+
+
+
+EntityEditorFactory::EntityEditorFactory(EntityEditorFactoryRoot& root, IEntityEditorCallbacks* callbacks)
+	: root(root)
+	, context(makeContext(callbacks))
+{
 }
 
 std::shared_ptr<IUIElement> EntityEditorFactory::makeLabel(const String& text) const
 {
-	auto label = std::make_shared<UILabel>("", factory.getStyle("labelLight"), LocalisedString::fromUserString(text));
+	auto label = std::make_shared<UILabel>("", root.factory.getStyle("labelLight"), LocalisedString::fromUserString(text));
 	label->setMaxWidth(100);
 	label->setMarquee(true);
 	auto labelBox = std::make_shared<UIWidget>("", Vector2f(100, 20), UISizer());
@@ -674,13 +711,13 @@ std::shared_ptr<IUIElement> EntityEditorFactory::makeField(const String& rawFiel
 	auto [fieldType, typeParams] = parseType(rawFieldType);
 	parameters.typeParameters = std::move(typeParams);
 		
-	const auto iter = fieldFactories.find(fieldType);
-	auto* compFieldFactory = iter != fieldFactories.end() ? iter->second.get() : nullptr;
+	const auto iter = root.fieldFactories.find(fieldType);
+	auto* compFieldFactory = iter != root.fieldFactories.end() ? iter->second.get() : nullptr;
 
 	if (createLabel == ComponentEditorLabelCreation::Always && compFieldFactory && compFieldFactory->canCreateLabel()) {
 		return compFieldFactory->createLabelAndField(*context, parameters);
 	} else if (createLabel != ComponentEditorLabelCreation::Never && compFieldFactory && compFieldFactory->isNested()) {
-		auto field = factory.makeUI("halley/entity_editor_compound_field");
+		auto field = root.factory.makeUI("halley/entity_editor_compound_field");
 		field->getWidgetAs<UILabel>("fieldName")->setText(LocalisedString::fromUserString(parameters.data.getLabelName()));
 		field->getWidget("fields")->add(compFieldFactory->createField(*context, parameters));
 		return field;
@@ -693,7 +730,7 @@ std::shared_ptr<IUIElement> EntityEditorFactory::makeField(const String& rawFiel
 		if (compFieldFactory) {
 			container->add(compFieldFactory->createField(*context, parameters), 1, Vector4f(), UISizerAlignFlags::Top | UISizerFillFlags::FillHorizontal);
 		} else {
-			container->add(std::make_shared<UILabel>("", factory.getStyle("labelLight"), LocalisedString::fromHardcodedString("N/A")));
+			container->add(std::make_shared<UILabel>("", root.factory.getStyle("labelLight"), LocalisedString::fromHardcodedString("N/A")));
 		}
 
 		return container;
@@ -702,47 +739,12 @@ std::shared_ptr<IUIElement> EntityEditorFactory::makeField(const String& rawFiel
 
 ConfigNode EntityEditorFactory::getDefaultNode(const String& fieldType) const
 {
-	const auto iter = fieldFactories.find(fieldType);
-	if (iter == fieldFactories.end()) {
+	const auto iter = root.fieldFactories.find(fieldType);
+	if (iter == root.fieldFactories.end()) {
 		return ConfigNode();
 	} else {
 		return iter->second->getDefaultNode();
 	}
-}
-
-void EntityEditorFactory::addFieldFactories(Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories)
-{
-	for (auto& factory: factories) {
-		fieldFactories[factory->getFieldType()] = std::move(factory);
-	}
-}
-
-void EntityEditorFactory::addStandardFieldFactories()
-{
-	addFieldFactories(EntityEditorFactories::getDefaultFactories());
-	addFieldFactories(EntityEditorFactories::getECSFactories(projectWindow.getProject().getECSData()));
-}
-
-void EntityEditorFactory::clear()
-{
-	fieldFactories.clear();
-}
-
-bool EntityEditorFactory::isEmpty() const
-{
-	return fieldFactories.empty();
-}
-
-void EntityEditorFactory::setCallbacks(IEntityEditorCallbacks& editor)
-{
-	callbacks = &editor;
-	makeContext();
-}
-
-void EntityEditorFactory::setGameResources(Resources& resources)
-{
-	gameResources = &resources;
-	makeContext();
 }
 
 std::pair<String, Vector<String>> EntityEditorFactory::parseType(const String& type) const
@@ -768,11 +770,7 @@ std::pair<String, Vector<String>> EntityEditorFactory::parseType(const String& t
 	return {type, {}};
 }
 
-void EntityEditorFactory::makeContext()
+std::unique_ptr<ComponentEditorContext> EntityEditorFactory::makeContext(IEntityEditorCallbacks* callbacks)
 {
-	if (!context) {
-		context = std::make_unique<ComponentEditorContext>(projectWindow, *this, callbacks, factory, gameResources);
-	} else {
-		context->set(*this, callbacks, factory, gameResources);
-	}
+	return std::make_unique<ComponentEditorContext>(root.projectWindow, *this, callbacks, root.factory, root.gameResources);
 }

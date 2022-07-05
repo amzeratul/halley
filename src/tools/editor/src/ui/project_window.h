@@ -59,7 +59,7 @@ namespace Halley {
 
     	Vector2f getChoosePrefabWindowSize() const;
 
-    	std::shared_ptr<EntityEditorFactory> getEntityEditorFactory();
+    	EntityEditorFactoryRoot& getEntityEditorFactoryRoot();
 		std::shared_ptr<ScriptNodeTypeCollection> getScriptNodeTypes();
 
     protected:
@@ -116,7 +116,7 @@ namespace Halley {
         std::shared_ptr<ConsoleWindow> consoleWindow;
         std::shared_ptr<PaletteWindow> assetFinder;
 
-        std::shared_ptr<EntityEditorFactory> entityEditorFactory;
+        std::shared_ptr<EntityEditorFactoryRoot> entityEditorFactoryRoot;
         
         std::unique_ptr<AssetPreviewGenerator> assetPreviewGenerator;
 

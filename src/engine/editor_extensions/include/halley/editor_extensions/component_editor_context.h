@@ -54,8 +54,6 @@ namespace Halley {
     public:
 	    ComponentEditorContext(IProjectWindow& projectWindow, IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources);
 
-		void set(IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources);
-
         UIFactory& getUIFactory() const;
 	    Resources& getGameResources() const;
 		IProjectWindow& getProjectWindow() const;

@@ -34,9 +34,9 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 
 	tasks = std::make_unique<TaskSet>();
 
-	entityEditorFactory = std::make_shared<EntityEditorFactory>(*this, factory);
-	entityEditorFactory->addStandardFieldFactories();
-	entityEditorFactory->setGameResources(project.getGameResources());
+	entityEditorFactoryRoot = std::make_shared<EntityEditorFactoryRoot>(*this, factory);
+	entityEditorFactoryRoot->addStandardFieldFactories();
+	entityEditorFactoryRoot->setGameResources(project.getGameResources());
 
 	project.withDLL([&] (ProjectDLL& dll)
 	{
@@ -44,7 +44,7 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 		updateDLLStatus(dll.getStatus());
 		hasDLL = dll.isLoaded();
 		if (hasDLL) {
-			entityEditorFactory->addFieldFactories(dll.getGame().createCustomEditorFieldFactories());
+			entityEditorFactoryRoot->addFieldFactories(dll.getGame().createCustomEditorFieldFactories());
 		}
 	});
 	project.addAssetLoadedListener(this);
@@ -186,16 +186,16 @@ bool ProjectWindow::loadCustomUI()
 
 	setupConsole(*game);
 
-	entityEditorFactory->clear();
-	entityEditorFactory->addStandardFieldFactories();
-	entityEditorFactory->addFieldFactories(project.getGameInstance()->createCustomEditorFieldFactories());
+	entityEditorFactoryRoot->clear();
+	entityEditorFactoryRoot->addStandardFieldFactories();
+	entityEditorFactoryRoot->addFieldFactories(project.getGameInstance()->createCustomEditorFieldFactories());
 	
 	return true;
 }
 
 void ProjectWindow::destroyCustomUI()
 {
-	entityEditorFactory->clear();
+	entityEditorFactoryRoot->clear();
 
 	if (!customTools.empty()) {
 		makeToolbar();
@@ -554,9 +554,9 @@ Vector2f ProjectWindow::getChoosePrefabWindowSize() const
 	return getSize() - Vector2f(900.0f, 350.0f);
 }
 
-std::shared_ptr<EntityEditorFactory> ProjectWindow::getEntityEditorFactory()
+EntityEditorFactoryRoot& ProjectWindow::getEntityEditorFactoryRoot()
 {
-	return entityEditorFactory;
+	return *entityEditorFactoryRoot;
 }
 
 std::shared_ptr<ScriptNodeTypeCollection> ProjectWindow::getScriptNodeTypes()

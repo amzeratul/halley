@@ -7,6 +7,7 @@
 #include "src/ui/select_asset_widget.h"
 
 namespace Halley {
+	class EntityEditorFactoryRoot;
 	class EntityEditorFactory;
 	class SceneEditorWindow;
 	class ECSData;
@@ -18,7 +19,7 @@ namespace Halley {
 	public:
 		EntityEditor(String id, UIFactory& factory);
 
-		void setEntityEditorFactory(std::shared_ptr<EntityEditorFactory> entityEditorFactory);
+		void setEntityEditorFactory(EntityEditorFactoryRoot* entityEditorFactory);
 
 		void onAddedToRoot(UIRoot& root) override;
 		void onRemovedFromRoot(UIRoot& root) override;
@@ -111,32 +112,38 @@ namespace Halley {
 		ConfigNode getComponentsFromClipboard();
 	};
 
-	class EntityEditorFactory : public IEntityEditorFactory {
+	class EntityEditorFactoryRoot {
+		friend class EntityEditorFactory;
 	public:
-		EntityEditorFactory(ProjectWindow& projectWindow, UIFactory& factory);
+		EntityEditorFactoryRoot(ProjectWindow& projectWindow, UIFactory& factory);
 		
-		void setCallbacks(IEntityEditorCallbacks& callbacks);
 		void setGameResources(Resources& resources);
 
 		void addFieldFactories(Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories);
 		void addStandardFieldFactories();
 		void clear();
 		bool isEmpty() const;
-	
+
+	private:
+		ProjectWindow& projectWindow;
+		UIFactory& factory;
+		Resources* gameResources = nullptr;
+		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
+	};
+
+	class EntityEditorFactory : public IEntityEditorFactory {
+	public:
+		EntityEditorFactory(EntityEditorFactoryRoot& root, IEntityEditorCallbacks* callbacks);
+
 		std::shared_ptr<IUIElement> makeLabel(const String& label) const override;
 		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const override;
 		ConfigNode getDefaultNode(const String& fieldType) const override;
 
 	private:
-		ProjectWindow& projectWindow;
-		UIFactory& factory;
-		IEntityEditorCallbacks* callbacks = nullptr;
-		Resources* gameResources = nullptr;
-		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
-
-		mutable std::unique_ptr<ComponentEditorContext> context;
+		EntityEditorFactoryRoot& root;
+		std::unique_ptr<ComponentEditorContext> context;
 
 		std::pair<String, Vector<String>> parseType(const String& type) const;
-		void makeContext();
+		std::unique_ptr<ComponentEditorContext> makeContext(IEntityEditorCallbacks* callbacks);
 	};
 }

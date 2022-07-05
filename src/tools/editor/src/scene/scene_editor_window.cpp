@@ -192,7 +192,7 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 		sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, world, project.getGameResources());
 		entityEditor->setSceneEditorWindow(*this, api);
 		entityEditor->setECSData(project.getECSData());
-		entityEditor->setEntityEditorFactory(projectWindow.getEntityEditorFactory());
+		entityEditor->setEntityEditorFactory(&projectWindow.getEntityEditorFactoryRoot());
 		entityList->setSceneData(sceneData);
 
 		// Select entity
@@ -249,7 +249,7 @@ void SceneEditorWindow::unloadScene()
 	sceneData.reset();
 	currentEntityScene.reset();
 	entityEditor->unloadEntity(false);
-	entityEditor->setEntityEditorFactory({});
+	entityEditor->setEntityEditorFactory(nullptr);
 	entityEditor->unloadIcons();
 	entityValidator.reset();
 	entityList->setSceneData({});
@@ -1299,7 +1299,10 @@ void SceneEditorWindow::setHighlightedComponents(Vector<String> componentNames)
 
 const IEntityEditorFactory& SceneEditorWindow::getEntityEditorFactory() const
 {
-	return *projectWindow.getEntityEditorFactory();
+	if (!entityEditorFactory) {
+		entityEditorFactory = std::make_shared<EntityEditorFactory>(projectWindow.getEntityEditorFactoryRoot(), nullptr);
+	}
+	return *entityEditorFactory;
 }
 
 std::shared_ptr<ScriptNodeTypeCollection> SceneEditorWindow::getScriptNodeTypes()

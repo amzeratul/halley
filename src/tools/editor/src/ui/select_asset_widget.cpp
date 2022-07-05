@@ -13,8 +13,14 @@ SelectAssetWidget::SelectAssetWidget(const String& id, UIFactory& factory, Asset
 	, projectWindow(dynamic_cast<ProjectWindow&>(projectWindow))
 	, type(type)
 	, allowEmpty("[None]")
+	, aliveFlag(std::make_shared<bool>(true))
 {
 	makeUI();
+}
+
+SelectAssetWidget::~SelectAssetWidget()
+{
+	*aliveFlag = false;
 }
 
 void SelectAssetWidget::setValue(const String& newValue)
@@ -84,9 +90,9 @@ void SelectAssetWidget::makeUI()
 
 void SelectAssetWidget::choose()
 {
-	auto callback = [=] (std::optional<String> result)
+	auto callback = [=, flag = aliveFlag] (std::optional<String> result)
 	{
-		if (result) {
+		if (*flag && result) {
 			setValue(result.value());
 		}
 	};

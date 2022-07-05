@@ -10,14 +10,7 @@ ComponentEditorContext::ComponentEditorContext(IProjectWindow& projectWindow, IE
 	, entityEditor(entityEditor)
 	, factory(&factory)
 	, gameResources(gameResources)
-{}
-
-void ComponentEditorContext::set(IEntityEditorFactory& entityEditorFactory, IEntityEditorCallbacks* entityEditor, UIFactory& factory, Resources* gameResources)
 {
-	this->entityEditorFactory = &entityEditorFactory;
-	this->entityEditor = entityEditor;
-	this->factory = &factory;
-	this->gameResources = gameResources;
 }
 
 Resources& ComponentEditorContext::getGameResources() const

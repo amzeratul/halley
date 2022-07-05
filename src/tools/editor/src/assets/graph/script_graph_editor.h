@@ -2,6 +2,7 @@
 
 #include "script_gizmo_ui.h"
 #include "../asset_editor.h"
+#include "src/scene/entity_editor.h"
 #include "src/ui/infini_canvas.h"
 #include "src/ui/scroll_background.h"
 
@@ -49,6 +50,7 @@ namespace Halley {
     	Vector<EntityEnumData> curEntities;
 
     	std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
+		std::shared_ptr<EntityEditorFactory> entityEditorFactory;
 
 		void open();
 		void setListeningToClient(bool listening);
