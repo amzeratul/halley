@@ -61,10 +61,6 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	// Update camera
 	updateCameraPos(t);
 
-	// Update world
-	world->step(TimeLine::FixedUpdate, t);
-	world->step(TimeLine::VariableUpdate, t);
-
 	// Update input state
 	inputState.mousePos = inputState.rawMousePos ? camera.screenToWorld(inputState.rawMousePos.value(), inputState.viewRect) : std::optional<Vector2f>();
 	mousePos = inputState.mousePos;
@@ -107,6 +103,10 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 		highlightDelta = 0;
 	}
 	updateEntityFocused();
+
+	// Update world
+	world->step(TimeLine::FixedUpdate, t);
+	world->step(TimeLine::VariableUpdate, t);
 
 	lastStepTime = t;
 }
