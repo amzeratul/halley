@@ -58,6 +58,7 @@ namespace Halley {
 
     	virtual void setDirection(EntityId entityId, const String& direction);
 
+        void setInputEnabled(bool enabled);
         void setInputDevice(int idx, std::shared_ptr<InputDevice> input);
         std::shared_ptr<InputDevice> getInputDevice(int idx) const;
         virtual int getInputButtonByName(const String& name) const;
@@ -96,6 +97,7 @@ namespace Halley {
         HashMap<int, std::shared_ptr<InputDevice>> inputDevices;
     	const ScriptNodeTypeCollection& nodeTypeCollection;
         bool isHost = false;
+        bool inputEnabled = true;
 
     	const ScriptGraph* currentGraph = nullptr;
     	ScriptState* currentState = nullptr;

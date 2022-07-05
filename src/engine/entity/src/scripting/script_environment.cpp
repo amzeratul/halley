@@ -312,6 +312,11 @@ void ScriptEnvironment::setDirection(EntityId entityId, const String& direction)
 	}
 }
 
+void ScriptEnvironment::setInputEnabled(bool enabled)
+{
+	inputEnabled = enabled;
+}
+
 void ScriptEnvironment::setInputDevice(int idx, std::shared_ptr<InputDevice> input)
 {
 	inputDevices[idx] = std::move(input);
@@ -319,6 +324,10 @@ void ScriptEnvironment::setInputDevice(int idx, std::shared_ptr<InputDevice> inp
 
 std::shared_ptr<InputDevice> ScriptEnvironment::getInputDevice(int idx) const
 {
+	if (!inputEnabled) {
+		return {};
+	}
+
 	const auto iter = inputDevices.find(idx);
 	if (iter != inputDevices.end()) {
 		return iter->second;
