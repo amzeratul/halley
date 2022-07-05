@@ -189,10 +189,12 @@ ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(ScriptNodeId nodeId
 		if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Active) {
 			drawMode.type = NodeDrawModeType::Active;
 			drawMode.time = nodeIntrospection.time;
+		} else if (nodeIntrospection.activationTime < 1.0f) {
+			drawMode.type = NodeDrawModeType::Normal;
+			drawMode.activationTime = nodeIntrospection.activationTime;
 		} else if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Unvisited) {
 			drawMode.type = NodeDrawModeType::Unvisited;
 		}
-		drawMode.activationTime = nodeIntrospection.activationTime;
 	} else {
 		// Rendering in editor
 		const bool highlightThis = highlightNode && highlightNode->nodeId == nodeId;
@@ -238,9 +240,13 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 			break;
 		}
 
-		if (drawMode.activationTime > 0.0f) {
+		if (drawMode.activationTime < 1.0f) {
 			const float t = drawMode.activationTime;
-			col = lerp(col, Colour4f(1, 1, 1), t * t);
+			const float t2 = std::pow(t, 0.5f);
+			const float t3 = std::pow(t, 0.3f);
+			const auto baseCol = lerp(col, col.multiplyLuma(0.3f), t2);
+			iconCol = lerp(Colour4f(1, 1, 1), Colour4f(0.5f, 0.5f, 0.5f), t2);
+			col = lerp(Colour4f(1, 1, 1), baseCol, t3);
 		}
 
 		// Destructor

@@ -149,6 +149,7 @@ ScriptState::NodeState& ScriptState::NodeState::operator=(const NodeState& other
 
 	hasPendingData = other.hasPendingData;
 	threadCount = other.threadCount;
+	timeSinceStart = other.timeSinceStart;
 
 	if (other.hasPendingData) {
 		if (other.pendingData) {
@@ -168,6 +169,7 @@ ScriptState::NodeState& ScriptState::NodeState::operator=(NodeState&& other)
 	releaseData();
 
 	threadCount = other.threadCount;
+	timeSinceStart = other.timeSinceStart;
 
 	data = other.data;
 	hasPendingData = other.hasPendingData;
@@ -182,6 +184,7 @@ ConfigNode ScriptState::NodeState::toConfigNode(const EntitySerializationContext
 {
 	ConfigNode::MapType result;
 	result["threadCount"] = threadCount;
+
 	if (hasPendingData) {
 		if (pendingData) {
 			result["pendingData"] = ConfigNode(*pendingData);
@@ -343,6 +346,10 @@ ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(ScriptNodeId no
 	result.state = NodeIntrospectionState::Unvisited;
 	result.time = 0;
 
+	const auto& state = nodeState.at(nodeId);
+	constexpr static int flashCycle = 3;
+	result.activationTime = (state.timeSinceStart > 0.02f || state.consecutiveSteps % flashCycle == 0) ? state.timeSinceStart : std::numeric_limits<float>::infinity();
+	
 	const auto& node = getScriptGraphPtr()->getNodes()[nodeId];
 	if (node.getNodeType().getClassification() == ScriptNodeClassification::Variable) {
 		result.state = NodeIntrospectionState::Visited;
@@ -383,7 +390,7 @@ void ScriptState::reset()
 	graphHash = 0;
 }
 
-void ScriptState::ensureReady(const EntitySerializationContext& context)
+void ScriptState::prepareStates(const EntitySerializationContext& context, Time t)
 {
 	const auto& nodes = getScriptGraphPtr()->getNodes();
 	if (needsStateLoading || nodeState.size() != nodes.size()) {
@@ -392,6 +399,15 @@ void ScriptState::ensureReady(const EntitySerializationContext& context)
 			ensureNodeLoaded(nodes[i], nodeState[i], context);
 		}
 		needsStateLoading = false;
+	}
+
+	for (auto& n: nodeState) {
+		if (n.timeSinceStart < 0.02f) {
+			n.consecutiveSteps++;
+		} else {
+			n.consecutiveSteps = 0;
+		}
+		n.timeSinceStart += static_cast<float>(t);
 	}
 }
 
@@ -519,6 +535,8 @@ void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state)
 			//state.data->copyFrom(std::move(*newData));
 			nodeType.initData(*state.data, node, EntitySerializationContext(), ConfigNode());
 		}
+
+		state.timeSinceStart = 0;
 	}
 }
 

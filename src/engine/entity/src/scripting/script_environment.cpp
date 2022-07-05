@@ -43,7 +43,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	if (!graphState.hasStarted() || graphState.getGraphHash() != currentGraph->getHash()) {
 		graphState.start(currentGraph->getStartNode(), currentGraph->getHash());
 	}
-	graphState.ensureReady(serializationContext);
+	graphState.prepareStates(serializationContext, time);
 
 	graphState.processMessages(time);
 

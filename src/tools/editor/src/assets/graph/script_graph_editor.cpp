@@ -264,6 +264,6 @@ void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 		context.resources = &gameResources;
 		scriptState->load(data, context);
 		scriptState->setScriptGraphPtr(scriptGraph.get());
-		scriptState->ensureReady(context);
+		scriptState->prepareStates(context, 0);
 	}
 }

@@ -59,7 +59,7 @@ namespace Halley {
 			NodeDrawModeType type = NodeDrawModeType::Normal;
 			bool selected = false;
 			float time = 0;
-			float activationTime = 0;
+			float activationTime = std::numeric_limits<float>::infinity();
 		};
 		
 		Resources& resources;

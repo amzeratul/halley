@@ -105,6 +105,8 @@ namespace Halley {
 		struct NodeState {
 			uint8_t threadCount = 0;
 			bool hasPendingData = false;
+			uint8_t consecutiveSteps = 0;
+			float timeSinceStart = std::numeric_limits<float>::infinity();
 			union {
 				gsl::owner<IScriptStateData*> data;
 				gsl::owner<ConfigNode*> pendingData;
@@ -144,7 +146,7 @@ namespace Halley {
 
     	void start(OptionalLite<ScriptNodeId> startNode, uint64_t graphHash);
 		void reset();
-		void ensureReady(const EntitySerializationContext& context);
+		void prepareStates(const EntitySerializationContext& context, Time t);
 
     	NodeState& getNodeState(ScriptNodeId nodeId);
 		void startNode(const ScriptGraphNode& node, NodeState& state);
