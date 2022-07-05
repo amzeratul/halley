@@ -38,6 +38,7 @@ ScriptMessage::ScriptMessage(const ConfigNode& node)
 {
 	type = node["type"];
 	params = node["params"];
+	delay = node["delay"].asFloat(0);
 }
 
 ConfigNode ScriptMessage::toConfig() const
@@ -45,24 +46,27 @@ ConfigNode ScriptMessage::toConfig() const
 	ConfigNode::MapType result;
 	result["type"] = type.toConfig();
 	result["params"] = params;
+	result["delay"] = delay;
 	return result;
-}
-
-String ScriptMessage::toString() const
-{
-	return type.message + "(" + params.asString() + ")";
 }
 
 void ScriptMessage::serialize(Serializer& s) const
 {
 	s << type;
 	s << params;
+	s << delay;
 }
 
 void ScriptMessage::deserialize(Deserializer& s)
 {
 	s >> type;
 	s >> params;
+	s >> delay;
+}
+
+String ScriptMessage::toString() const
+{
+	return type.message + "(" + params.asString() + ")";
 }
 
 

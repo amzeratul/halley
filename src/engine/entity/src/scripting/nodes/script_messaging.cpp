@@ -15,12 +15,12 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendMessage::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 7>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input },
-		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
+	const static auto data = std::array<PinType, 8>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input },
+		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
 
 	const auto msgType = ScriptMessageType(node.getSettings()["message"]);
 
-	return gsl::span<const IScriptNodeType::PinType>(data).subspan(0, 3 + msgType.nParams);
+	return gsl::span<const IScriptNodeType::PinType>(data).subspan(0, 4 + msgType.nParams);
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
@@ -36,20 +36,29 @@ std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getNodeDescription(
 		if (i != 0) {
 			str.append(", ");
 		}
-		str.append(getConnectedNodeName(world, node, graph, 3 + i), parameterColour);
+		str.append(getConnectedNodeName(world, node, graph, 4 + i), parameterColour);
 	}
 
 	str.append(") to script ");
 	str.append(msgType.script, parameterColour);
 	str.append(" on entity ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+
+	const auto delayStr = getConnectedNodeName(world, node, graph, 3);
+	if (delayStr != "<empty>") {
+		str.append(" after ");
+		str.append(delayStr + " s", parameterColour);
+	}
+
 	return str.moveResults();
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getPinDescription(const ScriptGraphNode& node, PinType elementType, ScriptPinId elementIdx) const
 {
-	if (elementIdx >= 3) {
-		return { "Parameter #" + toString(elementIdx - 2), {}};
+	if (elementIdx == 3) {
+		return { "Delay time", {}};
+	} else if (elementIdx >= 4) {
+		return { "Parameter #" + toString(elementIdx - 3), {}};
 	} else {
 		return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 	}
@@ -58,13 +67,14 @@ std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getPinDescription(c
 IScriptNodeType::Result ScriptSendMessage::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	ScriptMessage msg;
+	msg.delay = readDataPin(environment, node, 3).asFloat(0.0f);
 	ScriptMessageType& msgType = msg.type;
 	msgType = ScriptMessageType(node.getSettings()["message"]);
 
 	if (msgType.nParams > 0) {
 		msg.params = ConfigNode::SequenceType();
 		for (int i = 0; i < msgType.nParams; ++i) {
-			msg.params.asSequence().push_back(readDataPin(environment, node, 3 + i));
+			msg.params.asSequence().push_back(readDataPin(environment, node, 4 + i));
 		}
 	}
 

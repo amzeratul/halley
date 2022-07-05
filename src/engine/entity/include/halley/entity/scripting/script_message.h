@@ -22,6 +22,7 @@ namespace Halley {
     public:
         ScriptMessageType type;
         ConfigNode params;
+        float delay = 0;
 
         ScriptMessage() = default;
         ScriptMessage(const ConfigNode& node);

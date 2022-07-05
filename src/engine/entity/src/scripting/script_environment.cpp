@@ -45,7 +45,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	}
 	graphState.ensureReady(serializationContext);
 
-	graphState.processMessages();
+	graphState.processMessages(time);
 
 	// Allocate time for each thread
 	auto& threads = graphState.getThreads();

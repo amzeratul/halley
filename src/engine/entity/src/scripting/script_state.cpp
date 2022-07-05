@@ -453,11 +453,11 @@ void ScriptState::receiveMessage(ScriptMessage msg)
 	}
 }
 
-void ScriptState::processMessages()
+void ScriptState::processMessages(Time time)
 {
 	std_ex::erase_if(inbox, [=] (ScriptMessage& msg)
 	{
-		return processMessage(msg);
+		return processMessage(msg, time);
 	});
 }
 
@@ -481,8 +481,13 @@ const ScriptVariables& ScriptState::getSharedVariables() const
 	return sharedVars;
 }
 
-bool ScriptState::processMessage(ScriptMessage& msg)
+bool ScriptState::processMessage(ScriptMessage& msg, Time time)
 {
+	msg.delay = std::max(0.0f, msg.delay - static_cast<float>(time));
+	if (msg.delay > 0.0001f) {
+		return false;
+	}
+
 	if (const auto* scriptGraph = getScriptGraphPtr()) {
 		if (const auto inboxId = scriptGraph->getMessageInboxId(msg.type.message)) {
 			const auto& node = scriptGraph->getNodes().at(*inboxId);
