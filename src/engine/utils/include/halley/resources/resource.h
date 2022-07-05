@@ -7,7 +7,7 @@
 #include "metadata.h"
 #include "halley/text/enum_names.h"
 
-#if false && defined(DEV_BUILD) && !defined(__NX_TOOLCHAIN_MAJOR__)
+#if defined(DEV_BUILD) && !defined(__NX_TOOLCHAIN_MAJOR__)
 #define ENABLE_HOT_RELOAD
 #endif
 
