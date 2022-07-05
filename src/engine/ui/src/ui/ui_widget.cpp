@@ -791,6 +791,11 @@ const Vector<UIStyle>& UIWidget::getStyles() const
 	return styles;
 }
 
+ConfigNode UIWidget::getResultValue()
+{
+	return ConfigNode();
+}
+
 void UIWidget::draw(UIPainter& painter) const
 {
 }

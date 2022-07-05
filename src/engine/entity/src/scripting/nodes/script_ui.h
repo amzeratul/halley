@@ -7,6 +7,7 @@ namespace Halley {
 	class ScriptUIModalData final : public ScriptStateData<ScriptUIModalData> {
 	public:
 		std::shared_ptr<UIWidget> ui;
+		ConfigNode result;
 
 		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
 	};
@@ -27,6 +28,7 @@ namespace Halley {
 		void doInitData(ScriptUIModalData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
         Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptUIModalData& data) const override;
 		void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptUIModalData& curData) const override;
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptUIModalData& curData) const override;
 	};
 
 	class ScriptUIInWorldData final : public ScriptStateData<ScriptUIInWorldData> {

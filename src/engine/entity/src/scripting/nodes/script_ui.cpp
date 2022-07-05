@@ -5,8 +5,7 @@ using namespace Halley;
 
 ConfigNode ScriptUIModalData::toConfigNode(const EntitySerializationContext& context)
 {
-	// TODO?
-	return ConfigNode();
+	return ConfigNode(result);
 }
 
 Vector<IScriptNodeType::SettingType> ScriptUIModal::getSettingTypes() const
@@ -36,13 +35,22 @@ std::pair<String, Vector<ColourOverride>> ScriptUIModal::getNodeDescription(cons
 void ScriptUIModal::doInitData(ScriptUIModalData& data, const ScriptGraphNode& node, const EntitySerializationContext& context,	const ConfigNode& nodeData) const
 {
 	data.ui.reset();
+	data.result = nodeData;
 }
 
 IScriptNodeType::Result ScriptUIModal::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptUIModalData& data) const
 {
-	const String ui = node.getSettings()["ui"].asString("");
-	data.ui = environment.createModalUI(ui);
-	return Result(ScriptNodeExecutionState::Done);
+	if (!data.ui) {
+		const String ui = node.getSettings()["ui"].asString("");
+		data.ui = environment.createModalUI(ui);
+	}
+	if (data.ui->isAlive()) {
+		return Result(ScriptNodeExecutionState::Executing, time);
+	} else {
+		data.result = data.ui->getResultValue();
+		data.ui.reset();
+		return Result(ScriptNodeExecutionState::Done);
+	}
 }
 
 void ScriptUIModal::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptUIModalData& data) const
@@ -50,7 +58,13 @@ void ScriptUIModal::doDestructor(ScriptEnvironment& environment, const ScriptGra
 	if (data.ui) {
 		data.ui->destroy();
 		data.ui.reset();
+		data.result = ConfigNode();
 	}
+}
+
+ConfigNode ScriptUIModal::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pin_n, ScriptUIModalData& data) const
+{
+	return ConfigNode(data.result);
 }
 
 

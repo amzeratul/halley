@@ -180,6 +180,8 @@ namespace Halley {
 		bool hasStyle() const;
 		const Vector<UIStyle>& getStyles() const;
 
+		virtual ConfigNode getResultValue();
+
 	protected:
 		virtual void draw(UIPainter& painter) const;
 		virtual void drawAfterChildren(UIPainter& painter) const;
