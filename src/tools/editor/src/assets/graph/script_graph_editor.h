@@ -43,6 +43,7 @@ namespace Halley {
 		bool modified = false;
 		bool pendingLoad = false;
 		bool hasUI = false;
+		bool autoAcquire = false;
 
     	std::optional<uint32_t> scriptEnumHandle;
 		std::optional<uint32_t> scriptStateHandle;
@@ -60,5 +61,7 @@ namespace Halley {
 		void refreshScriptEnum();
 		void onScriptState(size_t connId, ConfigNode data);
 		void setCurrentInstance(std::pair<size_t, int64_t> entityId);
+
+		void tryAutoAcquire();
     };
 }

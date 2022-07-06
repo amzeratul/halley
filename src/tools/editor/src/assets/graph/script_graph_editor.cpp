@@ -66,6 +66,16 @@ void ScriptGraphEditor::onMakeUI()
 			setCurrentInstance({ 0, -1 });
 		}
 	});
+
+	const auto assetKey = toString(assetType) + ":" + assetId;
+	autoAcquire = projectWindow.getAssetSetting(assetKey, "autoAcquire").asBool(true);
+	bindData("autoAcquire", autoAcquire, [=](bool value)
+	{
+		projectWindow.setAssetSetting(assetKey, "autoAcquire", ConfigNode(value));
+		autoAcquire = value;
+		tryAutoAcquire();
+	});
+	tryAutoAcquire();
 }
 
 void ScriptGraphEditor::reload()
@@ -158,7 +168,16 @@ void ScriptGraphEditor::update(Time time, bool moved)
 void ScriptGraphEditor::setCurrentInstance(std::pair<size_t, int64_t> entityId)
 {
 	if (curEntityId != entityId) {
-		curEntityId = entityId;
+		if (entityId.second == -1) {
+			curEntityId.reset();
+			scriptState.reset();
+			if (gizmoEditor) {
+				gizmoEditor->setState(nullptr);
+			}
+		} else {
+			curEntityId = entityId;
+		}
+
 		if (scriptEnumHandle) {
 			setListeningToState(entityId);
 		}
@@ -222,11 +241,11 @@ void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
 		}
 	}
 
-	refreshScriptEnum();
-
 	if (curEntityId && curEntityId->first == connId && !std_ex::contains_if(curEntities, [&] (const EntityEnumData& d) { return d.entityId == curEntityId->second && d.connId == curEntityId->first; })) {
-		onScriptState(connId, ConfigNode());
+		getWidgetAs<UIDropdown>("instances")->setSelectedOption(0);
 	}
+
+	refreshScriptEnum();
 }
 
 void ScriptGraphEditor::refreshScriptEnum()
@@ -243,18 +262,13 @@ void ScriptGraphEditor::refreshScriptEnum()
 	}
 
 	instances->setOptions(std::move(ids), std::move(names));
+
+	tryAutoAcquire();
 }
 
 void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 {
-	if (!curEntityId) {
-		scriptState.reset();
-		if (gizmoEditor) {
-			gizmoEditor->setState(nullptr);
-		}
-	}
-
-	if (curEntityId->first != connId) {
+	if (!curEntityId || curEntityId->first != connId) {
 		return;
 	}
 
@@ -275,5 +289,15 @@ void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 		scriptState->load(data, context);
 		scriptState->setScriptGraphPtr(scriptGraph.get());
 		scriptState->prepareStates(context, 0);
+	}
+}
+
+void ScriptGraphEditor::tryAutoAcquire()
+{
+	if (autoAcquire && !curEntityId) {
+		auto instances = getWidgetAs<UIDropdown>("instances");
+		if (instances->getNumberOptions() >= 2) {
+			instances->setSelectedOption(1);
+		}
 	}
 }
