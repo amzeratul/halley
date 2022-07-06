@@ -246,7 +246,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 			const float t3 = std::pow(t, 0.3f);
 			const auto baseCol = lerp(col, col.multiplyLuma(0.3f), t2);
 			iconCol = lerp(Colour4f(1, 1, 1), Colour4f(0.5f, 0.5f, 0.5f), t2);
-			col = lerp(Colour4f(1, 1, 1), baseCol, t3);
+			col = lerp(Colour4f(1, 1, 1), baseCol, t3 * 0.5f + 0.5f);
 		}
 
 		// Destructor

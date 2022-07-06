@@ -150,6 +150,7 @@ ScriptState::NodeState& ScriptState::NodeState::operator=(const NodeState& other
 	hasPendingData = other.hasPendingData;
 	threadCount = other.threadCount;
 	timeSinceStart = other.timeSinceStart;
+	consecutiveSteps = other.consecutiveSteps;
 
 	if (other.hasPendingData) {
 		if (other.pendingData) {
@@ -170,6 +171,7 @@ ScriptState::NodeState& ScriptState::NodeState::operator=(NodeState&& other)
 
 	threadCount = other.threadCount;
 	timeSinceStart = other.timeSinceStart;
+	consecutiveSteps = other.consecutiveSteps;
 
 	data = other.data;
 	hasPendingData = other.hasPendingData;
@@ -347,8 +349,8 @@ ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(ScriptNodeId no
 	result.time = 0;
 
 	const auto& state = nodeState.at(nodeId);
-	constexpr static int flashCycle = 3;
-	result.activationTime = (state.timeSinceStart > 0.02f || state.consecutiveSteps % flashCycle == 0) ? state.timeSinceStart : std::numeric_limits<float>::infinity();
+	constexpr static int flashCycle = 2;
+	result.activationTime = (state.timeSinceStart > 0.02f || state.consecutiveSteps % flashCycle == 1) ? state.timeSinceStart : std::numeric_limits<float>::infinity();
 	
 	const auto& node = getScriptGraphPtr()->getNodes()[nodeId];
 	if (node.getNodeType().getClassification() == ScriptNodeClassification::Variable) {
@@ -402,7 +404,7 @@ void ScriptState::prepareStates(const EntitySerializationContext& context, Time 
 	}
 
 	for (auto& n: nodeState) {
-		if (n.timeSinceStart < 0.02f) {
+		if (n.timeSinceStart < 0.001f) {
 			n.consecutiveSteps++;
 		} else {
 			n.consecutiveSteps = 0;
