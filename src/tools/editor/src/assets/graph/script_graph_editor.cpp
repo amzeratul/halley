@@ -242,7 +242,9 @@ void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
 	}
 
 	if (curEntityId && curEntityId->first == connId && !std_ex::contains_if(curEntities, [&] (const EntityEnumData& d) { return d.entityId == curEntityId->second && d.connId == curEntityId->first; })) {
-		getWidgetAs<UIDropdown>("instances")->setSelectedOption(0);
+		if (!tryAutoAcquire()) {
+			getWidgetAs<UIDropdown>("instances")->setSelectedOption(0);
+		}
 	}
 
 	refreshScriptEnum();
@@ -292,12 +294,16 @@ void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 	}
 }
 
-void ScriptGraphEditor::tryAutoAcquire()
+bool ScriptGraphEditor::tryAutoAcquire()
 {
 	if (autoAcquire && !curEntityId) {
-		auto instances = getWidgetAs<UIDropdown>("instances");
-		if (instances->getNumberOptions() >= 2) {
-			instances->setSelectedOption(1);
+		if (!curEntities.empty()) {
+			const auto id = toString(curEntities.front().connId) + ":" + toString(curEntities.front().entityId);
+			const auto instances = getWidgetAs<UIDropdown>("instances");
+			instances->setSelectedOption(id);
+			return true;
 		}
 	}
+
+	return false;
 }

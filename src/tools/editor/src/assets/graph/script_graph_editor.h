@@ -62,6 +62,6 @@ namespace Halley {
 		void onScriptState(size_t connId, ConfigNode data);
 		void setCurrentInstance(std::pair<size_t, int64_t> entityId);
 
-		void tryAutoAcquire();
+		bool tryAutoAcquire();
     };
 }
