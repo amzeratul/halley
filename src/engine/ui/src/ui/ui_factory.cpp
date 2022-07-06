@@ -105,6 +105,20 @@ void UIFactory::addFactory(const String& key, WidgetFactory factory, UIFactoryWi
 	properties[key] = std::move(props);
 }
 
+bool UIFactory::hasFactoryFor(const String& key) const
+{
+	return factories.contains(key);
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeWidgetFromFactory(const String& key, const ConfigNode& config)
+{
+	auto iter = factories.find(key);
+	if (iter != factories.end()) {
+		return iter->second(config);
+	}
+	return {};
+}
+
 void UIFactory::pushConditions(Vector<String> conds)
 {
 	conditionStack.push_back(conds.size());

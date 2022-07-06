@@ -60,7 +60,9 @@ namespace Halley
 		UIFactory& operator=(UIFactory&& other) = delete;
 
 		void addFactory(const String& key, WidgetFactory factory, UIFactoryWidgetProperties properties = {});
-		
+		bool hasFactoryFor(const String& key) const;
+		std::shared_ptr<UIWidget> makeWidgetFromFactory(const String& key, const ConfigNode& config);
+
 		void pushConditions(Vector<String> conditions);
 		void popConditions();
 
@@ -196,7 +198,7 @@ namespace Halley
 		Vector<String> conditions;
 		Vector<size_t> conditionStack;
 
-		std::map<String, WidgetFactory> factories;
+		HashMap<String, WidgetFactory> factories;
 		std::map<String, UIFactoryWidgetProperties> properties;
 		std::map<String, UIInputButtons> inputButtons;
 
