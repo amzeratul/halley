@@ -52,7 +52,7 @@ IScriptNodeType::Result ScriptFlowGate::doUpdate(ScriptEnvironment& environment,
 	if (shouldFlow != data.flowing) {
 		data.flowing = shouldFlow;
 		if (shouldFlow) {
-			return Result(ScriptNodeExecutionState::ForkAndConvertToWatcher, 0, 1);
+			return Result(ScriptNodeExecutionState::Fork, 0, 1);
 		} else {
 			return Result(ScriptNodeExecutionState::Executing, time, 0, 1);
 		}
