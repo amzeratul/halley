@@ -383,6 +383,8 @@ void ScriptState::start(OptionalLite<ScriptNodeId> startNode, uint64_t hash)
 		threads.emplace_back(startNode.value());
 	}
 	graphHash = hash;
+	localVars.clear();
+	sharedVars.clear();
 	started = true;
 }
 

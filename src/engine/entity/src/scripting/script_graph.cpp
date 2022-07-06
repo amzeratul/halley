@@ -143,8 +143,6 @@ void ScriptGraphNode::deserialize(Deserializer& s)
 
 void ScriptGraphNode::feedToHash(Hash::Hasher& hasher)
 {
-	hasher.feed(position.x);
-	hasher.feed(position.y);
 	hasher.feed(type);
 	// TODO: settings, pins
 }
@@ -508,6 +506,7 @@ void ScriptGraph::finishGraph()
 
 	Hash::Hasher hasher;
 	ScriptNodeId i = 0;
+	hasher.feed(nodes.size());
 	for (auto& node: nodes) {
 		node.setId(i++);
 		node.feedToHash(hasher);

@@ -16,7 +16,9 @@ namespace Halley {
 		const ConfigNode& getVariable(const String& name) const;
     	void setVariable(const String& name, ConfigNode value);
 		bool hasVariable(const String& name) const;
+
 		bool empty() const;
+		void clear();
 
 	private:
 		ConfigNode dummy;

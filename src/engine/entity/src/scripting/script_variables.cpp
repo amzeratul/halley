@@ -47,6 +47,11 @@ bool ScriptVariables::empty() const
 	return variables.empty();
 }
 
+void ScriptVariables::clear()
+{
+	variables.clear();
+}
+
 ConfigNode ConfigNodeSerializer<ScriptVariables>::serialize(const ScriptVariables& variables, const EntitySerializationContext& context)
 {
 	return variables.toConfigNode();
