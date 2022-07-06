@@ -154,22 +154,35 @@ void GLUtils::setBlendType(BlendType type)
 		}
 
 		if (needsBlend) {
-			if (type.mode == BlendMode::Alpha) {
+			switch (type.mode) {
+			case BlendMode::Alpha:
+				glBlendEquation(GL_FUNC_ADD);
 				glBlendFunc(type.premultiplied ? GL_ONE : GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				glCheckError();
-			}
-			else if (type.mode == BlendMode::Multiply) {
+				break;
+			case BlendMode::Add:
+				glBlendEquation(GL_FUNC_ADD);
+				glBlendFunc(type.premultiplied ? GL_ONE : GL_SRC_ALPHA, GL_ONE);
+				break;
+			case BlendMode::Multiply:
+				glBlendEquation(GL_FUNC_ADD);
 				glBlendFunc(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA);
-				glCheckError();
-			}
-			else if (type.mode == BlendMode::Invert) {
+				break;
+			case BlendMode::Invert:
+				glBlendEquation(GL_FUNC_ADD);
 				glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA);
-				glCheckError();
+				break;
+			case BlendMode::Max:
+				glBlendEquation(GL_MAX);
+				glBlendFunc(type.premultiplied ? GL_ONE : GL_SRC_ALPHA, GL_ONE);
+				break;
+			case BlendMode::Min:
+				glBlendEquation(GL_MIN);
+				glBlendFunc(type.premultiplied ? GL_ONE : GL_SRC_ALPHA, GL_ONE);
+				break;
+			default:
+				break;
 			}
-			else {
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-				glCheckError();
-			}
+			glCheckError();
 		}
 
 		// Update current
