@@ -195,7 +195,7 @@ namespace Halley {
         ConfigNode serialize(const std::optional<T>& value, const EntitySerializationContext& context)
 		{
         	if (value) {
-				return ConfigNodeSerializer<T>::serialize(value.value(), context);
+				return ConfigNodeSerializer<T>().serialize(value.value(), context);
 			} else {
 				return ConfigNode();
 			}

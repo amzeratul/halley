@@ -5,7 +5,7 @@ using namespace Halley;
 
 ConfigNode ScriptInputButtonData::toConfigNode(const EntitySerializationContext& context)
 {
-	return ConfigNode();
+	return ConfigNodeSerializer<decltype(held)>().serialize(held, context);
 }
 
 String ScriptInputButton::getLabel(const ScriptGraphNode& node) const
@@ -57,7 +57,7 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getPinDescription(c
 
 void ScriptInputButton::doInitData(ScriptInputButtonData& data, const ScriptGraphNode& node, const EntitySerializationContext& context,	const ConfigNode& nodeData) const
 {
-	data.initialised = false;
+	data.held = ConfigNodeSerializer<decltype(data.held)>().deserialize(context, nodeData);
 }
 
 IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptInputButtonData& data) const
@@ -66,12 +66,13 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 	const int button = environment.getInputButtonByName(node.getSettings()["button"].asString("primary"));
 	const auto input = environment.getInputDevice(device);
 	if (input) {
-		const bool firstRun = !data.initialised;
-		data.initialised = true;
+		const auto wasHeld = data.held;
+		const bool held = input->isButtonDown(button);
+		data.held = held;
 
-		const bool pressed = input->isButtonPressed(button) || (firstRun && input->isButtonDown(button));
-		const bool released = input->isButtonReleased(button) || (firstRun && !input->isButtonDown(button));
-
+		const bool pressed = held && !wasHeld.value_or(false);
+		const bool released = !held && wasHeld.value_or(true);
+		
 		if (pressed || released) {
 			constexpr uint8_t pressedPin = 1;
 			constexpr uint8_t releasedPin = 2;
