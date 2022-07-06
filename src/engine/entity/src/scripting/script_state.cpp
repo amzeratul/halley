@@ -129,6 +129,7 @@ ScriptState::NodeState::NodeState(const ConfigNode& node, const EntitySerializat
 		pendingData = new ConfigNode(node["pendingData"]);
 		hasPendingData = true;
 	}
+	timeSinceStart = node["timeSinceStart"].asFloat(std::numeric_limits<float>::infinity());
 }
 
 ScriptState::NodeState::NodeState(const NodeState& other)
@@ -150,7 +151,6 @@ ScriptState::NodeState& ScriptState::NodeState::operator=(const NodeState& other
 	hasPendingData = other.hasPendingData;
 	threadCount = other.threadCount;
 	timeSinceStart = other.timeSinceStart;
-	consecutiveSteps = other.consecutiveSteps;
 
 	if (other.hasPendingData) {
 		if (other.pendingData) {
@@ -171,7 +171,6 @@ ScriptState::NodeState& ScriptState::NodeState::operator=(NodeState&& other)
 
 	threadCount = other.threadCount;
 	timeSinceStart = other.timeSinceStart;
-	consecutiveSteps = other.consecutiveSteps;
 
 	data = other.data;
 	hasPendingData = other.hasPendingData;
@@ -186,6 +185,10 @@ ConfigNode ScriptState::NodeState::toConfigNode(const EntitySerializationContext
 {
 	ConfigNode::MapType result;
 	result["threadCount"] = threadCount;
+
+	if (context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::DevCon))) {
+		result["timeSinceStart"] = timeSinceStart;
+	}
 
 	if (hasPendingData) {
 		if (pendingData) {
@@ -349,8 +352,7 @@ ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(ScriptNodeId no
 	result.time = 0;
 
 	const auto& state = nodeState.at(nodeId);
-	constexpr static int flashCycle = 2;
-	result.activationTime = (state.timeSinceStart > 0.02f || state.consecutiveSteps % flashCycle == 1) ? state.timeSinceStart : std::numeric_limits<float>::infinity();
+	result.activationTime = state.timeSinceStart;
 	
 	const auto& node = getScriptGraphPtr()->getNodes()[nodeId];
 	if (node.getNodeType().getClassification() == ScriptNodeClassification::Variable) {
@@ -404,11 +406,6 @@ void ScriptState::prepareStates(const EntitySerializationContext& context, Time 
 	}
 
 	for (auto& n: nodeState) {
-		if (n.timeSinceStart < 0.001f) {
-			n.consecutiveSteps++;
-		} else {
-			n.consecutiveSteps = 0;
-		}
 		n.timeSinceStart += static_cast<float>(t);
 	}
 }

@@ -106,7 +106,6 @@ namespace Halley {
 		struct NodeState {
 			uint8_t threadCount = 0;
 			bool hasPendingData = false;
-			uint8_t consecutiveSteps = 0;
 			float timeSinceStart = std::numeric_limits<float>::infinity();
 			union {
 				gsl::owner<IScriptStateData*> data;

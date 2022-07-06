@@ -18,6 +18,7 @@ namespace Halley {
         	Prefab,
 	        SaveData,
         	Network,
+			DevCon
         };
 
 		inline int makeMask(Type t)

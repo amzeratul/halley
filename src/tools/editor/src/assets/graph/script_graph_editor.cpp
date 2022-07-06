@@ -245,6 +245,9 @@ void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 {
 	if (!curEntityId) {
 		scriptState.reset();
+		if (gizmoEditor) {
+			gizmoEditor->setState(nullptr);
+		}
 	}
 
 	if (curEntityId->first != connId) {
@@ -253,6 +256,9 @@ void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 
 	if (data.getType() == ConfigNodeType::Undefined) {
 		scriptState.reset();
+		if (gizmoEditor) {
+			gizmoEditor->setState(nullptr);
+		}
 	} else {
 		if (!scriptState) {
 			scriptState = std::make_unique<ScriptState>();

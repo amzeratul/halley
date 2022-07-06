@@ -189,9 +189,9 @@ ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(ScriptNodeId nodeId
 		if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Active) {
 			drawMode.type = NodeDrawModeType::Active;
 			drawMode.time = nodeIntrospection.time;
-		} else if (nodeIntrospection.activationTime < 1.0f) {
+		} else if (nodeIntrospection.activationTime < 0.5f) {
 			drawMode.type = NodeDrawModeType::Normal;
-			drawMode.activationTime = nodeIntrospection.activationTime;
+			drawMode.activationTime = nodeIntrospection.activationTime * 2;
 		} else if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Unvisited) {
 			drawMode.type = NodeDrawModeType::Unvisited;
 		}
