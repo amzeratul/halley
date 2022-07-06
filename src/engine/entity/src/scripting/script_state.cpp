@@ -53,6 +53,7 @@ ScriptStateThread::ScriptStateThread(const ConfigNode& node, const EntitySeriali
 	if (node.hasKey("curNode")) {
 		curNode = node["curNode"].asInt();
 	}
+	curNodeTime = node["curNodeTime"].asFloat(0);
 }
 
 bool ScriptStateThread::isRunning() const
@@ -64,12 +65,19 @@ ConfigNode ScriptStateThread::toConfigNode(const EntitySerializationContext& con
 {
 	ConfigNode::MapType node;
 	node["stack"] = stack;
+
 	if (timeSlice != 0) {
 		node["timeSlice"] = timeSlice;
 	}
+
 	if (curNode) {
 		node["curNode"] = static_cast<int>(curNode.value());
 	}
+
+	if (context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::DevCon))) {
+		node["curNodeTime"] = curNodeTime;
+	}
+
 	return node;
 }
 

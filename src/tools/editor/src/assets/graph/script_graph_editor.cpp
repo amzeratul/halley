@@ -223,6 +223,10 @@ void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
 	}
 
 	refreshScriptEnum();
+
+	if (curEntityId && curEntityId->first == connId && !std_ex::contains_if(curEntities, [&] (const EntityEnumData& d) { return d.entityId == curEntityId->second && d.connId == curEntityId->first; })) {
+		onScriptState(connId, ConfigNode());
+	}
 }
 
 void ScriptGraphEditor::refreshScriptEnum()

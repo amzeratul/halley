@@ -112,14 +112,17 @@ void ScriptUIInWorld::doInitData(ScriptUIInWorldData& data, const ScriptGraphNod
 
 IScriptNodeType::Result ScriptUIInWorld::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptUIInWorldData& data) const
 {
-	const String ui = node.getSettings()["ui"].asString("");
-	const EntityId entityId = readEntityId(environment, node, 2);
-	const auto alignment = node.getSettings()["alignment"].asVector2f(Vector2f(0.5f, 0.5f));
-	const auto offset = node.getSettings()["offset"].asVector2f(Vector2f());
+	if (!data.ui) {
+		const String ui = node.getSettings()["ui"].asString("");
+		const EntityId entityId = readEntityId(environment, node, 2);
+		const auto alignment = node.getSettings()["alignment"].asVector2f(Vector2f(0.5f, 0.5f));
+		const auto offset = node.getSettings()["offset"].asVector2f(Vector2f());
 
-	data.ui = environment.createInWorldUI(ui, offset, alignment, entityId);
+		data.ui = environment.createInWorldUI(ui, offset, alignment, entityId);
+		return Result(ScriptNodeExecutionState::Fork);
+	}
 
-	return Result(ScriptNodeExecutionState::Done);
+	return Result(ScriptNodeExecutionState::Executing, time);
 }
 
 void ScriptUIInWorld::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptUIInWorldData& data) const
