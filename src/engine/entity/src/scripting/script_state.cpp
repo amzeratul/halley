@@ -555,8 +555,8 @@ void ScriptState::ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state
 
 void ScriptState::finishNode(const ScriptGraphNode& node, NodeState& state, bool allThreadsDone)
 {
-	if (state.data && (allThreadsDone || !node.getNodeType().canKeepData())) {
-		//state.data;
+	if (!state.hasPendingData && state.data && (allThreadsDone || !node.getNodeType().canKeepData())) {
+		state.data->finishData();
 	}
 }
 

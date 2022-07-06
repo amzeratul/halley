@@ -7,6 +7,7 @@ namespace Halley {
 		uint8_t outputMask = 0;
 
 		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+		void finishData() override;
 	};
 
 	class ScriptInputButton final : public ScriptNodeTypeBase<ScriptInputButtonData> {

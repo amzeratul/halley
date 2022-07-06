@@ -16,6 +16,7 @@ namespace Halley {
 		virtual ConfigNode toConfigNode(const EntitySerializationContext& context) = 0;
 		[[nodiscard]] virtual std::unique_ptr<IScriptStateData> clone() const = 0;
 		virtual void copyFrom(IScriptStateData&& src) = 0;
+		virtual void finishData() {}
 	};
 
 	template <typename T>

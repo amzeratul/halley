@@ -9,6 +9,11 @@ ConfigNode ScriptInputButtonData::toConfigNode(const EntitySerializationContext&
 	return ConfigNode(outputMask);
 }
 
+void ScriptInputButtonData::finishData()
+{
+	outputMask = 0;
+}
+
 String ScriptInputButton::getLabel(const ScriptGraphNode& node) const
 {
 	return node.getSettings()["button"].asString("");
@@ -85,7 +90,6 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 		data.outputMask = curMask;
 
 		if (activate != 0 || cancel != 0) {
-			Logger::logDev("Mask: " + toString(int(prevMask), 16) + " -> " + toString(int(curMask), 16) + ", activate: " + toString(int(activate), 16) + ", cancel: " + toString(int(cancel), 16));
 			return Result(ScriptNodeExecutionState::Fork, time, activate, cancel);
 		}
 	}
