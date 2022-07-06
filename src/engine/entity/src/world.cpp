@@ -196,8 +196,10 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 	if (!uuid.isValid()) {
 		uuid = UUID::generate();
 	}
+
 	if (uuidMap.contains(uuid)) {
-		throw Exception("Error creating entity - UUID " + toString(uuid) + " already exists.", HalleyExceptions::Entity);
+		const auto oldEntity = uuidMap.at(uuid);
+		throw Exception("Error creating entity \"" +name + "\" - UUID " + toString(uuid) + " already exists: " + oldEntity->name, HalleyExceptions::Entity);
 	}
 	
 	Entity* entity = new(entityPool->alloc()) Entity();

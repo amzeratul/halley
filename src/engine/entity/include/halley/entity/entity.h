@@ -147,6 +147,8 @@ namespace Halley {
 
 		bool isRemote(const World& world) const;
 
+		int getParentingDepth() const;
+
 	private:
 		// !!! WARNING !!!
 		// The order of elements in this class was carefully chosen to maximise cache performance!
@@ -646,6 +648,17 @@ namespace Halley {
 		bool operator!=(const EntityRef& other) const
 		{
 			return !(*this == other);
+		}
+
+		bool operator<(const EntityRef& other) const
+		{
+			return entity < other.entity;
+		}
+
+		int getParentingDepth() const
+		{
+			validate();
+			return entity->getParentingDepth();
 		}
 
 		World& getWorld() const

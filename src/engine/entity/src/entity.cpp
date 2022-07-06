@@ -321,6 +321,11 @@ bool Entity::isRemote(const World& world) const
 	return world.isEntityNetworkRemote(ConstEntityRef(*this, world));
 }
 
+int Entity::getParentingDepth() const
+{
+	return parent ? parent->getParentingDepth() + 1 : 0;
+}
+
 DataInterpolatorSet& Entity::setupNetwork(EntityRef& ref, uint8_t peerId)
 {
 	auto* networkComponent = tryGetComponent<NetworkComponent>();
