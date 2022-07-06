@@ -1,11 +1,12 @@
 #include "script_input.h"
 
 #include "halley/core/input/input_device.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 ConfigNode ScriptInputButtonData::toConfigNode(const EntitySerializationContext& context)
 {
-	return ConfigNodeSerializer<decltype(held)>().serialize(held, context);
+	return ConfigNode(outputMask);
 }
 
 String ScriptInputButton::getLabel(const ScriptGraphNode& node) const
@@ -57,31 +58,34 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getPinDescription(c
 
 void ScriptInputButton::doInitData(ScriptInputButtonData& data, const ScriptGraphNode& node, const EntitySerializationContext& context,	const ConfigNode& nodeData) const
 {
-	data.held = ConfigNodeSerializer<decltype(data.held)>().deserialize(context, nodeData);
+	data.outputMask = static_cast<uint8_t>(nodeData.asInt(0));
 }
 
 IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptInputButtonData& data) const
 {
+	constexpr uint8_t pressedPin = 1;
+	constexpr uint8_t releasedPin = 2;
+	constexpr uint8_t heldPin = 4;
+	constexpr uint8_t notHeldPin = 8;
+
 	const int device = node.getSettings()["device"].asInt(0);
 	const int button = environment.getInputButtonByName(node.getSettings()["button"].asString("primary"));
 	const auto input = environment.getInputDevice(device);
+
 	if (input) {
-		const auto wasHeld = data.held;
+		const auto prevMask = data.outputMask;
+
+		const bool pressed = input->isButtonPressed(button);
+		const bool released = input->isButtonReleased(button);
 		const bool held = input->isButtonDown(button);
-		data.held = held;
 
-		const bool pressed = held && !wasHeld.value_or(false);
-		const bool released = !held && wasHeld.value_or(true);
-		
-		if (pressed || released) {
-			constexpr uint8_t pressedPin = 1;
-			constexpr uint8_t releasedPin = 2;
-			constexpr uint8_t heldPin = 4;
-			constexpr uint8_t notHeldPin = 8;
+		const uint8_t curMask = (pressed ? pressedPin : 0) | (released ? releasedPin : 0) | (held ? heldPin : notHeldPin);
+		const uint8_t activate = curMask & ~prevMask;
+		const uint8_t cancel = (prevMask & ~curMask) & (heldPin | notHeldPin);
+		data.outputMask = curMask;
 
-			const uint8_t activate = (pressed ? (pressedPin | heldPin) : 0) | (released ? (releasedPin | notHeldPin) : 0);
-			const uint8_t cancel = (pressed ? notHeldPin : 0) | (released ? heldPin : 0);
-
+		if (activate != 0 || cancel != 0) {
+			Logger::logDev("Mask: " + toString(int(prevMask), 16) + " -> " + toString(int(curMask), 16) + ", activate: " + toString(int(activate), 16) + ", cancel: " + toString(int(cancel), 16));
 			return Result(ScriptNodeExecutionState::Fork, time, activate, cancel);
 		}
 	}

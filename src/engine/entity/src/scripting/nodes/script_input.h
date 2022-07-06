@@ -4,7 +4,7 @@
 namespace Halley {
 	class ScriptInputButtonData final : public ScriptStateData<ScriptInputButtonData> {
 	public:
-		std::optional<bool> held = false;
+		uint8_t outputMask = 0;
 
 		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
 	};
