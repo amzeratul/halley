@@ -366,6 +366,11 @@ Time ScriptEnvironment::getDeltaTime() const
 	return deltaTime;
 }
 
+EntityId ScriptEnvironment::getCurrentEntityId() const
+{
+	return currentEntity;
+}
+
 World& ScriptEnvironment::getWorld()
 {
 	return world;

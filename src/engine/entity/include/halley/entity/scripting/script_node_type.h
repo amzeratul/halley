@@ -72,6 +72,7 @@ namespace Halley {
 		ConfigNode readDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const;
 		void writeDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const;
 		EntityId readEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const;
+		EntityId readRawEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const;
 		String getConnectedNodeName(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, size_t pinN) const;
 
 		struct OutputNode {

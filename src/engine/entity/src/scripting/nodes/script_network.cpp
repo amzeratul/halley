@@ -76,8 +76,8 @@ std::pair<String, Vector<ColourOverride>> ScriptIfEntityAuthority::getNodeDescri
 
 IScriptNodeType::Result ScriptIfEntityAuthority::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	const auto entity = environment.tryGetEntity(readEntityId(environment, node, 1)).getEntityId();
-	const bool hasAuthority = environment.hasNetworkAuthorityOver(entity);
+	const auto entityId = readEntityId(environment, node, 1);
+	const bool hasAuthority = environment.hasNetworkAuthorityOver(entityId);
 	return Result(ScriptNodeExecutionState::Done, 0, hasAuthority ? 1 : 0);
 }
 

@@ -178,6 +178,12 @@ String IScriptNodeType::getConnectedNodeName(const World* world, const ScriptGra
 
 EntityId IScriptNodeType::readEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const
 {
+	const auto entityId = readRawEntityId(environment, node, idx);
+	return entityId.isValid() ? entityId : environment.getCurrentEntityId();
+}
+
+EntityId IScriptNodeType::readRawEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const
+{
 	if (idx < node.getPins().size()) {
 		const auto& pin = node.getPins()[idx];
 		if (!pin.connections.empty()) {

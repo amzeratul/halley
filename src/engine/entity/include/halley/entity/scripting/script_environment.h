@@ -76,6 +76,7 @@ namespace Halley {
 
     	int getCurrentFrameNumber() const;
         Time getDeltaTime() const;
+        EntityId getCurrentEntityId() const override;
 
         World& getWorld();
         Resources& getResources();
