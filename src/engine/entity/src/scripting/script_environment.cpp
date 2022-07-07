@@ -172,12 +172,18 @@ void ScriptEnvironment::addThread(ScriptStateThread thread, Vector<ScriptStateTh
 		++nThreads;
 	}
 
+	if (thread.getCurNode()) {
+		auto& nThreads = currentState->getNodeState(thread.getCurNode().value()).threadCount;
+		assert(nThreads == 0);
+		++nThreads;
+	}
+
 	pending.push_back(std::move(thread));
 }
 
 void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<ScriptNodeId> node, ScriptPinId outputPin)
 {
-	if (node) {
+	if (node && currentState->getNodeState(node.value()).threadCount == 0) {
 		thread.advanceToNode(node, outputPin);
 	} else {
 		terminateThread(thread, true);
@@ -187,7 +193,7 @@ void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<Sc
 void ScriptEnvironment::forkThread(ScriptStateThread& thread, std::array<IScriptNodeType::OutputNode, 8> outputNodes, Vector<ScriptStateThread>& pendingThreads, size_t firstIdx)
 {
 	for (size_t j = firstIdx; j < outputNodes.size(); ++j) {
-		if (outputNodes[j].dstNode) {
+		if (outputNodes[j].dstNode && currentState->getNodeState(outputNodes[j].dstNode.value()).threadCount == 0) {
 			addThread(thread.fork(outputNodes[j].dstNode.value(), outputNodes[j].outputPin), pendingThreads);
 		}
 	}
@@ -212,7 +218,7 @@ void ScriptEnvironment::mergeThread(ScriptStateThread& thread, bool wait)
 void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRollback)
 {
 	thread.advanceToNode({}, 0);
-
+	
 	auto& state = *currentState;
 	
 	auto& threadStack = thread.getStack();
@@ -229,6 +235,7 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRol
 			return;
 		}
 
+		assert(nodeState.threadCount > 0);
 		nodeState.threadCount--;
 		if (nodeState.threadCount == 0) {
 			if (node.getNodeType().hasDestructor()) {
