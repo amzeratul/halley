@@ -9,7 +9,7 @@ namespace Halley {
 
 	class UISlider : public UIWidget {
 	public:
-		UISlider(const String& id, UIStyle style, float minValue, float maxValue, float value = 0, bool hasSpinControl = false);
+		UISlider(const String& id, UIStyle style, float minValue, float maxValue, float value = 0, bool hasSpinControl = false, bool allowFloat = false);
 
 		void setValue(float value);
 		void setRelativeValue(float value);

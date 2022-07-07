@@ -6,7 +6,7 @@
 #include "widgets/ui_spin_control2.h"
 using namespace Halley;
 
-UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxValue, float value, bool hasSpinControl)
+UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxValue, float value, bool hasSpinControl, bool allowFloat)
 	: UIWidget(id, {}, UISizer(UISizerType::Horizontal, 0), style.getBorder("innerBorder"))
 	, minValue(minValue)
 	, maxValue(maxValue)
@@ -17,7 +17,7 @@ UISlider::UISlider(const String& id, UIStyle style, float minValue, float maxVal
 	UIWidget::add(sliderBar, 1, style.getBorder("barBorder"), UISizerAlignFlags::CentreVertical | UISizerFillFlags::FillHorizontal);
 
 	if (hasSpinControl) {
-		spinControl = std::make_shared<UISpinControl2>(id + "_input", style.getSubStyle("spinControl"), value, false);
+		spinControl = std::make_shared<UISpinControl2>(id + "_input", style.getSubStyle("spinControl"), value, allowFloat);
 		spinControl->setMinimumValue(minValue);
 		spinControl->setMaximumValue(maxValue);
 		UIWidget::add(spinControl, 0, {}, UISizerAlignFlags::Centre);
