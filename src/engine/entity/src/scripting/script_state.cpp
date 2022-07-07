@@ -26,6 +26,11 @@ ConfigNode ScriptStateThread::StackFrame::toConfigNode() const
 	return ConfigNode(Vector2i(node, pin));
 }
 
+String ScriptStateThread::StackFrame::toString() const
+{
+	return Halley::toString(node) + ":" + Halley::toString(static_cast<int>(pin));
+}
+
 bool ScriptStateThread::StackFrame::operator==(const StackFrame& other) const
 {
 	return node == other.node && pin == other.pin;
@@ -39,11 +44,13 @@ bool ScriptStateThread::StackFrame::operator!=(const StackFrame& other) const
 ScriptStateThread::ScriptStateThread()
 {
 	stack.reserve(16);
+	generateId();
 }
 
 ScriptStateThread::ScriptStateThread(ScriptNodeId startNode)
 	: curNode(startNode)
 {
+	generateId();
 }
 
 ScriptStateThread::ScriptStateThread(const ConfigNode& node, const EntitySerializationContext& context)
@@ -54,6 +61,7 @@ ScriptStateThread::ScriptStateThread(const ConfigNode& node, const EntitySeriali
 		curNode = node["curNode"].asInt();
 	}
 	curNodeTime = node["curNodeTime"].asFloat(0);
+	generateId();
 }
 
 bool ScriptStateThread::isRunning() const
@@ -108,6 +116,17 @@ bool ScriptStateThread::stackGoesThrough(ScriptNodeId node, std::optional<Script
 	});
 }
 
+uint32_t ScriptStateThread::getUniqueId() const
+{
+	return uniqueId;
+}
+
+void ScriptStateThread::generateId()
+{
+	static uint32_t nextId = 0;
+	uniqueId = nextId++;
+}
+
 void ScriptStateThread::advanceToNode(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin)
 {
 	if (curNode) {
@@ -120,6 +139,7 @@ void ScriptStateThread::advanceToNode(OptionalLite<ScriptNodeId> node, ScriptPin
 ScriptStateThread ScriptStateThread::fork(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin) const
 {
 	ScriptStateThread newThread = *this;
+	newThread.generateId();
 	newThread.advanceToNode(node, outputPin);
 	return newThread;
 }
@@ -366,17 +386,20 @@ ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(ScriptNodeId no
 	if (node.getNodeType().getClassification() == ScriptNodeClassification::Variable) {
 		result.state = NodeIntrospectionState::Visited;
 	} else {
+		int threadsFound = 0;
 		for (const auto& thread: threads) {
 			if (thread.getCurNode() == nodeId) {
 				result.state = NodeIntrospectionState::Active;
 				result.time = thread.getCurNodeTime();
+				++threadsFound;
 			} else if (result.state == NodeIntrospectionState::Unvisited) {
-				for (auto& f: thread.getStack()) {
-					if (f.node == nodeId) {
-						result.state = NodeIntrospectionState::Visited;
-					}
+				if (std_ex::contains_if(thread.getStack(), [&] (const auto& f) { return f.node == nodeId; })) {
+					result.state = NodeIntrospectionState::Visited;
 				}
 			}
+		}
+		if (threadsFound > 1) {
+			Logger::logError("Found " + toString(threadsFound) + " on node " + node.getType() + " (" + toString(node.getId()) + ")");
 		}
 	}
 

@@ -43,6 +43,7 @@ namespace Halley {
 			StackFrame(const ConfigNode& node);
 			StackFrame(ScriptNodeId node, ScriptPinId pin);
 			ConfigNode toConfigNode() const;
+			String toString() const;
 
 			bool operator==(const StackFrame& other) const;
 			bool operator!=(const StackFrame& other) const;
@@ -80,13 +81,18 @@ namespace Halley {
 		Vector<StackFrame>& getStack();
 		bool stackGoesThrough(ScriptNodeId node, std::optional<ScriptPinId> pin) const;
 
+		uint32_t getUniqueId() const;
+
 	private:
+		uint32_t uniqueId;
 		OptionalLite<ScriptNodeId> curNode;
 		bool merging = false;
 		bool watcher = false;
 		float timeSlice = 0;
 		float curNodeTime = 0;
 		Vector<StackFrame> stack;
+
+		void generateId();
 	};
 
     class ScriptState {
