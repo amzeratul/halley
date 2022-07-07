@@ -406,16 +406,14 @@ ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(ScriptNodeId no
 	return result;
 }
 
-void ScriptState::start(OptionalLite<ScriptNodeId> startNode, uint64_t hash)
+void ScriptState::start(uint64_t hash)
 {
 	threads.clear();
 	nodeCounters.clear();
-	if (startNode) {
-		threads.emplace_back(startNode.value());
-	}
 	graphHash = hash;
 	localVars.clear();
 	sharedVars.clear();
+	nodeState.clear();
 	started = true;
 }
 
@@ -501,12 +499,33 @@ void ScriptState::receiveMessage(ScriptMessage msg)
 	}
 }
 
-void ScriptState::processMessages(Time time)
+void ScriptState::processMessages(Time time, Vector<ScriptNodeId>& threadsToStart)
 {
-	std_ex::erase_if(inbox, [=] (ScriptMessage& msg)
+	std_ex::erase_if(inbox, [&] (ScriptMessage& msg)
 	{
-		return processMessage(msg, time);
+		return processMessage(msg, time, threadsToStart);
 	});
+}
+
+bool ScriptState::processMessage(ScriptMessage& msg, Time time, Vector<ScriptNodeId>& threadsToStart)
+{
+	if (const auto* scriptGraph = getScriptGraphPtr()) {
+		if (const auto inboxId = scriptGraph->getMessageInboxId(msg.type.message)) {
+			const auto& node = scriptGraph->getNodes().at(*inboxId);
+			auto& state = getNodeState(*inboxId);
+			assert(state.data);
+
+			ScriptReceiveMessage receiveMsgNode;
+			const bool accepted = receiveMsgNode.tryReceiveMessage(node, *dynamic_cast<ScriptReceiveMessageData*>(state.data), msg);
+			if (accepted) {
+				threadsToStart.push_back(*inboxId);
+			}
+			return accepted;
+		}
+	}
+
+	// If we get here, then we can never accept this, consume it
+	return true;
 }
 
 ScriptVariables& ScriptState::getLocalVariables()
@@ -527,27 +546,6 @@ ScriptVariables& ScriptState::getSharedVariables()
 const ScriptVariables& ScriptState::getSharedVariables() const
 {
 	return sharedVars;
-}
-
-bool ScriptState::processMessage(ScriptMessage& msg, Time time)
-{
-	if (const auto* scriptGraph = getScriptGraphPtr()) {
-		if (const auto inboxId = scriptGraph->getMessageInboxId(msg.type.message)) {
-			const auto& node = scriptGraph->getNodes().at(*inboxId);
-			auto& state = getNodeState(*inboxId);
-			assert(state.data);
-
-			ScriptReceiveMessage receiveMsgNode;
-			const bool accepted = receiveMsgNode.tryReceiveMessage(node, *dynamic_cast<ScriptReceiveMessageData*>(state.data), msg);
-			if (accepted) {
-				threads.push_back(ScriptStateThread(*inboxId));
-			}
-			return accepted;
-		}
-	}
-
-	// If we get here, then we can never accept this, consume it
-	return true;
 }
 
 ScriptState::NodeState& ScriptState::getNodeState(ScriptNodeId nodeId)

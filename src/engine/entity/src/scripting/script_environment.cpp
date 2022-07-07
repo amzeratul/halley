@@ -40,15 +40,30 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	currentGraph->assignTypes(nodeTypeCollection);
 	currentEntity = curEntity;
 
-	if (!graphState.hasStarted() || graphState.getGraphHash() != currentGraph->getHash()) {
-		graphState.start(currentGraph->getStartNode(), currentGraph->getHash());
-	}
-	graphState.prepareStates(serializationContext, time);
+	auto& threads = graphState.getThreads();
 
-	graphState.processMessages(time);
+	const bool hashChanged = graphState.getGraphHash() != currentGraph->getHash();
+	if (!graphState.hasStarted() || hashChanged) {
+		if (hashChanged) {
+			doTerminateState();
+		}
+
+		graphState.start(currentGraph->getHash());
+		graphState.prepareStates(serializationContext, time);
+		if (currentGraph->getStartNode()) {
+			threads.push_back(startThread(ScriptStateThread(*currentGraph->getStartNode())));
+		}
+	} else {
+		graphState.prepareStates(serializationContext, time);
+	}
+
+	Vector<ScriptNodeId> toStart;
+	graphState.processMessages(time, toStart);
+	for (const auto nodeId: toStart) {
+		threads.push_back(startThread(ScriptStateThread(nodeId)));
+	}
 
 	// Allocate time for each thread
-	auto& threads = graphState.getThreads();
 	for (auto& thread: threads) {
 		thread.getTimeSlice() = static_cast<float>(time);
 	}
@@ -163,7 +178,7 @@ void ScriptEnvironment::doTerminateState()
 	currentState->getThreads().clear();
 }
 
-void ScriptEnvironment::addThread(ScriptStateThread thread, Vector<ScriptStateThread>& pending)
+ScriptStateThread ScriptEnvironment::startThread(ScriptStateThread thread)
 {
 	for (const auto s: thread.getStack()) {
 		auto& nThreads = currentState->getNodeState(s.node).threadCount;
@@ -176,7 +191,12 @@ void ScriptEnvironment::addThread(ScriptStateThread thread, Vector<ScriptStateTh
 		initNode(nodeId, currentState->getNodeState(nodeId));
 	}
 
-	pending.push_back(std::move(thread));
+	return thread;
+}
+
+void ScriptEnvironment::addThread(ScriptStateThread thread, Vector<ScriptStateThread>& pending)
+{
+	pending.push_back(startThread(thread));
 }
 
 void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<ScriptNodeId> node, ScriptPinId outputPin)
