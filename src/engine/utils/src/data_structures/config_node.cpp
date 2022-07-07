@@ -944,6 +944,38 @@ const ConfigNode& ConfigNode::operator[](size_t idx) const
 	return asSequence().at(idx);
 }
 
+ConfigNode& ConfigNode::at(std::string_view key)
+{
+	auto& map = asMap();
+	const auto iter = map.find(key);
+	if (iter != map.end()) {
+		return iter->second;
+	} else {
+#if defined(STORE_CONFIG_NODE_PARENTING)
+		undefinedConfigNode.setParent(this, -1);
+		undefinedConfigNode.parent->file = parent ? parent->file : nullptr;
+#endif
+		undefinedConfigNodeName = key;
+		return undefinedConfigNode;
+	}
+}
+
+const ConfigNode& ConfigNode::at(std::string_view key) const
+{
+	const auto& map = asMap();
+	const auto iter = map.find(key);
+	if (iter != map.end()) {
+		return iter->second;
+	} else {
+#if defined(STORE_CONFIG_NODE_PARENTING)
+		undefinedConfigNode.setParent(this, -1);
+		undefinedConfigNode.parent->file = parent ? parent->file : nullptr;
+#endif
+		undefinedConfigNodeName = key;
+		return undefinedConfigNode;
+	}
+}
+
 Vector<ConfigNode>::iterator ConfigNode::begin()
 {
 	return asSequence().begin();

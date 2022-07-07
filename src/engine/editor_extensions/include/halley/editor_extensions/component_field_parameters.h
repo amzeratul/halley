@@ -11,7 +11,7 @@ namespace Halley {
 
 	class ComponentDataRetriever {
 	public:
-		using Retriever = std::function<ConfigNode&()>;
+		using Retriever = std::function<ConfigNode&(bool)>;
 		
 		ComponentDataRetriever(ConfigNode& componentData, String fieldName, String labelName);
 		ComponentDataRetriever getSubIndex(size_t index) const;

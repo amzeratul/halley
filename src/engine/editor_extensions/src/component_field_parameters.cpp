@@ -10,9 +10,13 @@ ComponentDataRetriever::ComponentDataRetriever(ConfigNode& componentData, String
 	, labelName(std::move(labelName))
 	, name(fieldName)
 {
-	retriever = [&componentData, fieldName] () -> ConfigNode&
+	retriever = [&componentData, fieldName] (bool writeable) -> ConfigNode&
 	{
-		return componentData[fieldName];
+		if (writeable) {
+			return componentData[fieldName];
+		} else {
+			return componentData.at(fieldName);
+		}
 	};
 }
 
@@ -26,9 +30,9 @@ ComponentDataRetriever::ComponentDataRetriever(ConfigNode& componentData, String
 ComponentDataRetriever ComponentDataRetriever::getSubIndex(size_t index) const
 {
 	auto r = retriever;
-	return ComponentDataRetriever(componentData, name + "[" + toString(index) + "]", labelName, [retriever = std::move(r), index] () -> ConfigNode&
+	return ComponentDataRetriever(componentData, name + "[" + toString(index) + "]", labelName, [retriever = std::move(r), index] (bool writeable) -> ConfigNode&
 	{
-		ConfigNode& node = retriever();
+		ConfigNode& node = retriever(writeable);
 		if (node.getType() == ConfigNodeType::Sequence) {
 			return node[index];
 		} else if (index == 0 && node.getType() != ConfigNodeType::Map) {
@@ -42,20 +46,20 @@ ComponentDataRetriever ComponentDataRetriever::getSubIndex(size_t index) const
 ComponentDataRetriever ComponentDataRetriever::getSubKey(const String& key) const
 {
 	auto r = retriever;
-	return ComponentDataRetriever(componentData, name + "[\"" + key + "\"]", labelName, [retriever = std::move(r), key] ()->ConfigNode&
+	return ComponentDataRetriever(componentData, name + "[\"" + key + "\"]", labelName, [retriever = std::move(r), key] (bool writeable) -> ConfigNode&
 	{
-		return retriever()[key];
+		return retriever(writeable)[key];
 	});
 }
 
 const ConfigNode& ComponentDataRetriever::getFieldData() const
 {
-	return retriever();
+	return retriever(false);
 }
 
 ConfigNode& ComponentDataRetriever::getWriteableFieldData() const
 {
-	return retriever();
+	return retriever(true);
 }
 
 const String& ComponentDataRetriever::getName() const

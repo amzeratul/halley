@@ -363,6 +363,9 @@ namespace Halley {
 		const ConfigNode& operator[](std::string_view key) const;
 		const ConfigNode& operator[](size_t idx) const;
 
+		ConfigNode& at(std::string_view key);
+		const ConfigNode& at(std::string_view key) const;
+
 		SequenceType::iterator begin();
 		SequenceType::iterator end();
 
