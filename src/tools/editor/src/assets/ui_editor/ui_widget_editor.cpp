@@ -69,7 +69,7 @@ void UIWidgetEditor::refresh()
 	if (curNode && entityFieldFactory) {
 		bool hasSizer = curNode->hasKey("sizer") || curNode->hasKey("children");
 		const bool isSpacer = curNode->hasKey("spacer") || curNode->hasKey("stretchSpacer");
-		
+
 		curNode->asMap().reserve(15); // Important: this prevents references being invalidated during a re-hash
 
 		if (curNode->hasKey("widget")) {

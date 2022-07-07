@@ -79,7 +79,7 @@ void UIWidgetList::onWidgetModified(const String& id, const ConfigNode& data)
 {
 	const auto info = getEntryInfo(data);
 	list->setLabel(id, LocalisedString::fromUserString(info.label), info.icon);
-	list->setForceLeaf(id, info.canHaveChildren);
+	list->setForceLeaf(id, !info.canHaveChildren);
 }
 
 void UIWidgetList::moveItems(gsl::span<const MoveOperation> changes)
