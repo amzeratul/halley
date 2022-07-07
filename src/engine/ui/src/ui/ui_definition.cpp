@@ -64,6 +64,9 @@ ConfigNode& UIDefinition::getRoot()
 
 UIDefinition::FindResult UIDefinition::findUUID(const String& id)
 {
+	if (id.isEmpty()) {
+		return FindResult{ nullptr, nullptr, -1 };
+	}
 	return findUUID(nullptr, -1, data.getRoot(), id);
 }
 
@@ -111,5 +114,10 @@ String UIDefinition::toYAML() const
 
 void UIDefinition::makeDefault()
 {
-	// TODO?
+	ConfigNode widget = ConfigNode::MapType();
+	widget["class"] = "widget";
+	ConfigNode node = ConfigNode::MapType();
+	node["widget"] = std::move(widget);
+	assignIds(node);
+	data.getRoot() = std::move(node);
 }

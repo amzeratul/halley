@@ -39,7 +39,7 @@ void UIEditorDisplay::drawAfterChildren(UIPainter& painter) const
 		auto p = painter.withAdjustedLayer(maxAdjustment + 1);
 
 		for (const auto& s: sizerSprites) {
-			p.draw(s);
+			//p.draw(s);
 		}
 
 		p.draw(boundsSprite);

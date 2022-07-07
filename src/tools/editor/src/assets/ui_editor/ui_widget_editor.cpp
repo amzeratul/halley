@@ -68,9 +68,13 @@ void UIWidgetEditor::refresh()
 	
 	if (curNode && entityFieldFactory) {
 		bool hasSizer = curNode->hasKey("sizer") || curNode->hasKey("children");
+		const bool isSpacer = curNode->hasKey("spacer") || curNode->hasKey("stretchSpacer");
+		
+		curNode->asMap().reserve(15); // Important: this prevents references being invalidated during a re-hash
 
 		if (curNode->hasKey("widget")) {
 			auto& widgetNode = (*curNode)["widget"];
+			widgetNode.ensureType(ConfigNodeType::Map);
 			const auto widgetClass = widgetNode["class"].asString();
 
 			if (widgetClass != "widget") {
@@ -91,7 +95,7 @@ void UIWidgetEditor::refresh()
 			populateSizerBox(*sizerBox->getWidget("sizerContents"), (*curNode)["sizer"]);
 		}
 
-		if (curNode->hasKey("spacer") || curNode->hasKey("stretchSpacer")) {
+		if (isSpacer) {
 			spacerBox->setActive(true);
 			populateSpacerBox(*spacerBox->getWidget("spacerContents"), (*curNode)[curNode->hasKey("stretchSpacer") ? "stretchSpacer" : "spacer"], *curNode);
 		} else {
@@ -180,13 +184,14 @@ void UIWidgetEditor::populateSizerBox(UIWidget& root, ConfigNode& node)
 		Entry{ "Type", "type", "Halley::UISizerType", Vector<String>{"horizontal"} },
 		Entry{ "Gap", "gap", "float", Vector<String>{"1"} },
 		Entry{ "Columns", "columns", "int", Vector<String>{"1"}},
-		Entry{ "Column Proportions", "columnProportions", "Vector<int>", Vector<String>{}}
+		Entry{ "Column Proportions", "columnProportions", "Halley::Vector<int>", Vector<String>{}}
 	};
 	populateBox(root, node, entries);
 }
 
 void UIWidgetEditor::populateBox(UIWidget& root, ConfigNode& node, gsl::span<const UIFactoryWidgetProperties::Entry> entries)
 {
+	node.ensureType(ConfigNodeType::Map);
 	for (const auto& e: entries) {
 		const auto params = ComponentFieldParameters("", ComponentDataRetriever(node, e.name, e.label), e.defaultValue);
 		auto field = entityFieldFactory->makeField(e.type, params, ComponentEditorLabelCreation::Always);
