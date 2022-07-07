@@ -384,7 +384,9 @@ bool ScriptGraph::connectPin(ScriptNodeId srcNodeIdx, ScriptPinId srcPinN, Entit
 
 	disconnectPinIfSingleConnection(srcNodeIdx, srcPinN);
 
-	srcPin.connections.emplace_back(ScriptGraphNode::PinConnection{ addEntityId(target) });
+	if (target.isValid()) {
+		srcPin.connections.emplace_back(ScriptGraphNode::PinConnection{ addEntityId(target) });
+	}
 
 	return true;
 }
