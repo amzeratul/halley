@@ -558,18 +558,13 @@ ScriptState::NodeState& ScriptState::getNodeState(ScriptNodeId nodeId)
 void ScriptState::startNode(const ScriptGraphNode& node, NodeState& state)
 {
 	assert(!state.hasPendingData);
-	if (state.threadCount == 0) {
-		state.threadCount = 1;
 
-		if (state.data) {
-			auto& nodeType = node.getNodeType();
-			//auto newData = nodeType.makeData();
-			//state.data->copyFrom(std::move(*newData));
-			nodeType.initData(*state.data, node, EntitySerializationContext(), ConfigNode());
-		}
-
-		state.timeSinceStart = 0;
+	if (state.data) {
+		auto& nodeType = node.getNodeType();
+		nodeType.initData(*state.data, node, EntitySerializationContext(), ConfigNode());
 	}
+	
+	state.timeSinceStart = 0;
 }
 
 void ScriptState::ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state, const EntitySerializationContext& context)

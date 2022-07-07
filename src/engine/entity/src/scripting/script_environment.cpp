@@ -89,7 +89,6 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		const auto& node = currentGraph->getNodes().at(nodeId);
 		const auto& nodeType = node.getNodeType();
 		auto& nodeState = graphState.getNodeState(nodeId);
-		graphState.startNode(node, nodeState);
 
 		// Update
 		const auto result = nodeType.update(*this, static_cast<Time>(timeLeft), node, nodeState.data);
@@ -173,9 +172,8 @@ void ScriptEnvironment::addThread(ScriptStateThread thread, Vector<ScriptStateTh
 	}
 
 	if (thread.getCurNode()) {
-		auto& nThreads = currentState->getNodeState(thread.getCurNode().value()).threadCount;
-		assert(nThreads == 0);
-		++nThreads;
+		const auto nodeId = thread.getCurNode().value();
+		initNode(nodeId, currentState->getNodeState(nodeId));
 	}
 
 	pending.push_back(std::move(thread));
@@ -183,11 +181,23 @@ void ScriptEnvironment::addThread(ScriptStateThread thread, Vector<ScriptStateTh
 
 void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<ScriptNodeId> node, ScriptPinId outputPin)
 {
-	if (node && currentState->getNodeState(node.value()).threadCount == 0) {
-		thread.advanceToNode(node, outputPin);
-	} else {
-		terminateThread(thread, true);
+	if (node) {
+		auto& state = currentState->getNodeState(node.value());
+		if (state.threadCount == 0) {
+			initNode(node.value(), state);
+			thread.advanceToNode(node, outputPin);
+			return;
+		}
 	}
+
+	terminateThread(thread, true);
+}
+
+void ScriptEnvironment::initNode(ScriptNodeId nodeId, ScriptState::NodeState& nodeState)
+{
+	assert(nodeState.threadCount == 0);
+	nodeState.threadCount++;
+	currentState->startNode(currentGraph->getNodes()[nodeId], nodeState);
 }
 
 void ScriptEnvironment::forkThread(ScriptStateThread& thread, std::array<IScriptNodeType::OutputNode, 8> outputNodes, Vector<ScriptStateThread>& pendingThreads, size_t firstIdx)

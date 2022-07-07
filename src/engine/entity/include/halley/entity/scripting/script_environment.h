@@ -115,6 +115,7 @@ namespace Halley {
         void doTerminateState();
         void addThread(ScriptStateThread thread, Vector<ScriptStateThread>& pending);
         void advanceThread(ScriptStateThread& thread, OptionalLite<ScriptNodeId> node, ScriptPinId outputPin);
+        void initNode(ScriptNodeId nodeId, ScriptState::NodeState& state);
         void forkThread(ScriptStateThread& thread, std::array<IScriptNodeType::OutputNode, 8> outputNodes, Vector<ScriptStateThread>& pendingThreads, size_t firstIdx = 0);
         void mergeThread(ScriptStateThread& thread, bool wait);
         void terminateThread(ScriptStateThread& thread, bool allowRollback);
