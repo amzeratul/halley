@@ -186,12 +186,10 @@ ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(ScriptNodeId nodeId
 	if (state) {
 		// Rendering in-game, with execution state
 		const auto nodeIntrospection = state->getNodeIntrospection(nodeId);
+		drawMode.activationTime = nodeIntrospection.activationTime < 0.5f ? nodeIntrospection.activationTime * 2 : std::numeric_limits<float>::infinity();
 		if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Active) {
 			drawMode.type = NodeDrawModeType::Active;
 			drawMode.time = nodeIntrospection.time;
-		} else if (nodeIntrospection.activationTime < 0.5f) {
-			drawMode.type = NodeDrawModeType::Normal;
-			drawMode.activationTime = nodeIntrospection.activationTime * 2;
 		} else if (nodeIntrospection.state == ScriptState::NodeIntrospectionState::Unvisited) {
 			drawMode.type = NodeDrawModeType::Unvisited;
 		}
@@ -244,9 +242,9 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 			const float t = drawMode.activationTime;
 			const float t2 = std::pow(t, 0.5f);
 			const float t3 = std::pow(t, 0.3f);
-			const auto baseCol = lerp(col, col.multiplyLuma(0.3f), t2);
-			iconCol = lerp(Colour4f(1, 1, 1), Colour4f(0.5f, 0.5f, 0.5f), t2);
-			col = lerp(Colour4f(1, 1, 1), baseCol, t3 * 0.5f + 0.5f);
+			const auto baseCol2 = lerp(baseCol, col, t2);
+			iconCol = lerp(Colour4f(1, 1, 1), iconCol, t2);
+			col = lerp(Colour4f(1, 1, 1), baseCol2, t3 * 0.5f + 0.5f);
 		}
 
 		// Destructor
