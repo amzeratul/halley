@@ -6,7 +6,7 @@ children:
 - widget: { class: scrollBarPane, size: [350, 250], scrollHorizontal: true, scrollVertical: true }
   proportion: 1
   children:
-  - widget: { class: treeList, id: widgetsList, multiSelect: false, canDrag: true, singleClickAccept: false }
+  - widget: { class: treeList, id: widgetsList, multiSelect: false, canDrag: true, singleClickAccept: false, singleRoot: true }
     proportion: 1
 - sizer: { type: horizontal }
   children:

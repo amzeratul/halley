@@ -1324,6 +1324,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTreeList(const ConfigNode& entryNode)
 	auto label = parseLabel(node);
 
 	auto widget = std::make_shared<UITreeList>(id, style);
+	widget->setSingleRoot(node["singleRoot"].asBool(false));
 	applyListProperties(*widget, node, "treeList");
 
 	return widget;
