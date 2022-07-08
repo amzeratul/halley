@@ -298,28 +298,20 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 		}
 
 		const auto label = nodeType->getLabel(node);
+		const auto largeLabel = nodeType->getLargeLabel(node);
 		const float iconExtraOffset = nodeType->getClassification() == ScriptNodeClassification::Variable ? -2.0f : 0.0f;
 		const Vector2f iconOffset = label.isEmpty() ? Vector2f() : Vector2f(0, (-8.0f + iconExtraOffset) / curZoom).round();
 
-		// Icon
-		getIcon(*nodeType, node).clone()
-			.setPosition(pos + iconOffset)
-			.setScale(1.0f / curZoom)
-			.setColour(iconCol)
-			.draw(painter);
-
-		// Label
-		if (!label.isEmpty()) {
-			const float size = 14 / curZoom;
+		auto drawLabel = [&](const String& text, Vector2f pos, float size, float maxWidth)
+		{
 			auto labelCopy = labelText.clone()
-				.setPosition(pos + Vector2f(0, (18.0f + iconExtraOffset) / curZoom).round())
-				.setText(label)
+				.setPosition(pos)
+				.setText(text)
 				.setSize(size)
 				.setOutline(8.0f / curZoom)
 				.setOutlineColour(col.multiplyLuma(0.75f))
 				.setOffset(Vector2f(0, 0.5f));
-
-			const float maxWidth = variable ? 40.0f : 56.0f;
+			
 			const auto extents = labelCopy.getExtents();
 			if (extents.x > maxWidth) {
 				labelCopy.setSize(size * maxWidth / extents.x);
@@ -327,6 +319,23 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 
 			labelCopy
 				.draw(painter);
+		};
+		
+		// Icon
+		const auto& icon = getIcon(*nodeType, node);
+		if (icon.hasMaterial()) {
+			icon.clone()
+				.setPosition(pos + iconOffset)
+				.setScale(1.0f / curZoom)
+				.setColour(iconCol)
+				.draw(painter);
+		} else if (!largeLabel.isEmpty()) {
+			drawLabel(largeLabel, pos + iconOffset, 20 / curZoom, (variable ? 55.0f : 70.0f) / curZoom);
+		}
+
+		// Label
+		if (!label.isEmpty()) {
+			drawLabel(label, pos + Vector2f(0, (18.0f + iconExtraOffset) / curZoom).round(), 14 / curZoom, (variable ? 40.0f : 56.0f) / curZoom);
 		}
 	}
 
@@ -442,7 +451,7 @@ const Sprite& ScriptRenderer::getIcon(const IScriptNodeType& nodeType, const Scr
 	if (iter != icons.end()) {
 		return iter->second;
 	}
-	icons[iconName] = Sprite().setImage(resources, iconName).setPivot(Vector2f(0.5f, 0.5f));
+	icons[iconName] = iconName.isEmpty() ? Sprite() : Sprite().setImage(resources, iconName).setPivot(Vector2f(0.5f, 0.5f));
 	return icons[iconName];
 }
 

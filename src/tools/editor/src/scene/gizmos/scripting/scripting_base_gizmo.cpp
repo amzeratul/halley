@@ -529,6 +529,9 @@ void ScriptingBaseGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& no
 	}
 	
 	const auto [text, colours] = nodeType->getDescription(node, world, nodeInfo.element, nodeInfo.elementId, *scriptGraph);
+	if (scriptState) {
+		
+	}
 	const auto elemPos = nodeInfo.element.type == ScriptNodeElementType::Node ? 0.5f * (nodeInfo.nodeArea.getBottomLeft() + nodeInfo.nodeArea.getBottomRight()) : nodeInfo.pinPos;
 	drawToolTip(painter, text, colours, elemPos);
 }

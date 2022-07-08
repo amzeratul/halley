@@ -4,7 +4,7 @@
 #include "halley/support/logger.h"
 using namespace Halley;
 
-String ScriptVariable::getLabel(const ScriptGraphNode& node) const
+String ScriptVariable::getLargeLabel(const ScriptGraphNode& node) const
 {
 	return node.getSettings()["variable"].asString("");
 }
@@ -56,7 +56,7 @@ ScriptVariableScope ScriptVariable::getScope(const ScriptGraphNode& node) const
 }
 
 
-String ScriptLiteral::getLabel(const ScriptGraphNode& node) const
+String ScriptLiteral::getLargeLabel(const ScriptGraphNode& node) const
 {
 	return node.getSettings()["value"].asString("0");
 }

@@ -40,13 +40,14 @@ namespace Halley {
 		virtual String getId() const = 0;
 		virtual String getName() const = 0;
 		virtual String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const;
+		virtual String getLargeLabel(const ScriptGraphNode& node) const;
 		virtual String getLabel(const ScriptGraphNode& node) const;
 
 		virtual Vector<SettingType> getSettingTypes() const;
 		virtual std::pair<String, Vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World* world, PinType elementType, ScriptPinId elementIdx, const ScriptGraph& graph) const;
 		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const;
 		virtual std::pair<String, Vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, ScriptPinId elementIdx) const;
-		virtual String getIconName(const ScriptGraphNode& node) const = 0;
+		virtual String getIconName(const ScriptGraphNode& node) const;
 		virtual ScriptNodeClassification getClassification() const = 0;
 		
 		virtual gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const = 0;

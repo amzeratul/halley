@@ -25,6 +25,11 @@ String IScriptNodeType::getShortDescription(const World* world, const ScriptGrap
 	return getName();
 }
 
+String IScriptNodeType::getLargeLabel(const ScriptGraphNode& node) const
+{
+	return "";
+}
+
 String IScriptNodeType::getLabel(const ScriptGraphNode& node) const
 {
 	return "";
@@ -102,6 +107,11 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinDescription(con
 		builder.append(" " + toString(static_cast<int>(typeIdx)));
 	}
 	return builder.moveResults();
+}
+
+String IScriptNodeType::getIconName(const ScriptGraphNode& node) const
+{
+	return "";
 }
 
 IScriptNodeType::PinType IScriptNodeType::getPin(const ScriptGraphNode& node, size_t n) const
