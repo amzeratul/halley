@@ -60,6 +60,8 @@ namespace Halley {
 		void onScriptEnum(size_t connId, ConfigNode data);
 		void refreshScriptEnum();
 		void onScriptState(size_t connId, ConfigNode data);
+		void onCurNodeData(const ConfigNode& curNodeData);
+		void setCurNodeData(const String& str);
 		void setCurrentInstance(std::pair<size_t, int64_t> entityId);
 		void updateNodeUnderCursor();
 		ConfigNode getCurrentNodeConfig();

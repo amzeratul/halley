@@ -56,6 +56,7 @@ namespace Halley {
 		void onMouseWheel(Vector2f mousePos, int amount, KeyMods keyMods);
 
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
+		void setCurNodeDevConData(const String& str);
 
 	private:
 		struct Dragging {
@@ -115,6 +116,8 @@ namespace Halley {
 		ExecutionQueue pendingUITasks;
 
 		ModifiedCallback modifiedCallback;
+
+		std::optional<std::pair<ScriptRenderer::NodeUnderMouseInfo, String>> devConData;
 
 		void drawToolTip(Painter& painter, const EntityTarget& entityTarget) const;
 		void drawToolTip(Painter& painter, const ScriptGraphNode& node, const ScriptRenderer::NodeUnderMouseInfo& nodeInfo) const;

@@ -22,6 +22,9 @@ namespace Halley {
 			ScriptPinId elementId;
 			Rect4f nodeArea;
 			Vector2f pinPos;
+
+			bool operator==(const NodeUnderMouseInfo& other) const;
+			bool operator!=(const NodeUnderMouseInfo& other) const;
 		};
 
 		struct ConnectionPath {

@@ -13,6 +13,16 @@ using namespace Halley;
 #endif
 #include "components/transform_2d_component.h"
 
+bool ScriptRenderer::NodeUnderMouseInfo::operator==(const NodeUnderMouseInfo& other) const
+{
+	return nodeId == other.nodeId && element == other.element && elementId == other.elementId;
+}
+
+bool ScriptRenderer::NodeUnderMouseInfo::operator!=(const NodeUnderMouseInfo& other) const
+{
+	return !(*this == other);
+}
+
 ScriptRenderer::ScriptRenderer(Resources& resources, const World* world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom)
 	: resources(resources)
 	, world(world)

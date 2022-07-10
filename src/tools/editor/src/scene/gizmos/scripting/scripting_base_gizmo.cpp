@@ -528,9 +528,12 @@ void ScriptingBaseGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& no
 		return;
 	}
 	
-	const auto [text, colours] = nodeType->getDescription(node, world, nodeInfo.element, nodeInfo.elementId, *scriptGraph);
-	if (scriptState) {
-		
+	auto [text, colours] = nodeType->getDescription(node, world, nodeInfo.element, nodeInfo.elementId, *scriptGraph);
+	if (devConData && devConData->first == nodeUnderMouse && !devConData->second.isEmpty()) {
+		colours.emplace_back(text.size(), std::nullopt);
+		text += "\n\nValue: ";
+		colours.emplace_back(text.size(), Colour4f(0.44f, 1.0f, 0.94f));
+		text += devConData->second;
 	}
 	const auto elemPos = nodeInfo.element.type == ScriptNodeElementType::Node ? 0.5f * (nodeInfo.nodeArea.getBottomLeft() + nodeInfo.nodeArea.getBottomRight()) : nodeInfo.pinPos;
 	drawToolTip(painter, text, colours, elemPos);
@@ -731,6 +734,15 @@ void ScriptingBaseGizmo::onMouseWheel(Vector2f mousePos, int amount, KeyMods key
 std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptingBaseGizmo::getNodeUnderMouse() const
 {
 	return nodeUnderMouse;
+}
+
+void ScriptingBaseGizmo::setCurNodeDevConData(const String& str)
+{
+	if (nodeUnderMouse) {
+		devConData = { *nodeUnderMouse, str };
+	} else {
+		devConData.reset();
+	}
 }
 
 void ScriptingBaseGizmo::drawWheelGuides(Painter& painter) const

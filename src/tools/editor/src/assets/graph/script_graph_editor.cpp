@@ -256,6 +256,49 @@ ConfigNode ScriptGraphEditor::getCurrentNodeConfig()
 	}
 }
 
+void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
+{
+	if (!curEntityId || curEntityId->first != connId) {
+		return;
+	}
+
+	if (data.getType() == ConfigNodeType::Undefined) {
+		scriptState.reset();
+		if (gizmoEditor) {
+			gizmoEditor->setState(nullptr);
+		}
+	} else {
+		if (!scriptState) {
+			scriptState = std::make_unique<ScriptState>();
+		}
+
+		scriptGraph->assignTypes(*scriptNodeTypes);
+
+		EntitySerializationContext context;
+		context.resources = &gameResources;
+		scriptState->load(data["scriptState"], context);
+		scriptState->setScriptGraphPtr(scriptGraph.get());
+		scriptState->prepareStates(context, 0);
+
+		onCurNodeData(data["curNode"]);
+	}
+}
+
+void ScriptGraphEditor::onCurNodeData(const ConfigNode& curNodeData)
+{
+	const auto requested = getCurrentNodeConfig();
+	if (requested.getType() != ConfigNodeType::Undefined && curNodeData.getType() != ConfigNodeType::Undefined && requested["nodeId"] == curNodeData["nodeId"] && requested["elementId"] == curNodeData["elementId"]) {
+		setCurNodeData(curNodeData["value"].asString(""));
+	} else {
+		setCurNodeData("");
+	}
+}
+
+void ScriptGraphEditor::setCurNodeData(const String& str)
+{
+	gizmoEditor->setCurNodeDevConData(str);
+}
+
 void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
 {
 	std_ex::erase_if(curEntities, [&](const auto& e) { return e.connId == connId; });
@@ -291,32 +334,6 @@ void ScriptGraphEditor::refreshScriptEnum()
 	instances->setOptions(std::move(ids), std::move(names));
 
 	tryAutoAcquire();
-}
-
-void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
-{
-	if (!curEntityId || curEntityId->first != connId) {
-		return;
-	}
-
-	if (data.getType() == ConfigNodeType::Undefined) {
-		scriptState.reset();
-		if (gizmoEditor) {
-			gizmoEditor->setState(nullptr);
-		}
-	} else {
-		if (!scriptState) {
-			scriptState = std::make_unique<ScriptState>();
-		}
-
-		scriptGraph->assignTypes(*scriptNodeTypes);
-
-		EntitySerializationContext context;
-		context.resources = &gameResources;
-		scriptState->load(data["scriptState"], context);
-		scriptState->setScriptGraphPtr(scriptGraph.get());
-		scriptState->prepareStates(context, 0);
-	}
 }
 
 bool ScriptGraphEditor::tryAutoAcquire()

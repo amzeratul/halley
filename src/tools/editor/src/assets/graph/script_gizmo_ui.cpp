@@ -94,6 +94,11 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptGizmoUI::getNodeUnderMou
 	return gizmo.getNodeUnderMouse();
 }
 
+void ScriptGizmoUI::setCurNodeDevConData(const String& str)
+{
+	gizmo.setCurNodeDevConData(str);
+}
+
 void ScriptGizmoUI::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	focus();
