@@ -162,6 +162,8 @@ void ScriptGraphEditor::update(Time time, bool moved)
 	if (gizmoEditor) {
 		gizmoEditor->setState(scriptState.get());
 		infiniCanvas->setScrollEnabled(!gizmoEditor->isHighlighted());
+
+		updateNodeUnderCursor();
 	}
 }
 
@@ -222,12 +224,35 @@ void ScriptGraphEditor::setListeningToState(std::pair<size_t, int64_t> entityId)
 		params["connId"] = static_cast<int>(entityId.first);
 		params["entityId"] = entityId.second;
 		params["scriptId"] = assetId;
+		params["curNode"] = getCurrentNodeConfig();
 		scriptStateHandle = devConServer.registerInterest("scriptState", params, [=] (size_t connId, ConfigNode result)
 		{
 			onScriptState(connId, std::move(result));
 		});
 	} else {
 		onScriptState(curEntityId ? curEntityId->first : 0, ConfigNode());
+	}
+}
+
+void ScriptGraphEditor::updateNodeUnderCursor()
+{
+	if (scriptStateHandle) {
+		auto& devConServer = *project.getDevConServer();
+		auto params = ConfigNode(devConServer.getInterestParams(scriptStateHandle.value()));
+		params["curNode"] = getCurrentNodeConfig();
+		devConServer.updateInterest(scriptStateHandle.value(), std::move(params));
+	}
+}
+
+ConfigNode ScriptGraphEditor::getCurrentNodeConfig()
+{
+	if (const auto node = gizmoEditor->getNodeUnderMouse()) {
+		ConfigNode::MapType result;
+		result["nodeId"] = node->nodeId;
+		result["elementId"] = node->elementId;
+		return result;
+	} else {
+		return {};
 	}
 }
 

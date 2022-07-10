@@ -36,6 +36,7 @@ namespace Halley
 		void reloadAssets(gsl::span<const String> assetIds);
 
 		void registerInterest(const String& id, const ConfigNode& params, uint32_t handle);
+		void updateInterest(uint32_t handle, const ConfigNode& params);
 		void unregisterInterest(uint32_t handle);
 
 	private:
@@ -63,7 +64,9 @@ namespace Halley
 		void reloadAssets(gsl::span<const String> assetIds);
 
 		InterestHandle registerInterest(String id, ConfigNode params, InterestCallback callback);
+		void updateInterest(InterestHandle handle, ConfigNode params);
 		void unregisterInterest(InterestHandle handle);
+		const ConfigNode& getInterestParams(InterestHandle handle) const;
 
 	protected:
 		void onReceiveNotifyInterestMsg(const DevConServerConnection& connection, DevCon::NotifyInterestMsg& msg);

@@ -21,6 +21,19 @@ void DevConInterest::registerInterest(String id, ConfigNode config, uint32_t han
 	group.lastResults.push_back(ConfigNode());
 }
 
+void DevConInterest::updateInterest(uint32_t handle, ConfigNode config)
+{
+	for (auto& [k, v] : interests) {
+		const auto iter = std::find(v.handles.begin(), v.handles.end(), handle);
+		if (iter != v.handles.end()) {
+			const auto idx = iter - v.handles.begin();
+			v.configs[idx] = std::move(config);
+
+			return;
+		}
+	}
+}
+
 void DevConInterest::unregisterInterest(uint32_t handle)
 {
 	for (auto& [k, v]: interests) {
@@ -103,6 +116,10 @@ void DevConClient::update(Time t)
 			onReceiveRegisterInterest(dynamic_cast<DevCon::RegisterInterestMsg&>(msg));
 			break;
 
+		case DevCon::MessageType::UpdateInterest:
+			onReceiveUpdateInterest(dynamic_cast<DevCon::UpdateInterestMsg&>(msg));
+			break;
+
 		case DevCon::MessageType::UnregisterInterest:
 			onReceiveUnregisterInterest(dynamic_cast<DevCon::UnregisterInterestMsg&>(msg));
 			break;
@@ -126,6 +143,11 @@ void DevConClient::onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg)
 void DevConClient::onReceiveRegisterInterest(DevCon::RegisterInterestMsg& msg)
 {
 	interest->registerInterest(msg.id, std::move(msg.params), msg.handle);
+}
+
+void DevConClient::onReceiveUpdateInterest(DevCon::UpdateInterestMsg& msg)
+{
+	interest->updateInterest(msg.handle, std::move(msg.params));
 }
 
 void DevConClient::onReceiveUnregisterInterest(const DevCon::UnregisterInterestMsg& msg)

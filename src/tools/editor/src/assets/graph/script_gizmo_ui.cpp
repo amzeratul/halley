@@ -89,6 +89,11 @@ std::shared_ptr<UIWidget> ScriptGizmoUI::makeUI()
 	return gizmo.makeUI();
 }
 
+std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptGizmoUI::getNodeUnderMouse() const
+{
+	return gizmo.getNodeUnderMouse();
+}
+
 void ScriptGizmoUI::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	focus();

@@ -55,6 +55,8 @@ namespace Halley {
 
 		void onMouseWheel(Vector2f mousePos, int amount, KeyMods keyMods);
 
+		std::optional<ScriptRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
+
 	private:
 		struct Dragging {
 			Vector<ScriptNodeId> nodeIds;

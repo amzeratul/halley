@@ -24,6 +24,8 @@ namespace Halley {
 		
 		std::shared_ptr<UIWidget> makeUI();
 
+		std::optional<ScriptRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
+
 	protected:
         void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 		void releaseMouse(Vector2f mousePos, int button) override;

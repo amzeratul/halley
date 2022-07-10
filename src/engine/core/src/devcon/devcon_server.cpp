@@ -59,6 +59,11 @@ void DevConServerConnection::registerInterest(const String& id, const ConfigNode
 	queue->enqueue(std::make_unique<DevCon::RegisterInterestMsg>(id, ConfigNode(params), handle), 0);
 }
 
+void DevConServerConnection::updateInterest(uint32_t handle, const ConfigNode& params)
+{
+	queue->enqueue(std::make_unique<DevCon::UpdateInterestMsg>(handle, ConfigNode(params)), 0);
+}
+
 void DevConServerConnection::unregisterInterest(uint32_t handle)
 {
 	queue->enqueue(std::make_unique<DevCon::UnregisterInterestMsg>(handle), 0);
@@ -121,12 +126,28 @@ DevConServer::InterestHandle DevConServer::registerInterest(String id, ConfigNod
 	return handle;
 }
 
+void DevConServer::updateInterest(InterestHandle handle, ConfigNode params)
+{
+	if (interest[handle].config != params) {
+		for (const auto& c : connections) {
+			c->updateInterest(handle, params);
+		}
+
+		interest[handle].config = std::move(params);
+	}
+}
+
 void DevConServer::unregisterInterest(InterestHandle handle)
 {
 	for (const auto& c: connections) {
 		c->unregisterInterest(handle);
 	}
 	interest.erase(handle);
+}
+
+const ConfigNode& DevConServer::getInterestParams(InterestHandle handle) const
+{
+	return interest.at(handle).config;
 }
 
 void DevConServer::onReceiveNotifyInterestMsg(const DevConServerConnection& connection, DevCon::NotifyInterestMsg& msg)

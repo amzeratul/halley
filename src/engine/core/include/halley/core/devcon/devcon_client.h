@@ -9,6 +9,7 @@ namespace Halley
 	class DevConClient;
 
 	namespace DevCon {
+		class UpdateInterestMsg;
 		class UnregisterInterestMsg;
 		class RegisterInterestMsg;
 	}
@@ -24,6 +25,7 @@ namespace Halley
 		DevConInterest(DevConClient& parent);
 		
 		void registerInterest(String id, ConfigNode config, uint32_t handle);
+		void updateInterest(uint32_t handle, ConfigNode config);
 		void unregisterInterest(uint32_t handle);
 
 		bool hasInterest(const String& id) const;
@@ -58,6 +60,7 @@ namespace Halley
 	protected:
 		void onReceiveReloadAssets(const DevCon::ReloadAssetsMsg& msg);
 		void onReceiveRegisterInterest(DevCon::RegisterInterestMsg& msg);
+		void onReceiveUpdateInterest(DevCon::UpdateInterestMsg& msg);
 		void onReceiveUnregisterInterest(const DevCon::UnregisterInterestMsg& msg);
 		void notifyInterest(uint32_t handle, ConfigNode data);
 

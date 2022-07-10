@@ -13,6 +13,7 @@ void DevCon::setupMessageQueue(MessageQueue& queue)
 	queue.addFactory<LogMsg>();
 	queue.addFactory<ReloadAssetsMsg>();
 	queue.addFactory<RegisterInterestMsg>();
+	queue.addFactory<UpdateInterestMsg>();
 	queue.addFactory<UnregisterInterestMsg>();
 	queue.addFactory<NotifyInterestMsg>();
 }
@@ -70,6 +71,26 @@ void RegisterInterestMsg::deserialize(Deserializer& s)
 	s >> params;
 	s >> handle;
 }
+
+
+UpdateInterestMsg::UpdateInterestMsg(uint32_t handle, ConfigNode params)
+	: handle(handle)
+	, params(std::move(params))
+{
+}
+
+void UpdateInterestMsg::serialize(Serializer& s) const
+{
+	s << handle;
+	s << params;
+}
+
+void UpdateInterestMsg::deserialize(Deserializer& s)
+{
+	s >> handle;
+	s >> params;
+}
+
 
 UnregisterInterestMsg::UnregisterInterestMsg(uint32_t handle)
 	: handle(handle)

@@ -728,6 +728,11 @@ void ScriptingBaseGizmo::onMouseWheel(Vector2f mousePos, int amount, KeyMods key
 	}
 }
 
+std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptingBaseGizmo::getNodeUnderMouse() const
+{
+	return nodeUnderMouse;
+}
+
 void ScriptingBaseGizmo::drawWheelGuides(Painter& painter) const
 {
 	const auto viewPort = Rect4f(painter.getViewPort());

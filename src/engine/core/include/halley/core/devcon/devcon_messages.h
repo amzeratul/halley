@@ -21,6 +21,7 @@ namespace Halley
 			Log,
 			ReloadAssets,
 			RegisterInterest,
+			UpdateInterest,
 			UnregisterInterest,
 			NotifyInterest
 		};
@@ -90,6 +91,19 @@ namespace Halley
 			String id;
 			ConfigNode params;
 			uint32_t handle;
+		};
+
+		class UpdateInterestMsg final : public DevConMessageBase<MessageType::UpdateInterest>
+		{
+		public:
+			UpdateInterestMsg() = default;
+			UpdateInterestMsg(uint32_t handle, ConfigNode params);
+
+			void serialize(Serializer& s) const override;
+			void deserialize(Deserializer& s) override;
+			
+			uint32_t handle;
+			ConfigNode params;
 		};
 
 		class UnregisterInterestMsg final : public DevConMessageBase<MessageType::UnregisterInterest>
