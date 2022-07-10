@@ -16,6 +16,7 @@ namespace Halley {
 
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
 		void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const override;
+		ConfigNode doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node) const override;
 
 	private:
 		ScriptVariableScope getScope(const ScriptGraphNode& node) const;

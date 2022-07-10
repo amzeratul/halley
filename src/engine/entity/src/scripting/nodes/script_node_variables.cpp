@@ -50,6 +50,12 @@ void ScriptVariable::doSetData(ScriptEnvironment& environment, const ScriptGraph
 	vars.setVariable(node.getSettings()["variable"].asString(""), std::move(data));
 }
 
+ConfigNode ScriptVariable::doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node) const
+{
+	const auto& vars = environment.getVariables(getScope(node));
+	return ConfigNode(vars.getVariable(node.getSettings()["variable"].asString("")));
+}
+
 ScriptVariableScope ScriptVariable::getScope(const ScriptGraphNode& node) const
 {
 	return fromString<ScriptVariableScope>(node.getSettings()["scope"].asString("local"));
