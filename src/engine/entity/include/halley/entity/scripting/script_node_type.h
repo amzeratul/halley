@@ -69,6 +69,7 @@ namespace Halley {
 		virtual ConfigNode getData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, IScriptStateData* curData) const = 0;
 		virtual void setData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, IScriptStateData* curData) const = 0;
         virtual EntityId getEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId pinN, IScriptStateData* curData) const = 0;
+		virtual ConfigNode getDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node, IScriptStateData* curData) const = 0;
 
 		ConfigNode readDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const;
 		void writeDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const;
@@ -99,7 +100,8 @@ namespace Halley {
 		virtual ConfigNode doGetData(EnvironmentType& environment, const ScriptGraphNode& node, size_t pinN, DataType& curData) const { return ConfigNode(); }
 		virtual void doSetData(EnvironmentType& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, DataType& curData) const {}
 		virtual EntityId doGetEntityId(EnvironmentType& environment, const ScriptGraphNode& node, ScriptPinId pinN, DataType& curData) const { return EntityId(); }
-		
+		virtual ConfigNode doGetDevConData(EnvironmentType& environment, const ScriptGraphNode& node, DataType& curData) const { return {}; }
+
 		std::unique_ptr<IScriptStateData> makeData() const override { return std::make_unique<DataType>(); }
 		void initData(IScriptStateData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override { doInitData(dynamic_cast<DataType&>(data), node, context, nodeData); }
 
@@ -109,6 +111,7 @@ namespace Halley {
 		ConfigNode getData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, IScriptStateData* curData) const final override { return doGetData(dynamic_cast<EnvironmentType&>(environment), node, pinN, *dynamic_cast<DataType*>(curData)); }
 		void setData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, IScriptStateData* curData) const final override { doSetData(dynamic_cast<EnvironmentType&>(environment), node, pinN, std::move(data), *dynamic_cast<DataType*>(curData)); }
 		EntityId getEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId pinN, IScriptStateData* curData) const final override { return doGetEntityId(dynamic_cast<EnvironmentType&>(environment), node, pinN, *dynamic_cast<DataType*>(curData)); }
+		ConfigNode getDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node, IScriptStateData* curData) const override { return doGetDevConData(dynamic_cast<EnvironmentType&>(environment), node, *dynamic_cast<DataType*>(curData)); }
 	};
 
 	template <typename EnvironmentType>
@@ -122,6 +125,7 @@ namespace Halley {
 		virtual ConfigNode doGetData(EnvironmentType& environment, const ScriptGraphNode& node, size_t pinN) const { return ConfigNode(); }
 		virtual void doSetData(EnvironmentType& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const {}
 		virtual EntityId doGetEntityId(EnvironmentType& environment, const ScriptGraphNode& node, ScriptPinId pinN) const { return EntityId(); }
+		virtual ConfigNode doGetDevConData(EnvironmentType& environment, const ScriptGraphNode& node) const { return {}; }
 
 		Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData*) const final override { return doUpdate(dynamic_cast<EnvironmentType&>(environment), time, node); }
 		void destructor(ScriptEnvironment& environment, const ScriptGraphNode& node, IScriptStateData*) const final override { return doDestructor(dynamic_cast<EnvironmentType&>(environment), node); }
@@ -129,6 +133,7 @@ namespace Halley {
 		ConfigNode getData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, IScriptStateData*) const final override { return doGetData(dynamic_cast<EnvironmentType&>(environment), node, pinN); }
 		void setData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, IScriptStateData*) const final override { doSetData(dynamic_cast<EnvironmentType&>(environment), node, pinN, std::move(data)); }
 		EntityId getEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId pinN, IScriptStateData*) const final override { return doGetEntityId(dynamic_cast<EnvironmentType&>(environment), node, pinN); }
+		ConfigNode getDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node, IScriptStateData*) const override { return doGetDevConData(dynamic_cast<EnvironmentType&>(environment), node); }
 	};
 
 	class ScriptNodeTypeCollection {

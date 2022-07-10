@@ -487,7 +487,7 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 			const float distance = (mousePos - curRect.getCenter()).length();
 			if (distance < bestDistance) {
 				bestDistance = distance;
-				bestResult = NodeUnderMouseInfo{ static_cast<ScriptNodeId>(i), ScriptNodePinType{ScriptNodeElementType::Node}, 0, curRect, Vector2f() };
+				bestResult = NodeUnderMouseInfo{ static_cast<ScriptNodeId>(i), ScriptNodePinType{ScriptNodeElementType::Node}, static_cast<ScriptPinId>(-1), curRect, Vector2f() };
 			}
 		}
 	}

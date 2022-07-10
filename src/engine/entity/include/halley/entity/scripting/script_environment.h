@@ -44,6 +44,7 @@ namespace Halley {
 
     	virtual void update(Time time, ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables);
     	void terminateState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables);
+		ConfigNode readNodeElementDevConData(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, ScriptNodeId nodeId, ScriptPinId pinId);
 
     	EntityRef tryGetEntity(EntityId entityId);
     	const ScriptGraph* getCurrentGraph() const;

@@ -249,7 +249,7 @@ ConfigNode ScriptGraphEditor::getCurrentNodeConfig()
 	if (const auto node = gizmoEditor->getNodeUnderMouse()) {
 		ConfigNode::MapType result;
 		result["nodeId"] = node->nodeId;
-		result["elementId"] = node->elementId;
+		result["elementId"] = static_cast<int>(static_cast<int8_t>(node->elementId));
 		return result;
 	} else {
 		return {};

@@ -170,6 +170,54 @@ void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEnti
 	currentEntity = EntityId();
 }
 
+ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, ScriptNodeId nodeId, ScriptPinId pinId)
+{
+	currentGraph = graphState.getScriptGraphPtr();
+	currentState = &graphState;
+	currentEntityVariables = &entityVariables;
+	currentGraph->assignTypes(nodeTypeCollection);
+	currentEntity = curEntity;
+
+	ConfigNode result = [&] () -> ConfigNode {
+		const auto& node = graphState.getScriptGraphPtr()->getNodes().at(nodeId);
+		const auto& nodeType = node.getNodeType();
+		if (pinId == static_cast<ScriptPinId>(-1)) {
+			return nodeType.getDevConData(*this, node, graphState.getNodeState(nodeId).data);
+		} else {
+			const auto& pinConfig = nodeType.getPinConfiguration(node)[pinId];
+			if (pinConfig.type == ScriptNodeElementType::ReadDataPin) {
+				if (pinConfig.direction == ScriptNodePinDirection::Input) {
+					return readInputDataPin(node, pinId);
+				} else {
+					return readOutputDataPin(node, pinId);
+				}
+			} else if (pinConfig.type == ScriptNodeElementType::TargetPin) {
+				EntityId id;
+				if (pinConfig.direction == ScriptNodePinDirection::Input) {
+					id = readInputEntityId(node, pinId);
+				} else {
+					id = readOutputEntityId(node, pinId);
+				}
+				if (id.isValid()) {
+					return ConfigNode("Entity \"" + world.getEntity(id).getName() + "\" (id " + toString(id.value) + ")");
+				} else {
+					return ConfigNode(String("Invalid entity"));
+				}
+			} else {
+				// No relevant data
+				return {};
+			}
+		}
+	}();
+
+	currentGraph = nullptr;
+	currentState = nullptr;
+	currentEntityVariables = nullptr;
+	currentEntity = EntityId();
+
+	return result;
+}
+
 void ScriptEnvironment::doTerminateState()
 {
 	for (auto& thread: currentState->getThreads()) {
