@@ -206,7 +206,9 @@ void ScriptGraphEditor::setListeningToClient(bool listening)
 			curEntities.clear();
 			refreshScriptEnum();
 		}
+		entityIdBeforeSuspend = curEntityId;
 		setListeningToState({0, -1});
+		curEntityId.reset();
 	}
 }
 
@@ -304,12 +306,13 @@ void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
 	std_ex::erase_if(curEntities, [&](const auto& e) { return e.connId == connId; });
 
 	if (data.getType() == ConfigNodeType::Sequence) {
-		for (const auto& entry : data.asSequence()) {
+		for (const auto& entry: data.asSequence()) {
 			curEntities.emplace_back(EntityEnumData{ connId, entry["entityId"].asInt64(), entry["name"].asString() });
 		}
 	}
 
 	if (curEntityId && curEntityId->first == connId && !std_ex::contains_if(curEntities, [&] (const EntityEnumData& d) { return d.entityId == curEntityId->second && d.connId == curEntityId->first; })) {
+		curEntityId.reset();
 		if (!tryAutoAcquire()) {
 			getWidgetAs<UIDropdown>("instances")->setSelectedOption(0);
 		}
@@ -340,7 +343,15 @@ bool ScriptGraphEditor::tryAutoAcquire()
 {
 	if (autoAcquire && !curEntityId) {
 		if (!curEntities.empty()) {
-			const auto id = toString(curEntities.front().connId) + ":" + toString(curEntities.front().entityId);
+			size_t bestIdx = 0;
+			if (entityIdBeforeSuspend) {
+				const auto iter = std_ex::find_if(curEntities, [&](const EntityEnumData& e) { return e.connId == entityIdBeforeSuspend->first && e.entityId == entityIdBeforeSuspend->second; });
+				if (iter != curEntities.end()) {
+					bestIdx = iter - curEntities.begin();
+				}
+			}
+
+			const auto id = toString(curEntities[bestIdx].connId) + ":" + toString(curEntities[bestIdx].entityId);
 			const auto instances = getWidgetAs<UIDropdown>("instances");
 			instances->setSelectedOption(id);
 			return true;

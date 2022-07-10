@@ -48,6 +48,7 @@ namespace Halley {
     	std::optional<uint32_t> scriptEnumHandle;
 		std::optional<uint32_t> scriptStateHandle;
 		std::optional<std::pair<size_t, int64_t>> curEntityId;
+		std::optional<std::pair<size_t, int64_t>> entityIdBeforeSuspend;
     	Vector<EntityEnumData> curEntities;
 
     	std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
