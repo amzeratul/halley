@@ -482,6 +482,59 @@ void ScriptEnvironment::assignTypes(const ScriptGraph& graph)
 	graph.assignTypes(nodeTypeCollection);
 }
 
+ConfigNode ScriptEnvironment::readInputDataPin(const ScriptGraphNode& node, ScriptPinId pinN)
+{
+	const auto& pins = node.getPins();
+	if (pinN >= pins.size()) {
+		return {};
+	}
+
+	const auto& pin = pins[pinN];
+	if (pin.connections.empty() || !pin.connections[0].dstNode) {
+		return {};
+	}
+	assert(pin.connections.size() == 1);
+
+	const auto& dst = pin.connections[0];
+	const auto& nodes = currentGraph->getNodes();
+	const auto& dstNode = nodes[dst.dstNode.value()];
+	return dstNode.getNodeType().getData(*this, dstNode, dst.dstPin, getNodeData(dst.dstNode.value()));
+}
+
+ConfigNode ScriptEnvironment::readOutputDataPin(const ScriptGraphNode& node, ScriptPinId pinN)
+{
+	return node.getNodeType().getData(*this, node, pinN, getNodeData(node.getId()));
+}
+
+EntityId ScriptEnvironment::readInputEntityIdRaw(const ScriptGraphNode& node, ScriptPinId pinN)
+{
+	if (pinN < node.getPins().size()) {
+		const auto& pin = node.getPins()[pinN];
+		if (!pin.connections.empty()) {
+			const auto& conn = pin.connections[0];
+			if (conn.entityIdx) {
+				return getCurrentGraph()->getEntityId(conn.entityIdx);
+			} else if (conn.dstNode) {
+				const auto& nodes = getCurrentGraph()->getNodes();
+				const auto& dstNode = nodes.at(conn.dstNode.value());
+				return dstNode.getNodeType().getEntityId(*this, dstNode, conn.dstPin, getNodeData(conn.dstNode.value()));
+			}
+		}
+	}
+	return EntityId();
+}
+
+EntityId ScriptEnvironment::readInputEntityId(const ScriptGraphNode& node, ScriptPinId pinN)
+{
+	const auto entityId = readInputEntityIdRaw(node, pinN);
+	return entityId.isValid() ? entityId : currentEntity;
+}
+
+EntityId ScriptEnvironment::readOutputEntityId(const ScriptGraphNode& node, ScriptPinId pinN)
+{
+	return node.getNodeType().getEntityId(*this, node, pinN, getNodeData(node.getId()));
+}
+
 void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)
 {
 	if (const auto* audioSource = tryGetComponent<AudioSourceComponent>(entityId)) {

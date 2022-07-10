@@ -288,7 +288,7 @@ void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 
 		EntitySerializationContext context;
 		context.resources = &gameResources;
-		scriptState->load(data, context);
+		scriptState->load(data["scriptState"], context);
 		scriptState->setScriptGraphPtr(scriptGraph.get());
 		scriptState->prepareStates(context, 0);
 	}

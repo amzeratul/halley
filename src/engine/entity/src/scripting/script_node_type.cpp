@@ -125,21 +125,7 @@ IScriptNodeType::PinType IScriptNodeType::getPin(const ScriptGraphNode& node, si
 
 ConfigNode IScriptNodeType::readDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	const auto& pins = node.getPins();
-	if (pinN >= pins.size()) {
-		return ConfigNode();
-	}
-
-	const auto& pin = pins[pinN];
-	if (pin.connections.empty() || !pin.connections[0].dstNode) {
-		return ConfigNode();
-	}
-	assert(pin.connections.size() == 1);
-
-	const auto& dst = pin.connections[0];
-	const auto& nodes = environment.getCurrentGraph()->getNodes();
-	const auto& dstNode = nodes[dst.dstNode.value()];
-	return dstNode.getNodeType().getData(environment, dstNode, dst.dstPin, environment.getNodeData(dst.dstNode.value()));
+	return environment.readInputDataPin(node, static_cast<ScriptPinId>(pinN));
 }
 
 void IScriptNodeType::writeDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const
@@ -188,26 +174,12 @@ String IScriptNodeType::getConnectedNodeName(const World* world, const ScriptGra
 
 EntityId IScriptNodeType::readEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const
 {
-	const auto entityId = readRawEntityId(environment, node, idx);
-	return entityId.isValid() ? entityId : environment.getCurrentEntityId();
+	return environment.readInputEntityId(node, static_cast<ScriptPinId>(idx));
 }
 
 EntityId IScriptNodeType::readRawEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const
 {
-	if (idx < node.getPins().size()) {
-		const auto& pin = node.getPins()[idx];
-		if (!pin.connections.empty()) {
-			const auto& conn = pin.connections[0];
-			if (conn.entityIdx) {
-				return environment.getCurrentGraph()->getEntityId(conn.entityIdx);
-			} else if (conn.dstNode) {
-				const auto& nodes = environment.getCurrentGraph()->getNodes();
-				const auto& dstNode = nodes.at(conn.dstNode.value());
-				return dstNode.getNodeType().getEntityId(environment, dstNode, conn.dstPin, environment.getNodeData(conn.dstNode.value()));
-			}
-		}
-	}
-	return EntityId();
+	return environment.readInputEntityIdRaw(node, static_cast<ScriptPinId>(idx));
 }
 
 std::array<IScriptNodeType::OutputNode, 8> IScriptNodeType::getOutputNodes(const ScriptGraphNode& node, uint8_t outputActiveMask) const

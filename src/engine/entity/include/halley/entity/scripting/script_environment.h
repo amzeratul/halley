@@ -51,6 +51,12 @@ namespace Halley {
         IScriptStateData* getNodeData(ScriptNodeId nodeId);
         void assignTypes(const ScriptGraph& graph);
 
+    	ConfigNode readInputDataPin(const ScriptGraphNode& node, ScriptPinId pinN);
+        ConfigNode readOutputDataPin(const ScriptGraphNode& node, ScriptPinId pinN);
+        EntityId readInputEntityIdRaw(const ScriptGraphNode& node, ScriptPinId pinN);
+        EntityId readInputEntityId(const ScriptGraphNode& node, ScriptPinId pinN);
+        EntityId readOutputEntityId(const ScriptGraphNode& node, ScriptPinId pinN);
+
     	void postAudioEvent(const String& id, EntityId entityId);
 
         ScriptVariables& getVariables(ScriptVariableScope scope);

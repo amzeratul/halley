@@ -206,14 +206,14 @@ ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(ScriptNodeId nodeId
 
 void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, ScriptPinId highlightElementId)
 {
-	const Vector2f border = Vector2f(18, 18);
-	const Vector2f nodeSize = getNodeSize(curZoom);
-	const auto pos = ((basePos + node.getPosition() * posScale) * curZoom).round() / curZoom;
-
 	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
 	if (!nodeType) {
 		return;
 	}
+
+	const Vector2f border = Vector2f(18, 18);
+	const Vector2f nodeSize = getNodeSize(*nodeType, curZoom);
+	const auto pos = ((basePos + node.getPosition() * posScale) * curZoom).round() / curZoom;
 
 	{
 		const auto baseCol = getNodeColour(*nodeType);
@@ -262,39 +262,22 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 		}
 		
 		// Node body
-		const bool variable = nodeType->getClassification() == ScriptNodeClassification::Variable;
-		if (variable) {
-			variableBg.clone()
-				.setColour(col)
-				.setPosition(pos)
-				.setScale(1.0f / curZoom)
-				.draw(painter);
+		nodeBg.clone()
+			.setColour(col)
+			.setPosition(pos)
+			.scaleTo(nodeSize + border)
+			.setSize(nodeBg.getSize() / curZoom)
+			.setSliceScale(1.0f / curZoom)
+			.draw(painter);
 
-			if (borderAlpha > 0.0001f) {
-				variableBgOutline.clone()
-					.setPosition(pos)
-					.setScale(1.0f / curZoom)
-					.setColour(Colour4f(1, 1, 1, borderAlpha))
-					.draw(painter);
-			}
-		} else {
-			nodeBg.clone()
-				.setColour(col)
+		if (borderAlpha > 0.0001f) {
+			nodeBgOutline.clone()
 				.setPosition(pos)
 				.scaleTo(nodeSize + border)
 				.setSize(nodeBg.getSize() / curZoom)
 				.setSliceScale(1.0f / curZoom)
+				.setColour(Colour4f(1, 1, 1, borderAlpha))
 				.draw(painter);
-
-			if (borderAlpha > 0.0001f) {
-				nodeBgOutline.clone()
-					.setPosition(pos)
-					.scaleTo(nodeSize + border)
-					.setSize(nodeBg.getSize() / curZoom)
-					.setSliceScale(1.0f / curZoom)
-					.setColour(Colour4f(1, 1, 1, borderAlpha))
-					.draw(painter);
-			}
 		}
 
 		const auto label = nodeType->getLabel(node);
@@ -330,12 +313,12 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 				.setColour(iconCol)
 				.draw(painter);
 		} else if (!largeLabel.isEmpty()) {
-			drawLabel(largeLabel, pos + iconOffset, 20 / curZoom, (variable ? 55.0f : 70.0f) / curZoom);
+			drawLabel(largeLabel, pos + iconOffset, 20 / curZoom, (nodeSize.x - 10.0f) / curZoom);
 		}
 
 		// Label
 		if (!label.isEmpty()) {
-			drawLabel(label, pos + Vector2f(0, (18.0f + iconExtraOffset) / curZoom).round(), 14 / curZoom, (variable ? 40.0f : 56.0f) / curZoom);
+			drawLabel(label, pos + Vector2f(0, (18.0f + iconExtraOffset) / curZoom).round(), 14 / curZoom, (nodeSize.x - 10.0f) / curZoom);
 		}
 	}
 
@@ -354,14 +337,14 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 	}
 }
 
-Vector2f ScriptRenderer::getNodeSize(float curZoom) const
+Vector2f ScriptRenderer::getNodeSize(const IScriptNodeType& nodeType, float curZoom) const
 {
-	return Vector2f(60, 60);
+	return nodeType.getClassification() == ScriptNodeClassification::Variable ? Vector2f(100, 40) : Vector2f(60, 60);
 }
 
 Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom, float posScale) const
 {
-	const Vector2f nodeSize = getNodeSize(curZoom);
+	const Vector2f nodeSize = getNodeSize(nodeType, curZoom);
 	const auto getOffset = [&] (size_t idx, size_t n)
 	{
 		const float spacing = nodeSize.x / (n + 1);
@@ -462,8 +445,6 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 	}
 
 	const float effectiveZoom = std::max(nativeZoom, curZoom);
-	const auto nodeSize = getNodeSize(effectiveZoom);
-	const Rect4f area = Rect4f(-nodeSize / 2, nodeSize / 2) / effectiveZoom;
 
 	float bestDistance = std::numeric_limits<float>::max();
 	std::optional<NodeUnderMouseInfo> bestResult;
@@ -472,7 +453,7 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 		const auto& node = graph->getNodes()[i];
 		const auto pos = basePos + node.getPosition();
 
-		const auto nodeBounds = Circle(pos, area.getSize().length() / 2);
+		const auto nodeBounds = Circle(pos, 60.0f);
 		if (!nodeBounds.contains(mousePos)) {
 			continue;
 		}
@@ -481,6 +462,8 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 		if (!nodeType) {
 			continue;
 		}
+		const auto nodeSize = getNodeSize(*nodeType, effectiveZoom);
+		const Rect4f area = Rect4f(-nodeSize / 2, nodeSize / 2) / effectiveZoom;
 		const auto curRect = area + pos;
 		
 		// Check each pin handle
@@ -524,14 +507,18 @@ Vector<ScriptNodeId> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZ
 	}
 
 	const float effectiveZoom = std::max(nativeZoom, curZoom);
-	const auto nodeSize = getNodeSize(effectiveZoom);
-	const Rect4f area = Rect4f(-nodeSize / 2, nodeSize / 2) / effectiveZoom;
-
 	Vector<ScriptNodeId> result;
 
 	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
 		const auto& node = graph->getNodes()[i];
 		const auto pos = basePos + node.getPosition();
+
+		const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
+		if (!nodeType) {
+			continue;
+		}
+		const auto nodeSize = getNodeSize(*nodeType, effectiveZoom);
+		const Rect4f area = Rect4f(-nodeSize / 2, nodeSize / 2) / effectiveZoom;
 		const auto curRect = area + pos;
 
 		if (curRect.overlaps(selBox)) {
