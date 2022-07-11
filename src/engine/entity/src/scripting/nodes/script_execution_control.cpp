@@ -78,3 +78,120 @@ IScriptNodeType::Result ScriptSpinwait::doUpdate(ScriptEnvironment& environment,
 {
 	return Result(ScriptNodeExecutionState::Executing, time);
 }
+
+
+
+Vector<IScriptNodeType::SettingType> ScriptStartScript::getSettingTypes() const
+{
+	return {
+		SettingType{ "script", "Halley::ResourceReference<Halley::ScriptGraph>", Vector<String>{""} },
+	};
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptStartScript::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Start Script ");
+	str.append(node.getSettings()["script"].asString(""), parameterColour);
+	str.append(" on ");
+	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	return str.moveResults();
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptStartScript::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
+	return data;
+}
+
+IScriptNodeType::Result ScriptStartScript::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	const auto& script = node.getSettings()["script"].asString("");
+	const auto target = readEntityId(environment, node, 2);
+
+	if (!script.isEmpty()) {
+		// TODO
+	}
+
+	return Result(ScriptNodeExecutionState::Done);
+}
+
+
+
+Vector<IScriptNodeType::SettingType> ScriptStopScript::getSettingTypes() const
+{
+	return {
+		SettingType{ "script", "Halley::ResourceReference<Halley::ScriptGraph>", Vector<String>{""} },
+	};
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptStopScript::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Stop Script ");
+	str.append(node.getSettings()["script"].asString(""), parameterColour);
+	str.append(" on ");
+	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	return str.moveResults();
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptStopScript::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
+	return data;
+}
+
+IScriptNodeType::Result ScriptStopScript::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	const auto& script = node.getSettings()["script"].asString("");
+	const auto target = readEntityId(environment, node, 2);
+
+	if (!script.isEmpty()) {
+		// TODO
+	}
+
+	return Result(ScriptNodeExecutionState::Done);
+}
+
+
+
+Vector<IScriptNodeType::SettingType> ScriptStopTag::getSettingTypes() const
+{
+	return {
+		SettingType{ "tag", "Halley::String", Vector<String>{""} },
+	};
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptStopTag::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Stop all Scripts matching tag ");
+	str.append(node.getSettings()["tag"].asString(""), parameterColour);
+	str.append(" on ");
+	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	return str.moveResults();
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptStopTag::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
+	return data;
+}
+
+IScriptNodeType::Result ScriptStopTag::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	const auto& tag = node.getSettings()["script"].asString("");
+	const auto target = readEntityId(environment, node, 2);
+
+	if (!tag.isEmpty()) {
+		// TODO
+	}
+
+	return Result(ScriptNodeExecutionState::Done);
+}

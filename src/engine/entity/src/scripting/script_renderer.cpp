@@ -320,10 +320,13 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 			icon.clone()
 				.setPosition(pos + iconOffset)
 				.setScale(1.0f / curZoom)
-				.setColour(iconCol)
+				.setColour(iconCol.multiplyAlpha(largeLabel.isEmpty() ? 1.0f : 0.25f))
 				.draw(painter);
-		} else if (!largeLabel.isEmpty()) {
-			drawLabel(largeLabel, pos + iconOffset, 20 / curZoom, (nodeSize.x - 10.0f) / curZoom);
+		}
+
+		// Large label
+		if (!largeLabel.isEmpty()) {
+			drawLabel(largeLabel, pos + iconOffset, 18 / curZoom, (nodeSize.x - 10.0f) / curZoom);
 		}
 
 		// Label
