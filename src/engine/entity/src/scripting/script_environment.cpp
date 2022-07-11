@@ -316,7 +316,7 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRol
 		assert(nodeState.threadCount > 0);
 		nodeState.threadCount--;
 		if (nodeState.threadCount == 0) {
-			if (node.getNodeType().hasDestructor()) {
+			if (node.getNodeType().hasDestructor(node)) {
 				node.getNodeType().destructor(*this, node, nodeState.data);
 			}
 			state.finishNode(node, nodeState, true);
@@ -585,10 +585,12 @@ EntityId ScriptEnvironment::readOutputEntityId(const ScriptGraphNode& node, Scri
 
 void ScriptEnvironment::postAudioEvent(const String& id, EntityId entityId)
 {
-	if (const auto* audioSource = tryGetComponent<AudioSourceComponent>(entityId)) {
-		api.audio->postEvent(id, audioSource->emitter);
-	} else {
-		api.audio->postEvent(id);
+	if (!id.isEmpty()) {
+		if (const auto* audioSource = tryGetComponent<AudioSourceComponent>(entityId)) {
+			api.audio->postEvent(id, audioSource->emitter);
+		} else {
+			api.audio->postEvent(id);
+		}
 	}
 }
 

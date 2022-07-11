@@ -56,7 +56,7 @@ namespace Halley {
 		virtual bool canAdd() const { return true; }
         virtual bool canDelete() const { return true; }
         virtual bool canKeepData() const { return false; }
-		virtual bool hasDestructor() const { return false; }
+		virtual bool hasDestructor(const ScriptGraphNode& node) const { return false; }
 		virtual bool showDestructor() const { return true; }
 
 		virtual std::unique_ptr<IScriptStateData> makeData() const { return {}; }

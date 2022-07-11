@@ -118,7 +118,7 @@ namespace Halley {
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/set_variable.png"; }
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
-		bool hasDestructor() const override { return true; }
+		bool hasDestructor(const ScriptGraphNode& node) const override { return true; }
 		Vector<SettingType> getSettingTypes() const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
 

@@ -18,7 +18,7 @@ namespace Halley {
 		String getName() const override { return "UI (Modal)"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/ui_modal.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
-		bool hasDestructor() const override { return true; }
+		bool hasDestructor(const ScriptGraphNode& node) const override { return true; }
 		bool canKeepData() const override { return true; }
 
 		Vector<SettingType> getSettingTypes() const override;
@@ -44,7 +44,7 @@ namespace Halley {
 		String getName() const override { return "UI (In World)"; }
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/ui_in_world.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
-		bool hasDestructor() const override { return true; }
+		bool hasDestructor(const ScriptGraphNode& node) const override { return true; }
 		bool canKeepData() const override { return true; }
 
 		Vector<SettingType> getSettingTypes() const override;

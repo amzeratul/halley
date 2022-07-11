@@ -138,7 +138,7 @@ String ScriptReceiveMessage::getShortDescription(const World* world, const Scrip
 	}
 }
 
-bool ScriptReceiveMessage::hasDestructor() const
+bool ScriptReceiveMessage::hasDestructor(const ScriptGraphNode& node) const
 {
 	return true;
 }

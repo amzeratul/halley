@@ -258,7 +258,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 		}
 
 		// Destructor
-		if (nodeType->hasDestructor() && nodeType->showDestructor()) {
+		if (nodeType->hasDestructor(node) && nodeType->showDestructor()) {
 			destructorBg.clone()
 				.setColour(col.multiplyLuma(0.6f))
 				.setPosition(pos + Vector2f(0, 29) / curZoom)
