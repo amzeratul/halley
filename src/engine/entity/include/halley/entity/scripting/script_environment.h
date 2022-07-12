@@ -39,6 +39,18 @@ namespace Halley {
             ConfigNode messageData;
         };
 
+        enum class ScriptExecutionRequestType {
+	        Start,
+            Stop,
+            StopTag
+        };
+
+        struct ScriptExecutionRequest {
+	        ScriptExecutionRequestType type;
+            EntityId target;
+            String value;
+        };
+
     	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection);
     	virtual ~ScriptEnvironment() = default;
 
@@ -98,6 +110,7 @@ namespace Halley {
 
     	Vector<std::pair<EntityId, ScriptMessage>> getOutboundScriptMessages();
         Vector<EntityMessageData> getOutboundEntityMessages();
+        Vector<ScriptExecutionRequest> getScriptExecutionRequests();
 
         virtual std::shared_ptr<UIWidget> createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId);
         virtual std::shared_ptr<UIWidget> createModalUI(const String& ui);
@@ -120,6 +133,7 @@ namespace Halley {
 
         Vector<std::pair<EntityId, ScriptMessage>> scriptOutbox;
         Vector<EntityMessageData> entityOutbox;
+        Vector<ScriptExecutionRequest> scriptExecutionRequestOutbox;
 
     private:
         void updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);

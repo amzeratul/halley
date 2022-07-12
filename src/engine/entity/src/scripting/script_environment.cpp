@@ -502,17 +502,17 @@ void ScriptEnvironment::sendSystemMessage(SystemMessageData message)
 
 void ScriptEnvironment::startScript(EntityId target, const String& scriptName)
 {
-	// TODO
+	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Start, target, scriptName });
 }
 
 void ScriptEnvironment::stopScript(EntityId target, const String& scriptName)
 {
-	// TODO
+	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Stop, target, scriptName });
 }
 
 void ScriptEnvironment::stopScriptTag(EntityId target, const String& tag)
 {
-	// TODO
+	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::StopTag, target, tag });
 }
 
 Vector<std::pair<EntityId, ScriptMessage>> ScriptEnvironment::getOutboundScriptMessages()
@@ -523,6 +523,11 @@ Vector<std::pair<EntityId, ScriptMessage>> ScriptEnvironment::getOutboundScriptM
 Vector<ScriptEnvironment::EntityMessageData> ScriptEnvironment::getOutboundEntityMessages()
 {
 	return std::move(entityOutbox);
+}
+
+Vector<ScriptEnvironment::ScriptExecutionRequest> ScriptEnvironment::getScriptExecutionRequests()
+{
+	return std::move(scriptExecutionRequestOutbox);
 }
 
 std::shared_ptr<UIWidget> ScriptEnvironment::createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId)
