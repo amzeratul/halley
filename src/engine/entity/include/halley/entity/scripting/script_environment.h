@@ -92,6 +92,10 @@ namespace Halley {
         void sendEntityMessage(EntityMessageData message);
         void sendSystemMessage(SystemMessageData message);
 
+        void startScript(EntityId target, const String& scriptName);
+        void stopScript(EntityId target, const String& scriptName);
+        void stopScriptTag(EntityId target, const String& tag);
+
     	Vector<std::pair<EntityId, ScriptMessage>> getOutboundScriptMessages();
         Vector<EntityMessageData> getOutboundEntityMessages();
 

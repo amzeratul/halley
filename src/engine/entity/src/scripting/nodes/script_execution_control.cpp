@@ -112,12 +112,43 @@ IScriptNodeType::Result ScriptStartScript::doUpdate(ScriptEnvironment& environme
 	const auto target = readEntityId(environment, node, 2);
 
 	if (!script.isEmpty()) {
-		// TODO
+		environment.startScript(target, script);
 	}
 
 	return Result(ScriptNodeExecutionState::Done);
 }
 
+
+
+std::pair<String, Vector<ColourOverride>> ScriptStartScriptName::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Start Script ");
+	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
+	str.append(" on ");
+	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	return str.moveResults();
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptStartScriptName::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
+	return data;
+}
+
+IScriptNodeType::Result ScriptStartScriptName::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	const auto& script = readDataPin(environment, node, 3).asString("");
+	const auto target = readEntityId(environment, node, 2);
+
+	if (!script.isEmpty()) {
+		environment.startScript(target, script);
+	}
+
+	return Result(ScriptNodeExecutionState::Done);
+}
 
 
 Vector<IScriptNodeType::SettingType> ScriptStopScript::getSettingTypes() const
@@ -151,7 +182,7 @@ IScriptNodeType::Result ScriptStopScript::doUpdate(ScriptEnvironment& environmen
 	const auto target = readEntityId(environment, node, 2);
 
 	if (!script.isEmpty()) {
-		// TODO
+		environment.stopScript(target, script);
 	}
 
 	return Result(ScriptNodeExecutionState::Done);
@@ -190,7 +221,7 @@ IScriptNodeType::Result ScriptStopTag::doUpdate(ScriptEnvironment& environment, 
 	const auto target = readEntityId(environment, node, 2);
 
 	if (!tag.isEmpty()) {
-		// TODO
+		environment.stopScriptTag(target, tag);
 	}
 
 	return Result(ScriptNodeExecutionState::Done);

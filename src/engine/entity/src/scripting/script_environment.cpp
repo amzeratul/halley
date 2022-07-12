@@ -500,6 +500,21 @@ void ScriptEnvironment::sendSystemMessage(SystemMessageData message)
 	world.sendSystemMessage(std::move(context), message.targetSystem, dst);
 }
 
+void ScriptEnvironment::startScript(EntityId target, const String& scriptName)
+{
+	// TODO
+}
+
+void ScriptEnvironment::stopScript(EntityId target, const String& scriptName)
+{
+	// TODO
+}
+
+void ScriptEnvironment::stopScriptTag(EntityId target, const String& tag)
+{
+	// TODO
+}
+
 Vector<std::pair<EntityId, ScriptMessage>> ScriptEnvironment::getOutboundScriptMessages()
 {
 	return std::move(scriptOutbox);
