@@ -32,6 +32,11 @@ std::pair<String, Vector<ColourOverride>> ScriptUIModal::getNodeDescription(cons
 	return str.moveResults();
 }
 
+String ScriptUIModal::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId element_idx) const
+{
+	return "ui.value";
+}
+
 void ScriptUIModal::doInitData(ScriptUIModalData& data, const ScriptGraphNode& node, const EntitySerializationContext& context,	const ConfigNode& nodeData) const
 {
 	data.ui.reset();

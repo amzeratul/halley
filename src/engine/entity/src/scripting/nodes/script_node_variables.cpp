@@ -73,7 +73,7 @@ String ScriptLiteral::getLargeLabel(const ScriptGraphNode& node) const
 
 String ScriptLiteral::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
 {
-	return getLabel(node);
+	return getLargeLabel(node);
 }
 
 gsl::span<const IScriptNodeType::PinType> ScriptLiteral::getPinConfiguration(const ScriptGraphNode& node) const
@@ -141,7 +141,7 @@ String ScriptComparison::getShortDescription(const World* world, const ScriptGra
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
-	auto op = getLabel(node);
+	auto op = getLargeLabel(node);
 	return addParentheses(std::move(a)) + " " + op + " " + addParentheses(std::move(b));
 }
 
@@ -205,7 +205,7 @@ String ScriptArithmetic::getShortDescription(const World* world, const ScriptGra
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
-	auto op = getLabel(node);
+	auto op = getLargeLabel(node);
 
 	if (op[0] >= 'a' && op[0] <= 'z') {
 		// If starts with a lower case letter, assume it's in function form
