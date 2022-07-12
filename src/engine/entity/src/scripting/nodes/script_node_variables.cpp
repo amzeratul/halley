@@ -64,7 +64,11 @@ ScriptVariableScope ScriptVariable::getScope(const ScriptGraphNode& node) const
 
 String ScriptLiteral::getLargeLabel(const ScriptGraphNode& node) const
 {
-	return node.getSettings()["value"].asString("0");
+	const auto& str = node.getSettings()["value"].asString("0");
+	if (str.isEmpty()) {
+		return "\"\"";
+	}
+	return str;
 }
 
 String ScriptLiteral::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
@@ -89,7 +93,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLiteral::getNodeDescription(cons
 {
 	auto data = getConfigNode(node);
 
-	auto str = ColourStringBuilder(true);
+	auto str = ColourStringBuilder(false);
 	bool quoting = false;
 	if (data.getType() == ConfigNodeType::Int) {
 		str.append("Int ");

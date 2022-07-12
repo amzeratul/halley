@@ -284,6 +284,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptStop>());
 	addScriptNode(std::make_unique<ScriptSpinwait>());
 	addScriptNode(std::make_unique<ScriptStartScript>());
+	addScriptNode(std::make_unique<ScriptStartScriptName>());
 	addScriptNode(std::make_unique<ScriptStopScript>());
 	addScriptNode(std::make_unique<ScriptStopTag>());
 	addScriptNode(std::make_unique<ScriptWait>());

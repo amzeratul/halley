@@ -22,6 +22,7 @@ namespace Halley {
 		State,
 		Action,
 		Variable,
+		Expression,
 		Terminator, // As in start/end, not as in Arnie
 		Unknown
 	};
