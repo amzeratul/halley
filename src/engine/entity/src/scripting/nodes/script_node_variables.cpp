@@ -64,9 +64,10 @@ ScriptVariableScope ScriptVariable::getScope(const ScriptGraphNode& node) const
 
 String ScriptLiteral::getLargeLabel(const ScriptGraphNode& node) const
 {
-	const auto& str = node.getSettings()["value"].asString("0");
-	if (str.isEmpty()) {
-		return "\"\"";
+	const auto& val = node.getSettings()["value"];
+	const auto& str = val.asString("");
+	if (val.getType() == ConfigNodeType::String || str.isEmpty()) {
+		return "\"" + str + "\"";
 	}
 	return str;
 }
