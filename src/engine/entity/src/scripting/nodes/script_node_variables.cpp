@@ -132,7 +132,7 @@ ConfigNode ScriptLiteral::getConfigNode(const ScriptGraphNode& node) const
 
 
 
-String ScriptComparison::getLabel(const ScriptGraphNode& node) const
+String ScriptComparison::getLargeLabel(const ScriptGraphNode& node) const
 {
 	return node.getSettings()["operator"].asString("==");
 }
@@ -196,7 +196,7 @@ ConfigNode ScriptComparison::doGetData(ScriptEnvironment& environment, const Scr
 
 
 
-String ScriptArithmetic::getLabel(const ScriptGraphNode& node) const
+String ScriptArithmetic::getLargeLabel(const ScriptGraphNode& node) const
 {
 	return node.getSettings()["operator"].asString("+");
 }
