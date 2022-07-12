@@ -34,6 +34,12 @@ std::shared_ptr<IUIElement> EnumFieldFactory::createField(const ComponentEditorC
 		node = ConfigNode(std::move(newVal));
 		context.onEntityUpdated();
 	});
+
+	if (defaultValue != value) {
+		auto& node = data.getWriteableFieldData();
+		node = ConfigNode(value);
+		context.onEntityUpdated();
+	}
 	
 	return container;
 }

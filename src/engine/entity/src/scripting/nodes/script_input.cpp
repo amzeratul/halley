@@ -22,7 +22,7 @@ String ScriptInputButton::getLabel(const ScriptGraphNode& node) const
 Vector<IScriptNodeType::SettingType> ScriptInputButton::getSettingTypes() const
 {
 	return {
-		SettingType{ "button", "Halley::InputButton", Vector<String>{"primary"} },
+		SettingType{ "button", "Halley::InputButton", Vector<String>{""} },
 		SettingType{ "device", "int", Vector<String>{"0"} },
 	};
 }
