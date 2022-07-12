@@ -505,7 +505,7 @@ std::pair<String, Vector<ColourOverride>> ScriptEntityIdToData::getNodeDescripti
 
 ConfigNode ScriptEntityIdToData::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	return ConfigNode(readEntityId(environment, node, 0).value);
+	return ConfigNode(readRawEntityId(environment, node, 0).value);
 }
 
 
