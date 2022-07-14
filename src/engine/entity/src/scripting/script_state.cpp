@@ -499,15 +499,15 @@ void ScriptState::receiveMessage(ScriptMessage msg)
 	}
 }
 
-void ScriptState::processMessages(Time time, Vector<ScriptNodeId>& threadsToStart)
+void ScriptState::processMessages(Vector<ScriptNodeId>& threadsToStart)
 {
 	std_ex::erase_if(inbox, [&] (ScriptMessage& msg)
 	{
-		return processMessage(msg, time, threadsToStart);
+		return processMessage(msg, threadsToStart);
 	});
 }
 
-bool ScriptState::processMessage(ScriptMessage& msg, Time time, Vector<ScriptNodeId>& threadsToStart)
+bool ScriptState::processMessage(ScriptMessage& msg, Vector<ScriptNodeId>& threadsToStart)
 {
 	if (const auto* scriptGraph = getScriptGraphPtr()) {
 		if (const auto inboxId = scriptGraph->getMessageInboxId(msg.type.message)) {

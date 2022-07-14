@@ -105,6 +105,7 @@ Vector<IScriptNodeType::SettingType> ScriptStartScript::getSettingTypes() const
 {
 	return {
 		SettingType{ "script", "Halley::ResourceReference<Halley::ScriptGraph>", Vector<String>{""} },
+		SettingType{ "tags", "Halley::Vector<Halley::String>", Vector<String>{""} },
 	};
 }
 
@@ -115,6 +116,8 @@ std::pair<String, Vector<ColourOverride>> ScriptStartScript::getNodeDescription(
 	str.append(node.getSettings()["script"].asString(""), parameterColour);
 	str.append(" on ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(" with tags ");
+	str.append(node.getSettings()["tags"].asString("{}"), parameterColour);
 	return str.moveResults();
 }
 
@@ -129,16 +132,23 @@ gsl::span<const IScriptNodeType::PinType> ScriptStartScript::getPinConfiguration
 IScriptNodeType::Result ScriptStartScript::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	const auto& script = node.getSettings()["script"].asString("");
+	const auto& tags = node.getSettings()["tags"].asVector<String>({});
 	const auto target = readEntityId(environment, node, 2);
 
 	if (!script.isEmpty()) {
-		environment.startScript(target, script);
+		environment.startScript(target, script, tags);
 	}
 
 	return Result(ScriptNodeExecutionState::Done);
 }
 
 
+Vector<IScriptNodeType::SettingType> ScriptStartScriptName::getSettingTypes() const
+{
+	return {
+		SettingType{ "tags", "Halley::Vector<Halley::String>", Vector<String>{""} },
+	};
+}
 
 std::pair<String, Vector<ColourOverride>> ScriptStartScriptName::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
@@ -147,6 +157,8 @@ std::pair<String, Vector<ColourOverride>> ScriptStartScriptName::getNodeDescript
 	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
 	str.append(" on ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(" with tags ");
+	str.append(node.getSettings()["tags"].asString("{}"), parameterColour);
 	return str.moveResults();
 }
 
@@ -162,9 +174,10 @@ IScriptNodeType::Result ScriptStartScriptName::doUpdate(ScriptEnvironment& envir
 {
 	const auto& script = readDataPin(environment, node, 3).asString("");
 	const auto target = readEntityId(environment, node, 2);
+	const auto& tags = node.getSettings()["tags"].asVector<String>({});
 
 	if (!script.isEmpty()) {
-		environment.startScript(target, script);
+		environment.startScript(target, script, tags);
 	}
 
 	return Result(ScriptNodeExecutionState::Done);

@@ -178,7 +178,7 @@ namespace Halley {
 		void incrementFrameNumber();
 
     	void receiveMessage(ScriptMessage msg);
-        void processMessages(Time time, Vector<ScriptNodeId>& threadsToStart);
+        void processMessages(Vector<ScriptNodeId>& threadsToStart);
 
 		ScriptVariables& getLocalVariables();
 		const ScriptVariables& getLocalVariables() const;
@@ -209,7 +209,7 @@ namespace Halley {
     	void onNodeStartedIntrospection(ScriptNodeId nodeId);
     	void onNodeEndedIntrospection(ScriptNodeId nodeId);
 		void ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state, const EntitySerializationContext& context);
-        bool processMessage(ScriptMessage& msg, Time time, Vector<ScriptNodeId>& threadsToStart);
+        bool processMessage(ScriptMessage& msg, Vector<ScriptNodeId>& threadsToStart);
     };
 	
 	template<>

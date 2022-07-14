@@ -56,12 +56,8 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	} else {
 		graphState.prepareStates(serializationContext, time);
 	}
-
-	Vector<ScriptNodeId> toStart;
-	graphState.processMessages(time, toStart);
-	for (const auto nodeId: toStart) {
-		threads.push_back(startThread(ScriptStateThread(nodeId)));
-	}
+	
+	processMessages(time, threads);
 
 	// Allocate time for each thread
 	for (auto& thread: threads) {
@@ -72,6 +68,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	Vector<ScriptStateThread> pendingThreads;
 	for (size_t i = 0; i < threads.size(); ++i) {
 		updateThread(graphState, threads[i], pendingThreads);
+		processMessages(threads[i].getTimeSlice(), pendingThreads);
 
 		for (auto& t: pendingThreads) {
 			threads.push_back(std::move(t));
@@ -384,6 +381,15 @@ void ScriptEnvironment::abortCodePath(ScriptNodeId node, std::optional<ScriptPin
 	}
 }
 
+void ScriptEnvironment::processMessages(Time time, Vector<ScriptStateThread>& pending)
+{
+	Vector<ScriptNodeId> toStart;
+	currentState->processMessages(toStart);
+	for (const auto nodeId: toStart) {
+		pending.push_back(startThread(ScriptStateThread(nodeId)));
+	}
+}
+
 EntityId ScriptEnvironment::getEntityIdFromUUID(const UUID& uuid) const
 {
 	auto e = world.findEntity(uuid, true);
@@ -499,7 +505,12 @@ void ScriptEnvironment::sendScriptMessage(EntityId dstEntity, ScriptMessage mess
 		dstEntity = currentEntity;
 	}
 
-	scriptOutbox.emplace_back(dstEntity, std::move(message));
+	if (dstEntity == currentEntity && message.type.script == currentState->getScriptId() && message.delay <= 0.00001f) {
+		// Quick path for instant self messages
+		currentState->receiveMessage(std::move(message));
+	} else {
+		scriptOutbox.emplace_back(dstEntity, std::move(message));
+	}
 }
 
 void ScriptEnvironment::sendEntityMessage(EntityMessageData message)
@@ -527,9 +538,9 @@ void ScriptEnvironment::sendSystemMessage(SystemMessageData message)
 	world.sendSystemMessage(std::move(context), message.targetSystem, dst);
 }
 
-void ScriptEnvironment::startScript(EntityId target, const String& scriptName)
+void ScriptEnvironment::startScript(EntityId target, const String& scriptName, Vector<String> tags)
 {
-	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Start, target, scriptName });
+	scriptExecutionRequestOutbox.emplace_back(ScriptExecutionRequest{ ScriptExecutionRequestType::Start, target, scriptName, std::move(tags) });
 }
 
 void ScriptEnvironment::stopScript(EntityId target, const String& scriptName)

@@ -49,6 +49,7 @@ namespace Halley {
 	        ScriptExecutionRequestType type;
             EntityId target;
             String value;
+            Vector<String> startTags;
         };
 
     	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection);
@@ -104,7 +105,7 @@ namespace Halley {
         void sendEntityMessage(EntityMessageData message);
         void sendSystemMessage(SystemMessageData message);
 
-        void startScript(EntityId target, const String& scriptName);
+        void startScript(EntityId target, const String& scriptName, Vector<String> tags);
         void stopScript(EntityId target, const String& scriptName);
         void stopScriptTag(EntityId target, const String& tag);
 
@@ -152,7 +153,9 @@ namespace Halley {
         void cancelOutputs(ScriptNodeId nodeId, uint8_t cancelMask);
         void abortCodePath(ScriptNodeId node, std::optional<ScriptPinId> outputPin);
         
-        EntityId getEntityIdFromUUID(const UUID& uuid) const override;
+        void processMessages(Time time, Vector<ScriptStateThread>& pending);
+
+    	EntityId getEntityIdFromUUID(const UUID& uuid) const override;
         UUID getUUIDFromEntityId(EntityId id) const override;
     };
 }
