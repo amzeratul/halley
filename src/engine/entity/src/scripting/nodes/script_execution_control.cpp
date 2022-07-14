@@ -21,6 +21,26 @@ IScriptNodeType::Result ScriptStart::doUpdate(ScriptEnvironment& environment, Ti
 }
 
 
+std::pair<String, Vector<ColourOverride>> ScriptDestructor::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	return { "On destruction", {} };
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptDestructor::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 1>{ PinType{ ET::FlowPin, PD::Output } };
+	return data;
+}
+
+IScriptNodeType::Result ScriptDestructor::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	return Result(ScriptNodeExecutionState::Done);
+}
+
+
+
 gsl::span<const IScriptNodeType::PinType> ScriptRestart::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;

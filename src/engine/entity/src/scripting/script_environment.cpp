@@ -45,7 +45,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	const bool hashChanged = graphState.getGraphHash() != currentGraph->getHash();
 	if (!graphState.hasStarted() || hashChanged) {
 		if (hashChanged) {
-			doTerminateState();
+			doTerminateState(false);
 		}
 
 		graphState.start(currentGraph->getHash());
@@ -218,12 +218,39 @@ ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState,
 	return result;
 }
 
-void ScriptEnvironment::doTerminateState()
+void ScriptEnvironment::doTerminateState(bool callDestructor)
 {
 	for (auto& thread: currentState->getThreads()) {
 		terminateThread(thread, false);
 	}
 	currentState->getThreads().clear();
+
+	if (callDestructor) {
+		for (auto& node: currentGraph->getNodes()) {
+			if (node.getType() == "destructor") {
+				runDestructor(node.getId());
+			}
+		}
+	}
+}
+
+void ScriptEnvironment::runDestructor(ScriptNodeId nodeId)
+{
+	Vector<ScriptStateThread> threads;
+	auto& t = threads.emplace_back(nodeId);
+	t.getTimeSlice() = std::numeric_limits<float>::infinity();
+
+	while (true) {
+		Vector<ScriptStateThread> pending;
+		for (auto& t: threads) {
+			updateThread(*currentState, t, pending);
+		}
+		if (pending.empty()) {
+			break;
+		} else {
+			threads = std::move(pending);
+		}
+	}
 }
 
 ScriptStateThread ScriptEnvironment::startThread(ScriptStateThread thread)

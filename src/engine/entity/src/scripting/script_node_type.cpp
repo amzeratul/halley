@@ -280,6 +280,7 @@ Vector<String> ScriptNodeTypeCollection::getNames(bool includeNonAddable) const
 void ScriptNodeTypeCollection::addBasicScriptNodes()
 {
 	addScriptNode(std::make_unique<ScriptStart>());
+	addScriptNode(std::make_unique<ScriptDestructor>());
 	addScriptNode(std::make_unique<ScriptRestart>());
 	addScriptNode(std::make_unique<ScriptStop>());
 	addScriptNode(std::make_unique<ScriptSpinwait>());

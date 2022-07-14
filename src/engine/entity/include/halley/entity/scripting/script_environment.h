@@ -137,7 +137,9 @@ namespace Halley {
 
     private:
         void updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);
-        void doTerminateState();
+        void doTerminateState(bool callDestructor = true);
+        void runDestructor(ScriptNodeId nodeId);
+
         ScriptStateThread startThread(ScriptStateThread thread);
         void addThread(ScriptStateThread thread, Vector<ScriptStateThread>& pending);
         void advanceThread(ScriptStateThread& thread, OptionalLite<ScriptNodeId> node, ScriptPinId outputPin);
