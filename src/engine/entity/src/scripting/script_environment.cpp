@@ -234,7 +234,7 @@ void ScriptEnvironment::doTerminateState(bool callDestructor)
 void ScriptEnvironment::runDestructor(ScriptNodeId nodeId)
 {
 	Vector<ScriptStateThread> threads;
-	auto& t = threads.emplace_back(nodeId);
+	auto& t = threads.emplace_back(startThread(ScriptStateThread(nodeId)));
 	t.getTimeSlice() = std::numeric_limits<float>::infinity();
 
 	while (true) {

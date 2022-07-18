@@ -576,11 +576,16 @@ bool ConfigNode::asBool() const
 		return floatData != 0;
 	} else if (type == ConfigNodeType::Int64) {
 		return int64Data != 0;
-	} else if (type == ConfigNodeType::Undefined) {
-		return false;
-	} else {
-		return asString() == "true";
+	} else if (type == ConfigNodeType::String) {
+		const auto& str = asString();
+		if (str == "true") {
+			return true;
+		} else if (str == "false") {
+			return false;
+		}
+		return !asString().isEmpty();
 	}
+	return false;
 }
 
 Vector2i ConfigNode::asVector2i() const

@@ -250,7 +250,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptStopTag::getPinConfiguration(con
 
 IScriptNodeType::Result ScriptStopTag::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	const auto& tag = node.getSettings()["script"].asString("");
+	const auto& tag = node.getSettings()["tag"].asString("");
 	const auto target = readEntityId(environment, node, 2);
 
 	if (!tag.isEmpty()) {
