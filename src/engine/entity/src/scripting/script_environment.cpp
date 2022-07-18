@@ -435,18 +435,18 @@ void ScriptEnvironment::setInputEnabled(bool enabled)
 	inputEnabled = enabled;
 }
 
-void ScriptEnvironment::setInputDevice(int idx, std::shared_ptr<InputDevice> input)
+void ScriptEnvironment::setInputDevice(EntityId target, std::shared_ptr<InputDevice> input)
 {
-	inputDevices[idx] = std::move(input);
+	inputDevices[target] = std::move(input);
 }
 
-std::shared_ptr<InputDevice> ScriptEnvironment::getInputDevice(int idx) const
+std::shared_ptr<InputDevice> ScriptEnvironment::getInputDevice(EntityId target) const
 {
 	if (!inputEnabled) {
 		return {};
 	}
 
-	const auto iter = inputDevices.find(idx);
+	const auto iter = inputDevices.find(target);
 	if (iter != inputDevices.end()) {
 		return iter->second;
 	} else {

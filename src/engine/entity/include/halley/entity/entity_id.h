@@ -9,8 +9,8 @@ namespace Halley {
 	struct alignas(8) EntityId {
 		int64_t value;
 
-		EntityId(int64_t value = -1) : value(value) {}
-
+		EntityId() : value(-1) {}
+		explicit EntityId(int64_t value) : value(value) {}
 		explicit EntityId(const String& str);
 
 		bool isValid() const { return value != -1; }

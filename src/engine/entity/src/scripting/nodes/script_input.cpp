@@ -23,7 +23,7 @@ Vector<IScriptNodeType::SettingType> ScriptInputButton::getSettingTypes() const
 {
 	return {
 		SettingType{ "button", "Halley::InputButton", Vector<String>{""} },
-		SettingType{ "device", "int", Vector<String>{"0"} },
+		SettingType{ "priority", "int", Vector<String>{"0"} },
 	};
 }
 
@@ -31,7 +31,8 @@ gsl::span<const IScriptNodeType::PinType> ScriptInputButton::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 5>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::FlowPin, PD::Output, true } };
+	const static auto data = std::array<PinType, 6>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::FlowPin, PD::Output, true } };
 	return data;
 }
 
@@ -41,7 +42,9 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(
 	str.append("Input ");
 	str.append(node.getSettings()["button"].asString(""), parameterColour);
 	str.append(" on ");
-	str.append(toString(node.getSettings()["device"].asInt(0)), parameterColour);
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(" with priority ");
+	str.append(node.getSettings()["priority"].asString(""), parameterColour);
 	return str.moveResults();
 }
 
@@ -73,9 +76,9 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 	constexpr uint8_t heldPin = 4;
 	constexpr uint8_t notHeldPin = 8;
 
-	const int device = node.getSettings()["device"].asInt(0);
+	const auto entity = readEntityId(environment, node, 1);
 	const int button = environment.getInputButtonByName(node.getSettings()["button"].asString("primary"));
-	const auto input = environment.getInputDevice(device);
+	const auto input = environment.getInputDevice(entity);
 
 	if (input) {
 		const auto prevMask = data.outputMask;
