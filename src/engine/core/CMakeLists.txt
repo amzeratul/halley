@@ -52,6 +52,7 @@ set(SOURCES
 
         "src/input/input_button_base.cpp"
         "src/input/input_device.cpp"
+        "src/input/input_exclusive.cpp"
         "src/input/input_joystick.cpp"
         "src/input/input_joystick_xinput.cpp"
         "src/input/input_keyboard.cpp"
@@ -158,6 +159,7 @@ set(HEADERS
         
         "include/halley/core/input/input_button_base.h"
         "include/halley/core/input/input_device.h"
+        "include/halley/core/input/input_exclusive.h"
         "include/halley/core/input/input_joystick.h"
         "include/halley/core/input/input_joystick_xinput.h"
         "include/halley/core/input/input_keyboard.h"

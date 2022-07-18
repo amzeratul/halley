@@ -27,6 +27,7 @@
 
 namespace Halley {
 	enum class KeyCode;
+	class InputExclusiveButton;
 
 	enum class JoystickType {
 		None,
@@ -53,6 +54,27 @@ namespace Halley {
 				"secondary",
 				"accept",
 				"cancel"
+			}};
+		}
+	};
+
+	enum class InputPriority : int8_t {
+        Minimum,
+        Low,
+        Normal,
+        High,
+        Maximum
+    };
+
+	template <>
+	struct EnumNames<InputPriority> {
+		constexpr std::array<const char*, 5> operator()() const {
+			return{{
+                "minimum",
+				"low",
+                "normal",
+				"high",
+                "maximum"
 			}};
 		}
 	};

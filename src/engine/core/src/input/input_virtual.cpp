@@ -25,6 +25,9 @@
 #include <algorithm>
 #include <utility>
 
+#include "halley/utils/algorithm.h"
+#include "input/input_exclusive.h"
+
 using namespace Halley;
 
 InputVirtual::InputVirtual(int nButtons, int nAxes)
@@ -499,5 +502,37 @@ void InputVirtual::setLastDevice(InputDevice* device)
 		setLastDevice(parent);
 	} else {
 		lastDevice = device;
+	}
+}
+
+std::unique_ptr<InputExclusiveButton> InputVirtual::makeExclusiveButton(InputButton button, InputPriority priority)
+{
+	auto exclusive = std::make_unique<InputExclusiveButton>(*this, priority, button);
+	addExclusiveButton(*exclusive);
+	return exclusive;
+}
+
+void InputVirtual::addExclusiveButton(InputExclusiveButton& exclusive)
+{
+	exclusiveButtons[exclusive.button].push_back(&exclusive);
+	refreshButtons(exclusive.button);
+}
+
+void InputVirtual::removeExclusiveButton(InputExclusiveButton& exclusive)
+{
+	std_ex::erase(exclusiveButtons[exclusive.button], &exclusive);
+	refreshButtons(exclusive.button);
+}
+
+void InputVirtual::refreshButtons(InputButton button)
+{
+	auto& bs = exclusiveButtons[button];
+	if (bs.empty()) {
+		exclusiveButtons.erase(button);
+	} else {
+		std::sort(bs.begin(), bs.end(), [] (const InputExclusiveButton* a, const InputExclusiveButton* b) { return a->priority > b->priority; });
+		for (size_t i = 0; i < bs.size(); ++i) {
+			bs[i]->active = i == 0;
+		}
 	}
 }

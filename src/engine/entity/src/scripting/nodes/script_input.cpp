@@ -4,6 +4,18 @@
 #include "halley/support/logger.h"
 using namespace Halley;
 
+ScriptInputButtonData::ScriptInputButtonData(const ScriptInputButtonData& other)
+{
+	*this = other;
+}
+
+ScriptInputButtonData& ScriptInputButtonData::operator=(const ScriptInputButtonData& other)
+{
+	outputMask = other.outputMask;
+	// Don't copy input
+	return *this;
+}
+
 ConfigNode ScriptInputButtonData::toConfigNode(const EntitySerializationContext& context)
 {
 	return ConfigNode(outputMask);
@@ -23,7 +35,7 @@ Vector<IScriptNodeType::SettingType> ScriptInputButton::getSettingTypes() const
 {
 	return {
 		SettingType{ "button", "Halley::InputButton", Vector<String>{""} },
-		SettingType{ "priority", "int", Vector<String>{"0"} },
+		SettingType{ "priority", "Halley::InputPriority", Vector<String>{"normal"} },
 	};
 }
 
@@ -44,7 +56,7 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(
 	str.append(" on ");
 	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
 	str.append(" with priority ");
-	str.append(node.getSettings()["priority"].asString(""), parameterColour);
+	str.append(node.getSettings()["priority"].asString("normal"), parameterColour);
 	return str.moveResults();
 }
 
@@ -76,16 +88,22 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 	constexpr uint8_t heldPin = 4;
 	constexpr uint8_t notHeldPin = 8;
 
-	const auto entity = readEntityId(environment, node, 1);
-	const int button = environment.getInputButtonByName(node.getSettings()["button"].asString("primary"));
-	const auto input = environment.getInputDevice(entity);
+	if (!data.input) {
+		const auto entity = readEntityId(environment, node, 1);
+		const int button = environment.getInputButtonByName(node.getSettings()["button"].asString("primary"));
+		const auto inputDevice = environment.getInputDevice(entity);
+		const auto priority = fromString<InputPriority>(node.getSettings()["priority"].asString("normal"));
+		if (inputDevice) {
+			data.input = inputDevice->makeExclusiveButton(button, priority);
+		}
+	}
 
-	if (input) {
+	if (data.input) {
 		const auto prevMask = data.outputMask;
 
-		const bool pressed = input->isButtonPressed(button);
-		const bool released = input->isButtonReleased(button);
-		const bool held = input->isButtonDown(button);
+		const bool pressed = data.input->isPressed();
+		const bool released = data.input->isReleased();
+		const bool held = data.input->isDown();
 
 		const uint8_t curMask = (pressed ? pressedPin : 0) | (released ? releasedPin : 0) | (held ? heldPin : notHeldPin);
 		const uint8_t activate = curMask & ~prevMask;
@@ -98,4 +116,9 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 	}
 
 	return Result(ScriptNodeExecutionState::Executing, time);
+}
+
+void ScriptInputButton::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptInputButtonData& data) const
+{
+	data.input.reset();
 }

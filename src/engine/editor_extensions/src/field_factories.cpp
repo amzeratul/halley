@@ -24,12 +24,10 @@ std::shared_ptr<IUIElement> EnumFieldFactory::createField(const ComponentEditorC
 
 	const auto& dropStyle = context.getUIFactory().getStyle("dropdown");
 
-	auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 	auto dropdown = std::make_shared<UIDropdown>("enum", dropStyle);
 	dropdown->setOptions(values);
-	container->add(dropdown);
 
-	container->bindData("enum", value, [&context, data](String newVal) {
+	dropdown->bindData("enum", value, [&context, data](String newVal) {
 		auto& node = data.getWriteableFieldData();
 		node = ConfigNode(std::move(newVal));
 		context.onEntityUpdated();
@@ -41,7 +39,7 @@ std::shared_ptr<IUIElement> EnumFieldFactory::createField(const ComponentEditorC
 		context.onEntityUpdated();
 	}
 	
-	return container;
+	return dropdown;
 }
 
 String EnumFieldFactory::getFieldType()

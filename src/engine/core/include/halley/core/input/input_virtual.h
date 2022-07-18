@@ -22,15 +22,21 @@
 #pragma once
 
 #include "input_button_base.h"
+#include "input_exclusive.h"
 #include "halley/maths/rect.h"
 #include "halley/data_structures/maybe.h"
 #include <set>
 
+#include "halley/data_structures/hash_map.h"
+
 namespace Halley {
 	enum class KeyCode;
 	using spInputDevice = std::shared_ptr<InputDevice>;
+	class InputExclusiveButton;
 
-	class InputVirtual : public InputDevice {
+	class InputVirtual final : public InputDevice {
+		friend class InputExclusiveButton;
+
 	public:
 		InputVirtual(int nButtons, int nAxes);
 
@@ -93,9 +99,9 @@ namespace Halley {
 
 		JoystickType getJoystickType() const override;
 
+		std::unique_ptr<InputExclusiveButton> makeExclusiveButton(InputButton button, InputPriority priority);
+
 	private:
-		void setLastDevice(InputDevice* device);
-		void updateLastDevice();
 
 		struct Bind {
 			spInputDevice device;
@@ -149,7 +155,15 @@ namespace Halley {
 		float repeatDelayFirst;
 		float repeatDelayHold;
 
+		HashMap<InputButton, Vector<InputExclusiveButton*>> exclusiveButtons;
+		
+		void setLastDevice(InputDevice* device);
+		void updateLastDevice();
 		std::set<spInputDevice> getAllDevices() const;
+
+		void addExclusiveButton(InputExclusiveButton& exclusive);
+		void removeExclusiveButton(InputExclusiveButton& exclusive);
+		void refreshButtons(InputButton button);
 	};
 
 	typedef std::shared_ptr<InputVirtual> spInputVirtual;

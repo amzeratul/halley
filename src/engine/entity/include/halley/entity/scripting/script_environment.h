@@ -2,6 +2,7 @@
 #include "script_message.h"
 #include "../entity_factory.h"
 #include "script_node_type.h"
+#include "halley/core/input/input_virtual.h"
 
 namespace Halley {
 	class UIWidget;
@@ -79,8 +80,8 @@ namespace Halley {
     	virtual void setDirection(EntityId entityId, const String& direction);
 
         void setInputEnabled(bool enabled);
-        void setInputDevice(EntityId target, std::shared_ptr<InputDevice> input);
-        std::shared_ptr<InputDevice> getInputDevice(EntityId target) const;
+        void setInputDevice(EntityId target, std::shared_ptr<InputVirtual> input);
+        std::shared_ptr<InputVirtual> getInputDevice(EntityId target) const;
         virtual int getInputButtonByName(const String& name) const;
 
         template <typename T>
@@ -120,7 +121,7 @@ namespace Halley {
 		const HalleyAPI& api;
     	World& world;
     	Resources& resources;
-        HashMap<EntityId, std::shared_ptr<InputDevice>> inputDevices;
+        HashMap<EntityId, std::shared_ptr<InputVirtual>> inputDevices;
     	const ScriptNodeTypeCollection& nodeTypeCollection;
         bool isHost = false;
         bool inputEnabled = true;

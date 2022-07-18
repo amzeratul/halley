@@ -435,12 +435,12 @@ void ScriptEnvironment::setInputEnabled(bool enabled)
 	inputEnabled = enabled;
 }
 
-void ScriptEnvironment::setInputDevice(EntityId target, std::shared_ptr<InputDevice> input)
+void ScriptEnvironment::setInputDevice(EntityId target, std::shared_ptr<InputVirtual> input)
 {
 	inputDevices[target] = std::move(input);
 }
 
-std::shared_ptr<InputDevice> ScriptEnvironment::getInputDevice(EntityId target) const
+std::shared_ptr<InputVirtual> ScriptEnvironment::getInputDevice(EntityId target) const
 {
 	if (!inputEnabled) {
 		return {};
