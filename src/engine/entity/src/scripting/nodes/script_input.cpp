@@ -63,13 +63,13 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(
 std::pair<String, Vector<ColourOverride>> ScriptInputButton::getPinDescription(const ScriptGraphNode& node, PinType element, ScriptPinId elementIdx) const
 {
 	switch (elementIdx) {
-	case 1:
-		return { "Flow Output when button is pressed", {}};
 	case 2:
-		return { "Flow Output when button is released", {}};
+		return { "Flow Output when button is pressed", {}};
 	case 3:
-		return { "Flow Output while button is held", {}};
+		return { "Flow Output when button is released", {}};
 	case 4:
+		return { "Flow Output while button is held", {}};
+	case 5:
 		return { "Flow Output while button is not held", {}};
 	default:
 		return ScriptNodeTypeBase<ScriptInputButtonData>::getPinDescription(node, element, elementIdx);

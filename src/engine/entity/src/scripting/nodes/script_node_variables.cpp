@@ -64,10 +64,12 @@ ScriptVariableScope ScriptVariable::getScope(const ScriptGraphNode& node) const
 
 String ScriptLiteral::getLargeLabel(const ScriptGraphNode& node) const
 {
-	const auto& val = node.getSettings()["value"];
+	const auto& val = getConfigNode(node);
 	const auto& str = val.asString("");
-	if (val.getType() == ConfigNodeType::String || str.isEmpty()) {
+	if (val.getType() == ConfigNodeType::String) {
 		return "\"" + str + "\"";
+	} else if (val.getType() == ConfigNodeType::Undefined) {
+		return "null";
 	}
 	return str;
 }
@@ -100,7 +102,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLiteral::getNodeDescription(cons
 		str.append("Int ");
 	} else if (data.getType() == ConfigNodeType::Float) {
 		str.append("Float ");
-	} else {
+	} else if (data.getType() != ConfigNodeType::Undefined) {
 		str.append("String ");
 		str.append("\"", parameterColour);
 		quoting = true;
@@ -120,7 +122,10 @@ ConfigNode ScriptLiteral::doGetData(ScriptEnvironment& environment, const Script
 
 ConfigNode ScriptLiteral::getConfigNode(const ScriptGraphNode& node) const
 {
-	const auto& value = node.getSettings()["value"].asString("0");
+	const auto& value = node.getSettings()["value"].asString("");
+	if (value == "null") {
+		return ConfigNode();
+	}
 	if (value.isNumber()) {
 		if (value.isInteger()) {
 			return ConfigNode(value.toInteger());
