@@ -3,13 +3,17 @@ using namespace Halley;
 
 ScriptFlowGateData::ScriptFlowGateData(const ConfigNode& node)
 {
-	flowing = node["flowing"].asBool(false);
+	if (node.hasKey("flowing")) {
+		flowing = node["flowing"].asBool();
+	}
 }
 
 ConfigNode ScriptFlowGateData::toConfigNode(const EntitySerializationContext& context)
 {
 	ConfigNode::MapType result;
-	result["flowing"] = flowing;
+	if (flowing) {
+		result["flowing"] = *flowing;
+	}
 	return result;
 }
 
@@ -17,7 +21,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptFlowGate::getPinConfiguration(co
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::FlowPin, PD::Output, true } };
+	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::FlowPin, PD::Output, true } };
 	return data;
 }
 
@@ -25,9 +29,8 @@ std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getNodeDescription(con
 {
 	const auto desc = getConnectedNodeName(world, node, graph, 1);
 	auto str = ColourStringBuilder(true);
-	str.append("Flow while ");
+	str.append("Flow based on ");
 	str.append(desc, parameterColour);
-	str.append(" is true");
 	return str.moveResults();
 }
 
@@ -35,6 +38,10 @@ std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getPinDescription(cons
 {
 	if (elementIdx == 1) {
 		return {"Condition", {}};
+	} else if (elementIdx == 2) {
+		return {"Flow while true", {}};
+	} else if (elementIdx == 3) {
+		return {"Flow while false", {}};
 	} else {
 		return ScriptNodeTypeBase<ScriptFlowGateData>::getPinDescription(node, element, elementIdx);
 	}
@@ -42,7 +49,7 @@ std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getPinDescription(cons
 
 void ScriptFlowGate::doInitData(ScriptFlowGateData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
-	data.flowing = false;
+	data.flowing.reset();
 }
 
 IScriptNodeType::Result ScriptFlowGate::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptFlowGateData& data) const
@@ -52,9 +59,9 @@ IScriptNodeType::Result ScriptFlowGate::doUpdate(ScriptEnvironment& environment,
 	if (shouldFlow != data.flowing) {
 		data.flowing = shouldFlow;
 		if (shouldFlow) {
-			return Result(ScriptNodeExecutionState::Fork, 0, 1);
+			return Result(ScriptNodeExecutionState::Fork, 0, 1, 2);
 		} else {
-			return Result(ScriptNodeExecutionState::Executing, time, 0, 1);
+			return Result(ScriptNodeExecutionState::Fork, 0, 2, 1);
 		}
 	} else {
 		return Result(ScriptNodeExecutionState::Executing, time);
