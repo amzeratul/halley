@@ -44,10 +44,6 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 
 	const bool hashChanged = graphState.getGraphHash() != currentGraph->getHash();
 	if (!graphState.hasStarted() || hashChanged) {
-		if (hashChanged) {
-			doTerminateState(false);
-		}
-
 		graphState.start(currentGraph->getHash());
 		graphState.prepareStates(serializationContext, time);
 		if (currentGraph->getStartNode()) {
@@ -215,18 +211,16 @@ ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState,
 	return result;
 }
 
-void ScriptEnvironment::doTerminateState(bool callDestructor)
+void ScriptEnvironment::doTerminateState()
 {
 	for (auto& thread: currentState->getThreads()) {
 		terminateThread(thread, false);
 	}
 	currentState->getThreads().clear();
 
-	if (callDestructor) {
-		for (auto& node: currentGraph->getNodes()) {
-			if (node.getType() == "destructor") {
-				runDestructor(node.getId());
-			}
+	for (auto& node: currentGraph->getNodes()) {
+		if (node.getType() == "destructor") {
+			runDestructor(node.getId());
 		}
 	}
 }
