@@ -19,7 +19,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptUIModal::getPinConfiguration(con
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType { ET::ReadDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType { ET::ReadDataPin, PD::Input }, PinType { ET::ReadDataPin, PD::Output } };
 	return data;
 }
 
@@ -28,6 +28,8 @@ std::pair<String, Vector<ColourOverride>> ScriptUIModal::getNodeDescription(cons
 	auto str = ColourStringBuilder(true);
 	str.append("Open modal UI ");
 	str.append(node.getSettings()["ui"].asString(""), parameterColour);
+	str.append(" with data ");
+	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	str.append(", wait for it, then output result value");
 	return str.moveResults();
 }
@@ -47,7 +49,7 @@ IScriptNodeType::Result ScriptUIModal::doUpdate(ScriptEnvironment& environment, 
 {
 	if (!data.ui) {
 		const String ui = node.getSettings()["ui"].asString("");
-		data.ui = environment.createModalUI(ui);
+		data.ui = environment.createModalUI(ui, readDataPin(environment, node, 2));
 	}
 	if (data.ui->isAlive()) {
 		return Result(ScriptNodeExecutionState::Executing, time);

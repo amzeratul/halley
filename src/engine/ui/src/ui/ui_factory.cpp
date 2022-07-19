@@ -679,14 +679,6 @@ UIFactoryWidgetProperties UIFactory::getScrollBarProperties() const
 	return result;
 }
 
-UIFactoryWidgetProperties UIFactory::getScrollBarPaneProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Scrollbar Pane";
-	//result.iconName = "widget_icons/dropdown.png";
-	return result;
-}
-
 UIFactoryWidgetProperties UIFactory::getSliderProperties() const
 {
 	UIFactoryWidgetProperties result;
@@ -1072,6 +1064,22 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollBarPane(const ConfigNode& entryNo
 
 	auto result = std::make_shared<UIScrollBarPane>(id, clipSize, style, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, alwaysShow);
 	result->getPane()->setScrollWheelEnabled(mouseWheelEnabled);
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getScrollBarPaneProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Scrollbar Pane";
+	//result.iconName = "widget_icons/dropdown.png";
+
+	result.entries.emplace_back("Clip Size", "clipSize", "Halley::Vector2f", "");
+	result.entries.emplace_back("Style", "style", "Halley::String", "scrollbar");
+	result.entries.emplace_back("Scroll Horizontal", "scrollHorizontal", "bool", "false");
+	result.entries.emplace_back("Scroll Vertical", "scrollVertical", "bool", "true");
+	result.entries.emplace_back("Auto Hide", "autoHide", "bool", "false");
+	result.entries.emplace_back("Mouse Wheel", "mouseWheelEnabled", "bool", "true");
+
 	return result;
 }
 

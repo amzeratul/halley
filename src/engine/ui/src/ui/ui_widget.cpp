@@ -791,6 +791,10 @@ const Vector<UIStyle>& UIWidget::getStyles() const
 	return styles;
 }
 
+void UIWidget::setResultValue(ConfigNode data)
+{
+}
+
 ConfigNode UIWidget::getResultValue()
 {
 	return ConfigNode();

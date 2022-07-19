@@ -180,6 +180,7 @@ namespace Halley {
 		bool hasStyle() const;
 		const Vector<UIStyle>& getStyles() const;
 
+		virtual void setResultValue(ConfigNode data);
 		virtual ConfigNode getResultValue();
 
 	protected:
