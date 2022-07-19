@@ -14,6 +14,8 @@ namespace Halley {
 	public:
 		UIEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow, const HalleyAPI& api);
 
+		void update(Time t, bool moved) override;
+
 		void reload() override;
 		void onMakeUI() override;
 		void markModified();
@@ -39,9 +41,11 @@ namespace Halley {
 		std::shared_ptr<UIEditorDisplay> display;
 		bool loaded = false;
 		bool modified = false;
+		bool pendingLoad = false;
 
 		String curSelection;
 
+		void open();
 		void doLoadUI();
 		void setSelectedWidget(const String& id);
 

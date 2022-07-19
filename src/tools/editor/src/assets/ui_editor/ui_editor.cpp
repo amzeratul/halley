@@ -5,15 +5,22 @@
 #include "ui_widget_list.h"
 #include "halley/tools/project/project.h"
 #include "src/scene/choose_window.h"
+#include "src/ui/project_window.h"
 using namespace Halley;
 
 UIEditor::UIEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow, const HalleyAPI& api)
 	: AssetEditor(factory, gameResources, project, AssetType::UIDefinition)
 	, projectWindow(projectWindow)
 {
-	gameI18N = std::make_unique<I18N>(gameResources, I18NLanguage("en-GB"));
-	gameFactory = project.getGameInstance()->createUIFactory(api, gameResources, *gameI18N);
-	factory.loadUI(*this, "halley/ui_editor");
+
+}
+
+void UIEditor::update(Time time, bool moved)
+{
+	if (pendingLoad && project.isDLLLoaded()) {
+		open();
+		pendingLoad = false;
+	}
 }
 
 void UIEditor::onMakeUI()
@@ -22,6 +29,7 @@ void UIEditor::onMakeUI()
 	display->setUIEditor(*this);
 	widgetList = getWidgetAs<UIWidgetList>("widgetList");
 	widgetList->setUIEditor(*this);
+	widgetList->setDefinition(uiDefinition);
 	widgetEditor = getWidgetAs<UIWidgetEditor>("widgetEditor");
 	widgetEditor->setUIEditor(*this, projectWindow);
 	widgetEditor->setGameResources(gameResources);
@@ -99,11 +107,26 @@ void UIEditor::reload()
 
 std::shared_ptr<const Resource> UIEditor::loadResource(const String& id)
 {
-	uiDefinition = std::make_shared<UIDefinition>(*gameResources.get<UIDefinition>(id));
+	if (project.isDLLLoaded()) {
+		open();
+		return uiDefinition;
+	} else {
+		pendingLoad = true;
+		return {};
+	}
+}
 
-	widgetList->setDefinition(uiDefinition);
+void UIEditor::open()
+{
+	uiDefinition = std::make_shared<UIDefinition>(*gameResources.get<UIDefinition>(assetId));
+	if (widgetList) {
+		widgetList->setDefinition(uiDefinition);
+	}
 
-	return uiDefinition;
+	gameI18N = std::make_unique<I18N>(gameResources, I18NLanguage("en-GB"));
+	auto* game = project.getGameInstance();
+	gameFactory = game->createUIFactory(projectWindow.getAPI(), gameResources, *gameI18N);
+	factory.loadUI(*this, "halley/ui_editor");
 }
 
 void UIEditor::doLoadUI()
