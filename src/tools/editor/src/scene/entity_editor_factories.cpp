@@ -1557,6 +1557,7 @@ public:
 		for (auto& [k, v]: ecsData.getSystems()) {
 			systemIds.push_back(k);
 		}
+		std::sort(systemIds.begin(), systemIds.end());
 
 		const auto& dropStyle = context.getUIFactory().getStyle("dropdownLight");
 		auto dropdown = std::make_shared<UIDropdown>("systemType", dropStyle);
