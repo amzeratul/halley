@@ -15,6 +15,7 @@
 #include "nodes/script_network.h"
 #include "nodes/script_sprite.h"
 #include "nodes/script_node_variables.h"
+#include "nodes/script_transform.h"
 #include "nodes/script_ui.h"
 #include "nodes/script_wait.h"
 #include "nodes/script_wait_for.h"
@@ -324,4 +325,6 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptDataToEntityId>());
 	addScriptNode(std::make_unique<ScriptUIModal>());
 	addScriptNode(std::make_unique<ScriptUIInWorld>());
+	addScriptNode(std::make_unique<ScriptSetPosition>());
+	addScriptNode(std::make_unique<ScriptGetPosition>());
 }

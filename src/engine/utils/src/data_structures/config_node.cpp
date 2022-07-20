@@ -585,7 +585,7 @@ bool ConfigNode::asBool() const
 		}
 		return !asString().isEmpty();
 	}
-	return false;
+	return type != ConfigNodeType::Undefined;
 }
 
 Vector2i ConfigNode::asVector2i() const
