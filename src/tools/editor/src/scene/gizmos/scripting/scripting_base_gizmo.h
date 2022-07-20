@@ -22,8 +22,8 @@ namespace Halley {
 		ScriptGraphNode& getNode(ScriptNodeId id);
 		const ScriptGraphNode& getNode(ScriptNodeId id) const;
 
-		ConfigNode copySelection() const;
-		ConfigNode cutSelection();
+		[[nodiscard]] ConfigNode copySelection() const;
+		[[nodiscard]] ConfigNode cutSelection();
 		void paste(const ConfigNode& node);
 		bool isValidPaste(const ConfigNode& node) const;
 		bool deleteSelection();

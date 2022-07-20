@@ -166,7 +166,7 @@ bool ScriptGizmoUI::onKeyPress(KeyboardKeyPress key)
 	}
 
 	if (key.is(KeyCode::X, KeyMods::Ctrl)) {
-		gizmo.cutSelection();
+		gizmo.cutSelectionToClipboard(clipboard);
 		return true;
 	}
 
