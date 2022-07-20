@@ -101,9 +101,10 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 	if (data.input) {
 		const auto prevMask = data.outputMask;
 
-		const bool pressed = data.input->isPressed();
-		const bool released = data.input->isReleased();
-		const bool held = data.input->isDown();
+		const bool canRead = environment.isInputEnabled();
+		const bool pressed = canRead && data.input->isPressed();
+		const bool released = canRead && data.input->isReleased();
+		const bool held = canRead && data.input->isDown();
 
 		const uint8_t curMask = (pressed ? pressedPin : 0) | (released ? releasedPin : 0) | (held ? heldPin : notHeldPin);
 		const uint8_t activate = curMask & ~prevMask;

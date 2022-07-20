@@ -80,6 +80,7 @@ namespace Halley {
     	virtual void setDirection(EntityId entityId, const String& direction);
 
         void setInputEnabled(bool enabled);
+        bool isInputEnabled() const;
         void setInputDevice(EntityId target, std::shared_ptr<InputVirtual> input);
         std::shared_ptr<InputVirtual> getInputDevice(EntityId target) const;
         virtual int getInputButtonByName(const String& name) const;
