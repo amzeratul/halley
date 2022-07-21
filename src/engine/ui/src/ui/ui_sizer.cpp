@@ -59,7 +59,7 @@ void UISizerEntry::placeInside(Rect4f rect, Rect4f origRect, Vector2f minSize, I
 	}
 
 	const Vector2f spareSize = cellSize - size;
-	const Vector2f pos = (rect.getTopLeft() + spareSize * anchoring).round();
+	const Vector2f pos = rect.getTopLeft() + (spareSize * anchoring).round();
 	const auto finalRect = Rect4f(pos, pos + size);
 
 	if (listener) {

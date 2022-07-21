@@ -20,6 +20,7 @@ namespace Halley {
 
 		UIAnchor& setBounds(UIParent& parent);
 		UIAnchor& setAutoBounds(bool enabled);
+		UIAnchor& setNumberOfSubpixels(float num);
 		
 		void position(UIWidget& widget) const;
 
@@ -35,5 +36,6 @@ namespace Halley {
 		Vector2f absoluteOffset;
 		std::optional<Rect4f> bounds;
 		bool autoBounds = false;
+		float numberOfSubpixels = 1;
 	};
 }

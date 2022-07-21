@@ -42,6 +42,12 @@ UIAnchor& UIAnchor::setAutoBounds(bool enabled)
 	return *this;
 }
 
+UIAnchor& UIAnchor::setNumberOfSubpixels(float num)
+{
+	numberOfSubpixels = num;
+	return *this;
+}
+
 void UIAnchor::position(UIWidget& widget) const
 {
 	const auto size = widget.getSize();
@@ -54,8 +60,8 @@ void UIAnchor::position(UIWidget& widget) const
 		targetPos.x = clamp(targetPos.x, curBounds->getLeft(), curBounds->getRight() - size.x);
 		targetPos.y = clamp(targetPos.y, curBounds->getTop(), curBounds->getBottom() - size.y);
 	}
-	
-	widget.setPosition(targetPos.round());
+
+	widget.setPosition((targetPos * numberOfSubpixels).round() / numberOfSubpixels);
 }
 
 UIAnchor UIAnchor::operator*(float f) const
@@ -86,7 +92,8 @@ bool UIAnchor::operator==(const UIAnchor& other) const
 		&& relativeAlignment == other.relativeAlignment
 		&& absoluteOffset == other.absoluteOffset
 		&& bounds == other.bounds
-		&& autoBounds == other.autoBounds;
+		&& autoBounds == other.autoBounds
+		&& numberOfSubpixels == other.numberOfSubpixels;
 }
 
 bool UIAnchor::operator!=(const UIAnchor& other) const
