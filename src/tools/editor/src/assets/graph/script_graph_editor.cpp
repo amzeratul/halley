@@ -131,6 +131,8 @@ void ScriptGraphEditor::onProjectDLLStatusChange(ProjectDLL::Status status)
 		clear();
 		gizmoEditor.reset();
 		infiniCanvas.reset();
+		scriptNodeTypes.reset();
+		entityEditorFactory.reset();
 		needsLoading = true;
 		hasUI = false;
 	}
