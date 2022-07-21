@@ -117,12 +117,18 @@ bool ScriptWhileLoop::doIsStackRollbackPoint(ScriptEnvironment& environment, con
 
 ScriptLerpLoopData::ScriptLerpLoopData(const ConfigNode& node)
 {
-	time = node.asFloat(0);
+	if (node.getType() != ConfigNodeType::Undefined) {
+		time = node.asFloat();
+	}
 }
 
 ConfigNode ScriptLerpLoopData::toConfigNode(const EntitySerializationContext& context)
 {
-	return ConfigNode(time);
+	if (time) {
+		return ConfigNode(*time);
+	} else {
+		return ConfigNode();
+	}
 }
 
 Vector<IScriptNodeType::SettingType> ScriptLerpLoop::getSettingTypes() const
@@ -179,17 +185,26 @@ void ScriptLerpLoop::doInitData(ScriptLerpLoopData& data, const ScriptGraphNode&
 IScriptNodeType::Result ScriptLerpLoop::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLerpLoopData& curData) const
 {
 	// Important: check for done before incrementing time. This makes sure that we had at least one iteration outputting 1.0f before terminating
+	// If time is not set at all, then it's the first iteration, which we'll report as consuming 0 seconds, this is to ensure we also get a proper instant first iteration
+
 	const float length = node.getSettings()["time"].asFloat(1);
-	const bool done = curData.time >= length;
-	const float timeLeft = std::max(length - curData.time, 0.0f);
-	curData.time += static_cast<float>(time);
-	return Result(ScriptNodeExecutionState::Done, std::min(static_cast<Time>(timeLeft), time), done ? 1 : 2);
+
+	const bool firstRun = !curData.time;
+	if (firstRun) {
+		curData.time = 0.0f;
+	}
+	const bool done = *curData.time >= length;
+
+	const float timeLeft = std::max(length - *curData.time, 0.0f);
+	*curData.time += static_cast<float>(time);
+
+	return Result(ScriptNodeExecutionState::Done, firstRun ? 0 : std::min(static_cast<Time>(timeLeft), time), done ? 1 : 2);
 }
 
 ConfigNode ScriptLerpLoop::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptLerpLoopData& curData) const
 {
 	const float length = node.getSettings()["time"].asFloat(1);
-	return ConfigNode(clamp(curData.time / length, 0.0f, 1.0f));
+	return ConfigNode(clamp(curData.time.value_or(0) / length, 0.0f, 1.0f));
 }
 
 bool ScriptLerpLoop::doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId outPin, ScriptLerpLoopData& curData) const

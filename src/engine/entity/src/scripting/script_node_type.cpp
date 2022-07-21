@@ -8,6 +8,7 @@
 #include "nodes/script_execution_control.h"
 #include "nodes/script_logic_gates.h"
 #include "nodes/script_audio.h"
+#include "nodes/script_entity.h"
 #include "nodes/script_flow_gate.h"
 #include "nodes/script_input.h"
 #include "nodes/script_loop.h"
@@ -330,4 +331,6 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptUIInWorld>());
 	addScriptNode(std::make_unique<ScriptSetPosition>());
 	addScriptNode(std::make_unique<ScriptGetPosition>());
+	addScriptNode(std::make_unique<ScriptSpawnEntity>());
+	addScriptNode(std::make_unique<ScriptDestroyEntity>());
 }

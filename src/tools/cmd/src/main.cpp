@@ -32,3 +32,11 @@ int main(int argc, char** argv)
 		}
 	}
 }
+
+namespace Halley {
+	// Make the linker shut up about this
+	class ComponentReflector;
+	ComponentReflector& getComponentReflector(int componentId) {
+		throw 0;
+	}
+}
