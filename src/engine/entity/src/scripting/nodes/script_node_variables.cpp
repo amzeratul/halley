@@ -271,6 +271,54 @@ ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const Scr
 }
 
 
+
+
+Vector<IScriptNodeType::SettingType> ScriptLerp::getSettingTypes() const
+{
+	return {
+		SettingType{ "from", "float", Vector<String>{"0"} },
+		SettingType{ "to", "float", Vector<String>{"1"} },
+	};
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptLerp::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptLerp::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Returns lerp(");
+	str.append(toString(node.getSettings()["from"].asFloat(0)), parameterColour);
+	str.append(", ");
+	str.append(toString(node.getSettings()["to"].asFloat(1)), parameterColour);
+	str.append(", ");
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(")");
+	return str.moveResults();
+}
+
+String ScriptLerp::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId element_idx) const
+{
+	const auto from = node.getSettings()["from"].asFloat(0);
+	const auto to = node.getSettings()["to"].asFloat(1);
+	return "lerp(" + toString(from) + ", " + toString(to) + ", " + getConnectedNodeName(world, node, graph, 0) + ")";
+}
+
+ConfigNode ScriptLerp::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pin_n) const
+{
+	const auto from = node.getSettings()["from"].asFloat(0);
+	const auto to = node.getSettings()["to"].asFloat(1);
+	const auto t = readDataPin(environment, node, 0).asFloat(0);
+	return ConfigNode(lerp(from, to, t));
+}
+
+
+
 gsl::span<const IScriptNodeType::PinType> ScriptAdvanceTo::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
