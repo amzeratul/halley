@@ -7,7 +7,7 @@ component:
   - sprite:
       type: 'Halley::Sprite'
       collapse: true
-      canSave: false
+      canSave: true
   - layer:
       type: int
       defaultValue: 0

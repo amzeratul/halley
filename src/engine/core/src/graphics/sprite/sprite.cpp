@@ -642,9 +642,10 @@ Sprite& Sprite::setOuterBorder(Vector4s border)
 
 ConfigNode ConfigNodeSerializer<Sprite>::serialize(const Sprite& sprite, const EntitySerializationContext& context)
 {
-	// TODO
-	// How do I even do this, though...
-	ConfigNode node;
+	ConfigNode node = ConfigNode::MapType();
+	if (sprite.getColour() != Colour4f(1, 1, 1, 1)) {
+		node["colour"] = sprite.getColour().toString();
+	}
 	return node;
 }
 
