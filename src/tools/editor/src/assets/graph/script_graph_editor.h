@@ -2,12 +2,13 @@
 
 #include "script_gizmo_ui.h"
 #include "../asset_editor.h"
+#include "halley/tools/dll/project_dll.h"
 #include "src/scene/entity_editor.h"
 #include "src/ui/infini_canvas.h"
 #include "src/ui/scroll_background.h"
 
 namespace Halley {
-    class ScriptGraphEditor : public AssetEditor {
+    class ScriptGraphEditor : public AssetEditor, IProjectDLLListener {
 	public:
 		ScriptGraphEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow);
 		~ScriptGraphEditor() override;
@@ -21,7 +22,9 @@ namespace Halley {
 		void save() override;
 		bool isModified() override;
 		void markModified();
-		
+
+		void onProjectDLLStatusChange(ProjectDLL::Status status) override;
+
 	protected:
     	void update(Time t, bool moved) override;
         std::shared_ptr<const Resource> loadResource(const String& assetId) override;
@@ -44,6 +47,7 @@ namespace Halley {
 		bool pendingLoad = false;
 		bool hasUI = false;
 		bool autoAcquire = false;
+		bool dllListenerAdded = false;
 
     	std::optional<uint32_t> scriptEnumHandle;
 		std::optional<uint32_t> scriptStateHandle;

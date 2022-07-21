@@ -15,6 +15,13 @@ ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResource
 
 ScriptGraphEditor::~ScriptGraphEditor()
 {
+	project.withDLL([&] (ProjectDLL& dll)
+	{
+		if (dllListenerAdded) {
+			dll.removeReloadListener(*this);
+		}
+	});
+
 	setListeningToClient(false);
 	assert(!scriptEnumHandle);
 	assert(!scriptStateHandle);
@@ -27,6 +34,14 @@ void ScriptGraphEditor::onActiveChanged(bool active)
 
 void ScriptGraphEditor::onMakeUI()
 {
+	project.withDLL([&] (ProjectDLL& dll)
+	{
+		if (!dllListenerAdded) {
+			dll.addReloadListener(*this);
+			dllListenerAdded = true;
+		}
+	});
+
 	scriptNodeTypes = projectWindow.getScriptNodeTypes();
 	entityEditorFactory = std::make_shared<EntityEditorFactory>(projectWindow.getEntityEditorFactoryRoot(), nullptr);
 
@@ -108,6 +123,17 @@ bool ScriptGraphEditor::isModified()
 void ScriptGraphEditor::markModified()
 {
 	modified = true;
+}
+
+void ScriptGraphEditor::onProjectDLLStatusChange(ProjectDLL::Status status)
+{
+	if (status == ProjectDLL::Status::Unloaded) {
+		clear();
+		gizmoEditor.reset();
+		infiniCanvas.reset();
+		needsLoading = true;
+		hasUI = false;
+	}
 }
 
 std::shared_ptr<const Resource> ScriptGraphEditor::loadResource(const String& assetId)
@@ -248,14 +274,16 @@ void ScriptGraphEditor::updateNodeUnderCursor()
 
 ConfigNode ScriptGraphEditor::getCurrentNodeConfig()
 {
-	if (const auto node = gizmoEditor->getNodeUnderMouse()) {
-		ConfigNode::MapType result;
-		result["nodeId"] = node->nodeId;
-		result["elementId"] = static_cast<int>(static_cast<int8_t>(node->elementId));
-		return result;
-	} else {
-		return {};
+	if (gizmoEditor) {
+		if (const auto node = gizmoEditor->getNodeUnderMouse()) {
+			ConfigNode::MapType result;
+			result["nodeId"] = node->nodeId;
+			result["elementId"] = static_cast<int>(static_cast<int8_t>(node->elementId));
+			return result;
+		}
 	}
+
+	return {};
 }
 
 void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
@@ -298,7 +326,9 @@ void ScriptGraphEditor::onCurNodeData(const ConfigNode& curNodeData)
 
 void ScriptGraphEditor::setCurNodeData(const String& str)
 {
-	gizmoEditor->setCurNodeDevConData(str);
+	if (gizmoEditor) {
+		gizmoEditor->setCurNodeDevConData(str);
+	}
 }
 
 void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
@@ -323,6 +353,9 @@ void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
 
 void ScriptGraphEditor::refreshScriptEnum()
 {
+	if (!hasUI) {
+		return;
+	}
 	const auto instances = getWidgetAs<UIDropdown>("instances");
 	Vector<String> ids;
 	Vector<LocalisedString> names;
