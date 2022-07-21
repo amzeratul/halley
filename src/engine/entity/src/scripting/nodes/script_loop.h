@@ -41,6 +41,36 @@ namespace Halley {
 		bool doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId outPin) const override;
 	};
 
+	class ScriptLerpLoopData : public ScriptStateData<ScriptLerpLoopData> {
+	public:
+		float time = 0;
+
+		ScriptLerpLoopData() = default;
+		ScriptLerpLoopData(const ConfigNode& node);
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+	};
+	
+	class ScriptLerpLoop final : public ScriptNodeTypeBase<ScriptLerpLoopData> {
+	public:
+		String getId() const override { return "lerpLoop"; }
+		String getName() const override { return "Lerp Loop"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/lerp.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
+		bool canKeepData() const override { return true; }
+
+		Vector<SettingType> getSettingTypes() const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		String getLabel(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		std::pair<String, Vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, ScriptPinId elementIdx) const override;
+		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const override;
+
+		void doInitData(ScriptLerpLoopData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLerpLoopData& curData) const override;
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptLerpLoopData& curData) const override;
+		bool doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId outPin, ScriptLerpLoopData& curData) const override;
+	};
+
 
 	class ScriptEveryFrameData : public ScriptStateData<ScriptEveryFrameData> {
 	public:

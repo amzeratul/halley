@@ -383,7 +383,7 @@ ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(ScriptNodeId no
 	result.activationTime = state.timeSinceStart;
 	
 	const auto& node = getScriptGraphPtr()->getNodes()[nodeId];
-	if (node.getNodeType().getClassification() == ScriptNodeClassification::Variable) {
+	if (node.getNodeType().getClassification() == ScriptNodeClassification::Variable || node.getNodeType().getClassification() == ScriptNodeClassification::Expression) {
 		result.state = NodeIntrospectionState::Visited;
 	} else {
 		int threadsFound = 0;
