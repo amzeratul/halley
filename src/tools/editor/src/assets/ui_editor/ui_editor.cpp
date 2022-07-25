@@ -50,6 +50,7 @@ void UIEditor::onMakeUI()
 	});
 
 	doLoadUI();
+	setSelectedWidget(getWidgetAs<UIList>("widgetsList")->getSelectedOptionId());
 }
 
 void UIEditor::markModified()
