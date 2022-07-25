@@ -63,7 +63,8 @@ namespace Halley {
 			Vector<ScriptNodeId> nodeIds;
 			Vector<Vector2f> startPos;
 			std::optional<Vector2f> startMousePos;
-			bool sticky;
+			bool sticky = false;
+			bool hadChange = false;
 		};
 
 		struct Connection {
@@ -133,7 +134,7 @@ namespace Halley {
 
 		void updateNodeAutoConnection(gsl::span<const ScriptNodeId> nodes);
 		void pruneConflictingAutoConnections();
-		void finishAutoConnection();
+		bool finishAutoConnection();
 		std::optional<Connection> findAutoConnectionForPin(ScriptNodeId srcNodeId, ScriptPinId srcPinIdx, Vector2f nodePos, ScriptNodePinType srcPinType, gsl::span<const ScriptNodeId> excludeIds) const;
 
 		void assignNodeTypes() const;

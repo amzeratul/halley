@@ -166,14 +166,18 @@ void ScriptingBaseGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 	if (inputState.mousePos) {
 		if (dragging->startMousePos) {
 			const Vector2f delta = inputState.mousePos.value() - *dragging->startMousePos;
-			for (size_t i = 0; i < dragging->nodeIds.size(); ++i) {
-				auto& node = scriptGraph->getNodes()[dragging->nodeIds[i]];
-				node.setPosition(dragging->startPos[i] + delta);
+			if (delta.length() > 1.0f) {
+				for (size_t i = 0; i < dragging->nodeIds.size(); ++i) {
+					auto& node = scriptGraph->getNodes()[dragging->nodeIds[i]];
+					node.setPosition(dragging->startPos[i] + delta);
+					dragging->hadChange = true;
+				}
 			}
 		} else {
 			for (size_t i = 0; i < dragging->nodeIds.size(); ++i) {
 				auto& node = scriptGraph->getNodes()[dragging->nodeIds[i]];
 				node.setPosition(*inputState.mousePos - basePos);
+				dragging->hadChange = true;
 			}
 		}
 	}
@@ -182,8 +186,10 @@ void ScriptingBaseGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 
 	if ((dragging->sticky && inputState.leftClickPressed) || (!dragging->sticky && !inputState.leftClickHeld)) {
 		dragging.reset();
-		finishAutoConnection();
-		onModified();
+		const bool newConnection = finishAutoConnection();
+		if (dragging->hadChange || newConnection) {
+			onModified();
+		}
 	}
 }
 
@@ -664,12 +670,14 @@ void ScriptingBaseGizmo::pruneConflictingAutoConnections()
 	}
 }
 
-void ScriptingBaseGizmo::finishAutoConnection()
+bool ScriptingBaseGizmo::finishAutoConnection()
 {
+	bool changed = false;
 	for (const auto& conn: pendingAutoConnections) {
-		scriptGraph->connectPins(conn.srcNode, conn.srcPin, conn.dstNode, conn.dstPin);
+		changed = scriptGraph->connectPins(conn.srcNode, conn.srcPin, conn.dstNode, conn.dstPin) || changed;
 	}
 	pendingAutoConnections.clear();
+	return changed;
 }
 
 std::optional<ScriptingBaseGizmo::Connection> ScriptingBaseGizmo::findAutoConnectionForPin(ScriptNodeId srcNodeId, ScriptPinId srcPinIdx, Vector2f nodePos, ScriptNodePinType srcPinType, gsl::span<const ScriptNodeId> excludeIds) const
