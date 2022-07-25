@@ -153,6 +153,7 @@ set(HEADERS
         "include/halley/core/graphics/text/text_renderer.h"
         "include/halley/core/graphics/texture_descriptor.h"
         "include/halley/core/graphics/texture.h"
+        "include/halley/core/graphics/texture.natvis"
 		"include/halley/core/graphics/window.h"
         
         "include/halley/core/halley_core.h"

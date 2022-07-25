@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="Halley::Entity">
+	  <DisplayString Condition="prefab._Ptr">{{id:{entityId.value} name:{name} prefab:{prefab->assetId}}}</DisplayString>
+	  <DisplayString>{{id:{entityId.value} name:{name}}}</DisplayString>
+  </Type>
+</AutoVisualizer>

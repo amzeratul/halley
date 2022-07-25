@@ -192,6 +192,7 @@ set(HEADERS
         "include/halley/resources/metadata.h"
         "include/halley/resources/resource_data.h"
         "include/halley/resources/resource.h"
+        "include/halley/resources/resource.natvis"
 
         "include/halley/support/assert.h"
         "include/halley/support/console.h"
