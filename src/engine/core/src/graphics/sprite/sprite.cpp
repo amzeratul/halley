@@ -646,6 +646,25 @@ ConfigNode ConfigNodeSerializer<Sprite>::serialize(const Sprite& sprite, const E
 	if (sprite.getColour() != Colour4f(1, 1, 1, 1)) {
 		node["colour"] = sprite.getColour().toString();
 	}
+	if (sprite.hasMaterial()) {
+		const auto& materialDef = sprite.getMaterial().getDefinition();
+		if (materialDef.getAssetId() != "Halley/Sprite") {
+			node["material"] = materialDef.getAssetId();
+		}
+		const auto& texs = materialDef.getTextures();
+		for (size_t i = 0; i < texs.size(); ++i) {
+			const auto& tex = sprite.getMaterial().getTexture(static_cast<int>(i));
+			const auto& texDef = texs[i];
+			if (tex && tex->getAssetId() != texDef.name && tex->getAssetId() != texDef.defaultTextureName) {
+				node["tex_" + texDef.name] = tex->getAssetId();
+			}
+		}
+		for (const auto& ub: materialDef.getUniformBlocks()) {
+			for (const auto& u: ub.uniforms) {
+				// ?
+			}
+		}
+	}
 	return node;
 }
 
