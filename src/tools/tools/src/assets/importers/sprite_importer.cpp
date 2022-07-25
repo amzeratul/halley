@@ -9,6 +9,7 @@
 #include "halley/data_structures/bin_pack.h"
 #include "halley/text/string_converter.h"
 #include "../../sprites/aseprite_reader.h"
+#include "halley/core/graphics/material/material_definition.h"
 #include "halley/support/logger.h"
 #include "halley/utils/hash.h"
 
@@ -125,7 +126,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			
 			auto spriteSheetName = baseSpriteSheetName;// +(frames.first.isEmpty() ? "" : ":" + frames.first);
 			auto spriteName = baseSpriteName + (frames.first.isEmpty() ? "" : ":" + frames.first);
-			Animation animation = generateAnimation(spriteName, spriteSheetName, meta.getString("material", "Halley/Sprite"), frames.second);
+			Animation animation = generateAnimation(spriteName, spriteSheetName, meta.getString("material", MaterialDefinition::defaultMaterial), frames.second);
 			collector.output(spriteName, AssetType::Animation, Serializer::toBytes(animation), {}, "pc", inputFile.name);
 
 			Vector<ImageData> totalFrames;
@@ -153,7 +154,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	ConfigNode spriteInfo;
 	auto atlasImage = generateAtlas(groupAtlasName, totalFrames, *spriteSheet, spriteInfo, powerOfTwo);
 	spriteSheet->setTextureName(groupAtlasName);
-	spriteSheet->setDefaultMaterialName(meta.getString("material", meta.getString("defaultMaterial", "Halley/Sprite")));
+	spriteSheet->setDefaultMaterialName(meta.getString("material", meta.getString("defaultMaterial", MaterialDefinition::defaultMaterial)));
 
 	// Metafile parameters
 	auto size = atlasImage->getSize();

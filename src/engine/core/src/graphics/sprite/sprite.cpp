@@ -281,7 +281,7 @@ Sprite& Sprite::setSize(Vector2f v)
 Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 {
 	if (materialName == "") {
-		materialName = "Halley/Sprite";
+		materialName = MaterialDefinition::defaultMaterial;
 	}
 	setMaterial(std::make_shared<Material>(resources.get<MaterialDefinition>(materialName)), false);
 	return *this;
@@ -394,7 +394,7 @@ Sprite& Sprite::setImage(Resources& resources, VideoAPI& videoAPI, std::shared_p
 		tex->startLoading();
 		tex->load(std::move(desc));
 
-		const auto matDef = resources.get<MaterialDefinition>(materialName.isEmpty() ? "Halley/Sprite" : materialName);
+		const auto matDef = resources.get<MaterialDefinition>(materialName.isEmpty() ? MaterialDefinition::defaultMaterial : materialName);
 		setImage(tex, matDef);
 		setImageData(*tex);
 	}
@@ -418,7 +418,7 @@ Sprite& Sprite::setSprite(Resources& resources, const String& spriteSheetName, c
 	Expects (!imageName.isEmpty());
 
 	if (materialName == "") {
-		materialName = "Halley/Sprite";
+		materialName = MaterialDefinition::defaultMaterial;
 	}
 	auto spriteSheet = resources.get<SpriteSheet>(spriteSheetName);
 	setImage(spriteSheet->getTexture(), resources.get<MaterialDefinition>(materialName));
@@ -648,7 +648,7 @@ ConfigNode ConfigNodeSerializer<Sprite>::serialize(const Sprite& sprite, const E
 	}
 	if (sprite.hasMaterial()) {
 		const auto& materialDef = sprite.getMaterial().getDefinition();
-		if (materialDef.getAssetId() != "Halley/Sprite") {
+		if (materialDef.getAssetId() != MaterialDefinition::defaultMaterial) {
 			node["material"] = materialDef.getAssetId();
 		}
 		const auto& texs = materialDef.getTextures();
@@ -720,7 +720,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		material = context.resources->get<MaterialDefinition>(materialNode.asString());
 		hasNewMaterial = true;
 	} else if (materialNode.getType() == ConfigNodeType::Del || !sprite.hasMaterial()) {
-		material = context.resources->get<MaterialDefinition>("Halley/Sprite");
+		material = context.resources->get<MaterialDefinition>(MaterialDefinition::defaultMaterial);
 		hasNewMaterial = true;
 	} else {
 		material = sprite.getMaterial().getDefinitionPtr();

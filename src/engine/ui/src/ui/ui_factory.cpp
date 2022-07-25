@@ -22,6 +22,7 @@
 #include "halley/ui/widgets/ui_paged_pane.h"
 #include "halley/support/logger.h"
 #include "ui_validator.h"
+#include "halley/core/graphics/material/material_definition.h"
 #include "halley/ui/widgets/ui_framed_image.h"
 #include "halley/ui/widgets/ui_hybrid_list.h"
 #include "widgets/ui_spin_list.h"
@@ -961,7 +962,7 @@ UIFactoryWidgetProperties UIFactory::getImageProperties() const
 {
 	UIFactoryWidgetProperties result;
 	result.entries.emplace_back("Image", "image", "Halley::ResourceReference<Halley::SpriteResource>", "");
-	result.entries.emplace_back("Material", "material", "Halley::ResourceReference<Halley::MaterialDefinition>", "Halley/Sprite");
+	result.entries.emplace_back("Material", "material", "Halley::ResourceReference<Halley::MaterialDefinition>", MaterialDefinition::defaultMaterial);
 	result.entries.emplace_back("Colour", "colour", "Halley::Colour4f", "#FFFFFF");
 	result.entries.emplace_back("Flip", "flip", "bool", "false");
 	result.entries.emplace_back("Pivot", "pivot", "std::optional<Halley::Vector2f>", "");

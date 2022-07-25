@@ -328,7 +328,7 @@ public:
 		fieldData.ensureType(ConfigNodeType::Map);
 
 		auto materialWidget = std::make_shared<SelectAssetWidget>("material", context.getUIFactory(), AssetType::MaterialDefinition, context.getGameResources(), context.getProjectWindow());
-		materialWidget->setDefaultAssetId("Halley/Sprite");
+		materialWidget->setDefaultAssetId(MaterialDefinition::defaultMaterial);
 		
 		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
 		container->getSizer().setColumnProportions({{0, 1}});

@@ -189,6 +189,8 @@ namespace Halley
 		friend class MaterialTextureParameter;
 
 	public:
+		constexpr static const char* defaultMaterial = "Halley/Sprite";
+
 		MaterialDefinition();
 		explicit MaterialDefinition(ResourceLoader& loader);
 

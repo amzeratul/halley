@@ -75,7 +75,7 @@ void SpriteSheetFrameTag::deserialize(Deserializer& s)
 }
 
 SpriteSheet::SpriteSheet()
-	: defaultMaterialName("Halley/Sprite")
+	: defaultMaterialName(MaterialDefinition::defaultMaterial)
 {
 }
 

@@ -144,7 +144,7 @@ void AnimationEditorDisplay::setAnimation(std::shared_ptr<const Animation> a)
 
 void AnimationEditorDisplay::setSprite(std::shared_ptr<const SpriteResource> sprite)
 {
-	origSprite.setImage(*sprite, resources.get<MaterialDefinition>("Halley/Sprite"));
+	origSprite.setImage(*sprite, resources.get<MaterialDefinition>(MaterialDefinition::defaultMaterial));
 	const auto pivot = Vector2i(origSprite.getAbsolutePivot());
 	const auto origin = -pivot - Vector2i(origSprite.getOuterBorder().xy());
 	const auto sz = Vector2i(origSprite.getUncroppedSize());
@@ -156,7 +156,7 @@ void AnimationEditorDisplay::setSprite(std::shared_ptr<const SpriteResource> spr
 
 void AnimationEditorDisplay::setTexture(std::shared_ptr<const Texture> texture)
 {
-	origSprite.setImage(texture, resources.get<MaterialDefinition>("Halley/Sprite"))
+	origSprite.setImage(texture, resources.get<MaterialDefinition>(MaterialDefinition::defaultMaterial))
 		.setTexRect(Rect4f(0, 0, 1, 1))
 		.setColour(Colour4f(1, 1, 1, 1))
 		.setSize(Vector2f(texture->getSize()));

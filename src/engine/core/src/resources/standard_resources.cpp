@@ -56,7 +56,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.setFallback<SpriteResource>("missing_image");
 	resources.setFallback<Texture>("missing_image");
 
-	resources.setFallback<MaterialDefinition>("Halley/Sprite");
+	resources.setFallback<MaterialDefinition>(MaterialDefinition::defaultMaterial);
 
 	resources.setFallback<Font>("Ubuntu Bold");
 

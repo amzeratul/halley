@@ -79,7 +79,7 @@ std::unique_ptr<Font> Font::loadResource(ResourceLoader& loader)
 	font->deserialize(ds);
 
 	auto texture = loader.getResources().get<Texture>(font->imageName);
-	auto matDef = loader.getResources().get<MaterialDefinition>(font->distanceField ? "Halley/Text" : "Halley/Sprite");
+	auto matDef = loader.getResources().get<MaterialDefinition>(font->distanceField ? "Halley/Text" : MaterialDefinition::defaultMaterial);
 	font->material = std::make_unique<Material>(matDef);
 	font->material->set(0, texture);
 

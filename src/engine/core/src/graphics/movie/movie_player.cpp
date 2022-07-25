@@ -181,14 +181,14 @@ Sprite MoviePlayer::getSprite(Resources& resources)
 
 	if (needsYV12Conversion()) {
 		if (renderTexture) {
-			auto matDef = resources.get<MaterialDefinition>("Halley/Sprite");
+			auto matDef = resources.get<MaterialDefinition>(MaterialDefinition::defaultMaterial);
 			return Sprite().setImage(renderTexture, matDef).setTexRect(texRect).setSize(Vector2f(videoSize));
 		} else {
 			return Sprite().setMaterial(resources, "Halley/SolidColour").setColour(Colour4f(0, 0, 0)).setSize(Vector2f(videoSize));
 		}
 	} else {
 		if (currentTexture) {
-			auto matDef = resources.get<MaterialDefinition>("Halley/Sprite");
+			auto matDef = resources.get<MaterialDefinition>(MaterialDefinition::defaultMaterial);
 			return Sprite().setImage(currentTexture, matDef).setTexRect(texRect).setSize(Vector2f(videoSize));
 		} else {
 			return Sprite().setMaterial(resources, "Halley/SolidColour").setColour(Colour4f(0, 0, 0)).setSize(Vector2f(videoSize));

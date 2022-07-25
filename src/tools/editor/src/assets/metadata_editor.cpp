@@ -83,7 +83,7 @@ void MetadataEditor::makeUI()
 		if (isAseprite) {
 			addBoolField("By Group", "group_separated", false);
 		}
-		addAssetTypeField("Material", "material", AssetType::MaterialDefinition, "Halley/Sprite");
+		addAssetTypeField("Material", "material", AssetType::MaterialDefinition, MaterialDefinition::defaultMaterial);
 		addStringField("Atlas", "atlas", "");
 		addAssetTypeField("Palette", "palette", AssetType::Texture, "");
 		addBoolField("Palette Top\nLine Only", "paletteTopLineOnly", false);
