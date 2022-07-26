@@ -27,6 +27,8 @@ namespace Halley {
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
 		void setCurNodeDevConData(const String& str);
 
+		void updateNodes();
+
 	protected:
         void pressMouse(Vector2f mousePos, int button, KeyMods keyMods) override;
 		void releaseMouse(Vector2f mousePos, int button) override;

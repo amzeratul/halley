@@ -86,6 +86,7 @@ void ScriptingNodeEditor::applyChanges()
 		} else {
 			gizmo->getNode(*nodeId).getSettings() = std::move(curSettings);
 		}
+		gizmo->updateNodes();
 		gizmo->getGraph().validateNodePins(*nodeId);
 		gizmo->onModified();
 	});

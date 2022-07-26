@@ -99,6 +99,11 @@ void ScriptGizmoUI::setCurNodeDevConData(const String& str)
 	gizmo.setCurNodeDevConData(str);
 }
 
+void ScriptGizmoUI::updateNodes()
+{
+	gizmo.updateNodes();
+}
+
 void ScriptGizmoUI::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	focus();

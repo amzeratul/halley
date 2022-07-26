@@ -366,6 +366,7 @@ void ScriptingBaseGizmo::setGraph(ScriptGraph* graph)
 {
 	scriptGraph = graph;
 	dragging.reset();
+	updateNodes();
 }
 
 void ScriptingBaseGizmo::setState(ScriptState* state)
@@ -750,6 +751,16 @@ void ScriptingBaseGizmo::setCurNodeDevConData(const String& str)
 		devConData = { *nodeUnderMouse, str };
 	} else {
 		devConData.reset();
+	}
+}
+
+void ScriptingBaseGizmo::updateNodes()
+{
+	if (scriptGraph && resources) {
+		assignNodeTypes();
+		for (auto& node: scriptGraph->getNodes()) {
+			node.getNodeType().updateSettings(node, *scriptGraph, *resources);
+		}
 	}
 }
 

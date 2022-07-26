@@ -102,6 +102,14 @@ namespace Halley {
 	
 	class ScriptGraph : public Resource {
 	public:
+		struct FunctionParameters {
+			uint8_t nOutput = 1;
+			uint8_t nDataInput = 0;
+			uint8_t nTargetInput = 0;
+			uint8_t nDataOutput = 0;
+			uint8_t nTargetOutput = 0;
+		};
+
 		ScriptGraph();
 		ScriptGraph(const ConfigNode& node);
 		ScriptGraph(const ConfigNode& node, const EntitySerializationContext& context);
@@ -147,6 +155,8 @@ namespace Halley {
 		OptionalLite<uint8_t> getEntityIdx(EntityId id) const;
 		uint8_t addEntityId(EntityId id);
 		void removeEntityId(EntityId id);
+
+		FunctionParameters getFunctionParameters() const;
 
 	private:
 		Vector<ScriptGraphNode> nodes;

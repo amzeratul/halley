@@ -30,6 +30,9 @@ ScriptGraphEditor::~ScriptGraphEditor()
 void ScriptGraphEditor::onActiveChanged(bool active)
 {
 	setListeningToClient(active);
+	if (active && gizmoEditor) {
+		gizmoEditor->updateNodes();
+	}
 }
 
 void ScriptGraphEditor::onMakeUI()

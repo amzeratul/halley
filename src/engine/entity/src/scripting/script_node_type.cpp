@@ -43,6 +43,10 @@ Vector<IScriptNodeType::SettingType> IScriptNodeType::getSettingTypes() const
 	return {};
 }
 
+void IScriptNodeType::updateSettings(ScriptGraphNode& node, const ScriptGraph& graph, Resources& resources) const
+{
+}
+
 std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node, const World* world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const
 {
 	switch (elementType.type) {

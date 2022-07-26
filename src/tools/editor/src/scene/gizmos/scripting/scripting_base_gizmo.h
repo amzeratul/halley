@@ -58,6 +58,8 @@ namespace Halley {
 		std::optional<ScriptRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
 		void setCurNodeDevConData(const String& str);
 
+		void updateNodes();
+
 	private:
 		struct Dragging {
 			Vector<ScriptNodeId> nodeIds;

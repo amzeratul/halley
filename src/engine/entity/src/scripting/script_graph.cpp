@@ -500,6 +500,24 @@ void ScriptGraph::removeEntityId(EntityId id)
 	}
 }
 
+ScriptGraph::FunctionParameters ScriptGraph::getFunctionParameters() const
+{
+	FunctionParameters result;
+
+	for (auto& node: nodes) {
+		if (node.getType() == "start") {
+			result.nDataInput = node.getSettings()["dataPins"].asInt(0);
+			result.nTargetInput = node.getSettings()["targetPins"].asInt(0);
+		} else if (node.getType() == "return") {
+			result.nOutput = node.getSettings()["flowPins"].asInt(1);
+			result.nDataOutput = node.getSettings()["dataPins"].asInt(0);
+			result.nTargetOutput = node.getSettings()["targetPins"].asInt(0);
+		}
+	}
+
+	return result;
+}
+
 void ScriptGraph::finishGraph()
 {
 	if (nodes.empty()) {

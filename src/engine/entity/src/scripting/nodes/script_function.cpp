@@ -12,7 +12,7 @@ Vector<IScriptNodeType::SettingType> ScriptFunctionCallExternal::getSettingTypes
 std::pair<String, Vector<ColourOverride>> ScriptFunctionCallExternal::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	auto str = ColourStringBuilder(true);
-	str.append("Call external function ");
+	str.append("Call ");
 	str.append(node.getSettings()["function"].asString(""), parameterColour);
 	return str.moveResults();
 }
@@ -22,11 +22,13 @@ gsl::span<const IScriptNodeType::PinType> ScriptFunctionCallExternal::getPinConf
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
 
-	size_t nOutput = 1;
-	size_t nDataInput = 0;
-	size_t nTargetInput = 0;
-	size_t nDataOutput = 0;
-	size_t nTargetOutput = 0;
+	auto& settings = node.getSettings();
+
+	const size_t nOutput = settings["nOutput"].asInt(1);
+	const size_t nDataInput = settings["nDataInput"].asInt(0);
+	const size_t nTargetInput = settings["nTargetInput"].asInt(0);
+	const size_t nDataOutput = settings["nDataOutput"].asInt(0);
+	const size_t nTargetOutput = settings["nTargetOutput"].asInt(0);
 
 	static thread_local std::vector<PinType> pins;
 	pins.clear();
@@ -52,6 +54,27 @@ gsl::span<const IScriptNodeType::PinType> ScriptFunctionCallExternal::getPinConf
 	return pins;
 }
 
+void ScriptFunctionCallExternal::updateSettings(ScriptGraphNode& node, const ScriptGraph& graph, Resources& resources) const
+{
+	auto& settings = node.getSettings();
+	const auto& functionName = settings["function"].asString("");
+	if (functionName.isEmpty() || !resources.exists<ScriptGraph>(functionName)) {
+		settings["nOutput"] = 1;
+		settings["nDataInput"] = 0;
+		settings["nTargetInput"] = 0;
+		settings["nDataOutput"] = 0;
+		settings["nTargetOutput"] = 0;
+	} else {
+		const auto function = resources.get<ScriptGraph>(functionName);
+		const auto pars = function->getFunctionParameters();
+		settings["nOutput"] = pars.nOutput;
+		settings["nDataInput"] = pars.nDataInput;
+		settings["nTargetInput"] = pars.nTargetInput;
+		settings["nDataOutput"] = pars.nDataOutput;
+		settings["nTargetOutput"] = pars.nTargetOutput;
+	}
+}
+
 IScriptNodeType::Result ScriptFunctionCallExternal::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	return Result(ScriptNodeExecutionState::Call);
@@ -65,8 +88,8 @@ Vector<IScriptNodeType::SettingType> ScriptFunctionReturn::getSettingTypes() con
 {
 	return {
 		SettingType{ "flowPins", "Halley::Range<int, 1, 4>", Vector<String>{"1"} },
-		SettingType{ "dataPins", "Halley::Range<int, 0, 4>", Vector<String>{""} },
-		SettingType{ "targetPins", "Halley::Range<int, 0, 4>", Vector<String>{""} },
+		SettingType{ "dataPins", "Halley::Range<int, 0, 4>", Vector<String>{"0"} },
+		SettingType{ "targetPins", "Halley::Range<int, 0, 4>", Vector<String>{"0"} },
 	};
 }
 

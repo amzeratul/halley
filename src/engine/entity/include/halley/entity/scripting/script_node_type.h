@@ -43,17 +43,19 @@ namespace Halley {
 		virtual String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const;
 		virtual String getLargeLabel(const ScriptGraphNode& node) const;
 		virtual String getLabel(const ScriptGraphNode& node) const;
-
-		virtual Vector<SettingType> getSettingTypes() const;
-		virtual std::pair<String, Vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World* world, PinType elementType, ScriptPinId elementIdx, const ScriptGraph& graph) const;
-		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const;
-		virtual std::pair<String, Vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, ScriptPinId elementIdx) const;
 		virtual String getIconName(const ScriptGraphNode& node) const;
 		virtual ScriptNodeClassification getClassification() const = 0;
-		
+
+		virtual Vector<SettingType> getSettingTypes() const;
+		virtual void updateSettings(ScriptGraphNode& node, const ScriptGraph& graph, Resources& resources) const;
+
 		virtual gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const = 0;
         PinType getPin(const ScriptGraphNode& node, size_t n) const;
 
+		virtual std::pair<String, Vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World* world, PinType elementType, ScriptPinId elementIdx, const ScriptGraph& graph) const;
+		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const;
+		virtual std::pair<String, Vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, ScriptPinId elementIdx) const;
+		
 		virtual bool canAdd() const { return true; }
         virtual bool canDelete() const { return true; }
         virtual bool canKeepData() const { return false; }
