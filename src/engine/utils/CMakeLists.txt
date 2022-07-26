@@ -12,6 +12,7 @@ set(SOURCES
         
         "src/concurrency/concurrent.cpp"
         "src/concurrency/executor.cpp"
+        "src/concurrency/shared_recursive_mutex.cpp"
         "src/concurrency/task.cpp"
         "src/concurrency/task_anchor.cpp"
         "src/concurrency/task_set.cpp"
@@ -106,6 +107,7 @@ set(HEADERS
         "include/halley/concurrency/concurrent.h"
         "include/halley/concurrency/executor.h"
         "include/halley/concurrency/future.h"
+        "include/halley/concurrency/shared_recursive_mutex.h"
         "include/halley/concurrency/task.h"
         "include/halley/concurrency/task_anchor.h"
         "include/halley/concurrency/task_set.h"
@@ -219,6 +221,7 @@ set(HEADERS
         "include/halley/utils/encrypt.h"
         "include/halley/utils/hash.h"
         "include/halley/utils/halley_iostream.h"
+        "include/halley/utils/scoped_guard.h"
         "include/halley/utils/type_traits.h"
         "include/halley/utils/utils.h"
         "include/halley/utils/variable.h"

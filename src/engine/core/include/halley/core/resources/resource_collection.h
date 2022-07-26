@@ -4,6 +4,7 @@
 #include <memory>
 #include <functional>
 #include <shared_mutex>
+#include <halley/concurrency/shared_recursive_mutex.h>
 #include <halley/text/halleystring.h>
 #include <halley/resources/resource_data.h>
 #include <halley/data_structures/hash_map.h>
@@ -76,7 +77,7 @@ namespace Halley
 		AssetType type;
 		ResourceLoaderFunc resourceLoader;
 		ResourceEnumeratorFunc resourceEnumerator;
-		mutable std::shared_mutex mutex;
+		mutable SharedRecursiveMutex mutex;
 	};
 
 	template <typename T>
