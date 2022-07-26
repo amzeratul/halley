@@ -5,8 +5,8 @@ using namespace Halley;
 Vector<IScriptNodeType::SettingType> ScriptStart::getSettingTypes() const
 {
 	return {
-		SettingType{ "dataOutputPins", "Halley::Range<int, 0, 4>", Vector<String>{""} },
-		SettingType{ "targetOutputPins", "Halley::Range<int, 0, 4>", Vector<String>{""} },
+		SettingType{ "dataPins", "Halley::Range<int, 0, 4>", Vector<String>{""} },
+		SettingType{ "targetPins", "Halley::Range<int, 0, 4>", Vector<String>{""} },
 	};
 }
 
@@ -20,8 +20,8 @@ gsl::span<const IScriptNodeType::PinType> ScriptStart::getPinConfiguration(const
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
 
-	size_t nDataOutput = node.getSettings()["dataOutputPins"].asInt(0);
-	size_t nTargetOutput = node.getSettings()["targetOutputPins"].asInt(0);
+	size_t nDataOutput = node.getSettings()["dataPins"].asInt(0);
+	size_t nTargetOutput = node.getSettings()["targetPins"].asInt(0);
 
 	if (nDataOutput > 4 || nTargetOutput > 0) {
 		static thread_local std::vector<PinType> pins;
