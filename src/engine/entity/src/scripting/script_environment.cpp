@@ -137,6 +137,12 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 				doTerminateState();
 				graphState.reset();
 				break;
+			} else if (result.state == ScriptNodeExecutionState::Call) {
+				advanceThread(thread, currentGraph->getCallNode(nodeId), 0);
+				// TODO
+			} else if (result.state == ScriptNodeExecutionState::Return) {
+				advanceThread(thread, currentGraph->getReturnNode(nodeId), 0);
+				// TODO
 			}
 		}
 	}

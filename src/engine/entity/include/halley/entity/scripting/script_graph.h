@@ -1,5 +1,6 @@
 #pragma once
 #include "script_node_enums.h"
+#include "script_state.h"
 #include "../entity_id.h"
 #include "halley/bytes/config_node_serializer.h"
 #include "halley/utils/hash.h"
@@ -82,6 +83,7 @@ namespace Halley {
 
 		void onNodeRemoved(ScriptNodeId nodeId);
 		void remapNodes(const HashMap<ScriptNodeId, ScriptNodeId>& remap);
+		void offsetNodes(ScriptNodeId offset);
 
 		void assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		const IScriptNodeType& getNodeType() const;
@@ -115,6 +117,7 @@ namespace Halley {
 		ScriptGraph(const ConfigNode& node, const EntitySerializationContext& context);
 
 		void load(const ConfigNode& node, const EntitySerializationContext& context);
+		void loadDependencies(const Resources& resources);
 
 		ConfigNode toConfigNode() const;
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
@@ -138,6 +141,8 @@ namespace Halley {
 		Vector<ScriptGraphNode>& getNodes() { return nodes; }
 
 		OptionalLite<ScriptNodeId> getStartNode() const;
+		OptionalLite<ScriptNodeId> getCallNode(ScriptNodeId node) const;
+		OptionalLite<ScriptNodeId> getReturnNode(ScriptNodeId node) const;
 		uint64_t getHash() const;
 
 		std::optional<ScriptNodeId> getMessageInboxId(const String& messageId, bool requiresSpawningScript = false) const;
@@ -161,9 +166,13 @@ namespace Halley {
 	private:
 		Vector<ScriptGraphNode> nodes;
 		Vector<EntityId> entityIds;
+		HashMap<ScriptNodeId, ScriptNodeId> callMap;
+		HashMap<ScriptNodeId, ScriptNodeId> returnMap;
 		uint64_t hash = 0;
 
 		mutable uint64_t lastAssignTypeHash = 1;
+
+		std::pair<ScriptNodeId, ScriptNodeId> appendGraph(const ScriptGraph& other);
 	};
 
 	template <>
