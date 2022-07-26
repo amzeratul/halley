@@ -6,12 +6,14 @@ namespace Halley {
 	public:
 		String getId() const override { return "start"; }
 		String getName() const override { return "Start"; }
-		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/start.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Terminator; }
-		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		bool canAdd() const override { return false; }
 		bool canDelete() const override { return false; }
+
+		Vector<SettingType> getSettingTypes() const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
 	};

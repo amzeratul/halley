@@ -14,7 +14,9 @@ namespace Halley {
 		Restart,
 		Terminate,
     	MergeAndWait,
-		MergeAndContinue
+		MergeAndContinue,
+		Call,
+		Return
 	};
 
 	enum class ScriptNodeClassification : uint8_t {

@@ -2,6 +2,14 @@
 
 using namespace Halley;
 
+Vector<IScriptNodeType::SettingType> ScriptStart::getSettingTypes() const
+{
+	return {
+		SettingType{ "dataOutputPins", "Halley::Range<int, 0, 4>", Vector<String>{""} },
+		SettingType{ "targetOutputPins", "Halley::Range<int, 0, 4>", Vector<String>{""} },
+	};
+}
+
 std::pair<String, Vector<ColourOverride>> ScriptStart::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	return { "Start script", {} };
@@ -11,8 +19,31 @@ gsl::span<const IScriptNodeType::PinType> ScriptStart::getPinConfiguration(const
 {
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
-	const static auto data = std::array<PinType, 1>{ PinType{ ET::FlowPin, PD::Output } };
-	return data;
+
+	size_t nDataOutput = node.getSettings()["dataOutputPins"].asInt(0);
+	size_t nTargetOutput = node.getSettings()["targetOutputPins"].asInt(0);
+
+	if (nDataOutput > 4 || nTargetOutput > 0) {
+		static thread_local std::vector<PinType> pins;
+		pins.clear();
+		pins.reserve(16);
+
+		pins.emplace_back(ET::FlowPin, PD::Output);
+		for (size_t i = 0; i < nDataOutput; ++i) {
+			pins.emplace_back(ET::ReadDataPin, PD::Output);
+		}
+		for (size_t i = 0; i < nTargetOutput; ++i) {
+			pins.emplace_back(ET::TargetPin, PD::Output);
+		}
+
+		return pins;
+	} else {
+		// Simple, common case
+		using ET = ScriptNodeElementType;
+		using PD = ScriptNodePinDirection;
+		const static auto data = std::array<PinType, 5>{ PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
+		return gsl::span<const PinType>(data).subspan(0, 1 + nDataOutput);
+	}
 }
 
 IScriptNodeType::Result ScriptStart::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const

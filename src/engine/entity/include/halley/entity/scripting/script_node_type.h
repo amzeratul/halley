@@ -18,11 +18,12 @@ namespace Halley {
         	ScriptNodeExecutionState state = ScriptNodeExecutionState::Done;
         	uint8_t outputsActive = 1;
 			uint8_t outputsCancelled = 0;
+			ScriptNodeId nodeRef = 0;
 	        Time timeElapsed = 0;
 
         	Result() = default;
-        	Result(ScriptNodeExecutionState state, Time timeElapsed = 0, uint8_t outputsActive = 1, uint8_t outputsCancelled = 0)
-        		: state(state), outputsActive(outputsActive), outputsCancelled(outputsCancelled), timeElapsed(timeElapsed)
+        	Result(ScriptNodeExecutionState state, Time timeElapsed = 0, uint8_t outputsActive = 1, uint8_t outputsCancelled = 0, ScriptNodeId nodeRef = 0)
+        		: state(state), outputsActive(outputsActive), outputsCancelled(outputsCancelled), nodeRef(nodeRef), timeElapsed(timeElapsed)
         	{}
         };
 
