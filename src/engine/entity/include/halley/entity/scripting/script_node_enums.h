@@ -24,6 +24,7 @@ namespace Halley {
 		Variable,
 		Expression,
 		Terminator, // As in start/end, not as in Arnie
+		Function,
 		Unknown
 	};
 

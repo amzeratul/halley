@@ -419,6 +419,8 @@ Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType)
 		return Colour4f(0.35f, 0.55f, 0.97f);
 	case ScriptNodeClassification::State:
 		return Colour4f(0.75f, 0.35f, 0.97f);
+	case ScriptNodeClassification::Function:
+		return Colour4f(1.00f, 0.49f, 0.68f);
 	}
 	return Colour4f(0.2f, 0.2f, 0.2f);
 }
