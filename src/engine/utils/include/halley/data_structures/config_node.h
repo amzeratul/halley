@@ -351,6 +351,7 @@ namespace Halley {
 		const MapType& asMap() const;
 		SequenceType& asSequence();
 		MapType& asMap();
+		size_t getSequenceSize(size_t defaultValue = 0) const;
 
 		void ensureType(ConfigNodeType type);
 

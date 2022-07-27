@@ -126,9 +126,9 @@ std::optional<std::pair<ScriptNodeId, ScriptPinId>> ScriptFunctionCallExternal::
 Vector<IScriptNodeType::SettingType> ScriptFunctionReturn::getSettingTypes() const
 {
 	return {
-		SettingType{ "flowPins", "Halley::Range<int, 1, 4>", Vector<String>{"1"} },
-		SettingType{ "dataPins", "Halley::Range<int, 0, 4>", Vector<String>{"0"} },
-		SettingType{ "targetPins", "Halley::Range<int, 0, 4>", Vector<String>{"0"} },
+		SettingType{ "flowPins", "Halley::Vector<Halley::String>", Vector<String>{"Output"} },
+		SettingType{ "dataPins", "Halley::Vector<Halley::String>", Vector<String>{""} },
+		SettingType{ "targetPins", "Halley::Vector<Halley::String>", Vector<String>{""} },
 	};
 }
 
@@ -144,9 +144,9 @@ gsl::span<const IScriptNodeType::PinType> ScriptFunctionReturn::getPinConfigurat
 	using ET = ScriptNodeElementType;
 	using PD = ScriptNodePinDirection;
 
-	const size_t nInput = node.getSettings()["flowPins"].asInt(1);
-	const size_t nDataInput = node.getSettings()["dataPins"].asInt(0);
-	const size_t nTargetInput = node.getSettings()["targetPins"].asInt(0);
+	const size_t nInput = node.getSettings()["flowPins"].getSequenceSize(1);
+	const size_t nDataInput = node.getSettings()["dataPins"].getSequenceSize(0);
+	const size_t nTargetInput = node.getSettings()["targetPins"].getSequenceSize(0);
 
 	if (nDataInput == 0 && nTargetInput == 0) {
 		// Simple, common case

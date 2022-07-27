@@ -868,6 +868,15 @@ ConfigNode::MapType& ConfigNode::asMap()
 	}
 }
 
+size_t ConfigNode::getSequenceSize(size_t defaultValue) const
+{
+	if (type == ConfigNodeType::Sequence || type == ConfigNodeType::DeltaSequence) {
+		return asSequence().size();
+	} else {
+		return defaultValue;
+	}
+}
+
 void ConfigNode::ensureType(ConfigNodeType t)
 {
 	if (type != t) {

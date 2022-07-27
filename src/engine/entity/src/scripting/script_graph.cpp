@@ -673,12 +673,12 @@ ScriptGraph::FunctionParameters ScriptGraph::getFunctionParameters() const
 
 	for (auto& node: nodes) {
 		if (node.getType() == "start") {
-			result.nDataInput = node.getSettings()["dataPins"].asInt(0);
-			result.nTargetInput = node.getSettings()["targetPins"].asInt(0);
+			result.nDataInput = static_cast<uint8_t>(node.getSettings()["dataPins"].getSequenceSize());
+			result.nTargetInput = static_cast<uint8_t>(node.getSettings()["targetPins"].getSequenceSize());
 		} else if (node.getType() == "return") {
-			result.nOutput = node.getSettings()["flowPins"].asInt(1);
-			result.nDataOutput = node.getSettings()["dataPins"].asInt(0);
-			result.nTargetOutput = node.getSettings()["targetPins"].asInt(0);
+			result.nOutput = static_cast<uint8_t>(node.getSettings()["flowPins"].getSequenceSize(1));
+			result.nDataOutput = static_cast<uint8_t>(node.getSettings()["dataPins"].getSequenceSize());
+			result.nTargetOutput = static_cast<uint8_t>(node.getSettings()["targetPins"].getSequenceSize());
 		}
 	}
 
