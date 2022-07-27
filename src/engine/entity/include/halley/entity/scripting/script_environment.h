@@ -154,6 +154,9 @@ namespace Halley {
 
         void cancelOutputs(ScriptNodeId nodeId, uint8_t cancelMask);
         void abortCodePath(ScriptNodeId node, std::optional<ScriptPinId> outputPin);
+
+        void callFunction(ScriptStateThread& thread);
+        void returnFromFunction(ScriptStateThread& thread);
         
         void processMessages(Time time, Vector<ScriptStateThread>& pending);
 

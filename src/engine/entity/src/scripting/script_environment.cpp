@@ -138,11 +138,9 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 				graphState.reset();
 				break;
 			} else if (result.state == ScriptNodeExecutionState::Call) {
-				advanceThread(thread, currentGraph->getCallNode(nodeId), 0);
-				// TODO
+				callFunction(thread);
 			} else if (result.state == ScriptNodeExecutionState::Return) {
-				advanceThread(thread, currentGraph->getReturnNode(nodeId), 0);
-				// TODO
+				returnFromFunction(thread);
 			}
 		}
 	}
@@ -378,6 +376,32 @@ void ScriptEnvironment::abortCodePath(ScriptNodeId node, std::optional<ScriptPin
 		if (thread.stackGoesThrough(node, outputPin)) {
 			terminateThread(thread, false);
 		}
+	}
+}
+
+void ScriptEnvironment::callFunction(ScriptStateThread& thread)
+{
+	const auto nodeId = thread.getCurNode().value();
+	advanceThread(thread, currentGraph->getCallNode(nodeId), 0);
+}
+
+void ScriptEnvironment::returnFromFunction(ScriptStateThread& thread)
+{
+	// TODO: determine output pin
+	// TODO: redirect data
+	const uint8_t outputPin = 0;
+
+	const auto returnNodeId = thread.getCurNode().value();
+	const auto nodeId = currentGraph->getReturnNode(returnNodeId);
+
+	if (nodeId) {
+		const auto& node = currentGraph->getNodes()[*nodeId];
+		const auto& nodeType = node.getNodeType();
+		const auto outputNodes = nodeType.getOutputNodes(node, static_cast<uint8_t>(1) << outputPin);
+
+		advanceThread(thread, outputNodes[0].dstNode, outputNodes[0].outputPin);
+	} else {
+		advanceThread(thread, {}, 0);
 	}
 }
 
