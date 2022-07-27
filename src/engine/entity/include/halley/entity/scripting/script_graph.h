@@ -90,16 +90,19 @@ namespace Halley {
 
 		ScriptNodeId getId() const { return id; }
 		void setId(ScriptNodeId i) { id = i; }
+		OptionalLite<ScriptNodeId> getParentNode() const { return parentNode; }
+		void setParentNode(OptionalLite<ScriptNodeId> id) { parentNode = id; }
 
 		ScriptNodePinType getPinType(ScriptPinId idx) const;
 
 	private:
-		Vector2f position;
-		String type;
+		mutable const IScriptNodeType* nodeType = nullptr;
 		ConfigNode settings;
 		Vector<Pin> pins;
+		String type;
+		Vector2f position;
 		ScriptNodeId id = 0;
-		mutable const IScriptNodeType* nodeType = nullptr;
+		OptionalLite<ScriptNodeId> parentNode;
 	};
 	
 	class ScriptGraph : public Resource {
@@ -174,7 +177,7 @@ namespace Halley {
 
 		mutable uint64_t lastAssignTypeHash = 1;
 
-		std::pair<ScriptNodeId, ScriptNodeId> appendGraph(const ScriptGraph& other);
+		std::pair<ScriptNodeId, ScriptNodeId> appendGraph(ScriptNodeId parent, const ScriptGraph& other);
 	};
 
 	template <>

@@ -195,6 +195,9 @@ void ScriptGraphNode::offsetNodes(ScriptNodeId offset)
 		}
 	}
 	id += offset;
+	if (parentNode) {
+		*parentNode += offset;
+	}
 }
 
 void ScriptGraphNode::assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const
@@ -255,9 +258,10 @@ void ScriptGraph::loadDependencies(const Resources& resources)
 			const auto function = node.getSettings()["function"].asString("");
 			if (!function.isEmpty()) {
 				if (resources.exists<ScriptGraph>(function)) {
-					const auto [startNode, returnNode] = appendGraph(*resources.get<ScriptGraph>(function));
-					callerToCallee.emplace_back(static_cast<ScriptNodeId>(i), startNode);
-					returnToCaller.emplace_back(returnNode, static_cast<ScriptNodeId>(i));
+					const ScriptNodeId nodeId = static_cast<ScriptNodeId>(i);
+					const auto [startNode, returnNode] = appendGraph(nodeId, *resources.get<ScriptGraph>(function));
+					callerToCallee.emplace_back(nodeId, startNode);
+					returnToCaller.emplace_back(returnNode, nodeId);
 					modified = true;
 				} else {
 					Logger::logError("Script \"" + function + "\" referenced by " + getAssetId() + " doesn't exist.");
@@ -611,9 +615,9 @@ void ScriptGraph::finishGraph()
 	hash = hasher.digest();
 }
 
-std::pair<ScriptNodeId, ScriptNodeId> ScriptGraph::appendGraph(const ScriptGraph& other)
+std::pair<ScriptNodeId, ScriptNodeId> ScriptGraph::appendGraph(ScriptNodeId parent, const ScriptGraph& other)
 {
-	const ScriptNodeId offset = static_cast<ScriptNodeId>(nodes.size());
+	const auto offset = static_cast<ScriptNodeId>(nodes.size());
 
 	ScriptNodeId startNode = offset;
 	ScriptNodeId returnNode = offset;
@@ -621,6 +625,7 @@ std::pair<ScriptNodeId, ScriptNodeId> ScriptGraph::appendGraph(const ScriptGraph
 	for (size_t i = 0; i < other.getNodes().size(); ++i) {
 		auto& node = nodes.emplace_back(other.getNodes()[i]);
 		node.offsetNodes(offset);
+		node.setParentNode(parent);
 		if (node.getType() == "start") {
 			startNode = offset + static_cast<ScriptNodeId>(i);
 		}

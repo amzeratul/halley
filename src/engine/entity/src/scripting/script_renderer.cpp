@@ -64,7 +64,9 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom, flo
 	const float effectiveZoom = std::max(nativeZoom, curZoom);
 
 	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
-		drawNodeOutputs(painter, basePos, static_cast<ScriptNodeId>(i), *graph, effectiveZoom, posScale);
+		if (!graph->getNodes()[i].getParentNode()) {
+			drawNodeOutputs(painter, basePos, static_cast<ScriptNodeId>(i), *graph, effectiveZoom, posScale);
+		}
 	}
 
 	for (const auto& currentPath: currentPaths) {
@@ -72,21 +74,23 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom, flo
 	}
 	
 	for (ScriptNodeId i = 0; i < static_cast<ScriptNodeId>(graph->getNodes().size()); ++i) {
-		const bool highlightThis = highlightNode && highlightNode->nodeId == i;
-		auto pinType = highlightThis ? highlightNode->element : std::optional<ScriptNodePinType>();
-		auto pinId = highlightThis ? highlightNode->elementId : 0;
+		if (!graph->getNodes()[i].getParentNode()) {
+			const bool highlightThis = highlightNode && highlightNode->nodeId == i;
+			auto pinType = highlightThis ? highlightNode->element : std::optional<ScriptNodePinType>();
+			auto pinId = highlightThis ? highlightNode->elementId : 0;
 
-		if (highlightNode && !highlightThis) {
-			const auto& pin = graph->getNodes()[highlightNode->nodeId].getPin(highlightNode->elementId);
-			for (const auto& conn: pin.connections) {
-				if (conn.dstNode == i) {
-					pinId = conn.dstPin;
-					pinType = graph->getNodes()[i].getPinType(pinId);
+			if (highlightNode && !highlightThis) {
+				const auto& pin = graph->getNodes()[highlightNode->nodeId].getPin(highlightNode->elementId);
+				for (const auto& conn: pin.connections) {
+					if (conn.dstNode == i) {
+						pinId = conn.dstPin;
+						pinType = graph->getNodes()[i].getPinType(pinId);
+					}
 				}
 			}
+			
+			drawNode(painter, basePos, graph->getNodes()[i], effectiveZoom, posScale, getNodeDrawMode(i), pinType, pinId);
 		}
-		
-		drawNode(painter, basePos, graph->getNodes()[i], effectiveZoom, posScale, getNodeDrawMode(i), pinType, pinId);
 	}
 }
 
