@@ -104,6 +104,27 @@ namespace Halley {
 		ScriptNodeId id = 0;
 		OptionalLite<ScriptNodeId> parentNode;
 	};
+
+	struct ScriptGraphNodeRoots {
+		struct Entry {
+			Range<ScriptNodeId> range;
+			ScriptNodeId root;
+
+			Entry() = default;
+			Entry(Range<ScriptNodeId> range, ScriptNodeId root);
+			Entry(const ConfigNode& node);
+			ConfigNode toConfigNode() const;
+		};
+
+		Vector<Entry> mapping;
+
+		ScriptGraphNodeRoots() = default;
+		ScriptGraphNodeRoots(const ConfigNode& node);
+		ConfigNode toConfigNode() const;
+
+		void addRoot(ScriptNodeId id, ScriptNodeId root);
+		ScriptNodeId getRoot(ScriptNodeId id) const;
+	};
 	
 	class ScriptGraph : public Resource {
 	public:
@@ -167,6 +188,8 @@ namespace Halley {
 		void removeEntityId(EntityId id);
 
 		ScriptNodeId getNodeRoot(ScriptNodeId nodeId) const;
+		const ScriptGraphNodeRoots& getRoots() const;
+		void setRoots(ScriptGraphNodeRoots roots);
 
 		FunctionParameters getFunctionParameters() const;
 
@@ -179,7 +202,11 @@ namespace Halley {
 
 		mutable uint64_t lastAssignTypeHash = 1;
 
+		ScriptGraphNodeRoots roots;
+
 		std::pair<ScriptNodeId, ScriptNodeId> appendGraph(ScriptNodeId parent, const ScriptGraph& other);
+		ScriptNodeId findNodeRoot(ScriptNodeId nodeId) const;
+		void generateRoots();
 	};
 
 	template <>

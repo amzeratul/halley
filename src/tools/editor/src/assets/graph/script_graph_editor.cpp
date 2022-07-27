@@ -299,6 +299,7 @@ void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 
 	if (data.getType() == ConfigNodeType::Undefined) {
 		scriptState.reset();
+		scriptGraph->setRoots({});
 		if (gizmoEditor) {
 			gizmoEditor->setState(nullptr);
 		}
@@ -314,6 +315,8 @@ void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 		scriptState->load(data["scriptState"], context);
 		scriptState->setScriptGraphPtr(scriptGraph.get());
 		scriptState->prepareStates(context, 0);
+
+		scriptGraph->setRoots(ScriptGraphNodeRoots(data["roots"]));
 
 		onCurNodeData(data["curNode"]);
 	}

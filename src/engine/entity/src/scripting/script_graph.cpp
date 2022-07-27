@@ -221,6 +221,57 @@ ScriptNodePinType ScriptGraphNode::getPinType(ScriptPinId idx) const
 	return config[idx];
 }
 
+ScriptGraphNodeRoots::Entry::Entry(Range<ScriptNodeId> range, ScriptNodeId root)
+	: range(range)
+	, root(root)
+{
+}
+
+ScriptGraphNodeRoots::Entry::Entry(const ConfigNode& node)
+{
+	auto r = node["range"].asVector2i();
+	range.start = r.x;
+	range.end = r.y;
+	root = node["root"].asInt();
+}
+
+ConfigNode ScriptGraphNodeRoots::Entry::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	result["range"] = Vector2i(range.start, range.end);
+	result["root"] = int(root);
+	return result;
+}
+
+ScriptGraphNodeRoots::ScriptGraphNodeRoots(const ConfigNode& node)
+{
+	mapping = node.asVector<Entry>();
+}
+
+ConfigNode ScriptGraphNodeRoots::toConfigNode() const
+{
+	return ConfigNode(mapping);
+}
+
+void ScriptGraphNodeRoots::addRoot(ScriptNodeId id, ScriptNodeId root)
+{
+	if (!mapping.empty() && mapping.back().root == root && mapping.back().range.end == id) {
+		mapping.back().range.end++;
+	} else {
+		mapping.emplace_back(Range<ScriptNodeId>(id, id + 1), root);
+	}
+}
+
+ScriptNodeId ScriptGraphNodeRoots::getRoot(ScriptNodeId id) const
+{
+	for (auto& e: mapping) {
+		if (e.range.contains(id)) {
+			return e.root;
+		}
+	}
+	return id;
+}
+
 ScriptGraph::ScriptGraph()
 {
 	finishGraph();
@@ -271,6 +322,7 @@ void ScriptGraph::loadDependencies(const Resources& resources)
 	}
 
 	if (modified) {
+		generateRoots();
 		finishGraph();
 	}
 }
@@ -583,12 +635,36 @@ void ScriptGraph::removeEntityId(EntityId id)
 
 ScriptNodeId ScriptGraph::getNodeRoot(ScriptNodeId nodeId) const
 {
-	auto parent = nodes[nodeId].getParentNode();
+	return roots.getRoot(nodeId);
+}
+
+ScriptNodeId ScriptGraph::findNodeRoot(ScriptNodeId nodeId) const
+{
+	const auto parent = nodes[nodeId].getParentNode();
 	if (parent) {
 		return getNodeRoot(*parent);
-	} else {
-		return nodeId;
 	}
+	return nodeId;
+}
+
+const ScriptGraphNodeRoots& ScriptGraph::getRoots() const
+{
+	return roots;
+}
+
+void ScriptGraph::generateRoots()
+{
+	for (size_t curNodeId = 0; curNodeId < nodes.size(); ++curNodeId) {
+		const auto parentId = findNodeRoot(static_cast<ScriptNodeId>(curNodeId));
+		if (curNodeId != parentId) {
+			roots.addRoot(static_cast<ScriptNodeId>(curNodeId), parentId);
+		}
+	}
+}
+
+void ScriptGraph::setRoots(ScriptGraphNodeRoots roots)
+{
+	this->roots = std::move(roots);
 }
 
 ScriptGraph::FunctionParameters ScriptGraph::getFunctionParameters() const
