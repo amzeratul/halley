@@ -166,6 +166,8 @@ namespace Halley {
 		uint8_t addEntityId(EntityId id);
 		void removeEntityId(EntityId id);
 
+		ScriptNodeId getNodeRoot(ScriptNodeId nodeId) const;
+
 		FunctionParameters getFunctionParameters() const;
 
 	private:

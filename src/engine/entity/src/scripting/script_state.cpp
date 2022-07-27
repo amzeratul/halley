@@ -400,20 +400,15 @@ ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(ScriptNodeId no
 	if (node.getNodeType().getClassification() == ScriptNodeClassification::Variable || node.getNodeType().getClassification() == ScriptNodeClassification::Expression) {
 		result.state = NodeIntrospectionState::Visited;
 	} else {
-		int threadsFound = 0;
 		for (const auto& thread: threads) {
-			if (thread.getCurNode() == nodeId) {
+			if (thread.getCurNode() && nodeId == getScriptGraphPtr()->getNodeRoot(*thread.getCurNode())) {
 				result.state = NodeIntrospectionState::Active;
-				result.time = thread.getCurNodeTime();
-				++threadsFound;
+				result.time = std::max(result.time, thread.getCurNodeTime());
 			} else if (result.state == NodeIntrospectionState::Unvisited) {
 				if (std_ex::contains_if(thread.getStack(), [&] (const auto& f) { return f.node == nodeId; })) {
 					result.state = NodeIntrospectionState::Visited;
 				}
 			}
-		}
-		if (threadsFound > 1) {
-			Logger::logError("Found " + toString(threadsFound) + " on node " + node.getType() + " (" + toString(node.getId()) + ")");
 		}
 	}
 

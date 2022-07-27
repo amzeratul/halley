@@ -581,6 +581,16 @@ void ScriptGraph::removeEntityId(EntityId id)
 	}
 }
 
+ScriptNodeId ScriptGraph::getNodeRoot(ScriptNodeId nodeId) const
+{
+	auto parent = nodes[nodeId].getParentNode();
+	if (parent) {
+		return getNodeRoot(*parent);
+	} else {
+		return nodeId;
+	}
+}
+
 ScriptGraph::FunctionParameters ScriptGraph::getFunctionParameters() const
 {
 	FunctionParameters result;
