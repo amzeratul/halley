@@ -31,7 +31,10 @@ void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInpu
 {
 	Executor(pendingUITasks).runPending();
 
-	resources = &res;
+	if (resources != &res) {
+		resources = &res;
+		updateNodes();
+	}
 	
 	if (!renderer) {
 		renderer = std::make_shared<ScriptRenderer>(res, world, *scriptNodeTypes, baseZoom);

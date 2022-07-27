@@ -667,6 +667,8 @@ void ScriptGraph::setRoots(ScriptGraphNodeRoots roots)
 	this->roots = std::move(roots);
 }
 
+PRAGMA_DEOPTIMIZE
+
 ScriptGraph::FunctionParameters ScriptGraph::getFunctionParameters() const
 {
 	FunctionParameters result;
@@ -675,10 +677,20 @@ ScriptGraph::FunctionParameters ScriptGraph::getFunctionParameters() const
 		if (node.getType() == "start") {
 			result.nDataInput = static_cast<uint8_t>(node.getSettings()["dataPins"].getSequenceSize());
 			result.nTargetInput = static_cast<uint8_t>(node.getSettings()["targetPins"].getSequenceSize());
+			auto dataPins = node.getSettings()["dataPins"].asVector<String>({});
+			auto targetPins = node.getSettings()["targetPins"].asVector<String>({});
+			result.inputNames = std::move(dataPins);
+			std::move(targetPins.begin(), targetPins.end(), std::back_inserter(result.inputNames));
 		} else if (node.getType() == "return") {
 			result.nOutput = static_cast<uint8_t>(node.getSettings()["flowPins"].getSequenceSize(1));
 			result.nDataOutput = static_cast<uint8_t>(node.getSettings()["dataPins"].getSequenceSize());
 			result.nTargetOutput = static_cast<uint8_t>(node.getSettings()["targetPins"].getSequenceSize());
+			auto flowPins = node.getSettings()["flowPins"].asVector<String>({});
+			auto dataPins = node.getSettings()["dataPins"].asVector<String>({});
+			auto targetPins = node.getSettings()["targetPins"].asVector<String>({});
+			result.outputNames = std::move(flowPins);
+			std::move(dataPins.begin(), dataPins.end(), std::back_inserter(result.outputNames));
+			std::move(targetPins.begin(), targetPins.end(), std::back_inserter(result.outputNames));
 		}
 	}
 

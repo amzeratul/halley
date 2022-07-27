@@ -37,6 +37,7 @@ void ScriptGizmoUI::onRemovedFromRoot(UIRoot& root)
 void ScriptGizmoUI::load(ScriptGraph& graph)
 {
 	gizmo.setGraph(&graph);
+	updateNodes();
 }
 
 void ScriptGizmoUI::setState(ScriptState* state)

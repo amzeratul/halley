@@ -46,6 +46,34 @@ gsl::span<const IScriptNodeType::PinType> ScriptStart::getPinConfiguration(const
 	}
 }
 
+std::pair<String, Vector<ColourOverride>> ScriptStart::getPinDescription(const ScriptGraphNode& node, PinType elementType, ScriptPinId elementIdx) const
+{
+	const size_t nOutput = 1;
+	const size_t nDataInput = node.getSettings()["dataPins"].getSequenceSize(0);
+	const size_t nTargetInput = node.getSettings()["targetPins"].getSequenceSize(0);
+
+	size_t idx = 0;
+	const char* key = nullptr;
+
+	if (elementIdx < nOutput) {
+		// Do nothing, let it fall back
+	} else if (elementIdx < nOutput + nDataInput) {
+		idx = elementIdx - nOutput;
+		key = "dataPins";
+	} else if (elementIdx < nOutput + nDataInput + nTargetInput) {
+		idx = elementIdx - nOutput - nDataInput;
+		key = "targetPins";
+	}
+
+	if (key) {
+		const auto name = node.getSettings()[key].asSequence().at(idx).asString();
+		if (!name.isEmpty()) {
+			return { name, {} };
+		}
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
 IScriptNodeType::Result ScriptStart::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	return Result(ScriptNodeExecutionState::Done);
