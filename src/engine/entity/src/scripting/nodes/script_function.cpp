@@ -35,14 +35,15 @@ gsl::span<const IScriptNodeType::PinType> ScriptFunctionCallExternal::getPinConf
 	pins.reserve(16);
 
 	pins.emplace_back(ET::FlowPin, PD::Input);
-	for (size_t i = 0; i < nOutput; ++i) {
-		pins.emplace_back(ET::FlowPin, PD::Output);
-	}
 	for (size_t i = 0; i < nDataInput; ++i) {
 		pins.emplace_back(ET::ReadDataPin, PD::Input);
 	}
 	for (size_t i = 0; i < nTargetInput; ++i) {
 		pins.emplace_back(ET::TargetPin, PD::Input);
+	}
+
+	for (size_t i = 0; i < nOutput; ++i) {
+		pins.emplace_back(ET::FlowPin, PD::Output);
 	}
 	for (size_t i = 0; i < nDataOutput; ++i) {
 		pins.emplace_back(ET::ReadDataPin, PD::Output);
@@ -80,8 +81,46 @@ IScriptNodeType::Result ScriptFunctionCallExternal::doUpdate(ScriptEnvironment& 
 	return Result(ScriptNodeExecutionState::Call);
 }
 
+ConfigNode ScriptFunctionCallExternal::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto other = getOtherPin(environment, node, pinN);
+	if (other) {
+		const auto& returnNode = environment.getCurrentGraph()->getNodes()[other->first];
+		return environment.readInputDataPin(returnNode, other->second);
+	} else {
+		return {};
+	}
+}
 
+EntityId ScriptFunctionCallExternal::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId pinN) const
+{
+	const auto other = getOtherPin(environment, node, pinN);
+	if (other) {
+		const auto& returnNode = environment.getCurrentGraph()->getNodes()[other->first];
+		return environment.readInputEntityId(returnNode, other->second);
+	} else {
+		return {};
+	}
+}
 
+std::optional<std::pair<ScriptNodeId, ScriptPinId>> ScriptFunctionCallExternal::getOtherPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	// Find the "return" node
+	const auto& graph = environment.getCurrentGraph();
+	const auto returnNodeId = graph->getReturnFrom(node.getId());
+	if (!returnNodeId) {
+		return std::nullopt;
+	}
+
+	// Find the pin on the return node
+	auto& settings = node.getSettings();
+	const size_t nDataInput = settings["nDataInput"].asInt(0);
+	const size_t nTargetInput = settings["nTargetInput"].asInt(0);
+	const size_t numInputPins = 1 + nDataInput + nTargetInput; // These are tied to the caller, not the return
+	const size_t returnPinN = pinN - numInputPins;
+
+	return std::pair<ScriptNodeId, ScriptPinId>{ *returnNodeId, static_cast<ScriptPinId>(returnPinN) };
+}
 
 
 Vector<IScriptNodeType::SettingType> ScriptFunctionReturn::getSettingTypes() const
@@ -135,5 +174,6 @@ gsl::span<const IScriptNodeType::PinType> ScriptFunctionReturn::getPinConfigurat
 
 IScriptNodeType::Result ScriptFunctionReturn::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	return Result(ScriptNodeExecutionState::Return);
+	const uint8_t inputPinMask = static_cast<uint8_t>(1 << environment.getCurrentInputPin());
+	return Result(ScriptNodeExecutionState::Return, 0, inputPinMask);
 }

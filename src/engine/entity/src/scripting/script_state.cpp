@@ -10,55 +10,65 @@ using namespace Halley;
 
 ScriptStateThread::StackFrame::StackFrame(const ConfigNode& n)
 {
-	auto v = n.asVector2i();
-	node = v.x;
-	pin = v.y;
+	const auto result = n.asInt64();
+	node = result & 0xFFFF;
+	outputPin = (result >> 16) & 0xFF;
+	inputPin = (result >> 24) & 0xFF;
 }
 
-ScriptStateThread::StackFrame::StackFrame(ScriptNodeId node, ScriptPinId pin)
+ScriptStateThread::StackFrame::StackFrame(ScriptNodeId node, ScriptPinId outputPin, ScriptPinId inputPin)
 	: node(node)
-	, pin(pin)
+	, outputPin(outputPin)
+	, inputPin(inputPin)
 {
 }
 
 ConfigNode ScriptStateThread::StackFrame::toConfigNode() const
 {
-	return ConfigNode(Vector2i(node, pin));
+	const int64_t result = static_cast<int64_t>(node) | (static_cast<int64_t>(outputPin) << 16) | (static_cast<int64_t>(inputPin) << 24);
+	return ConfigNode(result);
 }
 
 String ScriptStateThread::StackFrame::toString() const
 {
-	return Halley::toString(node) + ":" + Halley::toString(static_cast<int>(pin));
+	return Halley::toString(node) + ":" + Halley::toString(static_cast<int>(outputPin)) + "->" + Halley::toString(static_cast<int>(inputPin));
 }
 
 bool ScriptStateThread::StackFrame::operator==(const StackFrame& other) const
 {
-	return node == other.node && pin == other.pin;
+	return node == other.node && outputPin == other.outputPin;
 }
 
 bool ScriptStateThread::StackFrame::operator!=(const StackFrame& other) const
 {
-	return node != other.node || pin != other.pin;
+	return node != other.node || outputPin != other.outputPin;
 }
 
 ScriptStateThread::ScriptStateThread()
+	: merging(false)
+	, watcher(false)
 {
 	stack.reserve(16);
 	generateId();
 }
 
-ScriptStateThread::ScriptStateThread(ScriptNodeId startNode)
-	: curNode(startNode)
+ScriptStateThread::ScriptStateThread(ScriptNodeId startNode, ScriptPinId inputPin)
+	: ScriptStateThread()
 {
-	generateId();
+	curNode = startNode;
+	curInputPin = inputPin;
 }
 
 ScriptStateThread::ScriptStateThread(const ConfigNode& node, const EntitySerializationContext& context)
+	: ScriptStateThread()
 {
 	stack = node["stack"].asVector<StackFrame>();
 	timeSlice = node["timeSlice"].asFloat(0);
 	if (node.hasKey("curNode")) {
 		curNode = node["curNode"].asInt();
+	}
+	if (node.hasKey("curInputPin")) {
+		curInputPin = node["curInputPin"].asInt();
 	}
 	curNodeTime = node["curNodeTime"].asFloat(0);
 	generateId();
@@ -80,6 +90,9 @@ ConfigNode ScriptStateThread::toConfigNode(const EntitySerializationContext& con
 
 	if (curNode) {
 		node["curNode"] = static_cast<int>(curNode.value());
+		if (curInputPin != 0) {
+			node["curInputPin"] = static_cast<int>(curInputPin);
+		}
 	}
 
 	if (context.matchType(EntitySerialization::makeMask(EntitySerialization::Type::DevCon))) {
@@ -112,7 +125,7 @@ bool ScriptStateThread::stackGoesThrough(ScriptNodeId node, std::optional<Script
 {
 	return std::any_of(stack.begin(), stack.end(), [&] (const StackFrame& frame)
 	{
-		return frame.node == node && (!pin || frame.pin == pin);
+		return frame.node == node && (!pin || frame.outputPin == pin);
 	});
 }
 
@@ -127,20 +140,21 @@ void ScriptStateThread::generateId()
 	uniqueId = nextId++;
 }
 
-void ScriptStateThread::advanceToNode(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin)
+void ScriptStateThread::advanceToNode(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin, ScriptPinId inputPin)
 {
 	if (curNode) {
-		stack.push_back(StackFrame(*curNode, outputPin));
+		stack.push_back(StackFrame(*curNode, outputPin, curInputPin));
 	}
 	curNodeTime = 0;
 	curNode = node;
+	curInputPin = inputPin;
 }
 
-ScriptStateThread ScriptStateThread::fork(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin) const
+ScriptStateThread ScriptStateThread::fork(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin, ScriptPinId inputPin) const
 {
 	ScriptStateThread newThread = *this;
 	newThread.generateId();
-	newThread.advanceToNode(node, outputPin);
+	newThread.advanceToNode(node, outputPin, inputPin);
 	return newThread;
 }
 

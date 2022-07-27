@@ -141,8 +141,10 @@ namespace Halley {
 		Vector<ScriptGraphNode>& getNodes() { return nodes; }
 
 		OptionalLite<ScriptNodeId> getStartNode() const;
-		OptionalLite<ScriptNodeId> getCallNode(ScriptNodeId node) const;
-		OptionalLite<ScriptNodeId> getReturnNode(ScriptNodeId node) const;
+		OptionalLite<ScriptNodeId> getCallee(ScriptNodeId node) const;
+		OptionalLite<ScriptNodeId> getCaller(ScriptNodeId node) const;
+		OptionalLite<ScriptNodeId> getReturnTo(ScriptNodeId node) const;
+		OptionalLite<ScriptNodeId> getReturnFrom(ScriptNodeId node) const;
 		uint64_t getHash() const;
 
 		std::optional<ScriptNodeId> getMessageInboxId(const String& messageId, bool requiresSpawningScript = false) const;
@@ -166,8 +168,8 @@ namespace Halley {
 	private:
 		Vector<ScriptGraphNode> nodes;
 		Vector<EntityId> entityIds;
-		HashMap<ScriptNodeId, ScriptNodeId> callMap;
-		HashMap<ScriptNodeId, ScriptNodeId> returnMap;
+		Vector<std::pair<ScriptNodeId, ScriptNodeId>> callerToCallee;
+		Vector<std::pair<ScriptNodeId, ScriptNodeId>> returnToCaller;
 		uint64_t hash = 0;
 
 		mutable uint64_t lastAssignTypeHash = 1;

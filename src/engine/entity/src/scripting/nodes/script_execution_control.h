@@ -16,6 +16,11 @@ namespace Halley {
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
+		EntityId doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId pinN) const override;
+
+	private:
+		std::optional<std::pair<ScriptNodeId, ScriptPinId>> getOtherPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const;
 	};
 
 	class ScriptDestructor final : public ScriptNodeTypeBase<void> {

@@ -83,6 +83,7 @@ namespace Halley {
 		struct OutputNode {
 			OptionalLite<ScriptNodeId> dstNode;
 			ScriptPinId outputPin;
+			ScriptPinId inputPin;
 		};
 		std::array<OutputNode, 8> getOutputNodes(const ScriptGraphNode& node, uint8_t outputActiveMask) const;
 		ScriptPinId getNthOutputPinIdx(const ScriptGraphNode& node, size_t n) const;

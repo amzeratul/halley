@@ -99,6 +99,7 @@ namespace Halley {
     	int getCurrentFrameNumber() const;
         Time getDeltaTime() const;
         EntityId getCurrentEntityId() const override;
+        ScriptPinId getCurrentInputPin() const;
 
         World& getWorld();
         Resources& getResources();
@@ -127,6 +128,7 @@ namespace Halley {
         bool isHost = false;
         bool inputEnabled = true;
 
+        ScriptPinId currentInputPin = 0;
     	const ScriptGraph* currentGraph = nullptr;
     	ScriptState* currentState = nullptr;
         ScriptVariables* currentEntityVariables = nullptr;
@@ -145,7 +147,7 @@ namespace Halley {
 
         ScriptStateThread startThread(ScriptStateThread thread);
         void addThread(ScriptStateThread thread, Vector<ScriptStateThread>& pending);
-        void advanceThread(ScriptStateThread& thread, OptionalLite<ScriptNodeId> node, ScriptPinId outputPin);
+        void advanceThread(ScriptStateThread& thread, OptionalLite<ScriptNodeId> node, ScriptPinId outputPin, ScriptPinId inputPin);
         void initNode(ScriptNodeId nodeId, ScriptState::NodeState& state);
         void forkThread(ScriptStateThread& thread, std::array<IScriptNodeType::OutputNode, 8> outputNodes, Vector<ScriptStateThread>& pendingThreads, size_t firstIdx = 0);
         void mergeThread(ScriptStateThread& thread, bool wait);
@@ -156,7 +158,7 @@ namespace Halley {
         void abortCodePath(ScriptNodeId node, std::optional<ScriptPinId> outputPin);
 
         void callFunction(ScriptStateThread& thread);
-        void returnFromFunction(ScriptStateThread& thread);
+        void returnFromFunction(ScriptStateThread& thread, uint8_t outputPins);
         
         void processMessages(Time time, Vector<ScriptStateThread>& pending);
 

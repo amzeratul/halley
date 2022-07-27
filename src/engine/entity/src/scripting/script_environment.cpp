@@ -47,7 +47,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 		graphState.start(currentGraph->getHash());
 		graphState.prepareStates(serializationContext, time);
 		if (currentGraph->getStartNode()) {
-			threads.push_back(startThread(ScriptStateThread(*currentGraph->getStartNode())));
+			threads.push_back(startThread(ScriptStateThread(*currentGraph->getStartNode(), 0)));
 		}
 	} else {
 		graphState.prepareStates(serializationContext, time);
@@ -97,6 +97,7 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		const auto& node = currentGraph->getNodes().at(nodeId);
 		const auto& nodeType = node.getNodeType();
 		auto& nodeState = graphState.getNodeState(nodeId);
+		currentInputPin = thread.getCurInputPin();
 
 		// Update
 		const auto result = nodeType.update(*this, static_cast<Time>(timeLeft), node, nodeState.data);
@@ -129,7 +130,7 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 
 				auto outputNodes = nodeType.getOutputNodes(node, result.outputsActive);
 				forkThread(thread, outputNodes, pendingThreads, 1);
-				advanceThread(thread, outputNodes[0].dstNode, outputNodes[0].outputPin);
+				advanceThread(thread, outputNodes[0].dstNode, outputNodes[0].outputPin, outputNodes[0].inputPin);
 			} else if (result.state == ScriptNodeExecutionState::Terminate) {
 				doTerminateState();
 				break;
@@ -140,7 +141,7 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 			} else if (result.state == ScriptNodeExecutionState::Call) {
 				callFunction(thread);
 			} else if (result.state == ScriptNodeExecutionState::Return) {
-				returnFromFunction(thread);
+				returnFromFunction(thread, result.outputsActive);
 			}
 		}
 	}
@@ -232,7 +233,7 @@ void ScriptEnvironment::doTerminateState()
 void ScriptEnvironment::runDestructor(ScriptNodeId nodeId)
 {
 	Vector<ScriptStateThread> threads;
-	auto& t = threads.emplace_back(startThread(ScriptStateThread(nodeId)));
+	auto& t = threads.emplace_back(startThread(ScriptStateThread(nodeId, 0)));
 	t.getTimeSlice() = std::numeric_limits<float>::infinity();
 
 	while (true) {
@@ -269,13 +270,13 @@ void ScriptEnvironment::addThread(ScriptStateThread thread, Vector<ScriptStateTh
 	pending.push_back(startThread(thread));
 }
 
-void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<ScriptNodeId> node, ScriptPinId outputPin)
+void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<ScriptNodeId> node, ScriptPinId outputPin, ScriptPinId inputPin)
 {
 	if (node) {
 		auto& state = currentState->getNodeState(node.value());
 		if (state.threadCount == 0) {
 			initNode(node.value(), state);
-			thread.advanceToNode(node, outputPin);
+			thread.advanceToNode(node, outputPin, inputPin);
 			return;
 		}
 	}
@@ -294,7 +295,7 @@ void ScriptEnvironment::forkThread(ScriptStateThread& thread, std::array<IScript
 {
 	for (size_t j = firstIdx; j < outputNodes.size(); ++j) {
 		if (outputNodes[j].dstNode && currentState->getNodeState(outputNodes[j].dstNode.value()).threadCount == 0) {
-			addThread(thread.fork(outputNodes[j].dstNode.value(), outputNodes[j].outputPin), pendingThreads);
+			addThread(thread.fork(outputNodes[j].dstNode.value(), outputNodes[j].outputPin, outputNodes[j].inputPin), pendingThreads);
 		}
 	}
 }
@@ -317,7 +318,7 @@ void ScriptEnvironment::mergeThread(ScriptStateThread& thread, bool wait)
 
 void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRollback)
 {
-	thread.advanceToNode({}, 0);
+	thread.advanceToNode({}, 0, 0);
 	
 	auto& state = *currentState;
 	
@@ -329,9 +330,9 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRol
 
 		auto& nodeState = state.getNodeState(nodeId);
 
-		if (allowRollback && i >= 1 && node.getNodeType().isStackRollbackPoint(*this, node, threadStack[i].pin, nodeState.data)) {
+		if (allowRollback && i >= 1 && node.getNodeType().isStackRollbackPoint(*this, node, threadStack[i].outputPin, nodeState.data)) {
 			threadStack.resize(i);
-			thread.advanceToNode(nodeId, threadStack[i - 1].pin);
+			thread.advanceToNode(nodeId, threadStack[i - 1].outputPin, threadStack[i - 1].inputPin);
 			return;
 		}
 
@@ -382,26 +383,22 @@ void ScriptEnvironment::abortCodePath(ScriptNodeId node, std::optional<ScriptPin
 void ScriptEnvironment::callFunction(ScriptStateThread& thread)
 {
 	const auto nodeId = thread.getCurNode().value();
-	advanceThread(thread, currentGraph->getCallNode(nodeId), 0);
+	advanceThread(thread, currentGraph->getCallee(nodeId), 0, 0);
 }
 
-void ScriptEnvironment::returnFromFunction(ScriptStateThread& thread)
+void ScriptEnvironment::returnFromFunction(ScriptStateThread& thread, uint8_t outputPins)
 {
-	// TODO: determine output pin
-	// TODO: redirect data
-	const uint8_t outputPin = 0;
-
 	const auto returnNodeId = thread.getCurNode().value();
-	const auto nodeId = currentGraph->getReturnNode(returnNodeId);
+	const auto nodeId = currentGraph->getReturnTo(returnNodeId);
 
 	if (nodeId) {
 		const auto& node = currentGraph->getNodes()[*nodeId];
 		const auto& nodeType = node.getNodeType();
-		const auto outputNodes = nodeType.getOutputNodes(node, static_cast<uint8_t>(1) << outputPin);
+		const auto outputNodes = nodeType.getOutputNodes(node, outputPins);
 
-		advanceThread(thread, outputNodes[0].dstNode, outputNodes[0].outputPin);
+		advanceThread(thread, outputNodes[0].dstNode, outputNodes[0].outputPin, outputNodes[0].inputPin);
 	} else {
-		advanceThread(thread, {}, 0);
+		advanceThread(thread, {}, 0, 0);
 	}
 }
 
@@ -410,7 +407,7 @@ void ScriptEnvironment::processMessages(Time time, Vector<ScriptStateThread>& pe
 	Vector<ScriptNodeId> toStart;
 	currentState->processMessages(toStart);
 	for (const auto nodeId: toStart) {
-		pending.push_back(startThread(ScriptStateThread(nodeId)));
+		pending.push_back(startThread(ScriptStateThread(nodeId, 0)));
 	}
 }
 
@@ -516,6 +513,11 @@ Time ScriptEnvironment::getDeltaTime() const
 EntityId ScriptEnvironment::getCurrentEntityId() const
 {
 	return currentEntity;
+}
+
+ScriptPinId ScriptEnvironment::getCurrentInputPin() const
+{
+	return currentInputPin;
 }
 
 World& ScriptEnvironment::getWorld()

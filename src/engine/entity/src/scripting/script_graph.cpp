@@ -256,8 +256,8 @@ void ScriptGraph::loadDependencies(const Resources& resources)
 			if (!function.isEmpty()) {
 				if (resources.exists<ScriptGraph>(function)) {
 					const auto [startNode, returnNode] = appendGraph(*resources.get<ScriptGraph>(function));
-					callMap[static_cast<ScriptNodeId>(i)] = startNode;
-					returnMap[returnNode] = static_cast<ScriptNodeId>(i);
+					callerToCallee.emplace_back(static_cast<ScriptNodeId>(i), startNode);
+					returnToCaller.emplace_back(returnNode, static_cast<ScriptNodeId>(i));
 					modified = true;
 				} else {
 					Logger::logError("Script \"" + function + "\" referenced by " + getAssetId() + " doesn't exist.");
@@ -341,20 +341,38 @@ OptionalLite<ScriptNodeId> ScriptGraph::getStartNode() const
 	return {};
 }
 
-OptionalLite<ScriptNodeId> ScriptGraph::getCallNode(ScriptNodeId node) const
+OptionalLite<ScriptNodeId> ScriptGraph::getCallee(ScriptNodeId node) const
 {
-	const auto iter = callMap.find(node);
-	if (iter != callMap.end()) {
+	const auto iter = std_ex::find_if(callerToCallee, [&] (auto& e) { return e.first == node; });
+	if (iter != callerToCallee.end()) {
 		return iter->second;
 	}
 	return std::nullopt;
 }
 
-OptionalLite<ScriptNodeId> ScriptGraph::getReturnNode(ScriptNodeId node) const
+OptionalLite<ScriptNodeId> ScriptGraph::getCaller(ScriptNodeId node) const
 {
-	const auto iter = returnMap.find(node);
-	if (iter != returnMap.end()) {
+	const auto iter = std_ex::find_if(callerToCallee, [&] (auto& e) { return e.second == node; });
+	if (iter != callerToCallee.end()) {
+		return iter->first;
+	}
+	return std::nullopt;
+}
+
+OptionalLite<ScriptNodeId> ScriptGraph::getReturnTo(ScriptNodeId node) const
+{
+	const auto iter = std_ex::find_if(returnToCaller, [&] (auto& e) { return e.first == node; });
+	if (iter != returnToCaller.end()) {
 		return iter->second;
+	}
+	return std::nullopt;
+}
+
+OptionalLite<ScriptNodeId> ScriptGraph::getReturnFrom(ScriptNodeId node) const
+{
+	const auto iter = std_ex::find_if(returnToCaller, [&] (auto& e) { return e.second == node; });
+	if (iter != returnToCaller.end()) {
+		return iter->first;
 	}
 	return std::nullopt;
 }

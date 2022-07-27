@@ -51,6 +51,40 @@ IScriptNodeType::Result ScriptStart::doUpdate(ScriptEnvironment& environment, Ti
 	return Result(ScriptNodeExecutionState::Done);
 }
 
+ConfigNode ScriptStart::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto other = getOtherPin(environment, node, pinN);
+	if (other) {
+		const auto& returnNode = environment.getCurrentGraph()->getNodes()[other->first];
+		return environment.readInputDataPin(returnNode, other->second);
+	} else {
+		return {};
+	}
+}
+
+EntityId ScriptStart::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId pinN) const
+{
+	const auto other = getOtherPin(environment, node, pinN);
+	if (other) {
+		const auto& returnNode = environment.getCurrentGraph()->getNodes()[other->first];
+		return environment.readInputEntityId(returnNode, other->second);
+	} else {
+		return {};
+	}
+}
+
+std::optional<std::pair<ScriptNodeId, ScriptPinId>> ScriptStart::getOtherPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	// Find the "call" node
+	const auto& graph = environment.getCurrentGraph();
+	const auto callerNodeId = graph->getCaller(node.getId());
+	if (!callerNodeId) {
+		return std::nullopt;
+	}
+
+	return std::pair<ScriptNodeId, ScriptPinId>{ *callerNodeId, static_cast<ScriptPinId>(pinN) };
+}
+
 
 std::pair<String, Vector<ColourOverride>> ScriptDestructor::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {

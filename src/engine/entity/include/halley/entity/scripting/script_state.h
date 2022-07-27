@@ -37,11 +37,12 @@ namespace Halley {
 	public:
 		struct StackFrame {
 			ScriptNodeId node;
-			ScriptPinId pin;
+			ScriptPinId outputPin;
+			ScriptPinId inputPin;
 
 			StackFrame() = default;
 			StackFrame(const ConfigNode& node);
-			StackFrame(ScriptNodeId node, ScriptPinId pin);
+			StackFrame(ScriptNodeId node, ScriptPinId outputPin, ScriptPinId inputPin);
 			ConfigNode toConfigNode() const;
 			String toString() const;
 
@@ -51,7 +52,7 @@ namespace Halley {
 
 		ScriptStateThread();
 		ScriptStateThread(const ConfigNode& node, const EntitySerializationContext& context);
-		ScriptStateThread(ScriptNodeId startNode);
+		ScriptStateThread(ScriptNodeId startNode, ScriptPinId inputPin);
 		ScriptStateThread(const ScriptStateThread& other) = default;
 		ScriptStateThread(ScriptStateThread&& other) = default;
 		
@@ -61,9 +62,10 @@ namespace Halley {
 		ScriptStateThread& operator=(ScriptStateThread&& other) = default;
 		
 		OptionalLite<ScriptNodeId> getCurNode() const { return curNode; }
+		ScriptPinId getCurInputPin() const { return curInputPin; }
 
-		void advanceToNode(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin);
-		ScriptStateThread fork(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin) const;
+		void advanceToNode(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin, ScriptPinId inputPin);
+		ScriptStateThread fork(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin, ScriptPinId inputPin) const;
 		
 		float& getTimeSlice() { return timeSlice; }
 		float& getCurNodeTime() { return curNodeTime; }
@@ -86,8 +88,9 @@ namespace Halley {
 	private:
 		uint32_t uniqueId;
 		OptionalLite<ScriptNodeId> curNode;
-		bool merging = false;
-		bool watcher = false;
+		ScriptPinId curInputPin = 0;
+		bool merging : 1;
+		bool watcher : 1;
 		float timeSlice = 0;
 		float curNodeTime = 0;
 		Vector<StackFrame> stack;

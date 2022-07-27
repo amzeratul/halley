@@ -205,7 +205,7 @@ std::array<IScriptNodeType::OutputNode, 8> IScriptNodeType::getOutputNodes(const
 				const auto& output = node.getPin(i);
 				for (auto& conn: output.connections) {
 					if (conn.dstNode) {
-						result[nOutputsFound++] = OutputNode{ conn.dstNode, static_cast<ScriptPinId>(i) };
+						result[nOutputsFound++] = OutputNode{ conn.dstNode, static_cast<ScriptPinId>(i), conn.dstPin };
 					}
 				}
 			}
