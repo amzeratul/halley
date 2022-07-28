@@ -650,8 +650,6 @@ void ScriptGraph::setRoots(ScriptGraphNodeRoots roots)
 	this->roots = std::move(roots);
 }
 
-PRAGMA_DEOPTIMIZE
-
 ScriptGraph::FunctionParameters ScriptGraph::getFunctionParameters() const
 {
 	FunctionParameters result;

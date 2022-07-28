@@ -323,6 +323,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptEveryFrame>());
 	addScriptNode(std::make_unique<ScriptEveryTime>());
 	addScriptNode(std::make_unique<ScriptFlowGate>());
+	addScriptNode(std::make_unique<ScriptLatch>());
 	addScriptNode(std::make_unique<ScriptEntityAuthority>());
 	addScriptNode(std::make_unique<ScriptHostAuthority>());
 	addScriptNode(std::make_unique<ScriptIfEntityAuthority>());

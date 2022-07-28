@@ -97,7 +97,7 @@ namespace Halley {
 		static_assert(std::is_base_of_v<IScriptStateData, DataType>);
 		static_assert(std::is_base_of_v<ScriptEnvironment, EnvironmentType>);
 		
-		virtual Result doUpdate(EnvironmentType& environment, Time time, const ScriptGraphNode& node, DataType& curData) const = 0;
+		virtual Result doUpdate(EnvironmentType& environment, Time time, const ScriptGraphNode& node, DataType& curData) const { return Result(ScriptNodeExecutionState::Done); }
 		virtual void doDestructor(EnvironmentType& environment, const ScriptGraphNode& node, DataType& curData) const {}
 		virtual bool doIsStackRollbackPoint(EnvironmentType& environment, const ScriptGraphNode& node, ScriptPinId outPin, DataType& curData) const { return false; }
 		virtual void doInitData(DataType& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const = 0;
