@@ -27,6 +27,11 @@ void ScriptingBaseGizmo::setUIRoot(UIRoot& root)
 	uiRoot = &root;
 }
 
+void ScriptingBaseGizmo::setEventSink(UIWidget& sink)
+{
+	eventSink = &sink;
+}
+
 void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInputState& inputState)
 {
 	Executor(pendingUITasks).runPending();
@@ -596,7 +601,7 @@ void ScriptingBaseGizmo::openNodeUI(std::optional<ScriptNodeId> nodeId, std::opt
 {
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(type);
 	if (nodeType && (nodeId || !nodeType->getSettingTypes().empty())) {
-		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, entityEditorFactory, nodeId, *nodeType, pos));
+		uiRoot->addChild(std::make_shared<ScriptingNodeEditor>(*this, factory, entityEditorFactory, eventSink, nodeId, *nodeType, pos));
 	} else if (!nodeId) {
 		addNode(type, pos.value_or(Vector2f()), ConfigNode());
 	}

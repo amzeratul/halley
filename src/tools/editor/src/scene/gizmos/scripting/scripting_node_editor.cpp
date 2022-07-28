@@ -2,11 +2,12 @@
 #include "scripting_gizmo.h"
 using namespace Halley;
 
-ScriptingNodeEditor::ScriptingNodeEditor(ScriptingBaseGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, std::optional<uint32_t> nodeId, const IScriptNodeType& nodeType, std::optional<Vector2f> pos)
+ScriptingNodeEditor::ScriptingNodeEditor(ScriptingBaseGizmo& gizmo, UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, UIWidget* eventSink, std::optional<uint32_t> nodeId, const IScriptNodeType& nodeType, std::optional<Vector2f> pos)
 	: UIWidget("scripting_node_editor", {}, UISizer())
 	, gizmo(gizmo)
 	, factory(factory)
 	, entityEditorFactory(entityEditorFactory)
+	, eventSink(eventSink)
 	, nodeId(nodeId)
 	, nodeType(nodeType)
 	, curSettings(nodeId ? ConfigNode(gizmo.getNode(*nodeId).getSettings()) : ConfigNode::MapType())
@@ -20,6 +21,24 @@ ScriptingNodeEditor::ScriptingNodeEditor(ScriptingBaseGizmo& gizmo, UIFactory& f
 
 	setModal(true);
 	factory.loadUI(*this, "halley/scripting_node_editor");
+
+	setHandle(UIEventType::NavigateToAsset, [=] (const UIEvent& event)
+	{
+		if (this->eventSink) {
+			this->eventSink->sendEvent(event);
+		}
+		cancelChanges();
+		destroy();
+	});
+
+	setHandle(UIEventType::NavigateToFile, [=] (const UIEvent& event)
+	{
+		if (this->eventSink) {
+			this->eventSink->sendEvent(event);
+		}
+		cancelChanges();
+		destroy();
+	});
 }
 
 void ScriptingNodeEditor::onMakeUI()

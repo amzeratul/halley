@@ -14,6 +14,7 @@ namespace Halley {
 
 		ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom = 1.0f);
 		void setUIRoot(UIRoot& root);
+		void setEventSink(UIWidget& eventSink);
 
 		void addNode();
 		ScriptNodeId addNode(const String& type, Vector2f pos, ConfigNode settings);
@@ -92,6 +93,7 @@ namespace Halley {
 		UIRoot* uiRoot = nullptr;
 		const World* world = nullptr;
 		Resources* resources = nullptr;
+		UIWidget* eventSink = nullptr;
 
 		Vector2f basePos;
 		ScriptGraph* scriptGraph = nullptr;

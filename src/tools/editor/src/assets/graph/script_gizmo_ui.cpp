@@ -14,6 +14,7 @@ ScriptGizmoUI::ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEn
 	{
 		onModified();
 	});
+	gizmo.setEventSink(*this);
 
 	setHandle(UIEventType::MouseWheel, [=] (const UIEvent& event)
 	{
