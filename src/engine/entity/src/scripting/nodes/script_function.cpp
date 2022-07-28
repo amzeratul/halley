@@ -90,6 +90,11 @@ std::pair<String, Vector<ColourOverride>> ScriptFunctionCallExternal::getPinDesc
 	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 }
 
+String ScriptFunctionCallExternal::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+{
+	return getPinDescription(node, ScriptNodeElementType::ReadDataPin, elementIdx).first;
+}
+
 void ScriptFunctionCallExternal::updateSettings(ScriptGraphNode& node, const ScriptGraph& graph, Resources& resources) const
 {
 	auto& settings = node.getSettings();

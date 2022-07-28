@@ -74,6 +74,11 @@ std::pair<String, Vector<ColourOverride>> ScriptStart::getPinDescription(const S
 	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 }
 
+String ScriptStart::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+{
+	return getPinDescription(node, ScriptNodeElementType::ReadDataPin, elementIdx).first;
+}
+
 IScriptNodeType::Result ScriptStart::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	return Result(ScriptNodeExecutionState::Done);

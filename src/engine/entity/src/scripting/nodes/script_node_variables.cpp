@@ -272,6 +272,42 @@ ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const Scr
 
 
 
+String ScriptValueOr::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+{
+	auto a = getConnectedNodeName(world, node, graph, 0);
+	auto b = getConnectedNodeName(world, node, graph, 1);
+	return addParentheses(std::move(a)) + " ?? " + addParentheses(std::move(b));
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptValueOr::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = ScriptNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptValueOr::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Returns ");
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	str.append(" if defined, otherwise ");
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	return str.moveResults();
+}
+
+ConfigNode ScriptValueOr::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	auto a = readDataPin(environment, node, 0);
+	if (a.getType() != ConfigNodeType::Undefined) {
+		return a;
+	} else {
+		return readDataPin(environment, node, 1);
+	}
+}
+
+
 
 Vector<IScriptNodeType::SettingType> ScriptLerp::getSettingTypes() const
 {
