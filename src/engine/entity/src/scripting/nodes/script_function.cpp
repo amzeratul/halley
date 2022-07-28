@@ -4,7 +4,7 @@ using namespace Halley;
 
 String ScriptFunctionCallExternal::getIconName(const ScriptGraphNode& node) const
 {
-	auto icon = node.getSettings()["icon"].asString("");
+	auto icon = node.getSettings().getType() == ConfigNodeType::Map ? node.getSettings()["icon"].asString("") : "";
 	if (icon.isEmpty()) {
 		return "script_icons/function_call.png";
 	} else {
@@ -119,7 +119,11 @@ void ScriptFunctionCallExternal::updateSettings(ScriptGraphNode& node, const Scr
 
 IScriptNodeType::Result ScriptFunctionCallExternal::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
-	return Result(ScriptNodeExecutionState::Call);
+	if (node.getSettings()["function"].asString("").isEmpty()) {
+		return Result(ScriptNodeExecutionState::Done);
+	} else {
+		return Result(ScriptNodeExecutionState::Call);
+	}
 }
 
 ConfigNode ScriptFunctionCallExternal::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
