@@ -236,5 +236,8 @@ void ScriptGizmoUI::onDoubleClick(ScriptNodeId nodeId)
 		open(node.getSettings()["function"].asString(""));
 	} else if (node.getType() == "startScript") {
 		open(node.getSettings()["script"].asString(""));
+	} else if (node.getType() == "sendMessage") {
+		const auto msgType = ScriptMessageType(node.getSettings()["message"]);
+		open(msgType.script);
 	}
 }
