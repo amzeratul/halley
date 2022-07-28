@@ -222,13 +222,19 @@ void ScriptGizmoUI::updateSelectionBox()
 
 void ScriptGizmoUI::onDoubleClick(ScriptNodeId nodeId)
 {
-	const auto& node = gizmo.getGraph().getNodes()[nodeId];
-	if (node.getType() == "callExternal") {
-		const auto scriptId = node.getSettings()["function"].asString("");
+	auto open = [&] (const String& scriptId)
+	{
 		if (!scriptId.isEmpty()) {
 			auto uri = "asset:scriptGraph:" + scriptId;
 			Logger::logDev("Navigating to " + uri);
 			sendEvent(UIEvent(UIEventType::NavigateToAsset, getId(), std::move(uri)));
 		}
+	};
+
+	const auto& node = gizmo.getGraph().getNodes()[nodeId];
+	if (node.getType() == "callExternal") {
+		open(node.getSettings()["function"].asString(""));
+	} else if (node.getType() == "startScript") {
+		open(node.getSettings()["script"].asString(""));
 	}
 }
