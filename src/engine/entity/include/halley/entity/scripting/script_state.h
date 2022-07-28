@@ -85,6 +85,8 @@ namespace Halley {
 
 		uint32_t getUniqueId() const;
 
+		void offsetToNodeRange(Range<ScriptNodeId> range);
+
 	private:
 		uint32_t uniqueId;
 		OptionalLite<ScriptNodeId> curNode;
@@ -187,6 +189,8 @@ namespace Halley {
 		const ScriptVariables& getLocalVariables() const;
     	ScriptVariables& getSharedVariables();
 		const ScriptVariables& getSharedVariables() const;
+
+		void offsetToNodeRange(Range<ScriptNodeId> nodeRange);
 
 	private:
 		std::shared_ptr<const ScriptGraph> scriptGraph;

@@ -355,6 +355,7 @@ void ScriptGraph::serialize(Serializer& s) const
 	s << nodes;
 	s << callerToCallee;
 	s << returnToCaller;
+	s << subGraphs;
 }
 
 void ScriptGraph::deserialize(Deserializer& s)
@@ -362,6 +363,7 @@ void ScriptGraph::deserialize(Deserializer& s)
 	s >> nodes;
 	s >> callerToCallee;
 	s >> returnToCaller;
+	s >> subGraphs;
 	finishGraph();
 }
 
@@ -716,6 +718,42 @@ void ScriptGraph::appendGraph(ScriptNodeId parent, const ScriptGraph& other)
 
 	callerToCallee.emplace_back(parent, startNode);
 	returnToCaller.emplace_back(returnNode, parent);
+	subGraphs.emplace_back(other.getAssetId(), Range<ScriptNodeId>(offset, static_cast<ScriptNodeId>(nodes.size())));
+
+	// For nested calls
+	for (const auto& e: other.callerToCallee) {
+		callerToCallee.emplace_back(e.first + offset, e.second + offset);
+	}
+	for (const auto& e: other.returnToCaller) {
+		returnToCaller.emplace_back(e.first + offset, e.second + offset);
+	}
+	for (const auto& e: other.subGraphs) {
+		subGraphs.emplace_back(e.first, e.second + offset);
+	}
+}
+
+Vector<int> ScriptGraph::getSubGraphIndicesForAssetId(const String& id) const
+{
+	Vector<int> result;
+	if (id == getAssetId()) {
+		result.push_back(-1);
+	}
+	for (int i = 0; i < int(subGraphs.size()); ++i) {
+		if (subGraphs[i].first == id) {
+			result.push_back(i);
+		}
+	}
+
+	return result;
+}
+
+Range<ScriptNodeId> ScriptGraph::getSubGraphRange(int subGraphIdx) const
+{
+	if (subGraphIdx == -1) {
+		return {0, static_cast<ScriptNodeId>(nodes.size())};
+	} else {
+		return subGraphs[subGraphIdx].second;
+	}
 }
 
 ConfigNode ConfigNodeSerializer<ScriptGraph>::serialize(ScriptGraph script, const EntitySerializationContext& context)

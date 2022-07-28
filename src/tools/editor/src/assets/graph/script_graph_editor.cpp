@@ -310,10 +310,13 @@ void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 
 		scriptGraph->assignTypes(*scriptNodeTypes);
 
+		const auto nodeRange = data["nodeRange"].asVector2i(Vector2i(0, std::numeric_limits<ScriptNodeId>::max()));
+
 		EntitySerializationContext context;
 		context.resources = &gameResources;
 		scriptState->load(data["scriptState"], context);
 		scriptState->setScriptGraphPtr(scriptGraph.get());
+		scriptState->offsetToNodeRange(Range<ScriptNodeId>(nodeRange.x, nodeRange.y));
 		scriptState->prepareStates(context, 0);
 
 		scriptGraph->setRoots(ScriptGraphNodeRoots(data["roots"]));
@@ -345,7 +348,7 @@ void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
 
 	if (data.getType() == ConfigNodeType::Sequence) {
 		for (const auto& entry: data.asSequence()) {
-			curEntities.emplace_back(EntityEnumData{ connId, entry["entityId"].asInt64(), entry["name"].asString() });
+			curEntities.emplace_back(EntityEnumData{ connId, entry["entityId"].asInt64(), entry["name"].asString(), entry["scriptIdx"].asInt() });
 		}
 	}
 

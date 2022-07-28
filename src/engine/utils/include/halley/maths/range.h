@@ -54,6 +54,12 @@ namespace Halley {
 			}
 		}
 
+		template <typename U>
+		constexpr Range(const Range<U>& other)
+			: start(static_cast<T>(other.start))
+			, end(static_cast<T>(other.end))
+		{}
+
 		constexpr bool contains(T elem) const
 		{
 			return elem >= start && elem < end;
@@ -111,6 +117,26 @@ namespace Halley {
 		constexpr bool operator!=(const Range& other) const
 		{
 			return start != other.start || end != other.end;
+		}
+
+		constexpr Range operator+(T value) const
+		{
+			return Range(start + value, end + value);
+		}
+
+		constexpr Range operator-(T value) const
+		{
+			return Range(start - value, end - value);
+		}
+
+		constexpr Range operator*(T value) const
+		{
+			return Range(start * value, end * value);
+		}
+
+		constexpr Range operator/(T value) const
+		{
+			return Range(start / value, end / value);
 		}
 
 		Range getUnion(const Range& other) const

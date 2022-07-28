@@ -134,6 +134,16 @@ uint32_t ScriptStateThread::getUniqueId() const
 	return uniqueId;
 }
 
+void ScriptStateThread::offsetToNodeRange(Range<ScriptNodeId> range)
+{
+	if (curNode) {
+		*curNode -= range.start;
+	}
+	for (auto& s: stack) {
+		s.node -= range.start;
+	}
+}
+
 void ScriptStateThread::generateId()
 {
 	static uint32_t nextId = 0;
@@ -555,6 +565,15 @@ ScriptVariables& ScriptState::getSharedVariables()
 const ScriptVariables& ScriptState::getSharedVariables() const
 {
 	return sharedVars;
+}
+
+void ScriptState::offsetToNodeRange(Range<ScriptNodeId> nodeRange)
+{
+	for (auto& t: threads) {
+		t.offsetToNodeRange(nodeRange);
+	}
+	nodeState.erase(nodeState.begin(), nodeState.begin() + nodeRange.start);
+	nodeState.resize(nodeRange.getLength());
 }
 
 ScriptState::NodeState& ScriptState::getNodeState(ScriptNodeId nodeId)

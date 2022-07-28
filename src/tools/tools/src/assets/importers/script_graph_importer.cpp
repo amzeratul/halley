@@ -43,6 +43,7 @@ ScriptGraph ScriptGraphImporter::loadScript(const String& assetId, const Bytes& 
 {
 	ConfigFile config = YAMLConvert::parseConfig(gsl::as_bytes(gsl::span<const Byte>(bytes)));
 	auto script = ScriptGraph(config.getRoot());
+	script.setAssetId(assetId);
 	loadScriptDependencies(assetId, script, collector);
 	return script;
 }

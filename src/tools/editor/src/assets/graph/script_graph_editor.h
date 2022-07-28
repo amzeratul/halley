@@ -34,6 +34,7 @@ namespace Halley {
 			size_t connId;
 			int64_t entityId;
 			String name;
+			int scriptIdx;
 		};
 		
 		ProjectWindow& projectWindow;

@@ -184,7 +184,6 @@ namespace Halley {
 
 		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		void finishGraph();
-		void appendGraph(ScriptNodeId parent, const ScriptGraph& other);
 
 		EntityId getEntityId(OptionalLite<uint8_t> idx) const;
 		OptionalLite<uint8_t> getEntityIdx(EntityId id) const;
@@ -195,6 +194,10 @@ namespace Halley {
 		const ScriptGraphNodeRoots& getRoots() const;
 		void setRoots(ScriptGraphNodeRoots roots);
 
+		void appendGraph(ScriptNodeId parent, const ScriptGraph& other);
+		Vector<int> getSubGraphIndicesForAssetId(const String& id) const;
+		Range<ScriptNodeId> getSubGraphRange(int subGraphIdx) const;
+
 		FunctionParameters getFunctionParameters() const;
 
 	private:
@@ -202,6 +205,7 @@ namespace Halley {
 		Vector<EntityId> entityIds;
 		Vector<std::pair<ScriptNodeId, ScriptNodeId>> callerToCallee;
 		Vector<std::pair<ScriptNodeId, ScriptNodeId>> returnToCaller;
+		Vector<std::pair<String, Range<ScriptNodeId>>> subGraphs;
 		uint64_t hash = 0;
 
 		mutable uint64_t lastAssignTypeHash = 1;
