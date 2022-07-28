@@ -21,6 +21,13 @@ ScriptGizmoUI::ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEn
 			gizmo.onMouseWheel(*inputState.mousePos, event.getIntData(), event.getKeyMods());
 		}
 	});
+
+	setHandle(UIEventType::CanvasDoubleClicked, [=] (const UIEvent& event)
+	{
+		if (auto underMouse = gizmo.getNodeUnderMouse()) {
+			onDoubleClick(underMouse->nodeId);
+		}
+	});
 }
 
 void ScriptGizmoUI::onAddedToRoot(UIRoot& root)
@@ -208,6 +215,19 @@ void ScriptGizmoUI::updateSelectionBox()
 		const auto rect = Rect4f(*dragStart, *inputState.mousePos);
 		if (rect.getWidth() >= 2 || rect.getHeight() >= 2) {
 			inputState.selectionBox = rect;
+		}
+	}
+}
+
+void ScriptGizmoUI::onDoubleClick(ScriptNodeId nodeId)
+{
+	const auto& node = gizmo.getGraph().getNodes()[nodeId];
+	if (node.getType() == "callExternal") {
+		const auto scriptId = node.getSettings()["function"].asString("");
+		if (!scriptId.isEmpty()) {
+			auto uri = "asset:scriptGraph:" + scriptId;
+			Logger::logDev("Navigating to " + uri);
+			sendEvent(UIEvent(UIEventType::NavigateToAsset, getId(), std::move(uri)));
 		}
 	}
 }

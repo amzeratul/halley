@@ -152,7 +152,11 @@ void BaseCanvas::onMouseOver(Vector2f mousePos)
 
 void BaseCanvas::onDoubleClicked(Vector2f mousePos, KeyMods keyMods)
 {
-	sendEvent(UIEvent(UIEventType::ButtonDoubleClicked, getId()));
+	if (mouseMirror) {
+		mouseMirror->sendEvent(UIEvent(UIEventType::CanvasDoubleClicked, getId()));
+	} else {
+		sendEvent(UIEvent(UIEventType::CanvasDoubleClicked, getId()));
+	}
 }
 
 void BaseCanvas::refresh()

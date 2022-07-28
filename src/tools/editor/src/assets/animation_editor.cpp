@@ -73,7 +73,7 @@ void AnimationEditor::setupWindow()
 		animationDisplay->onMouseOver(mousePos);
 	});
 
-	setHandle(UIEventType::ButtonDoubleClicked, "scrollBackground", [=] (const UIEvent& event)
+	setHandle(UIEventType::CanvasDoubleClicked, "scrollBackground", [=] (const UIEvent& event)
 	{
 		metadataEditor.setPivot(Vector2i(animationDisplay->getMousePos()));
 		refresh();

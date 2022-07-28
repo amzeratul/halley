@@ -188,9 +188,10 @@ void ScriptingBaseGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 	updateNodeAutoConnection(dragging->nodeIds);
 
 	if ((dragging->sticky && inputState.leftClickPressed) || (!dragging->sticky && !inputState.leftClickHeld)) {
+		const bool hadChange = dragging->hadChange;
 		dragging.reset();
 		const bool newConnection = finishAutoConnection();
-		if (dragging->hadChange || newConnection) {
+		if (hadChange || newConnection) {
 			onModified();
 		}
 	}
