@@ -124,9 +124,10 @@ namespace Halley {
 
 		void addRoot(ScriptNodeId id, ScriptNodeId root);
 		ScriptNodeId getRoot(ScriptNodeId id) const;
+		void clear();
 	};
 	
-	class ScriptGraph : public Resource {
+	class ScriptGraph : public Resource, public std::enable_shared_from_this<ScriptGraph> {
 	public:
 		struct FunctionParameters {
 			uint8_t nOutput = 1;
@@ -143,7 +144,6 @@ namespace Halley {
 		ScriptGraph(const ConfigNode& node, const EntitySerializationContext& context);
 
 		void load(const ConfigNode& node, const EntitySerializationContext& context);
-		void loadDependencies(const Resources& resources);
 
 		ConfigNode toConfigNode() const;
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
@@ -183,6 +183,7 @@ namespace Halley {
 
 		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		void finishGraph();
+		void appendGraph(ScriptNodeId parent, const ScriptGraph& other);
 
 		EntityId getEntityId(OptionalLite<uint8_t> idx) const;
 		OptionalLite<uint8_t> getEntityIdx(EntityId id) const;
@@ -206,7 +207,6 @@ namespace Halley {
 
 		ScriptGraphNodeRoots roots;
 
-		std::pair<ScriptNodeId, ScriptNodeId> appendGraph(ScriptNodeId parent, const ScriptGraph& other);
 		ScriptNodeId findNodeRoot(ScriptNodeId nodeId) const;
 		void generateRoots();
 	};

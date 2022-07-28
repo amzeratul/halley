@@ -132,6 +132,7 @@ void ScriptGraphNode::serialize(Serializer& s) const
 	s << type;
 	s << settings;
 	s << pins;
+	s << parentNode;
 }
 
 void ScriptGraphNode::deserialize(Deserializer& s)
@@ -140,6 +141,7 @@ void ScriptGraphNode::deserialize(Deserializer& s)
 	s >> type;
 	s >> settings;
 	s >> pins;
+	s >> parentNode;
 }
 
 void ScriptGraphNode::feedToHash(Hash::Hasher& hasher)
@@ -272,6 +274,11 @@ ScriptNodeId ScriptGraphNodeRoots::getRoot(ScriptNodeId id) const
 	return id;
 }
 
+void ScriptGraphNodeRoots::clear()
+{
+	mapping.clear();
+}
+
 ScriptGraph::ScriptGraph()
 {
 	finishGraph();
@@ -296,35 +303,6 @@ void ScriptGraph::load(const ConfigNode& node, const EntitySerializationContext&
 	entityIds = ConfigNodeSerializer<Vector<EntityId>>().deserialize(context, node["entityIds"]);
 	lastAssignTypeHash = 0;
 	finishGraph();
-}
-
-void ScriptGraph::loadDependencies(const Resources& resources)
-{
-	bool modified = false;
-
-	// NB: Call to appendGraph will append elements to nodes
-	for (size_t i = 0; i < nodes.size(); ++i) {
-		auto& node = nodes[i];
-		if (node.getType() == "callExternal") {
-			const auto function = node.getSettings()["function"].asString("");
-			if (!function.isEmpty()) {
-				if (resources.exists<ScriptGraph>(function)) {
-					const ScriptNodeId nodeId = static_cast<ScriptNodeId>(i);
-					const auto [startNode, returnNode] = appendGraph(nodeId, *resources.get<ScriptGraph>(function));
-					callerToCallee.emplace_back(nodeId, startNode);
-					returnToCaller.emplace_back(returnNode, nodeId);
-					modified = true;
-				} else {
-					Logger::logError("Script \"" + function + "\" referenced by " + getAssetId() + " doesn't exist.");
-				}
-			}
-		}
-	}
-
-	if (modified) {
-		generateRoots();
-		finishGraph();
-	}
 }
 
 ConfigNode ScriptGraph::toConfigNode() const
@@ -356,7 +334,7 @@ std::shared_ptr<ScriptGraph> ScriptGraph::loadResource(ResourceLoader& loader)
 {
 	auto script = std::make_shared<ScriptGraph>();
 	Deserializer::fromBytes(*script, loader.getStatic()->getSpan(), SerializerOptions(SerializerOptions::maxVersion));
-	script->loadDependencies(loader.getResources());
+	script->generateRoots();
 	return script;
 }
 
@@ -375,11 +353,15 @@ void ScriptGraph::makeDefault()
 void ScriptGraph::serialize(Serializer& s) const
 {
 	s << nodes;
+	s << callerToCallee;
+	s << returnToCaller;
 }
 
 void ScriptGraph::deserialize(Deserializer& s)
 {
 	s >> nodes;
+	s >> callerToCallee;
+	s >> returnToCaller;
 	finishGraph();
 }
 
@@ -654,6 +636,7 @@ const ScriptGraphNodeRoots& ScriptGraph::getRoots() const
 
 void ScriptGraph::generateRoots()
 {
+	roots.clear();
 	for (size_t curNodeId = 0; curNodeId < nodes.size(); ++curNodeId) {
 		const auto parentId = findNodeRoot(static_cast<ScriptNodeId>(curNodeId));
 		if (curNodeId != parentId) {
@@ -713,7 +696,7 @@ void ScriptGraph::finishGraph()
 	hash = hasher.digest();
 }
 
-std::pair<ScriptNodeId, ScriptNodeId> ScriptGraph::appendGraph(ScriptNodeId parent, const ScriptGraph& other)
+void ScriptGraph::appendGraph(ScriptNodeId parent, const ScriptGraph& other)
 {
 	const auto offset = static_cast<ScriptNodeId>(nodes.size());
 
@@ -731,7 +714,9 @@ std::pair<ScriptNodeId, ScriptNodeId> ScriptGraph::appendGraph(ScriptNodeId pare
 			returnNode = offset + static_cast<ScriptNodeId>(i);
 		}
 	}
-	return { startNode, returnNode };
+
+	callerToCallee.emplace_back(parent, startNode);
+	returnToCaller.emplace_back(returnNode, parent);
 }
 
 ConfigNode ConfigNodeSerializer<ScriptGraph>::serialize(ScriptGraph script, const EntitySerializationContext& context)
