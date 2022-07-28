@@ -137,6 +137,7 @@ namespace Halley {
 			uint8_t nTargetOutput = 0;
 			Vector<String> inputNames;
 			Vector<String> outputNames;
+			String icon;
 		};
 
 		ScriptGraph();

@@ -6,7 +6,7 @@ namespace Halley {
 	public:
 		String getId() const override { return "callExternal"; }
 		String getName() const override { return "Call Function (External)"; }
-		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/function_call.png"; }
+		String getIconName(const ScriptGraphNode& node) const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Function; }
 
 		Vector<SettingType> getSettingTypes() const override;

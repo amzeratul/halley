@@ -2,6 +2,16 @@
 using namespace Halley;
 
 
+String ScriptFunctionCallExternal::getIconName(const ScriptGraphNode& node) const
+{
+	auto icon = node.getSettings()["icon"].asString("");
+	if (icon.isEmpty()) {
+		return "script_icons/function_call.png";
+	} else {
+		return icon;
+	}
+}
+
 Vector<IScriptNodeType::SettingType> ScriptFunctionCallExternal::getSettingTypes() const
 {
 	return {
@@ -92,6 +102,7 @@ void ScriptFunctionCallExternal::updateSettings(ScriptGraphNode& node, const Scr
 		settings["nTargetOutput"] = 0;
 		settings.removeKey("inputNames");
 		settings.removeKey("outputNames");
+		settings.removeKey("icon");
 	} else {
 		const auto function = resources.get<ScriptGraph>(functionName);
 		const auto pars = function->getFunctionParameters();
@@ -102,6 +113,7 @@ void ScriptFunctionCallExternal::updateSettings(ScriptGraphNode& node, const Scr
 		settings["nTargetOutput"] = pars.nTargetOutput;
 		settings["inputNames"] = pars.inputNames;
 		settings["outputNames"] = pars.outputNames;
+		settings["icon"] = pars.icon;
 	}
 }
 
@@ -171,6 +183,7 @@ std::optional<std::pair<ScriptNodeId, ScriptPinId>> ScriptFunctionCallExternal::
 Vector<IScriptNodeType::SettingType> ScriptFunctionReturn::getSettingTypes() const
 {
 	return {
+		SettingType{ "icon", "Halley::ResourceReference<Halley::SpriteResource>", Vector<String>{""} },
 		SettingType{ "flowPins", "Halley::Vector<Halley::String>", Vector<String>{"Output"} },
 		SettingType{ "dataPins", "Halley::Vector<Halley::String>", Vector<String>{""} },
 		SettingType{ "targetPins", "Halley::Vector<Halley::String>", Vector<String>{""} },

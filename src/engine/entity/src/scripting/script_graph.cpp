@@ -674,6 +674,7 @@ ScriptGraph::FunctionParameters ScriptGraph::getFunctionParameters() const
 			result.outputNames = std::move(flowPins);
 			std::move(dataPins.begin(), dataPins.end(), std::back_inserter(result.outputNames));
 			std::move(targetPins.begin(), targetPins.end(), std::back_inserter(result.outputNames));
+			result.icon = node.getSettings()["icon"].asString("");
 		}
 	}
 
