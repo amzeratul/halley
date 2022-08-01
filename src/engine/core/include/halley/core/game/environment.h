@@ -12,6 +12,7 @@ namespace Halley
 		Path getDataPath() const;
 		Path getGameDataPath() const;
 		const Vector<std::string>& getArguments() const;
+		bool hasArgument(const std::string& arg) const;
 
 		void parseProgramPath(const String& commandLine);
 		void setDataPath(Path pathName);

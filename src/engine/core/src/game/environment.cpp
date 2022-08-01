@@ -1,6 +1,7 @@
 #include <halley/os/os.h>
 #include "halley/core/game/environment.h"
 #include "halley/file/path.h"
+#include "halley/utils/algorithm.h"
 
 Halley::Path Halley::Environment::getProgramPath() const
 {
@@ -20,6 +21,11 @@ Halley::Path Halley::Environment::getGameDataPath() const
 const Halley::Vector<std::string>& Halley::Environment::getArguments() const
 {
 	return args;
+}
+
+bool Halley::Environment::hasArgument(const std::string& arg) const
+{
+	return std_ex::contains(args, arg);
 }
 
 void Halley::Environment::parseProgramPath(const String& commandLine)
