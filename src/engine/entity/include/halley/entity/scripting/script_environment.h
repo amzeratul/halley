@@ -158,7 +158,7 @@ namespace Halley {
         void abortCodePath(ScriptNodeId node, std::optional<ScriptPinId> outputPin);
 
         void callFunction(ScriptStateThread& thread);
-        void returnFromFunction(ScriptStateThread& thread, uint8_t outputPins);
+        void returnFromFunction(ScriptStateThread& thread, uint8_t outputPins, Vector<ScriptStateThread>& pendingThreads);
         
         void processMessages(Time time, Vector<ScriptStateThread>& pending);
 

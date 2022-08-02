@@ -143,7 +143,7 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 			} else if (result.state == ScriptNodeExecutionState::Call) {
 				callFunction(thread);
 			} else if (result.state == ScriptNodeExecutionState::Return) {
-				returnFromFunction(thread, result.outputsActive);
+				returnFromFunction(thread, result.outputsActive, pendingThreads);
 			}
 		}
 	}
@@ -389,7 +389,7 @@ void ScriptEnvironment::callFunction(ScriptStateThread& thread)
 	advanceThread(thread, currentGraph->getCallee(nodeId), 0, 0);
 }
 
-void ScriptEnvironment::returnFromFunction(ScriptStateThread& thread, uint8_t outputPins)
+void ScriptEnvironment::returnFromFunction(ScriptStateThread& thread, uint8_t outputPins, Vector<ScriptStateThread>& pendingThreads)
 {
 	const auto returnNodeId = thread.getCurNode().value();
 	const auto nodeId = currentGraph->getReturnTo(returnNodeId);
@@ -399,6 +399,7 @@ void ScriptEnvironment::returnFromFunction(ScriptStateThread& thread, uint8_t ou
 		const auto& nodeType = node.getNodeType();
 		const auto outputNodes = nodeType.getOutputNodes(node, outputPins);
 
+		forkThread(thread, outputNodes, pendingThreads, 1);
 		advanceThread(thread, outputNodes[0].dstNode, outputNodes[0].outputPin, outputNodes[0].inputPin);
 	} else {
 		advanceThread(thread, {}, 0, 0);
