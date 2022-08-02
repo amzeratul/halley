@@ -141,7 +141,7 @@ namespace Halley {
         Vector<ScriptExecutionRequest> scriptExecutionRequestOutbox;
 
     private:
-        void updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);
+        bool updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);
         void doTerminateState();
         void runDestructor(ScriptNodeId nodeId);
 

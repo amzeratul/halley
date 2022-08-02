@@ -63,13 +63,15 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	// Update all threads
 	Vector<ScriptStateThread> pendingThreads;
 	for (size_t i = 0; i < threads.size(); ++i) {
-		updateThread(graphState, threads[i], pendingThreads);
-		processMessages(threads[i].getTimeSlice(), pendingThreads);
+		const bool running = updateThread(graphState, threads[i], pendingThreads);
+		if (running) {
+			processMessages(threads[i].getTimeSlice(), pendingThreads);
 
-		for (auto& t: pendingThreads) {
-			threads.push_back(std::move(t));
+			for (auto& t: pendingThreads) {
+				threads.push_back(std::move(t));
+			}
+			pendingThreads.clear();
 		}
-		pendingThreads.clear();
 	}
 	removeStoppedThreads();
 
@@ -87,7 +89,7 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	currentEntity = EntityId();
 }
 
-void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads)
+bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads)
 {
 	float& timeLeft = thread.getTimeSlice();
 
@@ -133,11 +135,11 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 				advanceThread(thread, outputNodes[0].dstNode, outputNodes[0].outputPin, outputNodes[0].inputPin);
 			} else if (result.state == ScriptNodeExecutionState::Terminate) {
 				doTerminateState();
-				break;
+				return false;
 			} else if (result.state == ScriptNodeExecutionState::Restart) {
 				doTerminateState();
 				graphState.reset();
-				break;
+				return false;
 			} else if (result.state == ScriptNodeExecutionState::Call) {
 				callFunction(thread);
 			} else if (result.state == ScriptNodeExecutionState::Return) {
@@ -145,6 +147,7 @@ void ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 			}
 		}
 	}
+	return true;
 }
 
 
