@@ -59,7 +59,7 @@ bool TaskDisplay::updateTask(Time time, float targetDisplaySlot)
 		displaySlot = lerp(displaySlot, targetDisplaySlot, static_cast<float>(6 * time));
 	}
 
-	bool visible = true;
+	bool visible = task->isVisible();
 
 	if (task->getStatus() == TaskStatus::Done) {
 		progressDisplay = 1;

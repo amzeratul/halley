@@ -156,3 +156,7 @@ Task* Task::getParent() const
 	return parent;
 }
 
+void Task::setVisible(bool visible)
+{
+	isVisible = visible;
+}

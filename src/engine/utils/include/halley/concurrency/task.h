@@ -51,6 +51,8 @@ namespace Halley
 
 		Task* getParent() const;
 
+		void setVisible(bool visible);
+
 	private:
 		Vector<std::unique_ptr<Task>> continuations;
 		Vector<std::unique_ptr<Task>> pendingTasks;
@@ -67,7 +69,7 @@ namespace Halley
 		Task* parent = nullptr;
 
 		const bool isCancellable;
-		const bool isVisible;
+		bool isVisible;
 		
 		bool error = false;
 		std::list<std::pair<LoggerLevel, String>> messageLog;
