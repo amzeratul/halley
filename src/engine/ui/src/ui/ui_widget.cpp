@@ -394,6 +394,10 @@ void UIWidget::onMouseOver(Vector2f mousePos)
 {
 }
 
+void UIWidget::onMouseLeft(Vector2f mousePos)
+{
+}
+
 bool UIWidget::isActive() const
 {
 	return activeByUser && activeByInput && alive;

@@ -431,6 +431,7 @@ void UIRoot::updateMouseOver(const std::shared_ptr<UIWidget>& underMouse)
 	if (curMouseOver != underMouse) {
 		if (curMouseOver) {
 			curMouseOver->setMouseOver(false);
+			curMouseOver->onMouseLeft(lastMousePos);
 		}
 		if (underMouse) {
 			underMouse->setMouseOver(true);
