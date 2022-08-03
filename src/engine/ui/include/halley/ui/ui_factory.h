@@ -103,22 +103,31 @@ namespace Halley
 		static UISizerAlignFlags::Type parseSizerAlignFlags(const ConfigNode& node, UISizerAlignFlags::Type defaultValue = UISizerAlignFlags::Fill);
 		static ConfigNode makeSizerAlignFlagsNode(UISizerAlignFlags::Type align);
 		static UISizerAlignFlags::Type normalizeDirection(UISizerAlignFlags::Type align, bool removeFill);
-
-	protected:
+		
 		struct ParsedOption {
+			String text;
+			String textKey;
+			String tooltip;
+			String tooltipKey;
 			String id;
-			LocalisedString text;
 			String image;
-			String iconColour;
 			String inactiveImage;
 			String spriteSheet;
 			String sprite;
 			String imageColour;
-			LocalisedString tooltip;
 			Vector4f border;
 			bool active;
+
+			LocalisedString displayText;
+			LocalisedString displayTooltip;
+			
+			ParsedOption() = default;
+			ParsedOption(const ConfigNode& node);
+
+			void generateDisplay(const I18N& i18n);
 		};
-		
+
+	protected:		
 		const HalleyAPI& api;
 		Resources& resources;
 		const I18N& i18n;
@@ -184,6 +193,7 @@ namespace Halley
 		UIFactoryWidgetProperties getSpinListProperties() const;
 		UIFactoryWidgetProperties getOptionListMorpherProperties() const;
 		UIFactoryWidgetProperties getDebugConsoleProperties() const;
+		UIFactoryWidgetProperties getBaseListProperties() const;
 		UIFactoryWidgetProperties getListProperties() const;
 		UIFactoryWidgetProperties getTreeListProperties() const;
 		

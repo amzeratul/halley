@@ -518,31 +518,38 @@ LocalisedString UIFactory::parseLabel(const ConfigNode& node, const String& defa
 	return label;
 }
 
+UIFactory::ParsedOption::ParsedOption(const ConfigNode& n)
+{
+	id = n["id"].asString("");
+	text = n["text"].asString("");
+	textKey = n["textKey"].asString("");
+	tooltip = n["tooltip"].asString("");
+	tooltipKey = n["tooltipKey"].asString("");
+
+	if (id.isEmpty()) {
+		id = text;
+	}
+	
+	image = n["image"].asString("");
+	imageColour = n.hasKey("iconColour") ? n["iconColour"].asString() : n["imageColour"].asString("");
+	inactiveImage = n["inactiveImage"].asString("");
+	spriteSheet = n["spriteSheet"].asString("");
+	sprite = n["sprite"].asString("");
+	border = n["border"].asVector4f(Vector4f());
+	active = n["active"].asBool(true);
+}
+
+void UIFactory::ParsedOption::generateDisplay(const I18N& i18n)
+{
+	displayText = textKey.isEmpty() ? LocalisedString::fromUserString(text) : i18n.get(textKey);
+	displayTooltip = tooltipKey.isEmpty() ? LocalisedString::fromUserString(tooltip) : i18n.get(tooltipKey);
+}
+
 Vector<UIFactory::ParsedOption> UIFactory::parseOptions(const ConfigNode& node)
 {
-	Vector<ParsedOption> result;
-	if (node.getType() == ConfigNodeType::Sequence) {
-		for (const auto& n: node.asSequence()) {
-			auto id = n["id"].asString("");
-			auto label = parseLabel(n, id);
-			if (id.isEmpty()) {
-				id = label.getString();
-			}
-
-			ParsedOption option;
-			option.id = id;
-			option.text = label;
-			option.image = n["image"].asString("");
-			option.imageColour = n["imageColour"].asString("");
-			option.inactiveImage = n["inactiveImage"].asString("");
-			option.spriteSheet = n["spriteSheet"].asString("");
-			option.sprite = n["sprite"].asString("");
-			option.border = n["border"].asVector4f(Vector4f());
-			option.active = n["active"].asBool(true);
-			option.tooltip = parseLabel(n, "", "tooltip");
-			option.iconColour = n["iconColour"].asString("");
-			result.push_back(option);
-		}
+	Vector<ParsedOption> result = node.asVector<ParsedOption>();
+	for (auto& n: result) {
+		n.generateDisplay(i18n);
 	}
 	return result;
 }
@@ -744,17 +751,9 @@ UIFactoryWidgetProperties UIFactory::getDebugConsoleProperties() const
 	return result;
 }
 
-UIFactoryWidgetProperties UIFactory::getListProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "List";
-	result.iconName = "widget_icons/list.png";
-	return result;
-}
-
 UIFactoryWidgetProperties UIFactory::getTreeListProperties() const
 {
-	UIFactoryWidgetProperties result;
+	UIFactoryWidgetProperties result = getBaseListProperties();
 	result.name = "Tree List";
 	result.iconName = "widget_icons/treeList.png";
 	return result;
@@ -893,9 +892,9 @@ std::shared_ptr<UIWidget> UIFactory::makeDropdown(const ConfigNode& entryNode)
 	for (auto& o: options) {
 		Sprite icon;
 		if (!o.image.isEmpty()) {
-			icon = Sprite().setImage(getResources(), o.image).setColour(getColour(o.iconColour.isEmpty() ? "#FFFFFF" : o.iconColour));
+			icon = Sprite().setImage(getResources(), o.image).setColour(getColour(o.imageColour.isEmpty() ? "#FFFFFF" : o.imageColour));
 		}
-		entries.emplace_back(o.id, o.text, icon);
+		entries.emplace_back(o.id, o.displayText, icon);
 	}
 
 	auto widget = std::make_shared<UIDropdown>(id, style);
@@ -968,6 +967,8 @@ UIFactoryWidgetProperties UIFactory::getImageProperties() const
 	result.entries.emplace_back("Pivot", "pivot", "std::optional<Halley::Vector2f>", "");
 	result.entries.emplace_back("Rotation", "rotation", "Halley::Angle1f", "0");
 	result.entries.emplace_back("Layer Adjustment", "layerAdjustment", "std::optional<int>", "");
+	result.entries.emplace_back("Interact with Mouse", "interactWithMouse", "bool", "false");
+	result.entries.emplace_back("Inner Border", "innerBorder", "Halley::Vector4f", "");
 
 	result.name = "Image";
 	result.iconName = "widget_icons/image.png";
@@ -1230,6 +1231,33 @@ UIFactoryWidgetProperties UIFactory::getPagedPaneProperties() const
 	return result;
 }
 
+std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto style = UIStyle(node["style"].asString("list"), styleSheet);
+	auto label = parseLabel(node);
+
+	auto orientation = fromString<UISizerType>(node["type"].asString("vertical"));
+	int nColumns = node["columns"].asInt(1);
+
+	auto widget = std::make_shared<UIList>(node["id"].asString(), style, orientation, nColumns);
+	applyListProperties(*widget, node, "list");
+
+	return widget;
+}
+
+UIFactoryWidgetProperties UIFactory::getListProperties() const
+{
+	UIFactoryWidgetProperties result = getBaseListProperties();
+
+	result.entries.emplace_back("Columns", "columns", "int", "1");
+	result.entries.emplace_back("Orientation", "orientation", "Halley::UISizerType", "vertical");
+	result.entries.emplace_back("Text", "text", "Halley::String", "");
+	result.entries.emplace_back("Style", "style", "Halley::String", "list");
+
+	return result;
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeFramedImage(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
@@ -1281,7 +1309,7 @@ std::shared_ptr<UIWidget> UIFactory::makeSpinList(const ConfigNode& entryNode) {
 	Vector<LocalisedString> optionLabels;
 	for (auto& o : options) {
 		optionIds.push_back(o.id);
-		optionLabels.push_back(o.text);
+		optionLabels.push_back(o.displayText);
 	}
 
 	auto widget = std::make_shared<UISpinList>(id, style);
@@ -1302,26 +1330,12 @@ std::shared_ptr<UIWidget> UIFactory::makeOptionListMorpher(const ConfigNode& ent
 	Vector<LocalisedString> optionLabels;
 	for (auto& o : options) {
 		optionIds.push_back(o.id);
-		optionLabels.push_back(o.text);
+		optionLabels.push_back(o.displayText);
 	}
 
 	auto widget = std::make_shared<UIOptionListMorpher>(id, dropdownStyle, spinlistStyle);
 	applyInputButtons(*widget, node["inputButtons"].asString("list"));
 	widget->setOptions(optionIds, optionLabels);
-	return widget;
-}
-std::shared_ptr<UIWidget> UIFactory::makeList(const ConfigNode& entryNode)
-{
-	auto& node = entryNode["widget"];
-	auto style = UIStyle(node["style"].asString("list"), styleSheet);
-	auto label = parseLabel(node);
-
-	auto orientation = fromString<UISizerType>(node["type"].asString("vertical"));
-	int nColumns = node["columns"].asInt(1);
-
-	auto widget = std::make_shared<UIList>(node["id"].asString(), style, orientation, nColumns);
-	applyListProperties(*widget, node, "list");
-
 	return widget;
 }
 
@@ -1367,11 +1381,11 @@ void UIFactory::applyListProperties(UIList& list, const ConfigNode& node, const 
 
 			list.addImage(o.id, image, 1, o.border, UISizerAlignFlags::Centre);
 		} else {
-			list.addTextItem(o.id, o.text);
+			list.addTextItem(o.id, o.displayText);
 		}
 
-		if (!o.tooltip.getString().isEmpty()) {
-			list.getItem(o.id)->setToolTip(o.tooltip);
+		if (!o.displayTooltip.getString().isEmpty()) {
+			list.getItem(o.id)->setToolTip(o.displayTooltip);
 		}
 
 		list.setItemActive(o.id, o.active);
@@ -1381,6 +1395,22 @@ void UIFactory::applyListProperties(UIList& list, const ConfigNode& node, const 
 	list.setUniformSizedItems(node["uniformSizedItems"].asBool(false));
 	list.setSingleClickAccept(node["singleClickAccept"].asBool(true));
 	list.setMultiSelect(node["multiSelect"].asBool(false));
+}
+
+UIFactoryWidgetProperties UIFactory::getBaseListProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "List";
+	result.iconName = "widget_icons/list.png";
+
+	result.entries.emplace_back("Can Drag", "canDrag", "bool", "false");
+	result.entries.emplace_back("Multi-select", "multiSelect", "bool", "false");
+	result.entries.emplace_back("Single Click Accept", "singleClickAccept", "bool", "true");
+	result.entries.emplace_back("Uniform Sized Items", "uniformSizedItems", "bool", "false");
+
+	result.entries.emplace_back("Options", "options", "Halley::Vector<Halley::UIFactory::ParsedOption>", "");
+
+	return result;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeDebugConsole(const ConfigNode& entryNode)

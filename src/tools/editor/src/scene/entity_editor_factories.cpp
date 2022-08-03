@@ -1576,6 +1576,57 @@ private:
 	const ECSData& ecsData;
 };
 
+class ComponentEditorParsedOptionFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::UIFactory::ParsedOption";
+	}
+
+	bool isNested() const override
+	{
+		return true;
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode(ConfigNode::MapType());
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		const auto& data = pars.data;
+
+		auto& fieldData = data.getWriteableFieldData(); // HACK
+		fieldData.ensureType(ConfigNodeType::Map);
+		
+		auto container = std::make_shared<UIWidget>(data.getName(), Vector2f(), UISizer(UISizerType::Grid, 4.0f, 2));
+		container->getSizer().setColumnProportions({{0, 1}});
+		container->add(context.makeLabel("Id"));
+		container->add(context.makeField("Halley::String", pars.withSubKey("id", ""), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Text"));
+		container->add(context.makeField("Halley::String", pars.withSubKey("text", ""), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Text (Key)"));
+		container->add(context.makeField("Halley::String", pars.withSubKey("textKey", ""), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Tooltip"));
+		container->add(context.makeField("Halley::String", pars.withSubKey("tooltip", ""), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Tooltip (Key)"));
+		container->add(context.makeField("Halley::String", pars.withSubKey("tooltipKey", ""), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Image"));
+		container->add(context.makeField("Halley::ResourceReference<Halley::SpriteResource>", pars.withSubKey("image", ""), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Image (Inactive)"));
+		container->add(context.makeField("Halley::ResourceReference<Halley::SpriteResource>", pars.withSubKey("inactiveImage", ""), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Image Colour"));
+		container->add(context.makeField("Halley::Colour4f", pars.withSubKey("imageColour", ""), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Border"));
+		container->add(context.makeField("Halley::Vector4f", pars.withSubKey("border", ""), ComponentEditorLabelCreation::Never));
+		container->add(context.makeLabel("Active"));
+		container->add(context.makeField("bool", pars.withSubKey("active", ""), ComponentEditorLabelCreation::Never));
+		
+		return container;
+	}
+};
+
 
 Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
@@ -1610,6 +1661,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorRangeFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorUIAlignFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorScriptMessageTypeFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorParsedOptionFieldFactory>());
 
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<DefaultInputButtons>("Halley::InputButton"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<InputPriority>("Halley::InputPriority"));
