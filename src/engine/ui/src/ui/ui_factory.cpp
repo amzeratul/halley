@@ -1369,7 +1369,7 @@ void UIFactory::applyListProperties(UIList& list, const ConfigNode& node, const 
 			}
 
 			if (!o.imageColour.isEmpty()) {
-				normalSprite.setColour(o.imageColour);
+				normalSprite.setColour(Colour4f(o.imageColour));
 			}
 			auto image = std::make_shared<UIImage>(normalSprite);
 

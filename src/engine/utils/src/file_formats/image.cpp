@@ -231,29 +231,35 @@ void Image::blitFrom(Vector2i pos, gsl::span<const unsigned char> buffer, size_t
 			throw Exception("Unknown amount of bits per pixel: " + toString(srcBpp), HalleyExceptions::Utils);
 		}
 	} else if (getBytesPerPixel() == 4) {
-		int* dst = reinterpret_cast<int*>(px.get()) + pos.x + pos.y * w;
+		int* dst = reinterpret_cast<int*>(px.get());
 		if (srcBpp == 1) {
 			const unsigned char* src = reinterpret_cast<const unsigned char*>(buffer.data());
 			for (size_t y = yMin; y < yMax; y++) {
+				size_t dy = y + pos.y;
 				for (size_t x = xMin; x < xMax; x++) {
+					size_t dx = x + pos.x;
 					size_t pxPos = (x >> 3) + y * pitch;
 					int bit = 1 << (int(7 - x) & 7);
 					bool active = (src[pxPos] & bit) != 0;
-					dst[x + y * w] = convertRGBAToInt(255, 255, 255, active ? 255 : 0);
+					dst[dx + dy * w] = convertRGBAToInt(255, 255, 255, active ? 255 : 0);
 				}
 			}
 		} else if (srcBpp == 8) {
 			const unsigned char* src = reinterpret_cast<const unsigned char*>(buffer.data());
 			for (size_t y = yMin; y < yMax; y++) {
+				size_t dy = y + pos.y;
 				for (size_t x = xMin; x < xMax; x++) {
-					dst[x + y * w] = convertRGBAToInt(255, 255, 255, src[x + y * pitch]);
+					size_t dx = x + pos.x;
+					dst[dx + dy * w] = convertRGBAToInt(255, 255, 255, src[x + y * pitch]);
 				}
 			}
 		} else if (srcBpp == 32) {
 			const int* src = reinterpret_cast<const int*>(buffer.data());
 			for (size_t y = yMin; y < yMax; y++) {
+				size_t dy = y + pos.y;
 				for (size_t x = xMin; x < xMax; x++) {
-					dst[x + y * w] = src[x + y * pitch];
+					size_t dx = x + pos.x;
+					dst[dx + dy * w] = src[x + y * pitch];
 				}
 			}
 		} else {
