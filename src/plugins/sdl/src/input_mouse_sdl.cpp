@@ -25,7 +25,6 @@
 using namespace Halley;
 
 InputMouseSDL::InputMouseSDL()
-	: wheelMove(0)
 {
 	init(5);
 }
@@ -72,6 +71,11 @@ void InputMouseSDL::updateRemap(const std::function<Vector2f(Vector2i)>& remap) 
 Vector2f InputMouseSDL::getPosition() const
 {
 	return pos;
+}
+
+void InputMouseSDL::setPosition(Vector2i position)
+{
+	SDL_WarpMouseInWindow(nullptr, position.x, position.y);
 }
 
 int InputMouseSDL::getWheelMove() const

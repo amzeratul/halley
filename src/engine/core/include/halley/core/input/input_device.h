@@ -117,6 +117,7 @@ namespace Halley {
 		virtual JoystickType getJoystickType() const;
 
 		virtual Vector2f getPosition() const;
+		virtual void setPosition(Vector2i position);
 		virtual int getWheelMove() const;
 
 		virtual void setParent(InputDevice* parent);

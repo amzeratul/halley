@@ -122,6 +122,11 @@ Vector2f InputDevice::getPosition() const
 	return {};
 }
 
+void InputDevice::setPosition(Vector2i position)
+{
+
+}
+
 int InputDevice::getWheelMove() const
 {
 	return 0;

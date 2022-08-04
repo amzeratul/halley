@@ -33,6 +33,7 @@ namespace Halley {
 		friend class InputSDL;
 	public:
 		Vector2f getPosition() const override;
+		void setPosition(Vector2i position) override;
 		int getWheelMove() const override;
 		float getAxis(int n) override;
 
@@ -50,7 +51,7 @@ namespace Halley {
 
 		Vector2f pos;
 		Vector2f prevPos;
-		int wheelMove;
+		int wheelMove = 0;
 		bool isMouseTrapped = false;
 	};
 
