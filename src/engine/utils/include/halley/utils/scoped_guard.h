@@ -24,11 +24,12 @@ namespace Halley {
 
         ScopedGuard& operator=(const ScopedGuard& other) = delete;
 
-        ScopedGuard& operator=(ScopedGuard&& other) = delete
+        ScopedGuard& operator=(ScopedGuard&& other) noexcept
         {
             f = std::move(other.f);
             active = other.active;
             other.active = false;
+            return *this;
         }
 
     private:
