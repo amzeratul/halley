@@ -1251,7 +1251,7 @@ UIFactoryWidgetProperties UIFactory::getListProperties() const
 	UIFactoryWidgetProperties result = getBaseListProperties();
 
 	result.entries.emplace_back("Columns", "columns", "int", "1");
-	result.entries.emplace_back("Orientation", "orientation", "Halley::UISizerType", "vertical");
+	result.entries.emplace_back("Type", "type", "Halley::UISizerType", "vertical");
 	result.entries.emplace_back("Text", "text", "Halley::String", "");
 	result.entries.emplace_back("Style", "style", "Halley::String", "list");
 
