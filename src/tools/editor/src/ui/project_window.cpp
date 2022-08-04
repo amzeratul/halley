@@ -261,29 +261,31 @@ bool ProjectWindow::onKeyPress(KeyboardKeyPress key)
 		return true;
 	}
 
-	if (key.is(KeyCode::S, KeyMods::Ctrl)) {
-		assetEditorWindow->saveTab();
-		return true;
-	}
+	if (assetEditorWindow && assetEditorWindow->isActiveInHierarchy()) {
+		if (key.is(KeyCode::S, KeyMods::Ctrl)) {
+			assetEditorWindow->saveTab();
+			return true;
+		}
 
-	if (key.is(KeyCode::S, KeyMods::CtrlShift)) {
-		assetEditorWindow->saveAllTabs();
-		return true;
-	}
+		if (key.is(KeyCode::S, KeyMods::CtrlShift)) {
+			assetEditorWindow->saveAllTabs();
+			return true;
+		}
 
-	if (key.is(KeyCode::W, KeyMods::Ctrl)) {
-		assetEditorWindow->closeTab();
-		return true;
-	}
+		if (key.is(KeyCode::W, KeyMods::Ctrl)) {
+			assetEditorWindow->closeTab();
+			return true;
+		}
 
-	if (key.is(KeyCode::Tab, KeyMods::Ctrl)) {
-		assetEditorWindow->moveTabFocus(1);
-		return true;
-	}
+		if (key.is(KeyCode::Tab, KeyMods::Ctrl)) {
+			assetEditorWindow->moveTabFocus(1);
+			return true;
+		}
 
-	if (key.is(KeyCode::Tab, KeyMods::CtrlShift)) {
-		assetEditorWindow->moveTabFocus(-1);
-		return true;
+		if (key.is(KeyCode::Tab, KeyMods::CtrlShift)) {
+			assetEditorWindow->moveTabFocus(-1);
+			return true;
+		}
 	}
 
 	if (key.is(KeyCode::F1)) {
