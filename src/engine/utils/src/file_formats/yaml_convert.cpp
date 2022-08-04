@@ -24,16 +24,24 @@ ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node)
 		result = std::move(list);
 	}
 	else if (node.IsScalar()) {
-		auto str = String(node.as<std::string>());
-		if (str.isNumber()) {
-			if (str.isInteger()) {
-				result = str.toInteger();
-			} else {
-				result = str.toFloat();
+		if (node.Tag().find("binary") != std::string::npos) {
+			auto b = node.as<YAML::Binary>();
+			Bytes bs;
+			bs.resize(b.size());
+			memcpy(bs.data(), b.data(), b.size());
+			result = std::move(bs);
+		} else {
+			auto str = String(node.as<std::string>());
+			if (str.isNumber()) {
+				if (str.isInteger()) {
+					result = str.toInteger();
+				} else {
+					result = str.toFloat();
+				}
 			}
-		}
-		else {
-			result = str;
+			else {
+				result = str;
+			}
 		}
 	}
 
