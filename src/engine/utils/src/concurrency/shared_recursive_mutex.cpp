@@ -1,5 +1,6 @@
 #include "halley/concurrency/shared_recursive_mutex.h"
 #include <thread>
+#include <cassert>
 
 using namespace Halley;
 
