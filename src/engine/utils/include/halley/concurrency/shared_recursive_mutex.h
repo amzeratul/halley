@@ -1,6 +1,7 @@
 #pragma once
 
 #include <shared_mutex>
+#include <thread>
 
 namespace Halley {
     class SharedRecursiveMutex {
