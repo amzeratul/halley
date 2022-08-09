@@ -27,6 +27,17 @@ bool Triangle::contains(Vector2f p) const
 	return c.x >= 0 && c.y >= 0 && c.z >= 0;
 }
 
+float Triangle::getDistance(Vector2f p) const
+{
+	if (contains(p)) {
+		return 0;
+	}
+	const auto s0 = LineSegment(a, b);
+	const auto s1 = LineSegment(b, c);
+	const auto s2 = LineSegment(c, a);
+	return std::min(s0.getDistance(p), std::min(s1.getDistance(p), s2.getDistance(p)));
+}
+
 float Triangle::getArea() const
 {
 	return std::abs((b - a).cross(c - a)) / 2;
@@ -70,6 +81,54 @@ Triangle Triangle::operator*(float scalar) const
 Triangle Triangle::operator/(float scalar) const
 {
 	return Triangle(a / scalar, b / scalar, c / scalar);
+}
+
+Triangle& Triangle::operator+=(Vector2f v)
+{
+	a += v;
+	b += v;
+	c += v;
+	return *this;
+}
+
+Triangle& Triangle::operator-=(Vector2f v)
+{
+	a -= v;
+	b -= v;
+	c -= v;
+	return *this;
+}
+
+Triangle& Triangle::operator*=(Vector2f v)
+{
+	a *= v;
+	b *= v;
+	c *= v;
+	return *this;
+}
+
+Triangle& Triangle::operator/=(Vector2f v)
+{
+	a /= v;
+	b /= v;
+	c /= v;
+	return *this;
+}
+
+Triangle& Triangle::operator*=(float scalar)
+{
+	a *= scalar;
+	b *= scalar;
+	c *= scalar;
+	return *this;
+}
+
+Triangle& Triangle::operator/=(float scalar)
+{
+	a /= scalar;
+	b /= scalar;
+	c /= scalar;
+	return *this;
 }
 
 bool Triangle::operator==(const Triangle& other) const

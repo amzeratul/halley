@@ -99,6 +99,11 @@ namespace Halley {
 			return a + dir * clamp(x, 0.0f, len);
 		}
 
+		constexpr float getDistance(Vector2f point) const
+		{
+			return (getClosestPoint(point) - point).length();
+		}
+
 		constexpr float getClosestPointParametric(Vector2f point) const
 		{
 			const float len = (b - a).length();
