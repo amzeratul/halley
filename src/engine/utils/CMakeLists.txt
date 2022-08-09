@@ -47,6 +47,7 @@ set(SOURCES
         "src/maths/quaternion.cpp"
         "src/maths/random.cpp"
         "src/maths/ray.cpp"
+        "src/maths/triangle.cpp"
         "src/maths/uuid.cpp"
         
         "src/memory/memory.cpp"
@@ -168,6 +169,7 @@ set(HEADERS
         "include/halley/maths/quaternion.h"
         "include/halley/maths/random.h"
         "include/halley/maths/ray.h"
+        "include/halley/maths/triangle.h"
         "include/halley/maths/uuid.h"
         "include/halley/maths/uuid.natvis"
         "src/maths/mt199937ar.h"
