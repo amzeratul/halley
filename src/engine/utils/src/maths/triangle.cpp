@@ -41,3 +41,43 @@ Polygon Triangle::toPolygon() const
 {
 	return Polygon(VertexList{ a, b, c });
 }
+
+Triangle Triangle::operator+(Vector2f v) const
+{
+	return Triangle(a + v, b + v, c + v);
+}
+
+Triangle Triangle::operator-(Vector2f v) const
+{
+	return Triangle(a - v, b - v, c - v);
+}
+
+Triangle Triangle::operator*(Vector2f v) const
+{
+	return Triangle(a * v, b * v, c * v);
+}
+
+Triangle Triangle::operator/(Vector2f v) const
+{
+	return Triangle(a / v, b / v, c / v);
+}
+
+Triangle Triangle::operator*(float scalar) const
+{
+	return Triangle(a * scalar, b * scalar, c * scalar);
+}
+
+Triangle Triangle::operator/(float scalar) const
+{
+	return Triangle(a / scalar, b / scalar, c / scalar);
+}
+
+bool Triangle::operator==(const Triangle& other) const
+{
+	return a == other.a && b == other.b && c == other.c;
+}
+
+bool Triangle::operator!=(const Triangle& other) const
+{
+	return a != other.a || b != other.b || c != other.c;
+}

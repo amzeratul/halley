@@ -24,5 +24,15 @@ namespace Halley {
         float getPerimeter() const;
 
         Polygon toPolygon() const;
+
+        Triangle operator+(Vector2f v) const;
+        Triangle operator-(Vector2f v) const;
+        Triangle operator*(Vector2f v) const;
+        Triangle operator/(Vector2f v) const;
+        Triangle operator*(float scalar) const;
+        Triangle operator/(float scalar) const;
+
+        bool operator==(const Triangle& other) const;
+        bool operator!=(const Triangle& other) const;
     };
 }
