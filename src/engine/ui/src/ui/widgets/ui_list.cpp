@@ -154,6 +154,15 @@ Vector2f UIList::getDragPositionAdjustment(Vector2f pos, Vector2f startPos) cons
 	return pos;
 }
 
+void UIList::setItemText(int optionId, const String& text)
+{
+	if (optionId < 0 || optionId >= static_cast<int>(getNumberOfItems())) {
+		return;
+	}
+	const auto label = getItem(optionId)->getWidgetAs<UILabel>(getSelectedOptionId() + "_label");
+	label->setText(LocalisedString::fromUserString(text));
+}
+
 std::shared_ptr<UIListItem> UIList::addTextItem(const String& id, LocalisedString label, float maxWidth, bool centre, std::optional<LocalisedString> tooltip)
 {
 	// Use addTextItemAlignedInstead
