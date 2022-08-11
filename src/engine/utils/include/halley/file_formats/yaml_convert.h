@@ -26,8 +26,8 @@ namespace Halley {
 		static ConfigFile parseConfig(const Bytes& data);
 		static ConfigNode parseConfig(const String& str);
 		
-		static String generateYAML(const ConfigFile& config, const EmitOptions& options);
-		static String generateYAML(const ConfigNode& node, const EmitOptions& options);
+		static String generateYAML(const ConfigFile& config, const EmitOptions& options = {});
+		static String generateYAML(const ConfigNode& node, const EmitOptions& options = {});
 
 	private:
 		static void emitNode(const ConfigNode& node, YAML::Emitter& emitter, const EmitOptions& options);
