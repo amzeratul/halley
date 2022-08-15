@@ -143,7 +143,7 @@ AudioBuffer& AudioBufferPool::allocBuffer(size_t numSamples)
 {
 	Expects(numSamples < 65536);
 
-	const size_t idx = fastLog2Ceil(uint32_t(numSamples));
+	const size_t idx = fastLog2Ceil(std::max(static_cast<uint32_t>(16), static_cast<uint32_t>(numSamples)));
 	auto& buffers = buffersTable[idx];
 
 	for (auto& b: buffers) {

@@ -270,16 +270,16 @@ namespace Halley {
 
 	[[nodiscard]] constexpr inline int fastLog2Ceil (uint32_t value)
 	{
-		if (value == 0) {
-			return 0;
+		if (value <= 1) {
+			return static_cast<int>(value);
 		}
 		return fastLog2Floor(value - 1) + 1;
 	}
 
 	[[nodiscard]] constexpr inline int fastLog2Ceil (uint64_t value)
 	{
-		if (value == 0) {
-			return 0;
+		if (value <= 1) {
+			return static_cast<int>(value);
 		}
 		return fastLog2Floor(value - 1) + 1;
 	}
