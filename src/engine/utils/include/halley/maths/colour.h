@@ -79,7 +79,7 @@ namespace Halley {
 
 		constexpr Colour4() = default;
 
-		constexpr Colour4(T luma)
+		explicit constexpr Colour4(T luma)
 			: r(luma)
 			, g(luma)
 			, b(luma)
