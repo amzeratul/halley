@@ -690,7 +690,53 @@ public:
 
 	void setData(const Image& image) override
 	{
-		// TODO
+		for (int i = 0; i < 3 && !OpenClipboard(nullptr); ++i) {
+			if (i == 2) {
+				Logger::logError("Unable to open clipboard.");
+				return;
+			}
+			Sleep(5);
+		}
+		
+		if (!EmptyClipboard()) {
+			CloseClipboard();
+			Logger::logError("Unable to empty clipboard.");
+			return;
+		}
+
+		const size_t size = sizeof(BITMAPINFO) + image.getPixelBytes().size();
+		const int w = image.getWidth();
+		const int h = image.getHeight();
+
+		BITMAPINFO info;
+		ZeroMemory(&info, sizeof(info));
+		info.bmiHeader.biWidth = w;
+		info.bmiHeader.biHeight = h;
+		info.bmiHeader.biBitCount = 32;
+		info.bmiHeader.biSize = sizeof(BITMAPINFO);
+		info.bmiHeader.biPlanes = 1;
+		info.bmiHeader.biCompression = BI_RGB;
+		info.bmiHeader.biSizeImage = 0;
+
+		auto* data = GlobalAlloc(GMEM_MOVEABLE, size);
+		auto* dst = GlobalLock(data);
+		memset(dst, 0, size);
+		memcpy(dst, &info, sizeof(BITMAPINFO));
+
+		for (int y = 0; y < h; ++y) {
+			auto* dstLine = static_cast<char*>(dst) + sizeof(BITMAPINFO) + (y * w * 4);
+			auto line = image.getPixelBytes().subspan((h - y - 1) * w * 4, w * 4);
+			memcpy(dstLine, line.data(), line.size());
+		}
+		GlobalUnlock(data);
+
+		if (!SetClipboardData(CF_DIB, data)) {
+			CloseClipboard();
+			Logger::logError("Unable to set clipboard data.");
+			return;
+		}
+
+		CloseClipboard();
 	}
 
 	std::unique_ptr<Image> getImageData() override
@@ -724,7 +770,7 @@ public:
 			const bool flip = bmpInfo.bmiHeader.biHeight > 0;
 			result = std::make_unique<Image>(Image::Format::RGBA, Vector2i(w, h));
 			auto dstPixels = result->getPixels4BPP();
-			const RGBQUAD* src = reinterpret_cast<const RGBQUAD*>(static_cast<const char*>(rawData) + sizeof(BITMAPINFO));
+			const RGBQUAD* src = reinterpret_cast<const RGBQUAD*>(static_cast<const char*>(rawData) + bmpInfo.bmiHeader.biSize);
 			for (int y = 0; y < h; ++y) {
 				for (int x = 0; x < w; ++x) {
 					const int srcI = x + y * w;
