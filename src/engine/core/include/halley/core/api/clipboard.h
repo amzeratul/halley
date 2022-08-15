@@ -4,6 +4,8 @@
 #include "halley/text/halleystring.h"
 
 namespace Halley {
+	class Image;
+
 	class IClipboard
 	{
 	public:
@@ -11,5 +13,8 @@ namespace Halley {
 		
 		virtual void setData(const String& stringData) = 0;
 		virtual std::optional<String> getStringData() = 0;
+
+		virtual void setData(const Image& image) = 0;
+		virtual std::unique_ptr<Image> getImageData() = 0;
 	};
 }

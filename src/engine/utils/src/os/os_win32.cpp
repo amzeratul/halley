@@ -19,6 +19,7 @@
 
 \*****************************************************************/
 
+#include "halley/file_formats/image.h"
 #include "halley/text/string_converter.h"
 #include "halley/support/logger.h"
 #if defined(_WIN32) && !defined(WINDOWS_STORE)
@@ -681,6 +682,59 @@ public:
 		auto src = reinterpret_cast<const wchar_t*>(GlobalLock(data));
 		auto result = String(src);
 		GlobalUnlock(data);
+
+		CloseClipboard();
+
+		return result;
+	}
+
+	void setData(const Image& image) override
+	{
+		// TODO
+	}
+
+	std::unique_ptr<Image> getImageData() override
+	{
+		for (int i = 0; i < 3 && !OpenClipboard(nullptr); ++i) {
+			if (i == 2) {
+				Logger::logError("Unable to open clipboard");
+				return {};
+			}
+			Sleep(5);
+		}
+
+		if (!IsClipboardFormatAvailable(CF_DIB)) {
+			CloseClipboard();
+			Logger::logError("Clipboard format not available");
+			return {};
+		}
+
+		HANDLE data = GetClipboardData(CF_DIB);
+		if (data == nullptr) {
+			CloseClipboard();
+			Logger::logError("Unable to get clipboard data");
+			return {};
+		}
+
+		std::unique_ptr<Image> result;
+		if (const void* rawData = GlobalLock(data)) {
+			const auto bmpInfo = *static_cast<const BITMAPINFO*>(rawData);
+			const auto w = bmpInfo.bmiHeader.biWidth;
+			const auto h = std::abs(bmpInfo.bmiHeader.biHeight);
+			const bool flip = bmpInfo.bmiHeader.biHeight > 0;
+			result = std::make_unique<Image>(Image::Format::RGBA, Vector2i(w, h));
+			auto dstPixels = result->getPixels4BPP();
+			const RGBQUAD* src = reinterpret_cast<const RGBQUAD*>(static_cast<const char*>(rawData) + sizeof(BITMAPINFO));
+			for (int y = 0; y < h; ++y) {
+				for (int x = 0; x < w; ++x) {
+					const int srcI = x + y * w;
+					const int dstI = x + (flip ? (h - y - 1) : y) * w; 
+					dstPixels[dstI] = Image::convertRGBAToInt(src[srcI].rgbRed, src[srcI].rgbGreen, src[srcI].rgbBlue, src[srcI].rgbReserved);
+				}
+			}
+
+			GlobalUnlock(data);
+		}
 
 		CloseClipboard();
 
