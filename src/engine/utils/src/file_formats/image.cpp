@@ -101,6 +101,11 @@ unsigned int Image::convertRGBAToInt(unsigned int r, unsigned int g, unsigned in
 	return (a << 24) | (b << 16) | (g << 8) | r;
 }
 
+unsigned Image::convertColourToInt(Colour4c col)
+{
+	return (static_cast<unsigned>(col.a) << 24) | (static_cast<unsigned>(col.b) << 16) | (static_cast<unsigned>(col.g) << 8) | static_cast<unsigned>(col.r);
+}
+
 void Image::convertIntToRGBA(unsigned int col, unsigned int& r, unsigned int& g, unsigned int& b, unsigned int& a)
 {
 	r = col & 0xFF;

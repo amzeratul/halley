@@ -76,6 +76,7 @@ namespace Halley {
 		size_t getByteSize() const;
 
 		static unsigned int convertRGBAToInt(unsigned int r, unsigned int g, unsigned int b, unsigned int a=255);
+		static unsigned int convertColourToInt(Colour4c col);
 		static void convertIntToRGBA(unsigned int col, unsigned int& r, unsigned int& g, unsigned int& b, unsigned int& a);
 		static Colour4c convertIntToColour(unsigned int col);
 
