@@ -446,6 +446,23 @@ namespace Halley {
 			return nullptr;
 		}
 
+		template <typename T>
+		EntityId tryGetEntityIdWithComponentInTree() const
+		{
+			validateComponentType<T>();
+			auto* comp = tryGetComponent<T>();
+			if (comp) {
+				return getEntityId();
+			}
+			for (auto& child : getRawChildren()) {
+				auto childId = EntityRef(*child, getWorld()).tryGetEntityIdWithComponentInTree<T>();
+				if (childId.isValid()) {
+					return childId;
+				}
+			}
+			return {};
+		}
+
 		EntityId getEntityId() const
 		{
 			if (!entity) {
