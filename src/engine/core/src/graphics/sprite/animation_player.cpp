@@ -183,7 +183,7 @@ void AnimationPlayer::update(Time time)
 
 void AnimationPlayer::updateSprite(Sprite& sprite) const
 {
-	if (animation && hasUpdate && spriteData) {
+	if (animation && spriteData && (hasUpdate || !sprite.hasMaterial())) {
 		if (applyMaterial || !sprite.hasMaterial()) {
 			const auto& newMaterial = materialOverride ? materialOverride : animation->getMaterial();
 			if (!sprite.hasCompatibleMaterial(*newMaterial)) {
