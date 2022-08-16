@@ -40,6 +40,7 @@ namespace Halley
 #ifdef ENABLE_HOT_RELOAD
 		SpriteSheet* parent = nullptr;
 		uint32_t idx = 0;
+		String name;
 #endif
 	};
 

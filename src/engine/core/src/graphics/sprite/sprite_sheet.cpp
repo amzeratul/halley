@@ -186,12 +186,14 @@ void SpriteSheet::loadTexture(Resources& resources) const
 void SpriteSheet::assignIds()
 {
 #ifdef ENABLE_HOT_RELOAD
-	for (uint32_t idx = 0; idx < sprites.size(); ++idx) {
+	for (const auto& [name, idx]: spriteIdx) {
 		sprites[idx].parent = this;
 		sprites[idx].idx = idx;
+		sprites[idx].name = name;
 	}
 	dummySprite.parent = this;
 	dummySprite.idx = std::numeric_limits<uint32_t>::max();
+	dummySprite.name = "dummy";
 #endif	
 }
 

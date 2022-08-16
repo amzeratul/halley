@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
   <Type Name="Halley::Sprite">
+	  <DisplayString Condition="hotReloadRef != nullptr &amp;&amp; dynamic_cast&lt;const Halley::SpriteSheet*&gt;(hotReloadRef) != nullptr">{{pos:{vertexAttrib.pos}, size:{vertexAttrib.size}, ref:{((Halley::SpriteSheet*)hotReloadRef)->sprites[hotReloadIdx].name}, material:{*material}}}</DisplayString>
+	  <DisplayString Condition="hotReloadRef != nullptr &amp;&amp; dynamic_cast&lt;const Halley::SpriteResource*&gt;(hotReloadRef) != nullptr">{{pos:{vertexAttrib.pos}, size:{vertexAttrib.size}, ref:{((Halley::SpriteResource*)hotReloadRef)->assetId}, material:{*material}}}</DisplayString>
 	  <DisplayString Condition="material._Ptr">{{pos:{vertexAttrib.pos}, size:{vertexAttrib.size}, material:{*material}}}</DisplayString>
 	  <DisplayString>{{pos:{vertexAttrib.pos}, size:{vertexAttrib.size}, material:{{}}}}</DisplayString>
   </Type>
