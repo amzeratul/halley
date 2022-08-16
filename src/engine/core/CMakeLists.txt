@@ -147,6 +147,7 @@ set(HEADERS
         "include/halley/core/graphics/sprite/animation_player.h"
         "include/halley/core/graphics/sprite/particles.h"
         "include/halley/core/graphics/sprite/sprite.h"
+        "include/halley/core/graphics/sprite/sprite.natvis"
         "include/halley/core/graphics/sprite/sprite_painter.h"
         "include/halley/core/graphics/sprite/sprite_sheet.h"
         "include/halley/core/graphics/text/font.h"

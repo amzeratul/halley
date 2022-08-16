@@ -300,6 +300,11 @@ void SpriteSheet::reload(Resource&& resource)
 #endif
 }
 
+const String& SpriteSheet::getHotReloaderId() const
+{
+	return getAssetId();
+}
+
 void SpriteSheet::serialize(Serializer& s) const
 {
 	s << version;
@@ -460,6 +465,11 @@ void SpriteResource::reload(Resource&& resource)
 		sprite.first->reloadSprite(*this);
 	}
 #endif
+}
+
+const String& SpriteResource::getHotReloaderId() const
+{
+	return getAssetId();
 }
 
 void SpriteResource::serialize(Serializer& s) const

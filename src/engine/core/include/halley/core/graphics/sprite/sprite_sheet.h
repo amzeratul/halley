@@ -58,6 +58,8 @@ namespace Halley
 	public:
 		virtual ~SpriteHotReloader() = default;
 
+		virtual const String& getHotReloaderId() const = 0;
+
 #ifdef ENABLE_HOT_RELOAD
 		void addSprite(Sprite* sprite, uint32_t idx) const;
 		void removeSprite(Sprite* sprite) const;
@@ -108,6 +110,8 @@ namespace Halley
 		constexpr static AssetType getAssetType() { return AssetType::SpriteSheet; }
 		void reload(Resource&& resource) override;
 
+		const String& getHotReloaderId() const override;
+
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
@@ -148,6 +152,8 @@ namespace Halley
 		constexpr static AssetType getAssetType() { return AssetType::Sprite; }
 		static std::unique_ptr<SpriteResource> loadResource(ResourceLoader& loader);
 		void reload(Resource&& resource) override;
+
+		const String& getHotReloaderId() const override;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
