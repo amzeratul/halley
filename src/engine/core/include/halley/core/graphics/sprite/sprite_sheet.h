@@ -7,10 +7,13 @@
 #include <halley/text/halleystring.h>
 #include <halley/data_structures/hash_map.h>
 #include <gsl/span>
+
+#include "halley/file_formats/image.h"
 #include "halley/maths/vector4.h"
 
 namespace Halley
 {
+	class BinPackResult;
 	class Sprite;
 	class Resources;
 	class Serializer;
@@ -83,6 +86,31 @@ namespace Halley
 	class SpriteSheet final : public Resource, public SpriteHotReloader
 	{
 	public:
+		struct ImageData
+		{
+			int frameNumber = 0;
+			int origFrameNumber = 0;
+			int duration = 0;
+			String sequenceName;
+			String direction;
+			Rect4i clip;
+			Vector2i pivot;
+			Vector4s slices;
+
+			std::unique_ptr<Image> img;
+			Vector<String> filenames;
+			String origFilename;
+
+			bool operator==(const ImageData& other) const;
+			bool operator!=(const ImageData& other) const;
+
+		private:
+			friend class SpriteSheet;
+			
+			bool isDuplicate = false;
+			Vector<ImageData*> duplicatesOfThis;
+		};
+
 		SpriteSheet();
 		~SpriteSheet() override;
 
@@ -111,6 +139,8 @@ namespace Halley
 		const String& getDefaultMaterialName() const;
 		void clearMaterialCache() const;
 
+		std::unique_ptr<Image> generateAtlas(Vector<ImageData>& images, ConfigNode& spriteInfo, bool powerOfTwo);
+
 		static std::unique_ptr<SpriteSheet> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::SpriteSheet; }
 		void reload(Resource&& resource) override;
@@ -138,6 +168,10 @@ namespace Halley
 
 		void loadTexture(Resources& resources) const;
 		void assignIds();
+
+		std::unique_ptr<Image> makeAtlas(const Vector<BinPackResult>& result, ConfigNode& spriteInfo, bool powerOfTwo);
+		Vector2i computeAtlasSize(const Vector<BinPackResult>& results, bool powerOfTwo) const;
+		void markDuplicates(Vector<ImageData>& images) const;
 	};
 
 	class SpriteResource final : public Resource, public SpriteHotReloader

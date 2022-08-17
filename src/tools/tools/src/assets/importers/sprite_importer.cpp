@@ -15,24 +15,6 @@
 
 using namespace Halley;
 
-bool ImageData::operator==(const ImageData& other) const
-{
-	return frameNumber == other.frameNumber
-		&& origFrameNumber == other.origFrameNumber
-		&& duration == other.duration
-		&& sequenceName == other.sequenceName
-		&& clip == other.clip
-		&& pivot == other.pivot
-		&& slices == other.slices
-		&& filenames == other.filenames
-		&& origFilename == other.origFilename
-		&& img->getSize() == other.img->getSize();
-}
-
-bool ImageData::operator!=(const ImageData& other) const
-{
-	return !(*this == other);
-}
 
 void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
@@ -152,7 +134,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	auto groupAtlasName = asset.assetId;
 	auto spriteSheet = std::make_shared<SpriteSheet>();
 	ConfigNode spriteInfo;
-	auto atlasImage = generateAtlas(totalFrames, *spriteSheet, spriteInfo, powerOfTwo);
+	auto atlasImage = spriteSheet->generateAtlas(totalFrames, spriteInfo, powerOfTwo);
 	spriteSheet->setTextureName(groupAtlasName);
 	spriteSheet->setDefaultMaterialName(meta.getString("material", meta.getString("defaultMaterial", MaterialDefinition::defaultMaterial)));
 
@@ -289,139 +271,7 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 	return animation;
 }
 
-std::unique_ptr<Image> SpriteImporter::generateAtlas(Vector<ImageData>& images, SpriteSheet& spriteSheet, ConfigNode& spriteInfo, bool powerOfTwo)
-{
-	markDuplicates(images);
-
-	// Generate entries
-	int64_t totalImageArea = 0;
-	Vector<BinPackEntry> entries;
-	entries.reserve(images.size());
-	for (auto& img: images) {
-		if (!img.isDuplicate) {
-			auto size = img.clip.getSize();
-			totalImageArea += size.x * size.y;
-			entries.emplace_back(size, &img);
-		}
-	}
-
-	// Figure out a reasonable pack size to start with
-	const int minSize = nextPowerOf2(static_cast<int>(sqrt(static_cast<double>(totalImageArea)))) / 2;
-	const int64_t guessArea = int64_t(minSize) * int64_t(minSize);
-	const int maxSize = 4096;
-	int curSize = std::min(maxSize, std::max(32, static_cast<int>(minSize)));
-
-	// Try packing
-	bool wide = guessArea > 2 * totalImageArea;
-	while (true) {
-		Vector2i size(curSize * (wide ? 2 : 1), curSize);
-		if (size.x > maxSize || size.y > maxSize) {
-			// Give up!
-			throw Exception("Unable to pack " + toString(images.size()) + " sprites in a reasonably sized atlas! curSize at " + toString(curSize) + ", maxSize is " + toString(maxSize) + ". Total image area is " + toString(totalImageArea) + " px^2, sqrt = " + toString(lround(sqrt(totalImageArea))) + " px.", HalleyExceptions::Tools);
-		}
-
-		Logger::logInfo("Trying " + toString(size.x) + "x" + toString(size.y) + " px...");
-		//auto res = entries.size() < 50 ? BinPack::pack(entries, size) : BinPack::fastPack(entries, size);
-		auto res = BinPack::fastPack(entries, size);
-		if (res) {
-			// Found a pack
-			return makeAtlas(res.value(), spriteSheet, spriteInfo, powerOfTwo);
-		} else {
-			// Try 64x64, then 128x64, 128x128, 256x128, etc
-			if (wide) {
-				wide = false;
-				curSize *= 2;
-			}
-			else {
-				wide = true;
-			}
-		}
-	}
-}
-
-std::unique_ptr<Image> SpriteImporter::makeAtlas(const Vector<BinPackResult>& result, SpriteSheet& spriteSheet, ConfigNode& spriteInfo, bool powerOfTwo)
-{
-	spriteInfo.ensureType(ConfigNodeType::Sequence);
-	auto& infoSeq = spriteInfo.asSequence();
-	
-	Vector2i size = computeAtlasSize(result, powerOfTwo);
-
-	std::unique_ptr<Image> atlasImage;
-
-	for (const auto& packedImg: result) {
-		const ImageData* img = reinterpret_cast<ImageData*>(packedImg.data);
-
-		if (!atlasImage) {
-			atlasImage = std::make_unique<Image>(img->img->getFormat(), size);
-			atlasImage->clear(0);
-		}
-		if (atlasImage->getFormat() != img->img->getFormat()) {
-			throw Exception("Mixed image formats in atlas.", HalleyExceptions::Tools);
-		}
-		
-		atlasImage->blitFrom(packedImg.rect.getTopLeft(), *img->img, img->clip, packedImg.rotated);
-
-		const auto borderTL = img->clip.getTopLeft();
-		const auto borderBR = img->img->getSize() - img->clip.getSize() - borderTL;
-
-		// This is a 0.1px offset to avoid rounding errors drawing adjacent pixels
-		const auto offset = Vector2f(0.1f, 0.1f) / Vector2f(size);
-
-		auto addImageData = [&] (const ImageData& imgData) {
-			SpriteSheetEntry entry;
-			entry.size = Vector2f(imgData.clip.getSize());
-			entry.rotated = packedImg.rotated;
-			entry.pivot = imgData.clip.isEmpty() ? Vector2f() : Vector2f(imgData.pivot - imgData.clip.getTopLeft()) / entry.size;
-			entry.origPivot = imgData.pivot;
-			entry.coords = (Rect4f(Vector2f(packedImg.rect.getTopLeft()) + offset, Vector2f(packedImg.rect.getBottomRight()) - offset)) / Vector2f(size);
-			entry.trimBorder = Vector4s(static_cast<short>(borderTL.x), static_cast<short>(borderTL.y), static_cast<short>(borderBR.x), static_cast<short>(borderBR.y));
-			entry.slices = imgData.slices;
-
-			for (const auto& filename: imgData.filenames) {
-				spriteSheet.addSprite(filename, entry);
-
-				auto infoEntry = ConfigNode(ConfigNode::MapType());
-				infoEntry["name"] = filename;
-				infoEntry["x"] = packedImg.rect.getLeft();
-				infoEntry["y"] = packedImg.rect.getTop();
-				infoEntry["w"] = packedImg.rect.getWidth();
-				infoEntry["h"] = packedImg.rect.getHeight();
-				infoEntry["origFilename"] = imgData.origFilename;
-				infoEntry["origFrameN"] = imgData.origFrameNumber;
-				infoEntry["offX"] = borderTL.x;
-				infoEntry["offY"] = borderTL.y;
-				infoEntry["rotated"] = packedImg.rotated;
-				infoSeq.emplace_back(std::move(infoEntry));
-			}
-		};
-		
-		addImageData(*img);
-		for (const auto& dupe: img->duplicatesOfThis) {
-			addImageData(*dupe);
-		}
-	}
-
-	return atlasImage;
-}
-
-Vector2i SpriteImporter::computeAtlasSize(const Vector<BinPackResult>& results, bool powerOfTwo) const
-{
-	int w = 0;
-	int h = 0;
-
-	for (const auto& r: results) {
-		w = std::max(w, r.rect.getRight());
-		h = std::max(h, r.rect.getBottom());
-	}
-
-	if (powerOfTwo) {
-		return Vector2i(nextPowerOf2(w), nextPowerOf2(h));
-	} else {
-		return Vector2i(w, h);
-	}
-}
-
-Vector<ImageData> SpriteImporter::splitImagesInGrid(const Vector<ImageData>& images, Vector2i grid)
+Vector<SpriteImporter::ImageData> SpriteImporter::splitImagesInGrid(const Vector<ImageData>& images, Vector2i grid)
 {
 	Vector<ImageData> result;
 
@@ -454,30 +304,4 @@ Vector<ImageData> SpriteImporter::splitImagesInGrid(const Vector<ImageData>& ima
 	}
 
 	return result;
-}
-
-void SpriteImporter::markDuplicates(Vector<ImageData>& images) const
-{
-	HashMap<uint64_t, ImageData*> hashes;
-	
-	for (auto& image: images) {
-		Hash::Hasher hasher;
-		const auto clip = image.clip.intersection(image.img->getRect());
-		if (clip.isEmpty()) {
-			continue;
-		}
-		for (int y = clip.getTop(); y < clip.getBottom(); ++y) {
-			const auto row = image.img->getPixelBytesRow(clip.getLeft(), clip.getRight(), y);
-			hasher.feedBytes(as_bytes(row));
-		}
-		const auto hash = hasher.digest();
-
-		const auto iter = hashes.find(hash);
-		if (iter == hashes.end()) {
-			hashes[hash] = &image;
-		} else {
-			image.isDuplicate = true;
-			iter->second->duplicatesOfThis.push_back(&image);
-		}
-	}
 }

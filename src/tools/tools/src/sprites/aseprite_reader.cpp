@@ -8,7 +8,7 @@
 using namespace Halley;
 
 
-std::map<String, Vector<ImageData>> AsepriteReader::importAseprite(const String& spriteName, const Path& filename, gsl::span<const gsl::byte> fileData, bool trim, int padding, bool groupSeparated, bool sequenceSeparated)
+std::map<String, Vector<SpriteSheet::ImageData>> AsepriteReader::importAseprite(const String& spriteName, const Path& filename, gsl::span<const gsl::byte> fileData, bool trim, int padding, bool groupSeparated, bool sequenceSeparated)
 {
 	const String baseName = Path(spriteName).getFilename().string();
 
@@ -43,7 +43,7 @@ std::map<String, Vector<ImageData>> AsepriteReader::importAseprite(const String&
 	}
 
 	// Create frames
-	std::map<String, Vector<ImageData>> frameData;	
+	std::map<String, Vector<SpriteSheet::ImageData>> frameData;	
 	for (auto& t: tags) {
 		int i = 0;
 		String sequence = t.first;
@@ -64,12 +64,12 @@ std::map<String, Vector<ImageData>> AsepriteReader::importAseprite(const String&
 			for (auto& groupFrameImage : groupFrameImages) {
 				auto name = sequenceSeparated ? sequence : groupFrameImage.first;
 				
-				Vector<ImageData> groupFrameData;
+				Vector<SpriteSheet::ImageData> groupFrameData;
 				auto firstImage = frameData.find(name) == frameData.end();
 				addImageData(i, frameN, groupFrameData, std::move(groupFrameImage.second), aseFile, baseName, sequence, direction, duration, trim, padding, hasFrameNumber, name, firstImage, spriteName, filename);
 				
 				if (frameData.find(name) == frameData.end())	{
-					frameData[name] = Vector<ImageData>();
+					frameData[name] = Vector<SpriteSheet::ImageData>();
 				}
 				std::move(groupFrameData.begin(), groupFrameData.end(), std::back_inserter(frameData[name]));
 			}
@@ -80,7 +80,7 @@ std::map<String, Vector<ImageData>> AsepriteReader::importAseprite(const String&
 	return frameData;
 }
 
-void AsepriteReader::addImageData(int tagFrameNumber, int origFrameNumber, Vector<ImageData>& frameData, std::unique_ptr<Image> frameImage, const AsepriteFile& aseFile,
+void AsepriteReader::addImageData(int tagFrameNumber, int origFrameNumber, Vector<SpriteSheet::ImageData>& frameData, std::unique_ptr<Image> frameImage, const AsepriteFile& aseFile,
 	const String& baseName, const String& sequence, const String& direction, int duration, bool trim, int padding, bool hasFrameNumber, std::optional<String> group,
 	bool firstImage, const String& spriteName, const Path& filename)
 {

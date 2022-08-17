@@ -9,34 +9,11 @@ namespace Halley
 	class Animation;
 	class SpriteImporter;
 	
-	struct ImageData
-	{
-		int frameNumber = 0;
-		int origFrameNumber = 0;
-		int duration = 0;
-		String sequenceName;
-		String direction;
-		Rect4i clip;
-		Vector2i pivot;
-		Vector4s slices;
-
-		std::unique_ptr<Image> img;
-		Vector<String> filenames;
-		String origFilename;
-
-		bool operator==(const ImageData& other) const;
-		bool operator!=(const ImageData& other) const;
-
-	private:
-		friend class SpriteImporter;
-		
-		bool isDuplicate = false;
-		Vector<ImageData*> duplicatesOfThis;
-	};
-
 	class SpriteImporter : public IAssetImporter
 	{
 	public:
+		using ImageData = SpriteSheet::ImageData;
+
 		ImportAssetType getType() const override { return ImportAssetType::Sprite; }
 
 		void import(const ImportingAsset& asset, IAssetCollector& collector) override;
@@ -44,11 +21,6 @@ namespace Halley
 
 	private:
 		Animation generateAnimation(const String& spriteName, const String& spriteSheetName, const String& materialName, const Vector<ImageData>& frameData);
-
-		std::unique_ptr<Image> generateAtlas(Vector<ImageData>& images, SpriteSheet& spriteSheet, ConfigNode& spriteInfo, bool powerOfTwo);
-		std::unique_ptr<Image> makeAtlas(const Vector<BinPackResult>& result, SpriteSheet& spriteSheet, ConfigNode& spriteInfo, bool powerOfTwo);
-		Vector2i computeAtlasSize(const Vector<BinPackResult>& results, bool powerOfTwo) const;
-		void markDuplicates(Vector<ImageData>& images) const;
 
 		Vector<ImageData> splitImagesInGrid(const Vector<ImageData>& images, Vector2i grid);
 	};
