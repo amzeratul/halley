@@ -203,8 +203,9 @@ ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState,
 				} else {
 					id = readOutputEntityId(node, pinId);
 				}
-				if (id.isValid()) {
-					return ConfigNode("Entity \"" + world.getEntity(id).getName() + "\" (id " + toString(id.value) + ")");
+				const auto entityRef = world.tryGetEntity(id);
+				if (id.isValid() && entityRef.isValid()) {
+					return ConfigNode("Entity \"" + entityRef.getName() + "\" (id " + toString(id.value) + ")");
 				} else {
 					return ConfigNode(String("Invalid entity"));
 				}
