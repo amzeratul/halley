@@ -195,7 +195,11 @@ ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState,
 			} else if (pinConfig.type == ScriptNodeElementType::TargetPin) {
 				EntityId id;
 				if (pinConfig.direction == ScriptNodePinDirection::Input) {
-					id = readInputEntityId(node, pinId);
+					if (node.getPins()[pinId].hasConnection()) {
+						id = readInputEntityIdRaw(node, pinId);
+					} else {
+						id = readInputEntityId(node, pinId);
+					}
 				} else {
 					id = readOutputEntityId(node, pinId);
 				}
