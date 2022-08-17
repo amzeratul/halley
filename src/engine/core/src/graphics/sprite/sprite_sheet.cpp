@@ -2,8 +2,6 @@
 #include "halley/core/graphics/texture.h"
 #include "halley/core/api/halley_api.h"
 #include "resources/resources.h"
-#include "halley/file_formats/json/json.h"
-#include <halley/file_formats/json_file.h>
 #include "graphics/material/material.h"
 #include "graphics/material/material_definition.h"
 #include "graphics/sprite/sprite.h"
@@ -12,22 +10,28 @@
 
 using namespace Halley;
 
-template <typename T>
-static T readRect(JSONValue value)
+SpriteSheetEntry::SpriteSheetEntry(const ConfigNode& node)
 {
-	return T(value["x"], value["y"], value["w"], value["h"]);
+	pivot = node["pivot"].asVector2f({});
+	origPivot = node["origPivot"].asVector2i({});
+	size = node["size"].asVector2f();
+	coords = node["coords"].asRect4f({});
+	rotated = node["rotated"].asBool(false);
+	trimBorder = Vector4s(node["trimBorder"].asVector4i({}));
+	slices = Vector4s(node["slices"].asVector4i({}));
 }
 
-template <typename T>
-static T readVector(JSONValue value)
+ConfigNode SpriteSheetEntry::toConfigNode() const
 {
-	return T(value["x"], value["y"]);
-}
-
-template <typename T>
-static T readSize(JSONValue value)
-{
-	return T(value["w"], value["h"]);
+	ConfigNode::MapType result;
+	result["pivot"] = pivot;
+	result["origPivot"] = origPivot;
+	result["size"] = size;
+	result["coords"] = coords;
+	result["rotated"] = rotated;
+	result["trimBorder"] = Vector4i(trimBorder);
+	result["slices"] = Vector4i(slices);
+	return result;
 }
 
 void SpriteSheetEntry::serialize(Serializer& s) const
@@ -39,7 +43,6 @@ void SpriteSheetEntry::serialize(Serializer& s) const
 	s << origPivot;
 	s << size;
 	s << coords;
-	s << duration;
 	s << rotated;
 	s << trimBorder;
 	s << slices;
@@ -51,7 +54,6 @@ void SpriteSheetEntry::deserialize(Deserializer& s)
 	s >> origPivot;
 	s >> size;
 	s >> coords;
-	s >> duration;
 	s >> rotated;
 	s >> trimBorder;
 	s >> slices;
@@ -84,6 +86,30 @@ SpriteSheet::~SpriteSheet()
 #ifdef ENABLE_HOT_RELOAD
 	clearSpriteRefs();
 #endif
+}
+
+void SpriteSheet::load(const ConfigNode& node)
+{
+	textureName = node["textureName"].asString("");
+	defaultMaterialName = node["defaultMaterialName"].asString();
+	sprites = node["sprites"].asVector<SpriteSheetEntry>({});
+	if (node.hasKey("spriteIdx")) {
+		spriteIdx = node["spriteIdx"].asHashMap<String, uint32_t>();
+	} else {
+		spriteIdx.clear();
+	}
+	// TODO: frameTags
+}
+
+ConfigNode SpriteSheet::toConfigNode() const
+{
+	ConfigNode::MapType result;
+	result["textureName"] = textureName;
+	result["defaultMaterialName"] = defaultMaterialName;
+	result["sprites"] = sprites;
+	result["spriteIdx"] = spriteIdx;
+	// TODO: frameTags
+	return result;
 }
 
 const std::shared_ptr<const Texture>& SpriteSheet::getTexture() const
@@ -341,68 +367,6 @@ void SpriteSheet::deserialize(Deserializer& s)
 	}
 
 	assignIds();
-}
-
-void SpriteSheet::loadJson(gsl::span<const gsl::byte> data)
-{
-	auto src = reinterpret_cast<const char*>(data.data());
-
-	// Parse json
-	Json::Reader reader;
-	JSONValue root;
-	reader.parse(src, src + data.size(), root);
-
-	// Read Metadata
-	auto metadataNode = root["meta"];
-	Vector2f scale = Vector2f(1, 1);
-	textureName = "";
-	if (metadataNode) {
-		if (metadataNode["image"]) {
-			textureName = metadataNode["image"].asString();
-			Vector2f textureSize = readSize<Vector2f>(metadataNode["size"]);
-			scale = Vector2f(1.0f / textureSize.x, 1.0f / textureSize.y);
-		}
-		if (metadataNode["frameTags"]) {
-			for (auto& frameTag: metadataNode["frameTags"]) {
-				frameTags.push_back(SpriteSheetFrameTag());
-				auto& f = frameTags.back();
-				f.name = frameTag["name"].asString();
-				f.from = frameTag["from"].asInt();
-				f.to = frameTag["to"].asInt();
-			}
-		}
-	}
-
-	// Read sprites
-	auto frames = root["frames"];
-	for (auto iter = frames.begin(); iter != frames.end(); ++iter) {
-		auto sprite = *iter;
-
-		SpriteSheetEntry entry;
-		entry.rotated = sprite["rotated"].asBool();
-		
-		Rect4f frame = readRect<Rect4f>(sprite["frame"]);
-		Vector2f size = frame.getSize();
-		Vector2f texSize = size;
-		if (entry.rotated) {
-			std::swap(texSize.x, texSize.y);
-		}
-		entry.coords = Rect4f(frame.getTopLeft() * scale, texSize.x * scale.x, texSize.y * scale.y);
-		entry.size = size;
-
-		const Vector2i sourceSize = readSize<Vector2i>(sprite["sourceSize"]);
-		const Rect4i spriteSourceSize = readRect<Rect4i>(sprite["spriteSourceSize"]);
-		Vector2f rawPivot = readVector<Vector2f>(sprite["pivot"]);
-		Vector2i pivotPos = Vector2i(int(rawPivot.x * sourceSize.x + 0.5f), int(rawPivot.y * sourceSize.y + 0.5f));
-		Vector2i newPivotPos = pivotPos - spriteSourceSize.getTopLeft();
-		entry.pivot = Vector2f(newPivotPos) / Vector2f(spriteSourceSize.getSize());
-
-		if (sprite["duration"]) {
-			entry.duration = sprite["duration"].asInt();
-		}
-		
-		addSprite(iter.memberName(), entry);
-	}	
 }
 
 

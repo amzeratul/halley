@@ -105,7 +105,7 @@ ImportAssetType AssetImporter::getImportAssetType(const Path& path, bool skipRed
 		return ImportAssetType::AudioEvent;
 	} else if (root == "audio_object") {
 		return ImportAssetType::AudioObject;
-	} else if (root == "spritesheet") {
+	} else if (root == "sprite_sheet") {
 		return ImportAssetType::SpriteSheet;
 	} else if (root == "shader") {
 		return skipRedundantTypes ? ImportAssetType::Skip : ImportAssetType::Shader;

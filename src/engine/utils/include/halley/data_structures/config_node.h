@@ -11,6 +11,7 @@
 #include "halley/data_structures/vector.h"
 
 #include "hash_map.h"
+#include "halley/maths/rect.h"
 #include "halley/utils/type_traits.h"
 
 #if defined(DEV_BUILD)
@@ -121,6 +122,7 @@ namespace Halley {
 		explicit ConfigNode(const std::string_view& value);
 		explicit ConfigNode(bool value);
 		explicit ConfigNode(int value);
+		explicit ConfigNode(uint32_t value);
 		explicit ConfigNode(int64_t value);
 		explicit ConfigNode(float value);
 		explicit ConfigNode(Vector2i value);
@@ -129,6 +131,8 @@ namespace Halley {
 		explicit ConfigNode(Vector3f value);
 		explicit ConfigNode(Vector4i value);
 		explicit ConfigNode(Vector4f value);
+		explicit ConfigNode(Rect4i value);
+		explicit ConfigNode(Rect4f value);
 		explicit ConfigNode(Bytes value);
 		explicit ConfigNode(NoopType value);
 		explicit ConfigNode(DelType value);
@@ -152,6 +156,7 @@ namespace Halley {
 		ConfigNode& operator=(ConfigNode&& other) noexcept;
 		ConfigNode& operator=(bool value);
 		ConfigNode& operator=(int value);
+		ConfigNode& operator=(uint32_t value);
 		ConfigNode& operator=(int64_t value);
 		ConfigNode& operator=(float value);
 		ConfigNode& operator=(Vector2i value);
@@ -160,6 +165,8 @@ namespace Halley {
 		ConfigNode& operator=(Vector3f value);
 		ConfigNode& operator=(Vector4i value);
 		ConfigNode& operator=(Vector4f value);
+		ConfigNode& operator=(Rect4i value);
+		ConfigNode& operator=(Rect4f value);
 		ConfigNode& operator=(Range<float> value);
 		ConfigNode& operator=(Range<int> value);
 
@@ -241,6 +248,8 @@ namespace Halley {
 		Vector3f asVector3f() const;
 		Vector4i asVector4i() const;
 		Vector4f asVector4f() const;
+		Rect4i asRect4i() const;
+		Rect4f asRect4f() const;
 		Range<float> asFloatRange() const;
 		String asString() const;
 		const Bytes& asBytes() const;
@@ -256,6 +265,8 @@ namespace Halley {
 		Vector3f asVector3f(Vector3f defaultValue) const;
 		Vector4i asVector4i(Vector4i defaultValue) const;
 		Vector4f asVector4f(Vector4f defaultValue) const;
+		Rect4i asRect4i(Rect4i defaultValue) const;
+		Rect4f asRect4f(Rect4f defaultValue) const;
 		Range<float> asFloatRange(Range<float> defaultValue) const;
 
 		template <typename T>

@@ -30,9 +30,12 @@ namespace Halley
 		Rect4f coords;
 		Vector4s trimBorder;
 		Vector4s slices;
-		int duration = 0;
 		bool rotated = false;
 		bool sliced = false;
+
+		SpriteSheetEntry() = default;
+		SpriteSheetEntry(const ConfigNode& node);
+		ConfigNode toConfigNode() const;
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -81,7 +84,10 @@ namespace Halley
 	{
 	public:
 		SpriteSheet();
-		~SpriteSheet();
+		~SpriteSheet() override;
+
+		void load(const ConfigNode& node);
+		ConfigNode toConfigNode() const;
 		
 		const std::shared_ptr<const Texture>& getTexture() const;
 		const SpriteSheetEntry& getSprite(const String& name) const;
@@ -96,8 +102,6 @@ namespace Halley
 		size_t getSpriteCount() const;
 		std::optional<size_t> getIndex(const String& name) const;
 		bool hasSprite(const String& name) const;
-
-		void loadJson(gsl::span<const gsl::byte> data);
 
 		void addSprite(String name, const SpriteSheetEntry& sprite);
 		void setTextureName(String name);

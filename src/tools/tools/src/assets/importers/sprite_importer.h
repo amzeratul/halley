@@ -45,7 +45,7 @@ namespace Halley
 	private:
 		Animation generateAnimation(const String& spriteName, const String& spriteSheetName, const String& materialName, const Vector<ImageData>& frameData);
 
-		std::unique_ptr<Image> generateAtlas(const String& atlasName, Vector<ImageData>& images, SpriteSheet& spriteSheet, ConfigNode& spriteInfo, bool powerOfTwo);
+		std::unique_ptr<Image> generateAtlas(Vector<ImageData>& images, SpriteSheet& spriteSheet, ConfigNode& spriteInfo, bool powerOfTwo);
 		std::unique_ptr<Image> makeAtlas(const Vector<BinPackResult>& result, SpriteSheet& spriteSheet, ConfigNode& spriteInfo, bool powerOfTwo);
 		Vector2i computeAtlasSize(const Vector<BinPackResult>& results, bool powerOfTwo) const;
 		void markDuplicates(Vector<ImageData>& images) const;

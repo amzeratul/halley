@@ -2,12 +2,13 @@
 #include "halley/core/graphics/sprite/sprite_sheet.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/file_formats/yaml_convert.h"
 
 using namespace Halley;
 
 void SpriteSheetImporter::import(const ImportingAsset& asset, IAssetCollector& collector)
 {
 	SpriteSheet sheet;
-	sheet.loadJson(gsl::as_bytes(gsl::span<const Byte>(asset.inputFiles.at(0).data)));
+	sheet.load(YAMLConvert::parseConfig(asset.inputFiles.at(0).data).getRoot());
 	collector.output(asset.assetId, AssetType::SpriteSheet, Serializer::toBytes(sheet));
 }

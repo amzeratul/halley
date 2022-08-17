@@ -49,6 +49,11 @@ ConfigNode::ConfigNode(int value)
 	operator=(value);
 }
 
+ConfigNode::ConfigNode(uint32_t value)
+{
+	operator=(value);
+}
+
 ConfigNode::ConfigNode(int64_t value)
 {
 	operator=(value);
@@ -85,6 +90,16 @@ ConfigNode::ConfigNode(Vector4i value)
 }
 
 ConfigNode::ConfigNode(Vector4f value)
+{
+	operator=(value);
+}
+
+ConfigNode::ConfigNode(Rect4i value)
+{
+	operator=(value);
+}
+
+ConfigNode::ConfigNode(Rect4f value)
 {
 	operator=(value);
 }
@@ -203,6 +218,14 @@ ConfigNode& ConfigNode::operator=(int value)
 	return *this;
 }
 
+ConfigNode& ConfigNode::operator=(uint32_t value)
+{
+	reset();
+	type = ConfigNodeType::Int;
+	intData = value;
+	return *this;
+}
+
 ConfigNode& ConfigNode::operator=(int64_t value)
 {
 	reset();
@@ -256,6 +279,18 @@ ConfigNode& ConfigNode::operator=(Vector4i value)
 ConfigNode& ConfigNode::operator=(Vector4f value)
 {
 	auto seq = SequenceType({ ConfigNode(value.x), ConfigNode(value.y), ConfigNode(value.z), ConfigNode(value.w) });
+	return *this = std::move(seq);
+}
+
+ConfigNode& ConfigNode::operator=(Rect4i value)
+{
+	auto seq = SequenceType({ ConfigNode(value.getP1().x), ConfigNode(value.getP1().y), ConfigNode(value.getP2().x), ConfigNode(value.getP2().y) });
+	return *this = std::move(seq);
+}
+
+ConfigNode& ConfigNode::operator=(Rect4f value)
+{
+	auto seq = SequenceType({ ConfigNode(value.getP1().x), ConfigNode(value.getP1().y), ConfigNode(value.getP2().x), ConfigNode(value.getP2().y) });
 	return *this = std::move(seq);
 }
 
@@ -669,6 +704,26 @@ Vector4f ConfigNode::asVector4f() const
 	}
 }
 
+Rect4i ConfigNode::asRect4i() const
+{
+	if (type == ConfigNodeType::Sequence) {
+		auto& seq = asSequence();
+		return Rect4i(Vector2i(seq.at(0).asInt(), seq.at(1).asInt()), Vector2i(seq.at(2).asInt(), seq.at(3).asInt()));
+	} else {
+		throw Exception(getNodeDebugId() + " is not a rect4 type", HalleyExceptions::Resources);
+	}
+}
+
+Rect4f ConfigNode::asRect4f() const
+{
+	if (type == ConfigNodeType::Sequence) {
+		auto& seq = asSequence();
+		return Rect4f(Vector2f(seq.at(0).asFloat(), seq.at(1).asFloat()), Vector2f(seq.at(2).asFloat(), seq.at(3).asFloat()));
+	} else {
+		throw Exception(getNodeDebugId() + " is not a rect4 type", HalleyExceptions::Resources);
+	}
+}
+
 Range<float> ConfigNode::asFloatRange() const
 {
 	if (type == ConfigNodeType::Int2) {
@@ -746,6 +801,24 @@ Vector4f ConfigNode::asVector4f(Vector4f defaultValue) const
 		return defaultValue;
 	} else {
 		return asVector4f();
+	}
+}
+
+Rect4i ConfigNode::asRect4i(Rect4i defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return defaultValue;
+	} else {
+		return asRect4i();
+	}
+}
+
+Rect4f ConfigNode::asRect4f(Rect4f defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return defaultValue;
+	} else {
+		return asRect4f();
 	}
 }
 

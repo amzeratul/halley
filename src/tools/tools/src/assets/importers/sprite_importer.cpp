@@ -152,7 +152,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 	auto groupAtlasName = asset.assetId;
 	auto spriteSheet = std::make_shared<SpriteSheet>();
 	ConfigNode spriteInfo;
-	auto atlasImage = generateAtlas(groupAtlasName, totalFrames, *spriteSheet, spriteInfo, powerOfTwo);
+	auto atlasImage = generateAtlas(totalFrames, *spriteSheet, spriteInfo, powerOfTwo);
 	spriteSheet->setTextureName(groupAtlasName);
 	spriteSheet->setDefaultMaterialName(meta.getString("material", meta.getString("defaultMaterial", MaterialDefinition::defaultMaterial)));
 
@@ -289,12 +289,8 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 	return animation;
 }
 
-std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, Vector<ImageData>& images, SpriteSheet& spriteSheet, ConfigNode& spriteInfo, bool powerOfTwo)
+std::unique_ptr<Image> SpriteImporter::generateAtlas(Vector<ImageData>& images, SpriteSheet& spriteSheet, ConfigNode& spriteInfo, bool powerOfTwo)
 {
-	if (images.size() > 1) {
-		Logger::logInfo("Generating atlas \"" + atlasName + "\" with " + toString(images.size()) + " sprites...");
-	}
-
 	markDuplicates(images);
 
 	// Generate entries
@@ -329,13 +325,8 @@ std::unique_ptr<Image> SpriteImporter::generateAtlas(const String& atlasName, Ve
 		auto res = BinPack::fastPack(entries, size);
 		if (res) {
 			// Found a pack
-			if (images.size() > 1) {
-				Logger::logInfo("Atlas \"" + atlasName + "\" generated at " + toString(size.x) + "x" + toString(size.y) + " px with " + toString(images.size()) + " sprites. Total image area is " + toString(totalImageArea) + " px^2, sqrt = " + toString(lround(sqrt(totalImageArea))) + " px.");
-			}
-
 			return makeAtlas(res.value(), spriteSheet, spriteInfo, powerOfTwo);
-		}
-		else {
+		} else {
 			// Try 64x64, then 128x64, 128x128, 256x128, etc
 			if (wide) {
 				wide = false;
