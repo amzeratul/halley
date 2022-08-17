@@ -297,6 +297,11 @@ bool Project::writeAssetToDisk(const Path& path, gsl::span<const gsl::byte> data
 	return false;
 }
 
+bool Project::writeAssetToDisk(const Path& filePath, const Bytes& data)
+{
+	return writeAssetToDisk(filePath, gsl::as_bytes(gsl::span<const Byte>(data)));
+}
+
 bool Project::writeAssetToDisk(const Path& filePath, std::string_view str)
 {
 	return writeAssetToDisk(filePath, gsl::as_bytes(gsl::span<const char>(str)));

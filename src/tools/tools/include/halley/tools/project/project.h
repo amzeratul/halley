@@ -94,6 +94,7 @@ namespace Halley
 
 		void setAssetSaveNotification(bool enabled);
 		bool writeAssetToDisk(const Path& filePath, gsl::span<const gsl::byte> data) override;
+		bool writeAssetToDisk(const Path& filePath, const Bytes& data) override;
 		bool writeAssetToDisk(const Path& filePath, std::string_view str) override;
 
 		Vector<String> getAssetSrcList() const;

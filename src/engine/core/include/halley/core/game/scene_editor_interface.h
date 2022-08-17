@@ -387,6 +387,7 @@ namespace Halley {
         virtual ~IProject() = default;
 		virtual Path getAssetsSrcPath() const = 0;
 		virtual bool writeAssetToDisk(const Path& filePath, gsl::span<const gsl::byte> data) = 0;
+		virtual bool writeAssetToDisk(const Path& filePath, const Bytes& data) = 0;
 		virtual bool writeAssetToDisk(const Path& filePath, std::string_view str) = 0;
 	};
 
