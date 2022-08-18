@@ -374,6 +374,7 @@ void UIDropdown::close()
 		dropdownWindow->destroy();
 		dropdownWindow.reset();
 
+		sendEvent(UIEvent(UIEventType::DropdownHoveredChanged, getId(), getSelectedOptionId(), curOption));
 		sendEvent(UIEvent(UIEventType::DropdownClosed, getId(), getSelectedOptionId(), curOption));
 		playSound(styles.at(0).getString("closeSound"));
 	}
