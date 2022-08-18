@@ -348,7 +348,12 @@ void UIDropdown::open()
 
 		dropdownList->setHandle(UIEventType::ListHoveredChanged, [=] (const UIEvent& event)
 		{
-			sendEvent(UIEvent(UIEventType::DropdownHoveredChanged, getId(), event.getStringData(), event.getIntData()));
+			const int idx = event.getIntData();
+			if (idx == -1) {
+				sendEvent(UIEvent(UIEventType::DropdownHoveredChanged, getId(), getSelectedOptionId(), getSelectedOption()));
+			} else {
+				sendEvent(UIEvent(UIEventType::DropdownHoveredChanged, getId(), options.at(idx).id, idx));
+			}
 		});
 
 		sendEvent(UIEvent(UIEventType::DropdownOpened, getId(), getSelectedOptionId(), curOption));
