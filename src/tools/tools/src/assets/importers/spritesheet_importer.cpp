@@ -13,6 +13,7 @@ void SpriteSheetImporter::import(const ImportingAsset& asset, IAssetCollector& c
 
 	Metadata meta = asset.inputFiles.at(0).metadata;
 	meta.set("asset_compression", "deflate");
-	
-	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::SpriteSheet, Serializer::toBytes(sheet), meta);
+
+	const auto dstPath = Path(asset.assetId).replaceExtension("").string();
+	collector.output(dstPath, AssetType::SpriteSheet, Serializer::toBytes(sheet, SerializerOptions(SerializerOptions::maxVersion)), meta);
 }

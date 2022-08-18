@@ -54,7 +54,7 @@ void StandardResources::initialize(Resources& resources)
 	resources.setFallback<Animation>("missing_image");
 	resources.setFallback<SpriteSheet>("missing_image");
 	resources.setFallback<SpriteResource>("missing_image");
-	resources.setFallback<Texture>("missing_image");
+	resources.setFallback<Texture>("missing_image.ase");
 
 	resources.setFallback<MaterialDefinition>(MaterialDefinition::defaultMaterial);
 
