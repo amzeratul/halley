@@ -10,5 +10,9 @@ void SpriteSheetImporter::import(const ImportingAsset& asset, IAssetCollector& c
 {
 	SpriteSheet sheet;
 	sheet.load(YAMLConvert::parseConfig(asset.inputFiles.at(0).data).getRoot());
-	collector.output(asset.assetId, AssetType::SpriteSheet, Serializer::toBytes(sheet));
+
+	Metadata meta = asset.inputFiles.at(0).metadata;
+	meta.set("asset_compression", "deflate");
+	
+	collector.output(Path(asset.assetId).replaceExtension("").string(), AssetType::SpriteSheet, Serializer::toBytes(sheet), meta);
 }
