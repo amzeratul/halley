@@ -23,7 +23,7 @@
 
 using namespace Halley;
 
-constexpr static int currentAssetVersion = 115;
+constexpr static int currentAssetVersion = 116;
 constexpr static int currentCodegenVersion = Codegen::currentCodegenVersion;
 
 Project::Project(Path projectRootPath, Path halleyRootPath)
