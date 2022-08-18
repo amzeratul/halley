@@ -733,6 +733,16 @@ Image::Format Image::getImageFormat(gsl::span<const gsl::byte> bytes)
 	}
 }
 
+void Image::setFormat(Format f)
+{
+	const auto bpp0 = getBytesPerPixel();
+	format = f;
+	const auto bpp1 = getBytesPerPixel();
+	if (bpp0 != bpp1) {
+		throw Exception("Unable to convert between formats, BPP doesn't match.", HalleyExceptions::Utils);
+	}
+}
+
 bool Image::isQOI(gsl::span<const gsl::byte> bytes)
 {
 	unsigned char header[] = { 'q', 'o', 'i', 'f' };

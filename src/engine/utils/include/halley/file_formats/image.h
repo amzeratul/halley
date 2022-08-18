@@ -60,6 +60,7 @@ namespace Halley {
 		Bytes saveQOIToBytes() const;
 		static Vector2i getImageSize(gsl::span<const gsl::byte> bytes);
 		static Format getImageFormat(gsl::span<const gsl::byte> bytes);
+		void setFormat(Format format);
 
 		static bool isQOI(gsl::span<const gsl::byte> bytes);
 		static bool isPNG(gsl::span<const gsl::byte> bytes);
