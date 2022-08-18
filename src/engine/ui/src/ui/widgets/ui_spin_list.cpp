@@ -23,7 +23,7 @@ void UISpinList::setSelectedOption(int option)
 	int nextOption = clamp(option, 0, int(options.size()) - 1);
 	if (curOption != nextOption) {
 		curOption = nextOption;
-		sendEvent(UIEvent(UIEventType::DropboxSelectionChanged, getId(), optionIds[curOption], curOption));
+		sendEvent(UIEvent(UIEventType::DropdownSelectionChanged, getId(), optionIds[curOption], curOption));
 
 		if (getDataBindFormat() == UIDataBind::Format::String) {
 			notifyDataBind(optionIds[curOption]);

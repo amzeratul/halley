@@ -127,7 +127,7 @@ void EntityEditor::makeUI()
 		editPrefab();
 	});
 
-	setHandle(UIEventType::DropboxSelectionChanged, "entityIcon", [=](const UIEvent& event)
+	setHandle(UIEventType::DropdownSelectionChanged, "entityIcon", [=](const UIEvent& event)
 	{
 		setIcon(event.getStringData());
 	});

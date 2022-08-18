@@ -28,7 +28,7 @@ void UIDropdown::setSelectedOption(int option)
 		curOption = nextOption;
 		label.setText(options.at(curOption).label);
 		icon = options.at(curOption).icon;
-		sendEvent(UIEvent(UIEventType::DropboxSelectionChanged, getId(), options[curOption].id, curOption));
+		sendEvent(UIEvent(UIEventType::DropdownSelectionChanged, getId(), options[curOption].id, curOption));
 
 		if (getDataBindFormat() == UIDataBind::Format::String) {
 			notifyDataBind(options[curOption].id);
@@ -344,6 +344,11 @@ void UIDropdown::open()
 		dropdownList->setHandle(UIEventType::ListCancel, [=] (const UIEvent& event)
 		{
 			close();
+		});
+
+		dropdownList->setHandle(UIEventType::ListHoveredChanged, [=] (const UIEvent& event)
+		{
+			sendEvent(UIEvent(UIEventType::DropdownHoveredChanged, getId(), event.getStringData(), event.getIntData()));
 		});
 
 		sendEvent(UIEvent(UIEventType::DropdownOpened, getId(), getSelectedOptionId(), curOption));

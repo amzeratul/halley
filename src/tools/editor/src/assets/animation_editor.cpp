@@ -79,12 +79,12 @@ void AnimationEditor::setupWindow()
 		refresh();
 	});
 
-	setHandle(UIEventType::DropboxSelectionChanged, "sequence", [=] (const UIEvent& event)
+	setHandle(UIEventType::DropdownSelectionChanged, "sequence", [=] (const UIEvent& event)
 	{
 		animationDisplay->setSequence(event.getStringData());
 	});
 
-	setHandle(UIEventType::DropboxSelectionChanged, "direction", [=] (const UIEvent& event)
+	setHandle(UIEventType::DropdownSelectionChanged, "direction", [=] (const UIEvent& event)
 	{
 		animationDisplay->setDirection(event.getStringData());
 	});
