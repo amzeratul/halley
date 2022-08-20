@@ -10,21 +10,25 @@ using namespace Halley;
 
 ScriptingGizmo::ScriptingGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes)
 	: SceneEditorGizmo(snapRules)
-	, gizmo(factory, sceneEditorWindow.getEntityEditorFactory(), &sceneEditorWindow.getEntityFactory()->getWorld(), scriptNodeTypes, sceneEditorWindow.getProjectDefaultZoom())
 	, sceneEditorWindow(sceneEditorWindow)
+	, factory(factory)
+	, scriptNodeTypes(scriptNodeTypes)
 {
-	gizmo.setModifiedCallback([=] ()
-	{
-		modified = true;
-	});
-	gizmo.setUIRoot(sceneEditorWindow.getUIRoot());
 	compileEntityTargetList(sceneEditorWindow.getEntityFactory()->getWorld());
 }
 
 void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {
-	gizmo.setZoom(getZoom());
-	gizmo.update(time, sceneEditor.getResources(), inputState);
+	if (!gizmo) {
+		gizmo = std::make_unique<ScriptingBaseGizmo>(factory, sceneEditorWindow.getEntityEditorFactory(), &sceneEditorWindow.getEntityFactory()->getWorld(), sceneEditor.getResources(), scriptNodeTypes, sceneEditorWindow.getProjectDefaultZoom());
+		gizmo->setModifiedCallback([=] ()
+		{
+			modified = true;
+		});
+		gizmo->setUIRoot(sceneEditorWindow.getUIRoot());
+	}
+	gizmo->setZoom(getZoom());
+	gizmo->update(time, inputState);
 
 	if (modified) {
 		modified = false;
@@ -34,17 +38,17 @@ void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sc
 
 void ScriptingGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) const
 {
-	gizmo.draw(painter);
+	gizmo->draw(painter);
 }
 
 bool ScriptingGizmo::isHighlighted() const
 {
-	return gizmo.isHighlighted();
+	return gizmo->isHighlighted();
 }
 
 std::shared_ptr<UIWidget> ScriptingGizmo::makeUI()
 {
-	return gizmo.makeUI();
+	return gizmo->makeUI();
 }
 
 Vector<String> ScriptingGizmo::getHighlightedComponents() const
@@ -70,18 +74,18 @@ bool ScriptingGizmo::allowEntitySpriteSelection() const
 void ScriptingGizmo::loadEntityData()
 {
 	const auto* transform = getComponent<Transform2DComponent>();
-	gizmo.setBasePosition(transform ? transform->getGlobalPosition() : Vector2f());
+	gizmo->setBasePosition(transform ? transform->getGlobalPosition() : Vector2f());
 
 	auto* scriptGraph = getComponent<ScriptGraphComponent>();
-	gizmo.setGraph(scriptGraph ? &scriptGraph->scriptGraph : nullptr);
+	gizmo->setGraph(scriptGraph ? &scriptGraph->scriptGraph : nullptr);
 }
 
 void ScriptingGizmo::saveEntityData()
 {
 	ConfigNode scriptGraphData;
-	if (gizmo.getGraphPtr()) {
+	if (gizmo->getGraphPtr()) {
 		const auto context = sceneEditorWindow.getEntityFactory()->makeStandaloneContext();
-		scriptGraphData = gizmo.getGraph().toConfigNode(context->getEntitySerializationContext());
+		scriptGraphData = gizmo->getGraph().toConfigNode(context->getEntitySerializationContext());
 	}
 	
 	auto* data = getComponentData("CometScript");
@@ -100,18 +104,18 @@ void ScriptingGizmo::compileEntityTargetList(World& world)
 			entityTargets.emplace_back(ScriptingBaseGizmo::EntityTarget{ pos, e.getEntityId() });
 		}
 	}
-	gizmo.setEntityTargets(std::move(entityTargets));
+	gizmo->setEntityTargets(std::move(entityTargets));
 }
 
 bool ScriptingGizmo::onKeyPress(KeyboardKeyPress key)
 {
 	if (key.is(KeyCode::A, KeyMods::Ctrl)) {
-		gizmo.addNode();
+		gizmo->addNode();
 		return true;
 	}
 
 	if (key.is(KeyCode::Delete)) {
-		gizmo.deleteSelection();
+		gizmo->deleteSelection();
 		return true;
 	}
 	

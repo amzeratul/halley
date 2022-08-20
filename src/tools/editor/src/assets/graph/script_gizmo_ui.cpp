@@ -7,7 +7,7 @@ ScriptGizmoUI::ScriptGizmoUI(UIFactory& factory, Resources& resources, const IEn
 	, resources(resources)
 	, keyboard(std::move(keyboard))
 	, clipboard(std::move(clipboard))
-	, gizmo(factory, entityEditorFactory, nullptr, scriptNodeTypes)
+	, gizmo(factory, entityEditorFactory, nullptr, resources, scriptNodeTypes)
 	, modifiedCallback(std::move(modifiedCallback))
 {
 	gizmo.setModifiedCallback([=] ()
@@ -63,7 +63,7 @@ void ScriptGizmoUI::update(Time time, bool moved)
 	gizmo.setBasePosition(getPosition());
 	if (time > 0.00001) {
 		inputState.rawMousePos = inputState.mousePos;
-		gizmo.update(time, resources, inputState);
+		gizmo.update(time, inputState);
 		inputState.clear();
 	}
 }

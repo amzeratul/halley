@@ -18,8 +18,11 @@ namespace Halley {
 		bool onKeyPress(KeyboardKeyPress key) override;
 
 	private:
-		ScriptingBaseGizmo gizmo;
 		ISceneEditorWindow& sceneEditorWindow;
+		UIFactory& factory;
+		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
+
+		std::unique_ptr<ScriptingBaseGizmo> gizmo;
 		bool modified = false;
 
 		void loadEntityData();

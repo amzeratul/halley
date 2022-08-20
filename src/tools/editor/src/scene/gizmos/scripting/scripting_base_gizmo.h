@@ -12,7 +12,7 @@ namespace Halley {
 
 		using ModifiedCallback = std::function<void()>;
 
-		ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom = 1.0f);
+		ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom = 1.0f);
 		void setUIRoot(UIRoot& root);
 		void setEventSink(UIWidget& eventSink);
 
@@ -39,7 +39,7 @@ namespace Halley {
 		
 		ExecutionQueue& getExecutionQueue();
 
-		void update(Time time, Resources& resources, const SceneEditorInputState& inputState);
+		void update(Time time, const SceneEditorInputState& inputState);
 		void draw(Painter& painter) const;
 
 		bool isHighlighted() const;

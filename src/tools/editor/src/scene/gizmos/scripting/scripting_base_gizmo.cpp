@@ -7,11 +7,12 @@
 
 using namespace Halley;
 
-ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom)
+ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom)
 	: factory(factory)
 	, entityEditorFactory(entityEditorFactory)
 	, scriptNodeTypes(std::move(scriptNodeTypes))
 	, world(world)
+	, resources(&resources)
 	, baseZoom(baseZoom)
 {
 	tooltipLabel
@@ -32,17 +33,12 @@ void ScriptingBaseGizmo::setEventSink(UIWidget& sink)
 	eventSink = &sink;
 }
 
-void ScriptingBaseGizmo::update(Time time, Resources& res, const SceneEditorInputState& inputState)
+void ScriptingBaseGizmo::update(Time time, const SceneEditorInputState& inputState)
 {
 	Executor(pendingUITasks).runPending();
-
-	if (resources != &res) {
-		resources = &res;
-		updateNodes();
-	}
 	
 	if (!renderer) {
-		renderer = std::make_shared<ScriptRenderer>(res, world, *scriptNodeTypes, baseZoom);
+		renderer = std::make_shared<ScriptRenderer>(*resources, world, *scriptNodeTypes, baseZoom);
 	}
 	renderer->setGraph(scriptGraph);
 
