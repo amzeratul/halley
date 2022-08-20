@@ -31,6 +31,8 @@ void AudioObjectEditor::onMakeUI()
 		for (const auto& e: event.getConfigData().asSequence()) {
 			moveItem(e["itemId"].asString(), e["parentId"].asString(), e["oldParentId"].asString(), e["childIdx"].asInt(), e["oldChildIdx"].asInt());
 		}
+		populateTreeData();
+		onSelectionChange(hierarchy->getSelectedOptionId());
 	});
 
 	setHandle(UIEventType::ButtonClicked, "add", [=] (const UIEvent& event)
@@ -168,19 +170,18 @@ void AudioObjectEditor::update(Time t, bool moved)
 
 void AudioObjectEditor::doLoadUI()
 {
+	populateTreeData();
+
 	hierarchy->setCanSendEvents(false);
 	auto prevId = hierarchy->getSelectedOptionId();
 	hierarchy->clear();
 	hierarchy->setParent(*this);
-	treeData.clear();
 
 	if (audioObject) {
 		hierarchy->addTreeItem("root", "", 0, LocalisedString::fromUserString(audioObject->getAssetId()), "labelSpecial", factory.makeAssetTypeIcon(AssetType::AudioObject));
-		treeData["root"] = TreeData{ "", audioObject.get()};
 
-		size_t idx = 0;
 		for (auto& subObject: audioObject->getSubObjects()) {
-			populateObject("root", idx++, subObject);
+			populateTreeView("root", subObject);
 		}
 	}
 	hierarchy->sortItems();
@@ -192,31 +193,28 @@ void AudioObjectEditor::doLoadUI()
 	doSetCurrentObject();
 }
 
-void AudioObjectEditor::populateObject(const String& parentId, size_t idx, AudioSubObjectHandle& subObject)
+void AudioObjectEditor::populateTreeView(const String& parentId, AudioSubObjectHandle& subObject)
 {
 	if (!subObject.hasValue()) {
 		return;
 	}
 
 	const bool collapse = parentId != "root" && subObject->canCollapseToClip() && subObject->getClips().size() == 1;
-	const auto id = parentId + ":" + toString(idx);
+	const auto& id = subObject.getId();
 
 	if (collapse) {
 		for (auto& clip: subObject->getClips()) {
 			hierarchy->addTreeItem(id, parentId, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(clip), "labelSpecial", factory.makeAssetTypeIcon(AssetType::AudioClip));
-			treeData[id] = TreeData{ parentId, &subObject.getObject() };
 			break;
 		}
 	} else {
 		// Add this item
 		hierarchy->addTreeItem(id, parentId, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(subObject->getName()), "label", makeIcon(subObject->getType()));
-		treeData[id] = TreeData{ parentId, &subObject.getObject() };
 
 		// Add sub-categories
 		for (auto& cat: subObject->getSubCategories(getAudioProperties())) {
 			const auto catId = id + ":" + cat;
 			hierarchy->addTreeItem(catId, id, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(cat), "label", makeIcon(AudioSubObjectType::None));
-			treeData[catId] = TreeData{ id, &subObject.getObject(), cat };
 		}
 
 		// Populate sub-objects
@@ -224,15 +222,58 @@ void AudioObjectEditor::populateObject(const String& parentId, size_t idx, Audio
 		for (size_t i = 0; i < n; ++i) {
 			auto subObjectCat = subObject->getSubObjectCategory(i);
 			auto parent = subObjectCat.isEmpty() ? id : (id  + ":" + subObjectCat);
-			populateObject(parent, i, subObject->getSubObject(i));
+			populateTreeView(parent, subObject->getSubObject(i));
 		}
 
 		// Add clips
 		for (auto& clip: subObject->getClips()) {
 			const auto clipId = id + ":" + clip;
 			hierarchy->addTreeItem(clipId, id, std::numeric_limits<size_t>::max(), LocalisedString::fromUserString(clip), "labelSpecial", factory.makeAssetTypeIcon(AssetType::AudioClip));
-			treeData[clipId] = TreeData{ id, nullptr, {}, clip };
 		}
+	}
+}
+
+void AudioObjectEditor::populateTreeData()
+{
+	treeData.clear();
+	treeData["root"] = TreeData{ "", audioObject.get()};
+	if (audioObject) {
+		for (auto& subObject : audioObject->getSubObjects()) {
+			populateTreeData("root", subObject);
+		}
+	}
+}
+
+void AudioObjectEditor::populateTreeData(const String& parentId, AudioSubObjectHandle& subObject)
+{
+	if (!subObject.hasValue()) {
+		return;
+	}
+
+	const auto& id = subObject.getId();
+	assert(!id.isEmpty());
+
+	// Add this item
+	treeData[id] = TreeData{ parentId, &subObject.getObject() };
+
+	// Add sub-categories
+	for (auto& cat: subObject->getSubCategories(getAudioProperties())) {
+		const auto catId = id + ":" + cat;
+		treeData[catId] = TreeData{ id, &subObject.getObject(), cat };
+	}
+
+	// Populate sub-objects
+	const auto n = subObject->getNumSubObjects();
+	for (size_t i = 0; i < n; ++i) {
+		auto subObjectCat = subObject->getSubObjectCategory(i);
+		auto parent = subObjectCat.isEmpty() ? id : (id  + ":" + subObjectCat);
+		populateTreeData(parent, subObject->getSubObject(i));
+	}
+
+	// Add clips
+	for (auto& clip: subObject->getClips()) {
+		const auto clipId = id + ":" + clip;
+		treeData[clipId] = TreeData{ id, nullptr, {}, clip };
 	}
 }
 
@@ -311,7 +352,7 @@ void AudioObjectEditor::moveItem(const String& itemId, const String& parentId, c
 	} else {
 		moveObject(itemId, parentId, oldParentId, childIdx, oldChildIdx);
 	}
-	markModified(false);
+	markModified(true);
 }
 
 void AudioObjectEditor::moveObject(const String& itemId, const String& parentId, const String& oldParentId, int childIdx, int oldChildIdx)

@@ -47,7 +47,9 @@ namespace Halley {
         std::shared_ptr<UIWidget> currentObjectEditor;
 
         void doLoadUI();
-        void populateObject(const String& parentId, size_t idx, AudioSubObjectHandle& subObject);
+        void populateTreeView(const String& parentId, AudioSubObjectHandle& subObject);
+        void populateTreeData();
+        void populateTreeData(const String& parentId, AudioSubObjectHandle& subObject);
 
         void onSelectionChange(const String& id);
         void addObject();

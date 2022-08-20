@@ -2,6 +2,7 @@
 
 #include "audio_engine.h"
 #include "halley/bytes/byte_serializer.h"
+#include "halley/maths/uuid.h"
 #include "sub_objects/audio_sub_object_clips.h"
 #include "sub_objects/audio_sub_object_layers.h"
 #include "sub_objects/audio_sub_object_sequence.h"
@@ -119,14 +120,21 @@ void IAudioObject::swapClips(size_t idxA, size_t idxB)
 {
 }
 
+AudioSubObjectHandle::AudioSubObjectHandle()
+	: id(UUID::generate().toString())
+{
+}
+
 AudioSubObjectHandle::AudioSubObjectHandle(std::unique_ptr<IAudioSubObject> obj)
-	: obj(std::move(obj))
+	: id(UUID::generate().toString())
+	, obj(std::move(obj))
 {
 }
 
 AudioSubObjectHandle::AudioSubObjectHandle(const ConfigNode& node)
+	: id(UUID::generate().toString())
+	, obj(IAudioSubObject::makeSubObject(node))
 {
-	obj = IAudioSubObject::makeSubObject(node);
 }
 
 AudioSubObjectHandle::AudioSubObjectHandle(const AudioSubObjectHandle& other)
@@ -136,6 +144,7 @@ AudioSubObjectHandle::AudioSubObjectHandle(const AudioSubObjectHandle& other)
 
 AudioSubObjectHandle& AudioSubObjectHandle::operator=(const AudioSubObjectHandle& other)
 {
+	id = other.id;
 	if (hasValue() && other.hasValue() && obj->getType() == other->getType()) {
 		IAudioSubObject::copySubObject(*obj, other.getObject());
 	} else {
@@ -150,6 +159,11 @@ AudioSubObjectHandle& AudioSubObjectHandle::operator=(const AudioSubObjectHandle
 ConfigNode AudioSubObjectHandle::toConfigNode() const
 {
 	return obj->toConfigNode();
+}
+
+const String& AudioSubObjectHandle::getId() const
+{
+	return id;
 }
 
 IAudioSubObject& AudioSubObjectHandle::getObject()
