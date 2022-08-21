@@ -19,7 +19,7 @@ Vector<IScriptNodeType::SettingType> ScriptSpriteAnimation::getSettingTypes() co
 gsl::span<const IScriptNodeType::PinType> ScriptSpriteAnimation::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
 	return data;
 }
@@ -56,7 +56,7 @@ Vector<IScriptNodeType::SettingType> ScriptSpriteDirection::getSettingTypes() co
 gsl::span<const IScriptNodeType::PinType> ScriptSpriteDirection::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
 	return data;
 }
@@ -82,7 +82,7 @@ IScriptNodeType::Result ScriptSpriteDirection::doUpdate(ScriptEnvironment& envir
 gsl::span<const IScriptNodeType::PinType> ScriptSpriteAlpha::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
 	return data;
 }

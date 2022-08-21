@@ -22,7 +22,7 @@ namespace Halley {
 
 		void doInitData(ScriptSpawnEntityData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptSpawnEntityData& data) const override;
-		EntityId doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId pinN, ScriptSpawnEntityData& curData) const override;
+		EntityId doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN, ScriptSpawnEntityData& curData) const override;
 	};
 
 	class ScriptDestroyEntity final : public ScriptNodeTypeBase<void> {

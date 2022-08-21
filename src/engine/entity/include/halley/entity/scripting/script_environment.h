@@ -58,19 +58,19 @@ namespace Halley {
 
     	virtual void update(Time time, ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables);
     	void terminateState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables);
-		ConfigNode readNodeElementDevConData(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, ScriptNodeId nodeId, ScriptPinId pinId);
+		ConfigNode readNodeElementDevConData(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, GraphNodeId nodeId, GraphPinId pinId);
 
     	EntityRef tryGetEntity(EntityId entityId);
     	const ScriptGraph* getCurrentGraph() const;
-        size_t& getNodeCounter(ScriptNodeId nodeId);
-        IScriptStateData* getNodeData(ScriptNodeId nodeId);
+        size_t& getNodeCounter(GraphNodeId nodeId);
+        IScriptStateData* getNodeData(GraphNodeId nodeId);
         void assignTypes(const ScriptGraph& graph);
 
-    	ConfigNode readInputDataPin(const ScriptGraphNode& node, ScriptPinId pinN);
-        ConfigNode readOutputDataPin(const ScriptGraphNode& node, ScriptPinId pinN);
-        EntityId readInputEntityIdRaw(const ScriptGraphNode& node, ScriptPinId pinN);
-        EntityId readInputEntityId(const ScriptGraphNode& node, ScriptPinId pinN);
-        EntityId readOutputEntityId(const ScriptGraphNode& node, ScriptPinId pinN);
+    	ConfigNode readInputDataPin(const ScriptGraphNode& node, GraphPinId pinN);
+        ConfigNode readOutputDataPin(const ScriptGraphNode& node, GraphPinId pinN);
+        EntityId readInputEntityIdRaw(const ScriptGraphNode& node, GraphPinId pinN);
+        EntityId readInputEntityId(const ScriptGraphNode& node, GraphPinId pinN);
+        EntityId readOutputEntityId(const ScriptGraphNode& node, GraphPinId pinN);
 
     	void postAudioEvent(const String& id, EntityId entityId);
 
@@ -99,7 +99,7 @@ namespace Halley {
     	int getCurrentFrameNumber() const;
         Time getDeltaTime() const;
         EntityId getCurrentEntityId() const override;
-        ScriptPinId getCurrentInputPin() const;
+        GraphPinId getCurrentInputPin() const;
 
         World& getWorld();
         Resources& getResources();
@@ -128,7 +128,7 @@ namespace Halley {
         bool isHost = false;
         bool inputEnabled = true;
 
-        ScriptPinId currentInputPin = 0;
+        GraphPinId currentInputPin = 0;
     	const ScriptGraph* currentGraph = nullptr;
     	ScriptState* currentState = nullptr;
         ScriptVariables* currentEntityVariables = nullptr;
@@ -143,19 +143,19 @@ namespace Halley {
     private:
         bool updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);
         void doTerminateState();
-        void runDestructor(ScriptNodeId nodeId);
+        void runDestructor(GraphNodeId nodeId);
 
         ScriptStateThread startThread(ScriptStateThread thread);
         void addThread(ScriptStateThread thread, Vector<ScriptStateThread>& pending);
-        void advanceThread(ScriptStateThread& thread, OptionalLite<ScriptNodeId> node, ScriptPinId outputPin, ScriptPinId inputPin);
-        void initNode(ScriptNodeId nodeId, ScriptState::NodeState& state);
+        void advanceThread(ScriptStateThread& thread, OptionalLite<GraphNodeId> node, GraphPinId outputPin, GraphPinId inputPin);
+        void initNode(GraphNodeId nodeId, ScriptState::NodeState& state);
         void forkThread(ScriptStateThread& thread, std::array<IScriptNodeType::OutputNode, 8> outputNodes, Vector<ScriptStateThread>& pendingThreads, size_t firstIdx = 0);
         void mergeThread(ScriptStateThread& thread, bool wait);
         void terminateThread(ScriptStateThread& thread, bool allowRollback);
         void removeStoppedThreads();
 
-        void cancelOutputs(ScriptNodeId nodeId, uint8_t cancelMask);
-        void abortCodePath(ScriptNodeId node, std::optional<ScriptPinId> outputPin);
+        void cancelOutputs(GraphNodeId nodeId, uint8_t cancelMask);
+        void abortCodePath(GraphNodeId node, std::optional<GraphPinId> outputPin);
 
         void callFunction(ScriptStateThread& thread);
         void returnFromFunction(ScriptStateThread& thread, uint8_t outputPins, Vector<ScriptStateThread>& pendingThreads);

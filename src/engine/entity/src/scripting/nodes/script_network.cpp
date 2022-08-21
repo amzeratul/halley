@@ -3,7 +3,7 @@
 #include "halley/support/logger.h"
 using namespace Halley;
 
-String ScriptEntityAuthority::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptEntityAuthority::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return "has authority over " + getConnectedNodeName(world, node, graph, 0);
 }
@@ -11,7 +11,7 @@ String ScriptEntityAuthority::getShortDescription(const World* world, const Scri
 gsl::span<const IScriptNodeType::PinType> ScriptEntityAuthority::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
@@ -32,7 +32,7 @@ ConfigNode ScriptEntityAuthority::doGetData(ScriptEnvironment& environment, cons
 
 
 
-String ScriptHostAuthority::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptHostAuthority::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return "has host authority";
 }
@@ -40,7 +40,7 @@ String ScriptHostAuthority::getShortDescription(const World* world, const Script
 gsl::span<const IScriptNodeType::PinType> ScriptHostAuthority::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 1>{ PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
@@ -61,7 +61,7 @@ ConfigNode ScriptHostAuthority::doGetData(ScriptEnvironment& environment, const 
 gsl::span<const IScriptNodeType::PinType> ScriptIfEntityAuthority::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
 	return data;
 }
@@ -87,7 +87,7 @@ IScriptNodeType::Result ScriptIfEntityAuthority::doUpdate(ScriptEnvironment& env
 gsl::span<const IScriptNodeType::PinType> ScriptIfHostAuthority::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 2>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
 	return data;
 }

@@ -17,9 +17,9 @@ namespace Halley {
 	class ScriptRenderer {
 	public:
 		struct NodeUnderMouseInfo {
-			ScriptNodeId nodeId;
-			ScriptNodePinType element;
-			ScriptPinId elementId;
+			GraphNodeId nodeId;
+			GraphNodePinType element;
+			GraphPinId elementId;
 			Rect4f nodeArea;
 			Vector2f pinPos;
 
@@ -30,8 +30,8 @@ namespace Halley {
 		struct ConnectionPath {
 			Vector2f from;
 			Vector2f to;
-			ScriptNodePinType fromType;
-			ScriptNodePinType toType;
+			GraphNodePinType fromType;
+			GraphNodePinType toType;
 			bool fade = false;
 		};
 		
@@ -42,10 +42,10 @@ namespace Halley {
 		void draw(Painter& painter, Vector2f basePos, float curZoom, float posScale = 1.0f);
 
 		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const;
-		Vector2f getPinPosition(Vector2f basePos, const ScriptGraphNode& node, ScriptPinId idx, float zoom) const;
-		Vector<ScriptNodeId> getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const;
+		Vector2f getPinPosition(Vector2f basePos, const ScriptGraphNode& node, GraphPinId idx, float zoom) const;
+		Vector<GraphNodeId> getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const;
 		void setHighlight(std::optional<NodeUnderMouseInfo> highlightNode, OptionalLite<uint8_t> highlightEntity);
-		void setSelection(Vector<ScriptNodeId> selectedNodes);
+		void setSelection(Vector<GraphNodeId> selectedNodes);
 		void setCurrentPaths(Vector<ConnectionPath> path);
 
 		static Colour4f getNodeColour(const IScriptNodeType& nodeType);
@@ -85,20 +85,22 @@ namespace Halley {
 
 		std::optional<NodeUnderMouseInfo> highlightNode;
 		OptionalLite<uint8_t> highlightEntity;
-		Vector<ScriptNodeId> selectedNodes;
+		Vector<GraphNodeId> selectedNodes;
 		Vector<ConnectionPath> currentPaths;
 
-		void drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptNodeId nodeIdx, const ScriptGraph& graph, float curZoom, float posScale);
-		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, ScriptPinId highlightElementId);
+		void drawNodeOutputs(Painter& painter, Vector2f basePos, GraphNodeId nodeIdx, const ScriptGraph& graph, float curZoom, float posScale);
+		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<GraphNodePinType> highlightElement, GraphPinId highlightElementId);
 
 		Vector2f getNodeSize(const IScriptNodeType& nodeType, float curZoom) const;
 		Circle getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom, float posScale) const;
-		Colour4f getPinColour(ScriptNodePinType pinType) const;
+		Colour4f getPinColour(GraphNodePinType pinType) const;
 		const Sprite& getIcon(const IScriptNodeType& nodeType, const ScriptGraphNode& node);
 
 		BezierCubic makeBezier(const ConnectionPath& path) const;
 		void drawConnection(Painter& painter, const ConnectionPath& path, float curZoom, bool highlight, bool fade) const;
 
-		NodeDrawMode getNodeDrawMode(ScriptNodeId nodeId) const;
+		NodeDrawMode getNodeDrawMode(GraphNodeId nodeId) const;
+
+		GraphPinSide getSide(GraphNodePinType pinType) const;
 	};
 }

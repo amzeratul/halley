@@ -30,7 +30,7 @@ String ScriptWait::getLabel(const ScriptGraphNode& node) const
 gsl::span<const IScriptNodeType::PinType> ScriptWait::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 2>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
 	return data;
 }

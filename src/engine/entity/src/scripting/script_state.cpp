@@ -16,7 +16,7 @@ ScriptStateThread::StackFrame::StackFrame(const ConfigNode& n)
 	inputPin = (result >> 24) & 0xFF;
 }
 
-ScriptStateThread::StackFrame::StackFrame(ScriptNodeId node, ScriptPinId outputPin, ScriptPinId inputPin)
+ScriptStateThread::StackFrame::StackFrame(GraphNodeId node, GraphPinId outputPin, GraphPinId inputPin)
 	: node(node)
 	, outputPin(outputPin)
 	, inputPin(inputPin)
@@ -52,7 +52,7 @@ ScriptStateThread::ScriptStateThread()
 	generateId();
 }
 
-ScriptStateThread::ScriptStateThread(ScriptNodeId startNode, ScriptPinId inputPin)
+ScriptStateThread::ScriptStateThread(GraphNodeId startNode, GraphPinId inputPin)
 	: ScriptStateThread()
 {
 	curNode = startNode;
@@ -121,7 +121,7 @@ Vector<ScriptStateThread::StackFrame>& ScriptStateThread::getStack()
 	return stack;
 }
 
-bool ScriptStateThread::stackGoesThrough(ScriptNodeId node, std::optional<ScriptPinId> pin) const
+bool ScriptStateThread::stackGoesThrough(GraphNodeId node, std::optional<GraphPinId> pin) const
 {
 	return std::any_of(stack.begin(), stack.end(), [&] (const StackFrame& frame)
 	{
@@ -134,7 +134,7 @@ uint32_t ScriptStateThread::getUniqueId() const
 	return uniqueId;
 }
 
-void ScriptStateThread::offsetToNodeRange(Range<ScriptNodeId> range)
+void ScriptStateThread::offsetToNodeRange(Range<GraphNodeId> range)
 {
 	if (curNode) {
 		*curNode -= range.start;
@@ -150,7 +150,7 @@ void ScriptStateThread::generateId()
 	uniqueId = nextId++;
 }
 
-void ScriptStateThread::advanceToNode(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin, ScriptPinId inputPin)
+void ScriptStateThread::advanceToNode(OptionalLite<GraphNodeId> node, GraphPinId outputPin, GraphPinId inputPin)
 {
 	if (curNode) {
 		stack.push_back(StackFrame(*curNode, outputPin, curInputPin));
@@ -160,7 +160,7 @@ void ScriptStateThread::advanceToNode(OptionalLite<ScriptNodeId> node, ScriptPin
 	curInputPin = inputPin;
 }
 
-ScriptStateThread ScriptStateThread::fork(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin, ScriptPinId inputPin) const
+ScriptStateThread ScriptStateThread::fork(OptionalLite<GraphNodeId> node, GraphPinId outputPin, GraphPinId inputPin) const
 {
 	ScriptStateThread newThread = *this;
 	newThread.generateId();
@@ -387,7 +387,7 @@ bool ScriptState::isDead() const
 	return isDone() && !persistAfterDone;
 }
 
-bool ScriptState::hasThreadAt(ScriptNodeId node) const
+bool ScriptState::hasThreadAt(GraphNodeId node) const
 {
 	for (const auto& thread: threads) {
 		if (thread.getCurNode() == node) {
@@ -397,7 +397,7 @@ bool ScriptState::hasThreadAt(ScriptNodeId node) const
 	return false;
 }
 
-ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(ScriptNodeId nodeId) const
+ScriptState::NodeIntrospection ScriptState::getNodeIntrospection(GraphNodeId nodeId) const
 {
 	NodeIntrospection result;
 	result.state = NodeIntrospectionState::Unvisited;
@@ -460,7 +460,7 @@ void ScriptState::prepareStates(const EntitySerializationContext& context, Time 
 	}
 }
 
-size_t& ScriptState::getNodeCounter(ScriptNodeId node)
+size_t& ScriptState::getNodeCounter(GraphNodeId node)
 {
 	return nodeCounters[node];
 }
@@ -518,7 +518,7 @@ void ScriptState::receiveMessage(ScriptMessage msg)
 	}
 }
 
-void ScriptState::processMessages(Vector<ScriptNodeId>& threadsToStart)
+void ScriptState::processMessages(Vector<GraphNodeId>& threadsToStart)
 {
 	std_ex::erase_if(inbox, [&] (ScriptMessage& msg)
 	{
@@ -526,7 +526,7 @@ void ScriptState::processMessages(Vector<ScriptNodeId>& threadsToStart)
 	});
 }
 
-bool ScriptState::processMessage(ScriptMessage& msg, Vector<ScriptNodeId>& threadsToStart)
+bool ScriptState::processMessage(ScriptMessage& msg, Vector<GraphNodeId>& threadsToStart)
 {
 	if (const auto* scriptGraph = getScriptGraphPtr()) {
 		if (const auto inboxId = scriptGraph->getMessageInboxId(msg.type.message)) {
@@ -567,7 +567,7 @@ const ScriptVariables& ScriptState::getSharedVariables() const
 	return sharedVars;
 }
 
-void ScriptState::offsetToNodeRange(Range<ScriptNodeId> nodeRange)
+void ScriptState::offsetToNodeRange(Range<GraphNodeId> nodeRange)
 {
 	for (auto& t: threads) {
 		t.offsetToNodeRange(nodeRange);
@@ -576,7 +576,7 @@ void ScriptState::offsetToNodeRange(Range<ScriptNodeId> nodeRange)
 	nodeState.resize(nodeRange.getLength());
 }
 
-ScriptState::NodeState& ScriptState::getNodeState(ScriptNodeId nodeId)
+ScriptState::NodeState& ScriptState::getNodeState(GraphNodeId nodeId)
 {
 	return nodeState.at(nodeId);
 }

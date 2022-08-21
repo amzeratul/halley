@@ -9,7 +9,7 @@ String ScriptVariable::getLargeLabel(const ScriptGraphNode& node) const
 	return node.getSettings()["variable"].asString("");
 }
 
-String ScriptVariable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptVariable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return node.getSettings()["scope"].asString("local") + ":" + node.getSettings()["variable"].asString("");
 }
@@ -17,7 +17,7 @@ String ScriptVariable::getShortDescription(const World* world, const ScriptGraph
 gsl::span<const IScriptNodeType::PinType> ScriptVariable::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 2>{ PinType{ ET::WriteDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
@@ -74,7 +74,7 @@ String ScriptLiteral::getLargeLabel(const ScriptGraphNode& node) const
 	return str;
 }
 
-String ScriptLiteral::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptLiteral::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return getLargeLabel(node);
 }
@@ -82,7 +82,7 @@ String ScriptLiteral::getShortDescription(const World* world, const ScriptGraphN
 gsl::span<const IScriptNodeType::PinType> ScriptLiteral::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 1>{ PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
@@ -143,7 +143,7 @@ String ScriptComparison::getLargeLabel(const ScriptGraphNode& node) const
 	return node.getSettings()["operator"].asString("==");
 }
 
-String ScriptComparison::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptComparison::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
@@ -154,7 +154,7 @@ String ScriptComparison::getShortDescription(const World* world, const ScriptGra
 gsl::span<const IScriptNodeType::PinType> ScriptComparison::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
@@ -207,7 +207,7 @@ String ScriptArithmetic::getLargeLabel(const ScriptGraphNode& node) const
 	return node.getSettings()["operator"].asString("+");
 }
 
-String ScriptArithmetic::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptArithmetic::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
@@ -225,7 +225,7 @@ String ScriptArithmetic::getShortDescription(const World* world, const ScriptGra
 gsl::span<const IScriptNodeType::PinType> ScriptArithmetic::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
@@ -272,7 +272,7 @@ ConfigNode ScriptArithmetic::doGetData(ScriptEnvironment& environment, const Scr
 
 
 
-String ScriptValueOr::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptValueOr::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
@@ -282,7 +282,7 @@ String ScriptValueOr::getShortDescription(const World* world, const ScriptGraphN
 gsl::span<const IScriptNodeType::PinType> ScriptValueOr::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
@@ -320,7 +320,7 @@ Vector<IScriptNodeType::SettingType> ScriptLerp::getSettingTypes() const
 gsl::span<const IScriptNodeType::PinType> ScriptLerp::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 2>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
@@ -338,7 +338,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLerp::getNodeDescription(const S
 	return str.moveResults();
 }
 
-String ScriptLerp::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId element_idx) const
+String ScriptLerp::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId element_idx) const
 {
 	const auto from = node.getSettings()["from"].asFloat(0);
 	const auto to = node.getSettings()["to"].asFloat(1);
@@ -358,7 +358,7 @@ ConfigNode ScriptLerp::doGetData(ScriptEnvironment& environment, const ScriptGra
 gsl::span<const IScriptNodeType::PinType> ScriptAdvanceTo::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 9>{
 		PinType{ ET::FlowPin, PD::Input },
 		PinType{ ET::FlowPin, PD::Output },
@@ -373,7 +373,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptAdvanceTo::getPinConfiguration(c
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptAdvanceTo::getPinDescription(const ScriptGraphNode& node, PinType element, ScriptPinId elementIdx) const
+std::pair<String, Vector<ColourOverride>> ScriptAdvanceTo::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return { "Flow output.", {} };
@@ -466,7 +466,7 @@ String ScriptSetVariable::getLabel(const ScriptGraphNode& node) const
 gsl::span<const IScriptNodeType::PinType> ScriptSetVariable::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::WriteDataPin, PD::Output } };
 	return data;
 }
@@ -524,7 +524,7 @@ String ScriptHoldVariable::getLabel(const ScriptGraphNode& node) const
 gsl::span<const IScriptNodeType::PinType> ScriptHoldVariable::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 5>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::WriteDataPin, PD::Output } };
 	return data;
 }
@@ -577,12 +577,12 @@ void ScriptHoldVariable::doDestructor(ScriptEnvironment& environment, const Scri
 gsl::span<const IScriptNodeType::PinType> ScriptEntityIdToData::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
 
-String ScriptEntityIdToData::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptEntityIdToData::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return getConnectedNodeName(world, node, graph, 0);
 }
@@ -602,12 +602,12 @@ ConfigNode ScriptEntityIdToData::doGetData(ScriptEnvironment& environment, const
 gsl::span<const IScriptNodeType::PinType> ScriptDataToEntityId::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 2>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::TargetPin, PD::Output } };
 	return data;
 }
 
-String ScriptDataToEntityId::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptDataToEntityId::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return getConnectedNodeName(world, node, graph, 0);
 }
@@ -617,7 +617,7 @@ std::pair<String, Vector<ColourOverride>> ScriptDataToEntityId::getNodeDescripti
 	return { "Convert data to EntityId.", {} };
 }
 
-EntityId ScriptDataToEntityId::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId pinN) const
+EntityId ScriptDataToEntityId::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
 	const auto data = readDataPin(environment, node, 0);
 	EntityId result;

@@ -154,7 +154,7 @@ void ScriptingBaseGizmo::onNodeClicked(Vector2f mousePos, SelectionSetModifier m
 {
 	if (modifier == SelectionSetModifier::None) {
 		const auto& nodes = scriptGraph->getNodes();
-		Vector<ScriptNodeId> nodeIds = selectedNodes.getSelected();
+		Vector<GraphNodeId> nodeIds = selectedNodes.getSelected();
 		Vector<Vector2f> startPos;
 		startPos.reserve(nodeIds.size());
 		for (auto& node: nodeIds) {
@@ -242,7 +242,7 @@ void ScriptingBaseGizmo::onEditingConnection(const SceneEditorInputState& inputS
 				onModified();
 			}
 		} else {
-			if (srcType.type == ET::TargetPin && srcType.direction == ScriptNodePinDirection::Input) {
+			if (srcType.type == ET::TargetPin && srcType.direction == GraphNodePinDirection::Input) {
 				if (scriptGraph->connectPin(srcNodeId, srcPinId, curEntityTarget ? entityTargets[*curEntityTarget].entityId : EntityId())) {
 					onModified();
 				}
@@ -269,7 +269,7 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 	Vector<ScriptRenderer::ConnectionPath> paths;
 	if (nodeEditingConnection && nodeConnectionDst) {
 		const auto srcType = nodeEditingConnection->element;
-		ScriptNodePinType dstType = srcType.getReverseDirection();
+		GraphNodePinType dstType = srcType.getReverseDirection();
 		paths.push_back(ScriptRenderer::ConnectionPath{ nodeEditingConnection->pinPos, nodeConnectionDst.value(), srcType, dstType, false });
 	}
 
@@ -319,14 +319,14 @@ bool ScriptingBaseGizmo::isHighlighted() const
 	return !!nodeUnderMouse || curEntityTarget || nodeEditingConnection;
 }
 
-bool ScriptingBaseGizmo::destroyNode(ScriptNodeId id)
+bool ScriptingBaseGizmo::destroyNode(GraphNodeId id)
 {
 	return destroyNodes({ id });
 }
 
-bool ScriptingBaseGizmo::destroyNodes(Vector<ScriptNodeId> ids)
+bool ScriptingBaseGizmo::destroyNodes(Vector<GraphNodeId> ids)
 {
-	std::sort(ids.begin(), ids.end(), std::greater<ScriptNodeId>());
+	std::sort(ids.begin(), ids.end(), std::greater<GraphNodeId>());
 
 	bool modified = false;
 
@@ -379,12 +379,12 @@ void ScriptingBaseGizmo::setState(ScriptState* state)
 	scriptState = state;
 }
 
-ScriptGraphNode& ScriptingBaseGizmo::getNode(ScriptNodeId id)
+ScriptGraphNode& ScriptingBaseGizmo::getNode(GraphNodeId id)
 {
 	return scriptGraph->getNodes().at(id);
 }
 
-const ScriptGraphNode& ScriptingBaseGizmo::getNode(ScriptNodeId id) const
+const ScriptGraphNode& ScriptingBaseGizmo::getNode(GraphNodeId id) const
 {
 	return scriptGraph->getNodes().at(id);
 }
@@ -393,9 +393,9 @@ ConfigNode ScriptingBaseGizmo::copySelection() const
 {
 	const auto& nodes = scriptGraph->getNodes();
 	Vector<ScriptGraphNode> result;
-	HashMap<ScriptNodeId, ScriptNodeId> remap;
+	HashMap<GraphNodeId, GraphNodeId> remap;
 
-	ScriptNodeId newIdx = 0;
+	GraphNodeId newIdx = 0;
 	for (const auto id: selectedNodes.getSelected()) {
 		remap[id] = newIdx++;
 	}
@@ -430,14 +430,14 @@ void ScriptingBaseGizmo::paste(const ConfigNode& node)
 	}
 
 	// Reassign ids and paste
-	Vector<ScriptNodeId> sel;
+	Vector<GraphNodeId> sel;
 	Vector<Vector2f> startPos;
-	const auto startNewIdx = static_cast<ScriptNodeId>(scriptGraph->getNodes().size());
+	const auto startNewIdx = static_cast<GraphNodeId>(scriptGraph->getNodes().size());
 	auto newIdx = startNewIdx;
-	HashMap<ScriptNodeId, ScriptNodeId> remap;
+	HashMap<GraphNodeId, GraphNodeId> remap;
 	for (size_t i = 0; i < nodes.size(); ++i) {
 		sel.push_back(newIdx);
-		remap[static_cast<ScriptNodeId>(i)] = newIdx++;
+		remap[static_cast<GraphNodeId>(i)] = newIdx++;
 	}
 	for (size_t i = 0; i < nodes.size(); ++i) {
 		auto& node = scriptGraph->getNodes().emplace_back(nodes[i]);
@@ -593,7 +593,7 @@ std::shared_ptr<UIWidget> ScriptingBaseGizmo::makeUI()
 	return std::make_shared<ScriptingGizmoToolbar>(factory, *this);
 }
 
-void ScriptingBaseGizmo::openNodeUI(std::optional<ScriptNodeId> nodeId, std::optional<Vector2f> pos, const String& type)
+void ScriptingBaseGizmo::openNodeUI(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& type)
 {
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(type);
 	if (nodeType && (nodeId || !nodeType->getSettingTypes().empty())) {
@@ -623,10 +623,10 @@ void ScriptingBaseGizmo::addNode()
 	uiRoot->addChild(std::move(chooseAssetWindow));
 }
 
-ScriptNodeId ScriptingBaseGizmo::addNode(const String& type, Vector2f pos, ConfigNode settings)
+GraphNodeId ScriptingBaseGizmo::addNode(const String& type, Vector2f pos, ConfigNode settings)
 {
 	auto& nodes = scriptGraph->getNodes();
-	const ScriptNodeId id = static_cast<ScriptNodeId>(nodes.size());
+	const GraphNodeId id = static_cast<GraphNodeId>(nodes.size());
 	nodes.emplace_back(type, pos);
 	nodes.back().getSettings() = std::move(settings);
 	scriptGraph->finishGraph();
@@ -639,7 +639,7 @@ ScriptNodeId ScriptingBaseGizmo::addNode(const String& type, Vector2f pos, Confi
 	return id;
 }
 
-void ScriptingBaseGizmo::updateNodeAutoConnection(gsl::span<const ScriptNodeId> nodeIds)
+void ScriptingBaseGizmo::updateNodeAutoConnection(gsl::span<const GraphNodeId> nodeIds)
 {
 	pendingAutoConnections.clear();
 
@@ -649,10 +649,10 @@ void ScriptingBaseGizmo::updateNodeAutoConnection(gsl::span<const ScriptNodeId> 
 		const size_t nPins = node.getNodeType().getPinConfiguration(node).size();
 		for (size_t pinIdx = 0; pinIdx < nPins; ++pinIdx) {
 			const bool empty = !node.getPin(pinIdx).hasConnection();
-			const auto srcPinType = node.getPinType(static_cast<ScriptPinId>(pinIdx));
+			const auto srcPinType = node.getPinType(static_cast<GraphPinId>(pinIdx));
 
 			if (empty) {
-				auto conn = findAutoConnectionForPin(id, static_cast<ScriptPinId>(pinIdx), node.getPosition(), srcPinType, nodeIds);
+				auto conn = findAutoConnectionForPin(id, static_cast<GraphPinId>(pinIdx), node.getPosition(), srcPinType, nodeIds);
 				if (conn) {
 					pendingAutoConnections.push_back(*conn);
 				}
@@ -686,7 +686,7 @@ bool ScriptingBaseGizmo::finishAutoConnection()
 	return changed;
 }
 
-std::optional<ScriptingBaseGizmo::Connection> ScriptingBaseGizmo::findAutoConnectionForPin(ScriptNodeId srcNodeId, ScriptPinId srcPinIdx, Vector2f nodePos, ScriptNodePinType srcPinType, gsl::span<const ScriptNodeId> excludeIds) const
+std::optional<ScriptingBaseGizmo::Connection> ScriptingBaseGizmo::findAutoConnectionForPin(GraphNodeId srcNodeId, GraphPinId srcPinIdx, Vector2f nodePos, GraphNodePinType srcPinType, gsl::span<const GraphNodeId> excludeIds) const
 {
 	float bestDistance = 100.0f;
 	std::optional<Connection> bestPath;
@@ -704,14 +704,14 @@ std::optional<ScriptingBaseGizmo::Connection> ScriptingBaseGizmo::findAutoConnec
 		const size_t nPins = node.getNodeType().getPinConfiguration(node).size();
 		for (size_t pinIdx = 0; pinIdx < nPins; ++pinIdx) {
 			const bool empty = !node.getPin(pinIdx).hasConnection();
-			const auto dstPinType = node.getPinType(static_cast<ScriptPinId>(pinIdx));
+			const auto dstPinType = node.getPinType(static_cast<GraphPinId>(pinIdx));
 			if (empty && srcPinType.canConnectTo(dstPinType)) {
 				const auto srcPos = renderer->getPinPosition(basePos, getNode(srcNodeId), srcPinIdx, getZoom());
-				const auto dstPos = renderer->getPinPosition(basePos, getNode(node.getId()), static_cast<ScriptPinId>(pinIdx), getZoom());
+				const auto dstPos = renderer->getPinPosition(basePos, getNode(node.getId()), static_cast<GraphPinId>(pinIdx), getZoom());
 				const float distance = (srcPos - dstPos).length();
 				if (distance < bestDistance) {
 					bestDistance = distance;
-					bestPath = Connection{ srcNodeId, node.getId(), srcPinIdx, static_cast<ScriptPinId>(pinIdx), srcPinType, dstPinType, srcPos, dstPos, distance };
+					bestPath = Connection{ srcNodeId, node.getId(), srcPinIdx, static_cast<GraphPinId>(pinIdx), srcPinType, dstPinType, srcPos, dstPos, distance };
 				}
 			}
 		}

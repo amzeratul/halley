@@ -27,7 +27,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpawnEntity::getPinConfiguration
 	const bool asChild = node.getSettings()["asChild"].asBool(false);
 
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 5>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::TargetPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
 	return gsl::span<const PinType>(data).subspan(0, asChild ? 5 : 4);
 }
@@ -79,7 +79,7 @@ IScriptNodeType::Result ScriptSpawnEntity::doUpdate(ScriptEnvironment& environme
 	return Result(ScriptNodeExecutionState::Done);
 }
 
-EntityId ScriptSpawnEntity::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId pinN, ScriptSpawnEntityData& curData) const
+EntityId ScriptSpawnEntity::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN, ScriptSpawnEntityData& curData) const
 {
 	return curData.entityId;
 }
@@ -89,7 +89,7 @@ EntityId ScriptSpawnEntity::doGetEntityId(ScriptEnvironment& environment, const 
 gsl::span<const IScriptNodeType::PinType> ScriptDestroyEntity::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
 	return data;
 }

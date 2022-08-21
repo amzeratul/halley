@@ -50,6 +50,6 @@ namespace Halley {
 
 		void onModified();
 		void updateSelectionBox();
-		void onDoubleClick(ScriptNodeId nodeId);
+		void onDoubleClick(GraphNodeId nodeId);
 	};
 }

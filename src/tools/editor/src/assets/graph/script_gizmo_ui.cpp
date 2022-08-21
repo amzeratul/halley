@@ -220,7 +220,7 @@ void ScriptGizmoUI::updateSelectionBox()
 	}
 }
 
-void ScriptGizmoUI::onDoubleClick(ScriptNodeId nodeId)
+void ScriptGizmoUI::onDoubleClick(GraphNodeId nodeId)
 {
 	auto open = [&] (const String& scriptId)
 	{

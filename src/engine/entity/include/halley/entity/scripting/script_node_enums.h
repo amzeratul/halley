@@ -1,11 +1,8 @@
 #pragma once
 
-#include <cstdint>
+#include "halley/core/graph/base_graph_enums.h"
 
 namespace Halley {
- 	using ScriptNodeId = uint16_t;
-	using ScriptPinId = uint8_t;
-
 	enum class ScriptNodeExecutionState : uint8_t {
 		Done,
 		Fork,
@@ -39,76 +36,42 @@ namespace Halley {
 		TargetPin
 	};
 
-	enum class ScriptNodePinDirection : uint8_t {
-		Input,
-		Output
-	};
-
-	enum class ScriptPinSide : uint8_t {
-		Undefined,
-		Left,
-		Right,
-		Top,
-		Bottom
-	};
-
-	struct ScriptNodePinType {
+	struct GraphNodePinType {
 		ScriptNodeElementType type = ScriptNodeElementType::Undefined;
-		ScriptNodePinDirection direction = ScriptNodePinDirection::Input;
+		GraphNodePinDirection direction = GraphNodePinDirection::Input;
 		bool isCancellable : 1;
 		bool forceHorizontal : 1;
 		
-		ScriptNodePinType(ScriptNodeElementType type = ScriptNodeElementType::Undefined, ScriptNodePinDirection direction = ScriptNodePinDirection::Input, bool cancellable = false, bool forceHorizontal = false)
+		GraphNodePinType(ScriptNodeElementType type = ScriptNodeElementType::Undefined, GraphNodePinDirection direction = GraphNodePinDirection::Input, bool cancellable = false, bool forceHorizontal = false)
 			: type(type)
 			, direction(direction)
 			, isCancellable(cancellable)
 			, forceHorizontal(forceHorizontal)
 		{}
 
-		[[nodiscard]] bool operator==(const ScriptNodePinType& other) const
+		[[nodiscard]] bool operator==(const GraphNodePinType& other) const
 		{
 			return type == other.type && direction == other.direction && isCancellable == other.isCancellable && forceHorizontal == other.forceHorizontal;
 		}
 
-		[[nodiscard]] bool operator!=(const ScriptNodePinType& other) const
+		[[nodiscard]] bool operator!=(const GraphNodePinType& other) const
 		{
 			return !(*this == other);
 		}
 
-		[[nodiscard]] ScriptPinSide getSide() const
+		[[nodiscard]] GraphPinSide getSide() const
 		{
-			switch (type) {
-			case ScriptNodeElementType::TargetPin:
-				if (!forceHorizontal) {
-					return direction == ScriptNodePinDirection::Input ? ScriptPinSide::Top : ScriptPinSide::Bottom;
-				} else {
-					[[fallthrough]];
-				}
-			case ScriptNodeElementType::ReadDataPin:
-			case ScriptNodeElementType::WriteDataPin:
-			case ScriptNodeElementType::FlowPin:
-				return direction == ScriptNodePinDirection::Input ? ScriptPinSide::Left : ScriptPinSide::Right;
-			default:
-				return ScriptPinSide::Undefined;
-			}
+			return direction == GraphNodePinDirection::Input ? GraphPinSide::Left : GraphPinSide::Right;
 		}
 
-		[[nodiscard]] bool isMultiConnection() const
-		{
-			return (type == ScriptNodeElementType::ReadDataPin && direction == ScriptNodePinDirection::Output)
-				|| (type == ScriptNodeElementType::WriteDataPin && direction == ScriptNodePinDirection::Input)
-				|| (type == ScriptNodeElementType::FlowPin)
-				|| (type == ScriptNodeElementType::TargetPin && direction == ScriptNodePinDirection::Output);
-		}
-
-		[[nodiscard]] bool canConnectTo(const ScriptNodePinType& other) const
+		[[nodiscard]] bool canConnectTo(const GraphNodePinType& other) const
 		{
 			return type == other.type && direction != other.direction;
 		}
 
-		[[nodiscard]] ScriptNodePinType getReverseDirection() const
+		[[nodiscard]] GraphNodePinType getReverseDirection() const
 		{
-			return ScriptNodePinType(type, direction == ScriptNodePinDirection::Input ? ScriptNodePinDirection::Output : ScriptNodePinDirection::Input);
+			return GraphNodePinType(type, direction == GraphNodePinDirection::Input ? GraphNodePinDirection::Output : GraphNodePinDirection::Input);
 		}
 	};
 }

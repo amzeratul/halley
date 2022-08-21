@@ -171,7 +171,7 @@ void ScriptEnvironment::terminateState(ScriptState& graphState, EntityId curEnti
 	currentEntity = EntityId();
 }
 
-ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, ScriptNodeId nodeId, ScriptPinId pinId)
+ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, GraphNodeId nodeId, GraphPinId pinId)
 {
 	currentGraph = graphState.getScriptGraphPtr();
 	currentState = &graphState;
@@ -182,19 +182,19 @@ ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState,
 	ConfigNode result = [&] () -> ConfigNode {
 		const auto& node = graphState.getScriptGraphPtr()->getNodes().at(nodeId);
 		const auto& nodeType = node.getNodeType();
-		if (pinId == static_cast<ScriptPinId>(-1)) {
+		if (pinId == static_cast<GraphPinId>(-1)) {
 			return nodeType.getDevConData(*this, node, graphState.getNodeState(nodeId).data);
 		} else {
 			const auto& pinConfig = nodeType.getPinConfiguration(node)[pinId];
 			if (pinConfig.type == ScriptNodeElementType::ReadDataPin) {
-				if (pinConfig.direction == ScriptNodePinDirection::Input) {
+				if (pinConfig.direction == GraphNodePinDirection::Input) {
 					return readInputDataPin(node, pinId);
 				} else {
 					return readOutputDataPin(node, pinId);
 				}
 			} else if (pinConfig.type == ScriptNodeElementType::TargetPin) {
 				EntityId id;
-				if (pinConfig.direction == ScriptNodePinDirection::Input) {
+				if (pinConfig.direction == GraphNodePinDirection::Input) {
 					if (node.getPins()[pinId].hasConnection()) {
 						id = readInputEntityIdRaw(node, pinId);
 					} else {
@@ -238,7 +238,7 @@ void ScriptEnvironment::doTerminateState()
 	}
 }
 
-void ScriptEnvironment::runDestructor(ScriptNodeId nodeId)
+void ScriptEnvironment::runDestructor(GraphNodeId nodeId)
 {
 	Vector<ScriptStateThread> threads;
 	auto& t = threads.emplace_back(startThread(ScriptStateThread(nodeId, 0)));
@@ -278,7 +278,7 @@ void ScriptEnvironment::addThread(ScriptStateThread thread, Vector<ScriptStateTh
 	pending.push_back(startThread(thread));
 }
 
-void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<ScriptNodeId> node, ScriptPinId outputPin, ScriptPinId inputPin)
+void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<GraphNodeId> node, GraphPinId outputPin, GraphPinId inputPin)
 {
 	if (node) {
 		auto& state = currentState->getNodeState(node.value());
@@ -292,7 +292,7 @@ void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<Sc
 	terminateThread(thread, true);
 }
 
-void ScriptEnvironment::initNode(ScriptNodeId nodeId, ScriptState::NodeState& nodeState)
+void ScriptEnvironment::initNode(GraphNodeId nodeId, ScriptState::NodeState& nodeState)
 {
 	assert(nodeState.threadCount == 0);
 	nodeState.threadCount++;
@@ -361,7 +361,7 @@ void ScriptEnvironment::removeStoppedThreads()
 	std_ex::erase_if(currentState->getThreads(), [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); });
 }
 
-void ScriptEnvironment::cancelOutputs(ScriptNodeId nodeId, uint8_t cancelMask)
+void ScriptEnvironment::cancelOutputs(GraphNodeId nodeId, uint8_t cancelMask)
 {
 	if (cancelMask == 0xFF) {
 		abortCodePath(nodeId, {});
@@ -377,7 +377,7 @@ void ScriptEnvironment::cancelOutputs(ScriptNodeId nodeId, uint8_t cancelMask)
 	}
 }
 
-void ScriptEnvironment::abortCodePath(ScriptNodeId node, std::optional<ScriptPinId> outputPin)
+void ScriptEnvironment::abortCodePath(GraphNodeId node, std::optional<GraphPinId> outputPin)
 {
 	Expects(currentState != nullptr);
 
@@ -413,7 +413,7 @@ void ScriptEnvironment::returnFromFunction(ScriptStateThread& thread, uint8_t ou
 
 void ScriptEnvironment::processMessages(Time time, Vector<ScriptStateThread>& pending)
 {
-	Vector<ScriptNodeId> toStart;
+	Vector<GraphNodeId> toStart;
 	currentState->processMessages(toStart);
 	for (const auto nodeId: toStart) {
 		pending.push_back(startThread(ScriptStateThread(nodeId, 0)));
@@ -448,7 +448,7 @@ const ScriptGraph* ScriptEnvironment::getCurrentGraph() const
 	return currentGraph;
 }
 
-size_t& ScriptEnvironment::getNodeCounter(ScriptNodeId nodeId)
+size_t& ScriptEnvironment::getNodeCounter(GraphNodeId nodeId)
 {
 	return currentState->getNodeCounter(nodeId);
 }
@@ -524,7 +524,7 @@ EntityId ScriptEnvironment::getCurrentEntityId() const
 	return currentEntity;
 }
 
-ScriptPinId ScriptEnvironment::getCurrentInputPin() const
+GraphPinId ScriptEnvironment::getCurrentInputPin() const
 {
 	return currentInputPin;
 }
@@ -618,7 +618,7 @@ std::shared_ptr<UIWidget> ScriptEnvironment::createModalUI(const String& ui, Con
 	return {};
 }
 
-IScriptStateData* ScriptEnvironment::getNodeData(ScriptNodeId nodeId)
+IScriptStateData* ScriptEnvironment::getNodeData(GraphNodeId nodeId)
 {
 	return currentState->getNodeState(nodeId).data;
 }
@@ -628,7 +628,7 @@ void ScriptEnvironment::assignTypes(const ScriptGraph& graph)
 	graph.assignTypes(nodeTypeCollection);
 }
 
-ConfigNode ScriptEnvironment::readInputDataPin(const ScriptGraphNode& node, ScriptPinId pinN)
+ConfigNode ScriptEnvironment::readInputDataPin(const ScriptGraphNode& node, GraphPinId pinN)
 {
 	const auto& pins = node.getPins();
 	if (pinN >= pins.size()) {
@@ -647,12 +647,12 @@ ConfigNode ScriptEnvironment::readInputDataPin(const ScriptGraphNode& node, Scri
 	return dstNode.getNodeType().getData(*this, dstNode, dst.dstPin, getNodeData(dst.dstNode.value()));
 }
 
-ConfigNode ScriptEnvironment::readOutputDataPin(const ScriptGraphNode& node, ScriptPinId pinN)
+ConfigNode ScriptEnvironment::readOutputDataPin(const ScriptGraphNode& node, GraphPinId pinN)
 {
 	return node.getNodeType().getData(*this, node, pinN, getNodeData(node.getId()));
 }
 
-EntityId ScriptEnvironment::readInputEntityIdRaw(const ScriptGraphNode& node, ScriptPinId pinN)
+EntityId ScriptEnvironment::readInputEntityIdRaw(const ScriptGraphNode& node, GraphPinId pinN)
 {
 	if (pinN < node.getPins().size()) {
 		const auto& pin = node.getPins()[pinN];
@@ -670,13 +670,13 @@ EntityId ScriptEnvironment::readInputEntityIdRaw(const ScriptGraphNode& node, Sc
 	return EntityId();
 }
 
-EntityId ScriptEnvironment::readInputEntityId(const ScriptGraphNode& node, ScriptPinId pinN)
+EntityId ScriptEnvironment::readInputEntityId(const ScriptGraphNode& node, GraphPinId pinN)
 {
 	const auto entityId = readInputEntityIdRaw(node, pinN);
 	return entityId.isValid() ? entityId : currentEntity;
 }
 
-EntityId ScriptEnvironment::readOutputEntityId(const ScriptGraphNode& node, ScriptPinId pinN)
+EntityId ScriptEnvironment::readOutputEntityId(const ScriptGraphNode& node, GraphPinId pinN)
 {
 	return node.getNodeType().getEntityId(*this, node, pinN, getNodeData(node.getId()));
 }

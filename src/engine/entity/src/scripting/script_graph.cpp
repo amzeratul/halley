@@ -12,21 +12,21 @@ using namespace Halley;
 ScriptGraphNode::PinConnection::PinConnection(const ConfigNode& node)
 {
 	if (node.hasKey("dstNode")) {
-		dstNode = static_cast<ScriptNodeId>(node["dstNode"].asInt());
+		dstNode = static_cast<GraphNodeId>(node["dstNode"].asInt());
 	}
 	if (node.hasKey("entityIdx")) {
 		entityIdx = node["entityIdx"].asInt();
 	}
-	dstPin = static_cast<ScriptPinId>(node["dstPin"].asInt(0));
+	dstPin = static_cast<GraphPinId>(node["dstPin"].asInt(0));
 }
 
-ScriptGraphNode::PinConnection::PinConnection(ScriptNodeId dstNode, ScriptPinId dstPin)
+ScriptGraphNode::PinConnection::PinConnection(GraphNodeId dstNode, GraphPinId dstPin)
 	: dstNode(dstNode)
 	, dstPin(dstPin)
 {
 }
 
-ScriptGraphNode::PinConnection::PinConnection(OptionalLite<ScriptPinId> entityIdx)
+ScriptGraphNode::PinConnection::PinConnection(OptionalLite<GraphPinId> entityIdx)
 	: entityIdx(entityIdx)
 {
 }
@@ -150,13 +150,13 @@ void ScriptGraphNode::feedToHash(Hash::Hasher& hasher)
 	// TODO: settings, pins
 }
 
-void ScriptGraphNode::onNodeRemoved(ScriptNodeId nodeId)
+void ScriptGraphNode::onNodeRemoved(GraphNodeId nodeId)
 {
 	for (auto& pin: pins) {
 		for (auto& o: pin.connections) {
 			if (o.dstNode) {
 				if (o.dstNode.value() == nodeId) {
-					o.dstNode = OptionalLite<ScriptNodeId>();
+					o.dstNode = OptionalLite<GraphNodeId>();
 					o.dstPin = 0;
 				} else if (o.dstNode.value() >= nodeId) {
 					--o.dstNode.value();
@@ -167,7 +167,7 @@ void ScriptGraphNode::onNodeRemoved(ScriptNodeId nodeId)
 	}
 }
 
-void ScriptGraphNode::remapNodes(const HashMap<ScriptNodeId, ScriptNodeId>& remap)
+void ScriptGraphNode::remapNodes(const HashMap<GraphNodeId, GraphNodeId>& remap)
 {
 	for (auto& pin: pins) {
 		for (auto& o: pin.connections) {
@@ -187,7 +187,7 @@ void ScriptGraphNode::remapNodes(const HashMap<ScriptNodeId, ScriptNodeId>& rema
 	}
 }
 
-void ScriptGraphNode::offsetNodes(ScriptNodeId offset)
+void ScriptGraphNode::offsetNodes(GraphNodeId offset)
 {
 	for (auto& pin: pins) {
 		for (auto& o: pin.connections) {
@@ -214,16 +214,16 @@ const IScriptNodeType& ScriptGraphNode::getNodeType() const
 	return *nodeType;
 }
 
-ScriptNodePinType ScriptGraphNode::getPinType(ScriptPinId idx) const
+GraphNodePinType ScriptGraphNode::getPinType(GraphPinId idx) const
 {
 	const auto& config = getNodeType().getPinConfiguration(*this);
 	if (idx >= config.size()) {
-		return ScriptNodePinType();
+		return GraphNodePinType();
 	}
 	return config[idx];
 }
 
-ScriptGraphNodeRoots::Entry::Entry(Range<ScriptNodeId> range, ScriptNodeId root)
+ScriptGraphNodeRoots::Entry::Entry(Range<GraphNodeId> range, GraphNodeId root)
 	: range(range)
 	, root(root)
 {
@@ -255,16 +255,16 @@ ConfigNode ScriptGraphNodeRoots::toConfigNode() const
 	return ConfigNode(mapping);
 }
 
-void ScriptGraphNodeRoots::addRoot(ScriptNodeId id, ScriptNodeId root)
+void ScriptGraphNodeRoots::addRoot(GraphNodeId id, GraphNodeId root)
 {
 	if (!mapping.empty() && mapping.back().root == root && mapping.back().range.end == id) {
 		mapping.back().range.end++;
 	} else {
-		mapping.emplace_back(Range<ScriptNodeId>(id, id + 1), root);
+		mapping.emplace_back(Range<GraphNodeId>(id, id + 1), root);
 	}
 }
 
-ScriptNodeId ScriptGraphNodeRoots::getRoot(ScriptNodeId id) const
+GraphNodeId ScriptGraphNodeRoots::getRoot(GraphNodeId id) const
 {
 	for (auto& e: mapping) {
 		if (e.range.contains(id)) {
@@ -372,16 +372,16 @@ void ScriptGraph::makeBaseGraph()
 	nodes.emplace_back("start", Vector2f(0, -30));
 }
 
-OptionalLite<ScriptNodeId> ScriptGraph::getStartNode() const
+OptionalLite<GraphNodeId> ScriptGraph::getStartNode() const
 {
 	const auto iter = std::find_if(nodes.begin(), nodes.end(), [&] (const ScriptGraphNode& node) { return node.getType() == "start"; });
 	if (iter != nodes.end()) {
-		return static_cast<ScriptNodeId>(iter - nodes.begin());
+		return static_cast<GraphNodeId>(iter - nodes.begin());
 	}
 	return {};
 }
 
-OptionalLite<ScriptNodeId> ScriptGraph::getCallee(ScriptNodeId node) const
+OptionalLite<GraphNodeId> ScriptGraph::getCallee(GraphNodeId node) const
 {
 	const auto iter = std_ex::find_if(callerToCallee, [&] (auto& e) { return e.first == node; });
 	if (iter != callerToCallee.end()) {
@@ -390,7 +390,7 @@ OptionalLite<ScriptNodeId> ScriptGraph::getCallee(ScriptNodeId node) const
 	return std::nullopt;
 }
 
-OptionalLite<ScriptNodeId> ScriptGraph::getCaller(ScriptNodeId node) const
+OptionalLite<GraphNodeId> ScriptGraph::getCaller(GraphNodeId node) const
 {
 	const auto iter = std_ex::find_if(callerToCallee, [&] (auto& e) { return e.second == node; });
 	if (iter != callerToCallee.end()) {
@@ -399,7 +399,7 @@ OptionalLite<ScriptNodeId> ScriptGraph::getCaller(ScriptNodeId node) const
 	return std::nullopt;
 }
 
-OptionalLite<ScriptNodeId> ScriptGraph::getReturnTo(ScriptNodeId node) const
+OptionalLite<GraphNodeId> ScriptGraph::getReturnTo(GraphNodeId node) const
 {
 	const auto iter = std_ex::find_if(returnToCaller, [&] (auto& e) { return e.first == node; });
 	if (iter != returnToCaller.end()) {
@@ -408,7 +408,7 @@ OptionalLite<ScriptNodeId> ScriptGraph::getReturnTo(ScriptNodeId node) const
 	return std::nullopt;
 }
 
-OptionalLite<ScriptNodeId> ScriptGraph::getReturnFrom(ScriptNodeId node) const
+OptionalLite<GraphNodeId> ScriptGraph::getReturnFrom(GraphNodeId node) const
 {
 	const auto iter = std_ex::find_if(returnToCaller, [&] (auto& e) { return e.second == node; });
 	if (iter != returnToCaller.end()) {
@@ -422,7 +422,7 @@ uint64_t ScriptGraph::getHash() const
 	return hash;
 }
 
-std::optional<ScriptNodeId> ScriptGraph::getMessageInboxId(const String& messageId, bool requiresSpawningScript) const
+std::optional<GraphNodeId> ScriptGraph::getMessageInboxId(const String& messageId, bool requiresSpawningScript) const
 {
 	for (size_t i = 0; i < nodes.size(); ++i) {
 		const auto& node = nodes[i];
@@ -430,7 +430,7 @@ std::optional<ScriptNodeId> ScriptGraph::getMessageInboxId(const String& message
 			ScriptReceiveMessage nodeType;
 			const bool ok = nodeType.canReceiveMessage(node, messageId, requiresSpawningScript);
 			if (ok) {
-				return static_cast<ScriptNodeId>(i);
+				return static_cast<GraphNodeId>(i);
 			}
 		}
 	}
@@ -466,7 +466,7 @@ int ScriptGraph::getMessageNumParams(const String& messageId) const
 	return 0;
 }
 
-bool ScriptGraph::connectPins(ScriptNodeId srcNodeIdx, ScriptPinId srcPinN, ScriptNodeId dstNodeIdx, ScriptPinId dstPinN)
+bool ScriptGraph::connectPins(GraphNodeId srcNodeIdx, GraphPinId srcPinN, GraphNodeId dstNodeIdx, GraphPinId dstPinN)
 {
 	auto& srcNode = nodes.at(srcNodeIdx);
 	auto& srcPin = srcNode.getPin(srcPinN);
@@ -488,7 +488,7 @@ bool ScriptGraph::connectPins(ScriptNodeId srcNodeIdx, ScriptPinId srcPinN, Scri
 	return true;
 }
 
-bool ScriptGraph::connectPin(ScriptNodeId srcNodeIdx, ScriptPinId srcPinN, EntityId target)
+bool ScriptGraph::connectPin(GraphNodeId srcNodeIdx, GraphPinId srcPinN, EntityId target)
 {
 	auto& srcNode = nodes.at(srcNodeIdx);
 	auto& srcPin = srcNode.getPin(srcPinN);
@@ -508,7 +508,7 @@ bool ScriptGraph::connectPin(ScriptNodeId srcNodeIdx, ScriptPinId srcPinN, Entit
 	return true;
 }
 
-bool ScriptGraph::disconnectPin(ScriptNodeId nodeIdx, ScriptPinId pinN)
+bool ScriptGraph::disconnectPin(GraphNodeId nodeIdx, GraphPinId pinN)
 {
 	auto& node = nodes.at(nodeIdx);
 	auto& pin = node.getPin(pinN);
@@ -529,17 +529,17 @@ bool ScriptGraph::disconnectPin(ScriptNodeId nodeIdx, ScriptPinId pinN)
 	return true;
 }
 
-bool ScriptGraph::disconnectPinIfSingleConnection(ScriptNodeId nodeIdx, ScriptPinId pinN)
+bool ScriptGraph::disconnectPinIfSingleConnection(GraphNodeId nodeIdx, GraphPinId pinN)
 {
 	auto& node = nodes.at(nodeIdx);
-	if (node.getPinType(pinN).isMultiConnection()) {
+	if (isMultiConnection(node.getPinType(pinN))) {
 		return false;
 	}
 
 	return disconnectPin(nodeIdx, pinN);
 }
 
-void ScriptGraph::validateNodePins(ScriptNodeId nodeIdx)
+void ScriptGraph::validateNodePins(GraphNodeId nodeIdx)
 {
 	auto& node = nodes.at(nodeIdx);
 
@@ -547,7 +547,7 @@ void ScriptGraph::validateNodePins(ScriptNodeId nodeIdx)
 	const size_t nPinsTarget = node.getNodeType().getPinConfiguration(node).size();
 	if (nPinsCur > nPinsTarget) {
 		for (size_t i = nPinsTarget; i < nPinsCur; ++i) {
-			disconnectPin(nodeIdx, static_cast<ScriptPinId>(i));
+			disconnectPin(nodeIdx, static_cast<GraphPinId>(i));
 		}
 		node.getPins().resize(nPinsTarget);
 	}
@@ -617,12 +617,12 @@ void ScriptGraph::removeEntityId(EntityId id)
 	}
 }
 
-ScriptNodeId ScriptGraph::getNodeRoot(ScriptNodeId nodeId) const
+GraphNodeId ScriptGraph::getNodeRoot(GraphNodeId nodeId) const
 {
 	return roots.getRoot(nodeId);
 }
 
-ScriptNodeId ScriptGraph::findNodeRoot(ScriptNodeId nodeId) const
+GraphNodeId ScriptGraph::findNodeRoot(GraphNodeId nodeId) const
 {
 	const auto parent = nodes[nodeId].getParentNode();
 	if (parent) {
@@ -640,11 +640,18 @@ void ScriptGraph::generateRoots()
 {
 	roots.clear();
 	for (size_t curNodeId = 0; curNodeId < nodes.size(); ++curNodeId) {
-		const auto parentId = findNodeRoot(static_cast<ScriptNodeId>(curNodeId));
+		const auto parentId = findNodeRoot(static_cast<GraphNodeId>(curNodeId));
 		if (curNodeId != parentId) {
-			roots.addRoot(static_cast<ScriptNodeId>(curNodeId), parentId);
+			roots.addRoot(static_cast<GraphNodeId>(curNodeId), parentId);
 		}
 	}
+}
+
+bool ScriptGraph::isMultiConnection(GraphNodePinType pinType) const {
+	return (pinType.type == ScriptNodeElementType::ReadDataPin && pinType.direction == GraphNodePinDirection::Output)
+		|| (pinType.type == ScriptNodeElementType::WriteDataPin && pinType.direction == GraphNodePinDirection::Input)
+		|| (pinType.type == ScriptNodeElementType::FlowPin)
+		|| (pinType.type == ScriptNodeElementType::TargetPin && pinType.direction == GraphNodePinDirection::Output);
 }
 
 void ScriptGraph::setRoots(ScriptGraphNodeRoots roots)
@@ -688,7 +695,7 @@ void ScriptGraph::finishGraph()
 	}
 
 	Hash::Hasher hasher;
-	ScriptNodeId i = 0;
+	GraphNodeId i = 0;
 	hasher.feed(nodes.size());
 	for (auto& node: nodes) {
 		node.setId(i++);
@@ -697,28 +704,28 @@ void ScriptGraph::finishGraph()
 	hash = hasher.digest();
 }
 
-void ScriptGraph::appendGraph(ScriptNodeId parent, const ScriptGraph& other)
+void ScriptGraph::appendGraph(GraphNodeId parent, const ScriptGraph& other)
 {
-	const auto offset = static_cast<ScriptNodeId>(nodes.size());
+	const auto offset = static_cast<GraphNodeId>(nodes.size());
 
-	ScriptNodeId startNode = offset;
-	ScriptNodeId returnNode = offset;
+	GraphNodeId startNode = offset;
+	GraphNodeId returnNode = offset;
 
 	for (size_t i = 0; i < other.getNodes().size(); ++i) {
 		auto& node = nodes.emplace_back(other.getNodes()[i]);
 		node.offsetNodes(offset);
 		node.setParentNode(parent);
 		if (node.getType() == "start") {
-			startNode = offset + static_cast<ScriptNodeId>(i);
+			startNode = offset + static_cast<GraphNodeId>(i);
 		}
 		if (node.getType() == "return") {
-			returnNode = offset + static_cast<ScriptNodeId>(i);
+			returnNode = offset + static_cast<GraphNodeId>(i);
 		}
 	}
 
 	callerToCallee.emplace_back(parent, startNode);
 	returnToCaller.emplace_back(returnNode, parent);
-	subGraphs.emplace_back(other.getAssetId(), Range<ScriptNodeId>(offset, static_cast<ScriptNodeId>(nodes.size())));
+	subGraphs.emplace_back(other.getAssetId(), Range<GraphNodeId>(offset, static_cast<GraphNodeId>(nodes.size())));
 
 	// For nested calls
 	for (const auto& e: other.callerToCallee) {
@@ -747,10 +754,10 @@ Vector<int> ScriptGraph::getSubGraphIndicesForAssetId(const String& id) const
 	return result;
 }
 
-Range<ScriptNodeId> ScriptGraph::getSubGraphRange(int subGraphIdx) const
+Range<GraphNodeId> ScriptGraph::getSubGraphRange(int subGraphIdx) const
 {
 	if (subGraphIdx == -1) {
-		return {0, static_cast<ScriptNodeId>(nodes.size())};
+		return {0, static_cast<GraphNodeId>(nodes.size())};
 	} else {
 		return subGraphs[subGraphIdx].second;
 	}

@@ -4,7 +4,7 @@ using namespace Halley;
 gsl::span<const IScriptNodeType::PinType> ScriptBranch::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output } };
 	return data;
 }
@@ -44,7 +44,7 @@ std::pair<String, Vector<ColourOverride>> ScriptBranch::getPinDescription(const 
 gsl::span<const IScriptNodeType::PinType> ScriptFork::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output } };
 	return data;
 }
@@ -66,7 +66,7 @@ IScriptNodeType::Result ScriptFork::doUpdate(ScriptEnvironment& environment, Tim
 gsl::span<const IScriptNodeType::PinType> ScriptMergeAny::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
 	return data;
 }
@@ -90,7 +90,7 @@ IScriptNodeType::Result ScriptMergeAny::doUpdate(ScriptEnvironment& environment,
 gsl::span<const IScriptNodeType::PinType> ScriptMergeAll::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 2>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
 	return data;
 }
@@ -112,7 +112,7 @@ IScriptNodeType::Result ScriptMergeAll::doUpdate(ScriptEnvironment& environment,
 	const auto& pinConfigs = getPinConfiguration(node);
 	const auto& pins = node.getPins();
 	for (size_t i = 0; i < pins.size(); ++i) {
-		if (pinConfigs[i].type == ScriptNodeElementType::FlowPin && pinConfigs[i].direction == ScriptNodePinDirection::Input) {
+		if (pinConfigs[i].type == ScriptNodeElementType::FlowPin && pinConfigs[i].direction == GraphNodePinDirection::Input) {
 			for (const auto& conn: pins[i].connections) {
 				if (conn.dstNode) {
 					++expected;

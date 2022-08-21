@@ -20,7 +20,7 @@ ConfigNode ScriptFlowGateData::toConfigNode(const EntitySerializationContext& co
 gsl::span<const IScriptNodeType::PinType> ScriptFlowGate::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::FlowPin, PD::Output, true } };
 	return data;
 }
@@ -34,7 +34,7 @@ std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getNodeDescription(con
 	return str.moveResults();
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getPinDescription(const ScriptGraphNode& node, PinType element, ScriptPinId elementIdx) const
+std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return {"Condition", {}};
@@ -92,7 +92,7 @@ ConfigNode ScriptLatchData::toConfigNode(const EntitySerializationContext& conte
 	return result;
 }
 
-String ScriptLatch::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptLatch::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return "latch(" + getConnectedNodeName(world, node, graph, 0) + ")";
 }
@@ -100,7 +100,7 @@ String ScriptLatch::getShortDescription(const World* world, const ScriptGraphNod
 gsl::span<const IScriptNodeType::PinType> ScriptLatch::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::WriteDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }

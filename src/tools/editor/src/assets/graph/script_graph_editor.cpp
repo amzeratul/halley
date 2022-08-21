@@ -310,13 +310,13 @@ void ScriptGraphEditor::onScriptState(size_t connId, ConfigNode data)
 
 		scriptGraph->assignTypes(*scriptNodeTypes);
 
-		const auto nodeRange = data["nodeRange"].asVector2i(Vector2i(0, std::numeric_limits<ScriptNodeId>::max()));
+		const auto nodeRange = data["nodeRange"].asVector2i(Vector2i(0, std::numeric_limits<GraphNodeId>::max()));
 
 		EntitySerializationContext context;
 		context.resources = &gameResources;
 		scriptState->load(data["scriptState"], context);
 		scriptState->setScriptGraphPtr(scriptGraph.get());
-		scriptState->offsetToNodeRange(Range<ScriptNodeId>(nodeRange.x, nodeRange.y));
+		scriptState->offsetToNodeRange(Range<GraphNodeId>(nodeRange.x, nodeRange.y));
 		scriptState->prepareStates(context, 0);
 
 		scriptGraph->setRoots(ScriptGraphNodeRoots(data["roots"]));

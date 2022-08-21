@@ -8,7 +8,7 @@ using namespace Halley;
 gsl::span<const IScriptNodeType::PinType> ScriptSetPosition::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
 	return data;
 }
@@ -40,7 +40,7 @@ IScriptNodeType::Result ScriptSetPosition::doUpdate(ScriptEnvironment& environme
 gsl::span<const IScriptNodeType::PinType> ScriptGetPosition::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
@@ -53,7 +53,7 @@ std::pair<String, Vector<ColourOverride>> ScriptGetPosition::getNodeDescription(
 	return result.moveResults();
 }
 
-String ScriptGetPosition::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId element_idx) const
+String ScriptGetPosition::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId element_idx) const
 {
 	return "Position of " + getConnectedNodeName(world, node, graph, 0);
 }

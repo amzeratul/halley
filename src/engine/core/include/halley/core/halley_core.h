@@ -12,6 +12,12 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "game/game_console.h"
 #include "game/game_platform.h"
 
+#include "graph/base_graph_enums.h"
+#include "graph/base_graph_gizmo.h"
+#include "graph/base_graph_node.h"
+#include "graph/base_graph_renderer.h"
+#include "graph/base_graph.h"
+
 #include "graphics/blend.h"
 #include "graphics/painter.h"
 #include "graphics/render_context.h"

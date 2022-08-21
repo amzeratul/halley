@@ -23,7 +23,7 @@
 #include "nodes/script_function.h"
 using namespace Halley;
 
-String IScriptNodeType::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String IScriptNodeType::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return getName();
 }
@@ -84,12 +84,12 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinDescription(con
 		return "?";
 	};
 
-	auto getIO = [](ScriptNodePinDirection direction) -> const char*
+	auto getIO = [](GraphNodePinDirection direction) -> const char*
 	{
 		switch (direction) {
-		case ScriptNodePinDirection::Input:
+		case GraphNodePinDirection::Input:
 			return " Input";
-		case ScriptNodePinDirection::Output:
+		case GraphNodePinDirection::Output:
 			return " Output";
 		}
 		return nullptr;
@@ -127,12 +127,12 @@ IScriptNodeType::PinType IScriptNodeType::getPin(const ScriptGraphNode& node, si
 	if (n < pins.size()) {
 		return pins[n];
 	}
-	return PinType{ ScriptNodeElementType::Undefined, ScriptNodePinDirection::Input };
+	return PinType{ ScriptNodeElementType::Undefined, GraphNodePinDirection::Input };
 }
 
 ConfigNode IScriptNodeType::readDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	return environment.readInputDataPin(node, static_cast<ScriptPinId>(pinN));
+	return environment.readInputDataPin(node, static_cast<GraphPinId>(pinN));
 }
 
 void IScriptNodeType::writeDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const
@@ -181,12 +181,12 @@ String IScriptNodeType::getConnectedNodeName(const World* world, const ScriptGra
 
 EntityId IScriptNodeType::readEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const
 {
-	return environment.readInputEntityId(node, static_cast<ScriptPinId>(idx));
+	return environment.readInputEntityId(node, static_cast<GraphPinId>(idx));
 }
 
 EntityId IScriptNodeType::readRawEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t idx) const
 {
-	return environment.readInputEntityIdRaw(node, static_cast<ScriptPinId>(idx));
+	return environment.readInputEntityIdRaw(node, static_cast<GraphPinId>(idx));
 }
 
 std::array<IScriptNodeType::OutputNode, 8> IScriptNodeType::getOutputNodes(const ScriptGraphNode& node, uint8_t outputActiveMask) const
@@ -199,13 +199,13 @@ std::array<IScriptNodeType::OutputNode, 8> IScriptNodeType::getOutputNodes(const
 	size_t curOutputPin = 0;
 	size_t nOutputsFound = 0;
 	for (size_t i = 0; i < pinConfig.size(); ++i) {
-		if (pinConfig[i].type == ScriptNodeElementType::FlowPin && pinConfig[i].direction == ScriptNodePinDirection::Output) {
+		if (pinConfig[i].type == ScriptNodeElementType::FlowPin && pinConfig[i].direction == GraphNodePinDirection::Output) {
 			const bool outputActive = (outputActiveMask & (1 << curOutputPin)) != 0;
 			if (outputActive) {
 				const auto& output = node.getPin(i);
 				for (auto& conn: output.connections) {
 					if (conn.dstNode) {
-						result[nOutputsFound++] = OutputNode{ conn.dstNode, static_cast<ScriptPinId>(i), conn.dstPin };
+						result[nOutputsFound++] = OutputNode{ conn.dstNode, static_cast<GraphPinId>(i), conn.dstPin };
 					}
 				}
 			}
@@ -217,14 +217,14 @@ std::array<IScriptNodeType::OutputNode, 8> IScriptNodeType::getOutputNodes(const
 	return result;
 }
 
-ScriptPinId IScriptNodeType::getNthOutputPinIdx(const ScriptGraphNode& node, size_t n) const
+GraphPinId IScriptNodeType::getNthOutputPinIdx(const ScriptGraphNode& node, size_t n) const
 {
 	const auto& pinConfig = getPinConfiguration(node);
 	size_t curOutputPin = 0;
 	for (size_t i = 0; i < pinConfig.size(); ++i) {
-		if (pinConfig[i].type == ScriptNodeElementType::FlowPin && pinConfig[i].direction == ScriptNodePinDirection::Output) {
+		if (pinConfig[i].type == ScriptNodeElementType::FlowPin && pinConfig[i].direction == GraphNodePinDirection::Output) {
 			if (curOutputPin == n) {
-				return static_cast<ScriptPinId>(i);
+				return static_cast<GraphPinId>(i);
 			}
 			++curOutputPin;
 		}

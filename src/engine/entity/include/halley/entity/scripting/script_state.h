@@ -36,13 +36,13 @@ namespace Halley {
 	class ScriptStateThread {
 	public:
 		struct StackFrame {
-			ScriptNodeId node;
-			ScriptPinId outputPin;
-			ScriptPinId inputPin;
+			GraphNodeId node;
+			GraphPinId outputPin;
+			GraphPinId inputPin;
 
 			StackFrame() = default;
 			StackFrame(const ConfigNode& node);
-			StackFrame(ScriptNodeId node, ScriptPinId outputPin, ScriptPinId inputPin);
+			StackFrame(GraphNodeId node, GraphPinId outputPin, GraphPinId inputPin);
 			ConfigNode toConfigNode() const;
 			String toString() const;
 
@@ -52,7 +52,7 @@ namespace Halley {
 
 		ScriptStateThread();
 		ScriptStateThread(const ConfigNode& node, const EntitySerializationContext& context);
-		ScriptStateThread(ScriptNodeId startNode, ScriptPinId inputPin);
+		ScriptStateThread(GraphNodeId startNode, GraphPinId inputPin);
 		ScriptStateThread(const ScriptStateThread& other) = default;
 		ScriptStateThread(ScriptStateThread&& other) = default;
 		
@@ -61,11 +61,11 @@ namespace Halley {
 		ScriptStateThread& operator=(const ScriptStateThread& other) = default;
 		ScriptStateThread& operator=(ScriptStateThread&& other) = default;
 		
-		OptionalLite<ScriptNodeId> getCurNode() const { return curNode; }
-		ScriptPinId getCurInputPin() const { return curInputPin; }
+		OptionalLite<GraphNodeId> getCurNode() const { return curNode; }
+		GraphPinId getCurInputPin() const { return curInputPin; }
 
-		void advanceToNode(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin, ScriptPinId inputPin);
-		ScriptStateThread fork(OptionalLite<ScriptNodeId> node, ScriptPinId outputPin, ScriptPinId inputPin) const;
+		void advanceToNode(OptionalLite<GraphNodeId> node, GraphPinId outputPin, GraphPinId inputPin);
+		ScriptStateThread fork(OptionalLite<GraphNodeId> node, GraphPinId outputPin, GraphPinId inputPin) const;
 		
 		float& getTimeSlice() { return timeSlice; }
 		float& getCurNodeTime() { return curNodeTime; }
@@ -81,16 +81,16 @@ namespace Halley {
 
 		const Vector<StackFrame>& getStack() const;
 		Vector<StackFrame>& getStack();
-		bool stackGoesThrough(ScriptNodeId node, std::optional<ScriptPinId> pin) const;
+		bool stackGoesThrough(GraphNodeId node, std::optional<GraphPinId> pin) const;
 
 		uint32_t getUniqueId() const;
 
-		void offsetToNodeRange(Range<ScriptNodeId> range);
+		void offsetToNodeRange(Range<GraphNodeId> range);
 
 	private:
 		uint32_t uniqueId;
-		OptionalLite<ScriptNodeId> curNode;
-		ScriptPinId curInputPin = 0;
+		OptionalLite<GraphNodeId> curNode;
+		GraphPinId curInputPin = 0;
 		bool merging : 1;
 		bool watcher : 1;
 		float timeSlice = 0;
@@ -159,7 +159,7 @@ namespace Halley {
 		void reset();
 		void prepareStates(const EntitySerializationContext& context, Time t);
 
-    	NodeState& getNodeState(ScriptNodeId nodeId);
+    	NodeState& getNodeState(GraphNodeId nodeId);
 		void startNode(const ScriptGraphNode& node, NodeState& state);
 		void finishNode(const ScriptGraphNode& node, NodeState& state, bool allThreadsDone);
     	
@@ -168,10 +168,10 @@ namespace Halley {
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
         uint64_t getGraphHash() const { return graphHash; }
 
-    	bool hasThreadAt(ScriptNodeId node) const;
+    	bool hasThreadAt(GraphNodeId node) const;
 
-    	NodeIntrospection getNodeIntrospection(ScriptNodeId nodeId) const;
-    	size_t& getNodeCounter(ScriptNodeId node);
+    	NodeIntrospection getNodeIntrospection(GraphNodeId nodeId) const;
+    	size_t& getNodeCounter(GraphNodeId node);
 
 		void updateDisplayOffset(Time t);
 		Vector2f getDisplayOffset() const;
@@ -183,14 +183,14 @@ namespace Halley {
 		void incrementFrameNumber();
 
     	void receiveMessage(ScriptMessage msg);
-        void processMessages(Vector<ScriptNodeId>& threadsToStart);
+        void processMessages(Vector<GraphNodeId>& threadsToStart);
 
 		ScriptVariables& getLocalVariables();
 		const ScriptVariables& getLocalVariables() const;
     	ScriptVariables& getSharedVariables();
 		const ScriptVariables& getSharedVariables() const;
 
-		void offsetToNodeRange(Range<ScriptNodeId> nodeRange);
+		void offsetToNodeRange(Range<GraphNodeId> nodeRange);
 
 	private:
 		std::shared_ptr<const ScriptGraph> scriptGraph;
@@ -198,7 +198,7 @@ namespace Halley {
 
     	Vector<ScriptStateThread> threads;
 		Vector<NodeState> nodeState;
-    	std::map<ScriptNodeId, size_t> nodeCounters;
+    	std::map<GraphNodeId, size_t> nodeCounters;
     	ScriptVariables localVars;
 		ScriptVariables sharedVars;
 
@@ -213,10 +213,10 @@ namespace Halley {
 		Vector<String> tags;
 		Vector<ScriptMessage> inbox;
 
-    	void onNodeStartedIntrospection(ScriptNodeId nodeId);
-    	void onNodeEndedIntrospection(ScriptNodeId nodeId);
+    	void onNodeStartedIntrospection(GraphNodeId nodeId);
+    	void onNodeEndedIntrospection(GraphNodeId nodeId);
 		void ensureNodeLoaded(const ScriptGraphNode& node, NodeState& state, const EntitySerializationContext& context);
-        bool processMessage(ScriptMessage& msg, Vector<ScriptNodeId>& threadsToStart);
+        bool processMessage(ScriptMessage& msg, Vector<GraphNodeId>& threadsToStart);
     };
 	
 	template<>

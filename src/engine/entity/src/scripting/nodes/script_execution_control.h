@@ -14,15 +14,15 @@ namespace Halley {
 		Vector<SettingType> getSettingTypes() const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
-		std::pair<String, Vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, ScriptPinId elementIdx) const override;
-		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const override;
+		std::pair<String, Vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+		String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const override;
 		
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const override;
-		EntityId doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId pinN) const override;
+		EntityId doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const override;
 
 	private:
-		std::optional<std::pair<ScriptNodeId, ScriptPinId>> getOtherPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const;
+		std::optional<std::pair<GraphNodeId, GraphPinId>> getOtherPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const;
 	};
 
 	class ScriptDestructor final : public ScriptNodeTypeBase<void> {

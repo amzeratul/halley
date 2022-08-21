@@ -65,7 +65,7 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom, flo
 
 	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
 		if (!graph->getNodes()[i].getParentNode()) {
-			drawNodeOutputs(painter, basePos, static_cast<ScriptNodeId>(i), *graph, effectiveZoom, posScale);
+			drawNodeOutputs(painter, basePos, static_cast<GraphNodeId>(i), *graph, effectiveZoom, posScale);
 		}
 	}
 
@@ -73,10 +73,10 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom, flo
 		drawConnection(painter, currentPath, curZoom, false, currentPath.fade);
 	}
 	
-	for (ScriptNodeId i = 0; i < static_cast<ScriptNodeId>(graph->getNodes().size()); ++i) {
+	for (GraphNodeId i = 0; i < static_cast<GraphNodeId>(graph->getNodes().size()); ++i) {
 		if (!graph->getNodes()[i].getParentNode()) {
 			const bool highlightThis = highlightNode && highlightNode->nodeId == i;
-			auto pinType = highlightThis ? highlightNode->element : std::optional<ScriptNodePinType>();
+			auto pinType = highlightThis ? highlightNode->element : std::optional<GraphNodePinType>();
 			auto pinId = highlightThis ? highlightNode->elementId : 0;
 
 			if (highlightNode && !highlightThis) {
@@ -94,7 +94,7 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom, flo
 	}
 }
 
-void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptNodeId nodeIdx, const ScriptGraph& graph, float curZoom, float posScale)
+void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, GraphNodeId nodeIdx, const ScriptGraph& graph, float curZoom, float posScale)
 {
 	auto drawMode = getNodeDrawMode(nodeIdx);
 	NodeDrawMode dstDrawMode;
@@ -114,11 +114,11 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptN
 		
 		for (const auto& pinConnection: pin.connections) {
 			std::optional<Vector2f> dstPos;
-			ScriptNodePinType dstPinType;
+			GraphNodePinType dstPinType;
 
 			bool highlighted = pinHighlighted;
 
-			if (pinConnection.dstNode && srcPinType.direction == ScriptNodePinDirection::Output) {
+			if (pinConnection.dstNode && srcPinType.direction == GraphNodePinDirection::Output) {
 				const size_t dstIdx = pinConnection.dstPin;
 				const auto& dstNode = graph.getNodes().at(pinConnection.dstNode.value());
 				const auto* dstNodeType = nodeTypeCollection.tryGetNodeType(dstNode.getType());
@@ -141,7 +141,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptN
 					const auto* transform = entity.tryGetComponent<Transform2DComponent>();
 					if (transform) {
 						dstPos = transform->getGlobalPosition();
-						dstPinType = ScriptNodePinType{ ScriptNodeElementType::TargetPin, ScriptNodePinDirection::Output };
+						dstPinType = GraphNodePinType{ ScriptNodeElementType::TargetPin, GraphNodePinDirection::Output };
 					}
 				}
 
@@ -161,23 +161,23 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, ScriptN
 
 BezierCubic ScriptRenderer::makeBezier(const ConnectionPath& path) const
 {
-	auto getSideNormal = [] (ScriptPinSide side) -> Vector2f
+	auto getSideNormal = [] (GraphPinSide side) -> Vector2f
 	{
 		switch (side) {
-		case ScriptPinSide::Left:
+		case GraphPinSide::Left:
 			return Vector2f(-1, 0);
-		case ScriptPinSide::Right:
+		case GraphPinSide::Right:
 			return Vector2f(1, 0);
-		case ScriptPinSide::Top:
+		case GraphPinSide::Top:
 			return Vector2f(0, -1);
-		case ScriptPinSide::Bottom:
+		case GraphPinSide::Bottom:
 			return Vector2f(0, 1);
 		}
 		return Vector2f();
 	};
 	
-	const Vector2f fromDir = getSideNormal(path.fromType.getSide());
-	const Vector2f toDir = getSideNormal(path.toType.getSide());
+	const Vector2f fromDir = getSideNormal(getSide(path.fromType));
+	const Vector2f toDir = getSideNormal(getSide(path.toType));
 
 	const auto delta = path.to - path.from;
 	const float dist = std::max(std::max(std::abs(delta.x), std::abs(delta.y)), 20.0f) / 2;
@@ -194,7 +194,7 @@ void ScriptRenderer::drawConnection(Painter& painter, const ConnectionPath& path
 	painter.drawLine(bezier, 3.0f / curZoom, col);
 }
 
-ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(ScriptNodeId nodeId) const
+ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(GraphNodeId nodeId) const
 {
 	NodeDrawMode drawMode;
 	if (state) {
@@ -218,7 +218,25 @@ ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(ScriptNodeId nodeId
 	return drawMode;
 }
 
-void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<ScriptNodePinType> highlightElement, ScriptPinId highlightElementId)
+GraphPinSide ScriptRenderer::getSide(GraphNodePinType pinType) const
+{
+	switch (pinType.type) {
+	case ScriptNodeElementType::TargetPin:
+		if (!pinType.forceHorizontal) {
+			return pinType.direction == GraphNodePinDirection::Input ? GraphPinSide::Top : GraphPinSide::Bottom;
+		} else {
+			[[fallthrough]];
+		}
+	case ScriptNodeElementType::ReadDataPin:
+	case ScriptNodeElementType::WriteDataPin:
+	case ScriptNodeElementType::FlowPin:
+		return pinType.direction == GraphNodePinDirection::Input ? GraphPinSide::Left : GraphPinSide::Right;
+	default:
+		return GraphPinSide::Undefined;
+	}
+}
+
+void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<GraphNodePinType> highlightElement, GraphPinId highlightElementId)
 {
 	const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
 	if (!nodeType) {
@@ -368,7 +386,7 @@ Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vecto
 	};
 
 	const auto& pin = nodeType.getPin(node, pinN);
-	const auto pinSide = pin.getSide();
+	const auto pinSide = getSide(pin);
 	
 	size_t pinsOnSide = 0;
 	size_t idxOnSide = 0;
@@ -378,7 +396,7 @@ Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vecto
 		if (i == pinN) {
 			idxOnSide = pinsOnSide;
 		}
-		if (pinType.getSide() == pinSide) {
+		if (getSide(pinType) == pinSide) {
 			++pinsOnSide;
 		}
 	}
@@ -386,16 +404,16 @@ Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vecto
 	const auto sideOffset = getOffset(idxOnSide, pinsOnSide);
 	Vector2f offset;
 	switch (pinSide) {
-	case ScriptPinSide::Left:
+	case GraphPinSide::Left:
 		offset = Vector2f(-nodeSize.x * 0.5f, sideOffset);
 		break;
-	case ScriptPinSide::Right:
+	case GraphPinSide::Right:
 		offset = Vector2f(nodeSize.x * 0.5f, sideOffset);
 		break;
-	case ScriptPinSide::Top:
+	case GraphPinSide::Top:
 		offset = Vector2f(sideOffset, -nodeSize.y * 0.5f);
 		break;
-	case ScriptPinSide::Bottom:
+	case GraphPinSide::Bottom:
 		offset = Vector2f(sideOffset, nodeSize.y * 0.5f);
 		break;
 	default:
@@ -429,7 +447,7 @@ Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType)
 	return Colour4f(0.2f, 0.2f, 0.2f);
 }
 
-Colour4f ScriptRenderer::getPinColour(ScriptNodePinType pinType) const
+Colour4f ScriptRenderer::getPinColour(GraphNodePinType pinType) const
 {
 	switch (pinType.type) {
 	case ScriptNodeElementType::FlowPin:
@@ -496,7 +514,7 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 				const float distance = (mousePos - circle.getCentre()).length();
 				if (distance < bestDistance) {
 					bestDistance = distance;
-					bestResult = NodeUnderMouseInfo{ static_cast<ScriptNodeId>(i), pinType, static_cast<ScriptPinId>(j), curRect, circle.getCentre() };
+					bestResult = NodeUnderMouseInfo{ static_cast<GraphNodeId>(i), pinType, static_cast<GraphPinId>(j), curRect, circle.getCentre() };
 				}
 			}
 		}
@@ -506,7 +524,7 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 			const float distance = (mousePos - curRect.getCenter()).length();
 			if (distance < bestDistance) {
 				bestDistance = distance;
-				bestResult = NodeUnderMouseInfo{ static_cast<ScriptNodeId>(i), ScriptNodePinType{ScriptNodeElementType::Node}, static_cast<ScriptPinId>(-1), curRect, Vector2f() };
+				bestResult = NodeUnderMouseInfo{ static_cast<GraphNodeId>(i), GraphNodePinType{ScriptNodeElementType::Node}, static_cast<GraphPinId>(-1), curRect, Vector2f() };
 			}
 		}
 	}
@@ -514,19 +532,19 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 	return bestResult;
 }
 
-Vector2f ScriptRenderer::getPinPosition(Vector2f basePos, const ScriptGraphNode& node, ScriptPinId idx, float zoom) const
+Vector2f ScriptRenderer::getPinPosition(Vector2f basePos, const ScriptGraphNode& node, GraphPinId idx, float zoom) const
 {
 	return getNodeElementArea(node.getNodeType(), basePos, node, idx, zoom, 1.0f).getCentre();
 }
 
-Vector<ScriptNodeId> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const
+Vector<GraphNodeId> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const
 {
 	if (!graph) {
 		return {};
 	}
 
 	const float effectiveZoom = std::max(nativeZoom, curZoom);
-	Vector<ScriptNodeId> result;
+	Vector<GraphNodeId> result;
 
 	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
 		const auto& node = graph->getNodes()[i];
@@ -541,7 +559,7 @@ Vector<ScriptNodeId> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZ
 		const auto curRect = area + pos;
 
 		if (curRect.overlaps(selBox)) {
-			result.push_back(static_cast<ScriptNodeId>(i));
+			result.push_back(static_cast<GraphNodeId>(i));
 		}
 	}
 
@@ -554,7 +572,7 @@ void ScriptRenderer::setHighlight(std::optional<NodeUnderMouseInfo> node,Optiona
 	highlightEntity = entity;
 }
 
-void ScriptRenderer::setSelection(Vector<ScriptNodeId> nodes)
+void ScriptRenderer::setSelection(Vector<GraphNodeId> nodes)
 {
 	selectedNodes = std::move(nodes);
 }

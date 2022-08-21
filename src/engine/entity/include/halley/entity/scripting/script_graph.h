@@ -14,13 +14,13 @@ namespace Halley {
 	class ScriptGraphNode {
 	public:
 		struct PinConnection {
-			OptionalLite<ScriptNodeId> dstNode = {};
-			ScriptPinId dstPin = 0;
+			OptionalLite<GraphNodeId> dstNode = {};
+			GraphPinId dstPin = 0;
 			OptionalLite<uint8_t> entityIdx;
 
 			PinConnection() = default;
 			PinConnection(const ConfigNode& node);
-			PinConnection(ScriptNodeId dstNode, ScriptPinId dstPin);
+			PinConnection(GraphNodeId dstNode, GraphPinId dstPin);
 			explicit PinConnection(OptionalLite<uint8_t> entityIdx);
 
 			ConfigNode toConfigNode() const;
@@ -81,19 +81,19 @@ namespace Halley {
 
 		void feedToHash(Hash::Hasher& hasher);
 
-		void onNodeRemoved(ScriptNodeId nodeId);
-		void remapNodes(const HashMap<ScriptNodeId, ScriptNodeId>& remap);
-		void offsetNodes(ScriptNodeId offset);
+		void onNodeRemoved(GraphNodeId nodeId);
+		void remapNodes(const HashMap<GraphNodeId, GraphNodeId>& remap);
+		void offsetNodes(GraphNodeId offset);
 
 		void assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		const IScriptNodeType& getNodeType() const;
 
-		ScriptNodeId getId() const { return id; }
-		void setId(ScriptNodeId i) { id = i; }
-		OptionalLite<ScriptNodeId> getParentNode() const { return parentNode; }
-		void setParentNode(OptionalLite<ScriptNodeId> id) { parentNode = id; }
+		GraphNodeId getId() const { return id; }
+		void setId(GraphNodeId i) { id = i; }
+		OptionalLite<GraphNodeId> getParentNode() const { return parentNode; }
+		void setParentNode(OptionalLite<GraphNodeId> id) { parentNode = id; }
 
-		ScriptNodePinType getPinType(ScriptPinId idx) const;
+		GraphNodePinType getPinType(GraphPinId idx) const;
 
 	private:
 		mutable const IScriptNodeType* nodeType = nullptr;
@@ -101,17 +101,17 @@ namespace Halley {
 		Vector<Pin> pins;
 		String type;
 		Vector2f position;
-		ScriptNodeId id = 0;
-		OptionalLite<ScriptNodeId> parentNode;
+		GraphNodeId id = 0;
+		OptionalLite<GraphNodeId> parentNode;
 	};
 
 	struct ScriptGraphNodeRoots {
 		struct Entry {
-			Range<ScriptNodeId> range;
-			ScriptNodeId root;
+			Range<GraphNodeId> range;
+			GraphNodeId root;
 
 			Entry() = default;
-			Entry(Range<ScriptNodeId> range, ScriptNodeId root);
+			Entry(Range<GraphNodeId> range, GraphNodeId root);
 			Entry(const ConfigNode& node);
 			ConfigNode toConfigNode() const;
 		};
@@ -122,8 +122,8 @@ namespace Halley {
 		ScriptGraphNodeRoots(const ConfigNode& node);
 		ConfigNode toConfigNode() const;
 
-		void addRoot(ScriptNodeId id, ScriptNodeId root);
-		ScriptNodeId getRoot(ScriptNodeId id) const;
+		void addRoot(GraphNodeId id, GraphNodeId root);
+		GraphNodeId getRoot(GraphNodeId id) const;
 		void clear();
 	};
 	
@@ -167,20 +167,20 @@ namespace Halley {
 		const Vector<ScriptGraphNode>& getNodes() const { return nodes; }
 		Vector<ScriptGraphNode>& getNodes() { return nodes; }
 
-		OptionalLite<ScriptNodeId> getStartNode() const;
-		OptionalLite<ScriptNodeId> getCallee(ScriptNodeId node) const;
-		OptionalLite<ScriptNodeId> getCaller(ScriptNodeId node) const;
-		OptionalLite<ScriptNodeId> getReturnTo(ScriptNodeId node) const;
-		OptionalLite<ScriptNodeId> getReturnFrom(ScriptNodeId node) const;
+		OptionalLite<GraphNodeId> getStartNode() const;
+		OptionalLite<GraphNodeId> getCallee(GraphNodeId node) const;
+		OptionalLite<GraphNodeId> getCaller(GraphNodeId node) const;
+		OptionalLite<GraphNodeId> getReturnTo(GraphNodeId node) const;
+		OptionalLite<GraphNodeId> getReturnFrom(GraphNodeId node) const;
 		uint64_t getHash() const;
 
-		std::optional<ScriptNodeId> getMessageInboxId(const String& messageId, bool requiresSpawningScript = false) const;
+		std::optional<GraphNodeId> getMessageInboxId(const String& messageId, bool requiresSpawningScript = false) const;
 
-		bool connectPins(ScriptNodeId srcNode, ScriptPinId srcPinN, ScriptNodeId dstNode, ScriptPinId dstPin);
-		bool connectPin(ScriptNodeId srcNode, ScriptPinId srcPinN, EntityId target);
-		bool disconnectPin(ScriptNodeId nodeIdx, ScriptPinId pinN);
-		bool disconnectPinIfSingleConnection(ScriptNodeId nodeIdx, ScriptPinId pinN);
-		void validateNodePins(ScriptNodeId nodeIdx);
+		bool connectPins(GraphNodeId srcNode, GraphPinId srcPinN, GraphNodeId dstNode, GraphPinId dstPin);
+		bool connectPin(GraphNodeId srcNode, GraphPinId srcPinN, EntityId target);
+		bool disconnectPin(GraphNodeId nodeIdx, GraphPinId pinN);
+		bool disconnectPinIfSingleConnection(GraphNodeId nodeIdx, GraphPinId pinN);
+		void validateNodePins(GraphNodeId nodeIdx);
 
 		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		void finishGraph();
@@ -190,30 +190,31 @@ namespace Halley {
 		uint8_t addEntityId(EntityId id);
 		void removeEntityId(EntityId id);
 
-		ScriptNodeId getNodeRoot(ScriptNodeId nodeId) const;
+		GraphNodeId getNodeRoot(GraphNodeId nodeId) const;
 		const ScriptGraphNodeRoots& getRoots() const;
 		void setRoots(ScriptGraphNodeRoots roots);
 
-		void appendGraph(ScriptNodeId parent, const ScriptGraph& other);
+		void appendGraph(GraphNodeId parent, const ScriptGraph& other);
 		Vector<int> getSubGraphIndicesForAssetId(const String& id) const;
-		Range<ScriptNodeId> getSubGraphRange(int subGraphIdx) const;
+		Range<GraphNodeId> getSubGraphRange(int subGraphIdx) const;
 
 		FunctionParameters getFunctionParameters() const;
 
 	private:
 		Vector<ScriptGraphNode> nodes;
 		Vector<EntityId> entityIds;
-		Vector<std::pair<ScriptNodeId, ScriptNodeId>> callerToCallee;
-		Vector<std::pair<ScriptNodeId, ScriptNodeId>> returnToCaller;
-		Vector<std::pair<String, Range<ScriptNodeId>>> subGraphs;
+		Vector<std::pair<GraphNodeId, GraphNodeId>> callerToCallee;
+		Vector<std::pair<GraphNodeId, GraphNodeId>> returnToCaller;
+		Vector<std::pair<String, Range<GraphNodeId>>> subGraphs;
 		uint64_t hash = 0;
 
 		mutable uint64_t lastAssignTypeHash = 1;
 
 		ScriptGraphNodeRoots roots;
 
-		ScriptNodeId findNodeRoot(ScriptNodeId nodeId) const;
+		GraphNodeId findNodeRoot(GraphNodeId nodeId) const;
 		void generateRoots();
+		[[nodiscard]] bool isMultiConnection(GraphNodePinType pinType) const;
 	};
 
 	template <>

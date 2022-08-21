@@ -18,7 +18,7 @@ std::pair<String, Vector<ColourOverride>> ScriptStart::getNodeDescription(const 
 gsl::span<const IScriptNodeType::PinType> ScriptStart::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	
 	const size_t nDataOutput = node.getSettings()["dataPins"].getSequenceSize();
 	const size_t nTargetOutput = node.getSettings()["targetPins"].getSequenceSize();
@@ -40,13 +40,13 @@ gsl::span<const IScriptNodeType::PinType> ScriptStart::getPinConfiguration(const
 	} else {
 		// Simple, common case
 		using ET = ScriptNodeElementType;
-		using PD = ScriptNodePinDirection;
+		using PD = GraphNodePinDirection;
 		const static auto data = std::array<PinType, 5>{ PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
 		return gsl::span<const PinType>(data).subspan(0, 1 + nDataOutput);
 	}
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptStart::getPinDescription(const ScriptGraphNode& node, PinType elementType, ScriptPinId elementIdx) const
+std::pair<String, Vector<ColourOverride>> ScriptStart::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	const size_t nOutput = 1;
 	const size_t nDataInput = node.getSettings()["dataPins"].getSequenceSize(0);
@@ -74,7 +74,7 @@ std::pair<String, Vector<ColourOverride>> ScriptStart::getPinDescription(const S
 	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 }
 
-String ScriptStart::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptStart::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return getPinDescription(node, ScriptNodeElementType::ReadDataPin, elementIdx).first;
 }
@@ -95,7 +95,7 @@ ConfigNode ScriptStart::doGetData(ScriptEnvironment& environment, const ScriptGr
 	}
 }
 
-EntityId ScriptStart::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId pinN) const
+EntityId ScriptStart::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
 	const auto other = getOtherPin(environment, node, pinN);
 	if (other) {
@@ -106,7 +106,7 @@ EntityId ScriptStart::doGetEntityId(ScriptEnvironment& environment, const Script
 	}
 }
 
-std::optional<std::pair<ScriptNodeId, ScriptPinId>> ScriptStart::getOtherPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+std::optional<std::pair<GraphNodeId, GraphPinId>> ScriptStart::getOtherPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
 	// Find the "call" node
 	const auto& graph = environment.getCurrentGraph();
@@ -115,7 +115,7 @@ std::optional<std::pair<ScriptNodeId, ScriptPinId>> ScriptStart::getOtherPin(Scr
 		return std::nullopt;
 	}
 
-	return std::pair<ScriptNodeId, ScriptPinId>{ *callerNodeId, static_cast<ScriptPinId>(pinN) };
+	return std::pair<GraphNodeId, GraphPinId>{ *callerNodeId, static_cast<GraphPinId>(pinN) };
 }
 
 
@@ -127,7 +127,7 @@ std::pair<String, Vector<ColourOverride>> ScriptDestructor::getNodeDescription(c
 gsl::span<const IScriptNodeType::PinType> ScriptDestructor::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 1>{ PinType{ ET::FlowPin, PD::Output } };
 	return data;
 }
@@ -142,7 +142,7 @@ IScriptNodeType::Result ScriptDestructor::doUpdate(ScriptEnvironment& environmen
 gsl::span<const IScriptNodeType::PinType> ScriptRestart::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 1>{ PinType{ ET::FlowPin, PD::Input } };
 	return data;
 }
@@ -162,7 +162,7 @@ IScriptNodeType::Result ScriptRestart::doUpdate(ScriptEnvironment& environment, 
 gsl::span<const IScriptNodeType::PinType> ScriptStop::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 1>{ PinType{ ET::FlowPin, PD::Input } };
 	return data;
 }
@@ -182,7 +182,7 @@ IScriptNodeType::Result ScriptStop::doUpdate(ScriptEnvironment& environment, Tim
 gsl::span<const IScriptNodeType::PinType> ScriptSpinwait::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 1>{ PinType{ ET::FlowPin, PD::Input } };
 	return data;
 }
@@ -222,7 +222,7 @@ std::pair<String, Vector<ColourOverride>> ScriptStartScript::getNodeDescription(
 gsl::span<const IScriptNodeType::PinType> ScriptStartScript::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
 	return data;
 }
@@ -263,7 +263,7 @@ std::pair<String, Vector<ColourOverride>> ScriptStartScriptName::getNodeDescript
 gsl::span<const IScriptNodeType::PinType> ScriptStartScriptName::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
 	return data;
 }
@@ -302,7 +302,7 @@ std::pair<String, Vector<ColourOverride>> ScriptStopScript::getNodeDescription(c
 gsl::span<const IScriptNodeType::PinType> ScriptStopScript::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
 	return data;
 }
@@ -341,7 +341,7 @@ std::pair<String, Vector<ColourOverride>> ScriptStopTag::getNodeDescription(cons
 gsl::span<const IScriptNodeType::PinType> ScriptStopTag::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
 	return data;
 }

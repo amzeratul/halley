@@ -2,7 +2,7 @@
 
 using namespace Halley;
 
-String ScriptLogicGateAnd::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptLogicGateAnd::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
@@ -12,7 +12,7 @@ String ScriptLogicGateAnd::getShortDescription(const World* world, const ScriptG
 gsl::span<const IScriptNodeType::PinType> ScriptLogicGateAnd::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
@@ -36,7 +36,7 @@ ConfigNode ScriptLogicGateAnd::doGetData(ScriptEnvironment& environment, const S
 }
 
 
-String ScriptLogicGateOr::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptLogicGateOr::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
@@ -46,7 +46,7 @@ String ScriptLogicGateOr::getShortDescription(const World* world, const ScriptGr
 gsl::span<const IScriptNodeType::PinType> ScriptLogicGateOr::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
@@ -70,7 +70,7 @@ ConfigNode ScriptLogicGateOr::doGetData(ScriptEnvironment& environment, const Sc
 }
 
 
-String ScriptLogicGateXor::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptLogicGateXor::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	auto b = getConnectedNodeName(world, node, graph, 1);
@@ -80,7 +80,7 @@ String ScriptLogicGateXor::getShortDescription(const World* world, const ScriptG
 gsl::span<const IScriptNodeType::PinType> ScriptLogicGateXor::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
@@ -104,7 +104,7 @@ ConfigNode ScriptLogicGateXor::doGetData(ScriptEnvironment& environment, const S
 }
 
 
-String ScriptLogicGateNot::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptLogicGateNot::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	auto a = getConnectedNodeName(world, node, graph, 0);
 	return "NOT " + addParentheses(std::move(a));
@@ -113,7 +113,7 @@ String ScriptLogicGateNot::getShortDescription(const World* world, const ScriptG
 gsl::span<const IScriptNodeType::PinType> ScriptLogicGateNot::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 2>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }

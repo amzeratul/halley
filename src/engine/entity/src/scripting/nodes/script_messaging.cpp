@@ -14,7 +14,7 @@ Vector<IScriptNodeType::SettingType> ScriptSendMessage::getSettingTypes() const
 gsl::span<const IScriptNodeType::PinType> ScriptSendMessage::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 8>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
 
@@ -53,7 +53,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getNodeDescription(
 	return str.moveResults();
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getPinDescription(const ScriptGraphNode& node, PinType elementType, ScriptPinId elementIdx) const
+std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 3) {
 		return { "Delay time", {}};
@@ -105,7 +105,7 @@ Vector<IScriptNodeType::SettingType> ScriptReceiveMessage::getSettingTypes() con
 gsl::span<const IScriptNodeType::PinType> ScriptReceiveMessage::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 5>{ PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
 	const int nParams = node.getSettings()["nParams"].asInt(0);
 
@@ -120,7 +120,7 @@ std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getNodeDescripti
 	return str.moveResults();
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getPinDescription(const ScriptGraphNode& node, PinType element, ScriptPinId elementIdx) const
+std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx >= 1) {
 		return { "Parameter #" + toString(static_cast<int>(elementIdx)), {} };
@@ -129,7 +129,7 @@ std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getPinDescriptio
 	}
 }
 
-String ScriptReceiveMessage::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptReceiveMessage::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	if (elementIdx >= 1) {
 		return "msg.param" + toString(static_cast<int>(elementIdx));
@@ -226,7 +226,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendSystemMessage::getPinConfigu
 	const auto msgType = ScriptSystemMessageType(node.getSettings()["message"]);
 
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 2 + maxMsgParams>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output },
 		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
 	return gsl::span<const PinType>(data).subspan(0, 2 + std::min(msgType.members.size(), maxMsgParams));
@@ -294,7 +294,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSendEntityMessage::getPinConfigu
 	const auto msgType = ScriptEntityMessageType(node.getSettings()["message"]);
 
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3 + maxMsgParams>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input },
 		PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input } };
 	return gsl::span<const PinType>(data).subspan(0, 3 + std::min(msgType.members.size(), maxMsgParams));

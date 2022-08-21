@@ -22,6 +22,11 @@ set(SOURCES
         "src/game/halley_statics.cpp"
         "src/game/main_loop.cpp"
 
+        "src/graph/base_graph_gizmo.cpp"
+        "src/graph/base_graph_node.cpp"
+        "src/graph/base_graph_renderer.cpp"
+        "src/graph/base_graph.cpp"
+
         "src/graphics/blend.cpp"
         "src/graphics/camera.cpp"
         "src/graphics/material/material.cpp"
@@ -119,6 +124,12 @@ set(HEADERS
         "include/halley/core/game/game_platform.h"
         "include/halley/core/game/main_loop.h"
         "include/halley/core/game/scene_editor_interface.h"
+
+        "include/halley/core/graph/base_graph_enums.h"
+        "include/halley/core/graph/base_graph_gizmo.h"
+        "include/halley/core/graph/base_graph_node.h"
+        "include/halley/core/graph/base_graph_renderer.h"
+        "include/halley/core/graph/base_graph.h"
 
         "include/halley/core/graphics/blend.h"
         "include/halley/core/graphics/camera.h"

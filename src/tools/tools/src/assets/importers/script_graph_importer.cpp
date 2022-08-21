@@ -32,7 +32,7 @@ void ScriptGraphImporter::loadScriptDependencies(const String& assetId, ScriptGr
 					Logger::logError("Script \"" + function + "\" referenced by " + assetId + " doesn't exist.");
 				} else {
 					ScriptGraph otherGraph = loadScript(function, functionData, collector);
-					graph.appendGraph(static_cast<ScriptNodeId>(i), otherGraph);
+					graph.appendGraph(static_cast<GraphNodeId>(i), otherGraph);
 				}
 			}
 		}

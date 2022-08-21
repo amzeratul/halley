@@ -30,7 +30,7 @@ std::pair<String, Vector<ColourOverride>> ScriptFunctionCallExternal::getNodeDes
 gsl::span<const IScriptNodeType::PinType> ScriptFunctionCallExternal::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 
 	auto& settings = node.getSettings();
 
@@ -65,7 +65,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptFunctionCallExternal::getPinConf
 	return pins;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFunctionCallExternal::getPinDescription(const ScriptGraphNode& node, PinType elementType, ScriptPinId elementIdx) const
+std::pair<String, Vector<ColourOverride>> ScriptFunctionCallExternal::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx >= 1) {
 		const auto numInput = getNumOfInputPins(node);
@@ -90,7 +90,7 @@ std::pair<String, Vector<ColourOverride>> ScriptFunctionCallExternal::getPinDesc
 	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 }
 
-String ScriptFunctionCallExternal::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptFunctionCallExternal::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return getPinDescription(node, ScriptNodeElementType::ReadDataPin, elementIdx).first;
 }
@@ -142,7 +142,7 @@ ConfigNode ScriptFunctionCallExternal::doGetData(ScriptEnvironment& environment,
 	}
 }
 
-EntityId ScriptFunctionCallExternal::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId pinN) const
+EntityId ScriptFunctionCallExternal::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
 	const auto other = getReturnNodePin(environment, node, pinN);
 	if (other) {
@@ -161,7 +161,7 @@ size_t ScriptFunctionCallExternal::getNumOfInputPins(const ScriptGraphNode& node
 	return 1 + nDataInput + nTargetInput;
 }
 
-std::optional<std::pair<ScriptNodeId, ScriptPinId>> ScriptFunctionCallExternal::getStartNodePin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+std::optional<std::pair<GraphNodeId, GraphPinId>> ScriptFunctionCallExternal::getStartNodePin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
 	// Find the "start" node
 	const auto& graph = environment.getCurrentGraph();
@@ -170,10 +170,10 @@ std::optional<std::pair<ScriptNodeId, ScriptPinId>> ScriptFunctionCallExternal::
 		return std::nullopt;
 	}
 	
-	return std::pair<ScriptNodeId, ScriptPinId>{ *returnNodeId, static_cast<ScriptPinId>(pinN) };
+	return std::pair<GraphNodeId, GraphPinId>{ *returnNodeId, static_cast<GraphPinId>(pinN) };
 }
 
-std::optional<std::pair<ScriptNodeId, ScriptPinId>> ScriptFunctionCallExternal::getReturnNodePin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+std::optional<std::pair<GraphNodeId, GraphPinId>> ScriptFunctionCallExternal::getReturnNodePin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
 	// Find the "return" node
 	const auto& graph = environment.getCurrentGraph();
@@ -185,7 +185,7 @@ std::optional<std::pair<ScriptNodeId, ScriptPinId>> ScriptFunctionCallExternal::
 	// Find the pin on the return node
 	const size_t returnPinN = pinN - getNumOfInputPins(node);
 
-	return std::pair<ScriptNodeId, ScriptPinId>{ *returnNodeId, static_cast<ScriptPinId>(returnPinN) };
+	return std::pair<GraphNodeId, GraphPinId>{ *returnNodeId, static_cast<GraphPinId>(returnPinN) };
 }
 
 
@@ -209,7 +209,7 @@ std::pair<String, Vector<ColourOverride>> ScriptFunctionReturn::getNodeDescripti
 gsl::span<const IScriptNodeType::PinType> ScriptFunctionReturn::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 
 	const size_t nInput = node.getSettings()["flowPins"].getSequenceSize(1);
 	const size_t nDataInput = node.getSettings()["dataPins"].getSequenceSize(0);
@@ -218,7 +218,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptFunctionReturn::getPinConfigurat
 	if (nDataInput == 0 && nTargetInput == 0) {
 		// Simple, common case
 		using ET = ScriptNodeElementType;
-		using PD = ScriptNodePinDirection;
+		using PD = GraphNodePinDirection;
 		const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Input } };
 		return gsl::span<const PinType>(data).subspan(0, nInput);
 	} else {
@@ -239,7 +239,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptFunctionReturn::getPinConfigurat
 	}
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFunctionReturn::getPinDescription(const ScriptGraphNode& node, PinType elementType, ScriptPinId elementIdx) const
+std::pair<String, Vector<ColourOverride>> ScriptFunctionReturn::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	const size_t nInput = node.getSettings()["flowPins"].getSequenceSize(1);
 	const size_t nDataInput = node.getSettings()["dataPins"].getSequenceSize(0);

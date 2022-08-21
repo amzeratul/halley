@@ -21,7 +21,7 @@ String ScriptForLoop::getLabel(const ScriptGraphNode& node) const
 gsl::span<const IScriptNodeType::PinType> ScriptForLoop::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output } };
 	return data;
 }
@@ -41,7 +41,7 @@ std::pair<String, Vector<ColourOverride>> ScriptForLoop::getNodeDescription(cons
 	return str.moveResults();
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptForLoop::getPinDescription(const ScriptGraphNode& node, PinType element, ScriptPinId elementIdx) const
+std::pair<String, Vector<ColourOverride>> ScriptForLoop::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return {"Flow output after loop", {}};
@@ -67,7 +67,7 @@ void ScriptForLoop::doInitData(ScriptForLoopData& data, const ScriptGraphNode& n
 	data.iterations = 0;
 }
 
-bool ScriptForLoop::doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId outPin, ScriptForLoopData& curData) const
+bool ScriptForLoop::doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId outPin, ScriptForLoopData& curData) const
 {
 	return outPin == 2;
 }
@@ -81,7 +81,7 @@ bool ScriptForLoop::canKeepData() const
 gsl::span<const IScriptNodeType::PinType> ScriptWhileLoop::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output } };
 	return data;
 }
@@ -107,7 +107,7 @@ IScriptNodeType::Result ScriptWhileLoop::doUpdate(ScriptEnvironment& environment
 	return Result(ScriptNodeExecutionState::Done, 0, condition ? 2 : 1);
 }
 
-bool ScriptWhileLoop::doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId outPin) const
+bool ScriptWhileLoop::doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId outPin) const
 {
 	return outPin == 3;
 }
@@ -141,7 +141,7 @@ Vector<IScriptNodeType::SettingType> ScriptLerpLoop::getSettingTypes() const
 gsl::span<const IScriptNodeType::PinType> ScriptLerpLoop::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
@@ -159,7 +159,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLerpLoop::getNodeDescription(con
 	str.append(" whilst outputting from 0 to 1");
 	return str.moveResults();}
 
-std::pair<String, Vector<ColourOverride>> ScriptLerpLoop::getPinDescription(const ScriptGraphNode& node, PinType element, ScriptPinId elementIdx) const
+std::pair<String, Vector<ColourOverride>> ScriptLerpLoop::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return {"Flow output after loop", {}};
@@ -172,7 +172,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLerpLoop::getPinDescription(cons
 	}
 }
 
-String ScriptLerpLoop::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId element_idx) const
+String ScriptLerpLoop::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId element_idx) const
 {
 	return "Lerp progress";
 }
@@ -207,14 +207,14 @@ ConfigNode ScriptLerpLoop::doGetData(ScriptEnvironment& environment, const Scrip
 	return ConfigNode(clamp(curData.time.value_or(0) / length, 0.0f, 1.0f));
 }
 
-bool ScriptLerpLoop::doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptPinId outPin, ScriptLerpLoopData& curData) const
+bool ScriptLerpLoop::doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId outPin, ScriptLerpLoopData& curData) const
 {
 	return outPin == 2;
 }
 
 
 
-std::pair<String, Vector<ColourOverride>> ScriptWhileLoop::getPinDescription(const ScriptGraphNode& node, PinType element, ScriptPinId elementIdx) const
+std::pair<String, Vector<ColourOverride>> ScriptWhileLoop::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return {"Condition", {}};
@@ -245,7 +245,7 @@ ConfigNode ScriptEveryFrameData::toConfigNode(const EntitySerializationContext& 
 gsl::span<const IScriptNodeType::PinType> ScriptEveryFrame::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
@@ -258,7 +258,7 @@ std::pair<String, Vector<ColourOverride>> ScriptEveryFrame::getNodeDescription(c
 	return str.moveResults();
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptEveryFrame::getPinDescription(const ScriptGraphNode& node, PinType element, ScriptPinId elementIdx) const
+std::pair<String, Vector<ColourOverride>> ScriptEveryFrame::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 2) {
 		return { "Frame delta time", {} };
@@ -267,7 +267,7 @@ std::pair<String, Vector<ColourOverride>> ScriptEveryFrame::getPinDescription(co
 	}
 }
 
-String ScriptEveryFrame::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, ScriptPinId elementIdx) const
+String ScriptEveryFrame::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	return "Frame delta time";
 }
@@ -325,7 +325,7 @@ Vector<IScriptNodeType::SettingType> ScriptEveryTime::getSettingTypes() const
 gsl::span<const IScriptNodeType::PinType> ScriptEveryTime::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 2>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output } };
 	return data;
 }

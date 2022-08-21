@@ -12,7 +12,7 @@ Vector<IScriptNodeType::SettingType> ScriptAudioEvent::getSettingTypes() const
 gsl::span<const IScriptNodeType::PinType> ScriptAudioEvent::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
-	using PD = ScriptNodePinDirection;
+	using PD = GraphNodePinDirection;
 	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::TargetPin, PD::Input } };
 	return data;
 }
