@@ -4,6 +4,8 @@
 #include "halley/maths/vector2.h"
 
 namespace Halley {
+	class BaseGraphRenderer;
+	class BaseGraph;
 	class UIRoot;
 	class UIWidget;
 	class Resources;
@@ -54,6 +56,9 @@ namespace Halley {
 		const IEntityEditorFactory& entityEditorFactory;
 		Resources* resources = nullptr;
 
+		std::shared_ptr<BaseGraphRenderer> renderer;
+		BaseGraph* baseGraph = nullptr;
+
 		UIRoot* uiRoot = nullptr;
 		UIWidget* eventSink = nullptr;
 
@@ -64,5 +69,12 @@ namespace Halley {
 		mutable TextRenderer tooltipLabel;
 
 		ModifiedCallback modifiedCallback;
+
+		Vector<Connection> pendingAutoConnections;
+
+		void updateNodeAutoConnection(gsl::span<const GraphNodeId> nodes);
+		void pruneConflictingAutoConnections();
+		bool finishAutoConnection();
+		std::optional<Connection> findAutoConnectionForPin(GraphNodeId srcNodeId, GraphPinId srcPinIdx, Vector2f nodePos, GraphNodePinType srcPinType, gsl::span<const GraphNodeId> excludeIds) const;
 	};
 }

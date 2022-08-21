@@ -38,12 +38,12 @@ String IScriptNodeType::getLabel(const ScriptGraphNode& node) const
 	return "";
 }
 
-Vector<IScriptNodeType::SettingType> IScriptNodeType::getSettingTypes() const
+Vector<IScriptNodeType::SettingType> IGraphNodeType::getSettingTypes() const
 {
 	return {};
 }
 
-void IScriptNodeType::updateSettings(ScriptGraphNode& node, const ScriptGraph& graph, Resources& resources) const
+void IGraphNodeType::updateSettings(ScriptGraphNode& node, const ScriptGraph& graph, Resources& resources) const
 {
 }
 
@@ -62,12 +62,12 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const 
 	return { "?", {} };
 }
 
-std::pair<String, Vector<ColourOverride>> IScriptNodeType::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+std::pair<String, Vector<ColourOverride>> IGraphNodeType::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	return { getName(), {} };
 }
 
-std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const
+std::pair<String, Vector<ColourOverride>> IGraphNodeType::getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const
 {
 	auto getName = [](ScriptNodeElementType type) -> const char*
 	{
@@ -121,13 +121,13 @@ String IScriptNodeType::getIconName(const ScriptGraphNode& node) const
 	return "";
 }
 
-IScriptNodeType::PinType IScriptNodeType::getPin(const ScriptGraphNode& node, size_t n) const
+IScriptNodeType::PinType IGraphNodeType::getPin(const ScriptGraphNode& node, size_t n) const
 {
 	const auto& pins = getPinConfiguration(node);
 	if (n < pins.size()) {
 		return pins[n];
 	}
-	return PinType{ ScriptNodeElementType::Undefined, GraphNodePinDirection::Input };
+	return PinType{ {}, GraphNodePinDirection::Input };
 }
 
 ConfigNode IScriptNodeType::readDataPin(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const

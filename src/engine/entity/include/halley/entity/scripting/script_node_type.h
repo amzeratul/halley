@@ -11,8 +11,38 @@ namespace Halley {
 	class ScriptEnvironment;
 	class ScriptGraph;
     class ScriptState;
+	class BaseGraphNode;
+
+	class IGraphNodeType {
+	public:
+		struct SettingType {
+			String name;
+			String type;
+			Vector<String> defaultValue;
+		};
+
+		constexpr static Colour4f parameterColour = Colour4f(0.97f, 0.35f, 0.35f);
+		using PinType = GraphNodePinType;
+
+		virtual ~IGraphNodeType() = default;
+
+		virtual String getId() const = 0;
+		virtual String getName() const = 0;
+
+		virtual Vector<SettingType> getSettingTypes() const;
+		virtual void updateSettings(ScriptGraphNode& node, const ScriptGraph& graph, Resources& resources) const;
+
+		virtual gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const = 0;
+        PinType getPin(const ScriptGraphNode& node, size_t n) const;
+
+		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const;
+		virtual std::pair<String, Vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const;
+		
+		virtual bool canAdd() const { return true; }
+        virtual bool canDelete() const { return true; }
+	};
 	
-	class IScriptNodeType {
+	class IScriptNodeType : public IGraphNodeType {
 	public:		
         struct Result {
         	ScriptNodeExecutionState state = ScriptNodeExecutionState::Done;
@@ -27,37 +57,16 @@ namespace Halley {
         	{}
         };
 
-		struct SettingType {
-			String name;
-			String type;
-			Vector<String> defaultValue;
-		};
-
-		constexpr static Colour4f parameterColour = Colour4f(0.97f, 0.35f, 0.35f);
-		using PinType = GraphNodePinType;
-
 		virtual ~IScriptNodeType() = default;
 
-		virtual String getId() const = 0;
-		virtual String getName() const = 0;
+		virtual ScriptNodeClassification getClassification() const = 0;
+
+		virtual std::pair<String, Vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World* world, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const;
 		virtual String getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const;
 		virtual String getLargeLabel(const ScriptGraphNode& node) const;
 		virtual String getLabel(const ScriptGraphNode& node) const;
 		virtual String getIconName(const ScriptGraphNode& node) const;
-		virtual ScriptNodeClassification getClassification() const = 0;
 
-		virtual Vector<SettingType> getSettingTypes() const;
-		virtual void updateSettings(ScriptGraphNode& node, const ScriptGraph& graph, Resources& resources) const;
-
-		virtual gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const = 0;
-        PinType getPin(const ScriptGraphNode& node, size_t n) const;
-
-		virtual std::pair<String, Vector<ColourOverride>> getDescription(const ScriptGraphNode& node, const World* world, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const;
-		virtual std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const;
-		virtual std::pair<String, Vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const;
-		
-		virtual bool canAdd() const { return true; }
-        virtual bool canDelete() const { return true; }
         virtual bool canKeepData() const { return false; }
 		virtual bool hasDestructor(const ScriptGraphNode& node) const { return false; }
 		virtual bool showDestructor() const { return true; }

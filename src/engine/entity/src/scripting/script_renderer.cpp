@@ -13,12 +13,12 @@ using namespace Halley;
 #endif
 #include "components/transform_2d_component.h"
 
-bool ScriptRenderer::NodeUnderMouseInfo::operator==(const NodeUnderMouseInfo& other) const
+bool BaseGraphRenderer::NodeUnderMouseInfo::operator==(const NodeUnderMouseInfo& other) const
 {
 	return nodeId == other.nodeId && element == other.element && elementId == other.elementId;
 }
 
-bool ScriptRenderer::NodeUnderMouseInfo::operator!=(const NodeUnderMouseInfo& other) const
+bool BaseGraphRenderer::NodeUnderMouseInfo::operator!=(const NodeUnderMouseInfo& other) const
 {
 	return !(*this == other);
 }
@@ -45,9 +45,9 @@ ScriptRenderer::ScriptRenderer(Resources& resources, const World* world, const S
 		.setAlignment(0.5f);
 }
 
-void ScriptRenderer::setGraph(const ScriptGraph* graph)
+void ScriptRenderer::setGraph(const BaseGraph* graph)
 {
-	this->graph = graph;
+	this->graph = static_cast<const ScriptGraph*>(graph);
 }
 
 void ScriptRenderer::setState(const ScriptState* scriptState)
@@ -475,7 +475,7 @@ const Sprite& ScriptRenderer::getIcon(const IScriptNodeType& nodeType, const Scr
 	return icons[iconName];
 }
 
-std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const
+std::optional<BaseGraphRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const
 {
 	if (!graph) {
 		return {};
@@ -486,8 +486,8 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 	float bestDistance = std::numeric_limits<float>::max();
 	std::optional<NodeUnderMouseInfo> bestResult;
 	
-	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
-		const auto& node = graph->getNodes()[i];
+	for (size_t i = 0; i < graph->getNumNodes(); ++i) {
+		const auto& node = graph->getNode(i);
 		const auto pos = basePos + node.getPosition();
 
 		const auto nodeBounds = Circle(pos, 60.0f);
@@ -505,10 +505,10 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 		
 		// Check each pin handle
 		bool foundPin = false;
-		const auto& pins = nodeType->getPinConfiguration(node);
+		const auto& pins = node.getPinConfiguration();
 		for	(size_t j = 0; j < pins.size(); ++j) {
 			const auto& pinType = pins[j];
-			const auto circle = getNodeElementArea(*nodeType, basePos, node, j, curZoom, 1.0f).expand((pinPriority ? 12.0f : 4.0f) / curZoom);
+			const auto circle = getNodeElementArea(*nodeType, basePos, static_cast<const ScriptGraphNode&>(node), j, curZoom, 1.0f).expand((pinPriority ? 12.0f : 4.0f) / curZoom);
 			if (circle.contains(mousePos)) {
 				foundPin = true;
 				const float distance = (mousePos - circle.getCentre()).length();
@@ -532,9 +532,9 @@ std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnderMo
 	return bestResult;
 }
 
-Vector2f ScriptRenderer::getPinPosition(Vector2f basePos, const ScriptGraphNode& node, GraphPinId idx, float zoom) const
+Vector2f ScriptRenderer::getPinPosition(Vector2f basePos, const BaseGraphNode& node, GraphPinId idx, float zoom) const
 {
-	return getNodeElementArea(node.getNodeType(), basePos, node, idx, zoom, 1.0f).getCentre();
+	return getNodeElementArea(static_cast<const ScriptGraphNode&>(node).getNodeType(), basePos, static_cast<const ScriptGraphNode&>(node), idx, zoom, 1.0f).getCentre();
 }
 
 Vector<GraphNodeId> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const
@@ -546,8 +546,8 @@ Vector<GraphNodeId> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZo
 	const float effectiveZoom = std::max(nativeZoom, curZoom);
 	Vector<GraphNodeId> result;
 
-	for (size_t i = 0; i < graph->getNodes().size(); ++i) {
-		const auto& node = graph->getNodes()[i];
+	for (size_t i = 0; i < graph->getNumNodes(); ++i) {
+		const auto& node = graph->getNode(i);
 		const auto pos = basePos + node.getPosition();
 
 		const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
@@ -564,20 +564,4 @@ Vector<GraphNodeId> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZo
 	}
 
 	return result;
-}
-
-void ScriptRenderer::setHighlight(std::optional<NodeUnderMouseInfo> node,OptionalLite<uint8_t> entity)
-{
-	highlightNode = std::move(node);
-	highlightEntity = entity;
-}
-
-void ScriptRenderer::setSelection(Vector<GraphNodeId> nodes)
-{
-	selectedNodes = std::move(nodes);
-}
-
-void ScriptRenderer::setCurrentPaths(Vector<ConnectionPath> path)
-{
-	currentPaths = std::move(path);
 }

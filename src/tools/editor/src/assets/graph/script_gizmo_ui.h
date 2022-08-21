@@ -24,7 +24,7 @@ namespace Halley {
 		
 		std::shared_ptr<UIWidget> makeUI();
 
-		std::optional<ScriptRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
+		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
 		void setCurNodeDevConData(const String& str);
 
 		void updateNodes();

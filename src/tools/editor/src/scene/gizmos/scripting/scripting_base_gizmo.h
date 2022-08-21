@@ -46,39 +46,37 @@ namespace Halley {
 
 		void onMouseWheel(Vector2f mousePos, int amount, KeyMods keyMods);
 
-		std::optional<ScriptRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
+		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
 		void setCurNodeDevConData(const String& str);
 
 		void updateNodes();
 
 	private:
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
-		std::shared_ptr<ScriptRenderer> renderer;
 		const World* world = nullptr;
 
 		ScriptGraph* scriptGraph = nullptr;
 		ScriptState* scriptState = nullptr;
 
-		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeUnderMouse;
+		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> nodeUnderMouse;
 		SelectionSet<GraphNodeId> selectedNodes;
-		std::optional<ScriptRenderer::NodeUnderMouseInfo> nodeEditingConnection;
+		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> nodeEditingConnection;
 		std::optional<Vector2f> nodeConnectionDst;
 		std::optional<Vector2f> lastMousePos;
 		bool lastCtrlHeld = false;
 		bool lastShiftHeld = false;
 
 		std::optional<Dragging> dragging;
-		Vector<Connection> pendingAutoConnections;
 
 		Vector<EntityTarget> entityTargets;
 		std::optional<size_t> curEntityTarget;
 
 		ExecutionQueue pendingUITasks;
 
-		std::optional<std::pair<ScriptRenderer::NodeUnderMouseInfo, String>> devConData;
+		std::optional<std::pair<BaseGraphRenderer::NodeUnderMouseInfo, String>> devConData;
 
 		void drawToolTip(Painter& painter, const EntityTarget& entityTarget) const;
-		void drawToolTip(Painter& painter, const ScriptGraphNode& node, const ScriptRenderer::NodeUnderMouseInfo& nodeInfo) const;
+		void drawToolTip(Painter& painter, const ScriptGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const;
 		void drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f pos) const;
 		void drawEntityTargets(Painter& painter) const;
 
@@ -88,11 +86,6 @@ namespace Halley {
 		void onNodeDragging(const SceneEditorInputState& inputState);
 		void onPinClicked(bool rightClick, bool shiftHeld);
 		void onEditingConnection(const SceneEditorInputState& inputState);
-
-		void updateNodeAutoConnection(gsl::span<const GraphNodeId> nodes);
-		void pruneConflictingAutoConnections();
-		bool finishAutoConnection();
-		std::optional<Connection> findAutoConnectionForPin(GraphNodeId srcNodeId, GraphPinId srcPinIdx, Vector2f nodePos, GraphNodePinType srcPinType, gsl::span<const GraphNodeId> excludeIds) const;
 
 		void assignNodeTypes() const;
 		SelectionSetModifier getSelectionModifier(const SceneEditorInputState& inputState) const;

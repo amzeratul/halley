@@ -109,6 +109,7 @@ namespace Halley {
 
 		virtual BaseGraphNode& getNode(size_t i) = 0;
 		virtual const BaseGraphNode& getNode(size_t i) const = 0;
+		virtual size_t getNumNodes() const = 0;
 
 	protected:
 		virtual bool isMultiConnection(GraphNodePinType pinType) const
@@ -141,6 +142,11 @@ namespace Halley {
 		const BaseGraphNode& getNode(size_t i) const final override
 		{
 			return nodes.at(i);
+		}
+
+		size_t getNumNodes() const override
+		{
+			return nodes.size();
 		}
 
 	protected:

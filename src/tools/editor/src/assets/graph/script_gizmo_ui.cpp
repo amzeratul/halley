@@ -98,7 +98,7 @@ std::shared_ptr<UIWidget> ScriptGizmoUI::makeUI()
 	return gizmo.makeUI();
 }
 
-std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptGizmoUI::getNodeUnderMouse() const
+std::optional<BaseGraphRenderer::NodeUnderMouseInfo> ScriptGizmoUI::getNodeUnderMouse() const
 {
 	return gizmo.getNodeUnderMouse();
 }

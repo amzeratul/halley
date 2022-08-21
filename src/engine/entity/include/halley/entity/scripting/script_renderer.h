@@ -1,6 +1,7 @@
 #pragma once
 #include "script_node_type.h"
 #include "script_node_enums.h"
+#include "halley/core/graph/base_graph_renderer.h"
 #include "halley/core/graphics/sprite/sprite.h"
 #include "halley/maths/bezier.h"
 #include "halley/maths/circle.h"
@@ -14,35 +15,16 @@ namespace Halley {
 	class ScriptGraph;
 	class ScriptState;
 
-	class ScriptRenderer {
+	class ScriptRenderer : public BaseGraphRenderer {
 	public:
-		struct NodeUnderMouseInfo {
-			GraphNodeId nodeId;
-			GraphNodePinType element;
-			GraphPinId elementId;
-			Rect4f nodeArea;
-			Vector2f pinPos;
-
-			bool operator==(const NodeUnderMouseInfo& other) const;
-			bool operator!=(const NodeUnderMouseInfo& other) const;
-		};
-
-		struct ConnectionPath {
-			Vector2f from;
-			Vector2f to;
-			GraphNodePinType fromType;
-			GraphNodePinType toType;
-			bool fade = false;
-		};
-		
 		ScriptRenderer(Resources& resources, const World* world, const ScriptNodeTypeCollection& nodeTypeCollection, float nativeZoom);
 		
-		void setGraph(const ScriptGraph* graph);
+		void setGraph(const BaseGraph* graph);
 		void setState(const ScriptState* scriptState);
 		void draw(Painter& painter, Vector2f basePos, float curZoom, float posScale = 1.0f);
 
 		std::optional<NodeUnderMouseInfo> getNodeUnderMouse(Vector2f basePos, float curZoom, Vector2f mousePos, bool pinPriority) const;
-		Vector2f getPinPosition(Vector2f basePos, const ScriptGraphNode& node, GraphPinId idx, float zoom) const;
+		Vector2f getPinPosition(Vector2f basePos, const BaseGraphNode& node, GraphPinId idx, float zoom) const;
 		Vector<GraphNodeId> getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const;
 		void setHighlight(std::optional<NodeUnderMouseInfo> highlightNode, OptionalLite<uint8_t> highlightEntity);
 		void setSelection(Vector<GraphNodeId> selectedNodes);
@@ -82,11 +64,6 @@ namespace Halley {
 		Sprite destructorIcon;
 		TextRenderer labelText;
 		std::map<String, Sprite> icons;
-
-		std::optional<NodeUnderMouseInfo> highlightNode;
-		OptionalLite<uint8_t> highlightEntity;
-		Vector<GraphNodeId> selectedNodes;
-		Vector<ConnectionPath> currentPaths;
 
 		void drawNodeOutputs(Painter& painter, Vector2f basePos, GraphNodeId nodeIdx, const ScriptGraph& graph, float curZoom, float posScale);
 		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<GraphNodePinType> highlightElement, GraphPinId highlightElementId);

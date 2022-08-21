@@ -215,15 +215,15 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 
 	assignNodeTypes();
 
-	Vector<ScriptRenderer::ConnectionPath> paths;
+	Vector<BaseGraphRenderer::ConnectionPath> paths;
 	if (nodeEditingConnection && nodeConnectionDst) {
 		const auto srcType = nodeEditingConnection->element;
 		GraphNodePinType dstType = srcType.getReverseDirection();
-		paths.push_back(ScriptRenderer::ConnectionPath{ nodeEditingConnection->pinPos, nodeConnectionDst.value(), srcType, dstType, false });
+		paths.push_back(BaseGraphRenderer::ConnectionPath{ nodeEditingConnection->pinPos, nodeConnectionDst.value(), srcType, dstType, false });
 	}
 
 	for (auto& conn: pendingAutoConnections) {
-		paths.push_back(ScriptRenderer::ConnectionPath{ conn.srcPos, conn.dstPos, conn.srcType, conn.dstType, true });
+		paths.push_back(BaseGraphRenderer::ConnectionPath{ conn.srcPos, conn.dstPos, conn.srcType, conn.dstType, true });
 	}
 
 	drawEntityTargets(painter);
@@ -231,7 +231,7 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 	renderer->setHighlight(nodeUnderMouse, curEntityTarget ? scriptGraph->getEntityIdx(entityTargets[*curEntityTarget].entityId) : std::nullopt);
 	renderer->setSelection(selectedNodes.getSelected());
 	renderer->setCurrentPaths(paths);
-	renderer->setState(scriptState);
+	static_cast<ScriptRenderer&>(*renderer).setState(scriptState);
 	renderer->draw(painter, basePos, getZoom());
 
 	if (!dragging) {
@@ -318,6 +318,7 @@ ScriptGraph* ScriptingBaseGizmo::getGraphPtr()
 
 void ScriptingBaseGizmo::setGraph(ScriptGraph* graph)
 {
+	baseGraph = graph;
 	scriptGraph = graph;
 	dragging.reset();
 	updateNodes();
@@ -477,7 +478,7 @@ void ScriptingBaseGizmo::drawToolTip(Painter& painter, const EntityTarget& entit
 	drawToolTip(painter, text, colours, entityTarget.pos + Vector2f(0, 10));
 }
 
-void ScriptingBaseGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, const ScriptRenderer::NodeUnderMouseInfo& nodeInfo) const
+void ScriptingBaseGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const
 {
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
 	if (!nodeType) {
@@ -579,87 +580,6 @@ GraphNodeId ScriptingBaseGizmo::addNode(const String& type, Vector2f pos, Config
 	return id;
 }
 
-void ScriptingBaseGizmo::updateNodeAutoConnection(gsl::span<const GraphNodeId> nodeIds)
-{
-	pendingAutoConnections.clear();
-
-	const auto& nodes = scriptGraph->getNodes();
-	for (const auto id: nodeIds) {
-		const auto& node = nodes[id];
-		const size_t nPins = node.getNodeType().getPinConfiguration(node).size();
-		for (size_t pinIdx = 0; pinIdx < nPins; ++pinIdx) {
-			const bool empty = !node.getPin(pinIdx).hasConnection();
-			const auto srcPinType = node.getPinType(static_cast<GraphPinId>(pinIdx));
-
-			if (empty) {
-				auto conn = findAutoConnectionForPin(id, static_cast<GraphPinId>(pinIdx), node.getPosition(), srcPinType, nodeIds);
-				if (conn) {
-					pendingAutoConnections.push_back(*conn);
-				}
-			}
-		}
-	}
-
-	pruneConflictingAutoConnections();
-}
-
-void ScriptingBaseGizmo::pruneConflictingAutoConnections()
-{
-	std::sort(pendingAutoConnections.begin(), pendingAutoConnections.end());
-
-	for (size_t i = 0; i < pendingAutoConnections.size(); ++i) {
-		for (size_t j = i + 1; j < pendingAutoConnections.size(); ++j) {
-			if (pendingAutoConnections[i].conflictsWith(pendingAutoConnections[j])) {
-				pendingAutoConnections.erase(pendingAutoConnections.begin() + j);
-			}
-		}
-	}
-}
-
-bool ScriptingBaseGizmo::finishAutoConnection()
-{
-	bool changed = false;
-	for (const auto& conn: pendingAutoConnections) {
-		changed = scriptGraph->connectPins(conn.srcNode, conn.srcPin, conn.dstNode, conn.dstPin) || changed;
-	}
-	pendingAutoConnections.clear();
-	return changed;
-}
-
-std::optional<ScriptingBaseGizmo::Connection> ScriptingBaseGizmo::findAutoConnectionForPin(GraphNodeId srcNodeId, GraphPinId srcPinIdx, Vector2f nodePos, GraphNodePinType srcPinType, gsl::span<const GraphNodeId> excludeIds) const
-{
-	float bestDistance = 100.0f;
-	std::optional<Connection> bestPath;
-
-	for (auto& node: scriptGraph->getNodes()) {
-		if (std_ex::contains(excludeIds, node.getId()))	{
-			continue;
-		}
-
-		// Coarse distance test
-		if ((node.getPosition() - nodePos).length() > 200.0f) {
-			continue;
-		}
-
-		const size_t nPins = node.getNodeType().getPinConfiguration(node).size();
-		for (size_t pinIdx = 0; pinIdx < nPins; ++pinIdx) {
-			const bool empty = !node.getPin(pinIdx).hasConnection();
-			const auto dstPinType = node.getPinType(static_cast<GraphPinId>(pinIdx));
-			if (empty && srcPinType.canConnectTo(dstPinType)) {
-				const auto srcPos = renderer->getPinPosition(basePos, getNode(srcNodeId), srcPinIdx, getZoom());
-				const auto dstPos = renderer->getPinPosition(basePos, getNode(node.getId()), static_cast<GraphPinId>(pinIdx), getZoom());
-				const float distance = (srcPos - dstPos).length();
-				if (distance < bestDistance) {
-					bestDistance = distance;
-					bestPath = Connection{ srcNodeId, node.getId(), srcPinIdx, static_cast<GraphPinId>(pinIdx), srcPinType, dstPinType, srcPos, dstPos, distance };
-				}
-			}
-		}
-	}
-
-	return bestPath;
-}
-
 void ScriptingBaseGizmo::onMouseWheel(Vector2f mousePos, int amount, KeyMods keyMods)
 {
 	int axis;
@@ -685,7 +605,7 @@ void ScriptingBaseGizmo::onMouseWheel(Vector2f mousePos, int amount, KeyMods key
 	}
 }
 
-std::optional<ScriptRenderer::NodeUnderMouseInfo> ScriptingBaseGizmo::getNodeUnderMouse() const
+std::optional<BaseGraphRenderer::NodeUnderMouseInfo> ScriptingBaseGizmo::getNodeUnderMouse() const
 {
 	return nodeUnderMouse;
 }
