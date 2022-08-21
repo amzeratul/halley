@@ -151,6 +151,11 @@ GraphNodePinType ScriptGraphNode::getPinType(GraphPinId idx) const
 	return config[idx];
 }
 
+gsl::span<const GraphNodePinType> ScriptGraphNode::getPinConfiguration() const
+{
+	return getNodeType().getPinConfiguration(*this);
+}
+
 ScriptGraphNodeRoots::Entry::Entry(Range<GraphNodeId> range, GraphNodeId root)
 	: range(range)
 	, root(root)
@@ -293,6 +298,15 @@ void ScriptGraph::deserialize(Deserializer& s)
 	s >> returnToCaller;
 	s >> subGraphs;
 	finishGraph();
+}
+
+GraphNodeId ScriptGraph::addNode(const String& type, Vector2f pos, ConfigNode settings)
+{
+	const auto id = static_cast<GraphNodeId>(nodes.size());
+	nodes.emplace_back(type, pos);
+	nodes.back().getSettings() = std::move(settings);
+	finishGraph();
+	return id;
 }
 
 void ScriptGraph::makeBaseGraph()

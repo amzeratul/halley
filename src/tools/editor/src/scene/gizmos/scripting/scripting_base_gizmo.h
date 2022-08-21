@@ -3,18 +3,14 @@
 #include "halley/editor_extensions/scene_editor_gizmo.h"
 
 namespace Halley {
-	class ScriptingBaseGizmo {
+	class ScriptingBaseGizmo : public BaseGraphGizmo {
 	public:
 		struct EntityTarget {
 			Vector2f pos;
 			EntityId entityId;
 		};
 
-		using ModifiedCallback = std::function<void()>;
-
 		ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom = 1.0f);
-		void setUIRoot(UIRoot& root);
-		void setEventSink(UIWidget& eventSink);
 
 		void addNode();
 		GraphNodeId addNode(const String& type, Vector2f pos, ConfigNode settings);
@@ -46,12 +42,6 @@ namespace Halley {
 
 		std::shared_ptr<UIWidget> makeUI();
 
-		void setZoom(float zoom);
-		float getZoom() const;
-		void setBasePosition(Vector2f pos);
-
-		void onModified();
-		void setModifiedCallback(ModifiedCallback callback);
 		void setEntityTargets(Vector<EntityTarget> entityTargets);
 
 		void onMouseWheel(Vector2f mousePos, int amount, KeyMods keyMods);
@@ -62,40 +52,10 @@ namespace Halley {
 		void updateNodes();
 
 	private:
-		struct Dragging {
-			Vector<GraphNodeId> nodeIds;
-			Vector<Vector2f> startPos;
-			std::optional<Vector2f> startMousePos;
-			bool sticky = false;
-			bool hadChange = false;
-		};
-
-		struct Connection {
-			GraphNodeId srcNode;
-			GraphNodeId dstNode;
-			GraphPinId srcPin;
-			GraphPinId dstPin;
-			GraphNodePinType srcType;
-			GraphNodePinType dstType;
-			Vector2f srcPos;
-			Vector2f dstPos;
-			float distance;
-
-			bool operator<(const Connection& other) const;
-			bool conflictsWith(const Connection& connection) const;
-		};
-
-		UIFactory& factory;
-		const IEntityEditorFactory& entityEditorFactory;
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
 		std::shared_ptr<ScriptRenderer> renderer;
-
-		UIRoot* uiRoot = nullptr;
 		const World* world = nullptr;
-		Resources* resources = nullptr;
-		UIWidget* eventSink = nullptr;
 
-		Vector2f basePos;
 		ScriptGraph* scriptGraph = nullptr;
 		ScriptState* scriptState = nullptr;
 
@@ -110,17 +70,10 @@ namespace Halley {
 		std::optional<Dragging> dragging;
 		Vector<Connection> pendingAutoConnections;
 
-		float zoom = 1.0f;
-		float baseZoom = 1.0f;
-
 		Vector<EntityTarget> entityTargets;
 		std::optional<size_t> curEntityTarget;
 
-		mutable TextRenderer tooltipLabel;
-
 		ExecutionQueue pendingUITasks;
-
-		ModifiedCallback modifiedCallback;
 
 		std::optional<std::pair<ScriptRenderer::NodeUnderMouseInfo, String>> devConData;
 

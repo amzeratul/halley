@@ -83,6 +83,7 @@ namespace Halley {
 		virtual void offsetNodes(GraphNodeId offset);
 
 		virtual GraphNodePinType getPinType(GraphPinId idx) const = 0;
+		virtual gsl::span<const GraphNodePinType> getPinConfiguration() const = 0;
 
 		virtual void feedToHash(Hash::Hasher& hasher);
 
@@ -94,9 +95,34 @@ namespace Halley {
 		GraphNodeId id = 0;
 	};
 
-	template <typename NodeType>
+
 	class BaseGraph {
 	public:
+		virtual ~BaseGraph() = default;
+
+		virtual GraphNodeId addNode(const String& type, Vector2f pos, ConfigNode settings) = 0;
+
+		bool connectPins(GraphNodeId srcNodeIdx, GraphPinId srcPinN, GraphNodeId dstNodeIdx, GraphPinId dstPinN);
+		bool disconnectPin(GraphNodeId nodeIdx, GraphPinId pinN);
+		bool disconnectPinIfSingleConnection(GraphNodeId nodeIdx, GraphPinId pinN);
+		void validateNodePins(GraphNodeId nodeIdx);
+
+		virtual BaseGraphNode& getNode(size_t i) = 0;
+		virtual const BaseGraphNode& getNode(size_t i) const = 0;
+
+	protected:
+		virtual bool isMultiConnection(GraphNodePinType pinType) const
+		{
+			return false;
+		}
+	};
+
+
+	template <typename NodeType>
+	class BaseGraphImpl : public BaseGraph {
+	public:
+		static_assert(std::is_base_of_v<BaseGraphNode, NodeType>);
+		
 		const Vector<NodeType>& getNodes() const
 		{
 			return nodes;
@@ -107,79 +133,17 @@ namespace Halley {
 			return nodes;
 		}
 
-		bool connectPins(GraphNodeId srcNodeIdx, GraphPinId srcPinN, GraphNodeId dstNodeIdx, GraphPinId dstPinN)
+		BaseGraphNode& getNode(size_t i) final override
 		{
-			auto& srcNode = nodes.at(srcNodeIdx);
-			auto& srcPin = srcNode.getPin(srcPinN);
-			auto& dstNode = nodes.at(dstNodeIdx);
-			auto& dstPin = dstNode.getPin(dstPinN);
-
-			for (const auto& conn: srcPin.connections) {
-				if (conn.dstNode == dstNodeIdx && conn.dstPin == dstPinN) {
-					return false;
-				}
-			}
-
-			disconnectPinIfSingleConnection(srcNodeIdx, srcPinN);
-			disconnectPinIfSingleConnection(dstNodeIdx, dstPinN);
-			
-			srcPin.connections.emplace_back(BaseGraphNode::PinConnection{ dstNodeIdx, dstPinN });
-			dstPin.connections.emplace_back(BaseGraphNode::PinConnection{ srcNodeIdx, srcPinN });
-
-			return true;
+			return nodes.at(i);
 		}
 
-		bool disconnectPin(GraphNodeId nodeIdx, GraphPinId pinN)
+		const BaseGraphNode& getNode(size_t i) const final override
 		{
-			auto& node = nodes.at(nodeIdx);
-			auto& pin = node.getPin(pinN);
-			if (pin.connections.empty()) {
-				return false;
-			}
-
-			for (auto& conn: pin.connections) {
-				if (conn.dstNode) {
-					auto& otherNode = nodes.at(conn.dstNode.value());
-					auto& ocs = otherNode.getPin(conn.dstPin).connections;
-					std_ex::erase_if(ocs, [&] (const auto& oc) { return oc.dstNode == nodeIdx && oc.dstPin == pinN; });
-				}
-			}
-
-			pin.connections.clear();
-
-			return true;
-		}
-
-		bool disconnectPinIfSingleConnection(GraphNodeId nodeIdx, GraphPinId pinN)
-		{
-			auto& node = nodes.at(nodeIdx);
-			if (isMultiConnection(node.getPinType(pinN))) {
-				return false;
-			}
-
-			return disconnectPin(nodeIdx, pinN);
-		}
-
-		void validateNodePins(GraphNodeId nodeIdx)
-		{
-			auto& node = nodes.at(nodeIdx);
-
-			const size_t nPinsCur = node.getPins().size();
-			const size_t nPinsTarget = node.getNodeType().getPinConfiguration(node).size();
-			if (nPinsCur > nPinsTarget) {
-				for (size_t i = nPinsTarget; i < nPinsCur; ++i) {
-					disconnectPin(nodeIdx, static_cast<GraphPinId>(i));
-				}
-				node.getPins().resize(nPinsTarget);
-			}
+			return nodes.at(i);
 		}
 
 	protected:
 		Vector<NodeType> nodes;
-
-		virtual bool isMultiConnection(GraphNodePinType pinType) const
-		{
-			return false;
-		}
 	};
 }

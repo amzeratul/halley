@@ -61,6 +61,69 @@ void BaseGraphNode::feedToHash(Hash::Hasher& hasher)
 	// TODO: settings, pins
 }
 
+bool BaseGraph::connectPins(GraphNodeId srcNodeIdx, GraphPinId srcPinN, GraphNodeId dstNodeIdx, GraphPinId dstPinN) {
+	auto& srcNode = getNode(srcNodeIdx);
+	auto& srcPin = srcNode.getPin(srcPinN);
+	auto& dstNode = getNode(dstNodeIdx);
+	auto& dstPin = dstNode.getPin(dstPinN);
+
+	for (const auto& conn: srcPin.connections) {
+		if (conn.dstNode == dstNodeIdx && conn.dstPin == dstPinN) {
+			return false;
+		}
+	}
+
+	disconnectPinIfSingleConnection(srcNodeIdx, srcPinN);
+	disconnectPinIfSingleConnection(dstNodeIdx, dstPinN);
+			
+	srcPin.connections.emplace_back(BaseGraphNode::PinConnection{ dstNodeIdx, dstPinN });
+	dstPin.connections.emplace_back(BaseGraphNode::PinConnection{ srcNodeIdx, srcPinN });
+
+	return true;
+}
+
+bool BaseGraph::disconnectPin(GraphNodeId nodeIdx, GraphPinId pinN) {
+	auto& node = getNode(nodeIdx);
+	auto& pin = node.getPin(pinN);
+	if (pin.connections.empty()) {
+		return false;
+	}
+
+	for (auto& conn: pin.connections) {
+		if (conn.dstNode) {
+			auto& otherNode = getNode(conn.dstNode.value());
+			auto& ocs = otherNode.getPin(conn.dstPin).connections;
+			std_ex::erase_if(ocs, [&] (const auto& oc) { return oc.dstNode == nodeIdx && oc.dstPin == pinN; });
+		}
+	}
+
+	pin.connections.clear();
+
+	return true;
+}
+
+bool BaseGraph::disconnectPinIfSingleConnection(GraphNodeId nodeIdx, GraphPinId pinN) {
+	auto& node = getNode(nodeIdx);
+	if (isMultiConnection(node.getPinType(pinN))) {
+		return false;
+	}
+
+	return disconnectPin(nodeIdx, pinN);
+}
+
+void BaseGraph::validateNodePins(GraphNodeId nodeIdx) {
+	auto& node = getNode(nodeIdx);
+
+	const size_t nPinsCur = node.getPins().size();
+	const size_t nPinsTarget = node.getPinConfiguration().size();
+	if (nPinsCur > nPinsTarget) {
+		for (size_t i = nPinsTarget; i < nPinsCur; ++i) {
+			disconnectPin(nodeIdx, static_cast<GraphPinId>(i));
+		}
+		node.getPins().resize(nPinsTarget);
+	}
+}
+
 void BaseGraphNode::onNodeRemoved(GraphNodeId nodeId)
 {
 	for (auto& pin: pins) {

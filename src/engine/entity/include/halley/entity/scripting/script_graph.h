@@ -12,7 +12,7 @@ namespace Halley {
 	class ScriptGraph;
 	class World;
 
-	class ScriptGraphNode : public BaseGraphNode {
+	class ScriptGraphNode final : public BaseGraphNode {
 	public:
 		ScriptGraphNode();
 		ScriptGraphNode(String type, Vector2f position);
@@ -25,7 +25,9 @@ namespace Halley {
 
 		void assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		const IScriptNodeType& getNodeType() const;
+
 		GraphNodePinType getPinType(GraphPinId idx) const override;
+		gsl::span<const GraphNodePinType> getPinConfiguration() const override;
 
 		OptionalLite<GraphNodeId> getParentNode() const { return parentNode; }
 		void setParentNode(OptionalLite<GraphNodeId> id) { parentNode = id; }
@@ -59,7 +61,7 @@ namespace Halley {
 		void clear();
 	};
 	
-	class ScriptGraph : public Resource, public BaseGraph<ScriptGraphNode>, public std::enable_shared_from_this<ScriptGraph> {
+	class ScriptGraph final : public Resource, public BaseGraphImpl<ScriptGraphNode>, public std::enable_shared_from_this<ScriptGraph> {
 	public:
 		struct FunctionParameters {
 			uint8_t nOutput = 1;
@@ -94,6 +96,7 @@ namespace Halley {
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
+		GraphNodeId addNode(const String& type, Vector2f pos, ConfigNode settings) override;
 		void makeBaseGraph();
 
 		OptionalLite<GraphNodeId> getStartNode() const;

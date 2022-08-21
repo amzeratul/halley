@@ -8,29 +8,10 @@
 using namespace Halley;
 
 ScriptingBaseGizmo::ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom)
-	: factory(factory)
-	, entityEditorFactory(entityEditorFactory)
+	: BaseGraphGizmo(factory, entityEditorFactory, resources, baseZoom)
 	, scriptNodeTypes(std::move(scriptNodeTypes))
 	, world(world)
-	, resources(&resources)
-	, baseZoom(baseZoom)
 {
-	tooltipLabel
-		.setFont(factory.getResources().get<Font>("Ubuntu Bold"))
-		.setSize(14)
-		.setColour(Colour(1, 1, 1))
-		.setOutlineColour(Colour(0, 0, 0))
-		.setOutline(1);
-}
-
-void ScriptingBaseGizmo::setUIRoot(UIRoot& root)
-{
-	uiRoot = &root;
-}
-
-void ScriptingBaseGizmo::setEventSink(UIWidget& sink)
-{
-	eventSink = &sink;
 }
 
 void ScriptingBaseGizmo::update(Time time, const SceneEditorInputState& inputState)
@@ -113,41 +94,9 @@ void ScriptingBaseGizmo::update(Time time, const SceneEditorInputState& inputSta
 	lastShiftHeld = inputState.shiftHeld;
 }
 
-void ScriptingBaseGizmo::setZoom(float zoom)
-{
-	this->zoom = zoom;
-}
-
-float ScriptingBaseGizmo::getZoom() const
-{
-	return zoom;
-}
-
-void ScriptingBaseGizmo::setModifiedCallback(ModifiedCallback callback)
-{
-	modifiedCallback = std::move(callback);
-}
-
 void ScriptingBaseGizmo::setEntityTargets(Vector<EntityTarget> targets)
 {
 	entityTargets = std::move(targets);
-}
-
-bool ScriptingBaseGizmo::Connection::operator<(const Connection& other) const
-{
-	return distance < other.distance;
-}
-
-bool ScriptingBaseGizmo::Connection::conflictsWith(const Connection& other) const
-{
-	return (srcNode == other.srcNode && srcPin == other.srcPin) || (dstNode == other.dstNode && dstPin == other.dstPin);
-}
-
-void ScriptingBaseGizmo::onModified()
-{
-	if (modifiedCallback) {
-		modifiedCallback();
-	}
 }
 
 void ScriptingBaseGizmo::onNodeClicked(Vector2f mousePos, SelectionSetModifier modifier)
@@ -514,11 +463,6 @@ bool ScriptingBaseGizmo::deleteSelection()
 	return changed;
 }
 
-void ScriptingBaseGizmo::setBasePosition(Vector2f pos)
-{
-	basePos = pos;
-}
-
 ExecutionQueue& ScriptingBaseGizmo::getExecutionQueue()
 {
 	return pendingUITasks;
@@ -625,11 +569,7 @@ void ScriptingBaseGizmo::addNode()
 
 GraphNodeId ScriptingBaseGizmo::addNode(const String& type, Vector2f pos, ConfigNode settings)
 {
-	auto& nodes = scriptGraph->getNodes();
-	const GraphNodeId id = static_cast<GraphNodeId>(nodes.size());
-	nodes.emplace_back(type, pos);
-	nodes.back().getSettings() = std::move(settings);
-	scriptGraph->finishGraph();
+	const auto id = scriptGraph->addNode(type, pos, std::move(settings));
 	assignNodeTypes();
 	onModified();
 
