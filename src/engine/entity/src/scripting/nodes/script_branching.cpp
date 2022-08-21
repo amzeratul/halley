@@ -112,7 +112,7 @@ IScriptNodeType::Result ScriptMergeAll::doUpdate(ScriptEnvironment& environment,
 	const auto& pinConfigs = getPinConfiguration(node);
 	const auto& pins = node.getPins();
 	for (size_t i = 0; i < pins.size(); ++i) {
-		if (pinConfigs[i].type == ScriptNodeElementType::FlowPin && pinConfigs[i].direction == GraphNodePinDirection::Input) {
+		if (pinConfigs[i].type == GraphElementType(ScriptNodeElementType::FlowPin) && pinConfigs[i].direction == GraphNodePinDirection::Input) {
 			for (const auto& conn: pins[i].connections) {
 				if (conn.dstNode) {
 					++expected;

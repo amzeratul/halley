@@ -35,43 +35,4 @@ namespace Halley {
 		WriteDataPin,
 		TargetPin
 	};
-
-	struct GraphNodePinType {
-		ScriptNodeElementType type = ScriptNodeElementType::Undefined;
-		GraphNodePinDirection direction = GraphNodePinDirection::Input;
-		bool isCancellable : 1;
-		bool forceHorizontal : 1;
-		
-		GraphNodePinType(ScriptNodeElementType type = ScriptNodeElementType::Undefined, GraphNodePinDirection direction = GraphNodePinDirection::Input, bool cancellable = false, bool forceHorizontal = false)
-			: type(type)
-			, direction(direction)
-			, isCancellable(cancellable)
-			, forceHorizontal(forceHorizontal)
-		{}
-
-		[[nodiscard]] bool operator==(const GraphNodePinType& other) const
-		{
-			return type == other.type && direction == other.direction && isCancellable == other.isCancellable && forceHorizontal == other.forceHorizontal;
-		}
-
-		[[nodiscard]] bool operator!=(const GraphNodePinType& other) const
-		{
-			return !(*this == other);
-		}
-
-		[[nodiscard]] GraphPinSide getSide() const
-		{
-			return direction == GraphNodePinDirection::Input ? GraphPinSide::Left : GraphPinSide::Right;
-		}
-
-		[[nodiscard]] bool canConnectTo(const GraphNodePinType& other) const
-		{
-			return type == other.type && direction != other.direction;
-		}
-
-		[[nodiscard]] GraphNodePinType getReverseDirection() const
-		{
-			return GraphNodePinType(type, direction == GraphNodePinDirection::Input ? GraphNodePinDirection::Output : GraphNodePinDirection::Input);
-		}
-	};
 }

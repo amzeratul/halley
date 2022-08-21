@@ -76,7 +76,7 @@ void ScriptRenderer::draw(Painter& painter, Vector2f basePos, float curZoom, flo
 	for (GraphNodeId i = 0; i < static_cast<GraphNodeId>(graph->getNodes().size()); ++i) {
 		if (!graph->getNodes()[i].getParentNode()) {
 			const bool highlightThis = highlightNode && highlightNode->nodeId == i;
-			auto pinType = highlightThis ? highlightNode->element : std::optional<GraphNodePinType>();
+			auto pinType = highlightThis ? std::optional<GraphNodePinType>(highlightNode->element) : std::optional<GraphNodePinType>();
 			auto pinId = highlightThis ? highlightNode->elementId : 0;
 
 			if (highlightNode && !highlightThis) {
@@ -104,7 +104,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, GraphNo
 	if (!nodeType) {
 		return;
 	}
-	const bool nodeHighlighted = highlightNode && highlightNode->nodeId == nodeIdx && highlightNode->element.type == ScriptNodeElementType::Node;
+	const bool nodeHighlighted = highlightNode && highlightNode->nodeId == nodeIdx && highlightNode->element.type == GraphElementType(ScriptNodeElementType::Node);
 
 	for (size_t i = 0; i < node.getPins().size(); ++i) {
 		const auto& srcPinType = nodeType->getPin(node, i);
@@ -128,7 +128,7 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, GraphNo
 				dstPos = getNodeElementArea(*dstNodeType, basePos, dstNode, dstIdx, curZoom, posScale).getCentre();
 				dstPinType = dstNodeType->getPin(dstNode, dstIdx);
 				if (highlightNode && highlightNode->nodeId == pinConnection.dstNode.value()) {
-					if (highlightNode->element.type == ScriptNodeElementType::Node || highlightNode->elementId == pinConnection.dstPin) {
+					if (highlightNode->element.type == GraphElementType(ScriptNodeElementType::Node) || highlightNode->elementId == pinConnection.dstPin) {
 						highlighted = true;
 					}
 				}
@@ -210,7 +210,7 @@ ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(GraphNodeId nodeId)
 	} else {
 		// Rendering in editor
 		const bool highlightThis = highlightNode && highlightNode->nodeId == nodeId;
-		if (highlightThis && highlightNode->element.type == ScriptNodeElementType::Node) {
+		if (highlightThis && highlightNode->element.type == GraphElementType(ScriptNodeElementType::Node)) {
 			drawMode.type = NodeDrawModeType::Highlight;
 		}
 	}
@@ -220,7 +220,7 @@ ScriptRenderer::NodeDrawMode ScriptRenderer::getNodeDrawMode(GraphNodeId nodeId)
 
 GraphPinSide ScriptRenderer::getSide(GraphNodePinType pinType) const
 {
-	switch (pinType.type) {
+	switch (ScriptNodeElementType(pinType.type)) {
 	case ScriptNodeElementType::TargetPin:
 		if (!pinType.forceHorizontal) {
 			return pinType.direction == GraphNodePinDirection::Input ? GraphPinSide::Top : GraphPinSide::Bottom;
@@ -449,7 +449,7 @@ Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType)
 
 Colour4f ScriptRenderer::getPinColour(GraphNodePinType pinType) const
 {
-	switch (pinType.type) {
+	switch (ScriptNodeElementType(pinType.type)) {
 	case ScriptNodeElementType::FlowPin:
 		return pinType.isCancellable ? Colour4f(0.75f, 0.0f, 0.99f) : Colour4f(0.75f, 0.75f, 0.99f);
 	case ScriptNodeElementType::ReadDataPin:

@@ -96,107 +96,35 @@ ScriptGraphNode::ScriptGraphNode()
 {}
 
 ScriptGraphNode::ScriptGraphNode(String type, Vector2f position)
-	: position(position)
-	, type(std::move(type))
-	, settings(ConfigNode::MapType())
+	: BaseGraphNode(type, position)
 {
 }
 
 ScriptGraphNode::ScriptGraphNode(const ConfigNode& node)
+	: BaseGraphNode(node)
 {
-	position = node["position"].asVector2f();
-	type = node["type"].asString();
-	if (node.hasKey("settings")) {
-		settings = ConfigNode(node["settings"]);
-	} else {
-		settings = ConfigNode::MapType();
-	}
-	pins = node["pins"].asVector<Pin>();
-}
-
-ConfigNode ScriptGraphNode::toConfigNode() const
-{
-	ConfigNode::MapType result;
-	result["position"] = position;
-	result["type"] = type;
-	if (settings.getType() == ConfigNodeType::Map && !settings.asMap().empty()) {
-		result["settings"] = ConfigNode(settings);
-	}
-	result["pins"] = pins;
-	return result;
 }
 
 void ScriptGraphNode::serialize(Serializer& s) const
 {
-	s << position;
-	s << type;
-	s << settings;
-	s << pins;
+	BaseGraphNode::serialize(s);
 	s << parentNode;
 }
 
 void ScriptGraphNode::deserialize(Deserializer& s)
 {
-	s >> position;
-	s >> type;
-	s >> settings;
-	s >> pins;
+	BaseGraphNode::deserialize(s);
 	s >> parentNode;
 }
 
 void ScriptGraphNode::feedToHash(Hash::Hasher& hasher)
 {
-	hasher.feed(type);
-	// TODO: settings, pins
-}
-
-void ScriptGraphNode::onNodeRemoved(GraphNodeId nodeId)
-{
-	for (auto& pin: pins) {
-		for (auto& o: pin.connections) {
-			if (o.dstNode) {
-				if (o.dstNode.value() == nodeId) {
-					o.dstNode = OptionalLite<GraphNodeId>();
-					o.dstPin = 0;
-				} else if (o.dstNode.value() >= nodeId) {
-					--o.dstNode.value();
-				}
-			}
-		}
-		std_ex::erase_if(pin.connections, [] (const PinConnection& c) { return !c.hasConnection(); });
-	}
-}
-
-void ScriptGraphNode::remapNodes(const HashMap<GraphNodeId, GraphNodeId>& remap)
-{
-	for (auto& pin: pins) {
-		for (auto& o: pin.connections) {
-			if (o.dstNode) {
-				const auto iter = remap.find(o.dstNode.value());
-				if (iter != remap.end()) {
-					o.dstNode = iter->second;
-				} else {
-					o.dstNode.reset();
-					o.dstPin = 0;
-				}
-			} else if (o.entityIdx) {
-				o.entityIdx.reset();
-			}
-		}
-		std_ex::erase_if(pin.connections, [] (const PinConnection& c) { return !c.hasConnection(); });
-	}
+	BaseGraphNode::feedToHash(hasher);
 }
 
 void ScriptGraphNode::offsetNodes(GraphNodeId offset)
 {
-	for (auto& pin: pins) {
-		for (auto& o: pin.connections) {
-			if (o.dstNode) {
-				*o.dstNode += offset;
-			}
-		}
-	}
-	id += offset;
+	BaseGraphNode::offsetNodes(offset);
 	if (parentNode) {
 		*parentNode += offset;
 	}
@@ -466,28 +394,6 @@ int ScriptGraph::getMessageNumParams(const String& messageId) const
 	return 0;
 }
 
-bool ScriptGraph::connectPins(GraphNodeId srcNodeIdx, GraphPinId srcPinN, GraphNodeId dstNodeIdx, GraphPinId dstPinN)
-{
-	auto& srcNode = nodes.at(srcNodeIdx);
-	auto& srcPin = srcNode.getPin(srcPinN);
-	auto& dstNode = nodes.at(dstNodeIdx);
-	auto& dstPin = dstNode.getPin(dstPinN);
-
-	for (const auto& conn: srcPin.connections) {
-		if (conn.dstNode == dstNodeIdx && conn.dstPin == dstPinN) {
-			return false;
-		}
-	}
-
-	disconnectPinIfSingleConnection(srcNodeIdx, srcPinN);
-	disconnectPinIfSingleConnection(dstNodeIdx, dstPinN);
-	
-	srcPin.connections.emplace_back(ScriptGraphNode::PinConnection{ dstNodeIdx, dstPinN });
-	dstPin.connections.emplace_back(ScriptGraphNode::PinConnection{ srcNodeIdx, srcPinN });
-
-	return true;
-}
-
 bool ScriptGraph::connectPin(GraphNodeId srcNodeIdx, GraphPinId srcPinN, EntityId target)
 {
 	auto& srcNode = nodes.at(srcNodeIdx);
@@ -506,51 +412,6 @@ bool ScriptGraph::connectPin(GraphNodeId srcNodeIdx, GraphPinId srcPinN, EntityI
 	}
 
 	return true;
-}
-
-bool ScriptGraph::disconnectPin(GraphNodeId nodeIdx, GraphPinId pinN)
-{
-	auto& node = nodes.at(nodeIdx);
-	auto& pin = node.getPin(pinN);
-	if (pin.connections.empty()) {
-		return false;
-	}
-
-	for (auto& conn: pin.connections) {
-		if (conn.dstNode) {
-			auto& otherNode = nodes.at(conn.dstNode.value());
-			auto& ocs = otherNode.getPin(conn.dstPin).connections;
-			std_ex::erase_if(ocs, [&] (const auto& oc) { return oc.dstNode == nodeIdx && oc.dstPin == pinN; });
-		}
-	}
-
-	pin.connections.clear();
-
-	return true;
-}
-
-bool ScriptGraph::disconnectPinIfSingleConnection(GraphNodeId nodeIdx, GraphPinId pinN)
-{
-	auto& node = nodes.at(nodeIdx);
-	if (isMultiConnection(node.getPinType(pinN))) {
-		return false;
-	}
-
-	return disconnectPin(nodeIdx, pinN);
-}
-
-void ScriptGraph::validateNodePins(GraphNodeId nodeIdx)
-{
-	auto& node = nodes.at(nodeIdx);
-
-	const size_t nPinsCur = node.getPins().size();
-	const size_t nPinsTarget = node.getNodeType().getPinConfiguration(node).size();
-	if (nPinsCur > nPinsTarget) {
-		for (size_t i = nPinsTarget; i < nPinsCur; ++i) {
-			disconnectPin(nodeIdx, static_cast<GraphPinId>(i));
-		}
-		node.getPins().resize(nPinsTarget);
-	}
 }
 
 void ScriptGraph::assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const
@@ -648,10 +509,10 @@ void ScriptGraph::generateRoots()
 }
 
 bool ScriptGraph::isMultiConnection(GraphNodePinType pinType) const {
-	return (pinType.type == ScriptNodeElementType::ReadDataPin && pinType.direction == GraphNodePinDirection::Output)
-		|| (pinType.type == ScriptNodeElementType::WriteDataPin && pinType.direction == GraphNodePinDirection::Input)
-		|| (pinType.type == ScriptNodeElementType::FlowPin)
-		|| (pinType.type == ScriptNodeElementType::TargetPin && pinType.direction == GraphNodePinDirection::Output);
+	return (pinType.type == static_cast<int>(ScriptNodeElementType::ReadDataPin) && pinType.direction == GraphNodePinDirection::Output)
+		|| (pinType.type == static_cast<int>(ScriptNodeElementType::WriteDataPin) && pinType.direction == GraphNodePinDirection::Input)
+		|| (pinType.type == static_cast<int>(ScriptNodeElementType::FlowPin))
+		|| (pinType.type == static_cast<int>(ScriptNodeElementType::TargetPin) && pinType.direction == GraphNodePinDirection::Output);
 }
 
 void ScriptGraph::setRoots(ScriptGraphNodeRoots roots)

@@ -186,13 +186,13 @@ ConfigNode ScriptEnvironment::readNodeElementDevConData(ScriptState& graphState,
 			return nodeType.getDevConData(*this, node, graphState.getNodeState(nodeId).data);
 		} else {
 			const auto& pinConfig = nodeType.getPinConfiguration(node)[pinId];
-			if (pinConfig.type == ScriptNodeElementType::ReadDataPin) {
+			if (pinConfig.type == GraphElementType(ScriptNodeElementType::ReadDataPin)) {
 				if (pinConfig.direction == GraphNodePinDirection::Input) {
 					return readInputDataPin(node, pinId);
 				} else {
 					return readOutputDataPin(node, pinId);
 				}
-			} else if (pinConfig.type == ScriptNodeElementType::TargetPin) {
+			} else if (pinConfig.type == GraphElementType(ScriptNodeElementType::TargetPin)) {
 				EntityId id;
 				if (pinConfig.direction == GraphNodePinDirection::Input) {
 					if (node.getPins()[pinId].hasConnection()) {

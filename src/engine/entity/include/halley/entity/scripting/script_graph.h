@@ -3,6 +3,7 @@
 #include "script_state.h"
 #include "../entity_id.h"
 #include "halley/bytes/config_node_serializer.h"
+#include "halley/core/graph/base_graph.h"
 #include "halley/utils/hash.h"
 
 namespace Halley {
@@ -11,97 +12,28 @@ namespace Halley {
 	class ScriptGraph;
 	class World;
 
-	class ScriptGraphNode {
+	class ScriptGraphNode : public BaseGraphNode {
 	public:
-		struct PinConnection {
-			OptionalLite<GraphNodeId> dstNode = {};
-			GraphPinId dstPin = 0;
-			OptionalLite<uint8_t> entityIdx;
-
-			PinConnection() = default;
-			PinConnection(const ConfigNode& node);
-			PinConnection(GraphNodeId dstNode, GraphPinId dstPin);
-			explicit PinConnection(OptionalLite<uint8_t> entityIdx);
-
-			ConfigNode toConfigNode() const;
-
-			void serialize(Serializer& s) const;
-			void deserialize(Deserializer& s);
-
-			bool hasConnection() const;
-		};
-		
-		struct Pin {
-			Vector<PinConnection> connections;
-
-			Pin() = default;
-			Pin(const ConfigNode& node);
-			ConfigNode toConfigNode() const;
-
-			void serialize(Serializer& s) const;
-			void deserialize(Deserializer& s);
-
-			bool hasConnection() const;
-		};
-		
 		ScriptGraphNode();
 		ScriptGraphNode(String type, Vector2f position);
 		ScriptGraphNode(const ConfigNode& node);
+		
+		void serialize(Serializer& s) const override;
+		void deserialize(Deserializer& s) override;
 
-		ConfigNode toConfigNode() const;
-
-		void serialize(Serializer& s) const;
-		void deserialize(Deserializer& s);
-
-		Vector2f getPosition() const { return position; }
-		void setPosition(Vector2f p) { position = p; }
-
-		const String& getType() const { return type; }
-
-		Vector<Pin>& getPins() { return pins; }
-		const Vector<Pin>& getPins() const { return pins; }
-		Pin& getPin(size_t idx)
-		{
-			if (idx >= pins.size()) {
-				pins.resize(idx + 1);
-			}
-			return pins[idx];
-		}
-		const Pin& getPin(size_t idx) const
-		{
-			if (idx >= pins.size()) {
-				static Pin dummy;
-				return dummy;
-			}
-			return pins[idx];
-		}
-
-		const ConfigNode& getSettings() const { return settings; }
-		ConfigNode& getSettings() { return settings; }
-
-		void feedToHash(Hash::Hasher& hasher);
-
-		void onNodeRemoved(GraphNodeId nodeId);
-		void remapNodes(const HashMap<GraphNodeId, GraphNodeId>& remap);
-		void offsetNodes(GraphNodeId offset);
+		void feedToHash(Hash::Hasher& hasher) override;
 
 		void assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		const IScriptNodeType& getNodeType() const;
+		GraphNodePinType getPinType(GraphPinId idx) const override;
 
-		GraphNodeId getId() const { return id; }
-		void setId(GraphNodeId i) { id = i; }
 		OptionalLite<GraphNodeId> getParentNode() const { return parentNode; }
 		void setParentNode(OptionalLite<GraphNodeId> id) { parentNode = id; }
 
-		GraphNodePinType getPinType(GraphPinId idx) const;
+		void offsetNodes(GraphNodeId offset) override;
 
 	private:
 		mutable const IScriptNodeType* nodeType = nullptr;
-		ConfigNode settings;
-		Vector<Pin> pins;
-		String type;
-		Vector2f position;
-		GraphNodeId id = 0;
 		OptionalLite<GraphNodeId> parentNode;
 	};
 
@@ -127,7 +59,7 @@ namespace Halley {
 		void clear();
 	};
 	
-	class ScriptGraph : public Resource, public std::enable_shared_from_this<ScriptGraph> {
+	class ScriptGraph : public Resource, public BaseGraph<ScriptGraphNode>, public std::enable_shared_from_this<ScriptGraph> {
 	public:
 		struct FunctionParameters {
 			uint8_t nOutput = 1;
@@ -164,9 +96,6 @@ namespace Halley {
 
 		void makeBaseGraph();
 
-		const Vector<ScriptGraphNode>& getNodes() const { return nodes; }
-		Vector<ScriptGraphNode>& getNodes() { return nodes; }
-
 		OptionalLite<GraphNodeId> getStartNode() const;
 		OptionalLite<GraphNodeId> getCallee(GraphNodeId node) const;
 		OptionalLite<GraphNodeId> getCaller(GraphNodeId node) const;
@@ -176,11 +105,7 @@ namespace Halley {
 
 		std::optional<GraphNodeId> getMessageInboxId(const String& messageId, bool requiresSpawningScript = false) const;
 
-		bool connectPins(GraphNodeId srcNode, GraphPinId srcPinN, GraphNodeId dstNode, GraphPinId dstPin);
 		bool connectPin(GraphNodeId srcNode, GraphPinId srcPinN, EntityId target);
-		bool disconnectPin(GraphNodeId nodeIdx, GraphPinId pinN);
-		bool disconnectPinIfSingleConnection(GraphNodeId nodeIdx, GraphPinId pinN);
-		void validateNodePins(GraphNodeId nodeIdx);
 
 		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const;
 		void finishGraph();
@@ -201,7 +126,6 @@ namespace Halley {
 		FunctionParameters getFunctionParameters() const;
 
 	private:
-		Vector<ScriptGraphNode> nodes;
 		Vector<EntityId> entityIds;
 		Vector<std::pair<GraphNodeId, GraphNodeId>> callerToCallee;
 		Vector<std::pair<GraphNodeId, GraphNodeId>> returnToCaller;
@@ -214,7 +138,7 @@ namespace Halley {
 
 		GraphNodeId findNodeRoot(GraphNodeId nodeId) const;
 		void generateRoots();
-		[[nodiscard]] bool isMultiConnection(GraphNodePinType pinType) const;
+		[[nodiscard]] bool isMultiConnection(GraphNodePinType pinType) const override;
 	};
 
 	template <>

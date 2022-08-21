@@ -80,7 +80,7 @@ void ScriptingBaseGizmo::update(Time time, const SceneEditorInputState& inputSta
 
 	if (startedIdle && inputState.leftClickPressed && inputState.mousePos) {
 		const auto modifier = getSelectionModifier(inputState);
-		if (nodeUnderMouse && nodeUnderMouse->element.type == ScriptNodeElementType::Node) {
+		if (nodeUnderMouse && nodeUnderMouse->element.type == GraphElementType(ScriptNodeElementType::Node)) {
 			selectedNodes.mouseButtonPressed(nodeUnderMouse->nodeId, modifier, *inputState.mousePos);
 		} else {
 			selectedNodes.mouseButtonPressed({}, modifier, *inputState.mousePos);
@@ -92,7 +92,7 @@ void ScriptingBaseGizmo::update(Time time, const SceneEditorInputState& inputSta
 
 	if (startedIdle && inputState.mousePos) {
 		if (nodeUnderMouse) {
-			if (nodeUnderMouse->element.type == ScriptNodeElementType::Node) {
+			if (nodeUnderMouse->element.type == GraphElementType(ScriptNodeElementType::Node)) {
 				if (inputState.leftClickPressed) {
 					onNodeClicked(inputState.mousePos.value(), getSelectionModifier(inputState));
 				} else if (inputState.rightClickReleased) {
@@ -242,7 +242,7 @@ void ScriptingBaseGizmo::onEditingConnection(const SceneEditorInputState& inputS
 				onModified();
 			}
 		} else {
-			if (srcType.type == ET::TargetPin && srcType.direction == GraphNodePinDirection::Input) {
+			if (srcType.type == GraphElementType(ET::TargetPin) && srcType.direction == GraphNodePinDirection::Input) {
 				if (scriptGraph->connectPin(srcNodeId, srcPinId, curEntityTarget ? entityTargets[*curEntityTarget].entityId : EntityId())) {
 					onModified();
 				}
@@ -547,7 +547,7 @@ void ScriptingBaseGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& no
 		colours.emplace_back(text.size(), Colour4f(0.44f, 1.0f, 0.94f));
 		text += devConData->second;
 	}
-	const auto elemPos = nodeInfo.element.type == ScriptNodeElementType::Node ? 0.5f * (nodeInfo.nodeArea.getBottomLeft() + nodeInfo.nodeArea.getBottomRight()) : nodeInfo.pinPos;
+	const auto elemPos = nodeInfo.element.type == GraphElementType(ScriptNodeElementType::Node) ? 0.5f * (nodeInfo.nodeArea.getBottomLeft() + nodeInfo.nodeArea.getBottomRight()) : nodeInfo.pinPos;
 	drawToolTip(painter, text, colours, elemPos);
 }
 

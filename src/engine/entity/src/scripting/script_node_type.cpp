@@ -49,7 +49,7 @@ void IScriptNodeType::updateSettings(ScriptGraphNode& node, const ScriptGraph& g
 
 std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const ScriptGraphNode& node, const World* world, PinType elementType, uint8_t elementIdx, const ScriptGraph& graph) const
 {
-	switch (elementType.type) {
+	switch (ScriptNodeElementType(elementType.type)) {
 	case ScriptNodeElementType::ReadDataPin:
 	case ScriptNodeElementType::WriteDataPin:
 	case ScriptNodeElementType::FlowPin:
@@ -108,7 +108,7 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinDescription(con
 	}
 
 	ColourStringBuilder builder;
-	builder.append(getName(elementType.type));
+	builder.append(getName(ScriptNodeElementType(elementType.type)));
 	builder.append(getIO(elementType.direction));
 	if (typeTotal > 1) {
 		builder.append(" " + toString(static_cast<int>(typeIdx)));
@@ -158,7 +158,7 @@ String IScriptNodeType::getConnectedNodeName(const World* world, const ScriptGra
 {
 	const auto& pin = node.getPin(pinN);
 	if (pin.connections.empty()) {
-		if (node.getNodeType().getPin(node, pinN).type == ScriptNodeElementType::TargetPin) {
+		if (node.getNodeType().getPin(node, pinN).type == GraphElementType(ScriptNodeElementType::TargetPin)) {
 			return "<current entity>";
 		} else {
 			return "<empty>";
@@ -199,7 +199,7 @@ std::array<IScriptNodeType::OutputNode, 8> IScriptNodeType::getOutputNodes(const
 	size_t curOutputPin = 0;
 	size_t nOutputsFound = 0;
 	for (size_t i = 0; i < pinConfig.size(); ++i) {
-		if (pinConfig[i].type == ScriptNodeElementType::FlowPin && pinConfig[i].direction == GraphNodePinDirection::Output) {
+		if (pinConfig[i].type == GraphElementType(ScriptNodeElementType::FlowPin) && pinConfig[i].direction == GraphNodePinDirection::Output) {
 			const bool outputActive = (outputActiveMask & (1 << curOutputPin)) != 0;
 			if (outputActive) {
 				const auto& output = node.getPin(i);
@@ -222,7 +222,7 @@ GraphPinId IScriptNodeType::getNthOutputPinIdx(const ScriptGraphNode& node, size
 	const auto& pinConfig = getPinConfiguration(node);
 	size_t curOutputPin = 0;
 	for (size_t i = 0; i < pinConfig.size(); ++i) {
-		if (pinConfig[i].type == ScriptNodeElementType::FlowPin && pinConfig[i].direction == GraphNodePinDirection::Output) {
+		if (pinConfig[i].type == GraphElementType(ScriptNodeElementType::FlowPin) && pinConfig[i].direction == GraphNodePinDirection::Output) {
 			if (curOutputPin == n) {
 				return static_cast<GraphPinId>(i);
 			}
