@@ -5,6 +5,7 @@
 #include "../audio_filter_resample.h"
 #include "audio_object.h"
 #include "audio_source_clip.h"
+#include "audio_source_delay.h"
 #include "../audio_mixer.h"
 #include "sub_objects/audio_sub_object_layers.h"
 
@@ -69,6 +70,14 @@ size_t AudioSourceLayers::getSamplesLeft() const
 	return result;
 }
 
+void AudioSourceLayers::restart()
+{
+	for (auto& layer: layers) {
+		layer.restart(layerConfig, emitter);
+		layer.source->restart();
+	}
+}
+
 AudioSourceLayers::Layer::Layer(std::unique_ptr<AudioSource> source, AudioEmitter& emitter, size_t idx)
 	: source(std::move(source))
 	, idx(idx)
@@ -77,10 +86,22 @@ AudioSourceLayers::Layer::Layer(std::unique_ptr<AudioSource> source, AudioEmitte
 
 void AudioSourceLayers::Layer::init(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter)
 {
-	const auto targetGain = layerConfig.getLayer(idx).expression.evaluate(emitter);
+	const auto& curLayer = layerConfig.getLayer(idx);
+	restart(layerConfig, emitter);
+
+	synchronised = curLayer.synchronised;
+	restartFromBeginning = curLayer.restartFromBeginning;
+	if (curLayer.delay > 0.0001f) {
+		source = std::make_unique<AudioSourceDelay>(std::move(source), static_cast<size_t>(lroundl(curLayer.delay * AudioConfig::sampleRate)));
+	}
+}
+
+void AudioSourceLayers::Layer::restart(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter)
+{
+	const auto& curLayer = layerConfig.getLayer(idx);
+	const auto targetGain = curLayer.expression.evaluate(emitter);
 	fader.stopAndSetValue(targetGain);
 	prevGain = gain = targetGain;
-	synchronised = layerConfig.getLayer(idx).synchronised;
 	playing = targetGain > 0.0001f;
 }
 
@@ -100,5 +121,12 @@ void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& la
 	prevGain = gain;
 	gain = fader.getCurrentValue();
 
+	const bool wasPlaying = playing;
 	playing = gain > 0.0001f || prevGain > 0.0001f;
+
+	if (wasPlaying && !playing) {
+		if (restartFromBeginning) {
+			source->restart();
+		}
+	}
 }

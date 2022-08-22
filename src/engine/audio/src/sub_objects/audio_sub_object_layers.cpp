@@ -123,12 +123,14 @@ AudioSubObjectLayers::Layer::Layer(const ConfigNode& node)
 	object = IAudioSubObject::makeSubObject(node["object"]);
 	expression.load(node["expression"]);
 	synchronised = node["synchronised"].asBool(false);
+	restartFromBeginning = node["restartFromBeginning"].asBool(false);
 	if (node.hasKey("fadeIn")) {
 		fadeIn = AudioFade(node["fadeIn"]);
 	}
 	if (node.hasKey("fadeOut")) {
 		fadeOut = AudioFade(node["fadeOut"]);
 	}
+	delay = node["delay"].asFloat(0);
 }
 
 ConfigNode AudioSubObjectLayers::Layer::toConfigNode() const
@@ -136,12 +138,20 @@ ConfigNode AudioSubObjectLayers::Layer::toConfigNode() const
 	ConfigNode::MapType result;
 	result["object"] = object.toConfigNode();
 	result["expression"] = expression.toConfigNode();
-	result["synchronised"] = synchronised;
+	if (synchronised) {
+		result["synchronised"] = synchronised;
+	}
+	if (restartFromBeginning) {
+		result["restartFromBeginning"] = restartFromBeginning;
+	}
 	if (fadeIn) {
 		result["fadeIn"] = fadeIn->toConfigNode();
 	}
 	if (fadeOut) {
 		result["fadeOut"] = fadeOut->toConfigNode();
+	}
+	if (delay > 0.0001f) {
+		result["delay"] = delay;
 	}
 	return result;
 }
@@ -151,8 +161,10 @@ void AudioSubObjectLayers::Layer::serialize(Serializer& s) const
 	s << object;
 	s << expression;
 	s << synchronised;
+	s << restartFromBeginning;
 	s << fadeIn;
 	s << fadeOut;
+	s << delay;
 }
 
 void AudioSubObjectLayers::Layer::deserialize(Deserializer& s)
@@ -160,6 +172,8 @@ void AudioSubObjectLayers::Layer::deserialize(Deserializer& s)
 	s >> object;
 	s >> expression;
 	s >> synchronised;
+	s >> restartFromBeginning;
 	s >> fadeIn;
 	s >> fadeOut;
+	s >> delay;
 }

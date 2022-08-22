@@ -14,6 +14,7 @@ namespace Halley
 		bool getAudioData(size_t samplesRequested, AudioMultiChannelSamples dst) override;
 		bool isReady() const override;
 		size_t getSamplesLeft() const override;
+		void restart() override;
 
 	private:
 		enum class TrackState {

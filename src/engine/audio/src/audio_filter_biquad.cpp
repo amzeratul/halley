@@ -27,3 +27,8 @@ size_t AudioFilterBiquad::getSamplesLeft() const
 {
 	return src->getSamplesLeft();
 }
+
+void AudioFilterBiquad::restart()
+{
+	src->restart();
+}

@@ -35,6 +35,13 @@ size_t AudioSourceClip::getSamplesLeft() const
 	return looping ? std::numeric_limits<size_t>::max() : (clip->getLength() - streams[0].playbackPos);
 }
 
+void AudioSourceClip::restart()
+{
+	streams[0] = {};
+	streams[1] = {};
+	initialised = false;
+}
+
 bool AudioSourceClip::getAudioData(size_t samplesRequested, AudioMultiChannelSamples dstChannels)
 {
 	Expects(isReady());

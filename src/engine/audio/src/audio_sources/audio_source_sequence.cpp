@@ -125,6 +125,12 @@ size_t AudioSourceSequence::getSamplesLeft() const
 	return std::numeric_limits<size_t>::max();
 }
 
+void AudioSourceSequence::restart()
+{
+	playingTracks.clear();
+	initialize();
+}
+
 size_t AudioSourceSequence::PlayingTrack::getSamplesBeforeNextEvent(size_t fadeLen) const
 {
 	const auto left = source->getSamplesLeft();
@@ -149,6 +155,7 @@ void AudioSourceSequence::initialize()
 {
 	initialized = true;
 
+	playList.clear();
 	for (size_t i = 0; i < sequenceConfig.getNumSubObjects(); ++i) {
 		playList.push_back(i);
 	}

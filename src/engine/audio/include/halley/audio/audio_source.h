@@ -14,5 +14,6 @@ namespace Halley
 		virtual size_t getSamplesLeft() const = 0;
 		virtual bool isReady() const { return true; }
 		virtual bool getAudioData(size_t numSamples, AudioMultiChannelSamples dst) = 0;
+		virtual void restart() = 0;
 	};
 }

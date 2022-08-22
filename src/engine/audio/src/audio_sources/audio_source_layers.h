@@ -17,6 +17,7 @@ namespace Halley
 		bool getAudioData(size_t numSamples, AudioMultiChannelSamples dst) override;
 		bool isReady() const override;
 		size_t getSamplesLeft() const override;
+		void restart() override;
 
 	private:
 		class Layer {
@@ -26,11 +27,13 @@ namespace Halley
 			float gain = 0;
 			bool playing = false;
 			bool synchronised = false;
+			bool restartFromBeginning = false;
 			size_t idx = 0;
 			AudioFader fader;
 
 			Layer(std::unique_ptr<AudioSource> source, AudioEmitter& emitter, size_t idx);
 			void init(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter);
+			void restart(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter);
 			void update(float time, const AudioSubObjectLayers& layersConfig, AudioEmitter& emitter, const AudioFade& fade);
 		};
 

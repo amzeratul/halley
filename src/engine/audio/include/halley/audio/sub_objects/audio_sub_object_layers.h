@@ -11,7 +11,9 @@ namespace Halley {
 			AudioExpression expression;
 			std::optional<AudioFade> fadeIn;
 			std::optional<AudioFade> fadeOut;
+			float delay = 0;
 			bool synchronised = false;
+			bool restartFromBeginning = false;
 
 			Layer() = default;
 			Layer(const ConfigNode& node);

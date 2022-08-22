@@ -75,6 +75,12 @@ size_t AudioFilterResample::getSamplesLeft() const
 	return source->getSamplesLeft() * toHz / fromHz;
 }
 
+void AudioFilterResample::restart()
+{
+	source->restart();
+	resamplers.clear();
+}
+
 void AudioFilterResample::setFromHz(int fromHz)
 {
 	for (auto& r: resamplers) {
