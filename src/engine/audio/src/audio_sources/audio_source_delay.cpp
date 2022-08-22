@@ -23,10 +23,11 @@ bool AudioSourceDelay::getAudioData(size_t numSamples, AudioMultiChannelSamples 
 		AudioMixer::zero(dst);
 		return true;
 	} else {
-		AudioMixer::zeroRange(dst, getNumberOfChannels(), 0, curDelay);
+		const auto nChannels = getNumberOfChannels();
+		AudioMixer::zeroRange(dst, nChannels, 0, curDelay);
 		auto dst2 = dst;
-		for (auto& c: dst2) {
-			c = c.subspan(curDelay);
+		for (uint8_t i = 0; i < nChannels; ++i) {
+			dst2[i] = dst[i].subspan(curDelay);
 		}
 		const auto playing = src->getAudioData(numSamples - curDelay, dst2);
 		curDelay = 0;
