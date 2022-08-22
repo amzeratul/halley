@@ -859,11 +859,15 @@ Sprite::Sprite(const Sprite& other)
 
 Sprite::Sprite(Sprite&& other) noexcept
 {
-	*this = other;
+	*this = std::move(other);
 }
 
 Sprite& Sprite::operator=(const Sprite& other)
 {
+	if (this == &other) {
+		return *this;
+	}
+
 	vertexAttrib = other.vertexAttrib;
 	material = other.material;
 	size = other.size;
@@ -885,6 +889,10 @@ Sprite& Sprite::operator=(const Sprite& other)
 
 Sprite& Sprite::operator=(Sprite&& other) noexcept
 {
+	if (this == &other) {
+		return *this;
+	}
+
 	vertexAttrib = std::move(other.vertexAttrib);
 	material = std::move(other.material);
 	size = std::move(other.size);
