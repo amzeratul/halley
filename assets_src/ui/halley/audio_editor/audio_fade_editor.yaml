@@ -18,8 +18,9 @@ children:
 - widget: { class: widget, id: fadeLenOptions }
   sizer: { type: horizontal }
   children:
-  - widget: { class: label, text: ", length: " }
+  - widget: { class: label, text: " Len: " }
     fill: centre
-  - widget: { id: fadeLength, class: textInput, size: [50, 20], validator: numericPositive }
-  - widget: { class: label, text: " s" }
+  - widget: { id: fadeLength, class: spinControl2, minValue: 0, maxValue: 30, increment: 0.1, allowFloat: true, size: [60, 20] }
+  - widget: { class: label, text: " Delay: " }
     fill: centre
+  - widget: { id: fadeDelay, class: spinControl2, minValue: 0, maxValue: 30, increment: 0.1, allowFloat: true, size: [60, 20] }

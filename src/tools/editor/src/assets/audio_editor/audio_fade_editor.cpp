@@ -37,5 +37,13 @@ void AudioFadeEditor::onMakeUI()
 		if (onModifiedCallback) {
 			onModifiedCallback();
 		}
+	});
+
+	bindData("fadeDelay", fade.getDelay(), [=] (float value)
+	{
+		fade.setDelay(value);
+		if (onModifiedCallback) {
+			onModifiedCallback();
+		}
 	});	
 }

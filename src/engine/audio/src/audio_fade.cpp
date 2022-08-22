@@ -9,9 +9,17 @@ AudioFade::AudioFade(float length, AudioFadeCurve curve)
 {
 }
 
+AudioFade::AudioFade(float length, float delay, AudioFadeCurve curve)
+	: length(length)
+	, delay(delay)
+	, curve(curve)
+{
+}
+
 AudioFade::AudioFade(const ConfigNode& node)
 {
 	length = node["length"].asFloat(0.0f);
+	delay = node["delay"].asFloat(0.0f);
 	curve = fromString<AudioFadeCurve>(node["curve"].asString("none"));
 }
 
@@ -20,6 +28,9 @@ ConfigNode AudioFade::toConfigNode() const
 	ConfigNode::MapType result;
 	if (length > 0.0f) {
 		result["length"] = length;
+	}
+	if (delay > 0.0f) {
+		result["delay"] = delay;
 	}
 	if (curve != AudioFadeCurve::None) {
 		result["curve"] = toString(curve);
@@ -54,6 +65,16 @@ void AudioFade::setLength(float len)
 	length = len;
 }
 
+float AudioFade::getDelay() const
+{
+	return delay;
+}
+
+void AudioFade::setDelay(float value)
+{
+	delay = value;
+}
+
 AudioFadeCurve AudioFade::getCurve() const
 {
 	return curve;
@@ -66,18 +87,20 @@ void AudioFade::setCurve(AudioFadeCurve c)
 
 bool AudioFade::hasFade() const
 {
-	return curve != AudioFadeCurve::None && length > 0.0f;
+	return curve != AudioFadeCurve::None && (length > 0.0f || delay > 0.0f);
 }
 
 void AudioFade::serialize(Serializer& s) const
 {
 	s << length;
+	s << delay;
 	s << static_cast<int>(curve);
 }
 
 void AudioFade::deserialize(Deserializer& s)
 {
 	s >> length;
+	s >> delay;
 	int c;
 	s >> c;
 	curve = static_cast<AudioFadeCurve>(c);
@@ -88,7 +111,7 @@ void AudioFader::startFade(float from, float to, const AudioFade& fade)
 	this->fade = fade;
 	startVal = from;
 	endVal = to;
-	time = 0;
+	time = -fade.getDelay();
 
 	const float delta = std::abs(from - to);
 	if (delta < 0.001f) {
