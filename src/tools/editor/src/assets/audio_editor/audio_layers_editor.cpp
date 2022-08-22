@@ -28,6 +28,12 @@ void AudioLayersEditor::onMakeUI()
 		layerList->addItem(toString(i), std::make_shared<AudioLayersEditorLayer>(factory, *this, i), 1);
 	}
 
+	bindData("name", layers.getRawName(), [=] (String v)
+	{
+		editor.markModified(true);
+		layers.setName(std::move(v));
+	});
+
 	setHandle(UIEventType::ListItemsSwapped, [=] (const UIEvent& event)
 	{
 		std::swap(layers.getLayers()[event.getIntData()], layers.getLayers()[event.getIntData2()]);
@@ -81,6 +87,18 @@ void AudioLayersEditorLayer::onMakeUI()
 	bindData("synchronised", layer.synchronised, [this, &layer] (bool value)
 	{
 		layer.synchronised = value;
+		layersEditor.markModified(idx);
+	});
+
+	bindData("restartFromBeginning", layer.restartFromBeginning, [this, &layer] (bool value)
+	{
+		layer.restartFromBeginning = value;
+		layersEditor.markModified(idx);
+	});
+
+	bindData("delay", layer.delay, [this, &layer] (float value)
+	{
+		layer.delay = value;
 		layersEditor.markModified(idx);
 	});
 

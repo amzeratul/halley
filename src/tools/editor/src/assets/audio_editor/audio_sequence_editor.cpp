@@ -25,6 +25,12 @@ void AudioSequenceEditor::onMakeUI()
 		layerList->addItem(toString(i), std::make_shared<AudioSequenceEditorSegment>(factory, *this, i), 1);
 	}
 
+	bindData("name", sequence.getRawName(), [=] (String v)
+	{
+		sequence.setName(std::move(v));
+		editor.markModified(true);
+	});
+
 	bindData("sequenceType", toString(sequence.getSequenceType()), [=] (String value)
 	{
 		sequence.getSequenceType() = fromString<AudioSequenceType>(value);

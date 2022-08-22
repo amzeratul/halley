@@ -19,6 +19,10 @@ children:
     fill: [left, centreVertical]
   - widget: { class: checkbox, id: synchronised }
     fill: [left, centreVertical]
+  - widget: { class: label, text: "Restart on Resume: " }
+    fill: [left, centreVertical]
+  - widget: { class: checkbox, id: restartFromBeginning }
+    fill: [left, centreVertical]
   - widget: { class: label, text: "Override Fade In: " }
     fill: [left, centreVertical]
   - sizer: { type: horizontal }
@@ -37,3 +41,7 @@ children:
     - widget: { class: widget, id: fadeOutContainer }
       sizer: { type: horizontal }
       children: []
+  - widget: { class: label, text: "Delay: " }
+    fill: [left, centreVertical]
+  - widget: { class: spinControl2, id: delay, minValue: 0, maxValue: 30, increment: 0.1, size: [60, 20], allowFloat: true }
+    fill: [left, centreVertical]

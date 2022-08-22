@@ -10,6 +10,10 @@ children:
   - sizer: { type: grid, columns: 2, columnProportions: [0, 1], gap: 4 }
     border: [3, 0, 0, 0]
     children:
+    - widget: { class: label, text: "Name: " }
+      fill: [centreVertical, left]
+    - widget: { class: textInput, id: name, size: [300, 20] }
+      fill: [centreVertical, left]
     - widget: { class: widget, minSize: [100, 20] }
       children:
       - widget: { class: label, text: "Type: " }

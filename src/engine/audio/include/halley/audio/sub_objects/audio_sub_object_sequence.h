@@ -44,6 +44,8 @@ namespace Halley {
 	    std::unique_ptr<AudioSource> makeSource(AudioEngine& engine, AudioEmitter& emitter) const override;
 
         String getName() const override;
+		const String& getRawName() const;
+		void setName(String name);
 		size_t getNumSubObjects() const override;
 		const AudioSubObjectHandle& getSubObject(size_t n) const;
 		AudioSubObjectHandle& getSubObject(size_t n) override;
@@ -65,6 +67,7 @@ namespace Halley {
 		Segment& getSegment(size_t idx);
 
     private:
+		String name;
         Vector<Segment> segments;
 
         AudioFade crossFade;

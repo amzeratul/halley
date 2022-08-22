@@ -18,6 +18,7 @@ void AudioSubObjectLayers::load(const ConfigNode& node)
 	} else {
 		fadeConfig = AudioFade(1.0f, AudioFadeCurve::Linear);
 	}
+	name = node["name"].asString("");
 }
 
 ConfigNode AudioSubObjectLayers::toConfigNode() const
@@ -31,13 +32,24 @@ ConfigNode AudioSubObjectLayers::toConfigNode() const
 	if (fadeConfig.hasFade()) {
 		result["fade"] = fadeConfig.toConfigNode();
 	}
+	result["name"] = name;
 		
 	return result;
 }
 
 String AudioSubObjectLayers::getName() const
 {
-	return "Layers";
+	return name.isEmpty() ? "Layers" : name;
+}
+
+const String& AudioSubObjectLayers::getRawName() const
+{
+	return name;
+}
+
+void AudioSubObjectLayers::setName(String name)
+{
+	this->name = std::move(name);
 }
 
 size_t AudioSubObjectLayers::getNumSubObjects() const
@@ -70,12 +82,14 @@ void AudioSubObjectLayers::loadDependencies(Resources& resources)
 
 void AudioSubObjectLayers::serialize(Serializer& s) const
 {
+	s << name;
 	s << layers;
 	s << fadeConfig;
 }
 
 void AudioSubObjectLayers::deserialize(Deserializer& s)
 {
+	s >> name;
 	s >> layers;
 	s >> fadeConfig;
 }

@@ -7,11 +7,15 @@ children:
   - widget: { id: title, class: label, text: "Layers" }
     border: [0, 0, 0, 4]
     fill: centre
-  - sizer: { type: horizontal }
+  - sizer: { type: grid, columns: 2, columnProportions: [0, 1], gap: 4 }
+    border: [3, 0, 0, 0]
     children:
+    - widget: { class: label, text: "Name: " }
+      fill: [centreVertical, left]
+    - widget: { class: textInput, id: name, size: [300, 20] }
+      fill: [centreVertical, left]
     - widget: { class: label, text: "Crossfade: " }
       fill: [centreVertical, left]
-      border: [3, 0, 0, 0]
     - widget: { class: widget, id: fadeContainer }
       children: []
   - widget: { id: layers, class: list, canDrag: true, style: dragList }

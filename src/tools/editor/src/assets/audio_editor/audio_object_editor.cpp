@@ -190,7 +190,7 @@ void AudioObjectEditor::doLoadUI()
 	hierarchy->setSelectedOptionId(prevId);
 	hierarchy->setCanSendEvents(true);
 
-	doSetCurrentObject();
+	//doSetCurrentObject();
 }
 
 void AudioObjectEditor::populateTreeView(const String& parentId, AudioSubObjectHandle& subObject)
