@@ -36,6 +36,10 @@ float AudioFade::evaluate(float time) const
 		return clamp(time / length, 0.0f, 1.0f);
 	case AudioFadeCurve::Sinusoidal:
 		return smoothCos(clamp(time / length, 0.0f, 1.0f));
+	case AudioFadeCurve::Sqrt:
+		return std::sqrt(clamp(time / length, 0.0f, 1.0f));
+	case AudioFadeCurve::Sine:
+		return std::sin(clamp(time / length, 0.0f, 1.0f) * pif() * 0.5f);
 	}
 	return 1.0f;
 }

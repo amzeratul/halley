@@ -10,16 +10,20 @@ namespace Halley {
 	enum class AudioFadeCurve : uint8_t {
 		None,
 		Linear,
-		Sinusoidal
+		Sinusoidal,
+		Sqrt,
+		Sine,
 	};
 
 	template <>
 	struct EnumNames<AudioFadeCurve> {
-		constexpr std::array<const char*, 3> operator()() const {
+		constexpr std::array<const char*, 5> operator()() const {
 			return{{
 				"none",
 				"linear",
-				"sinusoidal"
+				"sinusoidal",
+				"sqrt",
+				"sine"
 			}};
 		}
 	};

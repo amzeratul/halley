@@ -8,9 +8,13 @@ children:
     - id: none
       text: None
     - id: linear
-      text: Linear
+      text: Linear (Equal Gain)
     - id: sinusoidal
-      text: Sinusoidal
+      text: Sinusoidal (Equal Gain)
+    - id: sqrt
+      text: Square Root (Equal Power)
+    - id: sine
+      text: Sine (Equal Power)
 - widget: { class: widget, id: fadeLenOptions }
   sizer: { type: horizontal }
   children:
