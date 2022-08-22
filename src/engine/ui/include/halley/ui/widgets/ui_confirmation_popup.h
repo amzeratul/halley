@@ -18,8 +18,11 @@ namespace Halley
 		using Callback = std::function<void(ButtonType)>;
 
 		UIConfirmationPopup(UIFactory& factory, String title, String message, Vector<ButtonType> buttons, Callback callback);
+		void onAddedToRoot(UIRoot& root) override;
+		void onRemovedFromRoot(UIRoot& root) override;
 
 		void onMakeUI() override;
+		bool onKeyPress(KeyboardKeyPress key) override;
 
 	private:
 		String title;
