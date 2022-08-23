@@ -32,7 +32,7 @@ namespace Halley
 			AudioFader fader;
 
 			Layer(std::unique_ptr<AudioSource> source, AudioEmitter& emitter, size_t idx);
-			void init(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter);
+			void init(const AudioSubObjectLayers& layerConfig);
 			void restart(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter);
 			void update(float time, const AudioSubObjectLayers& layersConfig, AudioEmitter& emitter, const AudioFade& fade);
 		};
@@ -42,5 +42,6 @@ namespace Halley
 		const AudioSubObjectLayers& layerConfig;
 		Vector<Layer> layers;
 		AudioFade fadeConfig;
+		bool initialized = false;
 	};
 }

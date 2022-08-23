@@ -20,7 +20,7 @@ AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter,
 	layers.reserve(layerSources.size());
 	for (size_t i = 0; i < layerSources.size(); ++i) {
 		layers.emplace_back(std::move(layerSources[i]), emitter, i);
-		layers.back().init(layerConfig, emitter);
+		layers.back().init(layerConfig);
 
 		assert(layers[0].source->getNumberOfChannels() == layers[i].source->getNumberOfChannels());
 	}
@@ -33,6 +33,13 @@ uint8_t AudioSourceLayers::getNumberOfChannels() const
 
 bool AudioSourceLayers::getAudioData(size_t numSamples, AudioMultiChannelSamples dst)
 {
+	if (!initialized) {
+		for (auto& layer : layers) {
+			layer.restart(layerConfig, emitter);
+		}
+		initialized = true;
+	}
+
 	const auto nChannels = getNumberOfChannels();
 	const float deltaTime = static_cast<float>(numSamples) / static_cast<float>(AudioConfig::sampleRate);
 
@@ -84,11 +91,9 @@ AudioSourceLayers::Layer::Layer(std::unique_ptr<AudioSource> source, AudioEmitte
 {
 }
 
-void AudioSourceLayers::Layer::init(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter)
+void AudioSourceLayers::Layer::init(const AudioSubObjectLayers& layerConfig)
 {
 	const auto& curLayer = layerConfig.getLayer(idx);
-	restart(layerConfig, emitter);
-
 	synchronised = curLayer.synchronised;
 	restartFromBeginning = curLayer.restartFromBeginning;
 	if (curLayer.delay > 0.0001f) {
