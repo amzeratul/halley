@@ -95,7 +95,6 @@ void AudioSourceLayers::Layer::init(const AudioSubObjectLayers& layerConfig)
 {
 	const auto& curLayer = layerConfig.getLayer(idx);
 	synchronised = curLayer.synchronised;
-	restartFromBeginning = curLayer.restartFromBeginning;
 	if (curLayer.delay > 0.0001f) {
 		source = std::make_unique<AudioSourceDelay>(std::move(source), static_cast<size_t>(lroundl(curLayer.delay * AudioConfig::sampleRate)));
 	}
@@ -117,8 +116,14 @@ void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& la
 
 	const auto delta = targetGain - fader.getTargetValue();
 	if (std::abs(delta) > 0.001f) {
-		const auto& fade = delta > 0 ? layer.fadeIn.value_or(generalFade) : layer.fadeOut.value_or(generalFade);
-		fader.startFade(gain, targetGain, fade);
+		const bool fadingIn = delta > 0;
+		const bool fromScratch = !playing && !layerStarted;
+		if (fadingIn && layer.onlyFadeInWhenResuming && fromScratch) {
+			fader.stopAndSetValue(targetGain);
+		} else {
+			const auto& fade = fadingIn ? layer.fadeIn.value_or(generalFade) : layer.fadeOut.value_or(generalFade);
+			fader.startFade(gain, targetGain, fade);
+		}
 	}
 
 	fader.update(time);
@@ -129,9 +134,10 @@ void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& la
 	const bool wasPlaying = playing;
 	playing = gain > 0.0001f || prevGain > 0.0001f;
 
-	if (wasPlaying && !playing) {
-		if (restartFromBeginning) {
-			source->restart();
-		}
+	if (playing) {
+		layerStarted = true;
+	} else if (wasPlaying && layer.restartFromBeginning) {
+		source->restart();
+		layerStarted = false;
 	}
 }

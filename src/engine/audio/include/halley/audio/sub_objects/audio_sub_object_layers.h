@@ -14,6 +14,7 @@ namespace Halley {
 			float delay = 0;
 			bool synchronised = false;
 			bool restartFromBeginning = false;
+			bool onlyFadeInWhenResuming = false;
 
 			Layer() = default;
 			Layer(const ConfigNode& node);

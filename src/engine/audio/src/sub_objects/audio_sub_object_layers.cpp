@@ -138,6 +138,7 @@ AudioSubObjectLayers::Layer::Layer(const ConfigNode& node)
 	expression.load(node["expression"]);
 	synchronised = node["synchronised"].asBool(false);
 	restartFromBeginning = node["restartFromBeginning"].asBool(false);
+	onlyFadeInWhenResuming = node["onlyFadeInWhenResuming"].asBool(false);
 	if (node.hasKey("fadeIn")) {
 		fadeIn = AudioFade(node["fadeIn"]);
 	}
@@ -158,6 +159,9 @@ ConfigNode AudioSubObjectLayers::Layer::toConfigNode() const
 	if (restartFromBeginning) {
 		result["restartFromBeginning"] = restartFromBeginning;
 	}
+	if (onlyFadeInWhenResuming) {
+		result["onlyFadeInWhenResuming"] = onlyFadeInWhenResuming;
+	}
 	if (fadeIn) {
 		result["fadeIn"] = fadeIn->toConfigNode();
 	}
@@ -176,6 +180,7 @@ void AudioSubObjectLayers::Layer::serialize(Serializer& s) const
 	s << expression;
 	s << synchronised;
 	s << restartFromBeginning;
+	s << onlyFadeInWhenResuming;
 	s << fadeIn;
 	s << fadeOut;
 	s << delay;
@@ -187,6 +192,7 @@ void AudioSubObjectLayers::Layer::deserialize(Deserializer& s)
 	s >> expression;
 	s >> synchronised;
 	s >> restartFromBeginning;
+	s >> onlyFadeInWhenResuming;
 	s >> fadeIn;
 	s >> fadeOut;
 	s >> delay;

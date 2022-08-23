@@ -19,9 +19,13 @@ children:
     fill: [left, centreVertical]
   - widget: { class: checkbox, id: synchronised }
     fill: [left, centreVertical]
-  - widget: { class: label, text: "Restart on Resume: " }
+  - widget: { class: label, text: "Restart From Beginning: " }
     fill: [left, centreVertical]
   - widget: { class: checkbox, id: restartFromBeginning }
+    fill: [left, centreVertical]
+  - widget: { class: label, text: "Only Fade In when Resuming: " }
+    fill: [left, centreVertical]
+  - widget: { class: checkbox, id: onlyFadeInWhenResuming }
     fill: [left, centreVertical]
   - widget: { class: label, text: "Override Fade In: " }
     fill: [left, centreVertical]

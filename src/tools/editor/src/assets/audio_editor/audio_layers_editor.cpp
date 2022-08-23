@@ -96,6 +96,12 @@ void AudioLayersEditorLayer::onMakeUI()
 		layersEditor.markModified(idx);
 	});
 
+	bindData("onlyFadeInWhenResuming", layer.onlyFadeInWhenResuming, [this, &layer] (bool value)
+	{
+		layer.onlyFadeInWhenResuming = value;
+		layersEditor.markModified(idx);
+	});
+
 	bindData("delay", layer.delay, [this, &layer] (float value)
 	{
 		layer.delay = value;

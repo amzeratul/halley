@@ -26,8 +26,8 @@ namespace Halley
 			float prevGain = 0;
 			float gain = 0;
 			bool playing = false;
+			bool layerStarted = false;
 			bool synchronised = false;
-			bool restartFromBeginning = false;
 			size_t idx = 0;
 			AudioFader fader;
 
