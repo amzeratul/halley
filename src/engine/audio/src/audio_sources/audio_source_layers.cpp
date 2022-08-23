@@ -19,7 +19,7 @@ AudioSourceLayers::AudioSourceLayers(AudioEngine& engine, AudioEmitter& emitter,
 {
 	layers.reserve(layerSources.size());
 	for (size_t i = 0; i < layerSources.size(); ++i) {
-		layers.emplace_back(std::move(layerSources[i]), emitter, i);
+		layers.emplace_back(std::move(layerSources[i]), i);
 		layers.back().init(layerConfig);
 
 		assert(layers[0].source->getNumberOfChannels() == layers[i].source->getNumberOfChannels());
@@ -85,7 +85,7 @@ void AudioSourceLayers::restart()
 	}
 }
 
-AudioSourceLayers::Layer::Layer(std::unique_ptr<AudioSource> source, AudioEmitter& emitter, size_t idx)
+AudioSourceLayers::Layer::Layer(std::unique_ptr<AudioSource> source, size_t idx)
 	: source(std::move(source))
 	, idx(idx)
 {
@@ -95,9 +95,6 @@ void AudioSourceLayers::Layer::init(const AudioSubObjectLayers& layerConfig)
 {
 	const auto& curLayer = layerConfig.getLayer(idx);
 	synchronised = curLayer.synchronised;
-	if (curLayer.delay > 0.0001f) {
-		source = std::make_unique<AudioSourceDelay>(std::move(source), static_cast<size_t>(lroundl(curLayer.delay * AudioConfig::sampleRate)));
-	}
 }
 
 void AudioSourceLayers::Layer::restart(const AudioSubObjectLayers& layerConfig, AudioEmitter& emitter)
@@ -107,6 +104,17 @@ void AudioSourceLayers::Layer::restart(const AudioSubObjectLayers& layerConfig, 
 	fader.stopAndSetValue(targetGain);
 	prevGain = gain = targetGain;
 	playing = targetGain > 0.0001f;
+	setSourceDelay(playing ? 0 : curLayer.delay);
+}
+
+void AudioSourceLayers::Layer::setSourceDelay(float delay)
+{
+	const auto delaySamples = static_cast<size_t>(lroundl(delay * AudioConfig::sampleRate));
+	if (auto* delaySource = dynamic_cast<AudioSourceDelay*>(source.get())) {
+		delaySource->setInitialDelay(delaySamples);
+	} else if (delay > 0.0001f) {
+		source = std::make_unique<AudioSourceDelay>(std::move(source), delaySamples);
+	}
 }
 
 void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& layersConfig, AudioEmitter& emitter, const AudioFade& generalFade)
@@ -118,6 +126,7 @@ void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& la
 	if (std::abs(delta) > 0.001f) {
 		const bool fadingIn = delta > 0;
 		const bool fromScratch = !playing && !layerStarted;
+
 		if (fadingIn && layer.onlyFadeInWhenResuming && fromScratch) {
 			fader.stopAndSetValue(targetGain);
 		} else {
@@ -137,6 +146,7 @@ void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& la
 	if (playing) {
 		layerStarted = true;
 	} else if (wasPlaying && layer.restartFromBeginning) {
+		setSourceDelay(layer.delay);
 		source->restart();
 		layerStarted = false;
 	}

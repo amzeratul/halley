@@ -50,3 +50,8 @@ void AudioSourceDelay::restart()
 	curDelay = initialDelay;
 	src->restart();
 }
+
+void AudioSourceDelay::setInitialDelay(size_t delay)
+{
+	initialDelay = delay;
+}

@@ -13,10 +13,11 @@ namespace Halley
 		bool isReady() const override;
 		size_t getSamplesLeft() const override;
         void restart() override;
+		void setInitialDelay(size_t delay);
 
 	private:
 		std::unique_ptr<AudioSource> src;
-        const size_t initialDelay;
+        size_t initialDelay;
 		size_t curDelay;
 	};
 }
