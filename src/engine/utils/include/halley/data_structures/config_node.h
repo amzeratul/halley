@@ -278,6 +278,8 @@ namespace Halley {
 				for (const auto& e : asSequence()) {
 					if constexpr (HasConfigNodeConstructor<T>::value) {
 						result.emplace_back(T(e));
+					} else if constexpr (std::is_enum_v<T>) {
+						result.emplace_back(fromString<T>(e.asString()));
 					} else {
 						result.emplace_back(e.convertTo(Tag<T>()));
 					}
