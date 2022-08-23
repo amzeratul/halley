@@ -123,6 +123,8 @@ namespace Halley {
 
 		void onOpenAssetFinder(PaletteWindow& assetFinder);
 
+		Resources& getGameResources() const override;
+
 	protected:
 		void update(Time t, bool moved) override;
 

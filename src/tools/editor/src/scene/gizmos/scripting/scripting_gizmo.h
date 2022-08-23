@@ -25,6 +25,7 @@ namespace Halley {
 		std::unique_ptr<ScriptingBaseGizmo> gizmo;
 		bool modified = false;
 
+		void initGizmo(Resources& gameResources);
 		void loadEntityData();
 		void saveEntityData();
 		void compileEntityTargetList(World& world);

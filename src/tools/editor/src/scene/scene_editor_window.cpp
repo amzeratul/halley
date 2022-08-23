@@ -478,6 +478,11 @@ void SceneEditorWindow::onOpenAssetFinder(PaletteWindow& assetFinder)
 	assetFinder.setInputGhostText(LocalisedString::fromHardcodedString("Search files by name (Prefix with @ to find an entity)"));
 }
 
+Resources& SceneEditorWindow::getGameResources() const
+{
+	return project.getGameResources();
+}
+
 void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 {
 	if (status == ProjectDLL::Status::Loaded) {

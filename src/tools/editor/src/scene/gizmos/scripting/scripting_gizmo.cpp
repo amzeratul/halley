@@ -14,19 +14,12 @@ ScriptingGizmo::ScriptingGizmo(SnapRules snapRules, UIFactory& factory, ISceneEd
 	, factory(factory)
 	, scriptNodeTypes(scriptNodeTypes)
 {
+	initGizmo(sceneEditorWindow.getGameResources());
 	compileEntityTargetList(sceneEditorWindow.getEntityFactory()->getWorld());
 }
 
 void ScriptingGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {
-	if (!gizmo) {
-		gizmo = std::make_unique<ScriptingBaseGizmo>(factory, sceneEditorWindow.getEntityEditorFactory(), &sceneEditorWindow.getEntityFactory()->getWorld(), sceneEditor.getResources(), scriptNodeTypes, sceneEditorWindow.getProjectDefaultZoom());
-		gizmo->setModifiedCallback([=] ()
-		{
-			modified = true;
-		});
-		gizmo->setUIRoot(sceneEditorWindow.getUIRoot());
-	}
 	gizmo->setZoom(getZoom());
 	gizmo->update(time, inputState);
 
@@ -69,6 +62,18 @@ void ScriptingGizmo::onEntityChanged()
 bool ScriptingGizmo::allowEntitySpriteSelection() const
 {
 	return false;
+}
+
+void ScriptingGizmo::initGizmo(Resources& gameResources)
+{
+	if (!gizmo) {
+		gizmo = std::make_unique<ScriptingBaseGizmo>(factory, sceneEditorWindow.getEntityEditorFactory(), &sceneEditorWindow.getEntityFactory()->getWorld(), gameResources, scriptNodeTypes, sceneEditorWindow.getProjectDefaultZoom());
+		gizmo->setModifiedCallback([=] ()
+		{
+			modified = true;
+		});
+		gizmo->setUIRoot(sceneEditorWindow.getUIRoot());
+	}
 }
 
 void ScriptingGizmo::loadEntityData()
