@@ -41,7 +41,7 @@ children:
     - widget: { class: widget, id: fadeOutContainer }
       sizer: { type: horizontal }
       children: []
-  - widget: { class: label, text: "Delay: " }
+  - widget: { class: label, text: "Delay on Enter: " }
     fill: [left, centreVertical]
   - widget: { class: spinControl2, id: delay, minValue: 0, maxValue: 30, increment: 0.1, size: [60, 20], allowFloat: true }
     fill: [left, centreVertical]
