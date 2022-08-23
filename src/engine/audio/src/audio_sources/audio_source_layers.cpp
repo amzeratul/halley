@@ -122,7 +122,7 @@ void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& la
 	gain = fader.getCurrentValue();
 
 	const bool wasPlaying = playing;
-	playing = gain > 0.0001f || prevGain > 0.0001f;
+	playing = gain > 0.0001f || prevGain > 0.0001f || fader.isFading();
 
 	if (wasPlaying && !playing) {
 		if (restartFromBeginning) {
