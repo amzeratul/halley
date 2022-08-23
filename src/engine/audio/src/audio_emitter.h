@@ -19,7 +19,7 @@ namespace Halley {
         void addVoice(std::unique_ptr<AudioVoice> voice);
         void removeFinishedVoices(Vector<AudioEventId>& removedIds);
         [[nodiscard]] gsl::span<const std::unique_ptr<AudioVoice>> getVoices() const;
-    	void forVoices(AudioObjectId audioObjectId, VoiceCallback callback);
+    	size_t forVoices(AudioObjectId audioObjectId, VoiceCallback callback);
 
         bool shouldBeRemoved();
         void makeTemporary();

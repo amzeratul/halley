@@ -26,6 +26,12 @@ children:
     - widget: { class: label, text: " ~ " }
       fill: centre
     - widget: { id: gainMax, class: textInput, size: [40, 20], validator: numericPositive }
+  - sizer: { horizontal }
+    children:
+    - widget: { class: label, text: "Singleton: " }
+      fill: centre
+    - widget: { id: singleton, class: checkbox }
+      fill: left
 - widget: { class: widget, id: volumeOptions, active: false }
   sizer: { type: horizontal }
   children:

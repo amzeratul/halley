@@ -177,6 +177,8 @@ namespace Halley
 		Range<float> getGain() const;
 		Range<float>& getGain();
 		void setGain(Range<float> gain);
+		bool isSingleton() const;
+		void setSingleton(bool value);
 
 		void serialize(Serializer& s) const override;
 		void deserialize(Deserializer& s) override;
@@ -187,6 +189,7 @@ namespace Halley
 
 	private:
 		bool legacy = false;
+		bool singleton = false;
 		Range<float> playGain;
 		float delay = 0;
 	};

@@ -240,6 +240,12 @@ void AudioEventEditorAction::makePlayAction(AudioEventActionPlay& action)
 		action.getGain().end = value;
 		editor.markModified();
 	});	
+	
+	bindData("singleton", action.isSingleton(), [=, &action] (bool value)
+	{
+		action.setSingleton(value);
+		editor.markModified();
+	});	
 }
 
 void AudioEventEditorAction::makeStopAction(AudioEventActionStop& action)

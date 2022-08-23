@@ -355,6 +355,7 @@ void AudioEventActionPlay::load(const ConfigNode& node)
 	} else {
 		objectName = node["object"].asString();
 		playGain = node["gain"].asFloatRange(Range<float>(1, 1));
+		singleton = node["singleton"].asBool(false);
 	}
 
 	delay = node["delay"].asFloat(0);
@@ -368,18 +369,25 @@ bool AudioEventActionPlay::run(AudioEngine& engine, AudioEventId uniqueId, Audio
 
 	const uint32_t audioObjectId = object->getAudioObjectId();
 
+	if (singleton) {
+		const size_t nPlaying = emitter.forVoices(audioObjectId, [&] (AudioVoice&) {});
+		if (nPlaying > 0) {
+			return false;
+		}
+	}
+
 	const auto gainRange = object->getGain() * playGain;
 	const float gain = engine.getRNG().getFloat(gainRange);
 	const auto pitchRange = object->getPitch();
 	const float pitch = clamp(engine.getRNG().getFloat(pitchRange.start, pitchRange.end), 0.1f, 2.0f);
 	const auto delaySamples = std::lroundf(delay * static_cast<float>(AudioConfig::sampleRate));
-	
+
 	auto source = object->makeSource(engine, emitter);
 	auto voice = std::make_unique<AudioVoice>(engine, std::move(source), gain, pitch, delaySamples, engine.getBusId(object->getBus()));
 	voice->setIds(uniqueId, audioObjectId);
 	voice->play(fade);
-	
 	emitter.addVoice(std::move(voice));
+
 	return true;
 }
 
@@ -413,9 +421,20 @@ void AudioEventActionPlay::setGain(Range<float> gain)
 	playGain = gain;
 }
 
+bool AudioEventActionPlay::isSingleton() const
+{
+	return singleton;
+}
+
+void AudioEventActionPlay::setSingleton(bool value)
+{
+	singleton = value;
+}
+
 void AudioEventActionPlay::serialize(Serializer& s) const
 {
 	s << legacy;
+	s << singleton;
 	if (legacy) {
 		s << *object;
 	} else {
@@ -428,6 +447,7 @@ void AudioEventActionPlay::serialize(Serializer& s) const
 void AudioEventActionPlay::deserialize(Deserializer& s)
 {
 	s >> legacy;
+	s >> singleton;
 	if (legacy) {
 		auto obj = std::make_shared<AudioObject>();
 		s >> *obj;
@@ -454,6 +474,9 @@ ConfigNode AudioEventActionPlay::toConfigNode() const
 
 	if (delay > 0.0001f) {
 		result["delay"] = delay;
+	}
+	if (singleton) {
+		result["singleton"] = singleton;
 	}
 
 	if (legacy) {

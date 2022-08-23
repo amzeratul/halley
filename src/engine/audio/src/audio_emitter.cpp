@@ -48,13 +48,16 @@ gsl::span<const std::unique_ptr<AudioVoice>> AudioEmitter::getVoices() const
 	return voices;
 }
 
-void AudioEmitter::forVoices(AudioObjectId audioObjectId, VoiceCallback callback)
+size_t AudioEmitter::forVoices(AudioObjectId audioObjectId, VoiceCallback callback)
 {
+	size_t n = 0;
 	for (auto& v: voices) {
 		if (v->getAudioObjectId() == audioObjectId) {
 			callback(*v);
+			++n;
 		}
 	}
+	return n;
 }
 
 bool AudioEmitter::shouldBeRemoved()
