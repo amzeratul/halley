@@ -43,7 +43,7 @@ bool AudioSourceLayers::getAudioData(size_t numSamples, AudioMultiChannelSamples
 	AudioMixer::zero(result.getSpans(), nChannels);
 	for (auto& layer: layers) {
 		layer.update(deltaTime, layerConfig, emitter, fadeConfig);
-		if (layer.playing || layer.synchronised) {
+		if (layer.playing || layer.synchronised || layer.fader.isFading()) {
 			ok = layer.source->getAudioData(numSamples, temp.getSampleSpans()) && ok;
 
 			if (layer.playing) {
@@ -122,7 +122,7 @@ void AudioSourceLayers::Layer::update(float time, const AudioSubObjectLayers& la
 	gain = fader.getCurrentValue();
 
 	const bool wasPlaying = playing;
-	playing = gain > 0.0001f || prevGain > 0.0001f || fader.isFading();
+	playing = gain > 0.0001f || prevGain > 0.0001f;
 
 	if (wasPlaying && !playing) {
 		if (restartFromBeginning) {
