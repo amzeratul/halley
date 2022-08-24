@@ -740,6 +740,10 @@ void SceneEditorWindow::collapsePrefab(const String& id)
 void SceneEditorWindow::onEntitiesSelected(Vector<String> selectedEntities)
 {
 	try {
+		if (!sceneData) {
+			Logger::logError("Scene Data not available at SceneEditorWindow::onEntitiesSelected");
+		}
+
 		if (selectedEntities.size() == 1) {
 			const auto& entityId = selectedEntities.front();
 			auto& firstEntityData = sceneData->getWriteableEntityNodeData(entityId).getData();
@@ -754,12 +758,14 @@ void SceneEditorWindow::onEntitiesSelected(Vector<String> selectedEntities)
 		}
 
 		Vector<UUID> uuids;
-		uuids.reserve(selectedEntities.size());
-		for (const auto& id: selectedEntities) {
-			uuids.emplace_back(id);
-		}
 		Vector<EntityData*> datas;
-		std::tie(uuids, datas) = sceneData->getWriteableEntityDatas(uuids);
+		if (!selectedEntities.empty()) {
+			uuids.reserve(selectedEntities.size());
+			for (const auto& id: selectedEntities) {
+				uuids.emplace_back(id);
+			}
+			std::tie(uuids, datas) = sceneData->getWriteableEntityDatas(uuids);
+		}
 		gameBridge->setSelectedEntities(std::move(uuids), std::move(datas));
 		
 		currentEntityIds = selectedEntities;
