@@ -605,8 +605,11 @@ void ProjectWindow::SettingsStorage::load()
 
 void ProjectWindow::SettingsStorage::setData(std::string_view key, ConfigNode value)
 {
-	data.getRoot()[key] = std::move(value);
-	dirty = true;
+	auto& val = data.getRoot()[key];
+	if (val != value) {
+		val = std::move(value);
+		dirty = true;
+	}
 }
 
 const ConfigNode& ProjectWindow::SettingsStorage::getData(std::string_view key) const
