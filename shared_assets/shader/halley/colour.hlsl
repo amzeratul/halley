@@ -1,5 +1,8 @@
-float3 hsvToRgb(float h, float s, float v)
+float3 hsvToRgb(float3 hsv)
 {
+    float h = hsv.x;
+    float s = hsv.y;
+    float v = hsv.z;
     float r = 0;
     float g = 0;
     float b = 0;
@@ -25,4 +28,25 @@ float3 hsvToRgb(float h, float s, float v)
     }
 
     return float3(r, g, b);
+}
+
+float3 rgbToHsv(float3 rgb, float defaultHue = 0, float defaultSaturation = 0)
+{
+    float ma = max(rgb.r, max(rgb.g, rgb.b));
+    float mi = min(rgb.r, min(rgb.g, rgb.b));
+    float c = ma - mi;
+    float hp = defaultHue * 6.0;
+    if (c > 0.0000001) {
+        if (abs(ma - rgb.r) < 0.0000001) {
+            hp = (((rgb.g - rgb.b) / c) + 6.0) % 6.0;
+        } else if (abs(ma - rgb.g) < 0.0000001) {
+            hp = (rgb.b - rgb.r) / c + 2;
+        } else {
+            hp = (rgb.r - rgb.g) / c + 4;
+        }
+    }
+    float h = hp / 6.0;
+    float v = ma;
+    float s = v > 0.0000001 ? c / v : defaultSaturation;
+    return float3(h, s, v);
 }

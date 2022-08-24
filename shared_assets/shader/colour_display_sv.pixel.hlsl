@@ -6,5 +6,5 @@ float4 main(VOut input) : SV_TARGET {
 	float h = input.custom0.r;
 	float s = coord.x;
 	float v = 1 - coord.y;
-	return float4(hsvToRgb(h, s, v), 1);
+	return float4(hsvToRgb(float3(h, s, v)), 1);
 }
