@@ -25,6 +25,12 @@ bool AudioSourceSequence::getAudioData(size_t samplesRequested, AudioMultiChanne
 		return false;
 	}
 
+	for (auto& track: playingTracks) {
+		if (!track.initialized) {
+			track.initialize();
+		}
+	}
+
 	const auto nChannels = getNumberOfChannels();
 	size_t samplePos = 0;
 	const auto fadeLen = static_cast<size_t>(sequenceConfig.getCrossFade().getLength() * AudioConfig::sampleRate);
@@ -151,6 +157,14 @@ size_t AudioSourceSequence::PlayingTrack::getSamplesBeforeEnd() const
 	return source->getSamplesLeft();
 }
 
+void AudioSourceSequence::PlayingTrack::initialize()
+{
+	const auto nSamples = source->getSamplesLeft();
+	if (endSample > 0 && static_cast<size_t>(endSample) < nSamples) {
+		endSamplesOverlap = nSamples - static_cast<size_t>(endSample);
+	}
+}
+
 void AudioSourceSequence::initialize()
 {
 	initialized = true;
@@ -205,9 +219,5 @@ void AudioSourceSequence::loadCurrentTrack()
 	auto& track = playingTracks.back();
 	track.fader.startFade(0.0f, 1.0f, sequenceConfig.getCrossFade());
 	track.prevGain = track.fader.getCurrentValue();
-
-	const auto nSamples = track.source->getSamplesLeft();
-	if (segment.endSample > 0 && static_cast<size_t>(segment.endSample) < nSamples) {
-		track.endSamplesOverlap = nSamples - static_cast<size_t>(segment.endSample);
-	}
+	track.endSample = segment.endSample;
 }

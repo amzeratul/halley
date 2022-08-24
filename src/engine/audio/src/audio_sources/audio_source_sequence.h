@@ -29,6 +29,8 @@ namespace Halley
 			TrackState state = TrackState::Playing;
 			float prevGain = 1.0f;
 			AudioFader fader;
+			bool initialized = false;
+			int endSample = 0;
 
 			PlayingTrack() = default;
 			PlayingTrack(std::unique_ptr<AudioSource> source)
@@ -38,6 +40,7 @@ namespace Halley
 			size_t getSamplesBeforeNextEvent(size_t fadeLen) const;
 			size_t getSamplesBeforeTransition(size_t fadeLen) const;
 			size_t getSamplesBeforeEnd() const;
+			void initialize();
 		};
 
 		AudioEngine& engine;
