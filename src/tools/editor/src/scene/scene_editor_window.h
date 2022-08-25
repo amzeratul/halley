@@ -70,6 +70,7 @@ namespace Halley {
 		void openEditPrefabWindow(const String& name);
 
 		const std::shared_ptr<ISceneData>& getSceneData() const override;
+		const std::shared_ptr<EntityList>& getEntityList() const;
 
 		void markModified() override;
 		void clearModifiedFlag();

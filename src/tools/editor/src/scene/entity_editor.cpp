@@ -643,6 +643,29 @@ IProjectWindow& EntityEditor::getProjectWindow() const
 	return sceneEditor->getProjectWindow();
 }
 
+Vector<IEntityEditorCallbacks::EntityInfo> EntityEditor::getEntities() const
+{
+	// TODO
+	return {};
+}
+
+IEntityEditorCallbacks::EntityInfo EntityEditor::getEntityInfo(const UUID& uuid) const
+{
+	try {
+		const auto data = sceneEditor->getSceneData()->getEntityNodeData(uuid.toString());
+		const auto info = sceneEditor->getEntityList()->getEntityInfo(data.getData());
+		return { info.name, info.icon, uuid };
+	} catch (const std::exception& e) {
+		Logger::logException(e);
+	}
+	return {};
+}
+
+void EntityEditor::goToEntity(const UUID& uuid)
+{
+	sceneEditor->selectEntity(uuid.toString());
+}
+
 void EntityEditor::setComponentColour(const String& name, UIWidget& component)
 {
 	const bool highlighted = std_ex::contains(highlightedComponents, name);

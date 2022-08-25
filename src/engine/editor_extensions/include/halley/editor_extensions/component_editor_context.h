@@ -2,6 +2,9 @@
 
 #include <memory>
 
+#include "halley/core/graphics/sprite/sprite.h"
+#include "halley/maths/uuid.h"
+
 namespace Halley {
 	class IProjectWindow;
 	class ISceneEditorWindow;
@@ -29,6 +32,16 @@ namespace Halley {
 		virtual void reloadEntity() = 0;
 		virtual void setTool(const String& tool, const String& componentName, const String& fieldName) = 0;
 		virtual void setDefaultName(const String& name, const String& prevName) = 0;
+
+		struct EntityInfo {
+			String name;
+			Sprite icon;
+			UUID uuid;
+		};
+
+		virtual Vector<EntityInfo> getEntities() const { return {}; }
+		virtual EntityInfo getEntityInfo(const UUID& uuid) const { return {}; }
+		virtual void goToEntity(const UUID& uuid) {}
 	};
 
 	class IEntityEditor : public IEntityEditorCallbacks {
@@ -64,6 +77,8 @@ namespace Halley {
 		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const;
     	ConfigNode getDefaultNode(const String& fieldType) const;
 	    void setDefaultName(const String& name, const String& prevName) const;
+
+		IEntityEditorCallbacks* getEntityEditorCallbacks() const;
 
     private:
 		IProjectWindow& projectWindow;

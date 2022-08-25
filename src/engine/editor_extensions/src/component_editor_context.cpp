@@ -62,6 +62,11 @@ void ComponentEditorContext::setDefaultName(const String& name, const String& pr
 	}
 }
 
+IEntityEditorCallbacks* ComponentEditorContext::getEntityEditorCallbacks() const
+{
+	return entityEditor;
+}
+
 void ComponentEditorContext::onEntityUpdated() const
 {
 	if (entityEditor) {

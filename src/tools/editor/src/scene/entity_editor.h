@@ -54,6 +54,10 @@ namespace Halley {
 
 		IProjectWindow& getProjectWindow() const;
 
+		Vector<EntityInfo> getEntities() const override;
+		EntityInfo getEntityInfo(const UUID& uuid) const override;
+		void goToEntity(const UUID& uuid) override;
+
 	protected:
 		bool onKeyPress(KeyboardKeyPress key) override;
 

@@ -27,6 +27,8 @@ namespace Halley {
 		virtual bool valueExists(const String& value);
 		virtual Sprite makeIcon();
 		virtual String doGetDisplayName(const String& name) const;
+		virtual String doGetToolTip(const String& value) const;
+		virtual void onValueChanged(const String& value);
 
 		UIFactory& factory;
 		ProjectWindow& projectWindow;
@@ -63,5 +65,26 @@ namespace Halley {
 	private:
 		AssetType type;
 		Resources& gameResources;
+	};
+
+	class IEntityEditorCallbacks;
+
+	class SelectEntityWidget : public SelectTargetWidget {
+	public:
+		SelectEntityWidget(const String& id, UIFactory& factory, IProjectWindow& projectWindow, IEntityEditorCallbacks* entityEditor);
+
+	protected:
+		std::shared_ptr<UIWidget> makeChooseWindow(std::function<void(std::optional<String>)> callback) override;
+		void goToValue(KeyMods keyMods) override;
+		bool hasGoTo() const override;
+		bool valueExists(const String& value) override;
+		Sprite makeIcon() override;
+		String doGetDisplayName(const String& name) const override;
+		String doGetToolTip(const String& value) const override;
+		void onValueChanged(const String& value) override;
+
+	private:
+		IEntityEditorCallbacks* entityEditor;
+		std::optional<IEntityEditor::EntityInfo> info;
 	};
 }

@@ -1022,6 +1022,11 @@ const std::shared_ptr<ISceneData>& SceneEditorWindow::getSceneData() const
 	return sceneData;
 }
 
+const std::shared_ptr<EntityList>& SceneEditorWindow::getEntityList() const
+{
+	return entityList;
+}
+
 void SceneEditorWindow::addNewEntity(std::optional<String> reference, bool childOfReference)
 {
 	EntityData data;

@@ -25,6 +25,7 @@ void SelectTargetWidget::setValue(const String& newValue)
 	if (newValue != value || firstValue) {
 		firstValue = false;
 		value = newValue;
+		onValueChanged(newValue);
 		input->setText(getDisplayName());
 
 		if (!displayErrorForEmpty || !defaultAssetId.isEmpty() || valueExists(newValue)) {
@@ -33,6 +34,8 @@ void SelectTargetWidget::setValue(const String& newValue)
 			input->getTextLabel().setColourOverride({ColourOverride(0, input->getStyles()[0].getColour("errorColour"))});
 		}
 		
+		input->setIcon(makeIcon(), Vector4f(-2, 0, 2, 0));
+
 		updateToolTip();
 		notifyDataBind(value);
 		sendEvent(UIEvent(UIEventType::TextChanged, getId(), value));
@@ -97,7 +100,7 @@ void SelectTargetWidget::choose()
 
 void SelectTargetWidget::updateToolTip()
 {
-	input->setToolTip(LocalisedString::fromUserString(value.isEmpty() ? defaultAssetId : value));
+	input->setToolTip(LocalisedString::fromUserString(doGetToolTip(value)));
 }
 
 void SelectTargetWidget::readFromDataBind()
@@ -140,6 +143,15 @@ Sprite SelectTargetWidget::makeIcon()
 String SelectTargetWidget::doGetDisplayName(const String& name) const
 {
 	return name;
+}
+
+String SelectTargetWidget::doGetToolTip(const String& value) const
+{
+	return value.isEmpty() ? defaultAssetId : value;
+}
+
+void SelectTargetWidget::onValueChanged(const String& value)
+{
 }
 
 
@@ -189,5 +201,63 @@ String SelectAssetWidget::doGetDisplayName(const String& name) const
 		return Path(name).getFilename().toString();
 	} else {
 		return name;
+	}
+}
+
+
+
+SelectEntityWidget::SelectEntityWidget(const String& id, UIFactory& factory, IProjectWindow& projectWindow, IEntityEditorCallbacks* entityEditor)
+	: SelectTargetWidget(id, factory, projectWindow)
+	, entityEditor(entityEditor)
+{
+	makeUI();
+}
+
+std::shared_ptr<UIWidget> SelectEntityWidget::makeChooseWindow(std::function<void(std::optional<String>)> callback)
+{
+	return {};
+}
+
+void SelectEntityWidget::goToValue(KeyMods keyMods)
+{
+	if (entityEditor) {
+		entityEditor->goToEntity(UUID(value));
+	}
+}
+
+bool SelectEntityWidget::hasGoTo() const
+{
+	return !!entityEditor;
+}
+
+bool SelectEntityWidget::valueExists(const String& value)
+{
+	return true;
+}
+
+Sprite SelectEntityWidget::makeIcon()
+{
+	return info ? info->icon : Sprite();
+}
+
+String SelectEntityWidget::doGetDisplayName(const String& name) const
+{
+	return info ? info->name : name;
+}
+
+String SelectEntityWidget::doGetToolTip(const String& value) const
+{
+	return info ? info->name : value;
+}
+
+void SelectEntityWidget::onValueChanged(const String& value)
+{
+	info.reset();
+	if (entityEditor) {
+		const auto uuid = UUID(value);
+		const auto newInfo = entityEditor->getEntityInfo(uuid);
+		if (newInfo.uuid == uuid) {
+			info = newInfo;
+		}
 	}
 }

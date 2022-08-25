@@ -12,6 +12,13 @@ namespace Halley {
 
 	class EntityList final : public UIWidget {
 	public:
+		struct EntityInfo {
+			String name;
+			Sprite icon;
+			IEntityValidator::Severity severity;
+			bool enabled = true;
+		};
+
 		EntityList(String id, UIFactory& factory);
 
 		void update(Time t, bool moved) override;
@@ -42,14 +49,9 @@ namespace Halley {
 		UITreeList& getList();
 		void collectEntities(Vector<String>& ids, Vector<String>& names, Vector<Sprite>& icons);
 
-	private:
-		struct EntityInfo {
-			String name;
-			Sprite icon;
-			IEntityValidator::Severity severity;
-			bool enabled = true;
-		};
+		EntityInfo getEntityInfo(const EntityData& data) const;
 
+	private:
 		UIFactory& factory;
 		SceneEditorWindow* sceneEditorWindow;
 		const EntityIcons* icons = nullptr;
@@ -67,7 +69,6 @@ namespace Halley {
 		void addEntities(const EntityTree& entity, const String& parentId);
 		void addEntity(const EntityData& data, const String& parentId, int childIndex);
 		void addEntityTree(const String& parentId, int childIndex, const EntityData& data);
-		EntityInfo getEntityInfo(const EntityData& data) const;
 
 		void openContextMenu(Vector<String> entityIds);
 		void onContextMenuAction(const String& actionId, gsl::span<const String> entityIds);

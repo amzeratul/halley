@@ -1627,6 +1627,31 @@ public:
 	}
 };
 
+class ComponentEditorEntityIdFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::EntityId";
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		const auto data = pars.data;
+		auto& fieldData = data.getFieldData();
+		const auto& uuid = fieldData.asString("");
+		
+		auto widget = std::make_shared<SelectEntityWidget>("entity", context.getUIFactory(), context.getProjectWindow(), context.getEntityEditorCallbacks());
+		widget->bindData("entity", uuid, [&context, data](String newVal)
+		{
+			auto& fieldData = data.getWriteableFieldData();
+			fieldData = ConfigNode(std::move(newVal)); 
+			context.onEntityUpdated();
+		});
+
+		return widget;
+	}
+};
+
 
 Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::getDefaultFactories()
 {
@@ -1662,6 +1687,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorUIAlignFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorScriptMessageTypeFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorParsedOptionFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorEntityIdFieldFactory>());
 
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<DefaultInputButtons>("Halley::InputButton"));
 	factories.emplace_back(EnumFieldFactory::makeEnumFactory<InputPriority>("Halley::InputPriority"));
