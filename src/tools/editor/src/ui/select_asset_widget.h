@@ -6,10 +6,10 @@ namespace Halley {
 	class UIFactory;
 	class UITextInput;
 
-	class SelectAssetWidget : public UIWidget {
+	class SelectTargetWidget : public UIWidget {
 	public:
-		SelectAssetWidget(const String& id, UIFactory& factory, AssetType type, Resources& gameResources, IProjectWindow& projectWindow);
-		~SelectAssetWidget() override;
+		SelectTargetWidget(const String& id, UIFactory& factory, IProjectWindow& projectWindow);
+		virtual ~SelectTargetWidget() override;
 
 		void setValue(const String& newValue);
 		String getValue() const;
@@ -18,25 +18,50 @@ namespace Halley {
 		void setAllowEmpty(std::optional<String> allowEmpty);
 		void setDisplayErrorForEmpty(bool enabled);
 
-	private:
+	protected:
+		void makeUI();
+
+		virtual std::shared_ptr<UIWidget> makeChooseWindow(std::function<void(std::optional<String>)> callback) = 0;
+		virtual void goToValue(KeyMods keyMods);
+		virtual bool hasGoTo() const;
+		virtual bool valueExists(const String& value);
+		virtual Sprite makeIcon();
+		virtual String doGetDisplayName(const String& name) const;
+
 		UIFactory& factory;
-		Resources& gameResources;
 		ProjectWindow& projectWindow;
-		AssetType type;
 		String value;
 		String defaultAssetId;
-		std::shared_ptr<UITextInput> input;
 		std::optional<String> allowEmpty;
-		std::shared_ptr<bool> aliveFlag;
-		bool displayErrorForEmpty = true;
-		bool firstValue = true;
 
-		void makeUI();
+	private:
 		void choose();
 		void updateToolTip();
 
 		void readFromDataBind() override;
 		String getDisplayName() const;
 		String getDisplayName(const String& name) const;
+
+		std::shared_ptr<UITextInput> input;
+		std::shared_ptr<bool> aliveFlag;
+		bool displayErrorForEmpty = true;
+		bool firstValue = true;
+	};
+
+	class SelectAssetWidget : public SelectTargetWidget {
+	public:
+		SelectAssetWidget(const String& id, UIFactory& factory, AssetType type, Resources& gameResources, IProjectWindow& projectWindow);
+
+	protected:
+		std::shared_ptr<UIWidget> makeChooseWindow(std::function<void(std::optional<String>)> callback) override;
+		void goToValue(KeyMods keyMods) override;
+		bool hasGoTo() const override;
+		bool valueExists(const String& value) override;
+		Sprite makeIcon() override;
+		String doGetDisplayName(const String& name) const override;
+
+	private:
+		AssetType type;
+		Resources& gameResources;
 	};
 }
