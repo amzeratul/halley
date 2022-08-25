@@ -24,6 +24,7 @@ namespace Halley {
 		void feedToHash(Hash::Hasher& hasher) override;
 
 		void assignType(const ScriptNodeTypeCollection& nodeTypeCollection) const;
+		void clearType() const;
 		const IScriptNodeType& getNodeType() const;
 
 		GraphNodePinType getPinType(GraphPinId idx) const override;
@@ -111,6 +112,7 @@ namespace Halley {
 		bool connectPin(GraphNodeId srcNode, GraphPinId srcPinN, EntityId target);
 
 		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const;
+		void clearTypes();
 		void finishGraph();
 
 		EntityId getEntityId(OptionalLite<uint8_t> idx) const;

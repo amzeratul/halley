@@ -136,6 +136,11 @@ void ScriptGraphNode::assignType(const ScriptNodeTypeCollection& nodeTypeCollect
 	Ensures(nodeType != nullptr);
 }
 
+void ScriptGraphNode::clearType() const
+{
+	nodeType = nullptr;
+}
+
 const IScriptNodeType& ScriptGraphNode::getNodeType() const
 {
 	Expects(nodeType != nullptr);
@@ -435,6 +440,14 @@ void ScriptGraph::assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection
 		for (const auto& node: nodes) {
 			node.assignType(nodeTypeCollection);
 		}
+	}
+}
+
+void ScriptGraph::clearTypes()
+{
+	lastAssignTypeHash = 0;
+	for (const auto& node: nodes) {
+		node.clearType();
 	}
 }
 

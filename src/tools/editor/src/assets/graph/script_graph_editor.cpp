@@ -136,6 +136,7 @@ void ScriptGraphEditor::onProjectDLLStatusChange(ProjectDLL::Status status)
 		infiniCanvas.reset();
 		scriptNodeTypes.reset();
 		entityEditorFactory.reset();
+		scriptGraph->clearTypes();
 		needsLoading = true;
 		hasUI = false;
 	}
