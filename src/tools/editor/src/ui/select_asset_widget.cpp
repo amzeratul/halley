@@ -28,7 +28,7 @@ void SelectTargetWidget::setValue(const String& newValue)
 		onValueChanged(newValue);
 		input->setText(getDisplayName());
 
-		if (!displayErrorForEmpty || !defaultAssetId.isEmpty() || valueExists(newValue)) {
+		if (!displayErrorForEmpty || !defaultAssetId.isEmpty() || currentValueExists()) {
 			input->getTextLabel().setColourOverride({});
 		} else {
 			input->getTextLabel().setColourOverride({ColourOverride(0, input->getStyles()[0].getColour("errorColour"))});
@@ -130,7 +130,7 @@ bool SelectTargetWidget::hasGoTo() const
 	return false;
 }
 
-bool SelectTargetWidget::valueExists(const String& value)
+bool SelectTargetWidget::currentValueExists()
 {
 	return true;
 }
@@ -185,7 +185,7 @@ bool SelectAssetWidget::hasGoTo() const
 	return true;
 }
 
-bool SelectAssetWidget::valueExists(const String& value)
+bool SelectAssetWidget::currentValueExists()
 {
 	return gameResources.ofType(type).exists(value);
 }
@@ -230,9 +230,9 @@ bool SelectEntityWidget::hasGoTo() const
 	return !!entityEditor;
 }
 
-bool SelectEntityWidget::valueExists(const String& value)
+bool SelectEntityWidget::currentValueExists()
 {
-	return true;
+	return value.isEmpty() || !!info;
 }
 
 Sprite SelectEntityWidget::makeIcon()

@@ -24,7 +24,7 @@ namespace Halley {
 		virtual std::shared_ptr<UIWidget> makeChooseWindow(std::function<void(std::optional<String>)> callback) = 0;
 		virtual void goToValue(KeyMods keyMods);
 		virtual bool hasGoTo() const;
-		virtual bool valueExists(const String& value);
+		virtual bool currentValueExists();
 		virtual Sprite makeIcon();
 		virtual String doGetDisplayName(const String& name) const;
 		virtual String doGetToolTip(const String& value) const;
@@ -58,7 +58,7 @@ namespace Halley {
 		std::shared_ptr<UIWidget> makeChooseWindow(std::function<void(std::optional<String>)> callback) override;
 		void goToValue(KeyMods keyMods) override;
 		bool hasGoTo() const override;
-		bool valueExists(const String& value) override;
+		bool currentValueExists() override;
 		Sprite makeIcon() override;
 		String doGetDisplayName(const String& name) const override;
 
@@ -77,7 +77,7 @@ namespace Halley {
 		std::shared_ptr<UIWidget> makeChooseWindow(std::function<void(std::optional<String>)> callback) override;
 		void goToValue(KeyMods keyMods) override;
 		bool hasGoTo() const override;
-		bool valueExists(const String& value) override;
+		bool currentValueExists() override;
 		Sprite makeIcon() override;
 		String doGetDisplayName(const String& name) const override;
 		String doGetToolTip(const String& value) const override;
