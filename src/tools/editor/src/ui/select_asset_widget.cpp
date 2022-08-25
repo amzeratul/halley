@@ -215,7 +215,7 @@ SelectEntityWidget::SelectEntityWidget(const String& id, UIFactory& factory, IPr
 
 std::shared_ptr<UIWidget> SelectEntityWidget::makeChooseWindow(std::function<void(std::optional<String>)> callback)
 {
-	return {};
+	return std::make_shared<ChooseEntityWindow>(factory, entityEditor ? entityEditor->getEntities() : Vector<IEntityEditorCallbacks::EntityInfo>(), std::move(callback));
 }
 
 void SelectEntityWidget::goToValue(KeyMods keyMods)
@@ -253,7 +253,7 @@ String SelectEntityWidget::doGetToolTip(const String& value) const
 void SelectEntityWidget::onValueChanged(const String& value)
 {
 	info.reset();
-	if (entityEditor) {
+	if (entityEditor && !value.isEmpty()) {
 		const auto uuid = UUID(value);
 		const auto newInfo = entityEditor->getEntityInfo(uuid);
 		if (newInfo.uuid == uuid) {

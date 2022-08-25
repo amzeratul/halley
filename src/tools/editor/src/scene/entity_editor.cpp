@@ -643,10 +643,24 @@ IProjectWindow& EntityEditor::getProjectWindow() const
 	return sceneEditor->getProjectWindow();
 }
 
+namespace {
+	void collectEntities(EntityList& entityList, const EntityTree& tree, Vector<IEntityEditorCallbacks::EntityInfo>& dst)
+	{
+		if (!tree.entityId.isEmpty()) {
+			auto info = entityList.getEntityInfo(*tree.data);
+			dst.push_back(IEntityEditorCallbacks::EntityInfo{ std::move(info.name), std::move(info.icon), UUID(tree.entityId) });
+		}
+		for (auto& c: tree.children) {
+			collectEntities(entityList, c, dst);
+		}
+	}
+}
+
 Vector<IEntityEditorCallbacks::EntityInfo> EntityEditor::getEntities() const
 {
-	// TODO
-	return {};
+	Vector<EntityInfo> result;
+	collectEntities(*sceneEditor->getEntityList(), sceneEditor->getSceneData()->getEntityTree(), result);
+	return result;
 }
 
 IEntityEditorCallbacks::EntityInfo EntityEditor::getEntityInfo(const UUID& uuid) const

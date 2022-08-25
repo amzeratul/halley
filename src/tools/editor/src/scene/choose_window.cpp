@@ -198,3 +198,39 @@ void ChoosePrefabWindow::onDestroyRequested()
 {
 	projectWindow.setSetting(EditorSettingType::Project, lastOptionKey, ConfigNode(lastOption));
 }
+
+
+
+ChooseEntityWindow::ChooseEntityWindow(UIFactory& factory, const Vector<IEntityEditorCallbacks::EntityInfo>& entities, Callback callback)
+	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), "[None]")
+{
+	Vector<String> ids;
+	Vector<String> names;
+	for (auto& e: entities) {
+		ids.push_back(e.uuid.toString());
+		names.push_back(e.name);
+		icons[ids.back()] = e.icon;
+	}
+
+	setAssetIds(ids, names, "");
+	setTitle(LocalisedString::fromHardcodedString("Choose Entity"));
+}
+
+int ChooseEntityWindow::getNumColumns(Vector2f scrollPaneSize) const
+{
+	return 1;
+}
+
+std::shared_ptr<UIImage> ChooseEntityWindow::makeIcon(const String& id, bool hasSearch)
+{
+	const auto iter = icons.find(id);
+	if (iter != icons.end()) {
+		return std::make_shared<UIImage>(iter->second);
+	}
+	return {};
+}
+
+std::shared_ptr<UISizer> ChooseEntityWindow::makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch)
+{
+	return ChooseAssetWindow::makeItemSizer(icon, label, true);
+}

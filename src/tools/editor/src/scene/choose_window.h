@@ -72,4 +72,17 @@ namespace Halley {
 		constexpr const static char* lastOptionKey = "prefab_picker.last_option";
 		String lastOption;
 	};
+
+    class ChooseEntityWindow : public ChooseAssetWindow {
+    public:
+        ChooseEntityWindow(UIFactory& factory, const Vector<IEntityEditorCallbacks::EntityInfo>& entityList, Callback callback);
+
+    protected:
+		int getNumColumns(Vector2f scrollPaneSize) const override;
+		std::shared_ptr<UIImage> makeIcon(const String& id, bool hasSearch) override;
+		std::shared_ptr<UISizer> makeItemSizer(std::shared_ptr<UIImage> icon, std::shared_ptr<UILabel> label, bool hasSearch) override;
+
+    private:
+		HashMap<String, Sprite> icons;
+    };
 }
