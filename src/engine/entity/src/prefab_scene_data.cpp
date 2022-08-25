@@ -17,7 +17,7 @@ PrefabSceneData::PrefabSceneData(Prefab& prefab, std::shared_ptr<EntityFactory> 
 {
 }
 
-ISceneData::EntityNodeData PrefabSceneData::getWriteableEntityNodeData(const String& id)
+std::optional<ISceneData::EntityNodeData> PrefabSceneData::tryGetWriteableEntityNodeData(const String& id)
 {
 	if (id.isEmpty()) {
 		return EntityNodeData(prefab.getEntityData(), "", 0);
@@ -25,7 +25,7 @@ ISceneData::EntityNodeData PrefabSceneData::getWriteableEntityNodeData(const Str
 	
 	const auto& data = findEntityAndParent(prefab.getEntityDatas(), nullptr, 0, id);
 	if (!data.entity) {
-		throw Exception("Entity data not found for \"" + id + "\"", HalleyExceptions::Entity);
+		return {};
 	}
 
 	String parentId;
@@ -54,9 +54,12 @@ std::pair<Vector<UUID>, Vector<EntityData*>> PrefabSceneData::getWriteableEntity
 	return { outputUUIDs, result };
 }
 
-ISceneData::ConstEntityNodeData PrefabSceneData::getEntityNodeData(const String& id)
+std::optional<ISceneData::ConstEntityNodeData> PrefabSceneData::tryGetEntityNodeData(const String& id)
 {
-	return ConstEntityNodeData(getWriteableEntityNodeData(id));
+	if (auto result = tryGetWriteableEntityNodeData(id)) {
+		return std::optional<ConstEntityNodeData>(ConstEntityNodeData(std::move(*result)));
+	}
+	return {};
 }
 
 void PrefabSceneData::reloadEntities(gsl::span<const String> ids, gsl::span<const EntityData*> datas)

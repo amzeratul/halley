@@ -8,9 +8,9 @@ namespace Halley {
     public:
     	explicit WorldSceneData(World& world);
 
-    	EntityNodeData getWriteableEntityNodeData(const String& id) override;
+    	std::optional<EntityNodeData> tryGetWriteableEntityNodeData(const String& id) override;
         std::pair<Vector<UUID>, Vector<EntityData*>> getWriteableEntityDatas(gsl::span<const UUID> ids) override;
-        ConstEntityNodeData getEntityNodeData(const String& id) override;
+        std::optional<ConstEntityNodeData> tryGetEntityNodeData(const String& id) override;
         void reloadEntities(gsl::span<const String> ids, gsl::span<const EntityData*> datas) override;
         EntityTree getEntityTree() const override;
         std::pair<String, size_t> reparentEntity(const String& entityId, const String& newParentId, size_t childIndex) override;

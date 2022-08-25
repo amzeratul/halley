@@ -303,9 +303,28 @@ namespace Halley {
 		
 		virtual ~ISceneData() = default;
 
-		virtual EntityNodeData getWriteableEntityNodeData(const String& id) = 0;
+		virtual std::optional<EntityNodeData> tryGetWriteableEntityNodeData(const String& id) = 0;
+		virtual std::optional<ConstEntityNodeData> tryGetEntityNodeData(const String& id) = 0;
+
+		EntityNodeData getWriteableEntityNodeData(const String& id)
+		{
+			auto result = tryGetWriteableEntityNodeData(id);
+			if (!result) {
+				throw Exception("Entity data not found for \"" + id + "\"", HalleyExceptions::Entity);
+			}
+			return *result;
+		}
+        ConstEntityNodeData getEntityNodeData(const String& id)
+		{
+			auto result = tryGetEntityNodeData(id);
+			if (!result) {
+				throw Exception("Entity data not found for \"" + id + "\"", HalleyExceptions::Entity);
+			}
+			return *result;
+		}
+		
 		virtual std::pair<Vector<UUID>, Vector<EntityData*>> getWriteableEntityDatas(gsl::span<const UUID> ids) = 0;
-		virtual ConstEntityNodeData getEntityNodeData(const String& id) = 0;
+
 		void reloadEntity(const String& id, const EntityData* data = nullptr);
 		virtual void reloadEntities(gsl::span<const String> ids, gsl::span<const EntityData*> datas) = 0;
 		virtual EntityTree getEntityTree() const = 0;

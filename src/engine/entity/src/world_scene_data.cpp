@@ -6,7 +6,7 @@ WorldSceneData::WorldSceneData(World& world)
 {
 }
 
-ISceneData::EntityNodeData WorldSceneData::getWriteableEntityNodeData(const String& id)
+std::optional<ISceneData::EntityNodeData> WorldSceneData::tryGetWriteableEntityNodeData(const String& id)
 {
 	throw Exception("Not implemented", HalleyExceptions::Entity);
 }
@@ -16,7 +16,7 @@ std::pair<Vector<UUID>, Vector<EntityData*>> WorldSceneData::getWriteableEntityD
 	throw Exception("Not implemented", HalleyExceptions::Entity);
 }
 
-ISceneData::ConstEntityNodeData WorldSceneData::getEntityNodeData(const String& id)
+std::optional<ISceneData::ConstEntityNodeData> WorldSceneData::tryGetEntityNodeData(const String& id)
 {
 	throw Exception("Not implemented", HalleyExceptions::Entity);
 }

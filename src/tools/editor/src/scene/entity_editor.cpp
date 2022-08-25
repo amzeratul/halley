@@ -665,14 +665,12 @@ Vector<IEntityEditorCallbacks::EntityInfo> EntityEditor::getEntities() const
 
 IEntityEditorCallbacks::EntityInfo EntityEditor::getEntityInfo(const UUID& uuid) const
 {
-	try {
-		const auto data = sceneEditor->getSceneData()->getEntityNodeData(uuid.toString());
-		const auto info = sceneEditor->getEntityList()->getEntityInfo(data.getData());
-		return { info.name, info.icon, uuid };
-	} catch (const std::exception& e) {
-		Logger::logException(e);
+	const auto data = sceneEditor->getSceneData()->tryGetEntityNodeData(uuid.toString());
+	if (!data) {
+		return {};
 	}
-	return {};
+	const auto info = sceneEditor->getEntityList()->getEntityInfo(data->getData());
+	return { info.name, info.icon, uuid };
 }
 
 void EntityEditor::goToEntity(const UUID& uuid)
