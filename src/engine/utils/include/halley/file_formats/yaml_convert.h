@@ -16,8 +16,9 @@ namespace Halley {
 	public:
 		class EmitOptions {
 		public:
+			EmitOptions() : compactMaps(false) {}
 			Vector<String> mapKeyOrder;
-			bool compactMaps = false;
+			bool compactMaps;
 		};
 		
 		static void parseConfig(ConfigFile& config, gsl::span<const gsl::byte> data);
