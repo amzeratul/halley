@@ -1,6 +1,6 @@
 #pragma once
 #include "base_graph_enums.h"
-#include "graphics/text/text_renderer.h"
+#include "halley/core/graphics/text/text_renderer.h"
 #include "halley/maths/vector2.h"
 
 namespace Halley {
