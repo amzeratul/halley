@@ -34,6 +34,22 @@ void ScriptMessageType::deserialize(Deserializer& s)
 	s >> nParams;
 }
 
+ScriptMessage::ScriptMessage(String script, String message)
+{
+	type = ScriptMessageType();
+	type.message = std::move(message);
+	type.script = std::move(script);
+}
+
+ScriptMessage::ScriptMessage(String script, String message, ConfigNode params)
+{
+	type = ScriptMessageType();
+	type.message = std::move(message);
+	type.script = std::move(script);
+
+	this->params = std::move(params);
+}
+
 ScriptMessage::ScriptMessage(const ConfigNode& node)
 {
 	type = node["type"];

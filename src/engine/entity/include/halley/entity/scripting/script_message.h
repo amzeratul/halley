@@ -25,7 +25,9 @@ namespace Halley {
         float delay = 0;
 
         ScriptMessage() = default;
-        ScriptMessage(const ConfigNode& node);
+        ScriptMessage(String script, String message);
+        ScriptMessage(String script, String message, ConfigNode params);
+    	ScriptMessage(const ConfigNode& node);
         ConfigNode toConfig() const;
         String toString() const;
 
