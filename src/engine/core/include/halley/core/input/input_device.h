@@ -105,6 +105,7 @@ namespace Halley {
 		virtual void clearButton(InputButton code);
 		virtual void clearButtonPress(InputButton code);
 		virtual void clearButtonRelease(InputButton code);
+		virtual void clearPresses();
 
 		virtual float getAxis(int /*n*/);
 		virtual int getAxisRepeat(int /*n*/);

@@ -52,7 +52,7 @@ namespace Halley {
 
 		String getButtonName(int code) override;
 
-		void clearPresses();
+		void clearPresses() override;
 
 		void onButtonStatus(int code, bool down);
 

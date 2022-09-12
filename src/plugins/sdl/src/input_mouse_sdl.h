@@ -36,6 +36,7 @@ namespace Halley {
 		void setPosition(Vector2i position) override;
 		int getWheelMove() const override;
 		float getAxis(int n) override;
+		void clearPresses() override;
 
 		void update();
 

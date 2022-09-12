@@ -69,17 +69,18 @@ bool InputDevice::isButtonDown(InputButton code)
 
 void InputDevice::clearButton(InputButton code)
 {
-	
 }
 
 void InputDevice::clearButtonPress(InputButton code)
 {
-	
 }
 
 void InputDevice::clearButtonRelease(InputButton code)
 {
-	
+}
+
+void InputDevice::clearPresses()
+{
 }
 
 float InputDevice::getAxis(int)

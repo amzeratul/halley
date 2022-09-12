@@ -86,10 +86,6 @@ int InputMouseSDL::getWheelMove() const
 void InputMouseSDL::update()
 {
 	clearPresses();
-	wheelMove = 0;
-	if (!isMouseTrapped) {
-		prevPos = pos;
-	}
 }
 
 float InputMouseSDL::getAxis(int n)
@@ -100,6 +96,15 @@ float InputMouseSDL::getAxis(int n)
 		return pos.y - prevPos.y;
 	} else {
 		return 0.0f;
+	}
+}
+
+void InputMouseSDL::clearPresses()
+{
+	InputButtonBase::clearPresses();
+	wheelMove = 0;
+	if (!isMouseTrapped) {
+		prevPos = pos;
 	}
 }
 
