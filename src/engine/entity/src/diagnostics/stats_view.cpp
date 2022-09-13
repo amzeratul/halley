@@ -17,12 +17,9 @@ ScreenOverlay::ScreenOverlay()
 void ScreenOverlay::draw(RenderContext& context)
 {
 	const auto viewPort = Rect4f(context.getDefaultRenderTarget().getViewPort());
-	const auto zoom2d = viewPort.getSize() / screenSize;
-	const float zoom = std::min(zoom2d.x, zoom2d.y);
+	screenSize = viewPort.getSize();
 
-	const auto camera = Camera(viewPort.getSize() / zoom * 0.5f)
-		.setZoom(zoom);
-		//.setViewPort(Rect4i(viewPort + ));
+	const auto camera = Camera(screenSize * 0.5f);
 
 	context.with(camera).bind([&](Painter& painter) {
 		paint(painter);

@@ -60,16 +60,18 @@ void PerformanceStatsView::paint(Painter& painter)
 
 	if (active) {
 		whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(painter.getViewPort().getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
-		
+
+		const auto rect = Rect4f(painter.getViewPort());
+
 		drawHeader(painter, false);
-		drawTimeline(painter, Rect4f(20, 80,	1240, 100));
+		drawTimeline(painter, Rect4f(20, 80,	rect.getWidth() - 40, 100));
 
 		if (page == 0) {
-			drawTimeGraph(painter, Rect4f(20, 200, 1240, 500));
+			drawTimeGraph(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220));
 		} else if (page == 1) {
-			drawTopSystems(painter, Rect4f(20, 200, 1240, 500));
+			drawTopSystems(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220));
 		} else if (page == 2) {
-			drawNetworkStats(painter, Rect4f(20, 200, 1240, 500));
+			drawNetworkStats(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220));
 		}
 	} else {
 		drawHeader(painter, true);
@@ -234,7 +236,8 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	}
 
 	if (simple) {
-		headerText.setPosition(Vector2f(1260, 700)).setOffset(Vector2f(1, 1)).setOutline(2.0f);
+		const auto pos = Vector2f(painter.getViewPort().getBottomRight()) - Vector2f(5, 5);
+		headerText.setPosition(pos).setOffset(Vector2f(1, 1)).setOutline(2.0f);
 	} else {
 		headerText.setPosition(Vector2f(10, 10)).setOffset(Vector2f()).setOutline(1.0f);
 	}
