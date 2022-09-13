@@ -413,6 +413,23 @@ namespace Halley {
 		}
 
 		template <typename T>
+		EntityId tryGetEntityIdWithComponentInAncestors() const
+		{
+			validateComponentType<T>();
+			auto* comp = tryGetComponent<T>();
+			if (comp) {
+				return getEntityId();
+			}
+			if (const auto parent = getParent(); parent.isValid()) {
+				const auto parentId = parent.tryGetEntityIdWithComponentInAncestors<T>();
+				if (parentId.isValid()) {
+					return parent.getEntityId();
+				}
+			}
+			return {};
+		}
+
+		template <typename T>
 		T* tryGetComponentInTree()
 		{
 			validateComponentType<T>();
