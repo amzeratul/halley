@@ -574,6 +574,13 @@ void ScriptHoldVariable::doDestructor(ScriptEnvironment& environment, const Scri
 
 
 
+Vector<IGraphNodeType::SettingType> ScriptEntityIdToData::getSettingTypes() const
+{
+	return {
+		SettingType{ "readRaw", "bool", Vector<String>{"true"} },
+	};
+}
+
 gsl::span<const IScriptNodeType::PinType> ScriptEntityIdToData::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
@@ -589,12 +596,18 @@ String ScriptEntityIdToData::getShortDescription(const World* world, const Scrip
 
 std::pair<String, Vector<ColourOverride>> ScriptEntityIdToData::getNodeDescription(const ScriptGraphNode& node, const World* world,	const ScriptGraph& graph) const
 {
-	return { "Convert EntityId to data.", {} };
+	if (node.getSettings()["readRaw"].asBool(true)) {
+		return { "Convert EntityId to data. Using readRaw function.", {} };
+	}
+	return { "Convert EntityId to data. Using read function which returns entity to which the script is attached to, if input is invalid.", {} };
 }
 
 ConfigNode ScriptEntityIdToData::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	return ConfigNode(readRawEntityId(environment, node, 0).value);
+	if (node.getSettings()["readRaw"].asBool(true)) {
+		return ConfigNode(readRawEntityId(environment, node, 0).value);
+	}
+	return ConfigNode(readEntityId(environment, node, 0).value);
 }
 
 
