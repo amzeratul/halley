@@ -114,6 +114,8 @@ namespace Halley
 		Sprite& setColour(Colour4f colour) { vertexAttrib.colour = colour; return *this; }
 		Colour4f getColour() const { return vertexAttrib.colour; }
 		Colour4f& getColour() { return vertexAttrib.colour; }
+		Sprite& setAlpha(float alpha) { vertexAttrib.colour.a = alpha; return *this; }
+		float getAlpha() const { return vertexAttrib.colour.a; }
 
 		Sprite& setTexRect(Rect4f texRect);
 		Rect4f getTexRect() const { return vertexAttrib.texRect0; }

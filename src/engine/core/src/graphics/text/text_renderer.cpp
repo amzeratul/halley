@@ -168,6 +168,23 @@ TextRenderer& TextRenderer::setLineSpacing(float spacing)
 	return *this;
 }
 
+TextRenderer& TextRenderer::setAlpha(float alpha)
+{
+	const auto c = colour.withAlpha(alpha);
+	if (colour != c) {
+		colour = c;
+		glyphsDirty = true;
+	}
+
+	const auto oc = outlineColour.withAlpha(alpha);
+	if (outlineColour != oc) {
+		outlineColour = oc;
+		materialDirty = true;
+	}
+
+	return *this;
+}
+
 TextRenderer& TextRenderer::setOutlineColour(Colour v)
 {
 	if (outlineColour != v) {
