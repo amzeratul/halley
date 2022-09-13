@@ -18,11 +18,12 @@ float4 main(VOut input) : SV_TARGET {
 
 	float a = tex0.Sample(sampler0, input.texCoord0).r;
 	float s = max(u_smoothness * texGrad, 0.001);
-	float inEdge = 0.51;
+	float inEdge = 0.5;
 
 	float edge0 = clamp(inEdge - s, 0.01, 0.98);
 	float edge1 = clamp(inEdge + s, edge0 + 0.01, 0.99);
 	float edge = smoothstep(edge0, edge1, a) * input.colour.a;
+
 	float4 colFill = input.colour;
 	float alpha = colFill.a * edge;
 	return float4(colFill.rgb * alpha, alpha);
