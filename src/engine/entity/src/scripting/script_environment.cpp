@@ -13,6 +13,7 @@
 #include "halley/core/graphics/sprite/animation_player.h"
 
 #include <components/audio_source_component.h>
+#include <components/scriptable_component.h>
 #include <components/sprite_animation_component.h>
 
 using namespace Halley;
@@ -561,7 +562,14 @@ void ScriptEnvironment::sendEntityMessage(EntityMessageData message)
 		message.targetEntity = currentEntity;
 	}
 
-	entityOutbox.emplace_back(std::move(message));
+	const auto entity = tryGetEntity(message.targetEntity);
+	if (entity.isValid()) {
+		if (entity.hasComponent<ScriptableComponent>()) {
+			entityOutbox.emplace_back(std::move(message));
+		} else {
+			Logger::logWarning("Trying to send message \"" + message.messageName + "\" to entity \"" + entity.getName() + "\", but it doesn't have a ScriptableComponent.");
+		}
+	}
 }
 
 void ScriptEnvironment::sendSystemMessage(SystemMessageData message)
