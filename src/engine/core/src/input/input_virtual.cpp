@@ -39,6 +39,16 @@ InputVirtual::InputVirtual(int nButtons, int nAxes)
 	axes.resize(nAxes);
 }
 
+InputVirtual::~InputVirtual()
+{
+	for (auto& binding: exclusiveButtons) {
+		for (auto& button: binding.second) {
+			button->parent = nullptr;
+			button->active = false;
+		}
+	}
+}
+
 bool InputVirtual::isEnabled() const
 {
 	for (const auto& d: getAllDevices()) {

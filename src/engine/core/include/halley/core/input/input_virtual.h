@@ -39,6 +39,7 @@ namespace Halley {
 
 	public:
 		InputVirtual(int nButtons, int nAxes);
+		~InputVirtual() override;
 
 		bool isEnabled() const override;
 		size_t getNumberHats() override;

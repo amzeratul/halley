@@ -19,7 +19,7 @@ namespace Halley {
         bool isDown() const;
 
 	private:
-        InputVirtual& parent;
+        InputVirtual* parent = nullptr;
         InputButton button = 0;
         InputPriority priority = InputPriority::Normal;
         bool active = true;
