@@ -156,9 +156,17 @@ namespace Halley {
 		}
 
 		constexpr Vector2D<T> getTopLeft() const { return p1; }
-		constexpr Vector2D<T> getBottomRight() const { return p2; }
-		constexpr Vector2D<T> getBottomLeft() const { return Vector2D<T>(p1.x, p2.y); }
+		constexpr Vector2D<T> getTopCenter() const { return Vector2D<T>((p1.x + p2.x) / 2, p1.y); }
 		constexpr Vector2D<T> getTopRight() const { return Vector2D<T>(p2.x, p1.y); }
+
+		constexpr Vector2D<T> getCenterLeft() const { return Vector2D<T>(p1.x, (p1.y + p2.y) / 2); }
+		constexpr Vector2D<T> getCenter() const { return (p1 + p2) / 2; }
+		constexpr Vector2D<T> getCenterRight() const { return Vector2D<T>(p2.x, (p1.y + p2.y) / 2); }
+
+		constexpr Vector2D<T> getBottomLeft() const { return Vector2D<T>(p1.x, p2.y); }
+		constexpr Vector2D<T> getBottomCenter() const { return Vector2D<T>((p1.x + p2.x) / 2, p2.y); }
+		constexpr Vector2D<T> getBottomRight() const { return p2; }
+
 		constexpr Vector2D<T> getSize() const { return p2 - p1; }
 
 		constexpr Vector2D<T>& getP1() { return p1; }
@@ -265,11 +273,6 @@ namespace Halley {
 		constexpr bool overlaps(Rect2D<T> other) const
 		{
 			return !(p2.x <= other.p1.x || other.p2.x <= p1.x || p2.y <= other.p1.y || other.p2.y <= p1.y);
-		}
-
-		constexpr Vector2D<T> getCenter() const
-		{
-			return (p1+p2)/2;
 		}
 
 		constexpr bool isEmpty() const
