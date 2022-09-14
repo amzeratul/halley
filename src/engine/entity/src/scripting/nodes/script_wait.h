@@ -5,6 +5,7 @@ namespace Halley {
 	class ScriptWaitData : public ScriptStateData<ScriptWaitData> {
 	public:
 		float timeLeft = 0;
+		bool setFromInput = false;
 
 		ScriptWaitData() = default;
 		ScriptWaitData(const ConfigNode& node);
