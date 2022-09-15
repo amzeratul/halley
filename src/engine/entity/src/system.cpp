@@ -117,7 +117,12 @@ void System::doProcessMessages(FamilyBindingBase& family, gsl::span<const int> t
 
 void System::doSendMessage(EntityId entityId, std::unique_ptr<Message> msg, int id)
 {
-	if (world->isEntityNetworkRemote(entityId)) {
+	const auto e = world->tryGetEntity(entityId);
+	if (!e.isValid()) {
+		return;
+	}
+
+	if (world->isEntityNetworkRemote(e)) {
 		world->sendNetworkMessage(entityId, id, std::move(msg));
 	} else {
 		outbox.emplace_back(std::make_pair(entityId, MessageEntry(std::move(msg), id, systemId)));
