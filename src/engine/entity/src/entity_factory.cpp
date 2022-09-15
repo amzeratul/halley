@@ -150,6 +150,9 @@ EntityFactoryContext::EntityFactoryContext(World& world, Resources& resources, i
 
 EntityId EntityFactoryContext::getEntityIdFromUUID(const UUID& uuid) const
 {
+	if (!uuid.isValid()) {
+		return EntityId();
+	}
 	const auto result = getEntity(uuid, true, true);
 	if (result.isValid()) {
 		return result.getEntityId();
@@ -160,7 +163,11 @@ EntityId EntityFactoryContext::getEntityIdFromUUID(const UUID& uuid) const
 
 UUID EntityFactoryContext::getUUIDFromEntityId(EntityId id) const
 {
-	return world->getEntity(id).getInstanceUUID();
+	if (auto e = world->tryGetEntity(id); e.isValid()) {
+		return e.getInstanceUUID();
+	} else {
+		return {};
+	}
 }
 
 void EntityFactoryContext::addEntity(EntityRef entity)
