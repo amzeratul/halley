@@ -200,7 +200,7 @@ ConfigNode ScriptComparison::doGetData(ScriptEnvironment& environment, const Scr
 		result = MathOps::compare(op, a.asString(""), b.asString(""));
 	} else if (typeA == ConfigNodeType::Float || typeB == ConfigNodeType::Float) {
 		result = MathOps::compare(op, a.asFloat(0), b.asFloat(0));
-	} else if (typeA == ConfigNodeType::Int64 || typeB == ConfigNodeType::Int64) {
+	} else if (typeA == ConfigNodeType::Int64 || typeB == ConfigNodeType::Int64 || typeA == ConfigNodeType::EntityId || typeB == ConfigNodeType::EntityId) {
 		result = MathOps::compare(op, a.asInt64(0), b.asInt64(0));
 	} else if (typeA == ConfigNodeType::Int || typeB == ConfigNodeType::Int) {
 		result = MathOps::compare(op, a.asInt(0), b.asInt(0));
@@ -616,9 +616,9 @@ std::pair<String, Vector<ColourOverride>> ScriptEntityIdToData::getNodeDescripti
 ConfigNode ScriptEntityIdToData::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
 	if (node.getSettings()["readRaw"].asBool(true)) {
-		return ConfigNode(readRawEntityId(environment, node, 0).value);
+		return ConfigNode(EntityIdHolder{ readRawEntityId(environment, node, 0).value });
 	}
-	return ConfigNode(readEntityId(environment, node, 0).value);
+	return ConfigNode(EntityIdHolder{ readEntityId(environment, node, 0).value });
 }
 
 
@@ -645,7 +645,7 @@ EntityId ScriptDataToEntityId::doGetEntityId(ScriptEnvironment& environment, con
 {
 	const auto data = readDataPin(environment, node, 0);
 	EntityId result;
-	result.value = data.asInt64(-1);
+	result.value = data.asEntityId({}).value;
 	return result;
 }
 

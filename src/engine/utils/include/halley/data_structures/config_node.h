@@ -65,12 +65,13 @@ namespace Halley {
 		Noop, // For delta coding
 		Idx, // For delta coding
 		Del, // For delta coding
-		Int64
+		Int64,
+		EntityId,
 	};
 
 	template <>
 	struct EnumNames<ConfigNodeType> {
-		constexpr std::array<const char*, 15> operator()() const {
+		constexpr std::array<const char*, 16> operator()() const {
 			return{{
 				"undefined",
 				"string",
@@ -86,12 +87,20 @@ namespace Halley {
 				"noop",
 				"idx",
 				"del",
-				"int64"
+				"int64",
+				"entityId"
 			}};
 		}
 	};
 
 	class ConfigFile;
+
+	struct EntityIdHolder {
+		int64_t value = -1;
+
+		void serialize(Serializer& s) const;
+		void deserialize(Deserializer& s);
+	};
 	
 	class ConfigNode
 	{
@@ -124,6 +133,7 @@ namespace Halley {
 		explicit ConfigNode(int value);
 		explicit ConfigNode(uint32_t value);
 		explicit ConfigNode(int64_t value);
+		explicit ConfigNode(EntityIdHolder value);
 		explicit ConfigNode(float value);
 		explicit ConfigNode(Vector2i value);
 		explicit ConfigNode(Vector2f value);
@@ -158,6 +168,7 @@ namespace Halley {
 		ConfigNode& operator=(int value);
 		ConfigNode& operator=(uint32_t value);
 		ConfigNode& operator=(int64_t value);
+		ConfigNode& operator=(EntityIdHolder value);
 		ConfigNode& operator=(float value);
 		ConfigNode& operator=(Vector2i value);
 		ConfigNode& operator=(Vector2f value);
@@ -240,6 +251,7 @@ namespace Halley {
 
 		int asInt() const;
 		int64_t asInt64() const;
+		EntityIdHolder asEntityId() const;
 		float asFloat() const;
 		bool asBool() const;
 		Vector2i asVector2i() const;
@@ -256,6 +268,7 @@ namespace Halley {
 
 		int asInt(int defaultValue) const;
 		int64_t asInt64(int64_t defaultValue) const;
+		EntityIdHolder asEntityId(EntityIdHolder defaultValue) const;
 		float asFloat(float defaultValue) const;
 		bool asBool(bool defaultValue) const;
 		String asString(const std::string_view& defaultValue) const;
@@ -477,6 +490,7 @@ namespace Halley {
 
 		int convertTo(Tag<int> tag) const;
 		int64_t convertTo(Tag<int64_t> tag) const;
+		EntityIdHolder convertTo(Tag<EntityIdHolder> tag) const;
 		float convertTo(Tag<float> tag) const;
 		bool convertTo(Tag<bool> tag) const;
 		uint8_t convertTo(Tag<uint8_t> tag) const;

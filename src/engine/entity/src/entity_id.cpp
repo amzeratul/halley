@@ -54,7 +54,7 @@ void EntityId::deserialize(Deserializer& s)
 ConfigNode ConfigNodeSerializer<EntityId>::serialize(EntityId id, const EntitySerializationContext& context)
 {
 	if (!context.entityContext) {
-		return ConfigNode(id.value);
+		return ConfigNode(EntityIdHolder{ id.value });
 	}
 
 	if (!id.isValid()) {
@@ -66,9 +66,9 @@ ConfigNode ConfigNodeSerializer<EntityId>::serialize(EntityId id, const EntitySe
 
 EntityId ConfigNodeSerializer<EntityId>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 {
-	if (node.getType() == ConfigNodeType::Int64) {
+	if (node.getType() == ConfigNodeType::EntityId) {
 		EntityId result;
-		result.value = node.asInt64();
+		result.value = node.asEntityId().value;
 		return result;
 	}
 

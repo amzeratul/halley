@@ -8,10 +8,10 @@ namespace Halley {
 	class ScriptVariables {
 	public:
 		ScriptVariables() = default;
-		ScriptVariables(const ConfigNode& node);
+		ScriptVariables(const ConfigNode& node, const EntitySerializationContext& context);
 
-		void load(const ConfigNode& node);
-		ConfigNode toConfigNode() const;
+		void load(const ConfigNode& node, const EntitySerializationContext& context);
+		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 
 		const ConfigNode& getVariable(const String& name) const;
     	void setVariable(const String& name, ConfigNode value);

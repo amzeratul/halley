@@ -1,26 +1,49 @@
 #include "scripting/script_variables.h"
 
+#include "entity_id.h"
+
 using namespace Halley;
 
-ScriptVariables::ScriptVariables(const ConfigNode& node)
+ScriptVariables::ScriptVariables(const ConfigNode& node, const EntitySerializationContext& context)
 {
-	load(node);
+	load(node, context);
 }
 
-void ScriptVariables::load(const ConfigNode& node)
+void ScriptVariables::load(const ConfigNode& node, const EntitySerializationContext& context)
 {
 	if (node.getType() == ConfigNodeType::Map) {
-		variables = node.asHashMap<String, ConfigNode>();
+		variables.clear();
+		for (const auto& [k, v]: node.asMap()) {
+			if (k.startsWith("entity!")) {
+				const auto entityId = ConfigNodeSerializer<EntityId>().deserialize(context, v);
+				variables[k.mid(7)] = EntityIdHolder{ entityId.value };
+			} else {
+				variables[k] = v;
+			}
+		}
 	} else if (node.getType() != ConfigNodeType::Undefined) {
 		for (const auto& [k, v]: node.asMap()) {
-			variables[k].applyDelta(v);
+			if (k.startsWith("entity!")) {
+				const auto entityId = ConfigNodeSerializer<EntityId>().deserialize(context, v);
+				variables[k.mid(7)] = EntityIdHolder{ entityId.value };
+			} else {
+				variables[k].applyDelta(v);
+			}
 		}
 	}
 }
 
-ConfigNode ScriptVariables::toConfigNode() const
+ConfigNode ScriptVariables::toConfigNode(const EntitySerializationContext& context) const
 {
-	return ConfigNode(variables);
+	ConfigNode::MapType result;
+	for (const auto& [k, v]: variables) {
+		if (v.getType() == ConfigNodeType::EntityId) {
+			result["entity!" + k] = ConfigNodeSerializer<EntityId>().serialize(EntityId(v.asEntityId().value), context);
+		} else {
+			result[k] = v;
+		}
+	}
+	return result;
 }
 
 const ConfigNode& ScriptVariables::getVariable(const String& name) const
@@ -54,15 +77,15 @@ void ScriptVariables::clear()
 
 ConfigNode ConfigNodeSerializer<ScriptVariables>::serialize(const ScriptVariables& variables, const EntitySerializationContext& context)
 {
-	return variables.toConfigNode();
+	return variables.toConfigNode(context);
 }
 
 ScriptVariables ConfigNodeSerializer<ScriptVariables>::deserialize(const EntitySerializationContext& context, const ConfigNode& node)
 {
-	return ScriptVariables(node);
+	return ScriptVariables(node, context);
 }
 
 void ConfigNodeSerializer<ScriptVariables>::deserialize(const EntitySerializationContext& context, const ConfigNode& node, ScriptVariables& target)
 {
-	target.load(node);
+	target.load(node, context);
 }
