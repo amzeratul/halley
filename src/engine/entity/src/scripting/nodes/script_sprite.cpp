@@ -13,7 +13,10 @@ using namespace Halley;
 
 Vector<IScriptNodeType::SettingType> ScriptSpriteAnimation::getSettingTypes() const
 {
-	return { SettingType{ "sequence", "Halley::String", Vector<String>{"default"} } };
+	return {
+		SettingType{ "sequence", "Halley::String", Vector<String>{"default"} },
+		SettingType{ "loop", "bool", Vector<String>{"true"} }
+	};
 }
 
 gsl::span<const IScriptNodeType::PinType> ScriptSpriteAnimation::getPinConfiguration(const ScriptGraphNode& node) const
@@ -31,6 +34,9 @@ std::pair<String, Vector<ColourOverride>> ScriptSpriteAnimation::getNodeDescript
 	str.append(node.getSettings()["sequence"].asString("default"), parameterColour);
 	str.append(" on entity ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	if (node.getSettings()["loop"].asBool(true)) {
+		str.append(" which loops");
+	}
 	return str.moveResults();
 }
 
@@ -40,7 +46,11 @@ IScriptNodeType::Result ScriptSpriteAnimation::doUpdate(ScriptEnvironment& envir
 	if (entity.isValid()) {
 		auto* spriteAnimation = entity.tryGetComponent<SpriteAnimationComponent>();
 		if (spriteAnimation) {
-			spriteAnimation->player.setSequence(node.getSettings()["sequence"].asString(""));
+			if (node.getSettings()["loop"].asBool(true)) {
+				spriteAnimation->player.setSequence(node.getSettings()["sequence"].asString(""));
+			} else {
+				spriteAnimation->player.playOnce(node.getSettings()["sequence"].asString(""));
+			}
 		}
 	}
 	return Result(ScriptNodeExecutionState::Done);

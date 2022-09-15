@@ -340,6 +340,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptGetPosition>());
 	addScriptNode(std::make_unique<ScriptSpawnEntity>());
 	addScriptNode(std::make_unique<ScriptDestroyEntity>());
+	addScriptNode(std::make_unique<ScriptFindChildByName>());
 	addScriptNode(std::make_unique<ScriptFunctionCallExternal>());
 	addScriptNode(std::make_unique<ScriptFunctionReturn>());
 }

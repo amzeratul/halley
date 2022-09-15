@@ -108,3 +108,56 @@ IScriptNodeType::Result ScriptDestroyEntity::doUpdate(ScriptEnvironment& environ
 	return Result(ScriptNodeExecutionState::Done);
 }
 
+
+Vector<IGraphNodeType::SettingType> ScriptFindChildByName::getSettingTypes() const
+{
+	return {
+		SettingType{ "childName", "Halley::String", Vector<String>{""} }
+	};
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptFindChildByName::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::ReadDataPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::TargetPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptFindChildByName::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Try to find first level child with name ");
+
+	if (node.getPin(0).hasConnection()) {
+		str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	}
+	else {
+		str.append(toString(node.getSettings()["childName"].asString("")), parameterColour);
+	}
+
+	str.append(" on ");
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+
+	return str.moveResults();
+}
+
+EntityId ScriptFindChildByName::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
+{
+	const auto entityRef = environment.getWorld().tryGetEntity(readEntityId(environment, node, 1));
+	if (entityRef.isValid()) {
+		auto childName = node.getSettings()["childName"].asString("");
+		if (node.getPin(0).hasConnection()) {
+			childName = readDataPin(environment, node, 0).asString("");
+		}
+		if (childName.isEmpty()) {
+			return {};
+		}
+		const auto childRef = entityRef.getChildWithName(childName);
+		if (childRef.isValid()) {
+			return childRef.getEntityId();
+		}
+	}
+
+	return {};
+}

@@ -611,6 +611,19 @@ namespace Halley {
 			return EntityRefIterable(entity->getChildren(), *world);
 		}
 
+		EntityRef getChildWithName(const String& name) const
+		{
+			validate();
+
+			for (const auto child : getChildren()) {
+				if (child.getName() == name) {
+					return child;
+				}
+			}
+
+			return {};
+		}
+
 		bool hasChildren() const
 		{
 			validate();
