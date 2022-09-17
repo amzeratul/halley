@@ -244,7 +244,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 	}
 
 	const Vector2f border = Vector2f(18, 18);
-	const Vector2f nodeSize = getNodeSize(*nodeType, curZoom);
+	const Vector2f nodeSize = getNodeSize(*nodeType, node, curZoom);
 	const auto pos = ((basePos + node.getPosition() * posScale) * curZoom).round() / curZoom;
 
 	{
@@ -371,14 +371,14 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 	}
 }
 
-Vector2f ScriptRenderer::getNodeSize(const IScriptNodeType& nodeType, float curZoom) const
+Vector2f ScriptRenderer::getNodeSize(const IScriptNodeType& nodeType, const BaseGraphNode& node, float curZoom) const
 {
 	return nodeType.getClassification() == ScriptNodeClassification::Variable ? Vector2f(100, 40) : Vector2f(60, 60);
 }
 
 Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom, float posScale) const
 {
-	const Vector2f nodeSize = getNodeSize(nodeType, curZoom);
+	const Vector2f nodeSize = getNodeSize(nodeType, node, curZoom);
 	const auto getOffset = [&] (size_t idx, size_t n)
 	{
 		const float spacing = nodeSize.x / (n + 1);
@@ -443,6 +443,8 @@ Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType)
 		return Colour4f(0.75f, 0.35f, 0.97f);
 	case ScriptNodeClassification::Function:
 		return Colour4f(1.00f, 0.49f, 0.68f);
+	case ScriptNodeClassification::Comment:
+		return Colour4f(0.4f, 0.4f, 0.45f);
 	}
 	return Colour4f(0.2f, 0.2f, 0.2f);
 }
@@ -499,7 +501,7 @@ std::optional<BaseGraphRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnde
 		if (!nodeType) {
 			continue;
 		}
-		const auto nodeSize = getNodeSize(*nodeType, effectiveZoom);
+		const auto nodeSize = getNodeSize(*nodeType, node, effectiveZoom);
 		const Rect4f area = Rect4f(-nodeSize / 2, nodeSize / 2) / effectiveZoom;
 		const auto curRect = area + pos;
 		
@@ -554,7 +556,7 @@ Vector<GraphNodeId> ScriptRenderer::getNodesInRect(Vector2f basePos, float curZo
 		if (!nodeType) {
 			continue;
 		}
-		const auto nodeSize = getNodeSize(*nodeType, effectiveZoom);
+		const auto nodeSize = getNodeSize(*nodeType, node, effectiveZoom);
 		const Rect4f area = Rect4f(-nodeSize / 2, nodeSize / 2) / effectiveZoom;
 		const auto curRect = area + pos;
 

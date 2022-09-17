@@ -68,7 +68,7 @@ namespace Halley {
 		void drawNodeOutputs(Painter& painter, Vector2f basePos, GraphNodeId nodeIdx, const ScriptGraph& graph, float curZoom, float posScale);
 		void drawNode(Painter& painter, Vector2f basePos, const ScriptGraphNode& node, float curZoom, float posScale, NodeDrawMode drawMode, std::optional<GraphNodePinType> highlightElement, GraphPinId highlightElementId);
 
-		Vector2f getNodeSize(const IScriptNodeType& nodeType, float curZoom) const;
+		Vector2f getNodeSize(const IScriptNodeType& nodeType, const BaseGraphNode& node, float curZoom) const;
 		Circle getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom, float posScale) const;
 		Colour4f getPinColour(GraphNodePinType pinType) const;
 		const Sprite& getIcon(const IScriptNodeType& nodeType, const ScriptGraphNode& node);

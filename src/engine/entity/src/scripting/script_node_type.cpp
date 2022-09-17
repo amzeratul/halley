@@ -21,6 +21,7 @@
 #include "nodes/script_wait.h"
 #include "nodes/script_wait_for.h"
 #include "nodes/script_function.h"
+#include "nodes/script_meta.h"
 using namespace Halley;
 
 String IScriptNodeType::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
@@ -343,4 +344,5 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptFindChildByName>());
 	addScriptNode(std::make_unique<ScriptFunctionCallExternal>());
 	addScriptNode(std::make_unique<ScriptFunctionReturn>());
+	addScriptNode(std::make_unique<ScriptComment>());
 }
