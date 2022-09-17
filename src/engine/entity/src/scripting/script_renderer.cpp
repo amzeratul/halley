@@ -31,8 +31,6 @@ ScriptRenderer::ScriptRenderer(Resources& resources, const World* world, const S
 {
 	nodeBg = Sprite().setImage(resources, "halley_ui/ui_float_solid_window.png").setPivot(Vector2f(0.5f, 0.5f));
 	nodeBgOutline = Sprite().setImage(resources, "halley_ui/ui_float_solid_window_outline.png").setPivot(Vector2f(0.5f, 0.5f));
-	variableBg = Sprite().setImage(resources, "halley_ui/script_variable.png").setPivot(Vector2f(0.5f, 0.5f));
-	variableBgOutline = Sprite().setImage(resources, "halley_ui/script_variable_outline.png").setPivot(Vector2f(0.5f, 0.5f));
 	destructorBg = Sprite().setImage(resources, "halley_ui/script_destructor_bg.png").setPivot(Vector2f(0.5f, 0.0f));
 	destructorIcon = Sprite().setImage(resources, "halley_ui/script_destructor_icon.png").setPivot(Vector2f(0.5f, 0.5f));
 	pinSprite = Sprite().setImage(resources, "halley_ui/ui_render_graph_node_pin.png").setPivot(Vector2f(0.5f, 0.5f));
@@ -41,8 +39,7 @@ ScriptRenderer::ScriptRenderer(Resources& resources, const World* world, const S
 		.setSize(14)
 		.setColour(Colour(1, 1, 1))
 		.setOutlineColour(Colour(0, 0, 0))
-		.setOutline(1)
-		.setAlignment(0.5f);
+		.setOutline(1);
 }
 
 void ScriptRenderer::setGraph(const BaseGraph* graph)
@@ -316,19 +313,24 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 		const auto largeLabel = nodeType->getLargeLabel(node);
 		const Vector2f iconOffset = label.isEmpty() ? Vector2f() : Vector2f(0, -8.0f / curZoom).round();
 
-		auto drawLabel = [&](const String& text, Vector2f pos, float size, float maxWidth)
+		auto drawLabel = [&](const String& text, Vector2f pos, float size, float maxWidth, bool split)
 		{
 			auto labelCopy = labelText.clone()
 				.setPosition(pos)
-				.setText(text)
 				.setSize(size)
 				.setOutline(8.0f / curZoom)
 				.setOutlineColour(col.multiplyLuma(0.75f))
-				.setOffset(Vector2f(0, 0.5f));
-			
-			const auto extents = labelCopy.getExtents();
-			if (extents.x > maxWidth) {
-				labelCopy.setSize(size * maxWidth / extents.x);
+				.setOffset(Vector2f(0.5f, 0.5f))
+				.setAlignment(0.0f);
+
+			if (split) {
+				labelCopy.setText(labelCopy.split(text, maxWidth));
+			} else {
+				labelCopy.setText(text);
+				const auto extents = labelCopy.getExtents();
+				if (extents.x > maxWidth) {
+					labelCopy.setSize(size * maxWidth / extents.x);
+				}
 			}
 
 			labelCopy
@@ -347,12 +349,14 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 
 		// Large label
 		if (!largeLabel.isEmpty()) {
-			drawLabel(largeLabel, pos + iconOffset, 18 / curZoom, (nodeSize.x - 10.0f) / curZoom);
+			const bool isComment = nodeType->getClassification() == ScriptNodeClassification::Comment;
+			const auto fontSize = isComment ? 14 : 18;
+			drawLabel(largeLabel, pos + iconOffset, fontSize / curZoom, (nodeSize.x - 10.0f) / curZoom, isComment);
 		}
 
 		// Label
 		if (!label.isEmpty()) {
-			drawLabel(label, pos + Vector2f(0, 18.0f / curZoom).round(), 14 / curZoom, (nodeSize.x - 10.0f) / curZoom);
+			drawLabel(label, pos + Vector2f(0, 18.0f / curZoom).round(), 14 / curZoom, (nodeSize.x - 10.0f) / curZoom, false);
 		}
 	}
 
@@ -373,7 +377,26 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 
 Vector2f ScriptRenderer::getNodeSize(const IScriptNodeType& nodeType, const BaseGraphNode& node, float curZoom) const
 {
-	return nodeType.getClassification() == ScriptNodeClassification::Variable ? Vector2f(100, 40) : Vector2f(60, 60);
+	switch (nodeType.getClassification()) {
+	case ScriptNodeClassification::Variable:
+		return Vector2f(100, 40);
+	case ScriptNodeClassification::Comment:
+		return getCommentNodeSize(node, curZoom);
+	default:
+		return Vector2f(60, 60);
+	}
+}
+
+Vector2f ScriptRenderer::getCommentNodeSize(const BaseGraphNode& node, float curZoom) const
+{
+	const auto text = labelText.clone()
+		.setSize(14);
+
+	const float maxWidth = 250.0f;
+	const auto split = text.split(node.getSettings()["comment"].asString(""), maxWidth);
+	const auto extents = text.getExtents(split);
+
+	return Vector2f::max(Vector2f(40, 40), extents + Vector2f(10, 10));
 }
 
 Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom, float posScale) const
@@ -492,11 +515,6 @@ std::optional<BaseGraphRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnde
 		const auto& node = graph->getNode(i);
 		const auto pos = basePos + node.getPosition();
 
-		const auto nodeBounds = Circle(pos, 60.0f);
-		if (!nodeBounds.contains(mousePos)) {
-			continue;
-		}
-		
 		const auto* nodeType = nodeTypeCollection.tryGetNodeType(node.getType());
 		if (!nodeType) {
 			continue;
@@ -504,6 +522,10 @@ std::optional<BaseGraphRenderer::NodeUnderMouseInfo> ScriptRenderer::getNodeUnde
 		const auto nodeSize = getNodeSize(*nodeType, node, effectiveZoom);
 		const Rect4f area = Rect4f(-nodeSize / 2, nodeSize / 2) / effectiveZoom;
 		const auto curRect = area + pos;
+
+		if (!curRect.grow(10).contains(mousePos)) {
+			continue;
+		}
 		
 		// Check each pin handle
 		bool foundPin = false;
