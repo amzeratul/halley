@@ -15,7 +15,8 @@ Vector<IScriptNodeType::SettingType> ScriptSpriteAnimation::getSettingTypes() co
 {
 	return {
 		SettingType{ "sequence", "Halley::String", Vector<String>{"default"} },
-		SettingType{ "loop", "bool", Vector<String>{"true"} }
+		SettingType{ "loop", "bool", Vector<String>{"true"} },
+		SettingType{ "wait", "bool", Vector<String>{"true"} },
 	};
 }
 
@@ -35,7 +36,10 @@ std::pair<String, Vector<ColourOverride>> ScriptSpriteAnimation::getNodeDescript
 	str.append(" on entity ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	if (node.getSettings()["loop"].asBool(true)) {
-		str.append(" which loops");
+		str.append(" which loops ");
+	}
+	if (node.getSettings()["wait"].asBool(true)) {
+		str.append(" and wait for it to finish ");
 	}
 	return str.moveResults();
 }
@@ -46,13 +50,23 @@ IScriptNodeType::Result ScriptSpriteAnimation::doUpdate(ScriptEnvironment& envir
 	if (entity.isValid()) {
 		auto* spriteAnimation = entity.tryGetComponent<SpriteAnimationComponent>();
 		if (spriteAnimation) {
-			if (node.getSettings()["loop"].asBool(true)) {
-				spriteAnimation->player.setSequence(node.getSettings()["sequence"].asString(""));
-			} else {
-				spriteAnimation->player.playOnce(node.getSettings()["sequence"].asString(""));
+			if (spriteAnimation->player.getCurrentSequenceName() != node.getSettings()["sequence"].asString("")) {
+				if (node.getSettings()["loop"].asBool(true)) {
+					spriteAnimation->player.setSequence(node.getSettings()["sequence"].asString(""));
+				}
+				else {
+					spriteAnimation->player.playOnce(node.getSettings()["sequence"].asString(""));
+				}
+			}
+
+			if (node.getSettings()["wait"].asBool(true)) {
+				if (spriteAnimation->player.isPlaying() && spriteAnimation->player.getCurrentSequenceName() == node.getSettings()["sequence"].asString("")) {
+					return Result(ScriptNodeExecutionState::Executing);
+				}
 			}
 		}
 	}
+
 	return Result(ScriptNodeExecutionState::Done);
 }
 
