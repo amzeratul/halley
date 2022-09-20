@@ -153,6 +153,11 @@ bool ScriptReceiveMessage::showDestructor() const
 	return false;
 }
 
+std::optional<Vector2f> ScriptReceiveMessage::getNodeSize(const BaseGraphNode& node, float curZoom) const
+{
+	return Vector2f(120, 60);
+}
+
 void ScriptReceiveMessage::doInitData(ScriptReceiveMessageData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
 	if (nodeData.getType() != ConfigNodeType::Undefined) {

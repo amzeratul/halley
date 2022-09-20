@@ -40,6 +40,8 @@ namespace Halley {
 		
 		virtual bool canAdd() const { return true; }
         virtual bool canDelete() const { return true; }
+
+		virtual std::optional<Vector2f> getNodeSize(const BaseGraphNode& node, float curZoom) const { return std::nullopt; }
 	};
 	
 	class IScriptNodeType : public IGraphNodeType {

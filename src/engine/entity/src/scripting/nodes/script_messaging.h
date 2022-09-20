@@ -40,6 +40,7 @@ namespace Halley {
 		String getLabel(const ScriptGraphNode& node) const override;
 		bool hasDestructor(const ScriptGraphNode& node) const override;
 		bool showDestructor() const override;
+		std::optional<Vector2f> getNodeSize(const BaseGraphNode& node, float curZoom) const override;
 
 		void doInitData(ScriptReceiveMessageData& data, const ScriptGraphNode& node, const EntitySerializationContext& context,	const ConfigNode& nodeData) const override;
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptReceiveMessageData& data) const override;

@@ -377,6 +377,10 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 
 Vector2f ScriptRenderer::getNodeSize(const IScriptNodeType& nodeType, const BaseGraphNode& node, float curZoom) const
 {
+	if (auto size = nodeType.getNodeSize(node, curZoom)) {
+		return size.value();
+	}
+
 	switch (nodeType.getClassification()) {
 	case ScriptNodeClassification::Variable:
 		return Vector2f(100, 40);
@@ -402,9 +406,9 @@ Vector2f ScriptRenderer::getCommentNodeSize(const BaseGraphNode& node, float cur
 Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom, float posScale) const
 {
 	const Vector2f nodeSize = getNodeSize(nodeType, node, curZoom);
-	const auto getOffset = [&] (size_t idx, size_t n)
+	const auto getOffset = [&] (size_t idx, size_t n, size_t axis)
 	{
-		const float spacing = nodeSize.x / (n + 1);
+		const float spacing = nodeSize[axis] / (n + 1);
 		return (static_cast<float>(idx) - (n - 1) * 0.5f) * spacing;
 	};
 
@@ -424,20 +428,19 @@ Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vecto
 		}
 	}
 	
-	const auto sideOffset = getOffset(idxOnSide, pinsOnSide);
 	Vector2f offset;
 	switch (pinSide) {
 	case GraphPinSide::Left:
-		offset = Vector2f(-nodeSize.x * 0.5f, sideOffset);
+		offset = Vector2f(-nodeSize.x * 0.5f, getOffset(idxOnSide, pinsOnSide, 1));
 		break;
 	case GraphPinSide::Right:
-		offset = Vector2f(nodeSize.x * 0.5f, sideOffset);
+		offset = Vector2f(nodeSize.x * 0.5f, getOffset(idxOnSide, pinsOnSide, 1));
 		break;
 	case GraphPinSide::Top:
-		offset = Vector2f(sideOffset, -nodeSize.y * 0.5f);
+		offset = Vector2f(getOffset(idxOnSide, pinsOnSide, 0), -nodeSize.y * 0.5f);
 		break;
 	case GraphPinSide::Bottom:
-		offset = Vector2f(sideOffset, nodeSize.y * 0.5f);
+		offset = Vector2f(getOffset(idxOnSide, pinsOnSide, 0 ), nodeSize.y * 0.5f);
 		break;
 	default:
 		break;
