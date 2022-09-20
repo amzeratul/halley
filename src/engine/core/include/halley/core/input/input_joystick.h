@@ -75,6 +75,7 @@ namespace Halley {
 		void setEnabled(bool enabled);
 
 		void clearAxes();
+		void clearPresses() override;
 
 		bool isAnyButtonPressed() override;
 		bool isAnyButtonReleased() override;

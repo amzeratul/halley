@@ -101,6 +101,14 @@ void InputJoystick::clearAxes()
 	}
 }
 
+void InputJoystick::clearPresses()
+{
+	InputButtonBase::clearPresses();
+	for (auto& hat: hats) {
+		hat->clearPresses();
+	}
+}
+
 bool InputJoystick::isAnyButtonPressed()
 {
 	for (auto& hat: hats) {
