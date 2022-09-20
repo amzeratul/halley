@@ -130,7 +130,10 @@ void ScriptGizmoUI::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 		inputState.middleClickHeld = true;
 	} else if (button == 2) {
 		inputState.rightClickPressed = true;
-		inputState.rightClickHeld = true;	
+		inputState.rightClickHeld = true;
+		if (!isHighlighted()) {
+			gizmo.addNode();
+		}
 	}
 }
 
