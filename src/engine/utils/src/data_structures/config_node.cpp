@@ -892,6 +892,8 @@ String ConfigNode::asString() const
 		return toString(asInt());
 	} else if (type == ConfigNodeType::Int64) {
 		return toString(asInt64());
+	} else if (type == ConfigNodeType::EntityId) {
+		return toString(asEntityId().value);
 	} else if (type == ConfigNodeType::Float) {
 		return toString(asFloat());
 	} else if (type == ConfigNodeType::Sequence) {
