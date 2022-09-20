@@ -54,6 +54,7 @@ namespace Halley {
 	private:
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
 		const World* world = nullptr;
+		static constexpr float gridSize = 16.0f;
 
 		ScriptGraph* scriptGraph = nullptr;
 		ScriptState* scriptState = nullptr;

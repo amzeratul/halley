@@ -122,14 +122,16 @@ void ScriptingBaseGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 			if (delta.length() > 1.0f) {
 				for (size_t i = 0; i < dragging->nodeIds.size(); ++i) {
 					auto& node = scriptGraph->getNodes()[dragging->nodeIds[i]];
-					node.setPosition(dragging->startPos[i] + delta);
+					const auto newPos = dragging->startPos[i] + delta;
+					node.setPosition(Vector2f(std::floor(newPos.x / gridSize) * gridSize, std::floor(newPos.y / gridSize) * gridSize));
 					dragging->hadChange = true;
 				}
 			}
 		} else {
 			for (size_t i = 0; i < dragging->nodeIds.size(); ++i) {
 				auto& node = scriptGraph->getNodes()[dragging->nodeIds[i]];
-				node.setPosition(*inputState.mousePos - basePos);
+				const auto newPos = *inputState.mousePos - basePos;
+				node.setPosition(Vector2f(std::floor(newPos.x / gridSize) * gridSize, std::floor(newPos.y / gridSize) * gridSize));
 				dragging->hadChange = true;
 			}
 		}
