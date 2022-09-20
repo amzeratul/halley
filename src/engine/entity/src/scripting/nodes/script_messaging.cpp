@@ -138,6 +138,11 @@ String ScriptReceiveMessage::getShortDescription(const World* world, const Scrip
 	}
 }
 
+String ScriptReceiveMessage::getLabel(const ScriptGraphNode& node) const
+{
+	return node.getSettings()["message"].asString("");
+}
+
 bool ScriptReceiveMessage::hasDestructor(const ScriptGraphNode& node) const
 {
 	return true;
