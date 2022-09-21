@@ -69,6 +69,66 @@ IScriptNodeType::Result ScriptFlowGate::doUpdate(ScriptEnvironment& environment,
 }
 
 
+ScriptFlowOnceData::ScriptFlowOnceData(const ConfigNode& node)
+{
+	if (node.hasKey("active")) {
+		active = node["active"].asBool();
+	}
+}
+
+ConfigNode ScriptFlowOnceData::toConfigNode(const EntitySerializationContext& context)
+{
+	ConfigNode::MapType result;
+	if (active) {
+		result["active"] = *active;
+	}
+	return result;
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptFlowOnce::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptFlowOnce::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	const auto desc = getConnectedNodeName(world, node, graph, 1);
+	auto str = ColourStringBuilder(true);
+	str.append("Flow once");
+	return str.moveResults();
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptFlowOnce::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+{
+	if (elementIdx == 1) {
+		return { "Flow once", {} };
+	}
+	else if (elementIdx == 2) {
+		return { "Flow otherwise", {} };
+	}
+	else {
+		return ScriptNodeTypeBase<ScriptFlowOnceData>::getPinDescription(node, element, elementIdx);
+	}
+}
+
+void ScriptFlowOnce::doInitData(ScriptFlowOnceData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
+{
+
+}
+
+IScriptNodeType::Result ScriptFlowOnce::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptFlowOnceData& data) const
+{
+	if (!data.active) {
+		data.active = true;
+		return Result(ScriptNodeExecutionState::Done, 0.0);
+	}
+	return Result(ScriptNodeExecutionState::Done, 0, 2, 1);
+}
+
+
 ScriptLatchData::ScriptLatchData(const ConfigNode& node)
 {
 	if (node.getType() == ConfigNodeType::Map) {

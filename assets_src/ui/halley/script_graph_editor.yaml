@@ -5,6 +5,9 @@ children:
 - widget: { class: widget, id: toolbar }
   sizer: { type: horizontal }
   children:
+  - widget: { class: widget, id: toolbarGizmo }
+    children: []
+    border: [0, 0, 10, 10]
   - widget: { class: checkbox, id: autoAcquire }
     fill: centre
     border: [0, 0, 2, 10]
@@ -14,12 +17,9 @@ children:
   - widget: { class: dropdown, id: instances, size: [200, 16] }
     fill: centre
     border: [0, 0, 0, 10]
-  - widget: { class: widget, id: toolbarGizmo }
-    children: []
-    border: [30, 0, 30, 10]
   - widget: { class: checkbox, id: autoConnectPins }
     fill: centre
-    border: [0, 0, 2, 10]
+    border: [10, 0, 2, 10]
   - widget: { class: label, text: Auto Connect Pins }
     fill: centre
     border: [2, 0, 6, 10]
