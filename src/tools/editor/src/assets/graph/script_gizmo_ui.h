@@ -20,6 +20,7 @@ namespace Halley {
 		void draw(UIPainter& painter) const override;
 
 		void setZoom(float zoom);
+		void setAutoConnectPins(bool autoConnect);
 		bool isHighlighted() const;
 		
 		std::shared_ptr<UIWidget> makeUI();

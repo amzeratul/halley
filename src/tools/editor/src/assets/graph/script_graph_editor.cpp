@@ -94,6 +94,14 @@ void ScriptGraphEditor::onMakeUI()
 		tryAutoAcquire();
 	});
 	tryAutoAcquire();
+
+	const auto autoConnect = projectWindow.getSetting(EditorSettingType::Project, "autoConnectPins").asBool(true);
+	gizmoEditor->setAutoConnectPins(autoConnect);
+	bindData("autoConnectPins", autoConnect, [=](bool value)
+	{
+		projectWindow.setSetting(EditorSettingType::Project, "autoConnectPins", ConfigNode(value));
+		gizmoEditor->setAutoConnectPins(value);
+	});
 }
 
 void ScriptGraphEditor::reload()

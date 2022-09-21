@@ -137,7 +137,9 @@ void ScriptingBaseGizmo::onNodeDragging(const SceneEditorInputState& inputState)
 		}
 	}
 
-	updateNodeAutoConnection(dragging->nodeIds);
+	if (autoConnectPin) {
+		updateNodeAutoConnection(dragging->nodeIds);
+	}
 
 	if ((dragging->sticky && inputState.leftClickPressed) || (!dragging->sticky && !inputState.leftClickHeld)) {
 		const bool hadChange = dragging->hadChange;
@@ -329,6 +331,11 @@ void ScriptingBaseGizmo::setGraph(ScriptGraph* graph)
 void ScriptingBaseGizmo::setState(ScriptState* state)
 {
 	scriptState = state;
+}
+
+void ScriptingBaseGizmo::setAutoConnectPins(bool autoConnect)
+{
+	autoConnectPin = autoConnect;
 }
 
 ScriptGraphNode& ScriptingBaseGizmo::getNode(GraphNodeId id)

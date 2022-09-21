@@ -32,7 +32,8 @@ namespace Halley {
 		ScriptGraph* getGraphPtr();
 		void setGraph(ScriptGraph* graph);
 		void setState(ScriptState* state);
-		
+		void setAutoConnectPins(bool autoConnect);
+
 		ExecutionQueue& getExecutionQueue();
 
 		void update(Time time, const SceneEditorInputState& inputState);
@@ -66,6 +67,7 @@ namespace Halley {
 		std::optional<Vector2f> lastMousePos;
 		bool lastCtrlHeld = false;
 		bool lastShiftHeld = false;
+		bool autoConnectPin = false;
 
 		std::optional<Dragging> dragging;
 

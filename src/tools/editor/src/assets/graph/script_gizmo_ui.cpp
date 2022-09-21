@@ -88,6 +88,11 @@ void ScriptGizmoUI::setZoom(float zoom)
 	gizmo.setZoom(zoom);
 }
 
+void ScriptGizmoUI::setAutoConnectPins(bool autoConnect)
+{
+	gizmo.setAutoConnectPins(autoConnect);
+}
+
 bool ScriptGizmoUI::isHighlighted() const
 {
 	return gizmo.isHighlighted();
