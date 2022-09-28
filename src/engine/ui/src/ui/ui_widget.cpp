@@ -665,8 +665,7 @@ void UIWidget::destroy()
 {
 	if (alive && !destroying) {
 		destroying = true;
-		onDestroyRequested();
-		bool ok = true;
+		bool ok = onDestroyRequested();
 		for (auto& b: behaviours) {
 			ok = ok && b->onParentDestroyed();
 		}
@@ -857,8 +856,9 @@ void UIWidget::onLayout()
 {
 }
 
-void UIWidget::onDestroyRequested()
+bool UIWidget::onDestroyRequested()
 {
+	return true;
 }
 
 void UIWidget::sendEvent(UIEvent event) const

@@ -16,6 +16,8 @@ namespace Halley {
 		Sprite& getSprite();
 		const Sprite& getSprite() const;
 
+		void setUseClipForPos(bool useClip);
+
 		void setLayerAdjustment(int adjustment);
 		void setWorldClip(std::optional<Rect4f> worldClip);
 		void setHoverable(Colour4f normalColour, Colour4f selColour);
@@ -32,6 +34,7 @@ namespace Halley {
 		Vector2f bottomRightBorder;
 		int layerAdjustment = 0;
 		bool dirty = true;
+		bool useClipForPos = true;
 		mutable uint8_t drawing = 0;
 		std::optional<Rect4f> worldClip;
 	};

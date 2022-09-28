@@ -194,9 +194,10 @@ void ChoosePrefabWindow::onOptionSelected(const String& id)
 	lastOption = id;
 }
 
-void ChoosePrefabWindow::onDestroyRequested()
+bool ChoosePrefabWindow::onDestroyRequested()
 {
 	projectWindow.setSetting(EditorSettingType::Project, lastOptionKey, ConfigNode(lastOption));
+	return true;
 }
 
 

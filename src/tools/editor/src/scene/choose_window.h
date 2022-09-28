@@ -65,7 +65,7 @@ namespace Halley {
     protected:
 		void onCategorySet(const String& id) override;
 		void onOptionSelected(const String& id) override;
-		void onDestroyRequested() override;
+		bool onDestroyRequested() override;
 	
 	private:
 		constexpr const static char* lastCategoryKey = "prefab_picker.last_category";

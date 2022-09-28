@@ -199,7 +199,7 @@ namespace Halley {
 		virtual TextInputData *getTextInputData();
 
 		virtual void onLayout();
-		virtual void onDestroyRequested();
+		virtual bool onDestroyRequested();
 		virtual void onParentChanged();
 		virtual void onActiveChanged(bool active);
 

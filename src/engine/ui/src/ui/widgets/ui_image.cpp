@@ -36,7 +36,7 @@ void UIImage::update(Time t, bool moved)
 	if (moved || dirty) {
 		Vector2f basePos = getPosition();
 		Vector2f imgBaseSize = sprite.getSize() + topLeftBorder + bottomRightBorder;
-		if (sprite.getClip()) {
+		if (useClipForPos && sprite.getClip()) {
 			auto c = sprite.getClip().value();
 			basePos -= c.getTopLeft();
 			imgBaseSize = Vector2f::min(c.getSize(), imgBaseSize);
@@ -79,6 +79,11 @@ Sprite& UIImage::getSprite()
 const Sprite& UIImage::getSprite() const
 {
 	return sprite;
+}
+
+void UIImage::setUseClipForPos(bool useClip)
+{
+	useClipForPos = useClip;
 }
 
 void UIImage::setLayerAdjustment(int adjustment)
