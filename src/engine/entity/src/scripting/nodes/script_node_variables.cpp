@@ -149,6 +149,43 @@ ConfigNode ScriptLiteral::getConfigNode(const ScriptGraphNode& node) const
 
 
 
+String ScriptColourLiteral::getLargeLabel(const ScriptGraphNode& node) const
+{
+	return node.getSettings()["value"].asString("#FFFFFF");
+}
+
+String ScriptColourLiteral::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return getLargeLabel(node);
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptColourLiteral::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 1>{ PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+Vector<IScriptNodeType::SettingType> ScriptColourLiteral::getSettingTypes() const
+{
+	return { SettingType{ "value", "Halley::Colour4f", Vector<String>{"#FFFFFF"} } };
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptColourLiteral::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(false);
+	str.append("Colour");
+	return str.moveResults();
+}
+
+ConfigNode ScriptColourLiteral::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	return ConfigNode(node.getSettings()["value"].asString("#FFFFFF"));
+}
+
+
+
 String ScriptComparison::getLargeLabel(const ScriptGraphNode& node) const
 {
 	return node.getSettings()["operator"].asString("==");
