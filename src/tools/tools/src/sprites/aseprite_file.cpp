@@ -18,7 +18,8 @@ struct AsepriteFileHeader
     uint16_t width;
     uint16_t height;
     uint16_t colourDepth;
-    uint32_t flags;
+    uint16_t flagsLow;
+	uint16_t flagsHigh;
     uint16_t speed;
     std::array<uint8_t, 8> _reserved0;
     uint8_t transparentPaletteEntry;
@@ -28,6 +29,7 @@ struct AsepriteFileHeader
     uint8_t pixelHeight;
     std::array<uint8_t, 92> _reserved2;
 };
+static_assert(sizeof(AsepriteFileHeader) == AsepriteFileHeader::size, "AsepriteFileHeader struct doesn't match declared size, make sure padding is not being inserted by the compiler.");
 
 struct AsepriteFileFrameHeader
 {
@@ -211,7 +213,7 @@ void AsepriteFile::load(gsl::span<const gsl::byte> data)
 
 	// Store header data
 	size = Vector2i(int(fileHeader.width), int(fileHeader.height));
-	flags = fileHeader.flags;
+	flags = static_cast<uint32_t>(fileHeader.flagsLow) | (static_cast<uint32_t>(fileHeader.flagsHigh) << 16);
 	transparentEntry = fileHeader.transparentPaletteEntry;
 	numOfColours = fileHeader.numberOfColours;
 	switch (fileHeader.colourDepth) {
