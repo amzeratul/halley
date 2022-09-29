@@ -18,8 +18,8 @@ Vector<IScriptNodeType::SettingType> ScriptSpawnEntity::getSettingTypes() const
 {
 	return {
 		SettingType{ "prefab", "Halley::ResourceReference<Halley::Prefab>", Vector<String>{""} },
-		SettingType{ "asChild", "bool", Vector<String>{"0"} },
-		SettingType{ "serializable", "bool", Vector<String>{"1"} }
+		SettingType{ "asChild", "bool", Vector<String>{"false"} },
+		SettingType{ "serializable", "bool", Vector<String>{"true"} }
 	};
 }
 
