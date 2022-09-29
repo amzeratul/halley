@@ -18,7 +18,8 @@ Vector<IScriptNodeType::SettingType> ScriptSpawnEntity::getSettingTypes() const
 {
 	return {
 		SettingType{ "prefab", "Halley::ResourceReference<Halley::Prefab>", Vector<String>{""} },
-		SettingType{ "asChild", "bool", Vector<String>{"0"} }
+		SettingType{ "asChild", "bool", Vector<String>{"0"} },
+		SettingType{ "serializable", "bool", Vector<String>{"1"} }
 	};
 }
 
@@ -35,6 +36,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptSpawnEntity::getPinConfiguration
 std::pair<String, Vector<ColourOverride>> ScriptSpawnEntity::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	const bool asChild = node.getSettings()["asChild"].asBool(false);
+	const bool serializable = node.getSettings()["serializable"].asBool(true);
 
 	auto str = ColourStringBuilder(true);
 	str.append("Spawn entity ");
@@ -44,6 +46,11 @@ std::pair<String, Vector<ColourOverride>> ScriptSpawnEntity::getNodeDescription(
 	if (asChild) {
 		str.append(" relative to parent ");
 		str.append(getConnectedNodeName(world, node, graph, 4), parameterColour);
+	}
+	if (serializable) {
+		str.append(" and serialize it ");
+	} else {
+		str.append(" and don't serialize it ");
 	}
 	return str.moveResults();
 }
@@ -59,6 +66,7 @@ IScriptNodeType::Result ScriptSpawnEntity::doUpdate(ScriptEnvironment& environme
 
 	const auto& prefab = node.getSettings()["prefab"].asString("");
 	const bool asChild = node.getSettings()["asChild"].asBool(false);
+	const bool serializable = node.getSettings()["serializable"].asBool(true);
 	const Vector2f position = readDataPin(environment, node, 2).asVector2f(Vector2f());
 
 	if (!prefab.isEmpty()) {
@@ -73,6 +81,7 @@ IScriptNodeType::Result ScriptSpawnEntity::doUpdate(ScriptEnvironment& environme
 			transform->setLocalPosition(position);
 		}
 
+		entity.setSerializable(serializable);
 		data.entityId = entity.getEntityId();
 	}
 
