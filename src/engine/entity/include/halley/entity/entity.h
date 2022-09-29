@@ -423,7 +423,7 @@ namespace Halley {
 			if (const auto parent = getParent(); parent.isValid()) {
 				const auto parentId = parent.tryGetEntityIdWithComponentInAncestors<T>();
 				if (parentId.isValid()) {
-					return parent.getEntityId();
+					return parentId;
 				}
 			}
 			return {};
