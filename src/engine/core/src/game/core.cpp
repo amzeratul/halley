@@ -359,27 +359,42 @@ void Core::updatePlatform()
 	}
 }
 
-void Core::onFixedUpdate(Time time)
+void Core::onFixedUpdate(Time delta)
 {
 	if (isRunning()) {
 		// TODO: move this to onTick
-		//doFixedUpdate(time);
+		//doFixedUpdate(delta);
 	}
 }
 
-void Core::onTick(Time time)
+void Core::onTick(Clock::time_point time, Time delta)
 {
 	auto& capture = ProfilerCapture::get();
 	const bool record = !profileCallbacks.empty();
 	capture.startFrame(record);
 	
-	processEvents(time);
+	processEvents(delta);
 
-	tickFrame(time);
+	tickFrame(delta);
 
 	capture.endFrame();
 	if (record && capture.getFrameTime() >= getProfileCaptureThreshold()) {
 		onProfileData(std::make_shared<ProfilerData>(capture.getCapture()));
+	}
+
+	if (game->getTargetBackgroundFPS() > 0) {
+		// Throttle CPU to match target (background) FPS when window has been
+		// minimized, or has lost keyboard focus.
+		const auto& window = api->video->getWindow().getDefinition();
+		if (window.isFocusLost() || (window.getWindowState() == WindowState::Minimized)) {
+			const Clock::time_point curTime = Clock::now();
+			const Time elapsed = std::chrono::duration<double>(curTime - time).count();
+			const Time wait = (1.0 / game->getTargetBackgroundFPS()) - elapsed;
+			if (wait > 0.001) {
+				using namespace std::chrono_literals;
+				std::this_thread::sleep_for(1s * wait);
+			}
+		}
 	}
 }
 

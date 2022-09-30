@@ -174,6 +174,10 @@ void SystemSDL::processVideoEvent(VideoAPI* video, const SDL_Event& event)
 				w->updateDefinition(w->getDefinition().withState(WindowState::Minimized));
 			} else if (event.window.event == SDL_WINDOWEVENT_RESTORED) {
 				w->updateDefinition(w->getDefinition().withState(WindowState::Normal));
+			} else if (event.window.event == SDL_WINDOWEVENT_FOCUS_GAINED) {
+				w->updateDefinition(w->getDefinition().withFocus(true));
+			} else if (event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
+				w->updateDefinition(w->getDefinition().withFocus(false));
 			}
 		}
 	}
