@@ -339,7 +339,7 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 		
 		// Icon
 		const auto& icon = getIcon(*nodeType, node);
-		if (icon.hasMaterial()) {
+		if (icon.hasMaterial() && nodeType->getClassification() != ScriptNodeClassification::Comment) {
 			icon.clone()
 				.setPosition(pos + iconOffset)
 				.setScale(1.0f / curZoom)
@@ -350,8 +350,9 @@ void ScriptRenderer::drawNode(Painter& painter, Vector2f basePos, const ScriptGr
 		// Large label
 		if (!largeLabel.isEmpty()) {
 			const bool isComment = nodeType->getClassification() == ScriptNodeClassification::Comment;
-			const auto fontSize = isComment ? 14 : 18;
-			drawLabel(largeLabel, pos + iconOffset, fontSize / curZoom, (nodeSize.x - 10.0f) / curZoom, isComment);
+			const auto fontSize = isComment ? 14.0f : 18.0f;
+			const auto margin = isComment ? 20.0f : 10.0f;
+			drawLabel(largeLabel, pos + iconOffset, fontSize / curZoom, (nodeSize.x - margin) / curZoom, isComment);
 		}
 
 		// Label
@@ -400,7 +401,7 @@ Vector2f ScriptRenderer::getCommentNodeSize(const BaseGraphNode& node, float cur
 	const auto split = text.split(node.getSettings()["comment"].asString(""), maxWidth);
 	const auto extents = text.getExtents(split);
 
-	return Vector2f::max(Vector2f(40, 40), extents + Vector2f(10, 10));
+	return Vector2f::max(Vector2f(40, 40), extents + Vector2f(20, 20));
 }
 
 Circle ScriptRenderer::getNodeElementArea(const IScriptNodeType& nodeType, Vector2f basePos, const ScriptGraphNode& node, size_t pinN, float curZoom, float posScale) const
@@ -470,7 +471,7 @@ Colour4f ScriptRenderer::getNodeColour(const IScriptNodeType& nodeType)
 	case ScriptNodeClassification::Function:
 		return Colour4f(1.00f, 0.49f, 0.68f);
 	case ScriptNodeClassification::Comment:
-		return Colour4f(0.4f, 0.4f, 0.45f);
+		return Colour4f(0.25f, 0.25f, 0.3f);
 	}
 	return Colour4f(0.2f, 0.2f, 0.2f);
 }
