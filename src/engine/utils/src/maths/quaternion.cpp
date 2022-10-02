@@ -90,10 +90,10 @@ Quaternion Quaternion::lookAt(const Vector3f& dir, const Vector3f& worldUp)
 {
 	// See https://stackoverflow.com/questions/52413464/look-at-quaternion-using-up-vector/52551983#52551983
 	const Vector3f fw = dir.normalized(); // Front
-	const Vector3f lf = fw.cross(worldUp).normalized(); // Left
-	const Vector3f up = lf.cross(fw); // Up
+	const Vector3f ri = worldUp.cross(fw).normalized(); // Left
+	const Vector3f up = fw.cross(ri); // Up
 
-	const auto a0 = lf;
+	const auto a0 = ri;
 	const auto a1 = up;
 	const auto a2 = fw;
 	const auto a00 = a0.x;
