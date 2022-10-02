@@ -21,6 +21,9 @@
 
 #include "halley/maths/line.h"
 
+#include "halley/maths/circle.h"
+#include "halley/maths/ray.h"
+
 using namespace Halley;
 
 
@@ -72,5 +75,33 @@ void Halley::Line::doLine(Vector2i p0, Vector2i p1, std::function<void(Vector2i)
 			err += dx;
 			y += sy;
 		}
+	}
+}
+
+std::optional<LineSegment> LineSegment::clip(const Circle& circle) const {
+	const bool aInside = circle.contains(a);
+	const bool bInside = circle.contains(b);
+	if (aInside && bInside) {
+		// Fully inside, no clip
+		return *this;
+	} else if (aInside) {
+		// Clip b
+		LineSegment result = *this;
+		result.b = Ray(b, (a - b).normalized()).castCircle(circle)->pos;
+		return result;
+	} else if (bInside) {
+		// Clip a
+		LineSegment result = *this;
+		result.a = Ray(a, (b - a).normalized()).castCircle(circle)->pos;
+		return result;
+	} else if (getDistance(circle.getCentre()) <= circle.getRadius()) {
+		// Clip both ends
+		LineSegment result;
+		result.a = Ray(a, (b - a).normalized()).castCircle(circle)->pos;
+		result.b = Ray(b, (a - b).normalized()).castCircle(circle)->pos;
+		return result;
+	} else {
+		// No overlap
+		return std::nullopt;
 	}
 }

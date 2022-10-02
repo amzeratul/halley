@@ -23,10 +23,11 @@
 
 #include "vector2.h"
 #include <optional>
-
 #include "range.h"
 
 namespace Halley {
+	class Circle;
+
 	class Line {
 	public:
 		constexpr Line() = default;
@@ -235,5 +236,7 @@ namespace Halley {
 		{
 			return (b - a).unit();
 		}
+
+		[[nodiscard]] std::optional<LineSegment> clip(const Circle& circle) const;
 	};
 }

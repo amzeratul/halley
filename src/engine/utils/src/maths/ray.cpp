@@ -12,16 +12,15 @@ Ray::Ray(Vector2f start, Vector2f dir)
 {
 }
 
-std::optional<std::pair<float, Vector2f>> Ray::castCircle(Vector2f centre, float radius) const
+std::optional<Ray::RayCastResult> Ray::castCircle(Vector2f centre, float radius) const
 {
 	const Vector2f localCentre = centre - p;
 	// Is ray already inside?
 	if (const float sqLen = (p - centre).squaredLength(); sqLen < radius * radius) {
 		if (sqLen > 0.00001f) {
-			return std::pair<float, Vector2f>(0.0f, (p - centre).normalized());
-		}
-		else {
-			return std::pair<float, Vector2f>(0.0f, Vector2f(0.0f, 1.0f));
+			return RayCastResult(0.0f, (p - centre).normalized(), p);
+		} else {
+			return RayCastResult(0.0f, Vector2f(0.0f, 1.0f), p);
 		}
 	}
 	
@@ -55,10 +54,15 @@ std::optional<std::pair<float, Vector2f>> Ray::castCircle(Vector2f centre, float
 	Ensures(!std::isnan(normal.x));
 	Ensures(!std::isnan(normal.y));
 	
-	return std::pair<float, Vector2f>(dist, normal);
+	return RayCastResult(dist, normal, intersectionPoint);
 }
 
-std::optional<std::pair<float, Vector2f>> Ray::castLineSegment(Vector2f a, Vector2f b) const
+std::optional<Ray::RayCastResult> Ray::castCircle(const Circle& circle) const
+{
+	return castCircle(circle.getCentre(), circle.getRadius());
+}
+
+std::optional<Ray::RayCastResult> Ray::castLineSegment(Vector2f a, Vector2f b) const
 {
 	// From http://geomalgorithms.com/a05-_intersect-1.html
 
@@ -92,11 +96,17 @@ std::optional<std::pair<float, Vector2f>> Ray::castLineSegment(Vector2f a, Vecto
 	Ensures(!std::isnan(normal.y));
 
 	//Logger::logInfo(" line [" + toString(s) + ", " + dir + "] - " + normal);
-	
-	return std::pair<float, Vector2f>(s, dir.dot(normal) > 0 ? -normal : normal);
+
+	const auto n = dir.dot(normal) > 0 ? -normal : normal;
+	return RayCastResult(s, n, p + dir * s);
 }
 
-std::optional<std::pair<float, Vector2f>> Ray::castPolygon(const Polygon& polygon) const
+std::optional<Ray::RayCastResult> Ray::castLineSegment(const LineSegment& lineSegment) const
+{
+	return castLineSegment(lineSegment.a, lineSegment.b);
+}
+
+std::optional<Ray::RayCastResult> Ray::castPolygon(const Polygon& polygon) const
 {
 	const auto& boundingCircle = polygon.getBoundingCircle();
 	if (!castCircle(boundingCircle.getCentre(), boundingCircle.getRadius())) {
@@ -105,11 +115,11 @@ std::optional<std::pair<float, Vector2f>> Ray::castPolygon(const Polygon& polygo
 
 	const auto& vertices = polygon.getVertices();
 	const auto vertexCount = int(vertices.size());
-	std::optional<std::pair<float, Vector2f>> closestIntersection;
+	std::optional<RayCastResult> closestIntersection;
 	int numIntersections = 0;
 	for (auto i = 0; i < vertexCount; i++) {
 		if (auto intersection = castLineSegment(vertices[i], vertices[(i+1)%(vertexCount)])) {
-			if (!closestIntersection || intersection->first < closestIntersection->first) {
+			if (!closestIntersection || intersection->distance < closestIntersection->distance) {
 				closestIntersection = intersection;
 			}
 			++numIntersections;
@@ -117,7 +127,7 @@ std::optional<std::pair<float, Vector2f>> Ray::castPolygon(const Polygon& polygo
 	}
 
 	if (numIntersections % 2 == 1) { // We're already inside
-		return std::pair<float, Vector2f>(0.0f, Vector2f());
+		return RayCastResult(0.0f, Vector2f(), p);
 	}
 
 	return closestIntersection;
