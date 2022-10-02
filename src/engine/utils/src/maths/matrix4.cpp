@@ -113,6 +113,15 @@ Vector4f Matrix4f::operator*(const Vector4f& v) const
 	return result;
 }
 
+void Matrix4f::loadZero()
+{
+	const static float zeroMatrix[] =  {1.0f, 0.0f, 0.0f, 0.0f,
+										0.0f, 1.0f, 0.0f, 0.0f,
+										0.0f, 0.0f, 1.0f, 0.0f,
+										0.0f, 0.0f, 0.0f, 1.0f};
+	memcpy(getElements(), zeroMatrix, sizeof(float) * 16);
+}
+
 void Matrix4f::loadIdentity()
 {
 	const static float identityMatrix[] =  {1.0f, 0.0f, 0.0f, 0.0f,
@@ -154,7 +163,7 @@ void Matrix4f::translate(Vector3f translation)
 
 void Matrix4f::transpose()
 {
-	auto e = getElements();
+	auto* e = getElements();
 	
 	std::swap(e[1], e[4]);
 	std::swap(e[2], e[8]);
@@ -164,6 +173,145 @@ void Matrix4f::transpose()
 	std::swap(e[7], e[13]);
 
 	std::swap(e[11], e[14]);
+}
+
+bool Matrix4f::invert()
+{
+	auto* e = getElements();
+	float inv[16];
+
+    inv[0] = e[5]  * e[10] * e[15] - 
+             e[5]  * e[11] * e[14] - 
+             e[9]  * e[6]  * e[15] + 
+             e[9]  * e[7]  * e[14] +
+             e[13] * e[6]  * e[11] - 
+             e[13] * e[7]  * e[10];
+
+    inv[4] = -e[4]  * e[10] * e[15] + 
+              e[4]  * e[11] * e[14] + 
+              e[8]  * e[6]  * e[15] - 
+              e[8]  * e[7]  * e[14] - 
+              e[12] * e[6]  * e[11] + 
+              e[12] * e[7]  * e[10];
+
+    inv[8] = e[4]  * e[9] * e[15] - 
+             e[4]  * e[11] * e[13] - 
+             e[8]  * e[5] * e[15] + 
+             e[8]  * e[7] * e[13] + 
+             e[12] * e[5] * e[11] - 
+             e[12] * e[7] * e[9];
+
+    inv[12] = -e[4]  * e[9] * e[14] + 
+               e[4]  * e[10] * e[13] +
+               e[8]  * e[5] * e[14] - 
+               e[8]  * e[6] * e[13] - 
+               e[12] * e[5] * e[10] + 
+               e[12] * e[6] * e[9];
+
+    inv[1] = -e[1]  * e[10] * e[15] + 
+              e[1]  * e[11] * e[14] + 
+              e[9]  * e[2] * e[15] - 
+              e[9]  * e[3] * e[14] - 
+              e[13] * e[2] * e[11] + 
+              e[13] * e[3] * e[10];
+
+    inv[5] = e[0]  * e[10] * e[15] - 
+             e[0]  * e[11] * e[14] - 
+             e[8]  * e[2] * e[15] + 
+             e[8]  * e[3] * e[14] + 
+             e[12] * e[2] * e[11] - 
+             e[12] * e[3] * e[10];
+
+    inv[9] = -e[0]  * e[9] * e[15] + 
+              e[0]  * e[11] * e[13] + 
+              e[8]  * e[1] * e[15] - 
+              e[8]  * e[3] * e[13] - 
+              e[12] * e[1] * e[11] + 
+              e[12] * e[3] * e[9];
+
+    inv[13] = e[0]  * e[9] * e[14] - 
+              e[0]  * e[10] * e[13] - 
+              e[8]  * e[1] * e[14] + 
+              e[8]  * e[2] * e[13] + 
+              e[12] * e[1] * e[10] - 
+              e[12] * e[2] * e[9];
+
+    inv[2] = e[1]  * e[6] * e[15] - 
+             e[1]  * e[7] * e[14] - 
+             e[5]  * e[2] * e[15] + 
+             e[5]  * e[3] * e[14] + 
+             e[13] * e[2] * e[7] - 
+             e[13] * e[3] * e[6];
+
+    inv[6] = -e[0]  * e[6] * e[15] + 
+              e[0]  * e[7] * e[14] + 
+              e[4]  * e[2] * e[15] - 
+              e[4]  * e[3] * e[14] - 
+              e[12] * e[2] * e[7] + 
+              e[12] * e[3] * e[6];
+
+    inv[10] = e[0]  * e[5] * e[15] - 
+              e[0]  * e[7] * e[13] - 
+              e[4]  * e[1] * e[15] + 
+              e[4]  * e[3] * e[13] + 
+              e[12] * e[1] * e[7] - 
+              e[12] * e[3] * e[5];
+
+    inv[14] = -e[0]  * e[5] * e[14] + 
+               e[0]  * e[6] * e[13] + 
+               e[4]  * e[1] * e[14] - 
+               e[4]  * e[2] * e[13] - 
+               e[12] * e[1] * e[6] + 
+               e[12] * e[2] * e[5];
+
+    inv[3] = -e[1] * e[6] * e[11] + 
+              e[1] * e[7] * e[10] + 
+              e[5] * e[2] * e[11] - 
+              e[5] * e[3] * e[10] - 
+              e[9] * e[2] * e[7] + 
+              e[9] * e[3] * e[6];
+
+    inv[7] = e[0] * e[6] * e[11] - 
+             e[0] * e[7] * e[10] - 
+             e[4] * e[2] * e[11] + 
+             e[4] * e[3] * e[10] + 
+             e[8] * e[2] * e[7] - 
+             e[8] * e[3] * e[6];
+
+    inv[11] = -e[0] * e[5] * e[11] + 
+               e[0] * e[7] * e[9] + 
+               e[4] * e[1] * e[11] - 
+               e[4] * e[3] * e[9] - 
+               e[8] * e[1] * e[7] + 
+               e[8] * e[3] * e[5];
+
+    inv[15] = e[0] * e[5] * e[10] - 
+              e[0] * e[6] * e[9] - 
+              e[4] * e[1] * e[10] + 
+              e[4] * e[2] * e[9] + 
+              e[8] * e[1] * e[6] - 
+              e[8] * e[2] * e[5];
+
+    const float det = e[0] * inv[0] + e[1] * inv[4] + e[2] * inv[8] + e[3] * inv[12];
+	if (det == 0) {
+		return false;
+	}
+
+	const float invDet = 1.0f / det;
+	for (int i = 0; i < 16; i++) {
+		e[i] = inv[i] * invDet;
+	}
+	return true;
+}
+
+Matrix4f Matrix4f::getInverse() const
+{
+	auto r = *this;
+	const bool ok = r.invert();
+	if (!ok) {
+		return Matrix4f::makeZero();
+	}
+	return r;
 }
 
 Quaternion Matrix4f::toRotationQuaternion() const
@@ -232,6 +380,13 @@ Vector4f Matrix4f::getRow(size_t row) const
 Vector4f Matrix4f::getColumn(size_t column) const
 {
 	return columns[column];
+}
+
+Matrix4f Matrix4f::makeZero()
+{
+	Matrix4f result;
+	result.loadZero();
+	return result;
 }
 
 Matrix4f Matrix4f::makeIdentity()
@@ -312,10 +467,10 @@ Matrix4f Matrix4f::makeRotation(const Quaternion& q)
 	const float j = q.y;
 	const float k = q.z;
 	const float mat[16] = {
-		1 - 2*(j*j + k*k), 2*(i*j + k*r), 2*(i*k - j*r), 0,
-		2*(i*j - k*r), 1 - 2*(i*i + k*k), 2*(j*k + i*r), 0,
-		2*(i*k + j*r), 2*(j*k - i*r), 1 - 2*(i*i + j*j), 0,
-		0, 0, 0, 1
+		1 - 2*(j*j + k*k), 2*(i*j + k*r),     2*(i*k - j*r),     0,
+		2*(i*j - k*r),     1 - 2*(i*i + k*k), 2*(j*k + i*r),     0,
+		2*(i*k + j*r),     2*(j*k - i*r),     1 - 2*(i*i + j*j), 0,
+		0,                 0,                 0,                 1
 	};
 
 	return Matrix4f(mat);
@@ -380,7 +535,7 @@ Matrix4f Matrix4f::makePerspective(float near, float far, float aspectRatio, con
 	const float tan = (fov * 0.5f).tan();
 	const float mat[16] = { 1.0f / (aspectRatio * tan), 0, 0, 0,
 							0, 1.0f / tan, 0, 0,
-							0, 0, (-near - far)/(near - far), 1,
+							0, 0, -(near + far)/(near - far), 1,
 							0, 0, (2 * far * near)/(near - far), 0 };
 	return Matrix4f(mat);
 }
