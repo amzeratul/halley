@@ -13,6 +13,7 @@
 
 namespace Halley
 {
+	class LineSegment;
 	class VideoAPI;
 	class MaterialDataBlock;
 	class MaterialConstantBuffer;
@@ -75,6 +76,7 @@ namespace Halley
 
 		// Draws a line across all points (if no material is specified, use standard one)
 		void drawLine(gsl::span<const Vector2f> points, float width, Colour4f colour, bool loop = false, std::shared_ptr<Material> material = {});
+		void drawLine(const LineSegment& line, float width, Colour4f colour, bool loop = false, std::shared_ptr<Material> material = {});
 		void drawLine(const BezierQuadratic& bezier, float width, Colour4f colour, std::shared_ptr<Material> material = {});
 		void drawLine(const BezierCubic& bezier, float width, Colour4f colour, std::shared_ptr<Material> material = {});
 

@@ -312,6 +312,11 @@ void Painter::drawLine(gsl::span<const Vector2f> points, float width, Colour4f c
 	drawQuads(material, vertices.size(), vertices.data());
 }
 
+void Painter::drawLine(const LineSegment& line, float width, Colour4f colour, bool loop, std::shared_ptr<Material> material)
+{
+	drawLine(gsl::span<const Vector2f>(&line.a, 2), width, colour, loop, std::move(material));
+}
+
 void Painter::drawLine(const BezierQuadratic& bezier, float width, Colour4f colour, std::shared_ptr<Material> material)
 {
 	auto points = bezier.toLineSegments();
