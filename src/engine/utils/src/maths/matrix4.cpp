@@ -482,6 +482,7 @@ Matrix4f Matrix4f::makeScaling(Vector2f scale)
 	result.loadIdentity();
 	result.columns[0][0] = scale.x;
 	result.columns[1][1] = scale.y;
+	result.columns[2][2] = 1.0f;
 	return result;
 }
 
