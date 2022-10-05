@@ -53,6 +53,24 @@ Polygon Triangle::toPolygon() const
 	return Polygon(VertexList{ a, b, c });
 }
 
+Circle Triangle::getCircumscribedCircle() const
+{
+	// Find two perpendicular bisectors
+	const auto b0 = Line(0.5f * (a + b), (a - b).normalized().orthoRight());
+	const auto b1 = Line(0.5f * (b + c), (b - c).normalized().orthoRight());
+
+	// Circle centre is where they cross
+	const auto centre = b0.intersection(b1);
+	if (!centre) {
+		return Circle();
+	}
+
+	// Radius is just the distance to any vertex
+	const auto radius = (a - *centre).length();
+
+	return Circle(*centre, radius);
+}
+
 Triangle Triangle::operator+(Vector2f v) const
 {
 	return Triangle(a + v, b + v, c + v);
