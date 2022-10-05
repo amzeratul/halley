@@ -238,5 +238,35 @@ namespace Halley {
 		}
 
 		[[nodiscard]] std::optional<LineSegment> clip(const Circle& circle) const;
+
+		[[nodiscard]] LineSegment operator+(Vector2f p) const
+		{
+			return LineSegment(a + p, b + p);
+		}
+
+		[[nodiscard]] LineSegment operator-(Vector2f p) const
+		{
+			return LineSegment(a - p, b - p);
+		}
+
+		[[nodiscard]] LineSegment operator*(Vector2f p) const
+		{
+			return LineSegment(a * p, b * p);
+		}
+
+		[[nodiscard]] LineSegment operator/(Vector2f p) const
+		{
+			return LineSegment(a / p, b / p);
+		}
+		
+		[[nodiscard]] LineSegment operator*(float s) const
+		{
+			return LineSegment(a * s, b * s);
+		}
+		
+		[[nodiscard]] LineSegment operator/(float s) const
+		{
+			return LineSegment(a / s, b / s);
+		}
 	};
 }
