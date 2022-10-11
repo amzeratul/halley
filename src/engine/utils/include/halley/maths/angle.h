@@ -37,7 +37,7 @@ namespace Halley {
 	public:
 		// Constructors
 		constexpr Angle() : value(0) {}
-		constexpr Angle(T _value) : value(_value) {}
+		explicit constexpr Angle(T radians) : value(radians) {}
 		constexpr Angle(const Angle &angle) : value(angle.value) {}
 		constexpr Angle(Angle&& angle) noexcept : value(std::move(angle.value)) {}
 

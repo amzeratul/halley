@@ -95,7 +95,7 @@ namespace Halley
 		Vector2f getUncroppedAbsolutePivot() const;
 
 		Sprite& setRotation(Angle1f angle);
-		Angle1f getRotation() const { return vertexAttrib.rotation; }
+		Angle1f getRotation() const { return Angle1f::fromRadians(vertexAttrib.rotation, false); }
 
 		Sprite& setSize(Vector2f size);
 		Sprite& setScale(Vector2f scale);
