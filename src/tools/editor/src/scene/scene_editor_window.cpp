@@ -8,6 +8,7 @@
 #include "halley/entity/world.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/tools/project/project.h"
+#include "halley/tools/validators/component_dependency_validator.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/ui/ui_factory.h"
 #include "scene_editor_canvas.h"
@@ -178,6 +179,7 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 
 		// Entity validator
 		entityValidator = std::make_shared<EntityValidator>(world);
+		entityValidator->addValidator(std::make_unique<ComponentDependencyValidator>(&project.getECSData()));
 		gameBridge->initializeEntityValidator(*entityValidator);
 
 		// Load prefab

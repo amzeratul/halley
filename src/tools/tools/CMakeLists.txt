@@ -74,6 +74,8 @@ set(SOURCES
     "src/make_font/font_generator.cpp"
     "src/make_font/make_font_tool.cpp"
 
+    "src/validators/component_dependency_validator.cpp"
+
     "src/packer/asset_pack_inspector.cpp"
     "src/packer/asset_pack_manifest.cpp"
     "src/packer/asset_packer.cpp"
@@ -131,6 +133,8 @@ set(HEADERS
     "include/halley/tools/dll/dynamic_library.h"
     "include/halley/tools/dll/load_dll_task.h"
     "include/halley/tools/dll/project_dll.h"
+
+    "include/halley/tools/validators/component_dependency_validator.h"
 
     "include/halley/tools/assets/asset_collector.h"
     "include/halley/tools/assets/asset_importer.h"
