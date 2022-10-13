@@ -155,6 +155,11 @@ namespace Halley {
 			return Rect2D(p1 - v.xy(), p2 + v.zw());
 		}
 
+		constexpr Vector4D<T> toVector4() const
+		{
+			return Vector4D<T>(p1.x, p1.y, p2.x, p2.y);
+		}
+
 		constexpr Vector2D<T> getTopLeft() const { return p1; }
 		constexpr Vector2D<T> getTopCenter() const { return Vector2D<T>((p1.x + p2.x) / 2, p1.y); }
 		constexpr Vector2D<T> getTopRight() const { return Vector2D<T>(p2.x, p1.y); }
