@@ -277,9 +277,9 @@ LocalisedString LocalisedString::fromUserString(const String& str)
 	return LocalisedString(str);
 }
 
-LocalisedString LocalisedString::fromNumber(int number)
+LocalisedString LocalisedString::fromNumber(int number, int base, int width, char fill)
 {
-	return LocalisedString(toString(number));
+	return LocalisedString(toString(number, base, width, fill));
 }
 
 LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0) const
