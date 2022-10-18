@@ -7,16 +7,24 @@ uniforms:
   - MaterialBlock:
     - u_smoothness: float
     - u_outline: float
+    - u_shadowDistance: float
+    - u_shadowSmoothness: float
     - u_outlineColour: vec4
+    - u_shadowColour: vec4
 passes:
   - blend: Alpha Premultiplied
     shader:
     - language: hlsl
-      vertex: sprite.vertex.hlsl
-      pixel: distance_field_sprite_outline.pixel.hlsl
+      vertex: text_offset.vertex.hlsl
+      pixel: text_shadow.pixel.hlsl
   - blend: Alpha Premultiplied
     shader:
     - language: hlsl
       vertex: sprite.vertex.hlsl
-      pixel: distance_field_sprite_fill.pixel.hlsl
+      pixel: text_outline.pixel.hlsl
+  - blend: Alpha Premultiplied
+    shader:
+    - language: hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: text_fill.pixel.hlsl
 ...

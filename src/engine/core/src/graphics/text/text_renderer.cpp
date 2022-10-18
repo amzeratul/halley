@@ -102,6 +102,27 @@ TextRenderer& TextRenderer::setOutline(float v)
 	return *this;
 }
 
+TextRenderer& TextRenderer::setOutline(float width, Colour colour)
+{
+	if (outline != width || outlineColour != colour) {
+		outline = width;
+		outlineColour = colour;
+		materialDirty = true;
+	}
+	return *this;
+}
+
+TextRenderer& TextRenderer::setShadow(float distance, float smoothness, Colour colour)
+{
+	if (shadowDistance != distance || shadowSmoothness != smoothness || shadowColour != colour) {
+		shadowDistance = distance;
+		shadowSmoothness = smoothness;
+		shadowColour = colour;
+		materialDirty = true;
+	}
+	return *this;
+}
+
 TextRenderer& TextRenderer::setAlignment(float v)
 {
 	if (align != v) {
@@ -582,13 +603,19 @@ void TextRenderer::updateMaterial(Material& material, const Font& font) const
 	const float scale = getScale(font);
 	
 	const float smooth = smoothness * lowSmooth;
+	const float shadowSmooth = shadowSmoothness * lowSmooth;
 	const float outlineSize = outline / smoothRadius / scale;
+
 	material
 		.set("u_smoothness", smooth)
 		.set("u_outline", outlineSize)
-		.set("u_outlineColour", outlineColour);
+		.set("u_shadowDistance", shadowDistance)
+		.set("u_shadowSmoothness", shadowSmooth)
+		.set("u_outlineColour", outlineColour)
+		.set("u_shadowColour", shadowColour);
 
-	material.setPassEnabled(0, outline > 0.0001f);
+	material.setPassEnabled(0, shadowColour.a > 0.001f);
+	material.setPassEnabled(1, outlineColour.a > 0.001f && outline > 0.0001f);
 }
 
 void TextRenderer::updateMaterialForFont(const Font& font) const
@@ -660,6 +687,9 @@ void ConfigNodeSerializer<TextRenderer>::deserialize(const EntitySerializationCo
 	}
 	if (node.hasKey("outlineColour")) {
 		target.setOutlineColour(Colour4f::fromString(node["outlineColour"].asString()));
+	}
+	if (node.hasKey("shadowColour")) {
+		target.setShadow(node["shadowDistance"].asFloat(0), node["shadowSmoothness"].asFloat(1), Colour4f::fromString(node["shadowColour"].asString()));
 	}
 	if (node.hasKey("alignment")) {
 		target.setAlignment(node["alignment"].asFloat());
