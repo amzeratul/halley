@@ -613,8 +613,8 @@ UIFactoryWidgetProperties UIFactory::getLabelProperties() const
 	result.entries.emplace_back("Max Height", "maxHeight", "std::optional<float>", "");
 	result.entries.emplace_back("Alignment", "alignment", "std::optional<float>", "");
 	result.entries.emplace_back("Font Size", "fontSize", "std::optional<float>", "");
-	result.entries.emplace_back("Marquee", "marquee", "std::optional<bool>", "");
-	result.entries.emplace_back("Word Wrap", "wordWrapped", "std::optional<bool>", "");
+	result.entries.emplace_back("Marquee", "marquee", "bool", "");
+	result.entries.emplace_back("Word Wrap", "wordWrapped", "bool", "");
 	result.entries.emplace_back("Colour", "colour", "Halley::Colour4f", "#FFFFFF");
 
 	result.name = "Label";

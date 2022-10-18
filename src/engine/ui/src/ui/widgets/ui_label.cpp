@@ -56,7 +56,9 @@ void UILabel::update(Time t, bool moved)
 void UILabel::setMarquee(bool enabled)
 {
 	marquee = enabled;
-	if (!marquee) {
+	if (marquee) {
+		wordWrapped = false;
+	} else {
 		marqueePos = 0;
 		marqueeIdle = 0;
 		marqueeDirection = -1;
