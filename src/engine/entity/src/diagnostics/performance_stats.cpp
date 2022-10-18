@@ -236,8 +236,8 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	}
 
 	if (simple) {
-		const auto pos = Vector2f(painter.getViewPort().getBottomRight()) - Vector2f(5, 5);
-		headerText.setPosition(pos).setOffset(Vector2f(1, 1)).setOutline(2.0f);
+		const auto pos = Vector2f(painter.getViewPort().getTopRight()) + Vector2f(-5, 5);
+		headerText.setPosition(pos).setOffset(Vector2f(1, 0)).setOutline(2.0f);
 	} else {
 		headerText.setPosition(Vector2f(10, 10)).setOffset(Vector2f()).setOutline(1.0f);
 	}
