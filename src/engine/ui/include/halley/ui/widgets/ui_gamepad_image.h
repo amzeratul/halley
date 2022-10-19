@@ -11,7 +11,6 @@ namespace Halley {
 
 	protected:
 		void setJoystickType(JoystickType type) override;
-		void onGamepadInput(const UIInputResults& input, Time time) override;
 
 	private:
 		UIStyle style;

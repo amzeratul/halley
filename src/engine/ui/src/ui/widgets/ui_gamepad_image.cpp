@@ -25,11 +25,3 @@ void UIGamepadImage::setJoystickType(JoystickType type)
 		setSprite(iconRetriever(button, type).setColour(colour));
 	}
 }
-
-void UIGamepadImage::onGamepadInput(const UIInputResults& input, Time time)
-{
-	if (input.isButtonPressed(UIGamepadInput::Button::Accept)) {
-		sendEvent(UIEvent(UIEventType::ButtonClicked, getId()));
-		playSound(style.getString("downSound"));
-	}
-}
