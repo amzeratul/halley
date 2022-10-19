@@ -522,6 +522,13 @@ std::unique_ptr<InputExclusiveButton> InputVirtual::makeExclusiveButton(InputBut
 	return exclusive;
 }
 
+void InputVirtual::clearPresses()
+{
+	for (auto& axis: axes) {
+		axis.curRepeatValue = 0;
+	}
+}
+
 void InputVirtual::addExclusiveButton(InputExclusiveButton& exclusive)
 {
 	exclusiveButtons[exclusive.button].push_back(&exclusive);

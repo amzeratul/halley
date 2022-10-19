@@ -102,6 +102,8 @@ namespace Halley {
 
 		std::unique_ptr<InputExclusiveButton> makeExclusiveButton(InputButton button, InputPriority priority);
 
+		void clearPresses() override;
+
 	private:
 
 		struct Bind {
