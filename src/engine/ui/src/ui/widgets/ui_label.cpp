@@ -166,6 +166,11 @@ void UILabel::setFutureText(Future<String> futureText)
 	});
 }
 
+const LocalisedString& UILabel::getText() const
+{
+	return text;
+}
+
 void UILabel::setColourOverride(const Vector<ColourOverride>& overrides)
 {
 	renderer.setColourOverride(overrides);

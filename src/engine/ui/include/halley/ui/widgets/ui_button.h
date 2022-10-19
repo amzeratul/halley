@@ -24,6 +24,7 @@ namespace Halley {
 		void setCanDoBorderOnly(bool canDo);
 
 		void setLabel(LocalisedString string);
+		const LocalisedString& getLabel() const;
 		void setIcon(Sprite icon);
 
 	protected:
