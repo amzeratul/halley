@@ -2,9 +2,8 @@
 
 using namespace Halley;
 
-UIGamepadImage::UIGamepadImage(UIStyle style, JoystickButtonPosition button, std::function<Sprite(JoystickButtonPosition, JoystickType)> iconRetriever, Colour4f col)
+UIGamepadImage::UIGamepadImage(JoystickButtonPosition button, std::function<Sprite(JoystickButtonPosition, JoystickType)> iconRetriever, Colour4f col)
 	: UIImage(Sprite())
-	, style(style)
 	, button(button)
 	, iconRetriever(std::move(iconRetriever))
 	, colour(col)

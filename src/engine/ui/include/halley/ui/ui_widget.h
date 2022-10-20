@@ -51,6 +51,7 @@ namespace Halley {
 		virtual void alignAt(const UIAnchor& anchor);
 		void alignAtAnchor();
 		void setAnchor(UIAnchor anchor);
+		const UIAnchor* getAnchor() const;
 		void setAnchor();
 
 		virtual std::optional<UISizer>& tryGetSizer();

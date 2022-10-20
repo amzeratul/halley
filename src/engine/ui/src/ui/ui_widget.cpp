@@ -188,6 +188,11 @@ void UIWidget::setAnchor(UIAnchor a)
 	}
 }
 
+const UIAnchor* UIWidget::getAnchor() const
+{
+	return anchor.get();
+}
+
 void UIWidget::setAnchor()
 {
 	anchor.reset();
