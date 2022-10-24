@@ -434,9 +434,7 @@ void UIWidget::updateActive(bool wasActiveBefore)
 
 void UIWidget::notifyActivationChange(bool active)
 {
-	if (isActive()) {
-		onActiveChanged(active);
-	}
+	onActiveChanged(active);
 	for (auto& c: getChildren()) {
 		c->notifyActivationChange(active);
 	}
