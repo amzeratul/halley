@@ -344,108 +344,65 @@ void Image::blitDownsampled(Image& srcImg, int scale)
 	}
 }
 
-inline constexpr static uint32_t alphaBlend(uint32_t src, uint32_t dst, uint32_t opacity)
-{
-	const uint32_t sr = src & 0xFF;
-	const uint32_t sg = (src >> 8) & 0xFF;
-	const uint32_t sb = (src >> 16) & 0xFF;
-	const uint32_t sa = (src >> 24) & 0xFF;
-	const uint32_t srcAlpha = (sa * opacity) / 255;
-
-	if (srcAlpha == 0) {
-		return dst;
-	} else {
-		const uint32_t dr = dst & 0xFF;
-		const uint32_t dg = (dst >> 8) & 0xFF;
-		const uint32_t db = (dst >> 16) & 0xFF;
-		const uint32_t da = (dst >> 24) & 0xFF;
-
-		const uint32_t oneMinusSrcAlpha = 255 - srcAlpha;
-		const uint32_t dstAlpha = (oneMinusSrcAlpha * da) / 255;
-		const uint32_t totalAlpha = srcAlpha + dstAlpha;
-
-		const uint32_t r = (sr * srcAlpha + dr * dstAlpha) / totalAlpha;
-		const uint32_t g = (sg * srcAlpha + dg * dstAlpha) / totalAlpha;
-		const uint32_t b = (sb * srcAlpha + db * dstAlpha) / totalAlpha;
-		const uint32_t a = srcAlpha + dstAlpha * oneMinusSrcAlpha / 255;
-
-		return r | (g << 8) | (b << 16) | (a << 24);
+namespace {
+	constexpr Colour4f alphaBlend(Colour4f src, Colour4f dst)
+	{
+		auto result = src.toVector4() * src.a + dst.toVector4() * (1.0f - src.a);
+		result.w = src.a + dst.a * (1.0f - src.a);
+		return Colour4f(result);
 	}
-}
 
-inline constexpr static uint32_t lightenBlend(uint32_t src, uint32_t dst, uint32_t opacity)
-{
-	const uint32_t sr = src & 0xFF;
-	const uint32_t sg = (src >> 8) & 0xFF;
-	const uint32_t sb = (src >> 16) & 0xFF;
-	const uint32_t sa = (src >> 24) & 0xFF;
-	const uint32_t srcAlpha = (sa * opacity) / 255;
-
-	if (srcAlpha == 0) {
-		return dst;
-	} else {
-		const uint32_t dr = dst & 0xFF;
-		const uint32_t dg = (dst >> 8) & 0xFF;
-		const uint32_t db = (dst >> 16) & 0xFF;
-		const uint32_t da = (dst >> 24) & 0xFF;
-
-		const uint32_t oneMinusSrcAlpha = 255 - srcAlpha;
-		const uint32_t dstAlpha = (oneMinusSrcAlpha * da) / 255;
-
-		const uint32_t r = std::max(sr * srcAlpha / 255, dr);
-		const uint32_t g = std::max(sg * srcAlpha / 255, dg);
-		const uint32_t b = std::max(sb * srcAlpha / 255, db);
-		const uint32_t a = srcAlpha + dstAlpha * oneMinusSrcAlpha / 255;
-
-		return r | (g << 8) | (b << 16) | (a << 24);
+	constexpr Colour4f lightenBlend(Colour4f src, Colour4f dst)
+	{
+		auto result = Vector4f::max(src.toVector4() * src.a, dst.toVector4());
+		result.w = src.a + dst.a * (1.0f - src.a);
+		return Colour4f(result);
 	}
-}
 
-inline constexpr static uint32_t addBlend(uint32_t src, uint32_t dst, uint32_t opacity)
-{
-	const uint32_t sr = src & 0xFF;
-	const uint32_t sg = (src >> 8) & 0xFF;
-	const uint32_t sb = (src >> 16) & 0xFF;
-	const uint32_t sa = (src >> 24) & 0xFF;
-	const uint32_t srcAlpha = (sa * opacity) / 255;
-
-	if (srcAlpha == 0) {
-		return dst;
-	} else {
-		const uint32_t dr = dst & 0xFF;
-		const uint32_t dg = (dst >> 8) & 0xFF;
-		const uint32_t db = (dst >> 16) & 0xFF;
-		const uint32_t da = (dst >> 24) & 0xFF;
-
-		const uint32_t dstAlpha = da;
-
-		const uint32_t a = std::max(srcAlpha, dstAlpha);
-		const uint32_t r = std::min((sr * srcAlpha + dr * dstAlpha) / a, 255u);
-		const uint32_t g = std::min((sg * srcAlpha + dg * dstAlpha) / a, 255u);
-		const uint32_t b = std::min((sb * srcAlpha + db * dstAlpha) / a, 255u);
-
-		return r | (g << 8) | (b << 16) | (a << 24);
+	constexpr Colour4f addBlend(Colour4f src, Colour4f dst)
+	{
+		auto result = src.toVector4() * src.a + dst.toVector4();
+		result.w = std::max(src.a, dst.a);
+		return Colour4f(result);
 	}
-}
-template<typename F>
-void blendImages(F f, const Image& src, Image& dst, Vector2i pos, uint8_t opacity)
-{
-	if (dst.getFormat() != Image::Format::RGBA || src.getFormat() != Image::Format::RGBA) {
-		throw Exception("Both images must be RGBA for drawing with alpha", HalleyExceptions::Utils);
-	}
-	uint32_t opacity32 = opacity;
 
-	const Rect4i srcRect = src.getRect().intersection(dst.getRect() - pos);
-	const Rect4i dstRect = dst.getRect().intersection(src.getRect() + pos);
+	template<typename F>
+	void blendImages(F f, const Image& src, Image& dst, Vector2i pos, uint8_t opacity)
+	{
+		if (dst.getFormat() != Image::Format::RGBA || src.getFormat() != Image::Format::RGBA) {
+			throw Exception("Both images must be RGBA for drawing with alpha", HalleyExceptions::Utils);
+		}
 
-	const size_t rectW = srcRect.getWidth();
-	const size_t rectH = srcRect.getHeight();
-	if (rectW > 0) {
-		for (size_t i = 0; i < rectH; ++i) {
-			const auto srcData = src.getPixels4BPP().subspan((i + srcRect.getTop()) * src.getWidth() + srcRect.getLeft());
-			const auto dstData = dst.getPixels4BPP().subspan((i + dstRect.getTop()) * dst.getWidth() + dstRect.getLeft());
-			for (size_t j = 0; j < rectW; ++j) {
-				dstData[j] = f(srcData[j], dstData[j], opacity32);
+		const Rect4i srcRect = src.getRect().intersection(dst.getRect() - pos);
+		const Rect4i dstRect = dst.getRect().intersection(src.getRect() + pos);
+
+		const size_t rectW = srcRect.getWidth();
+		const size_t rectH = srcRect.getHeight();
+		if (rectW > 0) {
+			for (size_t i = 0; i < rectH; ++i) {
+				const auto srcData = src.getPixels4BPP().subspan((i + srcRect.getTop()) * src.getWidth() + srcRect.getLeft());
+				const auto dstData = dst.getPixels4BPP().subspan((i + dstRect.getTop()) * dst.getWidth() + dstRect.getLeft());
+				for (size_t j = 0; j < rectW; ++j) {
+					const auto src = srcData[j];
+					const auto dst = dstData[j];
+
+					const uint32_t sr = src & 0xFF;
+					const uint32_t sg = (src >> 8) & 0xFF;
+					const uint32_t sb = (src >> 16) & 0xFF;
+					const uint32_t sa = (src >> 24) & 0xFF;
+					const uint32_t dr = dst & 0xFF;
+					const uint32_t dg = (dst >> 8) & 0xFF;
+					const uint32_t db = (dst >> 16) & 0xFF;
+					const uint32_t da = (dst >> 24) & 0xFF;
+					const uint32_t srcAlpha = (sa * opacity) / 255;
+
+					const auto srcCol = Colour4f(sr / 255.0f, sg / 255.0f, sb / 255.0f, srcAlpha / 255.0f);
+					const auto dstCol = Colour4f(dr / 255.0f, dg / 255.0f, db / 255.0f, da / 255.0f);
+
+					const auto result = f(srcCol, dstCol);
+
+					dstData[j] = Image::convertColourToInt(Colour4c(result));
+				}
 			}
 		}
 	}

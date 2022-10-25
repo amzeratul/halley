@@ -93,6 +93,13 @@ namespace Halley {
 			, a(a)
 		{}
 
+		constexpr Colour4(Vector4D<T> v)
+			: r(v.x)
+			, g(v.y)
+			, b(v.z)
+			, a(v.w)
+		{}
+
 		Colour4(const String& str)
 		{
 			*this = fromString(str);

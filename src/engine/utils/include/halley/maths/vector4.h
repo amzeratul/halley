@@ -173,8 +173,17 @@ namespace Halley {
 		// Dot product
 		constexpr inline T dot (Vector4D param) const
 		{
-
 			return (x * param.x) + (y * param.y) + (z * param.z) + (w * param.w);
+		}
+
+		constexpr static Vector4D<T> max(const Vector4D& a, const Vector4D& b)
+		{
+			return Vector4D(std::max(a.x, b.x), std::max(a.y, b.y), std::max(a.z, b.z), std::max(a.w, b.w));
+		}
+
+		constexpr static Vector4D<T> min(const Vector4D& a, const Vector4D& b)
+		{
+			return Vector4D(std::min(a.x, b.x), std::min(a.y, b.y), std::min(a.z, b.z), std::min(a.w, b.w));
 		}
 
 		// Length
