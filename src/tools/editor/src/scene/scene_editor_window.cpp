@@ -253,6 +253,7 @@ void SceneEditorWindow::unloadScene()
 	entityEditor->unloadEntity(false);
 	entityEditor->setEntityEditorFactory(nullptr);
 	entityEditor->unloadIcons();
+	entityEditor->unloadValidator();
 	entityValidator.reset();
 	entityList->setSceneData({});
 }

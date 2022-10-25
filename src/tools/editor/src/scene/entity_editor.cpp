@@ -58,7 +58,7 @@ void EntityEditor::setSceneEditorWindow(SceneEditorWindow& editor, const HalleyA
 	entityIcons = &editor.getEntityIcons();
 	this->api = &api;
 
-	entityValidatorUI->setValidator(editor.getEntityValidator());
+	entityValidatorUI->setValidator(&editor.getEntityValidator());
 
 	auto icons = entityIcons->getEntries();
 	Vector<UIDropdown::Entry> entries;
@@ -210,6 +210,11 @@ void EntityEditor::unloadIcons()
 	if (entityIcon) {
 		entityIcon->setOptions(Vector<UIDropdown::Entry>{});
 	}
+}
+
+void EntityEditor::unloadValidator()
+{
+	entityValidatorUI->setValidator(nullptr);
 }
 
 void EntityEditor::onFieldChangedByGizmo(const String& componentName, const String& fieldName)
