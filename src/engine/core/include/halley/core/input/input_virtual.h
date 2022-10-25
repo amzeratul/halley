@@ -70,7 +70,7 @@ namespace Halley {
 		void stopVibrating() override;
 
 		Vector2f getPosition() const override;
-		void setPosition(Vector2f pos);
+		void setPosition(Vector2f pos) override;
 		void setPositionLimits(Rect4f limits);
 		void setPositionLimits();
 
