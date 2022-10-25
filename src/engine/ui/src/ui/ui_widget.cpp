@@ -770,7 +770,7 @@ void UIWidget::setInputButtons(const UIInputButtons& buttons)
 
 Rect4f UIWidget::getMouseRect() const
 {
-	auto rect = Rect4f(getPosition(), getPosition() + getSize());
+	auto rect = getRect();
 	if (mouseClip) {
 		return rect.intersection(mouseClip.value());
 	} else {
