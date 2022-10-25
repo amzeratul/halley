@@ -78,6 +78,7 @@ namespace Halley {
 
 		void bindButton(int n, spInputDevice device, int deviceButton);
 		void bindButton(int n, spInputDevice device, KeyCode deviceButton);
+		void bindButtonChord(int n, spInputDevice device, int deviceButton0, int deviceButton1);
 		void bindAxis(int n, spInputDevice device, int deviceButton);
 		void bindAxisButton(int n, spInputDevice device, int negativeButton, int positiveButton);
 		void bindAxisButton(int n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton);
@@ -113,8 +114,8 @@ namespace Halley {
 			bool isAxis = false;
 			bool isAxisEmulation = false;
 
-			Bind(spInputDevice d, int n, bool axis);
-			Bind(spInputDevice d, int _a, int _b, bool axis);
+			Bind(spInputDevice d, int a, bool axis);
+			Bind(spInputDevice d, int a, int b, bool axis);
 		};
 
 		struct AxisData {

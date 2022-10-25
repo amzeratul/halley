@@ -44,8 +44,9 @@ namespace Halley {
 		void processAxisEvent(int axis, float value);
 		void processEvent(const SDL_Event& event);
 
-		void* joystick;
-		int index;
+		void* joystick = nullptr;
+		int index = 0;
+		int baseButtons = 0;
 
 		friend class InputSDL;
 	};

@@ -119,8 +119,16 @@ bool InputVirtual::isButtonPressed(InputButton code)
 {
 	auto& binds = buttons.at(code);
 	for (auto& bind : binds) {
-		if (bind.device->isButtonPressed(bind.a)) {
-			return true;
+		if (bind.b == -1) {
+			// Single bind
+			if (bind.device->isButtonPressed(bind.a)) {
+				return true;
+			}
+		} else {
+			// Chord bind
+			if ((bind.device->isButtonPressed(bind.a) && bind.device->isButtonDown(bind.b)) || (bind.device->isButtonPressed(bind.b) && bind.device->isButtonDown(bind.a))) {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -130,8 +138,16 @@ bool InputVirtual::isButtonPressedRepeat(InputButton code)
 {
 	auto& binds = buttons.at(code);
 	for (auto& bind : binds) {
-		if (bind.device->isButtonPressedRepeat(bind.a)) {
-			return true;
+		if (bind.b == -1) {
+			// Single bind
+			if (bind.device->isButtonPressedRepeat(bind.a)) {
+				return true;
+			}
+		} else {
+			// Chord bind
+			if (bind.device->isButtonPressedRepeat(bind.a) && bind.device->isButtonDown(bind.b)) {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -141,8 +157,18 @@ bool InputVirtual::isButtonReleased(InputButton code)
 {
 	auto& binds = buttons.at(code);
 	for (auto& bind : binds) {
-		if (bind.device->isButtonReleased(bind.a)) {
-			return true;
+		if (bind.b == -1) {
+			// Single bind
+			if (bind.device->isButtonReleased(bind.a)) {
+				return true;
+			}
+		} else {
+			// Chord bind
+			const bool aReleased = bind.device->isButtonReleased(bind.a);
+			const bool bReleased = bind.device->isButtonReleased(bind.b);
+			if ((aReleased && bReleased) || (aReleased && bind.device->isButtonDown(bind.b)) || (bReleased && bind.device->isButtonDown(bind.a))) {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -152,8 +178,14 @@ bool InputVirtual::isButtonDown(InputButton code)
 {
 	auto& binds = buttons.at(code);
 	for (auto& bind : binds) {
-		if (bind.device->isButtonDown(bind.a)) {
-			return true;
+		if (bind.b == -1) {
+			if (bind.device->isButtonDown(bind.a)) {
+				return true;
+			}
+		} else {
+			if (bind.device->isButtonDown(bind.a) && bind.device->isButtonDown(bind.b)) {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -164,6 +196,9 @@ void InputVirtual::clearButton(InputButton code)
 	auto& binds = buttons.at(code);
 	for (auto& bind : binds) {
 		bind.device->clearButton(bind.a);
+		if (bind.b != -1) {
+			bind.device->clearButton(bind.b);
+		}
 	}
 }
 
@@ -172,6 +207,9 @@ void InputVirtual::clearButtonPress(InputButton code)
 	auto& binds = buttons.at(code);
 	for (auto& bind : binds) {
 		bind.device->clearButtonPress(bind.a);
+		if (bind.b != -1) {
+			bind.device->clearButtonPress(bind.b);
+		}
 	}
 }
 
@@ -180,6 +218,9 @@ void InputVirtual::clearButtonRelease(InputButton code)
 	auto& binds = buttons.at(code);
 	for (auto& bind : binds) {
 		bind.device->clearButtonRelease(bind.a);
+		if (bind.b != -1) {
+			bind.device->clearButtonRelease(bind.b);
+		}
 	}
 }
 
@@ -218,6 +259,14 @@ void InputVirtual::bindButton(int n, spInputDevice device, int deviceN)
 void InputVirtual::bindButton(int n, spInputDevice device, KeyCode deviceButton)
 {
 	bindButton(n, std::move(device), static_cast<int>(deviceButton));
+}
+
+void InputVirtual::bindButtonChord(int n, spInputDevice device, int deviceButton0, int deviceButton1)
+{
+	if (!lastDevice) {
+		setLastDevice(device.get());
+	}
+	buttons.at(n).push_back(Bind(std::move(device), deviceButton0, deviceButton1, false));
 }
 
 void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
@@ -430,7 +479,7 @@ void InputVirtual::updateLastDevice()
 InputVirtual::Bind::Bind(spInputDevice d, int n, bool axis)
 	: device(std::move(d))
 	, a(n)
-	, b(0)
+	, b(-1)
 	, isAxis(axis)
 	, isAxisEmulation(false)
 {}
@@ -440,7 +489,7 @@ InputVirtual::Bind::Bind(spInputDevice d, int _a, int _b, bool axis)
 	, a(_a)
 	, b(_b)
 	, isAxis(axis)
-	, isAxisEmulation(true)
+	, isAxisEmulation(axis)
 {}
 
 InputVirtual::AxisData::AxisData() = default;
