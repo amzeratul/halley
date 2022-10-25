@@ -505,7 +505,7 @@ std::map<String, std::unique_ptr<Image>> AsepriteFile::makeGroupFrameImages(int 
 				if (groupImages.find(currentGroup) == groupImages.end())
 				{
 					auto groupFrameImage = std::make_unique<Image>(Image::Format::RGBA, size);
-					groupFrameImage->clear(Image::convertRGBAToInt(0, 0, 0, 0));;
+					groupFrameImage->clear(Image::convertRGBAToInt(0, 0, 0, 0));
 					groupImages[currentGroup] = std::move(groupFrameImage);
 				}
 			}

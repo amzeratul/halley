@@ -347,7 +347,7 @@ void Image::blitDownsampled(Image& srcImg, int scale)
 namespace {
 	constexpr Colour4f alphaBlend(Colour4f src, Colour4f dst)
 	{
-		auto result = src.toVector4() * src.a + dst.toVector4() * (1.0f - src.a);
+		auto result = src.toVector4() + dst.toVector4() * (1.0f - src.a);
 		result.w = src.a + dst.a * (1.0f - src.a);
 		return Colour4f(result);
 	}
@@ -369,6 +369,8 @@ namespace {
 	template<typename F>
 	void blendImages(F f, const Image& src, Image& dst, Vector2i pos, uint8_t opacity)
 	{
+		const float opacityFloat = opacity / 255.0f;
+
 		if (dst.getFormat() != Image::Format::RGBA || src.getFormat() != Image::Format::RGBA) {
 			throw Exception("Both images must be RGBA for drawing with alpha", HalleyExceptions::Utils);
 		}
@@ -394,9 +396,8 @@ namespace {
 					const uint32_t dg = (dst >> 8) & 0xFF;
 					const uint32_t db = (dst >> 16) & 0xFF;
 					const uint32_t da = (dst >> 24) & 0xFF;
-					const uint32_t srcAlpha = (sa * opacity) / 255;
 
-					const auto srcCol = Colour4f(sr / 255.0f, sg / 255.0f, sb / 255.0f, srcAlpha / 255.0f);
+					const auto srcCol = Colour4f(sr / 255.0f, sg / 255.0f, sb / 255.0f, sa / 255.0f) * opacityFloat;
 					const auto dstCol = Colour4f(dr / 255.0f, dg / 255.0f, db / 255.0f, da / 255.0f);
 
 					const auto result = f(srcCol, dstCol);
