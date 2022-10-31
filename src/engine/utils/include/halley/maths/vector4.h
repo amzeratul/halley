@@ -139,7 +139,7 @@ namespace Halley {
 		constexpr inline Vector4D operator * (V param) const { return Vector4D(T(x * param), T(y * param), T(z * param), T(w * param)); }
 
 		template <typename V>
-		constexpr inline Vector4D operator / (V param) const { return Vector4D(T(x / param), T(y / param), T(z * param), T(w * param)); }
+		constexpr inline Vector4D operator / (V param) const { return Vector4D(T(x / param), T(y / param), T(z / param), T(w / param)); }
 
 		// In-place operations
 		constexpr inline Vector4D& operator += (Vector4D param) { x += param.x; y += param.y; z += param.z; w += param.w; return *this; }

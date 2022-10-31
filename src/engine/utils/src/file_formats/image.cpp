@@ -347,8 +347,9 @@ void Image::blitDownsampled(Image& srcImg, int scale)
 namespace {
 	constexpr Colour4f alphaBlend(Colour4f src, Colour4f dst)
 	{
-		auto result = src.toVector4() + dst.toVector4() * (1.0f - src.a);
-		result.w = src.a + dst.a * (1.0f - src.a);
+		const float ao = src.a + dst.a * (1.0f - src.a);
+		auto result = (src.toVector4() * src.a + dst.toVector4() * dst.a * (1.0f - src.a)) / ao;
+		result.w = ao;
 		return Colour4f(result);
 	}
 
@@ -385,22 +386,10 @@ namespace {
 				const auto srcData = src.getPixels4BPP().subspan((i + srcRect.getTop()) * src.getWidth() + srcRect.getLeft());
 				const auto dstData = dst.getPixels4BPP().subspan((i + dstRect.getTop()) * dst.getWidth() + dstRect.getLeft());
 				for (size_t j = 0; j < rectW; ++j) {
-					const auto src = srcData[j];
-					const auto dst = dstData[j];
-
-					const uint32_t sr = src & 0xFF;
-					const uint32_t sg = (src >> 8) & 0xFF;
-					const uint32_t sb = (src >> 16) & 0xFF;
-					const uint32_t sa = (src >> 24) & 0xFF;
-					const uint32_t dr = dst & 0xFF;
-					const uint32_t dg = (dst >> 8) & 0xFF;
-					const uint32_t db = (dst >> 16) & 0xFF;
-					const uint32_t da = (dst >> 24) & 0xFF;
-
-					const auto srcCol = Colour4f(sr / 255.0f, sg / 255.0f, sb / 255.0f, sa / 255.0f) * opacityFloat;
-					const auto dstCol = Colour4f(dr / 255.0f, dg / 255.0f, db / 255.0f, da / 255.0f);
-
-					const auto result = f(srcCol, dstCol);
+					const auto srcCol = Colour4f(Image::convertIntToColour(srcData[j])).multiplyAlpha(opacityFloat);
+					const auto dstCol = Colour4f(Image::convertIntToColour(dstData[j]));
+					
+					const auto result = f(Colour4f(srcCol), Colour4f(dstCol));
 
 					dstData[j] = Image::convertColourToInt(Colour4c(result));
 				}
