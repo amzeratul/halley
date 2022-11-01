@@ -169,6 +169,7 @@ UIStyleDefinition::UIStyleDefinition(String styleName, const ConfigNode& node, U
 	, styleSheet(styleSheet)
 	, pimpl(std::make_unique<Pimpl>())
 {
+	classes = node["classes"].asVector<String>({});
 	loadDefaults();
 }
 
@@ -273,6 +274,16 @@ void UIStyleDefinition::reload(const ConfigNode& node)
 	loadDefaults();
 }
 
+gsl::span<const String> UIStyleDefinition::getClasses() const
+{
+	return classes;
+}
+
+bool UIStyleDefinition::hasClass(const String& className) const
+{
+	return std_ex::contains(classes, className);
+}
+
 void UIStyleDefinition::loadDefaults()
 {
 	pimpl->sprites.clear();
@@ -297,6 +308,16 @@ void UIStyleDefinition::loadDefaults()
 UIStyleSheet::UIStyleSheet(Resources& resources)
 	: resources(resources)
 {
+}
+
+UIStyleSheet::UIStyleSheet(Resources& resources, std::shared_ptr<const UIColourScheme> colourScheme)
+	: resources(resources)
+{
+	for (auto& style: resources.enumerate<ConfigFile>()) {
+		if (style.startsWith("ui_style/")) {
+			load(*resources.get<ConfigFile>(style), colourScheme);
+		}
+	}
 }
 
 UIStyleSheet::UIStyleSheet(Resources& resources, const ConfigFile& file, std::shared_ptr<const UIColourScheme> colourScheme)
@@ -378,6 +399,22 @@ std::shared_ptr<UIStyleDefinition> UIStyleSheet::getStyle(const String& styleNam
 		throw Exception("Unknown style: " + styleName, HalleyExceptions::UI);
 	}
 	return iter->second;
+}
+
+Vector<String> UIStyleSheet::getStylesForClass(const String& className) const
+{
+	Vector<String> result;
+	getStylesForClass(result, className);
+	return result;
+}
+
+void UIStyleSheet::getStylesForClass(Vector<String>& dst, const String& className) const
+{
+	for (const auto& [k, v]: styles) {
+		if (v->hasClass(className)) {
+			dst.push_back(v->getName());
+		}
+	}
 }
 
 bool UIStyleSheet::hasStyleObserver(const String& styleName) const

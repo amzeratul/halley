@@ -93,6 +93,11 @@ UIFactory::~UIFactory()
 {
 }
 
+void UIFactory::loadStyleSheetsFromResources()
+{
+	styleSheet = std::make_shared<UIStyleSheet>(resources, colourScheme);
+}
+
 void UIFactory::addFactory(const String& key, WidgetFactory factory, UIFactoryWidgetProperties props)
 {
 	if (props.iconName.isEmpty()) {
@@ -608,7 +613,7 @@ UIFactoryWidgetProperties UIFactory::getLabelProperties() const
 	result.canHaveChildren = false;
 	result.entries.emplace_back("Text", "text", "Halley::String", "");
 	result.entries.emplace_back("Text (Loc Key)", "textKey", "Halley::String", "");
-	result.entries.emplace_back("Style", "style", "Halley::String", "label");
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<label>", "label");
 	result.entries.emplace_back("Max Width", "maxWidth", "std::optional<float>", "");
 	result.entries.emplace_back("Max Height", "maxHeight", "std::optional<float>", "");
 	result.entries.emplace_back("Alignment", "alignment", "std::optional<float>", "");

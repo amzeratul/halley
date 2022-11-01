@@ -59,6 +59,8 @@ namespace Halley
 		UIFactory& operator=(const UIFactory& other) = delete;
 		UIFactory& operator=(UIFactory&& other) = delete;
 
+		void loadStyleSheetsFromResources();
+
 		void addFactory(const String& key, WidgetFactory factory, UIFactoryWidgetProperties properties = {});
 		bool hasFactoryFor(const String& key) const;
 		std::shared_ptr<UIWidget> makeWidgetFromFactory(const String& key, const ConfigNode& config);

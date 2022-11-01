@@ -2,6 +2,7 @@
 
 uiStyle:
   button:
+    classes: [button]
     normal: { img: $ui_button, colour: $ui_buttonNormal }
     down: { img: $ui_button, colour: $ui_buttonDown }
     hover: { img: $ui_button, colour: $ui_buttonHover }
@@ -18,6 +19,7 @@ uiStyle:
     iconColourDisabled: $ui_disabledText
 
   buttonThin:
+    classes: [button]
     normal: { img: $ui_button, colour: $ui_buttonNormal }
     down: { img: $ui_button, colour: $ui_buttonDown }
     hover: { img: $ui_button, colour: $ui_buttonHover }
@@ -34,6 +36,7 @@ uiStyle:
     disabledIconColour: $ui_disabledText
 
   buttonSmall:
+    classes: [button]
     normal: { img: $ui_button, colour: $ui_buttonNormal }
     down: { img: $ui_button, colour: $ui_buttonDown }
     hover: { img: $ui_button, colour: $ui_buttonHover }
@@ -50,6 +53,7 @@ uiStyle:
     iconColourDisabled: $ui_disabledText
 
   checkbox:
+    classes: [checkbox]
     normal: { img: $ui_checkbox, colour: $ui_inputNormal }
     checked: { img: $ui_checkbox_checked, colour: $ui_inputNormal }
     hover: { img: $ui_checkbox, colour: $ui_inputHover }
@@ -58,6 +62,7 @@ uiStyle:
     checkedDisabled: { img: $ui_checkbox_checked, colour: $ui_inputDisabled }
 
   input:
+    classes: [textInput]
     box: { img: $ui_input_thin, colour: $ui_inputNormal }
     caret: { img: halley_ui/ui_caret.png, colour: $ui_inputCaret }
     innerBorder: [ 6, 2, 6, 1 ]
@@ -67,6 +72,7 @@ uiStyle:
     minSize: 22
 
   inputThin:
+    classes: [textInput]
     box: { img: $ui_input_thin, colour: $ui_inputNormal }
     caret: { img: halley_ui/ui_caret.png, colour: $ui_inputCaret }
     innerBorder: [ 6, 2, 6, 3 ]
@@ -76,6 +82,7 @@ uiStyle:
     minSize: 22
 
   spinControl:
+    classes: [spinControl, spinControl2]
     box: { img: $ui_input_thin, colour: $ui_inputNormal }
     caret: { img: halley_ui/ui_caret.png, colour: $ui_inputCaret }
     innerBorder: [ 6, 2, 6, 3 ]
@@ -103,6 +110,7 @@ uiStyle:
 
 
   dropdown:
+    classes: [dropdown]
     normal: { img: $ui_dropdown_closed, colour: $ui_inputNormal }
     hover: { img: $ui_dropdown_closed, colour: $ui_inputHover }
     open: { img: $ui_dropdown_open, colour: $ui_inputHover }
@@ -124,6 +132,7 @@ uiStyle:
     scrollbarStyle: scrollbar
 
   dropdownLight:
+    classes: [dropdown]
     normal: { img: $ui_dropdown_closed, colour: $ui_inputNormal }
     hover: { img: $ui_dropdown_closed, colour: $ui_inputHover }
     open: { img: $ui_dropdown_open, colour: $ui_inputHover }
@@ -143,6 +152,7 @@ uiStyle:
     scrollbarStyle: scrollbar
 
   list:
+    classes: [list]
     background: { img: $ui_list_background, colour: $ui_listBackground }
     item:
       normal: ""
@@ -159,6 +169,7 @@ uiStyle:
     gap: 1
 
   listLight:
+    classes: [list]
     background: { img: $ui_list_background, colour: $ui_listBackground }
     item:
       normal: ""
@@ -174,6 +185,7 @@ uiStyle:
     gap: 1
 
   listNarrow:
+    classes: [list]
     background: { img: $ui_list_background, colour: $ui_listBackground }
     item:
       normal: ""
@@ -189,6 +201,7 @@ uiStyle:
     gap: 1
 
   treeList:
+    classes: [treeList]
     background: { img: $ui_list_background, colour: $ui_listBackground }
     item:
       normal: ""
@@ -244,6 +257,7 @@ uiStyle:
         labelBorder: [0, 0, 0, 0]
 
   scrollbar:
+    classes: [scrollbar]
     bar:
       horizontal: { img: halley_ui/ui_scrollbar.png, colour: $ui_scrollBackground }
       vertical: { img: halley_ui/ui_scrollbar.png, colour: $ui_scrollBackground }
@@ -258,24 +272,31 @@ uiStyle:
       hoverSound: ""
 
   label:
+    classes: [label]
     label: { font: Ubuntu Bold, size: 15, colour: $ui_text }
 
   labelToolbar:
+    classes: [label]
     label: { font: Ubuntu Bold, size: 15, colour: $toolbarText }
 
   labelLight:
+    classes: [label]
     label: { font: Ubuntu Light, size: 14, colour: $ui_text }
 
   labelSmall:
+    classes: [label]
     label: { font: Ubuntu Light, size: 12, colour: $ui_text }
 
   labelSmallDisabled:
+    classes: [label]
     label: { font: Ubuntu Light, size: 12, colour: $ui_disabledText }
 
   labelOutline:
+    classes: [label]
     label: { font: Ubuntu Bold, size: 15, colour: $ui_text, outline: 2, outlineColour: $ui_text_outline }
 
   tooltip:
+    classes: [tooltip]
     background: { img: $ui_tooltip, colour: $ui_listHover }
     innerBorder: [ 5, 5, 5, 5 ]
     delay: 0.3
@@ -283,6 +304,7 @@ uiStyle:
     label: { font: Ubuntu Bold, size: 14, colour: $ui_text }
 
   slider:
+    classes: [slider]
     emptyBar: { img: halley_ui/slider_bar_empty.png, colour: $ui_controlDisabled }
     fullBar: { img: halley_ui/slider_bar_full.png, colour: $ui_controlNormal }
     left: { img: halley_ui/slider_bar_left.png, colour: $ui_controlNormal }
@@ -321,6 +343,7 @@ uiStyle:
         disabledIconColour: $ui_disabledText
 
   tabs:
+    classes: [list]
     background: { img: $ui_tabs_bg, colour: $ui_controlNormal }
     item:
       normal: { img: $ui_tab_normal, colour: $ui_controlNormal }
@@ -338,9 +361,11 @@ uiStyle:
     gap: 2
 
   scrollBackground:
+    classes: [scrollPane]
     background: { img: $ui_scroll_background, colour: $ui_scrollBackground }
 
   infiniCanvas:
+    classes: [scrollPane]
     background: { img: $ui_scroll_background, colour: $ui_scrollBackground }
     border: { img: $ui_canvas_border, colour: $background0 }
 
@@ -374,6 +399,7 @@ uiStyle:
     separator: { img: $ui_separator, colour: $ui_disabledText }
 
   dragList:
+    classes: [list]
     background: ""
     item:
       normal: { img: "halley_ui/drag_item.png", colour: $ui_listBackground }
