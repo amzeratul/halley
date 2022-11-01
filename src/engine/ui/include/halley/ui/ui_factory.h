@@ -158,6 +158,7 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeSlider(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeHorizontalDiv(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeVerticalDiv(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeDivider(const ConfigNode& node, UISizerType type);
 		std::shared_ptr<UIWidget> makeTabbedPane(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makePagedPane(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makeFramedImage(const ConfigNode& entryNode);

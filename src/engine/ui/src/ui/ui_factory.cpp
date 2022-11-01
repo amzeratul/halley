@@ -1107,18 +1107,35 @@ std::shared_ptr<UIWidget> UIFactory::makeSlider(const ConfigNode& entryNode)
 
 std::shared_ptr<UIWidget> UIFactory::makeHorizontalDiv(const ConfigNode& entryNode)
 {
-	const auto& widgetNode = entryNode["widget"];
-	auto id = widgetNode["id"].asString("");
-	const auto& style = getStyle(widgetNode["style"].asString("horizontalDiv"));
-	return std::make_shared<UIImage>(std::move(id), style.getSprite("image"));
+	return makeDivider(entryNode, UISizerType::Horizontal);
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeVerticalDiv(const ConfigNode& entryNode)
 {
+	return makeDivider(entryNode, UISizerType::Vertical);
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeDivider(const ConfigNode& entryNode, UISizerType type)
+{
 	const auto& widgetNode = entryNode["widget"];
 	auto id = widgetNode["id"].asString("");
-	auto style = getStyle(widgetNode["style"].asString("verticalDiv"));
-	return std::make_shared<UIImage>(id, style.getSprite("image"));
+	const auto& style = getStyle(widgetNode["style"].asString(type == UISizerType::Horizontal ? "horizontalDiv" : "verticalDiv"));
+
+	if (style.hasSprite("midImage")) {
+		const auto gap = style.getFloat("gap", 0);
+
+		const int align = type == UISizerType::Horizontal
+			? (UISizerAlignFlags::CentreVertical | UISizerFillFlags::FillHorizontal)
+			: (UISizerAlignFlags::CentreHorizontal | UISizerFillFlags::FillVertical);
+
+		auto result = std::make_shared<UIWidget>(std::move(id), Vector2f(), UISizer(type, gap));
+		result->add(std::make_shared<UIImage>("", style.getSprite("image")), 1, {}, align);
+		result->add(std::make_shared<UIImage>("", style.getSprite("midImage")), 0, {}, UISizerAlignFlags::Centre);
+		result->add(std::make_shared<UIImage>("", style.getSprite("image")), 1, {}, align);
+		return result;
+	} else {
+		return std::make_shared<UIImage>(std::move(id), style.getSprite("image"));
+	}
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
