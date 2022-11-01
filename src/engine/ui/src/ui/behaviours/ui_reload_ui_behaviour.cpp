@@ -5,6 +5,7 @@
 #include "halley/ui/widgets/ui_label.h"
 #include "halley/support/logger.h"
 #include "ui_definition.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -66,9 +67,9 @@ void UIReloadUIBehaviour::setupUIStyleObservers()
 
 void UIReloadUIBehaviour::getStyleObservers(const UIWidget& widget, const UIStyleSheet& stylesheet, Vector<std::pair<String, int>>& styleObservers) const
 {
-	if(widget.hasStyle()) {
-		for(const auto& style : widget.getStyles()) {
-			if (stylesheet.hasStyleObserver(style.getName())) {
+	if (widget.hasStyle()) {
+		for (const auto& style: widget.getStyles()) {
+			if (stylesheet.hasStyleObserver(style.getName()) && !std_ex::contains_if(styleObservers, [&](const auto& so) { return so.first == style.getName(); })) {
 				styleObservers.emplace_back(style.getName(), stylesheet.getStyleObserver(style.getName()).getAssetVersion());
 			}
 		}

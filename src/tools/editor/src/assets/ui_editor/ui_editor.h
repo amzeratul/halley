@@ -4,15 +4,17 @@
 #include "ui_widget_editor.h"
 #include "ui_widget_list.h"
 #include "../asset_editor.h"
+#include "halley/tools/dll/project_dll.h"
 #include "src/scene/choose_window.h"
 
 namespace Halley {
 	class UIEditorDisplay;
 	class UIGraphNode;
 
-	class UIEditor : public AssetEditor {
+	class UIEditor : public AssetEditor, IProjectDLLListener {
 	public:
 		UIEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow, const HalleyAPI& api);
+		~UIEditor() override;
 
 		void update(Time t, bool moved) override;
 
@@ -27,6 +29,9 @@ namespace Halley {
 		UIFactory& getGameFactory();
 
 		bool onKeyPress(KeyboardKeyPress key) override;
+
+	protected:
+		void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 		
 	private:
 		std::shared_ptr<const Resource> loadResource(const String& assetId) override;
@@ -54,6 +59,8 @@ namespace Halley {
 		void addWidget(const String& referenceId, bool asChild, ConfigNode data);
 		void removeWidget();
 		void removeWidget(const String& id);
+
+		void loadGameFactory();
 	};
 
 	class ChooseUIWidgetWindow : public ChooseAssetWindow {

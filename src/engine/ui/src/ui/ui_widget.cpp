@@ -278,6 +278,7 @@ void UIWidget::clear()
 		sizer->clear();
 	}
 	UIParent::clear();
+	behaviours.clear();
 }
 
 void UIWidget::setInteractWithMouse(bool enabled)
