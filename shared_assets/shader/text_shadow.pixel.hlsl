@@ -6,9 +6,12 @@ SamplerState sampler0 : register(s0) {
 };
 
 cbuffer MaterialBlock : register(b1) {
-	float u_smoothness;
-	float u_outline;
-	float4 u_outlineColour;
+    float u_smoothness;
+    float u_outline;
+    float u_shadowDist;
+    float u_shadowSmoothness;
+    float4 u_outlineColour;
+    float4 u_shadowColour;
 };
 
 float4 main(VOut input) : SV_TARGET {
@@ -17,14 +20,14 @@ float4 main(VOut input) : SV_TARGET {
 	float texGrad = max(dx, dy);
 
 	float a = tex0.Sample(sampler0, input.texCoord0).r;
-	float s = max(u_smoothness * texGrad, 0.001);
+	float s = max(u_shadowSmoothness * texGrad, 0.001);
 	float inEdge = 0.5;
 
 	float edge0 = clamp(inEdge - s, 0.01, 0.98);
 	float edge1 = clamp(inEdge + s, edge0 + 0.01, 0.99);
 	float edge = smoothstep(edge0, edge1, a) * input.colour.a;
 
-	float4 colFill = input.colour;
-	float alpha = colFill.a * edge;
-	return float4(colFill.rgb * alpha, alpha);
+	float4 col = u_shadowColour;
+	float alpha = col.a * edge;
+	return float4(col.rgb * alpha, alpha);
 }

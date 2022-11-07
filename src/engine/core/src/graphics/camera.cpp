@@ -163,6 +163,10 @@ RenderTarget* Camera::getRenderTarget() const
 
 Rect4i Camera::getActiveViewPort() const
 {
+	if (!renderTarget && !defaultRenderTarget) {
+		return viewPort.value_or(Rect4i(-1, -1, 2, 2));
+	}
+
 	auto targetViewPort = getActiveRenderTarget().getViewPort();
 	if (viewPort) {
 		return viewPort->intersection(targetViewPort);

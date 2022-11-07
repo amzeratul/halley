@@ -33,6 +33,7 @@ namespace Halley {
 		void unloadEntity(bool becauseHasMultiple);
 		void reloadEntity() override;
 		void unloadIcons();
+		void unloadValidator();
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName) override;
 		void onFieldChangedProcedurally(const String& componentName, const String& fieldName) override;
 
@@ -57,7 +58,7 @@ namespace Halley {
 		Vector<EntityInfo> getEntities() const override;
 		EntityInfo getEntityInfo(const UUID& uuid) const override;
 		void goToEntity(const UUID& uuid) override;
-
+		
 	protected:
 		bool onKeyPress(KeyboardKeyPress key) override;
 

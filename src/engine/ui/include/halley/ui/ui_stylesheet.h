@@ -40,6 +40,9 @@ namespace Halley {
 
 		void reload(const ConfigNode& node);
 
+		gsl::span<const String> getClasses() const;
+		bool hasClass(const String& className) const;
+
 	private:
 		class Pimpl;
 		
@@ -49,6 +52,8 @@ namespace Halley {
 
 		std::unique_ptr<Pimpl> pimpl;
 
+		Vector<String> classes;
+
 		void loadDefaults();
 	};
 
@@ -57,6 +62,7 @@ namespace Halley {
 
 	public:
 		UIStyleSheet(Resources& resources);
+		UIStyleSheet(Resources& resources, std::shared_ptr<const UIColourScheme> colourScheme);
 		UIStyleSheet(Resources& resources, const ConfigFile& file, std::shared_ptr<const UIColourScheme> colourScheme = {});
 
 		void load(const ConfigFile& file, std::shared_ptr<const UIColourScheme> colourScheme = {});
@@ -69,8 +75,12 @@ namespace Halley {
 		std::shared_ptr<const UIStyleDefinition> getStyle(const String& styleName) const;
 		std::shared_ptr<UIStyleDefinition> getStyle(const String& styleName);
 
+		Vector<String> getStylesForClass(const String& className) const;
+		void getStylesForClass(Vector<String>& dst, const String& className) const;
+
 		bool hasStyleObserver(const String& styleName) const;
 		const ConfigObserver& getStyleObserver(const String& styleName) const;
+
 	private:
 		Resources& resources;
 		HashMap<String, std::shared_ptr<UIStyleDefinition>> styles;

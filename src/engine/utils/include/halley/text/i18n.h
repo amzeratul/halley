@@ -30,11 +30,12 @@ namespace Halley {
 		static LocalisedString fromHardcodedString(const char* str);
 		static LocalisedString fromHardcodedString(const String& str);
 		static LocalisedString fromUserString(const String& str);
-		static LocalisedString fromNumber(int number);
+		static LocalisedString fromNumber(int number, int base = 10, int width = 1, char fill = '0');
 
 		LocalisedString replaceTokens(const LocalisedString& tok0) const;
 		LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1) const;
 		LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2) const;
+		LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2, const LocalisedString& tok3) const;
 		LocalisedString replaceTokens(const std::map<String, LocalisedString>& tokens);
 
 		const String& getString() const;

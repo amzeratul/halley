@@ -33,7 +33,7 @@ namespace Halley {
 		friend class InputSDL;
 	public:
 		Vector2f getPosition() const override;
-		void setPosition(Vector2i position) override;
+		void setPosition(Vector2f position) override;
 		int getWheelMove() const override;
 		float getAxis(int n) override;
 		void clearPresses() override;

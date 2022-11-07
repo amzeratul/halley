@@ -157,14 +157,6 @@ void AsepriteCel::loadImage(AsepriteDepth depth, const Vector<uint32_t>& palette
 	} else if (depth == AsepriteDepth::RGBA32) {
 		const auto src = reinterpret_cast<uint32_t*>(rawData.data());
 		for (size_t i = 0; i < n; ++i) {
-			/*
-			const auto s = src[i];
-			const auto r = s & 0xFF;
-			const auto g = (s >> 8) & 0xFF;
-			const auto b = (s >> 16) & 0xFF;
-			const auto a = (s >> 24) & 0xFF;
-			dst[i] = (r << 24) | (g << 16) | (b << 8) | a;
-			*/
 			dst[i] = src[i];
 		}
 	}
@@ -505,7 +497,7 @@ std::map<String, std::unique_ptr<Image>> AsepriteFile::makeGroupFrameImages(int 
 				if (groupImages.find(currentGroup) == groupImages.end())
 				{
 					auto groupFrameImage = std::make_unique<Image>(Image::Format::RGBA, size);
-					groupFrameImage->clear(Image::convertRGBAToInt(0, 0, 0, 0));;
+					groupFrameImage->clear(Image::convertRGBAToInt(0, 0, 0, 0));
 					groupImages[currentGroup] = std::move(groupFrameImage);
 				}
 			}

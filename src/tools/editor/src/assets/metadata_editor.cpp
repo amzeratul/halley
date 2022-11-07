@@ -206,12 +206,12 @@ String MetadataEditor::getMetaValue(const String& key) const
 
 void MetadataEditor::makeIntField(UISizer& sizer, const String& key, int defaultValue)
 {
-	const auto effectiveDefault = effectiveMetadata.getString(":" + key, toString(defaultValue));
-	const auto value = metadata.getInt(key, 0);
+	const auto effectiveDefault = effectiveMetadata.getInt(":" + key, defaultValue);
+	const auto value = metadata.getInt(key, effectiveDefault);
 
 	const auto result = std::make_shared<UISpinControl2>(key, factory.getStyle("spinControl"), float(value), false);
 	result->setMinSize(Vector2f(40, 22));
-	result->setGhostText(LocalisedString::fromUserString(effectiveDefault));
+	result->setGhostText(LocalisedString::fromNumber(effectiveDefault));
 	sizer.add(result, 1);
 
 	bindData(key, value, [=] (int value)
@@ -222,12 +222,12 @@ void MetadataEditor::makeIntField(UISizer& sizer, const String& key, int default
 
 void MetadataEditor::makeFloatField(UISizer& sizer, const String& key, float defaultValue)
 {
-	const auto effectiveDefault = effectiveMetadata.getString(":" + key, toString(defaultValue));
-	const auto value = metadata.getFloat(key, 0);
+	const auto effectiveDefault = effectiveMetadata.getFloat(":" + key, defaultValue);
+	const auto value = metadata.getFloat(key, effectiveDefault);
 
 	const auto result = std::make_shared<UISpinControl2>(key, factory.getStyle("spinControl"), value, true);
 	result->setMinSize(Vector2f(40, 22));
-	result->setGhostText(LocalisedString::fromUserString(effectiveDefault));
+	result->setGhostText(LocalisedString::fromUserString(toString(effectiveDefault)));
 	sizer.add(result, 1);
 
 	bindData(key, value, [=] (float value)

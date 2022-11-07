@@ -47,7 +47,7 @@ InputJoystickXInput::InputJoystickXInput(int number)
 	hats[0]->setParent(this);
 
 	// Buttons
-	init(12);
+	init(16);
 }
 
 InputJoystickXInput::~InputJoystickXInput()
@@ -108,6 +108,10 @@ void InputJoystickXInput::update(Time t)
 		onButtonStatus(9, (b & XINPUT_GAMEPAD_START) != 0);
 		onButtonStatus(10, axes[4] > 0.5f);
 		onButtonStatus(11, axes[5] > 0.5f);
+		onButtonStatus(12, (b & XINPUT_GAMEPAD_DPAD_UP) != 0);
+		onButtonStatus(13, (b & XINPUT_GAMEPAD_DPAD_RIGHT) != 0);
+		onButtonStatus(14, (b & XINPUT_GAMEPAD_DPAD_DOWN) != 0);
+		onButtonStatus(15, (b & XINPUT_GAMEPAD_DPAD_LEFT) != 0);
 
 		// Update hat
 		hats[0]->onButtonStatus(0, (b & XINPUT_GAMEPAD_DPAD_UP) != 0);
@@ -147,6 +151,10 @@ int InputJoystickXInput::getButtonAtPosition(JoystickButtonPosition position) co
 		case JoystickButtonPosition::RightStick: return 7;
 		case JoystickButtonPosition::PlatformAcceptButton: return 0;
 		case JoystickButtonPosition::PlatformCancelButton: return 1;
+		case JoystickButtonPosition::DPadUp: return 12;
+		case JoystickButtonPosition::DPadRight: return 13;
+		case JoystickButtonPosition::DPadDown: return 14;
+		case JoystickButtonPosition::DPadLeft: return 15;
 		default: throw Exception("Invalid parameter", HalleyExceptions::InputPlugin);
 	}
 }

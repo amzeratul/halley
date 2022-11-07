@@ -47,8 +47,9 @@ void MainLoop::runLoop()
 		while (isRunning()) {
 			target.transitionStage();
 			constexpr Time fixedDelta = 1.0 / 60.0;
+			const Clock::time_point curTime = Clock::now();
 			target.onFixedUpdate(fixedDelta);
-			target.onTick(fixedDelta);
+			target.onTick(curTime, fixedDelta);
 		}
 	} else {
 		while (isRunning()) {
@@ -79,7 +80,8 @@ void MainLoop::runLoop()
 			}
 
 			// Run variable update
-			target.onTick(std::min(std::chrono::duration<float>(curTime - lastTime).count(), 0.1f)); // Never step by more than 100ms
+			const auto delta = std::min(std::chrono::duration<double>(curTime - lastTime).count(), 0.1); // Never step by more than 100ms
+			target.onTick(curTime, delta);
 			lastTime = curTime;
 		}
 	}

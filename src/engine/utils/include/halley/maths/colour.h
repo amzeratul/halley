@@ -29,6 +29,7 @@
 #include <cstdint>
 #include "halley/utils/utils.h"
 #include "halley/maths/vector3.h"
+#include "halley/maths/vector4.h"
 
 namespace Halley {
 	// This whole class is TERRIBLE
@@ -90,6 +91,13 @@ namespace Halley {
 			, g(g)
 			, b(b)
 			, a(a)
+		{}
+
+		constexpr Colour4(Vector4D<T> v)
+			: r(v.x)
+			, g(v.y)
+			, b(v.z)
+			, a(v.w)
 		{}
 
 		Colour4(const String& str)
@@ -252,6 +260,11 @@ namespace Halley {
 		[[nodiscard]] constexpr bool operator!=(const Colour4& c) const
 		{
 			return r != c.r || g != c.g || b != c.b || a != c.a;
+		}
+
+		[[nodiscard]] constexpr Vector4D<T> toVector4() const
+		{
+			return Vector4D<T>(r, g, b, a);
 		}
 
 	private:

@@ -377,14 +377,16 @@ void ProjectWindow::toggleDebugConsole()
 	if (debugConsole && debugConsole->isActive()) {
 		debugConsole->hide();
 	} else {
-		if (!debugConsole) {
-			debugConsole = std::make_shared<UIDebugConsole>("debugConsole", factory, debugConsoleController);
-			debugConsole->setChildLayerAdjustment(50);
-			debugConsole->setMinSize(Vector2f(640, 320));
-			debugConsole->setAnchor(UIAnchor(Vector2f(1.0f, 1.0f), Vector2f(1.0f, 1.0f), Vector2f(-10.0f, -10.0f)));
-			getRoot()->addChild(debugConsole);
+		if (debugConsoleController) { // Don't create unless ready
+			if (!debugConsole) {
+				debugConsole = std::make_shared<UIDebugConsole>("debugConsole", factory, debugConsoleController);
+				debugConsole->setChildLayerAdjustment(50);
+				debugConsole->setMinSize(Vector2f(640, 320));
+				debugConsole->setAnchor(UIAnchor(Vector2f(1.0f, 1.0f), Vector2f(1.0f, 1.0f), Vector2f(-10.0f, -10.0f)));
+				getRoot()->addChild(debugConsole);
+			}
+			debugConsole->show();
 		}
-		debugConsole->show();
 	}
 }
 

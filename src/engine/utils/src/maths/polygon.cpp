@@ -1234,13 +1234,13 @@ Polygon::CollisionResult Polygon::getCollisionWithSweepingCircle(Vector2f p0, fl
 		return result;
 	}
 
-	const auto submit = [&] (std::optional<std::pair<float, Vector2f>> c)
+	const auto submit = [&] (std::optional<Ray::RayCastResult> c)
 	{
-		if (c && c->first < moveLen) {
-			if (!result.collided || c->first < result.distance) {
+		if (c && c->distance < moveLen) {
+			if (!result.collided || c->distance < result.distance) {
 				result.collided = true;
-				result.distance = c->first;
-				result.normal = c->second;
+				result.distance = c->distance;
+				result.normal = c->normal;
 			}
 		}
 	};
@@ -1296,14 +1296,14 @@ Polygon::CollisionResult Polygon::getCollisionWithSweepingEllipse(Vector2f p0, V
 	const auto ray = Ray(localP0, localMoveDir);
 
 	float bestLen = localMoveLen;
-	const auto submit = [&] (std::optional<std::pair<float, Vector2f>> c)
+	const auto submit = [&] (std::optional<Ray::RayCastResult> c)
 	{
 		if (c) {
-			const float lenToCol = c->first;
+			const float lenToCol = c->distance;
 			if (lenToCol < bestLen) {
 				result.collided = true;
-				result.distance = c->first;
-				result.normal = c->second;
+				result.distance = c->distance;
+				result.normal = c->normal;
 				bestLen = lenToCol;
 			}
 		}

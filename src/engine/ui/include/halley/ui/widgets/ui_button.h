@@ -24,6 +24,7 @@ namespace Halley {
 		void setCanDoBorderOnly(bool canDo);
 
 		void setLabel(LocalisedString string);
+		const LocalisedString& getLabel() const;
 		void setIcon(Sprite icon);
 
 	protected:
@@ -31,7 +32,6 @@ namespace Halley {
 		void onStateChanged(State prev, State next) override;
 		void onShortcutPressed() override;
 
-	private:
 		Sprite sprite;
 		UIInputType curInputType = UIInputType::Undefined;
 		std::shared_ptr<UILabel> label;

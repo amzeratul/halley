@@ -56,7 +56,9 @@ void UILabel::update(Time t, bool moved)
 void UILabel::setMarquee(bool enabled)
 {
 	marquee = enabled;
-	if (!marquee) {
+	if (marquee) {
+		wordWrapped = false;
+	} else {
 		marqueePos = 0;
 		marqueeIdle = 0;
 		marqueeDirection = -1;
@@ -162,6 +164,11 @@ void UILabel::setFutureText(Future<String> futureText)
 			setText(LocalisedString::fromUserString(filtered));
 		}
 	});
+}
+
+const LocalisedString& UILabel::getText() const
+{
+	return text;
 }
 
 void UILabel::setColourOverride(const Vector<ColourOverride>& overrides)

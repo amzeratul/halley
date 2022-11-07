@@ -73,9 +73,9 @@ Vector2f InputMouseSDL::getPosition() const
 	return pos;
 }
 
-void InputMouseSDL::setPosition(Vector2i position)
+void InputMouseSDL::setPosition(Vector2f position)
 {
-	SDL_WarpMouseInWindow(nullptr, position.x, position.y);
+	SDL_WarpMouseInWindow(nullptr, static_cast<int>(position.x), static_cast<int>(position.y));
 }
 
 int InputMouseSDL::getWheelMove() const

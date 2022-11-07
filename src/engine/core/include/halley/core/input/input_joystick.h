@@ -46,7 +46,11 @@ namespace Halley {
 		Select,
 		Start,
 		PlatformAcceptButton,
-		PlatformCancelButton
+		PlatformCancelButton,
+		DPadUp,
+		DPadRight,
+		DPadDown,
+		DPadLeft
 	};
 
 	class InputJoystick : public InputButtonBase {

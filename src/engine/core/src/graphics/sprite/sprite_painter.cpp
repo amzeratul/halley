@@ -153,6 +153,14 @@ void SpritePainter::add(const Sprite& sprite, int mask, int layer, float tieBrea
 	}
 }
 
+void SpritePainter::add(Sprite&& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
+{
+	Expects(mask >= 0);
+	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::SpriteCached, cachedSprites.size(), 1, mask, layer, tieBreaker, sprites.size(), std::move(clip)));
+	cachedSprites.push_back(materialRecycler.clone(sprite));
+	dirty = true;
+}
+
 void SpritePainter::addCopy(const Sprite& sprite, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
 {
 	Expects(mask >= 0);
@@ -196,6 +204,14 @@ void SpritePainter::add(const TextRenderer& text, int mask, int layer, float tie
 		sprites.push_back(SpritePainterEntry(gsl::span<const TextRenderer>(&text, 1), mask, layer, tieBreaker, sprites.size(), std::move(clip)));
 		dirty = true;
 	}
+}
+
+void SpritePainter::add(TextRenderer&& text, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)
+{
+	Expects(mask >= 0);
+	sprites.push_back(SpritePainterEntry(SpritePainterEntryType::TextCached, cachedText.size(), 1, mask, layer, tieBreaker, sprites.size(), std::move(clip)));
+	cachedText.push_back(materialRecycler.clone(text));
+	dirty = true;
 }
 
 void SpritePainter::addCopy(const TextRenderer& text, int mask, int layer, float tieBreaker, std::optional<Rect4f> clip)

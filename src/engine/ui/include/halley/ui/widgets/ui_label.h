@@ -15,6 +15,7 @@ namespace Halley {
 		void setText(const LocalisedString& text);
 		void setText(LocalisedString&& text);
 		void setFutureText(Future<String> text);
+		const LocalisedString& getText() const;
 		void setColourOverride(const Vector<ColourOverride>& overrides);
 
 		void setMaxWidth(float maxWidth);

@@ -15,6 +15,7 @@ UIDebugConsole::UIDebugConsole(const String& id, UIFactory& factory, std::shared
 	, factory(factory)
 	, controller(std::move(controller))
 {
+	Expects(this->controller);
 	setup();
 }
 
@@ -365,7 +366,11 @@ void UIDebugConsole::setup()
 	inputField = getWidgetAs<UITextInput>("input");
 	inputField->setAutoCompleteHandle([=] (const StringUTF32& str) -> Vector<StringUTF32>
 	{
-		return controller->getAutoComplete(str);
+		if (controller) {
+			return controller->getAutoComplete(str);
+		} else {
+			return {};
+		}
 	});
 
 	setHandle(UIEventType::ButtonClicked, "ok", [=] (const UIEvent& event)
@@ -375,7 +380,12 @@ void UIDebugConsole::setup()
 	
 	setHandle(UIEventType::TextSubmit, "input", [=] (const UIEvent& event)
 	{
-		runCommand(event.getStringData());
+		auto cmd = event.getStringData();
+		Concurrent::execute(Executors::getMainUpdateThread(), [=]() {
+			if (controller) {
+				runCommand(cmd);
+			}
+		});
 	});
 
 	layout();

@@ -20,6 +20,7 @@ std::shared_ptr<IUIElement> EnumFieldFactory::createField(const ComponentEditorC
 
 	auto& fieldData = data.getFieldData();
 	const auto& defaultValue = pars.getStringDefaultParameter();
+	const auto& origValue = fieldData.asString("");
 	const auto& value = fieldData.asString(defaultValue.isEmpty() ? values.front() : defaultValue);
 
 	const auto& dropStyle = context.getUIFactory().getStyle("dropdown");
@@ -33,7 +34,7 @@ std::shared_ptr<IUIElement> EnumFieldFactory::createField(const ComponentEditorC
 		context.onEntityUpdated();
 	});
 
-	if (defaultValue != value) {
+	if (origValue != value && defaultValue.isEmpty()) {
 		auto& node = data.getWriteableFieldData();
 		node = ConfigNode(value);
 		context.onEntityUpdated();

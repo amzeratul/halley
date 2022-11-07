@@ -19,6 +19,15 @@ AddComponentWindow::AddComponentWindow(UIFactory& factory, const Vector<String>&
 }
 
 
+ChooseUIStyleWindow::ChooseUIStyleWindow(Vector2f minSize, UIFactory& factory, String uiClass, String defaultOption, Resources& gameResources, Callback callback)
+	: ChooseAssetWindow(minSize, factory, std::move(callback), {})
+{
+	auto gameFactory = factory.cloneWithResources(gameResources);
+	gameFactory->loadStyleSheetsFromResources();
+
+	setAssetIds(gameFactory->getStyleSheet()->getStylesForClass(uiClass), defaultOption);
+	setTitle(LocalisedString::fromHardcodedString("Choose UI Style"));
+}
 
 PaletteWindow::PaletteWindow(UIFactory& factory, Project& project, Callback callback)
 	: ChooseAssetWindow(Vector2f(), factory, std::move(callback), {})

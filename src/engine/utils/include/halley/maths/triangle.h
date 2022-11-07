@@ -1,5 +1,6 @@
 #pragma once
 
+#include "circle.h"
 #include "rect.h"
 #include "vector2.h"
 #include "vector3.h"
@@ -25,6 +26,8 @@ namespace Halley {
         float getPerimeter() const;
 
         Polygon toPolygon() const;
+
+        Circle getCircumscribedCircle() const;
 
         Triangle operator+(Vector2f v) const;
         Triangle operator-(Vector2f v) const;

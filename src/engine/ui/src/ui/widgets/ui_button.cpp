@@ -126,6 +126,16 @@ void UIButton::setLabel(LocalisedString text)
 	}
 }
 
+const LocalisedString& UIButton::getLabel() const
+{
+	if (label) {
+		return label->getText();
+	} else {
+		static const LocalisedString dummy;
+		return dummy;
+	}
+}
+
 void UIButton::setIcon(Sprite icon)
 {
 	if (!iconImage) {

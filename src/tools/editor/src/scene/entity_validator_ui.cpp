@@ -16,9 +16,9 @@ void EntityValidatorUI::onMakeUI()
 {
 }
 
-void EntityValidatorUI::setValidator(EntityValidator& v)
+void EntityValidatorUI::setValidator(EntityValidator* v)
 {
-	validator = &v;
+	validator = v;
 	refresh();
 }
 

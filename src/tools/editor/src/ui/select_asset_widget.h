@@ -67,6 +67,19 @@ namespace Halley {
 		Resources& gameResources;
 	};
 
+	class SelectUIStyleWidget : public SelectTargetWidget {
+	public:
+		SelectUIStyleWidget(const String& id, UIFactory& factory, String uiClass, Resources& gameResources, IProjectWindow& projectWindow);
+
+	protected:
+		std::shared_ptr<UIWidget> makeChooseWindow(std::function<void(std::optional<String>)> callback) override;
+		bool currentValueExists() override;
+
+	private:
+		String uiClass;
+		Resources& gameResources;
+	};
+
 	class IEntityEditorCallbacks;
 
 	class SelectEntityWidget : public SelectTargetWidget {

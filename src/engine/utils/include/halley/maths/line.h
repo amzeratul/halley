@@ -23,10 +23,11 @@
 
 #include "vector2.h"
 #include <optional>
-
 #include "range.h"
 
 namespace Halley {
+	class Circle;
+
 	class Line {
 	public:
 		constexpr Line() = default;
@@ -234,6 +235,38 @@ namespace Halley {
 		Vector2f getDirection() const
 		{
 			return (b - a).unit();
+		}
+
+		[[nodiscard]] std::optional<LineSegment> clip(const Circle& circle) const;
+
+		[[nodiscard]] LineSegment operator+(Vector2f p) const
+		{
+			return LineSegment(a + p, b + p);
+		}
+
+		[[nodiscard]] LineSegment operator-(Vector2f p) const
+		{
+			return LineSegment(a - p, b - p);
+		}
+
+		[[nodiscard]] LineSegment operator*(Vector2f p) const
+		{
+			return LineSegment(a * p, b * p);
+		}
+
+		[[nodiscard]] LineSegment operator/(Vector2f p) const
+		{
+			return LineSegment(a / p, b / p);
+		}
+		
+		[[nodiscard]] LineSegment operator*(float s) const
+		{
+			return LineSegment(a * s, b * s);
+		}
+		
+		[[nodiscard]] LineSegment operator/(float s) const
+		{
+			return LineSegment(a / s, b / s);
 		}
 	};
 }

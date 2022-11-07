@@ -1120,6 +1120,44 @@ public:
 	}
 };
 
+class ComponentEditorUIStyleFieldFactory : public IComponentEditorFieldFactory {
+public:
+	String getFieldType() override
+	{
+		return "Halley::UIStyle<>";
+	}
+
+	bool isNested() const override
+	{
+		return false;
+	}
+
+	ConfigNode getDefaultNode() const override
+	{
+		return ConfigNode();
+	}
+
+	std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override
+	{
+		const auto uiClass = pars.typeParameters.at(0);
+		const auto data = pars.data;
+		auto& fieldData = data.getFieldData();
+		const auto& styleName = fieldData.asString("");
+		const auto& defaultValue = pars.getStringDefaultParameter();
+		
+		auto widget = std::make_shared<SelectUIStyleWidget>("style", context.getUIFactory(), uiClass, context.getGameResources(), context.getProjectWindow());
+		widget->bindData("style", styleName, [&context, data](String newVal)
+		{
+			auto& fieldData = data.getWriteableFieldData();
+			fieldData = ConfigNode(std::move(newVal)); 
+			context.onEntityUpdated();
+		});
+		widget->setDefaultAssetId(defaultValue);
+
+		return widget;
+	}
+};
+
 class ComponentEditorScriptGraphFieldFactory : public IComponentEditorFieldFactory {
 public:
 	String getFieldType() override
@@ -1682,6 +1720,7 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	factories.emplace_back(std::make_unique<ComponentEditorColourFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorParticlesFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorResourceReferenceFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorUIStyleFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorScriptGraphFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorRangeFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorUIAlignFactory>());

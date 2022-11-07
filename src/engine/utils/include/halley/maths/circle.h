@@ -5,13 +5,16 @@
 #include "rect.h"
 
 namespace Halley {
-    class Circle {
+	class LineSegment;
+
+	class Circle {
     public:
         Circle() = default;
         Circle(Vector2f centre, float radius)
             : centre(centre)
             , radius(radius)
         {}
+        Circle(const LineSegment& segment);
 
         float getRadius() const { return radius; }
         Vector2f getCentre() const { return centre; }
@@ -23,9 +26,15 @@ namespace Halley {
         Rect4f getAABB() const;
 
         static Circle getSpanningCircle(const Vector<Vector2f>& points);
+        static Circle getSpanningCircle2(Vector<Vector2f> points);
 
     private:
         Vector2f centre;
         float radius;
+
+        static Circle getSpanningCircleTrivial(gsl::span<Vector2f> ps);
+        static Circle msw(gsl::span<Vector2f> ps, gsl::span<Vector2f, 3> rs);
+        static Vector2f& mswNonBase(Vector2f p, gsl::span<Vector2f, 3> rs);
     };
+
 }

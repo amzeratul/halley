@@ -9,7 +9,7 @@ namespace Halley {
 	public:
 		UIEditorDisplay(String id, Vector2f minSize, UISizer sizer);
 
-		void setUIEditor(UIEditor& uiEditor);
+		void setUIEditor(UIEditor* uiEditor);
 
 		void onMakeUI() override;
 		void drawAfterChildren(UIPainter& painter) const override;
@@ -17,12 +17,13 @@ namespace Halley {
 		void onLayout() override;
 
 		void setSelectedWidget(const String& id);
+		void clearDisplay();
 		void loadDisplay(const UIDefinition& uiDefinition);
 
 		void onPlaceInside(Rect4f rect, Rect4f origRect, const std::shared_ptr<IUIElement>& element, UISizer& sizer) override;
 
 	private:
-		UIFactory* factory = nullptr;
+		UIEditor* editor = nullptr;
 		std::map<UUID, std::shared_ptr<IUIElement>> elements;
 		std::shared_ptr<const IUIElement> curElement;
 		int maxAdjustment = 0;

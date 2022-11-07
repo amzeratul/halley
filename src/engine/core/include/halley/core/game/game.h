@@ -43,6 +43,7 @@ namespace Halley
 		virtual std::unique_ptr<Stage> makeStage(StageID id);
 
 		virtual int getTargetFPS() const;
+		virtual int getTargetBackgroundFPS() const;
 		virtual size_t getMaxThreads() const;
 
 		virtual String getDevConAddress() const;

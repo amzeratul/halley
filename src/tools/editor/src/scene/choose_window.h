@@ -41,6 +41,14 @@ namespace Halley {
 		bool hasPreview;
 	};
 
+	class ChooseUIStyleWindow : public ChooseAssetWindow {
+	public:
+        ChooseUIStyleWindow(Vector2f minSize, UIFactory& factory, String uiClass, String defaultOption, Resources& gameResources, Callback callback);
+
+    protected:
+		AssetType type;
+	};
+
 	class PaletteWindow final : public ChooseAssetWindow {
 	public:
 		using IconRetriever = std::function<Sprite(const String& prefix, const String& id)>;

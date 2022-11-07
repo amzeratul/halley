@@ -11,7 +11,7 @@ namespace Halley {
 
 		void onMakeUI() override;
 
-		void setValidator(EntityValidator& validator);
+		void setValidator(EntityValidator* validator);
 		void setEntity(EntityData& entity, IEntityEditor& entityEditor, Resources& gameResources);
 		void refresh();
 

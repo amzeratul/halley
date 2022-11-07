@@ -188,6 +188,11 @@ void UIWidget::setAnchor(UIAnchor a)
 	}
 }
 
+const UIAnchor* UIWidget::getAnchor() const
+{
+	return anchor.get();
+}
+
 void UIWidget::setAnchor()
 {
 	anchor.reset();
@@ -268,6 +273,12 @@ void UIWidget::remove(IUIElement& element)
 }
 
 void UIWidget::clear()
+{
+	clearChildren();
+	clearBehaviours();
+}
+
+void UIWidget::clearChildren()
 {
 	if (sizer) {
 		sizer->clear();
@@ -429,9 +440,7 @@ void UIWidget::updateActive(bool wasActiveBefore)
 
 void UIWidget::notifyActivationChange(bool active)
 {
-	if (isActive()) {
-		onActiveChanged(active);
-	}
+	onActiveChanged(active);
 	for (auto& c: getChildren()) {
 		c->notifyActivationChange(active);
 	}
@@ -767,7 +776,7 @@ void UIWidget::setInputButtons(const UIInputButtons& buttons)
 
 Rect4f UIWidget::getMouseRect() const
 {
-	auto rect = Rect4f(getPosition(), getPosition() + getSize());
+	auto rect = getRect();
 	if (mouseClip) {
 		return rect.intersection(mouseClip.value());
 	} else {

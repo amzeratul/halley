@@ -35,6 +35,8 @@ namespace Halley
 		TextRenderer& setColour(Colour colour);
 		TextRenderer& setOutlineColour(Colour colour);
 		TextRenderer& setOutline(float width);
+		TextRenderer& setOutline(float width, Colour colour);
+		TextRenderer& setShadow(float distance, float smoothness, Colour colour);
 		TextRenderer& setAlignment(float align);
 		TextRenderer& setOffset(Vector2f align);
 		TextRenderer& setClip(Rect4f clip);
@@ -87,12 +89,15 @@ namespace Halley
 		float align = 0;
 		float smoothness = 1.0f;
 		float lineSpacing = 0.0f;
+		float shadowDistance = 0.0f;
+		float shadowSmoothness = 1.0f;
 
 		Vector2f position;
 		Vector2f offset;
 		Vector2f pixelOffset;
 		Colour colour;
 		Colour outlineColour;
+		Colour shadowColour = Colour(0, 0, 0, 0);
 		std::optional<Rect4f> clip;
 
 		Vector<ColourOverride> colourOverrides;

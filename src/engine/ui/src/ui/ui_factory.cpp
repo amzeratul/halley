@@ -93,6 +93,11 @@ UIFactory::~UIFactory()
 {
 }
 
+void UIFactory::loadStyleSheetsFromResources()
+{
+	styleSheet = std::make_shared<UIStyleSheet>(resources, colourScheme);
+}
+
 void UIFactory::addFactory(const String& key, WidgetFactory factory, UIFactoryWidgetProperties props)
 {
 	if (props.iconName.isEmpty()) {
@@ -608,14 +613,14 @@ UIFactoryWidgetProperties UIFactory::getLabelProperties() const
 	result.canHaveChildren = false;
 	result.entries.emplace_back("Text", "text", "Halley::String", "");
 	result.entries.emplace_back("Text (Loc Key)", "textKey", "Halley::String", "");
-	result.entries.emplace_back("Style", "style", "Halley::String", "label");
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<label>", "label");
 	result.entries.emplace_back("Max Width", "maxWidth", "std::optional<float>", "");
 	result.entries.emplace_back("Max Height", "maxHeight", "std::optional<float>", "");
 	result.entries.emplace_back("Alignment", "alignment", "std::optional<float>", "");
 	result.entries.emplace_back("Font Size", "fontSize", "std::optional<float>", "");
-	result.entries.emplace_back("Marquee", "marquee", "std::optional<bool>", "");
-	result.entries.emplace_back("Word Wrap", "wordWrapped", "std::optional<bool>", "");
-	result.entries.emplace_back("Colour", "colour", "Halley::Colour4f", "#FFFFFF");
+	result.entries.emplace_back("Marquee", "marquee", "bool", "");
+	result.entries.emplace_back("Word Wrap", "wordWrapped", "bool", "");
+	result.entries.emplace_back("Colour", "colour", "std::optional<Halley::Colour4f>", "");
 
 	result.name = "Label";
 	result.iconName = "widget_icons/label.png";
@@ -1107,18 +1112,35 @@ std::shared_ptr<UIWidget> UIFactory::makeSlider(const ConfigNode& entryNode)
 
 std::shared_ptr<UIWidget> UIFactory::makeHorizontalDiv(const ConfigNode& entryNode)
 {
-	const auto& widgetNode = entryNode["widget"];
-	auto id = widgetNode["id"].asString("");
-	const auto& style = getStyle(widgetNode["style"].asString("horizontalDiv"));
-	return std::make_shared<UIImage>(std::move(id), style.getSprite("image"));
+	return makeDivider(entryNode, UISizerType::Horizontal);
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeVerticalDiv(const ConfigNode& entryNode)
 {
+	return makeDivider(entryNode, UISizerType::Vertical);
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeDivider(const ConfigNode& entryNode, UISizerType type)
+{
 	const auto& widgetNode = entryNode["widget"];
 	auto id = widgetNode["id"].asString("");
-	auto style = getStyle(widgetNode["style"].asString("verticalDiv"));
-	return std::make_shared<UIImage>(id, style.getSprite("image"));
+	const auto& style = getStyle(widgetNode["style"].asString(type == UISizerType::Horizontal ? "horizontalDiv" : "verticalDiv"));
+
+	if (style.hasSprite("midImage")) {
+		const auto gap = style.getFloat("gap", 0);
+
+		const int align = type == UISizerType::Horizontal
+			? (UISizerAlignFlags::CentreVertical | UISizerFillFlags::FillHorizontal)
+			: (UISizerAlignFlags::CentreHorizontal | UISizerFillFlags::FillVertical);
+
+		auto result = std::make_shared<UIWidget>(std::move(id), Vector2f(), UISizer(type, gap));
+		result->add(std::make_shared<UIImage>("", style.getSprite("image")), 1, {}, align);
+		result->add(std::make_shared<UIImage>("", style.getSprite("midImage")), 0, {}, UISizerAlignFlags::Centre);
+		result->add(std::make_shared<UIImage>("", style.getSprite("image")), 1, {}, align);
+		return result;
+	} else {
+		return std::make_shared<UIImage>(std::move(id), style.getSprite("image"));
+	}
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)

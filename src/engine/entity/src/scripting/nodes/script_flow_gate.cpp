@@ -125,7 +125,7 @@ IScriptNodeType::Result ScriptFlowOnce::doUpdate(ScriptEnvironment& environment,
 		data.active = true;
 		return Result(ScriptNodeExecutionState::Done, 0.0);
 	}
-	return Result(ScriptNodeExecutionState::Done, 0, 2, 1);
+	return Result(ScriptNodeExecutionState::Done, 0, 2, 0);
 }
 
 

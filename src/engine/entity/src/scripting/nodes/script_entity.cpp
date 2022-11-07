@@ -170,3 +170,35 @@ EntityId ScriptFindChildByName::doGetEntityId(ScriptEnvironment& environment, co
 
 	return {};
 }
+
+
+
+Vector<IGraphNodeType::SettingType> ScriptGetParent::getSettingTypes() const
+{
+	return { };
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptGetParent::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::TargetPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptGetParent::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Get parent of entity ");
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	return str.moveResults();
+}
+
+EntityId ScriptGetParent::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
+{
+	const auto entityRef = environment.getWorld().tryGetEntity(readEntityId(environment, node, 0));
+	if (entityRef.getParent().isValid()) {
+		return entityRef.getParent().getEntityId();
+	}
+	return {};
+}

@@ -35,7 +35,8 @@ void AssetBrowserTabs::openTab(std::optional<AssetType> assetType, const String&
 	auto tabContents = factory.makeUI("halley/asset_browser_tab_contents");
 	tabContents->setId("tabContents");
 	populateTab(*tabContents, assetType, name, key);
-	tabs->addItem(key, tabContents);
+	auto listItem = tabs->addItem(key, tabContents);
+	listItem->setToolTip(LocalisedString::fromUserString(name));
 
 	// Create window
 	auto window = std::make_shared<AssetEditorWindow>(factory, project, projectWindow);

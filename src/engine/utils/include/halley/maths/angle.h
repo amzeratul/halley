@@ -37,7 +37,7 @@ namespace Halley {
 	public:
 		// Constructors
 		constexpr Angle() : value(0) {}
-		constexpr Angle(T _value) : value(_value) {}
+		explicit constexpr Angle(T radians) : value(radians) {}
 		constexpr Angle(const Angle &angle) : value(angle.value) {}
 		constexpr Angle(Angle&& angle) noexcept : value(std::move(angle.value)) {}
 
@@ -79,8 +79,22 @@ namespace Halley {
 		constexpr void operator-= (const Angle &angle) { value -= angle.value; limit(); }
 
 		// Accessors
-		constexpr void setDegrees(const T degrees) { value = degToRad(degrees); limit(); }
-		constexpr void setRadians(const T radian) { value = radian; limit();}
+		constexpr void setDegrees(const T degrees, bool wrap = true)
+		{
+			value = degToRad(degrees);
+			if (wrap) {
+				limit();
+			}
+		}
+
+		constexpr void setRadians(const T radian, bool wrap = true)
+		{
+			value = radian;
+			if (wrap) {
+				limit();
+			}
+		}
+
 		constexpr T getDegrees() const { return radToDeg(value); }
 		constexpr T getRadians() const { return value; }
 		constexpr T toDegrees() const { return radToDeg(value); }
@@ -125,8 +139,18 @@ namespace Halley {
 		constexpr T tan() const noexcept { return std::tan(value); }
 
 		// Builder methods
-		constexpr static Angle fromRadians (const T radians) noexcept { Angle ang; ang.setRadians(radians); return ang; }
-		constexpr static Angle fromDegrees (const T degrees) noexcept { Angle ang; ang.setDegrees(degrees); return ang; }
+		constexpr static Angle fromRadians (const T radians, bool wrap = true) noexcept
+		{
+			Angle ang;
+			ang.setRadians(radians, wrap);
+			return ang;
+		}
+		constexpr static Angle fromDegrees (const T degrees, bool wrap = true) noexcept
+		{
+			Angle ang;
+			ang.setDegrees(degrees, wrap);
+			return ang;
+		}
 
 	private:
 		// Angle value in radians

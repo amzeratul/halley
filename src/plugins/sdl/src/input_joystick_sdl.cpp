@@ -41,14 +41,14 @@ InputJoystickSDL::InputJoystickSDL(int number)
 	axisAdjust = &defaultAxisAdjust;
 
 	// Hats
-	int nHats = SDL_JoystickNumHats(joy);
-	for (int i=0; i<nHats; i++) {
+	const int nHats = SDL_JoystickNumHats(joy);
+	for (int i = 0; i < nHats; i++) {
 		hats.push_back(spInputButtonBase(new InputJoystickHatSDL));
 	}
 
 	// Buttons
-	int buttons = SDL_JoystickNumButtons(joy);
-	init(std::max(buttons, 64));
+	baseButtons = SDL_JoystickNumButtons(joy);
+	init(std::min(baseButtons + 4, 64));
 }
 
 InputJoystickSDL::~InputJoystickSDL()
@@ -62,6 +62,12 @@ InputJoystickSDL::~InputJoystickSDL()
 void InputJoystickSDL::update(Time t)
 {
 	clearPresses();
+
+	if (!hats.empty()) {
+		for (int i = 0; i < 4; ++i) {
+			onButtonStatus(baseButtons + i, hats[0]->isButtonDown(i));
+		}
+	}
 	InputJoystick::update(t);
 }
 
@@ -117,6 +123,10 @@ int InputJoystickSDL::getButtonAtPosition(JoystickButtonPosition position) const
 		case JoystickButtonPosition::TriggerLeft: return 15;
 		case JoystickButtonPosition::TriggerRight: return 16;
 #endif
+		case JoystickButtonPosition::DPadUp: return baseButtons;
+		case JoystickButtonPosition::DPadRight: return baseButtons + 1;
+		case JoystickButtonPosition::DPadDown: return baseButtons + 2;
+		case JoystickButtonPosition::DPadLeft: return baseButtons + 3;
 		default: throw Exception("Invalid parameter", HalleyExceptions::Input);
 	}
 }

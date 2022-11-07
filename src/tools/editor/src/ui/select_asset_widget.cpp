@@ -206,6 +206,26 @@ String SelectAssetWidget::doGetDisplayName(const String& name) const
 
 
 
+SelectUIStyleWidget::SelectUIStyleWidget(const String& id, UIFactory& factory, String uiClass, Resources& gameResources, IProjectWindow& projectWindow)
+	: SelectTargetWidget(id, factory, projectWindow)
+	, uiClass(std::move(uiClass))
+	, gameResources(gameResources)
+{
+	makeUI();
+}
+
+std::shared_ptr<UIWidget> SelectUIStyleWidget::makeChooseWindow(std::function<void(std::optional<String>)> callback)
+{
+	return std::make_shared<ChooseUIStyleWindow>(Vector2f(), factory, uiClass, "", gameResources, callback);
+}
+
+bool SelectUIStyleWidget::currentValueExists()
+{
+	return true;
+}
+
+
+
 SelectEntityWidget::SelectEntityWidget(const String& id, UIFactory& factory, IProjectWindow& projectWindow, IEntityEditorCallbacks* entityEditor)
 	: SelectTargetWidget(id, factory, projectWindow)
 	, entityEditor(entityEditor)

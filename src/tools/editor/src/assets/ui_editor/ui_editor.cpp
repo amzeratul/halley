@@ -12,7 +12,18 @@ UIEditor::UIEditor(UIFactory& factory, Resources& gameResources, Project& projec
 	: AssetEditor(factory, gameResources, project, AssetType::UIDefinition)
 	, projectWindow(projectWindow)
 {
+	project.withDLL([&] (ProjectDLL& dll)
+	{
+		dll.addReloadListener(*this);
+	});
+}
 
+UIEditor::~UIEditor()
+{
+	projectWindow.getProject().withDLL([&](ProjectDLL& dll)
+	{
+		dll.removeReloadListener(*this);
+	});
 }
 
 void UIEditor::update(Time time, bool moved)
@@ -23,10 +34,22 @@ void UIEditor::update(Time time, bool moved)
 	}
 }
 
+void UIEditor::open()
+{
+	loadGameFactory();
+
+	uiDefinition = std::make_shared<UIDefinition>(*gameResources.get<UIDefinition>(assetId));
+	if (widgetList) {
+		widgetList->setDefinition(uiDefinition);
+	}
+
+	factory.loadUI(*this, "halley/ui_editor");
+}
+
 void UIEditor::onMakeUI()
 {
 	display = getWidgetAs<UIEditorDisplay>("display");
-	display->setUIEditor(*this);
+	display->setUIEditor(this);
 	widgetList = getWidgetAs<UIWidgetList>("widgetList");
 	widgetList->setUIEditor(*this);
 	widgetList->setDefinition(uiDefinition);
@@ -101,6 +124,24 @@ bool UIEditor::onKeyPress(KeyboardKeyPress key)
 	return false;
 }
 
+void UIEditor::onProjectDLLStatusChange(ProjectDLL::Status status)
+{
+	if (status == ProjectDLL::Status::Unloaded) {
+		if (display) {
+			display->setUIEditor(nullptr);
+		}
+		gameFactory = {};
+		gameI18N = {};
+		loaded = false;
+	} else if (status == ProjectDLL::Status::Loaded) {
+		loadGameFactory();
+		if (display) {
+			display->setUIEditor(this);
+		}
+		doLoadUI();
+	}
+}
+
 void UIEditor::reload()
 {
 	doLoadUI();
@@ -115,19 +156,6 @@ std::shared_ptr<const Resource> UIEditor::loadResource(const String& id)
 		pendingLoad = true;
 		return {};
 	}
-}
-
-void UIEditor::open()
-{
-	uiDefinition = std::make_shared<UIDefinition>(*gameResources.get<UIDefinition>(assetId));
-	if (widgetList) {
-		widgetList->setDefinition(uiDefinition);
-	}
-
-	gameI18N = std::make_unique<I18N>(gameResources, I18NLanguage("en-GB"));
-	auto* game = project.getGameInstance();
-	gameFactory = game->createUIFactory(projectWindow.getAPI(), gameResources, *gameI18N);
-	factory.loadUI(*this, "halley/ui_editor");
 }
 
 void UIEditor::doLoadUI()
@@ -214,6 +242,13 @@ void UIEditor::removeWidget(const String& id)
 		markModified();
 		widgetList->getList().removeItem(id);
 	}
+}
+
+void UIEditor::loadGameFactory()
+{
+	gameI18N = std::make_unique<I18N>(gameResources, I18NLanguage("en-GB"));
+	auto* game = project.getGameInstance();
+	gameFactory = game->createUIFactory(projectWindow.getAPI(), gameResources, *gameI18N);
 }
 
 ChooseUIWidgetWindow::ChooseUIWidgetWindow(UIFactory& factory, UIFactory& gameFactory, Callback callback)

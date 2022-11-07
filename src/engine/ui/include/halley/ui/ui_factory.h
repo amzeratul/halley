@@ -59,6 +59,8 @@ namespace Halley
 		UIFactory& operator=(const UIFactory& other) = delete;
 		UIFactory& operator=(UIFactory&& other) = delete;
 
+		void loadStyleSheetsFromResources();
+
 		void addFactory(const String& key, WidgetFactory factory, UIFactoryWidgetProperties properties = {});
 		bool hasFactoryFor(const String& key) const;
 		std::shared_ptr<UIWidget> makeWidgetFromFactory(const String& key, const ConfigNode& config);
@@ -158,6 +160,7 @@ namespace Halley
 		std::shared_ptr<UIWidget> makeSlider(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeHorizontalDiv(const ConfigNode& node);
 		std::shared_ptr<UIWidget> makeVerticalDiv(const ConfigNode& node);
+		std::shared_ptr<UIWidget> makeDivider(const ConfigNode& node, UISizerType type);
 		std::shared_ptr<UIWidget> makeTabbedPane(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makePagedPane(const ConfigNode& entryNode);
 		std::shared_ptr<UIWidget> makeFramedImage(const ConfigNode& entryNode);

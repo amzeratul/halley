@@ -10,22 +10,30 @@ UIEditorDisplay::UIEditorDisplay(String id, Vector2f minSize, UISizer sizer)
 	setCanSendEvents(false);
 }
 
-void UIEditorDisplay::setUIEditor(UIEditor& uiEditor)
+void UIEditorDisplay::setUIEditor(UIEditor* uiEditor)
 {
-	factory = &uiEditor.getGameFactory();
-	factory->setConstructionCallback([=] (const std::shared_ptr<IUIElement>& element, const String& uuid)
-	{
-		if (!uuid.isEmpty()) {
-			elements[UUID(uuid)] = element;
-		}
-		const auto widget = std::dynamic_pointer_cast<UIWidget>(element);
-		if (widget) {
-			maxAdjustment = std::max(maxAdjustment, widget->getChildLayerAdjustment());
-		}
-	});
+	editor = uiEditor;
 
-	boundsSprite.setImage(factory->getResources(), "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
-	sizerSprite.setImage(factory->getResources(), "whitebox_outline.png").setColour(Colour4f(0.7f, 0.7f, 0.7f));
+	if (editor) {
+		auto& factory = editor->getGameFactory();
+		factory.setConstructionCallback([=](const std::shared_ptr<IUIElement>& element, const String& uuid)
+		{
+			if (!uuid.isEmpty()) {
+				elements[UUID(uuid)] = element;
+			}
+			const auto widget = std::dynamic_pointer_cast<UIWidget>(element);
+			if (widget) {
+				maxAdjustment = std::max(maxAdjustment, widget->getChildLayerAdjustment());
+			}
+		});
+
+		boundsSprite.setImage(factory.getResources(), "whitebox_outline.png").setColour(Colour4f(0, 1, 0));
+		sizerSprite.setImage(factory.getResources(), "whitebox_outline.png").setColour(Colour4f(0.7f, 0.7f, 0.7f));
+	} else {
+		boundsSprite = {};
+		sizerSprite = {};
+		clearDisplay();
+	}
 }
 
 void UIEditorDisplay::onMakeUI()
@@ -64,13 +72,17 @@ void UIEditorDisplay::setSelectedWidget(const String& id)
 	updateCurWidget();
 }
 
-void UIEditorDisplay::loadDisplay(const UIDefinition& uiDefinition)
+void UIEditorDisplay::clearDisplay()
 {
 	clear();
 	elements.clear();
 	maxAdjustment = 0;
+}
 
-	factory->loadUI(*this, uiDefinition);
+void UIEditorDisplay::loadDisplay(const UIDefinition& uiDefinition)
+{
+	clearDisplay();
+	editor->getGameFactory().loadUI(*this, uiDefinition);
 }
 
 void UIEditorDisplay::onPlaceInside(Rect4f rect, Rect4f origRect, const std::shared_ptr<IUIElement>& element, UISizer& sizer)

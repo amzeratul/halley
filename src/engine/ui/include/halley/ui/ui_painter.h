@@ -17,6 +17,8 @@ namespace Halley {
 
 		void draw(const Sprite& sprite, bool forceCopy = false);
 		void draw(const TextRenderer& text, bool forceCopy = false);
+		void draw(Sprite&& sprite);
+		void draw(TextRenderer&& text);
 		void draw(std::function<void(Painter&)> f);
 
 		UIPainter clone() const;

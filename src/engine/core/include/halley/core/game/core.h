@@ -27,6 +27,7 @@ namespace Halley
 
 	class Core final : public CoreAPIInternal, public IMainLoopable, public ILoggerSink
 	{
+		using Clock = std::chrono::steady_clock;
 	public:
 		Core(std::unique_ptr<Game> game, Vector<std::string> args);
 		~Core();
@@ -40,8 +41,8 @@ namespace Halley
 		const Environment& getEnvironment() override;
 		bool isDevMode() override;
 		
-		void onFixedUpdate(Time time) override;
-		void onTick(Time time) override;
+		void onFixedUpdate(Time delta) override;
+		void onTick(Clock::time_point time, Time delta) override;
 		bool isRunning() const override	{ return running; }
 		bool transitionStage() override;
 		const HalleyAPI& getAPI() const override { return *api; }
