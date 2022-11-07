@@ -29,7 +29,7 @@ void UIReloadUIBehaviour::update(Time time)
 
 			// The above might throw, don't clear until after we know it hasn't
 			auto& widget = *getWidget();
-			widget.clear();
+			widget.clearChildren(); // Don't clear behaviours!!
 			widget.add(std::move(ui), 1);
 			widget.onMakeUI();
 			widget.layout();

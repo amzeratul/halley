@@ -65,6 +65,7 @@ namespace Halley {
 		void remove(IUIElement& element) override;
 
 		void clear() override;
+		void clearChildren();
 
 		void setInteractWithMouse(bool enabled);
 		virtual bool canInteractWithMouse() const;

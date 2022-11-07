@@ -620,7 +620,7 @@ UIFactoryWidgetProperties UIFactory::getLabelProperties() const
 	result.entries.emplace_back("Font Size", "fontSize", "std::optional<float>", "");
 	result.entries.emplace_back("Marquee", "marquee", "bool", "");
 	result.entries.emplace_back("Word Wrap", "wordWrapped", "bool", "");
-	result.entries.emplace_back("Colour", "colour", "Halley::Colour4f", "#FFFFFF");
+	result.entries.emplace_back("Colour", "colour", "std::optional<Halley::Colour4f>", "");
 
 	result.name = "Label";
 	result.iconName = "widget_icons/label.png";

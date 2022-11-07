@@ -274,11 +274,16 @@ void UIWidget::remove(IUIElement& element)
 
 void UIWidget::clear()
 {
+	clearChildren();
+	clearBehaviours();
+}
+
+void UIWidget::clearChildren()
+{
 	if (sizer) {
 		sizer->clear();
 	}
 	UIParent::clear();
-	behaviours.clear();
 }
 
 void UIWidget::setInteractWithMouse(bool enabled)
