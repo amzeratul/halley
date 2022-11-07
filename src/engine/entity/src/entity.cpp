@@ -219,6 +219,7 @@ void Entity::propagateEnabled(bool enabledStatus, bool parentStatus)
 			child->propagateEnabled(child->enabled, newStatus);
 		}
 		dirty = true;
+		markHierarchyDirty();
 	}
 }
 
