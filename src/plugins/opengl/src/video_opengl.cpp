@@ -263,7 +263,11 @@ std::unique_ptr<MaterialConstantBuffer> VideoOpenGL::createConstantBuffer()
 
 String VideoOpenGL::getShaderLanguage()
 {
+#if defined(HALLEY_OPENGL_USE_GLSL330)
+	return "glsl330";
+#else
 	return getPlatform() != GamePlatform::MacOS ? "glsl" : "glsl330";
+#endif
 }
 
 bool VideoOpenGL::isColumnMajor() const
