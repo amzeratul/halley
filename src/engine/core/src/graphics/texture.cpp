@@ -96,6 +96,15 @@ std::unique_ptr<Image> Texture::makeImage(Painter& painter) const
 	return image;
 }
 
+const Image* Texture::tryGetOriginalImage() const
+{
+	if (descriptor.retainPixelData) {
+		return descriptor.pixelData.getImage();
+	} else {
+		return nullptr;
+	}
+}
+
 ResourceMemoryUsage Texture::getMemoryUsage() const
 {
 	ResourceMemoryUsage result;
