@@ -6,10 +6,20 @@
 
 namespace Halley
 {
-	class TextureRenderTargetOpenGL final : public TextureRenderTarget
+	class IRenderTargetOpenGL
 	{
 	public:
-		~TextureRenderTargetOpenGL();
+		virtual ~IRenderTargetOpenGL() {}
+
+		virtual bool isScreenRenderTarget() const = 0;
+	};
+
+	class TextureRenderTargetOpenGL final : public TextureRenderTarget, public IRenderTargetOpenGL
+	{
+	public:
+		~TextureRenderTargetOpenGL() override;
+
+		bool isScreenRenderTarget() const override { return false; }
 
 		void onBind(Painter&) override;
 		void onUnbind(Painter&) override;
@@ -21,10 +31,12 @@ namespace Halley
 		GLuint fbo = 0;
 	};
 
-	class ScreenRenderTargetOpenGL final : public ScreenRenderTarget
+	class ScreenRenderTargetOpenGL final : public ScreenRenderTarget, public IRenderTargetOpenGL
 	{
 	public:
 		ScreenRenderTargetOpenGL(Rect4i rect) : ScreenRenderTarget(rect) {}
+
+		bool isScreenRenderTarget() const override { return true; }
 
 		bool getProjectionFlipVertical() const override;
 		bool getViewportFlipVertical() const override;

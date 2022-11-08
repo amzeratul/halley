@@ -123,6 +123,7 @@ namespace Halley
 		virtual void onUpdateProjection(Material& material, bool hashChanged) = 0;
 		void generateQuadIndices(IndexType firstVertex, size_t numQuads, IndexType* target);
 		RenderTarget& getActiveRenderTarget();
+		const RenderTarget* tryGetActiveRenderTarget() const;
 
 		const Vector<String>& getPendingDebugGroupStack() const;
 

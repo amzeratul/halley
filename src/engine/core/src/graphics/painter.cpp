@@ -698,6 +698,11 @@ RenderTarget& Painter::getActiveRenderTarget()
 	return *activeRenderTarget;
 }
 
+const RenderTarget* Painter::tryGetActiveRenderTarget() const
+{
+	return activeRenderTarget;
+}
+
 const Vector<String>& Painter::getPendingDebugGroupStack() const
 {
 	return pendingDebugGroupStack;

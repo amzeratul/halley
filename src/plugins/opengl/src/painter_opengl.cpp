@@ -3,6 +3,7 @@
 #include <gsl/gsl_assert>
 #include "shader_opengl.h"
 #include "constant_buffer_opengl.h"
+#include "render_target_opengl.h"
 #include "halley/core/graphics/material/material_parameter.h"
 #include "texture_opengl.h"
 
@@ -66,24 +67,46 @@ void PainterOpenGL::doEndRender()
 void PainterOpenGL::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil)
 {
 	glCheckError();
-	const auto col = colour.value_or(Colour());
-	glClearColor(col.r, col.g, col.b, col.a);
-	glClearDepth(depth.value_or(1.0f));
-	glClearStencil(stencil.value_or(0));
 
-	GLbitfield mask = 0;
-	if (colour) {
-		mask |= GL_COLOR_BUFFER_BIT;
+	auto renderTarget = dynamic_cast<const IRenderTargetOpenGL*>(tryGetActiveRenderTarget());
+
+	const auto col = colour.value_or(Colour());
+
+	if (!renderTarget || renderTarget->isScreenRenderTarget()) {
+		glClearColor(col.r, col.g, col.b, col.a);
+
+		glDepthMask(GL_TRUE);
+		glClearDepth(depth.value_or(1.0f));
+		glClearStencil(stencil.value_or(0));
+
+		GLbitfield mask = 0;
+		if (colour) {
+			mask |= GL_COLOR_BUFFER_BIT;
+		}
+		if (depth) {
+			mask |= GL_DEPTH_BUFFER_BIT;
+		}
+		if (stencil) {
+			mask |= GL_STENCIL_BUFFER_BIT;
+		}
+
+		glClear(mask);
+		glCheckError();
+	} else {
+		glClearBufferfv(GL_COLOR, 0, &col.r);
+		glCheckError();
+
+		if (depth) {
+			glDepthMask(GL_TRUE);
+			if (stencil) {
+				glClearBufferfi(GL_DEPTH_STENCIL, 0, depth.value(), stencil.value());
+			} else {
+				const float dv = depth.value();
+				glClearBufferfv(GL_DEPTH, 0, &dv);
+			}
+			glCheckError();
+		}
 	}
-	if (depth) {
-		mask |= GL_DEPTH_BUFFER_BIT;
-	}
-	if (stencil) {
-		mask |= GL_STENCIL_BUFFER_BIT;
-	}
-	
-	glClear(mask);
-	glCheckError();
 }
 
 void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
@@ -92,7 +115,7 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 
 	// Set blend and shader
 	glUtils->setBlendType(pass.getBlend());
-	glUtils->setDepthStencil(pass.getDepthStencil());
+	glUtils->setDepthStencil(material.getDepthStencil(passNumber));
 	ShaderOpenGL& shader = static_cast<ShaderOpenGL&>(pass.getShader());
 	shader.bind();
 

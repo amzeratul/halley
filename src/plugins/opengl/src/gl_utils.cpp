@@ -99,7 +99,6 @@ namespace Halley {
 			curTexUnit = 0;
 			curBlend = BlendType();
 			viewport = {0, 0, 0, 0};
-			clearCol = {0, 0, 0, 0};
 			scissoring = false;
 		}
 
@@ -108,7 +107,6 @@ namespace Halley {
 		std::array<unsigned int, 8> curTex;
 		BlendType curBlend;
 		Rect4i viewport;
-		Colour clearCol;
 		bool scissoring;
 	};
 
@@ -215,15 +213,18 @@ static GLenum getDepthComparison(DepthStencilComparisonFunction func)
 
 void GLUtils::setDepthStencil(const MaterialDepthStencil& depthStencil)
 {
-	return;
 	if (depthStencil.isDepthTestEnabled()) {
 		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(getDepthComparison(depthStencil.getDepthComparisonFunction()));
-		glDepthRange(0, 1);
 	} else {
 		glDisable(GL_DEPTH_TEST);
 	}
-	glDepthMask(depthStencil.isDepthWriteEnabled());
+	glCheckError();
+
+	glDepthMask(depthStencil.isDepthWriteEnabled() ? GL_TRUE : GL_FALSE);
+	glCheckError();
+
+	glDepthFunc(getDepthComparison(depthStencil.getDepthComparisonFunction()));
+	glCheckError();
 }
 
 void GLUtils::setTextureUnit(int n)
@@ -292,18 +293,16 @@ Halley::Rect4i GLUtils::getViewPort() const
 	return state.viewport;
 }
 
-void GLUtils::clear(Colour col)
-{
-	if (col != state.clearCol) {
-		glClearColor(col.r, col.g, col.b, col.a);
-		state.clearCol = col;
-	}
-	glClear(GL_COLOR_BUFFER_BIT);
-}
-
 void GLUtils::resetDefaultGLState()
 {
     glDisable(GL_BLEND);
     glClearColor(0, 0, 0, 0);
     glDisable(GL_SCISSOR_TEST);
+
+	glDisable(GL_DEPTH_TEST);
+	glDepthFunc(GL_ALWAYS);
+
+	glDepthMask(GL_TRUE);
+	glClearDepth(1.0);
+	glDepthRange(0.0, 1.0);
 }

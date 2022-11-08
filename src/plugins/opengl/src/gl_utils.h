@@ -51,7 +51,6 @@ namespace Halley {
 		void setScissor(Rect4i rect, bool enable);
 		Rect4i getViewPort() const;
 
-		void clear(Colour col);
 		static void doGlCheckError(const char* file = "", long line = 0);
 
         static void resetDefaultGLState();
