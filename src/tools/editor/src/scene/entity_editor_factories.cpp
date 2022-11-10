@@ -1313,15 +1313,15 @@ public:
 
 		auto updateValue = [=] ()
 		{
-			int value = 0;
+			const auto& alignCurSel = alignWeak.lock()->getSelectedOptionId();
+			int value = alignCurSel.isInteger() ? alignCurSel.toInteger() : 0;
+
 			if (fillHWeak.lock()->isChecked()) {
-				value |= UISizerAlignFlags::FillHorizontal;
+				value = (value & ~(UISizerAlignFlags::Left | UISizerAlignFlags::CentreHorizontal | UISizerAlignFlags::Right)) | UISizerAlignFlags::FillHorizontal;
 			}
 			if (fillVWeak.lock()->isChecked()) {
-				value |= UISizerAlignFlags::FillVertical;
+				value = (value & ~(UISizerAlignFlags::Top | UISizerAlignFlags::CentreVertical | UISizerAlignFlags::Bottom)) | UISizerAlignFlags::FillVertical;
 			}
-			const auto& alignCurSel = alignWeak.lock()->getSelectedOptionId();
-			value |= alignCurSel.isInteger() ? alignCurSel.toInteger() : 0;
 
 			data.getWriteableFieldData() = UIFactory::makeSizerAlignFlagsNode(UISizerAlignFlags::Type(value));
 			context.onEntityUpdated();
@@ -1363,6 +1363,8 @@ public:
 					newSelection = newTarget;
 				}
 			}
+			auto curSel = list->getSelectedOptionId();
+
 			if (newSelection) {
 				list->setSelectedOptionId(toString(newSelection.value()));
 			}
