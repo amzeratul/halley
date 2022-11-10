@@ -73,7 +73,7 @@ void UIEditor::onMakeUI()
 	});
 
 	doLoadUI();
-	setSelectedWidget(getWidgetAs<UIList>("widgetsList")->getSelectedOptionId());
+	reselectWidget();
 }
 
 void UIEditor::markModified()
@@ -89,6 +89,11 @@ void UIEditor::onWidgetModified(const String& id)
 		widgetList->onWidgetModified(id, *data.result);
 	}
 	markModified();
+}
+
+void UIEditor::reselectWidget()
+{
+	setSelectedWidget(getWidgetAs<UIList>("widgetsList")->getSelectedOptionId());
 }
 
 bool UIEditor::isModified()

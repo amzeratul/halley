@@ -102,6 +102,7 @@ void UIWidgetList::moveItems(gsl::span<const MoveOperation> changes)
 	}
 
 	uiEditor->markModified();
+	uiEditor->reselectWidget();
 }
 
 UIWidgetList::EntryInfo UIWidgetList::getEntryInfo(const ConfigNode& data) const
