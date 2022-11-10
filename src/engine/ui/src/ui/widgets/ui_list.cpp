@@ -363,15 +363,18 @@ void UIList::setItemEnabled(const String& id, bool enabled)
 	auto curId = getSelectedOptionId();
 	for (auto& item: items) {
 		if (item->getId() == id) {
-			if (!enabled) {
-				item->setSelected(false);
+			if (item->isEnabled() != enabled) {
+				if (!enabled) {
+					item->setSelected(false);
+				}
+				item->setEnabled(enabled);
+									
+				reassignIds();
+				resetSelectionIfInvalid();
 			}
-			item->setEnabled(enabled);
+			break;
 		}
 	}
-	reassignIds();
-
-	resetSelectionIfInvalid();
 }
 
 void UIList::resetSelectionIfInvalid()
@@ -494,16 +497,23 @@ void UIList::onCancel()
 
 void UIList::reassignIds()
 {
+	int newCurOption = curOption;
+
 	int i = 0;
 	int j = 0;
 	for (auto& item: items) {
 		if (item->isActive() && item->isEnabled()) {
+			if (curOption == item->getIndex()) {
+				newCurOption = i; // Defer assignment to later so it doesn't mess the logic in this loop
+			}
 			item->setIndex(i++);
 		} else {
 			item->setIndex(-1);
 		}
 		item->setAbsoluteIndex(j++);
 	}
+
+	curOption = newCurOption;
 }
 
 std::shared_ptr<UIListItem> UIList::getItem(int n) const
