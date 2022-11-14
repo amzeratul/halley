@@ -1379,8 +1379,8 @@ void UIFactory::applyListProperties(UIList& list, const ConfigNode& node, const 
 {
 	applyInputButtons(list, node["inputButtons"].asString(inputConfigName));
 
-	auto options = parseOptions(node["options"]);
-	for (auto& o: options) {
+	const auto options = parseOptions(node["options"]);
+	for (const auto& o: options) {
 		if (!o.image.isEmpty() || !o.sprite.isEmpty()) {
 			Sprite normalSprite;
 			
