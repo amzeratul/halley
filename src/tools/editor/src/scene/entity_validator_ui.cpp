@@ -22,11 +22,12 @@ void EntityValidatorUI::setValidator(EntityValidator* v)
 	refresh();
 }
 
-void EntityValidatorUI::setEntity(EntityData& e, IEntityEditor& editor, Resources& resources)
+void EntityValidatorUI::setEntity(EntityData& e, IEntityEditor& editor, Resources& resources, const EntityTree& tree)
 {
 	curEntity = &e;
 	entityEditor = &editor;
 	gameResources = &resources;
+	curTree = &tree;
 
 	isPrefab = !curEntity->getPrefab().isEmpty() && gameResources->exists<Prefab>(curEntity->getPrefab());
 	if (isPrefab) {
@@ -42,14 +43,16 @@ void EntityValidatorUI::refresh()
 	if (!curEntity || !validator) {
 		return;
 	}
-	
+
+	const auto entityDataStack = buildEntityDataStack(curEntity->getInstanceUUID());
+
 	Vector<IEntityValidator::Result> result;
 	if (isPrefab) {
 		const auto prefab = gameResources->get<Prefab>(curEntity->getPrefab());
 		curEntityInstance = prefab->getEntityData().instantiateWithAsCopy(*curEntity);
-		result = validator->validateEntity(curEntityInstance, true);
+		result = validator->validateEntity(curEntityInstance, true, entityDataStack);
 	} else {
-		result = validator->validateEntity(*curEntity, false);
+		result = validator->validateEntity(*curEntity, false, entityDataStack);
 	}
 	
 	if (result != curResultSet) {
@@ -104,6 +107,40 @@ void EntityValidatorUI::setSeverity(UIWidget& widget, UIFactory& factory, IEntit
 		auto c1 = factory.getColourScheme()->getColour(severity == IEntityValidator::Severity::Error ? "taskError" : "taskWarning");
 		capsule->addBehaviour(std::make_shared<UIPulseSpriteBehaviour>(c0, c1, 2.0, 1.0));
 	}
+}
+
+Vector<const EntityData*> EntityValidatorUI::buildEntityDataStack(UUID currentId) const
+{
+	if (curTree == nullptr) {
+		return {};
+	}
+
+	Vector<const EntityData*> entityDataStack;
+	for (const auto& child : curTree->children) {
+		if (fromString<UUID>(child.entityId) == currentId) {
+			return entityDataStack;
+		}
+
+		buildEntityDataStack(child, currentId, entityDataStack);
+	}
+
+	return entityDataStack;
+}
+
+bool EntityValidatorUI::buildEntityDataStack(const EntityTree& entityTree, const UUID& currentId, Vector<const EntityData*>& entityDataStack) const
+{
+	if (fromString<UUID>(entityTree.entityId) == currentId) {
+		return true;
+	}
+	entityDataStack.push_back(entityTree.data);
+
+	for (const auto& child : entityTree.children) {
+		if (buildEntityDataStack(child, currentId, entityDataStack)) {
+			return true;
+		}
+	}
+	entityDataStack.pop_back();
+	return false;
 }
 
 EntityValidatorListUI::EntityValidatorListUI(String id, UIFactory& factory)

@@ -129,7 +129,7 @@ namespace Halley {
 
     	virtual ~IEntityValidator() = default;
 
-        virtual Vector<Result> validateEntity(EntityValidator& validator, const EntityData& entityData) = 0;
+        virtual Vector<Result> validateEntity(EntityValidator& validator, const EntityData& currentEntityData, const Vector<const EntityData*>& entityDataStack) = 0;
     };
 
     class IEntityValidatorActionHandler {

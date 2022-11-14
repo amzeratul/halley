@@ -12,12 +12,16 @@ namespace Halley {
 		void onMakeUI() override;
 
 		void setValidator(EntityValidator* validator);
-		void setEntity(EntityData& entity, IEntityEditor& entityEditor, Resources& gameResources);
+		void setEntity(EntityData& entity, IEntityEditor& entityEditor, Resources& gameResources, const EntityTree& tree);
 		void refresh();
 
 		static void setSeverity(UIWidget& widget, UIFactory& factory, IEntityValidator::Severity severity);
 
 	private:
+
+		Vector<const EntityData*> buildEntityDataStack(UUID currentId) const;
+		bool buildEntityDataStack(const EntityTree& entityTree, const UUID& currentId, Vector<const EntityData*>& entityDataStack) const;
+
 		UIFactory& factory;
 
 		EntityValidator* validator = nullptr;
@@ -26,6 +30,7 @@ namespace Halley {
 
 		EntityData* curEntity = nullptr;
 		EntityData curEntityInstance;
+		const EntityTree* curTree = nullptr;
 		bool isPrefab = false;
 
 		Vector<IEntityValidator::Result> curResultSet;

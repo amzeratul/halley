@@ -133,7 +133,7 @@ void EntityEditor::makeUI()
 	});
 }
 
-bool EntityEditor::loadEntity(const String& id, EntityData& data, const Prefab* prefab, bool force, Resources& resources)
+bool EntityEditor::loadEntity(const String& id, EntityData& data, const Prefab* prefab, bool force, Resources& resources, EntityTree entityTree)
 {
 	Expects(ecsData);
 
@@ -147,6 +147,7 @@ bool EntityEditor::loadEntity(const String& id, EntityData& data, const Prefab* 
 	prefabData = prefab;
 	currentId = id;
 	isPrefab = !!prefabData;
+	currentTree = std::move(entityTree);
 
 	reloadEntity();
 
@@ -199,7 +200,7 @@ void EntityEditor::reloadEntity()
 		getWidgetAs<UICheckbox>("enabled")->setChecked(!getEntityData().getFlag(EntityData::Flag::Disabled));
 		setCanSendEvents(true);
 
-		entityValidatorUI->setEntity(*currentEntityData, *this, *gameResources);
+		entityValidatorUI->setEntity(*currentEntityData, *this, *gameResources, currentTree);
 	} else {
 		entityValidatorUI->setActive(false);
 	}
@@ -352,6 +353,8 @@ void EntityEditor::addComponent(const String& name, ConfigNode data)
 
 	// Reload
 	needToReloadUI = true;	
+	sceneEditor->validateAllEntities();
+
 	onEntityUpdated();
 }
 
@@ -365,6 +368,7 @@ void EntityEditor::deleteComponent(const String& name)
 
 			needToReloadUI = true;
 			sceneEditor->onComponentRemoved(name);
+			sceneEditor->validateAllEntities();
 			onEntityUpdated();
 			return;
 		}

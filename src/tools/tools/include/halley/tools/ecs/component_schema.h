@@ -23,6 +23,7 @@ namespace Halley
 		HashSet<String> includeFiles;
 		std::optional<String> customImplementation;
 		Vector<String> componentDependencies;
+		Vector<String> componentDependenciesInAncestors;
 		bool generate = false;
 
 		bool operator<(const ComponentSchema& other) const;

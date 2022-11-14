@@ -13,7 +13,7 @@ ComponentDependencyValidator::ComponentDependencyValidator(const ECSData* ecsDat
 
 }
 
-Vector<IEntityValidator::Result> ComponentDependencyValidator::validateEntity(EntityValidator& validator, const EntityData& entityData)
+Vector<IEntityValidator::Result> ComponentDependencyValidator::validateEntity(EntityValidator& validator, const EntityData& entityData, const Vector<const EntityData*>& entityDataStack)
 {
 	Vector<Result> result;
 
@@ -24,6 +24,22 @@ Vector<IEntityValidator::Result> ComponentDependencyValidator::validateEntity(En
 			const bool hasDepedency = std_ex::contains_if(entityData.getComponents(), [&](const std::pair<String, ConfigNode>& comp) { return comp.first == dependsOn; });
 			if (!hasDepedency) {
 				result.emplace_back(Severity::Error, component.first + " depends on " + dependsOn + " which is missing.");
+			}
+		}
+
+		for (auto& dependsOn : componentSchema.componentDependenciesInAncestors) {
+			const bool hasDepedency = std_ex::contains_if(entityData.getComponents(), [&](const std::pair<String, ConfigNode>& comp) { return comp.first == dependsOn; });
+			if (!hasDepedency) {
+				bool hasDepedencyInWalker = false;
+				for (const auto& stackWalker : entityDataStack) {
+					hasDepedencyInWalker = std_ex::contains_if(stackWalker->getComponents(), [&](const std::pair<String, ConfigNode>& comp) { return comp.first == dependsOn; });
+					if (hasDepedencyInWalker) {
+						break;
+					}
+				}
+				if (!hasDepedencyInWalker) {
+					result.emplace_back(Severity::Error, component.first + " depends on " + dependsOn + " which is missing on itself or in any of the parents.");
+				}
 			}
 		}
 	}

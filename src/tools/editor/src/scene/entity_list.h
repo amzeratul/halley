@@ -29,7 +29,7 @@ namespace Halley {
 		void refreshList();
 		void refreshNames();
 
-		void onEntityModified(const String& id, const EntityData* prevData, const EntityData& newData);
+		void onEntityModified(const String& id, const EntityData* prevData, const EntityData& newData, const Vector<const EntityData*>& entityDataStack = {});
 		void onEntitiesAdded(gsl::span<const EntityChangeOperation> changes);
 		void onEntitiesRemoved(gsl::span<const String> ids, const String& newSelectionId);
 
@@ -49,7 +49,7 @@ namespace Halley {
 		UITreeList& getList();
 		void collectEntities(Vector<String>& ids, Vector<String>& names, Vector<Sprite>& icons);
 
-		EntityInfo getEntityInfo(const EntityData& data) const;
+		EntityInfo getEntityInfo(const EntityData& data, const Vector<const EntityData*>& entityDataStack = {}) const;
 
 	private:
 		UIFactory& factory;
@@ -66,9 +66,9 @@ namespace Halley {
 		Time validationTimeout = 0;
 
 		void makeUI();
-		void addEntities(const EntityTree& entity, const String& parentId);
-		void addEntity(const EntityData& data, const String& parentId, int childIndex);
-		void addEntityTree(const String& parentId, int childIndex, const EntityData& data);
+		void addEntities(const EntityTree& entity, const String& parentId, Vector<const EntityData*>& entityDataStack);
+		void addEntity(const EntityData& data, const String& parentId, Vector<const EntityData*>& entityDataStack, int childIndex);
+		void addEntityTree(const String& parentId, int childIndex, const EntityData& data, Vector<const EntityData*> entityDataStack);
 
 		void openContextMenu(Vector<String> entityIds);
 		void onContextMenuAction(const String& actionId, gsl::span<const String> entityIds);
@@ -77,13 +77,13 @@ namespace Halley {
 		bool markValid(const UUID& uuid, IEntityValidator::Severity severity);
 		void notifyValidatorList();
 		void doValidateAllEntities();
-		void validateEntityTree(const EntityTree& entityTree);
-		void onEntityModified(const String& id, const EntityData& node, bool onlyRefreshValidation);
+		void validateEntityTree(const EntityTree& entityTree, Vector<const EntityData*>& entityDataStack);
+		void onEntityModified(const String& id, const EntityData& node, bool onlyRefreshValidation, const Vector<const EntityData*>& entityDataStack);
 
 		void setEntityExpanded(const String& id, bool expanded);
 		void updateItemEnabledStatus(UITreeListItem& item, bool enabled);
 		void updateItemEnabledStatus(UITreeListItem& item);
 
-		IEntityValidator::Severity getEntitySeverity(const EntityData& entityData, bool recursive) const;
+		IEntityValidator::Severity getEntitySeverity(const EntityData& entityData, bool recursive, const Vector<const EntityData*>& entityDataStack) const;
 	};
 }

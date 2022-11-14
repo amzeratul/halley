@@ -96,6 +96,15 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 			}
 		}
 	}
+
+	const auto depsInAncestors = node["componentDependenciesInAncestors"];
+	if (depsInAncestors.IsSequence()) {
+		for (auto n = depsInAncestors.begin(); n != depsInAncestors.end(); ++n) {
+			if (n->IsScalar()) {
+				componentDependenciesInAncestors.push_back(n->as<std::string>());
+			}
+		}
+	}
 }
 
 bool ComponentSchema::operator<(const ComponentSchema& other) const

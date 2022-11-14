@@ -35,11 +35,11 @@ EntityValidator::EntityValidator(World& world)
 {
 }
 
-Vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityData& entity, bool recursive)
+Vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityData& entity, bool recursive, const Vector<const EntityData*>& entityDataStack)
 {
 	try {
 		Vector<IEntityValidator::Result> result;
-		validateEntity(entity, recursive, result);
+		validateEntity(entity, recursive, result, entityDataStack);
 		return result;
 	} catch (const std::exception& e) {
 		Logger::logError("Exception when attempting to validate entity:");
@@ -51,14 +51,14 @@ Vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityDat
 	}
 }
 
-void EntityValidator::validateEntity(const EntityData& entity, bool recursive, Vector<IEntityValidator::Result>& result)
+void EntityValidator::validateEntity(const EntityData& entity, bool recursive, Vector<IEntityValidator::Result>& result, const Vector<const EntityData*>& entityDataStack)
 {
 	if (entity.getFlag(EntityData::Flag::Disabled)) {
 		return;
 	}
 
 	for (const auto& validator: validators) {
-		auto r = validator->validateEntity(*this, entity);
+		auto r = validator->validateEntity(*this, entity, entityDataStack);
 		for (auto& v: r) {
 			for (auto& a: v.suggestedActions) {
 				a.actionData["entity"] = entity.getInstanceUUID().toString();
@@ -69,7 +69,7 @@ void EntityValidator::validateEntity(const EntityData& entity, bool recursive, V
 
 	if (recursive) {
 		for (const auto& c: entity.getChildren()) {
-			validateEntity(c, recursive, result);
+			validateEntity(c, recursive, result, entityDataStack);
 		}
 	}
 }
