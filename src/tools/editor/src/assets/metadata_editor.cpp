@@ -284,6 +284,7 @@ void MetadataEditor::makeDropdownField(UISizer& sizer, const String& key, Vector
 void MetadataEditor::makeAssetTypeField(UISizer& sizer, const String& key, AssetType type, const String& defaultValue)
 {
 	const auto result = std::make_shared<SelectAssetWidget>(key, factory, type, project->getGameResources(), projectWindow);
+	result->setAllowEmpty("");
 	result->setMinSize(Vector2f(40, 22));
 	sizer.add(result, 1);
 
