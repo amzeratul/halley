@@ -241,6 +241,29 @@ namespace Halley {
 			return *this = std::move(map);
 		}
 
+		template <typename T, std::enable_if_t<std::is_enum_v<T>, bool> = true>
+		ConfigNode& operator=(T enumValue)
+		{
+			return *this = toString(enumValue);
+		}
+
+		template <typename T, std::enable_if_t<HasToConfigNode<T>::value, bool> = true>
+		ConfigNode& operator=(const T& value)
+		{
+			return *this = value.toConfigNode();
+		}
+
+		template <typename T>
+		ConfigNode& operator=(const std::optional<T>& value)
+		{
+			if (value) {
+				*this = *value;
+			} else {
+				reset();
+			}
+			return *this;
+		}
+
 		bool operator==(const ConfigNode& other) const;
 		bool operator!=(const ConfigNode& other) const;
 
@@ -362,7 +385,11 @@ namespace Halley {
 		template <typename T>
 		T asType() const
 		{
-			return convertTo(Tag<T>());
+			if constexpr (HasConfigNodeConstructor<T>::value) {
+				return T(*this);
+			} else {
+				return convertTo(Tag<T>());
+			}
 		}
 
 		template <typename T>
@@ -371,7 +398,32 @@ namespace Halley {
 			if (getType() == ConfigNodeType::Undefined) {
 				return defaultValue;
 			}
-			return convertTo(Tag<T>());
+			return asType<T>();
+		}
+
+		template <typename T>
+		T asEnum() const
+		{
+			return fromString<T>(asString());
+		}
+
+		template <typename T>
+		T asEnum(T defaultValue) const
+		{
+			if (getType() == ConfigNodeType::Undefined) {
+				return defaultValue;
+			}
+			return asEnum<T>();
+		}
+
+		template <typename T>
+		std::optional<T> asOptional() const
+		{
+			if (getType() == ConfigNodeType::Undefined) {
+				return {};
+			} else {
+				return asType<T>();
+			}
 		}
 		
 		const SequenceType& asSequence() const;
