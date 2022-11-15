@@ -192,6 +192,8 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 
 		// Setup editors
 		sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, world, project.getGameResources());
+		entityTree = sceneData->getEntityTree();
+
 		entityEditor->setSceneEditorWindow(*this, api);
 		entityEditor->setECSData(project.getECSData());
 		entityEditor->setEntityEditorFactory(&projectWindow.getEntityEditorFactoryRoot());
@@ -217,7 +219,6 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 		}
 		
 		currentEntityScene = sceneCreated;
-		entityTree = sceneData->getEntityTree();
 
 		// Custom UI
 		setCustomUI(gameBridge->makeCustomUI());
