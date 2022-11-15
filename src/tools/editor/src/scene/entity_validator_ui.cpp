@@ -1,6 +1,7 @@
 #include "entity_validator_ui.h"
 
 #include "entity_list.h"
+#include "scene_editor_window.h"
 #include "halley/editor_extensions/entity_validator.h"
 using namespace Halley;
 
@@ -22,12 +23,15 @@ void EntityValidatorUI::setValidator(EntityValidator* v)
 	refresh();
 }
 
-void EntityValidatorUI::setEntity(EntityData& e, IEntityEditor& editor, Resources& resources, const EntityTree& tree)
+void EntityValidatorUI::setEntity(EntityData& e, IEntityEditor& editor, Resources& resources)
 {
+	if (curEntity == &e) {
+		return;
+	}
+
 	curEntity = &e;
 	entityEditor = &editor;
 	gameResources = &resources;
-	curTree = &tree;
 
 	isPrefab = !curEntity->getPrefab().isEmpty() && gameResources->exists<Prefab>(curEntity->getPrefab());
 	if (isPrefab) {
@@ -43,16 +47,14 @@ void EntityValidatorUI::refresh()
 	if (!curEntity || !validator) {
 		return;
 	}
-
-	const auto entityDataStack = buildEntityDataStack(curEntity->getInstanceUUID());
-
+	
 	Vector<IEntityValidator::Result> result;
 	if (isPrefab) {
 		const auto prefab = gameResources->get<Prefab>(curEntity->getPrefab());
 		curEntityInstance = prefab->getEntityData().instantiateWithAsCopy(*curEntity);
-		result = validator->validateEntity(curEntityInstance, true, entityDataStack);
+		result = validator->validateEntity(curEntityInstance, true, sceneEditorWindow->getEntityTree());
 	} else {
-		result = validator->validateEntity(*curEntity, false, entityDataStack);
+		result = validator->validateEntity(*curEntity, false, sceneEditorWindow->getEntityTree());
 	}
 	
 	if (result != curResultSet) {
@@ -97,6 +99,11 @@ void EntityValidatorUI::refresh()
 	}
 }
 
+void EntityValidatorUI::setSceneEditorWindow(SceneEditorWindow* sceneEditor)
+{
+	sceneEditorWindow = sceneEditor;
+}
+
 void EntityValidatorUI::setSeverity(UIWidget& widget, UIFactory& factory, IEntityValidator::Severity severity)
 {
 	auto capsule = widget.getWidgetAs<UIImage>("capsule");
@@ -107,40 +114,6 @@ void EntityValidatorUI::setSeverity(UIWidget& widget, UIFactory& factory, IEntit
 		auto c1 = factory.getColourScheme()->getColour(severity == IEntityValidator::Severity::Error ? "taskError" : "taskWarning");
 		capsule->addBehaviour(std::make_shared<UIPulseSpriteBehaviour>(c0, c1, 2.0, 1.0));
 	}
-}
-
-Vector<const EntityData*> EntityValidatorUI::buildEntityDataStack(UUID currentId) const
-{
-	if (curTree == nullptr) {
-		return {};
-	}
-
-	Vector<const EntityData*> entityDataStack;
-	for (const auto& child : curTree->children) {
-		if (fromString<UUID>(child.entityId) == currentId) {
-			return entityDataStack;
-		}
-
-		buildEntityDataStack(child, currentId, entityDataStack);
-	}
-
-	return entityDataStack;
-}
-
-bool EntityValidatorUI::buildEntityDataStack(const EntityTree& entityTree, const UUID& currentId, Vector<const EntityData*>& entityDataStack) const
-{
-	if (fromString<UUID>(entityTree.entityId) == currentId) {
-		return true;
-	}
-	entityDataStack.push_back(entityTree.data);
-
-	for (const auto& child : entityTree.children) {
-		if (buildEntityDataStack(child, currentId, entityDataStack)) {
-			return true;
-		}
-	}
-	entityDataStack.pop_back();
-	return false;
 }
 
 EntityValidatorListUI::EntityValidatorListUI(String id, UIFactory& factory)

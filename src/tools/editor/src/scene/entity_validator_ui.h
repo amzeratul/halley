@@ -4,6 +4,7 @@
 namespace Halley {
 	class EntityList;
 	class EntityValidator;
+	class SceneEditorWindow;
 
 	class EntityValidatorUI : public UIWidget {
 	public:
@@ -12,17 +13,15 @@ namespace Halley {
 		void onMakeUI() override;
 
 		void setValidator(EntityValidator* validator);
-		void setEntity(EntityData& entity, IEntityEditor& entityEditor, Resources& gameResources, const EntityTree& tree);
+		void setEntity(EntityData& entity, IEntityEditor& entityEditor, Resources& gameResources);
 		void refresh();
+		void setSceneEditorWindow(SceneEditorWindow* sceneEditor);
 
 		static void setSeverity(UIWidget& widget, UIFactory& factory, IEntityValidator::Severity severity);
 
 	private:
-
-		Vector<const EntityData*> buildEntityDataStack(UUID currentId) const;
-		bool buildEntityDataStack(const EntityTree& entityTree, const UUID& currentId, Vector<const EntityData*>& entityDataStack) const;
-
 		UIFactory& factory;
+		SceneEditorWindow* sceneEditorWindow = nullptr;
 
 		EntityValidator* validator = nullptr;
 		IEntityEditor* entityEditor = nullptr;

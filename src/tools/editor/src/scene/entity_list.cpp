@@ -82,26 +82,22 @@ void EntityList::makeUI()
 	});
 }
 
-void EntityList::addEntities(const EntityTree& entity, const String& parentId, Vector<const EntityData*>& entityDataStack)
+void EntityList::addEntities(const EntityTree& entity, const String& parentId)
 {
 	// Root is empty, don't add it
 	if (!entity.entityId.isEmpty()) {
-		addEntity(*entity.data, parentId, entityDataStack, -1);
+		addEntity(*entity.data, parentId, -1);
 	}
 	
 	for (auto& e: entity.children) {
-		addEntities(e, entity.entityId, entityDataStack);
-	}
-
-	if (!entity.entityId.isEmpty()) {
-		entityDataStack.pop_back();
+		addEntities(e, entity.entityId);
 	}
 }
 
-void EntityList::addEntity(const EntityData& data, const String& parentId, Vector<const EntityData*>& entityDataStack, int childIndex)
+void EntityList::addEntity(const EntityData& data, const String& parentId, int childIndex)
 {
 	const bool isPrefab = !data.getPrefab().isEmpty();
-	const auto info = getEntityInfo(data, entityDataStack);
+	const auto info = getEntityInfo(data);
 	const size_t idx = childIndex >= 0 ? static_cast<size_t>(childIndex) : std::numeric_limits<size_t>::max();
 	const bool expanded = !data.getFlag(EntityData::Flag::TreeViewCollapsed);
 	const bool enabled = !data.getFlag(EntityData::Flag::Disabled);
@@ -110,20 +106,18 @@ void EntityList::addEntity(const EntityData& data, const String& parentId, Vecto
 	updateItemEnabledStatus(item, enabled);
 
 	markValid(data.getInstanceUUID(), info.severity);
-	entityDataStack.push_back(&data);
 }
 
-void EntityList::addEntityTree(const String& parentId, int childIndex, const EntityData& data, Vector<const EntityData*> entityDataStack)
+void EntityList::addEntityTree(const String& parentId, int childIndex, const EntityData& data)
 {
 	const auto& curId = data.getInstanceUUID().toString();
-	addEntity(data, parentId, entityDataStack, childIndex);
+	addEntity(data, parentId, childIndex);
 	for (const auto& child: data.getChildren()) {
-		addEntityTree(curId, -1, child, entityDataStack);
+		addEntityTree(curId, -1, child);
 	}
-	entityDataStack.pop_back();
 }
 
-EntityList::EntityInfo EntityList::getEntityInfo(const EntityData& data, const Vector<const EntityData*>& entityDataStack) const
+EntityList::EntityInfo EntityList::getEntityInfo(const EntityData& data) const
 {
 	EntityInfo result;
 	result.enabled = !data.getFlag(EntityData::Flag::Disabled);
@@ -131,12 +125,12 @@ EntityList::EntityInfo EntityList::getEntityInfo(const EntityData& data, const V
 	if (data.getPrefab().isEmpty()) {
 		result.name = data.getName().isEmpty() ? String("Unnamed Entity") : data.getName();
 		result.icon = icons->getIcon(data.getIcon());
-		result.severity = getEntitySeverity(data, false, entityDataStack);
+		result.severity = getEntitySeverity(data, false);
 	} else {
 		if (const auto prefab = sceneEditorWindow->getGamePrefab(data.getPrefab()); prefab && !prefab->hasFailed()) {
 			result.name = prefab->getPrefabName();
 			result.icon = icons->getIcon(prefab->getPrefabIcon());
-			result.severity = getEntitySeverity(prefab->getEntityData().instantiateWithAsCopy(data), true, entityDataStack);
+			result.severity = getEntitySeverity(prefab->getEntityData().instantiateWithAsCopy(data), true);
 		} else {
 			result.name = "Missing prefab! [" + data.getPrefab() + "]";
 			result.icon = icons->getIcon("");
@@ -161,7 +155,7 @@ void EntityList::refreshList()
 	list->clear();
 	if (sceneData) {
 		Vector<const EntityData*> entityDataStack;
-		addEntities(sceneData->getEntityTree(), "", entityDataStack);
+		addEntities(sceneData->getEntityTree(), "");
 	}
 	layout();
 	list->setScrollToSelection(true);
@@ -174,15 +168,15 @@ void EntityList::refreshNames()
 	refreshList();
 }
 
-void EntityList::onEntityModified(const String& id, const EntityData* prevData, const EntityData& newData, const Vector<const EntityData*>& entityDataStack)
+void EntityList::onEntityModified(const String& id, const EntityData* prevData, const EntityData& newData)
 {
 	const bool hasListChange = !prevData || newData.getName() != prevData->getName() || newData.getIcon() != prevData->getIcon() || newData.getPrefab() != prevData->getPrefab();
-	onEntityModified(id, newData, !hasListChange, entityDataStack);
+	onEntityModified(id, newData, !hasListChange);
 }
 
-void EntityList::onEntityModified(const String& id, const EntityData& node, bool onlyRefreshValidation, const Vector<const EntityData*>& entityDataStack)
+void EntityList::onEntityModified(const String& id, const EntityData& node, bool onlyRefreshValidation)
 {
-	auto info = getEntityInfo(node, entityDataStack);
+	auto info = getEntityInfo(node);
 	const bool validationChanged = markValid(node.getInstanceUUID(), info.severity);
 	if (validationChanged || !onlyRefreshValidation) {
 		list->setLabel(id, LocalisedString::fromUserString(info.name), std::move(info.icon));
@@ -206,8 +200,7 @@ void EntityList::onEntitiesAdded(gsl::span<const EntityChangeOperation> changes)
 	Vector<String> ids;
 
 	for (const auto& change: changes) {
-		Vector<const EntityData*> entityDataStack;
-		addEntityTree(change.parent, change.childIndex, change.data->asEntityData(), entityDataStack);
+		addEntityTree(change.parent, change.childIndex, change.data->asEntityData());
 		ids.push_back(change.entityId);
 	}
 
@@ -456,7 +449,7 @@ void EntityList::validateEntityTree(const EntityTree& entityTree, Vector<const E
 {
 	if (entityTree.data) {
 		entityDataStack.push_back(entityTree.data);
-		onEntityModified(entityTree.entityId, *entityTree.data, true, entityDataStack);
+		onEntityModified(entityTree.entityId, *entityTree.data, true);
 	}
 	for (auto& c: entityTree.children) {
 		validateEntityTree(c, entityDataStack);
@@ -466,10 +459,10 @@ void EntityList::validateEntityTree(const EntityTree& entityTree, Vector<const E
 	}
 }
 
-IEntityValidator::Severity EntityList::getEntitySeverity(const EntityData& entityData, bool recursive, const Vector<const EntityData*>& entityDataStack) const
+IEntityValidator::Severity EntityList::getEntitySeverity(const EntityData& entityData, bool recursive) const
 {
 	auto severity = IEntityValidator::Severity::None;
-	for (const auto& s: sceneEditorWindow->getEntityValidator().validateEntity(entityData, recursive, entityDataStack)) {
+	for (const auto& s: sceneEditorWindow->getEntityValidator().validateEntity(entityData, recursive, sceneEditorWindow->getEntityTree())) {
 		severity = std::max(severity, s.severity);
 	}
 	return severity;

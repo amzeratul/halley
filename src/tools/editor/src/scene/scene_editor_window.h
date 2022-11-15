@@ -125,6 +125,7 @@ namespace Halley {
 		void onOpenAssetFinder(PaletteWindow& assetFinder);
 
 		Resources& getGameResources() const override;
+		const EntityTree& getEntityTree() const;
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -142,6 +143,7 @@ namespace Halley {
 		UIFactory& uiFactory;
 		Project& project;
 		ProjectWindow& projectWindow;
+		EntityTree entityTree;
 
 		std::shared_ptr<SceneEditorGameBridge> gameBridge;
 		std::shared_ptr<SceneEditorCanvas> canvas;

@@ -217,6 +217,7 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 		}
 		
 		currentEntityScene = sceneCreated;
+		entityTree = sceneData->getEntityTree();
 
 		// Custom UI
 		setCustomUI(gameBridge->makeCustomUI());
@@ -486,6 +487,11 @@ Resources& SceneEditorWindow::getGameResources() const
 	return project.getGameResources();
 }
 
+const EntityTree& SceneEditorWindow::getEntityTree() const
+{
+	return entityTree;
+}
+
 void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
 {
 	if (status == ProjectDLL::Status::Loaded) {
@@ -574,6 +580,7 @@ void SceneEditorWindow::onEntitiesAdded(gsl::span<const EntityChangeOperation> c
 		sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	}
 
+	entityTree = sceneData->getEntityTree();
 	entityList->onEntitiesAdded(changes);
 	onEntitiesSelected(entityList->getCurrentSelections());
 	undoStack.pushAdded(modified, changes);
@@ -750,13 +757,12 @@ void SceneEditorWindow::onEntitiesSelected(Vector<String> selectedEntities)
 		if (selectedEntities.size() == 1) {
 			const auto& entityId = selectedEntities.front();
 			auto& firstEntityData = sceneData->getWriteableEntityNodeData(entityId).getData();
-			auto entityTree = sceneData->getEntityTree();
 			std::shared_ptr<const Prefab> prefabData;
 			const String prefabName = firstEntityData.getPrefab();
 			if (!prefabName.isEmpty()) {
 				prefabData = getGamePrefab(prefabName);
 			}
-			entityEditor->loadEntity(entityId, firstEntityData, prefabData.get(), false, project.getGameResources(), std::move(entityTree));
+			entityEditor->loadEntity(entityId, firstEntityData, prefabData.get(), false, project.getGameResources());
 		} else {
 			entityEditor->unloadEntity(!selectedEntities.empty());
 		}
@@ -830,6 +836,7 @@ void SceneEditorWindow::onEntitiesModified(gsl::span<const String> ids, gsl::spa
 
 	if (undoStack.pushModified(modified, ids, prevDatas, newDatas)) {
 		sceneData->reloadEntities(ids, newDatas);
+		entityTree = sceneData->getEntityTree();
 		for (size_t i = 0; i < ids.size(); ++i) {
 			const auto* prevData = prevDatas[i];
 			const auto* newData = newDatas[i];
@@ -846,6 +853,7 @@ void SceneEditorWindow::onEntityReplaced(const String& id, const String& parentI
 
 		if (hadChange) {
 			sceneData->reloadEntity(id);
+			entityTree = sceneData->getEntityTree();
 
 			const auto op = EntityChangeOperation{ std::make_unique<EntityData>(newData), id, parentId, childIndex };
 			entityList->onEntitiesRemoved(gsl::span<const String>(&id, 1), "");

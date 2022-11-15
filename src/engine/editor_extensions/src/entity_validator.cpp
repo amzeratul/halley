@@ -35,10 +35,12 @@ EntityValidator::EntityValidator(World& world)
 {
 }
 
-Vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityData& entity, bool recursive, const Vector<const EntityData*>& entityDataStack)
+Vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityData& entity, bool recursive, const EntityTree& entityTree)
 {
 	try {
 		Vector<IEntityValidator::Result> result;
+
+		auto entityDataStack = entityTree.buildEntityDataStack(toString(entity.getInstanceUUID()));
 		validateEntity(entity, recursive, result, entityDataStack);
 		return result;
 	} catch (const std::exception& e) {
@@ -51,7 +53,7 @@ Vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityDat
 	}
 }
 
-void EntityValidator::validateEntity(const EntityData& entity, bool recursive, Vector<IEntityValidator::Result>& result, const Vector<const EntityData*>& entityDataStack)
+void EntityValidator::validateEntity(const EntityData& entity, bool recursive, Vector<IEntityValidator::Result>& result, Vector<const EntityData*>& entityDataStack)
 {
 	if (entity.getFlag(EntityData::Flag::Disabled)) {
 		return;

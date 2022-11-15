@@ -29,7 +29,7 @@ namespace Halley {
 		void setSceneEditorWindow(SceneEditorWindow& sceneEditor, const HalleyAPI& api);
 		void setECSData(ECSData& data);
 
-		bool loadEntity(const String& id, EntityData& data, const Prefab* prefabData, bool force, Resources& gameResources, EntityTree entityTree);
+		bool loadEntity(const String& id, EntityData& data, const Prefab* prefabData, bool force, Resources& gameResources);
 		void unloadEntity(bool becauseHasMultiple);
 		void reloadEntity() override;
 		void unloadIcons();
@@ -77,7 +77,6 @@ namespace Halley {
 
 		EntityData* currentEntityData = nullptr;
 		EntityData prevEntityData;
-		EntityTree currentTree{};
 
 		String currentId;
 		const Prefab* prefabData = nullptr;

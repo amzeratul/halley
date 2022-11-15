@@ -59,6 +59,7 @@ void EntityEditor::setSceneEditorWindow(SceneEditorWindow& editor, const HalleyA
 	this->api = &api;
 
 	entityValidatorUI->setValidator(&editor.getEntityValidator());
+	entityValidatorUI->setSceneEditorWindow(&editor);
 
 	auto icons = entityIcons->getEntries();
 	Vector<UIDropdown::Entry> entries;
@@ -133,7 +134,7 @@ void EntityEditor::makeUI()
 	});
 }
 
-bool EntityEditor::loadEntity(const String& id, EntityData& data, const Prefab* prefab, bool force, Resources& resources, EntityTree entityTree)
+bool EntityEditor::loadEntity(const String& id, EntityData& data, const Prefab* prefab, bool force, Resources& resources)
 {
 	Expects(ecsData);
 
@@ -147,7 +148,6 @@ bool EntityEditor::loadEntity(const String& id, EntityData& data, const Prefab* 
 	prefabData = prefab;
 	currentId = id;
 	isPrefab = !!prefabData;
-	currentTree = std::move(entityTree);
 
 	reloadEntity();
 
@@ -200,7 +200,7 @@ void EntityEditor::reloadEntity()
 		getWidgetAs<UICheckbox>("enabled")->setChecked(!getEntityData().getFlag(EntityData::Flag::Disabled));
 		setCanSendEvents(true);
 
-		entityValidatorUI->setEntity(*currentEntityData, *this, *gameResources, currentTree);
+		entityValidatorUI->setEntity(*currentEntityData, *this, *gameResources);
 	} else {
 		entityValidatorUI->setActive(false);
 	}
@@ -353,9 +353,8 @@ void EntityEditor::addComponent(const String& name, ConfigNode data)
 
 	// Reload
 	needToReloadUI = true;	
-	sceneEditor->validateAllEntities();
-
 	onEntityUpdated();
+	sceneEditor->validateAllEntities();
 }
 
 void EntityEditor::deleteComponent(const String& name)
