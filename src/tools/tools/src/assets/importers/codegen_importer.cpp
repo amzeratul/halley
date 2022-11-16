@@ -22,7 +22,7 @@ void CodegenImporter::import(const ImportingAsset& asset, IAssetCollector& colle
 		++n;
 	}
 	ECSData data;
-	data.loadSources(srcs);
+	data.loadSources(srcs, true);
 
 	if (!collector.reportProgress(0.5f, "Generating code")) {
 		return;

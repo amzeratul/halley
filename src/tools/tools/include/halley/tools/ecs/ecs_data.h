@@ -25,7 +25,7 @@ namespace Halley {
 	
     class ECSData {
     public:
-		void loadSources(Vector<CodegenSourceInfo> files);
+		void loadSources(Vector<CodegenSourceInfo> files, bool throwOnValidationError);
 
 		const HashMap<String, ComponentSchema>& getComponents() const;
 		const HashMap<String, SystemSchema>& getSystems() const;
@@ -45,7 +45,7 @@ namespace Halley {
 		void addType(YAML::Node rootNode);
 		String getInclude(String typeName) const;
 
-    	void validate();
+    	std::optional<String> validate();
 		void process();
 
     	HashMap<String, ComponentSchema> components;

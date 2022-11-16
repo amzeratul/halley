@@ -486,5 +486,5 @@ void Project::loadECSData()
 		sources[i] = CodegenSourceInfo{inputFiles[i], data, true};
 	}
 	
-	ecsData->loadSources(sources);
+	ecsData->loadSources(sources, false);
 }

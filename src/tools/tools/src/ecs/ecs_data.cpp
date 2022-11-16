@@ -8,14 +8,20 @@
 using namespace Halley;
 
 
-void ECSData::loadSources(Vector<CodegenSourceInfo> files)
+void ECSData::loadSources(Vector<CodegenSourceInfo> files, bool throwOnValidationError)
 {
 	++revision;
 	for (auto& f : files) {
 		addSource(f);
 	}
 
-	validate();
+	if (throwOnValidationError) {
+		const auto error = validate();
+		if (error) {
+			throw Exception(*error, HalleyExceptions::Tools);
+		}
+	}
+	
 	process();
 }
 
@@ -59,14 +65,14 @@ int ECSData::getRevision() const
 	return revision;
 }
 
-void ECSData::validate()
+std::optional<String> ECSData::validate()
 {
 	for (auto& comp: components) {
 		for (auto& dep: comp.second.componentDependencies) {
 			if (dep == comp.second.name) {
-				throw Exception("Component " + comp.second.name + " depends on itself.", HalleyExceptions::Tools);
+				return "Component " + comp.second.name + " depends on itself.";
 			} else if (components.find(dep) == components.end()) {
-				throw Exception("Component " + comp.second.name + " depends on missing component \"" + dep + "\"", HalleyExceptions::Tools);
+				return "Component " + comp.second.name + " depends on missing component \"" + dep + "\"";
 			}
 		}
 	}
@@ -80,50 +86,52 @@ void ECSData::validate()
 				hasMain = true;
 			}
 			if (famNames.find(fam.name) != famNames.end()) {
-				throw Exception("System " + sys.second.name + " already has a family named " + fam.name, HalleyExceptions::Tools);
+				return "System " + sys.second.name + " already has a family named " + fam.name;
 			}
 			famNames.emplace(fam.name);
 
 			for (auto& comp : fam.components) {
 				if (components.find(comp.name) == components.end()) {
-					throw Exception("Unknown component \"" + comp.name + "\" in family \"" + fam.name + "\" of system \"" + sys.second.name + "\".", HalleyExceptions::Tools);
+					return "Unknown component \"" + comp.name + "\" in family \"" + fam.name + "\" of system \"" + sys.second.name + "\".";
 				}
 			}
 		}
 
 		for (auto& msg : sys.second.messages) {
 			if (messages.find(msg.name) == messages.end()) {
-				throw Exception("Unknown message \"" + msg.name + "\" in system \"" + sys.second.name + "\".", HalleyExceptions::Tools);
+				return "Unknown message \"" + msg.name + "\" in system \"" + sys.second.name + "\".";
 			}
 		}
 
 		if (!sys.second.systemMessages.empty() && sys.second.method == SystemMethod::Render) {
-			throw Exception("Render system \"" + sys.second.name + "\" cannot send or receive system messages.", HalleyExceptions::Tools);
+			return "Render system \"" + sys.second.name + "\" cannot send or receive system messages.";
 		}
 		
 		for (auto& msg : sys.second.systemMessages) {
 			if (systemMessages.find(msg.name) == systemMessages.end()) {
-				throw Exception("Unknown system message \"" + msg.name + "\" in system \"" + sys.second.name + "\".", HalleyExceptions::Tools);
+				return "Unknown system message \"" + msg.name + "\" in system \"" + sys.second.name + "\".";
 			}
 		}
 
 		for (auto& service : sys.second.services) {
 			if (types.find(service.name) == types.end()) {
-				throw Exception("Unknown service \"" + service.name + "\" in system \"" + sys.second.name + "\".", HalleyExceptions::Tools);
+				return "Unknown service \"" + service.name + "\" in system \"" + sys.second.name + "\".";
 			}
 		}
 
 		if (sys.second.strategy == SystemStrategy::Individual || sys.second.strategy == SystemStrategy::Parallel) {
 			if (!hasMain) {
-				throw Exception("System " + sys.second.name + " needs to have a main family due to its strategy.", HalleyExceptions::Tools);
+				return "System " + sys.second.name + " needs to have a main family due to its strategy.";
 			}
 			if (sys.second.strategy == SystemStrategy::Parallel) {
 				if (sys.second.families.size() != 1) {
-					throw Exception("System " + sys.second.name + " can only have one family due to its strategy.", HalleyExceptions::Tools);
+					return "System " + sys.second.name + " can only have one family due to its strategy.";
 				}
 			}
 		}
 	}
+
+	return {};
 }
 
 void ECSData::process()
