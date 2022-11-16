@@ -652,14 +652,21 @@ IProjectWindow& EntityEditor::getProjectWindow() const
 }
 
 namespace {
-	void collectEntities(EntityList& entityList, const EntityTree& tree, Vector<IEntityEditorCallbacks::EntityInfo>& dst)
+	void collectEntities(EntityList& entityList, const EntityTree& tree, const String& currentEntityId, bool isChildOfCurrentlySelected, String& longName, Vector<IEntityEditorCallbacks::EntityInfo>& dst)
 	{
 		if (!tree.entityId.isEmpty()) {
+			isChildOfCurrentlySelected |= tree.entityId == currentEntityId;
 			auto info = entityList.getEntityInfo(*tree.data);
-			dst.push_back(IEntityEditorCallbacks::EntityInfo{ std::move(info.name), std::move(info.icon), UUID(tree.entityId) });
+			String name = isChildOfCurrentlySelected ? "(X) " : "";
+			name = name + longName + info.name;
+			longName = longName + info.name + "/";
+			dst.push_back(IEntityEditorCallbacks::EntityInfo{ std::move(name), std::move(info.icon), UUID(tree.entityId) });
 		}
 		for (auto& c: tree.children) {
-			collectEntities(entityList, c, dst);
+			collectEntities(entityList, c, currentEntityId, isChildOfCurrentlySelected, longName, dst);
+		}
+		if (!tree.entityId.isEmpty()) {
+			longName = longName.substr(0, longName.substr(0, longName.length() - 1).find_last_of('/') + 1);
 		}
 	}
 }
@@ -667,7 +674,9 @@ namespace {
 Vector<IEntityEditorCallbacks::EntityInfo> EntityEditor::getEntities() const
 {
 	Vector<EntityInfo> result;
-	collectEntities(*sceneEditor->getEntityList(), sceneEditor->getSceneData()->getEntityTree(), result);
+	String longName;
+	
+	collectEntities(*sceneEditor->getEntityList(), sceneEditor->getSceneData()->getEntityTree(), currentId, false, longName, result);
 	return result;
 }
 
