@@ -207,7 +207,7 @@ Sprite& Sprite::setSliceScale(float scale)
 
 Sprite& Sprite::scaleTo(Vector2f newSize)
 {
-	return setScale(newSize / size);
+	return setScale(newSize / getUncroppedSize());
 }
 
 Sprite& Sprite::setFlip(bool v)
