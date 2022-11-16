@@ -45,3 +45,8 @@ bool WorldSceneData::isSingleRoot()
 {
 	return false;
 }
+
+Vector<const EntityData*> WorldSceneData::getEntityDataStack(const String& entityId)
+{
+	return {};
+}

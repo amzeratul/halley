@@ -265,41 +265,6 @@ namespace Halley {
 
 			return false;
 		}
-
-		Vector<const EntityData*> buildEntityDataStack(const String& currentId) const
-		{
-			Vector<const EntityData*> entityDataStack;
-			if (data != nullptr) {
-				entityDataStack.push_back(data);
-			}
-
-			for (const auto& child : children) {
-				if (child.entityId == currentId) {
-					return entityDataStack;
-				}
-
-				buildEntityDataStack(child, currentId, entityDataStack);
-			}
-
-			return entityDataStack;
-		}
-
-		bool buildEntityDataStack(const EntityTree& entityTree, const String& currentId, Vector<const EntityData*>& entityDataStack) const
-		{
-			if (entityTree.entityId == currentId) {
-				return true;
-			}
-			if (entityTree.data) {
-				entityDataStack.push_back(entityTree.data);
-			}
-			for (const auto& child : entityTree.children) {
-				if (buildEntityDataStack(child, currentId, entityDataStack)) {
-					return true;
-				}
-			}
-			entityDataStack.pop_back();
-			return false;
-		}
 	};
 
 	class ISceneData {
@@ -366,6 +331,7 @@ namespace Halley {
 		virtual std::pair<String, size_t> reparentEntity(const String& entityId, const String& newParentId, size_t childIndex) = 0;
 		virtual std::pair<String, size_t> getEntityParenting(const String& entityId) = 0;
         virtual bool isSingleRoot() = 0;
+		virtual Vector<const EntityData*> getEntityDataStack(const String& entityId) = 0;
 	};
 
 	class ISceneEditorGizmoCollection {

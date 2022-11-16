@@ -52,9 +52,9 @@ void EntityValidatorUI::refresh()
 	if (isPrefab) {
 		const auto prefab = gameResources->get<Prefab>(curEntity->getPrefab());
 		curEntityInstance = prefab->getEntityData().instantiateWithAsCopy(*curEntity);
-		result = validator->validateEntity(curEntityInstance, true, sceneEditorWindow->getEntityTree());
+		result = validator->validateEntity(curEntityInstance, true, sceneEditorWindow->getEntityDataStack(curEntityInstance.getInstanceUUID()));
 	} else {
-		result = validator->validateEntity(*curEntity, false, sceneEditorWindow->getEntityTree());
+		result = validator->validateEntity(*curEntity, false, sceneEditorWindow->getEntityDataStack(curEntityInstance.getInstanceUUID()));
 	}
 	
 	if (result != curResultSet) {

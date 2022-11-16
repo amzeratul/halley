@@ -35,12 +35,11 @@ EntityValidator::EntityValidator(World& world)
 {
 }
 
-Vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityData& entity, bool recursive, const EntityTree& entityTree)
+Vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityData& entity, bool recursive, Vector<const EntityData*> entityDataStack)
 {
 	try {
 		Vector<IEntityValidator::Result> result;
-
-		auto entityDataStack = entityTree.buildEntityDataStack(toString(entity.getInstanceUUID()));
+		
 		validateEntity(entity, recursive, result, entityDataStack);
 		return result;
 	} catch (const std::exception& e) {

@@ -192,7 +192,6 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 
 		// Setup editors
 		sceneData = std::make_shared<PrefabSceneData>(*prefab, entityFactory, world, project.getGameResources());
-		entityTree = sceneData->getEntityTree();
 
 		entityEditor->setSceneEditorWindow(*this, api);
 		entityEditor->setECSData(project.getECSData());
@@ -488,9 +487,9 @@ Resources& SceneEditorWindow::getGameResources() const
 	return project.getGameResources();
 }
 
-const EntityTree& SceneEditorWindow::getEntityTree() const
+Vector<const EntityData*> SceneEditorWindow::getEntityDataStack(const UUID& instanceUUID) const
 {
-	return entityTree;
+	return sceneData->getEntityDataStack(instanceUUID.toString());
 }
 
 void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)
@@ -581,7 +580,6 @@ void SceneEditorWindow::onEntitiesAdded(gsl::span<const EntityChangeOperation> c
 		sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	}
 
-	entityTree = sceneData->getEntityTree();
 	entityList->onEntitiesAdded(changes);
 	onEntitiesSelected(entityList->getCurrentSelections());
 	undoStack.pushAdded(modified, changes);
@@ -837,7 +835,6 @@ void SceneEditorWindow::onEntitiesModified(gsl::span<const String> ids, gsl::spa
 
 	if (undoStack.pushModified(modified, ids, prevDatas, newDatas)) {
 		sceneData->reloadEntities(ids, newDatas);
-		entityTree = sceneData->getEntityTree();
 		for (size_t i = 0; i < ids.size(); ++i) {
 			const auto* prevData = prevDatas[i];
 			const auto* newData = newDatas[i];
@@ -854,7 +851,6 @@ void SceneEditorWindow::onEntityReplaced(const String& id, const String& parentI
 
 		if (hadChange) {
 			sceneData->reloadEntity(id);
-			entityTree = sceneData->getEntityTree();
 
 			const auto op = EntityChangeOperation{ std::make_unique<EntityData>(newData), id, parentId, childIndex };
 			entityList->onEntitiesRemoved(gsl::span<const String>(&id, 1), "");

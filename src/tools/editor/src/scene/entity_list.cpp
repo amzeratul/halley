@@ -462,7 +462,7 @@ void EntityList::validateEntityTree(const EntityTree& entityTree, Vector<const E
 IEntityValidator::Severity EntityList::getEntitySeverity(const EntityData& entityData, bool recursive) const
 {
 	auto severity = IEntityValidator::Severity::None;
-	for (const auto& s: sceneEditorWindow->getEntityValidator().validateEntity(entityData, recursive, sceneEditorWindow->getEntityTree())) {
+	for (const auto& s: sceneEditorWindow->getEntityValidator().validateEntity(entityData, recursive, sceneEditorWindow->getEntityDataStack(entityData.getInstanceUUID()))) {
 		severity = std::max(severity, s.severity);
 	}
 	return severity;

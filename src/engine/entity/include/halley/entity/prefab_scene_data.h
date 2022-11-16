@@ -17,6 +17,7 @@ namespace Halley {
         std::pair<String, size_t> reparentEntity(const String& entityId, const String& newParentId, size_t childIndex) override;
         std::pair<String, size_t> getEntityParenting(const String& entityId) override;
         bool isSingleRoot() override;
+    	Vector<const EntityData*> getEntityDataStack(const String& entityId) override;
     	
     private:
     	Prefab& prefab;
@@ -32,6 +33,8 @@ namespace Halley {
 
         void fillEntityTree(const EntityData& node, EntityTree& tree) const;
     	void fillPrefabChildren(const EntityData& node, Vector<String>& dst) const;
+
+        bool fillEntityDataStack(Vector<const EntityData*>& stack, const EntityData& curEntity, const UUID& entityId);
 
         EntityData& findEntity(const String& id);
 
