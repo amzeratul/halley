@@ -8,7 +8,7 @@ namespace Halley {
     {
     public:
         ComponentDependencyValidator(const ECSData* ecsData);
-        Vector<Result> validateEntity(EntityValidator& validator, const EntityData& entityData, const Vector<const EntityData*>& entityDataStack) override;
+        Vector<Result> validateEntity(EntityValidator& validator, const EntityData& entityData) override;
     private:
         const ECSData* ecsData = nullptr;
     };

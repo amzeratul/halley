@@ -13,7 +13,7 @@ ComponentDependencyValidator::ComponentDependencyValidator(const ECSData* ecsDat
 
 }
 
-Vector<IEntityValidator::Result> ComponentDependencyValidator::validateEntity(EntityValidator& validator, const EntityData& entityData, const Vector<const EntityData*>& entityDataStack)
+Vector<IEntityValidator::Result> ComponentDependencyValidator::validateEntity(EntityValidator& validator, const EntityData& entityData)
 {
 	Vector<Result> result;
 
@@ -31,6 +31,8 @@ Vector<IEntityValidator::Result> ComponentDependencyValidator::validateEntity(En
 			const bool hasDepedency = std_ex::contains_if(entityData.getComponents(), [&](const std::pair<String, ConfigNode>& comp) { return comp.first == dependsOn; });
 			if (!hasDepedency) {
 				bool hasDepedencyInWalker = false;
+
+				const auto entityDataStack = validator.getEntityDataStack(entityData.getInstanceUUID());
 				for (const auto& stackWalker : entityDataStack) {
 					hasDepedencyInWalker = std_ex::contains_if(stackWalker->getComponents(), [&](const std::pair<String, ConfigNode>& comp) { return comp.first == dependsOn; });
 					if (hasDepedencyInWalker) {

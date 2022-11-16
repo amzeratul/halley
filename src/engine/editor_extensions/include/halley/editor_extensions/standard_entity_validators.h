@@ -4,7 +4,7 @@
 namespace Halley {
     class TransformEntityValidator : public IEntityValidator {
     public:
-	    Vector<Result> validateEntity(EntityValidator& validator, const EntityData& entityData, const Vector<const EntityData*>& entityDataStack) override;
+	    Vector<Result> validateEntity(EntityValidator& validator, const EntityData& entityData) override;
     };
 
     class AddComponentValidatorActionHandler : public IEntityValidatorActionHandler {

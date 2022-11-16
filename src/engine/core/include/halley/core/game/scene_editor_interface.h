@@ -129,7 +129,7 @@ namespace Halley {
 
     	virtual ~IEntityValidator() = default;
 
-        virtual Vector<Result> validateEntity(EntityValidator& validator, const EntityData& currentEntityData, const Vector<const EntityData*>& entityDataStack) = 0;
+        virtual Vector<Result> validateEntity(EntityValidator& validator, const EntityData& currentEntityData) = 0;
     };
 
     class IEntityValidatorActionHandler {
@@ -402,6 +402,8 @@ namespace Halley {
 		virtual String getCurrentAssetId() const = 0;
 
 		virtual Resources& getGameResources() const = 0;
+
+		virtual Vector<const EntityData*> getEntityDataStack(const UUID& instanceUUID) const = 0;
 	};
 
 	class IProject {

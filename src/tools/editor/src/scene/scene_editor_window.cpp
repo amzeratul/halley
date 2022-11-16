@@ -178,7 +178,7 @@ void SceneEditorWindow::loadScene(const Prefab& origPrefab)
 		auto& world = interface.getWorld();
 
 		// Entity validator
-		entityValidator = std::make_shared<EntityValidator>(world);
+		entityValidator = std::make_unique<EntityValidator>(world, *this);
 		entityValidator->addValidator(std::make_unique<ComponentDependencyValidator>(&project.getECSData()));
 		gameBridge->initializeEntityValidator(*entityValidator);
 

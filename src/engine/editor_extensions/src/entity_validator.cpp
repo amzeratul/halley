@@ -30,17 +30,18 @@ void ISceneData::reloadEntity(const String& id, const EntityData* data)
 	return reloadEntities(gsl::span<const String>(&id, 1), gsl::span<const EntityData*>(&data, 1));
 }
 
-EntityValidator::EntityValidator(World& world)
+EntityValidator::EntityValidator(World& world, const ISceneEditorWindow& sceneEditorWindow)
 	: world(world)
+	, sceneEditorWindow(sceneEditorWindow)
 {
 }
 
-Vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityData& entity, bool recursive, Vector<const EntityData*> entityDataStack)
+Vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityData& entity, bool recursive)
 {
 	try {
 		Vector<IEntityValidator::Result> result;
 		
-		validateEntity(entity, recursive, result, entityDataStack);
+		validateEntity(entity, recursive, result);
 		return result;
 	} catch (const std::exception& e) {
 		Logger::logError("Exception when attempting to validate entity:");
@@ -52,14 +53,14 @@ Vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityDat
 	}
 }
 
-void EntityValidator::validateEntity(const EntityData& entity, bool recursive, Vector<IEntityValidator::Result>& result, Vector<const EntityData*>& entityDataStack)
+void EntityValidator::validateEntity(const EntityData& entity, bool recursive, Vector<IEntityValidator::Result>& result)
 {
 	if (entity.getFlag(EntityData::Flag::Disabled)) {
 		return;
 	}
 
 	for (const auto& validator: validators) {
-		auto r = validator->validateEntity(*this, entity, entityDataStack);
+		auto r = validator->validateEntity(*this, entity);
 		for (auto& v: r) {
 			for (auto& a: v.suggestedActions) {
 				a.actionData["entity"] = entity.getInstanceUUID().toString();
@@ -70,7 +71,7 @@ void EntityValidator::validateEntity(const EntityData& entity, bool recursive, V
 
 	if (recursive) {
 		for (const auto& c: entity.getChildren()) {
-			validateEntity(c, recursive, result, entityDataStack);
+			validateEntity(c, recursive, result);
 		}
 	}
 }
@@ -122,4 +123,9 @@ void EntityValidator::addDefaults()
 World& EntityValidator::getWorld()
 {
 	return world;
+}
+
+Vector<const EntityData*> EntityValidator::getEntityDataStack(const UUID& uuid) const
+{
+	return sceneEditorWindow.getEntityDataStack(uuid);
 }

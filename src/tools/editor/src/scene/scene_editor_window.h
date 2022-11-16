@@ -125,7 +125,7 @@ namespace Halley {
 		void onOpenAssetFinder(PaletteWindow& assetFinder);
 
 		Resources& getGameResources() const override;
-		Vector<const EntityData*> getEntityDataStack(const UUID& instanceUUID) const;
+		Vector<const EntityData*> getEntityDataStack(const UUID& instanceUUID) const override;
 
 	protected:
 		void update(Time t, bool moved) override;
@@ -157,7 +157,7 @@ namespace Halley {
 		std::shared_ptr<EntityFactory> entityFactory;
 		std::optional<EntityScene> currentEntityScene;
 
-		std::shared_ptr<EntityValidator> entityValidator;
+		std::unique_ptr<EntityValidator> entityValidator;
 
 		Vector<String> currentEntityIds;
 

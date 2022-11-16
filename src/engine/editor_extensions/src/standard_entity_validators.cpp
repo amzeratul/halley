@@ -8,7 +8,7 @@
 
 using namespace Halley;
 
-Vector<IEntityValidator::Result> TransformEntityValidator::validateEntity(EntityValidator& validator, const EntityData& entityData, const Vector<const EntityData*>& entityDataStack)
+Vector<IEntityValidator::Result> TransformEntityValidator::validateEntity(EntityValidator& validator, const EntityData& entityData)
 {
 	Vector<Result> result;
 
