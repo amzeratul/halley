@@ -95,7 +95,7 @@ namespace Halley {
 		void setRequiresSelection(bool requireSelection);
 
 		std::shared_ptr<UILabel> makeLabel(String id, LocalisedString label, float maxWidth = 0) const;
-		std::shared_ptr<UIImage> makeIcon(Sprite image) const;
+		std::shared_ptr<UIImage> makeIcon(String id, Sprite image) const;
 
 		virtual Vector2f getDragPositionAdjustment(Vector2f pos, Vector2f startPos) const;
 

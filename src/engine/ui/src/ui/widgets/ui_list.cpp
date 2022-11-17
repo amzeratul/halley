@@ -137,9 +137,9 @@ std::shared_ptr<UILabel> UIList::makeLabel(String id, LocalisedString label, flo
 	return widget;
 }
 
-std::shared_ptr<UIImage> UIList::makeIcon(Sprite image) const
+std::shared_ptr<UIImage> UIList::makeIcon(String id, Sprite image) const
 {
-	auto icon = std::make_shared<UIImage>(image);
+	auto icon = std::make_shared<UIImage>(std::move(id), std::move(image));
 	applyImageColour(*icon);	
 	return icon;
 }
@@ -192,7 +192,7 @@ std::shared_ptr<UIListItem> UIList::addTextIconItem(const String& id, LocalisedS
 	const bool hasLabel = !label.getString().isEmpty();
 	
 	if (hasIcon) {
-		item->add(makeIcon(icon), 0, hasLabel ? Vector4f(0, 0, 4, 0) : border, hasLabel ? UISizerAlignFlags::Centre : fillFlags);
+		item->add(makeIcon(id + "_icon", icon), 0, hasLabel ? Vector4f(0, 0, 4, 0) : border, hasLabel ? UISizerAlignFlags::Centre : fillFlags);
 	}
 	if (hasLabel) {
 		item->add(makeLabel(id + "_label", std::move(label), maxWidth), 0, border, fillFlags);
