@@ -36,6 +36,7 @@ Vector<IScriptNodeType::SettingType> ScriptInputButton::getSettingTypes() const
 	return {
 		SettingType{ "button", "Halley::InputButton", Vector<String>{""} },
 		SettingType{ "priority", "Halley::InputPriority", Vector<String>{"normal"} },
+		SettingType{ "label", "Halley::String", Vector<String>{""} },
 	};
 }
 
@@ -57,6 +58,10 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(
 	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
 	str.append(" with priority ");
 	str.append(node.getSettings()["priority"].asString("normal"), parameterColour);
+	if (node.getSettings()["label"].asString("") != "") {
+		str.append(" and label ");
+		str.append(node.getSettings()["label"].asString(""), parameterColour);
+	}
 	return str.moveResults();
 }
 
@@ -94,7 +99,7 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 		const auto inputDevice = environment.getInputDevice(entity);
 		const auto priority = fromString<InputPriority>(node.getSettings()["priority"].asString("normal"));
 		if (inputDevice) {
-			data.input = inputDevice->makeExclusiveButton(button, priority);
+			data.input = inputDevice->makeExclusiveButton(button, priority, node.getSettings()["label"].asString(""));
 		}
 	}
 

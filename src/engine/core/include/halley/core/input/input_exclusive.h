@@ -10,7 +10,7 @@ namespace Halley {
         friend class InputVirtual;
 
     public:
-		InputExclusiveButton(InputVirtual& parent, InputPriority priority, InputButton button);
+		InputExclusiveButton(InputVirtual& parent, InputPriority priority, InputButton button, String label);
         ~InputExclusiveButton();
 
         bool isPressed() const;
@@ -18,10 +18,13 @@ namespace Halley {
         bool isReleased() const;
         bool isDown() const;
 
+        const String& getLabel() const;
+
 	private:
         InputVirtual* parent = nullptr;
         InputButton button = 0;
         InputPriority priority = InputPriority::Normal;
         bool active = true;
+        String label;
     };
 }

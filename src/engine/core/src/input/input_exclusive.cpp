@@ -3,10 +3,11 @@
 
 using namespace Halley;
 
-InputExclusiveButton::InputExclusiveButton(InputVirtual& parent, InputPriority priority, InputButton button)
+InputExclusiveButton::InputExclusiveButton(InputVirtual& parent, InputPriority priority, InputButton button, String label)
 	: parent(&parent)
 	, button(button)
 	, priority(priority)
+	, label(std::move(label))
 {
 }
 
@@ -35,4 +36,9 @@ bool InputExclusiveButton::isReleased() const
 bool InputExclusiveButton::isDown() const
 {
 	return active && parent ? parent->isButtonDown(button) : false;
+}
+
+const String& InputExclusiveButton::getLabel() const
+{
+	return label;
 }

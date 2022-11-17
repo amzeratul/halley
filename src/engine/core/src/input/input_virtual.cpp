@@ -564,9 +564,9 @@ void InputVirtual::setLastDevice(InputDevice* device)
 	}
 }
 
-std::unique_ptr<InputExclusiveButton> InputVirtual::makeExclusiveButton(InputButton button, InputPriority priority)
+std::unique_ptr<InputExclusiveButton> InputVirtual::makeExclusiveButton(InputButton button, InputPriority priority, const String& label)
 {
-	auto exclusive = std::make_unique<InputExclusiveButton>(*this, priority, button);
+	auto exclusive = std::make_unique<InputExclusiveButton>(*this, priority, button, label);
 	addExclusiveButton(*exclusive);
 	return exclusive;
 }
