@@ -440,6 +440,10 @@ size_t World::sendSystemMessage(SystemMessageContext origContext, const String& 
 		sendNetworkSystemMessage(targetSystem, context, destination);
 		totalCount += (destination == SystemMessageDestination::Host ? 1 : 2) * systemCount; // Assume at least two clients for non-host sends
 	}
+
+	if (totalCount == 0) {
+		Logger::logWarning("Message id " + toString(context.msgId) + " sent to system \"" + targetSystem + "\" was not received by any systems.");
+	}
 		
 	return totalCount;
 }

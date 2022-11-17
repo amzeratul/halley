@@ -42,5 +42,12 @@ namespace Halley
 		bool remote;
 		std::unique_ptr<SystemMessage> msg;
 		SystemMessageCallback callback;
+
+		SystemMessageContext(std::unique_ptr<SystemMessage> msg = {}, SystemMessageCallback callback = {}, bool remote = false)
+			: msgId(msg ? msg->getId() : 0)
+			, remote(remote)
+			, msg(std::move(msg))
+			, callback(std::move(callback))
+		{}
 	};
 }
