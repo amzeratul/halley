@@ -27,23 +27,23 @@ Vector<IEntityValidator::Result> ComponentDependencyValidator::validateEntity(En
 			}
 		}
 
-		for (auto& dependsOn : componentSchema.componentDependenciesInAncestors) {
-			const bool hasDepedency = std_ex::contains_if(entityData.getComponents(), [&](const std::pair<String, ConfigNode>& comp) { return comp.first == dependsOn; });
-			if (!hasDepedency) {
-				bool hasDepedencyInWalker = false;
+		//for (auto& dependsOn : componentSchema.componentDependenciesInAncestors) { // TODO disabled for now.. does not work as intended
+		//	const bool hasDepedency = std_ex::contains_if(entityData.getComponents(), [&](const std::pair<String, ConfigNode>& comp) { return comp.first == dependsOn; });
+		//	if (!hasDepedency) {
+		//		bool hasDepedencyInWalker = false;
 
-				const auto entityDataStack = validator.getEntityDataStack(entityData.getInstanceUUID());
-				for (const auto& stackWalker : entityDataStack) {
-					hasDepedencyInWalker = std_ex::contains_if(stackWalker->getComponents(), [&](const std::pair<String, ConfigNode>& comp) { return comp.first == dependsOn; });
-					if (hasDepedencyInWalker) {
-						break;
-					}
-				}
-				if (!hasDepedencyInWalker) {
-					result.emplace_back(Severity::Error, component.first + " depends on " + dependsOn + " which is missing on itself or in any of the parents.");
-				}
-			}
-		}
+		//		const auto entityDataStack = validator.getEntityDataStack(entityData.getInstanceUUID());
+		//		for (const auto& stackWalker : entityDataStack) {
+		//			hasDepedencyInWalker = std_ex::contains_if(stackWalker->getComponents(), [&](const std::pair<String, ConfigNode>& comp) { return comp.first == dependsOn; });
+		//			if (hasDepedencyInWalker) {
+		//				break;
+		//			}
+		//		}
+		//		if (!hasDepedencyInWalker) {
+		//			result.emplace_back(Severity::Error, component.first + " depends on " + dependsOn + " which is missing on itself or in any of the parents.");
+		//		}
+		//	}
+		//}
 	}
 
 	return result;

@@ -40,8 +40,10 @@ Vector<IEntityValidator::Result> EntityValidator::validateEntity(const EntityDat
 {
 	try {
 		Vector<IEntityValidator::Result> result;
-		
+
+		curEntity = &entity;
 		validateEntity(entity, recursive, result);
+		curEntity = nullptr;
 		return result;
 	} catch (const std::exception& e) {
 		Logger::logError("Exception when attempting to validate entity:");
@@ -127,5 +129,14 @@ World& EntityValidator::getWorld()
 
 Vector<const EntityData*> EntityValidator::getEntityDataStack(const UUID& uuid) const
 {
-	return sceneEditorWindow.getEntityDataStack(uuid);
+	Logger::logError("TODO: getEntityDataStack() is currently not implemented correctly");
+	return {};
+
+	// TODO disabled for now.. does not work as intended
+	//if (curEntity && !curEntity->getPrefab().isEmpty()) {
+	//	Vector<const EntityData*> entityDataStack;
+	//	curEntity->fillEntityDataStack(entityDataStack, uuid);
+	//	return entityDataStack;
+	//}
+	//return sceneEditorWindow.getEntityDataStack(uuid);
 }

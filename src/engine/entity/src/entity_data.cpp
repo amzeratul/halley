@@ -177,6 +177,22 @@ bool EntityData::hasComponent(const String& componentName) const
 	return false;
 }
 
+bool EntityData::fillEntityDataStack(Vector<const EntityData*>& stack, const UUID& entityId) const
+{
+	if (getInstanceUUID() == entityId) {
+		return true;
+	}
+
+	for (auto& c : getChildren()) {
+		if (c.fillEntityDataStack(stack, entityId)) {
+			stack.push_back(this);
+			return true;
+		}
+	}
+
+	return false;
+}
+
 const EntityData* EntityData::tryGetPrefabUUID(const UUID& uuid) const
 {
 	Expects(uuid.isValid());

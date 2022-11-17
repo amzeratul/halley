@@ -1478,6 +1478,7 @@ void SceneEditorWindow::undo()
 	undoStack.undo(*this);
 	refreshGizmos();
 	updateButtons();
+	validateAllEntities();
 }
 
 void SceneEditorWindow::redo()
@@ -1485,6 +1486,7 @@ void SceneEditorWindow::redo()
 	undoStack.redo(*this);
 	refreshGizmos();
 	updateButtons();
+	validateAllEntities();
 }
 
 const ConfigNode& SceneEditorWindow::getSetting(EditorSettingType type, std::string_view id) const

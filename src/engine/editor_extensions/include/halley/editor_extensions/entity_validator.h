@@ -22,11 +22,12 @@ namespace Halley {
 
         World& getWorld();
 
-    	Vector<const EntityData*> getEntityDataStack(const UUID& uuid) const;
+		Vector<const EntityData*> getEntityDataStack(const UUID& uuid) const;
 
     private:
         World& world;
         const ISceneEditorWindow& sceneEditorWindow;
+        const EntityData* curEntity = nullptr;
 
         Vector<std::unique_ptr<IEntityValidator>> validators;
         Vector<std::unique_ptr<IEntityValidatorActionHandler>> handlers;

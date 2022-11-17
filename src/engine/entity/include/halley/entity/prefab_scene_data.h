@@ -32,9 +32,6 @@ namespace Halley {
     	};
 
         void fillEntityTree(const EntityData& node, EntityTree& tree) const;
-    	void fillPrefabChildren(const EntityData& node, Vector<String>& dst) const;
-
-        bool fillEntityDataStack(Vector<const EntityData*>& stack, const EntityData& curEntity, const UUID& entityId);
 
         EntityData& findEntity(const String& id);
 

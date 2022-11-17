@@ -61,12 +61,14 @@ namespace Halley {
     	const UUID& getInstanceUUID() const { return instanceUUID; }
     	const UUID& getPrefabUUID() const { return prefabUUID; }
     	const UUID& getParentUUID() const { return parentUUID; }
-    	
+
     	const Vector<EntityData>& getChildren() const { return children; }
     	Vector<EntityData>& getChildren() { return children; }
     	const Vector<std::pair<String, ConfigNode>>& getComponents() const { return components; }
     	Vector<std::pair<String, ConfigNode>>& getComponents() { return components; }
         bool hasComponent(const String& componentName) const;
+
+        bool fillEntityDataStack(Vector<const EntityData*>& stack, const UUID& entityId) const;
 
   	    const EntityData* tryGetPrefabUUID(const UUID& uuid) const;
         const EntityData* tryGetInstanceUUID(const UUID& uuid) const;

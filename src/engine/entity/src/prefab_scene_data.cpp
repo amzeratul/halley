@@ -188,31 +188,13 @@ Vector<const EntityData*> PrefabSceneData::getEntityDataStack(const String& enti
 
 	for (const auto& n: prefab.getEntityDatas()) {
 		stack.clear();
-		const bool found = fillEntityDataStack(stack, n, uuid);
-		if (found) {
+		if (n.fillEntityDataStack(stack, uuid)) {
 			std::reverse(stack.begin(), stack.end());
 			return stack;
 		}
 	}
 
 	return {};
-}
-
-bool PrefabSceneData::fillEntityDataStack(Vector<const EntityData*>& stack, const EntityData& curEntity, const UUID& entityId)
-{
-	if (curEntity.getInstanceUUID() == entityId) {
-		return true;
-	}
-
-	for (auto& c: curEntity.getChildren()) {
-		const bool found = fillEntityDataStack(stack, c, entityId);
-		if (found) {
-			stack.push_back(&curEntity);
-			return true;
-		}
-	}
-
-	return false;
 }
 
 EntityData& PrefabSceneData::findEntity(const String& id)
