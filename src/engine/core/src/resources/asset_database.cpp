@@ -100,15 +100,20 @@ bool AssetDatabase::hasDatabase(AssetType type) const
 
 Vector<String> AssetDatabase::getAssets() const
 {
-	std::set<String> contains;
+	HashSet<String> contains;
 	Vector<String> result;
 	for (auto& db: dbs) {
-		String prefix = toString(AssetType(db.first)) + ":";
+		const String prefix = toString(static_cast<AssetType>(db.first)) + ":";
+
+		const auto nAssets = db.second.getAssets().size();
+		contains.reserve(contains.size() + nAssets);
+		result.reserve(result.size() + nAssets);
+
 		for (const auto& asset: db.second.getAssets()) {
 			String name = prefix + asset.first;
-			if (contains.find(name) == contains.end()) {
+			if (!contains.contains(name)) {
 				contains.insert(name);
-				result.push_back(name);
+				result.push_back(std::move(name));
 			}
 		}
 	}
