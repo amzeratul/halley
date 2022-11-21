@@ -90,18 +90,18 @@ KeyMods InputKeyboardSDL::getMods(int sdlMods) const
 	return KeyMods(mods);
 }
 
-String InputKeyboardSDL::getButtonName(int code)
+String InputKeyboardSDL::getButtonName(int code) const
 {
 	switch (code) {
 	case static_cast<int>(KeyCode::Esc):
-		return "Esc";
+		return "keyboard_esc";
 	case static_cast<int>(KeyCode::Delete):
-		return "Del";
+		return "keyboard_delete";
 	default:
 		if (code >= static_cast<int>(KeyCode::A) && code <= static_cast<int>(KeyCode::Z)) {
-			return String(static_cast<wchar_t>(code - static_cast<int>(KeyCode::A) + 'A'));
+			return String("keyboard_") + String(static_cast<wchar_t>(code - static_cast<int>(KeyCode::A) + 'A'));
 		} else {
-			return SDL_GetKeyName(SDL_Keycode(code));
+			return String("keyboard_") + SDL_GetKeyName(SDL_Keycode(code));
 		}
 	}
 }

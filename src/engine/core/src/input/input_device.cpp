@@ -22,7 +22,7 @@ size_t InputDevice::getNumberAxes()
 	return 0;
 }
 
-String InputDevice::getButtonName(int code)
+String InputDevice::getButtonName(int code) const
 {
 	return "";
 }
@@ -116,6 +116,11 @@ void InputDevice::stopVibrating()
 JoystickType InputDevice::getJoystickType() const
 {
 	return JoystickType::None;
+}
+
+InputType InputDevice::getInputType() const
+{
+	return InputType::None;
 }
 
 Vector2f InputDevice::getPosition() const

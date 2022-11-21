@@ -61,7 +61,7 @@ namespace Halley {
 		void clearButtonPress(InputButton code) override;
 		void clearButtonRelease(InputButton code) override;
 
-		String getButtonName(int code) override;
+		String getButtonName(int code) const override;
 
 		float getAxis(int n) override;
 		int getAxisRepeat(int n) override;
@@ -100,11 +100,12 @@ namespace Halley {
 		void setLastDeviceFreeze(bool frozen);
 
 		JoystickType getJoystickType() const override;
+		InputType getInputType() const override;
 
 		std::unique_ptr<InputExclusiveButton> makeExclusiveButton(InputButton button, InputPriority priority, const String& label);
 		Vector<std::pair<InputButton, String>> getExclusiveButtonLabels() const;
 
-		int getPhysicalButton(InputButton button, InputDevice* device = nullptr) const;
+		std::pair<InputDevice*, int> getPhysicalButton(InputButton button, InputDevice* device = nullptr) const;
 
 		void clearPresses() override;
 

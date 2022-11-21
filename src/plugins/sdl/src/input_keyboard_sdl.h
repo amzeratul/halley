@@ -11,7 +11,7 @@ namespace Halley {
 
 	class InputKeyboardSDL final : public InputKeyboard {
 	public:
-		String getButtonName(int code) override;
+		String getButtonName(int code) const override;
 
 		void update();
 

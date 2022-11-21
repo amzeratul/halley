@@ -88,6 +88,11 @@ void InputMouseSDL::update()
 	clearPresses();
 }
 
+InputType InputMouseSDL::getInputType() const
+{
+	return InputType::Mouse;
+}
+
 float InputMouseSDL::getAxis(int n)
 {
 	if (n == 0) {

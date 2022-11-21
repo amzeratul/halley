@@ -157,9 +157,9 @@ bool InputButtonBase::isButtonDown(KeyCode code)
 	return isButtonDown(static_cast<int>(code));
 }
 
-String InputButtonBase::getButtonName(int code)
+String InputButtonBase::getButtonName(int code) const
 {
-	return "Button" + toString(code);
+	return "button_" + toString(code);
 }
 
 void InputButtonBase::clearButton(InputButton code)

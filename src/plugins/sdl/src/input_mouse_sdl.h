@@ -39,6 +39,7 @@ namespace Halley {
 		void clearPresses() override;
 
 		void update();
+		InputType getInputType() const override;
 
 	private:
 		InputMouseSDL();

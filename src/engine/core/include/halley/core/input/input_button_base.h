@@ -27,7 +27,7 @@
 namespace Halley {
 	class InputButtonBase : public InputDevice {
 	public:
-		InputButtonBase(int nButtons=-1);
+		InputButtonBase(int nButtons = -1);
 
 		size_t getNumberButtons() override { return buttonDown.size(); }
 
@@ -50,7 +50,7 @@ namespace Halley {
 		void clearButtonPress(InputButton code) override;
 		void clearButtonRelease(InputButton code) override;
 
-		String getButtonName(int code) override;
+		String getButtonName(int code) const override;
 
 		void clearPresses() override;
 

@@ -382,12 +382,16 @@ void InputVirtual::bindWheel(spInputDevice device)
 	wheels.push_back(std::move(device));
 }
 
-String InputVirtual::getButtonName(int code)
+String InputVirtual::getButtonName(int code) const
 {
-	auto& binds = buttons.at(code);
+	const auto& binds = buttons.at(code);
 	if (!binds.empty()) {
-		Bind& bind = binds[0];
-		return bind.device->getButtonName(bind.a);
+		for (const auto& bind: binds) {
+			if (bind.device.get() == lastDevice) {
+				return bind.device->getButtonName(bind.a);
+			}
+		}
+		return binds.front().device->getButtonName(binds.front().a);
 	} else {
 		return "-";
 	}
@@ -554,6 +558,11 @@ JoystickType InputVirtual::getJoystickType() const
 	}
 }
 
+InputType InputVirtual::getInputType() const
+{
+	return InputType::Virtual;
+}
+
 void InputVirtual::setLastDevice(InputDevice* device)
 {
 	const auto parent = device->getParent();
@@ -583,22 +592,26 @@ Vector<std::pair<InputButton, String>> InputVirtual::getExclusiveButtonLabels() 
 	return result;
 }
 
-int InputVirtual::getPhysicalButton(InputButton button, InputDevice* device) const
+std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(InputButton button, InputDevice* device) const
 {
 	if (!device) {
 		device = lastDevice;
 	}
 
-	if (button < 0 || button >= static_cast<int>(buttons.size())) {
-		return 0;
-	}
-
-	for (const auto& binding: buttons[button]) {
-		if (binding.device.get() == device) {
-			return binding.a;
+	if (button >= 0 && button < static_cast<int>(buttons.size())) {
+		for (const auto& binding: buttons[button]) {
+			if (binding.device.get() == device) {
+				auto* virtualDevice = dynamic_cast<InputVirtual*>(device);
+				if (virtualDevice != nullptr) {
+					return virtualDevice->getPhysicalButton(binding.a);
+				} else {
+					return { device, binding.a };
+				}
+			}
 		}
 	}
-	return 0;
+
+	return { nullptr, 0 };
 }
 
 void InputVirtual::clearPresses()

@@ -99,3 +99,8 @@ void InputKeyboard::removeCapture(ITextInputCapture* capture)
 {
 	captures.erase(capture);
 }
+
+InputType InputKeyboard::getInputType() const
+{
+	return InputType::Keyboard;
+}

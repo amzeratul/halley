@@ -29,6 +29,14 @@ namespace Halley {
 	enum class KeyCode;
 	class InputExclusiveButton;
 
+	enum class InputType {
+		None,
+		Keyboard,
+		Mouse,
+		Gamepad,
+		Virtual
+	};
+
 	enum class JoystickType {
 		None,
 		Generic,
@@ -90,7 +98,7 @@ namespace Halley {
 		virtual size_t getNumberButtons();
 		virtual size_t getNumberAxes();
 
-		virtual String getButtonName(int code);
+		virtual String getButtonName(int code) const;
 
 		virtual bool isAnyButtonPressed();
 		virtual bool isAnyButtonPressedRepeat();
@@ -116,6 +124,7 @@ namespace Halley {
 		virtual void vibrate(spInputVibration /*vib*/);
 		virtual void stopVibrating();
 		virtual JoystickType getJoystickType() const;
+		virtual InputType getInputType() const;
 
 		virtual Vector2f getPosition() const;
 		virtual void setPosition(Vector2f position);

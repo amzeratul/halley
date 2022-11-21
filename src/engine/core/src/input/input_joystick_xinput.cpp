@@ -63,6 +63,11 @@ std::string InputJoystickXInput::getName() const
 }
 
 
+InputType InputJoystickXInput::getInputType() const
+{
+	return InputType::Gamepad;
+}
+
 void InputJoystickXInput::update(Time t)
 {
 	clearPresses();
@@ -157,6 +162,29 @@ int InputJoystickXInput::getButtonAtPosition(JoystickButtonPosition position) co
 		case JoystickButtonPosition::DPadLeft: return 15;
 		default: throw Exception("Invalid parameter", HalleyExceptions::InputPlugin);
 	}
+}
+
+String InputJoystickXInput::getButtonName(int code) const
+{
+	auto buttons = std::array<const char*, 16>{
+		"xbox_a",
+		"xbox_b",
+		"xbox_x",
+		"xbox_y",
+		"xbox_lb",
+		"xbox_rb",
+		"xbox_lsb",
+		"xbox_rsb",
+		"xbox_back",
+		"xbox_start",
+		"xbox_lt",
+		"xbox_rt",
+		"xbox_dpad_up",
+		"xbox_dpad_right",
+		"xbox_dpad_down",
+		"xbox_dpad_left",
+	};
+	return buttons[code];
 }
 
 
