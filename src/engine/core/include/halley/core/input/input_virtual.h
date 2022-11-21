@@ -102,6 +102,7 @@ namespace Halley {
 		JoystickType getJoystickType() const override;
 
 		std::unique_ptr<InputExclusiveButton> makeExclusiveButton(InputButton button, InputPriority priority, const String& label);
+		Vector<std::pair<InputButton, String>> getExclusiveButtonLabels() const;
 
 		void clearPresses() override;
 

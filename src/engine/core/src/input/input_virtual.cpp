@@ -571,6 +571,18 @@ std::unique_ptr<InputExclusiveButton> InputVirtual::makeExclusiveButton(InputBut
 	return exclusive;
 }
 
+Vector<std::pair<InputButton, String>> InputVirtual::getExclusiveButtonLabels() const
+{
+	Vector<std::pair<InputButton, String>> result;
+	for (const auto& button: exclusiveButtons) {
+		const auto& label = button.second.front()->getLabel();
+		if (!label.isEmpty()) {
+			result.emplace_back(button.first, label);
+		}
+	}
+	return result;
+}
+
 void InputVirtual::clearPresses()
 {
 	for (auto& axis: axes) {
