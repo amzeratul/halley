@@ -94,14 +94,14 @@ String InputKeyboardSDL::getButtonName(int code) const
 {
 	switch (code) {
 	case static_cast<int>(KeyCode::Esc):
-		return "keyboard_esc";
+		return "Esc";
 	case static_cast<int>(KeyCode::Delete):
-		return "keyboard_delete";
+		return "Del";
 	default:
 		if (code >= static_cast<int>(KeyCode::A) && code <= static_cast<int>(KeyCode::Z)) {
-			return String("keyboard_") + String(static_cast<wchar_t>(code - static_cast<int>(KeyCode::A) + 'A'));
+			return String(static_cast<wchar_t>(code - static_cast<int>(KeyCode::A) + 'A'));
 		} else {
-			return String("keyboard_") + SDL_GetKeyName(SDL_Keycode(code));
+			return SDL_GetKeyName(SDL_Keycode(code));
 		}
 	}
 }
