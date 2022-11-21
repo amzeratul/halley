@@ -1,6 +1,7 @@
 #pragma once
 #include <halley/time/halleytime.h>
 #include <string>
+#include <chrono>
 
 namespace Halley
 {
