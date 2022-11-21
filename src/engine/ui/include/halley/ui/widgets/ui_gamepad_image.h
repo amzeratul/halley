@@ -6,16 +6,18 @@
 namespace Halley {
 	class UIGamepadImage : public UIImage {
 	public:
-		UIGamepadImage(JoystickButtonPosition button, std::function<Sprite(JoystickButtonPosition, JoystickType)> iconRetriever, Colour4f col = Colour4f(1, 1, 1, 1));
+		UIGamepadImage(String id, JoystickButtonPosition button, std::function<Sprite(JoystickButtonPosition, JoystickType)> iconRetriever, Colour4f col = Colour4f(1, 1, 1, 1));
 		void update(Time t, bool moved) override;
 
-	protected:
 		void setJoystickType(JoystickType type) override;
+		void setButtonPosition(JoystickButtonPosition position);
 
 	private:
 		JoystickButtonPosition button;
 		std::function<Sprite(JoystickButtonPosition, JoystickType)> iconRetriever;
 		Colour4f colour;
 		std::optional<JoystickType> curType;
+
+		void refreshSprite();
 	};
 }

@@ -2,8 +2,8 @@
 
 using namespace Halley;
 
-UIGamepadImage::UIGamepadImage(JoystickButtonPosition button, std::function<Sprite(JoystickButtonPosition, JoystickType)> iconRetriever, Colour4f col)
-	: UIImage(Sprite())
+UIGamepadImage::UIGamepadImage(String id, JoystickButtonPosition button, std::function<Sprite(JoystickButtonPosition, JoystickType)> iconRetriever, Colour4f col)
+	: UIImage(std::move(id), Sprite())
 	, button(button)
 	, iconRetriever(std::move(iconRetriever))
 	, colour(col)
@@ -21,6 +21,24 @@ void UIGamepadImage::setJoystickType(JoystickType type)
 	if (type != curType) {
 		curType = type;
 
-		setSprite(iconRetriever(button, type).setColour(colour));
+		refreshSprite();
+	}
+}
+
+void UIGamepadImage::setButtonPosition(JoystickButtonPosition position)
+{
+	if (button != position) {
+		button = position;
+
+		refreshSprite();
+	}
+}
+
+void UIGamepadImage::refreshSprite()
+{
+	if (curType) {
+		setSprite(iconRetriever(button, curType.value()).setColour(colour));
+	} else {
+		setSprite(Sprite());
 	}
 }

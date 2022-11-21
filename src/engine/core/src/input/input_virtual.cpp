@@ -583,6 +583,24 @@ Vector<std::pair<InputButton, String>> InputVirtual::getExclusiveButtonLabels() 
 	return result;
 }
 
+int InputVirtual::getPhysicalButton(InputButton button, InputDevice* device) const
+{
+	if (!device) {
+		device = lastDevice;
+	}
+
+	if (button < 0 || button >= static_cast<int>(buttons.size())) {
+		return 0;
+	}
+
+	for (const auto& binding: buttons[button]) {
+		if (binding.device.get() == device) {
+			return binding.a;
+		}
+	}
+	return 0;
+}
+
 void InputVirtual::clearPresses()
 {
 	for (auto& axis: axes) {
