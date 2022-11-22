@@ -30,10 +30,11 @@
 
 using namespace Halley;
 
-InputVirtual::InputVirtual(int nButtons, int nAxes)
+InputVirtual::InputVirtual(int nButtons, int nAxes, InputType type)
 	: lastDeviceFrozen(false)
 	, repeatDelayFirst(0.20f)
 	, repeatDelayHold(0.10f)
+	, type(type)
 {
 	buttons.resize(nButtons);
 	axes.resize(nAxes);
@@ -560,7 +561,7 @@ JoystickType InputVirtual::getJoystickType() const
 
 InputType InputVirtual::getInputType() const
 {
-	return InputType::Virtual;
+	return type;
 }
 
 void InputVirtual::setLastDevice(InputDevice* device)
@@ -598,15 +599,41 @@ std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(InputButton button,
 		device = lastDevice;
 	}
 
+	auto isCompatible = [](InputDevice& a, InputDevice& b) -> bool
+	{
+		auto typeA = a.getInputType();
+		auto typeB = b.getInputType();
+		if (typeA == typeB) {
+			return true;
+		}
+		if ((typeA == InputType::Keyboard && typeB == InputType::Mouse) || (typeA == InputType::Mouse && typeB == InputType::Keyboard)) {
+			return true;
+		}
+		return false;
+	};
+
+	auto getBinding = [&](InputDevice& d, int bindingButton) -> std::pair<InputDevice*, int>
+	{
+		auto* virtualDevice = dynamic_cast<InputVirtual*>(&d);
+		if (virtualDevice != nullptr) {
+			return virtualDevice->getPhysicalButton(bindingButton);
+		} else {
+			return { &d, bindingButton };
+		}
+	};
+
 	if (button >= 0 && button < static_cast<int>(buttons.size())) {
+		// Look for exact match
 		for (const auto& binding: buttons[button]) {
 			if (binding.device.get() == device) {
-				auto* virtualDevice = dynamic_cast<InputVirtual*>(device);
-				if (virtualDevice != nullptr) {
-					return virtualDevice->getPhysicalButton(binding.a);
-				} else {
-					return { device, binding.a };
-				}
+				return getBinding(*binding.device, binding.a);
+			}
+		}
+
+		// Look for any compatible
+		for (const auto& binding: buttons[button]) {
+			if (isCompatible(*binding.device, *device)) {
+				return getBinding(*binding.device, binding.a);
 			}
 		}
 	}

@@ -38,7 +38,7 @@ namespace Halley {
 		friend class InputExclusiveButton;
 
 	public:
-		InputVirtual(int nButtons, int nAxes);
+		InputVirtual(int nButtons, int nAxes, InputType type = InputType::Virtual);
 		~InputVirtual() override;
 
 		bool isEnabled() const override;
@@ -162,6 +162,8 @@ namespace Halley {
 		
 		float repeatDelayFirst;
 		float repeatDelayHold;
+
+		InputType type;
 
 		HashMap<InputButton, Vector<InputExclusiveButton*>> exclusiveButtons;
 		
