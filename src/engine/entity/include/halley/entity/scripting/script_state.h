@@ -155,6 +155,9 @@ namespace Halley {
 		bool isDone() const;
 		bool isDead() const;
 
+		void setFrameFlag(bool flag);
+		bool getFrameFlag() const;
+
     	void start(uint64_t graphHash);
 		void reset();
 		void prepareStates(const EntitySerializationContext& context, Time t);
@@ -207,6 +210,7 @@ namespace Halley {
     	bool started = false;
 		bool persistAfterDone = false;
 		bool needsStateLoading = false;
+		bool frameFlag = false;
 
 		Vector2f displayOffset;
 

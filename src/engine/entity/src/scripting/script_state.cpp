@@ -387,6 +387,16 @@ bool ScriptState::isDead() const
 	return isDone() && !persistAfterDone;
 }
 
+void ScriptState::setFrameFlag(bool flag)
+{
+	frameFlag = flag;
+}
+
+bool ScriptState::getFrameFlag() const
+{
+	return frameFlag;
+}
+
 bool ScriptState::hasThreadAt(GraphNodeId node) const
 {
 	for (const auto& thread: threads) {
