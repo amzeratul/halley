@@ -2,7 +2,8 @@
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
   <Type Name="Halley::ConfigNode">
     <DisplayString Condition="type == ConfigNodeType::Int">{intData}</DisplayString>
-    <DisplayString Condition="type == ConfigNodeType::Int64">{int64Data}</DisplayString>
+	<DisplayString Condition="type == ConfigNodeType::Int64">{int64Data}</DisplayString>
+	<DisplayString Condition="type == ConfigNodeType::EntityId">EntityId:{int64Data}</DisplayString>
     <DisplayString Condition="type == ConfigNodeType::Float">{floatData}</DisplayString>
     <DisplayString Condition="type == ConfigNodeType::Int2">({vec2iData.x}, {vec2iData.y})</DisplayString>
     <DisplayString Condition="type == ConfigNodeType::Float2">({vec2fData.x}, {vec2fData.y})</DisplayString>
@@ -18,7 +19,8 @@
     <DisplayString>Undefined</DisplayString>
     <Expand>
 	    <Item Name="[Int]" Condition="type == ConfigNodeType::Int">intData</Item>
-      <Item Name="[Int64]" Condition="type == ConfigNodeType::Int64">int64Data</Item>
+		<Item Name="[Int64]" Condition="type == ConfigNodeType::Int64">int64Data</Item>
+		<Item Name="[EntityId]" Condition="type == ConfigNodeType::EntityId">int64Data</Item>
 	    <Item Name="[Float]" Condition="type == ConfigNodeType::Float">floatData</Item>
 	    <Item Name="[Int2]" Condition="type == ConfigNodeType::Int2">vec2iData</Item>
 	    <Item Name="[Float2]" Condition="type == ConfigNodeType::Float2">vec2fData</Item>
