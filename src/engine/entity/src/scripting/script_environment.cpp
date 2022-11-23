@@ -102,6 +102,12 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		auto& nodeState = graphState.getNodeState(nodeId);
 		currentInputPin = thread.getCurInputPin();
 
+		// Dead watcher
+		if (nodeState.threadCount == 0 && thread.isWatcher()) {
+			terminateThread(thread, false);
+			continue;
+		}
+		
 		// Update
 		const auto result = nodeType.update(*this, static_cast<Time>(timeLeft), node, nodeState.data);
 		thread.getCurNodeTime() += timeLeft;
@@ -117,14 +123,14 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		} else if (result.state == ScriptNodeExecutionState::Fork || result.state == ScriptNodeExecutionState::ForkAndConvertToWatcher) {
 			forkThread(thread, nodeType.getOutputNodes(node, result.outputsActive), pendingThreads);
 			if (result.state == ScriptNodeExecutionState::ForkAndConvertToWatcher) {
-				thread.setWatcher(true);
+				setWatcher(thread, true);
 			}
 		} else if (result.state == ScriptNodeExecutionState::MergeAndWait) {
 			mergeThread(thread, true);
 		} else {
 			// Node ended
 			graphState.finishNode(node, nodeState, false);
-			thread.setWatcher(false);
+			setWatcher(thread, false);
 
 			if (result.state == ScriptNodeExecutionState::Done || result.state == ScriptNodeExecutionState::MergeAndContinue) {
 				if (result.state == ScriptNodeExecutionState::MergeAndContinue) {
@@ -283,7 +289,7 @@ void ScriptEnvironment::advanceThread(ScriptStateThread& thread, OptionalLite<Gr
 {
 	if (node) {
 		auto& state = currentState->getNodeState(node.value());
-		if (state.threadCount == 0) {
+		if (state.threadCount == 0 && !thread.isWatcher()) {
 			initNode(node.value(), state);
 			thread.advanceToNode(node, outputPin, inputPin);
 			return;
@@ -345,8 +351,11 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRol
 			return;
 		}
 
-		assert(nodeState.threadCount > 0);
-		nodeState.threadCount--;
+		if (!thread.isWatcher()) {
+			assert(nodeState.threadCount > 0);
+			nodeState.threadCount--;
+		}
+
 		if (nodeState.threadCount == 0) {
 			if (node.getNodeType().hasDestructor(node)) {
 				node.getNodeType().destructor(*this, node, nodeState.data);
@@ -360,6 +369,32 @@ void ScriptEnvironment::terminateThread(ScriptStateThread& thread, bool allowRol
 void ScriptEnvironment::removeStoppedThreads()
 {
 	std_ex::erase_if(currentState->getThreads(), [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); });
+}
+
+void ScriptEnvironment::setWatcher(ScriptStateThread& thread, bool watcher)
+{
+	if (thread.isWatcher() != watcher) {
+		thread.setWatcher(watcher);
+
+		auto updateNode = [&](int nodeId)
+		{
+			auto& nThreads = currentState->getNodeState(nodeId).threadCount;
+			if (watcher) {
+				assert(nThreads >= 2);
+				--nThreads;
+			} else {
+				assert(nThreads >= 1);
+				++nThreads;
+			}
+		};
+
+		for (const auto s: thread.getStack()) {
+			updateNode(s.node);
+		}
+		if (thread.getCurNode()) {
+			updateNode(*thread.getCurNode());
+		}
+	}
 }
 
 void ScriptEnvironment::cancelOutputs(GraphNodeId nodeId, uint8_t cancelMask)
