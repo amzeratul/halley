@@ -577,7 +577,7 @@ std::pair<std::optional<Vector2f>, float> Navmesh::findRayCollision(Ray ray, flo
 			//edgeIdx = poly.getExitEdge(ray, edgeIdx.value() + 1);
 			edgeIdx = poly.getExitEdge(ray, edgeIdx.value() + 1);
 			if (!edgeIdx) {
-				Logger::logError("Could not recover from ping-pong, aborting.");
+				Logger::logError("Could not recover from navmesh ping-pong, aborting.");
 				return { ray.p, weightedDistance };
 			}
 		}
