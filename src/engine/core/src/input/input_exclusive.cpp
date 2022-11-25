@@ -20,22 +20,22 @@ InputExclusiveButton::~InputExclusiveButton()
 
 bool InputExclusiveButton::isPressed() const
 {
-	return active && parent ? parent->isButtonPressed(button) : false;
+	return parent ? parent->isButtonPressed(button, activeBinds) : false;
 }
 
 bool InputExclusiveButton::isPressedRepeat() const
 {
-	return active && parent ? parent->isButtonPressedRepeat(button) : false;
+	return parent ? parent->isButtonPressedRepeat(button, activeBinds) : false;
 }
 
 bool InputExclusiveButton::isReleased() const
 {
-	return active && parent ? parent->isButtonReleased(button) : false;
+	return parent ? parent->isButtonReleased(button, activeBinds) : false;
 }
 
 bool InputExclusiveButton::isDown() const
 {
-	return active && parent ? parent->isButtonDown(button) : false;
+	return parent ? parent->isButtonDown(button, activeBinds) : false;
 }
 
 const String& InputExclusiveButton::getLabel() const

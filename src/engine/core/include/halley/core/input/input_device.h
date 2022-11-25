@@ -91,7 +91,10 @@ namespace Halley {
 	
 	class InputDevice {
 	public:
+		InputDevice();
 		virtual ~InputDevice();
+
+		uint16_t getId() const { return deviceId; }
 
 		virtual bool isEnabled() const;
 
@@ -132,6 +135,9 @@ namespace Halley {
 
 		virtual void setParent(InputDevice* parent);
 		virtual InputDevice* getParent() const;
+
+	private:
+		uint16_t deviceId = 0;
 	};
 	
 }

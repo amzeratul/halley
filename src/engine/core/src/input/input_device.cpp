@@ -2,10 +2,13 @@
 
 using namespace Halley;
 
-InputDevice::~InputDevice()
+InputDevice::InputDevice()
 {
-	
+	static uint16_t id = 1;
+	deviceId = id++;
 }
+
+InputDevice::~InputDevice() = default;
 
 bool InputDevice::isEnabled() const
 {

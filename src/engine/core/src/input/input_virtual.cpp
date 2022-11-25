@@ -42,11 +42,9 @@ InputVirtual::InputVirtual(int nButtons, int nAxes, InputType type)
 
 InputVirtual::~InputVirtual()
 {
-	for (auto& binding: exclusiveButtons) {
-		for (auto& button: binding.second) {
-			button->parent = nullptr;
-			button->active = false;
-		}
+	for (auto& button: exclusiveButtons) {
+		button->parent = nullptr;
+		button->activeBinds.clear();
 	}
 }
 
@@ -118,18 +116,9 @@ bool InputVirtual::isAnyButtonDown()
 
 bool InputVirtual::isButtonPressed(InputButton code)
 {
-	auto& binds = buttons.at(code);
-	for (auto& bind : binds) {
-		if (bind.b == -1) {
-			// Single bind
-			if (bind.device->isButtonPressed(bind.a)) {
-				return true;
-			}
-		} else {
-			// Chord bind
-			if ((bind.device->isButtonPressed(bind.a) && bind.device->isButtonDown(bind.b)) || (bind.device->isButtonPressed(bind.b) && bind.device->isButtonDown(bind.a))) {
-				return true;
-			}
+	for (auto& bind : buttons.at(code)) {
+		if (bind.isButtonPressed()) {
+			return true;
 		}
 	}
 	return false;
@@ -137,18 +126,9 @@ bool InputVirtual::isButtonPressed(InputButton code)
 
 bool InputVirtual::isButtonPressedRepeat(InputButton code)
 {
-	auto& binds = buttons.at(code);
-	for (auto& bind : binds) {
-		if (bind.b == -1) {
-			// Single bind
-			if (bind.device->isButtonPressedRepeat(bind.a)) {
-				return true;
-			}
-		} else {
-			// Chord bind
-			if (bind.device->isButtonPressedRepeat(bind.a) && bind.device->isButtonDown(bind.b)) {
-				return true;
-			}
+	for (auto& bind : buttons.at(code)) {
+		if (bind.isButtonPressedRepeat()) {
+			return true;
 		}
 	}
 	return false;
@@ -156,20 +136,9 @@ bool InputVirtual::isButtonPressedRepeat(InputButton code)
 
 bool InputVirtual::isButtonReleased(InputButton code)
 {
-	auto& binds = buttons.at(code);
-	for (auto& bind : binds) {
-		if (bind.b == -1) {
-			// Single bind
-			if (bind.device->isButtonReleased(bind.a)) {
-				return true;
-			}
-		} else {
-			// Chord bind
-			const bool aReleased = bind.device->isButtonReleased(bind.a);
-			const bool bReleased = bind.device->isButtonReleased(bind.b);
-			if ((aReleased && bReleased) || (aReleased && bind.device->isButtonDown(bind.b)) || (bReleased && bind.device->isButtonDown(bind.a))) {
-				return true;
-			}
+	for (auto& bind : buttons.at(code)) {
+		if (bind.isButtonReleased()) {
+			return true;
 		}
 	}
 	return false;
@@ -177,16 +146,53 @@ bool InputVirtual::isButtonReleased(InputButton code)
 
 bool InputVirtual::isButtonDown(InputButton code)
 {
-	auto& binds = buttons.at(code);
-	for (auto& bind : binds) {
-		if (bind.b == -1) {
-			if (bind.device->isButtonDown(bind.a)) {
-				return true;
-			}
-		} else {
-			if (bind.device->isButtonDown(bind.a) && bind.device->isButtonDown(bind.b)) {
-				return true;
-			}
+	for (auto& bind : buttons.at(code)) {
+		if (bind.isButtonDown()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool InputVirtual::isButtonPressed(InputButton code, gsl::span<const uint32_t> activeBinds)
+{
+	refreshExclusiveButtons();
+	for (auto& bind : buttons.at(code)) {
+		if (std_ex::contains(activeBinds, bind.getPhysicalButtonId()) && bind.isButtonPressed()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool InputVirtual::isButtonPressedRepeat(InputButton code, gsl::span<const uint32_t> activeBinds)
+{
+	refreshExclusiveButtons();
+	for (auto& bind : buttons.at(code)) {
+		if (std_ex::contains(activeBinds, bind.getPhysicalButtonId()) && bind.isButtonPressedRepeat()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool InputVirtual::isButtonReleased(InputButton code, gsl::span<const uint32_t> activeBinds)
+{
+	refreshExclusiveButtons();
+	for (auto& bind : buttons.at(code)) {
+		if (std_ex::contains(activeBinds, bind.getPhysicalButtonId()) && bind.isButtonReleased()) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool InputVirtual::isButtonDown(InputButton code, gsl::span<const uint32_t> activeBinds)
+{
+	refreshExclusiveButtons();
+	for (auto& bind : buttons.at(code)) {
+		if (std_ex::contains(activeBinds, bind.getPhysicalButtonId()) && bind.isButtonDown()) {
+			return true;
 		}
 	}
 	return false;
@@ -255,6 +261,7 @@ void InputVirtual::bindButton(int n, spInputDevice device, int deviceN)
 		setLastDevice(device.get());
 	}
 	buttons.at(n).push_back(Bind(std::move(device), deviceN, false));
+	exclusiveButtonsDirty = true;
 }
 
 void InputVirtual::bindButton(int n, spInputDevice device, KeyCode deviceButton)
@@ -268,6 +275,7 @@ void InputVirtual::bindButtonChord(int n, spInputDevice device, int deviceButton
 		setLastDevice(device.get());
 	}
 	buttons.at(n).push_back(Bind(std::move(device), deviceButton0, deviceButton1, false));
+	exclusiveButtonsDirty = true;
 }
 
 void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
@@ -276,6 +284,7 @@ void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
 		setLastDevice(device.get());
 	}
 	axes.at(n).binds.push_back(Bind(std::move(device), deviceN, true));
+	exclusiveButtonsDirty = true;
 }
 
 void InputVirtual::bindAxisButton(int n, spInputDevice device, int negativeButton, int positiveButton)
@@ -284,6 +293,7 @@ void InputVirtual::bindAxisButton(int n, spInputDevice device, int negativeButto
 		setLastDevice(device.get());
 	}
 	axes.at(n).binds.push_back(Bind(std::move(device), negativeButton, positiveButton, true));
+	exclusiveButtonsDirty = true;
 }
 
 void InputVirtual::bindAxisButton(int n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton)
@@ -299,11 +309,13 @@ void InputVirtual::bindVibrationOverride(spInputDevice joy)
 void InputVirtual::unbindButton(int n)
 {
 	buttons.at(n).clear();
+	exclusiveButtonsDirty = true;
 }
 
 void InputVirtual::unbindAxis(int n)
 {
 	axes.at(n).binds.clear();
+	exclusiveButtonsDirty = true;
 }
 
 void InputVirtual::clearBindings()
@@ -497,6 +509,76 @@ InputVirtual::Bind::Bind(spInputDevice d, int _a, int _b, bool axis)
 	, isAxisEmulation(axis)
 {}
 
+bool InputVirtual::Bind::isButtonPressed() const
+{
+	if (b == -1) {
+		// Single bind
+		if (device->isButtonPressed(a)) {
+			return true;
+		}
+	} else {
+		// Chord bind
+		if ((device->isButtonPressed(a) && device->isButtonDown(b)) || (device->isButtonPressed(b) && device->isButtonDown(a))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool InputVirtual::Bind::isButtonPressedRepeat() const
+{
+	if (b == -1) {
+		// Single bind
+		if (device->isButtonPressedRepeat(a)) {
+			return true;
+		}
+	} else {
+		// Chord bind
+		if (device->isButtonPressedRepeat(a) && device->isButtonDown(b)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool InputVirtual::Bind::isButtonReleased() const
+{
+	if (b == -1) {
+		// Single bind
+		if (device->isButtonReleased(a)) {
+			return true;
+		}
+	} else {
+		// Chord bind
+		const bool aReleased = device->isButtonReleased(a);
+		const bool bReleased = device->isButtonReleased(b);
+		if ((aReleased && bReleased) || (aReleased && device->isButtonDown(b)) || (bReleased && device->isButtonDown(a))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool InputVirtual::Bind::isButtonDown() const
+{
+	if (b == -1) {
+		if (device->isButtonDown(a)) {
+			return true;
+		}
+	} else {
+		if (device->isButtonDown(a) && device->isButtonDown(b)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+uint32_t InputVirtual::Bind::getPhysicalButtonId() const
+{
+	return static_cast<uint32_t>(device->getId()) | (static_cast<uint32_t>(a) << 16) | (static_cast<uint32_t>(b) << 24);
+}
+
+
 InputVirtual::AxisData::AxisData() = default;
 
 InputVirtual::AxisData::AxisData(Vector<Bind> b)
@@ -581,19 +663,31 @@ std::unique_ptr<InputExclusiveButton> InputVirtual::makeExclusiveButton(InputBut
 	return exclusive;
 }
 
-Vector<std::pair<InputButton, String>> InputVirtual::getExclusiveButtonLabels() const
+Vector<InputVirtual::ExclusiveButtonInfo> InputVirtual::getExclusiveButtonLabels(InputDevice* preferredDevice)
 {
-	Vector<std::pair<InputButton, String>> result;
+	refreshExclusiveButtons();
+
+	if (!preferredDevice) {
+		preferredDevice = lastDevice;
+	}
+
+	Vector<ExclusiveButtonInfo> result;
 	for (const auto& button: exclusiveButtons) {
-		const auto& label = button.second.front()->getLabel();
-		if (!label.isEmpty()) {
-			result.emplace_back(button.first, label);
+		if (!button->activeBinds.empty()) {
+			const auto& label = button->getLabel();
+			if (!label.isEmpty()) {
+				auto [physicalDevice, physicalButton] = getPhysicalButton(*button, preferredDevice);
+				if (physicalDevice) {
+					auto info = ExclusiveButtonInfo{ button->button, label, physicalDevice, physicalButton };
+					result.emplace_back(std::move(info));
+				}
+			}
 		}
 	}
 	return result;
 }
 
-std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(InputButton button, InputDevice* device) const
+std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(const InputExclusiveButton& button, InputDevice* device) const
 {
 	if (!device) {
 		device = lastDevice;
@@ -601,44 +695,31 @@ std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(InputButton button,
 
 	auto isCompatible = [](InputDevice& a, InputDevice& b) -> bool
 	{
-		auto typeA = a.getInputType();
-		auto typeB = b.getInputType();
-		if (typeA == typeB) {
-			return true;
-		}
-		if ((typeA == InputType::Keyboard && typeB == InputType::Mouse) || (typeA == InputType::Mouse && typeB == InputType::Keyboard)) {
-			return true;
-		}
-		return false;
+		const auto typeA = a.getInputType();
+		const auto typeB = b.getInputType();
+		return (typeA == typeB)
+			|| (typeA == InputType::Keyboard && typeB == InputType::Mouse)
+			|| (typeA == InputType::Mouse && typeB == InputType::Keyboard);
 	};
 
-	auto getBinding = [&](InputDevice& d, int bindingButton) -> std::pair<InputDevice*, int>
-	{
-		auto* virtualDevice = dynamic_cast<InputVirtual*>(&d);
-		if (virtualDevice != nullptr) {
-			return virtualDevice->getPhysicalButton(bindingButton);
-		} else {
-			return { &d, bindingButton };
-		}
-	};
+	std::pair<InputDevice*, int> bestResult = { nullptr, 0 };
+	int bestScore = 0;
 
-	if (button >= 0 && button < static_cast<int>(buttons.size())) {
-		// Look for exact match
-		for (const auto& binding: buttons[button]) {
+	for (const auto& binding: buttons[button.button]) {
+		if (std_ex::contains(button.activeBinds, binding.getPhysicalButtonId())) {
 			if (binding.device.get() == device) {
-				return getBinding(*binding.device, binding.a);
+				return { binding.device.get(), binding.a };
 			}
-		}
 
-		// Look for any compatible
-		for (const auto& binding: buttons[button]) {
-			if (isCompatible(*binding.device, *device)) {
-				return getBinding(*binding.device, binding.a);
+			const int score = isCompatible(*binding.device, *device) ? 1 : 0;
+			if (score > bestScore) {
+				bestResult = { binding.device.get(), binding.a };
+				bestScore = score;
 			}
 		}
 	}
 
-	return { nullptr, 0 };
+	return bestResult;
 }
 
 void InputVirtual::clearPresses()
@@ -650,25 +731,34 @@ void InputVirtual::clearPresses()
 
 void InputVirtual::addExclusiveButton(InputExclusiveButton& exclusive)
 {
-	exclusiveButtons[exclusive.button].push_back(&exclusive);
-	refreshButtons(exclusive.button);
+	exclusiveButtons.push_back(&exclusive);
+	exclusiveButtonsDirty = true;
 }
 
 void InputVirtual::removeExclusiveButton(InputExclusiveButton& exclusive)
 {
-	std_ex::erase(exclusiveButtons[exclusive.button], &exclusive);
-	refreshButtons(exclusive.button);
+	std_ex::erase(exclusiveButtons, &exclusive);
+	exclusiveButtonsDirty = true;
 }
 
-void InputVirtual::refreshButtons(InputButton button)
+void InputVirtual::refreshExclusiveButtons()
 {
-	auto& bs = exclusiveButtons[button];
-	if (bs.empty()) {
-		exclusiveButtons.erase(button);
-	} else {
-		std::sort(bs.begin(), bs.end(), [] (const InputExclusiveButton* a, const InputExclusiveButton* b) { return a->priority > b->priority; });
-		for (size_t i = 0; i < bs.size(); ++i) {
-			bs[i]->active = i == 0;
+	if (exclusiveButtonsDirty) {
+		exclusiveButtonsDirty = false;
+
+		exclusiveButtonBindings.clear();
+		for (auto& exclusive: exclusiveButtons) {
+			exclusive->activeBinds.clear();
+			for (const auto& bind: buttons[exclusive->button]) {
+				exclusiveButtonBindings[bind.getPhysicalButtonId()].push_back(exclusive);
+			}
+		}
+		for (auto& [bindId, exclusives]: exclusiveButtonBindings) {
+			std::sort(exclusives.begin(), exclusives.end(), [] (const InputExclusiveButton* a, const InputExclusiveButton* b)
+			{
+				return a->priority > b->priority;
+			});
+			exclusives[0]->activeBinds.push_back(bindId);
 		}
 	}
 }

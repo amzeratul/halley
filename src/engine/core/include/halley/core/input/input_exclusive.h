@@ -24,7 +24,7 @@ namespace Halley {
         InputVirtual* parent = nullptr;
         InputButton button = 0;
         InputPriority priority = InputPriority::Normal;
-        bool active = true;
+        Vector<uint32_t> activeBinds;
         String label;
     };
 }
