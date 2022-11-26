@@ -40,6 +40,8 @@ void FrameDebugger::draw(RenderContext& context)
 	if (isRendering()) {
 		context.bind([&](Painter& painter)
 		{
+			painter.stopRecording();
+			painter.clear(Colour4f());
 			renderSnapshot->playback(painter, {});
 		});
 	}
