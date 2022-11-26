@@ -32,6 +32,8 @@ namespace Halley {
 		WorldSystemUpdate,
 		WorldSystemRender,
 
+        ScriptUpdate,
+
 		AudioGenerateBuffer,
 
 		DiskIO,

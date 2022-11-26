@@ -16,6 +16,8 @@
 #include <components/scriptable_component.h>
 #include <components/sprite_animation_component.h>
 
+#include "halley/support/profiler.h"
+
 using namespace Halley;
 
 ScriptEnvironment::ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection)
@@ -35,6 +37,8 @@ void ScriptEnvironment::update(Time time, ScriptState& graphState, EntityId curE
 	if (!currentGraph) {
 		throw Exception("Unable to update script state, script not set.", HalleyExceptions::Entity);
 	}
+
+	ProfilerEvent event(ProfilerEventType::ScriptUpdate, currentGraph->getAssetId());
 
 	currentState = &graphState;
 	currentEntityVariables = &entityVariables;

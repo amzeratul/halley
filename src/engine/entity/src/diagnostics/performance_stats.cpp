@@ -12,6 +12,7 @@
 #include "halley/support/profiler.h"
 #include "halley/time/halleytime.h"
 #include "halley/time/stopwatch.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -72,8 +73,10 @@ void PerformanceStatsView::paint(Painter& painter)
 		if (page == 0) {
 			drawTimeGraph(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220));
 		} else if (page == 1) {
-			drawTopSystems(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220), t);
+			drawTopEvents(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220), t, systemHistory);
 		} else if (page == 2) {
+			drawTopEvents(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220), t, scriptHistory);
+		} else if (page == 3) {
 			drawNetworkStats(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220));
 		}
 	} else {
@@ -103,12 +106,22 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	curFrameData.variableTime = getTime(TimeLine::VariableUpdate);
 	curFrameData.renderTime = getTime(TimeLine::Render) - static_cast<int>((vsyncTime.getLatest() + 500) / 1000);
 
+	for (auto& [k, e]: systemHistory) {
+		e.startUpdate();
+	}
+	for (auto& [k, e]: scriptHistory) {
+		e.startUpdate();
+	}
 	for (const auto& e: data->getEvents()) {
 		if (e.type == ProfilerEventType::WorldSystemUpdate || e.type == ProfilerEventType::WorldSystemRender) {
-			eventHistory[e.name].update(e.type, (e.endTime - e.startTime).count());
+			systemHistory[e.name].update(e.type, (e.endTime - e.startTime).count());
+		} else if (e.type == ProfilerEventType::ScriptUpdate) {
+			scriptHistory[e.name].update(e.type, (e.endTime - e.startTime).count());
 		}
 	}
-
+	std_ex::erase_if_value(systemHistory, [&](const auto& e) { return !e.isVisited(); });
+	std_ex::erase_if_value(scriptHistory, [&](const auto& e) { return !e.isVisited(); });
+	
 	if (capturing) {
 		lastProfileData = std::move(data);
 	}
@@ -122,7 +135,7 @@ void PerformanceStatsView::setNetworkStats(NetworkSession& session)
 
 int PerformanceStatsView::getNumPages() const
 {
-	return networkStats ? 3 : 2;
+	return networkStats ? 4 : 3;
 }
 
 int PerformanceStatsView::getPage() const
@@ -146,15 +159,27 @@ void PerformanceStatsView::EventHistoryData::update(ProfilerEventType type, int6
 	lowestEver = std::min(lowestEver, value);
 
 	size_t sampleRange = 120;
-	if (samples.size() < sampleRange) {
-		samples.push_back(value);
+	if (framesSinceLastVisit == 0 && !samples.empty()) {
+		++instanceCounter;
+		if (samples.size() < sampleRange) {
+			samples.back() += value;
+		} else {
+			samples[(samplePos + sampleRange - 1) % sampleRange] += value;
+		}
 	} else {
-		samples[samplePos] = value;
-		samplePos = (samplePos + 1) % sampleRange;
+		instanceCounter = 1;
+		if (samples.size() < sampleRange) {
+			samples.push_back(value);
+		} else {
+			samples[samplePos] = value;
+			samplePos = (samplePos + 1) % sampleRange;
+		}
 	}
 
 	sortedSamples = samples;
 	std::sort(sortedSamples.begin(), sortedSamples.end());
+
+	framesSinceLastVisit = 0;
 }
 
 int64_t PerformanceStatsView::EventHistoryData::getMinimum() const
@@ -187,6 +212,11 @@ int64_t PerformanceStatsView::EventHistoryData::getHistoricalMaximum() const
 	return highestEver;
 }
 
+int PerformanceStatsView::EventHistoryData::getNumInstances() const
+{
+	return instanceCounter;
+}
+
 int64_t PerformanceStatsView::EventHistoryData::getHistoricalMinimum() const
 {
 	return lowestEver;
@@ -196,6 +226,17 @@ ProfilerEventType PerformanceStatsView::EventHistoryData::getType() const
 {
 	return type;
 }
+
+void PerformanceStatsView::EventHistoryData::startUpdate()
+{
+	framesSinceLastVisit++;
+}
+
+bool PerformanceStatsView::EventHistoryData::isVisited() const
+{
+	return framesSinceLastVisit < 2;
+}
+
 
 void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 {
@@ -462,6 +503,8 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 		return Colour4f(0.7f, 0.7f, 0.7f);
 	case ProfilerEventType::AudioGenerateBuffer:
 		return Colour4f(0.5f, 0.8f, 1.0f);
+	case ProfilerEventType::ScriptUpdate:
+		return Colour4f(0.8f, 0.51f, 0.97f);
 	default:
 		return Colour4f(0.1f, 0.7f, 0.1f);
 	}
@@ -488,7 +531,7 @@ Colour4f PerformanceStatsView::getNetworkStatsCol(const AckUnreliableConnectionS
 	}
 }
 
-void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect, Time t)
+void PerformanceStatsView::drawTopEvents(Painter& painter, Rect4f rect, Time t, const HashMap<String, EventHistoryData>& eventHistory)
 {
 	struct CurEventData {
 		const String* name;
@@ -499,6 +542,7 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect, Time t)
 		int64_t thirdQuartile;
 		int64_t maximum;
 		Colour4f colour;
+		int instances;
 
 		bool operator< (const CurEventData& other) const
 		{
@@ -566,7 +610,7 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect, Time t)
 	curEvents.reserve(eventHistory.size());
 	for (const auto& [k, v]: eventHistory) {
 		const auto col = getEventColour(v.getType());
-		curEvents.emplace_back(CurEventData{ &k, v.getType(), v.getMinimum(), v.getFirstQuartile(), v.getMedian(), v.getThirdQuartile(), v.getMaximum(), col });
+		curEvents.emplace_back(CurEventData{ &k, v.getType(), v.getMinimum(), v.getFirstQuartile(), v.getMedian(), v.getThirdQuartile(), v.getMaximum(), col, v.getNumInstances() });
 		maxTime = std::max(maxTime, curEvents.back().maximum);
 	}
 	std::sort(curEvents.begin(), curEvents.end());
@@ -594,14 +638,14 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect, Time t)
 			.draw(painter);
 	}
 
-	for (size_t i = 0; i < nToShow; ++i) {
-		const auto& system = curEvents[i];
+	for (size_t i = 0; i < std::min(curEvents.size(), nToShow); ++i) {
+		const auto& event = curEvents[i];
 		columns[0].append(toString(i + 1) + ": ");
-		columns[0].append(*system.name + "\n", system.colour.inverseMultiplyLuma(0.5f));
-		columns[1].append(getTimeLabel(system.median) + " us\n", system.colour.inverseMultiplyLuma(0.5f));
+		columns[0].append(*event.name + (event.instances > 1 ? " x" + toString(event.instances) : String()) + "\n", event.colour.inverseMultiplyLuma(0.5f));
+		columns[1].append(getTimeLabel(event.median) + " us\n", event.colour.inverseMultiplyLuma(0.5f));
 
 		const auto pos = rect.getTopLeft() + Vector2f(barDrawX, (i + 1) * lineHeight);
-		drawBoxPlot(system, Rect4f(pos, Vector2f(rect.getRight(), pos.y + lineHeight)).shrink(1.0f), scale, system.colour);
+		drawBoxPlot(event, Rect4f(pos, Vector2f(rect.getRight(), pos.y + lineHeight)).shrink(1.0f), scale, event.colour);
 	}
 
 	for (size_t i = 1; i < systemLabels.size(); ++i) {

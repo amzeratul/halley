@@ -52,7 +52,12 @@ namespace Halley
 			int64_t getHistoricalMinimum() const;
 			int64_t getHistoricalMaximum() const;
 
+			int getNumInstances() const;
+
 			ProfilerEventType getType() const;
+
+			void startUpdate();
+			bool isVisited() const;
 
 		private:
 			ProfilerEventType type;
@@ -61,6 +66,8 @@ namespace Halley
 			size_t samplePos = 0;
 			int64_t highestEver = 0;
 			int64_t lowestEver = std::numeric_limits<int64_t>::max();
+			int framesSinceLastVisit = 1;
+			int instanceCounter = 0;
 		};
 		
 		TextRenderer headerText;
@@ -77,7 +84,8 @@ namespace Halley
 		
 		Vector<FrameData> frameData;
 		size_t lastFrameData = 0;
-		HashMap<String, EventHistoryData> eventHistory;
+		HashMap<String, EventHistoryData> systemHistory;
+		HashMap<String, EventHistoryData> scriptHistory;
 		std::shared_ptr<ProfilerData> lastProfileData;
 
 		float curMaxTime = 500000.0f;
@@ -98,7 +106,7 @@ namespace Halley
 		void drawTimeGraph(Painter& painter, Rect4f rect);
 		void drawTimeGraphThreads(Painter& painter, Rect4f rect, Range<ProfilerData::TimePoint> timeRange);
 		void drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo, Range<ProfilerData::TimePoint> timeRange);
-		void drawTopSystems(Painter& painter, Rect4f rect, Time t);
+		void drawTopEvents(Painter& painter, Rect4f rect, Time t, const HashMap<String, EventHistoryData>& eventHistory);
 		void drawNetworkStats(Painter& painter, Rect4f rect);
 		
 		Colour4f getEventColour(ProfilerEventType event) const;
