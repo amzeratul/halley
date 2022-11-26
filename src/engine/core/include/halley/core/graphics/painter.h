@@ -13,6 +13,7 @@
 
 namespace Halley
 {
+	class RenderSnapshot;
 	class LineSegment;
 	class VideoAPI;
 	class MaterialDataBlock;
@@ -57,8 +58,7 @@ namespace Halley
 		void clear(std::optional<Colour> colour, std::optional<float> depth = 1.0f, std::optional<uint8_t> stencil = 0);
 
 		void setRelativeClip(Rect4f rect);
-		void setClip(Rect4i rect);
-		void setClip();
+		void setClip(std::optional<Rect4i> rect = std::nullopt);
 
 		// Draws primitives
 		void draw(const std::shared_ptr<Material>& material, size_t numVertices, const void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
@@ -178,10 +178,12 @@ namespace Halley
 
 		HashMap<uint64_t, ConstantBufferEntry> constantBuffers;
 
+		RenderSnapshot* recordingSnapshot = nullptr;
+
 		void bind(RenderContext& context);
 		void unbind(RenderContext& context);
 		
-		void startRender();
+		void startRender(RenderSnapshot* snapshot);
 		void endRender();
 		
 		void resetPending();

@@ -12,6 +12,7 @@
 
 
 #include "api/video_api.h"
+#include "graphics/render_snapshot.h"
 #include "halley/maths/bezier.h"
 #include "halley/maths/polygon.h"
 #include "halley/support/profiler.h"
@@ -42,13 +43,18 @@ Painter::~Painter()
 {
 }
 
-void Painter::startRender()
+void Painter::startRender(RenderSnapshot* snapshot)
 {
 	Material::resetBindCache();
 	prevDrawCalls = nDrawCalls;
 	prevTriangles = nTriangles;
 	prevVertices = nVertices;
 	nDrawCalls = nTriangles = nVertices = 0;
+
+	recordingSnapshot = snapshot;
+	if (recordingSnapshot) {
+		recordingSnapshot->start();
+	}
 
 	refreshConstantBufferCache();
 	resetPending();
@@ -61,6 +67,12 @@ void Painter::endRender()
 	
 	ProfilerEvent event(ProfilerEventType::PainterEndRender);
 	doEndRender();
+
+	if (recordingSnapshot) {
+		recordingSnapshot->end();
+	}
+	recordingSnapshot = nullptr;
+
 	camera = Camera();
 	viewPort = Rect4i(0, 0, 0, 0);
 }
@@ -80,6 +92,9 @@ Rect4f Painter::getWorldViewAABB() const
 
 void Painter::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil)
 {
+	if (recordingSnapshot) {
+		recordingSnapshot->clear(colour, depth, stencil);
+	}
 	doClear(colour, depth, stencil);
 }
 
@@ -483,15 +498,19 @@ void Painter::makeSpaceForPendingIndices(size_t numIndices)
 
 void Painter::bind(RenderContext& context)
 {
+	if (recordingSnapshot) {
+		recordingSnapshot->bind(context);
+	}
+
 	// Setup camera
 	camera = context.getCamera();
-	camera.defaultRenderTarget = &context.getDefaultRenderTarget();
-
+	
 	// Set render target
-	activeRenderTarget = &camera.getActiveRenderTarget();
+	activeRenderTarget = &context.getDefaultRenderTarget();
 	if (!activeRenderTarget) {
 		throw Exception("No active render target", HalleyExceptions::Core);
 	}
+	camera.activeRenderTarget = activeRenderTarget;
 	activeRenderTarget->onBind(*this);
 
 	// Set viewport
@@ -505,9 +524,14 @@ void Painter::bind(RenderContext& context)
 
 void Painter::unbind(RenderContext& context)
 {
+	if (recordingSnapshot) {
+		recordingSnapshot->unbind(context);
+	}
+
 	flush();
 	activeRenderTarget->onUnbind(*this);
 	activeRenderTarget = nullptr;
+	camera.activeRenderTarget = nullptr;
 }
 
 void Painter::setRelativeClip(Rect4f rect)
@@ -527,14 +551,9 @@ void Painter::setRelativeClip(Rect4f rect)
 	setClip(Rect4i(Vector2i(Vector2f(x0, y0).floor()), Vector2i(Vector2f(x1, y1).ceil())));
 }
 
-void Painter::setClip(Rect4i rect)
+void Painter::setClip(std::optional<Rect4i> rect)
 {
 	pendingClip = rect;
-}
-
-void Painter::setClip()
-{
-	pendingClip = std::optional<Rect4i>();
 }
 
 Rect4i Painter::getRectangleForActiveRenderTarget(Rect4i r)
@@ -618,6 +637,10 @@ void Painter::resetPending()
 void Painter::executeDrawPrimitives(Material& material, size_t numVertices, gsl::span<char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads)
 {
 	Expects(primitiveType == PrimitiveType::Triangle);
+
+	if (recordingSnapshot) {
+		recordingSnapshot->draw(material, numVertices, vertexData, indices, primitiveType, allIndicesAreQuads);
+	}
 
 	ProfilerEvent event(ProfilerEventType::PainterDrawCall);
 
@@ -758,5 +781,8 @@ void Painter::updateClip()
 
 		flushPending();
 		setClip(targetClip, enableClip);
+		if (recordingSnapshot) {
+			recordingSnapshot->setClip(targetClip, enableClip);
+		}
 	}
 }

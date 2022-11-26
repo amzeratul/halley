@@ -96,18 +96,6 @@ Camera& Camera::setClippingPlanes(float near, float far)
 	return *this;
 }
 
-Camera& Camera::resetRenderTarget()
-{
-	renderTarget = nullptr;
-	return *this;
-}
-
-Camera& Camera::setRenderTarget(RenderTarget& target)
-{
-	renderTarget = &target;
-	return *this;
-}
-
 Camera& Camera::resetViewPort()
 {
 	viewPort.reset();
@@ -151,23 +139,9 @@ void Camera::updateProjection(bool flipVertical)
 	}
 }
 
-RenderTarget& Camera::getActiveRenderTarget() const
-{
-	return renderTarget ? *renderTarget : *defaultRenderTarget;
-}
-
-RenderTarget* Camera::getRenderTarget() const
-{
-	return renderTarget;
-}
-
 Rect4i Camera::getActiveViewPort() const
 {
-	if (!renderTarget && !defaultRenderTarget) {
-		return viewPort.value_or(Rect4i(-1, -1, 2, 2));
-	}
-
-	auto targetViewPort = getActiveRenderTarget().getViewPort();
+	auto targetViewPort = activeRenderTarget->getViewPort();
 	if (viewPort) {
 		return viewPort->intersection(targetViewPort);
 	} else {

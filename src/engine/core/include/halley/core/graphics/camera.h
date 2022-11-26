@@ -72,8 +72,6 @@ namespace Halley {
 
 		void updateProjection(bool flipVertical = true);
 
-		RenderTarget& getActiveRenderTarget() const;
-		RenderTarget* getRenderTarget() const;
 		Rect4i getActiveViewPort() const;
 
 		Rect4f getClippingRectangle() const;
@@ -91,7 +89,6 @@ namespace Halley {
 		float nearPlane = 0.1f;
 		float farPlane = 1000.0f;
 
-		RenderTarget* renderTarget = nullptr;
-		RenderTarget* defaultRenderTarget = nullptr;
+		RenderTarget* activeRenderTarget = nullptr;
 	};
 }
