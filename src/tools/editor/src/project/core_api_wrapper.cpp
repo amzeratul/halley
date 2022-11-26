@@ -69,6 +69,11 @@ void CoreAPIWrapper::removeProfilerCallback(IProfileCallback* callback)
 	parent.removeProfilerCallback(callback);
 }
 
+Future<std::unique_ptr<RenderSnapshot>> CoreAPIWrapper::requestRenderSnapshot()
+{
+	return parent.requestRenderSnapshot();
+}
+
 DevConClient* CoreAPIWrapper::getDevConClient() const
 {
 	return nullptr;

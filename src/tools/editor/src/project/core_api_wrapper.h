@@ -18,6 +18,7 @@ namespace Halley {
 		bool isDevMode() override;
 		void addProfilerCallback(IProfileCallback* callback) override;
 		void removeProfilerCallback(IProfileCallback* callback) override;
+		Future<std::unique_ptr<RenderSnapshot>> requestRenderSnapshot() override;
 		DevConClient* getDevConClient() const override;
 
 	private:

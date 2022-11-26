@@ -19,6 +19,7 @@
 #include <ctime>
 #include "../dummy/dummy_plugins.h"
 #include "entry/entry_point.h"
+#include "graphics/render_snapshot.h"
 #include "halley/core/devcon/devcon_client.h"
 #include "halley/net/connection/network_service.h"
 #include "halley/support/profiler.h"
@@ -468,6 +469,13 @@ void Core::render()
 			ProfilerEvent event(ProfilerEventType::CoreRender);
 
 			painter->startRender();
+
+			std::unique_ptr<RenderSnapshot> snapshot;
+			if (!pendingSnapshots.empty()) {
+				snapshot = std::make_unique<RenderSnapshot>();
+				painter->startRecording(snapshot.get());
+			}
+
 			if (currentStage) {
 				auto windowSize = api->video->getWindow().getDefinition().getSize();
 				if (windowSize != prevWindowSize) {
@@ -486,6 +494,11 @@ void Core::render()
 			}
 
 			painter->endRender();
+
+			if (snapshot) {
+				pendingSnapshots.front().setValue(std::move(snapshot));
+				pendingSnapshots.erase(pendingSnapshots.begin());
+			}
 		}
 	}
 }
@@ -688,4 +701,10 @@ void Core::addProfilerCallback(IProfileCallback* callback)
 void Core::removeProfilerCallback(IProfileCallback* callback)
 {
 	std_ex::erase_if(profileCallbacks, [&] (const auto& c) { return c == callback; });
+}
+
+Future<std::unique_ptr<RenderSnapshot>> Core::requestRenderSnapshot()
+{
+	auto& promise = pendingSnapshots.emplace_back();
+	return promise.getFuture();
 }

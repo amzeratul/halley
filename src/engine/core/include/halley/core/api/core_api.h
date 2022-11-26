@@ -5,8 +5,11 @@
 #include "halley/time/stopwatch.h"
 #include <cstdint>
 
+#include "halley/concurrency/future.h"
+
 namespace Halley
 {
+	class RenderSnapshot;
 	class DevConClient;
 	class Resources;
 	class Stage;
@@ -42,6 +45,8 @@ namespace Halley
 
 		virtual void addProfilerCallback(IProfileCallback* callback) = 0;
 		virtual void removeProfilerCallback(IProfileCallback* callback) = 0;
+
+		virtual Future<std::unique_ptr<RenderSnapshot>> requestRenderSnapshot() = 0;
 
 		virtual bool isDevMode() = 0;
 

@@ -16,6 +16,7 @@
 
 namespace Halley
 {
+	class RenderSnapshot;
 	class Game;
 	class HalleyAPI;
 	class Stage;
@@ -63,6 +64,8 @@ namespace Halley
 
 		void addProfilerCallback(IProfileCallback* callback) override;
 		void removeProfilerCallback(IProfileCallback* callback) override;
+
+		Future<std::unique_ptr<RenderSnapshot>> requestRenderSnapshot() override;
 
 		int getExitCode() const { return exitCode; }
 
@@ -121,6 +124,7 @@ namespace Halley
 		std::unique_ptr<DevConClient> devConClient;
 
 		Vector<IProfileCallback*> profileCallbacks;
+		Vector<Promise<std::unique_ptr<RenderSnapshot>>> pendingSnapshots;
 		
 		TreeMap<PluginType, Vector<std::unique_ptr<Plugin>>> plugins;
 		HalleyStatics statics;

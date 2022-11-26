@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stats_view.h"
+#include "halley/core/graphics/render_snapshot.h"
 
 namespace Halley
 {
@@ -13,9 +14,15 @@ namespace Halley
 		~FrameDebugger() override;
 
 		void update() override;
+		void draw(RenderContext& context) override;
 		void paint(Painter& painter) override;
+
+		bool isRendering() const;
 
 	private:
 		TextRenderer headerText;
+
+		std::unique_ptr<RenderSnapshot> renderSnapshot;
+		bool waiting = false;
 	};
 }
