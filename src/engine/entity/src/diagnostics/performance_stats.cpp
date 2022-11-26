@@ -601,8 +601,8 @@ void PerformanceStatsView::drawTopEvents(Painter& painter, Rect4f rect, Time t, 
 			.draw(painter);
 	};
 
-	std::array<float, 3> xPos = { 0, 350, 450 };
-	float barDrawX = 390;
+	const std::array<float, 3> xPos = { 0, 310, 360 };
+	const float barDrawX = xPos[2];
 	const int64_t granularity = 500'000;
 	int64_t maxTime = granularity;
 
@@ -625,20 +625,40 @@ void PerformanceStatsView::drawTopEvents(Painter& painter, Rect4f rect, Time t, 
 	Vector<ColourStringBuilder> columns;
 	columns.resize(systemLabels.size());
 
-	columns[0].append("Name:\n");
-	columns[1].append("Median:\n");
-	columns[2].append("Box Plot:\n");
+	columns[0].append("Name\n");
+	columns[1].append("Median\n");
+	columns[2].append("Box Plot\n");
 
-	// Vertical bars
-	for (int64_t time = 0; time < static_cast<int64_t>(curMaxTime); time += granularity) {
+	// Background
+	whitebox.clone()
+		.setPos(rect.getTopLeft() + Vector2f(barDrawX, lineHeight))
+		.scaleTo(rect.getSize() - Vector2f(barDrawX, lineHeight))
+		.setColour(Colour4f(0, 0, 0, 0.3f))
+		.draw(painter);
+
+	const size_t nRows = std::min(curEvents.size(), nToShow);
+
+	// Background guidelines
+	const size_t rowGroupSize = 1;
+	for (size_t i = 0; i < nRows; i += rowGroupSize * 2) {
+		const size_t lines = std::min(rowGroupSize, nRows - i);
 		whitebox.clone()
-			.setPos(rect.getTopLeft() + Vector2f(barDrawX + time * scale, lineHeight))
-			.scaleTo(Vector2f(1, rect.getHeight() - lineHeight))
-			.setColour(Colour4f(1, 1, 1, 0.25f))
+			.setPos(rect.getTopLeft() + Vector2f(0, (i + 1) * lineHeight))
+			.scaleTo(Vector2f(rect.getWidth(), lineHeight * lines))
+			.setColour(Colour4f(0, 0, 0, 0.1f))
 			.draw(painter);
 	}
 
-	for (size_t i = 0; i < std::min(curEvents.size(), nToShow); ++i) {
+	// Vertical bars
+	for (int i = 0; i <= curMaxTime / granularity + 0.01f; ++i) {
+		whitebox.clone()
+			.setPos(rect.getTopLeft() + Vector2f(barDrawX + i * (granularity * scale), lineHeight))
+			.scaleTo(Vector2f(1, rect.getHeight() - lineHeight))
+			.setColour(Colour4f(1, 1, 1, i % 2 == 0 ? 0.4f : 0.2f))
+			.draw(painter);
+	}
+
+	for (size_t i = 0; i < nRows; ++i) {
 		const auto& event = curEvents[i];
 		columns[0].append(toString(i + 1) + ": ");
 		columns[0].append(*event.name + (event.instances > 1 ? " x" + toString(event.instances) : String()) + "\n", event.colour.inverseMultiplyLuma(0.5f));
@@ -654,8 +674,12 @@ void PerformanceStatsView::drawTopEvents(Painter& painter, Rect4f rect, Time t, 
 
 	for (size_t i = 0; i < systemLabels.size(); ++i) {
 		auto [str, cols] = columns[i].moveResults();
-		systemLabels[i].setText(str).setColourOverride(cols);
-		systemLabels[i].setPosition(rect.getTopLeft() + Vector2f(xPos[i], 0)).draw(painter);
+		systemLabels[i]
+			.setText(str)
+			.setColourOverride(cols)
+			.setPosition(rect.getTopLeft() + Vector2f(xPos[i], 0))
+			.setAlignment(i == 1 ? 0.5f : 0.0f)
+			.draw(painter);
 	}
 }
 
