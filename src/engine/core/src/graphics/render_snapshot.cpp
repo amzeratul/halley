@@ -1,4 +1,6 @@
 #include "halley/core/graphics/render_snapshot.h"
+
+#include "graphics/render_target/render_target_texture.h"
 using namespace Halley;
 
 void RenderSnapshot::start()
@@ -57,6 +59,9 @@ void RenderSnapshot::playback(Painter& painter, std::optional<size_t> maxCommand
 {
 	painter.stopRecording();
 
+	const auto startCamera = painter.camera;
+	const auto startRenderTarget = painter.activeRenderTarget;
+
 	const size_t n = std::min(commands.size(), maxCommands.value_or(commands.size()));
 
 	for (size_t i = 0; i < n; ++i) {
@@ -85,6 +90,17 @@ void RenderSnapshot::playback(Painter& painter, std::optional<size_t> maxCommand
 				playDraw(painter, drawDatas[idx]);
 				break;
 			}
+		}
+	}
+
+	const auto finalRenderTarget = painter.activeRenderTarget;
+	painter.doUnbind();
+	painter.doBind(startCamera, *startRenderTarget);
+
+	if (startRenderTarget != finalRenderTarget) {
+		const auto* texRenderTarget = dynamic_cast<TextureRenderTarget*>(finalRenderTarget);
+		if (texRenderTarget) {
+			painter.blitTexture(texRenderTarget->getTexture(0));
 		}
 	}
 }

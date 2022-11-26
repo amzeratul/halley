@@ -46,6 +46,8 @@ void FrameDebugger::draw(RenderContext& context)
 			painter.stopRecording();
 			painter.clear(Colour4f());
 
+			n++;
+			framesToDraw = n % (renderSnapshot->getNumCommands() + 1);
 			renderSnapshot->playback(painter, framesToDraw);
 		});
 	}

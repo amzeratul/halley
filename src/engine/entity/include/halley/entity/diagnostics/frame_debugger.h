@@ -26,5 +26,6 @@ namespace Halley
 		bool waiting = false;
 		
 		size_t framesToDraw = 0;
+		size_t n = 0;
 	};
 }
