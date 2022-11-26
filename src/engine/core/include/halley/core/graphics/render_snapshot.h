@@ -53,11 +53,14 @@ namespace Halley {
             bool allIndicesAreQuads;
         };
 
-        Vector<std::pair<CommandType, uint16_t>> commands;
+        Vector<Vector<std::pair<CommandType, uint16_t>>> commands;
         Vector<BindData> bindDatas;
         Vector<SetClipData> setClipDatas;
         Vector<ClearData> clearDatas;
         Vector<DrawData> drawDatas;
+
+        Vector<std::pair<CommandType, uint16_t>>& getCurDrawCall();
+        void finishDrawCall();
 
         void playBind(Painter& painter, BindData& data);
         void playUnbind(Painter& painter);

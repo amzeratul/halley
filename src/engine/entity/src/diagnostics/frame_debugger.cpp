@@ -3,6 +3,7 @@
 #include "halley/core/api/halley_api.h"
 #include "halley/core/graphics/painter.h"
 #include "halley/core/resources/resources.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 FrameDebugger::FrameDebugger(Resources& resources, const HalleyAPI& api)
@@ -28,7 +29,9 @@ void FrameDebugger::update()
 		api.core->requestRenderSnapshot().then(Executors::getMainUpdateThread(), [&] (std::unique_ptr<RenderSnapshot> snapshot)
 		{
 			if (waiting) {
+				Logger::logDev("Captured frame in frame debugger");
 				renderSnapshot = std::move(snapshot);
+				framesToDraw = renderSnapshot->getNumCommands();
 				waiting = false;
 			}
 		});
@@ -42,7 +45,8 @@ void FrameDebugger::draw(RenderContext& context)
 		{
 			painter.stopRecording();
 			painter.clear(Colour4f());
-			renderSnapshot->playback(painter, {});
+
+			renderSnapshot->playback(painter, framesToDraw);
 		});
 	}
 
@@ -54,15 +58,16 @@ void FrameDebugger::paint(Painter& painter)
 	if (!isActive()) {
 		return;
 	}
+	painter.stopRecording();
 
 	headerText
-		.setPosition(Vector2f(10, 10))
+		.setPosition(Vector2f(10, 50))
 		.setOffset(Vector2f())
 		.setOutline(1.0f);
 
 	if (renderSnapshot) {
 		headerText
-			.setText("Halley Frame Debugger - Got " + toString(renderSnapshot->getNumCommands()) + " commands recorded.")
+			.setText("Halley Frame Debugger\nDraw call " + toString(framesToDraw) + "/" + toString(renderSnapshot->getNumCommands()))
 			.draw(painter);
 	} else {
 		headerText

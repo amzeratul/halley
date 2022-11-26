@@ -12,38 +12,40 @@ void RenderSnapshot::start()
 
 void RenderSnapshot::end()
 {
-	if (!commands.empty() && commands.back().first == CommandType::Bind) {
+	if (!commands.empty() && commands.back().empty()) {
 		commands.pop_back();
 	}
 }
 
 void RenderSnapshot::bind(RenderContext& context)
 {
-	commands.emplace_back(CommandType::Bind, static_cast<uint16_t>(bindDatas.size()));
+	getCurDrawCall().emplace_back(CommandType::Bind, static_cast<uint16_t>(bindDatas.size()));
 	bindDatas.push_back(BindData{ context.getCamera(), &context.getDefaultRenderTarget() });
 }
 
 void RenderSnapshot::unbind(RenderContext& context)
 {
-	commands.emplace_back(CommandType::Unbind, 0);
+	getCurDrawCall().emplace_back(CommandType::Unbind, 0);
 }
 
 void RenderSnapshot::setClip(Rect4i rect, bool enable)
 {
-	commands.emplace_back(CommandType::SetClip, static_cast<uint16_t>(setClipDatas.size()));
+	getCurDrawCall().emplace_back(CommandType::SetClip, static_cast<uint16_t>(setClipDatas.size()));
 	setClipDatas.push_back(SetClipData{ rect, enable });
 }
 
 void RenderSnapshot::clear(std::optional<Colour4f> colour, std::optional<float> depth, std::optional<uint8_t> stencil)
 {
-	commands.emplace_back(CommandType::Clear, static_cast<uint16_t>(clearDatas.size()));
+	getCurDrawCall().emplace_back(CommandType::Clear, static_cast<uint16_t>(clearDatas.size()));
 	clearDatas.push_back(ClearData{ colour, depth, stencil });
+	finishDrawCall();
 }
 
 void RenderSnapshot::draw(const Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitive, bool allIndicesAreQuads)
 {
-	commands.emplace_back(CommandType::Draw, static_cast<uint16_t>(drawDatas.size()));
+	getCurDrawCall().emplace_back(CommandType::Draw, static_cast<uint16_t>(drawDatas.size()));
 	drawDatas.push_back(DrawData{ material.clone(), numVertices, Vector<char>(vertexData.begin(), vertexData.end()), Vector<IndexType>(indices.begin(), indices.end()), primitive, allIndicesAreQuads });
+	finishDrawCall();
 }
 
 size_t RenderSnapshot::getNumCommands() const
@@ -56,32 +58,48 @@ void RenderSnapshot::playback(Painter& painter, std::optional<size_t> maxCommand
 	painter.stopRecording();
 
 	const size_t n = std::min(commands.size(), maxCommands.value_or(commands.size()));
+
 	for (size_t i = 0; i < n; ++i) {
-		const auto type = commands[i].first;
-		const auto idx = commands[i].second;
+		for (const auto& command: commands[i]) {
+			const auto type = command.first;
+			const auto idx = command.second;
 
-		switch (type) {
-		case CommandType::Bind:
-			playBind(painter, bindDatas[idx]);
-			break;
+			switch (type) {
+			case CommandType::Bind:
+				playBind(painter, bindDatas[idx]);
+				break;
 
-		case CommandType::Unbind:
-			playUnbind(painter);
-			break;
+			case CommandType::Unbind:
+				playUnbind(painter);
+				break;
 
-		case CommandType::Clear:
-			playClear(painter, clearDatas[idx]);
-			break;
+			case CommandType::Clear:
+				playClear(painter, clearDatas[idx]);
+				break;
 
-		case CommandType::SetClip:
-			playSetClip(painter, setClipDatas[idx]);
-			break;
+			case CommandType::SetClip:
+				playSetClip(painter, setClipDatas[idx]);
+				break;
 
-		case CommandType::Draw:
-			playDraw(painter, drawDatas[idx]);
-			break;
+			case CommandType::Draw:
+				playDraw(painter, drawDatas[idx]);
+				break;
+			}
 		}
 	}
+}
+
+Vector<std::pair<RenderSnapshot::CommandType, uint16_t>>& RenderSnapshot::getCurDrawCall()
+{
+	if (commands.empty()) {
+		commands.emplace_back();
+	}
+	return commands.back();
+}
+
+void RenderSnapshot::finishDrawCall()
+{
+	commands.emplace_back();
 }
 
 void RenderSnapshot::playBind(Painter& painter, BindData& data)

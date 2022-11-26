@@ -24,5 +24,7 @@ namespace Halley
 
 		std::unique_ptr<RenderSnapshot> renderSnapshot;
 		bool waiting = false;
+		
+		size_t framesToDraw = 0;
 	};
 }
