@@ -45,7 +45,15 @@ namespace Halley {
     public:
         using TimePoint = std::chrono::steady_clock::time_point;
     	using Duration = std::chrono::duration<int64_t, std::nano>;
-    	
+
+        enum class ThreadType {
+	        Update,
+            Render,
+            Audio,
+            Network,
+            Misc
+        };
+
 		class Event {
         public:
 	        String name;
@@ -65,6 +73,7 @@ namespace Halley {
     		TimePoint startTime;
     		TimePoint endTime;
     		Duration totalTime;
+            ThreadType type;
 
     		bool operator< (const ThreadInfo& other) const;
     	};

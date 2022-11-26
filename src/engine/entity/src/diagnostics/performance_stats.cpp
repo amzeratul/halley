@@ -28,8 +28,7 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI
 	api.core->addProfilerCallback(this);
 	
 	headerText = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
-	fpsLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f))
-		.setText("20\n\n30\n\n60").setAlignment(0.5f);
+	fpsLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f)).setOffset(Vector2f(0.5f, 0.5f));
 	graphLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f)).setAlignment(0.5f);
 	connLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
 
@@ -254,7 +253,7 @@ void PerformanceStatsView::drawTimeline(Painter& painter, Rect4f rect)
 {
 	const Vector2f displaySize = rect.getSize() - Vector2f(40, 0);
 	const auto pos = rect.getTopLeft();
-	const float maxFPS = 20.0f;
+	const float maxFPS = 30.0f;
 	const float scale = maxFPS / 1'000'000.0f * displaySize.y;
 
 	const Vector2f boxPos = pos + Vector2f(20, 0);
@@ -264,21 +263,21 @@ void PerformanceStatsView::drawTimeline(Painter& painter, Rect4f rect)
 		.scaleTo(displaySize + Vector2f(4, 4))
 		.draw(painter);
 
-	// 30 FPS bar
-	whitebox
-		.clone()
-		.setPosition(boxPos + Vector2f(0, displaySize.y / 3))
-		.scaleTo(Vector2f(displaySize.x, 1))
-		.setColour(Colour4f(0.75f))
-		.draw(painter);
+	auto drawBar = [&](Vector2f pos, const String& label)
+	{
+		whitebox
+			.clone()
+			.setPosition(pos)
+			.scaleTo(Vector2f(displaySize.x, 1))
+			.setColour(Colour4f(0.75f))
+			.draw(painter);
+		fpsLabel.setPosition(pos - Vector2f(15.0f, 0.0f)).setText(label).draw(painter);
+		fpsLabel.setPosition(pos + Vector2f(displaySize.x + 15.0f, 00.0f)).draw(painter);
+	};
 
-	// 60 FPS bar
-	whitebox
-		.clone()
-		.setPosition(boxPos + Vector2f(0, 2 * displaySize.y / 3))
-		.scaleTo(Vector2f(displaySize.x, 1))
-		.setColour(Colour4f(0.75f))
-		.draw(painter);
+	drawBar(boxPos, "30");
+	drawBar(boxPos + Vector2f(0, displaySize.y / 2), "60");
+	drawBar(boxPos + Vector2f(0, 3 * displaySize.y / 4), "120");
 
 	auto variableSprite = whitebox
 		.clone()
@@ -317,9 +316,6 @@ void PerformanceStatsView::drawTimeline(Painter& painter, Rect4f rect)
 			renderSprite.setPosition(p).setSize(s2).draw(painter);
 		}
 	}
-
-	fpsLabel.setPosition(pos + Vector2f(5.0f, 10.0f)).draw(painter);
-	fpsLabel.setPosition(pos + Vector2f(displaySize.x + 35.0f, 10.0f)).draw(painter);
 }
 
 void PerformanceStatsView::drawTimeGraph(Painter& painter, Rect4f rect)

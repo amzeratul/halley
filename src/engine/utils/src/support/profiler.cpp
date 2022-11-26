@@ -7,6 +7,9 @@ using namespace Halley;
 
 bool ProfilerData::ThreadInfo::operator<(const ThreadInfo& other) const
 {
+	if (type != other.type) {
+		return type < other.type;
+	}
 	return totalTime > other.totalTime;
 }
 
@@ -71,6 +74,7 @@ void ProfilerData::processEvents()
 		TimePoint end;
 		Duration totalTime;
 		bool first = true;
+		ThreadType type = ThreadType::Misc;
 	};
 	HashMap<std::thread::id, ThreadCurInfo> threadInfo;
 
@@ -107,12 +111,21 @@ void ProfilerData::processEvents()
 		if (e.type != ProfilerEventType::CoreVSync && e.depth == 0) {
 			curThread.totalTime += e.endTime - e.startTime;
 		}
+
+		// Process special events
+		if (e.type == ProfilerEventType::CoreVariableUpdate) {
+			curThread.type = ThreadType::Update;
+		} else if (e.type == ProfilerEventType::CoreRender) {
+			curThread.type = ThreadType::Render;
+		} else if (e.type == ProfilerEventType::AudioGenerateBuffer) {
+			curThread.type = ThreadType::Audio;
+		}
 	}
 
 	// Generate the thread list
 	for (const auto& [k, v]: threadInfo) {
 		const String name; // TODO
-		threads.emplace_back(ThreadInfo{ k, static_cast<int>(v.maxDepth), name, v.start, v.end, v.totalTime });
+		threads.emplace_back(ThreadInfo{ k, static_cast<int>(v.maxDepth), name, v.start, v.end, v.totalTime, v.type });
 	}
 	std::sort(threads.begin(), threads.end());
 }
