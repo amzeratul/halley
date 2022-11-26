@@ -25,6 +25,7 @@ set(SOURCES
 
         "src/components/transform_2d_component.cpp"
 
+        "src/diagnostics/frame_debugger.cpp"
         "src/diagnostics/performance_stats.cpp"
         "src/diagnostics/stats_view.cpp"
         "src/diagnostics/world_stats.cpp"
@@ -91,6 +92,7 @@ set(HEADERS
 
         "include/halley/entity/components/transform_2d_component.h"
 
+        "include/halley/entity/diagnostics/frame_debugger.h"
         "include/halley/entity/diagnostics/performance_stats.h"
         "include/halley/entity/diagnostics/stats_view.h"
         "include/halley/entity/diagnostics/world_stats.h"

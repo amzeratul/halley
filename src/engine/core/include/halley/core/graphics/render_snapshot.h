@@ -11,8 +11,12 @@ namespace Halley {
 
         void bind(RenderContext& context);
         void unbind(RenderContext& context);
+
+        void setClip(Rect4i rect, bool enable);
     	void clear(std::optional<Colour4f> colour, std::optional<float> depth, std::optional<uint8_t> stencil);
 	    void draw(Material& material, size_t size, gsl::span<char> span, gsl::span<const IndexType> indices, PrimitiveType primitive, bool allIndicesAreQuads);
-        void setClip(Rect4i rect, bool enable);
+
+        size_t getNumCommands() const;
+        void playback(Painter& painter, std::optional<size_t> maxCommands);
     };
 }

@@ -467,7 +467,7 @@ void Core::render()
 		{
 			ProfilerEvent event(ProfilerEventType::CoreRender);
 
-			painter->startRender(nullptr);
+			painter->startRender();
 			if (currentStage) {
 				auto windowSize = api->video->getWindow().getDefinition().getSize();
 				if (windowSize != prevWindowSize) {

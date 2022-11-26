@@ -108,6 +108,9 @@ namespace Halley
 		void pushDebugGroup(const String& id);
 		void popDebugGroup();
 
+		void startRecording(RenderSnapshot* snapshot);
+		void stopRecording();
+
 	protected:
 		virtual void startDrawCall() {}
 		virtual void endDrawCall() {}
@@ -183,7 +186,7 @@ namespace Halley
 		void bind(RenderContext& context);
 		void unbind(RenderContext& context);
 		
-		void startRender(RenderSnapshot* snapshot);
+		void startRender();
 		void endRender();
 		
 		void resetPending();

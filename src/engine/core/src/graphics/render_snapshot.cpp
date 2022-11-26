@@ -11,6 +11,21 @@ void RenderSnapshot::end()
 	// TODO
 }
 
+void RenderSnapshot::bind(RenderContext& context)
+{
+	// TODO
+}
+
+void RenderSnapshot::unbind(RenderContext& context)
+{
+	// TODO
+}
+
+void RenderSnapshot::setClip(Rect4i rect, bool enable)
+{
+	// TODO	
+}
+
 void RenderSnapshot::clear(std::optional<Colour4f> colour, std::optional<float> depth, std::optional<uint8_t> stencil)
 {
 	// TODO
@@ -21,17 +36,13 @@ void RenderSnapshot::draw(Material& material, size_t size, gsl::span<char> span,
 	// TODO
 }
 
-void RenderSnapshot::setClip(Rect4i rect, bool enable)
-{
-	// TODO	
-}
-
-void RenderSnapshot::bind(RenderContext& context)
+size_t RenderSnapshot::getNumCommands() const
 {
 	// TODO
+	return 0;
 }
 
-void RenderSnapshot::unbind(RenderContext& context)
+void RenderSnapshot::playback(Painter& painter, std::optional<size_t> maxCommands)
 {
 	// TODO
 }

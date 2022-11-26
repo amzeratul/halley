@@ -43,18 +43,13 @@ Painter::~Painter()
 {
 }
 
-void Painter::startRender(RenderSnapshot* snapshot)
+void Painter::startRender()
 {
 	Material::resetBindCache();
 	prevDrawCalls = nDrawCalls;
 	prevTriangles = nTriangles;
 	prevVertices = nVertices;
 	nDrawCalls = nTriangles = nVertices = 0;
-
-	recordingSnapshot = snapshot;
-	if (recordingSnapshot) {
-		recordingSnapshot->start();
-	}
 
 	refreshConstantBufferCache();
 	resetPending();
@@ -68,10 +63,7 @@ void Painter::endRender()
 	ProfilerEvent event(ProfilerEventType::PainterEndRender);
 	doEndRender();
 
-	if (recordingSnapshot) {
-		recordingSnapshot->end();
-	}
-	recordingSnapshot = nullptr;
+	stopRecording();
 
 	camera = Camera();
 	viewPort = Rect4i(0, 0, 0, 0);
@@ -478,6 +470,22 @@ void Painter::popDebugGroup()
 {
 	flush();
 	curDebugGroupStack.pop_back();
+}
+
+void Painter::startRecording(RenderSnapshot* snapshot)
+{
+	recordingSnapshot = snapshot;
+	if (recordingSnapshot) {
+		recordingSnapshot->start();
+	}
+}
+
+void Painter::stopRecording()
+{
+	if (recordingSnapshot) {
+		recordingSnapshot->end();
+		recordingSnapshot = nullptr;
+	}
 }
 
 void Painter::makeSpaceForPendingVertices(size_t numBytes)
