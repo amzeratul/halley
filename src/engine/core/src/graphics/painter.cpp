@@ -78,6 +78,11 @@ Rect4f Painter::getWorldViewAABB() const
 	return Rect4f(Vector2f(camPos.x, camPos.y) - size * 0.5f, size.x, size.y);
 }
 
+void Painter::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil)
+{
+	doClear(colour, depth, stencil);
+}
+
 static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
 {
 	return *reinterpret_cast<Vector4f*>(vertexAttrib + vertPosOffset);
@@ -591,7 +596,7 @@ void Painter::startDrawCall(const std::shared_ptr<Material>& material)
 void Painter::flushPending()
 {
 	if (verticesPending > 0) {
-		executeDrawPrimitives(*materialPending, verticesPending, vertexBuffer.data(), gsl::span<const IndexType>(indexBuffer.data(), indicesPending));
+		executeDrawPrimitives(*materialPending, verticesPending, gsl::span<char>(vertexBuffer), gsl::span<const IndexType>(indexBuffer.data(), indicesPending), PrimitiveType::Triangle, allIndicesAreQuads);
 	}
 
 	resetPending();
@@ -610,7 +615,7 @@ void Painter::resetPending()
 	pendingDebugGroupStack = curDebugGroupStack;
 }
 
-void Painter::executeDrawPrimitives(Material& material, size_t numVertices, void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType)
+void Painter::executeDrawPrimitives(Material& material, size_t numVertices, gsl::span<char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads)
 {
 	Expects(primitiveType == PrimitiveType::Triangle);
 
@@ -620,7 +625,7 @@ void Painter::executeDrawPrimitives(Material& material, size_t numVertices, void
 
 	// Load vertices
 	// BAD: This method should take const IndexType*!
-	setVertices(material.getDefinition(), numVertices, vertexData, indices.size(), const_cast<IndexType*>(indices.data()), allIndicesAreQuads);
+	setVertices(material.getDefinition(), numVertices, vertexData.data(), indices.size(), const_cast<IndexType*>(indices.data()), allIndicesAreQuads);
 
 	// Load material uniforms
 	setMaterialData(material);

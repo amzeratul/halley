@@ -32,6 +32,7 @@ namespace Halley
 	{
 		friend class RenderContext;
 		friend class Core;
+		friend class Material;
 
 		struct PainterVertexData
 		{
@@ -53,9 +54,7 @@ namespace Halley
 		const Camera& getCurrentCamera() const { return camera; }
 		Rect4f getWorldViewAABB() const;
 
-		virtual void clear(std::optional<Colour> colour, std::optional<float> depth = 1.0f, std::optional<uint8_t> stencil = 0) = 0;
-		virtual void setMaterialPass(const Material& material, int pass) = 0;
-		virtual void setMaterialData(const Material& material) = 0;
+		void clear(std::optional<Colour> colour, std::optional<float> depth = 1.0f, std::optional<uint8_t> stencil = 0);
 
 		void setRelativeClip(Rect4f rect);
 		void setClip(Rect4i rect);
@@ -116,6 +115,11 @@ namespace Halley
 		virtual void doEndRender() = 0;
 		virtual void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, IndexType* indices, bool standardQuadsOnly) = 0;
 		virtual void drawTriangles(size_t numIndices) = 0;
+
+		virtual void doClear(std::optional<Colour> colour, std::optional<float> depth = 1.0f, std::optional<uint8_t> stencil = 0) = 0;
+
+		virtual void setMaterialPass(const Material& material, int pass) = 0;
+		virtual void setMaterialData(const Material& material) = 0;
 
 		virtual void setViewPort(Rect4i rect) = 0;
 		virtual void setClip(Rect4i clip, bool enable) = 0;
@@ -183,7 +187,7 @@ namespace Halley
 		void resetPending();
 		void startDrawCall(const std::shared_ptr<Material>& material);
 		void flushPending();
-		void executeDrawPrimitives(Material& material, size_t numVertices, void* vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType = PrimitiveType::Triangle);
+		void executeDrawPrimitives(Material& material, size_t numVertices, gsl::span<char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads);
 
 		void makeSpaceForPendingVertices(size_t numBytes);
 		void makeSpaceForPendingIndices(size_t numIndices);

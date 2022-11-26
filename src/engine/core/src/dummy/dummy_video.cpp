@@ -104,7 +104,7 @@ DummyPainter::DummyPainter(VideoAPI& video, Resources& resources)
 	: Painter(video, resources)
 {}
 
-void DummyPainter::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil) {}
+void DummyPainter::doClear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil) {}
 
 void DummyPainter::setMaterialPass(const Material&, int) {}
 

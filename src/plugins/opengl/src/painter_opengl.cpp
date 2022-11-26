@@ -64,7 +64,7 @@ void PainterOpenGL::doEndRender()
 	glCheckError();
 }
 
-void PainterOpenGL::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil)
+void PainterOpenGL::doClear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil)
 {
 	glCheckError();
 

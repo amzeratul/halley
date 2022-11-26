@@ -40,7 +40,7 @@ void DX11Painter::doEndRender()
 	unbindRenderTargetTextureUnits(renderTargetTextureUnits.size(), 0);
 }
 
-void DX11Painter::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil)
+void DX11Painter::doClear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil)
 {
 	flush();
 	auto& renderTarget = dynamic_cast<IDX11RenderTarget&>(getActiveRenderTarget());
