@@ -57,6 +57,10 @@ void PerformanceStatsView::paint(Painter& painter)
 	ProfilerEvent event(ProfilerEventType::StatsView);
 	painter.setLogging(false);
 
+	const auto now = std::chrono::steady_clock::now();
+	const Time t = std::min(0.2, std::chrono::duration<Time>(now - lastUpdateTime).count());
+	lastUpdateTime = now;
+
 	if (active) {
 		whitebox.clone().setPosition(Vector2f(0, 0)).scaleTo(Vector2f(painter.getViewPort().getSize())).setColour(Colour4f(0, 0, 0, 0.5f)).draw(painter);
 
@@ -68,7 +72,7 @@ void PerformanceStatsView::paint(Painter& painter)
 		if (page == 0) {
 			drawTimeGraph(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220));
 		} else if (page == 1) {
-			drawTopSystems(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220));
+			drawTopSystems(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220), t);
 		} else if (page == 2) {
 			drawNetworkStats(painter, Rect4f(20, 200, rect.getWidth() - 40, rect.getHeight() - 220));
 		}
@@ -132,47 +136,58 @@ void PerformanceStatsView::setPage(int page)
 }
 
 PerformanceStatsView::EventHistoryData::EventHistoryData()
-	: average(120)
 {
 }
 
 void PerformanceStatsView::EventHistoryData::update(ProfilerEventType type, int64_t value)
 {
 	this->type = type;
-	const bool reset = average.pushValue(value);
-	if (reset) {
-		lastHighest = highest;
-		lastLowest = lowest;
-		highest = 0;
-		lowest = std::numeric_limits<int64_t>::max();
-	}
-	highest = std::max(highest, value);
-	lowest = std::min(lowest, value);
 	highestEver = std::max(highestEver, value);
 	lowestEver = std::min(lowestEver, value);
+
+	size_t sampleRange = 120;
+	if (samples.size() < sampleRange) {
+		samples.push_back(value);
+	} else {
+		samples[samplePos] = value;
+		samplePos = (samplePos + 1) % sampleRange;
+	}
+
+	sortedSamples = samples;
+	std::sort(sortedSamples.begin(), sortedSamples.end());
 }
 
-int64_t PerformanceStatsView::EventHistoryData::getAverage() const
+int64_t PerformanceStatsView::EventHistoryData::getMinimum() const
 {
-	return average.getAverage();
+	return sortedSamples.front();
 }
 
-int64_t PerformanceStatsView::EventHistoryData::getHighest() const
+int64_t PerformanceStatsView::EventHistoryData::getFirstQuartile() const
 {
-	return lastHighest;
+	return sortedSamples[sortedSamples.size() / 4];
 }
 
-int64_t PerformanceStatsView::EventHistoryData::getLowest() const
+int64_t PerformanceStatsView::EventHistoryData::getMedian() const
 {
-	return lastLowest;
+	return sortedSamples[sortedSamples.size() / 2];
 }
 
-int64_t PerformanceStatsView::EventHistoryData::getHighestEver() const
+int64_t PerformanceStatsView::EventHistoryData::getThirdQuartile() const
+{
+	return sortedSamples[sortedSamples.size() * 3 / 4];
+}
+
+int64_t PerformanceStatsView::EventHistoryData::getMaximum() const
+{
+	return sortedSamples.back();
+}
+
+int64_t PerformanceStatsView::EventHistoryData::getHistoricalMaximum() const
 {
 	return highestEver;
 }
 
-int64_t PerformanceStatsView::EventHistoryData::getLowestEver() const
+int64_t PerformanceStatsView::EventHistoryData::getHistoricalMinimum() const
 {
 	return lowestEver;
 }
@@ -473,21 +488,21 @@ Colour4f PerformanceStatsView::getNetworkStatsCol(const AckUnreliableConnectionS
 	}
 }
 
-void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
+void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect, Time t)
 {
 	struct CurEventData {
 		const String* name;
 		ProfilerEventType type;
-		int64_t avg;
-		int64_t high;
-		int64_t low;
-		int64_t highEver;
-		int64_t lowEver;
+		int64_t minimum;
+		int64_t firstQuartile;
+		int64_t median;
+		int64_t thirdQuartile;
+		int64_t maximum;
 		Colour4f colour;
 
 		bool operator< (const CurEventData& other) const
 		{
-			return avg > other.avg;
+			return median > other.median;
 		}
 	};
 
@@ -495,36 +510,48 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
 
 	const auto drawBoxPlot = [&] (const CurEventData& system, Rect4f rect, float scale, Colour4f colour)
 	{
-		const float low = system.low * scale;
-		const float lowEver = system.lowEver * scale;
-		const float high = system.high * scale;
-		const float highEver = system.highEver * scale;
-		const float avg = system.avg * scale;
+		const float minimum = system.minimum * scale;
+		const float firstQuartile = system.firstQuartile * scale;
+		const float median = system.median * scale;
+		const float thirdQuartile = system.thirdQuartile * scale;
+		const float maximum = system.maximum * scale;
 
 		const float everMargin = (rect.getHeight() - 1) / 2;
 
 		const auto transpColour = colour.inverseMultiplyLuma(0.5f).withAlpha(0.7f);
 
 		whitebox.clone()
-	        .setPos(rect.getTopLeft() + Vector2f(std::floor(low), 0))
-	        .scaleTo(Vector2f(std::floor(high) - std::floor(low), rect.getHeight()))
+	        .setPos(rect.getTopLeft() + Vector2f(std::floor(firstQuartile), 0))
+	        .scaleTo(Vector2f(std::floor(thirdQuartile) - std::floor(firstQuartile), rect.getHeight()))
 	        .setColour(transpColour)
 	        .draw(painter);
-
+		
 		whitebox.clone()
-			.setPos(rect.getTopLeft() + Vector2f(std::floor(lowEver), everMargin))
-			.scaleTo(Vector2f(std::floor(low) - std::floor(lowEver), 1))
+			.setPos(rect.getTopLeft() + Vector2f(std::floor(minimum), 0))
+			.scaleTo(Vector2f(1, rect.getHeight()))
 			.setColour(transpColour)
 			.draw(painter);
 
 		whitebox.clone()
-			.setPos(rect.getTopLeft() + Vector2f(std::floor(high), everMargin))
-			.scaleTo(Vector2f(std::floor(highEver) - std::floor(high), 1))
+			.setPos(rect.getTopLeft() + Vector2f(std::floor(minimum + 1), everMargin))
+			.scaleTo(Vector2f(std::floor(firstQuartile) - std::floor(minimum + 1), 1))
 			.setColour(transpColour)
 			.draw(painter);
 
 		whitebox.clone()
-			.setPos(rect.getTopLeft() + Vector2f(std::floor(avg) - 1.0f, 0))
+			.setPos(rect.getTopLeft() + Vector2f(std::floor(maximum - 1), 0))
+			.scaleTo(Vector2f(1, rect.getHeight()))
+			.setColour(transpColour)
+			.draw(painter);
+
+		whitebox.clone()
+			.setPos(rect.getTopLeft() + Vector2f(std::floor(thirdQuartile), everMargin))
+			.scaleTo(Vector2f(std::floor(maximum - 1) - std::floor(thirdQuartile), 1))
+			.setColour(transpColour)
+			.draw(painter);
+
+		whitebox.clone()
+			.setPos(rect.getTopLeft() + Vector2f(std::floor(median) - 1.0f, 0))
 			.scaleTo(Vector2f(2, rect.getHeight()))
 			.setColour(colour.inverseMultiplyLuma(0.2f))
 			.draw(painter);
@@ -539,13 +566,14 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
 	curEvents.reserve(eventHistory.size());
 	for (const auto& [k, v]: eventHistory) {
 		const auto col = getEventColour(v.getType());
-		curEvents.emplace_back(CurEventData{ &k, v.getType(), v.getAverage(), v.getHighest(), v.getLowest(), v.getHighestEver(), v.getLowestEver(), col });
-		maxTime = std::max(maxTime, curEvents.back().high);
+		curEvents.emplace_back(CurEventData{ &k, v.getType(), v.getMinimum(), v.getFirstQuartile(), v.getMedian(), v.getThirdQuartile(), v.getMaximum(), col });
+		maxTime = std::max(maxTime, curEvents.back().maximum);
 	}
 	std::sort(curEvents.begin(), curEvents.end());
 
-	const float maxTimeRounded = static_cast<float>(std::pow(2, std::ceil(std::log2(static_cast<float>(maxTime) / granularity))) * granularity);
-	const float scale = (rect.getWidth() - barDrawX) / maxTimeRounded;
+	const auto maxTimeTarget = std::ceil(static_cast<float>(maxTime) / granularity) * granularity;
+	curMaxTime = damp(curMaxTime, maxTimeTarget, 10.0f, static_cast<float>(t));
+	const float scale = (rect.getWidth() - barDrawX) / curMaxTime;
 
 	const auto lineHeight = systemLabels[0].getLineHeight();
 	const size_t nToShow = static_cast<size_t>(std::floor(rect.getHeight() / lineHeight));
@@ -554,11 +582,11 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
 	columns.resize(systemLabels.size());
 
 	columns[0].append("Name:\n");
-	columns[1].append("Avg:\n");
-	columns[2].append("Bounds:\n");
+	columns[1].append("Median:\n");
+	columns[2].append("Box Plot:\n");
 
 	// Vertical bars
-	for (int64_t time = 0; time < static_cast<int64_t>(maxTimeRounded); time += granularity) {
+	for (int64_t time = 0; time < static_cast<int64_t>(curMaxTime); time += granularity) {
 		whitebox.clone()
 			.setPos(rect.getTopLeft() + Vector2f(barDrawX + time * scale, lineHeight))
 			.scaleTo(Vector2f(1, rect.getHeight() - lineHeight))
@@ -570,7 +598,7 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
 		const auto& system = curEvents[i];
 		columns[0].append(toString(i + 1) + ": ");
 		columns[0].append(*system.name + "\n", system.colour.inverseMultiplyLuma(0.5f));
-		columns[1].append(getTimeLabel(system.avg) + " us\n", system.colour.inverseMultiplyLuma(0.5f));
+		columns[1].append(getTimeLabel(system.median) + " us\n", system.colour.inverseMultiplyLuma(0.5f));
 
 		const auto pos = rect.getTopLeft() + Vector2f(barDrawX, (i + 1) * lineHeight);
 		drawBoxPlot(system, Rect4f(pos, Vector2f(rect.getRight(), pos.y + lineHeight)).shrink(1.0f), scale, system.colour);

@@ -43,22 +43,24 @@ namespace Halley
 			
 			void update(ProfilerEventType type, int64_t value);
 
-			int64_t getAverage() const;
-			int64_t getHighest() const;
-			int64_t getLowest() const;
-			int64_t getHighestEver() const;
-			int64_t getLowestEver() const;
+			int64_t getMinimum() const;
+			int64_t getFirstQuartile() const;
+			int64_t getMedian() const;
+			int64_t getThirdQuartile() const;
+			int64_t getMaximum() const;
+
+			int64_t getHistoricalMinimum() const;
+			int64_t getHistoricalMaximum() const;
+
 			ProfilerEventType getType() const;
 
 		private:
 			ProfilerEventType type;
-			int64_t highest = 0;
-			int64_t lowest = std::numeric_limits<int64_t>::max();
-			int64_t lastHighest = 0;
-			int64_t lastLowest = 0;
+			Vector<int64_t> samples;
+			Vector<int64_t> sortedSamples;
+			size_t samplePos = 0;
 			int64_t highestEver = 0;
 			int64_t lowestEver = std::numeric_limits<int64_t>::max();
-			AveragingLatched<int64_t> average;
 		};
 		
 		TextRenderer headerText;
@@ -78,6 +80,9 @@ namespace Halley
 		HashMap<String, EventHistoryData> eventHistory;
 		std::shared_ptr<ProfilerData> lastProfileData;
 
+		float curMaxTime = 500000.0f;
+		std::chrono::steady_clock::time_point lastUpdateTime;
+
 		bool capturing = true;
 		int page = 0;
 
@@ -93,7 +98,7 @@ namespace Halley
 		void drawTimeGraph(Painter& painter, Rect4f rect);
 		void drawTimeGraphThreads(Painter& painter, Rect4f rect, Range<ProfilerData::TimePoint> timeRange);
 		void drawTimeGraphThread(Painter& painter, Rect4f rect, const ProfilerData::ThreadInfo& threadInfo, Range<ProfilerData::TimePoint> timeRange);
-		void drawTopSystems(Painter& painter, Rect4f rect);
+		void drawTopSystems(Painter& painter, Rect4f rect, Time t);
 		void drawNetworkStats(Painter& painter, Rect4f rect);
 		
 		Colour4f getEventColour(ProfilerEventType event) const;
