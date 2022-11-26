@@ -190,7 +190,7 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	const auto vsyncAvgTime = vsyncTime.getAverage();
 	const auto audioAvgTime = audioTime.getAverage();
 	const int curFPS = static_cast<int>(lround(1'000'000'000.0 / (frameAvgTime + vsyncAvgTime)));
-	const int maxFPS = static_cast<int>(lround(1'000'000'000.0 / frameAvgTime));
+	const int maxFPS = static_cast<int>(lround(1'000'000'000.0 / std::max(updateAvgTime, renderAvgTime)));
 
 	const auto updateCol = Colour4f(0.69f, 0.75f, 0.98f);
 	const auto renderCol = Colour4f(0.98f, 0.69f, 0.69f);
@@ -487,13 +487,13 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
 
 		bool operator< (const CurEventData& other) const
 		{
-			return high > other.high;
+			return avg > other.avg;
 		}
 	};
 
 	const auto getTimeLabel = [&] (int64_t t) { return toString((t + 500) / 1000); };
 
-	const auto drawAverageTimesBar = [&] (const CurEventData& system, Rect4f rect, float scale, Colour4f colour)
+	const auto drawBoxPlot = [&] (const CurEventData& system, Rect4f rect, float scale, Colour4f colour)
 	{
 		const float low = system.low * scale;
 		const float lowEver = system.lowEver * scale;
@@ -506,10 +506,10 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
 		const auto transpColour = colour.inverseMultiplyLuma(0.5f).withAlpha(0.7f);
 
 		whitebox.clone()
-		        .setPos(rect.getTopLeft() + Vector2f(std::floor(low), 0))
-		        .scaleTo(Vector2f(std::floor(high) - std::floor(low), rect.getHeight()))
-		        .setColour(transpColour)
-		        .draw(painter);
+	        .setPos(rect.getTopLeft() + Vector2f(std::floor(low), 0))
+	        .scaleTo(Vector2f(std::floor(high) - std::floor(low), rect.getHeight()))
+	        .setColour(transpColour)
+	        .draw(painter);
 
 		whitebox.clone()
 			.setPos(rect.getTopLeft() + Vector2f(std::floor(lowEver), everMargin))
@@ -573,7 +573,7 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
 		columns[1].append(getTimeLabel(system.avg) + " us\n", system.colour.inverseMultiplyLuma(0.5f));
 
 		const auto pos = rect.getTopLeft() + Vector2f(barDrawX, (i + 1) * lineHeight);
-		drawAverageTimesBar(system, Rect4f(pos, Vector2f(rect.getRight(), pos.y + lineHeight)).shrink(1.0f), scale, system.colour);
+		drawBoxPlot(system, Rect4f(pos, Vector2f(rect.getRight(), pos.y + lineHeight)).shrink(1.0f), scale, system.colour);
 	}
 
 	for (size_t i = 1; i < systemLabels.size(); ++i) {
