@@ -32,7 +32,7 @@ PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI
 	graphLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f)).setAlignment(0.5f);
 	connLabel = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 15, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
 
-	for (size_t i = 0; i < 8; ++i) {
+	for (size_t i = 0; i < 3; ++i) {
 		systemLabels.push_back(headerText.clone());
 	}
 
@@ -483,6 +483,7 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
 		int64_t low;
 		int64_t highEver;
 		int64_t lowEver;
+		Colour4f colour;
 
 		bool operator< (const CurEventData& other) const
 		{
@@ -492,40 +493,88 @@ void PerformanceStatsView::drawTopSystems(Painter& painter, Rect4f rect)
 
 	const auto getTimeLabel = [&] (int64_t t) { return toString((t + 500) / 1000); };
 
+	const auto drawAverageTimesBar = [&] (const CurEventData& system, Rect4f rect, float scale, Colour4f colour)
+	{
+		const float low = system.low * scale;
+		const float lowEver = system.lowEver * scale;
+		const float high = system.high * scale;
+		const float highEver = system.highEver * scale;
+		const float avg = system.avg * scale;
+
+		const float everMargin = (rect.getHeight() - 1) / 2;
+
+		const auto transpColour = colour.inverseMultiplyLuma(0.5f).withAlpha(0.7f);
+
+		whitebox.clone()
+		        .setPos(rect.getTopLeft() + Vector2f(std::floor(low), 0))
+		        .scaleTo(Vector2f(std::floor(high) - std::floor(low), rect.getHeight()))
+		        .setColour(transpColour)
+		        .draw(painter);
+
+		whitebox.clone()
+			.setPos(rect.getTopLeft() + Vector2f(std::floor(lowEver), everMargin))
+			.scaleTo(Vector2f(std::floor(low) - std::floor(lowEver), 1))
+			.setColour(transpColour)
+			.draw(painter);
+
+		whitebox.clone()
+			.setPos(rect.getTopLeft() + Vector2f(std::floor(high), everMargin))
+			.scaleTo(Vector2f(std::floor(highEver) - std::floor(high), 1))
+			.setColour(transpColour)
+			.draw(painter);
+
+		whitebox.clone()
+			.setPos(rect.getTopLeft() + Vector2f(std::floor(avg) - 1.0f, 0))
+			.scaleTo(Vector2f(2, rect.getHeight()))
+			.setColour(colour.inverseMultiplyLuma(0.2f))
+			.draw(painter);
+	};
+
+	std::array<float, 3> xPos = { 0, 350, 450 };
+	float barDrawX = 390;
+	const int64_t granularity = 500'000;
+	int64_t maxTime = granularity;
+
 	Vector<CurEventData> curEvents;
 	curEvents.reserve(eventHistory.size());
 	for (const auto& [k, v]: eventHistory) {
-		curEvents.emplace_back(CurEventData{ &k, v.getType(), v.getAverage(), v.getHighest(), v.getLowest(), v.getHighestEver(), v.getLowestEver() });
+		const auto col = getEventColour(v.getType());
+		curEvents.emplace_back(CurEventData{ &k, v.getType(), v.getAverage(), v.getHighest(), v.getLowest(), v.getHighestEver(), v.getLowestEver(), col });
+		maxTime = std::max(maxTime, curEvents.back().high);
 	}
 	std::sort(curEvents.begin(), curEvents.end());
+
+	const float maxTimeRounded = static_cast<float>(std::pow(2, std::ceil(std::log2(static_cast<float>(maxTime) / granularity))) * granularity);
+	const float scale = (rect.getWidth() - barDrawX) / maxTimeRounded;
+
+	const auto lineHeight = systemLabels[0].getLineHeight();
+	const size_t nToShow = static_cast<size_t>(std::floor(rect.getHeight() / lineHeight));
 
 	Vector<ColourStringBuilder> columns;
 	columns.resize(systemLabels.size());
 
 	columns[0].append("Name:\n");
 	columns[1].append("Avg:\n");
-	columns[2].append("Loc Min:\n");
-	columns[3].append("Loc Max:\n");
-	columns[4].append("Loc Var:\n");
-	columns[5].append("Min:\n");
-	columns[6].append("Max:\n");
-	columns[7].append("Var:\n");
+	columns[2].append("Bounds:\n");
 
-	const size_t nToShow = 25;
+	// Vertical bars
+	for (int64_t time = 0; time < static_cast<int64_t>(maxTimeRounded); time += granularity) {
+		whitebox.clone()
+			.setPos(rect.getTopLeft() + Vector2f(barDrawX + time * scale, lineHeight))
+			.scaleTo(Vector2f(1, rect.getHeight() - lineHeight))
+			.setColour(Colour4f(1, 1, 1, 0.25f))
+			.draw(painter);
+	}
+
 	for (size_t i = 0; i < nToShow; ++i) {
 		const auto& system = curEvents[i];
 		columns[0].append(toString(i + 1) + ": ");
-		columns[0].append(*system.name + "\n", getEventColour(system.type).inverseMultiplyLuma(0.5f));
-		columns[1].append(getTimeLabel(system.avg) + " us\n");
-		columns[2].append(getTimeLabel(system.low) + " us\n");
-		columns[3].append(getTimeLabel(system.high) + " us\n");
-		columns[4].append(getTimeLabel(system.high - system.low) + " us\n");
-		columns[5].append(getTimeLabel(system.lowEver) + " us\n");
-		columns[6].append(getTimeLabel(system.highEver) + " us\n");
-		columns[7].append(getTimeLabel(system.highEver - system.lowEver) + " us\n");
-	}
+		columns[0].append(*system.name + "\n", system.colour.inverseMultiplyLuma(0.5f));
+		columns[1].append(getTimeLabel(system.avg) + " us\n", system.colour.inverseMultiplyLuma(0.5f));
 
-	std::array<float, 8> xPos = { 0, 350, 450, 550, 650, 750, 850, 950 };
+		const auto pos = rect.getTopLeft() + Vector2f(barDrawX, (i + 1) * lineHeight);
+		drawAverageTimesBar(system, Rect4f(pos, Vector2f(rect.getRight(), pos.y + lineHeight)).shrink(1.0f), scale, system.colour);
+	}
 
 	for (size_t i = 1; i < systemLabels.size(); ++i) {
 		systemLabels[i].setAlignment(1);
