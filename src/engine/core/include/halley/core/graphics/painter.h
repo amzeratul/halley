@@ -34,6 +34,7 @@ namespace Halley
 		friend class RenderContext;
 		friend class Core;
 		friend class Material;
+		friend class RenderSnapshot;
 
 		struct PainterVertexData
 		{
@@ -185,6 +186,8 @@ namespace Halley
 
 		void bind(RenderContext& context);
 		void unbind(RenderContext& context);
+		void doBind(const Camera& camera, RenderTarget& renderTarget);
+		void doUnbind();
 		
 		void startRender();
 		void endRender();

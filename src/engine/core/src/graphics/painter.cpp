@@ -510,11 +510,25 @@ void Painter::bind(RenderContext& context)
 		recordingSnapshot->bind(context);
 	}
 
+	doBind(context.getCamera(), context.getDefaultRenderTarget());
+}
+
+void Painter::unbind(RenderContext& context)
+{
+	if (recordingSnapshot) {
+		recordingSnapshot->unbind(context);
+	}
+
+	doUnbind();
+}
+
+void Painter::doBind(const Camera& cam, RenderTarget& renderTarget)
+{
 	// Setup camera
-	camera = context.getCamera();
+	camera = cam;
 	
 	// Set render target
-	activeRenderTarget = &context.getDefaultRenderTarget();
+	activeRenderTarget = &renderTarget;
 	if (!activeRenderTarget) {
 		throw Exception("No active render target", HalleyExceptions::Core);
 	}
@@ -530,16 +544,14 @@ void Painter::bind(RenderContext& context)
 	updateProjection();
 }
 
-void Painter::unbind(RenderContext& context)
+void Painter::doUnbind()
 {
-	if (recordingSnapshot) {
-		recordingSnapshot->unbind(context);
+	if (activeRenderTarget) {
+		flush();
+		activeRenderTarget->onUnbind(*this);
+		activeRenderTarget = nullptr;
+		camera.activeRenderTarget = nullptr;
 	}
-
-	flush();
-	activeRenderTarget->onUnbind(*this);
-	activeRenderTarget = nullptr;
-	camera.activeRenderTarget = nullptr;
 }
 
 void Painter::setRelativeClip(Rect4f rect)

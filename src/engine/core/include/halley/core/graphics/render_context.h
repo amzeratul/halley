@@ -5,10 +5,12 @@ namespace Halley
 {
 	class Camera;
 	class RenderTarget;
+	class RenderSnapshot;
 
 	class RenderContext
 	{
 		friend class Core;
+		friend class RenderSnapshot;
 
 	public:
 		void bind(const std::function<void(Painter&)>& f)
