@@ -515,6 +515,8 @@ void Painter::bind(RenderContext& context)
 
 void Painter::unbind(RenderContext& context)
 {
+	flush();
+
 	if (recordingSnapshot) {
 		recordingSnapshot->unbind(context);
 	}
@@ -547,7 +549,6 @@ void Painter::doBind(const Camera& cam, RenderTarget& renderTarget)
 void Painter::doUnbind()
 {
 	if (activeRenderTarget) {
-		flush();
 		activeRenderTarget->onUnbind(*this);
 		activeRenderTarget = nullptr;
 		camera.activeRenderTarget = nullptr;

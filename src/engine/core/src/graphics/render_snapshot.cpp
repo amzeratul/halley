@@ -61,7 +61,9 @@ void RenderSnapshot::playback(Painter& painter, std::optional<size_t> maxCommand
 
 	const auto startCamera = painter.camera;
 	const auto startRenderTarget = painter.activeRenderTarget;
-	const auto startClip = painter.curClip;
+
+	painter.setClip();
+	painter.updateClip();
 
 	const size_t n = std::min(commands.size(), maxCommands.value_or(commands.size()));
 
@@ -97,8 +99,7 @@ void RenderSnapshot::playback(Painter& painter, std::optional<size_t> maxCommand
 	const auto finalRenderTarget = painter.activeRenderTarget;
 	painter.doUnbind();
 	painter.doBind(startCamera, *startRenderTarget);
-	painter.setClip(startClip);
-	painter.updateClip();
+	painter.setClip(Rect4i(), false);
 
 	if (startRenderTarget != finalRenderTarget) {
 		const auto* texRenderTarget = dynamic_cast<TextureRenderTarget*>(finalRenderTarget);
@@ -139,7 +140,6 @@ void RenderSnapshot::playClear(Painter& painter, ClearData& data)
 void RenderSnapshot::playSetClip(Painter& painter, SetClipData& data)
 {
 	painter.setClip(data.rect, data.enable);
-	painter.updateClip();
 }
 
 void RenderSnapshot::playDraw(Painter& painter, DrawData& data)
