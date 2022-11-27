@@ -13,7 +13,7 @@ namespace Halley
 		FrameDebugger(Resources& resources, const HalleyAPI& api);
 		~FrameDebugger() override;
 
-		void update() override;
+		void update(Time t) override;
 		void draw(RenderContext& context) override;
 		void paint(Painter& painter) override;
 
@@ -25,7 +25,6 @@ namespace Halley
 		std::unique_ptr<RenderSnapshot> renderSnapshot;
 		bool waiting = false;
 		
-		size_t framesToDraw = 0;
-		size_t n = 0;
+		int framesToDraw = 0;
 	};
 }

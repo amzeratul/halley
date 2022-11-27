@@ -47,12 +47,6 @@ PerformanceStatsView::~PerformanceStatsView()
 	api.core->removeProfilerCallback(this);
 }
 
-void PerformanceStatsView::update()
-{
-	//capturing = !active;
-	StatsView::update();
-}
-
 void PerformanceStatsView::paint(Painter& painter)
 {
 	ProfilerEvent event(ProfilerEventType::StatsView);

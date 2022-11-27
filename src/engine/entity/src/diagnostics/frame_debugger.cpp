@@ -16,10 +16,9 @@ FrameDebugger::~FrameDebugger()
 {
 }
 
-void FrameDebugger::update()
+void FrameDebugger::update(Time t)
 {
 	if (!isActive()) {
-		renderSnapshot = {};
 		waiting = false;
 		return;
 	}
@@ -31,10 +30,15 @@ void FrameDebugger::update()
 			if (waiting) {
 				Logger::logDev("Captured frame in frame debugger");
 				renderSnapshot = std::move(snapshot);
-				framesToDraw = renderSnapshot->getNumCommands();
+				framesToDraw = static_cast<int>(renderSnapshot->getNumCommands());
 				waiting = false;
 			}
 		});
+	}
+
+	if (renderSnapshot) {
+		const int dy = input->getAxisRepeat(1);
+		framesToDraw = clamp(framesToDraw + dy, 0, static_cast<int>(renderSnapshot->getNumCommands()));
 	}
 }
 
@@ -45,9 +49,7 @@ void FrameDebugger::draw(RenderContext& context)
 		{
 			painter.stopRecording();
 			painter.clear(Colour4f());
-
-			n++;
-			framesToDraw = n % (renderSnapshot->getNumCommands() + 1);
+			
 			renderSnapshot->playback(painter, framesToDraw);
 		});
 	}
@@ -58,6 +60,7 @@ void FrameDebugger::draw(RenderContext& context)
 void FrameDebugger::paint(Painter& painter)
 {
 	if (!isActive()) {
+		renderSnapshot = {};
 		return;
 	}
 	painter.stopRecording();
@@ -67,15 +70,20 @@ void FrameDebugger::paint(Painter& painter)
 		.setOffset(Vector2f())
 		.setOutline(1.0f);
 
+	ColourStringBuilder str;
+	str.append("Halley Frame Debugger\n");
+
 	if (renderSnapshot) {
-		headerText
-			.setText("Halley Frame Debugger\nDraw call " + toString(framesToDraw) + "/" + toString(renderSnapshot->getNumCommands()))
-			.draw(painter);
+		str.append("Draw call " + toString(framesToDraw) + " / " + toString(renderSnapshot->getNumCommands()));
 	} else {
-		headerText
-			.setText("Halley Frame Debugger - Waiting for snapshot...")
-			.draw(painter);
+		str.append("Waiting for snapshot...");
 	}
+
+	auto [strText, strCol] = str.moveResults();
+	headerText
+		.setText(std::move(strText))
+		.setColourOverride(std::move(strCol))
+		.draw(painter);
 }
 
 bool FrameDebugger::isRendering() const

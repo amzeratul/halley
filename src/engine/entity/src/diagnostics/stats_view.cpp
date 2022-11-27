@@ -26,17 +26,22 @@ void ScreenOverlay::draw(RenderContext& context)
 	});
 }
 
+void ScreenOverlay::update(Time t)
+{
+}
+
 Vector2f ScreenOverlay::getScreenSize() const
 {
 	return screenSize;
 }
+
 
 StatsView::StatsView(Resources& resources, const HalleyAPI& api)
 	: resources(resources)
 	, api(api)
 {}
 
-void StatsView::update()
+void StatsView::update(Time t)
 {
 }
 
@@ -48,6 +53,9 @@ void StatsView::draw(RenderContext& context)
 void StatsView::setActive(bool active)
 {
 	this->active = active;
+	if (input) {
+		input->setEnabled(active);
+	}
 }
 
 bool StatsView::isActive() const
@@ -58,6 +66,14 @@ bool StatsView::isActive() const
 void StatsView::setWorld(const World* world)
 {
 	this->world = world;
+}
+
+void StatsView::setInput(std::shared_ptr<InputVirtual> input, const StatsViewControls& controls)
+{
+	Vector<int> axes = { controls.xAxis, controls.yAxis };
+	Vector<int> buttons = { controls.accept, controls.cancel, controls.prevTab, controls.nextTab };
+	this->input = std::make_shared<InputExclusive>(input, axes, buttons);
+	this->input->setEnabled(active);
 }
 
 String StatsView::formatTime(int64_t ns) const

@@ -18,8 +18,7 @@ namespace Halley
 	public:
 		PerformanceStatsView(Resources& resources, const HalleyAPI& api);
 		~PerformanceStatsView() override;
-
-		void update() override;
+		
 		void paint(Painter& painter) override;
 
 		void onProfileData(std::shared_ptr<ProfilerData> data) override;
