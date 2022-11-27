@@ -1,5 +1,6 @@
 #include "halley/core/graphics/render_snapshot.h"
 
+#include "graphics/material/material_definition.h"
 #include "graphics/render_target/render_target_texture.h"
 using namespace Halley;
 
@@ -14,8 +15,15 @@ void RenderSnapshot::start()
 
 void RenderSnapshot::end()
 {
-	if (!commands.empty() && commands.back().empty()) {
-		commands.pop_back();
+	if (!commands.empty()) {
+		if (commands.back().empty()) {
+			commands.pop_back();
+		} else {
+			const auto lastType = commands.back().back().first;
+			if (lastType != CommandType::Draw && lastType != CommandType::Clear) {
+				commands.pop_back();
+			}
+		}
 	}
 }
 
@@ -57,11 +65,62 @@ size_t RenderSnapshot::getNumCommands() const
 
 RenderSnapshot::CommandInfo RenderSnapshot::getCommandInfo(size_t commandIdx) const
 {
-	const auto& command = commands.at(commandIdx);
-
 	CommandInfo result;
 
-	// TODO
+	const auto& command = commands.at(commandIdx);
+	result.type = command.empty() ? CommandType::Undefined : command.back().first;
+
+	for (auto& entry: command) {
+		if (entry.first == CommandType::Bind || entry.first == CommandType::Unbind) {
+			result.hasBindChange = true;
+		}
+		if (entry.first == CommandType::SetClip) {
+			result.hasClipChange = true;
+		}
+	}
+
+	if (commandIdx == 0) {
+		result.reason = Reason::First;
+	} else {
+		if (result.type == CommandType::Clear) {
+			result.reason = Reason::Clear;
+		} else if (result.type == CommandType::Draw) {
+			if (result.hasBindChange) {
+				result.reason = Reason::ChangeBind;
+			} else if (result.hasClipChange) {
+				result.reason = Reason::ChangeClip;
+			} else {
+				const auto& prev = commands.at(commandIdx - 1);
+				const auto prevType = prev.empty() ? CommandType::Undefined : prev.back().first;
+				if (prevType == CommandType::Clear) {
+					result.reason = Reason::AfterClear;
+				} else if (prevType == CommandType::Draw) {
+					const auto& curDraw = drawDatas[commands.at(commandIdx).back().second];
+					const auto& prevDraw = drawDatas[commands.at(commandIdx - 1).back().second];
+
+					if (curDraw.material->getDefinition().getName() != prevDraw.material->getDefinition().getName()) {
+						result.reason = Reason::MaterialDefinition;
+					} else if (curDraw.material->getTextures() != prevDraw.material->getTextures()) {
+						result.reason = Reason::Textures;
+					} else if (curDraw.material != prevDraw.material) {
+						result.reason = Reason::MaterialParameters;
+					}
+				}
+			}
+		}
+	}
+
+	if (result.type == CommandType::Clear) {
+		const auto& curClear = clearDatas[commands.at(commandIdx).back().second];
+		result.clearData = curClear;
+	} else if (result.type == CommandType::Draw) {
+		const auto& curDraw = drawDatas[commands.at(commandIdx).back().second];
+		result.materialDefinition = curDraw.material->getDefinition().getName();
+		result.materialHash = curDraw.material->getHash();
+		for (const auto& tex: curDraw.material->getTextures()) {
+			result.textures.push_back(tex->getAssetId());
+		}
+	}
 
 	return result;
 }

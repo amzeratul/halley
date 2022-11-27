@@ -7,6 +7,7 @@ namespace Halley {
     class RenderSnapshot {
     public:
     	enum class CommandType : uint8_t {
+            Undefined,
 	        Bind,
             Unbind,
             SetClip,
@@ -15,6 +16,7 @@ namespace Halley {
         };
 
         enum class Reason : uint8_t {
+            Unknown,
 	        First,
             Clear,
             AfterClear,
@@ -32,9 +34,11 @@ namespace Halley {
         };
 
         struct CommandInfo {
-            CommandType type;
-            Reason reason;
-            uint64_t materialHash;
+            CommandType type = CommandType::Undefined;
+            Reason reason = Reason::Unknown;
+            bool hasBindChange = false;
+            bool hasClipChange = false;
+            uint64_t materialHash = 0;
             String materialDefinition;
             Vector<String> textures;
             std::optional<ClearData> clearData;

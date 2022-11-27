@@ -21,6 +21,7 @@ namespace Halley
 
 	private:
 		TextRenderer headerText;
+		Sprite whitebox;
 
 		std::unique_ptr<RenderSnapshot> renderSnapshot;
 		bool waiting = false;
