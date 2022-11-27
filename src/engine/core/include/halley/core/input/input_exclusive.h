@@ -27,4 +27,33 @@ namespace Halley {
         Vector<uint32_t> activeBinds;
         String label;
     };
+
+    class InputExclusive : public InputDevice {
+    public:
+        InputExclusive(std::shared_ptr<InputVirtual> input, Vector<int> axes, Vector<int> buttons);
+
+	    InputType getInputType() const override;
+
+    	void setEnabled(bool enabled);
+        bool isEnabled() const override;
+
+        size_t getNumberButtons() override;
+	    size_t getNumberAxes() override;
+	    String getButtonName(int code) const override;
+
+    	bool isButtonPressed(InputButton code) override;
+	    bool isButtonPressedRepeat(InputButton code) override;
+	    bool isButtonReleased(InputButton code) override;
+	    bool isButtonDown(InputButton code) override;
+
+    	float getAxis(int) override;
+	    int getAxisRepeat(int) override;
+
+    private:
+        std::shared_ptr<InputVirtual> input;
+        Vector<int> axes;
+        Vector<int> buttons;
+        Vector<std::unique_ptr<InputExclusiveButton>> buttonsExclusive;
+        bool enabled = false;
+    };
 }
