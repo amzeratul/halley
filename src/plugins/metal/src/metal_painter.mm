@@ -70,8 +70,8 @@ void MetalPainter::endEncoding() {
 }
 
 void MetalPainter::setVertices(
-	const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices,
-	unsigned short* indices, bool standardQuadsOnly
+	const MaterialDefinition& material, size_t numVertices, const void* vertexData, size_t numIndices,
+	const IndexType* indices, bool standardQuadsOnly
 ) {
 	Expects(numVertices > 0);
 	Expects(numIndices >= numVertices);

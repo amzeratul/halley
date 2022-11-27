@@ -112,7 +112,7 @@ void DummyPainter::doStartRender() {}
 
 void DummyPainter::doEndRender() {}
 
-void DummyPainter::setVertices(const MaterialDefinition&, size_t, void*, size_t, unsigned short*, bool) {}
+void DummyPainter::setVertices(const MaterialDefinition&, size_t, const void*, size_t, const IndexType*, bool) {}
 
 void DummyPainter::drawTriangles(size_t) {}
 

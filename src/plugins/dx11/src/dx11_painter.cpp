@@ -121,7 +121,7 @@ void DX11Painter::setMaterialData(const Material& material)
 	}
 }
 
-void DX11Painter::setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly)
+void DX11Painter::setVertices(const MaterialDefinition& material, size_t numVertices, const void* vertexData, size_t numIndices, const IndexType* indices, bool standardQuadsOnly)
 {
 	const size_t stride = material.getVertexStride();
 	const size_t vertexDataSize = stride * numVertices;
@@ -141,7 +141,7 @@ void DX11Painter::setVertices(const MaterialDefinition& material, size_t numVert
 
 	{
 		auto& ib = indexBuffers[curBuffer];
-		ib.setData(gsl::as_bytes(gsl::span<unsigned short>(indices, numIndices)));
+		ib.setData(gsl::as_bytes(gsl::span<const unsigned short>(indices, numIndices)));
 		dx11Video.getDeviceContext().IASetIndexBuffer(ib.getBuffer(), DXGI_FORMAT_R16_UINT, ib.getOffset());
 	}
 }

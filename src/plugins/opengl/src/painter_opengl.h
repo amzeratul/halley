@@ -25,7 +25,7 @@ namespace Halley
 		void setClip(Rect4i clip, bool enable) override;
 
 	protected:
-		void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly) override;
+		void setVertices(const MaterialDefinition& material, size_t numVertices, const void* vertexData, size_t numIndices, const IndexType* indices, bool standardQuadsOnly) override;
 		void drawTriangles(size_t numIndices) override;
 		void setViewPort(Rect4i rect) override;
 		void onUpdateProjection(Material& material, bool hashChanged) override;

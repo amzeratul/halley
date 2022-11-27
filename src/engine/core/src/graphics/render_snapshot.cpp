@@ -55,7 +55,18 @@ size_t RenderSnapshot::getNumCommands() const
 	return commands.size();
 }
 
-void RenderSnapshot::playback(Painter& painter, std::optional<size_t> maxCommands)
+RenderSnapshot::CommandInfo RenderSnapshot::getCommandInfo(size_t commandIdx) const
+{
+	const auto& command = commands.at(commandIdx);
+
+	CommandInfo result;
+
+	// TODO
+
+	return result;
+}
+
+void RenderSnapshot::playback(Painter& painter, std::optional<size_t> maxCommands) const
 {
 	painter.stopRecording();
 
@@ -122,27 +133,27 @@ void RenderSnapshot::finishDrawCall()
 	commands.emplace_back();
 }
 
-void RenderSnapshot::playBind(Painter& painter, BindData& data)
+void RenderSnapshot::playBind(Painter& painter, const BindData& data) const
 {
 	painter.doBind(data.camera, *data.renderTarget);
 }
 
-void RenderSnapshot::playUnbind(Painter& painter)
+void RenderSnapshot::playUnbind(Painter& painter) const
 {
 	painter.doUnbind();
 }
 
-void RenderSnapshot::playClear(Painter& painter, ClearData& data)
+void RenderSnapshot::playClear(Painter& painter, const ClearData& data) const
 {
 	painter.clear(data.colour, data.depth, data.stencil);
 }
 
-void RenderSnapshot::playSetClip(Painter& painter, SetClipData& data)
+void RenderSnapshot::playSetClip(Painter& painter, const SetClipData& data) const
 {
 	painter.setClip(data.rect, data.enable);
 }
 
-void RenderSnapshot::playDraw(Painter& painter, DrawData& data)
+void RenderSnapshot::playDraw(Painter& painter, const DrawData& data) const
 {
 	painter.executeDrawPrimitives(*data.material, data.numVertices, data.vertexData, data.indices, data.primitive, data.allIndicesAreQuads);
 }

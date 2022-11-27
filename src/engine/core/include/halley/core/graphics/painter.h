@@ -117,7 +117,7 @@ namespace Halley
 		virtual void endDrawCall() {}
 		virtual void doStartRender() = 0;
 		virtual void doEndRender() = 0;
-		virtual void setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, IndexType* indices, bool standardQuadsOnly) = 0;
+		virtual void setVertices(const MaterialDefinition& material, size_t numVertices, const void* vertexData, size_t numIndices, const IndexType* indices, bool standardQuadsOnly) = 0;
 		virtual void drawTriangles(size_t numIndices) = 0;
 
 		virtual void doClear(std::optional<Colour> colour, std::optional<float> depth = 1.0f, std::optional<uint8_t> stencil = 0) = 0;
@@ -195,7 +195,7 @@ namespace Halley
 		void resetPending();
 		void startDrawCall(const std::shared_ptr<Material>& material);
 		void flushPending();
-		void executeDrawPrimitives(Material& material, size_t numVertices, gsl::span<char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads);
+		void executeDrawPrimitives(Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads);
 
 		void makeSpaceForPendingVertices(size_t numBytes);
 		void makeSpaceForPendingIndices(size_t numIndices);

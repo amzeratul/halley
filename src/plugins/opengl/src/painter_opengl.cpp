@@ -174,7 +174,7 @@ void PainterOpenGL::onUpdateProjection(Material& material, bool hashChanged)
 	}
 }
 
-void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVertices, void* vertexData, size_t numIndices, unsigned short* indices, bool standardQuadsOnly)
+void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVertices, const void* vertexData, size_t numIndices, const IndexType* indices, bool standardQuadsOnly)
 {
 	Expects(numVertices > 0);
 	Expects(numIndices >= numVertices);
@@ -183,21 +183,21 @@ void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVe
 
 	// Load indices into VBO
 	if (standardQuadsOnly) {
-		if (stdQuadElementBuffer.getSize() < numIndices * sizeof(unsigned short)) {
+		if (stdQuadElementBuffer.getSize() < numIndices * sizeof(IndexType)) {
 			size_t indicesToAllocate = nextPowerOf2(numIndices);
-			Vector<unsigned short> tmp(indicesToAllocate);
+			Vector<IndexType> tmp(indicesToAllocate);
 			generateQuadIndices(0, indicesToAllocate / 6, tmp.data());
-			stdQuadElementBuffer.setData(gsl::as_bytes(gsl::span<unsigned short>(tmp)));
+			stdQuadElementBuffer.setData(gsl::as_bytes(gsl::span<IndexType>(tmp)));
 		} else {
 			stdQuadElementBuffer.bind();
 		}
 	} else {
-		elementBuffer.setData(gsl::as_bytes(gsl::span<unsigned short>(indices, numIndices)));
+		elementBuffer.setData(gsl::as_bytes(gsl::span<const IndexType>(indices, numIndices)));
 	}
 
 	// Load vertices into VBO
 	size_t bytesSize = numVertices * material.getVertexStride();
-	vertexBuffer.setData(gsl::as_bytes(gsl::span<char>(static_cast<char*>(vertexData), bytesSize)));
+	vertexBuffer.setData(gsl::as_bytes(gsl::span<const char>(static_cast<const char*>(vertexData), bytesSize)));
 
 	// Set attributes
 	setupVertexAttributes(material);

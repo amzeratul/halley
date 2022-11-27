@@ -483,6 +483,7 @@ void Painter::startRecording(RenderSnapshot* snapshot)
 void Painter::stopRecording()
 {
 	if (recordingSnapshot) {
+		flush();
 		recordingSnapshot->end();
 		recordingSnapshot = nullptr;
 	}
@@ -655,7 +656,7 @@ void Painter::resetPending()
 	pendingDebugGroupStack = curDebugGroupStack;
 }
 
-void Painter::executeDrawPrimitives(Material& material, size_t numVertices, gsl::span<char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads)
+void Painter::executeDrawPrimitives(Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitiveType, bool allIndicesAreQuads)
 {
 	Expects(primitiveType == PrimitiveType::Triangle);
 
@@ -668,8 +669,7 @@ void Painter::executeDrawPrimitives(Material& material, size_t numVertices, gsl:
 	startDrawCall();
 
 	// Load vertices
-	// BAD: This method should take const IndexType*!
-	setVertices(material.getDefinition(), numVertices, vertexData.data(), indices.size(), const_cast<IndexType*>(indices.data()), allIndicesAreQuads);
+	setVertices(material.getDefinition(), numVertices, vertexData.data(), indices.size(), indices.data(), allIndicesAreQuads);
 
 	// Load material uniforms
 	setMaterialData(material);
