@@ -10,6 +10,8 @@ namespace Halley
 	public:
 		virtual ~TextureRenderTarget() {}
 
+		String getName() const override;
+
 		void setTarget(int attachmentNumber, std::shared_ptr<Texture> tex);
 		const std::shared_ptr<Texture>& getTexture(int attachmentNumber) const;
 

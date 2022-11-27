@@ -52,6 +52,9 @@ namespace Halley
 		MaterialDataBlockType getType() const;
 		uint64_t getHash() const;
 
+		bool operator==(const MaterialDataBlock& other) const;
+		bool operator!=(const MaterialDataBlock& other) const;
+
 	private:
 		Bytes data;
 		Vector<int> addresses;
@@ -96,6 +99,7 @@ namespace Halley
 
 		void setPassEnabled(int pass, bool enabled);
 		bool isPassEnabled(int pass) const;
+		const std::bitset<8>& getPassesEnabled() const { return passEnabled; }
 
 		MaterialDepthStencil getDepthStencil(int pass) const;
 		void setStencilReferenceOverride(std::optional<uint8_t> reference);

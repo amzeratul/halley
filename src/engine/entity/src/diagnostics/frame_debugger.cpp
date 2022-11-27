@@ -52,7 +52,7 @@ void FrameDebugger::draw(RenderContext& context)
 			painter.stopRecording();
 			painter.clear(Colour4f());
 			
-			renderSnapshot->playback(painter, framesToDraw);
+			lastPlaybackResult = renderSnapshot->playback(painter, framesToDraw);
 		});
 	}
 
@@ -99,7 +99,6 @@ void FrameDebugger::paint(Painter& painter)
 	painter.stopRecording();
 
 	ColourStringBuilder str;
-	str.append("Halley Frame Debugger\n");
 
 	if (renderSnapshot) {
 		str.append("Command " + toString(framesToDraw) + " / " + toString(renderSnapshot->getNumCommands()) + "\n");
@@ -110,16 +109,21 @@ void FrameDebugger::paint(Painter& painter)
 
 			str.append(getCommandType(info.type), green);
 			str.append(" [");
-			str.append(getReason(info.reason), red);
+			str.append(getReason(info.reason), green);
 			str.append("]");
 
 			if (info.type == RenderSnapshot::CommandType::Draw) {
+				str.append("\nPolygons: ");
+				str.append(toString(info.numTriangles), green);
+				str.append(info.numTriangles == 1 ? " triangle" : " triangles");
 				str.append("\nMaterial: ");
-				str.append(info.materialDefinition, green);
+				str.append(info.materialDefinition, info.hasMaterialDefChange ? red : green);
 				str.append(" [");
-				str.append("0x" + toString(info.materialHash, 16).asciiUpper(), green);
+				str.append("0x" + toString(info.materialHash, 16, 16).asciiUpper(), info.hasMaterialParamsChange ? red : green);
 				str.append("]\nTextures: ");
-				str.append(String::concatList(info.textures, ", "), green);
+				str.append(String::concatList(info.textures, ", "), info.hasTextureChange ? red : green);
+				str.append("\nRender target: ");
+				str.append(lastPlaybackResult.finalRenderTargetName, info.hasBindChange ? red : green);
 			} else if (info.type == RenderSnapshot::CommandType::Clear) {
 				if (info.clearData->colour) {
 					str.append("\nClear Colour: ");
@@ -131,7 +135,7 @@ void FrameDebugger::paint(Painter& painter)
 				}
 				if (info.clearData->stencil) {
 					str.append("\nClear Stencil: ");
-					str.append("0x" + toString(*info.clearData->stencil, 16).asciiUpper(), green);
+					str.append("0x" + toString(int(*info.clearData->stencil), 16, 2).asciiUpper(), green);
 				}
 			}
 		}

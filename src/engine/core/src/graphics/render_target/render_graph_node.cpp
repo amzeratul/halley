@@ -189,6 +189,7 @@ std::shared_ptr<Texture> RenderGraphNode::makeTexture(VideoAPI& video, RenderGra
 	desc.isDepthStencil = type == RenderGraphPinType::DepthStencilBuffer;
 	desc.useFiltering = false; // TODO: allow filtering
 	texture->load(std::move(desc));
+	texture->setAssetId(id);
 
 	return texture;
 }
@@ -251,7 +252,9 @@ void RenderGraphNode::renderNodePaintMethod(const RenderGraph& graph, const Rend
 		getTargetRenderContext(rc).with(*camera).bind([this, paintMethod] (Painter& painter)
 		{
 			painter.pushDebugGroup(id);
-			painter.clear(colourClear, depthClear, stencilClear);
+			if (colourClear || depthClear || stencilClear) {
+				painter.clear(colourClear, depthClear, stencilClear);
+			}
 			(*paintMethod)(painter);
 			painter.popDebugGroup();
 		});

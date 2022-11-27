@@ -79,6 +79,39 @@ RenderSnapshot::CommandInfo RenderSnapshot::getCommandInfo(size_t commandIdx) co
 		}
 	}
 
+	auto getLastDraw = [&]() -> const DrawData*
+	{
+		for (int i = static_cast<int>(commandIdx); --i >= 0; ) {
+			if (commands.at(i).back().first == CommandType::Draw) {
+				return &drawDatas[commands.at(i).back().second];
+			}
+		}
+		return nullptr;
+	};
+
+	if (result.type == CommandType::Clear) {
+		const auto& curClear = clearDatas[commands.at(commandIdx).back().second];
+		result.clearData = curClear;
+	} else if (result.type == CommandType::Draw) {
+		const auto& curDraw = drawDatas[commands.at(commandIdx).back().second];
+		const auto curMat = curDraw.material;
+		result.materialDefinition = curMat->getDefinition().getName();
+		result.materialHash = curMat->getHash();
+		for (const auto& tex: curMat->getTextures()) {
+			result.textures.push_back(tex->getAssetId());
+		}
+		result.numTriangles = curDraw.indices.size() / 3;
+
+		if (const auto* prevDraw = getLastDraw()) {
+			const auto prevMat = prevDraw->material;
+			result.hasMaterialDefChange = curMat->getDefinition().getName() != prevMat->getDefinition().getName();
+			result.hasTextureChange = curMat->getTextures() != prevMat->getTextures();
+			result.hasMaterialParamsChange = curMat->getDataBlocks() != prevMat->getDataBlocks()
+				|| curMat->getPassesEnabled() != prevMat->getPassesEnabled()
+				|| curMat->getStencilReferenceOverride() != prevMat->getStencilReferenceOverride();
+		}
+	}
+
 	if (commandIdx == 0) {
 		result.reason = Reason::First;
 	} else {
@@ -95,37 +128,22 @@ RenderSnapshot::CommandInfo RenderSnapshot::getCommandInfo(size_t commandIdx) co
 				if (prevType == CommandType::Clear) {
 					result.reason = Reason::AfterClear;
 				} else if (prevType == CommandType::Draw) {
-					const auto& curDraw = drawDatas[commands.at(commandIdx).back().second];
-					const auto& prevDraw = drawDatas[commands.at(commandIdx - 1).back().second];
-
-					if (curDraw.material->getDefinition().getName() != prevDraw.material->getDefinition().getName()) {
+					if (result.hasMaterialDefChange) {
 						result.reason = Reason::MaterialDefinition;
-					} else if (curDraw.material->getTextures() != prevDraw.material->getTextures()) {
-						result.reason = Reason::Textures;
-					} else if (curDraw.material != prevDraw.material) {
+					} else if (result.hasMaterialParamsChange) {
 						result.reason = Reason::MaterialParameters;
+					} else if (result.hasTextureChange) {
+						result.reason = Reason::Textures;
 					}
 				}
 			}
 		}
 	}
 
-	if (result.type == CommandType::Clear) {
-		const auto& curClear = clearDatas[commands.at(commandIdx).back().second];
-		result.clearData = curClear;
-	} else if (result.type == CommandType::Draw) {
-		const auto& curDraw = drawDatas[commands.at(commandIdx).back().second];
-		result.materialDefinition = curDraw.material->getDefinition().getName();
-		result.materialHash = curDraw.material->getHash();
-		for (const auto& tex: curDraw.material->getTextures()) {
-			result.textures.push_back(tex->getAssetId());
-		}
-	}
-
 	return result;
 }
 
-void RenderSnapshot::playback(Painter& painter, std::optional<size_t> maxCommands) const
+RenderSnapshot::PlaybackResult RenderSnapshot::playback(Painter& painter, std::optional<size_t> maxCommands) const
 {
 	painter.stopRecording();
 
@@ -177,6 +195,8 @@ void RenderSnapshot::playback(Painter& painter, std::optional<size_t> maxCommand
 			painter.blitTexture(texRenderTarget->getTexture(0));
 		}
 	}
+
+	return PlaybackResult{ finalRenderTarget ? finalRenderTarget->getName() : "" };
 }
 
 Vector<std::pair<RenderSnapshot::CommandType, uint16_t>>& RenderSnapshot::getCurDrawCall()

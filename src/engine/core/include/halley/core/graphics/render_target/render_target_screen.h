@@ -29,6 +29,8 @@ namespace Halley {
 		ScreenRenderTarget(Rect4i viewPort) : viewPort(viewPort) {}
 		virtual ~ScreenRenderTarget() {}
 
+		String getName() const override { return "Screen"; }
+
 		Rect4i getViewPort() const override { return viewPort; }
 
 		bool hasColourBuffer(int attachmentNumber) const override { return true; }

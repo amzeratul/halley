@@ -84,6 +84,16 @@ uint64_t MaterialDataBlock::getHash() const
 	return hash;
 }
 
+bool MaterialDataBlock::operator==(const MaterialDataBlock& other) const
+{
+	return getData() == other.getData();
+}
+
+bool MaterialDataBlock::operator!=(const MaterialDataBlock& other) const
+{
+	return getData() != other.getData();
+}
+
 bool MaterialDataBlock::setUniform(size_t offset, ShaderParameterType type, const void* srcData)
 {
 	Expects(dataBlockType != MaterialDataBlockType::SharedExternal);
@@ -223,24 +233,18 @@ bool Material::operator==(const Material& other) const
 		}
 		
 		// Different textures (only need to check pointer equality)
-		for (size_t i = 0; i < textures.size(); ++i) {
-			if (textures[i] != other.textures[i]) {
-				return false;
-			}
+		if (textures != other.textures) {
+			return false;
 		}
 
 		// Different data
-		for (size_t i = 0; i < dataBlocks.size(); ++i) {
-			if (dataBlocks[i].getData() != other.dataBlocks[i].getData()) {
-				return false;
-			}
+		if (dataBlocks != other.dataBlocks) {
+			return false;
 		}
 
 		// Different passes enabled
-		for (size_t i = 0; i < passEnabled.size(); ++i) {
-			if (passEnabled[i] != other.passEnabled[i]) {
-				return false;
-			}
+		if (passEnabled != other.passEnabled) {
+			return false;
 		}
 
 		// Must be the same

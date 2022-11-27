@@ -4,6 +4,15 @@
 
 using namespace Halley;
 
+String TextureRenderTarget::getName() const
+{
+	String name = "Tex";
+	if (!colourBuffer.empty() && colourBuffer[0]) {
+		name += ":" + colourBuffer[0]->getAssetId();
+	}
+	return name;
+}
+
 void TextureRenderTarget::setTarget(int attachmentNumber, std::shared_ptr<Texture> tex)
 {
 	Expects(attachmentNumber >= 0);

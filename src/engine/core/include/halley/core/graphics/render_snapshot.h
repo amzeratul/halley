@@ -38,10 +38,18 @@ namespace Halley {
             Reason reason = Reason::Unknown;
             bool hasBindChange = false;
             bool hasClipChange = false;
+            bool hasMaterialDefChange = false;
+            bool hasMaterialParamsChange = false;
+            bool hasTextureChange = false;
+            size_t numTriangles = 0;
             uint64_t materialHash = 0;
             String materialDefinition;
             Vector<String> textures;
             std::optional<ClearData> clearData;
+        };
+
+        struct PlaybackResult {
+            String finalRenderTargetName;
         };
 
         void start();
@@ -57,7 +65,7 @@ namespace Halley {
         size_t getNumCommands() const;
         CommandInfo getCommandInfo(size_t commandIdx) const;
 
-        void playback(Painter& painter, std::optional<size_t> maxCommands) const;
+        PlaybackResult playback(Painter& painter, std::optional<size_t> maxCommands) const;
 
     private:
         struct BindData {

@@ -24,6 +24,7 @@ namespace Halley
 		Sprite whitebox;
 
 		std::unique_ptr<RenderSnapshot> renderSnapshot;
+		RenderSnapshot::PlaybackResult lastPlaybackResult;
 		bool waiting = false;
 		
 		int framesToDraw = 0;
