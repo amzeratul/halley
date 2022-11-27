@@ -148,3 +148,42 @@ InputDevice* InputDevice::getParent() const
 {
 	return nullptr;
 }
+
+InputAxisRepeater::InputAxisRepeater(Time firstDelay, Time repeatInterval0, Time secondDelay, Time repeatInterval1)
+	: firstDelay(firstDelay)
+	, secondDelay(secondDelay)
+	, repeatInterval0(repeatInterval0)
+	, repeatInterval1(repeatInterval1)
+{
+}
+
+int InputAxisRepeater::update(float value, Time t)
+{
+	const int intValue = value > 0.5f ? 1 : (value < -0.5f ? -1 : 0);
+	const bool changed = intValue != lastValue;
+	lastValue = intValue;
+
+	if (intValue != 0) {
+		const auto prevInterval = timeHeld > secondDelay ? repeatInterval1 : (timeHeld > firstDelay ? repeatInterval0 : std::numeric_limits<Time>::infinity());
+
+		timeHeld += t;
+		timeSinceLastRepeat += t;
+
+		const auto interval = timeHeld > secondDelay ? repeatInterval1 : (timeHeld > firstDelay ? repeatInterval0 : std::numeric_limits<Time>::infinity());
+		if (interval != prevInterval) {
+			timeSinceLastRepeat = 0;
+			return intValue;
+		}
+
+		if (timeSinceLastRepeat > interval) {
+			timeSinceLastRepeat -= interval;
+			return intValue;
+		} else {
+			return changed ? intValue : 0;
+		}
+	} else {
+		timeHeld = 0;
+		timeSinceLastRepeat = 0;
+		return 0;
+	}
+}

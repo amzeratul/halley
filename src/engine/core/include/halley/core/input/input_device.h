@@ -139,5 +139,21 @@ namespace Halley {
 	private:
 		uint16_t deviceId = 0;
 	};
+
+	class InputAxisRepeater {
+	public:
+		InputAxisRepeater(Time firstDelay = 0.2, Time repeatInterval0 = 0.1, Time secondDelay = std::numeric_limits<Time>::infinity(), Time repeatInterval1 = 0);
+		int update(float value, Time t);
+
+	private:
+		Time firstDelay;
+		Time secondDelay;
+		Time repeatInterval0;
+		Time repeatInterval1;
+
+		int lastValue = 0;
+		Time timeHeld = 0;
+		Time timeSinceLastRepeat;
+	};
 	
 }

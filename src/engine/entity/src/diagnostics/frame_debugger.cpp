@@ -9,6 +9,7 @@ using namespace Halley;
 
 FrameDebugger::FrameDebugger(Resources& resources, const HalleyAPI& api)
 	: StatsView(resources, api)
+	, yAxisRepeater(0.2, 0.1, 1.0, 0)
 {
 	headerText = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
 	whitebox = Sprite().setImage(resources, "whitebox.png");
@@ -39,7 +40,7 @@ void FrameDebugger::update(Time t)
 	}
 
 	if (renderSnapshot) {
-		const int dy = input->getAxisRepeat(1);
+		const int dy = yAxisRepeater.update(input->getAxis(1), t);
 		framesToDraw = clamp(framesToDraw + dy, 0, static_cast<int>(renderSnapshot->getNumCommands()));
 	}
 }
