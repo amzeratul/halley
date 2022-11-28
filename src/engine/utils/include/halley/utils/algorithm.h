@@ -140,7 +140,7 @@ namespace Halley
 			return end;
 		}
 
-		const WeightType pick = rng.get(0, totalWeight);
+		const WeightType pick = rng.get(static_cast<decltype(totalWeight)>(0), totalWeight);
 		WeightType accum = 0;
 		for (Iter iter = begin; iter != end; ) {
 			accum += weights[iter - begin];
@@ -159,13 +159,13 @@ namespace Halley
 	}
 
 	template<typename Iter, typename W, typename R>
-	auto pickRandomWeighted(Iter begin, Iter end, W weightFunc, R& rng)
+	auto pickRandomWeighted(Iter begin, Iter end, W weightFunc, R& rng) -> Iter
 	{
 		return pickRandomWeighted(begin, end, weightFunc, rng, DeReference<Iter>());
 	}
 
 	template<typename Iter, typename W, typename R>
-	auto pickRandomWeightedOneCall(Iter begin, Iter end, W weightFunc, R& rng)
+	auto pickRandomWeightedOneCall(Iter begin, Iter end, W weightFunc, R& rng) -> Iter
 	{
 		return pickRandomWeightedOneCall(begin, end, weightFunc, rng, DeReference<Iter>());
 	}
