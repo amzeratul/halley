@@ -46,8 +46,9 @@ const String& InputExclusiveButton::getLabel() const
 
 
 
-InputExclusive::InputExclusive(std::shared_ptr<InputVirtual> input, Vector<int> axes, Vector<int> buttons)
+InputExclusive::InputExclusive(std::shared_ptr<InputVirtual> input, InputPriority priority, Vector<int> axes, Vector<int> buttons)
 	: input(std::move(input))
+	, priority(priority)
 	, axes(std::move(axes))
 	, buttons(std::move(buttons))
 {
@@ -64,7 +65,7 @@ void InputExclusive::setEnabled(bool enabled)
 		if (enabled) {
 			buttonsExclusive.reserve(buttons.size());
 			for (auto button: buttons) {
-				buttonsExclusive.push_back(input->makeExclusiveButton(button, InputPriority::Maximum, ""));
+				buttonsExclusive.push_back(input->makeExclusiveButton(button, priority, ""));
 			}
 		}
 	}

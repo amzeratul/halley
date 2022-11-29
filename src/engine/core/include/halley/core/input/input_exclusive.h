@@ -30,7 +30,7 @@ namespace Halley {
 
     class InputExclusive : public InputDevice {
     public:
-        InputExclusive(std::shared_ptr<InputVirtual> input, Vector<int> axes, Vector<int> buttons);
+        InputExclusive(std::shared_ptr<InputVirtual> input, InputPriority priority, Vector<int> axes, Vector<int> buttons);
 
 	    InputType getInputType() const override;
 
@@ -51,6 +51,7 @@ namespace Halley {
 
     private:
         std::shared_ptr<InputVirtual> input;
+        InputPriority priority;
         Vector<int> axes;
         Vector<int> buttons;
         Vector<std::unique_ptr<InputExclusiveButton>> buttonsExclusive;

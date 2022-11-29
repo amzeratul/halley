@@ -72,7 +72,7 @@ void StatsView::setInput(std::shared_ptr<InputVirtual> input, const StatsViewCon
 {
 	Vector<int> axes = { controls.xAxis, controls.yAxis };
 	Vector<int> buttons = { controls.accept, controls.cancel, controls.prevTab, controls.nextTab };
-	this->input = std::make_shared<InputExclusive>(input, axes, buttons);
+	this->input = std::make_shared<InputExclusive>(input, InputPriority::Maximum, axes, buttons);
 	this->input->setEnabled(active);
 }
 
