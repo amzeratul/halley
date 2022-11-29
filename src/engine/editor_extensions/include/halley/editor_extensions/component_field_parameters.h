@@ -11,12 +11,19 @@ namespace Halley {
 
 	class ComponentDataRetriever {
 	public:
-		using Retriever = std::function<ConfigNode&(bool)>;
+		enum class RetrievalType {
+			Read,
+			Write,
+			ReadParent
+		};
+
+		using Retriever = std::function<ConfigNode&(RetrievalType)>;
 		
 		ComponentDataRetriever(ConfigNode& componentData, String fieldName, String labelName);
 		ComponentDataRetriever getSubIndex(size_t index) const;
 		ComponentDataRetriever getSubKey(const String& key) const;
-		
+
+		const ConfigNode& getParentFieldData() const;
 		const ConfigNode& getFieldData() const;
 		ConfigNode& getWriteableFieldData() const;
 		const String& getName() const;

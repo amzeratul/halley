@@ -10,9 +10,11 @@ ComponentDataRetriever::ComponentDataRetriever(ConfigNode& componentData, String
 	, labelName(std::move(labelName))
 	, name(fieldName)
 {
-	retriever = [&componentData, fieldName] (bool writeable) -> ConfigNode&
+	retriever = [&componentData, fieldName] (RetrievalType type) -> ConfigNode&
 	{
-		if (writeable) {
+		if (type == RetrievalType::ReadParent) {
+			return componentData;
+		} else if (type == RetrievalType::Write) {
 			return componentData[fieldName];
 		} else {
 			return componentData.at(fieldName);
@@ -30,9 +32,13 @@ ComponentDataRetriever::ComponentDataRetriever(ConfigNode& componentData, String
 ComponentDataRetriever ComponentDataRetriever::getSubIndex(size_t index) const
 {
 	auto r = retriever;
-	return ComponentDataRetriever(componentData, name + "[" + toString(index) + "]", labelName, [retriever = std::move(r), index] (bool writeable) -> ConfigNode&
+	return ComponentDataRetriever(componentData, name + "[" + toString(index) + "]", labelName, [retriever = std::move(r), index] (RetrievalType type) -> ConfigNode&
 	{
-		ConfigNode& node = retriever(writeable);
+		if (type == RetrievalType::ReadParent) {
+			return retriever(RetrievalType::Read);
+		}
+
+		ConfigNode& node = retriever(type);
 		if (node.getType() == ConfigNodeType::Sequence) {
 			return node[index];
 		} else if (index == 0 && node.getType() != ConfigNodeType::Map) {
@@ -46,20 +52,28 @@ ComponentDataRetriever ComponentDataRetriever::getSubIndex(size_t index) const
 ComponentDataRetriever ComponentDataRetriever::getSubKey(const String& key) const
 {
 	auto r = retriever;
-	return ComponentDataRetriever(componentData, name + "[\"" + key + "\"]", labelName, [retriever = std::move(r), key] (bool writeable) -> ConfigNode&
+	return ComponentDataRetriever(componentData, name + "[\"" + key + "\"]", labelName, [retriever = std::move(r), key] (RetrievalType type) -> ConfigNode&
 	{
-		return retriever(writeable)[key];
+		if (type == RetrievalType::ReadParent) {
+			return retriever(RetrievalType::Read);
+		}
+		return retriever(type)[key];
 	});
+}
+
+const ConfigNode& ComponentDataRetriever::getParentFieldData() const
+{
+	return retriever(RetrievalType::ReadParent);
 }
 
 const ConfigNode& ComponentDataRetriever::getFieldData() const
 {
-	return retriever(false);
+	return retriever(RetrievalType::Read);
 }
 
 ConfigNode& ComponentDataRetriever::getWriteableFieldData() const
 {
-	return retriever(true);
+	return retriever(RetrievalType::Write);
 }
 
 const String& ComponentDataRetriever::getName() const
