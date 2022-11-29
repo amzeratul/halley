@@ -97,22 +97,22 @@ String InputExclusive::getButtonName(int code) const
 
 bool InputExclusive::isButtonPressed(InputButton code)
 {
-	return enabled ? buttonsExclusive[code]->isPressed() : false;
+	return enabled ? buttonsExclusive.at(code)->isPressed() : false;
 }
 
 bool InputExclusive::isButtonPressedRepeat(InputButton code)
 {
-	return enabled ? buttonsExclusive[code]->isPressedRepeat() : false;
+	return enabled ? buttonsExclusive.at(code)->isPressedRepeat() : false;
 }
 
 bool InputExclusive::isButtonReleased(InputButton code)
 {
-	return enabled ? buttonsExclusive[code]->isReleased() : false;
+	return enabled ? buttonsExclusive.at(code)->isReleased() : false;
 }
 
 bool InputExclusive::isButtonDown(InputButton code)
 {
-	return enabled ? buttonsExclusive[code]->isDown() : false;
+	return enabled ? buttonsExclusive.at(code)->isDown() : false;
 }
 
 float InputExclusive::getAxis(int i)
