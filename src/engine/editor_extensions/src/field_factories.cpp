@@ -7,16 +7,10 @@
 
 using namespace Halley;
 
-EnumFieldFactory::EnumFieldFactory(String name, Vector<String> values)
-	: fieldName(std::move(name))
-	, values(std::move(values))
-{
-	
-}
-
-std::shared_ptr<IUIElement> EnumFieldFactory::createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars)
+std::shared_ptr<IUIElement> BaseEnumFieldFactory::createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars)
 {
 	const auto data = pars.data;
+	const auto& values = getValues(data);
 
 	auto& fieldData = data.getFieldData();
 	const auto& defaultValue = pars.getStringDefaultParameter();
@@ -25,8 +19,10 @@ std::shared_ptr<IUIElement> EnumFieldFactory::createField(const ComponentEditorC
 
 	const auto& dropStyle = context.getUIFactory().getStyle("dropdown");
 
+	const auto sizer = std::make_shared<UISizer>();
 	auto dropdown = std::make_shared<UIDropdown>("enum", dropStyle);
 	dropdown->setOptions(values);
+	sizer->add(dropdown, 1);
 
 	dropdown->bindData("enum", value, [&context, data](String newVal) {
 		auto& node = data.getWriteableFieldData();
@@ -39,13 +35,54 @@ std::shared_ptr<IUIElement> EnumFieldFactory::createField(const ComponentEditorC
 		node = ConfigNode(value);
 		context.onEntityUpdated();
 	}
-	
-	return dropdown;
+
+	if (const auto dependentField = getDependentField()) {
+		sizer->add(std::make_shared<DependencyObserver>(data, *dependentField, data.getParentFieldData()[*dependentField].asString(""), [this, dropdown] (const ComponentDataRetriever& data)
+		{
+			dropdown->setOptions(getValues(data));
+		}));
+	}
+
+	return sizer;
+}
+
+std::optional<String> BaseEnumFieldFactory::getDependentField() const
+{
+	return std::nullopt;
+}
+
+DependencyObserver::DependencyObserver(ComponentDataRetriever data, String fieldName, String value, std::function<void(const ComponentDataRetriever&)> refreshCallback)
+	: UIWidget()
+	, data(std::move(data))
+	, fieldName(std::move(fieldName))
+	, value(std::move(value))
+	, refreshCallback(std::move(refreshCallback))
+{
+}
+
+void DependencyObserver::update(Time t, bool moved)
+{
+	const auto& curValue = data.getParentFieldData()[fieldName].asString("");
+	if (curValue != value) {
+		value = curValue;
+		refreshCallback(data);
+	}
+}
+
+EnumFieldFactory::EnumFieldFactory(String name, Vector<String> values)
+	: fieldName(std::move(name))
+	, values(std::move(values))
+{
 }
 
 String EnumFieldFactory::getFieldType()
 {
 	return fieldName;
+}
+
+Vector<String> EnumFieldFactory::getValues(const ComponentDataRetriever& data) const
+{
+	return values;
 }
 
 

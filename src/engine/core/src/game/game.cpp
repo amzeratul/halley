@@ -88,7 +88,7 @@ std::unique_ptr<ScriptNodeTypeCollection> Game::createScriptNodeTypeCollection()
 	return std::make_unique<ScriptNodeTypeCollection>();
 }
 
-Vector<std::unique_ptr<IComponentEditorFieldFactory>> Game::createCustomEditorFieldFactories()
+Vector<std::unique_ptr<IComponentEditorFieldFactory>> Game::createCustomEditorFieldFactories(Resources& gameResources)
 {
 	return {};
 }

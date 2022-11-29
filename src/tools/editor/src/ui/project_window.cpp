@@ -44,7 +44,7 @@ ProjectWindow::ProjectWindow(EditorUIFactory& factory, HalleyEditor& editor, Pro
 		updateDLLStatus(dll.getStatus());
 		hasDLL = dll.isLoaded();
 		if (hasDLL) {
-			entityEditorFactoryRoot->addFieldFactories(dll.getGame().createCustomEditorFieldFactories());
+			entityEditorFactoryRoot->addFieldFactories(dll.getGame().createCustomEditorFieldFactories(project.getGameResources()));
 		}
 	});
 	project.addAssetLoadedListener(this);
@@ -188,7 +188,7 @@ bool ProjectWindow::loadCustomUI()
 
 	entityEditorFactoryRoot->clear();
 	entityEditorFactoryRoot->addStandardFieldFactories();
-	entityEditorFactoryRoot->addFieldFactories(project.getGameInstance()->createCustomEditorFieldFactories());
+	entityEditorFactoryRoot->addFieldFactories(project.getGameInstance()->createCustomEditorFieldFactories(project.getGameResources()));
 	
 	return true;
 }

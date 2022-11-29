@@ -59,7 +59,7 @@ namespace Halley
 		virtual std::unique_ptr<AssetPreviewGenerator> createAssetPreviewGenerator(const HalleyAPI& api, Resources& resources);
 		virtual std::unique_ptr<UIFactory> createUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n);
 		virtual std::unique_ptr<ScriptNodeTypeCollection> createScriptNodeTypeCollection();
-		virtual Vector<std::unique_ptr<IComponentEditorFieldFactory>> createCustomEditorFieldFactories();
+		virtual Vector<std::unique_ptr<IComponentEditorFieldFactory>> createCustomEditorFieldFactories(Resources& resources);
 
 		const HalleyAPI& getAPI() const;
 		Resources& getResources() const;

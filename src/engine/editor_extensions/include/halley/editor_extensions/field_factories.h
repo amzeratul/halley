@@ -1,14 +1,40 @@
 #pragma once
 
+#include "component_field_parameters.h"
 #include "halley/core/game/scene_editor_interface.h"
+#include "halley/ui/ui_widget.h"
 
 namespace Halley {
-	class EnumFieldFactory : public IComponentEditorFieldFactory
+	class ComponentDataRetriever;
+
+	class BaseEnumFieldFactory : public IComponentEditorFieldFactory
+	{
+	public:
+		std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override;
+
+	protected:
+		virtual Vector<String> getValues(const ComponentDataRetriever& data) const = 0;
+		virtual std::optional<String> getDependentField() const;
+	};
+
+	class DependencyObserver : public UIWidget {
+	public:
+		DependencyObserver(ComponentDataRetriever data, String fieldName, String value, std::function<void(const ComponentDataRetriever&)> refreshCallback);
+
+		void update(Time t, bool moved) override;
+
+	private:
+		ComponentDataRetriever data;
+		String fieldName;
+		String value;
+		std::function<void(const ComponentDataRetriever&)> refreshCallback;
+	};
+
+	class EnumFieldFactory : public BaseEnumFieldFactory
 	{
 	public:
 		EnumFieldFactory(String name, Vector<String> values);
 		
-		std::shared_ptr<IUIElement> createField(const ComponentEditorContext& context, const ComponentFieldParameters& pars) override;
 		String getFieldType() override;
 
 		template <typename T>
@@ -17,6 +43,9 @@ namespace Halley {
 			const auto& vals = EnumNames<T>()();
 			return std::make_unique<EnumFieldFactory>(std::move(name), Vector<String>(vals.begin(), vals.end()));
 		}
+
+	protected:
+		Vector<String> getValues(const ComponentDataRetriever& data) const override;
 
 	private:
 		const String fieldName;
