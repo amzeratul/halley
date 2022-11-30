@@ -243,6 +243,18 @@ void ScriptGraph::load(const ConfigNode& node, const EntitySerializationContext&
 	finishGraph();
 }
 
+bool ScriptGraph::isPersistent() const
+{
+	// TODO
+	return false;
+}
+
+bool ScriptGraph::isSingleton() const
+{
+	// TODO
+	return true;
+}
+
 ConfigNode ScriptGraph::toConfigNode() const
 {
 	Expects(entityIds.empty());

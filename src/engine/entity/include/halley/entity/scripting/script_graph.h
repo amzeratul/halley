@@ -81,13 +81,16 @@ namespace Halley {
 
 		void load(const ConfigNode& node, const EntitySerializationContext& context);
 
+		bool isPersistent() const;
+		bool isSingleton() const;
+
 		ConfigNode toConfigNode() const;
 		ConfigNode toConfigNode(const EntitySerializationContext& context) const;
 		String toYAML() const;
 
 		Vector<String> getMessageNames() const;
 		int getMessageNumParams(const String& messageId) const;
-
+		
 		static std::shared_ptr<ScriptGraph> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::ScriptGraph; }
 

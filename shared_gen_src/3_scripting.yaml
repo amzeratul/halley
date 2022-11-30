@@ -6,7 +6,7 @@ component:
   - activeStates:
       type: 'Halley::Vector<std::shared_ptr<Halley::ScriptState>>'
       canEdit: false
-      canSave: true
+      canSave: false # TODO
       canNetwork: true
   - tags:
       type: 'Halley::Vector<Halley::String>'
@@ -15,7 +15,7 @@ component:
   - scripts:
       type: 'Halley::Vector<Halley::ResourceReference<Halley::ScriptGraph>>'
       canEdit: true
-      canSave: true
+      canSave: false
   - variables:
       type: 'Halley::ScriptVariables'
       canEdit: false
