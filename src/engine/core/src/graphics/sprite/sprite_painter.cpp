@@ -22,10 +22,10 @@ void MaterialRecycler::startFrame()
 
 std::shared_ptr<Material> MaterialRecycler::cloneMaterial(const Material& material)
 {
-	const auto iter = entries.find(material.getHash());
+	const auto iter = entries.find(material.getFullHash());
 	if (iter == entries.end()) {
 		auto m = material.clone();
-		entries[material.getHash()] = Entry{ m, 0 };
+		entries[material.getFullHash()] = Entry{ m, 0 };
 		return m;
 	} else {
 		iter->second.age = 0;

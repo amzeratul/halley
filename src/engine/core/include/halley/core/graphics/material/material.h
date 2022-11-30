@@ -119,7 +119,8 @@ namespace Halley
 			return *this;
 		}
 
-		uint64_t getHash() const;
+		uint64_t getPartialHash() const; // Not including textures
+		uint64_t getFullHash() const; // Including textures
 
 	private:
 		std::shared_ptr<const MaterialDefinition> materialDefinition;
@@ -129,7 +130,8 @@ namespace Halley
 		Vector<MaterialDataBlock> dataBlocks;
 		Vector<std::shared_ptr<const Texture>> textures;
 
-		mutable uint64_t hashValue = 0;
+		mutable uint64_t partialHashValue = 0;
+		mutable uint64_t fullHashValue = 0;
 		mutable bool needToUpdateHash = true;
 		std::optional<uint8_t> stencilReferenceOverride;
 		std::bitset<8> passEnabled;
@@ -138,7 +140,7 @@ namespace Halley
 		MaterialParameter& getParameter(const String& name);
 
 		bool setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data);
-		uint64_t computeHash() const;
+		void computeHashes() const;
 
 		const std::shared_ptr<const Texture>& getFallbackTexture() const;
 	};

@@ -96,7 +96,7 @@ RenderSnapshot::CommandInfo RenderSnapshot::getCommandInfo(size_t commandIdx) co
 		const auto& curDraw = drawDatas[commands.at(commandIdx).back().second];
 		const auto curMat = curDraw.material;
 		result.materialDefinition = curMat->getDefinition().getName();
-		result.materialHash = curMat->getHash();
+		result.materialHash = curMat->getPartialHash();
 		for (const auto& tex: curMat->getTextures()) {
 			result.textures.push_back(tex->getAssetId());
 		}

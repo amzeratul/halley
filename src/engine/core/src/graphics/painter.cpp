@@ -781,10 +781,10 @@ void Painter::updateProjection()
 
 	auto viewPortSize = (Vector2f(camera.getActiveViewPort().getSize()) / Vector2f(2, 2)).ceil() * Vector2f(2, 2);
 
-	const auto oldHash = halleyGlobalMaterial->getHash();
+	const auto oldHash = halleyGlobalMaterial->getFullHash();
 	halleyGlobalMaterial->set("u_mvp", projection);
 	halleyGlobalMaterial->set("u_viewPortSize", viewPortSize);
-	onUpdateProjection(*halleyGlobalMaterial, oldHash != halleyGlobalMaterial->getHash());
+	onUpdateProjection(*halleyGlobalMaterial, oldHash != halleyGlobalMaterial->getFullHash());
 }
 
 void Painter::updateClip()

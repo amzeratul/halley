@@ -44,6 +44,11 @@ void Hash::Hasher::feedBytes(gsl::span<const gsl::byte> bytes)
 
 uint64_t Hash::Hasher::digest()
 {
-	ready = false;
 	return XXH64_digest(data);
+}
+
+void Hash::Hasher::reset()
+{
+	XXH64_reset(data, 0);
+	ready = true;
 }

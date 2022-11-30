@@ -137,7 +137,8 @@ Material::Material(Material&& other) noexcept
 	for (auto& u: uniforms) {
 		u.rebind(*this);
 	}
-	other.hashValue = 0;
+	other.fullHashValue = 0;
+	other.partialHashValue = 0;
 }
 
 Material::Material(std::shared_ptr<const MaterialDefinition> definition, bool forceLocalBlocks)
@@ -194,12 +195,12 @@ void Material::initUniforms(bool forceLocalBlocks)
 void Material::bind(int passNumber, Painter& painter)
 {
 	// Avoid redundant work
-	if (currentMaterial == this && currentPass == passNumber && currentHash == getHash()) {
+	if (currentMaterial == this && currentPass == passNumber && currentHash == getFullHash()) {
 		return;
 	}
 	currentMaterial = this;
 	currentPass = passNumber;
-	currentHash = getHash();
+	currentHash = getFullHash();
 
 	painter.setMaterialPass(*this, passNumber);
 }
@@ -225,7 +226,7 @@ bool Material::operator==(const Material& other) const
 		// There's a chance this will fail, but... what are the odds? :D
 		// :D :D
 		// :D :D :D
-		return getHash() == other.getHash();
+		return getFullHash() == other.getFullHash();
 	} else {
 		// Different definitions
 		if (materialDefinition != other.materialDefinition) {
@@ -289,16 +290,12 @@ bool Material::setUniform(int blockNumber, size_t offset, ShaderParameterType ty
 	return false;
 }
 
-uint64_t Material::computeHash() const
+void Material::computeHashes() const
 {
 	Hash::Hasher hasher;
 
 	hasher.feed(materialDefinition.get());
 	
-	for (const auto& texture: textures) {
-		hasher.feed(texture.get());
-	}
-
 	for (const auto& dataBlock: dataBlocks) {
 		hasher.feedBytes(dataBlock.getData());
 	}
@@ -307,7 +304,13 @@ uint64_t Material::computeHash() const
 	hasher.feed(stencilReferenceOverride.value_or(0));
 	hasher.feed(passEnabled.to_ulong());
 
-	return hasher.digest();
+	partialHashValue = hasher.digest();
+
+	for (const auto& texture: textures) {
+		hasher.feed(texture.get());
+	}
+
+	fullHashValue = hasher.digest();
 }
 
 const std::shared_ptr<const Texture>& Material::getFallbackTexture() const
@@ -436,13 +439,22 @@ bool Material::hasParameter(const String& name) const
 	return false;
 }
 
-uint64_t Material::getHash() const
+uint64_t Material::getPartialHash() const
 {
 	if (needToUpdateHash) {
-		hashValue = computeHash();
+		computeHashes();
 		needToUpdateHash = false;
 	}
-	return hashValue;
+	return partialHashValue;
+}
+
+uint64_t Material::getFullHash() const
+{
+	if (needToUpdateHash) {
+		computeHashes();
+		needToUpdateHash = false;
+	}
+	return fullHashValue;
 }
 
 MaterialParameter& Material::getParameter(const String& name)
