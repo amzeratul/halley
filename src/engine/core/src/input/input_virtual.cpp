@@ -156,9 +156,9 @@ bool InputVirtual::isButtonDown(InputButton code)
 
 bool InputVirtual::isButtonPressed(InputButton code, gsl::span<const uint32_t> activeBinds)
 {
-	refreshExclusiveButtons();
+	refreshExclusives();
 	for (auto& bind : buttons.at(code)) {
-		if (std_ex::contains(activeBinds, bind.getPhysicalButtonId()) && bind.isButtonPressed()) {
+		if (checkBinds(activeBinds, bind) && bind.isButtonPressed()) {
 			return true;
 		}
 	}
@@ -167,9 +167,9 @@ bool InputVirtual::isButtonPressed(InputButton code, gsl::span<const uint32_t> a
 
 bool InputVirtual::isButtonPressedRepeat(InputButton code, gsl::span<const uint32_t> activeBinds)
 {
-	refreshExclusiveButtons();
+	refreshExclusives();
 	for (auto& bind : buttons.at(code)) {
-		if (std_ex::contains(activeBinds, bind.getPhysicalButtonId()) && bind.isButtonPressedRepeat()) {
+		if (checkBinds(activeBinds, bind) && bind.isButtonPressedRepeat()) {
 			return true;
 		}
 	}
@@ -178,9 +178,9 @@ bool InputVirtual::isButtonPressedRepeat(InputButton code, gsl::span<const uint3
 
 bool InputVirtual::isButtonReleased(InputButton code, gsl::span<const uint32_t> activeBinds)
 {
-	refreshExclusiveButtons();
+	refreshExclusives();
 	for (auto& bind : buttons.at(code)) {
-		if (std_ex::contains(activeBinds, bind.getPhysicalButtonId()) && bind.isButtonReleased()) {
+		if (checkBinds(activeBinds, bind) && bind.isButtonReleased()) {
 			return true;
 		}
 	}
@@ -189,13 +189,25 @@ bool InputVirtual::isButtonReleased(InputButton code, gsl::span<const uint32_t> 
 
 bool InputVirtual::isButtonDown(InputButton code, gsl::span<const uint32_t> activeBinds)
 {
-	refreshExclusiveButtons();
+	refreshExclusives();
 	for (auto& bind : buttons.at(code)) {
-		if (std_ex::contains(activeBinds, bind.getPhysicalButtonId()) && bind.isButtonDown()) {
+		if (checkBinds(activeBinds, bind) && bind.isButtonDown()) {
 			return true;
 		}
 	}
 	return false;
+}
+
+float InputVirtual::getAxis(int n, gsl::span<const uint32_t> activeBinds)
+{
+	refreshExclusives();
+	float value = 0;
+	for (auto& bind: axes.at(n).binds) {
+		if (checkBinds(activeBinds, bind)) {
+			value += bind.getAxis();
+		}
+	}
+	return value;
 }
 
 void InputVirtual::clearButton(InputButton code)
@@ -233,20 +245,10 @@ void InputVirtual::clearButtonRelease(InputButton code)
 
 float InputVirtual::getAxis(int n)
 {
-	auto& binds = axes.at(n).binds;
 	float value = 0;
-
-	for (size_t i=0; i<binds.size(); i++) {
-		Bind& b = binds[i];
-		if (b.isAxisEmulation) {
-			const int left = b.device->isButtonDown(b.a) ? 1 : 0;
-			const int right = b.device->isButtonDown(b.b) ? 1 : 0;
-			value += right - left;
-		} else {
-			value += b.device->getAxis(b.a);
-		}
+	for (auto& bind: axes.at(n).binds) {
+		value += bind.getAxis();
 	}
-
 	return value;
 }
 
@@ -261,7 +263,7 @@ void InputVirtual::bindButton(int n, spInputDevice device, int deviceN)
 		setLastDevice(device.get());
 	}
 	buttons.at(n).push_back(Bind(std::move(device), deviceN, false));
-	exclusiveButtonsDirty = true;
+	exclusiveDirty = true;
 }
 
 void InputVirtual::bindButton(int n, spInputDevice device, KeyCode deviceButton)
@@ -275,7 +277,7 @@ void InputVirtual::bindButtonChord(int n, spInputDevice device, int deviceButton
 		setLastDevice(device.get());
 	}
 	buttons.at(n).push_back(Bind(std::move(device), deviceButton0, deviceButton1, false));
-	exclusiveButtonsDirty = true;
+	exclusiveDirty = true;
 }
 
 void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
@@ -284,7 +286,7 @@ void InputVirtual::bindAxis(int n, spInputDevice device, int deviceN)
 		setLastDevice(device.get());
 	}
 	axes.at(n).binds.push_back(Bind(std::move(device), deviceN, true));
-	exclusiveButtonsDirty = true;
+	exclusiveDirty = true;
 }
 
 void InputVirtual::bindAxisButton(int n, spInputDevice device, int negativeButton, int positiveButton)
@@ -293,7 +295,7 @@ void InputVirtual::bindAxisButton(int n, spInputDevice device, int negativeButto
 		setLastDevice(device.get());
 	}
 	axes.at(n).binds.push_back(Bind(std::move(device), negativeButton, positiveButton, true));
-	exclusiveButtonsDirty = true;
+	exclusiveDirty = true;
 }
 
 void InputVirtual::bindAxisButton(int n, spInputDevice device, KeyCode negativeButton, KeyCode positiveButton)
@@ -309,13 +311,13 @@ void InputVirtual::bindVibrationOverride(spInputDevice joy)
 void InputVirtual::unbindButton(int n)
 {
 	buttons.at(n).clear();
-	exclusiveButtonsDirty = true;
+	exclusiveDirty = true;
 }
 
 void InputVirtual::unbindAxis(int n)
 {
 	axes.at(n).binds.clear();
-	exclusiveButtonsDirty = true;
+	exclusiveDirty = true;
 }
 
 void InputVirtual::clearBindings()
@@ -458,6 +460,13 @@ void InputVirtual::update(Time t)
 	if (positionLimits) {
 		position = positionLimits->getClosestPoint(position);
 	}
+
+	for (auto& button: exclusiveButtons) {
+		button->update(t);
+	}
+	for (auto& axis: exclusiveAxes) {
+		axis->update(t);
+	}
 }
 
 InputDevice* InputVirtual::getLastDevice() const
@@ -573,9 +582,32 @@ bool InputVirtual::Bind::isButtonDown() const
 	return false;
 }
 
-uint32_t InputVirtual::Bind::getPhysicalButtonId() const
+float InputVirtual::Bind::getAxis() const
 {
-	return static_cast<uint32_t>(device->getId()) | (static_cast<uint32_t>(a) << 16) | (static_cast<uint32_t>(b) << 24);
+	if (isAxisEmulation) {
+		const int left = device->isButtonDown(a) ? 1 : 0;
+		const int right = device->isButtonDown(b) ? 1 : 0;
+		return static_cast<float>(right - left);
+	} else {
+		return device->getAxis(a);
+	}
+}
+
+std::pair<uint32_t, uint32_t> InputVirtual::Bind::getPhysicalButtonIds() const
+{
+	if (isAxis && !isAxisEmulation) {
+		const auto idA = (static_cast<uint32_t>(device->getId()) << 16) | static_cast<uint32_t>(0x100) | static_cast<uint32_t>(a);
+		return { idA, 0 };
+	} else {
+		const auto idA = (static_cast<uint32_t>(device->getId()) << 16) | static_cast<uint32_t>(a);
+		if (b != -1) {
+			const auto idB = (static_cast<uint32_t>(device->getId()) << 16) | static_cast<uint32_t>(b);
+			assert(idB != 0); // If this is ever zero, it will conflict with "empty" id below
+			return { idA, idB };
+		} else {
+			return { idA, 0 };
+		}
+	}
 }
 
 
@@ -663,9 +695,16 @@ std::unique_ptr<InputExclusiveButton> InputVirtual::makeExclusiveButton(InputBut
 	return exclusive;
 }
 
+std::unique_ptr<InputExclusiveAxis> InputVirtual::makeExclusiveAxis(int axis, InputPriority priority, const String& label)
+{
+	auto exclusive = std::make_unique<InputExclusiveAxis>(*this, priority, axis, label);
+	addExclusiveAxis(*exclusive);
+	return exclusive;
+}
+
 Vector<InputVirtual::ExclusiveButtonInfo> InputVirtual::getExclusiveButtonLabels(InputDevice* preferredDevice)
 {
-	refreshExclusiveButtons();
+	refreshExclusives();
 
 	if (!preferredDevice) {
 		preferredDevice = lastDevice;
@@ -706,7 +745,7 @@ std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(const InputExclusiv
 	int bestScore = 0;
 
 	for (const auto& binding: buttons[button.button]) {
-		if (std_ex::contains(button.activeBinds, binding.getPhysicalButtonId())) {
+		if (checkBinds(button.activeBinds, binding)) {
 			if (binding.device.get() == device) {
 				return { binding.device.get(), binding.a };
 			}
@@ -722,6 +761,12 @@ std::pair<InputDevice*, int> InputVirtual::getPhysicalButton(const InputExclusiv
 	return bestResult;
 }
 
+bool InputVirtual::checkBinds(gsl::span<const uint32_t> activeBinds, const Bind& bind) const
+{
+	const auto ids = bind.getPhysicalButtonIds();
+	return std_ex::contains(activeBinds, ids.first) && (!ids.second || std_ex::contains(activeBinds, ids.second));
+}
+
 void InputVirtual::clearPresses()
 {
 	for (auto& axis: axes) {
@@ -732,33 +777,61 @@ void InputVirtual::clearPresses()
 void InputVirtual::addExclusiveButton(InputExclusiveButton& exclusive)
 {
 	exclusiveButtons.push_back(&exclusive);
-	exclusiveButtonsDirty = true;
+	exclusiveDirty = true;
 }
 
 void InputVirtual::removeExclusiveButton(InputExclusiveButton& exclusive)
 {
 	std_ex::erase(exclusiveButtons, &exclusive);
-	exclusiveButtonsDirty = true;
+	exclusiveDirty = true;
 }
 
-void InputVirtual::refreshExclusiveButtons()
+void InputVirtual::addExclusiveAxis(InputExclusiveAxis& exclusive)
 {
-	if (exclusiveButtonsDirty) {
-		exclusiveButtonsDirty = false;
+	exclusiveAxes.push_back(&exclusive);
+	exclusiveDirty = true;
+}
 
-		exclusiveButtonBindings.clear();
-		for (auto& exclusive: exclusiveButtons) {
+void InputVirtual::removeExclusiveAxis(InputExclusiveAxis& exclusive)
+{
+	std_ex::erase(exclusiveAxes, &exclusive);
+	exclusiveDirty = true;
+}
+
+void InputVirtual::refreshExclusives()
+{
+	if (exclusiveDirty) {
+		exclusiveDirty = false;
+
+		HashMap<uint32_t, Vector<InputExclusiveBinding*>> bindings;
+		
+		for (const auto& exclusive: exclusiveButtons) {
 			exclusive->activeBinds.clear();
 			for (const auto& bind: buttons[exclusive->button]) {
-				exclusiveButtonBindings[bind.getPhysicalButtonId()].push_back(exclusive);
+				const auto ids = bind.getPhysicalButtonIds();
+				bindings[ids.first].push_back(exclusive);
+				if (ids.second) {
+					bindings[ids.second].push_back(exclusive);
+				}
 			}
 		}
-		for (auto& [bindId, exclusives]: exclusiveButtonBindings) {
-			std::sort(exclusives.begin(), exclusives.end(), [] (const InputExclusiveButton* a, const InputExclusiveButton* b)
+		for (const auto& exclusive: exclusiveAxes) {
+			exclusive->activeBinds.clear();
+			for (const auto& bind: axes[exclusive->axis].binds) {
+				const auto ids = bind.getPhysicalButtonIds();
+				bindings[ids.first].push_back(exclusive);
+				if (ids.second) {
+					bindings[ids.second].push_back(exclusive);
+				}
+			}
+		}
+
+		for (auto& [bindId, exclusives]: bindings) {
+			std::sort(exclusives.begin(), exclusives.end(), [] (const InputExclusiveBinding* a, const InputExclusiveBinding* b)
 			{
-				return a->priority > b->priority;
+				return a->getPriority() > b->getPriority();
 			});
-			exclusives[0]->activeBinds.push_back(bindId);
+			exclusives[0]->getActiveBinds().push_back(bindId);
 		}
 	}
 }

@@ -33,9 +33,11 @@ namespace Halley {
 	enum class KeyCode;
 	using spInputDevice = std::shared_ptr<InputDevice>;
 	class InputExclusiveButton;
+	class InputExclusiveAxis;
 
 	class InputVirtual final : public InputDevice {
 		friend class InputExclusiveButton;
+		friend class InputExclusiveAxis;
 
 	public:
 		InputVirtual(int nButtons, int nAxes, InputType type = InputType::Virtual);
@@ -70,6 +72,8 @@ namespace Halley {
 
 		float getAxis(int n) override;
 		int getAxisRepeat(int n) override;
+
+		float getAxis(int n, gsl::span<const uint32_t> activeBinds);
 
 		void vibrate(spInputVibration vib) override;
 		void stopVibrating() override;
@@ -108,6 +112,7 @@ namespace Halley {
 		InputType getInputType() const override;
 
 		std::unique_ptr<InputExclusiveButton> makeExclusiveButton(InputButton button, InputPriority priority, const String& label);
+		std::unique_ptr<InputExclusiveAxis> makeExclusiveAxis(int axis, InputPriority priority, const String& label);
 
 		struct ExclusiveButtonInfo {
 			InputButton button;
@@ -136,7 +141,9 @@ namespace Halley {
 			bool isButtonReleased() const;
 			bool isButtonDown() const;
 
-			uint32_t getPhysicalButtonId() const;
+			float getAxis() const;
+
+			std::pair<uint32_t, uint32_t> getPhysicalButtonIds() const;
 		};
 
 		struct AxisData {
@@ -183,8 +190,8 @@ namespace Halley {
 		InputType type;
 
 		Vector<InputExclusiveButton*> exclusiveButtons;
-		HashMap<uint32_t, Vector<InputExclusiveButton*>> exclusiveButtonBindings;
-		bool exclusiveButtonsDirty = true;
+		Vector<InputExclusiveAxis*> exclusiveAxes;
+		bool exclusiveDirty = true;
 		
 		void setLastDevice(InputDevice* device);
 		void updateLastDevice();
@@ -192,8 +199,11 @@ namespace Halley {
 
 		void addExclusiveButton(InputExclusiveButton& exclusive);
 		void removeExclusiveButton(InputExclusiveButton& exclusive);
-		void refreshExclusiveButtons();
+		void addExclusiveAxis(InputExclusiveAxis& exclusive);
+		void removeExclusiveAxis(InputExclusiveAxis& exclusive);
+		void refreshExclusives();
 		std::pair<InputDevice*, int> getPhysicalButton(const InputExclusiveButton& button, InputDevice* device = nullptr) const;
+		bool checkBinds(gsl::span<const uint32_t> activeBinds, const Bind& bind) const;
 	};
 
 	typedef std::shared_ptr<InputVirtual> spInputVirtual;

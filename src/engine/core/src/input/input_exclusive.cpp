@@ -18,6 +18,10 @@ InputExclusiveButton::~InputExclusiveButton()
 	}
 }
 
+void InputExclusiveButton::update(Time t)
+{
+}
+
 bool InputExclusiveButton::isPressed() const
 {
 	return parent ? parent->isButtonPressed(button, activeBinds) : false;
@@ -43,6 +47,62 @@ const String& InputExclusiveButton::getLabel() const
 	return label;
 }
 
+InputPriority InputExclusiveButton::getPriority() const
+{
+	return priority;
+}
+
+Vector<uint32_t>& InputExclusiveButton::getActiveBinds()
+{
+	return activeBinds;
+}
+
+
+
+InputExclusiveAxis::InputExclusiveAxis(InputVirtual& parent, InputPriority priority, int axis, String label)
+	: parent(&parent)
+	, axis(axis)
+	, priority(priority)
+	, label(std::move(label))
+{
+}
+
+InputExclusiveAxis::~InputExclusiveAxis()
+{
+	if (parent) {
+		parent->removeExclusiveAxis(*this);
+	}
+}
+
+void InputExclusiveAxis::update(Time t)
+{
+	repeatValue = repeater.update(getAxis(), t);
+}
+
+float InputExclusiveAxis::getAxis() const
+{
+	return parent ? parent->getAxis(axis, activeBinds) : 0;
+}
+
+int InputExclusiveAxis::getAxisRepeat() const
+{
+	return repeatValue;
+}
+
+const String& InputExclusiveAxis::getLabel() const
+{
+	return label;
+}
+
+InputPriority InputExclusiveAxis::getPriority() const
+{
+	return priority;
+}
+
+Vector<uint32_t>& InputExclusiveAxis::getActiveBinds()
+{
+	return activeBinds;
+}
 
 
 
@@ -61,11 +121,17 @@ void InputExclusive::setEnabled(bool enabled)
 		this->enabled = enabled;
 
 		buttonsExclusive.clear();
+		axesExclusive.clear();
 
 		if (enabled) {
 			buttonsExclusive.reserve(buttons.size());
 			for (auto button: buttons) {
 				buttonsExclusive.push_back(input->makeExclusiveButton(button, priority, ""));
+			}
+
+			axesExclusive.reserve(axes.size());
+			for (auto axis: axes) {
+				axesExclusive.push_back(input->makeExclusiveAxis(axis, priority, ""));
 			}
 		}
 	}
@@ -118,10 +184,10 @@ bool InputExclusive::isButtonDown(InputButton code)
 
 float InputExclusive::getAxis(int i)
 {
-	return enabled ? input->getAxis(axes.at(i)) : 0.0f;
+	return enabled ? axesExclusive.at(i)->getAxis() : 0.0f;
 }
 
 int InputExclusive::getAxisRepeat(int i)
 {
-	return enabled ? input->getAxisRepeat(axes.at(i)) : 0;
+	return enabled ? axesExclusive.at(i)->getAxisRepeat() : 0;
 }

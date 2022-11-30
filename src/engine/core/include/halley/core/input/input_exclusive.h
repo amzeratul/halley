@@ -6,12 +6,22 @@
 namespace Halley {
     class InputVirtual;
 
-	class InputExclusiveButton {
+    class InputExclusiveBinding {
+    public:
+        virtual ~InputExclusiveBinding() = default;
+        virtual InputPriority getPriority() const = 0;
+        virtual Vector<uint32_t>& getActiveBinds() = 0;
+        virtual void update(Time t) = 0;
+    };
+
+	class InputExclusiveButton : private InputExclusiveBinding {
         friend class InputVirtual;
 
     public:
 		InputExclusiveButton(InputVirtual& parent, InputPriority priority, InputButton button, String label);
         ~InputExclusiveButton();
+
+        void update(Time t) override;
 
         bool isPressed() const;
         bool isPressedRepeat() const;
@@ -26,6 +36,37 @@ namespace Halley {
         InputPriority priority = InputPriority::Normal;
         Vector<uint32_t> activeBinds;
         String label;
+        
+        InputPriority getPriority() const override;
+        Vector<uint32_t>& getActiveBinds() override;
+	};
+
+	class InputExclusiveAxis : private InputExclusiveBinding {
+        friend class InputVirtual;
+
+    public:
+		InputExclusiveAxis(InputVirtual& parent, InputPriority priority, int axis, String label);
+        ~InputExclusiveAxis();
+
+        void update(Time t) override;
+
+        float getAxis() const;
+        int getAxisRepeat() const;
+
+        const String& getLabel() const;
+
+	private:
+        InputVirtual* parent = nullptr;
+        int axis = 0;
+        InputPriority priority = InputPriority::Normal;
+        Vector<uint32_t> activeBinds;
+        String label;
+
+        InputAxisRepeater repeater;
+        int repeatValue;
+        
+        InputPriority getPriority() const override;
+        Vector<uint32_t>& getActiveBinds() override;
     };
 
     class InputExclusive : public InputDevice {
@@ -46,8 +87,8 @@ namespace Halley {
 	    bool isButtonReleased(InputButton code) override;
 	    bool isButtonDown(InputButton code) override;
 
-    	float getAxis(int) override;
-	    int getAxisRepeat(int) override;
+    	float getAxis(int axis) override;
+	    int getAxisRepeat(int axis) override;
 
     private:
         std::shared_ptr<InputVirtual> input;
@@ -55,6 +96,7 @@ namespace Halley {
         Vector<int> axes;
         Vector<int> buttons;
         Vector<std::unique_ptr<InputExclusiveButton>> buttonsExclusive;
+        Vector<std::unique_ptr<InputExclusiveAxis>> axesExclusive;
         bool enabled = false;
     };
 }
