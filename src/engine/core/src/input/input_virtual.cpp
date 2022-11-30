@@ -245,11 +245,7 @@ void InputVirtual::clearButtonRelease(InputButton code)
 
 float InputVirtual::getAxis(int n)
 {
-	float value = 0;
-	for (auto& bind: axes.at(n).binds) {
-		value += bind.getAxis();
-	}
-	return value;
+	return axes.at(n).getValue();
 }
 
 int InputVirtual::getAxisRepeat(int n)
@@ -416,33 +412,8 @@ void InputVirtual::update(Time t)
 {
 	updateLastDevice();
 
-	for (size_t i = 0; i < axes.size(); i++) {
-		auto& axis = axes[i];
-
-		axis.curRepeatValue = 0;
-
-		float curVal = getAxis(int(i));
-		int intVal = curVal > 0.50f ? 1 : (curVal < -0.50f ? -1 : 0);
-
-		auto& timeSinceRepeat = axis.timeSinceRepeat;
-		auto& lastVal = axis.lastRepeatedValue;
-
-		if (lastVal != intVal) {
-			timeSinceRepeat = std::max(repeatDelayFirst, repeatDelayHold);
-			axis.numRepeats = 0;
-		}
-		
-		if (intVal != 0) {
-			Time threshold = axis.numRepeats == 1 ? repeatDelayFirst : repeatDelayHold;
-			timeSinceRepeat += t * fabs(curVal);
-			if (timeSinceRepeat >= threshold) {
-				axis.curRepeatValue = intVal;
-				axis.numRepeats++;
-				timeSinceRepeat = 0;
-			}
-		}
-
-		lastVal = intVal;
+	for (auto& axis: axes) {
+		axis.curRepeatValue = axis.repeat.update(axis.getValue(), t);
 	}
 
 	for (auto& pos: positions) {
@@ -616,6 +587,15 @@ InputVirtual::AxisData::AxisData() = default;
 InputVirtual::AxisData::AxisData(Vector<Bind> b)
 	: binds(std::move(b))
 {}
+
+float InputVirtual::AxisData::getValue() const
+{
+	float value = 0;
+	for (const auto& bind: binds) {
+		value += bind.getAxis();
+	}
+	return value;
+}
 
 InputVirtual::PositionBindData::PositionBindData() = default;
 

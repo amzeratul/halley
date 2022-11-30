@@ -148,13 +148,13 @@ namespace Halley {
 
 		struct AxisData {
 			Vector<Bind> binds;
-			int lastRepeatedValue = 0;
-			int numRepeats = 0;
 			int curRepeatValue = 0;
-			Time timeSinceRepeat = 0;
+			InputAxisRepeater repeat;
 
 			AxisData();
 			explicit AxisData(Vector<Bind> b);
+
+			float getValue() const;
 		};
 
 		struct PositionBindData
