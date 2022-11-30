@@ -510,7 +510,7 @@ StringUTF32 TextRenderer::split(const StringUTF32& str, float maxWidth, std::fun
 				if (!result.empty()) {
 					result.push_back('\n');
 				}
-				const int totalAdvance = std::max(advance + advanceAdjust, 1);
+				const int totalAdvance = std::max(advance + advanceAdjust, 0);
 				result += StringUTF32(lastValid->data(), totalAdvance);
 				src = src.subspan(advance);
 				break;
