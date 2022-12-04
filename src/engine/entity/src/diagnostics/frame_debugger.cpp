@@ -159,6 +159,10 @@ void FrameDebugger::paint(Painter& painter)
 				const double gapLen = (startTime - std::min(startTime, prevEndTime)) * 1'000'000;
 				
 				str.append("\nTime: ");
+				str.append(toString(lroundl(startTime * 1'000'000)) + " us", green);
+				str.append(" to ");
+				str.append(toString(lroundl(endTime * 1'000'000)) + " us", green);
+				str.append("\nDuration: ");
 				str.append(toString(lroundl(exclusiveCommandLen)) + " us", green);
 				str.append(" (");
 				str.append(toString(lroundl(setupLen)) + " us", green);
