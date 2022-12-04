@@ -4,6 +4,11 @@
 #include "graphics/render_target/render_target_texture.h"
 using namespace Halley;
 
+RenderSnapshot::RenderSnapshot()
+	: pendingTimestamps(0)
+{
+}
+
 void RenderSnapshot::start()
 {
 	commands.clear();
@@ -197,6 +202,50 @@ RenderSnapshot::PlaybackResult RenderSnapshot::playback(Painter& painter, std::o
 	}
 
 	return PlaybackResult{ finalRenderTarget ? finalRenderTarget->getName() : "" };
+}
+
+void RenderSnapshot::addPendingTimestamp()
+{
+	++pendingTimestamps;
+	timestamps.emplace_back();
+}
+
+void RenderSnapshot::onTimestamp(TimestampType type, size_t idx, Time value)
+{
+	if (type == TimestampType::FrameStart) {
+		startTime = value;
+	} else if (type == TimestampType::FrameEnd) {
+		endTime = value;
+	} else if (type == TimestampType::CommandStart) {
+		timestamps[idx].first = value;
+	} else if (type == TimestampType::CommandEnd) {
+		timestamps[idx].second = value;
+	}
+
+	--pendingTimestamps;
+}
+
+bool RenderSnapshot::hasPendingTimestamps() const
+{
+	return !!pendingTimestamps;
+}
+
+size_t RenderSnapshot::getNumTimestamps() const
+{
+	return timestamps.size();
+}
+
+std::pair<Time, Time> RenderSnapshot::getFrameTimeRange() const
+{
+	return { startTime, endTime };
+}
+
+std::pair<Time, Time> RenderSnapshot::getCommandTimeRange(size_t idx) const
+{
+	if (idx >= timestamps.size()) {
+		return { 0, 0 };
+	}
+	return timestamps.at(idx);
 }
 
 Vector<std::pair<RenderSnapshot::CommandType, uint16_t>>& RenderSnapshot::getCurDrawCall()

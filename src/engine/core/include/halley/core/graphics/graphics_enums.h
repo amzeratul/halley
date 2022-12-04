@@ -7,4 +7,11 @@ namespace Halley {
     {
         Triangle
     };
+
+    enum class TimestampType {
+	    FrameStart,
+        FrameEnd,
+        CommandStart,
+        CommandEnd
+    };
 }

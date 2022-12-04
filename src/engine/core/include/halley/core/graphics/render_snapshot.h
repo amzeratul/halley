@@ -52,6 +52,8 @@ namespace Halley {
             String finalRenderTargetName;
         };
 
+        RenderSnapshot();
+
         void start();
         void end();
 
@@ -66,6 +68,13 @@ namespace Halley {
         CommandInfo getCommandInfo(size_t commandIdx) const;
 
         PlaybackResult playback(Painter& painter, std::optional<size_t> maxCommands) const;
+
+        void addPendingTimestamp();
+        void onTimestamp(TimestampType type, size_t idx, Time value);
+        bool hasPendingTimestamps() const;
+        size_t getNumTimestamps() const;
+        std::pair<Time, Time> getFrameTimeRange() const;
+        std::pair<Time, Time> getCommandTimeRange(size_t idx) const;
 
     private:
         struct BindData {
@@ -92,6 +101,11 @@ namespace Halley {
         Vector<SetClipData> setClipDatas;
         Vector<ClearData> clearDatas;
         Vector<DrawData> drawDatas;
+
+    	std::atomic<int> pendingTimestamps;
+        Time startTime = 0;
+        Time endTime = 0;
+        Vector<std::pair<Time, Time>> timestamps;
 
         Vector<std::pair<CommandType, uint16_t>>& getCurDrawCall();
         void finishDrawCall();

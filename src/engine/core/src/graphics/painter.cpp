@@ -85,9 +85,14 @@ Rect4f Painter::getWorldViewAABB() const
 void Painter::clear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil)
 {
 	if (recordingSnapshot) {
+		const auto commandIdx = recordingSnapshot->getNumCommands();
 		recordingSnapshot->clear(colour, depth, stencil);
+		recordTimestamp(TimestampType::CommandStart, commandIdx);
+		doClear(colour, depth, stencil);
+		recordTimestamp(TimestampType::CommandEnd, commandIdx);
+	} else {
+		doClear(colour, depth, stencil);
 	}
-	doClear(colour, depth, stencil);
 }
 
 static Vector4f& getVertPos(char* vertexAttrib, size_t vertPosOffset)
@@ -472,21 +477,50 @@ void Painter::popDebugGroup()
 	curDebugGroupStack.pop_back();
 }
 
-void Painter::startRecording(RenderSnapshot* snapshot)
+void Painter::startRecording(RenderSnapshot& snapshot)
 {
-	recordingSnapshot = snapshot;
-	if (recordingSnapshot) {
-		recordingSnapshot->start();
-	}
+	flush();
+	stopRecording();
+	recordingSnapshot = &snapshot;
+	recordingSnapshot->start();
+
+	recordingPerformance = startPerformanceMeasurement();
+	recordTimestamp(TimestampType::FrameStart, 0);
 }
 
 void Painter::stopRecording()
 {
 	if (recordingSnapshot) {
 		flush();
+
+		recordTimestamp(TimestampType::FrameEnd, 0);
+		endPerformanceMeasurement();
+
 		recordingSnapshot->end();
 		recordingSnapshot = nullptr;
+		recordingPerformance = false;
 	}
+}
+
+bool Painter::startPerformanceMeasurement()
+{
+	return false;
+}
+
+void Painter::endPerformanceMeasurement()
+{
+}
+
+void Painter::recordTimestamp(TimestampType type, size_t id)
+{
+	if (recordingPerformance) {
+		recordingSnapshot->addPendingTimestamp();
+		doRecordTimestamp(type, id, recordingSnapshot);
+	}
+}
+
+void Painter::doRecordTimestamp(TimestampType type, size_t id, RenderSnapshot* snapshot)
+{
 }
 
 void Painter::makeSpaceForPendingVertices(size_t numBytes)
@@ -660,8 +694,11 @@ void Painter::executeDrawPrimitives(Material& material, size_t numVertices, gsl:
 {
 	Expects(primitiveType == PrimitiveType::Triangle);
 
+	size_t commandIdx = 0;
 	if (recordingSnapshot) {
+		commandIdx = recordingSnapshot->getNumCommands();
 		recordingSnapshot->draw(material, numVertices, vertexData, indices, primitiveType, allIndicesAreQuads);
+		recordTimestamp(TimestampType::CommandStart, commandIdx);
 	}
 
 	ProfilerEvent event(ProfilerEventType::PainterDrawCall);
@@ -693,6 +730,10 @@ void Painter::executeDrawPrimitives(Material& material, size_t numVertices, gsl:
 	}
 
 	endDrawCall();
+
+	if (recordingSnapshot) {
+		recordTimestamp(TimestampType::CommandEnd, commandIdx);
+	}
 }
 
 IndexType* Painter::getStandardQuadIndices(size_t numQuads)

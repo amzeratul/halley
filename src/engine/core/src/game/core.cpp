@@ -473,7 +473,7 @@ void Core::render()
 			std::unique_ptr<RenderSnapshot> snapshot;
 			if (!pendingSnapshots.empty()) {
 				snapshot = std::make_unique<RenderSnapshot>();
-				painter->startRecording(snapshot.get());
+				painter->startRecording(*snapshot);
 			}
 
 			if (currentStage) {
@@ -508,6 +508,7 @@ void Core::waitForRenderEnd()
 	if (api->video) {
 		ProfilerEvent event(ProfilerEventType::CoreVSync);
 		api->video->finishRender();
+		painter->onFinishRender();
 	}
 }
 

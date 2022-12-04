@@ -10,6 +10,7 @@
 #include "texture.h"
 #include "halley/data_structures/hash_map.h"
 #include "halley/maths/circle.h"
+#include "halley/time/halleytime.h"
 
 namespace Halley
 {
@@ -109,12 +110,10 @@ namespace Halley
 		void pushDebugGroup(const String& id);
 		void popDebugGroup();
 
-		void startRecording(RenderSnapshot* snapshot);
+		void startRecording(RenderSnapshot& snapshot);
 		void stopRecording();
 
 	protected:
-		virtual void startDrawCall() {}
-		virtual void endDrawCall() {}
 		virtual void doStartRender() = 0;
 		virtual void doEndRender() = 0;
 		virtual void setVertices(const MaterialDefinition& material, size_t numVertices, const void* vertexData, size_t numIndices, const IndexType* indices, bool standardQuadsOnly) = 0;
@@ -129,6 +128,16 @@ namespace Halley
 		virtual void setClip(Rect4i clip, bool enable) = 0;
 
 		virtual void onUpdateProjection(Material& material, bool hashChanged) = 0;
+
+		virtual bool startPerformanceMeasurement();
+		virtual void endPerformanceMeasurement();
+		void recordTimestamp(TimestampType type, size_t id);
+		virtual void doRecordTimestamp(TimestampType type, size_t id, RenderSnapshot* snapshot);
+
+		virtual void startDrawCall() {}
+		virtual void endDrawCall() {}
+		virtual void onFinishRender() {}
+
 		void generateQuadIndices(IndexType firstVertex, size_t numQuads, IndexType* target);
 		RenderTarget& getActiveRenderTarget();
 		const RenderTarget* tryGetActiveRenderTarget() const;
@@ -183,6 +192,7 @@ namespace Halley
 		HashMap<uint64_t, ConstantBufferEntry> constantBuffers;
 
 		RenderSnapshot* recordingSnapshot = nullptr;
+		bool recordingPerformance = false;
 
 		void bind(RenderContext& context);
 		void unbind(RenderContext& context);

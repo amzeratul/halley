@@ -1,4 +1,4 @@
-#include "diagnostics/frame_debugger.h"
+﻿#include "diagnostics/frame_debugger.h"
 
 #include "halley/core/api/halley_api.h"
 #include "halley/core/graphics/painter.h"
@@ -102,11 +102,20 @@ void FrameDebugger::paint(Painter& painter)
 	ColourStringBuilder str;
 
 	if (renderSnapshot) {
+		const auto green = Colour4f::fromString("#69E479");
+		const auto red = Colour4f::fromString("#E66F68");
+
+		auto [frameStart, frameEnd] = renderSnapshot->getFrameTimeRange();
+		if (frameEnd != frameStart) {
+			const auto time = (frameEnd - frameStart) * 1'000'000;
+			str.append("Total Frame Time: ");
+			str.append(toString(lroundl(time)) + " us\n", green);
+		}
+
 		str.append("Command " + toString(framesToDraw) + " / " + toString(renderSnapshot->getNumCommands()) + "\n");
 		if (framesToDraw > 0) {
-			const auto info = renderSnapshot->getCommandInfo(framesToDraw - 1);
-			const auto green = Colour4f::fromString("#69E479");
-			const auto red = Colour4f::fromString("#E66F68");
+			const auto frameIdx = framesToDraw - 1;
+			const auto info = renderSnapshot->getCommandInfo(frameIdx);
 
 			str.append(getCommandType(info.type), green);
 			str.append(" [");
@@ -138,6 +147,24 @@ void FrameDebugger::paint(Painter& painter)
 					str.append("\nClear Stencil: ");
 					str.append("0x" + toString(int(*info.clearData->stencil), 16, 2).asciiUpper(), green);
 				}
+			}
+
+			if (static_cast<int>(renderSnapshot->getNumTimestamps()) > frameIdx) {
+				const auto [startTime, endTime] = renderSnapshot->getCommandTimeRange(frameIdx);
+				const auto [prevStartTime, prevEndTime] = frameIdx > 0 ? renderSnapshot->getCommandTimeRange(frameIdx - 1) : std::pair<Time, Time>{0, 0};
+
+				const double commandTime = (endTime - startTime) * 1'000'000;
+				const double exclusiveCommandTime = (endTime - std::max(startTime, prevEndTime)) * 1'000'000;
+				//const double exclusiveCommandTime = (endTime - prevEndTime) * 1'000'000;
+				const double gapTime = (startTime - prevEndTime) * 1'000'000;
+				
+				str.append("\nTime: ");
+				str.append(toString(lroundl(exclusiveCommandTime)) + " us", green);
+				str.append(" (");
+				str.append(toString(lroundl(commandTime)) + " us", green);
+				str.append(" total, ");
+				str.append(toString(lroundl(gapTime)) + " us", lroundl(gapTime) > 0 ? red : green);
+				str.append(" gap)");
 			}
 		}
 	} else {

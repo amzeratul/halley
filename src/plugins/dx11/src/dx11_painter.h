@@ -36,6 +36,13 @@ namespace Halley
 
 		void onUpdateProjection(Material& material, bool hashChanged) override;
 
+	protected:
+		void onFinishRender() override;
+		bool startPerformanceMeasurement() override;
+		void endPerformanceMeasurement() override;
+		void doRecordTimestamp(TimestampType type, size_t id, RenderSnapshot* snapshot) override;
+		void doCheckEndOfPerformanceMeasurement();
+
 	private:
 		DX11Video& dx11Video;
 
@@ -53,6 +60,15 @@ namespace Halley
 		size_t curBuffer = 0;
 		std::optional<Rect4i> clipping;
 		Vector<int> renderTargetTextureUnits;
+
+		struct PerfQuery {
+			TimestampType type;
+			size_t id;
+			RenderSnapshot* snapshot;
+			ID3D11Query* query = nullptr;
+		};
+		ID3D11Query* timestampDisjointQuery = nullptr;
+		Vector<PerfQuery> perfQueries;
 
 		DX11Blend& getBlendMode(BlendType type);
 		void rotateBuffers();

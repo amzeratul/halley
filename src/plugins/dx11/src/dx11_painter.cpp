@@ -12,6 +12,8 @@
 #include "dx11_render_target.h"
 #include "halley/core/game/game_platform.h"
 #include "dx11_depth_stencil.h"
+#include "halley/core/graphics/render_snapshot.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 DX11Painter::DX11Painter(DX11Video& video, Resources& resources)
@@ -180,6 +182,11 @@ void DX11Painter::onUpdateProjection(Material& material, bool hashChanged)
 	}
 }
 
+void DX11Painter::onFinishRender()
+{
+	doCheckEndOfPerformanceMeasurement();
+}
+
 DX11Blend& DX11Painter::getBlendMode(BlendType type)
 {
 	auto iter = blendModes.find(type);
@@ -274,5 +281,86 @@ void DX11Painter::unbindRenderTargetTextureUnits(size_t lastIndex, int minimumTe
 	if (lastIndex > 0) {
 		const auto iter = renderTargetTextureUnits.begin();
 		renderTargetTextureUnits.erase(iter, iter + lastIndex);
+	}
+}
+
+bool DX11Painter::startPerformanceMeasurement()
+{
+	D3D11_QUERY_DESC desc;
+	desc.MiscFlags = 0;
+	desc.Query = D3D11_QUERY_TIMESTAMP_DISJOINT;
+	dx11Video.getDevice().CreateQuery(&desc, &timestampDisjointQuery);
+	if (timestampDisjointQuery) {
+		dx11Video.getDeviceContext().Begin(timestampDisjointQuery);
+		return true;
+	}
+	return false;
+}
+
+void DX11Painter::endPerformanceMeasurement()
+{
+	dx11Video.getDeviceContext().End(timestampDisjointQuery);
+}
+
+void DX11Painter::doRecordTimestamp(TimestampType type, size_t id, RenderSnapshot* snapshot)
+{
+	ID3D11Query* query = nullptr;
+	D3D11_QUERY_DESC desc;
+	desc.MiscFlags = 0;
+	desc.Query = D3D11_QUERY_TIMESTAMP;
+	dx11Video.getDevice().CreateQuery(&desc, &query);
+
+	if (query) {
+		dx11Video.getDeviceContext().End(query);
+		perfQueries.emplace_back(PerfQuery{ type, id, snapshot, query });
+	}
+}
+
+void DX11Painter::doCheckEndOfPerformanceMeasurement()
+{
+	auto clearQueries = [&]()
+	{
+		for (const auto& q : perfQueries) {
+			q.query->Release();
+		}
+		perfQueries.clear();
+	};
+
+	if (timestampDisjointQuery) {
+		D3D10_QUERY_DATA_TIMESTAMP_DISJOINT disjointData;
+		HRESULT result;
+		do {
+			result = dx11Video.getDeviceContext().GetData(timestampDisjointQuery, &disjointData, sizeof(disjointData), 0);
+			if (result != S_OK) {
+				Sleep(1);
+			}
+		} while (result != S_OK);
+
+		timestampDisjointQuery->Release();
+		timestampDisjointQuery = nullptr;
+
+		if (disjointData.Disjoint) {
+			Logger::logWarning("DX11 Profile Data was disjoint");
+			clearQueries();
+			return;
+		}
+
+		UINT64 firstTick = 0;
+		for (const auto& q: perfQueries) {
+			UINT64 tick;
+			do {
+				result = dx11Video.getDeviceContext().GetData(q.query, &tick, sizeof(tick), 0);
+				if (result != S_OK) {
+					Sleep(1);
+				}
+			} while (result != S_OK);
+			if (q.type == TimestampType::FrameStart) {
+				firstTick = tick;
+			}
+
+			const auto time = static_cast<Time>(tick - firstTick) / static_cast<Time>(disjointData.Frequency);
+			q.snapshot->onTimestamp(q.type, q.id, time);
+		}
+		clearQueries();
 	}
 }
