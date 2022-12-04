@@ -52,6 +52,12 @@ namespace Halley {
             String finalRenderTargetName;
         };
 
+        struct CommandTimeStamp {
+            Time start = 0;
+            Time end = 0;
+            Time setupDone = 0;
+        };
+
         RenderSnapshot();
 
         void start();
@@ -74,7 +80,7 @@ namespace Halley {
         bool hasPendingTimestamps() const;
         size_t getNumTimestamps() const;
         std::pair<Time, Time> getFrameTimeRange() const;
-        std::pair<Time, Time> getCommandTimeRange(size_t idx) const;
+        const CommandTimeStamp& getCommandTimeStamp(size_t idx) const;
 
     private:
         struct BindData {
@@ -105,7 +111,7 @@ namespace Halley {
     	std::atomic<int> pendingTimestamps;
         Time startTime = 0;
         Time endTime = 0;
-        Vector<std::pair<Time, Time>> timestamps;
+        Vector<CommandTimeStamp> timestamps;
 
         Vector<std::pair<CommandType, uint16_t>>& getCurDrawCall();
         void finishDrawCall();

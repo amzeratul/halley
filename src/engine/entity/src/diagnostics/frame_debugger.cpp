@@ -150,20 +150,22 @@ void FrameDebugger::paint(Painter& painter)
 			}
 
 			if (static_cast<int>(renderSnapshot->getNumTimestamps()) > frameIdx) {
-				const auto [startTime, endTime] = renderSnapshot->getCommandTimeRange(frameIdx);
-				const auto [prevStartTime, prevEndTime] = frameIdx > 0 ? renderSnapshot->getCommandTimeRange(frameIdx - 1) : std::pair<Time, Time>{0, 0};
+				const auto [startTime, endTime, setupTime] = renderSnapshot->getCommandTimeStamp(frameIdx);
+				const auto [prevStartTime, prevEndTime, prevSetupTime] = frameIdx > 0 ? renderSnapshot->getCommandTimeStamp(frameIdx - 1) : RenderSnapshot::CommandTimeStamp();
 
-				const double commandTime = (endTime - startTime) * 1'000'000;
-				const double exclusiveCommandTime = (endTime - std::max(startTime, prevEndTime)) * 1'000'000;
-				//const double exclusiveCommandTime = (endTime - prevEndTime) * 1'000'000;
-				const double gapTime = (startTime - prevEndTime) * 1'000'000;
+				const double commandLen = (endTime - startTime) * 1'000'000;
+				const double exclusiveCommandLen = (endTime - std::max(startTime, prevEndTime)) * 1'000'000;
+				const double setupLen = (setupTime - startTime) * 1'000'000;
+				const double gapLen = (startTime - std::min(startTime, prevEndTime)) * 1'000'000;
 				
 				str.append("\nTime: ");
-				str.append(toString(lroundl(exclusiveCommandTime)) + " us", green);
+				str.append(toString(lroundl(exclusiveCommandLen)) + " us", green);
 				str.append(" (");
-				str.append(toString(lroundl(commandTime)) + " us", green);
+				str.append(toString(lroundl(setupLen)) + " us", green);
+				str.append(" setup, ");
+				str.append(toString(lroundl(commandLen)) + " us", green);
 				str.append(" total, ");
-				str.append(toString(lroundl(gapTime)) + " us", lroundl(gapTime) > 0 ? red : green);
+				str.append(toString(lroundl(gapLen)) + " us", lroundl(gapLen) > 0 ? red : green);
 				str.append(" gap)");
 			}
 		}

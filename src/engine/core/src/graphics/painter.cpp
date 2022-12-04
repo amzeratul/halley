@@ -694,6 +694,8 @@ void Painter::executeDrawPrimitives(Material& material, size_t numVertices, gsl:
 {
 	Expects(primitiveType == PrimitiveType::Triangle);
 
+	ProfilerEvent event(ProfilerEventType::PainterDrawCall);
+
 	size_t commandIdx = 0;
 	if (recordingSnapshot) {
 		commandIdx = recordingSnapshot->getNumCommands();
@@ -701,13 +703,11 @@ void Painter::executeDrawPrimitives(Material& material, size_t numVertices, gsl:
 		recordTimestamp(TimestampType::CommandStart, commandIdx);
 	}
 
-	ProfilerEvent event(ProfilerEventType::PainterDrawCall);
-
 	startDrawCall();
 
 	// Load vertices
 	setVertices(material.getDefinition(), numVertices, vertexData.data(), indices.size(), indices.data(), allIndicesAreQuads);
-
+	
 	// Load material uniforms
 	setMaterialData(material);
 
@@ -716,6 +716,9 @@ void Painter::executeDrawPrimitives(Material& material, size_t numVertices, gsl:
 		if (material.isPassEnabled(i)) {
 			// Bind pass
 			material.bind(i, *this);
+			if (recordingSnapshot) {
+				recordTimestamp(TimestampType::CommandSetupDone, commandIdx);
+			}
 
 			// Draw
 			drawTriangles(indices.size());

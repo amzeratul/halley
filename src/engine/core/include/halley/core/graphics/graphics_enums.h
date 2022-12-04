@@ -12,6 +12,7 @@ namespace Halley {
 	    FrameStart,
         FrameEnd,
         CommandStart,
+        CommandSetupDone,
         CommandEnd
     };
 }

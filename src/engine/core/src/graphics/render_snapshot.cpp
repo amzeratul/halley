@@ -217,9 +217,14 @@ void RenderSnapshot::onTimestamp(TimestampType type, size_t idx, Time value)
 	} else if (type == TimestampType::FrameEnd) {
 		endTime = value;
 	} else if (type == TimestampType::CommandStart) {
-		timestamps[idx].first = value;
+		if (timestamps[idx].setupDone == 0) {
+			timestamps[idx].setupDone = value;
+		}
+		timestamps[idx].start = value;
 	} else if (type == TimestampType::CommandEnd) {
-		timestamps[idx].second = value;
+		timestamps[idx].end = value;
+	} else if (type == TimestampType::CommandSetupDone) {
+		timestamps[idx].setupDone = value;
 	}
 
 	--pendingTimestamps;
@@ -240,10 +245,12 @@ std::pair<Time, Time> RenderSnapshot::getFrameTimeRange() const
 	return { startTime, endTime };
 }
 
-std::pair<Time, Time> RenderSnapshot::getCommandTimeRange(size_t idx) const
+const RenderSnapshot::CommandTimeStamp& RenderSnapshot::getCommandTimeStamp(size_t idx) const
 {
+	static CommandTimeStamp dummy;
+
 	if (idx >= timestamps.size()) {
-		return { 0, 0 };
+		return dummy;
 	}
 	return timestamps.at(idx);
 }
