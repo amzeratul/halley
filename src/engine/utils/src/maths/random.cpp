@@ -56,6 +56,11 @@ Random::Random(Random&& other) noexcept = default;
 
 Random& Random::operator=(Random&& other) noexcept = default;
 
+int32_t Random::getInt(Range<int32_t> range)
+{
+	return getInt(range.start, range.end);
+}
+
 int32_t Random::getInt(int32_t min, int32_t max)
 {
 	if (min > max) {
