@@ -121,6 +121,8 @@ void FrameDebugger::paint(Painter& painter)
 			str.append(" [");
 			str.append(getReason(info.reason), green);
 			str.append("]");
+			str.append("\nRender target: ");
+			str.append(lastPlaybackResult.finalRenderTargetName, info.hasBindChange ? red : green);
 
 			if (info.type == RenderSnapshot::CommandType::Draw) {
 				str.append("\nPolygons: ");
@@ -132,8 +134,6 @@ void FrameDebugger::paint(Painter& painter)
 				str.append("0x" + toString(info.materialHash, 16, 16).asciiUpper(), info.hasMaterialParamsChange ? red : green);
 				str.append("]\nTextures: ");
 				str.append(String::concatList(info.textures, ", "), info.hasTextureChange ? red : green);
-				str.append("\nRender target: ");
-				str.append(lastPlaybackResult.finalRenderTargetName, info.hasBindChange ? red : green);
 			} else if (info.type == RenderSnapshot::CommandType::Clear) {
 				if (info.clearData->colour) {
 					str.append("\nClear Colour: ");
