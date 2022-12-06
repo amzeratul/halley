@@ -3,8 +3,10 @@
 #include "halleystring.h"
 #include <map>
 
+#include "halley/core/graphics/text/text_renderer.h"
 #include "halley/core/resources/resources.h"
 #include "halley/data_structures/maybe.h"
+#include "halley/maths/colour.h"
 
 namespace Halley {
 	class ConfigNode;
@@ -37,6 +39,7 @@ namespace Halley {
 		LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2) const;
 		LocalisedString replaceTokens(const LocalisedString& tok0, const LocalisedString& tok1, const LocalisedString& tok2, const LocalisedString& tok3) const;
 		LocalisedString replaceTokens(gsl::span<const LocalisedString> toks) const;
+		std::pair<LocalisedString, Vector<ColourOverride>> replaceTokens(gsl::span<const LocalisedString> toks, gsl::span<const std::optional<Colour4f>> colours) const;
 		LocalisedString replaceTokens(const std::map<String, LocalisedString>& tokens);
 
 		const String& getString() const;
@@ -44,6 +47,8 @@ namespace Halley {
 		bool operator==(const LocalisedString& other) const;
 		bool operator!=(const LocalisedString& other) const;
 		bool operator<(const LocalisedString& other) const;
+
+		LocalisedString operator+(const LocalisedString& other) const;
 
 		bool checkForUpdates();
 

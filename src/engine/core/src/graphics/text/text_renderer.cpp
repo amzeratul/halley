@@ -171,10 +171,10 @@ TextRenderer& TextRenderer::setPixelOffset(Vector2f offset)
 	return *this;
 }
 
-TextRenderer& TextRenderer::setColourOverride(const Vector<ColourOverride>& colOverride)
+TextRenderer& TextRenderer::setColourOverride(Vector<ColourOverride> colOverride)
 {
 	if (colourOverrides != colOverride) {
-		colourOverrides = colOverride;
+		colourOverrides = std::move(colOverride);
 		glyphsDirty = true;
 	}
 	return *this;

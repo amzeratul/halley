@@ -43,7 +43,7 @@ namespace Halley
 		TextRenderer& setClip();
 		TextRenderer& setSmoothness(float smoothness);
 		TextRenderer& setPixelOffset(Vector2f offset);
-		TextRenderer& setColourOverride(const Vector<ColourOverride>& colOverride);
+		TextRenderer& setColourOverride(Vector<ColourOverride> colOverride);
 		TextRenderer& setLineSpacing(float spacing);
 		TextRenderer& setAlpha(float alpha);
 

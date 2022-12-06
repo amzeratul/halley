@@ -171,9 +171,9 @@ const LocalisedString& UILabel::getText() const
 	return text;
 }
 
-void UILabel::setColourOverride(const Vector<ColourOverride>& overrides)
+void UILabel::setColourOverride(Vector<ColourOverride> overrides)
 {
-	renderer.setColourOverride(overrides);
+	renderer.setColourOverride(std::move(overrides));
 }
 
 void UILabel::setMaxWidth(float m)

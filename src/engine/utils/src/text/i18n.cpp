@@ -311,6 +311,36 @@ LocalisedString LocalisedString::replaceTokens(gsl::span<const LocalisedString> 
 	return LocalisedString(str);
 }
 
+std::pair<LocalisedString, Vector<ColourOverride>> LocalisedString::replaceTokens(gsl::span<const LocalisedString> toks, gsl::span<const std::optional<Colour4f>> colours) const
+{
+	assert(toks.size() == colours.size());
+
+	Vector<std::pair<int, size_t>> indices;
+
+	for (int i = 0; i < int(toks.size()); ++i) {
+		const auto pos = string.find("{" + toString(i) + "}");
+		if (pos != String::npos) {
+			indices.emplace_back(i, pos);
+		}
+	}
+
+	std::sort(indices.begin(), indices.end(), [] (const auto& a, const auto& b) { return a.second < b.second; });
+
+	auto str = std::string_view(string);
+
+	size_t lastPos = 0;
+	ColourStringBuilder builder;
+	for (const auto& index: indices) {
+		builder.append(str.substr(lastPos, index.second - lastPos));
+		builder.append(toks[index.first].getString(), colours[index.first]);
+		lastPos = index.second + 3;
+	}
+	builder.append(str.substr(lastPos));
+
+	auto result = builder.moveResults();
+	return { LocalisedString(std::move(result.first)), std::move(result.second) };
+}
+
 LocalisedString LocalisedString::replaceTokens(const std::map<String, LocalisedString>& tokens)
 {
 	auto curString = string;
@@ -340,6 +370,11 @@ bool LocalisedString::operator!=(const LocalisedString& other) const
 bool LocalisedString::operator<(const LocalisedString& other) const
 {
 	return string < other.string;
+}
+
+LocalisedString LocalisedString::operator+(const LocalisedString& other) const
+{
+	return LocalisedString(string + other.string);
 }
 
 bool LocalisedString::checkForUpdates()
