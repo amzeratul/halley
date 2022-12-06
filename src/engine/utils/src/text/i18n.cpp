@@ -302,6 +302,15 @@ LocalisedString LocalisedString::replaceTokens(const LocalisedString& tok0, cons
 	return LocalisedString(string.replaceAll("{0}", tok0.getString()).replaceAll("{1}", tok1.getString()).replaceAll("{2}", tok2.getString()).replaceAll("{3}", tok3.getString()));
 }
 
+LocalisedString LocalisedString::replaceTokens(gsl::span<const LocalisedString> toks) const
+{
+	auto str = string;
+	for (int i = 0; i < int(toks.size()); ++i) {
+		str = str.replaceAll("{" + toString(i) + "}", toks[i].getString());
+	}
+	return LocalisedString(str);
+}
+
 LocalisedString LocalisedString::replaceTokens(const std::map<String, LocalisedString>& tokens)
 {
 	auto curString = string;
