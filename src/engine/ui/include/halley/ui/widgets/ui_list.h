@@ -80,9 +80,12 @@ namespace Halley {
 		bool isSingleClickAccept() const;
 		void setSingleClickAccept(bool enabled);
 
-		void setUniformSizedItems(bool enabled);
+		void setUniformSizedItems(bool value);
 
-        void setScrollToSelection(bool enabled);
+        void setScrollToSelection(bool value);
+
+		void setShowSelection(bool value);
+		bool canShowSelection() const;
 
 		bool ignoreClip() const override;
 
@@ -137,6 +140,7 @@ namespace Halley {
 		bool scrollToSelection = true;
 		bool multiSelect = false;
 		bool notifyItemSelectionEnabled = true;
+		bool showSelection = true;
 		int itemUnderCursor = -1;
 
 		bool requiresSelection = true;
@@ -156,6 +160,8 @@ namespace Halley {
 		bool changeSelection(int oldItem, int newItem, SelectionMode mode);
 		bool deselectAll(std::optional<int> exceptFor);
 		void notifyNewItemSelected();
+
+		void updateShowSelection();
 	};
 
 	class UIListItem : public UIClickable {
@@ -167,6 +173,7 @@ namespace Halley {
 
 		void setSelected(bool selected);
 		bool isSelected() const;
+		void refreshSelectionState();
 
 		void setStyle(UIStyle style);
 

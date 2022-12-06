@@ -617,14 +617,35 @@ bool UIList::canDragListItem(const UIListItem& listItem)
 	return isDragEnabled();
 }
 
-void UIList::setUniformSizedItems(bool enabled)
+void UIList::setUniformSizedItems(bool value)
 {
-	uniformSizedItems = enabled;
+	uniformSizedItems = value;
 }
 
-void UIList::setScrollToSelection(bool enabled)
+void UIList::setScrollToSelection(bool value)
 {
-	scrollToSelection = enabled;
+	scrollToSelection = value;
+}
+
+void UIList::setShowSelection(bool value)
+{
+	if (showSelection != value) {
+		showSelection = value;
+		updateShowSelection();
+	}
+}
+
+bool UIList::canShowSelection() const
+{
+	return showSelection;
+}
+
+void UIList::updateShowSelection()
+{
+	const auto item = tryGetItem(getSelectedOption());
+	if (item) {
+		item->refreshSelectionState();
+	}
 }
 
 bool UIList::ignoreClip() const
@@ -943,15 +964,19 @@ void UIListItem::setSelected(bool s)
 {
 	if (selected != s) {
 		selected = s;
-		doSetState(getCurState());
-
-		sendEventDown(UIEvent(UIEventType::SetSelected, getId(), selected));
+		refreshSelectionState();
 	}
 }
 
 bool UIListItem::isSelected() const
 {
 	return selected;
+}
+
+void UIListItem::refreshSelectionState()
+{
+	doSetState(getCurState());
+	sendEventDown(UIEvent(UIEventType::SetSelected, getId(), isSelected() && parent.canShowSelection()));
 }
 
 void UIListItem::setStyle(UIStyle style)
@@ -1105,7 +1130,7 @@ void UIListItem::doSetState(State state)
 {
 	if (dragged || isManualDragging()) {
 		sprite = style.getSprite("drag");
-	} else if (selected && style.hasSprite("selected")) {
+	} else if (selected && parent.canShowSelection() && style.hasSprite("selected")) {
 		sprite = style.getSprite("selected");
 	} else if (!isEnabled() && style.hasSprite("disabled")) {
 		sprite = style.getSprite("disabled");
