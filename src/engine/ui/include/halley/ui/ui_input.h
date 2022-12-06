@@ -38,6 +38,7 @@ namespace Halley {
 	class UIInputButtons {
     public:
 		UIGamepadInput::Priority priorityLevel = UIGamepadInput::Priority::Normal;
+		bool boostPriorityWhenFocused = true;
 
 		int accept = -1;
 		int cancel = -1;

@@ -1125,7 +1125,7 @@ void UIWidget::receiveKeyPress(KeyboardKeyPress key)
 
 UIGamepadInput::Priority UIWidget::getInputPriority() const
 {
-	return focused ? UIGamepadInput::Priority::Focused : gamepadInputButtons->priorityLevel;
+	return focused && gamepadInputButtons->boostPriorityWhenFocused ? UIGamepadInput::Priority::Focused : gamepadInputButtons->priorityLevel;
 }
 
 void UIWidget::setChildLayerAdjustment(int delta)
