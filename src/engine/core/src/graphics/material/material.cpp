@@ -468,6 +468,11 @@ MaterialParameter& Material::getParameter(const String& name)
 	throw Exception("Uniform \"" + name + "\" not available in material \"" + materialDefinition->getName() + "\"", HalleyExceptions::Graphics);
 }
 
+void Material::setDefinition(std::shared_ptr<const MaterialDefinition> definition)
+{
+	materialDefinition = std::move(definition);
+}
+
 std::shared_ptr<Material> Material::clone() const
 {
 	return std::make_shared<Material>(*this);

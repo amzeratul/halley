@@ -205,6 +205,16 @@ MaterialPass& MaterialDefinition::getPass(int n)
 	return passes[n];
 }
 
+gsl::span<const MaterialPass> MaterialDefinition::getPasses() const
+{
+	return passes;
+}
+
+gsl::span<MaterialPass> MaterialDefinition::getPasses()
+{
+	return passes;
+}
+
 const String& MaterialDefinition::getName() const
 {
 	return name;
@@ -597,10 +607,21 @@ void MaterialPass::createShader(ResourceLoader& loader, String name, const Vecto
 	auto& video = *(loader.getAPI().video);
 	auto shaderData = loader.getResources().get<ShaderFile>(shaderAssetId + ":" + video.getShaderLanguage());
 
-	ShaderDefinition definition;
-	definition.name = name;
-	definition.vertexAttributes = attributes;
-	definition.shaders = shaderData->shaders;
+	auto definition = std::make_shared<ShaderDefinition>();
+	definition->name = name;
+	definition->vertexAttributes = attributes;
+	definition->shaders = shaderData->shaders;
 
-	shader = video.createShader(definition);
+	shader = video.createShader(*definition);
+
+	if (loader.getResources().getOptions().retainShaderData) {
+		shaderDefinition = std::move(definition);
+	}
+}
+
+void MaterialPass::replacePixelShader(const MaterialPass& pixelShaderSource, VideoAPI& video)
+{
+	shaderDefinition = std::make_shared<ShaderDefinition>(*shaderDefinition);
+	shaderDefinition->shaders[ShaderType::Pixel] = pixelShaderSource.shaderDefinition->shaders[ShaderType::Pixel];
+	shader = video.createShader(*shaderDefinition);
 }

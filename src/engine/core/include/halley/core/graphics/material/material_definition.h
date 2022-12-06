@@ -201,6 +201,8 @@ namespace Halley
 		int getNumPasses() const;
 		const MaterialPass& getPass(int n) const;
 		MaterialPass& getPass(int n);
+		gsl::span<const MaterialPass> getPasses() const;
+		gsl::span<MaterialPass> getPasses();
 
 		const String& getName() const;
 		size_t getVertexSize() const;
@@ -295,6 +297,8 @@ namespace Halley
 		bool enableStencilTest = false;
 	};
 
+	class ShaderDefinition;
+
 	class MaterialPass
 	{
 		friend class Material;
@@ -304,16 +308,25 @@ namespace Halley
 		explicit MaterialPass(const String& shaderAssetId, const ConfigNode& node);
 
 		BlendType getBlend() const { return blend; }
+		void setBlend(BlendType type) { blend = type; }
+
 		Shader& getShader() const { return *shader; }
+		void setShader(std::shared_ptr<Shader> shader) { this->shader = std::move(shader); }
+
 		const MaterialDepthStencil& getDepthStencil() const { return depthStencil; }
+		MaterialDepthStencil& getDepthStencil() { return depthStencil; }
+
 		CullingMode getCulling() const { return cull; }
+		void setCulling(CullingMode mode) { cull = mode; }
 
 		bool isEnabled() const { return enabled; }
+		void setEnabled(bool enabled) { this->enabled = enabled; }
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
 
 		void createShader(ResourceLoader& loader, String name, const Vector<MaterialAttribute>& attributes);
+		void replacePixelShader(const MaterialPass& pixelShaderSource, VideoAPI& video);
 
 	private:
 		std::shared_ptr<Shader> shader;
@@ -323,6 +336,7 @@ namespace Halley
 		bool enabled = true;
 		
 		String shaderAssetId;
+		std::shared_ptr<ShaderDefinition> shaderDefinition;
 	};
 }
 

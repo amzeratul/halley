@@ -148,7 +148,7 @@ RenderSnapshot::CommandInfo RenderSnapshot::getCommandInfo(size_t commandIdx) co
 	return result;
 }
 
-RenderSnapshot::PlaybackResult RenderSnapshot::playback(Painter& painter, std::optional<size_t> maxCommands) const
+RenderSnapshot::PlaybackResult RenderSnapshot::playback(Painter& painter, std::optional<size_t> maxCommands, std::shared_ptr<const MaterialDefinition> debugMaterial) const
 {
 	painter.stopRecording();
 
@@ -164,6 +164,7 @@ RenderSnapshot::PlaybackResult RenderSnapshot::playback(Painter& painter, std::o
 		for (const auto& command: commands[i]) {
 			const auto type = command.first;
 			const auto idx = command.second;
+			const bool last = i == n - 1;
 
 			switch (type) {
 			case CommandType::Bind:
@@ -183,7 +184,10 @@ RenderSnapshot::PlaybackResult RenderSnapshot::playback(Painter& painter, std::o
 				break;
 
 			case CommandType::Draw:
-				playDraw(painter, drawDatas[idx]);
+				playDraw(painter, drawDatas[idx], {});
+				if (last && debugMaterial) {
+					playDraw(painter, drawDatas[idx], debugMaterial);
+				}
 				break;
 			}
 		}
@@ -288,7 +292,20 @@ void RenderSnapshot::playSetClip(Painter& painter, const SetClipData& data) cons
 	painter.setClip(data.rect, data.enable);
 }
 
-void RenderSnapshot::playDraw(Painter& painter, const DrawData& data) const
+void RenderSnapshot::playDraw(Painter& painter, const DrawData& data, std::shared_ptr<const MaterialDefinition> debugMaterial) const
 {
-	painter.executeDrawPrimitives(*data.material, data.numVertices, data.vertexData, data.indices, data.primitive, data.allIndicesAreQuads);
+	auto material = data.material;
+	if (debugMaterial) {
+		const auto& srcPass = debugMaterial->getPass(0);
+
+		material = material->clone();
+		auto definition = std::make_shared<MaterialDefinition>(material->getDefinition());
+		for (auto& pass: definition->getPasses()) {
+			pass.replacePixelShader(srcPass, painter.video);
+			pass.setBlend(srcPass.getBlend());
+			pass.getDepthStencil() = srcPass.getDepthStencil();
+		}
+		material->setDefinition(std::move(definition));
+	}
+	painter.executeDrawPrimitives(*material, data.numVertices, data.vertexData, data.indices, data.primitive, data.allIndicesAreQuads);
 }

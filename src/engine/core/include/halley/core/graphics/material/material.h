@@ -85,6 +85,7 @@ namespace Halley
 
 		const MaterialDefinition& getDefinition() const { return *materialDefinition; }
 		const std::shared_ptr<const MaterialDefinition>& getDefinitionPtr() const { return materialDefinition; }
+		void setDefinition(std::shared_ptr<const MaterialDefinition> definition);
 
 		std::shared_ptr<Material> clone() const;
 		

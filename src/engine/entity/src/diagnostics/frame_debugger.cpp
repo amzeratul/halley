@@ -2,6 +2,7 @@
 
 #include "halley/core/api/halley_api.h"
 #include "halley/core/graphics/painter.h"
+#include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/graphics/render_snapshot.h"
 #include "halley/core/resources/resources.h"
 #include "halley/support/logger.h"
@@ -52,8 +53,12 @@ void FrameDebugger::draw(RenderContext& context)
 		{
 			painter.stopRecording();
 			painter.clear(Colour4f());
+
+			if (!debugMaterial && resources.getOptions().retainShaderData) {
+				debugMaterial = resources.get<MaterialDefinition>("Halley/FrameDebugView");
+			}
 			
-			lastPlaybackResult = renderSnapshot->playback(painter, framesToDraw);
+			lastPlaybackResult = renderSnapshot->playback(painter, framesToDraw, debugMaterial);
 		});
 	}
 

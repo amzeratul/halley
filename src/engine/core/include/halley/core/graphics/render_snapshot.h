@@ -73,7 +73,7 @@ namespace Halley {
         size_t getNumCommands() const;
         CommandInfo getCommandInfo(size_t commandIdx) const;
 
-        PlaybackResult playback(Painter& painter, std::optional<size_t> maxCommands) const;
+        PlaybackResult playback(Painter& painter, std::optional<size_t> maxCommands, std::shared_ptr<const MaterialDefinition> debugMaterial = {}) const;
 
         void addPendingTimestamp();
         void onTimestamp(TimestampType type, size_t idx, Time value);
@@ -120,6 +120,6 @@ namespace Halley {
         void playUnbind(Painter& painter) const;
         void playClear(Painter& painter, const ClearData& data) const;
         void playSetClip(Painter& painter, const SetClipData& data) const;
-        void playDraw(Painter& painter, const DrawData& data) const;
+        void playDraw(Painter& painter, const DrawData& data, std::shared_ptr<const MaterialDefinition> debugMaterial) const;
     };
 }

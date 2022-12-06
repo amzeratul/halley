@@ -246,10 +246,11 @@ namespace Halley
 
 	struct ResourceOptions {
 		bool retainPixelData = false;
-
-		ResourceOptions() = default;
-		ResourceOptions(bool retainPixelData)
+		bool retainShaderData = false;
+		
+		ResourceOptions(bool retainPixelData = false, bool retainShaderData = false)
 			: retainPixelData(retainPixelData)
+			, retainShaderData(retainShaderData)
 		{}
 	};
 }
