@@ -1,6 +1,7 @@
 #include "script_transform.h"
 
 #include "world.h"
+#include "world_position.h"
 #include "components/transform_2d_component.h"
 using namespace Halley;
 
@@ -26,11 +27,10 @@ std::pair<String, Vector<ColourOverride>> ScriptSetPosition::getNodeDescription(
 IScriptNodeType::Result ScriptSetPosition::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	auto* transform = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 2));
-	const auto pos = readDataPin(environment, node, 3);
+	const auto pos = WorldPosition(readDataPin(environment, node, 3), transform->getGlobalPosition(), transform->getSubWorld());
 
-	if (transform && (pos.getType() == ConfigNodeType::Float2 || pos.getType() == ConfigNodeType::Int2)) {
-		transform->setGlobalPosition(pos.asVector2f());
-	}
+	transform->setGlobalPosition(pos.pos);
+	transform->setSubWorld(pos.subWorld);
 
 	return Result(ScriptNodeExecutionState::Done);
 }
@@ -62,7 +62,7 @@ ConfigNode ScriptGetPosition::doGetData(ScriptEnvironment& environment, const Sc
 {
 	const auto* transform = environment.tryGetComponent<Transform2DComponent>(readEntityId(environment, node, 0));
 	if (transform) {
-		return ConfigNode(transform->getGlobalPosition());
+		return WorldPosition(transform->getGlobalPosition(), transform->getSubWorld()).toConfigNode();
 	}
 	return ConfigNode();
 }

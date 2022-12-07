@@ -22,6 +22,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "entity/entity_scene.h"
 #include "entity/entity_factory.h"
 #include "entity/entity_stage.h"
+#include "entity/world_position.h"
 
 #include "entity/diagnostics/frame_debugger.h"
 #include "entity/diagnostics/performance_stats.h"
