@@ -14,6 +14,8 @@ namespace Halley {
 
 		void setText(const LocalisedString& text);
 		void setText(LocalisedString&& text);
+		void setTextAndColours(LocalisedString text, Vector<ColourOverride> overrides);
+		void setTextAndColours(std::pair<LocalisedString, Vector<ColourOverride>> textAndColours);
 		void setFutureText(Future<String> text);
 		const LocalisedString& getText() const;
 		void setColourOverride(Vector<ColourOverride> overrides);

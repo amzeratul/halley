@@ -155,6 +155,18 @@ void UILabel::setText(LocalisedString&& t)
 	}
 }
 
+void UILabel::setTextAndColours(LocalisedString text, Vector<ColourOverride> overrides)
+{
+	setText(std::move(text));
+	setColourOverride(std::move(overrides));
+}
+
+void UILabel::setTextAndColours(std::pair<LocalisedString, Vector<ColourOverride>> textAndColours)
+{
+	setText(std::move(textAndColours.first));
+	setColourOverride(std::move(textAndColours.second));
+}
+
 void UILabel::setFutureText(Future<String> futureText)
 {
 	const auto flag = aliveFlag;
