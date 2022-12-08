@@ -61,6 +61,14 @@ std::pair<String, Vector<ColourOverride>> ScriptWait::getNodeDescription(const S
 	return str.moveResults();
 }
 
+String ScriptWait::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 2) {
+		return "Time Override";
+	}
+	return ScriptNodeTypeBase<ScriptWaitData>::getPinDescription(node, elementType, elementIdx);
+}
+
 IScriptNodeType::Result ScriptWait::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptWaitData& curData) const
 {
 	if (!curData.setFromInput && readDataPin(environment, node, 2).getType() == ConfigNodeType::Float) {

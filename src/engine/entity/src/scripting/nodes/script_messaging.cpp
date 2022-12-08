@@ -270,6 +270,16 @@ std::pair<String, Vector<ColourOverride>> ScriptSendSystemMessage::getNodeDescri
 	return str.moveResults();
 }
 
+String ScriptSendSystemMessage::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx >= 2) {
+		const auto msgType = ScriptSystemMessageType(node.getSettings()["message"]);
+		return msgType.members.at(elementIdx - 2);
+	}
+
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
 IScriptNodeType::Result ScriptSendSystemMessage::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
 {
 	const auto msgType = ScriptSystemMessageType(node.getSettings()["message"]);
