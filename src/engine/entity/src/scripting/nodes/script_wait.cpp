@@ -55,7 +55,7 @@ std::pair<String, Vector<ColourOverride>> ScriptWait::getNodeDescription(const S
 		str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 
 	} else {
-		str.append(toString(time), parameterColour);
+		str.append(toString(time), settingColour);
 	}
 	str.append(time == 1.0f ? " second" : " seconds");
 	return str.moveResults();

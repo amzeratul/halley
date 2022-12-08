@@ -23,7 +23,7 @@ std::pair<String, Vector<ColourOverride>> ScriptFunctionCallExternal::getNodeDes
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Call ");
-	str.append(node.getSettings()["function"].asString(""), parameterColour);
+	str.append(node.getSettings()["function"].asString(""), settingColour);
 	return str.moveResults();
 }
 

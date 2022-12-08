@@ -53,14 +53,14 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Input ");
-	str.append(node.getSettings()["button"].asString(""), parameterColour);
+	str.append(node.getSettings()["button"].asString(""), settingColour);
 	str.append(" on ");
 	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
 	str.append(" with priority ");
 	str.append(node.getSettings()["priority"].asString("normal"), parameterColour);
 	if (node.getSettings()["label"].asString("") != "") {
 		str.append(" and label ");
-		str.append(node.getSettings()["label"].asString(""), parameterColour);
+		str.append(node.getSettings()["label"].asString(""), settingColour);
 	}
 	return str.moveResults();
 }

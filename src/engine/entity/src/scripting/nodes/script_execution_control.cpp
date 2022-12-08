@@ -211,11 +211,11 @@ std::pair<String, Vector<ColourOverride>> ScriptStartScript::getNodeDescription(
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Start Script ");
-	str.append(node.getSettings()["script"].asString(""), parameterColour);
+	str.append(node.getSettings()["script"].asString(""), settingColour);
 	str.append(" on ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	str.append(" with tags ");
-	str.append(node.getSettings()["tags"].asString("{}"), parameterColour);
+	str.append(node.getSettings()["tags"].asString("{}"), settingColour);
 	return str.moveResults();
 }
 
@@ -256,7 +256,7 @@ std::pair<String, Vector<ColourOverride>> ScriptStartScriptName::getNodeDescript
 	str.append(" on ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	str.append(" with tags ");
-	str.append(node.getSettings()["tags"].asString("{}"), parameterColour);
+	str.append(node.getSettings()["tags"].asString("{}"), settingColour);
 	return str.moveResults();
 }
 
@@ -293,7 +293,7 @@ std::pair<String, Vector<ColourOverride>> ScriptStopScript::getNodeDescription(c
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Stop Script ");
-	str.append(node.getSettings()["script"].asString(""), parameterColour);
+	str.append(node.getSettings()["script"].asString(""), settingColour);
 	str.append(" on ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	return str.moveResults();
@@ -332,7 +332,7 @@ std::pair<String, Vector<ColourOverride>> ScriptStopTag::getNodeDescription(cons
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Stop all Scripts matching tag ");
-	str.append(node.getSettings()["tag"].asString(""), parameterColour);
+	str.append(node.getSettings()["tag"].asString(""), settingColour);
 	str.append(" on ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	return str.moveResults();

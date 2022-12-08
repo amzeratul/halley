@@ -24,12 +24,12 @@ std::pair<String, Vector<ColourOverride>> ScriptAudioEvent::getNodeDescription(c
 
 	auto str = ColourStringBuilder(true);
 	str.append("Post audio event ");
-	str.append(event, parameterColour);
+	str.append(event, settingColour);
 	str.append(" on entity ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	if (!destroyEvent.isEmpty()) {
 		str.append(", then post audio event ");
-		str.append(destroyEvent, parameterColour);
+		str.append(destroyEvent, settingColour);
 		str.append(" on destroy");
 	}
 	return str.moveResults();

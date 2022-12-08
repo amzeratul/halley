@@ -21,7 +21,8 @@ namespace Halley {
 			Vector<String> defaultValue;
 		};
 
-		constexpr static Colour4f parameterColour = Colour4f(0.97f, 0.35f, 0.35f);
+		constexpr static Colour4f parameterColour = Colour4f(0.47f, 0.58f, 0.98f);
+		constexpr static Colour4f settingColour = Colour4f(0.97f, 0.35f, 0.35f);
 		using PinType = GraphNodePinType;
 
 		virtual ~IGraphNodeType() = default;

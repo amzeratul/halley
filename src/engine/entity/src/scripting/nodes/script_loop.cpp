@@ -36,7 +36,7 @@ std::pair<String, Vector<ColourOverride>> ScriptForLoop::getNodeDescription(cons
 	const int count = node.getSettings()["loopCount"].asInt(0);
 	auto str = ColourStringBuilder(true);
 	str.append("Loop ");
-	str.append(toString(count), parameterColour);
+	str.append(toString(count), settingColour);
 	str.append(count == 1 ? " time" : " times");
 	return str.moveResults();
 }
@@ -96,7 +96,7 @@ std::pair<String, Vector<ColourOverride>> ScriptWhileLoop::getNodeDescription(co
 		str.append(" is true");
 	} else {
 		str.append("Loop ");
-		str.append("forever", parameterColour);
+		str.append("forever", settingColour);
 	}
 	return str.moveResults();
 }
@@ -155,7 +155,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLerpLoop::getNodeDescription(con
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Loop over ");
-	str.append(toString(node.getSettings()["time"].asFloat(1)) + "s", parameterColour);
+	str.append(toString(node.getSettings()["time"].asFloat(1)) + "s", settingColour);
 	str.append(" whilst outputting from 0 to 1");
 	return str.moveResults();}
 
@@ -254,7 +254,7 @@ std::pair<String, Vector<ColourOverride>> ScriptEveryFrame::getNodeDescription(c
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Pulse every ");
-	str.append("frame", parameterColour);
+	str.append("frame", settingColour);
 	return str.moveResults();
 }
 
@@ -334,7 +334,7 @@ std::pair<String, Vector<ColourOverride>> ScriptEveryTime::getNodeDescription(co
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Pulse every ");
-	str.append(toString(node.getSettings()["time"].asFloat(1.0f)), parameterColour);
+	str.append(toString(node.getSettings()["time"].asFloat(1.0f)), settingColour);
 	str.append(" s");
 	return str.moveResults();
 }

@@ -77,9 +77,9 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinAndConnectionDe
 	if ((type == ScriptNodeElementType::ReadDataPin || type == ScriptNodeElementType::TargetPin) && elementType.direction == GraphNodePinDirection::Input) {
 		builder.append(pinDesc);
 		builder.append(" := ");
-		builder.append(connected, parameterColour);
+		builder.append(connected, settingColour);
 	} else if (type == ScriptNodeElementType::WriteDataPin && elementType.direction == GraphNodePinDirection::Output) {
-		builder.append(connected, parameterColour);
+		builder.append(connected, settingColour);
 		builder.append(" := ");
 		builder.append(pinDesc);
 	} else {

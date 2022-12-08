@@ -29,7 +29,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getNodeDescription(
 
 	auto str = ColourStringBuilder(true);
 	str.append("Send message ");
-	str.append(msgType.message, parameterColour);
+	str.append(msgType.message, settingColour);
 	str.append("(");
 
 	for (int i = 0; i < msgType.nParams; ++i) {
@@ -40,14 +40,14 @@ std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getNodeDescription(
 	}
 
 	str.append(") to script ");
-	str.append(msgType.script, parameterColour);
+	str.append(msgType.script, settingColour);
 	str.append(" on entity ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 
 	const auto delayStr = getConnectedNodeName(world, node, graph, 3);
 	if (delayStr != "<empty>") {
 		str.append(" after ");
-		str.append(delayStr + " s", parameterColour);
+		str.append(delayStr + " s", settingColour);
 	}
 
 	return str.moveResults();
@@ -116,7 +116,7 @@ std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getNodeDescripti
 {
 	auto str = ColourStringBuilder(true);
 	str.append("On receive message ");
-	str.append(node.getSettings()["message"].asString(""), parameterColour);
+	str.append(node.getSettings()["message"].asString(""), settingColour);
 	return str.moveResults();
 }
 
@@ -248,7 +248,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSendSystemMessage::getNodeDescri
 
 	auto str = ColourStringBuilder(true);
 	str.append("Send message ");
-	str.append(msgType.message, parameterColour);
+	str.append(msgType.message, settingColour);
 	str.append("(");
 
 	size_t i = 0;
@@ -266,7 +266,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSendSystemMessage::getNodeDescri
 	}
 
 	str.append(") to system ");
-	str.append(node.getSettings()["system"].asString(""), parameterColour);
+	str.append(node.getSettings()["system"].asString(""), settingColour);
 	return str.moveResults();
 }
 
@@ -326,7 +326,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSendEntityMessage::getNodeDescri
 	
 	auto str = ColourStringBuilder(true);
 	str.append("Send message ");
-	str.append(msgType.message, parameterColour);
+	str.append(msgType.message, settingColour);
 	str.append("(");
 
 	size_t i = 0;

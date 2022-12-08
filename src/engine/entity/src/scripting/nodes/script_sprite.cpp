@@ -32,7 +32,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSpriteAnimation::getNodeDescript
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Play sequence ");
-	str.append(node.getSettings()["sequence"].asString("default"), parameterColour);
+	str.append(node.getSettings()["sequence"].asString("default"), settingColour);
 	str.append(" on entity ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	if (node.getSettings()["loop"].asBool(true)) {
@@ -89,7 +89,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSpriteDirection::getNodeDescript
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Set direction ");
-	str.append(node.getSettings()["direction"].asString("right"), parameterColour);
+	str.append(node.getSettings()["direction"].asString("right"), settingColour);
 	str.append(" on entity ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	return str.moveResults();

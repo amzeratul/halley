@@ -27,7 +27,7 @@ std::pair<String, Vector<ColourOverride>> ScriptUIModal::getNodeDescription(cons
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Open modal UI ");
-	str.append(node.getSettings()["ui"].asString(""), parameterColour);
+	str.append(node.getSettings()["ui"].asString(""), settingColour);
 	str.append(" with data ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	str.append(", wait for it, then output result value");
@@ -102,13 +102,13 @@ std::pair<String, Vector<ColourOverride>> ScriptUIInWorld::getNodeDescription(co
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Open UI ");
-	str.append(node.getSettings()["ui"].asString(""), parameterColour);
+	str.append(node.getSettings()["ui"].asString(""), settingColour);
 	str.append(" on entity ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	str.append(" with alignment ");
-	str.append(toString(node.getSettings()["alignment"].asVector2f(Vector2f(0.5f, 0.5f))), parameterColour);
+	str.append(toString(node.getSettings()["alignment"].asVector2f(Vector2f(0.5f, 0.5f))), settingColour);
 	str.append(" and offset ");
-	str.append(toString(node.getSettings()["offset"].asVector2f(Vector2f())), parameterColour);
+	str.append(toString(node.getSettings()["offset"].asVector2f(Vector2f())), settingColour);
 	return str.moveResults();
 }
 

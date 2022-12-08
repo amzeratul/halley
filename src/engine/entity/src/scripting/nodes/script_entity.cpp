@@ -40,7 +40,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSpawnEntity::getNodeDescription(
 
 	auto str = ColourStringBuilder(true);
 	str.append("Spawn entity ");
-	str.append(node.getSettings()["prefab"].asString(""), parameterColour);
+	str.append(node.getSettings()["prefab"].asString(""), settingColour);
 	str.append(" at position ");
 	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	if (asChild) {
@@ -142,7 +142,7 @@ std::pair<String, Vector<ColourOverride>> ScriptFindChildByName::getNodeDescript
 		str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
 	}
 	else {
-		str.append(toString(node.getSettings()["childName"].asString("")), parameterColour);
+		str.append(toString(node.getSettings()["childName"].asString("")), settingColour);
 	}
 
 	str.append(" on ");
