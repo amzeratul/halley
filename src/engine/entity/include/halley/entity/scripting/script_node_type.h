@@ -103,53 +103,50 @@ namespace Halley {
         static String addParentheses(String str);
 	};
 
-	template <typename DataType, typename EnvironmentType = ScriptEnvironment>
+	template <typename DataType>
 	class ScriptNodeTypeBase : public IScriptNodeType {
 	public:
 		static_assert(std::is_base_of_v<IScriptStateData, DataType>);
-		static_assert(std::is_base_of_v<ScriptEnvironment, EnvironmentType>);
 		
-		virtual Result doUpdate(EnvironmentType& environment, Time time, const ScriptGraphNode& node, DataType& curData) const { return Result(ScriptNodeExecutionState::Done); }
-		virtual void doDestructor(EnvironmentType& environment, const ScriptGraphNode& node, DataType& curData) const {}
-		virtual bool doIsStackRollbackPoint(EnvironmentType& environment, const ScriptGraphNode& node, GraphPinId outPin, DataType& curData) const { return false; }
+		virtual Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, DataType& curData) const { return Result(ScriptNodeExecutionState::Done); }
+		virtual void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, DataType& curData) const {}
+		virtual bool doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId outPin, DataType& curData) const { return false; }
 		virtual void doInitData(DataType& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const = 0;
-		virtual ConfigNode doGetData(EnvironmentType& environment, const ScriptGraphNode& node, size_t pinN, DataType& curData) const { return ConfigNode(); }
-		virtual void doSetData(EnvironmentType& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, DataType& curData) const {}
-		virtual EntityId doGetEntityId(EnvironmentType& environment, const ScriptGraphNode& node, GraphPinId pinN, DataType& curData) const { return EntityId(); }
-		virtual ConfigNode doGetDevConData(EnvironmentType& environment, const ScriptGraphNode& node, DataType& curData) const { return {}; }
+		virtual ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, DataType& curData) const { return ConfigNode(); }
+		virtual void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, DataType& curData) const {}
+		virtual EntityId doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN, DataType& curData) const { return EntityId(); }
+		virtual ConfigNode doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node, DataType& curData) const { return {}; }
 
 		std::unique_ptr<IScriptStateData> makeData() const override { return std::make_unique<DataType>(); }
 		void initData(IScriptStateData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override { doInitData(dynamic_cast<DataType&>(data), node, context, nodeData); }
 
-		Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData* curData) const final override { return doUpdate(dynamic_cast<EnvironmentType&>(environment), time, node, *dynamic_cast<DataType*>(curData)); }
-		void destructor(ScriptEnvironment& environment, const ScriptGraphNode& node, IScriptStateData* curData) const final override { return doDestructor(dynamic_cast<EnvironmentType&>(environment), node, *dynamic_cast<DataType*>(curData)); }
-		bool isStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId outPin, IScriptStateData* curData) const final override { return doIsStackRollbackPoint(dynamic_cast<EnvironmentType&>(environment), node, outPin, *dynamic_cast<DataType*>(curData)); }
-		ConfigNode getData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, IScriptStateData* curData) const final override { return doGetData(dynamic_cast<EnvironmentType&>(environment), node, pinN, *dynamic_cast<DataType*>(curData)); }
-		void setData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, IScriptStateData* curData) const final override { doSetData(dynamic_cast<EnvironmentType&>(environment), node, pinN, std::move(data), *dynamic_cast<DataType*>(curData)); }
-		EntityId getEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN, IScriptStateData* curData) const final override { return doGetEntityId(dynamic_cast<EnvironmentType&>(environment), node, pinN, *dynamic_cast<DataType*>(curData)); }
-		ConfigNode getDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node, IScriptStateData* curData) const override { return doGetDevConData(dynamic_cast<EnvironmentType&>(environment), node, *dynamic_cast<DataType*>(curData)); }
+		Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData* curData) const final override { return doUpdate(environment, time, node, *dynamic_cast<DataType*>(curData)); }
+		void destructor(ScriptEnvironment& environment, const ScriptGraphNode& node, IScriptStateData* curData) const final override { return doDestructor(environment, node, *dynamic_cast<DataType*>(curData)); }
+		bool isStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId outPin, IScriptStateData* curData) const final override { return doIsStackRollbackPoint(environment, node, outPin, *dynamic_cast<DataType*>(curData)); }
+		ConfigNode getData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, IScriptStateData* curData) const final override { return doGetData(environment, node, pinN, *dynamic_cast<DataType*>(curData)); }
+		void setData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, IScriptStateData* curData) const final override { doSetData(environment, node, pinN, std::move(data), *dynamic_cast<DataType*>(curData)); }
+		EntityId getEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN, IScriptStateData* curData) const final override { return doGetEntityId(environment, node, pinN, *dynamic_cast<DataType*>(curData)); }
+		ConfigNode getDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node, IScriptStateData* curData) const override { return doGetDevConData(environment, node, *dynamic_cast<DataType*>(curData)); }
 	};
 
-	template <typename EnvironmentType>
-	class ScriptNodeTypeBase<void, EnvironmentType> : public IScriptNodeType {
+	template <>
+	class ScriptNodeTypeBase<void> : public IScriptNodeType {
 	public:
-		static_assert(std::is_base_of_v<ScriptEnvironment, EnvironmentType>);
-		
-		virtual Result doUpdate(EnvironmentType& environment, Time time, const ScriptGraphNode& node) const { return Result(ScriptNodeExecutionState::Done); }
-		virtual void doDestructor(EnvironmentType& environment, const ScriptGraphNode& node) const {}
-		virtual bool doIsStackRollbackPoint(EnvironmentType& environment, const ScriptGraphNode& node, GraphPinId outPin) const { return false; }
-		virtual ConfigNode doGetData(EnvironmentType& environment, const ScriptGraphNode& node, size_t pinN) const { return ConfigNode(); }
-		virtual void doSetData(EnvironmentType& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const {}
-		virtual EntityId doGetEntityId(EnvironmentType& environment, const ScriptGraphNode& node, GraphPinId pinN) const { return EntityId(); }
-		virtual ConfigNode doGetDevConData(EnvironmentType& environment, const ScriptGraphNode& node) const { return {}; }
+		virtual Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const { return Result(ScriptNodeExecutionState::Done); }
+		virtual void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node) const {}
+		virtual bool doIsStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId outPin) const { return false; }
+		virtual ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const { return ConfigNode(); }
+		virtual void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data) const {}
+		virtual EntityId doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const { return EntityId(); }
+		virtual ConfigNode doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node) const { return {}; }
 
-		Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData*) const final override { return doUpdate(dynamic_cast<EnvironmentType&>(environment), time, node); }
-		void destructor(ScriptEnvironment& environment, const ScriptGraphNode& node, IScriptStateData*) const final override { return doDestructor(dynamic_cast<EnvironmentType&>(environment), node); }
-		bool isStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId outPin, IScriptStateData*) const final override { return doIsStackRollbackPoint(dynamic_cast<EnvironmentType&>(environment), node, outPin); }
-		ConfigNode getData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, IScriptStateData*) const final override { return doGetData(dynamic_cast<EnvironmentType&>(environment), node, pinN); }
-		void setData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, IScriptStateData*) const final override { doSetData(dynamic_cast<EnvironmentType&>(environment), node, pinN, std::move(data)); }
-		EntityId getEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN, IScriptStateData*) const final override { return doGetEntityId(dynamic_cast<EnvironmentType&>(environment), node, pinN); }
-		ConfigNode getDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node, IScriptStateData*) const override { return doGetDevConData(dynamic_cast<EnvironmentType&>(environment), node); }
+		Result update(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, IScriptStateData*) const final override { return doUpdate(environment, time, node); }
+		void destructor(ScriptEnvironment& environment, const ScriptGraphNode& node, IScriptStateData*) const final override { return doDestructor(environment, node); }
+		bool isStackRollbackPoint(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId outPin, IScriptStateData*) const final override { return doIsStackRollbackPoint(environment, node, outPin); }
+		ConfigNode getData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, IScriptStateData*) const final override { return doGetData(environment, node, pinN); }
+		void setData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, IScriptStateData*) const final override { doSetData(environment, node, pinN, std::move(data)); }
+		EntityId getEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN, IScriptStateData*) const final override { return doGetEntityId(environment, node, pinN); }
+		ConfigNode getDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node, IScriptStateData*) const override { return doGetDevConData(environment, node); }
 	};
 
 	class ScriptNodeTypeCollection {
