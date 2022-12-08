@@ -29,7 +29,7 @@ std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getNodeDescription(con
 {
 	const auto desc = getConnectedNodeName(world, node, graph, 1);
 	auto str = ColourStringBuilder(true);
-	str.append("Flow based on ");
+	str.append("Flow while ");
 	str.append(desc, parameterColour);
 	return str.moveResults();
 }

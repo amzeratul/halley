@@ -2,6 +2,8 @@
 #include "halley/data_structures/config_node.h"
 #include "halley/maths/vector2.h"
 
+class Transform2DComponent;
+
 namespace Halley {
 	class WorldPosition {
 	public:
@@ -15,6 +17,8 @@ namespace Halley {
 		}
 
 		WorldPosition(const ConfigNode& node, Vector2f defaultPos = {}, int defaultSubWorld = 0);
+		WorldPosition(Transform2DComponent& transform2D);
+
 		ConfigNode toConfigNode() const;
 		String toString() const;
 	};

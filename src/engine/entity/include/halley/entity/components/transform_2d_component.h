@@ -9,6 +9,7 @@
 
 namespace Halley
 {
+	class WorldPosition;
 	class Sprite;
 }
 
@@ -32,6 +33,7 @@ public:
 
 	Halley::Vector2f getGlobalPosition() const;
 	void setGlobalPosition(Halley::Vector2f v);
+	void setGlobalPosition(Halley::WorldPosition p);
 
 	Halley::Vector2f getGlobalScale() const;
 	void setGlobalScale(Halley::Vector2f v);

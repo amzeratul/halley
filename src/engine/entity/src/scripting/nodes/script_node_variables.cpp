@@ -528,13 +528,19 @@ Vector<IScriptNodeType::SettingType> ScriptSetVariable::getSettingTypes() const
 
 std::pair<String, Vector<ColourOverride>> ScriptSetVariable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
-	auto label = getLabel(node);
-
 	auto str = ColourStringBuilder(true);
 	str.append(getConnectedNodeName(world, node, graph, 3), parameterColour);
 	str.append(" := ");
-	str.append(label.isEmpty() ? getConnectedNodeName(world, node, graph, 2) : label, parameterColour);
+	str.append(node.getPin(2).hasConnection() ? getConnectedNodeName(world, node, graph, 2) : getLabel(node), parameterColour);
 	return str.moveResults();
+}
+
+String ScriptSetVariable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	if (elementIdx == 3) {
+		return node.getPin(2).hasConnection() ? getConnectedNodeName(world, node, graph, 2) : getLabel(node);
+	}
+	return "Set Variable";
 }
 
 IScriptNodeType::Result ScriptSetVariable::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const

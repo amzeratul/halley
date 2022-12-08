@@ -1,5 +1,7 @@
 #include "halley/entity/world_position.h"
 
+#include "components/transform_2d_component.h"
+
 using namespace Halley;
 
 WorldPosition::WorldPosition(const ConfigNode& node, Vector2f defaultPos, int defaultSubWorld)
@@ -21,6 +23,12 @@ WorldPosition::WorldPosition(const ConfigNode& node, Vector2f defaultPos, int de
 			}
 		}
 	}
+}
+
+WorldPosition::WorldPosition(Transform2DComponent& transform2D)
+{
+	pos = transform2D.getGlobalPosition();
+	subWorld = transform2D.getSubWorld();
 }
 
 ConfigNode WorldPosition::toConfigNode() const

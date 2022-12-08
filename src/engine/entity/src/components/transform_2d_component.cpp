@@ -1,5 +1,7 @@
 #include "halley/support/logger.h"
 #include "components/transform_2d_component.h"
+
+#include "world_position.h"
 #include "halley/core/graphics/sprite/sprite.h"
 
 using namespace Halley;
@@ -78,6 +80,12 @@ Vector2f Transform2DComponent::getGlobalPosition() const
 void Transform2DComponent::setGlobalPosition(Vector2f v)
 {
 	setLocalPosition(parentTransform ? parentTransform->inverseTransformPoint(v) : v);
+}
+
+void Transform2DComponent::setGlobalPosition(WorldPosition p)
+{
+	setGlobalPosition(p.pos);
+	setSubWorld(p.subWorld);
 }
 
 Vector2f Transform2DComponent::getGlobalScale() const
