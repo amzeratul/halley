@@ -174,6 +174,14 @@ std::pair<String, Vector<ColourOverride>> ScriptLatch::getNodeDescription(const 
 	return str.moveResults();
 }
 
+String ScriptLatch::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 1) {
+		return "Set Latched";
+	}
+	return ScriptNodeTypeBase<ScriptLatchData>::getPinDescription(node, elementType, elementIdx);
+}
+
 void ScriptLatch::doInitData(ScriptLatchData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
 	data = ScriptLatchData(nodeData);
