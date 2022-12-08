@@ -1,4 +1,7 @@
 #pragma once
+#include <typeinfo>
+#include <typeindex>
+
 #include "script_message.h"
 #include "../entity_factory.h"
 #include "script_node_type.h"
@@ -24,6 +27,11 @@ namespace Halley {
 				"entity"
 			}};
 		}
+	};
+    	    
+	class IScriptEnvironmentInterface {
+	public:
+		virtual ~IScriptEnvironmentInterface() = default;
 	};
 
     class ScriptEnvironment: private IEntityFactoryContext {
@@ -118,6 +126,24 @@ namespace Halley {
 
         virtual std::shared_ptr<UIWidget> createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId);
         virtual std::shared_ptr<UIWidget> createModalUI(const String& ui, ConfigNode data);
+        
+		template <typename T>
+		T& getInterface()
+		{
+			const auto iter = interfaces.find(std::type_index(typeid(T)));
+			if (iter == interfaces.end()) {
+				throw Exception(String("Script Environment does not have interface \"") + typeid(T).name() + "\"", HalleyExceptions::Scripting);
+			}
+			return dynamic_cast<T&>(*iter->second);
+		}
+
+		template <typename T>
+		void setInterface(T* interface)
+		{
+			static_assert(std::is_abstract_v<T>);
+			static_assert(std::is_base_of_v<IScriptEnvironmentInterface, T>);
+			interfaces[std::type_index(typeid(T))] = interface;
+		}
 
     protected:
 		const HalleyAPI& api;
@@ -139,6 +165,8 @@ namespace Halley {
         Vector<std::pair<EntityId, ScriptMessage>> scriptOutbox;
         Vector<EntityMessageData> entityOutbox;
         Vector<ScriptExecutionRequest> scriptExecutionRequestOutbox;
+
+    	HashMap<std::type_index, IScriptEnvironmentInterface*> interfaces;
 
     private:
         bool updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);
