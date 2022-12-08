@@ -65,7 +65,7 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(
 	return str.moveResults();
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptInputButton::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptInputButton::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	switch (elementIdx) {
 	case 2:

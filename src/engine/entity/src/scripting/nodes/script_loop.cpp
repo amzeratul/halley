@@ -41,12 +41,12 @@ std::pair<String, Vector<ColourOverride>> ScriptForLoop::getNodeDescription(cons
 	return str.moveResults();
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptForLoop::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptForLoop::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
-		return {"Flow output after loop", {}};
+		return "Flow output after loop";
 	} else if (elementIdx == 2) {
-		return {"Flow output for each loop iteration", {}};
+		return "Flow output for each loop iteration";
 	} else {
 		return ScriptNodeTypeBase<ScriptForLoopData>::getPinDescription(node, element, elementIdx);
 	}
@@ -159,12 +159,12 @@ std::pair<String, Vector<ColourOverride>> ScriptLerpLoop::getNodeDescription(con
 	str.append(" whilst outputting from 0 to 1");
 	return str.moveResults();}
 
-std::pair<String, Vector<ColourOverride>> ScriptLerpLoop::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptLerpLoop::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
-		return {"Flow output after loop", {}};
+		return "Flow output after loop";
 	} else if (elementIdx == 2) {
-		return {"Flow output for each loop iteration", {}};
+		return "Flow output for each loop iteration";
 	} else if (elementIdx == 3) {
 		return {"Loop progress (0..1)", {}};
 	} else {
@@ -214,14 +214,14 @@ bool ScriptLerpLoop::doIsStackRollbackPoint(ScriptEnvironment& environment, cons
 
 
 
-std::pair<String, Vector<ColourOverride>> ScriptWhileLoop::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptWhileLoop::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
-		return {"Condition", {}};
+		return "Condition";
 	} else if (elementIdx == 2) {
-		return {"Flow output after loop", {}};
+		return "Flow output after loop";
 	} else if (elementIdx == 3) {
-		return {"Flow output for each loop iteration", {}};
+		return "Flow output for each loop iteration";
 	} else {
 		return ScriptNodeTypeBase<void>::getPinDescription(node, element, elementIdx);
 	}
@@ -258,10 +258,10 @@ std::pair<String, Vector<ColourOverride>> ScriptEveryFrame::getNodeDescription(c
 	return str.moveResults();
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptEveryFrame::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptEveryFrame::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 2) {
-		return { "Frame delta time", {} };
+		return "Frame delta time";
 	} else {
 		return ScriptNodeTypeBase<ScriptEveryFrameData>::getPinDescription(node, element, elementIdx);
 	}

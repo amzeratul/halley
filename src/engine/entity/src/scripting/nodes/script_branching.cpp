@@ -23,17 +23,14 @@ IScriptNodeType::Result ScriptBranch::doUpdate(ScriptEnvironment& environment, T
 	return Result(ScriptNodeExecutionState::Done, 0, value ? 1 : 2);
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptBranch::getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const
+String ScriptBranch::getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const
 {
 	if (elementIdx >= 1) {
-		ColourStringBuilder builder;
 		if (elementIdx == 1) {
-			builder.append("Condition");
+			return "Condition";
 		} else {
-			builder.append("Flow Output if ");
-			builder.append(elementIdx == 2 ? "true" : "false", Colour4f(1, 0, 0));
+			return "Flow Output if " + String(elementIdx == 2 ? "true" : "false");
 		}
-		return builder.moveResults();
 	} else {
 		return IScriptNodeType::getPinDescription(node, elementType, elementIdx);
 	}	

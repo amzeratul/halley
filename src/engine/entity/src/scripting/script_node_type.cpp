@@ -55,7 +55,7 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const 
 	case ScriptNodeElementType::WriteDataPin:
 	case ScriptNodeElementType::FlowPin:
 	case ScriptNodeElementType::TargetPin:
-		return getPinDescription(node, elementType, elementIdx);
+		return getPinAndConnectionDescription(node, world, elementType, elementIdx, graph);
 	case ScriptNodeElementType::Node:
 		return getNodeDescription(node, world, graph);
 	}
@@ -63,12 +63,38 @@ std::pair<String, Vector<ColourOverride>> IScriptNodeType::getDescription(const 
 	return { "?", {} };
 }
 
+std::pair<String, Vector<ColourOverride>> IScriptNodeType::getPinAndConnectionDescription(const ScriptGraphNode& node, const World* world, PinType elementType, GraphPinId elementIdx, const ScriptGraph& graph) const
+{
+	auto pinDesc = getPinDescription(node, elementType, elementIdx);
+	auto connected = getConnectedNodeName(world, node, graph, elementIdx);
+	if (connected == "<empty>") {
+		return { pinDesc, {} };
+	}
+
+	ColourStringBuilder builder;
+
+	const auto type = ScriptNodeElementType(elementType.type);
+	if ((type == ScriptNodeElementType::ReadDataPin || type == ScriptNodeElementType::TargetPin) && elementType.direction == GraphNodePinDirection::Input) {
+		builder.append(pinDesc);
+		builder.append(" := ");
+		builder.append(connected, parameterColour);
+	} else if (type == ScriptNodeElementType::WriteDataPin && elementType.direction == GraphNodePinDirection::Output) {
+		builder.append(connected, parameterColour);
+		builder.append(" := ");
+		builder.append(pinDesc);
+	} else {
+		builder.append(pinDesc);
+	}
+
+	return builder.moveResults();
+}
+
 std::pair<String, Vector<ColourOverride>> IGraphNodeType::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	return { getName(), {} };
 }
 
-std::pair<String, Vector<ColourOverride>> IGraphNodeType::getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const
+String IGraphNodeType::getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const
 {
 	auto getName = [](ScriptNodeElementType type) -> const char*
 	{
@@ -114,7 +140,7 @@ std::pair<String, Vector<ColourOverride>> IGraphNodeType::getPinDescription(cons
 	if (typeTotal > 1) {
 		builder.append(" " + toString(static_cast<int>(typeIdx)));
 	}
-	return builder.moveResults();
+	return builder.moveResults().first;
 }
 
 String IScriptNodeType::getIconName(const ScriptGraphNode& node) const

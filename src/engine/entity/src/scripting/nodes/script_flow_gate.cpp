@@ -34,14 +34,14 @@ std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getNodeDescription(con
 	return str.moveResults();
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFlowGate::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptFlowGate::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
-		return {"Condition", {}};
+		return "Condition";
 	} else if (elementIdx == 2) {
-		return {"Flow while true", {}};
+		return "Flow while true";
 	} else if (elementIdx == 3) {
-		return {"Flow while false", {}};
+		return "Flow while false";
 	} else {
 		return ScriptNodeTypeBase<ScriptFlowGateData>::getPinDescription(node, element, elementIdx);
 	}
@@ -101,13 +101,13 @@ std::pair<String, Vector<ColourOverride>> ScriptFlowOnce::getNodeDescription(con
 	return str.moveResults();
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFlowOnce::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptFlowOnce::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
-		return { "Flow once", {} };
+		return "Flow once";
 	}
 	else if (elementIdx == 2) {
-		return { "Flow otherwise", {} };
+		return "Flow otherwise";
 	}
 	else {
 		return ScriptNodeTypeBase<ScriptFlowOnceData>::getPinDescription(node, element, elementIdx);

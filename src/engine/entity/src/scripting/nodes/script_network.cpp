@@ -47,7 +47,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptHostAuthority::getPinConfigurati
 
 std::pair<String, Vector<ColourOverride>> ScriptHostAuthority::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
-	return {"Has host authority", {}};
+	return { "Has host authority", {} };
 }
 
 ConfigNode ScriptHostAuthority::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
@@ -94,7 +94,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptIfHostAuthority::getPinConfigura
 
 std::pair<String, Vector<ColourOverride>> ScriptIfHostAuthority::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
-	return {"If has host authority", {}};
+	return { "If has host authority", {} };
 }
 
 IScriptNodeType::Result ScriptIfHostAuthority::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const

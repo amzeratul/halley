@@ -423,7 +423,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptAdvanceTo::getPinConfiguration(c
 	return data;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptAdvanceTo::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptAdvanceTo::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
 		return { "Flow output.", {} };
@@ -436,11 +436,11 @@ std::pair<String, Vector<ColourOverride>> ScriptAdvanceTo::getPinDescription(con
 	} else if (elementIdx == 5) {
 		return { "Flow output if variable was not modified.", {} };
 	} else if (elementIdx == 6) {
-		return { "Target value", {} };
+		return "Target value";
 	} else if (elementIdx == 7) {
-		return { "Increment value", {} };
+		return "Increment value";
 	} else if (elementIdx == 8) {
-		return { "Variable being modified", {} };
+		return "Variable being modified";
 	}
 	return ScriptNodeTypeBase<void>::getPinDescription(node, element, elementIdx);
 }

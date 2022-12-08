@@ -65,7 +65,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptFunctionCallExternal::getPinConf
 	return pins;
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFunctionCallExternal::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptFunctionCallExternal::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx >= 1) {
 		const auto numInput = getNumOfInputPins(node);
@@ -81,9 +81,9 @@ std::pair<String, Vector<ColourOverride>> ScriptFunctionCallExternal::getPinDesc
 
 		const auto& seq = node.getSettings()[key];
 		if (seq.getType() == ConfigNodeType::Sequence && seq.getSequenceSize() > idx) {
-			const auto name = seq.asSequence().at(idx).asString("");
+			auto name = seq.asSequence().at(idx).asString("");
 			if (!name.isEmpty()) {
-				return { name, {}};
+				return name;
 			}
 		}
 	}
@@ -92,7 +92,7 @@ std::pair<String, Vector<ColourOverride>> ScriptFunctionCallExternal::getPinDesc
 
 String ScriptFunctionCallExternal::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return getPinDescription(node, ScriptNodeElementType::ReadDataPin, elementIdx).first;
+	return getPinDescription(node, ScriptNodeElementType::ReadDataPin, elementIdx);
 }
 
 void ScriptFunctionCallExternal::updateSettings(ScriptGraphNode& node, const ScriptGraph& graph, Resources& resources) const
@@ -239,7 +239,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptFunctionReturn::getPinConfigurat
 	}
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptFunctionReturn::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptFunctionReturn::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	const size_t nInput = node.getSettings()["flowPins"].getSequenceSize(1);
 	const size_t nDataInput = node.getSettings()["dataPins"].getSequenceSize(0);
@@ -260,9 +260,9 @@ std::pair<String, Vector<ColourOverride>> ScriptFunctionReturn::getPinDescriptio
 	}
 
 	if (key) {
-		const auto name = node.getSettings()[key].asSequence().at(idx).asString();
+		auto name = node.getSettings()[key].asSequence().at(idx).asString();
 		if (!name.isEmpty()) {
-			return { name, {} };
+			return name;
 		}
 	}
 	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);

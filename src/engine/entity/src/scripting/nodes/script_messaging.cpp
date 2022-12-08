@@ -53,12 +53,12 @@ std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getNodeDescription(
 	return str.moveResults();
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptSendMessage::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	if (elementIdx == 3) {
-		return { "Delay time", {}};
+		return "Delay time";
 	} else if (elementIdx >= 4) {
-		return { "Parameter #" + toString(elementIdx - 3), {}};
+		return "Parameter #" + toString(elementIdx - 3);
 	} else {
 		return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
 	}
@@ -120,10 +120,10 @@ std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getNodeDescripti
 	return str.moveResults();
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptReceiveMessage::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
+String ScriptReceiveMessage::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx >= 1) {
-		return { "Parameter #" + toString(static_cast<int>(elementIdx)), {} };
+		return "Parameter #" + toString(static_cast<int>(elementIdx));
 	} else {
 		return ScriptNodeTypeBase<ScriptReceiveMessageData>::getPinDescription(node, element, elementIdx);
 	}

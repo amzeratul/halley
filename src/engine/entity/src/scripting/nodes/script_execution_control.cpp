@@ -46,7 +46,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptStart::getPinConfiguration(const
 	}
 }
 
-std::pair<String, Vector<ColourOverride>> ScriptStart::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+String ScriptStart::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
 	const size_t nOutput = 1;
 	const size_t nDataInput = node.getSettings()["dataPins"].getSequenceSize(0);
@@ -66,9 +66,9 @@ std::pair<String, Vector<ColourOverride>> ScriptStart::getPinDescription(const S
 	}
 
 	if (key) {
-		const auto name = node.getSettings()[key].asSequence().at(idx).asString();
+		auto name = node.getSettings()[key].asSequence().at(idx).asString();
 		if (!name.isEmpty()) {
-			return { name, {} };
+			return name;
 		}
 	}
 	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
@@ -76,7 +76,7 @@ std::pair<String, Vector<ColourOverride>> ScriptStart::getPinDescription(const S
 
 String ScriptStart::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return getPinDescription(node, ScriptNodeElementType::ReadDataPin, elementIdx).first;
+	return getPinDescription(node, ScriptNodeElementType::ReadDataPin, elementIdx);
 }
 
 IScriptNodeType::Result ScriptStart::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const

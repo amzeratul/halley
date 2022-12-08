@@ -11,7 +11,7 @@ namespace Halley {
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
 		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
-		std::pair<String, Vector<ColourOverride>> getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const override;
+		String getPinDescription(const ScriptGraphNode& node, PinType elementType, uint8_t elementIdx) const override;
 	};
 
 	class ScriptFork final : public ScriptNodeTypeBase<void> {
