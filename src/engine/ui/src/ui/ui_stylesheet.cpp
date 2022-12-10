@@ -148,7 +148,7 @@ bool hasValue(const ConfigNode* node, const String& key, HashMap<String, T>& cac
 		return true;
 	}
 
-	return node->hasKey(key) && typeRequired.size() == 0 || std_ex::contains(typeRequired, (*node)[key].getType());
+	return (node->hasKey(key) && typeRequired.size() == 0) || std_ex::contains(typeRequired, (*node)[key].getType());
 }
 
 class UIStyleDefinition::Pimpl {

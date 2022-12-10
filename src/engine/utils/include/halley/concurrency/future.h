@@ -21,7 +21,7 @@ namespace Halley
 		struct FunctionHelper
 		{
 			F f;
-			using ReturnType = typename std::result_of<F(T)>::type;
+			using ReturnType = typename std::invoke_result<F, T>::type;
 
 			static ReturnType call(F callback, T&& value)
 			{
@@ -47,7 +47,7 @@ namespace Halley
 		struct FunctionHelper
 		{
 			F f;
-			using ReturnType = typename std::result_of<F()>::type;
+			using ReturnType = typename std::invoke_result<F>::type;
 
 			static ReturnType call(F callback, VoidWrapper&& value)
 			{
