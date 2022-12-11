@@ -80,6 +80,7 @@ namespace Halley
 		AveragingLatched<int64_t> renderTime;
 		AveragingLatched<int64_t> vsyncTime;
 		AveragingLatched<int64_t> audioTime;
+		AveragingLatched<int64_t> gpuTime;
 		
 		Vector<FrameData> frameData;
 		size_t lastFrameData = 0;

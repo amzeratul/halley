@@ -523,12 +523,11 @@ void Painter::endPerformanceMeasurement()
 void Painter::recordTimestamp(TimestampType type, size_t id)
 {
 	if (recordingPerformance) {
-		if (type == TimestampType::FrameStart || type == TimestampType::FrameEnd) {
-			doRecordTimestamp(type, id, this);
-		} else if (recordingSnapshot) {
+		if (recordingSnapshot) {
 			recordingSnapshot->addPendingTimestamp();
-			doRecordTimestamp(type, id, recordingSnapshot);
 		}
+
+		doRecordTimestamp(type, id, recordingSnapshot);
 	}
 }
 
@@ -536,11 +535,7 @@ void Painter::doRecordTimestamp(TimestampType type, size_t id, ITimestampRecorde
 {
 }
 
-void Painter::addPendingTimestamp()
-{
-}
-
-void Painter::onTimestamp(TimestampType type, size_t idx, uint64_t value)
+void Painter::onTimestamp(ITimestampRecorder* snapshot, TimestampType type, size_t idx, uint64_t value)
 {
 	if (type == TimestampType::FrameStart) {
 		frameStart = value;
@@ -552,8 +547,8 @@ void Painter::onTimestamp(TimestampType type, size_t idx, uint64_t value)
 		profiler.recordEventEnd(profilerEventId, frameStartCPUTime + std::chrono::nanoseconds(frameEnd - frameStart));
 	}
 
-	if (recordingSnapshot) {
-		recordingSnapshot->onTimestamp(type, idx, value);
+	if (snapshot) {
+		snapshot->onTimestamp(type, idx, value);
 	}
 }
 

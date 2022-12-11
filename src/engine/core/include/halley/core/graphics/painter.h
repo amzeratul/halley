@@ -31,7 +31,7 @@ namespace Halley
 	class RenderContext;
 	class Core;
 
-	class Painter: protected ITimestampRecorder
+	class Painter
 	{
 		friend class RenderContext;
 		friend class Core;
@@ -134,6 +134,7 @@ namespace Halley
 		virtual void endPerformanceMeasurement();
 		void recordTimestamp(TimestampType type, size_t id);
 		virtual void doRecordTimestamp(TimestampType type, size_t id, ITimestampRecorder* snapshot);
+		void onTimestamp(ITimestampRecorder* snapshot, TimestampType type, size_t idx, uint64_t value);
 
 		virtual void startDrawCall() {}
 		virtual void endDrawCall() {}
@@ -226,8 +227,5 @@ namespace Halley
 		std::shared_ptr<Material> getSolidPolygonMaterial();
 
 		void refreshConstantBufferCache();
-
-		void addPendingTimestamp() override;
-		void onTimestamp(TimestampType type, size_t idx, uint64_t value) override;
 	};
 }

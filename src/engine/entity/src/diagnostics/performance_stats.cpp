@@ -18,13 +18,14 @@ using namespace Halley;
 
 PerformanceStatsView::PerformanceStatsView(Resources& resources, const HalleyAPI& api)
 	: StatsView(resources, api)
-	, boxBg(Sprite().setImage(resources, "halley/box_2px_outline.png"))
-	, whitebox(Sprite().setImage(resources, "whitebox.png"))
-	, audioTime(60)
-	, vsyncTime(60)
 	, totalFrameTime(60)
 	, updateTime(60)
 	, renderTime(60)
+	, vsyncTime(60)
+	, audioTime(60)
+	, gpuTime(60)
+	, boxBg(Sprite().setImage(resources, "halley/box_2px_outline.png"))
+	, whitebox(Sprite().setImage(resources, "whitebox.png"))
 {
 	api.core->addProfilerCallback(this);
 	
@@ -87,6 +88,7 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	vsyncTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVSync).count());
 	updateTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVariableUpdate).count() + data->getElapsedTime(ProfilerEventType::CoreFixedUpdate).count());
 	renderTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreRender).count() + (includeVsync ? vsyncTime.getLatest() : 0));
+	gpuTime.pushValue(data->getElapsedTime(ProfilerEventType::GPU).count());
 	totalFrameTime.pushValue(std::max(updateTime.getLatest(), renderTime.getLatest()));
 	audioTime.pushValue(api.audio->getLastTimeElapsed());
 
@@ -241,11 +243,13 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	const auto renderAvgTime = renderTime.getAverage();
 	const auto vsyncAvgTime = vsyncTime.getAverage();
 	const auto audioAvgTime = audioTime.getAverage();
+	const auto gpuAvgTime = gpuTime.getAverage();
 	const int curFPS = static_cast<int>(lround(1'000'000'000.0 / (frameAvgTime + vsyncAvgTime)));
-	const int maxFPS = static_cast<int>(lround(1'000'000'000.0 / std::max(updateAvgTime, renderAvgTime)));
+	const int maxFPS = static_cast<int>(lround(1'000'000'000.0 / std::max(std::max(updateAvgTime, renderAvgTime), gpuAvgTime)));
 
 	const auto updateCol = Colour4f(0.69f, 0.75f, 0.98f);
 	const auto renderCol = Colour4f(0.98f, 0.69f, 0.69f);
+	const auto gpuCol = Colour4f(0.98f, 0.85f, 0.55f);
 
 	ColourStringBuilder strBuilder;
 	strBuilder.append(toString(curFPS, 10, 3, ' '), curFPS < maxFPS ? std::optional<Colour4f>() : Colour4f(1, 0, 0));
@@ -255,6 +259,8 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	strBuilder.append(formatTime(updateAvgTime), updateCol);
 	strBuilder.append(" ms / ");
 	strBuilder.append(formatTime(renderAvgTime), renderCol);
+	strBuilder.append(" ms / ");
+	strBuilder.append(formatTime(gpuAvgTime), gpuCol);
 	strBuilder.append(" ms | ");
 	strBuilder.append(toString(painter.getPrevDrawCalls()));
 	strBuilder.append(" calls | ");
