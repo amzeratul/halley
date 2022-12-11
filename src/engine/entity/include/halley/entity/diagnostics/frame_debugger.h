@@ -28,7 +28,6 @@ namespace Halley
 		bool waiting = false;
 		
 		int framesToDraw = 0;
-		InputAxisRepeater yAxisRepeater;
 
 		std::shared_ptr<const MaterialDefinition> debugMaterial;
 	};

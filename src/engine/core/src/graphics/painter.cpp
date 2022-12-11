@@ -748,7 +748,7 @@ void Painter::executeDrawPrimitives(Material& material, size_t numVertices, gsl:
 			// Bind pass
 			material.bind(i, *this);
 			if (recordingSnapshot) {
-				//recordTimestamp(TimestampType::CommandSetupDone, commandIdx);
+				recordTimestamp(TimestampType::CommandSetupDone, commandIdx);
 			}
 
 			// Draw

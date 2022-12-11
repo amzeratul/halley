@@ -43,9 +43,10 @@ namespace Halley
 	}
 
 	template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-	String toString(T value, int base = 10, int width = 1, char fill = '0')
+	String toString(T value, int base = 10, int width = 1, char fill = '0', char thousandsSeparator = 0)
 	{
 		Expects(base == 10 || base == 16 || base == 8);
+
 		std::stringstream ss;
 		if (base == 16) {
 			ss.setf(std::ios::hex, std::ios::basefield);
@@ -55,8 +56,38 @@ namespace Halley
 		if (width > 1) {
 			ss << std::setfill(fill) << std::setw(width);
 		}
+
 		ss << value;
-		return ss.str();
+
+		if (thousandsSeparator != 0) {
+			std::stringstream ss2;
+
+			auto str = ss.str();
+			const size_t signLen = str[0] == '-' ? 1 : 0;
+			const size_t totalLen = str.length();
+			const size_t numLen = totalLen - signLen;
+			size_t firstBlockLen = numLen % 3;
+			if (firstBlockLen == 0) {
+				firstBlockLen = 3;
+			}
+			firstBlockLen += signLen;
+
+			size_t pos = 0;
+			size_t remaining = totalLen;
+			for (size_t len = firstBlockLen; remaining > 0; ) {
+				ss2 << std::string_view(str).substr(pos, len);
+				pos += len;
+				remaining -= len;
+				len = 3;
+
+				if (remaining > 0) {
+					ss2 << thousandsSeparator;
+				}
+			}
+			return ss2.str();
+		} else {
+			return ss.str();
+		}
 	}
 
 	struct UserConverter

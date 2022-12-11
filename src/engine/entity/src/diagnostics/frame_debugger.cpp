@@ -11,7 +11,6 @@ using namespace Halley;
 
 FrameDebugger::FrameDebugger(Resources& resources, const HalleyAPI& api)
 	: StatsView(resources, api)
-	, yAxisRepeater(0.2, 0.1, 1.0, 0)
 {
 	headerText = TextRenderer(resources.get<Font>("Ubuntu Bold"), "", 16, Colour(1, 1, 1), 1.0f, Colour(0.1f, 0.1f, 0.1f));
 	whitebox = Sprite().setImage(resources, "whitebox.png");
@@ -42,7 +41,7 @@ void FrameDebugger::update(Time t)
 	}
 
 	if (renderSnapshot) {
-		const int dy = yAxisRepeater.update(input->getAxis(1), t);
+		const int dy = input->getAxisRepeat(1);
 		framesToDraw = clamp(framesToDraw + dy, 0, static_cast<int>(renderSnapshot->getNumCommands()));
 	}
 }
@@ -113,9 +112,9 @@ void FrameDebugger::paint(Painter& painter)
 
 		auto [frameStart, frameEnd] = renderSnapshot->getFrameTimeRange();
 		if (frameEnd != frameStart) {
-			const auto time = (frameEnd - frameStart) / 1000;
+			const auto time = frameEnd - frameStart;
 			str.append("Total Frame Time: ");
-			str.append(toString(time) + " us\n", green);
+			str.append(toString(time, 10, 1, '0', ',') + " ns\n", green);
 		}
 
 		str.append("Command " + toString(framesToDraw) + " / " + toString(renderSnapshot->getNumCommands()) + "\n");
@@ -159,23 +158,19 @@ void FrameDebugger::paint(Painter& painter)
 				const auto [startTime, endTime, setupTime] = renderSnapshot->getCommandTimeStamp(frameIdx);
 				const auto [prevStartTime, prevEndTime, prevSetupTime] = frameIdx > 0 ? renderSnapshot->getCommandTimeStamp(frameIdx - 1) : RenderSnapshot::CommandTimeStamp();
 
-				const uint64_t commandLen = (endTime - startTime) / 1000;
-				const uint64_t exclusiveCommandLen = (endTime - std::max(startTime, prevEndTime)) / 1000;
-				const uint64_t setupLen = (setupTime - startTime) / 1000;
-				const uint64_t gapLen = (startTime - std::min(startTime, prevEndTime)) / 1000;
-				
-				str.append("\nTime: ");
-				str.append(toString(startTime / 1000) + " us", green);
-				str.append(" to ");
-				str.append(toString(endTime / 1000) + " us", green);
+				const uint64_t commandLen = endTime - startTime;
+				const uint64_t exclusiveCommandLen = endTime - std::max(startTime, prevEndTime);
+				const uint64_t setupLen = setupTime - startTime;
+				const uint64_t gapLen = startTime - std::min(startTime, prevEndTime);
+
 				str.append("\nDuration: ");
-				str.append(toString(exclusiveCommandLen) + " us", green);
+				str.append(toString(exclusiveCommandLen, 10, 1, '0', ',') + " ns", green);
 				str.append(" (");
-				str.append(toString(setupLen) + " us", green);
+				str.append(toString(setupLen, 10, 1, '0', ',') + " ns", green);
 				str.append(" setup, ");
-				str.append(toString(commandLen) + " us", green);
+				str.append(toString(commandLen, 10, 1, '0', ',') + " ns", green);
 				str.append(" total, ");
-				str.append(toString(gapLen) + " us", gapLen > 0 ? red : green);
+				str.append(toString(gapLen, 10, 1, '0', ',') + " ns", gapLen > 0 ? red : green);
 				str.append(" gap)");
 			}
 		}
