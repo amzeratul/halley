@@ -53,9 +53,9 @@ namespace Halley {
         };
 
         struct CommandTimeStamp {
-            Time start = 0;
-            Time end = 0;
-            Time setupDone = 0;
+            uint64_t start = 0;
+            uint64_t end = 0;
+            uint64_t setupDone = 0;
         };
 
         RenderSnapshot();
@@ -70,16 +70,19 @@ namespace Halley {
     	void clear(std::optional<Colour4f> colour, std::optional<float> depth, std::optional<uint8_t> stencil);
 	    void draw(const Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitive, bool allIndicesAreQuads);
 
+        void finish();
+
         size_t getNumCommands() const;
         CommandInfo getCommandInfo(size_t commandIdx) const;
 
         PlaybackResult playback(Painter& painter, std::optional<size_t> maxCommands, std::shared_ptr<const MaterialDefinition> debugMaterial = {}) const;
 
         void addPendingTimestamp();
-        void onTimestamp(TimestampType type, size_t idx, Time value);
-        bool hasPendingTimestamps() const;
+        void onTimestamp(TimestampType type, size_t idx, uint64_t value);
+
+    	bool hasPendingTimestamps() const;
         size_t getNumTimestamps() const;
-        std::pair<Time, Time> getFrameTimeRange() const;
+        std::pair<uint64_t, uint64_t> getFrameTimeRange() const;
         const CommandTimeStamp& getCommandTimeStamp(size_t idx) const;
 
     private:
@@ -94,6 +97,7 @@ namespace Halley {
         };
 
         struct DrawData {
+            const Material* materialTemp;
             std::shared_ptr<Material> material;
             size_t numVertices;
             Vector<char> vertexData;
@@ -109,8 +113,8 @@ namespace Halley {
         Vector<DrawData> drawDatas;
 
     	std::atomic<int> pendingTimestamps;
-        Time startTime = 0;
-        Time endTime = 0;
+        uint64_t startTime = 0;
+        uint64_t endTime = 0;
         Vector<CommandTimeStamp> timestamps;
 
         Vector<std::pair<CommandType, uint16_t>>& getCurDrawCall();

@@ -29,10 +29,13 @@ void FrameDebugger::update(Time t)
 
 	if (!renderSnapshot && !waiting) {
 		waiting = true;
-		api.core->requestRenderSnapshot().then(Executors::getMainUpdateThread(), [&] (std::unique_ptr<RenderSnapshot> snapshot)
+		api.core->requestRenderSnapshot().then(Executors::getMainUpdateThread(), [&](std::unique_ptr<RenderSnapshot> snapshot)
 		{
 			if (waiting) {
-				Logger::logDev("Captured frame in frame debugger");
+				auto [frameStart, frameEnd] = snapshot->getFrameTimeRange();
+				assert(!snapshot->hasPendingTimestamps());
+				Logger::logDev("Start: " + toString(frameStart) + ", end: " + toString(frameEnd));
+				Logger::logDev("Captured frame in frame debugger, " + toString(snapshot->getNumCommands()) + " commands in " + toString((frameEnd - frameStart) / 1000) + " us");
 				renderSnapshot = std::move(snapshot);
 				framesToDraw = static_cast<int>(renderSnapshot->getNumCommands());
 				waiting = false;
@@ -55,7 +58,7 @@ void FrameDebugger::draw(RenderContext& context)
 			painter.clear(Colour4f());
 
 			if (!debugMaterial && resources.getOptions().retainShaderData) {
-				debugMaterial = resources.get<MaterialDefinition>("Halley/FrameDebugView");
+				//debugMaterial = resources.get<MaterialDefinition>("Halley/FrameDebugView");
 			}
 			
 			lastPlaybackResult = renderSnapshot->playback(painter, framesToDraw, debugMaterial);
@@ -112,9 +115,9 @@ void FrameDebugger::paint(Painter& painter)
 
 		auto [frameStart, frameEnd] = renderSnapshot->getFrameTimeRange();
 		if (frameEnd != frameStart) {
-			const auto time = (frameEnd - frameStart) * 1'000'000;
+			const auto time = (frameEnd - frameStart) / 1000;
 			str.append("Total Frame Time: ");
-			str.append(toString(lroundl(time)) + " us\n", green);
+			str.append(toString(time) + " us\n", green);
 		}
 
 		str.append("Command " + toString(framesToDraw) + " / " + toString(renderSnapshot->getNumCommands()) + "\n");
@@ -158,23 +161,23 @@ void FrameDebugger::paint(Painter& painter)
 				const auto [startTime, endTime, setupTime] = renderSnapshot->getCommandTimeStamp(frameIdx);
 				const auto [prevStartTime, prevEndTime, prevSetupTime] = frameIdx > 0 ? renderSnapshot->getCommandTimeStamp(frameIdx - 1) : RenderSnapshot::CommandTimeStamp();
 
-				const double commandLen = (endTime - startTime) * 1'000'000;
-				const double exclusiveCommandLen = (endTime - std::max(startTime, prevEndTime)) * 1'000'000;
-				const double setupLen = (setupTime - startTime) * 1'000'000;
-				const double gapLen = (startTime - std::min(startTime, prevEndTime)) * 1'000'000;
+				const uint64_t commandLen = (endTime - startTime) / 1000;
+				const uint64_t exclusiveCommandLen = (endTime - std::max(startTime, prevEndTime)) / 1000;
+				const uint64_t setupLen = (setupTime - startTime) / 1000;
+				const uint64_t gapLen = (startTime - std::min(startTime, prevEndTime)) / 1000;
 				
 				str.append("\nTime: ");
-				str.append(toString(lroundl(startTime * 1'000'000)) + " us", green);
+				str.append(toString(startTime / 1000) + " us", green);
 				str.append(" to ");
-				str.append(toString(lroundl(endTime * 1'000'000)) + " us", green);
+				str.append(toString(endTime / 1000) + " us", green);
 				str.append("\nDuration: ");
-				str.append(toString(lroundl(exclusiveCommandLen)) + " us", green);
+				str.append(toString(exclusiveCommandLen) + " us", green);
 				str.append(" (");
-				str.append(toString(lroundl(setupLen)) + " us", green);
+				str.append(toString(setupLen) + " us", green);
 				str.append(" setup, ");
-				str.append(toString(lroundl(commandLen)) + " us", green);
+				str.append(toString(commandLen) + " us", green);
 				str.append(" total, ");
-				str.append(toString(lroundl(gapLen)) + " us", lroundl(gapLen) > 0 ? red : green);
+				str.append(toString(gapLen) + " us", gapLen > 0 ? red : green);
 				str.append(" gap)");
 			}
 		}

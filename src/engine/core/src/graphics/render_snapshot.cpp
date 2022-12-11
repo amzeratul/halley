@@ -2,6 +2,7 @@
 
 #include "graphics/material/material_definition.h"
 #include "graphics/render_target/render_target_texture.h"
+#include "halley/support/logger.h"
 using namespace Halley;
 
 RenderSnapshot::RenderSnapshot()
@@ -59,8 +60,15 @@ void RenderSnapshot::clear(std::optional<Colour4f> colour, std::optional<float> 
 void RenderSnapshot::draw(const Material& material, size_t numVertices, gsl::span<const char> vertexData, gsl::span<const IndexType> indices, PrimitiveType primitive, bool allIndicesAreQuads)
 {
 	getCurDrawCall().emplace_back(CommandType::Draw, static_cast<uint16_t>(drawDatas.size()));
-	drawDatas.push_back(DrawData{ material.clone(), numVertices, Vector<char>(vertexData.begin(), vertexData.end()), Vector<IndexType>(indices.begin(), indices.end()), primitive, allIndicesAreQuads });
+	drawDatas.push_back(DrawData{ &material, {}, numVertices, Vector<char>(vertexData.begin(), vertexData.end()), Vector<IndexType>(indices.begin(), indices.end()), primitive, allIndicesAreQuads });
 	finishDrawCall();
+}
+
+void RenderSnapshot::finish()
+{
+	for (auto& drawData: drawDatas) {
+		drawData.material = drawData.materialTemp->clone();
+	}
 }
 
 size_t RenderSnapshot::getNumCommands() const
@@ -211,11 +219,15 @@ RenderSnapshot::PlaybackResult RenderSnapshot::playback(Painter& painter, std::o
 void RenderSnapshot::addPendingTimestamp()
 {
 	++pendingTimestamps;
-	timestamps.emplace_back();
 }
 
-void RenderSnapshot::onTimestamp(TimestampType type, size_t idx, Time value)
+void RenderSnapshot::onTimestamp(TimestampType type, size_t idx, uint64_t value)
 {
+	if (timestamps.size() <= idx) {
+		timestamps.reserve(nextPowerOf2(idx + 1));
+		timestamps.resize(idx + 1);
+	}
+
 	if (type == TimestampType::FrameStart) {
 		startTime = value;
 	} else if (type == TimestampType::FrameEnd) {
@@ -236,7 +248,7 @@ void RenderSnapshot::onTimestamp(TimestampType type, size_t idx, Time value)
 
 bool RenderSnapshot::hasPendingTimestamps() const
 {
-	return !!pendingTimestamps;
+	return pendingTimestamps != 0;
 }
 
 size_t RenderSnapshot::getNumTimestamps() const
@@ -244,7 +256,7 @@ size_t RenderSnapshot::getNumTimestamps() const
 	return timestamps.size();
 }
 
-std::pair<Time, Time> RenderSnapshot::getFrameTimeRange() const
+std::pair<uint64_t, uint64_t> RenderSnapshot::getFrameTimeRange() const
 {
 	return { startTime, endTime };
 }

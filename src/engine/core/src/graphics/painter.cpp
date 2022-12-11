@@ -495,6 +495,7 @@ void Painter::stopRecording()
 
 		recordTimestamp(TimestampType::FrameEnd, 0);
 		endPerformanceMeasurement();
+		flush();
 
 		recordingSnapshot->end();
 		recordingSnapshot = nullptr;
@@ -671,7 +672,9 @@ void Painter::startDrawCall(const std::shared_ptr<Material>& material)
 void Painter::flushPending()
 {
 	if (verticesPending > 0) {
-		executeDrawPrimitives(*materialPending, verticesPending, gsl::span<char>(vertexBuffer), gsl::span<const IndexType>(indexBuffer.data(), indicesPending), PrimitiveType::Triangle, allIndicesAreQuads);
+		auto vertexSpan = gsl::span<char>(vertexBuffer.data(), verticesPending * materialPending->getDefinition().getVertexStride());
+		auto indexSpan = gsl::span<const IndexType>(indexBuffer.data(), indicesPending);
+		executeDrawPrimitives(*materialPending, verticesPending, vertexSpan, indexSpan, PrimitiveType::Triangle, allIndicesAreQuads);
 	}
 
 	resetPending();
@@ -717,7 +720,7 @@ void Painter::executeDrawPrimitives(Material& material, size_t numVertices, gsl:
 			// Bind pass
 			material.bind(i, *this);
 			if (recordingSnapshot) {
-				recordTimestamp(TimestampType::CommandSetupDone, commandIdx);
+				//recordTimestamp(TimestampType::CommandSetupDone, commandIdx);
 			}
 
 			// Draw

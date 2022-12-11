@@ -495,7 +495,8 @@ void Core::render()
 
 			painter->endRender();
 
-			if (snapshot) {
+			if (!pendingSnapshots.empty() && snapshot) {
+				snapshot->finish();
 				pendingSnapshots.front().setValue(std::move(snapshot));
 				pendingSnapshots.erase(pendingSnapshots.begin());
 			}

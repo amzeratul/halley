@@ -358,7 +358,7 @@ void DX11Painter::doCheckEndOfPerformanceMeasurement()
 				firstTick = tick;
 			}
 
-			const auto time = static_cast<Time>(tick - firstTick) / static_cast<Time>(disjointData.Frequency);
+			const auto time = uint64_t((static_cast<double>(tick - firstTick) / static_cast<double>(disjointData.Frequency)) * 1'000'000'000);
 			q.snapshot->onTimestamp(q.type, q.id, time);
 		}
 		clearQueries();
