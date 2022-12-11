@@ -1,5 +1,7 @@
 #include "halley/core/input/input_device.h"
 
+#include "halley/support/logger.h"
+
 using namespace Halley;
 
 InputDevice::InputDevice()
@@ -164,17 +166,17 @@ int InputAxisRepeater::update(float value, Time t)
 	lastValue = intValue;
 
 	if (intValue != 0) {
-		const auto prevInterval = timeHeld > secondDelay ? repeatInterval1 : (timeHeld > firstDelay ? repeatInterval0 : std::numeric_limits<Time>::infinity());
-
+		const auto prevIntervalIdx = timeHeld > secondDelay ? 2 : (timeHeld > firstDelay ? 1 : 0);
 		timeHeld += t;
 		timeSinceLastRepeat += t;
+		const auto intervalIdx = timeHeld > secondDelay ? 2 : (timeHeld > firstDelay ? 1 : 0);
 
-		const auto interval = timeHeld > secondDelay ? repeatInterval1 : (timeHeld > firstDelay ? repeatInterval0 : std::numeric_limits<Time>::infinity());
-		if (interval != prevInterval) {
+		if (intervalIdx != prevIntervalIdx) {
 			timeSinceLastRepeat = 0;
 			return intValue;
 		}
 
+		const auto interval = std::array<Time, 3>{std::numeric_limits<Time>::infinity(), repeatInterval0, repeatInterval1}[intervalIdx];
 		if (timeSinceLastRepeat > interval) {
 			timeSinceLastRepeat -= interval;
 			return intValue;
