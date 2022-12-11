@@ -40,7 +40,7 @@ namespace Halley
 		void onFinishRender() override;
 		bool startPerformanceMeasurement() override;
 		void endPerformanceMeasurement() override;
-		void doRecordTimestamp(TimestampType type, size_t id, RenderSnapshot* snapshot) override;
+		void doRecordTimestamp(TimestampType type, size_t id, ITimestampRecorder* snapshot) override;
 		void doCheckEndOfPerformanceMeasurement();
 
 	private:
@@ -64,7 +64,7 @@ namespace Halley
 		struct PerfQuery {
 			TimestampType type;
 			size_t id;
-			RenderSnapshot* snapshot;
+			ITimestampRecorder* snapshot;
 			ID3D11Query* query = nullptr;
 		};
 		ID3D11Query* timestampDisjointQuery = nullptr;

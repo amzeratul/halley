@@ -82,10 +82,12 @@ void PerformanceStatsView::paint(Painter& painter)
 
 void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 {
+	constexpr bool includeVsync = false;
+	
 	vsyncTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVSync).count());
 	updateTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreVariableUpdate).count() + data->getElapsedTime(ProfilerEventType::CoreFixedUpdate).count());
-	renderTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreRender).count());
-	totalFrameTime.pushValue(data->getTotalElapsedTime().count() - vsyncTime.getLatest());
+	renderTime.pushValue(data->getElapsedTime(ProfilerEventType::CoreRender).count() + (includeVsync ? vsyncTime.getLatest() : 0));
+	totalFrameTime.pushValue(std::max(updateTime.getLatest(), renderTime.getLatest()));
 	audioTime.pushValue(api.audio->getLastTimeElapsed());
 
 	auto getTime = [&](TimeLine timeline) -> int
@@ -98,7 +100,7 @@ void PerformanceStatsView::onProfileData(std::shared_ptr<ProfilerData> data)
 	auto& curFrameData = frameData[lastFrameData];
 	curFrameData.fixedTime = getTime(TimeLine::FixedUpdate);
 	curFrameData.variableTime = getTime(TimeLine::VariableUpdate);
-	curFrameData.renderTime = getTime(TimeLine::Render) - static_cast<int>((vsyncTime.getLatest() + 500) / 1000);
+	curFrameData.renderTime = getTime(TimeLine::Render) - (includeVsync ? 0 : static_cast<int>((vsyncTime.getLatest() + 500) / 1000));
 
 	for (auto& [k, e]: systemHistory) {
 		e.startUpdate();
@@ -474,7 +476,7 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 {
 	switch (type) {
 	case ProfilerEventType::CoreVSync:
-		return Colour4f(0.8f, 0.8f, 0.1f);
+		return Colour4f(0.6f, 0.6f, 0.4f);
 	case ProfilerEventType::CoreUpdate:
 	case ProfilerEventType::CoreFixedUpdate:
 	case ProfilerEventType::CoreVariableUpdate:
@@ -499,6 +501,8 @@ Colour4f PerformanceStatsView::getEventColour(ProfilerEventType type) const
 		return Colour4f(0.5f, 0.8f, 1.0f);
 	case ProfilerEventType::ScriptUpdate:
 		return Colour4f(0.8f, 0.51f, 0.97f);
+	case ProfilerEventType::GPU:
+		return Colour4f(1.0f, 0.85f, 0.1f);
 	default:
 		return Colour4f(0.1f, 0.7f, 0.1f);
 	}

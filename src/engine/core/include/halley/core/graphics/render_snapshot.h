@@ -1,10 +1,20 @@
 #pragma once
+#include "camera.h"
 #include "graphics_enums.h"
-#include "render_context.h"
 #include "material/material.h"
 
 namespace Halley {
-    class RenderSnapshot {
+    class ITimestampRecorder {
+    public:
+        virtual ~ITimestampRecorder() = default;
+        virtual void addPendingTimestamp() = 0;
+        virtual void onTimestamp(TimestampType type, size_t idx, uint64_t value) = 0;
+    };
+
+    class RenderContext;
+    class RenderTarget;
+
+    class RenderSnapshot : public ITimestampRecorder {
     public:
     	enum class CommandType : uint8_t {
             Undefined,
@@ -77,8 +87,8 @@ namespace Halley {
 
         PlaybackResult playback(Painter& painter, std::optional<size_t> maxCommands, std::shared_ptr<const MaterialDefinition> debugMaterial = {}) const;
 
-        void addPendingTimestamp();
-        void onTimestamp(TimestampType type, size_t idx, uint64_t value);
+        void addPendingTimestamp() override;
+        void onTimestamp(TimestampType type, size_t idx, uint64_t value) override;
 
     	bool hasPendingTimestamps() const;
         size_t getNumTimestamps() const;

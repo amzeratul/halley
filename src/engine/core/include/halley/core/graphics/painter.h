@@ -7,6 +7,7 @@
 #include <halley/maths/vector4.h>
 
 
+#include "render_snapshot.h"
 #include "texture.h"
 #include "halley/data_structures/hash_map.h"
 #include "halley/maths/circle.h"
@@ -30,7 +31,7 @@ namespace Halley
 	class RenderContext;
 	class Core;
 
-	class Painter
+	class Painter: protected ITimestampRecorder
 	{
 		friend class RenderContext;
 		friend class Core;
@@ -110,7 +111,7 @@ namespace Halley
 		void pushDebugGroup(const String& id);
 		void popDebugGroup();
 
-		void startRecording(RenderSnapshot& snapshot);
+		void startRecording(RenderSnapshot* snapshot);
 		void stopRecording();
 
 	protected:
@@ -132,7 +133,7 @@ namespace Halley
 		virtual bool startPerformanceMeasurement();
 		virtual void endPerformanceMeasurement();
 		void recordTimestamp(TimestampType type, size_t id);
-		virtual void doRecordTimestamp(TimestampType type, size_t id, RenderSnapshot* snapshot);
+		virtual void doRecordTimestamp(TimestampType type, size_t id, ITimestampRecorder* snapshot);
 
 		virtual void startDrawCall() {}
 		virtual void endDrawCall() {}
@@ -193,6 +194,8 @@ namespace Halley
 
 		RenderSnapshot* recordingSnapshot = nullptr;
 		bool recordingPerformance = false;
+		uint64_t frameStart, frameEnd;
+		std::chrono::steady_clock::time_point frameStartCPUTime;
 
 		void bind(RenderContext& context);
 		void unbind(RenderContext& context);
@@ -223,5 +226,8 @@ namespace Halley
 		std::shared_ptr<Material> getSolidPolygonMaterial();
 
 		void refreshConstantBufferCache();
+
+		void addPendingTimestamp() override;
+		void onTimestamp(TimestampType type, size_t idx, uint64_t value) override;
 	};
 }

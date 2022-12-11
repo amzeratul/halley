@@ -473,7 +473,9 @@ void Core::render()
 			std::unique_ptr<RenderSnapshot> snapshot;
 			if (!pendingSnapshots.empty()) {
 				snapshot = std::make_unique<RenderSnapshot>();
-				painter->startRecording(*snapshot);
+				painter->startRecording(snapshot.get());
+			} else if (isDevMode()) {
+				painter->startRecording(nullptr);
 			}
 
 			if (currentStage) {

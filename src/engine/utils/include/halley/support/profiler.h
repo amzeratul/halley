@@ -9,7 +9,7 @@
 #include "halley/time/halleytime.h"
 
 namespace Halley {
-	enum class ProfilerEventType {
+	enum class ProfilerEventType : uint8_t {
 	    CorePumpEvents,
 		CoreDevConClient,
 		CorePumpAudio,
@@ -36,6 +36,8 @@ namespace Halley {
 
 		AudioGenerateBuffer,
 
+        GPU,
+
 		DiskIO,
 
 		StatsView,
@@ -51,6 +53,7 @@ namespace Halley {
         enum class ThreadType {
 	        Update,
             Render,
+            GPU,
             Audio,
             Network,
             Misc
@@ -61,7 +64,7 @@ namespace Halley {
 	        String name;
         	std::thread::id threadId;
 			ProfilerEventType type;
-			int depth;
+			int16_t depth;
         	uint64_t id;
         	TimePoint startTime;
         	TimePoint endTime;
@@ -111,6 +114,8 @@ namespace Halley {
 
     	[[nodiscard]] EventId recordEventStart(ProfilerEventType type, std::string_view name);
     	void recordEventEnd(EventId id);
+    	[[nodiscard]] EventId recordEventStart(ProfilerEventType type, std::string_view name, std::chrono::steady_clock::time_point time);
+    	void recordEventEnd(EventId id, std::chrono::steady_clock::time_point time);
 
     	[[nodiscard]] bool isRecording() const;
 

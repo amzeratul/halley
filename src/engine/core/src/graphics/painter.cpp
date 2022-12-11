@@ -15,6 +15,7 @@
 #include "graphics/render_snapshot.h"
 #include "halley/maths/bezier.h"
 #include "halley/maths/polygon.h"
+#include "halley/support/logger.h"
 #include "halley/support/profiler.h"
 #include "halley/utils/algorithm.h"
 #include "resources/resources.h"
@@ -50,6 +51,7 @@ void Painter::startRender()
 	prevTriangles = nTriangles;
 	prevVertices = nVertices;
 	nDrawCalls = nTriangles = nVertices = 0;
+	frameStart = frameEnd = 0;
 
 	refreshConstantBufferCache();
 	resetPending();
@@ -477,28 +479,34 @@ void Painter::popDebugGroup()
 	curDebugGroupStack.pop_back();
 }
 
-void Painter::startRecording(RenderSnapshot& snapshot)
+void Painter::startRecording(RenderSnapshot* snapshot)
 {
 	flush();
 	stopRecording();
-	recordingSnapshot = &snapshot;
-	recordingSnapshot->start();
+	recordingSnapshot = snapshot;
+	if (recordingSnapshot) {
+		recordingSnapshot->start();
+	}
 
 	recordingPerformance = startPerformanceMeasurement();
-	recordTimestamp(TimestampType::FrameStart, 0);
+	if (recordingPerformance) {
+		recordTimestamp(TimestampType::FrameStart, 0);
+		frameStartCPUTime = std::chrono::steady_clock::now();
+	}
 }
 
 void Painter::stopRecording()
 {
-	if (recordingSnapshot) {
+	if (recordingPerformance) {
 		flush();
 
 		recordTimestamp(TimestampType::FrameEnd, 0);
 		endPerformanceMeasurement();
-		flush();
 
-		recordingSnapshot->end();
-		recordingSnapshot = nullptr;
+		if (recordingSnapshot) {
+			recordingSnapshot->end();
+			recordingSnapshot = nullptr;
+		}
 		recordingPerformance = false;
 	}
 }
@@ -515,13 +523,38 @@ void Painter::endPerformanceMeasurement()
 void Painter::recordTimestamp(TimestampType type, size_t id)
 {
 	if (recordingPerformance) {
-		recordingSnapshot->addPendingTimestamp();
-		doRecordTimestamp(type, id, recordingSnapshot);
+		if (type == TimestampType::FrameStart || type == TimestampType::FrameEnd) {
+			doRecordTimestamp(type, id, this);
+		} else if (recordingSnapshot) {
+			recordingSnapshot->addPendingTimestamp();
+			doRecordTimestamp(type, id, recordingSnapshot);
+		}
 	}
 }
 
-void Painter::doRecordTimestamp(TimestampType type, size_t id, RenderSnapshot* snapshot)
+void Painter::doRecordTimestamp(TimestampType type, size_t id, ITimestampRecorder* snapshot)
 {
+}
+
+void Painter::addPendingTimestamp()
+{
+}
+
+void Painter::onTimestamp(TimestampType type, size_t idx, uint64_t value)
+{
+	if (type == TimestampType::FrameStart) {
+		frameStart = value;
+	} else if (type == TimestampType::FrameEnd) {
+		frameEnd = value;
+
+		auto& profiler = ProfilerCapture::get();
+		const auto profilerEventId = profiler.recordEventStart(ProfilerEventType::GPU, "", frameStartCPUTime);
+		profiler.recordEventEnd(profilerEventId, frameStartCPUTime + std::chrono::nanoseconds(frameEnd - frameStart));
+	}
+
+	if (recordingSnapshot) {
+		recordingSnapshot->onTimestamp(type, idx, value);
+	}
 }
 
 void Painter::makeSpaceForPendingVertices(size_t numBytes)

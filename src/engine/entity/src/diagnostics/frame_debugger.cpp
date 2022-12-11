@@ -2,6 +2,7 @@
 
 #include "halley/core/api/halley_api.h"
 #include "halley/core/graphics/painter.h"
+#include "halley/core/graphics/render_context.h"
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/graphics/render_snapshot.h"
 #include "halley/core/resources/resources.h"
@@ -32,10 +33,7 @@ void FrameDebugger::update(Time t)
 		api.core->requestRenderSnapshot().then(Executors::getMainUpdateThread(), [&](std::unique_ptr<RenderSnapshot> snapshot)
 		{
 			if (waiting) {
-				auto [frameStart, frameEnd] = snapshot->getFrameTimeRange();
 				assert(!snapshot->hasPendingTimestamps());
-				Logger::logDev("Start: " + toString(frameStart) + ", end: " + toString(frameEnd));
-				Logger::logDev("Captured frame in frame debugger, " + toString(snapshot->getNumCommands()) + " commands in " + toString((frameEnd - frameStart) / 1000) + " us");
 				renderSnapshot = std::move(snapshot);
 				framesToDraw = static_cast<int>(renderSnapshot->getNumCommands());
 				waiting = false;

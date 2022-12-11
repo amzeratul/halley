@@ -302,7 +302,7 @@ void DX11Painter::endPerformanceMeasurement()
 	dx11Video.getDeviceContext().End(timestampDisjointQuery);
 }
 
-void DX11Painter::doRecordTimestamp(TimestampType type, size_t id, RenderSnapshot* snapshot)
+void DX11Painter::doRecordTimestamp(TimestampType type, size_t id, ITimestampRecorder* snapshot)
 {
 	ID3D11Query* query = nullptr;
 	D3D11_QUERY_DESC desc;
@@ -332,14 +332,14 @@ void DX11Painter::doCheckEndOfPerformanceMeasurement()
 		do {
 			result = dx11Video.getDeviceContext().GetData(timestampDisjointQuery, &disjointData, sizeof(disjointData), 0);
 			if (result != S_OK) {
-				Sleep(1);
+				std::this_thread::yield();
 			}
 		} while (result != S_OK);
 
 		timestampDisjointQuery->Release();
 		timestampDisjointQuery = nullptr;
 
-		if (disjointData.Disjoint) {
+		if (disjointData.Disjoint && !perfQueries.empty()) {
 			Logger::logWarning("DX11 Profile Data was disjoint");
 			clearQueries();
 			return;
@@ -351,7 +351,7 @@ void DX11Painter::doCheckEndOfPerformanceMeasurement()
 			do {
 				result = dx11Video.getDeviceContext().GetData(q.query, &tick, sizeof(tick), 0);
 				if (result != S_OK) {
-					Sleep(1);
+					std::this_thread::yield();
 				}
 			} while (result != S_OK);
 			if (q.type == TimestampType::FrameStart) {

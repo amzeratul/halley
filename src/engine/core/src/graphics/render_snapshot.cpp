@@ -1,5 +1,6 @@
 #include "halley/core/graphics/render_snapshot.h"
 
+#include "graphics/render_context.h"
 #include "graphics/material/material_definition.h"
 #include "graphics/render_target/render_target_texture.h"
 #include "halley/support/logger.h"

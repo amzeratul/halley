@@ -98,7 +98,7 @@ void ProfilerData::processEvents()
 		}
 		const auto depth = curThread.stackEnds.size();
 		curThread.maxDepth = std::max(curThread.maxDepth, depth);
-		e.depth = static_cast<int>(depth);
+		e.depth = static_cast<int16_t>(depth);
 		curThread.stackEnds.push_back(e.endTime);
 
 		// Store timing
@@ -119,6 +119,8 @@ void ProfilerData::processEvents()
 			curThread.type = ThreadType::Render;
 		} else if (e.type == ProfilerEventType::AudioGenerateBuffer) {
 			curThread.type = ThreadType::Audio;
+		} else if (e.type == ProfilerEventType::GPU) {
+			curThread.type = ThreadType::GPU;
 		}
 	}
 
@@ -146,12 +148,21 @@ ProfilerCapture& ProfilerCapture::get()
 
 ProfilerCapture::EventId ProfilerCapture::recordEventStart(ProfilerEventType type, std::string_view name)
 {
+	return recordEventStart(type, name, std::chrono::steady_clock::now());
+}
+
+void ProfilerCapture::recordEventEnd(EventId id)
+{
+	recordEventEnd(id, std::chrono::steady_clock::now());
+}
+
+ProfilerCapture::EventId ProfilerCapture::recordEventStart(ProfilerEventType type, std::string_view name, std::chrono::steady_clock::time_point time)
+{
 	if (recording) {
 		const auto id = curId++; // I think this is thread-safe?
 		if (id < endId) {
 			const auto pos = id % events.size();
-			const auto threadId = std::this_thread::get_id();
-			const auto time = std::chrono::steady_clock::now();
+			const auto threadId = type == ProfilerEventType::GPU ? std::thread::id() : std::this_thread::get_id();
 			events[pos] = ProfilerData::Event{ name, threadId, type, 0, id, time, {} };
 			return id;
 		} else {
@@ -161,10 +172,9 @@ ProfilerCapture::EventId ProfilerCapture::recordEventStart(ProfilerEventType typ
 	return 0;
 }
 
-void ProfilerCapture::recordEventEnd(EventId id)
+void ProfilerCapture::recordEventEnd(EventId id, std::chrono::steady_clock::time_point time)
 {
 	if (recording && id != 0) {
-		const auto time = std::chrono::steady_clock::now();
 		const auto pos = id % events.size();
 		if (events[pos].id == id) { // Dodgy, potential race condition here
 			events[pos].endTime = time;
