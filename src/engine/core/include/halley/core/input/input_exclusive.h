@@ -27,6 +27,7 @@ namespace Halley {
         bool isPressedRepeat() const;
         bool isReleased() const;
         bool isDown() const;
+        bool isActive() const;
 
         const String& getLabel() const;
 

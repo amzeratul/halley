@@ -44,8 +44,9 @@ gsl::span<const IScriptNodeType::PinType> ScriptInputButton::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 6>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output },
-		PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::FlowPin, PD::Output, true } };
+	const static auto data = std::array<PinType, 7>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::FlowPin, PD::Output, true },
+		PinType{ ET::FlowPin, PD::Output, true } };
 	return data;
 }
 
@@ -76,6 +77,8 @@ String ScriptInputButton::getPinDescription(const ScriptGraphNode& node, PinType
 		return "Flow Output while button is held";
 	case 5:
 		return "Flow Output while button is not held";
+	case 6:
+		return "Flow Output while input is active";
 	default:
 		return ScriptNodeTypeBase<ScriptInputButtonData>::getPinDescription(node, element, elementIdx);
 	}
@@ -92,6 +95,7 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 	constexpr uint8_t releasedPin = 2;
 	constexpr uint8_t heldPin = 4;
 	constexpr uint8_t notHeldPin = 8;
+	constexpr uint8_t activePin = 16;
 
 	if (!data.input) {
 		const auto entity = readEntityId(environment, node, 1);
@@ -110,10 +114,11 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 		const bool pressed = canRead && data.input->isPressed();
 		const bool released = canRead && data.input->isReleased();
 		const bool held = canRead && data.input->isDown();
+		const bool isActive = data.input->isActive();
 
-		const uint8_t curMask = (pressed ? pressedPin : 0) | (released ? releasedPin : 0) | (held ? heldPin : notHeldPin);
+		const uint8_t curMask = (pressed ? pressedPin : 0) | (released ? releasedPin : 0) | (held ? heldPin : notHeldPin) | (isActive ? activePin : 0);
 		const uint8_t activate = curMask & ~prevMask;
-		const uint8_t cancel = (prevMask & ~curMask) & (heldPin | notHeldPin);
+		const uint8_t cancel = (prevMask & ~curMask) & (heldPin | notHeldPin | activePin);
 		data.outputMask = curMask;
 
 		if (activate != 0 || cancel != 0) {

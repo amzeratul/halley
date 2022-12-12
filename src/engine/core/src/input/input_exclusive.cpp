@@ -42,6 +42,11 @@ bool InputExclusiveButton::isDown() const
 	return parent ? parent->isButtonDown(button, activeBinds) : false;
 }
 
+bool InputExclusiveButton::isActive() const
+{
+	return !activeBinds.empty();
+}
+
 const String& InputExclusiveButton::getLabel() const
 {
 	return label;
