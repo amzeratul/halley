@@ -77,6 +77,11 @@ Vector2f Transform2DComponent::getGlobalPosition() const
 	}
 }
 
+WorldPosition Transform2DComponent::getWorldPosition() const
+{
+	return WorldPosition(getGlobalPosition(), getSubWorld());
+}
+
 void Transform2DComponent::setGlobalPosition(Vector2f v)
 {
 	setLocalPosition(parentTransform ? parentTransform->inverseTransformPoint(v) : v);

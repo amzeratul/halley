@@ -32,6 +32,7 @@ public:
 	void setLocalRotation(Halley::Angle1f v);
 
 	Halley::Vector2f getGlobalPosition() const;
+	Halley::WorldPosition getWorldPosition() const;
 	void setGlobalPosition(Halley::Vector2f v);
 	void setGlobalPosition(Halley::WorldPosition p);
 
