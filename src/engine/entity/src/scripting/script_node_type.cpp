@@ -335,6 +335,7 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptLogicGateNot>());
 	addScriptNode(std::make_unique<ScriptAudioEvent>());
 	addScriptNode(std::make_unique<ScriptVariable>());
+	addScriptNode(std::make_unique<ScriptEntityVariable>());
 	addScriptNode(std::make_unique<ScriptLiteral>());
 	addScriptNode(std::make_unique<ScriptColourLiteral>());
 	addScriptNode(std::make_unique<ScriptComparison>());

@@ -68,7 +68,7 @@ namespace Halley {
     	void terminateState(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables);
 		ConfigNode readNodeElementDevConData(ScriptState& graphState, EntityId curEntity, ScriptVariables& entityVariables, GraphNodeId nodeId, GraphPinId pinId);
 
-    	EntityRef tryGetEntity(EntityId entityId);
+    	EntityRef tryGetEntity(EntityId entityId) const;
     	const ScriptGraph* getCurrentGraph() const;
         size_t& getNodeCounter(GraphNodeId nodeId);
         IScriptStateData* getNodeData(GraphNodeId nodeId);
@@ -84,6 +84,7 @@ namespace Halley {
 
         ScriptVariables& getVariables(ScriptVariableScope scope);
         const ScriptVariables& getVariables(ScriptVariableScope scope) const;
+        const ScriptVariables& getEntityVariables(EntityId entityId) const;
 
     	virtual void setDirection(EntityId entityId, const String& direction);
 

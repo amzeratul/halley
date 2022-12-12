@@ -52,13 +52,59 @@ void ScriptVariable::doSetData(ScriptEnvironment& environment, const ScriptGraph
 
 ConfigNode ScriptVariable::doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node) const
 {
-	const auto& vars = environment.getVariables(getScope(node));
-	return ConfigNode(vars.getVariable(node.getSettings()["variable"].asString("")));
+	return doGetData(environment, node, 1);
 }
 
 ScriptVariableScope ScriptVariable::getScope(const ScriptGraphNode& node) const
 {
 	return fromString<ScriptVariableScope>(node.getSettings()["scope"].asString("local"));
+}
+
+
+
+String ScriptEntityVariable::getLargeLabel(const ScriptGraphNode& node) const
+{
+	return node.getSettings()["variable"].asString("");
+}
+
+String ScriptEntityVariable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	return "entity:" + node.getSettings()["variable"].asString("");
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptEntityVariable::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	return data;
+}
+
+Vector<IGraphNodeType::SettingType> ScriptEntityVariable::getSettingTypes() const
+{
+	return {
+		SettingType{ "variable", "Halley::String", Vector<String>{""} }
+	};
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptEntityVariable::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Variable ");
+	str.append("entity:" + node.getSettings()["variable"].asString(""), settingColour);
+	str.append(" on entity ");
+	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
+	return str.moveResults();}
+
+ConfigNode ScriptEntityVariable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	const auto& vars = environment.getEntityVariables(readEntityId(environment, node, 0));
+	return ConfigNode(vars.getVariable(node.getSettings()["variable"].asString("")));
+}
+
+ConfigNode ScriptEntityVariable::doGetDevConData(ScriptEnvironment& environment, const ScriptGraphNode& node) const
+{
+	return doGetData(environment, node, 1);
 }
 
 

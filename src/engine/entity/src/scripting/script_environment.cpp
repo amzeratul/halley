@@ -478,7 +478,7 @@ UUID ScriptEnvironment::getUUIDFromEntityId(EntityId id) const
 	return UUID();
 }
 
-EntityRef ScriptEnvironment::tryGetEntity(EntityId entityId)
+EntityRef ScriptEnvironment::tryGetEntity(EntityId entityId) const
 {
 	return world.tryGetEntity(entityId.isValid() ? entityId : currentEntity);
 }
@@ -765,4 +765,18 @@ const ScriptVariables& ScriptEnvironment::getVariables(ScriptVariableScope scope
 	default:
 		throw Exception("Variable type " + toString(scope) + " not implemented", HalleyExceptions::Entity);
 	}
+}
+
+const ScriptVariables& ScriptEnvironment::getEntityVariables(EntityId entityId) const
+{
+	auto entity = tryGetEntity(entityId);
+	if (entity.isValid()) {
+		auto* scriptable = entity.tryGetComponent<ScriptableComponent>();
+		if (scriptable) {
+			return scriptable->variables;
+		}
+	}
+
+	static ScriptVariables dummy;
+	return dummy;
 }
