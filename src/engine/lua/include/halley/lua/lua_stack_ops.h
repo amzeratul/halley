@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <type_traits>
 
+#include "halley/data_structures/config_node.h"
+
 namespace Halley {
 	class String;
 	class LuaState;
@@ -26,6 +28,8 @@ namespace Halley {
 		void push(LuaCallback callback);
 		void pushTable(int nArrayIndices = 0, int nRecords = 0);
 
+		void load(const String& v, const String& name = "");
+
 		void makeGlobal(const String& name);
 
 		void setField(const String& name);
@@ -40,6 +44,7 @@ namespace Halley {
 		double popDouble();
 		String popString();
 		Vector2i popVector2i();
+		ConfigNode popConfigNode();
 		
 		bool isTopNil();
 		int getLength();

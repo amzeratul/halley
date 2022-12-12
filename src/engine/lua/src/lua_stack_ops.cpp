@@ -58,6 +58,12 @@ void LuaStackOps::pushTable(int nArrayIndices, int nRecords)
 	lua_createtable(state.getRawState(), nArrayIndices, nRecords);
 }
 
+void LuaStackOps::load(const String& v, const String& name)
+{
+	luaL_loadbuffer(state.getRawState(), v.c_str(), v.length(), name.isEmpty() ? nullptr : name.c_str());
+	state.call(0, 1);
+}
+
 void LuaStackOps::makeGlobal(const String& name)
 {
 	lua_setglobal(state.getRawState(), name.c_str());
@@ -115,6 +121,28 @@ Vector2i LuaStackOps::popVector2i()
 	result.y = popInt();
 	pop();
 	return result;
+}
+
+ConfigNode LuaStackOps::popConfigNode()
+{
+	auto type = lua_type(state.getRawState(), -1);
+	switch (type) {
+	case LUA_TNIL:
+		pop();
+		return ConfigNode();
+	case LUA_TNUMBER:
+		return ConfigNode(float(popDouble()));
+	case LUA_TBOOLEAN:
+		return ConfigNode(popBool());
+	case LUA_TSTRING:
+	case LUA_TTABLE:
+	case LUA_TFUNCTION:
+	case LUA_TUSERDATA:
+	case LUA_TTHREAD:
+	case LUA_TLIGHTUSERDATA:
+		return ConfigNode(popString());
+	}
+	return ConfigNode();
 }
 
 bool LuaStackOps::isTopNil()
