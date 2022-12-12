@@ -256,16 +256,16 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	strBuilder.append(" FPS | ");
 	strBuilder.append(toString(maxFPS, 10, 4, ' '), updateAvgTime > renderAvgTime ? updateCol : renderCol);
 	strBuilder.append(" FPS | ");
+	strBuilder.append(toString(painter.getPrevDrawCalls()));
+	strBuilder.append(" calls | ");
+	strBuilder.append(toString(painter.getPrevTriangles()));
+	strBuilder.append(" tris\n");
 	strBuilder.append(formatTime(updateAvgTime), updateCol);
 	strBuilder.append(" ms / ");
 	strBuilder.append(formatTime(renderAvgTime), renderCol);
 	strBuilder.append(" ms / ");
 	strBuilder.append(formatTime(gpuAvgTime), gpuCol);
-	strBuilder.append(" ms | ");
-	strBuilder.append(toString(painter.getPrevDrawCalls()));
-	strBuilder.append(" calls | ");
-	strBuilder.append(toString(painter.getPrevTriangles()));
-	strBuilder.append(" tris");
+	strBuilder.append(" ms");
 
 	if (networkStats) {
 		strBuilder.append(" | up: ");
@@ -293,8 +293,8 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	}
 
 	if (simple) {
-		const auto pos = Vector2f(painter.getViewPort().getTopRight()) + Vector2f(-5, 5);
-		headerText.setPosition(pos).setOffset(Vector2f(1, 0)).setOutline(2.0f);
+		const auto pos = Vector2f(painter.getViewPort().getBottomLeft()) + Vector2f(5, -5);
+		headerText.setPosition(pos).setOffset(Vector2f(0, 1)).setOutline(2.0f);
 	} else {
 		headerText.setPosition(Vector2f(10, 10)).setOffset(Vector2f()).setOutline(1.0f);
 	}
