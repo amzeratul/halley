@@ -15,15 +15,13 @@ ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node)
 			map[key] = parseYAMLNode(it->second);
 		}
 		result = std::move(map);
-	}
-	else if (node.IsSequence()) {
+	} else if (node.IsSequence()) {
 		Vector<ConfigNode> list;
 		for (auto& n : node) {
 			list.emplace_back(parseYAMLNode(n));
 		}
 		result = std::move(list);
-	}
-	else if (node.IsScalar()) {
+	} else if (node.IsScalar()) {
 		if (node.Tag().find("binary") != std::string::npos) {
 			auto b = node.as<YAML::Binary>();
 			Bytes bs;
@@ -38,9 +36,14 @@ ConfigNode YAMLConvert::parseYAMLNode(const YAML::Node& node)
 				} else {
 					result = str.toFloat();
 				}
-			}
-			else {
-				result = str;
+			} else {
+				if (str == "true") {
+					result = true;
+				} else if (str == "false") {
+					result = false;
+				} else {
+					result = str;
+				}
 			}
 		}
 	}
@@ -98,6 +101,10 @@ void YAMLConvert::emitNode(const ConfigNode& node, YAML::Emitter& emitter, const
 
 	case ConfigNodeType::Int64:
 		emitter << node.asInt64();
+		return;
+
+	case ConfigNodeType::Bool:
+		emitter << node.asBool();
 		return;
 
 	case ConfigNodeType::Int2:
@@ -215,6 +222,7 @@ bool YAMLConvert::isCompactSequence(const ConfigNode& node, int depth, const Emi
 		return ok;
 
 	case ConfigNodeType::Int:
+	case ConfigNodeType::Bool:
 	case ConfigNodeType::Float:
 	case ConfigNodeType::String:
 		return true;

@@ -67,11 +67,12 @@ namespace Halley {
 		Del, // For delta coding
 		Int64,
 		EntityId,
+		Bool
 	};
 
 	template <>
 	struct EnumNames<ConfigNodeType> {
-		constexpr std::array<const char*, 16> operator()() const {
+		constexpr std::array<const char*, 17> operator()() const {
 			return{{
 				"undefined",
 				"string",
@@ -88,7 +89,8 @@ namespace Halley {
 				"idx",
 				"del",
 				"int64",
-				"entityId"
+				"entityId",
+				"bool"
 			}};
 		}
 	};

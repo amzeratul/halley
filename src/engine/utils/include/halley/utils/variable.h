@@ -11,6 +11,7 @@ namespace Halley {
 	namespace Internal {
 		enum class VariableType {
 			Undefined,
+			Bool,
 			Int,
 			Float,
 			Int2,
@@ -30,6 +31,7 @@ namespace Halley {
 			VariableType type = VariableType::Undefined;
 
 			union {
+				bool boolValue;
 				int intValue;
 				float floatValue;
 				Vector2i vector2iValue;
@@ -40,8 +42,8 @@ namespace Halley {
 
 			void getValue(bool& v) const
 			{
-				Expects(type == VariableType::Int);
-				v = intValue != 0;
+				Expects(type == VariableType::Bool);
+				v = boolValue;
 			}
 
 			void getValue(int& v) const
@@ -114,9 +116,10 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<Internal::VariableType> {
-		constexpr std::array<const char*, 7> operator()() const {
+		constexpr std::array<const char*, 8> operator()() const {
 			return{{
 				"undefined",
+				"bool",
 				"int",
 				"float",
 				"int2",

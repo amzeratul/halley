@@ -23,6 +23,9 @@ Internal::VariableStorage& Internal::VariableStorage::operator=(const VariableSt
 	clear();
 	
 	switch (other.type) {
+	case VariableType::Bool:
+		boolValue = other.boolValue;
+		break;
 	case VariableType::Int:
 		intValue = other.intValue;
 		break;
@@ -51,6 +54,9 @@ Internal::VariableStorage& Internal::VariableStorage::operator=(VariableStorage&
 	clear();
 	
 	switch (other.type) {
+	case VariableType::Bool:
+		boolValue = other.boolValue;
+		break;
 	case VariableType::Int:
 		intValue = other.intValue;
 		break;
@@ -85,6 +91,10 @@ void Internal::VariableStorage::setValue(const ConfigNode& node)
 	clear();
 	
 	switch (node.getType()) {
+	case ConfigNodeType::Bool:
+		type = VariableType::Bool;
+		boolValue = node.asBool();
+		break;
 	case ConfigNodeType::Int:
 		type = VariableType::Int;
 		intValue = node.asInt();
@@ -125,6 +135,9 @@ void Internal::VariableStorage::serialize(Serializer& s) const
 {
 	s << type;
 	switch (type) {
+	case VariableType::Bool:
+		s << boolValue;
+		break;
 	case VariableType::Int:
 		s << intValue;
 		break;
@@ -154,6 +167,9 @@ void Internal::VariableStorage::deserialize(Deserializer& s)
 	
 	s >> type;
 	switch (type) {
+	case VariableType::Bool:
+		s >> boolValue;
+		break;
 	case VariableType::Int:
 		s >> intValue;
 		break;

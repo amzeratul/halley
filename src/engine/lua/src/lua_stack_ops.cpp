@@ -61,6 +61,8 @@ void LuaStackOps::push(const ConfigNode& node)
 		push(static_cast<double>(node.asFloat()));
 	} else if (node.getType() == ConfigNodeType::Int) {
 		push(node.asInt());
+	} else if (node.getType() == ConfigNodeType::Bool) {
+		push(node.asBool());
 	} else if (node.getType() == ConfigNodeType::String) {
 		push(node.asString());
 	} else if (node.getType() == ConfigNodeType::Sequence) {

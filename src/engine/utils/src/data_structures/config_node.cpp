@@ -169,6 +169,9 @@ ConfigNode& ConfigNode::operator=(const ConfigNode& other)
 		case ConfigNodeType::Int64:
 			*this = other.asInt64();
 			break;
+		case ConfigNodeType::Bool:
+			*this = other.asBool();
+			break;
 		case ConfigNodeType::EntityId:
 			*this = other.asEntityId();
 			break;
@@ -223,7 +226,7 @@ ConfigNode& ConfigNode::operator=(ConfigNode&& other) noexcept
 ConfigNode& ConfigNode::operator=(bool value)
 {
 	reset();
-	type = ConfigNodeType::Int;
+	type = ConfigNodeType::Bool;
 	intData = value ? 1 : 0;
 	return *this;
 }
@@ -359,6 +362,8 @@ bool ConfigNode::operator==(const ConfigNode& other) const
 			return asMap() == other.asMap();
 		case ConfigNodeType::Int:
 			return asInt() == other.asInt();
+		case ConfigNodeType::Bool:
+			return asBool() == other.asBool();
 		case ConfigNodeType::Int64:
 			return asInt64() == other.asInt64();
 		case ConfigNodeType::EntityId:
@@ -473,6 +478,9 @@ void ConfigNode::serialize(Serializer& s) const
 		case ConfigNodeType::Map:
 			s << asMap();
 			break;
+		case ConfigNodeType::Bool:
+			s << asBool();
+			break;
 		case ConfigNodeType::Int:
 			s << asInt();
 			break;
@@ -543,6 +551,9 @@ void ConfigNode::deserialize(Deserializer& s)
 		case ConfigNodeType::Map:
 			deserializeContents<MapType>(s);
 			break;
+		case ConfigNodeType::Bool:
+			deserializeContents<bool>(s);
+			break;
 		case ConfigNodeType::Int:
 			deserializeContents<int>(s);
 			break;
@@ -612,6 +623,8 @@ int ConfigNode::asInt() const
 		return int(int64Data);
 	} else if (type == ConfigNodeType::EntityId && int64Data == -1) {
 		return -1;
+	} else if (type == ConfigNodeType::Bool) {
+		return intData;
 	} else {
 		throw Exception(getNodeDebugId() + " cannot be converted to int.", HalleyExceptions::Resources);
 	}
@@ -625,6 +638,8 @@ int64_t ConfigNode::asInt64() const
 		return intData;
 	} else if (type == ConfigNodeType::Float) {
 		return int(floatData);
+	} else if (type == ConfigNodeType::Bool) {
+		return intData;
 	} else if (type == ConfigNodeType::String) {
 		return asString().toInteger();
 	} else {
@@ -653,6 +668,8 @@ float ConfigNode::asFloat() const
 		return floatData;
 	} else if (type == ConfigNodeType::Int64) {
 		return float(int64Data);
+	} else if (type == ConfigNodeType::Bool) {
+		return float(intData);
 	} else if (type == ConfigNodeType::String) {
 		return asString().toFloat();
 	} else if (type == ConfigNodeType::EntityId && int64Data == -1) {
@@ -664,7 +681,7 @@ float ConfigNode::asFloat() const
 
 bool ConfigNode::asBool() const
 {
-	if (type == ConfigNodeType::Int) {
+	if (type == ConfigNodeType::Int || type == ConfigNodeType::Bool) {
 		return intData != 0;
 	} else if (type == ConfigNodeType::Float) {
 		return floatData != 0;
@@ -674,7 +691,7 @@ bool ConfigNode::asBool() const
 		const auto& str = asString();
 		if (str == "true") {
 			return true;
-		} else if (str == "false") {
+		} else if (str == "false" || str == "0") {
 			return false;
 		}
 		return !asString().isEmpty();
@@ -892,6 +909,8 @@ String ConfigNode::asString() const
 		return toString(asInt());
 	} else if (type == ConfigNodeType::Int64) {
 		return toString(asInt64());
+	} else if (type == ConfigNodeType::Bool) {
+		return asBool() ? "true" : "false";
 	} else if (type == ConfigNodeType::EntityId) {
 		return toString(asEntityId().value);
 	} else if (type == ConfigNodeType::Float) {
@@ -1034,6 +1053,9 @@ void ConfigNode::ensureType(ConfigNodeType t)
 			break;
 		case ConfigNodeType::Int64:
 			*this = int64_t(0);
+			break;
+		case ConfigNodeType::Bool:
+			*this = false;
 			break;
 		case ConfigNodeType::EntityId:
 			*this = EntityIdHolder{};
@@ -1233,6 +1255,9 @@ String ConfigNode::getNodeDebugId() const
 			break;
 		case ConfigNodeType::Int:
 			value = toString(asInt());
+			break;
+		case ConfigNodeType::Bool:
+			value = asBool() ? "true" : "false";
 			break;
 		case ConfigNodeType::Float:
 			value = toString(asFloat());
@@ -1711,7 +1736,7 @@ ConfigNodeType ConfigNode::getPromotedType(gsl::span<const ConfigNodeType> types
 
 bool ConfigNode::isScalarType(ConfigNodeType type, bool acceptUndefined)
 {
-	return type == ConfigNodeType::Int || type == ConfigNodeType::Float || type == ConfigNodeType::Int64 || (acceptUndefined && type == ConfigNodeType::Undefined);
+	return type == ConfigNodeType::Int || type == ConfigNodeType::Float || type == ConfigNodeType::Int64 || type == ConfigNodeType::Bool || (acceptUndefined && type == ConfigNodeType::Undefined);
 }
 
 bool ConfigNode::isVector2Type(ConfigNodeType type, bool acceptUndefined)
@@ -1784,6 +1809,9 @@ bool ConfigNode::isEquivalentStrictOrder(const ConfigNode& other) const
 
 	if (type == ConfigNodeType::Int && other.type == ConfigNodeType::Float) {
 		return std::abs(asFloat() - other.asFloat()) < 0.00001f;
+	}
+	if (type == ConfigNodeType::Int && other.type == ConfigNodeType::Bool) {
+		return asInt() == other.asInt();
 	}
 	if (type == ConfigNodeType::Sequence && other.type == ConfigNodeType::Int2 && asSequence().size() >= 2) {
 		return asVector2i() == other.asVector2i();
