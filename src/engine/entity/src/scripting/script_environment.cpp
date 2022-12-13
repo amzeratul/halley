@@ -117,21 +117,13 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 		thread.getCurNodeTime() += timeLeft;
 		timeLeft -= static_cast<float>(result.timeElapsed);
 
-		if (result.outputsCancelled != 0) {
-			cancelOutputs(nodeId, result.outputsCancelled);
-		}
-
 		if (result.state == ScriptNodeExecutionState::Executing) {
 			// Still running this node, suspend
 			timeLeft = 0;
 		} else if (result.state == ScriptNodeExecutionState::Fork || result.state == ScriptNodeExecutionState::ForkAndConvertToWatcher) {
-			const auto nSpawned = forkThread(thread, nodeType.getOutputNodes(node, result.outputsActive), pendingThreads);
+			forkThread(thread, nodeType.getOutputNodes(node, result.outputsActive), pendingThreads);
 			if (result.state == ScriptNodeExecutionState::ForkAndConvertToWatcher) {
-				if (nSpawned > 0) {
-					setWatcher(thread, true);
-				} else {
-					terminateThread(thread, false);
-				}
+				setWatcher(thread, true);
 			}
 		} else if (result.state == ScriptNodeExecutionState::MergeAndWait) {
 			mergeThread(thread, true);
@@ -160,6 +152,10 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 			} else if (result.state == ScriptNodeExecutionState::Return) {
 				returnFromFunction(thread, result.outputsActive, pendingThreads);
 			}
+		}
+
+		if (result.outputsCancelled != 0) {
+			cancelOutputs(nodeId, result.outputsCancelled);
 		}
 	}
 	return true;
@@ -382,15 +378,21 @@ void ScriptEnvironment::removeStoppedThreads()
 	std_ex::erase_if(currentState->getThreads(), [&] (const ScriptStateThread& thread) { return !thread.getCurNode(); });
 }
 
-void ScriptEnvironment::setWatcher(ScriptStateThread& thread, bool watcher)
+void ScriptEnvironment::setWatcher(ScriptStateThread& thread, bool newState)
 {
-	if (thread.isWatcher() != watcher) {
-		thread.setWatcher(watcher);
+	if (thread.isWatcher() != newState) {
+		if (newState && (!thread.getCurNode() || currentState->getNodeState(*thread.getCurNode()).threadCount == 1)) {
+			// If this is the last thread on this node, don't bother setting as watcher, terminate instead
+			terminateThread(thread, false);
+			return;
+		}
+
+		thread.setWatcher(newState);
 
 		auto updateNode = [&](int nodeId)
 		{
 			auto& nThreads = currentState->getNodeState(nodeId).threadCount;
-			if (watcher) {
+			if (newState) {
 				assert(nThreads >= 2);
 				--nThreads;
 			} else {

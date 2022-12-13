@@ -182,7 +182,7 @@ namespace Halley {
         void mergeThread(ScriptStateThread& thread, bool wait);
         void terminateThread(ScriptStateThread& thread, bool allowRollback);
         void removeStoppedThreads();
-        void setWatcher(ScriptStateThread& thread, bool watcher);
+        void setWatcher(ScriptStateThread& thread, bool newState);
 
         void cancelOutputs(GraphNodeId nodeId, uint8_t cancelMask);
         void abortCodePath(GraphNodeId node, std::optional<GraphPinId> outputPin);
