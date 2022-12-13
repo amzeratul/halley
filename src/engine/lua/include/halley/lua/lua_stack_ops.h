@@ -29,6 +29,27 @@ namespace Halley {
 		void push(const ConfigNode& node);
 		void pushTable(int nArrayIndices = 0, int nRecords = 0);
 
+		template <typename T>
+		void push(const Vector<T>& vec)
+		{
+			const int n = static_cast<int>(vec.size());
+			pushTable(n, 0);
+			for (int i = 0; i < n; ++i) {
+				push(vec[i]);
+				setField(i);
+			}
+		}
+
+		template <typename T>
+		void push(const HashMap<String, T>& map)
+		{
+			pushTable(0, static_cast<int>(map.size()));
+			for (const auto& [k, v]: map) {
+				push(v);
+				setField(k);
+			}
+		}
+
 		void load(const String& v, const String& name = "");
 		void load(gsl::span<const gsl::byte> bytes, const String& name = "");
 		void load(const Bytes& bytes, const String& name = "");
