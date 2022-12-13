@@ -178,7 +178,7 @@ namespace Halley {
         void addThread(ScriptStateThread thread, Vector<ScriptStateThread>& pending);
         void advanceThread(ScriptStateThread& thread, OptionalLite<GraphNodeId> node, GraphPinId outputPin, GraphPinId inputPin);
         void initNode(GraphNodeId nodeId, ScriptState::NodeState& state);
-        void forkThread(ScriptStateThread& thread, std::array<IScriptNodeType::OutputNode, 8> outputNodes, Vector<ScriptStateThread>& pendingThreads, size_t firstIdx = 0);
+        size_t forkThread(ScriptStateThread& thread, std::array<IScriptNodeType::OutputNode, 8> outputNodes, Vector<ScriptStateThread>& pendingThreads, size_t firstIdx = 0);
         void mergeThread(ScriptStateThread& thread, bool wait);
         void terminateThread(ScriptStateThread& thread, bool allowRollback);
         void removeStoppedThreads();

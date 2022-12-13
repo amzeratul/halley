@@ -125,9 +125,13 @@ bool ScriptEnvironment::updateThread(ScriptState& graphState, ScriptStateThread&
 			// Still running this node, suspend
 			timeLeft = 0;
 		} else if (result.state == ScriptNodeExecutionState::Fork || result.state == ScriptNodeExecutionState::ForkAndConvertToWatcher) {
-			forkThread(thread, nodeType.getOutputNodes(node, result.outputsActive), pendingThreads);
+			const auto nSpawned = forkThread(thread, nodeType.getOutputNodes(node, result.outputsActive), pendingThreads);
 			if (result.state == ScriptNodeExecutionState::ForkAndConvertToWatcher) {
-				setWatcher(thread, true);
+				if (nSpawned > 0) {
+					setWatcher(thread, true);
+				} else {
+					terminateThread(thread, false);
+				}
 			}
 		} else if (result.state == ScriptNodeExecutionState::MergeAndWait) {
 			mergeThread(thread, true);
@@ -310,13 +314,16 @@ void ScriptEnvironment::initNode(GraphNodeId nodeId, ScriptState::NodeState& nod
 	currentState->startNode(currentGraph->getNodes()[nodeId], nodeState);
 }
 
-void ScriptEnvironment::forkThread(ScriptStateThread& thread, std::array<IScriptNodeType::OutputNode, 8> outputNodes, Vector<ScriptStateThread>& pendingThreads, size_t firstIdx)
+size_t ScriptEnvironment::forkThread(ScriptStateThread& thread, std::array<IScriptNodeType::OutputNode, 8> outputNodes, Vector<ScriptStateThread>& pendingThreads, size_t firstIdx)
 {
+	size_t n = 0;
 	for (size_t j = firstIdx; j < outputNodes.size(); ++j) {
 		if (outputNodes[j].dstNode && currentState->getNodeState(outputNodes[j].dstNode.value()).threadCount == 0) {
 			addThread(thread.fork(outputNodes[j].dstNode.value(), outputNodes[j].outputPin, outputNodes[j].inputPin), pendingThreads);
+			++n;
 		}
 	}
+	return n;
 }
 
 void ScriptEnvironment::mergeThread(ScriptStateThread& thread, bool wait)
