@@ -29,6 +29,13 @@ namespace Halley {
 		void pushTable(int nArrayIndices = 0, int nRecords = 0);
 
 		void load(const String& v, const String& name = "");
+		void load(gsl::span<const gsl::byte> bytes, const String& name = "");
+		void load(const Bytes& bytes, const String& name = "");
+		void eval(const String& v, const String& name = "");
+		void eval(gsl::span<const gsl::byte> bytes, const String& name = "");
+		void eval(const Bytes& bytes, const String& name = "");
+		Bytes compile(const String& v);
+		Bytes compileAndEval(const String& v, const String& name = "");
 
 		void makeGlobal(const String& name);
 

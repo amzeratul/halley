@@ -60,8 +60,64 @@ void LuaStackOps::pushTable(int nArrayIndices, int nRecords)
 
 void LuaStackOps::load(const String& v, const String& name)
 {
-	luaL_loadbuffer(state.getRawState(), v.c_str(), v.length(), name.isEmpty() ? nullptr : name.c_str());
+	luaL_loadbufferx(state.getRawState(), v.c_str(), v.length(), name.isEmpty() ? nullptr : name.c_str(), "t");
+}
+
+void LuaStackOps::load(gsl::span<const gsl::byte> bytes, const String& name)
+{
+	luaL_loadbufferx(state.getRawState(), reinterpret_cast<const char*>(bytes.data()), bytes.size_bytes(), name.isEmpty() ? nullptr : name.c_str(), "b");
+}
+
+void LuaStackOps::load(const Bytes& bytes, const String& name)
+{
+	load(gsl::as_bytes(gsl::span<const Byte>(bytes)), name);
+}
+
+void LuaStackOps::eval(const String& v, const String& name)
+{
+	load(v, name);
 	state.call(0, 1);
+}
+
+void LuaStackOps::eval(gsl::span<const gsl::byte> bytes, const String& name)
+{
+	load(bytes, name);
+	state.call(0, 1);
+}
+
+void LuaStackOps::eval(const Bytes& bytes, const String& name)
+{
+	load(bytes, name);
+	state.call(0, 1);
+}
+
+namespace {
+	int luaWriter(lua_State* L, const void* p, size_t sz, void* dstVoid)
+	{
+		auto dst = static_cast<Bytes*>(dstVoid);
+		const size_t startSize = dst->size();
+		dst->resize(startSize + sz);
+		memcpy(reinterpret_cast<char*>(dst->data()) + startSize, p, sz);
+		return 0;
+	}
+}
+
+Bytes LuaStackOps::compile(const String& v)
+{
+	Bytes data;
+	luaL_loadbuffer(state.getRawState(), v.c_str(), v.length(), nullptr);
+	lua_dump(state.getRawState(), &luaWriter, &data, false);
+	pop();
+	return data;
+}
+
+Bytes LuaStackOps::compileAndEval(const String& v, const String& name)
+{
+	Bytes data;
+	luaL_loadbuffer(state.getRawState(), v.c_str(), v.length(), name.isEmpty() ? nullptr : name.c_str());
+	lua_dump(state.getRawState(), &luaWriter, &data, false);
+	state.call(0, 1);
+	return data;
 }
 
 void LuaStackOps::makeGlobal(const String& name)
