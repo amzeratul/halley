@@ -26,6 +26,7 @@ namespace Halley {
 		void push(const String& v);
 		void push(Vector2i v);
 		void push(LuaCallback callback);
+		void push(const ConfigNode& node);
 		void pushTable(int nArrayIndices = 0, int nRecords = 0);
 
 		void load(const String& v, const String& name = "");
@@ -34,8 +35,8 @@ namespace Halley {
 		void eval(const String& v, const String& name = "");
 		void eval(gsl::span<const gsl::byte> bytes, const String& name = "");
 		void eval(const Bytes& bytes, const String& name = "");
-		Bytes compile(const String& v);
-		Bytes compileAndEval(const String& v, const String& name = "");
+		Bytes compile(const String& v, bool stripDebug = false);
+		Bytes compileAndEval(const String& v, const String& name = "", bool stripDebug = false);
 
 		void makeGlobal(const String& name);
 
@@ -140,6 +141,11 @@ namespace Halley {
 	template <>
 	struct FromLua<LuaState&> {
 		inline LuaState& operator()(LuaState& state) const { return state; };
+	};
+
+	template <>
+	struct FromLua<ConfigNode> {
+		inline ConfigNode operator()(LuaState& state) const { return LuaStackOps(state).popConfigNode(); };
 	};
 
 

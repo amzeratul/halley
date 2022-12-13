@@ -30,15 +30,15 @@ namespace Halley {
 	public:
 		LuaReference();
 		LuaReference(LuaState& lua);
+		LuaReference(const LuaReference& other) = delete;
 		LuaReference(LuaReference&& other) noexcept;
 		~LuaReference();
 
+		LuaReference& operator=(const LuaReference& other) = delete;
 		LuaReference& operator=(LuaReference&& other) noexcept;
 
-		LuaReference(const LuaReference& other) = delete;
-		LuaReference& operator=(const LuaReference& other) = delete;
-
 		void pushToLuaStack() const;
+		void clear();
 
 		LuaReference operator[](const String& name) const;
 

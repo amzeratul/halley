@@ -53,6 +53,21 @@ void LuaStackOps::push(LuaCallback callback)
 	state.pushCallback(std::move(callback));
 }
 
+void LuaStackOps::push(const ConfigNode& node)
+{
+	if (node.getType() == ConfigNodeType::Undefined) {
+		push(nullptr);
+	} else if (node.getType() == ConfigNodeType::Float) {
+		push(static_cast<double>(node.asFloat()));
+	} else if (node.getType() == ConfigNodeType::Int) {
+		push(node.asInt());
+	} else if (node.getType() == ConfigNodeType::String) {
+		push(node.asString());
+	} else {
+		throw Exception("Unimplemented ConfigNode to Lua serialization: " + toString(node.getType()), HalleyExceptions::Lua);
+	}
+}
+
 void LuaStackOps::pushTable(int nArrayIndices, int nRecords)
 {
 	lua_createtable(state.getRawState(), nArrayIndices, nRecords);
@@ -102,20 +117,20 @@ namespace {
 	}
 }
 
-Bytes LuaStackOps::compile(const String& v)
+Bytes LuaStackOps::compile(const String& v, bool stripDebug)
 {
 	Bytes data;
 	luaL_loadbuffer(state.getRawState(), v.c_str(), v.length(), nullptr);
-	lua_dump(state.getRawState(), &luaWriter, &data, false);
+	lua_dump(state.getRawState(), &luaWriter, &data, stripDebug);
 	pop();
 	return data;
 }
 
-Bytes LuaStackOps::compileAndEval(const String& v, const String& name)
+Bytes LuaStackOps::compileAndEval(const String& v, const String& name, bool stripDebug)
 {
 	Bytes data;
 	luaL_loadbuffer(state.getRawState(), v.c_str(), v.length(), name.isEmpty() ? nullptr : name.c_str());
-	lua_dump(state.getRawState(), &luaWriter, &data, false);
+	lua_dump(state.getRawState(), &luaWriter, &data, stripDebug);
 	state.call(0, 1);
 	return data;
 }

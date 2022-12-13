@@ -24,19 +24,19 @@ LuaReference::LuaReference(LuaReference&& other) noexcept
 	other.refId = LUA_NOREF;
 }
 
+LuaReference::~LuaReference()
+{
+	clear();
+}
+
 LuaReference& LuaReference::operator=(LuaReference&& other) noexcept
 {
+	clear();
+
 	lua = other.lua;
 	refId = other.refId;
 	other.refId = LUA_NOREF;
 	return *this;
-}
-
-LuaReference::~LuaReference()
-{
-	if (refId != LUA_NOREF && lua!= nullptr) {
-		luaL_unref(lua->getRawState(), LUA_REGISTRYINDEX, refId);
-	}
 }
 
 void LuaReference::pushToLuaStack() const
@@ -45,6 +45,14 @@ void LuaReference::pushToLuaStack() const
 	Expects (lua);
 
 	lua_rawgeti(lua->getRawState(), LUA_REGISTRYINDEX, refId);
+}
+
+void LuaReference::clear()
+{
+	if (refId != LUA_NOREF && lua != nullptr) {
+		luaL_unref(lua->getRawState(), LUA_REGISTRYINDEX, refId);
+		refId = LUA_NOREF;
+	}
 }
 
 LuaReference LuaReference::operator[](const String& name) const
