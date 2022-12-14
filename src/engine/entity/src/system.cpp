@@ -216,10 +216,10 @@ void System::doUpdate(Time time) {
 	HALLEY_DEBUG_TRACE_COMMENT(name.c_str());
 	ProfilerEvent event(ProfilerEventType::WorldSystemUpdate, name);
 
-	purgeMessages();
 	if (!messageTypesReceived.empty()) {
 		processMessages();
 	}
+	purgeMessages();
 	
 	updateBase(time);
 	dispatchMessages();
