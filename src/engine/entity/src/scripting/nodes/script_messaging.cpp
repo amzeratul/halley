@@ -30,7 +30,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSendMessage::getNodeDescription(
 	auto str = ColourStringBuilder(true);
 	str.append("Send message ");
 	str.append(msgType.message, settingColour);
-	str.append("(");
+	str.append(" (");
 
 	for (int i = 0; i < msgType.nParams; ++i) {
 		if (i != 0) {
@@ -249,7 +249,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSendSystemMessage::getNodeDescri
 	auto str = ColourStringBuilder(true);
 	str.append("Send message ");
 	str.append(msgType.message, settingColour);
-	str.append("(");
+	str.append(" (");
 
 	size_t i = 0;
 	for (const auto& m: msgType.members) {
@@ -327,7 +327,7 @@ std::pair<String, Vector<ColourOverride>> ScriptSendEntityMessage::getNodeDescri
 	auto str = ColourStringBuilder(true);
 	str.append("Send message ");
 	str.append(msgType.message, settingColour);
-	str.append("(");
+	str.append(" (");
 
 	size_t i = 0;
 	for (const auto& m: msgType.members) {
