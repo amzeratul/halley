@@ -141,11 +141,15 @@ void Camera::updateProjection(bool flipVertical)
 
 Rect4i Camera::getActiveViewPort() const
 {
-	auto targetViewPort = activeRenderTarget->getViewPort();
-	if (viewPort) {
-		return viewPort->intersection(targetViewPort);
+	if (activeRenderTarget) {
+		auto targetViewPort = activeRenderTarget->getViewPort();
+		if (viewPort) {
+			return viewPort->intersection(targetViewPort);
+		} else {
+			return targetViewPort;
+		}
 	} else {
-		return targetViewPort;
+		return viewPort.value_or(Rect4i());
 	}
 }
 
