@@ -11,7 +11,7 @@ ConfigNode ScriptUIModalData::toConfigNode(const EntitySerializationContext& con
 Vector<IScriptNodeType::SettingType> ScriptUIModal::getSettingTypes() const
 {
 	return {
-		SettingType{ "ui", "Halley::ResourceReference<Halley::UIDefinition>", Vector<String>{""} }
+		SettingType{ "ui", "Halley::String", Vector<String>{""} }
 	};
 }
 

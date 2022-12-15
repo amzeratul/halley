@@ -524,9 +524,9 @@ void ScriptEnvironment::setInputDevice(EntityId target, std::shared_ptr<InputVir
 	inputDevices[target] = std::move(input);
 }
 
-std::shared_ptr<InputVirtual> ScriptEnvironment::getInputDevice(EntityId target) const
+std::shared_ptr<InputVirtual> ScriptEnvironment::getInputDevice(EntityId target, bool bypassEnableCheck) const
 {
-	if (!inputEnabled) {
+	if (!inputEnabled && !bypassEnableCheck) {
 		return {};
 	}
 

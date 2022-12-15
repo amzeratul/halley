@@ -37,6 +37,7 @@ Vector<IScriptNodeType::SettingType> ScriptInputButton::getSettingTypes() const
 		SettingType{ "button", "Halley::InputButton", Vector<String>{""} },
 		SettingType{ "priority", "Halley::InputPriority", Vector<String>{"normal"} },
 		SettingType{ "label", "Halley::String", Vector<String>{""} },
+		SettingType{ "bypassEnableCheck", "bool", Vector<String>{""} },
 	};
 }
 
@@ -62,6 +63,10 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(
 	if (node.getSettings()["label"].asString("") != "") {
 		str.append(" and label ");
 		str.append(node.getSettings()["label"].asString(""), settingColour);
+	}
+	if (node.getSettings()["bypassEnableCheck"].asBool(false)) {
+		str.append(" and ");
+		str.append("bypass enable check", settingColour);
 	}
 	return str.moveResults();
 }
@@ -100,9 +105,9 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 	if (!data.input) {
 		const auto entity = readEntityId(environment, node, 1);
 		const int button = environment.getInputButtonByName(node.getSettings()["button"].asString("primary"));
-		const auto inputDevice = environment.getInputDevice(entity);
-		const auto priority = fromString<InputPriority>(node.getSettings()["priority"].asString("normal"));
+		const auto inputDevice = environment.getInputDevice(entity, node.getSettings()["bypassEnableCheck"].asBool(false));
 		if (inputDevice) {
+			const auto priority = fromString<InputPriority>(node.getSettings()["priority"].asString("normal"));
 			data.input = inputDevice->makeExclusiveButton(button, priority, node.getSettings()["label"].asString(""));
 		}
 	}
@@ -110,7 +115,7 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 	if (data.input) {
 		const auto prevMask = data.outputMask;
 
-		const bool canRead = environment.isInputEnabled();
+		const bool canRead = environment.isInputEnabled() || node.getSettings()["bypassEnableCheck"].asBool(false);
 		const bool pressed = canRead && data.input->isPressed();
 		const bool released = canRead && data.input->isReleased();
 		const bool held = canRead && data.input->isDown();

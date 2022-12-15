@@ -91,7 +91,7 @@ namespace Halley {
         void setInputEnabled(bool enabled);
         virtual bool isInputEnabled() const;
         void setInputDevice(EntityId target, std::shared_ptr<InputVirtual> input);
-        std::shared_ptr<InputVirtual> getInputDevice(EntityId target) const;
+        std::shared_ptr<InputVirtual> getInputDevice(EntityId target, bool bypassEnableCheck) const;
         virtual int getInputButtonByName(const String& name) const;
 
         template <typename T>
