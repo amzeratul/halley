@@ -79,4 +79,70 @@ namespace Halley {
 		ConfigNode doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ScriptLatchData& data) const override;
 		void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptLatchData& curData) const override;
 	};
+
+
+	class ScriptFenceData final : public ScriptStateData<ScriptFenceData> {
+	public:
+		bool signaled = false;
+
+		ScriptFenceData() = default;
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+	};
+
+	class ScriptFence final : public ScriptNodeTypeBase<ScriptFenceData> {
+	public:
+		String getId() const override { return "fence"; }
+		String getName() const override { return "Fence"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/fence.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::FlowControl; }
+
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+		void doInitData(ScriptFenceData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptFenceData& curData) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptFenceData& curData) const override;
+	};
+
+
+	class ScriptBreakerData final : public ScriptStateData<ScriptBreakerData> {
+	public:
+		bool signaled = false;
+		bool active = false;
+
+		ScriptBreakerData() = default;
+		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
+	};
+
+	class ScriptBreaker final : public ScriptNodeTypeBase<ScriptBreakerData> {
+	public:
+		String getId() const override { return "breaker"; }
+		String getName() const override { return "Breaker"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/breaker.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::State; }
+
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+		void doInitData(ScriptBreakerData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		void doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptBreakerData& curData) const override;
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptBreakerData& curData) const override;
+	};
+
+
+	class ScriptSignal final : public ScriptNodeTypeBase<void> {
+	public:
+		String getId() const override { return "signal"; }
+		String getName() const override { return "Signal"; }
+		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/signal.png"; }
+		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
+
+		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
+		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;
+		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
+
+		Result doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const override;
+	};
 }

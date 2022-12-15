@@ -208,3 +208,160 @@ void ScriptLatch::doSetData(ScriptEnvironment& environment, const ScriptGraphNod
 		}
 	}
 }
+
+
+
+ConfigNode ScriptFenceData::toConfigNode(const EntitySerializationContext& context)
+{
+	return ConfigNode(signaled);
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptFence::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::WriteDataPin, PD::Input }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptFence::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	return { "Waits until signaled.", {} };
+}
+
+String ScriptFence::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 2) {
+		return "Signal";
+	}
+	return ScriptNodeTypeBase<ScriptFenceData>::getPinDescription(node, elementType, elementIdx);
+}
+
+void ScriptFence::doInitData(ScriptFenceData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
+{
+	data.signaled = nodeData.asBool(false);
+}
+
+void ScriptFence::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptFenceData& curData) const
+{
+	curData.signaled = true;
+}
+
+IScriptNodeType::Result ScriptFence::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptFenceData& curData) const
+{
+	if (curData.signaled) {
+		curData.signaled = false;
+		return Result(ScriptNodeExecutionState::Done);
+	} else {
+		return Result(ScriptNodeExecutionState::Executing, time);
+	}
+}
+
+
+
+ConfigNode ScriptBreakerData::toConfigNode(const EntitySerializationContext& context)
+{
+	ConfigNode::MapType result;
+	result["signaled"] = signaled;
+	result["active"] = active;
+	return result;
+}
+
+gsl::span<const IGraphNodeType::PinType> ScriptBreaker::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output, true },
+		PinType{ ET::WriteDataPin, PD::Input }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptBreaker::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	return { "Flows until signaled",  {} };
+}
+
+String ScriptBreaker::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 2) {
+		return "Signal";
+	}
+	return ScriptNodeTypeBase<ScriptBreakerData>::getPinDescription(node, elementType, elementIdx);
+}
+
+void ScriptBreaker::doInitData(ScriptBreakerData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
+{
+	if (nodeData.getType() == ConfigNodeType::Undefined) {
+		data.signaled = false;
+		data.active = false;
+	} else {
+		data.signaled = nodeData["signaled"].asBool(false);
+		data.active = nodeData["active"].asBool(false);
+	}
+}
+
+void ScriptBreaker::doSetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN, ConfigNode data, ScriptBreakerData& curData) const
+{
+	if (curData.active) {
+		curData.signaled = true;
+	}
+}
+
+IScriptNodeType::Result ScriptBreaker::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptBreakerData& curData) const
+{
+	if (!curData.active) {
+		curData.active = true;
+		return Result(ScriptNodeExecutionState::ForkAndConvertToWatcher);
+	} else {
+		if (curData.signaled) {
+			curData.signaled = false;
+			curData.active = false;
+			return Result(ScriptNodeExecutionState::Done, 0, 0, 1);
+		} else {
+			return Result(ScriptNodeExecutionState::Executing, time);
+		}
+	}
+}
+
+
+
+gsl::span<const IGraphNodeType::PinType> ScriptSignal::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 3>{
+		PinType{ ET::FlowPin, PD::Input },
+		PinType{ ET::FlowPin, PD::Output },
+		PinType{ ET::WriteDataPin, PD::Output }
+	};
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptSignal::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Signals ");
+	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	return str.moveResults();
+}
+
+String ScriptSignal::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 2) {
+		return "Signal";
+	}
+	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+}
+
+IScriptNodeType::Result ScriptSignal::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+{
+	writeDataPin(environment, node, 2, ConfigNode(1));
+	return Result(ScriptNodeExecutionState::Done);
+}
