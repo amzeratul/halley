@@ -52,6 +52,10 @@ LuaState::LuaState(Resources& resources)
 
 LuaState::~LuaState()
 {
+	for (auto* ref: trackedReferences) {
+		ref->onStateDestroyed();
+	}
+
 	modules.clear();
 	closures.clear();
 	errorHandlerRef.reset();
@@ -209,6 +213,16 @@ String LuaState::errorHandler(String message)
 	}
 
 	return result;
+}
+
+void LuaState::addTrackedReference(LuaReference& ref)
+{
+	trackedReferences.emplace(&ref);
+}
+
+void LuaState::removeTrackedReference(LuaReference& ref)
+{
+	trackedReferences.erase(&ref);
 }
 
 const LuaReference& LuaState::packageLoader(String module)

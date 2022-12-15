@@ -29,7 +29,7 @@ namespace Halley {
 	class LuaReference {
 	public:
 		LuaReference();
-		LuaReference(LuaState& lua);
+		LuaReference(LuaState& lua, bool tracked = false);
 		LuaReference(const LuaReference& other) = delete;
 		LuaReference(LuaReference&& other) noexcept;
 		~LuaReference();
@@ -81,10 +81,13 @@ namespace Halley {
 		}
 
 		int getRefId() const { return refId; }
+		void onStateDestroyed();
+		bool isValid() const;
 
 	private:
-		LuaState* lua;
+		LuaState* lua = nullptr;
 		int refId = -1;
+		bool tracked = false;
 	};
 	
 	template <>

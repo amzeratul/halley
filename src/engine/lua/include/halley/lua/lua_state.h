@@ -35,6 +35,9 @@ namespace Halley {
 		void popLuaState();
 		String errorHandler(String message);
 
+		void addTrackedReference(LuaReference& ref);
+		void removeTrackedReference(LuaReference& ref);
+
 	private:
 		lua_State* lua;
 		Vector<lua_State*> pushedStates;
@@ -44,6 +47,7 @@ namespace Halley {
 		Vector<std::unique_ptr<LuaCallback>> closures;
 		std::unique_ptr<LuaReference> errorHandlerRef;
 		Vector<int> errorHandlerStackPos;
+		HashSet<LuaReference*> trackedReferences;
 
 		LuaReference loadScript(const String& chunkName, gsl::span<const gsl::byte> data);
 
