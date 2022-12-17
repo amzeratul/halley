@@ -478,6 +478,45 @@ namespace Halley {
 		}
 	};
 
+	template <typename K, typename V>
+	class ConfigNodeSerializer<HashMap<K, V>>
+	{
+	public:
+		ConfigNode serialize(const HashMap<K, V>& values, const EntitySerializationContext& context)
+		{
+        	auto serializer = ConfigNodeSerializer<V>();
+        	ConfigNode result = ConfigNode::MapType();
+        	for (auto& [key, value]: values) {
+        		result[toString(key)] = serializer.serialize(value, context);
+        	}
+        	return result;
+		}
+
+		HashMap<K, V> deserialize(const EntitySerializationContext& context, const ConfigNode& node)
+		{
+			HashMap<K, V> result;
+			deserialize(context, node, result);
+			return result;
+		}
+		
+		void deserialize(const EntitySerializationContext& context, const ConfigNode& node, HashMap<K, V>& result)
+		{
+			if (node.getType() == ConfigNodeType::Map || node.getType() == ConfigNodeType::DeltaMap) {
+				if (node.getType() == ConfigNodeType::Map) {
+					result.clear();
+				}
+				const auto& map = node.asMap();
+				for (const auto& s: map) {
+					if (s.second.getType() == ConfigNodeType::Del) {
+						result.erase(fromString<K>(s.first));
+					} else {
+						ConfigNodeHelper<V>().deserialize(result[fromString<K>(s.first)], V(), context, s.second);
+					}
+				}
+			}
+		}
+	};
+
 	template <typename T>
 	class ConfigNodeSerializer<OptionalLite<T>> {
 	public:
