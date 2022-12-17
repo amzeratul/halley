@@ -37,6 +37,16 @@ void AnimationEditor::update(Time t, bool moved)
 	const auto mousePos = Vector2i(animationDisplay->getMousePos());
 	const auto size = animationDisplay->getBounds().getSize();
 	String str = String("x: ") + toString(mousePos.x) + " y: " + toString(mousePos.y) + " (" + toString(size.x) + "x" + toString(size.y) + ")";
+
+	const auto spriteSheet = std::dynamic_pointer_cast<const SpriteSheet>(resource);
+	if (spriteSheet) {
+		if (const SpriteSheetEntry* result = spriteSheet->getSpriteAtTexel(mousePos)) {
+			str += "\nSprite: " + result->name;
+		} else {
+			str += "\nSprite: N/A";
+		}
+	}
+
 	info->setText(LocalisedString::fromUserString(str));
 }
 
@@ -49,6 +59,8 @@ std::shared_ptr<const Resource> AnimationEditor::loadResource(const String& asse
 		resource = gameResources.get<SpriteResource>(assetId);
 	} else if (assetType == AssetType::Texture) {
 		resource = gameResources.get<Texture>(assetId);
+	} else if (assetType == AssetType::SpriteSheet) {
+		resource = gameResources.get<SpriteSheet>(assetId);
 	}
 
 	return resource;
@@ -95,6 +107,7 @@ void AnimationEditor::loadAssetData()
 	const auto animation = std::dynamic_pointer_cast<const Animation>(resource);
 	const auto sprite = std::dynamic_pointer_cast<const SpriteResource>(resource);
 	const auto texture = std::dynamic_pointer_cast<const Texture>(resource);
+	const auto spriteSheet = std::dynamic_pointer_cast<const SpriteSheet>(resource);
 
 	if (animation) {
 		animationDisplay->setAnimation(animation);
@@ -102,6 +115,8 @@ void AnimationEditor::loadAssetData()
 		animationDisplay->setSprite(sprite);
 	} else if (texture) {
 		animationDisplay->setTexture(texture);
+	} else if (spriteSheet) {
+		animationDisplay->setTexture(spriteSheet->getTexture());
 	}
 
 	if (animation) {

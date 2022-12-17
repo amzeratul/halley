@@ -131,6 +131,8 @@ namespace Halley
 		std::optional<size_t> getIndex(const String& name) const;
 		bool hasSprite(const String& name) const;
 
+		const SpriteSheetEntry* getSpriteAtTexel(Vector2i pos) const;
+
 		void addSprite(String name, const SpriteSheetEntry& sprite);
 		void setTextureName(String name);
 
@@ -140,7 +142,7 @@ namespace Halley
 		void clearMaterialCache() const;
 
 		std::unique_ptr<Image> generateAtlas(Vector<ImageData>& images, ConfigNode& spriteInfo, bool powerOfTwo);
-
+	
 		static std::unique_ptr<SpriteSheet> loadResource(ResourceLoader& loader);
 		constexpr static AssetType getAssetType() { return AssetType::SpriteSheet; }
 		void reload(Resource&& resource) override;

@@ -191,6 +191,20 @@ bool SpriteSheet::hasSprite(const String& name) const
 	return spriteIdx.find(name) != spriteIdx.end();
 }
 
+const SpriteSheetEntry* SpriteSheet::getSpriteAtTexel(Vector2i pos) const
+{
+	const auto texSize = getTexture()->getSize();
+	const size_t n = getSpriteCount();
+	for (size_t i = 0; i < n; ++i) {
+		const auto& sprite = getSprite(i);
+		auto bounds = sprite.coords * Vector2f(texSize);
+		if (bounds.contains(Vector2f(pos))) {
+			return &sprite;
+		}
+	}
+	return nullptr;
+}
+
 std::unique_ptr<SpriteSheet> SpriteSheet::loadResource(ResourceLoader& loader)
 {
 	auto result = std::make_unique<SpriteSheet>();

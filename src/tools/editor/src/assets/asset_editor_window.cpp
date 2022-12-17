@@ -177,14 +177,17 @@ void AssetEditorWindow::createEditorTab(Path filePath, AssetType type, const Str
 		auto n = content->getNumberOfPages();
 		content->addPage();
 		content->getPage(n)->add(editor, 1);
+
+		const auto shortName = Path(name).getFilename().string();
 		const auto image = std::make_shared<UIImage>(factory.makeAssetTypeIcon(type));
-		const auto text = std::make_shared<UILabel>(name + "_" + toString(type) + ":label", contentList->getStyle(), LocalisedString::fromUserString(name));
+		const auto text = std::make_shared<UILabel>(name + "_" + toString(type) + ":label", contentList->getStyle(), LocalisedString::fromUserString(shortName));
 		
 		auto item = std::make_shared<UISizer>();
 		item->add(image);
 		item->add(text, 1.0f, {}, UISizerAlignFlags::CentreVertical);
 
-		contentList->addItem(toString(n), item);
+		auto listItem = contentList->addItem(toString(n), item);
+		listItem->setToolTip(LocalisedString::fromUserString(name));
 		contentList->setActive(contentList->getCount() > 1);
 		curEditors.push_back(editor);
 	}
@@ -193,10 +196,8 @@ void AssetEditorWindow::createEditorTab(Path filePath, AssetType type, const Str
 std::shared_ptr<AssetEditor> AssetEditorWindow::makeEditor(Path filePath, AssetType type, const String& name)
 {
 	switch (type) {
-	case AssetType::Sprite:
-		return {};
 	case AssetType::Animation:
-	case AssetType::Texture:
+	case AssetType::SpriteSheet:
 		return std::make_shared<AnimationEditor>(factory, project.getGameResources(), type, project, *metadataEditor);
 	case AssetType::Prefab:
 	case AssetType::Scene:
