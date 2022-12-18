@@ -388,6 +388,7 @@ void AnimationPlayer::onSequenceDone()
 
 void AnimationPlayer::updateIfNeeded()
 {
+#ifdef ENABLE_HOT_RELOAD
 	if (observer.needsUpdate()) {
 		observer.update();
 		dirId = -1;
@@ -396,6 +397,7 @@ void AnimationPlayer::updateIfNeeded()
 		setSequence(curSeqName);
 		setDirection(curDirName);
 	}
+#endif
 }
 
 AnimationPlayerLite::AnimationPlayerLite(std::shared_ptr<const Animation> animation, const String& sequence, const String& direction)
