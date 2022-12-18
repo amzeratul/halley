@@ -25,7 +25,7 @@ namespace Halley
 	{
 		// This structure must match the layout of the shader
 		// See shared_assets/material/sprite_base.yaml for reference
-		Vector4f vertPos;
+		//Vector4f vertPos; // A hack in getVertexAttrib() allows this field to be omitted as long as something else is here
 		Vector2f pos;
 		Vector2f pivot;
 		Vector2f size;
@@ -159,10 +159,7 @@ namespace Halley
 		Rect4f getAABB() const;
 		Rect4f getUncroppedAABB() const;
 		
-		bool isInView(Rect4f rect) const
-		{
-			return getAABB().overlaps(rect) && visible;
-		}
+		bool isInView(Rect4f rect) const;
 
 		Vector4s getOuterBorder() const { return outerBorder; }
 		Sprite& setOuterBorder(Vector4s border);
@@ -173,22 +170,25 @@ namespace Halley
 		bool operator!=(const Sprite& other) const;
 
 	private:
-		SpriteVertexAttrib vertexAttrib;
-		std::shared_ptr<const Material> material;
-
 		Vector2f size;
-		Vector4s slices;
+		bool visible : 1;
+		bool flip : 1;
+		bool hasClip : 1;
+		bool absoluteClip : 1;
+		bool sliced : 1;
 		float sliceScale = 1;
+
+		std::shared_ptr<const Material> material;
+		SpriteVertexAttrib vertexAttrib;
+
+		Vector4s slices;
 		Vector4s outerBorder;
 		Rect4f clip; // This is not a std::optional<Rect4f>, and instead has a companion bool, because it allows for better memory alignment
-		bool hasClip = false;
-		bool absoluteClip = false;
-		bool visible = true;
-		bool flip = false;
-		bool sliced = false;
 
 		void doSetSprite(const SpriteSheetEntry& entry, bool applyPivot);
 		void computeSize();
+
+		const void* getVertexAttrib() const;
 
 		template<typename F> void paintWithClip(Painter& painter, const std::optional<Rect4f>& clip, F f) const;
 

@@ -17,6 +17,11 @@ using namespace Halley;
 
 Sprite::Sprite()
 {
+	visible = true;
+	flip = false;
+	hasClip = false;
+	absoluteClip = false;
+	sliced = false;
 	setScale(Vector2f(1, 1));
 	setColour(Colour4f(1, 1, 1, 1));
 }
@@ -61,11 +66,11 @@ void Sprite::drawSliced(Painter& painter, const std::optional<Rect4f>& extClip) 
 void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) const
 {
 	if (material) {
-		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
 
 		paintWithClip(painter, extClip, [&] ()
 		{
-			painter.drawSprites(material, 1, &vertexAttrib);
+			painter.drawSprites(material, 1, getVertexAttrib());
 		});
 	}
 }
@@ -73,7 +78,7 @@ void Sprite::drawNormal(Painter& painter, const std::optional<Rect4f>& extClip) 
 void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel, const std::optional<Rect4f>& extClip) const
 {
 	if (material) {
-		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+		Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
 		
 		paintWithClip(painter, extClip, [&] ()
 		{
@@ -96,9 +101,9 @@ void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter) // static
 	}
 
 	auto& material = sprites[0].material;
-	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib));
+	Expects(material->getDefinition().getVertexStride() == sizeof(SpriteVertexAttrib) + 16);
 
-	size_t spriteSize = sizeof(SpriteVertexAttrib);
+	size_t spriteSize = sizeof(SpriteVertexAttrib) + 16;
 	char buffer[4096];
 	char* vertexData;
 	Vector<char> vertices;
@@ -113,7 +118,7 @@ void Sprite::draw(gsl::span<const Sprite> sprites, Painter& painter) // static
 	for (size_t i = 0; i < sprites.size(); i++) {
 		auto& sprite = sprites[i];
 		Expects(sprite.material == material);
-		memcpy(&vertexData[i * spriteSize], &sprite.vertexAttrib, spriteSize);
+		memcpy(&vertexData[i * spriteSize], sprite.getVertexAttrib(), spriteSize);
 	}
 
 	painter.drawSprites(material, sprites.size(), vertexData);
@@ -163,7 +168,8 @@ Rect4f Sprite::getAABB() const
 		return Rect4f(offsetPos, offsetPos + sz);
 	} else {
 		// This is a coarse test; will give a few false positives
-		const Vector2f sz2 = sz * std::sqrt(2);
+		constexpr float sqrt2 = 1.4142135623730950488016887242097f;
+		const Vector2f sz2 = sz * sqrt2;
 		return getPosition() + Rect4f(-sz2, sz2); // Could use offset here, but that would also need to take rotation into account
 	}
 }
@@ -177,8 +183,32 @@ Rect4f Sprite::getUncroppedAABB() const
 		return getPosition() - pivot + Rect4f(Vector2f(), sz);
 	} else {
 		// This is a coarse test; will give a few false positives
-		const Vector2f sz2 = sz * std::sqrt(2);
+		constexpr float sqrt2 = 1.4142135623730950488016887242097f;
+		const Vector2f sz2 = sz * sqrt2;
 		return getPosition() + Rect4f(-sz2, sz2); // Could use offset here, but that would also need to take rotation into account
+	}
+}
+
+bool Sprite::isInView(Rect4f rect) const
+{
+	if (!visible) {
+		return false;
+	}
+
+	const auto scaledSize = getScaledSize();
+
+	// Coarse test
+	constexpr float sqrt2 = 1.4142135623730950488016887242097f;
+	const Vector2f sz2 = scaledSize * sqrt2;
+	if (!(getPosition() + Rect4f(-sz2, sz2)).overlaps(rect)) {
+		return false;
+	}
+
+	// Perform fine test if needed
+	if (std::abs(getRotation().toRadians()) < 0.0001f) {
+		return getAABB().overlaps(rect);
+	} else {
+		return true;
 	}
 }
 
@@ -604,6 +634,11 @@ void Sprite::computeSize()
 	if (flip) {
 		vertexAttrib.size.x *= -1;
 	}
+}
+
+const void* Sprite::getVertexAttrib() const
+{
+	return reinterpret_cast<const char*>(&vertexAttrib) - sizeof(Vector4f);
 }
 
 Vector2f Sprite::getUncroppedSize() const
