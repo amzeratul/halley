@@ -304,7 +304,7 @@ void TextRenderer::generateSprites(Vector<Sprite>& sprites) const
 				std::shared_ptr<Material> materialToUse = hasMaterialOverride ? getMaterial(fontForGlyph) : fontForGlyph.getMaterial();
 
 				sprites[spritesInserted++] = Sprite()
-					.setMaterial(std::move(materialToUse), true)
+					.setMaterial(std::move(materialToUse))
 					.setSize(glyph.size)
 					.setTexRect(glyph.area)
 					.setColour(curCol)

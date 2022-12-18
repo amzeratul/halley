@@ -77,7 +77,7 @@ Sprite RenderSurface::getSurfaceSprite() const
 	
 	const auto& tex = renderTarget->getTexture(0);
 	return Sprite()
-		.setMaterial(material, false)
+		.setMaterial(material)
 		.setSize(Vector2f(curRenderSize))
 		.setTexRect(Rect4f(Vector2f(), Vector2f(curRenderSize) / Vector2f(tex->getSize())));
 }

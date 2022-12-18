@@ -283,17 +283,16 @@ Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 	if (materialName == "") {
 		materialName = MaterialDefinition::defaultMaterial;
 	}
-	setMaterial(std::make_shared<Material>(resources.get<MaterialDefinition>(materialName)), false);
+	setMaterial(std::make_shared<Material>(resources.get<MaterialDefinition>(materialName)));
 	return *this;
 }
 
-Sprite& Sprite::setMaterial(std::shared_ptr<Material> m, bool shared)
+Sprite& Sprite::setMaterial(std::shared_ptr<const Material> m)
 {
 	Expects(m != nullptr);
 
 	const bool hadMaterial = static_cast<bool>(material);
 	material = std::move(m);
-	sharedMaterial = shared;
 
 	if (!hadMaterial && !material->getTextures().empty()) {
 		const auto& tex0 = material->getTextures()[0];
@@ -305,25 +304,9 @@ Sprite& Sprite::setMaterial(std::shared_ptr<Material> m, bool shared)
 	return *this;
 }
 
-Sprite& Sprite::setMaterial(std::unique_ptr<Material> m)
+MaterialUpdater Sprite::getMutableMaterial()
 {
-	setMaterial(std::move(m), false);
-	return *this;
-}
-
-Material& Sprite::getMutableMaterial()
-{
-	return *getMutableMaterialPtr();
-}
-
-const std::shared_ptr<Material>& Sprite::getMutableMaterialPtr()
-{
-	Expects(material);
-	if (sharedMaterial) {
-		material = material->clone();
-		sharedMaterial = false;
-	}
-	return material;
+	return MaterialUpdater(material);
 }
 
 bool Sprite::hasCompatibleMaterial(const Material& other) const
@@ -341,14 +324,14 @@ Sprite& Sprite::setImageData(const Texture& image)
 	return *this;
 }
 
-Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> materialDefinition, bool shared)
+Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> materialDefinition)
 {
 	Expects(image != nullptr);
 	Expects(materialDefinition != nullptr);
 
 	auto mat = std::make_shared<Material>(materialDefinition);
 	mat->set(0, image);
-	setMaterial(mat, shared);
+	setMaterial(mat);
 	return *this;
 }
 
@@ -362,7 +345,7 @@ Sprite& Sprite::setImage(Resources& resources, const String& imageName, String m
 		materialName = sprite->getDefaultMaterialName();
 	}
 
-	setMaterial(sprite->getMaterial(materialName), true);
+	setMaterial(sprite->getMaterial(materialName));
 	doSetSprite(sprite->getSprite(), true);
 		
 #ifdef ENABLE_HOT_RELOAD
@@ -372,10 +355,10 @@ Sprite& Sprite::setImage(Resources& resources, const String& imageName, String m
 	return *this;
 }
 
-Sprite& Sprite::setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> materialDefinition, bool shared)
+Sprite& Sprite::setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> materialDefinition)
 {
 	const auto spriteSheet = sprite.getSpriteSheet();
-	setImage(spriteSheet->getTexture(), std::move(materialDefinition), shared);
+	setImage(spriteSheet->getTexture(), std::move(materialDefinition));
 	doSetSprite(sprite.getSprite(), true);
 	
 #ifdef ENABLE_HOT_RELOAD

@@ -281,7 +281,7 @@ void RenderGraphNode::renderNodeOverlayMethod(const RenderGraph& graph, const Re
 		painter.pushDebugGroup(id);
 		const auto& tex = overlayMethod->getTexture(0);
 		Sprite()
-			.setMaterial(overlayMethod, false)
+			.setMaterial(overlayMethod)
 			.setSize(Vector2f(currentSize))
 			.setTexRect(Rect4f(Vector2f(), Vector2f(currentSize) / Vector2f(tex->getSize())))
 			.draw(painter);

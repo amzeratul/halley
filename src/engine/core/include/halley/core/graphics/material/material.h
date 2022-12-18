@@ -42,7 +42,7 @@ namespace Halley
 
 	public:
 		MaterialDataBlock();
-		MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint, const String& name, const MaterialDefinition& def);
+		MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint, std::string_view name, const MaterialDefinition& def);
 		MaterialDataBlock(const MaterialDataBlock& other);
 		MaterialDataBlock(MaterialDataBlock&& other) noexcept;
 
@@ -75,7 +75,7 @@ namespace Halley
 		Material(Material&& other) noexcept;
 		explicit Material(std::shared_ptr<const MaterialDefinition> materialDefinition, bool forceLocalBlocks = false); // forceLocalBlocks is for engine use only
 
-		void bind(int pass, Painter& painter);
+		void bind(int pass, Painter& painter) const;
 		static void resetBindCache();
 
 		bool operator==(const Material& material) const;
@@ -106,15 +106,16 @@ namespace Halley
 		void setStencilReferenceOverride(std::optional<uint8_t> reference);
 		std::optional<uint8_t> getStencilReferenceOverride() const;
 
-		Material& set(const String& name, const std::shared_ptr<const Texture>& texture);
-		Material& set(const String& name, const std::shared_ptr<Texture>& texture);
+		Material& set(std::string_view name, const std::shared_ptr<const Texture>& texture);
+		Material& set(std::string_view name, const std::shared_ptr<Texture>& texture);
 		Material& set(size_t textureUnit, const std::shared_ptr<const Texture>& texture);
 		Material& set(size_t textureUnit, const std::shared_ptr<Texture>& texture);
 		
-		bool hasParameter(const String& name) const;
+		MaterialParameter& getParameter(std::string_view name);
+		bool hasParameter(std::string_view name) const;
 
 		template <typename T>
-		Material& set(const String& name, const T& value)
+		Material& set(std::string_view name, const T& value)
 		{
 			getParameter(name).set(value);
 			return *this;
@@ -138,11 +139,45 @@ namespace Halley
 		std::bitset<8> passEnabled;
 
 		void initUniforms(bool forceLocalBlocks);
-		MaterialParameter& getParameter(const String& name);
 
 		bool setUniform(int blockNumber, size_t offset, ShaderParameterType type, const void* data);
 		void computeHashes() const;
 
 		const std::shared_ptr<const Texture>& getFallbackTexture() const;
+	};
+
+	class MaterialUpdater {
+	public:
+		MaterialUpdater();
+		MaterialUpdater(std::shared_ptr<const Material>& orig);
+		MaterialUpdater(const MaterialUpdater& other) = delete;
+		MaterialUpdater(MaterialUpdater&& other) noexcept;
+		~MaterialUpdater();
+
+		MaterialUpdater& operator=(const MaterialUpdater& other) = delete;
+		MaterialUpdater& operator=(MaterialUpdater&& other) noexcept;
+
+		bool isValid() const;
+
+		MaterialUpdater& set(std::string_view name, const std::shared_ptr<const Texture>& texture);
+		MaterialUpdater& set(std::string_view name, const std::shared_ptr<Texture>& texture);
+		MaterialUpdater& set(size_t textureUnit, const std::shared_ptr<const Texture>& texture);
+		MaterialUpdater& set(size_t textureUnit, const std::shared_ptr<Texture>& texture);
+
+		template <typename T>
+		MaterialUpdater& set(std::string_view name, const T& value)
+		{
+			getParameter(name).set(value);
+			return *this;
+		}
+
+		MaterialUpdater& setPassEnabled(int pass, bool enabled);
+		MaterialUpdater& setStencilReferenceOverride(std::optional<uint8_t> reference);
+
+	private:
+		std::shared_ptr<const Material>* orig = nullptr;
+		std::shared_ptr<Material> material;
+
+		MaterialParameter& getParameter(std::string_view name);
 	};
 }

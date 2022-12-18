@@ -187,7 +187,7 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 		if (applyMaterial || !sprite.hasMaterial()) {
 			const auto& newMaterial = materialOverride ? materialOverride : animation->getMaterial();
 			if (!sprite.hasCompatibleMaterial(*newMaterial)) {
-				sprite.setMaterial(newMaterial, true);
+				sprite.setMaterial(newMaterial);
 			}
 		} else {
 			sprite.getMutableMaterial().set(0, animation->getSpriteSheet().getTexture());
@@ -214,13 +214,13 @@ void AnimationPlayer::updateSprite(Sprite& sprite) const
 	}
 }
 
-AnimationPlayer& AnimationPlayer::setMaterialOverride(std::shared_ptr<Material> material)
+AnimationPlayer& AnimationPlayer::setMaterialOverride(std::shared_ptr<const Material> material)
 {
 	materialOverride = std::move(material);
 	return *this;
 }
 
-std::shared_ptr<Material> AnimationPlayer::getMaterialOverride() const
+std::shared_ptr<const Material> AnimationPlayer::getMaterialOverride() const
 {
 	return materialOverride;
 }
@@ -457,7 +457,7 @@ void AnimationPlayerLite::update(Time time, Sprite& sprite)
 
 	if (changed) {
 		sprite
-			.setMaterial(animation->getMaterial(), true)
+			.setMaterial(animation->getMaterial())
 			.setSprite(curSeq->getFrame(curFrame).getSprite(curDir));
 	}
 }

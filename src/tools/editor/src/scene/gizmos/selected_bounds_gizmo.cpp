@@ -95,7 +95,7 @@ void SelectedBoundsGizmo::drawOutlineTree(Painter& painter, EntityRef entity, co
 void SelectedBoundsGizmo::drawStencilSprite(Painter& painter, const Sprite& sprite) const
 {
 	Sprite s = sprite;
-	s.setMaterial(stencilMaterial->clone());
+	s.setMaterial(stencilMaterial);
 	s.getMutableMaterial().set(0, sprite.getMaterial().getTexture(0));
 	s.draw(painter);
 }
@@ -118,7 +118,7 @@ void SelectedBoundsGizmo::drawOutlineSprite(Painter& painter, const Sprite& spri
 	const auto texGrads = Vector4f(texGrad0.x, texGrad0.y, texGrad1.x, texGrad1.y);
 
 	Sprite s = sprite;
-	s.setMaterial(outlineMaterial->clone());
+	s.setMaterial(outlineMaterial);
 	s.setColour(colour);
 	s.getMutableMaterial().set(0, tex0);
 	s.setCustom0(texGrads);

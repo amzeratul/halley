@@ -9,7 +9,7 @@
 
 using namespace Halley;
 
-static Material* currentMaterial = nullptr;
+static const Material* currentMaterial = nullptr;
 static int currentPass = 0;
 static uint64_t currentHash = 0;
 
@@ -19,7 +19,7 @@ MaterialDataBlock::MaterialDataBlock()
 {
 }
 
-MaterialDataBlock::MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint, const String& name, const MaterialDefinition& def)
+MaterialDataBlock::MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint, std::string_view name, const MaterialDefinition& def)
 	: data(type == MaterialDataBlockType::SharedExternal ? 0 : size, 0)
 	, addresses(def.getNumPasses() * shaderStageCount)
 	, dataBlockType(type)
@@ -37,8 +37,8 @@ MaterialDataBlock::MaterialDataBlock(const MaterialDataBlock& other)
 	: data(other.data)
 	, addresses(other.addresses)
 	, dataBlockType(other.dataBlockType)
-	, bindPoint(other.bindPoint)
 	, needToUpdateHash(other.needToUpdateHash)
+	, bindPoint(other.bindPoint)
 	, hash(other.hash)
 {}
 
@@ -46,8 +46,8 @@ MaterialDataBlock::MaterialDataBlock(MaterialDataBlock&& other) noexcept
 	: data(std::move(other.data))
 	, addresses(std::move(other.addresses))
 	, dataBlockType(other.dataBlockType)
-	, bindPoint(other.bindPoint)
 	, needToUpdateHash(other.needToUpdateHash)
+	, bindPoint(other.bindPoint)
 	, hash(other.hash)
 {
 	other.hash = 0;
@@ -192,7 +192,7 @@ void Material::initUniforms(bool forceLocalBlocks)
 	}
 }
 
-void Material::bind(int passNumber, Painter& painter)
+void Material::bind(int passNumber, Painter& painter) const
 {
 	// Avoid redundant work
 	if (currentMaterial == this && currentPass == passNumber && currentHash == getFullHash()) {
@@ -388,7 +388,7 @@ const Vector<MaterialTextureParameter>& Material::getTextureUniforms() const
 	return textureUniforms;
 }
 
-Material& Material::set(const String& name, const std::shared_ptr<const Texture>& texture)
+Material& Material::set(std::string_view name, const std::shared_ptr<const Texture>& texture)
 {
 	const auto& texs = materialDefinition->getTextures();
 	for (size_t i = 0; i < texs.size(); ++i) {
@@ -402,10 +402,10 @@ Material& Material::set(const String& name, const std::shared_ptr<const Texture>
 		}
 	}
 
-	throw Exception("Texture sampler \"" + name + "\" not available in material \"" + materialDefinition->getName() + "\"", HalleyExceptions::Graphics);
+	throw Exception("Texture sampler \"" + String(name) + "\" not available in material \"" + materialDefinition->getName() + "\"", HalleyExceptions::Graphics);
 }
 
-Material& Material::set(const String& name, const std::shared_ptr<Texture>& texture)
+Material& Material::set(std::string_view name, const std::shared_ptr<Texture>& texture)
 {
 	return set(name, std::shared_ptr<const Texture>(texture));
 }
@@ -429,7 +429,7 @@ Material& Material::set(size_t textureUnit, const std::shared_ptr<Texture>& text
 	return set(textureUnit, std::shared_ptr<const Texture>(texture));
 }
 
-bool Material::hasParameter(const String& name) const
+bool Material::hasParameter(std::string_view name) const
 {
 	for (auto& u: uniforms) {
 		if (u.name == name) {
@@ -457,7 +457,7 @@ uint64_t Material::getFullHash() const
 	return fullHashValue;
 }
 
-MaterialParameter& Material::getParameter(const String& name)
+MaterialParameter& Material::getParameter(std::string_view name)
 {
 	for (auto& u : uniforms) {
 		if (u.name == name) {
@@ -465,7 +465,7 @@ MaterialParameter& Material::getParameter(const String& name)
 		}
 	}
 
-	throw Exception("Uniform \"" + name + "\" not available in material \"" + materialDefinition->getName() + "\"", HalleyExceptions::Graphics);
+	throw Exception("Uniform \"" + String(name) + "\" not available in material \"" + materialDefinition->getName() + "\"", HalleyExceptions::Graphics);
 }
 
 void Material::setDefinition(std::shared_ptr<const MaterialDefinition> definition)
@@ -476,4 +476,81 @@ void Material::setDefinition(std::shared_ptr<const MaterialDefinition> definitio
 std::shared_ptr<Material> Material::clone() const
 {
 	return std::make_shared<Material>(*this);
+}
+
+
+MaterialUpdater::MaterialUpdater(std::shared_ptr<const Material>& orig)
+	: orig(&orig)
+	, material(orig->clone())
+{
+}
+
+MaterialUpdater::MaterialUpdater(MaterialUpdater&& other) noexcept
+{
+	orig = other.orig;
+	other.orig = nullptr;
+	material = std::move(other.material);
+}
+
+MaterialUpdater::~MaterialUpdater()
+{
+	if (orig) {
+		*orig = material;
+	}
+}
+
+MaterialUpdater& MaterialUpdater::operator=(MaterialUpdater&& other) noexcept
+{
+	if (this != &other) {
+		orig = other.orig;
+		other.orig = nullptr;
+		material = std::move(other.material);
+	}
+	return *this;
+}
+
+bool MaterialUpdater::isValid() const
+{
+	return orig != nullptr;
+}
+
+MaterialUpdater& MaterialUpdater::set(std::string_view name, const std::shared_ptr<const Texture>& texture)
+{
+	material->set(name, texture);
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::set(std::string_view name, const std::shared_ptr<Texture>& texture)
+{
+	material->set(name, texture);
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::set(size_t textureUnit, const std::shared_ptr<const Texture>& texture)
+{
+	material->set(textureUnit, texture);
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::set(size_t textureUnit, const std::shared_ptr<Texture>& texture)
+{
+	material->set(textureUnit, texture);
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::setPassEnabled(int pass, bool enabled)
+{
+	material->setPassEnabled(pass, enabled);
+	return *this;
+}
+
+MaterialUpdater& MaterialUpdater::setStencilReferenceOverride(std::optional<uint8_t> reference)
+{
+	material->setStencilReferenceOverride(reference);
+	return *this;
+}
+
+MaterialParameter& MaterialUpdater::getParameter(std::string_view name)
+{
+	return material->getParameter(name);
 }
