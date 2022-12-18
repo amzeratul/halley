@@ -254,6 +254,7 @@ constexpr static bool alwaysLogType(ProfilerEventType type)
 	case ProfilerEventType::CoreVSync:
 	case ProfilerEventType::CoreFixedUpdate:
 	case ProfilerEventType::CoreVariableUpdate:
+	case ProfilerEventType::GPU:
 		return true;
 	default:
 		return false;

@@ -40,6 +40,7 @@ void DX11Painter::doEndRender()
 {
 	// Unbind recently bound render-target textures
 	unbindRenderTargetTextureUnits(renderTargetTextureUnits.size(), 0);
+	dx11Video.getDeviceContext().Flush();
 }
 
 void DX11Painter::doClear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil)
@@ -300,6 +301,7 @@ bool DX11Painter::startPerformanceMeasurement()
 void DX11Painter::endPerformanceMeasurement()
 {
 	dx11Video.getDeviceContext().End(timestampDisjointQuery);
+	dx11Video.getDeviceContext().Flush();
 }
 
 void DX11Painter::doRecordTimestamp(TimestampType type, size_t id, ITimestampRecorder* snapshot)
@@ -313,6 +315,10 @@ void DX11Painter::doRecordTimestamp(TimestampType type, size_t id, ITimestampRec
 	if (query) {
 		dx11Video.getDeviceContext().End(query);
 		perfQueries.emplace_back(PerfQuery{ type, id, snapshot, query });
+	}
+
+	if (type == TimestampType::FrameStart) {
+		dx11Video.getDeviceContext().Flush();
 	}
 }
 

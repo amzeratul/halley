@@ -23,6 +23,7 @@
 
 #include "input_vibration.h"
 #include <halley/text/halleystring.h>
+#include <halley/text/string_converter.h>
 #include "halley/maths/vector2.h"
 
 namespace Halley {
