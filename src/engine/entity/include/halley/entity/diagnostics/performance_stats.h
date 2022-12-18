@@ -61,12 +61,15 @@ namespace Halley
 		private:
 			ProfilerEventType type;
 			Vector<int64_t> samples;
-			Vector<int64_t> sortedSamples;
+			mutable Vector<int64_t> sortedSamples;
 			size_t samplePos = 0;
 			int64_t highestEver = 0;
 			int64_t lowestEver = std::numeric_limits<int64_t>::max();
 			int framesSinceLastVisit = 1;
 			int instanceCounter = 0;
+			mutable bool needsSorting = false;
+
+			void sortIfNeeded() const;
 		};
 		
 		TextRenderer headerText;

@@ -174,34 +174,37 @@ void PerformanceStatsView::EventHistoryData::update(ProfilerEventType type, int6
 		}
 	}
 
-	sortedSamples = samples;
-	std::sort(sortedSamples.begin(), sortedSamples.end());
-
+	needsSorting = true;
 	framesSinceLastVisit = 0;
 }
 
 int64_t PerformanceStatsView::EventHistoryData::getMinimum() const
 {
+	sortIfNeeded();
 	return sortedSamples.front();
 }
 
 int64_t PerformanceStatsView::EventHistoryData::getFirstQuartile() const
 {
+	sortIfNeeded();
 	return sortedSamples[sortedSamples.size() / 4];
 }
 
 int64_t PerformanceStatsView::EventHistoryData::getMedian() const
 {
+	sortIfNeeded();
 	return sortedSamples[sortedSamples.size() / 2];
 }
 
 int64_t PerformanceStatsView::EventHistoryData::getThirdQuartile() const
 {
+	sortIfNeeded();
 	return sortedSamples[sortedSamples.size() * 3 / 4];
 }
 
 int64_t PerformanceStatsView::EventHistoryData::getMaximum() const
 {
+	sortIfNeeded();
 	return sortedSamples.back();
 }
 
@@ -233,6 +236,15 @@ void PerformanceStatsView::EventHistoryData::startUpdate()
 bool PerformanceStatsView::EventHistoryData::isVisited() const
 {
 	return framesSinceLastVisit < 2;
+}
+
+void PerformanceStatsView::EventHistoryData::sortIfNeeded() const
+{
+	if (needsSorting) {
+		needsSorting = false;
+		sortedSamples = samples;
+		std::sort(sortedSamples.begin(), sortedSamples.end());
+	}
 }
 
 
