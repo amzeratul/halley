@@ -465,16 +465,17 @@ void Core::render()
 			api->video->startRender();
 		}
 
+		std::unique_ptr<RenderSnapshot> snapshot;
 		{
 			ProfilerEvent event(ProfilerEventType::CoreRender);
 
 			painter->startRender();
 
-			std::unique_ptr<RenderSnapshot> snapshot;
 			if (!pendingSnapshots.empty()) {
 				snapshot = std::make_unique<RenderSnapshot>();
 				painter->startRecording(snapshot.get());
-			} else if (isDevMode()) {
+			}
+			else if (isDevMode()) {
 				painter->startRecording(nullptr);
 			}
 
@@ -490,11 +491,14 @@ void Core::render()
 
 				try {
 					currentStage->onRender(context);
-				} catch (Exception& e) {
+				}
+				catch (Exception& e) {
 					game->onUncaughtException(e, TimeLine::Render);
 				}
 			}
 
+		}
+		{
 			painter->endRender();
 
 			if (!pendingSnapshots.empty() && snapshot) {
