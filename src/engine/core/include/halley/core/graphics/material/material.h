@@ -125,11 +125,11 @@ namespace Halley
 		Vector<MaterialDataBlock> dataBlocks;
 		Vector<std::shared_ptr<const Texture>> textures;
 
-		mutable uint64_t partialHashValue = 0;
-		mutable uint64_t fullHashValue = 0;
 		mutable bool needToUpdateHash = true;
 		std::optional<uint8_t> stencilReferenceOverride;
 		std::bitset<8> passEnabled;
+		mutable uint64_t fullHashValue = 0;
+		mutable uint64_t partialHashValue = 0;
 
 		void initUniforms(bool forceLocalBlocks);
 

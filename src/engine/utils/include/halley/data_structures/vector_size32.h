@@ -220,7 +220,9 @@ namespace Halley {
 		{
 			// TODO: could be faster
 			clear();
-			reserve(end - begin);
+			if constexpr (std::is_same_v<typename std::iterator_traits<InputIt>::iterator_category, std::random_access_iterator_tag>) {
+				reserve(end - begin);
+			}
 			for (auto iter = begin; iter != end; ++iter) {
 				push_back(*iter);
 			}

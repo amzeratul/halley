@@ -51,7 +51,7 @@ namespace Halley {
 
     private:
 		AudioObjectId audioObjectId = 0;
-		std::vector<AudioSubObjectHandle> objects;
+		Vector<AudioSubObjectHandle> objects;
 		
 		String bus;
 		Range<float> pitch;

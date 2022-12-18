@@ -93,7 +93,7 @@ namespace Halley
 	class ComponentFieldSchema : public MemberSchema {
 	public:
 		String displayName;
-		std::vector<EntitySerialization::Type> serializationTypes;
+		Vector<EntitySerialization::Type> serializationTypes;
 		bool hideInEditor = false;
 		bool collapse = false;
 		std::optional<Range<float>> range;
