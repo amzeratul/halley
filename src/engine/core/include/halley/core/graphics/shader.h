@@ -1,34 +1,13 @@
 #pragma once
 #include "halley/core/graphics/material/material.h"
 #include <halley/data_structures/vector.h>
+#include "shader_type.h"
 
 namespace Halley
 {
 	class ResourceLoader;
 	class MaterialParameterBinding;
 	class MaterialAttribute;
-
-	enum class ShaderType
-	{
-		Vertex,
-		Pixel,
-		Geometry,
-		Combined,
-
-		NumOfShaderTypes
-	};
-
-	template <>
-	struct EnumNames<ShaderType> {
-		constexpr std::array<const char*, 4> operator()() const {
-			return{{
-				"vertex",
-				"pixel",
-				"geometry",
-				"combined"
-			}};
-		}
-	};
 
 	class ShaderDefinition
 	{

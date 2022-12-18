@@ -156,6 +156,7 @@ set(HEADERS
         "include/halley/core/graphics/render_target/render_target_screen.h"
         "include/halley/core/graphics/render_target/render_target_texture.h"
         "include/halley/core/graphics/shader.h"
+        "include/halley/core/graphics/shader_type.h"
         "include/halley/core/graphics/sprite/animation.h"
         "include/halley/core/graphics/sprite/animation_player.h"
         "include/halley/core/graphics/sprite/particles.h"

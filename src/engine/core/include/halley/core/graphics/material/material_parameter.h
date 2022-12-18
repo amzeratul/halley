@@ -17,19 +17,6 @@ namespace Halley
 	class MaterialPass;
 	enum class ShaderParameterType : uint8_t;
 
-	class MaterialTextureParameter
-	{
-	public:
-		MaterialTextureParameter(Material& material, const String& name, TextureSamplerType samplerType);
-		unsigned int getAddress(int pass, ShaderType stage) const;
-		TextureSamplerType getSamplerType() const { return samplerType; }
-
-	private:
-		String name;
-		Vector<int> addresses;
-		TextureSamplerType samplerType;
-	};
-
 	class MaterialParameter
 	{
 		friend class Material;

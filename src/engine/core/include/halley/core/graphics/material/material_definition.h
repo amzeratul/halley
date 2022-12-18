@@ -3,6 +3,7 @@
 #include "halley/data_structures/config_node.h"
 #include "halley/resources/resource.h"
 #include "halley/maths/range.h"
+#include "halley/core/graphics/shader_type.h"
 
 namespace Halley
 {
@@ -167,6 +168,8 @@ namespace Halley
 		static size_t getAttributeSize(ShaderParameterType type);
 	};
 
+	class MaterialDefinition;
+
 	class MaterialTexture
 	{
 	public:
@@ -174,9 +177,17 @@ namespace Halley
 		String defaultTextureName;
 		TextureSamplerType samplerType = TextureSamplerType::Texture2D;
 		std::shared_ptr<const Texture> defaultTexture;
+		Vector<int> addresses;
 
 		MaterialTexture();
 		MaterialTexture(String name, String defaultTexture, TextureSamplerType samplerType);
+
+		void loadAddresses(const MaterialDefinition& def);
+		unsigned int getAddress(int pass, ShaderType stage) const;
+
+		const String& getName() const { return name; }
+		const String& getDefaultTextureName() const { return defaultTextureName; }
+		TextureSamplerType getSamplerType() const { return samplerType; }
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);

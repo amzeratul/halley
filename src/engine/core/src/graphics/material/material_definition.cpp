@@ -128,6 +128,27 @@ MaterialTexture::MaterialTexture(String name, String defaultTexture, TextureSamp
 	, samplerType(samplerType)
 {}
 
+namespace {
+	constexpr static int shaderStageCount = int(ShaderType::NumOfShaderTypes);
+}
+
+void MaterialTexture::loadAddresses(const MaterialDefinition& definition)
+{
+	const auto& passes = definition.getPasses();
+	addresses.resize(passes.size() * shaderStageCount);
+	for (size_t i = 0; i < passes.size(); i++) {
+		auto& shader = passes[i].getShader();
+		for (int j = 0; j < shaderStageCount; ++j) {
+			addresses[i * shaderStageCount + j] = shader.getUniformLocation(name, ShaderType(j));
+		}
+	}
+}
+
+unsigned MaterialTexture::getAddress(int pass, ShaderType stage) const
+{
+	return addresses[pass * shaderStageCount + int(stage)];
+}
+
 void MaterialTexture::serialize(Serializer& s) const
 {
 	s << name;
@@ -162,6 +183,7 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 		if (!tex.defaultTextureName.isEmpty()) {
 			tex.defaultTexture = loader.getResources().get<Texture>(tex.defaultTextureName);
 		}
+		tex.loadAddresses(*this);
 	}
 }
 

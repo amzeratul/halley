@@ -132,7 +132,7 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 	// Bind textures
 	// TODO: move this logic to Painter?
 	int textureUnit = 0;
-	for (auto& tex: material.getTextureUniforms()) {
+	for (auto& tex: material.getDefinition().getTextures()) {
 		int location = tex.getAddress(passNumber, ShaderType::Combined);
 		if (location == -1) {
 			location = textureUnit;

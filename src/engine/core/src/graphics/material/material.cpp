@@ -114,7 +114,6 @@ bool MaterialDataBlock::setUniform(size_t offset, ShaderParameterType type, cons
 Material::Material(const Material& other)
 	: materialDefinition(other.materialDefinition)
 	, uniforms(other.uniforms)
-	, textureUniforms(other.textureUniforms)
 	, dataBlocks(other.dataBlocks)
 	, textures(other.textures)
 	, passEnabled(other.passEnabled)
@@ -128,7 +127,6 @@ Material::Material(const Material& other)
 Material::Material(Material&& other) noexcept
 	: materialDefinition(std::move(other.materialDefinition))
 	, uniforms(std::move(other.uniforms))
-	, textureUniforms(std::move(other.textureUniforms))
 	, dataBlocks(std::move(other.dataBlocks))
 	, textures(std::move(other.textures))
 	, passEnabled(other.passEnabled)
@@ -184,10 +182,8 @@ void Material::initUniforms(bool forceLocalBlocks)
 	const auto& textureDefs = materialDefinition->getTextures();
 	const size_t nTextures = textureDefs.size();
 	textures.reserve(nTextures);
-	textureUniforms.reserve(nTextures);
 	for (size_t i = 0; i < nTextures; ++i) {
 		const auto& tex = textureDefs[i];
-		textureUniforms.push_back(MaterialTextureParameter(*this, tex.name, tex.samplerType));
 		textures.push_back(tex.defaultTexture);
 	}
 }
@@ -381,11 +377,6 @@ void Material::setStencilReferenceOverride(std::optional<uint8_t> reference)
 std::optional<uint8_t> Material::getStencilReferenceOverride() const
 {
 	return stencilReferenceOverride;
-}
-
-const Vector<MaterialTextureParameter>& Material::getTextureUniforms() const
-{
-	return textureUniforms;
 }
 
 Material& Material::set(std::string_view name, const std::shared_ptr<const Texture>& texture)

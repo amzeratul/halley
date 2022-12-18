@@ -294,9 +294,8 @@ Sprite& Sprite::setMaterial(std::shared_ptr<const Material> m)
 	const bool hadMaterial = static_cast<bool>(material);
 	material = std::move(m);
 
-	if (!hadMaterial && !material->getTextures().empty()) {
-		const auto& tex0 = material->getTextures()[0];
-		if (tex0) {
+	if (!hadMaterial && material->getNumTextureUnits() > 0) {
+		if (const auto& tex0 = material->getRawTexture(0)) {
 			setImageData(*tex0);
 		}
 	}

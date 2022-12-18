@@ -111,8 +111,8 @@ RenderSnapshot::CommandInfo RenderSnapshot::getCommandInfo(size_t commandIdx) co
 		const auto curMat = curDraw.material;
 		result.materialDefinition = curMat->getDefinition().getName();
 		result.materialHash = curMat->getPartialHash();
-		for (const auto& tex: curMat->getTextures()) {
-			result.textures.push_back(tex->getAssetId());
+		for (size_t i = 0; i < curMat->getNumTextureUnits(); ++i) {
+			result.textures.push_back(curMat->getRawTexture(static_cast<int>(i))->getAssetId());
 		}
 		result.numTriangles = curDraw.indices.size() / 3;
 

@@ -17,7 +17,6 @@ namespace Halley
 	class Painter;
 	class MaterialDefinition;
 	class MaterialParameter;
-	class MaterialTextureParameter;
 	class VideoAPI;
 
 	class MaterialConstantBuffer
@@ -91,7 +90,6 @@ namespace Halley
 		
 		const std::shared_ptr<const Texture>& getTexture(int textureUnit) const;
 		std::shared_ptr<const Texture> getRawTexture(int textureUnit) const;
-		const Vector<MaterialTextureParameter>& getTextureUniforms() const;
 		const Vector<std::shared_ptr<const Texture>>& getTextures() const;
 		size_t getNumTextureUnits() const;
 
@@ -128,7 +126,6 @@ namespace Halley
 		std::shared_ptr<const MaterialDefinition> materialDefinition;
 		
 		Vector<MaterialParameter> uniforms;
-		Vector<MaterialTextureParameter> textureUniforms;
 		Vector<MaterialDataBlock> dataBlocks;
 		Vector<std::shared_ptr<const Texture>> textures;
 

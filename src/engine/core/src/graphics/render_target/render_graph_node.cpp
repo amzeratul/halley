@@ -54,7 +54,7 @@ RenderGraphNode::RenderGraphNode(const RenderGraphDefinition::Node& definition)
 			}
 		}
 
-		const auto& texs = overlayMethod->getTextureUniforms();
+		const auto& texs = overlayMethod->getDefinition().getTextures();
 		Vector<RenderGraphPinType> inputPinTypes;
 		inputPinTypes.reserve(2 + texs.size());
 		inputPinTypes.push_back(RenderGraphPinType::ColourBuffer);
