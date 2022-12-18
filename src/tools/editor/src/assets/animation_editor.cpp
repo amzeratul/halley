@@ -38,6 +38,7 @@ void AnimationEditor::update(Time t, bool moved)
 	const auto size = animationDisplay->getBounds().getSize();
 	String str = String("x: ") + toString(mousePos.x) + " y: " + toString(mousePos.y) + " (" + toString(size.x) + "x" + toString(size.y) + ")";
 
+#ifdef ENABLE_HOT_RELOAD
 	const auto spriteSheet = std::dynamic_pointer_cast<const SpriteSheet>(resource);
 	if (spriteSheet) {
 		if (const SpriteSheetEntry* result = spriteSheet->getSpriteAtTexel(mousePos)) {
@@ -46,6 +47,7 @@ void AnimationEditor::update(Time t, bool moved)
 			str += "\nSprite: N/A";
 		}
 	}
+#endif
 
 	info->setText(LocalisedString::fromUserString(str));
 }
