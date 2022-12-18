@@ -827,11 +827,7 @@ Sprite::~Sprite()
 
 void Sprite::reloadSprite(const SpriteResource& sprite)
 {
-	if (sharedMaterial) {
-		setMaterial(sprite.getMaterial(material->getDefinition().getName()));
-	} else if (material) {
-		material->set(0, sprite.getSpriteSheet()->getTexture());
-	}
+	setMaterial(sprite.getMaterial(material->getDefinition().getName()));
 	doSetSprite(sprite.getSprite(), lastAppliedPivot);
 }
 
@@ -862,7 +858,6 @@ Sprite& Sprite::operator=(const Sprite& other)
 	visible = other.visible;
 	flip = other.flip;
 	sliced = other.sliced;
-	sharedMaterial = other.sharedMaterial;
 	lastAppliedPivot = other.lastAppliedPivot;
 	
 	setHotReload(other.hotReloadRef, other.hotReloadIdx);
@@ -887,7 +882,6 @@ Sprite& Sprite::operator=(Sprite&& other) noexcept
 	visible = std::move(other.visible);
 	flip = std::move(other.flip);
 	sliced = std::move(other.sliced);
-	sharedMaterial = std::move(other.sharedMaterial);
 	lastAppliedPivot = std::move(other.lastAppliedPivot);
 
 	setHotReload(other.hotReloadRef, other.hotReloadIdx);
