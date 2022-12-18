@@ -7,18 +7,12 @@
 
 using namespace Halley;
 
-MaterialParameter::MaterialParameter(Material& material, String name, ShaderParameterType type, int blockNumber, size_t offset)
+MaterialParameter::MaterialParameter(Material& material, ShaderParameterType type, uint16_t blockNumber, uint32_t offset)
 	: material(&material)
-	, name(std::move(name))
 	, offset(offset)
-	, type(type)
 	, blockNumber(blockNumber)
+	, type(type)
 {
-}
-
-void MaterialParameter::rebind(Material& m) noexcept
-{
-	material = &m;
 }
 
 bool MaterialParameter::set(Colour colour)

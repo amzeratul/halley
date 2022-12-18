@@ -13,8 +13,13 @@
 
 using namespace Halley;
 
+namespace {
+	constexpr int shaderStageCount = int(ShaderType::NumOfShaderTypes);
+}
+
 MaterialUniform::MaterialUniform()
-	: type(ShaderParameterType::Invalid)
+	: granularity(1.0f)
+	, type(ShaderParameterType::Invalid)
 {}
 
 MaterialUniform::MaterialUniform(String name, ShaderParameterType type, std::optional<Range<float>> range, float granularity, bool editable, String autoVariable, ConfigNode defaultValue)
@@ -49,11 +54,9 @@ void MaterialUniform::deserialize(Deserializer& s)
 	s >> defaultValue;
 }
 
-MaterialUniformBlock::MaterialUniformBlock() {}
-
-MaterialUniformBlock::MaterialUniformBlock(const String& name, const Vector<MaterialUniform>& uniforms)
-	: name(name)
-	, uniforms(uniforms)
+MaterialUniformBlock::MaterialUniformBlock(String name, Vector<MaterialUniform> uniforms)
+	: name(std::move(name))
+	, uniforms(std::move(uniforms))
 {}
 
 void MaterialUniformBlock::serialize(Serializer& s) const
@@ -66,6 +69,11 @@ void MaterialUniformBlock::deserialize(Deserializer& s)
 {
 	s >> name;
 	s >> uniforms;
+}
+
+int MaterialUniformBlock::getAddress(int pass, ShaderType stage) const
+{
+	return addresses[pass * shaderStageCount + static_cast<int>(stage)];
 }
 
 MaterialAttribute::MaterialAttribute()
@@ -128,10 +136,6 @@ MaterialTexture::MaterialTexture(String name, String defaultTexture, TextureSamp
 	, samplerType(samplerType)
 {}
 
-namespace {
-	constexpr static int shaderStageCount = int(ShaderType::NumOfShaderTypes);
-}
-
 void MaterialTexture::loadAddresses(const MaterialDefinition& definition)
 {
 	const auto& passes = definition.getPasses();
@@ -184,6 +188,29 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 			tex.defaultTexture = loader.getResources().get<Texture>(tex.defaultTextureName);
 		}
 		tex.loadAddresses(*this);
+	}
+
+	// Load attributes and blocks
+	uint16_t blockNumber = 0;
+	for (auto& uniformBlock: uniformBlocks) {
+		uniformBlock.addresses.resize(getNumPasses() * shaderStageCount);
+		for (int i = 0; i < getNumPasses(); ++i) {
+			auto& shader = getPass(i).getShader();
+			for (int j = 0; j < shaderStageCount; ++j) {
+				uniformBlock.addresses[i * shaderStageCount + j] = shader.getBlockLocation(name, static_cast<ShaderType>(j));
+			}
+		}
+
+		size_t curOffset = 0;
+		for (auto& uniform: uniformBlock.uniforms) {
+			auto size = MaterialAttribute::getAttributeSize(uniform.type);
+			curOffset = alignUp(curOffset, std::min(static_cast<size_t>(16), size));
+			uniform.blockNumber = blockNumber;
+			uniform.offset = static_cast<uint32_t>(curOffset);
+			curOffset += size;
+		}
+		uniformBlock.offset = curOffset;
+		++blockNumber;
 	}
 }
 

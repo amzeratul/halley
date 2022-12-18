@@ -9,11 +9,11 @@
 
 using namespace Halley;
 
-static const Material* currentMaterial = nullptr;
-static int currentPass = 0;
-static uint64_t currentHash = 0;
-
-constexpr static int shaderStageCount = int(ShaderType::NumOfShaderTypes);
+namespace {
+	const Material* currentMaterial = nullptr;
+	int currentPass = 0;
+	uint64_t currentHash = 0;
+}
 
 MaterialDataBlock::MaterialDataBlock()
 {
@@ -21,21 +21,13 @@ MaterialDataBlock::MaterialDataBlock()
 
 MaterialDataBlock::MaterialDataBlock(MaterialDataBlockType type, size_t size, int bindPoint, std::string_view name, const MaterialDefinition& def)
 	: data(type == MaterialDataBlockType::SharedExternal ? 0 : size, 0)
-	, addresses(def.getNumPasses() * shaderStageCount)
 	, dataBlockType(type)
 	, bindPoint(static_cast<int16_t>(bindPoint))
 {
-	for (int i = 0; i < def.getNumPasses(); ++i) {
-		auto& shader = def.getPass(i).getShader();
-		for (int j = 0; j < shaderStageCount; ++j) {
-			addresses[i * shaderStageCount + j] = shader.getBlockLocation(name, ShaderType(j));
-		}
-	}
 }
 
 MaterialDataBlock::MaterialDataBlock(const MaterialDataBlock& other)
 	: data(other.data)
-	, addresses(other.addresses)
 	, dataBlockType(other.dataBlockType)
 	, needToUpdateHash(other.needToUpdateHash)
 	, bindPoint(other.bindPoint)
@@ -44,18 +36,12 @@ MaterialDataBlock::MaterialDataBlock(const MaterialDataBlock& other)
 
 MaterialDataBlock::MaterialDataBlock(MaterialDataBlock&& other) noexcept
 	: data(std::move(other.data))
-	, addresses(std::move(other.addresses))
 	, dataBlockType(other.dataBlockType)
 	, needToUpdateHash(other.needToUpdateHash)
 	, bindPoint(other.bindPoint)
 	, hash(other.hash)
 {
 	other.hash = 0;
-}
-
-int MaterialDataBlock::getAddress(int pass, ShaderType stage) const
-{
-	return addresses[pass * shaderStageCount + int(stage)];
 }
 
 int MaterialDataBlock::getBindPoint() const
@@ -113,28 +99,20 @@ bool MaterialDataBlock::setUniform(size_t offset, ShaderParameterType type, cons
 
 Material::Material(const Material& other)
 	: materialDefinition(other.materialDefinition)
-	, uniforms(other.uniforms)
 	, dataBlocks(other.dataBlocks)
 	, textures(other.textures)
-	, passEnabled(other.passEnabled)
 	, stencilReferenceOverride(other.stencilReferenceOverride)
+	, passEnabled(other.passEnabled)
 {
-	for (auto& u: uniforms) {
-		u.rebind(*this);
-	}
 }
 
 Material::Material(Material&& other) noexcept
 	: materialDefinition(std::move(other.materialDefinition))
-	, uniforms(std::move(other.uniforms))
 	, dataBlocks(std::move(other.dataBlocks))
 	, textures(std::move(other.textures))
-	, passEnabled(other.passEnabled)
 	, stencilReferenceOverride(other.stencilReferenceOverride)
+	, passEnabled(other.passEnabled)
 {
-	for (auto& u: uniforms) {
-		u.rebind(*this);
-	}
 	other.fullHashValue = 0;
 	other.partialHashValue = 0;
 }
@@ -160,22 +138,13 @@ Material::Material(std::shared_ptr<const MaterialDefinition> definition, bool fo
 
 void Material::initUniforms(bool forceLocalBlocks)
 {
-	int blockNumber = 0;
 	int nextBindPoint = 1;
 	for (auto& uniformBlock : materialDefinition->getUniformBlocks()) {
-		size_t curOffset = 0;
-		for (auto& uniform: uniformBlock.uniforms) {
-			auto size = MaterialAttribute::getAttributeSize(uniform.type);
-			curOffset = alignUp(curOffset, std::min(size_t(16), size));
-			uniforms.push_back(MaterialParameter(*this, uniform.name, uniform.type, blockNumber, curOffset));
-			curOffset += size;
-		}
-		auto type = uniformBlock.name == "HalleyBlock"
+		const auto type = uniformBlock.name == "HalleyBlock"
 			? (forceLocalBlocks ? MaterialDataBlockType::SharedLocal : MaterialDataBlockType::SharedExternal)
 			: MaterialDataBlockType::Local;
-		int bind = type == MaterialDataBlockType::Local ? nextBindPoint++ : 0;
-		dataBlocks.push_back(MaterialDataBlock(type, curOffset, bind, uniformBlock.name, *materialDefinition));
-		++blockNumber;
+		const int bind = type == MaterialDataBlockType::Local ? nextBindPoint++ : 0;
+		dataBlocks.push_back(MaterialDataBlock(type, uniformBlock.offset, bind, uniformBlock.name, *materialDefinition));
 	}
 
 	// Load textures
@@ -328,11 +297,6 @@ std::shared_ptr<const Texture> Material::getRawTexture(int textureUnit) const
 	return textureUnit >= 0 && textureUnit < int(textures.size()) ? textures[textureUnit] : std::shared_ptr<const Texture>();
 }
 
-const Vector<MaterialParameter>& Material::getUniforms() const
-{
-	return uniforms;
-}
-
 const Vector<MaterialDataBlock>& Material::getDataBlocks() const
 {
 	return dataBlocks;
@@ -422,9 +386,11 @@ Material& Material::set(size_t textureUnit, const std::shared_ptr<Texture>& text
 
 bool Material::hasParameter(std::string_view name) const
 {
-	for (auto& u: uniforms) {
-		if (u.name == name) {
-			return true;
+	for (const auto& block: materialDefinition->getUniformBlocks()) {
+		for (const auto& u: block.uniforms) {
+			if (u.name == name) {
+				return true;
+			}
 		}
 	}
 	return false;
@@ -448,11 +414,13 @@ uint64_t Material::getFullHash() const
 	return fullHashValue;
 }
 
-MaterialParameter& Material::getParameter(std::string_view name)
+MaterialParameter Material::getParameter(std::string_view name)
 {
-	for (auto& u : uniforms) {
-		if (u.name == name) {
-			return u;
+	for (const auto& block: materialDefinition->getUniformBlocks()) {
+		for (const auto& u: block.uniforms) {
+			if (u.name == name) {
+				return MaterialParameter(*this, u.type, u.blockNumber, u.offset);
+			}
 		}
 	}
 
@@ -541,7 +509,7 @@ MaterialUpdater& MaterialUpdater::setStencilReferenceOverride(std::optional<uint
 	return *this;
 }
 
-MaterialParameter& MaterialUpdater::getParameter(std::string_view name)
+MaterialParameter MaterialUpdater::getParameter(std::string_view name)
 {
 	return material->getParameter(name);
 }

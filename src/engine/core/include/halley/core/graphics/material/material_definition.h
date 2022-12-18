@@ -125,6 +125,8 @@ namespace Halley
 		String autoVariable;
 		std::optional<Range<float>> range;
 		float granularity;
+		uint32_t offset = 0;
+		uint16_t blockNumber = 0;
 		bool editable = true;
 		ShaderParameterType type;
 		ConfigNode defaultValue;
@@ -141,12 +143,16 @@ namespace Halley
 	public:
 		String name;
 		Vector<MaterialUniform> uniforms;
+		Vector<int> addresses;
+		size_t offset = 0;
 
-		MaterialUniformBlock();
-		MaterialUniformBlock(const String& name, const Vector<MaterialUniform>& uniforms);
+		MaterialUniformBlock() = default;
+		MaterialUniformBlock(String name, Vector<MaterialUniform> uniforms);
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
+
+		int getAddress(int pass, ShaderType stage) const;
 	};
 
 	class MaterialAttribute

@@ -121,8 +121,10 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 
 	// Bind constant buffer
 	// TODO: move this logic to Painter?
-	for (auto& dataBlock: material.getDataBlocks()) {
-		int address = dataBlock.getAddress(passNumber, ShaderType::Combined);
+	for (size_t i = 0; i < material.getDataBlocks().size(); ++i) {
+		const auto& dataBlock = material.getDataBlocks()[i];
+		const auto& dataBlockDef = material.getDefinition().getUniformBlocks()[i];
+		int address = dataBlockDef.getAddress(passNumber, ShaderType::Combined);
 		if (address == -1) {
 			address = dataBlock.getBindPoint();
 		}

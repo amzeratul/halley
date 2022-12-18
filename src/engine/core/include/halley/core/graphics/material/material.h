@@ -45,7 +45,6 @@ namespace Halley
 		MaterialDataBlock(const MaterialDataBlock& other);
 		MaterialDataBlock(MaterialDataBlock&& other) noexcept;
 
-		int getAddress(int pass, ShaderType stage) const;
 		int getBindPoint() const;
 		gsl::span<const gsl::byte> getData() const;
 		MaterialDataBlockType getType() const;
@@ -56,7 +55,6 @@ namespace Halley
 
 	private:
 		Bytes data;
-		Vector<int> addresses;
 		MaterialDataBlockType dataBlockType = MaterialDataBlockType::Local;
 		mutable bool needToUpdateHash = true;
 		int16_t bindPoint = 0;
@@ -93,7 +91,6 @@ namespace Halley
 		const Vector<std::shared_ptr<const Texture>>& getTextures() const;
 		size_t getNumTextureUnits() const;
 
-		const Vector<MaterialParameter>& getUniforms() const;
 		const Vector<MaterialDataBlock>& getDataBlocks() const;
 
 		void setPassEnabled(int pass, bool enabled);
@@ -109,7 +106,7 @@ namespace Halley
 		Material& set(size_t textureUnit, const std::shared_ptr<const Texture>& texture);
 		Material& set(size_t textureUnit, const std::shared_ptr<Texture>& texture);
 		
-		MaterialParameter& getParameter(std::string_view name);
+		MaterialParameter getParameter(std::string_view name);
 		bool hasParameter(std::string_view name) const;
 
 		template <typename T>
@@ -125,7 +122,6 @@ namespace Halley
 	private:
 		std::shared_ptr<const MaterialDefinition> materialDefinition;
 		
-		Vector<MaterialParameter> uniforms;
 		Vector<MaterialDataBlock> dataBlocks;
 		Vector<std::shared_ptr<const Texture>> textures;
 
@@ -175,6 +171,6 @@ namespace Halley
 		std::shared_ptr<const Material>* orig = nullptr;
 		std::shared_ptr<Material> material;
 
-		MaterialParameter& getParameter(std::string_view name);
+		MaterialParameter getParameter(std::string_view name);
 	};
 }
