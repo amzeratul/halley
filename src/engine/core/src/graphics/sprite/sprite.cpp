@@ -195,12 +195,16 @@ bool Sprite::isInView(Rect4f rect) const
 		return false;
 	}
 
+	constexpr auto sqrt2 = 1.4142135623730950488016887242097f;
 	const auto scaledSize = getScaledSize();
+	const auto sz2 = scaledSize * sqrt2;
 
 	// Coarse test
-	constexpr float sqrt2 = 1.4142135623730950488016887242097f;
-	const Vector2f sz2 = scaledSize * sqrt2;
-	if (!(getPosition() + Rect4f(-sz2, sz2)).overlaps(rect)) {
+	const Vector2f pivot = getPivot();
+	const auto pos = getPosition();
+	const auto offsetPos = pos - (sz2 * pivot);
+
+	if (!Rect4f(offsetPos, offsetPos + sz2).overlaps(rect)) {
 		return false;
 	}
 
