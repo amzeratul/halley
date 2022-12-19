@@ -3,6 +3,7 @@
 
 #include "halley/support/logger.h"
 #include "halley/text/string_converter.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
 
@@ -29,11 +30,16 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 				//   access: protected
 				//   initialValue: 5
 				const YAML::Node& memberProperties = m->second;
-				const String type = memberProperties["type"].as<std::string>();
 				const String access = memberProperties["access"].as<std::string>("public");
 				const String displayName = memberProperties["displayName"].as<std::string>("");
 				const bool hideInEditor = memberProperties["hideInEditor"].as<bool>(false);
 				const bool collapse = memberProperties["collapse"].as<bool>(false);
+
+				const String typeRaw = memberProperties["type"].as<std::string>();
+				const auto parseableRange = std::string_view(typeRaw).substr(0, typeRaw.find('<'));
+				const auto maxSpaces = std::count(parseableRange.begin(), parseableRange.end(), ' ');
+				const auto typeSplit = typeRaw.split(' ', maxSpaces + 1);
+				const auto typeSchema = TypeSchema(typeSplit.back(), std_ex::contains(typeSplit, "const"), std_ex::contains(typeSplit, "static"), std_ex::contains(typeSplit, "constexpr"), std_ex::contains(typeSplit, "mutable"));
 
 				std::set<EntitySerialization::Type> serializeTypes;
 				if (memberProperties["canEdit"].as<bool>(true)) {
@@ -74,7 +80,7 @@ ComponentSchema::ComponentSchema(YAML::Node node, bool generate)
 					}
 				}
 
-				auto& field = members.emplace_back(TypeSchema(type), std::move(name), std::move(defaultValue), fromString<MemberAccess>(access));
+				auto& field = members.emplace_back(typeSchema, std::move(name), std::move(defaultValue), fromString<MemberAccess>(access));
 				field.collapse = collapse;
 				field.serializationTypes = Vector<EntitySerialization::Type>(serializeTypes.begin(), serializeTypes.end());
 				field.hideInEditor = hideInEditor;

@@ -44,9 +44,16 @@ public:
 
 class ComponentEditorIntFieldFactory : public IComponentEditorFieldFactory {
 public:
+	ComponentEditorIntFieldFactory(String fieldType, std::optional<float> minValue, std::optional<float> maxValue)
+		: fieldType(std::move(fieldType))
+		, minValue(minValue)
+		, maxValue(maxValue)
+	{
+	}
+
 	String getFieldType() override
 	{
-		return "int";
+		return fieldType;
 	}
 
 	ConfigNode getDefaultNode() const override
@@ -68,6 +75,8 @@ public:
 			data.getWriteableFieldData() = ConfigNode(newVal);
 			context.onEntityUpdated();
 		});
+		field->setMinimumValue(minValue);
+		field->setMaximumValue(maxValue);
 		container->add(field, 1);
 
 		auto reset = std::make_shared<UIButton>("resetValue", context.getUIFactory().getStyle("buttonThin"), UISizer());
@@ -82,21 +91,11 @@ public:
 
 		return container;
 	}
-};
-
-class ComponentEditorCustomIntFieldFactory : public ComponentEditorIntFieldFactory {
-public:
-	ComponentEditorCustomIntFieldFactory(String fieldType)
-		: fieldType(std::move(fieldType))
-	{}
-
-	String getFieldType() override
-	{
-		return fieldType;
-	}
 
 private:
 	String fieldType;
+	std::optional<float> minValue;
+	std::optional<float> maxValue;
 };
 
 class ComponentEditorFloatFieldFactory : public IComponentEditorFieldFactory {
@@ -1698,7 +1697,15 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 	Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
 
 	factories.emplace_back(std::make_unique<ComponentEditorTextFieldFactory>());
-	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("int8_t", static_cast<float>(std::numeric_limits<int8_t>::min()), static_cast<float>(std::numeric_limits<int8_t>::max())));
+	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("int16_t", static_cast<float>(std::numeric_limits<int16_t>::min()), static_cast<float>(std::numeric_limits<int16_t>::max())));
+	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("int", std::nullopt, std::nullopt));
+	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("int32_t", std::nullopt, std::nullopt));
+	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("int64_t", std::nullopt, std::nullopt));
+	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("uint8_t", 0.0f, static_cast<float>(std::numeric_limits<uint8_t>::max())));
+	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("uint16_t", 0.0f, static_cast<float>(std::numeric_limits<uint16_t>::max())));
+	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("uint32_t", 0.0f, std::nullopt));
+	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("uint64_t", 0.0f, std::nullopt));
 	factories.emplace_back(std::make_unique<ComponentEditorFloatFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorAngle1fFieldFactory>());
 	factories.emplace_back(std::make_unique<ComponentEditorBoolFieldFactory>());

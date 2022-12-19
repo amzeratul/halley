@@ -18,8 +18,14 @@ component:
       access: protected
       displayName: Rotation
   - subWorld:
-      type: 'Halley::OptionalLite<int>'
+      type: 'Halley::OptionalLite<int16_t>'
       access: protected
       displayName: Subworld
+  - revision:
+      type: 'mutable uint16_t'
+      access: protected
+      canEdit: false
+      canSave: false
+      defaultValue: 0
 
 ...

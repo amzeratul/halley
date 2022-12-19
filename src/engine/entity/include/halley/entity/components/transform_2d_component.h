@@ -63,14 +63,13 @@ private:
 	friend class Halley::EntityRef;
 
 	mutable Transform2DComponent* parentTransform = nullptr;
-	mutable uint16_t revision = 0;
 	mutable uint8_t worldPartition = 0;
 
 	mutable uint8_t cachedValues = 0;
-	mutable int cachedSubWorld = 0;
+	mutable int16_t cachedSubWorld = 0;
+	mutable Halley::Angle1f cachedGlobalRotation;
 	mutable Halley::Vector2f cachedGlobalPos;
 	mutable Halley::Vector2f cachedGlobalScale;
-	mutable Halley::Angle1f cachedGlobalRotation;
 
 	mutable Halley::EntityRef entity;
 

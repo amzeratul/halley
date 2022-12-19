@@ -18,12 +18,14 @@ namespace Halley
 		bool isConst = false;
 		bool isStatic = false;
 		bool isConstExpr = false;
+		bool isMutable = false;
 
-		TypeSchema(String name, bool isConst = false, bool isStatic = false, bool isConstExpr = false)
+		TypeSchema(String name, bool isConst = false, bool isStatic = false, bool isConstExpr = false, bool isMutable = false)
 			: name(std::move(name))
 			, isConst(isConst)
 			, isStatic(isStatic)
 			, isConstExpr(isConstExpr)
+			, isMutable(isMutable)
 		{}
 	};
 

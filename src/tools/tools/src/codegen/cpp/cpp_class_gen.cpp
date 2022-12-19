@@ -206,6 +206,9 @@ String CPPClassGenerator::getTypeString(const TypeSchema& type)
 	if (type.isConstExpr) {
 		value += "constexpr ";
 	}
+	if (type.isMutable) {
+		value += "mutable ";
+	}
 	value += type.name;
 	return value;
 }

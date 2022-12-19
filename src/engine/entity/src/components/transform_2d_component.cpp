@@ -132,7 +132,7 @@ int Transform2DComponent::getSubWorld() const
 		if (parentTransform) {
 			if (!isCached(CachedIndices::SubWorld)) {
 				setCached(CachedIndices::SubWorld);
-				cachedSubWorld = parentTransform->getSubWorld();
+				cachedSubWorld = static_cast<int16_t>(parentTransform->getSubWorld());
 			}
 			return cachedSubWorld;
 		} else {
@@ -143,8 +143,8 @@ int Transform2DComponent::getSubWorld() const
 
 void Transform2DComponent::setSubWorld(int world)
 {
-	if (subWorld != world) {
-		subWorld = world;
+	if (subWorld != static_cast<int16_t>(world)) {
+		subWorld = static_cast<int16_t>(world);
 		markDirty();
 	}
 }
