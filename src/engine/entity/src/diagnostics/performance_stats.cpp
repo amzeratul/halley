@@ -266,7 +266,7 @@ void PerformanceStatsView::drawHeader(Painter& painter, bool simple)
 	ColourStringBuilder strBuilder;
 	strBuilder.append(toString(curFPS, 10, 3, ' '), curFPS < maxFPS ? std::optional<Colour4f>() : Colour4f(1, 0, 0));
 	strBuilder.append(" FPS | ");
-	strBuilder.append(toString(maxFPS, 10, 4, ' '), updateAvgTime > renderAvgTime ? updateCol : renderCol);
+	strBuilder.append(toString(maxFPS, 10, 4, ' '), (updateAvgTime > renderAvgTime && updateAvgTime > gpuAvgTime) ? updateCol : (renderAvgTime > gpuAvgTime ? renderCol : gpuCol));
 	strBuilder.append(" FPS | ");
 	strBuilder.append(toString(painter.getPrevDrawCalls()));
 	strBuilder.append(" calls | ");
