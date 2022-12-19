@@ -349,6 +349,16 @@ bool MaterialDefinition::isColumnMajor() const
 	return columnMajor;
 }
 
+std::shared_ptr<const Material> MaterialDefinition::getMaterial() const
+{
+	auto m = material.lock();
+	if (!m) {
+		m = std::make_shared<Material>(shared_from_this());
+		material = m;
+	}
+	return m;
+}
+
 void MaterialDefinition::loadUniforms(const ConfigNode& node)
 {
 	for (auto& blockEntry : node.asSequence()) {

@@ -22,6 +22,7 @@ Sprite::Sprite()
 	hasClip = false;
 	absoluteClip = false;
 	sliced = false;
+	rotated = false;
 	setScale(Vector2f(1, 1));
 	setColour(Colour4f(1, 1, 1, 1));
 }
@@ -160,7 +161,7 @@ Rect4f Sprite::getAABB() const
 	//Expects(!std::isnan(sz.x));
 	//Expects(!std::isnan(sz.y));
 	
-	if (std::abs(getRotation().toRadians()) < 0.0001f) {
+	if (!rotated) {
 		// No rotation, give exact bounding box
 		const Vector2f pivot = getPivot();
 		const auto pos = getPosition();
@@ -195,30 +196,13 @@ bool Sprite::isInView(Rect4f rect) const
 		return false;
 	}
 
-	constexpr auto sqrt2 = 1.4142135623730950488016887242097f;
-	const auto scaledSize = getScaledSize();
-	const auto sz2 = scaledSize * sqrt2;
-
-	// Coarse test
-	const Vector2f pivot = getPivot();
-	const auto pos = getPosition();
-	const auto offsetPos = pos - (sz2 * pivot);
-
-	if (!Rect4f(offsetPos, offsetPos + sz2).overlaps(rect)) {
-		return false;
-	}
-
-	// Perform fine test if needed
-	if (std::abs(getRotation().toRadians()) < 0.0001f) {
-		return getAABB().overlaps(rect);
-	} else {
-		return true;
-	}
+	return getAABB().overlaps(rect);
 }
 
 Sprite& Sprite::setRotation(Angle1f v)
 {
 	vertexAttrib.rotation = v.getRadians();
+	rotated = std::abs(v.getRadians()) > 0.000001f;
 	return *this;
 }
 
@@ -317,7 +301,7 @@ Sprite& Sprite::setMaterial(Resources& resources, String materialName)
 	if (materialName == "") {
 		materialName = MaterialDefinition::defaultMaterial;
 	}
-	setMaterial(std::make_shared<Material>(resources.get<MaterialDefinition>(materialName)));
+	setMaterial(resources.get<MaterialDefinition>(materialName)->getMaterial());
 	return *this;
 }
 
@@ -735,16 +719,16 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 
 	// Get the material definition
 	bool hasNewMaterial = false;
-	std::shared_ptr<const MaterialDefinition> material;
+	std::shared_ptr<const MaterialDefinition> materialDefinition;
 	const auto& materialNode = node["material"];
 	if (materialNode.getType() == ConfigNodeType::String) {
-		material = context.resources->get<MaterialDefinition>(materialNode.asString());
+		materialDefinition = context.resources->get<MaterialDefinition>(materialNode.asString());
 		hasNewMaterial = true;
 	} else if (materialNode.getType() == ConfigNodeType::Del || !sprite.hasMaterial()) {
-		material = context.resources->get<MaterialDefinition>(MaterialDefinition::defaultMaterial);
+		materialDefinition = context.resources->get<MaterialDefinition>(MaterialDefinition::defaultMaterial);
 		hasNewMaterial = true;
 	} else {
-		material = sprite.getMaterial().getDefinitionPtr();
+		materialDefinition = sprite.getMaterial().getDefinitionPtr();
 	}
 
 	auto loadTexture = [&](const String& nodeName, size_t texUnit) -> bool
@@ -769,21 +753,21 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		return true;
 	};
 
-	if (material) {
-		if (material->getTextures().empty()) {
+	if (materialDefinition) {
+		if (materialDefinition->getTextures().empty()) {
 			if (hasNewMaterial) {
-				sprite.setMaterial(std::make_shared<Material>(material));
+				sprite.setMaterial(materialDefinition->getMaterial());
 			}
 		} else {
 			// Load each texture
 			size_t i = 0;
-			for (const auto& tex: material->getTextures()) {
+			for (const auto& tex: materialDefinition->getTextures()) {
 				const bool loaded = loadTexture("tex_" + tex.name, i);
 				if (!loaded) {
 					if (i == 0) {
 						if (!loadTexture("image", i)) {
 							if (hasNewMaterial) {
-								sprite.setMaterial(std::make_shared<Material>(material));
+								sprite.setMaterial(materialDefinition->getMaterial());
 							}
 						}
 					} else if (i == 1) {
@@ -795,7 +779,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		}
 
 		// Load material parameters
-		for (const auto& block: material->getUniformBlocks()) {
+		for (const auto& block: materialDefinition->getUniformBlocks()) {
 			for (const auto& uniform: block.uniforms) {
 				auto applyValue = [&] (const ConfigNode& node)
 				{
@@ -896,6 +880,7 @@ Sprite& Sprite::operator=(const Sprite& other)
 	visible = other.visible;
 	flip = other.flip;
 	sliced = other.sliced;
+	rotated = other.rotated;
 	lastAppliedPivot = other.lastAppliedPivot;
 	
 	setHotReload(other.hotReloadRef, other.hotReloadIdx);
@@ -912,15 +897,16 @@ Sprite& Sprite::operator=(Sprite&& other) noexcept
 	vertexAttrib = std::move(other.vertexAttrib);
 	material = std::move(other.material);
 	size = std::move(other.size);
-	slices = std::move(other.slices);
-	outerBorder = std::move(other.outerBorder);
+	slices = other.slices;
+	outerBorder = other.outerBorder;
 	clip = std::move(other.clip);
 	hasClip = other.hasClip;
 	absoluteClip = other.absoluteClip;
 	visible = other.visible;
 	flip = other.flip;
 	sliced = other.sliced;
-	lastAppliedPivot = std::move(other.lastAppliedPivot);
+	rotated = other.rotated;
+	lastAppliedPivot = other.lastAppliedPivot;
 
 	setHotReload(other.hotReloadRef, other.hotReloadIdx);
 	other.setHotReload(nullptr, 0);

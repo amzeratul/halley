@@ -199,7 +199,7 @@ namespace Halley
 		void deserialize(Deserializer& s);
 	};
 
-	class MaterialDefinition final : public Resource
+	class MaterialDefinition final : public Resource, public std::enable_shared_from_this<MaterialDefinition>
 	{
 		friend class Material;
 		friend class MaterialParameter;
@@ -243,6 +243,8 @@ namespace Halley
 
 		bool isColumnMajor() const;
 
+		std::shared_ptr<const Material> getMaterial() const;
+
 	private:
 		String name;
 		Vector<MaterialPass> passes;
@@ -256,6 +258,7 @@ namespace Halley
 
 		std::shared_ptr<const Texture> fallbackTexture;
 		Vector<String> tags;
+		mutable std::weak_ptr<const Material> material;
 
 		void loadUniforms(const ConfigNode& node);
 		void loadTextures(const ConfigNode& node);

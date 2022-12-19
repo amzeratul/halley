@@ -176,6 +176,7 @@ namespace Halley
 		bool hasClip : 1;
 		bool absoluteClip : 1;
 		bool sliced : 1;
+		bool rotated : 1;
 		float sliceScale = 1;
 
 		std::shared_ptr<const Material> material;
@@ -206,8 +207,8 @@ namespace Halley
 
 	private:
 		bool lastAppliedPivot = false;
-		const SpriteHotReloader* hotReloadRef = nullptr;
 		uint32_t hotReloadIdx = 0;
+		const SpriteHotReloader* hotReloadRef = nullptr;
 
 		void setHotReload(const SpriteHotReloader* ref, uint32_t index);
 #else
