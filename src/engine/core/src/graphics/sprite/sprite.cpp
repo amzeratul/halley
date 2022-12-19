@@ -89,7 +89,7 @@ void Sprite::drawSliced(Painter& painter, Vector4s slicesPixel, const std::optio
 			slices.w /= size.y;
 			slices *= sliceScale;
 
-			painter.drawSlicedSprite(material, vertexAttrib.scale, slices, &vertexAttrib);
+			painter.drawSlicedSprite(material, vertexAttrib.scale, slices, getVertexAttrib());
 		});
 	}
 }
@@ -911,11 +911,11 @@ Sprite& Sprite::operator=(Sprite&& other) noexcept
 	slices = std::move(other.slices);
 	outerBorder = std::move(other.outerBorder);
 	clip = std::move(other.clip);
-	hasClip = std::move(other.hasClip);
-	absoluteClip = std::move(other.absoluteClip);
-	visible = std::move(other.visible);
-	flip = std::move(other.flip);
-	sliced = std::move(other.sliced);
+	hasClip = other.hasClip;
+	absoluteClip = other.absoluteClip;
+	visible = other.visible;
+	flip = other.flip;
+	sliced = other.sliced;
 	lastAppliedPivot = std::move(other.lastAppliedPivot);
 
 	setHotReload(other.hotReloadRef, other.hotReloadIdx);

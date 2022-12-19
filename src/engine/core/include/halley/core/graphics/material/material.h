@@ -45,9 +45,9 @@ namespace Halley
 		MaterialDataBlock(const MaterialDataBlock& other);
 		MaterialDataBlock(MaterialDataBlock&& other) noexcept;
 
-		int getBindPoint() const;
+		int getBindPoint() const { return bindPoint; }
 		gsl::span<const gsl::byte> getData() const;
-		MaterialDataBlockType getType() const;
+		MaterialDataBlockType getType() const { return dataBlockType; }
 		uint64_t getHash() const;
 
 		bool operator==(const MaterialDataBlock& other) const;

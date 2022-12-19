@@ -44,19 +44,9 @@ MaterialDataBlock::MaterialDataBlock(MaterialDataBlock&& other) noexcept
 	other.hash = 0;
 }
 
-int MaterialDataBlock::getBindPoint() const
-{
-	return bindPoint;
-}
-
 gsl::span<const gsl::byte> MaterialDataBlock::getData() const
 {
 	return gsl::as_bytes(gsl::span<const Byte>(data));
-}
-
-MaterialDataBlockType MaterialDataBlock::getType() const
-{
-	return dataBlockType;
 }
 
 uint64_t MaterialDataBlock::getHash() const
