@@ -18,6 +18,7 @@ namespace Halley
 	class MaterialImporter;
 	class MaterialTextureParameter;
 	class Texture;
+	class Material;
 
 	enum class ShaderParameterType : uint8_t
 	{
