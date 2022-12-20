@@ -7,6 +7,7 @@
 #include "halley/core/graphics/text/text_renderer.h"
 
 namespace Halley {
+	class IFrameData;
 	struct SceneEditorOutputState;
 	class EntityRef;
 	class World;
@@ -18,11 +19,16 @@ namespace Halley {
 		SceneEditor();
     	virtual ~SceneEditor();
 
-		void init(SceneEditorContext& context) final override;
-		void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState) override;
-		void render(RenderContext& rc) override;
+    	void init(SceneEditorContext& context) final override;
+		void update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState) final override;
+		void render(RenderContext& rc) final override;
 
-		bool isReadyToCreateWorld() const final override;
+    	virtual void preUpdate(Time t);
+    	virtual void postUpdate(Time t);
+		virtual void preRender(RenderContext& rc);
+		virtual void postRender(RenderContext& rc);
+
+    	bool isReadyToCreateWorld() const final override;
 		void createWorld(std::shared_ptr<const UIColourScheme> colourScheme) final override;
 
 		World& getWorld() const override;
@@ -105,6 +111,8 @@ namespace Halley {
     	Vector<EntityRef> getRootEntitiesAt(Rect4f area, bool allowUnselectable, EntityAtPositionSelectMode mode) const;
        	virtual float getSpriteDepth(EntityRef& e, Rect4f area) const;
 
+		virtual std::unique_ptr<IFrameData> makeFrameData();
+
 	private:
 		struct CameraAnimation {
 			Vector2f p0;
@@ -147,6 +155,8 @@ namespace Halley {
 		Vector<UUID> selBoxStartSelectedEntities;
 
 		AssetPreviewGenerator* assetPreviewGenerator = nullptr;
+
+		std::unique_ptr<IFrameData> curFrameData;
 
     	void moveCameraTo2D(Vector2f pos);
     	Vector2f roundPosition(Vector2f pos) const;

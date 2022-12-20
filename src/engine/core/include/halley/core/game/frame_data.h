@@ -4,24 +4,40 @@
 
 namespace Halley {
 	class Core;
+	class SceneEditor;
 
-	class FrameData {
+	class IFrameData {
 		friend class Core;
+		friend class SceneEditor;
 
 	public:
-		virtual ~FrameData() = default;
+		virtual ~IFrameData() = default;
 
-		virtual void startFrame(bool multithreaded) {}
+	protected:
+		static thread_local IFrameData* threadInstance;
 
-		template <typename T>
+		virtual void doStartFrame(bool multithreaded, IFrameData* previous) {}
+	};
+
+	template <typename T>
+	class FrameData : public IFrameData {
+	public:
+		virtual void startFrame(bool multithreaded, T* previous) {}
+
 		static T& getCurrent()
 		{
-			static_assert(std::is_base_of_v<FrameData, T>);
 			assert(threadInstance != nullptr);
 			return static_cast<T&>(*threadInstance);
 		}
 
-	private:
-		static thread_local FrameData* threadInstance;
+	protected:
+		void doStartFrame(bool multithreaded, IFrameData* previous) override
+		{
+			startFrame(multithreaded, static_cast<T*>(previous));
+		}
+	};
+
+	class EmptyFrameData : public FrameData<EmptyFrameData> {
+	public:
 	};
 }

@@ -15,6 +15,7 @@
 #include "halley/entity/components/transform_2d_component.h"
 #include "components/sprite_component.h"
 #include "components/camera_component.h"
+#include "halley/core/game/frame_data.h"
 #include "halley/core/graphics/material/material.h"
 #include "halley/core/graphics/material/material_definition.h"
 #include "halley/core/graphics/render_target/render_surface.h"
@@ -54,10 +55,19 @@ void SceneEditor::init(SceneEditorContext& context)
 		.setColour(Colour(1, 1, 1))
 		.setOutlineColour(Colour())
 		.setOffset(Vector2f(0, 1));
+
+	curFrameData = makeFrameData();
 }
 
 void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOutputState& outputState)
 {
+	if (curFrameData) {
+		curFrameData->doStartFrame(false, nullptr);
+	}
+	IFrameData::threadInstance = curFrameData.get();
+
+	preUpdate(t);
+
 	// Update camera
 	updateCameraPos(t);
 
@@ -112,10 +122,16 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	world->step(TimeLine::VariableUpdate, t);
 
 	lastStepTime = t;
+
+	postUpdate(t);
 }
 
 void SceneEditor::render(RenderContext& rc)
 {
+	IFrameData::threadInstance = curFrameData.get();
+
+	preRender(rc);
+
 	world->render(rc);
 
 	rc.with(camera).bind([&] (Painter& painter)
@@ -128,6 +144,24 @@ void SceneEditor::render(RenderContext& rc)
 	{
 		drawOverlay(painter, painter.getWorldViewAABB());
 	});
+
+	postRender(rc);
+}
+
+void SceneEditor::preUpdate(Time t)
+{
+}
+
+void SceneEditor::postUpdate(Time t)
+{
+}
+
+void SceneEditor::preRender(RenderContext& rc)
+{
+}
+
+void SceneEditor::postRender(RenderContext& rc)
+{
 }
 
 bool SceneEditor::isReadyToCreateWorld() const
@@ -603,6 +637,11 @@ float SceneEditor::getSpriteDepth(EntityRef& e, Rect4f rect) const
 	} else {
 		return -std::numeric_limits<float>::infinity();
 	}
+}
+
+std::unique_ptr<IFrameData> SceneEditor::makeFrameData()
+{
+	return {};
 }
 
 void SceneEditor::CameraPanAnimation::stop()

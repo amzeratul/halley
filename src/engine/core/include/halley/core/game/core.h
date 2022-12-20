@@ -115,8 +115,8 @@ namespace Halley
 		uint32_t curStageFrames = 0;
 		bool pendingStageTransition = false;
 
-		std::unique_ptr<FrameData> frameDataUpdate;
-		std::unique_ptr<FrameData> frameDataRender;
+		std::unique_ptr<IFrameData> frameDataUpdate;
+		std::unique_ptr<IFrameData> frameDataRender;
 
 		bool initialized = false;
 		bool running = true;

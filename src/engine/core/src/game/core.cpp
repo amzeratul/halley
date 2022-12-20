@@ -412,20 +412,20 @@ void Core::tickFrame(Time time)
 	
 	if (multithreaded) {
 		auto updateTask = Concurrent::execute([&] () {
-			FrameData::threadInstance = frameDataUpdate.get();
+			IFrameData::threadInstance = frameDataUpdate.get();
 			runPreVariableUpdate(time);
 			runVariableUpdate(time);
 			runPostVariableUpdate(time);
 		});
 		if (frameDataRender) {
 			assert(curStageFrames > 0);
-			FrameData::threadInstance = frameDataRender.get();
+			IFrameData::threadInstance = frameDataRender.get();
 			render();
 			waitForRenderEnd();
 		}
 		updateTask.wait();
 	} else {
-		FrameData::threadInstance = frameDataUpdate.get();
+		IFrameData::threadInstance = frameDataUpdate.get();
 		runPreVariableUpdate(time);
 		runVariableUpdate(time);
 		runPostVariableUpdate(time);
@@ -534,7 +534,7 @@ void Core::updateFrameData(bool multithreaded)
 		frameDataUpdate = game->makeFrameData();
 		assert(!!frameDataUpdate);
 	}
-	frameDataUpdate->startFrame(multithreaded);
+	frameDataUpdate->doStartFrame(multithreaded, multithreaded ? frameDataRender.get() : nullptr);
 }
 
 void Core::showComputerInfo() const
@@ -737,4 +737,4 @@ Future<std::unique_ptr<RenderSnapshot>> Core::requestRenderSnapshot()
 	return promise.getFuture();
 }
 
-thread_local FrameData* FrameData::threadInstance = nullptr;
+thread_local IFrameData* IFrameData::threadInstance = nullptr;

@@ -33,9 +33,9 @@ std::unique_ptr<Stage> Game::makeStage(StageID)
 	return {};
 }
 
-std::unique_ptr<FrameData> Game::makeFrameData()
+std::unique_ptr<IFrameData> Game::makeFrameData()
 {
-	return std::make_unique<FrameData>();
+	return std::make_unique<EmptyFrameData>();
 }
 
 int Game::getTargetFPS() const
