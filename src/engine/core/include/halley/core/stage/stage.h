@@ -3,6 +3,7 @@
 #include "stage_id.h"
 #include "halley/core/resources/resources.h"
 #include "halley/core/api/halley_api.h"
+#include "halley/core/game/frame_data.h"
 
 namespace Halley
 {
@@ -17,16 +18,21 @@ namespace Halley
 	class Stage
 	{
 	public:
-		virtual ~Stage() {}
+		virtual ~Stage() = default;
 
-		virtual void init() {}
+		virtual void init();
 
-		virtual void onStartFrame(Time) {}
-		virtual void onFixedUpdate(Time) {}
-		virtual void onVariableUpdate(Time) {}
-		virtual void onRender(RenderContext&) const {}
+		virtual void onStartFrame(Time dt);
+		virtual void onFixedUpdate(Time dt);
+		virtual void onVariableUpdate(Time dt);
+		virtual void onRender(RenderContext& rc) const;
 
-		const HalleyAPI& getAPI() const { return *api; }
+		virtual void onStartFrame(Time dt, FrameData& frameData);
+		virtual void onFixedUpdate(Time dt, FrameData& frameData);
+		virtual void onVariableUpdate(Time dt, FrameData& frameData);
+		virtual void onRender(RenderContext& rc, FrameData& frameData) const;
+
+		const HalleyAPI& getAPI() const;
 
 		virtual bool onQuitRequested(); // Return true if OK to quit
 
@@ -47,7 +53,8 @@ namespace Halley
 		Game& getGame() const;
 
 		template <typename T>
-		std::shared_ptr<const T> getResource(const String& name) const {
+		std::shared_ptr<const T> getResource(const String& name) const
+		{
 			return getResources().of<T>().get(name);
 		}
 

@@ -118,6 +118,7 @@ set(HEADERS
 
         "include/halley/core/game/core.h"
         "include/halley/core/game/environment.h"
+        "include/halley/core/game/frame_data.h"
         "include/halley/core/game/game.h"
         "include/halley/core/game/game_console.h"
         "include/halley/core/game/halley_main.h"

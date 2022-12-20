@@ -317,7 +317,7 @@ void Core::processEvents(Time time)
 void Core::runStartFrame(Time time)
 {
 	if (currentStage) {
-		currentStage->onStartFrame(time);
+		currentStage->onStartFrame(time, *frameDataUpdate);
 	}
 }
 
@@ -407,20 +407,25 @@ void Core::tickFrame(Time time)
 
 	const bool multithreaded = currentStage && currentStage->hasMultithreadedRendering();
 
+	updateFrameData(multithreaded);
 	runStartFrame(time);
 	
 	if (multithreaded) {
 		auto updateTask = Concurrent::execute([&] () {
+			FrameData::threadInstance = frameDataUpdate.get();
 			runPreVariableUpdate(time);
 			runVariableUpdate(time);
 			runPostVariableUpdate(time);
 		});
-		if (curStageFrames > 0) {
+		if (frameDataRender) {
+			assert(curStageFrames > 0);
+			FrameData::threadInstance = frameDataRender.get();
 			render();
 			waitForRenderEnd();
 		}
 		updateTask.wait();
 	} else {
+		FrameData::threadInstance = frameDataUpdate.get();
 		runPreVariableUpdate(time);
 		runVariableUpdate(time);
 		runPostVariableUpdate(time);
@@ -438,7 +443,7 @@ void Core::doFixedUpdate(Time time)
 	if (running && currentStage) {
 		ProfilerEvent event(ProfilerEventType::CoreFixedUpdate);
 		try {
-			currentStage->onFixedUpdate(time);
+			currentStage->onFixedUpdate(time, *frameDataUpdate);
 		} catch (Exception& e) {
 			game->onUncaughtException(e, TimeLine::FixedUpdate);
 		}
@@ -450,7 +455,7 @@ void Core::runVariableUpdate(Time time)
 	if (running && currentStage) {
 		ProfilerEvent event(ProfilerEventType::CoreVariableUpdate);
 		try {
-			currentStage->onVariableUpdate(time);
+			currentStage->onVariableUpdate(time, *frameDataUpdate);
 		} catch (Exception& e) {
 			game->onUncaughtException(e, TimeLine::VariableUpdate);
 		}
@@ -474,7 +479,7 @@ void Core::render()
 			if (!pendingSnapshots.empty()) {
 				snapshot = std::make_unique<RenderSnapshot>();
 				painter->startRecording(snapshot.get());
-			} else if (isDevMode()) {
+			} else if (true || isDevMode()) {
 				painter->startRecording(nullptr);
 			}
 
@@ -489,7 +494,7 @@ void Core::render()
 				RenderContext context(*painter, *camera, *screenTarget);
 
 				try {
-					currentStage->onRender(context);
+					currentStage->onRender(context, *frameDataRender);
 				}
 				catch (Exception& e) {
 					game->onUncaughtException(e, TimeLine::Render);
@@ -515,6 +520,21 @@ void Core::waitForRenderEnd()
 		ProfilerEvent event(ProfilerEventType::CoreVSync);
 		api->video->finishRender();
 		painter->onFinishRender();
+	}
+}
+
+void Core::updateFrameData(bool multithreaded)
+{
+	if (multithreaded) {
+		std::swap(frameDataUpdate, frameDataRender);
+	} else {
+		frameDataRender = {};
+	}
+	if (frameDataUpdate) {
+		frameDataUpdate->clear();
+	} else {
+		frameDataUpdate = game->makeFrameData();
+		assert(!!frameDataUpdate);
 	}
 }
 
@@ -606,6 +626,8 @@ bool Core::transitionStage()
 		// Update stage
 		currentStage = std::move(nextStage);
 		curStageFrames = 0;
+		frameDataUpdate = {};
+		frameDataRender = {};
 
 		// Prepare next stage
 		if (currentStage) {
@@ -715,3 +737,5 @@ Future<std::unique_ptr<RenderSnapshot>> Core::requestRenderSnapshot()
 	auto& promise = pendingSnapshots.emplace_back();
 	return promise.getFuture();
 }
+
+thread_local FrameData* FrameData::threadInstance = nullptr;

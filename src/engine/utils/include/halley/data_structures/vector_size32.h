@@ -322,7 +322,7 @@ namespace Halley {
 		{
 			do_resize(size, [this] (pointer bytes)
 			{
-				std::allocator_traits<Allocator>::construct(*this, bytes, T());
+				std::allocator_traits<Allocator>::construct(as_allocator(), bytes, T());
 			});
 		}
 
@@ -330,7 +330,7 @@ namespace Halley {
 		{
 			do_resize(size, [&] (pointer bytes)
 			{
-				std::allocator_traits<Allocator>::construct(*this, bytes, defaultValue);
+				std::allocator_traits<Allocator>::construct(as_allocator(), bytes, defaultValue);
 			});
 		}
 
@@ -347,7 +347,7 @@ namespace Halley {
 		void clear() noexcept
 		{
 			for (size_type i = 0; i < m_size; ++i) {
-				std::allocator_traits<Allocator>::destroy(*this, m_data + i);
+				std::allocator_traits<Allocator>::destroy(as_allocator(), m_data + i);
 			}
 			m_size = 0;
 		}
@@ -371,7 +371,7 @@ namespace Halley {
 			return do_insert(pos, [&](size_t prevSize) {
 				reserve(size() + count);
 				for (size_t i = 0; i < count; ++i) {
-					std::allocator_traits<Allocator>::construct(*this, data() + (i + prevSize), value);
+					std::allocator_traits<Allocator>::construct(as_allocator(), data() + (i + prevSize), value);
 				}
 				m_size = static_cast<uint32_t>(prevSize + count);
 			});
@@ -386,7 +386,7 @@ namespace Halley {
 					reserve(size() + count);
 					size_t i = 0;
 					for (auto iter = first; iter != last; ++iter) {
-						std::allocator_traits<Allocator>::construct(*this, data() + (i + prevSize), *iter);
+						std::allocator_traits<Allocator>::construct(as_allocator(), data() + (i + prevSize), *iter);
 						++i;
 					}
 					m_size = static_cast<uint32_t>(prevSize + count);
@@ -431,7 +431,7 @@ namespace Halley {
 			const auto idx = m_size;
 			construct_with_ensure_capacity(m_size + 1, [&] (pointer data)
 			{
-				std::allocator_traits<Allocator>::construct(*this, data + idx, std::forward<Args>(args)...);
+				std::allocator_traits<Allocator>::construct(as_allocator(), data + idx, std::forward<Args>(args)...);
 			});
 			++m_size;
 			return elem(idx);
@@ -441,7 +441,7 @@ namespace Halley {
 		{
 			construct_with_ensure_capacity(m_size + 1, [&](pointer data)
 			{
-				std::allocator_traits<Allocator>::construct(*this, data + m_size, value);
+				std::allocator_traits<Allocator>::construct(as_allocator(), data + m_size, value);
 			});
 			++m_size;
 		}
@@ -450,7 +450,7 @@ namespace Halley {
 		{
 			construct_with_ensure_capacity(m_size + 1, [&](pointer data)
 			{
-				std::allocator_traits<Allocator>::construct(*this, data + m_size, std::move(value));
+				std::allocator_traits<Allocator>::construct(as_allocator(), data + m_size, std::move(value));
 			});
 			++m_size;
 		}
@@ -458,7 +458,7 @@ namespace Halley {
 		void pop_back()
 		{
 			assert(!empty());
-			std::allocator_traits<Allocator>::destroy(*this, &back());
+			std::allocator_traits<Allocator>::destroy(as_allocator(), &back());
 			--m_size;
 		}
 
@@ -524,16 +524,16 @@ namespace Halley {
 		{
 			assert(newCapacity >= m_size);
 			if (newCapacity != m_capacity) {
-				pointer newData = newCapacity > 0 ? std::allocator_traits<Allocator>::allocate(*this, newCapacity) : nullptr;
+				pointer newData = newCapacity > 0 ? std::allocator_traits<Allocator>::allocate(as_allocator(), newCapacity) : nullptr;
 
 				construct(newData);
 				
 				if (m_data) {
 					for (size_type i = 0; i < m_size; ++i) {
-						std::allocator_traits<Allocator>::construct(*this, newData + i, std::move(m_data[i]));
-						std::allocator_traits<Allocator>::destroy(*this, m_data + i);
+						std::allocator_traits<Allocator>::construct(as_allocator(), newData + i, std::move(m_data[i]));
+						std::allocator_traits<Allocator>::destroy(as_allocator(), m_data + i);
 					}
-					std::allocator_traits<Allocator>::deallocate(*this, m_data, m_capacity);
+					std::allocator_traits<Allocator>::deallocate(as_allocator(), m_data, m_capacity);
 				}
 				
 				m_data = newData;
@@ -562,7 +562,7 @@ namespace Halley {
 		{
 			assert(newSize <= m_size);
 			for (size_type i = newSize; i < m_size; ++i) {
-				std::allocator_traits<Allocator>::destroy(*this, m_data + i);
+				std::allocator_traits<Allocator>::destroy(as_allocator(), m_data + i);
 			}
 			m_size = newSize;
 		}
@@ -602,6 +602,11 @@ namespace Halley {
 		[[nodiscard]] iterator de_const_iter(const_iterator iter)
 		{
 			return iterator(begin() + (iter - begin()));
+		}
+
+		[[nodiscard]] Allocator& as_allocator() noexcept
+		{
+			return *this;
 		}
 	};
 

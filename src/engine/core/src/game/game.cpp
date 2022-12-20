@@ -30,7 +30,12 @@ void Game::endGame()
 
 std::unique_ptr<Stage> Game::makeStage(StageID)
 {
-	return std::unique_ptr<Stage>();
+	return {};
+}
+
+std::unique_ptr<FrameData> Game::makeFrameData()
+{
+	return std::make_unique<FrameData>();
 }
 
 int Game::getTargetFPS() const

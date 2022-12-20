@@ -82,6 +82,7 @@ namespace Halley
 		void tickFrame(Time time);
 		void render();
 		void waitForRenderEnd();
+		void updateFrameData(bool multithreaded);
 
 		void showComputerInfo() const;
 
@@ -113,6 +114,9 @@ namespace Halley
 		std::unique_ptr<Stage> nextStage;
 		uint32_t curStageFrames = 0;
 		bool pendingStageTransition = false;
+
+		std::unique_ptr<FrameData> frameDataUpdate;
+		std::unique_ptr<FrameData> frameDataRender;
 
 		bool initialized = false;
 		bool running = true;

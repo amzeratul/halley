@@ -2,9 +2,54 @@
 
 using namespace Halley;
 
-Stage::Stage(String _name)
-	: name(std::move(_name))
+Stage::Stage(String name)
+	: name(std::move(name))
 {
+}
+
+void Stage::init()
+{
+}
+
+void Stage::onStartFrame(Time dt)
+{
+}
+
+void Stage::onFixedUpdate(Time dt)
+{
+}
+
+void Stage::onVariableUpdate(Time dt)
+{
+}
+
+void Stage::onRender(RenderContext& rc) const
+{
+}
+
+void Stage::onStartFrame(Time dt, FrameData& frameData)
+{
+	onStartFrame(dt);
+}
+
+void Stage::onFixedUpdate(Time dt, FrameData& frameData)
+{
+	onFixedUpdate(dt);
+}
+
+void Stage::onVariableUpdate(Time dt, FrameData& frameData)
+{
+	onVariableUpdate(dt);
+}
+
+void Stage::onRender(RenderContext& rc, FrameData& frameData) const
+{
+	onRender(rc);
+}
+
+const HalleyAPI& Stage::getAPI() const
+{
+	return *api;
 }
 
 bool Stage::onQuitRequested()

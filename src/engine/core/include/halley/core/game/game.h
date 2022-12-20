@@ -2,6 +2,7 @@
 
 #include "halley/core/stage/stage.h"
 #include "halley/core/game/scene_editor_interface.h"
+#include "frame_data.h"
 
 namespace Halley
 {
@@ -41,6 +42,7 @@ namespace Halley
 		virtual void endGame();
 
 		virtual std::unique_ptr<Stage> makeStage(StageID id);
+		virtual std::unique_ptr<FrameData> makeFrameData();
 
 		virtual int getTargetFPS() const;
 		virtual int getTargetBackgroundFPS() const;
