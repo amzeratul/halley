@@ -36,6 +36,7 @@ namespace Halley
 
 		virtual bool onQuitRequested(); // Return true if OK to quit
 
+		virtual std::unique_ptr<FrameData> makeFrameData();
 		virtual bool hasMultithreadedRendering() const;
 
 	protected:

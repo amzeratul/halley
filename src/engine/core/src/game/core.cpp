@@ -530,12 +530,11 @@ void Core::updateFrameData(bool multithreaded)
 	} else {
 		frameDataRender = {};
 	}
-	if (frameDataUpdate) {
-		frameDataUpdate->clear();
-	} else {
+	if (!frameDataUpdate) {
 		frameDataUpdate = game->makeFrameData();
 		assert(!!frameDataUpdate);
 	}
+	frameDataUpdate->startFrame(multithreaded);
 }
 
 void Core::showComputerInfo() const

@@ -11,7 +11,7 @@ namespace Halley {
 	public:
 		virtual ~FrameData() = default;
 
-		virtual void clear() {}
+		virtual void startFrame(bool multithreaded) {}
 
 		template <typename T>
 		static T& getCurrent()

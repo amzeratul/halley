@@ -1,5 +1,7 @@
 #include "stage/stage.h"
 
+#include "game/game.h"
+
 using namespace Halley;
 
 Stage::Stage(String name)
@@ -55,6 +57,11 @@ const HalleyAPI& Stage::getAPI() const
 bool Stage::onQuitRequested()
 {
 	return true;
+}
+
+std::unique_ptr<FrameData> Stage::makeFrameData()
+{
+	return game->makeFrameData();
 }
 
 bool Stage::hasMultithreadedRendering() const
