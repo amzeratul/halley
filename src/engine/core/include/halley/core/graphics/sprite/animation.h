@@ -148,13 +148,19 @@ namespace Halley
 		void addDirection(const AnimationDirection& direction);
 
 	private:
-		String name;
-		String spriteSheetName;
-		String materialName;
-		Vector<AnimationSequence> sequences;
-		Vector<AnimationDirection> directions;
+		mutable bool hasPivot = false;
+		mutable bool hasBounds = false;
+		mutable Vector2i pivot;
+		mutable Rect4i bounds;
 
 		std::shared_ptr<const SpriteSheet> spriteSheet;
 		std::shared_ptr<Material> material;
+
+		Vector<AnimationSequence> sequences;
+		Vector<AnimationDirection> directions;
+
+		String name;
+		String spriteSheetName;
+		String materialName;
 	};
 }

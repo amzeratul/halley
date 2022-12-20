@@ -287,15 +287,23 @@ Vector<String> Animation::getDirectionNames() const
 
 Vector2i Animation::getPivot() const
 {
-	return sequences.at(0).getFrame(0).getSprite(0).origPivot;
+	if (!hasPivot) {
+		pivot = sequences.at(0).getFrame(0).getSprite(0).origPivot;
+		hasPivot = true;
+	}
+	return pivot;
 }
 
 Rect4i Animation::getBounds() const
 {
-	auto& sprite = sequences.at(0).getFrame(0).getSprite(0);
-	const auto size = Vector2i(sprite.size) + Vector2i(sprite.trimBorder.xy() + sprite.trimBorder.zw());
-	const auto pivot = sprite.origPivot;
-	return Rect4i(-pivot, -pivot + size);
+	if (!hasBounds) {
+		auto& sprite = sequences.at(0).getFrame(0).getSprite(0);
+		const auto size = Vector2i(sprite.size) + Vector2i(sprite.trimBorder.xy() + sprite.trimBorder.zw());
+		const auto pivot = sprite.origPivot;
+		bounds = Rect4i(-pivot, -pivot + size);
+		hasBounds = true;
+	}
+	return bounds;
 }
 
 bool Animation::hasSequence(const String& seqName) const

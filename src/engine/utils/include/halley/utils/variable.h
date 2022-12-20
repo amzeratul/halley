@@ -138,7 +138,12 @@ namespace Halley {
 		Variable(const VariableTable& parent, String key)
 			: VariableBase(parent, std::move(key))
 		{}
-		
+
+		Variable(const Variable<T>& other) = delete;
+		Variable(Variable<T>&& other) = default;
+		Variable& operator=(const Variable<T>& other) = delete;
+		Variable& operator=(Variable<T>&& other) = default;
+
 		operator T()
 		{
 			T v;
