@@ -169,6 +169,7 @@ namespace Halley {
 		bool entityDirty = false;
 		bool entityReloaded = false;
 		bool editor = false;
+		bool devMode = false;
 		
 		Vector<Entity*> entities;
 		Vector<Entity*> entitiesPendingCreation;

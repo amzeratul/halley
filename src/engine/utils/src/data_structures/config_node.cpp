@@ -1118,7 +1118,7 @@ const ConfigNode& ConfigNode::operator[](std::string_view key) const
 		undefinedConfigNode.setParent(this, -1);
 		undefinedConfigNode.parent->file = parent ? parent->file : nullptr;
 #endif
-		undefinedConfigNodeName = key;
+		//undefinedConfigNodeName = key;
 		return undefinedConfigNode;
 	}
 }
@@ -1139,7 +1139,7 @@ ConfigNode& ConfigNode::at(std::string_view key)
 		undefinedConfigNode.setParent(this, -1);
 		undefinedConfigNode.parent->file = parent ? parent->file : nullptr;
 #endif
-		undefinedConfigNodeName = key;
+		//undefinedConfigNodeName = key;
 		return undefinedConfigNode;
 	}
 }
@@ -1155,7 +1155,7 @@ const ConfigNode& ConfigNode::at(std::string_view key) const
 		undefinedConfigNode.setParent(this, -1);
 		undefinedConfigNode.parent->file = parent ? parent->file : nullptr;
 #endif
-		undefinedConfigNodeName = key;
+		//undefinedConfigNodeName = key;
 		return undefinedConfigNode;
 	}
 }

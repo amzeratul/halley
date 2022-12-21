@@ -28,6 +28,7 @@ World::World(const HalleyAPI& api, Resources& resources, WorldReflection reflect
 	, componentDeleterTable(std::make_shared<ComponentDeleterTable>())
 	, entityPool(std::make_shared<PoolAllocator<Entity>>())
 {
+	devMode = api.core->isDevMode();
 }
 
 World::~World()
@@ -197,7 +198,8 @@ EntityRef World::createEntity(UUID uuid, String name, std::optional<EntityRef> p
 		uuid = UUID::generate();
 	}
 
-	if (uuidMap.contains(uuid)) {
+	// Don't do this check in release mode as it's somewhat expensive
+	if (devMode && uuidMap.contains(uuid)) {
 		const auto oldEntity = uuidMap.at(uuid);
 		throw Exception("Error creating entity \"" +name + "\" - UUID " + toString(uuid) + " already exists: " + oldEntity->name, HalleyExceptions::Entity);
 	}
@@ -450,7 +452,7 @@ size_t World::sendSystemMessage(SystemMessageContext origContext, const String& 
 
 bool World::isDevMode() const
 {
-	return api.core->isDevMode();
+	return devMode;
 }
 
 void World::setEditor(bool isEditor)
