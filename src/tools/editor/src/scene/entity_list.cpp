@@ -200,7 +200,7 @@ void EntityList::onEntitiesAdded(gsl::span<const EntityChangeOperation> changes)
 	Vector<String> ids;
 
 	for (const auto& change: changes) {
-		addEntityTree(change.parent, change.childIndex, change.data->asEntityData());
+		addEntityTree(change.parent, change.childIndex, dynamic_cast<const EntityData&>(*change.data));
 		ids.push_back(change.entityId);
 	}
 

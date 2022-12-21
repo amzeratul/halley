@@ -7,7 +7,7 @@
 namespace Halley {
 	class IDataInterpolatorSetRetriever;
 
-	class EntityDataDelta : public IEntityData {
+	class EntityDataDelta final : public IEntityData {
 		friend class EntityData;
 		
 	public:
@@ -51,9 +51,7 @@ namespace Halley {
 
 		bool isSimpleDelta() const;
     	
-        bool isDelta() const override;
-        const EntityData& asEntityData() const override;
-        const EntityDataDelta& asEntityDataDelta() const override;
+        Type getType() const override;
 
 		void instantiate(const UUID& uuid);
 		EntityDataDelta instantiateAsCopy(const UUID& uuid) const;

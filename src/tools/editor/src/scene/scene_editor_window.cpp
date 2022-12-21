@@ -565,7 +565,7 @@ void SceneEditorWindow::addEntities(gsl::span<const EntityChangeOperation> chang
 			const size_t insertPos = change.childIndex >= 0 ? static_cast<size_t>(change.childIndex) : std::numeric_limits<size_t>::max();
 			auto& seq = parentData.getChildren();
 
-			seq.insert(seq.begin() + std::min(insertPos, seq.size()), change.data->asEntityData());
+			seq.insert(seq.begin() + std::min(insertPos, seq.size()), dynamic_cast<const EntityData&>(*change.data));
 		}
 	}
 
@@ -575,7 +575,7 @@ void SceneEditorWindow::addEntities(gsl::span<const EntityChangeOperation> chang
 void SceneEditorWindow::onEntitiesAdded(gsl::span<const EntityChangeOperation> changes)
 {
 	for (const auto& change: changes) {
-		const auto& id = change.data->asEntityData().getInstanceUUID().toString();
+		const auto& id = dynamic_cast<const EntityData&>(*change.data).getInstanceUUID().toString();
 		const auto& parentId = change.parent;
 		sceneData->reloadEntity(parentId.isEmpty() ? id : parentId);
 	}
@@ -614,7 +614,7 @@ void SceneEditorWindow::modifyEntities(gsl::span<const EntityChangeOperation> pa
 		oldDatas.emplace_back(EntityData(data));
 		oldDataPtrs.emplace_back(&oldDatas.back()); // This is only OK because of the reserve above, otherwise the pointer might be invalidated
 		newDataPtrs.emplace_back(&data);
-		data.applyDelta(patch.data->asEntityDataDelta());
+		data.applyDelta(dynamic_cast<const EntityDataDelta&>(*patch.data));
 	}
 	
 	onEntitiesModified(ids, oldDataPtrs, newDataPtrs);
@@ -666,7 +666,7 @@ void SceneEditorWindow::replaceEntities(gsl::span<const EntityChangeOperation> p
 {
 	// TODO
 	Expects(patches.size() == 1);
-	replaceEntity(patches.front().entityId, EntityData(patches.front().data->asEntityData()));
+	replaceEntity(patches.front().entityId, EntityData(dynamic_cast<const EntityData&>(*patches.front().data)));
 }
 
 void SceneEditorWindow::extractPrefab(const String& id)

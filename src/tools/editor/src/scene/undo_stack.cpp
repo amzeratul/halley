@@ -188,7 +188,7 @@ bool UndoStack::ActionPair::arePatchesCompatible(const EntityChangeOperation& a,
 	}
 
 	if (type == Type::EntityModified) {
-		return a.data->asEntityDataDelta().modifiesTheSameAs(b.data->asEntityDataDelta());
+		return dynamic_cast<const EntityDataDelta&>(*a.data).modifiesTheSameAs(dynamic_cast<const EntityDataDelta&>(*b.data));
 	}
 
 	return true;	

@@ -6,14 +6,19 @@
 namespace Halley {
 	class EntityData;
     class EntityDataDelta;
+    class EntityDataInstanced;
 
 	class IEntityData {
 	public:
+        enum class Type {
+	        Data,
+            Delta,
+            Instanced
+        };
+
 		virtual ~IEntityData() = default;
 
-		virtual bool isDelta() const = 0;
-		virtual const EntityData& asEntityData() const = 0;
-		virtual const EntityDataDelta& asEntityDataDelta() const = 0;
+		virtual Type getType() const = 0;
 	};
 
 	struct EntityChangeOperation {
@@ -26,10 +31,8 @@ namespace Halley {
         bool operator==(const EntityChangeOperation& other) const;
         bool operator!=(const EntityChangeOperation& other) const;
 	};
-	
-    class EntityData : public IEntityData {
-    	friend class EntityDataDelta;
-    	
+
+    class IEntityConcreteData : public IEntityData {
     public:
         enum class Flag : uint8_t {
 	        NotSelectable = 1,
@@ -37,6 +40,25 @@ namespace Halley {
             TreeViewCollapsed = 4
         };
 
+    	virtual const String& getName() const = 0;
+    	virtual const String& getPrefab() const = 0;
+        virtual uint8_t getFlags() const = 0;
+    	virtual bool getFlag(Flag flag) const = 0;
+        virtual const UUID& getInstanceUUID() const = 0;
+        virtual const UUID& getPrefabUUID() const = 0;
+
+        virtual size_t getNumChildren() const = 0;
+        virtual const IEntityConcreteData& getChild(size_t idx) const = 0;
+        virtual size_t getNumComponents() const = 0;
+        virtual const std::pair<String, ConfigNode>& getComponent(size_t idx) const = 0;
+
+		bool hasChildWithUUID(const UUID& uuid) const;
+	};
+	
+    class EntityData final : public IEntityConcreteData {
+    	friend class EntityDataDelta;
+    	
+    public:
     	EntityData();
     	
         explicit EntityData(UUID instanceUUID);
@@ -53,20 +75,25 @@ namespace Halley {
     	void serialize(Serializer& s) const;
     	void deserialize(Deserializer& s);
 
-    	const String& getName() const { return name; }
-    	const String& getPrefab() const { return prefab; }
+    	const String& getName() const override { return name; }
+    	const String& getPrefab() const override { return prefab; }
     	const String& getIcon() const { return icon; }
-        uint8_t getFlags() const { return flags; }
-        bool getFlag(Flag flag) const;
-    	const UUID& getInstanceUUID() const { return instanceUUID; }
-    	const UUID& getPrefabUUID() const { return prefabUUID; }
+        uint8_t getFlags() const override { return flags; }
+        bool getFlag(Flag flag) const override;
+    	const UUID& getInstanceUUID() const override { return instanceUUID; }
+    	const UUID& getPrefabUUID() const override { return prefabUUID; }
     	const UUID& getParentUUID() const { return parentUUID; }
 
     	const Vector<EntityData>& getChildren() const { return children; }
     	Vector<EntityData>& getChildren() { return children; }
-    	const Vector<std::pair<String, ConfigNode>>& getComponents() const { return components; }
+        size_t getNumChildren() const override;
+        const IEntityConcreteData& getChild(size_t idx) const override;
+
+        const Vector<std::pair<String, ConfigNode>>& getComponents() const { return components; }
     	Vector<std::pair<String, ConfigNode>>& getComponents() { return components; }
         bool hasComponent(const String& componentName) const;
+        size_t getNumComponents() const override;
+        const std::pair<String, ConfigNode>& getComponent(size_t idx) const override;
 
         bool fillEntityDataStack(Vector<const EntityData*>& stack, const UUID& entityId) const;
 
@@ -99,9 +126,7 @@ namespace Halley {
 		void instantiateWith(const EntityData& instance);
 	    EntityData instantiateWithAsCopy(const EntityData& instance) const;
     	
-        bool isDelta() const override;
-        const EntityData& asEntityData() const override;
-        const EntityDataDelta& asEntityDataDelta() const override;
+        Type getType() const override;
 
     	void setSceneRoot(bool root);
     	bool isSceneRoot() const;

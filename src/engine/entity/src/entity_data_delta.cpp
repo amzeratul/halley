@@ -233,19 +233,9 @@ bool EntityDataDelta::isSimpleDelta() const
 	return true;
 }
 
-bool EntityDataDelta::isDelta() const
+IEntityData::Type EntityDataDelta::getType() const
 {
-	return true;
-}
-
-const EntityData& EntityDataDelta::asEntityData() const
-{
-	throw Exception("Not an EntityData", HalleyExceptions::Entity);
-}
-
-const EntityDataDelta& EntityDataDelta::asEntityDataDelta() const
-{
-	return *this;
+	return Type::Delta;
 }
 
 void EntityDataDelta::instantiate(const UUID& uuid)

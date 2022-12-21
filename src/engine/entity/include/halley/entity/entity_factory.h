@@ -2,6 +2,7 @@
 #include <functional>
 
 #include "create_functions.h"
+#include "entity_data_instanced.h"
 #include "prefab.h"
 #include "halley/file_formats/config_file.h"
 #include "halley/data_structures/maybe.h"
@@ -57,9 +58,9 @@ namespace Halley {
 		Resources& resources;
 
 		void updateEntityNode(const IEntityData& iData, EntityRef entity, std::optional<EntityRef> parent, const std::shared_ptr<EntityFactoryContext>& context);
-		void updateEntityComponents(EntityRef entity, const EntityData& data, const EntityFactoryContext& context);
+		void updateEntityComponents(EntityRef entity, const IEntityConcreteData& data, const EntityFactoryContext& context);
 		void updateEntityComponentsDelta(EntityRef entity, const EntityDataDelta& delta, const EntityFactoryContext& context);
-		void updateEntityChildren(EntityRef entity, const EntityData& data, const std::shared_ptr<EntityFactoryContext>& context);
+		void updateEntityChildren(EntityRef entity, const IEntityConcreteData& data, const std::shared_ptr<EntityFactoryContext>& context);
 		void updateEntityChildrenDelta(EntityRef entity, const EntityDataDelta& delta, const std::shared_ptr<EntityFactoryContext>& context);
 		std::optional<ConfigNode> getComponentsWithPrefabDefaults(EntityRef entity, const EntityFactoryContext& context, const ConfigNode& componentData, const String& componentName);
 
@@ -67,7 +68,7 @@ namespace Halley {
 		EntityRef getEntity(const UUID& instanceUUID, EntityFactoryContext& context, bool allowWorldLookup);
 
 		std::shared_ptr<EntityFactoryContext> makeContext(const IEntityData& data, std::optional<EntityRef> existing, EntityScene* scene, bool updateContext, int serializationMask, EntityFactoryContext* parent = nullptr, IDataInterpolatorSetRetriever* interpolators = nullptr);
-		EntityRef instantiateEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup);
+		EntityRef instantiateEntity(const IEntityConcreteData& data, EntityFactoryContext& context, bool allowWorldLookup);
 		void preInstantiateEntities(const IEntityData& data, EntityFactoryContext& context, int depth);
 		void collectExistingEntities(EntityRef entity, EntityFactoryContext& context);
 
@@ -121,7 +122,7 @@ namespace Halley {
 		void notifyEntity(const EntityRef& entity) const;
 		EntityRef getEntity(const UUID& uuid, bool allowPrefabUUID, bool allowWorldLookup) const;
 
-		bool needsNewContextFor(const EntityData& value) const;
+		bool needsNewContextFor(const IEntityConcreteData& value) const;
 		bool isUpdateContext() const;
 
 		const IEntityData& getRootEntityData() const;
@@ -144,7 +145,7 @@ namespace Halley {
 		EntityId curEntity;
 
 		const IEntityData* entityData = nullptr;
-		EntityData instancedEntityData;
+		EntityDataInstanced instancedEntityData;
 
 		void setEntityData(const IEntityData& iData);
 	};

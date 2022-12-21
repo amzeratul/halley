@@ -15,10 +15,10 @@ EntityChangeOperation EntityChangeOperation::clone() const
 	result.childIndex = childIndex;
 
 	if (data) {
-		if (data->isDelta()) {
-			result.data = std::make_unique<EntityDataDelta>(data->asEntityDataDelta());
+		if (data->getType() == IEntityData::Type::Delta) {
+			result.data = std::make_unique<EntityDataDelta>(dynamic_cast<EntityDataDelta&>(*data));
 		} else {
-			result.data = std::make_unique<EntityData>(data->asEntityData());
+			result.data = std::make_unique<EntityData>(dynamic_cast<EntityData&>(*data));
 		}
 	}
 
@@ -31,7 +31,7 @@ bool EntityChangeOperation::operator==(const EntityChangeOperation& other) const
 		return false;
 	}
 	if (data && other.data) {
-		if (data->isDelta() != other.data->isDelta()) {
+		if (data->getType() != other.data->getType()) {
 			return false;
 		}
 		// TODO, compare datas
@@ -43,6 +43,17 @@ bool EntityChangeOperation::operator==(const EntityChangeOperation& other) const
 bool EntityChangeOperation::operator!=(const EntityChangeOperation& other) const
 {
 	return !(*this == other);
+}
+
+bool IEntityConcreteData::hasChildWithUUID(const UUID& uuid) const
+{
+	const auto n = getNumChildren();
+	for (size_t i = 0; i < n; ++i) {
+		if (getChild(i).getInstanceUUID() == uuid) {
+			return true;
+		}
+	}
+	return false;
 }
 
 EntityData::EntityData()
@@ -167,6 +178,16 @@ bool EntityData::getFlag(Flag flag) const
 	return (flags & static_cast<uint8_t>(flag)) != 0;
 }
 
+size_t EntityData::getNumChildren() const
+{
+	return children.size();
+}
+
+const IEntityConcreteData& EntityData::getChild(size_t idx) const
+{
+	return children[idx];
+}
+
 bool EntityData::hasComponent(const String& componentName) const
 {
 	for (const auto& c: components) {
@@ -175,6 +196,16 @@ bool EntityData::hasComponent(const String& componentName) const
 		}
 	}
 	return false;
+}
+
+size_t EntityData::getNumComponents() const
+{
+	return components.size();
+}
+
+const std::pair<String, ConfigNode>& EntityData::getComponent(size_t idx) const
+{
+	return components[idx];
 }
 
 bool EntityData::fillEntityDataStack(Vector<const EntityData*>& stack, const UUID& entityId) const
@@ -488,19 +519,9 @@ EntityData EntityData::instantiateWithAsCopy(const EntityData& instance) const
 	return clone;
 }
 
-bool EntityData::isDelta() const
+IEntityData::Type EntityData::getType() const
 {
-	return false;
-}
-
-const EntityData& EntityData::asEntityData() const
-{
-	return *this;
-}
-
-const EntityDataDelta& EntityData::asEntityDataDelta() const
-{
-	throw Exception("Not an EntityDataDelta", HalleyExceptions::Entity);
+	return Type::Data;
 }
 
 void EntityData::setSceneRoot(bool root)

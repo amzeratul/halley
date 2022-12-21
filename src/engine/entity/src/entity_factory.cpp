@@ -6,6 +6,7 @@
 #include "component_reflector.h"
 #include "entity_scene.h"
 #include "halley/support/logger.h"
+#include "entity_data_instanced.h"
 #include "world.h"
 #include "registry.h"
 #include "halley/bytes/byte_serializer.h"
@@ -117,16 +118,16 @@ std::shared_ptr<const Prefab> EntityFactory::getPrefab(const String& id) const
 
 std::shared_ptr<const Prefab> EntityFactory::getPrefab(std::optional<EntityRef> entity, const IEntityData& data) const
 {
-	if (data.isDelta()) {
+	if (data.getType() == IEntityData::Type::Delta) {
 		assert(entity);
-		const auto& prefabId = data.asEntityDataDelta().getPrefab();
+		const auto& prefabId = dynamic_cast<const EntityDataDelta&>(data).getPrefab();
 		if (prefabId) {
 			return getPrefab(prefabId.value());
 		} else {
 			return entity->getPrefab();
 		}
 	} else {
-		return getPrefab(data.asEntityData().getPrefab());
+		return getPrefab(dynamic_cast<const IEntityConcreteData&>(data).getPrefab());
 	}
 }
 
@@ -197,7 +198,7 @@ EntityRef EntityFactoryContext::getEntity(const UUID& uuid, bool allowPrefabUUID
 	}
 }
 
-bool EntityFactoryContext::needsNewContextFor(const EntityData& data) const
+bool EntityFactoryContext::needsNewContextFor(const IEntityConcreteData& data) const
 {
 	const bool entityDataIsPrefabInstance = !data.getPrefab().isEmpty();
 	const bool abandonPrefab = prefab && !data.getPrefabUUID().isValid();
@@ -242,14 +243,14 @@ void EntityFactoryContext::setCurrentEntity(EntityId entity)
 void EntityFactoryContext::setEntityData(const IEntityData& iData)
 {
 	if (prefab) {
-		if (iData.isDelta()) {
-			const auto& newPrefab = iData.asEntityDataDelta().getPrefab();
+		if (iData.getType() == IEntityData::Type::Delta) {
+			const auto& newPrefab = dynamic_cast<const EntityDataDelta&>(iData).getPrefab();
 			if (newPrefab && newPrefab != prefab->getAssetId()) {
 				Logger::logWarning("Changing prefab in EntityFactoryContext::setEntityData, this will probably not work correctly");
 			}
 			entityData = &iData;
 		} else {
-			instancedEntityData = prefab->getEntityData().instantiateWithAsCopy(iData.asEntityData());
+			instancedEntityData = EntityDataInstanced(prefab->getEntityData(), dynamic_cast<const IEntityConcreteData&>(iData));
 			entityData = &instancedEntityData;
 		}
 	} else {
@@ -319,8 +320,8 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 
 	context->setCurrentEntity(entity.getEntityId());
 
-	if (iData.isDelta()) {
-		const auto& delta = iData.asEntityDataDelta();
+	if (iData.getType() == IEntityData::Type::Delta) {
+		const auto& delta = dynamic_cast<const EntityDataDelta&>(iData);
 		if (delta.getName()) {
 			entity.setName(delta.getName().value());
 		}
@@ -332,7 +333,7 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 		updateEntityComponentsDelta(entity, delta, *context);
 		updateEntityChildrenDelta(entity, delta, context);
 	} else {
-		const auto& data = iData.asEntityData();
+		const auto& data = dynamic_cast<const IEntityConcreteData&>(iData);
 		entity.setName(data.getName());
 		entity.setSelectable(!data.getFlag(EntityData::Flag::NotSelectable));
 		entity.setEnabled(!data.getFlag(EntityData::Flag::Disabled));
@@ -347,13 +348,15 @@ void EntityFactory::updateEntityNode(const IEntityData& iData, EntityRef entity,
 	context->setCurrentEntity(EntityId());
 }
 
-void EntityFactory::updateEntityComponents(EntityRef entity, const EntityData& data, const EntityFactoryContext& context)
+void EntityFactory::updateEntityComponents(EntityRef entity, const IEntityConcreteData& data, const EntityFactoryContext& context)
 {
 	const auto& func = world.getCreateComponentFunction();
+	const size_t nComponents = data.getNumComponents();
 
 	if (entity.getNumComponents() == 0) {
 		// Simple population
-		for (const auto& [componentName, componentData]: data.getComponents()) {
+		for (size_t i = 0; i < nComponents; ++i) {
+			const auto& [componentName, componentData] = data.getComponent(i);
 			try {
 				func(context, componentName, entity, componentData);
 			} catch (...) {
@@ -368,7 +371,8 @@ void EntityFactory::updateEntityComponents(EntityRef entity, const EntityData& d
 		}
 
 		// Populate
-		for (const auto& [componentName, componentData]: data.getComponents()) {
+		for (size_t i = 0; i < nComponents; ++i) {
+			const auto& [componentName, componentData] = data.getComponent(i);
 			try {
 				const auto result = func(context, componentName, entity, componentData);
 				if (!result.created) {
@@ -426,15 +430,13 @@ std::optional<ConfigNode> EntityFactory::getComponentsWithPrefabDefaults(EntityR
 	return result;
 }
 
-void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& data, const std::shared_ptr<EntityFactoryContext>& context)
+void EntityFactory::updateEntityChildren(EntityRef entity, const IEntityConcreteData& data, const std::shared_ptr<EntityFactoryContext>& context)
 {
 	if (!entity.getRawChildren().empty()) {
 		// Delete old children that are no longer present
-		const auto& newChildren = data.getChildren();
 		Vector<EntityRef> toDelete;
 		for (auto c: entity.getChildren()) {
-			const auto& uuid = c.getInstanceUUID();
-			if (!std_ex::contains_if(newChildren, [&] (const EntityData& c) { return c.getInstanceUUID() == uuid; })) {
+			if (!data.hasChildWithUUID(c.getInstanceUUID())) {
 				toDelete.push_back(c);
 			}
 		}
@@ -444,7 +446,9 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& dat
 	}
 	
 	// Update children
-	for (const auto& child: data.getChildren()) {
+	const auto nChildren = data.getNumChildren();
+	for (size_t i = 0; i < nChildren; ++i) {
+		const auto& child = data.getChild(i);
 		if (context->needsNewContextFor(child)) {
 			const auto newContext = makeContext(child, entity, context->getScene(), context->isUpdateContext(), context->getEntitySerializationContext().entitySerializationTypeMask, context.get());
 			updateEntityNode(newContext->getRootEntityData(), getEntity(child.getInstanceUUID(), *newContext, false), entity, newContext);
@@ -455,8 +459,9 @@ void EntityFactory::updateEntityChildren(EntityRef entity, const EntityData& dat
 
 	// Ensure children order
 	Vector<UUID> childInstanceUUIDs;
-	childInstanceUUIDs.reserve(data.getChildren().size());
-	for (const auto& child: data.getChildren()) {
+	childInstanceUUIDs.reserve(nChildren);
+	for (size_t i = 0; i < nChildren; ++i) {
+		const auto& child = data.getChild(i);
 		childInstanceUUIDs.push_back(child.getInstanceUUID());
 	}
 	entity.sortChildrenByInstanceUUIDs(childInstanceUUIDs);
@@ -492,8 +497,8 @@ void EntityFactory::updateEntityChildrenDelta(EntityRef entity, const EntityData
 
 void EntityFactory::preInstantiateEntities(const IEntityData& iData, EntityFactoryContext& context, int depth)
 {
-	if (iData.isDelta()) {
-		const auto& delta = iData.asEntityDataDelta();
+	if (iData.getType() == IEntityData::Type::Delta) {
+		const auto& delta = dynamic_cast<const EntityDataDelta&>(iData);
 		
 		for (const auto& child: delta.getChildrenAdded()) {
 			preInstantiateEntities(child, context, depth + 1);
@@ -502,19 +507,21 @@ void EntityFactory::preInstantiateEntities(const IEntityData& iData, EntityFacto
 			preInstantiateEntities(child.second, context, depth + 1);
 		}
 	} else {
-		const auto& data = iData.asEntityData();
+		const auto& data = dynamic_cast<const IEntityConcreteData&>(iData);
 		const auto entity = instantiateEntity(data, context, context.isUpdateContext() && depth == 0);
 		if (depth == 0) {
 			context.notifyEntity(entity);
 		}
-		
-		for (const auto& child: data.getChildren()) {
+
+		const auto nChildren = data.getNumChildren();
+		for (size_t i = 0; i < nChildren; ++i) {
+			const auto& child = data.getChild(i);
 			preInstantiateEntities(child, context, depth + 1);
 		}
 	}
 }
 
-EntityRef EntityFactory::instantiateEntity(const EntityData& data, EntityFactoryContext& context, bool allowWorldLookup)
+EntityRef EntityFactory::instantiateEntity(const IEntityConcreteData& data, EntityFactoryContext& context, bool allowWorldLookup)
 {
 	const auto existing = tryGetEntity(data.getInstanceUUID(), context, allowWorldLookup);
 	if (existing.isValid()) {
