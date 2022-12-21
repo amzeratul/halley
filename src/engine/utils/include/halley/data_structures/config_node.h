@@ -438,8 +438,8 @@ namespace Halley {
 
 		void ensureType(ConfigNodeType type);
 
-		bool hasKey(const String& key) const;
-		void removeKey(const String& key);
+		bool hasKey(std::string_view key) const;
+		void removeKey(std::string_view key);
 
 		ConfigNode& operator[](std::string_view key);
 		ConfigNode& operator[](size_t idx);

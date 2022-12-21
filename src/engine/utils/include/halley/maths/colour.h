@@ -30,6 +30,7 @@
 #include "halley/utils/utils.h"
 #include "halley/maths/vector3.h"
 #include "halley/maths/vector4.h"
+#include "halley/text/encode.h"
 
 namespace Halley {
 	// This whole class is TERRIBLE
@@ -126,7 +127,7 @@ namespace Halley {
 			return ss.str();
 		}
 
-		[[nodiscard]] static Colour4 fromString(String str)
+		[[nodiscard]] static Colour4 fromString(std::string_view str)
 		{
 			Colour4 col;
 			size_t len = str.length();
@@ -273,13 +274,11 @@ namespace Halley {
 			return convertColour<T, uint8_t>(v);
 		}
 
-		static T parseHex(String str)
+		static T parseHex(std::string_view str)
 		{
-			std::stringstream ss(str);
-			int value;
-			ss << std::hex;
-			ss >> value;
-			return convertColour<uint8_t, T>(static_cast<uint8_t>(value));
+			uint8_t out;
+			Encode::decodeBase16(str, gsl::as_writable_bytes(gsl::span<uint8_t>(&out, 1)));
+			return convertColour<uint8_t, T>(out);
 		}
 
 		template <typename U>

@@ -139,9 +139,11 @@ ConfigNode::ConfigNode(IdxType value)
 	operator=(value);
 }
 
-void ConfigNode::removeKey(const String& key)
+void ConfigNode::removeKey(std::string_view key)
 {
-	asMap().erase(key);
+	auto& map = asMap();
+	const auto iter = map.find(key);
+	map.erase(iter);
 }
 
 ConfigNode::~ConfigNode()
@@ -688,13 +690,13 @@ bool ConfigNode::asBool() const
 	} else if (type == ConfigNodeType::Int64) {
 		return int64Data != 0;
 	} else if (type == ConfigNodeType::String) {
-		const auto& str = asString();
+		const auto& str = asStringView();
 		if (str == "true") {
 			return true;
 		} else if (str == "false" || str == "0") {
 			return false;
 		}
-		return !asString().isEmpty();
+		return !str.empty();
 	} else if (type == ConfigNodeType::EntityId) {
 		return int64Data != -1;
 	}
@@ -1104,7 +1106,7 @@ void ConfigNode::ensureType(ConfigNodeType t)
 	}
 }
 
-bool ConfigNode::hasKey(const String& key) const
+bool ConfigNode::hasKey(std::string_view key) const
 {
 	if (type == ConfigNodeType::Map || type == ConfigNodeType::DeltaMap) {
 		auto& map = asMap();

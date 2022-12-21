@@ -722,7 +722,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 	std::shared_ptr<const MaterialDefinition> materialDefinition;
 	const auto& materialNode = node["material"];
 	if (materialNode.getType() == ConfigNodeType::String) {
-		materialDefinition = context.resources->get<MaterialDefinition>(materialNode.asString());
+		materialDefinition = context.resources->get<MaterialDefinition>(materialNode.asStringView());
 		hasNewMaterial = true;
 	} else if (materialNode.getType() == ConfigNodeType::Del || !sprite.hasMaterial()) {
 		materialDefinition = context.resources->get<MaterialDefinition>(MaterialDefinition::defaultMaterial);
@@ -744,9 +744,9 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		}
 		
 		if (texUnit == 0) {
-			sprite.setImage(*context.resources, imageNode.asString(), node["material"].asStringView(sprite.hasMaterial() ? std::string_view(sprite.getMaterial().getDefinition().getName()) : ""));
+			sprite.setImage(*context.resources, imageNode.asStringView(), node["material"].asStringView(sprite.hasMaterial() ? std::string_view(sprite.getMaterial().getDefinition().getName()) : ""));
 		} else {
-			const auto image = context.resources->get<SpriteResource>(imageNode.asString());
+			const auto image = context.resources->get<SpriteResource>(imageNode.asStringView());
 			sprite.setTexRect1(image->getSprite().coords);
 			sprite.getMutableMaterial().set(texUnit, image->getSpriteSheet()->getTexture());
 		}
@@ -835,7 +835,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		if (colourNode.getType() == ConfigNodeType::Del) {
 			sprite.setColour(Colour(1, 1, 1));
 		} else {
-			sprite.setColour(Colour4f::fromString(node["colour"].asString()));
+			sprite.setColour(Colour4f::fromString(node["colour"].asStringView()));
 		}
 	}
 }
