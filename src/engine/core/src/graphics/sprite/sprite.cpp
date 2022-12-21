@@ -352,13 +352,13 @@ Sprite& Sprite::setImage(std::shared_ptr<const Texture> image, std::shared_ptr<c
 	return *this;
 }
 
-Sprite& Sprite::setImage(Resources& resources, const String& imageName, String materialName)
+Sprite& Sprite::setImage(Resources& resources, std::string_view imageName, std::string_view materialName)
 {
-	Expects (!imageName.isEmpty());
+	Expects (!imageName.empty());
 
 	const auto sprite = resources.get<SpriteResource>(imageName);
 
-	if (materialName == "") {
+	if (materialName.empty()) {
 		materialName = sprite->getDefaultMaterialName();
 	}
 
@@ -385,7 +385,7 @@ Sprite& Sprite::setImage(const SpriteResource& sprite, std::shared_ptr<const Mat
 	return *this;
 }
 
-Sprite& Sprite::setImage(Resources& resources, VideoAPI& videoAPI, std::shared_ptr<Image> image, String materialName)
+Sprite& Sprite::setImage(Resources& resources, VideoAPI& videoAPI, std::shared_ptr<Image> image, std::string_view materialName)
 {
 	if (image && image->getSize().x > 0 && image->getSize().y > 0) {
 		auto tex = std::shared_ptr<Texture>(videoAPI.createTexture(image->getSize()));
@@ -394,7 +394,7 @@ Sprite& Sprite::setImage(Resources& resources, VideoAPI& videoAPI, std::shared_p
 		tex->startLoading();
 		tex->load(std::move(desc));
 
-		const auto matDef = resources.get<MaterialDefinition>(materialName.isEmpty() ? MaterialDefinition::defaultMaterial : materialName);
+		const auto matDef = resources.get<MaterialDefinition>(materialName.empty() ? MaterialDefinition::defaultMaterial : materialName);
 		setImage(tex, matDef);
 		setImageData(*tex);
 	}
@@ -412,10 +412,10 @@ Sprite& Sprite::setSprite(const SpriteResource& sprite, bool applyPivot)
 	return *this;
 }
 
-Sprite& Sprite::setSprite(Resources& resources, const String& spriteSheetName, const String& imageName, String materialName)
+Sprite& Sprite::setSprite(Resources& resources, std::string_view spriteSheetName, std::string_view imageName, std::string_view materialName)
 {
-	Expects (!spriteSheetName.isEmpty());
-	Expects (!imageName.isEmpty());
+	Expects (!spriteSheetName.empty());
+	Expects (!imageName.empty());
 
 	if (materialName == "") {
 		materialName = MaterialDefinition::defaultMaterial;
@@ -427,9 +427,9 @@ Sprite& Sprite::setSprite(Resources& resources, const String& spriteSheetName, c
 	return *this;
 }
 
-Sprite& Sprite::setSprite(const SpriteSheet& sheet, const String& name, bool applyPivot)
+Sprite& Sprite::setSprite(const SpriteSheet& sheet, std::string_view name, bool applyPivot)
 {
-	Expects (!name.isEmpty());
+	Expects (!name.empty());
 	setSprite(sheet.getSprite(name), applyPivot);
 	return *this;
 }
@@ -731,7 +731,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		materialDefinition = sprite.getMaterial().getDefinitionPtr();
 	}
 
-	auto loadTexture = [&](const String& nodeName, size_t texUnit) -> bool
+	auto loadTexture = [&](std::string_view nodeName, size_t texUnit) -> bool
 	{
 		if (!node.hasKey(nodeName)) {
 			return false;
@@ -744,7 +744,7 @@ void ConfigNodeSerializer<Sprite>::deserialize(const EntitySerializationContext&
 		}
 		
 		if (texUnit == 0) {
-			sprite.setImage(*context.resources, imageNode.asString(), node["material"].asString(sprite.hasMaterial() ? sprite.getMaterial().getDefinition().getName() : ""));
+			sprite.setImage(*context.resources, imageNode.asString(), node["material"].asStringView(sprite.hasMaterial() ? std::string_view(sprite.getMaterial().getDefinition().getName()) : ""));
 		} else {
 			const auto image = context.resources->get<SpriteResource>(imageNode.asString());
 			sprite.setTexRect1(image->getSprite().coords);

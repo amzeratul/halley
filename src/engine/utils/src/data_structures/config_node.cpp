@@ -942,6 +942,15 @@ String ConfigNode::asString() const
 	}
 }
 
+std::string_view ConfigNode::asStringView() const
+{
+	if (type == ConfigNodeType::String) {
+		return *strData;
+	} else {
+		throw Exception("Can't convert " + getNodeDebugId() + " from " + toString(getType()) + " to StringView.", HalleyExceptions::Resources);
+	}
+}
+
 int ConfigNode::asInt(int defaultValue) const
 {
 	if (type == ConfigNodeType::Undefined) {
@@ -993,6 +1002,15 @@ String ConfigNode::asString(const std::string_view& defaultValue) const
 		return defaultValue;
 	} else {
 		return asString();
+	}
+}
+
+std::string_view ConfigNode::asStringView(const std::string_view& defaultValue) const
+{
+	if (type == ConfigNodeType::Undefined) {
+		return defaultValue;
+	} else {
+		return asStringView();
 	}
 }
 

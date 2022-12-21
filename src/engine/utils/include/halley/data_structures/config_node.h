@@ -289,6 +289,7 @@ namespace Halley {
 		Rect4f asRect4f() const;
 		Range<float> asFloatRange() const;
 		String asString() const;
+		std::string_view asStringView() const;
 		const Bytes& asBytes() const;
 
 		int asInt(int defaultValue) const;
@@ -297,6 +298,7 @@ namespace Halley {
 		float asFloat(float defaultValue) const;
 		bool asBool(bool defaultValue) const;
 		String asString(const std::string_view& defaultValue) const;
+		std::string_view asStringView(const std::string_view& defaultValue) const;
 		Vector2i asVector2i(Vector2i defaultValue) const;
 		Vector2f asVector2f(Vector2f defaultValue) const;
 		Vector3i asVector3i(Vector3i defaultValue) const;

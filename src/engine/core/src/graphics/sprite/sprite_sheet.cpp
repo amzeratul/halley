@@ -123,7 +123,7 @@ const std::shared_ptr<const Texture>& SpriteSheet::getTexture() const
 	return texture;
 }
 
-const SpriteSheetEntry& SpriteSheet::getSprite(const String& name) const
+const SpriteSheetEntry& SpriteSheet::getSprite(std::string_view name) const
 {
 	const auto idx = getIndex(name);
 	if (!idx) {
@@ -138,7 +138,7 @@ const SpriteSheetEntry& SpriteSheet::getSprite(size_t idx) const
 	return sprites[idx];
 }
 
-const SpriteSheetEntry* SpriteSheet::tryGetSprite(const String& name) const
+const SpriteSheetEntry* SpriteSheet::tryGetSprite(std::string_view name) const
 {
 	const auto idx = getIndex(name);
 	if (!idx) {
@@ -176,7 +176,7 @@ size_t SpriteSheet::getSpriteCount() const
 	return sprites.size();
 }
 
-std::optional<size_t> SpriteSheet::getIndex(const String& name) const
+std::optional<size_t> SpriteSheet::getIndex(std::string_view name) const
 {
 	const auto iter = spriteIdx.find(name);
 	if (iter == spriteIdx.end()) {
@@ -186,7 +186,7 @@ std::optional<size_t> SpriteSheet::getIndex(const String& name) const
 	}
 }
 
-bool SpriteSheet::hasSprite(const String& name) const
+bool SpriteSheet::hasSprite(std::string_view name) const
 {
 	return spriteIdx.find(name) != spriteIdx.end();
 }
@@ -257,7 +257,7 @@ void SpriteSheet::setTextureName(String name)
 	textureName = std::move(name);
 }
 
-std::shared_ptr<Material> SpriteSheet::getMaterial(const String& name) const
+std::shared_ptr<Material> SpriteSheet::getMaterial(std::string_view name) const
 {
 	const auto iter = materials.find(name);
 	std::shared_ptr<Material> result;
@@ -591,7 +591,7 @@ std::shared_ptr<const SpriteSheet> SpriteResource::getSpriteSheet() const
 	return spriteSheet.lock();
 }
 
-std::shared_ptr<Material> SpriteResource::getMaterial(const String& name) const
+std::shared_ptr<Material> SpriteResource::getMaterial(std::string_view name) const
 {
 	return spriteSheet.lock()->getMaterial(name);
 }

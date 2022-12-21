@@ -32,26 +32,26 @@ namespace Halley
 		};
 
 	public:
-		using ResourceLoaderFunc = std::function<std::shared_ptr<Resource>(const String&, ResourceLoadPriority)>;
+		using ResourceLoaderFunc = std::function<std::shared_ptr<Resource>(std::string_view, ResourceLoadPriority)>;
 		using ResourceEnumeratorFunc = std::function<Vector<String>()>;
 
 		explicit ResourceCollectionBase(Resources& parent, AssetType type);
 		virtual ~ResourceCollectionBase() {}
 
-		void setResource(int curDepth, const String& assetId, std::shared_ptr<Resource> resource);
+		void setResource(int curDepth, std::string_view assetId, std::shared_ptr<Resource> resource);
 		void setResourceLoader(ResourceLoaderFunc loader);
 		void setResourceEnumerator(ResourceEnumeratorFunc enumerator);
 
 		void clear();
-		void unload(const String& assetId);
+		void unload(std::string_view assetId);
 		void unloadAll(int minDepth = 0);
-		bool exists(const String& assetId) const;
-		void setFallback(const String& assetId);
+		bool exists(std::string_view assetId) const;
+		void setFallback(std::string_view assetId);
 
-		void reload(const String& assetId);
-		void purge(const String& assetId);
+		void reload(std::string_view assetId);
+		void purge(std::string_view assetId);
 
-		std::shared_ptr<Resource> getUntyped(const String& name, ResourceLoadPriority priority = ResourceLoadPriority::Normal);
+		std::shared_ptr<Resource> getUntyped(std::string_view name, ResourceLoadPriority priority = ResourceLoadPriority::Normal);
 
 		Vector<String> enumerate() const;
 
@@ -67,8 +67,8 @@ namespace Halley
 	protected:
 		virtual std::shared_ptr<Resource> loadResource(ResourceLoader& loader) = 0;
 
-		std::shared_ptr<Resource> doGet(const String& name, ResourceLoadPriority priority, bool allowFallback);
-		std::pair<std::shared_ptr<Resource>, bool> loadAsset(const String& assetId, ResourceLoadPriority priority, bool allowFallback);
+		std::shared_ptr<Resource> doGet(std::string_view name, ResourceLoadPriority priority, bool allowFallback);
+		std::pair<std::shared_ptr<Resource>, bool> loadAsset(std::string_view assetId, ResourceLoadPriority priority, bool allowFallback);
 
 	private:
 		Resources& parent;
@@ -90,7 +90,7 @@ namespace Halley
 			: ResourceCollectionBase(parent, type)
 		{}
 
-		std::shared_ptr<const T> get(const String& assetId, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
+		std::shared_ptr<const T> get(std::string_view assetId, ResourceLoadPriority priority = ResourceLoadPriority::Normal)
 		{
 			return std::static_pointer_cast<T>(doGet(assetId, priority, true));
 		}

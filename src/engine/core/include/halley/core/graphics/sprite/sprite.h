@@ -72,15 +72,15 @@ namespace Halley
 		bool hasMaterial() const { return material != nullptr; }
 		bool hasCompatibleMaterial(const Material& other) const;
 
-		Sprite& setImage(Resources& resources, const String& imageName, String materialName = "");
+		Sprite& setImage(Resources& resources, std::string_view imageName, std::string_view materialName = "");
 		Sprite& setImage(std::shared_ptr<const Texture> image, std::shared_ptr<const MaterialDefinition> material);
 		Sprite& setImage(const SpriteResource& sprite, std::shared_ptr<const MaterialDefinition> material);
-		Sprite& setImage(Resources& resources, VideoAPI& videoAPI, std::shared_ptr<Image> image, String materialName = "");
+		Sprite& setImage(Resources& resources, VideoAPI& videoAPI, std::shared_ptr<Image> image, std::string_view materialName = "");
 		Sprite& setImageData(const Texture& image);
 
-		Sprite& setSprite(Resources& resources, const String& spriteSheetName, const String& imageName, String materialName = "");
+		Sprite& setSprite(Resources& resources, std::string_view spriteSheetName, std::string_view imageName, std::string_view materialName = "");
 		Sprite& setSprite(const SpriteResource& sprite, bool applyPivot = true);
-		Sprite& setSprite(const SpriteSheet& sheet, const String& name, bool applyPivot = true);
+		Sprite& setSprite(const SpriteSheet& sheet, std::string_view name, bool applyPivot = true);
 		Sprite& setSprite(const SpriteSheetEntry& entry, bool applyPivot = true);
 
 		Sprite& setPos(Vector2f pos) { Expects(pos.isValid()); vertexAttrib.pos = pos; return *this; }

@@ -21,7 +21,7 @@ void ResourceCollectionBase::clear()
 	resources.clear();
 }
 
-void ResourceCollectionBase::unload(const String& assetId)
+void ResourceCollectionBase::unload(std::string_view assetId)
 {
 	resources.erase(assetId);
 }
@@ -41,7 +41,7 @@ void ResourceCollectionBase::unloadAll(int minDepth)
 	}
 }
 
-void ResourceCollectionBase::reload(const String& assetId)
+void ResourceCollectionBase::reload(std::string_view assetId)
 {
 	auto res = resources.find(assetId);
 	if (res != resources.end()) {
@@ -52,21 +52,21 @@ void ResourceCollectionBase::reload(const String& assetId)
 			newAsset->onLoaded(parent);
 			resWrap.res->reloadResource(std::move(*newAsset));
 		} catch (std::exception& e) {
-			Logger::logError("Error while reloading " + assetId + ": " + e.what());
+			Logger::logError("Error while reloading " + String(assetId) + ": " + e.what());
 		} catch (...) {
-			Logger::logError("Unknown error while reloading " + assetId);
+			Logger::logError("Unknown error while reloading " + String(assetId));
 		}
 	}
 }
 
-void ResourceCollectionBase::purge(const String& assetId)
+void ResourceCollectionBase::purge(std::string_view assetId)
 {
 	if (!resourceLoader) {
 		parent.locator->purge(assetId, type);
 	}
 }
 
-std::shared_ptr<Resource> ResourceCollectionBase::getUntyped(const String& name, ResourceLoadPriority priority)
+std::shared_ptr<Resource> ResourceCollectionBase::getUntyped(std::string_view name, ResourceLoadPriority priority)
 {
 	return doGet(name, priority, true);
 }
@@ -161,7 +161,7 @@ ResourceMemoryUsage ResourceCollectionBase::getMemoryUsageAndAge(float time)
 	return usage;
 }
 
-std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(const String& assetId, ResourceLoadPriority priority, bool allowFallback) {
+std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(std::string_view assetId, ResourceLoadPriority priority, bool allowFallback) {
 	std::shared_ptr<Resource> newRes;
 
 	if (resourceLoader) {
@@ -190,7 +190,7 @@ std::pair<std::shared_ptr<Resource>, bool> ResourceCollectionBase::loadAsset(con
 	return std::make_pair(newRes, true);
 }
 
-std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& assetId, ResourceLoadPriority priority, bool allowFallback)
+std::shared_ptr<Resource> ResourceCollectionBase::doGet(std::string_view assetId, ResourceLoadPriority priority, bool allowFallback)
 {
 	// Look in cache and return if it's there
 	{
@@ -222,7 +222,7 @@ std::shared_ptr<Resource> ResourceCollectionBase::doGet(const String& assetId, R
 	return newRes;
 }
 
-bool ResourceCollectionBase::exists(const String& assetId) const
+bool ResourceCollectionBase::exists(std::string_view assetId) const
 {
 	// Look in cache
 	const auto res = resources.find(assetId);
@@ -233,12 +233,12 @@ bool ResourceCollectionBase::exists(const String& assetId) const
 	return parent.locator->exists(assetId, type);
 }
 
-void ResourceCollectionBase::setFallback(const String& assetId)
+void ResourceCollectionBase::setFallback(std::string_view assetId)
 {
 	fallback = assetId;
 }
 
-void ResourceCollectionBase::setResource(int curDepth, const String& name, std::shared_ptr<Resource> resource) {
+void ResourceCollectionBase::setResource(int curDepth, std::string_view name, std::shared_ptr<Resource> resource) {
 	resources.emplace(name, Wrapper(std::move(resource), curDepth));
 }
 

@@ -61,13 +61,13 @@ namespace Halley {
 		}
 
 		template <typename T>
-		std::shared_ptr<const T> get(const String& name, ResourceLoadPriority priority = ResourceLoadPriority::Normal) const
+		std::shared_ptr<const T> get(std::string_view name, ResourceLoadPriority priority = ResourceLoadPriority::Normal) const
 		{
 			return of<T>().get(name, priority);
 		}
 
 		template <typename T>
-		void preload(const String& name) const
+		void preload(std::string_view name) const
 		{
 			static_cast<void>(of<T>().get(name, ResourceLoadPriority::Low));
 		}
@@ -81,7 +81,7 @@ namespace Halley {
 		}
 
 		template <typename T>
-		void unload(const String& name) const
+		void unload(std::string_view name) const
 		{
 			of<T>().unload(name);
 		}
@@ -93,13 +93,13 @@ namespace Halley {
 		}
 
 		template <typename T>
-		void setFallback(const String& name)
+		void setFallback(std::string_view name)
 		{
 			of<T>().setFallback(name);
 		}
 
 		template <typename T>
-		[[nodiscard]] bool exists(const String& name) const
+		[[nodiscard]] bool exists(std::string_view name) const
 		{
 			return of<T>().exists(name);
 		}

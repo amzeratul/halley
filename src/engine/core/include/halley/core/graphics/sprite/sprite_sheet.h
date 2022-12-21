@@ -118,9 +118,9 @@ namespace Halley
 		ConfigNode toConfigNode() const;
 		
 		const std::shared_ptr<const Texture>& getTexture() const;
-		const SpriteSheetEntry& getSprite(const String& name) const;
+		const SpriteSheetEntry& getSprite(std::string_view name) const;
 		const SpriteSheetEntry& getSprite(size_t idx) const;
-		const SpriteSheetEntry* tryGetSprite(const String& name) const;
+		const SpriteSheetEntry* tryGetSprite(std::string_view name) const;
 		const SpriteSheetEntry& getDummySprite() const;
 
 		const Vector<SpriteSheetFrameTag>& getFrameTags() const;
@@ -128,15 +128,15 @@ namespace Halley
 		const HashMap<String, uint32_t>& getSpriteNameMap() const;
 
 		size_t getSpriteCount() const;
-		std::optional<size_t> getIndex(const String& name) const;
-		bool hasSprite(const String& name) const;
+		std::optional<size_t> getIndex(std::string_view name) const;
+		bool hasSprite(std::string_view name) const;
 
 		const SpriteSheetEntry* getSpriteAtTexel(Vector2i pos) const;
 
 		void addSprite(String name, const SpriteSheetEntry& sprite);
 		void setTextureName(String name);
 
-		std::shared_ptr<Material> getMaterial(const String& name) const;
+		std::shared_ptr<Material> getMaterial(std::string_view name) const;
 		void setDefaultMaterialName(String materialName);
 		const String& getDefaultMaterialName() const;
 		void clearMaterialCache() const;
@@ -187,7 +187,7 @@ namespace Halley
 		size_t getIdx() const;
 		std::shared_ptr<const SpriteSheet> getSpriteSheet() const;
 
-		std::shared_ptr<Material> getMaterial(const String& name) const;
+		std::shared_ptr<Material> getMaterial(std::string_view name) const;
 		const String& getDefaultMaterialName() const;
 
 		constexpr static AssetType getAssetType() { return AssetType::Sprite; }
