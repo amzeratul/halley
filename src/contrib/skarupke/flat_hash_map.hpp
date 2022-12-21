@@ -78,11 +78,13 @@ struct KeyOrValueHasher : functor_storage<size_t, hasher>
         : hasher_storage(hash)
     {
     }
-    size_t operator()(const key_type & key)
+    template <typename U>
+    size_t operator()(const U & key)
     {
         return static_cast<hasher_storage &>(*this)(key);
     }
-    size_t operator()(const key_type & key) const
+    template <typename U>
+	size_t operator()(const U & key) const
     {
         return static_cast<const hasher_storage &>(*this)(key);
     }
@@ -105,6 +107,17 @@ struct KeyOrValueHasher : functor_storage<size_t, hasher>
         return static_cast<const hasher_storage &>(*this)(value.first);
     }
 };
+
+template <typename T>
+struct FirstOfPairOrValue {
+    const T& operator()(const T& v) { return v; }
+};
+
+template <typename K, typename V>
+struct FirstOfPairOrValue<std::pair<K, V>> {
+    const K& operator()(const std::pair<K, V>& v) { return v.first; }
+};
+
 template<typename key_type, typename value_type, typename key_equal>
 struct KeyOrValueEquality : functor_storage<bool, key_equal>
 {
@@ -114,46 +127,10 @@ struct KeyOrValueEquality : functor_storage<bool, key_equal>
         : equality_storage(equality)
     {
     }
-    bool operator()(const key_type & lhs, const key_type & rhs)
+    template<typename L, typename R>
+    bool operator()(const L & lhs, const R & rhs)
     {
-        return static_cast<equality_storage &>(*this)(lhs, rhs);
-    }
-    bool operator()(const key_type & lhs, const value_type & rhs)
-    {
-        return static_cast<equality_storage &>(*this)(lhs, rhs.first);
-    }
-    bool operator()(const value_type & lhs, const key_type & rhs)
-    {
-        return static_cast<equality_storage &>(*this)(lhs.first, rhs);
-    }
-    bool operator()(const value_type & lhs, const value_type & rhs)
-    {
-        return static_cast<equality_storage &>(*this)(lhs.first, rhs.first);
-    }
-    template<typename F, typename S>
-    bool operator()(const key_type & lhs, const std::pair<F, S> & rhs)
-    {
-        return static_cast<equality_storage &>(*this)(lhs, rhs.first);
-    }
-    template<typename F, typename S>
-    bool operator()(const std::pair<F, S> & lhs, const key_type & rhs)
-    {
-        return static_cast<equality_storage &>(*this)(lhs.first, rhs);
-    }
-    template<typename F, typename S>
-    bool operator()(const value_type & lhs, const std::pair<F, S> & rhs)
-    {
-        return static_cast<equality_storage &>(*this)(lhs.first, rhs.first);
-    }
-    template<typename F, typename S>
-    bool operator()(const std::pair<F, S> & lhs, const value_type & rhs)
-    {
-        return static_cast<equality_storage &>(*this)(lhs.first, rhs.first);
-    }
-    template<typename FL, typename SL, typename FR, typename SR>
-    bool operator()(const std::pair<FL, SL> & lhs, const std::pair<FR, SR> & rhs)
-    {
-        return static_cast<equality_storage &>(*this)(lhs.first, rhs.first);
+        return static_cast<equality_storage &>(*this)(FirstOfPairOrValue<L>()(lhs), FirstOfPairOrValue<R>()(rhs));
     }
 };
 static constexpr int8_t min_lookups = 4;
@@ -539,7 +516,8 @@ public:
         return end();
     }
 
-    iterator find(const FindKey & key)
+    template<typename U>
+    iterator find(const U & key)
     {
         size_t index = hash_policy.index_for_hash(hash_object(key), num_slots_minus_one);
         EntryPointer it = entries + ptrdiff_t(index);
@@ -550,10 +528,13 @@ public:
         }
         return end();
     }
-    const_iterator find(const FindKey & key) const
+
+    template<typename U>
+    const_iterator find(const U & key) const
     {
-        return const_cast<sherwood_v3_table *>(this)->find(key);
+        return const_cast<sherwood_v3_table *>(this)->find<U>(key);
     }
+
     size_t count(const FindKey & key) const
     {
         return find(key) == end() ? 0 : 1;

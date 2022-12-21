@@ -81,7 +81,7 @@ String::String(const StringUTF32& utf32)
 	size_t len = getUTF8Len(utf32);
 	str.resize(len);
 	if (len > 0) {
-		UTF32toUTF8(&utf32[0],getCharPointer(0));
+		UTF32toUTF8(utf32.data() ,getCharPointer(0));
 	}
 }
 

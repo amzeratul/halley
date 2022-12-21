@@ -1,24 +1,5 @@
 #pragma once
 
-/*
-
-#include <EASTL/hash_map.h>
-
-namespace Halley {
-	template<typename Key, typename T> using HashMap = eastl::hash_map<Key, T, std::hash<Key>>;
-}
-
-*/
-
-/*
-#include <unordered_map>
-
-namespace Halley {
-	template<typename Key, typename T> using HashMap = std::unordered_map<Key, T, std::hash<Key>>;
-}
-*/
-
-
 #ifdef min
 #undef min
 #endif
@@ -26,9 +7,25 @@ namespace Halley {
 #undef max
 #endif
 #include "../../../../../contrib/skarupke/flat_hash_map.hpp"
+#include <string_view>
 
 namespace Halley {
+
+	class String;
+
+	template <typename T>
+	struct EqualToPicker {
+		using type = std::equal_to<T>;
+	};
 	
-	template<typename Key, typename Value, typename Hash = std::hash<Key>> using HashMap = ska::flat_hash_map<Key, Value, Hash>;
-	template<typename T, typename Hash = std::hash<T>> using HashSet = ska::flat_hash_set<T, Hash>;
+	template <>
+	struct EqualToPicker<String> {
+		using type = std::equal_to<std::string_view>;
+	};
+
+	template<typename Key, typename Value, typename Hash = std::hash<Key>>
+	using HashMap = ska::flat_hash_map<Key, Value, Hash, typename EqualToPicker<Key>::type>;
+
+	template<typename Key, typename Hash = std::hash<Key>>
+	using HashSet = ska::flat_hash_set<Key, Hash, typename EqualToPicker<Key>::type>;
 }

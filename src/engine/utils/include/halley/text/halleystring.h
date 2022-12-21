@@ -200,17 +200,18 @@ namespace Halley {
 	bool operator== (const std::basic_string_view<char32_t>& lhp, const StringUTF32& rhp);
 
 	using StringArray = Vector<String>;
-
-	
 }
 
 namespace std {
 	template<>
 	struct hash<Halley::String>
 	{
-		size_t operator()(const Halley::String& s) const noexcept
-		{
-			return std::hash<std::string>()(s.cppStr());
-		}
+		using hash_type = std::hash<std::string_view>;
+		using is_transparent = void;
+
+		size_t operator()(const Halley::String& s) const noexcept { return hash_type()(s.cppStr());	}
+		size_t operator()(const std::string& s) const noexcept { return hash_type()(s); }
+		size_t operator()(const std::string_view s) const noexcept { return hash_type()(s); }
+		size_t operator()(const char* s) const noexcept { return hash_type()(s); }
 	};
 }
