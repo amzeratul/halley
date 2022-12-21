@@ -127,7 +127,7 @@ const SpriteSheetEntry& SpriteSheet::getSprite(std::string_view name) const
 {
 	const auto idx = getIndex(name);
 	if (!idx) {
-		Logger::logError("Spritesheet does not contain sprite \"" + name + "\".");
+		Logger::logError("Spritesheet does not contain sprite \"" + String(name) + "\".");
 		return dummySprite;
 	}
 	return getSprite(idx.value());
