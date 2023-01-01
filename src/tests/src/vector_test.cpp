@@ -105,6 +105,13 @@ namespace {
 		for (int i = 0; i < 10; ++i) {
 			EXPECT_EQ(a[i], c[i]);
 		}
+
+		EXPECT_FALSE(a == b);
+		EXPECT_TRUE(a == c);
+
+		std::swap(b, c);
+		EXPECT_TRUE(a == b);
+		EXPECT_FALSE(a == c);
 	}
 }
 
