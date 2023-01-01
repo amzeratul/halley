@@ -115,9 +115,11 @@ namespace {
 	}
 
 	template <typename T>
-	void testSBO()
+	void testSBO(size_t expectedSBOSize)
 	{
 		constexpr size_t maxSBO = static_cast<size_t>(T::sbo_max_objects());
+		EXPECT_EQ(maxSBO, expectedSBOSize);
+
 		T a;
 		EXPECT_TRUE(a.using_sbo());
 
@@ -185,8 +187,8 @@ TEST(VectorSize32, Assignment)
 
 TEST(VectorSize32, SBO)
 {
-	testSBO<VectorSize32<char>>();
-	testSBO<VectorSize32<int>>();
-	testSBO<VectorSize32<size_t>>();
-	testSBO<VectorSize32<String>>();
+	testSBO<VectorSize32<char>>(15);
+	testSBO<VectorSize32<int>>(3);
+	testSBO<VectorSize32<size_t>>(1);
+	testSBO<VectorSize32<String>>(0);
 }
