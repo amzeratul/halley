@@ -1391,7 +1391,7 @@ void SceneEditorWindow::positionEntity(EntityData& entityData, Vector2f pos) con
 {
 	for (auto& [componentName, component]: entityData.getComponents()) {
 		if (componentName == "Transform2D") {
-			component.asMap()["position"] = pos;
+			component["position"] = pos;
 		}
 	}
 }

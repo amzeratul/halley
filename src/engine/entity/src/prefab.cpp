@@ -214,7 +214,7 @@ const ConfigNode* Prefab::tryGetGameData(const String& key) const
 		return nullptr;
 	}
 
-	auto& map = gameData.getRoot().asMap();
+	const auto& map = gameData.getRoot().asMap();
 	const auto iter = map.find(key);
 	if (iter == map.end()) {
 		return nullptr;

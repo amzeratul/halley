@@ -147,9 +147,7 @@ Service& World::addService(std::shared_ptr<Service> service)
 
 void World::loadSystems(const ConfigNode& root)
 {
-	auto timelines = root["timelines"].asMap();
-	for (auto iter = timelines.begin(); iter != timelines.end(); ++iter) {
-		String timelineName = iter->first;
+	for (const auto& [timelineName, tlSystems]: root["timelines"].asMap()) {
 		TimeLine timeline;
 		if (timelineName == "fixedUpdate") {
 			timeline = TimeLine::FixedUpdate;
@@ -161,7 +159,7 @@ void World::loadSystems(const ConfigNode& root)
 			throw Exception("Unknown timeline: " + timelineName, HalleyExceptions::Entity);
 		}
 
-		for (auto& sysName: iter->second) {
+		for (auto& sysName: tlSystems) {
 			String name = sysName.asString();
 			addSystem(reflection.createSystem(name + "System"), timeline).setName(name);
 		}

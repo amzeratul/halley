@@ -234,10 +234,10 @@ ConfigNode& PolygonGizmo::getField(ConfigNode& node, const String& fieldName)
 		auto& field = (node)[name];
 		if (field.getType() == ConfigNodeType::Sequence) {
 			const auto idx = key.toInteger();
-			return (node)[name].asSequence()[idx];
+			return (node)[name][idx];
 		}
 		else if (field.getType() == ConfigNodeType::Map) {
-			return (node)[name].asMap()[key];
+			return (node)[name][key];
 		}
 		else {
 			return (node)[fieldName];
