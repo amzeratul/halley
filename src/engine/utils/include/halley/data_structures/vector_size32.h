@@ -87,12 +87,12 @@ namespace Halley {
 		}
 	}
 
-	template <typename T, class Allocator = std::allocator<T>>
-	class VectorSize32 : Allocator {
+	template <typename T, typename SizeType = uint32_t, bool EnableSBO = false, size_t SBOPadding = 0, class Allocator = std::allocator<T>>
+	class VectorStd : Allocator {
 	public:
 		using value_type = T;
-		using size_type = uint32_t;
-		using difference_type = int32_t;
+		using size_type = SizeType;
+		using difference_type = typename std::make_signed<SizeType>::type;
 		using reference = T&;
 		using const_reference = const T&;
 		using pointer = typename std::allocator_traits<Allocator>::pointer;
@@ -103,36 +103,36 @@ namespace Halley {
 		using reverse_iterator = std::reverse_iterator<iterator>;
 		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-		constexpr static bool enable_sbo = false; // SBO = Small Buffer Optimization
+		constexpr static bool enable_sbo = EnableSBO; // SBO = Small Buffer Optimization
 		constexpr static float growth_factor = 2.0f; // When resizing, what number to scale by
 
-		VectorSize32() noexcept = default;
+		VectorStd() noexcept = default;
 
-		explicit VectorSize32(const Allocator& allocator) noexcept
+		explicit VectorStd(const Allocator& allocator) noexcept
 			: Allocator(allocator)
 		{
 		}
 
-		VectorSize32(size_t count, T defaultValue, const Allocator& alloc = Allocator())
+		VectorStd(size_t count, T defaultValue, const Allocator& alloc = Allocator())
 			: Allocator(alloc)
 		{
 			resize(count, std::move(defaultValue));
 		}
 
-		explicit VectorSize32(size_t count, const Allocator& alloc = Allocator())
+		explicit VectorStd(size_t count, const Allocator& alloc = Allocator())
 			: Allocator(alloc)
 		{
 			resize(count);
 		}
 
 		template <class InputIt, std::enable_if_t<is_iterator_v<InputIt>, int> Test = 0>
-		VectorSize32(InputIt first, InputIt last, const Allocator& alloc = Allocator())
+		VectorStd(InputIt first, InputIt last, const Allocator& alloc = Allocator())
 			: Allocator(alloc)
 		{
 			assign(std::move(first), std::move(last));
 		}
 		
-		VectorSize32(const VectorSize32& other)
+		VectorStd(const VectorStd& other)
 		{
 			change_capacity(other.st_capacity());
 			m_size = other.m_size;
@@ -143,7 +143,7 @@ namespace Halley {
 			}
 		}
 		
-		VectorSize32(const VectorSize32& other, const Allocator& alloc)
+		VectorStd(const VectorStd& other, const Allocator& alloc)
 			: Allocator(alloc)
 		{
 			change_capacity(other.st_capacity());
@@ -155,7 +155,7 @@ namespace Halley {
 			}
 		}
 		
-		VectorSize32(VectorSize32&& other) noexcept
+		VectorStd(VectorStd&& other) noexcept
 			: Allocator(std::move(other))
 			, m_size(other.m_size)
 			, m_capacity(other.m_capacity)
@@ -166,7 +166,7 @@ namespace Halley {
 			other.m_capacity = 0;
 		}
 
-		VectorSize32(VectorSize32&& other, const Allocator& alloc)
+		VectorStd(VectorStd&& other, const Allocator& alloc)
 			: Allocator(alloc)
 			, m_size(other.m_size)
 			, m_capacity(other.m_capacity)
@@ -177,7 +177,7 @@ namespace Halley {
 			other.m_capacity = 0;
 		}
 
-		VectorSize32(std::initializer_list<T> list, const Allocator& alloc = Allocator())
+		VectorStd(std::initializer_list<T> list, const Allocator& alloc = Allocator())
 			: Allocator(alloc)
 		{
 			reserve(list.size());
@@ -186,7 +186,7 @@ namespace Halley {
 			}
 		}
 		
-		~VectorSize32() noexcept
+		~VectorStd() noexcept
 		{
 			clear();
 			if (!using_sbo()) {
@@ -194,7 +194,7 @@ namespace Halley {
 			}
 		}
 
-		VectorSize32& operator=(const VectorSize32& other)
+		VectorStd& operator=(const VectorStd& other)
 		{
 			if (this == &other) {
 				return *this;
@@ -205,7 +205,7 @@ namespace Halley {
 			return *this;
 		}
 
-		VectorSize32& operator=(VectorSize32&& other) noexcept
+		VectorStd& operator=(VectorStd&& other) noexcept
 		{
 			Allocator::operator=(std::move(other));
 			m_data = other.m_data;
@@ -217,7 +217,7 @@ namespace Halley {
 			return *this;
 		}
 
-		VectorSize32& operator=(std::initializer_list<T> list)
+		VectorStd& operator=(std::initializer_list<T> list)
 		{
 			// TODO: could be faster
 			assign(list.begin(), list.end());
@@ -478,7 +478,7 @@ namespace Halley {
 			set_size(st_size() - 1);
 		}
 
-		void swap(VectorSize32& other) noexcept
+		void swap(VectorStd& other) noexcept
 		{
 			std::swap(m_data, other.m_data);
 			std::swap(m_size, other.m_size);
@@ -537,8 +537,8 @@ namespace Halley {
 		[[nodiscard]] constexpr static size_type sbo_max_objects()
 		{
 			if constexpr (enable_sbo) {
-				constexpr auto size_bytes = sizeof(VectorSize32);
-				constexpr auto sbo_align_enabled = alignof(VectorSize32) >= alignof(T);
+				constexpr auto size_bytes = sizeof(VectorStd);
+				constexpr auto sbo_align_enabled = alignof(VectorStd) >= alignof(T);
 				constexpr auto first_sbo_offset = sbo_start_offset_bytes();
 				const auto result = sbo_align_enabled && first_sbo_offset < size_bytes ? (size_bytes - first_sbo_offset) / sizeof(T) : 0ull;
 				static_assert(result <= 127); // More than 127 wouldn't fit in the 7-bit size field
@@ -720,45 +720,51 @@ namespace Halley {
 		}
 	};
 
-	template <typename T, class Allocator>
-	bool operator==(const VectorSize32<T, Allocator>& a, const VectorSize32<T, Allocator>& b)
+	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1>
+	bool operator==(const VectorStd<T, SizeType, SBO0, SBOP0, A0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1>& b)
 	{
 		return std::equal(a.begin(), a.end(), b.begin(), b.end());
 	}
 
-	template <typename T, class Allocator>
-	bool operator!=(const VectorSize32<T, Allocator>& a, const VectorSize32<T, Allocator>& b)
+	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1>
+	bool operator!=(const VectorStd<T, SizeType, SBO0, SBOP0, A0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1>& b)
 	{
 		return !std::equal(a.begin(), a.end(), b.begin(), b.end());
 	}
 
-	template <typename T, class Allocator>
-	bool operator<(const VectorSize32<T, Allocator>& a, const VectorSize32<T, Allocator>& b)
+	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1>
+	bool operator<(const VectorStd<T, SizeType, SBO0, SBOP0, A0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1>& b)
 	{
 		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](const T& a, const T& b) { return a < b; });
 	}
 
-	template <typename T, class Allocator>
-	bool operator>(const VectorSize32<T, Allocator>& a, const VectorSize32<T, Allocator>& b)
+	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1>
+	bool operator>(const VectorStd<T, SizeType, SBO0, SBOP0, A0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1>& b)
 	{
 		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](const T& a, const T& b) { return a > b; });
 	}
 
-	template <typename T, class Allocator>
-	bool operator<=(const VectorSize32<T, Allocator>& a, const VectorSize32<T, Allocator>& b)
+	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1>
+	bool operator<=(const VectorStd<T, SizeType, SBO0, SBOP0, A0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1>& b)
 	{
 		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](const T& a, const T& b) { return a <= b; });
 	}
 
-	template <typename T, class Allocator>
-	bool operator>=(const VectorSize32<T, Allocator>& a, const VectorSize32<T, Allocator>& b)
+	template<typename T, typename SizeType, bool SBO0, bool SBO1, size_t SBOP0, size_t SBOP1, class A0, class A1>
+	bool operator>=(const VectorStd<T, SizeType, SBO0, SBOP0, A0>& a, const VectorStd<T, SizeType, SBO1, SBOP1, A1>& b)
 	{
 		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](const T& a, const T& b) { return a >= b; });
 	}
 
-	template<typename T, class Allocator>
-	void swap(VectorSize32<T, Allocator>& a, VectorSize32<T, Allocator>& b) noexcept
+
+	template<typename T, typename SizeType, bool EnableSBO, size_t SBOPadding, class Allocator>
+	void swap(VectorStd<T, SizeType, EnableSBO, SBOPadding, Allocator>& a, VectorStd<T, SizeType, EnableSBO, SBOPadding, Allocator>& b) noexcept
 	{
 		a.swap(b);
 	}
+
+
+	// Default versions
+	template<typename T, typename Allocator = std::allocator<T>>
+	using VectorSize32 = VectorStd<T, uint32_t, false, 0, Allocator>;
 }

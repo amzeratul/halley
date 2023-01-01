@@ -117,6 +117,10 @@ namespace {
 	template <typename T>
 	void testSBO(size_t expectedSBOSize)
 	{
+		if (!T::enable_sbo) {
+			return;
+		}
+
 		constexpr size_t maxSBO = static_cast<size_t>(T::sbo_max_objects());
 		EXPECT_EQ(maxSBO, expectedSBOSize);
 
