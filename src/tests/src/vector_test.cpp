@@ -11,11 +11,11 @@ namespace {
 		T a;
 
 		for (int i = 0; i < 100; ++i) {
-			a.push_back(i);
+			a.push_back(i + 100);
 		}
 
 		for (int i = 0; i < 100; ++i) {
-			EXPECT_EQ(i, a[i]);
+			EXPECT_EQ(i + 100, a[i]);
 		}
 
 		const auto b = T(5, 10);
@@ -113,6 +113,32 @@ namespace {
 		EXPECT_TRUE(a == b);
 		EXPECT_FALSE(a == c);
 	}
+
+	template <typename T>
+	void testSBO()
+	{
+		constexpr size_t maxSBO = static_cast<size_t>(T::sbo_max_objects());
+		T a;
+		EXPECT_TRUE(a.using_sbo());
+
+		for (size_t i = 0; i < maxSBO; ++i) {
+			const auto val = i + 100;
+			if constexpr (std::is_same_v<typename T::value_type, Halley::String>) {
+				a.push_back(toString(val));
+			} else {
+				a.push_back(T::value_type(val));
+			}
+		}
+		EXPECT_TRUE(a.using_sbo());
+
+		T b = a;
+		EXPECT_TRUE(b.using_sbo());
+		b.push_back({});
+		EXPECT_FALSE(b.using_sbo());
+		b.pop_back();
+		b.shrink_to_fit();
+		EXPECT_TRUE(b.using_sbo());
+	}
 }
 
 TEST(StdVector, Construction)
@@ -155,4 +181,12 @@ TEST(VectorSize32, SelfMove)
 TEST(VectorSize32, Assignment)
 {
 	testAssignment<VectorSize32<int>>();
+}
+
+TEST(VectorSize32, SBO)
+{
+	testSBO<VectorSize32<char>>();
+	testSBO<VectorSize32<int>>();
+	testSBO<VectorSize32<size_t>>();
+	testSBO<VectorSize32<String>>();
 }

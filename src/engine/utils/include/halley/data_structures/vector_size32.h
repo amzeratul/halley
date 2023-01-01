@@ -266,7 +266,7 @@ namespace Halley {
 
 		[[nodiscard]] constexpr size_t max_size() const
 		{
-			return std::numeric_limits<size_type>::max();
+			return std::numeric_limits<size_type>::max() / 2;
 		}
 
 		[[nodiscard]] constexpr bool empty() const
@@ -525,6 +525,16 @@ namespace Halley {
 			return m_s.small.sbo_enabled;
 		}
 
+		[[nodiscard]] constexpr static size_type sbo_max_objects()
+		{
+			constexpr auto size_bytes = sizeof(VectorSize32);
+			constexpr auto sbo_align_enabled = alignof(VectorSize32) >= alignof(T);
+			constexpr auto first_sbo_offset = sbo_start_offset_bytes();
+			const auto result = sbo_align_enabled && first_sbo_offset < size_bytes ? (size_bytes - first_sbo_offset) / sizeof(T) : 0ull;
+			static_assert(result <= 127); // More than 127 wouldn't fit in the 7-bit size field
+			return static_cast<size_type>(result);
+		}
+
 	private:
 		struct SBO {
 			union {
@@ -560,20 +570,22 @@ namespace Halley {
 		void change_capacity(size_type newCapacity, const F& construct)
 		{
 			const auto size = st_size();
+			const auto capacity = st_capacity();
 			assert(newCapacity >= size);
-			if (newCapacity != capacity()) {
-				const bool canUseSBO = get_max_sbo_objects() >= newCapacity;
+			if (newCapacity != capacity) {
+				const bool canUseSBO = sbo_max_objects() >= newCapacity;
 				pointer newData = canUseSBO ? sbo_data() : (newCapacity > 0 ? std::allocator_traits<Allocator>::allocate(as_allocator(), newCapacity) : nullptr);
 
 				construct(newData);
 				
 				if (!empty()) {
+					auto* oldData = data();
 					for (size_type i = 0; i < size; ++i) {
-						std::allocator_traits<Allocator>::construct(as_allocator(), newData + i, std::move(data()[i]));
-						std::allocator_traits<Allocator>::destroy(as_allocator(), data() + i);
+						std::allocator_traits<Allocator>::construct(as_allocator(), newData + i, std::move(oldData[i]));
+						std::allocator_traits<Allocator>::destroy(as_allocator(), oldData + i);
 					}
 					if (!m_s.small.sbo_enabled) {
-						std::allocator_traits<Allocator>::deallocate(as_allocator(), m_data, m_capacity);
+						std::allocator_traits<Allocator>::deallocate(as_allocator(), oldData, capacity);
 					}
 				}
 
@@ -673,33 +685,23 @@ namespace Halley {
 
 		[[nodiscard]] constexpr size_type st_capacity() const
 		{
-			return m_s.small.sbo_enabled ? get_max_sbo_objects() : m_capacity;
+			return m_s.small.sbo_enabled ? sbo_max_objects() : m_capacity;
 		}
 
 		// N.B.: sbo = small buffer optimization
 		[[nodiscard]] constexpr pointer sbo_data()
 		{
-			return reinterpret_cast<pointer>(reinterpret_cast<char*>(this) + get_sbo_start_offset_bytes());
+			return reinterpret_cast<pointer>(reinterpret_cast<char*>(this) + sbo_start_offset_bytes());
 		}
 
 		[[nodiscard]] constexpr const_pointer sbo_data() const
 		{
-			return reinterpret_cast<const_pointer>(reinterpret_cast<const char*>(this) + get_sbo_start_offset_bytes());
+			return reinterpret_cast<const_pointer>(reinterpret_cast<const char*>(this) + sbo_start_offset_bytes());
 		}
 
-		[[nodiscard]] constexpr static std::size_t get_sbo_start_offset_bytes()
+		[[nodiscard]] constexpr static std::size_t sbo_start_offset_bytes()
 		{
 			return VectorDetail::alignUp<size_t>(1ull, alignof(T));
-		}
-
-		[[nodiscard]] constexpr static size_type get_max_sbo_objects()
-		{
-			constexpr auto size_bytes = sizeof(VectorSize32);
-			constexpr auto sbo_align_enabled = alignof(VectorSize32) >= alignof(T);
-			constexpr auto first_sbo_offset = get_sbo_start_offset_bytes();
-			const auto result = sbo_align_enabled && first_sbo_offset < size_bytes ? (size_bytes - first_sbo_offset) / sizeof(T) : 0ull;
-			static_assert(result <= 127); // More than 127 wouldn't fit in the 7-bit size field
-			return static_cast<size_type>(result);
 		}
 	};
 
