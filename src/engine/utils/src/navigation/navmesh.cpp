@@ -478,8 +478,8 @@ void Navmesh::postProcessPath(Vector<Vector2f>& points, NavigationQuery::PostPro
 	Vector<NodeId> nodeIds;
 	nodeIds.resize(points.size());
 	for (size_t i = 0; i < points.size(); ++i) {
-		nodeIds[i] = getNodeAt(points[i]).value_or(-1);
-		assert(nodeIds[i] != -1);
+		nodeIds[i] = getNodeAt(points[i]).value_or(static_cast<NodeId>(-1));
+		assert(nodeIds[i] != static_cast<NodeId>(-1));
 	}
 
 	Vector<float> pathCosts;
