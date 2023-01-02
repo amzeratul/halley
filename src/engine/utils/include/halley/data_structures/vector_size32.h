@@ -207,6 +207,10 @@ namespace Halley {
 
 		VectorStd& operator=(VectorStd&& other) noexcept
 		{
+			if (this != &other) {
+				return *this;
+			}
+
 			destroy();
 			Allocator::operator=(std::move(other));
 			move_data_from(other);
