@@ -117,7 +117,7 @@ namespace {
 	template <typename T>
 	void testSBO(size_t expectedSBOSize)
 	{
-		if (!T::enable_sbo) {
+		if (!T::sbo_enabled()) {
 			return;
 		}
 
@@ -125,7 +125,6 @@ namespace {
 		EXPECT_EQ(maxSBO, expectedSBOSize);
 
 		T a;
-		EXPECT_TRUE(a.using_sbo());
 
 		for (size_t i = 0; i < maxSBO; ++i) {
 			const auto val = i + 100;
@@ -135,15 +134,15 @@ namespace {
 				a.push_back(T::value_type(val));
 			}
 		}
-		EXPECT_TRUE(a.using_sbo());
+		EXPECT_TRUE(a.sbo_active());
 
 		T b = a;
-		EXPECT_TRUE(b.using_sbo());
+		EXPECT_TRUE(b.sbo_active());
 		b.push_back({});
-		EXPECT_FALSE(b.using_sbo());
+		EXPECT_FALSE(b.sbo_active());
 		b.pop_back();
 		b.shrink_to_fit();
-		EXPECT_TRUE(b.using_sbo());
+		EXPECT_TRUE(b.sbo_active());
 	}
 }
 

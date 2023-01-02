@@ -103,7 +103,6 @@ namespace Halley {
 		using reverse_iterator = std::reverse_iterator<iterator>;
 		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-		constexpr static bool enable_sbo = EnableSBO; // SBO = Small Buffer Optimization
 		constexpr static float growth_factor = 2.0f; // When resizing, what number to scale by
 
 		VectorStd() noexcept = default;
@@ -189,7 +188,7 @@ namespace Halley {
 		~VectorStd() noexcept
 		{
 			clear();
-			if (!using_sbo()) {
+			if (!sbo_active()) {
 				std::allocator_traits<Allocator>::deallocate(*this, m_data, m_capacity);
 			}
 		}
@@ -256,12 +255,12 @@ namespace Halley {
 
 		[[nodiscard]] constexpr pointer data()
 		{
-			return using_sbo() ? sbo_data() : m_data;
+			return sbo_active() ? sbo_data() : m_data;
 		}
 
 		[[nodiscard]] constexpr const_pointer data() const
 		{
-			return using_sbo() ? sbo_data() : m_data;
+			return sbo_active() ? sbo_data() : m_data;
 		}
 
 		[[nodiscard]] constexpr size_t size() const
@@ -271,7 +270,7 @@ namespace Halley {
 
 		[[nodiscard]] constexpr size_t max_size() const
 		{
-			return enable_sbo ? std::numeric_limits<size_type>::max() / 2 : std::numeric_limits<size_type>::max();
+			return sbo_enabled() ? std::numeric_limits<size_type>::max() / 2 : std::numeric_limits<size_type>::max();
 		}
 
 		[[nodiscard]] constexpr bool empty() const
@@ -525,9 +524,14 @@ namespace Halley {
 			return const_reverse_iterator(begin())++;
 		}
 
-		[[nodiscard]] constexpr bool using_sbo() const
+		[[nodiscard]] constexpr static bool sbo_enabled()
 		{
-			if constexpr (enable_sbo) {
+			return sbo_max_objects() > 0;
+		}
+
+		[[nodiscard]] constexpr bool sbo_active() const
+		{
+			if constexpr (sbo_enabled()) {
 				return m_size.small.sbo_enabled;
 			} else {
 				return false;
@@ -536,7 +540,7 @@ namespace Halley {
 
 		[[nodiscard]] constexpr static size_type sbo_max_objects()
 		{
-			if constexpr (enable_sbo) {
+			if constexpr (EnableSBO) {
 				constexpr auto size_bytes = sizeof(VectorStd);
 				constexpr auto sbo_align_enabled = alignof(VectorStd) >= alignof(T);
 				constexpr auto first_sbo_offset = sbo_start_offset_bytes();
@@ -583,7 +587,7 @@ namespace Halley {
 			const auto capacity = st_capacity();
 			assert(newCapacity >= size);
 			if (newCapacity != capacity) {
-				const bool canUseSBO = enable_sbo && sbo_max_objects() >= newCapacity;
+				const bool canUseSBO = sbo_max_objects() >= newCapacity;
 				pointer newData = canUseSBO ? sbo_data() : (newCapacity > 0 ? std::allocator_traits<Allocator>::allocate(as_allocator(), newCapacity) : nullptr);
 
 				construct(newData);
@@ -594,13 +598,13 @@ namespace Halley {
 						std::allocator_traits<Allocator>::construct(as_allocator(), newData + i, std::move(oldData[i]));
 						std::allocator_traits<Allocator>::destroy(as_allocator(), oldData + i);
 					}
-					if (!using_sbo() && oldData) {
+					if (!sbo_active() && oldData) {
 						std::allocator_traits<Allocator>::deallocate(as_allocator(), oldData, capacity);
 					}
 				}
 
-				if (using_sbo() != canUseSBO) {
-					if constexpr (enable_sbo) {
+				if (sbo_active() != canUseSBO) {
+					if constexpr (sbo_enabled()) {
 						m_size.small.sbo_enabled = canUseSBO;
 					}
 					set_size(size);
@@ -641,8 +645,8 @@ namespace Halley {
 
 		void set_size(size_type sz)
 		{
-			if constexpr (enable_sbo) {
-				if (using_sbo()) {
+			if constexpr (sbo_enabled()) {
+				if (sbo_active()) {
 					m_size.small.size = static_cast<uint8_t>(sz);
 				} else {
 					m_size.big.size = sz;
@@ -696,12 +700,12 @@ namespace Halley {
 
 		[[nodiscard]] constexpr size_type st_size() const
 		{
-			return enable_sbo ? (using_sbo() ? m_size.small.size : m_size.big.size) : m_size.size;
+			return sbo_enabled() ? (sbo_active() ? m_size.small.size : m_size.big.size) : m_size.size;
 		}
 
 		[[nodiscard]] constexpr size_type st_capacity() const
 		{
-			return using_sbo() ? sbo_max_objects() : m_capacity;
+			return sbo_active() ? sbo_max_objects() : m_capacity;
 		}
 
 		[[nodiscard]] constexpr pointer sbo_data()
@@ -766,5 +770,5 @@ namespace Halley {
 
 	// Default versions
 	template<typename T, typename Allocator = std::allocator<T>>
-	using VectorSize32 = VectorStd<T, uint32_t, false, 0, Allocator>;
+	using VectorSize32 = VectorStd<T, uint32_t, true, 0, Allocator>;
 }
