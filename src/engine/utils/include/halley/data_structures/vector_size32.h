@@ -134,46 +134,36 @@ namespace Halley {
 		VectorStd(const VectorStd& other)
 		{
 			change_capacity(other.st_capacity());
-			m_size = other.m_size;
-			const auto* otherData = other.data();
-			const auto sz = st_size();
-			for (size_type i = 0; i < sz; ++i) {
-				std::allocator_traits<Allocator>::construct(*this, data() + i, otherData[i]);
+			auto* dst = data();
+			const auto iterEnd = other.end();
+			for (auto iter = other.begin(); iter != iterEnd; ++iter) {
+				std::allocator_traits<Allocator>::construct(*this, dst++, *iter);
 			}
+			set_size(other.st_size());
 		}
 		
 		VectorStd(const VectorStd& other, const Allocator& alloc)
 			: Allocator(alloc)
 		{
 			change_capacity(other.st_capacity());
-			m_size = other.m_size;
-			const auto* otherData = other.data();
-			const auto sz = st_size();
-			for (size_type i = 0; i < sz; ++i) {
-				std::allocator_traits<Allocator>::construct(*this, data() + i, otherData[i]);
+			auto* dst = data();
+			const auto iterEnd = other.end();
+			for (auto iter = other.begin(); iter != iterEnd; ++iter) {
+				std::allocator_traits<Allocator>::construct(*this, dst++, *iter);
 			}
+			set_size(other.st_size());
 		}
 		
 		VectorStd(VectorStd&& other) noexcept
 			: Allocator(std::move(other))
-			, m_size(other.m_size)
-			, m_capacity(other.m_capacity)
-			, m_data(other.m_data)
 		{
-			other.m_data = nullptr;
-			other.m_size = {};
-			other.m_capacity = 0;
+			move_data_from(other);
 		}
 
 		VectorStd(VectorStd&& other, const Allocator& alloc)
 			: Allocator(alloc)
-			, m_size(other.m_size)
-			, m_capacity(other.m_capacity)
-			, m_data(other.m_data)
 		{
-			other.m_data = nullptr;
-			other.m_size = {};
-			other.m_capacity = 0;
+			move_data_from(other);
 		}
 
 		VectorStd(std::initializer_list<T> list, const Allocator& alloc = Allocator())
@@ -187,10 +177,7 @@ namespace Halley {
 		
 		~VectorStd() noexcept
 		{
-			clear();
-			if (!sbo_active()) {
-				std::allocator_traits<Allocator>::deallocate(*this, m_data, m_capacity);
-			}
+			destroy();
 		}
 
 		VectorStd& operator=(const VectorStd& other)
@@ -204,28 +191,36 @@ namespace Halley {
 			return *this;
 		}
 
+		template<typename A, typename S, bool SBO, size_t SBOP>
+		VectorStd& operator=(const VectorStd<T, S, SBO, SBOP, A>& other)
+		{
+			if constexpr (std::is_same_v<decltype(this), decltype(&other)>) {
+				if (this == &other) {
+					return *this;
+				}
+			}
+
+			assign(other.begin(), other.end());
+			
+			return *this;
+		}
+
 		VectorStd& operator=(VectorStd&& other) noexcept
 		{
+			destroy();
 			Allocator::operator=(std::move(other));
-			m_data = other.m_data;
-			m_size = other.m_size;
-			m_capacity = other.m_capacity;
-			other.m_data = nullptr;
-			other.m_size = {};
-			other.m_capacity = 0;
+			move_data_from(other);
 			return *this;
 		}
 
 		VectorStd& operator=(std::initializer_list<T> list)
 		{
-			// TODO: could be faster
 			assign(list.begin(), list.end());
 			return *this;
 		}
 
 		void assign(size_t count, const T& value)
 		{
-			// TODO: could be faster
 			clear();
 			resize(count, value);
 		}
@@ -233,13 +228,24 @@ namespace Halley {
 		template <class InputIt, std::enable_if_t<is_iterator_v<InputIt>, int> Test = 0>
 		void assign(InputIt begin, InputIt end)
 		{
-			// TODO: could be faster
 			clear();
+
 			if constexpr (std::is_same_v<typename std::iterator_traits<InputIt>::iterator_category, std::random_access_iterator_tag>) {
-				reserve(end - begin);
-			}
-			for (auto iter = begin; iter != end; ++iter) {
-				push_back(*iter);
+				// RandomAccessIterator
+				const auto sz = static_cast<size_t>(end - begin);
+				reserve(sz);
+				auto* dst = data();
+
+				for (auto iter = begin; iter != end; ++iter) {
+					std::allocator_traits<Allocator>::construct(as_allocator(), dst, *iter);
+					++dst;
+				}
+				set_size(static_cast<size_type>(sz));
+			} else {
+				// Non-Random Access Iterator
+				for (auto iter = begin; iter != end; ++iter) {
+					push_back(*iter);
+				}
 			}
 		}
 
@@ -270,7 +276,7 @@ namespace Halley {
 
 		[[nodiscard]] constexpr size_t max_size() const
 		{
-			return sbo_enabled() ? std::numeric_limits<size_type>::max() / 2 : std::numeric_limits<size_type>::max();
+			return std::numeric_limits<size_type>::max() / 2;
 		}
 
 		[[nodiscard]] constexpr bool empty() const
@@ -564,13 +570,19 @@ namespace Halley {
 					uint8_t size : 7;
 					uint8_t padding[sizeof(size_type) - 1];
 				} small;
-				size_type size;
 			};
 
-			SBO() : size(0) {}
+			SBO()
+			{
+				big.sbo_enabled = false;
+				big.size = 0;
+			}
 		} m_size;
 		size_type m_capacity = 0;
-		pointer m_data = nullptr;
+		union {
+			pointer m_data = nullptr;
+			uint8_t sbo_padding[SBOPadding + sizeof(pointer)];
+		};
 
 		static_assert(sizeof(SBO) == sizeof(size_type));
 		static_assert(alignof(SBO) == alignof(size_type));
@@ -645,14 +657,10 @@ namespace Halley {
 
 		void set_size(size_type sz)
 		{
-			if constexpr (sbo_enabled()) {
-				if (sbo_active()) {
-					m_size.small.size = static_cast<uint8_t>(sz);
-				} else {
-					m_size.big.size = sz;
-				}
+			if (sbo_active()) {
+				m_size.small.size = static_cast<uint8_t>(sz);
 			} else {
-				m_size.size = sz;
+				m_size.big.size = sz;
 			}
 		}
 
@@ -678,6 +686,40 @@ namespace Halley {
 			return begin() + idx;
 		}
 
+		void move_data_from(VectorStd& other)
+		{
+			if (other.sbo_active()) {
+				// Using SBO, move elements
+				m_size = other.m_size;
+
+				auto* dst = data();
+				auto iter = other.begin();
+				const auto iterEnd = other.end();
+				for (; iter != iterEnd; ++iter) {
+					std::allocator_traits<Allocator>::construct(*this, dst++, std::move(*iter));
+				}
+				
+				other.clear();
+			} else {
+				// No SBO, steal data
+				m_size = other.m_size;
+				m_capacity = other.m_capacity;
+				m_data = other.m_data;
+
+				other.m_data = nullptr;
+				other.m_size = {};
+				other.m_capacity = 0;
+			}
+		}
+
+		void destroy()
+		{
+			clear();
+			if (!sbo_active()) {
+				std::allocator_traits<Allocator>::deallocate(*this, m_data, m_capacity);
+			}
+		}
+
 		[[nodiscard]] reference elem(size_t pos)
 		{
 			return data()[pos];
@@ -700,7 +742,7 @@ namespace Halley {
 
 		[[nodiscard]] constexpr size_type st_size() const
 		{
-			return sbo_enabled() ? (sbo_active() ? m_size.small.size : m_size.big.size) : m_size.size;
+			return sbo_active() ? m_size.small.size : m_size.big.size;
 		}
 
 		[[nodiscard]] constexpr size_type st_capacity() const
@@ -769,6 +811,6 @@ namespace Halley {
 
 
 	// Default versions
-	template<typename T, typename Allocator = std::allocator<T>>
-	using VectorSize32 = VectorStd<T, uint32_t, true, 0, Allocator>;
+	template<typename T, typename Allocator = std::allocator<T>, int Padding = 0>
+	using VectorSize32 = VectorStd<T, uint32_t, true, Padding, Allocator>;
 }

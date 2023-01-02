@@ -15,8 +15,8 @@ namespace Halley {
 
 namespace Halley
 {
-	//template<typename T> using Vector = std::vector<T>;
-	template<typename T> using Vector = VectorSize32<T>;
+	template<typename T, typename Allocator = std::allocator<T>, int Padding = 0>
+	using Vector = VectorSize32<T, Allocator, Padding>;
 }
 
 #endif

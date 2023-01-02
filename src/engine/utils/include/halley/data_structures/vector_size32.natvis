@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-    <Type Name="Halley::VectorSize32&lt;*&gt;">
-        <DisplayString>{{ size={m_size} }}</DisplayString>
+    <Type Name="Halley::VectorStd&lt;*&gt;">
+		<DisplayString Condition="m_size.small.sbo_enabled">{{ size={(size_t)m_size.small.size}, SBO }}</DisplayString>
+		<DisplayString Condition="!m_size.small.sbo_enabled">{{ size={(size_t)m_size.big.size}, capacity={m_capacity} }}</DisplayString>
         <Expand>
-            <Item Name="[size]" ExcludeView="simple">m_size</Item>
-            <Item Name="[capacity]" ExcludeView="simple">m_capacity</Item>
-            <ArrayItems>
-                <Size>m_size</Size>
+			<Item Name="[size]" ExcludeView="simple" Condition="m_size.small.sbo_enabled">(int)m_size.small.size</Item>
+			<Item Name="[size]" ExcludeView="simple" Condition="!m_size.small.sbo_enabled">m_size.big.size</Item>
+            <Item Name="[capacity]" ExcludeView="simple" Condition="!m_size.small.sbo_enabled">m_capacity</Item>
+			<ArrayItems Condition="m_size.small.sbo_enabled">
+				<Size>m_size.small.size</Size>
+				<ValuePointer>(($T1*)this)+1</ValuePointer>
+			</ArrayItems>
+			<ArrayItems Condition="!m_size.small.sbo_enabled">
+                <Size>m_size.big.size</Size>
                 <ValuePointer>m_data</ValuePointer>
             </ArrayItems>
         </Expand>
