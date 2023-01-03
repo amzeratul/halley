@@ -207,7 +207,7 @@ namespace Halley {
 
 		VectorStd& operator=(VectorStd&& other) noexcept
 		{
-			if (this != &other) {
+			if (this == &other) {
 				return *this;
 			}
 
