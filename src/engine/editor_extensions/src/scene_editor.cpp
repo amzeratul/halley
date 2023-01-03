@@ -66,10 +66,10 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 		curFrameData->doStartFrame(false, nullptr);
 	}
 	
-	IFrameData::setThreadFrameData(curFrameData.get());
+	pushThreadFrameData();
 	auto guard = ScopedGuard([&] ()
 	{
-		IFrameData::setThreadFrameData(nullptr);
+		popThreadFrameData();
 	});
 	
 	preUpdate(t);
@@ -136,9 +136,9 @@ void SceneEditor::render(RenderContext& rc)
 {
 	auto guard = ScopedGuard([&] ()
 	{
-		IFrameData::setThreadFrameData(nullptr);
+		popThreadFrameData();
 	});
-	IFrameData::setThreadFrameData(curFrameData.get());
+	pushThreadFrameData();
 
 	preRender(rc);
 
@@ -510,6 +510,23 @@ void SceneEditor::saveCameraPos()
 	editorInterface->setAssetSetting("cameraZoom", ConfigNode(camera.zoom));
 }
 
+void SceneEditor::pushThreadFrameData() const
+{
+	if (curFrameDataDepth == 0) {
+		IFrameData::setThreadFrameData(curFrameData.get());
+	}
+	++curFrameDataDepth;
+}
+
+void SceneEditor::popThreadFrameData() const
+{
+	assert(curFrameDataDepth > 0);
+	--curFrameDataDepth;
+	if (curFrameDataDepth == 0) {
+		IFrameData::setThreadFrameData(nullptr);
+	}
+}
+
 bool SceneEditor::loadCameraPos()
 {
 	Expects(editorInterface);
@@ -539,6 +556,12 @@ void SceneEditor::setupTools(UIList& toolList, ISceneEditorGizmoCollection& gizm
 void SceneEditor::setSelectedEntities(Vector<UUID> uuids, Vector<EntityData*> entityDatas)
 {
 	Expects(uuids.size() == entityDatas.size());
+
+	pushThreadFrameData();
+	auto guard = ScopedGuard([&] ()
+	{
+		popThreadFrameData();
+	});
 	
 	selectedEntityIds.resize(uuids.size());
 	for (size_t i = 0; i < uuids.size(); ++i) {
@@ -690,6 +713,12 @@ Vector<EntityRef> SceneEditor::getRootEntitiesAt(Vector2f point, bool allowUnsel
 
 Vector<EntityRef> SceneEditor::getRootEntitiesAt(Rect4f area, bool allowUnselectable, EntityAtPositionSelectMode mode) const
 {
+	pushThreadFrameData();
+	auto guard = ScopedGuard([&] ()
+	{
+		popThreadFrameData();
+	});
+
 	const auto entities = getEntitiesAt(area, allowUnselectable, mode);
 
 	Vector<EntityRef> result;

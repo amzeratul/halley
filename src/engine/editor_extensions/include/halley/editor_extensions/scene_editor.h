@@ -157,6 +157,7 @@ namespace Halley {
 		AssetPreviewGenerator* assetPreviewGenerator = nullptr;
 
 		std::unique_ptr<IFrameData> curFrameData;
+		mutable uint8_t curFrameDataDepth = 0;
 
     	void moveCameraTo2D(Vector2f pos);
     	Vector2f roundPosition(Vector2f pos) const;
@@ -174,5 +175,8 @@ namespace Halley {
 
 		void updateCameraPos(Time t);
     	void saveCameraPos();
+
+		void pushThreadFrameData() const;
+		void popThreadFrameData() const;
 	};
 }
