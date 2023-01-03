@@ -18,6 +18,7 @@
 #include "halley/entity/entity_scene.h"
 #include "halley/entity/components/transform_2d_component.h"
 #include "halley/file_formats/image.h"
+#include "halley/utils/scoped_guard.h"
 using namespace Halley;
 
 AssetPreviewGenerator::AssetPreviewGenerator(Game& game, const HalleyAPI& api, Resources& resources)
@@ -107,6 +108,10 @@ Future<AssetPreviewData> AssetPreviewGenerator::getPrefabPreviewData(AssetType a
 		// Frame data
 		auto frameData = game.makeFrameData();
 		IFrameData::setThreadFrameData(frameData.get());
+		auto guard = ScopedGuard([&] ()
+		{
+			IFrameData::setThreadFrameData(nullptr);
+		});
 		
 		// Create world
 		auto world = std::shared_ptr<World>(World::make(api, resources, "stages/prefab_preview", true));
@@ -149,16 +154,17 @@ Future<AssetPreviewData> AssetPreviewGenerator::getPrefabPreviewData(AssetType a
 		// Simulate again
 		frameData->doStartFrame(false, nullptr);
 		world->step(TimeLine::VariableUpdate, 0.1);
-		IFrameData::setThreadFrameData(nullptr);
 
 		return AssetPreviewInfo{ world, rect, zoom, name, std::move(frameData) };
 	}).then(renderQueue, [this] (AssetPreviewInfo info) -> AssetPreviewData
 	{
+		auto guard = ScopedGuard([&] ()
+		{
+			IFrameData::setThreadFrameData(nullptr);
+		});
 		IFrameData::setThreadFrameData(info.frameData.get());
 		auto rc2 = curRC->with(*worldRenderTarget);
-		auto result = renderAssetPreview(info, rc2);
-		IFrameData::setThreadFrameData(nullptr);
-		return result;
+		return renderAssetPreview(info, rc2);
 	});
 }
 

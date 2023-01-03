@@ -24,6 +24,7 @@
 #include "halley/entity/scripting/script_node_type.h"
 #include "halley/utils/algorithm.h"
 #include "halley/ui/widgets/ui_popup_menu.h"
+#include "halley/utils/scoped_guard.h"
 
 using namespace Halley;
 
@@ -64,8 +65,13 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	if (curFrameData) {
 		curFrameData->doStartFrame(false, nullptr);
 	}
+	
 	IFrameData::setThreadFrameData(curFrameData.get());
-
+	auto guard = ScopedGuard([&] ()
+	{
+		IFrameData::setThreadFrameData(nullptr);
+	});
+	
 	preUpdate(t);
 
 	// Update camera
@@ -128,6 +134,10 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 
 void SceneEditor::render(RenderContext& rc)
 {
+	auto guard = ScopedGuard([&] ()
+	{
+		IFrameData::setThreadFrameData(nullptr);
+	});
 	IFrameData::setThreadFrameData(curFrameData.get());
 
 	preRender(rc);

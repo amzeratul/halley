@@ -435,6 +435,8 @@ void Core::tickFrame(Time time)
 		}
 	}
 
+	IFrameData::setThreadFrameData(nullptr);
+
 	curStageFrames++;
 }
 
