@@ -5,6 +5,7 @@
 #include <components/sprite_component.h>
 
 #include "halley/core/api/halley_api.h"
+#include "halley/core/game/game.h"
 #include "halley/core/graphics/camera.h"
 #include "halley/core/graphics/painter.h"
 #include "halley/core/graphics/render_context.h"
@@ -19,8 +20,9 @@
 #include "halley/file_formats/image.h"
 using namespace Halley;
 
-AssetPreviewGenerator::AssetPreviewGenerator(const HalleyAPI& api, Resources& resources)
-	: api(api)
+AssetPreviewGenerator::AssetPreviewGenerator(Game& game, const HalleyAPI& api, Resources& resources)
+	: game(game)
+	, api(api)
 	, resources(resources)
 	, renderExecutor(renderQueue)
 {
@@ -102,6 +104,10 @@ Future<AssetPreviewData> AssetPreviewGenerator::getSpritePreviewData(AssetType a
 Future<AssetPreviewData> AssetPreviewGenerator::getPrefabPreviewData(AssetType assetType, const String& id, Vector2i size)
 {
 	return Concurrent::execute(previewExecutor->getQueue(), [this, id, size] () -> AssetPreviewInfo {
+		// Frame data
+		auto frameData = game.makeFrameData();
+		IFrameData::setThreadFrameData(frameData.get());
+		
 		// Create world
 		auto world = std::shared_ptr<World>(World::make(api, resources, "stages/prefab_preview", true));
 		setupPrefabPreviewWorld(*world, size);
@@ -112,6 +118,7 @@ Future<AssetPreviewData> AssetPreviewGenerator::getPrefabPreviewData(AssetType a
 		auto sceneCreated = entityFactory->createScene(prefab, true);
 
 		// Run a simulation step
+		frameData->doStartFrame(false, nullptr);
 		world->step(TimeLine::VariableUpdate, 0.1);
 		
 		// Get main entity info
@@ -140,13 +147,18 @@ Future<AssetPreviewData> AssetPreviewGenerator::getPrefabPreviewData(AssetType a
 		createPrefabPreviewCamera(*entityFactory, *world, spriteBounds, zoom);
 
 		// Simulate again
+		frameData->doStartFrame(false, nullptr);
 		world->step(TimeLine::VariableUpdate, 0.1);
+		IFrameData::setThreadFrameData(nullptr);
 
-		return AssetPreviewInfo{ world, rect, zoom, name };
+		return AssetPreviewInfo{ world, rect, zoom, name, std::move(frameData) };
 	}).then(renderQueue, [this] (AssetPreviewInfo info) -> AssetPreviewData
 	{
+		IFrameData::setThreadFrameData(info.frameData.get());
 		auto rc2 = curRC->with(*worldRenderTarget);
-		return renderAssetPreview(info, rc2);
+		auto result = renderAssetPreview(info, rc2);
+		IFrameData::setThreadFrameData(nullptr);
+		return result;
 	});
 }
 

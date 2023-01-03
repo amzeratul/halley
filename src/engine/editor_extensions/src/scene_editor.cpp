@@ -64,7 +64,7 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 	if (curFrameData) {
 		curFrameData->doStartFrame(false, nullptr);
 	}
-	IFrameData::threadInstance = curFrameData.get();
+	IFrameData::setThreadFrameData(curFrameData.get());
 
 	preUpdate(t);
 
@@ -128,7 +128,7 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 
 void SceneEditor::render(RenderContext& rc)
 {
-	IFrameData::threadInstance = curFrameData.get();
+	IFrameData::setThreadFrameData(curFrameData.get());
 
 	preRender(rc);
 

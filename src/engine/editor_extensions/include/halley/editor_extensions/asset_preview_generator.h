@@ -8,6 +8,8 @@
 #include "halley/text/i18n.h"
 
 namespace Halley {
+	class IFrameData;
+	class Game;
 	class EntityFactory;
 	class Image;
 
@@ -16,6 +18,7 @@ namespace Halley {
 		Rect4i rect;
 		float zoom;
 		String name;
+		std::unique_ptr<IFrameData> frameData;
 	};
 
 	struct AssetPreviewData {
@@ -45,7 +48,7 @@ namespace Halley {
 
 	class AssetPreviewGenerator {
 	public:
-		AssetPreviewGenerator(const HalleyAPI& api, Resources& resources);
+		AssetPreviewGenerator(Game& game, const HalleyAPI& api, Resources& resources);
 		virtual ~AssetPreviewGenerator() = default;
 
 		Future<AssetPreviewData> getAssetPreviewData(AssetType assetType, const String& id, Vector2i size);
@@ -57,6 +60,7 @@ namespace Halley {
 		void render(RenderContext& rc);
 		
 	protected:
+		Game& game;
 		const HalleyAPI& api;
 		Resources& resources;
 

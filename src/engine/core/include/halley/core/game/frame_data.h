@@ -5,13 +5,20 @@
 namespace Halley {
 	class Core;
 	class SceneEditor;
+	class AssetPreviewGenerator;
 
 	class IFrameData {
 		friend class Core;
 		friend class SceneEditor;
+		friend class AssetPreviewGenerator;
 
 	public:
 		virtual ~IFrameData() = default;
+
+		static void setThreadFrameData(IFrameData* value)
+		{
+			threadInstance = value;
+		}
 
 	protected:
 		static thread_local IFrameData* threadInstance;
@@ -26,8 +33,13 @@ namespace Halley {
 
 		static T& getCurrent()
 		{
-			assert(threadInstance != nullptr);
+			assert(hasCurrent());
 			return static_cast<T&>(*threadInstance);
+		}
+
+		static bool hasCurrent()
+		{
+			return threadInstance != nullptr;
 		}
 
 	protected:

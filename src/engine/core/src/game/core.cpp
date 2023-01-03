@@ -412,20 +412,20 @@ void Core::tickFrame(Time time)
 	
 	if (multithreaded) {
 		auto updateTask = Concurrent::execute([&] () {
-			IFrameData::threadInstance = frameDataUpdate.get();
+			IFrameData::setThreadFrameData(frameDataUpdate.get());
 			runPreVariableUpdate(time);
 			runVariableUpdate(time);
 			runPostVariableUpdate(time);
 		});
 		if (frameDataRender) {
 			assert(curStageFrames > 0);
-			IFrameData::threadInstance = frameDataRender.get();
+			IFrameData::setThreadFrameData(frameDataRender.get());
 			render();
 			waitForRenderEnd();
 		}
 		updateTask.wait();
 	} else {
-		IFrameData::threadInstance = frameDataUpdate.get();
+		IFrameData::setThreadFrameData(frameDataUpdate.get());
 		runPreVariableUpdate(time);
 		runVariableUpdate(time);
 		runPostVariableUpdate(time);
