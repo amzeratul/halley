@@ -3,15 +3,7 @@
 #include <type_traits>
 
 namespace Halley {
-	class Core;
-	class SceneEditor;
-	class AssetPreviewGenerator;
-
 	class IFrameData {
-		friend class Core;
-		friend class SceneEditor;
-		friend class AssetPreviewGenerator;
-
 	public:
 		virtual ~IFrameData() = default;
 
@@ -20,10 +12,10 @@ namespace Halley {
 			threadInstance = value;
 		}
 
+		virtual void doStartFrame(bool multithreaded, IFrameData* previous) {}
+
 	protected:
 		static thread_local IFrameData* threadInstance;
-
-		virtual void doStartFrame(bool multithreaded, IFrameData* previous) {}
 	};
 
 	template <typename T>

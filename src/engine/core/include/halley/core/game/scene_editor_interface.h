@@ -406,6 +406,8 @@ namespace Halley {
 		virtual Vector<const EntityData*> getEntityDataStack(const UUID& instanceUUID) const = 0;
 	};
 
+	class Game;
+
 	class IProject {
     public:		
         virtual ~IProject() = default;
@@ -413,6 +415,7 @@ namespace Halley {
 		virtual bool writeAssetToDisk(const Path& filePath, gsl::span<const gsl::byte> data) = 0;
 		virtual bool writeAssetToDisk(const Path& filePath, const Bytes& data) = 0;
 		virtual bool writeAssetToDisk(const Path& filePath, std::string_view str) = 0;
+		virtual Game* getGameInstance() const = 0;
 	};
 
 	class IProjectWindow {

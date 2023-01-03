@@ -130,7 +130,7 @@ namespace Halley
 			}
 		}
 
-		Game* getGameInstance() const;
+		Game* getGameInstance() const override;
 
 		std::optional<AssetPreviewData> getCachedAssetPreview(AssetType type, const String& id);
 		void setCachedAssetPreview(AssetType type, const String& id, AssetPreviewData data);
