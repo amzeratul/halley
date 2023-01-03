@@ -157,7 +157,7 @@ RenderSnapshot::CommandInfo RenderSnapshot::getCommandInfo(size_t commandIdx) co
 	return result;
 }
 
-RenderSnapshot::PlaybackResult RenderSnapshot::playback(Painter& painter, std::optional<size_t> maxCommands, std::shared_ptr<const MaterialDefinition> debugMaterial) const
+RenderSnapshot::PlaybackResult RenderSnapshot::playback(Painter& painter, std::optional<size_t> maxCommands, TargetBufferType blitType, std::shared_ptr<const MaterialDefinition> debugMaterial) const
 {
 	painter.stopRecording();
 
@@ -210,7 +210,11 @@ RenderSnapshot::PlaybackResult RenderSnapshot::playback(Painter& painter, std::o
 	if (startRenderTarget != finalRenderTarget) {
 		const auto* texRenderTarget = dynamic_cast<TextureRenderTarget*>(finalRenderTarget);
 		if (texRenderTarget) {
-			painter.blitTexture(texRenderTarget->getTexture(0));
+			if (blitType == TargetBufferType::Depth) {
+				painter.blitTexture(texRenderTarget->getDepthTexture(), blitType);
+			} else {
+				painter.blitTexture(texRenderTarget->getTexture(0), blitType);
+			}
 		}
 	}
 

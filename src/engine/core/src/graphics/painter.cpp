@@ -37,6 +37,7 @@ Painter::Painter(VideoAPI& video, Resources& resources)
 	, solidLineMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidLine")))
 	, solidPolygonMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/SolidPolygon")))
 	, blitMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/Blit")))
+	, blitDepthMaterial(std::make_unique<Material>(resources.get<MaterialDefinition>("Halley/BlitDepth")))
 {
 }
 
@@ -442,7 +443,7 @@ void Painter::drawPolygon(const Polygon& polygon, Colour4f colour, std::shared_p
 	draw(material, vertices.size(), vertices.data(), indices, PrimitiveType::Triangle);
 }
 
-void Painter::blitTexture(const std::shared_ptr<const Texture>& texture)
+void Painter::blitTexture(const std::shared_ptr<const Texture>& texture, TargetBufferType blitType)
 {
 	struct BlitVertex {
 		Vector4f p;
@@ -456,10 +457,11 @@ void Painter::blitTexture(const std::shared_ptr<const Texture>& texture)
 
 	std::array<uint16_t, 6> indices = { 0, 1, 3, 1, 2, 3 };
 
-	blitMaterial->set(0, texture);
-	draw(blitMaterial, 4, vs.data(), indices, PrimitiveType::Triangle);
+	const auto material = blitType == TargetBufferType::Depth ? blitDepthMaterial : blitMaterial;
+	material->set(0, texture);
+	draw(material, 4, vs.data(), indices, PrimitiveType::Triangle);
 	flushPending();
-	blitMaterial->set(0, std::shared_ptr<const Texture>{});
+	material->set(0, std::shared_ptr<const Texture>{});
 }
 
 void Painter::setLogging(bool logging)

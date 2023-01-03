@@ -28,7 +28,8 @@ namespace Halley
 		bool waiting = false;
 		
 		int framesToDraw = 0;
-
+		TargetBufferType blitType = TargetBufferType::Colour;
+		
 		std::shared_ptr<const MaterialDefinition> debugMaterial;
 	};
 }

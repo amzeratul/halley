@@ -48,7 +48,7 @@ namespace Halley
 			IndexType firstIndex;
 		};
 
-	public:
+	public:		
 		Painter(VideoAPI& video, Resources& resources);
 		virtual ~Painter();
 
@@ -96,7 +96,7 @@ namespace Halley
 		void drawPolygon(const Polygon& polygon, Colour4f colour, std::shared_ptr<const Material> material = {});
 
 		// Blit a texture over
-		void blitTexture(const std::shared_ptr<const Texture>& texture);
+		void blitTexture(const std::shared_ptr<const Texture>& texture, TargetBufferType blitType = TargetBufferType::Colour);
 
 		size_t getNumDrawCalls() const { return nDrawCalls; }
 		size_t getNumVertices() const { return nVertices; }
@@ -175,6 +175,7 @@ namespace Halley
 		std::shared_ptr<const Material> solidLineMaterial;
 		std::shared_ptr<const Material> solidPolygonMaterial;
 		std::shared_ptr<Material> blitMaterial;
+		std::shared_ptr<Material> blitDepthMaterial;
 
 		size_t nDrawCalls = 0;
 		size_t nVertices = 0;

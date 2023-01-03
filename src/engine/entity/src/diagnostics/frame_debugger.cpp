@@ -57,8 +57,8 @@ void FrameDebugger::draw(RenderContext& context)
 			if (!debugMaterial && resources.getOptions().retainShaderData) {
 				//debugMaterial = resources.get<MaterialDefinition>("Halley/FrameDebugView");
 			}
-			
-			lastPlaybackResult = renderSnapshot->playback(painter, framesToDraw, debugMaterial);
+
+			lastPlaybackResult = renderSnapshot->playback(painter, framesToDraw, blitType, debugMaterial);
 		});
 	}
 

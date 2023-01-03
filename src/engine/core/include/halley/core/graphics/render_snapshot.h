@@ -14,6 +14,12 @@ namespace Halley {
     class RenderContext;
     class RenderTarget;
 
+	enum class TargetBufferType {
+		Colour,
+		Depth,
+		Stencil
+	};
+
     class RenderSnapshot : public ITimestampRecorder {
     public:
     	enum class CommandType : uint8_t {
@@ -85,7 +91,7 @@ namespace Halley {
         size_t getNumCommands() const;
         CommandInfo getCommandInfo(size_t commandIdx) const;
 
-        PlaybackResult playback(Painter& painter, std::optional<size_t> maxCommands, std::shared_ptr<const MaterialDefinition> debugMaterial = {}) const;
+        PlaybackResult playback(Painter& painter, std::optional<size_t> maxCommands, TargetBufferType blitType = TargetBufferType::Colour, std::shared_ptr<const MaterialDefinition> debugMaterial = {}) const;
 
         void addPendingTimestamp() override;
         void onTimestamp(TimestampType type, size_t idx, uint64_t value) override;
