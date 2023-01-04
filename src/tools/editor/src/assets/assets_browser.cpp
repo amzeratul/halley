@@ -359,36 +359,43 @@ void AssetsBrowser::addAsset()
 	
 	const auto assetType = curSrcPath.getFront(1).string();
 
-	getRoot()->addChild(std::make_shared<NewAssetWindow>(factory, [=] (std::optional<String> newName)
+	auto window = std::make_shared<NewAssetWindow>(factory, [=](std::optional<String> newName)
 	{
 		if (newName) {
 			if (assetType == "prefab") {
 				Prefab prefab;
 				prefab.makeDefault();
 				addAsset(newName.value() + ".prefab", prefab.toYAML());
-			} else if (assetType == "scene") {
+			}
+			else if (assetType == "scene") {
 				Scene scene;
 				scene.makeDefault();
 				addAsset(newName.value() + ".scene", scene.toYAML());
-			} else if (assetType == "audio_object") {
+			}
+			else if (assetType == "audio_object") {
 				AudioObject object;
 				object.makeDefault();
 				addAsset(newName.value() + ".yaml", object.toYAML());
-			} else if (assetType == "audio_event") {
+			}
+			else if (assetType == "audio_event") {
 				AudioEvent audioEvent;
 				audioEvent.makeDefault();
 				addAsset(newName.value() + ".yaml", audioEvent.toYAML());
-			} else if (assetType == "ui") {
+			}
+			else if (assetType == "ui") {
 				UIDefinition ui;
 				ui.makeDefault();
 				addAsset(newName.value() + ".yaml", ui.toYAML());
-			} else if (assetType == "comet") {
+			}
+			else if (assetType == "comet") {
 				ScriptGraph graph;
 				graph.makeDefault();
 				addAsset(newName.value() + ".comet", graph.toYAML());
 			}
 		}
-	}));
+	});
+	window->setChildLayerAdjustment(10);
+	getRoot()->addChild(std::move(window));
 }
 
 void AssetsBrowser::addAsset(Path path, std::string_view data)
