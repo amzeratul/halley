@@ -285,14 +285,10 @@ UIDebugConsoleSyntax::VariantMatch UIDebugConsoleSyntax::getVariantMatch(const S
 UIDebugConsoleSyntax::VariantMatch UIDebugConsoleSyntax::getVariantMatch(const String& command, gsl::span<const String> args, bool validate) const
 {
 	Expects(variants.size() <= 8);
-
-	if (args.empty()) {
-		return {};
-	}
-
+	
 	std::array<bool, 8> validVariant;
 	for (size_t i = 0; i < validVariant.size(); ++i) {
-		validVariant[i] = i < variants.size();
+		validVariant[i] = i < variants.size() && (!validate || args.size() == variants[i].args.size());
 	}
 
 	// Check for valid variants
@@ -335,7 +331,7 @@ UIDebugConsoleSyntax::VariantMatch UIDebugConsoleSyntax::getVariantMatch(const S
 
 	// Find start of cur argument
 	size_t argStart = command.length() + 1;
-	for (size_t i = 0; i < args.size() - 1; ++i) {
+	for (int i = 0; i < static_cast<int>(args.size()) - 1; ++i) {
 		argStart += args[i].length() + 1;
 	}
 	
