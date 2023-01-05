@@ -42,6 +42,12 @@ void EntityValidatorUI::setEntity(EntityData& e, IEntityEditor& editor, Resource
 	refresh();
 }
 
+void EntityValidatorUI::unloadEntity()
+{
+	curEntity = {};
+	setActive(false);
+}
+
 void EntityValidatorUI::refresh()
 {
 	if (!curEntity || !validator) {

@@ -14,6 +14,7 @@ namespace Halley {
 
 		void setValidator(EntityValidator* validator);
 		void setEntity(EntityData& entity, IEntityEditor& entityEditor, Resources& gameResources);
+		void unloadEntity();
 		void refresh();
 		void setSceneEditorWindow(SceneEditorWindow* sceneEditor);
 

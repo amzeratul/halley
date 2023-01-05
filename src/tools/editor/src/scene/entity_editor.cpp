@@ -202,7 +202,7 @@ void EntityEditor::reloadEntity()
 
 		entityValidatorUI->setEntity(*currentEntityData, *this, *gameResources);
 	} else {
-		entityValidatorUI->setActive(false);
+		entityValidatorUI->unloadEntity();
 	}
 }
 
