@@ -700,22 +700,6 @@ UIFactoryWidgetProperties UIFactory::getSliderProperties() const
 	return result;
 }
 
-UIFactoryWidgetProperties UIFactory::getHorizontalDivProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Horizontal Divider";
-	result.iconName = "widget_icons/horizontalDiv.png";
-	return result;
-}
-
-UIFactoryWidgetProperties UIFactory::getVerticalDivProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Vertical Divider";
-	result.iconName = "widget_icons/verticalDiv.png";
-	return result;
-}
-
 UIFactoryWidgetProperties UIFactory::getFramedImageProperties() const
 {
 	UIFactoryWidgetProperties result;
@@ -797,7 +781,7 @@ UIFactoryWidgetProperties UIFactory::getButtonProperties() const
 	result.canHaveChildren = true;
 	result.entries.emplace_back("Text", "text", "Halley::String", "");
 	result.entries.emplace_back("Text (Loc Key)", "textKey", "Halley::String", "");
-	result.entries.emplace_back("Style", "style", "Halley::String", "button");
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<button>", "button");
 	result.entries.emplace_back("Icon", "icon", "Halley::ResourceReference<Halley::SpriteResource>", "");
 	result.entries.emplace_back("Mouse Border", "mouseBorder", "Halley::Vector4f", Vector<String>{"0", "0", "0", "0"});
 	return result;
@@ -1081,7 +1065,7 @@ UIFactoryWidgetProperties UIFactory::getScrollBarPaneProperties() const
 	//result.iconName = "widget_icons/dropdown.png";
 
 	result.entries.emplace_back("Clip Size", "clipSize", "Halley::Vector2f", "");
-	result.entries.emplace_back("Style", "style", "Halley::String", "scrollbar");
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<scrollbar>", "scrollbar");
 	result.entries.emplace_back("Scroll Horizontal", "scrollHorizontal", "bool", "false");
 	result.entries.emplace_back("Scroll Vertical", "scrollVertical", "bool", "true");
 	result.entries.emplace_back("Auto Hide", "autoHide", "bool", "false");
@@ -1110,9 +1094,27 @@ std::shared_ptr<UIWidget> UIFactory::makeSlider(const ConfigNode& entryNode)
 	return slider;
 }
 
+UIFactoryWidgetProperties UIFactory::getHorizontalDivProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Horizontal Divider";
+	result.iconName = "widget_icons/horizontalDiv.png";
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<horizontalDiv>", "horizontalDiv");
+	return result;
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeHorizontalDiv(const ConfigNode& entryNode)
 {
 	return makeDivider(entryNode, UISizerType::Horizontal);
+}
+
+UIFactoryWidgetProperties UIFactory::getVerticalDivProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Vertical Divider";
+	result.iconName = "widget_icons/verticalDiv.png";
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<verticalDiv>", "verticalDiv");
+	return result;
 }
 
 std::shared_ptr<UIWidget> UIFactory::makeVerticalDiv(const ConfigNode& entryNode)
@@ -1197,7 +1199,7 @@ UIFactoryWidgetProperties UIFactory::getTabbedPaneProperties() const
 	result.iconName = "widget_icons/tabbedPane.png";
 	result.childName = "Tab";
 
-	result.entries.emplace_back("Style", "style", "Halley::String", "tabs");
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<list>", "tabs");
 
 	result.childEntries.emplace_back("Id", "id", "Halley::String", "");
 	result.childEntries.emplace_back("Text", "text", "Halley::String", "");
