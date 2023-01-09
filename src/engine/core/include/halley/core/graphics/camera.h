@@ -53,9 +53,6 @@ namespace Halley {
 		Camera& setFieldOfView(Angle1f fov);
 		Camera& setClippingPlanes(float near, float far);
 
-		Camera& resetRenderTarget();
-		Camera& setRenderTarget(RenderTarget& target);
-
 		Camera& resetViewPort();
 		Camera& setViewPort(Rect4i viewPort);
 
