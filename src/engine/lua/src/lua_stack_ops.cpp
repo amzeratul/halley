@@ -68,7 +68,7 @@ void LuaStackOps::push(const ConfigNode& node)
 	} else if (node.getType() == ConfigNodeType::Sequence) {
 		push(node.asSequence());
 	} else if (node.getType() == ConfigNodeType::Map) {
-		push(node.asMap());
+		push<ConfigNode>(node.asMap());
 	} else {
 		throw Exception("Unimplemented ConfigNode to Lua serialization: " + toString(node.getType()), HalleyExceptions::Lua);
 	}
