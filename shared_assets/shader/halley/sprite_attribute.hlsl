@@ -33,4 +33,5 @@ struct VOut {
     float2 pivot : POSITION3;
     float2 size : SIZE0;
     float2 scale : SCALE;
+    float4 texCoord0Bounds : TEXCOORD0BOUNDS;
 };
