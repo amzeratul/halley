@@ -576,7 +576,7 @@ namespace Halley {
 				} small;
 			};
 
-			SBO()
+			SBO() noexcept
 			{
 				big.sbo_enabled = false;
 				big.size = 0;
