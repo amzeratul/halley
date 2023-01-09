@@ -38,7 +38,7 @@ namespace Halley {
 
     	void reloadProject();
 
-    	void addTask(std::unique_ptr<Task> task);
+    	void addTask(std::unique_ptr<Task> task) override;
 
     	const ConfigNode& getSetting(EditorSettingType type, std::string_view id) const override;
         void setSetting(EditorSettingType type, std::string_view id, ConfigNode data) override;
