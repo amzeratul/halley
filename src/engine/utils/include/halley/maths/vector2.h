@@ -45,12 +45,13 @@ namespace Halley {
 
 	public:
 		using ScalarType = T;
-		T x,y;
+		T x = 0;
+		T y = 0;
 
 		// Constructors
-		constexpr Vector2D () noexcept : x(0), y(0) {}
-		constexpr Vector2D (T x, T y) noexcept : x(x), y(y) {}
-		constexpr Vector2D (const Vector2D& vec) noexcept : x(static_cast<T>(vec.x)), y(static_cast<T>(vec.y)) {}
+		constexpr Vector2D() noexcept = default;
+		constexpr Vector2D(T x, T y) noexcept : x(x), y(y) {}
+		constexpr Vector2D(const Vector2D& vec) noexcept = default;
 		template <typename V> constexpr explicit Vector2D (const Vector2D<V>& vec) noexcept : x(static_cast<T>(vec.x)), y(static_cast<T>(vec.y)) {}
 
 		constexpr Vector2D (T length, U angle) noexcept
@@ -75,9 +76,9 @@ namespace Halley {
 		}
 
 		// Assignment and comparison
-		constexpr Vector2D& operator = (const Vector2D& param) { x = param.x; y = param.y; return *this; }
-		constexpr Vector2D& operator = (Vector2D&& param) noexcept { x = param.x; y = param.y; return *this; }
-		constexpr Vector2D& operator = (T param) { x = param; y = param; return *this; }
+		constexpr Vector2D& operator= (const Vector2D& param) = default;
+		constexpr Vector2D& operator= (Vector2D&& param) noexcept = default;
+		constexpr Vector2D& operator= (T param) { x = param; y = param; return *this; }
 		[[nodiscard]] constexpr bool operator == (Vector2D param) const { return x == param.x && y == param.y; }
 		[[nodiscard]] constexpr bool operator != (Vector2D param) const { return x != param.x || y != param.y; }
 		[[nodiscard]] constexpr bool operator < (Vector2D param) const { return y != param.y ? y < param.y : x < param.x; }
@@ -225,7 +226,6 @@ namespace Halley {
 		}
 	};
 
-
 	////////////////////
 	// Global operators
 	template <typename T, class U, typename V, std::enable_if_t<std::is_arithmetic_v<V>, int> = 0>
@@ -243,6 +243,8 @@ namespace Halley {
 	typedef Vector2D<char> Vector2c;
 	typedef Vector2f Position;
 	typedef Vector2f Size;
+	
+	static_assert(std::is_trivially_copyable_v<Vector2f>);
 }
 
 namespace std {
