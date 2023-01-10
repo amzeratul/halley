@@ -11,7 +11,6 @@ Halley::NavigationPathFollower::NavigationPathFollower(const ConfigNode& node)
 		needsToReEvaluatePath = true; // Path doesn't store all its info on ConfigNode, so re-query it
 	}
 	curPos = node["curPos"].asVector2f(Vector2f());
-	curSubWorld = node["curSubWorld"].asInt(0);
 	nextPathIdx = node["nextPathIdx"].asInt(0);
 	nextRegionIdx = node["nextRegionIdx"].asInt(0);
 }
@@ -23,11 +22,8 @@ ConfigNode NavigationPathFollower::toConfigNode() const
 	if (path) {
 		result["path"] = path->toConfigNode();
 	}
-	if (curPos != Vector2f()) {
+	if (curPos != WorldPosition()) {
 		result["curPos"] = curPos;
-	}
-	if (curSubWorld != 0) {
-		result["curSubWorld"] = curSubWorld;
 	}
 	if (nextPathIdx != 0) {
 		result["nextPathIdx"] = static_cast<int>(nextPathIdx);
@@ -51,10 +47,9 @@ const std::optional<NavigationPath>& NavigationPathFollower::getPath() const
 	return path;
 }
 
-void NavigationPathFollower::update(Vector2f curPos, int curSubWorld, const NavmeshSet& navmeshSet, float threshold)
+void NavigationPathFollower::update(WorldPosition curPos, const NavmeshSet& navmeshSet, float threshold)
 {
 	this->curPos = curPos;
-	this->curSubWorld = curSubWorld;
 
 	if (!path) {
 		return;
@@ -75,7 +70,7 @@ void NavigationPathFollower::update(Vector2f curPos, int curSubWorld, const Navm
 	}
 
 	const auto nextPos = path->path[nextPathIdx];
-	const bool arrivedAtNextNode = (nextPos - curPos).length() < threshold;
+	const bool arrivedAtNextNode = (nextPos - curPos.pos).length() < threshold;
 	
 	if (arrivedAtNextNode) {
 		nextPathIdx++;
@@ -89,30 +84,30 @@ void NavigationPathFollower::goToNextRegion(const NavmeshSet& navmeshSet)
 {
 	if (nextRegionIdx < path->regions.size()) {
 		// Last position on the last path
-		const auto startPos = path->path.empty() ? path->query.from : path->path.back();
+		const auto startPos = path->path.empty() ? path->query.from.pos : path->path.back();
 		
 		// Get next region and figure where in it we want to end up at
 		const bool isLastRegion = nextRegionIdx == path->regions.size() - 1;
 		const auto& region = path->regions[nextRegionIdx];
 		const auto& regionNavMesh = navmeshSet.getNavmeshes()[region.regionNodeId];
-		const auto endPos = isLastRegion ? path->query.to : regionNavMesh.getPortals()[region.exitEdgeId].pos;
+		const auto endPos = isLastRegion ? path->query.to.pos : regionNavMesh.getPortals()[region.exitEdgeId].pos;
 
 		// Run the new query for just this region
 		const int subWorld = regionNavMesh.getSubWorld();
 
 		std::optional<NavigationPath> newPath = {};
 		if (isLastRegion || path->query.postProcessingType == NavigationQuery::PostProcessingType::None) {
-			const auto query = NavigationQuery(startPos, subWorld, endPos, subWorld, path->query.postProcessingType);
+			const auto query = NavigationQuery(WorldPosition(startPos, subWorld), WorldPosition(endPos, subWorld), path->query.postProcessingType);
 			newPath = navmeshSet.pathfindInRegion(query, region.regionNodeId);
 		} else {
 			// Pathfind between regions
 			const auto& secondRegion = path->regions[nextRegionIdx + 1];
 			const auto& secondRegionNavMesh = navmeshSet.getNavmeshes()[secondRegion.regionNodeId];
-			const auto secondEndPos = nextRegionIdx + 1 == path->regions.size() - 1 ? path->query.to : secondRegionNavMesh.getPortals()[secondRegion.exitEdgeId].pos;
+			const auto secondEndPos = nextRegionIdx + 1 == path->regions.size() - 1 ? path->query.to.pos : secondRegionNavMesh.getPortals()[secondRegion.exitEdgeId].pos;
 			const auto& portal = regionNavMesh.getPortals().at(region.exitEdgeId);
 			
-			const auto queryStart = NavigationQuery(startPos, subWorld, endPos, subWorld, NavigationQuery::PostProcessingType::None);
-			const auto queryEnd = NavigationQuery(endPos, secondRegionNavMesh.getSubWorld(), secondEndPos, secondRegionNavMesh.getSubWorld(), NavigationQuery::PostProcessingType::None);
+			const auto queryStart = NavigationQuery(WorldPosition(startPos, subWorld), WorldPosition(endPos, subWorld), NavigationQuery::PostProcessingType::None);
+			const auto queryEnd = NavigationQuery(WorldPosition(endPos, secondRegionNavMesh.getSubWorld()), WorldPosition(secondEndPos, secondRegionNavMesh.getSubWorld()), NavigationQuery::PostProcessingType::None);
 			newPath = navmeshSet.pathfindBetweenRegions(queryStart, queryEnd, region.regionNodeId, secondRegion.regionNodeId, portal, path->query.postProcessingType);
 		}
 
@@ -136,13 +131,12 @@ void NavigationPathFollower::reEvaluatePath(const NavmeshSet& navmeshSet)
 	needsToReEvaluatePath = false;
 	auto query = path->query;
 	query.from = curPos;
-	query.fromSubWorld = curSubWorld;
 	setPath(navmeshSet.pathfind(query));
 }
 
 Vector2f NavigationPathFollower::getNextPosition() const
 {
-	return path->path.size() > nextPathIdx ? path->path[nextPathIdx] : curPos;
+	return path->path.size() > nextPathIdx ? path->path[nextPathIdx] : curPos.pos;
 }
 
 size_t NavigationPathFollower::getNextPathIdx() const

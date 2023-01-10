@@ -47,6 +47,16 @@ WorldPosition WorldPosition::operator-(const Vector2f& other) const
 	return WorldPosition(pos - other, subWorld);
 }
 
+bool WorldPosition::operator==(const WorldPosition& other) const
+{
+	return pos == other.pos && subWorld == other.subWorld;
+}
+
+bool WorldPosition::operator!=(const WorldPosition& other) const
+{
+	return pos != other.pos || subWorld != other.subWorld;
+}
+
 ConfigNode ConfigNodeSerializer<WorldPosition>::serialize(const WorldPosition& target, const EntitySerializationContext& context)
 {
 	return target.toConfigNode();

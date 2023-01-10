@@ -35,8 +35,8 @@ namespace Halley {
 		std::optional<NavigationPath> pathfindBetweenRegions(const NavigationQuery& queryStart, const NavigationQuery& queryEnd, uint16_t startRegionId, uint16_t endRegionId, const Navmesh::Portal& portal, NavigationQuery::PostProcessingType postProcessing) const;
 
 		gsl::span<const Navmesh> getNavmeshes() const { return navmeshes; }
-		const Navmesh* getNavMeshAt(Vector2f pos, int subWorld) const;
-		size_t getNavMeshIdxAt(Vector2f pos, int subWorld) const;
+		const Navmesh* getNavMeshAt(WorldPosition pos) const;
+		size_t getNavMeshIdxAt(WorldPosition pos) const;
 
 		std::pair<uint16_t, uint16_t> getPortalDestination(uint16_t region, uint16_t edge) const;
 

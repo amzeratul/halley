@@ -1,5 +1,6 @@
 #pragma once
 
+#include "world_position.h"
 #include "halley/data_structures/config_node.h"
 #include "halley/text/enum_names.h"
 
@@ -12,14 +13,12 @@ namespace Halley {
 			Aggressive
 		};
 
-		Vector2f from;
-		int fromSubWorld = 0;
-		Vector2f to;
-		int toSubWorld = 0;
+		WorldPosition from;
+		WorldPosition to;
 		PostProcessingType postProcessingType;
 
 		NavigationQuery();
-		NavigationQuery(Vector2f from, int fromSubWorld, Vector2f to, int toSubWorld, PostProcessingType postProcessing);
+		NavigationQuery(WorldPosition from, WorldPosition to, PostProcessingType postProcessing);
 		explicit NavigationQuery(const ConfigNode& node);
 
 		ConfigNode toConfigNode() const;

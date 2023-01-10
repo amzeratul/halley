@@ -6,11 +6,9 @@ using namespace Halley;
 
 NavigationQuery::NavigationQuery() = default;
 
-NavigationQuery::NavigationQuery(Vector2f from, int fromSubWorld, Vector2f to, int toSubWorld, PostProcessingType postProcessing)
+NavigationQuery::NavigationQuery(WorldPosition from, WorldPosition to, PostProcessingType postProcessing)
 	: from(from)
-	, fromSubWorld(fromSubWorld)
 	, to(to)
-	, toSubWorld(toSubWorld)
 	, postProcessingType(postProcessing)
 {
 }
@@ -18,9 +16,7 @@ NavigationQuery::NavigationQuery(Vector2f from, int fromSubWorld, Vector2f to, i
 NavigationQuery::NavigationQuery(const ConfigNode& node)
 {
 	from = node["from"].asVector2f();
-	fromSubWorld = node["fromSubWorld"].asInt();
 	to = node["to"].asVector2f();
-	toSubWorld = node["toSubWorld"].asInt();
 	postProcessingType = fromString<PostProcessingType>(node["postProcessingType"].asString());
 }
 
@@ -29,9 +25,7 @@ ConfigNode NavigationQuery::toConfigNode() const
 	ConfigNode::MapType result;
 
 	result["from"] = from;
-	result["fromSubWorld"] = fromSubWorld;
 	result["to"] = to;
-	result["toSubWorld"] = toSubWorld;
 	result["postProcessingType"] = Halley::toString(postProcessingType);
 	
 	return result;
@@ -40,15 +34,13 @@ ConfigNode NavigationQuery::toConfigNode() const
 String NavigationQuery::toString() const
 {
 	using Halley::toString;
-	return "navQuery(" + toString(from) + ":" + toString(fromSubWorld) + " -> " + toString(to) + ":" + toString(toSubWorld) + ", " + toString(postProcessingType) + ")";
+	return "navQuery(" + toString(from) + " -> " + toString(to) + ", " + toString(postProcessingType) + ")";
 }
 
 bool NavigationQuery::operator==(const NavigationQuery& other) const
 {
 	return from == other.from
-		&& fromSubWorld == other.fromSubWorld
 		&& to == other.to
-		&& toSubWorld == other.toSubWorld
 		&& postProcessingType == other.postProcessingType;
 }
 

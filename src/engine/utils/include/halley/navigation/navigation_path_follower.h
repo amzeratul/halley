@@ -1,6 +1,7 @@
 #pragma once
 
 #include "navigation_path.h"
+#include "world_position.h"
 
 namespace Halley {
 	class NavmeshSet;
@@ -15,15 +16,14 @@ namespace Halley {
 		void setPath(std::optional<NavigationPath> p);
 		const std::optional<NavigationPath>& getPath() const;
 
-		void update(Vector2f curPos, int curSubWorld, const NavmeshSet& navmeshSet, float threshold);
+		void update(WorldPosition curPos, const NavmeshSet& navmeshSet, float threshold);
 		
 		Vector2f getNextPosition() const;
 		size_t getNextPathIdx() const;
 		bool isDone() const;
 
 	private:
-		Vector2f curPos;
-		int curSubWorld = 0;
+		WorldPosition curPos;
 		size_t nextPathIdx = 0;
 		size_t nextRegionIdx = 0;
 		std::optional<NavigationPath> path;

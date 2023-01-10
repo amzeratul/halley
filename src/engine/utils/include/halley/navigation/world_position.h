@@ -24,6 +24,9 @@ namespace Halley {
 
 		WorldPosition operator+(const Vector2f& other) const;
 		WorldPosition operator-(const Vector2f& other) const;
+
+		bool operator==(const WorldPosition& other) const;
+		bool operator!=(const WorldPosition& other) const;
 	};
 
 	template<>

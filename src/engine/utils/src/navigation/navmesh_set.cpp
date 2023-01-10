@@ -82,8 +82,8 @@ void NavmeshSet::clearSubWorld(int subWorld)
 
 std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query) const
 {
-	const size_t fromRegion = getNavMeshIdxAt(query.from, query.fromSubWorld);
-	const size_t toRegion = getNavMeshIdxAt(query.to, query.toSubWorld);
+	const size_t fromRegion = getNavMeshIdxAt(query.from);
+	const size_t toRegion = getNavMeshIdxAt(query.to);
 	constexpr size_t notFound = std::numeric_limits<size_t>::max();
 
 	if (fromRegion == notFound || toRegion == notFound) {
@@ -94,7 +94,7 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query)
 		return pathfindInRegion(query, static_cast<uint16_t>(fromRegion));
 	} else {
 		// Gotta path between regions first
-		auto regionPath = findRegionPath(query.from, query.to, static_cast<uint16_t>(fromRegion), static_cast<uint16_t>(toRegion));
+		auto regionPath = findRegionPath(query.from.pos, query.to.pos, static_cast<uint16_t>(fromRegion), static_cast<uint16_t>(toRegion));
 		if (regionPath.size() <= 1) {
 			// Failed
 			return {};
@@ -119,10 +119,10 @@ std::optional<NavigationPath> NavmeshSet::pathfindBetweenRegions(const Navigatio
 	return NavigationPath(queryStart, std::move(points));
 }
 
-const Navmesh* NavmeshSet::getNavMeshAt(Vector2f pos, int subWorld) const
+const Navmesh* NavmeshSet::getNavMeshAt(WorldPosition pos) const
 {
 	for (const auto& navmesh: navmeshes) {
-		if (navmesh.getSubWorld() == subWorld && navmesh.containsPoint(pos)) {
+		if (navmesh.getSubWorld() == pos.subWorld && navmesh.containsPoint(pos.pos)) {
 			return &navmesh;
 		}
 	}
@@ -130,11 +130,11 @@ const Navmesh* NavmeshSet::getNavMeshAt(Vector2f pos, int subWorld) const
 	return nullptr;
 }
 
-size_t NavmeshSet::getNavMeshIdxAt(Vector2f pos, int subWorld) const
+size_t NavmeshSet::getNavMeshIdxAt(WorldPosition pos) const
 {
 	size_t i = 0;
 	for (const auto& navmesh: navmeshes) {
-		if (navmesh.getSubWorld() == subWorld && navmesh.containsPoint(pos)) {
+		if (navmesh.getSubWorld() == pos.subWorld && navmesh.containsPoint(pos.pos)) {
 			return i;
 		}
 		i++;
@@ -391,8 +391,8 @@ Vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
 	points.reserve(pointsCount); 
 	nodeIds.reserve(pointsCount);
 	
-	points.emplace_back(queryStart.from);
-	nodeIds.emplace_back(startNavmesh.getNodeAt(queryStart.from).value());
+	points.emplace_back(queryStart.from.pos);
+	nodeIds.emplace_back(startNavmesh.getNodeAt(queryStart.from.pos).value());
 	for (size_t i = 1; i < startLeg.size(); ++i) {
 		const auto cur = startLeg[i - 1];
 		
@@ -405,8 +405,8 @@ Vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
 	
 	// Note crossover point
 	int crossoverPoint = static_cast<int>(points.size());
-	points.emplace_back(queryStart.to); // Same as queryEnd.from
-	nodeIds.emplace_back(startNavmesh.getNodeAt(queryStart.to).value());
+	points.emplace_back(queryStart.to.pos); // Same as queryEnd.from
+	nodeIds.emplace_back(startNavmesh.getNodeAt(queryStart.to.pos).value());
 	
 	for (size_t i = 1; i < endLeg.size(); ++i) {
 		const auto cur = endLeg[i - 1];
@@ -417,8 +417,8 @@ Vector<Vector2f> NavmeshSet::postProcessPathBetweenRegions(
 		points.emplace_back(0.5f * (edge.a + edge.b));
 		nodeIds.emplace_back(cur.node);
 	}
-	points.emplace_back(queryEnd.to);
-	nodeIds.emplace_back(endNavmesh.getNodeAt(queryEnd.to).value());
+	points.emplace_back(queryEnd.to.pos);
+	nodeIds.emplace_back(endNavmesh.getNodeAt(queryEnd.to.pos).value());
 
 	// Calculate path costs
 	Vector<float> pathCosts;

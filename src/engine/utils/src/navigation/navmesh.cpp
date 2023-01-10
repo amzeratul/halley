@@ -324,12 +324,12 @@ void Navmesh::NodeAndConn::deserialize(Deserializer& s)
 
 std::optional<Vector<Navmesh::NodeAndConn>> Navmesh::pathfindNodes(const NavigationQuery& query) const
 {
-	if (query.fromSubWorld != subWorld || query.toSubWorld != subWorld) {
+	if (query.from.subWorld != subWorld || query.to.subWorld != subWorld) {
 		return {};
 	}
 
-	auto fromId = getNodeAt(query.from);
-	auto toId = getNodeAt(query.to);
+	auto fromId = getNodeAt(query.from.pos);
+	auto toId = getNodeAt(query.to.pos);
 
 	if (!fromId || !toId) {
 		return {};
@@ -440,7 +440,7 @@ std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, co
 	Vector<Vector2f> points;
 	points.reserve(nodePath.size() + 1);
 	
-	points.push_back(query.from);
+	points.push_back(query.from.pos);
 	for (size_t i = 1; i < nodePath.size(); ++i) {
 		const auto cur = nodePath[i - 1];
 
@@ -449,7 +449,7 @@ std::optional<NavigationPath> Navmesh::makePath(const NavigationQuery& query, co
 		
 		points.push_back(0.5f * (edge.a + edge.b));
 	}
-	points.push_back(query.to);
+	points.push_back(query.to.pos);
 	
 	if (query.postProcessingType != NavigationQuery::PostProcessingType::None) {
 		postProcessPath(points, query.postProcessingType);
