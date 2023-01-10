@@ -73,6 +73,7 @@ namespace Halley {} // Get GitHub to realise this is C++ :3
 #include "navigation/navigation_query.h"
 #include "navigation/navigation_path.h"
 #include "navigation/navigation_path_follower.h"
+#include "navigation/world_position.h"
 
 #include "plugin/plugin.h"
 

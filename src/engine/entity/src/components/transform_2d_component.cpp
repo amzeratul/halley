@@ -1,7 +1,7 @@
 #include "halley/support/logger.h"
 #include "components/transform_2d_component.h"
 
-#include "world_position.h"
+#include "halley/navigation/world_position.h"
 #include "halley/core/graphics/sprite/sprite.h"
 
 using namespace Halley;
@@ -11,6 +11,11 @@ Transform2DComponent::Transform2DComponent() = default;
 
 Transform2DComponent::Transform2DComponent(Vector2f localPosition, Angle1f localRotation, Vector2f localScale, int subWorld)
 	: Transform2DComponentBase(localPosition, localScale, localRotation, subWorld)
+{
+}
+
+Transform2DComponent::Transform2DComponent(WorldPosition localPosition, Angle1f localRotation, Vector2f localScale)
+	: Transform2DComponentBase(localPosition.pos, localScale, localRotation, localPosition.subWorld)
 {
 }
 

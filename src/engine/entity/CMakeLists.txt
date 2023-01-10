@@ -22,7 +22,6 @@ set(SOURCES
         "src/prefab_scene_data.cpp"
         "src/system.cpp"
         "src/world.cpp"
-        "src/world_position.cpp"
         "src/world_scene_data.cpp"
 
         "src/components/transform_2d_component.cpp"
@@ -91,7 +90,6 @@ set(HEADERS
         "include/halley/entity/system_message.h"
         "include/halley/entity/type_deleter.h"
         "include/halley/entity/world.h"
-        "include/halley/entity/world_position.h"
         "include/halley/entity/world_scene_data.h"
 
         "include/halley/entity/components/transform_2d_component.h"

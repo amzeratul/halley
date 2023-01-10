@@ -68,6 +68,7 @@ set(SOURCES
 	"src/navigation/navmesh.cpp"
 	"src/navigation/navmesh_generator.cpp"
 	"src/navigation/navmesh_set.cpp"
+	"src/navigation/world_position.cpp"
 
         "src/resources/metadata.cpp"
         "src/resources/resource.cpp"
@@ -192,6 +193,7 @@ set(HEADERS
 	"include/halley/navigation/navmesh.h"
 	"include/halley/navigation/navmesh_generator.h"
 	"include/halley/navigation/navmesh_set.h"
+	"include/halley/navigation/world_position.h"
         
         "include/halley/plugin/plugin.h"
         
