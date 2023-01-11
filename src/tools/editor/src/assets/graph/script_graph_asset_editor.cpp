@@ -107,7 +107,7 @@ void ScriptGraphAssetEditor::open()
 	if (graphEditor) {
 		graphEditor->setScriptGraph(std::move(scriptGraph));
 	} else {
-		graphEditor = std::make_shared<ScriptGraphEditor>(factory, gameResources, project, projectWindow, std::move(scriptGraph));
+		graphEditor = std::make_shared<ScriptGraphEditor>(factory, gameResources, projectWindow, std::move(scriptGraph));
 		add(graphEditor, 1);
 	}
 	if (modified) {

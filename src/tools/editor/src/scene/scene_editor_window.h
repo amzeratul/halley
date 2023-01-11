@@ -7,8 +7,10 @@
 #include "halley/tools/dll/dynamic_library.h"
 #include "undo_stack.h"
 #include "halley/tools/dll/project_dll.h"
+#include "src/assets/graph/script_graph_editor.h"
 
 namespace Halley {
+	class PrefabEditor;
 	class ProjectWindow;
 	class AssetBrowserTabs;
 	class HalleyAPI;
@@ -18,7 +20,7 @@ namespace Halley {
 
 	class SceneEditorWindow final : public UIWidget, public IProjectDLLListener, public ISceneEditorWindow {
 	public:
-		SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, ProjectWindow& projectWindow);
+		SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, ProjectWindow& projectWindow, PrefabEditor& parentEditor);
 		~SceneEditorWindow();
 
 		void onAddedToRoot(UIRoot& root) override;
@@ -127,6 +129,8 @@ namespace Halley {
 		Resources& getGameResources() const override;
 		Vector<const EntityData*> getEntityDataStack(const UUID& instanceUUID) const override;
 
+		void drillDownEditor(std::shared_ptr<UIWidget> editor);
+
 	protected:
 		void update(Time t, bool moved) override;
 
@@ -143,6 +147,7 @@ namespace Halley {
 		UIFactory& uiFactory;
 		Project& project;
 		ProjectWindow& projectWindow;
+		PrefabEditor& parentEditor;
 
 		std::shared_ptr<SceneEditorGameBridge> gameBridge;
 		std::shared_ptr<SceneEditorCanvas> canvas;

@@ -8,6 +8,7 @@
 #include "halley/ui/widgets/ui_dropdown.h"
 #include "halley/ui/widgets/ui_textinput.h"
 #include "scene_editor_window.h"
+#include "src/assets/graph/script_graph_editor.h"
 #include "src/ui/project_window.h"
 #include "src/ui/select_asset_widget.h"
 using namespace Halley;
@@ -621,7 +622,20 @@ void EntityEditor::onEntityUpdated()
 
 void EntityEditor::setTool(const String& tool, const String& componentName, const String& fieldName)
 {
-	sceneEditor->setTool(tool, componentName, fieldName);
+	if (tool == "!scripting") {
+		auto graph = std::make_shared<ScriptGraph>(getComponentData(componentName, fieldName));
+		auto scriptEditor = std::make_shared<ScriptGraphEditor>(factory, *gameResources, sceneEditor->getProjectWindow(), graph,
+			[=, componentName=componentName, fieldName=fieldName] (bool accept, std::shared_ptr<ScriptGraph> graph)
+		{
+			if (accept) {
+				getComponentData(componentName, fieldName) = graph->toConfigNode();
+				onEntityUpdated();
+			}
+		});
+		sceneEditor->drillDownEditor(scriptEditor);
+	} else {
+		sceneEditor->setTool(tool, componentName, fieldName);
+	}
 }
 
 EntityData& EntityEditor::getEntityData()
@@ -633,6 +647,17 @@ EntityData& EntityEditor::getEntityData()
 const EntityData& EntityEditor::getEntityData() const
 {
 	return *currentEntityData;
+}
+
+ConfigNode& EntityEditor::getComponentData(const String& componentName, const String& fieldName)
+{
+	for (auto& comp : currentEntityData->getComponents()) {
+		if (comp.first == componentName) {
+			return comp.second[fieldName];
+		}
+	}
+	static ConfigNode dummy;
+	return dummy;
 }
 
 void EntityEditor::setHighlightedComponents(Vector<String> componentNames)

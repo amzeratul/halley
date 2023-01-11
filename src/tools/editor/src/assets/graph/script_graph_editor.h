@@ -9,7 +9,9 @@
 namespace Halley {
 	class ScriptGraphEditor : public UIWidget {
 	public:
-		ScriptGraphEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph);
+		using Callback = std::function<void(bool, std::shared_ptr<ScriptGraph>)>;
+
+		ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph, Callback callback = {});
 		~ScriptGraphEditor() override;
 
 		void setScriptGraph(std::shared_ptr<ScriptGraph> graph);
@@ -36,6 +38,7 @@ namespace Halley {
 		ProjectWindow& projectWindow;
 		Resources& gameResources;
 		Project& project;
+		Callback callback;
 
     	std::shared_ptr<ScriptGraph> scriptGraph;
 		std::unique_ptr<ScriptState> scriptState;

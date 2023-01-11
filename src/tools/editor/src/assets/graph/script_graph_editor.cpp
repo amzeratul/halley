@@ -5,18 +5,19 @@
 #include "src/ui/project_window.h"
 using namespace Halley;
 
-ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph)
+ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph, Callback callback)
 	: UIWidget("ScriptGraphEditor", {}, UISizer())
 	, factory(factory)
 	, projectWindow(projectWindow)
 	, gameResources(gameResources)
-	, project(project)
-	, scriptGraph(scriptGraph)
+	, project(projectWindow.getProject())
+	, callback(std::move(callback))
+	, scriptGraph(std::move(scriptGraph))
 {
 	factory.loadUI(*this, "halley/script_graph_editor");
 	
 	if (gizmoEditor) {
-		gizmoEditor->load(*scriptGraph);
+		gizmoEditor->load(*this->scriptGraph);
 	}
 
 	setListeningToClient(true);
@@ -87,6 +88,8 @@ void ScriptGraphEditor::onMakeUI()
 	getWidget("toolbarGizmo")->clear();
 	getWidget("toolbarGizmo")->add(gizmoEditor->makeUI());
 
+	getWidget("drillUpBar")->setActive(!!callback);
+
 	bindData("instances", "-1:-1", [=](String id)
 	{
 		auto split = id.split(':');
@@ -115,6 +118,18 @@ void ScriptGraphEditor::onMakeUI()
 	{
 		projectWindow.setSetting(EditorSettingType::Project, "autoConnectPins", ConfigNode(value));
 		gizmoEditor->setAutoConnectPins(value);
+	});
+
+	setHandle(UIEventType::ButtonClicked, "ok", [=](const UIEvent& event)
+	{
+		callback(true, scriptGraph);
+		destroy();
+	});
+
+	setHandle(UIEventType::ButtonClicked, "cancel", [=](const UIEvent& event)
+	{
+		callback(false, scriptGraph);
+		destroy();
 	});
 }
 

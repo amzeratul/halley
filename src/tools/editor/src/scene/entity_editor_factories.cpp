@@ -1176,7 +1176,7 @@ public:
 
 		field->setHandle(UIEventType::ButtonClicked, "editScript", [=, &context] (const UIEvent& event)
 		{
-			context.setTool("scripting", componentName, data.getName());
+			context.setTool("!scripting", componentName, data.getName());
 		});
 
 		return field;

@@ -108,6 +108,7 @@ namespace Halley {
 		void setTool(const String& tool, const String& componentName, const String& fieldName) override;
 		EntityData& getEntityData();
 		const EntityData& getEntityData() const;
+		ConfigNode& getComponentData(const String& componentName, const String& fieldName);
 
 		std::set<String> getComponentsOnEntity() const;
 		std::set<String> getComponentsOnPrefab() const;

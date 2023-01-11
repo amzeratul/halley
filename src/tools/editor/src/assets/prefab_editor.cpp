@@ -48,11 +48,30 @@ void PrefabEditor::onOpenAssetFinder(PaletteWindow& assetFinder)
 	}
 }
 
+void PrefabEditor::drillDownEditor(std::shared_ptr<UIWidget> editor)
+{
+	for (auto& otherDrill: drillDown) {
+		otherDrill->setActive(false);
+	}
+	add(editor, 1);
+	drillDown.push_back(std::move(editor));
+	window->setActive(false);
+	layout();
+}
+
 void PrefabEditor::update(Time t, bool moved)
 {
 	if (pendingLoad && project.isDLLLoaded()) {
 		pendingLoad = false;
 		open();
+	}
+	if (!drillDown.empty() && !drillDown.back()->isAlive()) {
+		drillDown.pop_back();
+	}
+	if (drillDown.empty()) {
+		window->setActive(true);
+	} else {
+		drillDown.back()->setActive(true);
 	}
 }
 
@@ -79,7 +98,7 @@ void PrefabEditor::open()
 	Expects (project.isDLLLoaded());
 	
 	if (!window) {
-		window = std::make_shared<SceneEditorWindow>(factory, project, projectWindow.getAPI(), projectWindow);
+		window = std::make_shared<SceneEditorWindow>(factory, project, projectWindow.getAPI(), projectWindow, *this);
 		add(window, 1);
 	}
 	if (assetType == AssetType::Scene || assetType == AssetType::Prefab) {

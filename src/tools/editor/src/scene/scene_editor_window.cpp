@@ -16,10 +16,11 @@
 #include "scene_editor_gizmo_collection.h"
 #include "halley/entity/components/transform_2d_component.h"
 #include "halley/tools/project/project_properties.h"
+#include "src/assets/prefab_editor.h"
 #include "src/ui/project_window.h"
 using namespace Halley;
 
-SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, ProjectWindow& projectWindow)
+SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, ProjectWindow& projectWindow, PrefabEditor& parentEditor)
 	: UIWidget("scene_editor", {}, UISizer())
 	, api(api)
 	, uiFactory(factory)
@@ -27,6 +28,7 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 	, projectWindow(projectWindow)
 	, gameBridge(std::make_shared<SceneEditorGameBridge>(api, uiFactory.getResources(), uiFactory, project, projectWindow, *this))
 	, entityIcons(std::make_shared<EntityIcons>(project.getGameResources(), *factory.getColourScheme()))
+	, parentEditor(parentEditor)
 {
 	makeUI();
 
@@ -490,6 +492,11 @@ Resources& SceneEditorWindow::getGameResources() const
 Vector<const EntityData*> SceneEditorWindow::getEntityDataStack(const UUID& instanceUUID) const
 {
 	return sceneData->getEntityDataStack(instanceUUID.toString());
+}
+
+void SceneEditorWindow::drillDownEditor(std::shared_ptr<UIWidget> editor)
+{
+	parentEditor.drillDownEditor(editor);
 }
 
 void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)

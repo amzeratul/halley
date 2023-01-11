@@ -27,4 +27,11 @@ children:
   proportion: 1
   sizer: { type: free }
   children: []
+- widget: { class: widget, id: drillUpBar }
+  sizer: { type: horizontal }
+  children:
+  - spacer: {}
+    proportion: 1
+  - widget: { class: button, id: ok, text: OK, size: [100, 16] }
+  - widget: { class: button, id: cancel, text: Cancel, size: [100, 16] }
 ...

@@ -14,6 +14,8 @@ namespace Halley {
 		bool canSave(bool forceInstantCheck) const override;
 		void onOpenAssetFinder(PaletteWindow& assetFinder) override;
 
+		void drillDownEditor(std::shared_ptr<UIWidget> editor);
+
 	protected:
 		void update(Time t, bool moved) override;
 		std::shared_ptr<const Resource> loadResource(const String& assetId) override;
@@ -23,6 +25,7 @@ namespace Halley {
 		Project& project;
 		ProjectWindow& projectWindow;
 		std::shared_ptr<SceneEditorWindow> window;
+		Vector<std::shared_ptr<UIWidget>> drillDown;
 
 		bool pendingLoad = false;
 
