@@ -445,9 +445,9 @@ bool ScriptGraph::connectPin(GraphNodeId srcNodeIdx, GraphPinId srcPinN, EntityI
 	return true;
 }
 
-void ScriptGraph::assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const
+void ScriptGraph::assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection, bool force) const
 {
-	if (lastAssignTypeHash != hash) {
+	if (lastAssignTypeHash != hash || force) {
 		lastAssignTypeHash = hash;
 		for (const auto& node: nodes) {
 			node.assignType(nodeTypeCollection);

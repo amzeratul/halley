@@ -114,7 +114,7 @@ namespace Halley {
 
 		bool connectPin(GraphNodeId srcNode, GraphPinId srcPinN, EntityId target);
 
-		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection) const;
+		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection, bool force = false) const;
 		void clearTypes();
 		void finishGraph();
 

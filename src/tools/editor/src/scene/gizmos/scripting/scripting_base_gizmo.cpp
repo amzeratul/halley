@@ -247,10 +247,10 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 	}
 }
 
-void ScriptingBaseGizmo::assignNodeTypes() const
+void ScriptingBaseGizmo::assignNodeTypes(bool force) const
 {
 	if (scriptGraph && scriptNodeTypes) {
-		scriptGraph->assignTypes(*scriptNodeTypes);
+		scriptGraph->assignTypes(*scriptNodeTypes, force);
 	}
 }
 
@@ -325,7 +325,7 @@ void ScriptingBaseGizmo::setGraph(ScriptGraph* graph)
 	baseGraph = graph;
 	scriptGraph = graph;
 	dragging.reset();
-	updateNodes();
+	updateNodes(true);
 }
 
 void ScriptingBaseGizmo::setState(ScriptState* state)
@@ -628,10 +628,10 @@ void ScriptingBaseGizmo::setCurNodeDevConData(const String& str)
 	}
 }
 
-void ScriptingBaseGizmo::updateNodes()
+void ScriptingBaseGizmo::updateNodes(bool force)
 {
 	if (scriptGraph && resources) {
-		assignNodeTypes();
+		assignNodeTypes(force);
 		for (auto& node: scriptGraph->getNodes()) {
 			node.getNodeType().updateSettings(node, *scriptGraph, *resources);
 		}

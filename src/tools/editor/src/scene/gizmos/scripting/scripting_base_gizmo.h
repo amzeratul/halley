@@ -50,7 +50,7 @@ namespace Halley {
 		std::optional<BaseGraphRenderer::NodeUnderMouseInfo> getNodeUnderMouse() const;
 		void setCurNodeDevConData(const String& str);
 
-		void updateNodes();
+		void updateNodes(bool force = false);
 
 	private:
 		std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
@@ -90,7 +90,7 @@ namespace Halley {
 		void onPinClicked(bool rightClick, bool shiftHeld);
 		void onEditingConnection(const SceneEditorInputState& inputState);
 
-		void assignNodeTypes() const;
+		void assignNodeTypes(bool force = false) const;
 		SelectionSetModifier getSelectionModifier(const SceneEditorInputState& inputState) const;
 
 		void drawWheelGuides(Painter& painter) const;
