@@ -1,30 +1,37 @@
 #include "script_graph_editor.h"
-
 #include "script_gizmo_ui.h"
 #include "halley/tools/project/project.h"
 #include "src/ui/infini_canvas.h"
 #include "src/ui/project_window.h"
 using namespace Halley;
 
-ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow)
-	: AssetEditor(factory, gameResources, project, AssetType::ScriptGraph)
+ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph)
+	: UIWidget("ScriptGraphEditor", {}, UISizer())
+	, factory(factory)
 	, projectWindow(projectWindow)
 	, gameResources(gameResources)
+	, project(project)
+	, scriptGraph(scriptGraph)
 {
+	factory.loadUI(*this, "halley/script_graph_editor");
+	
+	if (gizmoEditor) {
+		gizmoEditor->load(*scriptGraph);
+	}
+
+	setListeningToClient(true);
 }
 
 ScriptGraphEditor::~ScriptGraphEditor()
 {
-	project.withDLL([&] (ProjectDLL& dll)
-	{
-		if (dllListenerAdded) {
-			dll.removeReloadListener(*this);
-		}
-	});
-
 	setListeningToClient(false);
 	assert(!scriptEnumHandle);
 	assert(!scriptStateHandle);
+}
+
+void ScriptGraphEditor::setScriptGraph(std::shared_ptr<ScriptGraph> graph)
+{
+	scriptGraph = std::move(graph);
 }
 
 void ScriptGraphEditor::onActiveChanged(bool active)
@@ -35,23 +42,30 @@ void ScriptGraphEditor::onActiveChanged(bool active)
 	}
 }
 
+void ScriptGraphEditor::setModified(bool value)
+{
+	modified = value;
+}
+
+bool ScriptGraphEditor::isModified()
+{
+	return modified;
+}
+
+std::shared_ptr<ScriptGraph> ScriptGraphEditor::getScriptGraph()
+{
+	return scriptGraph;
+}
+
 void ScriptGraphEditor::onMakeUI()
 {
-	project.withDLL([&] (ProjectDLL& dll)
-	{
-		if (!dllListenerAdded) {
-			dll.addReloadListener(*this);
-			dllListenerAdded = true;
-		}
-	});
-
 	scriptNodeTypes = projectWindow.getScriptNodeTypes();
 	entityEditorFactory = std::make_shared<EntityEditorFactory>(projectWindow.getEntityEditorFactoryRoot(), nullptr);
 
 	gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *entityEditorFactory, scriptNodeTypes, 
-		projectWindow.getAPI().input->getKeyboard(), projectWindow.getAPI().system->getClipboard(), [=] ()
+	projectWindow.getAPI().input->getKeyboard(), projectWindow.getAPI().system->getClipboard(), [=] ()
 	{
-		markModified();
+		setModified(true);
 	});
 	
 	if (scriptGraph) {
@@ -85,7 +99,7 @@ void ScriptGraphEditor::onMakeUI()
 		}
 	});
 
-	const auto assetKey = toString(assetType) + ":" + assetId;
+	const auto assetKey = toString(AssetType::ScriptGraph) + ":" + scriptGraph->getAssetId();
 	autoAcquire = projectWindow.getAssetSetting(assetKey, "autoAcquire").asBool(true);
 	bindData("autoAcquire", autoAcquire, [=](bool value)
 	{
@@ -104,101 +118,8 @@ void ScriptGraphEditor::onMakeUI()
 	});
 }
 
-void ScriptGraphEditor::reload()
+void ScriptGraphEditor::update(Time t, bool moved)
 {
-}
-
-void ScriptGraphEditor::refreshAssets()
-{
-}
-
-void ScriptGraphEditor::save()
-{
-	if (modified) {
-		modified = false;
-
-		const auto assetPath = Path("comet/" + scriptGraph->getAssetId() + ".comet");
-		const auto strData = scriptGraph->toYAML();
-
-		project.setAssetSaveNotification(false);
-		project.writeAssetToDisk(assetPath, gsl::as_bytes(gsl::span<const char>(strData.c_str(), strData.length())));
-		project.setAssetSaveNotification(true);
-	}
-}
-
-bool ScriptGraphEditor::isModified()
-{
-	return modified;
-}
-
-void ScriptGraphEditor::markModified()
-{
-	modified = true;
-}
-
-void ScriptGraphEditor::onProjectDLLStatusChange(ProjectDLL::Status status)
-{
-	if (status == ProjectDLL::Status::Unloaded) {
-		clear();
-		gizmoEditor.reset();
-		infiniCanvas.reset();
-		scriptNodeTypes.reset();
-		entityEditorFactory.reset();
-		scriptGraph->clearTypes();
-		needsLoading = true;
-		hasUI = false;
-	}
-}
-
-std::shared_ptr<const Resource> ScriptGraphEditor::loadResource(const String& assetId)
-{
-	if (project.isDLLLoaded()) {
-		open();
-	} else {
-		pendingLoad = true;
-	}
-	
-	return {};
-}
-
-void ScriptGraphEditor::open()
-{
-	Expects (project.isDLLLoaded());
-
-	if (!hasUI) {
-		factory.loadUI(*this, "halley/script_graph_editor");
-		hasUI = true;
-	}
-	
-	const auto assetPath = project.getImportAssetsDatabase().getPrimaryInputFile(assetType, assetId);
-	const auto assetData = Path::readFile(project.getAssetsSrcPath() / assetPath);
-
-	if (!assetData.empty()) {
-		auto config = YAMLConvert::parseConfig(assetData);
-		scriptGraph = std::make_shared<ScriptGraph>(config.getRoot());
-	} else {
-		scriptGraph = std::make_shared<ScriptGraph>();
-		scriptGraph->makeDefault();
-		markModified();
-	}
-	scriptGraph->setAssetId(assetId);
-
-	if (gizmoEditor) {
-		gizmoEditor->load(*scriptGraph);
-	}
-
-	setListeningToClient(true);
-}
-
-void ScriptGraphEditor::update(Time time, bool moved)
-{
-	if (pendingLoad && project.isDLLLoaded()) {
-		pendingLoad = false;
-		open();
-	}
-
-	AssetEditor::update(time, moved);
-
 	if (gizmoEditor) {
 		gizmoEditor->setState(scriptState.get());
 		infiniCanvas->setScrollEnabled(!gizmoEditor->isHighlighted());
@@ -233,7 +154,7 @@ void ScriptGraphEditor::setListeningToClient(bool listening)
 	if (listening) {
 		if (!scriptEnumHandle) {
 			refreshScriptEnum();
-			scriptEnumHandle = devConServer.registerInterest("scriptEnum", ConfigNode(assetId), [=] (size_t connId, ConfigNode result)
+			scriptEnumHandle = devConServer.registerInterest("scriptEnum", ConfigNode(scriptGraph->getAssetId()), [=] (size_t connId, ConfigNode result)
 			{
 				onScriptEnum(connId, std::move(result));
 			});
@@ -265,7 +186,7 @@ void ScriptGraphEditor::setListeningToState(std::pair<size_t, int64_t> entityId)
 		ConfigNode::MapType params;
 		params["connId"] = static_cast<int>(entityId.first);
 		params["entityId"] = EntityIdHolder{ entityId.second };
-		params["scriptId"] = assetId;
+		params["scriptId"] = scriptGraph->getAssetId();
 		params["curNode"] = getCurrentNodeConfig();
 		scriptStateHandle = devConServer.registerInterest("scriptState", params, [=] (size_t connId, ConfigNode result)
 		{
@@ -373,9 +294,6 @@ void ScriptGraphEditor::onScriptEnum(size_t connId, ConfigNode data)
 
 void ScriptGraphEditor::refreshScriptEnum()
 {
-	if (!hasUI) {
-		return;
-	}
 	const auto instances = getWidgetAs<UIDropdown>("instances");
 	Vector<String> ids;
 	Vector<LocalisedString> names;

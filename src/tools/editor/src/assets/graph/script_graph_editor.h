@@ -5,29 +5,24 @@
 #include "halley/tools/dll/project_dll.h"
 #include "src/scene/entity_editor.h"
 #include "src/ui/infini_canvas.h"
-#include "src/ui/scroll_background.h"
 
 namespace Halley {
-    class ScriptGraphEditor : public AssetEditor, IProjectDLLListener {
+	class ScriptGraphEditor : public UIWidget {
 	public:
-		ScriptGraphEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow);
+		ScriptGraphEditor(UIFactory& factory, Resources& gameResources, Project& project, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph);
 		~ScriptGraphEditor() override;
 
+		void setScriptGraph(std::shared_ptr<ScriptGraph> graph);
+
 		void onActiveChanged(bool active) override;
+		void setModified(bool modified);
+		bool isModified();
+		std::shared_ptr<ScriptGraph> getScriptGraph();
 
-        void reload() override;
-        void refreshAssets() override;
 		void onMakeUI() override;
-		
-		void save() override;
-		bool isModified() override;
-		void markModified();
-
-		void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 
 	protected:
     	void update(Time t, bool moved) override;
-        std::shared_ptr<const Resource> loadResource(const String& assetId) override;
 
     private:
 		struct EntityEnumData {
@@ -36,19 +31,19 @@ namespace Halley {
 			String name;
 			int scriptIdx;
 		};
-		
+
+		UIFactory& factory;
 		ProjectWindow& projectWindow;
 		Resources& gameResources;
+		Project& project;
+
     	std::shared_ptr<ScriptGraph> scriptGraph;
 		std::unique_ptr<ScriptState> scriptState;
 
 		std::shared_ptr<ScriptGizmoUI> gizmoEditor;
 		std::shared_ptr<InfiniCanvas> infiniCanvas;
 		bool modified = false;
-		bool pendingLoad = false;
-		bool hasUI = false;
 		bool autoAcquire = false;
-		bool dllListenerAdded = false;
 
     	std::optional<uint32_t> scriptEnumHandle;
 		std::optional<uint32_t> scriptStateHandle;
@@ -59,7 +54,6 @@ namespace Halley {
     	std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
 		std::shared_ptr<EntityEditorFactory> entityEditorFactory;
 
-		void open();
 		void setListeningToClient(bool listening);
 		void setListeningToState(std::pair<size_t, int64_t> entityId);
 
@@ -73,5 +67,5 @@ namespace Halley {
 		ConfigNode getCurrentNodeConfig();
 
 		bool tryAutoAcquire();
-    };
+	};
 }
