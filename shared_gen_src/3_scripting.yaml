@@ -25,14 +25,14 @@ component:
 ---
 
 component:
-  name: CometScript
+  name: EmbeddedScript
   componentDependencies: [Scriptable, Transform2D]
   members:
   - script:
       type: 'Halley::ScriptGraph'
       canEdit: true
       canSave: false
-      displayName: Graph
+      displayName: Script
 
 ---
 

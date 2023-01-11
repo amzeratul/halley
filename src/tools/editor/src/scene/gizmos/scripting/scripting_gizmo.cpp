@@ -1,7 +1,7 @@
 #include "scripting_gizmo.h"
 
-#include <components/script_component.h>
-#include <components/script_graph_component.h>
+#include <components/scriptable_component.h>
+#include <components/embedded_script_component.h>
 #include <components/script_target_component.h>
 
 #include "halley/entity/components/transform_2d_component.h"
@@ -81,8 +81,8 @@ void ScriptingGizmo::loadEntityData()
 	const auto* transform = getComponent<Transform2DComponent>();
 	gizmo->setBasePosition(transform ? transform->getGlobalPosition() : Vector2f());
 
-	auto* scriptGraph = getComponent<ScriptGraphComponent>();
-	gizmo->setGraph(scriptGraph ? &scriptGraph->scriptGraph : nullptr);
+	auto* scriptGraph = getComponent<EmbeddedScriptComponent>();
+	gizmo->setGraph(scriptGraph ? &scriptGraph->script : nullptr);
 }
 
 void ScriptingGizmo::saveEntityData()

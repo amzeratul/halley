@@ -1,21 +1,21 @@
-// Halley codegen version 105
+// Halley codegen version 118
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
 #include <halley.hpp>
 #endif
 
-class CometScriptComponent final : public Halley::Component {
+class EmbeddedScriptComponent final : public Halley::Component {
 public:
 	static constexpr int componentIndex{ 9 };
-	static const constexpr char* componentName{ "CometScript" };
+	static const constexpr char* componentName{ "EmbeddedScript" };
 
 	Halley::ScriptGraph script{};
 
-	CometScriptComponent() {
+	EmbeddedScriptComponent() {
 	}
 
-	CometScriptComponent(Halley::ScriptGraph script)
+	EmbeddedScriptComponent(Halley::ScriptGraph script)
 		: script(std::move(script))
 	{
 	}
