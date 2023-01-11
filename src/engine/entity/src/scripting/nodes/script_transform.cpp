@@ -1,7 +1,7 @@
 #include "script_transform.h"
 
 #include "world.h"
-#include "world_position.h"
+#include "halley/navigation/world_position.h"
 #include "components/transform_2d_component.h"
 using namespace Halley;
 
