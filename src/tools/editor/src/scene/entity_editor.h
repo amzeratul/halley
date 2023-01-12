@@ -134,7 +134,7 @@ namespace Halley {
 		ProjectWindow& projectWindow;
 		UIFactory& factory;
 		Resources* gameResources = nullptr;
-		std::map<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
+		HashMap<String, std::unique_ptr<IComponentEditorFieldFactory>> fieldFactories;
 	};
 
 	class EntityEditorFactory : public IEntityEditorFactory {
@@ -145,9 +145,12 @@ namespace Halley {
 		std::shared_ptr<IUIElement> makeField(const String& fieldType, ComponentFieldParameters parameters, ComponentEditorLabelCreation createLabel) const override;
 		ConfigNode getDefaultNode(const String& fieldType) const override;
 
+		void addFieldFactory(std::unique_ptr<IComponentEditorFieldFactory> factory);
+
 	private:
 		EntityEditorFactoryRoot& root;
 		std::unique_ptr<ComponentEditorContext> context;
+		HashMap<String, std::unique_ptr<IComponentEditorFieldFactory>> additionalFieldFactories;
 
 		std::pair<String, Vector<String>> parseType(const String& type) const;
 		std::unique_ptr<ComponentEditorContext> makeContext(IEntityEditorCallbacks* callbacks);

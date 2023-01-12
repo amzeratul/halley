@@ -181,12 +181,14 @@ void SceneEditorGizmoCollection::resetTools()
 			return std::make_unique<TranslateGizmo>(snapRules, factory, sceneEditorWindow);
 		}
 	);
+	/*
 	addTool(Tool("scripting", LocalisedString::fromHardcodedString("Scripting [S]"), Sprite().setImage(resources, "ui/scene_editor_scripting.png"), KeyCode::S),
 		[this] (SnapRules snapRules, const String& componentName, const String& fieldName)
 		{
 			return std::make_unique<ScriptingGizmo>(snapRules, factory, sceneEditorWindow, sceneEditorWindow.getScriptNodeTypes());
 		}
 	);
+	*/
 }
 
 void SceneEditorGizmoCollection::clear()

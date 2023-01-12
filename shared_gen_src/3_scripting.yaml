@@ -39,6 +39,8 @@ component:
 component:
   name: ScriptTarget
   componentDependencies: [Transform2D]
-  members: []
+  members:
+  - id:
+      type: 'Halley::String'
 
 ...

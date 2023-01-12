@@ -29,9 +29,11 @@ children:
   children: []
 - widget: { class: widget, id: drillUpBar }
   sizer: { type: horizontal }
+  border: [0, 6, 0, 0]
   children:
   - spacer: {}
     proportion: 1
   - widget: { class: button, id: ok, text: OK, size: [100, 16] }
+    border: [0, 0, 3, 0]
   - widget: { class: button, id: cancel, text: Cancel, size: [100, 16] }
 ...

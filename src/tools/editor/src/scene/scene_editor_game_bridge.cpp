@@ -353,6 +353,11 @@ void SceneEditorGameBridge::validateAllEntities()
 	sceneEditorWindow.validateAllEntities();
 }
 
+World& SceneEditorGameBridge::getWorld() const
+{
+	return interface->getWorld();
+}
+
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {

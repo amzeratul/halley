@@ -118,6 +118,11 @@ void ScriptGizmoUI::updateNodes()
 	gizmo.updateNodes();
 }
 
+void ScriptGizmoUI::setEntityTargets(Vector<String> entityTargets)
+{
+	gizmo.setEntityTargets(std::move(entityTargets));
+}
+
 void ScriptGizmoUI::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	focus();

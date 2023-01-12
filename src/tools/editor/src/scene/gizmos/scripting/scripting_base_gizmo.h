@@ -5,11 +5,6 @@
 namespace Halley {
 	class ScriptingBaseGizmo : public BaseGraphGizmo {
 	public:
-		struct EntityTarget {
-			Vector2f pos;
-			EntityId entityId;
-		};
-
 		ScriptingBaseGizmo(UIFactory& factory, const IEntityEditorFactory& entityEditorFactory, const World* world, Resources& resources, std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes, float baseZoom = 1.0f);
 
 		void addNode();
@@ -43,7 +38,7 @@ namespace Halley {
 
 		std::shared_ptr<UIWidget> makeUI();
 
-		void setEntityTargets(Vector<EntityTarget> entityTargets);
+		void setEntityTargets(Vector<String> entityTargets);
 
 		void onMouseWheel(Vector2f mousePos, int amount, KeyMods keyMods);
 
@@ -71,17 +66,14 @@ namespace Halley {
 
 		std::optional<Dragging> dragging;
 
-		Vector<EntityTarget> entityTargets;
-		std::optional<size_t> curEntityTarget;
+		Vector<String> entityTargets;
 
 		ExecutionQueue pendingUITasks;
 
 		std::optional<std::pair<BaseGraphRenderer::NodeUnderMouseInfo, String>> devConData;
 
-		void drawToolTip(Painter& painter, const EntityTarget& entityTarget) const;
 		void drawToolTip(Painter& painter, const ScriptGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const;
 		void drawToolTip(Painter& painter, const String& text, const Vector<ColourOverride>& colours, Vector2f pos) const;
-		void drawEntityTargets(Painter& painter) const;
 
 		void openNodeUI(std::optional<GraphNodeId> nodeId, std::optional<Vector2f> pos, const String& nodeType);
 

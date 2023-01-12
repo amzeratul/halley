@@ -131,6 +131,10 @@ namespace Halley {
 
 		void drillDownEditor(std::shared_ptr<UIWidget> editor);
 
+		Vector<const EntityData*> queryEntityDatas(const String& containComponent) const;
+
+		World& getWorld() const;
+
 	protected:
 		void update(Time t, bool moved) override;
 

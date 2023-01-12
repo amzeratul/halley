@@ -11,7 +11,7 @@ namespace Halley {
 	public:
 		using Callback = std::function<void(bool, std::shared_ptr<ScriptGraph>)>;
 
-		ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph, Callback callback = {});
+		ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph, Callback callback = {}, Vector<String> entityTargets = {});
 		~ScriptGraphEditor() override;
 
 		void setScriptGraph(std::shared_ptr<ScriptGraph> graph);
@@ -56,6 +56,7 @@ namespace Halley {
 
     	std::shared_ptr<ScriptNodeTypeCollection> scriptNodeTypes;
 		std::shared_ptr<EntityEditorFactory> entityEditorFactory;
+		Vector<String> entityTargets;
 
 		void setListeningToClient(bool listening);
 		void setListeningToState(std::pair<size_t, int64_t> entityId);

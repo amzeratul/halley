@@ -53,6 +53,8 @@ namespace Halley {
 
 		void initializeEntityValidator(EntityValidator& validator);
 		void validateAllEntities() override;
+
+		World& getWorld() const;
 	
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;

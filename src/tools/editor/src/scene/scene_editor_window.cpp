@@ -1560,3 +1560,8 @@ Future<AssetPreviewData> SceneEditorWindow::getAssetPreviewData(AssetType assetT
 {
 	return projectWindow.getAssetPreviewData(assetType, id, size);
 }
+
+World& SceneEditorWindow::getWorld() const
+{
+	return gameBridge->getWorld();
+}

@@ -141,10 +141,6 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, GraphNo
 						dstPinType = GraphNodePinType{ ScriptNodeElementType::TargetPin, GraphNodePinDirection::Output };
 					}
 				}
-
-				if (highlightEntity == pinConnection.entityIdx) {
-					highlighted = true;
-				}
 			}
 			
 			if (dstPos) {

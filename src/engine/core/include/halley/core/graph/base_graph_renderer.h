@@ -38,13 +38,12 @@ namespace Halley {
 		virtual Vector2f getPinPosition(Vector2f basePos, const BaseGraphNode& node, GraphPinId idx, float zoom) const = 0;
 		virtual Vector<GraphNodeId> getNodesInRect(Vector2f basePos, float curZoom, Rect4f selBox) const = 0;
 
-		void setHighlight(std::optional<NodeUnderMouseInfo> highlightNode, OptionalLite<uint8_t> highlightEntity);
+		void setHighlight(std::optional<NodeUnderMouseInfo> highlightNode);
 		void setSelection(Vector<GraphNodeId> selectedNodes);
 		void setCurrentPaths(Vector<ConnectionPath> path);
 
 	protected:
 		std::optional<NodeUnderMouseInfo> highlightNode;
-		OptionalLite<uint8_t> highlightEntity;
 		Vector<GraphNodeId> selectedNodes;
 		Vector<ConnectionPath> currentPaths;
 	};

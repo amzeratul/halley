@@ -2,10 +2,9 @@
 using namespace Halley;
 
 
-void BaseGraphRenderer::setHighlight(std::optional<NodeUnderMouseInfo> node,OptionalLite<uint8_t> entity)
+void BaseGraphRenderer::setHighlight(std::optional<NodeUnderMouseInfo> node)
 {
 	highlightNode = std::move(node);
-	highlightEntity = entity;
 }
 
 void BaseGraphRenderer::setSelection(Vector<GraphNodeId> nodes)

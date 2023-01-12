@@ -1,5 +1,7 @@
 #include "entity_editor.h"
 
+#include <components/script_target_component.h>
+
 #include "choose_window.h"
 #include "entity_editor_factories.h"
 #include "entity_validator_ui.h"
@@ -8,6 +10,7 @@
 #include "halley/ui/widgets/ui_dropdown.h"
 #include "halley/ui/widgets/ui_textinput.h"
 #include "scene_editor_window.h"
+#include "halley/entity/components/transform_2d_component.h"
 #include "src/assets/graph/script_graph_editor.h"
 #include "src/ui/project_window.h"
 #include "src/ui/select_asset_widget.h"
@@ -624,6 +627,14 @@ void EntityEditor::setTool(const String& tool, const String& componentName, cons
 {
 	if (tool == "!scripting") {
 		auto graph = std::make_shared<ScriptGraph>(getComponentData(componentName, fieldName));
+
+		Vector<String> entityTargets;
+		for (const auto& e: sceneEditor->getWorld().getEntities()) {
+			if (const auto* target = e.tryGetComponent<ScriptTargetComponent>()) {
+				entityTargets.emplace_back(target->id);
+			}
+		}
+
 		auto scriptEditor = std::make_shared<ScriptGraphEditor>(factory, *gameResources, sceneEditor->getProjectWindow(), graph,
 			[=, componentName=componentName, fieldName=fieldName] (bool accept, std::shared_ptr<ScriptGraph> graph)
 		{
@@ -631,8 +642,8 @@ void EntityEditor::setTool(const String& tool, const String& componentName, cons
 				getComponentData(componentName, fieldName) = graph->toConfigNode();
 				onEntityUpdated();
 			}
-		});
-		sceneEditor->drillDownEditor(scriptEditor);
+		}, std::move(entityTargets));
+		sceneEditor->drillDownEditor(std::move(scriptEditor));
 	} else {
 		sceneEditor->setTool(tool, componentName, fieldName);
 	}
@@ -787,9 +798,13 @@ std::shared_ptr<IUIElement> EntityEditorFactory::makeField(const String& rawFiel
 {
 	auto [fieldType, typeParams] = parseType(rawFieldType);
 	parameters.typeParameters = std::move(typeParams);
-		
-	const auto iter = root.fieldFactories.find(fieldType);
-	auto* compFieldFactory = iter != root.fieldFactories.end() ? iter->second.get() : nullptr;
+
+	IComponentEditorFieldFactory* compFieldFactory = nullptr;
+	if (const auto iter = root.fieldFactories.find(fieldType); iter != root.fieldFactories.end()) {
+		compFieldFactory = iter->second.get();
+	} else if (const auto iter2 = additionalFieldFactories.find(fieldType); iter2 != additionalFieldFactories.end()) {
+		compFieldFactory = iter2->second.get();
+	}	
 
 	if (createLabel == ComponentEditorLabelCreation::Always && compFieldFactory && compFieldFactory->canCreateLabel()) {
 		return compFieldFactory->createLabelAndField(*context, parameters);
@@ -822,6 +837,11 @@ ConfigNode EntityEditorFactory::getDefaultNode(const String& fieldType) const
 	} else {
 		return iter->second->getDefaultNode();
 	}
+}
+
+void EntityEditorFactory::addFieldFactory(std::unique_ptr<IComponentEditorFieldFactory> factory)
+{
+	additionalFieldFactories[factory->getFieldType()] = std::move(factory);
 }
 
 std::pair<String, Vector<String>> EntityEditorFactory::parseType(const String& type) const

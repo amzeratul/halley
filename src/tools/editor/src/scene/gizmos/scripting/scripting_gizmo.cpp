@@ -46,7 +46,7 @@ std::shared_ptr<UIWidget> ScriptingGizmo::makeUI()
 
 Vector<String> ScriptingGizmo::getHighlightedComponents() const
 {
-	return { "CometScript" };
+	return { "EmbeddedScript" };
 }
 
 void ScriptingGizmo::refreshEntity()
@@ -93,20 +93,19 @@ void ScriptingGizmo::saveEntityData()
 		scriptGraphData = gizmo->getGraph().toConfigNode(context->getEntitySerializationContext());
 	}
 	
-	auto* data = getComponentData("CometScript");
+	auto* data = getComponentData("EmbeddedScript");
 	if (data) {
 		(*data)["script"] = scriptGraphData;
 	}
-	markModified("CometScript", "script");
+	markModified("EmbeddedScript", "script");
 }
 
 void ScriptingGizmo::compileEntityTargetList(World& world)
 {
-	Vector<ScriptingBaseGizmo::EntityTarget> entityTargets;
+	Vector<String> entityTargets;
 	for (const auto& e: world.getEntities()) {
-		if (e.hasComponent<ScriptTargetComponent>()) {
-			const auto pos = e.getComponent<Transform2DComponent>().getGlobalPosition();
-			entityTargets.emplace_back(ScriptingBaseGizmo::EntityTarget{ pos, e.getEntityId() });
+		if (const auto* target = e.tryGetComponent<ScriptTargetComponent>()) {
+			entityTargets.emplace_back(target->id);
 		}
 	}
 	gizmo->setEntityTargets(std::move(entityTargets));

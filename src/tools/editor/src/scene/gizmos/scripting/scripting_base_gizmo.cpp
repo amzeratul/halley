@@ -25,18 +25,6 @@ void ScriptingBaseGizmo::update(Time time, const SceneEditorInputState& inputSta
 
 	assignNodeTypes();
 
-	// Find entity target under mouse
-	curEntityTarget.reset();
-	const auto curZoom = getZoom();
-	if (inputState.mousePos && !inputState.selectionBox) {
-		for (size_t i = 0; i < entityTargets.size(); ++i) {
-			const auto& entity = entityTargets[i];
-			if (Circle(entity.pos, 6.0f / curZoom).contains(inputState.mousePos.value())) {
-				curEntityTarget = i;
-			}
-		}
-	}
-
 	// This must be set before onNodeDragging/onEditingConnection below
 	const bool startedIdle = !dragging && !nodeEditingConnection;
 
@@ -94,7 +82,7 @@ void ScriptingBaseGizmo::update(Time time, const SceneEditorInputState& inputSta
 	lastShiftHeld = inputState.shiftHeld;
 }
 
-void ScriptingBaseGizmo::setEntityTargets(Vector<EntityTarget> targets)
+void ScriptingBaseGizmo::setEntityTargets(Vector<String> targets)
 {
 	entityTargets = std::move(targets);
 }
@@ -196,7 +184,7 @@ void ScriptingBaseGizmo::onEditingConnection(const SceneEditorInputState& inputS
 			}
 		} else {
 			if (srcType.type == GraphElementType(ET::TargetPin) && srcType.direction == GraphNodePinDirection::Input) {
-				if (scriptGraph->connectPin(srcNodeId, srcPinId, curEntityTarget ? entityTargets[*curEntityTarget].entityId : EntityId())) {
+				if (scriptGraph->connectPin(srcNodeId, srcPinId, EntityId())) {
 					onModified();
 				}
 			}
@@ -230,9 +218,7 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 		paths.push_back(BaseGraphRenderer::ConnectionPath{ conn.srcPos, conn.dstPos, conn.srcType, conn.dstType, true });
 	}
 
-	drawEntityTargets(painter);
-	
-	renderer->setHighlight(nodeUnderMouse, curEntityTarget ? scriptGraph->getEntityIdx(entityTargets[*curEntityTarget].entityId) : std::nullopt);
+	renderer->setHighlight(nodeUnderMouse);
 	renderer->setSelection(selectedNodes.getSelected());
 	renderer->setCurrentPaths(paths);
 	static_cast<ScriptRenderer&>(*renderer).setState(scriptState);
@@ -241,8 +227,6 @@ void ScriptingBaseGizmo::draw(Painter& painter) const
 	if (!dragging) {
 		if (nodeUnderMouse) {
 			drawToolTip(painter, scriptGraph->getNodes().at(nodeUnderMouse->nodeId), nodeUnderMouse.value());
-		} else if (curEntityTarget) {
-			drawToolTip(painter, entityTargets[curEntityTarget.value()]);
 		}
 	}
 }
@@ -269,7 +253,7 @@ SelectionSetModifier ScriptingBaseGizmo::getSelectionModifier(const SceneEditorI
 
 bool ScriptingBaseGizmo::isHighlighted() const
 {
-	return !!nodeUnderMouse || curEntityTarget || nodeEditingConnection;
+	return !!nodeUnderMouse || nodeEditingConnection;
 }
 
 bool ScriptingBaseGizmo::destroyNode(GraphNodeId id)
@@ -478,15 +462,6 @@ ExecutionQueue& ScriptingBaseGizmo::getExecutionQueue()
 	return pendingUITasks;
 }
 
-void ScriptingBaseGizmo::drawToolTip(Painter& painter, const EntityTarget& entityTarget) const
-{
-	ColourStringBuilder builder;
-	builder.append("Entity ");
-	builder.append("\"" + world->getEntity(entityTarget.entityId).getName() + "\"", IScriptNodeType::parameterColour);
-	const auto [text, colours] = builder.moveResults();
-	drawToolTip(painter, text, colours, entityTarget.pos + Vector2f(0, 10));
-}
-
 void ScriptingBaseGizmo::drawToolTip(Painter& painter, const ScriptGraphNode& node, const BaseGraphRenderer::NodeUnderMouseInfo& nodeInfo) const
 {
 	const auto* nodeType = scriptNodeTypes->tryGetNodeType(node.getType());
@@ -528,18 +503,6 @@ void ScriptingBaseGizmo::drawToolTip(Painter& painter, const String& text, const
 
 	tooltipLabel
 		.draw(painter);
-}
-
-void ScriptingBaseGizmo::drawEntityTargets(Painter& painter) const
-{
-	const float curZoom = getZoom();
-	
-	for (const auto& e: entityTargets) {
-		const float radius = 6.0f / curZoom;
-		const float width = 1.5f / curZoom;
-		const auto col = curEntityTarget && entityTargets[*curEntityTarget].entityId == e.entityId ? Colour4f(1, 1, 1) : Colour4f(0.35f, 1.0f, 0.35f);
-		painter.drawCircle(e.pos, radius, width, col);
-	}
 }
 
 std::shared_ptr<UIWidget> ScriptingBaseGizmo::makeUI()

@@ -1,11 +1,12 @@
 #include "script_graph_editor.h"
 #include "script_gizmo_ui.h"
+#include "script_target_entity_factory.h"
 #include "halley/tools/project/project.h"
 #include "src/ui/infini_canvas.h"
 #include "src/ui/project_window.h"
 using namespace Halley;
 
-ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph, Callback callback)
+ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph, Callback callback, Vector<String> entityTargets)
 	: UIWidget("ScriptGraphEditor", {}, UISizer())
 	, factory(factory)
 	, projectWindow(projectWindow)
@@ -13,13 +14,9 @@ ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResource
 	, project(projectWindow.getProject())
 	, callback(std::move(callback))
 	, scriptGraph(std::move(scriptGraph))
+	, entityTargets(std::move(entityTargets))
 {
 	factory.loadUI(*this, "halley/script_graph_editor");
-	
-	if (gizmoEditor) {
-		gizmoEditor->load(*this->scriptGraph);
-	}
-
 	setListeningToClient(true);
 }
 
@@ -62,12 +59,15 @@ void ScriptGraphEditor::onMakeUI()
 {
 	scriptNodeTypes = projectWindow.getScriptNodeTypes();
 	entityEditorFactory = std::make_shared<EntityEditorFactory>(projectWindow.getEntityEditorFactoryRoot(), nullptr);
+	entityEditorFactory->addFieldFactory(std::make_unique<ScriptTargetEntityFactory>(*this));
 
 	gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *entityEditorFactory, scriptNodeTypes, 
-	projectWindow.getAPI().input->getKeyboard(), projectWindow.getAPI().system->getClipboard(), [=] ()
-	{
-		setModified(true);
-	});
+		projectWindow.getAPI().input->getKeyboard(), projectWindow.getAPI().system->getClipboard(), [=] ()
+		{
+			setModified(true);
+		}
+	);
+	gizmoEditor->setEntityTargets(entityTargets);
 	
 	if (scriptGraph) {
 		gizmoEditor->load(*scriptGraph);

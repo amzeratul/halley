@@ -202,3 +202,35 @@ EntityId ScriptGetParent::doGetEntityId(ScriptEnvironment& environment, const Sc
 	}
 	return {};
 }
+
+
+
+Vector<IGraphNodeType::SettingType> ScriptEntityReference::getSettingTypes() const
+{
+	return {
+		SettingType{ "entity", "Halley::ScriptTargetId", Vector<String>{""} }
+	};
+}
+
+gsl::span<const IScriptNodeType::PinType> ScriptEntityReference::getPinConfiguration(const ScriptGraphNode& node) const
+{
+	using ET = ScriptNodeElementType;
+	using PD = GraphNodePinDirection;
+	const static auto data = std::array<PinType, 1>{ PinType{ ET::TargetPin, PD::Output } };
+	return data;
+}
+
+std::pair<String, Vector<ColourOverride>> ScriptEntityReference::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
+{
+	auto str = ColourStringBuilder(true);
+	str.append("Entity with ScriptTarget reference ");
+	str.append(node.getSettings()["entity"].asString(""), settingColour);
+	return str.moveResults();
+}
+
+EntityId ScriptEntityReference::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
+{
+	// TODO
+	return EntityId();
+	//return environment.getScriptTarget(node.getSettings()["entity"].asString(""));
+}
