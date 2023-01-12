@@ -112,16 +112,9 @@ namespace Halley {
 
 		std::optional<GraphNodeId> getMessageInboxId(const String& messageId, bool requiresSpawningScript = false) const;
 
-		bool connectPin(GraphNodeId srcNode, GraphPinId srcPinN, EntityId target);
-
 		void assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection, bool force = false) const;
 		void clearTypes();
 		void finishGraph();
-
-		EntityId getEntityId(OptionalLite<uint8_t> idx) const;
-		OptionalLite<uint8_t> getEntityIdx(EntityId id) const;
-		uint8_t addEntityId(EntityId id);
-		void removeEntityId(EntityId id);
 
 		GraphNodeId getNodeRoot(GraphNodeId nodeId) const;
 		const ScriptGraphNodeRoots& getRoots() const;
@@ -134,7 +127,6 @@ namespace Halley {
 		FunctionParameters getFunctionParameters() const;
 
 	private:
-		Vector<EntityId> entityIds;
 		Vector<std::pair<GraphNodeId, GraphNodeId>> callerToCallee;
 		Vector<std::pair<GraphNodeId, GraphNodeId>> returnToCaller;
 		Vector<std::pair<String, Range<GraphNodeId>>> subGraphs;

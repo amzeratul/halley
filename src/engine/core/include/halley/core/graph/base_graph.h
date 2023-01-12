@@ -12,12 +12,10 @@ namespace Halley {
 		struct PinConnection {
 			OptionalLite<GraphNodeId> dstNode = {};
 			GraphPinId dstPin = 0;
-			OptionalLite<uint8_t> entityIdx;
 
 			PinConnection() = default;
 			PinConnection(const ConfigNode& node);
 			PinConnection(GraphNodeId dstNode, GraphPinId dstPin);
-			explicit PinConnection(OptionalLite<uint8_t> entityIdx);
 
 			ConfigNode toConfigNode() const;
 

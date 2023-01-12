@@ -131,16 +131,6 @@ void ScriptRenderer::drawNodeOutputs(Painter& painter, Vector2f basePos, GraphNo
 				}
 
 				dstDrawMode = getNodeDrawMode(*pinConnection.dstNode);
-			} else if (pinConnection.entityIdx && world) {
-				const auto entityId = graph.getEntityId(pinConnection.entityIdx);
-				auto entity = world->tryGetEntity(entityId);
-				if (entity.isValid()) {
-					const auto* transform = entity.tryGetComponent<Transform2DComponent>();
-					if (transform) {
-						dstPos = transform->getGlobalPosition();
-						dstPinType = GraphNodePinType{ ScriptNodeElementType::TargetPin, GraphNodePinDirection::Output };
-					}
-				}
 			}
 			
 			if (dstPos) {

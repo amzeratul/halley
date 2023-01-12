@@ -727,9 +727,7 @@ EntityId ScriptEnvironment::readInputEntityIdRaw(const ScriptGraphNode& node, Gr
 		const auto& pin = node.getPins()[pinN];
 		if (!pin.connections.empty()) {
 			const auto& conn = pin.connections[0];
-			if (conn.entityIdx) {
-				return getCurrentGraph()->getEntityId(conn.entityIdx);
-			} else if (conn.dstNode) {
+			if (conn.dstNode) {
 				const auto& nodes = getCurrentGraph()->getNodes();
 				const auto& dstNode = nodes.at(conn.dstNode.value());
 				return dstNode.getNodeType().getEntityId(*this, dstNode, conn.dstPin, getNodeData(conn.dstNode.value()));

@@ -182,12 +182,6 @@ void ScriptingBaseGizmo::onEditingConnection(const SceneEditorInputState& inputS
 			if (scriptGraph->connectPins(srcNodeId, srcPinId, dstNodeId, dstPinId)) {
 				onModified();
 			}
-		} else {
-			if (srcType.type == GraphElementType(ET::TargetPin) && srcType.direction == GraphNodePinDirection::Input) {
-				if (scriptGraph->connectPin(srcNodeId, srcPinId, EntityId())) {
-					onModified();
-				}
-			}
 		}
 		
 		nodeEditingConnection.reset();

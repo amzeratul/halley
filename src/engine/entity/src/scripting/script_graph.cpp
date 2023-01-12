@@ -14,20 +14,12 @@ ScriptGraphNode::PinConnection::PinConnection(const ConfigNode& node)
 	if (node.hasKey("dstNode")) {
 		dstNode = static_cast<GraphNodeId>(node["dstNode"].asInt());
 	}
-	if (node.hasKey("entityIdx")) {
-		entityIdx = node["entityIdx"].asInt();
-	}
 	dstPin = static_cast<GraphPinId>(node["dstPin"].asInt(0));
 }
 
 ScriptGraphNode::PinConnection::PinConnection(GraphNodeId dstNode, GraphPinId dstPin)
 	: dstNode(dstNode)
 	, dstPin(dstPin)
-{
-}
-
-ScriptGraphNode::PinConnection::PinConnection(OptionalLite<GraphPinId> entityIdx)
-	: entityIdx(entityIdx)
 {
 }
 
@@ -40,9 +32,6 @@ ConfigNode ScriptGraphNode::PinConnection::toConfigNode() const
 	if (dstPin != 0) {
 		result["dstPin"] = static_cast<int>(dstPin);
 	}
-	if (entityIdx) {
-		result["entityIdx"] = entityIdx.value();
-	}
 	return result;
 }
 
@@ -50,19 +39,17 @@ void ScriptGraphNode::PinConnection::serialize(Serializer& s) const
 {
 	s << dstNode;
 	s << dstPin;
-	s << entityIdx;
 }
 
 void ScriptGraphNode::PinConnection::deserialize(Deserializer& s)
 {
 	s >> dstNode;
 	s >> dstPin;
-	s >> entityIdx;
 }
 
 bool ScriptGraphNode::PinConnection::hasConnection() const
 {
-	return dstNode || entityIdx;
+	return dstNode;
 }
 
 ScriptGraphNode::Pin::Pin(const ConfigNode& node)
@@ -238,7 +225,6 @@ ScriptGraph::ScriptGraph(const ConfigNode& node, const EntitySerializationContex
 void ScriptGraph::load(const ConfigNode& node, const EntitySerializationContext& context)
 {
 	nodes = node["nodes"].asVector<ScriptGraphNode>({});
-	entityIds = ConfigNodeSerializer<Vector<EntityId>>().deserialize(context, node["entityIds"]);
 	lastAssignTypeHash = 0;
 	finishGraph();
 }
@@ -257,8 +243,6 @@ bool ScriptGraph::isSingleton() const
 
 ConfigNode ScriptGraph::toConfigNode() const
 {
-	Expects(entityIds.empty());
-
 	ConfigNode::MapType result;
 	result["nodes"] = nodes;
 	return result;
@@ -268,7 +252,6 @@ ConfigNode ScriptGraph::toConfigNode(const EntitySerializationContext& context) 
 {
 	ConfigNode::MapType result;
 	result["nodes"] = nodes;
-	result["entityIds"] = ConfigNodeSerializer<Vector<EntityId>>().serialize(entityIds, context);
 	return result;
 }
 
@@ -296,7 +279,6 @@ void ScriptGraph::reload(Resource&& resource)
 void ScriptGraph::makeDefault()
 {
 	nodes.clear();
-	entityIds.clear();
 	finishGraph();
 }
 
@@ -425,26 +407,6 @@ int ScriptGraph::getMessageNumParams(const String& messageId) const
 	return 0;
 }
 
-bool ScriptGraph::connectPin(GraphNodeId srcNodeIdx, GraphPinId srcPinN, EntityId target)
-{
-	auto& srcNode = nodes.at(srcNodeIdx);
-	auto& srcPin = srcNode.getPin(srcPinN);
-
-	for (const auto& conn: srcPin.connections) {
-		if (getEntityId(conn.entityIdx) == target) {
-			return false;
-		}
-	}
-
-	disconnectPinIfSingleConnection(srcNodeIdx, srcPinN);
-
-	if (target.isValid()) {
-		srcPin.connections.emplace_back(ScriptGraphNode::PinConnection{ addEntityId(target) });
-	}
-
-	return true;
-}
-
 void ScriptGraph::assignTypes(const ScriptNodeTypeCollection& nodeTypeCollection, bool force) const
 {
 	if (lastAssignTypeHash != hash || force) {
@@ -460,60 +422,6 @@ void ScriptGraph::clearTypes()
 	lastAssignTypeHash = 0;
 	for (const auto& node: nodes) {
 		node.clearType();
-	}
-}
-
-EntityId ScriptGraph::getEntityId(OptionalLite<uint8_t> idx) const
-{
-	if (!idx) {
-		return EntityId();
-	}
-	return entityIds.at(idx.value());
-}
-
-OptionalLite<uint8_t> ScriptGraph::getEntityIdx(EntityId id) const
-{
-	const auto iter = std_ex::find(entityIds, id);
-	if (iter == entityIds.end()) {
-		return {};
-	} else {
-		return static_cast<uint8_t>(iter - entityIds.begin());
-	}
-}
-
-uint8_t ScriptGraph::addEntityId(EntityId id)
-{
-	// Look for existing
-	size_t empty = std::numeric_limits<size_t>::max();
-	for (size_t i = 0; i < entityIds.size(); ++i) {
-		if (entityIds[i] == id) {
-			return static_cast<uint8_t>(i);
-		} else if (!entityIds[i].isValid() && empty == std::numeric_limits<size_t>::max()) {
-			empty = i;
-		}
-	}
-
-	// Fill empty slot
-	if (empty != std::numeric_limits<size_t>::max()) {
-		entityIds[empty] = id;
-		return static_cast<uint8_t>(empty);
-	}
-
-	// Add new slot
-	const auto idx = entityIds.size();
-	if (idx >= 255) {
-		throw Exception("Too many entityIds in ScriptGraph", HalleyExceptions::Entity);
-	}
-	entityIds.push_back(id);
-	return static_cast<uint8_t>(idx);
-}
-
-void ScriptGraph::removeEntityId(EntityId id)
-{
-	for (size_t i = 0; i < entityIds.size(); ++i) {
-		if (entityIds[i] == id) {
-			entityIds[i] = EntityId();
-		}
 	}
 }
 

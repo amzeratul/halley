@@ -153,8 +153,6 @@ void BaseGraphNode::remapNodes(const HashMap<GraphNodeId, GraphNodeId>& remap)
 					o.dstNode.reset();
 					o.dstPin = 0;
 				}
-			} else if (o.entityIdx) {
-				o.entityIdx.reset();
 			}
 		}
 		std_ex::erase_if(pin.connections, [] (const PinConnection& c) { return !c.hasConnection(); });
