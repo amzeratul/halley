@@ -2,6 +2,7 @@
 
 #include "world.h"
 #include "components/transform_2d_component.h"
+#include "halley/navigation/world_position.h"
 using namespace Halley;
 
 ConfigNode ScriptSpawnEntityData::toConfigNode(const EntitySerializationContext& context)
@@ -216,7 +217,7 @@ gsl::span<const IScriptNodeType::PinType> ScriptEntityReference::getPinConfigura
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 1>{ PinType{ ET::TargetPin, PD::Output } };
+	const static auto data = std::array<PinType, 2>{ PinType{ ET::TargetPin, PD::Output }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
 
@@ -228,9 +229,28 @@ std::pair<String, Vector<ColourOverride>> ScriptEntityReference::getNodeDescript
 	return str.moveResults();
 }
 
+String ScriptEntityReference::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
+{
+	if (elementIdx == 0) {
+		return "ScriptTarget \"" + node.getSettings()["entity"].asString("") + "\"";
+	} else {
+		return "Position of ScriptTarget \"" + node.getSettings()["entity"].asString("") + "\"";
+	}
+}
+
 EntityId ScriptEntityReference::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
 	// TODO
 	return EntityId();
 	//return environment.getScriptTarget(node.getSettings()["entity"].asString(""));
+}
+
+ConfigNode ScriptEntityReference::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
+{
+	auto* transform = environment.tryGetComponent<Transform2DComponent>(doGetEntityId(environment, node, 0));
+	if (transform) {
+		return transform->getWorldPosition().toConfigNode();
+	} else {
+		return {};
+	}
 }
