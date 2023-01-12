@@ -238,6 +238,11 @@ String ScriptEntityReference::getShortDescription(const World* world, const Scri
 	}
 }
 
+String ScriptEntityReference::getLargeLabel(const ScriptGraphNode& node) const
+{
+	return node.getSettings()["scriptTargetId"].asString("");
+}
+
 EntityId ScriptEntityReference::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
 	return environment.getScriptTarget(node.getSettings()["scriptTargetId"].asString(""));

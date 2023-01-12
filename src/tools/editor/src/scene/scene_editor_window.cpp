@@ -494,9 +494,9 @@ Vector<const EntityData*> SceneEditorWindow::getEntityDataStack(const UUID& inst
 	return sceneData->getEntityDataStack(instanceUUID.toString());
 }
 
-void SceneEditorWindow::drillDownEditor(std::shared_ptr<UIWidget> editor)
+void SceneEditorWindow::drillDownEditor(std::shared_ptr<DrillDownAssetWindow> editor)
 {
-	parentEditor.drillDownEditor(editor);
+	parentEditor.drillDownEditor(std::move(editor));
 }
 
 void SceneEditorWindow::onProjectDLLStatusChange(ProjectDLL::Status status)

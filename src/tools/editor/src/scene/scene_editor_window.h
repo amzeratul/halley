@@ -10,6 +10,7 @@
 #include "src/assets/graph/script_graph_editor.h"
 
 namespace Halley {
+	class DrillDownAssetWindow;
 	class PrefabEditor;
 	class ProjectWindow;
 	class AssetBrowserTabs;
@@ -129,7 +130,7 @@ namespace Halley {
 		Resources& getGameResources() const override;
 		Vector<const EntityData*> getEntityDataStack(const UUID& instanceUUID) const override;
 
-		void drillDownEditor(std::shared_ptr<UIWidget> editor);
+		void drillDownEditor(std::shared_ptr<DrillDownAssetWindow> editor);
 
 		Vector<const EntityData*> queryEntityDatas(const String& containComponent) const;
 

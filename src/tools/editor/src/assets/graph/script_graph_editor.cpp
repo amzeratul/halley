@@ -7,7 +7,7 @@
 using namespace Halley;
 
 ScriptGraphEditor::ScriptGraphEditor(UIFactory& factory, Resources& gameResources, ProjectWindow& projectWindow, std::shared_ptr<ScriptGraph> scriptGraph, Callback callback, Vector<String> entityTargets)
-	: UIWidget("ScriptGraphEditor", {}, UISizer())
+	: DrillDownAssetWindow("ScriptGraphEditor", {}, UISizer())
 	, factory(factory)
 	, projectWindow(projectWindow)
 	, gameResources(gameResources)
@@ -48,6 +48,12 @@ void ScriptGraphEditor::setModified(bool value)
 bool ScriptGraphEditor::isModified()
 {
 	return modified;
+}
+
+void ScriptGraphEditor::drillDownSave()
+{
+	callback(true, scriptGraph);
+	setModified(false);
 }
 
 std::shared_ptr<ScriptGraph> ScriptGraphEditor::getScriptGraph()

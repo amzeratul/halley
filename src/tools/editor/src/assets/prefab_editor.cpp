@@ -26,12 +26,15 @@ void PrefabEditor::onDoubleClick()
 
 bool PrefabEditor::isModified()
 {
-	return window && window->isModified();
+	return (window && window->isModified()) || (!drillDown.empty() && drillDown.back()->isModified());
 }
 
 void PrefabEditor::save()
 {
 	if (window) {
+		if (!drillDown.empty()) {
+			drillDown.back()->drillDownSave();
+		}
 		window->saveScene();
 	}
 }
@@ -48,7 +51,7 @@ void PrefabEditor::onOpenAssetFinder(PaletteWindow& assetFinder)
 	}
 }
 
-void PrefabEditor::drillDownEditor(std::shared_ptr<UIWidget> editor)
+void PrefabEditor::drillDownEditor(std::shared_ptr<DrillDownAssetWindow> editor)
 {
 	for (auto& otherDrill: drillDown) {
 		otherDrill->setActive(false);

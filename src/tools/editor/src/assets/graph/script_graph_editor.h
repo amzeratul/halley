@@ -7,7 +7,7 @@
 #include "src/ui/infini_canvas.h"
 
 namespace Halley {
-	class ScriptGraphEditor : public UIWidget {
+	class ScriptGraphEditor : public DrillDownAssetWindow {
 	public:
 		using Callback = std::function<void(bool, std::shared_ptr<ScriptGraph>)>;
 
@@ -18,7 +18,8 @@ namespace Halley {
 
 		void onActiveChanged(bool active) override;
 		void setModified(bool modified);
-		bool isModified();
+		bool isModified() override;
+		void drillDownSave() override;
 		std::shared_ptr<ScriptGraph> getScriptGraph();
 
 		void onMakeUI() override;
