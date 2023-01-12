@@ -133,6 +133,11 @@ void ScriptGraphEditor::onMakeUI()
 	});
 }
 
+const Vector<String>& ScriptGraphEditor::getScriptTargetIds() const
+{
+	return entityTargets;
+}
+
 void ScriptGraphEditor::update(Time t, bool moved)
 {
 	if (gizmoEditor) {

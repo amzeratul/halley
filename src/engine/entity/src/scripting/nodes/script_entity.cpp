@@ -209,7 +209,7 @@ EntityId ScriptGetParent::doGetEntityId(ScriptEnvironment& environment, const Sc
 Vector<IGraphNodeType::SettingType> ScriptEntityReference::getSettingTypes() const
 {
 	return {
-		SettingType{ "entity", "Halley::ScriptTargetId", Vector<String>{""} }
+		SettingType{ "scriptTargetId", "Halley::ScriptTargetId", Vector<String>{""} }
 	};
 }
 
@@ -225,30 +225,31 @@ std::pair<String, Vector<ColourOverride>> ScriptEntityReference::getNodeDescript
 {
 	auto str = ColourStringBuilder(true);
 	str.append("Entity with ScriptTarget reference ");
-	str.append(node.getSettings()["entity"].asString(""), settingColour);
+	str.append(node.getSettings()["scriptTargetId"].asString(""), settingColour);
 	return str.moveResults();
 }
 
 String ScriptEntityReference::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
 	if (elementIdx == 0) {
-		return "ScriptTarget \"" + node.getSettings()["entity"].asString("") + "\"";
+		return node.getSettings()["scriptTargetId"].asString("");
 	} else {
-		return "Position of ScriptTarget \"" + node.getSettings()["entity"].asString("") + "\"";
+		return "pos(" + node.getSettings()["scriptTargetId"].asString("") + ")";
 	}
 }
 
 EntityId ScriptEntityReference::doGetEntityId(ScriptEnvironment& environment, const ScriptGraphNode& node, GraphPinId pinN) const
 {
-	// TODO
-	return EntityId();
-	//return environment.getScriptTarget(node.getSettings()["entity"].asString(""));
+	return environment.getScriptTarget(node.getSettings()["scriptTargetId"].asString(""));
 }
 
 ConfigNode ScriptEntityReference::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	auto* transform = environment.tryGetComponent<Transform2DComponent>(doGetEntityId(environment, node, 0));
-	if (transform) {
+	const auto entityId = doGetEntityId(environment, node, 0);
+	if (!entityId.isValid()) {
+		return {};
+	}
+	if (auto* transform = environment.tryGetComponent<Transform2DComponent>(entityId)) {
 		return transform->getWorldPosition().toConfigNode();
 	} else {
 		return {};

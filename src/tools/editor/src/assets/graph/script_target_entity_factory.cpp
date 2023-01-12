@@ -1,5 +1,7 @@
 #include "script_target_entity_factory.h"
 
+#include "script_graph_editor.h"
+
 using namespace Halley;
 
 ScriptTargetEntityFactory::ScriptTargetEntityFactory(ScriptGraphEditor& editor)
@@ -17,8 +19,7 @@ std::shared_ptr<IUIElement> ScriptTargetEntityFactory::createField(const Compone
 
     const String value = data.getFieldData().asString("");
 
-    Vector<String> ids;
-    // TODO: populate
+    Vector<String> ids = editor.getScriptTargetIds();
 
     const auto& dropStyle = context.getUIFactory().getStyle("dropdownLight");
     auto dropdown = std::make_shared<UIDropdown>("systemType", dropStyle);

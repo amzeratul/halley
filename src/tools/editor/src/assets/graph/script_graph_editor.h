@@ -23,6 +23,8 @@ namespace Halley {
 
 		void onMakeUI() override;
 
+		const Vector<String>& getScriptTargetIds() const;
+
 	protected:
     	void update(Time t, bool moved) override;
 

@@ -14,9 +14,13 @@ using namespace Halley;
 
 class ComponentEditorTextFieldFactory : public IComponentEditorFieldFactory {
 public:
+	ComponentEditorTextFieldFactory(String fieldName)
+		: fieldName(fieldName)
+	{}
+
 	String getFieldType() override
 	{
-		return "Halley::String";
+		return fieldName;
 	}
 
 	ConfigNode getDefaultNode() const override
@@ -40,6 +44,9 @@ public:
 
 		return field;
 	}
+
+private:
+	String fieldName;
 };
 
 class ComponentEditorIntFieldFactory : public IComponentEditorFieldFactory {
@@ -1696,7 +1703,8 @@ Vector<std::unique_ptr<IComponentEditorFieldFactory>> EntityEditorFactories::get
 {
 	Vector<std::unique_ptr<IComponentEditorFieldFactory>> factories;
 
-	factories.emplace_back(std::make_unique<ComponentEditorTextFieldFactory>());
+	factories.emplace_back(std::make_unique<ComponentEditorTextFieldFactory>("Halley::String"));
+	factories.emplace_back(std::make_unique<ComponentEditorTextFieldFactory>("Halley::ScriptTargetId"));
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("int8_t", static_cast<float>(std::numeric_limits<int8_t>::min()), static_cast<float>(std::numeric_limits<int8_t>::max())));
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("int16_t", static_cast<float>(std::numeric_limits<int16_t>::min()), static_cast<float>(std::numeric_limits<int16_t>::max())));
 	factories.emplace_back(std::make_unique<ComponentEditorIntFieldFactory>("int", std::nullopt, std::nullopt));

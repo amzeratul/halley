@@ -674,6 +674,19 @@ std::shared_ptr<UIWidget> ScriptEnvironment::createModalUI(const String& ui, Con
 	return {};
 }
 
+EntityId ScriptEnvironment::getScriptTarget(const String& id) const
+{
+	if (scriptTargetRetriever) {
+		return scriptTargetRetriever(id);
+	}
+	return {};
+}
+
+void ScriptEnvironment::setScriptTargetRetriever(ScriptTargetRetriever scriptTargetRetriever)
+{
+	this->scriptTargetRetriever = std::move(scriptTargetRetriever);
+}
+
 IScriptStateData* ScriptEnvironment::getNodeData(GraphNodeId nodeId)
 {
 	return currentState->getNodeState(nodeId).data;

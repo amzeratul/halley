@@ -800,11 +800,11 @@ std::shared_ptr<IUIElement> EntityEditorFactory::makeField(const String& rawFiel
 	parameters.typeParameters = std::move(typeParams);
 
 	IComponentEditorFieldFactory* compFieldFactory = nullptr;
-	if (const auto iter = root.fieldFactories.find(fieldType); iter != root.fieldFactories.end()) {
+	if (const auto additionalIter = additionalFieldFactories.find(fieldType); additionalIter != additionalFieldFactories.end()) {
+		compFieldFactory = additionalIter->second.get();
+	} else if (const auto iter = root.fieldFactories.find(fieldType); iter != root.fieldFactories.end()) {
 		compFieldFactory = iter->second.get();
-	} else if (const auto iter2 = additionalFieldFactories.find(fieldType); iter2 != additionalFieldFactories.end()) {
-		compFieldFactory = iter2->second.get();
-	}	
+	}
 
 	if (createLabel == ComponentEditorLabelCreation::Always && compFieldFactory && compFieldFactory->canCreateLabel()) {
 		return compFieldFactory->createLabelAndField(*context, parameters);

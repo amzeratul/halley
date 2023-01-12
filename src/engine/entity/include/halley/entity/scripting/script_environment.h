@@ -61,6 +61,8 @@ namespace Halley {
             Vector<String> startTags;
         };
 
+        using ScriptTargetRetriever = std::function<EntityId(const String&)>;
+
     	ScriptEnvironment(const HalleyAPI& api, World& world, Resources& resources, const ScriptNodeTypeCollection& nodeTypeCollection);
     	virtual ~ScriptEnvironment() = default;
 
@@ -127,7 +129,10 @@ namespace Halley {
 
         virtual std::shared_ptr<UIWidget> createInWorldUI(const String& ui, Vector2f offset, Vector2f alignment, EntityId entityId);
         virtual std::shared_ptr<UIWidget> createModalUI(const String& ui, ConfigNode data);
-        
+
+        EntityId getScriptTarget(const String& id) const;
+        void setScriptTargetRetriever(ScriptTargetRetriever scriptTargetRetriever);
+
 		template <typename T>
 		T& getInterface()
 		{
@@ -168,6 +173,8 @@ namespace Halley {
         Vector<ScriptExecutionRequest> scriptExecutionRequestOutbox;
 
     	HashMap<std::type_index, IScriptEnvironmentInterface*> interfaces;
+
+        ScriptTargetRetriever scriptTargetRetriever;
 
     private:
         bool updateThread(ScriptState& graphState, ScriptStateThread& thread, Vector<ScriptStateThread>& pendingThreads);
