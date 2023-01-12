@@ -65,7 +65,10 @@ void ScriptGraphEditor::onMakeUI()
 {
 	scriptNodeTypes = projectWindow.getScriptNodeTypes();
 	entityEditorFactory = std::make_shared<EntityEditorFactory>(projectWindow.getEntityEditorFactoryRoot(), nullptr);
-	entityEditorFactory->addFieldFactory(std::make_unique<ScriptTargetEntityFactory>(*this));
+	if (callback) {
+		// Only add this overriding default factory if we're running inside scene editor
+		entityEditorFactory->addFieldFactory(std::make_unique<ScriptTargetEntityFactory>(*this));
+	}
 
 	gizmoEditor = std::make_shared<ScriptGizmoUI>(factory, gameResources, *entityEditorFactory, scriptNodeTypes, 
 		projectWindow.getAPI().input->getKeyboard(), projectWindow.getAPI().system->getClipboard(), [=] ()
