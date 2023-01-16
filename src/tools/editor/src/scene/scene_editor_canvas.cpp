@@ -9,14 +9,16 @@
 #include "scene_editor_gizmo_collection.h"
 #include "halley/core/game/scene_editor_interface.h"
 #include "scene_editor_window.h"
+#include "halley/tools/project/project.h"
 #include "src/project/core_api_wrapper.h"
 
 using namespace Halley;
 
-SceneEditorCanvas::SceneEditorCanvas(String id, UIFactory& factory, Resources& resources, const HalleyAPI& api, std::optional<UISizer> sizer)
+SceneEditorCanvas::SceneEditorCanvas(String id, UIFactory& factory, Resources& resources, const HalleyAPI& api, Project& project, std::optional<UISizer> sizer)
 	: UIWidget(std::move(id), Vector2f(32, 32), std::move(sizer))
 	, factory(factory)
 	, resources(resources)
+	, project(project)
 {
 	border.setImage(resources, "whitebox.png").setColour(Colour4f());
 	surface = std::make_shared<RenderSurface>(*api.video, resources);
@@ -28,6 +30,26 @@ SceneEditorCanvas::SceneEditorCanvas(String id, UIFactory& factory, Resources& r
 	{
 		onMouseWheel(event);
 	});
+
+	project.withDLL([&] (ProjectDLL& dll)
+	{
+		dll.addReloadListener(*this);
+	});
+}
+
+SceneEditorCanvas::~SceneEditorCanvas()
+{
+	project.withDLL([&] (ProjectDLL& dll)
+	{
+		dll.removeReloadListener(*this);
+	});
+}
+
+void SceneEditorCanvas::onProjectDLLStatusChange(ProjectDLL::Status status)
+{
+	if (status == ProjectDLL::Status::Unloaded) {
+		ready = false;
+	}
 }
 
 void SceneEditorCanvas::update(Time t, bool moved)
@@ -41,6 +63,7 @@ void SceneEditorCanvas::update(Time t, bool moved)
 	if (gameBridge) {
 		outputState.clear();
 		gameBridge->update(t, inputState, outputState);
+		ready = true;
 	}
 	notifyOutputState();
 	clearInputState();
@@ -73,7 +96,7 @@ void SceneEditorCanvas::draw(UIPainter& painter) const
 
 void SceneEditorCanvas::render(RenderContext& rc) const
 {
-	if (gameBridge && surface->isReady()) {
+	if (gameBridge && surface->isReady() && ready) {
 		auto context = rc.with(surface->getRenderTarget());
 		gameBridge->render(context);
 	}

@@ -1,5 +1,6 @@
 #pragma once
 #include "halley/core/game/scene_editor_interface.h"
+#include "halley/tools/dll/project_dll.h"
 #include "halley/ui/ui_widget.h"
 
 namespace Halley {
@@ -9,9 +10,10 @@ namespace Halley {
 	class RenderSurface;
 	class SceneEditorGizmoCollection;
 
-	class SceneEditorCanvas final : public UIWidget {
+	class SceneEditorCanvas final : public UIWidget, IProjectDLLListener {
 	public:
-		SceneEditorCanvas(String id, UIFactory& factory, Resources& resources, const HalleyAPI& api, std::optional<UISizer> sizer = {});
+		SceneEditorCanvas(String id, UIFactory& factory, Resources& resources, const HalleyAPI& api, Project& project, std::optional<UISizer> sizer = {});
+		~SceneEditorCanvas();
 
 		void setGameBridge(SceneEditorGameBridge& gameBridge);
 		void setSceneEditorWindow(SceneEditorWindow& editorWindow);
@@ -31,16 +33,21 @@ namespace Halley {
 		void releaseMouse(Vector2f mousePos, int button) override;
 		void onMouseOver(Vector2f mousePos) override;
 		void onMouseWheel(const UIEvent& event);
+		
+		void onProjectDLLStatusChange(ProjectDLL::Status status) override;
 
 	private:
 		UIFactory& factory;
 		Resources& resources;
+		Project& project;
+
 		SceneEditorWindow* editorWindow = nullptr;
 		SceneEditorGameBridge* gameBridge = nullptr;
 
 		Sprite border;
 
 		std::shared_ptr<RenderSurface> surface;
+		bool ready = false;
 
 		std::shared_ptr<InputKeyboard> keyboard;
 		std::shared_ptr<InputDevice> mouse;
