@@ -8,7 +8,7 @@
 #include "halley/text/enum_names.h"
 
 #if defined(DEV_BUILD) && !defined(__NX_TOOLCHAIN_MAJOR__)
-//#define ENABLE_HOT_RELOAD
+#define ENABLE_HOT_RELOAD
 #endif
 
 namespace Halley

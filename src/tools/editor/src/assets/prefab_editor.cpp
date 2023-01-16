@@ -72,7 +72,9 @@ void PrefabEditor::update(Time t, bool moved)
 		drillDown.pop_back();
 	}
 	if (drillDown.empty()) {
-		window->setActive(true);
+		if (window) {
+			window->setActive(true);
+		}
 	} else {
 		drillDown.back()->setActive(true);
 	}
