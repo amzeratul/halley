@@ -1,4 +1,6 @@
 #include "scripting_gizmo_toolbar.h"
+
+#include "scripting_base_gizmo.h"
 #include "scripting_gizmo.h"
 using namespace Halley;
 
