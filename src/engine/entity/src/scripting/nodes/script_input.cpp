@@ -45,9 +45,9 @@ gsl::span<const IScriptNodeType::PinType> ScriptInputButton::getPinConfiguration
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 7>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output },
+	const static auto data = std::array<PinType, 8>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output },
 		PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::FlowPin, PD::Output, true },
-		PinType{ ET::FlowPin, PD::Output, true } };
+		PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::ReadDataPin, PD::Input } };
 	return data;
 }
 
@@ -60,10 +60,17 @@ std::pair<String, Vector<ColourOverride>> ScriptInputButton::getNodeDescription(
 	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
 	str.append(" with priority ");
 	str.append(node.getSettings()["priority"].asString("normal"), parameterColour);
-	if (node.getSettings()["label"].asString("") != "") {
+	if (node.getPin(7).hasConnection()) {
 		str.append(" and label ");
-		str.append(node.getSettings()["label"].asString(""), settingColour);
+		str.append(getConnectedNodeName(world, node, graph, 7), parameterColour);
 	}
+	else {
+		if (node.getSettings()["label"].asString("") != "") {
+			str.append(" and label ");
+			str.append(node.getSettings()["label"].asString(""), settingColour);
+		}
+	}
+
 	if (node.getSettings()["bypassEnableCheck"].asBool(false)) {
 		str.append(" and ");
 		str.append("bypass enable check", settingColour);
@@ -84,6 +91,8 @@ String ScriptInputButton::getPinDescription(const ScriptGraphNode& node, PinType
 		return "Flow Output while button is not held";
 	case 6:
 		return "Flow Output while input is active";
+	case 7:
+		return "Label";
 	default:
 		return ScriptNodeTypeBase<ScriptInputButtonData>::getPinDescription(node, element, elementIdx);
 	}
@@ -108,7 +117,11 @@ IScriptNodeType::Result ScriptInputButton::doUpdate(ScriptEnvironment& environme
 		const auto inputDevice = environment.getInputDevice(entity, node.getSettings()["bypassEnableCheck"].asBool(false));
 		if (inputDevice) {
 			const auto priority = fromString<InputPriority>(node.getSettings()["priority"].asString("normal"));
-			data.input = inputDevice->makeExclusiveButton(button, priority, node.getSettings()["label"].asString(""));
+			auto label = readDataPin(environment, node, 7).asString("");
+			if (label.isEmpty()) {
+				label = node.getSettings()["label"].asString("");
+			}
+			data.input = inputDevice->makeExclusiveButton(button, priority, label);
 		}
 	}
 
