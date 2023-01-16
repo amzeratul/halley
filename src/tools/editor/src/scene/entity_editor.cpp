@@ -627,6 +627,7 @@ void EntityEditor::setTool(const String& tool, const String& componentName, cons
 {
 	if (tool == "!scripting") {
 		auto graph = std::make_shared<ScriptGraph>(getComponentData(componentName, fieldName));
+		graph->setAssetId(String("embed:") + currentEntityData->getInstanceUUID());
 
 		Vector<String> entityTargets;
 		for (const auto& e: sceneEditor->getWorld().getEntities()) {
