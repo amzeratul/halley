@@ -96,25 +96,25 @@ struct KeyOrValueHasher : functor_storage<size_t, hasher>
     {
         return static_cast<const hasher_storage &>(*this)(value.first);
     }
-    template<typename F, typename S>
+    template<typename F, typename S, std::enable_if_t<!std::is_same_v<key_type, std::pair<F, S>>, int> = 0>
     size_t operator()(const std::pair<F, S> & value)
     {
         return static_cast<hasher_storage &>(*this)(value.first);
     }
-    template<typename F, typename S>
+    template<typename F, typename S, std::enable_if_t<!std::is_same_v<key_type, std::pair<F, S>>, int> = 0>
     size_t operator()(const std::pair<F, S> & value) const
     {
         return static_cast<const hasher_storage &>(*this)(value.first);
     }
 };
 
-template <typename T>
+template <typename T, typename E>
 struct FirstOfPairOrValue {
     const T& operator()(const T& v) { return v; }
 };
 
 template <typename K, typename V>
-struct FirstOfPairOrValue<std::pair<K, V>> {
+struct FirstOfPairOrValue<std::pair<K, V>, std::true_type> {
     const K& operator()(const std::pair<K, V>& v) { return v.first; }
 };
 
@@ -130,7 +130,10 @@ struct KeyOrValueEquality : functor_storage<bool, key_equal>
     template<typename L, typename R>
     bool operator()(const L & lhs, const R & rhs)
     {
-        return static_cast<equality_storage &>(*this)(FirstOfPairOrValue<L>()(lhs), FirstOfPairOrValue<R>()(rhs));
+        return static_cast<equality_storage &>(*this)(
+            FirstOfPairOrValue<L, std::conditional_t<std::is_same_v<key_type, L>, std::false_type, std::true_type>>()(lhs),
+            FirstOfPairOrValue<R, std::conditional_t<std::is_same_v<key_type, R>, std::false_type, std::true_type>>()(rhs)
+        );
     }
 };
 static constexpr int8_t min_lookups = 4;
