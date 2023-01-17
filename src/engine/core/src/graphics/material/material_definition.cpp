@@ -353,10 +353,15 @@ std::shared_ptr<const Material> MaterialDefinition::getMaterial() const
 {
 	auto m = material.lock();
 	if (!m) {
-		m = std::make_shared<Material>(shared_from_this());
+		m = makeMaterial();
 		material = m;
 	}
 	return m;
+}
+
+std::shared_ptr<const Material> MaterialDefinition::makeMaterial() const
+{
+	return std::make_shared<Material>(shared_from_this());
 }
 
 void MaterialDefinition::loadUniforms(const ConfigNode& node)

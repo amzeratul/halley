@@ -245,6 +245,7 @@ namespace Halley
 		bool isColumnMajor() const;
 
 		std::shared_ptr<const Material> getMaterial() const;
+		NOINLINE virtual std::shared_ptr<const Material> makeMaterial() const;
 
 	private:
 		String name;

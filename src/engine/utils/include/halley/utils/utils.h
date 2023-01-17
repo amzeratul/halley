@@ -51,9 +51,13 @@
 		#define PRAGMA_DEOPTIMIZE
 		#define PRAGMA_REOPTIMIZE
 	#endif
+
+	#define NOINLINE __declspec(noinline)
 #else
 	#define PRAGMA_DEOPTIMIZE
 	#define PRAGMA_REOPTIMIZE
+
+	#define NOINLINE __attribute__((noinline))
 #endif
 
 namespace Halley {
