@@ -150,6 +150,8 @@ std::pair<String, Vector<ColourOverride>> ScriptLiteral::getNodeDescription(cons
 		str.append("Float ");
 	} else if (data.getType() == ConfigNodeType::Float2) {
 		str.append("Vector2f ");
+	} else if (data.getType() == ConfigNodeType::Bool) {
+		str.append("Bool ");
 	} else if (data.getType() != ConfigNodeType::Undefined) {
 		str.append("String ");
 		str.append("\"", settingColour);
@@ -181,6 +183,10 @@ ConfigNode ScriptLiteral::getConfigNode(const ScriptGraphNode& node) const
 		if (strings.size() == 2 && strings[0].isNumber() && strings[1].isNumber()) {
 			return ConfigNode(Vector2f(strings[0].toFloat(), strings[1].toFloat()));
 		}
+	}
+
+	if (value == "true" || value == "false") {
+		return ConfigNode(value == "true");
 	}
 
 	if (value.isNumber()) {
