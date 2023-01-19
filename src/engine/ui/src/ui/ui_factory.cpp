@@ -652,14 +652,6 @@ UIFactoryWidgetProperties UIFactory::getSpinControl2Properties() const
 	return result;
 }
 
-UIFactoryWidgetProperties UIFactory::getDropdownProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Dropdown";
-	result.iconName = "widget_icons/dropdown.png";
-	return result;
-}
-
 UIFactoryWidgetProperties UIFactory::getCheckboxProperties() const
 {
 	UIFactoryWidgetProperties result;
@@ -864,6 +856,19 @@ std::shared_ptr<UIWidget> UIFactory::makeSpinControl2(const ConfigNode& entryNod
 	if (node.hasKey("increment")) {
 		result->setIncrement(node["increment"].asFloat());
 	}
+
+	return result;
+}
+
+UIFactoryWidgetProperties UIFactory::getDropdownProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Dropdown";
+	result.iconName = "widget_icons/dropdown.png";
+
+	result.entries.emplace_back("Style", "style", "Halley::UIStyle<dropdown>", "dropdown");
+	result.entries.emplace_back("Options", "options", "Halley::Vector<Halley::UIFactory::ParsedOption>", "");
+	result.entries.emplace_back("Input Buttons", "inputButtons", "Halley::String", "list");
 
 	return result;
 }
