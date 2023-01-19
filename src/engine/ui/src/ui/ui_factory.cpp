@@ -1047,22 +1047,6 @@ std::shared_ptr<UIWidget> UIFactory::makeScrollBar(const ConfigNode& entryNode)
 	return std::make_shared<UIScrollBar>(id, scrollDirection, style, alwaysShow);
 }
 
-std::shared_ptr<UIWidget> UIFactory::makeScrollBarPane(const ConfigNode& entryNode)
-{
-	auto& node = entryNode["widget"];
-	auto id = node["id"].asString("");
-	auto clipSize = node["clipSize"].asVector2f(Vector2f());
-	auto style = UIStyle(node["style"].asString("scrollbar"), styleSheet);
-	auto scrollHorizontal = node["scrollHorizontal"].asBool(false);
-	auto scrollVertical = node["scrollVertical"].asBool(true);
-	auto alwaysShow = !node["autoHide"].asBool(false);
-	auto mouseWheelEnabled = node["mouseWheelEnabled"].asBool(true);
-
-	auto result = std::make_shared<UIScrollBarPane>(id, clipSize, style, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, alwaysShow);
-	result->getPane()->setScrollWheelEnabled(mouseWheelEnabled);
-	return result;
-}
-
 UIFactoryWidgetProperties UIFactory::getScrollBarPaneProperties() const
 {
 	UIFactoryWidgetProperties result;
@@ -1076,6 +1060,22 @@ UIFactoryWidgetProperties UIFactory::getScrollBarPaneProperties() const
 	result.entries.emplace_back("Auto Hide", "autoHide", "bool", "false");
 	result.entries.emplace_back("Mouse Wheel", "mouseWheelEnabled", "bool", "true");
 
+	return result;
+}
+
+std::shared_ptr<UIWidget> UIFactory::makeScrollBarPane(const ConfigNode& entryNode)
+{
+	auto& node = entryNode["widget"];
+	auto id = node["id"].asString("");
+	auto clipSize = node["clipSize"].asVector2f(Vector2f());
+	auto style = UIStyle(node["style"].asString("scrollbar"), styleSheet);
+	auto scrollHorizontal = node["scrollHorizontal"].asBool(false);
+	auto scrollVertical = node["scrollVertical"].asBool(true);
+	auto alwaysShow = !node["autoHide"].asBool(false);
+	auto mouseWheelEnabled = node["mouseWheelEnabled"].asBool(true);
+
+	auto result = std::make_shared<UIScrollBarPane>(id, clipSize, style, makeSizerOrDefault(entryNode, UISizer(UISizerType::Vertical)), scrollHorizontal, scrollVertical, alwaysShow);
+	result->getPane()->setScrollWheelEnabled(mouseWheelEnabled);
 	return result;
 }
 

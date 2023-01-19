@@ -271,6 +271,21 @@ uiStyle:
       downSound: ""
       hoverSound: ""
 
+  scrollbarHalley:
+    classes: [scrollbar]
+    bar:
+      horizontal: { img: halley_ui/ui_scrollbar.png, colour: $ui_scrollBackground }
+      vertical: { img: halley_ui/ui_scrollbar.png, colour: $ui_scrollBackground }
+    thumb:
+      normal: { img: halley_ui/ui_scrollbar.png, colour: $ui_scrollBarNormal }
+      down: { img: halley_ui/ui_scrollbar.png, colour: $ui_scrollBarDown }
+      hover: { img: halley_ui/ui_scrollbar.png, colour: $ui_scrollBarHover }
+      disabled: { img: halley_ui/ui_scrollbar.png, colour: $ui_scrollBarDisabled }
+      innerBorder: [ 3, 3, 3, 3 ]
+      upSound: ""
+      downSound: ""
+      hoverSound: ""
+
   label:
     classes: [label]
     label: { font: Ubuntu Bold, size: 15, colour: $ui_text }
