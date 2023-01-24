@@ -79,6 +79,8 @@ namespace Halley
 		UIFactoryWidgetProperties getGlobalWidgetProperties() const;
 		Vector<String> getWidgetClassList() const;
 
+		const HashMap<String, UIInputButtons>& getInputButtons() const;
+		void setInputButtons(HashMap<String, UIInputButtons> buttons);
 		void setInputButtons(const String& key, UIInputButtons buttons);
 		void applyInputButtons(UIWidget& widget, const String& key);
 
@@ -212,8 +214,8 @@ namespace Halley
 		Vector<size_t> conditionStack;
 
 		HashMap<String, WidgetFactory> factories;
-		std::map<String, UIFactoryWidgetProperties> properties;
-		std::map<String, UIInputButtons> inputButtons;
+		HashMap<String, UIFactoryWidgetProperties> properties;
+		HashMap<String, UIInputButtons> inputButtons;
 
 		ConstructionCallback constructionCallback;
 	};

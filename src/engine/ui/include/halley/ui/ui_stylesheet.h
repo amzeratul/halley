@@ -81,6 +81,8 @@ namespace Halley {
 		bool hasStyleObserver(const String& styleName) const;
 		const ConfigObserver& getStyleObserver(const String& styleName) const;
 
+		void applyStyles(const UIStyleSheet& other);
+
 	private:
 		Resources& resources;
 		HashMap<String, std::shared_ptr<UIStyleDefinition>> styles;

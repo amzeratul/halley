@@ -426,3 +426,10 @@ const ConfigObserver& UIStyleSheet::getStyleObserver(const String& styleName) co
 {
 	return observers.at(styleToObserver.at(styleName));
 }
+
+void UIStyleSheet::applyStyles(const UIStyleSheet& other)
+{
+	for (const auto& [k, v]: other.styles) {
+		styles[k] = v;
+	}
+}

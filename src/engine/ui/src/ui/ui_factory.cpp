@@ -203,6 +203,16 @@ Vector<String> UIFactory::getWidgetClassList() const
 	return result;
 }
 
+const HashMap<String, UIInputButtons>& UIFactory::getInputButtons() const
+{
+	return inputButtons;
+}
+
+void UIFactory::setInputButtons(HashMap<String, UIInputButtons> buttons)
+{
+	inputButtons = std::move(buttons);
+}
+
 void UIFactory::setInputButtons(const String& key, UIInputButtons buttons)
 {
 	inputButtons[key] = buttons;
