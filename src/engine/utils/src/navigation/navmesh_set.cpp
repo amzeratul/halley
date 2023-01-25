@@ -90,11 +90,11 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query,
 		// Failed
 		if (errorOut) {
 			if (fromRegion == notFound && toRegion == notFound) {
-				*errorOut = "Neither the path's start position nor its end position are on the navmesh.";
+				*errorOut = "neither the start position " + query.from + " nor the end position " + query.to + " are on the navmesh";
 			} else if (fromRegion == notFound) {
-				*errorOut = "The path's start position is not on the navmesh.";
+				*errorOut = "start position " + query.from + " is not on the navmesh";
 			} else {
-				*errorOut = "The path's end position is not on the navmesh.";
+				*errorOut = "end position " + query.to + " is not on the navmesh";
 			}
 		}
 		return {};
@@ -107,7 +107,7 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query,
 		if (regionPath.size() <= 1) {
 			// Failed
 			if (errorOut) {
-				*errorOut = "There's no path connecting the start and end regions.";
+				*errorOut = "no path from " + query.from + " to " + query.to;
 			}
 			return {};
 		} else {
