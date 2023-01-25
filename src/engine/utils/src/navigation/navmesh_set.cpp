@@ -80,7 +80,7 @@ void NavmeshSet::clearSubWorld(int subWorld)
 	navmeshes.erase(std::remove_if(navmeshes.begin(), navmeshes.end(), [&] (const Navmesh& nav) { return nav.getSubWorld() == subWorld; }), navmeshes.end());
 }
 
-std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query) const
+std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query, String* errorOut) const
 {
 	const size_t fromRegion = getNavMeshIdxAt(query.from);
 	const size_t toRegion = getNavMeshIdxAt(query.to);
@@ -88,6 +88,15 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query)
 
 	if (fromRegion == notFound || toRegion == notFound) {
 		// Failed
+		if (errorOut) {
+			if (fromRegion == notFound && toRegion == notFound) {
+				*errorOut = "Neither the path's start position nor its end position are on the navmesh.";
+			} else if (fromRegion == notFound) {
+				*errorOut = "The path's start position is not on the navmesh.";
+			} else {
+				*errorOut = "The path's end position is not on the navmesh.";
+			}
+		}
 		return {};
 	} else if (fromRegion == toRegion) {
 		// Just path in that mesh
@@ -97,6 +106,9 @@ std::optional<NavigationPath> NavmeshSet::pathfind(const NavigationQuery& query)
 		auto regionPath = findRegionPath(query.from.pos, query.to.pos, static_cast<uint16_t>(fromRegion), static_cast<uint16_t>(toRegion));
 		if (regionPath.size() <= 1) {
 			// Failed
+			if (errorOut) {
+				*errorOut = "There's no path connecting the start and end regions.";
+			}
 			return {};
 		} else {
 			return NavigationPath(query, {}, std::move(regionPath));

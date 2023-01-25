@@ -30,7 +30,7 @@ namespace Halley {
 		void linkNavmeshes();
 		void reportUnlinkedPortals(std::function<String(Vector2i)> getChunkName) const;
 
-		std::optional<NavigationPath> pathfind(const NavigationQuery& query) const;
+		std::optional<NavigationPath> pathfind(const NavigationQuery& query, String* errorOut = nullptr) const;
 		std::optional<NavigationPath> pathfindInRegion(const NavigationQuery& query, uint16_t regionId) const;
 		std::optional<NavigationPath> pathfindBetweenRegions(const NavigationQuery& queryStart, const NavigationQuery& queryEnd, uint16_t startRegionId, uint16_t endRegionId, const Navmesh::Portal& portal, NavigationQuery::PostProcessingType postProcessing) const;
 
