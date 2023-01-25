@@ -21,7 +21,7 @@
 	//#include <nmmintrin.h> // SSE4.1
 #endif
 
-#ifdef HAS_AVS
+#ifdef HAS_AVX
 	#include <immintrin.h>
 #endif
 

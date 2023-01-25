@@ -6,9 +6,7 @@ using namespace Halley;
 
 #if defined(_M_X64) || defined(__x86_64__)
 #define HAS_SSE
-#if !defined(__linux__)
 #define HAS_AVX
-#endif
 #endif
 
 #if defined(_M_IX86) || defined(__i386)
@@ -167,13 +165,18 @@ void AudioMixer::copy(AudioSamples dst, AudioSamples src, float gainStart, float
 
 #else
 
+#ifndef __APPLE__
 #include <cpuid.h>
 static inline unsigned long long _xgetbv(unsigned int index){
 	unsigned int eax, edx;
 	__asm__ __volatile__("xgetbv" : "=a"(eax), "=d"(edx) : "c"(index));
 	return ((unsigned long long)edx << 32) | eax;
 }
+#endif
+
+#ifndef _XCR_XFEATURE_ENABLED_MASK
 #define _XCR_XFEATURE_ENABLED_MASK 0
+#endif
 
 #endif
 
