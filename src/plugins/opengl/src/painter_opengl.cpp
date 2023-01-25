@@ -52,8 +52,6 @@ void PainterOpenGL::doStartRender()
 
 	glBindVertexArray(vao);
 #endif
-
-	clear(Colour(0, 0, 0, 1.0f), 1.0f, 0);
 }
 
 void PainterOpenGL::doEndRender()
