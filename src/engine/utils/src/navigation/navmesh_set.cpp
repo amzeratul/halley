@@ -155,6 +155,26 @@ size_t NavmeshSet::getNavMeshIdxAt(WorldPosition pos) const
 	return std::numeric_limits<size_t>::max();
 }
 
+std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, float anisotropy) const
+{
+	std::optional<WorldPosition> bestPoint;
+	float bestDist = std::numeric_limits<float>::infinity();
+
+	for (const auto& navmesh: navmeshes) {
+		if (navmesh.getSubWorld() == pos.subWorld) {
+			const auto curPoint = navmesh.getClosestPointTo(pos.pos, anisotropy);
+			if (curPoint) {
+				const float dist = (*curPoint - pos.pos).length();
+				if (dist < bestDist) {
+					bestDist = dist;
+					bestPoint = curPoint;
+				}
+			}
+		}
+	}
+	return bestPoint;
+}
+
 void NavmeshSet::linkNavmeshes()
 {
 	regionNodes.clear();

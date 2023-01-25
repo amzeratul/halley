@@ -188,6 +188,31 @@ bool Navmesh::containsPoint(Vector2f position) const
 	return false;
 }
 
+std::optional<Vector2f> Navmesh::getClosestPointTo(Vector2f pos, float anisotropy) const
+{
+	if (containsPoint(pos)) {
+		return pos;
+	}
+
+	float bestDist = std::numeric_limits<float>::infinity();
+	std::optional<Vector2f> bestPoint;
+
+	for (const auto& poly: polygons) {
+		// Coarse test vs circle first
+		const auto distToCircle = poly.getBoundingCircle().getDistanceTo(pos);
+		if (distToCircle <= bestDist) {
+			const auto p = poly.getClosestPoint(pos, anisotropy);
+			const float dist = (p - pos).length();
+			if (dist < bestDist) {
+				bestPoint = p;
+				bestDist = dist;
+			}
+		}
+	}
+
+	return bestPoint;
+}
+
 NavmeshBounds::NavmeshBounds(Vector2f origin, Vector2f side0, Vector2f side1, size_t side0Divisions, size_t side1Divisions, Vector2f scaleFactor)
 	: origin(origin)
 	, side0(side0)

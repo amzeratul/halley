@@ -19,8 +19,10 @@ namespace Halley {
         float getRadius() const { return radius; }
         Vector2f getCentre() const { return centre; }
 
-    	bool contains(Vector2f point) const;
-        bool overlaps(const Circle& circle) const;
+    	[[nodiscard]] bool contains(Vector2f point) const;
+        [[nodiscard]] float getDistanceTo(Vector2f point) const;
+        [[nodiscard]] float getDistanceTo(const Circle& circle) const;
+        [[nodiscard]] bool overlaps(const Circle& circle) const;
 
     	[[nodiscard]] Circle expand(float radius) const;
         Rect4f getAABB() const;

@@ -33,6 +33,16 @@ Rect4f Circle::getAABB() const
 	return Rect4f(centre - Vector2f(radius, radius), centre + Vector2f(radius, radius));
 }
 
+float Circle::getDistanceTo(Vector2f point) const
+{
+	return std::max((centre - point).length() - radius, 0.0f);
+}
+
+float Circle::getDistanceTo(const Circle& circle) const
+{
+	return std::max((centre - circle.centre).length() - radius - circle.radius, 0.0f);
+}
+
 Circle Circle::getSpanningCircle(const Vector<Vector2f>& points)
 {
 
