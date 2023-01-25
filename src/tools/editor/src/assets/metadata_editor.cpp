@@ -51,6 +51,7 @@ void MetadataEditor::saveMetadata()
 {
 	if (changed) {
 		project->writeMetadataToDisk(filePath, metadata);
+		origMetadata = metadata;
 		changed = false;
 		getWidget("applyChanges")->setEnabled(false);
 	}
