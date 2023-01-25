@@ -203,9 +203,35 @@ void NavmeshGenerator::generateConnectivity(gsl::span<NavmeshNode> polygons)
 
 void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float maxSize, bool allowSimplification, const NavmeshBounds& bounds)
 {
+	// First, eliminate repeat links to the same neighbour
+	for (auto& poly: polygons) {
+		auto n = poly.connections.size();
+		for (size_t i = 0; i < n;) {
+			if (poly.connections[i] != -1 && poly.connections[i] == poly.connections[(i + 1) % n]) {
+				// If two adjacent connections connect to the same polygon, delete that connection and the middle vertex
+				// e.g.:
+				//
+				//         1
+				//  0 +----+----+ 2
+				//	  |         |
+				//  4 +---------+ 3
+				//
+				// connections[0] and [1] link to the same polygon, therefore erase connections[0] and vertex[1]
+
+				assert(n >= 4); // If it's a triangle, we'll have problems...
+				poly.connections.erase(poly.connections.begin() + i);
+				auto vs = poly.polygon.getVertices();
+				vs.erase(vs.begin() + ((i + 1) % n));
+				poly.polygon.setVertices(vs);
+				--n;
+			} else {
+				++i;
+			}
+		}
+	}
+
 	// Go through each polygon and see if any of its neighbours can be merged with it.
 	// If it can be merged, repeat the loop on the same polygon, otherwise move on
-	
 	for (int aIdx = 0; aIdx < static_cast<int>(polygons.size()); ++aIdx) {
 		auto& polyA = polygons[aIdx];
 		if (!polyA.alive) {
@@ -220,7 +246,7 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 				auto& polyB = polygons[bIdx];
 				auto bEdgeIter = std::find_if(polyB.connections.begin(), polyB.connections.end(), [&] (int c) { return c == aIdx; });
 				assert(bEdgeIter != polyB.connections.end());
-				
+
 				auto mergedPolygon = merge(polyA, polyB, j, bEdgeIter - polyB.connections.begin(), aIdx, bIdx, maxSize, allowSimplification, bounds);
 				if (mergedPolygon) {
 					for (auto& c: polyB.connections) {
