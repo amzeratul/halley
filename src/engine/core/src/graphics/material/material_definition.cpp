@@ -197,7 +197,7 @@ MaterialDefinition::MaterialDefinition(ResourceLoader& loader)
 		for (int i = 0; i < getNumPasses(); ++i) {
 			auto& shader = getPass(i).getShader();
 			for (int j = 0; j < shaderStageCount; ++j) {
-				uniformBlock.addresses[i * shaderStageCount + j] = shader.getBlockLocation(name, static_cast<ShaderType>(j));
+				uniformBlock.addresses[i * shaderStageCount + j] = shader.getBlockLocation(uniformBlock.name, static_cast<ShaderType>(j));
 			}
 		}
 
