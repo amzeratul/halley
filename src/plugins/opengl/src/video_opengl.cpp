@@ -263,10 +263,10 @@ std::unique_ptr<MaterialConstantBuffer> VideoOpenGL::createConstantBuffer()
 
 String VideoOpenGL::getShaderLanguage()
 {
-#if defined(HALLEY_OPENGL_USE_GLSL330)
-	return "glsl330";
+#if defined(HALLEY_OPENGL_USE_GLSL410)
+	return "glsl410";
 #else
-	return getPlatform() != GamePlatform::MacOS ? "glsl" : "glsl330";
+	return getPlatform() != GamePlatform::MacOS ? "glsl" : "glsl410";
 #endif
 }
 
