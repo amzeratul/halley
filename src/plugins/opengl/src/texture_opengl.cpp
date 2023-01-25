@@ -139,14 +139,16 @@ void TextureOpenGL::create(Vector2i size, TextureFormat format, bool useMipMap, 
 
 	GLuint internalFormat = getGLInternalFormat(format);
 	GLuint pixelFormat = getGLPixelFormat(format);
-	int stride = pixelData.empty() ? size.x : pixelData.getStrideOr(size.x);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBitsPerPixel(format));
-	glPixelStorei(GL_PACK_ROW_LENGTH, stride);
+
+	if (format != TextureFormat::Depth) {
+		const int stride = pixelData.empty() ? size.x : pixelData.getStrideOr(size.x);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, TextureDescriptor::getBitsPerPixel(format));
+		glPixelStorei(GL_PACK_ROW_LENGTH, stride);
+		glCheckError();
+	}
 
 	if (pixelData.empty()) {
-		Vector<char> blank;
-		blank.resize(size.x * size.y * TextureDescriptor::getBitsPerPixel(format));
-		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, size.x, size.y, 0, pixelFormat, GL_UNSIGNED_BYTE, blank.data());
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, size.x, size.y, 0, pixelFormat, GL_UNSIGNED_BYTE, nullptr);
 	} else {
 		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, size.x, size.y, 0, pixelFormat, GL_UNSIGNED_BYTE, pixelData.getBytes());
 	}
