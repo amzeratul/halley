@@ -720,7 +720,10 @@ namespace Halley {
 		{
 			clear();
 			if (!sbo_active()) {
-				std::allocator_traits<Allocator>::deallocate(*this, m_data, m_capacity);
+				if (m_data) {
+					std::allocator_traits<Allocator>::deallocate(*this, m_data, m_capacity);
+					m_data = nullptr;
+				}
 			}
 		}
 
