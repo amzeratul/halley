@@ -29,6 +29,8 @@ namespace Halley {
 
 		void burstParticles(float n);
 
+		void reset();
+
 		void setEnabled(bool enabled);
 		bool isEnabled() const;
 
