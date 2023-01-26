@@ -478,15 +478,15 @@ gsl::span<const IScriptNodeType::PinType> ScriptAdvanceTo::getPinConfiguration(c
 String ScriptAdvanceTo::getPinDescription(const ScriptGraphNode& node, PinType element, GraphPinId elementIdx) const
 {
 	if (elementIdx == 1) {
-		return { "Flow output.", {} };
+		return "Flow output.";
 	} else if (elementIdx == 2) {
-		return { "Flow output if target is reached.", {} };
+		return "Flow output if target is reached.";
 	} else if (elementIdx == 3) {
-		return { "Flow output if target is not reached.", {} };
+		return "Flow output if target is not reached.";
 	} else if (elementIdx == 4) {
-		return { "Flow output if variable was modified.", {} };
+		return "Flow output if variable was modified.";
 	} else if (elementIdx == 5) {
-		return { "Flow output if variable was not modified.", {} };
+		return "Flow output if variable was not modified.";
 	} else if (elementIdx == 6) {
 		return "Target value";
 	} else if (elementIdx == 7) {
