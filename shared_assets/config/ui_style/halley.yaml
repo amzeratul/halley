@@ -378,6 +378,7 @@ uiStyle:
   scrollBackground:
     classes: [scrollPane]
     background: { img: $ui_scroll_background, colour: $ui_scrollBackground }
+    border: ""
 
   infiniCanvas:
     classes: [scrollPane]
