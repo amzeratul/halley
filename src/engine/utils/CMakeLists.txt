@@ -168,6 +168,7 @@ set(HEADERS
         "include/halley/maths/matrix4.h"
         "include/halley/maths/ops.h"
         "include/halley/maths/polygon.h"
+        "include/halley/maths/polygon.natvis"
         "include/halley/maths/quaternion.h"
         "include/halley/maths/random.h"
         "include/halley/maths/ray.h"
