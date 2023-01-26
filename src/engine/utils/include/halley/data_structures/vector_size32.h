@@ -719,12 +719,7 @@ namespace Halley {
 		void destroy()
 		{
 			clear();
-			if (!sbo_active()) {
-				if (m_data) {
-					std::allocator_traits<Allocator>::deallocate(*this, m_data, m_capacity);
-					m_data = nullptr;
-				}
-			}
+			change_capacity(0);
 		}
 
 		[[nodiscard]] reference elem(size_t pos)
