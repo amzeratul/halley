@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+    <Type Name="gsl::span&lt;*,-1&gt;">
+		<DisplayString>{{ size={storage_.size_} }}</DisplayString>
+		<Expand>
+			<Item Name="[size]" ExcludeView="simple">storage_.size_</Item>
+			<ArrayItems>
+				<Size>storage_.size_</Size>
+				<ValuePointer>storage_.data_</ValuePointer>
+			</ArrayItems>
+		</Expand>
+    </Type>
+</AutoVisualizer>

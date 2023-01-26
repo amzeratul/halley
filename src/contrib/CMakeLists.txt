@@ -68,6 +68,17 @@ set(SOURCES
         )
 
 set(HEADERS
+        "gsl/gsl"
+        "gsl/gsl_algorithm"
+        "gsl/gsl_assert"
+        "gsl/gsl_byte"
+        "gsl/gsl_util"
+        "gsl/multi_span"
+        "gsl/pointers"
+        "gsl/span"
+        "gsl/span.natvis"
+        "gsl/string_span"
+
         "json/json-forwards.h"
         "json/json.h"
 
