@@ -207,7 +207,7 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 	for (auto& poly: polygons) {
 		auto n = poly.connections.size();
 		for (size_t i = 0; i < n;) {
-			if (poly.connections[i] != -1 && poly.connections[i] == poly.connections[(i + 1) % n]) {
+			if (poly.connections[i] >= 0 && poly.connections[i] == poly.connections[(i + 1) % n]) {
 				// If two adjacent connections connect to the same polygon, delete that connection and the middle vertex
 				// e.g.:
 				//
