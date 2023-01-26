@@ -93,6 +93,11 @@ void Particles::burstParticles(float n)
 	pendingSpawn += n;
 }
 
+void Particles::reset()
+{
+	firstUpdate = true;
+}
+
 void Particles::setEnabled(bool e)
 {
 	enabled = e;
