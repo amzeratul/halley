@@ -498,7 +498,7 @@ size_t NavmeshGenerator::split(Vector<NavmeshNode>& nodes, size_t idx, LineSegme
 	auto polys = node.polygon.splitConvexByLine(Line(splitBy.a, (splitBy.b - splitBy.a).normalized()));
 	for (const auto& p: polys) {
 		if (!p.isConvex()) {
-			Logger::logError("Convex polygon somehow split in non-convex polygons?");
+			Logger::logError("Convex polygon " + node.polygon.toString() + " somehow split in non-convex polygon " + p.toString());
 		}
 	}
 
@@ -570,7 +570,6 @@ void NavmeshGenerator::applyRegions(gsl::span<NavmeshNode> nodes, gsl::span<cons
 		for (auto& node: nodes) {
 			for (const auto& convexRegion: convexRegions) {
 				if (convexRegion.isPointInside(node.polygon.getCentre())) {
-				//if (node.polygon.classify(convexRegion) != Polygon::SATClassification::Separate) {
 					node.regionGroup = curRegionGroup;
 					break;
 				}

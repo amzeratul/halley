@@ -80,12 +80,12 @@ void Polygon::checkConvex()
 	size_t right = 0;
 	float area2 = 0;
 
-	constexpr float epsilon = 0.000001f;
+	constexpr float epsilon = 0.00001f;
 	for (size_t i = 0; i < n; ++i) {
 		auto a = vertices[i];
 		auto b = vertices[(i + 1) % n];
 		auto c = vertices[(i + 2) % n];
-		if ((b - a).length() < 0.000001f) {
+		if ((b - a).length() < epsilon) {
 			valid = false;
 			return;
 		}
