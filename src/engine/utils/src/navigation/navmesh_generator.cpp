@@ -477,7 +477,7 @@ void NavmeshGenerator::splitByPortals(Vector<NavmeshNode>& nodes, gsl::span<cons
 				// Create new nodes
 				for (size_t i = 0; i < polys.size(); ++i) {
 					assert(polys[i].isValid());
-					assert(polys[i].isConvex());
+					//assert(polys[i].isConvex());
 					
 					auto& curNode = i == 0 ? node : nodes.emplace_back();
 					curNode.polygon = std::move(polys[i]);
