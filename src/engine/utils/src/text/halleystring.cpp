@@ -933,12 +933,12 @@ Vector<String> String::split(String delimiter, size_t limit) const
 	return result;
 }
 
-String String::concatList(const Vector<String>& list, String separator)
+String String::concatList(gsl::span<const String> list, std::string_view separator)
 {
 	std::stringstream ss;
 	for (size_t i = 0; i < list.size(); i++) {
 		if (i != 0) {
-			ss << separator.cppStr();
+			ss << separator;
 		}
 		ss << list[i].cppStr();
 	}

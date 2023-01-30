@@ -123,6 +123,8 @@ namespace Halley {
 
 		float getArea() const { return area; }
 
+		String toString() const;
+
 	private:
 		Circle circle;
 		VertexList vertices;

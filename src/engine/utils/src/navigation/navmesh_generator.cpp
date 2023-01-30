@@ -229,7 +229,7 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 			}
 		}
 	}
-
+	
 	// Go through each polygon and see if any of its neighbours can be merged with it.
 	// If it can be merged, repeat the loop on the same polygon, otherwise move on
 	for (int aIdx = 0; aIdx < static_cast<int>(polygons.size()); ++aIdx) {
@@ -244,6 +244,10 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 
 			if (bIdx > aIdx) {
 				auto& polyB = polygons[bIdx];
+				if (!polyB.alive) {
+					continue;
+				}
+
 				auto bEdgeIter = std::find_if(polyB.connections.begin(), polyB.connections.end(), [&] (int c) { return c == aIdx; });
 				assert(bEdgeIter != polyB.connections.end());
 
@@ -358,7 +362,7 @@ std::optional<NavmeshGenerator::NavmeshNode> NavmeshGenerator::merge(const Navme
 	
 	auto result = NavmeshNode(std::move(prePoly), std::move(connA));
 	if (allowSimplification) {
-		simplifyPolygon(result, 0.1f, bounds);
+		simplifyPolygon(result, 1.0f, bounds);
 	}
 
 	if (result.polygon.getNumSides() <= maxPolygonSides && result.polygon.isValid() && result.polygon.isConvex()) {
@@ -378,25 +382,32 @@ void NavmeshGenerator::simplifyPolygon(NavmeshNode& node, float threshold, const
 	size_t n = vs.size();
 	
 	bool simplified = false;
-	for (size_t i = 0; n > 3 && i < n; ++i) {
+	for (size_t i = 0; n > 3 && i < n; ) {
 		const size_t prevI = (i + n - 1) % n;
 		const size_t nextI = (i + 1) % n;
 		if (conn[prevI] == -1 && conn[i] == -1) {
 			// Check if "cur" is close enough in line with "prev" and "next". If so, eliminate it.
-			Vector2f cur = vs[i];
-			Vector2f prev = vs[prevI];
-			Vector2f next = vs[nextI];
-			const float maxDist = (prev - next).length() * threshold;
-			if (LineSegment(prev, next).contains(cur, maxDist)) {
-				// Vertex eligible for removal, but first check if it's not in the navmesh bounds, as we don't want to affect navmesh connectivity
-				if (!bounds.isPointOnEdge(cur, threshold * 2)) {
-					vs.erase(vs.begin() + i);
-					conn.erase(conn.begin() + i);
-					--n;
-					--i;
-					simplified = true;
-				}
+			const auto cur = vs[i];
+			const auto prev = vs[prevI];
+			const auto next = vs[nextI];
+
+			// Eligible for removal if the angle between the two segments is narrow enough, or if it's off by less than threshold
+			constexpr auto minCos = 0.99619469809174553229501040247389f; // cos(5°)
+			const auto dirA = (cur - prev).unit();
+			const auto dirB = (next - cur).unit();
+			const bool eligible = dirA.dot(dirB) > minCos || LineSegment(prev, next).contains(cur, threshold);
+
+			// Vertex eligible for removal, but first check if it's not in the navmesh bounds, as we don't want to affect navmesh connectivity
+			if (eligible && !bounds.isPointOnEdge(cur, threshold * 2)) {
+				vs.erase(vs.begin() + i);
+				conn.erase(conn.begin() + i);
+				--n;
+				simplified = true;
+			} else {
+				++i;
 			}
+		} else {
+			++i;
 		}
 	}
 
@@ -408,7 +419,7 @@ void NavmeshGenerator::simplifyPolygon(NavmeshNode& node, float threshold, const
 void NavmeshGenerator::simplifyPolygons(Vector<NavmeshNode>& nodes, const NavmeshBounds& bounds)
 {
 	for (auto& node: nodes) {
-		simplifyPolygon(node, 0.1f, bounds);
+		simplifyPolygon(node, 1.0f, bounds);
 	}
 }
 

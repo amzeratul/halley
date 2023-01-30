@@ -1386,6 +1386,11 @@ std::optional<size_t> Polygon::getExitEdge(const Ray& ray, size_t startFromEdge)
 	return {};
 }
 
+String Polygon::toString() const
+{
+	return "[" + String::concatList(std_ex::transform(vertices, [&](Vector2f p) -> String { return p.toString(); }), ", ") + "]";
+}
+
 bool Polygon::operator==(const Polygon& other) const
 {
 	return vertices == other.vertices;

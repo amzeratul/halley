@@ -25,6 +25,7 @@
 #include <string>
 #include <halley/data_structures/vector.h>
 #include <gsl/gsl_assert>
+#include <gsl/span>
 #include <cstdint>
 #include <limits>
 
@@ -152,7 +153,8 @@ namespace Halley {
 
 		Vector<String> split(char delimiter, size_t limit = std::numeric_limits<size_t>::max()) const;
 		Vector<String> split(String delimiter, size_t limit = std::numeric_limits<size_t>::max()) const;
-		static String concatList(const Vector<String>& list, String separator);
+
+		static String concatList(gsl::span<const String> list, std::string_view separator);
 
 		//////////
 
