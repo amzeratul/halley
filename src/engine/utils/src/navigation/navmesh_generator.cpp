@@ -569,7 +569,8 @@ void NavmeshGenerator::applyRegions(gsl::span<NavmeshNode> nodes, gsl::span<cons
 		region.splitIntoConvex(convexRegions);
 		for (auto& node: nodes) {
 			for (const auto& convexRegion: convexRegions) {
-				if (node.polygon.classify(convexRegion) != Polygon::SATClassification::Separate) {
+				if (convexRegion.isPointInside(node.polygon.getCentre())) {
+				//if (node.polygon.classify(convexRegion) != Polygon::SATClassification::Separate) {
 					node.regionGroup = curRegionGroup;
 					break;
 				}
