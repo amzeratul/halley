@@ -70,6 +70,11 @@ namespace Halley {
 			return (getClosestPoint(point) - point).length() < epsilon;
 		}
 
+		[[nodiscard]] String toString() const
+		{
+			return "(p0: " + Halley::toString(origin) + ", n: " + Halley::toString(dir) + ")";
+		}
+
 		static Vector<Vector2i> generateLine(Vector2i p0, Vector2i p1);
 		static void doLine(Vector2i p0, Vector2i p1, std::function<void(Vector2i)> callback);
 	};
@@ -267,6 +272,11 @@ namespace Halley {
 		[[nodiscard]] LineSegment operator/(float s) const
 		{
 			return LineSegment(a / s, b / s);
+		}
+
+		[[nodiscard]] String toString() const
+		{
+			return "(" + Halley::toString(a) + ", " + Halley::toString(b) + ")";
 		}
 	};
 }
