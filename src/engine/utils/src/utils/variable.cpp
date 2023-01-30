@@ -213,7 +213,7 @@ Internal::VariableBase::VariableBase(const VariableTable& parent, String key)
 	refresh();
 }
 
-void Internal::VariableBase::refresh()
+void Internal::VariableBase::refresh() const
 {
 	Expects(parent);
 	if (parent->getAssetVersion() != parentVersion) {

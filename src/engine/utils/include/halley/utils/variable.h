@@ -107,10 +107,10 @@ namespace Halley {
 
 			const VariableTable* parent = nullptr;
 			String key;
-			int parentVersion = -1;
-			VariableStorage storage;
+			mutable int parentVersion = -1;
+			mutable VariableStorage storage;
 
-			void refresh();
+			void refresh() const;
 		};		
 	}
 
@@ -144,7 +144,7 @@ namespace Halley {
 		Variable& operator=(const Variable<T>& other) = delete;
 		Variable& operator=(Variable<T>&& other) = default;
 
-		operator T()
+		operator T() const
 		{
 			T v;
 			refresh();
@@ -152,7 +152,7 @@ namespace Halley {
 			return v;
 		}
 		
-		T get()
+		T get() const
 		{
 			T v;
 			refresh();
