@@ -1,0 +1,26 @@
+---
+widget: { class: image, image: "$ui_title_capsule", innerBorder: [ 6, 3, 6, 6 ], colour: $ui_popupWindow, size: [300, 60] }
+sizer: { type: vertical }
+fill: centre
+proportion: 1
+children:
+- sizer: { type: horizontal }
+  children:
+  - widget: { class: label, id: title, text: "Go To" }
+    fill: centre
+    proportion: 1
+- sizer: { type: horizontal }
+  border: [0, 10, 0, 10]
+  fill: centre
+  children:
+  - widget: { class: label, id: message, text: "Position: " }
+    border: [0, 0, 20, 0]
+  - widget: { class: spinControl2, id: posX, size: [80, 20], allowFloat: true }
+  - widget: { class: spinControl2, id: posY, size: [80, 20], allowFloat: true }
+- sizer: { type: horizontal }
+  children:
+  - widget: { id: ok, class: button, text: OK, size: [100, 22] }
+    proportion: 1
+  - widget: { id: cancel, class: button, text: Cancel, size: [100, 22] }
+    proportion: 1
+...

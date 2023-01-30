@@ -218,5 +218,7 @@ namespace Halley {
 
 		void undo();
 		void redo();
+
+		void openGoToDialogue();
 	};
 }

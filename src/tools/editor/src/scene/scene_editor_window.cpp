@@ -16,6 +16,7 @@
 #include "scene_editor_gizmo_collection.h"
 #include "halley/entity/components/transform_2d_component.h"
 #include "halley/tools/project/project_properties.h"
+#include "halley/ui/widgets/ui_goto_popup.h"
 #include "src/assets/prefab_editor.h"
 #include "src/ui/project_window.h"
 using namespace Halley;
@@ -357,6 +358,11 @@ bool SceneEditorWindow::onKeyPress(KeyboardKeyPress key)
 
 	if (key.is(KeyCode::F2)) {
 		entityEditor->focusRenameEntity();
+		return true;
+	}
+
+	if (key.is(KeyCode::G, KeyMods::Ctrl)) {
+		openGoToDialogue();
 		return true;
 	}
 
@@ -1564,4 +1570,15 @@ Future<AssetPreviewData> SceneEditorWindow::getAssetPreviewData(AssetType assetT
 World& SceneEditorWindow::getWorld() const
 {
 	return gameBridge->getWorld();
+}
+
+void SceneEditorWindow::openGoToDialogue()
+{
+	Vector2f startPos = gameBridge->getCameraPos();
+	getRoot()->addChild(std::make_shared<UIGoToPopup>(uiFactory, startPos, [=](std::optional<Vector2f> result)
+	{
+		if (result) {
+			gameBridge->moveCamera(*result);
+		}
+	}));
 }
