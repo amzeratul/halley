@@ -29,6 +29,7 @@ NavmeshSet NavmeshGenerator::generate(const Params& params)
 	}
 
 	splitByPortals(polygons, params.subworldPortals);
+	splitByRegions(polygons, params.regions);
 	generateConnectivity(polygons);
 	tagEdgeConnections(polygons, params.bounds.edges);
 	removeNodesBeyondPortals(polygons);
@@ -249,7 +250,10 @@ void NavmeshGenerator::postProcessPolygons(Vector<NavmeshNode>& polygons, float 
 				}
 
 				auto bEdgeIter = std::find_if(polyB.connections.begin(), polyB.connections.end(), [&] (int c) { return c == aIdx; });
-				assert(bEdgeIter != polyB.connections.end());
+				if (bEdgeIter == polyB.connections.end()) {
+					// assert(false);
+					continue;
+				}
 
 				auto mergedPolygon = merge(polyA, polyB, j, bEdgeIter - polyB.connections.begin(), aIdx, bIdx, maxSize, allowSimplification, bounds);
 				if (mergedPolygon) {
@@ -450,44 +454,78 @@ void NavmeshGenerator::splitByPortals(Vector<NavmeshNode>& nodes, gsl::span<cons
 {
 	const auto nNodes = nodes.size();
 	for (size_t idx = 0; idx < nNodes; ++idx) {
-		auto& node = nodes[idx];
-		
 		for (auto& portal: portals) {
-			if (!node.polygon.isConvex()) {
-				Logger::logError("Non-convex polygon found at splitByPortals stage, skipping");
-				continue;
-			}
+			split(nodes, idx, portal.segment, [&](NavmeshNode& curNode)
+			{
+				curNode.beyondPortal = portal.isBeyondPortal(curNode.polygon.getCentre()) ? NavmeshNodePortalSide::Beyond : NavmeshNodePortalSide::Before;
+			});
+		}
+	}
+}
 
-			auto result = node.polygon.classify(portal.segment);
-			if (result != Polygon::SATClassification::Separate) {
-				
-				auto polys = node.polygon.splitConvexByLine(Line(portal.segment.a, (portal.segment.b - portal.segment.a).normalized()));
-
-				// Reset connections to existing nodes
-				for (const auto c: node.connections) {
-					if (c >= 0) {
-						for (auto& otherC: nodes[c].connections) {
-							if (otherC == static_cast<int>(idx)) {
-								otherC = -1;
-							}
-						}
-					}
-				}
-
-				// Create new nodes
-				for (size_t i = 0; i < polys.size(); ++i) {
-					assert(polys[i].isValid());
-					//assert(polys[i].isConvex());
-					
-					auto& curNode = i == 0 ? node : nodes.emplace_back();
-					curNode.polygon = std::move(polys[i]);
-					curNode.connections.clear();
-					curNode.connections.resize(curNode.polygon.getNumSides(), -1);
-					curNode.beyondPortal = portal.isBeyondPortal(curNode.polygon.getCentre()) ? NavmeshNodePortalSide::Beyond : NavmeshNodePortalSide::Before;
+void NavmeshGenerator::splitByRegions(Vector<NavmeshNode>& nodes, gsl::span<const Polygon> regions)
+{
+	const auto nNodes = nodes.size();
+	for (size_t idx = 0; idx < nNodes; ++idx) {
+		for (auto& region: regions) {
+			const auto n = region.getNumSides();
+			for (size_t i = 0; i < n; ++i) {
+				const auto nOut = split(nodes, idx, region.getEdge(i), [&](NavmeshNode& curNode) {});
+				if (nOut > 1) {
+					// Don't split the same polygon more than once!
+					break;
 				}
 			}
 		}
 	}
+}
+
+size_t NavmeshGenerator::split(Vector<NavmeshNode>& nodes, size_t idx, LineSegment splitBy, std::function<void(NavmeshNode&)> postProcess)
+{
+	auto& node = nodes[idx];
+	if (!node.polygon.isConvex()) {
+		Logger::logError("Non-convex polygon found at split stage, skipping");
+		return 1;
+	}
+
+	// Check if the segment overlaps the line
+	const auto result = node.polygon.classify(splitBy);
+	if (result == Polygon::SATClassification::Separate) {
+		return 1;
+	}
+
+	// Do the actual split
+	auto polys = node.polygon.splitConvexByLine(Line(splitBy.a, (splitBy.b - splitBy.a).normalized()));
+	for (const auto& p: polys) {
+		if (!p.isConvex()) {
+			Logger::logError("Convex polygon somehow split in non-convex polygons?");
+		}
+	}
+
+	// Reset connections to existing nodes
+	for (const auto c: node.connections) {
+		if (c >= 0) {
+			for (auto& otherC: nodes[c].connections) {
+				if (otherC == static_cast<int>(idx)) {
+					otherC = -1;
+				}
+			}
+		}
+	}
+
+	// Create new nodes
+	for (size_t i = 0; i < polys.size(); ++i) {
+		assert(polys[i].isValid());
+		//assert(polys[i].isConvex());
+		
+		auto& curNode = i == 0 ? node : nodes.emplace_back();
+		curNode.polygon = std::move(polys[i]);
+		curNode.connections.clear();
+		curNode.connections.resize(curNode.polygon.getNumSides(), -1);
+		postProcess(curNode);
+	}
+
+	return polys.size();
 }
 
 void NavmeshGenerator::removeNodesBeyondPortals(Vector<NavmeshNode>& nodes)

@@ -71,6 +71,8 @@ namespace Halley {
 		static void limitPolygonSides(Vector<Polygon>& polygons, size_t maxSides);
 
 		static void splitByPortals(Vector<NavmeshNode>& nodes, gsl::span<const NavmeshSubworldPortal> portals);
+		static void splitByRegions(Vector<NavmeshNode>& nodes, gsl::span<const Polygon> regions);
+		static size_t split(Vector<NavmeshNode>& nodes, size_t idx, LineSegment splitBy, std::function<void(NavmeshNode&)> postProcess);
 		static void removeNodesBeyondPortals(Vector<NavmeshNode>& nodes);
 
 		static void applyRegions(gsl::span<NavmeshNode> nodes, gsl::span<const Polygon> regions);
