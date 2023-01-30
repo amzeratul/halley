@@ -155,7 +155,7 @@ size_t NavmeshSet::getNavMeshIdxAt(WorldPosition pos) const
 	return std::numeric_limits<size_t>::max();
 }
 
-std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, float anisotropy) const
+std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, float anisotropy, float nudge) const
 {
 	std::optional<WorldPosition> bestPoint;
 	float bestDist = std::numeric_limits<float>::infinity();
@@ -172,7 +172,32 @@ std::optional<WorldPosition> NavmeshSet::getClosestPointTo(WorldPosition pos, fl
 			}
 		}
 	}
-	return bestPoint;
+
+	if (bestPoint) {
+		const auto scale = Vector2f(1.0f, anisotropy);
+		const auto du = ((bestPoint->pos - pos.pos) * scale).unit();
+
+		const auto p1 = *bestPoint + (du / scale) * nudge;
+		if (getNavMeshAt(p1)) {
+			return p1;
+		}
+
+		const auto p2 = *bestPoint + (du.orthoLeft() / scale) * nudge;
+		if (getNavMeshAt(p2)) {
+			return p2;
+		}
+
+		const auto p3 = *bestPoint + (du.orthoRight() / scale) * nudge;
+		if (getNavMeshAt(p3)) {
+			return p3;
+		}
+
+		if (getNavMeshAt(*bestPoint)) {
+			return bestPoint;
+		}
+	}
+
+	return {};
 }
 
 void NavmeshSet::linkNavmeshes()
