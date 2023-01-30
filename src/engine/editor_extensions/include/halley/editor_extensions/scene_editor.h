@@ -56,6 +56,7 @@ namespace Halley {
 
     	std::optional<Vector2f> getMousePos() const override;
 		Vector2f getCameraPos() const override;
+		std::optional<Vector2f> getWorldOffset() const override;
 		float getZoom() const;
     	
     	void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) override;
@@ -102,7 +103,6 @@ namespace Halley {
     	virtual void setEntityFocus(Vector<EntityId> entityIds);
 		void cycleHighlight(int delta) override;
 
-		virtual std::optional<Vector2f> getWorldOffset() const;
 		std::unique_ptr<World> doCreateWorld(const String& stageName) const;
 
     	virtual Vector<EntityRef> getEntitiesAt(Rect4f area, bool allowUnselectable, EntityAtPositionSelectMode mode) const;

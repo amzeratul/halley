@@ -232,6 +232,7 @@ namespace Halley {
 
     	virtual std::optional<Vector2f> getMousePos() const = 0;
     	virtual Vector2f getCameraPos() const = 0;
+        virtual std::optional<Vector2f> getWorldOffset() const = 0;
 
         virtual Vector<UIPopupMenuItem> getSceneContextMenu(const Vector2f& mousePos) const = 0;
         virtual void onSceneContextMenuSelection(const String& id) = 0;

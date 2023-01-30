@@ -42,6 +42,7 @@ namespace Halley {
 		void cycleHighlight(int delta);
 		std::optional<Vector2f> getMousePos() const;
 		Vector2f getCameraPos() const;
+		std::optional<Vector2f> getWorldOffset() const;
 
 		void refreshAssets();
 
@@ -55,7 +56,7 @@ namespace Halley {
 		void validateAllEntities() override;
 
 		World& getWorld() const;
-	
+
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;
 		void openAsset(AssetType assetType, const String& assetId) override;

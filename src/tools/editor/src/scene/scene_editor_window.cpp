@@ -1574,11 +1574,12 @@ World& SceneEditorWindow::getWorld() const
 
 void SceneEditorWindow::openGoToDialogue()
 {
-	Vector2f startPos = gameBridge->getCameraPos();
+	const auto worldOffset = gameBridge->getWorldOffset().value_or(Vector2f());
+	const auto startPos = gameBridge->getCameraPos() + worldOffset;
 	getRoot()->addChild(std::make_shared<UIGoToPopup>(uiFactory, startPos, [=](std::optional<Vector2f> result)
 	{
 		if (result) {
-			gameBridge->moveCamera(*result);
+			gameBridge->moveCamera(*result - worldOffset);
 		}
 	}));
 }

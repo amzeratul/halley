@@ -211,7 +211,15 @@ Vector2f SceneEditorGameBridge::getCameraPos() const
 	if (interfaceReady) {
 		return interface->getCameraPos();
 	}
-	return Vector2f();
+	return {};
+}
+
+std::optional<Vector2f> SceneEditorGameBridge::getWorldOffset() const
+{
+	if (interfaceReady) {
+		return interface->getWorldOffset();
+	}
+	return {};
 }
 
 bool SceneEditorGameBridge::saveAsset(const Path& path, gsl::span<const gsl::byte> data)
