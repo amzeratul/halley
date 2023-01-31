@@ -277,6 +277,10 @@ AckUnreliableSubPacket MessageQueueUDP::createPacket()
 			const size_t totalSize = msgSize + headerSize;
 
 			if (size + totalSize <= maxSize || (first && allowMaxSizeViolation)) {
+				if (size > maxSize) {
+					Logger::logWarning("Sending " + toString(size) + " bytes in a message, max is " + toString(maxSize) + " bytes.");
+				}
+
 				// It fits, so add it
 				size += totalSize;
 
