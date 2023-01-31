@@ -27,7 +27,11 @@ void ScriptVariables::load(const ConfigNode& node, const EntitySerializationCont
 				const auto entityId = ConfigNodeSerializer<EntityId>().deserialize(context, v);
 				variables[k.mid(7)] = EntityIdHolder{ entityId.value };
 			} else {
-				variables[k].applyDelta(v);
+				if (v.getType() == ConfigNodeType::Del) {
+					variables.erase(k);
+				} else {
+					variables[k].applyDelta(v);
+				}
 			}
 		}
 	}
