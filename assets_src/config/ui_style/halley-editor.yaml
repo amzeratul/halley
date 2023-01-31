@@ -13,6 +13,7 @@ uiStyle:
     selectionChangedSound: ""
     label: { font: Ubuntu Bold, size: 18, colour: $toolbarText }
     selectedImageColour: $toolbarIconSelected
+    hoveredImageColour: $toolbarNormal
     imageColour: $toolbarIconNormal
     gap: -5
 
