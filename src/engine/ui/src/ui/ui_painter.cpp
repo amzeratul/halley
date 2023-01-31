@@ -29,12 +29,10 @@ UIPainter UIPainter::withAdjustedLayer(int delta) const
 UIPainter UIPainter::withClip(std::optional<Rect4f> newClip) const
 {
 	auto result = clone();
-	if (newClip) {
-		if (clip) {
-			result.clip = clip->intersection(newClip.value());
-		} else {
-			result.clip = newClip;
-		}
+	if (newClip && clip) {
+		result.clip = clip->intersection(newClip.value());
+	} else {
+		result.clip = newClip;
 	}
 	return result;
 }

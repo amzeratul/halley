@@ -387,7 +387,7 @@ void UISizer::setRectBox(Rect4f rect, IUIElementListener* listener)
 	int otherAxis = 1 - mainAxis;
 
 	Vector2f sizerMinSize = computeMinimumSizeBox(false);
-	float spare = (rect.getSize() - sizerMinSize)[mainAxis];
+	float spare = std::max(0.0f, (rect.getSize() - sizerMinSize)[mainAxis]);
 	
 	bool first = true;
 	for (auto& e: entries) {

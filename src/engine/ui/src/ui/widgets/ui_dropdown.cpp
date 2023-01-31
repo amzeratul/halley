@@ -187,6 +187,12 @@ void UIDropdown::draw(UIPainter& painter) const
 	painter.draw(label);
 }
 
+void UIDropdown::drawChildren(UIPainter& painter) const
+{
+	auto p2 = painter.withClip(std::nullopt);
+	UIClickable::drawChildren(p2);
+}
+
 void UIDropdown::update(Time t, bool moved)
 {
 	bool optionsUpdated = false;
