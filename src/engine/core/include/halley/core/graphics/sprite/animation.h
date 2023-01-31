@@ -57,7 +57,7 @@ namespace Halley
 
 	public:
 		AnimationSequence();
-		AnimationSequence(String name, bool loop, bool noFlip);
+		AnimationSequence(String name, bool loop, bool noFlip, bool fallback);
 
 		size_t numFrames() const { return frames.size(); }
 		size_t numFrameDefinitions() const { return frameDefinitions.size(); }
@@ -69,6 +69,7 @@ namespace Halley
 		const String& getName() const { return name; }
 		bool isLooping() const { return loop; }
 		bool isNoFlip() const { return noFlip; }
+		bool isFallback() const { return fallback; }
 
 		void serialize(Serializer& s) const;
 		void deserialize(Deserializer& s);
@@ -83,6 +84,7 @@ namespace Halley
 		String name;
 		bool loop = false;
 		bool noFlip = false;
+		bool fallback = false;
 	};
 
 	class AnimationDirection

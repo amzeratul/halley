@@ -48,7 +48,8 @@ void AnimationImporter::parseAnimation(Animation& animation, gsl::span<const gsl
 		int frameDuration = lround(1000.0 / fps);
 		bool loop = sequenceNode["loop"].as<bool>(true);
 		bool noFlip = sequenceNode["noFlip"].as<bool>(false);
-		AnimationSequence sequence(name, loop, noFlip);
+		bool fallback = false;
+		AnimationSequence sequence(name, loop, noFlip, fallback);
 		String fileName = sequenceNode["fileName"].as<std::string>();
 
 		// Load frames

@@ -108,7 +108,7 @@ void SpriteImporter::import(const ImportingAsset& asset, IAssetCollector& collec
 			
 			auto spriteSheetName = baseSpriteSheetName;// +(frames.first.isEmpty() ? "" : ":" + frames.first);
 			auto spriteName = baseSpriteName + (frames.first.isEmpty() ? "" : ":" + frames.first);
-			Animation animation = generateAnimation(spriteName, spriteSheetName, meta.getString("material", MaterialDefinition::defaultMaterial), frames.second);
+			Animation animation = generateAnimation(spriteName, spriteSheetName, meta.getString("material", MaterialDefinition::defaultMaterial), frames.second, meta.getString("fallbackSequence", ""));
 			collector.output(spriteName, AssetType::Animation, Serializer::toBytes(animation), {}, "pc", inputFile.name);
 
 			Vector<ImageData> totalFrames;
@@ -192,7 +192,7 @@ String SpriteImporter::getAssetId(const Path& file, const std::optional<Metadata
 	return IAssetImporter::getAssetId(file, metadata);
 }
 
-Animation SpriteImporter::generateAnimation(const String& spriteName, const String& spriteSheetName, const String& materialName, const Vector<ImageData>& frameData)
+Animation SpriteImporter::generateAnimation(const String& spriteName, const String& spriteSheetName, const String& materialName, const Vector<ImageData>& frameData, const String& fallbackSequenceName)
 {
 	Animation animation;
 
@@ -246,7 +246,7 @@ Animation SpriteImporter::generateAnimation(const String& spriteName, const Stri
 
 		auto i = sequences.find(sequence);
 		if (i == sequences.end()) {
-			sequences[sequence] = AnimationSequence(sequence, true, false);
+			sequences[sequence] = AnimationSequence(sequence, true, false, sequence == fallbackSequenceName);
 		}
 
 		directionsPerSequence[sequence].insert(frame.direction);

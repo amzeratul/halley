@@ -65,10 +65,11 @@ void AnimationFrameDefinition::deserialize(Deserializer& s)
 
 AnimationSequence::AnimationSequence() {}
 
-AnimationSequence::AnimationSequence(String name, bool loop, bool noFlip)
+AnimationSequence::AnimationSequence(String name, bool loop, bool noFlip, bool fallback)
 	: name(std::move(name))
 	, loop(loop)
 	, noFlip(noFlip)
+	, fallback(fallback)
 {}
 
 void AnimationSequence::serialize(Serializer& s) const
@@ -77,6 +78,7 @@ void AnimationSequence::serialize(Serializer& s) const
 	s << name;
 	s << loop;
 	s << noFlip;
+	s << fallback;
 }
 
 void AnimationSequence::deserialize(Deserializer& s)
@@ -85,6 +87,7 @@ void AnimationSequence::deserialize(Deserializer& s)
 	s >> name;
 	s >> loop;
 	s >> noFlip;
+	s >> fallback;
 }
 
 void AnimationSequence::addFrame(const AnimationFrameDefinition& animationFrameDefinition)
@@ -235,12 +238,22 @@ void Animation::addDirection(const AnimationDirection& direction)
 
 const AnimationSequence& Animation::getSequence(const String& seqName) const
 {
+	const AnimationSequence* fallback = nullptr;
+
 	for (auto& seq: sequences) {
 		if (seq.name == seqName) {
 			return seq;
 		}
+		if (seq.isFallback()) {
+			fallback = &seq;
+		}
 	}
-	return sequences.at(0);
+
+	if (fallback) {
+		return *fallback;
+	} else {
+		return sequences.at(0);
+	}
 }
 
 const AnimationDirection& Animation::getDirection(const String& dirName) const

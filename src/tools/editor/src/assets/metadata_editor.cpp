@@ -86,6 +86,7 @@ void MetadataEditor::makeUI()
 		}
 		addAssetTypeField("Material", "material", AssetType::MaterialDefinition, MaterialDefinition::defaultMaterial);
 		addStringField("Atlas", "atlas", "");
+		addStringField("Fallback Sequence", "fallbackSequence", "");
 		addAssetTypeField("Palette", "palette", AssetType::Texture, "");
 		addBoolField("Palette Top\nLine Only", "paletteTopLineOnly", false);
 		addBoolField("Filtering", "filtering", false);
