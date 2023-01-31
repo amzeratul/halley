@@ -608,15 +608,13 @@ namespace Halley {
 
 				construct(newData);
 				
-				if (!empty()) {
-					auto* oldData = data();
-					for (size_type i = 0; i < size; ++i) {
-						std::allocator_traits<Allocator>::construct(as_allocator(), newData + i, std::move(oldData[i]));
-						std::allocator_traits<Allocator>::destroy(as_allocator(), oldData + i);
-					}
-					if (!sbo_active() && oldData) {
-						std::allocator_traits<Allocator>::deallocate(as_allocator(), oldData, capacity);
-					}
+				auto* oldData = data();
+				for (size_type i = 0; i < size; ++i) {
+					std::allocator_traits<Allocator>::construct(as_allocator(), newData + i, std::move(oldData[i]));
+					std::allocator_traits<Allocator>::destroy(as_allocator(), oldData + i);
+				}
+				if (!sbo_active() && oldData && capacity > 0) {
+					std::allocator_traits<Allocator>::deallocate(as_allocator(), oldData, capacity);
 				}
 
 				if (sbo_active() != canUseSBO) {
