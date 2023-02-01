@@ -4,7 +4,7 @@ component:
   name: Scriptable
   members:
   - activeStates:
-      type: 'Halley::Vector<std::shared_ptr<Halley::ScriptState>>'
+      type: 'Halley::HashMap<Halley::String, std::shared_ptr<Halley::ScriptState>>'
       canEdit: false
       canSave: false # TODO
       canNetwork: true
