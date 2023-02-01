@@ -21,6 +21,7 @@ namespace Halley {
 		Vector2f getNextPosition() const;
 		size_t getNextPathIdx() const;
 		bool isDone() const;
+		int getNavmeshSubWorld() const;
 
 	private:
 		WorldPosition curPos;
@@ -28,6 +29,7 @@ namespace Halley {
 		size_t nextRegionIdx = 0;
 		std::optional<NavigationPath> path;
 		bool needsToReEvaluatePath = false;
+		int navmeshSubWorld = 0;
 
 		void goToNextRegion(const NavmeshSet& navmeshSet);
 		void reEvaluatePath(const NavmeshSet& navmeshSet);

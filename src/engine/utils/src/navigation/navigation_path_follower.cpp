@@ -40,6 +40,11 @@ void NavigationPathFollower::setPath(std::optional<NavigationPath> p)
 	path = std::move(p);
 	nextPathIdx = 0;
 	nextRegionIdx = 0;
+	if (path) {
+		navmeshSubWorld = path->query.from.subWorld;
+	} else {
+		navmeshSubWorld = 0;
+	}
 }
 
 const std::optional<NavigationPath>& NavigationPathFollower::getPath() const
@@ -68,7 +73,7 @@ void NavigationPathFollower::update(WorldPosition curPos, const NavmeshSet& navm
 			return;
 		}
 	}
-
+	
 	const auto nextPos = path->path[nextPathIdx];
 	const bool arrivedAtNextNode = (nextPos - curPos.pos).length() < threshold;
 	
@@ -116,6 +121,7 @@ void NavigationPathFollower::goToNextRegion(const NavmeshSet& navmeshSet)
 			path->path = std::move(newPath->path);
 			nextPathIdx = 0;
 			nextRegionIdx++;
+			navmeshSubWorld = subWorld;
 		} else {
 			Logger::logWarning("Failed to find path within region.");
 			setPath({});
@@ -147,6 +153,11 @@ size_t NavigationPathFollower::getNextPathIdx() const
 bool NavigationPathFollower::isDone() const
 {
 	return !path;
+}
+
+int NavigationPathFollower::getNavmeshSubWorld() const
+{
+	return navmeshSubWorld;
 }
 
 ConfigNode ConfigNodeSerializer<NavigationPathFollower>::serialize(const NavigationPathFollower& follower, const EntitySerializationContext& context)
