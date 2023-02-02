@@ -11,5 +11,9 @@ component:
       type: 'Halley::DataInterpolatorSet'
       canSave: false
       canEdit: false
+  - lockOwnerId:
+      type: 'std::optional<uint8_t>'
+      canSave: false
+      canEdit: false
 
 ...

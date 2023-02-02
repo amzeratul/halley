@@ -1,4 +1,4 @@
-// Halley codegen version 105
+// Halley codegen version 118
 #pragma once
 
 #ifndef DONT_INCLUDE_HALLEY_HPP
@@ -12,6 +12,7 @@ public:
 
 	std::optional<uint8_t> ownerId{};
 	Halley::DataInterpolatorSet dataInterpolatorSet{};
+	std::optional<uint8_t> lockOwnerId{};
 
 	NetworkComponent() {
 	}
