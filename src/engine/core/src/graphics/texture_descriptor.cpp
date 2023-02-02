@@ -158,6 +158,8 @@ int TextureDescriptor::getBitsPerPixel(TextureFormat format)
 		return 3;
 	case TextureFormat::RGB:
 		return 3;
+	case TextureFormat::RGB565:
+		return 2;
 	case TextureFormat::Indexed:
 	case TextureFormat::Red:
 		return 1;

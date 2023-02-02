@@ -12,22 +12,7 @@ DX11Texture::DX11Texture(DX11Video& video, Vector2i size)
 
 DX11Texture::~DX11Texture()
 {
-	if (samplerState) {
-		samplerState->Release();
-		samplerState = nullptr;
-	}
-	if (srv) {
-		srv->Release();
-		srv = nullptr;
-	}
-	if (srvAlt) {
-		srvAlt->Release();
-		srvAlt = nullptr;
-	}
-	if (texture) {
-		texture->Release();
-		texture = nullptr;
-	}
+	clear();
 }
 
 DX11Texture& DX11Texture::operator=(DX11Texture&& other) noexcept
@@ -67,7 +52,9 @@ static D3D11_TEXTURE_ADDRESS_MODE getAddressMode(TextureAddressMode mode)
 
 void DX11Texture::doLoad(TextureDescriptor& descriptor)
 {
-	int bpp = 0;
+	clear();
+
+	int bpp = TextureDescriptor::getBitsPerPixel(descriptor.format);
 
 	CD3D11_TEXTURE2D_DESC desc;
 	desc.Width = size.x;
@@ -78,18 +65,18 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 	case TextureFormat::Indexed:
 	case TextureFormat::Red:
 		desc.Format = DXGI_FORMAT_R8_UNORM;
-		bpp = 1;
 		break;
 	case TextureFormat::RGB:
 		throw Exception("RGB textures are not supported", HalleyExceptions::VideoPlugin);
 		break;
 	case TextureFormat::RGBA:
 		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		bpp = 4;
 		break;
 	case TextureFormat::Depth:
 		desc.Format = DXGI_FORMAT_R24G8_TYPELESS;
-		bpp = 4;
+		break;
+	case TextureFormat::RGB565:
+		desc.Format = DXGI_FORMAT_B5G6R5_UNORM;
 		break;
 	default:
 		throw Exception("Unknown texture format", HalleyExceptions::VideoPlugin);
@@ -240,6 +227,26 @@ void DX11Texture::copyToImageDirectly(Image& image) const
 	}
 
 	dc.Unmap(texture, 0);
+}
+
+void DX11Texture::clear()
+{
+	if (samplerState) {
+		samplerState->Release();
+		samplerState = nullptr;
+	}
+	if (srv) {
+		srv->Release();
+		srv = nullptr;
+	}
+	if (srvAlt) {
+		srvAlt->Release();
+		srvAlt = nullptr;
+	}
+	if (texture) {
+		texture->Release();
+		texture = nullptr;
+	}
 }
 
 DXGI_FORMAT DX11Texture::getFormat() const

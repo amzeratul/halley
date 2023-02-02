@@ -40,5 +40,6 @@ namespace Halley
 		size_t vramUsage = 0;
 
 		void copyToImageDirectly(Image& image) const;
+		void clear();
 	};
 }
