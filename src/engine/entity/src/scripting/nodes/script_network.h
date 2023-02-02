@@ -61,7 +61,7 @@ namespace Halley {
 		ScriptLockData(const ConfigNode& node);
 		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
 
-		std::optional<int32_t> requestPending;
+		Future<bool> requestPending;
 	};
 
 	class ScriptLock final : public ScriptNodeTypeBase<ScriptLockData> {

@@ -693,16 +693,10 @@ ScriptEnvironment::LockStatus ScriptEnvironment::getLockStatus(EntityId playerId
 	return LockStatus::Unlocked;
 }
 
-bool ScriptEnvironment::isPendingLockResponse(int32_t token) const
+Future<bool> ScriptEnvironment::lockAcquire(EntityId playerId, EntityId targetId)
 {
 	// TODO
-	return false;
-}
-
-std::optional<int32_t> ScriptEnvironment::lockAcquire(EntityId playerId, EntityId targetId)
-{
-	// TODO
-	return std::nullopt;
+	return Future<bool>::makeImmediate(true);
 }
 
 void ScriptEnvironment::lockRelease(EntityId playerId, EntityId targetId)

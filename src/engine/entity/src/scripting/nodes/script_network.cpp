@@ -107,23 +107,16 @@ IScriptNodeType::Result ScriptIfHostAuthority::doUpdate(ScriptEnvironment& envir
 
 ScriptLockData::ScriptLockData(const ConfigNode& node)
 {
-	if (node.hasKey("requestPending")) {
-		requestPending = node["requestPending"].asInt();
-	}
 }
 
 ConfigNode ScriptLockData::toConfigNode(const EntitySerializationContext& context)
 {
-	ConfigNode::MapType result;
-	if (requestPending) {
-		result["requestPending"] = *requestPending;
-	}
-	return result;
+	return {};
 }
 
 void ScriptLock::doInitData(ScriptLockData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
-	data.requestPending.reset();
+	data.requestPending = Future<bool>();
 }
 
 String ScriptLock::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
@@ -161,26 +154,17 @@ std::pair<String, Vector<ColourOverride>> ScriptLock::getNodeDescription(const S
 
 IScriptNodeType::Result ScriptLock::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLockData& data) const
 {
-	if (data.requestPending) {
-		if (environment.isPendingLockResponse(*data.requestPending)) {
-			// Waiting
-			return Result(ScriptNodeExecutionState::Executing, time);
-		} else {
-			// Got response
-			const auto lockStatus = environment.getLockStatus(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
-			const bool success = lockStatus == ScriptEnvironment::LockStatus::Unlocked || lockStatus == ScriptEnvironment::LockStatus::AcquiredByMe;
-			return Result(ScriptNodeExecutionState::Done, 0, success ? 1 : 2);
-		}
+	if (!data.requestPending.isValid()) {
+		data.requestPending = environment.lockAcquire(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
+	}
+
+	if (data.requestPending.hasValue()) {
+		// Got response
+		const bool success = data.requestPending.get();
+		return Result(ScriptNodeExecutionState::Done, 0, success ? 1 : 2);
 	} else {
-		const auto pending = environment.lockAcquire(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
-		if (pending) {
-			// Start waiting for response
-			data.requestPending = pending;
-			return Result(ScriptNodeExecutionState::Executing, time);
-		} else {
-			// Means we already had the lock
-			return Result(ScriptNodeExecutionState::Done, 0, 1);
-		}
+		// Waiting
+		return Result(ScriptNodeExecutionState::Executing, time);
 	}
 }
 

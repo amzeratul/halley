@@ -140,8 +140,7 @@ namespace Halley {
         };
 
         LockStatus getLockStatus(EntityId playerId, EntityId targetId) const;
-        bool isPendingLockResponse(int32_t token) const;
-        std::optional<int32_t> lockAcquire(EntityId playerId, EntityId targetId); // Returns empty if lock was already acquired
+        Future<bool> lockAcquire(EntityId playerId, EntityId targetId);
         void lockRelease(EntityId playerId, EntityId targetId);
 
 		template <typename T>
