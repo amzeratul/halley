@@ -133,6 +133,17 @@ namespace Halley {
         EntityId getScriptTarget(const String& id) const;
         void setScriptTargetRetriever(ScriptTargetRetriever scriptTargetRetriever);
 
+        enum class LockStatus {
+	        Unlocked,
+            AcquiredByMe,
+            AcquiredByOther
+        };
+
+        LockStatus getLockStatus(EntityId playerId, EntityId targetId) const;
+        bool isPendingLockResponse(int32_t token) const;
+        std::optional<int32_t> lockAcquire(EntityId playerId, EntityId targetId); // Returns empty if lock was already acquired
+        void lockRelease(EntityId playerId, EntityId targetId);
+
 		template <typename T>
 		T& getInterface()
 		{

@@ -687,6 +687,29 @@ void ScriptEnvironment::setScriptTargetRetriever(ScriptTargetRetriever scriptTar
 	this->scriptTargetRetriever = std::move(scriptTargetRetriever);
 }
 
+ScriptEnvironment::LockStatus ScriptEnvironment::getLockStatus(EntityId playerId, EntityId targetId) const
+{
+	// TODO
+	return LockStatus::Unlocked;
+}
+
+bool ScriptEnvironment::isPendingLockResponse(int32_t token) const
+{
+	// TODO
+	return false;
+}
+
+std::optional<int32_t> ScriptEnvironment::lockAcquire(EntityId playerId, EntityId targetId)
+{
+	// TODO
+	return std::nullopt;
+}
+
+void ScriptEnvironment::lockRelease(EntityId playerId, EntityId targetId)
+{
+	// TODO
+}
+
 IScriptStateData* ScriptEnvironment::getNodeData(GraphNodeId nodeId)
 {
 	return currentState->getNodeState(nodeId).data;

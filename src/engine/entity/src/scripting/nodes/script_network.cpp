@@ -104,52 +104,98 @@ IScriptNodeType::Result ScriptIfHostAuthority::doUpdate(ScriptEnvironment& envir
 }
 
 
+
+ScriptLockData::ScriptLockData(const ConfigNode& node)
+{
+	if (node.hasKey("requestPending")) {
+		requestPending = node["requestPending"].asInt();
+	}
+}
+
+ConfigNode ScriptLockData::toConfigNode(const EntitySerializationContext& context)
+{
+	ConfigNode::MapType result;
+	if (requestPending) {
+		result["requestPending"] = *requestPending;
+	}
+	return result;
+}
+
+void ScriptLock::doInitData(ScriptLockData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
+{
+	data.requestPending.reset();
+}
+
 String ScriptLock::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
 {
-	if (elementIdx == 2) {
-		return "Lock Acquired";
+	if (elementIdx == 1) {
+		return "Player";
+	} else if (elementIdx == 2) {
+		return "Target";
 	} else if (elementIdx == 3) {
+		return "Lock Acquired";
+	} else if (elementIdx == 4) {
 		return "Lock Not Acquired";
 	}
-	return ScriptNodeTypeBase<void>::getPinDescription(node, elementType, elementIdx);
+	return ScriptNodeTypeBase<ScriptLockData>::getPinDescription(node, elementType, elementIdx);
 }
 
 gsl::span<const IGraphNodeType::PinType> ScriptLock::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output } };
+	const static auto data = std::array<PinType, 5>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output }, PinType{ ET::FlowPin, PD::Output } };
 	return data;
 }
 
 std::pair<String, Vector<ColourOverride>> ScriptLock::getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const
 {
 	ColourStringBuilder str;
-	str.append("Tries to acquire lock for ");
+	str.append("Tries to acquire lock for player ");
 	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(" and target ");
+	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
 	str.append(" and branches based on success");
 	return str.moveResults();
 }
 
-IScriptNodeType::Result ScriptLock::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+IScriptNodeType::Result ScriptLock::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLockData& data) const
 {
-	// TODO
-	const bool success = true;
-	return Result(ScriptNodeExecutionState::Done, 0, success ? 1 : 2);
+	if (data.requestPending) {
+		if (environment.isPendingLockResponse(*data.requestPending)) {
+			// Waiting
+			return Result(ScriptNodeExecutionState::Executing, time);
+		} else {
+			// Got response
+			const auto lockStatus = environment.getLockStatus(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
+			const bool success = lockStatus == ScriptEnvironment::LockStatus::Unlocked || lockStatus == ScriptEnvironment::LockStatus::AcquiredByMe;
+			return Result(ScriptNodeExecutionState::Done, 0, success ? 1 : 2);
+		}
+	} else {
+		const auto pending = environment.lockAcquire(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
+		if (pending) {
+			// Start waiting for response
+			data.requestPending = pending;
+			return Result(ScriptNodeExecutionState::Executing, time);
+		} else {
+			// Means we already had the lock
+			return Result(ScriptNodeExecutionState::Done, 0, 1);
+		}
+	}
 }
 
 
 
 String ScriptLockAvailable::getShortDescription(const World* world, const ScriptGraphNode& node, const ScriptGraph& graph, GraphPinId elementIdx) const
 {
-	return "Lock for " + getConnectedNodeName(world, node, graph, 0) + " available";
+	return "Lock for " + getConnectedNodeName(world, node, graph, 1) + " available to " + getConnectedNodeName(world, node, graph, 0);
 }
 
 gsl::span<const IGraphNodeType::PinType> ScriptLockAvailable::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 2>{PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
+	const static auto data = std::array<PinType, 3>{ PinType{ ET::TargetPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::ReadDataPin, PD::Output } };
 	return data;
 }
 
@@ -157,24 +203,61 @@ std::pair<String, Vector<ColourOverride>> ScriptLockAvailable::getNodeDescriptio
 {
 	ColourStringBuilder str;
 	str.append("Is lock for ");
+	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
+	str.append(" available or acquired by ");
 	str.append(getConnectedNodeName(world, node, graph, 0), parameterColour);
-	str.append(" available or acquired by me?");
 	return str.moveResults();
 }
 
 ConfigNode ScriptLockAvailable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	// TODO
-	return ConfigNode(true);
+	const auto status = environment.getLockStatus(readEntityId(environment, node, 0), readEntityId(environment, node, 1));
+	return ConfigNode(status == ScriptEnvironment::LockStatus::Unlocked || status == ScriptEnvironment::LockStatus::AcquiredByMe);
 }
 
 
+
+
+ScriptLockAvailableGateData::ScriptLockAvailableGateData(const ConfigNode& node)
+{
+	if (node.hasKey("flowing")) {
+		flowing = node["flowing"].asBool();
+	}
+}
+
+ConfigNode ScriptLockAvailableGateData::toConfigNode(const EntitySerializationContext& context)
+{
+	ConfigNode::MapType result;
+	if (flowing) {
+		result["flowing"] = *flowing;
+	}
+	return result;
+}
+
+String ScriptLockAvailableGate::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
+{
+	if (elementIdx == 1) {
+		return "Player";
+	} else if (elementIdx == 2) {
+		return "Target";
+	} else if (elementIdx == 3) {
+		return "Flow if available";
+	} else if (elementIdx == 4) {
+		return "Flow if not available";
+	}
+	return ScriptNodeTypeBase<ScriptLockAvailableGateData>::getPinDescription(node, elementType, elementIdx);
+}
+
+void ScriptLockAvailableGate::doInitData(ScriptLockAvailableGateData& data, const ScriptGraphNode& node, const EntitySerializationContext& context,	const ConfigNode& nodeData) const
+{
+	data.flowing.reset();
+}
 
 gsl::span<const IGraphNodeType::PinType> ScriptLockAvailableGate::getPinConfiguration(const ScriptGraphNode& node) const
 {
 	using ET = ScriptNodeElementType;
 	using PD = GraphNodePinDirection;
-	const static auto data = std::array<PinType, 4>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::FlowPin, PD::Output, true } };
+	const static auto data = std::array<PinType, 5>{ PinType{ ET::FlowPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::TargetPin, PD::Input }, PinType{ ET::FlowPin, PD::Output, true }, PinType{ ET::FlowPin, PD::Output, true } };
 	return data;
 }
 
@@ -182,13 +265,25 @@ std::pair<String, Vector<ColourOverride>> ScriptLockAvailableGate::getNodeDescri
 {
 	ColourStringBuilder str;
 	str.append("Flow based on lock for ");
+	str.append(getConnectedNodeName(world, node, graph, 2), parameterColour);
+	str.append(" being available or acquired by ");
 	str.append(getConnectedNodeName(world, node, graph, 1), parameterColour);
-	str.append(" being available or acquired by me");
 	return str.moveResults();
 }
 
-IScriptNodeType::Result ScriptLockAvailableGate::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node) const
+IScriptNodeType::Result ScriptLockAvailableGate::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLockAvailableGateData& data) const
 {
-	// TODO
-	return Result(ScriptNodeExecutionState::Done, 0, 1);
+	const auto lockStatus = environment.getLockStatus(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
+	const bool shouldFlow = lockStatus == ScriptEnvironment::LockStatus::Unlocked || lockStatus == ScriptEnvironment::LockStatus::AcquiredByMe;
+
+	if (shouldFlow != data.flowing) {
+		data.flowing = shouldFlow;
+		if (shouldFlow) {
+			return Result(ScriptNodeExecutionState::Fork, 0, 1, 2);
+		} else {
+			return Result(ScriptNodeExecutionState::Fork, 0, 2, 1);
+		}
+	} else {
+		return Result(ScriptNodeExecutionState::Executing, time);
+	}
 }

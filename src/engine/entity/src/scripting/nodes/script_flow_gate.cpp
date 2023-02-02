@@ -65,7 +65,7 @@ IScriptNodeType::Result ScriptFlowGate::doUpdate(ScriptEnvironment& environment,
 		}
 	} else {
 		return Result(ScriptNodeExecutionState::Executing, time);
-	}	
+	}
 }
 
 
