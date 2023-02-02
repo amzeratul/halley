@@ -1321,6 +1321,9 @@ public:
     {
     }
 
+    template <typename... T>
+    void operator()(T... ts) = delete;
+
     inline V & operator[](const K & key)
     {
         return emplace(key, convertible_to_value()).first->second;
