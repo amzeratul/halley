@@ -155,7 +155,7 @@ std::pair<String, Vector<ColourOverride>> ScriptLock::getNodeDescription(const S
 IScriptNodeType::Result ScriptLock::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLockData& data) const
 {
 	if (!data.requestPending.isValid()) {
-		data.requestPending = environment.lockAcquire(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
+		data.requestPending = environment.getInterface<INetworkSystemInterface>().lockAcquire(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
 	}
 
 	if (data.requestPending.hasValue()) {
@@ -195,8 +195,8 @@ std::pair<String, Vector<ColourOverride>> ScriptLockAvailable::getNodeDescriptio
 
 ConfigNode ScriptLockAvailable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	const auto status = environment.getLockStatus(readEntityId(environment, node, 0), readEntityId(environment, node, 1));
-	return ConfigNode(status == ScriptEnvironment::LockStatus::Unlocked || status == ScriptEnvironment::LockStatus::AcquiredByMe);
+	const auto status = environment.getInterface<INetworkSystemInterface>().getLockStatus(readEntityId(environment, node, 0), readEntityId(environment, node, 1));
+	return ConfigNode(status == INetworkSystemInterface::LockStatus::Unlocked || status == INetworkSystemInterface::LockStatus::AcquiredByMe);
 }
 
 
@@ -257,8 +257,8 @@ std::pair<String, Vector<ColourOverride>> ScriptLockAvailableGate::getNodeDescri
 
 IScriptNodeType::Result ScriptLockAvailableGate::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLockAvailableGateData& data) const
 {
-	const auto lockStatus = environment.getLockStatus(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
-	const bool shouldFlow = lockStatus == ScriptEnvironment::LockStatus::Unlocked || lockStatus == ScriptEnvironment::LockStatus::AcquiredByMe;
+	const auto lockStatus = environment.getInterface<INetworkSystemInterface>().getLockStatus(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
+	const bool shouldFlow = lockStatus == INetworkSystemInterface::LockStatus::Unlocked || lockStatus == INetworkSystemInterface::LockStatus::AcquiredByMe;
 
 	if (shouldFlow != data.flowing) {
 		data.flowing = shouldFlow;

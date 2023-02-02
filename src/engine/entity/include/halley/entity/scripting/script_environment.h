@@ -34,6 +34,21 @@ namespace Halley {
 		virtual ~IScriptEnvironmentInterface() = default;
 	};
 
+    class INetworkSystemInterface : public IScriptEnvironmentInterface {
+	public:
+        enum class LockStatus {
+	        Unlocked,
+            AcquiredByMe,
+            AcquiredByOther
+        };
+
+    	virtual ~INetworkSystemInterface() = default;
+
+        virtual LockStatus getLockStatus(EntityId playerId, EntityId targetId) const = 0;
+        virtual Future<bool> lockAcquire(EntityId playerId, EntityId targetId) = 0;
+        virtual void lockRelease(EntityId playerId, EntityId targetId) = 0;
+	};
+
     class ScriptEnvironment: private IEntityFactoryContext {
     public:
         struct EntityMessageData {
@@ -132,17 +147,7 @@ namespace Halley {
 
         EntityId getScriptTarget(const String& id) const;
         void setScriptTargetRetriever(ScriptTargetRetriever scriptTargetRetriever);
-
-        enum class LockStatus {
-	        Unlocked,
-            AcquiredByMe,
-            AcquiredByOther
-        };
-
-        LockStatus getLockStatus(EntityId playerId, EntityId targetId) const;
-        Future<bool> lockAcquire(EntityId playerId, EntityId targetId);
-        void lockRelease(EntityId playerId, EntityId targetId);
-
+        
 		template <typename T>
 		T& getInterface()
 		{
