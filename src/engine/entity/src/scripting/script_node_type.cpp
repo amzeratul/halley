@@ -356,6 +356,9 @@ void ScriptNodeTypeCollection::addBasicScriptNodes()
 	addScriptNode(std::make_unique<ScriptHostAuthority>());
 	addScriptNode(std::make_unique<ScriptIfEntityAuthority>());
 	addScriptNode(std::make_unique<ScriptIfHostAuthority>());
+	addScriptNode(std::make_unique<ScriptLock>());
+	addScriptNode(std::make_unique<ScriptLockAvailable>());
+	addScriptNode(std::make_unique<ScriptLockAvailableGate>());
 	addScriptNode(std::make_unique<ScriptSendMessage>());
 	addScriptNode(std::make_unique<ScriptReceiveMessage>());
 	addScriptNode(std::make_unique<ScriptSendSystemMessage>());
