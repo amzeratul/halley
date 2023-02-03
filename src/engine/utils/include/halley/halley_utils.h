@@ -2,6 +2,8 @@
 
 namespace Halley {} // Get GitHub to realise this is C++ :3
 
+#include "audio/resampler.h"
+
 #include "concurrency/concurrent.h"
 #include "concurrency/shared_recursive_mutex.h"
 #include "concurrency/task.h"
