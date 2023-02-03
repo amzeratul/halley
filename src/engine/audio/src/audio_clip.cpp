@@ -228,11 +228,11 @@ size_t StreamingAudioClip::copyChannelData(size_t channelN, size_t pos, size_t l
 	const size_t toWrite = std::min(len, buffer.size());
 
 	AudioMixer::copy(dst, buffer, gain0, gain1);
-	//memcpy(dst.data(), buffer.data(), toWrite * sizeof(AudioSample));
 	buffer.erase(buffer.begin(), buffer.begin() + toWrite);
 
 	if (toWrite < len) {
-		AudioMixer::copy(dst.subspan(toWrite, len - toWrite), AudioSamples(buffer).subspan(toWrite, len - toWrite), gain1, gain1);
+		AudioMixer::zero(dst.subspan(toWrite, len - toWrite));
+		//AudioMixer::copy(dst.subspan(toWrite, len - toWrite), AudioSamples(buffer).subspan(toWrite, len - toWrite), gain1, gain1);
 		//memcpy(dst.data() + toWrite, buffer.data() + toWrite, (len - toWrite) * sizeof(AudioSample));
 	}
 
@@ -246,7 +246,7 @@ uint8_t StreamingAudioClip::getNumberOfChannels() const
 
 size_t StreamingAudioClip::getLength() const
 {
-	return length;
+	return std::numeric_limits<size_t>::max();
 }
 
 size_t StreamingAudioClip::getSamplesLeft() const

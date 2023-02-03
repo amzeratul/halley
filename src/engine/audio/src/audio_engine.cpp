@@ -394,5 +394,8 @@ void AudioEngine::setBusGain(const String& name, float gain)
 
 float AudioEngine::getCompositeBusGain(uint8_t id) const
 {
+	if (id >= buses.size()) {
+		return 1.0f;
+	}
 	return buses.at(id).compositeGain;
 }

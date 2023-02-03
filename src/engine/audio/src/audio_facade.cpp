@@ -327,6 +327,10 @@ void AudioFacade::onNeedBuffer()
 
 const AudioProperties& AudioFacade::getAudioProperties() const
 {
+	if (!resources->exists<GameProperties>("game_properties")) {
+		static AudioProperties dummy;
+		return dummy;
+	}
 	const auto properties = resources->get<GameProperties>("game_properties");
 	return properties->getAudioProperties();
 }
