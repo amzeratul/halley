@@ -13,19 +13,21 @@ namespace Halley
 		RGBA,
 		Depth,
 		Red,
-		RGB565
+		RGB565,
+		RGBA5551
 	};
 
 	template <>
 	struct EnumNames<TextureFormat> {
-		constexpr std::array<const char*, 6> operator()() const {
+		constexpr std::array<const char*, 7> operator()() const {
 			return{{
 				"indexed",
 				"rgb",
 				"rgba",
 				"depth",
 				"red",
-				"rgb565"
+				"rgb565",
+				"rgba5551"
 			}};
 		}
 	};
