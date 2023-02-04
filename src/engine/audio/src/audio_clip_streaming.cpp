@@ -73,7 +73,7 @@ size_t AudioClipStreaming::copyChannelData(size_t channelN, size_t pos, size_t l
 	buffer.erase(buffer.begin(), buffer.begin() + toWrite);
 
 	if (toWrite < len) {
-		Logger::logWarning("AudioClipStreaming ran out of samples - had " + toString(static_cast<int>(toWrite)) + ", requested " + toString(static_cast<int>(len)));
+		//Logger::logWarning("AudioClipStreaming ran out of samples - had " + toString(static_cast<int>(toWrite)) + ", requested " + toString(static_cast<int>(len)));
 		AudioMixer::zero(dst.subspan(toWrite, len - toWrite));
 	}
 
