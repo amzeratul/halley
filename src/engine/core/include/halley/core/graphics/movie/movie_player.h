@@ -14,7 +14,7 @@ namespace Halley
 	class TextureDescriptor;
 	class VideoAPI;
 	class AudioAPI;
-	class StreamingAudioClip;
+	class AudioClipStreaming;
 	class IAudioHandle;
 	class TextureRenderTarget;
 
@@ -116,7 +116,7 @@ namespace Halley
 		std::shared_ptr<TextureRenderTarget> renderTarget;
 		std::shared_ptr<Texture> renderTexture;
 
-		std::shared_ptr<StreamingAudioClip> streamingClip;
+		std::shared_ptr<AudioClipStreaming> streamingClip;
 		std::shared_ptr<IAudioHandle> audioHandle;
 
 		std::atomic<bool> threadRunning;

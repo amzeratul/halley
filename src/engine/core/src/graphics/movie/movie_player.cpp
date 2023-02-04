@@ -9,6 +9,8 @@
 #include "halley/core/graphics/render_context.h"
 #include "halley/audio/audio_clip.h"
 #include <chrono>
+
+#include "halley/audio/audio_clip_streaming.h"
 #include "halley/audio/audio_position.h"
 #include "halley/support/logger.h"
 
@@ -43,7 +45,7 @@ void MoviePlayer::play()
 		}
 
 		if (!streamingClip) {
-			streamingClip = std::make_shared<StreamingAudioClip>(2);
+			streamingClip = std::make_shared<AudioClipStreaming>(2);
 		}
 
 		state = MoviePlayerState::StartingToPlay;
