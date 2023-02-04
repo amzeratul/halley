@@ -1017,6 +1017,7 @@ EXPORT int speex_resampler_set_rate_frac(SpeexResamplerState *st, spx_uint32_t r
    spx_uint32_t fact;
    spx_uint32_t old_den;
    spx_uint32_t i;
+   spx_uint32_t max_factor;
    if (st->in_rate == in_rate && st->out_rate == out_rate && st->num_rate == ratio_num && st->den_rate == ratio_den)
       return RESAMPLER_ERR_SUCCESS;
    
@@ -1025,13 +1026,20 @@ EXPORT int speex_resampler_set_rate_frac(SpeexResamplerState *st, spx_uint32_t r
    st->out_rate = out_rate;
    st->num_rate = ratio_num;
    st->den_rate = ratio_den;
-   /* FIXME: This is terribly inefficient, but who cares (at least for now)? */
-   for (fact=2;fact<=IMIN(st->num_rate, st->den_rate);fact++)
+
+   while ((st->num_rate % 2 == 0) && (st->den_rate % 2 == 0))
+   {
+      st->num_rate /= 2;
+      st->den_rate /= 2;
+   }
+   max_factor = (spx_uint32_t)(sqrt(IMIN(st->num_rate, st->den_rate)));
+   for (fact = 3; fact <= max_factor; fact += 2)
    {
       while ((st->num_rate % fact == 0) && (st->den_rate % fact == 0))
       {
          st->num_rate /= fact;
          st->den_rate /= fact;
+         max_factor = (spx_uint32_t)(sqrt(IMIN(st->num_rate, st->den_rate)));
       }
    }
       

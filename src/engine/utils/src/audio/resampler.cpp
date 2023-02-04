@@ -46,6 +46,13 @@ void AudioResampler::setRate(int from, int to)
 	speex_resampler_set_rate(resampler.get(), from, to);
 }
 
+void AudioResampler::setRateFrac(int num, int denum, int from, int to)
+{
+	this->from = from;
+	this->to = to;
+	speex_resampler_set_rate_frac(resampler.get(), num, denum, from, to);
+}
+
 AudioResamplerResult AudioResampler::resample(gsl::span<const float> src, gsl::span<float> dst, size_t channel)
 {
 	unsigned inLen = unsigned(src.size() / nChannels);

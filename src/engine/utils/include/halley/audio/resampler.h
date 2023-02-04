@@ -30,6 +30,7 @@ namespace Halley
 		void setFromHz(int from);
 		void setToHz(int to);
 		void setRate(int from, int to);
+		void setRateFrac(int num, int denum, int from, int to);
 
 	private:
 		std::unique_ptr<SpeexResamplerState, void(*)(SpeexResamplerState*)> resampler;
