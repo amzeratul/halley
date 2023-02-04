@@ -20,6 +20,9 @@ namespace Halley
 		size_t getSamplesLeft() const;
 		bool isLoaded() const override;
 
+		void setLatencyTarget(size_t samples);
+		size_t getLatencyTarget() const;
+
 	private:
 		std::atomic_size_t length;
 		mutable std::atomic_size_t samplesLeft;
@@ -27,6 +30,7 @@ namespace Halley
 		mutable std::mutex mutex;
 		uint8_t numChannels = 0;
 		bool ready = false;
+		size_t latencyTarget;
 
 		std::unique_ptr<AudioResampler> resampler;
 		Vector<float> pending;

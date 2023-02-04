@@ -6,13 +6,13 @@ using namespace Halley;
 
 namespace {
 	constexpr float outSampleRate = 48000.0f;
-	const size_t maxBufferSize = 2048;
 }
 
 AudioClipStreaming::AudioClipStreaming(uint8_t numChannels)
 	: length(0)
 	, samplesLeft(0)
 	, numChannels(numChannels)
+	, latencyTarget(1024)
 	, samplesLeftAvg(8)
 {
 	buffers.resize(numChannels);
@@ -35,7 +35,7 @@ void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
 	length += nSamples;
 	samplesLeft += nSamples;
 
-	if (samplesLeft >= maxBufferSize / 2) {
+	if (samplesLeft >= latencyTarget) {
 		ready = true;
 	}
 }
@@ -104,6 +104,16 @@ bool AudioClipStreaming::isLoaded() const
 	return ready;
 }
 
+void AudioClipStreaming::setLatencyTarget(size_t samples)
+{
+	latencyTarget = samples;
+}
+
+size_t AudioClipStreaming::getLatencyTarget() const
+{
+	return latencyTarget;
+}
+
 void AudioClipStreaming::doAddInterleavedSamplesWithResample(AudioSamplesConst origSrc)
 {
 	AudioSamplesConst src;
@@ -151,7 +161,7 @@ void AudioClipStreaming::updateSync(float maxPitchShift, float sourceSampleRate)
 	if (samplesLeftAvg.size() >= 3) {
 		const float d = maxPitchShift;
 		const float avgSamplesLeft = samplesLeftAvg.getFloatMean();
-		const float ratio = 1.0f / lerp(1.0f + d, 1.0f - d, clamp(avgSamplesLeft / static_cast<float>(maxBufferSize), 0.0f, 1.0f));
+		const float ratio = 1.0f / lerp(1.0f + d, 1.0f - d, clamp(avgSamplesLeft / static_cast<float>(2 * latencyTarget), 0.0f, 1.0f));
 		const auto fromRate = sourceSampleRate * ratio;
 
 		//Logger::logDev(toString(int(playbackSamplesLeft)) + " [" + toString(int(avgSamplesLeft)) + "], " + toString(ratio) + "x, " + toString(fromRate) + " Hz");
