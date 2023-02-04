@@ -85,6 +85,13 @@ void XAudio2SourceVoice::play()
 	callback();
 }
 
+uint64_t XAudio2SourceVoice::getSamplesPlayed() const
+{
+	XAUDIO2_VOICE_STATE state;
+	voice->GetState(&state);
+	return state.SamplesPlayed;
+}
+
 void XAudio2SourceVoice::OnVoiceProcessingPassStart(UINT32 BytesRequired) {}
 void XAudio2SourceVoice::OnVoiceProcessingPassEnd() {}
 void XAudio2SourceVoice::OnStreamEnd()
@@ -174,7 +181,9 @@ void XAudio2AudioOutput::onAudioAvailable()
 	if (voice && availableBytes > 0) {
 		buffer.resize(availableBytes);
 		getAudioOutputInterface().output(gsl::as_writable_bytes(gsl::span<char>(buffer)), true);
-		voice->queueAudio(gsl::span<const float>(reinterpret_cast<const float*>(buffer.data()), buffer.size() / 4));
+		const auto samples = gsl::span<const float>(reinterpret_cast<const float*>(buffer.data()), buffer.size() / 4);
+		samplesSubmitted += samples.size() / format.numChannels;
+		voice->queueAudio(samples);
 	}
 }
 
@@ -186,6 +195,16 @@ bool XAudio2AudioOutput::needsMoreAudio()
 bool XAudio2AudioOutput::needsAudioThread() const
 {
 	return false;
+}
+
+uint64_t XAudio2AudioOutput::getSamplesPlayed() const
+{
+	return voice->getSamplesPlayed();
+}
+
+uint64_t XAudio2AudioOutput::getSamplesSubmitted() const
+{
+	return samplesSubmitted;
 }
 
 IXAudio2& XAudio2AudioOutput::getXAudio2()

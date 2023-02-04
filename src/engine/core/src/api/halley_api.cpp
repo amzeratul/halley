@@ -24,6 +24,9 @@ void HalleyAPI::assign()
 	if (audioInternal) {
 		audio = audioInternal.get();
 	}
+	if (audioOutputInternal) {
+		audioOutput = audioOutputInternal.get();
+	}
 	if (platformInternal) {
 		platform = platformInternal.get();
 	}
@@ -162,5 +165,5 @@ void HalleyAPI::replaceCoreAPI(CoreAPIInternal* coreAPI)
 
 uint32_t Halley::getHalleyDLLAPIVersion()
 {
-	return 306;
+	return 307;
 }

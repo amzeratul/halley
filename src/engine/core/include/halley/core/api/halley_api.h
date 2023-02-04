@@ -36,6 +36,7 @@ namespace Halley
 		VideoAPI* video;
 		InputAPI* input;
 		AudioAPI* audio;
+		AudioOutputAPI* audioOutput;
 		PlatformAPI* platform;
 		NetworkAPI* network;
 		MovieAPI* movie;

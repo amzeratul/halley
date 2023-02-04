@@ -26,6 +26,8 @@ namespace Halley
 		void queueAudio(gsl::span<const float> samples);
 		void play();
 
+		uint64_t getSamplesPlayed() const;
+
 		void __stdcall OnVoiceProcessingPassStart(UINT32 BytesRequired) override;
 		void __stdcall OnVoiceProcessingPassEnd() override;
 
@@ -78,6 +80,9 @@ namespace Halley
 
 		bool needsAudioThread() const override;
 
+		uint64_t getSamplesPlayed() const override;
+		uint64_t getSamplesSubmitted() const override;
+
 		IXAudio2& getXAudio2();
 
 	private:
@@ -87,5 +92,6 @@ namespace Halley
 		AudioCallback callback;
 		AudioSpec format;
 		Vector<char> buffer;
+		std::atomic_uint64_t samplesSubmitted = 0;
 	};
 }
