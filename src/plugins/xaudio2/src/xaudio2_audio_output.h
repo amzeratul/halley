@@ -1,8 +1,6 @@
 #pragma once
 #include "halley/core/api/halley_api_internal.h"
 
-#define WINVER 0x0A00
-#define _WIN32_WINNT 0x0A00
 #include <xaudio2.h>
 
 namespace Halley
