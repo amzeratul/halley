@@ -1018,6 +1018,23 @@ EXPORT int speex_resampler_set_rate_frac(SpeexResamplerState *st, spx_uint32_t r
    spx_uint32_t old_den;
    spx_uint32_t i;
    spx_uint32_t max_factor;
+
+   while ((ratio_num % 2 == 0) && (ratio_den % 2 == 0))
+   {
+      ratio_num /= 2;
+      ratio_den /= 2;
+   }
+   max_factor = (spx_uint32_t)(sqrt(IMIN(ratio_num, ratio_den)));
+   for (fact = 3; fact <= max_factor; fact += 2)
+   {
+      while ((ratio_num % fact == 0) && (ratio_den % fact == 0))
+      {
+         ratio_num /= fact;
+         ratio_den /= fact;
+         max_factor = (spx_uint32_t)(sqrt(IMIN(ratio_num, ratio_den)));
+      }
+   }
+      
    if (st->in_rate == in_rate && st->out_rate == out_rate && st->num_rate == ratio_num && st->den_rate == ratio_den)
       return RESAMPLER_ERR_SUCCESS;
    
@@ -1027,22 +1044,6 @@ EXPORT int speex_resampler_set_rate_frac(SpeexResamplerState *st, spx_uint32_t r
    st->num_rate = ratio_num;
    st->den_rate = ratio_den;
 
-   while ((st->num_rate % 2 == 0) && (st->den_rate % 2 == 0))
-   {
-      st->num_rate /= 2;
-      st->den_rate /= 2;
-   }
-   max_factor = (spx_uint32_t)(sqrt(IMIN(st->num_rate, st->den_rate)));
-   for (fact = 3; fact <= max_factor; fact += 2)
-   {
-      while ((st->num_rate % fact == 0) && (st->den_rate % fact == 0))
-      {
-         st->num_rate /= fact;
-         st->den_rate /= fact;
-         max_factor = (spx_uint32_t)(sqrt(IMIN(st->num_rate, st->den_rate)));
-      }
-   }
-      
    if (old_den > 0)
    {
       for (i=0;i<st->nb_channels;i++)

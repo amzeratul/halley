@@ -352,7 +352,9 @@ int AudioEngine::getBusId(const String& busName)
 	if (iter != buses.end()) {
 		return int(iter - buses.begin());
 	} else {
-		Logger::logError("Unknown audio bus: " + busName);
+		if (!busName.isEmpty()) {
+			Logger::logError("Unknown audio bus: " + busName);
+		}
 		return 0;
 	}
 }

@@ -30,21 +30,19 @@ size_t AudioResampler::numOutputSamples(size_t numInputSamples) const
 
 void AudioResampler::setFromHz(float from)
 {
-	this->from = from;
-	speex_resampler_set_rate(resampler.get(), lroundl(from), lroundl(to));
+	setRate(from, to);
 }
 
 void AudioResampler::setToHz(float to)
 {
-	this->to = to;
-	speex_resampler_set_rate(resampler.get(), lroundl(from), lroundl(to));
+	setRate(from, to);
 }
 
 void AudioResampler::setRate(float from, float to)
 {
 	this->from = from;
 	this->to = to;
-	speex_resampler_set_rate(resampler.get(), lroundl(from), lroundl(to));
+	speex_resampler_set_rate_frac(resampler.get(), lroundl(from), lroundl(to), lroundl(from), lroundl(to));
 }
 
 AudioResamplerResult AudioResampler::resample(gsl::span<const float> src, gsl::span<float> dst, size_t channel)

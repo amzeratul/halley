@@ -41,6 +41,24 @@ namespace Halley {
             }
         }
 
+        T getOldest() const
+        {
+            if (data.size() < maxSize) {
+                return data.front();
+            } else {
+                return data[pos];
+            }
+        }
+
+        T getLatest() const
+        {
+            if (data.size() < maxSize) {
+                return data.back();
+            } else {
+                return data[(pos + maxSize - 1) % maxSize];
+            }
+        }
+
         float getFloatMean() const
         {
             return static_cast<float>(getSum()) / data.size();

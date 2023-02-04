@@ -130,7 +130,7 @@ void AudioClipStreaming::doAddInterleavedSamplesWithResample(AudioSamplesConst o
 	const size_t srcSamplesNotRead = src.size() - srcSamplesRead;
 	if (srcSamplesNotRead > 0) {
 		pending.resize(srcSamplesNotRead);
-		memcpy(pending.data(), src.data() + srcSamplesRead, srcSamplesNotRead);
+		memcpy(pending.data(), src.data() + srcSamplesRead, srcSamplesNotRead * sizeof(float));
 	}
 	resampleSrcBuffer.clear();
 
