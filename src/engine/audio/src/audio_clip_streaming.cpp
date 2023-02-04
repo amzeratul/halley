@@ -8,7 +8,7 @@ AudioClipStreaming::AudioClipStreaming(uint8_t numChannels)
 	: length(0)
 	, samplesLeft(0)
 	, numChannels(numChannels)
-	, samplesLeftAvg(6)
+	, samplesLeftAvg(4)
 {
 	buffers.resize(numChannels);
 }
@@ -29,28 +29,32 @@ void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
 
 	length += nSamples;
 	samplesLeft += nSamples;
+
+	if (samplesLeft > 512) {
+		ready = true;
+	}
 }
 
-void AudioClipStreaming::addInterleavedSamplesWithResample(AudioSamplesConst src, float sourceSampleRate, std::optional<float> syncMaxPitchShift)
+void AudioClipStreaming::addInterleavedSamplesWithResample(AudioSamplesConst src, float sourceSampleRate)
 {
 	if (!resampler) {
 		resampler = std::make_unique<AudioResampler>(lroundl(sourceSampleRate), 48000, numChannels, 1.0f);
 	}
 
-	if (syncMaxPitchShift) {
-		updateSync(*syncMaxPitchShift, sourceSampleRate);
+	resampler->setFromHz(lroundl(sourceSampleRate));
+
+	doAddInterleavedSamplesWithResample(src);
+}
+
+void AudioClipStreaming::addInterleavedSamplesWithResampleSync(AudioSamplesConst src, float sourceSampleRate, float maxPitchShift, AudioOutputAPI& audioOut)
+{
+	if (!resampler) {
+		resampler = std::make_unique<AudioResampler>(lroundl(sourceSampleRate), 48000, numChannels, 1.0f);
 	}
 
-	const auto nOut = resampler->numOutputSamples(src.size());
-	const auto minBufferSize = nextPowerOf2(nOut + numChannels); // Not sure if the extra sample per channel is needed
-	if (resampleAudioBuffer.size() < minBufferSize) {
-		resampleAudioBuffer.resize(minBufferSize);
-	}
+	updateSync(maxPitchShift, sourceSampleRate, audioOut);
 
-	const auto dst = gsl::span<float>(resampleAudioBuffer.data(), nOut);
-	resampler->resampleInterleaved(src, dst);
-
-	addInterleavedSamples(dst);
+	doAddInterleavedSamplesWithResample(src);
 }
 
 size_t AudioClipStreaming::copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
@@ -64,7 +68,7 @@ size_t AudioClipStreaming::copyChannelData(size_t channelN, size_t pos, size_t l
 	buffer.erase(buffer.begin(), buffer.begin() + toWrite);
 
 	if (toWrite < len) {
-		Logger::logWarning("AudioClipStreaming ran out of samples.");
+		Logger::logWarning("AudioClipStreaming ran out of samples - had " + toString(static_cast<int>(toWrite)) + ", requested " + toString(static_cast<int>(len)));
 		AudioMixer::zero(dst.subspan(toWrite, len - toWrite));
 	}
 
@@ -90,7 +94,26 @@ size_t AudioClipStreaming::getSamplesLeft() const
 	return samplesLeft;
 }
 
-void AudioClipStreaming::updateSync(float maxPitchShift, float sourceSampleRate)
+bool AudioClipStreaming::isLoaded() const
+{
+	return ready;
+}
+
+void AudioClipStreaming::doAddInterleavedSamplesWithResample(AudioSamplesConst src)
+{
+	const auto nOut = resampler->numOutputSamples(src.size());
+	const auto minBufferSize = nextPowerOf2(nOut + numChannels); // Not sure if the extra sample per channel is needed
+	if (resampleAudioBuffer.size() < minBufferSize) {
+		resampleAudioBuffer.resize(minBufferSize);
+	}
+
+	const auto dst = gsl::span<float>(resampleAudioBuffer.data(), nOut);
+	resampler->resampleInterleaved(src, dst);
+
+	addInterleavedSamples(dst);
+}
+
+void AudioClipStreaming::updateSync(float maxPitchShift, float sourceSampleRate, AudioOutputAPI& audioOut)
 {
 	// Based on paper
 	// "Dynamic Rate Control for Retro Game Emulators"
@@ -98,15 +121,22 @@ void AudioClipStreaming::updateSync(float maxPitchShift, float sourceSampleRate)
 	// December 12, 2012
 	// https://raw.githubusercontent.com/libretro/docs/master/archive/ratecontrol.pdf
 
-	samplesLeftAvg.add(samplesLeft);
+	const auto playbackSamplesLeftHW = audioOut.getSamplesSubmitted() - audioOut.getSamplesPlayed();
+	const auto playbackSamplesLeftSW = static_cast<size_t>(samplesLeft);
+	const auto playbackSamplesLeft = playbackSamplesLeftHW + playbackSamplesLeftSW;
+	samplesLeftAvg.add(playbackSamplesLeft);
+
 	if (samplesLeftAvg.size() >= 3) {
 		const float d = maxPitchShift;
-		const float AbcEst = samplesLeftAvg.getFloatMean();
-		const float AB = 1024; // Max buffer size
-		const float ratio = AB / ((1 + d) * AB - 2 * d * AbcEst);
+		const float avgSamplesLeft = samplesLeftAvg.getFloatMean();
+		const float maxBufferSize = 2048;
+		const float ratio = 1.0f / lerp(1.0f + d, 1.0f - d, clamp(avgSamplesLeft / maxBufferSize, 0.0f, 1.0f));
 		const int fromRate = lroundl(sourceSampleRate * ratio);
 
-		//Logger::logDev(toString(int(samplesLeft)) + " [" + toString(int(AbcEst)) + "], " + toString(ratio) + "x, " + toString(fromRate) + " Hz");
-		resampler->setRate(fromRate, 48000);
+		//Logger::logDev(toString(int(playbackSamplesLeftHW)) + " + " + toString(int(playbackSamplesLeftSW)) + " [" + toString(int(avgSamplesLeft)) + "], " + toString(ratio) + "x, " + toString(fromRate) + " Hz");
+		//resampler->setRate(fromRate, 48000);
+		resampler->setRateFrac(lroundl(fromRate * 1000), 48'000'000, lroundl(sourceSampleRate), 48000);
+	} else {
+		resampler->setRate(lroundl(sourceSampleRate), 48000);
 	}
 }

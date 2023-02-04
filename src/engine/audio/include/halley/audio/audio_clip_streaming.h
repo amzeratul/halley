@@ -11,12 +11,14 @@ namespace Halley
 		AudioClipStreaming(uint8_t numChannels);
 
 		void addInterleavedSamples(AudioSamplesConst src);
-		void addInterleavedSamplesWithResample(AudioSamplesConst src, float sourceSampleRate, std::optional<float> syncMaxPitchShift = std::nullopt);
+		void addInterleavedSamplesWithResample(AudioSamplesConst src, float sourceSampleRate);
+		void addInterleavedSamplesWithResampleSync(AudioSamplesConst src, float sourceSampleRate, float maxPitchShift, AudioOutputAPI& audioOut);
 
 		size_t copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const override;
 		uint8_t getNumberOfChannels() const override;
 		size_t getLength() const override;
 		size_t getSamplesLeft() const;
+		bool isLoaded() const override;
 
 	private:
 		std::atomic_size_t length;
@@ -24,11 +26,13 @@ namespace Halley
 		mutable Vector<Vector<AudioSample>> buffers;
 		mutable std::mutex mutex;
 		uint8_t numChannels = 0;
+		bool ready = false;
 
 		std::unique_ptr<AudioResampler> resampler;
 		Vector<float> resampleAudioBuffer;
 		RollingDataSet<size_t> samplesLeftAvg;
 
-		void updateSync(float maxPitchShift, float sourceSampleRate);
+		void doAddInterleavedSamplesWithResample(AudioSamplesConst src);
+		void updateSync(float maxPitchShift, float sourceSampleRate, AudioOutputAPI& audioOut);
 	};
 }
