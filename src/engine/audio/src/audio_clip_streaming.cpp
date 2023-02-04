@@ -12,7 +12,7 @@ AudioClipStreaming::AudioClipStreaming(uint8_t numChannels)
 	: length(0)
 	, samplesLeft(0)
 	, numChannels(numChannels)
-	, latencyTarget(1024)
+	, latencyTarget(2048)
 	, samplesLeftAvg(8)
 {
 	buffers.resize(numChannels);
