@@ -82,6 +82,8 @@ if (MSVC)
 	if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
 		add_definitions(-D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00 -DWINDOWS_STORE)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /await")
+	elseif(REQUIRE_WINDOWS_10)
+		add_definitions(-D_WIN32_WINNT=0x0A00 -DWINVER=0x0A00)
 	else()
 		add_definitions(-D_WIN32_WINNT=0x0601 -DWINVER=0x0601)
 	endif()
@@ -122,6 +124,7 @@ set(USE_METAL 0)
 set(USE_SDL2 1)
 set(USE_ASIO 1)
 set(USE_WINRT 0)
+set(USE_XAUDIO2 0)
 set(USE_MEDIA_FOUNDATION 0)
 set(USE_AVFOUNDATION 0)
 set(USE_ANDROID 0)
@@ -144,6 +147,7 @@ endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(USE_DX11 1)
+	set(USE_XAUDIO2 1)
 	set(USE_MEDIA_FOUNDATION 1)
 endif ()
 
@@ -154,6 +158,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
 	set(USE_OPENGL 0)
 	set(USE_ASIO 0)
 	set(USE_WINRT 1)
+	set(USE_XAUDIO2 1)
 endif ()
 
 if (APPLE)
@@ -235,6 +240,11 @@ if (USE_WINRT)
 	if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
 		add_definitions(-DWITH_WINRT)
 	endif()
+endif()
+
+# XAudio2
+if (USE_XAUDIO2)
+	add_definitions(-DWITH_XAUDIO2)
 endif()
 
 # Android
@@ -398,6 +408,14 @@ set(HALLEY_PROJECT_LIBS
 	)
 endif ()
 
+if (USE_XAUDIO2)
+set(HALLEY_PROJECT_LIBS
+	optimized halley-xaudio2
+	debug halley-xaudio2_d
+	${HALLEY_PROJECT_LIBS}
+	)
+endif ()
+
 if (USE_ANDROID)
 set(HALLEY_PROJECT_LIBS
 	optimized halley-android
@@ -507,6 +525,9 @@ function(halleyProject name sources headers proj_resources genDefinitions target
 		endif ()
 		if (USE_WINRT)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-winrt)
+		endif ()
+		if (USE_XAUDIO2)
+			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-xaudio2)
 		endif ()
 		if (USE_MEDIA_FOUNDATION)
 			SET(LINK_LIBRARIES ${LINK_LIBRARIES} halley-mf)

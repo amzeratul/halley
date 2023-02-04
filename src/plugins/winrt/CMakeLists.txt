@@ -9,7 +9,6 @@ set(SOURCES
     "src/winrt_platform.cpp"
     "src/winrt_plugin.cpp"
     "src/winrt_system.cpp"
-    "src/xaudio2_audio_output.cpp"
     )
 
 set(HEADERS
@@ -18,7 +17,6 @@ set(HEADERS
     "src/winrt_input.h"
     "src/winrt_platform.h"
     "src/winrt_system.h"
-    "src/xaudio2_audio_output.h"
     )
 
 assign_source_group(${SOURCES})

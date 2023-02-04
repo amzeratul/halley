@@ -1,5 +1,3 @@
-#ifdef WINDOWS_STORE
-
 #include "xaudio2_audio_output.h"
 #include "Xaudio2.h"
 using namespace Halley;
@@ -65,7 +63,7 @@ void XAudio2SourceVoice::queueAudio(gsl::span<const float> samples)
 	memcpy_s(data, samples.size_bytes(), samples.data(), samples.size_bytes());
 
 	buffer.Flags = 0;
-	buffer.AudioBytes = samples.size_bytes();
+	buffer.AudioBytes = static_cast<UINT32>(samples.size_bytes());
 	buffer.pAudioData = reinterpret_cast<const BYTE*>(data);
 	buffer.PlayBegin = 0;
 	buffer.PlayLength = 0;
@@ -170,10 +168,13 @@ void XAudio2AudioOutput::stopPlayback()
 	voice.reset();
 }
 
-void XAudio2AudioOutput::queueAudio(gsl::span<const float> data)
+void XAudio2AudioOutput::onAudioAvailable()
 {
-	if (voice) {
-		voice->queueAudio(data);
+	const size_t availableBytes = getAudioOutputInterface().getAvailable();
+	if (voice && availableBytes > 0) {
+		buffer.resize(availableBytes);
+		getAudioOutputInterface().output(gsl::as_writable_bytes(gsl::span<char>(buffer)), true);
+		voice->queueAudio(gsl::span<const float>(reinterpret_cast<const float*>(buffer.data()), buffer.size() / 4));
 	}
 }
 
@@ -191,5 +192,3 @@ IXAudio2& XAudio2AudioOutput::getXAudio2()
 {
 	return *xAudio2;
 }
-
-#endif

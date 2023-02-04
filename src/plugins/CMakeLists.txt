@@ -22,6 +22,10 @@ if (USE_WINRT)
     add_subdirectory(winrt)
 endif ()
 
+if (USE_XAUDIO2)
+    add_subdirectory(xaudio2)
+endif ()
+
 if (USE_MEDIA_FOUNDATION)
     add_subdirectory(mf)
 endif ()

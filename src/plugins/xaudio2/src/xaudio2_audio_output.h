@@ -1,6 +1,9 @@
 #pragma once
 #include "halley/core/api/halley_api_internal.h"
-#include "xaudio2.h"
+
+#define WINVER 0x0A00
+#define _WIN32_WINNT 0x0A00
+#include <xaudio2.h>
 
 namespace Halley
 {
@@ -64,7 +67,7 @@ namespace Halley
 	public:
 		void init() override;
 		void deInit() override;
-
+		
 		Vector<std::unique_ptr<const AudioDevice>> getAudioDevices() override;
 		AudioSpec openAudioDevice(const AudioSpec& requestedFormat, const AudioDevice* device, AudioCallback prepareAudioCallback) override;
 		void closeAudioDevice() override;
@@ -72,7 +75,7 @@ namespace Halley
 		void startPlayback() override;
 		void stopPlayback() override;
 
-		void queueAudio(gsl::span<const float> data) override;
+		void onAudioAvailable() override;
 		bool needsMoreAudio() override;
 
 		bool needsAudioThread() const override;
@@ -85,5 +88,6 @@ namespace Halley
 		std::unique_ptr<XAudio2SourceVoice> voice;
 		AudioCallback callback;
 		AudioSpec format;
+		Vector<char> buffer;
 	};
 }
