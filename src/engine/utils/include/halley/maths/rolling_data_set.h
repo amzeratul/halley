@@ -22,22 +22,28 @@ namespace Halley {
             pos = (pos + 1) % maxSize;
         }
 
-        T getMean() const
+        T getSum() const
         {
-            T a = 0;
+	        T a = 0;
             for (auto& v: data) {
                 a += v;
             }
-            return (a + data.size() / 2) / data.size();
+            return a;
+        }
+
+        T getMean() const
+        {
+            const auto a = getSum();
+            if constexpr (std::is_integral_v<T>) {
+                return (getSum() + data.size() / 2) / data.size();
+            } else {
+	           return getSum() / data.size();
+            }
         }
 
         float getFloatMean() const
         {
-            float a = 0;
-            for (auto& v: data) {
-                a += v;
-            }
-            return a / static_cast<float>(data.size());
+            return static_cast<float>(getSum()) / data.size();
         }
 
         size_t size() const
@@ -52,7 +58,7 @@ namespace Halley {
 
     private:
         Vector<T> data;
-        size_t maxSize;
-        size_t pos;
+        size_t maxSize = 0;
+        size_t pos = 0;
     };
 }

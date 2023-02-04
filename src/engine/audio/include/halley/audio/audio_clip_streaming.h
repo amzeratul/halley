@@ -12,7 +12,7 @@ namespace Halley
 
 		void addInterleavedSamples(AudioSamplesConst src);
 		void addInterleavedSamplesWithResample(AudioSamplesConst src, float sourceSampleRate);
-		void addInterleavedSamplesWithResampleSync(AudioSamplesConst src, float sourceSampleRate, float maxPitchShift, AudioOutputAPI& audioOut);
+		void addInterleavedSamplesWithResampleSync(AudioSamplesConst src, float sourceSampleRate, float maxPitchShift);
 
 		size_t copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const override;
 		uint8_t getNumberOfChannels() const override;
@@ -30,9 +30,10 @@ namespace Halley
 
 		std::unique_ptr<AudioResampler> resampler;
 		Vector<float> resampleAudioBuffer;
+
 		RollingDataSet<size_t> samplesLeftAvg;
 
 		void doAddInterleavedSamplesWithResample(AudioSamplesConst src);
-		void updateSync(float maxPitchShift, float sourceSampleRate, AudioOutputAPI& audioOut);
+		void updateSync(float maxPitchShift, float sourceSampleRate);
 	};
 }

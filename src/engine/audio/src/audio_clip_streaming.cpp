@@ -4,11 +4,16 @@
 
 using namespace Halley;
 
+namespace {
+	constexpr int outSampleRate = 48000;
+	const size_t maxBufferSize = 2048;
+}
+
 AudioClipStreaming::AudioClipStreaming(uint8_t numChannels)
 	: length(0)
 	, samplesLeft(0)
 	, numChannels(numChannels)
-	, samplesLeftAvg(4)
+	, samplesLeftAvg(8)
 {
 	buffers.resize(numChannels);
 }
@@ -30,7 +35,7 @@ void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
 	length += nSamples;
 	samplesLeft += nSamples;
 
-	if (samplesLeft > 512) {
+	if (samplesLeft >= maxBufferSize / 2) {
 		ready = true;
 	}
 }
@@ -38,7 +43,7 @@ void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
 void AudioClipStreaming::addInterleavedSamplesWithResample(AudioSamplesConst src, float sourceSampleRate)
 {
 	if (!resampler) {
-		resampler = std::make_unique<AudioResampler>(lroundl(sourceSampleRate), 48000, numChannels, 1.0f);
+		resampler = std::make_unique<AudioResampler>(lroundl(sourceSampleRate), outSampleRate, numChannels, 1.0f);
 	}
 
 	resampler->setFromHz(lroundl(sourceSampleRate));
@@ -46,13 +51,13 @@ void AudioClipStreaming::addInterleavedSamplesWithResample(AudioSamplesConst src
 	doAddInterleavedSamplesWithResample(src);
 }
 
-void AudioClipStreaming::addInterleavedSamplesWithResampleSync(AudioSamplesConst src, float sourceSampleRate, float maxPitchShift, AudioOutputAPI& audioOut)
+void AudioClipStreaming::addInterleavedSamplesWithResampleSync(AudioSamplesConst src, float sourceSampleRate, float maxPitchShift)
 {
 	if (!resampler) {
-		resampler = std::make_unique<AudioResampler>(lroundl(sourceSampleRate), 48000, numChannels, 1.0f);
+		resampler = std::make_unique<AudioResampler>(lroundl(sourceSampleRate), outSampleRate, numChannels, 1.0f);
 	}
 
-	updateSync(maxPitchShift, sourceSampleRate, audioOut);
+	updateSync(maxPitchShift, sourceSampleRate);
 
 	doAddInterleavedSamplesWithResample(src);
 }
@@ -113,7 +118,7 @@ void AudioClipStreaming::doAddInterleavedSamplesWithResample(AudioSamplesConst s
 	addInterleavedSamples(dst);
 }
 
-void AudioClipStreaming::updateSync(float maxPitchShift, float sourceSampleRate, AudioOutputAPI& audioOut)
+void AudioClipStreaming::updateSync(float maxPitchShift, float sourceSampleRate)
 {
 	// Based on paper
 	// "Dynamic Rate Control for Retro Game Emulators"
@@ -121,22 +126,19 @@ void AudioClipStreaming::updateSync(float maxPitchShift, float sourceSampleRate,
 	// December 12, 2012
 	// https://raw.githubusercontent.com/libretro/docs/master/archive/ratecontrol.pdf
 
-	const auto playbackSamplesLeftHW = audioOut.getSamplesSubmitted() - audioOut.getSamplesPlayed();
-	const auto playbackSamplesLeftSW = static_cast<size_t>(samplesLeft);
-	const auto playbackSamplesLeft = playbackSamplesLeftHW + playbackSamplesLeftSW;
+	const auto playbackSamplesLeft = samplesLeft.load();
 	samplesLeftAvg.add(playbackSamplesLeft);
 
 	if (samplesLeftAvg.size() >= 3) {
 		const float d = maxPitchShift;
 		const float avgSamplesLeft = samplesLeftAvg.getFloatMean();
-		const float maxBufferSize = 2048;
-		const float ratio = 1.0f / lerp(1.0f + d, 1.0f - d, clamp(avgSamplesLeft / maxBufferSize, 0.0f, 1.0f));
+		const float ratio = 1.0f / lerp(1.0f + d, 1.0f - d, clamp(avgSamplesLeft / static_cast<float>(maxBufferSize), 0.0f, 1.0f));
 		const int fromRate = lroundl(sourceSampleRate * ratio);
 
-		//Logger::logDev(toString(int(playbackSamplesLeftHW)) + " + " + toString(int(playbackSamplesLeftSW)) + " [" + toString(int(avgSamplesLeft)) + "], " + toString(ratio) + "x, " + toString(fromRate) + " Hz");
-		//resampler->setRate(fromRate, 48000);
-		resampler->setRateFrac(lroundl(fromRate * 1000), 48'000'000, lroundl(sourceSampleRate), 48000);
+		//Logger::logDev(toString(int(playbackSamplesLeft)) + " [" + toString(int(avgSamplesLeft)) + "], " + toString(ratio) + "x, " + toString(fromRate) + " Hz");
+		resampler->setRate(fromRate, outSampleRate);
+		//resampler->setRateFrac(lroundl(fromRate * 1000), 48'000'000, lroundl(sourceSampleRate), outSampleRate);
 	} else {
-		resampler->setRate(lroundl(sourceSampleRate), 48000);
+		resampler->setRate(lroundl(sourceSampleRate), outSampleRate);
 	}
 }

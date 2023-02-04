@@ -72,7 +72,7 @@ void AudioFacade::doStartPlayback(int deviceNumber, bool createEngine)
 		}
 
 		AudioSpec format;
-		format.bufferSize = 512;
+		format.bufferSize = 400;
 		format.format = AudioSampleFormat::Float;
 		format.numChannels = 2;
 		format.sampleRate = 48000;
