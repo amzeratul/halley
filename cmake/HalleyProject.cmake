@@ -147,8 +147,10 @@ endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(USE_DX11 1)
-	set(USE_XAUDIO2 1)
 	set(USE_MEDIA_FOUNDATION 1)
+	if (REQUIRE_WINDOWS_10)
+		set(USE_XAUDIO2 1)
+	endif()
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "WindowsStore")
