@@ -29,7 +29,9 @@ namespace Halley
 		bool ready = false;
 
 		std::unique_ptr<AudioResampler> resampler;
-		Vector<float> resampleAudioBuffer;
+		Vector<float> pending;
+		Vector<float> resampleDstBuffer;
+		Vector<float> resampleSrcBuffer;
 
 		RollingDataSet<size_t> samplesLeftAvg;
 

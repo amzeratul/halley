@@ -31,7 +31,7 @@ bool AudioFilterResample::getAudioData(size_t numSamples, AudioMultiChannelSampl
 
 	if (resamplers.empty()) {
 		for (size_t i = 0; i < nChannels; ++i) {
-			resamplers.push_back(std::make_unique<AudioResampler>(fromHz, toHz, 1, 0.0f));
+			resamplers.push_back(std::make_unique<AudioResampler>(static_cast<float>(fromHz), static_cast<float>(toHz), 1, 0.0f));
 		}
 	}
 
@@ -84,6 +84,6 @@ void AudioFilterResample::restart()
 void AudioFilterResample::setFromHz(int fromHz)
 {
 	for (auto& r: resamplers) {
-		r->setFromHz(fromHz);
+		r->setFromHz(static_cast<float>(fromHz));
 	}
 }

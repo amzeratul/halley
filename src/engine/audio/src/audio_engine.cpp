@@ -159,7 +159,7 @@ void AudioEngine::start(AudioSpec s, AudioOutputAPI& o, const AudioProperties& a
 	channels[1].pan = 1.0f;
 
 	if (spec.sampleRate != 48000) {
-		outResampler = std::make_unique<AudioResampler>(48000, spec.sampleRate, spec.numChannels, Debug::isDebug() ? 0.0f : 0.5f);
+		outResampler = std::make_unique<AudioResampler>(48000.0f, static_cast<float>(spec.sampleRate), spec.numChannels, Debug::isDebug() ? 0.0f : 0.5f);
 	}
 
 	loadBuses();

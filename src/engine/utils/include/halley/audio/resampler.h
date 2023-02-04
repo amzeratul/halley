@@ -17,7 +17,7 @@ namespace Halley
 	class AudioResampler
 	{
 	public:
-		AudioResampler(int from, int to, int nChannels, float quality = 1.0f);
+		AudioResampler(float from, float to, int nChannels, float quality = 1.0f);
 		~AudioResampler();
 
 		size_t numOutputSamples(size_t numInputSamples) const;
@@ -27,15 +27,15 @@ namespace Halley
 		AudioResamplerResult resampleInterleaved(gsl::span<const short> src, gsl::span<short> dst);
 		AudioResamplerResult resampleNonInterleaved(gsl::span<const float> src, gsl::span<float> dst, const size_t numChannels);
 
-		void setFromHz(int from);
-		void setToHz(int to);
-		void setRate(int from, int to);
-		void setRateFrac(int num, int denum, int from, int to);
+		void setFromHz(float from);
+		void setToHz(float to);
+		void setRate(float from, float to);
 
 	private:
 		std::unique_ptr<SpeexResamplerState, void(*)(SpeexResamplerState*)> resampler;
 		size_t nChannels;
-		int from;
-		int to;
+		float from;
+		float to;
 	};
+	
 }

@@ -5,7 +5,7 @@
 using namespace Halley;
 
 namespace {
-	constexpr int outSampleRate = 48000;
+	constexpr float outSampleRate = 48000.0f;
 	const size_t maxBufferSize = 2048;
 }
 
@@ -43,10 +43,10 @@ void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
 void AudioClipStreaming::addInterleavedSamplesWithResample(AudioSamplesConst src, float sourceSampleRate)
 {
 	if (!resampler) {
-		resampler = std::make_unique<AudioResampler>(lroundl(sourceSampleRate), outSampleRate, numChannels, 1.0f);
+		resampler = std::make_unique<AudioResampler>(sourceSampleRate, outSampleRate, numChannels, 1.0f);
 	}
 
-	resampler->setFromHz(lroundl(sourceSampleRate));
+	resampler->setRate(sourceSampleRate, outSampleRate);
 
 	doAddInterleavedSamplesWithResample(src);
 }
@@ -54,7 +54,7 @@ void AudioClipStreaming::addInterleavedSamplesWithResample(AudioSamplesConst src
 void AudioClipStreaming::addInterleavedSamplesWithResampleSync(AudioSamplesConst src, float sourceSampleRate, float maxPitchShift)
 {
 	if (!resampler) {
-		resampler = std::make_unique<AudioResampler>(lroundl(sourceSampleRate), outSampleRate, numChannels, 1.0f);
+		resampler = std::make_unique<AudioResampler>(sourceSampleRate, outSampleRate, numChannels, 1.0f);
 	}
 
 	updateSync(maxPitchShift, sourceSampleRate);
@@ -104,18 +104,37 @@ bool AudioClipStreaming::isLoaded() const
 	return ready;
 }
 
-void AudioClipStreaming::doAddInterleavedSamplesWithResample(AudioSamplesConst src)
+void AudioClipStreaming::doAddInterleavedSamplesWithResample(AudioSamplesConst origSrc)
 {
-	const auto nOut = resampler->numOutputSamples(src.size());
-	const auto minBufferSize = nextPowerOf2(nOut + numChannels); // Not sure if the extra sample per channel is needed
-	if (resampleAudioBuffer.size() < minBufferSize) {
-		resampleAudioBuffer.resize(minBufferSize);
+	AudioSamplesConst src;
+	if (pending.empty()) {
+		src = origSrc;
+	} else {
+		resampleSrcBuffer.resize(pending.size() + origSrc.size());
+		memcpy(resampleSrcBuffer.data(), pending.data(), pending.size() * sizeof(float));
+		memcpy(resampleSrcBuffer.data() + pending.size(), origSrc.data(), origSrc.size_bytes());
+		pending.clear();
+		src = resampleSrcBuffer;
 	}
 
-	const auto dst = gsl::span<float>(resampleAudioBuffer.data(), nOut);
-	resampler->resampleInterleaved(src, dst);
+	const auto nOut = resampler->numOutputSamples(src.size());
+	const auto minBufferSize = nextPowerOf2(nOut + numChannels); // Not sure if the extra sample per channel is needed
+	if (resampleDstBuffer.size() < minBufferSize) {
+		resampleDstBuffer.resize(minBufferSize);
+	}
 
-	addInterleavedSamples(dst);
+	const auto dst = gsl::span<float>(resampleDstBuffer.data(), nOut);
+	const auto result = resampler->resampleInterleaved(src, dst);
+
+	const size_t srcSamplesRead = result.nRead * numChannels;
+	const size_t srcSamplesNotRead = src.size() - srcSamplesRead;
+	if (srcSamplesNotRead > 0) {
+		pending.resize(srcSamplesNotRead);
+		memcpy(pending.data(), src.data() + srcSamplesRead, srcSamplesNotRead);
+	}
+	resampleSrcBuffer.clear();
+
+	addInterleavedSamples(dst.subspan(0, result.nWritten * numChannels));
 }
 
 void AudioClipStreaming::updateSync(float maxPitchShift, float sourceSampleRate)
@@ -133,12 +152,12 @@ void AudioClipStreaming::updateSync(float maxPitchShift, float sourceSampleRate)
 		const float d = maxPitchShift;
 		const float avgSamplesLeft = samplesLeftAvg.getFloatMean();
 		const float ratio = 1.0f / lerp(1.0f + d, 1.0f - d, clamp(avgSamplesLeft / static_cast<float>(maxBufferSize), 0.0f, 1.0f));
-		const int fromRate = lroundl(sourceSampleRate * ratio);
+		const auto fromRate = sourceSampleRate * ratio;
 
 		//Logger::logDev(toString(int(playbackSamplesLeft)) + " [" + toString(int(avgSamplesLeft)) + "], " + toString(ratio) + "x, " + toString(fromRate) + " Hz");
 		resampler->setRate(fromRate, outSampleRate);
 		//resampler->setRateFrac(lroundl(fromRate * 1000), 48'000'000, lroundl(sourceSampleRate), outSampleRate);
 	} else {
-		resampler->setRate(lroundl(sourceSampleRate), outSampleRate);
+		resampler->setRate(sourceSampleRate, outSampleRate);
 	}
 }
