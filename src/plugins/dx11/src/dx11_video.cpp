@@ -67,12 +67,13 @@ void DX11Video::initD3D(Window& window)
 #endif
 
 	ID3D11DeviceContext* dc;
-	D3D_FEATURE_LEVEL featureLevels[] = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0 };
+	D3D_FEATURE_LEVEL featureLevels[] = { D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0 };
 	uint32_t flags = 0;
 	if (Debug::isDebug()) {
 		flags |= D3D11_CREATE_DEVICE_DEBUG;
 	}
-	auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, featureLevels, 3, D3D11_SDK_VERSION, &device, nullptr, &dc);
+	D3D_FEATURE_LEVEL featureLevel;
+	const auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, featureLevels, 4, D3D11_SDK_VERSION, &device, &featureLevel, &dc);
 	if (result != S_OK) {
 		throw Exception("Unable to initialise DX11", HalleyExceptions::VideoPlugin);
 	}
