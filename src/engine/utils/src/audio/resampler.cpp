@@ -3,11 +3,13 @@
 
 using namespace Halley;
 
-static std::unique_ptr<SpeexResamplerState, void(*)(SpeexResamplerState*)> makeResampler(int from, int to, int channels, float quality)
-{
-	int err;
-	auto * rawResampler = speex_resampler_init(unsigned(channels), unsigned(from), unsigned(to), std::max(0, std::min(int(quality * 10 + 0.5f), 10)), &err);
-	return std::unique_ptr<SpeexResamplerState, void(*)(SpeexResamplerState*)>(rawResampler, [] (SpeexResamplerState* s) { speex_resampler_destroy(s); });
+namespace {
+	std::unique_ptr<SpeexResamplerState, void(*)(SpeexResamplerState*)> makeResampler(int from, int to, int channels, float quality)
+	{
+		int err;
+		auto* rawResampler = speex_resampler_init(unsigned(channels), unsigned(from), unsigned(to), std::max(0, std::min(int(quality * 10 + 0.5f), 10)), &err);
+		return std::unique_ptr<SpeexResamplerState, void(*)(SpeexResamplerState*)>(rawResampler, [](SpeexResamplerState* s) { speex_resampler_destroy(s); });
+	}
 }
 
 AudioResampler::AudioResampler(int from, int to, int nChannels, float quality)
@@ -19,6 +21,30 @@ AudioResampler::AudioResampler(int from, int to, int nChannels, float quality)
 }
 
 AudioResampler::~AudioResampler() = default;
+
+size_t AudioResampler::numOutputSamples(size_t numInputSamples) const
+{
+	return numInputSamples * to / from;
+}
+
+void AudioResampler::setFromHz(int from)
+{
+	this->from = from;
+	speex_resampler_set_rate(resampler.get(), from, to);
+}
+
+void AudioResampler::setToHz(int to)
+{
+	this->to = to;
+	speex_resampler_set_rate(resampler.get(), from, to);
+}
+
+void AudioResampler::setRate(int from, int to)
+{
+	this->from = from;
+	this->to = to;
+	speex_resampler_set_rate(resampler.get(), from, to);
+}
 
 AudioResamplerResult AudioResampler::resample(gsl::span<const float> src, gsl::span<float> dst, size_t channel)
 {
@@ -53,7 +79,7 @@ AudioResamplerResult AudioResampler::resampleInterleaved(gsl::span<const short> 
 	return result;
 }
 
-AudioResamplerResult AudioResampler::resampleNoninterleaved(gsl::span<const float> src, gsl::span<float> dst, const size_t numChannels)
+AudioResamplerResult AudioResampler::resampleNonInterleaved(gsl::span<const float> src, gsl::span<float> dst, const size_t numChannels)
 {
 	AudioResamplerResult result;
 	result.nRead = 0;
@@ -68,15 +94,4 @@ AudioResamplerResult AudioResampler::resampleNoninterleaved(gsl::span<const floa
 	}
 
 	return result;
-}
-
-size_t AudioResampler::numOutputSamples(size_t numInputSamples) const
-{
-	return numInputSamples * to / from;
-}
-
-void AudioResampler::setFromHz(int from)
-{
-	this->from = from;
-	speex_resampler_set_rate(resampler.get(), from, to);
 }

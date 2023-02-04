@@ -4,7 +4,9 @@
 using namespace Halley;
 
 AudioClipStreaming::AudioClipStreaming(uint8_t numChannels)
-	: numChannels(numChannels)
+	: length(0)
+	, samplesLeft(0)
+	, numChannels(numChannels)
 {
 	buffers.resize(numChannels);
 }
@@ -24,6 +26,25 @@ void AudioClipStreaming::addInterleavedSamples(AudioSamplesConst src)
 	}
 
 	length += nSamples;
+	samplesLeft += nSamples;
+}
+
+void AudioClipStreaming::addInterleavedSamplesWithResample(AudioSamplesConst src, float sourceSampleRate)
+{
+	if (!resampler) {
+		resampler = std::make_unique<AudioResampler>(lroundl(sourceSampleRate), 48000, numChannels, 1.0f);
+	}
+
+	const auto nOut = resampler->numOutputSamples(src.size());
+	const auto minBufferSize = nextPowerOf2(nOut + numChannels); // Not sure if the extra sample per channel is needed
+	if (resampleAudioBuffer.size() < minBufferSize) {
+		resampleAudioBuffer.resize(minBufferSize);
+	}
+
+	const auto dst = gsl::span<float>(resampleAudioBuffer.data(), nOut);
+	resampler->resampleInterleaved(src, dst);
+
+	addInterleavedSamples(dst);
 }
 
 size_t AudioClipStreaming::copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const
@@ -38,9 +59,9 @@ size_t AudioClipStreaming::copyChannelData(size_t channelN, size_t pos, size_t l
 
 	if (toWrite < len) {
 		AudioMixer::zero(dst.subspan(toWrite, len - toWrite));
-		//AudioMixer::copy(dst.subspan(toWrite, len - toWrite), AudioSamples(buffer).subspan(toWrite, len - toWrite), gain1, gain1);
-		//memcpy(dst.data() + toWrite, buffer.data() + toWrite, (len - toWrite) * sizeof(AudioSample));
 	}
+
+	samplesLeft -= toWrite;
 
 	return len;
 }
@@ -57,6 +78,5 @@ size_t AudioClipStreaming::getLength() const
 
 size_t AudioClipStreaming::getSamplesLeft() const
 {
-	std::unique_lock<std::mutex> lock(mutex);
-	return buffers.at(0).size();
+	return samplesLeft;
 }

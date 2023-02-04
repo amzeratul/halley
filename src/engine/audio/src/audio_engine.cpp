@@ -209,7 +209,7 @@ void AudioEngine::generateBuffer()
 		const auto resampledBuffer = pool->getBuffer(samplesToRead * numChannels * spec.sampleRate / 48000 + 16);
 		const auto srcSpan = bufferRef.getSpan().subspan(0, samplesToRead * numChannels);
 		const auto dstSpan = resampledBuffer.getSpan();
-		auto result = interleave ? outResampler->resampleInterleaved(srcSpan, dstSpan) : outResampler->resampleNoninterleaved(srcSpan, dstSpan, numChannels);
+		auto result = interleave ? outResampler->resampleInterleaved(srcSpan, dstSpan) : outResampler->resampleNonInterleaved(srcSpan, dstSpan, numChannels);
 		if (result.nRead != samplesToRead) {
 			Logger::logError("Audio resampler failed to read all input sample data.");
 		}
