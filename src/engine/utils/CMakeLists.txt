@@ -172,6 +172,7 @@ set(HEADERS
         "include/halley/maths/quaternion.h"
         "include/halley/maths/random.h"
         "include/halley/maths/ray.h"
+        "include/halley/maths/rolling_data_set.h"
         "include/halley/maths/sphere.h"
         "include/halley/maths/triangle.h"
         "include/halley/maths/uuid.h"

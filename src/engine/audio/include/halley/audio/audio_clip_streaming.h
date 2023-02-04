@@ -1,6 +1,7 @@
 #pragma once
 #include "audio_clip.h"
 #include "halley/audio/resampler.h"
+#include "halley/maths/rolling_data_set.h"
 
 namespace Halley
 {
@@ -10,7 +11,7 @@ namespace Halley
 		AudioClipStreaming(uint8_t numChannels);
 
 		void addInterleavedSamples(AudioSamplesConst src);
-		void addInterleavedSamplesWithResample(AudioSamplesConst src, float sourceSampleRate);
+		void addInterleavedSamplesWithResample(AudioSamplesConst src, float sourceSampleRate, std::optional<float> syncMaxPitchShift = std::nullopt);
 
 		size_t copyChannelData(size_t channelN, size_t pos, size_t len, float gain0, float gain1, AudioSamples dst) const override;
 		uint8_t getNumberOfChannels() const override;
@@ -26,5 +27,8 @@ namespace Halley
 
 		std::unique_ptr<AudioResampler> resampler;
 		Vector<float> resampleAudioBuffer;
+		RollingDataSet<size_t> samplesLeftAvg;
+
+		void updateSync(float maxPitchShift, float sourceSampleRate);
 	};
 }
