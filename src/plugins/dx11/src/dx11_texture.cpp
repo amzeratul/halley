@@ -75,11 +75,14 @@ void DX11Texture::doLoad(TextureDescriptor& descriptor)
 	case TextureFormat::Depth:
 		desc.Format = DXGI_FORMAT_R24G8_TYPELESS;
 		break;
-	case TextureFormat::RGB565:
+	case TextureFormat::BGR565:
 		desc.Format = DXGI_FORMAT_B5G6R5_UNORM;
 		break;
-	case TextureFormat::RGBA5551:
+	case TextureFormat::BGRA5551:
 		desc.Format = DXGI_FORMAT_B5G5R5A1_UNORM;
+		break;
+	case TextureFormat::BGRX:
+		desc.Format = DXGI_FORMAT_B8G8R8X8_UNORM;
 		break;
 	default:
 		throw Exception("Unknown texture format", HalleyExceptions::VideoPlugin);
