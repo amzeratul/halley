@@ -111,6 +111,15 @@ uint16_t NetworkSession::getClientCount() const
 	}
 }
 
+Vector<NetworkSession::PeerId> NetworkSession::getRemotePeers() const
+{
+	Vector<PeerId> result;
+	for (auto& peer: peers) {
+		result.push_back(peer.peerId);
+	}
+	return result;
+}
+
 void NetworkSession::update(Time t)
 {
 	service.update(t);

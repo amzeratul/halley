@@ -46,6 +46,7 @@ namespace Halley {
 
 		std::optional<PeerId> getMyPeerId() const;
 		uint16_t getClientCount() const;
+		Vector<PeerId> getRemotePeers() const;
 
 		ConnectionStatus getStatus() const;
 		NetworkSessionType getType() const;
