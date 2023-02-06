@@ -103,7 +103,7 @@ void PrefabEditor::open()
 	Expects (project.isDLLLoaded());
 	
 	if (!window) {
-		window = std::make_shared<SceneEditorWindow>(factory, project, projectWindow.getAPI(), projectWindow, *this);
+		window = std::make_shared<SceneEditorWindow>(factory, project, projectWindow.getAPI(), projectWindow, *this, assetType);
 		add(window, 1);
 	}
 	if (assetType == AssetType::Scene || assetType == AssetType::Prefab) {

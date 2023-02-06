@@ -401,6 +401,7 @@ namespace Halley {
 		virtual Path getPrimaryInputFile(AssetType type, const String& assetId, bool absolute) const = 0;
 
 		virtual String getCurrentAssetId() const = 0;
+		virtual bool isScene() const = 0;
 
 		virtual Resources& getGameResources() const = 0;
 

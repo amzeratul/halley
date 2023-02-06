@@ -15,8 +15,6 @@ SceneEditorGameBridge::SceneEditorGameBridge(const HalleyAPI& api, Resources& re
 	, factory(factory)
 	, sceneEditorWindow(sceneEditorWindow)
 {
-	gizmos = std::make_unique<SceneEditorGizmoCollection>(factory, resources, sceneEditorWindow);
-
 	gameResources = &project.getGameResources();
 	project.withLoadedDLL([&] (ProjectDLL& dll)
 	{
@@ -96,8 +94,11 @@ void SceneEditorGameBridge::initializeInterfaceIfNeeded(bool force)
 	}
 }
 
-SceneEditorGizmoCollection& SceneEditorGameBridge::getGizmos() const
+SceneEditorGizmoCollection& SceneEditorGameBridge::getGizmos()
 {
+	if (!gizmos) {
+		gizmos = std::make_unique<SceneEditorGizmoCollection>(factory, resources, sceneEditorWindow);
+	}
 	return *gizmos;
 }
 
@@ -388,7 +389,7 @@ void SceneEditorGameBridge::load()
 		context.resources = gameResources;
 		context.editorResources = &resources;
 		context.api = gameAPI.get();
-		context.gizmos = gizmos.get();
+		context.gizmos = &getGizmos();
 		context.editorInterface = this;
 
 		guardedRun([&]() {

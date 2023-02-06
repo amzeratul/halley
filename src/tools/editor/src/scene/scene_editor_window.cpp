@@ -21,15 +21,16 @@
 #include "src/ui/project_window.h"
 using namespace Halley;
 
-SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, ProjectWindow& projectWindow, PrefabEditor& parentEditor)
+SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, ProjectWindow& projectWindow, PrefabEditor& parentEditor, AssetType assetType)
 	: UIWidget("scene_editor", {}, UISizer())
 	, api(api)
 	, uiFactory(factory)
 	, project(project)
 	, projectWindow(projectWindow)
+	, parentEditor(parentEditor)
+	, assetType(assetType)
 	, gameBridge(std::make_shared<SceneEditorGameBridge>(api, uiFactory.getResources(), uiFactory, project, projectWindow, *this))
 	, entityIcons(std::make_shared<EntityIcons>(project.getGameResources(), *factory.getColourScheme()))
-	, parentEditor(parentEditor)
 {
 	makeUI();
 
@@ -260,6 +261,11 @@ void SceneEditorWindow::unloadScene()
 	entityEditor->unloadValidator();
 	entityValidator.reset();
 	entityList->setSceneData({});
+}
+
+bool SceneEditorWindow::isScene() const
+{
+	return assetType == AssetType::Scene;
 }
 
 void SceneEditorWindow::update(Time t, bool moved)

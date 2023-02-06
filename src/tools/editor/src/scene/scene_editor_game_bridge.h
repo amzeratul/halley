@@ -25,7 +25,7 @@ namespace Halley {
 		ISceneEditor& getInterface() const;
 		void initializeInterfaceIfNeeded(bool force);
 
-		SceneEditorGizmoCollection& getGizmos() const;
+		SceneEditorGizmoCollection& getGizmos();
 
 		void changeZoom(int amount, Vector2f mousePos);
 		void dragCamera(Vector2f pos);

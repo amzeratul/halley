@@ -21,7 +21,7 @@ namespace Halley {
 
 	class SceneEditorWindow final : public UIWidget, public IProjectDLLListener, public ISceneEditorWindow {
 	public:
-		SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, ProjectWindow& projectWindow, PrefabEditor& parentEditor);
+		SceneEditorWindow(UIFactory& factory, Project& project, const HalleyAPI& api, ProjectWindow& projectWindow, PrefabEditor& parentEditor, AssetType assetType);
 		~SceneEditorWindow();
 
 		void onAddedToRoot(UIRoot& root) override;
@@ -29,6 +29,7 @@ namespace Halley {
 		bool loadSceneFromFile(AssetType assetType, const String& name);
 		void loadScene(const Prefab& prefab);
 		void unloadScene();
+		bool isScene() const override;
 
 		void onComponentRemoved(const String& name) override;
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);
@@ -153,6 +154,7 @@ namespace Halley {
 		Project& project;
 		ProjectWindow& projectWindow;
 		PrefabEditor& parentEditor;
+		AssetType assetType;
 
 		std::shared_ptr<SceneEditorGameBridge> gameBridge;
 		std::shared_ptr<SceneEditorCanvas> canvas;

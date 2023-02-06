@@ -1,5 +1,6 @@
 #include "scene_editor_gizmo_collection.h"
 
+#include "gizmos/comments_gizmo.h"
 #include "gizmos/scripting/scripting_gizmo.h"
 #include "gizmos/translate_gizmo.h"
 #include "gizmos/selected_bounds_gizmo.h"
@@ -181,6 +182,14 @@ void SceneEditorGizmoCollection::resetTools()
 			return std::make_unique<TranslateGizmo>(snapRules, factory, sceneEditorWindow);
 		}
 	);
+	if (sceneEditorWindow.isScene()) {
+		addTool(Tool("comments", LocalisedString::fromHardcodedString("Comments [M]"), Sprite().setImage(resources, "ui/scene_editor_comments.png"), KeyCode::M),
+			[this] (SnapRules snapRules, const String& componentName, const String& fieldName)
+			{
+				return std::make_unique<CommentsGizmo>(snapRules, factory, sceneEditorWindow);
+			}
+		);
+	}
 	addTool(Tool("scripting", LocalisedString::fromHardcodedString("Scripting [S]"), Sprite().setImage(resources, "ui/scene_editor_scripting.png"), KeyCode::S),
 		[this] (SnapRules snapRules, const String& componentName, const String& fieldName)
 		{
