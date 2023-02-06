@@ -34,7 +34,14 @@ namespace Halley {
 		virtual ~IScriptEnvironmentInterface() = default;
 	};
 
-    class INetworkSystemInterface : public IScriptEnvironmentInterface {
+    class INetworkLock {
+    public:
+        virtual ~INetworkLock() = default;
+    };
+
+    using NetworkLockHandle = std::unique_ptr<INetworkLock>;
+
+    class INetworkLockSystemInterface : public IScriptEnvironmentInterface {
 	public:
         enum class LockStatus {
 	        Unlocked,
@@ -42,11 +49,10 @@ namespace Halley {
             AcquiredByOther
         };
 
-    	virtual ~INetworkSystemInterface() = default;
+    	virtual ~INetworkLockSystemInterface() = default;
 
         virtual LockStatus getLockStatus(EntityId playerId, EntityId targetId) const = 0;
-        virtual Future<bool> lockAcquire(EntityId playerId, EntityId targetId) = 0;
-        virtual void lockRelease(EntityId playerId, EntityId targetId) = 0;
+        virtual Future<NetworkLockHandle> lockAcquire(EntityId playerId, EntityId targetId) = 0;
 	};
 
     class ScriptEnvironment: private IEntityFactoryContext {

@@ -61,7 +61,8 @@ namespace Halley {
 		ScriptLockData(const ConfigNode& node);
 		ConfigNode toConfigNode(const EntitySerializationContext& context) override;
 
-		Future<bool> requestPending;
+		Future<NetworkLockHandle> requestPending;
+		NetworkLockHandle lock;
 	};
 
 	class ScriptLock final : public ScriptNodeTypeBase<ScriptLockData> {
@@ -71,7 +72,9 @@ namespace Halley {
 		String getIconName(const ScriptGraphNode& node) const override { return "script_icons/lock.png"; }
 		ScriptNodeClassification getClassification() const override { return ScriptNodeClassification::Action; }
 
+		bool hasDestructor(const ScriptGraphNode& node) const override;
 		void doInitData(ScriptLockData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const override;
+		void doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptLockData& data) const override;
 		String getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const override;
 		gsl::span<const PinType> getPinConfiguration(const ScriptGraphNode& node) const override;
 		std::pair<String, Vector<ColourOverride>> getNodeDescription(const ScriptGraphNode& node, const World* world, const ScriptGraph& graph) const override;

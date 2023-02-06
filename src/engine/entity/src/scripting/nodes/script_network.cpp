@@ -114,9 +114,21 @@ ConfigNode ScriptLockData::toConfigNode(const EntitySerializationContext& contex
 	return {};
 }
 
+bool ScriptLock::hasDestructor(const ScriptGraphNode& node) const
+{
+	return true;
+}
+
 void ScriptLock::doInitData(ScriptLockData& data, const ScriptGraphNode& node, const EntitySerializationContext& context, const ConfigNode& nodeData) const
 {
-	data.requestPending = Future<bool>();
+	data.lock = {};
+	data.requestPending = {};
+}
+
+void ScriptLock::doDestructor(ScriptEnvironment& environment, const ScriptGraphNode& node, ScriptLockData& data) const
+{
+	data.lock = {};
+	data.requestPending = {};
 }
 
 String ScriptLock::getPinDescription(const ScriptGraphNode& node, PinType elementType, GraphPinId elementIdx) const
@@ -155,13 +167,13 @@ std::pair<String, Vector<ColourOverride>> ScriptLock::getNodeDescription(const S
 IScriptNodeType::Result ScriptLock::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLockData& data) const
 {
 	if (!data.requestPending.isValid()) {
-		data.requestPending = environment.getInterface<INetworkSystemInterface>().lockAcquire(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
+		data.requestPending = environment.getInterface<INetworkLockSystemInterface>().lockAcquire(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
 	}
 
 	if (data.requestPending.hasValue()) {
 		// Got response
-		const bool success = data.requestPending.get();
-		return Result(ScriptNodeExecutionState::Done, 0, success ? 1 : 2);
+		data.lock = data.requestPending.get();
+		return Result(ScriptNodeExecutionState::Done, 0, data.lock ? 1 : 2);
 	} else {
 		// Waiting
 		return Result(ScriptNodeExecutionState::Executing, time);
@@ -195,8 +207,8 @@ std::pair<String, Vector<ColourOverride>> ScriptLockAvailable::getNodeDescriptio
 
 ConfigNode ScriptLockAvailable::doGetData(ScriptEnvironment& environment, const ScriptGraphNode& node, size_t pinN) const
 {
-	const auto status = environment.getInterface<INetworkSystemInterface>().getLockStatus(readEntityId(environment, node, 0), readEntityId(environment, node, 1));
-	return ConfigNode(status == INetworkSystemInterface::LockStatus::Unlocked || status == INetworkSystemInterface::LockStatus::AcquiredByMe);
+	const auto status = environment.getInterface<INetworkLockSystemInterface>().getLockStatus(readEntityId(environment, node, 0), readEntityId(environment, node, 1));
+	return ConfigNode(status == INetworkLockSystemInterface::LockStatus::Unlocked || status == INetworkLockSystemInterface::LockStatus::AcquiredByMe);
 }
 
 
@@ -257,8 +269,8 @@ std::pair<String, Vector<ColourOverride>> ScriptLockAvailableGate::getNodeDescri
 
 IScriptNodeType::Result ScriptLockAvailableGate::doUpdate(ScriptEnvironment& environment, Time time, const ScriptGraphNode& node, ScriptLockAvailableGateData& data) const
 {
-	const auto lockStatus = environment.getInterface<INetworkSystemInterface>().getLockStatus(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
-	const bool shouldFlow = lockStatus == INetworkSystemInterface::LockStatus::Unlocked || lockStatus == INetworkSystemInterface::LockStatus::AcquiredByMe;
+	const auto lockStatus = environment.getInterface<INetworkLockSystemInterface>().getLockStatus(readEntityId(environment, node, 1), readEntityId(environment, node, 2));
+	const bool shouldFlow = lockStatus == INetworkLockSystemInterface::LockStatus::Unlocked || lockStatus == INetworkLockSystemInterface::LockStatus::AcquiredByMe;
 
 	if (shouldFlow != data.flowing) {
 		data.flowing = shouldFlow;
