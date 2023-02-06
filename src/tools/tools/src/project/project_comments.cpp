@@ -10,6 +10,7 @@ ProjectComment::ProjectComment(const ConfigNode& node)
 {
 	pos = node["pos"].asVector2f({});
 	text = node["text"].asString({});
+	scene = node["scene"].asString({});
 	priority = node["priority"].asEnum<ProjectCommentPriority>({});
 }
 
@@ -18,6 +19,7 @@ ConfigNode ProjectComment::toConfigNode() const
 	ConfigNode::MapType result;
 	result["pos"] = pos;
 	result["text"] = text;
+	result["scene"] = scene;
 	result["priority"] = priority;
 	return result;
 }
@@ -39,9 +41,15 @@ ProjectComments::ProjectComments(Path commentsRoot)
 	loadAll();
 }
 
-const HashMap<UUID, ProjectComment>& ProjectComments::getComments() const
+Vector<UUID> ProjectComments::getComments(const String& scene) const
 {
-	return comments;
+	Vector<UUID> result;
+	for (auto& [k, v]: comments) {
+		if (v.scene == scene) {
+			result.push_back(k);
+		}
+	}
+	return result;
 }
 
 const ProjectComment& ProjectComments::getComment(const UUID& id) const
@@ -75,8 +83,14 @@ uint64_t ProjectComments::getVersion() const
 
 void ProjectComments::update(Time t)
 {
-	if (monitor.poll()) {
-		loadAll();
+	monitorTime += t;
+	const auto threshold = monitor.hasRealImplementation() ? 0.5 : 2.0;
+
+	if (monitorTime > threshold) {
+		monitorTime = 0;
+		if (monitor.poll()) {
+			loadAll();
+		}
 	}
 }
 

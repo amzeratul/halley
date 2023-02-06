@@ -29,6 +29,7 @@ namespace Halley {
         Vector2f pos;
         String text;
         ProjectCommentPriority priority;
+        String scene;
 
         ProjectComment() = default;
         ProjectComment(const ConfigNode& node);
@@ -42,7 +43,7 @@ namespace Halley {
     public:
         ProjectComments(Path commentsRoot);
 
-        const HashMap<UUID, ProjectComment>& getComments() const;
+        Vector<UUID> getComments(const String& scene) const;
         const ProjectComment& getComment(const UUID& id) const;
 
         UUID addComment(ProjectComment comment);
@@ -55,6 +56,7 @@ namespace Halley {
     private:
         Path commentsRoot;
         DirectoryMonitor monitor;   // Important, this needs to be after commentsRoot, as it has dependent initialization
+        Time monitorTime = 0;
 
         HashMap<UUID, ProjectComment> comments;
         uint64_t version = 0;
