@@ -75,6 +75,8 @@ void Project::update(Time time)
 	{
 		dll.reloadIfChanged();
 	});
+
+	comments->update(time);
 }
 
 void Project::onBuildDone()
