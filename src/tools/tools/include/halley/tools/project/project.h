@@ -15,6 +15,7 @@
 
 namespace Halley
 {
+	class ProjectComments;
 	class GameProperties;
 	class IHalleyEntryPoint;
 	class ProjectLoader;
@@ -86,6 +87,7 @@ namespace Halley
 		void removeAssetLoadedListener(IAssetLoadListener* listener);
 		
 		ProjectProperties& getProperties() const;
+		ProjectComments& getComments() const;
 		GameProperties& getGameProperties() const;
 
 		Metadata getImportMetadata(AssetType type, const String& assetId) const;
@@ -152,7 +154,9 @@ namespace Halley
 		std::unique_ptr<ImportAssetsDatabase> codegenDatabase;
 		std::unique_ptr<ImportAssetsDatabase> sharedCodegenDatabase;
 		std::shared_ptr<AssetImporter> assetImporter;
+
 		std::unique_ptr<ProjectProperties> properties;
+		std::unique_ptr<ProjectComments> comments;
 		std::unique_ptr<GameProperties> gameProperties;
 		std::unique_ptr<ECSData> ecsData;
 

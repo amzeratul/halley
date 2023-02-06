@@ -369,6 +369,8 @@ namespace Halley {
 		virtual ISceneEditorWindow& getSceneEditorWindow() = 0;
 		virtual bool canBoxSelectEntities() = 0;
 	};
+
+	class IProject;
 	
 	class ISceneEditorWindow {
 	public:
@@ -406,6 +408,8 @@ namespace Halley {
 		virtual Resources& getGameResources() const = 0;
 
 		virtual Vector<const EntityData*> getEntityDataStack(const UUID& instanceUUID) const = 0;
+
+		virtual IProject& getProject() const = 0;
 	};
 
 	class Game;

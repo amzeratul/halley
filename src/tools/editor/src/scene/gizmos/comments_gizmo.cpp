@@ -1,8 +1,12 @@
 #include "comments_gizmo.h"
+#include "halley/tools/project/project.h"
+#include "halley/tools/project/project_comments.h"
 using namespace Halley;
 
 CommentsGizmo::CommentsGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow)
 	: SceneEditorGizmo(snapRules)
+	, comments(dynamic_cast<Project&>(sceneEditorWindow.getProject()).getComments())
+	, factory(factory)
 {
 }
 

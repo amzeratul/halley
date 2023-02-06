@@ -2,6 +2,8 @@
 #include "halley/editor_extensions/scene_editor_gizmo.h"
 
 namespace Halley {
+	class ProjectComments;
+
 	class CommentsGizmo final : public SceneEditorGizmo {
 	public:
 		explicit CommentsGizmo(SnapRules snapRules, UIFactory& factory, ISceneEditorWindow& sceneEditorWindow);
@@ -14,5 +16,9 @@ namespace Halley {
 		Vector<String> getHighlightedComponents() const override;
 		bool onKeyPress(KeyboardKeyPress key) override;
 		bool canBoxSelectEntities() const override;
+
+	private:
+		ProjectComments& comments;
+		UIFactory& factory;
     };
 }

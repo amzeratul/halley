@@ -96,6 +96,7 @@ set(SOURCES
 
     "src/project/build_project_task.cpp"
     "src/project/project.cpp"
+    "src/project/project_comments.cpp"
     "src/project/project_loader.cpp"
     "src/project/project_properties.cpp"
 
@@ -153,6 +154,7 @@ set(HEADERS
 
     "include/halley/tools/project/build_project_task.h"
     "include/halley/tools/project/project.h"
+    "include/halley/tools/project/project_comments.h"
     "include/halley/tools/project/project_loader.h"
     "include/halley/tools/project/project_properties.h"
 

@@ -19,6 +19,7 @@
 #include "halley/core/properties/game_properties.h"
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/tools/codegen/codegen.h"
+#include "halley/tools/project/project_comments.h"
 #include "halley/utils/algorithm.h"
 
 using namespace Halley;
@@ -31,6 +32,7 @@ Project::Project(Path projectRootPath, Path halleyRootPath)
 	, halleyRootPath(std::move(halleyRootPath))
 {
 	properties = std::make_unique<ProjectProperties>(rootPath / "halley_project" / "properties.yaml");
+	comments = std::make_unique<ProjectComments>(rootPath / "halley_project" / "comments");
 	gameProperties = std::make_unique<GameProperties>(rootPath / "assets_src" / "game_properties" / "game_properties.yaml");
 	assetPackManifest = rootPath / properties->getAssetPackManifest();
 
@@ -238,6 +240,11 @@ void Project::removeAssetLoadedListener(IAssetLoadListener* listener)
 ProjectProperties& Project::getProperties() const
 {
 	return *properties;
+}
+
+ProjectComments& Project::getComments() const
+{
+	return *comments;
 }
 
 GameProperties& Project::getGameProperties() const

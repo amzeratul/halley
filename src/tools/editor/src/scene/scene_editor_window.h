@@ -136,6 +136,7 @@ namespace Halley {
 		Vector<const EntityData*> queryEntityDatas(const String& containComponent) const;
 
 		World& getWorld() const;
+		IProject& getProject() const override;
 
 	protected:
 		void update(Time t, bool moved) override;

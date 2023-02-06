@@ -29,9 +29,10 @@ SceneEditorWindow::SceneEditorWindow(UIFactory& factory, Project& project, const
 	, projectWindow(projectWindow)
 	, parentEditor(parentEditor)
 	, assetType(assetType)
-	, gameBridge(std::make_shared<SceneEditorGameBridge>(api, uiFactory.getResources(), uiFactory, project, projectWindow, *this))
 	, entityIcons(std::make_shared<EntityIcons>(project.getGameResources(), *factory.getColourScheme()))
 {
+	gameBridge = std::make_shared<SceneEditorGameBridge>(api, uiFactory.getResources(), uiFactory, project, projectWindow, *this);
+
 	makeUI();
 
 	project.withDLL([&] (ProjectDLL& dll)
@@ -1576,6 +1577,11 @@ Future<AssetPreviewData> SceneEditorWindow::getAssetPreviewData(AssetType assetT
 World& SceneEditorWindow::getWorld() const
 {
 	return gameBridge->getWorld();
+}
+
+IProject& SceneEditorWindow::getProject() const
+{
+	return project;
 }
 
 void SceneEditorWindow::openGoToDialogue()
