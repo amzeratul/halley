@@ -39,7 +39,7 @@ namespace Halley {
         virtual ~INetworkLock() = default;
     };
 
-    using NetworkLockHandle = std::unique_ptr<INetworkLock>;
+    using NetworkLockHandle = std::shared_ptr<INetworkLock>;
 
     class INetworkLockSystemInterface : public IScriptEnvironmentInterface {
 	public:
