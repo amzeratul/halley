@@ -66,6 +66,34 @@ namespace Halley {
 	};
 
 	template <>
+    class ConfigNodeSerializer<int8_t> {
+    public:
+        ConfigNode serialize(int8_t value, const EntitySerializationContext& context)
+		{
+			return ConfigNode(static_cast<int>(value));
+		}
+		
+		int8_t deserialize(const EntitySerializationContext&, const ConfigNode& node)
+        {
+			return static_cast<int8_t>(node.asInt(0));
+        }
+    };
+
+	template <>
+    class ConfigNodeSerializer<uint8_t> {
+    public:
+        ConfigNode serialize(uint8_t value, const EntitySerializationContext& context)
+		{
+			return ConfigNode(static_cast<int>(value));
+		}
+		
+		uint8_t deserialize(const EntitySerializationContext&, const ConfigNode& node)
+        {
+			return static_cast<uint8_t>(node.asInt(0));
+        }
+    };
+
+	template <>
     class ConfigNodeSerializer<int16_t> {
     public:
         ConfigNode serialize(int16_t value, const EntitySerializationContext& context)
@@ -80,16 +108,44 @@ namespace Halley {
     };
 
 	template <>
-    class ConfigNodeSerializer<int> {
+    class ConfigNodeSerializer<uint16_t> {
     public:
-        ConfigNode serialize(int value, const EntitySerializationContext& context)
+        ConfigNode serialize(uint16_t value, const EntitySerializationContext& context)
+		{
+			return ConfigNode(static_cast<int>(value));
+		}
+		
+		uint16_t deserialize(const EntitySerializationContext&, const ConfigNode& node)
+        {
+			return static_cast<uint16_t>(node.asInt(0));
+        }
+    };
+
+	template <>
+    class ConfigNodeSerializer<int32_t> {
+    public:
+        ConfigNode serialize(int32_t value, const EntitySerializationContext& context)
 		{
 			return ConfigNode(value);
 		}
 		
-		int deserialize(const EntitySerializationContext&, const ConfigNode& node)
+		int32_t deserialize(const EntitySerializationContext&, const ConfigNode& node)
         {
 			return node.asInt(0);
+        }
+    };
+
+	template <>
+    class ConfigNodeSerializer<uint32_t> {
+    public:
+        ConfigNode serialize(uint32_t value, const EntitySerializationContext& context)
+		{
+			return ConfigNode(static_cast<int64_t>(value));
+		}
+		
+		uint32_t deserialize(const EntitySerializationContext&, const ConfigNode& node)
+        {
+			return static_cast<uint32_t>(node.asInt64(0));
         }
     };
 
