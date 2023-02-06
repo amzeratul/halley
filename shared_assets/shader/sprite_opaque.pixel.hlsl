@@ -5,5 +5,5 @@ SamplerState sampler0 : register(s0);
 
 float4 main(VOut input) : SV_TARGET {
 	float4 col = tex0.Sample(sampler0, input.texCoord0.xy);
-	return col.rgb1 * input.colour.rgb1 + input.colourAdd;
+	return float4(col.rgb * input.colour.rgb, 1) + input.colourAdd;
 }

@@ -7,6 +7,6 @@ passes:
   - blend: Opaque
     shader:
     - language: hlsl
-      vertex: sprite_opaque.vertex.hlsl
-      pixel: sprite.pixel.hlsl
+      vertex: sprite.vertex.hlsl
+      pixel: sprite_opaque.pixel.hlsl
 ...

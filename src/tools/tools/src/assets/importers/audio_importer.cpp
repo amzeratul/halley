@@ -235,7 +235,7 @@ Bytes AudioImporter::encodeVorbis(int nChannels, int sampleRate, gsl::span<const
 
 Vector<float> AudioImporter::resampleChannel(int from, int to, gsl::span<const float> src)
 {
-	AudioResampler resampler(from, to, 1, 1.0f);
+	AudioResampler resampler(static_cast<float>(from), static_cast<float>(to), 1, 1.0f);
 	Vector<float> dst(resampler.numOutputSamples(src.size()) + 1024);
 	auto result = resampler.resampleInterleaved(src, dst);
 	if (result.nRead != src.size()) {
