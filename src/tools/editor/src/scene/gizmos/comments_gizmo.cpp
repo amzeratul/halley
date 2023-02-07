@@ -21,20 +21,28 @@ void CommentsGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sce
 		updateHandles();
 	}
 
+	bool changed = false;
 	std::optional<UUID> highlightedHandle;
 	for (auto& handle: handles) {
-		const auto newPos = handle.update(inputState, handles);
-
-		if (newPos) {
-			comments.updateComment(UUID(handle.getId()), [&] (ProjectComment& comment)
-			{
-				comment.pos = *newPos + getWorldOffset();
-			});
+		const auto deltaPos = handle.update(inputState, handles);
+		if (deltaPos) {
+			changed = true;
 		}
 
 		if (handle.isOver()) {
 			highlightedHandle = UUID(handle.getId());
 		}
+	}
+
+	if (changed) {
+		for (auto& handle: handles) {
+			if (handle.isHeld()) {
+				comments.updateComment(UUID(handle.getId()), [&] (ProjectComment& comment)
+				{
+					comment.pos = handle.getPosition() + getWorldOffset();
+				});
+			}
+		}		
 	}
 
 	if (inputState.mousePos) {
@@ -67,7 +75,7 @@ std::shared_ptr<UIWidget> CommentsGizmo::makeUI()
 
 void CommentsGizmo::addComment(Vector2f pos)
 {
-	auto uuid = comments.addComment(ProjectComment(pos + getWorldOffset()));
+	auto uuid = comments.addComment(ProjectComment(pos + getWorldOffset(), sceneEditorWindow.getSceneNameForComments()));
 	handles.push_back(makeHandle(uuid, pos));
 	forceHighlight = true;
 }

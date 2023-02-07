@@ -4,10 +4,12 @@
 #include "halley/file_formats/yaml_convert.h"
 #include "halley/support/logger.h"
 #include "halley/tools/file/filesystem.h"
+#include "halley/utils/algorithm.h"
 using namespace Halley;
 
-ProjectComment::ProjectComment(Vector2f pos)
+ProjectComment::ProjectComment(Vector2f pos, String scene)
 	: pos(pos)
+	, scene(std::move(scene))
 {
 }
 
@@ -73,6 +75,8 @@ void ProjectComments::deleteComment(const UUID& id)
 {
 	deleteFile(id);
 	comments.erase(id);
+
+	std_ex::erase(toSave, id);
 }
 
 void ProjectComments::setComment(const UUID& id, ProjectComment comment)
@@ -81,11 +85,16 @@ void ProjectComments::setComment(const UUID& id, ProjectComment comment)
 	comments[id] = std::move(comment);
 }
 
-void ProjectComments::updateComment(const UUID& id, std::function<void(ProjectComment&)> f)
+void ProjectComments::updateComment(const UUID& id, std::function<void(ProjectComment&)> f, bool immediate)
 {
 	auto& comment = comments[id];
 	f(comment);
-	saveFile(id, comment);
+
+	if (immediate) {
+		saveFile(id, comment);
+	} else {
+		toSave.push_back(id);
+	}
 }
 
 uint64_t ProjectComments::getVersion() const
@@ -104,6 +113,16 @@ void ProjectComments::update(Time t)
 			loadAll();
 		}
 	}
+
+	if (toSave.empty()) {
+		saveTimeout = 0;
+	} else {
+		saveTimeout += t;
+		if (saveTimeout > 1.0) {
+			savePending();
+			saveTimeout = 0;
+		}
+	}
 }
 
 void ProjectComments::loadAll()
@@ -119,6 +138,14 @@ void ProjectComments::loadAll()
 	}
 }
 
+void ProjectComments::savePending()
+{
+	for (auto& id: toSave) {
+		saveFile(id, comments.at(id));
+	}
+	toSave.clear();
+}
+
 void ProjectComments::saveFile(const UUID& id, const ProjectComment& comment)
 {
 	const auto path = getPath(id);
@@ -126,7 +153,7 @@ void ProjectComments::saveFile(const UUID& id, const ProjectComment& comment)
 
 	YAMLConvert::EmitOptions options;
 	Path::writeFile(path, YAMLConvert::generateYAML(comment.toConfigNode(), options));
-	++version;
+	//++version; // Don't modify on save, causes issues with editor
 }
 
 bool ProjectComments::loadFile(const Path& path)
