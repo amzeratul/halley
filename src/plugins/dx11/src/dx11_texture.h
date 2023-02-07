@@ -25,6 +25,8 @@ namespace Halley
 		DXGI_FORMAT getFormat() const;
 		ID3D11Texture2D* getTexture() const;
 
+		void replaceShaderResourceView(ID3D11ShaderResourceView* view);
+
 	protected:
 		size_t getVRamUsage() const override;
 		void doCopyToTexture(Painter& painter, Texture& other) const override;

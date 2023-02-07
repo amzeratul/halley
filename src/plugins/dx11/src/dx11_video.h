@@ -44,6 +44,7 @@ namespace Halley {
 		ID3D11Device& getDevice();
 		ID3D11DeviceContext1& getDeviceContext();
 		DX11SwapChain& getSwapChain();
+		D3D_FEATURE_LEVEL getFeatureLevel() const;
 		
 		SystemAPI& getSystem();
 
@@ -55,6 +56,7 @@ namespace Halley {
 
 		ID3D11Device* device = nullptr;
 		ID3D11DeviceContext1* deviceContext = nullptr;
+		D3D_FEATURE_LEVEL featureLevel;
 
 		bool initialised = false;
 		bool useVsync = false;

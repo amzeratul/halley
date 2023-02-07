@@ -265,6 +265,14 @@ ID3D11Texture2D* DX11Texture::getTexture() const
 	return texture;
 }
 
+void DX11Texture::replaceShaderResourceView(ID3D11ShaderResourceView* view)
+{
+	if (srv) {
+		srv->Release();
+	}
+	srv = view;
+}
+
 size_t DX11Texture::getVRamUsage() const
 {
 	return vramUsage;

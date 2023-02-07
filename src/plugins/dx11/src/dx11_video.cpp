@@ -67,13 +67,12 @@ void DX11Video::initD3D(Window& window)
 #endif
 
 	ID3D11DeviceContext* dc;
-	D3D_FEATURE_LEVEL featureLevels[] = { D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0 };
+	std::array<D3D_FEATURE_LEVEL, 3> featureLevels = { D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1, D3D_FEATURE_LEVEL_10_0 };
 	uint32_t flags = 0;
 	if (Debug::isDebug()) {
 		flags |= D3D11_CREATE_DEVICE_DEBUG;
 	}
-	D3D_FEATURE_LEVEL featureLevel;
-	const auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, featureLevels, 4, D3D11_SDK_VERSION, &device, &featureLevel, &dc);
+	const auto result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags, featureLevels.data(), static_cast<UINT>(featureLevels.size()), D3D11_SDK_VERSION, &device, &featureLevel, &dc);
 	if (result != S_OK) {
 		throw Exception("Unable to initialise DX11", HalleyExceptions::VideoPlugin);
 	}
@@ -196,6 +195,11 @@ DX11SwapChain& DX11Video::getSwapChain()
 {
 	Expects(swapChain != nullptr);
 	return *swapChain;
+}
+
+D3D_FEATURE_LEVEL DX11Video::getFeatureLevel() const
+{
+	return featureLevel;
 }
 
 SystemAPI& DX11Video::getSystem()
