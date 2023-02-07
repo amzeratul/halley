@@ -24,6 +24,15 @@ CommentsGizmo::CommentsGizmo(SnapRules snapRules, UIFactory& factory, ISceneEdit
 	commentIconNormal = Sprite()
 		.setImage(factory.getResources(), "ui/comment_icon_normal.png")
 		.setPivot(Vector2f(0.5f, 0.5f));
+
+	tooltipBg = Sprite()
+		.setImage(factory.getResources(), "whitebox.png")
+		.setColour(Colour4f(0, 0, 0, 0.5f));
+
+	tooltipText = TextRenderer()
+		.setFont(factory.getResources().get<Font>("Ubuntu Bold"))
+		.setColour(Colour4f(1, 1, 1))
+		.setSize(14);
 }
 
 void CommentsGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
@@ -118,6 +127,26 @@ void CommentsGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) cons
 				.setSliceScale(1.0f / curZoom)
 				.draw(painter);
 		}
+
+		if (handle.isOver()) {
+			const float maxWidth = 200;
+
+			auto t = tooltipText.clone()
+				.setSize(14 / zoom)
+				.setText(tooltipText.split(comment.text, maxWidth));
+			auto tooltipSize = t.getExtents();
+
+			const auto tooltipBorder = Vector2f(5, 5) / zoom;
+			const auto tooltipPos = handle.getPosition() + (nodeSize * nodeScale) * Vector2f(0.5f, -0.5f);
+			tooltipBg.clone()
+				.setPosition(tooltipPos)
+				.setSize(tooltipSize + 2 * tooltipBorder)
+				.draw(painter);
+
+			t
+				.setPosition(tooltipPos + tooltipBorder)
+				.draw(painter);
+		}
 	}
 }
 
@@ -148,7 +177,7 @@ void CommentsGizmo::addComment(Vector2f pos)
 
 void CommentsGizmo::editComment(const UUID& uuid)
 {
-
+	sceneEditorWindow.getUIRoot().addChild(std::make_shared<CommentEditWindow>(factory, comments, uuid));
 }
 
 void CommentsGizmo::deleteComments()
@@ -227,4 +256,76 @@ bool CommentsGizmo::onKeyPress(KeyboardKeyPress key)
 bool CommentsGizmo::canBoxSelectEntities() const
 {
 	return false;
+}
+
+
+
+CommentEditWindow::CommentEditWindow(UIFactory& factory, ProjectComments& comments, const UUID& uuid)
+	: UIWidget("", {}, UISizer())
+	, factory(factory)
+	, comments(comments)
+	, uuid(uuid)
+{
+	factory.loadUI(*this, "halley/comment_edit_popup");
+	setAnchor(UIAnchor());
+}
+
+void CommentEditWindow::onAddedToRoot(UIRoot& root)
+{
+	root.registerKeyPressListener(shared_from_this(), 10);
+	root.focusNext(false);
+}
+
+void CommentEditWindow::onRemovedFromRoot(UIRoot& root)
+{
+	root.removeKeyPressListener(*this);
+}
+
+void CommentEditWindow::onMakeUI()
+{
+	loadComment();
+
+	setHandle(UIEventType::ButtonClicked, "ok", [=](const UIEvent& event)
+	{
+		onOK();
+	});
+	
+	setHandle(UIEventType::ButtonClicked, "cancel", [=](const UIEvent& event)
+	{
+		onCancel();
+	});
+}
+
+bool CommentEditWindow::onKeyPress(KeyboardKeyPress key)
+{
+	if (key.is(KeyCode::Enter)) {
+		onOK();
+	}
+
+	if (key.is(KeyCode::Esc)) {
+		onCancel();
+	}
+
+	return false;
+}
+
+void CommentEditWindow::loadComment()
+{
+	const auto& comment = comments.getComment(uuid);
+	getWidgetAs<UIDropdown>("priority")->setSelectedOption(toString(comment.priority));
+	getWidgetAs<UITextInput>("comment")->setText(comment.text);
+}
+
+void CommentEditWindow::onOK()
+{
+	comments.updateComment(uuid, [&](ProjectComment& comment) {
+		comment.priority = fromString<ProjectCommentPriority>(getWidgetAs<UIDropdown>("priority")->getSelectedOptionId());
+		comment.text = getWidgetAs<UITextInput>("comment")->getText();
+	}, true);
+	destroy();
+}
+
+void CommentEditWindow::onCancel()
+{
+	destroy();
 }

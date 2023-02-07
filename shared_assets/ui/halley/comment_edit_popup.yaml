@@ -1,0 +1,83 @@
+uuid: 7aca13f6-be8f-414d-b975-92ad5accfe62
+proportion: 1
+sizer:
+  columnProportions: []
+  type: vertical
+widget:
+  class: image
+  colour: $ui_popupWindow
+  image: $ui_title_capsule
+  innerBorder: [6, 3, 6, 6]
+  size: [300, 200]
+children:
+  - uuid: 4863e58f-b63b-4ae8-b235-780db4c30216
+    sizer:
+      columnProportions: []
+      type: horizontal
+    children:
+      - uuid: 1a15c4ca-09d4-4a90-8cd2-6238b62537de
+        proportion: 1
+        widget:
+          class: label
+          id: title
+          text: Edit Comment
+        fill: centre
+  - uuid: 0374d2a1-b25a-4f33-868a-c0952790d3df
+    border: [0, 10, 0, 10]
+    sizer:
+      columnProportions: []
+      type: horizontal
+    children:
+      - uuid: 8f2e2201-2a29-4daf-839d-193803a158d0
+        border: [0, 0, 20, 0]
+        widget:
+          class: label
+          id: message
+          text: "Priority: "
+        fill: [fillHorizontal, centreVertical]
+      - uuid: be58a57d-542d-4472-bf74-b597d97d29e1
+        sizer:
+          columnProportions: []
+        widget:
+          class: dropdown
+          id: priority
+          options:
+            - border: [0, 0, 0, 0]
+              id: low
+              image: ""
+              text: Low
+            - id: medium
+              text: Medium
+            - id: high
+              text: High
+          size: [100, 22]
+    fill: centre
+  - uuid: efe99784-c2a4-4811-bb62-84c7165f55dc
+    proportion: 1
+    border: [5, 0, 5, 5]
+    sizer:
+      columnProportions: []
+    widget:
+      class: textInput
+      id: comment
+      multiLine: true
+  - uuid: 63514aa6-8e85-4099-9c02-4a05c68f8f29
+    sizer:
+      columnProportions: []
+      type: horizontal
+    children:
+      - uuid: 219d5054-1df1-4505-a2f0-033ecb7d1bc9
+        proportion: 1
+        widget:
+          class: button
+          id: ok
+          size: [100, 22]
+          text: OK
+      - uuid: 6cf44450-7493-4366-a3e1-f4778045ddcd
+        proportion: 1
+        widget:
+          class: button
+          id: cancel
+          size: [100, 22]
+          text: Cancel
+fill: centre

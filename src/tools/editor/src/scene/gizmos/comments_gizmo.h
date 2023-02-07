@@ -34,6 +34,8 @@ namespace Halley {
 		Sprite commentBg;
 		Sprite commentOutline;
 		Sprite commentIconNormal;
+		Sprite tooltipBg;
+		TextRenderer tooltipText;
 		float nodeScale = 1.0f;
 
 		void addComment(Vector2f pos);
@@ -45,4 +47,24 @@ namespace Halley {
 		Vector2f getWorldOffset() const;
 		Colour4f getCommentColour(ProjectCommentPriority priority) const;
     };
+
+	class CommentEditWindow : public UIWidget {
+	public:
+		CommentEditWindow(UIFactory& factory, ProjectComments& comments, const UUID& uuid);
+
+		void onAddedToRoot(UIRoot& root) override;
+		void onRemovedFromRoot(UIRoot& root) override;
+
+		void onMakeUI() override;
+		bool onKeyPress(KeyboardKeyPress key) override;
+
+	private:
+		UIFactory& factory;
+		ProjectComments& comments;
+		UUID uuid;
+
+		void loadComment();
+		void onOK();
+		void onCancel();
+	};
 }
