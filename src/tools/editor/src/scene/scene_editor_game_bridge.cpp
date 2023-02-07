@@ -367,6 +367,14 @@ World& SceneEditorGameBridge::getWorld() const
 	return interface->getWorld();
 }
 
+String SceneEditorGameBridge::getSceneNameForComments(AssetType assetType, const String& assetId) const
+{
+	if (interface) {
+		return interface->getSceneNameForComments(assetType, assetId);
+	}
+	return assetId;
+}
+
 void SceneEditorGameBridge::load()
 {
 	guardedRun([&]() {

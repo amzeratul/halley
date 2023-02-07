@@ -31,7 +31,7 @@ namespace Halley {
 	class SceneEditorGizmoHandle {
 	public:
 		using SnapFunction = std::function<Vector2f(int, Vector2f)>;
-		using BoundsCheckFunction = std::function<bool(Vector2f, Vector2f)>;
+		using BoundsCheckFunction = std::function<bool(Vector2f myPos, Vector2f mousePos)>;
 
 		SceneEditorGizmoHandle(String id = "");
 		std::optional<Vector2f> update(const SceneEditorInputState& inputState, gsl::span<SceneEditorGizmoHandle> handles = {});

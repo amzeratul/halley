@@ -269,6 +269,11 @@ bool SceneEditorWindow::isScene() const
 	return assetType == AssetType::Scene;
 }
 
+String SceneEditorWindow::getSceneNameForComments() const
+{
+	return gameBridge->getSceneNameForComments(assetType, prefab->getAssetId());
+}
+
 void SceneEditorWindow::update(Time t, bool moved)
 {
 	if (toolModeTimeout > 0) {

@@ -2,6 +2,7 @@
 #include "halley/editor_extensions/scene_editor_gizmo.h"
 
 namespace Halley {
+	class ProjectComment;
 	class ProjectComments;
 
 	class CommentsGizmo final : public SceneEditorGizmo {
@@ -20,5 +21,11 @@ namespace Halley {
 	private:
 		ProjectComments& comments;
 		UIFactory& factory;
+		ISceneEditorWindow& sceneEditorWindow;
+
+		Vector<SceneEditorGizmoHandle> handles;
+		uint64_t lastVersion = 0;
+
+		void updateGizmos();
     };
 }

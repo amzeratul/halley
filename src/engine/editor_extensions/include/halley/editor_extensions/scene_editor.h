@@ -75,6 +75,8 @@ namespace Halley {
 
 		bool shouldDrawOutline(const Sprite& sprite) const override;
 
+    	String getSceneNameForComments(AssetType assetType, const String& assetId) const override;
+
     protected:
 		enum class EntityAtPositionSelectMode {
 			All,

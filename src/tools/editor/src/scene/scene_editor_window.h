@@ -30,6 +30,7 @@ namespace Halley {
 		void loadScene(const Prefab& prefab);
 		void unloadScene();
 		bool isScene() const override;
+		String getSceneNameForComments() const override;
 
 		void onComponentRemoved(const String& name) override;
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);

@@ -244,6 +244,7 @@ namespace Halley {
 
     	virtual void initializeEntityValidator(EntityValidator& validator) = 0;
         virtual bool shouldDrawOutline(const Sprite& sprite) const = 0;
+        virtual String getSceneNameForComments(AssetType assetType, const String& assetId) const = 0;
     };
 
 	class EntityTree {
@@ -404,6 +405,7 @@ namespace Halley {
 
 		virtual String getCurrentAssetId() const = 0;
 		virtual bool isScene() const = 0;
+		virtual String getSceneNameForComments() const = 0;
 
 		virtual Resources& getGameResources() const = 0;
 

@@ -839,3 +839,8 @@ bool SceneEditor::shouldDrawOutline(const Sprite& sprite) const
 {
 	return true;
 }
+
+String SceneEditor::getSceneNameForComments(AssetType assetType, const String& assetId) const
+{
+	return assetId;
+}

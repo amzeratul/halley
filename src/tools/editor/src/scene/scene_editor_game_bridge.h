@@ -56,6 +56,7 @@ namespace Halley {
 		void validateAllEntities() override;
 
 		World& getWorld() const;
+		String getSceneNameForComments(AssetType assetType, const String& assetId) const;
 
 	protected:
 		bool saveAsset(const Path& path, gsl::span<const gsl::byte> data) override;

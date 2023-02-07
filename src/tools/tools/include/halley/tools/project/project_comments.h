@@ -43,12 +43,13 @@ namespace Halley {
     public:
         ProjectComments(Path commentsRoot);
 
-        Vector<UUID> getComments(const String& scene) const;
+        Vector<std::pair<UUID, const ProjectComment*>> getComments(const String& scene) const;
         const ProjectComment& getComment(const UUID& id) const;
 
         UUID addComment(ProjectComment comment);
         void deleteComment(const UUID& id);
         void setComment(const UUID& id, ProjectComment comment);
+        void updateComment(const UUID& id, std::function<void(ProjectComment&)> f);
 
         uint64_t getVersion() const;
         void update(Time t);

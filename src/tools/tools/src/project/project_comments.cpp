@@ -41,12 +41,12 @@ ProjectComments::ProjectComments(Path commentsRoot)
 	loadAll();
 }
 
-Vector<UUID> ProjectComments::getComments(const String& scene) const
+Vector<std::pair<UUID, const ProjectComment*>> ProjectComments::getComments(const String& scene) const
 {
-	Vector<UUID> result;
+	Vector<std::pair<UUID, const ProjectComment*>> result;
 	for (auto& [k, v]: comments) {
 		if (v.scene == scene) {
-			result.push_back(k);
+			result.emplace_back(k, &v);
 		}
 	}
 	return result;
@@ -74,6 +74,13 @@ void ProjectComments::setComment(const UUID& id, ProjectComment comment)
 {
 	saveFile(id, comment);
 	comments[id] = std::move(comment);
+}
+
+void ProjectComments::updateComment(const UUID& id, std::function<void(ProjectComment&)> f)
+{
+	auto& comment = comments[id];
+	f(comment);
+	saveFile(id, comment);
 }
 
 uint64_t ProjectComments::getVersion() const
