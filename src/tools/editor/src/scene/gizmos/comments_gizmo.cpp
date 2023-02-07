@@ -16,6 +16,10 @@ CommentsGizmo::CommentsGizmo(SnapRules snapRules, UIFactory& factory, ISceneEdit
 	commentBg = Sprite()
 		.setImage(factory.getResources(), "halley_ui/ui_float_solid_window.png")
 		.setPivot(Vector2f(0.5f, 0.5f));
+
+	commentIconNormal = Sprite()
+		.setImage(factory.getResources(), "ui/comment_icon_normal.png")
+		.setPivot(Vector2f(0.5f, 0.5f));
 }
 
 void CommentsGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
@@ -76,7 +80,9 @@ void CommentsGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) cons
 	const auto border = Vector2f(18, 18);
 
 	for (auto& handle: handles) {
-		auto col = Colour4f::fromString("#7794F9");
+		const auto& comment = comments.getComment(UUID(handle.getId()));
+
+		auto col = getCommentColour(comment.priority);
 		if (handle.isOver()) {
 			col = col.inverseMultiplyLuma(0.7f);
 		}
@@ -88,7 +94,25 @@ void CommentsGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) cons
 			.scaleTo(nodeSize * nodeScale + border / curZoom)
 			.setSliceScale(1.0f / curZoom)
 			.draw(painter);
+
+		commentIconNormal.clone()
+			.setScale(nodeScale * 0.5f)
+			.setPosition(handle.getPosition())
+			.draw(painter);
 	}
+}
+
+Colour4f CommentsGizmo::getCommentColour(ProjectCommentPriority priority) const
+{
+	switch (priority) {
+	case ProjectCommentPriority::Low:
+		return Colour4f::fromString("#14C03A");
+	case ProjectCommentPriority::Medium:
+		return Colour4f::fromString("#ECBC1A");
+	case ProjectCommentPriority::High:
+		return Colour4f::fromString("#EA3A1C");
+	}
+	return Colour4f();
 }
 
 std::shared_ptr<UIWidget> CommentsGizmo::makeUI()

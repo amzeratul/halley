@@ -2,6 +2,7 @@
 #include "halley/editor_extensions/scene_editor_gizmo.h"
 
 namespace Halley {
+	enum class ProjectCommentPriority;
 	class ProjectComment;
 	class ProjectComments;
 
@@ -29,6 +30,7 @@ namespace Halley {
 		bool forceHighlight = false;
 
 		Sprite commentBg;
+		Sprite commentIconNormal;
 		float nodeScale = 1.0f;
 
 		void addComment(Vector2f pos);
@@ -37,5 +39,6 @@ namespace Halley {
 		SceneEditorGizmoHandle makeHandle(const UUID& uuid, Vector2f pos);
 		void updateHandles();
 		Vector2f getWorldOffset() const;
+		Colour4f getCommentColour(ProjectCommentPriority priority) const;
     };
 }
