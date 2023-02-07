@@ -90,6 +90,7 @@ namespace Halley {
 		void setOutputState(SceneEditorOutputState* outputState);
 
 		virtual bool isHighlighted() const;
+		virtual bool blockRightClick() const;
 		virtual void deselect();
 		virtual bool allowEntitySpriteSelection() const;
 		

@@ -36,7 +36,7 @@ ISceneEditorGizmoCollection::SelectResult SceneEditorGizmoCollection::update(Tim
 		activeGizmo->update(time, sceneEditor, inputState);
 		activeGizmo->setOutputState(nullptr);
 
-		return SelectResult{ activeGizmo->isHighlighted(), activeGizmo->allowEntitySpriteSelection() };
+		return SelectResult{ activeGizmo->isHighlighted(), activeGizmo->allowEntitySpriteSelection(), activeGizmo->blockRightClick() };
 	}
 	return SelectResult();
 }

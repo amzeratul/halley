@@ -15,6 +15,7 @@ namespace Halley {
 		std::shared_ptr<UIWidget> makeUI() override;
 
 		bool isHighlighted() const override;
+		bool blockRightClick() const override;
 		Vector<String> getHighlightedComponents() const override;
 		bool onKeyPress(KeyboardKeyPress key) override;
 		bool canBoxSelectEntities() const override;
@@ -30,6 +31,7 @@ namespace Halley {
 		bool forceHighlight = false;
 
 		Sprite commentBg;
+		Sprite commentOutline;
 		Sprite commentIconNormal;
 		float nodeScale = 1.0f;
 

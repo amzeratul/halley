@@ -107,6 +107,7 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 
 	// Update gizmos
 	const auto gizmoUpdateResult = gizmoCollection->update(t, camera, *this, inputState, outputState);
+	outputState.blockRightClick = gizmoUpdateResult.blockRightClick;
 	if (!gizmoUpdateResult.hasHighlight && inputState.leftClickPressed) {
 		gizmoCollection->deselect();
 		onClick(inputState, outputState, gizmoUpdateResult.allowEntitySpriteSelection);

@@ -44,7 +44,16 @@ std::optional<Vector2f> SceneEditorGizmoHandle::update(const SceneEditorInputSta
 		}
 	}
 
-	if (inputState.selectionBox) {
+	if (inputState.leftClickPressed && over && !selected) {
+		selected = true;
+		if (!inputState.shiftHeld) {
+			for (auto& handle: handles) {
+				if (&handle != this && handle.isSelected()) {
+					handle.setSelected(false);
+				}
+			}
+		}
+	} else if (inputState.selectionBox) {
 		selected = (selected && inputState.shiftHeld) || (inputState.selectionBox.has_value() && inputState.selectionBox.value().contains(pos));
 	}
 
@@ -197,6 +206,11 @@ void SceneEditorGizmo::setOutputState(SceneEditorOutputState* state)
 }
 
 bool SceneEditorGizmo::isHighlighted() const
+{
+	return false;
+}
+
+bool SceneEditorGizmo::blockRightClick() const
 {
 	return false;
 }

@@ -55,16 +55,17 @@ void SceneEditorCanvas::onProjectDLLStatusChange(ProjectDLL::Status status)
 void SceneEditorCanvas::update(Time t, bool moved)
 {
 	updateInputState();
-
-	if (inputState.rightClickPressed) {
-		openRightClickMenu();
-	}
 	
 	if (gameBridge) {
 		outputState.clear();
 		gameBridge->update(t, inputState, outputState);
 		ready = true;
 	}
+
+	if (inputState.rightClickPressed && !outputState.blockRightClick) {
+		openRightClickMenu();
+	}
+
 	notifyOutputState();
 	clearInputState();
 

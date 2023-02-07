@@ -17,6 +17,10 @@ CommentsGizmo::CommentsGizmo(SnapRules snapRules, UIFactory& factory, ISceneEdit
 		.setImage(factory.getResources(), "halley_ui/ui_float_solid_window.png")
 		.setPivot(Vector2f(0.5f, 0.5f));
 
+	commentOutline = Sprite()
+		.setImage(factory.getResources(), "halley_ui/ui_float_solid_window_outline.png")
+		.setPivot(Vector2f(0.5f, 0.5f));
+
 	commentIconNormal = Sprite()
 		.setImage(factory.getResources(), "ui/comment_icon_normal.png")
 		.setPivot(Vector2f(0.5f, 0.5f));
@@ -45,6 +49,12 @@ void CommentsGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sce
 
 		if (handle.isOver()) {
 			highlightedHandle = UUID(handle.getId());
+		}
+	}
+
+	if (!inputState.selectionBox && inputState.leftClickReleased && !highlightedHandle) {
+		for (auto& handle: handles) {
+			handle.setSelected(false);
 		}
 	}
 
@@ -99,6 +109,15 @@ void CommentsGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) cons
 			.setScale(nodeScale * 0.5f)
 			.setPosition(handle.getPosition())
 			.draw(painter);
+
+		if (handle.isSelected()) {
+			commentOutline.clone()
+				.setPosition(handle.getPosition())
+				.setSize(commentBg.getSize() / curZoom)
+				.scaleTo(nodeSize * nodeScale + border / curZoom)
+				.setSliceScale(1.0f / curZoom)
+				.draw(painter);
+		}
 	}
 }
 
@@ -163,6 +182,11 @@ Vector2f CommentsGizmo::getWorldOffset() const
 bool CommentsGizmo::isHighlighted() const
 {
 	return forceHighlight || std::any_of(handles.begin(), handles.end(), [&](const auto& handle) { return handle.isOver(); });
+}
+
+bool CommentsGizmo::blockRightClick() const
+{
+	return isHighlighted();
 }
 
 Vector<String> CommentsGizmo::getHighlightedComponents() const

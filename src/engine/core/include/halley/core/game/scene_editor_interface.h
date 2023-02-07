@@ -354,6 +354,7 @@ namespace Halley {
 		struct SelectResult {
 			bool hasHighlight = false;
 			bool allowEntitySpriteSelection = true;
+			bool blockRightClick = false;
 		};
 
 		using GizmoFactory = std::function<std::unique_ptr<SceneEditorGizmo>(SnapRules snapRules, const String& componentName, const String& fieldName)>;

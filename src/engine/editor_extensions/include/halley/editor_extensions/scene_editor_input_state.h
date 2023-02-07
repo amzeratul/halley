@@ -45,6 +45,7 @@ namespace Halley {
 		std::optional<Vector<UUID>> newSelection;
 		UIList::SelectionMode selectionMode = UIList::SelectionMode::Normal;
 		std::optional<UUID> mouseOver;
+		bool blockRightClick = false;
 
 		void clear()
 		{
@@ -52,6 +53,7 @@ namespace Halley {
 			newSelection.reset();
 			selectionMode = UIList::SelectionMode::Normal;
 			mouseOver.reset();
+			blockRightClick = false;
 		}
 	};
 }
