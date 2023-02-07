@@ -38,6 +38,7 @@ namespace Halley
 		GLBuffer elementBuffer;
 		GLBuffer stdQuadElementBuffer;
 		std::unique_ptr<GLUtils> glUtils;
+		std::optional<Rect4i> clipping;
 
 		void setupVertexAttributes(const MaterialDefinition& material);
 	};

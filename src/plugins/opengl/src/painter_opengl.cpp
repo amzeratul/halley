@@ -64,6 +64,8 @@ void PainterOpenGL::doEndRender()
 
 void PainterOpenGL::doClear(std::optional<Colour> colour, std::optional<float> depth, std::optional<uint8_t> stencil)
 {
+	glUtils->setScissor(Rect4i(), false);
+
 	glCheckError();
 
 	auto renderTarget = dynamic_cast<const IRenderTargetOpenGL*>(tryGetActiveRenderTarget());
@@ -111,9 +113,12 @@ void PainterOpenGL::setMaterialPass(const Material& material, int passNumber)
 {
 	auto& pass = material.getDefinition().getPass(passNumber);
 
+	glUtils->setScissor(clipping.value_or(Rect4i()), clipping.has_value());
+
 	// Set blend and shader
 	glUtils->setBlendType(pass.getBlend());
 	glUtils->setDepthStencil(material.getDepthStencil(passNumber));
+
 	ShaderOpenGL& shader = static_cast<ShaderOpenGL&>(pass.getShader());
 	shader.bind();
 
@@ -159,7 +164,7 @@ void PainterOpenGL::setMaterialData(const Material& material)
 
 void PainterOpenGL::setClip(Rect4i clip, bool enable)
 {
-	glUtils->setScissor(clip, enable);
+	clipping = enable ? clip : std::optional<Rect4i>();
 }
 
 void PainterOpenGL::setViewPort(Rect4i rect)
