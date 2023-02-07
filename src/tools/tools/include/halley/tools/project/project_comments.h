@@ -62,8 +62,8 @@ namespace Halley {
 
         HashMap<UUID, ProjectComment> comments;
         uint64_t version = 0;
-        Vector<UUID> toSave;
-        HashMap<UUID, uint64_t> lastWrittenHash;
+        HashSet<UUID> toSave;
+        HashMap<UUID, uint64_t> lastSeenHash;
 
         void loadAll();
         void savePending();

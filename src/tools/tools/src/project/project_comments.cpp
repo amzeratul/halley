@@ -74,14 +74,15 @@ UUID ProjectComments::addComment(ProjectComment comment)
 
 void ProjectComments::deleteComment(const UUID& id)
 {
-	deleteFile(id);
+	toSave.erase(id);
 	comments.erase(id);
-
-	std_ex::erase(toSave, id);
+	savePending();
+	deleteFile(id);
 }
 
 void ProjectComments::setComment(const UUID& id, ProjectComment comment)
 {
+	savePending();
 	saveFile(id, comment);
 	comments[id] = std::move(comment);
 }
@@ -92,9 +93,10 @@ void ProjectComments::updateComment(const UUID& id, std::function<void(ProjectCo
 	f(comment);
 
 	if (immediate) {
+		savePending();
 		saveFile(id, comment);
 	} else {
-		toSave.push_back(id);
+		toSave.emplace(id);
 	}
 }
 
@@ -121,13 +123,14 @@ void ProjectComments::update(Time t)
 		saveTimeout += t;
 		if (saveTimeout > 1.0) {
 			savePending();
-			saveTimeout = 0;
 		}
 	}
 }
 
 void ProjectComments::loadAll()
 {
+	savePending();
+
 	HashSet<UUID> present;
 
 	bool modified = false;
@@ -153,6 +156,7 @@ void ProjectComments::loadAll()
 
 void ProjectComments::savePending()
 {
+	saveTimeout = 0;
 	for (auto& id: toSave) {
 		saveFile(id, comments.at(id));
 	}
@@ -168,7 +172,7 @@ void ProjectComments::saveFile(const UUID& id, const ProjectComment& comment)
 	const auto bytes = YAMLConvert::generateYAML(comment.toConfigNode(), options);
 	const auto data = gsl::as_bytes(gsl::span<const char>(bytes.c_str(), bytes.length()));
 	Path::writeFile(path, data);
-	lastWrittenHash[id] = Hash::hash(data);
+	lastSeenHash[id] = Hash::hash(data);
 
 	monitorTime = -2; // At least 2 seconds before attempting to read dir
 }
@@ -178,13 +182,12 @@ bool ProjectComments::loadFile(const UUID& uuid, const Path& path)
 	if (uuid.isValid()) {
 		const auto bytes = Path::readFile(path);
 
-		const auto hashIter = lastWrittenHash.find(uuid);
-		if (hashIter != lastWrittenHash.end()) {
-			const auto hash = Hash::hash(bytes);
-			if (hash == hashIter->second) {
-				return false;
-			}
+		const auto hash = Hash::hash(bytes);
+		const auto hashIter = lastSeenHash.find(uuid);
+		if (hashIter != lastSeenHash.end() && hash == hashIter->second) {
+			return false;
 		}
+		lastSeenHash[uuid] = hash;
 
 		const auto configFile = YAMLConvert::parseConfig(bytes);
 		auto comment = ProjectComment(configFile.getRoot());
@@ -206,8 +209,7 @@ bool ProjectComments::loadFile(const UUID& uuid, const Path& path)
 void ProjectComments::deleteFile(const UUID& id)
 {
 	Path::removeFile(getPath(id));
-	lastWrittenHash.erase(id);
-	++version;
+	lastSeenHash.erase(id);
 }
 
 Path ProjectComments::getPath(const UUID& id) const

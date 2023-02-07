@@ -396,9 +396,7 @@ bool UITextInput::onKeyPress(KeyboardKeyPress key)
 	}
 
 	if (key.is(KeyCode::Enter) || key.is(KeyCode::KeypadEnter)) {
-		if (!multiLine) {
-			submit();
-		}
+		submit();
 		return true;
 	}
 

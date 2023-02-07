@@ -206,6 +206,8 @@ SceneEditorGizmoHandle CommentsGizmo::makeHandle(const UUID& uuid, Vector2f pos)
 
 void CommentsGizmo::updateHandles()
 {
+	Logger::logDev("Updating handles");
+
 	const auto activeComments = comments.getComments(sceneEditorWindow.getSceneNameForComments());
 	handles.resize(activeComments.size());
 	for (size_t i = 0; i < activeComments.size(); ++i) {
@@ -294,19 +296,27 @@ void CommentEditWindow::onMakeUI()
 	{
 		onCancel();
 	});
+
+	setHandle(UIEventType::TextSubmit, "comment", [=](const UIEvent& event)
+	{
+		return onOK();
+	});
 }
 
 bool CommentEditWindow::onKeyPress(KeyboardKeyPress key)
 {
 	if (key.is(KeyCode::Enter)) {
 		onOK();
+		return true;
 	}
 
 	if (key.is(KeyCode::Esc)) {
 		onCancel();
+		return true;
 	}
 
-	return false;
+	// Block everything else
+	return true;
 }
 
 void CommentEditWindow::loadComment()
