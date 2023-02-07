@@ -178,7 +178,7 @@ void DX11Painter::setClip(Rect4i clip, bool enable)
 
 void DX11Painter::onUpdateProjection(Material& material, bool hashChanged)
 {
-	if (hashChanged) {
+	if (true || hashChanged) {
 		setMaterialData(material);
 	}
 }
