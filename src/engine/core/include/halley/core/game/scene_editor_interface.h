@@ -406,6 +406,7 @@ namespace Halley {
 		virtual String getCurrentAssetId() const = 0;
 		virtual bool isScene() const = 0;
 		virtual String getSceneNameForComments() const = 0;
+		virtual Vector2f getWorldOffset() const = 0;
 
 		virtual Resources& getGameResources() const = 0;
 

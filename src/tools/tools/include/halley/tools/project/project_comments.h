@@ -28,10 +28,11 @@ namespace Halley {
     public:
         Vector2f pos;
         String text;
-        ProjectCommentPriority priority;
         String scene;
+        ProjectCommentPriority priority = ProjectCommentPriority::Low;
 
         ProjectComment() = default;
+        explicit ProjectComment(Vector2f pos);
         ProjectComment(const ConfigNode& node);
         ConfigNode toConfigNode() const;
 

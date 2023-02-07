@@ -25,7 +25,14 @@ namespace Halley {
 
 		Vector<SceneEditorGizmoHandle> handles;
 		uint64_t lastVersion = 0;
+		Vector2f lastMousePos;
+		bool forceHighlight = false;
 
-		void updateGizmos();
+		void addComment(Vector2f pos);
+		void editComment(const UUID& uuid);
+
+		SceneEditorGizmoHandle makeHandle(const UUID& uuid, Vector2f pos);
+		void updateHandles();
+		Vector2f getWorldOffset() const;
     };
 }

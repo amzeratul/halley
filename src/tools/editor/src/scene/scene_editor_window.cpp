@@ -274,6 +274,11 @@ String SceneEditorWindow::getSceneNameForComments() const
 	return gameBridge->getSceneNameForComments(assetType, prefab->getAssetId());
 }
 
+Vector2f SceneEditorWindow::getWorldOffset() const
+{
+	return gameBridge->getWorldOffset().value_or(Vector2f());
+}
+
 void SceneEditorWindow::update(Time t, bool moved)
 {
 	if (toolModeTimeout > 0) {

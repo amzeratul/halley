@@ -13,20 +13,38 @@ CommentsGizmo::CommentsGizmo(SnapRules snapRules, UIFactory& factory, ISceneEdit
 
 void CommentsGizmo::update(Time time, const ISceneEditor& sceneEditor, const SceneEditorInputState& inputState)
 {
+	forceHighlight = false;
+
 	const auto curVersion = comments.getVersion();
 	if (curVersion != lastVersion) {
 		lastVersion = curVersion;
-		updateGizmos();
+		updateHandles();
 	}
 
+	std::optional<UUID> highlightedHandle;
 	for (auto& handle: handles) {
 		const auto newPos = handle.update(inputState, handles);
 
 		if (newPos) {
 			comments.updateComment(UUID(handle.getId()), [&] (ProjectComment& comment)
 			{
-				comment.pos = *newPos;
+				comment.pos = *newPos + getWorldOffset();
 			});
+		}
+
+		if (handle.isOver()) {
+			highlightedHandle = UUID(handle.getId());
+		}
+	}
+
+	if (inputState.mousePos) {
+		lastMousePos = *inputState.mousePos;
+		if (inputState.rightClickPressed) {
+			if (highlightedHandle) {
+				editComment(*highlightedHandle);
+			} else {
+				addComment(*inputState.mousePos);
+			}
 		}
 	}
 }
@@ -38,7 +56,7 @@ void CommentsGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) cons
 
 	for (auto& handle: handles) {
 		auto r = rect + handle.getPosition();
-		painter.drawRect(r, 2, Colour4f(1, 1, 1));
+		painter.drawRect(r, 2, Colour4f(1, 1, 1, handle.isOver() ? 1.0f : 0.5f));
 	}
 }
 
@@ -47,28 +65,50 @@ std::shared_ptr<UIWidget> CommentsGizmo::makeUI()
 	return {};
 }
 
-void CommentsGizmo::updateGizmos()
+void CommentsGizmo::addComment(Vector2f pos)
+{
+	auto uuid = comments.addComment(ProjectComment(pos + getWorldOffset()));
+	handles.push_back(makeHandle(uuid, pos));
+	forceHighlight = true;
+}
+
+void CommentsGizmo::editComment(const UUID& uuid)
+{
+
+}
+
+SceneEditorGizmoHandle CommentsGizmo::makeHandle(const UUID& uuid, Vector2f pos)
 {
 	const float size = 64;
 	const auto rect = Rect4f(-size / 2, -size / 2, size, size);
 
+	auto handle = SceneEditorGizmoHandle(uuid.toString());
+	handle.setPosition(pos, true);
+	handle.setBoundsCheck([=] (Vector2f myPos, Vector2f mousePos) -> bool
+	{
+		return (rect + myPos).contains(mousePos);
+	});
+
+	return handle;
+}
+
+void CommentsGizmo::updateHandles()
+{
 	const auto activeComments = comments.getComments(sceneEditorWindow.getSceneNameForComments());
 	handles.resize(activeComments.size());
 	for (size_t i = 0; i < activeComments.size(); ++i) {
-		auto handle = SceneEditorGizmoHandle(activeComments[i].first.toString());
-		handle.setPosition(activeComments[i].second->pos, true);
-		handle.setBoundsCheck([=] (Vector2f myPos, Vector2f mousePos) -> bool
-		{
-			return (rect + myPos).contains(mousePos);
-		});
-
-		handles[i] = std::move(handle);
+		handles[i] = makeHandle(activeComments[i].first, activeComments[i].second->pos - getWorldOffset());
 	}
+}
+
+Vector2f CommentsGizmo::getWorldOffset() const
+{
+	return sceneEditorWindow.getWorldOffset();
 }
 
 bool CommentsGizmo::isHighlighted() const
 {
-	return std::any_of(handles.begin(), handles.end(), [&](const auto& handle) { return handle.isOver(); });
+	return forceHighlight || std::any_of(handles.begin(), handles.end(), [&](const auto& handle) { return handle.isOver(); });
 }
 
 Vector<String> CommentsGizmo::getHighlightedComponents() const
@@ -78,6 +118,11 @@ Vector<String> CommentsGizmo::getHighlightedComponents() const
 
 bool CommentsGizmo::onKeyPress(KeyboardKeyPress key)
 {
+	if (key.is(KeyCode::A, KeyMods::Ctrl)) {
+		addComment(lastMousePos);
+		return true;
+	}
+
 	return false;
 }
 

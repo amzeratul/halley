@@ -6,6 +6,11 @@
 #include "halley/tools/file/filesystem.h"
 using namespace Halley;
 
+ProjectComment::ProjectComment(Vector2f pos)
+	: pos(pos)
+{
+}
+
 ProjectComment::ProjectComment(const ConfigNode& node)
 {
 	pos = node["pos"].asVector2f({});
@@ -105,7 +110,7 @@ void ProjectComments::loadAll()
 {
 	bool modified = false;
 	for (const auto& path: FileSystem::enumerateDirectory(commentsRoot)) {
-		modified = loadFile(path) || modified;
+		modified = loadFile(commentsRoot / path) || modified;
 	}
 
 	if (modified) {
@@ -116,8 +121,11 @@ void ProjectComments::loadAll()
 
 void ProjectComments::saveFile(const UUID& id, const ProjectComment& comment)
 {
+	const auto path = getPath(id);
+	FileSystem::createParentDir(path);
+
 	YAMLConvert::EmitOptions options;
-	Path::writeFile(getPath(id), YAMLConvert::generateYAML(comment.toConfigNode(), options));
+	Path::writeFile(path, YAMLConvert::generateYAML(comment.toConfigNode(), options));
 	++version;
 }
 
