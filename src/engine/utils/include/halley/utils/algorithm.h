@@ -217,29 +217,35 @@ namespace std_ex {
 	}
 
 	template <typename C, typename F>
-	void erase_if_value(C& map, F predicate)
+	size_t erase_if_value(C& map, F predicate)
 	{
+		size_t n = 0;
 		const auto endIter = map.end();
 		for (auto iter = map.begin(); iter != endIter;) {
 		     if (predicate(iter->second)) {
 		          iter = map.erase(iter);
+				  ++n;
 		     } else {
 		          ++iter;
 		     }
-		}		
+		}
+		return n;
 	}
 
 	template <typename C, typename F>
-	void erase_if_key(C& map, F predicate)
+	size_t erase_if_key(C& map, F predicate)
 	{
+		size_t n = 0;
 		const auto endIter = map.end();
 		for (auto iter = map.begin(); iter != endIter;) {
 		     if (predicate(iter->first)) {
 		          iter = map.erase(iter);
+				  ++n;
 		     } else {
 		          ++iter;
 		     }
-		}		
+		}
+		return n;
 	}
 
 	template <typename C, typename V>

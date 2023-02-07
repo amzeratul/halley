@@ -127,12 +127,24 @@ void ProjectComments::update(Time t)
 
 void ProjectComments::loadAll()
 {
+	HashSet<UUID> present;
+
 	bool modified = false;
-	for (const auto& path: FileSystem::enumerateDirectory(commentsRoot)) {
-		modified = loadFile(commentsRoot / path) || modified;
+	for (const auto& file: FileSystem::enumerateDirectory(commentsRoot)) {
+		const auto path = commentsRoot / file;
+		const auto uuid = getUUID(path);
+		if (uuid.isValid()) {
+			modified = loadFile(uuid, path) || modified;
+			present.emplace(uuid);
+		}
 	}
 
-	if (modified) {
+	const auto nRemoved = std_ex::erase_if_key(comments, [&](const UUID& key)
+	{
+		return !present.contains(key);
+	});
+
+	if (modified || nRemoved > 0) {
 		++version;
 		Logger::logDev("Comments loaded from disk");
 	}
@@ -154,27 +166,25 @@ void ProjectComments::saveFile(const UUID& id, const ProjectComment& comment)
 	YAMLConvert::EmitOptions options;
 	Path::writeFile(path, YAMLConvert::generateYAML(comment.toConfigNode(), options));
 	//++version; // Don't modify on save, causes issues with editor
+
+	monitorTime = -2; // At least 2 seconds before attempting to read dir
 }
 
-bool ProjectComments::loadFile(const Path& path)
+bool ProjectComments::loadFile(const UUID& uuid, const Path& path)
 {
-	auto filename = path.getFilename().replaceExtension("").toString();
-	if (filename.startsWith("comment_") && filename.length() == 44) {
-		const auto uuid = UUID(filename.substr(8));
-		if (uuid.isValid()) {
-			const auto configFile = YAMLConvert::parseConfig(Path::readFile(path));
-			auto comment = ProjectComment(configFile.getRoot());
+	if (uuid.isValid()) {
+		const auto configFile = YAMLConvert::parseConfig(Path::readFile(path));
+		auto comment = ProjectComment(configFile.getRoot());
 
-			auto iter = comments.find(uuid);
-			if (iter != comments.end()) {
-				if (iter->second != comment) {
-					iter->second = std::move(comment);
-					return true;
-				}
-			} else {
-				comments[uuid] = std::move(comment);
+		auto iter = comments.find(uuid);
+		if (iter != comments.end()) {
+			if (iter->second != comment) {
+				iter->second = std::move(comment);
 				return true;
 			}
+		} else {
+			comments[uuid] = std::move(comment);
+			return true;
 		}
 	}
 	return false;
@@ -189,4 +199,13 @@ void ProjectComments::deleteFile(const UUID& id)
 Path ProjectComments::getPath(const UUID& id) const
 {
 	return commentsRoot / ("comment_" + id.toString() + ".yaml");
+}
+
+UUID ProjectComments::getUUID(const Path& path) const
+{
+	const auto filename = path.getFilename().replaceExtension("").toString();
+	if (filename.startsWith("comment_") && filename.length() == 44) {
+		return UUID(filename.substr(8));
+	}
+	return UUID();
 }

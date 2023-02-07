@@ -67,9 +67,10 @@ namespace Halley {
         void loadAll();
         void savePending();
         void saveFile(const UUID& id, const ProjectComment& comment);
-        bool loadFile(const Path& path);
+        bool loadFile(const UUID& id, const Path& path);
         void deleteFile(const UUID& id);
 
         Path getPath(const UUID& id) const;
+        UUID getUUID(const Path& path) const;
     };
 }

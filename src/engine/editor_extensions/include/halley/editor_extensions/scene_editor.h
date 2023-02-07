@@ -57,7 +57,7 @@ namespace Halley {
     	std::optional<Vector2f> getMousePos() const override;
 		Vector2f getCameraPos() const override;
 		std::optional<Vector2f> getWorldOffset() const override;
-		float getZoom() const;
+		float getZoom() const override;
     	
     	void setupConsoleCommands(UIDebugConsoleController& controller, ISceneEditorWindow& sceneEditor) override;
 

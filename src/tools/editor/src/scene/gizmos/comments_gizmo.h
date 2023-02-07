@@ -28,6 +28,9 @@ namespace Halley {
 		Vector2f lastMousePos;
 		bool forceHighlight = false;
 
+		Sprite commentBg;
+		float nodeScale = 1.0f;
+
 		void addComment(Vector2f pos);
 		void editComment(const UUID& uuid);
 
