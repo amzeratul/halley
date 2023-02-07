@@ -54,8 +54,6 @@ void EditorRootStage::onVariableUpdate(Time time)
 		createLoadProjectUI();
 	}
 
-	updateUI(time);
-
 	if (devConServer) {
 		devConServer->update(time);
 	}
@@ -69,6 +67,8 @@ void EditorRootStage::onVariableUpdate(Time time)
 	if (project) {
 		project->update(time);
 	}
+
+	updateUI(time);
 }
 
 void EditorRootStage::onRender(RenderContext& context) const

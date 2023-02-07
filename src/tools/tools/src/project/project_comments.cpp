@@ -42,7 +42,7 @@ bool ProjectComment::operator!=(const ProjectComment& other) const
 }
 
 ProjectComments::ProjectComments(Path commentsRoot)
-	: commentsRoot(std::move(commentsRoot))
+	: commentsRoot(commentsRoot)
 	, monitor(commentsRoot)
 {
 	loadAll();
