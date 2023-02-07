@@ -16,6 +16,7 @@ namespace Halley {
 
 		bool isHighlighted() const override;
 		bool blockRightClick() const override;
+		bool allowEntitySpriteSelection() const override;
 		Vector<String> getHighlightedComponents() const override;
 		bool onKeyPress(KeyboardKeyPress key) override;
 		bool canBoxSelectEntities() const override;
@@ -37,6 +38,7 @@ namespace Halley {
 
 		void addComment(Vector2f pos);
 		void editComment(const UUID& uuid);
+		void deleteComments();
 
 		SceneEditorGizmoHandle makeHandle(const UUID& uuid, Vector2f pos);
 		void updateHandles();

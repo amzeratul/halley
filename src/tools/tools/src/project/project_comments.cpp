@@ -5,6 +5,7 @@
 #include "halley/support/logger.h"
 #include "halley/tools/file/filesystem.h"
 #include "halley/utils/algorithm.h"
+#include "halley/utils/hash.h"
 using namespace Halley;
 
 ProjectComment::ProjectComment(Vector2f pos, String scene)
@@ -164,8 +165,10 @@ void ProjectComments::saveFile(const UUID& id, const ProjectComment& comment)
 	FileSystem::createParentDir(path);
 
 	YAMLConvert::EmitOptions options;
-	Path::writeFile(path, YAMLConvert::generateYAML(comment.toConfigNode(), options));
-	//++version; // Don't modify on save, causes issues with editor
+	const auto bytes = YAMLConvert::generateYAML(comment.toConfigNode(), options);
+	const auto data = gsl::as_bytes(gsl::span<const char>(bytes.c_str(), bytes.length()));
+	Path::writeFile(path, data);
+	lastWrittenHash[id] = Hash::hash(data);
 
 	monitorTime = -2; // At least 2 seconds before attempting to read dir
 }
@@ -173,7 +176,17 @@ void ProjectComments::saveFile(const UUID& id, const ProjectComment& comment)
 bool ProjectComments::loadFile(const UUID& uuid, const Path& path)
 {
 	if (uuid.isValid()) {
-		const auto configFile = YAMLConvert::parseConfig(Path::readFile(path));
+		const auto bytes = Path::readFile(path);
+
+		const auto hashIter = lastWrittenHash.find(uuid);
+		if (hashIter != lastWrittenHash.end()) {
+			const auto hash = Hash::hash(bytes);
+			if (hash == hashIter->second) {
+				return false;
+			}
+		}
+
+		const auto configFile = YAMLConvert::parseConfig(bytes);
 		auto comment = ProjectComment(configFile.getRoot());
 
 		auto iter = comments.find(uuid);
@@ -193,6 +206,7 @@ bool ProjectComments::loadFile(const UUID& uuid, const Path& path)
 void ProjectComments::deleteFile(const UUID& id)
 {
 	Path::removeFile(getPath(id));
+	lastWrittenHash.erase(id);
 	++version;
 }
 

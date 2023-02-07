@@ -151,6 +151,16 @@ void CommentsGizmo::editComment(const UUID& uuid)
 
 }
 
+void CommentsGizmo::deleteComments()
+{
+	for (auto& handle: handles) {
+		if (handle.isSelected()) {
+			comments.deleteComment(UUID(handle.getId()));
+		}
+	}
+	std_ex::erase_if(handles, [&](const auto& handle) { return handle.isSelected(); });
+}
+
 SceneEditorGizmoHandle CommentsGizmo::makeHandle(const UUID& uuid, Vector2f pos)
 {
 	const auto rect = Rect4f(-commentSize.x / 2, -commentSize.y / 2, commentSize.x, commentSize.y);
@@ -189,6 +199,11 @@ bool CommentsGizmo::blockRightClick() const
 	return isHighlighted();
 }
 
+bool CommentsGizmo::allowEntitySpriteSelection() const
+{
+	return false;
+}
+
 Vector<String> CommentsGizmo::getHighlightedComponents() const
 {
 	return {};
@@ -198,6 +213,11 @@ bool CommentsGizmo::onKeyPress(KeyboardKeyPress key)
 {
 	if (key.is(KeyCode::A, KeyMods::Ctrl)) {
 		addComment(lastMousePos);
+		return true;
+	}
+
+	if (key.is(KeyCode::Delete)) {
+		deleteComments();
 		return true;
 	}
 
