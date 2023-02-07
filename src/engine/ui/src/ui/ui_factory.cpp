@@ -638,14 +638,6 @@ UIFactoryWidgetProperties UIFactory::getLabelProperties() const
 	return result;
 }
 
-UIFactoryWidgetProperties UIFactory::getTextInputProperties() const
-{
-	UIFactoryWidgetProperties result;
-	result.name = "Text Input";
-	result.iconName = "widget_icons/textInput.png";
-	return result;
-}
-
 UIFactoryWidgetProperties UIFactory::getSpinControlProperties() const
 {
 	UIFactoryWidgetProperties result;
@@ -789,6 +781,23 @@ UIFactoryWidgetProperties UIFactory::getButtonProperties() const
 	return result;
 }
 
+UIFactoryWidgetProperties UIFactory::getTextInputProperties() const
+{
+	UIFactoryWidgetProperties result;
+	result.name = "Text Input";
+	result.iconName = "widget_icons/textInput.png";
+
+	result.entries.emplace_back("Max Length", "maxLength", "std::optional<int>", "");
+	result.entries.emplace_back("History", "history", "bool", "false");
+	result.entries.emplace_back("Read Only", "readOnly", "bool", "false");
+	result.entries.emplace_back("Multi Line", "multiLine", "bool", "false");
+	result.entries.emplace_back("Clear on Submit", "clearOnSubmit", "bool", "false");
+	result.entries.emplace_back("Ghost Text", "ghost", "Halley::String", "");
+	result.entries.emplace_back("Show Ghost when Focused", "showGhostWhenFocused", "bool", "false");
+
+	return result;
+}
+
 std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 {
 	auto& node = entryNode["widget"];
@@ -824,6 +833,7 @@ std::shared_ptr<UIWidget> UIFactory::makeTextInput(const ConfigNode& entryNode)
 	result->setHistoryEnabled(node["history"].asBool(false));
 	result->setClearOnSubmit(node["clearOnSubmit"].asBool(false));
 	result->setShowGhostWhenFocused(node["showGhostWhenFocused"].asBool(false));
+	result->setMultiLine(node["multiLine"].asBool(false));
 
 	return result;
 }

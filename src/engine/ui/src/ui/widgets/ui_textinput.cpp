@@ -150,6 +150,16 @@ bool UITextInput::isHistoryEnabled() const
 	return historyEnabled;
 }
 
+void UITextInput::setMultiLine(bool enabled)
+{
+	multiLine = enabled;
+}
+
+bool UITextInput::isMultiLine() const
+{
+	return multiLine;
+}
+
 void UITextInput::draw(UIPainter& painter) const
 {
 	if (sprite.hasMaterial()) {
@@ -386,7 +396,7 @@ bool UITextInput::onKeyPress(KeyboardKeyPress key)
 	}
 
 	if (key.is(KeyCode::Enter) || key.is(KeyCode::KeypadEnter)) {
-		if (!isMultiLine) {
+		if (!multiLine) {
 			submit();
 		}
 		return true;

@@ -55,6 +55,9 @@ namespace Halley {
 		void setHistoryEnabled(bool enabled);
 		bool isHistoryEnabled() const;
 
+		void setMultiLine(bool enabled);
+		bool isMultiLine() const;
+
 		void submit();
 		void setClearOnSubmit(bool enabled);
 		bool isClearOnSubmit() const;
@@ -126,7 +129,7 @@ namespace Halley {
 		int caretPos = 0;
 		bool caretShowing = false;
 
-		bool isMultiLine = false;
+		bool multiLine = false;
 		bool clearOnSubmit = false;
 		bool showGhostWhenFocused = false;
 	};
