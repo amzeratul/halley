@@ -80,12 +80,11 @@ void CommentsGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sce
 
 	if (inputState.mousePos) {
 		lastMousePos = *inputState.mousePos;
-		if (inputState.rightClickPressed) {
-			if (highlightedHandle) {
-				editComment(*highlightedHandle);
-			} else {
-				addComment(*inputState.mousePos);
-			}
+		if (inputState.rightClickPressed && highlightedHandle) {
+			editComment(*highlightedHandle);
+		}
+		if (inputState.leftClickPressed && inputState.ctrlHeld && !highlightedHandle) {
+			addComment(*inputState.mousePos);
 		}
 	}
 }
@@ -173,6 +172,7 @@ void CommentsGizmo::addComment(Vector2f pos)
 	auto uuid = comments.addComment(ProjectComment(pos + getWorldOffset(), sceneEditorWindow.getSceneNameForComments()));
 	handles.push_back(makeHandle(uuid, pos));
 	forceHighlight = true;
+	editComment(uuid);
 }
 
 void CommentsGizmo::editComment(const UUID& uuid)
@@ -206,8 +206,6 @@ SceneEditorGizmoHandle CommentsGizmo::makeHandle(const UUID& uuid, Vector2f pos)
 
 void CommentsGizmo::updateHandles()
 {
-	Logger::logDev("Updating handles");
-
 	const auto activeComments = comments.getComments(sceneEditorWindow.getSceneNameForComments());
 	handles.resize(activeComments.size());
 	for (size_t i = 0; i < activeComments.size(); ++i) {
@@ -260,21 +258,25 @@ bool CommentsGizmo::canBoxSelectEntities() const
 	return false;
 }
 
+bool CommentsGizmo::canSelectEntities() const
+{
+	return false;
+}
 
 
 CommentEditWindow::CommentEditWindow(UIFactory& factory, ProjectComments& comments, const UUID& uuid)
-	: UIWidget("", {}, UISizer())
+	: PopupWindow("commentEdit")
 	, factory(factory)
 	, comments(comments)
 	, uuid(uuid)
 {
 	factory.loadUI(*this, "halley/comment_edit_popup");
-	setAnchor(UIAnchor());
 }
 
 void CommentEditWindow::onAddedToRoot(UIRoot& root)
 {
 	root.registerKeyPressListener(shared_from_this(), 10);
+	root.focusNext(false);
 	root.focusNext(false);
 }
 

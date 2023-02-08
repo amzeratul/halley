@@ -98,6 +98,7 @@ namespace Halley {
 
 		virtual bool onKeyPress(KeyboardKeyPress key);
 		virtual bool canBoxSelectEntities() const;
+		virtual bool canSelectEntities() const;
 
 	protected:
 		virtual void onEntityChanged();

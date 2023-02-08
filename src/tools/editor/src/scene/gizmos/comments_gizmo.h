@@ -1,5 +1,6 @@
 #pragma once
 #include "halley/editor_extensions/scene_editor_gizmo.h"
+#include "src/ui/popup_window.h"
 
 namespace Halley {
 	enum class ProjectCommentPriority;
@@ -20,6 +21,7 @@ namespace Halley {
 		Vector<String> getHighlightedComponents() const override;
 		bool onKeyPress(KeyboardKeyPress key) override;
 		bool canBoxSelectEntities() const override;
+		bool canSelectEntities() const override;
 
 	private:
 		ProjectComments& comments;
@@ -27,7 +29,7 @@ namespace Halley {
 		ISceneEditorWindow& sceneEditorWindow;
 
 		Vector<SceneEditorGizmoHandle> handles;
-		uint64_t lastVersion = 0;
+		uint64_t lastVersion = std::numeric_limits<uint64_t>::max();
 		Vector2f lastMousePos;
 		bool forceHighlight = false;
 
@@ -48,7 +50,7 @@ namespace Halley {
 		Colour4f getCommentColour(ProjectCommentPriority priority) const;
     };
 
-	class CommentEditWindow : public UIWidget {
+	class CommentEditWindow : public PopupWindow {
 	public:
 		CommentEditWindow(UIFactory& factory, ProjectComments& comments, const UUID& uuid);
 

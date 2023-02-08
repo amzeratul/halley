@@ -72,6 +72,14 @@ bool SceneEditorGizmoCollection::canBoxSelectEntities()
 	return true;
 }
 
+bool SceneEditorGizmoCollection::canSelectEntities()
+{
+	if (activeGizmo) {
+		return activeGizmo->canSelectEntities();
+	}
+	return true;
+}
+
 void SceneEditorGizmoCollection::refreshEntity()
 {
 	selectedBoundsGizmo->refreshEntity();

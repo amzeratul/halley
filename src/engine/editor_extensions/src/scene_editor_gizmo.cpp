@@ -239,6 +239,11 @@ bool SceneEditorGizmo::canBoxSelectEntities() const
 	return false;
 }
 
+bool SceneEditorGizmo::canSelectEntities() const
+{
+	return true;
+}
+
 void SceneEditorGizmo::onEntityChanged()
 {}
 

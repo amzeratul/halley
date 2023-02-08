@@ -104,6 +104,10 @@ void SceneEditor::update(Time t, SceneEditorInputState inputState, SceneEditorOu
 		selBox.reset();
 		selBoxStartSelectedEntities.clear();
 	}
+	if (!gizmoCollection->canSelectEntities()) {
+		outputState.newSelection = Vector<UUID>();
+		outputState.selectionMode = UIList::SelectionMode::Normal;
+	}
 
 	// Update gizmos
 	const auto gizmoUpdateResult = gizmoCollection->update(t, camera, *this, inputState, outputState);

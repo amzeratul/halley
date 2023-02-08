@@ -16,6 +16,7 @@ namespace Halley {
 		void draw(Painter& painter, const ISceneEditor& sceneEditor) override;
 		void setSelectedEntities(Vector<EntityRef> entities, Vector<EntityData*> entityDatas) override;
 		bool canBoxSelectEntities() override;
+		bool canSelectEntities() override;
 		void refreshEntity() override;
 		void onEntityModified(const UUID& uuid, const EntityData& oldData, const EntityData& newData);
 		std::shared_ptr<UIWidget> setTool(const String& tool, const String& componentName, const String& fieldName) override;
