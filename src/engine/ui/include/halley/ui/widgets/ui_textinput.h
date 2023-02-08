@@ -124,7 +124,7 @@ namespace Halley {
 		std::optional<Range<float>> autoSizeRange;
 
 		Vector2f textScrollPos;
-		float caretPhysicalPos = 0;
+		Vector2f caretPhysicalPos;
 		float caretTime = 0;
 		int caretPos = 0;
 		bool caretShowing = false;

@@ -190,7 +190,7 @@ void UITextInput::updateCaret()
 		caretTime = 0;
 		caretShowing = true;
 		caretPos = pos;
-		caretPhysicalPos = label.getCharacterPosition(caretPos, text.getText()).x;
+		caretPhysicalPos = label.getCharacterPosition(caretPos, label.getTextUTF32());
 	}
 }
 
@@ -282,6 +282,26 @@ void UITextInput::setAutoSize(std::optional<Range<float>> range)
 
 void UITextInput::update(Time t, bool moved)
 {
+	// Update auto text
+	const bool showGhost = text.getText().empty() && (!isFocused() || showGhostWhenFocused || isReadOnly());
+	const bool showAutoComplete = autoCompleteCurOption.has_value();
+	ghostText.checkForUpdates();
+	ghostLabel.setText(showAutoComplete ? getAutoCompleteCaption() : (showGhost ? ghostText.getString().getUTF32() : StringUTF32()));
+
+	// Update text
+	const auto textBounds = getTextBounds();
+	if (multiLine) {
+		const auto extents = label.getExtents(text.getText());
+		if (extents.x > textBounds.getWidth()) {
+			label.setText(label.split(text.getText(), textBounds.getWidth() - 1));
+		} else {
+			label.setText(text.getText());
+		}
+	} else {
+		label.setText(text.getText());
+	}
+
+	// Caret
 	if (isFocused()) {
 		caretTime += float(t);
 		if (caretTime > 0.4f) {
@@ -299,24 +319,23 @@ void UITextInput::update(Time t, bool moved)
 		caretShowing = false;
 	}
 
-	// Update text labels
-	const bool showGhost = text.getText().empty() && (!isFocused() || showGhostWhenFocused || isReadOnly());
-	const bool showAutoComplete = autoCompleteCurOption.has_value();
-	ghostText.checkForUpdates();
-	ghostLabel.setText(showAutoComplete ? getAutoCompleteCaption() : (showGhost ? ghostText.getString().getUTF32() : StringUTF32()));
-	label.setText(text.getText());
-
 	// Size
-	const float length = label.empty() ? ghostLabel.getExtents().x : label.getExtents().x;
+	auto textSize = label.empty() ? ghostLabel.getExtents() : label.getExtents();
 	if (autoSizeRange) {
 		const auto border = getTextInnerBorder();
-		setMinSize(Vector2f(std::clamp(length + border.x + border.z, autoSizeRange->start, autoSizeRange->end), getMinimumSize().y));
+		setMinSize(Vector2f(std::clamp(textSize.x + border.x + border.z, autoSizeRange->start, autoSizeRange->end), getMinimumSize().y));
 	}
 
 	// Position the text
-	const auto textBounds = getTextBounds();
-	if (length > textBounds.getWidth()) {
-		textScrollPos.x = clamp(textScrollPos.x, std::max(0.0f, caretPhysicalPos - textBounds.getWidth()), std::min(length - textBounds.getWidth(), caretPhysicalPos));
+	if (!multiLine && textSize.x > textBounds.getWidth()) {
+		textScrollPos.x = clamp(textScrollPos.x, std::max(0.0f, caretPhysicalPos.x - textBounds.getWidth()), std::min(textSize.x - textBounds.getWidth(), caretPhysicalPos.x));
+		const auto clip = Rect4f(textScrollPos, textScrollPos + textBounds.getSize());
+		label.setClip(clip);
+		ghostLabel.setClip(clip);
+	} else if (textSize.y > textBounds.getHeight()) {
+		const float caretTop = caretPhysicalPos.y;
+		const float caretBottom = caretPhysicalPos.y + label.getLineHeight();
+		textScrollPos.y = clamp(textScrollPos.y, std::max(0.0f, caretBottom - textBounds.getHeight()), std::min(textSize.y - textBounds.getHeight(), caretTop));
 		const auto clip = Rect4f(textScrollPos, textScrollPos + textBounds.getSize());
 		label.setClip(clip);
 		ghostLabel.setClip(clip);
@@ -330,7 +349,7 @@ void UITextInput::update(Time t, bool moved)
 	ghostLabel.setPosition(textPos);
 
 	// Position the caret
-	caret.setPos(textPos + Vector2f(caretPhysicalPos, 0));
+	caret.setPos(textPos + caretPhysicalPos);
 
 	// Position the icon
 	if (icon.hasMaterial()) {
@@ -393,6 +412,16 @@ bool UITextInput::onKeyPress(KeyboardKeyPress key)
 			navigateHistory(-1);
 			return true;
 		}
+	} else if (multiLine) {
+		if (key.is(KeyCode::Up)) {
+			text.setSelection(static_cast<int>(label.getCharacterAt(caretPhysicalPos + Vector2f(0, -label.getLineHeight()))));
+			return true;
+		}
+
+		if (key.is(KeyCode::Down)) {
+			text.setSelection(static_cast<int>(label.getCharacterAt(caretPhysicalPos + Vector2f(0, label.getLineHeight()))));
+			return true;
+		}
 	}
 
 	if (key.is(KeyCode::Enter) || key.is(KeyCode::KeypadEnter)) {
@@ -406,8 +435,8 @@ bool UITextInput::onKeyPress(KeyboardKeyPress key)
 void UITextInput::pressMouse(Vector2f mousePos, int button, KeyMods keyMods)
 {
 	if (button == 0) {
-		Vector2f labelClickPos = mousePos - label.getPosition();
-		text.setSelection(int(label.getCharacterAt(labelClickPos)));
+		const auto labelClickPos = mousePos - label.getPosition();
+		text.setSelection(static_cast<int>(label.getCharacterAt(labelClickPos)));
 		updateCaret();
 	}
 }
