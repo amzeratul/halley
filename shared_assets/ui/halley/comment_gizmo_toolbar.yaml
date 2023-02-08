@@ -1,0 +1,4 @@
+widget: { class: widget }
+sizer: { type: vertical }
+children:
+- widget: { class: button, id: addComment, text: Add Comment, tooltip: "Add a new Comment [Ctrl+Left Click] / [Ctrl+A]" }

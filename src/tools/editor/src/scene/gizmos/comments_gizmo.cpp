@@ -84,7 +84,7 @@ void CommentsGizmo::update(Time time, const ISceneEditor& sceneEditor, const Sce
 			editComment(*highlightedHandle);
 		}
 		if (inputState.leftClickPressed && inputState.ctrlHeld && !highlightedHandle) {
-			addComment(*inputState.mousePos);
+			addComment(*inputState.mousePos, false);
 		}
 	}
 }
@@ -164,20 +164,51 @@ Colour4f CommentsGizmo::getCommentColour(ProjectCommentPriority priority) const
 
 std::shared_ptr<UIWidget> CommentsGizmo::makeUI()
 {
-	return {};
+	auto ui = factory.makeUI("halley/comment_gizmo_toolbar");
+	ui->setInteractWithMouse(true);
+	
+	ui->setHandle(UIEventType::ButtonClicked, "addComment", [=] (const UIEvent& event)
+	{
+		Concurrent::execute(Executors::getMainUpdateThread(), [=] ()
+		{
+			addComment(sceneEditorWindow.getWorldCameraPosition(), true);
+		});
+	});
+	
+	return ui;
 }
 
-void CommentsGizmo::addComment(Vector2f pos)
+void CommentsGizmo::addComment(Vector2f pos, bool isWorldSpace)
 {
-	auto uuid = comments.addComment(ProjectComment(pos + getWorldOffset(), sceneEditorWindow.getSceneNameForComments()));
-	handles.push_back(makeHandle(uuid, pos));
+	const auto worldPos = pos + (isWorldSpace ? Vector2f() : getWorldOffset());
+	const auto screenPos = pos - (isWorldSpace ? getWorldOffset() : Vector2f());
+	const auto uuid = comments.addComment(ProjectComment(worldPos, sceneEditorWindow.getSceneNameForComments()));
+
+	for (auto& handle: handles) {
+		handle.setSelected(false);
+	}
+	handles.push_back(makeHandle(uuid, screenPos));
+	//handles.back().setSelected(true);
 	forceHighlight = true;
-	editComment(uuid);
+
+	editComment(uuid, [=] (bool ok)
+	{
+		if (!ok) {
+			deleteComment(uuid);
+		}
+	});
 }
 
-void CommentsGizmo::editComment(const UUID& uuid)
+void CommentsGizmo::editComment(const UUID& uuid, std::function<void(bool)> callback)
 {
-	sceneEditorWindow.getUIRoot().addChild(std::make_shared<CommentEditWindow>(factory, comments, uuid));
+	sceneEditorWindow.getUIRoot().addChild(std::make_shared<CommentEditWindow>(factory, comments, uuid, std::move(callback)));
+}
+
+void CommentsGizmo::deleteComment(const UUID& uuid)
+{
+	comments.deleteComment(uuid);
+	const auto id = uuid.toString();
+	std_ex::erase_if(handles, [&](const auto& handle) { return handle.getId() == id; });
 }
 
 void CommentsGizmo::deleteComments()
@@ -241,7 +272,7 @@ Vector<String> CommentsGizmo::getHighlightedComponents() const
 bool CommentsGizmo::onKeyPress(KeyboardKeyPress key)
 {
 	if (key.is(KeyCode::A, KeyMods::Ctrl)) {
-		addComment(lastMousePos);
+		addComment(lastMousePos, false);
 		return true;
 	}
 
@@ -264,11 +295,12 @@ bool CommentsGizmo::canSelectEntities() const
 }
 
 
-CommentEditWindow::CommentEditWindow(UIFactory& factory, ProjectComments& comments, const UUID& uuid)
+CommentEditWindow::CommentEditWindow(UIFactory& factory, ProjectComments& comments, const UUID& uuid, Callback callback)
 	: PopupWindow("commentEdit")
 	, factory(factory)
 	, comments(comments)
 	, uuid(uuid)
+	, callback(std::move(callback))
 {
 	factory.loadUI(*this, "halley/comment_edit_popup");
 }
@@ -334,10 +366,16 @@ void CommentEditWindow::onOK()
 		comment.priority = fromString<ProjectCommentPriority>(getWidgetAs<UIDropdown>("priority")->getSelectedOptionId());
 		comment.text = getWidgetAs<UITextInput>("comment")->getText();
 	}, true);
+	if (callback) {
+		callback(true);
+	}
 	destroy();
 }
 
 void CommentEditWindow::onCancel()
 {
+	if (callback) {
+		callback(false);
+	}
 	destroy();
 }

@@ -40,8 +40,9 @@ namespace Halley {
 		TextRenderer tooltipText;
 		float nodeScale = 1.0f;
 
-		void addComment(Vector2f pos);
-		void editComment(const UUID& uuid);
+		void addComment(Vector2f pos, bool isWorldSpace);
+		void editComment(const UUID& uuid, std::function<void(bool)> callback = {});
+		void deleteComment(const UUID& uuid);
 		void deleteComments();
 
 		SceneEditorGizmoHandle makeHandle(const UUID& uuid, Vector2f pos);
@@ -52,7 +53,8 @@ namespace Halley {
 
 	class CommentEditWindow : public PopupWindow {
 	public:
-		CommentEditWindow(UIFactory& factory, ProjectComments& comments, const UUID& uuid);
+		using Callback = std::function<void(bool)>;
+		CommentEditWindow(UIFactory& factory, ProjectComments& comments, const UUID& uuid, Callback callback);
 
 		void onAddedToRoot(UIRoot& root) override;
 		void onRemovedFromRoot(UIRoot& root) override;
@@ -64,6 +66,7 @@ namespace Halley {
 		UIFactory& factory;
 		ProjectComments& comments;
 		UUID uuid;
+		Callback callback;
 
 		void loadComment();
 		void onOK();
