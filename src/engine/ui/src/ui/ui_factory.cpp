@@ -1205,9 +1205,10 @@ std::shared_ptr<UIWidget> UIFactory::makeTabbedPane(const ConfigNode& entryNode)
 		pane->getPage(i)->add(makeWidget(tabNode), 1);
 	}
 
-	tabs->setHandle(UIEventType::ListSelectionChanged, [pane] (const UIEvent& event)
+	tabs->setHandle(UIEventType::ListSelectionChanged, [pane, tabs] (const UIEvent& event)
 	{
-		pane->setPage(event.getIntData());
+		const auto& item = tabs->getItem(event.getStringData());
+		pane->setPage(item->getAbsoluteIndex());
 		event.getCurWidget().sendEvent(UIEvent(UIEventType::TabChanged, event.getSourceId(), event.getIntData()));
 	});
 
