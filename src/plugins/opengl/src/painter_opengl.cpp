@@ -209,6 +209,8 @@ void PainterOpenGL::setVertices(const MaterialDefinition& material, size_t numVe
 
 void PainterOpenGL::setupVertexAttributes(const MaterialDefinition& material)
 {
+    uint32_t unusedLocations = 0xffff;
+
 	// Set vertex attribute pointers in VBO
 	size_t vertexStride = material.getVertexStride();
 	for (auto& attribute : material.getAttributes()) {
@@ -254,9 +256,23 @@ void PainterOpenGL::setupVertexAttributes(const MaterialDefinition& material)
 		size_t offset = attribute.offset;
 		glVertexAttribPointer(attribute.location, count, type, GL_FALSE, GLsizei(vertexStride), reinterpret_cast<GLvoid*>(offset));
 		glCheckError();
+
+        Ensures(attribute.location < 16);
+        uint32_t mask = 1u << attribute.location;
+        Ensures((unusedLocations & mask) != 0);
+        unusedLocations &= ~mask;
 	}
 
-	// TODO: disable positions not used by this program
+    // Disable unused locations.
+    int location = 0;
+    while (unusedLocations != 0) {
+        if ((unusedLocations & 1) != 0) {
+            glDisableVertexAttribArray(location);
+        }
+        unusedLocations >>= 1;
+        location++;
+    }
+    glCheckError();
 }
 
 void PainterOpenGL::drawTriangles(size_t numIndices)
