@@ -45,7 +45,7 @@ namespace Halley {
 
 		void bindTexture(unsigned int id);
 		void setTextureUnit(int n);
-		void setNumberOfTextureUnits(int n);
+		void resetTextureUnits();
 
 		void setViewPort(Rect4i rect);
 		void setScissor(Rect4i rect, bool enable);

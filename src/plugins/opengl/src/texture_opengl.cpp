@@ -43,6 +43,7 @@ TextureOpenGL& TextureOpenGL::operator=(TextureOpenGL&& other) noexcept
 void TextureOpenGL::doLoad(TextureDescriptor& d)
 {
 	GLUtils glUtils;
+    glUtils.setTextureUnit(0);
 	glUtils.bindTexture(textureId);
 	
 	if (texSize != d.size) {

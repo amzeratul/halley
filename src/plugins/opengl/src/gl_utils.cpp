@@ -248,21 +248,14 @@ void GLUtils::bindTexture(unsigned int id)
 	}
 }
 
-void GLUtils::setNumberOfTextureUnits(int n)
+void GLUtils::resetTextureUnits()
 {
-	Expects(n >= 1);
-	Expects(n < 8);
-
-	int prevUnit = state.curTexUnit;
-
-	for (int i = n; i < state.numUnits; i++) {
+	for (int i = state.numUnits - 1; i >= 0; i--) {
 		setTextureUnit(i);
 		bindTexture(0);
 	}
 
-	setTextureUnit(prevUnit < n ? prevUnit : 0);
-
-	state.numUnits = n + 1;
+	state.numUnits = 0;
 }
 
 void GLUtils::setViewPort(Rect4i r)

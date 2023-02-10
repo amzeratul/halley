@@ -32,8 +32,7 @@ void PainterOpenGL::doStartRender()
 		glUtils = std::make_unique<GLUtils>();
 	}
 	
-	glUtils->setNumberOfTextureUnits(1);
-	glUtils->bindTexture(0);
+	glUtils->resetTextureUnits();
 	glUtils->setScissor(Rect4i(), false);
 
 	vertexBuffer.init(GL_ARRAY_BUFFER);
