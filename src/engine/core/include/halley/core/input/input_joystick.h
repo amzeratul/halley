@@ -72,6 +72,8 @@ namespace Halley {
 
 		virtual void update(Time t);
 
+		std::pair<float, float> getVibration() const override;
+		void setVibration(float low, float high) override;
 		void vibrate(spInputVibration vibration) override;
 		void stopVibrating() override;
 
@@ -92,10 +94,10 @@ namespace Halley {
 		Vector<spInputButtonBase> hats;
 		std::function<float (float)> axisAdjust;
 
-		virtual void setVibration(float low, float high);
-
 	private:
 		Vector<spInputVibration> vibs;
+		float baseLowVib = 0;
+		float baseHighVib = 0;
 		float curLowVib = 0;
 		float curHighVib = 0;
 		std::chrono::steady_clock::time_point lastTime;

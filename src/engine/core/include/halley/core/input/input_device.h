@@ -125,8 +125,11 @@ namespace Halley {
 		virtual size_t getNumberHats();
 		virtual std::shared_ptr<InputDevice> getHat(int /*n*/);
 
+		virtual std::pair<float, float> getVibration() const;
+		virtual void setVibration(float low, float high);
 		virtual void vibrate(spInputVibration /*vib*/);
 		virtual void stopVibrating();
+		
 		virtual JoystickType getJoystickType() const;
 		virtual InputType getInputType() const;
 

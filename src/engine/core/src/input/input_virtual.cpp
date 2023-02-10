@@ -327,6 +327,24 @@ void InputVirtual::clearBindings()
 	vibrationOverride = spInputDevice();
 }
 
+std::pair<float, float> InputVirtual::getVibration() const
+{
+	const auto& dev = vibrationOverride ? vibrationOverride.get() : lastDevice;
+	if (dev) {
+		return dev->getVibration();
+	} else {
+		return {};
+	}
+}
+
+void InputVirtual::setVibration(float low, float high)
+{
+	const auto& dev = vibrationOverride ? vibrationOverride.get() : lastDevice;
+	if (dev) {
+		dev->setVibration(low, high);
+	}
+}
+
 void InputVirtual::vibrate(spInputVibration vib)
 {
 	const auto& dev = vibrationOverride ? vibrationOverride.get() : lastDevice;

@@ -108,6 +108,15 @@ std::shared_ptr<InputDevice> InputDevice::getHat(int)
 	return {};
 }
 
+std::pair<float, float> InputDevice::getVibration() const
+{
+	return {};
+}
+
+void InputDevice::setVibration(float low, float high)
+{
+}
+
 void InputDevice::vibrate(spInputVibration)
 {
 	

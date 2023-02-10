@@ -190,6 +190,8 @@ String InputJoystickXInput::getButtonName(int code) const
 
 void InputJoystickXInput::setVibration(float low, float high)
 {
+	InputJoystick::setVibration(low, high);
+	
 	XINPUT_VIBRATION vibration;
 	ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
 	vibration.wLeftMotorSpeed = static_cast<WORD>(clamp(low * 65535, 0.0f, 65535.0f));

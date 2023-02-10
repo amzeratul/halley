@@ -75,6 +75,8 @@ namespace Halley {
 
 		float getAxis(int n, gsl::span<const uint32_t> activeBinds);
 
+		std::pair<float, float> getVibration() const override;
+		void setVibration(float low, float high) override;
 		void vibrate(spInputVibration vib) override;
 		void stopVibrating() override;
 

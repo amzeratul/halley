@@ -69,16 +69,6 @@ void InputJoystick::update(Time t)
 	updateVibration(t);
 }
 
-void InputJoystick::vibrate(spInputVibration vibration)
-{
-	vibs.push_back(vibration);
-}
-
-void InputJoystick::stopVibrating()
-{
-	vibs.clear();
-}
-
 bool InputJoystick::isEnabled() const
 {
 	return enabled;
@@ -144,8 +134,28 @@ void InputJoystick::setAxisAdjust(std::function<float(float)> f)
 	axisAdjust = f;
 }
 
-void InputJoystick::setVibration(float, float)
+std::pair<float, float> InputJoystick::getVibration() const
 {
+	return { curLowVib, curHighVib };
+}
+
+void InputJoystick::setVibration(float low, float high)
+{
+	curHighVib += high - baseHighVib;
+	curLowVib += low - baseLowVib;
+	
+	baseHighVib = high;
+	baseLowVib = low;
+}
+
+void InputJoystick::vibrate(spInputVibration vibration)
+{
+	vibs.push_back(vibration);
+}
+
+void InputJoystick::stopVibrating()
+{
+	vibs.clear();
 }
 
 void InputJoystick::updateVibration(Time t)
@@ -162,19 +172,20 @@ void InputJoystick::updateVibration(Time t)
 		return;
 	}
 	
-	float high = 0;
-	float low = 0;
+	float high = baseHighVib;
+	float low = baseLowVib;
 	
-	Vector<spInputVibration> vibs2 = std::move(vibs);
-	vibs.clear();
-	
-	for (auto& i : vibs2) {
+	for (size_t i = 0; i < vibs.size();) {
 		float h = 0;
 		float l = 0;
-		bool result = i->getState(t, h, l);
+		const bool result = vibs[i]->getState(t, h, l);
+
 		if (result) {
-			vibs.push_back(i);
+			++i;
+		} else {
+			vibs.erase(vibs.begin() + i);
 		}
+		
 		high += h;
 		low += l;
 	}
