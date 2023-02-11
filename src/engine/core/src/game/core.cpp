@@ -450,7 +450,7 @@ void Core::fixedUpdate(Time time)
 			}
 		}
 
-		Logger::logDev(toString(n));
+		//Logger::logDev(toString(n));
 	}
 }
 

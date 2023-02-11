@@ -83,6 +83,11 @@ ProjectLoader& HalleyEditor::getProjectLoader()
 	return *projectLoader;
 }
 
+double HalleyEditor::getTargetBackgroundFPS() const
+{
+	return 30.0;
+}
+
 void HalleyEditor::init(const Environment& environment, const Vector<String>& args)
 {
 	rootPath = environment.getProgramPath().parentPath();

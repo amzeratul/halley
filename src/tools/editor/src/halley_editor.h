@@ -21,6 +21,8 @@ namespace Halley
 		Preferences& getPreferences();
 		ProjectLoader& getProjectLoader();
 
+		double getTargetBackgroundFPS() const override;
+
 	protected:
 		void init(const Environment& environment, const Vector<String>& args) override;
 		int initPlugins(IPluginRegistry &registry) override;

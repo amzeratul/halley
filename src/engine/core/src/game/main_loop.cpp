@@ -91,7 +91,7 @@ Time MainLoop::snapElapsedTime(Time measuredElapsed, std::optional<Time> desired
 		elapsed = 1.0 / 144.0;
 	}
 
-	Logger::logDev(toString(elapsed));
+	//Logger::logDev(toString(elapsed));
 	return elapsed;
 }
 
