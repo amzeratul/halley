@@ -38,14 +38,19 @@ std::unique_ptr<IFrameData> Game::makeFrameData()
 	return std::make_unique<EmptyFrameData>();
 }
 
-int Game::getTargetFPS() const
+double Game::getTargetFPS() const
 {
-	return 60;
+	return 60.0;
 }
 
-int Game::getTargetBackgroundFPS() const
+double Game::getTargetBackgroundFPS() const
 {
 	return getTargetFPS();
+}
+
+double Game::getFixedUpdateFPS() const
+{
+	return 60.0;
 }
 
 String Game::getDevConAddress() const

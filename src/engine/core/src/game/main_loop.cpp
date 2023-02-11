@@ -24,9 +24,6 @@ MainLoop::MainLoop(IMainLoopable& target, GameLoader& reloader)
 
 void MainLoop::run()
 {
-	capFrameRate = true;
-	fps = target.getTargetFPS();
-
 	do {
 		runLoop();
 	} while (tryReload());
@@ -36,59 +33,29 @@ void MainLoop::runLoop()
 {
 	std::cout << ConsoleColour(Console::GREEN) << "\nStarting main loop." << ConsoleColour() << std::endl;
 
-	using Clock = std::chrono::steady_clock;
 	using namespace std::chrono_literals;
 
-	int64_t nSteps = 0;
-	Clock::time_point startTime;
-	Clock::time_point targetTime;
-	Clock::time_point lastFrameStartTime;
-	startTime = targetTime = lastFrameStartTime = Clock::now();
-
+	Clock::time_point lastFrameStartTime = Clock::now();
 	auto frameTimes = RollingDataSet<Clock::time_point>(13);
 
 	while (isRunning()) {
-		fps = target.getTargetFPS();
-		if (fps <= 0) {
-			target.transitionStage();
-			constexpr Time fixedDelta = 1.0 / 60.0;
-			target.onFixedUpdate(fixedDelta);
-			target.onTick(fixedDelta, [] (bool) {});
-		} else {
-			if (target.transitionStage()) {
-				// Reset counters
-				startTime = targetTime = lastFrameStartTime = Clock::now();
-				nSteps = 0;
-				frameTimes.clear();
-			}
-			Clock::time_point curFrameStartTime = Clock::now();
+		if (target.transitionStage()) {
+			frameTimes.clear();
+		}
 
-			// Got any fixed updates to do?
-			if (curFrameStartTime >= targetTime) {
-				// Figure out how many steps we need...
-				const Time fixedDelta = 1.0 / fps;
-				int stepsNeeded = int(std::chrono::duration<float>(curFrameStartTime - targetTime).count() * fps);
+		Clock::time_point curFrameStartTime = Clock::now();
+		frameTimes.add(curFrameStartTime);
 
-				// Run up to 5 (if we're more than 5 frames late, ignore them. C'est la vie)
-				for (int i = 0; i < std::min(stepsNeeded, 5); i++) {
-					target.onFixedUpdate(fixedDelta);
-				}
+		const double fps = target.getTargetFPS();
+		const std::optional<Time> elapsedTarget = fps > 0 ? 1.0 / fps : std::optional<Time>();
+		const Time measuredElapsed = std::chrono::duration<double>(curFrameStartTime - lastFrameStartTime).count();
+		Time elapsed = snapElapsedTime(measuredElapsed, elapsedTarget, frameTimes);
 
-				// Update target
-				nSteps += stepsNeeded;
-				targetTime = startTime + std::chrono::microseconds((nSteps * 1000000ll) / fps);
-			} else {
-				// Nope, release CPU
-				std::this_thread::yield();
-			}
-
-			// Run variable update
-			const Time elapsed = std::chrono::duration<double>(curFrameStartTime - lastFrameStartTime).count();
-			const auto delta = std::min(elapsed, 0.1); // Never step by more than 100ms
-			frameTimes.add(curFrameStartTime);
-			target.onTick(delta, [&] (bool vsync)
-			{
-				const Time tolerance = vsync ? 0.003 : 0.0;
+		const auto delta = std::min(elapsed, 0.100); // Never step by more than 100ms
+		target.onTick(delta, [&] (bool vsync)
+		{
+			if (fps > 0) {
+				const Time tolerance = vsync ? 0.003 : 0.0; // 3 ms tolerance if vsync is on. This is to make sure we don't overshoot and miss vsync
 				const auto now = Clock::now();
 				const Time wait = (1.0 * frameTimes.size()) / fps - std::chrono::duration<double>(now - frameTimes.getOldest()).count() - tolerance;
 
@@ -96,12 +63,36 @@ void MainLoop::runLoop()
 					using namespace std::chrono_literals;
 					std::this_thread::sleep_for(1.0s * wait);
 				}
-			});
-			lastFrameStartTime = curFrameStartTime;
-		}
+			}
+		});
+
+		lastFrameStartTime = curFrameStartTime;
 	}
 
 	std::cout << ConsoleColour(Console::GREEN) << "Main loop terminated." << ConsoleColour() << std::endl;
+}
+
+Time MainLoop::snapElapsedTime(Time measuredElapsed, std::optional<Time> desired, RollingDataSet<Clock::time_point>& frameTimes)
+{
+	Time elapsed = measuredElapsed;
+
+	const auto frameTimesTotal = std::chrono::duration<double>(frameTimes.getLatest() - frameTimes.getOldest()).count();
+	const auto avgFrameLen = frameTimesTotal / (frameTimes.size() - 1);
+	if (desired) {
+		if (std::abs(avgFrameLen - *desired) <= 0.001) {
+			// Snap frame time if average has been within 1ms
+			elapsed = *desired;
+		}
+	} else if (std::abs(avgFrameLen - 1.0 / 60.0) <= 0.001) {
+		elapsed = 1.0 / 60.0;
+	} else if (std::abs(avgFrameLen - 1.0 / 120.0) <= 0.001) {
+		elapsed = 1.0 / 120.0;
+	} else if (std::abs(avgFrameLen - 1.0 / 144.0) <= 0.001) {
+		elapsed = 1.0 / 144.0;
+	}
+
+	Logger::logDev(toString(elapsed));
+	return elapsed;
 }
 
 bool MainLoop::isRunning() const

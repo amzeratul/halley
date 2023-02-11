@@ -42,7 +42,6 @@ namespace Halley
 		const Environment& getEnvironment() override;
 		bool isDevMode() override;
 		
-		void onFixedUpdate(Time delta) override;
 		void onTick(Time delta, std::function<void(bool)> preVsyncWait) override;
 		bool isRunning() const override	{ return running; }
 		bool transitionStage() override;
@@ -54,7 +53,7 @@ namespace Halley
 		void onSuspended() override;
 		void onReloaded() override;
 		void onTerminatedInError(const std::string& error) override;
-		int getTargetFPS() override;
+		double getTargetFPS() override;
 
 		void registerDefaultPlugins();
 		void registerPlugin(std::unique_ptr<Plugin> plugin) override;
@@ -78,7 +77,6 @@ namespace Halley
 		void initResources();
 		void setOutRedirect(bool appendToExisting);
 
-		void doFixedUpdate(Time time);
 		void tickFrame(Time time, std::function<void(bool)> preVsyncWait);
 		void render();
 		void waitForRenderEnd(std::function<void(bool)> preVsyncWait);
@@ -88,9 +86,11 @@ namespace Halley
 
 		void processEvents(Time time);
 		void runStartFrame(Time time);
-		void runPreVariableUpdate(Time time);
-		void runVariableUpdate(Time time);
-		void runPostVariableUpdate(Time time);
+		void update(Time time);
+		void preUpdate(Time time);
+		void fixedUpdate(Time time);
+		void variableUpdate(Time time);
+		void postUpdate(Time time);
 		void pumpAudio();
 		void updateSystem(Time time);
 		void updatePlatform();
@@ -114,6 +114,7 @@ namespace Halley
 		std::unique_ptr<Stage> nextStage;
 		uint32_t curStageFrames = 0;
 		bool pendingStageTransition = false;
+		Time fixedUpdateTime = 0;
 
 		std::unique_ptr<IFrameData> frameDataUpdate;
 		std::unique_ptr<IFrameData> frameDataRender;

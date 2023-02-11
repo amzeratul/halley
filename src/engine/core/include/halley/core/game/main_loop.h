@@ -3,6 +3,8 @@
 #include <string>
 #include <chrono>
 
+#include "halley/maths/rolling_data_set.h"
+
 namespace Halley
 {
 	class HalleyStatics;
@@ -19,14 +21,13 @@ namespace Halley
 		virtual bool transitionStage() = 0;
 		virtual bool isRunning() const = 0;
 		virtual void onTick(Time delta, std::function<void(bool)> preVsyncWait) = 0;
-		virtual void onFixedUpdate(Time delta) = 0;
 
 		virtual void init() = 0;
 		virtual void onSuspended() = 0;
 		virtual void onReloaded() = 0;
 		virtual void onTerminatedInError(const std::string& error) = 0;
 
-		virtual int getTargetFPS() = 0;
+		virtual double getTargetFPS() = 0;
 	};
 
 	class MainLoop
@@ -39,10 +40,10 @@ namespace Halley
 		IMainLoopable& target;
 		GameLoader& reloader;
 
-		int fps = 60;
-		bool capFrameRate = false;
+		using Clock = std::chrono::high_resolution_clock;
 
 		void runLoop();
+		Time snapElapsedTime(Time measuredElapsed, std::optional<Time> desired, RollingDataSet<Clock::time_point>& frameTimes);
 		bool isRunning() const;
 		bool tryReload() const;
 	};

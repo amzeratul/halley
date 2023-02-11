@@ -172,7 +172,7 @@ void Core::onTerminatedInError(const std::string& error)
 	hasError = true;
 }
 
-int Core::getTargetFPS()
+double Core::getTargetFPS()
 {
 	if (api && api->video && api->video->hasWindow()) {
 		const auto& window = api->video->getWindow().getDefinition();
@@ -327,21 +327,6 @@ void Core::runStartFrame(Time time)
 	}
 }
 
-void Core::runPreVariableUpdate(Time time)
-{
-	if (devConClient) {
-		ProfilerEvent event(ProfilerEventType::CoreDevConClient);
-		devConClient->update(time);
-	}
-}
-
-void Core::runPostVariableUpdate(Time time)
-{
-	pumpAudio();
-	updatePlatform();
-	updateSystem(time);
-}
-
 void Core::pumpAudio()
 {
 	if (api->audio) {
@@ -363,14 +348,6 @@ void Core::updatePlatform()
 	if (api->platform) {
 		ProfilerEvent event(ProfilerEventType::CoreUpdatePlatform);
 		api->platformInternal->update();
-	}
-}
-
-void Core::onFixedUpdate(Time delta)
-{
-	if (isRunning()) {
-		// TODO: move this to onTick
-		//doFixedUpdate(delta);
 	}
 }
 
@@ -404,9 +381,7 @@ void Core::tickFrame(Time time, std::function<void(bool)> preVsyncWait)
 	if (multithreaded) {
 		auto updateTask = Concurrent::execute([&] () {
 			IFrameData::setThreadFrameData(frameDataUpdate.get());
-			runPreVariableUpdate(time);
-			runVariableUpdate(time);
-			runPostVariableUpdate(time);
+			update(time);
 		});
 		if (frameDataRender) {
 			assert(curStageFrames > 0);
@@ -417,9 +392,7 @@ void Core::tickFrame(Time time, std::function<void(bool)> preVsyncWait)
 		updateTask.wait();
 	} else {
 		IFrameData::setThreadFrameData(frameDataUpdate.get());
-		runPreVariableUpdate(time);
-		runVariableUpdate(time);
-		runPostVariableUpdate(time);
+		update(time);
 		if (isRunning()) { // Check again, it might have changed
 			render();
 			waitForRenderEnd(std::move(preVsyncWait));
@@ -431,19 +404,57 @@ void Core::tickFrame(Time time, std::function<void(bool)> preVsyncWait)
 	curStageFrames++;
 }
 
-void Core::doFixedUpdate(Time time)
+void Core::update(Time time)
 {
-	if (running && currentStage) {
-		ProfilerEvent event(ProfilerEventType::CoreFixedUpdate);
-		try {
-			currentStage->onFixedUpdate(time, *frameDataUpdate);
-		} catch (Exception& e) {
-			game->onUncaughtException(e, TimeLine::FixedUpdate);
-		}
+	preUpdate(time);
+	fixedUpdate(time);
+	variableUpdate(time);
+	postUpdate(time);
+}
+
+void Core::preUpdate(Time time)
+{
+	if (devConClient) {
+		ProfilerEvent event(ProfilerEventType::CoreDevConClient);
+		devConClient->update(time);
 	}
 }
 
-void Core::runVariableUpdate(Time time)
+void Core::postUpdate(Time time)
+{
+	pumpAudio();
+	updatePlatform();
+	updateSystem(time);
+}
+
+void Core::fixedUpdate(Time time)
+{
+	if (running && currentStage) {
+		fixedUpdateTime += time;
+		const Time fixedUpdatePeriod = 1.0 / game->getFixedUpdateFPS();
+		size_t n = 0;
+		while ((fixedUpdateTime - fixedUpdatePeriod) >= -0.0001) {
+			fixedUpdateTime = std::max(fixedUpdateTime - fixedUpdatePeriod, 0.0);
+
+			ProfilerEvent event(ProfilerEventType::CoreFixedUpdate);
+			try {
+				currentStage->onFixedUpdate(fixedUpdatePeriod, *frameDataUpdate);
+			} catch (Exception& e) {
+				game->onUncaughtException(e, TimeLine::FixedUpdate);
+			}
+
+			++n;
+			if (n == 5) {
+				// Don't let it run more than 5 fixed frames per variable frame
+				fixedUpdateTime = 0;
+			}
+		}
+
+		Logger::logDev(toString(n));
+	}
+}
+
+void Core::variableUpdate(Time time)
 {		
 	if (running && currentStage) {
 		ProfilerEvent event(ProfilerEventType::CoreVariableUpdate);

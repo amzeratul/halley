@@ -44,8 +44,9 @@ namespace Halley
 		virtual std::unique_ptr<Stage> makeStage(StageID id);
 		virtual std::unique_ptr<IFrameData> makeFrameData();
 
-		virtual int getTargetFPS() const;
-		virtual int getTargetBackgroundFPS() const;
+		virtual double getTargetFPS() const;
+		virtual double getTargetBackgroundFPS() const;
+		virtual double getFixedUpdateFPS() const;
 		virtual size_t getMaxThreads() const;
 
 		virtual String getDevConAddress() const;
