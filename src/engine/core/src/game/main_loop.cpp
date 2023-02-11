@@ -12,6 +12,8 @@
 #include <thread>
 #include <cstdint>
 
+#include "halley/maths/rolling_data_set.h"
+
 using namespace Halley;
 
 MainLoop::MainLoop(IMainLoopable& target, GameLoader& reloader)
@@ -40,31 +42,32 @@ void MainLoop::runLoop()
 	int64_t nSteps = 0;
 	Clock::time_point startTime;
 	Clock::time_point targetTime;
-	Clock::time_point lastTime;
-	startTime = targetTime = lastTime = Clock::now();
+	Clock::time_point lastFrameStartTime;
+	startTime = targetTime = lastFrameStartTime = Clock::now();
 
-	if (fps <= 0) {
-		while (isRunning()) {
+	auto frameTimes = RollingDataSet<Clock::time_point>(13);
+
+	while (isRunning()) {
+		fps = target.getTargetFPS();
+		if (fps <= 0) {
 			target.transitionStage();
 			constexpr Time fixedDelta = 1.0 / 60.0;
-			const Clock::time_point curTime = Clock::now();
 			target.onFixedUpdate(fixedDelta);
-			target.onTick(curTime, fixedDelta);
-		}
-	} else {
-		while (isRunning()) {
+			target.onTick(fixedDelta, [] (bool) {});
+		} else {
 			if (target.transitionStage()) {
 				// Reset counters
-				startTime = targetTime = lastTime = Clock::now();
+				startTime = targetTime = lastFrameStartTime = Clock::now();
 				nSteps = 0;
+				frameTimes.clear();
 			}
-			Clock::time_point curTime = Clock::now();
+			Clock::time_point curFrameStartTime = Clock::now();
 
 			// Got any fixed updates to do?
-			if (curTime >= targetTime) {
+			if (curFrameStartTime >= targetTime) {
 				// Figure out how many steps we need...
 				const Time fixedDelta = 1.0 / fps;
-				int stepsNeeded = int(std::chrono::duration<float>(curTime - targetTime).count() * fps);
+				int stepsNeeded = int(std::chrono::duration<float>(curFrameStartTime - targetTime).count() * fps);
 
 				// Run up to 5 (if we're more than 5 frames late, ignore them. C'est la vie)
 				for (int i = 0; i < std::min(stepsNeeded, 5); i++) {
@@ -80,9 +83,21 @@ void MainLoop::runLoop()
 			}
 
 			// Run variable update
-			const auto delta = std::min(std::chrono::duration<double>(curTime - lastTime).count(), 0.1); // Never step by more than 100ms
-			target.onTick(curTime, delta);
-			lastTime = curTime;
+			const Time elapsed = std::chrono::duration<double>(curFrameStartTime - lastFrameStartTime).count();
+			const auto delta = std::min(elapsed, 0.1); // Never step by more than 100ms
+			frameTimes.add(curFrameStartTime);
+			target.onTick(delta, [&] (bool vsync)
+			{
+				const Time tolerance = vsync ? 0.003 : 0.0;
+				const auto now = Clock::now();
+				const Time wait = (1.0 * frameTimes.size()) / fps - std::chrono::duration<double>(now - frameTimes.getOldest()).count() - tolerance;
+
+				if (wait > 0) {
+					using namespace std::chrono_literals;
+					std::this_thread::sleep_for(1.0s * wait);
+				}
+			});
+			lastFrameStartTime = curFrameStartTime;
 		}
 	}
 

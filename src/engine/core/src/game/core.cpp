@@ -174,7 +174,14 @@ void Core::onTerminatedInError(const std::string& error)
 
 int Core::getTargetFPS()
 {
-	return game->getTargetFPS();
+	if (api && api->video && api->video->hasWindow()) {
+		const auto& window = api->video->getWindow().getDefinition();
+		if (!window.isFocusLost() && window.getWindowState() != WindowState::Minimized) {
+			return game->getTargetFPS();
+		}
+	}
+
+	return game->getTargetBackgroundFPS();
 }
 
 void Core::init()
@@ -244,7 +251,6 @@ void Core::deInit()
 		api->audio->stopPlayback();
 	}
 
-	
 	// Stop thread pool and other statics
 	statics.suspend();
 	
@@ -368,7 +374,7 @@ void Core::onFixedUpdate(Time delta)
 	}
 }
 
-void Core::onTick(Clock::time_point time, Time delta)
+void Core::onTick(Time delta, std::function<void(bool)> preVsyncWait)
 {
 	auto& capture = ProfilerCapture::get();
 	const bool record = !profileCallbacks.empty();
@@ -376,30 +382,15 @@ void Core::onTick(Clock::time_point time, Time delta)
 	
 	processEvents(delta);
 
-	tickFrame(delta);
+	tickFrame(delta, std::move(preVsyncWait));
 
 	capture.endFrame();
 	if (record && capture.getFrameTime() >= getProfileCaptureThreshold()) {
 		onProfileData(std::make_shared<ProfilerData>(capture.getCapture()));
 	}
-
-	if (game->getTargetBackgroundFPS() > 0) {
-		// Throttle CPU to match target (background) FPS when window has been
-		// minimized, or has lost keyboard focus.
-		const auto& window = api->video->getWindow().getDefinition();
-		if (window.isFocusLost() || (window.getWindowState() == WindowState::Minimized)) {
-			const Clock::time_point curTime = Clock::now();
-			const Time elapsed = std::chrono::duration<double>(curTime - time).count();
-			const Time wait = (1.0 / game->getTargetBackgroundFPS()) - elapsed;
-			if (wait > 0.001) {
-				using namespace std::chrono_literals;
-				std::this_thread::sleep_for(1s * wait);
-			}
-		}
-	}
 }
 
-void Core::tickFrame(Time time)
+void Core::tickFrame(Time time, std::function<void(bool)> preVsyncWait)
 {
 	if (!isRunning()) {
 		return;
@@ -421,7 +412,7 @@ void Core::tickFrame(Time time)
 			assert(curStageFrames > 0);
 			IFrameData::setThreadFrameData(frameDataRender.get());
 			render();
-			waitForRenderEnd();
+			waitForRenderEnd(std::move(preVsyncWait));
 		}
 		updateTask.wait();
 	} else {
@@ -431,7 +422,7 @@ void Core::tickFrame(Time time)
 		runPostVariableUpdate(time);
 		if (isRunning()) { // Check again, it might have changed
 			render();
-			waitForRenderEnd();
+			waitForRenderEnd(std::move(preVsyncWait));
 		}
 	}
 
@@ -516,12 +507,16 @@ void Core::render()
 	}
 }
 
-void Core::waitForRenderEnd()
+void Core::waitForRenderEnd(std::function<void(bool)> preVsyncWait)
 {
 	if (api->video) {
+		bool hasVsync = true; // TODO
 		ProfilerEvent event(ProfilerEventType::CoreVSync);
+		preVsyncWait(hasVsync);
 		api->video->finishRender();
 		painter->onFinishRender();
+	} else {
+		preVsyncWait(false);
 	}
 }
 

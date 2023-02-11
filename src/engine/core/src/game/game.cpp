@@ -45,7 +45,7 @@ int Game::getTargetFPS() const
 
 int Game::getTargetBackgroundFPS() const
 {
-	return 30;
+	return getTargetFPS();
 }
 
 String Game::getDevConAddress() const

@@ -22,6 +22,12 @@ namespace Halley {
             pos = (pos + 1) % maxSize;
         }
 
+        void clear()
+        {
+            data.clear();
+            pos = 0;
+        }
+
         T getSum() const
         {
 	        T a = 0;

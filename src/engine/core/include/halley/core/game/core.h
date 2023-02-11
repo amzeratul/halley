@@ -43,7 +43,7 @@ namespace Halley
 		bool isDevMode() override;
 		
 		void onFixedUpdate(Time delta) override;
-		void onTick(Clock::time_point time, Time delta) override;
+		void onTick(Time delta, std::function<void(bool)> preVsyncWait) override;
 		bool isRunning() const override	{ return running; }
 		bool transitionStage() override;
 		const HalleyAPI& getAPI() const override { return *api; }
@@ -79,9 +79,9 @@ namespace Halley
 		void setOutRedirect(bool appendToExisting);
 
 		void doFixedUpdate(Time time);
-		void tickFrame(Time time);
+		void tickFrame(Time time, std::function<void(bool)> preVsyncWait);
 		void render();
-		void waitForRenderEnd();
+		void waitForRenderEnd(std::function<void(bool)> preVsyncWait);
 		void updateFrameData(bool multithreaded);
 
 		void showComputerInfo() const;
