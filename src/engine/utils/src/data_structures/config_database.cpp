@@ -1,0 +1,54 @@
+#include "halley/data_structures/config_database.h"
+
+#include "halley/core/resources/resources.h"
+#include "halley/file_formats/config_file.h"
+
+using namespace Halley;
+
+void ConfigDatabase::load(Resources& resources, const String& prefix)
+{
+	for (const auto& configName: resources.enumerate<ConfigFile>()) {
+		if (configName.startsWith(prefix)) {
+			loadFile(*resources.get<ConfigFile>(configName));
+		}
+	}
+}
+
+void ConfigDatabase::loadFile(const ConfigFile& configFile)
+{
+	observers[configFile.getAssetId()] = ConfigObserver(configFile);
+	loadConfig(configFile.getRoot());
+}
+
+int ConfigDatabase::getVersion() const
+{
+	return version;
+}
+
+void ConfigDatabase::loadConfig(const ConfigNode& node)
+{
+	for (const auto& [k, v]: node.asMap()) {
+		for (auto& db: dbs) {
+			if (db->getKey() == k) {
+				db->loadConfigs(v);
+				break;
+			}
+		}
+	}
+}
+
+void ConfigDatabase::update()
+{
+	bool changed = false;
+	for (auto& [k, o]: observers) {
+		if (o.needsUpdate()) {
+			changed = true;
+			o.update();
+			loadConfig(o.getRoot());
+		}
+	}
+
+	if (changed) {
+		++version;
+	}
+}
