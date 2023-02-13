@@ -119,6 +119,8 @@ namespace Halley {
 
     class ConfigDatabase {
     public:
+        ConfigDatabase(std::optional<Vector<String>> onlyLoad = std::nullopt);
+
         void load(Resources& resources, const String& prefix);
         void loadFile(const ConfigFile& configFile);
         void loadConfig(const ConfigNode& node);
@@ -173,6 +175,8 @@ namespace Halley {
         HashMap<String, ConfigObserver> observers;
         int version = 0;
         static size_t nextIdx;
+
+        std::optional<Vector<String>> onlyLoad;
 
         template <typename T>
         ConfigDatabaseType<T>& of() const

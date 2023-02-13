@@ -2,8 +2,14 @@
 
 #include "halley/core/resources/resources.h"
 #include "halley/file_formats/config_file.h"
+#include "halley/utils/algorithm.h"
 
 using namespace Halley;
+
+ConfigDatabase::ConfigDatabase(std::optional<Vector<String>> onlyLoad)
+	: onlyLoad(std::move(onlyLoad))
+{
+}
 
 void ConfigDatabase::load(Resources& resources, const String& prefix)
 {
@@ -28,6 +34,10 @@ int ConfigDatabase::getVersion() const
 void ConfigDatabase::loadConfig(const ConfigNode& node)
 {
 	for (const auto& [k, v]: node.asMap()) {
+		if (onlyLoad && !std_ex::contains(*onlyLoad, k)) {
+			continue;
+		}
+
 		for (auto& db: dbs) {
 			if (db && db->getKey() == k) {
 				db->loadConfigs(v);
