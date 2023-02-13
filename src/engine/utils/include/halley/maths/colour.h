@@ -27,6 +27,8 @@
 #include "halley/text/halleystring.h"
 #include <gsl/gsl_assert>
 #include <cstdint>
+
+#include "halley/data_structures/config_node.h"
 #include "halley/utils/utils.h"
 #include "halley/maths/vector3.h"
 #include "halley/maths/vector4.h"
@@ -104,6 +106,15 @@ namespace Halley {
 		Colour4(const String& str)
 		{
 			*this = fromString(str);
+		}
+
+		Colour4(const ConfigNode& node)
+		{
+			if (node.getType() == ConfigNodeType::Map) {
+				*this = fromString(node["colour"].asString());
+			} else {
+				*this = fromString(node.asString("#000000"));
+			}
 		}
 
 		template <typename U>

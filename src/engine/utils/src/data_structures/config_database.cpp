@@ -52,3 +52,5 @@ void ConfigDatabase::update()
 		++version;
 	}
 }
+
+size_t ConfigDatabase::nextIdx = 0;

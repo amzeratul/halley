@@ -1,3 +1,5 @@
+#pragma once
+
 #include "hash_map.h"
 #include "vector.h"
 #include "config_node.h"
@@ -100,13 +102,18 @@ namespace Halley {
     public:
         void load(Resources& resources, const String& prefix);
         void loadFile(const ConfigFile& configFile);
+        void loadConfig(const ConfigNode& node);
         void update();
 
         template <typename T>
         void init(String key)
         {
-            T::getIdx() = dbs.size();
-            dbs.push_back(std::make_unique<ConfigDatabaseType<T>>(std::move(key)));
+            auto& idx = ConfigDatabaseType<T>::getIdx();
+            if (idx == std::numeric_limits<size_t>::max()) {
+                idx = nextIdx++;
+            }
+            dbs.resize(std::max(dbs.size(), nextPowerOf2(idx + 1)));
+            dbs[idx] = std::make_unique<ConfigDatabaseType<T>>(std::move(key));
         }
 
         template <typename T>
@@ -145,13 +152,12 @@ namespace Halley {
         Vector<std::unique_ptr<IConfigDatabaseType>> dbs;
         HashMap<String, ConfigObserver> observers;
         int version = 0;
+        static size_t nextIdx;
 
         template <typename T>
         ConfigDatabaseType<T>& of() const
         {
-            return static_cast<ConfigDatabaseType<T>&>(*dbs[T::getIdx()]);
+            return static_cast<ConfigDatabaseType<T>&>(*dbs[ConfigDatabaseType<T>::getIdx()]);
         }
-
-        void loadConfig(const ConfigNode& node);
     };
 }
