@@ -4,6 +4,7 @@
 #include "vector.h"
 #include "config_node.h"
 #include "../text/halleystring.h"
+#include <typeinfo>
 
 namespace Halley {
     class ConfigNode;
@@ -39,7 +40,12 @@ namespace Halley {
 
         const T& get(std::string_view id) const
         {
-            return entries.at(id);
+            const auto iter = entries.find(id);
+            if (iter != entries.end()) {
+                return iter->second;
+            } else {
+                throw Exception(String("Entry not found in ConfigDatabaseType<") + typeid(T).name() + ">: \"" + id + "\"", HalleyExceptions::Utils);
+            }
         }
 
         const T* tryGet(std::string_view id) const
@@ -58,12 +64,20 @@ namespace Halley {
 
         Vector<String> getKeys() const
         {
-            Vector<String> result;
-            result.resize(entries.size());
-            for (const auto& e: entries) {
-                result.push_back(e.first);
+            if (entries.empty()) {
+                return {};
             }
-            return result;
+            if (keys.empty()) {
+                // Avoid threading issues
+				Vector<String> keysLocal;
+				keysLocal.reserve(entries.size());
+				for (const auto& e: entries) {
+				    keysLocal.push_back(e.first);
+				}
+				keys = std::move(keysLocal);
+            }
+
+            return keys;
         }
 
         const HashMap<String, T>& getEntries() const
@@ -78,14 +92,18 @@ namespace Halley {
 
         void loadConfigs(const ConfigNode& nodes)
         {
-            for (const auto& n: nodes.asSequence()) {
-                loadConfig(n);
+            if (nodes.getType() == ConfigNodeType::Sequence) {
+                for (const auto& n : nodes.asSequence()) {
+                    loadConfig(n);
+                }
             }
+            keys.clear();
         }
 
         void loadConfig(const ConfigNode& node)
         {
             entries[node["id"].asString()] = T(node);
+            keys.clear();
         }
 
         static size_t& getIdx()
@@ -96,6 +114,7 @@ namespace Halley {
 
     private:
         HashMap<String, T> entries;
+        mutable Vector<String> keys;
     };
 
     class ConfigDatabase {
@@ -112,7 +131,8 @@ namespace Halley {
             if (idx == std::numeric_limits<size_t>::max()) {
                 idx = nextIdx++;
             }
-            dbs.resize(std::max(dbs.size(), nextPowerOf2(idx + 1)));
+            dbs.reserve(std::max(dbs.size(), nextPowerOf2(idx + 1)));
+        	dbs.resize(std::max(dbs.size(), idx + 1));
             dbs[idx] = std::make_unique<ConfigDatabaseType<T>>(std::move(key));
         }
 

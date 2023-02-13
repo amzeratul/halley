@@ -29,7 +29,7 @@ void ConfigDatabase::loadConfig(const ConfigNode& node)
 {
 	for (const auto& [k, v]: node.asMap()) {
 		for (auto& db: dbs) {
-			if (db->getKey() == k) {
+			if (db && db->getKey() == k) {
 				db->loadConfigs(v);
 				break;
 			}
