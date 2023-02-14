@@ -64,6 +64,8 @@ SceneEditorWindow::~SceneEditorWindow()
 void SceneEditorWindow::makeUI()
 {
 	add(uiFactory.makeUI("halley/scene_editor_window"), 1);
+
+	leftPanel = getWidget("sceneEditorLeftPanel");
 	
 	canvas = getWidgetAs<SceneEditorCanvas>("canvas");
 	canvas->setSceneEditorWindow(*this);
@@ -298,6 +300,12 @@ void SceneEditorWindow::update(Time t, bool moved)
 	}
 
 	updateButtons();
+
+	if (gameBridge) {
+		const bool sidePanelsVisible = gameBridge->getGizmos().canSelectEntities();
+		leftPanel->setActive(sidePanelsVisible);
+		entityEditor->setActive(sidePanelsVisible);
+	}
 
 	if (entityList && gameBridge) {
 		gameBridge->setEntityHighlightedOnList(entityList->getEntityUnderCursor(), false);
