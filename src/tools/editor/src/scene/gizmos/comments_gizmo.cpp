@@ -169,6 +169,12 @@ Colour4f CommentsGizmo::getCommentColour(ProjectCommentPriority priority) const
 	return Colour4f();
 }
 
+void CommentsGizmo::setFilter(std::optional<ProjectCommentCategory> categoryFilter)
+{
+	this->categoryFilter = categoryFilter;
+	updateHandles();
+}
+
 std::shared_ptr<UIWidget> CommentsGizmo::makeUI()
 {
 	auto ui = factory.makeUI("halley/comment_gizmo_toolbar");
@@ -180,6 +186,15 @@ std::shared_ptr<UIWidget> CommentsGizmo::makeUI()
 		{
 			addComment(sceneEditorWindow.getWorldCameraPosition(), true);
 		});
+	});
+
+	ui->bindData("categoryFilter", "", [=](String categoryFilter)
+	{
+		if (categoryFilter == "all") {
+			setFilter(std::nullopt);
+		} else {
+			setFilter(fromString<ProjectCommentCategory>(categoryFilter));
+		}
 	});
 	
 	return ui;
@@ -249,9 +264,12 @@ SceneEditorGizmoHandle CommentsGizmo::makeHandle(const UUID& uuid, Vector2f pos)
 void CommentsGizmo::updateHandles()
 {
 	const auto activeComments = comments.getComments(sceneEditorWindow.getSceneNameForComments());
-	handles.resize(activeComments.size());
-	for (size_t i = 0; i < activeComments.size(); ++i) {
-		handles[i] = makeHandle(activeComments[i].first, activeComments[i].second->pos - getWorldOffset());
+	handles.clear();
+	handles.reserve(activeComments.size());
+	for (const auto& comment: activeComments) {
+		if (!categoryFilter || comment.second->category == categoryFilter) {
+			handles.push_back(makeHandle(comment.first, comment.second->pos - getWorldOffset()));
+		}
 	}
 }
 

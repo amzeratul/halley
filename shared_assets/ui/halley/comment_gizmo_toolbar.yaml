@@ -1,4 +1,39 @@
 widget: { class: widget }
-sizer: { type: vertical }
+sizer: { type: vertical, gap: 5 }
 children:
 - widget: { class: button, id: addComment, text: Add Comment, tooltip: "Add a new Comment [Ctrl+Left Click] / [Ctrl+A]" }
+- sizer: { type: horizontal, gap: 5 }
+  children:
+  - uuid: fb569c32-808e-47dd-a24e-ac5c53895dc8
+    widget:
+      class: label
+      text: "Filter:"
+    fill: [fillHorizontal, centreVertical]
+  - uuid: a4e610cf-9c71-41f0-8955-6bd81869b246
+    sizer:
+      columnProportions: []
+    widget:
+      class: dropdown
+      id: categoryFilter
+      options:
+        - id: all
+          image: comments/comment_small_icon_all.png
+          text: "[Show All]"
+        - id: misc
+          image: comments/comment_small_icon_misc.png
+          text: Misc
+        - id: art
+          image: comments/comment_small_icon_art.png
+          text: Art
+        - id: implementation
+          image: comments/comment_small_icon_implementation.png
+          text: Implementation
+        - id: music
+          image: comments/comment_small_icon_music.png
+          text: Music
+        - id: sound
+          image: comments/comment_small_icon_sound.png
+          text: Sound
+        - id: writing
+          image: comments/comment_small_icon_writing.png
+          text: Writing

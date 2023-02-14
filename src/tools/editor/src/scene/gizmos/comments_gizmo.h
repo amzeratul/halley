@@ -41,6 +41,8 @@ namespace Halley {
 		TextRenderer tooltipText;
 		float nodeScale = 1.0f;
 
+		std::optional<ProjectCommentCategory> categoryFilter;
+
 		void addComment(Vector2f pos, bool isWorldSpace);
 		void editComment(const UUID& uuid, std::function<void(bool)> callback = {});
 		void deleteComment(const UUID& uuid);
@@ -50,6 +52,8 @@ namespace Halley {
 		void updateHandles();
 		Vector2f getWorldOffset() const;
 		Colour4f getCommentColour(ProjectCommentPriority priority) const;
+
+		void setFilter(std::optional<ProjectCommentCategory> categoryFilter);
     };
 
 	class CommentEditWindow : public PopupWindow {
