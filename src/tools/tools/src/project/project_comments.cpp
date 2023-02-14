@@ -19,7 +19,8 @@ ProjectComment::ProjectComment(const ConfigNode& node)
 	pos = node["pos"].asVector2f({});
 	text = node["text"].asString({});
 	scene = node["scene"].asString({});
-	priority = node["priority"].asEnum<ProjectCommentPriority>({});
+	priority = node["priority"].asEnum<ProjectCommentPriority>(ProjectCommentPriority::Note);
+	category = node["category"].asEnum<ProjectCommentCategory>(ProjectCommentCategory::Misc);
 }
 
 ConfigNode ProjectComment::toConfigNode() const
@@ -29,12 +30,13 @@ ConfigNode ProjectComment::toConfigNode() const
 	result["text"] = text;
 	result["scene"] = scene;
 	result["priority"] = priority;
+	result["category"] = category;
 	return result;
 }
 
 bool ProjectComment::operator==(const ProjectComment& other) const
 {
-	return pos == other.pos && text == other.text && priority == other.priority;
+	return pos == other.pos && text == other.text && scene == other.scene && priority == other.priority && category == other.category;
 }
 
 bool ProjectComment::operator!=(const ProjectComment& other) const

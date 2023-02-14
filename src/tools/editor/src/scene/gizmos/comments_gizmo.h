@@ -1,5 +1,6 @@
 #pragma once
 #include "halley/editor_extensions/scene_editor_gizmo.h"
+#include "halley/tools/project/project_comments.h"
 #include "src/ui/popup_window.h"
 
 namespace Halley {
@@ -35,8 +36,8 @@ namespace Halley {
 
 		Sprite commentBg;
 		Sprite commentOutline;
-		Sprite commentIconNormal;
 		Sprite tooltipBg;
+		HashMap<ProjectCommentCategory, Sprite> commentIcons;
 		TextRenderer tooltipText;
 		float nodeScale = 1.0f;
 

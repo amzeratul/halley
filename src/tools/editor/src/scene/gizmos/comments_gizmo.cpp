@@ -13,24 +13,29 @@ CommentsGizmo::CommentsGizmo(SnapRules snapRules, UIFactory& factory, ISceneEdit
 	, factory(factory)
 	, sceneEditorWindow(sceneEditorWindow)
 {
+	auto& resources = factory.getResources();
+
 	commentBg = Sprite()
-		.setImage(factory.getResources(), "halley_ui/ui_float_solid_window.png")
+		.setImage(resources, "halley_ui/ui_float_solid_window.png")
 		.setPivot(Vector2f(0.5f, 0.5f));
 
 	commentOutline = Sprite()
-		.setImage(factory.getResources(), "halley_ui/ui_float_solid_window_outline.png")
+		.setImage(resources, "halley_ui/ui_float_solid_window_outline.png")
 		.setPivot(Vector2f(0.5f, 0.5f));
 
-	commentIconNormal = Sprite()
-		.setImage(factory.getResources(), "ui/comment_icon_normal.png")
-		.setPivot(Vector2f(0.5f, 0.5f));
+	commentIcons[ProjectCommentCategory::Misc] = Sprite().setImage(resources, "comments/comment_icon_misc.png").setPivot(Vector2f(0.5f, 0.5f));
+	commentIcons[ProjectCommentCategory::Art] = Sprite().setImage(resources, "comments/comment_icon_art.png").setPivot(Vector2f(0.5f, 0.5f));
+	commentIcons[ProjectCommentCategory::Implementation] = Sprite().setImage(resources, "comments/comment_icon_implementation.png").setPivot(Vector2f(0.5f, 0.5f));
+	commentIcons[ProjectCommentCategory::Music] = Sprite().setImage(resources, "comments/comment_icon_music.png").setPivot(Vector2f(0.5f, 0.5f));
+	commentIcons[ProjectCommentCategory::Sound] = Sprite().setImage(resources, "comments/comment_icon_sound.png").setPivot(Vector2f(0.5f, 0.5f));
+	commentIcons[ProjectCommentCategory::Writing] = Sprite().setImage(resources, "comments/comment_icon_writing.png").setPivot(Vector2f(0.5f, 0.5f));
 
 	tooltipBg = Sprite()
-		.setImage(factory.getResources(), "whitebox.png")
+		.setImage(resources, "whitebox.png")
 		.setColour(Colour4f(0, 0, 0, 0.5f));
 
 	tooltipText = TextRenderer()
-		.setFont(factory.getResources().get<Font>("Ubuntu Bold"))
+		.setFont(resources.get<Font>("Ubuntu Bold"))
 		.setColour(Colour4f(1, 1, 1))
 		.setSize(14);
 }
@@ -113,7 +118,7 @@ void CommentsGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) cons
 			.setSliceScale(1.0f / curZoom)
 			.draw(painter);
 
-		commentIconNormal.clone()
+		commentIcons.at(comment.category).clone()
 			.setScale(nodeScale * 0.5f)
 			.setPosition(handle.getPosition())
 			.draw(painter);
@@ -152,6 +157,8 @@ void CommentsGizmo::draw(Painter& painter, const ISceneEditor& sceneEditor) cons
 Colour4f CommentsGizmo::getCommentColour(ProjectCommentPriority priority) const
 {
 	switch (priority) {
+	case ProjectCommentPriority::Note:
+		return Colour4f::fromString("#3D4988");
 	case ProjectCommentPriority::Low:
 		return Colour4f::fromString("#14C03A");
 	case ProjectCommentPriority::Medium:
@@ -357,6 +364,7 @@ void CommentEditWindow::loadComment()
 {
 	const auto& comment = comments.getComment(uuid);
 	getWidgetAs<UIDropdown>("priority")->setSelectedOption(toString(comment.priority));
+	getWidgetAs<UIDropdown>("category")->setSelectedOption(toString(comment.category));
 	getWidgetAs<UITextInput>("comment")->setText(comment.text);
 }
 
@@ -364,6 +372,7 @@ void CommentEditWindow::onOK()
 {
 	comments.updateComment(uuid, [&](ProjectComment& comment) {
 		comment.priority = fromString<ProjectCommentPriority>(getWidgetAs<UIDropdown>("priority")->getSelectedOptionId());
+		comment.category = fromString<ProjectCommentCategory>(getWidgetAs<UIDropdown>("category")->getSelectedOptionId());
 		comment.text = getWidgetAs<UITextInput>("comment")->getText();
 	}, true);
 	if (callback) {

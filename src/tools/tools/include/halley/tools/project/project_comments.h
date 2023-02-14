@@ -8,6 +8,7 @@
 
 namespace Halley {
     enum class ProjectCommentPriority {
+        Note,
 	    Low,
         Medium,
         High
@@ -15,11 +16,35 @@ namespace Halley {
 
 	template <>
 	struct EnumNames<ProjectCommentPriority> {
-		constexpr std::array<const char*, 3> operator()() const {
+		constexpr std::array<const char*, 4> operator()() const {
 			return{{
+                "note",
 				"low",
                 "medium",
                 "high"
+			}};
+		}
+	};
+
+    enum class ProjectCommentCategory {
+	    Misc,
+        Art,
+        Implementation,
+        Music,
+        Sound,
+        Writing
+    };
+
+	template <>
+	struct EnumNames<ProjectCommentCategory> {
+		constexpr std::array<const char*, 6> operator()() const {
+			return{{
+				"misc",
+                "art",
+                "implementation",
+                "music",
+                "sound",
+                "writing"
 			}};
 		}
 	};
@@ -29,7 +54,8 @@ namespace Halley {
         Vector2f pos;
         String text;
         String scene;
-        ProjectCommentPriority priority = ProjectCommentPriority::Low;
+        ProjectCommentPriority priority = ProjectCommentPriority::Note;
+        ProjectCommentCategory category = ProjectCommentCategory::Misc;
 
         explicit ProjectComment(Vector2f pos = {}, String scene = "");
         ProjectComment(const ConfigNode& node);
