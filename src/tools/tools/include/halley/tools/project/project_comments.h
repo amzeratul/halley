@@ -54,10 +54,10 @@ namespace Halley {
         Vector2f pos;
         String text;
         String scene;
-        ProjectCommentPriority priority = ProjectCommentPriority::Note;
         ProjectCommentCategory category = ProjectCommentCategory::Misc;
+        ProjectCommentPriority priority = ProjectCommentPriority::Note;
 
-        explicit ProjectComment(Vector2f pos = {}, String scene = "");
+        explicit ProjectComment(Vector2f pos = {}, String scene = "", ProjectCommentCategory category = ProjectCommentCategory::Misc, ProjectCommentPriority priority = ProjectCommentPriority::Note);
         ProjectComment(const ConfigNode& node);
         ConfigNode toConfigNode() const;
 

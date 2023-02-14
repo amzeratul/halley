@@ -189,7 +189,9 @@ void CommentsGizmo::addComment(Vector2f pos, bool isWorldSpace)
 {
 	const auto worldPos = pos + (isWorldSpace ? Vector2f() : getWorldOffset());
 	const auto screenPos = pos - (isWorldSpace ? getWorldOffset() : Vector2f());
-	const auto uuid = comments.addComment(ProjectComment(worldPos, sceneEditorWindow.getSceneNameForComments()));
+
+	const auto category = sceneEditorWindow.getSetting(EditorSettingType::Project, "comments.last_category").asEnum(ProjectCommentCategory::Misc);
+	const auto uuid = comments.addComment(ProjectComment(worldPos, sceneEditorWindow.getSceneNameForComments(), category));
 
 	for (auto& handle: handles) {
 		handle.setSelected(false);
@@ -200,7 +202,9 @@ void CommentsGizmo::addComment(Vector2f pos, bool isWorldSpace)
 
 	editComment(uuid, [=] (bool ok)
 	{
-		if (!ok) {
+		if (ok) {
+			sceneEditorWindow.setSetting(EditorSettingType::Project, "comments.last_category", ConfigNode(toString(comments.getComment(uuid).category)));
+		} else {
 			deleteComment(uuid);
 		}
 	});

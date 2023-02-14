@@ -8,9 +8,11 @@
 #include "halley/utils/hash.h"
 using namespace Halley;
 
-ProjectComment::ProjectComment(Vector2f pos, String scene)
+ProjectComment::ProjectComment(Vector2f pos, String scene, ProjectCommentCategory category, ProjectCommentPriority priority)
 	: pos(pos)
 	, scene(std::move(scene))
+	, category(category)
+	, priority(priority)
 {
 }
 
@@ -19,8 +21,8 @@ ProjectComment::ProjectComment(const ConfigNode& node)
 	pos = node["pos"].asVector2f({});
 	text = node["text"].asString({});
 	scene = node["scene"].asString({});
-	priority = node["priority"].asEnum<ProjectCommentPriority>(ProjectCommentPriority::Note);
 	category = node["category"].asEnum<ProjectCommentCategory>(ProjectCommentCategory::Misc);
+	priority = node["priority"].asEnum<ProjectCommentPriority>(ProjectCommentPriority::Note);
 }
 
 ConfigNode ProjectComment::toConfigNode() const
@@ -29,8 +31,8 @@ ConfigNode ProjectComment::toConfigNode() const
 	result["pos"] = pos;
 	result["text"] = text;
 	result["scene"] = scene;
-	result["priority"] = priority;
 	result["category"] = category;
+	result["priority"] = priority;
 	return result;
 }
 
