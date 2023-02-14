@@ -10,6 +10,11 @@ set(SOURCES
 
         "lodepng/lodepng.cpp"
 
+        "lz4/lz4.c"
+        "lz4/lz4file.c"
+        "lz4/lz4frame.c"
+        "lz4/lz4hc.c"
+
         "speex/resample.c"
 
         "stb_image/stb_image.c"
@@ -86,6 +91,12 @@ set(HEADERS
         
         "lodepng/lodepng.h"
         
+        "lz4/lz4.h"
+        "lz4/lz4file.h"
+        "lz4/lz4frame_static.h"
+        "lz4/lz4frame.h"
+        "lz4/lz4hc.h"
+
         "stb_image/stb_image.h"
         
         "tiny-aes/aes.h"

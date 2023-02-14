@@ -4,6 +4,7 @@
 #include "../../../../contrib/zlib/zlib.h"
 #include "halley/support/exception.h"
 #include "halley/text/string_converter.h"
+#include "lz4/lz4.h"
 
 using namespace Halley;
 
@@ -60,14 +61,26 @@ std::shared_ptr<const char> Compression::decompressToSharedPtr(gsl::span<const g
 
 Bytes Compression::compressRaw(gsl::span<const gsl::byte> bytes, bool insertLength, int level)
 {
-	Expects (sizeof(uint64_t) == 8);
-
 	const uint64_t inSize = bytes.size_bytes();
 	const size_t headerSize = insertLength ? 8 : 0;
 	Bytes result(size_t(inSize) + headerSize + 16); // Header size, plus 16 bytes for headroom, should be enough for any compression
 
+	auto span = compressRaw(bytes, gsl::as_writable_bytes(gsl::span<Byte>(result)), insertLength, level);
+	result.resize(span.size_bytes());
+	
+	return result;
+}
+
+gsl::span<gsl::byte> Compression::compressRaw(gsl::span<const gsl::byte> inBytes, gsl::span<gsl::byte> outBytes, bool insertLength, int level)
+{
+	Expects (sizeof(uint64_t) == 8);
+
+	const uint64_t inSize = inBytes.size_bytes();
+	const size_t headerSize = insertLength ? 8 : 0;
+
 	if (insertLength) {
-		memcpy(result.data(), &inSize, 8);
+		assert(outBytes.size_bytes() >= 8);
+		memcpy(outBytes.data(), &inSize, 8);
 	}
 
 	z_stream stream;
@@ -79,10 +92,10 @@ Bytes Compression::compressRaw(gsl::span<const gsl::byte> bytes, bool insertLeng
 		throw Exception("Unable to initialize zlib compression", HalleyExceptions::Compression);
 	}
 
-	stream.avail_in = uInt(bytes.size_bytes());
-	stream.next_in = reinterpret_cast<unsigned char*>(const_cast<gsl::byte*>(bytes.data()));
-	stream.avail_out = uInt(result.size() - headerSize);
-	stream.next_out = result.data() + headerSize;
+	stream.avail_in = uInt(inBytes.size_bytes());
+	stream.next_in = reinterpret_cast<unsigned char*>(const_cast<gsl::byte*>(inBytes.data()));
+	stream.avail_out = uInt(outBytes.size() - headerSize);
+	stream.next_out = reinterpret_cast<unsigned char*>(const_cast<gsl::byte*>(outBytes.data())) + headerSize;
 
 	do {
 		res = deflate(&stream, Z_FINISH);
@@ -95,9 +108,7 @@ Bytes Compression::compressRaw(gsl::span<const gsl::byte> bytes, bool insertLeng
 	const size_t outSize = size_t(stream.total_out);
 	deflateEnd(&stream);
 
-	result.resize(headerSize + outSize);
-	
-	return result;
+	return outBytes.subspan(0, headerSize + outSize);
 }
 
 Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSize, size_t expectedSize)
@@ -166,4 +177,39 @@ Bytes Compression::decompressRaw(gsl::span<const gsl::byte> bytes, size_t maxSiz
 
 		return result;
 	}
+}
+
+size_t Compression::lz4Compress(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> dst)
+{
+	return LZ4_compress_default(reinterpret_cast<const char*>(src.data()), reinterpret_cast<char*>(dst.data()), static_cast<int>(src.size_bytes()), static_cast<int>(dst.size_bytes()));
+}
+
+size_t Compression::lz4Compress(gsl::span<const char> src, gsl::span<char> dst)
+{
+	return lz4Compress(gsl::as_bytes(src), gsl::as_writable_bytes(dst));
+}
+
+size_t Compression::lz4Compress(gsl::span<const Byte> src, gsl::span<Byte> dst)
+{
+	return lz4Compress(gsl::as_bytes(src), gsl::as_writable_bytes(dst));
+}
+
+std::optional<size_t> Compression::lz4Decompress(gsl::span<const gsl::byte> src, gsl::span<gsl::byte> dst)
+{
+	const auto result = LZ4_decompress_safe(reinterpret_cast<const char*>(src.data()), reinterpret_cast<char*>(dst.data()), static_cast<int>(src.size_bytes()), static_cast<int>(dst.size_bytes()));
+	if (result >= 0) {
+		return result;
+	} else {
+		return std::nullopt;
+	}
+}
+
+std::optional<size_t> Compression::lz4Decompress(gsl::span<const char> src, gsl::span<char> dst)
+{
+	return lz4Decompress(gsl::as_bytes(src), gsl::as_writable_bytes(dst));
+}
+
+std::optional<size_t> Compression::lz4Decompress(gsl::span<const Byte> src, gsl::span<Byte> dst)
+{
+	return lz4Decompress(gsl::as_bytes(src), gsl::as_writable_bytes(dst));
 }
