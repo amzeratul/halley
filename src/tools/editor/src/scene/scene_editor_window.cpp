@@ -1320,6 +1320,7 @@ void SceneEditorWindow::setToolUI(std::shared_ptr<UIWidget> ui)
 		customUIField->add(ui, 1);
 	}
 	customUIField->setActive(!!ui);
+	customUIField->setInteractWithMouse(true);
 }
 
 void SceneEditorWindow::setModified(bool enabled)
