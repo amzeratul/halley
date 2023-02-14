@@ -17,14 +17,14 @@ static void zlibFree(voidpf opaque, voidpf address)
 	free(address);
 }
 
-Bytes Compression::compress(const Bytes& bytes)
+Bytes Compression::compress(const Bytes& bytes, int level)
 {
-	return compress(gsl::as_bytes(gsl::span<const Byte>(bytes)));
+	return compress(gsl::as_bytes(gsl::span<const Byte>(bytes)), level);
 }
 
-Bytes Compression::compress(gsl::span<const gsl::byte> bytes)
+Bytes Compression::compress(gsl::span<const gsl::byte> bytes, int level)
 {
-	return compressRaw(bytes, true);
+	return compressRaw(bytes, true, level);
 }
 
 Bytes Compression::decompress(const Bytes& bytes, size_t maxSize)
@@ -58,7 +58,7 @@ std::shared_ptr<const char> Compression::decompressToSharedPtr(gsl::span<const g
 	return result;
 }
 
-Bytes Compression::compressRaw(gsl::span<const gsl::byte> bytes, bool insertLength)
+Bytes Compression::compressRaw(gsl::span<const gsl::byte> bytes, bool insertLength, int level)
 {
 	Expects (sizeof(uint64_t) == 8);
 
@@ -74,7 +74,7 @@ Bytes Compression::compressRaw(gsl::span<const gsl::byte> bytes, bool insertLeng
 	stream.zalloc = &zlibAlloc;
 	stream.zfree = &zlibFree;
 	stream.opaque = nullptr;
-	int res = deflateInit(&stream, Z_DEFAULT_COMPRESSION);
+	int res = deflateInit(&stream, level);
 	if (res != Z_OK) {
 		throw Exception("Unable to initialize zlib compression", HalleyExceptions::Compression);
 	}
