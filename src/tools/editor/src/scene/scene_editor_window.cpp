@@ -286,6 +286,11 @@ Vector2f SceneEditorWindow::getWorldCameraPosition() const
 	return gameBridge->getCameraPos() + getWorldOffset();
 }
 
+void SceneEditorWindow::setCameraPosition(Vector2f pos)
+{
+	gameBridge->moveCamera(pos);
+}
+
 void SceneEditorWindow::update(Time t, bool moved)
 {
 	if (toolModeTimeout > 0) {

@@ -34,6 +34,7 @@ namespace Halley {
 		String getSceneNameForComments() const override;
 		Vector2f getWorldOffset() const override;
 		Vector2f getWorldCameraPosition() const override;
+		void setCameraPosition(Vector2f pos) override;
 
 		void onComponentRemoved(const String& name) override;
 		void onFieldChangedByGizmo(const String& componentName, const String& fieldName);

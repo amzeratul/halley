@@ -411,6 +411,7 @@ namespace Halley {
 		virtual String getSceneNameForComments() const = 0;
 		virtual Vector2f getWorldOffset() const = 0;
 		virtual Vector2f getWorldCameraPosition() const = 0;
+		virtual void setCameraPosition(Vector2f pos) = 0;
 
 		virtual Resources& getGameResources() const = 0;
 
