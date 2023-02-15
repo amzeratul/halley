@@ -40,7 +40,7 @@ std::unique_ptr<IFrameData> Game::makeFrameData()
 
 double Game::getTargetFPS() const
 {
-	return 60.0;
+	return 0.0;
 }
 
 double Game::getTargetBackgroundFPS() const
