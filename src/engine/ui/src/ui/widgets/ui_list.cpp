@@ -130,6 +130,10 @@ std::shared_ptr<UILabel> UIList::makeLabel(String id, LocalisedString label, flo
 		widget->setSelectable(style.getTextRenderer("label"), style.getTextRenderer("selectedLabel"));
 	}
 
+	if (style.hasTextRenderer("hoverLabel")) {
+		widget->setHoverable(style.getTextRenderer("label"), style.getTextRenderer("hoverLabel"));
+	}
+
 	if (style.hasTextRenderer("disabledLabel")) {
 		widget->setDisablable(style.getTextRenderer("label"), style.getTextRenderer("disabledLabel"));
 	}
