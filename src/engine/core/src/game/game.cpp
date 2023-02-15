@@ -90,7 +90,9 @@ std::unique_ptr<AssetPreviewGenerator> Game::createAssetPreviewGenerator(const H
 
 std::unique_ptr<UIFactory> Game::createUIFactory(const HalleyAPI& api, Resources& resources, I18N& i18n)
 {
-	return std::make_unique<UIFactory>(api, resources, i18n);
+	auto factory = std::make_unique<UIFactory>(api, resources, i18n);
+	factory->loadStyleSheetsFromResources();
+	return factory;
 }
 
 std::unique_ptr<ScriptNodeTypeCollection> Game::createScriptNodeTypeCollection()
