@@ -31,7 +31,7 @@ namespace Halley {
         static Circle getSpanningCircle(const Vector<Vector2f>& points);
         static Circle getSpanningCircle2(Vector<Vector2f> points);
 
-        static Circle getCircleTangentToAngle(Vector2f A, Vector2f B, Vector2f C, float radius); // corner ABC, where B is the angle
+        static std::optional<Circle> getCircleTangentToAngle(Vector2f A, Vector2f B, Vector2f C, float radius); // corner ABC, where B is the angle
 
     private:
         Vector2f centre;

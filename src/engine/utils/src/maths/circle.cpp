@@ -150,7 +150,7 @@ Circle Circle::getSpanningCircleTrivial(gsl::span<Vector2f> ps)
 	}
 }
 
-Circle Circle::getCircleTangentToAngle(Vector2f A, Vector2f B, Vector2f C, float radius)
+std::optional<Circle> Circle::getCircleTangentToAngle(Vector2f A, Vector2f B, Vector2f C, float radius)
 {
 	// Let P be the centre of the circle
 	// alpha is the angle at B
@@ -160,7 +160,7 @@ Circle Circle::getCircleTangentToAngle(Vector2f A, Vector2f B, Vector2f C, float
 
 	const float cosAlpha = (B - A).normalized().dot((C - B).normalized());
 	if (cosAlpha > 0.9999f) {
-		throw Exception("Attempting to find circle tangent to collinear points", HalleyExceptions::Utils);
+		return std::nullopt;
 	}
 	const float halfSinAlpha = std::sqrt((1.0f - cosAlpha) / 2.0f);
 	const float d = radius / halfSinAlpha;
