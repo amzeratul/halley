@@ -33,6 +33,11 @@ Rect4f Circle::getAABB() const
 	return Rect4f(centre - Vector2f(radius, radius), centre + Vector2f(radius, radius));
 }
 
+Vector2f Circle::project(Vector2f point) const
+{
+	return centre + (point - centre).normalized() * radius;
+}
+
 float Circle::getDistanceTo(Vector2f point) const
 {
 	return std::max((centre - point).length() - radius, 0.0f);
@@ -143,4 +148,24 @@ Circle Circle::getSpanningCircleTrivial(gsl::span<Vector2f> ps)
 	} else {
 		throw Exception("Invalid spanning circle trivial case in msw algorithm", HalleyExceptions::Utils);
 	}
+}
+
+Circle Circle::getCircleTangentToAngle(Vector2f A, Vector2f B, Vector2f C, float radius)
+{
+	// Let P be the centre of the circle
+	// alpha is the angle at B
+	// d is the distance from B, along the ABC bisector
+	// d = r / sin(alpha/2)
+	// Using sin(alpha/2) = sqrt((1 - cos(alpha)) / 2)
+
+	const float cosAlpha = (B - A).normalized().dot((C - B).normalized());
+	if (cosAlpha > 0.9999f) {
+		throw Exception("Attempting to find circle tangent to collinear points", HalleyExceptions::Utils);
+	}
+	const float halfSinAlpha = std::sqrt((1.0f - cosAlpha) / 2.0f);
+	const float d = radius / halfSinAlpha;
+
+	const auto bisectorN = (((A - B).normalized() + (C - B).normalized()) * 0.5f).normalized();
+	const auto P = B + d * bisectorN;
+	return Circle(P, radius);
 }

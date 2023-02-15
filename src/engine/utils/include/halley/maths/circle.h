@@ -25,10 +25,13 @@ namespace Halley {
         [[nodiscard]] bool overlaps(const Circle& circle) const;
 
     	[[nodiscard]] Circle expand(float radius) const;
-        Rect4f getAABB() const;
+        [[nodiscard]] Rect4f getAABB() const;
+        [[nodiscard]] Vector2f project(Vector2f point) const;
 
         static Circle getSpanningCircle(const Vector<Vector2f>& points);
         static Circle getSpanningCircle2(Vector<Vector2f> points);
+
+        static Circle getCircleTangentToAngle(Vector2f A, Vector2f B, Vector2f C, float radius); // corner ABC, where B is the angle
 
     private:
         Vector2f centre;
