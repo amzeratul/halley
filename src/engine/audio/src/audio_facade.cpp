@@ -152,7 +152,7 @@ void AudioFacade::onResume()
 
 int64_t AudioFacade::getLastTimeElapsed() const
 {
-	return engine->getLastTimeElapsed();
+	return running ? engine->getLastTimeElapsed() : 0;
 }
 
 std::optional<AudioSpec> AudioFacade::getAudioSpec() const
