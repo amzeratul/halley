@@ -30,7 +30,70 @@
 #include <ctime>
 using namespace Halley;
 
+#define XINPUT_GAMEPAD_GUIDE 0x400
+
 #pragma comment(lib, "XInput9_1_0.lib")
+//#pragma comment(lib, "XInput.lib")
+
+namespace {
+	struct XINPUT_STATE_EX
+	{
+	    uint32_t eventCount;
+	    WORD wButtons;
+	    BYTE bLeftTrigger;
+	    BYTE bRightTrigger;
+	    SHORT sThumbLX;
+	    SHORT sThumbLY;
+	    SHORT sThumbRX;
+	    SHORT sThumbRY;
+	};
+
+	int __stdcall xinputGetStateExPtr(int, XINPUT_STATE_EX*);
+
+	void* getXInputGetStateSecret()
+	{
+		static bool opened = false;
+		static HMODULE dll = nullptr;
+		static FARPROC proc = nullptr;
+
+		if (!opened) {
+			opened = true;
+			wchar_t systemPath[MAX_PATH];
+			GetSystemDirectoryW(systemPath, sizeof(systemPath));
+			const auto dllPath = StringUTF16(systemPath) + L"\\XInput1_3.dll";
+			dll = LoadLibraryW(dllPath.c_str());
+
+			if (dll) {
+				proc = GetProcAddress(dll, reinterpret_cast<LPCSTR>(100));
+			}
+		}
+		return proc;
+	}
+
+	DWORD XInputGetStateEx(DWORD index, XINPUT_STATE* state)
+	{
+		auto f = static_cast<decltype(&xinputGetStateExPtr)>(getXInputGetStateSecret());
+		if (f) {
+			XINPUT_STATE_EX stateEx;
+			ZeroMemory(&stateEx, sizeof(stateEx));
+			const auto result = f(index, &stateEx);
+			if (result != ERROR_SUCCESS) {
+				return result;
+			}
+
+			state->dwPacketNumber = stateEx.eventCount;
+			state->Gamepad.wButtons = stateEx.wButtons;
+			state->Gamepad.bLeftTrigger = stateEx.bLeftTrigger;
+			state->Gamepad.bRightTrigger = stateEx.bRightTrigger;
+			state->Gamepad.sThumbLX = stateEx.sThumbLX;
+			state->Gamepad.sThumbLY = stateEx.sThumbLY;
+			state->Gamepad.sThumbRX = stateEx.sThumbRX;
+			state->Gamepad.sThumbRY = stateEx.sThumbRY;
+			return 0;
+		}
+		return XInputGetState(index, state);
+	}
+}
 
 
 InputJoystickXInput::InputJoystickXInput(int number)
@@ -47,7 +110,7 @@ InputJoystickXInput::InputJoystickXInput(int number)
 	hats[0]->setParent(this);
 
 	// Buttons
-	init(16);
+	init(17);
 }
 
 InputJoystickXInput::~InputJoystickXInput()
@@ -81,7 +144,7 @@ void InputJoystickXInput::update(Time t)
 	XINPUT_STATE state;
 	ZeroMemory(&state, sizeof(XINPUT_STATE));
 
-	DWORD result = XInputGetState(index, &state);
+	DWORD result = XInputGetStateEx(index, &state);
 	if (result == ERROR_SUCCESS) {	// WTF, Microsoft
 		if (!isEnabled()) {
 			setEnabled(true);
@@ -117,6 +180,7 @@ void InputJoystickXInput::update(Time t)
 		onButtonStatus(13, (b & XINPUT_GAMEPAD_DPAD_RIGHT) != 0);
 		onButtonStatus(14, (b & XINPUT_GAMEPAD_DPAD_DOWN) != 0);
 		onButtonStatus(15, (b & XINPUT_GAMEPAD_DPAD_LEFT) != 0);
+		onButtonStatus(16, (b & XINPUT_GAMEPAD_GUIDE) != 0);
 
 		// Update hat
 		hats[0]->onButtonStatus(0, (b & XINPUT_GAMEPAD_DPAD_UP) != 0);
@@ -160,13 +224,14 @@ int InputJoystickXInput::getButtonAtPosition(JoystickButtonPosition position) co
 		case JoystickButtonPosition::DPadRight: return 13;
 		case JoystickButtonPosition::DPadDown: return 14;
 		case JoystickButtonPosition::DPadLeft: return 15;
+		case JoystickButtonPosition::System: return 16;
 		default: throw Exception("Invalid parameter", HalleyExceptions::InputPlugin);
 	}
 }
 
 String InputJoystickXInput::getButtonName(int code) const
 {
-	auto buttons = std::array<const char*, 16>{
+	auto buttons = std::array<const char*, 17>{
 		"xbox_a",
 		"xbox_b",
 		"xbox_x",
@@ -183,6 +248,7 @@ String InputJoystickXInput::getButtonName(int code) const
 		"xbox_dpad_right",
 		"xbox_dpad_down",
 		"xbox_dpad_left",
+		"xbox_guide"
 	};
 	return buttons[code];
 }

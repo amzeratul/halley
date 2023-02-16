@@ -50,7 +50,8 @@ namespace Halley {
 		DPadUp,
 		DPadRight,
 		DPadDown,
-		DPadLeft
+		DPadLeft,
+		System
 	};
 
 	class InputJoystick : public InputButtonBase {
